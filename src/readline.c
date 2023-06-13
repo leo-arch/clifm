@@ -724,8 +724,9 @@ fix_rl_point(const unsigned char c)
 	rl_point += mlen > 0 ? mlen - 1 : 0;
 }
 
-/* This function is automatically called by readline() to handle input.
- * Used to introduce suggestions and syntax highlighting. */
+/* Custom implementation of readline's rl_getc() hacked to introduce
+ * suggestions, alternative TAB completion, and syntax highlighting.
+ * This function is automatically called by readline() to handle input. */
 static int
 my_rl_getc(FILE *stream)
 {
@@ -733,14 +734,8 @@ my_rl_getc(FILE *stream)
 	unsigned char c;
 	static unsigned char prev = 0;
 
-#ifndef _NO_FZF
-	if (xargs.fzftab == 1 || conf.warning_prompt == 1) {
-#else
-	if (conf.warning_prompt == 1) {
-#endif /* !_NO_FZF */
-		if (prompt_offset == UNSET)
-			prompt_offset = get_prompt_offset(rl_prompt);
-	}
+	if (fzftab != 0 && prompt_offset == UNSET)
+		prompt_offset = get_prompt_offset(rl_prompt);
 
 	while (1) {
 		result = (int)read(fileno(stream), &c, sizeof(unsigned char)); /* flawfinder: ignore */

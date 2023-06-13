@@ -1137,8 +1137,8 @@ main(int argc, char *argv[])
 	 * per user basis */
 	init_config();
 	check_options();
+
 	set_sel_file();
-//	set_env();
 	create_tmp_files();
 #ifndef _NO_FZF
 	set_finder_paths();
@@ -1195,7 +1195,6 @@ main(int argc, char *argv[])
 		add_to_jumpdb(workspaces[cur_ws].path);
 
 	initialize_readline();
-//	check_working_shell();
 	get_prompt_cmds();
 
 #ifndef _NO_TRASH
@@ -1217,7 +1216,6 @@ main(int argc, char *argv[])
 #endif
 
 	load_pinned_dir();
-	load_prompts();
 	init_workspaces_opts();
 
 	/* # 2. MAIN PROGRAM LOOP # */

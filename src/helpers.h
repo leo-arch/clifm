@@ -605,7 +605,7 @@ extern int watch;
 		: attr.st_blocks * S_BLKSIZE)
 
 #define UNUSED(x) (void)(x) /* Just silence the compiler's warning */
-#define TOUPPER(ch) (((ch) >= 'a' && (ch) <= 'z') ? ((ch) - 'a' + 'A') : (ch))
+#define TOUPPER(c) (((c) >= 'a' && (c) <= 'z') ? ((c) - 'a' + 'A') : (c))
 
 /* UINT_MAX is 4294967295 == 10 digits */
 #define DIGINUM(n) (((n) < 10) ? 1 \
@@ -618,10 +618,14 @@ extern int watch;
 		: ((n) < 100000000)  ? 8   \
 		: ((n) < 1000000000) ? 9   \
 				      : 10)
-#define IS_DIGIT(n) ((unsigned int)(n) >= '0' && (unsigned int)(n) <= '9')
-#define IS_ALPHA(n) ((unsigned int)(n) >= 'a' && (unsigned int)(n) <= 'z')
+#define IS_DIGIT(c)    ((unsigned int)(c) >= '0' && (unsigned int)(c) <= '9')
+#define IS_ALPHA(c)    ((unsigned int)(c) >= 'a' && (unsigned int)(c) <= 'z')
+#define IS_COMMENT(c)  ((unsigned int)(c) == '#' || (unsigned int)(c) == ';')
+#define IS_CTRL_CHR(c) ((unsigned int)(c) < ' ')
+#define IS_NEWLINE(c)  ((unsigned int)(c) == '\n')
+#define SKIP_LINE(c)   (IS_COMMENT((c)) || IS_NEWLINE((c)) || IS_CTRL_CHR((c)))
 
-#define SELFORPARENT(n) (*(n) == '.' && (!(n)[1] || ((n)[1] == '.' && !(n)[2])))
+#define SELFORPARENT(s) (*(s) == '.' && (!(s)[1] || ((s)[1] == '.' && !(s)[2])))
 
 #define FILE_URI_PREFIX_LEN 7
 #define IS_FILE_URI(f) ((f)[4] == ':'                                  \

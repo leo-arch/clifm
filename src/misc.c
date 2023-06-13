@@ -1319,21 +1319,25 @@ expand_prompt_name(char *name)
 	while (--i >= 0) {
 		if (*p != *prompts[i].name || strcmp(p, prompts[i].name) != 0)
 			continue;
+
 		if (prompts[i].regular) {
 			free(conf.encoded_prompt);
 			conf.encoded_prompt = savestring(prompts[i].regular,
 				strlen(prompts[i].regular));
 		}
+
 		if (prompts[i].warning) {
 			free(conf.wprompt_str);
 			conf.wprompt_str = savestring(prompts[i].warning,
 				strlen(prompts[i].warning));
 		}
+
 		prompt_notif = prompts[i].notifications;
 		conf.warning_prompt = prompts[i].warning_prompt_enabled;
 
 		xstrsncpy(cur_prompt_name, prompts[i].name,
 			sizeof(cur_prompt_name) - 1);
+
 		return EXIT_SUCCESS;
 	}
 

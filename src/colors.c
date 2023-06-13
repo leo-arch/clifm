@@ -884,21 +884,6 @@ reset_iface_colors(void)
 	*dn_c = '\0';
 }
 
-/* Disable colors for suggestions */
-/*
-void
-unset_suggestions_color(void)
-{
-	strcpy(sb_c, SUG_NO_COLOR); // shell built-ins
-	strcpy(sc_c, SUG_NO_COLOR); // external commands
-	strcpy(sd_c, SUG_NO_COLOR); // internal commands description
-	strcpy(sf_c, SUG_NO_COLOR); // file names
-	strcpy(sh_c, SUG_NO_COLOR); // history
-	strcpy(sp_c, SUG_NO_COLOR); // suggestions pointer
-	strcpy(sx_c, SUG_NO_COLOR); // internal commands and params
-	strcpy(sz_c, SUG_NO_COLOR); // file names (fuzzy)
-} */
-
 /* Import the color scheme NAME from DATADIR (usually /usr/local/share)
  * Return zero on success or one on failure */
 int
@@ -1052,7 +1037,7 @@ cschemes_function(char **args)
 	}
 
 	if (conf.colorize == 0) {
-		printf("%s: Colors are disabled\n", PROGRAM_NAME);
+		printf(_("%s: Colors are disabled\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 
@@ -1746,7 +1731,7 @@ store_definition(char *str)
 
 	char *name = str;
 	char *value = strchr(name, '=');
-	if (!value || !*(value + 1) || value == name)
+	if (!value || !value[1] || value == name)
 		return;
 
 	*value = '\0';
@@ -1761,10 +1746,6 @@ store_definition(char *str)
 		val_len = (size_t)(s - value);
 	} else {
 		val_len = strlen(value);
-		if (val_len > 0 && value[val_len - 1] == '\n') {
-			value[val_len - 1] = '\0';
-			val_len--;
-		}
 	}
 
 	if ((*value >= 'A' && *value <= 'Z') || (*value >= 'a' && *value <= 'z')) {
@@ -1826,6 +1807,142 @@ set_fzf_opts(char *line)
 }
 #endif /* !_NO_FZF */
 
+static void
+set_cs_prompt(char *line)
+{
+	if (IS_CTRL_CHR(*line))
+		return;
+
+	char *p = remove_quotes(line);
+	if (!p || !*p)
+		return;
+
+	if (expand_prompt_name(p) != EXIT_SUCCESS) {
+		free(conf.encoded_prompt);
+		conf.encoded_prompt = savestring(p, strlen(p));
+	}
+}
+
+static void
+set_cs_prompt_noti(const char *line)
+{
+	if (IS_CTRL_CHR(*line))
+		return;
+
+	if (*line == 't' && strncmp(line, "true", 4) == 0)
+		prompt_notif = 1;
+	else if (*line == 'f' && strncmp(line, "false", 5) == 0)
+		prompt_notif = 0;
+	else
+		prompt_notif = DEF_PROMPT_NOTIF;
+}
+
+static void
+set_cs_enable_warning_prompt(const char *line)
+{
+	if (IS_CTRL_CHR(*line))
+		return;
+
+	if (*line == 't' && strncmp(line, "true", 4) == 0)
+		conf.warning_prompt = 1;
+	else if (*line == 'f' && strncmp(line, "false", 5) == 0)
+		conf.warning_prompt = 0;
+	else
+		conf.warning_prompt = DEF_WARNING_PROMPT;
+}
+
+static void
+set_cs_warning_prompt_str(char *line)
+{
+	if (IS_CTRL_CHR(*line))
+		return;
+
+	char *p = remove_quotes(line);
+	if (!p)
+		return;
+
+	free(conf.wprompt_str);
+	conf.wprompt_str = savestring(p, strlen(p));
+}
+
+#ifndef _NO_FZF
+static void
+set_cs_fzftabopts(char *line)
+{
+	if (IS_CTRL_CHR(*line))
+		return;
+
+	char *p = remove_quotes(line);
+	if (!p || !*p)
+		return;
+
+	set_fzf_opts(p);
+}
+#endif /* !_NO_FZF */
+
+static void
+set_cs_iface_colors(char *line, char **ifacecolors)
+{
+	if (IS_CTRL_CHR(*line))
+		return;
+
+	char *color_line = strip_color_line(line, 't');
+	if (!color_line)
+		return;
+
+	*ifacecolors = savestring(color_line, strlen(color_line));
+	free(color_line);
+}
+
+static void
+set_cs_filetype_colors(char *line, char **filecolors)
+{
+	if (IS_CTRL_CHR(*line))
+		return;
+
+	char *color_line = strip_color_line(line, 't');
+	if (!color_line)
+		return;
+
+	*filecolors = savestring(color_line, strlen(color_line));
+	free(color_line);
+}
+
+static void
+set_cs_extcolors(char *line, char **extcolors, const ssize_t line_len)
+{
+	char *p = line + 10; /* 10 == "ExtColors=" */
+	if (IS_CTRL_CHR(*p) || ((*p == '\'' || *p == '"') && !*(++p)))
+		return;
+
+	ssize_t l = line_len - (p - line);
+
+	if (l > 0 && (p[l - 1] == '\'' || p[l - 1] == '"')) {
+		p[l - 1] = '\0';
+		l--;
+	}
+
+	*extcolors = savestring(p, (size_t)l);
+}
+
+static void
+set_cs_dir_icon_color(char *line, const ssize_t line_len)
+{
+	char *p = line + 13; /* 13 == "DirIconColor=" */
+	if (IS_CTRL_CHR(*p) || ((*p == '\'' || *p == '"') && !*(++p)))
+		return;
+
+	if (line[line_len - 1] == '\'' || line[line_len - 1] == '"')
+		line[line_len - 1] = '\0';
+
+	char *c = (char *)NULL;
+
+	if (is_color_code(p) == 0 && (c = check_defs(p)) == NULL)
+		return;
+
+	sprintf(dir_ico_c, "\x1b[%sm", c ? c : p);
+}
+
 /* Get color lines from the configuration file */
 static int
 read_color_scheme_file(const char *colorscheme, char **filecolors,
@@ -1877,46 +1994,27 @@ read_color_scheme_file(const char *colorscheme, char **filecolors,
 	ssize_t line_len = 0;
 
 	while ((line_len = getline(&line, &line_size, fp_colors)) > 0) {
-		if (*line == '#' || *line == '\n')
+		if (SKIP_LINE(*line))
 			continue;
+
+		if (line[line_len - 1] == '\n') {
+			line[line_len - 1] = '\0';
+			line_len--;
+		}
 
 		if (*line == 'd' && strncmp(line, "define ", 7) == 0) {
 			store_definition(line + 7);
 		}
 
 		else if (*line == 'P' && strncmp(line, "Prompt=", 7) == 0) {
-			if (line[line_len - 1] == '\n') {
-				line[line_len - 1] = '\0';
-				line_len--;
-			}
-			char *p = line + 7;
-			if (*p < ' ')
-				continue;
-			if ((*p == '\'' || *p == '"') && (!*(p + 1) || (*(p + 1) == '\''
-			|| *(p + 1) == '"' )) && (*(p + 1) && !*(p + 2)))
-				continue;
-
-			if (expand_prompt_name(p) != EXIT_SUCCESS) {
-				free(conf.encoded_prompt);
-				conf.encoded_prompt = savestring(p, strlen(p));
-			}
-			continue;
+			set_cs_prompt(line + 7);
 		}
 
 		/* The following values override those set via the Prompt line
 		 * (provided it was set to a valid prompt name, as defined in the
-		 * prompts file)*/
+		 * prompts file). */
 		else if (*line == 'N' && strncmp(line, "Notifications=", 14) == 0) {
-			char *p = line + 14;
-			if (*p < ' ')
-				continue;
-
-			if (*p == 't' && strncmp(p, "true", 4) == 0)
-				prompt_notif = 1;
-			else if (*p == 'f' && strncmp(p, "false", 5) == 0)
-				prompt_notif = 0;
-			else
-				prompt_notif = DEF_PROMPT_NOTIF;
+			set_cs_prompt_noti(line + 14);
 		}
 
 /*		else if (*line == 'R' && strncmp(line, "RightPrompt=", 12) == 0) {
@@ -1932,41 +2030,18 @@ read_color_scheme_file(const char *colorscheme, char **filecolors,
 
 		else if (xargs.warning_prompt == UNSET && *line == 'E'
 		&& strncmp(line, "EnableWarningPrompt=", 20) == 0) {
-			char *p = line + 20;
-			if (*p < ' ')
-				continue;
-
-			if (*p == 't' && strncmp(p, "true", 4) == 0)
-				conf.warning_prompt = 1;
-			else if (*p == 'f' && strncmp(p, "false", 5) == 0)
-				conf.warning_prompt = 0;
-			else
-				conf.warning_prompt = DEF_WARNING_PROMPT;
+			set_cs_enable_warning_prompt(line + 20);
 		}
 
 		else if (*line == 'W' && strncmp(line, "WarningPrompt=", 14) == 0) {
-			char *p = line + 14;
-			if (*p < ' ')
-				continue;
-
-			char *q = remove_quotes(p);
-			if (!q)
-				continue;
-
-			free(conf.wprompt_str);
-			conf.wprompt_str = savestring(q, strlen(q));
+			set_cs_warning_prompt_str(line + 14);
 		}
 
 #ifndef _NO_FZF
 		else if (*line == 'F' && strncmp(line, "FzfTabOptions=", 14) == 0) {
-			char *p = line + 14;
-			if (*p < ' ')
-				continue;
-
-			char *q = remove_quotes(p);
-			set_fzf_opts(q);
+			set_cs_fzftabopts(line + 14);
 		}
-#endif /* _NO_FZF */
+#endif /* !_NO_FZF */
 
 		else if (*line == 'D' && strncmp(line, "DividingLine=", 13) == 0) {
 			set_div_line(line + 13);
@@ -1975,80 +2050,25 @@ read_color_scheme_file(const char *colorscheme, char **filecolors,
 		/* Interface colors */
 		else if (!*ifacecolors && *line == 'I'
 		&& strncmp(line, "InterfaceColors=", 16) == 0) {
-			char *p = line + 16;
-			if (*p < ' ')
-				continue;
-
-			char *color_line = strip_color_line(p, 't');
-			if (!color_line)
-				continue;
-
-			*ifacecolors = savestring(color_line, strlen(color_line));
-			free(color_line);
+			set_cs_iface_colors(line + 16, ifacecolors);
 		}
 
 		/* Filetype colors */
 		else if (!*filecolors && *line == 'F'
 		&& strncmp(line, "FiletypeColors=", 15) == 0) {
-			char *p = line + 15;
-			if (*p < ' ')
-				continue;
-
-			char *color_line = strip_color_line(p, 't');
-			if (!color_line)
-				continue;
-
-			*filecolors = savestring(color_line, strlen(color_line));
-			free(color_line);
+			set_cs_filetype_colors(line + 15, filecolors);
 		}
 
 		/* File extension colors */
 		else if (!*extcolors && *line == 'E'
 		&& strncmp(line, "ExtColors=", 10) == 0) {
-			char *p = line + 10;
-			if (*p < ' ')
-				continue;
-
-			if (*p == '\'' || *p == '"')
-				if (!*(++p))
-					continue;
-
-			ssize_t l = line_len - (p - line);
-			if (l > 0 && p[l - 1] == '\n') {
-				p[l - 1] = '\0';
-				l--;
-			}
-			if (l > 0 && (p[l - 1] == '\'' || p[l - 1] == '"')) {
-				p[l - 1] = '\0';
-				l--;
-			}
-			*extcolors = savestring(p, (size_t)l);
+			set_cs_extcolors(line, extcolors, line_len);
 		}
 
 #ifndef _NO_ICONS
 		/* Directory icon color */
 		else if (*line == 'D' && strncmp(line, "DirIconColor=", 13) == 0) {
-			char *p = line + 13;
-			if (*p < ' ')
-				continue;
-
-			if ((*p == '\'' || *p == '"') && !*(++p))
-				continue;
-
-			if (line[line_len - 1] == '\n') {
-				line[line_len - 1] = '\0';
-				--line_len;
-			}
-
-			if (line[line_len - 1] == '\'' || line[line_len - 1] == '"')
-				line[line_len - 1] = '\0';
-
-			char *c = (char *)NULL;
-
-			if (is_color_code(p) == 0 && (c = check_defs(p)) == NULL)
-				continue;
-
-			sprintf(dir_ico_c, "\x1b[%sm", c ? c : p);
+			set_cs_dir_icon_color(line, line_len);
 		}
 #endif /* !_NO_ICONS */
 
@@ -2373,7 +2393,6 @@ colors_list(char *ent, const int eln, const int pad, const int new_line)
 	if (wlen == 0)
 		wname = truncate_wname(ent);
 
-//	char *color = fi_c;
 	char *color = (char *)NULL;
 
 	if (ret == -1) {

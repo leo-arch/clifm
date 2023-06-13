@@ -3149,6 +3149,7 @@ init_config(void)
 	xstrsncpy(div_line, DEF_DIV_LINE, sizeof(div_line));
 #endif /* CLIFM_SUCKLESS */
 
+	load_prompts();
 	check_colors();
 
 #ifndef _NO_FZF

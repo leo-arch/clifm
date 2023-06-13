@@ -1681,11 +1681,8 @@ set_prompts_file(void)
 
 	char *cmd[] = {"cp", t, f, NULL};
 	int ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
-	if (ret != EXIT_SUCCESS) {
-		free(f);
-		return (char *)NULL;
-	}
-	return f;
+	if (ret == EXIT_SUCCESS)
+		return f;
 
 ERROR:
 	free(f);
@@ -1717,13 +1714,14 @@ load_prompts(void)
 	char *line = (char *)NULL;
 
 	while (getline(&line, &line_sz, fp) > 0) {
-		if (!*line || *line == '#' || *line == '\n')
+		if (SKIP_LINE(*line))
 			continue;
+
 		if (*line == '[') {
 			if (prompts[n].name)
 				n++;
 			prompts = (struct prompts_t *)xrealloc(
-					prompts, (n + 2) * sizeof(struct prompts_t));
+				prompts, (n + 2) * sizeof(struct prompts_t));
 			unset_prompt_values(n);
 
 			char *name = strbtw(line, '[', ']');
@@ -1735,7 +1733,7 @@ load_prompts(void)
 				continue;
 			}
 			prompts[n].name = (char *)xrealloc(prompts[n].name,
-							(strlen(name) + 1) * sizeof(char));
+				(strlen(name) + 1) * sizeof(char));
 			strcpy(prompts[n].name, name);
 			free(name);
 			name = (char *)NULL;
@@ -1745,9 +1743,7 @@ load_prompts(void)
 			continue;
 
 		char *ret = strchr(line, '=');
-		if (!ret)
-			continue;
-		if (!*(++ret))
+		if (!ret || !*(++ret))
 			continue;
 
 		size_t ret_len = strlen(ret);
@@ -1772,7 +1768,7 @@ load_prompts(void)
 
 		if (strncmp(line, "RegularPrompt=", 14) == 0) {
 			prompts[n].regular = (char *)xrealloc(prompts[n].regular,
-							(ret_len + 1) * sizeof(char));
+				(ret_len + 1) * sizeof(char));
 			strcpy(prompts[n].regular, ret);
 			continue;
 		}
@@ -1789,7 +1785,7 @@ load_prompts(void)
 
 		if (strncmp(line, "WarningPrompt=", 14) == 0) {
 			prompts[n].warning = (char *)xrealloc(prompts[n].warning,
-								(ret_len + 1) * sizeof(char));
+				(ret_len + 1) * sizeof(char));
 			strcpy(prompts[n].warning, ret);
 		}
 	}
