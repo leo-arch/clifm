@@ -559,6 +559,34 @@ is_color_code(const char *str)
 	return 1;
 }
 
+/* Update the wp_c color code to match the last color used in the warning
+ * prompt string.
+ * NOTE: If we don't do this, the text entered in the warning prompt (wp_c)
+ * won't match the warning prompt color. */
+void
+update_warning_prompt_text_color(void)
+{
+	if (!conf.wprompt_str || !*conf.wprompt_str)
+		return;
+
+	/* Let's look for the last "\e[" */
+	char *start = strrchr(conf.wprompt_str, '[');
+	if (!start || start - conf.wprompt_str < 2 || *(start - 1) != 'e'
+	|| *(start - 2) != '\\' || !IS_DIGIT(*(start + 1)))
+		return;
+
+	start++;
+	char *end = strchr(start, 'm');
+	if (!end)
+		return;
+
+	*end = '\0';
+	if (is_color_code(start))
+		snprintf(wp_c, sizeof(wp_c), "\x1b[%sm", start);
+
+	*end = 'm';
+}
+
 #ifndef CLIFM_SUCKLESS
 /* If STR is a valid Xterm-like color name, return the value for this name.
  * If an attribute is appended to the name (ex: NAME-1), return value for this
@@ -2317,6 +2345,7 @@ set_colors(const char *colorscheme, const int check_env)
 
 	/* If some color is unset or is a wrong color code, set the default value */
 	set_default_colors();
+	update_warning_prompt_text_color();
 
 	if (xargs.no_bold == 1)
 		disable_bold();

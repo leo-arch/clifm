@@ -36,6 +36,7 @@
 #include <errno.h>
 
 #include "aux.h"
+#include "colors.h" /* update_warning_prompt_text_color() */
 #include "exec.h"
 #include "file_operations.h"
 #include "history.h"
@@ -1055,6 +1056,8 @@ switch_prompt(const size_t n)
 
 	prompt_notif = prompts[n].notifications;
 	conf.warning_prompt = prompts[n].warning_prompt_enabled;
+
+	update_warning_prompt_text_color();
 
 	return EXIT_SUCCESS;
 }

@@ -29,7 +29,6 @@ __BEGIN_DECLS
 
 char *prompt(void);
 char *decode_prompt(char *);
-//int  prompt_function(char *, char *);
 int  prompt_function(char **);
 
 __END_DECLS
