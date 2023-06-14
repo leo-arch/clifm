@@ -733,6 +733,12 @@ run_finder(const size_t height, const int offset, const char *lw,
 	int prev = (conf.fzf_preview > 0 && SHOW_PREVIEWS(cur_comp_type) == 1) ? 1 : 0;
 	int prev_hidden = conf.fzf_preview == 2 ? 1 : 0;
 
+	/* Some shells, like xonsh (the only one to my knowledge), have problems
+	 * parsing the command constructed below. Let's force launch_execle() to
+	 * use "/bin/sh" to avoid this issue. */
+	char *shell_bk = user.shell;
+	user.shell = (char *)NULL;
+
 	/* If height was not set in FZF_DEFAULT_OPTS nor in the config
 	 * file, let's define it ourselves */
 	char height_str[sizeof(size_t) + 21];
@@ -743,7 +749,7 @@ run_finder(const size_t height, const int offset, const char *lw,
 	char cmd[(PATH_MAX * 2) + (NAME_MAX * 2)];
 	if (tabmode == FNF_TAB) {
 		snprintf(cmd, sizeof(cmd), "fnf "
-				"--read-null --pad=%d --query=\"%s\" --reverse "
+				"--read-null --pad=%d --query='%s' --reverse "
 				"--tab-accepts --right-accepts --left-aborts "
 				"--lines=%zu %s %s < %s > %s",
 				offset, lw ? lw : "", height,
@@ -772,7 +778,7 @@ run_finder(const size_t height, const int offset, const char *lw,
 		snprintf(cmd, sizeof(cmd), "fzf %s "
 			"%s --margin=0,0,0,%d "
 			"%s --read0 --ansi "
-			"--query=\"%s\" %s %s %s %s %s "
+			"--query='%s' %s %s %s %s %s "
 			"< %s > %s",
 			conf.fzftab_options,
 			*height_str ? height_str : "", offset,
@@ -806,6 +812,9 @@ ctrl-d:deselect-all,ctrl-t:toggle-all" : "",
 	int dr = (flags & DELAYED_REFRESH) ? 1 : 0;
 	flags &= ~DELAYED_REFRESH;
 	int ret = launch_execle(cmd);
+
+	/* Restore the user's shell to its original value. */
+	user.shell = shell_bk;
 
 	if (prev == 1)
 		clear_fzf();
