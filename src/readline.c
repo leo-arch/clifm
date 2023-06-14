@@ -749,7 +749,7 @@ my_rl_getc(FILE *stream)
 			prev = c;
 
 			if (rl_end == 0) {
-				fzf_open_with = 0;
+//				fzf_open_with = 0;
 				if (conf.highlight == 1)
 					rl_redisplay();
 			}

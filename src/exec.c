@@ -572,92 +572,35 @@ export_var_function(char **args)
 	return status;
 }
 
-/*
-static int
-_export(char *arg)
-{
-	if (!arg || !*arg)
-		return (-1);
-
-	// ARG might have been escaped by parse_input_str(), in the command
-	// and parameter substitution block. Let's deescape it
-	char *ds = dequote_str(arg, 0);
-	if (!ds) {
-		xerror(_("%s: Error dequoting argument\n"), PNL);
-		return (-1);
-	}
-
-	char *p = strchr(ds, '=');
-	if (!p || !*(p + 1)) {
-		xerror(_("%s: %s: Empty assignement\n"), PNL, ds);
-		free(ds);
-		return (-1);
-	}
-
-	errno = 0;
-
-	*p = '\0';
-	int ret = setenv(ds, p + 1, 1);
-	if (ret == -1) {
-		xerror("%s: %s\n", PROGRAM_NAME, strerror(errno));
-	}
-	*p = '=';
-
-	free(ds);
-	return errno;
-} */
-
-static inline void
-append_ampersand(char **cmd, size_t *len)
-{
-	if (fzf_open_with == 1) {
-		fzf_open_with = 0;
-		strcat(*cmd, " &>/dev/null");
-		*len += 12;
-	}
-
-	(*cmd)[*len - 3] = ' ';
-	(*cmd)[*len - 2] = '&';
-	(*cmd)[*len - 1] = '\0';
-}
-
 static inline char *
 construct_shell_cmd(char **args)
 {
-	/* Bypass CliFM's parsing, expansions, and checks to be executed
-	 * DIRECTLY by the system shell (launch_execle()). */
-	char *first = args[0];
-	if (*args[0] == ':' || *args[0] == ';')
-		first++;
-
-	size_t len = strlen(first) + 3;
-	char *cmd = (char *)xnmalloc(len + (bg_proc ? 2 : 0)
-			+ (fzf_open_with ? 12 : 0), sizeof(char));
-	strcpy(cmd, first);
-	cmd[len - 3] = ' ';
-	cmd[len - 2] = '\0';
-
+	/* If the command starts with either ':' or ';', it has bypassed all clifm
+	 * expansions. At this point we don't care about it: skip this char. */
+	int bypass = (*args[0] == ';' || *args[0] == ':');
 	size_t i;
-	for (i = 1; args[i]; i++) {
-		/* Dest string (cmd) is NULL terminated, just as the source
-		 * string (comm[i]). */
-		if (i > 1) {
-			cmd[len - 3] = ' ';
-			cmd[len - 2] = '\0';
-		}
-		len += strlen(args[i]) + 1;
-		/* LEN holds the previous size of the buffer, plus space, the
-		 * ampersand character, and the new src string. The buffer is
-		 * thus big enough. */
-		cmd = (char *)xrealloc(cmd, (len + 3 + (bg_proc ? 2 : 0)
-				+ (fzf_open_with ? 12 : 0)) * sizeof(char));
-		strcat(cmd, args[i]);
+	size_t total_len = bg_proc == 1 ? 2 : 0; /* 2 == '&' + NUL byte */
+	size_t cmd_len = 0;
+
+	for (i = 0; args[i]; i++)
+		total_len += strlen(args[i]) + 1; /* 1 == space */
+
+	char *cmd = (char *)xnmalloc(total_len + 1, sizeof(char));
+
+	for (i = 0; args[i]; i++) {
+		char *src = (i == 0 && bypass == 1) ? args[i] + 1 : args[i];
+		xstrsncpy(cmd + cmd_len, src, total_len);
+		cmd_len += strlen(src) + 1;
+		cmd[cmd_len - 1] = ' ';
+		cmd[cmd_len] = '\0';
 	}
 
-	if (bg_proc) /* If backgrounded */
-		append_ampersand(&cmd, &len);
-	else
-		cmd[len - 3] = '\0';
+	if (bg_proc == 1) {
+		cmd[cmd_len] = '&';
+		cmd[cmd_len + 1] = '\0';
+	} else {
+		cmd[cmd_len - 1] = '\0'; /* Remove trailing space */
+	}
 
 	return cmd;
 }

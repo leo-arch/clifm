@@ -154,7 +154,7 @@ int
 	follow_symlinks = UNSET,
 	fzftab = UNSET,
 	fzf_height_set = 0,
-	fzf_open_with = 0,
+//	fzf_open_with = 0,
 	fzf_preview_border_type = 0,
 	hist_status = UNSET,
 	home_ok = 1,

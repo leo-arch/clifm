@@ -1144,7 +1144,7 @@ rl_clear_line(int count, int key)
 		return EXIT_SUCCESS;
 
 	words_num = 0;
-	fzf_open_with = 0;
+//	fzf_open_with = 0;
 
 #ifndef _NO_HIGHLIGHT
 	if (cur_color != tx_c) {

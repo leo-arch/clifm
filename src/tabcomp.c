@@ -1636,7 +1636,7 @@ do_completion(char *buf, const size_t prefix_len, const int multi)
 		p = savestring(buf, blen);
 	}
 
-	fzf_open_with = 1;
+//	fzf_open_with = 1;
 	write_completion(p, prefix_len, multi);
 	free(p);
 

@@ -1456,8 +1456,6 @@ free_stuff(void)
 	if (xargs.stealth_mode != 1)
 		save_jumpdb();
 
-//	save_dirhist();
-
 	if (conf.restore_last_path || conf.cd_on_quit)
 		save_last_path();
 
@@ -1658,8 +1656,6 @@ free_stuff(void)
 	rl_clear_history();
 	rl_free_undo_list();
 	rl_clear_pending_input();
-//	rl_free_line_state();
-//	rl_clear_visible_line();
 
 /*
 #if defined(__clang__)

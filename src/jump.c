@@ -832,7 +832,7 @@ dirjump(char **args, const int mode)
 				if (!IS_VALID_JUMP_ENTRY(j))
 					continue;
 
-				/* Exclue CWD */
+				/* Exclude CWD */
 				if (workspaces[cur_ws].path
 				&& jump_db[j].path[1] == workspaces[cur_ws].path[1]
 				&& strcmp(jump_db[j].path, workspaces[cur_ws].path) == 0)

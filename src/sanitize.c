@@ -226,6 +226,8 @@ sanitize_cmd_environ(void)
 	/* Import and sanitize */
 	char *e = (char *)NULL;
 	if ((flags & GUI)) {
+		/* Redhat mentions XAUTHORITY as a safe variable. See
+		 * "https://redhat-crypto.gitlab.io/defensive-coding-guide/#sect-Defensive_Coding-Tasks-Processes-environ" */
 		e = getenv("DISPLAY");
 		if (e && sanitize_cmd(e, SNT_DISPLAY) == EXIT_SUCCESS) {
 			new_env[n] = (char *)xnmalloc(9 + strlen(e), sizeof(char));
@@ -249,6 +251,11 @@ sanitize_cmd_environ(void)
 		sprintf(new_env[n], "TZ=%s", e);
 		n++;
 	}
+
+	/* LANG, LANGUAGE, LC_ADDRESS, LC_ALL, LC_COLLATE, LC_CTYPE,
+	 * LC_IDENTIFICATION, LC_MEASUREMENT, LC_MESSAGES, LC_MONETARY,
+	 * LC_NAME, LC_NUMERIC, LC_PAPER, LC_TELEPHONE, and LC_TIME are also
+	 * safe according to Redhat. */
 
 	e = getenv("LANG");
 	if (e && sanitize_cmd(e, SNT_MISC) == EXIT_SUCCESS) {
