@@ -734,7 +734,7 @@ my_rl_getc(FILE *stream)
 	unsigned char c;
 	static unsigned char prev = 0;
 
-	if (fzftab != 0 && prompt_offset == UNSET)
+	if (prompt_offset == UNSET)
 		prompt_offset = get_prompt_offset(rl_prompt);
 
 	while (1) {
