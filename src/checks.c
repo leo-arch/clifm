@@ -112,7 +112,7 @@ is_file_in_cwd(char *name)
 }
 
 int
-is_url(char *url)
+is_url(const char *url)
 {
 	if ((*url == 'w' && url[1] == 'w' && url[2] == 'w' && url[3] == '.'
 	&& url[4]) || strstr(url, "://") != NULL)
@@ -545,11 +545,6 @@ is_acl(char *file)
 	/* If num > 3 we have something else besides owner, group, and others,
 	 * that is, we have at least one ACL property */
 	return (num > 3 ? 1 : 0);
-
-/*	if (num > 3)
-		return 1;
-
-	return 0; */
 #endif /* _ACL_OK */
 }
 
@@ -570,7 +565,7 @@ is_number(const char *restrict str)
  * for fused parameters in internal commands
  * Returns the index of the digit in STR or -1 if no digit is found */
 static inline int
-contains_digit(char *str)
+contains_digit(const char *str)
 {
 	if (!str || !*str || !*(++str))
 		return (-1);

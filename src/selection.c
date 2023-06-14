@@ -132,7 +132,7 @@ select_file(char *file)
 }
 
 static int
-sel_glob(char *str, const char *sel_path, mode_t filetype)
+sel_glob(char *str, const char *sel_path, const mode_t filetype)
 {
 	if (!str || !*str)
 		return (-1);
@@ -316,7 +316,7 @@ sel_glob(char *str, const char *sel_path, mode_t filetype)
 }
 
 static int
-sel_regex(char *str, const char *sel_path, mode_t filetype)
+sel_regex(char *str, const char *sel_path, const mode_t filetype)
 {
 	if (!str || !*str)
 		return (-1);
@@ -547,7 +547,7 @@ check_sel_path(char **sel_path)
 }
 
 static off_t
-get_sel_file_size(size_t i, int *status)
+get_sel_file_size(const size_t i, int *status)
 {
 	*status = 0;
 
@@ -570,7 +570,7 @@ get_sel_file_size(size_t i, int *status)
 }
 
 static void
-print_total_size(off_t total, const int status)
+print_total_size(const off_t total, const int status)
 {
 	char *human_size = get_size_unit(total);
 
@@ -636,7 +636,6 @@ print_sel_results(const int new_sel, const char *sel_path,
 	}
 
 	if (new_sel <= 0) {
-//		if (pattern)
 		if (pattern && err == 0)
 			fprintf(stderr, _("sel: No matches found\n"));
 		return EXIT_FAILURE;
@@ -725,12 +724,11 @@ select_filename(char *arg, char *dir, int *err)
 }
 
 static int
-select_pattern(char *arg, char *dir, mode_t filetype, int *err)
+select_pattern(char *arg, const char *dir, const mode_t filetype, int *err)
 {
 	int ret = sel_glob(arg, dir ? dir : NULL, filetype ? filetype : 0);
 
 	/* If glob failed, try REGEX */
-//	if (ret <= 0)
 	if (ret == -1)
 		ret = sel_regex(arg, dir ? dir : NULL, filetype);
 
@@ -905,7 +903,7 @@ ERROR:
 }
 
 static int
-desel_entries(char **desel_elements, size_t desel_n, int desel_screen)
+desel_entries(char **desel_elements, const size_t desel_n, const int desel_screen)
 {
 	char **desel_path = (char **)NULL;
 	int i = (int)desel_n;
@@ -1077,7 +1075,7 @@ get_desel_input(size_t *n)
 }
 
 static inline void
-free_desel_elements(size_t desel_n, char ***desel_elements)
+free_desel_elements(const size_t desel_n, char ***desel_elements)
 {
 	int i = (int)desel_n;
 	while (--i >= 0)
@@ -1086,7 +1084,7 @@ free_desel_elements(size_t desel_n, char ***desel_elements)
 }
 
 static inline int
-handle_alpha_entry(int i, size_t desel_n, char **desel_elements)
+handle_alpha_entry(const int i, const size_t desel_n, char **desel_elements)
 {
 	if (*desel_elements[i] == 'e' && !desel_elements[i][1]) {
 		free_desel_elements(desel_n, &desel_elements);
@@ -1114,7 +1112,7 @@ handle_alpha_entry(int i, size_t desel_n, char **desel_elements)
 }
 
 static inline int
-valid_desel_eln(int i, size_t desel_n, char **desel_elements)
+valid_desel_eln(const int i, const size_t desel_n, char **desel_elements)
 {
 	int n = atoi(desel_elements[i]);
 

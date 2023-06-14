@@ -517,7 +517,6 @@ truncate_name(const char *str)
 }
 
 static inline void
-//set_cursor_position(const int baej, size_t *slines)
 set_cursor_position(const int baej)
 {
 	/* If not at the end of the line, move the cursor there */
@@ -534,22 +533,11 @@ set_cursor_position(const int baej)
 
 	if (baej == 1)
 		SUGGEST_BAEJ(BAEJ_OFFSET, sp_c);
-
-/*	int baej_new_line = 1;
-	if (baej == 1) {
-		if (baej_new_line == 1) {
-			puts("");
-			(*slines)++;
-		} else {
-			int off = BAEJ_OFFSET;
-			SUGGEST_BAEJ(off, sp_c);
-		}
-	} */
 }
 
 static inline int
 check_conditions(const size_t offset, const size_t wlen, int *baej,
-				size_t *slines)
+	size_t *slines)
 {
 	if (offset > wlen)
 		return EXIT_FAILURE;
@@ -615,7 +603,6 @@ print_suggestion(const char *str, size_t offset, char *color)
 
 	HIDE_CURSOR;
 
-//	if (suggestion_buf && suggestion_buf != str)
 	if (suggestion.printed && str != suggestion_buf)
 		clear_suggestion(CS_FREEBUF);
 
@@ -663,7 +650,6 @@ print_suggestion(const char *str, size_t offset, char *color)
 		suggestion_buf = savestring(str, strlen(str));
 	}
 
-//	set_cursor_position(baej, &slines);
 	set_cursor_position(baej);
 	_print_suggestion(str, offset, color);
 
@@ -681,7 +667,7 @@ print_suggestion(const char *str, size_t offset, char *color)
 
 static inline char *
 get_reg_file_color(const char *filename, const struct stat *attr,
-                   int *free_color)
+	int *free_color)
 {
 	if (conf.light_mode == 1) return fi_c;
 	if (access(filename, R_OK) == -1) return nf_c;
@@ -812,7 +798,7 @@ skip_leading_backslashes(char **str, size_t *len)
 }
 
 static void
-match_print(char *match, size_t len, char *color, const int append_slash)
+match_print(char *match, const size_t len, char *color, const int append_slash)
 {
 	char t[PATH_MAX + 2];
 	*t = '\0';
@@ -965,7 +951,7 @@ print_directory_suggestion(const size_t i, const size_t len, char *color)
 
 static inline void
 print_reg_file_suggestion(char *str, const size_t i, size_t len,
-                          char *color, const int dot_slash)
+	char *color, const int dot_slash)
 {
 	if (conf.suggest_filetype_color)
 		color = file_info[i].color;
@@ -1005,7 +991,7 @@ print_reg_file_suggestion(char *str, const size_t i, size_t len,
 
 static int
 check_filenames(char *str, size_t len, const int first_word,
-				const size_t full_word)
+	const size_t full_word)
 {
 	char *color = (conf.suggest_filetype_color == 1) ? no_c : sf_c;
 
@@ -1167,7 +1153,7 @@ check_builtins(const char *str, const size_t len, const int print)
 }
 
 static inline int
-print_cmd_suggestion(size_t i, size_t len)
+print_cmd_suggestion(const size_t i, const size_t len)
 {
 	if (is_internal_c(bin_commands[i])) {
 		if (strlen(bin_commands[i]) > len) {
@@ -1191,7 +1177,7 @@ print_cmd_suggestion(size_t i, size_t len)
 }
 
 static inline int
-print_internal_cmd_suggestion(char *str, size_t len, const int print)
+print_internal_cmd_suggestion(char *str, const size_t len, const int print)
 {
 	/* Check internal command with fused parameter */
 	char *p = (char *)NULL;
@@ -1597,7 +1583,7 @@ turn_it_wrong(void)
 /* Switch to the warning prompt
  * FC is first char and LC last char */
 static void
-print_warning_prompt(const char fc, unsigned char lc)
+print_warning_prompt(const char fc, const unsigned char lc)
 {
 	if (conf.warning_prompt == 0 || wrong_cmd == 1
 	|| fc == ';' || fc == ':' || fc == '#' || fc == '@'
@@ -1622,7 +1608,7 @@ print_warning_prompt(const char fc, unsigned char lc)
 
 #ifndef _NO_TAGS
 static inline int
-check_tags(const char *str, const size_t len, int type)
+check_tags(const char *str, const size_t len, const int type)
 {
 	if (!str || !*str || len == 0 || tags_n == 0 || !tags)
 		return NO_MATCH;
@@ -1641,7 +1627,7 @@ check_tags(const char *str, const size_t len, int type)
 #endif /* _NO_TAGS */
 
 static int
-check_sort_methods(char *str, const size_t len)
+check_sort_methods(const char *str, const size_t len)
 {
 	if (len == 0) {
 		if (suggestion.printed)

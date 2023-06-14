@@ -26,7 +26,7 @@
 
 __BEGIN_DECLS
 
-int is_compressed(char *, int);
+int is_compressed(char *, const int);
 int archiver(char **, char);
 
 __END_DECLS

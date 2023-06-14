@@ -135,7 +135,7 @@ int_cmds_generator(const char *text, int state)
 	if (!state)
 		i = 0;
 
-	static char *cmd_desc[] = {
+	static char *const cmd_desc[] = {
 		"/       (search for files)",
 		"ac      (archive-compress files)",
 		"acd     (set autocd on/off)",
@@ -749,7 +749,6 @@ my_rl_getc(FILE *stream)
 			prev = c;
 
 			if (rl_end == 0) {
-//				fzf_open_with = 0;
 				if (conf.highlight == 1)
 					rl_redisplay();
 			}
@@ -2046,7 +2045,7 @@ sort_num_generator(const char *text, int state)
 	if (num_text == INT_MIN)
 		return (char *)NULL;
 
-	static char *sorts[] = {
+	static char *const sorts[] = {
 	    "none",
 	    "name",
 	    "size",
@@ -2989,7 +2988,7 @@ file_types_opts_generator(const char *text, int state)
 	if (!state)
 		i = 0;
 
-	static char *ft_opts[] = {
+	static char *const ft_opts[] = {
 		"b (Block device)",
 		"c (Character device)",
 		"d (Directory)",
@@ -3139,7 +3138,7 @@ rl_swap_fields(char ***a)
 static int
 cmd_takes_edit(const char *str)
 {
-	static char *cmds[] = {
+	static char *const cmds[] = {
 		"actions",
 		"bm", "bookmarks",
 		"config",
@@ -3443,8 +3442,8 @@ complete_tag_names(char *text, int *exit_status)
 		return matches;
 	}
 
-	// comp == 2
-	// Let's match tagged files for the untag function
+	/* comp == 2
+	 * Let's match tagged files for the untag function. */
 	char *_tag = get_cur_tag();
 	matches = check_tagged_files(_tag);
 	free(_tag);
@@ -3738,8 +3737,8 @@ complete_trashed_files(const char *text, const enum comp_type flag)
 
 
 	if (tabmode == STD_TAB && conf.colorize == 1)
-		// Only used to remove trash extension from files so
-		// that we can correctly set file color by extension.
+		/* Only used to remove trash extension from files so
+		 * that we can correctly set file color by extension. */
 		flags |= STATE_COMPLETING;
 
 	cur_comp_type = flag;
@@ -3812,7 +3811,7 @@ complete_sel_keyword(const char *text, int *exit_status, const size_t words_n)
 {
 	*exit_status = EXIT_FAILURE;
 
-	if (words_n == 1 && text[1] != ':') // only "s:" is allowed as first word
+	if (words_n == 1 && text[1] != ':') /* Only "s:" is allowed as first word */
 		return (char **)NULL;
 
 	char **matches = rl_completion_matches("", &sel_entries_generator);
@@ -3837,12 +3836,12 @@ complete_eln(char *text, int *exit_status, const size_t words_n)
 	if (!is_number(text) || (n = atoi(text)) < 1 || n > (int)files)
 		return (char **)NULL;
 
-	// first word
+	/* First word */
 	if (words_n == 1) {
 		if (xrename >= 2 || (file_info[n - 1].dir == 1 && conf.autocd == 0)
 		|| (file_info[n - 1].dir == 0 && conf.auto_open == 0))
 			return (char **)NULL;
-	} else { // Second word or more
+	} else { /* Second word or more */
 		if (xrename == 1 || xrename == 3 || _expand_eln(text) == 0)
 			return (char **)NULL;
 	}

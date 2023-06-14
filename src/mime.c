@@ -515,7 +515,7 @@ mime_import(char *file)
 	sprintf(config_path, "%s/.config/mimeapps.list", user.home);
 	sprintf(local_path, "%s/.local/share/applications/mimeapps.list", user.home);
 
-	char *mime_paths[] = {config_path, local_path,
+	const char *const mime_paths[] = {config_path, local_path,
 	    "/usr/local/share/applications/mimeapps.list",
 	    "/usr/share/applications/mimeapps.list",
 	    "/etc/xdg/mimeapps.list", NULL};
@@ -633,9 +633,6 @@ get_filename(char *file_path)
 	char *f = strrchr(file_path, '/');
 	if (f && *(++f))
 		return f;
-
-/*	if (f)
-		return (f + 1); */
 
 	return (char *)NULL;
 }

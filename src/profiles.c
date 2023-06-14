@@ -117,7 +117,7 @@ check_profile(const char *name)
 
 /* Switch profile to PROF */
 int
-profile_set(char *prof)
+profile_set(const char *prof)
 {
 	if (xargs.stealth_mode == 1) {
 		printf("%s: profiles: %s\n", PROGRAM_NAME, STEALTH_DISABLED);
@@ -280,7 +280,7 @@ profile_set(char *prof)
 
 /* Add a new profile named PROF */
 static int
-profile_add(char *prof)
+profile_add(const char *prof)
 {
 	if (!prof)
 		return EXIT_FAILURE;
@@ -368,7 +368,7 @@ profile_add(char *prof)
 
 /* Delete the profile PROF */
 static int
-profile_del(char *prof)
+profile_del(const char *prof)
 {
 	if (xargs.stealth_mode == 1) {
 		printf("%s: profiles: %s\n", PROGRAM_NAME, STEALTH_DISABLED);
@@ -442,7 +442,7 @@ validate_profile_name(const char *name)
 }
 
 static int
-create_profile(char *name)
+create_profile(const char *name)
 {
 	if (name) {
 		if (validate_profile_name(name) == EXIT_SUCCESS)
@@ -457,7 +457,7 @@ create_profile(char *name)
 }
 
 static int
-delete_profile(char *name)
+delete_profile(const char *name)
 {
 	if (name)
 		return profile_del(name);
@@ -467,7 +467,7 @@ delete_profile(char *name)
 }
 
 static int
-switch_profile(char *name)
+switch_profile(const char *name)
 {
 	if (name)
 		return profile_set(name);

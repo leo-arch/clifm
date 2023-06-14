@@ -372,7 +372,7 @@ alphasort_insensitive(const struct dirent **a, const struct dirent **b)
 }
 
 static inline void
-print_owner_group_sort(int mode)
+print_owner_group_sort(const int mode)
 {
 	if (conf.light_mode == 1) {
 		printf(_("%s (not available: using 'name') %s\n"),

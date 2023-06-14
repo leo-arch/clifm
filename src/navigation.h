@@ -32,7 +32,7 @@ int  backdir(char *);
 int  cd_function(char *, const int);
 char *fastback(char *);
 int  forth_function(char **);
-char **get_bd_matches(const char *, int *, int);
+char **get_bd_matches(const char *, int *, const int);
 int  handle_workspaces(char **);
 void print_dirhist(char *);
 int  pwd_function(const char *);

@@ -125,7 +125,7 @@ get_block_devices(void)
 }
 
 static int
-unmount_dev(size_t i, const int n)
+unmount_dev(const size_t i, const int n)
 {
 	if (xargs.mount_cmd == UNSET) {
 		xerror(_("%s: No mount application found. Install either "
@@ -383,7 +383,7 @@ free_media(void)
 
 /* Get device information via external application */
 static int
-print_dev_info(int n)
+print_dev_info(const int n)
 {
 	if (!media[n].dev || xargs.mount_cmd == UNSET)
 		return EXIT_FAILURE;

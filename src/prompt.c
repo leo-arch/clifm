@@ -135,7 +135,7 @@ gen_time(const int c)
 }
 
 static inline char *
-get_dir_basename(char *_path)
+get_dir_basename(const char *_path)
 {
 	char *temp = (char *)NULL,
 		 *ret = (char *)NULL;
@@ -153,7 +153,7 @@ get_dir_basename(char *_path)
 }
 
 static inline char *
-reduce_path(char *_path)
+reduce_path(const char *_path)
 {
 	char *temp = (char *)NULL;
 
@@ -171,7 +171,7 @@ reduce_path(char *_path)
 }
 
 static inline char *
-gen_pwd(int c)
+gen_pwd(const int c)
 {
 	char *temp = (char *)NULL, *tmp_path = (char *)NULL;
 	int free_tmp_path = 0;
@@ -480,7 +480,7 @@ gen_emergency_prompt(void)
 }
 
 static inline char *
-gen_stats_str(int flag)
+gen_stats_str(const int flag)
 {
 	size_t val = 0;
 
@@ -521,7 +521,7 @@ gen_stats_str(int flag)
 }
 
 static inline char *
-gen_notification(int flag)
+gen_notification(const int flag)
 {
 	char *p;
 	if (user.uid == 0)
@@ -840,7 +840,7 @@ setenv_prompt(void)
 }
 
 static inline size_t
-set_prompt_length(size_t decoded_prompt_len)
+set_prompt_length(const size_t decoded_prompt_len)
 {
 	size_t len = 0;
 

@@ -41,6 +41,7 @@
 #include "file_operations.h"
 #include "exec.h"
 #include "config.h" /* set_div_line() */
+#include "sanitize.h"
 
 #ifndef CLIFM_SUCKLESS
 /* qsort(3) is used only by get_colorschemes(), which is not included
@@ -74,7 +75,7 @@ static struct colors_t *defs;
 static size_t defs_n = 0;
 
 /* Xterm-like color names taken from vifm(1) */
-static struct colors_t color_names[] = {
+static const struct colors_t color_names[] = {
 	{"Black", "38;5;0"},
 	{"Red", "38;5;1"},
 	{"Green", "38;5;2"},
@@ -592,7 +593,7 @@ update_warning_prompt_text_color(void)
  * If an attribute is appended to the name (ex: NAME-1), return value for this
  * name plus the corresponding attribute. */
 static char *
-check_names(char *str)
+check_names(const char *str)
 {
 	char attr = 0;
 	char *dash = strchr(str, '-');
@@ -624,7 +625,7 @@ check_names(char *str)
 
 /* If STR is a valid color variable name, return the value of this variable */
 static char *
-check_defs(char *str)
+check_defs(const char *str)
 {
 	if (defs_n == 0 || !str || !*str)
 		return (char *)NULL;
@@ -752,7 +753,7 @@ check_ext_string(const char *ext)
  * The hash table is checked first, and, in case of a conflict, a regular
  * string comparison is performed to resolve it. */
 char *
-get_ext_color(char *ext)
+get_ext_color(const char *ext)
 {
 	if (!ext || !*ext || !*(++ext) || ext_colors_n == 0)
 		return (char *)NULL;
@@ -775,7 +776,7 @@ get_ext_color(char *ext)
  * 't', and ExtColors, if mode is 'x') returning the same string
  * containing only allowed characters */
 static char *
-strip_color_line(const char *str, char mode)
+strip_color_line(const char *str, const char mode)
 {
 	if (!str || !*str)
 		return (char *)NULL;
@@ -1471,7 +1472,7 @@ set_default_size_shades(void)
  * ext_colors global array
  * If LINE contains a color variable, expand it, check it, and store it */
 static int
-store_extension_line(char *line)
+store_extension_line(const char *line)
 {
 	/* Remove the leading "*." from the extension line */
 	if (!line || *line != '*' || *(line + 1) != '.' || !*(line + 2))

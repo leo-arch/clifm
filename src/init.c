@@ -243,7 +243,7 @@ init_conf_struct(void)
 }
 
 void
-set_prop_fields(char *line)
+set_prop_fields(const char *line)
 {
 	if (!line || !*line)
 		return;
@@ -300,7 +300,6 @@ set_prop_fields(char *line)
 int
 get_sys_shell(void)
 {
-//	if (!user.shell || !user.shell_basename)
 	if (!user.shell)
 		return SHELL_POSIX;
 
@@ -316,28 +315,6 @@ get_sys_shell(void)
 
 	char *s = ret + 1;
 	user.shell_basename = savestring(s, strlen(s));
-
-//	char *s = user.shell_basename;
-/*	char l[PATH_MAX];
-	*l = '\0';
-
-	if (user.shell) {
-		xstrsncpy(l, user.shell, sizeof(l));
-	} else {
-		ssize_t ret = readlinkat(AT_FDCWD, "/bin/sh", l, sizeof(l));
-
-		if (!*l || ret == -1)
-			return SHELL_NONE;
-
-		l[ret] = '\0';
-	}
-
-	char *s = (char *)NULL;
-	char *p = strrchr(l, '/');
-	if (p && *(++p))
-		s = p;
-	else
-		s = l; */
 
 	if (*s == 'b' && strcmp(s, "bash") == 0)
 		return SHELL_BASH;
@@ -368,7 +345,7 @@ init_gettext(void)
 #endif /* !_NO_GETTEXT */
 
 int
-backup_argv(int argc, char **argv)
+backup_argv(const int argc, char **argv)
 {
 	argc_bk = argc;
 	argv_bk = (char **)xnmalloc((size_t)argc + 1, sizeof(char *));
@@ -557,7 +534,7 @@ try_standard_data_dirs(void)
 	if (user.home && *user.home)
 		snprintf(home_local, sizeof(home_local), "%s/.local/share", user.home);
 
-	char *data_dirs[] = {
+	char *const data_dirs[] = {
 		home_local,
 		"/usr/local/share",
 		"/usr/share",
@@ -588,7 +565,7 @@ try_standard_data_dirs(void)
 }
 
 static char *
-try_datadir(char *dir)
+try_datadir(const char *dir)
 {
 	if (!dir || !*dir)
 		return (char *)NULL;
@@ -619,7 +596,7 @@ try_datadir(char *dir)
 }
 
 static char *
-resolve_absolute_path(char *s)
+resolve_absolute_path(const char *s)
 {
 	if (!s || !*s)
 		return (char *)NULL;
@@ -637,7 +614,7 @@ resolve_absolute_path(char *s)
 }
 
 static char *
-resolve_relative_path(char *s)
+resolve_relative_path(const char *s)
 {
 	if (!s || !*s)
 		return (char *)NULL;
@@ -656,7 +633,7 @@ resolve_relative_path(char *s)
 }
 
 static char *
-resolve_basename(char *s)
+resolve_basename(const char *s)
 {
 	if (!s || !*s)
 		return (char *)NULL;
@@ -854,7 +831,7 @@ xgetenv(const char *s, const int alloc)
  * '/etc/shells'.
  * Return EXIT_SUCCESS if found or EXIT_FAILURE if not. */
 static int
-check_etc_shells(char *file, int *_errno)
+check_etc_shells(const char *file, int *_errno)
 {
 	int fd;
 	FILE *fp = open_fstream_r("/etc/shells", &fd);
@@ -1049,7 +1026,7 @@ get_user_data(void)
 
 #ifndef _DIRENT_HAVE_D_TYPE
 static int
-check_tag(char *name)
+check_tag(const char *name)
 {
 	if (!name || !*name)
 		return EXIT_FAILURE;
@@ -1879,7 +1856,7 @@ set_sort_by_name(const char *name)
 }
 
 static inline void
-set_sort(char *arg)
+set_sort(const char *arg)
 {
 	int n = 0;
 
@@ -2191,14 +2168,14 @@ _set_starting_path(char *_path)
 /* Evaluate external arguments, if any, and change initial variables to
  * its corresponding value. */
 void
-external_arguments(int argc, char **argv)
+external_arguments(const int argc, char **argv)
 {
 	/* Disable automatic error messages to be able to handle them ourselves
 	 * via the '?' case in the switch. */
 	opterr = optind = 0;
 
 	/* Link long (--option) and short options (-o) for the getopt_long function. */
-	static struct option longopts[] = {
+	static const struct option longopts[] = {
 		{"no-hidden", no_argument, 0, 'a'},
 		{"show-hidden", no_argument, 0, 'A'},
 		{"bookmarks-file", required_argument, 0, 'b'},
@@ -3366,7 +3343,7 @@ free_aliases(void)
 }
 
 static inline void
-write_alias(char *s, char *p)
+write_alias(const char *s, char *p)
 {
 	aliases = (struct alias_t *)xrealloc(aliases, (aliases_n + 2)
 				* sizeof(struct alias_t));
@@ -3391,7 +3368,7 @@ write_alias(char *s, char *p)
 }
 
 static int
-alias_exists(char *s)
+alias_exists(const char *s)
 {
 	int i = (int)aliases_n;
 

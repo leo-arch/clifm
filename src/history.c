@@ -384,41 +384,6 @@ log_msg(char *_msg, const int print_prompt, const int logme,
 	write_msg_into_logfile(_msg);
 }
 
-/*
-int
-save_dirhist(void)
-{
-	if (!dirhist_file)
-		return EXIT_FAILURE;
-
-	if (!old_pwd || !*old_pwd)
-		return EXIT_SUCCESS;
-
-	int fd = 0;
-	FILE *fp = open_fstream_w(dirhist_file, &fd);
-	if (!fp) {
-		xerror(_("%s: Error saving directory history: %s\n"),
-			PROGRAM_NAME, strerror(errno));
-		return EXIT_FAILURE;
-	}
-
-	// Let's keep only the last MaxDirhist entries
-	int i, n = dirhist_total_index <= conf.max_dirhist ? 0
-		: dirhist_total_index - conf.max_dirhist;
-
-	for (i = n; i < dirhist_total_index; i++) {
-		// Exclude invalid/consecutive equal entries
-		if (!old_pwd[i] || *old_pwd[i] == _ESC || (i > 0 && old_pwd[i - 1]
-		&& strcmp(old_pwd[i - 1], old_pwd[i]) == 0))
-			continue;
-
-		fprintf(fp, "%s\n", old_pwd[i]);
-	}
-
-	fclose(fp);
-	return EXIT_SUCCESS;
-} */
-
 static void
 append_to_dirhist_file(const char *dir_path)
 {
@@ -518,12 +483,11 @@ edit_history(char **args)
 	if (ret != EXIT_SUCCESS)
 		return ret;
 
-	/* Get modification time after opening the config file */
+	/* Get modification time after opening the config file. */
 	stat(hist_file, &attr);
 	/* If modification times differ, the file was modified after being
-	 * opened */
+	 * opened. */
 	if (mtime_bfr != (time_t)attr.st_mtime) {
-//		ret = reload_history(args);
 		ret = reload_history();
 		print_reload_msg(_("File modified. History entries reloaded\n"));
 		return ret;

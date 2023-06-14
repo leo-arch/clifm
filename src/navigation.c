@@ -461,7 +461,7 @@ handle_workspaces(char **args)
 
 /* Return the list of paths in CWD matching STR */
 char **
-get_bd_matches(const char *str, int *n, int mode)
+get_bd_matches(const char *str, int *n, const int mode)
 {
 	if (*workspaces[cur_ws].path == '/' && !workspaces[cur_ws].path[1])
 		return (char **)NULL;
@@ -544,7 +544,7 @@ get_bd_matches(const char *str, int *n, int mode)
 }
 
 static int
-grab_bd_input(int n)
+grab_bd_input(const int n)
 {
 	char *input = (char *)NULL;
 	putchar('\n');
@@ -633,7 +633,7 @@ backdir_menu(char **matches)
 }
 
 static int
-help_or_root(char *str)
+help_or_root(const char *str)
 {
 	if (str && IS_HELP(str)) {
 		puts(_(BD_USAGE));
@@ -738,7 +738,7 @@ xchdir(char *dir, const int cd_flag)
 }
 
 static char *
-check_cdpath(char *name)
+check_cdpath(const char *name)
 {
 	if (cdpath_n == 0 || !name || !*name)
 		return (char *)NULL;

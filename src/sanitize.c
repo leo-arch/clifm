@@ -292,7 +292,7 @@ restore_cmd_environ(void)
 
 /* Sanitize cmd string coming from the mimelist file */
 static int
-sanitize_mime(char *cmd)
+sanitize_mime(const char *cmd)
 {
 	/* Only %f is allowed */
 	char *p = strchr(cmd, '%');
@@ -312,7 +312,7 @@ sanitize_mime(char *cmd)
 
 /* Sanitize cmd string coming from the net file */
 static int
-sanitize_net(char *cmd)
+sanitize_net(const char *cmd)
 {
 	if (strlen(cmd) > strspn(cmd, ALLOWED_CHARS_NET))
 		return EXIT_FAILURE;
@@ -322,7 +322,7 @@ sanitize_net(char *cmd)
 
 /* Sanitize value of DISPLAY env var */
 static int
-sanitize_misc(char *str)
+sanitize_misc(const char *str)
 {
 	if (strlen(str) > strspn(str, ALLOWED_CHARS_MISC))
 		return EXIT_FAILURE;
@@ -332,7 +332,7 @@ sanitize_misc(char *str)
 
 /* Sanitize value of DISPLAY env var */
 static int
-sanitize_display(char *str)
+sanitize_display(const char *str)
 {
 	if (strlen(str) > strspn(str, ALLOWED_CHARS_DISPLAY))
 		return EXIT_FAILURE;
@@ -342,7 +342,7 @@ sanitize_display(char *str)
 
 /* Sanitize cmd string coming from profile, prompt, and autocmds */
 static int
-sanitize_gral(char *cmd)
+sanitize_gral(const char *cmd)
 {
 	if (strlen(cmd) > strspn(cmd, ALLOWED_CHARS_GRAL))
 		return EXIT_FAILURE;
@@ -353,7 +353,7 @@ sanitize_gral(char *cmd)
 /* Returns 1 if at least one character in CMD is a non-escaped
  * blacklisted char (<>|;&$). Oterwise, returns 0 */
 static int
-sanitize_blacklist(char *cmd)
+sanitize_blacklist(const char *cmd)
 {
 	if (!cmd || !*cmd)
 		return EXIT_SUCCESS;
@@ -382,7 +382,7 @@ sanitize_blacklist(char *cmd)
  * zero otherwise. This means: do not allow custom scripts or binaries,
  * but only whatever could be found in the sanitized PATH variable */
 static int
-clean_cmd(char *str)
+clean_cmd(const char *str)
 {
 	if (!str || !*str)
 		return EXIT_FAILURE;
@@ -408,7 +408,7 @@ clean_cmd(char *str)
 /* Sanitize CMD according to TYPE. Returns zero if command is safe or
  * one if not */
 int
-sanitize_cmd(char *str, int type)
+sanitize_cmd(const char *str, const int type)
 {
 	if (!str || !*str)
 		return EXIT_FAILURE;

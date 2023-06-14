@@ -326,7 +326,7 @@ get_cwd(char *buf, const size_t buflen, const int check_workspace)
 }
 
 char *
-normalize_path(char *src, size_t src_len)
+normalize_path(char *src, const size_t src_len)
 {
 	if (!src || !*src)
 		return (char *)NULL;
@@ -501,7 +501,7 @@ rl_ring_bell(void)
 }
 
 char *
-gen_date_suffix(struct tm tm)
+gen_date_suffix(const struct tm tm)
 {
 	char date[64] = "";
 	strftime(date, sizeof(date), "%b %d %H:%M:%S %Y", &tm);
@@ -515,7 +515,7 @@ gen_date_suffix(struct tm tm)
 
 /* Create directory DIR with permissions set to MODE */
 int
-xmkdir(char *dir, mode_t mode)
+xmkdir(char *dir, const mode_t mode)
 {
 	mode_t old_mask = umask(0);
 	int ret = mkdirat(AT_FDCWD, dir, mode);
@@ -722,7 +722,7 @@ get_hex_num(const char *str)
  * the function will just check if the directory is populated (it has at
  * least 3 files, including self and parent) */
 int
-count_dir(const char *dir, int pop)
+count_dir(const char *dir, const int pop)
 {
 	if (!dir)
 		return (-1);
@@ -794,7 +794,7 @@ get_cmd_path(const char *cmd)
 /* Convert SIZE to human readeable form (at most 2 decimal places)
  * Returns a string of at most MAX_UNIT_SIZE, defined in aux.h */
 char *
-get_size_unit(off_t size)
+get_size_unit(const off_t size)
 {
 	/* MAX_UNIT_SIZE == 10 == "1023.99YB\0" */
 	char *str = xnmalloc(MAX_UNIT_SIZE, sizeof(char));
@@ -978,7 +978,7 @@ xatoi(const char *s)
 
 /* Some memory wrapper functions */
 void *
-xrealloc(void *ptr, size_t size)
+xrealloc(void *ptr, const size_t size)
 {
 	void *p = realloc(ptr, size);
 
@@ -992,7 +992,7 @@ xrealloc(void *ptr, size_t size)
 }
 
 void *
-xcalloc(size_t nmemb, size_t size)
+xcalloc(const size_t nmemb, const size_t size)
 {
 	void *p = calloc(nmemb, size);
 
@@ -1006,7 +1006,7 @@ xcalloc(size_t nmemb, size_t size)
 }
 
 void *
-xnmalloc(size_t nmemb, size_t size)
+xnmalloc(const size_t nmemb, const size_t size)
 {
 	void *p = malloc(nmemb * size);
 

@@ -88,7 +88,7 @@ struct shades_t size_shades;
 struct paths_t *paths = (struct paths_t *)NULL;
 struct ext_t *ext_colors = (struct ext_t *)NULL;
 
-struct sort_t _sorts[] = {
+const struct sort_t _sorts[] = {
     {"none", 0, 0},
     {"name", 1, 0},
     {"size", 2, 0},
@@ -154,7 +154,6 @@ int
 	follow_symlinks = UNSET,
 	fzftab = UNSET,
 	fzf_height_set = 0,
-//	fzf_open_with = 0,
 	fzf_preview_border_type = 0,
 	hist_status = UNSET,
 	home_ok = 1,

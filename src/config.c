@@ -604,7 +604,7 @@ setenv_plugins_helper(void)
 			"%s/.local/share/clifm/plugins/plugins-helper", user.home);
 	}
 
-	const char *_paths[] = {
+	const char *const _paths[] = {
 		home_local,
 #if defined(__HAIKU__)
 		"/boot/system/non-packaged/data/clifm/plugins/plugins-helper",
@@ -682,7 +682,7 @@ set_sel_file(void)
 }
 
 static int
-import_from_data_dir(char *src_filename, char *dest)
+import_from_data_dir(const char *src_filename, char *dest)
 {
 	if (!data_dir || !src_filename || !dest
 	|| !*data_dir || !*src_filename || !*dest)
@@ -2090,7 +2090,7 @@ print_mime_file_msg(char *file)
 }
 
 int
-create_mime_file(char *file, int new_prof)
+create_mime_file(char *file, const int new_prof)
 {
 	if (!file || !*file)
 		return EXIT_FAILURE;

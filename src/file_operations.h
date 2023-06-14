@@ -42,7 +42,7 @@ int  cp_mv_file(char **, const int, const int);
 int  create_files(char **);
 int  dup_file(char **);
 int  edit_link(char *);
-char *_export(char **, int);
+char *_export(char **, const int);
 int  open_file(char *);
 int  open_function(char **);
 int  remove_file(char **);

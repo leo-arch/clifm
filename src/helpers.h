@@ -1140,7 +1140,7 @@ struct sort_t {
 	int pad;
 };
 
-extern struct sort_t _sorts[];
+extern const struct sort_t _sorts[];
 
 /* Prompts and prompt settings */
 struct prompts_t {
@@ -1337,7 +1337,6 @@ extern int
 	follow_symlinks,
 	fzftab,
 	fzf_height_set,
-//	fzf_open_with,
 	fzf_preview_border_type,
 	hist_status,
 	home_ok,

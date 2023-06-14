@@ -529,7 +529,7 @@ check_iso(char *file)
  * well (and there is no need to run two functions (is_compressed and
  * check_iso), when we can run just one) */
 int
-is_compressed(char *file, int test_iso)
+is_compressed(char *file, const int test_iso)
 {
 	if (!file || !*file) {
 		xerror("%s\n", _("Error querying file type"));
@@ -720,7 +720,7 @@ get_archive_filename(void)
  * tells if we have one or multiple file. Returns zero on success and
  * one on error */
 static int
-zstandard(char *in_file, char *out_file, char mode, char op)
+zstandard(char *in_file, char *out_file, const char mode, const char op)
 {
 	int exit_status = EXIT_SUCCESS;
 	char *deq_file = dequote_str(in_file, 0);
@@ -1272,7 +1272,7 @@ decompress_files(char **args)
  * zero on success and one on error. Depends on 'zstd' for Zdtandard
  * files, 'atool' and 'archivemount' for the remaining types. */
 int
-archiver(char **args, char mode)
+archiver(char **args, const char mode)
 {
 	if (!args[1])
 		return EXIT_FAILURE;

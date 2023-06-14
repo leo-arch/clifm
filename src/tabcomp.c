@@ -197,7 +197,7 @@ get_cursor_position(int *c, int *l)
 `*' for executables
 `=' for sockets */
 static int
-stat_char(char *filename)
+stat_char(const char *filename)
 {
 	struct stat attr;
 	int r;
@@ -656,10 +656,6 @@ get_last_word(char *str, const int original_query)
 	}
 
 	return w;
-/*	if (!word)
-		return str;
-
-	return *word == '/' ? word + 1 : word; */
 }
 
 static void
@@ -877,7 +873,7 @@ print_no_finder_file(void)
  * downloads/_.pdf<TAB> -> downloads/file.pdf
  * _.pdf<TAB> -> file.pdf */
 static char *
-get_glob_file_target(char *str, char *initial_path)
+get_glob_file_target(char *str, const char *initial_path)
 {
 	if (!str || !*str)
 		return (char *)NULL;
@@ -1204,7 +1200,7 @@ count_quote_chars(const char *str, const size_t len)
 /* Calculate the length of the matching prefix to insert into the line
  * buffer only the non-matched part of the string returned by FZF. */
 static size_t
-calculate_prefix_len(char *str, const char *query, const char *lw)
+calculate_prefix_len(const char *str, const char *query, const char *lw)
 {
 	enum comp_type ct = cur_comp_type;
 
@@ -1636,7 +1632,6 @@ do_completion(char *buf, const size_t prefix_len, const int multi)
 		p = savestring(buf, blen);
 	}
 
-//	fzf_open_with = 1;
 	write_completion(p, prefix_len, multi);
 	free(p);
 
@@ -1775,7 +1770,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
    `!' means to do standard completion, and list all possible completions
    if there is more than one. */
 int
-tab_complete(int what_to_do)
+tab_complete(const int what_to_do)
 {
 	if (rl_notab == 1)
 		return EXIT_SUCCESS;

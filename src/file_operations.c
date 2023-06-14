@@ -177,7 +177,7 @@ create_tmp_file(char **file, int *fd)
 }
 
 static char
-get_file_suffix(mode_t type)
+get_file_suffix(const mode_t type)
 {
 	switch (type) {
 	case DT_DIR: return '/';
@@ -191,7 +191,7 @@ get_file_suffix(mode_t type)
 }
 
 static void
-print_file(FILE *fp, char *name, mode_t type)
+print_file(FILE *fp, const char *name, const mode_t type)
 {
 #ifndef _DIRENT_HAVE_D_TYPE
 	UNUSED(type);
@@ -261,7 +261,7 @@ write_files_to_tmp(struct dirent ***a, int *n, const char *target,
 }
 
 static int
-open_tmp_file(struct dirent ***a, int n, char *tmp_file, char *app)
+open_tmp_file(struct dirent ***a, const int n, char *tmp_file, char *app)
 {
 	int exit_status = EXIT_SUCCESS;
 	size_t i;
@@ -390,7 +390,7 @@ get_remove_files(const char *target, char **tmp_files,
 }
 
 static char *
-get_rm_param(char ***rfiles, int n)
+get_rm_param(char ***rfiles, const int n)
 {
 	char *_param = (char *)NULL;
 	struct stat a;
@@ -418,7 +418,7 @@ get_rm_param(char ***rfiles, int n)
 }
 
 static char **
-construct_rm_cmd(char ***rfiles, char *_param, size_t n)
+construct_rm_cmd(char ***rfiles, char *_param, const size_t n)
 {
 	char **cmd = (char **)xnmalloc(n + 4, sizeof(char *));
 
@@ -480,7 +480,7 @@ bulk_remove_files(char ***rfiles)
 }
 
 static int
-diff_files(char *tmp_file, int n)
+diff_files(char *tmp_file, const int n)
 {
 	FILE *fp = fopen(tmp_file, "r");
 	char line[PATH_MAX + 6];
@@ -2070,7 +2070,7 @@ ERROR:
  * into a temporary file. Return the address of this empt file if
  * success (it must be freed) or NULL in case of error */
 char *
-_export(char **filenames, int open)
+_export(char **filenames, const int open)
 {
 	char *tmp_file = (char *)xnmalloc(strlen(tmp_dir) + 14, sizeof(char));
 	sprintf(tmp_file, "%s/%s", tmp_dir, TMP_FILENAME);

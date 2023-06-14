@@ -127,7 +127,7 @@ get_remote(char *name)
 }
 
 static inline int
-_create_mountpoint(int i)
+_create_mountpoint(const int i)
 {
 	char *cmd[] = {"mkdir", "-p", remotes[i].mountpoint, NULL};
 
@@ -140,7 +140,7 @@ _create_mountpoint(int i)
 }
 
 static inline int
-cd_to_mountpoint(int i)
+cd_to_mountpoint(const int i)
 {
 	free(workspaces[cur_ws].path);
 	workspaces[cur_ws].path = savestring(remotes[i].mountpoint,
@@ -156,14 +156,14 @@ cd_to_mountpoint(int i)
 }
 
 static inline int
-print_cd_error(int i)
+print_cd_error(const int i)
 {
 	xerror("net: %s: %s\n", remotes[i].mountpoint, strerror(errno));
 	return EXIT_FAILURE;
 }
 
 static inline int
-print_no_mount_cmd_error(int i)
+print_no_mount_cmd_error(const int i)
 {
 	xerror(_("net: No mount command specified for '%s'\n"), remotes[i].name);
 	return EXIT_FAILURE;

@@ -178,7 +178,7 @@ __attribute__((__format__(__printf__, 3, 0)))
 /* We use __attribute__ here to silence clang warning: "format string is
  * not a string literal" */
 int
-_err(int msg_type, int prompt_flag, const char *format, ...)
+_err(const int msg_type, const int prompt_flag, const char *format, ...)
 {
 	va_list arglist, tmp_list;
 
@@ -893,7 +893,7 @@ confirm_sudo_cmd(char **cmd)
  * Returns the exit status of the executed command */
 static int
 launch_new_instance_cmd(char ***cmd, char **self, char **_sudo,
-	char **dir, int sudo)
+	char **dir, const int sudo)
 {
 	int ret = 0;
 #if defined(__HAIKU__)
@@ -1224,7 +1224,7 @@ parse_usrvar_value(const char *str, const char c)
 }
 
 int
-create_usr_var(char *str)
+create_usr_var(const char *str)
 {
 	if (!str || !*str)
 		return EXIT_FAILURE;
@@ -1286,7 +1286,7 @@ free_tags(void)
 }
 
 int
-free_remotes(int exit)
+free_remotes(const int exit)
 {
 	if (exit)
 		autounmount_remotes();

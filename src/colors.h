@@ -34,7 +34,7 @@ int  cschemes_function(char **);
 size_t get_colorschemes(void);
 #endif /* CLIFM_SUCKLESS */
 char *get_dir_color(const char *, const mode_t, const nlink_t, const int);
-char *get_ext_color(char *);
+char *get_ext_color(const char *);
 char *get_file_color(const char *, const struct stat *);
 char *get_regfile_color(const char *, const struct stat *, int *);
 int  import_color_scheme(const char *);

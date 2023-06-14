@@ -1144,7 +1144,6 @@ rl_clear_line(int count, int key)
 		return EXIT_SUCCESS;
 
 	words_num = 0;
-//	fzf_open_with = 0;
 
 #ifndef _NO_HIGHLIGHT
 	if (cur_color != tx_c) {
@@ -1617,9 +1616,8 @@ rl_ws1(int count, int key)
 		rl_delete_text(0, rl_end);
 
 	if (cur_ws == 0) {
-		/* If the user attempts to switch to the same workspace she's
-		 * currently in, switch rather to the previous workspace */
-//		if (xargs.toggle_workspaces == 1 && prev_ws != cur_ws) {
+		/* If the user attempts to switch to the same workspace they're
+		 * currently in, switch rather to the previous workspace. */
 		if (prev_ws != cur_ws) {
 			char t[16];
 			snprintf(t, sizeof(t), "ws %d", prev_ws + 1);
@@ -1640,7 +1638,6 @@ rl_ws2(int count, int key)
 		rl_delete_text(0, rl_end);
 
 	if (cur_ws == 1) {
-//		if (xargs.toggle_workspaces == 1 && prev_ws != cur_ws) {
 		if (prev_ws != cur_ws) {
 			char t[16];
 			snprintf(t, sizeof(t), "ws %d", prev_ws + 1);
@@ -1661,7 +1658,6 @@ rl_ws3(int count, int key)
 		rl_delete_text(0, rl_end);
 
 	if (cur_ws == 2) {
-//		if (xargs.toggle_workspaces == 1 && prev_ws != cur_ws) {
 		if (prev_ws != cur_ws) {
 			char t[16];
 			snprintf(t, sizeof(t), "ws %d", prev_ws + 1);
@@ -1682,7 +1678,6 @@ rl_ws4(int count, int key)
 		rl_delete_text(0, rl_end);
 
 	if (cur_ws == 3) {
-//		if (xargs.toggle_workspaces == 1 && prev_ws != cur_ws) {
 		if (prev_ws != cur_ws) {
 			char t[16];
 			snprintf(t, sizeof(t), "ws %d", prev_ws + 1);
@@ -2029,66 +2024,6 @@ rl_del_last_word(int count, int key)
 	return EXIT_SUCCESS;
 }
 
-/*
-static int
-xrl_yank_last_arg(int count, int key)
-{
-	UNUSED(key);
-
-	int p = (int)curhistindex;
-
-	if (--p < 0)
-		return EXIT_FAILURE;
-
-#ifndef _NO_SUGGESTIONS
-	if (suggestion.printed == 1 && suggestion_buf) {
-		clear_suggestion(CS_FREEBUF);
-		fputs(df_c, stdout);
-	}
-#endif
-
-//	rl_yank_nth_arg(rl_explicit_arg ? count : '$', key);
-//	return EXIT_SUCCESS;
-
-	char *last_arg = history_arg_extract(count, count, history[p].cmd);
-	if (!last_arg)
-		last_arg = history[p].cmd;
-
-	curhistindex = (size_t)p;
-
-	HIDE_CURSOR;
-	int rl_point_bk = rl_point;
-
-#ifndef _NO_HIGHLIGHT
-	if (conf.highlight == 1) {
-		print_highlight_string(last_arg, rl_point);
-	} else
-#endif
-	{
-		rl_delete_text(rl_point, rl_end);
-		fputs(tx_c, stdout);
-		cur_color = tx_c;
-		rl_insert_text(last_arg);
-	}
-
-	UNHIDE_CURSOR;
-	rl_point = rl_point_bk;
-	cur_color = df_c;
-	fputs(df_c, stdout);
-
-	if (last_arg != history[p].cmd)
-		free(last_arg);
-
-	return EXIT_SUCCESS;
-} */
-
-/*
-void
-add_func_to_rl(void)
-{
-	rl_add_defun("my-test", rl_test, -1);
-} */
-
 static int
 rl_toggle_virtualdir_full_paths(int count, int key)
 {
@@ -2147,9 +2082,7 @@ set_keybinds_from_file(void)
 
 	/* Navigation */
 	/* Define multiple keybinds for different terminals:
-	 * rxvt, xterm, kernel console */
-	/*      rl_bind_keyseq("\\M-[D", rl_test); // Left arrow key
-	rl_bind_keyseq("\\M-+", rl_test); */
+	 * rxvt, xterm, kernel console. */
 	rl_bind_keyseq(find_key("parent-dir"), rl_dir_parent);
 	rl_bind_keyseq(find_key("parent-dir2"), rl_dir_parent);
 	rl_bind_keyseq(find_key("parent-dir3"), rl_dir_parent);
@@ -2233,8 +2166,6 @@ set_keybinds_from_file(void)
 	rl_bind_keyseq(find_key("toggle-max-name-len"), rl_toggle_max_filename_len);
 	rl_bind_keyseq(find_key("quit"), rl_quit);
 
-//	rl_bind_keyseq(find_key("yank-last-arg"), xrl_yank_last_arg);
-
 	/* Plugins */
 	rl_bind_keyseq(find_key("plugin1"), rl_plugin1);
 	rl_bind_keyseq(find_key("plugin2"), rl_plugin2);
@@ -2307,8 +2238,6 @@ set_default_keybinds(void)
 	/* Settings */
 	rl_bind_keyseq("\\M-w", rl_toggle_virtualdir_full_paths);
 	rl_bind_keyseq("\\M-t", rl_clear_msgs);
-	/*rl_bind_keyseq("", rl_next_profile);
-	rl_bind_keyseq("", rl_previous_profile); */
 	rl_bind_keyseq("\\M-o", rl_lock);
 	rl_bind_keyseq("\\C-r", rl_refresh);
 	rl_bind_keyseq("\\M-c", rl_clear_line);

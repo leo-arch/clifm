@@ -187,7 +187,7 @@ print_file_attrs(const int aflags)
 }
 
 static int
-get_file_attrs(char *file)
+get_file_attrs(const char *file)
 {
 # if !defined(FS_IOC_GETFLAGS)
 	UNUSED(file);
@@ -208,7 +208,7 @@ get_file_attrs(char *file)
 #endif /* LINUX_FILE_ATTRS */
 
 static char *
-get_link_color(char *name)
+get_link_color(const char *name)
 {
 	struct stat a;
 	char *color = no_c;
@@ -329,7 +329,7 @@ get_file_perms(const mode_t mode)
 /* Returns EXIT_SUCCESS if the permissions string S (in octal notation)
  * is a valid permissions string, or EXIT_FAILURE otherwise. */
 static int
-validate_octal_perms(char *s, const size_t l)
+validate_octal_perms(const char *s, const size_t l)
 {
 	if (l > 4 || l < 3) {
 		xerror(_("pc: %s digits. Either 3 or 4 are "
@@ -404,7 +404,7 @@ validate_symbolic_perms(const char *s)
 /* Returns EXIT_SUCCESS if the permissions string S is a valid permissions
  * string, or EXIT_FAILURE otherwise. */
 static int
-validate_new_perms(char *s)
+validate_new_perms(const char *s)
 {
 	size_t l = strlen(s);
 	if (*s >= '0' && *s <= '9')
@@ -422,7 +422,7 @@ validate_new_perms(char *s)
 /* Convert permissions in symbolic notation given by S into octal notation
  * and return it as a string. */
 static char *
-perm2octal(char *s)
+perm2octal(const char *s)
 {
 	int a, b, c, d;
 	a = b = c = d = 0;
@@ -454,7 +454,7 @@ perm2octal(char *s)
  * same set of permissions. Otherwise, we have multiple files with different
  * sets of permissions. */
 static char *
-get_new_perms(char *str, const int diff)
+get_new_perms(const char *str, const int diff)
 {
 	int poffset_bk = prompt_offset;
 	prompt_offset = 3;
@@ -646,7 +646,7 @@ set_file_perms(char **args)
 }
 
 static char *
-get_new_ownership(char *str, const int diff)
+get_new_ownership(const char *str, const int diff)
 {
 	int poffset_bk = prompt_offset;
 	prompt_offset = 3;

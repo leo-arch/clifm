@@ -57,7 +57,7 @@ utf8nextcodepoint(const char *s)
 	}
 }
 
-/* A Unicode aware version of xstrcaschr (in strings.c)*/
+/* A Unicode aware version of xstrcasechr (in strings.c)*/
 static char *
 utf8casechr(char *s, char *c)
 {

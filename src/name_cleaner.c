@@ -90,7 +90,7 @@ struct  bleach_t {
 };
 
 static int
-get_utf_8_width(char c)
+get_utf_8_width(const char c)
 {
 	if ((c & UTF_8_ENCODED_MASK) == UTF_8_ENCODED_START) { /* UTF-8 leading byte */
 		check_width(c, 2);
@@ -112,7 +112,7 @@ get_utf_8_width(char c)
  * {[()]} are replaced by a dash (-)
  * Everything else is replaced by an underscore (_) */
 static int
-translate_unsafe_char(unsigned char c)
+translate_unsafe_char(const unsigned char c)
 {
 	unsigned char t = 0;
 	if ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'z')

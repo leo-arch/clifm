@@ -41,11 +41,11 @@ __BEGIN_DECLS
 int  _expand_eln(const char *);
 char *abbreviate_file_name(char *);
 char *get_cwd(char *, const size_t, const int);
-int  count_dir(const char *, int);
+int  count_dir(const char *, const int);
 off_t dir_size(char *, const int, int *);
 char from_hex(char);
 //char *from_octal(char *s);
-char *gen_date_suffix(struct tm);
+char *gen_date_suffix(const struct tm);
 void gen_time_str(char *, const size_t, const time_t);
 char *get_cmd_path(const char *);
 int  get_rgb(char *, int *, int *, int *, int *);
@@ -53,10 +53,10 @@ void clear_term_img(void);
 mode_t get_dt(const mode_t);
 /*int *get_hex_num(const char *str); */
 int  get_link_ref(const char *);
-char *get_size_unit(off_t);
+char *get_size_unit(const off_t);
 //int  get_term_bgcolor(const int ifd, const int ofd);
 char *hex2rgb(char *);
-char *normalize_path(char *, size_t);
+char *normalize_path(char *, const size_t);
 FILE *open_fstream_r(char *, int *);
 FILE *open_fstream_w(char *, int *);
 int  read_octal(char *);
@@ -67,16 +67,16 @@ char *url_decode(char *);
 int  xatoi(const char *);
 char *xitoa(int);
 char xgetchar(void);
-int  xmkdir(char *, mode_t);
+int  xmkdir(char *, const mode_t);
 
 #ifndef _NO_ICONS
 size_t hashme(const char *, const int);
 #endif
 
 /* Some memory wrapper functions */
-void *xrealloc(void *, size_t);
-void *xcalloc(size_t, size_t);
-void *xnmalloc(size_t, size_t);
+void *xrealloc(void *, const size_t);
+void *xcalloc(const size_t, const size_t);
+void *xnmalloc(const size_t, const size_t);
 
 __END_DECLS
 

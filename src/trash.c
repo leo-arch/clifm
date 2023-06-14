@@ -463,7 +463,7 @@ END:
 
 /* Remove NAME file and the corresponding .trashinfo file from the trash can */
 static int
-remove_file_from_trash(char *name)
+remove_file_from_trash(const char *name)
 {
 	char rm_file[PATH_MAX], rm_info[PATH_MAX];
 	snprintf(rm_file, sizeof(rm_file), "%s/%s", trash_files_dir, name);

@@ -34,20 +34,14 @@ __BEGIN_DECLS
 char *dequote_str(char *, int);
 char *escape_str(const char *);
 int  *expand_range(char *, int);
-//int  fuzzy_match(char *, char *, const int, const int);
-
-//int  fuzzy_match(char *, char *, const int);
-//int  fuzzy_match2(char *, char *, const int, int *);
-
-char *gen_rand_str(size_t);
+char *gen_rand_str(const size_t);
 char *get_last_chr(char *, const char, const int);
-//char *get_last_space(char *, const int);
 char **get_substr(char *, const char);
 char *home_tilde(char *, int *);
 char **parse_input_str(char *);
 char *remove_quotes(char *);
 char *replace_slashes(char *, const char);
-char *replace_substr(char *, char *, char *);
+char *replace_substr(const char *, const char *, char *);
 char *savestring(const char *restrict, size_t);
 char **split_str(const char *, const int);
 char *strbfrlst(char *, const char);

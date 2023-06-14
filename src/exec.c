@@ -264,7 +264,7 @@ get_exit_code(const int status, const int exec_flag)
 }
 
 static int
-run_in_foreground(pid_t pid)
+run_in_foreground(const pid_t pid)
 {
 	int status = 0;
 
@@ -279,7 +279,7 @@ run_in_foreground(pid_t pid)
 }
 
 static int
-run_in_background(pid_t pid)
+run_in_background(const pid_t pid)
 {
 	int status = 0;
 
@@ -657,7 +657,7 @@ run_shell_cmd(char **args)
 
 /* Free everything and exit the program */
 static void
-_quit(char **args, int exit_status)
+_quit(char **args, const int exit_status)
 {
 	if (!args || !args[0])
 		return;
@@ -751,7 +751,7 @@ dirs_first_function(const char *arg)
 }
 
 static int
-filescounter_function(char *arg)
+filescounter_function(const char *arg)
 {
 	if (!arg) {
 		puts(_(FC_USAGE));
@@ -785,7 +785,7 @@ filescounter_function(char *arg)
 }
 
 static int
-pager_function(char *arg)
+pager_function(const char *arg)
 {
 	if (!arg || IS_HELP(arg)) {
 		puts(_(PAGER_USAGE));
@@ -830,7 +830,7 @@ pager_function(char *arg)
 }
 
 static int
-ext_cmds_function(char *arg)
+ext_cmds_function(const char *arg)
 {
 	if (!arg || IS_HELP(arg)) {
 		puts(_(EXT_USAGE));
@@ -856,7 +856,7 @@ ext_cmds_function(char *arg)
 }
 
 static int
-autocd_function(char *arg)
+autocd_function(const char *arg)
 {
 	if (!arg) {
 		fprintf(stderr, "%s\n", _(AUTOCD_USAGE));
@@ -883,7 +883,7 @@ autocd_function(char *arg)
 }
 
 static int
-auto_open_function(char *arg)
+auto_open_function(const char *arg)
 {
 	if (!arg) {
 		fprintf(stderr, "%s\n", _(AUTO_OPEN_USAGE));
@@ -909,7 +909,7 @@ auto_open_function(char *arg)
 }
 
 static int
-columns_function(char *arg)
+columns_function(const char *arg)
 {
 	if (!arg || IS_HELP(arg)) {
 		puts(_(COLUMNS_USAGE));
@@ -941,7 +941,7 @@ columns_function(char *arg)
 }
 
 static int
-icons_function(char *arg)
+icons_function(const char *arg)
 {
 #ifdef _NO_ICONS
 	UNUSED(arg);
@@ -975,7 +975,7 @@ icons_function(char *arg)
 }
 
 static int
-msgs_function(char *arg)
+msgs_function(const char *arg)
 {
 	if (arg && IS_HELP(arg)) {
 		puts(_(MSG_USAGE));
@@ -1012,7 +1012,7 @@ msgs_function(char *arg)
 }
 
 static int
-opener_function(char *arg)
+opener_function(const char *arg)
 {
 	if (!arg) {
 		printf("opener: %s\n", conf.opener ? conf.opener : "lira (built-in)");
@@ -1105,7 +1105,7 @@ list_aliases(void)
 }
 
 static int
-print_alias(char *name)
+print_alias(const char *name)
 {
 	if (!name || !*name)
 		return EXIT_FAILURE;
@@ -1390,7 +1390,7 @@ reload_function(void)
 
 /* MODE could be either MEDIA_LIST (mp command) or MEDIA_MOUNT (media command) */
 static int
-media_function(char *arg, int mode)
+media_function(char *arg, const int mode)
 {
 	if (arg && IS_HELP(arg)) {
 		if (mode == MEDIA_LIST)

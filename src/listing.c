@@ -69,6 +69,7 @@
 #include "checks.h"
 #include "exec.h"
 #include "autocmds.h"
+#include "sanitize.h"
 
 #ifndef _NO_ICONS
 # include "icons.h"
@@ -392,7 +393,7 @@ post_listing(DIR *dir, const int close_dir, const int reset_pager)
 		return EXIT_FAILURE;
 
 /* Let plugins and external programs running in clifm know whether
- * we have changed the current directory (last command) or not */
+ * we have changed the current directory (last command) or not. */
 //	setenv("CLIFM_CHPWD", dir_changed == 1 ? "1" : "0", 1);
 
 	dir_changed = 0;

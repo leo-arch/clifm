@@ -549,7 +549,7 @@ strbtw(char *str, const char a, const char b)
 
 /* Replace the first occurrence of NEEDLE in HAYSTACK by REP */
 char *
-replace_substr(char *haystack, char *needle, char *rep)
+replace_substr(const char *haystack, const char *needle, char *rep)
 {
 	if (!haystack || !*haystack || !needle || !*needle || !rep)
 		return (char *)NULL;
@@ -576,7 +576,7 @@ replace_substr(char *haystack, char *needle, char *rep)
 	}
 
 	char *new_str = (char *)xnmalloc(strlen(haystack) + strlen(rep)
-					+ 1, sizeof(char));
+		+ 1, sizeof(char));
 	strcpy(new_str, haystack);
 	strcat(new_str, rep);
 	return new_str;
@@ -584,7 +584,7 @@ replace_substr(char *haystack, char *needle, char *rep)
 
 /* Generate a random string of LEN bytes using characters from CHARSET */
 char *
-gen_rand_str(size_t len)
+gen_rand_str(const size_t len)
 {
 	const char charset[] = "0123456789#%-_"
 			 "abcdefghijklmnopqrstuvwxyz"
@@ -1047,7 +1047,7 @@ check_shell_functions(const char *str)
 	default: return 0;
 	} */
 
-	char *funcs[] = {
+	const char *funcs[] = {
 		"for ", "for(",
 		"do ", "do(",
 		"while ", "while(",

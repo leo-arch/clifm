@@ -27,18 +27,18 @@
 
 __BEGIN_DECLS
 
-int  _err(int msg_type, int, const char *, ...);
+int  _err(const int, const int, const char *, ...);
 int  alias_import(char *);
 void bonus_function(void);
 int  confirm_sudo_cmd(char **);
-int  create_usr_var(char *);
+int  create_usr_var(const char *);
 int  expand_prompt_name(char *);
 int  filter_function(char *);
 void free_autocmds(void);
 void free_prompts(void);
 void free_software(void);
 void free_stuff(void);
-void free_remotes(int);
+void free_remotes(const int);
 void free_tags(void);
 void free_workspaces_filters(void);
 char *get_newname(const char *, char *, int *);
@@ -70,7 +70,6 @@ void reset_inotify(void);
 void read_kqueue(void);
 #endif
 void set_filter_type(const char);
-int  sanitize_cmd(char *, int);
 /*void refresh_files_list(void); */
 
 __END_DECLS

@@ -44,7 +44,7 @@
 
 /* A few printing functions */
 static int
-print_tag_creation_error(const char *link, mode_t mode)
+print_tag_creation_error(const char *link, const mode_t mode)
 {
 	if (S_ISLNK(mode))
 		xerror(_("tag: %s: File already tagged\n"), link);
@@ -77,7 +77,7 @@ print_no_such_tag(const char *name)
 }
 
 static int
-print_usage(int retval)
+print_usage(const int retval)
 {
 	puts(TAG_USAGE);
 	return retval;
