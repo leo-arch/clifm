@@ -152,21 +152,12 @@ sel_glob(char *str, const char *sel_path, const mode_t filetype)
 		globfree(&gbuf);
 		return (-1);
 	}
-/*	if (ret == GLOB_NOSPACE || ret == GLOB_ABORTED) {
-		globfree(&gbuf);
-		return (-1);
-	}
-
-	if (ret == GLOB_NOMATCH) {
-		globfree(&gbuf);
-		return 0;
-	} */
 
 	char **matches = (char **)NULL;
 	int i, k = 0;
 	struct dirent **ent = (struct dirent **)NULL;
 
-	if (invert) {
+	if (invert == 1) {
 		if (!sel_path) {
 			matches = (char **)xnmalloc(files + 2, sizeof(char *));
 
@@ -282,21 +273,23 @@ sel_glob(char *str, const char *sel_path, const mode_t filetype)
 				char *tmp = (char *)NULL;
 				if (*workspaces[cur_ws].path == '/'
 				&& !*(workspaces[cur_ws].path + 1)) {
-					tmp = (char *)xnmalloc(strlen(matches[i]) + 2,
-						sizeof(char));
-					sprintf(tmp, "/%s", matches[i]);
+					size_t tmp_len = strlen(matches[i]) + 2;
+					tmp = (char *)xnmalloc(tmp_len, sizeof(char));
+					snprintf(tmp, tmp_len, "/%s", matches[i]);
 				} else {
-					tmp = (char *)xnmalloc(strlen(workspaces[cur_ws].path)
-						+ strlen(matches[i]) + 2, sizeof(char));
-					sprintf(tmp, "%s/%s", workspaces[cur_ws].path, matches[i]);
+					size_t tmp_len = strlen(workspaces[cur_ws].path)
+						+ strlen(matches[i]) + 2;
+					tmp = (char *)xnmalloc(tmp_len, sizeof(char));
+					snprintf(tmp, tmp_len, "%s/%s",
+						workspaces[cur_ws].path, matches[i]);
 				}
 				new_sel += select_file(tmp);
 				free(tmp);
 			}
 		} else {
-			char *tmp = (char *)xnmalloc(strlen(sel_path)
-						+ strlen(matches[i]) + 2, sizeof(char));
-			sprintf(tmp, "%s/%s", sel_path, matches[i]);
+			size_t tmp_len = strlen(sel_path) + strlen(matches[i]) + 2;
+			char *tmp = (char *)xnmalloc(tmp_len, sizeof(char));
+			snprintf(tmp, tmp_len, "%s/%s", sel_path, matches[i]);
 			new_sel += select_file(tmp);
 			free(tmp);
 		}
@@ -400,9 +393,9 @@ sel_regex(char *str, const char *sel_path, const mode_t filetype)
 				}
 			}
 
-			char *tmp_path = (char *)xnmalloc(strlen(sel_path)
-					+ strlen(list[i]->d_name) + 2, sizeof(char));
-			sprintf(tmp_path, "%s/%s", sel_path, list[i]->d_name);
+			size_t tmp_len = strlen(sel_path) + strlen(list[i]->d_name) + 2;
+			char *tmp_path = (char *)xnmalloc(tmp_len, sizeof(char));
+			snprintf(tmp_path, tmp_len, "%s/%s", sel_path, list[i]->d_name);
 
 			if (regexec(&regex, list[i]->d_name, 0, NULL, 0) == EXIT_SUCCESS) {
 				if (invert == 0)
@@ -482,7 +475,7 @@ parse_sel_params(char ***args, int *ifiletype, mode_t *filetype, int *isel_path)
 static char *
 construct_sel_path(char *sel_path)
 {
-	char tmpdir[PATH_MAX + 1];
+	char tmpdir[PATH_MAX];
 	xstrsncpy(tmpdir, sel_path, sizeof(tmpdir) - 1);
 
 	if (*sel_path == '.' && realpath(sel_path, tmpdir) == NULL) {
@@ -496,15 +489,16 @@ construct_sel_path(char *sel_path)
 			xerror("%s\n", _("sel: Error expanding path"));
 			return (char *)NULL;
 		}
-		strcpy(tmpdir, exp_path);
+
+		xstrsncpy(tmpdir, exp_path, sizeof(tmpdir) - 1);
 		free(exp_path);
 	}
 
 	char *dir = (char *)NULL;
 	if (*tmpdir != '/') {
-		dir = (char *)xnmalloc(strlen(workspaces[cur_ws].path)
-				+ strlen(tmpdir) + 2, sizeof(char));
-		sprintf(dir, "%s/%s", workspaces[cur_ws].path, tmpdir);
+		size_t dir_len = strlen(workspaces[cur_ws].path) + strlen(tmpdir) + 2;
+		dir = (char *)xnmalloc(dir_len, sizeof(char));
+		snprintf(dir, dir_len, "%s/%s", workspaces[cur_ws].path, tmpdir);
 	} else {
 		dir = savestring(tmpdir, strlen(tmpdir));
 	}
@@ -522,7 +516,7 @@ check_sel_path(char **sel_path)
 	if (strchr(*sel_path, '\\')) {
 		char *deq = dequote_str(*sel_path, 0);
 		if (deq) {
-			strcpy(*sel_path, deq);
+			xstrsncpy(*sel_path, deq, strlen(deq));
 			free(deq);
 		}
 	}
@@ -656,23 +650,26 @@ static char *
 construct_sel_filename(const char *dir, const char *name)
 {
 	char *f = (char *)NULL;
+	size_t flen = 0;
 
 	if (!dir) {
 		if (*workspaces[cur_ws].path == '/'
 		&& !*(workspaces[cur_ws].path + 1)) {
-			f = (char *)xnmalloc(strlen(name) + 2, sizeof(char));
-			sprintf(f, "/%s", name);
+			flen = strlen(name) + 2;
+			f = (char *)xnmalloc(flen, sizeof(char));
+			snprintf(f, flen, "/%s", name);
 			return f;
 		}
 
-		f = (char *)xnmalloc(strlen(workspaces[cur_ws].path)
-			+ strlen(name) + 2, sizeof(char));
-		sprintf(f, "%s/%s", workspaces[cur_ws].path, name);
+		flen = strlen(workspaces[cur_ws].path) + strlen(name) + 2;
+		f = (char *)xnmalloc(flen, sizeof(char));
+		snprintf(f, flen, "%s/%s", workspaces[cur_ws].path, name);
 		return f;
 	}
 
-	f = (char *)xnmalloc(strlen(dir) + strlen(name) + 2, sizeof(char));
-	sprintf(f, "%s/%s", dir, name);
+	flen = strlen(dir) + strlen(name) + 2;
+	f = (char *)xnmalloc(flen, sizeof(char));
+	snprintf(f, flen, "%s/%s", dir, name);
 	return f;
 }
 
@@ -684,7 +681,7 @@ select_filename(char *arg, char *dir, int *err)
 	if (strchr(arg, '\\')) {
 		char *deq_str = dequote_str(arg, 0);
 		if (deq_str) {
-			strcpy(arg, deq_str);
+			xstrsncpy(arg, deq_str, strlen(deq_str));
 			free(deq_str);
 		}
 	}
@@ -923,13 +920,8 @@ desel_entries(char **desel_elements, const size_t desel_n, const int desel_scree
 		desel_path = desel_elements;
 	}
 
-/*	new_selections = (char **)xrealloc(new_selections, (desel_n + 2) * sizeof(char *));
-	for (new_seln = 0; new_seln < desel_n; new_seln++)
-		new_selections[new_seln] = savestring(desel_path[new_seln], strlen(desel_path[new_seln]));
-	new_selections[new_seln] = (char *)NULL; */
-
 	/* Search the sel array for the path of the element to deselect and
-	 * store its index */
+	 * store its index. */
 	int err = 0, dn = (int)desel_n;
 	i = (int)desel_n;
 	while (--i >= 0) {
@@ -958,18 +950,20 @@ desel_entries(char **desel_elements, const size_t desel_n, const int desel_scree
 
 		/* Once the index was found, rearrange the sel array removing the
 		 * deselected element (actually, moving each string after it to
-		 * the previous position) */
+		 * the previous position). */
 		for (j = desel_index; j < (int)(sel_n - 1); j++) {
-			sel_elements[j].name = (char *)xrealloc(sel_elements[j].name,
-			    (strlen(sel_elements[j + 1].name) + 1) * sizeof(char));
-			strcpy(sel_elements[j].name, sel_elements[j + 1].name);
+			size_t len = strlen(sel_elements[j + 1].name);
+			sel_elements[j].name =
+				(char *)xrealloc(sel_elements[j].name, (len + 1) * sizeof(char));
+
+			xstrsncpy(sel_elements[j].name, sel_elements[j + 1].name, len);
 			sel_elements[j].size = sel_elements[j + 1].size;
 		}
 	}
 
 	/* Free the last DN elements from the old sel array. They won't
 	 * be used anymore, for they contain the same value as the last
-	 * non-deselected element due to the above array rearrangement */
+	 * non-deselected element due to the above array rearrangement. */
 	for (i = 1; i <= (int)dn; i++) {
 		if (((int)sel_n - i) >= 0 && sel_elements[(int)sel_n - i].name) {
 			free(sel_elements[(int)sel_n - i].name);
@@ -977,7 +971,7 @@ desel_entries(char **desel_elements, const size_t desel_n, const int desel_scree
 		}
 	}
 
-	/* Reallocate the sel array according to the new size */
+	/* Reallocate the sel array according to the new size. */
 	sel_n = (sel_n - (size_t)dn);
 
 	if ((int)sel_n < 0)
@@ -986,7 +980,7 @@ desel_entries(char **desel_elements, const size_t desel_n, const int desel_scree
 	if (sel_n > 0)
 		sel_elements = (struct sel_t *)xrealloc(sel_elements, sel_n * sizeof(struct sel_t));
 
-	/* Deallocate local arrays */
+	/* Deallocate local arrays. */
 	i = (int)desel_n;
 	while (--i >= 0) {
 		if (desel_screen == 1)
@@ -1026,7 +1020,7 @@ deselect_all(void)
 }
 
 /* Deselect files passed as parameters to the desel command
- * Returns zero on success and 1 on error */
+ * Returns zero on success or 1 on error. */
 static inline int
 deselect_from_args(char **args)
 {

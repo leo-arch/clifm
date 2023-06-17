@@ -695,8 +695,10 @@ get_reg_file_color(const char *filename, const struct stat *attr,
 	if (!extcolor)
 		return fi_c;
 
-	char *ext_color = (char *)xnmalloc(strlen(extcolor) + 4, sizeof(char));
-	sprintf(ext_color, "\x1b[%sm", extcolor);
+	size_t len = strlen(extcolor) + 4;
+	char *ext_color = (char *)xnmalloc(len, sizeof(char));
+	snprintf(ext_color, len, "\x1b[%sm", extcolor);
+
 	*free_color = 1;
 	return ext_color;
 }
@@ -1688,17 +1690,16 @@ get_last_word(const char *last_space)
 	const char *tmp = (last_space && *(last_space + 1)) ? last_space + 1
 			: (rl_line_buffer ? rl_line_buffer : (char *)NULL);
 	if (tmp) {
-//		size_t len = tmp == rl_line_buffer ? ((size_t)rl_end + 5) : (strlen(tmp) + 1);
-		size_t len = strlen(tmp) + 1;
-		last_word = (char *)xrealloc(last_word, len * sizeof(char));
-		strcpy(last_word, tmp);
+		size_t len = strlen(tmp);
+		last_word = (char *)xrealloc(last_word, (len + 1) * sizeof(char));
+		xstrsncpy(last_word, tmp, len);
 	} else {
 		last_word = (char *)xrealloc(last_word, 1 * sizeof(char));
 		*last_word = '\0';
 	}
 
 	last_word_offset = (last_space && *(last_space + 1) && rl_line_buffer)
-			? (int)((last_space + 1) - rl_line_buffer) : 0;
+		? (int)((last_space + 1) - rl_line_buffer) : 0;
 }
 
 static int

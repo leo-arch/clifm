@@ -446,16 +446,17 @@ re_sort_files_list(void)
 	return ret;
 }
 
-/* If ARG is a string, write the corresponding integer to ARG itself
- * Return zero if ARG corresponds to a valid sorting method, and one
- * otherwise */
+/* If ARG is a string, write the corresponding integer to ARG itself.
+ * Return zero if ARG corresponds to a valid sorting method or one
+ * otherwise. */
 static inline int
 _set_sort_by_name(char **arg)
 {
 	size_t i;
 	for (i = 0; i <= SORT_TYPES; i++) {
 		if (*(*arg) == *_sorts[i].name && strcmp(*arg, _sorts[i].name) == 0) {
-			sprintf(*arg, "%d", _sorts[i].num);
+			*arg = (char *)xrealloc(*arg, 32 * sizeof(char));
+			snprintf(*arg, 32, "%d", _sorts[i].num);
 			return EXIT_SUCCESS;
 		}
 	}

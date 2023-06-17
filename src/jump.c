@@ -379,11 +379,12 @@ save_jump_suggestion(char *str)
 	if (len > 0 && str[len - 1] == '/')
 		slash = 1;
 
-	jump_suggestion = xnmalloc(len + (slash ? 1 : 2), sizeof(char));
-	if (!slash)
-		sprintf(jump_suggestion, "%s/", str);
+	size_t jump_sug_len = len + (slash == 1 ? 1 : 2);
+	jump_suggestion = xnmalloc(jump_sug_len, sizeof(char));
+	if (slash == 0)
+		snprintf(jump_suggestion, jump_sug_len, "%s/", str);
 	else
-		strcpy(jump_suggestion, str);
+		xstrsncpy(jump_suggestion, str, jump_sug_len - 1);
 
 	return EXIT_SUCCESS;
 }

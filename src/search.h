@@ -28,8 +28,6 @@
 __BEGIN_DECLS
 
 int search_function(char **);
-int search_glob(char **, const int);
-int search_regex(char **, const int, const int);
 
 __END_DECLS
 

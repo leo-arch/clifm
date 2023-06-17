@@ -811,7 +811,7 @@ change_to_path(char *new_path, const int cd_flag)
 	if (strchr(new_path, '\\')) {
 		char *deq_path = dequote_str(new_path, 0);
 		if (deq_path) {
-			strcpy(new_path, deq_path);
+			xstrsncpy(new_path, deq_path, strlen(deq_path));
 			free(deq_path);
 		}
 	}

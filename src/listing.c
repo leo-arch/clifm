@@ -1229,7 +1229,7 @@ print_entry_nocolor_light(int *ind_char, const int i, const int pad,
 		get_ext_info(i, &_trim, &ext_len);
 
 		xstrsncpy(tname, wname ? wname : file_info[i].name,
-				(NAME_MAX * sizeof(wchar_t)) - 1);
+			(NAME_MAX * sizeof(wchar_t)) - 1);
 		diff = u8truncstr(tname, (size_t)_max - 1 - ext_len);
 		file_info[i].len = (size_t)_max;
 		n = tname;
@@ -2559,8 +2559,9 @@ list_dir(void)
 			if (!extcolor)
 				break;
 
-			file_info[n].ext_color = (char *)xnmalloc(strlen(extcolor) + 4, sizeof(char));
-			sprintf(file_info[n].ext_color, "\x1b[%sm", extcolor);
+			size_t len = strlen(extcolor) + 4;
+			file_info[n].ext_color = (char *)xnmalloc(len, sizeof(char));
+			snprintf(file_info[n].ext_color, len, "\x1b[%sm", extcolor);
 			file_info[n].color = file_info[n].ext_color;
 			extcolor = (char *)NULL;
 		} /* End of DT_REG block */

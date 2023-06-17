@@ -196,7 +196,7 @@ check_app_existence(char **app, char **arg)
 		size_t len = user.home_len + strlen(*app);
 		len += *arg ? strlen(*arg) + 1 : 0;
 		char *_path = (char *)xnmalloc(len, sizeof(char));
-		sprintf(_path, "%s/%s", user.home, *app + 2);
+		snprintf(_path, len, "%s/%s", user.home, *app + 2);
 
 		if (access(_path, X_OK) == -1) {
 			free(_path);
@@ -204,10 +204,10 @@ check_app_existence(char **app, char **arg)
 		}
 
 		if (*arg)
-			sprintf(_path, "%s/%s %s", user.home, *app + 2, *arg);
+			snprintf(_path, len, "%s/%s %s", user.home, *app + 2, *arg);
 
 		*app = (char *)xrealloc(*app, (len + 2) * sizeof(char));
-		strcpy(*app, _path);
+		xstrsncpy(*app, _path, len + 1);
 		free(_path);
 		return 2;
 	}
@@ -512,8 +512,10 @@ mime_import(char *file)
 		return (-1);
 	}
 
-	sprintf(config_path, "%s/.config/mimeapps.list", user.home);
-	sprintf(local_path, "%s/.local/share/applications/mimeapps.list", user.home);
+	snprintf(config_path, home_len + 23,
+		"%s/.config/mimeapps.list", user.home);
+	snprintf(local_path, home_len + 41,
+		"%s/.local/share/applications/mimeapps.list", user.home);
 
 	const char *const mime_paths[] = {config_path, local_path,
 	    "/usr/local/share/applications/mimeapps.list",
@@ -703,8 +705,9 @@ expand_app_fields(char ***cmd, size_t *n, char *fpath, int *exec_flags)
 	for (i = 0; a[i]; i++) {
 		/* Expand %f pĺaceholder */
 		if (*a[i] == '%' && *(a[i] + 1) == 'f') {
-			a[i] = (char *)xrealloc(a[i], (strlen(fpath) + 1) * sizeof(char));
-			strcpy(a[i], fpath);
+			size_t fpath_len = strlen(fpath);
+			a[i] = (char *)xrealloc(a[i], (fpath_len + 1) * sizeof(char));
+			xstrsncpy(a[i], fpath, fpath_len);
 			f = 1;
 			continue;
 		}
@@ -721,8 +724,10 @@ expand_app_fields(char ***cmd, size_t *n, char *fpath, int *exec_flags)
 			char *p = expand_env(a[i]);
 			if (!p)
 				continue;
-			a[i] = (char *)xrealloc(a[i], (strlen(p) + 1) * sizeof(char *));
-			strcpy(a[i], p);
+
+			size_t p_len = strlen(p);
+			a[i] = (char *)xrealloc(a[i], (p_len + 1) * sizeof(char *));
+			xstrsncpy(a[i], p, p_len);
 			free(p);
 			continue;
 		}
@@ -862,8 +867,9 @@ mime_list_open(char **apps, char *file)
 				continue;
 			}
 			if (*cmd[i] == '%' && cmd[i][1] == 'f') {
-				cmd[i] = (char *)xrealloc(cmd[i], (strlen(file) + 1) * sizeof(char));
-				strcpy(cmd[i], file);
+				size_t file_len = strlen(file);
+				cmd[i] = (char *)xrealloc(cmd[i], (file_len + 1) * sizeof(char));
+				xstrsncpy(cmd[i], file, file_len);
 				f = 1;
 			}
 			if (*cmd[i] == '$' && cmd[i][1] >= 'A' && cmd[i][1] <= 'Z') {
@@ -1074,8 +1080,9 @@ mime_open_with_tab(char *filename, const char *prefix, const int only_names)
 					 * env var name itself instead of its expanded value */
 					app_env = savestring(app, strlen(app));
 					/* app: the expanded value */
-					app = (char *)xrealloc(app, (app_len + strlen(t) + 1) * sizeof(char));
-					strcpy(app, t);
+					size_t tlen = strlen(t);
+					app = (char *)xrealloc(app, (app_len + tlen + 1) * sizeof(char));
+					xstrsncpy(app, t, app_len + tlen);
 					free(t);
 				} else {
 					continue;
@@ -1141,8 +1148,9 @@ mime_open_with_tab(char *filename, const char *prefix, const int only_names)
 
 	/* If only one match */
 	if (appsn == 2) {
-		apps[0] = (char *)xrealloc(apps[0], (strlen(apps[1]) + 1) * sizeof(char));
-		strcpy(apps[0], apps[1]);
+		size_t src_len = strlen(apps[1]);
+		apps[0] = (char *)xrealloc(apps[0], (src_len + 1) * sizeof(char));
+		xstrsncpy(apps[0], apps[1], src_len);
 		free(apps[1]);
 		apps[1] = (char *)NULL;
 	}
@@ -1419,9 +1427,9 @@ mime_open_with(char *filename, char **args)
 				 * value */
 				appb = savestring(app, strlen(app));
 				/* app: the expanded value */
-				app = (char *)xrealloc(app, (app_len + strlen(t) + 1)
-						* sizeof(char));
-				strcpy(app, t);
+				size_t tlen = strlen(t);
+				app = (char *)xrealloc(app, (app_len + tlen + 1) * sizeof(char));
+				xstrsncpy(app, t, app_len + tlen);
 				free(t);
 			}
 

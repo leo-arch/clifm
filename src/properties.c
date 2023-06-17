@@ -443,8 +443,8 @@ perm2octal(const char *s)
 	if (TOUPPER(s[5]) == 'S') a += 2;
 	if (TOUPPER(s[8]) == 'T') a += 1;
 
-	char *p = (char *)xnmalloc(32, sizeof(char));
-	sprintf(p, "%d%d%d%d", a, b, c, d);
+	char *p = (char *)xnmalloc(64, sizeof(char));
+	snprintf(p, 64, "%d%d%d%d", a, b, c, d);
 
 	return p;
 }
@@ -563,7 +563,7 @@ get_perm_str(char **s, int *diff)
 
 	if (s[1]) { /* Multiple files */
 		struct perms_t p = get_common_perms(s, diff);
-		sprintf(ptr, "%c%c%c%c%c%c%c%c%c",
+		snprintf(ptr, 10, "%c%c%c%c%c%c%c%c%c",
 			p.ur, p.uw, p.ux, p.gr, p.gw, p.gx, p.or, p.ow, p.ox);
 		return ptr;
 	}
@@ -577,7 +577,7 @@ get_perm_str(char **s, int *diff)
 	}
 
 	struct perms_t p = get_file_perms(a.st_mode);
-	sprintf(ptr, "%c%c%c%c%c%c%c%c%c",
+	snprintf(ptr, 10, "%c%c%c%c%c%c%c%c%c",
 		p.ur, p.uw, p.ux, p.gr, p.gw, p.gx, p.or, p.ow, p.ox);
 
 	return ptr;
@@ -730,8 +730,9 @@ get_common_ownership(char **args, int *exit_status, int *diff)
 	if (owner_len + group_len == 0)
 		return (char *)NULL;
 
-	char *p = xnmalloc(owner_len + group_len + 2, sizeof(char));
-	sprintf(p, "%s%c%s", owner_len > 0 ? owner->pw_name : "",
+	size_t len = owner_len + group_len + 2;
+	char *p = xnmalloc(len, sizeof(char));
+	snprintf(p, len, "%s%c%s", owner_len > 0 ? owner->pw_name : "",
 		group_len > 0 ? ':' : 0,
 		group_len > 0 ? group->gr_name : "");
 
@@ -1786,7 +1787,7 @@ construct_timestamp(char *time_str, const time_t ltime)
 	} else {
 		/* INVALID_TIME_STR (global) is generated at startup by
 		 * check_time_str(), in init.c. */
-		strcpy(file_time, invalid_time_str);
+		xstrsncpy(file_time, invalid_time_str, sizeof(file_time) - 1);
 	}
 
 	snprintf(time_str, TIME_STR_LEN, "%s%s%s ", cdate, *file_time

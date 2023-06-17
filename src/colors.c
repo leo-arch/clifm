@@ -1505,9 +1505,9 @@ store_extension_line(const char *line)
 	size_t len = (size_t)(q - line);
 	ext_colors[ext_colors_n].len = len;
 	ext_colors[ext_colors_n].name = savestring(line, len);
-	ext_colors[ext_colors_n].value =
-		(char *)xnmalloc(strlen(code) + 3, sizeof(char));
-	sprintf(ext_colors[ext_colors_n].value, "0;%s", code);
+	size_t elen = strlen(code) + 3;
+	ext_colors[ext_colors_n].value = (char *)xnmalloc(elen, sizeof(char));
+	snprintf(ext_colors[ext_colors_n].value, elen, "0;%s", code);
 //	ext_color[ext_colors_n].hash = hashme(line, 0);
 
 	if (xargs.no_bold == 1)
@@ -1595,101 +1595,103 @@ set_default_colors(void)
 	if (!ext_colors)
 		split_extension_colors(DEF_EXT_COLORS);
 
-	if (!*hb_c) strcpy(hb_c, DEF_HB_C);
-	if (!*hc_c) strcpy(hc_c, DEF_HC_C);
-	if (!*hd_c) strcpy(hd_c, DEF_HD_C);
-	if (!*he_c) strcpy(he_c, DEF_HE_C);
-	if (!*hn_c) strcpy(hn_c, DEF_HN_C);
-	if (!*hp_c) strcpy(hp_c, DEF_HP_C);
-	if (!*hq_c) strcpy(hq_c, DEF_HQ_C);
-	if (!*hr_c) strcpy(hr_c, DEF_HR_C);
-	if (!*hs_c) strcpy(hs_c, DEF_HS_C);
-	if (!*hv_c) strcpy(hv_c, DEF_HV_C);
-//	if (!*hw_c) strcpy(hw_c, DEF_HW_C);
-	if (!*tt_c) strcpy(tt_c, DEF_TT_C);
+	if (!*hb_c) xstrsncpy(hb_c, DEF_HB_C, sizeof(hb_c) - 1);
+	if (!*hc_c) xstrsncpy(hc_c, DEF_HC_C, sizeof(hc_c) - 1);
+	if (!*hd_c) xstrsncpy(hd_c, DEF_HD_C, sizeof(hd_c) - 1);
+	if (!*he_c) xstrsncpy(he_c, DEF_HE_C, sizeof(he_c) - 1);
+	if (!*hn_c) xstrsncpy(hn_c, DEF_HN_C, sizeof(hn_c) - 1);
+	if (!*hp_c) xstrsncpy(hp_c, DEF_HP_C, sizeof(hp_c) - 1);
+	if (!*hq_c) xstrsncpy(hq_c, DEF_HQ_C, sizeof(hq_c) - 1);
+	if (!*hr_c) xstrsncpy(hr_c, DEF_HR_C, sizeof(hr_c) - 1);
+	if (!*hs_c) xstrsncpy(hs_c, DEF_HS_C, sizeof(hs_c) - 1);
+	if (!*hv_c) xstrsncpy(hv_c, DEF_HV_C, sizeof(hv_c) - 1);
+//	if (!*hw_c) xstrsncpy(hw_c, DEF_HW_C, sizeof(hb_c) - 1);
+	if (!*tt_c) xstrsncpy(tt_c, DEF_TT_C, sizeof(tt_c) - 1);
 
-	if (!*sb_c) strcpy(sb_c, DEF_SB_C);
-	if (!*sc_c) strcpy(sc_c, DEF_SC_C);
-	if (!*sd_c) strcpy(sd_c, DEF_SD_C);
-	if (!*sh_c) strcpy(sh_c, DEF_SH_C);
-	if (!*sf_c) strcpy(sf_c, DEF_SF_C);
-	if (!*sx_c) strcpy(sx_c, DEF_SX_C);
-	if (!*sp_c) strcpy(sp_c, DEF_SP_C);
-	if (!*sz_c) strcpy(sz_c, DEF_SZ_C);
+	if (!*sb_c) xstrsncpy(sb_c, DEF_SB_C, sizeof(sb_c) - 1);
+	if (!*sc_c) xstrsncpy(sc_c, DEF_SC_C, sizeof(sc_c) - 1);
+	if (!*sd_c) xstrsncpy(sd_c, DEF_SD_C, sizeof(sd_c) - 1);
+	if (!*sh_c) xstrsncpy(sh_c, DEF_SH_C, sizeof(sh_c) - 1);
+	if (!*sf_c) xstrsncpy(sf_c, DEF_SF_C, sizeof(sf_c) - 1);
+	if (!*sx_c) xstrsncpy(sx_c, DEF_SX_C, sizeof(sx_c) - 1);
+	if (!*sp_c) xstrsncpy(sp_c, DEF_SP_C, sizeof(sp_c) - 1);
+	if (!*sz_c) xstrsncpy(sz_c, DEF_SZ_C, sizeof(sz_c) - 1);
 
-	if (!*el_c) strcpy(el_c, DEF_EL_C);
-	if (!*mi_c) strcpy(mi_c, DEF_MI_C);
+	if (!*el_c) xstrsncpy(el_c, DEF_EL_C, sizeof(el_c) - 1);
+	if (!*mi_c) xstrsncpy(mi_c, DEF_MI_C, sizeof(mi_c) - 1);
 	/* If unset from the config file, use current workspace color */
-	if (!*dl_c && config_ok == 0) strcpy(dl_c, DEF_DL_C);
+	if (!*dl_c && config_ok == 0) xstrsncpy(dl_c, DEF_DL_C, sizeof(dl_c) - 1);
 
-	if (!*df_c) strcpy(df_c, DEF_DF_C);
-	if (!*fc_c) strcpy(fc_c, DEF_FC_C);
-	if (!*wc_c) strcpy(wc_c, DEF_WC_C);
-	if (!*tx_c) strcpy(tx_c, DEF_TX_C);
+	if (!*df_c) xstrsncpy(df_c, DEF_DF_C, sizeof(df_c) - 1);
+	if (!*fc_c) xstrsncpy(fc_c, DEF_FC_C, sizeof(fc_c) - 1);
+	if (!*wc_c) xstrsncpy(wc_c, DEF_WC_C, sizeof(wc_c) - 1);
+	if (!*tx_c) xstrsncpy(tx_c, DEF_TX_C, sizeof(tx_c) - 1);
 
-	if (!*lc_c) strcpy(lc_c, term_caps.color >= 256 ? DEF_LC_C_256 : DEF_LC_C);
+	if (!*lc_c)
+		xstrsncpy(lc_c, term_caps.color >= 256 ? DEF_LC_C_256 : DEF_LC_C,
+			sizeof(lc_c) - 1);
 
-	if (!*li_c) strcpy(li_c, DEF_LI_C);
-	if (!*li_cb) strcpy(li_cb, DEF_LI_CB);
-	if (!*ti_c) strcpy(ti_c, DEF_TI_C);
-	if (!*em_c) strcpy(em_c, DEF_EM_C);
-	if (!*wm_c) strcpy(wm_c, DEF_WM_C);
-	if (!*nm_c) strcpy(nm_c, DEF_NM_C);
-	if (!*si_c) strcpy(si_c, DEF_SI_C);
-	if (!*bm_c) strcpy(bm_c, DEF_BM_C);
-	if (!*ts_c) strcpy(ts_c, DEF_TS_C);
-	if (!*wp_c) strcpy(wp_c, DEF_WP_C);
-	if (!*xs_c) strcpy(xs_c, DEF_XS_C);
-	if (!*xf_c) strcpy(xf_c, DEF_XF_C);
+	if (!*li_c) xstrsncpy(li_c, DEF_LI_C, sizeof(li_c) - 1);
+	if (!*li_cb) xstrsncpy(li_cb, DEF_LI_CB, sizeof(li_cb) - 1);
+	if (!*ti_c) xstrsncpy(ti_c, DEF_TI_C, sizeof(ti_c) - 1);
+	if (!*em_c) xstrsncpy(em_c, DEF_EM_C, sizeof(em_c) - 1);
+	if (!*wm_c) xstrsncpy(wm_c, DEF_WM_C, sizeof(wm_c) - 1);
+	if (!*nm_c) xstrsncpy(nm_c, DEF_NM_C, sizeof(nm_c) - 1);
+	if (!*si_c) xstrsncpy(si_c, DEF_SI_C, sizeof(si_c) - 1);
+	if (!*bm_c) xstrsncpy(bm_c, DEF_BM_C, sizeof(bm_c) - 1);
+	if (!*ts_c) xstrsncpy(ts_c, DEF_TS_C, sizeof(ts_c) - 1);
+	if (!*wp_c) xstrsncpy(wp_c, DEF_WP_C, sizeof(wp_c) - 1);
+	if (!*xs_c) xstrsncpy(xs_c, DEF_XS_C, sizeof(xs_c) - 1);
+	if (!*xf_c) xstrsncpy(xf_c, DEF_XF_C, sizeof(xf_c) - 1);
 
-	if (!*hw_c) strcpy(hw_c, wp_c);
+	if (!*hw_c) xstrsncpy(hw_c, wp_c, sizeof(hw_c) - 1);
 
-	if (!*ws1_c) strcpy(ws1_c, DEF_WS1_C);
-	if (!*ws2_c) strcpy(ws2_c, DEF_WS2_C);
-	if (!*ws3_c) strcpy(ws3_c, DEF_WS3_C);
-	if (!*ws4_c) strcpy(ws4_c, DEF_WS4_C);
-	if (!*ws5_c) strcpy(ws5_c, DEF_WS5_C);
-	if (!*ws6_c) strcpy(ws6_c, DEF_WS6_C);
-	if (!*ws7_c) strcpy(ws7_c, DEF_WS7_C);
-	if (!*ws8_c) strcpy(ws8_c, DEF_WS8_C);
+	if (!*ws1_c) xstrsncpy(ws1_c, DEF_WS1_C, sizeof(ws1_c) - 1);
+	if (!*ws2_c) xstrsncpy(ws2_c, DEF_WS2_C, sizeof(ws2_c) - 1);
+	if (!*ws3_c) xstrsncpy(ws3_c, DEF_WS3_C, sizeof(ws3_c) - 1);
+	if (!*ws4_c) xstrsncpy(ws4_c, DEF_WS4_C, sizeof(ws4_c) - 1);
+	if (!*ws5_c) xstrsncpy(ws5_c, DEF_WS5_C, sizeof(ws5_c) - 1);
+	if (!*ws6_c) xstrsncpy(ws6_c, DEF_WS6_C, sizeof(ws6_c) - 1);
+	if (!*ws7_c) xstrsncpy(ws7_c, DEF_WS7_C, sizeof(ws7_c) - 1);
+	if (!*ws8_c) xstrsncpy(ws8_c, DEF_WS8_C, sizeof(ws8_c) - 1);
 
-	if (!*di_c) strcpy(di_c, DEF_DI_C);
-	if (!*nd_c) strcpy(nd_c, DEF_ND_C);
-	if (!*ed_c) strcpy(ed_c, DEF_ED_C);
-	if (!*fi_c) strcpy(fi_c, DEF_FI_C);
-	if (!*ef_c) strcpy(ef_c, DEF_EF_C);
-	if (!*nf_c) strcpy(nf_c, DEF_NF_C);
-	if (!*ln_c) strcpy(ln_c, DEF_LN_C);
-	if (!*or_c) strcpy(or_c, DEF_OR_C);
-	if (!*pi_c) strcpy(pi_c, DEF_PI_C);
-	if (!*so_c) strcpy(so_c, DEF_SO_C);
-	if (!*bd_c) strcpy(bd_c, DEF_BD_C);
-	if (!*cd_c) strcpy(cd_c, DEF_CD_C);
-	if (!*su_c) strcpy(su_c, DEF_SU_C);
-	if (!*sg_c) strcpy(sg_c, DEF_SG_C);
-	if (!*st_c) strcpy(st_c, DEF_ST_C);
-	if (!*tw_c) strcpy(tw_c, DEF_TW_C);
-	if (!*ow_c) strcpy(ow_c, DEF_OW_C);
-	if (!*ex_c) strcpy(ex_c, DEF_EX_C);
-	if (!*ee_c) strcpy(ee_c, DEF_EE_C);
-	if (!*ca_c) strcpy(ca_c, DEF_CA_C);
-	if (!*no_c) strcpy(no_c, DEF_NO_C);
-	if (!*uf_c) strcpy(uf_c, DEF_UF_C);
-	if (!*mh_c) strcpy(mh_c, DEF_MH_C);
+	if (!*di_c) xstrsncpy(di_c, DEF_DI_C, sizeof(di_c) - 1);
+	if (!*nd_c) xstrsncpy(nd_c, DEF_ND_C, sizeof(nd_c) - 1);
+	if (!*ed_c) xstrsncpy(ed_c, DEF_ED_C, sizeof(ed_c) - 1);
+	if (!*fi_c) xstrsncpy(fi_c, DEF_FI_C, sizeof(fi_c) - 1);
+	if (!*ef_c) xstrsncpy(ef_c, DEF_EF_C, sizeof(ef_c) - 1);
+	if (!*nf_c) xstrsncpy(nf_c, DEF_NF_C, sizeof(nf_c) - 1);
+	if (!*ln_c) xstrsncpy(ln_c, DEF_LN_C, sizeof(ln_c) - 1);
+	if (!*or_c) xstrsncpy(or_c, DEF_OR_C, sizeof(or_c) - 1);
+	if (!*pi_c) xstrsncpy(pi_c, DEF_PI_C, sizeof(pi_c) - 1);
+	if (!*so_c) xstrsncpy(so_c, DEF_SO_C, sizeof(so_c) - 1);
+	if (!*bd_c) xstrsncpy(bd_c, DEF_BD_C, sizeof(bd_c) - 1);
+	if (!*cd_c) xstrsncpy(cd_c, DEF_CD_C, sizeof(cd_c) - 1);
+	if (!*su_c) xstrsncpy(su_c, DEF_SU_C, sizeof(su_c) - 1);
+	if (!*sg_c) xstrsncpy(sg_c, DEF_SG_C, sizeof(sg_c) - 1);
+	if (!*st_c) xstrsncpy(st_c, DEF_ST_C, sizeof(st_c) - 1);
+	if (!*tw_c) xstrsncpy(tw_c, DEF_TW_C, sizeof(tw_c) - 1);
+	if (!*ow_c) xstrsncpy(ow_c, DEF_OW_C, sizeof(ow_c) - 1);
+	if (!*ex_c) xstrsncpy(ex_c, DEF_EX_C, sizeof(ex_c) - 1);
+	if (!*ee_c) xstrsncpy(ee_c, DEF_EE_C, sizeof(ee_c) - 1);
+	if (!*ca_c) xstrsncpy(ca_c, DEF_CA_C, sizeof(ca_c) - 1);
+	if (!*no_c) xstrsncpy(no_c, DEF_NO_C, sizeof(no_c) - 1);
+	if (!*uf_c) xstrsncpy(uf_c, DEF_UF_C, sizeof(uf_c) - 1);
+	if (!*mh_c) xstrsncpy(mh_c, DEF_MH_C, sizeof(mh_c) - 1);
 #ifndef _NO_ICONS
-	if (!*dir_ico_c) strcpy(dir_ico_c, DEF_DIR_ICO_C);
+	if (!*dir_ico_c) xstrsncpy(dir_ico_c, DEF_DIR_ICO_C, sizeof(dir_ico_c) - 1);
 #endif
 
-	if (!*dr_c) strcpy(dr_c, term_caps.color >= 256 ? DEF_DR_C256 : DEF_DR_C);
-	if (!*dw_c) strcpy(dw_c, term_caps.color >= 256 ? DEF_DW_C256 : DEF_DW_C);
-	if (!*dxd_c) strcpy(dxd_c, term_caps.color >= 256 ? DEF_DXD_C256 : DEF_DXD_C);
-	if (!*dxr_c) strcpy(dxr_c, term_caps.color >= 256 ? DEF_DXR_C256 : DEF_DXR_C);
-	if (!*dg_c) strcpy(dg_c, term_caps.color >= 256 ? DEF_DG_C256 : DEF_DG_C);
-//	if (!*dd_c) strcpy(dd_c, DEF_DD_C); // Date color unset: let's use gradient
-//	if (!*dz_c) strcpy(dz_c, DEF_DZ_C); // Size color unset: let's use gradient
-	if (!*do_c) strcpy(do_c, term_caps.color >= 256 ? DEF_DO_C256 : DEF_DO_C);
-	if (!*dp_c) strcpy(dp_c, term_caps.color >= 256 ? DEF_DP_C256 : DEF_DP_C);
-	if (!*dn_c) strcpy(dn_c, DEF_DN_C);
+	if (!*dr_c) xstrsncpy(dr_c, term_caps.color >= 256 ? DEF_DR_C256 : DEF_DR_C, sizeof(dr_c) - 1);
+	if (!*dw_c) xstrsncpy(dw_c, term_caps.color >= 256 ? DEF_DW_C256 : DEF_DW_C, sizeof(dw_c) - 1);
+	if (!*dxd_c) xstrsncpy(dxd_c, term_caps.color >= 256 ? DEF_DXD_C256 : DEF_DXD_C, sizeof(dxd_c) - 1);
+	if (!*dxr_c) xstrsncpy(dxr_c, term_caps.color >= 256 ? DEF_DXR_C256 : DEF_DXR_C, sizeof(dxr_c) - 1);
+	if (!*dg_c) xstrsncpy(dg_c, term_caps.color >= 256 ? DEF_DG_C256 : DEF_DG_C, sizeof(dg_c) - 1);
+//	if (!*dd_c) xstrsncpy(dd_c, DEF_DD_C, sizeof(dd_c) - 1); // Date color unset: let's use gradient
+//	if (!*dz_c) xstrsncpy(dz_c, DEF_DZ_C, sizeof(dz_c) - 1); // Size color unset: let's use gradient
+	if (!*do_c) xstrsncpy(do_c, term_caps.color >= 256 ? DEF_DO_C256 : DEF_DO_C, sizeof(do_c) - 1);
+	if (!*dp_c) xstrsncpy(dp_c, term_caps.color >= 256 ? DEF_DP_C256 : DEF_DP_C, sizeof(dp_c) - 1);
+	if (!*dn_c) xstrsncpy(dn_c, DEF_DN_C, sizeof(dn_c) - 1);
 }
 
 /* Set a pointer to the current color scheme */
@@ -1825,9 +1827,17 @@ set_fzf_opts(char *line)
 		_err('w', PRINT_PROMPT, _("%s: FzfTabOptions contains unsafe "
 			"characters (<>|;&$`). Falling back to default values.\n"),
 			PROGRAM_NAME);
-		char *p = conf.colorize == 1 ? DEF_FZFTAB_OPTIONS
+		if (conf.colorize == 1) {
+			conf.fzftab_options =
+				savestring(DEF_FZFTAB_OPTIONS, strlen(DEF_FZFTAB_OPTIONS));
+		} else {
+			conf.fzftab_options =
+				savestring(DEF_FZFTAB_OPTIONS_NO_COLOR,
+				strlen(DEF_FZFTAB_OPTIONS_NO_COLOR));
+		}
+/*		char *p = conf.colorize == 1 ? DEF_FZFTAB_OPTIONS
 			: DEF_FZFTAB_OPTIONS_NO_COLOR;
-		conf.fzftab_options = savestring(p, strlen(p));
+		conf.fzftab_options = savestring(p, strlen(p)); */
 	}
 
 	fzf_height_set = 0;
@@ -1969,7 +1979,7 @@ set_cs_dir_icon_color(char *line, const ssize_t line_len)
 	if (is_color_code(p) == 0 && (c = check_defs(p)) == NULL)
 		return;
 
-	sprintf(dir_ico_c, "\x1b[%sm", c ? c : p);
+	snprintf(dir_ico_c, sizeof(dir_ico_c), "\x1b[%sm", c ? c : p);
 }
 
 /* Get color lines from the configuration file */
@@ -2387,9 +2397,9 @@ colors_list(char *ent, const int eln, const int pad, const int new_line)
 	*index = '\0';
 
 	if (eln > 0)
-		sprintf(index, "%d ", eln); /* NOLINT */
+		snprintf(index, sizeof(index), "%d ", eln); /* NOLINT */
 	else if (eln == -1)
-		sprintf(index, "? "); /* NOLINT */
+		snprintf(index, sizeof(index), "? "); /* NOLINT */
 	else
 		index[0] = '\0';
 

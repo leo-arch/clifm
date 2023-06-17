@@ -983,10 +983,10 @@ truncate_file(char *file, const int max, const int check_dups)
 
 #if !defined(__OpenBSD__)
 	char *tmp = (char *)xnmalloc(config_dir_len + 12, sizeof(char));
-	sprintf(tmp, "%s/log.XXXXXX", config_dir); /* NOLINT */
+	snprintf(tmp, config_dir_len + 12, "%s/log.XXXXXX", config_dir);
 #else
 	char *tmp = (char *)xnmalloc(config_dir_len + 16, sizeof(char));
-	sprintf(tmp, "%s/log.XXXXXXXXXX", config_dir); /* NOLINT */
+	snprintf(tmp, config_dir_len + 16, "%s/log.XXXXXXXXXX", config_dir);
 #endif
 
 	int fdd = mkstemp(tmp);

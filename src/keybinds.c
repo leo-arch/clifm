@@ -394,7 +394,7 @@ rl_prepend_sudo(int count, int key)
 		len = strlen(t);
 		if (len > 0 && t[len - 1] != ' ') {
 			s = (char *)xnmalloc(len + 2, sizeof(char));
-			sprintf(s, "%s ", t);
+			snprintf(s, len + 2, "%s ", t);
 			len++;
 		} else {
 			s = t;
@@ -403,7 +403,7 @@ rl_prepend_sudo(int count, int key)
 	} else {
 		len = strlen(DEF_SUDO_CMD) + 1;
 		s = (char *)xnmalloc(len + 1, sizeof(char));
-		sprintf(s, "%s ", DEF_SUDO_CMD);
+		snprintf(s, len + 1, "%s ", DEF_SUDO_CMD);
 	}
 
 	char *c = (char *)NULL;
@@ -1067,7 +1067,7 @@ rl_open_preview(int count, int key)
 		return EXIT_FAILURE;
 
 	char *file = (char *)xnmalloc(config_dir_len + 15, sizeof(char));
-	sprintf(file, "%s/preview.clifm", config_dir);
+	snprintf(file, config_dir_len + 15, "%s/preview.clifm", config_dir);
 
 	int ret = open_file(file);
 	free(file);
@@ -1519,8 +1519,9 @@ run_man_cmd(char *str)
 	char *mp = (char *)NULL;
 	char *p = getenv("MANPAGER");
 	if (p) {
-		mp = (char *)xnmalloc(strlen(p) + 1, sizeof(char *));
-		strcpy(mp, p);
+		size_t len = strlen(p);
+		mp = (char *)xnmalloc(len + 1, sizeof(char *));
+		xstrsncpy(mp, p, len);
 		unsetenv("MANPAGER");
 	}
 

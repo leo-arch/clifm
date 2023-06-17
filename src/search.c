@@ -44,6 +44,15 @@
 #include "navigation.h"
 #include "sort.h"
 
+#define ERR_SKIP_REGEX 2
+
+struct search_t {
+	char *name;
+	size_t len;
+	int eln;
+	int pad;
+};
+
 static int
 exec_find(char *_path, char *method, char *pattern)
 {
@@ -77,14 +86,17 @@ run_find(char *search_path, char *arg)
 		return exec_find(_path, method, arg + 1);
 
 	int ret = EXIT_SUCCESS;
-	char *ss = (char *)xnmalloc(strlen(arg + 1) + 5, sizeof(char));
+
+	size_t sslen = strlen(arg + 1) + 5;
+	char *ss = (char *)xnmalloc(sslen, sizeof(char));
+
 #if !defined(_BE_POSIX) && !defined(__OpenBSD__)
 	if (conf.search_strategy == REGEX_ONLY)
-		sprintf(ss, ".*%s.*", arg + 1);
+		snprintf(ss, sslen, ".*%s.*", arg + 1);
 	else
-		sprintf(ss, "*%s*", arg + 1);
+		snprintf(ss, sslen, "*%s*", arg + 1);
 #else
-	sprintf(ss, "*%s*", arg + 1);
+	snprintf(ss, sslen, "*%s*", arg + 1);
 #endif /* !_BE_POSIX && !__OpenBSD__ */
 
 	ret = exec_find(_path, method, ss);
@@ -93,371 +105,344 @@ run_find(char *search_path, char *arg)
 	return ret;
 }
 
-/* List matching file names in the specified directory */
-int
-search_glob(char **args, const int invert)
+static int
+set_file_type_and_search_path(char **args, mode_t *file_type,
+	char **search_path, const int invert)
 {
-	if (!args || !args[0])
-		return EXIT_FAILURE;
-
-	char *search_str = (char *)NULL, *search_path = (char *)NULL;
-	mode_t file_type = 0;
-	struct stat attr;
-
 	/* If there are two arguments, the one starting with '-' is the
-	 * file type and the other is the path */
+	 * file type and the other is the path. */
 	if (args[1] && args[2]) {
 		if (*args[1] == '-') {
-			file_type = (mode_t)args[1][1];
-			search_path = args[2];
+			*file_type = (mode_t)args[1][1];
+			*search_path = args[2];
 		} else if (*args[2] == '-') {
-			file_type = (mode_t)args[2][1];
-			search_path = args[1];
+			*file_type = (mode_t)args[2][1];
+			*search_path = args[1];
 		} else {
-			search_path = args[1];
+			*search_path = args[1];
 		}
 	} else {
-		/* If just one argument, '-' indicates file type. Else, we have a path */
+		/* If just one argument, '-' indicates file type. Else, we have a path. */
 		if (args[1]) {
 			if (*args[1] == '-')
-				file_type = (mode_t)args[1][1];
+				*file_type = (mode_t)args[1][1];
 			else
-				search_path = args[1];
+				*search_path = args[1];
 		}
 	}
 
-	/* If no arguments, search_path will be NULL and file_type zero */
-	if (file_type != 0) {
-		/* Convert file type into a macro that can be decoded by stat(). If
-		 * file type is specified, matches will be checked against this value */
-		switch (file_type) {
-		case 'b': file_type = invert == 1 ? DT_BLK : S_IFBLK; break;
-		case 'c': file_type = invert == 1 ? DT_CHR : S_IFCHR; break;
-		case 'd': file_type = invert == 1 ? DT_DIR : S_IFDIR; break;
-		case 'f': file_type = invert == 1 ? DT_REG : S_IFREG; break;
-		case 'l': file_type = invert == 1 ? DT_LNK : S_IFLNK; break;
-		case 'p': file_type = invert == 1 ? DT_FIFO : S_IFIFO; break;
-		case 's': file_type = invert == 1 ? DT_SOCK : S_IFSOCK; break;
-		case 'x': run_find(search_path, args[0]); return EXIT_SUCCESS;
-		default:
-			fprintf(stderr, _("search: '%c': Unrecognized file "
-				"type\n"), (char)file_type);
-			return 2; /* Return 2 to avoid trying the regex approach */
-		}
+	if (*file_type == 0)
+		return EXIT_SUCCESS;
+
+	/* Convert file type into a macro that can be decoded by stat(). If
+	 * file type is specified, matches will be checked against this value. */
+	switch (*file_type) {
+	case 'b': *file_type = invert == 1 ? DT_BLK : S_IFBLK; break;
+	case 'c': *file_type = invert == 1 ? DT_CHR : S_IFCHR; break;
+	case 'd': *file_type = invert == 1 ? DT_DIR : S_IFDIR; break;
+	case 'f': *file_type = invert == 1 ? DT_REG : S_IFREG; break;
+	case 'l': *file_type = invert == 1 ? DT_LNK : S_IFLNK; break;
+	case 'p': *file_type = invert == 1 ? DT_FIFO : S_IFIFO; break;
+	case 's': *file_type = invert == 1 ? DT_SOCK : S_IFSOCK; break;
+	case 'x': run_find(*search_path, args[0]); return EXIT_SUCCESS;
+	default:
+		fprintf(stderr, _("search: '%c': Unrecognized file "
+			"type\n"), (char)*file_type);
+		break;
 	}
 
-	/* If we have a path ("/str /path"), chdir into it, since glob()
-	 * works on CWD */
-	if (search_path && *search_path) {
-		/* Deescape the search path, if necessary */
-		if (strchr(search_path, '\\')) {
-			char *deq_dir = dequote_str(search_path, 0);
-			if (!deq_dir) {
-				xerror(_("search: %s: Error dequoting file name\n"), args[1]);
-				return EXIT_FAILURE;
-			}
+	return EXIT_SUCCESS;
+}
 
-			strcpy(search_path, deq_dir);
-			free(deq_dir);
-		}
-
-		size_t path_len = strlen(search_path);
-		if (path_len > 1 && search_path[path_len - 1] == '/')
-			search_path[path_len - 1] = '\0';
-
-		/* If search is current directory */
-		if ((*search_path == '.' && !search_path[1]) ||
-		    (search_path[1] == workspaces[cur_ws].path[1]
-		    && strcmp(search_path, workspaces[cur_ws].path) == 0)) {
-				search_path = (char *)NULL;
-		} else {
-			if (xchdir(search_path, NO_TITLE) == -1) {
-				xerror("search: %s: %s\n", search_path, strerror(errno));
-				return EXIT_FAILURE;
-			}
-		}
-	}
-
-	int i;
-	char *tmp = args[0];
-
-	if (invert == 1)
-		tmp++;
-
-	search_flags &= ~NO_GLOB_CHAR;
-	/* Search for globbing char */
-	int glob_char_found = check_glob_char(tmp, GLOB_REGEX);
-
-	/* If search string is just "STR" (no glob chars), change it to either "*STR*"
-	 * (if search strategy is GLOB_ONLY), or ".*STR.*" */
-	if (glob_char_found == 0) {
-		search_flags |= NO_GLOB_CHAR;
-		size_t search_str_len = strlen(args[0]);
-
-		args[0] = (char *)xrealloc(args[0], (search_str_len + 5) * sizeof(char));
-		tmp = args[0];
-		if (invert == 1)
-			++tmp;
-
-		size_t slen = strlen(tmp);
-		char *s = savestring(tmp, slen);
-
-		if (conf.search_strategy != GLOB_ONLY) {
-			*(tmp + 1) = '.';
-			*(tmp + 2) = '*';
-			strcpy(tmp + 3, s + 1);
-			slen += 2;
-			tmp[slen] = '.';
-			tmp[slen + 1] = '*';
-			tmp[slen + 2] = '\0';
-			free(s);
-//			search_flags |= NO_GLOB_CHAR;
-			/* Let's return here to perform a regex search (if called from
-			 * search_function(), in search.c) */
+static int
+chdir_search_path(char **search_path, const char *arg)
+{
+	if (strchr(*search_path, '\\')) {
+		char *deq_dir = dequote_str(*search_path, 0);
+		if (!deq_dir) {
+			xerror(_("search: %s: Error dequoting file name\n"), arg);
 			return EXIT_FAILURE;
-		} else {
-			*(tmp + 1) = '*';
-			strcpy(tmp + 2, s + 1);
-			slen++;
-			tmp[slen] = '*';
-			tmp[slen + 1] = '\0';
-			free(s);
-			search_str = tmp + 1;
 		}
-	} else {
-		search_str = tmp + 1;
+
+		xstrsncpy(*search_path, deq_dir, strlen(deq_dir));
+		free(deq_dir);
 	}
 
-	/* Get matches, if any */
-	glob_t globbed_files;
-	int ret = glob(search_str, GLOB_BRACE, NULL, &globbed_files);
-	if (ret != 0) {
-/*		puts(_("Glob: No matches found. Trying regex...")); */
-		globfree(&globbed_files);
+	size_t path_len = strlen(*search_path);
+	if (path_len > 1 && (*search_path)[path_len - 1] == '/')
+		(*search_path)[path_len - 1] = '\0';
 
+	/* If search path is the current directory. */
+	if ((*(*search_path) == '.' && !(*search_path)[1]) ||
+	    ((*search_path)[1] == workspaces[cur_ws].path[1]
+	    && strcmp(*search_path, workspaces[cur_ws].path) == 0)) {
+			*search_path = (char *)NULL;
+	} else {
+		if (xchdir(*search_path, NO_TITLE) == -1) {
+			xerror("search: %s: %s\n", *search_path, strerror(errno));
+			return EXIT_FAILURE;
+		}
+	}
+
+	return EXIT_SUCCESS;
+}
+
+static char **
+glob_sort_dirs(glob_t globbed_files, size_t *g)
+{
+	int *dirs = (int *)xnmalloc(globbed_files.gl_pathc + 1, sizeof(int));
+	char **gfiles = (char **)xnmalloc(globbed_files.gl_pathc + 1, sizeof(char *));
+	struct stat attr;
+	size_t i, n = 0;
+
+	for (i = 0; globbed_files.gl_pathv[i]; i++) {
+		if (stat(globbed_files.gl_pathv[i], &attr) != -1
+		&& S_ISDIR(attr.st_mode))
+			dirs[i] = 1;
+		else
+			dirs[i] = 0;
+	}
+
+	for (i = 0; globbed_files.gl_pathv[i]; i++) {
+		if (dirs[i] == 1) {
+			gfiles[n] = globbed_files.gl_pathv[i];
+			n++;
+		}
+	}
+
+	for (i = 0; globbed_files.gl_pathv[i]; i++) {
+		if (dirs[i] == 0) {
+			gfiles[n] = globbed_files.gl_pathv[i];
+			n++;
+		}
+	}
+
+	free(dirs);
+	gfiles[n] = (char *)NULL;
+
+	*g = n;
+	return gfiles;
+}
+
+static struct search_t *
+get_glob_matches(char **gfiles, const char *search_path,
+	const mode_t file_type, const size_t g)
+{
+	struct search_t *matches = (struct search_t *)xnmalloc(
+		g + 1, sizeof(struct search_t));
+
+	size_t i;
+	int n = 0;
+	struct stat attr;
+
+	for (i = 0; gfiles[i]; i++) {
+		if (SELFORPARENT(gfiles[i]))
+			continue;
+
+		if (file_type != 0) {
+			/* Simply skip all files not matching file_type. */
+			if (lstat(gfiles[i], &attr) == -1
+			|| (attr.st_mode & S_IFMT) != file_type)
+				continue;
+		}
+
+		matches[n].name = savestring(gfiles[i], strlen(gfiles[i]));
+
+		/* Get the longest file name in the list. */
+		/* If not in CWD, we only need to know the file's length (no ELN) */
 		if (search_path) {
-			/* Go back to the directory we came from */
-			if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1)
-				xerror("search: %s: %s\n", workspaces[cur_ws].path, strerror(errno));
+			/* This will be passed to colors_list(): -1 means no ELN */
+			matches[n].eln = -1;
+			matches[n].len = wc_xstrlen(matches[n].name);
+			n++;
+			continue;
 		}
 
-		return EXIT_FAILURE;
+		/* No search_path */
+		/* If searching in CWD, take into account the file's ELN
+		 * when calculating its length. */
+		size_t j, f = 0;
+		for (j = 0; file_info[j].name; j++) {
+			if (!matches[n].name || *matches[n].name != *file_info[j].name
+			|| strcmp(matches[n].name, file_info[j].name) != 0)
+				continue;
+
+			f = 1;
+			matches[n].eln = (int)(j + 1);
+			matches[n].len = wc_xstrlen(file_info[j].name)
+				+ (size_t)file_info[j].eln_n + 1;
+		}
+
+		if (f == 0) {
+			matches[n].eln = -1;
+			matches[n].len = 0;
+		}
+
+		n++;
 	}
 
-	size_t g = 0;
-	char **gfiles = (char **)NULL;
+	matches[n].name = (char *)NULL;
+	return matches;
+}
 
-	/* glob(3) doesn't sort directories first. Let's do it ourselves */
-	if (conf.list_dirs_first == 1) {
-		int *dirs = (int *)xnmalloc(globbed_files.gl_pathc + 1, sizeof(int));
-		gfiles = (char **)xnmalloc(globbed_files.gl_pathc + 1, sizeof(char *));
-		for (i = 0; globbed_files.gl_pathv[i]; i++) {
-			if (stat(globbed_files.gl_pathv[i], &attr) != -1
-			&& S_ISDIR(attr.st_mode))
-				dirs[i] = 1;
-			else
-				dirs[i] = 0;
-		}
-
-		for (i = 0; globbed_files.gl_pathv[i]; i++) {
-			if (dirs[i] == 1) {
-				gfiles[g] = globbed_files.gl_pathv[i];
-				g++;
-			}
-		}
-
-		for (i = 0; globbed_files.gl_pathv[i]; i++) {
-			if (dirs[i] == 0) {
-				gfiles[g] = globbed_files.gl_pathv[i];
-				g++;
-			}
-		}
-
-		free(dirs);
-		gfiles[g] = (char *)NULL;
-	} else {
-		gfiles = globbed_files.gl_pathv;
-		g = globbed_files.gl_pathc;
-	}
-
-	/* We have matches */
-	int sfiles = 0, found = 0;
-	size_t flongest = 0;
-
-	/* We need to store pointers to matching file names in array of pointers,
-	 * just as the file name length (to construct the columned output), and,
-	 * if searching in CWD, its index (ELN) in the dirlist array as well */
-	char **pfiles = (char **)NULL;
-	int *eln = (int *)0;
-	size_t *files_len = (size_t *)0;
+static struct search_t *
+get_non_matches_from_search_path(const char *search_path, char **gfiles,
+		const mode_t file_type)
+{
 	struct dirent **ent = (struct dirent **)NULL;
-	int longest_eln = -1;
+	int dir_entries = scandir(search_path, &ent, skip_files, xalphasort);
+	if (dir_entries == -1)
+		return (struct search_t *)NULL;
 
-	if (invert == 1) {
-		if (!search_path) {
-			int k;
-			pfiles = (char **)xnmalloc(files + 1, sizeof(char *));
-			eln = (int *)xnmalloc(files + 1, sizeof(int));
-			files_len = (size_t *)xnmalloc(files + 1, sizeof(size_t));
+	int i, j, n = 0;
+	struct search_t *matches = (struct search_t *)xnmalloc(
+		(size_t)dir_entries + 1, sizeof(struct search_t));
 
-			for (k = 0; file_info[k].name; k++) {
-				int l, f = 0;
-
-				for (l = 0; gfiles[l]; l++) {
-					if (*gfiles[l] == *file_info[k].name
-					&& strcmp(gfiles[l], file_info[k].name) == 0) {
-						f = 1;
-						break;
-					}
-				}
-
-				if (f == 1 || (file_type && file_info[k].type != file_type))
-					continue;
-
-				eln[found] = (int)(k + 1);
-				files_len[found] = wc_xstrlen(file_info[k].name)
-					+ (size_t)file_info[k].eln_n + 1;
-
-				if (files_len[found] > flongest) {
-					flongest = files_len[found];
-					longest_eln = k + 1;
-				}
-
-				pfiles[found] = file_info[k].name;
-				found++;
+	for (i = 0; i < dir_entries; i++) {
+		int f = 0;
+		for (j = 0; gfiles[j]; j++) {
+			if (*ent[i]->d_name == *gfiles[j]
+			&& strcmp(ent[i]->d_name, gfiles[j]) == 0) {
+				f = 1;
+				break;
 			}
-		} else {
-			sfiles = scandir(search_path, &ent, skip_files, xalphasort);
-			if (sfiles == -1)
-				goto SCANDIR_ERROR;
+		}
 
-			pfiles = (char **)xnmalloc((size_t)sfiles + 1, sizeof(char *));
-			eln = (int *)xnmalloc((size_t)sfiles + 1, sizeof(int));
-			files_len = (size_t *)xnmalloc((size_t)sfiles + 1, sizeof(size_t));
-
-			int k, l;
-			for (k = 0; k < sfiles; k++) {
-				int f = 0;
-				for (l = 0; gfiles[l]; l++) {
-					if (*ent[k]->d_name == *gfiles[l]
-					&& strcmp(ent[k]->d_name, gfiles[l]) == 0) {
-						f = 1;
-						break;
-					}
-				}
-
-				if (f == 1)
-					continue;
+		if (f == 1)
+			continue;
 
 #if !defined(_DIRENT_HAVE_D_TYPE)
-				mode_t type;
-				if (lstat(ent[k]->d_name, &attr) == -1)
-					continue;
-				type = get_dt(attr.st_mode);
-				if (file_type && type != file_type)
+		mode_t type;
+		struct stat attr;
+		if (lstat(ent[i]->d_name, &attr) == -1)
+			continue;
+
+		type = get_dt(attr.st_mode);
+		if (file_type && type != file_type)
 #else
-				if (file_type && ent[k]->d_type != file_type)
+		if (file_type && ent[i]->d_type != file_type)
 #endif
-					continue;
+			continue;
 
-				eln[found] = -1;
-				files_len[found] = wc_xstrlen(ent[k]->d_name);
-
-				if (files_len[found] > flongest)
-					flongest = files_len[found];
-
-				pfiles[found] = ent[k]->d_name;
-				found++;
-			}
-		}
+		matches[n].eln = -1;
+		matches[n].len = wc_xstrlen(ent[i]->d_name);
+		matches[n].name = strdup(ent[i]->d_name);
+		n++;
 	}
 
-	else { /* No invert search */
-		pfiles = (char **)xnmalloc(g + 1, sizeof(char *));
-		eln = (int *)xnmalloc(g + 1, sizeof(int));
-		files_len = (size_t *)xnmalloc(g + 1, sizeof(size_t));
+	i = dir_entries;
+	while (--i >= 0)
+		free(ent[i]);
+	free(ent);
 
-		for (i = 0; gfiles[i]; i++) {
-			if (*gfiles[i] == '.' && (!gfiles[i][1]
-			|| (gfiles[i][1] == '.'	&& !gfiles[i][2])))
-				continue;
+	matches[n].name = (char *)NULL;
+	return matches;
+}
 
-			if (file_type != 0) {
-				/* Simply skip all files not matching file_type */
-				if (lstat(gfiles[i], &attr) == -1)
-					continue;
-				if ((attr.st_mode & S_IFMT) != file_type)
-					continue;
-			}
+static struct search_t *
+get_glob_matches_invert(char **gfiles, const char *search_path,
+	const mode_t file_type)
+{
+	if (search_path)
+		return get_non_matches_from_search_path(search_path, gfiles, file_type);
 
-			pfiles[found] = gfiles[i];
+	int i, j, n = 0;
+	struct search_t *matches =
+		(struct search_t *)xnmalloc(files + 1, sizeof(struct search_t));
 
-			/* Get the longest file name in the list */
-			/* If not in CWD, we only need to know the file's length (no ELN) */
-			if (search_path) {
-				/* This will be passed to colors_list(): -1 means no ELN */
-				eln[found] = -1;
-				files_len[found] = wc_xstrlen(pfiles[found]);
+	for (i = 0; file_info[i].name; i++) {
+		int f = 0;
 
-				if (files_len[found] > flongest)
-					flongest = files_len[found];
-
-				found++;
-				continue;
-			}
-
-			/* If no search_path */
-			/* If searching in CWD, take into account the file's ELN
-			 * when calculating its legnth */
-			size_t j, f = 0;
-			for (j = 0; file_info[j].name; j++) {
-				if (*pfiles[found] != *file_info[j].name
-				|| strcmp(pfiles[found], file_info[j].name) != 0)
-					continue;
-
+		for (j = 0; gfiles[j]; j++) {
+			if (*gfiles[j] == *file_info[i].name
+			&& strcmp(gfiles[j], file_info[i].name) == 0) {
 				f = 1;
-				eln[found] = (int)(j + 1);
-				files_len[found] = wc_xstrlen(file_info[j].name)
-					+ (size_t)file_info[j].eln_n + 1;
-
-				if (files_len[found] > flongest) {
-					flongest = files_len[found];
-					longest_eln = (int)(j + 1);
-				}
+				break;
 			}
-
-			if (f == 0) {
-				eln[found] = -1;
-				files_len[found] = 0;
-			}
-
-			found++;
 		}
+
+		if (f == 1 || (file_type && file_info[i].type != file_type))
+			continue;
+
+		matches[n].eln = (int)(i + 1);
+		matches[n].len = wc_xstrlen(file_info[i].name)
+			+ (size_t)file_info[i].eln_n + 1;
+
+		matches[n].name = strdup(file_info[i].name);
+		n++;
 	}
 
-SCANDIR_ERROR:
-	if (found == 0)
-		goto END;
+	matches[n].name = (char *)NULL;
+	return matches;
+}
 
-	int eln_pad = 0;
-	if (!search_path) {
-		if (conf.icons == 1)
-			flongest += 3;
+static void
+get_glob_longest(struct search_t *matches, int *longest_eln,
+	size_t *longest_match, int *eln_pad)
+{
+	int search_path = (*eln_pad == -1);
 
-		int largest = 0;
-		i = found;
-		while (--i >= 0) {
-			if (eln[i] > largest)
-				largest = eln[i];
-		}
-		eln_pad = DIGINUM(largest);
+	size_t i;
+	for (i = 0; matches[i].name; i++) {
+		if (matches[i].len <= *longest_match)
+			continue;
 
-		if (longest_eln > -1)
-			flongest += (size_t)(eln_pad - DIGINUM(longest_eln));
+		*longest_match = matches[i].len;
+		*longest_eln = matches[i].eln;
 	}
 
-	/* Print the results using colors and columns */
-	int columns_n = 0, last_column = 0;
+	if (search_path == 1) {
+		*longest_eln = -1;
+		return;
+	}
+
+	if (conf.icons == 1)
+		*longest_match += 3;
+
+	int largest = 0;
+	for (i = 0; matches[i].name; i++) {
+		if (matches[i].eln > largest)
+			largest = matches[i].eln;
+	}
+
+	*eln_pad = DIGINUM(largest);
+	*longest_match += (size_t)(*eln_pad - DIGINUM(*longest_eln));
+}
+
+/* Original string is either "/QUERY" or "/!QUERY". Let's extract QUERY.
+ * If the query string contains no metacharacters, change it to "*QUERY*" */
+static char *
+construct_glob_query(char **arg, const int invert)
+{
+	search_flags &= ~NO_GLOB_CHAR;
+	char *query = *arg + (invert == 1 ? 2 : 1);
+
+	/* If the query string already contains metacharacters, return it as is. */
+	if (check_glob_char(query, GLOB_REGEX) == 1)
+		return query;
+
+	search_flags |= NO_GLOB_CHAR;
+	if (conf.search_strategy != GLOB_ONLY) {
+		/* Let's return here to perform a regex search. */
+		return (char *)NULL;
+	}
+
+	/* Search strategy is glob-only */
+	size_t len = strlen(*arg);
+
+	char *q = savestring(query, len - (invert == 1 ? 2 : 1));
+	*arg = (char *)xrealloc(*arg, (len + 3) * sizeof(char));
+
+	snprintf((*arg) + 1, len + 2, "*%s*", q);
+	free(q);
+
+	return (*arg) + 1;
+}
+
+static int
+calculate_glob_output_columns(const size_t flongest, const int found)
+{
+	int columns_n = 0;
 
 	struct winsize w;
 	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
@@ -471,59 +456,140 @@ SCANDIR_ERROR:
 	if (columns_n > found)
 		columns_n = found;
 
-	size_t t = tab_offset;
+	return columns_n;
+}
+
+static int
+print_glob_matches(struct search_t *matches, const char *search_path)
+{
+	int found = 0;
+	for (found = 0; matches && matches[found].name; found++);
+	if (found == 0)
+		return 0;
+
+	int eln_pad = search_path ? -1 : 0;
+	int longest_eln = -1;
+	size_t flongest = 0;
+
+	get_glob_longest(matches, &longest_eln, &flongest, &eln_pad);
+
+	int columns_n = calculate_glob_output_columns(flongest, found);
+
+	/* colors_list() makes use of TAB_OFFSET. We don't want it here. */
+	size_t tab_offset_bk = tab_offset;
 	tab_offset = 0;
 
-	for (i = 0; i < found; i++) {
-		if (!pfiles[i])
-			continue;
+	int last_column = 0, i;
 
+	for (i = 0; matches[i].name; i++) {
 		if ((i + 1) % columns_n == 0)
 			last_column = 1;
 		else
 			last_column = 0;
 
-		char ind_chr = file_info[eln[i] - 1].sel == 1 ? SELFILE_CHR : ' ';
-		char *ind_chr_color = file_info[eln[i] - 1].sel == 1 ? li_cb : "";
-
 		if (!search_path) {
-			printf("%s%*d%s%s%c%s%s%s%s%c", el_c, eln_pad, eln[i], df_c,
+			/* Print ELN, file indicator, and icon. */
+			int index = matches[i].eln - 1;
+			char ind_chr = file_info[index].sel == 1 ? SELFILE_CHR : ' ';
+			char *ind_chr_color = file_info[index].sel == 1 ? li_cb : "";
+
+			printf("%s%*d%s%s%c%s%s%s%s%c", el_c, eln_pad, matches[i].eln, df_c,
 				ind_chr_color, ind_chr, df_c,
-				conf.icons == 1 ? file_info[eln[i] - 1].icon_color : "",
-				conf.icons == 1 ? file_info[eln[i] - 1].icon : "",
+				conf.icons == 1 ? file_info[index].icon_color : "",
+				conf.icons == 1 ? file_info[index].icon : "",
 				df_c, conf.icons == 1 ? ' ' : 0);
 		}
 
+		/* Print file name. */
 		int name_pad = (last_column == 1 || i == (found - 1)) ? NO_PAD :
-		    (int)(flongest - files_len[i] - ( search_path ? 0
-		    : (size_t)(eln_pad - DIGINUM(eln[i])) ) + 1);
+		    (int)(flongest - matches[i].len - ( search_path ? 0
+		    : (size_t)(eln_pad - DIGINUM(matches[i].eln)) ) + 1);
 
 		if (name_pad < 0)
 			name_pad = 0;
 
-		colors_list(pfiles[i], NO_ELN, name_pad,
+		colors_list(matches[i].name, NO_ELN, name_pad,
 		    (last_column == 1 || i == found - 1) ? 1 : NO_NEWLINE);
 	}
-	tab_offset = t;
+
+	tab_offset = tab_offset_bk;
 
 	print_reload_msg(_("Matches found: %d%s\n"), found,
 		conf.search_strategy != GLOB_ONLY ? " (glob)" : "");
 
-END:
-	/* Free stuff */
-	if (invert == 1 && search_path) {
-		i = sfiles;
-		while (--i >= 0)
-			free(ent[i]);
-		free(ent);
+	return found;
+}
+
+/* List matching file names in the specified directory. */
+static int
+search_glob(char **args)
+{
+	if (!args || !args[0])
+		return EXIT_FAILURE;
+
+	int invert = (args[0][1] == '!');
+
+	char *search_query = (char *)NULL, *search_path = (char *)NULL;
+	mode_t file_type = 0;
+
+	if (set_file_type_and_search_path(args, &file_type,
+	&search_path, invert) == EXIT_FAILURE)
+		return ERR_SKIP_REGEX;
+
+	/* If we have a path ("/str /path"), chdir into it, since glob(3)
+	 * works on CWD. */
+	if (search_path && *search_path
+	&& chdir_search_path(&search_path, args[1]) == EXIT_FAILURE)
+		return ERR_SKIP_REGEX;
+
+	search_query = construct_glob_query(&args[0], invert);
+	if (!search_query && conf.search_strategy != GLOB_ONLY)
+		return EXIT_FAILURE;
+
+	/* Get matches, if any. */
+	glob_t globbed_files;
+	int ret = glob(search_query, GLOB_BRACE, NULL, &globbed_files);
+	if (ret != 0) {
+		globfree(&globbed_files);
+
+		/* Go back to the directory we came from */
+		if (search_path && xchdir(workspaces[cur_ws].path, NO_TITLE) == -1)
+			xerror("search: %s: %s\n", workspaces[cur_ws].path, strerror(errno));
+
+		return EXIT_FAILURE;
 	}
 
-	free(eln);
-	free(files_len);
-	free(pfiles);
+	/* We have matches */
+
+	char **gfiles = globbed_files.gl_pathv;
+	size_t g = globbed_files.gl_pathc;
+
+	/* glob(3) doesn't sort directories first. Let's do it ourselves */
+	if (conf.list_dirs_first == 1)
+		gfiles = glob_sort_dirs(globbed_files, &g);
+
+	/* We need to store pointers to matching file names in array of pointers,
+	 * just as the file name length (to construct the columned output), and,
+	 * if searching in CWD, its index (ELN) in the dirlist array as well */
+	struct search_t *list = (struct search_t *)NULL;
+
+	if (invert == 0)
+		list = get_glob_matches(gfiles, search_path, file_type, g);
+	else
+		list = get_glob_matches_invert(gfiles, search_path, file_type);
+
+	globfree(&globbed_files);
+
+	int matches = print_glob_matches(list, search_path);
+
+	/* Free stuff */
+	size_t i;
+	for (i = 0; list[i].name; i++)
+		free(list[i].name);
+	free(list);
+
 	if (conf.list_dirs_first == 1)
 		free(gfiles);
-	globfree(&globbed_files);
 
 	/* If needed, go back to the directory we came from */
 	if (search_path && xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
@@ -531,164 +597,314 @@ END:
 		return EXIT_FAILURE;
 	}
 
-	return found == 0 ? EXIT_FAILURE : EXIT_SUCCESS;
+	return (matches == 0 ? EXIT_FAILURE : EXIT_SUCCESS);
 }
 
-/* List matching (or not marching, if inverse is set to 1) file names
- * in the specified directory */
-int
-search_regex(char **args, const int invert, const int case_sens)
+/* Original string is either "/QUERY" or "/!QUERY". Let's extract QUERY.
+ * If the query string contains no metacharacters, change it to ".*QUERY.*" */
+static char *
+construct_regex_query(char **arg, const int invert, int *regex_found)
+{
+	char *query = *arg + (invert == 1 ? 2 : 1);
+
+	*regex_found = check_regex(query);
+	if (*regex_found == EXIT_SUCCESS)
+		return query;
+
+	size_t len = strlen(*arg);
+
+	char *q = savestring(query, len - (invert == 1 ? 2 : 1));
+	*arg = (char *)xrealloc(*arg, (len + 5) * sizeof(char));
+
+	snprintf(*arg + 1, len + 4, ".*%s.*", q);
+	free(q);
+
+	return *arg + 1;
+}
+
+static void
+err_regex_no_match(const int regex_found, const char *arg)
+{
+	char *input = (conf.autocd == 1 && !arg && (regex_found == EXIT_FAILURE
+			|| (search_flags & NO_GLOB_CHAR)) && rl_line_buffer)
+			? strrchr(rl_line_buffer, '/') : (char *)NULL;
+
+	if (input && input != rl_line_buffer) {
+		/* Input string contains at least two slashes. It looks like a path:
+		 * let's err like it was. */
+		xerror("cd: %s: %s\n", rl_line_buffer, strerror(ENOENT));
+	} else if (search_flags & NO_GLOB_CHAR) {
+		fputs(_("search: No matches found\n"), stderr);
+	} else {
+		fputs(_("No matches found\n"), stderr);
+	}
+
+	search_flags &= ~NO_GLOB_CHAR;
+}
+
+static void
+free_regex_dirlist(struct dirent ***dirlist, const int tmp_files)
+{
+	if (!dirlist)
+		return;
+
+	int i = tmp_files;
+	while (--i >= 0)
+		free((*dirlist)[i]);
+
+	free(*dirlist);
+
+	if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1)
+		xerror("search: %s: %s\n", workspaces[cur_ws].path, strerror(errno));
+}
+
+static int
+check_regex_file_type(struct dirent **reg_dirlist, const int index,
+	const mode_t file_type)
+{
+	if (reg_dirlist) { /* A search path has been provided. */
+#if !defined(_DIRENT_HAVE_D_TYPE)
+		mode_t type;
+		struct stat attr;
+		if (lstat(reg_dirlist[index]->d_name, &attr) == -1)
+			return EXIT_FAILURE;
+
+		switch (attr.st_mode & S_IFMT) {
+		case S_IFBLK: type = DT_BLK; break;
+		case S_IFCHR: type = DT_CHR; break;
+		case S_IFDIR: type = DT_DIR; break;
+		case S_IFIFO: type = DT_FIFO; break;
+		case S_IFLNK: type = DT_LNK; break;
+		case S_IFREG: type = DT_REG; break;
+		case S_IFSOCK: type = DT_SOCK; break;
+		default: type = DT_UNKNOWN; break;
+		}
+
+		if (type != file_type)
+#else
+		if (reg_dirlist[index]->d_type != file_type)
+#endif
+			return EXIT_FAILURE;
+	} else { /* Searching in CWD. */
+		if (file_info[index].type != file_type)
+			return EXIT_FAILURE;
+	}
+
+	return EXIT_SUCCESS;
+}
+
+static struct search_t
+load_entry_info(struct dirent **reg_dirlist, const int index)
+{
+	char *name = reg_dirlist ? reg_dirlist[index]->d_name
+		: file_info[index].name;
+
+	struct search_t list;
+	list.name = name;
+	list.eln = reg_dirlist ? -1 : index + 1;
+	list.len = wc_xstrlen(name);
+	list.len += (!reg_dirlist && conf.icons == 1) ? 3 : 0;
+	list.len += reg_dirlist ? 0 : (size_t)(DIGINUM(list.eln) + 1);
+
+	return list;
+}
+
+static size_t
+get_regex_largest(struct search_t *list, const int total, int *elnpad)
+{
+	int i = total;
+	size_t largest_file = 0;
+	int largest_file_eln = -1;
+	int largest_eln = -1;
+
+	while (--i >= 0) {
+		if (list[i].len > largest_file) {
+			largest_file = list[i].len;
+			largest_file_eln = list[i].eln;
+		}
+		if (list[i].eln != -1 && list[i].eln > largest_eln)
+			largest_eln = list[i].eln;
+	}
+
+	*elnpad = DIGINUM(largest_eln);
+	largest_file += (size_t)(*elnpad - DIGINUM(largest_file_eln));
+
+	return largest_file;
+}
+
+static size_t
+calc_columns(const size_t largest_file, const size_t matches)
+{
+	struct winsize w;
+	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+	unsigned short termcols = w.ws_col;
+
+	size_t columns;
+	if (largest_file == 0 || largest_file > termcols)
+		columns = 1;
+	else
+		columns = (size_t)termcols / (largest_file + 1);
+
+	if (columns > matches)
+		columns = matches;
+
+	return columns;
+}
+
+static void
+print_regex_entry(struct search_t list, const int namepad, const int elnpad,
+	const int newline)
+{
+	if (list.eln != -1) {
+		// Print ELN, file indicator, and icon.
+		int index = list.eln - 1;
+		char ind_chr = file_info[index].sel == 1 ? SELFILE_CHR : ' ';
+		char *ind_chr_color = file_info[index].sel == 1 ? li_cb : "";
+
+		printf("%s%*d%s%s%c%s%s%s%s%c", el_c, elnpad,
+			list.eln, df_c, ind_chr_color, ind_chr, df_c,
+			conf.icons == 1 ? file_info[index].icon_color : "",
+			conf.icons == 1 ? file_info[index].icon : "",
+			df_c, conf.icons == 1 ? ' ' : 0);
+	}
+
+	colors_list(list.name, NO_ELN, namepad, newline);
+}
+
+static size_t
+print_regex_matches(const mode_t file_type, struct dirent **reg_dirlist,
+	int *regex_index)
+{
+	/* colors_list() makes use of TAB_OFFSET. We don't need it here. */
+	size_t tab_offset_bk = tab_offset;
+	tab_offset = 0;
+
+	size_t total; /* Total number of matches (without file type filter) */
+	for (total = 0; regex_index[total] > -1; total++);
+
+	struct search_t *list =
+		(struct search_t *)xnmalloc(total + 1, sizeof(struct search_t));
+
+	size_t matches = 0; /* Number of filtered matches */
+
+	int i = (int)total;
+	while (--i >= 0) {
+		int index = regex_index[i];
+
+		if (file_type != 0 && check_regex_file_type(reg_dirlist,
+		index, file_type) == EXIT_FAILURE)
+			continue;
+
+		list[matches] = load_entry_info(reg_dirlist, index);
+		matches++;
+	}
+
+	size_t count = 0;
+	if (matches == 0) {
+		fputs(_("search: No matches found\n"), stderr);
+		goto END;
+	}
+
+	int eln_pad = -1;
+	size_t largest_file = get_regex_largest(list, (int)matches, &eln_pad);
+	size_t columns = calc_columns(largest_file, matches);
+
+	size_t last_col = 0, cur_col = 0;
+
+	i = (int)matches;
+	while (--i >= 0) {
+		cur_col++;
+		count++;
+
+		if (cur_col == columns) {
+			last_col = 1;
+			cur_col = 0;
+		} else {
+			last_col = 0;
+		}
+
+		/* Calculate how much right pad we need for the current entry */
+		int name_pad = (last_col == 1 || count == matches) ? NO_PAD :
+			(int)(largest_file - list[i].len - (list[i].eln == -1 ? 0
+			: (size_t)(eln_pad - DIGINUM(list[i].eln))) + 1);
+
+		if (name_pad < 0)
+			name_pad = 0;
+
+		int newline = (last_col == 1 || count == matches);
+		print_regex_entry(list[i], name_pad, eln_pad, newline);
+	}
+
+	print_reload_msg("Matches found: %zu\n", count);
+
+END:
+	free(list);
+	tab_offset = tab_offset_bk;
+	return count;
+}
+
+/* List matching (or non-marching if INVERT is set to 1) file names
+ * in the specified directory. */
+static int
+search_regex(char **args)
 {
 	if (!args || !args[0])
 		return EXIT_FAILURE;
 
-	char *search_str = (char *)NULL, *search_path = (char *)NULL;
+	int invert = (args[0][1] == '!');
+	char *search_query = (char *)NULL, *search_path = (char *)NULL;
 	mode_t file_type = 0;
 
-	/* If there are two arguments, the one starting with '-' is the
-	 * file type and the other is the path */
-	if (args[1] && args[2]) {
-		if (*args[1] == '-') {
-			file_type = (mode_t) * (args[1] + 1);
-			search_path = args[2];
-		} else if (*args[2] == '-') {
-			file_type = (mode_t) * (args[2] + 1);
-			search_path = args[1];
-		} else {
-			search_path = args[1];
-		}
-	} else {
-		/* If just one argument, '-' indicates file type. Else, we have a path */
-		if (args[1]) {
-			if (*args[1] == '-')
-				file_type = (mode_t) * (args[1] + 1);
-			else
-				search_path = args[1];
-		}
-	}
+	if (set_file_type_and_search_path(args, &file_type,
+	&search_path, 1) == EXIT_FAILURE)
+		return EXIT_FAILURE;
 
-	/* If no arguments, search_path will be NULL and file_type zero */
-	if (file_type != 0) {
-		/* If file type is specified, matches will be checked against this value */
-		switch (file_type) {
-		case 'b': file_type = DT_BLK; break;
-		case 'c': file_type = DT_CHR; break;
-		case 'd': file_type = DT_DIR; break;
-		case 'f': file_type = DT_REG; break;
-		case 'l': file_type = DT_LNK; break;
-		case 'p': file_type = DT_FIFO; break;
-		case 's': file_type = DT_SOCK; break;
-		case 'x': run_find(search_path, args[0]); return EXIT_SUCCESS;
-		default:
-			xerror(_("search: '%c': Unrecognized file type\n"), (char)file_type);
+	struct dirent **reg_dirlist = (struct dirent **)NULL;
+	int tmp_files = - 1;
+
+	if (search_path && *search_path) {
+		if (chdir_search_path(&search_path, args[1]) == EXIT_FAILURE)
+			return EXIT_FAILURE;
+
+		tmp_files = scandir(".", &reg_dirlist, skip_files, xalphasort);
+		if (tmp_files == -1) {
+			xerror("search: %s: %s\n", search_path, strerror(errno));
+
+			if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1)
+				xerror("search: %s: %s\n", workspaces[cur_ws].path, strerror(errno));
+
 			return EXIT_FAILURE;
 		}
 	}
 
-	struct dirent **reg_dirlist = (struct dirent **)NULL;
-	int tmp_files = 0;
+	int regex_found = 0;
+	search_query = construct_regex_query(&args[0], invert, &regex_found);
 
-	/* If we have a path ("/str /path"), chdir into it, since
-	 * regex() works on CWD */
-	if (search_path && *search_path) {
-		/* Deescape the search path, if necessary */
-		if (strchr(search_path, '\\')) {
-			char *deq_dir = dequote_str(search_path, 0);
-
-			if (!deq_dir) {
-				xerror(_("search: %s: Error dequoting file name\n"), args[1]);
-				return EXIT_FAILURE;
-			}
-
-			strcpy(search_path, deq_dir);
-			free(deq_dir);
-		}
-
-		size_t path_len = strlen(search_path);
-		if (path_len > 1 && search_path[path_len - 1] == '/')
-			search_path[path_len - 1] = '\0';
-
-		if ((*search_path == '.' && !search_path[1])
-		|| (search_path[1] == workspaces[cur_ws].path[1]
-		&& strcmp(search_path, workspaces[cur_ws].path) == 0))
-			search_path = (char *)NULL;
-
-		if (search_path && *search_path) {
-			if (xchdir(search_path, NO_TITLE) == -1) {
-				xerror("search: %s: %s\n", search_path, strerror(errno));
-				return EXIT_FAILURE;
-			}
-
-			tmp_files = scandir(".", &reg_dirlist, skip_files, xalphasort);
-			if (tmp_files == -1) {
-				xerror("search: %s: %s\n", search_path, strerror(errno));
-
-				if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
-					xerror("search: %s: %s\n",
-						workspaces[cur_ws].path, strerror(errno));
-				}
-
-				return EXIT_FAILURE;
-			}
-		}
-	}
-
+	/* Get matches */
 	size_t i;
 
-	/* Search for regex expression */
-	int regex_found = check_regex(args[0] + 1);
-
-	/* If search string is just "STR" (no regex chars), change it
-	 * to ".*STR.*" */
-	if (regex_found == EXIT_FAILURE) {
-		size_t search_str_len = strlen(args[0]);
-
-		args[0] = (char *)xrealloc(args[0], (search_str_len + 5) * sizeof(char));
-		char *tmp_str = (char *)xnmalloc(search_str_len + 1, sizeof(char));
-		strcpy(tmp_str, args[0] + (invert ? 2 : 1));
-		*args[0] = '.';
-		*(args[0] + 1) = '*';
-		*(args[0] + 2) = '\0';
-		strcat(args[0], tmp_str);
-		free(tmp_str);
-		*(args[0] + search_str_len + 1) = '.';
-		*(args[0] + search_str_len + 2) = '*';
-		*(args[0] + search_str_len + 3) = '\0';
-		search_str = args[0];
-	} else {
-		search_str = args[0] + (invert == 1 ? 2 : 1);
-	}
-
-	/* Get matches, if any, using regular expressions */
 	regex_t regex_files;
-	int reg_flags = case_sens ? (REG_NOSUB | REG_EXTENDED)
-				: (REG_NOSUB | REG_EXTENDED | REG_ICASE);
-	int ret = regcomp(&regex_files, search_str, reg_flags);
+	int reg_flags = conf.case_sens_search == 1 ? (REG_NOSUB | REG_EXTENDED)
+		: (REG_NOSUB | REG_EXTENDED | REG_ICASE);
+	int ret = regcomp(&regex_files, search_query, reg_flags);
 
 	if (ret != EXIT_SUCCESS) {
-		xerror(_("'%s': Invalid regular expression\n"), search_str);
+		xerror(_("'%s': Invalid regular expression\n"), search_query);
 		regfree(&regex_files);
-
-		if (search_path) {
-			for (i = 0; i < (size_t)tmp_files; i++)
-				free(reg_dirlist[i]);
-			free(reg_dirlist);
-
-			if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
-				xerror("search: %s: %s\n", workspaces[cur_ws].path, strerror(errno));
-			}
-		}
-
+		free_regex_dirlist(&reg_dirlist, tmp_files);
 		return EXIT_FAILURE;
 	}
 
 	size_t found = 0;
 	int *regex_index = (int *)xnmalloc((search_path ? (size_t)tmp_files
-		: files) + 1, sizeof(int));
+		: files) + 2, sizeof(int));
+	size_t max = (search_path && *search_path) ? (size_t)tmp_files : files;
 
-	for (i = 0; i < (search_path ? (size_t)tmp_files : files); i++) {
-		if (regexec(&regex_files, (search_path ? reg_dirlist[i]->d_name
-		: file_info[i].name), 0, NULL, 0) == EXIT_SUCCESS) {
+	for (i = 0; i < max; i++) {
+		char *name = (search_path && *search_path) ? reg_dirlist[i]->d_name
+		: file_info[i].name;
+
+		if (regexec(&regex_files, name, 0, NULL, 0) == EXIT_SUCCESS) {
 			if (invert == 0) {
 				regex_index[found] = (int)i;
 				found++;
@@ -701,225 +917,42 @@ search_regex(char **args, const int invert, const int case_sens)
 		}
 	}
 
+	regex_index[found] = -1; /* Mark end of array */
 	regfree(&regex_files);
 
 	if (found == 0) {
-		int exit_status = EXIT_FAILURE;
-		char *s = (conf.autocd == 1 && !args[1] && (regex_found == EXIT_FAILURE
-				|| (search_flags & NO_GLOB_CHAR)) && rl_line_buffer)
-				? strrchr(rl_line_buffer, '/') : (char *)NULL;
-
-		if (s && s != rl_line_buffer) {
-			/* Input string looks like a path: let's err like it was */
-			xerror("cd: %s: %s\n", rl_line_buffer, strerror(ENOENT));
-			exit_status = ENOENT;
-		} else if (search_flags & NO_GLOB_CHAR) {
-			fputs(_("search: No matches found\n"), stderr);
-		} else {
-			fputs(_("No matches found\n"), stderr);
-		}
-		search_flags &= ~NO_GLOB_CHAR;
-
+		err_regex_no_match(regex_found, args[1]);
 		free(regex_index);
-
-		if (search_path) {
-			int j = tmp_files;
-			while (--j >= 0)
-				free(reg_dirlist[j]);
-			free(reg_dirlist);
-
-			if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1)
-				xerror("search: %s: %s\n", workspaces[cur_ws].path, strerror(errno));
-		}
-
-		return exit_status;
+		free_regex_dirlist(&reg_dirlist, tmp_files);
+		return EXIT_FAILURE;
 	}
 
-	/* We have matches */
-	size_t flongest = 0, type_ok = 0;
+	/* We have matches: print them. */
+	size_t matches = print_regex_matches(file_type, reg_dirlist, regex_index);
 
-	size_t *files_len = (size_t *)xnmalloc(found + 1, sizeof(size_t));
-	int *match_type = (int *)xnmalloc(found + 1, sizeof(int));
-	int longest_eln = -1;
-
-	/* Get the longest file name in the list */
-	int j = (int)found;
-	while (--j >= 0) {
-		/* Simply skip all files not matching file_type */
-		if (file_type != 0) {
-			match_type[j] = 0;
-
-			if (search_path) {
-#if !defined(_DIRENT_HAVE_D_TYPE)
-				mode_t type;
-				struct stat attr;
-				if (lstat(reg_dirlist[regex_index[j]]->d_name, &attr) == -1)
-					continue;
-				switch (attr.st_mode & S_IFMT) {
-				case S_IFBLK: type = DT_BLK; break;
-				case S_IFCHR: type = DT_CHR; break;
-				case S_IFDIR: type = DT_DIR; break;
-				case S_IFIFO: type = DT_FIFO; break;
-				case S_IFLNK: type = DT_LNK; break;
-				case S_IFREG: type = DT_REG; break;
-				case S_IFSOCK: type = DT_SOCK; break;
-				default: type = DT_UNKNOWN; break;
-				}
-				if (type != file_type)
-#else
-				if (reg_dirlist[regex_index[j]]->d_type != file_type)
-#endif
-					continue;
-			} else {
-				if (file_info[regex_index[j]].type != file_type)
-					continue;
-			}
-		}
-
-		/* Amount of non-filtered files */
-		type_ok++;
-		/* Index of each non-filtered file */
-		match_type[j] = 1;
-
-		/* If not searching in CWD, we only need to know the file's
-		 * length (no ELN) */
-		if (search_path) {
-			files_len[j] = wc_xstrlen(reg_dirlist[regex_index[j]]->d_name);
-
-			if (files_len[j] > flongest)
-				flongest = files_len[j];
-		} else {
-			/* If searching in CWD, take into account the file's ELN
-			 * when calculating its length */
-			files_len[j] = wc_xstrlen(file_info[regex_index[j]].name)
-					+ (size_t)DIGINUM(regex_index[j] + 1) + 1;
-
-			if (files_len[j] > flongest) {
-				flongest = files_len[j];
-				longest_eln = regex_index[j] + 1;
-			}
-		}
-	}
-
-	if (type_ok != 0) {
-		int last_column = 0;
-		size_t total_cols = 0;
-
-		struct winsize w;
-		ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-		unsigned short terminal_cols = w.ws_col;
-
-		int eln_pad = 0;
-		if (!search_path) {
-			if (conf.icons == 1)
-				flongest += 3;
-
-			int largest = 0;
-			j = (int)found;
-			while (--j >= 0) {
-				if (match_type[j] == 0)
-					continue;
-				if (regex_index[j] + 1 > largest)
-					largest = regex_index[j] + 1;
-			}
-			eln_pad = DIGINUM(largest);
-
-			if (longest_eln > -1)
-				flongest += (size_t)(eln_pad - DIGINUM(longest_eln));
-		}
-
-		if (flongest == 0 || flongest > terminal_cols)
-			total_cols = 1;
-		else
-			total_cols = (size_t)terminal_cols / (flongest + 1);
-
-		if (total_cols > type_ok)
-			total_cols = type_ok;
-
-		/* cur_col: Current columns number */
-		size_t cur_col = 0, counter = 0;
-		size_t t = tab_offset;
-		tab_offset = 0;
-		for (i = 0; i < found; i++) {
-			if (match_type[i] == 0)
-				continue;
-			/* Print the results using colors and columns */
-			cur_col++;
-
-			/* If the current file is in the last column or is the last
-			 * listed file, we need to print no pad and a newline char.
-			 * Else, print the corresponding pad, to equate the longest
-			 * file length, and no newline char */
-			if (cur_col == total_cols) {
-				last_column = 1;
-				cur_col = 0;
-			} else {
-				last_column = 0;
-			}
-
-			/* Counter: Current amount of non-filtered files: if
-			 * COUNTER equals TYPE_OK (total amount of non-filtered
-			 * files), we have the last file to be printed */
-			counter++;
-
-			char ind_chr = file_info[regex_index[i]].sel == 1 ? SELFILE_CHR : ' ';
-			char *ind_chr_color = file_info[regex_index[i]].sel == 1 ? li_cb : "";
-
-			if (!search_path) {
-				printf("%s%*d%s%s%c%s%s%s%s%c", el_c, eln_pad,
-					regex_index[i] + 1, df_c, ind_chr_color, ind_chr, df_c,
-					conf.icons == 1 ? file_info[regex_index[i]].icon_color : "",
-					conf.icons == 1 ? file_info[regex_index[i]].icon : "",
-					df_c, conf.icons == 1 ? ' ' : 0);
-			}
-
-			int name_pad = (last_column == 1 || counter == type_ok) ? NO_PAD :
-				(int)(flongest - files_len[i] - ( search_path ? 0
-				: (size_t)(eln_pad - DIGINUM(regex_index[i] + 1)) ) + 1);
-
-			if (name_pad < 0)
-				name_pad = 0;
-
-			colors_list(search_path ? reg_dirlist[regex_index[i]]->d_name
-				: file_info[regex_index[i]].name,
-				NO_ELN, name_pad,
-				(last_column == 1 || counter == type_ok) ? PRINT_NEWLINE
-				: NO_NEWLINE);
-
-/*			colors_list(search_path ? reg_dirlist[regex_index[i]]->d_name
-					: file_info[regex_index[i]].name,
-					search_path ? NO_ELN : regex_index[i] + 1,
-					(last_column || counter == type_ok) ? NO_PAD
-					: (int)(flongest - files_len[i]) + 1,
-					(last_column || counter == type_ok) ? PRINT_NEWLINE
-					: NO_NEWLINE); */
-		}
-		tab_offset = t;
-
-		print_reload_msg(_("Matches found: %zu\n"), counter);
-	} else {
-		fputs(_("No matches found\n"), stderr);
-	}
-
-	/* Free stuff */
-	free(files_len);
-	free(match_type);
 	free(regex_index);
+	free_regex_dirlist(&reg_dirlist, tmp_files);
 
-	/* If needed, go back to the directory we came from */
-	if (search_path) {
-		j = tmp_files;
-		while (--j >= 0)
-			free(reg_dirlist[j]);
-		free(reg_dirlist);
+	return matches == 0 ? EXIT_FAILURE : EXIT_SUCCESS;
+}
 
-		if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
-			xerror("search: %s: %s\n", workspaces[cur_ws].path, strerror(errno));
-			return EXIT_FAILURE;
-		}
+static int
+err_glob_no_match(const char *arg)
+{
+	char *input = (conf.autocd == 1 && !arg
+		&& (search_flags & NO_GLOB_CHAR)
+		&& rl_line_buffer) ? strrchr(rl_line_buffer, '/')
+		: (char *)NULL;
+
+	if (input && input != rl_line_buffer) {
+		/* Input string contains two slashes: it looks like a path, so let's
+		 * err like it was. */
+		xerror("cd: %s: %s\n", rl_line_buffer, strerror(ENOENT));
+		return EXIT_FAILURE;
 	}
 
-	return type_ok != 0 ? EXIT_SUCCESS : EXIT_FAILURE;
+	fputs(_("search: No matches found\n"), stderr);
+	return EXIT_FAILURE;
 }
 
 /* We have three search strategies:
@@ -934,32 +967,18 @@ search_function(char **args)
 		return EXIT_SUCCESS;
 	}
 
-	int invert = args[0][1] == '!' ? 1 : 0;
+	if (conf.search_strategy == REGEX_ONLY)
+		return search_regex(args);
 
-	if (conf.search_strategy != REGEX_ONLY) {
-		int ret = search_glob(args, invert);
-		if (ret != EXIT_FAILURE)
-			return (ret == 2 ? 1 : ret);
+	int ret = search_glob(args);
+	if (ret != EXIT_FAILURE)
+		return (ret == ERR_SKIP_REGEX ? 1 : ret);
 
-		if (conf.search_strategy == GLOB_ONLY) {
-			char *s = (conf.autocd == 1 && !args[1]
-				&& (search_flags & NO_GLOB_CHAR)
-				&& rl_line_buffer) ? strrchr(rl_line_buffer, '/')
-				: (char *)NULL;
+	if (conf.search_strategy == GLOB_ONLY)
+		return err_glob_no_match(args[1]);
 
-			if (s && s != rl_line_buffer) {
-				/* Input string looks like a path: let's err like it was */
-				xerror("cd: %s: %s\n", rl_line_buffer, strerror(ENOENT));
-				return ENOENT;
-			} else {
-				fputs(_("search: No matches found\n"), stderr);
-				return EXIT_FAILURE;
-			}
-		}
+	if (!(search_flags & NO_GLOB_CHAR))
+		fputs(_("Glob: No matches found. Trying regex...\n"), stderr);
 
-		if (!(search_flags & NO_GLOB_CHAR))
-			fputs(_("Glob: No matches found. Trying regex...\n"), stderr);
-	}
-
-	return search_regex(args, invert, conf.case_sens_search == 1 ? 1 : 0);
+	return search_regex(args);
 }

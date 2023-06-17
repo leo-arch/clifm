@@ -290,8 +290,9 @@ abbreviate_file_name(char *str)
 	if (workspaces && workspaces[cur_ws].path && wlen > 1 && len > wlen
 	&& strncmp(str, workspaces[cur_ws].path, wlen) == 0
 	&& *(str + wlen) == '/') {
-		name = (char *)xnmalloc(strlen(str + wlen + 1) + 3, sizeof(char));
-		sprintf(name, "./%s", str + wlen + 1);
+		size_t name_len = strlen(str + wlen + 1) + 3;
+		name = (char *)xnmalloc(name_len, sizeof(char));
+		snprintf(name, name_len, "./%s", str + wlen + 1);
 		return name;
 	}
 
@@ -341,10 +342,12 @@ normalize_path(char *src, const size_t src_len)
 			xerror(_("%s: %s: Error deescaping string\n"), PROGRAM_NAME, src);
 			return (char *)NULL;
 		}
+
 		size_t tlen = strlen(tmp);
 		if (tlen > 0 && tmp[tlen - 1] == '/')
 			tmp[tlen - 1] = '\0';
-		strcpy(src, tmp);
+
+		xstrsncpy(src, tmp, tlen);
 		free(tmp);
 		tmp = (char *)NULL;
 	}
@@ -680,43 +683,6 @@ hex2rgb(char *hex)
 	snprintf(tmp_color, sizeof(tmp_color), "%d;38;2;%d;%d;%d", attr, r, g, b);
 	return tmp_color;
 }
-
-/* Given this value: \xA0\xA1\xA2, return an array of integers with
- * the integer values for A0, A1, and A2 respectivelly */
-/*int *
-get_hex_num(const char *str)
-{
-	size_t i = 0;
-	int *hex_n = (int *)xnmalloc(3, sizeof(int));
-
-	while (*str) {
-		if (*str != '\\') {
-			str++;
-			continue;
-		}
-
-		if (*(str + 1) != 'x')
-			break;
-
-		str += 2;
-		char *tmp = xnmalloc(3, sizeof(char));
-		xstrsncpy(tmp, str, 2);
-
-		if (i >= 3)
-			hex_n = xrealloc(hex_n, (i + 1) * sizeof(int *));
-
-		hex_n[i++] = hex2int(tmp);
-
-		free(tmp);
-		tmp = (char *)NULL;
-		str++;
-	}
-
-	hex_n = xrealloc(hex_n, (i + 1) * sizeof(int));
-	hex_n[i] = -1; // -1 marks the end of the int array
-
-	return hex_n;
-} */
 
 /* Count files in DIR_PATH, including self and parent. If POP is set to 1,
  * the function will just check if the directory is populated (it has at

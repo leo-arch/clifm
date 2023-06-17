@@ -229,9 +229,10 @@ static inline char *
 gen_exit_status(void)
 {
 	size_t code_len = (size_t)DIGINUM(exit_code);
+	size_t len = code_len + 3 + (MAX_COLOR * 2);
 
-	char *temp = (char *)xnmalloc(code_len + 12 + MAX_COLOR, sizeof(char));
-	sprintf(temp, "%s%d\001%s\002",
+	char *temp = (char *)xnmalloc(len, sizeof(char));
+	snprintf(temp, len, "%s%d\001%s\002",
 		(exit_code == 0) ? (conf.colorize == 1 ? xs_c : "")
 		: (conf.colorize == 1 ? xf_c : ""), exit_code, df_c);
 
@@ -411,7 +412,7 @@ add_string(char **tmp, const int c, char **line, char **res, size_t *len)
 		*res = (char *)xrealloc(*res, (l + 1) * sizeof(char));
 	}
 
-	strcat(*res, *tmp);
+	xstrncat(*res, strlen(*res), *tmp, l + 1);
 	free(*tmp);
 }
 
@@ -431,8 +432,9 @@ substitute_cmd(char **line, char **res, size_t *len)
 	int tmp = strcntchr(*line, ')');
 	if (tmp == -1) return; /* No ending bracket */
 
-	char *tmp_str = (char *)xnmalloc(strlen(*line) + 2, sizeof(char));
-	sprintf(tmp_str, "$%s", *line);
+	size_t tmp_len = strlen(*line) + 2;
+	char *tmp_str = (char *)xnmalloc(tmp_len, sizeof(char));
+	snprintf(tmp_str, tmp_len, "$%s", *line);
 
 	tmp_str[tmp + 2] = '\0';
 	*line += tmp + 1;
@@ -458,7 +460,7 @@ substitute_cmd(char **line, char **res, size_t *len)
 			} else {
 				*res = (char *)xrealloc(*res, (*len + 2) * sizeof(char));
 			}
-			strcat(*res, wordbuf.we_wordv[j]);
+			xstrncat(*res, strlen(*res), wordbuf.we_wordv[j], *len + 2);
 		}
 	}
 
@@ -509,8 +511,8 @@ gen_stats_str(const int flag)
 
 	char *p = (char *)NULL;
 	if (val != 0) {
-		p = (char *)xnmalloc(sizeof(size_t) + 1, sizeof(char));
-		sprintf(p, "%zu", val);
+		p = (char *)xnmalloc(32, sizeof(char));
+		snprintf(p, 32, "%zu", val);
 	} else {
 		p = (char *)xnmalloc(2, sizeof(char));
 		*p = '-';
@@ -524,24 +526,29 @@ static inline char *
 gen_notification(const int flag)
 {
 	char *p;
-	if (user.uid == 0)
+	size_t len = 32;
+
+/*	if (user.uid == 0) {
 		p = (char *)xnmalloc(2, sizeof(char));
-	else
-		p = (char *)xnmalloc(sizeof(size_t) + 2, sizeof(char));
+		len = 2;
+	} else { */
+//	len = DIGINUM(UINT_MAX) + 2;
+	p = (char *)xnmalloc(len, sizeof(char));
+//	}
 	*p = '\0';
 
 	switch (flag) {
 	case NOTIF_ERROR:
 		if (msgs.error > 0)
-			sprintf(p, "E%zu", msgs.error);
+			snprintf(p, len, "E%zu", msgs.error);
 		break;
 	case NOTIF_NOTICE:
 		if (msgs.notice > 0)
-			sprintf(p, "N%zu", msgs.notice);
+			snprintf(p, len, "N%zu", msgs.notice);
 		break;
 	case NOTIF_WARNING:
 		if (msgs.warning > 0)
-			sprintf(p, "W%zu", msgs.warning);
+			snprintf(p, len, "W%zu", msgs.warning);
 		break;
 	case NOTIF_ROOT:
 		if (user.uid == 0)
@@ -549,11 +556,11 @@ gen_notification(const int flag)
 		break;
 	case NOTIF_SEL:
 		if (sel_n > 0)
-			sprintf(p, "*%zu", sel_n);
+			snprintf(p, len, "*%zu", sel_n);
 		break;
 	case NOTIF_TRASH:
 		if (trash_n > 2)
-			sprintf(p, "T%zu", trash_n - 2);
+			snprintf(p, len, "T%zu", trash_n - 2);
 		break;
 	default: break;
 	}
@@ -818,22 +825,22 @@ setenv_prompt(void)
 	 * (sel files, trash, stealth mode, messages) to be handled by
 	 * the prompt itself */
 	char t[32];
-	sprintf(t, "%d", (int)sel_n);
+	snprintf(t, sizeof(t), "%d", (int)sel_n);
 	setenv("CLIFM_STAT_SEL", t, 1);
 #ifndef _NO_TRASH
-	sprintf(t, "%d", trash_n > 2 ? (int)trash_n - 2 : 0);
+	snprintf(t, sizeof(t), "%d", trash_n > 2 ? (int)trash_n - 2 : 0);
 	setenv("CLIFM_STAT_TRASH", t, 1);
 #endif
-	sprintf(t, "%d", (int)msgs.error);
+	snprintf(t, sizeof(t), "%d", (int)msgs.error);
 	setenv("CLIFM_STAT_ERROR_MSGS", t, 1);
-	sprintf(t, "%d", (int)msgs.warning);
+	snprintf(t, sizeof(t), "%d", (int)msgs.warning);
 	setenv("CLIFM_STAT_WARNING_MSGS", t, 1);
-	sprintf(t, "%d", (int)msgs.notice);
+	snprintf(t, sizeof(t), "%d", (int)msgs.notice);
 	setenv("CLIFM_STAT_NOTICE_MSGS", t, 1);
 
-	sprintf(t, "%d", cur_ws + 1);
+	snprintf(t, sizeof(t), "%d", cur_ws + 1);
 	setenv("CLIFM_STAT_WS", t, 1);
-	sprintf(t, "%d", exit_code);
+	snprintf(t, sizeof(t), "%d", exit_code);
 	setenv("CLIFM_STAT_EXIT", t, 1);
 	setenv("CLIFM_STAT_ROOT", user.uid == 0 ? "1" : "0", 1);
 	setenv("CLIFM_STAT_STEALTH", (xargs.stealth_mode == 1) ? "1" : "0", 1);

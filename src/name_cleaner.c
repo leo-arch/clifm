@@ -213,11 +213,11 @@ clean_file_name(char *restrict name)
 		/* ASCII chars */
 		if (n == 38) { /* & */
 			if (q == p || *(q - 1) != DEFAULT_TRANSLATION) {
-				strcat(q, "_and_");
+				xstrncat(q, strlen(q), "_and_", NAME_MAX);
 				q += 5;
 				cur_len += 5;
 			} else {
-				sprintf(q - 1, "_and_");
+				snprintf(q - 1, NAME_MAX, "_and_");
 				q += 4;
 				cur_len += 4;
 			}
@@ -287,11 +287,11 @@ clean_file_name(char *restrict name)
 
 		size_t tlen = strlen(t);
 		if (q == p || *(q - 1) != DEFAULT_TRANSLATION) {
-			strcat(q, t);
+			xstrncat(q, strlen(q), t, NAME_MAX);
 			q += tlen;
 			cur_len += tlen;
 		} else {
-			sprintf(q - 1, "%s", t);
+			snprintf(q - 1, NAME_MAX, "%s", t);
 			q += (tlen > 0 ? tlen - 1 : 0);
 			cur_len += (tlen > 0 ? tlen - 1 : 0);
 		}
@@ -536,7 +536,8 @@ bleach_files(char **names)
 			xerror(_("bleach: %s: Error dequoting file name\n"), names[i]);
 			continue;
 		}
-		strcpy(names[i], dstr);
+
+		xstrsncpy(names[i], dstr, strlen(dstr));
 		free(dstr);
 		size_t nlen = strlen(names[i]);
 		if (names[i][nlen - 1] == '/')
@@ -558,8 +559,9 @@ bleach_files(char **names)
 		bfiles[f].original = savestring(names[i], nlen);
 		if (sl) {
 			*sl = '\0';
-			bfiles[f].replacement = (char *)xnmalloc(nlen + strlen(p) + 2, sizeof(char));
-			sprintf(bfiles[f].replacement, "%s/%s", names[i], p);
+			size_t len = nlen + strlen(p) + 2;
+			bfiles[f].replacement = (char *)xnmalloc(len, sizeof(char));
+			snprintf(bfiles[f].replacement, len, "%s/%s", names[i], p);
 			*sl = '/';
 		} else {
 			bfiles[f].replacement = savestring(p, strlen(p));
@@ -583,16 +585,16 @@ CONFIRM:
 	int _edit = 0, edited_names = 0;
 
 	while (!input) {
-		input = rl_no_hist(_("Is this OK? [y/N/(e)dit] "));
+		input = rl_no_hist(_("Is this OK? [y/n/(e)dit] "));
+
+		if (!input)
+			continue;
 
 		if (input && (*(input + 1) || !strchr("yYnNeEq", *input))) {
 			free(input);
 			input = (char *)NULL;
 			continue;
 		}
-
-		if (!input)
-			break;
 
 		switch (*input) {
 		case 'y': /* fallthrough */
@@ -602,6 +604,7 @@ CONFIRM:
 			bfiles = edit_replacements(bfiles, &f, &edited_names);
 			if (!bfiles)
 				break;
+
 			if (edited_names == 1 && f > 0) {
 				free(input);
 				input = (char *)NULL;
@@ -648,18 +651,19 @@ CONFIRM:
 	int total_rename = rename == 1 ? (int)f : 0;
 	size_t rep_suffix = 1;
 	int exit_status = EXIT_SUCCESS;
+
 	for (i = 0; i < f; i++) {
 		char *o = bfiles[i].original ? bfiles[i].original : (char *)NULL;
 		char *r = bfiles[i].replacement ? bfiles[i].replacement : (char *)NULL;
 		if (o && *o && r && *r && rename) {
 			/* Make sure the replacement file name does not exist. If
-			 * it does, append REP_SUFFIX and try again */
+			 * it does, append REP_SUFFIX and try again. */
 			struct stat a;
 			while (lstat(r, &a) == 0) {
 				char tmp[PATH_MAX];
-				xstrsncpy(tmp, r, PATH_MAX - 1);
-				r = (char *)xrealloc(r,	PATH_MAX * sizeof(char));
-				sprintf(r, "%s-%zu", tmp, rep_suffix);
+				xstrsncpy(tmp, r, sizeof(tmp) - 1);
+				r = (char *)xrealloc(r,	(PATH_MAX + 32) * sizeof(char));
+				snprintf(r, PATH_MAX + 31, "%s-%zu", tmp, rep_suffix);
 				rep_suffix++;
 			}
 
@@ -669,15 +673,17 @@ CONFIRM:
 				exit_status = EXIT_FAILURE;
 			}
 		}
+
 		free(o);
 		free(r);
 	}
+
 	free(bfiles);
 
 	if (exit_status == EXIT_FAILURE || total_rename == 0) {
 		printf(_("%s: %d file(s) bleached\n"), FUNC_NAME, total_rename);
 	} else {
-		_err(ERR_NO_LOG, PRINT_PROMPT, ("%s: %d file(s) bleached\n"),
+		_err(ERR_NO_LOG, PRINT_PROMPT, _("%s: %d file(s) bleached\n"),
 			FUNC_NAME, total_rename);
 	}
 
@@ -688,6 +694,7 @@ CONFIRM:
 		free_dirlist();
 		return list_dir();
 	}
+
 	return EXIT_SUCCESS;
 #else
 	return exit_status;

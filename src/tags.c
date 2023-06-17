@@ -124,7 +124,7 @@ print_tagged_file(char *name, const char *tag)
 	if (strchr(name, '\\')) {
 		char *d = dequote_str(name, 0);
 		if (d) {
-			strcpy(name, d);
+			xstrsncpy(name, d, strlen(d));
 			free(d);
 		}
 	}
@@ -150,7 +150,7 @@ list_files_in_tag(char *name)
 	if (strchr(name, '\\')) {
 		char *p = dequote_str(name, 0);
 		if (p) {
-			strcpy(name, p);
+			xstrsncpy(name, p, strlen(p));
 			free(p);
 		}
 	}
@@ -250,7 +250,7 @@ is_tag(char *name)
 	if (strchr(name, '\\')) {
 		char *deq = dequote_str(name, 0);
 		if (deq) {
-			strcpy(name, deq);
+			xstrsncpy(name, deq, strlen(deq));
 			free(deq);
 		}
 	}
@@ -436,10 +436,16 @@ remove_tags(char **args)
 	return exit_status;
 }
 
-/* Tag the file named NAME as TAG */
+/* Tag the file named NAME as TAG. */
 static int
 tag_file(char *name, char *tag)
 {
+	struct stat a;
+	if (lstat(name, &a) == -1) {
+		xerror("tag: %s: %s\n", name, strerror(errno));
+		return EXIT_FAILURE;
+	}
+
 	int new_tag = 0;
 	char *p = (char *)NULL;
 	if (strchr(tag, '\\'))
@@ -447,7 +453,6 @@ tag_file(char *name, char *tag)
 	char dir[PATH_MAX];
 	snprintf(dir, sizeof(dir), "%s/%s", tags_dir, p ? p : tag);
 
-	struct stat a;
 	if (stat(dir, &a) == -1) {
 		if (xmkdir(dir, S_IRWXU) != EXIT_SUCCESS) {
 			xerror(_("tag: %s: Cannot create tag: %s\n"),

@@ -1115,24 +1115,31 @@ my_rl_path_completion(const char *text, int state)
 //		if (!*text)
 //			text = ".";
 
-		if (text_len)
+		if (text_len) {
 			dirname = savestring(p, text_len);
-		else
-			dirname = savestring("", 1);
+		} else {
+			dirname = (char *)xnmalloc(2, sizeof(char));
+			*dirname = '\0';
+			dirname[1] = '\0';
+//			dirname = savestring("", 1);
+		}
 
-		if (dirname[0] == '.' && dirname[1] == '/')
-			exec = 1; /* Only executable files and directories are allowed */
+		exec = (*dirname == '.' && dirname[1] == '/');
+/*		if (dirname[0] == '.' && dirname[1] == '/')
+			exec = 1; // Only executable files and directories are allowed
 		else
-			exec = 0;
+			exec = 0; */
 
 		/* Get everything after last slash */
 		temp = strrchr(dirname, '/');
 
 		if (temp) {
-			strcpy(filename, ++temp);
+			// At this point, FILENAME has been allocated with TEXT_LEN bytes.
+			xstrsncpy(filename, ++temp, text_len);
 			*temp = '\0';
 		} else {
-			strcpy(dirname, ".");
+			*dirname = '.';
+			dirname[1] = '\0';
 		}
 
 		/* We aren't done yet.  We also support the "~user" syntax. */
@@ -1218,9 +1225,9 @@ my_rl_path_completion(const char *text, int state)
 #if !defined(_DIRENT_HAVE_D_TYPE)
 		struct stat attr;
 		if (!dirname || (*dirname == '.' && !*(dirname + 1)))
-			xstrsncpy(tmp, ent->d_name, PATH_MAX);
+			xstrsncpy(tmp, ent->d_name, sizeof(tmp) - 1);
 		else
-			snprintf(tmp, PATH_MAX, "%s%s", dirname, ent->d_name);
+			snprintf(tmp, sizeof(tmp), "%s%s", dirname, ent->d_name);
 
 		if (lstat(tmp, &attr) == -1)
 			continue;
@@ -1257,7 +1264,7 @@ my_rl_path_completion(const char *text, int state)
 					if (dirname[0] == '.' && !dirname[1]) {
 						ret = get_link_ref(ent->d_name);
 					} else {
-						snprintf(tmp, PATH_MAX, "%s%s", dirname, ent->d_name);
+						snprintf(tmp, sizeof(tmp), "%s%s", dirname, ent->d_name);
 						ret = get_link_ref(tmp);
 					}
 
@@ -1281,7 +1288,7 @@ my_rl_path_completion(const char *text, int state)
 					if (dirname[0] == '.' && !dirname[1]) {
 						ret = get_link_ref(ent->d_name);
 					} else {
-						snprintf(tmp, PATH_MAX, "%s%s", dirname, ent->d_name);
+						snprintf(tmp, sizeof(tmp), "%s%s", dirname, ent->d_name);
 						ret = get_link_ref(tmp);
 					}
 
@@ -1321,7 +1328,7 @@ my_rl_path_completion(const char *text, int state)
 				if (type == DT_REG || type == DT_DIR) {
 					/* dir_tmp is dirname less "./", already allocated before
 					 * the while loop */
-					snprintf(tmp, PATH_MAX, "%s%s", dir_tmp, ent->d_name);
+					snprintf(tmp, sizeof(tmp), "%s%s", dir_tmp, ent->d_name);
 
 					if (type == DT_DIR || access(tmp, X_OK) == 0)
 						match = 1;
@@ -1393,7 +1400,7 @@ my_rl_path_completion(const char *text, int state)
 					if (dirname[0] == '.' && !dirname[1]) {
 						ret = get_link_ref(ent->d_name);
 					} else {
-						snprintf(tmp, PATH_MAX, "%s%s", dirname, ent->d_name);
+						snprintf(tmp, sizeof(tmp), "%s%s", dirname, ent->d_name);
 						ret = get_link_ref(tmp);
 					}
 
@@ -1420,7 +1427,7 @@ my_rl_path_completion(const char *text, int state)
 					if (dirname[0] == '.' && !dirname[1]) {
 						ret = get_link_ref(ent->d_name);
 					} else {
-						snprintf(tmp, PATH_MAX, "%s%s", dirname, ent->d_name);
+						snprintf(tmp, sizeof(tmp), "%s%s", dirname, ent->d_name);
 						ret = get_link_ref(tmp);
 					}
 
@@ -1447,7 +1454,7 @@ my_rl_path_completion(const char *text, int state)
 
 			else if (exec_path) {
 				if (type == DT_REG || type == DT_DIR) {
-					snprintf(tmp, PATH_MAX, "%s%s", dir_tmp, ent->d_name);
+					snprintf(tmp, sizeof(tmp), "%s%s", dir_tmp, ent->d_name);
 					if (type == DT_DIR || access(tmp, X_OK) == 0)
 						match = 1;
 				}
@@ -1495,9 +1502,9 @@ my_rl_path_completion(const char *text, int state)
 		if (dirname && (dirname[0] != '.' || dirname[1])) {
 /*			if (rl_complete_with_tilde_expansion && *users_dirname == '~') {
 				size_t dirlen = strlen(dirname);
-				temp = (char *)xnmalloc(dirlen + strlen(ent->d_name) + 2,
-									sizeof(char));
-				strcpy(temp, dirname);
+				size_t len = dirlen + strlen(ent->d_name) + 1;
+				temp = (char *)xnmalloc(len + 1, sizeof(char));
+				xstrsncpy(temp, dirname, len);
 				// Canonicalization cuts off any final slash present.
 				// We need to add it back.
 
@@ -1506,14 +1513,14 @@ my_rl_path_completion(const char *text, int state)
 					temp[dirlen + 1] = '\0';
 				}
 			} else { */
-			temp = (char *)xnmalloc(strlen(users_dirname) +
-					strlen(ent->d_name) + 1, sizeof(char));
-			strcpy(temp, users_dirname);
-
+			size_t temp_len = strlen(users_dirname) + strlen(ent->d_name) + 1;
+			temp = (char *)xnmalloc(temp_len, sizeof(char));
+			snprintf(temp, temp_len, "%s%s", users_dirname, ent->d_name);
+//			strcpy(temp, users_dirname);
 			/* If fast_back == 1 and filename is empty, we have the
 			 * root dir: do not append anything else */
 //			if (fast_back == 0 || (filename && *filename))
-			strcat(temp, ent->d_name);
+//			strcat(temp, ent->d_name);
 		} else {
 			temp = savestring(ent->d_name, strlen(ent->d_name));
 		}
@@ -2263,8 +2270,9 @@ expand_tilde_glob(char *text)
 		return (char *)NULL;
 
 	char *g = *(ls + 1) ? ls + 1 : (char *)NULL;
-	char *tmp = (char *)xnmalloc(strlen(q) + 2 + (g ? strlen(g) : 0), sizeof(char));
-	sprintf(tmp, "%s/%s", q, g);
+	size_t len = strlen(q) + 2 + (g ? strlen(g) : 0);
+	char *tmp = (char *)xnmalloc(len, sizeof(char));
+	snprintf(tmp, len, "%s/%s", q, g);
 	free(q);
 
 	return tmp;
@@ -2493,8 +2501,9 @@ rl_trashed_files(const char *text)
 		free(tfiles[1]);
 		tfiles[1] = (char *)NULL;
 		if (d) {
-			tfiles[0] = (char *)xrealloc(tfiles[0], (strlen(d) + 1) * sizeof(char));
-			strcpy(tfiles[0], d);
+			size_t len = strlen(d);
+			tfiles[0] = (char *)xrealloc(tfiles[0], (len + 1) * sizeof(char));
+			xstrsncpy(tfiles[0], d, len);
 			free(d);
 		}
 	}
@@ -2567,15 +2576,19 @@ tag_entries_generator(const char *text, int state)
 			p = dequote_str(name, 0);
 			q = p;
 		}
+
 		reinsert_slashes(q);
+
 		char tmp[PATH_MAX], *r = (char *)NULL;
-		snprintf(tmp, PATH_MAX, "/%s", q);
+		snprintf(tmp, sizeof(tmp), "/%s", q);
 		int free_tmp = 0;
 		r = home_tilde(tmp, &free_tmp);
 		q = strdup(r ? r : tmp);
+
 		free(p);
 		if (free_tmp == 1)
 			free(r);
+
 		return q;
 	}
 
@@ -4289,8 +4302,9 @@ set_rl_init_file(void)
 	if (!config_dir_gral || !*config_dir_gral)
 		return;
 
-	char *rl_file = (char *)xnmalloc(strlen(config_dir_gral) + 16, sizeof(char));
-	sprintf(rl_file, "%s/readline.clifm", config_dir_gral);
+	size_t len = strlen(config_dir_gral) + 16;
+	char *rl_file = (char *)xnmalloc(len, sizeof(char));
+	snprintf(rl_file, len, "%s/readline.clifm", config_dir_gral);
 
 	/* This file should have been imported by import_rl_file (config.c)
 	 * In case it wasn't, let's create here a skeleton: if not found,

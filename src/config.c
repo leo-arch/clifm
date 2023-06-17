@@ -144,17 +144,17 @@ print_config_value(const char *option, void *cur_value, void *def_value,
 }
 
 /* Return a mallo'ced pointer to a string representing the value for
- * TabCompletionMode in the config file */
+ * TabCompletionMode in the config file. */
 static char *
 get_tab_comp_mode_str(void)
 {
 	char *s = (char *)xnmalloc(9, sizeof(char));
 
 	switch (tabmode) {
-	case FZF_TAB: strcpy(s, "fzf"); break;
-	case FNF_TAB: strcpy(s, "fnf"); break;
-	case SMENU_TAB: strcpy(s, "smenu"); break;
-	case STD_TAB: strcpy(s, "standard"); break;
+	case FZF_TAB: xstrsncpy(s, "fzf", 3); break;
+	case FNF_TAB: xstrsncpy(s, "fnf", 3); break;
+	case SMENU_TAB: xstrsncpy(s, "smenu", 5); break;
+	case STD_TAB: xstrsncpy(s, "standard", 8); break;
 	default: free(s); s = (char *)NULL; break;
 	}
 
@@ -668,14 +668,17 @@ set_sel_file(void)
 	if (!config_dir)
 		return;
 
+	size_t len = 0;
 	if (conf.share_selbox == 0) {
 		/* Private selection box is stored in the profile directory */
-		sel_file = (char *)xnmalloc(config_dir_len + 14, sizeof(char));
-		sprintf(sel_file, "%s/selbox.clifm", config_dir);
+		len = config_dir_len + 14;
+		sel_file = (char *)xnmalloc(len, sizeof(char));
+		snprintf(sel_file, len, "%s/selbox.clifm", config_dir);
 	} else {
 		/* Shared selection box is stored in the general config dir */
-		sel_file = (char *)xnmalloc(config_dir_len + 23, sizeof(char));
-		sprintf(sel_file, "%s/.config/%s/selbox.clifm", user.home, PNL);
+		len = config_dir_len + 23;
+		sel_file = (char *)xnmalloc(len, sizeof(char));
+		snprintf(sel_file, len, "%s/.config/%s/selbox.clifm", user.home, PNL);
 	}
 
 	return;
@@ -1041,6 +1044,7 @@ create_tmp_files(void)
 		return;
 
 	size_t pnl_len = strlen(PNL);
+	size_t tmp_len = 0;
 
 	/* #### CHECK THE TMP DIR #### */
 
@@ -1049,12 +1053,13 @@ create_tmp_files(void)
 	 * with the sticky bit set), so that every user is able to create files
 	 * in here, but only the file's owner can remove or modify them */
 	size_t user_len = user.name ? strlen(user.name) : 7; /* 7: len of "unknown" */
-	tmp_dir = (char *)xnmalloc(P_tmpdir_len + pnl_len
-			+ user_len + 3, sizeof(char));
+
+	tmp_len = P_tmpdir_len + pnl_len + user_len + 3;
+	tmp_dir = (char *)xnmalloc(tmp_len, sizeof(char));
 	if (P_tmpdir_len > 0 && P_tmpdir[P_tmpdir_len - 1] == '/')
-		sprintf(tmp_dir, "%s%s", P_tmpdir, PNL); /* On OpenBSD we get "/tmp/" */
+		snprintf(tmp_dir, tmp_len, "%s%s", P_tmpdir, PNL); /* On OpenBSD we get "/tmp/" */
 	else
-		sprintf(tmp_dir, "%s/%s", P_tmpdir, PNL);
+		snprintf(tmp_dir, tmp_len, "%s/%s", P_tmpdir, PNL);
 	/* P_tmpdir is defined in stdio.h and it's value is usually /tmp
 	 * If not defined, it will be defined as "/tmp" */
 
@@ -1072,7 +1077,7 @@ create_tmp_files(void)
 	 * store the list of selected files: TMP_DIR/clifm/username/.selbox_PROFILE.
 	 * We use here very restrictive permissions (700), since only the
 	 * corresponding user must be able to read and/or modify this list */
-	sprintf(tmp_dir, "%s/%s/%s", P_tmpdir, PNL,
+	snprintf(tmp_dir, tmp_len, "%s/%s/%s", P_tmpdir, PNL,
 		user.name ? user.name : "unknown");
 	if (stat(tmp_dir, &attr) == -1) {
 		if (xmkdir(tmp_dir, S_IRWXU) == EXIT_FAILURE) {
@@ -1112,12 +1117,14 @@ create_tmp_files(void)
 		size_t prof_len = alt_profile ? strlen(alt_profile) : 7;
 		/* 7 == lenght of "default" */
 
-		sel_file = (char *)xnmalloc(P_tmpdir_len + prof_len + 15, sizeof(char));
-		sprintf(sel_file, "%s/selbox_%s.clifm", P_tmpdir,
+		tmp_len = P_tmpdir_len + prof_len + 15;
+		sel_file = (char *)xnmalloc(tmp_len, sizeof(char));
+		snprintf(sel_file, tmp_len, "%s/selbox_%s.clifm", P_tmpdir,
 		    alt_profile ? alt_profile : "default");
 	} else {
-		sel_file = (char *)xnmalloc(P_tmpdir_len + 14, sizeof(char));
-		sprintf(sel_file, "%s/selbox.clifm", P_tmpdir);
+		tmp_len = P_tmpdir_len + 14;
+		sel_file = (char *)xnmalloc(tmp_len, sizeof(char));
+		snprintf(sel_file, tmp_len, "%s/selbox.clifm", P_tmpdir);
 	}
 
 	_err('w', PRINT_PROMPT, _("%s: %s: Using a temporary directory for "
@@ -1129,6 +1136,7 @@ static void
 define_config_file_names(void)
 {
 	size_t pnl_len = strlen(PNL);
+	size_t tmp_len = 0;
 
 	if (alt_config_dir) {
 		config_dir_gral = savestring(alt_config_dir, strlen(alt_config_dir));
@@ -1141,13 +1149,14 @@ define_config_file_names(void)
 		char *xdg_config_home = getenv("XDG_CONFIG_HOME");
 		if (xdg_config_home) {
 			size_t len = strlen(xdg_config_home);
-			config_dir_gral = (char *)xnmalloc(len + pnl_len + 2, sizeof(char));
-			sprintf(config_dir_gral, "%s/%s", xdg_config_home, PNL);
+			tmp_len = len + pnl_len + 2;
+			config_dir_gral = (char *)xnmalloc(tmp_len, sizeof(char));
+			snprintf(config_dir_gral, tmp_len, "%s/%s", xdg_config_home, PNL);
 			xdg_config_home = (char *)NULL;
 		} else {
-			config_dir_gral = (char *)xnmalloc(user.home_len + pnl_len
-				+ 11, sizeof(char));
-			sprintf(config_dir_gral, "%s/.config/%s", user.home, PNL);
+			tmp_len = user.home_len + pnl_len + 10;
+			config_dir_gral = (char *)xnmalloc(tmp_len, sizeof(char));
+			snprintf(config_dir_gral, tmp_len, "%s/.config/%s", user.home, PNL);
 		}
 	}
 
@@ -1156,90 +1165,90 @@ define_config_file_names(void)
 	/* alt_profile will not be NULL whenever the -P option is used
 	 * to run clifm under an alternative profile */
 	if (alt_profile) {
-		config_dir = (char *)xnmalloc(config_gral_len + strlen(alt_profile)
-			+ 11, sizeof(char));
-		sprintf(config_dir, "%s/profiles/%s", config_dir_gral, alt_profile);
+		tmp_len = config_gral_len + strlen(alt_profile) + 11;
+		config_dir = (char *)xnmalloc(tmp_len, sizeof(char));
+		snprintf(config_dir, tmp_len, "%s/profiles/%s",
+			config_dir_gral, alt_profile);
 	} else {
-		config_dir = (char *)xnmalloc(config_gral_len + 18, sizeof(char));
-		sprintf(config_dir, "%s/profiles/default", config_dir_gral);
+		tmp_len = config_gral_len + 18;
+		config_dir = (char *)xnmalloc(tmp_len, sizeof(char));
+		snprintf(config_dir, tmp_len, "%s/profiles/default", config_dir_gral);
 	}
 
 	config_dir_len = strlen(config_dir);
 
-	tags_dir = (char *)xnmalloc(config_dir_len + 6, sizeof(char));
-	sprintf(tags_dir, "%s/tags", config_dir);
+	tmp_len = config_dir_len + 6;
+	tags_dir = (char *)xnmalloc(tmp_len, sizeof(char));
+	snprintf(tags_dir, tmp_len, "%s/tags", config_dir);
 
 	if (alt_kbinds_file) {
 		kbinds_file = savestring(alt_kbinds_file, strlen(alt_kbinds_file));
 		free(alt_kbinds_file);
 		alt_kbinds_file = (char *)NULL;
 	} else {
-		/* Keybindings per user, not per profile */
-		kbinds_file = (char *)xnmalloc(config_gral_len + 19, sizeof(char));
-		sprintf(kbinds_file, "%s/keybindings.clifm", config_dir_gral);
+		/* Keybindings per user, not per profile. */
+		tmp_len = config_gral_len + 19;
+		kbinds_file = (char *)xnmalloc(tmp_len, sizeof(char));
+		snprintf(kbinds_file, tmp_len, "%s/keybindings.clifm", config_dir_gral);
 	}
 
-	colors_dir = (char *)xnmalloc(config_gral_len + 8, sizeof(char));
-	sprintf(colors_dir, "%s/colors", config_dir_gral);
+	tmp_len = config_gral_len + 8;
+	colors_dir = (char *)xnmalloc(tmp_len, sizeof(char));
+	snprintf(colors_dir, tmp_len, "%s/colors", config_dir_gral);
 
-	plugins_dir = (char *)xnmalloc(config_gral_len + 9, sizeof(char));
-	sprintf(plugins_dir, "%s/plugins", config_dir_gral);
-/*
-#ifndef _NO_TRASH
-	trash_dir = (char *)xnmalloc(user.home_len + 20, sizeof(char));
-	sprintf(trash_dir, "%s/.local/share/Trash", user.home);
+	tmp_len = config_gral_len + 9;
+	plugins_dir = (char *)xnmalloc(tmp_len, sizeof(char));
+	snprintf(plugins_dir, tmp_len, "%s/plugins", config_dir_gral);
 
-	size_t trash_len = strlen(trash_dir);
-
-	trash_files_dir = (char *)xnmalloc(trash_len + 7, sizeof(char));
-	sprintf(trash_files_dir, "%s/files", trash_dir);
-
-	trash_info_dir = (char *)xnmalloc(trash_len + 6, sizeof(char));
-	sprintf(trash_info_dir, "%s/info", trash_dir);
-#endif */
-
-	dirhist_file = (char *)xnmalloc(config_dir_len + 15, sizeof(char));
-	sprintf(dirhist_file, "%s/dirhist.clifm", config_dir);
+	tmp_len = config_dir_len + 15;
+	dirhist_file = (char *)xnmalloc(tmp_len, sizeof(char));
+	snprintf(dirhist_file, tmp_len, "%s/dirhist.clifm", config_dir);
 
 	if (!alt_bm_file) {
-		bm_file = (char *)xnmalloc(config_dir_len + 17, sizeof(char));
-		sprintf(bm_file, "%s/bookmarks.clifm", config_dir);
+		tmp_len = config_dir_len + 17;
+		bm_file = (char *)xnmalloc(tmp_len, sizeof(char));
+		snprintf(bm_file, tmp_len, "%s/bookmarks.clifm", config_dir);
 	} else {
 		bm_file = savestring(alt_bm_file, strlen(alt_bm_file));
 		free(alt_bm_file);
 		alt_bm_file = (char *)NULL;
 	}
 
-	msgs_log_file = (char *)xnmalloc(config_dir_len + 15, sizeof(char));
-	sprintf(msgs_log_file, "%s/msglogs.clifm", config_dir);
+	tmp_len = config_dir_len + 15;
+	msgs_log_file = (char *)xnmalloc(tmp_len, sizeof(char));
+	snprintf(msgs_log_file, tmp_len, "%s/msglogs.clifm", config_dir);
 
-	cmds_log_file = (char *)xnmalloc(config_dir_len + 15, sizeof(char));
-	sprintf(cmds_log_file, "%s/cmdlogs.clifm", config_dir);
+	cmds_log_file = (char *)xnmalloc(tmp_len, sizeof(char));
+	snprintf(cmds_log_file, tmp_len, "%s/cmdlogs.clifm", config_dir);
 
-	hist_file = (char *)xnmalloc(config_dir_len + 15, sizeof(char));
-	sprintf(hist_file, "%s/history.clifm", config_dir);
+	hist_file = (char *)xnmalloc(tmp_len, sizeof(char));
+	snprintf(hist_file, tmp_len, "%s/history.clifm", config_dir);
 
 	if (!alt_config_file) {
-		config_file = (char *)xnmalloc(config_dir_len + pnl_len
-			+ 4, sizeof(char));
-		sprintf(config_file, "%s/%src", config_dir, PNL);
+		tmp_len = config_dir_len + pnl_len + 4;
+		config_file = (char *)xnmalloc(tmp_len, sizeof(char));
+		snprintf(config_file, tmp_len, "%s/%src", config_dir, PNL);
 	} else {
 		config_file = savestring(alt_config_file, strlen(alt_config_file));
 		free(alt_config_file);
 		alt_config_file = (char *)NULL;
 	}
 
-	profile_file = (char *)xnmalloc(config_dir_len + 15, sizeof(char));
-	sprintf(profile_file, "%s/profile.clifm", config_dir);
+	tmp_len = config_dir_len + 15;
+	profile_file = (char *)xnmalloc(tmp_len, sizeof(char));
+	snprintf(profile_file, tmp_len, "%s/profile.clifm", config_dir);
 
-	mime_file = (char *)xnmalloc(config_dir_len + 16, sizeof(char));
-	sprintf(mime_file, "%s/mimelist.clifm", config_dir);
+	tmp_len = config_dir_len + 16;
+	mime_file = (char *)xnmalloc(tmp_len, sizeof(char));
+	snprintf(mime_file, tmp_len, "%s/mimelist.clifm", config_dir);
 
-	actions_file = (char *)xnmalloc(config_dir_len + 15, sizeof(char));
-	sprintf(actions_file, "%s/actions.clifm", config_dir);
+	tmp_len = config_dir_len + 15;
+	actions_file = (char *)xnmalloc(tmp_len, sizeof(char));
+	snprintf(actions_file, tmp_len, "%s/actions.clifm", config_dir);
 
-	remotes_file = (char *)xnmalloc(config_dir_len + 12, sizeof(char));
-	sprintf(remotes_file, "%s/nets.clifm", config_dir);
+	tmp_len = config_dir_len + 12;
+	remotes_file = (char *)xnmalloc(tmp_len, sizeof(char));
+	snprintf(remotes_file, tmp_len, "%s/nets.clifm", config_dir);
 
 	return;
 }
@@ -2247,7 +2256,7 @@ set_div_line(char *line)
 		return;
 	}
 
-	xstrsncpy(div_line, tmp, NAME_MAX);
+	xstrsncpy(div_line, tmp, sizeof(div_line) - 1);
 }
 
 static inline int
@@ -2797,7 +2806,7 @@ read_config(void)
 		else if (*line == 'P' && strncmp(line, "PropFields=", 11) == 0) {
 			char *tmp = get_line_value(line + 11);
 			if (tmp) {
-				xstrsncpy(prop_fields_str, tmp, PROP_FIELDS_SIZE);
+				xstrsncpy(prop_fields_str, tmp, sizeof(prop_fields_str) - 1);
 				set_prop_fields(prop_fields_str);
 			}
 		}
@@ -3092,16 +3101,19 @@ set_trash_dirs(void)
 		return;
 	}
 
-	trash_dir = (char *)xnmalloc(user.home_len + 20, sizeof(char));
-	sprintf(trash_dir, "%s/.local/share/Trash", user.home);
+	size_t len = user.home_len + 20;
+	trash_dir = (char *)xnmalloc(len, sizeof(char));
+	snprintf(trash_dir, len, "%s/.local/share/Trash", user.home);
 
 	size_t trash_len = strlen(trash_dir);
 
-	trash_files_dir = (char *)xnmalloc(trash_len + 7, sizeof(char));
-	sprintf(trash_files_dir, "%s/files", trash_dir);
+	len = trash_len + 7;
+	trash_files_dir = (char *)xnmalloc(len, sizeof(char));
+	snprintf(trash_files_dir, len, "%s/files", trash_dir);
 
-	trash_info_dir = (char *)xnmalloc(trash_len + 6, sizeof(char));
-	sprintf(trash_info_dir, "%s/info", trash_dir);
+	len = trash_len + 6;
+	trash_info_dir = (char *)xnmalloc(len, sizeof(char));
+	snprintf(trash_info_dir, len, "%s/info", trash_dir);
 
 	create_trash_dirs();
 }
@@ -3146,7 +3158,7 @@ init_config(void)
 	if (config_ok == 1)
 		read_config();
 #else
-	xstrsncpy(div_line, DEF_DIV_LINE, sizeof(div_line));
+	xstrsncpy(div_line, DEF_DIV_LINE, sizeof(div_line) - 1);
 #endif /* CLIFM_SUCKLESS */
 
 	load_prompts();

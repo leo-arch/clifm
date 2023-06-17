@@ -245,6 +245,15 @@ xstrsncpy(char *restrict dst, const char *restrict src, size_t n)
 	return (size_t)(end - dst - 1);
 }
 
+/* A safe strcat(1) */
+char *
+xstrncat(char *restrict dst, const size_t dst_end, const char *restrict src,
+	const size_t dst_len)
+{
+	xstrsncpy(dst + dst_end, src, dst_len - dst_end);
+	return dst;
+}
+
 /* strverscmp() is a GNU extension, and as such not available on some systems
  * This function is a modified version of the GLIBC and uClibc strverscmp()
  * taken from here:
@@ -498,20 +507,21 @@ strbfrlst(char *str, const char c)
 
 	*q = '\0';
 
-	char *buf = (char *)malloc((size_t)(q - str + 1));
+	size_t buf_len = (size_t)(q - str);
+	char *buf = (char *)malloc(buf_len + 1);
 	if (!buf) {
 		*q = c;
 		return (char *)NULL;
 	}
 
-	strcpy(buf, str);
+	xstrsncpy(buf, str, buf_len);
 	*q = c;
 	return buf;
 }
 
 /* Returns the string between first ocurrence of A and the first
  * ocurrence of B in STR, or NULL if: there is nothing between A and
- * B, or A and/or B are not found */
+ * B, or A and/or B are not found. */
 char *
 strbtw(char *str, const char a, const char b)
 {
@@ -535,19 +545,20 @@ strbtw(char *str, const char a, const char b)
 
 	*pb = '\0';
 
-	char *buf = (char *)malloc((size_t)(pb - pa));
+	size_t buf_len = (size_t)(pb - pa);
+	char *buf = (char *)malloc(buf_len + 1);
 
 	if (!buf) {
 		*pb = b;
 		return (char *)NULL;
 	}
 
-	strcpy(buf, pa + 1);
+	xstrsncpy(buf, pa + 1, buf_len);
 	*pb = b;
 	return buf;
 }
 
-/* Replace the first occurrence of NEEDLE in HAYSTACK by REP */
+/* Replace the first occurrence of NEEDLE in HAYSTACK by REP. */
 char *
 replace_substr(const char *haystack, const char *needle, char *rep)
 {
@@ -561,24 +572,24 @@ replace_substr(const char *haystack, const char *needle, char *rep)
 	char *needle_end = ret + strlen(needle);
 	*ret = '\0';
 
+	size_t new_str_len = 0;
+
 	if (*needle_end) {
 		size_t rem_len = strlen(needle_end);
 		char *rem = (char *)xnmalloc(rem_len + 1, sizeof(char));
-		strcpy(rem, needle_end);
+		xstrsncpy(rem, needle_end, rem_len);
 
-		char *new_str = (char *)xnmalloc(strlen(haystack) + strlen(rep)
-						+ rem_len + 1, sizeof(char));
-		strcpy(new_str, haystack);
-		strcat(new_str, rep);
-		strcat(new_str, rem);
+		new_str_len = strlen(haystack) + strlen(rep) + rem_len + 1;
+		char *new_str = (char *)xnmalloc(new_str_len, sizeof(char));
+		snprintf(new_str, new_str_len, "%s%s%s", haystack, rep, rem);
 		free(rem);
 		return new_str;
 	}
 
-	char *new_str = (char *)xnmalloc(strlen(haystack) + strlen(rep)
-		+ 1, sizeof(char));
-	strcpy(new_str, haystack);
-	strcat(new_str, rep);
+	new_str_len = strlen(haystack) + strlen(rep) + 1;
+	char *new_str = (char *)xnmalloc(new_str_len, sizeof(char));
+	snprintf(new_str, new_str_len, "%s%s", haystack, rep);
+
 	return new_str;
 }
 
@@ -1463,9 +1474,9 @@ eln_expand(char ***substr, const size_t i)
 	/* Replace the ELN by the corresponding escaped file name */
 	if (file_info[j].type == DT_DIR && file_info[j].name[file_info[j].len > 0
 	? file_info[j].len - 1 : 0] != '/') {
-		(*substr)[i] = (char *)xrealloc((*substr)[i],
-			(strlen(esc_str) + 2) * sizeof(char));
-		sprintf((*substr)[i], "%s/", esc_str);
+		size_t len = strlen(esc_str) + 2;
+		(*substr)[i] = (char *)xrealloc((*substr)[i], len * sizeof(char));
+		snprintf((*substr)[i], len, "%s/", esc_str);
 		free(esc_str);
 	} else {
 		free((*substr)[i]);
@@ -1563,8 +1574,9 @@ expand_bm_name(char **name)
 
 		char *q = escape_str(bookmarks[j].path);
 		char *tmp = q ? q : bookmarks[j].path;
-		*name = (char *)xrealloc(*name, (strlen(tmp) + 1) * sizeof(char));
-		strcpy(*name, tmp);
+		size_t tmp_len = strlen(tmp);
+		*name = (char *)xrealloc(*name, (tmp_len + 1) * sizeof(char));
+		xstrsncpy(*name, tmp, tmp_len);
 		free(q);
 		bm_exp = EXIT_SUCCESS;
 
@@ -1587,8 +1599,9 @@ expand_int_var(char **name)
 		|| strcmp(var_name, usr_var[j].name) != 0 || !usr_var[j].value)
 			continue;
 
-		*name = (char *)xrealloc(*name, (strlen(usr_var[j].value) + 1) * sizeof(char));
-		strcpy(*name, usr_var[j].value);
+		size_t val_len = strlen(usr_var[j].value);
+		*name = (char *)xrealloc(*name, (val_len + 1) * sizeof(char));
+		xstrsncpy(*name, usr_var[j].value, val_len);
 		break;
 	}
 }
@@ -1995,9 +2008,9 @@ expand_ranges(char ***substr)
 			}
 
 			for (i = 0; i < ranges_n; i++) {
-				ranges_cmd[j] = (char *)xcalloc((size_t)DIGINUM(ranges[i])
-					+ 1, sizeof(int));
-				sprintf(ranges_cmd[j], "%d", ranges[i]);
+				size_t len = (size_t)DIGINUM(ranges[i]) + 1;
+				ranges_cmd[j] = (char *)xnmalloc(len, sizeof(int));
+				snprintf(ranges_cmd[j], len, "%d", ranges[i]);
 				j++;
 			}
 
@@ -2140,8 +2153,9 @@ expand_symlink(char **substr)
 		return (-1);
 	}
 
-	*substr = (char *)xrealloc(*substr, (strlen(real_path) + 1) * sizeof(char));
-	strcpy(*substr, real_path);
+	size_t rp_len = strlen(real_path);
+	*substr = (char *)xrealloc(*substr, (rp_len + 1) * sizeof(char));
+	xstrsncpy(*substr, real_path, rp_len);
 	free(real_path);
 
 	return 0;
@@ -2474,9 +2488,9 @@ parse_input_str(char *str)
 		if (*substr[i] == '$') {
 			char *p = getenv(substr[i] + 1);
 			if (p) {
-				substr[i] = (char *)xrealloc(substr[i],
-					(strlen(p) + 1) * sizeof(char));
-				strcpy(substr[i], p);
+				size_t plen = strlen(p);
+				substr[i] = (char *)xrealloc(substr[i], (plen + 1) * sizeof(char));
+				xstrsncpy(substr[i], p, plen);
 			}
 		}
 
@@ -2501,7 +2515,7 @@ parse_input_str(char *str)
 		if (slen > FILE_URI_PREFIX_LEN && IS_FILE_URI(substr[i])) {
 			char tmp[PATH_MAX];
 			xstrsncpy(tmp, substr[i], sizeof(tmp) - 1);
-			strcpy(substr[i], tmp + FILE_URI_PREFIX_LEN);
+			xstrsncpy(substr[i], tmp + FILE_URI_PREFIX_LEN, slen);
 		}
 
 			/* ###############################
@@ -2534,9 +2548,9 @@ parse_input_str(char *str)
 			 * ###################################### */
 
 		if (*substr[i] == ',' && !substr[i][1] && pinned_dir) {
-			substr[i] = (char *)xrealloc(substr[i], (strlen(pinned_dir) + 1)
-				* sizeof(char));
-			strcpy(substr[i], pinned_dir);
+			size_t plen = strlen(pinned_dir);
+			substr[i] = (char *)xrealloc(substr[i], (plen + 1) * sizeof(char));
+			xstrsncpy(substr[i], pinned_dir, plen);
 		}
 
 			/* ######################################
@@ -2761,8 +2775,10 @@ home_tilde(char *new_path, int *_free)
 	&& (user.home[user.home_len - 1] == '/'
 	|| *(new_path + user.home_len) == '/') ) {
 		/* If path == HOME/file */
-		path_tilde = (char *)xnmalloc(strlen(new_path + user.home_len + 1) + 3, sizeof(char));
-		sprintf(path_tilde, "~/%s", new_path + user.home_len + 1);
+		size_t len = strlen(new_path + user.home_len + 1) + 3;
+		path_tilde = (char *)xnmalloc(len, sizeof(char));
+		snprintf(path_tilde, len, "~/%s", new_path + user.home_len + 1);
+
 		*_free = 1;
 		return path_tilde;
 	}
@@ -2841,8 +2857,8 @@ savestring(const char *restrict str, size_t size)
 
 	if (!ptr)
 		return (char *)NULL;
-	strcpy(ptr, str);
 
+	xstrsncpy(ptr, str, size);
 	return ptr;
 }
 
@@ -3022,8 +3038,9 @@ get_substr(char *str, const char ifs)
 
 		/* Copy the expanded range into the buffer */
 		for (j = (size_t)afirst; j <= (size_t)asecond; j++) {
-			rbuf[k] = (char *)xnmalloc((size_t)DIGINUM((int)j) + 1, sizeof(char));
-			sprintf(rbuf[k], "%zu", j);
+			size_t len = (size_t)DIGINUM((int)j) + 1;
+			rbuf[k] = (char *)xnmalloc(len, sizeof(char));
+			snprintf(rbuf[k], len, "%zu", j);
 			k++;
 		}
 

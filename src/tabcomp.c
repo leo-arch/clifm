@@ -276,9 +276,10 @@ print_filename(char *to_print, char *full_pathname)
 			putc('*', rl_outstream);
 			return 1;
 		}
-      /* If to_print != full_pathname, to_print is the basename of the
-       * path passed. In this case, we try to expand the directory
-       * name before checking for the stat character */
+
+		/* If to_print != full_pathname, to_print is the basename of the
+		 * path passed. In this case, we try to expand the directory
+		 * name before checking for the stat character. */
 		int extension_char = 0;
 		if (to_print != full_pathname) {
 			/* Terminate the directory name */
@@ -292,9 +293,7 @@ print_filename(char *to_print, char *full_pathname)
 			size_t slen = strlen(s);
 			size_t tlen = strlen(to_print);
 			char *new_full_pathname = (char *)xnmalloc(slen + tlen + 2, sizeof(char));
-			strcpy(new_full_pathname, s);
-			new_full_pathname[slen] = '/';
-			strcpy(new_full_pathname + slen + 1, to_print);
+			snprintf(new_full_pathname, slen + tlen + 2, "%s/%s", s, to_print);
 
 			extension_char = stat_char(new_full_pathname);
 
@@ -890,8 +889,9 @@ get_glob_file_target(char *str, const char *initial_path)
 	if (*str == '/' || !initial_path)
 		return str;
 
-	char *p = (char *)xnmalloc(strlen(initial_path) + strlen(str) + 1, sizeof(char));
-	sprintf(p, "%s%s", initial_path, str);
+	size_t len = strlen(initial_path) + strlen(str) + 1;
+	char *p = (char *)xnmalloc(len, sizeof(char));
+	snprintf(p, len, "%s%s", initial_path, str);
 
 	return p;
 }
@@ -941,11 +941,13 @@ get_finder_output(const int multi, char *base)
 			} else if (cur_comp_type == TCMP_TAGS_F && tags_dir && cur_tag) {
 				s = get_tagged_file_target(line);
 			} else if (cur_comp_type == TCMP_BM_PREFIX) {
-				s = (char *)xnmalloc(strlen(line) + 3, sizeof(char));
-				sprintf(s, "b:%s", line);
+				size_t len = strlen(line) + 3;
+				s = (char *)xnmalloc(len, sizeof(char));
+				snprintf(s, len, "b:%s", line);
 			} else if (cur_comp_type == TCMP_TAGS_T) {
-				s = (char *)xnmalloc(strlen(line) + 3, sizeof(char));
-				sprintf(s, "t:%s", line);
+				size_t len = strlen(line) + 3;
+				s = (char *)xnmalloc(len, sizeof(char));
+				snprintf(s, len, "t:%s", line);
 			}
 			q = escape_str(s);
 			if (s != line)
@@ -962,7 +964,7 @@ get_finder_output(const int multi, char *base)
 		size_t qlen = (r != line) ? strlen(r) : (size_t)line_len;
 		bsize += qlen + 3;
 		buf = (char *)xrealloc(buf, bsize * sizeof(char));
-		strcat(buf, r);
+		xstrncat(buf, strlen(buf), r, bsize);
 
 		if (multi == 1) {
 			size_t l = strlen(buf);
@@ -1557,8 +1559,9 @@ do_some_cleanup(char **buf, char **matches, const char *query,
 	else if (ct == TCMP_OPENWITH) {
 		/* If multiple words ("CMD ARG..."), quote the string. */
 		if (strchr(*buf, ' ')) {
-			char *tmp = (char *)xnmalloc(strlen(*buf) + 3, sizeof(char));
-			sprintf(tmp, "\"%s\"", *buf);
+			size_t len = strlen(*buf) + 3;
+			char *tmp = (char *)xnmalloc(len, sizeof(char));
+			snprintf(tmp, len, "\"%s\"", *buf);
 			free(*buf);
 			*buf = tmp;
 		}
@@ -1601,7 +1604,7 @@ do_some_cleanup(char **buf, char **matches, const char *query,
 		size_t l = strlen(*buf);
 		char *p = savestring(*buf, l);
 		*buf = (char *)xrealloc(*buf, (l + 2) * sizeof(char));
-		sprintf(*buf, "~%s", p);
+		snprintf(*buf, l + 2, "~%s", p);
 		free(p);
 	}
 
@@ -2373,8 +2376,9 @@ DISPLAY_MATCHES:
 			if (strstr(matches[0], "/..")) {
 				dd = normalize_path(matches[0], strlen(matches[0]));
 				if (dd) {
-					char *ddd = (char *)xnmalloc(strlen(dd) + 2, sizeof(char *));
-					sprintf(ddd, "%s/", dd);
+					size_t ddlen = strlen(dd) + 2;
+					char *ddd = (char *)xnmalloc(ddlen, sizeof(char *));
+					snprintf(ddd, ddlen, "%s/", dd);
 					free(dd);
 					dd = ddd;
 				}

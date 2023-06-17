@@ -279,20 +279,19 @@ trash_clear(void)
 	int ret = EXIT_SUCCESS;
 	size_t i;
 	for (i = 0; i < (size_t)files_n; i++) {
-		size_t info_file_len = strlen(trash_files[i]->d_name) + 11;
-		char *info_file = (char *)xnmalloc(info_file_len, sizeof(char));
-		sprintf(info_file, "%s.trashinfo", trash_files[i]->d_name);
+		size_t len = strlen(trash_files[i]->d_name) + 11;
+		char *info_file = (char *)xnmalloc(len, sizeof(char));
+		snprintf(info_file, len, "%s.trashinfo", trash_files[i]->d_name);
 
 		char *file1 = (char *)NULL;
-		file1 = (char *)xnmalloc(strlen(trash_files_dir) +
-					strlen(trash_files[i]->d_name) + 2, sizeof(char));
-
-		sprintf(file1, "%s/%s", trash_files_dir, trash_files[i]->d_name);
+		len = strlen(trash_files_dir) + strlen(trash_files[i]->d_name) + 2;
+		file1 = (char *)xnmalloc(len, sizeof(char));
+		snprintf(file1, len, "%s/%s", trash_files_dir, trash_files[i]->d_name);
 
 		char *file2 = (char *)NULL;
-		file2 = (char *)xnmalloc(strlen(trash_info_dir) +
-					strlen(info_file) + 2, sizeof(char));
-		sprintf(file2, "%s/%s", trash_info_dir, info_file);
+		len = strlen(trash_info_dir) + strlen(info_file) + 2;
+		file2 = (char *)xnmalloc(len, sizeof(char));
+		snprintf(file2, len, "%s/%s", trash_info_dir, info_file);
 
 		char *tmp_cmd[] = {"rm", "-rf", "--", file1, file2, NULL};
 		ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG);
@@ -331,9 +330,9 @@ trash_clear(void)
 static int
 del_trash_file_and_exit(char **file_suffix, char **info_file)
 {
-	char *trash_file = (char *)xnmalloc(strlen(trash_files_dir)
-		+ strlen(*file_suffix) + 2, sizeof(char));
-	sprintf(trash_file, "%s/%s", trash_files_dir, *file_suffix);
+	size_t len = strlen(trash_files_dir) + strlen(*file_suffix) + 2;
+	char *trash_file = (char *)xnmalloc(len, sizeof(char));
+	snprintf(trash_file, len, "%s/%s", trash_files_dir, *file_suffix);
 
 	char *tmp_cmd[] = {"rm", "-rf", "--", trash_file, NULL};
 	int ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG);
@@ -351,7 +350,7 @@ del_trash_file_and_exit(char **file_suffix, char **info_file)
 }
 
 static int
-trash_element(const char *suffix, const struct tm *tm, char *file)
+trash_file(const char *suffix, const struct tm *tm, char *file)
 {
 	struct stat attr;
 	if (lstat(file, &attr) == -1) {
@@ -404,31 +403,38 @@ trash_element(const char *suffix, const struct tm *tm, char *file)
 		filename[filename_len - (size_t)size] = '\0';
 	}
 
-	size_t file_suffix_len = filename_len + suffix_len + 2;
-	char *file_suffix = (char *)xnmalloc(file_suffix_len, sizeof(char));
-	sprintf(file_suffix, "%s.%s", filename, suffix);
+	size_t len = filename_len + suffix_len + 2;
+	char *file_suffix = (char *)xnmalloc(len, sizeof(char));
+	snprintf(file_suffix, len, "%s.%s", filename, suffix);
 
 	/* Move the original file into the trash directory. */
 	/* NOTE: It is guaranteed (by check_trash_file()) that FILE does not
 	 * end with a slash. */
-	char *dest = (char *)xnmalloc(strlen(trash_files_dir)
-		+ strlen(file_suffix) + 2, sizeof(char));
-	sprintf(dest, "%s/%s", trash_files_dir, file_suffix);
+	len = strlen(trash_files_dir) + strlen(file_suffix) + 2;
+	char *dest = (char *)xnmalloc(len, sizeof(char));
+	snprintf(dest, len, "%s/%s", trash_files_dir, file_suffix);
 
-	char *tmp_cmd[] = {"mv", "--", file, dest, NULL};
-	ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG);
+	ret = rename(file, dest);
+	if (ret != EXIT_SUCCESS && errno == EXDEV) {
+		/* Destination file is on a different file system, which is why
+		 * rename(3) doesn't work: let's try with mv(1). */
+		char *tmp_cmd[] = {"mv", "--", file, dest, NULL};
+		ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG);
+	}
+
 	free(dest);
 
 	if (ret != EXIT_SUCCESS) {
-		xerror(_("trash: %s: Error moving file to Trash\n"), file);
+//		xerror(_("trash: %s: Error moving file to Trash\n"), file);
+		xerror(_("trash: %s: %s\n"), file, strerror(errno));
 		free(file_suffix);
-		return ret;
+		return errno;
 	}
 
 	/* Generate the info file */
-	size_t info_file_len = strlen(trash_info_dir) + strlen(file_suffix) + 12;
-	char *info_file = (char *)xnmalloc(info_file_len, sizeof(char));
-	sprintf(info_file, "%s/%s.trashinfo", trash_info_dir, file_suffix);
+	len = strlen(trash_info_dir) + strlen(file_suffix) + 12;
+	char *info_file = (char *)xnmalloc(len, sizeof(char));
+	snprintf(info_file, len, "%s/%s.trashinfo", trash_info_dir, file_suffix);
 
 	int fd = 0;
 	FILE *info_fp = open_fstream_w(info_file, &fd);
@@ -790,7 +796,7 @@ untrash_file(char *file)
 	if (ret == -1) {
 		if (errno == EXDEV) {
 			/* Destination file is on a different file system, which is why
-			 * rename(3) doesn't work: let's try moving the file. */
+			 * rename(3) doesn't work: let's try with mv(1). */
 			char *cmd[] = {"mv", "--", undel_file, url_decoded, NULL};
 			ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 			if (ret != EXIT_SUCCESS) {
@@ -1082,7 +1088,7 @@ check_trash_file(char *deq_file)
 {
 	char tmp_cmd[PATH_MAX];
 	if (*deq_file == '/') /* If absolute path */
-		strcpy(tmp_cmd, deq_file);
+		xstrsncpy(tmp_cmd, deq_file, sizeof(tmp_cmd) - 1);
 	else /* If relative path, add path to check against TRASH_DIR */
 		snprintf(tmp_cmd, sizeof(tmp_cmd), "%s/%s",
 			workspaces[cur_ws].path, deq_file);
@@ -1101,14 +1107,14 @@ check_trash_file(char *deq_file)
 
 	size_t l = strlen(deq_file);
 	if (l > 0 && deq_file[l - 1] == '/')
-		// Do not trash (move) symlinks ending with a slash. According to 'info mv':
-		//"_Warning_: Avoid specifying a source name with a trailing slash, when
-		//it might be a symlink to a directory. Otherwise, 'mv' may do something
-		//very surprising, since its behavior depends on the underlying rename
-		//system call. On a system with a modern Linux-based kernel, it fails
-		//with 'errno=ENOTDIR'.  However, on other systems (at least FreeBSD 6.1
-		//and Solaris 10) it silently renames not the symlink but rather the
-		//directory referenced by the symlink."
+		/* Do not trash (move) symlinks ending with a slash. According to 'info mv':
+		 * "_Warning_: Avoid specifying a source name with a trailing slash, when
+		 * it might be a symlink to a directory. Otherwise, 'mv' may do something
+		 * very surprising, since its behavior depends on the underlying rename
+		 * system call. On a system with a modern Linux-based kernel, it fails
+		 * with 'errno=ENOTDIR'.  However, on other systems (at least FreeBSD 6.1
+		 * and Solaris 10) it silently renames not the symlink but rather the
+		 * directory referenced by the symlink." */
 		deq_file[l - 1] = '\0';
 
 	struct stat a;
@@ -1198,7 +1204,7 @@ trash_files_args(char **args)
 			cwd = is_file_in_cwd(deq_file);
 
 		/* Once here, everything is fine: trash the file */
-		if (trash_element(suffix, &t, deq_file) == EXIT_SUCCESS) {
+		if (trash_file(suffix, &t, deq_file) == EXIT_SUCCESS) {
 			trashed_files++;
 			if (print_removed_files == 1) {
 				/* Store indices of successfully trashed files */
@@ -1233,6 +1239,7 @@ trash_files_args(char **args)
 			xgetchar();
 			reload_dirlist();
 		}
+
 		print_trashed_files(args, successfully_trashed, n);
 		print_reload_msg(_("%zu file(s) trashed\n"), trashed_files);
 		print_reload_msg(_("%zu total trashed file(s)\n"),

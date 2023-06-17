@@ -114,7 +114,7 @@ get_block_devices(void)
 
 		bd = (char **)xrealloc(bd, (n + 2) * sizeof(char *));
 		bd[n] = (char *)xnmalloc(blen + 6, sizeof(char *));
-		sprintf(bd[n], "/dev/%s", name);
+		snprintf(bd[n], blen + 6, "/dev/%s", name);
 		n++;
 		bd[n] = (char *)NULL;
 		free(blockdev[i]);
@@ -197,7 +197,7 @@ get_dev_label(void)
 				char pp = 0;
 				pp = (char)(from_hex(*(p + 2)) << 4 | from_hex(*(p + 3)));
 				*p = pp;
-				strcpy(p + 1, p + 4);
+				xstrsncpy(p + 1, p + 4, strlen(p + 4));
 			}
 			label = savestring(name, strlen(name));
 		}

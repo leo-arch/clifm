@@ -582,8 +582,9 @@ try_datadir(const char *dir)
 	/* Try DIR/share/clifm/clifmrc */
 	snprintf(p, sizeof(p), "%s/share/%s/%src", dir, PNL, PNL);
 	if (stat(p, &a) != -1 && S_ISREG(a.st_mode)) {
-		char *q = (char *)xnmalloc(strlen(dir) + 7, sizeof(char));
-		sprintf(q, "%s/share", dir);
+		size_t len = strlen(dir) + 7;
+		char *q = (char *)xnmalloc(len, sizeof(char));
+		snprintf(q, len, "%s/share", dir);
 		return q;
 	}
 
@@ -1523,9 +1524,10 @@ load_remotes(void)
 				name = (char *)NULL;
 				continue;
 			}
+			size_t name_len = strlen(name);
 			remotes[n].name = (char *)xrealloc(remotes[n].name,
-							(strlen(name) + 1) * sizeof(char));
-			strcpy(remotes[n].name, name);
+				(name_len + 1) * sizeof(char));
+			xstrsncpy(remotes[n].name, name, name_len);
 			free(name);
 			name = (char *)NULL;
 		}
@@ -1551,16 +1553,16 @@ load_remotes(void)
 
 		if (strncmp(line, "Comment=", 8) == 0) {
 			remotes[n].desc = (char *)xrealloc(remotes[n].desc,
-							(ret_len + 1) * sizeof(char));
-			strcpy(remotes[n].desc, ret);
+				(ret_len + 1) * sizeof(char));
+			xstrsncpy(remotes[n].desc, ret, ret_len);
 		} else if (strncmp(line, "Mountpoint=", 11) == 0) {
 			char *tmp = (char *)NULL;
 			if (*ret == '~')
 				tmp = tilde_expand(ret);
+			size_t mnt_len = tmp ? strlen(tmp) : ret_len;
 			remotes[n].mountpoint = (char *)xrealloc(remotes[n].mountpoint,
-								((tmp ? strlen(tmp) : ret_len) + 1)
-								* sizeof(char));
-			strcpy(remotes[n].mountpoint, tmp ? tmp : ret);
+				(mnt_len + 1) * sizeof(char));
+			xstrsncpy(remotes[n].mountpoint, tmp ? tmp : ret, mnt_len);
 			free(tmp);
 			if (count_dir(remotes[n].mountpoint, CPOP) > 2)
 				remotes[n].mounted = 1;
@@ -1569,10 +1571,10 @@ load_remotes(void)
 			if (remotes[n].mountpoint) {
 				char *rep = replace_substr(ret, "%m", remotes[n].mountpoint);
 				if (rep) {
+					size_t rep_len = strlen(rep);
 					remotes[n].mount_cmd = (char *)xrealloc(
-								remotes[n].mount_cmd,
-								(strlen(rep) + 1) * sizeof(char));
-					strcpy(remotes[n].mount_cmd, rep);
+						remotes[n].mount_cmd, (rep_len + 1) * sizeof(char));
+					xstrsncpy(remotes[n].mount_cmd, rep, rep_len);
 					free(rep);
 					replaced = 1;
 				}
@@ -1580,18 +1582,18 @@ load_remotes(void)
 
 			if (!replaced) {
 				remotes[n].mount_cmd = (char *)xrealloc(remotes[n].mount_cmd,
-									(ret_len + 1) * sizeof(char));
-				strcpy(remotes[n].mount_cmd, ret);
+					(ret_len + 1) * sizeof(char));
+				xstrsncpy(remotes[n].mount_cmd, ret, ret_len);
 			}
 		} else if (strncmp(line, "UnmountCmd=", 11) == 0) {
 			int replaced = 0;
 			if (remotes[n].mountpoint) {
 				char *rep = replace_substr(ret, "%m", remotes[n].mountpoint);
 				if (rep) {
+					size_t rep_len = strlen(rep);
 					remotes[n].unmount_cmd = (char *)xrealloc(
-							remotes[n].unmount_cmd,
-							(strlen(rep) + 1) * sizeof(char));
-					strcpy(remotes[n].unmount_cmd, rep);
+						remotes[n].unmount_cmd, (rep_len + 1) * sizeof(char));
+					xstrsncpy(remotes[n].unmount_cmd, rep, rep_len);
 					free(rep);
 					replaced = 1;
 				}
@@ -1599,8 +1601,8 @@ load_remotes(void)
 
 			if (!replaced) {
 				remotes[n].unmount_cmd = (char *)xrealloc(remotes[n].unmount_cmd,
-								(ret_len + 1) * sizeof(char));
-				strcpy(remotes[n].unmount_cmd, ret);
+					(ret_len + 1) * sizeof(char));
+				xstrsncpy(remotes[n].unmount_cmd, ret, ret_len);
 			}
 		} else if (strncmp(line, "AutoUnmount=", 12) == 0) {
 			if (strcmp(ret, "true") == 0)
@@ -1642,8 +1644,10 @@ set_prompts_file(void)
 		return (char *)NULL;
 
 	struct stat a;
-	char *f = (char *)xnmalloc(strlen(config_dir_gral) + 15, sizeof(char));
-	sprintf(f, "%s/prompts.clifm", config_dir_gral);
+
+	size_t len = strlen(config_dir_gral) + 15;
+	char *f = (char *)xnmalloc(len, sizeof(char));
+	snprintf(f, len, "%s/prompts.clifm", config_dir_gral);
 
 	if (stat(f, &a) != -1 && S_ISREG(a.st_mode))
 		return f;
@@ -1709,9 +1713,10 @@ load_prompts(void)
 				name = (char *)NULL;
 				continue;
 			}
+			size_t name_len = strlen(name);
 			prompts[n].name = (char *)xrealloc(prompts[n].name,
-				(strlen(name) + 1) * sizeof(char));
-			strcpy(prompts[n].name, name);
+				(name_len + 1) * sizeof(char));
+			xstrsncpy(prompts[n].name, name, name_len);
 			free(name);
 			name = (char *)NULL;
 		}
@@ -1746,7 +1751,7 @@ load_prompts(void)
 		if (strncmp(line, "RegularPrompt=", 14) == 0) {
 			prompts[n].regular = (char *)xrealloc(prompts[n].regular,
 				(ret_len + 1) * sizeof(char));
-			strcpy(prompts[n].regular, ret);
+			xstrsncpy(prompts[n].regular, ret, ret_len);
 			continue;
 		}
 
@@ -1763,7 +1768,7 @@ load_prompts(void)
 		if (strncmp(line, "WarningPrompt=", 14) == 0) {
 			prompts[n].warning = (char *)xrealloc(prompts[n].warning,
 				(ret_len + 1) * sizeof(char));
-			strcpy(prompts[n].warning, ret);
+			xstrsncpy(prompts[n].warning, ret, ret_len);
 		}
 	}
 
@@ -1819,7 +1824,8 @@ open_reg_exit(char *filename, const int url, const int preview)
 			+ (alt_profile ? strlen(alt_profile) : 7) + 40;
 
 		mime_file = (char *)xnmalloc(mime_file_len, sizeof(char));
-		sprintf(mime_file, "%s/.config/clifm/profiles/%s/%s.clifm",
+		snprintf(mime_file, mime_file_len,
+			"%s/.config/clifm/profiles/%s/%s.clifm",
 			homedir, alt_profile ? alt_profile : "default",
 			preview == 1 ? "preview" : "mimelist");
 	}
@@ -2104,8 +2110,9 @@ resolve_path(char *file)
 			exit(errno);
 		}
 
-		_path = (char *)xnmalloc(strlen(cwd) + strlen(file) + 2, sizeof(char));
-		sprintf(_path, "%s/%s", cwd, file);
+		size_t len = strlen(cwd) + strlen(file) + 2;
+		_path = (char *)xnmalloc(len, sizeof(char));
+		snprintf(_path, len, "%s/%s", cwd, file);
 	}
 
 	return _path;
@@ -3100,7 +3107,7 @@ get_last_path(void)
 		return EXIT_FAILURE;
 
 	char *last_file = (char *)xnmalloc(config_dir_len + 7, sizeof(char));
-	sprintf(last_file, "%s/.last", config_dir);
+	snprintf(last_file, config_dir_len + 7, "%s/.last", config_dir);
 
 	int fd;
 	FILE *fp = open_fstream_r(last_file, &fd);
@@ -3139,7 +3146,7 @@ load_pinned_dir(void)
 		return EXIT_FAILURE;
 
 	char *pin_file = (char *)xnmalloc(config_dir_len + 6, sizeof(char));
-	sprintf(pin_file, "%s/.pin", config_dir);
+	snprintf(pin_file, config_dir_len + 6, "%s/.pin", config_dir);
 
 	int fd;
 	FILE *fp = open_fstream_r(pin_file, &fd);
@@ -3435,7 +3442,7 @@ write_dirhist(char *line, ssize_t len)
 
 	old_pwd[dirhist_total_index] = (char *)xnmalloc((size_t)len + 1,
 		sizeof(char));
-	strcpy(old_pwd[dirhist_total_index], line);
+	xstrsncpy(old_pwd[dirhist_total_index], line, (size_t)len);
 	dirhist_total_index++;
 }
 
@@ -3809,9 +3816,17 @@ check_options(void)
 
 	if (!conf.fzftab_options) {
 		if (conf.colorize == 1 || !getenv("FZF_DEFAULT_OPTS")) {
-			char *pp = conf.colorize == 1
+			if (conf.colorize == 1) {
+				conf.fzftab_options =
+					savestring(DEF_FZFTAB_OPTIONS, strlen(DEF_FZFTAB_OPTIONS));
+			} else {
+				conf.fzftab_options =
+					savestring(DEF_FZFTAB_OPTIONS_NO_COLOR,
+					strlen(DEF_FZFTAB_OPTIONS_NO_COLOR));
+			}
+/*			char *pp = conf.colorize == 1
 				? DEF_FZFTAB_OPTIONS : DEF_FZFTAB_OPTIONS_NO_COLOR;
-			conf.fzftab_options = savestring(pp, strlen(pp));
+			conf.fzftab_options = savestring(pp, strlen(pp)); */
 		} else {
 			conf.fzftab_options = savestring("", 1);
 		}
@@ -4133,8 +4148,16 @@ check_options(void)
 
 	if (!conf.encoded_prompt || !*conf.encoded_prompt) {
 		free(conf.encoded_prompt);
-		char *t = conf.colorize == 1 ? DEFAULT_PROMPT : DEFAULT_PROMPT_NO_COLOR;
-		conf.encoded_prompt = savestring(t, strlen(t));
+		if (conf.colorize == 1) {
+			conf.encoded_prompt =
+				savestring(DEFAULT_PROMPT, strlen(DEFAULT_PROMPT));
+		} else {
+			conf.encoded_prompt =
+				savestring(DEFAULT_PROMPT_NO_COLOR,
+				strlen(DEFAULT_PROMPT_NO_COLOR));
+		}
+/*		char *t = conf.colorize == 1 ? DEFAULT_PROMPT : DEFAULT_PROMPT_NO_COLOR;
+		conf.encoded_prompt = savestring(t, strlen(t)); */
 	}
 
 	if ((xargs.stealth_mode == 1 || home_ok == 0 ||

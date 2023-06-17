@@ -161,8 +161,10 @@ static int
 create_tmp_file(char **file, int *fd)
 {
 	size_t tmp_len = strlen(xargs.stealth_mode == 1 ? P_tmpdir : tmp_dir);
-	*file = (char *)xnmalloc(tmp_len + strlen(TMP_FILENAME) + 2, sizeof(char));
-	sprintf(*file, "%s/%s", xargs.stealth_mode == 1
+	size_t file_len = tmp_len + strlen(TMP_FILENAME) + 2;
+
+	*file = (char *)xnmalloc(file_len, sizeof(char));
+	snprintf(*file, file_len, "%s/%s", xargs.stealth_mode == 1
 		? P_tmpdir : tmp_dir, TMP_FILENAME);
 
 	errno = 0;
@@ -202,6 +204,7 @@ print_file(FILE *fp, const char *name, const mode_t type)
 #else
 	char s = get_file_suffix(type);
 #endif
+
 	if (s)
 		fprintf(fp, "%s%c\n", name, s);
 	else
@@ -288,6 +291,7 @@ END:
 	for (i = 0; i < (size_t)n && *a && (*a)[i]; i++)
 		free((*a)[i]);
 	free(*a);
+
 	return exit_status;
 }
 
@@ -309,10 +313,12 @@ get_files_from_tmp_file(const char *tmp_file, const char *target, const int n)
 	while ((len = getline(&line, &size, fp)) > 0) {
 		if (*line == '#' || *line == '\n')
 			continue;
+
 		if (line[len - 1] == '\n') {
 			line[len - 1] = '\0';
 			len--;
 		}
+
 		if (len > 0 && (line[len - 1] == '/' || line[len - 1] == '@'
 		|| line[len - 1] == '=' || line[len - 1] == '|'
 		|| line[len - 1] == '?') ) {
@@ -352,8 +358,8 @@ static char **
 get_remove_files(const char *target, char **tmp_files,
 	struct dirent ***a, const int n)
 {
-	size_t i, j = 0, l = (target == workspaces[cur_ws].path)
-		? files : (size_t)n;
+	size_t i, j = 0;
+	size_t l = (target == workspaces[cur_ws].path) ? files : (size_t)n;
 	char **rem_files = (char **)xnmalloc(l + 2, sizeof(char *));
 
 	if (target == workspaces[cur_ws].path) {
@@ -372,10 +378,10 @@ get_remove_files(const char *target, char **tmp_files,
 		if (remove_this_file((*a)[i]->d_name, tmp_files) == 1) {
 			char p[PATH_MAX];
 			if (*target == '/') {
-				snprintf(p, PATH_MAX, "%s/%s", target, (*a)[i]->d_name);
+				snprintf(p, sizeof(p), "%s/%s", target, (*a)[i]->d_name);
 			} else {
-				snprintf(p, PATH_MAX, "%s/%s/%s", workspaces[cur_ws].path,
-				         target, (*a)[i]->d_name);
+				snprintf(p, sizeof(p), "%s/%s/%s", workspaces[cur_ws].path,
+					target, (*a)[i]->d_name);
 			}
 			rem_files[j] = savestring(p, strlen(p));
 			j++;
@@ -399,8 +405,9 @@ get_rm_param(char ***rfiles, const int n)
 	while (--i >= 0) {
 		if (lstat((*rfiles)[i], &a) == -1)
 			continue;
+
 	/* We don't need interactivity here: the user already confirmed the
-	 * operation before calling this function */
+	 * operation before calling this function. */
 		if (S_ISDIR(a.st_mode)) {
 #if defined(_BE_POSIX)
 			_param = savestring("-rf", 3);
@@ -783,7 +790,8 @@ dup_file(char **cmd)
 				xerror("dup: %s: Error dequoting file name\n", source);
 				continue;
 			}
-			strcpy(source, deq_str);
+
+			xstrsncpy(source, deq_str, strlen(deq_str));
 			free(deq_str);
 		}
 
@@ -810,7 +818,7 @@ dup_file(char **cmd)
 				dest_dir, source_name);
 
 		char bk[PATH_MAX + 11];
-		xstrsncpy(bk, tmp_dest, PATH_MAX);
+		xstrsncpy(bk, tmp_dest, sizeof(bk) - 1);
 		struct stat attr;
 		size_t suffix = 1;
 		while (stat(bk, &attr) == EXIT_SUCCESS) {
@@ -1116,8 +1124,9 @@ format_new_filename(char **name)
 	if (!npath)
 		return EXIT_FAILURE;
 
-	*name = (char *)xrealloc(*name, (strlen(npath) + 2) * sizeof(char));
-	sprintf(*name, "%s%c", npath, is_dir == 1 ? '/' : 0);
+	size_t name_len = strlen(npath) + 2;
+	*name = (char *)xrealloc(*name, name_len * sizeof(char));
+	snprintf(*name, name_len, "%s%c", npath, is_dir == 1 ? '/' : 0);
 	free(npath);
 
 	return EXIT_SUCCESS;
@@ -1270,7 +1279,7 @@ open_function(char **cmd)
 				return EXIT_FAILURE;
 			}
 
-			strcpy(cmd[1], deq_path);
+			xstrsncpy(cmd[1], deq_path, strlen(deq_path));
 			free(deq_path);
 		}
 	}
@@ -1435,7 +1444,7 @@ edit_link(char *link)
 			return EXIT_FAILURE;
 		}
 
-		strcpy(link, tmp);
+		xstrsncpy(link, tmp, strlen(tmp));
 		free(tmp);
 	}
 
@@ -1886,7 +1895,8 @@ bulk_rename(char **args)
 				xerror(_("br: %s: Error dequoting file name\n"), args[i]);
 				continue;
 			}
-			strcpy(args[i], deq_file);
+
+			xstrsncpy(args[i], deq_file, strlen(deq_file));
 			free(deq_file);
 		}
 
@@ -2072,8 +2082,9 @@ ERROR:
 char *
 _export(char **filenames, const int open)
 {
-	char *tmp_file = (char *)xnmalloc(strlen(tmp_dir) + 14, sizeof(char));
-	sprintf(tmp_file, "%s/%s", tmp_dir, TMP_FILENAME);
+	size_t len = strlen(tmp_dir) + 14;
+	char *tmp_file = (char *)xnmalloc(len, sizeof(char));
+	snprintf(tmp_file, len, "%s/%s", tmp_dir, TMP_FILENAME);
 
 	int fd = mkstemp(tmp_file);
 	if (fd == -1) {

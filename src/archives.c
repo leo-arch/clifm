@@ -169,8 +169,9 @@ extract_iso(char *file)
 	int exit_status = EXIT_SUCCESS;
 
 	/* 7z x -oDIR FILE (use FILE as DIR) */
-	char *o_option = (char *)xnmalloc(strlen(file) + 7, sizeof(char));
-	sprintf(o_option, "-o%s.dir", file); /* NOLINT */
+	size_t flen = strlen(file);
+	char *o_option = (char *)xnmalloc(flen + 7, sizeof(char));
+	snprintf(o_option, flen + 7, "-o%s.dir", file); /* NOLINT */
 
 	/* Construct and execute cmd */
 	char *cmd[] = {"7z", "x", o_option, file, NULL};
@@ -191,8 +192,9 @@ extract_iso_to_dir(char *file)
 	if (!ext_path)
 		return EXIT_FAILURE;
 
-	char *o_option = (char *)xnmalloc(strlen(ext_path) + 3, sizeof(char));
-	sprintf(o_option, "-o%s", ext_path); /* NOLINT */
+	size_t len = strlen(ext_path);
+	char *o_option = (char *)xnmalloc(len + 3, sizeof(char));
+	snprintf(o_option, len + 3, "-o%s", ext_path); /* NOLINT */
 	free(ext_path);
 
 	/* Construct and execute cmd */
@@ -241,13 +243,13 @@ create_mountpoint(char *file)
 	char *tfile = (p && *(++p)) ? p : file;
 
 	if (xargs.stealth_mode == 1) {
-		mountpoint = (char *)xnmalloc(strlen(tfile) + P_tmpdir_len + 15,
-			sizeof(char));
-		sprintf(mountpoint, "%s/clifm-mounts/%s", P_tmpdir, tfile); /* NOLINT */
+		size_t len = strlen(tfile) + P_tmpdir_len + 15;
+		mountpoint = (char *)xnmalloc(len, sizeof(char));
+		snprintf(mountpoint, len, "%s/clifm-mounts/%s", P_tmpdir, tfile);
 	} else {
-		mountpoint = (char *)xnmalloc(config_dir_len + strlen(tfile) + 9,
-			sizeof(char));
-		sprintf(mountpoint, "%s/mounts/%s", config_dir, tfile); /* NOLINT */
+		size_t len = config_dir_len + strlen(tfile) + 9;
+		mountpoint = (char *)xnmalloc(len, sizeof(char));
+		snprintf(mountpoint, len, "%s/mounts/%s", config_dir, tfile); /* NOLINT */
 	}
 
 	char *dir_cmd[] = {"mkdir", "-pm700", mountpoint, NULL};
@@ -337,14 +339,12 @@ handle_iso(char *file)
 
 	char sel_op = get_operation(OP_ISO);
 
-	char *ret = strchr(file, '\\');
-	if (ret) {
+	if (strchr(file, '\\')) {
 		char *deq_file = dequote_str(file, 0);
 		if (deq_file) {
-			strcpy(file, deq_file); /* NOLINT */
+			xstrsncpy(file, deq_file, strlen(deq_file));
 			free(deq_file);
 		}
-		ret = (char *)NULL;
 	}
 
 	switch (sel_op) {
@@ -360,11 +360,13 @@ handle_iso(char *file)
 static int
 create_iso_from_block_dev(char *in_file, char *out_file)
 {
-	char *if_option = (char *)xnmalloc(strlen(in_file) + 4, sizeof(char));
-	sprintf(if_option, "if=%s", in_file); /* NOLINT */
+	size_t len = strlen(in_file) + 4;
+	char *if_option = (char *)xnmalloc(len, sizeof(char));
+	snprintf(if_option, len, "if=%s", in_file); /* NOLINT */
 
-	char *of_option = (char *)xnmalloc(strlen(out_file) + 4, sizeof(char));
-	sprintf(of_option, "of=%s", out_file); /* NOLINT */
+	len = strlen(out_file) + 4;
+	char *of_option = (char *)xnmalloc(len, sizeof(char));
+	snprintf(of_option, len, "of=%s", out_file); /* NOLINT */
 
 	char *sudo = get_sudo_path();
 	if (!sudo) {
@@ -669,7 +671,7 @@ add_default_extension(char *name)
 
 	char *t = savestring(name, name_len);
 	name = (char *)xrealloc(name, (name_len + 8) * sizeof(char));
-	sprintf(name, "%s.tar.gz", t); /* NOLINT */
+	snprintf(name, name_len + 8, "%s.tar.gz", t); /* NOLINT */
 	free(t);
 
 	return name;
@@ -753,9 +755,9 @@ zstandard(char *in_file, char *out_file, const char mode, const char op)
 		char option[3] = "";
 
 		switch (op) {
-		case 'e': strcpy(option, "-d"); break;
-		case 't': strcpy(option, "-t"); break;
-		case 'i': strcpy(option, "-l"); break;
+		case 'e': xstrsncpy(option, "-d", sizeof(option) - 1); break;
+		case 't': xstrsncpy(option, "-t", sizeof(option) - 1); break;
+		case 'i': xstrsncpy(option, "-l", sizeof(option) - 1); break;
 		default: break;
 		}
 
@@ -852,8 +854,9 @@ compress_others(char **args, char *name)
 	char **tcmd = (char **)xnmalloc(3 + i + 1, sizeof(char *));
 	tcmd[0] = savestring("atool", 5);
 	tcmd[1] = savestring("-a", 2);
-	tcmd[2] = (char *)xnmalloc(strlen(name) + (!ext_ok ? 7 : 0) + 1, sizeof(char *));
-	sprintf(tcmd[2], "%s%s", name, !ext_ok ? ".tar.gz" : ""); /* NOLINT */
+	size_t len = strlen(name) + (!ext_ok ? 7 : 0) + 1;
+	tcmd[2] = (char *)xnmalloc(len, sizeof(char *));
+	snprintf(tcmd[2], len, "%s%s", name, !ext_ok ? ".tar.gz" : ""); /* NOLINT */
 	n += 3;
 
 	for (i = 1; args[i]; i++) {
@@ -916,7 +919,7 @@ check_not_compressed(char **args)
 		char *deq = (char *)NULL;
 		if (strchr(args[i], '\\')) {
 			deq = dequote_str(args[i], 0);
-			strcpy(args[i], deq); /* NOLINT */
+			xstrsncpy(args[i], deq, strlen(deq));
 			free(deq);
 		}
 

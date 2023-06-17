@@ -1203,7 +1203,7 @@ _toggle_exec(char **args)
 		if (strchr(args[i], '\\')) {
 			char *tmp = dequote_str(args[i], 0);
 			if (tmp) {
-				strcpy(args[i], tmp);
+				xstrsncpy(args[i], tmp, strlen(tmp));
 				free(tmp);
 			}
 		}
@@ -1852,31 +1852,39 @@ set_cp_cmd(char **cmd, const int cp_force)
 			conf.cp_cmd = CP_CP_FORCE;
 	}
 
+	size_t dst_len = 0;
+
 	switch (conf.cp_cmd) {
 	case CP_ADVCP:
-		*cmd = (char *)xrealloc(*cmd, (strlen(_DEF_ADVCP_CMD) + 1) * sizeof(char));
-		strcpy(*cmd, _DEF_ADVCP_CMD);
+		dst_len = strlen(_DEF_ADVCP_CMD);
+		*cmd = (char *)xrealloc(*cmd, (dst_len + 1) * sizeof(char));
+		xstrsncpy(*cmd, _DEF_ADVCP_CMD, dst_len);
 		break;
 	case CP_ADVCP_FORCE:
-		*cmd = (char *)xrealloc(*cmd, (strlen(_DEF_ADVCP_CMD_FORCE) + 1) * sizeof(char));
-		strcpy(*cmd, _DEF_ADVCP_CMD_FORCE);
+		dst_len = strlen(_DEF_ADVCP_CMD_FORCE);
+		*cmd = (char *)xrealloc(*cmd, (dst_len + 1) * sizeof(char));
+		xstrsncpy(*cmd, _DEF_ADVCP_CMD_FORCE, dst_len);
 		break;
 	case CP_WCP:
-		*cmd = (char *)xrealloc(*cmd, (strlen(_DEF_WCP_CMD) + 1) * sizeof(char));
-		strcpy(*cmd, _DEF_WCP_CMD);
+		dst_len = strlen(_DEF_WCP_CMD);
+		*cmd = (char *)xrealloc(*cmd, (dst_len + 1) * sizeof(char));
+		xstrsncpy(*cmd, _DEF_WCP_CMD, dst_len);
 		break;
 	case CP_RSYNC:
-		*cmd = (char *)xrealloc(*cmd, (strlen(_DEF_RSYNC_CMD) + 1) * sizeof(char));
-		strcpy(*cmd, _DEF_RSYNC_CMD);
+		dst_len = strlen(_DEF_RSYNC_CMD);
+		*cmd = (char *)xrealloc(*cmd, (dst_len + 1) * sizeof(char));
+		xstrsncpy(*cmd, _DEF_RSYNC_CMD, dst_len);
 		break;
 	case CP_CP_FORCE:
-		*cmd = (char *)xrealloc(*cmd, (strlen(_DEF_CP_CMD_FORCE) + 1) * sizeof(char));
-		strcpy(*cmd, _DEF_CP_CMD_FORCE);
+		dst_len = strlen(_DEF_CP_CMD_FORCE);
+		*cmd = (char *)xrealloc(*cmd, (dst_len + 1) * sizeof(char));
+		xstrsncpy(*cmd, _DEF_CP_CMD_FORCE, dst_len);
 		break;
 	case CP_CP: /* fallthrough */
 	default:
-		*cmd = (char *)xrealloc(*cmd, (strlen(_DEF_CP_CMD) + 1) * sizeof(char));
-		strcpy(*cmd, _DEF_CP_CMD);
+		dst_len = strlen(_DEF_CP_CMD);
+		*cmd = (char *)xrealloc(*cmd, (dst_len + 1) * sizeof(char));
+		xstrsncpy(*cmd, _DEF_CP_CMD, dst_len);
 		break;
 	}
 
@@ -1894,23 +1902,29 @@ set_mv_cmd(char **cmd, const int mv_force)
 			conf.mv_cmd = MV_MV_FORCE;
 	}
 
+	size_t dst_len = 0;
+
 	switch (conf.mv_cmd) {
 	case MV_ADVMV:
-		*cmd = (char *)xrealloc(*cmd, (strlen(_DEF_ADVMV_CMD) + 1) * sizeof(char));
-		strcpy(*cmd, _DEF_ADVMV_CMD);
+		dst_len = strlen(_DEF_ADVMV_CMD);
+		*cmd = (char *)xrealloc(*cmd, (dst_len + 1) * sizeof(char));
+		xstrsncpy(*cmd, _DEF_ADVMV_CMD, dst_len);
 		break;
 	case MV_ADVMV_FORCE:
-		*cmd = (char *)xrealloc(*cmd, (strlen(_DEF_ADVMV_CMD) + 1) * sizeof(char));
-		strcpy(*cmd, _DEF_ADVMV_CMD_FORCE);
+		dst_len = strlen(_DEF_ADVMV_CMD);
+		*cmd = (char *)xrealloc(*cmd, (dst_len + 1) * sizeof(char));
+		xstrsncpy(*cmd, _DEF_ADVMV_CMD_FORCE, dst_len);
 		break;
 	case MV_MV_FORCE:
-		*cmd = (char *)xrealloc(*cmd, (strlen(_DEF_MV_CMD_FORCE) + 1) * sizeof(char));
-		strcpy(*cmd, _DEF_MV_CMD_FORCE);
+		dst_len = strlen(_DEF_MV_CMD_FORCE);
+		*cmd = (char *)xrealloc(*cmd, (dst_len + 1) * sizeof(char));
+		xstrsncpy(*cmd, _DEF_MV_CMD_FORCE, dst_len);
 		break;
 	case MV_MV: /* fallthrough */
 	default:
-		*cmd = (char *)xrealloc(*cmd, (strlen(_DEF_MV_CMD) + 1) * sizeof(char));
-		strcpy(*cmd, _DEF_MV_CMD);
+		dst_len = strlen(_DEF_MV_CMD);
+		*cmd = (char *)xrealloc(*cmd, (dst_len + 1) * sizeof(char));
+		xstrsncpy(*cmd, _DEF_MV_CMD, dst_len);
 		break;
 	}
 
@@ -1974,8 +1988,9 @@ preview_edit(char *app)
 	if (!config_dir)
 		return EXIT_FAILURE;
 
-	char *file = (char *)xnmalloc(config_dir_len + 15, sizeof(char));
-	sprintf(file, "%s/preview.clifm", config_dir);
+	size_t len = config_dir_len + 15;
+	char *file = (char *)xnmalloc(len, sizeof(char));
+	snprintf(file, len, "%s/preview.clifm", config_dir);
 
 	int ret = EXIT_SUCCESS;
 	if (app) {
@@ -2455,18 +2470,18 @@ exec_cmd(char **comm)
 		if (*comm[0] == 'l' && !comm[0][1]) {
 			comm[0] = (char *)xrealloc(comm[0], 7 * sizeof(char));
 #if defined(_BE_POSIX)
-			strcpy(comm[0], "ln -s");
+			xstrsncpy(comm[0], "ln -s", 5);
 #else
-			strcpy(comm[0], "ln -sn");
+			xstrsncpy(comm[0], "ln -sn", 6);
 #endif
-			/* Make sure the symlink source is always an absolute path */
+			/* Make sure the symlink source is always an absolute path. */
 			if (comm[1] && *comm[1] != '/' && *comm[1] != '~') {
 				size_t len = strlen(comm[1]);
 				char *tmp = (char *)xnmalloc(len + 1, sizeof(char));
 				xstrsncpy(tmp, comm[1], len);
-				comm[1] = (char *)xrealloc(comm[1], (len
-						+ strlen(workspaces[cur_ws].path) + 2) * sizeof(char));
-				sprintf(comm[1], "%s/%s", workspaces[cur_ws].path, tmp);
+				size_t comm_len = len + strlen(workspaces[cur_ws].path) + 2;
+				comm[1] = (char *)xrealloc(comm[1], comm_len * sizeof(char));
+				snprintf(comm[1], comm_len, "%s/%s", workspaces[cur_ws].path, tmp);
 				free(tmp);
 			}
 		} else if (*comm[0] == 'r' && !comm[0][1]) {
@@ -2474,7 +2489,7 @@ exec_cmd(char **comm)
 			goto CHECK_EVENTS;
 		} else if (*comm[0] == 'm' && comm[0][1] == 'd' && !comm[0][2]) {
 			comm[0] = (char *)xrealloc(comm[0], 9 * sizeof(char));
-			strcpy(comm[0], "mkdir -p");
+			xstrsncpy(comm[0], "mkdir -p", 8);
 		}
 
 		if (*comm[0] == 'l' && comm[0][1] == 'e' && !comm[0][2]) {

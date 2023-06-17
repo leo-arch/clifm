@@ -61,7 +61,7 @@ get_plugin_path(char *action, int *status)
 
 	if (strchr(action, '/')) {
 		cmd = (char *)xnmalloc(action_len + 1, sizeof(char));
-		xstrsncpy(cmd, action, action_len + 1);
+		xstrsncpy(cmd, action, action_len);
 		dir_path = 1;
 	} else { /* If not a path, PLUGINS_DIR is assumed */
 		if (!plugins_dir || !*plugins_dir) {

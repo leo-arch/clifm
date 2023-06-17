@@ -224,20 +224,23 @@ sanitize_cmd_environ(void)
 	}
 
 	/* Import and sanitize */
+	size_t len = 0;
 	char *e = (char *)NULL;
 	if ((flags & GUI)) {
 		/* Redhat mentions XAUTHORITY as a safe variable. See
 		 * "https://redhat-crypto.gitlab.io/defensive-coding-guide/#sect-Defensive_Coding-Tasks-Processes-environ" */
 		e = getenv("DISPLAY");
 		if (e && sanitize_cmd(e, SNT_DISPLAY) == EXIT_SUCCESS) {
-			new_env[n] = (char *)xnmalloc(9 + strlen(e), sizeof(char));
-			sprintf(new_env[n], "DISPLAY=%s", e);
+			len = 9 + strlen(e);
+			new_env[n] = (char *)xnmalloc(len, sizeof(char));
+			snprintf(new_env[n], len, "DISPLAY=%s", e);
 			n++;
 		}
 		e = getenv("TERM");
 		if (e && sanitize_cmd(e, SNT_MISC) == EXIT_SUCCESS) {
-			new_env[n] = (char *)xnmalloc(6 + strlen(e), sizeof(char));
-			sprintf(new_env[n], "TERM=%s", e);
+			len = 6 + strlen(e);
+			new_env[n] = (char *)xnmalloc(len, sizeof(char));
+			snprintf(new_env[n], len, "TERM=%s", e);
 			n++;
 		}
 		/* If running on Wayland and WAYLAND_DISPLAY isn't set, Wayland
@@ -247,8 +250,9 @@ sanitize_cmd_environ(void)
 
 	e = getenv("TZ");
 	if (e && sanitize_cmd(e, SNT_MISC) == EXIT_SUCCESS) {
-		new_env[n] = (char *)xnmalloc(4 + strlen(e), sizeof(char));
-		sprintf(new_env[n], "TZ=%s", e);
+		len = strlen(e) + 4;
+		new_env[n] = (char *)xnmalloc(len, sizeof(char));
+		snprintf(new_env[n], len, "TZ=%s", e);
 		n++;
 	}
 
@@ -259,11 +263,12 @@ sanitize_cmd_environ(void)
 
 	e = getenv("LANG");
 	if (e && sanitize_cmd(e, SNT_MISC) == EXIT_SUCCESS) {
-		new_env[n] = (char *)xnmalloc(6 + strlen(e), sizeof(char));
-		sprintf(new_env[n], "LANG=%s", e);
+		len = strlen(e) + 6;
+		new_env[n] = (char *)xnmalloc(len, sizeof(char));
+		snprintf(new_env[n], len, "LANG=%s", e);
 		n++;
-		new_env[n] = (char *)xnmalloc(8 + strlen(e), sizeof(char));
-		sprintf(new_env[n], "LC_ALL=%s", e);
+		new_env[n] = (char *)xnmalloc(len + 2, sizeof(char));
+		snprintf(new_env[n], len + 2, "LC_ALL=%s", e);
 		n++;
 	}
 
