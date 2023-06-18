@@ -924,8 +924,8 @@ command line switch."
 #define SEL_USAGE "Select one or multiple files\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   s, sel ELN/FILE... [[!]PATTERN] [-FILETYPE] [:PATH]\n\n\
-Recognized file types: (d)irectory, (r)egular file, symbolic (l)ink,\n\
-(s)ocket, (f)ifo/pipe, (b)lock device, (c)haracter device\n\n\
+Recognized file types: (d)irectory, regular (f)ile, symbolic (l)ink,\n\
+(s)ocket, fifo/(p)ipe, (b)lock device, (c)haracter device\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Select the file whose ELN is 12\n\
     s 12 (or 's <TAB>' to choose from a list - multi-selection is allowed)\n\
@@ -934,7 +934,7 @@ Recognized file types: (d)irectory, (r)egular file, symbolic (l)ink,\n\
 - Select multiple files at once\n\
     s 12 15-21 *.pdf\n\
 - Select all regular files in /etc starting with 'd'\n\
-    s ^d.* -r :/etc\n\
+    s ^d.* -f :/etc\n\
 - Select all files in the current directory (including hidden files)\n\
     s * .* (or Alt-a)\n\
 - Interactively select files in '/media' (requires fzf, fnf, or smenu\n\

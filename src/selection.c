@@ -132,9 +132,9 @@ select_file(char *file)
 }
 
 static char **
-load_matches_invert_cwd(glob_t gbuf, const mode_t filetype, int *k)
+load_matches_invert_cwd(glob_t gbuf, const mode_t filetype, int *matches)
 {
-	char **matches = (char **)xnmalloc(files + 2, sizeof(char *));
+	char **list = (char **)xnmalloc(files + 2, sizeof(char *));
 
 	int i = (int)files;
 	while (--i >= 0) {
@@ -149,19 +149,19 @@ load_matches_invert_cwd(glob_t gbuf, const mode_t filetype, int *k)
 		}
 
 		if (j == -1) {
-			matches[*k] = file_info[i].name;
-			(*k)++;
+			list[*matches] = file_info[i].name;
+			(*matches)++;
 		}
 	}
 
-	return matches;
+	return list;
 }
 
 static char **
 load_matches_invert_nocwd(glob_t gbuf, struct dirent **ent,
-	const mode_t filetype, int *k, const int ret)
+	const mode_t filetype, int *matches, const int ret)
 {
-	char **matches = (char **)xnmalloc((size_t)ret + 2, sizeof(char *));
+	char **list = (char **)xnmalloc((size_t)ret + 2, sizeof(char *));
 
 	int i = ret;
 	while (--i >= 0) {
@@ -184,21 +184,41 @@ load_matches_invert_nocwd(glob_t gbuf, struct dirent **ent,
 		}
 
 		if (j == -1) {
-			matches[*k] = ent[i]->d_name;
-			(*k)++;
+			list[*matches] = ent[i]->d_name;
+			(*matches)++;
 		}
 	}
 
-	return matches;
+	return list;
+}
+
+static mode_t
+convert_filetype_mask(const mode_t filetype)
+{
+	mode_t type = 0;
+
+	switch (filetype) {
+	case DT_DIR:  type = S_IFDIR;  break;
+	case DT_REG:  type = S_IFREG;  break;
+	case DT_LNK:  type = S_IFLNK;  break;
+	case DT_SOCK: type = S_IFSOCK; break;
+	case DT_FIFO: type = S_IFIFO;  break;
+	case DT_BLK:  type = S_IFBLK;  break;
+	case DT_CHR:  type = S_IFCHR;  break;
+	default: break;
+	}
+
+	return type;
 }
 
 static char **
-load_matches(glob_t gbuf, const mode_t filetype, int *k)
+load_matches(glob_t gbuf, const mode_t filetype, int *matches)
 {
-	char **matches = (char **)xnmalloc(gbuf.gl_pathc + 2, sizeof(char *));
-	mode_t type = 0;
+	char **list = (char **)xnmalloc(gbuf.gl_pathc + 2, sizeof(char *));
+	mode_t type = convert_filetype_mask(filetype);
+//	mode_t type = 0;
 
-	if (filetype) {
+/*	if (filetype) {
 		switch (filetype) {
 		case DT_DIR:  type = S_IFDIR;  break;
 		case DT_REG:  type = S_IFREG;  break;
@@ -209,11 +229,10 @@ load_matches(glob_t gbuf, const mode_t filetype, int *k)
 		case DT_CHR:  type = S_IFCHR;  break;
 		default: break;
 		}
-	}
+	} */
 
 	int i = (int)gbuf.gl_pathc;
 	while (--i >= 0) {
-		/* Skip self and parent directories. */
 		char *basename = strrchr(gbuf.gl_pathv[i], '/');
 		if (!basename && SELFORPARENT(gbuf.gl_pathv[i]))
 			continue;
@@ -227,27 +246,27 @@ load_matches(glob_t gbuf, const mode_t filetype, int *k)
 				continue;
 		}
 
-		matches[*k] = gbuf.gl_pathv[i];
-		(*k)++;
+		list[*matches] = gbuf.gl_pathv[i];
+		(*matches)++;
 	}
 
-	return matches;
+	return list;
 }
 
 static int
-select_matches(char **matches, const char *sel_path, const int k)
+select_matches(char **list, const char *sel_path, const int matches)
 {
-	int i = k;
+	int i = matches;
 	int new_sel = 0;
 
 	while (--i >= 0) {
-		if (!matches[i])
+		if (!list[i])
 			continue;
 
 		if (sel_path) {
-			size_t tmp_len = strlen(sel_path) + strlen(matches[i]) + 2;
+			size_t tmp_len = strlen(sel_path) + strlen(list[i]) + 2;
 			char *tmp = (char *)xnmalloc(tmp_len, sizeof(char));
-			snprintf(tmp, tmp_len, "%s/%s", sel_path, matches[i]);
+			snprintf(tmp, tmp_len, "%s/%s", sel_path, list[i]);
 
 			new_sel += select_file(tmp);
 
@@ -256,8 +275,8 @@ select_matches(char **matches, const char *sel_path, const int k)
 		}
 
 		/* CWD */
-		if (*matches[i] == '/') { /* Absolute path */
-			new_sel += select_file(matches[i]);
+		if (*list[i] == '/') { /* Absolute path */
+			new_sel += select_file(list[i]);
 			continue;
 		}
 
@@ -267,15 +286,15 @@ select_matches(char **matches, const char *sel_path, const int k)
 		if (*workspaces[cur_ws].path == '/'
 		&& !*(workspaces[cur_ws].path + 1)) {
 			/* CWD is root */
-			size_t tmp_len = strlen(matches[i]) + 2;
+			size_t tmp_len = strlen(list[i]) + 2;
 			tmp = (char *)xnmalloc(tmp_len, sizeof(char));
-			snprintf(tmp, tmp_len, "/%s", matches[i]);
+			snprintf(tmp, tmp_len, "/%s", list[i]);
 		} else {
 			size_t tmp_len = strlen(workspaces[cur_ws].path)
-				+ strlen(matches[i]) + 2;
+				+ strlen(list[i]) + 2;
 			tmp = (char *)xnmalloc(tmp_len, sizeof(char));
 			snprintf(tmp, tmp_len, "%s/%s",
-				workspaces[cur_ws].path, matches[i]);
+				workspaces[cur_ws].path, list[i]);
 		}
 
 		new_sel += select_file(tmp);
@@ -473,17 +492,17 @@ sel_regex(char *str, const char *sel_path, const mode_t filetype)
 /* Convert file type into a macro that can be decoded by stat(3).
  * If file type is specified, matches will be checked against
  * this value. */
-static inline mode_t
+static mode_t
 convert_filetype(mode_t *filetype)
 {
 	switch (*filetype) {
-	case 'd': *filetype = DT_DIR; break;
-	case 'r': *filetype = DT_REG; break;
-	case 'l': *filetype = DT_LNK; break;
-	case 's': *filetype = DT_SOCK; break;
-	case 'f': *filetype = DT_FIFO; break;
 	case 'b': *filetype = DT_BLK; break;
 	case 'c': *filetype = DT_CHR; break;
+	case 'd': *filetype = DT_DIR; break;
+	case 'f': *filetype = DT_REG; break;
+	case 'l': *filetype = DT_LNK; break;
+	case 's': *filetype = DT_SOCK; break;
+	case 'p': *filetype = DT_FIFO; break;
 	default:
 		xerror(_("%s: '%c': Unrecognized file type\n"),
 		    PROGRAM_NAME, (char)*filetype);
