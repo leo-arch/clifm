@@ -49,6 +49,10 @@
 #define PREVIEW_FILE 1
 #define OPEN_FILE    2
 
+/* Macros to be able to consult the value of a macro string */
+#define STRINGIZE_(x) #x
+#define STRINGIZE(x) STRINGIZE_(x)
+
 /* If path was not set (neither in the config file nor via command line nor
  * via the RestoreLastPath option), set the default (CWD), and if CWD is not
  * set, use the user's home directory, and if the home dir cannot be found

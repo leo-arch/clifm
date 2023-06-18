@@ -76,10 +76,6 @@
 #include "sanitize.h"
 #include "selection.h"
 
-/* Macros to be able to consult the value of a macro string */
-#define STRINGIZE_(x) #x
-#define STRINGIZE(x) STRINGIZE_(x)
-
 /* We need this for get_user_groups() */
 #if !defined(NGROUPS_MAX)
 # if defined(__linux__)
