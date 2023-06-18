@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Jun 11, 2023" "clifm 1.12.11" "CLIFM Manual"
+.TH "CLIFM" "1" "Jun 18, 2023" "clifm 1.12.13" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -1033,9 +1033,9 @@ If not in light mode, once a file is selected, and if the file is in the current
 .sp
 Just as in the \fIsearch\fR function, it is also possible to further filter the list of matches indicating the desired file type. For instance, \fIs ^ \-d\fR will select all directories in the current working directory. For available file type filters see the \fIsearch\fR function above.
 .sp
-By default, the selection function operates on the current working directory. To select files in any other directory use the ":PATH" expression. For example, to select all regular files with a .conf extension in the /etc directory, the command would be: \fIs\ .*\\.conf$\ \-r :/etc\fR, or using wildcards: \fIs *.conf \-r\ :/etc\fR. Of course, you can also do just \fIs -r /etc/*.conf\fR.
+By default, the selection function operates on the current working directory. To select files in any other directory use the ":PATH" expression. For example, to select all regular files with a .conf extension in the /etc directory, the command would be: \fIs\ .*\\.conf$\ \-f :/etc\fR, or using wildcards: \fIs *.conf \-f\ :/etc\fR. Of course, you can also do just \fIs -f /etc/*.conf\fR.
 .sp
-Just as in the case of the \fIsearch\fR function, inverse matching is supported for patterns, either wildcards or regular expressions. To invert or reverse the meaning and action of a pattern, prepend an exclamation mark (!). E.g., to select all non-hidden regular files in the Documents directory, issue this command: \fIs !^\.\ \-r :Documents\fR, or, to select all directories in /etc, except those ending with ".d": \fIs !*.d \-d :/etc\fR.
+Just as in the case of the \fIsearch\fR function, inverse matching is supported for patterns, either wildcards or regular expressions. To invert the meaning and action of a pattern, prepend an exclamation mark (!). E.g., to select all non-hidden regular files in the Documents directory, issue this command: \fIs !^\.\ \-f :Documents\fR, or, to select all directories in /etc, except those ending with ".d": \fIs !*.d \-d :/etc\fR.
 .sp
 Glob and regular expressions could be used together. For example: \fIs ^[r|R].*d$ /etc/*.conf\fR will select all files starting with either 'r' or 'R' and ending with 'd' in the current working directory, plus all .conf files in the \fI/etc\fR directory. However, this use is discouraged if both patterns refer to the same directory, since the second one will probably override the result of the first one.
 .sp
