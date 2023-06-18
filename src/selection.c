@@ -138,7 +138,7 @@ load_matches_invert_cwd(glob_t gbuf, const mode_t filetype, int *matches)
 
 	int i = (int)files;
 	while (--i >= 0) {
-		if (filetype && file_info[i].type != filetype)
+		if (filetype != 0 && file_info[i].type != filetype)
 			continue;
 
 		int j = (int)gbuf.gl_pathc;
@@ -170,9 +170,9 @@ load_matches_invert_nocwd(glob_t gbuf, struct dirent **ent,
 		if (lstat(ent[i]->d_name, &attr) == -1)
 			continue;
 		mode_t type = get_dt(attr.st_mode);
-		if (filetype && type != filetype)
+		if (filetype != 0 && type != filetype)
 #else
-		if (filetype && ent[i]->d_type != filetype)
+		if (filetype != 0 && ent[i]->d_type != filetype)
 #endif
 			continue;
 
@@ -216,20 +216,6 @@ load_matches(glob_t gbuf, const mode_t filetype, int *matches)
 {
 	char **list = (char **)xnmalloc(gbuf.gl_pathc + 2, sizeof(char *));
 	mode_t type = convert_filetype_mask(filetype);
-//	mode_t type = 0;
-
-/*	if (filetype) {
-		switch (filetype) {
-		case DT_DIR:  type = S_IFDIR;  break;
-		case DT_REG:  type = S_IFREG;  break;
-		case DT_LNK:  type = S_IFLNK;  break;
-		case DT_SOCK: type = S_IFSOCK; break;
-		case DT_FIFO: type = S_IFIFO;  break;
-		case DT_BLK:  type = S_IFBLK;  break;
-		case DT_CHR:  type = S_IFCHR;  break;
-		default: break;
-		}
-	} */
 
 	int i = (int)gbuf.gl_pathc;
 	while (--i >= 0) {
@@ -239,7 +225,7 @@ load_matches(glob_t gbuf, const mode_t filetype, int *matches)
 		if (basename && basename[1] && SELFORPARENT(basename + 1))
 			continue;
 
-		if (filetype) {
+		if (filetype != 0) {
 			struct stat attr;
 			if (lstat(gbuf.gl_pathv[i], &attr) == -1
 			|| (attr.st_mode & S_IFMT) != type)
@@ -370,7 +356,7 @@ sel_regex_cwd(regex_t regex, const mode_t filetype, const int invert)
 	int i = (int)files;
 
 	while (--i >= 0) {
-		if (filetype && file_info[i].type != filetype)
+		if (filetype != 0 && file_info[i].type != filetype)
 			continue;
 
 		char tmp_path[PATH_MAX];
@@ -406,24 +392,11 @@ sel_regex_nocwd(regex_t regex, const char *sel_path, const mode_t filetype,
 		return (-1);
 	}
 
-	mode_t type = 0;
-	if (filetype) {
-		switch (filetype) {
-		case DT_DIR:  type = S_IFDIR;  break;
-		case DT_REG:  type = S_IFREG;  break;
-		case DT_LNK:  type = S_IFLNK;  break;
-		case DT_SOCK: type = S_IFSOCK; break;
-		case DT_FIFO: type = S_IFIFO;  break;
-		case DT_BLK:  type = S_IFBLK;  break;
-		case DT_CHR:  type = S_IFCHR;  break;
-		default: break;
-		}
-	}
+	mode_t type = convert_filetype_mask(filetype);
 
 	int i = (int)filesn;
-
 	while (--i >= 0) {
-		if (filetype) {
+		if (filetype != 0) {
 			struct stat attr;
 			if (lstat(list[i]->d_name, &attr) != -1
 			&& (attr.st_mode & S_IFMT) != type) {
