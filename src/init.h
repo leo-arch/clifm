@@ -32,7 +32,6 @@ void check_env_filter(void);
 void check_options(void);
 void get_aliases(void);
 size_t get_cdpath(void);
-void get_data_dir(void);
 int  get_home(void);
 int  get_last_path(void);
 size_t get_path_env(void);
@@ -55,9 +54,8 @@ int  load_pinned_dir(void);
 int  load_prompts(void);
 int  load_remotes(void);
 void load_tags(void);
-void parse_cmdline_args(const int, char **);
 void set_prop_fields(const char *);
-int  set_start_path(void);
+//int  set_start_path(void);
 void unset_xargs(void);
 /*int xsecure_env(const int mode); */
 

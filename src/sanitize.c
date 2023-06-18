@@ -25,7 +25,7 @@
 #include "helpers.h"
 
 #include <string.h>
-#include <paths.h>
+#include <paths.h> /* _PATH_STDPATH */
 #include <stdio.h>
 #include <errno.h>
 

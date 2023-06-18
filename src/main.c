@@ -37,6 +37,7 @@
 #include <termios.h>
 #include <unistd.h>
 
+#include "args.h"
 #include "aux.h"
 #include "checks.h"
 #include "config.h"
