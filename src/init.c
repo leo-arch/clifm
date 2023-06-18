@@ -2164,7 +2164,7 @@ _set_starting_path(char *_path)
 	}
 }
 
-/* Evaluate external arguments, if any, and change initial variables to
+/* Evaluate command line arguments, if any, and change initial variables to
  * its corresponding value. */
 void
 external_arguments(const int argc, char **argv)

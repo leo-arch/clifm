@@ -202,16 +202,14 @@ check_term_support(const char *_term)
 void
 check_term(void)
 {
-	char *_term = getenv("TERM");
-	if (!_term || !*_term) {
-		_term = "xterm";
+	char *t = getenv("TERM");
+	if (!t || !*t) {
+		t = "xterm";
 		_err('w', PRINT_PROMPT, _("%s: The TERM environment variable is unset.\n"
 			"Running in xterm compatibility mode\n"), PROGRAM_NAME);
 	}
 
-	check_term_support(_term);
-
-	return;
+	check_term_support(t);
 }
 
 static void
@@ -319,7 +317,7 @@ check_third_party_cmds_alt(void)
 	if ( (p = get_cmd_path("grm")) ) {
 		free(p); bin_flags |= BSD_HAVE_COREUTILS;
 	}
-#endif // CHECK_COREUTILS
+#endif /* CHECK_COREUTILS */
 
 	set_mount_cmd(udisks2ok, udevilok);
 }
@@ -564,7 +562,7 @@ is_number(const char *restrict str)
  * char of STR. Used by find_cmd() (called by is_internal_c()) to check
  * for fused parameters in internal commands
  * Returns the index of the digit in STR or -1 if no digit is found */
-static inline int
+static int
 contains_digit(const char *str)
 {
 	if (!str || !*str || !*(++str))
@@ -582,8 +580,8 @@ contains_digit(const char *str)
 	return (-1);
 }
 
-/* Returns 1 if CMD is found in CMDS_LIST and zero otherwise */
-static inline int
+/* Return 1 if CMD is found in CMDS_LIST and zero otherwise. */
+static int
 find_cmd(const struct cmdslist_t *cmds_list, const size_t list_size, char *cmd)
 {
 	int found = 0, i = (int)list_size;
@@ -1048,6 +1046,4 @@ truncate_file(char *file, const int max, const int check_dups)
 	close(fdd);
 	fclose(fp);
 	free(tmp);
-
-	return;
 }

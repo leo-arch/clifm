@@ -176,7 +176,8 @@ xsecure_env(const int mode)
 	return EXIT_SUCCESS;
 }
 
-/* Create a sanitized environment to run a single shell command */
+/* Create a sanitized environment to run a single shell command.
+ * See https://redhat-crypto.gitlab.io/defensive-coding-guide/#sect-Defensive_Coding-Tasks-Processes-environ */
 void
 sanitize_cmd_environ(void)
 {
@@ -411,7 +412,7 @@ clean_cmd(const char *str)
 }
 
 /* Sanitize CMD according to TYPE. Returns zero if command is safe or
- * one if not */
+ * one if not. */
 int
 sanitize_cmd(const char *str, const int type)
 {

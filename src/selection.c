@@ -195,20 +195,16 @@ load_matches_invert_nocwd(glob_t gbuf, struct dirent **ent,
 static mode_t
 convert_filetype_mask(const mode_t filetype)
 {
-	mode_t type = 0;
-
 	switch (filetype) {
-	case DT_DIR:  type = S_IFDIR;  break;
-	case DT_REG:  type = S_IFREG;  break;
-	case DT_LNK:  type = S_IFLNK;  break;
-	case DT_SOCK: type = S_IFSOCK; break;
-	case DT_FIFO: type = S_IFIFO;  break;
-	case DT_BLK:  type = S_IFBLK;  break;
-	case DT_CHR:  type = S_IFCHR;  break;
-	default: break;
+	case DT_DIR:  return S_IFDIR;
+	case DT_REG:  return S_IFREG;
+	case DT_LNK:  return S_IFLNK;
+	case DT_SOCK: return S_IFSOCK;
+	case DT_FIFO: return S_IFIFO;
+	case DT_BLK:  return S_IFBLK;
+	case DT_CHR:  return S_IFCHR;
+	default: return 0;
 	}
-
-	return type;
 }
 
 static char **
@@ -491,7 +487,7 @@ parse_sel_params(char ***args, int *ifiletype, mode_t *filetype, int *isel_path)
 	char *sel_path = (char *)NULL;
 	int i;
 	for (i = 1; (*args)[i]; i++) {
-		if (*(*args)[i] == '-') {
+		if (*(*args)[i] == '-' && (*args)[i][1] && !(*args)[i][2]) {
 			*ifiletype = i;
 			*filetype = (mode_t)*((*args)[i] + 1);
 		}
@@ -808,6 +804,8 @@ sel_function(char **args)
 		if (i == ifiletype || i == isel_path)
 			continue;
 		f++;
+
+		pattern = (char *)NULL;
 		if (check_regex(args[i]) == EXIT_SUCCESS) {
 			pattern = args[i];
 			if (*pattern == '!')
@@ -1215,10 +1213,12 @@ end_deselect(const int err, char ***args)
 	if (sel_n && argsbk == 0 && deselect(*args) != 0)
 		exit_status = EXIT_FAILURE;
 
-	if (err) return EXIT_FAILURE;
+	if (err)
+		return EXIT_FAILURE;
 
 	if (conf.autols == 1 && exit_status == EXIT_SUCCESS)
 		reload_dirlist();
+
 	if (argsbk > 0) {
 		print_reload_msg(_("%zu file(s) deselected\n"), desel_files);
 		print_reload_msg(_("%zu total selected file(s)\n"), sel_n);
