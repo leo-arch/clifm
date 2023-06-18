@@ -2167,7 +2167,7 @@ _set_starting_path(char *_path)
 /* Evaluate command line arguments, if any, and change initial variables to
  * its corresponding value. */
 void
-external_arguments(const int argc, char **argv)
+parse_cmdline_args(const int argc, char **argv)
 {
 	/* Disable automatic error messages to be able to handle them ourselves
 	 * via the '?' case in the switch. */

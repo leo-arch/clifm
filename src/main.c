@@ -1093,10 +1093,10 @@ main(int argc, char *argv[])
 
 	set_locale();
 
-	/* Store external arguments to be able to rerun external_arguments()
+	/* Store external arguments to be able to rerun parse_cmdline_args()
 	 * in case the user edits the config file, in which case the program
 	 * must rerun init_config(), get_aliases(), get_prompt_cmds(), and
-	 * then external_arguments() */
+	 * then parse_cmdline_args() */
 	backup_argv(argc, argv);
 
 	atexit(free_stuff); /* free_stuff does some cleaning */
@@ -1113,16 +1113,16 @@ main(int argc, char *argv[])
 	unset_xargs();
 
 	/* Manage external arguments
-	 * External arguments will override initialization values (init_config) */
+	 * Command line arguments will override initialization values (init_config) */
 	if (argc > 1)
-		external_arguments(argc, argv);
-	/* external_arguments is executed before init_config because, if
+		parse_cmdline_args(argc, argv);
+	/* parse_cmdline_args is executed before init_config() because, if
 	 * specified (-P option), it sets the value of alt_profile, which
-	 * is then checked by init_config */
+	 * is then checked by init_config(). */
 
 	/* Get paths from PATH environment variable. These paths will be
 	 * used later by get_path_programs (for the autocomplete function)
-	 * and get_cmd_path() */
+	 * and get_cmd_path(). */
 	if (!(flags & PATH_PROGRAMS_ALREADY_LOADED))
 		path_n = get_path_env();
 	cdpath_n = get_cdpath();

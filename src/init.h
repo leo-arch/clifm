@@ -30,7 +30,6 @@ __BEGIN_DECLS
 int  backup_argv(const int, char **);
 void check_env_filter(void);
 void check_options(void);
-void external_arguments(const int, char **);
 void get_aliases(void);
 size_t get_cdpath(void);
 void get_data_dir(void);
@@ -56,6 +55,7 @@ int  load_pinned_dir(void);
 int  load_prompts(void);
 int  load_remotes(void);
 void load_tags(void);
+void parse_cmdline_args(const int, char **);
 void set_prop_fields(const char *);
 int  set_start_path(void);
 void unset_xargs(void);
