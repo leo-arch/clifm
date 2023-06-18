@@ -39,7 +39,7 @@
 #include <string.h>
 #include <termios.h>
 #include <time.h>
-//#include <unistd.h>
+#include <unistd.h>
 #include <readline/tilde.h> /* tilde_expand() */
 
 #if defined(__OpenBSD__)
