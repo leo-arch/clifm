@@ -294,11 +294,10 @@ run_in_background(const pid_t pid)
 	return get_exit_code(status, EXEC_BG_PROC);
 }
 
-//////// TESTING CUSTOM_SHELL
 /* Implementation of system(3).
  * Unlike system(3), which runs a command using '/bin/sh' as the executing
  * shell, xsystem() uses a custom shell (user.shell) specified via CLIFM_SHELL
- * or SHELL, falling back to '/bin/sh' only if none of this variables was set. */
+ * or SHELL, falling back to '/bin/sh' only if none of there variables are set. */
 static int
 xsystem(const char *cmd)
 {
@@ -328,7 +327,6 @@ xsystem(const char *cmd)
 		return (-1);
 	}
 }
-//////// TESTING CUSTOM_SHELL
 
 /* Execute a command using the system shell.
  *
@@ -350,10 +348,7 @@ launch_execle(const char *cmd)
 	&& xargs.secure_env == 0)
 		sanitize_cmd_environ();
 
-//	int status = system(cmd);
-//////// TESTING CUSTOM_SHELL
 	int status = xsystem(cmd);
-//////// TESTING CUSTOM_SHELL
 
 	if (xargs.secure_cmds == 1 && xargs.secure_env_full == 0
 	&& xargs.secure_env == 0)

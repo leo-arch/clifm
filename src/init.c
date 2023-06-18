@@ -962,13 +962,10 @@ get_user_data(void)
 		char *p = xgetenv("USER", 1);
 		tmp_user.name = p ? p : savestring(pw->pw_name, strlen(pw->pw_name));
 
-//		q = xgetenv("SHELL", 1);
-//////// TESTING CUSTOM_SHELL
 		char *custom_shell = xgetenv("CLIFM_SHELL", 1);
 		p = custom_shell ? custom_shell : xgetenv("SHELL", 1);
 		if (custom_shell)
 			is_custom_shell = 1;
-//////// TESTING CUSTOM_SHELL
 
 		tmp_user.shell = p ? p : savestring(pw->pw_shell, strlen(pw->pw_shell));
 
@@ -986,14 +983,9 @@ get_user_data(void)
 		homedir = pw->pw_dir;
 	}
 
-//////// TESTING CUSTOM_SHELL
 	tmp_user.shell_basename = (char *)NULL;
 	if (is_custom_shell == 1)
 		validate_custom_shell(&tmp_user.shell);
-
-//	char *p = tmp_user.shell ? strrchr(tmp_user.shell, '/') : (char *)NULL;
-//	tmp_user.shell_basename = (p && *(p + 1)) ? p + 1 : (char *)NULL;
-//////// TESTING CUSTOM_SHELL
 
 	if (homedir == pw->pw_dir && (!homedir
 	|| stat(homedir, &a) == -1 || !S_ISDIR(a.st_mode))) {
