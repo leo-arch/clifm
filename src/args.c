@@ -942,6 +942,7 @@ set_opener(const char *str)
 static void
 set_alt_profile(const char *name)
 {
+#ifndef _NO_PROFILES
 	free(alt_profile);
 
 	if (validate_profile_name(name) == EXIT_SUCCESS) {
@@ -952,6 +953,11 @@ set_alt_profile(const char *name)
 	fprintf(stderr, _("%s: %s: Invalid profile name\n"),
 		PROGRAM_NAME, name);
 	exit(EXIT_FAILURE);
+#else
+	UNUSED(name);
+	fprintf(stderr, "%s: profiles: %s\n", PROGRAM_NAME, NOT_AVAILABLE);
+	exit(EXIT_FAILURE);
+#endif /* !_NO_PROFILES */
 }
 
 static void
@@ -982,15 +988,18 @@ static void
 set_workspace(const char *opt)
 {
 	if (!is_number(opt))
-		return;
+		goto ERROR;
 
 	int opt_int = atoi(opt);
-	if (opt_int >= 0 && opt_int <= MAX_WS)
+	if (opt_int >= 0 && opt_int <= MAX_WS) {
 		cur_ws = opt_int - 1;
-	else {
-		_err('w', PRINT_PROMPT, "%s: %s: Invalid workspace\n",
-			PROGRAM_NAME, opt);
+		return;
 	}
+
+ERROR:
+	fprintf(stderr, "%s: %s: Invalid workspace. Valid "
+		"values are 1-8.\n", PROGRAM_NAME, opt);
+	exit(EXIT_FAILURE);
 }
 
 static void
@@ -999,14 +1008,162 @@ set_bell_style(const char *opt)
 	int a = atoi(opt);
 
 	if (!is_number(opt) || a < 0 || a > 3) {
-		_err('w', PRINT_PROMPT, "%s: %s: Invalid bell style. Valid options "
+		fprintf(stderr, "%s: %s: Invalid bell style. Valid values "
 			"are 0:none, 1:audible, 2:visible (requires readline >= 8.1), "
 			"3:flash. Defaults to 'visible', and, if not possible, 'none'.\n",
 			PROGRAM_NAME, opt);
-		return;
+		exit(EXIT_FAILURE);
 	}
 
 	xargs.bell_style = a;
+}
+
+static void
+set_fuzzy_algo(const char *opt)
+{
+	int a = opt ? atoi(opt) : -1;
+
+	if (!opt || a < 1 || a > FUZZY_ALGO_MAX) {
+		fprintf(stderr, "%s: %s: Invalid fuzzy algorithm. Valid "
+			"values are either 1 or 2.\n", PROGRAM_NAME, opt);
+		exit(EXIT_FAILURE);
+	}
+
+	xargs.fuzzy_match_algo = conf.fuzzy_match_algo = a;
+}
+
+static void
+set_color_scheme(const char *opt)
+{
+	if (!opt || !*opt || *opt == '-')
+		err_arg_required("--color-scheme");
+		/* err_arg_required calls exit() */
+
+	conf.usr_cscheme = savestring(opt, strlen(opt));
+}
+
+static void
+set_datadir(char *opt)
+{
+	if (!opt || !*opt || *opt == '-')
+		err_arg_required("--data-dir");
+		/* err_arg_required calls exit() */
+
+	get_data_dir_from_path(opt);
+}
+
+static void
+set_fnftab(void)
+{
+#ifndef _NO_FZF
+	xargs.fnftab = 1; fzftab = 1; tabmode = FNF_TAB;
+#else
+	fprintf(stderr, _("%s: fnf-tab: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
+	exit(EXIT_FAILURE);
+#endif /* _NO_FZF */
+}
+
+static void
+set_fzfpreview(const int optc)
+{
+#ifndef _NO_FZF
+	xargs.fzf_preview = 1;
+	conf.fzf_preview = optc == LOPT_FZFPREVIEW ? 1 : 2;
+	xargs.fzftab = fzftab = 1; tabmode = FZF_TAB;
+#else
+	fprintf(stderr, _("%s: fzf-preview: %s\n"),
+		PROGRAM_NAME, _(NOT_AVAILABLE));
+	exit(EXIT_FAILURE);
+#endif /* !_NO_FZF */
+}
+
+static void
+set_fzftab(void)
+{
+#ifndef _NO_FZF
+	xargs.fzftab = fzftab = 1; tabmode = FZF_TAB;
+#else
+	fprintf(stderr, _("%s: fzf-tab: %s\n"),
+		PROGRAM_NAME, _(NOT_AVAILABLE));
+	exit(EXIT_FAILURE);
+#endif /* !_NO_FZF */
+}
+
+static void
+set_fzytab(void)
+{
+	fprintf(stderr, "%s: --fzytab: We have migrated to 'fnf'.\n"
+		"Install 'fnf' (https://github.com/leo-arch/fnf) and then "
+		"use --fnftab instead\n", PROGRAM_NAME);
+	exit(EXIT_FAILURE);
+}
+
+static void
+set_no_colors(void)
+{
+	xargs.colorize = conf.colorize = 0;
+#ifndef _NO_HIGHLIGHT
+	xargs.highlight = conf.highlight = 0;
+#endif /* !_NO_HIGHLIGHT */
+}
+
+static void
+set_shotgun_file(char *opt)
+{
+	if (!opt || !*opt || *opt == '-')
+		err_arg_required("--shotgun-file");
+		/* err_arg_required calls exit() */
+
+	alt_preview_file = stat_file(opt);
+}
+
+static void
+set_smenutab(void)
+{
+#ifndef _NO_FZF
+	xargs.smenutab = 1; fzftab = 1; tabmode = SMENU_TAB;
+#else
+	fprintf(stderr, _("%s: smenu-tab: %s\n"),
+		PROGRAM_NAME, _(NOT_AVAILABLE));
+	exit(EXIT_FAILURE);
+#endif /* !_NO_FZF */
+}
+
+static void
+set_stdtab(void)
+{
+#ifndef _NO_FZF
+	xargs.fzftab = 0;
+#endif /* !_NO_FZF */
+	fzftab = 0; tabmode = STD_TAB;
+}
+
+static void
+set_no_suggestions(void)
+{
+#ifndef _NO_SUGGESTIONS
+	xargs.suggestions = conf.suggestions = 0;
+#endif /* !_NO_SUGGESTIONS */
+	return;
+}
+
+static void
+set_trash_as_rm(void)
+{
+#ifndef _NO_TRASH
+	xargs.trasrm = conf.tr_as_rm = 1;
+#else
+	fprintf(stderr, _("%s: trash: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
+	exit(EXIT_FAILURE);
+#endif /* !_NO_TRASH */
+}
+
+static void
+set_vt100(void)
+{
+	xargs.vt100 = 1;
+	xargs.clear_screen = conf.clear_screen = 0;
+	fzftab = 0; tabmode = STD_TAB;
 }
 
 /* Evaluate command line arguments, if any, and change initial variables to
@@ -1061,13 +1218,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case 'o': conf.autols = xargs.autols = 0; break;
 		case 'O': conf.autols = xargs.autols = 1; break;
 		case 'p': path_value = optarg; xargs.path = 1; break;
-		case 'P':
-#ifndef _NO_PROFILES
-			set_alt_profile(optarg); break;
-#else
-			fprintf(stderr, "%s: profiles: %s\n", PROGRAM_NAME, NOT_AVAILABLE);
-			exit(EXIT_FAILURE);
-#endif /* !_NO_PROFILES */
+		case 'P': set_alt_profile(optarg); break;
 		case 'r': xargs.refresh_on_empty_line = 0; break;
 		case 's': conf.splash_screen = xargs.splash = 1; break;
 		case 'S': xargs.stealth_mode = 1; break;
@@ -1079,87 +1230,44 @@ parse_cmdline_args(const int argc, char **argv)
 		case 'z': set_sort(optarg); break;
 
 		/* Only-long options */
-		case LOPT_BELL: set_bell_style(optarg); break;
+		case LOPT_BELL:
+			set_bell_style(optarg); break;
 		case LOPT_CASE_SENS_DIRJUMP:
 			xargs.case_sens_dirjump = conf.case_sens_dirjump = 1; break;
 		case LOPT_CASE_SENS_PATH_COMP:
 			xargs.case_sens_path_comp = conf.case_sens_path_comp = 1; break;
-		case LOPT_CD_ON_QUIT: xargs.cd_on_quit = conf.cd_on_quit = 1; break;
-
+		case LOPT_CD_ON_QUIT:
+			xargs.cd_on_quit = conf.cd_on_quit = 1; break;
 		case LOPT_COLOR_SCHEME:
-			if (!optarg || !*optarg || *optarg == '-')
-				err_arg_required("--color-scheme");
-			conf.usr_cscheme = savestring(optarg, strlen(optarg));
-			break;
-
-		case LOPT_CWD_IN_TITLE: xargs.cwd_in_title = 1; break;
-
+			set_color_scheme(optarg); break;
+		case LOPT_CWD_IN_TITLE:
+			xargs.cwd_in_title = 1; break;
 		case LOPT_DATA_DIR:
-			if (!optarg || !*optarg || *optarg == '-')
-				err_arg_required("--data-dir");
-			get_data_dir_from_path(optarg);
-			break;
-
+			set_datadir(optarg); break;
 		case LOPT_DESKTOP_NOTIFICATIONS:
 			xargs.desktop_notifications = conf.desktop_notifications = 1;
 			break;
-		case LOPT_DISK_USAGE: xargs.disk_usage = conf.disk_usage = 1; break;
-
+		case LOPT_DISK_USAGE:
+			xargs.disk_usage = conf.disk_usage = 1; break;
 		case LOPT_FNFTAB:
-#ifndef _NO_FZF
-			xargs.fnftab = 1; fzftab = 1; tabmode = FNF_TAB; break;
-#else
-			fprintf(stderr, _("%s: fnf-tab: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
-			exit(EXIT_FAILURE);
-#endif /* _NO_FZF */
-
+			set_fnftab(); break;
 		case LOPT_FULL_DIR_SIZE:
 			xargs.full_dir_size = conf.full_dir_size = 1; break;
-
-		case LOPT_FUZZY_ALGO: {
-			int a = optarg ? atoi(optarg) : -1;
-			if (!optarg || a < 1 || a > FUZZY_ALGO_MAX) {
-				fprintf(stderr, "%s: fuzzy-algo: Valid arguments are either 1 "
-					"or 2\n", PROGRAM_NAME);
-				exit(EXIT_FAILURE);
-			}
-			xargs.fuzzy_match_algo = conf.fuzzy_match_algo = a;
-			}
-			break;
-
+		case LOPT_FUZZY_ALGO:
+			set_fuzzy_algo(optarg); break;
 		case LOPT_FUZZY_MATCHING:
 			xargs.fuzzy_match = conf.fuzzy_match = 1; break;
-
 		case LOPT_FZFPREVIEW: /* fallthrough */
 		case LOPT_FZFPREVIEW_HIDDEN:
-#ifndef _NO_FZF
-			xargs.fzf_preview = 1;
-			conf.fzf_preview = optc == LOPT_FZFPREVIEW ? 1 : 2;
-			xargs.fzftab = fzftab = 1; tabmode = FZF_TAB;
-			break;
-#else
-			fprintf(stderr, _("%s: fzf-preview: %s\n"),
-				PROGRAM_NAME, _(NOT_AVAILABLE));
-			exit(EXIT_FAILURE);
-#endif /* !_NO_FZF */
-
+			set_fzfpreview(optc); break;
 		case LOPT_FZFTAB:
-#ifndef _NO_FZF
-			xargs.fzftab = fzftab = 1; tabmode = FZF_TAB; break;
-#else
-			fprintf(stderr, _("%s: fzf-tab: %s\n"),
-				PROGRAM_NAME, _(NOT_AVAILABLE));
-			exit(EXIT_FAILURE);
-#endif /* !_NO_FZF */
-
+			set_fzftab(); break;
 		case LOPT_FZYTAB:
-			fprintf(stderr, "%s: --fzytab: We have migrated to 'fnf'.\n"
-				"Install 'fnf' (https://github.com/leo-arch/fnf) and then "
-				"use --fnftab instead\n", PROGRAM_NAME);
-			exit(EXIT_FAILURE);
+			set_fzytab(); break;
 
 #ifndef _NO_ICONS
-		case LOPT_ICONS: xargs.icons = conf.icons = 1; break;
+		case LOPT_ICONS:
+			xargs.icons = conf.icons = 1; break;
 		case LOPT_ICONS_USE_FILE_COLOR:
 			xargs.icons = conf.icons = xargs.icons_use_file_color = 1; break;
 #else
@@ -1169,41 +1277,41 @@ parse_cmdline_args(const int argc, char **argv)
 			exit(EXIT_FAILURE);
 #endif /* !_NO_ICONS */
 
-		case LOPT_INT_VARS: xargs.int_vars = int_vars = 1; break;
-		case LOPT_LIST_AND_QUIT: xargs.list_and_quit = 1; break;
-
+		case LOPT_INT_VARS:
+			xargs.int_vars = int_vars = 1; break;
+		case LOPT_LIST_AND_QUIT:
+			xargs.list_and_quit = 1; break;
 		case LOPT_MAX_DIRHIST:
 			set_max_value(optarg, &xargs.max_dirhist, &conf.max_dirhist);
 			break;
-
 		case LOPT_MAX_FILES:
 			set_max_value(optarg, &xargs.max_files, &max_files);
 			break;
-
 		case LOPT_MAX_PATH:
 			set_max_value(optarg, &xargs.max_path, &conf.max_path);
 			break;
-
-		case LOPT_MNT_UDISKS2: xargs.mount_cmd = MNT_UDISKS2; break;
+		case LOPT_MNT_UDISKS2:
+			xargs.mount_cmd = MNT_UDISKS2; break;
 		case LOPT_NO_APPARENT_SIZE:
 			xargs.apparent_size = conf.apparent_size = 0; break;
-		case LOPT_NO_BOLD: xargs.no_bold = 1; break;
-		case LOPT_NO_CD_AUTO: xargs.autocd = conf.autocd = 0; break;
-		case LOPT_NO_CLASSIFY: xargs.classify = conf.classify = 0; break;
+		case LOPT_NO_BOLD:
+			xargs.no_bold = 1; break;
+		case LOPT_NO_CD_AUTO:
+			xargs.autocd = conf.autocd = 0; break;
+		case LOPT_NO_CLASSIFY:
+			xargs.classify = conf.classify = 0; break;
 		case LOPT_NO_CLEAR_SCREEN:
 			xargs.clear_screen = conf.clear_screen = 0; break;
-
 		case LOPT_NO_COLORS:
-			xargs.colorize = conf.colorize = 0;
-#ifndef _NO_HIGHLIGHT
-			xargs.highlight = conf.highlight = 0;
-#endif /* !_NO_HIGHLIGHT */
-			break;
-
-		case LOPT_NO_COLUMNS: xargs.columns = conf.columned = 0; break;
-		case LOPT_NO_DIR_JUMPER: xargs.no_dirjump = 1; break;
-		case LOPT_NO_FILE_CAP: xargs.check_cap = check_cap = 0; break;
-		case LOPT_NO_FILE_EXT: xargs.check_ext = check_ext = 0; break;
+			set_no_colors(); break;
+		case LOPT_NO_COLUMNS:
+			xargs.columns = conf.columned = 0; break;
+		case LOPT_NO_DIR_JUMPER:
+			xargs.no_dirjump = 1; break;
+		case LOPT_NO_FILE_CAP:
+			xargs.check_cap = check_cap = 0; break;
+		case LOPT_NO_FILE_EXT:
+			xargs.check_ext = check_ext = 0; break;
 		case LOPT_NO_FILES_COUNTER:
 			xargs.files_counter = conf.files_counter = 0; break;
 		case LOPT_NO_FOLLOW_SYMLINKS:
@@ -1216,26 +1324,26 @@ parse_cmdline_args(const int argc, char **argv)
 #endif /* !_NO_HIGHLIGHT */
 			break;
 
-		case LOPT_NO_HISTORY: xargs.history = 0; break;
-		case LOPT_NO_OPEN_AUTO: xargs.auto_open = conf.auto_open = 0; break;
-		case LOPT_NO_REFRESH_ON_RESIZE: xargs.refresh_on_resize = 0; break;
+		case LOPT_NO_HISTORY:
+			xargs.history = 0; break;
+		case LOPT_NO_OPEN_AUTO:
+			xargs.auto_open = conf.auto_open = 0; break;
+		case LOPT_NO_REFRESH_ON_RESIZE:
+			xargs.refresh_on_resize = 0; break;
 		case LOPT_NO_RESTORE_LAST_PATH:
 			xargs.restore_last_path = conf.restore_last_path = 0; break;
-
 		case LOPT_NO_SUGGESTIONS:
-#ifndef _NO_SUGGESTIONS
-			xargs.suggestions = conf.suggestions = 0;
-#endif /* !_NO_SUGGESTIONS */
-			break;
-
-		case LOPT_NO_TIPS: xargs.tips = conf.tips = 0; break;
-		case LOPT_NO_TRIM_NAMES: xargs.trim_names = conf.trim_names = 0; break;
+			set_no_suggestions(); break;
+		case LOPT_NO_TIPS:
+			xargs.tips = conf.tips = 0; break;
+		case LOPT_NO_TRIM_NAMES:
+			xargs.trim_names = conf.trim_names = 0; break;
 		case LOPT_NO_WARNING_PROMPT:
 			xargs.warning_prompt = conf.warning_prompt = 0; break;
 		case LOPT_NO_WELCOME_MESSAGE:
 			xargs.welcome_message = conf.welcome_message = 0; break;
-
-		case LOPT_ONLY_DIRS: xargs.only_dirs = conf.only_dirs = 1; break;
+		case LOPT_ONLY_DIRS:
+			xargs.only_dirs = conf.only_dirs = 1; break;
 
 		case LOPT_OPEN: { /* --open or --preview */
 			open_prev_file = optarg;
@@ -1246,10 +1354,14 @@ parse_cmdline_args(const int argc, char **argv)
 				open_prev_mode = OPEN_FILE; /* --open */
 		} break;
 
-		case LOPT_OPENER: set_opener(optarg); break;
-		case LOPT_PRINT_SEL: xargs.printsel = conf.print_selfiles = 1; break;
-		case LOPT_RL_VI_MODE: xargs.rl_vi_mode = 1; break;
-		case LOPT_SECURE_CMDS: xargs.secure_cmds = 1; break;
+		case LOPT_OPENER:
+			set_opener(optarg); break;
+		case LOPT_PRINT_SEL:
+			xargs.printsel = conf.print_selfiles = 1; break;
+		case LOPT_RL_VI_MODE:
+			xargs.rl_vi_mode = 1; break;
+		case LOPT_SECURE_CMDS:
+			xargs.secure_cmds = 1; break;
 
 		case LOPT_SECURE_ENV:
 			xargs.secure_env = 1;
@@ -1261,58 +1373,34 @@ parse_cmdline_args(const int argc, char **argv)
 			xsecure_env(SECURE_ENV_FULL);
 			break;
 
-		case LOPT_SEL_FILE: set_custom_selfile(optarg); break;
+		case LOPT_SEL_FILE:
+			set_custom_selfile(optarg); break;
 		case LOPT_SHARE_SELBOX:
 			xargs.share_selbox = conf.share_selbox = 1; break;
-
 		case LOPT_SHOTGUN_FILE:
-			if (!optarg || !*optarg || *optarg == '-')
-				err_arg_required("--shotgun-file");
-			alt_preview_file = stat_file(optarg);
-			break;
-
-		case LOPT_SI: xargs.si = 1; break;
-
+			set_shotgun_file(optarg); break;
+		case LOPT_SI:
+			xargs.si = 1; break;
 		case LOPT_SMENUTAB:
-#ifndef _NO_FZF
-			xargs.smenutab = 1; fzftab = 1; tabmode = SMENU_TAB; break;
-#else
-			fprintf(stderr, _("%s: smenu-tab: %s\n"),
-				PROGRAM_NAME, _(NOT_AVAILABLE));
-			exit(EXIT_FAILURE);
-#endif /* !_NO_FZF */
-
+			set_smenutab(); break;
 		case LOPT_SORT_REVERSE:
 			xargs.sort_reverse = conf.sort_reverse = 1; break;
-
 		case LOPT_STDTAB:
-#ifndef _NO_FZF
-			xargs.fzftab = 0;
-#endif /* !_NO_FZF */
-			fzftab = 0; tabmode = STD_TAB;
-			break;
-
+			set_stdtab(); break;
 		case LOPT_TRASH_AS_RM:
-#ifndef _NO_TRASH
-			xargs.trasrm = conf.tr_as_rm = 1; break;
-#else
-			fprintf(stderr, _("%s: trash: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
-			exit(EXIT_FAILURE);
-#endif /* !_NO_TRASH */
-
-		case LOPT_VIRTUAL_DIR: set_virtual_dir(optarg); break;
+			set_trash_as_rm(); break;
+		case LOPT_VIRTUAL_DIR:
+			set_virtual_dir(optarg); break;
 		case LOPT_VIRTUAL_DIR_FULL_PATHS:
 			xargs.virtual_dir_full_paths = 1; break;
-
 		case LOPT_VT100:
-			xargs.vt100 = 1;
-			xargs.clear_screen = conf.clear_screen = 0;
-			fzftab = 0; tabmode = STD_TAB;
-			break;
+			set_vt100(); break;
 
 		/* Handle error */
-		case ':': err_arg_required(argv[optind - 1]); exit(EXIT_FAILURE);
-		case '?': err_invalid_opt(argv[optind - 1]); exit(EXIT_FAILURE);
+		case ':':
+			err_arg_required(argv[optind - 1]); exit(EXIT_FAILURE);
+		case '?':
+			err_invalid_opt(argv[optind - 1]); exit(EXIT_FAILURE);
 
 		default: break;
 		}

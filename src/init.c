@@ -59,12 +59,6 @@
 #include "config.h"
 #include "exec.h"
 #include "jump.h" /* add_to_jumpdb() */
-
-#if defined(_NO_PROFILES) || defined(_NO_FZF) || defined(_NO_ICONS) \
-|| defined(_NO_TRASH)
-# include "messages.h"
-#endif
-
 #include "misc.h"
 #include "navigation.h"
 #include "sort.h"
