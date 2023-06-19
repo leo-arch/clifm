@@ -53,6 +53,199 @@
 #define STRINGIZE_(x) #x
 #define STRINGIZE(x) STRINGIZE_(x)
 
+#ifdef RUN_CMD
+# define OPTSTRING "+:aAb:c:C:D:eEfFgGhHiIk:lLmoOp:P:rsStvw:xyz:"
+#else
+# define OPTSTRING "+:aAb:c:D:eEfFgGhHiIk:lLmoOp:P:rsStvw:xyz:"
+#endif /* RUN_CMD */
+
+/* Macros for long options. Let's use values >= 200 to avoid conflicts
+ * with short options (a-Z == 65-122). */
+#define LOPT_NO_CD_AUTO             200
+#define LOPT_NO_OPEN_AUTO           201
+#define LOPT_NO_RESTORE_LAST_PATH   202
+#define LOPT_NO_TIPS                203
+#define LOPT_DISK_USAGE             204
+#define LOPT_NO_CLASSIFY            205
+#define LOPT_SHARE_SELBOX           206
+#define LOPT_RL_VI_MODE             207
+#define LOPT_MAX_DIRHIST            208
+#define LOPT_SORT_REVERSE           209
+#define LOPT_NO_FILES_COUNTER       210
+#define LOPT_NO_WELCOME_MESSAGE     211
+#define LOPT_NO_CLEAR_SCREEN        212
+//#define LOPT_ENABLE_LOGS            213
+#define LOPT_MAX_PATH               214
+#define LOPT_OPENER                 215
+#define LOPT_ONLY_DIRS              217
+#define LOPT_LIST_AND_QUIT          218
+#define LOPT_COLOR_SCHEME           219
+#define LOPT_CD_ON_QUIT             220
+#define LOPT_NO_DIR_JUMPER          221
+#define LOPT_ICONS                  222
+#define LOPT_ICONS_USE_FILE_COLOR   223
+#define LOPT_NO_COLUMNS             224
+#define LOPT_NO_COLORS              225
+#define LOPT_MAX_FILES              226
+#define LOPT_TRASH_AS_RM            227
+#define LOPT_CASE_SENS_DIRJUMP      228
+#define LOPT_CASE_SENS_PATH_COMP    229
+#define LOPT_CWD_IN_TITLE           230
+#define LOPT_OPEN                   231
+#define LOPT_PREVIEW                231 /* Same value as LOPT_OPEN is intended */
+#define LOPT_PRINT_SEL              232
+#define LOPT_NO_SUGGESTIONS         233
+//#define LOPT_AUTOJUMP               234
+#define LOPT_NO_HIGHLIGHT           235
+#define LOPT_NO_FILE_CAP            236
+#define LOPT_NO_FILE_EXT            237
+#define LOPT_NO_FOLLOW_SYMLINKS     238
+#define LOPT_INT_VARS               240
+#define LOPT_STDTAB                 241
+#define LOPT_NO_WARNING_PROMPT      242
+#define LOPT_MNT_UDISKS2            243
+#define LOPT_SECURE_ENV             244
+#define LOPT_SECURE_ENV_FULL        245
+#define LOPT_SECURE_CMDS            246
+#define LOPT_FULL_DIR_SIZE          247
+#define LOPT_NO_APPARENT_SIZE       248
+#define LOPT_NO_HISTORY             249
+#define LOPT_FZYTAB                 250 /* legacy: replaced by fnftab */
+#define LOPT_NO_REFRESH_ON_RESIZE   251
+#define LOPT_BELL                   252
+#define LOPT_FUZZY_MATCHING         253
+#define LOPT_SMENUTAB               254
+#define LOPT_VIRTUAL_DIR_FULL_PATHS 255
+#define LOPT_VIRTUAL_DIR            256
+#define LOPT_DESKTOP_NOTIFICATIONS  257
+#define LOPT_VT100                  258
+#define LOPT_NO_FZFPREVIEW          259
+#define LOPT_FZFPREVIEW             260 /* legacy: preview is now default */
+#define LOPT_FZFPREVIEW_HIDDEN      261
+#define LOPT_SHOTGUN_FILE           262
+#define LOPT_FZFTAB                 263
+#define LOPT_SI                     264
+#define LOPT_DATA_DIR               265
+#define LOPT_FUZZY_ALGO             266
+#define LOPT_SEL_FILE               267
+#define LOPT_NO_TRIM_NAMES          268
+#define LOPT_NO_BOLD                269
+#define LOPT_FNFTAB                 270
+
+/* Link long (--option) and short options (-o) for the getopt_long function. */
+static const struct option longopts[] = {
+	{"no-hidden", no_argument, 0, 'a'},
+	{"show-hidden", no_argument, 0, 'A'},
+	{"bookmarks-file", required_argument, 0, 'b'},
+	{"config-file", required_argument, 0, 'c'},
+
+#ifdef RUN_CMD
+	{"cmd", required_argument, 0, 'C'},
+#endif /* RUN_CMD */
+
+	{"config-dir", required_argument, 0, 'D'},
+	{"no-eln", no_argument, 0, 'e'},
+	{"eln-use-workspace-color", no_argument, 0, 'E'},
+	{"no-dirs-first", no_argument, 0, 'f'},
+	{"dirs-first", no_argument, 0, 'F'},
+	{"pager", no_argument, 0, 'g'},
+	{"no-pager", no_argument, 0, 'G'},
+	{"help", no_argument, 0, 'h'},
+	{"horizontal-list", no_argument, 0, 'H'},
+	{"no-case-sensitive", no_argument, 0, 'i'},
+	{"case-sensitive", no_argument, 0, 'I'},
+	{"keybindings-file", required_argument, 0, 'k'},
+	{"no-long-view", no_argument, 0, 'l'},
+	{"long-view", no_argument, 0, 'L'},
+	{"dirhist-map", no_argument, 0, 'm'},
+	{"no-autols", no_argument, 0, 'o'},
+	{"autols", no_argument, 0, 'O'},
+	{"path", required_argument, 0, 'p'},
+	{"profile", required_argument, 0, 'P'},
+	{"no-refresh-on-emtpy-line", no_argument, 0, 'r'},
+	{"splash", no_argument, 0, 's'},
+	{"stealth-mode", no_argument, 0, 'S'},
+	{"disk-usage-analyzer", no_argument, 0, 't'},
+	{"version", no_argument, 0, 'v'},
+	{"workspace", required_argument, 0, 'w'},
+	{"no-ext-cmds", no_argument, 0, 'x'},
+	{"light-mode", no_argument, 0, 'y'},
+	{"sort", required_argument, 0, 'z'},
+
+	/* Only-long options */
+//		{"autojump", no_argument, 0, LOPT_NO_AUTOJUMP},
+	{"bell", required_argument, 0, LOPT_BELL},
+	{"case-sens-dirjump", no_argument, 0, LOPT_CASE_SENS_DIRJUMP},
+	{"case-sens-path-comp", no_argument, 0, LOPT_CASE_SENS_PATH_COMP},
+	{"cd-on-quit", no_argument, 0, LOPT_CD_ON_QUIT},
+	{"color-scheme", required_argument, 0, LOPT_COLOR_SCHEME},
+	{"cwd-in-title", no_argument, 0, LOPT_CWD_IN_TITLE},
+	{"data-dir", required_argument, 0, LOPT_DATA_DIR},
+	{"desktop-notifications", no_argument, 0, LOPT_DESKTOP_NOTIFICATIONS},
+	{"disk-usage", no_argument, 0, LOPT_DISK_USAGE},
+//		{"enable-logs", no_argument, 0, LOPT_ENABLE_LOGS},
+	{"fnftab", no_argument, 0, LOPT_FNFTAB},
+	{"full-dir-size", no_argument, 0, LOPT_FULL_DIR_SIZE},
+	{"fuzzy-matching", no_argument, 0, LOPT_FUZZY_MATCHING},
+	{"fuzzy-algo", required_argument, 0, LOPT_FUZZY_ALGO},
+	{"fzfpreview", no_argument, 0, LOPT_FZFPREVIEW}, // legacy: is default now
+	{"fzfpreview-hidden", no_argument, 0, LOPT_FZFPREVIEW_HIDDEN},
+	{"fzftab", no_argument, 0, LOPT_FZFTAB},
+	{"fzytab", no_argument, 0, LOPT_FZYTAB}, // legacy: replaced by fnftab
+	{"icons", no_argument, 0, LOPT_ICONS},
+	{"icons-use-file-color", no_argument, 0, LOPT_ICONS_USE_FILE_COLOR},
+	{"int-vars", no_argument, 0, LOPT_INT_VARS},
+	{"list-and-quit", no_argument, 0, LOPT_LIST_AND_QUIT},
+	{"max-dirhist", required_argument, 0, LOPT_MAX_DIRHIST},
+	{"max-files", required_argument, 0, LOPT_MAX_FILES},
+	{"max-path", required_argument, 0, LOPT_MAX_PATH},
+	{"mnt-udisks2", no_argument, 0, LOPT_MNT_UDISKS2},
+	{"no-apparent-size", no_argument, 0, LOPT_NO_APPARENT_SIZE},
+	{"no-bold", no_argument, 0, LOPT_NO_BOLD},
+	{"no-cd-auto", no_argument, 0, LOPT_NO_CD_AUTO},
+	{"no-classify", no_argument, 0, LOPT_NO_CLASSIFY},
+	{"no-clear-screen", no_argument, 0, LOPT_NO_CLEAR_SCREEN},
+	{"no-colors", no_argument, 0, LOPT_NO_COLORS},
+	{"no-columns", no_argument, 0, LOPT_NO_COLUMNS},
+	{"no-dir-jumper", no_argument, 0, LOPT_NO_DIR_JUMPER},
+	{"no-file-cap", no_argument, 0, LOPT_NO_FILE_CAP},
+	{"no-file-ext", no_argument, 0, LOPT_NO_FILE_EXT},
+	{"no-follow-symlinks", no_argument, 0, LOPT_NO_FOLLOW_SYMLINKS},
+	{"no-highlight", no_argument, 0, LOPT_NO_HIGHLIGHT},
+	{"no-files-counter", no_argument, 0, LOPT_NO_FILES_COUNTER},
+	{"no-fzfpreview", no_argument, 0, LOPT_NO_FZFPREVIEW},
+	{"no-history", no_argument, 0, LOPT_NO_HISTORY},
+	{"no-open-auto", no_argument, 0, LOPT_NO_OPEN_AUTO},
+	{"no-refresh-on-resize", no_argument, 0, LOPT_NO_REFRESH_ON_RESIZE},
+	{"no-restore-last-path", no_argument, 0, LOPT_NO_RESTORE_LAST_PATH},
+	{"no-suggestions", no_argument, 0, LOPT_NO_SUGGESTIONS},
+	{"no-tips", no_argument, 0, LOPT_NO_TIPS},
+	{"no-trim-names", no_argument, 0, LOPT_NO_TRIM_NAMES},
+	{"no-warning-prompt", no_argument, 0, LOPT_NO_WARNING_PROMPT},
+	{"no-welcome-message", no_argument, 0, LOPT_NO_WELCOME_MESSAGE},
+	{"only-dirs", no_argument, 0, LOPT_ONLY_DIRS},
+	{"open", required_argument, 0, LOPT_OPEN},
+	{"opener", required_argument, 0, LOPT_OPENER},
+	{"preview", required_argument, 0, LOPT_PREVIEW},
+	{"print-sel", no_argument, 0, LOPT_PRINT_SEL},
+	{"rl-vi-mode", no_argument, 0, LOPT_RL_VI_MODE},
+	{"share-selbox", no_argument, 0, LOPT_SHARE_SELBOX},
+	{"sort-reverse", no_argument, 0, LOPT_SORT_REVERSE},
+	{"trash-as-rm", no_argument, 0, LOPT_TRASH_AS_RM},
+	{"secure-cmds", no_argument, 0, LOPT_SECURE_CMDS},
+	{"secure-env", no_argument, 0, LOPT_SECURE_ENV},
+	{"secure-env-full", no_argument, 0, LOPT_SECURE_ENV_FULL},
+	{"sel-file", required_argument, 0, LOPT_SEL_FILE},
+	{"shotgun-file", required_argument, 0, LOPT_SHOTGUN_FILE},
+	{"si", no_argument, 0, LOPT_SI},
+	{"smenutab", no_argument, 0, LOPT_SMENUTAB},
+	{"stdtab", no_argument, 0, LOPT_STDTAB},
+	{"virtual-dir", required_argument, 0, LOPT_VIRTUAL_DIR},
+	{"virtual-dir-full-paths", no_argument, 0, LOPT_VIRTUAL_DIR_FULL_PATHS},
+	{"vt100", no_argument, 0, LOPT_VT100},
+    {0, 0, 0, 0}
+};
+
 /* If path was not set (neither in the config file nor via command line nor
  * via the RestoreLastPath option), set the default (CWD), and if CWD is not
  * set, use the user's home directory, and if the home dir cannot be found
@@ -155,7 +348,7 @@ try_standard_data_dirs(void)
 #if defined(__HAIKU__)
 		"/boot/system/non-packaged/data",
 		"/boot/system/data",
-#endif
+#endif /* __HAIKU__ */
 		NULL };
 
 	size_t i;
@@ -375,7 +568,7 @@ open_reg_exit(char *filename, const int url, const int preview)
 		exit(EXIT_SUCCESS);
 #else
 	UNUSED(url);
-#endif
+#endif /* !_NO_LIRA */
 
 	char *p = (char *)NULL;
 	if (*filename == '~')
@@ -484,10 +677,20 @@ stat_file(char *file)
 }
 
 static void
-err_arg_required(const char *s)
+err_arg_required(const char *arg)
 {
 	fprintf(stderr, _("%s: '%s': Option requires an argument\n"
-		"Try '%s --help' for more information.\n"), PNL, s, PNL);
+		"Try '%s --help' for more information.\n"), PROGRAM_NAME,
+		arg, PROGRAM_NAME);
+	exit(EXIT_FAILURE);
+}
+
+static void
+err_invalid_opt(const char *arg)
+{
+	fprintf(stderr, _("%s: '%s': Unrecognized option\n"
+		"Try '%s --help' for more information.\n"),
+		PROGRAM_NAME, arg, PROGRAM_NAME);
 	exit(EXIT_FAILURE);
 }
 
@@ -715,124 +918,8 @@ void
 parse_cmdline_args(const int argc, char **argv)
 {
 	/* Disable automatic error messages to be able to handle them ourselves
-	 * via the '?' case in the switch. */
+	 * via the '?' and ':' cases in the switch statement. */
 	opterr = optind = 0;
-
-	/* Link long (--option) and short options (-o) for the getopt_long function. */
-	static const struct option longopts[] = {
-		{"no-hidden", no_argument, 0, 'a'},
-		{"show-hidden", no_argument, 0, 'A'},
-		{"bookmarks-file", required_argument, 0, 'b'},
-		{"config-file", required_argument, 0, 'c'},
-
-#ifdef RUN_CMD
-		{"cmd", required_argument, 0, 'C'},
-#endif
-
-		{"config-dir", required_argument, 0, 'D'},
-		{"no-eln", no_argument, 0, 'e'},
-		{"eln-use-workspace-color", no_argument, 0, 'E'},
-		{"no-dirs-first", no_argument, 0, 'f'},
-		{"dirs-first", no_argument, 0, 'F'},
-		{"pager", no_argument, 0, 'g'},
-		{"no-pager", no_argument, 0, 'G'},
-		{"help", no_argument, 0, 'h'},
-		{"horizontal-list", no_argument, 0, 'H'},
-		{"no-case-sensitive", no_argument, 0, 'i'},
-		{"case-sensitive", no_argument, 0, 'I'},
-		{"keybindings-file", required_argument, 0, 'k'},
-		{"no-long-view", no_argument, 0, 'l'},
-		{"long-view", no_argument, 0, 'L'},
-		{"dirhist-map", no_argument, 0, 'm'},
-		{"no-autols", no_argument, 0, 'o'},
-		{"autols", no_argument, 0, 'O'},
-		{"path", required_argument, 0, 'p'},
-		{"profile", required_argument, 0, 'P'},
-		{"no-refresh-on-emtpy-line", no_argument, 0, 'r'},
-		{"splash", no_argument, 0, 's'},
-		{"stealth-mode", no_argument, 0, 'S'},
-		{"disk-usage-analyzer", no_argument, 0, 't'},
-		{"version", no_argument, 0, 'v'},
-		{"workspace", required_argument, 0, 'w'},
-		{"no-ext-cmds", no_argument, 0, 'x'},
-		{"light-mode", no_argument, 0, 'y'},
-		{"sort", required_argument, 0, 'z'},
-
-		/* Only long options. Let's use values >= 200 to avoid conflicts
-		 * with short options (a-Z == 65-122). */
-		{"no-cd-auto", no_argument, 0, 200},
-		{"no-open-auto", no_argument, 0, 201},
-		{"no-restore-last-path", no_argument, 0, 202},
-		{"no-tips", no_argument, 0, 203},
-		{"disk-usage", no_argument, 0, 204},
-		{"no-classify", no_argument, 0, 205},
-		{"share-selbox", no_argument, 0, 206},
-		{"rl-vi-mode", no_argument, 0, 207},
-		{"max-dirhist", required_argument, 0, 208},
-		{"sort-reverse", no_argument, 0, 209},
-		{"no-files-counter", no_argument, 0, 210},
-		{"no-welcome-message", no_argument, 0, 211},
-		{"no-clear-screen", no_argument, 0, 212},
-//		{"enable-logs", no_argument, 0, 213},
-		{"max-path", required_argument, 0, 214},
-		{"opener", required_argument, 0, 215},
-		{"only-dirs", no_argument, 0, 217},
-		{"list-and-quit", no_argument, 0, 218},
-		{"color-scheme", required_argument, 0, 219},
-		{"cd-on-quit", no_argument, 0, 220},
-		{"no-dir-jumper", no_argument, 0, 221},
-		{"icons", no_argument, 0, 222},
-		{"icons-use-file-color", no_argument, 0, 223},
-		{"no-columns", no_argument, 0, 224},
-		{"no-colors", no_argument, 0, 225},
-		{"max-files", required_argument, 0, 226},
-		{"trash-as-rm", no_argument, 0, 227},
-		{"case-sens-dirjump", no_argument, 0, 228},
-		{"case-sens-path-comp", no_argument, 0, 229},
-		{"cwd-in-title", no_argument, 0, 230},
-		{"open", required_argument, 0, 231},
-		{"preview", required_argument, 0, 231},
-		{"print-sel", no_argument, 0, 232},
-		{"no-suggestions", no_argument, 0, 233},
-//		{"autojump", no_argument, 0, 234},
-		{"no-highlight", no_argument, 0, 235},
-		{"no-file-cap", no_argument, 0, 236},
-		{"no-file-ext", no_argument, 0, 237},
-		{"no-follow-symlinks", no_argument, 0, 238},
-		{"int-vars", no_argument, 0, 240},
-		{"stdtab", no_argument, 0, 241},
-		{"no-warning-prompt", no_argument, 0, 242},
-		{"mnt-udisks2", no_argument, 0, 243},
-		{"secure-env", no_argument, 0, 244},
-		{"secure-env-full", no_argument, 0, 245},
-		{"secure-cmds", no_argument, 0, 246},
-		{"full-dir-size", no_argument, 0, 247},
-		{"no-apparent-size", no_argument, 0, 248},
-		{"no-history", no_argument, 0, 249},
-		{"fzytab", no_argument, 0, 250},
-		{"no-refresh-on-resize", no_argument, 0, 251},
-		{"bell", required_argument, 0, 252},
-		{"fuzzy-matching", no_argument, 0, 253},
-		{"smenutab", no_argument, 0, 254},
-		{"virtual-dir-full-paths", no_argument, 0, 255},
-		{"virtual-dir", required_argument, 0, 256},
-		{"desktop-notifications", no_argument, 0, 257},
-		{"vt100", no_argument, 0, 258},
-		{"no-fzfpreview", no_argument, 0, 259},
-		{"fzfpreview", no_argument, 0, 260}, // legacy
-		{"fzfpreview-hidden", no_argument, 0, 261},
-		{"shotgun-file", required_argument, 0, 262},
-		{"fzftab", no_argument, 0, 263},
-		{"si", no_argument, 0, 264},
-		{"data-dir", required_argument, 0, 265},
-		{"fuzzy-algo", required_argument, 0, 266},
-		{"sel-file", required_argument, 0, 267},
-		{"no-trim-names", no_argument, 0, 268},
-		{"no-bold", no_argument, 0, 269},
-		{"fnftab", no_argument, 0, 270},
-	    {0, 0, 0, 0}
-	};
-
 	int optc;
 	int open_prev_mode = 0;
 
@@ -840,7 +927,7 @@ parse_cmdline_args(const int argc, char **argv)
 	char *path_value = (char *)NULL,
 #ifndef _NO_PROFILES
 		*alt_profile_value = (char *)NULL,
-#endif
+#endif /* !_NO_PROFILES */
 		*alt_dir_value = (char *)NULL,
 		*config_value = (char *)NULL,
 		*kbinds_value = (char *)NULL,
@@ -848,264 +935,11 @@ parse_cmdline_args(const int argc, char **argv)
 		*bm_value = (char *)NULL,
 		*open_prev_file = (char *)NULL;
 
-	while ((optc = getopt_long(argc, argv,
-#ifdef RUN_CMD
-		    "+aAb:c:C:D:eEfFgGhHiIk:lLmoOp:P:rsStUuvw:Wxyz:",
-#else
-		    "+aAb:c:D:eEfFgGhHiIk:lLmoOp:P:rsStUuvw:Wxyz:",
-#endif
-			longopts, (int *)0)) != EOF) {
-		/* ':' and '::' in the short options string means 'required' and
-		 * 'optional argument' respectivelly. Thus, 'p' and 'P' require
-		 * an argument here. The plus char (+) tells getopt to stop
-		 * processing at the first non-option (and non-argument) */
+	while ((optc = getopt_long(argc, argv, OPTSTRING,
+		longopts, (int *)0)) != EOF) {
+
 		switch (optc) {
-
-		case 200: xargs.autocd = conf.autocd = 0; break;
-		case 201: xargs.auto_open = conf.auto_open = 0; break;
-		case 202: xargs.restore_last_path = conf.restore_last_path = 0; break;
-		case 203: xargs.tips = conf.tips = 0; break;
-		case 204: xargs.disk_usage = conf.disk_usage = 1; break;
-		case 205: xargs.classify = conf.classify = 0; break;
-		case 206: xargs.share_selbox = conf.share_selbox = 1; break;
-		case 207: xargs.rl_vi_mode = 1; break;
-
-		case 208: {
-			if (!is_number(optarg))
-				break;
-			int opt_int = atoi(optarg);
-			if (opt_int >= 0 && opt_int <= INT_MAX)
-				xargs.max_dirhist = conf.max_dirhist = opt_int;
-		} break;
-
-		case 209: xargs.sort_reverse = conf.sort_reverse = 1; break;
-		case 210: xargs.files_counter = conf.files_counter = 0; break;
-		case 211: xargs.welcome_message = conf.welcome_message = 0; break;
-		case 212: xargs.clear_screen = conf.clear_screen = 0; break;
-
-		case 214: {
-			if (!is_number(optarg))
-				break;
-			int opt_int = atoi(optarg);
-			if (opt_int >= 0 && opt_int <= INT_MAX)
-				xargs.max_path = conf.max_path = opt_int;
-		} break;
-
-		case 215:
-			if (*optarg == '~') {
-				char *ep = tilde_expand(optarg);
-				if (ep) {
-					conf.opener = savestring(ep, strlen(ep));
-					free(ep);
-				} else {
-					_err('w', PRINT_PROMPT, _("%s: Error expanding tilde. "
-						"Using default opener\n"), PROGRAM_NAME);
-				}
-			} else {
-				conf.opener = savestring(optarg, strlen(optarg));
-			}
-			break;
-
-		case 217: xargs.only_dirs = conf.only_dirs = 1; break;
-		case 218: xargs.list_and_quit = 1; break;
-
-		case 219:
-			if (!optarg || !*optarg || *optarg == '-')
-				err_arg_required("--color-scheme");
-
-			conf.usr_cscheme = savestring(optarg, strlen(optarg));
-			break;
-
-		case 220: xargs.cd_on_quit = conf.cd_on_quit = 1; break;
-		case 221: xargs.no_dirjump = 1; break;
-#ifndef _NO_ICONS
-		case 222: xargs.icons = conf.icons = 1; break;
-		case 223: xargs.icons = conf.icons = xargs.icons_use_file_color = 1; break;
-#else
-		case 222: /* fallthrough */
-		case 223:
-			fprintf(stderr, _("%s: icons: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
-			exit(EXIT_FAILURE);
-#endif /* !_NO_ICONS */
-		case 224: xargs.columns = conf.columned = 0; break;
-		case 225:
-			xargs.colorize = conf.colorize = 0;
-#ifndef _NO_HIGHLIGHT
-			xargs.highlight = conf.highlight = 0;
-#endif /* _NO_HIGHLIGHT */
-			break;
-
-		case 226:
-			if (!is_number(optarg))
-				break;
-			int opt_int = atoi(optarg);
-			if (opt_int >= 0 && opt_int <= INT_MAX)
-				xargs.max_files = max_files = opt_int;
-			break;
-
-		case 227:
-#ifndef _NO_TRASH
-			xargs.trasrm = conf.tr_as_rm = 1; break;
-#else
-			fprintf(stderr, _("%s: trash: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
-			exit(EXIT_FAILURE);
-#endif /* !_NO_TRASH */
-		case 228: xargs.case_sens_dirjump = conf.case_sens_dirjump = 1; break;
-		case 229: xargs.case_sens_path_comp = conf.case_sens_path_comp = 1; break;
-		case 230: xargs.cwd_in_title = 1; break;
-
-		case 231: { /* --open or --preview */
-			open_prev_file = optarg;
-			int n = *argv[optind - 1] == '-' ? 1 : 2;
-			if (*(argv[optind - n] + 2) == 'p')
-				open_prev_mode = PREVIEW_FILE; /* --preview */
-			else
-				open_prev_mode = OPEN_FILE; /* --open */
-		} break;
-
-		case 232: xargs.printsel = conf.print_selfiles = 1; break;
-		case 233:
-#ifndef _NO_SUGGESTIONS
-			xargs.suggestions = conf.suggestions = 0;
-#endif /* !_NO_SUGGESTIONS */
-			break;
-		case 235:
-#ifndef _NO_HIGHLIGHT
-			xargs.highlight = conf.highlight = 0;
-#endif /* !_NO_HIGHLIGHT */
-			break;
-		case 236: xargs.check_cap = check_cap = 0; break;
-		case 237: xargs.check_ext = check_ext = 0; break;
-		case 238: xargs.follow_symlinks = follow_symlinks = 0; break;
-		case 240: xargs.int_vars = int_vars = 1; break;
-		case 241:
-#ifndef _NO_FZF
-			xargs.fzftab = 0;
-#endif /* !_NO_FZF */
-			fzftab = 0; tabmode = STD_TAB;
-			break;
-		case 242: xargs.warning_prompt = conf.warning_prompt = 0; break;
-		case 243: xargs.mount_cmd = MNT_UDISKS2; break;
-		case 244:
-			xargs.secure_env = 1;
-			xsecure_env(SECURE_ENV_IMPORT);
-			break;
-		case 245:
-			xargs.secure_env_full = 1;
-			xsecure_env(SECURE_ENV_FULL);
-			break;
-		case 246: xargs.secure_cmds = 1; break;
-		case 247: xargs.full_dir_size = conf.full_dir_size = 1; break;
-		case 248: xargs.apparent_size = conf.apparent_size = 0; break;
-		case 249: xargs.history = 0; break;
-		case 250:
-			fprintf(stderr, "%s: --fzytab: We have migrated to 'fnf'.\n"
-				"Install 'fnf' (https://github.com/leo-arch/fnf) and then "
-				"use --fnftab instead\n", PROGRAM_NAME);
-			exit(EXIT_FAILURE);
-		case 251: xargs.refresh_on_resize = 0; break;
-		case 252: {
-			int a = atoi(optarg);
-			if (!is_number(optarg) || a < 0 || a > 3) {
-				fprintf(stderr, "%s: bell: valid options are 0:none, 1:audible, "
-					"2:visible (requires readline >= 8.1), 3:flash. Defaults "
-					"to 'visible', and, if not possible, 'none'.\n",
-					PROGRAM_NAME);
-				exit(EXIT_FAILURE);
-			}
-			xargs.bell_style = a; break;
-			}
-		case 253: xargs.fuzzy_match = conf.fuzzy_match = 1; break;
-		case 254:
-#ifndef _NO_FZF
-			xargs.smenutab = 1; fzftab = 1; tabmode = SMENU_TAB; break;
-#else
-			fprintf(stderr, _("%s: smenu-tab: %s\n"),
-				PROGRAM_NAME, _(NOT_AVAILABLE));
-			exit(EXIT_FAILURE);
-#endif /* !_NO_FZF */
-		case 255: xargs.virtual_dir_full_paths = 1; break;
-		case 256:
-			if (optarg && *optarg && *optarg == '/') {
-				virtual_dir_value = optarg;
-			} else {
-				fprintf(stderr, "%s: '--virtual-dir': Absolute path "
-					"is required as argument\n", PROGRAM_NAME);
-				exit(EXIT_FAILURE);
-			}
-			break;
-
-		case 257: xargs.desktop_notifications = conf.desktop_notifications = 1;
-			break;
-		case 258:
-			xargs.vt100 = 1;
-			xargs.clear_screen = conf.clear_screen = 0;
-			fzftab = 0; tabmode = STD_TAB;
-			break;
-
-		case 259: xargs.fzf_preview = conf.fzf_preview = 0; break;
-
-		case 260: /* fallthrough */ /* --fzfpreview */
-		case 261: /* --fzfpreview-hidden */
-#ifndef _NO_FZF
-			xargs.fzf_preview = 1;
-			conf.fzf_preview = optc == 260 ? 1 : 2;
-			xargs.fzftab = fzftab = 1; tabmode = FZF_TAB;
-#else
-			fprintf(stderr, _("%s: fzf-preview: %s\n"),
-				PROGRAM_NAME, _(NOT_AVAILABLE));
-			exit(EXIT_FAILURE);
-#endif /* !_NO_FZF */
-			break;
-
-		case 262:
-			if (!optarg || !*optarg || *optarg == '-')
-				err_arg_required("--shotgun-file");
-
-			alt_preview_file = stat_file(optarg);
-			break;
-
-		case 263:
-#ifndef _NO_FZF
-			xargs.fzftab = fzftab = 1; tabmode = FZF_TAB; break;
-#else
-			fprintf(stderr, _("%s: fzf-tab: %s\n"),
-				PROGRAM_NAME, _(NOT_AVAILABLE));
-			exit(EXIT_FAILURE);
-#endif /* !_NO_FZF */
-
-		case 264: xargs.si = 1; break;
-
-		case 265:
-			if (!optarg || !*optarg || *optarg == '-')
-				err_arg_required("--data-dir");
-
-			get_data_dir_from_path(optarg);
-			break;
-
-		case 266: {
-			int a = optarg ? atoi(optarg) : -1;
-			if (!optarg || a < 1 || a > FUZZY_ALGO_MAX) {
-				fprintf(stderr, "%s: fuzzy-algo: Valid arguments are either 1 "
-					"or 2\n", PROGRAM_NAME);
-				exit(EXIT_FAILURE);
-			}
-			xargs.fuzzy_match_algo = conf.fuzzy_match_algo = a;
-			}
-			break;
-
-		case 267: set_custom_selfile(optarg); break;
-		case 268: xargs.trim_names = conf.trim_names = 0; break;
-		case 269: xargs.no_bold = 1; break;
-
-		case 270:
-#ifndef _NO_FZF
-			xargs.fnftab = 1; fzftab = 1; tabmode = FNF_TAB; break;
-#else
-			fprintf(stderr, _("%s: fnf-tab: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
-			exit(EXIT_FAILURE);
-#endif /* _NO_FZF */
-
+		/* Short options */
 		case 'a': conf.show_hidden = xargs.hidden = 0; break;
 		case 'A': conf.show_hidden = xargs.hidden = 1; break;
 		case 'b': xargs.bm_file = 1; bm_value = optarg; break;
@@ -1119,7 +953,7 @@ parse_cmdline_args(const int argc, char **argv)
 			}
 			cmd_line_cmd = savestring(optarg, strlen(optarg));
 			break;
-#endif
+#endif /* RUN_CMD */
 
 		case 'D': alt_dir_value = optarg; break;
 		case 'e': xargs.noeln = conf.no_eln = 1; break;
@@ -1164,42 +998,291 @@ parse_cmdline_args(const int argc, char **argv)
 		case 'y': conf.light_mode = xargs.light = 1; break;
 		case 'z': set_sort(optarg); break;
 
-		case '?': /* If some unrecognized option was found... */
-			/* Options that require an argument */
-			/* Short options */
-			switch (optopt) {
-			case 'b': /* fallthrough */
-			case 'c': /* fallthrough */
-#ifdef RUN_CMD
-			case 'C': /* fallthrough */
-#endif
-			case 'D': /* fallthrough */
-			case 'k': /* fallthrough */
-			case 'p': /* fallthrough */
-			case 'P': /* fallthrough */
-			case 'w': /* fallthrough */
-			case 'z': /* fallthrough */
-			/* Long options */
-			case 208: /* fallthrough */
-			case 214: /* fallthrough */
-			case 215: /* fallthrough */
-			case 219: /* fallthrough */
-			case 226: /* fallthrough */
-			case 231: /* fallthrough */
-			case 252: /* fallthrough */
-			case 256: /* fallthrough */
-			case 262: /* fallthrough */
-			case 265: /* fallthrough */
-			case 266: /* fallthrough */
-			case 267: err_arg_required(argv[optind - 1]); break;
-
-			default: break;
+		/* Only-long options */
+		case LOPT_BELL: {
+			int a = atoi(optarg);
+			if (!is_number(optarg) || a < 0 || a > 3) {
+				fprintf(stderr, "%s: bell: valid options are 0:none, 1:audible, "
+					"2:visible (requires readline >= 8.1), 3:flash. Defaults "
+					"to 'visible', and, if not possible, 'none'.\n",
+					PROGRAM_NAME);
+				exit(EXIT_FAILURE);
+			}
+			xargs.bell_style = a; break;
 			}
 
-			fprintf(stderr, _("%s: '%s': Unrecognized option\n"
-				"Try '%s --help' for more information.\n"),
-				PROGRAM_NAME, argv[optind - 1], PNL);
+		case LOPT_CASE_SENS_DIRJUMP:
+			xargs.case_sens_dirjump = conf.case_sens_dirjump = 1; break;
+		case LOPT_CASE_SENS_PATH_COMP:
+			xargs.case_sens_path_comp = conf.case_sens_path_comp = 1; break;
+		case LOPT_CD_ON_QUIT: xargs.cd_on_quit = conf.cd_on_quit = 1; break;
+
+		case LOPT_COLOR_SCHEME:
+			if (!optarg || !*optarg || *optarg == '-')
+				err_arg_required("--color-scheme");
+
+			conf.usr_cscheme = savestring(optarg, strlen(optarg));
+			break;
+
+		case LOPT_CWD_IN_TITLE: xargs.cwd_in_title = 1; break;
+
+		case LOPT_DATA_DIR:
+			if (!optarg || !*optarg || *optarg == '-')
+				err_arg_required("--data-dir");
+
+			get_data_dir_from_path(optarg);
+			break;
+
+		case LOPT_DESKTOP_NOTIFICATIONS:
+			xargs.desktop_notifications = conf.desktop_notifications = 1;
+			break;
+		case LOPT_DISK_USAGE: xargs.disk_usage = conf.disk_usage = 1; break;
+
+		case LOPT_FNFTAB:
+#ifndef _NO_FZF
+			xargs.fnftab = 1; fzftab = 1; tabmode = FNF_TAB; break;
+#else
+			fprintf(stderr, _("%s: fnf-tab: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
 			exit(EXIT_FAILURE);
+#endif /* _NO_FZF */
+
+		case LOPT_FULL_DIR_SIZE:
+			xargs.full_dir_size = conf.full_dir_size = 1; break;
+
+		case LOPT_FUZZY_ALGO: {
+			int a = optarg ? atoi(optarg) : -1;
+			if (!optarg || a < 1 || a > FUZZY_ALGO_MAX) {
+				fprintf(stderr, "%s: fuzzy-algo: Valid arguments are either 1 "
+					"or 2\n", PROGRAM_NAME);
+				exit(EXIT_FAILURE);
+			}
+			xargs.fuzzy_match_algo = conf.fuzzy_match_algo = a;
+			}
+			break;
+
+		case LOPT_FUZZY_MATCHING:
+			xargs.fuzzy_match = conf.fuzzy_match = 1; break;
+
+		case LOPT_FZFPREVIEW: /* fallthrough */
+		case LOPT_FZFPREVIEW_HIDDEN:
+#ifndef _NO_FZF
+			xargs.fzf_preview = 1;
+			conf.fzf_preview = optc == LOPT_FZFPREVIEW ? 1 : 2;
+			xargs.fzftab = fzftab = 1; tabmode = FZF_TAB;
+#else
+			fprintf(stderr, _("%s: fzf-preview: %s\n"),
+				PROGRAM_NAME, _(NOT_AVAILABLE));
+			exit(EXIT_FAILURE);
+#endif /* !_NO_FZF */
+			break;
+
+		case LOPT_FZFTAB:
+#ifndef _NO_FZF
+			xargs.fzftab = fzftab = 1; tabmode = FZF_TAB; break;
+#else
+			fprintf(stderr, _("%s: fzf-tab: %s\n"),
+				PROGRAM_NAME, _(NOT_AVAILABLE));
+			exit(EXIT_FAILURE);
+#endif /* !_NO_FZF */
+
+		case LOPT_FZYTAB:
+			fprintf(stderr, "%s: --fzytab: We have migrated to 'fnf'.\n"
+				"Install 'fnf' (https://github.com/leo-arch/fnf) and then "
+				"use --fnftab instead\n", PROGRAM_NAME);
+			exit(EXIT_FAILURE);
+
+#ifndef _NO_ICONS
+		case LOPT_ICONS: xargs.icons = conf.icons = 1; break;
+		case LOPT_ICONS_USE_FILE_COLOR:
+			xargs.icons = conf.icons = xargs.icons_use_file_color = 1; break;
+#else
+		case LOPT_ICONS: /* fallthrough */
+		case LOPT_ICONS_USE_FILE_COLOR:
+			fprintf(stderr, _("%s: icons: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
+			exit(EXIT_FAILURE);
+#endif /* !_NO_ICONS */
+
+		case LOPT_INT_VARS: xargs.int_vars = int_vars = 1; break;
+		case LOPT_LIST_AND_QUIT: xargs.list_and_quit = 1; break;
+
+		case LOPT_MAX_DIRHIST: {
+			if (!is_number(optarg))
+				break;
+			int opt_int = atoi(optarg);
+			if (opt_int >= 0 && opt_int <= INT_MAX)
+				xargs.max_dirhist = conf.max_dirhist = opt_int;
+		} break;
+
+		case LOPT_MAX_FILES: {
+			if (!is_number(optarg))
+				break;
+			int opt_int = atoi(optarg);
+			if (opt_int >= 0 && opt_int <= INT_MAX)
+				xargs.max_files = max_files = opt_int;
+		} break;
+
+		case LOPT_MAX_PATH: {
+			if (!is_number(optarg))
+				break;
+			int opt_int = atoi(optarg);
+			if (opt_int >= 0 && opt_int <= INT_MAX)
+				xargs.max_path = conf.max_path = opt_int;
+		} break;
+
+		case LOPT_MNT_UDISKS2: xargs.mount_cmd = MNT_UDISKS2; break;
+		case LOPT_NO_APPARENT_SIZE:
+			xargs.apparent_size = conf.apparent_size = 0; break;
+		case LOPT_NO_BOLD: xargs.no_bold = 1; break;
+		case LOPT_NO_CD_AUTO: xargs.autocd = conf.autocd = 0; break;
+		case LOPT_NO_CLASSIFY: xargs.classify = conf.classify = 0; break;
+		case LOPT_NO_CLEAR_SCREEN:
+			xargs.clear_screen = conf.clear_screen = 0; break;
+
+		case LOPT_NO_COLORS:
+			xargs.colorize = conf.colorize = 0;
+#ifndef _NO_HIGHLIGHT
+			xargs.highlight = conf.highlight = 0;
+#endif /* !_NO_HIGHLIGHT */
+			break;
+
+		case LOPT_NO_COLUMNS: xargs.columns = conf.columned = 0; break;
+		case LOPT_NO_DIR_JUMPER: xargs.no_dirjump = 1; break;
+		case LOPT_NO_FILE_CAP: xargs.check_cap = check_cap = 0; break;
+		case LOPT_NO_FILE_EXT: xargs.check_ext = check_ext = 0; break;
+		case LOPT_NO_FILES_COUNTER:
+			xargs.files_counter = conf.files_counter = 0; break;
+		case LOPT_NO_FOLLOW_SYMLINKS:
+			xargs.follow_symlinks = follow_symlinks = 0; break;
+		case LOPT_NO_FZFPREVIEW:
+			xargs.fzf_preview = conf.fzf_preview = 0; break;
+		case LOPT_NO_HIGHLIGHT:
+#ifndef _NO_HIGHLIGHT
+			xargs.highlight = conf.highlight = 0;
+#endif /* !_NO_HIGHLIGHT */
+			break;
+
+		case LOPT_NO_HISTORY: xargs.history = 0; break;
+		case LOPT_NO_OPEN_AUTO: xargs.auto_open = conf.auto_open = 0; break;
+		case LOPT_NO_REFRESH_ON_RESIZE: xargs.refresh_on_resize = 0; break;
+		case LOPT_NO_RESTORE_LAST_PATH:
+			xargs.restore_last_path = conf.restore_last_path = 0; break;
+
+		case LOPT_NO_SUGGESTIONS:
+#ifndef _NO_SUGGESTIONS
+			xargs.suggestions = conf.suggestions = 0;
+#endif /* !_NO_SUGGESTIONS */
+			break;
+
+		case LOPT_NO_TIPS: xargs.tips = conf.tips = 0; break;
+		case LOPT_NO_TRIM_NAMES: xargs.trim_names = conf.trim_names = 0; break;
+		case LOPT_NO_WARNING_PROMPT:
+			xargs.warning_prompt = conf.warning_prompt = 0; break;
+		case LOPT_NO_WELCOME_MESSAGE:
+			xargs.welcome_message = conf.welcome_message = 0; break;
+
+		case LOPT_ONLY_DIRS: xargs.only_dirs = conf.only_dirs = 1; break;
+
+		case LOPT_OPEN: { /* --open or --preview */
+			open_prev_file = optarg;
+			int n = *argv[optind - 1] == '-' ? 1 : 2;
+			if (*(argv[optind - n] + 2) == 'p')
+				open_prev_mode = PREVIEW_FILE; /* --preview */
+			else
+				open_prev_mode = OPEN_FILE; /* --open */
+		} break;
+
+		case LOPT_OPENER:
+			if (*optarg == '~') {
+				char *ep = tilde_expand(optarg);
+				if (ep) {
+					conf.opener = savestring(ep, strlen(ep));
+					free(ep);
+				} else {
+					_err('w', PRINT_PROMPT, _("%s: Error expanding tilde. "
+						"Using default opener\n"), PROGRAM_NAME);
+				}
+			} else {
+				conf.opener = savestring(optarg, strlen(optarg));
+			}
+			break;
+
+		case LOPT_PRINT_SEL: xargs.printsel = conf.print_selfiles = 1; break;
+		case LOPT_RL_VI_MODE: xargs.rl_vi_mode = 1; break;
+		case LOPT_SECURE_CMDS: xargs.secure_cmds = 1; break;
+
+		case LOPT_SECURE_ENV:
+			xargs.secure_env = 1;
+			xsecure_env(SECURE_ENV_IMPORT);
+			break;
+
+		case LOPT_SECURE_ENV_FULL:
+			xargs.secure_env_full = 1;
+			xsecure_env(SECURE_ENV_FULL);
+			break;
+
+		case LOPT_SEL_FILE: set_custom_selfile(optarg); break;
+		case LOPT_SHARE_SELBOX:
+			xargs.share_selbox = conf.share_selbox = 1; break;
+
+		case LOPT_SHOTGUN_FILE:
+			if (!optarg || !*optarg || *optarg == '-')
+				err_arg_required("--shotgun-file");
+
+			alt_preview_file = stat_file(optarg);
+			break;
+
+		case LOPT_SI: xargs.si = 1; break;
+
+		case LOPT_SMENUTAB:
+#ifndef _NO_FZF
+			xargs.smenutab = 1; fzftab = 1; tabmode = SMENU_TAB; break;
+#else
+			fprintf(stderr, _("%s: smenu-tab: %s\n"),
+				PROGRAM_NAME, _(NOT_AVAILABLE));
+			exit(EXIT_FAILURE);
+#endif /* !_NO_FZF */
+
+		case LOPT_SORT_REVERSE:
+			xargs.sort_reverse = conf.sort_reverse = 1; break;
+
+		case LOPT_STDTAB:
+#ifndef _NO_FZF
+			xargs.fzftab = 0;
+#endif /* !_NO_FZF */
+			fzftab = 0; tabmode = STD_TAB;
+			break;
+
+		case LOPT_TRASH_AS_RM:
+#ifndef _NO_TRASH
+			xargs.trasrm = conf.tr_as_rm = 1; break;
+#else
+			fprintf(stderr, _("%s: trash: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
+			exit(EXIT_FAILURE);
+#endif /* !_NO_TRASH */
+
+		case LOPT_VIRTUAL_DIR:
+			if (optarg && *optarg && *optarg == '/') {
+				virtual_dir_value = optarg;
+			} else {
+				fprintf(stderr, "%s: '--virtual-dir': Absolute path "
+					"is required as argument\n", PROGRAM_NAME);
+				exit(EXIT_FAILURE);
+			}
+			break;
+
+		case LOPT_VIRTUAL_DIR_FULL_PATHS:
+			xargs.virtual_dir_full_paths = 1; break;
+
+		case LOPT_VT100:
+			xargs.vt100 = 1;
+			xargs.clear_screen = conf.clear_screen = 0;
+			fzftab = 0; tabmode = STD_TAB;
+			break;
+
+		/* Handle error */
+		case ':': err_arg_required(argv[optind - 1]); exit(EXIT_FAILURE);
+		case '?': err_invalid_opt(argv[optind - 1]); exit(EXIT_FAILURE);
+
 		default: break;
 		}
 	}
@@ -1248,5 +1331,5 @@ parse_cmdline_args(const int argc, char **argv)
 			exit(EXIT_FAILURE);
 		}
 	}
-#endif
+#endif /* !_NO_PROFILES */
 }

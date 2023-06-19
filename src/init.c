@@ -54,12 +54,10 @@
 
 #include <paths.h> /* _PATH_STDPATH */
 
-//#include "args.h"
 #include "aux.h"
 #include "checks.h" /* truncate_file(), is_number() */
 #include "config.h"
 #include "exec.h"
-//#include "init.h"
 #include "jump.h" /* add_to_jumpdb() */
 
 #if defined(_NO_PROFILES) || defined(_NO_FZF) || defined(_NO_ICONS) \
@@ -67,11 +65,9 @@
 # include "messages.h"
 #endif
 
-//#include "mime.h"
 #include "misc.h"
 #include "navigation.h"
 #include "sort.h"
-//#include "file_operations.h"
 #include "autocmds.h"
 #include "sanitize.h"
 #include "selection.h"
@@ -1966,7 +1962,8 @@ load_pinned_dir(void)
 }
 
 #if defined(__CYGWIN__)
-static int check_cmd_ext(const char *s)
+static int
+check_cmd_ext(const char *s)
 {
 	if (!s || !*s)
 		return 1;
@@ -2120,7 +2117,7 @@ get_path_programs(void)
 	bin_commands[l] = (char *)NULL;
 }
 
-static inline void
+static void
 free_aliases(void)
 {
 	int i = (int)aliases_n;
@@ -2135,7 +2132,7 @@ free_aliases(void)
 	aliases_n = 0;
 }
 
-static inline void
+static void
 write_alias(const char *s, char *p)
 {
 	aliases = (struct alias_t *)xrealloc(aliases, (aliases_n + 2)
@@ -2398,7 +2395,7 @@ set_sudo_cmd(void)
 	sudo_cmd = DEF_SUDO_CMD;
 }
 
-/* If some option was not set, set it to the default value */
+/* If some option was not set, set it to the default value. */
 void
 check_options(void)
 {
