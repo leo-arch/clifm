@@ -912,6 +912,42 @@ _set_starting_path(char *_path)
 	}
 }
 
+static void
+set_opener(const char *str)
+{
+	if (!str || !*str)
+		return;
+
+	if (*str != '~') {
+		conf.opener = savestring(optarg, strlen(optarg));
+		return;
+	}
+
+	char *ep = tilde_expand(optarg);
+	if (ep) {
+		conf.opener = savestring(ep, strlen(ep));
+		free(ep);
+	} else {
+		_err('w', PRINT_PROMPT, _("%s: Error expanding tilde. "
+			"Using default opener.\n"), PROGRAM_NAME);
+	}
+}
+
+static void
+set_alt_profile(const char *name)
+{
+	free(alt_profile);
+
+	if (validate_profile_name(name) == EXIT_SUCCESS) {
+		alt_profile = savestring(name, strlen(name));
+		return;
+	}
+
+	fprintf(stderr, _("%s: %s: Invalid profile name\n"),
+		PROGRAM_NAME, name);
+	exit(EXIT_FAILURE);
+}
+
 /* Evaluate command line arguments, if any, and change initial variables to
  * its corresponding value. */
 void
@@ -1020,7 +1056,6 @@ parse_cmdline_args(const int argc, char **argv)
 		case LOPT_COLOR_SCHEME:
 			if (!optarg || !*optarg || *optarg == '-')
 				err_arg_required("--color-scheme");
-
 			conf.usr_cscheme = savestring(optarg, strlen(optarg));
 			break;
 
@@ -1029,7 +1064,6 @@ parse_cmdline_args(const int argc, char **argv)
 		case LOPT_DATA_DIR:
 			if (!optarg || !*optarg || *optarg == '-')
 				err_arg_required("--data-dir");
-
 			get_data_dir_from_path(optarg);
 			break;
 
@@ -1191,21 +1225,7 @@ parse_cmdline_args(const int argc, char **argv)
 				open_prev_mode = OPEN_FILE; /* --open */
 		} break;
 
-		case LOPT_OPENER:
-			if (*optarg == '~') {
-				char *ep = tilde_expand(optarg);
-				if (ep) {
-					conf.opener = savestring(ep, strlen(ep));
-					free(ep);
-				} else {
-					_err('w', PRINT_PROMPT, _("%s: Error expanding tilde. "
-						"Using default opener\n"), PROGRAM_NAME);
-				}
-			} else {
-				conf.opener = savestring(optarg, strlen(optarg));
-			}
-			break;
-
+		case LOPT_OPENER: set_opener(optarg); break;
 		case LOPT_PRINT_SEL: xargs.printsel = conf.print_selfiles = 1; break;
 		case LOPT_RL_VI_MODE: xargs.rl_vi_mode = 1; break;
 		case LOPT_SECURE_CMDS: xargs.secure_cmds = 1; break;
@@ -1321,15 +1341,7 @@ parse_cmdline_args(const int argc, char **argv)
 		set_alt_config_file(config_value);
 
 #ifndef _NO_PROFILES
-	if (alt_profile_value) {
-		free(alt_profile);
-		if (validate_profile_name(alt_profile_value) == EXIT_SUCCESS) {
-			alt_profile = savestring(alt_profile_value, strlen(alt_profile_value));
-		} else {
-			fprintf(stderr, _("%s: %s: Invalid profile name\n"), PROGRAM_NAME,
-				alt_profile_value);
-			exit(EXIT_FAILURE);
-		}
-	}
+	if (alt_profile_value)
+		set_alt_profile(alt_profile_value);
 #endif /* !_NO_PROFILES */
 }
