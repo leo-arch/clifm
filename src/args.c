@@ -46,6 +46,11 @@
 #include "sanitize.h"
 #include "strings.h"
 
+#if defined(_NO_PROFILES) || defined(_NO_FZF) || defined(_NO_ICONS) \
+|| defined(_NO_TRASH)
+# include "messages.h"
+#endif
+
 #define PREVIEW_FILE 1
 #define OPEN_FILE    2
 
@@ -245,6 +250,24 @@ static const struct option longopts[] = {
 	{"vt100", no_argument, 0, LOPT_VT100},
     {0, 0, 0, 0}
 };
+
+static void
+err_arg_required(const char *arg)
+{
+	fprintf(stderr, _("%s: '%s': Option requires an argument\n"
+		"Try '%s --help' for more information.\n"), PROGRAM_NAME,
+		arg, PROGRAM_NAME);
+	exit(EXIT_FAILURE);
+}
+
+static void
+err_invalid_opt(const char *arg)
+{
+	fprintf(stderr, _("%s: '%s': Unrecognized option\n"
+		"Try '%s --help' for more information.\n"),
+		PROGRAM_NAME, arg, PROGRAM_NAME);
+	exit(EXIT_FAILURE);
+}
 
 /* If path was not set (neither in the config file nor via command line nor
  * via the RestoreLastPath option), set the default (CWD), and if CWD is not
@@ -618,13 +641,14 @@ open_preview_file(char *file, const int mode)
 			"configuration files is not allowed\n", PROGRAM_NAME);
 		exit(EXIT_FAILURE);
 	}
-	char *_path = file;
+
+	char *fpath = file;
 	int url = 1, preview = mode == PREVIEW_FILE ? 1 : 0;
 
 	struct stat attr;
-	if (IS_FILE_URI(_path)) {
-		_path = file + 7;
-		if (stat(_path, &attr) == -1) {
+	if (IS_FILE_URI(fpath)) {
+		fpath = file + 7;
+		if (stat(fpath, &attr) == -1) {
 			xerror("%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
 			exit(errno);
 		}
@@ -632,10 +656,10 @@ open_preview_file(char *file, const int mode)
 		goto RUN;
 	}
 
-	if (is_url(_path) == EXIT_FAILURE) {
+	if (is_url(fpath) == EXIT_FAILURE) {
 		url = 0;
-		if (*_path != '~' && stat(_path, &attr) == -1) {
-			xerror("%s: %s: %s\n", PROGRAM_NAME, _path, strerror(errno));
+		if (*fpath != '~' && stat(fpath, &attr) == -1) {
+			xerror("%s: %s: %s\n", PROGRAM_NAME, fpath, strerror(errno));
 			exit(errno);
 		}
 	}
@@ -646,7 +670,7 @@ RUN:
 	if (preview == 1)
 		clear_term_img();
 
-	open_reg_exit(_path, url, preview);
+	open_reg_exit(fpath, url, preview);
 }
 
 static char *
@@ -674,24 +698,6 @@ stat_file(char *file)
 	}
 
 	return p;
-}
-
-static void
-err_arg_required(const char *arg)
-{
-	fprintf(stderr, _("%s: '%s': Option requires an argument\n"
-		"Try '%s --help' for more information.\n"), PROGRAM_NAME,
-		arg, PROGRAM_NAME);
-	exit(EXIT_FAILURE);
-}
-
-static void
-err_invalid_opt(const char *arg)
-{
-	fprintf(stderr, _("%s: '%s': Unrecognized option\n"
-		"Try '%s --help' for more information.\n"),
-		PROGRAM_NAME, arg, PROGRAM_NAME);
-	exit(EXIT_FAILURE);
 }
 
 static void
@@ -948,6 +954,61 @@ set_alt_profile(const char *name)
 	exit(EXIT_FAILURE);
 }
 
+static void
+set_virtual_dir(const char *str)
+{
+	if (!str || !*str || *str != '/') {
+		fprintf(stderr, "%s: '--virtual-dir': Absolute path "
+			"is required as argument\n", PROGRAM_NAME);
+		exit(EXIT_FAILURE);
+	}
+
+	stdin_tmp_dir = savestring(optarg, strlen(optarg));
+	setenv("CLIFM_VIRTUAL_DIR", stdin_tmp_dir, 1);
+}
+
+static void
+set_max_value(const char *opt, int *xval, int *intval)
+{
+	if (!is_number(opt))
+		return;
+
+	int opt_int = atoi(opt);
+	if (opt_int >= 0 && opt_int <= INT_MAX)
+		*xval = *intval = opt_int;
+}
+
+static void
+set_workspace(const char *opt)
+{
+	if (!is_number(opt))
+		return;
+
+	int opt_int = atoi(opt);
+	if (opt_int >= 0 && opt_int <= MAX_WS)
+		cur_ws = opt_int - 1;
+	else {
+		_err('w', PRINT_PROMPT, "%s: %s: Invalid workspace\n",
+			PROGRAM_NAME, opt);
+	}
+}
+
+static void
+set_bell_style(const char *opt)
+{
+	int a = atoi(opt);
+
+	if (!is_number(opt) || a < 0 || a > 3) {
+		_err('w', PRINT_PROMPT, "%s: %s: Invalid bell style. Valid options "
+			"are 0:none, 1:audible, 2:visible (requires readline >= 8.1), "
+			"3:flash. Defaults to 'visible', and, if not possible, 'none'.\n",
+			PROGRAM_NAME, opt);
+		return;
+	}
+
+	xargs.bell_style = a;
+}
+
 /* Evaluate command line arguments, if any, and change initial variables to
  * its corresponding value. */
 void
@@ -956,20 +1017,11 @@ parse_cmdline_args(const int argc, char **argv)
 	/* Disable automatic error messages to be able to handle them ourselves
 	 * via the '?' and ':' cases in the switch statement. */
 	opterr = optind = 0;
+
 	int optc;
 	int open_prev_mode = 0;
-
-	/* Variables to store arguments to options. */
-	char *path_value = (char *)NULL,
-#ifndef _NO_PROFILES
-		*alt_profile_value = (char *)NULL,
-#endif /* !_NO_PROFILES */
-		*alt_dir_value = (char *)NULL,
-		*config_value = (char *)NULL,
-		*kbinds_value = (char *)NULL,
-		*virtual_dir_value = (char *)NULL,
-		*bm_value = (char *)NULL,
-		*open_prev_file = (char *)NULL;
+	char *path_value = (char *)NULL;
+	char *open_prev_file = (char *)NULL;
 
 	while ((optc = getopt_long(argc, argv, OPTSTRING,
 		longopts, (int *)0)) != EOF) {
@@ -978,8 +1030,8 @@ parse_cmdline_args(const int argc, char **argv)
 		/* Short options */
 		case 'a': conf.show_hidden = xargs.hidden = 0; break;
 		case 'A': conf.show_hidden = xargs.hidden = 1; break;
-		case 'b': xargs.bm_file = 1; bm_value = optarg; break;
-		case 'c': xargs.config = 1; config_value = optarg; break;
+		case 'b': xargs.bm_file = 1; set_alt_bm_file(optarg); break;
+		case 'c': xargs.config = 1; set_alt_config_file(optarg); break;
 
 #ifdef RUN_CMD
 		case 'C':
@@ -991,7 +1043,7 @@ parse_cmdline_args(const int argc, char **argv)
 			break;
 #endif /* RUN_CMD */
 
-		case 'D': alt_dir_value = optarg; break;
+		case 'D': set_alt_config_dir(optarg); break;
 		case 'e': xargs.noeln = conf.no_eln = 1; break;
 		case 'E': xargs.eln_use_workspace_color = 1; break;
 		case 'f': conf.list_dirs_first = xargs.dirs_first = 0; break;
@@ -1002,7 +1054,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case 'H': xargs.horizontal_list = 1; conf.listing_mode = HORLIST; break;
 		case 'i': conf.case_sens_list = xargs.case_sens_list = 0; break;
 		case 'I': conf.case_sens_list = xargs.case_sens_list = 1; break;
-		case 'k': kbinds_value = optarg; break;
+		case 'k': set_alt_kbinds_file(optarg); break;
 		case 'l': conf.long_view = xargs.longview = 0; break;
 		case 'L': conf.long_view = xargs.longview = 1; break;
 		case 'm': conf.dirhist_map = xargs.dirmap = 1; break;
@@ -1011,7 +1063,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case 'p': path_value = optarg; xargs.path = 1; break;
 		case 'P':
 #ifndef _NO_PROFILES
-			alt_profile_value = optarg; break;
+			set_alt_profile(optarg); break;
 #else
 			fprintf(stderr, "%s: profiles: %s\n", PROGRAM_NAME, NOT_AVAILABLE);
 			exit(EXIT_FAILURE);
@@ -1021,32 +1073,13 @@ parse_cmdline_args(const int argc, char **argv)
 		case 'S': xargs.stealth_mode = 1; break;
 		case 't': xargs.disk_usage_analyzer = 1; break;
 		case 'v': printf("%s\n", VERSION); exit(EXIT_SUCCESS);
-
-		case 'w': {
-			if (!is_number(optarg))
-				break;
-			int iopt = atoi(optarg);
-			if (iopt >= 0 && iopt <= MAX_WS)
-				cur_ws = iopt - 1;
-		} break;
-
+		case 'w': set_workspace(optarg); break;
 		case 'x': conf.ext_cmd_ok = xargs.ext = 0; break;
 		case 'y': conf.light_mode = xargs.light = 1; break;
 		case 'z': set_sort(optarg); break;
 
 		/* Only-long options */
-		case LOPT_BELL: {
-			int a = atoi(optarg);
-			if (!is_number(optarg) || a < 0 || a > 3) {
-				fprintf(stderr, "%s: bell: valid options are 0:none, 1:audible, "
-					"2:visible (requires readline >= 8.1), 3:flash. Defaults "
-					"to 'visible', and, if not possible, 'none'.\n",
-					PROGRAM_NAME);
-				exit(EXIT_FAILURE);
-			}
-			xargs.bell_style = a; break;
-			}
-
+		case LOPT_BELL: set_bell_style(optarg); break;
 		case LOPT_CASE_SENS_DIRJUMP:
 			xargs.case_sens_dirjump = conf.case_sens_dirjump = 1; break;
 		case LOPT_CASE_SENS_PATH_COMP:
@@ -1103,12 +1136,12 @@ parse_cmdline_args(const int argc, char **argv)
 			xargs.fzf_preview = 1;
 			conf.fzf_preview = optc == LOPT_FZFPREVIEW ? 1 : 2;
 			xargs.fzftab = fzftab = 1; tabmode = FZF_TAB;
+			break;
 #else
 			fprintf(stderr, _("%s: fzf-preview: %s\n"),
 				PROGRAM_NAME, _(NOT_AVAILABLE));
 			exit(EXIT_FAILURE);
 #endif /* !_NO_FZF */
-			break;
 
 		case LOPT_FZFTAB:
 #ifndef _NO_FZF
@@ -1139,29 +1172,17 @@ parse_cmdline_args(const int argc, char **argv)
 		case LOPT_INT_VARS: xargs.int_vars = int_vars = 1; break;
 		case LOPT_LIST_AND_QUIT: xargs.list_and_quit = 1; break;
 
-		case LOPT_MAX_DIRHIST: {
-			if (!is_number(optarg))
-				break;
-			int opt_int = atoi(optarg);
-			if (opt_int >= 0 && opt_int <= INT_MAX)
-				xargs.max_dirhist = conf.max_dirhist = opt_int;
-		} break;
+		case LOPT_MAX_DIRHIST:
+			set_max_value(optarg, &xargs.max_dirhist, &conf.max_dirhist);
+			break;
 
-		case LOPT_MAX_FILES: {
-			if (!is_number(optarg))
-				break;
-			int opt_int = atoi(optarg);
-			if (opt_int >= 0 && opt_int <= INT_MAX)
-				xargs.max_files = max_files = opt_int;
-		} break;
+		case LOPT_MAX_FILES:
+			set_max_value(optarg, &xargs.max_files, &max_files);
+			break;
 
-		case LOPT_MAX_PATH: {
-			if (!is_number(optarg))
-				break;
-			int opt_int = atoi(optarg);
-			if (opt_int >= 0 && opt_int <= INT_MAX)
-				xargs.max_path = conf.max_path = opt_int;
-		} break;
+		case LOPT_MAX_PATH:
+			set_max_value(optarg, &xargs.max_path, &conf.max_path);
+			break;
 
 		case LOPT_MNT_UDISKS2: xargs.mount_cmd = MNT_UDISKS2; break;
 		case LOPT_NO_APPARENT_SIZE:
@@ -1247,7 +1268,6 @@ parse_cmdline_args(const int argc, char **argv)
 		case LOPT_SHOTGUN_FILE:
 			if (!optarg || !*optarg || *optarg == '-')
 				err_arg_required("--shotgun-file");
-
 			alt_preview_file = stat_file(optarg);
 			break;
 
@@ -1280,16 +1300,7 @@ parse_cmdline_args(const int argc, char **argv)
 			exit(EXIT_FAILURE);
 #endif /* !_NO_TRASH */
 
-		case LOPT_VIRTUAL_DIR:
-			if (optarg && *optarg && *optarg == '/') {
-				virtual_dir_value = optarg;
-			} else {
-				fprintf(stderr, "%s: '--virtual-dir': Absolute path "
-					"is required as argument\n", PROGRAM_NAME);
-				exit(EXIT_FAILURE);
-			}
-			break;
-
+		case LOPT_VIRTUAL_DIR: set_virtual_dir(optarg); break;
 		case LOPT_VIRTUAL_DIR_FULL_PATHS:
 			xargs.virtual_dir_full_paths = 1; break;
 
@@ -1312,36 +1323,14 @@ parse_cmdline_args(const int argc, char **argv)
 		exit(EXIT_SUCCESS); /* Never reached */
 	}
 
-	char *_path = (char *)NULL;
+	char *spath = (char *)NULL;
 	if (argv[optind]) /* Starting path passed as positional parameter */
-		_path = resolve_starting_path(argv[optind]);
+		spath = resolve_starting_path(argv[optind]);
 	else if (path_value) /* Starting path passed via -p */
-		_path = resolve_starting_path(path_value);
+		spath = resolve_starting_path(path_value);
 
-	if (_path) {
-		_set_starting_path(_path);
-		free(_path);
+	if (spath) {
+		_set_starting_path(spath);
+		free(spath);
 	}
-
-	if (bm_value)
-		set_alt_bm_file(bm_value);
-
-	if (virtual_dir_value) {
-		stdin_tmp_dir = savestring(virtual_dir_value, strlen(virtual_dir_value));
-		setenv("CLIFM_VIRTUAL_DIR", stdin_tmp_dir, 1);
-	}
-
-	if (alt_dir_value)
-		set_alt_config_dir(alt_dir_value);
-
-	if (kbinds_value)
-		set_alt_kbinds_file(kbinds_value);
-
-	if (xargs.config == 1 && config_value)
-		set_alt_config_file(config_value);
-
-#ifndef _NO_PROFILES
-	if (alt_profile_value)
-		set_alt_profile(alt_profile_value);
-#endif /* !_NO_PROFILES */
 }
