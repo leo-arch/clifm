@@ -437,12 +437,12 @@ get_entry_color(char **matches, const size_t i, const char *norm_prefix)
 		return uf_c;
 	}
 
+	enum comp_type t = cur_comp_type;
 	/* Absolute path (/FILE) or file in CWD (./FILE) */
 	if ( (*dir == '/' || (*dir == '.' && *(dir + 1) == '/') )
-	&& (cur_comp_type == TCMP_PATH || cur_comp_type == TCMP_SEL
-	|| cur_comp_type == TCMP_DESEL || cur_comp_type == TCMP_BM_PATHS
-	|| cur_comp_type == TCMP_GLOB || cur_comp_type == TCMP_DIRHIST
-	|| cur_comp_type == TCMP_JUMP) ) {
+	&& (t == TCMP_PATH || t == TCMP_SEL || t == TCMP_DESEL
+	|| t == TCMP_BM_PATHS || t == TCMP_GLOB || t == TCMP_DIRHIST
+	|| t == TCMP_JUMP) ) {
 		if (lstat(dir, &attr) != -1)
 			return fzftab_color(dir, &attr);
 		return uf_c;
@@ -450,8 +450,7 @@ get_entry_color(char **matches, const size_t i, const char *norm_prefix)
 
 	/* Tilde */
 	if (*dir == '~' && (cur_comp_type == TCMP_PATH
-	|| cur_comp_type == TCMP_BM_PATHS
-	|| cur_comp_type == TCMP_SEL || cur_comp_type == TCMP_DESEL) ) {
+	|| t == TCMP_BM_PATHS || t == TCMP_SEL || t == TCMP_DESEL) ) {
 		char *exp_path = tilde_expand(matches[i]);
 		if (exp_path) {
 			char tmp_path[PATH_MAX + 1];
@@ -463,7 +462,7 @@ get_entry_color(char **matches, const size_t i, const char *norm_prefix)
 		}
 	}
 
-	if (cur_comp_type == TCMP_PATH || cur_comp_type == TCMP_RANGES) {
+	if (t == TCMP_PATH || t == TCMP_RANGES) {
 		char tmp_path[PATH_MAX];
 		snprintf(tmp_path, sizeof(tmp_path), "%s/%s",
 			workspaces[cur_ws].path, dir);
@@ -472,13 +471,13 @@ get_entry_color(char **matches, const size_t i, const char *norm_prefix)
 		return uf_c;
 	}
 
-	if (cur_comp_type == TCMP_UNTRASH || cur_comp_type == TCMP_TRASHDEL) {
+	if (t == TCMP_UNTRASH || t == TCMP_TRASHDEL) {
 		if (lstat(dir, &attr) != -1)
 			return fzftab_color(dir, &attr);
 		return uf_c;
 	}
 
-	if (cur_comp_type == TCMP_CMD && is_internal_c(dir))
+	if (t == TCMP_CMD && is_internal_c(dir))
 		return hv_c;
 
 	return df_c;
@@ -493,12 +492,13 @@ write_completion(char *buf, const size_t offset, const int multi)
 		 * need to consider other completion types as well. */
 		ERASE_TO_RIGHT;
 
+	enum comp_type t = cur_comp_type;
 	/* Remove ending new line char */
 	char *n = strchr(buf, '\n');
 	if (n)
 		*n = '\0';
 
-	if (cur_comp_type == TCMP_GLOB) {
+	if (t == TCMP_GLOB) {
 		size_t blen = strlen(buf);
 		if (blen > 0 && buf[blen - 1] == '/')
 			buf[blen - 1] = '\0';
@@ -510,11 +510,11 @@ write_completion(char *buf, const size_t offset, const int multi)
 		}
 	}
 
-	if (cur_comp_type == TCMP_ENVIRON || cur_comp_type == TCMP_USERS)
+	if (t == TCMP_ENVIRON || t == TCMP_USERS)
 		/* Skip the leading dollar sign (env vars) and tilde (users) */
 		buf++;
 
-	if (cur_comp_type == TCMP_PATH && multi == 0) {
+	if (t == TCMP_PATH && multi == 0) {
 		char *esc_buf = escape_str(buf);
 		if (esc_buf) {
 			rl_insert_text(esc_buf + offset);
@@ -523,24 +523,22 @@ write_completion(char *buf, const size_t offset, const int multi)
 			rl_insert_text(buf + offset);
 		}
 
-	} else if (cur_comp_type == TCMP_FILE_TYPES_OPTS
-	|| cur_comp_type == TCMP_MIME_LIST || cur_comp_type == TCMP_BOOKMARK
-	|| cur_comp_type == TCMP_WORKSPACES || cur_comp_type == TCMP_NET
-	|| cur_comp_type == TCMP_CSCHEME || cur_comp_type == TCMP_PROMPTS
-	|| cur_comp_type == TCMP_HIST || cur_comp_type == TCMP_BACKDIR
-	|| cur_comp_type == TCMP_PROF || cur_comp_type == TCMP_BM_PREFIX
-	|| cur_comp_type == TCMP_TAGS_T) {
+	} else if (t == TCMP_FILE_TYPES_OPTS || t == TCMP_MIME_LIST
+	|| t == TCMP_BOOKMARK || t == TCMP_WORKSPACES || t == TCMP_NET
+	|| t == TCMP_CSCHEME || t == TCMP_PROMPTS || t == TCMP_HIST
+	|| t == TCMP_BACKDIR || t == TCMP_PROF || t == TCMP_BM_PREFIX
+	|| t == TCMP_TAGS_T) {
 		rl_insert_text(buf + offset);
 		return;
 
-	} else if (cur_comp_type == TCMP_OWNERSHIP) {
+	} else if (t == TCMP_OWNERSHIP) {
 		rl_insert_text(buf + offset);
 		if (rl_line_buffer && !strchr(rl_line_buffer, ':'))
 			rl_stuff_char(':');
 		return;
 
 	} else {
-		if (conf.autocd == 0 && cur_comp_type == TCMP_JUMP)
+		if (conf.autocd == 0 && t == TCMP_JUMP)
 			rl_insert_text("cd ");
 		rl_insert_text(buf + offset);
 	}
@@ -610,12 +608,11 @@ write_completion(char *buf, const size_t offset, const int multi)
 	struct stat attr;
 	if (stat(d, &attr) != -1 && S_ISDIR(attr.st_mode)) {
 		/* If not the root directory, append a slash */
-		if ((*d != '/' || *(d + 1) || cur_comp_type == TCMP_USERS))
+		if ((*d != '/' || *(d + 1) || t == TCMP_USERS))
 			rl_insert_text("/");
 	} else {
-		if (rl_end == rl_point && cur_comp_type != TCMP_OPENWITH
-		&& cur_comp_type != TCMP_TAGS_T && cur_comp_type != TCMP_FILE_TYPES_OPTS
-		&& cur_comp_type != TCMP_MIME_LIST)
+		if (rl_end == rl_point && t != TCMP_OPENWITH && t != TCMP_TAGS_T
+		&& t != TCMP_FILE_TYPES_OPTS && t != TCMP_MIME_LIST)
 			rl_stuff_char(' ');
 	}
 
@@ -1049,7 +1046,8 @@ store_completions(char **matches)
 		no_file_comp = 1; /* We're not completing file names. */
 
 	char *norm_prefix = (char *)NULL;
-	if (ct == TCMP_PATH && strstr(matches[0], "/.."))
+	if (ct == TCMP_PATH && ((*matches[0] == '.' && matches[0][1] == '/')
+	|| strstr(matches[0], "/..")))
 		norm_prefix = normalize_path(matches[0], strlen(matches[0]));
 
 	size_t i;
