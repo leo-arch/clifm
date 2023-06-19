@@ -1023,8 +1023,27 @@ write_comp_to_file(char *entry, const char *color, FILE *fp)
 	fprintf(fp, "%s%s%s%c", c ? c : color, entry, NC, end_char);
 }
 
-/* Store possible completions (MATCHES) in FINDER_IN_FILE to pass them to the finder,
- * either FZF or FNF.
+/* Return a normalized (absolute) path for the query string PREFIX.
+ * Ex: "./b<TAB>" -> /parent/dir
+ * The 'b' is excluded, since it will be added later using the list of
+ * matches passed to store_completions(). */
+static char *
+normalize_prefix(char *prefix)
+{
+	char *s = strrchr(prefix, '/');
+	if (s && s != prefix && s[1])
+		*s = '\0';
+
+	char *norm_prefix = normalize_path(prefix, strlen(prefix));
+
+	if (s)
+		*s = '/';
+
+	return norm_prefix;
+}
+
+/* Store possible completions (MATCHES) in FINDER_IN_FILE to pass them to the
+ * finder, either FZF or FNF.
  * Return the number of stored matches. */
 static size_t
 store_completions(char **matches)
@@ -1048,7 +1067,7 @@ store_completions(char **matches)
 	char *norm_prefix = (char *)NULL;
 	if (ct == TCMP_PATH && ((*matches[0] == '.' && matches[0][1] == '/')
 	|| strstr(matches[0], "/..")))
-		norm_prefix = normalize_path(matches[0], strlen(matches[0]));
+		norm_prefix = normalize_prefix(matches[0]);
 
 	size_t i;
 	/* 'view' cmd with only one match: matches[0]. */
@@ -1071,7 +1090,7 @@ store_completions(char **matches)
 
 		if (prev == 1) {
 			int get_base_name = ((ct == TCMP_PATH || ct == TCMP_GLOB)
-					&& !(flags & PREVIEWER)) ? 1 : 0;
+				&& !(flags & PREVIEWER)) ? 1 : 0;
 			char *p = get_base_name == 1 ? strrchr(matches[i], '/') : (char *)NULL;
 			size_t l = strlen(p && *(p + 1) ? p + 1 : matches[i]);
 			if (l > longest_prev_entry)
@@ -1092,6 +1111,7 @@ store_completions(char **matches)
 				entry += 1;
 		} else if (no_file_comp == 1) {
 			color = mi_c;
+
 		} else if (ct != TCMP_HIST && ct != TCMP_TAGS_F
 		&& ct != TCMP_FILE_TYPES_OPTS && ct != TCMP_MIME_LIST
 		&& ct != TCMP_CMD_DESC) {
