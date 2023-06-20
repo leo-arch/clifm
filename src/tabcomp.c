@@ -418,7 +418,7 @@ fzftab_color(char *filename, const struct stat *attr)
 }
 
 static char *
-get_entry_color(char **matches, const size_t i, const char *norm_prefix)
+get_entry_color(char *entry, const char *norm_prefix)
 {
 	if (conf.colorize == 0)
 		return (char *)NULL;
@@ -426,61 +426,59 @@ get_entry_color(char **matches, const size_t i, const char *norm_prefix)
 	struct stat attr;
 
 	/* Normalize URI file scheme */
-	char *dir = matches[i];
-	size_t dlen = strlen(dir);
-	if (dlen > FILE_URI_PREFIX_LEN && IS_FILE_URI(dir))
-		dir += FILE_URI_PREFIX_LEN;
+	size_t len = strlen(entry);
+	if (len > FILE_URI_PREFIX_LEN && IS_FILE_URI(entry))
+		entry += FILE_URI_PREFIX_LEN;
 
 	if (norm_prefix) {
-		char *s = strrchr(dir, '/');
-		char p[PATH_MAX];
-		snprintf(p, sizeof(p), "%s/%s", norm_prefix, (s && *(++s)) ? s : dir);
-		if (lstat(p, &attr) != -1)
-			return fzftab_color(p, &attr);
+		char *s = strrchr(entry, '/');
+		char tmp[PATH_MAX];
+		snprintf(tmp, sizeof(tmp), "%s/%s", norm_prefix,
+			(s && *(++s)) ? s : entry);
+		if (lstat(tmp, &attr) != -1)
+			return fzftab_color(tmp, &attr);
 		return uf_c;
 	}
 
 	enum comp_type t = cur_comp_type;
 	/* Absolute path (/FILE) or file in CWD (./FILE) */
-	if ( (*dir == '/' || (*dir == '.' && *(dir + 1) == '/') )
+	if ( (*entry == '/' || (*entry == '.' && entry[1] == '/') )
 	&& (t == TCMP_PATH || t == TCMP_SEL || t == TCMP_DESEL
 	|| t == TCMP_BM_PATHS || t == TCMP_DIRHIST || t == TCMP_JUMP) ) {
-		if (lstat(dir, &attr) != -1)
-			return fzftab_color(dir, &attr);
+		if (lstat(entry, &attr) != -1)
+			return fzftab_color(entry, &attr);
 		return uf_c;
 	}
 
 	/* Tilde */
-	if (*dir == '~' && (t == TCMP_PATH || t == TCMP_TAGS_F
+	if (*entry == '~' && (t == TCMP_PATH || t == TCMP_TAGS_F
 	|| t == TCMP_BM_PATHS || t == TCMP_SEL || t == TCMP_DESEL) ) {
-		char *exp_path = tilde_expand(matches[i]);
+		char *exp_path = tilde_expand(entry);
 		if (exp_path) {
-			char tmp_path[PATH_MAX + 1];
-			xstrsncpy(tmp_path, exp_path, PATH_MAX);
+			char *color = uf_c;
+			if (lstat(exp_path, &attr) != -1)
+				color = fzftab_color(exp_path, &attr);
 			free(exp_path);
-			if (lstat(tmp_path, &attr) != -1)
-				return fzftab_color(tmp_path, &attr);
-			return uf_c;
+			return color;
 		}
 	}
 
 	if (t == TCMP_PATH || t == TCMP_RANGES) {
-		char tmp_path[PATH_MAX];
-		snprintf(tmp_path, sizeof(tmp_path), "%s/%s",
-			workspaces[cur_ws].path, dir);
-		if (lstat(tmp_path, &attr) != -1)
-			return fzftab_color(tmp_path, &attr);
+		char tmp[PATH_MAX];
+		snprintf(tmp, sizeof(tmp), "%s/%s", workspaces[cur_ws].path, entry);
+		if (lstat(tmp, &attr) != -1)
+			return fzftab_color(tmp, &attr);
 		return uf_c;
 	}
 
 	if (t == TCMP_UNTRASH || t == TCMP_TRASHDEL || t == TCMP_GLOB
 	|| t == TCMP_TAGS_F || t == TCMP_FILE_TYPES_FILES) {
-		if (lstat(dir, &attr) != -1)
-			return fzftab_color(dir, &attr);
+		if (lstat(entry, &attr) != -1)
+			return fzftab_color(entry, &attr);
 		return uf_c;
 	}
 
-	if (t == TCMP_CMD && is_internal_c(dir))
+	if (t == TCMP_CMD && is_internal_c(entry))
 		return hv_c;
 
 	return df_c;
@@ -1096,16 +1094,16 @@ store_completions(char **matches)
 		if (!matches[i] || !*matches[i] || SELFORPARENT(matches[i]))
 			continue;
 
+		char *color = df_c, *entry = matches[i];
+
 		if (prev == 1) {
 			int get_base_name = ((ct == TCMP_PATH || ct == TCMP_GLOB)
 				&& !(flags & PREVIEWER)) ? 1 : 0;
-			char *p = get_base_name == 1 ? strrchr(matches[i], '/') : (char *)NULL;
-			size_t l = strlen(p && *(p + 1) ? p + 1 : matches[i]);
-			if (l > longest_prev_entry)
-				longest_prev_entry = l;
+			char *p = get_base_name == 1 ? strrchr(entry, '/') : (char *)NULL;
+			size_t len = strlen(p && *(p + 1) ? p + 1 : entry);
+			if (len > longest_prev_entry)
+				longest_prev_entry = len;
 		}
-
-		char *color = df_c, *entry = matches[i];
 
 		if (ct == TCMP_BACKDIR) {
 			color = di_c;
@@ -1122,22 +1120,22 @@ store_completions(char **matches)
 
 		} else if (ct != TCMP_HIST && ct != TCMP_FILE_TYPES_OPTS
 		&& ct != TCMP_MIME_LIST && ct != TCMP_CMD_DESC) {
-			char *cl = get_entry_color(matches, i, norm_prefix);
+			char *cl = get_entry_color(entry, norm_prefix);
 			char ext_cl[MAX_COLOR + 5];
 			*ext_cl = '\0';
 			/* If color does not start with escape, then we have a color
 			 * for a file extension. In this case, we need to properly
 			 * construct the color code. */
 			if (cl && *cl != _ESC)
-				snprintf(ext_cl, MAX_COLOR + 4, "\x1b[%sm", cl);
+				snprintf(ext_cl, sizeof(ext_cl) - 1, "\x1b[%sm", cl);
 
 			color = *ext_cl ? ext_cl : (cl ? cl : "");
 
 			if (ct != TCMP_SEL && ct != TCMP_DESEL && ct != TCMP_BM_PATHS
 			&& ct != TCMP_DIRHIST && ct != TCMP_OPENWITH && ct != TCMP_BACKDIR
 			&& ct != TCMP_JUMP && ct != TCMP_TAGS_F) {
-				_path = strrchr(matches[i], '/');
-				entry = (_path && *(++_path)) ? _path : matches[i];
+				_path = strrchr(entry, '/');
+				entry = (_path && *(++_path)) ? _path : entry;
 			}
 		}
 
