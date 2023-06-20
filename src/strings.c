@@ -103,8 +103,8 @@ static char len_buf[ARG_MAX * sizeof(wchar_t)] __attribute__((aligned));
 static int quoted_words[INT_ARRAY_MAX];
 #define QWORDS_ARRAY_LEN (sizeof(quoted_words) / sizeof(int))
 
-/* Get the last occurrence of the (non-escaped) character C in STR (whose length is LEN)
- * Return a pointer to it if found or NULL if not */
+/* Get the last occurrence of the (non-escaped) character C in STR (whose
+ * length is LEN). Return a pointer to it if found or NULL if not. */
 char *
 get_last_chr(char *str, const char c, const int len)
 {

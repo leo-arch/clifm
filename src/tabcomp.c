@@ -94,6 +94,9 @@ typedef char *rl_cpvfunc_t;
 		putc(c, rl_outstream)
 
 #ifndef _NO_FZF
+
+/* We need to know the longest entry (if previewing files) to correctly
+ * calculate the width of the preview window. */
 static size_t longest_prev_entry;
 
 /* The following three functions are used to get current cursor position
@@ -483,6 +486,112 @@ get_entry_color(char **matches, const size_t i, const char *norm_prefix)
 	return df_c;
 }
 
+/* Get the word after the last non-escaped space in the input buffer. */
+static char *
+get_last_input_word(void)
+{
+	if (!rl_line_buffer)
+		return (char *)NULL;
+
+	char *lb = rl_line_buffer;
+	char *lastword = (char *)NULL;
+
+	while (*lb) {
+		if (lb == rl_line_buffer) {
+			lb++;
+			continue;
+		}
+
+		if (*lb == ' ' && *(lb - 1) != '\\' && *(lb + 1) != ' ')
+			lastword = lb + 1;
+
+		lb++;
+	}
+
+	return lastword;
+}
+
+/* Store the deescaped string STR into the buffer BUF (only up to MAX bytes).
+ * Returns the number of copied bytes. */
+static size_t
+deescape_word(char *str, char *buf, const size_t max)
+{
+	size_t i = 0;
+	char *p = str;
+
+	while (*p && i < max) {
+		if (*p != '\\') {
+			buf[i] = *p;
+			i++;
+		}
+		p++;
+	}
+
+	buf[i] = '\0';
+	return i;
+}
+
+/* Append slash for dirs and space for non-dirs to the current completion */
+static void
+append_ending_char(const enum comp_type ct)
+{
+	/* We only want the portion of the line before the cursor position. */
+	char cur_char = rl_line_buffer[rl_point];
+	rl_line_buffer[rl_point] = '\0';
+
+	char *lastword = get_last_input_word();
+	if (!lastword || !*lastword)
+		lastword = rl_line_buffer;
+	if (!lastword)
+		return;
+
+	char deq_str[PATH_MAX];
+	*deq_str = '\0';
+	/* Clang static analysis complains that tmp[4] (deq_str[4]) is a garbage
+	 * value. Initialize only this exact value to get rid of the warning. */
+	deq_str[4] = '\0';
+	size_t deq_str_len = 0;
+
+	if (strchr(lastword, '\\'))
+		deq_str_len = deescape_word(lastword, deq_str, sizeof(deq_str) - 1);
+
+	char _path[PATH_MAX + NAME_MAX];
+	*_path = '\0';
+	char *tmp = *deq_str ? deq_str : lastword;
+
+	size_t len = tmp == deq_str ? deq_str_len : strlen(tmp);
+	size_t is_file_uri = 0;
+
+	if (*tmp == 'f' && tmp[1] == 'i' && len > FILE_URI_PREFIX_LEN
+	&& IS_FILE_URI(tmp))
+		is_file_uri = 1;
+
+	char *name = tmp;
+	char *p = is_file_uri == 0 ? normalize_path(tmp, len) : (char *)NULL;
+	if (p)
+		name = p;
+
+	if (is_file_uri == 1)
+		name += FILE_URI_PREFIX_LEN;
+
+	struct stat attr;
+	if (stat(name, &attr) != -1 && S_ISDIR(attr.st_mode)) {
+		/* If not the root directory, append a slash. */
+		if ((*name != '/' || *(name + 1) || ct == TCMP_USERS))
+			rl_insert_text("/");
+	} else {
+		if (rl_end == rl_point && ct != TCMP_OPENWITH && ct != TCMP_TAGS_T
+		&& ct != TCMP_FILE_TYPES_OPTS && ct != TCMP_MIME_LIST)
+			rl_stuff_char(' ');
+	}
+
+	/* Restore the character we removed to trim the line at cursor position. */
+	rl_line_buffer[rl_point] = cur_char;
+
+	if (name == p)
+		free(p);
+}
+
 static void
 write_completion(char *buf, const size_t offset, const int multi)
 {
@@ -543,84 +652,7 @@ write_completion(char *buf, const size_t offset, const int multi)
 		rl_insert_text(buf + offset);
 	}
 
-	/* Append slash for dirs and space for non-dirs */
-
-	/* We only want the line before the cursor position */
-	char cur_point = rl_line_buffer[rl_point];
-	rl_line_buffer[rl_point] = '\0';
-
-	char *pp = rl_line_buffer;
-	char *ss = (char *)NULL;
-	if (pp) {
-		while (*pp) {
-			if (pp == rl_line_buffer) {
-				pp++;
-				continue;
-			}
-
-			if (*pp == ' ' && *(pp - 1) != '\\' && *(pp + 1) != ' ')
-				ss = pp + 1;
-
-			pp++;
-		}
-	}
-
-	if (!ss || !*ss)
-		ss = rl_line_buffer;
-	if (!ss)
-		return;
-
-	char deq_str[PATH_MAX];
-	*deq_str = '\0';
-	/* Clang static analysis complains that tmp[4] (deq_str[4]) is a garbage
-	 * value. Initialize only this exact value to get rid of the warning */
-	deq_str[4] = '\0';
-	if (strchr(ss, '\\')) {
-		size_t i = 0;
-		char *b = ss;
-		while (*b && i < (PATH_MAX - 1)) {
-			if (*b != '\\') {
-				deq_str[i] = *b;
-				i++;
-			}
-			b++;
-		}
-		deq_str[i] = '\0';
-	}
-
-	char _path[PATH_MAX + NAME_MAX];
-	*_path = '\0';
-	char *tmp = *deq_str ? deq_str : ss;
-
-	size_t dlen = strlen(tmp), is_file_uri = 0;
-	if (*tmp == 'f' && *(tmp + 1) == 'i' && dlen > FILE_URI_PREFIX_LEN
-	&& IS_FILE_URI(tmp))
-		is_file_uri = 1;
-
-	char *d = tmp;
-	char *p = is_file_uri == 0 ? normalize_path(tmp, strlen(tmp)) : (char *)NULL;
-	if (p)
-		d = p;
-
-	if (is_file_uri == 1)
-		d += FILE_URI_PREFIX_LEN;
-
-	struct stat attr;
-	if (stat(d, &attr) != -1 && S_ISDIR(attr.st_mode)) {
-		/* If not the root directory, append a slash */
-		if ((*d != '/' || *(d + 1) || t == TCMP_USERS))
-			rl_insert_text("/");
-	} else {
-		if (rl_end == rl_point && t != TCMP_OPENWITH && t != TCMP_TAGS_T
-		&& t != TCMP_FILE_TYPES_OPTS && t != TCMP_MIME_LIST)
-			rl_stuff_char(' ');
-	}
-
-	/* Restore the character we removed to trim the line at cursor position */
-	rl_line_buffer[rl_point] = cur_point;
-
-	if (d == p)
-		free(p);
+	append_ending_char(t);
 }
 
 /* Return a pointer to the beginning of the word right after the last
@@ -666,7 +698,7 @@ set_fzf_env_vars(const int height)
 	}
 
 	/* Let's correct image coordinates on the screen based on the preview
-	 * window style */
+	 * window style. */
 	int x = term_cols, y = line;
 	switch (fzf_preview_border_type) {
 	case FZF_BORDER_BOTTOM: /* fallthrough */
@@ -704,8 +736,8 @@ clear_fzf(void)
 }
 
 /* Calculate the available space for the fzf preview window based on
- * the main window width, terminal columns, and longest entry
- * Return (size_t)-1 if the space is less than 50% of total space */
+ * the main window width, terminal columns, and longest entry.
+ * Return (size_t)-1 if the space is less than 50% of total space. */
 static size_t
 get_preview_win_width(const int offset)
 {
@@ -1025,8 +1057,8 @@ write_comp_to_file(char *entry, const char *color, FILE *fp)
 
 /* Return a normalized (absolute) path for the query string PREFIX.
  * Ex: "./b<TAB>" -> /parent/dir
- * The 'b' is excluded, since it will be added later using the list of
- * matches passed to store_completions(). */
+ * The partially typed basename, here 'b', is excluded, since it will be added
+ * later using the list of matches passed to store_completions(). */
 static char *
 normalize_prefix(char *prefix)
 {
