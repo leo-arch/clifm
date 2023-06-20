@@ -2571,6 +2571,7 @@ tag_entries_generator(const char *text, int state)
 	while (i < tagged_files_n && (name = tagged_files[i++]->d_name) != NULL) {
 		if (SELFORPARENT(name))
 			continue;
+
 		char *p = (char *)NULL, *q = name;
 		if (strchr(name, '\\')) {
 			p = dequote_str(name, 0);
@@ -2584,6 +2585,10 @@ tag_entries_generator(const char *text, int state)
 		int free_tmp = 0;
 		r = home_tilde(tmp, &free_tmp);
 		q = strdup(r ? r : tmp);
+
+		size_t len = strlen(q);
+		if (len > 1 && q[len - 1] == '/')
+			q[len - 1] = '\0';
 
 		free(p);
 		if (free_tmp == 1)

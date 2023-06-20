@@ -444,15 +444,14 @@ get_entry_color(char **matches, const size_t i, const char *norm_prefix)
 	/* Absolute path (/FILE) or file in CWD (./FILE) */
 	if ( (*dir == '/' || (*dir == '.' && *(dir + 1) == '/') )
 	&& (t == TCMP_PATH || t == TCMP_SEL || t == TCMP_DESEL
-	|| t == TCMP_BM_PATHS || t == TCMP_GLOB || t == TCMP_DIRHIST
-	|| t == TCMP_JUMP) ) {
+	|| t == TCMP_BM_PATHS || t == TCMP_DIRHIST || t == TCMP_JUMP) ) {
 		if (lstat(dir, &attr) != -1)
 			return fzftab_color(dir, &attr);
 		return uf_c;
 	}
 
 	/* Tilde */
-	if (*dir == '~' && (cur_comp_type == TCMP_PATH
+	if (*dir == '~' && (t == TCMP_PATH || t == TCMP_TAGS_F
 	|| t == TCMP_BM_PATHS || t == TCMP_SEL || t == TCMP_DESEL) ) {
 		char *exp_path = tilde_expand(matches[i]);
 		if (exp_path) {
@@ -474,7 +473,8 @@ get_entry_color(char **matches, const size_t i, const char *norm_prefix)
 		return uf_c;
 	}
 
-	if (t == TCMP_UNTRASH || t == TCMP_TRASHDEL) {
+	if (t == TCMP_UNTRASH || t == TCMP_TRASHDEL || t == TCMP_GLOB
+	|| t == TCMP_TAGS_F || t == TCMP_FILE_TYPES_FILES) {
 		if (lstat(dir, &attr) != -1)
 			return fzftab_color(dir, &attr);
 		return uf_c;
@@ -531,7 +531,7 @@ deescape_word(char *str, char *buf, const size_t max)
 	return i;
 }
 
-/* Append slash for dirs and space for non-dirs to the current completion */
+/* Append slash for dirs and space for non-dirs to the current completion. */
 static void
 append_ending_char(const enum comp_type ct)
 {
@@ -592,6 +592,7 @@ append_ending_char(const enum comp_type ct)
 		free(p);
 }
 
+/* Write the text BUF, at offset OFFSET, into STDOUT. */
 static void
 write_completion(char *buf, const size_t offset, const int multi)
 {
@@ -619,11 +620,11 @@ write_completion(char *buf, const size_t offset, const int multi)
 		}
 	}
 
-	if (t == TCMP_ENVIRON || t == TCMP_USERS)
+	if (t == TCMP_ENVIRON || t == TCMP_USERS) {
 		/* Skip the leading dollar sign (env vars) and tilde (users) */
 		buf++;
 
-	if (t == TCMP_PATH && multi == 0) {
+	} else if (t == TCMP_PATH && multi == 0) {
 		char *esc_buf = escape_str(buf);
 		if (esc_buf) {
 			rl_insert_text(esc_buf + offset);
@@ -1018,32 +1019,7 @@ get_finder_output(const int multi, char *base)
 static void
 write_comp_to_file(char *entry, const char *color, FILE *fp)
 {
-	char *c = (char *)NULL, tmp[MAX_COLOR + 4];
 	char end_char = tabmode == SMENU_TAB ? '\n' : '\0';
-
-	if (cur_comp_type == TCMP_TAGS_F || cur_comp_type == TCMP_GLOB
-	|| cur_comp_type == TCMP_FILE_TYPES_FILES) {
-		size_t len = strlen(entry);
-		if (len > 1 && entry[len - 1] == '/')
-			entry[len - 1] = '\0';
-
-		char *p = (char *)NULL;
-		if (*entry == '~')
-			p = tilde_expand(entry);
-
-		struct stat a;
-		if (lstat(p ? p : entry, &a) != -1) {
-			c = fzftab_color(entry, &a);
-			if (*c != _ESC) {
-				snprintf(tmp, sizeof(tmp), "\x1b[%sm", c);
-				c = tmp;
-			}
-		} else {
-			c = uf_c;
-		}
-
-		free(p);
-	}
 
 	if (wc_xstrlen(entry) == 0) {
 		char *wname = truncate_wname(entry);
@@ -1052,7 +1028,7 @@ write_comp_to_file(char *entry, const char *color, FILE *fp)
 		return;
 	}
 
-	fprintf(fp, "%s%s%s%c", c ? c : color, entry, NC, end_char);
+	fprintf(fp, "%s%s%s%c", color, entry, NC, end_char);
 }
 
 /* Return a normalized (absolute) path for the query string PREFIX.
@@ -1144,9 +1120,8 @@ store_completions(char **matches)
 		} else if (no_file_comp == 1) {
 			color = mi_c;
 
-		} else if (ct != TCMP_HIST && ct != TCMP_TAGS_F
-		&& ct != TCMP_FILE_TYPES_OPTS && ct != TCMP_MIME_LIST
-		&& ct != TCMP_CMD_DESC) {
+		} else if (ct != TCMP_HIST && ct != TCMP_FILE_TYPES_OPTS
+		&& ct != TCMP_MIME_LIST && ct != TCMP_CMD_DESC) {
 			char *cl = get_entry_color(matches, i, norm_prefix);
 			char ext_cl[MAX_COLOR + 5];
 			*ext_cl = '\0';
@@ -1160,7 +1135,7 @@ store_completions(char **matches)
 
 			if (ct != TCMP_SEL && ct != TCMP_DESEL && ct != TCMP_BM_PATHS
 			&& ct != TCMP_DIRHIST && ct != TCMP_OPENWITH && ct != TCMP_BACKDIR
-			&& ct != TCMP_JUMP) {
+			&& ct != TCMP_JUMP && ct != TCMP_TAGS_F) {
 				_path = strrchr(matches[i], '/');
 				entry = (_path && *(++_path)) ? _path : matches[i];
 			}
@@ -1190,6 +1165,7 @@ get_query_str(char *lw)
 	char *tmp = (char *)NULL;
 
 	switch (cur_comp_type) {
+	/* These completions take an empty query string */
 	case TCMP_RANGES:           /* fallthrough */
 	case TCMP_SEL:              /* fallthrough */
 	case TCMP_BM_PATHS:         /* fallthrough */
@@ -1234,9 +1210,7 @@ get_query_str(char *lw)
 		query = (tmp && *tmp && tmp[1]) ? tmp + 1 : (char *)NULL;
 		break;
 
-	default:
-		query = lw ? lw : (char *)NULL;
-		break;
+	default: query = lw; break;
 	}
 
 	return query;
@@ -1259,7 +1233,7 @@ count_quote_chars(const char *str, const size_t len)
 }
 
 /* Calculate the length of the matching prefix to insert into the line
- * buffer only the non-matched part of the string returned by FZF. */
+ * buffer only the non-matched part of the string returned by the finder. */
 static size_t
 calculate_prefix_len(const char *str, const char *query, const char *lw)
 {
@@ -1270,6 +1244,7 @@ calculate_prefix_len(const char *str, const char *query, const char *lw)
 	|| ct == TCMP_JUMP || ct == TCMP_BM_PREFIX || ct == TCMP_BM_PATHS
 	|| ct == TCMP_TAGS_F || ct == TCMP_GLOB || ct == TCMP_DIRHIST
 	|| ct == TCMP_FILE_TYPES_FILES || ct == TCMP_CMD_DESC)
+		/* None of these completions produces a partial match (prefix) */
 		return 0;
 
 	size_t prefix_len = 0, len = strlen(str);
@@ -1408,7 +1383,7 @@ clean_rl_buffer(const char *text)
 }
 
 /* Calculate the offset (left padding) of the finder's window based on
- * the cursor position and the current query string. */
+ * the cursor position, the current query string, and the completion type. */
 static int
 get_finder_offset(const char *query, const char *text, char **matches,
 	const char *lw, size_t *height, int *total_line_len)
@@ -1466,18 +1441,15 @@ get_finder_offset(const char *query, const char *text, char **matches,
 		}
 	}
 
-	if (ct == TCMP_OWNERSHIP) {
-		if (query) {
-			if (query == lb)
-				finder_offset = lb ? (int)wc_xstrlen(lb) - 3 : 0;
-			else
-				finder_offset = (int)(query - lb);
-		}
+	if (ct == TCMP_OWNERSHIP && query) {
+		if (query == lb)
+			finder_offset = lb ? (int)wc_xstrlen(lb) - 3 : 0;
+		else
+			finder_offset = (int)(query - lb);
 	}
 
-	else if (ct == TCMP_DESEL) {
-		if (query)
-			finder_offset = prompt_offset + (int)(query - lb) - 3;
+	else if (ct == TCMP_DESEL && query) {
+		finder_offset = prompt_offset + (int)(query - lb) - 3;
 	}
 
 	else if (ct == TCMP_HIST) {
@@ -1592,6 +1564,8 @@ get_finder_offset(const char *query, const char *text, char **matches,
 	return finder_offset;
 }
 
+/* Depending on the completion type, either the typed text (input buffer), or
+ * the text to be inseted, needs to be modified. Let's do that here. */
 static void
 do_some_cleanup(char **buf, char **matches, const char *query,
 	size_t *prefix_len)
@@ -1606,15 +1580,13 @@ do_some_cleanup(char **buf, char **matches, const char *query,
 		rl_point = start;
 	}
 
-	else if (ct == TCMP_OPENWITH) {
-		/* If multiple words ("CMD ARG..."), quote the string. */
-		if (strchr(*buf, ' ')) {
-			size_t len = strlen(*buf) + 3;
-			char *tmp = (char *)xnmalloc(len, sizeof(char));
-			snprintf(tmp, len, "\"%s\"", *buf);
-			free(*buf);
-			*buf = tmp;
-		}
+	else if (ct == TCMP_OPENWITH && strchr(*buf, ' ')) {
+		/* We have multiple words ("CMD ARG..."): quote the string. */
+		size_t len = strlen(*buf) + 3;
+		char *tmp = (char *)xnmalloc(len, sizeof(char));
+		snprintf(tmp, len, "\"%s\"", *buf);
+		free(*buf);
+		*buf = tmp;
 	}
 
 	else if (ct == TCMP_HIST || ct == TCMP_JUMP) {
@@ -1627,7 +1599,8 @@ do_some_cleanup(char **buf, char **matches, const char *query,
 	|| ct == TCMP_BM_PATHS || ct == TCMP_BM_PREFIX
 	|| ct == TCMP_TAGS_T || ct == TCMP_DIRHIST) {
 		char *s = rl_line_buffer ? get_last_chr(rl_line_buffer,
-			(ct == TCMP_GLOB && words_num == 1) ? '/' : ' ', rl_end) : (char *)NULL;
+			(ct == TCMP_GLOB && words_num == 1)
+			? '/' : ' ', rl_end) : (char *)NULL;
 		if (s) {
 			rl_point = (int)(s - rl_line_buffer + 1);
 			rl_delete_text(rl_point, rl_end);
@@ -1659,14 +1632,13 @@ do_some_cleanup(char **buf, char **matches, const char *query,
 	}
 
 	else {
-		if ((conf.case_sens_path_comp == 0 || conf.fuzzy_match == 1) && query) {
-			/* Honor case insensitive completion/fuzzy matches. */
-			if (strncmp(matches[0], *buf, *prefix_len) != 0) {
-				int bk = rl_point;
-				rl_delete_text(bk - (int)*prefix_len, rl_end);
-				rl_point = rl_end = bk - (int)*prefix_len;
-				*prefix_len = 0;
-			}
+		/* Honor case insensitive completion/fuzzy matches. */
+		if ((conf.case_sens_path_comp == 0 || conf.fuzzy_match == 1)
+		&& query && strncmp(matches[0], *buf, *prefix_len) != 0) {
+			int bk = rl_point;
+			rl_delete_text(bk - (int)*prefix_len, rl_end);
+			rl_point = rl_end = bk - (int)*prefix_len;
+			*prefix_len = 0;
 		}
 	}
 }
@@ -1674,7 +1646,7 @@ do_some_cleanup(char **buf, char **matches, const char *query,
 static int
 do_completion(char *buf, const size_t prefix_len, const int multi)
 {
-	/* Some buffer clean up: remove new line char and ending spaces. */
+	/* Some further buffer clean up: remove new line char and ending spaces. */
 	size_t blen = strlen(buf);
 	int j = (int)blen;
 	if (j > 0 && buf[j - 1] == '\n') {
@@ -1701,7 +1673,7 @@ do_completion(char *buf, const size_t prefix_len, const int multi)
 }
 
 /* Calculate currently used lines to go back to the correct cursor
- * position after quitting FZF. */
+ * position after quitting the finder. */
 static void
 move_cursor_up(const int total_line_len)
 {
@@ -1742,8 +1714,8 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	if (num_matches == (size_t)-1)
 		return EXIT_FAILURE;
 
-	/* Set a pointer to the last word (either space or slash) in the
-	 * input buffer. Used to highlight the matching prefix in the finder. */
+	/* Set a pointer to the last word in the query string. We use this to
+	 * highlight the matching prefix in the list of matches. */
 	char *lw = get_last_word(original_query ? original_query : matches[0],
 		original_query ? 1 : 0);
 
@@ -1804,6 +1776,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 
 	do_some_cleanup(&buf, matches, query, &prefix_len);
 
+	/* Let's insert the selected match(es): BUF. */
 	if (buf && *buf && do_completion(buf, prefix_len, multi) == EXIT_FAILURE) {
 		free(buf);
 		return EXIT_FAILURE;
@@ -2354,7 +2327,7 @@ DISPLAY_MATCHES:
 				}
 #endif /* !_NO_HIGHLIGHT */
 				fprintf(rl_outstream, "Display all %d possibilities? "
-					"(y or n) ", len);
+					"[y/n] ", len);
 				fflush(rl_outstream);
 				if (!get_y_or_n())
 					goto RESTART;
