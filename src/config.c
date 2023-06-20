@@ -890,8 +890,11 @@ create_preview_file(void)
 	if (stat(file, &attr) == EXIT_SUCCESS)
 		return EXIT_SUCCESS;
 
+#if !defined(__FreeBSD__) && !defined(__OpenBSD__) && !defined(__NetBSD__) \
+&& !defined(__DragonFly__) && !defined(__APPLE__)
 	if (import_from_data_dir("preview.clifm", file) == EXIT_SUCCESS)
 		return EXIT_SUCCESS;
+#endif /* !BSD */
 
 	int fd = 0;
 	FILE *fp = open_fstream_w(file, &fd);
@@ -921,7 +924,7 @@ create_preview_file(void)
 #.*=/home/USER/.config/ranger/scope.sh %%f 120 80 /tmp/clifm/ True\n\
 \n\
 # Directories\n\
-inode/directory=exa -a --tree --level=1 --;lsd -A --tree --depth=1 --color=always;tree -a -L 1;ls -Ap --color=always --indicator-style=none;\n\
+inode/directory=exa -a --tree --level=1 --;lsd -A --tree --depth=1 --color=always;tree -a -L 1;%s\n\
 \n\
 # Web content\n\
 ^text/html$=w3m -dump;lynx -dump --;elinks -dump;pandoc -s -t markdown --;\n\
@@ -957,7 +960,14 @@ application/(zip|gzip|x-7z-compressed|x-xz|x-bzip*|x-tar)=atool --list --;bsdtar
 application/x-bittorrent=transmission-show --;\n\
 \n\
 # Fallback\n\
-.*=file -b --;true;\n");
+.*=file -b --;true;\n",
+#if !defined(__FreeBSD__) && !defined(__OpenBSD__) && !defined(__NetBSD__) \
+&& !defined(__DragonFly__) && !defined(__APPLE__)
+	"ls -Ap --color=always --indicator-style=none;"
+#else
+	"gls -Ap --color=always --indicator-style=none;ls -Ap;"
+#endif /* !BSD */
+	);
 
 	fclose(fp);
 	return EXIT_SUCCESS;
