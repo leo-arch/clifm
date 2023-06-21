@@ -2388,8 +2388,8 @@ remove_trash_ext(char **ent)
  * 1 or 0 respectivelly).
  * ELN could be:
  * > 0: The ELN of a file in CWD
- * -1: Error getting ELN
- * 0: ELN should not be printed, for example, when listing files not in CWD */
+ * -1:  Error getting ELN
+ * 0:   ELN should not be printed. Ex: when listing files not in CWD */
 void
 colors_list(char *ent, const int eln, const int pad, const int new_line)
 {
@@ -2430,8 +2430,8 @@ colors_list(char *ent, const int eln, const int pad, const int new_line)
 
 	char *wname = (char *)NULL;
 	size_t wlen = wc_xstrlen(ent);
-	if (wlen == 0)
-		wname = truncate_wname(ent);
+	if (wlen == 0) /* Embedded control chars */
+		wname = replace_ctrl_chars(ent);
 
 	char *color = (char *)NULL;
 
@@ -2488,6 +2488,37 @@ colors_list(char *ent, const int eln, const int pad, const int new_line)
 }
 
 #ifndef CLIFM_SUCKLESS
+/* Returns 1 if the file NAME is a valid color scheme name, or 0 otherwise.
+ * If true, NAME is truncated to its last dot (the file extension is removed). */
+static int
+is_valid_colorscheme_name(char *name)
+{
+	if (SELFORPARENT(name))
+		return 0;
+
+	char *ret = strrchr(name, '.');
+	if (!ret || ret == name || strcmp(ret, ".clifm") != 0)
+		return 0;
+
+	*ret = '\0';
+
+	return 1;
+}
+
+/* Returns 1 if the color scheme name NAME already exists in the current
+ * list of color schemes, which contains TOTAL entries. */
+static int
+is_duplicate_colorscheme_name(const char *name, const size_t total)
+{
+	size_t i;
+	for (i = 0; i < total; i++) {
+		if (*color_schemes[i] == *name && strcmp(name, color_schemes[i]) == 0)
+			return 1;
+	}
+
+	return 0;
+}
+
 size_t
 get_colorschemes(void)
 {
@@ -2497,39 +2528,27 @@ get_colorschemes(void)
 	DIR *dir_p;
 	size_t i = 0;
 
-	if (colors_dir && stat(colors_dir, &attr) == EXIT_SUCCESS) {
-		schemes_total = count_dir(colors_dir, NO_CPOP) - 2;
-		if (schemes_total) {
-			if (!(dir_p = opendir(colors_dir))) {
-				_err('e', PRINT_PROMPT, "opendir: %s: %s\n", colors_dir,
-					strerror(errno));
-				return 0;
-			}
-
-			color_schemes = (char **)xrealloc(color_schemes,
-				((size_t)schemes_total + 2) * sizeof(char *));
-
-			while ((ent = readdir(dir_p)) != NULL) {
-				/* Skipp . and .. */
-				char *name = ent->d_name;
-				if (*name == '.' && (!name[1] || (name[1] == '.' && !name[2])))
-					continue;
-
-				char *ret = strchr(name, '.');
-				/* If the file contains not dot, or if its extension is not
-				 * .clifm, or if it's just a hidden file named ".clifm",
-				 * skip it */
-				if (!ret || ret == name || strcmp(ret, ".clifm") != 0)
-					continue;
-
-				*ret = '\0';
-				color_schemes[i] = savestring(name, strlen(name));
-				i++;
-			}
-
-			closedir(dir_p);
-			color_schemes[i] = (char *)NULL;
+	if (colors_dir && stat(colors_dir, &attr) != -1
+	&& (schemes_total = count_dir(colors_dir, NO_CPOP) - 2) > 0) {
+		if (!(dir_p = opendir(colors_dir))) {
+			_err('e', PRINT_PROMPT, "opendir: %s: %s\n", colors_dir,
+				strerror(errno));
+			return 0;
 		}
+
+		color_schemes = (char **)xrealloc(color_schemes,
+			((size_t)schemes_total + 2) * sizeof(char *));
+
+		while ((ent = readdir(dir_p)) != NULL) {
+			if (is_valid_colorscheme_name(ent->d_name) == 0)
+				continue;
+
+			color_schemes[i] = savestring(ent->d_name, strlen(ent->d_name));
+			i++;
+		}
+
+		closedir(dir_p);
+		color_schemes[i] = (char *)NULL;
 	}
 
 	if (!data_dir)
@@ -2537,7 +2556,7 @@ get_colorschemes(void)
 
 	char sys_colors_dir[PATH_MAX];
 	snprintf(sys_colors_dir, sizeof(sys_colors_dir), "%s/%s/colors",
-		data_dir, PNL); /* NOLINT */
+		data_dir, PROGRAM_NAME); /* NOLINT */
 
 	if (stat(sys_colors_dir, &attr) == -1)
 		goto END;
@@ -2555,37 +2574,16 @@ get_colorschemes(void)
 	}
 
 	color_schemes = (char **)xrealloc(color_schemes,
-					((size_t)schemes_total + 2) * sizeof(char *));
+		((size_t)schemes_total + 2) * sizeof(char *));
 
 	size_t i_tmp = i;
 
 	while ((ent = readdir(dir_p)) != NULL) {
-		/* Skipp . and .. */
-		char *name = ent->d_name;
-		if (*name == '.' && (!name[1] || (name[1] == '.' && !name[2])))
+		if (is_valid_colorscheme_name(ent->d_name) == 0
+		|| is_duplicate_colorscheme_name(ent->d_name, i_tmp) == 1)
 			continue;
 
-		char *ret = strchr(name, '.');
-		/* If the file contains not dot, or if its extension is not
-		 * .clifm, or if it's just a hidden file named ".clifm", skip it */
-		if (!ret || ret == name || strcmp(ret, ".clifm") != 0)
-			continue;
-
-		*ret = '\0';
-
-		size_t j;
-		int dup = 0;
-		for (j = 0; j < i_tmp; j++) {
-			if (*color_schemes[j] == *name && strcmp(name, color_schemes[j]) == 0) {
-				dup = 1;
-				break;
-			}
-		}
-
-		if (dup == 1)
-			continue;
-
-		color_schemes[i] = savestring(name, strlen(name));
+		color_schemes[i] = savestring(ent->d_name, strlen(ent->d_name));
 		i++;
 	}
 
