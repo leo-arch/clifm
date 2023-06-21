@@ -419,13 +419,14 @@ u8truncstr(char *restrict str, const size_t max)
 		len += l;
 	}
 
+//	wcsncpy((wchar_t *)str, buf, (size_t)bmax * sizeof(wchar_t));
 	wcscpy((wchar_t *)str, buf);
 	return bmax - len;
 }
 
 /* Replace control characters in NAME by '^' */
 char *
-truncate_wname(const char *name)
+replace_ctrl_chars(const char *name)
 {
 	int i;
 	char *n = (char *)xnmalloc(NAME_MAX, sizeof(char));

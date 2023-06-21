@@ -1027,7 +1027,7 @@ write_comp_to_file(char *entry, const char *color, FILE *fp)
 	char end_char = tabmode == SMENU_TAB ? '\n' : '\0';
 
 	if (wc_xstrlen(entry) == 0) {
-		char *wname = truncate_wname(entry);
+		char *wname = replace_ctrl_chars(entry);
 		fprintf(fp, "%s%c", wname ? wname : entry, end_char);
 		free(wname);
 		return;

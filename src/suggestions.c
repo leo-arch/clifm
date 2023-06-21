@@ -510,7 +510,7 @@ truncate_name(const char *str)
 	|| suggestion.type == FILE_SUG) {
 		size_t wlen = wc_xstrlen(str);
 		if (wlen == 0)
-			wname = truncate_wname(str);
+			wname = replace_ctrl_chars(str);
 	}
 
 	return wname;

@@ -48,7 +48,7 @@ char *strbfrlst(char *, const char);
 char *strbtw(char *, const char, const char);
 int  strcntchr(const char *, const char);
 int  strcntchrlst(const char *, const char);
-char *truncate_wname(const char *);
+char *replace_ctrl_chars(const char *);
 int  u8truncstr(char *restrict, size_t);
 size_t wc_xstrlen(const char *restrict);
 char *xstrrpbrk(char *, const char *);
