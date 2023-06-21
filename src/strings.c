@@ -2745,27 +2745,24 @@ parse_input_str(char *str)
 	return substr;
 }
 
-/* Reduce "$HOME" to tilde ("~"). The new_path variable is always either
- * "$HOME" or "$HOME/file", that's why there's no need to check for
- * "/file"
- * If NEW_PATH isn't home, NEW_PATH is returned without allocating new
- * memory, in which case _FREE is set to zero */
+/* Reduce "$HOME" to tilde ("~").
+ * If NEW_PATH isn't in home, NEW_PATH is returned without allocating new
+ * memory, in which case FREE_BUF is set to zero.
+ * Otherwise, the reduced path is copied into malloc'ed memory. */
 char *
-home_tilde(char *new_path, int *_free)
+home_tilde(char *new_path, int *free_buf)
 {
-	*_free = 0;
+	*free_buf = 0;
 	if (home_ok == 0 || !new_path || !*new_path || !user.home)
 		return (char *)NULL;
 
-	char *path_tilde = (char *)NULL;
-
-	/* If path == HOME */
+	/* If new_path == HOME */
 	if (new_path[1] && user.home[1] && new_path[1] == user.home[1]
 	&& strcmp(new_path, user.home) == 0) {
-		path_tilde = (char *)xnmalloc(2, sizeof(char));
+		char *path_tilde = (char *)xnmalloc(2, sizeof(char));
 		path_tilde[0] = '~';
 		path_tilde[1] = '\0';
-		*_free = 1;
+		*free_buf = 1;
 		return path_tilde;
 	}
 
@@ -2774,12 +2771,12 @@ home_tilde(char *new_path, int *_free)
 	/* Avoid names like these: "HOMEfile". It should always be rather "HOME/file" */
 	&& (user.home[user.home_len - 1] == '/'
 	|| *(new_path + user.home_len) == '/') ) {
-		/* If path == HOME/file */
+		/* If new_path == HOME/file */
 		size_t len = strlen(new_path + user.home_len + 1) + 3;
-		path_tilde = (char *)xnmalloc(len, sizeof(char));
+		char *path_tilde = (char *)xnmalloc(len, sizeof(char));
 		snprintf(path_tilde, len, "~/%s", new_path + user.home_len + 1);
 
-		*_free = 1;
+		*free_buf = 1;
 		return path_tilde;
 	}
 

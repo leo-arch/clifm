@@ -2586,7 +2586,7 @@ tag_entries_generator(const char *text, int state)
 		r = home_tilde(tmp, &free_tmp);
 		q = strdup(r ? r : tmp);
 
-		size_t len = strlen(q);
+		size_t len = q ? strlen(q) : 0;
 		if (len > 1 && q[len - 1] == '/')
 			q[len - 1] = '\0';
 

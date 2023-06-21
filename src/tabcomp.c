@@ -767,31 +767,34 @@ run_finder(const size_t height, const int offset, const char *lw,
 	user.shell = (char *)NULL;
 
 	/* If height was not set in FZF_DEFAULT_OPTS nor in the config
-	 * file, let's define it ourselves */
-	char height_str[sizeof(size_t) + 21];
+	 * file, let's define it ourselves. */
+	char height_str[10 + 32];
 	*height_str = '\0';
 	if (fzf_height_set == 0)
 		snprintf(height_str, sizeof(height_str), "--height=%zu", height);
 
 	char cmd[(PATH_MAX * 2) + (NAME_MAX * 2)];
+
 	if (tabmode == FNF_TAB) {
 		snprintf(cmd, sizeof(cmd), "fnf "
-				"--read-null --pad=%d --query='%s' --reverse "
-				"--tab-accepts --right-accepts --left-aborts "
-				"--lines=%zu %s %s < %s > %s",
-				offset, lw ? lw : "", height,
-				conf.colorize == 0 ? "--no-color" : "",
-				multi ? "--multi" : "",
-				finder_in_file, finder_out_file);
+			"--read-null --pad=%d --query='%s' --reverse "
+			"--tab-accepts --right-accepts --left-aborts "
+			"--lines=%zu %s %s < %s > %s",
+			offset, lw ? lw : "", height,
+			conf.colorize == 0 ? "--no-color" : "",
+			multi == 1 ? "--multi" : "",
+			finder_in_file, finder_out_file);
+
 	} else if (tabmode == SMENU_TAB) {
 		snprintf(cmd, sizeof(cmd), "smenu %s "
-				"-t -d -n%zu -limits l:%d -W$'\n' %s < %s > %s",
-				smenutab_options_env ? smenutab_options_env : DEF_SMENU_OPTIONS,
-				height, PATH_MAX, multi ? "-P$'\n'" : "",
-				finder_in_file, finder_out_file);
-	} else {
+			"-t -d -n%zu -limits l:%d -W$'\n' %s < %s > %s",
+			smenutab_options_env ? smenutab_options_env : DEF_SMENU_OPTIONS,
+			height, PATH_MAX, multi == 1 ? "-P$'\n'" : "",
+			finder_in_file, finder_out_file);
+
+	} else { /* FZF */
 		/* All fixed parameters are compatible with at least fzf 0.16.11 (Aug 1, 2017) */
-		char prev_opts[40];
+		char prev_opts[18 + 32];
 		*prev_opts = '\0';
 		char prev_str[] = "--preview \"clifm --preview {}\"";
 
@@ -809,9 +812,9 @@ run_finder(const size_t height, const int offset, const char *lw,
 			"< %s > %s",
 			conf.fzftab_options,
 			*height_str ? height_str : "", offset,
-			conf.case_sens_path_comp ? "+i" : "-i",
+			conf.case_sens_path_comp == 1 ? "+i" : "-i",
 			lw ? lw : "", conf.colorize == 0 ? "--color=bw" : "",
-			multi ? "--multi --bind tab:toggle+down,ctrl-s:select-all,\
+			multi == 1 ? "--multi --bind tab:toggle+down,ctrl-s:select-all,\
 ctrl-d:deselect-all,ctrl-t:toggle-all" : "",
 			prev == 1 ? prev_str : "",
 			(prev == 1 && prev_hidden == 1)
@@ -819,6 +822,10 @@ ctrl-d:deselect-all,ctrl-t:toggle-all" : "",
 			*prev_opts ? prev_opts : "",
 			finder_in_file, finder_out_file);
 
+		/* Skim is a nice alternative, but it currently (0.10.4) fails
+		 * clearing the screen when --height is set, which makes it unusable
+		 * for us. The issue has been reported, but there was no response.
+		 * See https://github.com/lotabout/skim/issues/494 */
 /*		snprintf(cmd, sizeof(cmd), "sk %s " // skim
 			"%s --margin=0,0,0,%d --color=16 "
 			"--read0 --ansi --inline-info "
@@ -827,7 +834,7 @@ ctrl-d:deselect-all,ctrl-t:toggle-all" : "",
 			conf.fzftab_options,
 			*height_str ? height_str : "", *offset,
 			lw ? lw : "", conf.colorize == 0 ? "--no-color" : "",
-			multi ? "--multi --bind tab:toggle+down,ctrl-s:select-all,\
+			multi == 1 ? "--multi --bind tab:toggle+down,ctrl-s:select-all,\
 ctrl-d:deselect-all,ctrl-t:toggle-all" : "",
 			prev == 1 ? prev_str : "",
 			(prev == 1 && prev_hidden == 1)
