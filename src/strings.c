@@ -388,14 +388,15 @@ wc_xstrlen(const char *restrict str)
 	return 0;
 }
 
-/* Truncate an UTF-8 string at width MAX. Returns the difference beetween
- * MAX and the point at which STR was actually trimmed (this difference
- * should be added to STR as spaces to equate MAX and get a correct length)
+/* Truncate an UTF-8 string at width MAX.
+ * Returns the difference beetween MAX and the point at which STR was actually
+ * trimmed (this difference should be added to STR as spaces to equate MAX
+ * and get a correct length).
  * Since a wide char could take two o more columns to be draw, and since
  * you might want to trim the name in the middle of a wide char, this
  * function won't store the last wide char to avoid taking more columns
  * than MAX. In this case, the programmer should take care of filling the
- * empty spaces (usually no more than one) herself */
+ * empty spaces (usually no more than one) theyself. */
 int
 u8truncstr(char *restrict str, const size_t max)
 {
@@ -418,7 +419,7 @@ u8truncstr(char *restrict str, const size_t max)
 		len += l;
 	}
 
-	wcscpy((wchar_t *)str, buf);
+	wcslcpy((wchar_t *)str, buf, max);
 	return bmax - len;
 }
 
