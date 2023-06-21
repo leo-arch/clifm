@@ -825,9 +825,10 @@ get_ext_info(const int i, int *trim_type, size_t *ext_len)
 }
 
 /* Construct the file name to be displayed.
- * The file name is trimmed if necessary (if conf.max_name_len is set). */
+ * The file name is trimmed if longer than MAX_NAMELEN (if conf.max_name_len
+ * is set). */
 static char *
-construct_filename(const int i, struct wtrim_t *wtrim, const int max)
+construct_filename(const int i, struct wtrim_t *wtrim, const int max_namelen)
 {
 	/* wc_xstrlen returns 0 if a non-printable char was found in the file name */
 	if (file_info[i].len == 0) {
@@ -838,7 +839,7 @@ construct_filename(const int i, struct wtrim_t *wtrim, const int max)
 	char *name = wtrim->wname ? wtrim->wname : file_info[i].name;
 
 	if (files <= 1 || conf.max_name_len == UNSET || conf.long_view != 0
-	|| (int)file_info[i].len <= max)
+	|| (int)file_info[i].len <= max_namelen)
 		return name;
 
 	wtrim->type = TRIM_NO_EXT;
@@ -847,20 +848,21 @@ construct_filename(const int i, struct wtrim_t *wtrim, const int max)
 
 	xstrsncpy(name_buf, wtrim->wname ? wtrim->wname
 		: file_info[i].name, sizeof(name_buf) - 1);
-	wtrim->diff = u8truncstr(name_buf, (size_t)max - 1 - ext_len);
-	file_info[i].len = (size_t)max;
+	wtrim->diff = u8truncstr(name_buf, (size_t)max_namelen - 1 - ext_len);
+	file_info[i].len = (size_t)max_namelen;
 
 	return name_buf;
 }
 
 static void
-print_entry_color(int *ind_char, const int i, const int pad, const int _max)
+print_entry_color(int *ind_char, const int i, const int pad,
+	const int max_namelen)
 {
 	*ind_char = 0;
 	char *end_color = file_info[i].dir == 1 ? fc_c : df_c;
 
 	struct wtrim_t wtrim = (struct wtrim_t){0};
-	char *n = construct_filename(i, &wtrim, _max);
+	char *n = construct_filename(i, &wtrim, max_namelen);
 
 	char trim_diff[14];
 	*trim_diff = '\0';
@@ -961,10 +963,11 @@ print_entry_color(int *ind_char, const int i, const int pad, const int _max)
 }
 
 static void
-print_entry_nocolor(int *ind_char, const int i, const int pad, const int _max)
+print_entry_nocolor(int *ind_char, const int i, const int pad,
+	const int max_namelen)
 {
 	struct wtrim_t wtrim = (struct wtrim_t){0};
-	char *n = construct_filename(i, &wtrim, _max);
+	char *n = construct_filename(i, &wtrim, max_namelen);
 
 	char trim_diff[14];
 	*trim_diff = '\0';
@@ -1061,13 +1064,13 @@ print_entry_nocolor(int *ind_char, const int i, const int pad, const int _max)
 
 static void
 print_entry_color_light(int *ind_char, const int i, const int pad,
-	const int _max)
+	const int max_namelen)
 {
 	*ind_char = 0;
 	char *end_color = file_info[i].dir == 1 ? fc_c : df_c;
 
 	struct wtrim_t wtrim = (struct wtrim_t){0};
-	char *n = construct_filename(i, &wtrim, _max);
+	char *n = construct_filename(i, &wtrim, max_namelen);
 
 	char trim_diff[14];
 	*trim_diff = '\0';
@@ -1150,10 +1153,10 @@ print_entry_color_light(int *ind_char, const int i, const int pad,
 
 static void
 print_entry_nocolor_light(int *ind_char, const int i, const int pad,
-	const int _max)
+	const int max_namelen)
 {
 	struct wtrim_t wtrim = (struct wtrim_t){0};
-	char *n = construct_filename(i, &wtrim, _max);
+	char *n = construct_filename(i, &wtrim, max_namelen);
 
 	char trim_diff[14];
 	*trim_diff = '\0';
@@ -1225,14 +1228,14 @@ print_entry_nocolor_light(int *ind_char, const int i, const int pad,
 
 /* Pad the current file name to equate the longest file name length */
 static void
-pad_filename(int *ind_char, const int i, const int pad,
+pad_filename(const int ind_char, const int i, const int pad,
 	const int termcap_move_right)
 {
 	int cur_len = 0;
 
 #ifndef _NO_ICONS
 	cur_len = pad + 1 + (conf.icons == 1 ? 3 : 0) + (int)file_info[i].len
-		+ (*ind_char ? 1 : 0);
+		+ (ind_char == 1 ? 1 : 0);
 #else
 	cur_len = pad + 1 + (int)file_info[i].len + (*ind_char ? 1 : 0);
 #endif
@@ -1256,13 +1259,13 @@ pad_filename(int *ind_char, const int i, const int pad,
 
 /* Add spaces needed to equate the longest file name length */
 static void
-pad_filename_light(int *ind_char, const int i, const int pad,
+pad_filename_light(const int ind_char, const int i, const int pad,
 	const int termcap_move_right)
 {
 	int cur_len = 0;
 #ifndef _NO_ICONS
 	cur_len = pad + 1 + (conf.icons == 1 ? 3 : 0)
-		+ (int)file_info[i].len + (*ind_char ? 1 : 0);
+		+ (int)file_info[i].len + (ind_char == 1 ? 1 : 0);
 #else
 	cur_len = pad + 1 + (int)file_info[i].len + (*ind_char ? 1 : 0);
 #endif
@@ -1304,7 +1307,7 @@ list_files_horizontal(size_t *counter, int *reset_pager, const int pad,
 		print_entry_function = conf.light_mode == 1
 			? print_entry_nocolor_light : print_entry_nocolor;
 
-	void (*pad_filename_function)(int *, const int, const int, const int);
+	void (*pad_filename_function)(const int, const int, const int, const int);
 	pad_filename_function = conf.light_mode == 1
 		? pad_filename_light : pad_filename;
 
@@ -1355,16 +1358,16 @@ list_files_horizontal(size_t *counter, int *reset_pager, const int pad,
 			 * #    PRINT THE CURRENT ENTRY    #
 			 * ################################# */
 
-		/* Trim file name to MAX_NAME_LEN */
 		int fc = file_info[i].dir != 1 ? (int)longest_fc : 0;
-		int _max = conf.max_name_len + fc;
+		/* Displayed file name will be trimmed to MAX_NAME_LEN. */
+		int max_namelen = conf.max_name_len + fc;
 
 		file_info[i].eln_n = conf.no_eln == 1 ? -1 : DIGINUM(i + 1);
 
-		print_entry_function(&ind_char, i, pad, _max);
+		print_entry_function(&ind_char, i, pad, max_namelen);
 
 		if (last_column == 0)
-			pad_filename_function(&ind_char, i, pad, termcap_move_right);
+			pad_filename_function(ind_char, i, pad, termcap_move_right);
 		else
 			putchar('\n');
 	}
@@ -1399,7 +1402,7 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 		print_entry_function = conf.light_mode == 1
 			? print_entry_nocolor_light : print_entry_nocolor;
 
-	void (*pad_filename_function)(int *, const int, const int, const int);
+	void (*pad_filename_function)(const int, const int, const int, const int);
 	pad_filename_function = conf.light_mode == 1
 		? pad_filename_light : pad_filename;
 
@@ -1489,16 +1492,16 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 			 * #    PRINT THE CURRENT ENTRY    #
 			 * ################################# */
 
-		/* Trim file name to MAX_NAME_LEN (+ LONGEST_FC) */
 		int fc = file_info[x].dir != 1 ? (int)longest_fc : 0;
-		int _max = conf.max_name_len + fc;
+		/* Displayed file name will be trimmed to MAX_NAMELEN. */
+		int max_namelen = conf.max_name_len + fc;
 
 		file_info[x].eln_n = conf.no_eln == 1 ? -1 : DIGINUM(x + 1);
 
-		print_entry_function(&ind_char, x, pad, _max);
+		print_entry_function(&ind_char, x, pad, max_namelen);
 
 		if (last_column == 0)
-			pad_filename_function(&ind_char, x, pad, termcap_move_right);
+			pad_filename_function(ind_char, x, pad, termcap_move_right);
 		else
 			/* Last column is populated. Ex:
 			 * 1 file  3 file3  5 file5HERE
@@ -1949,7 +1952,7 @@ list_dir_light(void)
 	/* Get possible amount of columns for the dirlist screen */
 	columns_n = conf.columned == 0 ? 1 : get_columns();
 
-	if (conf.listing_mode == VERTLIST) /* ls(1) like listing */
+	if (conf.listing_mode == VERTLIST) /* ls(1)-like listing */
 		list_files_vertical(&counter, &reset_pager, pad, columns_n);
 	else
 		list_files_horizontal(&counter, &reset_pager, pad, columns_n);
