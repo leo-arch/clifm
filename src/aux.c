@@ -503,14 +503,15 @@ rl_ring_bell(void)
 	}
 }
 
+/* Generate a time string (based on the struct tm TM) with this form:
+ * YYYYMMDDHHMMSS.
+ * This function is used mostly by the trash function to generate unique
+ * suffixes for trashed files. */
 char *
 gen_date_suffix(const struct tm tm)
 {
-	char date[64] = "";
-	strftime(date, sizeof(date), "%b %d %H:%M:%S %Y", &tm);
-
 	char *suffix = (char *)xnmalloc(68, sizeof(char));
-	snprintf(suffix, 67, "%d%d%d%d%d%d", tm.tm_year + 1900,
+	snprintf(suffix, 67, "%04d%02d%02d%02d%02d%02d", tm.tm_year + 1900,
 	    tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
 
 	return suffix;

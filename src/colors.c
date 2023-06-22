@@ -2368,7 +2368,18 @@ set_colors(const char *colorscheme, const int check_env)
  * extension in order to correctly determine the file color (according to
  * its actual extension).
  * Remove this extension (setting the initial dot to NULL) and return a
- * pointer to this character, so that we can later reinsert the dot */
+ * pointer to this character, so that we can later reinsert the dot.
+ *
+ * NOTE: We append a time suffix (via gen_time_suffix()) to the trashed file
+ * name in order to make it unique.
+ * Now, since other trash implementation do not do this, we need to check the
+ * extension name (otherwise, we might end up removing the original file
+ * extension).
+ * The time suffix is "YYYYMMDDHHMMSS". So we need to check whether we have an
+ * extension name of at least fourteen digits, being the first one '2' (the
+ * time suffix starts by the year, so that it's quite safe to assume the first
+ * one will be '2' (at least until the year 3000!)). Not perfect, but it
+ * works most of the time. */
 char *
 remove_trash_ext(char **ent)
 {
@@ -2377,7 +2388,8 @@ remove_trash_ext(char **ent)
 		return (char *)NULL;
 
 	char *d = strrchr(*ent, '.');
-	if (d && d != *ent && d[1] && IS_DIGIT(d[1]))
+	if (d && d != *ent && d[1] == '2'
+	&& strlen(d + 1) == 14 && is_number(d + 1))
 		*d = '\0';
 
 	return d;
