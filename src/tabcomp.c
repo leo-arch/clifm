@@ -390,7 +390,7 @@ fzftab_color(char *filename, const struct stat *attr)
 			return cl;
 
 		/* If trashed file, remove the trash extension, so we can get the
-		 * color according to the actual file extension */
+		 * color according to the actual file extension. */
 		char *te = (char *)NULL;
 		if (cur_comp_type == TCMP_UNTRASH || cur_comp_type == TCMP_TRASHDEL) {
 			flags |= STATE_COMPLETING;

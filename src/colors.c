@@ -2377,7 +2377,7 @@ remove_trash_ext(char **ent)
 		return (char *)NULL;
 
 	char *d = strrchr(*ent, '.');
-	if (d && d != *ent)
+	if (d && d != *ent && d[1] && IS_DIGIT(d[1]))
 		*d = '\0';
 
 	return d;

@@ -510,7 +510,7 @@ gen_date_suffix(const struct tm tm)
 	strftime(date, sizeof(date), "%b %d %H:%M:%S %Y", &tm);
 
 	char *suffix = (char *)xnmalloc(68, sizeof(char));
-	snprintf(suffix, 67, "%d%d%d%d%d%d", tm.tm_year + 1900, /* NOLINT */
+	snprintf(suffix, 67, "%d%d%d%d%d%d", tm.tm_year + 1900,
 	    tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
 
 	return suffix;

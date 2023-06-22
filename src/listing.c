@@ -267,7 +267,7 @@ print_disk_usage(void)
 }
 
 static void
-_print_selfiles(const unsigned short t_rows)
+print_sel_files(const unsigned short t_rows)
 {
 	int limit = conf.max_printselfiles;
 
@@ -434,7 +434,7 @@ post_listing(DIR *dir, const int close_dir, const int reset_pager)
 		printf(_("Color scheme %s->%s %s\n"), mi_c, df_c, cur_cscheme);
 
 	if (conf.print_selfiles == 1 && sel_n > 0)
-		_print_selfiles(term_lines);
+		print_sel_files(term_lines);
 
 	return EXIT_SUCCESS;
 }
