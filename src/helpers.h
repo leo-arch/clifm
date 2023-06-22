@@ -34,21 +34,17 @@
 # define _DEFAULT_SOURCE
 # if defined(__linux__) || defined(__CYGWIN__)
 #  define _XOPEN_SOURCE /* wcwidth() */
-# endif
-# if defined(__FreeBSD__) || defined(__DragonFly__)
+# elif defined(__FreeBSD__) || defined(__DragonFly__)
 #  define _XOPEN_SOURCE
 #  define __XSI_VISIBLE 700
 #  define __BSD_VISIBLE 1
-# endif
-# ifdef __NetBSD__
+# elif defined(__NetBSD__)
 #  define _XOPEN_SOURCE
 #  define _NETBSD_SOURCE
 #  define __BSD_VISIBLE 1
-# endif
-# ifdef __OpenBSD__
+# elif defined(__OpenBSD__)
 #  define _BSD_SOURCE
-# endif
-# ifdef __APPLE__
+# elif defined(__APPLE__)
 #  define _DARWIN_C_SOURCE
 # endif
 #endif

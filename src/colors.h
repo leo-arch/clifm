@@ -38,7 +38,6 @@ char *get_ext_color(const char *);
 char *get_file_color(const char *, const struct stat *);
 char *get_regfile_color(const char *, const struct stat *, int *);
 int  import_color_scheme(const char *);
-//void remove_bold_attr(char **);
 void update_warning_prompt_text_color(void);
 void remove_bold_attr(char *);
 char *remove_trash_ext(char **);

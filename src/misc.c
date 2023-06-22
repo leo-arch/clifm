@@ -899,7 +899,7 @@ confirm_sudo_cmd(char **cmd)
  * Returns the exit status of the executed command */
 static int
 launch_new_instance_cmd(char ***cmd, char **self, char **_sudo,
-	char **dir, const int sudo)
+	char **dir, int sudo)
 {
 	int ret = 0;
 #if defined(__HAIKU__)
@@ -941,7 +941,7 @@ launch_new_instance_cmd(char ***cmd, char **self, char **_sudo,
 // cppcheck-suppress syntaxError
 
 /* Open DIR in a new instance of the program (using TERM, set in the config
- * file, as terminal emulator) */
+ * file, as terminal emulator). */
 int
 new_instance(char *dir, const int sudo)
 {
@@ -964,10 +964,10 @@ new_instance(char *dir, const int sudo)
 		return EXIT_FAILURE;
 	}
 
-	char *self = get_cmd_path(PNL);
+	char *self = get_cmd_path(PROGRAM_NAME);
 	if (!self) {
 		free(_sudo); free(deq_dir);
-		xerror("%s: %s: %s\n", PROGRAM_NAME, PNL, strerror(errno));
+		xerror("%s: %s: %s\n", PROGRAM_NAME, PROGRAM_NAME, strerror(errno));
 		return errno;
 	}
 

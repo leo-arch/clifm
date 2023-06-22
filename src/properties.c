@@ -93,9 +93,6 @@
  * allocation) the appropeiate value, and then print them all
  * (print_entry_props()). */
 
-/* A path (2, or the compiler complains), plus 7 colors, plus an icon */
-//#define NAME_STR_LEN ((PATH_MAX * sizeof(wchar_t) * 2) + (MAX_COLOR * 7) + 3)
-
 /* 14 colors + 15 single chars + NUL byte */
 #define PERM_STR_LEN ((MAX_COLOR * 14) + 16) /* construct_file_perms() */
 

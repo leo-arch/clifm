@@ -43,9 +43,9 @@
 #include <unistd.h>
 
 #if defined(LINUX_FILE_ATTRS)
-# include <linux/fs.h> // FS_IMMUTABLE_FL
-# include <sys/ioctl.h> // ioctl(3)
-# include <fcntl.h> // O_RDONLY
+# include <linux/fs.h> /* FS_IMMUTABLE_FL */
+# include <sys/ioctl.h> /* ioctl(3) */
+# include <fcntl.h> /* O_RDONLY */
 #endif /* LINUX_FILE_ATTRS */
 
 #include "aux.h"
@@ -341,7 +341,7 @@ check_third_party_cmds(void)
 	int udisks2ok = 0, udevilok = 0, check_coreutils = 0;
 #if defined(CHECK_COREUTILS)
 	check_coreutils = 1;
-#endif // CHECK_COREUTILS
+#endif /* CHECK_COREUTILS */
 
 	int i = (int)path_progsn;
 
@@ -389,7 +389,7 @@ check_third_party_cmds(void)
 			bin_flags |= BSD_HAVE_COREUTILS;
 			check_coreutils = 0;
 		}
-#endif // CHECK_COREUTILS
+#endif /* CHECK_COREUTILS */
 
 		if (udevilok == 1 && udisks2ok == 1 && check_coreutils == 0
 		&& (bin_flags & (FZF_BIN_OK & FNF_BIN_OK & SMENU_BIN_OK
@@ -1014,7 +1014,7 @@ truncate_file(char *file, const int max, const int check_dups)
 	size_t prev_line_size = 0;
 
 	while (getline(&line, &line_size, fp) > 0) {
-		// Skip consecutive equal entries
+		/* Skip consecutive equal entries */
 		if (check_dups == 1 && prev_line && line_size == prev_line_size
 		&& strcmp(line, prev_line) == 0)
 			continue;

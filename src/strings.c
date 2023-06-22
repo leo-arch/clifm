@@ -1039,7 +1039,7 @@ check_shell_functions(const char *str)
 	if (!str || !*str)
 		return 0;
 
-	if (int_vars == 0) { // Take assignements as shell functions
+	if (int_vars == 0) { /* Take assignements as shell functions */
 		char *s = strchr(str, ' ');
 		char *e = strchr(str, '=');
 		if (!s && e)
@@ -1060,7 +1060,7 @@ check_shell_functions(const char *str)
 	default: return 0;
 	} */
 
-	const char *funcs[] = {
+	const char *const funcs[] = {
 		"for ", "for(",
 		"do ", "do(",
 		"while ", "while(",
@@ -2467,7 +2467,7 @@ parse_input_str(char *str)
 		stdin_dir_ok = 1;
 
 	/* Let's expand ranges first: the numbers resulting from the expanded range
-	 * will be expanded into the corresponding file names by eln_expand() bwlow. */
+	 * will be expanded into the corresponding file names by eln_expand() below. */
 	expand_ranges(&substr);
 
 	for (i = 0; i <= args_n; i++) {

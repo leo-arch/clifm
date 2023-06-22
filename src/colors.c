@@ -424,7 +424,7 @@ get_regfile_color(const char *filename, const struct stat *attr, int *is_ext)
 	if (!extcolor)
 		return color ? color : fi_c;
 
-	snprintf(tmp_color, sizeof(tmp_color), "\x1b[%sm", extcolor); // NOLINT
+	snprintf(tmp_color, sizeof(tmp_color), "\x1b[%sm", extcolor); /* NOLINT */
 	color = tmp_color;
 	extcolor = (char *)NULL;
 	*is_ext = 1;
@@ -2371,13 +2371,12 @@ set_colors(const char *colorscheme, const int check_env)
  * pointer to this character, so that we can later reinsert the dot.
  *
  * NOTE: We append a time suffix (via gen_time_suffix()) to the trashed file
- * name in order to make it unique.
- * Now, since other trash implementation do not do this, we need to check the
- * extension name (otherwise, we might end up removing the original file
- * extension).
+ * name in order to make it unique. Now, since other trash implementations do
+ * not do this, we need to check the extension name (otherwise, we might end
+ * up removing the original file extension).
  * The time suffix is "YYYYMMDDHHMMSS". So we need to check whether we have an
- * extension name of at least fourteen digits, being the first one '2' (the
- * time suffix starts by the year, so that it's quite safe to assume the first
+ * extension name of at least 14 digits, being the first one '2' (the time
+ * suffix starts by the year, so that it's quite safe to assume the first
  * one will be '2' (at least until the year 3000!)). Not perfect, but it
  * works most of the time. */
 char *
