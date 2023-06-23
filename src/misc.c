@@ -2072,31 +2072,36 @@ list_commands(void)
 
 #if !defined(__HAIKU__) && !defined(__sun)
 /* Retrieve pager path, first from PAGER, then try less(1), and finally
- * more(1). If none is found returns NULL */
+ * more(1). If none is found returns NULL. */
 static char *
 get_pager(void)
 {
 	char *_pager = (char *)NULL;
 	char *p = getenv("PAGER");
-	if (p)
+	if (p) {
+		char *s = strchr(p, ' ');
+		if (s) *s = '\0';
 		_pager = savestring(p, strlen(p));
-	else {
-		p = get_cmd_path("less");
-		if (p) {
-			_pager = savestring(p, strlen(p));
-			free(p);
-		} else {
-			p = get_cmd_path("more");
-			if (p) {
-				_pager = savestring(p, strlen(p));
-				free(p);
-			}
-		}
+		return _pager;
 	}
 
-	return _pager;
+	p = get_cmd_path("less");
+	if (p) {
+		_pager = savestring(p, strlen(p));
+		free(p);
+		return _pager;
+	}
+
+	p = get_cmd_path("more");
+	if (p) {
+		_pager = savestring(p, strlen(p));
+		free(p);
+		return _pager;
+	}
+
+	return (char *)NULL;
 }
-#endif /* !__HAIKU__ */
+#endif /* !__HAIKU__ && !__sun */
 
 /* Help topics */
 static void
@@ -2333,7 +2338,7 @@ quick_help(char *topic)
 	}
 
 	char tmp_file[PATH_MAX];
-	snprintf(tmp_file, PATH_MAX - 1, "%s/%s", xargs.stealth_mode == 1
+	snprintf(tmp_file, sizeof(tmp_file), "%s/%s", xargs.stealth_mode == 1
 		? P_tmpdir : tmp_dir, TMP_FILENAME);
 
 	int fd = mkstemp(tmp_file);
