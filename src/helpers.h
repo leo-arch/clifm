@@ -27,8 +27,6 @@
 
 #if (defined(__linux__) || defined(__CYGWIN__)) && !defined(_BE_POSIX)
 # define _GNU_SOURCE
-#elif defined(__sun)
-# define BSD_COMP
 #else
 # define _POSIX_C_SOURCE 200809L
 # define _DEFAULT_SOURCE
@@ -46,6 +44,9 @@
 #  define _BSD_SOURCE
 # elif defined(__APPLE__)
 #  define _DARWIN_C_SOURCE
+# elif defined(__sun)
+#  define __EXTENSIONS__
+#  define BSD_COMP
 # endif
 #endif
 
@@ -464,7 +465,7 @@ extern int watch;
 
 #define __MB_LEN_MAX 16
 
-/* OpenBSD recommends the use of ten trailing X's. See mkstemp(3) */
+/* OpenBSD recommends the use of 10 trailing X's. See mkstemp(3) */
 #if defined(__OpenBSD__)
 # define TMP_FILENAME ".tempXXXXXXXXXX"
 #else

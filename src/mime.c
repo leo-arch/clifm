@@ -33,11 +33,7 @@
 #include <readline/tilde.h>
 
 #ifndef _NO_MAGIC
-#if defined(__sun)
-# include <ast/magic.h> // WRONG HEADER!!!!!
-#else
 # include <magic.h>
-#endif /* __sun */
 #endif /* !_NO_MAGIC */
 
 #ifndef _NO_ARCHIVING
