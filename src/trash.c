@@ -414,19 +414,23 @@ trash_file(const char *suffix, const struct tm *tm, char *file)
 	char *dest = (char *)xnmalloc(len, sizeof(char));
 	snprintf(dest, len, "%s/%s", trash_files_dir, file_suffix);
 
-	ret = rename(file, dest);
+	int mvcmd = 0;
+	ret = renameat(AT_FDCWD, file, AT_FDCWD, dest);
 	if (ret != EXIT_SUCCESS && errno == EXDEV) {
 		/* Destination file is on a different file system, which is why
 		 * rename(3) doesn't work: let's try with mv(1). */
 		char *tmp_cmd[] = {"mv", "--", file, dest, NULL};
 		ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG);
+		mvcmd = 1;
 	}
 
 	free(dest);
 
 	if (ret != EXIT_SUCCESS) {
-//		xerror(_("trash: %s: Error moving file to Trash\n"), file);
-		xerror(_("trash: %s: %s\n"), file, strerror(errno));
+		if (mvcmd == 1)
+			xerror(_("trash: %s: Error moving file to Trash\n"), file);
+		else
+			xerror(_("trash: %s: %s\n"), file, strerror(errno));
 		free(file_suffix);
 		return errno;
 	}
