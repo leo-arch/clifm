@@ -2070,7 +2070,7 @@ list_commands(void)
 	return EXIT_SUCCESS;
 }
 
-#if !defined(__HAIKU__)
+#if !defined(__HAIKU__) && !defined(__sun)
 /* Retrieve pager path, first from PAGER, then try less(1), and finally
  * more(1). If none is found returns NULL */
 static char *
