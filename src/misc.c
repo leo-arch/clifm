@@ -287,7 +287,6 @@ reset_inotify(void)
 	char rpath[PATH_MAX];
 	snprintf(rpath, sizeof(rpath), "%s/", workspaces[cur_ws].path);
 
-//	inotify_wd = inotify_add_watch(inotify_fd, workspaces[cur_ws].path, INOTIFY_MASK);
 	inotify_wd = inotify_add_watch(inotify_fd, rpath, INOTIFY_MASK);
 	if (inotify_wd > 0)
 		watch = 1;
@@ -427,19 +426,14 @@ read_kqueue(void)
 	struct kevent event_data[NUM_EVENT_SLOTS];
 	memset((void *)event_data, '\0', sizeof(struct kevent) * NUM_EVENT_SLOTS);
 
-	int i, refresh = 0;
+	int i;
 	int count = kevent(kq, NULL, 0, event_data, 4096, &timeout);
 
 	for (i = 0; i < count; i++) {
 		if (event_data[i].fflags & KQUEUE_FFLAGS) {
-			refresh = 1;
-			break;
+			reload_dirlist();
+			return;
 		}
-	}
-
-	if (refresh == 1) {
-		reload_dirlist();
-		return;
 	}
 }
 #endif /* LINUX_INOTIFY */

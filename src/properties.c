@@ -1607,13 +1607,13 @@ construct_and_print_filename(const struct fileinfo *props,
 		ext_name = get_ext_info_long(props->name, plen, &trim, &ext_len);
 
 		xstrsncpy(tname, wname ? wname : props->name, sizeof(tname) - 1);
-		int a = (int)plen - rest - 1 - (int)ext_len;
-		if (a < 0)
-			a = 0;
+		int trim_point = (int)plen - rest - 1 - (int)ext_len;
+		if (trim_point < 0)
+			trim_point = 0;
 		if (conf.unicode)
-			diff = u8truncstr(tname, (size_t)(a));
+			diff = u8truncstr(tname, (size_t)trim_point);
 		else
-			tname[a] = '\0';
+			tname[trim_point] = '\0';
 
 		cur_len -= (size_t)rest;
 	}
@@ -1885,8 +1885,8 @@ print_entry_props(const struct fileinfo *props,	const struct maxes_t *maxes,
 	char ino_str[INO_STR_LEN];
 	*ino_str = '\0';
 	if (prop_fields.inode == 1) {
-		snprintf(ino_str, INO_STR_LEN, "\x1b[0m%s%*ju %s", tx_c, (int)maxes->inode,
-			(uintmax_t)props->inode, df_c);
+		snprintf(ino_str, INO_STR_LEN, "\x1b[0m%s%*ju %s", tx_c,
+			(int)maxes->inode, (uintmax_t)props->inode, df_c);
 	}
 
 	char fc_str[FC_STR_LEN];
@@ -1903,12 +1903,12 @@ print_entry_props(const struct fileinfo *props,	const struct maxes_t *maxes,
 
 	/* Print stuff */
 
-	printf("%s" /* Files counter for dirs */
-		   "%s" /* Inode */
-		   "%s" /* Permissions */
-		   "%s " /* Extended attributes (@) */
-		   "%s" /* User and group ID */
-		   "%s" /* Time */
+	printf("%s"    /* Files counter for dirs */
+		   "%s"    /* Inode */
+		   "%s"    /* Permissions */
+		   "%s "   /* Extended attributes (@) */
+		   "%s"    /* User and group ID */
+		   "%s"    /* Time */
 		   "%s\n", /* Size / device info */
 
 		prop_fields.counter != 0 ? fc_str : "",
@@ -1922,7 +1922,7 @@ print_entry_props(const struct fileinfo *props,	const struct maxes_t *maxes,
 	return EXIT_SUCCESS;
 }
 
-/* Print final stats for the disk usage analyzer mode: total and largest file */
+/* Print final stats for the disk usage analyzer mode: total and largest file. */
 void
 print_analysis_stats(const off_t total, const off_t largest,
 	const char *color, const char *name)
