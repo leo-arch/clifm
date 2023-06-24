@@ -136,8 +136,9 @@ run_and_refresh(char **cmd, const int skip_force)
 			return EINVAL;
 
 		/* If we have a number, either it was not expanded by parse_input_str(),
-		 * in which case it is an invalid ELN, or it was expanded to a file named
-		 * as a number. Let's check if we have such file name in the files list */
+		 * in which case it is an invalid ELN, or it was expanded to a file
+		 * named as a number. Let's check if we have such file name in the
+		 * files list. */
 		if (is_number(cmd[1])) {
 			int i = (int)files;
 			while (--i >= 0) {
@@ -190,7 +191,7 @@ run_and_refresh(char **cmd, const int skip_force)
 
 	size_t i;
 	for (i = 1; cmd[i]; i++) {
-		/* The -f,--force parameter is internal. Skip it
+		/* The -f,--force parameter is internal. Skip it.
 		 * It instructs cp/mv to run non-interactively (no -i param) */
 		if (skip_force == 1 && i == 1 && is_force_param(cmd[i]) == 1)
 			continue;
@@ -242,7 +243,7 @@ run_and_refresh(char **cmd, const int skip_force)
 		save_sel();
 	}
 
-#if defined(__HAIKU__) || defined(__CYGWIN__)
+#if defined(__HAIKU__) || defined(__CYGWIN__) || defined(__sun)
 	if (conf.autols == 1 && cmd[1] && strcmp(cmd[1], "--help") != 0
 	&& strcmp(cmd[1], "--version") != 0)
 		reload_dirlist();
@@ -297,7 +298,7 @@ run_in_background(const pid_t pid)
 /* Implementation of system(3).
  * Unlike system(3), which runs a command using '/bin/sh' as the executing
  * shell, xsystem() uses a custom shell (user.shell) specified via CLIFM_SHELL
- * or SHELL, falling back to '/bin/sh' only if none of there variables are set. */
+ * or SHELL, falling back to '/bin/sh' only if none of these variables are set. */
 static int
 xsystem(const char *cmd)
 {
@@ -442,7 +443,7 @@ launch_execve(char **cmd, const int bg, const int xflags)
 /* Prevent the user from killing the program via the 'kill',
  * 'pkill' or 'killall' commands, from within CliFM itself.
  * Otherwise, the program will be forcefully terminated without
- * freeing allocated memory */
+ * freeing allocated memory. */
 static inline int
 graceful_quit(char **args)
 {

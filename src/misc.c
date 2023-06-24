@@ -310,9 +310,9 @@ read_inotify(void)
 	i = (int)read(inotify_fd, inotify_buf, EVENT_BUF_LEN);
 
 	if (i <= 0) {
-#ifdef INOTIFY_DEBUG
+# ifdef INOTIFY_DEBUG
 		puts("INOTIFY_RETURN");
-#endif /* INOTIFY_DEBUG */
+# endif /* INOTIFY_DEBUG */
 		return;
 	}
 
@@ -322,22 +322,22 @@ read_inotify(void)
 	ptr += sizeof(struct inotify_event) + event->len) {
 		event = (struct inotify_event *)ptr;
 
-#ifdef INOTIFY_DEBUG
+# ifdef INOTIFY_DEBUG
 		printf("%s (%u:%d): ", *event->name
 			? event->name : NULL, event->len, event->wd);
-#endif /* INOTIFY_DEBUG */
+# endif /* INOTIFY_DEBUG */
 
 		if (!event->wd) {
-#ifdef INOTIFY_DEBUG
+# ifdef INOTIFY_DEBUG
 			puts("INOTIFY_BREAK");
-#endif /* INOTIFY_DEBUG */
+# endif /* INOTIFY_DEBUG */
 			break;
 		}
 
 		if (event->mask & IN_CREATE) {
-#ifdef INOTIFY_DEBUG
+# ifdef INOTIFY_DEBUG
 			puts("IN_CREATE");
-#endif /* INOTIFY_DEBUG */
+# endif /* INOTIFY_DEBUG */
 			struct stat a;
 			if (event->len && lstat(event->name, &a) != 0) {
 				/* The file was created, but doesn't exist anymore */
@@ -358,22 +358,22 @@ read_inotify(void)
 				ignore_event = 0;
 			} else {
 				/* If destiny file name is already in the files list,
-				 * ignore this event */
+				 * ignore this event. */
 				ignore_event = 1;
 			}
 		}
 
 		if (event->mask & IN_DELETE) {
-#ifdef INOTIFY_DEBUG
+# ifdef INOTIFY_DEBUG
 			puts("IN_DELETE");
-#endif /* INOTIFY_DEBUG */
+# endif /* INOTIFY_DEBUG */
 			struct stat a;
 			if (event->len && lstat(event->name, &a) == 0)
 				/* The file was removed, but is still there (recreated) */
 				ignore_event = 1;
 		}
 
-#ifdef INOTIFY_DEBUG
+# ifdef INOTIFY_DEBUG
 		if (event->mask & IN_DELETE_SELF)
 			puts("IN_DELETE_SELF");
 		if (event->mask & IN_MOVE_SELF)
@@ -384,21 +384,21 @@ read_inotify(void)
 			puts("IN_MOVED_TO");
 		if (event->mask & IN_IGNORED)
 			puts("IN_IGNORED");
-#endif /* INOTIFY_DEBUG */
+# endif /* INOTIFY_DEBUG */
 
-		if (!ignore_event && (event->mask & INOTIFY_MASK))
+		if (ignore_event == 0 && (event->mask & INOTIFY_MASK))
 			refresh = 1;
 	}
 
 	if (refresh == 1 && exit_code == EXIT_SUCCESS) {
-#ifdef INOTIFY_DEBUG
+# ifdef INOTIFY_DEBUG
 		puts("INOTIFY_REFRESH");
-#endif /* INOTIFY_DEBUG */
+# endif /* INOTIFY_DEBUG */
 		reload_dirlist();
 	} else {
-#ifdef INOTIFY_DEBUG
+# ifdef INOTIFY_DEBUG
 		puts("INOTIFY_RESET");
-#endif /* INOTIFY_DEBUG */
+# endif /* INOTIFY_DEBUG */
 		/* Reset the inotify watch list */
 		reset_inotify();
 	}
@@ -441,12 +441,6 @@ read_kqueue(void)
 		reload_dirlist();
 		return;
 	}
-
-/*	if (event_fd >= 0) {
-		close(event_fd);
-		event_fd = -1;
-		watch = 0;
-	} */
 }
 #endif /* LINUX_INOTIFY */
 
@@ -895,8 +889,8 @@ confirm_sudo_cmd(char **cmd)
 	return rl_get_y_or_n(_("Run command? [y/n] "));
 }
 
-/* Launch a new instance using CMD. If CMD is NULL, try "CONF.TERM clifm"
- * Returns the exit status of the executed command */
+/* Launch a new instance using CMD. If CMD is NULL, try "CONF.TERM clifm".
+ * Returns the exit status of the executed command. */
 static int
 launch_new_instance_cmd(char ***cmd, char **self, char **_sudo,
 	char **dir, int sudo)
@@ -2325,8 +2319,10 @@ quick_help(char *topic)
 	printf("%s                                %s\n\n%s\n\n%s",
 		ASCII_LOGO, _PROGRAM_NAME, QUICK_HELP_HEADER, QUICK_HELP_NAVIGATION);
 	printf("\n\n%s\n\n%s\n", QUICK_HELP_BASIC_OPERATIONS, QUICK_HELP_MISC);
+# ifdef __HAIKU__
 	puts(_("\nNOTE: Some keybindings on Haiku might differ. Take a look "
 		"at your current keybindings via the 'kb' command"));
+# endif /* __HAIKU__ */
 	return EXIT_SUCCESS;
 #else
 	char *_pager = (char *)NULL;
@@ -2382,7 +2378,7 @@ quick_help(char *topic)
 	if (conf.autols == 1)
 		reload_dirlist();
 	return EXIT_SUCCESS;
-#endif
+#endif /* __HAIKU || __sun */
 }
 
 void
