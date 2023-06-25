@@ -172,11 +172,13 @@ If not obvious, comment what your code is trying to achieve: there is no good so
 3)  Execute command
  And take more input...
 
-**C)** The last step above (3) calls the `exec_cmd()` function (`in exec.c`) to find out what needs to be done based on the user's input. The structure of the `exec_cmd` function is a big if-else chain: if the command is internal, that is, one of **Clifm**'s built-in commands, the corresponding function will be called and executed; if not, if it is rather an external command, it will be executed by the system shell (via `launch_execle()`, also in `exec.c`).
+**C)** The last step above (3) calls the `exec_cmd()` function (`in exec.c`) to find out what needs to be done based on the user's input. The structure of the `exec_cmd` function is a big if-else chain: if the command is internal, that is, one of **clifm**'s built-in commands, the corresponding function will be called and executed; if not, if it is rather an external command, it will be executed by the system shell (via `launch_execl()`, also in `exec.c`).<sup>1</sup>
+
+<sup>1</sup> The shell used to launch external commands is taken from: 1) **CLIFM_SHELL** environment variable, 2) **SHELL** environment variable, or 3) the `password` database (via **getpwuid**(3)), in this order. Note that if running with `--secure-cmds`, `--secure-env`, or `--secure-env-full`, steps 1 and 2 are skipped. 
 
 **D)** Listing
 
-This is the basic structure of **Clifm**: generally speaking, it is just a shell. In between, however, lots of things happen. Leaving aside the above mentioned functions, the most important one is `listdir()`, defined in `listing.c`. Everything related to listing files happens here: reading files in the current directory (via **readdir**(3)), getting file information (via the dirent struct returned by **readdir**(3) itself and **stat**(3)), sorting files (via **qsort**(3)), and storing all these information in a global struct (`file_info`) for future access, for example, to get file properties of a given entry.
+This is the basic structure of **clifm**: generally speaking, it is just a shell. In between, however, lots of things happen. Leaving aside the above mentioned functions, the most important one is `listdir()`, defined in `listing.c`. Everything related to listing files happens here: reading files in the current directory (via **readdir**(3)), getting file information (via the dirent struct returned by **readdir**(3) itself and **stat**(3)), sorting files (via **qsort**(3)), and storing all these information in a global struct (`file_info`) for future access, for example, to get file properties of a given entry.
 
 **E)** Whatever happens later, is just some function or operation invoked by the user and happening on top of the steps described above: opening a file or directory (via the `open_function()` and `cd_function()` functions, in `file_operations.c` and `navigation.c` respectivelly), opening a bookmark (`bookmarks.c`), operating on files (`file_operations.c`), switching to a different profile (`profiles.c`), trashing a file (`trash.c`), searching for a file (`search.c`), running a plugin (`actions.c`), and so on.
 
@@ -247,6 +249,12 @@ cc -I/usr/local/include -L/usr/local/lib -O3 -s -fstack-protector-strong -march=
 
 ```sh
 gcc -o clifm *.c -lreadline -lintl -lmagic
+```
+
+6) _SunOS_:
+
+```sh
+gcc -o clifm *.c -lreadline -ltermcap -lmagic
 ```
 
 **NOTE**: Since compiling in this way only produces a binary file, it is necessary to manually copy the remaining files. See the `install` block of the [Makefile](https://github.com/leo-arch/clifm/blob/master/Makefile).
