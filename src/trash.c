@@ -294,7 +294,7 @@ trash_clear(void)
 		snprintf(file2, len, "%s/%s", trash_info_dir, info_file);
 
 		char *tmp_cmd[] = {"rm", "-rf", "--", file1, file2, NULL};
-		ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG);
+		ret = launch_execv(tmp_cmd, FOREGROUND, E_NOFLAG);
 
 		free(file1);
 		free(file2);
@@ -335,7 +335,7 @@ del_trash_file_and_exit(char **file_suffix, char **info_file)
 	snprintf(trash_file, len, "%s/%s", trash_files_dir, *file_suffix);
 
 	char *tmp_cmd[] = {"rm", "-rf", "--", trash_file, NULL};
-	int ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG);
+	int ret = launch_execv(tmp_cmd, FOREGROUND, E_NOFLAG);
 	free(trash_file);
 
 	if (ret != EXIT_SUCCESS) {
@@ -420,7 +420,7 @@ trash_file(const char *suffix, const struct tm *tm, char *file)
 		/* Destination file is on a different file system, which is why
 		 * rename(3) doesn't work: let's try with mv(1). */
 		char *tmp_cmd[] = {"mv", "--", file, dest, NULL};
-		ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG);
+		ret = launch_execv(tmp_cmd, FOREGROUND, E_NOFLAG);
 		mvcmd = 1;
 	}
 
@@ -495,7 +495,7 @@ remove_file_from_trash(const char *name)
 		return err;
 
 	char *cmd[] = {"rm", "-rf", "--", rm_file, rm_info, NULL};
-	return launch_execve(cmd, FOREGROUND, E_NOFLAG);
+	return launch_execv(cmd, FOREGROUND, E_NOFLAG);
 }
 
 static int
@@ -802,7 +802,7 @@ untrash_file(char *file)
 			/* Destination file is on a different file system, which is why
 			 * rename(3) doesn't work: let's try with mv(1). */
 			char *cmd[] = {"mv", "--", undel_file, url_decoded, NULL};
-			ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+			ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 			if (ret != EXIT_SUCCESS) {
 				free(url_decoded);
 				return ret;
@@ -817,7 +817,7 @@ untrash_file(char *file)
 	free(url_decoded);
 
 	char *cmd[] = {"rm", "-rf", "--", undel_info, NULL};
-	ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+	ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	if (ret != EXIT_SUCCESS) {
 		xerror(_("undel: %s: Error removing info file\n"), undel_info);
 		return ret;

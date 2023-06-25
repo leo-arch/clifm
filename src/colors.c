@@ -931,7 +931,7 @@ import_color_scheme(const char *name)
 		return EXIT_FAILURE;
 
 	char *cmd[] = {"cp", dfile, colors_dir, NULL};
-	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) == EXIT_SUCCESS)
+	if (launch_execv(cmd, FOREGROUND, E_NOFLAG) == EXIT_SUCCESS)
 		return EXIT_SUCCESS;
 
 	return EXIT_FAILURE;
@@ -989,7 +989,7 @@ edit_colorscheme(char *app)
 	int ret = EXIT_FAILURE;
 	if (app && *app) {
 		char *cmd[] = {app, file, NULL};
-		ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+		ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	} else {
 		open_in_foreground = 1;
 		ret = open_file(file);

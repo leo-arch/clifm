@@ -755,7 +755,7 @@ set_alt_config_dir(char *dir)
 
 	if (stat(dir, &attr) == -1) {
 		char *tmp_cmd[] = {"mkdir", "-p", dir, NULL};
-		int ret = launch_execve(tmp_cmd, FOREGROUND, E_NOSTDERR);
+		int ret = launch_execv(tmp_cmd, FOREGROUND, E_NOSTDERR);
 		if (ret != EXIT_SUCCESS) {
 			_err('e', PRINT_PROMPT, _("%s: %s: Cannot create directory "
 				"(error %d)\nFalling back to default configuration "

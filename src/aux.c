@@ -136,7 +136,7 @@ kitty_clear(void)
 //	char *cmd[] = { "printf", "\033_Ga=d\033\\", NULL };
 	char *cmd[] = {"kitty", "icat", "--clear", "--silent",
 		"--transfer-mode=stream", NULL};
-	launch_execve(cmd, 0, 0);
+	launch_execv(cmd, 0, 0);
 }
 
 /* Remove any image printed by ueberzug.
@@ -841,15 +841,15 @@ dir_size(char *dir, const int size_in_bytes, int *status)
 		char *bin = (bin_flags & GNU_DU_BIN_DU) ? "du" : "gdu";
 		if (conf.apparent_size != 1) {
 			char *cmd[] = {bin, "-s", block_size, "--", dir, NULL};
-			*status = launch_execve(cmd, FOREGROUND, E_NOSTDERR);
+			*status = launch_execv(cmd, FOREGROUND, E_NOSTDERR);
 		} else {
 			char *cmd[] = {bin, "-s", "--apparent-size", block_size,
 				"--", dir, NULL};
-			*status = launch_execve(cmd, FOREGROUND, E_NOSTDERR);
+			*status = launch_execv(cmd, FOREGROUND, E_NOSTDERR);
 		}
 	} else {
 		char *cmd[] = {"du", "-ks", "--", dir, NULL};
-		*status = launch_execve(cmd, FOREGROUND, E_NOSTDERR);
+		*status = launch_execv(cmd, FOREGROUND, E_NOSTDERR);
 	}
 
 	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */

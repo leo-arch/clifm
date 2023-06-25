@@ -282,7 +282,7 @@ open_tmp_file(struct dirent ***a, const int n, char *tmp_file, char *app)
 	}
 
 	char *cmd[] = {app, tmp_file, NULL};
-	exit_status = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+	exit_status = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 
 	if (exit_status == EXIT_SUCCESS)
 		return EXIT_SUCCESS;
@@ -472,7 +472,7 @@ bulk_remove_files(char ***rfiles)
 	char *_param = get_rm_param(rfiles, n);
 	char **cmd = construct_rm_cmd(rfiles, _param, (size_t)n);
 
-	int ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+	int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 
 	i = n;
 	while (--i >= 0)
@@ -620,11 +620,11 @@ open_file(char *file)
 	if (conf.opener) {
 		if (*conf.opener == 'g' && strcmp(conf.opener, "gio") == 0) {
 			char *cmd[] = {"gio", "open", file, NULL};
-			if (launch_execve(cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS)
+			if (launch_execv(cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS)
 				exit_status = EXIT_FAILURE;
 		} else {
 			char *cmd[] = {conf.opener, file, NULL};
-			if (launch_execve(cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS)
+			if (launch_execv(cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS)
 				exit_status = EXIT_FAILURE;
 		}
 	} else {
@@ -639,7 +639,7 @@ open_file(char *file)
 # else
 		char *cmd[] = {"xdg-open", file, NULL};
 # endif /* __HAIKU__ */
-		if (launch_execve(cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS)
+		if (launch_execv(cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
 #endif /* _NO_LIRA */
 	}
@@ -833,7 +833,7 @@ dup_file(char **cmd)
 		/* 2. Run command. */
 		if (rsync_path) {
 			char *_cmd[] = {"rsync", "-aczvAXHS", "--progress", source, dest, NULL};
-			if (launch_execve(_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+			if (launch_execv(_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 				exit_status = EXIT_FAILURE;
 		} else {
 #if !defined(_BE_POSIX)
@@ -841,7 +841,7 @@ dup_file(char **cmd)
 #else
 			char *_cmd[] = {"cp", source, dest, NULL};
 #endif
-			if (launch_execve(_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+			if (launch_execv(_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 				exit_status = EXIT_FAILURE;
 		}
 
@@ -1361,7 +1361,7 @@ open_function(char **cmd)
 
 	/* Some application was specified to open the file. Use it. */
 	char *tmp_cmd[] = {cmd[2], file, NULL};
-	ret = launch_execve(tmp_cmd, bg_proc ? BACKGROUND : FOREGROUND, E_NOSTDERR);
+	ret = launch_execv(tmp_cmd, bg_proc ? BACKGROUND : FOREGROUND, E_NOSTDERR);
 	if (ret == EXIT_SUCCESS)
 		return EXIT_SUCCESS;
 
@@ -1495,7 +1495,7 @@ edit_link(char *link)
 #else
 	char *cmd[] = {"ln", "-sf", new_path, link, NULL};
 #endif /* _BE_POSIX */
-	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
+	if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 		free(new_path);
 		return EXIT_FAILURE;
 	}
@@ -1626,7 +1626,7 @@ cp_mv_file(char **args, const int copy_and_rename, const int force)
 
 	tcmd[n] = (char *)NULL;
 
-	int ret = launch_execve(tcmd, FOREGROUND, E_NOFLAG);
+	int ret = launch_execv(tcmd, FOREGROUND, E_NOFLAG);
 
 	for (i = 0; tcmd[i]; i++)
 		free(tcmd[i]);
@@ -1810,7 +1810,7 @@ remove_file(char **args)
 	rm_cmd[1] = set_rm_params(have_dirs, rm_force);
 	rm_cmd[2] = "--";
 
-	if (launch_execve(rm_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+	if (launch_execv(rm_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		exit_status = EXIT_FAILURE;
 
 #if defined(__HAIKU__) ||  defined(__CYGWIN__)

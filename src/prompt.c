@@ -796,7 +796,7 @@ run_prompt_cmds(void)
 	for (i = 0; i < prompt_cmds_n; i++) {
 		if (xargs.secure_cmds == 0
 		|| sanitize_cmd(prompt_cmds[i], SNT_PROMPT) == EXIT_SUCCESS)
-			launch_execle(prompt_cmds[i]);
+			launch_execl(prompt_cmds[i]);
 	}
 	flags = tflags;
 }
@@ -1137,7 +1137,7 @@ edit_prompts_file(char *app)
 	int ret = EXIT_FAILURE;
 	if (app && *app) {
 		char *cmd[] = {app, prompts_file, NULL};
-		ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+		ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	} else {
 		open_in_foreground = 1;
 		ret = open_file(prompts_file);

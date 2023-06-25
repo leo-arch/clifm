@@ -44,8 +44,8 @@ int  exec_cmd(char **);
 void exec_chained_cmds(char *);
 void exec_profile(void);
 int  get_exit_code(const int, const int);
-int  launch_execve(char **, const int, const int);
-int  launch_execle(const char *);
+int  launch_execv(char **, const int, const int);
+int  launch_execl(const char *);
 int  run_and_refresh(char **, const int);
 
 __END_DECLS

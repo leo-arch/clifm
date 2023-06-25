@@ -1553,7 +1553,7 @@ run_dir_cmd(const int mode)
 
 	if (xargs.secure_cmds == 0
 	|| sanitize_cmd(buf, SNT_AUTOCMD) == EXIT_SUCCESS)
-		launch_execle(buf);
+		launch_execl(buf);
 }
 
 /* Check if S is either .cfm.in or .cfm.out */

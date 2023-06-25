@@ -1146,8 +1146,8 @@ main(int argc, char *argv[])
 	load_actions();
 	get_aliases();
 
-	/* Get the list of available applications in PATH to be used by the
-	 * custom TAB-completion function (tab_complete, in tabcomp.c) */
+	/* Get the list of available programs in PATH to be used by the
+	 * custom TAB-completion function (tab_complete(), in tabcomp.c) */
 	if (!(flags & PATH_PROGRAMS_ALREADY_LOADED))
 		get_path_programs();
 

@@ -191,7 +191,7 @@ RUN_AUTOCMD:
 		if (autocmds[i].cmd) {
 			if (xargs.secure_cmds == 0
 			|| sanitize_cmd(autocmds[i].cmd, SNT_AUTOCMD) == EXIT_SUCCESS)
-				launch_execle(autocmds[i].cmd);
+				launch_execl(autocmds[i].cmd);
 		}
 
 		break;

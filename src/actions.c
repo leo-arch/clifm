@@ -150,7 +150,7 @@ run_action(char *action, char **args)
 		if (wfd == -1)
 			_exit(EXIT_FAILURE);
 
-		int ret = launch_execve(args, FOREGROUND, E_NOFLAG);
+		int ret = launch_execv(args, FOREGROUND, E_NOFLAG);
 		/* RET will be read later by waitpid(3) to get plugin exit status */
 		close(wfd);
 		_exit(ret);
@@ -269,7 +269,7 @@ edit_actions(char *app)
 
 	if (app && *app) {
 		char *cmd[] = {app, actions_file, NULL};
-		ret = launch_execve(cmd, FOREGROUND, E_NOSTDERR);
+		ret = launch_execv(cmd, FOREGROUND, E_NOSTDERR);
 	} else {
 		open_in_foreground = 1;
 		ret = open_file(actions_file);

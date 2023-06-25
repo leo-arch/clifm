@@ -412,7 +412,7 @@ get_mime(char *file)
 	fclose(file_fp_err);
 
 	char *cmd[] = {"file", "--mime-type", file, NULL};
-	int ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+	int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 
 	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
 	dup2(stderr_bk, STDERR_FILENO); /* Restore original stderr */
@@ -612,7 +612,7 @@ mime_edit(char **args)
 
 	} else {
 		char *cmd[] = {args[2], mime_file, NULL};
-		if ((exit_status = launch_execve(cmd, FOREGROUND, E_NOFLAG)) != EXIT_SUCCESS)
+		if ((exit_status = launch_execv(cmd, FOREGROUND, E_NOFLAG)) != EXIT_SUCCESS)
 			return exit_status;
 	}
 
@@ -767,7 +767,7 @@ run_mime_app(char **app, char **fpath)
 		n++;
 	}
 
-	int ret = launch_execve(cmd, (bg_proc && !open_in_foreground)
+	int ret = launch_execv(cmd, (bg_proc && !open_in_foreground)
 			? BACKGROUND : FOREGROUND, exec_flags);
 
 	for (i = 0; i < n; i++)
@@ -885,7 +885,7 @@ mime_list_open(char **apps, char *file)
 			cmd[i + 1] = (char *)NULL;
 		}
 
-		if (launch_execve(cmd, bg_proc ? BACKGROUND : FOREGROUND,
+		if (launch_execv(cmd, bg_proc ? BACKGROUND : FOREGROUND,
 		exec_flags) == EXIT_SUCCESS)
 			ret = EXIT_SUCCESS;
 
@@ -907,7 +907,7 @@ mime_list_open(char **apps, char *file)
 				env = expand_env(app);
 
 			char *cmd[] = {env ? env : app, file, NULL};
-			if (launch_execve(cmd, bg_proc ? BACKGROUND : FOREGROUND,
+			if (launch_execv(cmd, bg_proc ? BACKGROUND : FOREGROUND,
 			bg_proc ? E_NOSTDERR : E_NOFLAG) == EXIT_SUCCESS)
 				ret = EXIT_SUCCESS;
 			free(env);
@@ -1178,9 +1178,9 @@ run_cmd_noargs(char *arg, char *name)
 	if (*arg == 'a' && arg[1] == 'd' && !arg[2])
 		ret = archiver(cmd, 'd');
 	else
-		ret = launch_execve(cmd, bg_proc ? BACKGROUND : FOREGROUND, E_NOSTDERR);
+		ret = launch_execv(cmd, bg_proc ? BACKGROUND : FOREGROUND, E_NOSTDERR);
 #else
-	ret = launch_execve(cmd, bg_proc ? BACKGROUND : FOREGROUND, E_NOSTDERR);
+	ret = launch_execv(cmd, bg_proc ? BACKGROUND : FOREGROUND, E_NOSTDERR);
 #endif
 
 	if (ret == EXIT_SUCCESS)
@@ -1248,7 +1248,7 @@ run_cmd_plus_args(char **args, char *name)
 	int exec_flags = E_NOFLAG;
 	append_params(args, name, &cmd, &exec_flags);
 
-	int ret = launch_execve(cmd, bg_proc ? BACKGROUND : FOREGROUND, exec_flags);
+	int ret = launch_execv(cmd, bg_proc ? BACKGROUND : FOREGROUND, exec_flags);
 
 	for (i = 0; cmd[i]; i++)
 		free(cmd[i]);
@@ -1531,7 +1531,7 @@ mime_open_url(char *url)
 		*p = '\0';
 
 	char *cmd[] = {app, url, NULL};
-	int ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+	int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	free(app);
 
 	if (ret != EXIT_SUCCESS)

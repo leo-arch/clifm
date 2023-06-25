@@ -175,7 +175,7 @@ extract_iso(char *file)
 
 	/* Construct and execute cmd */
 	char *cmd[] = {"7z", "x", o_option, file, NULL};
-	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+	if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		exit_status = EXIT_FAILURE;
 
 	free(o_option);
@@ -199,7 +199,7 @@ extract_iso_to_dir(char *file)
 
 	/* Construct and execute cmd */
 	char *cmd[] = {"7z", "x", o_option, file, NULL};
-	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+	if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		exit_status = EXIT_FAILURE;
 
 	free(o_option);
@@ -214,7 +214,7 @@ list_iso_contents(char *file)
 
 	/* 7z l FILE */
 	char *cmd[] = {"7z", "l", file, NULL};
-	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+	if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		exit_status = EXIT_FAILURE;
 
 	return exit_status;
@@ -227,7 +227,7 @@ test_iso(char *file)
 
 	/* 7z t FILE */
 	char *cmd[] = {"7z", "t", file, NULL};
-	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+	if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		exit_status = EXIT_FAILURE;
 
 	return exit_status;
@@ -253,7 +253,7 @@ create_mountpoint(char *file)
 	}
 
 	char *dir_cmd[] = {"mkdir", "-pm700", mountpoint, NULL};
-	if (launch_execve(dir_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
+	if (launch_execv(dir_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 		free(mountpoint);
 		mountpoint = (char *)NULL;
 	}
@@ -312,7 +312,7 @@ mount_iso(char *file)
 		return EXIT_SUCCESS;
 	}
 
-	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
+	if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 		free(mountpoint);
 		free(sudo);
 		return EXIT_FAILURE;
@@ -380,7 +380,7 @@ create_iso_from_block_dev(char *in_file, char *out_file)
 	    "conv=noerror,sync", "status=progress", NULL};
 
 	if (confirm_sudo_cmd(cmd) == 1) {
-		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
 	}
 
@@ -403,7 +403,7 @@ create_iso(char *in_file, char *out_file)
 	/* If IN_FILE is a directory */
 	if (S_ISDIR(attr.st_mode)) {
 		char *cmd[] = {"mkisofs", "-R", "-o", out_file, in_file, NULL};
-		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 			return EXIT_FAILURE;
 		return EXIT_SUCCESS;
 	}
@@ -491,7 +491,7 @@ check_iso(char *file)
 	fclose(fpp);
 
 	char *cmd[] = {"file", "-b", file, NULL};
-	int retval = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+	int retval = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 
 	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
 	dup2(stderr_bk, STDERR_FILENO); /* Restore original stderr */
@@ -615,7 +615,7 @@ is_compressed(char *file, const int test_iso)
 	fclose(fpp);
 
 	char *cmd[] = {"file", "-b", file, NULL};
-	int retval = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+	int retval = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 
 	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
 	dup2(stderr_bk, STDERR_FILENO); /* Restore original stderr */
@@ -734,12 +734,12 @@ zstandard(char *in_file, char *out_file, const char mode, const char op)
 	if (mode == 'c') {
 		if (out_file) {
 			char *cmd[] = {"zstd", "-zo", out_file, deq_file, NULL};
-			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+			if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 				exit_status = EXIT_FAILURE;
 		} else {
 			char *cmd[] = {"zstd", "-z", deq_file, NULL};
 
-			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+			if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 				exit_status = EXIT_FAILURE;
 		}
 
@@ -762,7 +762,7 @@ zstandard(char *in_file, char *out_file, const char mode, const char op)
 		}
 
 		char *cmd[] = {"zstd", option, deq_file, NULL};
-		exit_status = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+		exit_status = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 		free(deq_file);
 
 		if (exit_status != EXIT_SUCCESS)
@@ -788,19 +788,19 @@ zstandard(char *in_file, char *out_file, const char mode, const char op)
 		switch (*operation) {
 		case 'e': {
 			char *cmd[] = {"zstd", "-d", deq_file, NULL};
-			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+			if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 				exit_status = EXIT_FAILURE;
 		} break;
 
 		case 't': {
 			char *cmd[] = {"zstd", "-t", deq_file, NULL};
-			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+			if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 				exit_status = EXIT_FAILURE;
 		} break;
 
 		case 'i': {
 			char *cmd[] = {"zstd", "-l", deq_file, NULL};
-			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+			if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 				exit_status = EXIT_FAILURE;
 		} break;
 
@@ -869,7 +869,7 @@ compress_others(char **args, char *name)
 	}
 	tcmd[n] = (char *)NULL;
 
-	int ret = launch_execve(tcmd, FOREGROUND, E_NOFLAG);
+	int ret = launch_execv(tcmd, FOREGROUND, E_NOFLAG);
 
 	for (i = 0; tcmd[i]; i++)
 		free(tcmd[i]);
@@ -1036,7 +1036,7 @@ list_others(char **args)
 		printf(_("%s%sFile%s: %s\n"), (i > 1) ? "\n" : "", BOLD, df_c, args[i]);
 
 		char *cmd[] = {"atool", "-l", args[i], NULL};
-		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
 	}
 
@@ -1059,7 +1059,7 @@ extract_to_dir_others(char **args)
 
 		/* Construct and execute cmd */
 		char *cmd[] = {"atool", "-X", ext_path, args[i], NULL};
-		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
 
 		free(ext_path);
@@ -1091,7 +1091,7 @@ extract_others(char **args)
 
 	/* Launch it */
 	int exit_status = EXIT_SUCCESS;
-	if (launch_execve(tcmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+	if (launch_execv(tcmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		exit_status = EXIT_FAILURE;
 
 	for (i = 0; tcmd[i]; i++)
@@ -1155,7 +1155,7 @@ repack_others(char **args)
 	tcmd[n] = (char *)NULL;
 
 	int exit_status = EXIT_SUCCESS;
-	if (launch_execve(tcmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+	if (launch_execv(tcmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		exit_status = EXIT_FAILURE;
 
 	for (i = 0; tcmd[i]; i++)
@@ -1204,7 +1204,7 @@ mount_others(char **args)
 
 		/* Construct and execute cmd */
 		char *cmd[] = {"archivemount", args[i], mountpoint, NULL};
-		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
+		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 			free(mountpoint);
 			continue;
 		}

@@ -1365,7 +1365,7 @@ set_prompts_file(void)
 		goto ERROR;
 
 	char *cmd[] = {"cp", t, f, NULL};
-	int ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+	int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	if (ret == EXIT_SUCCESS)
 		return f;
 

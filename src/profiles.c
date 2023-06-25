@@ -306,7 +306,7 @@ profile_add(const char *prof)
 
 	/* #### CREATE THE CONFIG DIR #### */
 	char *tmp_cmd[] = {"mkdir", "-p", nconfig_dir, NULL};
-	if (launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
+	if (launch_execv(tmp_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 		xerror(_("pf: mkdir: %s: Error creating "
 			"configuration directory\n"), nconfig_dir);
 		free(nconfig_dir);
@@ -395,7 +395,7 @@ profile_del(const char *prof)
 	snprintf(tmp, len, "%s/profiles/%s", config_dir_gral, prof);
 
 	char *cmd[] = {"rm", "-r", "--", tmp, NULL};
-	int ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+	int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	free(tmp);
 
 	if (ret != EXIT_SUCCESS) {
@@ -541,7 +541,7 @@ rename_profile(char **args)
 		config_dir_gral, args[1]);
 
 	char *cmd[] = {"mv", "--", src_pf_name, dst_pf_name, NULL};
-	int ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+	int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	if (ret != EXIT_SUCCESS) {
 		xerror(_("pf: Error renaming profile\n"));
 		return ret;

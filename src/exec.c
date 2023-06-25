@@ -222,7 +222,7 @@ run_and_refresh(char **cmd, const int skip_force)
 	}
 
 	tcmd[n] = (char *)NULL;
-	int ret = launch_execve(tcmd, FOREGROUND, E_NOFLAG);
+	int ret = launch_execv(tcmd, FOREGROUND, E_NOFLAG);
 
 	for (i = 0; i < n; i++)
 		free(tcmd[i]);
@@ -231,7 +231,7 @@ run_and_refresh(char **cmd, const int skip_force)
 	if (ret != EXIT_SUCCESS)
 		return ret;
 
-	/* Error messages are printed by launch_execve() itself */
+	/* Error messages are printed by launch_execv() itself */
 
 	/* If 'rm sel' and command is successful, deselect everything */
 	if (is_sel && *cmd[0] == 'r' && cmd[0][1] == 'm' && (!cmd[0][2]
@@ -320,7 +320,6 @@ xsystem(const char *cmd)
 		signal(SIGTSTP, SIG_DFL);
 
 		execl(shell_path, shell_name, "-c", cmd, (char *)NULL);
-//		execle(shell_path, shell_name, "-c", cmd, (char *)NULL, environ);
 		_exit(errno);
 	} else {
 		if (waitpid(pid, &status, 0) == pid)
@@ -338,10 +337,10 @@ xsystem(const char *cmd)
  * The shell takes care of special functions such as pipes and stream redirection,
  * special chars like wildcards, quotes, and escape sequences.
  *
- * Use only when the shell is needed; otherwise, launch_execve() should be
+ * Use only when the shell is needed; otherwise, launch_execv() should be
  * used instead. */
 int
-launch_execle(const char *cmd)
+launch_execl(const char *cmd)
 {
 	if (!cmd || !*cmd)
 		return EXEC_NULLPARAM;
@@ -365,20 +364,10 @@ launch_execle(const char *cmd)
  * (cmd), an integer (bg) specifying if the command should be
  * backgrounded (1) or not (0), and a flag to control file descriptors */
 int
-launch_execve(char **cmd, const int bg, const int xflags)
+launch_execv(char **cmd, const int bg, const int xflags)
 {
 	if (!cmd)
 		return EXEC_NULLPARAM;
-
-/*	char *cmd_path = *cmd[0] != '/' ? get_cmd_path(cmd[0]) : cmd[0];
-	if (cmd[0] && !cmd_path) {
-		xerror("%s: %s: %s", PROGRAM_NAME, cmd[0], NOTFOUND_MSG);
-		return EXEC_NOTFOUND;
-	} */
-
-	/* Reenable SIGCHLD, in case it was disabled. Otherwise, waitpid
-	 * won't be able to catch error codes coming from the child. */
-//	signal(SIGCHLD, SIG_DFL);
 
 	int status = 0;
 	pid_t pid = fork();
@@ -409,8 +398,6 @@ launch_execve(char **cmd, const int bg, const int xflags)
 		}
 
 		execvp(cmd[0], cmd);
-//		execve(cmd_path, cmd, safe_env ? safe_env : environ);
-//		execve(cmd_path, cmd, environ);
 		/* These error messages will be printed only if E_NOSTDERR is not set.
 		 * Otherwise, the caller should print the error messages itself. */
 		if (errno == ENOENT) {
@@ -438,9 +425,6 @@ launch_execve(char **cmd, const int bg, const int xflags)
 	if (bg == 1 && status == EXIT_SUCCESS && xargs.open != 1)
 		reload_dirlist();
 
-//	printf("%s (%s)\n", cmd_path, cmd[0]); fflush(stdout); sleep(1);
-/*	if (cmd_path != cmd[0])
-		free(cmd_path); */
 	return status;
 }
 
@@ -644,7 +628,7 @@ run_shell_cmd(char **args)
 	/* Calling the system shell is vulnerable to command injection, true.
 	 * But it is the user here who is directly running the command: this
 	 * should not be taken as an untrusted source. */
-	int exit_status = launch_execle(cmd);
+	int exit_status = launch_execl(cmd);
 	free(cmd);
 
 /* For the time being, this is too slow on Cygwin. */
@@ -1482,7 +1466,7 @@ launch_shell(char **args)
 	if (!args[0][1]) {
 		/* If just ":" or ";", launch the default shell */
 		char *cmd[] = {user.shell, NULL};
-		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 			return EXIT_FAILURE;
 		return EXIT_SUCCESS;
 	}
@@ -1932,7 +1916,7 @@ set_mv_cmd(char **cmd, const int mv_force)
 }
 
 /* Let's check we have not left any zombie process behind. This happens
- * whenever we run a process in the background via launch_execve */
+ * whenever we run a process in the background via launch_execv. */
 static void
 check_zombies(void)
 {
@@ -1995,7 +1979,7 @@ preview_edit(char *app)
 	int ret = EXIT_SUCCESS;
 	if (app) {
 		char *cmd[] = { app, file, NULL };
-		ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+		ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	} else {
 		ret = open_file(file);
 	}

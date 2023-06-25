@@ -131,7 +131,7 @@ _create_mountpoint(const int i)
 {
 	char *cmd[] = {"mkdir", "-p", remotes[i].mountpoint, NULL};
 
-	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
+	if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 		xerror("net: %s: %s\n", remotes[i].mountpoint, strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -191,7 +191,7 @@ remotes_mount(char *name)
 
 	/* Make sure mountpoint is not populated and run the mount command */
 	if (count_dir(remotes[i].mountpoint, CPOP) <= 2
-	&& launch_execle(remotes[i].mount_cmd) != EXIT_SUCCESS)
+	&& launch_execl(remotes[i].mount_cmd) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
 	if (xchdir(remotes[i].mountpoint, SET_TITLE) == -1)
@@ -267,7 +267,7 @@ remotes_unmount(char *name)
 			reload_dirlist();
 	}
 
-	if (launch_execle(remotes[i].unmount_cmd) != EXIT_SUCCESS)
+	if (launch_execl(remotes[i].unmount_cmd) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
 	remotes[i].mounted = 0;
@@ -291,7 +291,7 @@ remotes_edit(char *app)
 	int ret = EXIT_SUCCESS;
 	if (app && *app) {
 		char *cmd[] = {app, remotes_file, NULL};
-		ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+		ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	} else {
 		open_in_foreground = 1;
 		ret = open_file(remotes_file);
@@ -371,7 +371,7 @@ automount_remotes(void)
 			struct stat attr;
 			if (stat(remotes[i].mountpoint, &attr) == -1) {
 				char *cmd[] = {"mkdir", "-p", remotes[i].mountpoint, NULL};
-				if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+				if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 					continue;
 			} else {
 				if (count_dir(remotes[i].mountpoint, CPOP) > 2)
@@ -381,7 +381,7 @@ automount_remotes(void)
 			int ret = 0;
 			printf(_("%s: net: %s: Mounting remote...\n"), PROGRAM_NAME,
 				remotes[i].name);
-			if ((ret = launch_execle(remotes[i].mount_cmd)) != EXIT_SUCCESS) {
+			if ((ret = launch_execl(remotes[i].mount_cmd)) != EXIT_SUCCESS) {
 				_err('w', PRINT_PROMPT, _("net: %s: Mount command failed with "
 					"error code %d\n"), remotes[i].name, ret);
 				exit_status = EXIT_FAILURE;
@@ -423,7 +423,7 @@ autounmount_remotes(void)
 			int ret = 0;
 			printf(_("%s: net: %s: Unmounting remote...\n"), PROGRAM_NAME,
 				remotes[i].name);
-			if ((ret = launch_execle(remotes[i].unmount_cmd)) != EXIT_SUCCESS) {
+			if ((ret = launch_execl(remotes[i].unmount_cmd)) != EXIT_SUCCESS) {
 				xerror(_("%s: net: %s: Unmount command failed with "
 					"error code %d\n"), PROGRAM_NAME, remotes[i].name, ret);
 				exit_status = EXIT_FAILURE;

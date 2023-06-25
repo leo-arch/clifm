@@ -58,11 +58,11 @@ exec_find(char *_path, char *method, char *pattern)
 {
 	if (follow_symlinks == 1) {
 		char *cmd[] = {"find", "-L", _path, method, pattern, NULL};
-		return launch_execve(cmd, FOREGROUND, E_NOSTDERR);
+		return launch_execv(cmd, FOREGROUND, E_NOSTDERR);
 	}
 
 	char *cmd[] = {"find", _path, method, pattern, NULL};
-	return launch_execve(cmd, FOREGROUND, E_NOSTDERR);
+	return launch_execv(cmd, FOREGROUND, E_NOSTDERR);
 }
 
 static int

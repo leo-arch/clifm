@@ -240,7 +240,7 @@ gen_shell_cmd_comp(char *cmd)
 		"%s/%s/tools/manpages_comp_gen.py", data_dir, PNL);
 
 	char *c[] = {manpage_parser_file, "-k", cmd, NULL};
-	return launch_execve(c, FOREGROUND, E_MUTE);
+	return launch_execv(c, FOREGROUND, E_MUTE);
 }
 
 /* Get short and long options for command CMD, store them in the EXT_OPTS

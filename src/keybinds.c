@@ -96,7 +96,7 @@ kbinds_reset(void)
 		exit_status = create_kbinds_file();
 	} else {
 		char *cmd[] = {"rm", "--", kbinds_file, NULL};
-		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) == EXIT_SUCCESS)
+		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) == EXIT_SUCCESS)
 			exit_status = create_kbinds_file();
 		else
 			exit_status = EXIT_FAILURE;
@@ -131,7 +131,7 @@ kbinds_edit(char *app)
 	int ret = EXIT_SUCCESS;
 	if (app && *app) {
 		char *cmd[] = {app, kbinds_file, NULL};
-		ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+		ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	} else {
 		open_in_foreground = 1;
 		ret = open_file(kbinds_file);
@@ -1248,7 +1248,7 @@ rl_lock(int count, int key)
 #else
 	char *cmd[] = {"vlock", NULL};
 #endif
-	ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+	ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 
 	rl_prep_terminal(0);
 	xrl_reset_line_state();
@@ -1525,7 +1525,7 @@ run_man_cmd(char *str)
 		unsetenv("MANPAGER");
 	}
 
-	int ret = launch_execle(str) != EXIT_SUCCESS;
+	int ret = launch_execl(str) != EXIT_SUCCESS;
 
 	if (mp) {
 		setenv("MANPAGER", mp, 1);
@@ -1590,7 +1590,7 @@ rl_manpage(int count, int key)
 		free_suggestion();
 #endif
 	char *cmd[] = {"man", PNL, NULL};
-	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+	if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 	return EXIT_SUCCESS;
 }

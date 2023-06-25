@@ -308,7 +308,7 @@ send_desktop_notification(char *msg)
 
 #if defined(__HAIKU__)
 	char *cmd[] = {"notify", "--type", type, "--title", PROGRAM_NAME, p, NULL};
-	ret = launch_execve(cmd, FOREGROUND, E_MUTE);
+	ret = launch_execv(cmd, FOREGROUND, E_MUTE);
 #elif defined (__APPLE__)
 	size_t msg_len = strlen(msg) + strlen(type) + strlen(PROGRAM_NAME) + 60;
 	char *_msg = (char *)xnmalloc(msg_len, sizeof(char));
@@ -316,11 +316,11 @@ send_desktop_notification(char *msg)
 		"'display notification \"%s\" subtitle \"%s\" with title \"%s\"'",
 		msg, type, PROGRAM_NAME);
 	char *cmd[] = {"osascript", "-e", _msg, NULL};
-	ret = launch_execve(cmd, FOREGROUND, E_MUTE);
+	ret = launch_execv(cmd, FOREGROUND, E_MUTE);
 	free(_msg);
 #else
 	char *cmd[] = {"notify-send", "-u", type, PROGRAM_NAME, p, NULL};
-	ret = launch_execve(cmd, FOREGROUND, E_MUTE);
+	ret = launch_execv(cmd, FOREGROUND, E_MUTE);
 #endif
 
 	if (ret == EXIT_SUCCESS)
@@ -473,7 +473,7 @@ edit_history(char **args)
 	/* If we have an opening application (2nd argument) */
 	if (args[2]) {
 		char *cmd[] = {args[2], hist_file, NULL};
-		ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+		ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	} else {
 		open_in_foreground = 1;
 		ret = open_file(hist_file);

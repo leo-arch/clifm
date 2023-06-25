@@ -97,7 +97,7 @@ regen_config(void)
 
 		char *cmd[] = {"mv", config_file, bk, NULL};
 
-		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 			return EXIT_FAILURE;
 
 		printf(_("Old configuration file stored as '%s'\n"), bk);
@@ -537,7 +537,7 @@ edit_function(char **args)
 	/* If there is an argument... */
 	if (opening_app) {
 		char *cmd[] = {opening_app, config_file, NULL};
-		ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+		ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	} else {
 		/* If no application was passed as 2nd argument */
 		open_in_foreground = 1;
@@ -699,7 +699,7 @@ import_from_data_dir(const char *src_filename, char *dest)
 		return EXIT_FAILURE;
 
 	char *cmd[] = {"cp", sys_file, dest, NULL};
-	int ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+	int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	if (ret == EXIT_SUCCESS) {
 		/* Make sure config files have always 600 permissions. */
 		chmod(dest, S_IRUSR | S_IWUSR);
@@ -1852,7 +1852,7 @@ create_config_files(void)
 	/* Use the mkdir(1) to let it handle parent directories */
 	if (stat(config_dir, &attr) == -1) {
 		char *tmp_cmd[] = {"mkdir", "-p", config_dir, NULL};
-		if (launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
+		if (launch_execv(tmp_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 			config_ok = 0;
 			_err('e', PRINT_PROMPT, _("%s: mkdir: '%s': Error creating "
 				"configuration directory. Bookmarks, commands logs, and "
@@ -3085,7 +3085,7 @@ create_trash_dirs(void)
 		snprintf(trash_info, sizeof(trash_info), "%s/files", trash_dir);
 
 		char *cmd[] = {"mkdir", "-p", trash_files, trash_info, NULL};
-		int ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+		int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 
 		if (ret != EXIT_SUCCESS) {
 			trash_ok = 0;

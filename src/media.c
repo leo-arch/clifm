@@ -152,7 +152,7 @@ unmount_dev(const size_t i, const int n)
 
 	char *cmd[] = {xargs.mount_cmd == MNT_UDISKS2 ? "udisksctl" : "udevil",
 			"unmount", "-b", media[n].dev, NULL};
-	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+	if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		exit_status = EXIT_FAILURE;
 
 	if (exit_status != EXIT_FAILURE && xargs.mount_cmd == MNT_UDEVIL)
@@ -324,10 +324,10 @@ mount_dev(const int n)
 
 	if (xargs.mount_cmd == MNT_UDISKS2) {
 		char *cmd[] = {"udisksctl", "mount", "-b", media[n].dev, NULL};
-		launch_execve(cmd, FOREGROUND, E_NOFLAG);
+		launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	} else {
 		char *cmd[] = {"udevil", "mount", media[n].dev, NULL};
-		launch_execve(cmd, FOREGROUND, E_NOFLAG);
+		launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	}
 
 	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
@@ -391,11 +391,11 @@ print_dev_info(const int n)
 	int exit_status = EXIT_SUCCESS;
 	if (xargs.mount_cmd == MNT_UDEVIL) {
 		char *cmd[] = {"udevil", "info", media[n].dev, NULL};
-		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
 	} else {
 		char *cmd[] = {"udisksctl", "info", "-b", media[n].dev, NULL};
-		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
 	}
 

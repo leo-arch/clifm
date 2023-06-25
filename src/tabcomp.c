@@ -761,7 +761,7 @@ run_finder(const size_t height, const int offset, const char *lw,
 	int prev_hidden = conf.fzf_preview == 2 ? 1 : 0;
 
 	/* Some shells, like xonsh (the only one to my knowledge), have problems
-	 * parsing the command constructed below. Let's force launch_execle() to
+	 * parsing the command constructed below. Let's force launch_execl() to
 	 * use "/bin/sh" to avoid this issue. */
 	char *shell_bk = user.shell;
 	user.shell = (char *)NULL;
@@ -845,7 +845,7 @@ ctrl-d:deselect-all,ctrl-t:toggle-all" : "",
 
 	int dr = (flags & DELAYED_REFRESH) ? 1 : 0;
 	flags &= ~DELAYED_REFRESH;
-	int ret = launch_execle(cmd);
+	int ret = launch_execl(cmd);
 
 	/* Restore the user's shell to its original value. */
 	user.shell = shell_bk;

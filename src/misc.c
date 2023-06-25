@@ -898,7 +898,7 @@ launch_new_instance_cmd(char ***cmd, char **self, char **_sudo,
 
 	if (*cmd) {
 		ret = (sudo == 0 || confirm_sudo_cmd(*cmd) == 1)
-			? launch_execve(*cmd, BACKGROUND, E_NOFLAG)
+			? launch_execv(*cmd, BACKGROUND, E_NOFLAG)
 			: EXIT_SUCCESS;
 		size_t i;
 		for (i = 0; (*cmd)[i]; i++)
@@ -908,11 +908,11 @@ launch_new_instance_cmd(char ***cmd, char **self, char **_sudo,
 		if (sudo == 1) {
 			char *tcmd[] = {conf.term, *_sudo, *self, *dir, NULL};
 			ret = (confirm_sudo_cmd(tcmd) == 1)
-				? launch_execve(tcmd, BACKGROUND, E_NOFLAG)
+				? launch_execv(tcmd, BACKGROUND, E_NOFLAG)
 				: EXIT_SUCCESS;
 		} else {
 			char *tcmd[] = {conf.term, *self, *dir, NULL};
-			ret = launch_execve(tcmd, BACKGROUND, E_NOFLAG);
+			ret = launch_execv(tcmd, BACKGROUND, E_NOFLAG);
 		}
 	}
 
@@ -1174,10 +1174,10 @@ save_last_path(void)
 
 	if (conf.cd_on_quit == 1) {
 		char *cmd[] = {"cp", "-p", last_dir, last_dir_tmp, NULL};
-		launch_execve(cmd, FOREGROUND, E_NOFLAG);
+		launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	} else { /* If not cd on quit, remove the file. */
 		char *cmd[] = {"rm", "-f", "--", last_dir_tmp, NULL};
-		launch_execve(cmd, FOREGROUND, E_NOFLAG);
+		launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	}
 
 	free(last_dir_tmp);
@@ -1361,7 +1361,7 @@ remove_virtual_dir(void)
 		xchmod(stdin_tmp_dir, "0700", 1);
 
 		char *rm_cmd[] = {"rm", "-r", "--", stdin_tmp_dir, NULL};
-		int ret = launch_execve(rm_cmd, FOREGROUND, E_NOFLAG);
+		int ret = launch_execv(rm_cmd, FOREGROUND, E_NOFLAG);
 		if (ret != EXIT_SUCCESS)
 			exit_code = ret;
 		free(stdin_tmp_dir);
@@ -1718,7 +1718,7 @@ create_virtual_dir(const int user_provided)
 
 	char *cmd[] = {"mkdir", "-p", "--", stdin_tmp_dir, NULL};
 	int ret = 0;
-	if ((ret = launch_execve(cmd, FOREGROUND, E_MUTE)) != EXIT_SUCCESS) {
+	if ((ret = launch_execv(cmd, FOREGROUND, E_MUTE)) != EXIT_SUCCESS) {
 		if (user_provided == 1) {
 			_err('e', PRINT_PROMPT, "%s: mkdir: %s: %s. Trying with "
 				"default value\n", PROGRAM_NAME, stdin_tmp_dir, strerror(ret));
@@ -1920,7 +1920,7 @@ END:
 		xchmod(stdin_tmp_dir, "0700", 1);
 
 		char *rm_cmd[] = {"rm", "-r", "--", stdin_tmp_dir, NULL};
-		int ret = launch_execve(rm_cmd, FOREGROUND, E_NOFLAG);
+		int ret = launch_execv(rm_cmd, FOREGROUND, E_NOFLAG);
 		if (ret != EXIT_SUCCESS)
 			exit_status = ret;
 
@@ -2052,7 +2052,7 @@ list_commands(void)
 	char cmd[PATH_MAX];
 	snprintf(cmd, sizeof(cmd), "export PAGER=\"less -p '^[0-9]+\\.[[:space:]]COMMANDS'\"; man %s\n",
 			PNL);
-	if (launch_execle(cmd) != EXIT_SUCCESS)
+	if (launch_execl(cmd) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
 	return EXIT_SUCCESS;
@@ -2356,10 +2356,10 @@ quick_help(char *topic)
 	char *p = (n && *(++n)) ? n : _pager;
 	if (*p == 'l' && strcmp(p, "less") == 0) {
 		char *cmd[] = {_pager, "-FIRXP?e\\(END\\):CLIFM", tmp_file, NULL};
-		ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+		ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	} else {
 		char *cmd[] = {_pager, tmp_file, NULL};
-		ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+		ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	}
 	unlink(tmp_file);
 

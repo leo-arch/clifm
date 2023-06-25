@@ -123,7 +123,7 @@ edit_bookmarks(char *cmd, const int flag)
 		open_in_foreground = 0;
 	} else {
 		char *tmp_cmd[] = {cmd, bm_file, NULL};
-		ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG);
+		ret = launch_execv(tmp_cmd, FOREGROUND, E_NOFLAG);
 	}
 
 	if (ret != EXIT_SUCCESS) {

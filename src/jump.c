@@ -343,7 +343,7 @@ edit_jumpdb(char *app)
 	int ret = EXIT_FAILURE;
 	if (app && *app) {
 		char *cmd[] = {app, jump_file, NULL};
-		ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+		ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	} else {
 		open_in_foreground = 1;
 		ret = open_file(jump_file);
