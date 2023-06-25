@@ -60,8 +60,6 @@ ABCDEFGHIJKLMNOPQRSTUVWXYZ\
 __BEGIN_DECLS
 
 int  sanitize_cmd(const char *, const int);
-void sanitize_cmd_environ(void);
-void restore_cmd_environ(void);
 int  xsecure_env(const int);
 
 __END_DECLS

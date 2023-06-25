@@ -1475,6 +1475,7 @@ extern char
 	*trash_info_dir,
 #endif
 
+
 	**argv_bk,
 	**bin_commands,
 	**cdpaths,

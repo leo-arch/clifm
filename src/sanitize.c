@@ -35,9 +35,6 @@
 
 #define UNSAFE_CMD "Unsafe command. Consult the manpage for more information"
 
-static char **env_bk = (char **)NULL;
-static char **new_env = (char **)NULL;
-
 /* Unset environ: little implementation of clearenv(3), not available
  * on some systems (not POSIX) */
 static void
@@ -99,7 +96,7 @@ xsetenv(const char *name, const char *value)
 }
 
 /* Sanitize the environment: set environ to NULL and then set a few
- * environment variables to get a minimally working environment */
+ * environment variables to get a minimally working environment. */
 int
 xsecure_env(const int mode)
 {
@@ -174,126 +171,6 @@ xsecure_env(const int mode)
 		xsetenv("FZF_DEFAULT_OPTS", fzfopts);
 
 	return EXIT_SUCCESS;
-}
-
-/* Create a sanitized environment to run a single shell command.
- * See https://redhat-crypto.gitlab.io/defensive-coding-guide/#sect-Defensive_Coding-Tasks-Processes-environ */
-void
-sanitize_cmd_environ(void)
-{
-	/* Pointer to environ original address. We will use these to restore
-	 * the original environ later (restore_cmd_environ()) */
-	env_bk = environ;
-
-	new_env = (char **)xnmalloc(12, sizeof(char *));
-	size_t n = 0;
-	char p[PATH_MAX];
-
-#ifdef _PATH_STDPATH
-	snprintf(p, sizeof(p), "PATH=%s", _PATH_STDPATH);
-	new_env[n] = savestring(p, strlen(p));
-	n++;
-#else
-	char *q = (char *)NULL;
-	size_t len = confstr(_CS_PATH, NULL, 0); /* Get value's size */
-	q = (char *)xnmalloc(len, sizeof(char)); /* Allocate space */
-	confstr(_CS_PATH, q, len);               /* Get value */
-	new_env[n] = savestring(q, strlen(q));   /* Set it */
-	n++;
-	free(q);
-#endif /* _PATH_STDPATH */
-
-	new_env[n] = savestring("IFS=\" \n\t\"", 9);
-	n++;
-	if (user.name) {
-		snprintf(p, sizeof(p), "USER=%s", user.name);
-		new_env[n] = savestring(p, strlen(p));
-		n++;
-		snprintf(p, sizeof(p), "LOGNAME=%s", user.name);
-		new_env[n] = savestring(p, strlen(p));
-		n++;
-	}
-	if (user.home) {
-		snprintf(p, sizeof(p), "HOME=%s", user.home);
-		new_env[n] = savestring(p, strlen(p));
-		n++;
-	}
-	if (user.shell) {
-		snprintf(p, sizeof(p), "SHELL=%s", user.shell);
-		new_env[n] = savestring(p, strlen(p));
-		n++;
-	}
-
-	/* Import and sanitize */
-	size_t len = 0;
-	char *e = (char *)NULL;
-	if ((flags & GUI)) {
-		/* Redhat mentions XAUTHORITY as a safe variable. See
-		 * "https://redhat-crypto.gitlab.io/defensive-coding-guide/#sect-Defensive_Coding-Tasks-Processes-environ" */
-		e = getenv("DISPLAY");
-		if (e && sanitize_cmd(e, SNT_DISPLAY) == EXIT_SUCCESS) {
-			len = 9 + strlen(e);
-			new_env[n] = (char *)xnmalloc(len, sizeof(char));
-			snprintf(new_env[n], len, "DISPLAY=%s", e);
-			n++;
-		}
-		e = getenv("TERM");
-		if (e && sanitize_cmd(e, SNT_MISC) == EXIT_SUCCESS) {
-			len = 6 + strlen(e);
-			new_env[n] = (char *)xnmalloc(len, sizeof(char));
-			snprintf(new_env[n], len, "TERM=%s", e);
-			n++;
-		}
-		/* If running on Wayland and WAYLAND_DISPLAY isn't set, Wayland
-		 * client will try a fallback dispay, usually wayland-0 or wayland-1.
-		 * So, there's no need to set WAYLAND_DISPLAY */
-	}
-
-	e = getenv("TZ");
-	if (e && sanitize_cmd(e, SNT_MISC) == EXIT_SUCCESS) {
-		len = strlen(e) + 4;
-		new_env[n] = (char *)xnmalloc(len, sizeof(char));
-		snprintf(new_env[n], len, "TZ=%s", e);
-		n++;
-	}
-
-	/* LANG, LANGUAGE, LC_ADDRESS, LC_ALL, LC_COLLATE, LC_CTYPE,
-	 * LC_IDENTIFICATION, LC_MEASUREMENT, LC_MESSAGES, LC_MONETARY,
-	 * LC_NAME, LC_NUMERIC, LC_PAPER, LC_TELEPHONE, and LC_TIME are also
-	 * safe according to Redhat. */
-
-	e = getenv("LANG");
-	if (e && sanitize_cmd(e, SNT_MISC) == EXIT_SUCCESS) {
-		len = strlen(e) + 6;
-		new_env[n] = (char *)xnmalloc(len, sizeof(char));
-		snprintf(new_env[n], len, "LANG=%s", e);
-		n++;
-		new_env[n] = (char *)xnmalloc(len + 2, sizeof(char));
-		snprintf(new_env[n], len + 2, "LC_ALL=%s", e);
-		n++;
-	}
-
-	new_env[n] = (char *)NULL;
-
-	/* Set environ to our controlled environment */
-	environ = new_env;
-}
-
-/* Restore the environment after running a cmd with a sanitized environment
- * via sanitize_cmd_environ() */
-void
-restore_cmd_environ(void)
-{
-	/* Free the buffer holding the controlled environ */
-	size_t i;
-	for (i = 0; new_env[i]; i++)
-		free(new_env[i]);
-	free(new_env);
-	new_env = (char **)NULL;
-
-	/* Restore environ to its original value */
-	environ = env_bk;
-	env_bk = (char **)NULL;
 }
 
 /* Sanitize cmd string coming from the mimelist file */

@@ -320,6 +320,7 @@ xsystem(const char *cmd)
 		signal(SIGTSTP, SIG_DFL);
 
 		execl(shell_path, shell_name, "-c", cmd, (char *)NULL);
+//		execle(shell_path, shell_name, "-c", cmd, (char *)NULL, environ);
 		_exit(errno);
 	} else {
 		if (waitpid(pid, &status, 0) == pid)
@@ -345,15 +346,7 @@ launch_execle(const char *cmd)
 	if (!cmd || !*cmd)
 		return EXEC_NULLPARAM;
 
-	if (xargs.secure_cmds == 1 && xargs.secure_env_full == 0
-	&& xargs.secure_env == 0)
-		sanitize_cmd_environ();
-
 	int status = xsystem(cmd);
-
-	if (xargs.secure_cmds == 1 && xargs.secure_env_full == 0
-	&& xargs.secure_env == 0)
-		restore_cmd_environ();
 
 	int exit_status = get_exit_code(status, EXEC_FG_PROC);
 
@@ -377,9 +370,15 @@ launch_execve(char **cmd, const int bg, const int xflags)
 	if (!cmd)
 		return EXEC_NULLPARAM;
 
+/*	char *cmd_path = *cmd[0] != '/' ? get_cmd_path(cmd[0]) : cmd[0];
+	if (cmd[0] && !cmd_path) {
+		xerror("%s: %s: %s", PROGRAM_NAME, cmd[0], NOTFOUND_MSG);
+		return EXEC_NOTFOUND;
+	} */
+
 	/* Reenable SIGCHLD, in case it was disabled. Otherwise, waitpid
 	 * won't be able to catch error codes coming from the child. */
-	signal(SIGCHLD, SIG_DFL);
+//	signal(SIGCHLD, SIG_DFL);
 
 	int status = 0;
 	pid_t pid = fork();
@@ -410,6 +409,8 @@ launch_execve(char **cmd, const int bg, const int xflags)
 		}
 
 		execvp(cmd[0], cmd);
+//		execve(cmd_path, cmd, safe_env ? safe_env : environ);
+//		execve(cmd_path, cmd, environ);
 		/* These error messages will be printed only if E_NOSTDERR is not set.
 		 * Otherwise, the caller should print the error messages itself. */
 		if (errno == ENOENT) {
@@ -437,6 +438,9 @@ launch_execve(char **cmd, const int bg, const int xflags)
 	if (bg == 1 && status == EXIT_SUCCESS && xargs.open != 1)
 		reload_dirlist();
 
+//	printf("%s (%s)\n", cmd_path, cmd[0]); fflush(stdout); sleep(1);
+/*	if (cmd_path != cmd[0])
+		free(cmd_path); */
 	return status;
 }
 

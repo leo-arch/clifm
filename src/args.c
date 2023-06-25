@@ -1361,7 +1361,9 @@ parse_cmdline_args(const int argc, char **argv)
 		case LOPT_RL_VI_MODE:
 			xargs.rl_vi_mode = 1; break;
 		case LOPT_SECURE_CMDS:
-			xargs.secure_cmds = 1; break;
+			xargs.secure_cmds = xargs.secure_env = 1;
+			xsecure_env(SECURE_ENV_IMPORT);
+			break;
 
 		case LOPT_SECURE_ENV:
 			xargs.secure_env = 1;

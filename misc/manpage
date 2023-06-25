@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Jun 18, 2023" "clifm 1.12.13" "CLIFM Manual"
+.TH "CLIFM" "1" "Jun 25, 2023" "clifm 1.12.16" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -344,7 +344,7 @@ always print the list of selected files. Since this list could be quite extensiv
 set readline to vi editing mode (defaults to emacs editing mode)
 .TP
 \fB\-\-secure\-cmds\fR
-Filter commands passed to the OS to mitigate command injection attacks. Consult the \fBSECURITY\fR section below
+Filter commands passed to the OS to mitigate command injection attacks (\fI\-\-secure\-env\fR is implied). Consult the \fBSECURITY\fR section below
 .TP
 \fB\-\-secure\-env\fR
 run \fBclifm\fR in a secure environment (regular mode). Consult the \fBSECURITY\fR section below
@@ -2889,14 +2889,7 @@ Every time a command is thus automatically executed via the system shell (i.e. w
 .TP
 Commands containing \fIat least one\fR unsafe character will be rejected. Of course, we cannot (and should not) prevent what looks like legitimate, benign commands from being executed. But we can stop commands that, in an untrusted environment, look suspicious. This is specially the case of stream redirection (>), pipes (|), sequential (;) and conditional execution (&&, ||), command substitution ($(cmd)), and environment variables ($VAR).
 .TP
-\fBc)\fR Unless already running in a secure environment (via the \fI\-\-secure\-env\fR or \fI\-\-secure\-env\-full\fR options), a sanitized environment will be created for the command to be executed (returning afterwards to the original environment). The values for this secure environment are as follows:
-.sp
- \fBPATH\fR               Taken from \fB_PATH_STDPATH\fR (or \fB_CS_PATH\fR)
- \fBIFS\fR                " \\t\\n"
- \fBUSER\fR, \fBHOME\fR, \fBSHELL\fR  Retrieved from the password database via \fBgetpwuid(3)\fR
- \fBLOGNAME\fR            Same as \fBUSER\fR
- \fBDISPLAY\fR, \fBTZ\fR, \fBLANG\fR, \fBTERM\fR Imported from the environment and sanitized
- \fBLC_ALL\fR             Same as \fBLANG\fR
+\fBc)\fR A secure environment is set (\fI\-\-secure\-env\fR is implied; to run on a fully sanitized environment run as follows: \fI\-\-secure\-cmds \-\-secure\-env\-full\fR:
 
 .SH 21. MISCELLANEOUS NOTES
 .sp
