@@ -472,7 +472,7 @@ is_secure_env(void)
 	size_t i;
 	for (i = 0; argv_bk[i]; i++) {
 		if (*argv_bk[i] == '-'
-		&& (strncmp(argv_bk[i], "--secure-env", 12) == 0))
+		&& (strncmp(argv_bk[i], "--secure-", 9) == 0))
 			return 1;
 	}
 
