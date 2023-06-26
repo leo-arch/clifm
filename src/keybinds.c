@@ -1550,7 +1550,7 @@ rl_kbinds_help(int count, int key)
 	char cmd[PATH_MAX];
 	snprintf(cmd, sizeof(cmd),
 		"export PAGER=\"less -p ^[0-9]+\\.[[:space:]]KEYBOARD[[:space:]]SHORTCUTS\"; man %s\n",
-		PNL);
+		PROGRAM_NAME);
 	int ret = run_man_cmd(cmd);
 	if (!ret)
 		return EXIT_FAILURE;
@@ -1571,7 +1571,8 @@ rl_cmds_help(int count, int key)
 
 	char cmd[PATH_MAX];
 	snprintf(cmd, sizeof(cmd),
-		"export PAGER=\"less -p ^[0-9]+\\.[[:space:]]COMMANDS\"; man %s\n", PNL);
+		"export PAGER=\"less -p ^[0-9]+\\.[[:space:]]COMMANDS\"; man %s\n",
+		PROGRAM_NAME);
 	int ret = run_man_cmd(cmd);
 	if (!ret)
 		return EXIT_FAILURE;
@@ -1589,7 +1590,7 @@ rl_manpage(int count, int key)
 	if (suggestion.printed && suggestion_buf)
 		free_suggestion();
 #endif
-	char *cmd[] = {"man", PNL, NULL};
+	char *cmd[] = {"man", PROGRAM_NAME, NULL};
 	if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 	return EXIT_SUCCESS;

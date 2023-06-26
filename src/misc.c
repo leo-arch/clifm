@@ -2051,7 +2051,7 @@ list_commands(void)
 {
 	char cmd[PATH_MAX];
 	snprintf(cmd, sizeof(cmd), "export PAGER=\"less -p '^[0-9]+\\.[[:space:]]COMMANDS'\"; man %s\n",
-			PNL);
+			PROGRAM_NAME);
 	if (launch_execl(cmd) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
@@ -2311,7 +2311,8 @@ quick_help(char *topic)
 
 #if defined(__HAIKU__) || defined(__sun)
 	printf("%s                                %s\n\n%s\n\n%s",
-		ASCII_LOGO, _PROGRAM_NAME, QUICK_HELP_HEADER, QUICK_HELP_NAVIGATION);
+		ASCII_LOGO, PROGRAM_NAME_UPPERCASE, QUICK_HELP_HEADER,
+		QUICK_HELP_NAVIGATION);
 	printf("\n\n%s\n\n%s\n", QUICK_HELP_BASIC_OPERATIONS, QUICK_HELP_MISC);
 # ifdef __HAIKU__
 	puts(_("\nNOTE: Some keybindings on Haiku might differ. Take a look "
@@ -2322,7 +2323,8 @@ quick_help(char *topic)
 	char *_pager = (char *)NULL;
 	if (xargs.stealth_mode == 1 || !(_pager = get_pager())) {
 		printf("%s                                %s\n\n%s\n\n%s",
-			ASCII_LOGO, _PROGRAM_NAME, QUICK_HELP_HEADER, QUICK_HELP_NAVIGATION);
+			ASCII_LOGO, PROGRAM_NAME_UPPERCASE, QUICK_HELP_HEADER,
+			QUICK_HELP_NAVIGATION);
 		printf("\n\n%s\n\n%s\n", QUICK_HELP_BASIC_OPERATIONS, QUICK_HELP_MISC);
 		return EXIT_SUCCESS;
 	}
@@ -2348,7 +2350,8 @@ quick_help(char *topic)
 	}
 
 	dprintf(fd, "%s                                %s\n\n%s\n\n%s",
-			ASCII_LOGO, _PROGRAM_NAME, QUICK_HELP_HEADER, QUICK_HELP_NAVIGATION);
+			ASCII_LOGO, PROGRAM_NAME_UPPERCASE, QUICK_HELP_HEADER,
+			QUICK_HELP_NAVIGATION);
 	dprintf(fd, "\n\n%s\n\n%s", QUICK_HELP_BASIC_OPERATIONS, QUICK_HELP_MISC);
 
 	int ret;
@@ -2381,7 +2384,7 @@ help_function(void)
 	fputs(NC, stdout);
 	printf("%s\n", ASCII_LOGO);
 	printf(_("%s %s (%s), by %s\n"), PROGRAM_NAME, VERSION, DATE, AUTHOR);
-	printf("\nUSAGE: %s %s\n%s%s%s", PNL, GRAL_USAGE, _(SHORT_OPTIONS),
+	printf("\nUSAGE: %s %s\n%s%s%s", PROGRAM_NAME, GRAL_USAGE, _(SHORT_OPTIONS),
 		_(LONG_OPTIONS_A), _(LONG_OPTIONS_B));
 
 	puts("\nBUILT-IN COMMANDS:\n");
@@ -2409,7 +2412,7 @@ splash(void)
 {
 	printf("\n%s%s\n\n%s%s\t\t       %s%s\n           %s\n",
 		conf.colorize ? D_CYAN : "", ASCII_LOGO_BIG, df_c,
-		BOLD, df_c, _PROGRAM_NAME, _(PROGRAM_DESC));
+		BOLD, df_c, PROGRAM_NAME_UPPERCASE, _(PROGRAM_DESC));
 
 	if (conf.splash_screen) {
 		printf(_("\n            Press any key to continue... "));

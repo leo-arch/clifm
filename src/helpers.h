@@ -129,9 +129,8 @@
 #include "strings.h"
 #include "settings.h"
 
-#define _PROGRAM_NAME "CliFM"
+#define PROGRAM_NAME_UPPERCASE "CliFM"
 #define PROGRAM_NAME "clifm"
-#define PNL "clifm" /* Program name lowercase */
 #define PROGRAM_DESC "The command line file manager"
 #define VERSION "1.12.16"
 #define AUTHOR "L. Abramovich"

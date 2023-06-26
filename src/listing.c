@@ -1900,7 +1900,7 @@ list_dir_light(void)
 		if (n > (unsigned int)INT_MAX) {
 			n--;
 			_err('w', PRINT_PROMPT, _("%s: Integer overflow "
-				"detected (showing only %u files)\n"), PNL, n);
+				"detected (showing only %u files)\n"), PROGRAM_NAME, n);
 			break;
 		}
 
@@ -2547,7 +2547,7 @@ list_dir(void)
 		if (n > (unsigned int)INT_MAX) {
 			n--;
 			_err('w', PRINT_PROMPT, _("%s: Integer overflow "
-				"detected (showing only %u files)\n"), PNL, n);
+				"detected (showing only %u files)\n"), PROGRAM_NAME, n);
 			break;
 		}
 

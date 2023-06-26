@@ -924,7 +924,7 @@ import_color_scheme(const char *name)
 
 	char dfile[PATH_MAX];
 	snprintf(dfile, sizeof(dfile), "%s/%s/colors/%s.clifm", data_dir,
-		PNL, name);
+		PROGRAM_NAME, name);
 
 	struct stat attr;
 	if (stat(dfile, &attr) == -1)
@@ -2004,7 +2004,7 @@ read_color_scheme_file(const char *colorscheme, char **filecolors,
 	if (data_dir && (!*colorscheme_file
 	|| stat(colorscheme_file, &attr) == -1)) {
 		snprintf(colorscheme_file, sizeof(colorscheme_file),
-			"%s/%s/colors/%s.clifm", data_dir, PNL, colorscheme
+			"%s/%s/colors/%s.clifm", data_dir, PROGRAM_NAME, colorscheme
 			? colorscheme : "default");
 	}
 

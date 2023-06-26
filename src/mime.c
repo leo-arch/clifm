@@ -933,7 +933,7 @@ mime_open_with_tab(char *filename, const char *prefix, const int only_names)
 	if (!filename || !mime_file)
 		return (char **)NULL;
 
-	err_name = (xargs.open == 1 || xargs.preview == 1) ? PNL : "mime";
+	err_name = (xargs.open == 1 || xargs.preview == 1) ? PROGRAM_NAME : "mime";
 
 	char *name = (char *)NULL,
 		 *deq_file = (char *)NULL,
@@ -1100,7 +1100,7 @@ mime_open_with_tab(char *filename, const char *prefix, const int only_names)
 			}
 			/* Do not allow APP to be plain "clifm", since
 			 * nested executions of clifm are not allowed */
-			else if (*app == PNL[0] && strcmp(app, PNL) == 0) {
+			else if (*app == PROGRAM_NAME[0] && strcmp(app, PROGRAM_NAME) == 0) {
 				;
 			} else if (*app == '/') {
 				if (access(app, X_OK) == 0)
@@ -1294,7 +1294,7 @@ mime_open_with(char *filename, char **args)
 	if (!filename || !mime_file)
 		return EXIT_FAILURE;
 
-	err_name = (xargs.open == 1 || xargs.preview == 1) ? PNL : "mime";
+	err_name = (xargs.open == 1 || xargs.preview == 1) ? PROGRAM_NAME : "mime";
 
 	char *name = (char *)NULL,
 		 *deq_file = (char *)NULL,
@@ -1444,7 +1444,7 @@ mime_open_with(char *filename, char **args)
 			}
 			/* Do not allow APP to be plain "clifm", since
 			 * nested executions of clifm are not allowed */
-			else if (*app == PNL[0] && strcmp(app, PNL) == 0) {
+			else if (*app == PROGRAM_NAME[0] && strcmp(app, PROGRAM_NAME) == 0) {
 				;
 			} else if (*app == '/') {
 				if (access(app, X_OK) == 0) {
@@ -1520,7 +1520,7 @@ mime_open_url(char *url)
 	if (!url || !*url)
 		return EXIT_FAILURE;
 
-	err_name = (xargs.open == 1 || xargs.preview == 1) ? PNL : "mime";
+	err_name = (xargs.open == 1 || xargs.preview == 1) ? PROGRAM_NAME : "mime";
 
 	char *app = get_app("text/html", 0);
 	if (!app)
@@ -1745,7 +1745,7 @@ mime_open(char **args)
 	if (!args[1] || IS_HELP(args[1]))
 		return print_mime_help();
 
-	err_name = (xargs.open == 1 || xargs.preview == 1) ? PNL : "mime";
+	err_name = (xargs.open == 1 || xargs.preview == 1) ? PROGRAM_NAME : "mime";
 
 	if (*args[1] == 'i' && strcmp(args[1], "import") == 0)
 		return import_mime();

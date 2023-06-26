@@ -298,7 +298,7 @@ profile_add(const char *prof)
 		return EXIT_FAILURE;
 	}
 
-	size_t pnl_len = strlen(PNL);
+	size_t pnl_len = strlen(PROGRAM_NAME);
 	size_t tmp_len = strlen(config_dir_gral) + strlen(prof) + 11;
 	/* ### GENERATE PROGRAM'S CONFIG DIRECTORY NAME ### */
 	char *nconfig_dir = (char *)xnmalloc(tmp_len, sizeof(char));
@@ -319,7 +319,7 @@ profile_add(const char *prof)
 
 	tmp_len = config_len + pnl_len + 4;
 	char *nconfig_file = (char *)xnmalloc(tmp_len, sizeof(char));
-	snprintf(nconfig_file, tmp_len, "%s/%src", nconfig_dir, PNL);
+	snprintf(nconfig_file, tmp_len, "%s/%src", nconfig_dir, PROGRAM_NAME);
 	tmp_len = config_len + 15;
 	char *nhist_file = (char *)xnmalloc(tmp_len, sizeof(char));
 	snprintf(nhist_file, tmp_len, "%s/history.clifm", nconfig_dir);

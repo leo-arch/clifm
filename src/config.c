@@ -65,9 +65,9 @@ set_finder_paths(void)
 {
 	char *p = xargs.stealth_mode == 1 ? P_tmpdir : tmp_dir;
 	snprintf(finder_in_file, sizeof(finder_in_file), "%s/%s.finder.in",
-		p, PNL);
+		p, PROGRAM_NAME);
 	snprintf(finder_out_file, sizeof(finder_out_file), "%s/%s.finder.out",
-		p, PNL);
+		p, PROGRAM_NAME);
 }
 #endif /* _NO_FZF */
 
@@ -590,7 +590,7 @@ setenv_plugins_helper(void)
 	if (data_dir && *data_dir) {
 		char _path[PATH_MAX];
 		snprintf(_path, sizeof(_path), "%s/%s/plugins/plugins-helper",
-			data_dir, PNL);
+			data_dir, PROGRAM_NAME);
 
 		if (stat(_path, &attr) != -1
 		&& setenv("CLIFM_PLUGINS_HELPER", _path, 1) == 0)
@@ -678,7 +678,8 @@ set_sel_file(void)
 		/* Shared selection box is stored in the general config dir */
 		len = config_dir_len + 23;
 		sel_file = (char *)xnmalloc(len, sizeof(char));
-		snprintf(sel_file, len, "%s/.config/%s/selbox.clifm", user.home, PNL);
+		snprintf(sel_file, len, "%s/.config/%s/selbox.clifm", user.home,
+			PROGRAM_NAME);
 	}
 
 	return;
@@ -693,7 +694,7 @@ import_from_data_dir(const char *src_filename, char *dest)
 
 	struct stat attr;
 	char sys_file[PATH_MAX];
-	snprintf(sys_file, sizeof(sys_file), "%s/%s/%s", data_dir, PNL,
+	snprintf(sys_file, sizeof(sys_file), "%s/%s/%s", data_dir, PROGRAM_NAME,
 		src_filename);
 	if (stat(sys_file, &attr) == -1)
 		return EXIT_FAILURE;
@@ -1053,7 +1054,7 @@ create_tmp_files(void)
 	if (xargs.stealth_mode == 1)
 		return;
 
-	size_t pnl_len = strlen(PNL);
+	size_t pnl_len = strlen(PROGRAM_NAME);
 	size_t tmp_len = 0;
 
 	/* #### CHECK THE TMP DIR #### */
@@ -1067,9 +1068,9 @@ create_tmp_files(void)
 	tmp_len = P_tmpdir_len + pnl_len + user_len + 3;
 	tmp_dir = (char *)xnmalloc(tmp_len, sizeof(char));
 	if (P_tmpdir_len > 0 && P_tmpdir[P_tmpdir_len - 1] == '/')
-		snprintf(tmp_dir, tmp_len, "%s%s", P_tmpdir, PNL); /* On OpenBSD we get "/tmp/" */
+		snprintf(tmp_dir, tmp_len, "%s%s", P_tmpdir, PROGRAM_NAME); /* On OpenBSD we get "/tmp/" */
 	else
-		snprintf(tmp_dir, tmp_len, "%s/%s", P_tmpdir, PNL);
+		snprintf(tmp_dir, tmp_len, "%s/%s", P_tmpdir, PROGRAM_NAME);
 	/* P_tmpdir is defined in stdio.h and it's value is usually /tmp
 	 * If not defined, it will be defined as "/tmp" */
 
@@ -1087,7 +1088,7 @@ create_tmp_files(void)
 	 * store the list of selected files: TMP_DIR/clifm/username/.selbox_PROFILE.
 	 * We use here very restrictive permissions (700), since only the
 	 * corresponding user must be able to read and/or modify this list */
-	snprintf(tmp_dir, tmp_len, "%s/%s/%s", P_tmpdir, PNL,
+	snprintf(tmp_dir, tmp_len, "%s/%s/%s", P_tmpdir, PROGRAM_NAME,
 		user.name ? user.name : "unknown");
 	if (stat(tmp_dir, &attr) == -1) {
 		if (xmkdir(tmp_dir, S_IRWXU) == EXIT_FAILURE) {
@@ -1145,7 +1146,7 @@ create_tmp_files(void)
 static void
 define_config_file_names(void)
 {
-	size_t pnl_len = strlen(PNL);
+	size_t pnl_len = strlen(PROGRAM_NAME);
 	size_t tmp_len = 0;
 
 	if (alt_config_dir) {
@@ -1161,12 +1162,14 @@ define_config_file_names(void)
 			size_t len = strlen(xdg_config_home);
 			tmp_len = len + pnl_len + 2;
 			config_dir_gral = (char *)xnmalloc(tmp_len, sizeof(char));
-			snprintf(config_dir_gral, tmp_len, "%s/%s", xdg_config_home, PNL);
+			snprintf(config_dir_gral, tmp_len, "%s/%s", xdg_config_home,
+				PROGRAM_NAME);
 			xdg_config_home = (char *)NULL;
 		} else {
 			tmp_len = user.home_len + pnl_len + 10;
 			config_dir_gral = (char *)xnmalloc(tmp_len, sizeof(char));
-			snprintf(config_dir_gral, tmp_len, "%s/.config/%s", user.home, PNL);
+			snprintf(config_dir_gral, tmp_len, "%s/.config/%s", user.home,
+				PROGRAM_NAME);
 		}
 	}
 
@@ -1237,7 +1240,7 @@ define_config_file_names(void)
 	if (!alt_config_file) {
 		tmp_len = config_dir_len + pnl_len + 4;
 		config_file = (char *)xnmalloc(tmp_len, sizeof(char));
-		snprintf(config_file, tmp_len, "%s/%src", config_dir, PNL);
+		snprintf(config_file, tmp_len, "%s/%src", config_dir, PROGRAM_NAME);
 	} else {
 		config_file = savestring(alt_config_file, strlen(alt_config_file));
 		free(alt_config_file);
@@ -1284,7 +1287,7 @@ create_main_config_file(char *file)
 {
 	/* First, try to import it from DATADIR */
 	char src_filename[NAME_MAX];
-	snprintf(src_filename, sizeof(src_filename), "%src", PNL);
+	snprintf(src_filename, sizeof(src_filename), "%src", PROGRAM_NAME);
 	if (import_from_data_dir(src_filename, file) == EXIT_SUCCESS)
 		return EXIT_SUCCESS;
 
@@ -1908,7 +1911,7 @@ create_config_files(void)
 				"# Uncommented, non-empty lines are executed line by line. If you\n"
 				"# want a multi-line command, just write a script for it:\n"
 				"#sh /path/to/my/script.sh\n"),
-				_PROGRAM_NAME, _PROGRAM_NAME);
+				PROGRAM_NAME_UPPERCASE, PROGRAM_NAME_UPPERCASE);
 			fclose(profile_fp);
 		}
 	}

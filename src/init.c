@@ -318,8 +318,8 @@ init_gettext(void)
 	char locale_dir[PATH_MAX];
 	snprintf(locale_dir, sizeof(locale_dir), "%s/locale", data_dir
 		? data_dir : "/usr/local/share");
-	bindtextdomain(PNL, locale_dir);
-	textdomain(PNL);
+	bindtextdomain(PROGRAM_NAME, locale_dir);
+	textdomain(PROGRAM_NAME);
 
 	return EXIT_SUCCESS;
 
@@ -332,8 +332,8 @@ backup_argv(const int argc, char **argv)
 	argc_bk = argc;
 	argv_bk = (char **)xnmalloc((size_t)argc + 1, sizeof(char *));
 
-	/* Let's store the executable base name, excluding the path
-	 * This is done mainly to detect and disallow nested instances (see exec.c) */
+	/* Let's store the executable base name, excluding the path.
+	 * Done to detect and disallow nested instances (see exec.c). */
 	char *n = strrchr(argv[0], '/');
 	if (n && *n && *(n + 1))
 		bin_name = savestring(n + 1, strlen(n + 1));
@@ -1360,7 +1360,7 @@ set_prompts_file(void)
 		goto ERROR;
 
 	char t[PATH_MAX];
-	snprintf(t, sizeof(t), "%s/%s/prompts.clifm", data_dir, PNL);
+	snprintf(t, sizeof(t), "%s/%s/prompts.clifm", data_dir, PROGRAM_NAME);
 	if (stat(t, &a) == -1 || !S_ISREG(a.st_mode))
 		goto ERROR;
 

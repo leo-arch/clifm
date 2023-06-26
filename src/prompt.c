@@ -631,7 +631,8 @@ decode_prompt(char *line)
 				temp = gen_octal(&line, &c); goto ADD_STRING;
 
 			case 'c': /* Program name */
-				temp = savestring(PNL, strlen(PNL)); goto ADD_STRING;
+				temp = savestring(PROGRAM_NAME, strlen(PROGRAM_NAME));
+				goto ADD_STRING;
 
 			case 'P': /* Current profile name */
 				temp = gen_profile(); goto ADD_STRING;

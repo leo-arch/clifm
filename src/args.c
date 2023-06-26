@@ -379,7 +379,8 @@ try_standard_data_dirs(void)
 
 	for (i = 0; data_dirs[i]; i++) {
 		char tmp[PATH_MAX + 5 + 10];
-		snprintf(tmp, sizeof(tmp), "%s/%s/%src", data_dirs[i], PNL, PNL);
+		snprintf(tmp, sizeof(tmp), "%s/%s/%src", data_dirs[i],
+			PROGRAM_NAME, PROGRAM_NAME);
 
 		if (stat(tmp, &a) == -1 || !S_ISREG(a.st_mode))
 			continue;
@@ -407,7 +408,7 @@ try_datadir(const char *dir)
 	char p[PATH_MAX];
 
 	/* Try DIR/share/clifm/clifmrc */
-	snprintf(p, sizeof(p), "%s/share/%s/%src", dir, PNL, PNL);
+	snprintf(p, sizeof(p), "%s/share/%s/%src", dir, PROGRAM_NAME, PROGRAM_NAME);
 	if (stat(p, &a) != -1 && S_ISREG(a.st_mode)) {
 		size_t len = strlen(dir) + 7;
 		char *q = (char *)xnmalloc(len, sizeof(char));
@@ -416,7 +417,7 @@ try_datadir(const char *dir)
 	}
 
 	/* Try DIR/clifm/clifmrc */
-	snprintf(p, sizeof(p), "%s/%s/%src", dir, PNL, PNL);
+	snprintf(p, sizeof(p), "%s/%s/%src", dir, PROGRAM_NAME, PROGRAM_NAME);
 	if (stat(p, &a) != -1 && S_ISREG(a.st_mode))
 		return savestring(dir, strlen(dir));
 
@@ -481,30 +482,30 @@ resolve_basename(const char *s)
 }
 
 static int
-get_data_dir_from_path(char *s)
+get_data_dir_from_path(char *arg)
 {
-	if (!s || !*s)
+	if (!arg || !*arg)
 		return EXIT_FAILURE;
 
-	char *dd = (char *)NULL;
-	char *t = *s == '~' ? tilde_expand(s) : s;
+	char *datadir = (char *)NULL;
+	char *name = *arg == '~' ? tilde_expand(arg) : arg;
 
-	if (*t == '/' && (dd = resolve_absolute_path(t)))
+	if (*name == '/' && (datadir = resolve_absolute_path(name)))
 		goto END;
 
-	if (strchr(t, '/') && (dd = resolve_relative_path(t)))
+	if (strchr(name, '/') && (datadir = resolve_relative_path(name)))
 		goto END;
 
-	dd = resolve_basename(t);
+	datadir = resolve_basename(name);
 
 END:
-	if (t != s)
-		free(t);
+	if (name != arg)
+		free(name);
 
-	if (!dd)
+	if (!datadir)
 		return EXIT_FAILURE;
 
-	data_dir = dd;
+	data_dir = datadir;
 	return EXIT_SUCCESS;
 }
 
@@ -520,7 +521,9 @@ get_data_dir(void)
 #ifdef CLIFM_DATADIR
 	struct stat a;
 	char p[PATH_MAX];
-	snprintf(p, sizeof(p), "%s/%s/%src", STRINGIZE(CLIFM_DATADIR), PNL, PNL);
+	snprintf(p, sizeof(p), "%s/%s/%src", STRINGIZE(CLIFM_DATADIR),
+		PROGRAM_NAME, PROGRAM_NAME);
+
 	if (stat(p, &a) != -1 && S_ISREG(a.st_mode)) {
 		data_dir = savestring(STRINGIZE(CLIFM_DATADIR),
 			strlen(STRINGIZE(CLIFM_DATADIR)));

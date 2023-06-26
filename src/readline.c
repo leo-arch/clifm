@@ -237,7 +237,7 @@ gen_shell_cmd_comp(char *cmd)
 
 	char manpage_parser_file[PATH_MAX];
 	snprintf(manpage_parser_file, sizeof(manpage_parser_file),
-		"%s/%s/tools/manpages_comp_gen.py", data_dir, PNL);
+		"%s/%s/tools/manpages_comp_gen.py", data_dir, PROGRAM_NAME);
 
 	char *c[] = {manpage_parser_file, "-k", cmd, NULL};
 	return launch_execv(c, FOREGROUND, E_MUTE);
@@ -255,7 +255,7 @@ get_shell_cmd_opts(char *cmd)
 
 	char p[PATH_MAX];
 	snprintf(p, sizeof(p), "%s/.local/share/%s/completions/%s.clifm",
-		user.home, PNL, cmd);
+		user.home, PROGRAM_NAME, cmd);
 
 	struct stat a;
 	if (stat(p, &a) == -1) {
@@ -4323,7 +4323,7 @@ set_rl_init_file(void)
 			return;
 		}
 		fprintf(fp, "# This is readline's configuration file for %s\n",
-			_PROGRAM_NAME);
+			PROGRAM_NAME_UPPERCASE);
 		fclose(fp);
 	}
 

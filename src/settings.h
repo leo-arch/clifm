@@ -322,7 +322,7 @@ xf=1;31:xs=0;32:"
 #define DEF_WELCOME_MESSAGE 1
 
 /* This expands to "CliFM > The command line file manager" */
-#define DEF_WELCOME_MESSAGE_STR _PROGRAM_NAME " > " PROGRAM_DESC
+#define DEF_WELCOME_MESSAGE_STR PROGRAM_NAME_UPPERCASE " > " PROGRAM_DESC
 
 /* We have three search strategies: GLOB_ONLY, REGEX_ONLY, GLOB_REGEX */
 #define DEF_SEARCH_STRATEGY GLOB_REGEX
