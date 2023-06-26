@@ -148,7 +148,7 @@ static void
 ueberzug_clear(char *file)
 {
 	int fd = 0;
-	FILE *fp = open_fstream_w(file, &fd);
+	FILE *fp = open_fwrite(file, &fd);
 	if (!fp)
 		return;
 
@@ -529,10 +529,12 @@ xmkdir(char *dir, const mode_t mode)
 	return EXIT_SUCCESS;
 }
 
-/* Open a file for read only. Return a file stream associated to a file
- * descriptor (FD) for the file named NAME */
+/* Open a file for read only. Return a file stream associated to the file
+ * named NAME and updates FD to hold the corresponding file descriptor.
+ * NOTE: As stated here, file streams should be preferred over file descriptors:
+ * https://www.gnu.org/software/libc/manual/html_node/Streams-and-File-Descriptors.html */
 FILE *
-open_fstream_r(char *name, int *fd)
+open_fread(char *name, int *fd)
 {
 	if (!name || !*name)
 		return (FILE *)NULL;
@@ -551,10 +553,12 @@ open_fstream_r(char *name, int *fd)
 }
 
 /* Create a file for writing (truncating it to zero length if it already exists).
- * Return a file stream associated to a file descriptor (FD) for the file
- * named NAME. */
+ * Return a file stream associated to the file named NAME and update FD to hold
+ * the corresponding file descriptor.
+ * NOTE: As stated here, file streams should be preferred over file descriptors:
+ * https://www.gnu.org/software/libc/manual/html_node/Streams-and-File-Descriptors.html*/
 FILE *
-open_fstream_w(char *name, int *fd)
+open_fwrite(char *name, int *fd)
 {
 	if (!name || !*name)
 		return (FILE *)NULL;
@@ -577,14 +581,14 @@ inline mode_t
 get_dt(const mode_t mode)
 {
 	switch (mode & S_IFMT) {
-	case S_IFBLK: return DT_BLK;
-	case S_IFCHR: return DT_CHR;
-	case S_IFDIR: return DT_DIR;
-	case S_IFIFO: return DT_FIFO;
-	case S_IFLNK: return DT_LNK;
-	case S_IFREG: return DT_REG;
+	case S_IFBLK:  return DT_BLK;
+	case S_IFCHR:  return DT_CHR;
+	case S_IFDIR:  return DT_DIR;
+	case S_IFIFO:  return DT_FIFO;
+	case S_IFLNK:  return DT_LNK;
+	case S_IFREG:  return DT_REG;
 	case S_IFSOCK: return DT_SOCK;
-	default: return DT_UNKNOWN;
+	default:       return DT_UNKNOWN;
 	}
 }
 
@@ -855,7 +859,7 @@ dir_size(char *dir, const int size_in_bytes, int *status)
 	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
 	close(stdout_bk);
 
-	FILE *fp = open_fstream_r(file, &fd);
+	FILE *fp = open_fread(file, &fd);
 	if (!fp) {
 		unlink(file);
 		return (-1);

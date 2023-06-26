@@ -216,7 +216,7 @@ write_files_to_tmp(struct dirent ***a, int *n, const char *target,
 	char *tmp_file)
 {
 	int fd = 0;
-	FILE *fp = open_fstream_w(tmp_file, &fd);
+	FILE *fp = open_fwrite(tmp_file, &fd);
 	if (!fp) {
 		_err('e', PRINT_PROMPT, "%s: rr: fopen: %s: %s\n", PROGRAM_NAME,
 			tmp_file, strerror(errno));
@@ -1871,7 +1871,7 @@ bulk_rename(char **args)
 
 #if defined(__HAIKU__) || defined(__sun)
 	int tmp_fd = 0;
-	fp = open_fstream_w(bulk_file, &tmp_fd);
+	fp = open_fwrite(bulk_file, &tmp_fd);
 	if (!fp) {
 		xerror("br: fopen: %s: %s\n", bulk_file, strerror(errno));
 		return EXIT_FAILURE;
@@ -1937,7 +1937,7 @@ bulk_rename(char **args)
 		return EXIT_FAILURE;
 	}
 
-	fp = open_fstream_r(bulk_file, &fd);
+	fp = open_fread(bulk_file, &fd);
 	if (!fp) {
 		xerror("br: %s: %s\n", bulk_file, strerror(errno));
 		return EXIT_FAILURE;
@@ -1961,7 +1961,7 @@ bulk_rename(char **args)
 	}
 
 	fclose(fp);
-	fp = open_fstream_r(bulk_file, &fd);
+	fp = open_fread(bulk_file, &fd);
 	if (!fp) {
 		xerror("br: %s: %s\n", bulk_file, strerror(errno));
 		return errno;
@@ -2096,7 +2096,7 @@ _export(char **filenames, const int open)
 	size_t i;
 #if defined(__HAIKU__) || defined(__sun)
 	int tmp_fd = 0;
-	FILE *fp = open_fstream_w(tmp_file, &tmp_fd);
+	FILE *fp = open_fwrite(tmp_file, &tmp_fd);
 	if (!fp) {
 		xerror("exp: %s: %s\n", tmp_file, strerror(errno));
 		free(tmp_file);

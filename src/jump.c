@@ -270,7 +270,7 @@ save_jumpdb(void)
 	snprintf(jump_file, sizeof(jump_file), "%s/jump.clifm", config_dir);
 
 	int fd = 0;
-	FILE *fp = open_fstream_w(jump_file, &fd);
+	FILE *fp = open_fwrite(jump_file, &fd);
 	if (!fp)
 		return;
 

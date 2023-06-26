@@ -77,7 +77,7 @@ save_sel(void)
 	}
 
 	int fd = 0;
-	FILE *fp = open_fstream_w(sel_file, &fd);
+	FILE *fp = open_fwrite(sel_file, &fd);
 	if (!fp) {
 		xerror("sel: %s: %s\n", sel_file, strerror(errno));
 		return EXIT_FAILURE;

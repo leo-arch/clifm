@@ -168,7 +168,7 @@ get_start_path_and_ws_names(char **sp, char **ws)
 		return;
 
 	int fd;
-	FILE *fp = open_fstream_r(config_file, &fd);
+	FILE *fp = open_fread(config_file, &fd);
 	if (!fp)
 		return;
 
@@ -726,7 +726,7 @@ create_kbinds_file(void)
 
 	/* Else, create it */
 	int fd = 0;
-	FILE *fp = open_fstream_w(kbinds_file, &fd);
+	FILE *fp = open_fwrite(kbinds_file, &fd);
 	if (!fp) {
 		_err('w', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME, kbinds_file,
 			strerror(errno));
@@ -897,7 +897,7 @@ create_preview_file(void)
 #endif /* !BSD */
 
 	int fd = 0;
-	FILE *fp = open_fstream_w(file, &fd);
+	FILE *fp = open_fwrite(file, &fd);
 	if (!fp) {
 		_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, file,
 			strerror(errno));
@@ -987,7 +987,7 @@ create_actions_file(char *file)
 
 	/* Else, create it */
 	int fd = 0;
-	FILE *fp = open_fstream_w(file, &fd);
+	FILE *fp = open_fwrite(file, &fd);
 	if (!fp) {
 		_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, file,
 			strerror(errno));
@@ -1290,7 +1290,7 @@ create_main_config_file(char *file)
 
 	/* If not found, create it */
 	int fd;
-	FILE *config_fp = open_fstream_w(file, &fd);
+	FILE *config_fp = open_fwrite(file, &fd);
 
 	if (!config_fp) {
 		xerror("%s: fopen: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
@@ -1731,7 +1731,7 @@ create_def_color_scheme(void)
 
 	/* If cannot be imported either, create it with default values */
 	int fd;
-	FILE *fp = open_fstream_w(cscheme_file, &fd);
+	FILE *fp = open_fwrite(cscheme_file, &fd);
 	if (!fp) {
 		_err('w', PRINT_PROMPT, "%s: Error creating default color scheme "
 			"file: %s\n", PROGRAM_NAME, strerror(errno));
@@ -1810,7 +1810,7 @@ create_remotes_file(void)
 
 	/* If not in DATADIR, let's create a minimal file here */
 	int fd = 0;
-	FILE *fp = open_fstream_w(remotes_file, &fd);
+	FILE *fp = open_fwrite(remotes_file, &fd);
 	if (!fp) {
 		_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
 		    remotes_file, strerror(errno));
@@ -1897,7 +1897,7 @@ create_config_files(void)
 
 	if (stat(profile_file, &attr) == -1) {
 		int fd = 0;
-		FILE *profile_fp = open_fstream_w(profile_file, &fd);
+		FILE *profile_fp = open_fwrite(profile_file, &fd);
 		if (!profile_fp) {
 			_err('e', PRINT_PROMPT, "%s: fopen: '%s': %s\n", PROGRAM_NAME,
 			    profile_file, strerror(errno));
@@ -1945,7 +1945,7 @@ static int
 create_mime_file_anew(char *file)
 {
 	int fd;
-	FILE *fp = open_fstream_w(file, &fd);
+	FILE *fp = open_fwrite(file, &fd);
 	if (!fp) {
 		_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, file,
 			strerror(errno));
@@ -2138,7 +2138,7 @@ create_bm_file(void)
 		return EXIT_SUCCESS;
 
 	int fd = 0;
-	FILE *fp = open_fstream_w(bm_file, &fd);
+	FILE *fp = open_fwrite(bm_file, &fd);
 	if (!fp) {
 		_err('e', PRINT_PROMPT, "bookmarks: '%s': %s\n", bm_file,
 			strerror(errno));
@@ -2490,7 +2490,7 @@ static void
 read_config(void)
 {
 	int fd;
-	FILE *config_fp = open_fstream_r(config_file, &fd);
+	FILE *config_fp = open_fread(config_file, &fd);
 	if (!config_fp) {
 		_err('e', PRINT_PROMPT, _("%s: fopen: '%s': %s. Using default "
 			"values.\n"), PROGRAM_NAME, config_file, strerror(errno));

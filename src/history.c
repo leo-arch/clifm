@@ -149,7 +149,7 @@ gen_file(char *file)
 	int fd = 0;
 	FILE *fp = (FILE *)NULL;
 
-	fp = open_fstream_w(file, &fd);
+	fp = open_fwrite(file, &fd);
 	if (!fp)
 		return EXIT_FAILURE;
 

@@ -213,7 +213,7 @@ profile_set(const char *prof)
 			history_truncate_file(hist_file, conf.max_hist);
 		} else {
 			int fd = 0;
-			FILE *hist_fp = open_fstream_w(hist_file, &fd);
+			FILE *hist_fp = open_fwrite(hist_file, &fd);
 			if (hist_fp) {
 				fputs("edit\n", hist_fp);
 				fclose(hist_fp);
@@ -331,7 +331,7 @@ profile_add(const char *prof)
 
 	/* #### CREATE THE HISTORY FILE #### */
 	int fd = 0;
-	FILE *hist_fp = open_fstream_w(nhist_file, &fd);
+	FILE *hist_fp = open_fwrite(nhist_file, &fd);
 	if (!hist_fp) {
 		xerror("pf: fopen: %s: %s\n", nhist_file, strerror(errno));
 		exit_status = EXIT_FAILURE;

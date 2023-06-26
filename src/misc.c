@@ -1011,7 +1011,7 @@ alias_import(char *file)
 
 	/* Open the file to import aliases from */
 	int fd;
-	FILE *fp = open_fstream_r(rfile, &fd);
+	FILE *fp = open_fread(rfile, &fd);
 	if (!fp) {
 		xerror("%s: '%s': %s\n", PROGRAM_NAME, rfile, strerror(errno));
 		return EXIT_FAILURE;
@@ -1150,7 +1150,7 @@ save_last_path(void)
 	snprintf(last_dir, config_dir_len + 7, "%s/.last", config_dir);
 
 	int fd = 0;
-	FILE *last_fp = open_fstream_w(last_dir, &fd);
+	FILE *last_fp = open_fwrite(last_dir, &fd);
 	if (!last_fp) {
 		xerror(_("%s: Error saving last visited directory: %s\n"),
 			PROGRAM_NAME, strerror(errno));
@@ -1959,7 +1959,7 @@ save_pinned_dir(void)
 	snprintf(pin_file, config_dir_len + 7, "%s/.pin", config_dir);
 
 	int fd = 0;
-	FILE *fp = open_fstream_w(pin_file, &fd);
+	FILE *fp = open_fwrite(pin_file, &fd);
 	if (!fp) {
 		xerror(_("%s: Error storing pinned directory: %s\n"),
 			PROGRAM_NAME, strerror(errno));
@@ -2340,7 +2340,7 @@ quick_help(char *topic)
 	}
 
 	FILE *fp;
-	fp = open_fstream_w(tmp_file, &fd);
+	fp = open_fwrite(tmp_file, &fd);
 	if (!fp) {
 		xerror("%s: fopen: %s: %s\n", PROGRAM_NAME, tmp_file, strerror(errno));
 		free(_pager);

@@ -407,7 +407,7 @@ init_history(void)
 	} else {
 	/* If the history file doesn't exist, create it */
 		int fd = 0;
-		FILE *hist_fp = open_fstream_w(hist_file, &fd);
+		FILE *hist_fp = open_fwrite(hist_file, &fd);
 		if (!hist_fp) {
 			_err('w', PRINT_PROMPT, "%s: fopen: '%s': %s\n",
 			    PROGRAM_NAME, hist_file, strerror(errno));
@@ -547,7 +547,7 @@ static int
 check_etc_shells(const char *file, int *_errno)
 {
 	int fd;
-	FILE *fp = open_fstream_r("/etc/shells", &fd);
+	FILE *fp = open_fread("/etc/shells", &fd);
 	if (!fp) {
 		*_errno = errno;
 		return EXIT_FAILURE;
@@ -847,7 +847,7 @@ load_jumpdb(void)
 	snprintf(jump_file, config_dir_len + 12, "%s/jump.clifm", config_dir);
 
 	int fd;
-	FILE *fp = open_fstream_r(jump_file, &fd);
+	FILE *fp = open_fread(jump_file, &fd);
 	if (!fp) {
 		free(jump_file);
 		return;
@@ -999,7 +999,7 @@ load_bookmarks(void)
 		return EXIT_FAILURE;
 
 	int fd;
-	FILE *fp = open_fstream_r(bm_file, &fd);
+	FILE *fp = open_fread(bm_file, &fd);
 	if (!fp)
 		return EXIT_FAILURE;
 
@@ -1143,7 +1143,7 @@ load_actions(void)
 
 	/* Open the actions file */
 	int fd;
-	FILE *fp = open_fstream_r(actions_file, &fd);
+	FILE *fp = open_fread(actions_file, &fd);
 	if (!fp)
 		return EXIT_FAILURE;
 
@@ -1197,7 +1197,7 @@ load_remotes(void)
 		return EXIT_FAILURE;
 
 	int fd;
-	FILE *fp = open_fstream_r(remotes_file, &fd);
+	FILE *fp = open_fread(remotes_file, &fd);
 	if (!fp) {
 		xerror("%s: %s\n", remotes_file, strerror(errno));
 		return EXIT_FAILURE;
@@ -1385,7 +1385,7 @@ load_prompts(void)
 		return EXIT_FAILURE;
 
 	int fd;
-	FILE *fp = open_fstream_r(prompts_file, &fd);
+	FILE *fp = open_fread(prompts_file, &fd);
 	if (!fp) {
 		xerror("%s: %s\n", prompts_file, strerror(errno));
 		return EXIT_FAILURE;
@@ -1653,7 +1653,7 @@ get_sel_files(void)
 
 	/* Open the tmp sel file and load its contents into the sel array */
 	int fd;
-	FILE *fp = open_fstream_r(sel_file, &fd);
+	FILE *fp = open_fread(sel_file, &fd);
 	/*  sel_elements = xcalloc(1, sizeof(char *)); */
 	if (!fp)
 		return EXIT_FAILURE;
@@ -1886,7 +1886,7 @@ get_last_path(void)
 	snprintf(last_file, config_dir_len + 7, "%s/.last", config_dir);
 
 	int fd;
-	FILE *fp = open_fstream_r(last_file, &fd);
+	FILE *fp = open_fread(last_file, &fd);
 	if (!fp) {
 		free(last_file);
 		return EXIT_FAILURE;
@@ -1925,7 +1925,7 @@ load_pinned_dir(void)
 	snprintf(pin_file, config_dir_len + 6, "%s/.pin", config_dir);
 
 	int fd;
-	FILE *fp = open_fstream_r(pin_file, &fd);
+	FILE *fp = open_fread(pin_file, &fd);
 	if (!fp) {
 		free(pin_file);
 		return EXIT_FAILURE;
@@ -2173,7 +2173,7 @@ get_aliases(void)
 		return;
 
 	int fd;
-	FILE *fp = open_fstream_r(config_file, &fd);
+	FILE *fp = open_fread(config_file, &fd);
 	if (!fp) {
 		_err('e', PRINT_PROMPT, "%s: alias: '%s': %s\n",
 		    PROGRAM_NAME, config_file, strerror(errno));
@@ -2232,7 +2232,7 @@ load_dirhist(void)
 	truncate_file(dirhist_file, conf.max_dirhist, 1);
 
 	int fd;
-	FILE *fp = open_fstream_r(dirhist_file, &fd);
+	FILE *fp = open_fread(dirhist_file, &fd);
 	if (!fp)
 		return EXIT_FAILURE;
 
@@ -2284,7 +2284,7 @@ get_prompt_cmds(void)
 		return;
 
 	int fd;
-	FILE *fp = open_fstream_r(config_file, &fd);
+	FILE *fp = open_fread(config_file, &fd);
 	if (!fp) {
 		_err('e', PRINT_PROMPT, "%s: prompt: '%s': %s\n",
 		    PROGRAM_NAME, config_file, strerror(errno));

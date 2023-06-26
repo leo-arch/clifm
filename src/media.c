@@ -333,7 +333,7 @@ mount_dev(const int n)
 	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
 	close(stdout_bk);
 
-	FILE *fp = open_fstream_r(file, &fd);
+	FILE *fp = open_fread(file, &fd);
 	if (!fp) {
 		unlink(file);
 		return EXIT_FAILURE;

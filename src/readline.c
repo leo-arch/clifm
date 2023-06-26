@@ -264,7 +264,7 @@ get_shell_cmd_opts(char *cmd)
 	}
 
 	int fd;
-	FILE *fp = open_fstream_r(p, &fd);
+	FILE *fp = open_fread(p, &fd);
 	if (!fp)
 		return EXIT_FAILURE;
 
@@ -4316,7 +4316,7 @@ set_rl_init_file(void)
 	 * readline refuses to colorize history lines */
 	if (stat(rl_file, &a) == -1) {
 		int fd;
-		FILE *fp = open_fstream_w(rl_file, &fd);
+		FILE *fp = open_fwrite(rl_file, &fd);
 		if (!fp) {
 			_err('w', PRINT_PROMPT, "%s: fopen: %s: %s\n", PROGRAM_NAME,
 				rl_file, strerror(errno));

@@ -1062,7 +1062,7 @@ static size_t
 store_completions(char **matches)
 {
 	int fd = 0;
-	FILE *fp = open_fstream_w(finder_in_file, &fd);
+	FILE *fp = open_fwrite(finder_in_file, &fd);
 	if (!fp) {
 		_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
 			finder_in_file, strerror(errno));

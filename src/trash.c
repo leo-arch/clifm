@@ -441,7 +441,7 @@ trash_file(const char *suffix, const struct tm *tm, char *file)
 	snprintf(info_file, len, "%s/%s.trashinfo", trash_info_dir, file_suffix);
 
 	int fd = 0;
-	FILE *info_fp = open_fstream_w(info_file, &fd);
+	FILE *info_fp = open_fwrite(info_file, &fd);
 	if (!info_fp) {
 		xerror("trash: %s: %s\n", info_file, strerror(errno));
 		return del_trash_file_and_exit(&file_suffix, &info_file);

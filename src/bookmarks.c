@@ -690,7 +690,7 @@ del_bookmarks(char **args)
 	free(rstr);
 
 	int fd = 0;
-	FILE *fp = open_fstream_r(bm_file, &fd);
+	FILE *fp = open_fread(bm_file, &fd);
 	if (!fp) {
 		xerror("%s: %s\nbookmarks: Error reading the bookmarks file\n",
 			bm_file, strerror(errno));
@@ -698,7 +698,7 @@ del_bookmarks(char **args)
 	}
 
 	int tmp_fd = 0;
-	FILE *tmp_fp = open_fstream_w(tmp_file, &tmp_fd);
+	FILE *tmp_fp = open_fwrite(tmp_file, &tmp_fd);
 	if (!tmp_fp) {
 		xerror("%s: %s\nbookmarks: Error creating temporary file\n",
 			tmp_file, strerror(errno));

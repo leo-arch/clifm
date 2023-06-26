@@ -2,7 +2,7 @@
 
 /*
  * This file is part of CliFM
- * 
+ *
  * Copyright (C) 2016-2023, L. Abramovich <leo.clifm@outlook.com>
  * All rights reserved.
 
@@ -455,7 +455,7 @@ check_iso(char *file)
 	free(rand_ext);
 
 	int fd;
-	FILE *fp = open_fstream_w(iso_tmp_file, &fd);
+	FILE *fp = open_fwrite(iso_tmp_file, &fd);
 	if (!fp) {
 		xerror("archiver: %s: %s\n", iso_tmp_file, strerror(errno));
 		return (-1);
@@ -502,7 +502,7 @@ check_iso(char *file)
 		return (-1);
 
 	if (access(iso_tmp_file, F_OK) == 0) {
-		fp = open_fstream_r(iso_tmp_file, &fd);
+		fp = open_fread(iso_tmp_file, &fd);
 		if (fp) {
 			char line[255] = "";
 			if (fgets(line, (int)sizeof(line), fp) == NULL) {
@@ -579,7 +579,7 @@ is_compressed(char *file, const int test_iso)
 	free(rand_ext);
 
 	int fd;
-	FILE *fp = open_fstream_w(archiver_tmp_file, &fd);
+	FILE *fp = open_fwrite(archiver_tmp_file, &fd);
 	if (!fp) {
 		xerror("archiver: %s: %s\n", archiver_tmp_file, strerror(errno));
 		return (-1);
@@ -626,7 +626,7 @@ is_compressed(char *file, const int test_iso)
 		return (-1);
 
 	if (access(archiver_tmp_file, F_OK) == 0) {
-		fp = open_fstream_r(archiver_tmp_file, &fd);
+		fp = open_fread(archiver_tmp_file, &fd);
 		if (fp) {
 			char line[255];
 			if (fgets(line, (int)sizeof(line), fp) == NULL) {

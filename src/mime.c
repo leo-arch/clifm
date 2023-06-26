@@ -376,7 +376,7 @@ get_mime(char *file)
 		unlink(mime_tmp_file);
 
 	int fd = 0;
-	FILE *file_fp = open_fstream_w(mime_tmp_file, &fd);
+	FILE *file_fp = open_fwrite(mime_tmp_file, &fd);
 	if (!file_fp) {
 		xerror("%s: fopen: %s: %s\n", err_name, mime_tmp_file, strerror(errno));
 		return (char *)NULL;
@@ -486,7 +486,7 @@ mime_import(char *file)
 
 	/* Open the new mimelist file */
 	int fd = 0;
-	FILE *mime_fp = open_fstream_w(file, &fd);
+	FILE *mime_fp = open_fwrite(file, &fd);
 	if (!mime_fp) {
 		xerror("%s: fopen: %s: %s\n", err_name, file, strerror(errno));
 		return (-1);

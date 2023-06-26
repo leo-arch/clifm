@@ -930,8 +930,8 @@ check_for_alias(char **args)
 	return (char **)NULL;
 }
 
-/* Keep only the last MAX records in FILE
- * If CHECK_DUPS is 1, skip consecutive equal entries */
+/* Keep only the last MAX records in FILE.
+ * If CHECK_DUPS is 1, skip consecutive equal entries. */
 void
 truncate_file(char *file, const int max, const int check_dups)
 {
@@ -944,7 +944,7 @@ truncate_file(char *file, const int max, const int check_dups)
 
 	int fd;
 	if (stat(file, &attr) == -1) {
-		fp = open_fstream_w(file, &fd);
+		fp = open_fwrite(file, &fd);
 		if (!fp) {
 			_err(0, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, file,
 				strerror(errno));
@@ -956,7 +956,7 @@ truncate_file(char *file, const int max, const int check_dups)
 	}
 
 	/* Once we know the files exists, keep only MAX entries. */
-	fp = open_fstream_r(file, &fd);
+	fp = open_fread(file, &fd);
 	if (!fp) {
 		_err(0, NOPRINT_PROMPT, "%s: log: %s: %s\n", PROGRAM_NAME,
 		    file, strerror(errno));

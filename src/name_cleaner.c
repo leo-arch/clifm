@@ -397,7 +397,7 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 #endif
 	close(fd);
 
-	fp = open_fstream_r(f, &fd);
+	fp = open_fread(f, &fd);
 	if (!fp) {
 		_err('e', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
 		return (struct bleach_t *)NULL;
@@ -420,7 +420,7 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 	}
 
 	fclose(fp);
-	fp = open_fstream_r(f, &fd);
+	fp = open_fread(f, &fd);
 	if (!fp) {
 		_err('e', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
 		return (struct bleach_t *)NULL;
