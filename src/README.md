@@ -188,7 +188,9 @@ This is the basic structure of **clifm**: generally speaking, it is just a shell
 | --- | --- | --- | --- |
 | Initialization | `main.c` | `main` | See also `init.c` and `config.c` |
 | Default settings | `settings.h` | | See also `messages.h` and the icons header files |
+| Command line arguments | `args.c` | `parse_cmdline_args` | |
 | Add a new command | `exec.c` | `exec_cmd` | Most of the time you want your command to be available for TAB completion and suggestions. See below. |
+| External commands execution | `exec.c` | `launch_execv` and `launch_execl` | |
 | Add a new prompt feature | `prompt.c` | `prompt` | |
 | Tweak how we open files | `mime.c` | `mime_open` | |
 | Tweak how we bookmark files | `bookmarks.c` | `bookmarks_function` | |
