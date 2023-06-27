@@ -1321,14 +1321,15 @@ print_timestamps(char *filename, const struct stat *attr)
 		cbdate = btf;
 	}
 #  else /* HAVE_ST_BIRTHTIME || __BSD_VISIBLE */
+	time_t bt = attr->st_birthtime;
 #   if defined(__NetBSD__)
-	xgen_time_str(creation_time, sizeof(creation_time), attr->st_birthtime,
-		(size_t)st_birthtimespec.tv_nsec);
+	xgen_time_str(creation_time, sizeof(creation_time), bt,
+		(size_t)attr->st_birthtimespec.tv_nsec);
 #   elif defined(__FreeBSD__) || defined(__CYGWIN__)
-	xgen_time_str(creation_time, sizeof(creation_time), attr->st_birthtime,
-		(size_t)st_birthtim.tv_nsec);
+	xgen_time_str(creation_time, sizeof(creation_time), bt,
+		(size_t)attr->st_birthtim.tv_nsec);
 #   else
-	gen_time_str(creation_time, sizeof(creation_time), attr->st_birthtime);
+	gen_time_str(creation_time, sizeof(creation_time), bt);
 #   endif /* __NetBSD__ */
 
 	if (conf.colorize == 1 && !*dd_c) {
