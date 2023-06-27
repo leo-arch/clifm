@@ -484,6 +484,9 @@ extern int watch;
 # define DT_REG     8
 # define DT_LNK     10
 # define DT_SOCK    12
+# ifdef __sun
+#  define DT_DOOR   13
+# endif /* __sun */
 #endif /* __HAIKU__ || __sun */
 
 #define DT_NONE     14
@@ -1126,6 +1129,9 @@ struct stats_t {
 	size_t extended;
 	size_t unknown;
 	size_t unstat; /* Non-statable file */
+#ifdef __sun
+	size_t door;
+#endif /* __sun */
 };
 
 extern struct stats_t stats;
@@ -1510,6 +1516,9 @@ extern char
 	nd_c[MAX_COLOR], /* No read directory */
 	nf_c[MAX_COLOR], /* No read file */
 	no_c[MAX_COLOR], /* Unknown */
+#ifdef __sun
+	oo_c[MAX_COLOR], /* Solaris door */
+#endif /* __sun */
 	or_c[MAX_COLOR], /* Broken symlink */
 	ow_c[MAX_COLOR], /* Other writable */
 	pi_c[MAX_COLOR], /* FIFO, pipe */

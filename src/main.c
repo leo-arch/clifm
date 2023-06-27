@@ -320,6 +320,9 @@ char
 	nd_c[MAX_COLOR], /* No read directory */
 	nf_c[MAX_COLOR], /* No read file */
 	no_c[MAX_COLOR], /* Unknown */
+#ifdef __sun
+	oo_c[MAX_COLOR], /* Solaris door */
+#endif /* __sun */
 	or_c[MAX_COLOR], /* Broken symlink */
 	ow_c[MAX_COLOR], /* Other writable */
 	pi_c[MAX_COLOR], /* FIFO, pipe */

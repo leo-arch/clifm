@@ -569,6 +569,9 @@ get_longest_filename(const int n, const int pad)
 					break;
 				case DT_BLK:  /* fallthrough */
 				case DT_CHR:  /* fallthrough */
+#ifdef __sun
+				case DT_DOOR: /* fallthrough */
+#endif /* __sun */
 				case DT_LNK:  /* fallthrough */
 				case DT_SOCK: /* fallthrough */
 				case DT_FIFO: /* fallthrough */
@@ -589,7 +592,7 @@ get_longest_filename(const int n, const int pad)
 #ifndef _NO_ICONS
 	if (conf.icons == 1 && conf.long_view == 0 && conf.columned == 1)
 		longest += 3;
-#endif
+#endif /* !_NO_ICONS */
 
 	/* longest_fc stores the amount of digits taken by the files counter of
 	 * the longest file name, provided it is a directory
@@ -1052,6 +1055,9 @@ print_entry_nocolor(int *ind_char, const int i, const int pad,
 
 		case DT_BLK: putchar(BLK_CHR); break;
 		case DT_CHR: putchar(CHR_CHR); break;
+#ifdef __sun
+		case DT_DOOR: putchar(DOOR_CHR); break;
+#endif /* __sun */
 		case DT_FIFO: putchar(FIFO_CHR); break;
 		case DT_SOCK: putchar(SOCK_CHR); break;
 		case DT_UNKNOWN: putchar(UNKNOWN_CHR); break;
@@ -1215,6 +1221,9 @@ print_entry_nocolor_light(int *ind_char, const int i, const int pad,
 
 		case DT_BLK: putchar(BLK_CHR); break;
 		case DT_CHR: putchar(CHR_CHR); break;
+#ifdef __sun
+		case DT_DOOR: putchar(DOOR_CHR); break;
+#endif /* __sun */
 		case DT_FIFO: putchar(FIFO_CHR); break;
 		case DT_LNK: putchar(LINK_CHR); break;
 		case DT_SOCK: putchar(SOCK_CHR); break;
@@ -1238,7 +1247,7 @@ pad_filename(const int ind_char, const int i, const int pad,
 		+ (ind_char == 1 ? 1 : 0);
 #else
 	cur_len = pad + 1 + (int)file_info[i].len + (*ind_char ? 1 : 0);
-#endif
+#endif /* !_NO_ICONS */
 
 	if (file_info[i].dir == 1 && conf.classify == 1) {
 		cur_len++;
@@ -1268,7 +1277,7 @@ pad_filename_light(const int ind_char, const int i, const int pad,
 		+ (int)file_info[i].len + (ind_char == 1 ? 1 : 0);
 #else
 	cur_len = pad + 1 + (int)file_info[i].len + (*ind_char ? 1 : 0);
-#endif
+#endif /* !_NO_ICONS */
 
 	if (conf.classify == 1) {
 		if (file_info[i].dir == 1)
@@ -1644,6 +1653,9 @@ exclude_file_type_light(const unsigned char type)
 	case 'c': if (type == DT_CHR) match = 1; break;
 	case 'b': if (type == DT_BLK) match = 1; break;
 	case 'p': if (type == DT_FIFO) match = 1; break;
+#ifdef __sun
+	case 'D': if (type == DT_DOOR) match = 1; break;
+#endif /* __sun */
 	default: return EXIT_FAILURE;
 	}
 
@@ -1668,6 +1680,9 @@ exclude_file_type(const mode_t mode, const nlink_t links)
 	switch (*(filter.str + 1)) {
 	case 'b': if (S_ISBLK(mode)) match = 1; break;
 	case 'd': if (S_ISDIR(mode)) match = 1; break;
+#ifdef __sun
+	case 'D': if (S_ISDOOR(mode)) match = 1; break;
+#endif /* __sun */
 	case 'c': if (S_ISCHR(mode)) match = 1; break;
 	case 'f': if (S_ISREG(mode)) match = 1; break;
 	case 'l': if (S_ISLNK(mode)) match = 1; break;
@@ -1701,7 +1716,7 @@ list_dir_light(void)
 {
 #ifdef _LIST_SPEED
 	clock_t start = clock();
-#endif
+#endif /* _LIST_SPEED */
 
 	int virtual_dir = 0;
 	if (stdin_tmp_dir && strcmp(stdin_tmp_dir, workspaces[cur_ws].path) == 0)
@@ -1775,7 +1790,7 @@ list_dir_light(void)
 		&& exclude_file_type_light((unsigned char)get_dt(attr.st_mode)) == EXIT_SUCCESS) {
 #else
 		&& exclude_file_type_light(ent->d_type) == EXIT_SUCCESS) {
-#endif
+#endif /* !_DIRENT_HAVE_D_TYPE */
 			excluded_files++;
 			continue;
 		}
@@ -1832,7 +1847,7 @@ list_dir_light(void)
 #else
 		file_info[n].icon = (char *)NULL;
 		file_info[n].icon_color = df_c;
-#endif
+#endif /* !_NO_ICONS */
 		switch (file_info[n].type) {
 		case DT_DIR:
 #ifndef _NO_ICONS
@@ -1843,7 +1858,7 @@ list_dir_light(void)
 				if (*dir_ico_c)
 					file_info[n].icon_color = dir_ico_c;
 			}
-#endif
+#endif /* !_NO_ICONS */
 
 			stats.dir++;
 			if (conf.files_counter == 1)
@@ -1860,7 +1875,7 @@ list_dir_light(void)
 #ifndef _NO_ICONS
 				file_info[n].icon = ICON_LOCK;
 				file_info[n].icon_color = YELLOW;
-#endif
+#endif /* !_NO_ICONS */
 			}
 
 			break;
@@ -1868,7 +1883,7 @@ list_dir_light(void)
 		case DT_LNK:
 #ifndef _NO_ICONS
 			file_info[n].icon = ICON_LINK;
-#endif
+#endif /* !_NO_ICONS */
 			file_info[n].color = ln_c;
 			stats.link++;
 			break;
@@ -1878,6 +1893,9 @@ list_dir_light(void)
 		case DT_FIFO: file_info[n].color = pi_c; stats.fifo++; break;
 		case DT_BLK: file_info[n].color = bd_c; stats.block_dev++; break;
 		case DT_CHR: file_info[n].color = cd_c; stats.char_dev++; break;
+#ifdef __sun
+		case DT_DOOR: file_info[n].color = oo_c; stats.door++; break;
+#endif /* __sun */
 		case DT_UNKNOWN: file_info[n].color = uf_c; stats.unknown++; break;
 		default: file_info[n].color = df_c; break;
 		}
@@ -1885,7 +1903,7 @@ list_dir_light(void)
 #ifndef _NO_ICONS
 		if (xargs.icons_use_file_color == 1 && conf.icons == 1)
 			file_info[n].icon_color = file_info[n].color;
-#endif
+#endif /* !_NO_ICONS */
 
 		if (conf.long_view == 1) {
 			struct stat _attr;
@@ -1971,7 +1989,7 @@ END:
 #ifdef _LIST_SPEED
 	clock_t end = clock();
 	printf("list_dir time: %f\n", (double)(end - start) / CLOCKS_PER_SEC);
-#endif
+#endif /* _LIST_SPEED */
 
 	return exit_code;
 }
@@ -2063,6 +2081,9 @@ reset_stats(void)
 	stats.extended = 0;
 	stats.unknown = 0;
 	stats.unstat = 0;
+#ifdef __sun
+	stats.door = 0;
+#endif /* __sun */
 }
 
 /* Get the color of a link target NAME, whose file attributes are ATTR,
@@ -2075,6 +2096,9 @@ get_link_target_color(const char *name, const struct stat *attr, const size_t i)
 	case S_IFIFO:  file_info[i].color = pi_c; break;
 	case S_IFBLK:  file_info[i].color = bd_c; break;
 	case S_IFCHR:  file_info[i].color = cd_c; break;
+#ifdef __sun
+	case S_IFDOOR: file_info[i].color = oo_c; break;
+#endif /* __sun */
 	case S_IFREG: {
 		int ext = 0;
 		char *color = get_regfile_color(name, attr, &ext);
@@ -2102,7 +2126,7 @@ list_dir(void)
 {
 #ifdef _LIST_SPEED
 	clock_t start = clock();
-#endif
+#endif /* _LIST_SPEED */
 
 	if (conf.clear_screen == 1) {
 		CLEAR; fflush(stdout);
@@ -2273,6 +2297,9 @@ list_dir(void)
 			case S_IFBLK: file_info[n].type = DT_BLK; stats.block_dev++; break;
 			case S_IFCHR: file_info[n].type = DT_CHR; stats.char_dev++; break;
 			case S_IFDIR: file_info[n].type = DT_DIR; stats.dir++; break;
+#ifdef __sun
+			case S_IFDOOR: file_info[n].type = DT_DOOR; stats.door++; break;
+#endif /* __sun */
 			case S_IFIFO: file_info[n].type = DT_FIFO; stats.fifo++; break;
 			case S_IFLNK: file_info[n].type = DT_LNK; stats.link++; break;
 			case S_IFREG: file_info[n].type = DT_REG; stats.reg++; break;
@@ -2384,7 +2411,7 @@ list_dir(void)
 		case DT_LNK: {
 #ifndef _NO_ICONS
 			file_info[n].icon = ICON_LINK;
-#endif
+#endif /* !_NO_ICONS */
 			if (follow_symlinks == 0) {
 				file_info[n].color = ln_c;
 				break;
@@ -2430,14 +2457,14 @@ list_dir(void)
 		case DT_REG: {
 #ifdef _LINUX_CAP
 			cap_t cap;
-#endif
+#endif /* !_LINUX_CAP */
 			/* Do not perform the access check if the user is root */
 			if (user.uid != 0 && stat_ok == 1
 			&& check_file_access(attr.st_mode, attr.st_uid, attr.st_gid) == 0) {
 #ifndef _NO_ICONS
 				file_info[n].icon = ICON_LOCK;
 				file_info[n].icon_color = YELLOW;
-#endif
+#endif /* !_NO_ICONS */
 				file_info[n].color = nf_c;
 			} else if (stat_ok == 1 && (attr.st_mode & 04000)) { /* SUID */
 				file_info[n].exec = 1;
@@ -2445,14 +2472,14 @@ list_dir(void)
 				file_info[n].color = su_c;
 #ifndef _NO_ICONS
 				file_info[n].icon = ICON_EXEC;
-#endif
+#endif /* !_NO_ICONS */
 			} else if (stat_ok == 1 && (attr.st_mode & 02000)) { /* SGID */
 				file_info[n].exec = 1;
 				stats.exec++; stats.sgid++;
 				file_info[n].color = sg_c;
 #ifndef _NO_ICONS
 				file_info[n].icon = ICON_EXEC;
-#endif
+#endif /* !_NO_ICONS */
 			}
 
 #ifdef _LINUX_CAP
@@ -2461,7 +2488,7 @@ list_dir(void)
 				stats.caps++;
 				cap_free(cap);
 			}
-#endif
+#endif /* !_LINUX_CAP */
 
 			else if (stat_ok == 1
 			&& ((attr.st_mode & 00100) // Exec
@@ -2473,7 +2500,7 @@ list_dir(void)
 				stats.exec++;
 #ifndef _NO_ICONS
 				file_info[n].icon = ICON_EXEC;
-#endif
+#endif /* !_NO_ICONS */
 				if (file_info[n].size == 0)
 					file_info[n].color = ee_c;
 				else
@@ -2496,7 +2523,7 @@ list_dir(void)
 			int name_icon_found = 0;
 			if (conf.icons == 1)
 				name_icon_found = get_name_icon(file_info[n].name, (int)n);
-#endif
+#endif /* !_NO_ICONS */
 
 			/* Check file extension (only if accessible, has no capabilities
 			 * and is not executable) */
@@ -2512,7 +2539,7 @@ list_dir(void)
 #ifndef _NO_ICONS
 			if (conf.icons == 1 && name_icon_found == 0)
 				get_ext_icon(ext, (int)n);
-#endif
+#endif /* !_NO_ICONS */
 			char *extcolor = get_ext_color(ext);
 			if (!extcolor)
 				break;
@@ -2529,6 +2556,9 @@ list_dir(void)
 		case DT_FIFO: file_info[n].color = pi_c; break;
 		case DT_BLK: file_info[n].color = bd_c; break;
 		case DT_CHR: file_info[n].color = cd_c; break;
+#ifdef __sun
+		case DT_DOOR: file_info[n].color = oo_c; break;
+#endif /* __sun */
 		case DT_UNKNOWN: file_info[n].color = uf_c; break;
 		default: file_info[n].color = df_c; break;
 		}
@@ -2536,7 +2566,7 @@ list_dir(void)
 #ifndef _NO_ICONS
 		if (xargs.icons_use_file_color == 1 && conf.icons == 1)
 			file_info[n].icon_color = file_info[n].color;
-#endif
+#endif /* !_NO_ICONS */
 		if (conf.long_view == 1 && stat_ok == 1)
 			set_long_attribs((int)n, &attr);
 
@@ -2635,7 +2665,7 @@ END:
 #ifdef _LIST_SPEED
 	clock_t end = clock();
 	printf("list_dir time: %f\n", (double)(end - start) / CLOCKS_PER_SEC);
-#endif
+#endif /* _LIST_SPEED */
 
 	return exit_code;
 }

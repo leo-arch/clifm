@@ -27,7 +27,7 @@
 #include <stdio.h>
 #ifdef __linux__
 # include <sys/capability.h>
-#endif
+#endif /* __linux__ */
 #include <dirent.h>
 #include <errno.h>
 #include <string.h>
@@ -47,7 +47,7 @@
 /* qsort(3) is used only by get_colorschemes(), which is not included
  * if CLIFM_SUCKLESS is defined */
 # include "sort.h" /* compare_string() (used by qsort(3)) */
-#endif
+#endif /* !CLIFM_SUCKLESS */
 
 #define RL_PRINTABLE    1
 #define RL_NO_PRINTABLE 0 /* Add non-printing flags (\001 and \002)*/
@@ -845,6 +845,9 @@ reset_filetype_colors(void)
 	*ow_c = '\0';
 	*no_c = '\0';
 	*uf_c = '\0';
+#ifdef __sun
+	*oo_c = '\0';
+#endif /* __sun */
 }
 
 void
@@ -1185,6 +1188,10 @@ set_filetype_colors(char **colors, const size_t words)
 				set_color(colors[i] + 3, or_c, RL_PRINTABLE);
 			else if (colors[i][1] == 'w')
 				set_color(colors[i] + 3, ow_c, RL_PRINTABLE);
+#ifdef __sun
+			else if (colors[i][1] == 'o') /* oo = Door */
+				set_color(colors[i] + 3, oo_c, RL_PRINTABLE);
+#endif /* __sun */
 		}
 
 		else if (*colors[i] == 'p' && colors[i][1] == 'i')
@@ -1678,9 +1685,13 @@ set_default_colors(void)
 	if (!*no_c) xstrsncpy(no_c, DEF_NO_C, sizeof(no_c) - 1);
 	if (!*uf_c) xstrsncpy(uf_c, DEF_UF_C, sizeof(uf_c) - 1);
 	if (!*mh_c) xstrsncpy(mh_c, DEF_MH_C, sizeof(mh_c) - 1);
+#ifdef __sun
+	if (!*oo_c) xstrsncpy(oo_c, DEF_OO_C, sizeof(oo_c) - 1);
+#endif /* __sun */
+
 #ifndef _NO_ICONS
 	if (!*dir_ico_c) xstrsncpy(dir_ico_c, DEF_DIR_ICO_C, sizeof(dir_ico_c) - 1);
-#endif
+#endif /* !_NO_ICONS */
 
 	if (!*dr_c) xstrsncpy(dr_c, term_caps.color >= 256 ? DEF_DR_C256 : DEF_DR_C, sizeof(dr_c) - 1);
 	if (!*dw_c) xstrsncpy(dw_c, term_caps.color >= 256 ? DEF_DW_C256 : DEF_DW_C, sizeof(dw_c) - 1);
@@ -2240,7 +2251,7 @@ disable_bold(void)
 
 #ifndef _NO_ICONS
 	remove_bold_attr(dir_ico_c);
-#endif
+#endif /* !_NO_ICONS */
 
 	/* Syntax highlighting */
 	remove_bold_attr(hb_c);
@@ -2305,7 +2316,7 @@ set_colors(const char *colorscheme, const int check_env)
 
 #ifndef _NO_ICONS
 	*dir_ico_c = '\0';
-#endif
+#endif /* !_NO_ICONS */
 
 	int ret = EXIT_SUCCESS;
 	if (colorscheme && *colorscheme && color_schemes)
@@ -2352,7 +2363,7 @@ set_colors(const char *colorscheme, const int check_env)
 
 #ifndef CLIFM_SUCKLESS
 	clear_defs();
-#endif
+#endif /* CLIFM_SUCKLESS */
 
 	/* If some color is unset or is a wrong color code, set the default value */
 	set_default_colors();
@@ -2482,6 +2493,9 @@ colors_list(char *ent, const int eln, const int pad, const int new_line)
 		case S_IFIFO: color = pi_c; break;
 		case S_IFBLK: color = bd_c; break;
 		case S_IFCHR: color = cd_c; break;
+#ifdef __sun
+		case S_IFDOOR: color = oo_c; break;
+#endif /* __sun */
 		case S_IFSOCK: color = so_c; break;
 		default: color = no_c; break;
 		}

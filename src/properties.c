@@ -65,6 +65,7 @@
 /* Required by the pc command */
 #include "readline.h"
 
+/* Do we have files birth time? */
 #if !defined(_BE_POSIX) && !defined(__DragonFly__) && !defined(__OpenBSD__) \
 && (defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE) || defined(_STATX))
 # define HAVE_BTIME
@@ -1120,6 +1121,9 @@ get_file_type_and_color(const char *filename, const struct stat *attr,
 		break;
 
 	case S_IFBLK:  *file_type = 'b'; color = *ctype = bd_c; break;
+#ifdef __sun
+	case S_IFDOOR: *file_type = 'D'; color = *ctype = oo_c; break;
+#endif /* __sun */
 	case S_IFCHR:  *file_type = 'c'; color = *ctype = cd_c; break;
 	case S_IFIFO:  *file_type = 'p'; color = *ctype = pi_c; break;
 	case S_IFSOCK: *file_type = 's'; color = *ctype = so_c; break;
@@ -1888,13 +1892,16 @@ static void
 set_file_type_and_color(const mode_t mode, char *type, char **color)
 {
 	switch (mode & S_IFMT) {
-	case S_IFREG:  *type = '.'; break;
-	case S_IFDIR:  *type = 'd'; *color = di_c; break;
-	case S_IFLNK:  *type = 'l'; *color = ln_c; break;
-	case S_IFSOCK: *type = 's'; *color = so_c; break;
 	case S_IFBLK:  *type = 'b'; *color = bd_c; break;
 	case S_IFCHR:  *type = 'c'; *color = cd_c; break;
+	case S_IFDIR:  *type = 'd'; *color = di_c; break;
+#ifdef __sun
+	case S_IFDOOR: *type = 'D'; *color = oo_c; break;
+#endif /* __sun */
 	case S_IFIFO:  *type = 'p'; *color = pi_c; break;
+	case S_IFLNK:  *type = 'l'; *color = ln_c; break;
+	case S_IFREG:  *type = '.'; break;
+	case S_IFSOCK: *type = 's'; *color = so_c; break;
 	default:       *type = '?'; break;
 	}
 

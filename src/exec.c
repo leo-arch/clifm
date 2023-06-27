@@ -1728,6 +1728,10 @@ Unstatable files:            %zu\n\
 	stats.extended, stats.other_writable, stats.sticky, stats.unknown,
 	stats.unstat);
 
+#ifdef __sun
+	printf("Doors:                 %zu\n", stats.door);
+#endif /* __sun */
+
 	return EXIT_SUCCESS;
 }
 

@@ -91,6 +91,9 @@ xf=1;31:xs=0;32:"
 #define DEF_ND_C  "\x1b[1;31m" /* Unaccessible dir */
 #define DEF_NF_C  "\x1b[2;31m" /* Unaccessible file */
 #define DEF_NO_C  "\x1b[0;31;47m" /* Unknown file type */
+#ifdef __sun
+#define DEF_OO_C  "\x1b[0;4;35m" /* Solaris door */
+#endif /* __sun */
 #define DEF_OR_C  "\x1b[2;4;36m" /* Orphaned/broken symlink */
 #define DEF_OW_C  "\x1b[34;42m" /* Other-writable */
 #define DEF_PI_C  "\x1b[0;35m" /* FIFO/pipe */
@@ -197,14 +200,17 @@ xf=1;31:xs=0;32:"
 
 /* Characters used to classify files when running colorless and classify
  * is enabled */
+#define CHR_CHR     '-'
+#define BLK_CHR     '+'
+#define BRK_LNK_CHR '!'
+#define DIR_CHR     '/'
+#ifdef __sun
+# define DOOR_CHR   '>'
+#endif /* __sun */
 #define EXEC_CHR    '*'
 #define FIFO_CHR    '|'
-#define DIR_CHR     '/'
 #define LINK_CHR    '@'
-#define BRK_LNK_CHR '!'
 #define SOCK_CHR    '='
-#define BLK_CHR     '+'
-#define CHR_CHR     '-'
 #define UNKNOWN_CHR '?'
 
 #define SELFILE_CHR  '*'
