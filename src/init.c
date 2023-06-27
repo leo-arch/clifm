@@ -330,20 +330,15 @@ int
 backup_argv(const int argc, char **argv)
 {
 	argc_bk = argc;
-	argv_bk = (char **)xnmalloc((size_t)argc + 1, sizeof(char *));
+	argv_bk = argv;
 
 	/* Let's store the executable base name, excluding the path.
 	 * Done to detect and disallow nested instances (see exec.c). */
 	char *n = strrchr(argv[0], '/');
-	if (n && *n && *(n + 1))
+	if (n && n[1])
 		bin_name = savestring(n + 1, strlen(n + 1));
 	else
 		bin_name = savestring(argv[0], strlen(argv[0]));
-
-	int i = argc;
-	while (--i >= 0)
-		argv_bk[i] = savestring(argv[i], strlen(argv[i]));
-	argv_bk[argc] = (char *)NULL;
 
 	return EXIT_SUCCESS;
 }
@@ -714,7 +709,7 @@ get_user_data(void)
 	}
 
 	/* Sometimes (FreeBSD for example) the home directory, as returned by the
-	 * passwd struct, is a symlink, in which case we want to resolve it
+	 * passwd struct, is a symlink, in which case we want to resolve it.
 	 * See https://lists.freebsd.org/pipermail/freebsd-arm/2016-July/014404.html */
 	char *r = realpath(homedir, NULL);
 	if (r) {

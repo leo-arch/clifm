@@ -1534,13 +1534,6 @@ free_stuff(void)
 		free(history);
 	}
 
-	if (argv_bk) {
-		i = argc_bk;
-		while (--i >= 0)
-			free(argv_bk[i]);
-		free(argv_bk);
-	}
-
 	if (dirhist_total_index) {
 		i = (int)dirhist_total_index;
 		while (--i >= 0)

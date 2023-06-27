@@ -44,17 +44,15 @@ char *get_cwd(char *, const size_t, const int);
 int  count_dir(const char *, const int);
 off_t dir_size(char *, const int, int *);
 char from_hex(char);
-//char *from_octal(char *s);
 char *gen_date_suffix(const struct tm);
 void gen_time_str(char *, const size_t, const time_t);
+void xgen_time_str(char *, const size_t, const time_t, const size_t);
 char *get_cmd_path(const char *);
 int  get_rgb(char *, int *, int *, int *, int *);
 void clear_term_img(void);
 mode_t get_dt(const mode_t);
-/*int *get_hex_num(const char *str); */
 int  get_link_ref(const char *);
 char *get_size_unit(const off_t);
-//int  get_term_bgcolor(const int ifd, const int ofd);
 char *hex2rgb(char *);
 char *normalize_path(char *, const size_t);
 FILE *open_fread(char *, int *);

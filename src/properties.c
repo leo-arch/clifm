@@ -1251,9 +1251,30 @@ print_timestamps(char *filename, const struct stat *attr)
 	char access_time[MAX_TIME_STR];
 	char change_time[MAX_TIME_STR];
 
-	gen_time_str(mod_time, sizeof(mod_time), attr->st_mtime);
-	gen_time_str(access_time, sizeof(access_time), attr->st_atime);
-	gen_time_str(change_time, sizeof(change_time), attr->st_ctime);
+// NetBSD: st_mtimespec.tv_nsec / st_birthtimespec.tv_nsec
+// MacOS: st_mtimespec.tv_nsec (st_birthtimespec only for stat64(), not for regular stat())
+
+// OpenBSD/Termux: st_mtim.tv_nsec / (no birthtime)
+// FreeBSD: st_mtim.tv_nsec / st_birthtim.tv_nsec
+// Cygwin: st_mtim.tv_nsec / st_birthtim.tv_nsec
+// Haiku: st_mtim.tv_nsec
+// SunOS: st_mtim.tv_nsec (stat(1) has birthtime)
+
+#if defined(__NetBSD__) || defined(__APPLE__)
+	xgen_time_str(mod_time, sizeof(mod_time), attr->st_mtime,
+		(size_t)attr->st_mtimespec.tv_nsec);
+	xgen_time_str(access_time, sizeof(access_time), attr->st_atime,
+		(size_t)attr->st_atimespec.tv_nsec);
+	xgen_time_str(change_time, sizeof(change_time), attr->st_ctime,
+		(size_t)attr->st_ctimespec.tv_nsec);
+#else
+	xgen_time_str(mod_time, sizeof(mod_time), attr->st_mtime,
+		(size_t)attr->st_mtim.tv_nsec);
+	xgen_time_str(access_time, sizeof(access_time), attr->st_atime,
+		(size_t)attr->st_atim.tv_nsec);
+	xgen_time_str(change_time, sizeof(change_time), attr->st_ctime,
+		(size_t)attr->st_ctim.tv_nsec);
+#endif /* __NetBSD__ || __APPLE__ */
 
 	char *cadate = cdate;
 	char *cmdate = cdate;
@@ -1286,7 +1307,9 @@ print_timestamps(char *filename, const struct stat *attr)
 	struct statx attrx;
 	int ret = statx(AT_FDCWD, filename, AT_SYMLINK_NOFOLLOW, STATX_BTIME, &attrx);
 	if (ret == 0 && attrx.stx_mask & STATX_BTIME) {
-		gen_time_str(creation_time, sizeof(creation_time), attrx.stx_btime.tv_sec);
+		xgen_time_str(creation_time, sizeof(creation_time),
+			attrx.stx_btime.tv_sec, (size_t)attrx.stx_btime.tv_nsec);
+//		gen_time_str(creation_time, sizeof(creation_time), attrx.stx_btime.tv_sec);
 	} else {
 		/* Birthtime is not available */
 		*creation_time = '-';
@@ -1298,8 +1321,15 @@ print_timestamps(char *filename, const struct stat *attr)
 		cbdate = btf;
 	}
 #  else /* HAVE_ST_BIRTHTIME || __BSD_VISIBLE */
-	time_t bt = attr->st_birthtime;
-	gen_time_str(creation_time, sizeof(creation_time), bt);
+#   if defined(__NetBSD__)
+	xgen_time_str(creation_time, sizeof(creation_time), attr->st_birthtime,
+		(size_t)st_birthtimespec.tv_nsec);
+#   elif defined(__FreeBSD__) || defined(__CYGWIN__)
+	xgen_time_str(creation_time, sizeof(creation_time), attr->st_birthtime,
+		(size_t)st_birthtim.tv_nsec);
+#   else
+	gen_time_str(creation_time, sizeof(creation_time), attr->st_birthtime);
+#   endif /* __NetBSD__ */
 
 	if (conf.colorize == 1 && !*dd_c) {
 		get_color_age(bt, btf, sizeof(btf));
