@@ -46,7 +46,6 @@ off_t dir_size(char *, const int, int *);
 char from_hex(char);
 char *gen_date_suffix(const struct tm);
 void gen_time_str(char *, const size_t, const time_t);
-void xgen_time_str(char *, const size_t, const time_t, const size_t);
 char *get_cmd_path(const char *);
 int  get_rgb(char *, int *, int *, int *, int *);
 void clear_term_img(void);

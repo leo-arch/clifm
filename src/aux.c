@@ -77,25 +77,6 @@ hashme(const char *str, const int case_sensitive) {
 }
 #endif /* !_NO_ICONS */
 
-/* Write into BUF, whose size is SIZE, the timestamp TIM, with nanoseconds NSEC,
- * in human readable format. */
-void
-xgen_time_str(char *buf, const size_t size, const time_t tim, const size_t nsec)
-{
-	struct tm t;
-
-	if (tim >= 0 && localtime_r(&tim, &t)) {
-		*buf = '\0';
-		size_t len = strftime(buf, size, "%a %b %d %T", &t);
-		len += (size_t)snprintf(buf + len, size - len, ".%09zu ", nsec);
-		strftime(buf + len, size - len, "%Y %z", &t);
-		return;
-	}
-
-	*buf = '-';
-	buf[1] = '\0';
-}
-
 void
 gen_time_str(char *buf, const size_t size, const time_t _time)
 {

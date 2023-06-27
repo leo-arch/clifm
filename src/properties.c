@@ -65,6 +65,26 @@
 /* Required by the pc command */
 #include "readline.h"
 
+/* A few macros for nano-second precision.
+ * Used to print timestamps with the p/pp command. */
+#if defined(__NetBSD__) || defined(__APPLE__)
+# define ATIMNSEC st_atimespec.tv_nsec
+# define CTIMNSEC st_mtimespec.tv_nsec
+# define MTIMNSEC st_ctimespec.tv_nsec
+#else
+# define ATIMNSEC st_atim.tv_nsec
+# define CTIMNSEC st_ctim.tv_nsec
+# define MTIMNSEC st_mtim.tv_nsec
+#endif /* __NetBSD__ || __APPLE__ */
+
+#ifdef _STATX
+# define BTIMNSEC stx_btime.tv_nsec
+#elif defined(__NetBSD__) // __APPLE__ should be added here
+# define BTIMNSEC st_birthtimespec.tv_nsec
+#elif defined(__FreeBSD__) || defined(__CYGWIN__)
+# define BTIMNSEC st_birthtim.tv_nsec
+#endif /* _STATX */
+
 #ifndef major
 # define major(x) ((x >> 8) & 0x7F)
 #endif
@@ -1237,6 +1257,25 @@ print_file_details(char *filename, const struct stat *attr, const char file_type
 #endif /* _LINUX_XATTR */
 }
 
+/* Write into BUF, whose size is SIZE, the timestamp TIM, with nanoseconds NSEC,
+ * in human readable format. */
+static void
+xgen_time_str(char *buf, const size_t size, const time_t tim, const size_t nsec)
+{
+	struct tm t;
+
+	if (tim >= 0 && localtime_r(&tim, &t)) {
+		*buf = '\0';
+		size_t len = strftime(buf, size, "%a %b %d %T", &t);
+		len += (size_t)snprintf(buf + len, size - len, ".%09zu ", nsec);
+		strftime(buf + len, size - len, "%Y %z", &t);
+		return;
+	}
+
+	*buf = '-';
+	buf[1] = '\0';
+}
+
 static void
 print_timestamps(char *filename, const struct stat *attr)
 {
@@ -1247,38 +1286,20 @@ print_timestamps(char *filename, const struct stat *attr)
 	char *cdate = conf.colorize == 1 ? dd_c : "";
 	char *cend = conf.colorize == 1 ? df_c : "";
 
-	char mod_time[MAX_TIME_STR];
 	char access_time[MAX_TIME_STR];
 	char change_time[MAX_TIME_STR];
+	char mod_time[MAX_TIME_STR];
 
-// NetBSD: st_mtimespec.tv_nsec / st_birthtimespec.tv_nsec
-// MacOS: st_mtimespec.tv_nsec (st_birthtimespec only for stat64(), not for regular stat())
-
-// OpenBSD/Termux: st_mtim.tv_nsec / (no birthtime)
-// FreeBSD: st_mtim.tv_nsec / st_birthtim.tv_nsec
-// Cygwin: st_mtim.tv_nsec / st_birthtim.tv_nsec
-// Haiku: st_mtim.tv_nsec
-// SunOS: st_mtim.tv_nsec (stat(1) has birthtime)
-
-#if defined(__NetBSD__) || defined(__APPLE__)
-	xgen_time_str(mod_time, sizeof(mod_time), attr->st_mtime,
-		(size_t)attr->st_mtimespec.tv_nsec);
 	xgen_time_str(access_time, sizeof(access_time), attr->st_atime,
-		(size_t)attr->st_atimespec.tv_nsec);
+		(size_t)attr->ATIMNSEC);
 	xgen_time_str(change_time, sizeof(change_time), attr->st_ctime,
-		(size_t)attr->st_ctimespec.tv_nsec);
-#else
+		(size_t)attr->CTIMNSEC);
 	xgen_time_str(mod_time, sizeof(mod_time), attr->st_mtime,
-		(size_t)attr->st_mtim.tv_nsec);
-	xgen_time_str(access_time, sizeof(access_time), attr->st_atime,
-		(size_t)attr->st_atim.tv_nsec);
-	xgen_time_str(change_time, sizeof(change_time), attr->st_ctime,
-		(size_t)attr->st_ctim.tv_nsec);
-#endif /* __NetBSD__ || __APPLE__ */
+		(size_t)attr->MTIMNSEC);
 
 	char *cadate = cdate;
-	char *cmdate = cdate;
 	char *ccdate = cdate;
+	char *cmdate = cdate;
 
 	char atf[MAX_SHADE_LEN], mtf[MAX_SHADE_LEN], ctf[MAX_SHADE_LEN];
 	*atf = *mtf = *ctf = '\0';
@@ -1308,8 +1329,7 @@ print_timestamps(char *filename, const struct stat *attr)
 	int ret = statx(AT_FDCWD, filename, AT_SYMLINK_NOFOLLOW, STATX_BTIME, &attrx);
 	if (ret == 0 && attrx.stx_mask & STATX_BTIME) {
 		xgen_time_str(creation_time, sizeof(creation_time),
-			attrx.stx_btime.tv_sec, (size_t)attrx.stx_btime.tv_nsec);
-//		gen_time_str(creation_time, sizeof(creation_time), attrx.stx_btime.tv_sec);
+			attrx.stx_btime.tv_sec, (size_t)attrx.BTIMNSEC);
 	} else {
 		/* Birthtime is not available */
 		*creation_time = '-';
@@ -1320,17 +1340,15 @@ print_timestamps(char *filename, const struct stat *attr)
 		get_color_age(attrx.stx_btime.tv_sec, btf, sizeof(btf));
 		cbdate = btf;
 	}
+
 #  else /* HAVE_ST_BIRTHTIME || __BSD_VISIBLE */
 	time_t bt = attr->st_birthtime;
-#   if defined(__NetBSD__)
+#   ifdef BTIMNSEC
 	xgen_time_str(creation_time, sizeof(creation_time), bt,
-		(size_t)attr->st_birthtimespec.tv_nsec);
-#   elif defined(__FreeBSD__) || defined(__CYGWIN__)
-	xgen_time_str(creation_time, sizeof(creation_time), bt,
-		(size_t)attr->st_birthtim.tv_nsec);
+		(size_t)attr->BTIMNSEC);
 #   else
 	gen_time_str(creation_time, sizeof(creation_time), bt);
-#   endif /* __NetBSD__ */
+#   endif /* BTIMNSEC */
 
 	if (conf.colorize == 1 && !*dd_c) {
 		get_color_age(bt, btf, sizeof(btf));
