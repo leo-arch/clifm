@@ -252,6 +252,9 @@ get_link_color(const char *name)
 		case S_IFIFO:  color = pi_c; break;
 		case S_IFBLK:  color = bd_c; break;
 		case S_IFCHR:  color = cd_c; break;
+#ifdef __sun
+		case S_IFDOOR: color = oo_c; break;
+#endif /* __sun */
 		case S_IFREG: {
 			int ext = 0;
 			color = get_regfile_color(name, &a, &ext);
@@ -1224,6 +1227,9 @@ print_file_details(char *filename, const struct stat *attr, const char file_type
 	case 'b': fputs(_("Block special file"), stdout); break;
 	case 'c': fputs(_("Character special file"), stdout); break;
 	case 'd': fputs(_("Directory"), stdout); break;
+#ifdef __sun
+	case 'D': fputs(_("Door"), stdout); break;
+#endif /* __sun */
 	case 'l': fputs(_("Symbolic link"), stdout); break;
 	case 'p': fputs(_("Fifo"), stdout); break;
 	case 's': fputs(_("Socket"), stdout); break;
