@@ -2980,6 +2980,9 @@ check_file_type_opts(const char c)
 	case 'b': return stats.block_dev > 0 ? 1 : 0;
 	case 'c': return stats.char_dev > 0 ? 1 : 0;
 	case 'd': return stats.dir > 0 ? 1 : 0;
+#ifdef __sun
+	case 'D': return stats.door > 0 ? 1 : 0;
+#endif /* __sun */
 	case 'f': return stats.reg > 0 ? 1 : 0;
 	case 'h': return stats.multi_link > 0 ? 1 : 0;
 	case 'l': return stats.link > 0 ? 1 : 0;
@@ -3010,6 +3013,9 @@ file_types_opts_generator(const char *text, int state)
 		"b (Block device)",
 		"c (Character device)",
 		"d (Directory)",
+#ifdef __sun
+		"D (Door)",
+#endif /* __sun */
 		"f (Regular file)",
 		"h (Multi-hardlink file)",
 		"l (Symbolic link)",
@@ -3061,6 +3067,12 @@ file_types_generator(const char *text, int state)
 			if (file_info[i].dir == 1)
 				ret = strdup(name);
 			break;
+#ifdef __sun
+		case 'D':
+			if (file_info[i].type == DT_DOOR)
+				ret = strdup(name);
+			break;
+#endif /* __sun */
 		case 'f':
 			if (file_info[i].type == DT_REG)
 				ret = strdup(name);

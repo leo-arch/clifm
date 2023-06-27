@@ -140,6 +140,9 @@ set_file_type_and_search_path(char **args, mode_t *file_type,
 	case 'b': *file_type = invert == 1 ? DT_BLK : S_IFBLK; break;
 	case 'c': *file_type = invert == 1 ? DT_CHR : S_IFCHR; break;
 	case 'd': *file_type = invert == 1 ? DT_DIR : S_IFDIR; break;
+#ifdef __sun
+	case 'D': *file_type = invert == 1 ? DT_DOOR : S_IFDOOR; break;
+#endif /* __sun */
 	case 'f': *file_type = invert == 1 ? DT_REG : S_IFREG; break;
 	case 'l': *file_type = invert == 1 ? DT_LNK : S_IFLNK; break;
 	case 'p': *file_type = invert == 1 ? DT_FIFO : S_IFIFO; break;
@@ -321,7 +324,7 @@ get_non_matches_from_search_path(const char *search_path, char **gfiles,
 		if (file_type && type != file_type)
 #else
 		if (file_type && ent[i]->d_type != file_type)
-#endif
+#endif /* !_DIRENT_HAVE_D_TYPE */
 			continue;
 
 		matches[n].eln = -1;
@@ -673,6 +676,9 @@ check_regex_file_type(struct dirent **reg_dirlist, const int index,
 		case S_IFBLK: type = DT_BLK; break;
 		case S_IFCHR: type = DT_CHR; break;
 		case S_IFDIR: type = DT_DIR; break;
+#ifdef __sun
+		case S_IFDOOR: type = DT_DOOR; break;
+#endif /* __sun */
 		case S_IFIFO: type = DT_FIFO; break;
 		case S_IFLNK: type = DT_LNK; break;
 		case S_IFREG: type = DT_REG; break;
