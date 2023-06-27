@@ -65,6 +65,11 @@
 /* Required by the pc command */
 #include "readline.h"
 
+#if !defined(_BE_POSIX) && !defined(__DragonFly__) && !defined(__OpenBSD__) \
+&& (defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE) || defined(_STATX))
+# define HAVE_BTIME
+#endif
+
 /* A few macros for nano-second precision.
  * Used to print timestamps with the p/pp command. */
 #if defined(__NetBSD__) || defined(__APPLE__)
@@ -77,13 +82,15 @@
 # define MTIMNSEC st_mtim.tv_nsec
 #endif /* __NetBSD__ || __APPLE__ */
 
-#ifdef _STATX
-# define BTIMNSEC stx_btime.tv_nsec
-#elif defined(__NetBSD__) // __APPLE__ should be added here
-# define BTIMNSEC st_birthtimespec.tv_nsec
-#elif defined(__FreeBSD__) || defined(__CYGWIN__)
-# define BTIMNSEC st_birthtim.tv_nsec
-#endif /* _STATX */
+#ifdef HAVE_BTIME
+# ifdef _STATX
+#  define BTIMNSEC stx_btime.tv_nsec
+# elif defined(__NetBSD__) // __APPLE__ should be added here
+#  define BTIMNSEC st_birthtimespec.tv_nsec
+# elif defined(__FreeBSD__) || defined(__CYGWIN__)
+#  define BTIMNSEC st_birthtim.tv_nsec
+# endif /* _STATX */
+#endif /* HAVE_BTIME */
 
 #ifndef major
 # define major(x) ((x >> 8) & 0x7F)
@@ -1279,9 +1286,9 @@ xgen_time_str(char *buf, const size_t size, const time_t tim, const size_t nsec)
 static void
 print_timestamps(char *filename, const struct stat *attr)
 {
-#if !defined(_STATX)
+#ifndef _STATX
 	UNUSED(filename);
-#endif
+#endif /* !_STATX */
 
 	char *cdate = conf.colorize == 1 ? dd_c : "";
 	char *cend = conf.colorize == 1 ? df_c : "";
@@ -1317,14 +1324,13 @@ print_timestamps(char *filename, const struct stat *attr)
 	printf(_("Modify: \t%s%s%s\n"), cmdate, mod_time, cend);
 	printf(_("Change: \t%s%s%s\n"), ccdate, change_time, cend);
 
-#if !defined(_BE_POSIX) && !defined(__DragonFly__) && !defined(__OpenBSD__)
-# if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE) || defined(_STATX)
+#ifdef HAVE_BTIME
 	char *cbdate = cdate;
 	char btf[MAX_SHADE_LEN];
 	*btf = '\0';
 	char creation_time[MAX_TIME_STR];
 
-#  if defined(_STATX)
+# ifdef _STATX
 	struct statx attrx;
 	int ret = statx(AT_FDCWD, filename, AT_SYMLINK_NOFOLLOW, STATX_BTIME, &attrx);
 	if (ret == 0 && attrx.stx_mask & STATX_BTIME) {
@@ -1341,24 +1347,23 @@ print_timestamps(char *filename, const struct stat *attr)
 		cbdate = btf;
 	}
 
-#  else /* HAVE_ST_BIRTHTIME || __BSD_VISIBLE */
+# else /* HAVE_ST_BIRTHTIME || __BSD_VISIBLE */
 	time_t bt = attr->st_birthtime;
-#   ifdef BTIMNSEC
+#  ifdef BTIMNSEC
 	xgen_time_str(creation_time, sizeof(creation_time), bt,
 		(size_t)attr->BTIMNSEC);
-#   else
+#  else
 	gen_time_str(creation_time, sizeof(creation_time), bt);
-#   endif /* BTIMNSEC */
+#  endif /* BTIMNSEC */
 
 	if (conf.colorize == 1 && !*dd_c) {
 		get_color_age(bt, btf, sizeof(btf));
 		cbdate = btf;
 	}
-#  endif /* _STATX */
+# endif /* _STATX */
 
 	printf(_("Birth: \t\t%s%s%s\n"), cbdate, creation_time, cend);
-# endif /* HAVE_ST_BIRTHTIME || __BSD_VISIBLE || _STATX */
-#endif /* !_BE_POSIX && !__DragonFly__ && !__OpenBSD__ */
+#endif /* HAVE_BTIME */
 }
 
 static void
