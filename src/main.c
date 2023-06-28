@@ -358,7 +358,7 @@ char
 
 #ifndef _NO_ICONS
 	dir_ico_c[MAX_COLOR], /* Directories icon color */
-#endif
+#endif /* !_NO_ICONS */
 
 	/* Syntax highlighting */
 	hb_c[MAX_COLOR], /* Brackets: () [] {} */
@@ -784,7 +784,6 @@ const struct cmdslist_t param_str[] = {
 	{NULL, 0}
 };
 
-
 #ifdef LINUX_INOTIFY
 int inotify_fd = UNSET, inotify_wd = UNSET;
 unsigned int INOTIFY_MASK =
@@ -792,12 +791,12 @@ unsigned int INOTIFY_MASK =
 /*#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 18, 0)
 	| IN_DONT_FOLLOW | IN_EXCL_UNLINK | IN_ONLYDIR | IN_MASK_CREATE;
 #else */
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 15)
+# if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 15)
 	| IN_DONT_FOLLOW | IN_ONLYDIR
-#endif /* LINUX >= 2.6.15 */
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 36)
+# endif /* LINUX >= 2.6.15 */
+# if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 36)
 	| IN_EXCL_UNLINK
-#endif /* LINUX >= 2.6.36 */
+# endif /* LINUX >= 2.6.36 */
 	;
 #elif defined(BSD_KQUEUE)
 int kq, event_fd = UNSET;
@@ -805,7 +804,8 @@ struct kevent events_to_monitor[NUM_EVENT_FDS];
 unsigned int KQUEUE_FFLAGS = NOTE_DELETE | NOTE_EXTEND| NOTE_LINK
 	| NOTE_RENAME | NOTE_REVOKE | NOTE_WRITE;
 struct timespec timeout;
-#endif
+#endif /* LINUX_INOTIFY */
+
 int watch = UNSET;
 
 #ifdef RUN_CMD
@@ -858,7 +858,7 @@ run_main_loop(void)
 #ifdef RUN_CMD
 	if (cmd_line_cmd)
 		run_and_exit();
-#endif
+#endif // RUN_CMD
 
 	int i;
 	/* 1) Infinite loop to keep the program running */
@@ -916,7 +916,7 @@ _list(void)
 #ifdef RUN_CMD
 	if (cmd_line_cmd)
 		return;
-#endif
+#endif // RUN_CMD
 
 	if (conf.autols == 1 && isatty(STDIN_FILENO)) {
 #ifdef LINUX_INOTIFY
@@ -932,7 +932,7 @@ _list(void)
 			_err('w', PRINT_PROMPT, "%s: kqueue: %s\n",
 				PROGRAM_NAME, strerror(errno));
 		}
-#endif
+#endif /* LINUX_INOTIFY */
 
 		if (conf.colorize == 1 && xargs.eln_use_workspace_color == 1)
 			set_eln_color();
@@ -1047,7 +1047,7 @@ check_gui(void)
 	/* Running on a graphical environment? */
 #if !defined(__HAIKU__) && !defined(__CYGWIN__)
 	if (getenv("DISPLAY") || getenv("WAYLAND_DISPLAY"))
-#endif
+#endif /* !__HAIKU__ && !__CYGWIN__ */
 	{
 		flags |= GUI;
 	}
@@ -1092,7 +1092,7 @@ main(int argc, char *argv[])
 	init_msgs();
 #if !defined(_NO_ICONS)
 	init_icons_hashes();
-#endif
+#endif /* !_NO_ICONS */
 /*	init_file_flags(); */
 
 	set_locale();
@@ -1172,7 +1172,7 @@ main(int argc, char *argv[])
 #ifndef __HAIKU__
 	/* No need for this warning on Haiku: it runs as root by default */
 	set_root_indicator();
-#endif
+#endif /* !__HAIKU__ */
 
 	load_remotes();
 	automount_remotes();
@@ -1202,7 +1202,7 @@ main(int argc, char *argv[])
 
 #ifndef _NO_TRASH
 	init_trash();
-#endif
+#endif /* !_NO_TRASH */
 
 	get_hostname();
 	init_shell();
@@ -1216,7 +1216,7 @@ main(int argc, char *argv[])
 
 #ifndef _NO_PROFILES
 	get_profile_names();
-#endif
+#endif /* !_NO_PROFILES */
 
 	load_pinned_dir();
 	init_workspaces_opts();

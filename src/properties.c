@@ -77,6 +77,8 @@
 
 /* A few macros for nano-second precision.
  * Used to print timestamps with the p/pp command. */
+#define NANO_SEC_MAX 999999999
+
 #if defined(__NetBSD__) || defined(__APPLE__)
 # define ATIMNSEC st_atimespec.tv_nsec
 # define CTIMNSEC st_ctimespec.tv_nsec
@@ -1279,29 +1281,50 @@ print_file_details(char *filename, const struct stat *attr, const char file_type
 }
 
 /* Write into BUF, whose size is SIZE, the timestamp TIM, with nanoseconds NSEC,
- * in human readable format. */
+ * in human readable format.
+ * NSEC must be a tv_nsec member of a timespec struct, which, according to the
+ * GNU docs (https://www.gnu.org/software/libc/manual/html_node/Time-Types.html),
+ * is guarranted to be 0-999999999, so that it should fit into a size_t type.
+ * See also https://en.cppreference.com/w/c/chrono/timespec
+ * NOTE: coreutils stat.c uses an int to hold a tv_nsec value. */
 static void
-xgen_time_str(char *buf, const size_t size, const time_t tim, const size_t nsec)
+xgen_time_str(char *buf, const size_t buf_size, const time_t tim,
+	const size_t nsec)
 {
-	struct tm t;
-
-	if (tim >= 0 && localtime_r(&tim, &t)) {
-		*buf = '\0';
-		size_t len = strftime(buf, size, "%a %b %d %T", &t);
-		len += (size_t)snprintf(buf + len, size - len, ".%09zu ", nsec);
-		strftime(buf + len, size - len, "%Y %z", &t);
+	if (buf_size == 0)
 		return;
-	}
 
-	*buf = '-';
-	buf[1] = '\0';
+	struct tm t;
+	if (nsec > NANO_SEC_MAX || tim < 0 || !localtime_r(&tim, &t))
+		goto END;
+
+	*buf = '\0';
+	size_t len = strftime(buf, buf_size, "%a %b %d %T", &t);
+	if (len == 0) /* Error or exhausted space in BUF. */
+		return;
+
+	len += (size_t)snprintf(buf + len, buf_size - len, ".%09zu ", nsec);
+	if (len >= buf_size) /* Error or exhausted space in BUF. */
+		return;
+
+	strftime(buf + len, buf_size - len, "%Y %z", &t);
+	return;
+
+END:
+	if (buf_size > 1) {
+		*buf = '-';
+		buf[1] = '\0';
+	} else {
+		*buf = '\0';
+	}
 }
 
 static void
-print_timestamps(char *filename, const struct stat *attr)
+print_timestamps(char *filename, const struct stat *attr, const int follow_link)
 {
 #ifndef _STATX
 	UNUSED(filename);
+	UNUSED(follow_link);
 #endif /* !_STATX */
 
 	char *cdate = conf.colorize == 1 ? dd_c : "";
@@ -1346,7 +1369,10 @@ print_timestamps(char *filename, const struct stat *attr)
 
 # ifdef _STATX
 	struct statx attrx;
-	int ret = statx(AT_FDCWD, filename, AT_SYMLINK_NOFOLLOW, STATX_BTIME, &attrx);
+	char *rpath = follow_link == 1 ? realpath(filename, NULL) : filename;
+	int ret = statx(AT_FDCWD, rpath, AT_SYMLINK_NOFOLLOW, STATX_BTIME, &attrx);
+	if (rpath != filename)
+		free(rpath);
 	if (ret == 0 && attrx.stx_mask & STATX_BTIME) {
 		xgen_time_str(creation_time, sizeof(creation_time),
 			attrx.stx_btime.tv_sec, (size_t)attrx.BTIMNSEC);
@@ -1542,7 +1568,7 @@ get_properties(char *filename, const int follow_link)
 	print_file_name(filename, color, file_type, attr.st_mode, link_target);
 	free(link_target);
 	print_file_details(filename, &attr, file_type, file_perm);
-	print_timestamps(filename, &attr);
+	print_timestamps(filename, &attr, follow_link);
 	print_file_size(filename, &attr, file_perm, follow_link);
 
 	return EXIT_SUCCESS;
