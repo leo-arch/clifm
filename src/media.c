@@ -46,6 +46,9 @@
 # include <sys/mount.h>
 #elif defined(__sun)
 # include <sys/mnttab.h> /* getmntent() */
+# ifndef MNTTAB
+#  define MNTTAB "/etc/mnttab"
+# endif /* MNTTAB */
 #endif /* __linux__ || __CYGWIN__ */
 
 #include <dirent.h>
@@ -521,7 +524,7 @@ print_mnt_info(const int n)
 static size_t
 xgetmntinfo_sun(void)
 {
-	FILE *fp = fopen("/etc/mnttab", "r");
+	FILE *fp = fopen(MNTTAB, "r");
 	if (!fp)
 		return 0;
 
