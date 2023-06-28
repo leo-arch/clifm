@@ -1708,7 +1708,7 @@ static char *
 set_rm_params(const int dirs, const int rm_force)
 {
 	if (dirs == 1) {
-#if defined(_BE_POSIX)
+#if defined(_BE_POSIX) || defined(__sun)
 		return (rm_force == 1 ? "-rf" : "-r");
 #elif defined(__NetBSD__) || defined(__OpenBSD__) || defined(__APPLE__)
 		if (bin_flags & BSD_HAVE_COREUTILS)
@@ -1721,7 +1721,7 @@ set_rm_params(const int dirs, const int rm_force)
 	}
 
 /* No directories */
-#if defined(_BE_POSIX)
+#if defined(_BE_POSIX) || defined(__sun)
 	return "-f";
 #elif defined(__NetBSD__) || defined(__OpenBSD__) || defined(__APPLE__)
 	if (bin_flags & BSD_HAVE_COREUTILS)
