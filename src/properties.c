@@ -1167,7 +1167,7 @@ print_file_perms(char *filename, const struct stat *attr,
 
 static void
 print_file_name(char *filename, const char *color, const char file_type,
-	const mode_t mode, const char *link_target)
+	const mode_t mode, char *link_target)
 {
 	char *wname = wc_xstrlen(filename) == 0 ? replace_ctrl_chars(filename)
 		: (char *)NULL;
@@ -1177,8 +1177,11 @@ print_file_name(char *filename, const char *color, const char file_type,
 
 	if (file_type != 'l') {
 		if (link_target) { /* 'pp' on a symlink */
-			printf(_("\tName: %s%s%s <- %s%s%s\n"), file_type == 0 ? no_c : color,
-				link_target, df_c, ln_c, wname ? wname : filename, df_c);
+			char *tmp = abbreviate_file_name(link_target);
+			printf(_("\tName: %s%s%s <- %s%s%s\n"), file_type == 0
+				? no_c : color, tmp ? tmp : link_target, df_c, ln_c,
+				wname ? wname : filename, df_c);
+			free(tmp);
 		} else {
 			printf(_("\tName: %s%s%s\n"), file_type == 0 ? no_c : color,
 				wname ? wname : filename, df_c);
@@ -1320,11 +1323,10 @@ END:
 }
 
 static void
-print_timestamps(char *filename, const struct stat *attr, const int follow_link)
+print_timestamps(char *filename, const struct stat *attr)
 {
 #ifndef _STATX
 	UNUSED(filename);
-	UNUSED(follow_link);
 #endif /* !_STATX */
 
 	char *cdate = conf.colorize == 1 ? dd_c : "";
@@ -1369,10 +1371,8 @@ print_timestamps(char *filename, const struct stat *attr, const int follow_link)
 
 # ifdef _STATX
 	struct statx attrx;
-	char *rpath = follow_link == 1 ? realpath(filename, NULL) : filename;
-	int ret = statx(AT_FDCWD, rpath, AT_SYMLINK_NOFOLLOW, STATX_BTIME, &attrx);
-	if (rpath != filename)
-		free(rpath);
+	int ret = statx(AT_FDCWD, filename, AT_SYMLINK_NOFOLLOW,
+		STATX_BTIME, &attrx);
 	if (ret == 0 && attrx.stx_mask & STATX_BTIME) {
 		xgen_time_str(creation_time, sizeof(creation_time),
 			attrx.stx_btime.tv_sec, (size_t)attrx.BTIMNSEC);
@@ -1536,7 +1536,7 @@ get_properties(char *filename, const int follow_link)
 		filename += 2;
 
 	/* Check file existence. */
-	struct stat attr;
+	struct stat attr, attrb;
 
 	int ret = follow_link == 1 ? stat(filename, &attr) : lstat(filename, &attr);
 	if (ret == -1)
@@ -1548,17 +1548,12 @@ get_properties(char *filename, const int follow_link)
 	int file_perm = check_file_access(attr.st_mode, attr.st_uid, attr.st_gid);
 
 	char *link_target = (char *)NULL;
-	if (follow_link == 1) {
+	if (follow_link == 1 && lstat(filename, &attrb) != -1
+	&& S_ISLNK(attrb.st_mode)) {
 		/* pp: In case of a symlink we want both the symlink name (FILENAME)
 		 * and the target name (LINK_TARGET): the Name field in the output
 		 * will be printed as follows: "Name: target <- link_name". */
-		struct stat b;
-		if (lstat(filename, &b) != -1 && S_ISLNK(b.st_mode)) {
-			char *tmp = realpath(filename, (char *)NULL);
-			link_target = tmp ? abbreviate_file_name(tmp) : (char *)NULL;
-			if (link_target != tmp)
-				free(tmp);
-		}
+		link_target = realpath(filename, (char *)NULL);
 	}
 
 	char *color = get_file_type_and_color(link_target ? link_target : filename,
@@ -1566,9 +1561,9 @@ get_properties(char *filename, const int follow_link)
 
 	print_file_perms(filename, &attr, file_type, ctype);
 	print_file_name(filename, color, file_type, attr.st_mode, link_target);
-	free(link_target);
 	print_file_details(filename, &attr, file_type, file_perm);
-	print_timestamps(filename, &attr, follow_link);
+	print_timestamps(link_target ? link_target : filename, &attr);
+	free(link_target);
 	print_file_size(filename, &attr, file_perm, follow_link);
 
 	return EXIT_SUCCESS;
