@@ -34,12 +34,16 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
-#if defined(__linux__)
-# include <sys/sysmacros.h>
-#endif
 #include <fcntl.h>
 #include <grp.h>
 #include <pwd.h>
+
+#if defined(__linux__) || defined(__CYGWIN__)
+# include <sys/sysmacros.h> /* minor(), major() */
+#elif defined(__sun)
+# include <sys/mkdev.h> /* minor(), major() */
+/* For BSD systems, we need sys/types.h, already included in helpers.h */
+#endif /* __linux__ */
 
 #if defined(__OpenBSD__) || defined(__NetBSD__) \
 || defined(__FreeBSD__) || defined(__APPLE__)
