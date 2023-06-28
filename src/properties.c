@@ -79,8 +79,8 @@
  * Used to print timestamps with the p/pp command. */
 #if defined(__NetBSD__) || defined(__APPLE__)
 # define ATIMNSEC st_atimespec.tv_nsec
-# define CTIMNSEC st_mtimespec.tv_nsec
-# define MTIMNSEC st_ctimespec.tv_nsec
+# define CTIMNSEC st_ctimespec.tv_nsec
+# define MTIMNSEC st_mtimespec.tv_nsec
 #else
 # define ATIMNSEC st_atim.tv_nsec
 # define CTIMNSEC st_ctim.tv_nsec
