@@ -418,6 +418,7 @@ Available file type characters:\n\
   b: Block devices\n\
   c: Character devices\n\
   d: Directories\n\
+  D: Doors (Solaris only)\n\
   f: Regular files\n\
   h: Multi-hardlink files\n\
   l: Symbolic links\n\
