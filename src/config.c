@@ -3071,38 +3071,29 @@ get_fzf_win_height(void)
 static void
 create_trash_dirs(void)
 {
-	struct stat attr;
-	if (stat(trash_dir, &attr) == -1) {
-		if (xargs.stealth_mode == 1) {
-			_err('w', PRINT_PROMPT, _("%s: %s: %s. Trash function disabled. "
-				"If needed, create the directory manually and restart %s.\n"),
-				PROGRAM_NAME, trash_dir, strerror(errno), PROGRAM_NAME);
-			trash_ok = 0;
-			return;
-		}
+	struct stat a;
+	if (stat(trash_files_dir, &a) != -1 && S_ISDIR(a.st_mode)
+	&& stat(trash_info_dir, &a) != -1 && !S_ISDIR(a.st_mode))
+		return;
 
-		char trash_files[PATH_MAX];
-		snprintf(trash_files, sizeof(trash_files), "%s/files", trash_dir);
-
-		char trash_info[PATH_MAX];
-		snprintf(trash_info, sizeof(trash_info), "%s/files", trash_dir);
-
-		char *cmd[] = {"mkdir", "-p", trash_files, trash_info, NULL};
-		int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
-
-		if (ret != EXIT_SUCCESS) {
-			trash_ok = 0;
-			_err('w', PRINT_PROMPT, _("%s: mkdir: %s: Error creating trash "
-				"directory. Trash function disabled\n"),
-				PROGRAM_NAME, trash_dir);
-		}
+	if (xargs.stealth_mode == 1) {
+		_err('w', PRINT_PROMPT, _("%s: %s: %s. Trash function disabled. "
+			"If needed, create the directory manually and restart %s.\n"),
+			PROGRAM_NAME, trash_dir, strerror(errno), PROGRAM_NAME);
+		trash_ok = 0;
+		return;
 	}
 
-	/* If it exists, check if it is writable */
-	else if (access(trash_dir, W_OK) == -1) {
+	char *cmd[] = {"mkdir", "-p", trash_files_dir, trash_info_dir, NULL};
+	int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
+
+	if (ret != EXIT_SUCCESS) {
 		trash_ok = 0;
-		_err('w', PRINT_PROMPT, _("%s: %s: Directory not writable. "
-			"Trash function disabled\n"), PROGRAM_NAME, trash_dir);
+		_err('w', PRINT_PROMPT, _("%s: mkdir: %s: Error creating the trash "
+			"directory (or one of its subdirectories: files/ and info/). "
+			"Trash function disabled.\n"),
+			PROGRAM_NAME, trash_dir);
+		return;
 	}
 }
 
