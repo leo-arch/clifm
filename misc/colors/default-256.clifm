@@ -149,6 +149,7 @@ define TEMP=38;5;247   # Dimmed white
 # ne = Empty directory with no read permission
 # nf = Regular file with no read permission
 # no = Unknown
+# oo = Door (Solaris only)
 # or = Broken symlink
 # ow = Other-writable
 # pi = FIFO/pipe
