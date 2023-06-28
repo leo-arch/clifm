@@ -538,8 +538,8 @@ xgetmntinfo_sun(void)
 			continue;
 
 		int perm = check_file_access(a.st_mode, a.st_uid, a.st_gid);
-		printf("%s%s%s %s%s%s [%s]\n", el_c, n + 1, df_c,
-			perm == 1 ? di_c : nd_c, mp, df_c, list.mnt_special);
+		printf("%s%zu%s %s%s%s [%s]\n", el_c, n + 1, df_c,
+			perm == 1 ? di_c : nd_c, mp, df_c, ent.mnt_special);
 
 		media = (struct mnt_t *)xrealloc(media, (n + 2) * sizeof(struct mnt_t));
 		media[n].mnt = savestring(mp, strlen(mp));
