@@ -3073,12 +3073,13 @@ create_trash_dirs(void)
 {
 	struct stat a;
 	if (stat(trash_files_dir, &a) != -1 && S_ISDIR(a.st_mode)
-	&& stat(trash_info_dir, &a) != -1 && !S_ISDIR(a.st_mode))
+	&& stat(trash_info_dir, &a) != -1 && S_ISDIR(a.st_mode))
 		return;
 
 	if (xargs.stealth_mode == 1) {
 		_err('w', PRINT_PROMPT, _("%s: %s: %s. Trash function disabled. "
-			"If needed, create the directory manually and restart %s.\n"),
+			"If needed, create the directories manually and restart %s."
+			"Ex: mkdir -p ~/.local/Trash/{files,info}\n"),
 			PROGRAM_NAME, trash_dir, strerror(errno), PROGRAM_NAME);
 		trash_ok = 0;
 		return;
