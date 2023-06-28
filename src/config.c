@@ -3078,8 +3078,8 @@ create_trash_dirs(void)
 
 	if (xargs.stealth_mode == 1) {
 		_err('w', PRINT_PROMPT, _("%s: %s: %s. Trash function disabled. "
-			"If needed, create the directories manually and restart %s."
-			"Ex: mkdir -p ~/.local/Trash/{files,info}\n"),
+			"If needed, create the directories manually and restart %s.\n"
+			"Ex: mkdir -p ~/.local/share/Trash/{files,info}\n"),
 			PROGRAM_NAME, trash_dir, strerror(errno), PROGRAM_NAME);
 		trash_ok = 0;
 		return;
@@ -3091,9 +3091,10 @@ create_trash_dirs(void)
 	if (ret != EXIT_SUCCESS) {
 		trash_ok = 0;
 		_err('w', PRINT_PROMPT, _("%s: mkdir: %s: Error creating the trash "
-			"directory (or one of its subdirectories: files/ and info/). "
-			"Trash function disabled.\n"),
-			PROGRAM_NAME, trash_dir);
+			"directory (or one of its subdirectories: files/ and info/).\n"
+			"Try creating them manually and restart %s.\n"
+			"Ex: mkdir -p ~/.local/share/Trash/{files,info}\n"),
+			PROGRAM_NAME, trash_dir, PROGRAM_NAME);
 		return;
 	}
 }

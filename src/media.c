@@ -44,6 +44,8 @@
 # include <sys/param.h>
 # include <sys/ucred.h>
 # include <sys/mount.h>
+#elif defined(__sun)
+# include <sys/mnttab.h> /* getmntent() */
 #endif /* __linux__ || __CYGWIN__ */
 
 #include <dirent.h>
@@ -56,6 +58,10 @@
 #include "jump.h"
 #include "misc.h"
 #include "history.h"
+
+#ifdef __sun
+# include "checks.h" /* check_file_access() */
+#endif /* __sun */
 
 /* Information about devices */
 struct mnt_t {
@@ -509,6 +515,49 @@ print_mnt_info(const int n)
 	return exit_status;
 }
 
+#ifdef __sun
+/* Get and list available mountpoints (dirs only).
+ * Returns the number of mounpoints found. */
+static size_t
+xgetmntinfo_sun(void)
+{
+	FILE *fp = fopen("/etc/mnttab", "r");
+	if (!fp)
+		return 0;
+
+	size_t n = 0;
+	struct mnttab ent;
+
+	while (getmntent(fp, &ent) != -1) {
+		char *mp = ent.mnt_mountp;
+		if (!mp || !*mp)
+			continue;
+
+		struct stat a;
+		if (stat(mp, &a) == -1 || !S_ISDIR(a.st_mode))
+			continue;
+
+		int perm = check_file_access(a.st_mode, a.st_uid, a.st_gid);
+		printf("%s%s%s %s%s%s [%s]\n", el_c, n + 1, df_c,
+			perm == 1 ? di_c : nd_c, mp, df_c, list.mnt_special);
+
+		media = (struct mnt_t *)xrealloc(media, (n + 2) * sizeof(struct mnt_t));
+		media[n].mnt = savestring(mp, strlen(mp));
+		media[n].label = (char *)NULL;
+		media[n].dev = (char *)NULL;
+		n++;
+	}
+
+	fclose(fp);
+
+	media[n].mnt = (char *)NULL;
+	media[n].label = (char *)NULL;
+	media[n].dev = (char *)NULL;
+
+	return n;
+}
+#endif /* __sun */
+
 /* If MODE is MEDIA_MOUNT (used by the 'media' command) list mounted and
  * unmounted devices allowing the user to mount or unmount any of them.
  * If MODE is rather MEDIA_LIST (used by the 'mp' command), just list
@@ -564,6 +613,8 @@ media_menu(const int mode)
 #elif defined(__NetBSD__)
 	struct statvfs *fslist;
 	mp_n = (size_t)getmntinfo(&fslist, MNT_NOWAIT);
+#elif defined(__sun)
+	mp_n = xgetmntinfo_sun();
 #endif /* HAVE_PROC_MOUNTS */
 
 	/* This should never happen: There should always be a mountpoint,
