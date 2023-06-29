@@ -55,8 +55,6 @@
 #define CTLESC '\001'
 #define CTLNUL '\177'
 
-#define __WS_STR_LEN sizeof(int) + 6 + (MAX_COLOR + 2) * 2
-
 #define ROOT_IND "\001\x1b[1;31m\002R\001\x1b[0m\002"
 #define ROOT_IND_NO_COLOR "R"
 #define ROOT_IND_SIZE 17
@@ -199,7 +197,8 @@ gen_pwd(const int c)
 static inline char *
 gen_workspace(void)
 {
-	char s[__WS_STR_LEN];
+		/* An int (or workspace name) + workspaces color + NUL byte */
+	char s[NAME_MAX + sizeof(ws1_c) + 1];
 	char *cl = (char *)NULL;
 
 	if (conf.colorize == 1) {
@@ -219,9 +218,9 @@ gen_workspace(void)
 	}
 
 	if (workspaces[cur_ws].name)
-		snprintf(s, __WS_STR_LEN, "%s%s", cl, workspaces[cur_ws].name);
+		snprintf(s, sizeof(s), "%s%s", cl, workspaces[cur_ws].name);
 	else
-		snprintf(s, __WS_STR_LEN, "%s%d", cl, cur_ws + 1);
+		snprintf(s, sizeof(s), "%s%d", cl, cur_ws + 1);
 	return savestring(s, strnlen(s, sizeof(s)));
 }
 
@@ -382,15 +381,6 @@ gen_shell_name(void)
 		return savestring(user.shell_basename, strlen(user.shell_basename));
 
 	return savestring("unknown", 7);
-/*	char *p = (char *)NULL,
-		 *shell_name = strrchr(user.shell, '/');
-
-	if (shell_name && *(shell_name + 1))
-		p = shell_name + 1;
-	else
-		p = user.shell;
-
-	return savestring(p, strlen(p)); */
 }
 
 static inline void
@@ -693,7 +683,7 @@ ADD_STRING:
 		}
 
 		/* If not escape code, check for command substitution, and if not,
-		 * just add whatever char is there */
+		 * just add whatever char is there. */
 		else {
 			/* Remove non-escaped quotes */
 			if (c == '\'' || c == '"')
