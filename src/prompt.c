@@ -86,6 +86,9 @@ emergency prompt"
 #define STATS_EXTENDED 16 /* Extended attributes (acl) */
 #define STATS_UNKNOWN  17
 #define STATS_UNSTAT   18
+#ifdef __sun
+# define STATS_DOOR    19
+#endif /* __sun */
 
 #define NOTIF_SEL     0
 #define NOTIF_TRASH   1
@@ -221,6 +224,7 @@ gen_workspace(void)
 		snprintf(s, sizeof(s), "%s%s", cl, workspaces[cur_ws].name);
 	else
 		snprintf(s, sizeof(s), "%s%d", cl, cur_ws + 1);
+
 	return savestring(s, strnlen(s, sizeof(s)));
 }
 
@@ -482,6 +486,9 @@ gen_stats_str(const int flag)
 	case STATS_CAP: val = stats.caps; break;
 	case STATS_CHR: val = stats.char_dev; break;
 	case STATS_DIR: val = stats.dir; break;
+#ifdef __sun
+	case STATS_DOOR: val = stats.door; break;
+#endif /* __sun */
 	case STATS_EXE: val = stats.exec; break;
 	case STATS_EXTENDED: val = stats.extended; break;
 	case STATS_FIFO: val = stats.fifo; break;
@@ -596,6 +603,9 @@ decode_prompt(char *line)
 			case '"': temp = gen_stats_str(STATS_STICKY); goto ADD_STRING;
 			case '?': temp = gen_stats_str(STATS_UNKNOWN); goto ADD_STRING;
 			case '!': temp = gen_stats_str(STATS_UNSTAT); goto ADD_STRING;
+#idef __sun
+			case '>': temp = gen_stats_str(STATS_DOOR); goto ADD_STRING;
+#endif /* __sun */
 
 			case '*': temp = gen_notification(NOTIF_SEL); goto ADD_STRING;
 			case '%': temp = gen_notification(NOTIF_TRASH); goto ADD_STRING;
@@ -1152,7 +1162,6 @@ edit_prompts_file(char *app)
 }
 
 int
-//prompt_function(char *arg, char *app)
 prompt_function(char **args)
 {
 	if (!args[0] || !*args[0] || (*args[0] == 'l'
