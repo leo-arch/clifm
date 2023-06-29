@@ -2,7 +2,7 @@
 
 /*
  * This file is part of CliFM
- * 
+ *
  * Copyright (C) 2016-2023, L. Abramovich <leo.clifm@outlook.com>
  * All rights reserved.
 
@@ -546,13 +546,18 @@ get_longest_filename(const int n, const int pad)
 		size_t total_len = 0;
 		file_info[i].eln_n = conf.no_eln == 1 ? -1 : DIGINUM(i + 1);
 
-		size_t blen = file_info[i].len;
-		if (file_info[i].len > (size_t)conf.max_name_len)
-			file_info[i].len = (size_t)conf.max_name_len;
+		size_t file_len = file_info[i].len;
+		if (file_len == 0) {
+			/* Embedded control chars. Reconstruct and recalculate length. */
+			char *wname = replace_ctrl_chars(file_info[i].name);
+			file_len = wname ? wc_xstrlen(wname) : 0;
+			free(wname);
+		}
 
-		total_len = (size_t)pad + 1 + file_info[i].len;
+		if (file_len > (size_t)conf.max_name_len)
+			file_len = (size_t)conf.max_name_len;
 
-		file_info[i].len = blen;
+		total_len = (size_t)pad + 1 + file_len;
 
 		if (conf.long_view == 0 && conf.classify == 1) {
 			if (file_info[i].dir)
@@ -1707,6 +1712,24 @@ exclude_file_type(const mode_t mode, const nlink_t links)
 		return filter.rev == 1 ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 
+/* Return 1 if NAME contains at least one UTF8 character or control char, or
+ * 0 otherwise.
+ * This check is performed over file names to be listed. If the file name is
+ * not UTF8, we get its visible length directly from xstrsncpy(), instead of
+ * running xstrsncpy() and then wc_xstrlen(). This gives us a little
+ * performance improvement: 3% faster over 100000 files. */
+static inline uint8_t
+is_utf8_name(const char *name)
+{
+	while (*name) {
+		if ((*name & 0xC0) == 0xC0 || *name < ' ')
+			return 1;
+		name++;
+	}
+
+	return 0;
+}
+
 /* List files in the current working directory (global variable 'path').
  * Unlike list_dir(), however, this function uses no color and runs
  * neither stat() nor count_dir(), which makes it quite faster. Return
@@ -1804,7 +1827,7 @@ list_dir_light(void)
 //		init_fileinfo(n);
 
 		file_info[n].name = (char *)xnmalloc(NAME_MAX + 1, sizeof(char));
-		if (conf.unicode == 0) {
+		if (conf.unicode == 0 || is_utf8_name(ename) == 0) {
 			file_info[n].len = xstrsncpy(file_info[n].name, ename, NAME_MAX);
 		} else {
 			xstrsncpy(file_info[n].name, ename, NAME_MAX);
@@ -2280,7 +2303,8 @@ list_dir(void)
 		}
 
 		file_info[n].name = (char *)xnmalloc(NAME_MAX + 1, sizeof(char));
-		if (conf.unicode == 0) {
+
+		if (conf.unicode == 0 || is_utf8_name(ename) == 0) {
 			file_info[n].len = xstrsncpy(file_info[n].name, ename, NAME_MAX);
 		} else {
 			xstrsncpy(file_info[n].name, ename, NAME_MAX);

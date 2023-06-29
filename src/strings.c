@@ -442,7 +442,7 @@ replace_ctrl_chars(const char *name)
 	for (i = 0; name[i]; i++) {
 		if (i == NAME_MAX)
 			break;
-		if ((signed char)name[i] >= 0 && (signed char)name[i] <= 31)
+		if ((signed char)name[i] >= 0 && (signed char)name[i] < ' ')
 			*n = '^';
 		else
 			*n = name[i];
