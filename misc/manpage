@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Jun 28, 2023" "clifm 1.12.17" "CLIFM Manual"
+.TH "CLIFM" "1" "Jun 29, 2023" "clifm 1.12.18" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -1800,6 +1800,8 @@ The following files statistics escape codes are also recognized (not available i
 \fB\\E\fR: Amount of files with extended attributes in the current directory.TP
 .TP
 \fB\\O\fR: Amount of other-writable files in the current directory
+.TP
+\fB\\>\fR: Amount of door files in the current directory (Solaris only)
 .TP
 \fB\\"\fR: Amount of files with the sticky bit set in the current directory
 .TP
