@@ -601,7 +601,7 @@ update_warning_prompt_text_color(void)
 				"'prompt edit' or 'cs edit') or upgrading to a newer version "
 				"of the library (>= 7.0 is recommended).\n"),
 				PROGRAM_NAME, rl_library_version);
-			}
+		}
 	}
 
 	*end = 'm';
@@ -882,7 +882,7 @@ reset_iface_colors(void)
 	*hr_c = '\0';
 	*hs_c = '\0';
 	*hv_c = '\0';
-	*hw_c = '\0';
+//	*hw_c = '\0';
 
 	*sb_c = '\0';
 	*sc_c = '\0';
@@ -1670,7 +1670,7 @@ set_default_colors(void)
 	if (!*xs_c) xstrsncpy(xs_c, DEF_XS_C, sizeof(xs_c) - 1);
 	if (!*xf_c) xstrsncpy(xf_c, DEF_XF_C, sizeof(xf_c) - 1);
 
-	if (!*hw_c) xstrsncpy(hw_c, wp_c, sizeof(hw_c) - 1);
+//	if (!*hw_c) xstrsncpy(hw_c, wp_c, sizeof(hw_c) - 1);
 
 	if (!*ws1_c) xstrsncpy(ws1_c, DEF_WS1_C, sizeof(ws1_c) - 1);
 	if (!*ws2_c) xstrsncpy(ws2_c, DEF_WS2_C, sizeof(ws2_c) - 1);
@@ -2283,7 +2283,7 @@ disable_bold(void)
 	remove_bold_attr(hr_c);
 	remove_bold_attr(hs_c);
 	remove_bold_attr(hv_c);
-	remove_bold_attr(hw_c);
+//	remove_bold_attr(hw_c);
 
 	/* File properties */
 	remove_bold_attr(dr_c);

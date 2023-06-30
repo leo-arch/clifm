@@ -1566,11 +1566,11 @@ turn_it_wrong(void)
 	char *b = rl_copy_text(0, rl_end);
 	if (!b) return;
 
-	fputs(hw_c, stdout);
-//	fputs(wp_c, stdout);
+//	fputs(hw_c, stdout);
+	fputs(wp_c, stdout);
 	fflush(stdout);
-//	cur_color = wp_c;
-	cur_color = hw_c;
+	cur_color = wp_c;
+//	cur_color = hw_c;
 	int bk = rl_point;
 
 	rl_delete_text(0, rl_end);
