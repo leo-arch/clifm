@@ -41,7 +41,7 @@
 #include "aux.h"
 #include "file_operations.h"
 #include "history.h"
-#if NO_FS_EVENTS_MONITOR
+#ifdef NO_FS_EVENTS_MONITOR
 # include "listing.h" /* reload_dirlist() */
 #endif /* NO_FS_EVENTS_MONITOR */
 #include "messages.h"
@@ -687,7 +687,7 @@ CONFIRM:
 			FUNC_NAME, total_rename);
 	}
 
-#if NO_FS_EVENTS_MONITOR
+#ifdef NO_FS_EVENTS_MONITOR
 	if (exit_status == EXIT_FAILURE)
 		return EXIT_FAILURE;
 	if (conf.autols == 1) {

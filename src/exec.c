@@ -243,7 +243,7 @@ run_and_refresh(char **cmd, const int skip_force)
 		save_sel();
 	}
 
-#if NO_FS_EVENTS_MONITOR
+#ifdef NO_FS_EVENTS_MONITOR
 	if (conf.autols == 1 && cmd[1] && strcmp(cmd[1], "--help") != 0
 	&& strcmp(cmd[1], "--version") != 0)
 		reload_dirlist();

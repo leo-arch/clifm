@@ -1658,7 +1658,7 @@ cp_mv_file(char **args, const int copy_and_rename, const int force)
 	&& (!args[0][2] || args[0][2] == ' '))
 		deselect_all();
 
-#if NO_FS_EVENTS_MONITOR
+#ifdef NO_FS_EVENTS_MONITOR
 	if (conf.autols == 1)
 		reload_dirlist();
 #endif /* NO_FS_EVENTS_MONITOR */
@@ -1827,7 +1827,7 @@ remove_file(char **args)
 	if (launch_execv(rm_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		exit_status = EXIT_FAILURE;
 
-#if NO_FS_EVENTS_MONITOR
+#ifdef NO_FS_EVENTS_MONITOR
 	else {
 		if (cwd == 1 && conf.autols == 1 && strcmp(args[1], "--help") != 0
 		&& strcmp(args[1], "--version") != 0)
@@ -2213,7 +2213,7 @@ batch_link(char **args)
 		}
 	}
 
-#if NO_FS_EVENTS_MONITOR
+#ifdef NO_FS_EVENTS_MONITOR
 	if (exit_status == EXIT_SUCCESS && conf.autols)
 		reload_dirlist();
 #endif /* NO_FS_EVENTS_MONITOR */
