@@ -71,6 +71,9 @@
 # define _NO_MAGIC
 #endif
 
+/* We have no file system changes monitor (i.e. inotify or kqueue) for these
+ * systems: screen refresh after file operations is made forcefully in case
+ * of success. */
 #if defined(__HAIKU__) || defined(__CYGWIN__) || defined(__sun)
 # define NO_FS_EVENTS_MONITOR
 #endif /* __HAIKU__ || __CYGWIN__ || __sun */

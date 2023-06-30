@@ -68,7 +68,7 @@
 #define UNSAFE_META      7
 #define UNSAFE_TOO_LONG  8
 
-static char *unsafe_name_msgs[] = {
+static char *const unsafe_name_msgs[] = {
 	"Starts with a dash (-): command option flags collision",
 	"Reserved (internal: MIME/file type expansion)",
 	"Reserved (internal: ELN/range expansion)",
@@ -839,11 +839,11 @@ dup_file(char **cmd)
 			if (launch_execv(_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 				exit_status = EXIT_FAILURE;
 		} else {
-#if !defined(_BE_POSIX)
-			char *_cmd[] = {"cp", "-a", source, dest, NULL};
-#else
+#ifdef _BE_POSIX
 			char *_cmd[] = {"cp", source, dest, NULL};
-#endif
+#else
+			char *_cmd[] = {"cp", "-a", source, dest, NULL};
+#endif /* _BE_POSIX */
 			if (launch_execv(_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 				exit_status = EXIT_FAILURE;
 		}
@@ -1300,7 +1300,7 @@ open_function(char **cmd)
 	 * will be opened. */
 	char no_open_file = 1;
 	const char *file_type = (char *)NULL;
-	const char *types[] = {
+	const char *const types[] = {
 		"block device",
 		"character device",
 		"socket",
@@ -1432,8 +1432,7 @@ print_current_target(const char *link, char **target)
 	ssize_t ret = readlinkat(AT_FDCWD, link, tmp, sizeof(tmp));
 
 	if (ret != -1 && *tmp) {
-		printf(_("%s%s%s (broken link)\n"),
-			uf_c, tmp, df_c);
+		printf(_("%s%s%s (broken link)\n"), uf_c, tmp, df_c);
 		free(*target);
 		*target = savestring(tmp, strlen(tmp));
 		return;
@@ -1504,10 +1503,10 @@ edit_link(char *link)
 	}
 
 	/* Finally, relink the symlink to new_path */
-#if !defined(_BE_POSIX)
-	char *cmd[] = {"ln", "-sfn", new_path, link, NULL};
-#else
+#ifdef _BE_POSIX
 	char *cmd[] = {"ln", "-sf", new_path, link, NULL};
+#else
+	char *cmd[] = {"ln", "-sfn", new_path, link, NULL};
 #endif /* _BE_POSIX */
 	if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 		free(new_path);
@@ -2074,10 +2073,10 @@ bulk_rename(char **args)
 	}
 	fclose(fp);
 
-#if defined(__HAIKU__) || defined(__CYGWIN__)
+#ifdef NO_FS_EVENTS_MONITOR
 	if (conf.autols == 1)
 		reload_dirlist();
-#endif
+#endif /* NO_FS_EVENTS_MONITOR */
 
 	return exit_status;
 
