@@ -32,6 +32,14 @@
 #include <errno.h>
 #include <string.h>
 
+/* Only used to check the readline version */
+#ifdef __OpenBSD__
+  typedef char *rl_cpvfunc_t;
+# include <ereadline/readline/readline.h>
+#else
+# include <readline/readline.h>
+#endif /* __OpenBSD__ */
+
 #include "aux.h"
 #include "checks.h"
 #include "colors.h"
@@ -582,8 +590,18 @@ update_warning_prompt_text_color(void)
 		return;
 
 	*end = '\0';
-	if (is_color_code(start))
+	if (is_color_code(start)) {
 		snprintf(wp_c, sizeof(wp_c), "\x1b[%sm", start);
+
+#if defined(RL_READLINE_VERSION) && RL_READLINE_VERSION < 0x0700
+		_err('w', PRINT_PROMPT, _("%s: Escape sequence detected in the warning "
+			"prompt string: this might cause some glichtes in the prompt due "
+			"to some bugs in the current readline library (%s). Please "
+			"consider removing these escape sequences (via either 'prompt edit' "
+			"or 'cs edit') or upgrading to a newer version of the library "
+			"(>= 7.0 is recommended).\n"), PROGRAM_NAME, rl_library_version);
+#endif /* READLINE < 7.0 */
+	}
 
 	*end = 'm';
 }

@@ -435,13 +435,13 @@ construct_wide_char(unsigned char c)
 /* Handle the input char C and sepcify what to do next based on this char
  * Return values:
  * SUGGEST_ONLY = Do not insert char (already inserted here). Make suggestions.
- * RL_INSERT_ONLY = Let readline insert the char. Do not suggest.
+ * RL_INSERT_CHAR = Let readline insert the char. Do not suggest.
  * SKIP_CHAR = Do not insert char. Do not suggest.
  * SKIP_CHAR_NO_REDISPLAY = Same as SKIP_CHAR, but do not call rl_redisplay(). */
 static int
 rl_exclude_input(unsigned char c)
 {
-	/* If del or backspace, highlight, but do not suggest. */
+	/* Delete or backspace keys. */
 	int _del = 0;
 
 	/* Disable suggestions while in vi command mode and reenable them
@@ -506,18 +506,17 @@ rl_exclude_input(unsigned char c)
 
 	/* Skip control characters (0 - 31) except backspace (8), tab(9),
 	 * enter (13), and escape (27). */
-	if (c < 32 && c != BS && c != _TAB && c != ENTER && c != _ESC)
+	if (c < ' ' && c != BS && c != _TAB && c != ENTER && c != _ESC)
 		return RL_INSERT_CHAR;
 
-	/* Multi-byte char. Send it directly to the input buffer. We can't
-	 * process it here, since we process only single bytes. */
+	/* Multi-byte (UTF8) char. */
 	if ((c & 0xc0) == 0xc0 || (c & 0xc0) == 0x80)
 		return construct_wide_char(c);
 
 	if (c != _ESC)
 		cmdhist_flag = 0;
 
-	/* Skip backspace, Enter, and TAB keys. */
+	/* Skip ESC, backspace, Enter, and TAB keys. */
 	switch (c) {
 		case DELETE: /* fallthrough */
 		case BS:
@@ -589,7 +588,7 @@ END:
 #ifndef _NO_HIGHLIGHT
 	if (conf.highlight == 0) {
 		if (_del > 0) {
-#ifndef _NO_SUGGESTIONS
+# ifndef _NO_SUGGESTIONS
 			/* Since we have removed a char, let's check if there is
 			 * a suggestion available using the modified input line. */
 			if (wrong_cmd == 1 && s == -1 && rl_end > 0) {
@@ -604,11 +603,11 @@ END:
 				if (_del == DEL_EMPTY_LINE)
 					leftmost_bell();
 			}
-#endif /* !_NO_SUGGESTIONS */
+# endif /* !_NO_SUGGESTIONS */
 
-#ifdef NO_BACKWARD_SUGGEST
+# ifdef NO_BACKWARD_SUGGEST
 			return SKIP_CHAR;
-#endif /* NO_BACKWARD_SUGGEST */
+# endif /* NO_BACKWARD_SUGGEST */
 		}
 		return SUGGEST_ONLY;
 	}

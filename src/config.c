@@ -1768,8 +1768,8 @@ create_def_color_scheme(void)
 			"DividingLine=\"%s\"\n\n"
 
 			"# If set to 'true', automatically print notifications at the left\n\
-of the prompt. If set to 'false', let the prompt string handle these notifications\n\
-itself via escape codes. See the manpage for more information\n"
+# of the prompt. If set to 'false', let the prompt string handle these notifications\n\
+# itself via escape codes. See the manpage for more information\n"
 			"Notifications=\"%s\"\n\n"
 			"Prompt=\"%s\"\n\n"
 
