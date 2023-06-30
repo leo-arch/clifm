@@ -2485,7 +2485,8 @@ CALC_OFFSET:
 		|| cur_comp_type == TCMP_BM_PATHS || cur_comp_type == TCMP_MIME_LIST
 		|| cur_comp_type == TCMP_CMD_DESC || cur_comp_type == TCMP_SEL
 		|| cur_comp_type == TCMP_DIRHIST
-		|| (tabmode == STD_TAB && cur_comp_type == TCMP_JUMP))
+		|| (tabmode == STD_TAB && (cur_comp_type == TCMP_JUMP
+		|| cur_comp_type == TCMP_TAGS_F) ) )
 			/* We don't want to highlight the matching part */
 			tab_offset = 0;
 
