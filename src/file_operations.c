@@ -182,12 +182,15 @@ static char
 get_file_suffix(const mode_t type)
 {
 	switch (type) {
-	case DT_DIR: return '/';
+	case DT_DIR: return DIR_CHR;
 	case DT_REG: return 0;
-	case DT_LNK: return '@';
-	case DT_SOCK: return '=';
-	case DT_FIFO: return '|';
-	case DT_UNKNOWN: return '?';
+	case DT_LNK: return LINK_CHR;
+	case DT_SOCK: return SOCK_CHR;
+	case DT_FIFO: return FIFO_CHR;
+#ifdef __sun
+	case DT_DOOR: return DOOR_CHR;
+#endif /* __sun */
+	case DT_UNKNOWN: return UNKNOWN_CHR;
 	default: return 0;
 	}
 }
@@ -409,7 +412,7 @@ get_rm_param(char ***rfiles, const int n)
 	/* We don't need interactivity here: the user already confirmed the
 	 * operation before calling this function. */
 		if (S_ISDIR(a.st_mode)) {
-#if defined(_BE_POSIX)
+#if defined(_BE_POSIX) || defined(__sun)
 			_param = savestring("-rf", 3);
 #else
 			_param = savestring("-drf", 4);
@@ -1303,6 +1306,9 @@ open_function(char **cmd)
 		"socket",
 		"FIFO/pipe",
 		"unknown file type",
+#ifdef __sun
+		"door",
+#endif /* __sun */
 		NULL};
 
 	switch ((attr.st_mode & S_IFMT)) {
@@ -1311,7 +1317,11 @@ open_function(char **cmd)
 	case S_IFCHR: file_type = types[OPEN_CHR]; break;
 	case S_IFSOCK: file_type = types[OPEN_SOCK]; break;
 	case S_IFIFO: file_type = types[OPEN_FIFO]; break;
+#ifdef __sun
+	case S_IFDOOR: file_type = types[OPEN_DOOR]; break;
+#endif /* __sun */
 	case S_IFDIR: return cd_function(file, CD_PRINT_ERROR);
+
 	case S_IFLNK: {
 		int ret = get_link_ref(file);
 		if (ret == -1) {
@@ -1326,11 +1336,15 @@ open_function(char **cmd)
 			case S_IFCHR: file_type = types[OPEN_CHR]; break;
 			case S_IFSOCK: file_type = types[OPEN_SOCK]; break;
 			case S_IFIFO: file_type = types[OPEN_FIFO]; break;
+#ifdef __sun
+			case S_IFDOOR: file_type = types[OPEN_DOOR]; break;
+#endif /* __sun */
 			default: file_type = types[OPEN_UNKNOWN]; break;
 			}
 		}
 		}
 		break;
+
 	case S_IFREG: no_open_file = 0;	break;
 	default: file_type = types[OPEN_UNKNOWN]; break;
 	}
@@ -1644,10 +1658,10 @@ cp_mv_file(char **args, const int copy_and_rename, const int force)
 	&& (!args[0][2] || args[0][2] == ' '))
 		deselect_all();
 
-#if defined(__HAIKU__) || defined(__CYGWIN__)
+#if NO_FS_EVENTS_MONITOR
 	if (conf.autols == 1)
 		reload_dirlist();
-#endif
+#endif /* NO_FS_EVENTS_MONITOR */
 
 	return EXIT_SUCCESS;
 }
@@ -1813,13 +1827,13 @@ remove_file(char **args)
 	if (launch_execv(rm_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		exit_status = EXIT_FAILURE;
 
-#if defined(__HAIKU__) ||  defined(__CYGWIN__)
+#if NO_FS_EVENTS_MONITOR
 	else {
 		if (cwd == 1 && conf.autols == 1 && strcmp(args[1], "--help") != 0
 		&& strcmp(args[1], "--version") != 0)
 			reload_dirlist();
 	}
-#endif /* __HAIKU__ || __CYGWIN__ */
+#endif /* NO_FS_EVENTS_MONITOR */
 
 	if (is_sel && exit_status == EXIT_SUCCESS)
 		deselect_all();
@@ -2199,10 +2213,10 @@ batch_link(char **args)
 		}
 	}
 
-#if defined(__HAIKU__) || defined(__CYGWIN__)
+#if NO_FS_EVENTS_MONITOR
 	if (exit_status == EXIT_SUCCESS && conf.autols)
 		reload_dirlist();
-#endif
+#endif /* NO_FS_EVENTS_MONITOR */
 
 	free(suffix);
 	return exit_status;

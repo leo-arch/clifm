@@ -31,6 +31,9 @@
 #define OPEN_SOCK    2
 #define OPEN_FIFO    3
 #define OPEN_UNKNOWN 4
+#ifdef __sun
+# define OPEN_DOOR   5
+#endif /*  */
 
 __BEGIN_DECLS
 

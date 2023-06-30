@@ -227,8 +227,11 @@ wx_parent_check(char *file)
 
 		break;
 
-	case S_IFSOCK:
-	case S_IFIFO:
+#ifdef __sun
+	case S_IFDOOR: /* fallthrough */
+#endif /* __sun */
+	case S_IFSOCK: /* fallthrough */
+	case S_IFIFO: /* fallthrough */
 	case S_IFLNK:
 		/* Symlinks, sockets and pipes do not support immutable bit */
 		if (parent) {

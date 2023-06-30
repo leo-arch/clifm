@@ -41,9 +41,9 @@
 #include "aux.h"
 #include "file_operations.h"
 #include "history.h"
-#if defined(__HAIKU__) || defined(__CYGWIN__)
-# include "listing.h"
-#endif
+#if NO_FS_EVENTS_MONITOR
+# include "listing.h" /* reload_dirlist() */
+#endif /* NO_FS_EVENTS_MONITOR */
 #include "messages.h"
 #include "misc.h"
 #include "cleaner_table.h"
@@ -687,7 +687,7 @@ CONFIRM:
 			FUNC_NAME, total_rename);
 	}
 
-#if defined(__HAIKU__) || defined(__CYGWIN__)
+#if NO_FS_EVENTS_MONITOR
 	if (exit_status == EXIT_FAILURE)
 		return EXIT_FAILURE;
 	if (conf.autols == 1) {
@@ -698,7 +698,7 @@ CONFIRM:
 	return EXIT_SUCCESS;
 #else
 	return exit_status;
-#endif /* __HAIKU__ || __CYGWIN__ */
+#endif /* NO_FS_EVENTS_MONITOR */
 }
 
 #else
