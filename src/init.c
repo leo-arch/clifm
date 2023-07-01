@@ -1824,7 +1824,13 @@ get_path_env(void)
 		char d = *q;
 		*q = '\0';
 		if (*p && (q - p) > 0) {
-			paths[n].path = savestring(p, (size_t)(q - p));
+			size_t len = (size_t)(q - p);
+			if (len > 1 && p[len - 1] == '/') {
+				p[len - 1] = '\0';
+				len--;
+			}
+
+			paths[n].path = savestring(p, len);
 			n++;
 		}
 
