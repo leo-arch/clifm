@@ -536,8 +536,12 @@ search_glob(char **args)
 	mode_t file_type = 0;
 
 	if (set_file_type_and_search_path(args, &file_type,
-	&search_path, invert) == EXIT_FAILURE)
+	&search_path, invert) == EXIT_FAILURE) {
 		return ERR_SKIP_REGEX;
+	}
+
+	if (file_type == 'x') /* Recursive search via find(1) */
+		return EXIT_SUCCESS;
 
 	/* If we have a path ("/str /path"), chdir into it, since glob(3)
 	 * works on CWD. */
@@ -864,6 +868,9 @@ search_regex(char **args)
 	if (set_file_type_and_search_path(args, &file_type,
 	&search_path, 1) == EXIT_FAILURE)
 		return EXIT_FAILURE;
+
+	if (file_type == 'x') /* Recursive search via find(1) */
+		return EXIT_SUCCESS;
 
 	struct dirent **reg_dirlist = (struct dirent **)NULL;
 	int tmp_files = - 1;
