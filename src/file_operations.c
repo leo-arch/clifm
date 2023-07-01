@@ -66,7 +66,8 @@
 #define UNSAFE_SYS_KEY   5
 #define UNSAFE_CONTROL   6
 #define UNSAFE_META      7
-#define UNSAFE_TOO_LONG  8
+#define UNSAFE_NOT_PORTABLE 8
+#define UNSAFE_TOO_LONG  9
 
 static char *const unsafe_name_msgs[] = {
 	"Starts with a dash (-): command option flags collision",
@@ -77,8 +78,21 @@ static char *const unsafe_name_msgs[] = {
 	"Reserved shell/system keyword",
 	"Contains control characters",
 	"Contains shell meta-characters",
+	"Contains characters not in the Portable Filename Character Set",
 	"Too long"
 };
+
+#ifdef _BE_POSIX
+# define PORTABLE_CHARSET "abcdefghijklmnopqrstuvwxyz\
+ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-_"
+
+/* Return 0 if NAME is a portable file name. Otherwise, return 1. */
+static int
+is_portable_filename(const char *name, const size_t len)
+{
+	return len > strspn(name, PORTABLE_CHARSET);
+}
+#endif /* _BE_POSIX */
 
 /* Print/set the file creation mode mask (umask). */
 int
@@ -1036,6 +1050,13 @@ is_valid_filename(char *name)
 		printf("%s: %s\n", name, unsafe_name_msgs[UNSAFE_TOO_LONG]);
 		return 0;
 	}
+
+#ifdef _BE_POSIX
+	if (is_portable_filename(name, (size_t)(s - name)) != EXIT_SUCCESS) {
+		printf("%s: %s\n", name, unsafe_name_msgs[UNSAFE_NOT_PORTABLE]);
+		return 0;
+	}
+#endif /* _BE_POSIX */
 
 	return 1;
 }
