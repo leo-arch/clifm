@@ -184,7 +184,7 @@ static int
 check_app_existence(char **app, char **arg)
 {
 	if (*(*app) == 'a' && *(*app + 1) == 'd' && !*(*app + 2))
-		/* No need to check: 'ad' is an internal command */
+		/* No need to check: 'ad' is an internal command. */
 		return 1;
 
 	/* Expand tilde */
@@ -1032,7 +1032,7 @@ mime_open_with_tab(char *filename, const char *prefix, const int only_names)
 
 		while (*tmp) {
 			size_t app_len = 0;
-			/* Split the appplications line into substrings, if any */
+			/* Split the applications line into substrings, if any. */
 			while (*tmp != '\0' && *tmp != ';'
 			&& *tmp != '\n' && *tmp != '\'' && *tmp != '"') {
 				app[app_len] = *tmp;
@@ -1073,7 +1073,7 @@ mime_open_with_tab(char *filename, const char *prefix, const int only_names)
 				char *t = expand_env(app);
 				if (t) {
 					/* app_env: A copy of the original string: let's display the
-					 * env var name itself instead of its expanded value */
+					 * env var name itself instead of its expanded value. */
 					app_env = savestring(app, strlen(app));
 					/* app: the expanded value */
 					size_t tlen = strlen(t);
@@ -1099,13 +1099,13 @@ mime_open_with_tab(char *filename, const char *prefix, const int only_names)
 				}
 			}
 			/* Do not allow APP to be plain "clifm", since
-			 * nested executions of clifm are not allowed */
+			 * nested executions of clifm are not allowed. */
 			else if (*app == PROGRAM_NAME[0] && strcmp(app, PROGRAM_NAME) == 0) {
 				;
 			} else if (*app == '/') {
 				if (access(app, X_OK) == 0)
 					file_path = app;
-			/* 'ad' is an internal command, no need to check it */
+			/* 'ad' is an internal command, no need to check it. */
 			} else if (*app == 'a' && app[1] == 'd' && !app[2]){
 				file_path = savestring("ad", 2);
 			} else {
@@ -1113,7 +1113,7 @@ mime_open_with_tab(char *filename, const char *prefix, const int only_names)
 			}
 
 			/* We are completing the 'edit' subcommand. Return command
-			 * names only (not parameters) */
+			 * names only (not parameters). */
 			if (ret && only_names == 0)
 				*ret = ' ';
 
