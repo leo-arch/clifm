@@ -1048,99 +1048,157 @@ create_actions_file(char *file)
 	return EXIT_SUCCESS;
 }
 
-void
-create_tmp_files(void)
+static char *
+define_tmp_rootdir(int *from_env)
 {
-	if (xargs.stealth_mode == 1)
-		return;
+	char *temp = (char *)NULL;
+	*from_env = 1;
 
-	size_t pnl_len = strlen(PROGRAM_NAME);
-	size_t tmp_len = 0;
-
-	/* #### CHECK THE TMP DIR #### */
-
-	/* If the temporary directory doesn't exist, create it. Let's create the
-	 * parent directory (/tmp/clifm) with 1777 permissions (world writable
-	 * with the sticky bit set), so that every user is able to create files
-	 * in here, but only the file's owner can remove or modify them */
-	size_t user_len = user.name ? strlen(user.name) : 7; /* 7: len of "unknown" */
-
-	tmp_len = P_tmpdir_len + pnl_len + user_len + 3;
-	tmp_dir = (char *)xnmalloc(tmp_len, sizeof(char));
-	if (P_tmpdir_len > 0 && P_tmpdir[P_tmpdir_len - 1] == '/')
-		snprintf(tmp_dir, tmp_len, "%s%s", P_tmpdir, PROGRAM_NAME); /* On OpenBSD we get "/tmp/" */
-	else
-		snprintf(tmp_dir, tmp_len, "%s/%s", P_tmpdir, PROGRAM_NAME);
-	/* P_tmpdir is defined in stdio.h and it's value is usually /tmp
-	 * If not defined, it will be defined as "/tmp" */
-
-	int tmp_root_ok = 1;
-	struct stat attr;
-	/* Create /tmp */
-	if (stat(P_tmpdir, &attr) == -1)
-		if (xmkdir(P_tmpdir, S_IRWXU | S_IRWXG | S_IRWXO | S_ISVTX) == EXIT_FAILURE)
-			tmp_root_ok = 0;
-	/* Create /tmp/clifm */
-	if (stat(tmp_dir, &attr) == -1)
-		xmkdir(tmp_dir, S_IRWXU | S_IRWXG | S_IRWXO | S_ISVTX);
-
-	/* Once the parent directory exists, create the user's directory to
-	 * store the list of selected files: TMP_DIR/clifm/username/.selbox_PROFILE.
-	 * We use here very restrictive permissions (700), since only the
-	 * corresponding user must be able to read and/or modify this list */
-	snprintf(tmp_dir, tmp_len, "%s/%s/%s", P_tmpdir, PROGRAM_NAME,
-		user.name ? user.name : "unknown");
-	if (stat(tmp_dir, &attr) == -1) {
-		if (xmkdir(tmp_dir, S_IRWXU) == EXIT_FAILURE) {
-			selfile_ok = 0;
-			_err('e', PRINT_PROMPT, _("%s: %s: %s\n"), PROGRAM_NAME,
-				tmp_dir, strerror(errno));
-		}
+	if (xargs.secure_env != 1 && xargs.secure_env_full != 1) {
+		temp = getenv("CLIFM_TMPDIR");
+		if (!temp || !*temp)
+			temp = getenv("TMPDIR");
 	}
 
-	/* If the directory exists, check it is writable */
-	else if (access(tmp_dir, W_OK) == -1) {
-		if (!sel_file) {
-			selfile_ok = 0;
-			_err('w', PRINT_PROMPT, "%s: %s: Directory not writable. Selected "
-				"files will be lost after program exit\n",
-				PROGRAM_NAME, tmp_dir);
-		}
+	if (!temp || !*temp) {
+		*from_env = 0;
+		temp = P_tmpdir;
 	}
 
+	size_t len = strlen(temp);
+	if (len > 1 && temp[len - 1] == '/') {
+		temp[len] = '\0';
+		len--;
+	}
+
+	char *p = temp;
+	if (*temp != '/') {
+		p = normalize_path(temp, len);
+		if (!p)
+			p = temp;
+	}
+
+	char *tmp_root_dir = savestring(p, strlen(p));
+	if (p != temp)
+		free(p);
+
+	return tmp_root_dir;
+}
+
+/* Define and create the root of our temporary directory. Checks are made in
+ * this order: CLIFM_TMPDIR, TMPDIR, P_tmpdir, and /tmp */
+static char *
+create_tmp_rootdir(void)
+{
+	int from_env = 0;
+	char *tmp_root_dir = define_tmp_rootdir(&from_env);
+	if (!tmp_root_dir || !*tmp_root_dir)
+		goto END;
+
+	struct stat a;
+
+	if (stat(tmp_root_dir, &a) != -1)
+		return tmp_root_dir;
+
+	int ret = EXIT_SUCCESS;
+	char *cmd[] = {"mkdir", "-p", "--", tmp_root_dir, NULL};
+	if ((ret = launch_execv(cmd, FOREGROUND, E_NOSTDERR)) == EXIT_SUCCESS)
+		return tmp_root_dir;
+
+	if (from_env == 0) /* Error creating P_tmpdir */
+		goto END;
+
+	_err('w', PRINT_PROMPT, _("%s: %s: %s.\n"
+		"Cannot create temporary directory. Falling back to '%s'.\n"),
+		PROGRAM_NAME, tmp_root_dir, strerror(ret), P_tmpdir);
+
+	free(tmp_root_dir);
+	tmp_root_dir = savestring(P_tmpdir, P_tmpdir_len);
+
+	if (stat(tmp_root_dir, &a) != -1)
+		return tmp_root_dir;
+
+	char *cmd2[] = {"mkdir", "-p", "--", tmp_root_dir, NULL};
+	if (launch_execv(cmd2, FOREGROUND, E_NOSTDERR) == EXIT_SUCCESS)
+		return tmp_root_dir;
+
+END: /* If everything fails, fallback to /tmp */
+	free(tmp_root_dir);
+	return savestring("/tmp", 4);
+}
+
+static void
+create_selfile(const size_t tmp_rootdir_len)
+{
 	/* sel_file should has been set before by set_sel_file(). If not set,
-	 * we do not have access to the config dir */
+	 * we do not have access to the config dir. */
 	if (sel_file)
 		return;
 
-	/*"We will write a temporary selfile in /tmp. Check if this latter is
-	 * available */
-	if (tmp_root_ok == 0) {
-		_err('w', PRINT_PROMPT, "%s: Could not create the selections file.\n"
-			"Selected files will be lost after program exit\n",
-		    PROGRAM_NAME, tmp_dir);
-		return;
-	}
-
+	size_t len = 0;
 	/* If the config directory isn't available, define an alternative
 	 * selection file in /tmp (if available) */
 	if (conf.share_selbox == 0) {
 		size_t prof_len = alt_profile ? strlen(alt_profile) : 7;
 		/* 7 == lenght of "default" */
 
-		tmp_len = P_tmpdir_len + prof_len + 15;
-		sel_file = (char *)xnmalloc(tmp_len, sizeof(char));
-		snprintf(sel_file, tmp_len, "%s/selbox_%s.clifm", P_tmpdir,
+		len = tmp_rootdir_len + prof_len + 15;
+		sel_file = (char *)xnmalloc(len, sizeof(char));
+		snprintf(sel_file, len, "%s/selbox_%s.clifm", tmp_rootdir,
 		    alt_profile ? alt_profile : "default");
 	} else {
-		tmp_len = P_tmpdir_len + 14;
-		sel_file = (char *)xnmalloc(tmp_len, sizeof(char));
-		snprintf(sel_file, tmp_len, "%s/selbox.clifm", P_tmpdir);
+		len = tmp_rootdir_len + 14;
+		sel_file = (char *)xnmalloc(len, sizeof(char));
+		snprintf(sel_file, len, "%s/selbox.clifm", tmp_rootdir);
 	}
 
 	_err('w', PRINT_PROMPT, _("%s: %s: Using a temporary directory for "
 		"the Selection Box. Selected files won't be persistent across "
 		"reboots\n"), PROGRAM_NAME, tmp_dir);
+}
+
+void
+create_tmp_files(void)
+{
+	if (xargs.stealth_mode == 1)
+		return;
+
+	tmp_rootdir = create_tmp_rootdir();
+
+	size_t tmp_rootdir_len = strlen(tmp_rootdir);
+	size_t pnl_len = strlen(PROGRAM_NAME);
+	size_t user_len = user.name ? strlen(user.name) : 7; /* 7: len of "unknown" */
+
+	size_t tmp_len = tmp_rootdir_len + pnl_len + user_len + 3;
+	tmp_dir = (char *)xnmalloc(tmp_len, sizeof(char));
+	snprintf(tmp_dir, tmp_len, "%s/%s", tmp_rootdir, PROGRAM_NAME);
+
+	struct stat attr;
+	if (stat(tmp_dir, &attr) == -1)
+		xmkdir(tmp_dir, S_IRWXU | S_IRWXG | S_IRWXO | S_ISVTX);
+
+	/* Once TMP_ROOTDIR exists, create the user's directory to store
+	 * the list of selected files: TMP_DIR/clifm/username/.selbox_PROFILE.
+	 * We use here very restrictive permissions (700), since only the
+	 * current user must be able to read and/or modify this list. */
+	snprintf(tmp_dir, tmp_len, "%s/%s/%s", tmp_rootdir, PROGRAM_NAME,
+		user.name ? user.name : "unknown");
+	if (stat(tmp_dir, &attr) == -1
+	&& xmkdir(tmp_dir, S_IRWXU) == EXIT_FAILURE) {
+		selfile_ok = 0;
+		_err('e', PRINT_PROMPT, _("%s: %s: %s\n"), PROGRAM_NAME,
+			tmp_dir, strerror(errno));
+	}
+
+	/* If the directory exists, check if it is writable. */
+	else if (access(tmp_dir, W_OK) == -1 && !sel_file) {
+		selfile_ok = 0;
+		_err('w', PRINT_PROMPT, "%s: %s: Directory not writable. Selected "
+			"files will be lost after program exit\n",
+			PROGRAM_NAME, tmp_dir);
+	}
+
+	create_selfile(tmp_rootdir_len);
 }
 
 static void

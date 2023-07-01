@@ -1626,6 +1626,7 @@ free_stuff(void)
 #endif
 
 	free(sel_file);
+	free(tmp_rootdir);
 	free(tmp_dir);
 	free(user.name);
 	free(user.home);

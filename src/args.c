@@ -565,7 +565,7 @@ open_reg_exit(char *filename, const int url, const int preview)
 	char *homedir = (xargs.secure_env == 1 || xargs.secure_env_full == 1)
 		? get_home_sec_env() : getenv("HOME");
 	if (!homedir) {
-		xerror("%s: Could not retrieve the home directory\n", PROGRAM_NAME);
+		xerror(_("%s: Could not retrieve the home directory\n"), PROGRAM_NAME);
 		exit(EXIT_FAILURE);
 	}
 

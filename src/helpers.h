@@ -1480,6 +1480,7 @@ extern char
 	*suggestion_buf,
 #endif
 	*tags_dir,
+	*tmp_rootdir,
 	*tmp_dir,
 #ifndef _NO_TRASH
 	*trash_dir,

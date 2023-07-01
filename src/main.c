@@ -286,6 +286,7 @@ char
 #endif
 	*sys_shell = (char *)NULL,
 	*tags_dir = (char *)NULL,
+	*tmp_rootdir = (char *)NULL,
 	*tmp_dir = (char *)NULL,
 #ifndef _NO_TRASH
 	*trash_dir = (char *)NULL,
