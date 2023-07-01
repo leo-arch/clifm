@@ -1949,13 +1949,13 @@ list_dir_light(void)
 	}
 
 	if (xargs.disk_usage_analyzer == 1)
-		putchar('\r');
+		fputs("\r            \r", stdout); /* Erase the "Scanning ..." message */
 
 	file_info[n].name = (char *)NULL;
 	files = (size_t)n;
 
 	if (n == 0) {
-		printf("%s. ..%s\n", conf.colorize ? di_c : df_c, df_c);
+		printf("%s. ..%s\n", di_c, df_c);
 		free(file_info);
 		goto END;
 	}
@@ -2613,14 +2613,16 @@ list_dir(void)
 		file_info = xrealloc(file_info, (n + 1) * sizeof(struct fileinfo)); */
 
 	if (xargs.disk_usage_analyzer == 1 || (conf.long_view == 1
-	&& conf.full_dir_size == 1))
-		putchar('\r'); /* Erase the "Retrieveing file sizes" message */
+	&& conf.full_dir_size == 1)) {
+		fputs("\r            \r", stdout); /* Erase the "Scanning ..." message */
+		fflush(stdout);
+	}
 
 	file_info[n].name = (char *)NULL;
 	files = n;
 
 	if (n == 0) {
-		printf("%s. ..%s\n", conf.colorize ? di_c : df_c, df_c);
+		printf("%s. ..%s\n", di_c, df_c);
 		free(file_info);
 		goto END;
 	}
