@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Jun 29, 2023" "clifm 1.12.18" "CLIFM Manual"
+.TH "CLIFM" "1" "Jul 1, 2023" "clifm 1.12.18" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -2788,6 +2788,15 @@ An absolute path to the shell \fBclifm\fR will use to run external commands. Onl
 .TP
 .B SHELL
 Same as \fBCLIFM_SHELL\fR. Note however that \fBCLIFM_SHELL\fR takes precedence over \fBSHELL\fR.
+.TP
+.B TMPDIR
+Path to a directory where temporary files will be created
+.TP
+.B CLIFM_TMPDIR
+Same as \fBTMPDIR\fR, but specific to \fBclifm\fR (takes precendece over \fBTMPDIR\fR)
+.TP
+.B TERM
+Terminal type for which output is to be prepared
 .TP
 .B FZF_DEFAULT_OPTS
 A quoted list of options to be passed to FZF (if used for TAB completion)
