@@ -1063,6 +1063,10 @@ switch_prompt(const size_t n)
 	}
 
 	prompt_notif = prompts[n].notifications;
+
+	if (xargs.warning_prompt == 0)
+		return EXIT_SUCCESS;
+
 	conf.warning_prompt = prompts[n].warning_prompt_enabled;
 
 	update_warning_prompt_text_color();
