@@ -31,7 +31,7 @@
 
 #define ACTIONS_USAGE "List or edit actions/plugins\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  actions [list] [edit [APP]]\n\n\
+  actions [list | edit [APP]]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - List available actions/plugins\n\
     actions list\n\
@@ -50,7 +50,7 @@ use the -h,--help flag. Example: \"- --help\"."
 
 #define ALIAS_USAGE "List, print, or import aliases\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  alias [import FILE] [list] [NAME]\n\n\
+  alias [import FILE | list | NAME]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - List available aliases\n\
     alias\n\
@@ -86,7 +86,7 @@ atool(1)          Extraction/decompression, listing, and repacking of archives"
 
 #define AUTOCD_USAGE "Turn autocd on/off\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  acd, autocd [on, off, status]"
+  acd, autocd [on | off | status]"
 
 #define AUTOCMDS_USAGE "Tweak settings or run custom commands on a per directory basis\n\n\
 There are two ways to set autocommands:\n\
@@ -112,12 +112,12 @@ stuff, set here the path to a script doing whatever needs to be done."
 
 #define AUTO_OPEN_USAGE "Turn auto-open on/off\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  ao, auto-open [on, off, status]"
+  ao, auto-open [on | off | status]"
 
 #define BACK_USAGE "Change to the previous directory in the directory \
 history list\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  b, back [h, hist] [clear] [!ELN]\n\n\
+  b, back [h, hist | clear | !ELN]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Just change to the previously visited directory\n\
     b (also Alt-j or Shift-Left)\n\
@@ -157,7 +157,7 @@ change this suffix)"
 
 #define BOOKMARKS_USAGE "Manage bookmarks\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  bm, bookmarks [a, add FILENAME NAME] [d, del [NAME]] [e, edit [APP]] [NAME]\n\n\
+  bm, bookmarks [a, add FILENAME NAME | d, del [NAME] | e, edit [APP] | NAME]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Open the bookmarks screen\n\
     bm (Alt-b)\n\
@@ -203,11 +203,11 @@ change this suffix)"
 
 #define COLUMNS_USAGE "Set columned list of files on/off\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  cl, columns [on, off]"
+  cl, columns [on | off]"
 
 #define CS_USAGE "Switch color schemes\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  cs, colorschemes [COLORSCHEME] [edit [APP]] [n, name]\n\n\
+  cs, colorschemes [COLORSCHEME | edit [APP] | n, name]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Print current color scheme\n\
     cs name (or 'cs n')\n\
@@ -259,7 +259,7 @@ Tip: Take a look at the 'j' command as well"
 
 #define DIRHIST_USAGE "List or access entries in the directory history list\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  b/f [hist] [clear] [!ELN]\n\n\
+  b/f [hist | clear | !ELN]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Print the directory history list\n\
     b hist\n\
@@ -283,7 +283,7 @@ Parameters passed to cp: -a"
 
 #define EDIT_USAGE "Edit the main configuration file\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  config [reset] [dump] [APPLICATION]\n\n\
+  config [reset | dump | APPLICATION]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Open/edit the configuration file\n\
     config (or F10)\n\
@@ -300,7 +300,7 @@ Parameters passed to cp: -a"
 
 #define EXPORT_FILES_USAGE "Export files to a temporary file\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  exp [ELN/FILE]...\n\n\
+  exp [ELN/FILE...]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Export all selected files\n\
     exp sel\n\
@@ -313,7 +313,7 @@ Parameters passed to cp: -a"
 
 #define FC_USAGE "Turn on/off the files counter for directories\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  fc [on, off, status]"
+  fc [on | off | status]"
 
 #define FILE_DETAILS "List file details\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
@@ -343,7 +343,7 @@ Note 2: Unlink 'p', 'pp' always follows symlinks to their target file."
 
 #define FF_USAGE "Set list-directories-first on/off\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  ff, dirs-first [on, off, status]\n\
+  ff, dirs-first [on | off | status]\n\
 \x1b[1mEXAMPLE\x1b[0m\n\
 - Disable list directories-first\n\
     ff off\n\
@@ -393,7 +393,7 @@ that there is no need to set this variable."
 
 #define FILTER_USAGE "Set a filter for the files list\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  ft, filter [unset] [[!]REGEX,=FILE-TYPE-CHAR]\n\n\
+  ft, filter [unset | [!]REGEX,=FILE-TYPE-CHAR]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Print the current filter, if any\n\
     ft\n\
@@ -449,7 +449,7 @@ files in the current directory:\n\n\
 
 #define FORTH_USAGE "Change to the next directory in the directory history list\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  f, forth [h, hist] [clear] [!ELN]\n\n\
+  f, forth [h, hist | clear | !ELN]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Just change to the next visited directory\n\
     f (also Alt-k or Shift-Right)\n\
@@ -477,7 +477,7 @@ files in the current directory:\n\n\
 
 #define HF_USAGE "Set hidden files on/off\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  hf, hh, hidden [on, off, status]\n\n\
+  hf, hh, hidden [on | off | status]\n\n\
 \x1b[1mEXAMPLE\x1b[0m\n\
 - Show hidden files\n\
     hh on\n\
@@ -493,7 +493,7 @@ history or !<TAB>: List available commands\n\
 
 #define HISTORY_USAGE "List or access commands history entries\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  history [edit [APP]] [clear] [-n] [on, off, status, show-time]\n\n\
+  history [edit [APP] | clear | -N | on | off | status | show-time [-N]]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Print the complete list of commands in history\n\
     history\n\
@@ -529,7 +529,7 @@ You can also access the commands history via the exclamation mark (!)\n\
 
 #define JUMP_USAGE "Change to a directory in the jump database (visited directories)\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  j [--purge [NUM]] [--edit [APP]], jc, jp, jl [STRING]..., je\n\n\
+  j [--purge [NUM] | --edit [APP]], jc, jp, jl [STRING]..., je\n\n\
 For information about the matching algorithm consult the manpage\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Print the list of entries in the jump database\n\
@@ -561,7 +561,7 @@ For information about the matching algorithm consult the manpage\n\n\
 
 #define KB_USAGE "Manage key bindings\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  kb, keybinds [list] [edit [APP]] [reset] [readline]\n\n\
+  kb, keybinds [list | edit [APP] | reset | readline]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - List your current key bindings\n\
     kb (or 'kb list')\n\
@@ -583,7 +583,7 @@ For information about the matching algorithm consult the manpage\n\n\
 
 #define LL_USAGE "Toggle long view mode\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  ll, lv [on, off]\n\n\
+  ll, lv [on | off]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Change to long view\n\
     ll on\n\
@@ -596,7 +596,7 @@ For information about the matching algorithm consult the manpage\n\n\
 
 #define LOG_USAGE "Manage Clifm logs\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  log [cmd, msg] [list, on, off, status, clear]\n\n\
+  log [cmd | msg] [list | on | off | status | clear]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Print message logs\n\
     log msg list (or just 'log msg')\n\
@@ -623,11 +623,11 @@ To get information about a device, enter iELN. For example: i12"
 #define MF_USAGE "Limit the amount of files listed on the screen to NUM \
 (valid range: >= 0). Use 'unset' to remove the files limit.\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  mf [NUM, unset]"
+  mf [NUM | unset]"
 
 #define MIME_USAGE "Set default opening applications based on MIME types or file names\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  mm, mime [open FILE] [info FILE] [edit [APP]] [import]\n\n\
+  mm, mime [open FILE | info FILE | edit [APP] | import]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Open the file 'book.pdf' with the default opening application\n\
     mm open book.pdf\n\
@@ -669,7 +669,7 @@ To get information about a device, enter iELN. For example: i12"
 
 #define NET_USAGE "Manage network resources\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  net [NAME] [list] [edit [APP]] [m, mount NAME] [u, unmount NAME]\n\n\
+  net [NAME] [list | edit [APP] | m, mount NAME | u, unmount NAME]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - List available remote resources (like SSHFS or samba)\n\
     net (or 'net list')\n\
@@ -687,7 +687,7 @@ To get information about a device, enter iELN. For example: i12"
 
 #define NEW_USAGE "Create new files and/or directories\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  n, new [FILE]... [DIR/]...\n\n\
+  n, new [FILE...] [DIR/...]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Create two files named file1 and file2\n\
     n file1 file2\n\
@@ -762,7 +762,7 @@ Note: Use the 'pc' command to edit files permissions"
 
 #define PAGER_USAGE "Set the files list pager on/off\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  pg, pager [on, off, status, NUM]\n\n\
+  pg, pager [on | off | status | NUM]\n\n\
 If set to 'on', run the pager whenever the list of files does no fit on\n\
 the screen. If set to any positive integer greater than 1, run the pager\n\
 whenever the amount of files in the current directory is greater than or\n\
@@ -797,7 +797,7 @@ Note: Use the 'oc' command to edit files ownership"
 
 #define PROFILES_USAGE "Manage profiles\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  pf, profile [list] [set, add, del PROFILE] [rename PROFILE NEW_NAME]\n\n\
+  pf, profile [list | set, add, del PROFILE | rename PROFILE NEW_NAME]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Print the current profile name\n\
     pf\n\
@@ -814,7 +814,7 @@ Note: Use the 'oc' command to edit files ownership"
 
 #define PROMPT_USAGE "Change current prompt\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  prompt [set NAME] [list] [unset] [edit [APP]] [reload]\n\
+  prompt [set NAME | list | unset | edit [APP] | reload]\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - List available prompts\n\
     prompt list (or 'prompt set <TAB>' to choose from a list)\n\
@@ -835,7 +835,7 @@ whatever prompt you like."
 
 #define PROP_USAGE "Print files properties\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  p, pp, prop [ELN/FILE]...\n\n\
+  p, pp, prop [ELN/FILE...]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Print the properties of the file whose ELN is 12\n\
     p 12 (or 'p <TAB>' to choose from a list)\n\
@@ -851,7 +851,7 @@ themselves, 'pp' always follows symlinks to their target file."
 
 #define PWD_DESC "Print the name of the current working directory\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  pwd [-LP]\n\n\
+  pwd [-L | -P]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Print the logical working directory (do not resolve symlinks)\n\
     pwd (or 'pwd -L')\n\
@@ -967,8 +967,8 @@ Note: Both numbers and names are allowed\n\n\
 
 #define TAG_USAGE "(Un)tag files and/or directories\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  tag [add, del, list, list-full, merge, new, rename, untag]\n\
-      [FILE]... [[:]TAG]\n\n\
+  tag [add | del | list | list-full | merge | new | rename | untag]\n\
+      [FILE...] [[:]TAG]\n\n\
 Instead of the long format described above, you can use any of the\n\
 following shortcuts as well:\n\n\
   ta: Tag files as ...       (same as 'tag add')\n\
@@ -1030,7 +1030,7 @@ Mark the files you need via TAB and then press Enter or Right"
 
 #define TRASH_USAGE "Send one or multiple files to the trash can\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  t, trash [ELN/FILE]... [list] [clear] [empty] [del]\n\n\
+  t, trash [ELN/FILE... | list | clear | empty | del]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Trash the file whose ELN is 12\n\
     t 12\n\
@@ -1067,7 +1067,7 @@ Note: MODE is an octal value from 000 to 777\n\n\
 
 #define UNTRASH_USAGE "Restore files from the trash can\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  u, undel, untrash [FILE]... [*, a, all]\n\n\
+  u, undel, untrash [FILE... | *, a, all]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Untrash all trashed files (restore them to their original location)\n\
     u *\n\
@@ -1088,7 +1088,7 @@ Note: Use the 'trash' command to trash files. Try 'trash --help'"
 
 #define VIEW_USAGE "Preview files in the current directory (requires fzf)\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  view [edit [app]]\n\n\
+  view [edit [APP]]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Just run the previewer\n\
     view (or Alt+-)\n\
@@ -1166,7 +1166,7 @@ Use the 'cr' plugin to send a file to a remote location:\n\
 
 #define WS_USAGE "Switch workspaces\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  ws [NUM/NAME [unset], +, -]\n\n\
+  ws [NUM/NAME [unset] | + | -]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - List available workspaces\n\
     ws (or 'ws <TAB>')\n\

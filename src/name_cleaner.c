@@ -150,15 +150,11 @@ get_uft8_dec_value(size_t *i, char *str)
 		(*i)++;
 
 		if (str[*i] == '\0') {
-/*			fprintf(stderr, "CliFM: warning: UTF-8 sequence ended unexpectedly "
-					"(null)\n"); */
 			failed = 1;
 			break;
 		}
 
 		if ((str[*i] & UTF_8_ENCODED_MASK) != UTF_8_ENCODED_CONT) { /* Not a UTF-8 continuation byte */
-/*			fprintf(stderr, "CliFM: warning: UTF-8 sequence ended unexpectedly "
-					"(missing continuation byte)\n"); */
 			failed = 1;
 			break;
 		}
@@ -169,9 +165,7 @@ get_uft8_dec_value(size_t *i, char *str)
 		expected_chars--;
 	}
 
-	if (failed)
-		return (-2);
-	return new_value;
+	return failed == 1 ? (-2) : new_value;
 }
 
 /* Clean up NAME either by removing those (extended-ASCII/Unicode) characters
