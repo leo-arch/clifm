@@ -2,7 +2,7 @@
 
 /*
  * This file is part of CliFM
- * 
+ *
  * Copyright (C) 2016-2023, L. Abramovich <leo.clifm@outlook.com>
  * All rights reserved.
 
@@ -30,9 +30,9 @@
 
 #include "helpers.h"
 
-// Not needed on __linux__, __CYGWIN__, __TERMUX__, __sun, __FreeBSD__,
-// and __OpenBSD__ at least
-#include <ctype.h>
+// Unrequired on __linux__, __CYGWIN__, __TERMUX__, __sun, __FreeBSD__,
+// __NetBSD__, __HAIKU__, __DragonFly__, and __OpenBSD__ at least
+//#include <ctype.h>
 
 #include <dirent.h>
 #include <errno.h>

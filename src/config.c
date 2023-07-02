@@ -1128,14 +1128,14 @@ END: /* If everything fails, fallback to /tmp */
 static void
 create_selfile(const size_t tmp_rootdir_len)
 {
-	/* sel_file should has been set before by set_sel_file(). If not set,
+	/* SEL_FILE should has been set before by set_sel_file(). If not set,
 	 * we do not have access to the config dir. */
 	if (sel_file)
 		return;
 
 	size_t len = 0;
 	/* If the config directory isn't available, define an alternative
-	 * selection file in /tmp (if available) */
+	 * selection file in TMP_ROOTDIR (if available). */
 	if (conf.share_selbox == 0) {
 		size_t prof_len = alt_profile ? strlen(alt_profile) : 7;
 		/* 7 == lenght of "default" */

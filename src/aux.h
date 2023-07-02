@@ -2,7 +2,7 @@
 
 /*
  * This file is part of CliFM
- * 
+ *
  * Copyright (C) 2016-2023, L. Abramovich <leo.clifm@outlook.com>
  * All rights reserved.
 
@@ -68,7 +68,7 @@ int  xmkdir(char *, const mode_t);
 
 #ifndef _NO_ICONS
 size_t hashme(const char *, const int);
-#endif
+#endif /* !_NO_ICONS */
 
 /* Some memory wrapper functions */
 void *xrealloc(void *, const size_t);
