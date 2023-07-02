@@ -512,6 +512,7 @@ set_events_checker(void)
 {
 #if defined(LINUX_INOTIFY)
 	reset_inotify();
+
 #elif defined(BSD_KQUEUE)
 	if (event_fd >= 0) {
 		close(event_fd);
@@ -527,12 +528,19 @@ set_events_checker(void)
 	if (event_fd >= 0) {
 		/* Prepare for events */
 		EV_SET(&events_to_monitor[0], event_fd, EVFILT_VNODE,
-				EV_ADD | EV_CLEAR, KQUEUE_FFLAGS, 0, workspaces[cur_ws].path);
+			EV_ADD | EV_CLEAR, KQUEUE_FFLAGS, 0, workspaces[cur_ws].path);
 		watch = 1;
 		/* Register events */
 //		kevent(kq, events_to_monitor, NUM_EVENT_SLOTS, NULL, NUM_EVENT_FDS, NULL);
 		kevent(kq, events_to_monitor, NUM_EVENT_SLOTS, NULL, 0, NULL);
 	}
+
+#elif defined(GENERIC_FS_MONITOR)
+	struct stat a;
+	if (stat(workspaces[cur_ws].path, &a) != -1)
+		curdir_mtime = a.st_mtime;
+	else
+		curdir_mtime = 0;
 #endif /* LINUX_INOTIFY */
 }
 

@@ -231,6 +231,9 @@ extern int kq, event_fd;
 extern struct kevent events_to_monitor[];
 extern unsigned int KQUEUE_FFLAGS;
 extern struct timespec timeout;
+#else
+# define GENERIC_FS_MONITOR
+extern time_t curdir_mtime;
 #endif /* LINUX_INOTIFY */
 extern int watch;
 

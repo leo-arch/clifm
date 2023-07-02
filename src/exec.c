@@ -2827,13 +2827,20 @@ exec_cmd(char **comm)
 CHECK_EVENTS:
 	if (conf.autols == 0)
 		return exit_code;
-#ifdef LINUX_INOTIFY
+
+#if defined(LINUX_INOTIFY)
 	if (watch)
 		read_inotify();
 #elif defined(BSD_KQUEUE)
 	if (watch && event_fd >= 0)
 		read_kqueue();
+#elif defined(GENERIC_FS_MONITOR)
+	struct stat a;
+	if (curdir_mtime != 0 && stat(workspaces[cur_ws].path, &a) != -1
+	&& curdir_mtime != a.st_mtime)
+		reload_dirlist();
 #endif /* LINUX_INOTIFY */
+
 	return exit_code;
 }
 
