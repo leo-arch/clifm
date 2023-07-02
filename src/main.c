@@ -1165,7 +1165,7 @@ main(int argc, char *argv[])
 	/* Initialize gettext() for translations */
 #ifndef _NO_GETTEXT
 	init_gettext();
-#endif
+#endif /* !_NO_GETTEXT */
 
 	fputs(df_c, stdout);
 	fflush(stdout);

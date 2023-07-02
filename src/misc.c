@@ -283,7 +283,7 @@ reset_inotify(void)
 	}
 
 	/* If CWD is a symlink to a directory and it does not end with a slash,
-	 * inotify_add_watch(3) fails with ENOTDIR */
+	 * inotify_add_watch(3) fails with ENOTDIR. */
 	char rpath[PATH_MAX];
 	snprintf(rpath, sizeof(rpath), "%s/", workspaces[cur_ws].path);
 
@@ -353,13 +353,9 @@ read_inotify(void)
 					break;
 			}
 
-			if (j < 0) {
-				ignore_event = 0;
-			} else {
-				/* If destiny file name is already in the files list,
-				 * ignore this event. */
-				ignore_event = 1;
-			}
+			/* If destiny file name is already in the files list (j >= 0),
+			 * ignore this event. */
+			ignore_event = (j < 0) ? 0 : 1;
 		}
 
 		if (event->mask & IN_DELETE) {

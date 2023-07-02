@@ -523,7 +523,7 @@ set_events_checker(void)
 	event_fd = open(workspaces[cur_ws].path, O_EVTONLY);
 # else
 	event_fd = open(workspaces[cur_ws].path, O_RDONLY);
-# endif
+# endif /* O_EVTONLY */
 	if (event_fd >= 0) {
 		/* Prepare for events */
 		EV_SET(&events_to_monitor[0], event_fd, EVFILT_VNODE,

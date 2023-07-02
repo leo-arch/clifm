@@ -1847,14 +1847,6 @@ remove_file(char **args)
 	if (launch_execv(rm_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		exit_status = EXIT_FAILURE;
 
-#ifdef NO_FS_EVENTS_MONITOR
-	else {
-		if (cwd == 1 && conf.autols == 1 && strcmp(args[1], "--help") != 0
-		&& strcmp(args[1], "--version") != 0)
-			reload_dirlist();
-	}
-#endif /* NO_FS_EVENTS_MONITOR */
-
 	if (is_sel && exit_status == EXIT_SUCCESS)
 		deselect_all();
 

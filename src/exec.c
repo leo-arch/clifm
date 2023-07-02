@@ -2833,7 +2833,7 @@ CHECK_EVENTS:
 #elif defined(BSD_KQUEUE)
 	if (watch && event_fd >= 0)
 		read_kqueue();
-#endif
+#endif /* LINUX_INOTIFY */
 	return exit_code;
 }
 
