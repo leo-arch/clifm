@@ -2,7 +2,7 @@
 
 /*
  * This file is part of CliFM
- * 
+ *
  * Copyright (C) 2016-2023, L. Abramovich <leo.clifm@outlook.com>
  * All rights reserved.
 
@@ -112,7 +112,7 @@ xsecure_env(const int mode)
 	xerror("%s: secure-env: This feature is not available "
 		"on MacOS\n", PROGRAM_NAME);
 	exit(EXIT_FAILURE);
-#endif /* __APPLE__ */
+#endif /* __HAIKU__ */
 
 	char *display = (char *)NULL,
 		 *wayland_display = (char *)NULL,

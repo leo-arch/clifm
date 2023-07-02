@@ -1,7 +1,7 @@
 /* name_cleaner.c -- functions to clean up file names
  * 
  * This file is part of CliFM
- * 
+ *
  * Copyright (C) 2016-2023, L. Abramovich <leo.clifm@outlook.com>
  * All rights reserved.
 

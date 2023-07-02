@@ -2,7 +2,7 @@
 
 /*
  * This file is part of CliFM
- * 
+ *
  * Copyright (C) 2016-2023, L. Abramovich <leo.clifm@outlook.com>
  * All rights reserved.
 
@@ -69,7 +69,7 @@ get_profile_names(void)
 	size_t i, pf_n = 0;
 #if !defined(_DIRENT_HAVE_D_TYPE)
 	struct stat attr;
-#endif
+#endif /* !_DIRENT_HAVE_D_TYPE */
 
 	for (i = 0; i < (size_t)files_n; i++) {
 #if !defined(_DIRENT_HAVE_D_TYPE)
@@ -80,7 +80,7 @@ get_profile_names(void)
 		if (S_ISDIR(attr.st_mode)
 #else
 		if (profs[i]->d_type == DT_DIR
-#endif /* _DIRENT_HAVE_D_TYPE */
+#endif /* !_DIRENT_HAVE_D_TYPE */
 		    /* Discard ".", "..", and hidden dirs */
 		    && *profs[i]->d_name != '.') {
 			profile_names = (char **)xrealloc(profile_names, (pf_n + 1)

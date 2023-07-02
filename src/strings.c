@@ -2,7 +2,7 @@
 
 /*
  * This file is part of CliFM
- * 
+ *
  * Copyright (C) 2016-2023, L. Abramovich <leo.clifm@outlook.com>
  * All rights reserved.
 
@@ -431,7 +431,7 @@ u8truncstr(char *restrict str, const size_t max)
 	return bmax - len;
 }
 
-/* Replace control characters in NAME by '^' */
+/* Replace control characters in NAME by '^'. */
 char *
 replace_ctrl_chars(const char *name)
 {
@@ -722,7 +722,6 @@ cmd_keeps_quotes(const char *str)
 		return 0;
 
 	return (strncmp(str, "ft ", 3) == 0 || strncmp(str, "filter ", 7) == 0);
-//	|| strncmp(str, "n ", 2) == 0 || strncmp(str, "new ", 4) == 0);
 }
 
 /* This function takes a string as argument and splits it into substrings
@@ -2803,7 +2802,7 @@ home_tilde(char *new_path, int *free_buf)
  * smaller than the amount of files currently listed on the screen, and
  * the second (right) extreme is bigger than the first (left). Returns
  * an array of int's with the expanded range or NULL if one of the
- * above conditions is not met */
+ * above conditions is not met. */
 int *
 expand_range(char *str, int listdir)
 {
@@ -2857,7 +2856,7 @@ expand_range(char *str, int listdir)
 }
 
 /* Returns a pointer to a copy of the string STR with size SIZE, or
- * NULL on error */
+ * NULL on error. */
 char *
 savestring(const char *restrict str, size_t size)
 {
@@ -2875,7 +2874,7 @@ savestring(const char *restrict str, size_t size)
 }
 
 /* Take a string and returns the same string escaped. If nothing to be
- * escaped, the original string is returned */
+ * escaped, the original string is returned. */
 char *
 escape_str(const char *str)
 {
@@ -2905,7 +2904,7 @@ escape_str(const char *str)
  * if there is a range, expand it. Returns an array containing all
  * substrings in STR plus expandes ranges, or NULL if: STR is NULL or
  * empty, STR contains only IFS(s), or in case of memory allocation
- * error */
+ * error. */
 char **
 get_substr(char *str, const char ifs)
 {
@@ -3041,8 +3040,7 @@ get_substr(char *str, const char ifs)
 		char **rbuf = (char **)NULL;
 		rbuf = (char **)xnmalloc((substr_n + (size_t)(asecond - afirst) + 1),
 								sizeof(char *));
-		/* Copy everything before the range expression
-		 * into the buffer */
+		/* Copy everything before the range expression into the buffer */
 		for (j = 0; j < i; j++) {
 			rbuf[k] = savestring(substr[j], strlen(substr[j]));
 			k++;
@@ -3057,7 +3055,7 @@ get_substr(char *str, const char ifs)
 		}
 
 		/* Copy everything after the range expression into
-		 * the buffer, if anything */
+		 * the buffer, if anything. */
 		if (substr[i + 1]) {
 			next = k;
 			for (j = (i + 1); substr[j]; j++) {
@@ -3065,12 +3063,12 @@ get_substr(char *str, const char ifs)
 				k++;
 			}
 		} else { /* If there's nothing after last range, there's no next
-		either */
+		either. */
 			next = 0;
 		}
 
 		/* Repopulate the original array with the expanded range and
-		 * remaining strings */
+		 * remaining strings. */
 		substr_n = k;
 		for (j = 0; substr[j]; j++)
 			free(substr[j]);

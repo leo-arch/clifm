@@ -2,7 +2,7 @@
 
 /*
  * This file is part of CliFM
- * 
+ *
  * Copyright (C) 2016-2023, L. Abramovich <leo.clifm@outlook.com>
  * All rights reserved.
 
@@ -1443,10 +1443,10 @@ check_actions(char **args)
 			// REMOVE ONCE THE DH PLUGIN'S DEPRECATION PERIOD IS OVER
 			if (*usr_actions[i].name == 'd' && usr_actions[i].name[1] == 'h'
 			&& !usr_actions[i].name[2]) {
-				_err('n', PRINT_PROMPT, "%s: The 'dh' plugin is deprecated. "
+				_err('n', PRINT_PROMPT, _("%s: The 'dh' plugin is deprecated. "
 					"Use the built-in 'dh' command instead disabling the "
 					"'dh' plugin ('actions edit'). Once done, run 'dh --help' "
-					"for more information about the new command.\n",
+					"for more information about the new command.\n"),
 					PROGRAM_NAME);
 			}
 

@@ -2,7 +2,7 @@
 
 /*
  * This file is part of CliFM
- * 
+ *
  * Copyright (C) 2016-2023, L. Abramovich <leo.clifm@outlook.com>
  * All rights reserved.
 
@@ -53,9 +53,6 @@
 #include "messages.h"
 #include "file_operations.h"
 #include "init.h"
-/*
-char **new_selections = (char **)NULL;
-size_t new_seln = 0; */
 
 /* Save selected elements into a tmp file. Returns 1 if success and 0
  * if error. This function allows the user to work with multiple

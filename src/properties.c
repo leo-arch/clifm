@@ -2,7 +2,7 @@
 
 /*
  * This file is part of CliFM
- * 
+ *
  * Copyright (C) 2016-2023, L. Abramovich <leo.clifm@outlook.com>
  * All rights reserved.
 
@@ -309,7 +309,7 @@ get_total_size(char *filename, int *status)
 static struct perms_t
 get_file_perms(const mode_t mode)
 {
-	struct perms_t p;
+	struct perms_t p = {0};
 
 	p.ur = p.uw = p.ux = '-';
 	p.gr = p.gw = p.gx = '-';
@@ -318,9 +318,6 @@ get_file_perms(const mode_t mode)
 	p.cur = p.cuw = p.cux = dn_c;
 	p.cgr = p.cgw = p.cgx = dn_c;
 	p.cor = p.cow = p.cox = dn_c;
-
-	p.pad1 = p.pad2 = p.pad3 = 0;
-	p.pad4 = 0;
 
 	mode_t val = (mode & (mode_t)~S_IFMT);
 	if (val & S_IRUSR) { p.ur = 'r'; p.cur = dr_c; }
@@ -534,14 +531,7 @@ get_common_perms(char **s, int *diff)
 {
 	*diff = 0;
 	struct stat a, b;
-	struct perms_t p;
-
-	p.cur = p.cuw = p.cux = (char *)NULL;
-	p.cgr = p.cgw = p.cgx = (char *)NULL;
-	p.cor = p.cow = p.cox = (char *)NULL;
-
-	p.pad1 = p.pad2 = p.pad3 = 0;
-	p.pad4 = 0;
+	struct perms_t p = {0};
 
 	p.ur = p.gr = p.or = 'r';
 	p.uw = p.gw = p.ow = 'w';

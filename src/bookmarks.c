@@ -2,7 +2,7 @@
 
 /*
  * This file is part of CliFM
- * 
+ *
  * Copyright (C) 2016-2023, L. Abramovich <leo.clifm@outlook.com>
  * All rights reserved.
 
@@ -609,10 +609,7 @@ mark_bookmarks_for_deletion(char **args, int *exit_status)
 static struct bookmarks_t
 extract_shortcut_and_name(char *line)
 {
-	struct bookmarks_t bm;
-	bm.name = (char *)NULL;
-	bm.shortcut = (char *)NULL;
-	bm.path = (char *)NULL;
+	struct bookmarks_t bm = {0};
 
 	if (!line || !*line)
 		return bm;

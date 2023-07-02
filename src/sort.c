@@ -2,7 +2,7 @@
 
 /*
  * This file is part of CliFM
- * 
+ *
  * Copyright (C) 2016-2023, L. Abramovich <leo.clifm@outlook.com>
  * All rights reserved.
 
@@ -129,7 +129,7 @@ compare_strings(char **s1, char **s2)
 		ret = strcmp(*s1, *s2);
 
 	return ret;
-#endif // HAVE_STRCOLL
+#endif /* HAVE_STRCOLL */
 }
 
 static int

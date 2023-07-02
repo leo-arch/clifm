@@ -2,7 +2,7 @@
 
 /*
  * This file is part of CliFM
- * 
+ *
  * Copyright (C) 2016-2023, L. Abramovich <leo.clifm@outlook.com>
  * All rights reserved.
 
@@ -39,20 +39,20 @@
 #if defined(__NetBSD__) || defined(__FreeBSD__)
 # include <sys/param.h>
 # include <sys/sysctl.h>
-#endif
+#endif /* __NetBSD__ || __FreeBSD__ */
 
 #ifdef __OpenBSD__
 typedef char *rl_cpvfunc_t;
 # include <ereadline/readline/readline.h>
 #else
 # include <readline/readline.h>
-#endif
+#endif /* __OpenBSD__ */
 
 #include <time.h>
 #include <unistd.h>
 #ifdef LINUX_INOTIFY
 # include <sys/inotify.h>
-#endif
+#endif /* LINUX_INOTIFY */
 
 #include "aux.h"
 #include "bookmarks.h"
@@ -672,7 +672,7 @@ print_tips(const int all)
 		"running the 'X' command (note the uppercase)",
 #ifdef __linux__
 		"Manage removable devices via the 'media' command",
-#endif
+#endif /* __linux__ */
 		"Create a fresh configuration file: 'config reset'",
 		"Use 'ln edit' (or 'le') to edit symbolic links",
 		"Change default keyboard shortcuts: F9 (or 'kb edit')",
@@ -892,7 +892,7 @@ launch_new_instance_cmd(char ***cmd, char **self, char **_sudo,
 	int ret = 0;
 #if defined(__HAIKU__)
 	sudo = 0;
-#endif
+#endif /* __HAIKU__ */
 
 	setenv("CLIFM_OWN_CHILD", "1", 1);
 
@@ -943,7 +943,7 @@ new_instance(char *dir, const int sudo)
 #ifndef __HAIKU__
 	if (sudo == 1 && !(_sudo = get_sudo_path()))
 		return errno;
-#endif
+#endif /* !__HAIKU__ */
 
 	char *deq_dir = dequote_str(dir, 0);
 	if (!deq_dir) {
@@ -1421,13 +1421,13 @@ free_stuff(void)
 
 #ifdef RUN_CMD
 	free(cmd_line_cmd);
-#endif
+#endif /* RUN_CMD */
 
 #if !defined(_NO_ICONS)
 	free(name_icons_hashes);
 	free(dir_icons_hashes);
 	free(ext_icons_hashes);
-#endif
+#endif /* !_NO_ICONS */
 
 	free(conf.time_str);
 
@@ -1442,7 +1442,7 @@ free_stuff(void)
 		close(event_fd);
 	if (kq != UNSET)
 		close(kq);
-#endif
+#endif /* LINUX_INOTIFY */
 
 	free_prompts();
 	free(prompts_file);
@@ -1623,7 +1623,7 @@ free_stuff(void)
 #ifndef _NO_SUGGESTIONS
 	free(suggestion_buf);
 	free(conf.suggestion_strategy);
-#endif
+#endif /* !_NO_SUGGESTIONS */
 
 	free(sel_file);
 	free(tmp_rootdir);
@@ -1639,7 +1639,7 @@ free_stuff(void)
 	free(trash_dir);
 	free(trash_files_dir);
 	free(trash_info_dir);
-#endif
+#endif /* !_NO_TRASH */
 	free(tags_dir);
 	free(conf.term);
 	free(quote_chars);

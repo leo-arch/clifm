@@ -66,26 +66,26 @@ struct bookmarks_t *bookmarks = (struct bookmarks_t *)NULL;
 struct fileinfo *file_info = (struct fileinfo *)NULL;
 struct remote_t *remotes = (struct remote_t *)NULL;
 struct alias_t *aliases = (struct alias_t *)NULL;
-struct user_t user;
+struct user_t user = {0};
 /* Store device and inode number of selected files */
 struct devino_t *sel_devino = (struct devino_t *)NULL;
 #ifndef _NO_SUGGESTIONS
-struct suggestions_t suggestion;
+struct suggestions_t suggestion = {0};
 #endif
-struct stats_t stats;
+struct stats_t stats = {0};
 struct autocmds_t *autocmds = (struct autocmds_t *)NULL;
-struct opts_t opts;
+struct opts_t opts = {0};
 struct opts_t workspace_opts[MAX_WS];
 struct sel_t *sel_elements = (struct sel_t *)NULL;
 struct prompts_t *prompts = (struct prompts_t *)NULL;
 struct history_t *history = (struct history_t *)NULL;
-struct msgs_t msgs;
-struct props_t prop_fields;
-struct termcaps_t term_caps;
-struct filter_t filter;
-struct config_t conf;
-struct shades_t date_shades;
-struct shades_t size_shades;
+struct msgs_t msgs = {0};
+struct props_t prop_fields = {0};
+struct termcaps_t term_caps = {0};
+struct filter_t filter = {0};
+struct config_t conf = {0};
+struct shades_t date_shades = {0};
+struct shades_t size_shades = {0};
 struct paths_t *paths = (struct paths_t *)NULL;
 struct ext_t *ext_colors = (struct ext_t *)NULL;
 
@@ -110,7 +110,7 @@ enum prog_msg pmsg = NOMSG;
 enum comp_type cur_comp_type = TCMP_NONE;
 enum tab_mode tabmode = STD_TAB;
 
-struct param_t xargs;
+struct param_t xargs = {0};
 unsigned short term_cols;
 
 /* Bit flag holders */
@@ -1036,9 +1036,9 @@ set_locale(void)
 	/* Use the locale specified by the environment */
 	setlocale(LC_ALL, "");
 	if (strcmp(nl_langinfo(CODESET), "UTF-8") != 0) {
-		_err('w', PRINT_PROMPT, "%s: Locale is not UTF-8. To avoid "
+		_err('w', PRINT_PROMPT, _("%s: Locale is not UTF-8. To avoid "
 			"encoding issues you might want to set an UTF-8 locale. Ex: "
-			"export LANG=es_AR.UTF-8\n", PROGRAM_NAME);
+			"export LANG=es_AR.UTF-8\n"), PROGRAM_NAME);
 	}
 }
 

@@ -2,7 +2,7 @@
 
 /*
  * This file is part of CliFM
- * 
+ *
  * Copyright (C) 2016-2023, L. Abramovich <leo.clifm@outlook.com>
  * All rights reserved.
 
@@ -693,7 +693,7 @@ check_regex_file_type(struct dirent **reg_dirlist, const int index,
 		if (type != file_type)
 #else
 		if (reg_dirlist[index]->d_type != file_type)
-#endif
+#endif /* !_DIRENT_HAVE_D_TYPE */
 			return EXIT_FAILURE;
 	} else { /* Searching in CWD. */
 		if (file_info[index].type != file_type)

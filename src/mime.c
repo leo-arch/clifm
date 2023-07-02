@@ -2,7 +2,7 @@
 
 /*
  * This file is part of CliFM
- * 
+ *
  * Copyright (C) 2016-2023, L. Abramovich <leo.clifm@outlook.com>
  * All rights reserved.
 
@@ -471,7 +471,7 @@ mime_import(char *file)
 	xerror("%s: Importing MIME associations is not supported "
 		"on MacOS\n", err_name);
 	return (-1);
-#endif
+#endif /* __HAIKU__ */
 
 	if (!(flags & GUI)) { /* Not in X, exit */
 		xerror(_("%s: Nothing was imported. No graphical "
@@ -750,7 +750,7 @@ run_mime_app(char **app, char **fpath)
 #ifndef __CYGWIN__
 	// fpath is an argument passed to mime_open(), which should not be freed
 		free(*fpath);
-#endif
+#endif /* !__CYGWIN__ */
 		return EXIT_FAILURE;
 	}
 
@@ -778,7 +778,7 @@ run_mime_app(char **app, char **fpath)
 #ifndef __CYGWIN__
 	// fpath is an argument passed to mime_open(), which should not be freed
 	free(*fpath);
-#endif
+#endif /* !__CYGWIN */
 
 	if (ret == EXIT_SUCCESS)
 		return EXIT_SUCCESS;
@@ -967,7 +967,7 @@ mime_open_with_tab(char *filename, const char *prefix, const int only_names)
 	mime = xmagic(name, MIME_TYPE);
 #else
 	mime = get_mime(name);
-#endif
+#endif /* !_NO_MAGIC */
 	if (!mime)
 		goto FAIL;
 
@@ -1181,7 +1181,7 @@ run_cmd_noargs(char *arg, char *name)
 		ret = launch_execv(cmd, bg_proc ? BACKGROUND : FOREGROUND, E_NOSTDERR);
 #else
 	ret = launch_execv(cmd, bg_proc ? BACKGROUND : FOREGROUND, E_NOSTDERR);
-#endif
+#endif /* !_NO_ARCHIVING */
 
 	if (ret == EXIT_SUCCESS)
 		return EXIT_SUCCESS;
@@ -1340,7 +1340,7 @@ mime_open_with(char *filename, char **args)
 	mime = xmagic(name, MIME_TYPE);
 #else
 	mime = get_mime(name);
-#endif
+#endif /* !_NO_MAGIC */
 	if (!mime)
 		goto FAIL;
 
@@ -1656,7 +1656,7 @@ handle_no_app(const int info, char **fpath, char **mime, const char *arg)
 		}
 #else
 		xerror(_("%s: %s: No associated application found\n"), err_name, arg);
-#endif
+#endif /* !_NO_ARCHIVING */
 	}
 
 	free(*fpath);
@@ -1782,7 +1782,7 @@ mime_open(char **args)
 		return EXIT_FAILURE;
 	}
 	char *mime = get_mime(file_path);
-#endif
+#endif /* !_NO_MAGIC */
 
 	if (!mime)
 		return print_error_no_mime(&file_path);
@@ -1806,7 +1806,7 @@ mime_open(char **args)
 #ifndef _NO_ARCHIVING
 	if (*app == 'a' && app[1] == 'd' && !app[2])
 		return run_archiver(&file_path, &app);
-#endif
+#endif /* !_NO_ARCHIVING */
 
 #ifdef __CYGWIN__
 	// Some Windows programs, like Word and Powerpoint (but not Excel!!), do
@@ -1820,7 +1820,7 @@ mime_open(char **args)
 	return run_mime_app(&app, &args[file_index]);
 #else
 	return run_mime_app(&app, &file_path);
-#endif
+#endif /* __CYGWIN__ */
 }
 #else
 void *_skip_me_lira;

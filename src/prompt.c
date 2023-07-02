@@ -2,7 +2,7 @@
 
 /*
  * This file is part of CliFM
- * 
+ *
  * Copyright (C) 2016-2023, L. Abramovich <leo.clifm@outlook.com>
  * All rights reserved.
 
@@ -31,7 +31,7 @@
 #include <string.h>
 #if !defined(__HAIKU__) && !defined(__OpenBSD__) && !defined(__ANDROID__)
 # include <wordexp.h>
-#endif
+#endif /* !__HAIKU__ && !__OpenBSD__ && !__ANDROID__ */
 #include <readline/readline.h>
 #include <errno.h>
 
@@ -831,7 +831,7 @@ setenv_prompt(void)
 #ifndef _NO_TRASH
 	snprintf(t, sizeof(t), "%d", trash_n > 2 ? (int)trash_n - 2 : 0);
 	setenv("CLIFM_STAT_TRASH", t, 1);
-#endif
+#endif /* !_NO_TRASH */
 	snprintf(t, sizeof(t), "%d", (int)msgs.error);
 	setenv("CLIFM_STAT_ERROR_MSGS", t, 1);
 	snprintf(t, sizeof(t), "%d", (int)msgs.warning);
@@ -934,7 +934,7 @@ initialize_prompt_data(void)
 	run_prompt_cmds();
 #ifndef _NO_TRASH
 	update_trash_indicator();
-#endif
+#endif /* !_NO_TRASH */
 	get_sel_files();
 	setenv_prompt();
 
@@ -946,7 +946,7 @@ initialize_prompt_data(void)
 		rl_point = rl_end = 0;
 		recover_from_wrong_cmd();
 	}
-#endif
+#endif /* !_NO_SUGGESTIONS */
 
 	/* Print error messages */
 	if (print_msg == 1 && msgs_n > 0) {

@@ -2,7 +2,7 @@
 
 /*
  * This file is part of CliFM
- * 
+ *
  * Copyright (C) 2016-2023, L. Abramovich <leo.clifm@outlook.com>
  * All rights reserved.
 
@@ -30,21 +30,21 @@
 #include <string.h>
 #if defined(__OpenBSD__)
 # include <strings.h>
-#endif
+#endif /* __OpenBSD__ */
 #include <unistd.h>
 #include <dirent.h>
 #include <pwd.h>
 
 #if defined(__linux__)
 # include <sys/capability.h>
-#endif
+#endif /* __linux__ */
 
 #if defined(__OpenBSD__)
 typedef char *rl_cpvfunc_t;
 # include <ereadline/readline/readline.h>
 #else
 # include <readline/readline.h>
-#endif
+#endif /* __OpenBSD__ */
 
 #include "aux.h"
 #include "checks.h"
@@ -402,7 +402,7 @@ recover_from_wrong_cmd(void)
 		recolorize_line();
 		rl_point = p;
 	}
-#endif
+#endif /* !_NO_HIGHLIGHT */
 	wrong_cmd = 0;
 
 	return EXIT_SUCCESS;
@@ -680,7 +680,7 @@ get_reg_file_color(const char *filename, const struct stat *attr,
 		cap_free(cap);
 		return ca_c;
 	}
-#endif
+#endif /* _LINUX_CAP */
 	if (attr->st_mode & (S_IXUSR | S_IXGRP | S_IXOTH))
 		return (FILE_SIZE_PTR == 0) ? ee_c : ex_c;
 
@@ -2029,8 +2029,6 @@ rl_suggestions(const unsigned char c)
 		return EXIT_SUCCESS;
 	}
 
-//	size_t buflen = (size_t)rl_end;
-//	suggestion.full_line_len = buflen + 1;
 	suggestion.full_line_len = (size_t)rl_end + 1;
 	char *last_space = get_last_chr(rl_line_buffer, ' ', rl_end);
 
@@ -2134,7 +2132,7 @@ rl_suggestions(const unsigned char c)
 			}
 		/* An alias name could be the same as the beginning of the alias
 		 * defintion, so that this test must always be skipped in case
-		 * of aliases */
+		 * of aliases. */
 		} else if (suggestion.type != ALIAS_SUG && c != ' ' && word
 		&& (conf.case_sens_path_comp ? (*word == *suggestion_buf
 		&& strncmp(word, suggestion_buf, wlen) == 0)
@@ -2171,7 +2169,7 @@ rl_suggestions(const unsigned char c)
 
 	char *lb = rl_line_buffer;
 	/* 3.d) Let's suggest non-fixed parameters for internal commands
-	 * Only if second word or more (first word is the command name) */
+	 * Only if second word or more (first word is the command name). */
 
 	switch (words_num > 1 ? *lb : '\0') {
 	case 'b': /* Bookmark names */
@@ -2248,8 +2246,7 @@ rl_suggestions(const unsigned char c)
 		if (lb[1] == ' ' && lb[2] == '-' && (lb[3] == 'h'
 		|| strncmp(lb + 2, "--help", strlen(lb + 2)) == 0))
 			break;
-//		if (lb[1] == ' '  || ((lb[1] == 'c'	|| lb[1] == 'o'
-//		|| lb[1] == 'p') && lb[2] == ' ')) {
+
 		if (lb[1] == ' '  || ((lb[1] == 'c'	|| lb[1] == 'p') && lb[2] == ' ')) {
 			if ((printed = check_jcmd(full_line)) != NO_MATCH) {
 				zero_offset = 1;

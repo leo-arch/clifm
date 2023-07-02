@@ -1,7 +1,7 @@
 /* cleaner_table.h - A table for characters translation
  *
  * This file is part of CliFM
- * 
+ *
  * Copyright (C) 2016-2023, L. Abramovich <leo.clifm@outlook.com>
  * All rights reserved.
 

@@ -4,7 +4,7 @@
 
 /*
  * This file is part of CliFM
- * 
+ *
  * Copyright (C) 2016-2023, L. Abramovich <leo.clifm@outlook.com>
  * All rights reserved.
 
@@ -39,7 +39,7 @@
 #include <string.h>
 #ifdef __OpenBSD__
 # include <strings.h>
-#endif
+#endif /* __OpenBSD__ */
 #include <unistd.h>
 #include <errno.h>
 #include <limits.h>
@@ -51,7 +51,7 @@ typedef char *rl_cpvfunc_t;
 # include <ereadline/readline/readline.h>
 #else
 # include <readline/readline.h>
-#endif
+#endif /* __OpenBSD__ */
 
 #include "misc.h"
 #include "aux.h"
@@ -67,11 +67,11 @@ typedef char *rl_cpvfunc_t;
 
 #ifndef _NO_SUGGESTIONS
 # include "suggestions.h"
-#endif
+#endif /* !_NO_SUGGESTIONS */
 
 #ifndef _NO_HIGHLIGHT
 # include "highlight.h"
-#endif
+#endif /* !_NO_HIGHLIGHT */
 
 #define DEL_EMPTY_LINE     1
 #define DEL_NON_EMPTY_LINE 2
@@ -1897,7 +1897,7 @@ filenames_gen_eln(const char *text, int state)
 #ifndef _NO_SUGGESTIONS
 			if (suggestion_buf)
 				clear_suggestion(CS_FREEBUF);
-#endif
+#endif /* !_NO_SUGGESTIONS */
 			return strdup(name);
 		}
 	}
@@ -1934,7 +1934,7 @@ filenames_gen_ranges(const char *text, int state)
 #ifndef _NO_SUGGESTIONS
 			if (suggestion_buf)
 				clear_suggestion(CS_FREEBUF);
-#endif
+#endif /* !_NO_SUGGESTIONS */
 			return strdup(name);
 		}
 	}
@@ -3238,7 +3238,7 @@ complete_bookmark_names(char *text, const size_t words_n, int *exit_status)
 #ifndef _NO_SUGGESTIONS
 	if (suggestion.type != FILE_SUG)
 		rl_attempted_completion_over = 1;
-#endif
+#endif /* !_NO_SUGGESTIONS */
 	char *p = dequote_str((char *)text, 0);
 	char **matches = rl_completion_matches(p ? p : text, &bookmarks_generator);
 	free(p);
@@ -3410,7 +3410,7 @@ complete_glob(char *text, int *exit_status)
 #ifndef _NO_SUGGESTIONS
 	if (conf.suggestions == 1 && wrong_cmd == 1)
 		recover_from_wrong_cmd();
-#endif // !_NO_SUGGESTIONS
+#endif /* !_NO_SUGGESTIONS */
 	if (!matches[1])
 		rl_swap_fields(&matches);
 
@@ -3430,7 +3430,7 @@ complete_shell_cmd_opts(char *text, int *exit_status)
 	*exit_status = EXIT_FAILURE;
 	char **matches = (char **)NULL;
 
-	char lw[NAME_MAX + 1]; *lw = '\0'; // Last word before the dash
+	char lw[NAME_MAX + 1]; *lw = '\0'; /* Last word before the dash */
 	char *a = strrchr(rl_line_buffer, ' ');
 
 	if (a) {
@@ -3714,7 +3714,7 @@ complete_profiles(char *text, const size_t words_n)
 # ifndef _NO_SUGGESTIONS
 	if (suggestion.type != FILE_SUG)
 		rl_attempted_completion_over = 1;
-# endif // _NO_SUGGESTIONS
+# endif /* _NO_SUGGESTIONS */
 	char *p = dequote_str((char *)text, 0);
 	char **matches = rl_completion_matches(p ? p : text, &profiles_generator);
 	free(p);
@@ -3928,7 +3928,7 @@ my_rl_completion(const char *text, const int start, const int end)
 	 * Drawback: whatever comes next to our word will be decolorized as well.
 	 * But no color is better than wrong (and partially) colored word. */
 		cur_color = (char *)NULL;
-#endif
+#endif /* !_NO_HIGHLIGHT */
 
 	/* Do not complete when the cursor is on a word. Ex: dir/_ilename */
 	if (rl_point < rl_end && rl_line_buffer[rl_point] != ' ') {

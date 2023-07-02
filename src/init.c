@@ -2,7 +2,7 @@
 
 /*
  * This file is part of CliFM
- * 
+ *
  * Copyright (C) 2016-2023, L. Abramovich <leo.clifm@outlook.com>
  * All rights reserved.
 
@@ -597,8 +597,8 @@ validate_custom_shell(char **file)
 static struct user_t
 get_user_data_env(void)
 {
-	struct user_t tmp_user;
-	tmp_user.home = (char *)NULL;
+	struct user_t tmp_user = {0};
+//	tmp_user.home = (char *)NULL;
 	/* If secure-env, do not fallback to environment variables */
 	int sec_env = is_secure_env();
 	char *t = sec_env == 0 ? xgetenv("HOME", 0) : (char *)NULL;
@@ -645,7 +645,7 @@ struct user_t
 get_user_data(void)
 {
 	struct passwd *pw = (struct passwd *)NULL;
-	struct user_t tmp_user;
+	struct user_t tmp_user = {0};
 
 	errno = 0;
 	tmp_user.uid = geteuid();
@@ -1159,7 +1159,7 @@ load_actions(void)
 
 		/* Now copy left and right value of each action into the actions struct */
 		usr_actions = xrealloc(usr_actions, (size_t)(actions_n + 1)
-					* sizeof(struct actions_t));
+			* sizeof(struct actions_t));
 		usr_actions[actions_n].value = savestring(tmp + 1, strlen(tmp + 1));
 		*tmp = '\0';
 		usr_actions[actions_n].name = savestring(line, strlen(line));
@@ -1212,7 +1212,7 @@ load_remotes(void)
 			if (remotes[n].name)
 				n++;
 			remotes = (struct remote_t *)xrealloc(
-					remotes, (n + 2) * sizeof(struct remote_t));
+				remotes, (n + 2) * sizeof(struct remote_t));
 			reset_remotes_values(n);
 
 			char *name = strbtw(line, '[', ']');
@@ -2131,7 +2131,7 @@ static void
 write_alias(const char *s, char *p)
 {
 	aliases = (struct alias_t *)xrealloc(aliases, (aliases_n + 2)
-				* sizeof(struct alias_t));
+		* sizeof(struct alias_t));
 	aliases[aliases_n].name = savestring(s, strlen(s));
 	int add = 0;
 	if (*p == '\'') {

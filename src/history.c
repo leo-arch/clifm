@@ -2,7 +2,7 @@
 
 /*
  * This file is part of CliFM
- * 
+ *
  * Copyright (C) 2016-2023, L. Abramovich <leo.clifm@outlook.com>
  * All rights reserved.
 
@@ -327,12 +327,12 @@ send_desktop_notification(char *msg)
 		return;
 
 	/* Error: warn and print the original message */
-	xerror("%s: Notification daemon error: %s\n"
+	xerror(_("%s: Notification daemon error: %s\n"
 		"Disable desktop notifications (run 'help desktop-notifications' "
 		"for details) or %s to silence this "
-		"warning (original message printed below)\n", PROGRAM_NAME,
-		strerror(ret), ret == ENOENT ? "install a notification daemon"
-		: "fix this error (consult your daemon's documentation)");
+		"warning (original message printed below)\n"), PROGRAM_NAME,
+		strerror(ret), ret == ENOENT ? _("install a notification daemon")
+		: _("fix this error (consult your daemon's documentation)"));
 	xerror("%s\n", msg);
 }
 
