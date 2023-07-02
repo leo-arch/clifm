@@ -1065,22 +1065,20 @@ define_tmp_rootdir(int *from_env)
 		temp = P_tmpdir;
 	}
 
-	size_t len = strlen(temp);
-	if (len > 1 && temp[len - 1] == '/') {
-		temp[len] = '\0';
-		len--;
-	}
-
 	char *p = temp;
 	if (*temp != '/') {
-		p = normalize_path(temp, len);
+		p = normalize_path(temp, strlen(temp));
 		if (!p)
 			p = temp;
 	}
 
-	char *tmp_root_dir = savestring(p, strlen(p));
+	size_t len = strlen(p);
+	char *tmp_root_dir = savestring(p, len);
 	if (p != temp)
 		free(p);
+
+	if (len > 1 && tmp_root_dir[len - 1] == '/')
+		tmp_root_dir[len - 1] = '\0';
 
 	return tmp_root_dir;
 }

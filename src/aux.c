@@ -30,7 +30,10 @@
 
 #include "helpers.h"
 
+// Not needed on __linux__, __CYGWIN__, __TERMUX__, __sun, __FreeBSD__,
+// and __OpenBSD__ at least
 #include <ctype.h>
+
 #include <dirent.h>
 #include <errno.h>
 #include <stdio.h>
@@ -184,6 +187,7 @@ clear_term_img(void)
 	}
 }
 
+/* Return a pointer to the first digit found in STR or NULL if none is found. */
 static char *
 find_digit(char *str)
 {
@@ -199,8 +203,8 @@ find_digit(char *str)
 	return (char *)NULL;
 }
 
-/* Check whether a given command needs ELN's to be expanded/completed/suggested
- * Returns 1 if yes or 0 if not */
+/* Check whether a given command needs ELN's to be expanded/completed/suggested.
+ * Returns 1 if yes or 0 if not. */
 int
 _expand_eln(const char *text)
 {
@@ -240,7 +244,7 @@ _expand_eln(const char *text)
 	return 1;
 }
 
-/* Sleep for MSEC milliseconds */
+/* Sleep for MSEC milliseconds. */
 /* Taken from https://stackoverflow.com/questions/1157209/is-there-an-alternative-sleep-function-in-c-to-milliseconds */
 static int
 msleep(long msec)
@@ -263,14 +267,15 @@ msleep(long msec)
 	return res;
 }
 
-/* Convert the file named STR (as absolute path) into a more friendly format
+/* Convert the file named STR (as absolute path) into a more friendly format.
  * Change absolute paths into:
  * "./" if file is in CWD
  * "~" if file is in HOME
  * The reformated file name is returned if actually reformated, in which case
- * the returned value should be freed by the caller
+ * the returned value should be free'd by the caller.
  * Otherwise, a pointer to the original string is returned and must not be
- * freed by the caller
+ * free'd by the caller.
+ * Usage example:
  * char *ret = abbreviate_file_name(str);
  * ...
  * if (ret && ret != str)
@@ -309,6 +314,12 @@ abbreviate_file_name(char *str)
 	return str;
 }
 
+/* Return the current working directory from any of the following sources and
+ * in this order:
+ * 1 - Path of the current workspace (if CHECK_WORKSPACE is set to 1).
+ * 2 - PWD environment variable (if not --secure-env-full)
+ * 3 - getcwd(3), in which case the value is stored in BUF, whose size is BUFLEN.
+ * */
 char *
 get_cwd(char *buf, const size_t buflen, const int check_workspace)
 {
@@ -326,6 +337,10 @@ get_cwd(char *buf, const size_t buflen, const int check_workspace)
 	return tmp;
 }
 
+/* Canonicalize/normalize the path SRC without resolving symlinks.
+ * SRC is deescaped if necessary.
+ * ~/./.. are resolved.
+ * The resolved path is returned and must be free'd by the caller. */
 char *
 normalize_path(char *src, const size_t src_len)
 {
@@ -425,7 +440,7 @@ normalize_path(char *src, const size_t src_len)
 				const char *slash = memrchr(res, '/', res_len);
 #else
 				const char *slash = strrchr(res, '/');
-#endif
+#endif /* !__HAIKU && !_BE_POSIX && !__APPLE__ */
 				if (slash)
 					res_len = (size_t)(slash - res);
 				continue;
@@ -455,6 +470,8 @@ normalize_path(char *src, const size_t src_len)
 	return res;
 }
 
+/* Ring the terminal bell according to any of the following modes:
+ * AUDIBLE, FLASH, or VISIBLE. */
 void
 rl_ring_bell(void)
 {
@@ -470,7 +487,7 @@ rl_ring_bell(void)
 		fflush(stderr);
 		return;
 
-#ifdef _READLINE_HAS_ACTIVATE_MARK
+#ifdef _READLINE_HAS_ACTIVATE_MARK /* Readline >= 8.1 */
 	case BELL_VISIBLE: {
 		int point = rl_point;
 
@@ -517,15 +534,18 @@ gen_date_suffix(const struct tm tm)
 	return suffix;
 }
 
-/* Create directory DIR with permissions set to MODE */
+/* Create directory DIR with permissions set to MODE (ignoring the current
+ * umask value). */
 int
 xmkdir(char *dir, const mode_t mode)
 {
 	mode_t old_mask = umask(0);
 	int ret = mkdirat(AT_FDCWD, dir, mode);
 	umask(old_mask);
+
 	if (ret == -1)
 		return EXIT_FAILURE;
+
 	return EXIT_SUCCESS;
 }
 
@@ -624,7 +644,7 @@ hex2int(const char *str)
 	return ((n[0] * 16) + n[1]);
 }
 
-/* Disassemble the hex color HEX into attribute, R, G, and B values
+/* Disassemble the hex color HEX into attribute, R, G, and B values.
  * Based on https://mprog.wordpress.com/c/miscellaneous/convert-hexcolor-to-rgb-decimal */
 int
 get_rgb(char *hex, int *attr, int *r, int *g, int *b)
@@ -692,9 +712,10 @@ hex2rgb(char *hex)
 	return tmp_color;
 }
 
-/* Count files in DIR_PATH, including self and parent. If POP is set to 1,
- * the function will just check if the directory is populated (it has at
- * least 3 files, including self and parent) */
+/* Count files in the directory DIR, including self and parent. If POP is set
+ * to 1, the function will just check if the directory is populated (it has at
+ * least 3 files, including self and parent).
+ * Returns -1 in case of error or an integer (0-INT_MAX) in case of success. */
 int
 count_dir(const char *dir, const int pop)
 {
@@ -725,8 +746,10 @@ count_dir(const char *dir, const int pop)
 	return (int)c;
 }
 
-/* Get the path of a given command from the PATH environment variable.
- * It basically does the same as the 'which' Unix command. */
+/* Get the path of a the command CMD inspecting all paths in the PATH
+ * environment variable (it basically does the same as which(1)).
+ * Returns the appropriate path or NULL in case of error (in which case
+ * errno is set to either EINVAL or ENOENT). */
 char *
 get_cmd_path(const char *cmd)
 {
@@ -770,7 +793,7 @@ get_cmd_path(const char *cmd)
 	return (char *)NULL;
 }
 
-/* Convert SIZE to human readeable form (at most 2 decimal places)
+/* Convert SIZE to human readeable form (at most 2 decimal places).
  * Returns a string of at most MAX_UNIT_SIZE, defined in aux.h */
 char *
 get_size_unit(const off_t size)
@@ -804,8 +827,8 @@ get_size_unit(const off_t size)
 	return str;
 }
 
-/* Return the full size of the directory DIR using du(1)
- * The size is reported in bytes if SIZE_IN_BYTES is set to 1
+/* Return the full size of the directory DIR using du(1).
+ * The size is reported in bytes if SIZE_IN_BYTES is set to 1.
  * Otherwise, human format is used.
  * STATUS is updated to the command exit code. */
 off_t
@@ -904,7 +927,7 @@ S_IFSOCK: 140000 / 49152
 S_IFBLK: 60000 / 24576
 S_IFCHR: 20000 / 8192
 S_IFIFO: 10000 / 4096
- * See the inode manpage */
+ * See the inode manpage. */
 int
 get_link_ref(const char *link)
 {
@@ -941,7 +964,7 @@ xitoa(int n)
 
 /* A secure atoi implementation to prevent integer under- and over-flow.
  * Returns the corresponding integer, if valid, or INT_MIN if invalid,
- * setting errno to ERANGE */
+ * setting errno to ERANGE. */
 int
 xatoi(const char *s)
 {
@@ -998,7 +1021,7 @@ xnmalloc(const size_t nmemb, const size_t size)
 	return p;
 }
 
-/* Unlike getchar this does not wait for newline('\n')
+/* Unlike getchar(3) this function does not wait for newline ('\n').
 https://stackoverflow.com/questions/12710582/how-can-i-capture-a-key-stroke-immediately-in-linux 
 */
 char
@@ -1020,14 +1043,14 @@ xgetchar(void)
 	return c;
 }
 
-/* Converts a hex char to its integer value */
+/* Converts a hex char to its integer value. */
 char
 from_hex(char c)
 {
 	return (char)(isdigit(c) ? c - '0' : tolower(c) - 'a' + 10);
 }
 
-/* Converts an integer value to its hex form */
+/* Converts an integer value to its hex form. */
 static char
 to_hex(char c)
 {
@@ -1035,7 +1058,7 @@ to_hex(char c)
 	return hex[c & 15];
 }
 
-/* Returns a url-encoded version of str */
+/* Returns a url-encoded version of STR. */
 char *
 url_encode(char *str)
 {
@@ -1078,7 +1101,7 @@ url_encode(char *str)
 	return buf;
 }
 
-/* Returns a url-decoded version of str */
+/* Returns a url-decoded version of STR. */
 char *
 url_decode(char *str)
 {
