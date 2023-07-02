@@ -493,7 +493,7 @@ get_new_perms(const char *str, const int diff)
 
 	if (diff == 1) {
 		printf(_("%sFiles with different sets of permissions\n"
-			"Only shared permission bits are set in the template"), tx_c);
+			"Only shared permission bits are set in the template\n"), tx_c);
 	}
 	printf(_("%sEdit file permissions (Ctrl-d to quit)\n"
 		"Both symbolic and numeric notation are supported\n"), tx_c);
