@@ -496,7 +496,7 @@ get_new_perms(const char *str, const int diff)
 			"Only shared permission bits are set in the template"), tx_c);
 	}
 	printf(_("%sEdit file permissions (Ctrl-d to quit)\n"
-		"Both symbolic and numeric notation are supported"), tx_c);
+		"Both symbolic and numeric notation are supported\n"), tx_c);
 	char m[(MAX_COLOR * 2) + 7];
 	snprintf(m, sizeof(m), "\001%s\002>\001%s\002 ", mi_c, tx_c);
 
