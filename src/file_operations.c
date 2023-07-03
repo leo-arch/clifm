@@ -808,7 +808,7 @@ dup_file(char **cmd)
 				continue;
 			}
 
-			xstrsncpy(source, deq_str, strlen(deq_str));
+			xstrsncpy(source, deq_str, strlen(deq_str) + 1);
 			free(deq_str);
 		}
 
@@ -835,7 +835,7 @@ dup_file(char **cmd)
 				dest_dir, source_name);
 
 		char bk[PATH_MAX + 11];
-		xstrsncpy(bk, tmp_dest, sizeof(bk) - 1);
+		xstrsncpy(bk, tmp_dest, sizeof(bk));
 		struct stat attr;
 		size_t suffix = 1;
 		while (stat(bk, &attr) == EXIT_SUCCESS) {
@@ -1303,7 +1303,7 @@ open_function(char **cmd)
 				return EXIT_FAILURE;
 			}
 
-			xstrsncpy(cmd[1], deq_path, strlen(deq_path));
+			xstrsncpy(cmd[1], deq_path, strlen(deq_path) + 1);
 			free(deq_path);
 		}
 	}
@@ -1478,7 +1478,7 @@ edit_link(char *link)
 			return EXIT_FAILURE;
 		}
 
-		xstrsncpy(link, tmp, strlen(tmp));
+		xstrsncpy(link, tmp, strlen(tmp) + 1);
 		free(tmp);
 	}
 
@@ -1922,7 +1922,7 @@ bulk_rename(char **args)
 				continue;
 			}
 
-			xstrsncpy(args[i], deq_file, strlen(deq_file));
+			xstrsncpy(args[i], deq_file, strlen(deq_file) + 1);
 			free(deq_file);
 		}
 
@@ -2197,12 +2197,12 @@ batch_link(char **args)
 
 	for (i = 1; args[i]; i++) {
 		if (!suffix || !*suffix) {
-			snprintf(tmp, NAME_MAX, "%s.link", args[i]);
+			snprintf(tmp, sizeof(tmp), "%s.link", args[i]);
 		} else {
 			if (*suffix == '.')
-				snprintf(tmp, NAME_MAX, "%s%s", args[i], suffix);
+				snprintf(tmp, sizeof(tmp), "%s%s", args[i], suffix);
 			else
-				snprintf(tmp, NAME_MAX, "%s.%s", args[i], suffix);
+				snprintf(tmp, sizeof(tmp), "%s.%s", args[i], suffix);
 		}
 
 		struct stat a;
@@ -2213,7 +2213,7 @@ batch_link(char **args)
 			if (d && *(d + 1) && is_number(d + 1))
 				*d = '\0';
 			snprintf(cur_suffix, sizeof(cur_suffix), "-%zu", added_suffix);
-			strncat(tmp, cur_suffix, sizeof(tmp) - strnlen(tmp, sizeof(tmp)) - 1);
+			xstrncat(tmp, strlen(tmp), cur_suffix, sizeof(tmp));
 			added_suffix++;
 		}
 

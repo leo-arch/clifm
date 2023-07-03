@@ -261,7 +261,7 @@ gen_octal(char **line, int *c)
 	char octal_string[4];
 	int n;
 
-	xstrsncpy(octal_string, *line, 3);
+	xstrsncpy(octal_string, *line, sizeof(octal_string));
 	octal_string[3] = '\0';
 
 	n = read_octal(octal_string);
@@ -1097,7 +1097,7 @@ set_prompt(char *name)
 		if (*p != *prompts[i].name || strcmp(p, prompts[i].name) != 0)
 			continue;
 		free(p);
-		xstrsncpy(cur_prompt_name, prompts[i].name, sizeof(cur_prompt_name) - 1);
+		xstrsncpy(cur_prompt_name, prompts[i].name, sizeof(cur_prompt_name));
 		return switch_prompt((size_t)i);
 	}
 

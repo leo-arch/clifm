@@ -235,29 +235,32 @@ xstrnlen(const char *restrict s)
 /* Modified version of strlcpy(3) using memccpy(3), as suggested here:
  * https://www.open-std.org/jtc1/sc22/wg14/www/docs/n2349.htm
  *
- * Copy at most N bytes of SRC into DST and return the number of bytes
- * copied (excluding the terminating null byte) all at once.
+ * Copy at most (N - 1) bytes of SRC into DST and return the number of bytes
+ * copied (excluding the terminating null byte), all at once.
+ * Note that N must be the total size of the buffer DST, including the
+ * terminating NUL byte.
  * Unlike strncpy(3), it always NULL terminates the destination string (DST),
- * even if no NUL char is found in the first N characters of SRC. */
+ * even if no NUL char is found in the first N characters of SRC.
+ * Returns the number of bytes copied, including the terminating NUL byte. */
 size_t
 xstrsncpy(char *restrict dst, const char *restrict src, size_t n)
 {
-	n++;
 	char *end = memccpy(dst, src, '\0', n);
 	if (!end) {
 		dst[n - 1] = '\0';
 		end = dst + n;
 	}
 
-	return (size_t)(end - dst - 1);
+	return (size_t)(end - dst);
 }
 
-/* A safe strcat(1) */
+/* A safe strcat(1). Append the string SRC to the buffer DST, always null
+ * terminating DST. */
 char *
-xstrncat(char *restrict dst, const size_t dst_end, const char *restrict src,
-	const size_t dst_len)
+xstrncat(char *restrict dst, const size_t dst_len, const char *restrict src,
+	const size_t dst_size)
 {
-	xstrsncpy(dst + dst_end, src, dst_len - dst_end);
+	xstrsncpy(dst + dst_len, src, dst_size - dst_len);
 	return dst;
 }
 
@@ -523,7 +526,7 @@ strbfrlst(char *str, const char c)
 		return (char *)NULL;
 	}
 
-	xstrsncpy(buf, str, buf_len);
+	xstrsncpy(buf, str, buf_len + 1);
 	*q = c;
 	return buf;
 }
@@ -562,7 +565,7 @@ strbtw(char *str, const char a, const char b)
 		return (char *)NULL;
 	}
 
-	xstrsncpy(buf, pa + 1, buf_len);
+	xstrsncpy(buf, pa + 1, buf_len + 1);
 	*pb = b;
 	return buf;
 }
@@ -586,7 +589,7 @@ replace_substr(const char *haystack, const char *needle, char *rep)
 	if (*needle_end) {
 		size_t rem_len = strlen(needle_end);
 		char *rem = (char *)xnmalloc(rem_len + 1, sizeof(char));
-		xstrsncpy(rem, needle_end, rem_len);
+		xstrsncpy(rem, needle_end, rem_len + 1);
 
 		new_str_len = strlen(haystack) + strlen(rep) + rem_len + 1;
 		char *new_str = (char *)xnmalloc(new_str_len, sizeof(char));
@@ -1193,7 +1196,7 @@ expand_tag(char ***args, const int tag_index)
 		if (!ret || !*rpath) {
 			/* This tagged file points to a non-existent file. Just copy
 			 * the tag path. */
-			xstrsncpy(rpath, filename, sizeof(rpath) - 1);
+			xstrsncpy(rpath, filename, sizeof(rpath));
 		}
 
 		char *esc_str = escape_str(rpath);
@@ -1590,7 +1593,7 @@ expand_bm_name(char **name)
 		char *tmp = q ? q : bookmarks[j].path;
 		size_t tmp_len = strlen(tmp);
 		*name = (char *)xrealloc(*name, (tmp_len + 1) * sizeof(char));
-		xstrsncpy(*name, tmp, tmp_len);
+		xstrsncpy(*name, tmp, tmp_len + 1);
 		free(q);
 		bm_exp = EXIT_SUCCESS;
 
@@ -1615,7 +1618,7 @@ expand_int_var(char **name)
 
 		size_t val_len = strlen(usr_var[j].value);
 		*name = (char *)xrealloc(*name, (val_len + 1) * sizeof(char));
-		xstrsncpy(*name, usr_var[j].value, val_len);
+		xstrsncpy(*name, usr_var[j].value, val_len + 1);
 		break;
 	}
 }
@@ -2169,7 +2172,7 @@ expand_symlink(char **substr)
 
 	size_t rp_len = strlen(real_path);
 	*substr = (char *)xrealloc(*substr, (rp_len + 1) * sizeof(char));
-	xstrsncpy(*substr, real_path, rp_len);
+	xstrsncpy(*substr, real_path, rp_len + 1);
 	free(real_path);
 
 	return 0;
@@ -2504,7 +2507,7 @@ parse_input_str(char *str)
 			if (p) {
 				size_t plen = strlen(p);
 				substr[i] = (char *)xrealloc(substr[i], (plen + 1) * sizeof(char));
-				xstrsncpy(substr[i], p, plen);
+				xstrsncpy(substr[i], p, plen + 1);
 			}
 		}
 
@@ -2528,8 +2531,8 @@ parse_input_str(char *str)
 		size_t slen = strlen(substr[i]);
 		if (slen > FILE_URI_PREFIX_LEN && IS_FILE_URI(substr[i])) {
 			char tmp[PATH_MAX];
-			xstrsncpy(tmp, substr[i], sizeof(tmp) - 1);
-			xstrsncpy(substr[i], tmp + FILE_URI_PREFIX_LEN, slen);
+			xstrsncpy(tmp, substr[i], sizeof(tmp));
+			xstrsncpy(substr[i], tmp + FILE_URI_PREFIX_LEN, slen + 1);
 		}
 
 			/* ###############################
@@ -2564,7 +2567,7 @@ parse_input_str(char *str)
 		if (*substr[i] == ',' && !substr[i][1] && pinned_dir) {
 			size_t plen = strlen(pinned_dir);
 			substr[i] = (char *)xrealloc(substr[i], (plen + 1) * sizeof(char));
-			xstrsncpy(substr[i], pinned_dir, plen);
+			xstrsncpy(substr[i], pinned_dir, plen + 1);
 		}
 
 			/* ######################################
@@ -2869,7 +2872,7 @@ savestring(const char *restrict str, size_t size)
 	if (!ptr)
 		return (char *)NULL;
 
-	xstrsncpy(ptr, str, size);
+	xstrsncpy(ptr, str, size + 1);
 	return ptr;
 }
 
@@ -2949,7 +2952,7 @@ get_substr(char *str, const char ifs)
 
 			substr[substr_n] = p;
 			p = (char *)NULL;
-			xstrsncpy(substr[substr_n], buf, length);
+			xstrsncpy(substr[substr_n], buf, length + 1);
 			substr_n++;
 			length = 0;
 		} else {

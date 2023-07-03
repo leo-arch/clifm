@@ -167,7 +167,7 @@ chdir_search_path(char **search_path, const char *arg)
 			return EXIT_FAILURE;
 		}
 
-		xstrsncpy(*search_path, deq_dir, strlen(deq_dir));
+		xstrsncpy(*search_path, deq_dir, strlen(deq_dir) + 1);
 		free(deq_dir);
 	}
 

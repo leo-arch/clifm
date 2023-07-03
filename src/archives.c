@@ -342,7 +342,7 @@ handle_iso(char *file)
 	if (strchr(file, '\\')) {
 		char *deq_file = dequote_str(file, 0);
 		if (deq_file) {
-			xstrsncpy(file, deq_file, strlen(deq_file));
+			xstrsncpy(file, deq_file, strlen(deq_file) + 1);
 			free(deq_file);
 		}
 	}
@@ -755,9 +755,9 @@ zstandard(char *in_file, char *out_file, const char mode, const char op)
 		char option[3] = "";
 
 		switch (op) {
-		case 'e': xstrsncpy(option, "-d", sizeof(option) - 1); break;
-		case 't': xstrsncpy(option, "-t", sizeof(option) - 1); break;
-		case 'i': xstrsncpy(option, "-l", sizeof(option) - 1); break;
+		case 'e': xstrsncpy(option, "-d", sizeof(option)); break;
+		case 't': xstrsncpy(option, "-t", sizeof(option)); break;
+		case 'i': xstrsncpy(option, "-l", sizeof(option)); break;
 		default: break;
 		}
 
@@ -919,7 +919,7 @@ check_not_compressed(char **args)
 		char *deq = (char *)NULL;
 		if (strchr(args[i], '\\')) {
 			deq = dequote_str(args[i], 0);
-			xstrsncpy(args[i], deq, strlen(deq));
+			xstrsncpy(args[i], deq, strlen(deq) + 1);
 			free(deq);
 		}
 

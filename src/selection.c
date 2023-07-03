@@ -516,7 +516,7 @@ static char *
 construct_sel_path(char *sel_path)
 {
 	char tmpdir[PATH_MAX];
-	xstrsncpy(tmpdir, sel_path, sizeof(tmpdir) - 1);
+	xstrsncpy(tmpdir, sel_path, sizeof(tmpdir));
 
 	if (*sel_path == '.' && realpath(sel_path, tmpdir) == NULL) {
 		xerror("sel: %s: %s\n", sel_path, strerror(errno));
@@ -530,7 +530,7 @@ construct_sel_path(char *sel_path)
 			return (char *)NULL;
 		}
 
-		xstrsncpy(tmpdir, exp_path, sizeof(tmpdir) - 1);
+		xstrsncpy(tmpdir, exp_path, sizeof(tmpdir));
 		free(exp_path);
 	}
 
@@ -556,7 +556,7 @@ check_sel_path(char **sel_path)
 	if (strchr(*sel_path, '\\')) {
 		char *deq = dequote_str(*sel_path, 0);
 		if (deq) {
-			xstrsncpy(*sel_path, deq, strlen(deq));
+			xstrsncpy(*sel_path, deq, strlen(deq) + 1);
 			free(deq);
 		}
 	}
@@ -724,7 +724,7 @@ select_filename(char *arg, char *dir, int *err)
 	if (strchr(arg, '\\')) {
 		char *deq_str = dequote_str(arg, 0);
 		if (deq_str) {
-			xstrsncpy(arg, deq_str, strlen(deq_str));
+			xstrsncpy(arg, deq_str, strlen(deq_str) + 1);
 			free(deq_str);
 		}
 	}
@@ -987,7 +987,7 @@ deselect_entries(char **desel_path, const size_t desel_n, int *err,
 			sel_elements[j].name =
 				(char *)xrealloc(sel_elements[j].name, (len + 1) * sizeof(char));
 
-			xstrsncpy(sel_elements[j].name, sel_elements[j + 1].name, len);
+			xstrsncpy(sel_elements[j].name, sel_elements[j + 1].name, len + 1);
 			sel_elements[j].size = sel_elements[j + 1].size;
 		}
 	}

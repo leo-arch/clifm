@@ -81,7 +81,7 @@ dequote_remote_name(char *name)
 	if (strchr(name, '\\')) {
 		deq = dequote_str(name, 0);
 		if (deq) {
-			xstrsncpy(name, deq, strlen(deq));
+			xstrsncpy(name, deq, strlen(deq) + 1);
 			free(deq);
 		} else {
 			xerror("net: %s: Error dequoting resource name\n", name);

@@ -25,6 +25,7 @@
 #include "helpers.h"
 
 #include <errno.h>
+#include <fcntl.h> /* open(2) */
 #include <limits.h>
 #include <stdio.h>
 #include <readline/readline.h>
@@ -96,7 +97,6 @@ regen_config(void)
 		snprintf(bk, sizeof(bk), "%s.%s", config_file, date);
 
 		char *cmd[] = {"mv", config_file, bk, NULL};
-
 		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 			return EXIT_FAILURE;
 
@@ -151,10 +151,10 @@ get_tab_comp_mode_str(void)
 	char *s = (char *)xnmalloc(9, sizeof(char));
 
 	switch (tabmode) {
-	case FZF_TAB: xstrsncpy(s, "fzf", 3); break;
-	case FNF_TAB: xstrsncpy(s, "fnf", 3); break;
-	case SMENU_TAB: xstrsncpy(s, "smenu", 5); break;
-	case STD_TAB: xstrsncpy(s, "standard", 8); break;
+	case FZF_TAB: xstrsncpy(s, "fzf", 4); break;
+	case FNF_TAB: xstrsncpy(s, "fnf", 4); break;
+	case SMENU_TAB: xstrsncpy(s, "smenu", 6); break;
+	case STD_TAB: xstrsncpy(s, "standard", 9); break;
 	default: free(s); s = (char *)NULL; break;
 	}
 
@@ -703,7 +703,7 @@ import_from_data_dir(const char *src_filename, char *dest)
 	int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	if (ret == EXIT_SUCCESS) {
 		/* Make sure config files have always 600 permissions. */
-		chmod(dest, S_IRUSR | S_IWUSR);
+		xchmod(dest, "0600", 1);
 		return EXIT_SUCCESS;
 	}
 
@@ -2325,7 +2325,7 @@ set_div_line(char *line)
 		return;
 	}
 
-	xstrsncpy(div_line, tmp, sizeof(div_line) - 1);
+	xstrsncpy(div_line, tmp, sizeof(div_line));
 }
 
 static inline int
@@ -2875,7 +2875,7 @@ read_config(void)
 		else if (*line == 'P' && strncmp(line, "PropFields=", 11) == 0) {
 			char *tmp = get_line_value(line + 11);
 			if (tmp) {
-				xstrsncpy(prop_fields_str, tmp, sizeof(prop_fields_str) - 1);
+				xstrsncpy(prop_fields_str, tmp, sizeof(prop_fields_str));
 				set_prop_fields(prop_fields_str);
 			}
 		}
@@ -3220,7 +3220,7 @@ init_config(void)
 	if (config_ok == 1)
 		read_config();
 #else
-	xstrsncpy(div_line, DEF_DIV_LINE, sizeof(div_line) - 1);
+	xstrsncpy(div_line, DEF_DIV_LINE, sizeof(div_line));
 #endif /* CLIFM_SUCKLESS */
 
 	load_prompts();

@@ -1095,7 +1095,7 @@ check_trash_file(char *deq_file)
 {
 	char tmp_cmd[PATH_MAX];
 	if (*deq_file == '/') /* If absolute path */
-		xstrsncpy(tmp_cmd, deq_file, sizeof(tmp_cmd) - 1);
+		xstrsncpy(tmp_cmd, deq_file, sizeof(tmp_cmd));
 	else /* If relative path, add path to check against TRASH_DIR */
 		snprintf(tmp_cmd, sizeof(tmp_cmd), "%s/%s",
 			workspaces[cur_ws].path, deq_file);

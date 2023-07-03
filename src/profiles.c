@@ -550,7 +550,7 @@ rename_profile(char **args)
 	size_t len = strlen(args[1]);
 	profile_names[src_pf_index] = (char *)xrealloc(profile_names[src_pf_index],
 		(len + 1) * sizeof(char));
-	xstrsncpy(profile_names[src_pf_index], args[1], len);
+	xstrsncpy(profile_names[src_pf_index], args[1], len + 1);
 
 	printf(_("pf: %s: Profile successfully renamed to %s%s%s\n"),
 		args[0], BOLD, args[1], df_c);

@@ -1140,7 +1140,8 @@ print_file_perms(char *filename, const struct stat *attr,
 	const char file_type_char, const char *file_type_char_color)
 {
 	char tmp_file_type_char_color[MAX_COLOR + 1];
-	xstrsncpy(tmp_file_type_char_color, file_type_char_color, MAX_COLOR);
+	xstrsncpy(tmp_file_type_char_color, file_type_char_color,
+		sizeof(tmp_file_type_char_color));
 	if (xargs.no_bold != 1)
 		remove_bold_attr(tmp_file_type_char_color);
 
@@ -1498,11 +1499,12 @@ err_no_file(const char *filename, const int errnum, const int follow_link)
 	if (lstat(filename, &a) == -1 || !S_ISLNK(a.st_mode))
 		goto END;
 
-	char target[PATH_MAX + 1];
-	ssize_t len = readlink(filename, target, sizeof(target) - 1);
+	char target[PATH_MAX];
+	ssize_t len = readlinkat(XAT_FDCWD, filename, target, sizeof(target));
 	if (len > 0) {
 		target[len] = '\0';
-		xerror(_("prop: %s -> %s: Broken symbolic link\n"), filename, target);
+		xerror(_("prop: %s %s->%s %s: Broken symbolic link\n"), filename,
+			mi_c, df_c, target);
 		return EXIT_FAILURE;
 	}
 
@@ -1685,7 +1687,7 @@ construct_and_print_filename(const struct fileinfo *props,
 		size_t ext_len = 0;
 		ext_name = get_ext_info_long(props->name, plen, &trim, &ext_len);
 
-		xstrsncpy(tname, wname ? wname : props->name, sizeof(tname) - 1);
+		xstrsncpy(tname, wname ? wname : props->name, sizeof(tname));
 		int trim_point = (int)plen - rest - 1 - (int)ext_len;
 		if (trim_point < 0)
 			trim_point = 0;
@@ -1796,7 +1798,7 @@ construct_file_perms(const mode_t mode, char *perm_str, const char file_type,
 	const char *ctype)
 {
 	char tmp_ctype[MAX_COLOR + 1];
-	xstrsncpy(tmp_ctype, ctype, MAX_COLOR);
+	xstrsncpy(tmp_ctype, ctype, sizeof(tmp_ctype));
 	if (xargs.no_bold != 1)
 		remove_bold_attr(tmp_ctype);
 
@@ -1863,7 +1865,7 @@ construct_timestamp(char *time_str, const time_t ltime)
 	} else {
 		/* INVALID_TIME_STR (global) is generated at startup by
 		 * check_time_str(), in init.c. */
-		xstrsncpy(file_time, invalid_time_str, sizeof(file_time) - 1);
+		xstrsncpy(file_time, invalid_time_str, sizeof(file_time));
 	}
 
 	snprintf(time_str, TIME_STR_LEN, "%s%s%s ", cdate, *file_time

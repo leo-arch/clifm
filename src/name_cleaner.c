@@ -207,7 +207,7 @@ clean_file_name(char *restrict name)
 		/* ASCII chars */
 		if (n == 38) { /* & */
 			if (q == p || *(q - 1) != DEFAULT_TRANSLATION) {
-				xstrncat(q, strlen(q), "_and_", NAME_MAX);
+				xstrncat(q, strlen(q), "_and_", NAME_MAX + 1);
 				q += 5;
 				cur_len += 5;
 			} else {
@@ -281,7 +281,7 @@ clean_file_name(char *restrict name)
 
 		size_t tlen = strlen(t);
 		if (q == p || *(q - 1) != DEFAULT_TRANSLATION) {
-			xstrncat(q, strlen(q), t, NAME_MAX);
+			xstrncat(q, strlen(q), t, NAME_MAX + 1);
 			q += tlen;
 			cur_len += tlen;
 		} else {
@@ -531,7 +531,7 @@ bleach_files(char **names)
 			continue;
 		}
 
-		xstrsncpy(names[i], dstr, strlen(dstr));
+		xstrsncpy(names[i], dstr, strlen(dstr) + 1);
 		free(dstr);
 		size_t nlen = strlen(names[i]);
 		if (names[i][nlen - 1] == '/') {
@@ -657,7 +657,7 @@ CONFIRM:
 			struct stat a;
 			while (lstat(r, &a) == 0) {
 				char tmp[PATH_MAX];
-				xstrsncpy(tmp, r, sizeof(tmp) - 1);
+				xstrsncpy(tmp, r, sizeof(tmp));
 				r = (char *)xrealloc(r,	(PATH_MAX + 32) * sizeof(char));
 				snprintf(r, PATH_MAX + 31, "%s-%zu", tmp, rep_suffix);
 				rep_suffix++;

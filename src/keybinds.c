@@ -1521,7 +1521,7 @@ run_man_cmd(char *str)
 	if (p) {
 		size_t len = strlen(p);
 		mp = (char *)xnmalloc(len + 1, sizeof(char *));
-		xstrsncpy(mp, p, len);
+		xstrsncpy(mp, p, len + 1);
 		unsetenv("MANPAGER");
 	}
 

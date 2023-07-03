@@ -384,7 +384,7 @@ save_jump_suggestion(char *str)
 	if (slash == 0)
 		snprintf(jump_suggestion, jump_sug_len, "%s/", str);
 	else
-		xstrsncpy(jump_suggestion, str, jump_sug_len - 1);
+		xstrsncpy(jump_suggestion, str, jump_sug_len);
 
 	return EXIT_SUCCESS;
 }

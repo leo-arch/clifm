@@ -124,7 +124,7 @@ print_tagged_file(char *name, const char *tag)
 	if (strchr(name, '\\')) {
 		char *d = dequote_str(name, 0);
 		if (d) {
-			xstrsncpy(name, d, strlen(d));
+			xstrsncpy(name, d, strlen(d) + 1);
 			free(d);
 		}
 	}
@@ -150,7 +150,7 @@ list_files_in_tag(char *name)
 	if (strchr(name, '\\')) {
 		char *p = dequote_str(name, 0);
 		if (p) {
-			xstrsncpy(name, p, strlen(p));
+			xstrsncpy(name, p, strlen(p) + 1);
 			free(p);
 		}
 	}
@@ -250,7 +250,7 @@ is_tag(char *name)
 	if (strchr(name, '\\')) {
 		char *deq = dequote_str(name, 0);
 		if (deq) {
-			xstrsncpy(name, deq, strlen(deq));
+			xstrsncpy(name, deq, strlen(deq) + 1);
 			free(deq);
 		}
 	}

@@ -203,7 +203,7 @@ check_app_existence(char **app, char **arg)
 			snprintf(_path, len, "%s/%s %s", user.home, *app + 2, *arg);
 
 		*app = (char *)xrealloc(*app, (len + 2) * sizeof(char));
-		xstrsncpy(*app, _path, len + 1);
+		xstrsncpy(*app, _path, len + 2);
 		free(_path);
 		return 2;
 	}
@@ -703,7 +703,7 @@ expand_app_fields(char ***cmd, size_t *n, char *fpath, int *exec_flags)
 		if (*a[i] == '%' && *(a[i] + 1) == 'f') {
 			size_t fpath_len = strlen(fpath);
 			a[i] = (char *)xrealloc(a[i], (fpath_len + 1) * sizeof(char));
-			xstrsncpy(a[i], fpath, fpath_len);
+			xstrsncpy(a[i], fpath, fpath_len + 1);
 			f = 1;
 			continue;
 		}
@@ -723,7 +723,7 @@ expand_app_fields(char ***cmd, size_t *n, char *fpath, int *exec_flags)
 
 			size_t p_len = strlen(p);
 			a[i] = (char *)xrealloc(a[i], (p_len + 1) * sizeof(char *));
-			xstrsncpy(a[i], p, p_len);
+			xstrsncpy(a[i], p, p_len + 1);
 			free(p);
 			continue;
 		}
@@ -865,7 +865,7 @@ mime_list_open(char **apps, char *file)
 			if (*cmd[i] == '%' && cmd[i][1] == 'f') {
 				size_t file_len = strlen(file);
 				cmd[i] = (char *)xrealloc(cmd[i], (file_len + 1) * sizeof(char));
-				xstrsncpy(cmd[i], file, file_len);
+				xstrsncpy(cmd[i], file, file_len + 1);
 				f = 1;
 			}
 			if (*cmd[i] == '$' && cmd[i][1] >= 'A' && cmd[i][1] <= 'Z') {
@@ -1078,7 +1078,7 @@ mime_open_with_tab(char *filename, const char *prefix, const int only_names)
 					/* app: the expanded value */
 					size_t tlen = strlen(t);
 					app = (char *)xrealloc(app, (app_len + tlen + 1) * sizeof(char));
-					xstrsncpy(app, t, app_len + tlen);
+					xstrsncpy(app, t, app_len + tlen + 1);
 					free(t);
 				} else {
 					continue;
@@ -1146,7 +1146,7 @@ mime_open_with_tab(char *filename, const char *prefix, const int only_names)
 	if (appsn == 2) {
 		size_t src_len = strlen(apps[1]);
 		apps[0] = (char *)xrealloc(apps[0], (src_len + 1) * sizeof(char));
-		xstrsncpy(apps[0], apps[1], src_len);
+		xstrsncpy(apps[0], apps[1], src_len + 1);
 		free(apps[1]);
 		apps[1] = (char *)NULL;
 	}
@@ -1425,7 +1425,7 @@ mime_open_with(char *filename, char **args)
 				/* app: the expanded value */
 				size_t tlen = strlen(t);
 				app = (char *)xrealloc(app, (app_len + tlen + 1) * sizeof(char));
-				xstrsncpy(app, t, app_len + tlen);
+				xstrsncpy(app, t, app_len + tlen + 1);
 				free(t);
 			}
 

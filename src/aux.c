@@ -362,7 +362,7 @@ normalize_path(char *src, const size_t src_len)
 		if (tlen > 0 && tmp[tlen - 1] == '/')
 			tmp[tlen - 1] = '\0';
 
-		xstrsncpy(src, tmp, tlen);
+		xstrsncpy(src, tmp, tlen + 1);
 		free(tmp);
 		tmp = (char *)NULL;
 	}

@@ -573,7 +573,7 @@ construct_shell_cmd(char **args)
 
 	for (i = 0; args[i]; i++) {
 		char *src = (i == 0 && bypass == 1) ? args[i] + 1 : args[i];
-		xstrsncpy(cmd + cmd_len, src, total_len);
+		xstrsncpy(cmd + cmd_len, src, total_len + 1);
 		cmd_len += strlen(src) + 1;
 		cmd[cmd_len - 1] = ' ';
 		cmd[cmd_len] = '\0';
@@ -1187,7 +1187,7 @@ _toggle_exec(char **args)
 		if (strchr(args[i], '\\')) {
 			char *tmp = dequote_str(args[i], 0);
 			if (tmp) {
-				xstrsncpy(args[i], tmp, strlen(tmp));
+				xstrsncpy(args[i], tmp, strlen(tmp) + 1);
 				free(tmp);
 			}
 		}
@@ -1846,33 +1846,33 @@ set_cp_cmd(char **cmd, const int cp_force)
 	case CP_ADVCP:
 		dst_len = strlen(_DEF_ADVCP_CMD);
 		*cmd = (char *)xrealloc(*cmd, (dst_len + 1) * sizeof(char));
-		xstrsncpy(*cmd, _DEF_ADVCP_CMD, dst_len);
+		xstrsncpy(*cmd, _DEF_ADVCP_CMD, dst_len + 1);
 		break;
 	case CP_ADVCP_FORCE:
 		dst_len = strlen(_DEF_ADVCP_CMD_FORCE);
 		*cmd = (char *)xrealloc(*cmd, (dst_len + 1) * sizeof(char));
-		xstrsncpy(*cmd, _DEF_ADVCP_CMD_FORCE, dst_len);
+		xstrsncpy(*cmd, _DEF_ADVCP_CMD_FORCE, dst_len + 1);
 		break;
 	case CP_WCP:
 		dst_len = strlen(_DEF_WCP_CMD);
 		*cmd = (char *)xrealloc(*cmd, (dst_len + 1) * sizeof(char));
-		xstrsncpy(*cmd, _DEF_WCP_CMD, dst_len);
+		xstrsncpy(*cmd, _DEF_WCP_CMD, dst_len + 1);
 		break;
 	case CP_RSYNC:
 		dst_len = strlen(_DEF_RSYNC_CMD);
 		*cmd = (char *)xrealloc(*cmd, (dst_len + 1) * sizeof(char));
-		xstrsncpy(*cmd, _DEF_RSYNC_CMD, dst_len);
+		xstrsncpy(*cmd, _DEF_RSYNC_CMD, dst_len + 1);
 		break;
 	case CP_CP_FORCE:
 		dst_len = strlen(_DEF_CP_CMD_FORCE);
 		*cmd = (char *)xrealloc(*cmd, (dst_len + 1) * sizeof(char));
-		xstrsncpy(*cmd, _DEF_CP_CMD_FORCE, dst_len);
+		xstrsncpy(*cmd, _DEF_CP_CMD_FORCE, dst_len + 1);
 		break;
 	case CP_CP: /* fallthrough */
 	default:
 		dst_len = strlen(_DEF_CP_CMD);
 		*cmd = (char *)xrealloc(*cmd, (dst_len + 1) * sizeof(char));
-		xstrsncpy(*cmd, _DEF_CP_CMD, dst_len);
+		xstrsncpy(*cmd, _DEF_CP_CMD, dst_len + 1);
 		break;
 	}
 
@@ -1896,23 +1896,23 @@ set_mv_cmd(char **cmd, const int mv_force)
 	case MV_ADVMV:
 		dst_len = strlen(_DEF_ADVMV_CMD);
 		*cmd = (char *)xrealloc(*cmd, (dst_len + 1) * sizeof(char));
-		xstrsncpy(*cmd, _DEF_ADVMV_CMD, dst_len);
+		xstrsncpy(*cmd, _DEF_ADVMV_CMD, dst_len + 1);
 		break;
 	case MV_ADVMV_FORCE:
 		dst_len = strlen(_DEF_ADVMV_CMD);
 		*cmd = (char *)xrealloc(*cmd, (dst_len + 1) * sizeof(char));
-		xstrsncpy(*cmd, _DEF_ADVMV_CMD_FORCE, dst_len);
+		xstrsncpy(*cmd, _DEF_ADVMV_CMD_FORCE, dst_len + 1);
 		break;
 	case MV_MV_FORCE:
 		dst_len = strlen(_DEF_MV_CMD_FORCE);
 		*cmd = (char *)xrealloc(*cmd, (dst_len + 1) * sizeof(char));
-		xstrsncpy(*cmd, _DEF_MV_CMD_FORCE, dst_len);
+		xstrsncpy(*cmd, _DEF_MV_CMD_FORCE, dst_len + 1);
 		break;
 	case MV_MV: /* fallthrough */
 	default:
 		dst_len = strlen(_DEF_MV_CMD);
 		*cmd = (char *)xrealloc(*cmd, (dst_len + 1) * sizeof(char));
-		xstrsncpy(*cmd, _DEF_MV_CMD, dst_len);
+		xstrsncpy(*cmd, _DEF_MV_CMD, dst_len + 1);
 		break;
 	}
 
@@ -2458,15 +2458,15 @@ exec_cmd(char **comm)
 		if (*comm[0] == 'l' && !comm[0][1]) {
 			comm[0] = (char *)xrealloc(comm[0], 7 * sizeof(char));
 #if defined(_BE_POSIX)
-			xstrsncpy(comm[0], "ln -s", 5);
+			xstrsncpy(comm[0], "ln -s", 6);
 #else
-			xstrsncpy(comm[0], "ln -sn", 6);
+			xstrsncpy(comm[0], "ln -sn", 7);
 #endif
 			/* Make sure the symlink source is always an absolute path. */
 			if (comm[1] && *comm[1] != '/' && *comm[1] != '~') {
 				size_t len = strlen(comm[1]);
 				char *tmp = (char *)xnmalloc(len + 1, sizeof(char));
-				xstrsncpy(tmp, comm[1], len);
+				xstrsncpy(tmp, comm[1], len + 1);
 				size_t comm_len = len + strlen(workspaces[cur_ws].path) + 2;
 				comm[1] = (char *)xrealloc(comm[1], comm_len * sizeof(char));
 				snprintf(comm[1], comm_len, "%s/%s", workspaces[cur_ws].path, tmp);
@@ -2477,7 +2477,7 @@ exec_cmd(char **comm)
 			goto CHECK_EVENTS;
 		} else if (*comm[0] == 'm' && comm[0][1] == 'd' && !comm[0][2]) {
 			comm[0] = (char *)xrealloc(comm[0], 9 * sizeof(char));
-			xstrsncpy(comm[0], "mkdir -p", 8);
+			xstrsncpy(comm[0], "mkdir -p", 9);
 		}
 
 		if (*comm[0] == 'l' && comm[0][1] == 'e' && !comm[0][2]) {

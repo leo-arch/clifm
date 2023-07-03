@@ -61,7 +61,7 @@ get_plugin_path(char *action, int *status)
 
 	if (strchr(action, '/')) {
 		cmd = (char *)xnmalloc(action_len + 1, sizeof(char));
-		xstrsncpy(cmd, action, action_len);
+		xstrsncpy(cmd, action, action_len + 1);
 		dir_path = 1;
 	} else { /* If not a path, PLUGINS_DIR is assumed */
 		if (!plugins_dir || !*plugins_dir) {
@@ -111,7 +111,7 @@ run_action(char *action, char **args)
 
 	size_t cmd_len = strlen(cmd);
 	args[0] = (char *)xrealloc(args[0], (cmd_len + 1) * sizeof(char));
-	xstrsncpy(args[0], cmd, cmd_len);
+	xstrsncpy(args[0], cmd, cmd_len + 1);
 
 	free(cmd);
 

@@ -1137,8 +1137,8 @@ my_rl_path_completion(const char *text, int state)
 		temp = strrchr(dirname, '/');
 
 		if (temp) {
-			// At this point, FILENAME has been allocated with TEXT_LEN bytes.
-			xstrsncpy(filename, ++temp, text_len);
+			/* At this point, FILENAME has been allocated with TEXT_LEN bytes. */
+			xstrsncpy(filename, ++temp, text_len + 1);
 			*temp = '\0';
 		} else {
 			*dirname = '.';
@@ -1228,7 +1228,7 @@ my_rl_path_completion(const char *text, int state)
 #if !defined(_DIRENT_HAVE_D_TYPE)
 		struct stat attr;
 		if (!dirname || (*dirname == '.' && !*(dirname + 1)))
-			xstrsncpy(tmp, ent->d_name, sizeof(tmp) - 1);
+			xstrsncpy(tmp, ent->d_name, sizeof(tmp));
 		else
 			snprintf(tmp, sizeof(tmp), "%s%s", dirname, ent->d_name);
 
@@ -1369,7 +1369,7 @@ my_rl_path_completion(const char *text, int state)
 					&& (r = fuzzy_match(filename, ent->d_name,
 					filename_len, fuzzy_str_type)) > best_fz_score) {
 						if (!dirname || (*dirname == '.' && !*(dirname + 1))) {
-							xstrsncpy(_fmatch, ent->d_name, sizeof(_fmatch) - 1);
+							xstrsncpy(_fmatch, ent->d_name, sizeof(_fmatch));
 						} else {
 							snprintf(_fmatch, sizeof(_fmatch), "%s%s",
 								dirname, ent->d_name);
@@ -1507,7 +1507,7 @@ my_rl_path_completion(const char *text, int state)
 				size_t dirlen = strlen(dirname);
 				size_t len = dirlen + strlen(ent->d_name) + 1;
 				temp = (char *)xnmalloc(len + 1, sizeof(char));
-				xstrsncpy(temp, dirname, len);
+				xstrsncpy(temp, dirname, len + 1);
 				// Canonicalization cuts off any final slash present.
 				// We need to add it back.
 
@@ -2506,7 +2506,7 @@ rl_trashed_files(const char *text)
 		if (d) {
 			size_t len = strlen(d);
 			tfiles[0] = (char *)xrealloc(tfiles[0], (len + 1) * sizeof(char));
-			xstrsncpy(tfiles[0], d, len);
+			xstrsncpy(tfiles[0], d, len + 1);
 			free(d);
 		}
 	}
@@ -3440,7 +3440,7 @@ complete_shell_cmd_opts(char *text, int *exit_status)
 	if (a) {
 		*a = '\0';
 		char *b = strrchr(rl_line_buffer, ' ');
-		xstrsncpy(lw, (b && *(b + 1)) ? b + 1 : rl_line_buffer, sizeof(lw) - 1);
+		xstrsncpy(lw, (b && *(b + 1)) ? b + 1 : rl_line_buffer, sizeof(lw));
 		*a = ' ';
 	}
 

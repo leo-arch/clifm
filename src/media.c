@@ -206,7 +206,7 @@ get_dev_label(void)
 				char pp = 0;
 				pp = (char)(from_hex(*(p + 2)) << 4 | from_hex(*(p + 3)));
 				*p = pp;
-				xstrsncpy(p + 1, p + 4, strlen(p + 4));
+				xstrsncpy(p + 1, p + 4, strlen(p + 4) + 1);
 			}
 			label = savestring(name, strlen(name));
 		}

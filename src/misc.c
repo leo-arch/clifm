@@ -146,18 +146,16 @@ END:
 void
 set_eln_color(void)
 {
-	size_t len = sizeof(el_c) - 1;
-
 	switch (cur_ws) {
-	case 0: xstrsncpy(el_c, *ws1_c ? ws1_c : DEF_EL_C, len); break;
-	case 1: xstrsncpy(el_c, *ws2_c ? ws2_c : DEF_EL_C, len); break;
-	case 2: xstrsncpy(el_c, *ws3_c ? ws3_c : DEF_EL_C, len); break;
-	case 3: xstrsncpy(el_c, *ws4_c ? ws4_c : DEF_EL_C, len); break;
-	case 4: xstrsncpy(el_c, *ws5_c ? ws5_c : DEF_EL_C, len); break;
-	case 5: xstrsncpy(el_c, *ws6_c ? ws6_c : DEF_EL_C, len); break;
-	case 6: xstrsncpy(el_c, *ws7_c ? ws7_c : DEF_EL_C, len); break;
-	case 7: xstrsncpy(el_c, *ws8_c ? ws8_c : DEF_EL_C, len); break;
-	default: xstrsncpy(el_c, DEF_EL_C, len); break;
+	case 0: xstrsncpy(el_c, *ws1_c ? ws1_c : DEF_EL_C, sizeof(el_c)); break;
+	case 1: xstrsncpy(el_c, *ws2_c ? ws2_c : DEF_EL_C, sizeof(el_c)); break;
+	case 2: xstrsncpy(el_c, *ws3_c ? ws3_c : DEF_EL_C, sizeof(el_c)); break;
+	case 3: xstrsncpy(el_c, *ws4_c ? ws4_c : DEF_EL_C, sizeof(el_c)); break;
+	case 4: xstrsncpy(el_c, *ws5_c ? ws5_c : DEF_EL_C, sizeof(el_c)); break;
+	case 5: xstrsncpy(el_c, *ws6_c ? ws6_c : DEF_EL_C, sizeof(el_c)); break;
+	case 6: xstrsncpy(el_c, *ws7_c ? ws7_c : DEF_EL_C, sizeof(el_c)); break;
+	case 7: xstrsncpy(el_c, *ws8_c ? ws8_c : DEF_EL_C, sizeof(el_c)); break;
+	default: xstrsncpy(el_c, DEF_EL_C, sizeof(el_c)); break;
 	}
 }
 
@@ -843,17 +841,17 @@ get_cmd(char *dir, char *_sudo, char *self, const int sudo)
 	if (sudo == 1) {
 		len = strlen(self);
 		cmd[i + plus] = (char *)xnmalloc(len + 1, sizeof(char));
-		xstrsncpy(cmd[i + plus], _sudo, len);
+		xstrsncpy(cmd[i + plus], _sudo, len + 1);
 		plus++;
 	}
 
 	len = strlen(self);
 	cmd[i + plus] = (char *)xnmalloc(len + 1, sizeof(char));
-	xstrsncpy(cmd[i + plus], self, len);
+	xstrsncpy(cmd[i + plus], self, len + 1);
 	plus++;
 	len = strlen(dir);
 	cmd[i + plus] = (char *)xnmalloc(len + 1, sizeof(char));
-	xstrsncpy(cmd[i + plus], dir, len);
+	xstrsncpy(cmd[i + plus], dir, len + 1);
 	plus++;
 	cmd[i + plus] = (char *)NULL;
 
@@ -1226,7 +1224,7 @@ create_usr_var(const char *str)
 	*p = '\0';
 	size_t len = (size_t)(p - str);
 	char *name = (char *)xnmalloc(len + 1, sizeof(char));
-	xstrsncpy(name, str, len);
+	xstrsncpy(name, str, len + 1);
 	*p = '=';
 
 	char *value = parse_usrvar_value(str, '=');
@@ -1328,8 +1326,7 @@ expand_prompt_name(char *name)
 		if (xargs.warning_prompt != 0)
 			conf.warning_prompt = prompts[i].warning_prompt_enabled;
 
-		xstrsncpy(cur_prompt_name, prompts[i].name,
-			sizeof(cur_prompt_name) - 1);
+		xstrsncpy(cur_prompt_name, prompts[i].name, sizeof(cur_prompt_name));
 
 		return EXIT_SUCCESS;
 	}
@@ -1851,7 +1848,7 @@ handle_stdin(void)
 			if (*q != '/' || !q[1])
 				snprintf(source, sizeof(source), "%s/%s", cwd, q);
 			else
-				xstrsncpy(source, q, sizeof(source) - 1);
+				xstrsncpy(source, q, sizeof(source));
 
 			char dest[PATH_MAX + 1];
 			snprintf(dest, sizeof(dest), "%s/%s", stdin_tmp_dir, tmp_file);

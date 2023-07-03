@@ -1692,7 +1692,7 @@ get_last_word(const char *last_space)
 	if (tmp) {
 		size_t len = strlen(tmp);
 		last_word = (char *)xrealloc(last_word, (len + 1) * sizeof(char));
-		xstrsncpy(last_word, tmp, len);
+		xstrsncpy(last_word, tmp, len + 1);
 	} else {
 		last_word = (char *)xrealloc(last_word, 1 * sizeof(char));
 		*last_word = '\0';
@@ -1934,7 +1934,7 @@ check_backdir(void)
 	/* Remove the last component of the current path name (CWD):
 	 * we want to match only PARENT directories */
 	char bk_cwd[PATH_MAX + 1];
-	xstrsncpy(bk_cwd, workspaces[cur_ws].path, PATH_MAX);
+	xstrsncpy(bk_cwd, workspaces[cur_ws].path, sizeof(bk_cwd));
 
 	char *q = strrchr(bk_cwd, '/');
 	if (q)

@@ -1226,7 +1226,7 @@ load_remotes(void)
 			size_t name_len = strlen(name);
 			remotes[n].name = (char *)xrealloc(remotes[n].name,
 				(name_len + 1) * sizeof(char));
-			xstrsncpy(remotes[n].name, name, name_len);
+			xstrsncpy(remotes[n].name, name, name_len + 1);
 			free(name);
 			name = (char *)NULL;
 		}
@@ -1253,7 +1253,7 @@ load_remotes(void)
 		if (strncmp(line, "Comment=", 8) == 0) {
 			remotes[n].desc = (char *)xrealloc(remotes[n].desc,
 				(ret_len + 1) * sizeof(char));
-			xstrsncpy(remotes[n].desc, ret, ret_len);
+			xstrsncpy(remotes[n].desc, ret, ret_len + 1);
 		} else if (strncmp(line, "Mountpoint=", 11) == 0) {
 			char *tmp = (char *)NULL;
 			if (*ret == '~')
@@ -1261,7 +1261,7 @@ load_remotes(void)
 			size_t mnt_len = tmp ? strlen(tmp) : ret_len;
 			remotes[n].mountpoint = (char *)xrealloc(remotes[n].mountpoint,
 				(mnt_len + 1) * sizeof(char));
-			xstrsncpy(remotes[n].mountpoint, tmp ? tmp : ret, mnt_len);
+			xstrsncpy(remotes[n].mountpoint, tmp ? tmp : ret, mnt_len + 1);
 			free(tmp);
 			if (count_dir(remotes[n].mountpoint, CPOP) > 2)
 				remotes[n].mounted = 1;
@@ -1273,7 +1273,7 @@ load_remotes(void)
 					size_t rep_len = strlen(rep);
 					remotes[n].mount_cmd = (char *)xrealloc(
 						remotes[n].mount_cmd, (rep_len + 1) * sizeof(char));
-					xstrsncpy(remotes[n].mount_cmd, rep, rep_len);
+					xstrsncpy(remotes[n].mount_cmd, rep, rep_len + 1);
 					free(rep);
 					replaced = 1;
 				}
@@ -1282,7 +1282,7 @@ load_remotes(void)
 			if (!replaced) {
 				remotes[n].mount_cmd = (char *)xrealloc(remotes[n].mount_cmd,
 					(ret_len + 1) * sizeof(char));
-				xstrsncpy(remotes[n].mount_cmd, ret, ret_len);
+				xstrsncpy(remotes[n].mount_cmd, ret, ret_len + 1);
 			}
 		} else if (strncmp(line, "UnmountCmd=", 11) == 0) {
 			int replaced = 0;
@@ -1292,7 +1292,7 @@ load_remotes(void)
 					size_t rep_len = strlen(rep);
 					remotes[n].unmount_cmd = (char *)xrealloc(
 						remotes[n].unmount_cmd, (rep_len + 1) * sizeof(char));
-					xstrsncpy(remotes[n].unmount_cmd, rep, rep_len);
+					xstrsncpy(remotes[n].unmount_cmd, rep, rep_len + 1);
 					free(rep);
 					replaced = 1;
 				}
@@ -1301,7 +1301,7 @@ load_remotes(void)
 			if (!replaced) {
 				remotes[n].unmount_cmd = (char *)xrealloc(remotes[n].unmount_cmd,
 					(ret_len + 1) * sizeof(char));
-				xstrsncpy(remotes[n].unmount_cmd, ret, ret_len);
+				xstrsncpy(remotes[n].unmount_cmd, ret, ret_len + 1);
 			}
 		} else if (strncmp(line, "AutoUnmount=", 12) == 0) {
 			if (strcmp(ret, "true") == 0)
@@ -1415,7 +1415,7 @@ load_prompts(void)
 			size_t name_len = strlen(name);
 			prompts[n].name = (char *)xrealloc(prompts[n].name,
 				(name_len + 1) * sizeof(char));
-			xstrsncpy(prompts[n].name, name, name_len);
+			xstrsncpy(prompts[n].name, name, name_len + 1);
 			free(name);
 			name = (char *)NULL;
 		}
@@ -1450,7 +1450,7 @@ load_prompts(void)
 		if (strncmp(line, "RegularPrompt=", 14) == 0) {
 			prompts[n].regular = (char *)xrealloc(prompts[n].regular,
 				(ret_len + 1) * sizeof(char));
-			xstrsncpy(prompts[n].regular, ret, ret_len);
+			xstrsncpy(prompts[n].regular, ret, ret_len + 1);
 			continue;
 		}
 
@@ -1467,7 +1467,7 @@ load_prompts(void)
 		if (strncmp(line, "WarningPrompt=", 14) == 0) {
 			prompts[n].warning = (char *)xrealloc(prompts[n].warning,
 				(ret_len + 1) * sizeof(char));
-			xstrsncpy(prompts[n].warning, ret, ret_len);
+			xstrsncpy(prompts[n].warning, ret, ret_len + 1);
 		}
 	}
 
@@ -2220,7 +2220,7 @@ write_dirhist(char *line, ssize_t len)
 
 	old_pwd[dirhist_total_index] = (char *)xnmalloc((size_t)len + 1,
 		sizeof(char));
-	xstrsncpy(old_pwd[dirhist_total_index], line, (size_t)len);
+	xstrsncpy(old_pwd[dirhist_total_index], line, (size_t)len + 1);
 	dirhist_total_index++;
 }
 
@@ -2336,7 +2336,7 @@ check_time_str(void)
 	if (conf.relative_time == 1) {
 	/* +1 = extra space to avoid hitting the screen right edge in long view */
 		prop_fields.len += (7 + 1);
-		strncpy(invalid_time_str, " -     ", MAX_TIME_STR);
+		xstrsncpy(invalid_time_str, " -     ", sizeof(invalid_time_str));
 		return;
 	}
 
@@ -2443,7 +2443,7 @@ check_options(void)
 	}
 
 	if (!*prop_fields_str) {
-		xstrsncpy(prop_fields_str, DEF_PROP_FIELDS, PROP_FIELDS_SIZE);
+		xstrsncpy(prop_fields_str, DEF_PROP_FIELDS, sizeof(prop_fields_str));
 		set_prop_fields(prop_fields_str);
 	}
 	check_time_str();
@@ -2940,7 +2940,7 @@ check_options(void)
 
 	if ((xargs.stealth_mode == 1 || home_ok == 0 ||
 	config_ok == 0 || !config_file) && !*div_line)
-		xstrsncpy(div_line, DEF_DIV_LINE, sizeof(div_line) - 1);
+		xstrsncpy(div_line, DEF_DIV_LINE, sizeof(div_line));
 
 	if (xargs.stealth_mode == 1 && !conf.opener) {
 		/* Since in stealth mode we have no access to the config file, we cannot
