@@ -418,7 +418,7 @@ trash_file(const char *suffix, const struct tm *tm, char *file)
 	snprintf(dest, len, "%s/%s", trash_files_dir, file_suffix);
 
 	int mvcmd = 0;
-	ret = renameat(AT_FDCWD, file, AT_FDCWD, dest);
+	ret = renameat(XAT_FDCWD, file, XAT_FDCWD, dest);
 	if (ret != EXIT_SUCCESS && errno == EXDEV) {
 		/* Destination file is on a different file system, which is why
 		 * rename(3) doesn't work: let's try with mv(1). */
@@ -799,7 +799,7 @@ untrash_file(char *file)
 		return EEXIST;
 	}
 
-	int ret = renameat(AT_FDCWD, undel_file, AT_FDCWD, url_decoded);
+	int ret = renameat(XAT_FDCWD, undel_file, XAT_FDCWD, url_decoded);
 	if (ret == -1) {
 		if (errno == EXDEV) {
 			/* Destination file is on a different file system, which is why

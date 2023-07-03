@@ -1675,7 +1675,7 @@ get_sel_files(void)
 		if (!*line || *line == '#' || len == 0)
 			continue;
 
-		if (fstatat(AT_FDCWD, line, &a, AT_SYMLINK_NOFOLLOW) == -1)
+		if (fstatat(XAT_FDCWD, line, &a, AT_SYMLINK_NOFOLLOW) == -1)
 			continue;
 
 		sel_elements = (struct sel_t *)xrealloc(sel_elements,

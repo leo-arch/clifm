@@ -649,7 +649,7 @@ set_file_perms(char **args)
 	size_t n = 0;
 	mode_t mode = (mode_t)strtol(octal_str, 0, 8);
 	for (i = 1; args[i]; i++) {
-		if (fchmodat(AT_FDCWD, args[i], mode, 0) == EXIT_SUCCESS) {
+		if (fchmodat(XAT_FDCWD, args[i], mode, 0) == EXIT_SUCCESS) {
 			n++;
 		} else {
 			xerror(_("pc: Changing permissions of '%s': %s\n"),
@@ -836,7 +836,7 @@ set_file_owner(char **args)
 			return errno;
 		}
 
-		if (fchownat(AT_FDCWD, args[i],
+		if (fchownat(XAT_FDCWD, args[i],
 		*new_own ? owner->pw_uid : a.st_uid,
 		new_group ? group->gr_gid : a.st_gid,
 		0) == -1) {
@@ -1190,7 +1190,7 @@ print_file_name(char *filename, const char *color, const char file_type,
 
 	} else { /* Broken link */
 		char target[PATH_MAX] = "";;
-		ssize_t ret = readlinkat(AT_FDCWD, filename, target, sizeof(target));
+		ssize_t ret = readlinkat(XAT_FDCWD, filename, target, sizeof(target));
 
 		if (ret != -1 && *target) {
 			printf(_("\tName: %s%s%s -> %s%s%s (broken link)\n"), or_c,

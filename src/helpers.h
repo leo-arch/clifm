@@ -217,6 +217,15 @@ void *__dso_handle;
 # define LINUX_FILE_ATTRS
 #endif
 
+#if defined(__sun)
+/* Solaris/Illumos defines AT_FDCWD as 0xffd19553 (-3041965); without the int
+ * cast, the value gets interpreted as uint (4291925331), which throws compiler
+ * warnings. See https://github.com/python/cpython/issues/60169 */
+# define XAT_FDCWD (int)AT_FDCWD
+#else
+# define XAT_FDCWD AT_FDCWD
+#endif /* __sun */
+
 /* Event handling */
 #if defined(LINUX_INOTIFY)
 # define NUM_EVENT_SLOTS 32 /* Make room for 32 events */
@@ -897,6 +906,20 @@ struct fileinfo {
 	char *icon;
 	char *icon_color;
 	char *name;
+	size_t len;
+	time_t ltime; /* For long view mode */
+	time_t time;
+	dev_t rdev; /* Needed to calculate major and minor devs in long view */
+	ino_t inode;
+	off_t size;
+	nlink_t linkn;
+#ifndef __sun
+	int pad; /* nlink_t is 4 bytes on Solaris: no need for extra pad */
+#endif /* __sun */
+	uid_t uid;
+	gid_t gid;
+	mode_t mode; /* Store st_mode (for long view mode) */
+	mode_t type; /* Store d_type value */
 	int dir;
 	int eln_n;
 	int exec;
@@ -906,18 +929,6 @@ struct fileinfo {
 	int sel;
 	int xattr;
 	int du_status; /* Exit status of du(1) for dir full sizes */
-	int pad;
-	size_t len;
-	mode_t mode; /* Store st_mode (for long view mode) */
-	mode_t type; /* Store d_type value */
-	ino_t inode;
-	off_t size;
-	uid_t uid;
-	gid_t gid;
-	nlink_t linkn;
-	time_t ltime; /* For long view mode */
-	time_t time;
-	dev_t rdev; /* To calculate major and minor devs in long view */
 };
 
 extern struct fileinfo *file_info;
@@ -1279,19 +1290,19 @@ enum jump {
 
 enum comp_type {
 	TCMP_BOOKMARK =	  0,
-	TCMP_CMD =		  1,
+	TCMP_CMD =        1,
 	TCMP_CSCHEME = 	  2,
-	TCMP_DESEL = 	  3,
-	TCMP_ELN =		  4,
+	TCMP_DESEL =      3,
+	TCMP_ELN =        4,
 	TCMP_HIST =       5,
 	TCMP_JUMP =       6,
-	TCMP_NET =	      7,
+	TCMP_NET =        7,
 	TCMP_NONE =       8,
 	TCMP_OPENWITH =   9,
 	TCMP_PATH =       10,
 	TCMP_PROF =       11,
-	TCMP_RANGES = 	  12,
-	TCMP_SEL =	      13,
+	TCMP_RANGES =     12,
+	TCMP_SEL =        13,
 	TCMP_SORT =       14,
 	TCMP_TRASHDEL =	  15,
 	TCMP_UNTRASH =    16,

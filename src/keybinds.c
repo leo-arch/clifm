@@ -2051,7 +2051,7 @@ rl_toggle_virtualdir_full_paths(int count, int key)
 
 		if (!p || !*p) continue;
 
-		if (renameat(AT_FDCWD, file_info[i].name, AT_FDCWD, p) == -1)
+		if (renameat(XAT_FDCWD, file_info[i].name, XAT_FDCWD, p) == -1)
 			_err('w', PRINT_PROMPT, "renameat: %s: %s\n",
 				file_info[i].name, strerror(errno));
 

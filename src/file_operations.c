@@ -707,7 +707,7 @@ toggle_exec(const char *file, mode_t mode)
 	// Set it only for owner, unset it for every one
 //	(0100 & mode) ? (mode &= (mode_t)~0111) : (mode |= 0100);
 
-	if (fchmodat(AT_FDCWD, file, mode, 0) == -1) {
+	if (fchmodat(XAT_FDCWD, file, mode, 0) == -1) {
 		xerror("te: Changing permissions of '%s': %s\n",
 			file, strerror(errno));
 		return EXIT_FAILURE;
@@ -896,7 +896,7 @@ create_file(char *name)
 			goto CONT;
 
 		errno = 0;
-		if (mkdirat(AT_FDCWD, name, mode) == -1) {
+		if (mkdirat(XAT_FDCWD, name, mode) == -1) {
 			xerror("new: %s: %s\n", name, strerror(errno));
 			status = EXIT_FAILURE;
 			break;
@@ -1450,7 +1450,7 @@ print_current_target(const char *link, char **target)
 	}
 
 	char tmp[PATH_MAX] = "";
-	ssize_t ret = readlinkat(AT_FDCWD, link, tmp, sizeof(tmp));
+	ssize_t ret = readlinkat(XAT_FDCWD, link, tmp, sizeof(tmp));
 
 	if (ret != -1 && *tmp) {
 		printf(_("%s%s%s (broken link)\n"), uf_c, tmp, df_c);
@@ -2071,7 +2071,7 @@ bulk_rename(char **args)
 		if (line[line_len - 1] == '\n')
 			line[line_len - 1] = '\0';
 		if (args[i] && strcmp(args[i], line) != 0) {
-			if (renameat(AT_FDCWD, args[i], AT_FDCWD, line) == -1)
+			if (renameat(XAT_FDCWD, args[i], XAT_FDCWD, line) == -1)
 				exit_status = errno;
 		}
 
@@ -2218,7 +2218,7 @@ batch_link(char **args)
 		}
 
 		char *ptr = strrchr(tmp, '/');
-		if (symlinkat(args[i], AT_FDCWD, (ptr && ++ptr) ? ptr : tmp) == -1) {
+		if (symlinkat(args[i], XAT_FDCWD, (ptr && ++ptr) ? ptr : tmp) == -1) {
 			exit_status = errno;
 			xerror(_("bl: symlinkat: %s: Cannot create symlink: %s\n"),
 				ptr ? ptr : tmp, strerror(errno));

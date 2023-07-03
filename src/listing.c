@@ -527,7 +527,7 @@ set_events_checker(void)
 # endif /* O_EVTONLY */
 	if (event_fd >= 0) {
 		/* Prepare for events */
-		EV_SET(&events_to_monitor[0], event_fd, EVFILT_VNODE,
+		EV_SET(&events_to_monitor[0], (uintptr_t)event_fd, EVFILT_VNODE,
 			EV_ADD | EV_CLEAR, KQUEUE_FFLAGS, 0, workspaces[cur_ws].path);
 		watch = 1;
 		/* Register events */

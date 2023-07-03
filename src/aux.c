@@ -183,7 +183,7 @@ clear_term_img(void)
 	struct stat a;
 	if (p && stat(p, &a) != -1) {
 		kitty_clear();
-		unlinkat(AT_FDCWD, p, 0);
+		unlinkat(XAT_FDCWD, p, 0);
 	}
 }
 
@@ -540,7 +540,7 @@ int
 xmkdir(char *dir, const mode_t mode)
 {
 	mode_t old_mask = umask(0);
-	int ret = mkdirat(AT_FDCWD, dir, mode);
+	int ret = mkdirat(XAT_FDCWD, dir, mode);
 	umask(old_mask);
 
 	if (ret == -1)

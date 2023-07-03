@@ -600,7 +600,7 @@ untag(char **args, const size_t n, size_t *t)
 
 		if (lstat(f, &a) != -1 && S_ISLNK(a.st_mode)) {
 			errno = 0;
-			if (unlinkat(AT_FDCWD, f, 0) == -1) {
+			if (unlinkat(XAT_FDCWD, f, 0) == -1) {
 				exit_status = errno;
 				xerror("tag: %s: %s\n", args[i], strerror(errno));
 			} else {

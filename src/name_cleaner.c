@@ -661,7 +661,7 @@ CONFIRM:
 				rep_suffix++;
 			}
 
-			if (renameat(AT_FDCWD, o, AT_FDCWD, r) == -1) {
+			if (renameat(XAT_FDCWD, o, XAT_FDCWD, r) == -1) {
 				xerror("bleach: renameat: %s: %s\n", o, strerror(errno));
 				total_rename--;
 				exit_status = EXIT_FAILURE;

@@ -449,7 +449,11 @@ rl_exclude_input(unsigned char c)
 	if (rl_editing_mode == 0) {
 		if (rl_readline_state & RL_STATE_VICMDONCE) {
 			if (c == 'i') {
+#ifdef __sun
+				rl_readline_state &= ~RL_STATE_VICMDONCE;
+#else
 				rl_readline_state &= (unsigned long)~RL_STATE_VICMDONCE;
+#endif /* __sun */
 #ifndef _NO_SUGGESTIONS
 			} else if (suggestion.printed) {
 				clear_suggestion(CS_FREEBUF);
