@@ -1257,9 +1257,9 @@ pad_filename(const int ind_char, const int i, const int pad,
 
 #ifndef _NO_ICONS
 	cur_len = pad + 1 + (conf.icons == 1 ? 3 : 0) + (int)file_info[i].len
-		+ (ind_char == 1 ? 1 : 0);
+		+ (ind_char ? 1 : 0);
 #else
-	cur_len = pad + 1 + (int)file_info[i].len + (*ind_char ? 1 : 0);
+	cur_len = pad + 1 + (int)file_info[i].len + (ind_char ? 1 : 0);
 #endif /* !_NO_ICONS */
 
 	if (file_info[i].dir == 1 && conf.classify == 1) {
@@ -1287,9 +1287,9 @@ pad_filename_light(const int ind_char, const int i, const int pad,
 	int cur_len = 0;
 #ifndef _NO_ICONS
 	cur_len = pad + 1 + (conf.icons == 1 ? 3 : 0)
-		+ (int)file_info[i].len + (ind_char == 1 ? 1 : 0);
+		+ (int)file_info[i].len + (ind_char ? 1 : 0);
 #else
-	cur_len = pad + 1 + (int)file_info[i].len + (*ind_char ? 1 : 0);
+	cur_len = pad + 1 + (int)file_info[i].len + (ind_char ? 1 : 0);
 #endif /* !_NO_ICONS */
 
 	if (conf.classify == 1) {

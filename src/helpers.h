@@ -716,6 +716,20 @@ extern int watch;
 
 /* User settings (mostly from the config file) */
 struct config_t {
+	char *opener;
+	char *encoded_prompt;
+	char *term;
+	char *time_str;
+	char *welcome_message_str;
+	char *wprompt_str;
+#ifndef _NO_SUGGESTIONS
+	char *suggestion_strategy;
+#else
+	char *pad1; /* Keep the struct alignment */
+#endif /* !_NO_SUGGESTIONS */
+	char *usr_cscheme;
+	char *fzftab_options;
+
 	int apparent_size;
 	int auto_open;
 	int autocd;
@@ -729,9 +743,7 @@ struct config_t {
 	int clear_screen;
 	int cmd_desc_sug;
 	int colorize;
-
 	int color_lnk_as_target;
-
 	int columned;
 	int cp_cmd;
 	int desktop_notifications;
@@ -790,20 +802,6 @@ struct config_t {
 	int warning_prompt;
 	int welcome_message;
 	int pad3;
-
-	char *opener;
-	char *encoded_prompt;
-	char *term;
-	char *time_str;
-	char *welcome_message_str;
-	char *wprompt_str;
-#ifndef _NO_SUGGESTIONS
-	char *suggestion_strategy;
-#else
-	char *pad4; /* Keep the struct alignment */
-#endif /* !_NO_SUGGESTIONS */
-	char *usr_cscheme;
-	char *fzftab_options;
 };
 
 extern struct config_t conf;
@@ -948,7 +946,7 @@ struct maxes_t {
 
 struct devino_t {
 	ino_t ino;
-	dev_t dev;
+	dev_t dev; /* 4 bytes on OpenBSD */
 	char mark;
 	char pad1;
 	char pad2;
@@ -1119,9 +1117,9 @@ struct suggestions_t {
 	size_t full_line_len;
 	size_t nlines;
 	int filetype;
-    int printed;
+	int printed;
 	int type;
-    int offset;
+	int offset;
 };
 
 extern struct suggestions_t suggestion;

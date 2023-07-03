@@ -1994,6 +1994,7 @@ set_cs_extcolors(char *line, char **extcolors, const ssize_t line_len)
 	*extcolors = savestring(p, (size_t)l);
 }
 
+#ifndef _NO_ICONS
 static void
 set_cs_dir_icon_color(char *line, const ssize_t line_len)
 {
@@ -2011,6 +2012,7 @@ set_cs_dir_icon_color(char *line, const ssize_t line_len)
 
 	snprintf(dir_ico_c, sizeof(dir_ico_c), "\x1b[%sm", c ? c : p);
 }
+#endif /* !_NO_ICONS */
 
 /* Get color lines from the configuration file */
 static int
