@@ -872,12 +872,12 @@ extern struct kbinds_t *kbinds;
 /* Struct to store the dirjump database values */
 struct jump_t {
 	char *path;
-	int keep;
-	int rank;
 	size_t len;
 	size_t visits;
 	time_t first_visit;
 	time_t last_visit;
+	int keep;
+	int rank;
 };
 
 extern struct jump_t *jump_db;
@@ -909,12 +909,12 @@ struct fileinfo {
 	size_t len;
 	time_t ltime; /* For long view mode */
 	time_t time;
-	dev_t rdev; /* Needed to calculate major and minor devs in long view */
 	ino_t inode;
 	off_t size;
-	nlink_t linkn;
+	dev_t rdev; /* 4 bytes on OpenBSD (used to calculate major and minor devs in long view) */
+	nlink_t linkn; /* 4 bytes on Solaris/OpenBSD */
 #ifndef __sun
-	int pad; /* nlink_t is 4 bytes on Solaris: no need for extra pad */
+	int pad;
 #endif /* __sun */
 	uid_t uid;
 	gid_t gid;
@@ -944,13 +944,15 @@ struct maxes_t {
 };
 
 struct devino_t {
-	dev_t dev;
 	ino_t ino;
+	dev_t dev;
 	char mark;
 	char pad1;
 	char pad2;
 	char pad3;
+#ifndef __OpenBSD__
 	int pad4;
+#endif /* !__OpenBSD__ */
 };
 
 extern struct devino_t *sel_devino;
@@ -1035,16 +1037,16 @@ struct param_t {
 	int fzftab;
 	int fnftab;
 	int smenutab;
-#endif
+#endif /* !_NO_FZF */
 	int hidden;
 #ifndef _NO_HIGHLIGHT
 	int highlight;
-#endif
+#endif /* !_NO_HIGHLIGHT */
 	int history;
 	int horizontal_list;
 #ifndef _NO_ICONS
 	int icons;
-#endif
+#endif /* !_NO_ICONS */
 	int icons_use_file_color;
 	int int_vars;
 	int list_and_quit;
@@ -1079,11 +1081,11 @@ struct param_t {
 	int stealth_mode;
 #ifndef _NO_SUGGESTIONS
 	int suggestions;
-#endif
+#endif /* !_NO_SUGGESTIONS */
 	int tips;
 #ifndef _NO_TRASH
 	int trasrm;
-#endif
+#endif /* !_NO_TRASH */
 	int trim_names;
 	int virtual_dir_full_paths;
 	int vt100;
@@ -1110,13 +1112,13 @@ extern struct remote_t *remotes;
 
 /* Store information about the current suggestion */
 struct suggestions_t {
+	char *color;
+	size_t full_line_len;
+	size_t nlines;
 	int filetype;
     int printed;
 	int type;
     int offset;
-	char *color;
-	size_t full_line_len;
-	size_t nlines;
 };
 
 extern struct suggestions_t suggestion;
