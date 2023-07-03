@@ -849,10 +849,10 @@ autocd_function(const char *arg)
 
 	if (strcmp(arg, "on") == 0) {
 		conf.autocd = 1;
-		printf(_("Autocd enabled\n"));
+		puts(_("Autocd enabled"));
 	} else if (strcmp(arg, "off") == 0) {
 		conf.autocd = 0;
-		printf(_("Autocd disabled\n"));
+		puts(_("Autocd disabled"));
 	} else if (strcmp(arg, "status") == 0) {
 		printf(_("Autocd is %s\n"), conf.autocd == 1
 			? _("enabled") : _("disabled"));
