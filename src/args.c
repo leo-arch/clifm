@@ -1026,9 +1026,9 @@ set_fuzzy_algo(const char *opt)
 {
 	int a = opt ? atoi(opt) : -1;
 
-	if (!opt || a < 1 || a > FUZZY_ALGO_MAX) {
+	if (a < 1 || a > FUZZY_ALGO_MAX) {
 		fprintf(stderr, "%s: %s: Invalid fuzzy algorithm. Valid "
-			"values are either 1 or 2.\n", PROGRAM_NAME, opt);
+			"values are either 1 or 2.\n", PROGRAM_NAME, opt ? opt : "NULL");
 		exit(EXIT_FAILURE);
 	}
 
@@ -1211,7 +1211,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case 'F': conf.list_dirs_first = xargs.dirs_first = 1; break;
 		case 'g': conf.pager = xargs.pager = 1; break;
 		case 'G': conf.pager = xargs.pager = 0; break;
-		case 'h': help_function(); exit(EXIT_SUCCESS);
+		case 'h': help_function(); exit(EXIT_SUCCESS); break;
 		case 'H': xargs.horizontal_list = 1; conf.listing_mode = HORLIST; break;
 		case 'i': conf.case_sens_list = xargs.case_sens_list = 0; break;
 		case 'I': conf.case_sens_list = xargs.case_sens_list = 1; break;
@@ -1227,7 +1227,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case 's': conf.splash_screen = xargs.splash = 1; break;
 		case 'S': xargs.stealth_mode = 1; break;
 		case 't': xargs.disk_usage_analyzer = 1; break;
-		case 'v': printf("%s\n", VERSION); exit(EXIT_SUCCESS);
+		case 'v': printf("%s\n", VERSION); exit(EXIT_SUCCESS); break;
 		case 'w': set_workspace(optarg); break;
 		case 'x': conf.ext_cmd_ok = xargs.ext = 0; break;
 		case 'y': conf.light_mode = xargs.light = 1; break;
@@ -1279,6 +1279,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case LOPT_ICONS_USE_FILE_COLOR:
 			fprintf(stderr, _("%s: icons: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
 			exit(EXIT_FAILURE);
+			break;
 #endif /* !_NO_ICONS */
 
 		case LOPT_INT_VARS:
@@ -1404,9 +1405,9 @@ parse_cmdline_args(const int argc, char **argv)
 
 		/* Handle error */
 		case ':':
-			err_arg_required(argv[optind - 1]); exit(EXIT_FAILURE);
+			err_arg_required(argv[optind - 1]); exit(EXIT_FAILURE); break;
 		case '?':
-			err_invalid_opt(argv[optind - 1]); exit(EXIT_FAILURE);
+			err_invalid_opt(argv[optind - 1]); exit(EXIT_FAILURE); break;
 
 		default: break;
 		}
@@ -1418,10 +1419,12 @@ parse_cmdline_args(const int argc, char **argv)
 	}
 
 	char *spath = (char *)NULL;
-	if (argv[optind]) /* Starting path passed as positional parameter */
+	if (argv[optind]) { /* Starting path passed as positional parameter */
 		spath = resolve_starting_path(argv[optind]);
-	else if (path_value) /* Starting path passed via -p */
-		spath = resolve_starting_path(path_value);
+	} else {
+		if (path_value) /* Starting path passed via -p */
+			spath = resolve_starting_path(path_value);
+	}
 
 	if (spath) {
 		_set_starting_path(spath);

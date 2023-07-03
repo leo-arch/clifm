@@ -140,8 +140,9 @@ check_autocmds(void)
 		if (rev == 0) {
 			if (found == 0)
 				continue;
-		} else if (found == 1) {
-			continue;
+		} else {
+			if (found == 1)
+				continue;
 		}
 
 RUN_AUTOCMD:

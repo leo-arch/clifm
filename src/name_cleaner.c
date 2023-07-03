@@ -534,8 +534,10 @@ bleach_files(char **names)
 		xstrsncpy(names[i], dstr, strlen(dstr));
 		free(dstr);
 		size_t nlen = strlen(names[i]);
-		if (names[i][nlen - 1] == '/')
-			names[i][--nlen] = '\0';
+		if (names[i][nlen - 1] == '/') {
+			names[i][nlen - 1] = '\0';
+			nlen--;
+		}
 
 		char *sl = strrchr(names[i], '/');
 		char *p = clean_file_name((sl && *(sl + 1)) ? sl + 1 : names[i]);

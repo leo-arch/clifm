@@ -303,7 +303,8 @@ fuzzy_match_v1(char *s1, char *s2, const size_t s1_len)
 		if (l > 0 && (!IS_ALPHA_CASE(*(m - 1)) || IS_CAMEL_CASE(*m, *(m - 1)) ) )
 			word_beginning++;
 
-		hs = ++m;
+		m++;
+		hs = m;
 		s1++;
 		l++;
 	}
