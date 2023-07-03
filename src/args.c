@@ -1074,6 +1074,7 @@ set_fzfpreview(const int optc)
 	conf.fzf_preview = optc == LOPT_FZFPREVIEW ? 1 : 2;
 	xargs.fzftab = fzftab = 1; tabmode = FZF_TAB;
 #else
+	UNUSED(optc);
 	fprintf(stderr, _("%s: fzf-preview: %s\n"),
 		PROGRAM_NAME, _(NOT_AVAILABLE));
 	exit(EXIT_FAILURE);
