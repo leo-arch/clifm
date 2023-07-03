@@ -205,27 +205,28 @@ get_longest_tag(void)
 }
 
 /* List all tags applied to the file whose device ID is DEV and inode number
- * is INO */
+ * is INO. */
 static void
 list_tags_having_file(const dev_t dev, const ino_t ino)
 {
 	if (!tags_dir || !tags)
 		return;
 
-	DIR *dir;
-	struct dirent *ent;
-	struct stat a;
-
 	size_t i;
 	for (i = 0; tags[i]; i++) {
 		char tmp[PATH_MAX];
 		snprintf(tmp, sizeof(tmp), "%s/%s", tags_dir, tags[i]);
-		if ((dir = opendir(tmp)) == NULL)
+
+		DIR *dir = opendir(tmp);
+		if (dir == NULL)
 			continue;
 
+		struct dirent *ent;
 		while ((ent = readdir(dir))) {
 			char full_name[PATH_MAX + NAME_MAX + 2];
 			snprintf(full_name, sizeof(full_name), "%s/%s", tmp, ent->d_name);
+
+			struct stat a;
 			if (stat(full_name, &a) == -1)
 				continue;
 

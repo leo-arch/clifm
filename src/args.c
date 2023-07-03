@@ -571,12 +571,10 @@ open_reg_exit(char *filename, const int url, const int preview)
 
 	tmp_dir = savestring(P_tmpdir, P_tmpdir_len);
 
-	size_t mime_file_len = 0;
-
 	if (alt_preview_file && preview == 1) {
 		mime_file = savestring(alt_preview_file, strlen(alt_preview_file));
 	} else {
-		mime_file_len = strlen(homedir)
+		size_t mime_file_len = strlen(homedir)
 			+ (alt_profile ? strlen(alt_profile) : 7) + 40;
 
 		mime_file = (char *)xnmalloc(mime_file_len, sizeof(char));
@@ -966,7 +964,7 @@ set_alt_profile(const char *name)
 static void
 set_virtual_dir(const char *str)
 {
-	if (!str || !*str || *str != '/') {
+	if (!str || *str != '/') {
 		fprintf(stderr, "%s: '--virtual-dir': Absolute path "
 			"is required as argument\n", PROGRAM_NAME);
 		exit(EXIT_FAILURE);
