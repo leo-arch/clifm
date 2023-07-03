@@ -2,7 +2,7 @@
 
 /*
  * This file is part of CliFM
- * 
+ *
  * Copyright (C) 2016-2023, L. Abramovich <leo.clifm@outlook.com>
  * All rights reserved.
 
@@ -35,7 +35,7 @@
 #include <readline/tilde.h>
 
 #include "aux.h"
-#include "colors.h" // colors_list()
+#include "colors.h" /* colors_list() */
 #include "misc.h"
 #include "exec.h"
 #include "init.h"
@@ -84,8 +84,8 @@ print_usage(const int retval)
 }
 
 #ifndef _DIRENT_HAVE_D_TPYE
-/* Check whether NAME is actually tagged as TAG
- * Returns 1 if true and zero otherwise */
+/* Check whether NAME is actually tagged as TAG.
+ * Returns 1 if true and zero otherwise. */
 static int
 check_tagged_file(const char *tag, const char *name)
 {
@@ -100,7 +100,7 @@ check_tagged_file(const char *tag, const char *name)
 }
 #endif /* _DIRENT_HAVE_D_TPYE */
 
-/* Print the tagged file NAME tagged as TAG */
+/* Print the tagged file NAME tagged as TAG. */
 static void
 print_tagged_file(char *name, const char *tag)
 {
@@ -134,16 +134,12 @@ print_tagged_file(char *name, const char *tag)
 	colors_list(abbr_name ? abbr_name : tmp, 0, 0, 1);
 	if (abbr_name != tmp)
 		free(abbr_name);
-/*	char *p = strrchr(tmp, '/');
-	if (p && p != q)
-		*p = '\0';
-	printf("%s%s%s [%s]\n", mi_c, (p && *(p + 1)) ? p + 1 : tmp, df_c, tmp); */
 
 	if (free_name == 1)
 		free(q);
 }
 
-/* Print the list of all files tagged as NAME */
+/* Print the list of all files tagged as NAME. */
 static int
 list_files_in_tag(char *name)
 {
@@ -188,8 +184,8 @@ list_files_in_tag(char *name)
 	return EXIT_SUCCESS;
 }
 
-/* Return the length of longest tag name
- * Used to pad the output of the 'tag list' command */
+/* Return the length of longest tag name.
+ * Used to pad the output of the 'tag list' command. */
 static size_t
 get_longest_tag(void)
 {
@@ -240,8 +236,8 @@ list_tags_having_file(const dev_t dev, const ino_t ino)
 	}
 }
 
-/* Check whether NAME is a valid and existent tag name
- * Returns 1 if true or zero otherwise */
+/* Check whether NAME is a valid and existent tag name.
+ * Returns 1 if true or zero otherwise. */
 int
 is_tag(char *name)
 {
@@ -265,7 +261,7 @@ is_tag(char *name)
 	return 0;
 }
 
-/* Print the list of available tags and all files tagged as each tag */
+/* Print the list of available tags and all files tagged as each tag. */
 static int
 list_tags_full(void)
 {
@@ -356,7 +352,7 @@ reload_tags(void)
 	load_tags();
 }
 
-/* Create tags according to ARGS + 2 */
+/* Create tags according to ARGS + 2. */
 static int
 create_tags(char **args)
 {
@@ -399,7 +395,7 @@ create_tags(char **args)
 	return exit_status;
 }
 
-/* Remove those tags specified in ARGS + 2 */
+/* Remove those tags specified in ARGS + 2. */
 static int
 remove_tags(char **args)
 {
@@ -493,9 +489,9 @@ tag_file(char *name, char *tag)
 	return EXIT_SUCCESS;
 }
 
-/* Return an array with indices of tag names (:TAG) found in the ARGS array
- * The indices array is terminated by a -1
- * Returns NULL if no index was found */
+/* Return an array with indices of tag names (:TAG) found in the ARGS array.
+ * The indices array is terminated by a -1.
+ * Returns NULL if no index was found .*/
 static int *
 get_tags(char **args)
 {
@@ -521,7 +517,7 @@ get_tags(char **args)
 	return t;
 }
 
-/* Tag file names found in ARGS as all tags (:TAG) found in ARGS */
+/* Tag file names found in ARGS as all tags (:TAG) found in ARGS. */
 static int
 tag_files(char **args)
 {
@@ -563,7 +559,7 @@ tag_files(char **args)
 	return EXIT_SUCCESS;
 }
 
-/* Untag file names found in ARGS tagged as ARGS[N] */
+/* Untag file names found in ARGS tagged as ARGS[N]. */
 static int
 untag(char **args, const size_t n, size_t *t)
 {
@@ -617,7 +613,7 @@ untag(char **args, const size_t n, size_t *t)
 	return exit_status;
 }
 
-/* Untag file names found in ARGS as all tags (:TAG) found in ARGS */
+/* Untag file names found in ARGS as all tags (:TAG) found in ARGS. */
 static int
 untag_files(char **args)
 {
@@ -636,7 +632,7 @@ untag_files(char **args)
 	return exit_status;
 }
 
-/* Rename tag ARGS[2] as ARGS[3] */
+/* Rename tag ARGS[2] as ARGS[3]. */
 static int
 rename_tag(char **args)
 {
@@ -668,8 +664,8 @@ rename_tag(char **args)
 	return EXIT_SUCCESS;
 }
 
-/* Move all (tagged) files (symlinks) in SRC into DST
- * Returns zero if success or the appropriate ERRNO in case of error */
+/* Move all (tagged) files (symlinks) in SRC into DST.
+ * Returns zero if success or the appropriate ERRNO in case of error. */
 static int
 recursive_mv_tags(const char *src, const char *dst)
 {
@@ -704,7 +700,7 @@ recursive_mv_tags(const char *src, const char *dst)
 	return exit_status;
 }
 
-/* Merge tags ARGS[2] and ARGS[3] */
+/* Merge tags ARGS[2] and ARGS[3]. */
 static int
 merge_tags(char **args)
 {
@@ -754,7 +750,7 @@ merge_tags(char **args)
  * tu -> tag untag
  * ty -> tag merge
  * The first string in ARGS must always be one of the left values
- * Returns an array with the expanded values */
+ * Returns an array with the expanded values. */
 static char **
 reconstruct_input(char **args)
 {
@@ -784,7 +780,7 @@ reconstruct_input(char **args)
 	return a;
 }
 
-/* Free stuff in A (if needed) and exit the tag function */
+/* Free stuff in A (if needed) and exit the tag function. */
 static int
 end_tag_function(const int exit_status, char **a, const int free_args)
 {
@@ -799,7 +795,7 @@ end_tag_function(const int exit_status, char **a, const int free_args)
 	return exit_status;
 }
 
-/* Check whether we should print help message or not */
+/* Check whether we should print help message or not. */
 static int
 is_tag_help(char **args)
 {
@@ -811,7 +807,7 @@ is_tag_help(char **args)
 	return (!args[1] || first_is_help || (args[2] && IS_HELP(args[2])));
 }
 
-/* Handle tag actions according to ARGS */
+/* Handle tag actions according to ARGS. */
 int
 tags_function(char **args)
 {
