@@ -964,7 +964,7 @@ static int
 list_colorschemes(void)
 {
 	if (cschemes_n == 0) {
-		printf(_("cs: No color scheme found\n"));
+		puts(_("cs: No color scheme found"));
 		return EXIT_SUCCESS;
 	}
 
@@ -2700,10 +2700,10 @@ color_codes(void)
 	printf(_(" %sfile name%s: uf: Unaccessible (non-stat'able) file\n"),
 		uf_c, df_c);
 
-	printf(_("\n*The slash followed by a number (/xx) after directories "
+	puts(_("\n*The slash followed by a number (/xx) after directories "
 		 "or symbolic links to directories indicates the amount of "
 		 "files contained by the corresponding directory, excluding "
-		 "self (.) and parent (..) directories.\n"));
+		 "self (.) and parent (..) directories."));
 	printf(_("\nThe second field in this list is the code that is to be used "
 		 "to modify the color of the corresponding file type in the "
 		 "color scheme file (in the \"FiletypeColors\" line), "

@@ -1031,7 +1031,7 @@ static int
 list_prompts(void)
 {
 	if (prompts_n == 0) {
-		printf(_("prompt: No extra prompts found. Using the default prompt\n"));
+		puts(_("prompt: No extra prompts found. Using the default prompt"));
 		return EXIT_SUCCESS;
 	}
 

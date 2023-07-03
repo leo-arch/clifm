@@ -641,7 +641,7 @@ help_or_root(const char *str)
 	}
 
 	if (*workspaces[cur_ws].path == '/' && !workspaces[cur_ws].path[1]) {
-		printf(_("bd: /: No parent directory\n"));
+		puts(_("bd: /: No parent directory"));
 		return EXIT_SUCCESS;
 	}
 

@@ -1697,7 +1697,7 @@ expand_mime_type(char ***substr)
 	}
 
 	if (mime_type_n > 0) {
-		printf(_("Querying MIME types... "));
+		fputs(_("Querying MIME types... "), stdout);
 		fflush(stdout);
 	}
 

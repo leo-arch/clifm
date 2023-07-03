@@ -636,7 +636,7 @@ print_selected_files(void)
 		printf("%s%*zu%s ", el_c, epad, i + 1, df_c);
 		colors_list(sel_elements[i].name, NO_ELN, NO_PAD, PRINT_NEWLINE);
 
-		printf(_("Calculating file size... ")); fflush(stdout);
+		fputs(_("Calculating file size... "), stdout); fflush(stdout);
 		int ret = 0;
 		off_t s = get_sel_file_size(i, &ret);
 		if (ret != 0)
@@ -671,7 +671,7 @@ print_sel_results(const int new_sel, const char *sel_path,
 
 	if (new_sel <= 0) {
 		if (pattern && err == 0)
-			fprintf(stderr, _("sel: No matches found\n"));
+			fputs(_("sel: No matches found\n"), stderr);
 		return EXIT_FAILURE;
 	}
 
@@ -816,7 +816,7 @@ sel_function(char **args)
 	}
 
 	if (f == 0)
-		fprintf(stderr, _("Missing parameter. Try 's --help'\n"));
+		fputs(_("Missing parameter. Try 's --help'\n"), stderr);
 	free(dir);
 
 	return print_sel_results(new_sel, sel_path, pattern, err);
@@ -886,7 +886,7 @@ show_sel_files(void)
 		printf("%s%*zu%s ", el_c, epad, i + 1, df_c);
 		colors_list(sel_elements[i].name, NO_ELN, NO_PAD, PRINT_NEWLINE);
 
-		printf(_("Calculating file size... ")); fflush(stdout);
+		fputs(_("Calculating file size... "), stdout); fflush(stdout);
 		int ret = 0;
 		off_t s = get_sel_file_size(i, &ret);
 		if (ret != 0)

@@ -827,10 +827,10 @@ ext_cmds_function(const char *arg)
 			conf.ext_cmd_ok ? _("allowed") : _("not allowed"));
 	} else if (*arg == 'o' && strcmp(arg, "on") == 0) {
 		conf.ext_cmd_ok = 1;
-		printf(_("External commands allowed\n"));
+		puts(_("External commands allowed"));
 	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
 		conf.ext_cmd_ok = 0;
-		printf(_("External commands disallowed\n"));
+		puts(_("External commands disallowed"));
 	} else {
 		fprintf(stderr, "%s\n", _(EXT_USAGE));
 		exit_status = EXIT_FAILURE;
@@ -876,10 +876,10 @@ auto_open_function(const char *arg)
 
 	if (strcmp(arg, "on") == 0) {
 		conf.auto_open = 1;
-		printf(_("Auto-open enabled\n"));
+		puts(_("Auto-open enabled"));
 	} else if (strcmp(arg, "off") == 0) {
 		conf.auto_open = 0;
-		printf(_("Auto-open disabled\n"));
+		puts(_("Auto-open disabled"));
 	} else if (strcmp(arg, "status") == 0) {
 		printf(_("Auto-open is %s\n"), conf.auto_open == 1
 			? _("enabled") : _("disabled"));
@@ -2212,7 +2212,7 @@ run_log_cmd(char **args)
 		if (*args[1] == 'c' && strcmp(args[1], "clear") == 0) {
 			int ret = clear_logs(MSG_LOGS);
 			if (ret == EXIT_SUCCESS)
-				printf(_("log: Message logs cleared\n"));
+				puts(_("log: Message logs cleared"));
 			return ret;
 		}
 	}

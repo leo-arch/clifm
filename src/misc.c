@@ -2407,7 +2407,7 @@ splash(void)
 		BOLD, df_c, PROGRAM_NAME_UPPERCASE, _(PROGRAM_DESC));
 
 	if (conf.splash_screen) {
-		printf(_("\n            Press any key to continue... "));
+		fputs(_("\n            Press any key to continue... "), stdout);
 		xgetchar();
 		putchar('\n');
 	} else {

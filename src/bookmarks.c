@@ -526,7 +526,7 @@ bookmark_add(char *file, char *name, char *shortcut)
 
 	fclose(bm_fp);
 
-	printf(_("File succesfully bookmarked\n"));
+	puts(_("File succesfully bookmarked"));
 	if (s)
 		printf("[%s]%s %s->%s %s\n", s, n, mi_c, tx_c, np ? np : file);
 	else

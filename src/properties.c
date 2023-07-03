@@ -515,7 +515,7 @@ get_new_perms(const char *str, const int diff)
 
 	if (diff == 0 && new_perms && *str == *new_perms
 	&& strcmp(str, new_perms) == 0) {
-		fprintf(stderr, _("pc: Nothing to do\n"));
+		fputs(_("pc: Nothing to do\n"), stderr);
 		free(new_perms);
 		new_perms = (char *)NULL;
 	}
@@ -699,7 +699,7 @@ get_new_ownership(const char *str, const int diff)
 	prompt_offset = poffset_bk;
 
 	if (diff == 0 && new_own && *str == *new_own && strcmp(str, new_own) == 0) {
-		fprintf(stderr, _("oc: Nothing to do\n"));
+		fputs(_("oc: Nothing to do\n"), stderr);
 		free(new_own);
 		new_own = (char *)NULL;
 	}

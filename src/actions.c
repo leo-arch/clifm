@@ -249,8 +249,8 @@ static int
 edit_actions(char *app)
 {
 	if (xargs.stealth_mode == 1) {
-		printf(_("actions: Access to configuration files is not allowed "
-			"in stealth mode\n"));
+		puts(_("actions: Access to configuration files is not allowed "
+			"in stealth mode"));
 		return EXIT_SUCCESS;
 	}
 
@@ -334,8 +334,8 @@ actions_function(char **args)
 	if (!args[1] || strcmp(args[1], "list") == 0) {
 		if (actions_n > 0) {
 			/* Just list available actions */
-			printf(_("To run a plugin just enter its action name\n"
-				"Example: enter '//' to run the rgfind plugin\n"));
+			puts(_("To run a plugin just enter its action name\n"
+				"Example: enter '//' to run the rgfind plugin"));
 			size_t i, largest = get_largest_action_name();
 			for (i = 0; i < actions_n; i++) {
 				printf("%-*s %s->%s %s\n", (int)largest, usr_actions[i].name,

@@ -240,7 +240,7 @@ write_files_to_tmp(struct dirent ***a, int *n, const char *target,
 		return errno;
 	}
 
-	fprintf(fp, _(BULK_RM_TMP_FILE_HEADER));
+	fprintf(fp, "%s", _(BULK_RM_TMP_FILE_HEADER));
 
 	size_t i;
 	if (target == workspaces[cur_ws].path) {
@@ -1159,7 +1159,7 @@ format_new_filename(char **name)
 static void
 press_key_to_continue(void)
 {
-	printf(_("Press any key to continue ..."));
+	fputs(_("Press any key to continue ..."), stdout);
 	xgetchar();
 	putchar('\n');
 }
@@ -1442,7 +1442,7 @@ get_new_link_target(char *cur_target)
 static void
 print_current_target(const char *link, char **target)
 {
-	printf(_("Current target -> "));
+	fputs(_("Current target -> "), stdout);
 
 	if (*target) {
 		colors_list(*target, NO_ELN, NO_PAD, PRINT_NEWLINE);
@@ -1459,7 +1459,7 @@ print_current_target(const char *link, char **target)
 		return;
 	}
 
-	printf(_("??? (broken link)\n"));
+	puts(_("??? (broken link)"));
 	return;
 }
 
