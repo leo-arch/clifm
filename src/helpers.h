@@ -913,7 +913,7 @@ struct fileinfo {
 	off_t size;
 	dev_t rdev; /* 4 bytes on OpenBSD (used to calculate major and minor devs in long view) */
 	nlink_t linkn; /* 4 bytes on Solaris/OpenBSD */
-#ifndef __sun
+#if !defined(__sun)
 	int pad;
 #endif /* __sun */
 	uid_t uid;
@@ -929,6 +929,9 @@ struct fileinfo {
 	int sel;
 	int xattr;
 	int du_status; /* Exit status of du(1) for dir full sizes */
+#if defined(__FreeBSD__) || defined(__NetBSD__)
+	int pad2;
+#endif /* __FreeBSD__ || __NetBSD__ */
 };
 
 extern struct fileinfo *file_info;
@@ -950,7 +953,7 @@ struct devino_t {
 	char pad1;
 	char pad2;
 	char pad3;
-#ifndef __OpenBSD__
+#if !defined(__OpenBSD__)
 	int pad4;
 #endif /* !__OpenBSD__ */
 };
