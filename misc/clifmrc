@@ -133,16 +133,15 @@
 # using a tilde (~).
 # Set it to -1 (or empty) to remove this limit.
 # If running in long mode, this setting is overriden by MinFilenameTrim
-# whenever MAXFILENAMELEN is smaller than MINFILENAMETRIM
+# whenever MAXFILENAMELEN is smaller than MINFILENAMETRIM.
 ;MaxFilenameLen=20
 
 # Trim file names longer than MAXFILENAMELEN
 ;TrimNames=true
 
-# Minimum length at which a file name can be trimmed in long view mode
-# (including ELN length and spaces). When running in long mode, this
-# setting overrides MaxFilenameLen whenever MAXFILENAMELEN is smaller
-# than MINFILENAMETRIM.
+# Minimum length at which a file name can be trimmed in long view mode.
+# When running in long mode, this setting overrides MaxFilenameLen
+# whenever MAXFILENAMELEN is smaller than MINFILENAMETRIM.
 ;MinFilenameTrim=20
 
 # A comma separated list of workspace names in the form NUM=NAME

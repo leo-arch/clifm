@@ -1481,9 +1481,9 @@ create_main_config_file(char *file)
 # Log commands entered in the command line\n\
 ;LogCmds=%s\n\n"
 
-	    "# Minimum length at which a file name can be trimmed in long view mode\n\
-# (including ELN length and spaces). If running in long mode, this setting\n\
-# overrides MaxFilenameLen whenever this latter is smaller than MINFILENAMETRIM\n\
+	    "# Minimum length at which a file name can be trimmed in long view mode.\n\
+# If running in long mode, this setting overrides MaxFilenameLen whenever\n\
+# this latter is smaller than MINFILENAMETRIM.\n\
 ;MinFilenameTrim=%d\n\n"
 
 	    "# When a directory rank in the jump database is below MinJumpRank, it\n\
