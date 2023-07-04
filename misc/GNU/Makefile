@@ -116,6 +116,7 @@ LIBS_DragonFly ?= -I/usr/local/include -L/usr/local/lib -lreadline $(LINTL) $(LM
 LIBS_NetBSD ?= -I/usr/pkg/include -L/usr/pkg/lib -Wl,-R/usr/pkg/lib -lreadline $(LINTL) $(LMAGIC)
 LIBS_OpenBSD ?= -I/usr/local/include -L/usr/local/lib -lereadline $(LINTL) $(LMAGIC)
 LIBS_Darwin ?= -I/opt/local/include -L/opt/local/lib -lreadline $(LINTL) $(LMAGIC)
+LIBS_SunOS ?= -lreadline -ltermcap $(LMAGIC)
 
 $(BIN): $(SRC) $(HEADERS)
 	@printf "Detected operating system: %s\n" "$(OS)"
