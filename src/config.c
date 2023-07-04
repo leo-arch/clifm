@@ -1126,7 +1126,7 @@ END: /* If everything fails, fallback to /tmp */
 }
 
 static void
-create_selfile(const size_t tmp_rootdir_len)
+define_selfile(const size_t tmp_rootdir_len)
 {
 	/* SEL_FILE should has been set before by set_sel_file(). If not set,
 	 * we do not have access to the config dir. */
@@ -1161,6 +1161,7 @@ create_tmp_files(void)
 	if (xargs.stealth_mode == 1)
 		return;
 
+	free(tmp_rootdir); /* In case we come from reload_config() */
 	tmp_rootdir = create_tmp_rootdir();
 
 	size_t tmp_rootdir_len = strlen(tmp_rootdir);
@@ -1196,7 +1197,7 @@ create_tmp_files(void)
 			PROGRAM_NAME, tmp_dir);
 	}
 
-	create_selfile(tmp_rootdir_len);
+	define_selfile(tmp_rootdir_len);
 }
 
 static void
