@@ -586,7 +586,7 @@ CONFIRM:
 		if (!input)
 			continue;
 
-		if (input && (*(input + 1) || !strchr("yYnNeEq", *input))) {
+		if (input[1] || !strchr("yYnNeEq", *input)) {
 			free(input);
 			input = (char *)NULL;
 			continue;
@@ -686,11 +686,8 @@ CONFIRM:
 #ifdef NO_FS_EVENTS_MONITOR
 	if (exit_status == EXIT_FAILURE)
 		return EXIT_FAILURE;
-	if (conf.autols == 1) {
-		free_dirlist();
-		return list_dir();
-	}
-
+	if (conf.autols == 1)
+		reload_dirlist();
 	return EXIT_SUCCESS;
 #else
 	return exit_status;
