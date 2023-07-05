@@ -1842,7 +1842,7 @@ list_dir_light(void)
 		if (conf.unicode == 0 || is_utf8_name(ename) == 0) {
 			file_info[n].len = xstrsncpy(file_info[n].name, ename, NAME_MAX + 1);
 			if (file_info[n].len > 0)
-				file_info[n].len--;
+				file_info[n].len--; /* Do not count terminating NUL byte */
 		} else {
 			xstrsncpy(file_info[n].name, ename, NAME_MAX + 1);
 			file_info[n].len = wc_xstrlen(ename);
@@ -2321,7 +2321,7 @@ list_dir(void)
 		if (conf.unicode == 0 || is_utf8_name(ename) == 0) {
 			file_info[n].len = xstrsncpy(file_info[n].name, ename, NAME_MAX + 1);
 			if (file_info[n].len > 0)
-				file_info[n].len--;
+				file_info[n].len--; /* Do not count terminating NUL byte */
 		} else {
 			xstrsncpy(file_info[n].name, ename, NAME_MAX + 1);
 			file_info[n].len = wc_xstrlen(ename);
@@ -2380,27 +2380,30 @@ list_dir(void)
 		case SATIME:
 			file_info[n].time = stat_ok ? (time_t)attr.st_atime : 0;
 			break;
-#if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE)
+
 		case SBTIME:
-# if defined(__OpenBSD__)
-			file_info[n].time = stat_ok ? (time_t)attr.__st_birthtim.tv_sec : 0;
-# elif !defined(__DragonFly__)
-			file_info[n].time = stat_ok ? (time_t)attr.st_birthtime : 0;
-# endif /* __OpenBSD__ */
-			break;
-#elif defined(_STATX)
-		case SBTIME: {
+#ifdef ST_BTIME
+# ifdef _STATX
+		{
 			struct statx attx;
 			if (statx(AT_FDCWD, ename, AT_SYMLINK_NOFOLLOW, STATX_BTIME, &attx) == -1)
 				file_info[n].time = 0;
 			else
-				file_info[n].time = (time_t)attx.stx_btime.tv_sec;
-		} break;
+				file_info[n].time = (time_t)attx.ST_BTIME.tv_sec;
+		}
+# else
+			file_info[n].time = stat_ok ? (time_t)attr.ST_BTIME.tv_sec : 0;
+# endif /* _STATX */
 #else
-		case SBTIME: file_info[n].time = stat_ok ? (time_t)attr.st_ctime : 0; break;
-#endif /* HAVE_ST_BIRTHTIME || __BSD_VISIBLE */
-		case SCTIME: file_info[n].time = stat_ok ? (time_t)attr.st_ctime : 0; break;
-		case SMTIME: file_info[n].time = stat_ok ? (time_t)attr.st_mtime : 0; break;
+			/* Let's us change time if birth time is not available */
+			file_info[n].time = stat_ok ? (time_t)attr.st_ctime : 0;
+#endif /* ST_BTIME */
+			break;
+
+		case SCTIME: file_info[n].time = stat_ok ? (time_t)attr.st_ctime : 0;
+			break;
+		case SMTIME: file_info[n].time = stat_ok ? (time_t)attr.st_mtime : 0;
+			break;
 		default: file_info[n].time = 0; break;
 		}
 

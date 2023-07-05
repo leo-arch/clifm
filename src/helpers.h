@@ -226,6 +226,21 @@ void *__dso_handle;
 # define XAT_FDCWD AT_FDCWD
 #endif /* __sun */
 
+/* Do we have files birth time? */
+/* ST_BTIME is the timespec struct for files creation time. Valid fields are
+ * tv_sec and tv_nsec. */
+#ifdef _STATX
+# define ST_BTIME stx_btime
+/* OpenBSD defines the interface (see sys/stat.h), but the file system doesn't
+ * actually store creation times: the value of __st_birthtim is always zero.
+#elif defined(__OpenBSD__)
+# define ST_BTIME __st_birthtim */
+#elif defined(__NetBSD__) || defined(__APPLE__)
+# define ST_BTIME st_birthtimespec
+#elif defined(__FreeBSD__) || defined(__CYGWIN__)
+# define ST_BTIME st_birthtim
+#endif /* _STATX */
+
 /* Event handling */
 #if defined(LINUX_INOTIFY)
 # define NUM_EVENT_SLOTS 32 /* Make room for 32 events */

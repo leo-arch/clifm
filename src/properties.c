@@ -69,12 +69,6 @@
 /* Required by the pc command */
 #include "readline.h"
 
-/* Do we have files birth time? */
-#if !defined(_BE_POSIX) && !defined(__DragonFly__) && !defined(__OpenBSD__) \
-&& (defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE) || defined(_STATX))
-# define HAVE_BTIME
-#endif
-
 /* A few macros for nano-second precision.
  * Used to print timestamps with the p/pp command. */
 #define NANO_SEC_MAX 999999999
@@ -88,16 +82,6 @@
 # define CTIMNSEC st_ctim.tv_nsec
 # define MTIMNSEC st_mtim.tv_nsec
 #endif /* __NetBSD__ || __APPLE__ */
-
-#ifdef HAVE_BTIME
-# ifdef _STATX
-#  define BTIMNSEC stx_btime.tv_nsec
-# elif defined(__NetBSD__) // __APPLE__ should be added here
-#  define BTIMNSEC st_birthtimespec.tv_nsec
-# elif defined(__FreeBSD__) || defined(__CYGWIN__)
-#  define BTIMNSEC st_birthtim.tv_nsec
-# endif /* _STATX */
-#endif /* HAVE_BTIME */
 
 #ifndef major
 # define major(x) ((x >> 8) & 0x7F)
@@ -1354,7 +1338,7 @@ print_timestamps(char *filename, const struct stat *attr)
 	printf(_("Modify: \t%s%s%s\n"), cmdate, mod_time, cend);
 	printf(_("Change: \t%s%s%s\n"), ccdate, change_time, cend);
 
-#ifdef HAVE_BTIME
+#ifdef ST_BTIME
 	char *cbdate = cdate;
 	char btf[MAX_SHADE_LEN];
 	*btf = '\0';
@@ -1366,7 +1350,7 @@ print_timestamps(char *filename, const struct stat *attr)
 		STATX_BTIME, &attrx);
 	if (ret == 0 && attrx.stx_mask & STATX_BTIME) {
 		xgen_time_str(creation_time, sizeof(creation_time),
-			attrx.stx_btime.tv_sec, (size_t)attrx.BTIMNSEC);
+			attrx.ST_BTIME.tv_sec, (size_t)attrx.ST_BTIME.tv_nsec);
 	} else {
 		/* Birthtime is not available */
 		*creation_time = '-';
@@ -1374,27 +1358,22 @@ print_timestamps(char *filename, const struct stat *attr)
 	}
 
 	if (conf.colorize == 1 && !*dd_c) {
-		get_color_age(attrx.stx_btime.tv_sec, btf, sizeof(btf));
+		get_color_age(attrx.ST_BTIME.tv_sec, btf, sizeof(btf));
 		cbdate = btf;
 	}
 
-# else /* HAVE_ST_BIRTHTIME || __BSD_VISIBLE */
-	time_t bt = attr->st_birthtime;
-#  ifdef BTIMNSEC
-	xgen_time_str(creation_time, sizeof(creation_time), bt,
-		(size_t)attr->BTIMNSEC);
-#  else
-	gen_time_str(creation_time, sizeof(creation_time), bt);
-#  endif /* BTIMNSEC */
+# else
+	xgen_time_str(creation_time, sizeof(creation_time), attr->ST_BTIME.tv_sec,
+		(size_t)attr->ST_BTIME.tv_nsec);
 
 	if (conf.colorize == 1 && !*dd_c) {
-		get_color_age(bt, btf, sizeof(btf));
+		get_color_age(attr->ST_BTIME.tv_sec, btf, sizeof(btf));
 		cbdate = btf;
 	}
 # endif /* _STATX */
 
 	printf(_("Birth: \t\t%s%s%s\n"), cbdate, creation_time, cend);
-#endif /* HAVE_BTIME */
+#endif /* ST_BTIME */
 }
 
 static void
