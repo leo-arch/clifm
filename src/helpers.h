@@ -239,7 +239,7 @@ void *__dso_handle;
 # define ST_BTIME st_birthtimespec
 #elif defined(__FreeBSD__) || defined(__CYGWIN__)
 # define ST_BTIME st_birthtim
-#elif defined(__sun) && !defined(NO_SUN_BIRTHTIME)
+#elif defined(__sun) && !defined(_NO_SUN_BIRTHTIME)
 # define ST_BTIME
 #endif /* _STATX */
 

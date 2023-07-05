@@ -256,7 +256,7 @@ gcc -o clifm *.c -lreadline -lintl -lmagic
 6) _SunOS_:
 
 ```sh
-gcc -o clifm *.c -lreadline -ltermcap -lmagic
+gcc -o clifm *.c -lreadline -ltermcap -lmagic -lnvpair
 ```
 
 **NOTE**: Since compiling in this way only produces a binary file, it is necessary to manually copy the remaining files. See the `install` block of the [Makefile](https://github.com/leo-arch/clifm/blob/master/Makefile).
@@ -312,6 +312,7 @@ make -f misc/GNU/Makefile _BE_POSIX=1 _NO_ICONS=1
 | `_NO_SUGGESTIONS` | Disable [suggestions](https://github.com/leo-arch/clifm/wiki/Specifics#auto-suggestions) support |
 | `_NO_TAGS` | Disable support for [`Etiqueta`, the tags system](https://github.com/leo-arch/clifm/wiki/Common-Operations#tagging-files) |
 | `_NO_PROFILES` | Disable [user profiles](https://github.com/leo-arch/clifm/wiki/Specifics#profiles) support |
+| `_NO_SUN_BIRTHTIME` | Compile without files birthtime support (Solaris only). You can drop the `-lnvpair` compilation flag. | 
 | `_NO_TRASH` | Disable [trash](https://github.com/leo-arch/clifm/wiki/Common-Operations#trashing-files) support |
 | `_TOURBIN_QSORT` | Use Alexey Tourbin faster [qsort implementation](https://github.com/svpv/qsort) instead of [qsort(3)](https://www.man7.org/linux/man-pages/man3/qsort.3.html) |
 | `_VANILLA_READLINE` | Disable all **clifm** specific features added to readline: syntax highlighting, autosuggestions, TAB completion for **clifm** specific features/commands, and alternative TAB completion modes (fzf, fnf, and smenu) |
