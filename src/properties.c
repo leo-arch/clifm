@@ -27,6 +27,9 @@
  * (licenced MIT) and modified to fit our needs.
  * All changes are licensed under GPL-2.0-or-later. */
 
+/* get_birthtime() was taken from GNU stat.c, licensed under GPL-3.0-or-later:
+ * All changes are licensed under GPL-2.0-or-later. */
+
 #include "helpers.h"
 
 #include <errno.h>
@@ -41,7 +44,7 @@
 #if defined(__linux__) || defined(__CYGWIN__)
 # include <sys/sysmacros.h> /* minor(), major() */
 #elif defined(__sun)
-# if defined(ST_BTIME)
+# if defined(ST_BTIME) /* Undefined if compiled with _NO_SUN_BIRTHTIME */
 #  include <attr.h> /* getattrat, nvlist_lookup_uint64_array, nvlist_free */
 #  include <limits.h> /* LONG_MAX */
 # endif /* ST_BTIME */
@@ -69,12 +72,10 @@
 #include "colors.h"
 #include "messages.h"
 #include "misc.h"
-
-/* Required by the pc command */
-#include "readline.h"
+#include "readline.h" /* Required by the 'pc' command */
 
 /* A few macros for nano-second precision.
- * Used to print timestamps with the p/pp command. */
+ * Used to print timestamps with the 'p/pp' command. */
 #define NANO_SEC_MAX 999999999
 
 #if defined(__NetBSD__) || defined(__APPLE__)

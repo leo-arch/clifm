@@ -226,7 +226,7 @@ void *__dso_handle;
 # define XAT_FDCWD AT_FDCWD
 #endif /* __sun */
 
-/* Do we have files birth time? */
+/* Do we have files birth time? If yes, define ST_BTIME. */
 /* ST_BTIME is the timespec struct for files creation time. Valid fields are
  * tv_sec and tv_nsec. */
 #ifdef _STATX
@@ -240,6 +240,8 @@ void *__dso_handle;
 #elif defined(__FreeBSD__) || defined(__CYGWIN__)
 # define ST_BTIME st_birthtim
 #elif defined(__sun) && !defined(_NO_SUN_BIRTHTIME)
+/* In the case of Solaris, ST_BTIME is just a flag telling we should run
+ * get_birthtime() to get files creation time. */
 # define ST_BTIME
 #endif /* _STATX */
 
@@ -652,7 +654,7 @@ extern int watch;
 		: ((n) < 10000000)   ? 7   \
 		: ((n) < 100000000)  ? 8   \
 		: ((n) < 1000000000) ? 9   \
-				      : 10)
+				             : 10)
 #define IS_DIGIT(c)    ((unsigned int)(c) >= '0' && (unsigned int)(c) <= '9')
 #define IS_ALPHA(c)    ((unsigned int)(c) >= 'a' && (unsigned int)(c) <= 'z')
 #define IS_COMMENT(c)  ((unsigned int)(c) == '#' || (unsigned int)(c) == ';')
