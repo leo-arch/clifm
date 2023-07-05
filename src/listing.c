@@ -2382,7 +2382,7 @@ list_dir(void)
 			break;
 
 		case SBTIME:
-#ifdef ST_BTIME
+#if defined(ST_BTIME) && !defined(__sun)
 # ifdef _STATX
 		{
 			struct statx attx;
@@ -2395,7 +2395,7 @@ list_dir(void)
 			file_info[n].time = stat_ok ? (time_t)attr.ST_BTIME.tv_sec : 0;
 # endif /* _STATX */
 #else
-			/* Let's us change time if birth time is not available */
+			/* Let's use change time if birth time is not available */
 			file_info[n].time = stat_ok ? (time_t)attr.st_ctime : 0;
 #endif /* ST_BTIME */
 			break;

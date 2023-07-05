@@ -41,6 +41,10 @@
 #if defined(__linux__) || defined(__CYGWIN__)
 # include <sys/sysmacros.h> /* minor(), major() */
 #elif defined(__sun)
+# if defined(ST_BTIME)
+#  include <attr.h> /* getattrat, nvlist_lookup_uint64_array, nvlist_free */
+#  include <limits.h> /* LONG_MAX */
+# endif /* ST_BTIME */
 # include <sys/mkdev.h> /* minor(), major() */
 /* For BSD systems, we need sys/types.h, already included in helpers.h */
 #endif /* __linux__ */
@@ -156,6 +160,31 @@ struct perms_t {
 	char pad3;
 	int  pad4;
 };
+
+#if defined(__sun) && defined(ST_BTIME)
+static struct timespec
+get_birthtime(const char *filename)
+{
+	struct timespec ts = {0};
+	nvlist_t *response;
+
+	if (getattrat(XAT_FDCWD, XATTR_VIEW_READWRITE, filename, &response) != 0)
+		return ts;
+
+	uint64_t *val;
+	uint_t n;
+
+	if (nvlist_lookup_uint64_array(response, A_CRTIME, &val, &n) == 0
+	&& n >= 2 && val[0] <= LONG_MAX && val[1] < 1000000000 * 2 /* for leap seconds */) {
+		ts.tv_sec = val[0];
+		ts.tv_nsec = val[1];
+	}
+
+	nvlist_free(response);
+
+	return ts;
+}
+#endif /* __sun && ST_BTIME */
 
 #if defined(LINUX_FILE_ATTRS)
 /* Print file attributes as lsattr(1) would.
@@ -1343,6 +1372,7 @@ print_timestamps(char *filename, const struct stat *attr)
 	char btf[MAX_SHADE_LEN];
 	*btf = '\0';
 	char creation_time[MAX_TIME_STR];
+	time_t bt = 0;
 
 # ifdef _STATX
 	struct statx attrx;
@@ -1351,26 +1381,29 @@ print_timestamps(char *filename, const struct stat *attr)
 	if (ret == 0 && attrx.stx_mask & STATX_BTIME) {
 		xgen_time_str(creation_time, sizeof(creation_time),
 			attrx.ST_BTIME.tv_sec, (size_t)attrx.ST_BTIME.tv_nsec);
+		bt = attrx.ST_BTIME.tv_sec;
 	} else {
 		/* Birthtime is not available */
 		*creation_time = '-';
 		creation_time[1] = '\0';
 	}
 
-	if (conf.colorize == 1 && !*dd_c) {
-		get_color_age(attrx.ST_BTIME.tv_sec, btf, sizeof(btf));
-		cbdate = btf;
-	}
+# elif defined(__sun)
+	struct timespec birthtim = get_birthtime(filename);
+	xgen_time_str(creation_time, sizeof(creation_time), birthtim.tv_sec,
+		(size_t)birthtim.tv_nsec);
+	bt = birthtim.tv_sec;
 
 # else
 	xgen_time_str(creation_time, sizeof(creation_time), attr->ST_BTIME.tv_sec,
 		(size_t)attr->ST_BTIME.tv_nsec);
+	bt = attr->ST_BTIME.tv_sec;
+# endif /* _STATX */
 
 	if (conf.colorize == 1 && !*dd_c) {
-		get_color_age(attr->ST_BTIME.tv_sec, btf, sizeof(btf));
+		get_color_age(bt, btf, sizeof(btf));
 		cbdate = btf;
 	}
-# endif /* _STATX */
 
 	printf(_("Birth: \t\t%s%s%s\n"), cbdate, creation_time, cend);
 #endif /* ST_BTIME */
