@@ -33,7 +33,7 @@ LIBS_DragonFly ?= -I/usr/local/include -L/usr/local/lib -lreadline -lintl -lmagi
 LIBS_NetBSD ?= -I/usr/pkg/include -L/usr/pkg/lib -Wl,-R/usr/pkg/lib -lreadline -lintl -lmagic
 LIBS_OpenBSD ?= -I/usr/local/include -L/usr/local/lib -lereadline -lintl -lmagic
 LIBS_Darwin ?= -I/opt/local/include -L/opt/local/lib -lreadline -lintl -lmagic
-LIBS_SunOS ?= -lreadline -ltermcap -lmagic
+LIBS_SunOS ?= -lreadline -ltermcap -lmagic -lnvpair
 
 $(BIN): $(SRC) $(HEADERS)
 	@printf "Detected operating system: %s\n" "$(OS)"
