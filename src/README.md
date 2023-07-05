@@ -261,11 +261,11 @@ gcc -o clifm *.c -lreadline -ltermcap -lmagic -lnvpair
 
 **NOTE**: Since compiling in this way only produces a binary file, it is necessary to manually copy the remaining files. See the `install` block of the [Makefile](https://github.com/leo-arch/clifm/blob/master/Makefile).
 
-**NOTE 2**: You can drop `-lmagic` if compiling with `_NOMAGIC`. In the same way, you can drop `-lintl` if compiling with `_NO_GETTEXT`. See below.
+**NOTE 2**: You can drop `-lmagic` if compiling with `_NO_MAGIC`. In the same way, you can drop `-lintl` if compiling with `_NO_GETTEXT`. See below.
 
-**NOTE 3**: If the binary size is an issue, it is recommended to use [upx(1)](https://linux.die.net/man/1/upx) to significantly reduce (50-70%) the size of the executable file (at the expense of some performance):
+**NOTE 3**: If running on _Solaris/Illumos_ consult the [troubleshooting section](https://github.com/leo-arch/clifm/wiki/Troubleshooting#warning-prompt) in case of issues with the warning prompt. The `nvpair` library is used to get files creation time. You can drop `-lnvpair`, however, if compiling with `_NO_SUN_BIRTHTIME`.
 
-**NOTE 4**: If running on _Solaris/Illumos_ consult the [troubleshooting section](https://github.com/leo-arch/clifm/wiki/Troubleshooting#warning-prompt) in case of issues with the warning prompt.
+**NOTE 4**: If the binary size is an issue, it is recommended to use [upx(1)](https://linux.die.net/man/1/upx) to significantly reduce (50-70%) the size of the executable file (at the expense of some performance):
 
 ```sh
 upx clifm
