@@ -2456,8 +2456,6 @@ CALC_OFFSET:
 			ptr++;
 		}
 
-/*		qq = strrchr(ptr, '/');
-		if (qq) { */
 		qq = (cur_comp_type == TCMP_DESEL || cur_comp_type == TCMP_SEL
 		|| cur_comp_type == TCMP_HIST) ? ptr : strrchr(ptr, '/');
 
@@ -2490,8 +2488,8 @@ CALC_OFFSET:
 			/* We don't want to highlight the matching part */
 			tab_offset = 0;
 
-		if (cur_comp_type == TCMP_PATH && ptr && *ptr == '/' && tab_offset > 0)
-			tab_offset--;
+/*		if (cur_comp_type == TCMP_PATH && ptr && *ptr == '/' && tab_offset > 0)
+			tab_offset--; */
 
 		if (cur_comp_type == TCMP_HIST && ptr && *ptr == '!' && tab_offset > 0) {
 			if (conf.fuzzy_match == 1)
@@ -2541,7 +2539,7 @@ CALC_OFFSET:
 
 					/* Now print the non-matching part of the match */
 					char *temp;
-					int printed_length;
+					int printed_length = 0;
 					temp = printable_part(matches[l]);
 					printed_length = (int)wc_xstrlen(temp);
 					printed_length += print_filename(temp, matches[l]);
