@@ -364,8 +364,12 @@ xf=1;31:xs=0;32:"
 #define DEFAULT_PROMPT_NO_COLOR "[\\S]\\l \\A \\u:\\H \\w\\n<\\z> \\$ "
 
 #define DEF_WARNING_PROMPT 1
-#define DEF_WPROMPT_STR "\\[\\e[00;02;31m\\](!) > "
 #define DEF_WPROMPT_STR_NO_COLOR "(!) > "
+#if RL_READLINE_VERSION < 0x0700
+# define DEF_WPROMPT_STR DEF_WPROMPT_STR_NO_COLOR
+#else
+# define DEF_WPROMPT_STR "\\[\\e[00;02;31m\\](!) > "
+#endif /* READLINE < 7.0 */
 
 /* These options, except --preview-window=border-left (fzf 0.27), work with at
  * least fzf 0.18.0 (Mar 31, 2018) */
