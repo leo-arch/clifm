@@ -279,22 +279,22 @@ strip --strip-unneeded --remove-section=.comment --remove-section=.note clifm
 
 ### Compiling features in/out
 
-**Clifm** allows you to enable or disable some features at compile time. If for whatever reason you don't plan to use a certain feature, it is better to remove this feature from the resulting binary: you'll get a (bit) faster and smaller executable. To do this, pass one or more of the following options to the compiler using the `-D` parameter. For example, to get a POSIX compliant executable without icons support:
+**Clifm** allows you to enable or disable some features at compile time. If for whatever reason you don't plan to use a certain feature, it is better to remove this feature from the resulting binary: you'll get a (bit) faster and smaller executable. To do this, pass one or more of the following options to the compiler using the `-D` parameter. For example, to get a binary without icons and translation support:
 
 ```sh
-gcc ... -D_BE_POSIX -D_NO_ICONS ...
+gcc ... -D_NO_GETTEXT -D_NO_ICONS ...
 ```
 
 You can also use the `CPPFLAGS` variable. For example:
 
 ```sh
-export CPPFLAGS="$CPPFLAGS -D_BE_POSIX -D_NO_ICONS"
+export CPPFLAGS="$CPPFLAGS -D_NO_GETTEXT -D_NO_ICONS"
 make
 ```
 
 If using GNU Make you can pass these options directly to **make**(1) via a GNU specific Makefile:
 ```sh
-make -f misc/GNU/Makefile _BE_POSIX=1 _NO_ICONS=1
+make -f misc/GNU/Makefile _NO_GETTEXT=1 _NO_ICONS=1
 ```
 
 | Option | Description |
@@ -319,7 +319,7 @@ make -f misc/GNU/Makefile _BE_POSIX=1 _NO_ICONS=1
 | `_TOURBIN_QSORT` | Use Alexey Tourbin faster [qsort implementation](https://github.com/svpv/qsort) instead of [qsort(3)](https://www.man7.org/linux/man-pages/man3/qsort.3.html) |
 | `_VANILLA_READLINE` | Disable all **clifm** specific features added to readline: syntax highlighting, autosuggestions, TAB completion for **clifm** specific features/commands, and alternative TAB completion modes (fzf, fnf, and smenu) |
 
-<sup>1</sup> Only one feature is lost (Linux): Files birth time. We get this information via [statx(2)](https://man7.org/linux/man-pages/man2/statx.2.html), which is Linux specific.
+<sup>1</sup> Shell commands, like **cp**(1), **rm**(1), and so on, use only POSIX compliant flags (for example, the `-a` flag is not available for **cp**(1), just as the `-I` flag is not available for **rm**(1)). On Linux, files birth time is disabled: we get this information via [statx(2)](https://man7.org/linux/man-pages/man2/statx.2.html), which is Linux specific.
 
 <sup>2</sup> The [stealth mode](https://github.com/leo-arch/clifm/wiki/Specifics#stealth-mode) achieves basically the same functionality: disabling access to config files. However, there is an important difference: if compiled with `CLIFM_SUCKLESS`, functions handling configuration files are directly removed from the source code, resulting in a smaller binary.
 
