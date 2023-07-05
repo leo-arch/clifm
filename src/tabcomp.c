@@ -2362,12 +2362,11 @@ DISPLAY_MATCHES:
 			fputs(tx_c, stdout);
 		}
 #endif /* !_NO_HIGHLIGHT */
-		char *qq = (char *)NULL, *ptr = (char *)NULL;
 		if (cur_comp_type != TCMP_PATH && cur_comp_type != TCMP_GLOB)
 			goto CALC_OFFSET;
 
 		/* If /path/to/dir/<TAB> or /path/to/dir/GLOB<TAB>, let's temporarily
-		 * change to /path/to/dir, so that the finder knows where we are */
+		 * change to /path/to/dir, so that the finder knows where we are. */
 		if (*matches[0] == '~') {
 			char *exp_path = tilde_expand(matches[0]);
 			if (exp_path) {
@@ -2375,18 +2374,6 @@ DISPLAY_MATCHES:
 				free(exp_path);
 				did_chdir = 1;
 			}
-
-/*		} else if (*matches[0] == '$' && matches[0][1]) {
-			char *p = strchr(matches[0] + 1, '/');
-			if (p)
-				*p = '\0';
-			char *e = getenv(matches[0] + 1);
-			if (p)
-				*p = '/';
-			if (e && xchdir(e, NO_TITLE) == 0) {
-				did_chdir = 1;
-			} */
-
 		} else {
 			char *dir = matches[0];
 
@@ -2397,8 +2384,6 @@ DISPLAY_MATCHES:
 			if (!p)
 				goto CALC_OFFSET;
 
-// TESTING SYMLINKS
-			// WHAT ABOUT P????
 			char *dd = (char *)NULL;
 			// MATCHES[0] SHOULD BE DIR!!
 			if (strstr(matches[0], "/..")) {
@@ -2413,7 +2398,6 @@ DISPLAY_MATCHES:
 			}
 			dir = dd ? dd : matches[0];
 			did_chdir = 1;
-// TESTING SYMLINKS
 
 			if (p == dir) {
 				if (*(p + 1)) {
@@ -2431,10 +2415,8 @@ DISPLAY_MATCHES:
 				*p = '/';
 			}
 
-// TESTING SYMLINKS
 			if (dir != matches[0])
 				free(dir);
-// TESTING SYMLINKS
 		}
 
 CALC_OFFSET:
@@ -2448,7 +2430,8 @@ CALC_OFFSET:
 		}
 #endif /* !_NO_FZF */
 
-		ptr = matches[0];
+		/* Standard TAB completion */
+		char *ptr = matches[0];
 		/* Skip leading backslashes */
 		while (*ptr) {
 			if (*ptr != '\\')
@@ -2456,7 +2439,7 @@ CALC_OFFSET:
 			ptr++;
 		}
 
-		qq = (cur_comp_type == TCMP_DESEL || cur_comp_type == TCMP_SEL
+		char *qq = (cur_comp_type == TCMP_DESEL || cur_comp_type == TCMP_SEL
 		|| cur_comp_type == TCMP_HIST) ? ptr : strrchr(ptr, '/');
 
 		if (qq && qq != ptr) {
@@ -2469,7 +2452,8 @@ CALC_OFFSET:
 				}
 			}
 		} else {
-			tab_offset = strlen(ptr);
+			int add = (cur_comp_type == TCMP_PATH && *ptr == '/') ? 1 : 0;
+			tab_offset = strlen(ptr + add);
 		}
 
 		if (cur_comp_type == TCMP_OWNERSHIP && *ptr == ':' && !*(ptr + 1)) {
@@ -2487,9 +2471,6 @@ CALC_OFFSET:
 		|| cur_comp_type == TCMP_TAGS_F) ) )
 			/* We don't want to highlight the matching part */
 			tab_offset = 0;
-
-/*		if (cur_comp_type == TCMP_PATH && ptr && *ptr == '/' && tab_offset > 0)
-			tab_offset--; */
 
 		if (cur_comp_type == TCMP_HIST && ptr && *ptr == '!' && tab_offset > 0) {
 			if (conf.fuzzy_match == 1)
@@ -2559,16 +2540,6 @@ CALC_OFFSET:
 			fputs(tx_c, stdout);
 		rl_reset_line_state();
 
-//		if (cur_comp_type == TCMP_UNTRASH || cur_comp_type ==  TCMP_TRASHDEL) {
-			/* This flag was set to true when completing trashed files.
-			 * See 't del' and 'u' commands completion in readline.c */
-//			flags &= ~STATE_COMPLETING;
-
-//			if (conf.colorize == 1 && workspaces && workspaces[cur_ws].path)
-				/* Let's change back to the current directory */
-//				xchdir(workspaces[cur_ws].path, NO_TITLE);
-//		}
-
 #ifndef _NO_FZF
 RESET_PATH:
 #endif /* !_NO_FZF */
@@ -2582,9 +2553,6 @@ RESTART:
 #ifndef _NO_HIGHLIGHT
 		if (conf.highlight == 1 && wrong_cmd == 0) {
 			int bk = rl_point;
-/*			rl_point = 0;
-			recolorize_line();
-			rl_point = bk; */
 			HIDE_CURSOR;
 			char *ss = rl_copy_text(0, rl_end);
 			rl_delete_text(0, rl_end);
@@ -2614,7 +2582,6 @@ RESTART:
 				rl_redisplay();
 			}
 			UNHIDE_CURSOR;
-//			rl_point = rl_end = bk;
 			rl_point = bk;
 			free(ss);
 		}
