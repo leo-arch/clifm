@@ -253,7 +253,7 @@ cc -I/usr/local/include -L/usr/local/lib -O3 -s -fstack-protector-strong -march=
 gcc -o clifm *.c -lreadline -lintl -lmagic
 ```
 
-6) _SunOS_:
+6) _Solaris/Illumos_:
 
 ```sh
 gcc -o clifm *.c -lreadline -ltermcap -lmagic -lnvpair
@@ -264,6 +264,8 @@ gcc -o clifm *.c -lreadline -ltermcap -lmagic -lnvpair
 **NOTE 2**: You can drop `-lmagic` if compiling with `_NOMAGIC`. In the same way, you can drop `-lintl` if compiling with `_NO_GETTEXT`. See below.
 
 **NOTE 3**: If the binary size is an issue, it is recommended to use [upx(1)](https://linux.die.net/man/1/upx) to significantly reduce (50-70%) the size of the executable file (at the expense of some performance):
+
+**NOTE 4**: If running on _Solaris/Illumos_ consult the [troubleshooting section](https://github.com/leo-arch/clifm/wiki/Troubleshooting#warning-prompt) in case of issues with the warning prompt.
 
 ```sh
 upx clifm
