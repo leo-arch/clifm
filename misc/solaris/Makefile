@@ -14,7 +14,7 @@ DESKTOPICONPREFIX ?= $(DATADIR)/icons/hicolor
 PROG_DATADIR ?= $(DATADIR)/$(BIN)
 
 SHELL ?= /bin/sh
-INSTALL ?= /usr/gnu/bin/install
+INSTALL ?= ginstall
 RM ?= rm
 
 SRCDIR = src
