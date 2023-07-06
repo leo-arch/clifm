@@ -2421,6 +2421,7 @@ DISPLAY_MATCHES:
 
 CALC_OFFSET:
 #ifndef _NO_FZF
+		/* Alternative TAB completion: fzf, fnf, smenu */
 		if (fzftab == 1) {
 			char *t = text ? text : (char *)NULL;
 			if (finder_tabcomp(matches, common_prefix_added == 1 ? t : NULL,
@@ -2519,10 +2520,8 @@ CALC_OFFSET:
 					}
 
 					/* Now print the non-matching part of the match */
-					char *temp;
-					int printed_length = 0;
-					temp = printable_part(matches[l]);
-					printed_length = (int)wc_xstrlen(temp);
+					char *temp = printable_part(matches[l]);
+					int printed_length = (int)wc_xstrlen(temp);
 					printed_length += print_filename(temp, matches[l]);
 
 					if (j + 1 < limit) {

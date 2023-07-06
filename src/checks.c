@@ -521,7 +521,7 @@ is_acl(char *file)
 
 #ifndef _ACL_OK
 	return 0;
-#else
+#else /* _ACL_OK */
 
 	acl_t acl;
 	acl = acl_get_file(file, ACL_TYPE_ACCESS);

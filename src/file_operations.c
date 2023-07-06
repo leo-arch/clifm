@@ -426,7 +426,7 @@ get_rm_param(char ***rfiles, const int n)
 	/* We don't need interactivity here: the user already confirmed the
 	 * operation before calling this function. */
 		if (S_ISDIR(a.st_mode)) {
-#if defined(_BE_POSIX) || defined(__sun)
+#if defined(_BE_POSIX)
 			_param = savestring("-rf", 3);
 #else
 			_param = savestring("-drf", 4);
@@ -1742,7 +1742,7 @@ static char *
 set_rm_params(const int dirs, const int rm_force)
 {
 	if (dirs == 1) {
-#if defined(_BE_POSIX) || defined(__sun)
+#if defined(_BE_POSIX)
 		return (rm_force == 1 ? "-rf" : "-r");
 #elif defined(__NetBSD__) || defined(__OpenBSD__) || defined(__APPLE__)
 		if (bin_flags & BSD_HAVE_COREUTILS)
@@ -1751,11 +1751,11 @@ set_rm_params(const int dirs, const int rm_force)
 			return (rm_force == 1 ? "-drf" : "-dr");
 #else
 		return (rm_force == 1 ? "-drf" : "-dIr");
-#endif
+#endif /* _BE_POSIX */
 	}
 
 /* No directories */
-#if defined(_BE_POSIX) || defined(__sun)
+#if defined(_BE_POSIX)
 	return "-f";
 #elif defined(__NetBSD__) || defined(__OpenBSD__) || defined(__APPLE__)
 	if (bin_flags & BSD_HAVE_COREUTILS)
@@ -1764,7 +1764,7 @@ set_rm_params(const int dirs, const int rm_force)
 		return "-f";
 #else
 	return (rm_force == 1 ? "-f" : "-I");
-#endif
+#endif /* _BE_POSIX */
 }
 
 int
@@ -1902,13 +1902,13 @@ bulk_rename(char **args)
 		xerror("br: fopen: %s: %s\n", bulk_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
-#endif
+#endif /* __HAIKU__ || __sun */
 
 #if !defined(__HAIKU__) && !defined(__sun)
 	dprintf(fd, BULK_RENAME_TMP_FILE_HEADER);
 #else
 	fprintf(fp, BULK_RENAME_TMP_FILE_HEADER);
-#endif
+#endif /* !__HAIKU__ && !__sun */
 
 	struct stat attr;
 	size_t counter = 0;
@@ -1949,11 +1949,11 @@ bulk_rename(char **args)
 		dprintf(fd, "%s\n", args[i]);
 #else
 		fprintf(fp, "%s\n", args[i]);
-#endif
+#endif /* !__HAIKU__ && !__sun */
 	}
 #if defined(__HAIKU__) || defined(__sun)
 	fclose(fp);
-#endif
+#endif /* __HAIKU__ || __sun */
 	arg_total = i;
 	close(fd);
 
@@ -2128,7 +2128,7 @@ _export(char **filenames, const int open)
 		free(tmp_file);
 		return (char *)NULL;
 	}
-#endif
+#endif /* __HAIKU__ || __sun */
 
 	/* If no argument, export files in CWD. */
 	if (!filenames[1]) {
@@ -2137,7 +2137,7 @@ _export(char **filenames, const int open)
 			dprintf(fd, "%s\n", file_info[i].name);
 #else
 			fprintf(fp, "%s\n", file_info[i].name);
-#endif
+#endif /* !__HAIKU__ && !__sun */
 	} else {
 		for (i = 1; filenames[i]; i++) {
 			if (*filenames[i] == '.' && (!filenames[i][1]
@@ -2147,12 +2147,12 @@ _export(char **filenames, const int open)
 			dprintf(fd, "%s\n", filenames[i]);
 #else
 			fprintf(fp, "%s\n", filenames[i]);
-#endif
+#endif /* !__HAIKU__ && !__sun */
 		}
 	}
 #if defined(__HAIKU__) || defined(__sun)
 	fclose(fp);
-#endif
+#endif /* __HAIKU__ || __sun */
 	close(fd);
 
 	if (!open)

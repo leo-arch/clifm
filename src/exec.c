@@ -26,7 +26,7 @@
 
 #ifdef __OpenBSD__
 # include <sys/dirent.h>
-#endif
+#endif /* __OpenBSD__ */
 
 #include <dirent.h>
 #include <errno.h>
@@ -41,14 +41,14 @@ typedef char *rl_cpvfunc_t;
 # include <ereadline/readline/readline.h>
 #else
 # include <readline/readline.h>
-#endif
+#endif /* __OpenBSD__ */
 
 #include <limits.h>
 
 #include "actions.h"
 #ifndef _NO_ARCHIVING
 # include "archives.h"
-#endif
+#endif /* !_NO_ARCHIVING */
 #include "aux.h"
 #include "bookmarks.h"
 #include "checks.h"
@@ -66,7 +66,7 @@ typedef char *rl_cpvfunc_t;
 #include "navigation.h"
 #ifndef _NO_PROFILES
 # include "profiles.h"
-#endif
+#endif /* !_NO_PROFILES */
 #include "prompt.h"
 #include "properties.h"
 #include "readline.h"
@@ -76,12 +76,12 @@ typedef char *rl_cpvfunc_t;
 #include "sort.h"
 #ifndef _NO_TRASH
 # include "trash.h"
-#endif
+#endif /* !_NO_TRASH */
 #include "messages.h"
 #include "media.h"
 #ifndef _NO_BLEACH
 # include "name_cleaner.h"
-#endif
+#endif /* !_NO_BLEACH */
 #include "sanitize.h"
 #include "tags.h"
 #include "tabcomp.h"
