@@ -428,6 +428,11 @@ get_rm_param(char ***rfiles, const int n)
 		if (S_ISDIR(a.st_mode)) {
 #if defined(_BE_POSIX)
 			_param = savestring("-rf", 3);
+#elif defined(__sun)
+			if (bin_flags & BSD_HAVE_COREUTILS)
+				_param = savestring("-drf", 4);
+			else
+				_param = savestring("-rf", 3);
 #else
 			_param = savestring("-drf", 4);
 #endif /* _BE_POSIX */
@@ -446,10 +451,15 @@ construct_rm_cmd(char ***rfiles, char *_param, const size_t n)
 {
 	char **cmd = (char **)xnmalloc(n + 4, sizeof(char *));
 
+#ifdef __sun
+	if (bin_flags & BSD_HAVE_COREUTILS)
+		cmd[0] = savestring("grm", 3);
+	else
+		cmd[0] = savestring("rm", 2);
+#else
 	cmd[0] = savestring("rm", 2);
-	/* We know _param won't be greater than 4 (as defined in get_rm_param),
-	 * so that using strnlen here is secure */
-	cmd[1] = savestring(_param, strnlen(_param, 5));
+#endif /* __sun */
+	cmd[1] = savestring(_param, strlen(_param));
 	cmd[2] = savestring("--", 2);
 	free(_param);
 
@@ -855,6 +865,10 @@ dup_file(char **cmd)
 		} else {
 #ifdef _BE_POSIX
 			char *_cmd[] = {"cp", source, dest, NULL};
+#elif defined(__sun)
+			char *name = (bin_flags & BSD_HAVE_COREUTILS) ? "gcp" : "cp";
+			char *opt = (bin_flags & BSD_HAVE_COREUTILS) ? "-a" : "--";
+			char *_cmd[] = {name, opt, source, dest, NULL};
 #else
 			char *_cmd[] = {"cp", "-a", source, dest, NULL};
 #endif /* _BE_POSIX */
@@ -1734,7 +1748,7 @@ list_removed_files(char **cmd, const size_t *dirs, const size_t start,
 	free(removed_files);
 }
 
-/* Return the appropriate parameters for rm(1), depending on:
+/* Return the appropriate parameters for (g)rm(1), depending on:
  * 1. The installed version of rm
  * 2. The list of files to be removed contains at least 1 dir (DIRS)
  * 3. We should run interactively (RM_FORCE) */
@@ -1744,11 +1758,15 @@ set_rm_params(const int dirs, const int rm_force)
 	if (dirs == 1) {
 #if defined(_BE_POSIX)
 		return (rm_force == 1 ? "-rf" : "-r");
-#elif defined(__NetBSD__) || defined(__OpenBSD__) || defined(__APPLE__)
+#elif defined(CHECK_COREUTILS)
 		if (bin_flags & BSD_HAVE_COREUTILS)
 			return (rm_force == 1 ? "-drf" : "-dIr");
 		else
+# if defined(__sun)
+			return (rm_force == 1 ? "-rf" : "-r");
+# else
 			return (rm_force == 1 ? "-drf" : "-dr");
+# endif /* __sun */
 #else
 		return (rm_force == 1 ? "-drf" : "-dIr");
 #endif /* _BE_POSIX */
@@ -1757,7 +1775,7 @@ set_rm_params(const int dirs, const int rm_force)
 /* No directories */
 #if defined(_BE_POSIX)
 	return "-f";
-#elif defined(__NetBSD__) || defined(__OpenBSD__) || defined(__APPLE__)
+#elif defined(CHECK_COREUTILS)
 	if (bin_flags & BSD_HAVE_COREUTILS)
 		return (rm_force == 1 ? "-f" : "-I");
 	else
@@ -1840,7 +1858,11 @@ remove_file(char **args)
 		return EXIT_FAILURE;
 	}
 
+#if defined(CHECK_COREUTILS)
 	rm_cmd[0] = (bin_flags & BSD_HAVE_COREUTILS) ? "grm" : "rm";
+#else
+	rm_cmd[0] = "rm";
+#endif /* CHECK_COREUTILS */
 	rm_cmd[1] = set_rm_params(have_dirs, rm_force);
 	rm_cmd[2] = "--";
 

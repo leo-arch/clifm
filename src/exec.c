@@ -634,7 +634,7 @@ run_shell_cmd(char **args)
 /* For the time being, this is too slow on Cygwin. */
 #if !defined(__CYGWIN__)
 	reload_binaries();
-#endif
+#endif /* !__CYGWIN__ */
 
 	return exit_status;
 }
@@ -2342,7 +2342,7 @@ exec_cmd(char **comm)
 		xerror("%s: tag: %s\n", PROGRAM_NAME, NOT_AVAILABLE);
 		return EXIT_FAILURE;
 	}
-#endif
+#endif /* !_NO_TAGS */
 
 	/*     ################# NEW FILE ##################     */
 	else if (*comm[0] == 'n' && (!comm[0][1] || strcmp(comm[0], "new") == 0))
@@ -2360,7 +2360,7 @@ exec_cmd(char **comm)
 	|| strcmp(comm[0], "touch") == 0 || strcmp(comm[0], "ln") == 0
 	|| strcmp(comm[0], "chmod") == 0))
 		return (exit_code = run_and_refresh(comm, 0));
-#endif
+#endif /* __HAIKU__ || __CYGWIN__ */
 
 	/*     ############### COPY AND MOVE ##################     */
 	/* c, m, v, vv, or p, paste commands */
@@ -2461,7 +2461,7 @@ exec_cmd(char **comm)
 			xstrsncpy(comm[0], "ln -s", 6);
 #else
 			xstrsncpy(comm[0], "ln -sn", 7);
-#endif
+#endif /* _BE_POSIX */
 			/* Make sure the symlink source is always an absolute path. */
 			if (comm[1] && *comm[1] != '/' && *comm[1] != '~') {
 				size_t len = strlen(comm[1]);
@@ -2477,6 +2477,7 @@ exec_cmd(char **comm)
 			goto CHECK_EVENTS;
 		} else if (*comm[0] == 'm' && comm[0][1] == 'd' && !comm[0][2]) {
 			comm[0] = (char *)xrealloc(comm[0], 9 * sizeof(char));
+			/* -p is POSIX: it should be there for all mkdir implementations. */
 			xstrsncpy(comm[0], "mkdir -p", 9);
 		}
 
@@ -2579,7 +2580,7 @@ exec_cmd(char **comm)
 #else
 		xerror("%s: bleach: %s\n", PROGRAM_NAME, NOT_AVAILABLE);
 		return EXIT_FAILURE;
-#endif
+#endif /* !_NO_BLEACH */
 	}
 
 	/*   ################ ARCHIVER ##################     */
@@ -2595,7 +2596,7 @@ exec_cmd(char **comm)
 #else
 		xerror("%s: archiver: %s\n", PROGRAM_NAME, _(NOT_AVAILABLE));
 		return EXIT_FAILURE;
-#endif
+#endif /* !_NO_ARCHIVING */
 	}
 
 	/* ##################################################
@@ -2674,7 +2675,7 @@ exec_cmd(char **comm)
 #else
 		{ xerror("%s: prof: %s\n", PROGRAM_NAME, NOT_AVAILABLE);
 		return EXIT_FAILURE; }
-#endif /* _NO_PROFILES */
+#endif /* !_NO_PROFILES */
 
 	/* #### MOUNTPOINTS #### */
 	else if (*comm[0] == 'm' && ((comm[0][1] == 'p' && !comm[0][2])

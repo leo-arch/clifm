@@ -70,7 +70,7 @@ recur_perm_check(const char *dirname)
 	struct dirent *ent;
 #if !defined(_DIRENT_HAVE_D_TYPE)
 	struct stat attr;
-#endif
+#endif /* !_DIRENT_HAVE_D_TYPE */
 
 	if (!(dir = opendir(dirname)))
 		return EXIT_FAILURE;
@@ -82,7 +82,7 @@ recur_perm_check(const char *dirname)
 		if (S_ISDIR(attr.st_mode)) {
 #else
 		if (ent->d_type == DT_DIR) {
-#endif
+#endif /* !_DIRENT_HAVE_D_TYPE */
 			char dirpath[PATH_MAX] = "";
 
 			if (*ent->d_name == '.' && (!ent->d_name[1]
@@ -421,7 +421,7 @@ trash_file(const char *suffix, const struct tm *tm, char *file)
 	ret = renameat(XAT_FDCWD, file, XAT_FDCWD, dest);
 	if (ret != EXIT_SUCCESS && errno == EXDEV) {
 		/* Destination file is on a different file system, which is why
-		 * rename(3) doesn't work: let's try with mv(1). */
+		 * renameat(2) doesn't work: let's try with mv(1). */
 		char *tmp_cmd[] = {"mv", "--", file, dest, NULL};
 		ret = launch_execv(tmp_cmd, FOREGROUND, E_NOFLAG);
 		mvcmd = 1;

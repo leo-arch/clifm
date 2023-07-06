@@ -337,7 +337,8 @@ xf=1;31:xs=0;32:"
 #define DEF_BELL_STYLE     BELL_VISIBLE
 #define VISIBLE_BELL_DELAY 30 /* Milliseconds */
 
-/* cp, mv, and rm commands */
+/* cp and mv commands
+ * All options used for cp(1) and mv(1) are POSIX. No need to check. */
 #define _DEF_CP_CMD "cp -iRp"
 #define _DEF_CP_CMD_FORCE "cp -Rp"
 #define _DEF_ADVCP_CMD "advcp -giRp"

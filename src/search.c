@@ -680,9 +680,9 @@ check_regex_file_type(struct dirent **reg_dirlist, const int index,
 		case S_IFBLK: type = DT_BLK; break;
 		case S_IFCHR: type = DT_CHR; break;
 		case S_IFDIR: type = DT_DIR; break;
-#ifdef __sun
+# ifdef __sun
 		case S_IFDOOR: type = DT_DOOR; break;
-#endif /* __sun */
+# endif /* __sun */
 		case S_IFIFO: type = DT_FIFO; break;
 		case S_IFLNK: type = DT_LNK; break;
 		case S_IFREG: type = DT_REG; break;
