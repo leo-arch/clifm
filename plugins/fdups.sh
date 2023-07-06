@@ -10,9 +10,9 @@
 #
 # Dependencies:
 #	find md5sum sort uniq xargs sed stat (on Linux/Haiku)
-#	gfind md5 sort guniq xargs sed stat (on FreeBSD/NetBSD/OpenBSD/MacOS)
+#	gfind md5 sort guniq xargs sed stat (on FreeBSD/NetBSD/OpenBSD/MacOS/SunOS)
 #
-# On FreeBSD/NetBSD/OpenBSD/MacOS you need to install both coreutils (for guniq)
+# On FreeBSD/NetBSD/OpenBSD/MacOS/SunOS you need to install both coreutils (for guniq)
 # and findutils (for gfind)
 #
 # Notes:
@@ -36,7 +36,7 @@ Linux|Haiku)
 	UNIQ="uniq"
 	STAT="stat -c %Y"
 	;;
-FreeBSD|NetBSD|OpenBSD|Darwin)
+FreeBSD|NetBSD|OpenBSD|Darwin|SunOS)
 	FIND="gfind"
 	if [ "$OS" = "NetBSD" ]; then
 		MD5="md5 -n"
