@@ -46,6 +46,12 @@
 
 #define ERR_SKIP_REGEX 2
 
+#if defined(__OpenBSD__) || defined(__sun)
+/* OpenBSD/Solaris find(1) has neither -regex nor -iregex. We'll try to use
+ * gfind(1) instead.*/
+# define FIND_HAS_NO_REGEX
+#endif /* __OpenBSD__ || __sun */
+
 struct search_t {
 	char *name;
 	size_t len;
@@ -54,54 +60,85 @@ struct search_t {
 };
 
 static int
-exec_find(char *_path, char *method, char *pattern)
+exec_find(char *name, char *_path, char *method, char *pattern)
 {
 	if (follow_symlinks == 1) {
-		char *cmd[] = {"find", "-L", _path, method, pattern, NULL};
+		char *cmd[] = {name, "-L", _path, method, pattern, NULL};
 		return launch_execv(cmd, FOREGROUND, E_NOSTDERR);
 	}
 
-	char *cmd[] = {"find", _path, method, pattern, NULL};
+	char *cmd[] = {name, _path, method, pattern, NULL};
 	return launch_execv(cmd, FOREGROUND, E_NOSTDERR);
 }
+
+#ifdef FIND_HAS_NO_REGEX
+static char *
+define_find_name(void)
+{
+	static int check = 1;
+	static int have_gfind = 0;
+
+	/* Let's run this only once. */
+	if (check == 1) {
+		check = 0;
+		char *p = get_cmd_path("gfind");
+		if (p)
+			have_gfind = 1;
+		free(p);
+	}
+
+	return (have_gfind == 1 ? "gfind" : "find");
+}
+#endif /* FIND_HAS_NO_REGEX */
 
 static int
 run_find(char *search_path, char *arg)
 {
 	char *_path = (search_path && *search_path) ? search_path : ".";
+	char *name = "find";
+
 #if defined(_BE_POSIX)
 	/* POSIX find(1) only supports -name */
 	char *method = "-name";
-#elif defined(__OpenBSD__)
-	/* No -regex nor -iregex option in OpenBSD's find(1).
-	 * We should use gfind(1) instead, provided by the 'findutils' package. */
-	char *method = conf.case_sens_search == 1 ? "-name" : "-iname";
 #else
 	char *method = conf.search_strategy == REGEX_ONLY
 		? (conf.case_sens_search == 1 ? "-regex" : "-iregex")
 		: (conf.case_sens_search == 1 ? "-name" : "-iname");
+# if defined(FIND_HAS_NO_REGEX)
+	name = define_find_name();
+	if (*name != 'g') /* GNU find (gfind) not found */
+		method = conf.case_sens_search == 1 ? "-name" : "-iname";
+# endif /* FIND_HAS_NO_REGEX */
 #endif /* _BE_POSIX */
 
 	int glob_char = check_glob_char(arg + 1, GLOB_REGEX);
 	if (glob_char == 1)
-		return exec_find(_path, method, arg + 1);
+		return exec_find(name, _path, method, arg + 1);
 
 	int ret = EXIT_SUCCESS;
 
-	size_t sslen = strlen(arg + 1) + 5;
-	char *ss = (char *)xnmalloc(sslen, sizeof(char));
+	size_t pattern_len = strlen(arg + 1) + 5;
+	char *pattern = (char *)xnmalloc(pattern_len, sizeof(char));
 
-#if !defined(_BE_POSIX) && !defined(__OpenBSD__)
-	if (conf.search_strategy == REGEX_ONLY)
-		snprintf(ss, sslen, ".*%s.*", arg + 1);
-	else
-		snprintf(ss, sslen, "*%s*", arg + 1);
+#if !defined(_BE_POSIX)
+	if (conf.search_strategy == REGEX_ONLY) {
+# if !defined(FIND_HAS_NO_REGEX)
+		snprintf(pattern, pattern_len, ".*%s.*", arg + 1);
+# else
+		if (*name == 'g') /* We have GNU find (gfind) */
+			snprintf(pattern, pattern_len, ".*%s.*", arg + 1);
+		else
+			snprintf(pattern, pattern_len, "*%s*", arg + 1);
+# endif /* FIND_HAS_NO_REGEX */
+	} else {
+		snprintf(pattern, pattern_len, "*%s*", arg + 1);
+	}
 #else
-	snprintf(ss, sslen, "*%s*", arg + 1);
-#endif /* !_BE_POSIX && !__OpenBSD__ */
+	snprintf(pattern, pattern_len, "*%s*", arg + 1);
+#endif /* !_BE_POSIX */
 
-	ret = exec_find(_path, method, ss);
-	free(ss);
+	ret = exec_find(name, _path, method, pattern);
+	free(pattern);
 
 	return ret;
 }
