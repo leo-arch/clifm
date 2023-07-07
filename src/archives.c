@@ -78,10 +78,7 @@ static char *
 get_extraction_path(void)
 {
 	char *ext_path = ask_user_for_path();
-	if (!ext_path)
-		return (char *)NULL;
-
-	if (!*ext_path) {
+	if (!ext_path || !*ext_path) {
 		free(ext_path);
 		return (char *)NULL;
 	}
@@ -110,7 +107,8 @@ get_extraction_path(void)
 	return ext_path;
 }
 
-static char get_operation(const int mode)
+static char
+get_operation(const int mode)
 {
 	char sel_op = 0;
 	char *op = (char *)NULL;

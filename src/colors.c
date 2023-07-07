@@ -353,7 +353,8 @@ static const struct colors_t color_names[] = {
  *
  * This function is used to print properties strings ('p' command
  * and long view mode). It takes the user defined color of the
- * corresponding file type (e.g. dirs) and removes the bold attribute. */
+ * corresponding file type (e.g. dirs) and removes the bold attribute.
+ * Also used when running with --no-bold. */
 void
 remove_bold_attr(char *str)
 {
@@ -476,7 +477,7 @@ get_file_color(const char *filename, const struct stat *attr)
 	cap_t cap;
 #else
 	UNUSED(filename);
-#endif
+#endif /* _LINUX_CAP */
 	if (attr->st_mode & 04000) { /* SUID */
 		color = su_c;
 	} else if (attr->st_mode & 02000) { /* SGID */
@@ -487,7 +488,7 @@ get_file_color(const char *filename, const struct stat *attr)
 		color = ca_c;
 		cap_free(cap);
 	}
-#endif
+#endif /* _LINUX_CAP */
 	else if ((attr->st_mode & 00100) /* Exec */
 	|| (attr->st_mode & 00010) || (attr->st_mode & 00001)) {
 		color = FILE_SIZE_PTR == 0 ? ee_c : ex_c;
@@ -502,7 +503,7 @@ get_file_color(const char *filename, const struct stat *attr)
 	return color;
 }
 
-/* Validate a hex color code string with this format: RRGGBB-[1-9] */
+/* Validate a hex color code string with this format: RRGGBB-[1-9]. */
 static int
 is_hex_color(const char *str)
 {
@@ -529,7 +530,7 @@ is_hex_color(const char *str)
 
 /* Check if STR has the format of a color code string (a number or a
  * semicolon list (max 12 fields) of numbers of at most 3 digits each).
- * Hex color codes (#RRGGBB) are also validated
+ * Hex color codes (#RRGGBB) are also validated.
  * Returns 1 if true and 0 if false. */
 static int
 is_color_code(const char *str)
@@ -642,7 +643,7 @@ check_names(const char *str)
 	return tmp_color;
 }
 
-/* If STR is a valid color variable name, return the value of this variable */
+/* If STR is a valid color variable name, return the value of this variable. */
 static char *
 check_defs(const char *str)
 {
@@ -669,7 +670,7 @@ check_defs(const char *str)
 	return val;
 }
 
-/* Free custom color variables set from the color scheme file */
+/* Free custom color variables set from the color scheme file. */
 static void
 clear_defs(void)
 {
@@ -841,32 +842,32 @@ strip_color_line(const char *str, const char mode)
 void
 reset_filetype_colors(void)
 {
-	*nd_c = '\0';
-	*nf_c = '\0';
+	*bd_c = '\0';
+	*ca_c = '\0';
+	*cd_c = '\0';
 	*di_c = '\0';
 	*ed_c = '\0';
-	*ex_c = '\0';
 	*ee_c = '\0';
-	*bd_c = '\0';
+	*ef_c = '\0';
+	*ex_c = '\0';
+	*fi_c = '\0';
 	*ln_c = '\0';
 	*mh_c = '\0';
-	*or_c = '\0';
-	*so_c = '\0';
-	*pi_c = '\0';
-	*cd_c = '\0';
-	*fi_c = '\0';
-	*ef_c = '\0';
-	*su_c = '\0';
-	*sg_c = '\0';
-	*ca_c = '\0';
-	*st_c = '\0';
-	*tw_c = '\0';
-	*ow_c = '\0';
+	*nd_c = '\0';
+	*nf_c = '\0';
 	*no_c = '\0';
-	*uf_c = '\0';
 #ifdef __sun
 	*oo_c = '\0';
 #endif /* __sun */
+	*or_c = '\0';
+	*ow_c = '\0';
+	*pi_c = '\0';
+	*sg_c = '\0';
+	*so_c = '\0';
+	*st_c = '\0';
+	*su_c = '\0';
+	*tw_c = '\0';
+	*uf_c = '\0';
 }
 
 void
@@ -894,25 +895,25 @@ reset_iface_colors(void)
 	*sz_c = '\0';
 
 	*bm_c = '\0';
+	*df_c = '\0';
 	*dl_c = '\0';
 	*el_c = '\0';
-	*mi_c = '\0';
-	*tx_c = '\0';
-	*df_c = '\0';
+	*em_c = '\0';
 	*fc_c = '\0';
-	*wc_c = '\0';
 	*li_c = '\0';
 	*li_cb = '\0';
-	*ti_c = '\0';
-	*em_c = '\0';
-	*wm_c = '\0';
+	*mi_c = '\0';
 	*nm_c = '\0';
 	*si_c = '\0';
-	*ts_c = '\0';
-	*wp_c = '\0';
+	*ti_c = '\0';
 	*tt_c = '\0';
-	*xs_c = '\0';
+	*ts_c = '\0';
+	*tx_c = '\0';
+	*wc_c = '\0';
+	*wm_c = '\0';
+	*wp_c = '\0';
 	*xf_c = '\0';
+	*xs_c = '\0';
 
 	*ws1_c = '\0';
 	*ws2_c = '\0';
@@ -923,16 +924,16 @@ reset_iface_colors(void)
 	*ws7_c = '\0';
 	*ws8_c = '\0';
 
+	*dd_c = '\0';
+	*dg_c = '\0';
+	*dn_c = '\0';
+	*do_c = '\0';
+	*dp_c = '\0';
 	*dr_c = '\0';
 	*dw_c = '\0';
 	*dxd_c = '\0';
 	*dxr_c = '\0';
-	*dg_c = '\0';
-	*dd_c = '\0';
 	*dz_c = '\0';
-	*do_c = '\0';
-	*dp_c = '\0';
-	*dn_c = '\0';
 }
 
 /* Import the color scheme NAME from DATADIR (usually /usr/local/share)
@@ -1076,7 +1077,7 @@ cschemes_function(char **args)
 #ifdef CLIFM_SUCKLESS
 	UNUSED(args);
 	printf("%s: colors: %s. Edit settings.h in the source code "
-		"and recompile\n", PROGRAM_NAME, NOT_AVAILABLE);
+		"and recompile.\n", PROGRAM_NAME, NOT_AVAILABLE);
 	return EXIT_FAILURE;
 #else
 	if (xargs.stealth_mode == 1) {
@@ -1125,7 +1126,7 @@ set_color(char *_color, char var[], const int flag)
 #endif /* !CLIFM_SUCKLESS */
 	{
 		/* A null color string will be set to the default value by
-		 * set_default_colors function */
+		 * set_default_colors function. */
 		*var = '\0';
 		return;
 	}
@@ -1577,6 +1578,7 @@ split_extension_colors(char *extcolors)
 				eol = 1;
 				break;
 			}
+
 			buf[len] = '\0';
 			if (store_extension_line(buf) == EXIT_SUCCESS)
 				*buf = '\0';
@@ -1756,7 +1758,7 @@ get_cur_colorscheme(const char *colorscheme)
 	return EXIT_SUCCESS;
 }
 
-/* Try to retrieve colors from the environment */
+/* Try to retrieve colors from the environment. */
 static void
 get_colors_from_env(char **file, char **ext, char **iface)
 {
@@ -1783,7 +1785,8 @@ get_colors_from_env(char **file, char **ext, char **iface)
 }
 
 #ifndef CLIFM_SUCKLESS
-/* Store color variable defined in STR into the global defs struct */
+/* Store the color variable STR (in the form VAR=VALUE) into the global
+ * defs struct. */
 static void
 store_definition(char *str)
 {
@@ -2161,13 +2164,13 @@ read_color_scheme_file(const char *colorscheme, char **filecolors,
 }
 #endif /* !CLIFM_SUCKLESS */
 
-/* Split the colors line COLORS_LINE and set the corresponding colors
- * according to TYPE (either interface or file type color) */
+/* Split the colors line LINE and set the corresponding colors
+ * according to TYPE (either interface or file type color). */
 static void
-split_color_line(char *colors_line, const int type)
+split_color_line(char *line, const int type)
 {
 	/* Split the colors line into substrings (one per color) */
-	char *p = colors_line, *buf = (char *)NULL, **colors = (char **)NULL;
+	char *p = line, *buf = (char *)NULL, **colors = (char **)NULL;
 	size_t len = 0, words = 0;
 	int eol = 0;
 
@@ -2288,16 +2291,16 @@ disable_bold(void)
 //	remove_bold_attr(hw_c);
 
 	/* File properties */
+	remove_bold_attr(dd_c);
+	remove_bold_attr(dg_c);
+	remove_bold_attr(dn_c);
+	remove_bold_attr(do_c);
+	remove_bold_attr(dp_c);
 	remove_bold_attr(dr_c);
 	remove_bold_attr(dw_c);
 	remove_bold_attr(dxd_c);
 	remove_bold_attr(dxr_c);
-	remove_bold_attr(dg_c);
-	remove_bold_attr(dd_c);
 	remove_bold_attr(dz_c);
-	remove_bold_attr(do_c);
-	remove_bold_attr(dp_c);
-	remove_bold_attr(dn_c);
 
 	/* Workspaces */
 	remove_bold_attr(ws1_c);
@@ -2314,12 +2317,13 @@ disable_bold(void)
 	remove_bold_attr(li_c);
 	remove_bold_attr(li_cb);
 	remove_bold_attr(nm_c);
-	remove_bold_attr(wm_c);
 	remove_bold_attr(si_c);
 	remove_bold_attr(ti_c);
 	remove_bold_attr(tx_c);
 	remove_bold_attr(xs_c);
 	remove_bold_attr(xf_c);
+
+	remove_bold_attr(wm_c);
 }
 
 /* Get color codes values from either the environment or the config file
@@ -2428,7 +2432,7 @@ remove_trash_ext(char **ent)
 
 /* Print the entry ENT using color codes and ELN as ELN, right padding PAD
  * chars and terminate ENT with or without a new line char (NEW_LINE
- * 1 or 0 respectivelly).
+ * 1 or 0 respectively).
  * ELN could be:
  * > 0: The ELN of a file in CWD
  * -1:  Error getting ELN
@@ -2660,7 +2664,7 @@ print_color_blocks(void)
 	SET_LINE_WRAP;
 }
 
-/* List color codes for file types used by the program */
+/* List color codes for file types used by the program. */
 void
 color_codes(void)
 {
@@ -2689,6 +2693,9 @@ color_codes(void)
 	printf(_(" %sfile name%s: cd: Character special file\n"), cd_c, df_c);
 	printf(_(" %sfile name%s: so: Socket file\n"), so_c, df_c);
 	printf(_(" %sfile name%s: pi: Pipe or FIFO special file\n"), pi_c, df_c);
+#ifdef __sun
+	printf(_(" %sfile name%s: oo: Door file\n"), oo_c, df_c);
+#endif /* __sun */
 	printf(_(" %sfile name%s: su: SUID file\n"), su_c, df_c);
 	printf(_(" %sfile name%s: sg: SGID file\n"), sg_c, df_c);
 	printf(_(" %sfile name%s: ca: File with capabilities\n"), ca_c, df_c);

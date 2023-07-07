@@ -73,7 +73,8 @@ run_find(char *search_path, char *arg)
 	/* POSIX find(1) only supports -name */
 	char *method = "-name";
 #elif defined(__OpenBSD__)
-	/* No -regex nor -iregex option in OpenBSD's find(1) */
+	/* No -regex nor -iregex option in OpenBSD's find(1).
+	 * We should use gfind(1) instead, provided by the 'findutils' package. */
 	char *method = conf.case_sens_search == 1 ? "-name" : "-iname";
 #else
 	char *method = conf.search_strategy == REGEX_ONLY

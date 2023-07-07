@@ -220,7 +220,7 @@ print_file(FILE *fp, const char *name, const mode_t type)
 		s = get_file_suffix(a.st_mode);
 #else
 	char s = get_file_suffix(type);
-#endif
+#endif /* !_DIRENT_HAVE_D_TYPE */
 
 	if (s)
 		fprintf(fp, "%s%c\n", name, s);
