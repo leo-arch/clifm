@@ -33,19 +33,19 @@ typedef char *rl_cpvfunc_t;
 #else
 # include <readline/readline.h>
 //# include <readline/history.h> // history_arg_extract
-#endif
+#endif /* __OpenBSD__ */
 
 #ifdef __TINYC__
 /* Silence a tcc warning. We don't use CTRL anyway */
 # undef CTRL
-#endif
+#endif /* __TINYC */
 
 #include <termios.h>
 #include <unistd.h>
 
 #ifdef __NetBSD__
 # include <string.h>
-#endif
+#endif /* __NetBSD__ */
 
 #include <dirent.h>
 #include <errno.h>
@@ -65,11 +65,11 @@ typedef char *rl_cpvfunc_t;
 
 #ifndef _NO_SUGGESTIONS
 # include "suggestions.h"
-#endif
+#endif /* !_NO_SUGGESTIONS */
 
 #ifndef _NO_HIGHLIGHT
 # include "highlight.h"
-#endif
+#endif /* !_NO_HIGHLIGHT */
 
 /* Let's use these word delimiters to print first suggested word
  * and to delete last typed word */
@@ -77,7 +77,7 @@ typedef char *rl_cpvfunc_t;
 
 #ifndef _NO_SUGGESTIONS
 static int accept_first_word = 0;
-#endif
+#endif /* !_NO_SUGGESTIONS */
 
 static void
 xrl_reset_line_state(void)
@@ -271,7 +271,7 @@ keybind_exec_cmd(char *str)
 #ifndef _NO_SUGGESTIONS
 	if (suggestion.printed == 1 && suggestion_buf)
 		clear_suggestion(CS_FREEBUF);
-#endif
+#endif /* !_NO_SUGGESTIONS */
 
 	int exit_status = EXIT_FAILURE;
 	char **cmd = parse_input_str(str);
@@ -383,7 +383,7 @@ rl_prepend_sudo(int count, int key)
 		clear_suggestion(CS_FREEBUF);
 		fputs(df_c, stdout);
 	}
-#endif
+#endif /* !_NO_SUGGESTIONS */
 
 	int free_s = 1;
 	size_t len = 0;
@@ -439,7 +439,7 @@ rl_prepend_sudo(int count, int key)
 		clear_suggestion(CS_FREEBUF);
 		rl_point = r;
 	}
-#endif
+#endif /* !_NO_SUGGESTIONS */
 	return EXIT_SUCCESS;
 }
 
@@ -459,7 +459,7 @@ my_insert_text(char *text, char *s, const char _s)
 {
 #ifdef _NO_HIGHLIGHT
 	UNUSED(s); UNUSED(_s);
-#endif
+#endif /* !_NO_HIGHLIGHT */
 
 	if (!text || !*text)
 		return;
@@ -556,7 +556,7 @@ my_insert_text(char *text, char *s, const char _s)
 
 		UNHIDE_CURSOR;
 	} else
-#endif
+#endif /* !_NO_HIGHLIGHT */
 INSERT_TEXT:
 	{
 		rl_insert_text(text);
@@ -916,7 +916,7 @@ rl_toggle_long_view(int count, int key)
 #ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
 		free_suggestion();
-#endif
+#endif /* !_NO_SUGGESTIONS */
 
 	conf.long_view = conf.long_view == 1 ? 0 : 1;
 
@@ -944,7 +944,7 @@ rl_toggle_dirs_first(int count, int key)
 #ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
 		free_suggestion();
-#endif
+#endif /* !_NO_SUGGESTIONS */
 
 	conf.list_dirs_first = conf.list_dirs_first ? 0 : 1;
 
@@ -970,7 +970,7 @@ rl_toggle_light_mode(int count, int key)
 #ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
 		free_suggestion();
-#endif
+#endif /* !_NO_SUGGESTIONS */
 
 	conf.light_mode = conf.light_mode == 1 ? 0 : 1;
 
@@ -1003,7 +1003,7 @@ rl_toggle_hidden_files(int count, int key)
 #ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
 		free_suggestion();
-#endif
+#endif /* !_NO_SUGGESTIONS */
 
 	conf.show_hidden = conf.show_hidden == 1 ? 0 : 1;
 
@@ -1150,7 +1150,7 @@ rl_clear_line(int count, int key)
 		cur_color = tx_c;
 		fputs(cur_color, stdout);
 	}
-#endif
+#endif /* !_NO_HIGHLIGHT */
 
 #ifndef _NO_SUGGESTIONS
 	if (wrong_cmd) {
@@ -1184,7 +1184,7 @@ rl_sort_next(int count, int key)
 #ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
 		free_suggestion();
-#endif
+#endif /* !_NO_SUGGESTIONS */
 	conf.sort++;
 	if (conf.sort > SORT_TYPES)
 		conf.sort = 0;
@@ -1211,7 +1211,7 @@ rl_sort_previous(int count, int key)
 #ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
 		free_suggestion();
-#endif
+#endif /* !_NO_SUGGESTIONS */
 	conf.sort--;
 	if (conf.sort < 0)
 		conf.sort = SORT_TYPES;
@@ -1236,18 +1236,19 @@ rl_lock(int count, int key)
 #ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
 		free_suggestion();
-#endif
+#endif /* !_NO_SUGGESTIONS */
 	rl_deprep_terminal();
 
-#if __FreeBSD__ || __NetBSD__ || __OpenBSD__
-	char *cmd[] = {"lock", NULL};
-#elif __APPLE__
-	char *cmd[] = {"bashlock", NULL};
-#elif __HAIKU__
+#if defined(__APPLE__)
+	char *cmd[] = {"bashlock", NULL}; /* See https://github.com/acornejo/bashlock */
+#elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) \
+|| defined(__DragonFly__)
+	char *cmd[] = {"lock", "-p", NULL};
+#elif defined(__HAIKU__)
 	char *cmd[] = {"peaclock", NULL};
 #else
 	char *cmd[] = {"vlock", NULL};
-#endif
+#endif /* __APPLE__ */
 	ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 
 	rl_prep_terminal(0);
@@ -1372,7 +1373,7 @@ rl_profile_previous(int count, int key)
 #ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
 		free_suggestion();
-#endif
+#endif /* !_NO_SUGGESTIONS */
 	int prev_prof, cur_prof = -1, total_profs = 0;
 	get_cur_prof(&cur_prof, &total_profs);
 
@@ -1407,7 +1408,7 @@ rl_profile_next(int count, int key)
 #ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
 		free_suggestion();
-#endif
+#endif /* !_NO_SUGGESTIONS */
 	int next_prof, cur_prof = -1, total_profs = 0;
 	get_cur_prof(&cur_prof, &total_profs);
 
@@ -1545,7 +1546,7 @@ rl_kbinds_help(int count, int key)
 #ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
 		free_suggestion();
-#endif
+#endif /* !_NO_SUGGESTIONS */
 
 	char cmd[PATH_MAX];
 	snprintf(cmd, sizeof(cmd),
@@ -1567,7 +1568,7 @@ rl_cmds_help(int count, int key)
 #ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
 		free_suggestion();
-#endif
+#endif /* !_NO_SUGGESTIONS */
 
 	char cmd[PATH_MAX];
 	snprintf(cmd, sizeof(cmd),
@@ -1589,7 +1590,7 @@ rl_manpage(int count, int key)
 #ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
 		free_suggestion();
-#endif
+#endif /* !_NO_SUGGESTIONS */
 	char *cmd[] = {"man", PROGRAM_NAME, NULL};
 	if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
@@ -1804,7 +1805,7 @@ print_highlight_string(char *s, const int insert_point)
 		rl_redisplay();
 	}
 }
-#endif
+#endif /* !_NO_HIGHLIGHT */
 
 static int
 print_cmdhist_line(int n, int beg_line)
@@ -1818,7 +1819,7 @@ print_cmdhist_line(int n, int beg_line)
 	if (conf.highlight == 1)
 		print_highlight_string(history[n].cmd, 0);
 	else
-#endif
+#endif /* !_NO_HIGHLIGHT */
 	{
 		rl_replace_line(history[n].cmd, 1);
 	}
@@ -1906,7 +1907,7 @@ rl_cmdhist(int count, int key)
 		free(suggestion_buf);
 		suggestion_buf = (char *)NULL;
 	}
-#endif
+#endif /* !_NO_SUGGESTIONS */
 
 	if (key == 16) /* C-p  */
 		key = 65;  /* Up   */
@@ -1969,7 +1970,7 @@ rl_tab_comp(int count, int key)
 #ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
 		clear_suggestion(CS_FREEBUF);
-#endif
+#endif /* !_NO_SUGGESTIONS */
 	UNUSED(count); UNUSED(key);
 
 	tab_complete('!');
@@ -1982,7 +1983,7 @@ rl_del_last_word(int count, int key)
 #ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
 		clear_suggestion(CS_FREEBUF);
-#endif
+#endif /* !_NO_SUGGESTIONS */
 	UNUSED(count); UNUSED(key);
 
 	if (rl_point == 0)
@@ -2021,7 +2022,7 @@ rl_del_last_word(int count, int key)
 #ifndef _NO_SUGGESTIONS
 	if (conf.suggestions == 1 && n == 0 && wrong_cmd)
 		recover_from_wrong_cmd();
-#endif
+#endif /* !_NO_SUGGESTIONS */
 
 	return EXIT_SUCCESS;
 }

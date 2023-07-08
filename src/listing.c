@@ -28,10 +28,10 @@
 #include <sys/statvfs.h>
 #if defined(BSD_KQUEUE)
 # include <unistd.h> /* open(2) */
-#endif
+#endif /* BSD_KQUEUE */
 #if defined(__linux__)
 # include <sys/capability.h>
-#endif
+#endif /* __linux__ */
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -39,17 +39,17 @@
 #if defined(__OpenBSD__)
 # include <strings.h>
 # include <inttypes.h> /* uintmax_t */
-#endif
+#endif /* __OpenBSD__ */
 
 #if defined(_LINUX_XATTR)
 # include <sys/xattr.h>
-#endif
+#endif /* _LINUX_XATTR */
 
 #include <limits.h> /* INT_MAX */
 
 #if defined(_LIST_SPEED)
 # include <time.h>
-#endif
+#endif /* _LIST_SPEED */
 
 #if defined(TOURBIN_QSORT)
 # include "qsort.h"
@@ -73,7 +73,7 @@
 
 #ifndef _NO_ICONS
 # include "icons.h"
-#endif
+#endif /* !_NO_ICONS */
 
 /* In case we want to try some faster printf implementation */
 /*#if defined(_PALAND_PRINTF)
@@ -154,7 +154,7 @@ init_icons_hashes(void)
 	set_dir_names_hashes();
 	set_ext_names_hashes();
 }
-#endif // !_NO_ICONS
+#endif /* !_NO_ICONS */
 
 #if defined(TOURBIN_QSORT)
 static inline void
@@ -203,7 +203,7 @@ print_div_line(void)
 #ifdef RUN_CMD
 	if (cmd_line_cmd)
 		return;
-#endif
+#endif /* RUN_CMD */
 
 	if (conf.colorize == 1)
 		set_div_line_color();
@@ -928,7 +928,7 @@ print_entry_color(int *ind_char, const int i, const int pad,
 			}
 		}
 	} else
-#endif
+#endif /* !_NO_ICONS */
 	{
 		if (conf.no_eln == 1) {
 			if (wtrim.type > 0) {
@@ -1623,7 +1623,7 @@ get_largest(const size_t i, off_t *size, char **name, char **color, off_t *total
 }
 
 /* Return the lenght of the longest UID:GID string for files listed in
- * long view mode */
+ * long view mode. */
 static size_t
 get_max_ug_str(void)
 {
@@ -2687,7 +2687,7 @@ reload_dirlist(void)
 #ifdef RUN_CMD
 	if (cmd_line_cmd)
 		return;
-#endif
+#endif /* RUN_CMD */
 
 	free_dirlist();
 	int bk = exit_code;
