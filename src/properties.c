@@ -55,17 +55,17 @@
 #if defined(__OpenBSD__) || defined(__NetBSD__) \
 || defined(__FreeBSD__) || defined(__APPLE__)
 # include <inttypes.h> /* uintmax_t, intmax_t */
-#endif
+#endif /* __OpenBSD__ || __NetBSD__ || __FreeBSD__ || __APPLE__ */
 
 #ifdef LINUX_FILE_ATTRS
 # include <sys/ioctl.h>  /* ioctl(3) */
 # include <linux/fs.h>   /* FS_IOC_GETFLAGS */
 # include "properties.h" /* XFS_?????_FL flags */
-#endif
+#endif /* LINUX_FILE_ATTRS */
 
 #ifdef _LINUX_XATTR
 # include <sys/xattr.h>
-#endif
+#endif /* _LINUX_XATTR */
 
 #include "aux.h"
 #include "checks.h"
@@ -90,14 +90,14 @@
 
 #ifndef major
 # define major(x) ((x >> 8) & 0x7F)
-#endif
+#endif /* major */
 #ifndef minor
 # define minor(x) (x & 0xFF)
-#endif
+#endif /* minor */
 
 #ifndef DT_DIR
 # define DT_DIR 4
-#endif
+#endif /* DT_DIR */
 
 /* Macros to calculate relative timestamps */
 #define RT_SECOND 1

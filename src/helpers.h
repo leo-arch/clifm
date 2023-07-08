@@ -715,6 +715,22 @@ extern int watch;
 #define UNSET_LINE_WRAP fputs("\x1b[?7l", stderr)
 #define RING_BELL       fputs("\007", stderr)
 
+/* Get the maximum value for a given data type.
+ * Taken from coreutils (https://github.com/coreutils/gnulib/blob/master/lib/intprops.h) */
+/*
+#include <limits.h> // CHAR_BIT
+#define TYPE_SIGNED(t)  (!((t)0 < (t)-1))
+#define TYPE_WIDTH(t)   (sizeof(t) * CHAR_BIT)
+#define TYPE_MAXIMUM(t)                                   \
+        ((t)(!TYPE_SIGNED(t)                              \
+        ? (t)-1                                           \
+        : ((((t)1 << (TYPE_WIDTH(t) - 2)) - 1) * 2 + 1)))
+
+// Safely cast the number N to the type T. The type T is never overflowed:
+// if N is bigger than what T can hold, the maximum value T can hold is
+// returned.
+#define SAFECAST(n, t) ((t)(n) < 0 ? TYPE_MAXIMUM(t) : (t)(n)) */
+
 /*
 // See https://bestasciitable.com
 #define __CTRL(n) ((n) & ~(1 << 6)) // Just unset (set to zero) the seventh bit

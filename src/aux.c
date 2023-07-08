@@ -732,12 +732,10 @@ count_dir(const char *dir, const int pop)
 	unsigned int c = 0;
 
 	while (readdir(p)) {
-		c++;
-		if (c > (unsigned int)INT_MAX) {
-			--c;
+		if (c + 1 > INT_MAX)
 			break;
-		}
 
+		c++;
 		if (pop && c > 2)
 			break;
 	}

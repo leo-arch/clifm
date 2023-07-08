@@ -545,9 +545,9 @@ set_events_checker(void)
 }
 
 static void
-get_longest_filename(const int n, const int pad)
+get_longest_filename(const size_t n, const int pad)
 {
-	int i = (max_files != UNSET && max_files < n) ? max_files : n;
+	int i = (max_files != UNSET && max_files < (int)n) ? max_files : (int)n;
 	int longest_index = -1;
 
 	while (--i >= 0) {
@@ -643,7 +643,7 @@ get_longest_filename(const int n, const int pad)
 
 /* Set a few extra properties needed for long view mode */
 static void
-set_long_attribs(const int n, const struct stat *attr)
+set_long_attribs(const size_t n, const struct stat *attr)
 {
 	file_info[n].uid = attr->st_uid;
 	file_info[n].gid = attr->st_gid;
@@ -1779,8 +1779,8 @@ list_dir_light(void)
 
 	errno = 0;
 	longest = 0;
-	unsigned int n = 0;
-	unsigned int total_dents = 0, count = 0;
+	size_t n = 0;
+	size_t total_dents = 0, count = 0;
 
 	file_info = (struct fileinfo *)xnmalloc(ENTRY_N + 2, sizeof(struct fileinfo));
 
@@ -1945,17 +1945,16 @@ list_dir_light(void)
 		if (conf.long_view == 1) {
 			struct stat _attr;
 			if (lstat(file_info[n].name, &_attr) != -1)
-				set_long_attribs((int)n, &_attr);
+				set_long_attribs(n, &_attr);
 		}
 
 		if (xargs.disk_usage_analyzer == 1)
 			get_largest(n, &largest_size, &largest_name, &largest_color, &total_size);
 
 		n++;
-		if (n > (unsigned int)INT_MAX) {
-			n--;
+		if (n > INT_MAX) {
 			_err('w', PRINT_PROMPT, _("%s: Integer overflow "
-				"detected (showing only %u files)\n"), PROGRAM_NAME, n);
+				"detected (showing only %zu files)\n"), PROGRAM_NAME, n - 1);
 			break;
 		}
 
@@ -1966,7 +1965,7 @@ list_dir_light(void)
 		fputs("\r            \r", stdout); /* Erase the "Scanning ..." message */
 
 	file_info[n].name = (char *)NULL;
-	files = (size_t)n;
+	files = n;
 
 	if (n == 0) {
 		printf("%s. ..%s\n", di_c, df_c);
@@ -1984,10 +1983,8 @@ list_dir_light(void)
 	size_t columns_n = 1;
 
 	/* Get the longest file name */
-	if (conf.columned == 1 || conf.long_view == 1) {
-		int nn = (int)n;
-		get_longest_filename(nn, pad);
-	}
+	if (conf.columned == 1 || conf.long_view == 1)
+		get_longest_filename(n, pad);
 
 				/* ########################
 				 * #    LONG VIEW MODE    #
@@ -2247,8 +2244,8 @@ list_dir(void)
 
 	errno = 0;
 	longest = 0;
-	unsigned int n = 0;
-	unsigned int total_dents = 0, count = 0;
+	size_t n = 0;
+	size_t total_dents = 0, count = 0;
 
 	file_info = (struct fileinfo *)xnmalloc(ENTRY_N + 2, sizeof(struct fileinfo));
 
@@ -2397,7 +2394,7 @@ list_dir(void)
 #else
 			/* Let's use change time if birth time is not available */
 			file_info[n].time = stat_ok ? (time_t)attr.st_ctime : 0;
-#endif /* ST_BTIME */
+#endif /* ST_BTIME && !__sun */
 			break;
 
 		case SCTIME: file_info[n].time = stat_ok ? (time_t)attr.st_ctime : 0;
@@ -2611,16 +2608,17 @@ list_dir(void)
 			file_info[n].icon_color = file_info[n].color;
 #endif /* !_NO_ICONS */
 		if (conf.long_view == 1 && stat_ok == 1)
-			set_long_attribs((int)n, &attr);
+			set_long_attribs(n, &attr);
 
 		if (xargs.disk_usage_analyzer == 1)
 			get_largest(n, &largest_size, &largest_name, &largest_color, &total_size);
 
 		n++;
-		if (n > (unsigned int)INT_MAX) {
-			n--;
+		if (n > INT_MAX) {
+			/* Though it might seem arbitrary and stretched, an int allows us
+			 * to store more than 2 billion files per directory. */
 			_err('w', PRINT_PROMPT, _("%s: Integer overflow "
-				"detected (showing only %u files)\n"), PROGRAM_NAME, n);
+				"detected (showing only %zu files)\n"), PROGRAM_NAME, n - 1);
 			break;
 		}
 
@@ -2664,10 +2662,8 @@ list_dir(void)
 	size_t columns_n = 1;
 
 	/* Get the longest file name */
-	if (conf.columned == 1 || conf.long_view == 1) {
-		int nn = (int)n;
-		get_longest_filename(nn, pad);
-	}
+	if (conf.columned == 1 || conf.long_view == 1)
+		get_longest_filename(n, pad);
 
 				/* ########################
 				 * #    LONG VIEW MODE    #
