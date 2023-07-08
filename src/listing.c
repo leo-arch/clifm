@@ -2057,67 +2057,19 @@ check_seltag(const dev_t dev, const ino_t ino, const nlink_t links,
 	return 0;
 }
 
-/* Initialize the file_info struct, mostly in case stat fails */
+/* Initialize the file_info struct, mostly in case stat fails. */
 static inline void
 init_fileinfo(const size_t n)
 {
+	file_info[n] = (struct fileinfo){0};
 	file_info[n].color = df_c;
-	file_info[n].ext_color = (char *)NULL;
-	file_info[n].ext_name = (char *)NULL;
 #ifndef _NO_ICONS
 	file_info[n].icon = DEF_FILE_ICON;
 	file_info[n].icon_color = DEF_FILE_ICON_COLOR;
-#endif
-	file_info[n].name = (char *)NULL;
-	file_info[n].dir = 0;
-	file_info[n].eln_n = 0;
-	file_info[n].exec = 0;
-	file_info[n].filesn = 0; /* Number of files in subdir */
-	file_info[n].ruser = 1; /* User read permission for dir */
-	file_info[n].symlink = 0;
-	file_info[n].sel = 0;
-	file_info[n].len = 0;
-	file_info[n].mode = 0; /* Store st_mode (for long view mode) */
-	file_info[n].type = 0; /* Store d_type value */
-	file_info[n].inode = 0;
+#endif /* !_NO_ICONS */
+	file_info[n].ruser = 1;
 	file_info[n].size = 1;
-	file_info[n].uid = 0;
-	file_info[n].gid = 0;
 	file_info[n].linkn = 1;
-	file_info[n].ltime = 0; /* For long view mode */
-	file_info[n].time = 0;
-	file_info[n].xattr = 0;
-	file_info[n].du_status = 0;
-/*	file_info[n].dev = 0;
-	file_info[n].ino = 0; */
-}
-
-/* Initialize the stats struct */
-static inline void
-reset_stats(void)
-{
-	stats.dir = 0;
-	stats.reg = 0;
-	stats.exec = 0;
-	stats.hidden = 0;
-	stats.suid = 0;
-	stats.sgid = 0;
-	stats.fifo = 0;
-	stats.socket = 0;
-	stats.block_dev = 0;
-	stats.char_dev = 0;
-	stats.caps = 0;
-	stats.link = 0;
-	stats.broken_link = 0;
-	stats.multi_link = 0;
-	stats.other_writable = 0;
-	stats.sticky = 0;
-	stats.extended = 0;
-	stats.unknown = 0;
-	stats.unstat = 0;
-#ifdef __sun
-	stats.door = 0;
-#endif /* __sun */
 }
 
 /* Get the color of a link target NAME, whose file attributes are ATTR,
@@ -2202,7 +2154,8 @@ list_dir(void)
 		trim.len = 0;
 	}
 
-	reset_stats();
+	/* Reset the stats struct */
+	stats = (struct stats_t){0};
 	get_term_size();
 
 	if (conf.long_view == 1)
