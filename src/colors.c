@@ -2589,7 +2589,7 @@ get_colorschemes(void)
 		color_schemes = (char **)xrealloc(color_schemes,
 			((size_t)schemes_total + 2) * sizeof(char *));
 
-		while ((ent = readdir(dir_p)) != NULL) {
+		while ((ent = readdir(dir_p)) != NULL && i < (size_t)schemes_total) {
 			if (is_valid_colorscheme_name(ent->d_name) == 0)
 				continue;
 
@@ -2628,7 +2628,7 @@ get_colorschemes(void)
 
 	size_t i_tmp = i;
 
-	while ((ent = readdir(dir_p)) != NULL) {
+	while ((ent = readdir(dir_p)) != NULL && i < (size_t)schemes_total) {
 		if (is_valid_colorscheme_name(ent->d_name) == 0
 		|| is_duplicate_colorscheme_name(ent->d_name, i_tmp) == 1)
 			continue;
