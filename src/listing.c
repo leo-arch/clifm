@@ -1952,9 +1952,9 @@ list_dir_light(void)
 			get_largest(n, &largest_size, &largest_name, &largest_color, &total_size);
 
 		n++;
-		if (n > INT_MAX) {
+		if (n + 1 > INT_MAX) {
 			_err('w', PRINT_PROMPT, _("%s: Integer overflow "
-				"detected (showing only %zu files)\n"), PROGRAM_NAME, n - 1);
+				"detected (showing only %zu files)\n"), PROGRAM_NAME, n);
 			break;
 		}
 
@@ -2614,18 +2614,18 @@ list_dir(void)
 			get_largest(n, &largest_size, &largest_name, &largest_color, &total_size);
 
 		n++;
-		if (n > INT_MAX) {
+		if (n + 1 > INT_MAX) {
 			/* Though it might seem arbitrary and stretched, an int allows us
 			 * to store more than 2 billion files per directory. */
 			_err('w', PRINT_PROMPT, _("%s: Integer overflow "
-				"detected (showing only %zu files)\n"), PROGRAM_NAME, n - 1);
+				"detected (showing only %zu files)\n"), PROGRAM_NAME, n);
 			break;
 		}
 
 		count++;
 	}
 
-/*	unsigned int tdents = total_dents > 0 ? total_dents : ENTRY_N + 2;
+/*	size_t tdents = total_dents > 0 ? total_dents : ENTRY_N + 2;
 	if (tdents > n)
 		file_info = xrealloc(file_info, (n + 1) * sizeof(struct fileinfo)); */
 

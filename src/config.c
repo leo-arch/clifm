@@ -2260,7 +2260,7 @@ set_pager_value(char *line, int *var)
 		if (l > 0 && p[l - 1] == '\n')
 			p[l - 1] = '\0';
 
-		int n = xatoi(p);
+		int n = atoi(p);
 		if (n == INT_MIN)
 			return;
 

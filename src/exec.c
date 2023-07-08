@@ -787,7 +787,7 @@ pager_function(const char *arg)
 	}
 
 	if (is_number(arg)) {
-		int n = xatoi(arg);
+		int n = atoi(arg);
 		if (n == INT_MIN) {
 			xerror("%s\n", _("pg: xatoi: Error converting to integer"));
 			return EXIT_FAILURE;
