@@ -577,9 +577,21 @@ For information about the matching algorithm consult the manpage\n\n\
 #define LE_USAGE "Edit a symbolic link\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   le SYMLINK\n\n\
+The user is prompted to enter a new link target using the current\n\
+target as template.\n\n\
 \x1b[1mEXAMPLE\x1b[0m\n\
 - Edit the symbolic link named file.link\n\
     le file.link"
+
+#define LINK_USAGE "Create a symbolic link\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
+  l TARGET [LINK_NAME]\n\n\
+If LINK_NAME is omitted, it is created as TARGET_BASENAME.link in\n\
+the current directory.\n\n\
+\x1b[1mEXAMPLE\x1b[0m\n\
+- Create a symbolic link to file.zst named mylink\n\
+    l file.zst mylink\n\n\
+Note: Use the 'le' command to edit a symbolic link. Try 'le --help'."
 
 #define LL_USAGE "Toggle long view mode\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
@@ -1098,11 +1110,10 @@ Note: Use the 'trash' command to trash files. Try 'trash --help'"
     view edit vi\n\n\
 Enter 'help file-previews' for more information"
 
-#define WRAPPERS_USAGE "c, l, m, md, and r commands are wrappers \
-for cp(1), ln(1), mv(1),\nmkdir(1), and rm(1) shell commands respectively.\n\n\
+#define WRAPPERS_USAGE "c, m, md, and r commands are wrappers \
+for cp(1), mv(1),\nmkdir(1), and rm(1) shell commands respectively.\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
 c  -> cp -iRp\n\
-l  -> ln -sn\n\
 m  -> mv -i\n\
 md -> mkdir -p\n\
 r  -> rm -dIr (for directories) (1)(2)(4)\n\
@@ -1150,19 +1161,16 @@ Example: cp -abf ...\n\n\
     r sel\n\
 - Remove all selected files (non-interactively)\n\
     r -f sel\n\
-- Create a symbolic link pointing to the directory whose ELN is 12 named\n\
-  'link'\n\
-    l 12 link\n\
+  Note: Use the 't' command to send files to the trash can. Try 't --help'.\n\
 - Create a directory named 'mydir'\n\
     md mydir\n\
   Note: To create files and directories you can use the 'n' command as\n\
-  well. See 'n --help'\n\
-- Edit the symbolic link named 'mylink'\n\
-    le mylink\n\n\
+  well. Try 'n --help'.\n\n\
 Use the 'vv' command to copy files into a directory and bulk rename them\n\
-at once. See 'vv --help'\n\n\
+at once. Try 'vv --help'.\n\n\
 Use the 'cr' plugin to send a file to a remote location:\n\
-    cr FILE (run 'cr --edit' before to set up your remotes)"
+    cr FILE (run 'cr --edit' before to set up your remotes)\n\n\
+Use the 'l' command to create symbolic links, and 'le' to edit them."
 
 #define WS_USAGE "Switch workspaces\n\n\
 \x1b[1mUSAGE\x1b[0m\n\

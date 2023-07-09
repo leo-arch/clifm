@@ -1477,14 +1477,16 @@ print_current_target(const char *link, char **target)
 	return;
 }
 
-/* Relink the symbolic link LINK to a new target */
+/* Relink the symbolic link LINK to a new target. */
 int
 edit_link(char *link)
 {
-	if (!link || !*link)
-		return EXIT_FAILURE;
+	if (!link || !*link || IS_HELP(link)) {
+		puts(LE_USAGE);
+		return EXIT_SUCCESS;
+	}
 
-	/* Dequote the file name, if necessary */
+	/* Dequote the file name, if necessary. */
 	if (strchr(link, '\\')) {
 		char *tmp = dequote_str(link, 0);
 		if (!tmp) {
@@ -1500,7 +1502,7 @@ edit_link(char *link)
 	if (len > 0 && link[len - 1] == '/')
 		link[len - 1] = '\0';
 
-	/* Check we have a valid symbolic link */
+	/* Check if we have a valid symbolic link */
 	struct stat attr;
 	if (lstat(link, &attr) == -1) {
 		xerror("le: %s: %s\n", link, strerror(errno));
@@ -1528,23 +1530,21 @@ edit_link(char *link)
 	if (!new_path) /* The user pressed C-d */
 		return EXIT_SUCCESS;
 
-	/* Check new_path existence and warn the user if it does not exist */
+	/* Check new_path existence and warn the user if it does not exist. */
 	if (lstat(new_path, &attr) == -1) {
 		xerror("%s: %s\n", new_path, strerror(errno));
-		if (rl_get_y_or_n(_("Relink as a broken symbolic link? [y/n] ")) == 0) {
+		if (rl_get_y_or_n(_("Relink as broken symbolic link? [y/n] ")) == 0) {
 			free(new_path);
 			return EXIT_SUCCESS;
 		}
 	}
 
-	/* Finally, relink the symlink to new_path */
-#ifdef _BE_POSIX
-	char *cmd[] = {"ln", "-sf", new_path, link, NULL};
-#else
-	char *cmd[] = {"ln", "-sfn", new_path, link, NULL};
-#endif /* _BE_POSIX */
-	if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
+	/* Finally, remove the link and recreate it as link to new_path. */
+	if (unlinkat(XAT_FDCWD, link, 0) == -1
+	|| symlinkat(new_path, XAT_FDCWD, link) == -1) {
 		free(new_path);
+		xerror(_("le: Cannot relink symbolic link '%s': %s\n"),
+			link, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -1552,6 +1552,70 @@ edit_link(char *link)
 	fflush(stdout);
 	colors_list(new_path, NO_ELN, NO_PAD, PRINT_NEWLINE);
 	free(new_path);
+
+	return EXIT_SUCCESS;
+}
+
+/* Create a symbolic link to ARGS[0] named ARGS[1]. If args[1] is not specified,
+ * the link is created as target_basename.link.
+ * Returns 0 in case of success, or 1 otherwise. */
+int
+symlink_file(char **args)
+{
+	if (!args[0] || !*args[0] || IS_HELP(args[0])) {
+		puts(LINK_USAGE);
+		return EXIT_SUCCESS;
+	}
+
+	size_t len = strlen(args[0]);
+	if (len > 1 && args[0][len - 1] == '/')
+		args[0][len - 1] = '\0';
+
+	if (strchr(args[0], '\\')) {
+		char *deq = dequote_str(args[0], 0);
+		if (deq) {
+			free(args[0]);
+			args[0] = deq;
+		}
+	}
+
+	char *target = args[0];
+	char *link_name = args[1];
+	char tmp[PATH_MAX];
+
+	if (!link_name || !*link_name) {
+		char *p = strrchr(target, '/');
+		snprintf(tmp, sizeof(tmp), "%s.link", (p && p[1]) ? p + 1 : target);
+		link_name = tmp;
+	}
+
+	len = strlen(link_name);
+	if (len > 1 && link_name[len - 1] == '/')
+		link_name[len - 1] = '\0';
+
+	struct stat a;
+	if (lstat(target, &a) == -1) {
+		printf("link: %s: %s\n", target, strerror(errno));
+		if (rl_get_y_or_n(_("Create broken symbolic link? [y/n] ")) == 0)
+			return EXIT_SUCCESS;
+	}
+
+	if (lstat(link_name, &a) != -1 && S_ISLNK(a.st_mode)) {
+		printf("link: %s: %s\n", link_name, strerror(EEXIST));
+		if (rl_get_y_or_n(_("Overwrite this file? [y/n] ")) == 0)
+			return EXIT_SUCCESS;
+
+		if (unlinkat(XAT_FDCWD, link_name, 0) == -1) {
+			xerror("link: %s: %s\n", link_name, strerror(errno));
+			return EXIT_FAILURE;
+		}
+	}
+
+	if (symlinkat(target, XAT_FDCWD, link_name) == -1) {
+		xerror(_("link: Cannot create symbolic link '%s': %s\n"),
+			link_name, strerror(errno));
+		return EXIT_FAILURE;
+	}
 
 	return EXIT_SUCCESS;
 }

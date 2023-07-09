@@ -46,6 +46,7 @@ int  create_files(char **);
 int  dup_file(char **);
 int  edit_link(char *);
 char *_export(char **, const int);
+int  symlink_file(char **);
 int  open_file(char *);
 int  open_function(char **);
 int  remove_file(char **);
