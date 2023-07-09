@@ -2890,8 +2890,12 @@ read_config(void)
 			set_config_bool_value(line + 16, &conf.restore_last_path);
 		}
 
-		else if (*line == 'R' && strncmp(line, "RlEditMode=0", 12) == 0)
-			rl_vi_editing_mode(1, 0); /* Readline defaults to emacs */
+		else if (*line == 'R' && strncmp(line, "RlEditMode=", 11) == 0) {
+			if (*(line + 11) == '0')
+				rl_vi_editing_mode(1, 0);
+			else
+				rl_emacs_editing_mode(1, 0);
+		}
 
 		else if (*line == 'r' && strncmp(line, "rmForce=", 8) == 0) {
 			set_config_bool_value(line + 8, &conf.rm_force);

@@ -2106,7 +2106,7 @@ get_link_target_color(const char *name, const struct stat *attr, const size_t i)
 }
 
 /* List files in the current working directory. Uses file type colors
- * and columns. Return zero on success or one on error */
+ * and columns. Return 0 on success or 1 on error. */
 int
 list_dir(void)
 {
