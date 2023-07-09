@@ -1186,7 +1186,8 @@ print_file_name(char *filename, const char *color, const char file_type,
 			printf(_("\tName: %s%s%s <- %s%s%s\n"), file_type == 0
 				? no_c : color, tmp ? tmp : link_target, df_c, ln_c,
 				wname ? wname : filename, df_c);
-			free(tmp);
+			if (tmp != link_target)
+				free(tmp);
 		} else {
 			printf(_("\tName: %s%s%s\n"), file_type == 0 ? no_c : color,
 				wname ? wname : filename, df_c);
