@@ -120,12 +120,12 @@ get_new_filename(char *cur_name)
 	return n;
 }
 
-/* Run CMD via execve() and refresh the screen in case of success
- * skip_force might be true (1) only when coming from cp_mv_file(), that is,
- * for the c and m commands, which take -f,--force as parameter to
- * intruct cp/mv to run non-interactivelly (no -i) */
+/* Run CMD (either cp(1) or mv(1)) via execv().
+ * skip_force is true (1) when the -f,--force parameter has been provided to
+ * either 'c' or 'm' commands: it intructs cp/mv to run non-interactivelly
+ * (no -i). */
 int
-run_and_refresh(char **cmd, const int skip_force)
+run_cp_mv_cmd(char **cmd, const int skip_force)
 {
 	if (!cmd)
 		return EXIT_FAILURE;

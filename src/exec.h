@@ -46,7 +46,7 @@ void exec_profile(void);
 int  get_exit_code(const int, const int);
 int  launch_execv(char **, const int, const int);
 int  launch_execl(const char *);
-int  run_and_refresh(char **, const int);
+int  run_cp_mv_cmd(char **, const int);
 
 __END_DECLS
 

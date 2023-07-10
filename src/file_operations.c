@@ -1692,7 +1692,7 @@ validate_vv_dest_dir(const char *file)
 }
 
 /* Launch the command associated to 'c' (also 'v' and 'vv') or 'm'
- * internal commands */
+ * internal commands. */
 int
 cp_mv_file(char **args, const int copy_and_rename, const int force)
 {
@@ -1708,7 +1708,7 @@ cp_mv_file(char **args, const int copy_and_rename, const int force)
 	}
 
 	if (is_sel == 0 && copy_and_rename == 0)
-		return run_and_refresh(args, force);
+		return run_cp_mv_cmd(args, force);
 
 	size_t n = 0;
 	char **tcmd = (char **)xnmalloc(3 + args_n + 2, sizeof(char *));
