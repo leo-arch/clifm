@@ -27,6 +27,10 @@ set meta-flag on
 set input-meta on
 set output-meta on
 
+$if mode=vi
+"\e\C-e": emacs-editing-mode
+$endif
+
 $if mode=emacs
 
 # For linux console and RH/Debian xterm
@@ -44,6 +48,7 @@ $if mode=emacs
 # A few keybinds to avoid conflicts with CliFM specific keybinds
 "\C-d":
 "\e\e":
+"\e\C-j": vi-editing-mode
 "\C-r\C-r": re-read-init-file
 "\C-zA": do-lowercase-version
 "\C-zB": do-lowercase-version
