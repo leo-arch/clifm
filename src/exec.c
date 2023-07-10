@@ -2215,6 +2215,30 @@ run_log_cmd(char **args)
 	return EXIT_FAILURE;
 }
 
+#ifdef GENERIC_FS_MONITOR
+/* Update the current list of files if the modification time of the current
+ * directory changed and if the number of files differ. Sometimes, processes
+ * create temporary files (changing modification time) that are immediately
+ * deleted (resulting in the same amount of files), in which case there is no
+ * need to update the list of files (this happens for example with 'git pull',
+ * or with a command along the lines of 'touch file && rm file'). */
+static void
+check_fs_changes(void)
+{
+	if (!workspaces || cur_ws < 0 || cur_ws >= MAX_WS
+	|| !workspaces[cur_ws].path)
+		return;
+
+	int cur_files = count_dir(workspaces[cur_ws].path, 0) - 2;
+	struct stat a;
+
+	if (curdir_mtime != 0 && stat(workspaces[cur_ws].path, &a) != -1
+	&& curdir_mtime != a.st_mtime
+	&& cur_files >= 0 && files != (size_t)cur_files)
+		reload_dirlist();
+}
+#endif /* GENERIC_FS_MONITOR */
+
 /* Take the command entered by the user, already splitted into substrings
  * by parse_input_str(), and call the corresponding function. Return zero
  * in case of success and one in case of error
@@ -2786,12 +2810,7 @@ CHECK_EVENTS:
 	if (watch && event_fd >= 0)
 		read_kqueue();
 #elif defined(GENERIC_FS_MONITOR)
-	int cur_files = count_dir(workspaces[cur_ws].path, 0) - 2;
-	struct stat a;
-	if (curdir_mtime != 0 && stat(workspaces[cur_ws].path, &a) != -1
-	&& curdir_mtime != a.st_mtime
-	&& cur_files >= 0 && files != (size_t)cur_files)
-		reload_dirlist();
+		check_fs_changes();
 #endif /* LINUX_INOTIFY */
 
 	return exit_code;
