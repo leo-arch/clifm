@@ -2352,16 +2352,6 @@ exec_cmd(char **comm)
 	else if (*comm[0] == 'd' && (!comm[0][1] || strcmp(comm[0], "dup") == 0))
 		exit_code = dup_file(comm);
 
-#if defined(__HAIKU__) || defined(__CYGWIN__)
-	else if ((*comm[0] == 'c' || *comm[0] == 'r' || *comm[0] == 'm'
-	|| *comm[0] == 't' || *comm[0] == 'u' || *comm[0] == 'l')
-	&& (strcmp(comm[0], "cp") == 0 || strcmp(comm[0], "rm") == 0
-	|| strcmp(comm[0], "mkdir") == 0 || strcmp(comm[0], "unlink") == 0
-	|| strcmp(comm[0], "touch") == 0 || strcmp(comm[0], "ln") == 0
-	|| strcmp(comm[0], "chmod") == 0))
-		return (exit_code = run_and_refresh(comm, 0));
-#endif /* __HAIKU__ || __CYGWIN__ */
-
 	/*     ############### COPY AND MOVE ##################     */
 	/* c, m, v, vv, and paste commands */
 	else if ((*comm[0] == 'c' && !comm[0][1])
