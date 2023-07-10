@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Jul 9, 2023" "clifm 1.13" "CLIFM Manual"
+.TH "CLIFM" "1" "Jul 10, 2023" "clifm 1.13" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -603,8 +603,8 @@ Each file name will be copied into a temporary file, which will be opened with t
 .sp
 This built-in bulk rename function won't deal with deletions, replacements, file name conflicts and the like. For a smarter alternative use \fBqmv\fR(1).
 .TP
-\fBc\fR, \fBl \fR[\fIe\fR, \fIedit\fR], \fBm\fR, \fBmd\fR, \fBr\fR
-short for the following commands respectively: \fIcp\ \-iRp\fR, \fIln\ \-sn\fR, \fImv\ \-i\fR, \fImkdir\ \-p\fR, and \fIrm\ \-I\fR (for files) or \fIrm\ \-dIr\fR (for directories).
+\fBc\fR, \fBm\fR, \fBmd\fR, \fBr\fR
+short for the following commands respectively: \fIcp\ \-iRp\fR, \fImv\ \-i\fR, \fImkdir\ \-p\fR, and \fIrm\ \-I\fR (for files) or \fIrm\ \-dIr\fR (for directories).
 .sp
 Note that, in case of multiple files, the \fIr\fR command executes \fIrm -dIr\fR if at least one file is a directory.
 .sp
@@ -614,7 +614,7 @@ By default, the \fIc\fR, \fIm\fR, and \fIr\fR commands execute \fBcp\fR(1), \fBm
 
   b) Permanently. Use the \fIcpCmd\fR, \fImvCmd\fR, and \fIrmForce\fR options in the configuration file to permanently set any of these commands to non-interactive mode.
 .sp
-On NetBSD, OpenBSD, and MacOS, \fIgrm\fR (the GNU version of \fIrm\fR) is used if available. If not, the \fIr\fR command executes \fBrm\fR(1) as follows: \fIrm \-drf\fR for directories, and \fIrm \-f\fR for files. Note that, if compiled with _BE_POSIX, the \fI\-d\fR flag is not available, in which case \fIrm \-rf\fR is used instead.
+On NetBSD, OpenBSD, Solaris, and MacOS, \fIgrm\fR (the GNU version of \fIrm\fR) is used if available. If not, the \fIr\fR command executes \fBrm\fR(1) as follows: \fIrm \-drf\fR for directories, and \fIrm \-f\fR for files. Note that, if compiled with _BE_POSIX (or runnin on Solaris), the \fI\-d\fR flag is not available, in which case \fIrm \-rf\fR is used instead.
 .sp
 To use these commands without any of these arguments, or with any other argument you want, use the non-abbreviated (shell) command, for instance, \fIcp\fR instead of \fIc\fR. Of course, you can also create aliases to use you preferred commands, for example, "c='cp \-adp'". Consult the \fIalias\fR command above for more information.
 .sp
@@ -796,6 +796,13 @@ Take a look at the \fIdh\fR command as well.
 .TP
 .B kb, keybinds \fR[\fIlist\fR] [\fIedit\fR [\fIAPP\fR]] [\fIreset\fR] [\fIreadline\fR]
 with no argument (or if the argument is \fIlist\fR), prints the current keyboard codes and their associated functions. To edit the keybindings file, use the \fIedit\fR option (the file will be opened with APP, if specified, or with the default associated application otherwise). If you somehow messed up your keybindings, use the 'reset' option to create a fresh keybindings file with the default values. To list readline keybindings, use the \fIreadline\fR option. Bear in mind that these keybindings are not provided by \fBclifm\fR, but by readline itself, and as such depend on the system settings (they can be customized however via the \fI~/.inputrc\fR file).
+.TP
+.B l, le
+Create (\fIl\fR) or edit (\fIle\fR) symbolic links.
+.sp
+The syntax for the \fIl\fR command is: \fIl TARGET [LINK_NAME]\fR. Note that if \fILINK_NAME\fR is omitted, the symbolic link is created as \fITARGET_BASENAME.link\fR in the current directory.
+.sp
+To edit the target of a symbolic link use the \fIle\fR command followed by the desired link name. The user will be prompted to enter a new link target, using the current one as template.
 .TP
 .B ll, lv \fR[\fIon\fR, \fIoff\fR]
 Toggle long/detail view mode
