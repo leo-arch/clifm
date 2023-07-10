@@ -116,7 +116,7 @@ Besides common file operations such as copy, move, remove, etc., _clifm_ provide
   - [Files encryption/decryption (plugin)](https://github.com/leo-arch/clifm/wiki/Advanced#plugins)
   - [Copy files to your smart phone (plugin)](https://github.com/leo-arch/clifm/wiki/Advanced#plugins)
   - [Archiving and compression](https://github.com/leo-arch/clifm/wiki/Advanced#archives) support (including Zstandard and ISO 9660)
-  - [Symlinks editor](https://github.com/leo-arch/clifm/wiki/Introduction#c-l-e-edit-m-md-r)
+  - [Symlinks editor](https://github.com/leo-arch/clifm/wiki/Introduction#l-le)
   - File permissions/ownership editor via the [`pc`](https://github.com/leo-arch/clifm/wiki/Introduction#pc) and [`oc`](https://github.com/leo-arch/clifm/wiki/Introduction#oc) commands respectively 
   - [Remote file systems management](https://github.com/leo-arch/clifm/wiki/Introduction#net)
   - [Mount/unmount storage devices](https://github.com/leo-arch/clifm/wiki/Introduction#media)
