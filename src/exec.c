@@ -2363,7 +2363,7 @@ exec_cmd(char **comm)
 #endif /* __HAIKU__ || __CYGWIN__ */
 
 	/*     ############### COPY AND MOVE ##################     */
-	/* c, m, v, vv, or p, paste commands */
+	/* c, m, v, vv, and paste commands */
 	else if ((*comm[0] == 'c' && !comm[0][1])
 
 	|| (*comm[0] == 'm' && !comm[0][1])
@@ -2451,27 +2451,25 @@ exec_cmd(char **comm)
 		goto CHECK_EVENTS;
 	}
 
-	/*  ############# SOME SHELL CMD WRAPPERS ###############  */
+	/*  ########## R and MD commands (SHELL CMD WRAPPERS) ############  */
 	else if (strcmp(comm[0], "r") == 0 || strcmp(comm[0], "md") == 0) {
 		/* This help is only for c, m, r, and md commands */
 		if (comm[1] && IS_HELP(comm[1])) {
 			puts(_(WRAPPERS_USAGE)); return EXIT_SUCCESS;
 		}
 
-		if (*comm[0] == 'r' && !comm[0][1]) {
+		if (*comm[0] == 'r') {
 			exit_code = remove_file(comm);
 			goto CHECK_EVENTS;
 		}
 
-		if (*comm[0] == 'm' && comm[0][1] == 'd' && !comm[0][2]) {
-			comm[0] = (char *)xrealloc(comm[0], 9 * sizeof(char));
-			/* -p is POSIX: it should be there for all mkdir implementations. */
-			xstrsncpy(comm[0], "mkdir -p", 9);
+		comm[0] = (char *)xrealloc(comm[0], 9 * sizeof(char));
+		/* -p is POSIX: it should be there for all mkdir implementations. */
+		xstrsncpy(comm[0], "mkdir -p", 9);
 
-			kbind_busy = 1;
-			exit_code = run_and_refresh(comm, 0);
-			kbind_busy = 0;
-		}
+		kbind_busy = 1;
+		exit_code = run_and_refresh(comm, 0);
+		kbind_busy = 0;
 	}
 
 	/*    ########### TOGGLE LONG VIEW ##################     */

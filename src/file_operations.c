@@ -1611,7 +1611,16 @@ symlink_file(char **args)
 		}
 	}
 
-	if (symlinkat(target, XAT_FDCWD, link_name) == -1) {
+	char *abs_path = normalize_path(target, strlen(target));
+	if (!abs_path) {
+		xerror(_("link: %s: Error getting absolute path\n"), target);
+		return EXIT_FAILURE;
+	}
+
+	int ret = symlinkat(abs_path, XAT_FDCWD, link_name);
+	free(abs_path);
+
+	if (ret == -1) {
 		xerror(_("link: Cannot create symbolic link '%s': %s\n"),
 			link_name, strerror(errno));
 		return EXIT_FAILURE;
