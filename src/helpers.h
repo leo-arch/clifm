@@ -93,20 +93,24 @@
 #  define LINUX_INOTIFY
 # else
 #  include <stdint.h> /* uint8_t */
-# endif /* USE_GENERIC_FS_MONITOR */
+# endif /* !USE_GENERIC_FS_MONITOR */
 #elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) \
 || defined(__DragonFly__)
 # include <sys/types.h>
-# include <sys/event.h>
 # include <sys/time.h>
 # include <sys/param.h>
 # include <sys/syslimits.h>
-# define BSD_KQUEUE
+# ifndef USE_GENERIC_FS_MONITOR
+#  include <sys/event.h>
+#  define BSD_KQUEUE
+# endif /* !USE_GENERIC_FS_MONITOR */
 #elif defined(__APPLE__)
 # include <sys/types.h>
-# include <sys/event.h>
 # include <sys/time.h>
-# define BSD_KQUEUE
+# ifndef USE_GENERIC_FS_MONITOR
+#  include <sys/event.h>
+#  define BSD_KQUEUE
+# endif /* !USE_GENERIC_FS_MONITOR */
 #elif defined(__sun) || defined(__CYGWIN__)
 # include <sys/types.h>
 # include <sys/time.h>
