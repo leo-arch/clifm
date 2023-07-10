@@ -2786,9 +2786,11 @@ CHECK_EVENTS:
 	if (watch && event_fd >= 0)
 		read_kqueue();
 #elif defined(GENERIC_FS_MONITOR)
+	int cur_files = count_dir(workspaces[cur_ws].path, 0) - 2;
 	struct stat a;
 	if (curdir_mtime != 0 && stat(workspaces[cur_ws].path, &a) != -1
-	&& curdir_mtime != a.st_mtime)
+	&& curdir_mtime != a.st_mtime
+	&& cur_files >= 0 && files != (size_t)cur_files)
 		reload_dirlist();
 #endif /* LINUX_INOTIFY */
 

@@ -87,9 +87,13 @@
 #if defined(__linux__)
 # include <linux/version.h>
 # include <linux/limits.h>
-# include <sys/inotify.h>
 # include <sys/types.h>
-# define LINUX_INOTIFY
+# ifndef USE_GENERIC_FS_MONITOR
+#  include <sys/inotify.h>
+#  define LINUX_INOTIFY
+# else
+#  include <stdint.h> /* uint8_t */
+# endif /* USE_GENERIC_FS_MONITOR */
 #elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) \
 || defined(__DragonFly__)
 # include <sys/types.h>
@@ -154,7 +158,7 @@ void *__dso_handle;
 #  define PATH_MAX 4096
 # else
 #  define PATH_MAX 1024
-# endif /* __linux */
+# endif /* __linux__ */
 #endif /* PATH_MAX */
 
 #ifndef HOST_NAME_MAX
