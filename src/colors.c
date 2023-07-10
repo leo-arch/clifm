@@ -883,7 +883,6 @@ reset_iface_colors(void)
 	*hr_c = '\0';
 	*hs_c = '\0';
 	*hv_c = '\0';
-//	*hw_c = '\0';
 
 	*sb_c = '\0';
 	*sc_c = '\0';
@@ -1633,7 +1632,6 @@ set_default_colors(void)
 	if (!*hr_c) xstrsncpy(hr_c, DEF_HR_C, sizeof(hr_c));
 	if (!*hs_c) xstrsncpy(hs_c, DEF_HS_C, sizeof(hs_c));
 	if (!*hv_c) xstrsncpy(hv_c, DEF_HV_C, sizeof(hv_c));
-//	if (!*hw_c) xstrsncpy(hw_c, DEF_HW_C, sizeof(hb_c));
 	if (!*tt_c) xstrsncpy(tt_c, DEF_TT_C, sizeof(tt_c));
 
 	if (!*sb_c) xstrsncpy(sb_c, DEF_SB_C, sizeof(sb_c));
@@ -1671,8 +1669,6 @@ set_default_colors(void)
 	if (!*wp_c) xstrsncpy(wp_c, DEF_WP_C, sizeof(wp_c));
 	if (!*xs_c) xstrsncpy(xs_c, DEF_XS_C, sizeof(xs_c));
 	if (!*xf_c) xstrsncpy(xf_c, DEF_XF_C, sizeof(xf_c));
-
-//	if (!*hw_c) xstrsncpy(hw_c, wp_c, sizeof(hw_c));
 
 	if (!*ws1_c) xstrsncpy(ws1_c, DEF_WS1_C, sizeof(ws1_c));
 	if (!*ws2_c) xstrsncpy(ws2_c, DEF_WS2_C, sizeof(ws2_c));
@@ -2288,7 +2284,6 @@ disable_bold(void)
 	remove_bold_attr(hr_c);
 	remove_bold_attr(hs_c);
 	remove_bold_attr(hv_c);
-//	remove_bold_attr(hw_c);
 
 	/* File properties */
 	remove_bold_attr(dd_c);

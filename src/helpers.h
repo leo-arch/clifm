@@ -1631,7 +1631,6 @@ extern char
 	hr_c[MAX_COLOR], /* Redirection > */
 	hs_c[MAX_COLOR], /* Process separators | & ; */
 	hv_c[MAX_COLOR], /* Variables $ */
-//	hw_c[MAX_COLOR], /* Wrong, non-existent command name */
 
 	/* File properties */
 	dr_c[MAX_COLOR],  /* Read */

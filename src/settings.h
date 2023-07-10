@@ -190,12 +190,6 @@ xf=1;31:xs=0;32:"
 #define DEF_SIZE_SHADES_256 "2,197-2,79,77,228,215,203"
 #define DEF_SIZE_SHADES_8   "1,31-2,32,33,31"
 
-/* This one is purely internal: cur_color is set to this value when
- * entering the warning prompt, so that that we can check cur_color
- * anytime to know whether we are in the warning prompt or not */
-//#define DEF_HW_C "\x1b[00;31m"
-//#define DEF_HW_C DEF_WP_C
-
 #define DEF_DIR_ICO_C "\x1b[0;33m"
 
 /* Characters used to classify files when running colorless and classify
