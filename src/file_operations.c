@@ -1765,11 +1765,6 @@ cp_mv_file(char **args, const int copy_and_rename, const int force)
 	&& (!args[0][2] || args[0][2] == ' '))
 		deselect_all();
 
-#ifdef NO_FS_EVENTS_MONITOR
-	if (conf.autols == 1)
-		reload_dirlist();
-#endif /* NO_FS_EVENTS_MONITOR */
-
 	return EXIT_SUCCESS;
 }
 
@@ -2181,11 +2176,6 @@ bulk_rename(char **args)
 	}
 	fclose(fp);
 
-#ifdef NO_FS_EVENTS_MONITOR
-	if (conf.autols == 1)
-		reload_dirlist();
-#endif /* NO_FS_EVENTS_MONITOR */
-
 	return exit_status;
 
 ERROR:
@@ -2319,11 +2309,6 @@ batch_link(char **args)
 				ptr ? ptr : tmp, strerror(errno));
 		}
 	}
-
-#ifdef NO_FS_EVENTS_MONITOR
-	if (exit_status == EXIT_SUCCESS && conf.autols)
-		reload_dirlist();
-#endif /* NO_FS_EVENTS_MONITOR */
 
 	free(suffix);
 	return exit_status;

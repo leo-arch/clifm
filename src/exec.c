@@ -243,12 +243,6 @@ run_and_refresh(char **cmd, const int skip_force)
 		save_sel();
 	}
 
-#ifdef NO_FS_EVENTS_MONITOR
-	if (conf.autols == 1 && cmd[1] && strcmp(cmd[1], "--help") != 0
-	&& strcmp(cmd[1], "--version") != 0)
-		reload_dirlist();
-#endif /* NO_FS_EVENTS_MONITOR */
-
 	return EXIT_SUCCESS;
 }
 
@@ -2457,9 +2451,8 @@ exec_cmd(char **comm)
 		/* -p is POSIX: it should be there for all mkdir implementations. */
 		xstrsncpy(comm[0], "mkdir -p", 9);
 
-		kbind_busy = 1;
-		exit_code = run_and_refresh(comm, 0);
-		kbind_busy = 0;
+		if ((exit_code = run_shell_cmd(comm)) == EXIT_FAILURE)
+			return EXIT_FAILURE;
 	}
 
 	/*    ########### TOGGLE LONG VIEW ##################     */

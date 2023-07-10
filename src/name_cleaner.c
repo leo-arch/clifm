@@ -41,9 +41,6 @@
 #include "aux.h"
 #include "file_operations.h"
 #include "history.h"
-#ifdef NO_FS_EVENTS_MONITOR
-# include "listing.h" /* reload_dirlist() */
-#endif /* NO_FS_EVENTS_MONITOR */
 #include "messages.h"
 #include "misc.h"
 #include "cleaner_table.h"
@@ -682,16 +679,6 @@ CONFIRM:
 		_err(ERR_NO_LOG, PRINT_PROMPT, _("%s: %d file(s) bleached\n"),
 			FUNC_NAME, total_rename);
 	}
-
-#ifdef NO_FS_EVENTS_MONITOR
-	if (exit_status == EXIT_FAILURE)
-		return EXIT_FAILURE;
-	if (conf.autols == 1)
-		reload_dirlist();
-	return EXIT_SUCCESS;
-#else
-	return exit_status;
-#endif /* NO_FS_EVENTS_MONITOR */
 }
 
 #else
