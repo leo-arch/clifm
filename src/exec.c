@@ -43,6 +43,9 @@ typedef char *rl_cpvfunc_t;
 # include <readline/readline.h>
 #endif /* __OpenBSD__ */
 
+#ifdef __TINYC__
+# undef CHAR_MAX /* Silence redefinition error */
+#endif
 #include <limits.h>
 
 #include "actions.h"

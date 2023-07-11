@@ -72,7 +72,7 @@ extern "C" {
 # define utf8_pure
 # define utf8_restrict __restrict
 # define utf8_weak __inline
-#elif defined(__clang__) || defined(__GNUC__)
+#elif defined(__clang__) || defined(__GNUC__) || defined(__TINYC__)
 # define utf8_nonnull __attribute__((nonnull))
 # define utf8_pure __attribute__((pure))
 # define utf8_restrict __restrict__

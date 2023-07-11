@@ -45,6 +45,9 @@
 #if defined(LINUX_FILE_ATTRS)
 # include <linux/fs.h> /* FS_IMMUTABLE_FL */
 # include <sys/ioctl.h> /* ioctl(3) */
+# ifdef __TINYC__
+#  undef SYNC_FILE_RANGE_WRITE_AND_WAIT /* Silence redefinition error */
+# endif
 # include <fcntl.h> /* O_RDONLY */
 #endif /* LINUX_FILE_ATTRS */
 

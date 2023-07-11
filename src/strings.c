@@ -41,6 +41,7 @@
 #include <time.h>
 #include <wchar.h>
 #if !defined(__HAIKU__) && !defined(__OpenBSD__) && !defined(__ANDROID__)
+# define HAVE_WORDEXP
 # include <wordexp.h>
 #endif
 #include <limits.h>
@@ -192,7 +193,7 @@ xstrrpbrk(char *s, const char *accept)
 
 #if (defined(__linux__) || defined(__CYGWIN__)) && defined(_BE_POSIX)
 /* strcasestr(3) is a GNU extension on Linux. If GNU extensions are not
- * available, let's use this as replacement */
+ * available, let's use this as replacement. */
 char *
 xstrcasestr(char *a, char *b)
 {
@@ -224,7 +225,7 @@ xstrcasestr(char *a, char *b)
 }
 #endif /* (__linux__ || __CYGWIN__) && _BE_POSIX */
 
-/* Just a strlen that sets a read limit in case of non-null terminated string */
+/* Just a strlen that sets a read limit in case of non-null terminated string. */
 size_t
 xstrnlen(const char *restrict s)
 {
@@ -271,8 +272,8 @@ xstrncat(char *restrict dst, const size_t dst_len, const char *restrict src,
  */
 
 /* Compare S1 and S2 as strings holding indices/version numbers,
-   returning less than, equal to or greater than zero if S1 is less than,
-   equal to or greater than S2 (for more info, see the texinfo doc) */
+ * returning less than, equal to or greater than zero if S1 is less than,
+ * equal to or greater than S2 (for more info, see the texinfo doc). */
 int
 xstrverscmp(const char *s1, const char *s2)
 {
@@ -380,7 +381,7 @@ xstrverscmp(const char *s1, const char *s2)
 	}
 }
 
-/* A strlen implementation able to handle wide chars */
+/* A strlen implementation able to handle wide chars. */
 size_t
 wc_xstrlen(const char *restrict str)
 {
@@ -458,7 +459,7 @@ replace_ctrl_chars(const char *name)
 
 /* Returns the index of the first appearance of c in str, if any, and
  * -1 if c was not found or if no str. NOTE: Same thing as strchr(),
- * except that returns an index, not a pointer */
+ * except that returns an index, not a pointer. */
 int
 strcntchr(const char *str, const char c)
 {
@@ -477,8 +478,8 @@ strcntchr(const char *str, const char c)
 	return (-1);
 }
 
-/* Returns the index of the last appearance of c in str, if any, and
- * -1 if c was not found or if no str */
+/* Returns the index of the last appearance of C in STR, if any, and
+ * -1 if C was not found or STR is NULL. */
 int
 strcntchrlst(const char *str, const char c)
 {
@@ -605,7 +606,7 @@ replace_substr(const char *haystack, const char *needle, char *rep)
 	return new_str;
 }
 
-/* Generate a random string of LEN bytes using characters from CHARSET */
+/* Generate a random string of LEN bytes using characters from CHARSET. */
 char *
 gen_rand_str(const size_t len)
 {
@@ -1096,7 +1097,7 @@ check_shell_functions(const char *str)
 }
 
 /* Check whether STR is an internal command with a fused parameter (CMDNUMBER).
- * Returns EXIT_SUCCESS if true or EXIT_FAILURE otherwise */
+ * Returns EXIT_SUCCESS if true or EXIT_FAILURE otherwise. */
 static int
 is_fused_param(char *str)
 {
@@ -1865,7 +1866,7 @@ expand_glob(char ***substr, const int *glob_array, const size_t glob_n)
 	return 0;
 }
 
-#if !defined(__HAIKU__) && !defined(__OpenBSD__) && !defined(__ANDROID__)
+#ifdef HAVE_WORDEXP
 static int
 expand_word(char ***substr, const int *word_array, const size_t word_n)
 {
@@ -1950,7 +1951,7 @@ expand_word(char ***substr, const int *word_array, const size_t word_n)
 
 	return 0;
 }
-#endif /* !__HAIKU__ && !__OpenBSD__ && !__ANDROID__ */
+#endif /* HAVE_WORDEXP */
 
 static size_t
 check_ranges(char ***substr, int **range_array)
@@ -2667,10 +2668,10 @@ parse_input_str(char *str)
 	int *glob_array = (int *)xnmalloc(INT_ARRAY_MAX, sizeof(int));
 	size_t glob_n = 0;
 
-#if !defined(__HAIKU__) && !defined(__OpenBSD__) && !defined(__ANDROID__)
+#ifdef HAVE_WORDEXP
 	int *word_array = (int *)xnmalloc(INT_ARRAY_MAX, sizeof(int));
 	size_t word_n = 0;
-#endif /* !__HAIKU__ && !__OpenBSD__ && !__ANDROID__ */
+#endif /* HAVE_WORDEXP */
 
 	for (i = 0; substr[i]; i++) {
 		if ((is_action == 1 && i == 0) || is_quoted_word(i))
@@ -2691,10 +2692,10 @@ parse_input_str(char *str)
 		if (substr[0][0] == '/' && i == 0)
 			continue;
 
-#if !defined(__HAIKU__) && !defined(__OpenBSD__) && !defined(__ANDROID__)
+#ifdef HAVE_WORDEXP
 		/* Let's make wordexp(3) ignore escaped words. */
 		int is_escaped = strchr(substr[i], '\\') ? 1 : 0;
-#endif /* !__HAIKU__ && !OpenBSD && !__ANDROID__ */
+#endif /* HAVE_WORDEXP */
 
 		size_t j = 0;
 		for (j = 0; substr[i][j]; j++) {
@@ -2708,7 +2709,7 @@ parse_input_str(char *str)
 				}
 			}
 
-#if !defined(__HAIKU__) && !defined(__OpenBSD__) && !defined(__ANDROID__)
+#ifdef HAVE_WORDEXP
 			/* Command substitution, tilde, and environment variables
 			 * expansion is made by wordexp(3) */
 			if (is_escaped == 0 && IS_WORD(substr[i][j], substr[i][j + 1])) {
@@ -2719,7 +2720,7 @@ parse_input_str(char *str)
 					word_n++;
 				}
 			}
-#endif /* !__HAIKU__ && !OpenBSD && !__ANDROID__ */
+#endif /* HAVE_WORDEXP */
 		}
 	}
 
@@ -2738,14 +2739,14 @@ parse_input_str(char *str)
 		 * #    3.2) COMMAND & PARAMETER SUBSTITUTION    #
 		 * ############################################### */
 
-#if !defined(__HAIKU__) && !defined(__OpenBSD__) && !defined(__ANDROID__)
+#ifdef HAVE_WORDEXP
 	if (word_n > 0) {
 		if (expand_word(&substr, word_array, word_n) == -1)
 			return (char **)NULL;
 	}
 
 	free(word_array);
-#endif /* !__HAIKU__ && !__OpenBSD && !__ANDROID__ */
+#endif /* HAVE_WORDEXP */
 
 
 			/* #######################################

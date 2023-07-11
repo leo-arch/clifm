@@ -29,7 +29,7 @@
 #include <readline/readline.h> /* tilde_expand() */
 #include <string.h>
 #include <unistd.h>
-#include <limits.h>
+//#include <limits.h>
 
 #include "aux.h"
 #include "bookmarks.h"

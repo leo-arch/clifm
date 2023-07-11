@@ -50,6 +50,13 @@
 # endif
 #endif
 
+#ifdef __TINYC__
+# define __STDC_NO_VLA__ 1
+/* Compilation fails on TinyC since 2021 due to regex.h.
+ * See https://www.mail-archive.com/bug-gnulib@gnu.org/msg41564.html */
+//void *__dso_handle;
+#endif /* __TINYC__ */
+
 /* Setting GLOB_BRACE to ZERO disables support for GLOB_BRACE if not
  * available on current platform */
 #if !defined(__TINYC__) && !defined(GLOB_BRACE)
@@ -79,7 +86,8 @@
 
 #ifndef _NO_GETTEXT
 # include <libintl.h>
-#endif
+#endif /* !_NO_GETTEXT*/
+
 #include <regex.h>
 #include <stdlib.h>
 #include <sys/stat.h> /* S_BLKSIZE */
@@ -147,13 +155,6 @@
 #define LICENSE "GPL2+"
 #define COLORS_REPO "https://github.com/leo-arch/clifm-colors"
 
-#if defined(__TINYC__)
-//# define __STDC_NO_VLA__ 1
-/* Compilation fails on TinyC since 2021 due to regex.h.
- * See https://www.mail-archive.com/bug-gnulib@gnu.org/msg41564.html */
-void *__dso_handle;
-#endif /* __TINYC__ */
-
 #define EXIT_SUCCESS 0
 #define EXIT_FAILURE 1
 
@@ -163,7 +164,7 @@ void *__dso_handle;
 # else
 #  define PATH_MAX 1024
 # endif /* __linux__ */
-#endif /* PATH_MAX */
+#endif /* !PATH_MAX */
 
 #ifndef HOST_NAME_MAX
 # if defined(__ANDROID__)
@@ -175,12 +176,12 @@ void *__dso_handle;
 
 #ifndef NAME_MAX
 # define NAME_MAX 255
-#endif
+#endif /* !NAME_MAX */
 
 /* Used by FILE_SIZE and FILE_SIZE_PTR macros to calculate file sizes */
 #ifndef S_BLKSIZE
 # define S_BLKSIZE 512 /* Not defined in Termux */
-#endif
+#endif /* !S_BLKSIZE */
 
 /*#define CMD_LEN_MAX (PATH_MAX + ((NAME_MAX + 1) << 1)) */
 #ifndef ARG_MAX
@@ -189,7 +190,7 @@ void *__dso_handle;
 # else
 #  define ARG_MAX 512 * 1024
 # endif /* __linux__ */
-#endif /* ARG_MAX */
+#endif /* !ARG_MAX */
 
 /* _GNU_SOURCE is only defined if __linux__ is defined and _BE_POSIX is not defined */
 #ifdef _GNU_SOURCE
@@ -206,7 +207,7 @@ void *__dso_handle;
 #endif /* _GNU_SOURCE */
 
 /* Because capability.h is deprecated in BSD */
-#if __linux__
+#ifdef __linux__
 # if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 24)
 #  define _LINUX_CAP
 # endif /* LINUX_VERSION (2.6.24)*/
@@ -218,7 +219,7 @@ void *__dso_handle;
 # define LINUX_FILE_ATTRS
 #endif
 
-#if defined(__sun)
+#ifdef __sun
 /* Solaris/Illumos defines AT_FDCWD as 0xffd19553 (-3041965); without the int
  * cast, the value gets interpreted as uint (4291925331), which throws compiler
  * warnings. See https://github.com/python/cpython/issues/60169 */
@@ -253,6 +254,7 @@ void *__dso_handle;
 # define EVENT_BUF_LEN (EVENT_SIZE * NUM_EVENT_SLOTS)
 extern int inotify_fd, inotify_wd;
 extern unsigned int INOTIFY_MASK;
+extern int watch;
 #elif defined(BSD_KQUEUE)
 # define NUM_EVENT_SLOTS 10
 # define NUM_EVENT_FDS   10
@@ -260,11 +262,11 @@ extern int kq, event_fd;
 extern struct kevent events_to_monitor[];
 extern unsigned int KQUEUE_FFLAGS;
 extern struct timespec timeout;
+extern int watch;
 #else
 # define GENERIC_FS_MONITOR
 extern time_t curdir_mtime;
 #endif /* LINUX_INOTIFY */
-extern int watch;
 
 /* The following flags are used via an integer (FLAGS). If an integer has
  * 4 bytes, then we can use a total of 32 flags (0-31)

@@ -29,6 +29,9 @@
 #include <string.h>
 #include <unistd.h>
 #include <readline/readline.h>
+#ifdef __TINYC__
+# undef CHAR_MAX /* Silence redefinition error */
+#endif
 #include <limits.h>
 #include <fcntl.h>
 #include <dirent.h>
