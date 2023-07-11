@@ -1532,7 +1532,7 @@ END:
  * instead of just 'p', symbolic links are followed and directories size is
  * calculated recursively. */
 static int
-get_properties(char *filename, const int follow_link)
+do_stat(char *filename, const int follow_link)
 {
 	if (!filename || !*filename)
 		return EXIT_FAILURE;
@@ -1575,6 +1575,7 @@ get_properties(char *filename, const int follow_link)
 	return EXIT_SUCCESS;
 }
 
+/* Print file properties (in a stat(1) fashion) for all files passed via ARGS. */
 int
 properties_function(char **args, const int follow_link)
 {
@@ -1597,7 +1598,7 @@ properties_function(char **args, const int follow_link)
 			args[i] = deq_file;
 		}
 
-		if (get_properties(args[i], follow_link) != 0)
+		if (do_stat(args[i], follow_link) != 0)
 			exit_status = EXIT_FAILURE;
 	}
 
