@@ -294,7 +294,7 @@ init_autocmd_opts(void)
 }
 
 /* Take an autocmd line (from the config file) and store parameters
- * in a struct */
+ * in a struct. */
 void
 parse_autocmd_line(char *cmd)
 {

@@ -1226,7 +1226,7 @@ print_file_details(char *filename, const struct stat *attr, const char file_type
 {
 #if !defined(LINUX_FILE_ATTRS) && !defined(_LINUX_XATTR)
 	UNUSED(filename);
-#endif
+#endif /* !LINUX_FILE_ATTRS && ! _LINUX_XATTR */
 
 	struct passwd *owner = getpwuid(attr->st_uid);
 	struct group *group = getgrgid(attr->st_gid);

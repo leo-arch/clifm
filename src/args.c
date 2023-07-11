@@ -1169,7 +1169,7 @@ set_vt100(void)
 }
 
 /* Evaluate command line arguments, if any, and change initial variables to
- * its corresponding value. */
+ * their corresponding values. */
 void
 parse_cmdline_args(const int argc, char **argv)
 {

@@ -26,9 +26,9 @@
 #define PROPERTIES_H
 
 #ifdef LINUX_FILE_ATTRS
-/* On some Linux distros, some of these flags are not defined (in linux/fs.h)
- * On Debian, for example, FS_DAX_FL, FS_CASEFOLD_FL, and FS_VERITY_FL are undefined
- * Let's define them ourselves */
+/* On some Linux distros, some of these flags are not defined (in linux/fs.h).
+ * On Debian, for example, FS_DAX_FL, FS_CASEFOLD_FL, and FS_VERITY_FL are undefined.
+ * Let's define them ourselves. */
 # define XFS_SECRM_FL        0x00000001 /* Secure deletion */
 # define XFS_UNRM_FL         0x00000002 /* Undelete */
 # define XFS_COMPR_FL        0x00000004 /* Compress file */

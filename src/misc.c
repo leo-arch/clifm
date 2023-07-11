@@ -30,6 +30,7 @@
 #include "helpers.h"
 
 #include <errno.h>
+#include <fcntl.h> /* AT_FDCWD macro */
 #include <signal.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -1134,7 +1135,7 @@ alias_import(char *file)
 
 /* Store last visited directory for the restore last path and the
  * cd on quit functions. Current workspace/path will be marked with an
- * asterisk. It will be read at startup by get_last_path */
+ * asterisk. It will be read at startup by get_last_path(). */
 void
 save_last_path(void)
 {
@@ -1170,8 +1171,7 @@ save_last_path(void)
 		char *cmd[] = {"cp", "-p", last_dir, last_dir_tmp, NULL};
 		launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	} else { /* If not cd on quit, remove the file. */
-		char *cmd[] = {"rm", "-f", "--", last_dir_tmp, NULL};
-		launch_execv(cmd, FOREGROUND, E_NOFLAG);
+		unlinkat(XAT_FDCWD, last_dir_tmp, 0);
 	}
 
 	free(last_dir_tmp);
