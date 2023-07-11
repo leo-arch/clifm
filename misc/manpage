@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Jul 10, 2023" "clifm 1.13" "CLIFM Manual"
+.TH "CLIFM" "1" "Jul 11, 2023" "clifm 1.13" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -1246,7 +1246,11 @@ T}	All .txt files (CWD)
 
 .SH 6. KEYBOARD SHORTCUTS
 .TP
-\fBRight\fR, \fBC\-f:\fR Accept the entire current suggestion
+\fBCtrl-Alt-j:\fR Switch to vi editing mode
+.TP
+\fBCtrl-Alt-e:\fR Switch back to emacs editing mode (default)
+.TP
+\fBRight\fR, \fBCtrl\-f:\fR Accept the entire current suggestion
 .TP
 \fBAlt-Right\fR, \fBAlt\-f:\fR Accept only the first word of the current suggestion (up to first slash or space)
 .TP
@@ -1262,13 +1266,13 @@ T}	All .txt files (CWD)
 .TP
 \fBAlt\-,:\fR Toggle list only directories on/off
 .TP
-\fBC\-Alt\-l:\fR Toggle max file name length on/off
+\fBCtrl\-Alt\-l:\fR Toggle max file name length on/off
 .TP
-\fBC\-Alt\-i:\fR, \fBAlt\-TAB:\fR Toggle disk usage analyzer on/off
+\fBCtrl\-Alt\-i:\fR, \fBAlt\-TAB:\fR Toggle disk usage analyzer on/off
 .TP
 \fBAlt\-w:\fR Toggle full path file names in virtual directories
 .TP
-\fBC\-l:\fR Refresh the screen (reprint the list of files in the current directory)
+\fBCtrl\-l:\fR Refresh the screen (reprint the list of files in the current directory)
 .TP
 \fBAlt\-t:\fR Clear program messages
 .TP
@@ -1302,39 +1306,39 @@ T}	All .txt files (CWD)
 .TP
 \fBAlt\-e, Home:\fR Change to home directory
 .TP
-\fBAlt\-u, S\-Up:\fR Change to parent directory
+\fBAlt\-u, Shift\-Up:\fR Change to parent directory
 .TP
-\fBAlt\-j, S\-Left:\fR Change to previous visited directory
+\fBAlt\-j, Shift\-Left:\fR Change to previous visited directory
 .TP
-\fBAlt\-k, S\-Right:\fR Change to next visited directory
+\fBAlt\-k, Shift\-Right:\fR Change to next visited directory
 .TP
-\fBC\-Alt\-j:\fR Change to first visited directory
+\fBCtrl\-Alt\-j:\fR Change to first visited directory
 .TP
-\fBC\-Alt\-k:\fR Change to last visited directory
+\fBCtrl\-Alt\-k:\fR Change to last visited directory
 .TP
-\fBC\-Alt\-o:\fR Switch to previous profile
+\fBCtrl\-Alt\-o:\fR Switch to previous profile
 .TP
-\fBC\-Alt\-p:\fR Switch to next profile
+\fBCtrl\-Alt\-p:\fR Switch to next profile
 .TP
-\fBC\-Alt\-a:\fR Archive selected files
+\fBCtrl\-Alt\-a:\fR Archive selected files
 .TP
-\fBC\-Alt\-e:\fR Export selected files
+\fBCtrl\-Alt\-e:\fR Export selected files
 .TP
-\fBC\-Alt\-r:\fR Rename selected files
+\fBCtrl\-Alt\-r:\fR Rename selected files
 .TP
-\fBC\-Alt\-d:\fR Remove selected files
+\fBCtrl\-Alt\-d:\fR Remove selected files
 .TP
-\fBC\-Alt\-t:\fR Trash selected files
+\fBCtrl\-Alt\-t:\fR Trash selected files
 .TP
-\fBC\-Alt\-u:\fR Restore trashed files
+\fBCtrl\-Alt\-u:\fR Restore trashed files
 .TP
-\fBC\-Alt\-b:\fR Bookmark last selected file/directory
+\fBCtrl\-Alt\-b:\fR Bookmark last selected file/directory
 .TP
-\fBC\-Alt\-g:\fR Open/change-to last selected file/directory
+\fBCtrl\-Alt\-g:\fR Open/change-to last selected file/directory
 .TP
-\fBC\-Alt\-n:\fR Move selected files into the current directory
+\fBCtrl\-Alt\-n:\fR Move selected files into the current directory
 .TP
-\fBC\-Alt\-v:\fR Copy selected files into the current directory
+\fBCtrl\-Alt\-v:\fR Copy selected files into the current directory
 .TP
 \fBAlt\-y:\fR Toggle light mode on/off
 .TP
@@ -1342,9 +1346,9 @@ T}	All .txt files (CWD)
 .TP
 \fBAlt\-x:\fR Switch to next sorting method
 .TP
-\fBC\-x:\fR Launch a new instance of \fBclifm\fR
+\fBCtrl\-x:\fR Launch a new instance of \fBclifm\fR
 .TP
-\fBC\-y:\fR Copy the contents of the line buffer to the clipboard \fB(1)\fR
+\fBCtrl\-y:\fR Copy the contents of the line buffer to the clipboard \fB(1)\fR
 .TP
 \fBF1:\fR Go to the manpage
 .TP
@@ -1366,9 +1370,7 @@ T}	All .txt files (CWD)
 .TP
 \fBF12:\fR Quit
 .TP
-NOTE: \fBC\fR stands for Control and \fBS\fR for Shift.
-.TP
-NOTE 2: Some of these keybindings might not work on your console/terminal emulator, depending on your system. Some useful tips on this regard:
+NOTE 1: Some of these keybindings might not work on your console/terminal emulator, depending on your system. Some useful tips on this regard:
 .TP
 \fB(1)\fR This shortcut is bound to the \fIxclip\fR plugin. See the \fBPLUGINS\fR section below for more information.
 .TP

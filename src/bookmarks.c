@@ -29,18 +29,17 @@
 #include <readline/readline.h> /* tilde_expand() */
 #include <string.h>
 #include <unistd.h>
-//#include <limits.h>
 
-#include "aux.h"
-#include "bookmarks.h"
-#include "checks.h"
-#include "exec.h"
-#include "file_operations.h"
-#include "init.h"
-#include "readline.h"
-#include "messages.h"
-#include "listing.h"
-#include "misc.h"
+#include "aux.h" /* xatoi(), normalize_path(), open_fread(), open_fwrite() */
+#include "bookmarks.h" /* bookmarks_function() */
+#include "checks.h" /* is_number() */
+#include "exec.h" /* launch_execv() */
+#include "file_operations.h" /* open_function() */
+#include "init.h" /* load_bookmarks() */
+#include "readline.h" /* rl_no_hist() */
+#include "messages.h" /* STEALTH_DISABLED */
+#include "listing.h" /* reload_dirlist() */
+#include "misc.h" /* _err(), xerror() */
 
 #define NO_BOOKMARKS "bookmarks: No bookmarks\nUse 'bm add dir/ name' \
 to create a bookmark\nTry 'bm --help' for more information"
@@ -741,7 +740,7 @@ del_bookmarks(char **args)
 	return exit_status;
 }
 
-/* Handle bookmarks: run the corresponding function according to CMD */
+/* Handle bookmarks: run the corresponding function according to CMD. */
 int
 bookmarks_function(char **cmd)
 {
