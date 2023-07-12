@@ -2128,6 +2128,7 @@ rl_suggestions(const unsigned char c)
 				zero_offset = 1;
 				goto SUCCESS;
 			}
+
 		/* An alias name could be the same as the beginning of the alias
 		 * defintion, so that this test must always be skipped in case
 		 * of aliases. */
@@ -2179,10 +2180,11 @@ rl_suggestions(const unsigned char c)
 				} else {
 					if (suggestion.printed)
 						clear_suggestion(CS_FREEBUF);
-					if (*(lb + 3) != '-') // Might be --help, let it continue
+					if (*(lb + 3) != '-') /* Might be --help, let it continue */
 						goto FAIL;
 				}
-			} else if (words_num > 3) {
+			} else if (words_num > 5) {
+				/* 5 == 'bm add dir/ name shortcut'*/
 				goto FAIL;
 			}
 		}
@@ -2191,8 +2193,8 @@ rl_suggestions(const unsigned char c)
 		else if (lb[1] == 'd' && lb[2] == ' ' && lb[3]) {
 				if (*(lb + 3) == '/' && !*(lb + 4)) {
 					/* The query string is a single slash: do nothing */
-					if (suggestion.printed)
-						clear_suggestion(CS_FREEBUF);
+//					if (suggestion.printed)
+//						clear_suggestion(CS_FREEBUF);
 					goto FAIL;
 				}
 				if ((printed = check_backdir()) != NO_MATCH)
@@ -2208,8 +2210,8 @@ rl_suggestions(const unsigned char c)
 			if ((printed = check_dirhist(word, wlen)) != NO_MATCH) {
 				goto SUCCESS;
 			} else {
-				if (suggestion.printed)
-					clear_suggestion(CS_FREEBUF);
+//				if (suggestion.printed)
+//					clear_suggestion(CS_FREEBUF);
 				goto FAIL;
 			}
 		}
@@ -2233,8 +2235,8 @@ rl_suggestions(const unsigned char c)
 			if ((printed = check_dirhist(word, wlen)) != NO_MATCH) {
 				goto SUCCESS;
 			} else {
-				if (suggestion.printed)
-					clear_suggestion(CS_FREEBUF);
+//				if (suggestion.printed)
+//					clear_suggestion(CS_FREEBUF);
 				goto FAIL;
 			}
 		}
@@ -2270,8 +2272,8 @@ rl_suggestions(const unsigned char c)
 			if ((printed = check_profiles(word, wlen)) != NO_MATCH) {
 				goto SUCCESS;
 			} else {
-				if (suggestion.printed)
-					clear_suggestion(CS_FREEBUF);
+//				if (suggestion.printed)
+//					clear_suggestion(CS_FREEBUF);
 				goto FAIL;
 			}
 		}
@@ -2612,13 +2614,13 @@ CHECK_FIRST_WORD:
 NO_SUGGESTION:
 	/* Clear current suggestion, if any, only if no escape char is contained
 	 * in the current input sequence. This is mainly to avoid erasing
-	 * the suggestion if moving thought the text via the arrow keys */
+	 * the suggestion if moving thought the text via the arrow keys. */
 	if (suggestion.printed) {
 		if (!strchr(word, _ESC)) {
-			clear_suggestion(CS_FREEBUF);
+//			clear_suggestion(CS_FREEBUF);
 			goto FAIL;
 		} else {
-			/* Go to SUCCESS to avoid removing the suggestion buffer */
+			/* Go to SUCCESS to avoid removing the suggestion buffer. */
 			printed = PARTIAL_MATCH;
 			goto SUCCESS;
 		}
@@ -2669,12 +2671,14 @@ SUCCESS:
 	return EXIT_SUCCESS;
 
 FAIL:
-	suggestion.printed = 0;
+	if (suggestion.printed == 1)
+		clear_suggestion(CS_FREEBUF);
+//	suggestion.printed = 0;
 	free(first_word);
 	free(last_word);
 	last_word = (char *)NULL;
-	free(suggestion_buf);
-	suggestion_buf = (char *)NULL;
+//	free(suggestion_buf);
+//	suggestion_buf = (char *)NULL;
 	return EXIT_FAILURE;
 }
 #else
