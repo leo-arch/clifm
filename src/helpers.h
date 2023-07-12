@@ -183,7 +183,6 @@
 # define S_BLKSIZE 512 /* Not defined in Termux */
 #endif /* !S_BLKSIZE */
 
-/*#define CMD_LEN_MAX (PATH_MAX + ((NAME_MAX + 1) << 1)) */
 #ifndef ARG_MAX
 # ifdef __linux__
 #  define ARG_MAX 128 * 1024
@@ -192,8 +191,7 @@
 # endif /* __linux__ */
 #endif /* !ARG_MAX */
 
-/* _GNU_SOURCE is only defined if __linux__ is defined and _BE_POSIX is not defined */
-#ifdef _GNU_SOURCE
+#if defined(__linux__) && !defined(_BE_POSIX)
 # if (__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 28))
 #  if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
 #   define _STATX
@@ -204,20 +202,13 @@
 #   define _LINUX_XATTR
 #  endif /* LINUX_VERSION (2.4) */
 # endif /* __GLIBC__ */
-#endif /* _GNU_SOURCE */
-
-/* Because capability.h is deprecated in BSD */
-#ifdef __linux__
 # if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 24)
 #  define _LINUX_CAP
 # endif /* LINUX_VERSION (2.6.24)*/
-#endif /* __linux__ */
-
-// NOT SUPPORTED ON TERMUX. NOT SURE ABOUT CYGWIN. CHECK.
-#if defined(__linux__) && !defined(_BE_POSIX) && !defined(__TERMUX__) \
-&& !defined(__CYGWIN__)
-# define LINUX_FILE_ATTRS
-#endif /* __linux && !_BE_POSIX && !__TERMUX__ && !__CYGWIN__ */
+# ifndef __TERMUX__
+#  define LINUX_FILE_ATTRS
+# endif /* !__TERMUX__ */
+#endif /* _GNU_SOURCE */
 
 #ifdef __sun
 /* Solaris/Illumos defines AT_FDCWD as 0xffd19553 (-3041965); without the int

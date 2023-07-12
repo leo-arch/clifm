@@ -568,7 +568,7 @@ const struct cmdslist_t internal_cmds[] = {
 size_t internal_cmds_n = 0;
 
 /* A list of internal commands and fixed parameters for the auto-suggestions
- * system */
+ * system. */
 const struct cmdslist_t param_str[] = {
 	{"actions edit", 12},
 	{"actions list", 12},
@@ -784,8 +784,9 @@ const struct cmdslist_t param_str[] = {
 	{NULL, 0}
 };
 
-#ifdef LINUX_INOTIFY
+#if defined(LINUX_INOTIFY)
 int inotify_fd = UNSET, inotify_wd = UNSET;
+int watch = UNSET;
 unsigned int INOTIFY_MASK =
 	IN_CREATE | IN_DELETE | IN_DELETE_SELF | IN_MOVE | IN_MOVE_SELF
 /*#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 18, 0)
@@ -800,6 +801,7 @@ unsigned int INOTIFY_MASK =
 	;
 #elif defined(BSD_KQUEUE)
 int kq, event_fd = UNSET;
+int watch = UNSET;
 struct kevent events_to_monitor[NUM_EVENT_FDS];
 unsigned int KQUEUE_FFLAGS = NOTE_DELETE | NOTE_EXTEND| NOTE_LINK
 	| NOTE_RENAME | NOTE_REVOKE | NOTE_WRITE;
@@ -807,8 +809,6 @@ struct timespec timeout;
 #elif defined(GENERIC_FS_MONITOR)
 time_t curdir_mtime = 0;
 #endif /* LINUX_INOTIFY */
-
-int watch = UNSET;
 
 #ifdef RUN_CMD
 // Run the command passed via --cmd and exit
@@ -1092,7 +1092,7 @@ main(int argc, char *argv[])
 	init_conf_struct();
 	init_filter();
 	init_msgs();
-#if !defined(_NO_ICONS)
+#ifndef _NO_ICONS
 	init_icons_hashes();
 #endif /* !_NO_ICONS */
 /*	init_file_flags(); */
