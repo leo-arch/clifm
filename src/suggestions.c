@@ -59,7 +59,7 @@ typedef char *rl_cpvfunc_t;
 
 #ifndef _NO_HIGHLIGHT
 # include "highlight.h"
-#endif
+#endif /* !_NO_HIGHLIGHT */
 
 #define NO_MATCH      0
 #define PARTIAL_MATCH 1
@@ -91,7 +91,7 @@ change_word_color(const char *_last_word, const int offset, const char *color)
 	rl_point = bk;
 	fputs("\x1b[?25h", stdout);
 }
-#endif */
+#endif // !_NO_HIGHLIGHT */
 
 static char *
 check_int_cmd_desc(const char *s, const size_t l)

@@ -30,7 +30,7 @@ typedef char *rl_cpvfunc_t;
 #include <ereadline/readline/readline.h>
 #else
 #include <readline/readline.h>
-#endif
+#endif /* __OpenBSD__ */
 
 #include "checks.h"
 

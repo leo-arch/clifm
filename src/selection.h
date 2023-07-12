@@ -28,7 +28,7 @@
 #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) \
 || defined(__DragonFly__)
 # include <sys/ioctl.h>
-#endif
+#endif /* BSD */
 
 __BEGIN_DECLS
 

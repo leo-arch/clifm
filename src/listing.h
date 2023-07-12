@@ -34,7 +34,7 @@ void refresh_screen(void);
 
 #ifndef _NO_ICONS
 void init_icons_hashes(void);
-#endif
+#endif /* !_NO_ICONS */
 
 __END_DECLS
 

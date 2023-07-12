@@ -38,7 +38,7 @@
 
 #ifndef _NO_ARCHIVING
 #include "archives.h"
-#endif
+#endif /* !_NO_ARCHIVING */
 
 #include "aux.h"
 #include "checks.h"

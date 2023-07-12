@@ -44,7 +44,7 @@
 # include "mime.h"
 #else
 # include <unistd.h>
-#endif
+#endif /* !_NO_MAGIC */
 
 #define OP_ISO    1
 #define OP_OTHERS 0

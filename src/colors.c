@@ -688,7 +688,7 @@ END:
 	free(defs);
 	defs = (struct colors_t *)NULL;
 }
-#endif /* CLIFM_SUCKLESS */
+#endif /* !CLIFM_SUCKLESS */
 
 /* Look for the hash HASH in the hash table.
  * Return a pointer to the corresponding color if found or NULL
@@ -1068,7 +1068,7 @@ set_colorscheme(char *arg)
 
 	return EXIT_FAILURE;
 }
-#endif /* CLIFM_SUCKLESS */
+#endif /* !CLIFM_SUCKLESS */
 
 int
 cschemes_function(char **args)
@@ -2236,6 +2236,9 @@ disable_bold(void)
 	remove_bold_attr(nd_c);
 	remove_bold_attr(nf_c);
 	remove_bold_attr(no_c);
+#ifdef __sun
+	remove_bold_attr(oo_c);
+#endif /* __sun */
 	remove_bold_attr(or_c);
 	remove_bold_attr(ow_c);
 	remove_bold_attr(pi_c);

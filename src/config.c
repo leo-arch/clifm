@@ -49,7 +49,7 @@
 /* Only for old log file split. Remove when needed */
 #ifndef _NO_SPLIT_LOG
 # include "history.h" // split_old_log_file()
-#endif
+#endif /* !_NO_SPLIT_LOG */
 ////////////////////
 
 #define DUMP_CONFIG_STR  0
@@ -232,7 +232,7 @@ dump_config(void)
 	n = DEF_SUGGESTIONS;
 	print_config_value("AutoSuggestions", &conf.suggestions, &n,
 		DUMP_CONFIG_BOOL);
-#endif
+#endif /* !_NO_SUGGESTIONS */
 
 	n = DEF_CASE_SENS_DIRJUMP;
 	print_config_value("CaseSensitiveDirjump", &conf.case_sens_dirjump,
@@ -304,12 +304,12 @@ dump_config(void)
 
 	n = DEF_FZF_PREVIEW;
 	print_config_value("FzfPreview", &conf.fzf_preview, &n, DUMP_CONFIG_BOOL);
-#endif
+#endif /* !_NO_FZF */
 
 #ifndef _NO_ICONS
 	n = DEF_ICONS;
 	print_config_value("Icons", &conf.icons, &n, DUMP_CONFIG_BOOL);
-#endif
+#endif /* !_NO_ICONS */
 
 	n = DEF_LIGHT_MODE;
 	print_config_value("LightMode", &conf.light_mode, &n, DUMP_CONFIG_BOOL);
@@ -432,12 +432,12 @@ dump_config(void)
 	s = DEF_SUG_STRATEGY;
 	print_config_value("SuggestionStrategy", conf.suggestion_strategy,
 		s, DUMP_CONFIG_STR);
-#endif
+#endif /* !_NO_SUGGESTIONS */
 #ifndef _NO_HIGHLIGHT
 	n = DEF_HIGHLIGHT;
 	print_config_value("SyntaxHighlighting", &conf.highlight, &n,
 		DUMP_CONFIG_BOOL);
-#endif
+#endif /* !_NO_HIGHLIGHT */
 
 	char *ss = get_tab_comp_mode_str();
 	print_config_value("TabCompletionMode", ss,
@@ -445,7 +445,7 @@ dump_config(void)
 		(bin_flags & FZF_BIN_OK) ? "fzf" : "standard",
 #else
 		"standard",
-#endif
+#endif /* !_NO_FZF */
 		DUMP_CONFIG_STR);
 	free(ss);
 
@@ -461,7 +461,7 @@ dump_config(void)
 #ifndef _NO_TRASH
 	n = DEF_TRASRM;
 	print_config_value("TrashAsRm", &conf.tr_as_rm, &n, DUMP_CONFIG_BOOL);
-#endif
+#endif /* !_NO_TRASH */
 
 	n = DEF_TRIM_NAMES;
 	print_config_value("TrimNames", &conf.trim_names, &n, DUMP_CONFIG_BOOL);
@@ -2520,7 +2520,7 @@ set_tabcomp_mode(const char *line)
 		fzftab = 1; tabmode = SMENU_TAB;
 	}
 }
-#endif /* _NO_FZF */
+#endif /* !_NO_FZF */
 
 static void
 set_starting_path(char *line)
@@ -2602,7 +2602,7 @@ read_config(void)
 		&& strncmp(line, "AutoSuggestions=", 16) == 0) {
 			set_config_bool_value(line + 16, &conf.suggestions);
 		}
-#endif
+#endif /* !_NO_SUGGESTIONS */
 
 		else if (xargs.case_sens_dirjump == UNSET && *line == 'C'
 		&& strncmp(line, "CaseSensitiveDirJump=", 21) == 0) {
@@ -3006,7 +3006,7 @@ read_config(void)
 		&& strncmp(line, "TrashAsRm=", 10) == 0) {
 			set_config_bool_value(line + 10, &conf.tr_as_rm);
 		}
-#endif
+#endif /* !_NO_TRASH */
 
 		else if (xargs.trim_names == UNSET && *line == 'T'
 		&& strncmp(line, "TrimNames=", 10) == 0) {
@@ -3215,7 +3215,7 @@ init_config(void)
 ///////// TEMPORAL CODE
 #ifndef _NO_SPLIT_LOG
 	split_old_log_file();
-#endif
+#endif /* !_NO_SPLIT_LOG */
 ///////////////////////
 
 
@@ -3226,7 +3226,7 @@ init_config(void)
 		read_config();
 #else
 	xstrsncpy(div_line, DEF_DIV_LINE, sizeof(div_line));
-#endif /* CLIFM_SUCKLESS */
+#endif /* !CLIFM_SUCKLESS */
 
 	load_prompts();
 	check_colors();
@@ -3236,7 +3236,7 @@ init_config(void)
 	 * check whether it is present in FZF_DEFAULT_OPTS */
 	if (fzftab && fzf_height_set == 0)
 		fzf_height_set = get_fzf_win_height();
-#endif
+#endif /* !_NO_FZF */
 
 	char *t = getenv("TERM");
 	if (xargs.list_and_quit != 1 && t && *t == 'x'
@@ -3262,7 +3262,7 @@ reset_variables(void)
 	free(trash_files_dir);
 	free(trash_info_dir);
 	trash_dir = trash_files_dir = trash_info_dir = (char *)NULL;
-#endif
+#endif /* !_NO_TRASH */
 
 	free(bm_file);
 	free(msgs_log_file);
@@ -3293,7 +3293,7 @@ reset_variables(void)
 	free(suggestion_buf);
 	free(conf.suggestion_strategy);
 	suggestion_buf = conf.suggestion_strategy = (char *)NULL;
-#endif
+#endif /* !_NO_SUGGESTIONS */
 
 	free(conf.fzftab_options);
 	free(tags_dir);
@@ -3345,7 +3345,7 @@ reset_variables(void)
 	follow_symlinks = UNSET;
 #ifndef _NO_FZF
 	fzftab = UNSET;
-#endif
+#endif /* !_NO_FZF */
 	hist_status = UNSET;
 	int_vars = UNSET;
 	max_files = UNSET;
@@ -3373,7 +3373,7 @@ reset_variables(void)
 	selfile_ok = 1;
 #ifndef _NO_TRASH
 	trash_ok = 1;
-#endif
+#endif /* !_NO_TRASH */
 
 	pmsg = NOMSG;
 }

@@ -307,7 +307,7 @@ xf=1;31:xs=0;32:"
 # define DEF_SUDO_CMD "doas"
 #else
 # define DEF_SUDO_CMD "sudo"
-#endif
+#endif /* __OpenBSD__ */
 #define DEF_SUG_FILETYPE_COLOR 0
 #define DEF_SUG_STRATEGY "ehfj-ac"
 #define DEF_SUGGESTIONS 1
@@ -387,7 +387,7 @@ alt-down:preview-page-down --inline-info --layout=reverse-list \
 # define DEF_TERM_CMD "Terminal"
 #else
 # define DEF_TERM_CMD "xterm -e"
-#endif
+#endif /* __HAIKU__ */
 
 #define FALLBACK_SHELL "/bin/sh"
 
@@ -399,6 +399,6 @@ alt-down:preview-page-down --inline-info --layout=reverse-list \
 # define FALLBACK_OPENER "open"
 #else
 # define FALLBACK_OPENER "xdg-open"
-#endif
+#endif /* __APPLE__ */
 
 #endif /* SETTINGS_H */

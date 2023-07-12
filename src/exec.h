@@ -27,7 +27,7 @@
 
 #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun)
 # include <signal.h>
-#endif
+#endif /* BSD || __sun */
 
 #define EXEC_BG_PROC 0
 #define EXEC_FG_PROC 1

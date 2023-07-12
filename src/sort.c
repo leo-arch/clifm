@@ -30,7 +30,7 @@
 #include <unistd.h>
 #if defined(__OpenBSD__)
 # include <strings.h>
-#endif
+#endif /* __OpenBSD__ */
 
 #include "checks.h"
 #include "aux.h" /* xatoi */
@@ -403,7 +403,7 @@ print_sort_method(void)
 #else
 		printf(_("btime (not available: using 'ctime') %s\n"),
 		    (conf.sort_reverse) ? "[rev]" : ""); break;
-#endif
+#endif /* HAVE_ST_BIRTHTIME || __BSD_VISIBLE || _STATX */
 	case SCTIME:
 		printf(_("ctime %s\n"), (conf.sort_reverse) ? "[rev]" : ""); break;
 	case SMTIME:

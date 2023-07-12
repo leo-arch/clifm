@@ -31,7 +31,7 @@
 #include <readline/readline.h>
 #ifdef __TINYC__
 # undef CHAR_MAX /* Silence redefinition error */
-#endif
+#endif /* __TINYC__ */
 #include <limits.h>
 #include <fcntl.h>
 #include <dirent.h>

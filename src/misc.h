@@ -68,7 +68,7 @@ void read_inotify(void);
 void reset_inotify(void);
 #elif defined(BSD_KQUEUE)
 void read_kqueue(void);
-#endif
+#endif /* LINUX_INOTIFY */
 void set_filter_type(const char);
 /*void refresh_files_list(void); */
 

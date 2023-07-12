@@ -172,7 +172,7 @@ list_files_in_tag(char *name)
 		if (check_tagged_file(name, t[i]->d_name) == 0) {
 #else
 		if (SELFORPARENT(t[i]->d_name) || t[i]->d_type != DT_LNK) {
-#endif
+#endif /* !_DIRENT_HAVE_D_TYPE */
 			free(t[i]);
 			continue;
 		}

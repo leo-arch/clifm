@@ -34,7 +34,7 @@
 
 #if defined(__HAIKU__)
 # include <stdint.h>
-#endif
+#endif /* __HAIKU__ */
 #include <glob.h>
 #include <stdio.h>
 #include <string.h>
@@ -43,7 +43,7 @@
 #if !defined(__HAIKU__) && !defined(__OpenBSD__) && !defined(__ANDROID__)
 # define HAVE_WORDEXP
 # include <wordexp.h>
-#endif
+#endif /* !__HAIKU__ && !__OpenBSD && !__ANDROID */
 #include <limits.h>
 #include <dirent.h>
 #include <errno.h>

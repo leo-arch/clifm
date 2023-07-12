@@ -445,7 +445,7 @@ struct icons_t icon_ext[] = {
     {"bat", ICON_SCRIPT, WHITE},
 #if defined(_ICONS_IN_TERMINAL)
     {"bib", FILE_BIBTEX, B_WHITE},
-#endif
+#endif /* _ICONS_IN_TERMINAL */
     {"bin", ICON_BINARY, WHITE},
     {"bmp", ICON_IMG, GREEN},
     {"bz2", ICON_ARCHIVE, YELLOW},

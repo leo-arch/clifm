@@ -546,7 +546,7 @@ is_acl(char *file)
 	/* If num > 3 we have something else besides owner, group, and others,
 	 * that is, we have at least one ACL property */
 	return (num > 3 ? 1 : 0);
-#endif /* _ACL_OK */
+#endif /* !_ACL_OK */
 }
 
 /* Check whether a given string contains only digits. Returns 1 if true
@@ -988,7 +988,7 @@ truncate_file(char *file, const int max, const int check_dups)
 #else
 	char *tmp = (char *)xnmalloc(config_dir_len + 16, sizeof(char));
 	snprintf(tmp, config_dir_len + 16, "%s/log.XXXXXXXXXX", config_dir);
-#endif
+#endif /* !__OpenBSD__ */
 
 	int fdd = mkstemp(tmp);
 	if (fdd == -1) {
@@ -1007,7 +1007,7 @@ truncate_file(char *file, const int max, const int check_dups)
 		free(tmp);
 		return;
 	}
-#endif
+#endif /* __HAIKU__ || __sun */
 
 	int i = 1;
 	size_t line_size = 0;
@@ -1028,7 +1028,7 @@ truncate_file(char *file, const int max, const int check_dups)
 			dprintf(fdd, "%s", line);
 #else
 			fprintf(fpp, "%s", line);
-#endif
+#endif /* !__HAIKU__ && !__sun */
 
 		if (check_dups == 1) {
 			free(prev_line);
@@ -1041,7 +1041,7 @@ truncate_file(char *file, const int max, const int check_dups)
 
 #if defined(__HAIKU__) || defined(__sun)
 	fclose(fpp);
-#endif
+#endif /* __HAIKU__ || __sun */
 
 	free(line);
 	unlinkat(fd, file, 0);

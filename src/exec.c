@@ -45,7 +45,7 @@ typedef char *rl_cpvfunc_t;
 
 #ifdef __TINYC__
 # undef CHAR_MAX /* Silence redefinition error */
-#endif
+#endif /* __TINYC__ */
 #include <limits.h>
 
 #include "actions.h"
@@ -1260,7 +1260,7 @@ ow_function(char **args)
 	UNUSED(args);
 	xerror("%s: %s\n", PROGRAM_NAME, _(NOT_AVAILABLE));
 	return EXIT_FAILURE;
-#endif
+#endif /* !_NO_LIRA */
 }
 
 static int
@@ -1667,7 +1667,7 @@ lira_function(char **args)
 	UNUSED(args);
 	xerror("%s: lira: %s\n", PROGRAM_NAME, _(NOT_AVAILABLE));
 	return EXIT_FAILURE;
-#endif
+#endif /* !_NO_LIRA */
 }
 
 static inline int
@@ -2047,7 +2047,7 @@ preview_function(char **args)
 	else { /* Only available since readline 7.0 */
 		rl_clear_visible_line();
 	}
-#endif
+#endif /* READLINE < 7.0 */
 
 	if (sel_n > seln_bk) {
 		print_reload_msg(_("%zu file(s) selected\n"), sel_n - seln_bk);

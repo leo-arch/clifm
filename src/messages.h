@@ -1216,7 +1216,7 @@ Page Down: Advance one page\nq: Stop pagging\n"
 # define HELP_MESSAGE "Enter '?' or press F1-F3 for instructions"
 #else
 # define HELP_MESSAGE "Enter '?' or press F5-F7 for instructions"
-#endif
+#endif /* !__HAIKU__ */
 
 #define SHORT_OPTIONS "\
 \n  -a, --no-hidden\t\t Do not show hidden files (default)\

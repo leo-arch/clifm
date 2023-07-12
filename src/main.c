@@ -50,7 +50,7 @@
 #include "misc.h"
 #ifndef _NO_PROFILES
 # include "profiles.h"
-#endif
+#endif /* !_NO_PROFILES */
 #include "prompt.h"
 #include "readline.h"
 #include "remotes.h"
@@ -71,7 +71,7 @@ struct user_t user = {0};
 struct devino_t *sel_devino = (struct devino_t *)NULL;
 #ifndef _NO_SUGGESTIONS
 struct suggestions_t suggestion = {0};
-#endif
+#endif /* !_NO_SUGGESTIONS */
 struct stats_t stats = {0};
 struct autocmds_t *autocmds = (struct autocmds_t *)NULL;
 struct opts_t opts = {0};
@@ -186,7 +186,7 @@ int
 	switch_cscheme = 0,
 #ifndef _NO_TRASH
 	trash_ok = 1,
-#endif
+#endif /* !_NO_TRASH */
 	wrong_cmd = 0,
 	xrename = 0;
 
@@ -225,7 +225,7 @@ size_t
 size_t *name_icons_hashes = (size_t *)0;
 size_t *dir_icons_hashes = (size_t *)0;
 size_t *ext_icons_hashes = (size_t *)0;
-#endif
+#endif /* !_NO_ICONS */
 
 char
 	cur_prompt_name[NAME_MAX + 1] = "",
@@ -241,7 +241,7 @@ char
 
 #ifdef RUN_CMD
 	*cmd_line_cmd = (char *)NULL,
-#endif
+#endif /* RUN_CMD */
 
 	*actions_file = (char *)NULL,
 	*alt_bm_file = (char *)NULL,
@@ -283,7 +283,7 @@ char
 	*sudo_cmd = (char *)NULL,
 #ifndef _NO_SUGGESTIONS
 	*suggestion_buf = (char *)NULL,
-#endif
+#endif /* !_NO_SUGGESTIONS */
 	*sys_shell = (char *)NULL,
 	*tags_dir = (char *)NULL,
 	*tmp_rootdir = (char *)NULL,
@@ -292,7 +292,7 @@ char
 	*trash_dir = (char *)NULL,
 	*trash_files_dir = (char *)NULL,
 	*trash_info_dir = (char *)NULL,
-#endif
+#endif /* !_NO_TRASH */
 
 	**argv_bk = (char **)NULL,
 	**bin_commands = (char **)NULL,
@@ -845,7 +845,7 @@ run_and_exit(void)
 	UNHIDE_CURSOR;
 	exit(exit_code);
 }
-#endif // RUN_CMD
+#endif /* RUN_CMD */
 
 /* This is the main structure of any basic shell (a REPL)
 	 1 - Grab user input
@@ -860,7 +860,7 @@ run_main_loop(void)
 #ifdef RUN_CMD
 	if (cmd_line_cmd)
 		run_and_exit();
-#endif // RUN_CMD
+#endif /* RUN_CMD */
 
 	int i;
 	/* 1) Infinite loop to keep the program running */
@@ -918,7 +918,7 @@ _list(void)
 #ifdef RUN_CMD
 	if (cmd_line_cmd)
 		return;
-#endif // RUN_CMD
+#endif /* RUN_CMD */
 
 	if (conf.autols == 1 && isatty(STDIN_FILENO)) {
 #ifdef LINUX_INOTIFY

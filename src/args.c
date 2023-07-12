@@ -49,7 +49,7 @@
 #if defined(_NO_PROFILES) || defined(_NO_FZF) || defined(_NO_ICONS) \
 || defined(_NO_TRASH)
 # include "messages.h"
-#endif
+#endif /* _NO_PROFILES || _NO_FZF || _NO_ICONS || _NO_TRASH */
 
 #define PREVIEW_FILE 1
 #define OPEN_FILE    2

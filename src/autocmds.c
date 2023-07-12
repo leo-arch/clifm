@@ -28,7 +28,7 @@
 #include <string.h>
 #include <glob.h>
 #include <readline/tilde.h>
-#include <limits.h>
+#include <limits.h> /* INT_MIN */
 
 #include "aux.h"
 #include "colors.h"

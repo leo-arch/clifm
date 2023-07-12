@@ -36,9 +36,9 @@
 # ifdef __TINYC__
 /* Silence a tcc warning. We don't use CTRL anyway */
 #  undef CTRL
-# endif
+# endif /* __TINYC__ */
 # include <sys/ioctl.h>
-#endif
+#endif /* __linux__ || __HAIKU__ || __APPLE__ || __sun || __CYGWIN__ */
 #include <limits.h>
 
 #include "aux.h"
@@ -170,7 +170,7 @@ load_matches_invert_nocwd(glob_t gbuf, struct dirent **ent,
 		if (filetype != 0 && type != filetype)
 #else
 		if (filetype != 0 && ent[i]->d_type != filetype)
-#endif
+#endif /* !_DIRENT_HAVE_D_TYPE */
 			continue;
 
 		int j = (int)gbuf.gl_pathc;

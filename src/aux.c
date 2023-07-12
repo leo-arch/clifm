@@ -51,7 +51,7 @@
 #include "checks.h"
 #ifndef _NO_HIGHLIGHT
 # include "highlight.h"
-#endif
+#endif /* !_NO_HIGHLIGHT */
 
 #ifndef _NO_ICONS
 /* Generate a hash of the string STR (case sensitively if CASE_SENTITIVE is

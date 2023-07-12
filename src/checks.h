@@ -29,9 +29,8 @@ __BEGIN_DECLS
 
 #ifndef _NO_FZF
 void check_completion_mode(void);
-#endif
+#endif /* !_NO_FZF */
 
-//void check_file_size(char *, int);
 int  check_file_access(const mode_t, const uid_t, const gid_t);
 char **check_for_alias(char **);
 int  check_glob_char(const char *, const int);

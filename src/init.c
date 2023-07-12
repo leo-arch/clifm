@@ -31,7 +31,7 @@
 #if defined(__linux__) || defined(__HAIKU__) || defined(__sun) \
 || defined(__CYGWIN__)
 # include <grp.h> /* getgrouplist(3) */
-#endif
+#endif /* __linux__ || __HAIKU__ || __sun || __CYGWIN__ */
 
 #include <pwd.h>
 #include <signal.h>
@@ -50,7 +50,7 @@
 
 #if defined(__NetBSD__)
 # include <ctype.h>
-#endif
+#endif /* __NetBSD__ */
 
 #include <paths.h> /* _PATH_STDPATH */
 
@@ -156,12 +156,12 @@ init_conf_struct(void)
 	conf.highlight = UNSET;
 #else
 	conf.highlight = 0;
-#endif
+#endif /* !_NO_HIGHLIGHT */
 #ifndef _NO_ICONS
 	conf.icons = UNSET;
 #else
 	conf.icons = 0;
-#endif
+#endif /* !_NO_ICONS */
 	conf.light_mode = UNSET;
 	conf.list_dirs_first = UNSET;
 	conf.listing_mode = UNSET;
@@ -203,8 +203,7 @@ init_conf_struct(void)
 
 #ifndef _NO_TRASH
 	conf.tr_as_rm = UNSET;
-#endif
-//	conf.unicode = UNSET;
+#endif /* !_NO_TRASH */
 	conf.unicode = DEF_UNICODE;
 	conf.warning_prompt = UNSET;
 	conf.welcome_message = UNSET;
@@ -214,7 +213,7 @@ init_conf_struct(void)
 	conf.opener = (char *)NULL;
 #ifndef _NO_SUGGESTIONS
 	conf.suggestion_strategy = (char *)NULL;
-#endif
+#endif /* !_NO_SUGGESTIONS */
 	conf.term = (char *)NULL;
 	conf.time_str = (char *)NULL;
 	conf.usr_cscheme = (char *)NULL;
@@ -254,7 +253,7 @@ set_prop_fields(const char *line)
 		case 'S': prop_fields.size = PROP_SIZE_BYTES; break;
 #if defined(_LINUX_XATTR)
 		case 'x': prop_fields.xattr = 1; break;
-#endif
+#endif /* _LINUX_XATTR */
 		default: break;
 		}
 	}
@@ -1525,17 +1524,17 @@ unset_xargs(void)
 	xargs.fzftab = UNSET;
 	xargs.fnftab = UNSET;
 	xargs.smenutab = UNSET;
-#endif
+#endif /* !_NO_FZF */
 	xargs.hidden = UNSET;
 #ifndef _NO_HIGHLIGHT
 	xargs.highlight = UNSET;
-#endif
+#endif /* !_NO_HIGHLIGHT */
 	xargs.history = UNSET;
 	xargs.horizontal_list = UNSET;
 #ifndef _NO_ICONS
 	xargs.icons = UNSET;
 	xargs.icons_use_file_color = UNSET;
-#endif
+#endif /* !_NO_ICONS */
 	xargs.int_vars = UNSET;
 	xargs.light = UNSET;
 	xargs.list_and_quit = UNSET;
@@ -1570,12 +1569,12 @@ unset_xargs(void)
 
 #ifndef _NO_SUGGESTIONS
 	xargs.suggestions = UNSET;
-#endif
+#endif /* !_NO_SUGGESTIONS */
 
 	xargs.tips = UNSET;
 #ifndef _NO_TRASH
 	xargs.trasrm = UNSET;
-#endif
+#endif /* !_NO_TRASH */
 	xargs.trim_names = UNSET;
 	xargs.virtual_dir_full_paths = UNSET;
 	xargs.vt100 = UNSET;
@@ -1797,7 +1796,7 @@ get_path_env(void)
 		char *p = (char *)xnmalloc(s, sizeof(char)); /* Allocate space */
 		confstr(_CS_PATH, p, s);               /* Get value */
 		ptr = p;
-#endif
+#endif /* !_PATH_STDPATH */
 	}
 
 	if (!ptr)
@@ -2952,7 +2951,7 @@ check_options(void)
 #ifndef _NO_SUGGESTIONS
 	if (term_caps.suggestions == 0)
 		xargs.suggestions = conf.suggestions = 0;
-#endif
+#endif /* !_NO_SUGGESTIONS */
 	if (term_caps.color == 0)
 		xargs.colorize = conf.colorize = 0;
 	if (term_caps.pager == 0)

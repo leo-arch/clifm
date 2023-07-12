@@ -49,7 +49,7 @@ typedef char *rl_cpvfunc_t;
 # include <ereadline/readline/readline.h>
 #else
 # include <readline/readline.h>
-#endif
+#endif /* __OpenBSD__ */
 
 #include <errno.h>
 #include <fcntl.h>
@@ -69,11 +69,11 @@ typedef char *rl_cpvfunc_t;
 
 #ifndef _NO_HIGHLIGHT
 # include "highlight.h"
-#endif
+#endif /* !_NO_HIGHLIGHT */
 
 #ifndef _NO_SUGGESTIONS
 # include "suggestions.h"
-#endif
+#endif /* !_NO_SUGGESTIONS */
 
 #define CPR     "\x1b[6n" /* Cursor position report */
 #define CPR_LEN (sizeof(CPR) - 1)
@@ -209,7 +209,7 @@ stat_char(const char *filename)
 	r = lstat(filename, &attr);
 #else
 	r = stat(filename, &attr);
-#endif
+#endif /* S_ISLNK */
 
 	if (r == -1)
 		return 0;
@@ -232,7 +232,7 @@ stat_char(const char *filename)
 	} else {
 		if (S_ISFIFO(attr.st_mode))
 			c = '|';
-#endif
+#endif /* S_ISFIFO */
 	}
 
 	return c;
@@ -1796,7 +1796,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 		rl_restore_prompt();
 		wrong_cmd = 0;
 	}
-#endif
+#endif /* !_NO_SUGGESTIONS */
 
 	return EXIT_SUCCESS;
 }

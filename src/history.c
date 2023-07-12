@@ -100,7 +100,7 @@ split_old_log_file(void)
 	remove(old_file);
 }
 ////////////////////
-#endif // _NO_SPLIT_LOG
+#endif /* _NO_SPLIT_LOG */
 
 /* Return a string with the current date.
  * Used to compose log entries. */
@@ -282,7 +282,7 @@ send_desktop_notification(char *msg)
 	case WARNING: snprintf(type, sizeof(type), "normal"); break;
 	case NOTICE: snprintf(type, sizeof(type), "low"); break;
 	default: snprintf(type, sizeof(type), "low"); break;
-#endif
+#endif /* __HAIKU__ */
 	}
 
 	size_t mlen = strlen(msg);
@@ -321,7 +321,7 @@ send_desktop_notification(char *msg)
 #else
 	char *cmd[] = {"notify-send", "-u", type, PROGRAM_NAME, p, NULL};
 	ret = launch_execv(cmd, FOREGROUND, E_MUTE);
-#endif
+#endif /* __HAIKU__ */
 
 	if (ret == EXIT_SUCCESS)
 		return;

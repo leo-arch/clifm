@@ -92,7 +92,7 @@ static char ext_opts[MAX_EXT_OPTS][MAX_EXT_OPTS_LEN];
 #ifndef _NO_TAGS
 static struct dirent **tagged_files = (struct dirent **)NULL;
 static int tagged_files_n = 0;
-#endif
+#endif /* !_NO_TAGS */
 
 /* Get user input (y/n, uppercase is allowed) using _MSG as message.
  * The question will be repeated until 'y' or 'n' is entered.

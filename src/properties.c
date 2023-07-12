@@ -59,9 +59,9 @@
 
 #ifdef LINUX_FILE_ATTRS
 # include <sys/ioctl.h>  /* ioctl(3) */
-#ifdef __TINYC__
-# undef SYNC_FILE_RANGE_WRITE_AND_WAIT /* Silence redefinition error */
-#endif
+# ifdef __TINYC__
+#  undef SYNC_FILE_RANGE_WRITE_AND_WAIT /* Silence redefinition error */
+# endif /* __TINYC__ */
 # include <linux/fs.h>   /* FS_IOC_GETFLAGS */
 # include "properties.h" /* XFS_?????_FL flags */
 #endif /* LINUX_FILE_ATTRS */

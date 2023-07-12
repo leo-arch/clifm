@@ -47,8 +47,8 @@
 # elif defined(__sun)
 #  define __EXTENSIONS__
 #  define BSD_COMP
-# endif
-#endif
+# endif /* __linux__ || __CYGWIN__ */
+#endif /* (__linux__ || __CYGWIN__) && !_BE_POSIX */
 
 #ifdef __TINYC__
 # define __STDC_NO_VLA__ 1
@@ -61,28 +61,28 @@
  * available on current platform */
 #if !defined(__TINYC__) && !defined(GLOB_BRACE)
 # define GLOB_BRACE 0
-#endif
+#endif /* !__TINYC__ && !GLOB_BRACE */
 
 #if defined(__CYGWIN__) && defined(_BE_POSIX) && !defined(GLOB_TILDE)
 # define GLOB_TILDE 0
-#endif
+#endif /* __CYGWIN__ && _BE_POSIX && !GLOB_TILDE */
 
 /* Support large files on ARM and 32-bit machines */
 #if defined(__arm__) || defined(__i386__)
 # define _FILE_OFFSET_BITS 64
 # define _TIME_BITS 64 /* Address Y2038 problem for 32 bits machines */
-#endif
+#endif /* __arm__ || __i386__ */
 
 /* _NO_LIRA implies _NO_MAGIC */
 #if defined(_NO_LIRA) && !defined(_NO_MAGIC)
 # define _NO_MAGIC
-#endif
+#endif /* _NO_LIRA && !_NO_MAGIC */
 
 #if (defined(__linux__) || defined(__CYGWIN__) || defined(__HAIKU__)) \
 && !defined(_BE_POSIX)
 /* du(1) can report sizes in bytes, apparent sizes, and take custom block sizes */
 # define HAVE_GNU_DU
-#endif
+#endif /* (__linux__ || __CYGWIN__ || __HAIKU__) && !_BE_POSIX */
 
 #ifndef _NO_GETTEXT
 # include <libintl.h>
@@ -131,16 +131,16 @@
 #  define __BEGIN_DECLS extern "C" {
 # else
 #  define __BEGIN_DECLS
-# endif
-#endif
+# endif /* __cplusplus */
+#endif /* !__BEGIN_DECLS */
 
 #ifndef __END_DECLS
 # ifdef __cpluplus
 #  define __END_DECLS }
 # else
 #  define __END_DECLS
-# endif
-#endif
+# endif /* __cplusplus */
+#endif /* !__END_DECLS */
 
 #include "strings.h"
 #include "settings.h"
@@ -217,7 +217,7 @@
 #if defined(__linux__) && !defined(_BE_POSIX) && !defined(__TERMUX__) \
 && !defined(__CYGWIN__)
 # define LINUX_FILE_ATTRS
-#endif
+#endif /* __linux && !_BE_POSIX && !__TERMUX__ && !__CYGWIN__ */
 
 #ifdef __sun
 /* Solaris/Illumos defines AT_FDCWD as 0xffd19553 (-3041965); without the int
@@ -314,7 +314,7 @@ extern time_t curdir_mtime;
 #if (defined(__OpenBSD__) || defined(__NetBSD__) || defined(__APPLE__) \
 || defined(__sun)) && !defined(_BE_POSIX)
 # define CHECK_COREUTILS
-#endif
+#endif /* (__OpenBSD__ || __NetBSD__ || __APPLE__ || __sun) && !_BE_POSIX */
 
 /* File ownership flags (used by check_file_access() in checks.c) */
 #define R_USR (1 << 1)
@@ -517,7 +517,7 @@ extern time_t curdir_mtime;
 
 #ifndef P_tmpdir
 # define P_tmpdir "/tmp"
-#endif
+#endif /* P_tmpdir */
 
 #if defined(__HAIKU__) || defined(__sun)
 # define DT_UNKNOWN 0
@@ -1433,7 +1433,7 @@ extern int
 	switch_cscheme,
 #ifndef _NO_TRASH
 	trash_ok,
-#endif
+#endif /* !_NO_TRASH */
 	wrong_cmd,
 	xrename; /* We're running a secondary prompt for the rename function */
 
@@ -1474,7 +1474,7 @@ extern size_t
 extern size_t *name_icons_hashes;
 extern size_t *dir_icons_hashes;
 extern size_t *ext_icons_hashes;
-#endif
+#endif /* !_NO_ICONS */
 
 extern struct termios shell_tmodes;
 extern pid_t own_pid;
@@ -1494,7 +1494,7 @@ extern char
 
 #ifdef RUN_CMD
 	*cmd_line_cmd,
-#endif
+#endif /* RUN_CMD */
 
 	*actions_file,
 	*alt_config_dir,
@@ -1536,7 +1536,7 @@ extern char
 	*sudo_cmd,
 #ifndef _NO_SUGGESTIONS
 	*suggestion_buf,
-#endif
+#endif /* !_NO_SUGGESTIONS */
 	*tags_dir,
 	*tmp_rootdir,
 	*tmp_dir,
@@ -1544,7 +1544,7 @@ extern char
 	*trash_dir,
 	*trash_files_dir,
 	*trash_info_dir,
-#endif
+#endif /* !_NO_TRASH */
 
 
 	**argv_bk,
@@ -1620,7 +1620,7 @@ extern char
 
 #ifndef _NO_ICONS
     dir_ico_c[MAX_COLOR], /* Directories icon color */
-#endif
+#endif /* !_NO_ICONS */
 
 	/* Syntax highlighting */
 	hb_c[MAX_COLOR], /* Brackets () [] {} */

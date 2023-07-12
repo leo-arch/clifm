@@ -33,7 +33,7 @@
 #if defined(__OpenBSD__) || defined(__NetBSD__) \
 || defined(__FreeBSD__) || defined(__APPLE__) || defined(__HAIKU__)
 # include <inttypes.h> /* intmax_t */
-#endif
+#endif /* BSD || __HAIKU__ */
 
 #include "aux.h"
 #include "checks.h"

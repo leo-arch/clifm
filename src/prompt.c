@@ -50,7 +50,7 @@
 
 #ifndef _NO_SUGGESTIONS
 # include "suggestions.h"
-#endif
+#endif /* !_NO_SUGGESTIONS */
 
 #define CTLESC '\001'
 #define CTLNUL '\177'
