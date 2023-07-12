@@ -1961,8 +1961,11 @@ list_dir_light(void)
 		count++;
 	}
 
-	if (xargs.disk_usage_analyzer == 1)
+	if (xargs.disk_usage_analyzer == 1
+	|| (conf.long_view == 1 && conf.full_dir_size == 1)) {
 		fputs("\r            \r", stdout); /* Erase the "Scanning ..." message */
+		fflush(stdout);
+	}
 
 	file_info[n].name = (char *)NULL;
 	files = n;
@@ -2235,6 +2238,8 @@ list_dir(void)
 
 		int stat_ok = 1;
 		if (fstatat(fd, ename, &attr, virtual_dir == 1 ? 0 : AT_SYMLINK_NOFOLLOW) == -1) {
+			if (virtual_dir == 1)
+				continue;
 			stat_ok = 0;
 			stats.unstat++;
 		}
