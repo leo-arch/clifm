@@ -368,7 +368,7 @@ mount_dev(const int n)
 	p += 4;
 
 	/* Using strnlen() here avoids a Redhat hardened compilation warning. */
-	size_t plen = strnlen(p, sizeof(out_line));
+	size_t plen = strnlen(p, sizeof(out_line) - 4);
 	if (plen > 0 && p[plen - 1] == '\n') {
 		plen--;
 		p[plen] = '\0';
