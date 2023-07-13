@@ -432,8 +432,11 @@ launch_execv(char **cmd, const int bg, const int xflags)
 static inline int
 graceful_quit(char **args)
 {
+	if (!args || !args[0])
+		return EXIT_FAILURE;
+
 	size_t i;
-	for (i = 1; i <= args_n; i++) {
+	for (i = 1; args[i]; i++) {
 		if ((strcmp(args[0], "kill") == 0 && atoi(args[i]) == (int)own_pid)
 		|| ((strcmp(args[0], "killall") == 0 || strcmp(args[0], "pkill") == 0)
 		&& bin_name && strcmp(args[i], bin_name) == 0)) {
@@ -592,6 +595,9 @@ construct_shell_cmd(char **args)
 static inline int
 check_shell_cmd_conditions(char **args)
 {
+	if (!args || !args[0])
+		return EXIT_FAILURE;
+
 	/* No command name ends with a slash */
 	size_t len = (args && args[0]) ? strlen(args[0]) : 0;
 	if (len > 0 && args[0][len - 1] == '/') {
