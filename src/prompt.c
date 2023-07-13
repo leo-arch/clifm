@@ -225,7 +225,8 @@ gen_workspace(void)
 	else
 		snprintf(s, sizeof(s), "%s%d", cl, cur_ws + 1);
 
-	return savestring(s, strlen(s));
+	/* Using strnlen() here avoids a Redhat hardened compilation warning. */
+	return savestring(s, strnlen(s, sizeof(s)));
 }
 
 static inline char *
@@ -315,7 +316,8 @@ gen_user_name(void)
 static inline char *
 gen_hostname(const int c)
 {
-	char *temp = savestring(hostname, strlen(hostname));
+	/* Using strnlen() here avoids a Redhat hardened compilation warning. */
+	char *temp = savestring(hostname, strnlen(hostname, sizeof(hostname)));
 	if (c != 'h')
 		return temp;
 

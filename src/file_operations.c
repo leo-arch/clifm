@@ -462,7 +462,10 @@ construct_rm_cmd(char ***rfiles, char *_param, const size_t n)
 #else
 	cmd[0] = savestring("rm", 2);
 #endif /* __sun */
-	cmd[1] = savestring(_param, strlen(_param));
+	/* Using strnlen() here avoids a Redhat hardened compilation warning. */
+	/* As returned by get_rm_param(), we know that _param is at most 5 bytes
+	 * (including the terminating NUL byte). */
+	cmd[1] = savestring(_param, strnlen(_param, 5));
 	cmd[2] = savestring("--", 2);
 	free(_param);
 
@@ -2301,7 +2304,8 @@ batch_link(char **args)
 			if (d && *(d + 1) && is_number(d + 1))
 				*d = '\0';
 			snprintf(cur_suffix, sizeof(cur_suffix), "-%zu", added_suffix);
-			xstrncat(tmp, strlen(tmp), cur_suffix, sizeof(tmp));
+			/* Using strnlen() here avoids a Redhat hardened compilation warning. */
+			xstrncat(tmp, strnlen(tmp, sizeof(tmp)), cur_suffix, sizeof(tmp));
 			added_suffix++;
 		}
 
