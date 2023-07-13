@@ -361,17 +361,19 @@ mount_dev(const int n)
 
 	/* Recover the mountpoint used by the mounting command. */
 	char *p = strstr(out_line, " at ");
-	if (!p || *(p + 4) != '/') {
+	if (!p || !p[1] || !p[2] || !p[3] || p[4] != '/') {
 		xerror(_("%s: Error retrieving mountpoint\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 	p += 4;
 
-	size_t plen = strnlen(p, sizeof(out_line) - 4);
-	if (plen > 0 && p[plen - 1] == '\n')
-		p[plen - 1] = '\0';
+	size_t plen = strlen(p);
+	if (plen > 0 && p[plen - 1] == '\n') {
+		plen--;
+		p[plen] = '\0';
+	}
 
-	media[n].mnt = savestring(p, strnlen(p, sizeof(out_line) - 4));
+	media[n].mnt = savestring(p, plen);
 
 	return EXIT_SUCCESS;
 }

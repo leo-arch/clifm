@@ -225,7 +225,7 @@ gen_workspace(void)
 	else
 		snprintf(s, sizeof(s), "%s%d", cl, cur_ws + 1);
 
-	return savestring(s, strnlen(s, sizeof(s)));
+	return savestring(s, strlen(s));
 }
 
 static inline char *
@@ -315,7 +315,7 @@ gen_user_name(void)
 static inline char *
 gen_hostname(const int c)
 {
-	char *temp = savestring(hostname, strnlen(hostname, sizeof(hostname)));
+	char *temp = savestring(hostname, strlen(hostname));
 	if (c != 'h')
 		return temp;
 
