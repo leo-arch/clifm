@@ -905,6 +905,13 @@ create_preview_file(void)
 		return EXIT_FAILURE;
 	}
 
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) \
+|| defined(__DragonFly__) || defined(__sun) || defined(__APPLE__)
+	char lscmd[] = "gls -Ap --color=always --indicator-style=none;ls -Ap;";
+#else
+	char lscmd[] = "ls -Ap --color=always --indicator-style=none;";
+#endif /* !BSD */
+
 	fprintf(fp, "                  ######################################\n\
                   #   Configuration file for Shotgun   #\n\
                   #       CliFM's file previewer       #\n\
@@ -962,13 +969,7 @@ application/x-bittorrent=transmission-show --;\n\
 \n\
 # Fallback\n\
 .*=file -b --;true;\n",
-#if !defined(__FreeBSD__) && !defined(__OpenBSD__) && !defined(__NetBSD__) \
-&& !defined(__DragonFly__) && !defined(__APPLE__)
-	"ls -Ap --color=always --indicator-style=none;"
-#else
-	"gls -Ap --color=always --indicator-style=none;ls -Ap;"
-#endif /* !BSD */
-	);
+	lscmd);
 
 	fclose(fp);
 	return EXIT_SUCCESS;
@@ -3422,9 +3423,6 @@ reload_config(void)
 	check_options();
 	set_sel_file();
 	create_tmp_files();
-
-	/* If some option was set via command line, keep that value for any profile */
-//	check_cmd_line_options();
 
 #ifndef _NO_FZF
 	if (tabmode_bk != tabmode)

@@ -459,11 +459,11 @@ get_dir_color(const char *filename, const mode_t mode, const nlink_t links,
 	if (mode & S_IWOTH)
 		is_oth_w = 1;
 
-	size_t files_dir = count > -1 ? (size_t)count : (links > 2 ? (size_t)links
-		: (size_t)count_dir(filename, CPOP));
+	size_t files_dir = count > -1 ? (size_t)count : (links > 2
+		? (size_t)links : (size_t)count_dir(filename, CPOP));
 
 	color = sticky ? (is_oth_w ? tw_c : st_c) : is_oth_w ? ow_c
-		   : ((files_dir == 2 || files_dir == 0) ? ed_c : di_c);
+		: ((files_dir == 2 || files_dir == 0) ? ed_c : di_c);
 
 	return color;
 }
@@ -559,13 +559,13 @@ is_color_code(const char *str)
 	}
 
 	/* No digits at all, ending semicolon, more than eleven fields, or
-	 * more than three consecutive digits */
+	 * more than three consecutive digits. */
 	if (!digits || digits > 3 || semicolon > 11)
 		return 0;
 
 	/* At this point, we have a semicolon separated string of digits (3
 	 * consecutive max) with at most 12 fields. The only thing not
-	 * validated here are numbers themselves */
+	 * validated here are numbers themselves. */
 	return 1;
 }
 
@@ -794,7 +794,7 @@ get_ext_color(const char *ext)
 #ifndef CLIFM_SUCKLESS
 /* Strip color lines from the config file (FiletypeColors, if mode is
  * 't', and ExtColors, if mode is 'x') returning the same string
- * containing only allowed characters */
+ * containing only allowed characters. */
 static char *
 strip_color_line(const char *str, const char mode)
 {
@@ -936,7 +936,7 @@ reset_iface_colors(void)
 }
 
 /* Import the color scheme NAME from DATADIR (usually /usr/local/share)
- * Return zero on success or one on failure */
+ * Return zero on success or one on failure. */
 int
 import_color_scheme(const char *name)
 {
@@ -979,9 +979,9 @@ list_colorschemes(void)
 	return EXIT_SUCCESS;
 }
 
-/* Edit the current color scheme file
+/* Edit the current color scheme file.
  * If the file is not in the local colors dir, try to copy it from DATADIR
- * into the local dir to avoid permission issues */
+ * into the local dir to avoid permission issues. */
 static int
 edit_colorscheme(char *app)
 {
@@ -1112,7 +1112,7 @@ cschemes_function(char **args)
 }
 
 /* Set color variable VAR (static global) to _COLOR.
- * If not printable, add non-printing char flags (\001 and \002) */
+ * If not printable, add non-printing char flags (\001 and \002). */
 static void
 set_color(char *_color, char var[], const int flag)
 {
@@ -1646,7 +1646,8 @@ set_default_colors(void)
 	if (!*el_c) xstrsncpy(el_c, DEF_EL_C, sizeof(el_c));
 	if (!*mi_c) xstrsncpy(mi_c, DEF_MI_C, sizeof(mi_c));
 	/* If unset from the config file, use current workspace color */
-	if (!*dl_c && config_ok == 0) xstrsncpy(dl_c, DEF_DL_C, sizeof(dl_c));
+	if (!*dl_c && config_ok == 0)
+		xstrsncpy(dl_c, DEF_DL_C, sizeof(dl_c));
 
 	if (!*df_c) xstrsncpy(df_c, DEF_DF_C, sizeof(df_c));
 	if (!*fc_c) xstrsncpy(fc_c, DEF_FC_C, sizeof(fc_c));
@@ -1654,8 +1655,8 @@ set_default_colors(void)
 	if (!*tx_c) xstrsncpy(tx_c, DEF_TX_C, sizeof(tx_c));
 
 	if (!*lc_c)
-		xstrsncpy(lc_c, term_caps.color >= 256 ? DEF_LC_C_256 : DEF_LC_C,
-			sizeof(lc_c));
+		xstrsncpy(lc_c, term_caps.color >= 256
+			? DEF_LC_C_256 : DEF_LC_C, sizeof(lc_c));
 
 	if (!*li_c) xstrsncpy(li_c, DEF_LI_C, sizeof(li_c));
 	if (!*li_cb) xstrsncpy(li_cb, DEF_LI_CB, sizeof(li_cb));
@@ -1707,18 +1708,28 @@ set_default_colors(void)
 #endif /* __sun */
 
 #ifndef _NO_ICONS
-	if (!*dir_ico_c) xstrsncpy(dir_ico_c, DEF_DIR_ICO_C, sizeof(dir_ico_c));
+	if (!*dir_ico_c)
+		xstrsncpy(dir_ico_c, DEF_DIR_ICO_C, sizeof(dir_ico_c));
 #endif /* !_NO_ICONS */
 
-	if (!*dr_c) xstrsncpy(dr_c, term_caps.color >= 256 ? DEF_DR_C256 : DEF_DR_C, sizeof(dr_c));
-	if (!*dw_c) xstrsncpy(dw_c, term_caps.color >= 256 ? DEF_DW_C256 : DEF_DW_C, sizeof(dw_c));
-	if (!*dxd_c) xstrsncpy(dxd_c, term_caps.color >= 256 ? DEF_DXD_C256 : DEF_DXD_C, sizeof(dxd_c));
-	if (!*dxr_c) xstrsncpy(dxr_c, term_caps.color >= 256 ? DEF_DXR_C256 : DEF_DXR_C, sizeof(dxr_c));
-	if (!*dg_c) xstrsncpy(dg_c, term_caps.color >= 256 ? DEF_DG_C256 : DEF_DG_C, sizeof(dg_c));
-//	if (!*dd_c) xstrsncpy(dd_c, DEF_DD_C, sizeof(dd_c)); // Date color unset: let's use gradient
-//	if (!*dz_c) xstrsncpy(dz_c, DEF_DZ_C, sizeof(dz_c)); // Size color unset: let's use gradient
-	if (!*do_c) xstrsncpy(do_c, term_caps.color >= 256 ? DEF_DO_C256 : DEF_DO_C, sizeof(do_c));
-	if (!*dp_c) xstrsncpy(dp_c, term_caps.color >= 256 ? DEF_DP_C256 : DEF_DP_C, sizeof(dp_c));
+	if (!*dr_c) xstrsncpy(dr_c, term_caps.color >= 256
+		? DEF_DR_C256 : DEF_DR_C, sizeof(dr_c));
+	if (!*dw_c) xstrsncpy(dw_c, term_caps.color >= 256
+		? DEF_DW_C256 : DEF_DW_C, sizeof(dw_c));
+	if (!*dxd_c) xstrsncpy(dxd_c, term_caps.color >= 256
+		? DEF_DXD_C256 : DEF_DXD_C, sizeof(dxd_c));
+	if (!*dxr_c) xstrsncpy(dxr_c, term_caps.color >= 256
+		? DEF_DXR_C256 : DEF_DXR_C, sizeof(dxr_c));
+	if (!*dg_c) xstrsncpy(dg_c, term_caps.color >= 256
+		? DEF_DG_C256 : DEF_DG_C, sizeof(dg_c));
+/*	if (!*dd_c) // Date color unset: let's use shades
+		xstrsncpy(dd_c, DEF_DD_C, sizeof(dd_c));
+	if (!*dz_c) // Size color unset: let's use shades
+		xstrsncpy(dz_c, DEF_DZ_C, sizeof(dz_c)); */
+	if (!*do_c) xstrsncpy(do_c, term_caps.color >= 256
+		? DEF_DO_C256 : DEF_DO_C, sizeof(do_c));
+	if (!*dp_c) xstrsncpy(dp_c, term_caps.color >= 256
+		? DEF_DP_C256 : DEF_DP_C, sizeof(dp_c));
 	if (!*dn_c) xstrsncpy(dn_c, DEF_DN_C, sizeof(dn_c));
 }
 
