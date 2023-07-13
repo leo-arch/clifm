@@ -178,7 +178,7 @@ If not obvious, comment what your code is trying to achieve: there is no good so
 
 **D)** Listing
 
-This is the basic structure of **clifm**: generally speaking, it is just a shell. In between, however, lots of things happen. Leaving aside the above mentioned functions, the most important one is `listdir()`, defined in `listing.c`. Everything related to listing files happens here: reading files in the current directory (via **readdir**(3)), getting file information (via the dirent struct returned by **readdir**(3) itself and **stat**(3)), sorting files (via **qsort**(3)), and storing all these information in a global struct (`file_info`) for future access, for example, to get file properties of a given entry.
+This is the basic structure of **clifm**: generally speaking, it is just a shell. In between, however, lots of things happen. Leaving aside the above mentioned functions, the most important one is `listdir()`, defined in `listing.c`. Everything related to listing files happens here: reading files in the current directory (via **readdir**(3)), getting file information (via the dirent struct returned by **readdir**(3) itself and **stat**(2)), sorting files (via **qsort**(3)), and storing all this information into a global struct (`file_info`) for future access, for example, to get file properties of a given entry.
 
 **E)** Whatever happens later, is just some function or operation invoked by the user and happening on top of the steps described above: opening a file or directory (via the `open_function()` and `cd_function()` functions, in `file_operations.c` and `navigation.c` respectivelly), opening a bookmark (`bookmarks.c`), operating on files (`file_operations.c`), switching to a different profile (`profiles.c`), trashing a file (`trash.c`), searching for a file (`search.c`), running a plugin (`actions.c`), and so on.
 
@@ -314,7 +314,7 @@ make -f misc/GNU/Makefile _NO_GETTEXT=1 _NO_ICONS=1
 | `_NO_SUGGESTIONS` | Disable [suggestions](https://github.com/leo-arch/clifm/wiki/Specifics#auto-suggestions) support |
 | `_NO_TAGS` | Disable support for [`Etiqueta`, the tags system](https://github.com/leo-arch/clifm/wiki/Common-Operations#tagging-files) |
 | `_NO_PROFILES` | Disable [user profiles](https://github.com/leo-arch/clifm/wiki/Specifics#profiles) support |
-| `_NO_SUN_BIRTHTIME` | Compile without files birthtime support (Solaris only). You can drop the `-lnvpair` compilation flag. | 
+| `_NO_SUN_BIRTHTIME` | Compile without files birthtime support (Solaris only). You can drop the `-lnvpair` compilation flag. Use only with the [Solaris-specific Makefile](https://github.com/leo-arch/clifm/blob/master/misc/solaris/Makefile), appending this flag to `CPPFLAGS`. | 
 | `_NO_TRASH` | Disable [trash](https://github.com/leo-arch/clifm/wiki/Common-Operations#trashing-files) support |
 | `_TOURBIN_QSORT` | Use Alexey Tourbin faster [qsort implementation](https://github.com/svpv/qsort) instead of [qsort(3)](https://www.man7.org/linux/man-pages/man3/qsort.3.html) |
 | `_VANILLA_READLINE` | Disable all **clifm** specific features added to readline: syntax highlighting, autosuggestions, TAB completion for **clifm** specific features/commands, and alternative TAB completion modes (fzf, fnf, and smenu) |
