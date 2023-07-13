@@ -556,6 +556,9 @@ export_var_function(char **args)
 static inline char *
 construct_shell_cmd(char **args)
 {
+	if (!args || !args[0])
+		return (char *)NULL;
+
 	/* If the command starts with either ':' or ';', it has bypassed all clifm
 	 * expansions. At this point we don't care about it: skip this char. */
 	int bypass = (*args[0] == ';' || *args[0] == ':');
