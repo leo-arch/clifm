@@ -210,15 +210,6 @@
 # endif /* !__TERMUX__ */
 #endif /* _GNU_SOURCE */
 
-#ifdef __sun
-/* Solaris/Illumos defines AT_FDCWD as 0xffd19553 (-3041965); without the int
- * cast, the value gets interpreted as uint (4291925331), which throws compiler
- * warnings. See https://github.com/python/cpython/issues/60169 */
-# define XAT_FDCWD (int)AT_FDCWD
-#else
-# define XAT_FDCWD AT_FDCWD
-#endif /* __sun */
-
 /* Do we have files birth time? If yes, define ST_BTIME. */
 /* ST_BTIME is the timespec struct for files creation time. Valid fields are
  * tv_sec and tv_nsec. */
@@ -258,6 +249,15 @@ extern int watch;
 # define GENERIC_FS_MONITOR
 extern time_t curdir_mtime;
 #endif /* LINUX_INOTIFY */
+
+#ifdef __sun
+/* Solaris/Illumos defines AT_FDCWD as 0xffd19553 (-3041965); without the int
+ * cast, the value gets interpreted as uint (4291925331), which throws compiler
+ * warnings. See https://github.com/python/cpython/issues/60169 */
+# define XAT_FDCWD (int)AT_FDCWD
+#else
+# define XAT_FDCWD AT_FDCWD
+#endif /* __sun */
 
 /* The following flags are used via an integer (FLAGS). If an integer has
  * 4 bytes, then we can use a total of 32 flags (0-31)

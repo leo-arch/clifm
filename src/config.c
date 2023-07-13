@@ -2494,7 +2494,7 @@ set_sug_strat(const char *line)
 		return;
 
 	free(conf.suggestion_strategy);
-	conf.suggestion_strategy = savestring(tmp, strnlen(tmp, sizeof(tmp)));
+	conf.suggestion_strategy = savestring(tmp, strlen(tmp));
 }
 #endif /* _NO_SUGGESTIONS */
 
