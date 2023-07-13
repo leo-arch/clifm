@@ -2237,7 +2237,8 @@ list_dir(void)
 		init_fileinfo(n);
 
 		int stat_ok = 1;
-		if (fstatat(fd, ename, &attr, virtual_dir == 1 ? 0 : AT_SYMLINK_NOFOLLOW) == -1) {
+		if (fstatat(fd, ename, &attr, virtual_dir == 1
+		? 0 : AT_SYMLINK_NOFOLLOW) == -1) {
 			if (virtual_dir == 1)
 				continue;
 			stat_ok = 0;

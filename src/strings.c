@@ -129,6 +129,7 @@ get_last_chr(char *str, const char c, const int len)
 	return (char *)NULL;
 }
 
+/* Replace all slashes in STR by the character C. */
 char *
 replace_slashes(char *str, const char c)
 {
@@ -150,8 +151,9 @@ replace_slashes(char *str, const char c)
 	return p;
 }
 
-/* Find the character C in the string S ignoring case
- * Returns a pointer to the matching char in S if C was found, or NULL otherwise */
+/* Find the character C in the string S ignoring case.
+ * Returns a pointer to the matching char in S if C was found, or NULL
+ * otherwise. */
 char *
 xstrcasechr(char *s, char c)
 {
@@ -171,7 +173,7 @@ xstrcasechr(char *s, char c)
 }
 
 /* A reverse strpbrk(3): returns a pointer to the LAST char in S matching
- * a char in ACCEPT, or NULL if no match is found */
+ * a char in ACCEPT, or NULL if no match is found. */
 char *
 xstrrpbrk(char *s, const char *accept)
 {
@@ -392,9 +394,11 @@ wc_xstrlen(const char *restrict str)
 	len = mbstowcs(wbuf, str, ARG_MAX);
 	if (len == (size_t)-1) /* Invalid multi-byte sequence found */
 		return 0;
+
 	int w = wcswidth(wbuf, len);
 	if (w != -1)
 		return (size_t)w;
+
 	/* A non-printable wide char was found */
 	return 0;
 }
@@ -403,7 +407,7 @@ wc_xstrlen(const char *restrict str)
  * Returns the difference beetween MAX and the point at which STR was actually
  * trimmed (this difference should be added to STR as spaces to equate MAX
  * and get a correct length).
- * Since a wide char could take two o more columns to be draw, and since
+ * Since a wide char could take two o more columns to be drawn, and since
  * you might want to trim the name in the middle of a wide char, this
  * function won't store the last wide char to avoid taking more columns
  * than MAX. In this case, the programmer should take care of filling the
@@ -688,7 +692,7 @@ init_quoted_words(void)
  * we lost track of quoted words, because the old indices point now to
  * expanded fields.
  * Ex: 'p sel "12"' -> the quoted word index is originally 2, but after the
- * expansion of the 'sel' keyword, the index 2 points now to a selected file
+ * expansion of the 'sel' keyword, the index 2 points now to a selected file.
  *
  * This function updates quoted word indices taking into account the starting
  * point, i.e. the word after the expandable expression (START), and the amount
@@ -1417,7 +1421,7 @@ get_bm_paths(void)
 }
 
 /* Reconstruct the array DST inserting all fields in the array SRC at
- * index I in DST. NUM is uptdated to the number of inserted fields. */
+ * index I in DST. NUM is updated to the number of inserted fields. */
 static char **
 insert_fields(char ***dst, char ***src, const size_t i, size_t *num)
 {
@@ -1472,7 +1476,7 @@ insert_fields(char ***dst, char ***src, const size_t i, size_t *num)
 	return d;
 }
 
-/* Expand the ELN at SUBSTR[I] into the corresponding file name */
+/* Expand the ELN at SUBSTR[I] into the corresponding file name. */
 static void
 eln_expand(char ***substr, const size_t i)
 {
@@ -1480,7 +1484,7 @@ eln_expand(char ***substr, const size_t i)
 	/* Because of _expand_eln(), which is called immediately before this
 	 * function, it is guaranteed that NUM won't over/under-flow:
 	 * NUM is > 0 and <= the amount of listed files (and this latter is
-	 * never greater than INT_MAX) */
+	 * never greater than INT_MAX). */
 	int j = num - 1;
 	char *esc_str = escape_str(file_info[j].name);
 	if (!esc_str)
@@ -1575,8 +1579,8 @@ expand_sel_keyword(char ***substr)
 	}
 }
 
-/* Expand the bookmark name NAME into the corresponding bookmark path.
- * Return EXIT_SUCCESS if the expansion took place or EXIT_FAILURE otherwise */
+/* Expand the bookmark NAME into the corresponding bookmark path.
+ * Returns EXIT_SUCCESS if the expansion took place or EXIT_FAILURE otherwise */
 static int
 expand_bm_name(char **name)
 {
@@ -1605,7 +1609,7 @@ expand_bm_name(char **name)
 	return bm_exp;
 }
 
-/* Expand internal variable name NAME into its value */
+/* Expand the internal variable NAME into its right value. */
 static void
 expand_int_var(char **name)
 {
@@ -2061,7 +2065,7 @@ static void
 expand_regex(char ***substr)
 {
 	/* Let's store all strings currently in substr plus REGEX expanded
-	 * files, if any, in a temporary array */
+	 * files, if any, in a temporary array. */
 	char **tmp = (char **)xnmalloc(files + args_n + 2, sizeof(char *));
 	size_t i, j, n = 0;
 	regex_t regex;
@@ -2108,7 +2112,7 @@ expand_regex(char ***substr)
 			if (regexec(&regex, file_info[j].name, 0, NULL, 0) != EXIT_SUCCESS)
 				continue;
 
-			// Make sure the matching file name is not already in the tmp array
+			/* Make sure the matching file name is not already in the tmp array */
 			int m = (int)n, found = 0;
 			while (--m >= 0) {
 				if (*file_info[j].name == *tmp[m]
@@ -2242,7 +2246,7 @@ gen_full_line(char **str, const int fusedcmd_ok)
 
 	/* If ";cmd" or ":cmd" the whole input line will be send to
 	 * exec_cmd() and will be executed by the system shell via
-	 * execle(). Since we don't run split_str() here, dequoting
+	 * execl(). Since we don't run split_str() here, dequoting
 	 * and deescaping is performed directly by the system shell. */
 	return cmd;
 }
@@ -2801,7 +2805,7 @@ home_tilde(char *new_path, int *free_buf)
 	return new_path;
 }
 
-/* Expand a range of numbers given by str. It will expand the range
+/* Expand a range of numbers given by STR. It will expand the range
  * provided that both extremes are numbers, bigger than zero, equal or
  * smaller than the amount of files currently listed on the screen, and
  * the second (right) extreme is bigger than the first (left). Returns
@@ -2859,7 +2863,7 @@ expand_range(char *str, int listdir)
 	return buf;
 }
 
-/* Returns a pointer to a copy of the string STR with size SIZE, or
+/* Returns a pointer to a copy of the string STR, malloc'ed with size SIZE, or
  * NULL on error. */
 char *
 savestring(const char *restrict str, size_t size)
@@ -2878,7 +2882,8 @@ savestring(const char *restrict str, size_t size)
 }
 
 /* Take a string and returns the same string escaped. If nothing to be
- * escaped, the original string is returned. */
+ * escaped, the original string is returned. In either cases, the returned
+ * string must be free'd by the caller. */
 char *
 escape_str(const char *str)
 {
@@ -2904,11 +2909,10 @@ escape_str(const char *str)
 	return buf;
 }
 
-/* Get all substrings from STR using IFS as substring separator, and,
- * if there is a range, expand it. Returns an array containing all
- * substrings in STR plus expandes ranges, or NULL if: STR is NULL or
- * empty, STR contains only IFS(s), or in case of memory allocation
- * error. */
+/* Get all substrings from STR using IFS as substring separator, and, if there
+ * is a range, expand it. Returns an array containing all substrings in STR
+ * plus expanded ranges (duplicates are removed), or NULL if: STR is NULL or
+ * empty, STR contains only IFS(s), or in case of memory allocation error. */
 char **
 get_substr(char *str, const char ifs)
 {
@@ -3126,9 +3130,7 @@ get_substr(char *str, const char ifs)
 }
 
 /* This function simply deescapes whatever escaped chars it founds in
- * TEXT, so that readline can compare it to system file names when
- * completing paths. Returns a string containing text without escape
- * sequences */
+ * TEXT. Returns a string containing TEXT without escape sequences. */
 char *
 dequote_str(char *text, int mt)
 {
@@ -3136,7 +3138,7 @@ dequote_str(char *text, int mt)
 	if (!text || !*text)
 		return (char *)NULL;
 
-	/* At most, we need as many bytes as in text (in case no escape
+	/* At most, we need as many bytes as in TEXT (in case no escape
 	 * sequence is found). */
 	char *buf = (char *)NULL;
 	buf = (char *)xnmalloc(strlen(text) + 1, sizeof(char));
