@@ -25,6 +25,7 @@ HEADERS = $(SRCDIR)/*.h
 
 LMAGIC = -lmagic
 LINTL = -lintl
+LUTIL = -lutil
 
 ifdef DEBUG
 	CFLAGS += -g
@@ -95,6 +96,11 @@ ifdef _NO_MAGIC
 	undefine LMAGIC
 endif
 
+ifdef _NO_NETBSD_FFLAGS
+	CPPFLAGS += -D_NO_NETBSD_FFLAGS
+	undefine LUTIL
+endif
+
 ifdef _NO_PROFILES
 	CPPFLAGS += -D_NO_PROFILES
 endif
@@ -117,7 +123,7 @@ CPPFLAGS += -DCLIFM_DATADIR=$(DATADIR)
 LIBS_Linux ?= -lreadline -lacl -lcap $(LMAGIC)
 LIBS_FreeBSD ?= -I/usr/local/include -L/usr/local/lib -lreadline $(LINTL) $(LMAGIC)
 LIBS_DragonFly ?= -I/usr/local/include -L/usr/local/lib -lreadline $(LINTL) $(LMAGIC)
-LIBS_NetBSD ?= -I/usr/pkg/include -L/usr/pkg/lib -Wl,-R/usr/pkg/lib -lreadline $(LINTL) $(LMAGIC)
+LIBS_NetBSD ?= -I/usr/pkg/include -L/usr/pkg/lib -Wl,-R/usr/pkg/lib -lreadline $(LINTL) $(LMAGIC) $(LUTIL)
 LIBS_OpenBSD ?= -I/usr/local/include -L/usr/local/lib -lereadline $(LINTL) $(LMAGIC)
 LIBS_Darwin ?= -I/opt/local/include -L/opt/local/lib -lreadline $(LINTL) $(LMAGIC)
 
