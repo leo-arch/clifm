@@ -318,6 +318,7 @@ make -f misc/GNU/Makefile _NO_GETTEXT=1 _NO_ICONS=1
 | `_NO_SUN_BIRTHTIME` | Compile without files birthtime support (Solaris only). You can drop the `-lnvpair` compilation flag. Use only with the [Solaris-specific Makefile](https://github.com/leo-arch/clifm/blob/master/misc/solaris/Makefile), appending this flag to `CPPFLAGS`. | 
 | `_NO_TRASH` | Disable [trash](https://github.com/leo-arch/clifm/wiki/Common-Operations#trashing-files) support |
 | `_TOURBIN_QSORT` | Use Alexey Tourbin faster [qsort implementation](https://github.com/svpv/qsort) instead of [qsort(3)](https://www.man7.org/linux/man-pages/man3/qsort.3.html) |
+| `USE_GENERIC_FS_MONITOR` | Use the generic file system events monitor instead of inotify (Linux) or kqueue (BSD) |
 | `_VANILLA_READLINE` | Disable all **clifm** specific features added to readline: syntax highlighting, autosuggestions, TAB completion for **clifm** specific features/commands, and alternative TAB completion modes (fzf, fnf, and smenu) |
 
 <sup>1</sup> Shell commands, like **cp**(1), **rm**(1), and so on, use only POSIX compliant flags (for example, the `-a` flag is not available for **cp**(1), just as the `-I` flag is not available for **rm**(1)). On Linux, files birth time is disabled: we get this information via [statx(2)](https://man7.org/linux/man-pages/man2/statx.2.html), which is Linux specific.
