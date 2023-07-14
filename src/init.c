@@ -1790,7 +1790,7 @@ get_path_env(void)
 	|| xargs.secure_env_full == 1 || !(ptr = getenv("PATH")) || !*ptr) {
 		malloced_ptr = 1;
 #ifdef _PATH_STDPATH
-		ptr = savestring(_PATH_STDPATH, strlen(_PATH_STDPATH));
+		ptr = savestring(_PATH_STDPATH, sizeof(_PATH_STDPATH) - 1);
 #else
 		size_t s = confstr(_CS_PATH, NULL, 0); /* Get value's size */
 		char *p = (char *)xnmalloc(s, sizeof(char)); /* Allocate space */
@@ -2479,10 +2479,10 @@ check_options(void)
 
 	if (!conf.wprompt_str) {
 		if (conf.colorize == 1)
-			conf.wprompt_str = savestring(DEF_WPROMPT_STR, strlen(DEF_WPROMPT_STR));
+			conf.wprompt_str = savestring(DEF_WPROMPT_STR, sizeof(DEF_WPROMPT_STR) - 1);
 		else
 			conf.wprompt_str = savestring(DEF_WPROMPT_STR_NO_COLOR,
-				strlen(DEF_WPROMPT_STR_NO_COLOR));
+				sizeof(DEF_WPROMPT_STR_NO_COLOR) - 1);
 	}
 
 	/* Do no override command line options */
@@ -2595,11 +2595,11 @@ check_options(void)
 		if (conf.colorize == 1 || !getenv("FZF_DEFAULT_OPTS")) {
 			if (conf.colorize == 1) {
 				conf.fzftab_options =
-					savestring(DEF_FZFTAB_OPTIONS, strlen(DEF_FZFTAB_OPTIONS));
+					savestring(DEF_FZFTAB_OPTIONS, sizeof(DEF_FZFTAB_OPTIONS) - 1);
 			} else {
 				conf.fzftab_options =
 					savestring(DEF_FZFTAB_OPTIONS_NO_COLOR,
-					strlen(DEF_FZFTAB_OPTIONS_NO_COLOR));
+					sizeof(DEF_FZFTAB_OPTIONS_NO_COLOR) - 1);
 			}
 /*			char *pp = conf.colorize == 1
 				? DEF_FZFTAB_OPTIONS : DEF_FZFTAB_OPTIONS_NO_COLOR;
@@ -2913,7 +2913,7 @@ check_options(void)
 		free(tmp_user.groups);
 
 		if (!user.shell)
-			user.shell = savestring(FALLBACK_SHELL, strlen(FALLBACK_SHELL));
+			user.shell = savestring(FALLBACK_SHELL, sizeof(FALLBACK_SHELL) - 1);
 
 		free(user.shell_basename);
 		user.shell_basename = (char *)NULL;
@@ -2921,17 +2921,17 @@ check_options(void)
 	} */
 
 	if (!conf.term)
-		conf.term = savestring(DEF_TERM_CMD, strlen(DEF_TERM_CMD));
+		conf.term = savestring(DEF_TERM_CMD, sizeof(DEF_TERM_CMD) - 1);
 
 	if (!conf.encoded_prompt || !*conf.encoded_prompt) {
 		free(conf.encoded_prompt);
 		if (conf.colorize == 1) {
 			conf.encoded_prompt =
-				savestring(DEFAULT_PROMPT, strlen(DEFAULT_PROMPT));
+				savestring(DEFAULT_PROMPT, sizeof(DEFAULT_PROMPT) - 1);
 		} else {
 			conf.encoded_prompt =
 				savestring(DEFAULT_PROMPT_NO_COLOR,
-				strlen(DEFAULT_PROMPT_NO_COLOR));
+				sizeof(DEFAULT_PROMPT_NO_COLOR) - 1);
 		}
 /*		char *t = conf.colorize == 1 ? DEFAULT_PROMPT : DEFAULT_PROMPT_NO_COLOR;
 		conf.encoded_prompt = savestring(t, strlen(t)); */
@@ -2945,7 +2945,7 @@ check_options(void)
 		/* Since in stealth mode we have no access to the config file, we cannot
 		 * use Lira, since it relays on a file. Set it thus to FALLBACK_OPENER,
 		 * if not already set via command line */
-		conf.opener = savestring(FALLBACK_OPENER, strlen(FALLBACK_OPENER));
+		conf.opener = savestring(FALLBACK_OPENER, sizeof(FALLBACK_OPENER) - 1);
 	}
 
 #ifndef _NO_SUGGESTIONS

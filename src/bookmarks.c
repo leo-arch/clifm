@@ -499,8 +499,8 @@ bookmark_add(char *file, char *name, char *shortcut)
 			goto ERROR;
 	}
 
-	/* Once we have path, name and (optioanlly) shortcut, write it to the
-	 * bookmarks file */
+	/* Once we have path, name and (optionally) shortcut, write it to the
+	 * bookmarks file. */
 	FILE *bm_fp = fopen(bm_file, "a+");
 	if (!bm_fp) {
 		exit_status = errno;

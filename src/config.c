@@ -905,7 +905,9 @@ create_preview_file(void)
 		return EXIT_FAILURE;
 	}
 
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) \
+#if defined(_BE_POSIX)
+	char lscmd[] = "ls -Ap;";
+#elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) \
 || defined(__DragonFly__) || defined(__sun) || defined(__APPLE__)
 	char lscmd[] = "gls -Ap --color=always --indicator-style=none;ls -Ap;";
 #else
@@ -1166,7 +1168,7 @@ create_tmp_files(void)
 	tmp_rootdir = create_tmp_rootdir();
 
 	size_t tmp_rootdir_len = strlen(tmp_rootdir);
-	size_t pnl_len = strlen(PROGRAM_NAME);
+	size_t pnl_len = sizeof(PROGRAM_NAME) - 1;
 	size_t user_len = user.name ? strlen(user.name) : 7; /* 7: len of "unknown" */
 
 	size_t tmp_len = tmp_rootdir_len + pnl_len + user_len + 3;
@@ -1204,7 +1206,7 @@ create_tmp_files(void)
 static void
 define_config_file_names(void)
 {
-	size_t pnl_len = strlen(PROGRAM_NAME);
+	size_t pnl_len = sizeof(PROGRAM_NAME) - 1;
 	size_t tmp_len = 0;
 
 	if (alt_config_dir) {
