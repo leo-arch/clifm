@@ -238,7 +238,7 @@ gcc -I/usr/local/include -L/usr/local/lib -O3 -s -fstack-protector-strong -march
 3)  _NetBSD_:
 
 ```sh
-gcc -I/usr/pkg/include -L/usr/pkg/lib -Wl,-R/usr/pkg/lib -O3 -s -fstack-protector-strong -march=native -Wall -o clifm *.c -lintl -lreadline -lmagic
+gcc -I/usr/pkg/include -L/usr/pkg/lib -Wl,-R/usr/pkg/lib -O3 -s -fstack-protector-strong -march=native -Wall -o clifm *.c -lintl -lreadline -lmagic -lutil
 ```
 
 4)  _OpenBSD_:
@@ -311,6 +311,7 @@ make -f misc/GNU/Makefile _NO_GETTEXT=1 _NO_ICONS=1
 | `_NO_ICONS` | Disable [icons](https://github.com/leo-arch/clifm/wiki/Advanced/#icons-smirk) support |
 | `_NO_LIRA` | Disable [Lira](https://github.com/leo-arch/clifm/wiki/Specifics#resource-opener) support. Implies `_NO_MAGIC` |
 | `_NO_MAGIC` | Allow compilation without `libmagic` dependency<sup>3</sup> |
+| `_NO_NETBSD_FFLAGS` | Disable support for BSD file flags (NetBSD only). You can drop the `-lutil` compilation flag. |
 | `_NO_SUGGESTIONS` | Disable [suggestions](https://github.com/leo-arch/clifm/wiki/Specifics#auto-suggestions) support |
 | `_NO_TAGS` | Disable support for [`Etiqueta`, the tags system](https://github.com/leo-arch/clifm/wiki/Common-Operations#tagging-files) |
 | `_NO_PROFILES` | Disable [user profiles](https://github.com/leo-arch/clifm/wiki/Specifics#profiles) support |
