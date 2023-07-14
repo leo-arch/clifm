@@ -70,6 +70,18 @@
 # include <sys/xattr.h>
 #endif /* _LINUX_XATTR */
 
+/* Do we have BSD file flags support? */
+#if defined(__FreeBSD__) || (defined(__NetBSD__) && !defined(_NO_NETBSD_FFLAGS)) \
+|| defined(__OpenBSD__) || defined(__DragonFly__) || defined(__APPLE__)
+# define HAVE_BSD_FFLAGS
+# ifdef __NetBSD__
+#  include <util.h> /* flags_to_string() */
+#  define FLAGSTOSTR_FUNC(x) flags_to_string((x), "-")
+# else
+#  define FLAGSTOSTR_FUNC(x) fflagstostr((x)) /* Provided by unistd.h */
+# endif /* __NetBSD__ */
+#endif /* BSD */
+
 #include "aux.h"
 #include "checks.h"
 #include "colors.h"
@@ -1284,6 +1296,13 @@ print_file_details(char *filename, const struct stat *attr, const char file_type
 		print_file_attrs(get_file_attrs(filename));
 	else
 		puts(_("Unavailable"));
+
+#elif defined(HAVE_BSD_FFLAGS)
+	fputs(_("Flags: \t\t"), stdout);
+	char *fflags = !S_ISDIR(attr->st_mode)
+		? FLAGSTOSTR_FUNC(attr->st_flags) : (char *)NULL;
+	printf("%s\n", (!fflags || !*fflags) ? "-" : fflags);
+	free(fflags);
 #endif /* LINUX_FILE_ATTRS */
 
 #if defined(_LINUX_XATTR)
