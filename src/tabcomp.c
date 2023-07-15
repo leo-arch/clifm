@@ -1129,16 +1129,13 @@ store_completions(char **matches)
 		&& ct != TCMP_MIME_LIST && ct != TCMP_CMD_DESC) {
 			char *cl = get_entry_color(entry, norm_prefix);
 			*tmp_color = '\0';
-//			char ext_cl[MAX_COLOR + 5];
-//			*ext_cl = '\0';
+
 			/* If color does not start with escape, then we have a color
 			 * for a file extension. In this case, we need to properly
 			 * construct the color code. */
 			if (cl && *cl != _ESC)
-//				snprintf(ext_cl, sizeof(ext_cl) - 1, "\x1b[%sm", cl);
 				snprintf(tmp_color, sizeof(tmp_color), "\x1b[%sm", cl);
 
-//			color = *ext_cl ? ext_cl : (cl ? cl : "");
 			color = *tmp_color ? tmp_color : (cl ? cl : "");
 
 			if (ct != TCMP_SEL && ct != TCMP_DESEL && ct != TCMP_BM_PATHS

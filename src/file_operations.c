@@ -1697,6 +1697,171 @@ validate_vv_dest_dir(const char *file)
 	return EXIT_SUCCESS;
 }
 
+static char *
+get_new_filename(char *cur_name)
+{
+	char _prompt[NAME_MAX];
+	snprintf(_prompt, sizeof(_prompt), _("Enter new name (Ctrl-d to quit)\n"
+		"\001%s\002>\001%s\002 "), mi_c, tx_c);
+
+	char *new_name = (char *)NULL;
+	while (!new_name) {
+		int quoted = 0;
+		new_name = get_newname(_prompt, cur_name, &quoted);
+		UNUSED(quoted);
+
+		if (!new_name) /* The user pressed Ctrl-d */
+			return (char *)NULL;
+
+		if (is_blank_name(new_name) == 1) {
+			free(new_name);
+			new_name = (char *)NULL;
+		}
+	}
+
+	size_t l = strlen(new_name);
+	if (l > 0 && new_name[l - 1] == ' ') {
+		l--;
+		new_name[l] = '\0';
+	}
+
+	char *n = normalize_path(new_name, l);
+	free(new_name);
+
+	return n;
+}
+
+/* Run CMD (either cp(1) or mv(1)) via execv().
+ * skip_force is true (1) when the -f,--force parameter has been provided to
+ * either 'c' or 'm' commands: it intructs cp/mv to run non-interactivelly
+ * (no -i). */
+static int
+run_cp_mv_cmd(char **cmd, const int skip_force)
+{
+	if (!cmd)
+		return EXIT_FAILURE;
+
+	char *new_name = (char *)NULL;
+	if (xrename == 1) {
+		if (!cmd[1])
+			return EINVAL;
+
+		/* If we have a number, either it was not expanded by parse_input_str(),
+		 * in which case it is an invalid ELN, or it was expanded to a file
+		 * named as a number. Let's check if we have such file name in the
+		 * files list. */
+		if (is_number(cmd[1])) {
+			int i = (int)files;
+			while (--i >= 0) {
+				if (*cmd[1] != *file_info[i].name)
+					continue;
+				if (strcmp(cmd[1], file_info[i].name) == 0)
+					break;
+			}
+			if (i == -1) {
+				xerror(_("%s: %s: No such ELN\n"), PROGRAM_NAME, cmd[1]);
+				xrename = 0;
+				return ENOENT;
+			}
+		} else {
+			char *p = dequote_str(cmd[1], 0);
+			struct stat a;
+			int ret = lstat(p ? p : cmd[1], &a);
+			free(p);
+			if (ret == -1) {
+				xrename = 0;
+				xerror("m: %s: %s\n", cmd[1], strerror(errno));
+				return errno;
+			}
+		}
+
+		new_name = get_new_filename(cmd[1]);
+		if (!new_name)
+			return EXIT_SUCCESS;
+	}
+
+	char **tcmd = xnmalloc(3 + args_n + 2, sizeof(char *));
+	size_t n = 0;
+	char *p = strchr(cmd[0], ' ');
+	if (p && *(p + 1)) {
+		*p = '\0';
+		p++;
+		tcmd[0] = savestring(cmd[0], strlen(cmd[0]));
+		tcmd[1] = savestring(p, strlen(p));
+		n += 2;
+	} else {
+		tcmd[0] = savestring(cmd[0], strlen(cmd[0]));
+		n++;
+	}
+
+	/* wcp does not support end of options (--) */
+	if (strcmp(cmd[0], "wcp") != 0) {
+		tcmd[n] = savestring("--", 2);
+		n++;
+	}
+
+	size_t i;
+	for (i = 1; cmd[i]; i++) {
+		/* The -f,--force parameter is internal. Skip it.
+		 * It instructs cp/mv to run non-interactively (no -i param) */
+		if (skip_force == 1 && i == 1 && is_force_param(cmd[i]) == 1)
+			continue;
+		p = dequote_str(cmd[i], 0);
+		if (!p)
+			continue;
+		tcmd[n] = savestring(p, strlen(p));
+		free(p);
+		n++;
+	}
+
+	if (cmd[1] && !cmd[2] && *cmd[0] == 'c' && *(cmd[0] + 1) == 'p'
+	&& *(cmd[0] + 2) == ' ') {
+		tcmd[n][0] = '.';
+		tcmd[n][1] = '\0';
+		n++;
+	} else {
+		if (new_name) {
+			p = (char *)NULL;
+			if (*new_name == '~')
+				p = tilde_expand(new_name);
+			char *q = p ? p : new_name;
+			tcmd[n] = savestring(q, strlen(q));
+			free(new_name);
+			free(p);
+			n++;
+		}
+	}
+
+	tcmd[n] = (char *)NULL;
+	int ret = launch_execv(tcmd, FOREGROUND, E_NOFLAG);
+
+	for (i = 0; i < n; i++)
+		free(tcmd[i]);
+	free(tcmd);
+
+	if (ret != EXIT_SUCCESS)
+		return ret;
+
+	/* Error messages are printed by launch_execv() itself */
+
+	/* If 'rm sel' and command is successful, deselect everything */
+	if (is_sel && *cmd[0] == 'r' && cmd[0][1] == 'm' && (!cmd[0][2]
+	|| cmd[0][2] == ' ')) {
+		int j = (int)sel_n;
+		while (--j >= 0)
+			free(sel_elements[j].name);
+		sel_n = 0;
+		save_sel();
+	}
+
+#ifdef GENERIC_FS_MONITOR
+	if (*cmd[0] == 'm')
+		reload_dirlist();
+#endif /* GENERIC_FS_MONITOR */
+
+	return EXIT_SUCCESS;
+}
+
 /* Launch the command associated to 'c' (also 'v' and 'vv') or 'm'
  * internal commands. */
 int
@@ -2181,6 +2346,11 @@ bulk_rename(char **args)
 		exit_status = errno;
 	}
 	fclose(fp);
+
+#ifdef GENERIC_FS_MONITOR
+	if (exit_status == EXIT_SUCCESS)
+		reload_dirlist();
+#endif /* GENERIC_FS_MONITOR */
 
 	return exit_status;
 
