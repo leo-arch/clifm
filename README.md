@@ -239,6 +239,7 @@ For a complete description please consult our [Wiki](https://github.com/leo-arch
 <summary>Click here to expand</summary>
 
 * `Development`
+  - Support for BSD file flags (`p`/`pp` command).
   - Nano-second precision for timestamps (`p`/`pp` command).
   - Ported to Solaris (including doors support). If you experience some issue with the warning prompt, please consult the [troubleshooting section](https://github.com/leo-arch/clifm/wiki/Troubleshooting#warning-prompt).
   - Since `fzy` has been [inactive for more than a year](https://github.com/jhawthorn/fzy), we have forked it as [fnf](https://github.com/leo-arch/fnf) (including some features needed to make it work with **clifm**). Because of this, `--fzytab` has been renamed to `--fnftab`, just as the `TabCompletionMode` option in the config file now takes `fnf` instead of `fzy` as value.
