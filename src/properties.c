@@ -76,9 +76,9 @@
 # define HAVE_BSD_FFLAGS
 # ifdef __NetBSD__
 #  include <util.h> /* flags_to_string() */
-#  define FLAGSTOSTR_FUNC(x) flags_to_string((x), "-")
+#  define FLAGSTOSTR_FUNC(f) flags_to_string((f), "-")
 # else
-#  define FLAGSTOSTR_FUNC(x) fflagstostr((x)) /* Provided by unistd.h */
+#  define FLAGSTOSTR_FUNC(f) fflagstostr((f)) /* Provided by unistd.h */
 # endif /* __NetBSD__ */
 #endif /* BSD */
 
