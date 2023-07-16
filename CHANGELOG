@@ -1,3 +1,71 @@
+1.13 (Voodoo Root)
+
+Bug fixes
+* A variable assignment triggers the warning prompt even if running with --int-vars.
+* "clifm --open=~PATH" not working.
+* Crash when running the 'n' command with an empty string: n "".
+* Suggestion persists after running a keybinding.
+* Image previews with 'clifmrun' are broken since ueberzug 18.2.0.
+* No path completion for 'x/X' command.
+* The 'new' command is not properly handling file names with tilde (via secondary prompt)
+* Some keybindings are overlapping (ex: press Alt-b and then Alt-m)
+* Quoted strings passed to either the 'new' or the 'filter' commands are expanded (wordexp(3)).
+* The regular files filter (=f) wrongly expands to non-regular files.
+* The 'new' command splits quoted names containing spaces (ex: 'n "a b/"'). 
+* Wrong highlighted match in standard TAB completion when using the 'j' command.
+* TAB completion for ranges lists files even when the range goes beyond the number of files.
+* Duplicate entries in the jump database.
+* Wrong message when adding instead of removing a line from the tmp file in bulk remove ('rr').
+* 'cs' (color scheme) does not work in autocommands if it's not the last directive.
+* Cannot enter cyrillic characters.
+* 'jo' command removed: not useful and broken since 1.11.
+* Wrong completer offset when warning prompt is disabled.
+* Prompt options in the color scheme file do not properly override options specified in the prompts file.
+* When customized, the warning prompt color does not match the color used for input text.
+* Tagging non-existent file names.
+* "s /path/to/dir/.*" selects self and parent directories (instead of just hidden files).
+* "s * -d" fails to select a directory file named "-dir".
+* Wrong matches color when TAB completing self or parent dir (ex: "./dir/<TAB>").
+* Unrecognized option '--indicator-style=none' when previewing directories on BSD.
+* Color scheme names containing a dot are not recognized, even if they have a .clifm extension.
+* Wrong file color when listing trashed files not trashed by clifm.
+* Quick help (?) fails if PAGER env var is set and contains spaces.
+* Trash dirs not properly created if they do not exist, breaking the trash function.
+* Wrong columns width when file names contain embedded control characters.
+* Wrong message ("No matches found") after recursive search (-x)
+* "Scanning ..." message not properly removed in case of empty directories.
+* --no-warning-prompt not working.
+* Listing files twice upon file removal (Haiku, Cygwin)
+* MinFilenameTrim overriden by MaxFilenameLen in long view.
+* Setting RlEditMode to 1 does not switch back to emacs mode.
+* Ctrl-Alt-j and Ctrl-Alt-m switch to vi editing mode, while Ctrl-Alt-e switches back to emacs mode.
+* Suggestions not properly removed in some cases (type 'bm add Camera/ cm', when suggested string is "bm add Camera/ Camera cm")
+* If running via the cd_on_quit.sh shell function, the shell directory is always changed, even if the exit command was not 'Q'.
+
+New features/improvements
+* The shell used to run external commands can be set via either CLIFM_SHELL or SHELL environment variables.
+* On NetBSD, OpenBSD, and MacOS, use 'grm' (the GNU version of 'rm') if available.
+* Add status message to the 'reload' command.
+* Append a slash to directory names when reporting removed files.
+* Harden config files creation: always set permissions to 600, disregarding umask (see CWE-732).
+* Add 'umask' builtin command.
+* 'pwd' is now a builtin.
+* The 'p' command do not follows symlinks (unless it is a symlink to a dir and ends with a slash), while 'pp' always does.
+* TAB complete authentication command (ex: sudo) with available command names. 
+* Improved input handling for both 'new' and 'dup' commands (via secondary prompts)
+* Ask the user for confirmation when creating unsafe file names ('new' command).
+* Do not perform multi-file expansions (say, ranges), if there's a file named after the expandible expression.
+* Since fzy has been inactive for more than a year (and our patch has not been even reviewed), we forked it as fnf and migrated clifm to it: '--fzytab' is now '--fnftab', and the TabCompletionMode option now takes "fnf" instead of "fzy" as value.
+* Make file type filter chars in selection match those used by the search function.
+* Port to SunOS/Solaris/Illumos.
+* Solaris doors support.
+* Nano-second precision for timestamps in p/pp command.
+* Support for BSD file flags (p/pp command).
+* Honor both CLIFM_TMPDIR and TMPDIR environment variables.
+* A generic file system events monitor using mtimes (for when neither inotify nor kqueue are available).
+* In case of find(1) implementations not supporting regex (OpenBSD/Solaris) try to use gfind(1) instead.
+* Enable secure cmds/environment on NetBSD, Haiku, and MacOS.
+
 1.12 - Blondebeard
 
 Bug fixes
