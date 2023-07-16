@@ -28,7 +28,6 @@ CPPFLAGS += -DCLIFM_DATADIR=$(DATADIR)
 LIBS ?= -lreadline -ltermcap -lmagic -lnvpair
 
 $(BIN): $(SRC) $(HEADERS)
-	@printf "Detected operating system: %s\n" "$(OS)"
 	$(CC) -o $(BIN) $(SRC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $(LIBS)
 
 build: $(BIN)
