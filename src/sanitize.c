@@ -34,13 +34,15 @@
 #include "misc.h"
 
 #define UNSAFE_CMD "Unsafe command. Consult the manpage for more information"
+/* If PATH cannot be retrieved from any other source, let's use this value */
+#define MINIMAL_PATH "/usr/local/bin:/bin:/usr/bin:/sbin:/usr/sbin"
 
 /* Unset environ: little implementation of clearenv(3), not available
  * on some systems (not POSIX) */
 static void
 xclearenv(void)
 {
-#if !defined(__NetBSD__) && !defined(__HAIKU__)
+#if !defined(__NetBSD__) && !defined(__HAIKU__) && !defined(__APPLE__)
 	/* This seems to be enough (it is it according to the Linux/FreeBSD
 	 * manpage for clearenv(3)). */
 	environ = NULL;
@@ -66,7 +68,7 @@ xclearenv(void)
 			exit(EXIT_FAILURE);
 		}
 	}
-#endif /* !__NetBSD__ && !__HAIKU__ */
+#endif /* !__NetBSD__ && !__HAIKU__ && !__APPLE__ */
 }
 
 static void
@@ -84,7 +86,7 @@ set_path_env(void)
 	ret = setenv("PATH", p, 1);            /* Set it */
 	free(p);
 #else
-	ret = setenv("PATH", "/bin:/usr/bin", 1);
+	ret = setenv("PATH", MINIMAL_PATH, 1);
 #endif /* _PATH_STDPATH */
 
 	if (ret == -1) {
@@ -105,12 +107,6 @@ xsetenv(const char *name, const char *value)
 int
 xsecure_env(const int mode)
 {
-#if defined(__APPLE__)
-	xerror("%s: secure-env: This feature is not available "
-		"on MacOS\n", PROGRAM_NAME);
-	exit(EXIT_FAILURE);
-#endif /* __APPLE__ */
-
 	char *display = (char *)NULL,
 		 *wayland_display = (char *)NULL,
 		 *_term = (char *)NULL,
