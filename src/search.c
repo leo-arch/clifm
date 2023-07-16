@@ -615,7 +615,7 @@ search_glob(char **args)
 
 	/* We need to store pointers to matching file names in array of pointers,
 	 * just as the file name length (to construct the columned output), and,
-	 * if searching in CWD, its index (ELN) in the dirlist array as well */
+	 * if searching in CWD, its index (ELN) in the dirlist array as well. */
 	struct search_t *list = (struct search_t *)NULL;
 
 	if (invert == 0)
@@ -628,10 +628,12 @@ search_glob(char **args)
 	int matches = print_glob_matches(list, search_path);
 
 	/* Free stuff */
-	size_t i;
-	for (i = 0; list[i].name; i++)
-		free(list[i].name);
-	free(list);
+	if (list) {
+		size_t i;
+		for (i = 0; list[i].name; i++)
+			free(list[i].name);
+		free(list);
+	}
 
 	if (conf.list_dirs_first == 1)
 		free(gfiles);
