@@ -40,11 +40,13 @@
 static void
 xclearenv(void)
 {
-	environ = NULL; /* This seems to be enough (it is it according to
-	the Linux manpage for clearenv(3)) */
-/*
-//	static char *namebuf = NULL;
-//	static size_t lastlen = 0;
+#if !defined(__NetBSD__) && !defined(__HAIKU__)
+	/* This seems to be enough (it is it according to the Linux/FreeBSD
+	 * manpage for clearenv(3)). */
+	environ = NULL;
+#else
+	static char *namebuf = NULL;
+	static size_t lastlen = 0;
 
  	while (environ != NULL && environ[0] != NULL) {
 		size_t len = strcspn(environ[0], "=");
@@ -63,7 +65,8 @@ xclearenv(void)
 				namebuf, strerror(errno));
 			exit(EXIT_FAILURE);
 		}
-	} */
+	}
+#endif /* !__NetBSD__ && !__HAIKU__ */
 }
 
 static void
@@ -71,15 +74,17 @@ set_path_env(void)
 {
 	int ret = -1;
 
-#ifdef _PATH_STDPATH
+#if defined(_PATH_STDPATH)
 	ret = setenv("PATH", _PATH_STDPATH, 1);
-#else
+#elif defined(_CS_PATH)
 	char *p = (char *)NULL;
 	size_t n = confstr(_CS_PATH, NULL, 0); /* Get value's size */
 	p = (char *)xnmalloc(n, sizeof(char)); /* Allocate space */
 	confstr(_CS_PATH, p, n);               /* Get value */
 	ret = setenv("PATH", p, 1);            /* Set it */
 	free(p);
+#else
+	ret = setenv("PATH", "/bin:/usr/bin", 1);
 #endif /* _PATH_STDPATH */
 
 	if (ret == -1) {
@@ -100,19 +105,11 @@ xsetenv(const char *name, const char *value)
 int
 xsecure_env(const int mode)
 {
-#ifdef __HAIKU__
-	xerror("%s: secure-env: This feature is not available "
-		"on Haiku\n", PROGRAM_NAME);
-	exit(EXIT_FAILURE);
-#elif __NetBSD__
-	xerror("%s: secure-env: This feature is not available "
-		"on NetBSD\n", PROGRAM_NAME);
-	exit(EXIT_FAILURE);
-#elif __APPLE__
+#if defined(__APPLE__)
 	xerror("%s: secure-env: This feature is not available "
 		"on MacOS\n", PROGRAM_NAME);
 	exit(EXIT_FAILURE);
-#endif /* __HAIKU__ */
+#endif /* __APPLE__ */
 
 	char *display = (char *)NULL,
 		 *wayland_display = (char *)NULL,
@@ -160,7 +157,7 @@ xsecure_env(const int mode)
 	if (tz && sanitize_cmd(tz, SNT_MISC) == EXIT_SUCCESS)
 		xsetenv("TZ", tz);
 
-	if (lang && sanitize_cmd(lang, SNT_MISC) ==  EXIT_SUCCESS) {
+	if (lang && sanitize_cmd(lang, SNT_MISC) == EXIT_SUCCESS) {
 		xsetenv("LANG", lang);
 		xsetenv("LC_ALL", lang);
 	} else {

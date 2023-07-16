@@ -1931,7 +1931,7 @@ cp_mv_file(char **args, const int copy_and_rename, const int force)
 		return vv_rename_files(args);
 
 	/* If 'mv sel' and command is successful deselect everything,
-	 * since sel files are note there anymore */
+	 * since sel files are not there anymore. */
 	if (*args[0] == 'm' && args[0][1] == 'v'
 	&& (!args[0][2] || args[0][2] == ' '))
 		deselect_all();
