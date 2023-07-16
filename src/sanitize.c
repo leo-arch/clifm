@@ -51,7 +51,7 @@ xclearenv(void)
  	while (environ != NULL && environ[0] != NULL) {
 		size_t len = strcspn(environ[0], "=");
 		if (len == 0) {
-			// Handle empty variable name (corrupted environ[])
+			/* Handle empty variable name (corrupted environ[]) */
 			continue;
 		}
 		if (len > lastlen) {

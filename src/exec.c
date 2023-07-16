@@ -492,8 +492,8 @@ _quit(char **args, const int exit_status)
 	if (!args || !args[0])
 		return;
 
-	if (*args[0] == 'Q')
-		conf.cd_on_quit = 1;
+	if (conf.cd_on_quit == 1)
+		conf.cd_on_quit = (*args[0] == 'Q');
 
 	if (args[1] && *args[1] == '-' && IS_HELP(args[1])) {
 		puts(QUIT_HELP);
