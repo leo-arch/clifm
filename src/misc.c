@@ -1406,6 +1406,9 @@ save_last_path(char *last_path_tmp)
 static void
 handle_last_path(void)
 {
+	if (!config_dir_gral)
+		return;
+
 	/* The cd_on_quit.sh function changes the shell current directory to the
 	 * directory specifcied in ~/.config/clifm/.last if this file is found (it
 	 * is actually a symlink to ~/.config/clifm/profiles/PROFILE/.last).
