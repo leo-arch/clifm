@@ -141,7 +141,7 @@ int_cmds_generator(const char *text, int state)
 		"acd     (set autocd on/off)",
 		"actions (manage actions-plugins)",
 		"ad      (dearchive-decompress files)",
-		"alias   (manage aliases)",
+		"alias   (list aliases)",
 		"ao      (set auto-open on/off)",
 		"b       (go back in the directory history list)",
 		"bd      (change to a parent directory)",
