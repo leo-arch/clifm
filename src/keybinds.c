@@ -1339,14 +1339,14 @@ rl_quit(int count, int key)
 	puts("\n");
 
 	/* Reset terminal attributes before exiting. Without this line, the program
-	 * quits, but terminal input is not printed to STDOUT */
+	 * quits, but terminal input is not printed to STDOUT. */
 	tcsetattr(STDIN_FILENO, TCSANOW, &shell_tmodes);
 	exit(EXIT_SUCCESS);
 }
 
 #ifndef _NO_PROFILES
 /* Get current profile and total amount of profiles and store this info
- * in pointers CUR and TOTAL */
+ * in pointers CUR and TOTAL. */
 static void
 get_cur_prof(int *cur, int *total)
 {

@@ -1133,51 +1133,6 @@ alias_import(char *file)
 	return EXIT_SUCCESS;
 }
 
-/* Store last visited directory for the restore last path and the
- * cd on quit functions. Current workspace/path will be marked with an
- * asterisk. It will be read at startup by get_last_path(). */
-void
-save_last_path(void)
-{
-	if (config_ok == 0 || !config_dir || !config_dir_gral) return;
-
-	char *last_dir = (char *)xnmalloc(config_dir_len + 7, sizeof(char));
-	snprintf(last_dir, config_dir_len + 7, "%s/.last", config_dir);
-
-	int fd = 0;
-	FILE *last_fp = open_fwrite(last_dir, &fd);
-	if (!last_fp) {
-		xerror(_("%s: Error saving last visited directory: %s\n"),
-			PROGRAM_NAME, strerror(errno));
-		free(last_dir);
-		return;
-	}
-
-	for (size_t i = 0; i < MAX_WS; i++) {
-		if (workspaces[i].path) {
-			if ((size_t)cur_ws == i)
-				fprintf(last_fp, "*%zu:%s\n", i, workspaces[i].path);
-			else
-				fprintf(last_fp, "%zu:%s\n", i, workspaces[i].path);
-		}
-	}
-
-	fclose(last_fp);
-
-	char *last_dir_tmp = (char *)xnmalloc(strlen(config_dir_gral) + 7, sizeof(char *));
-	snprintf(last_dir_tmp, config_dir_len + 7, "%s/.last", config_dir_gral);
-
-	if (conf.cd_on_quit == 1) {
-		char *cmd[] = {"cp", "-p", last_dir, last_dir_tmp, NULL};
-		launch_execv(cmd, FOREGROUND, E_NOFLAG);
-	} else { /* If not cd on quit, remove the file. */
-		unlinkat(XAT_FDCWD, last_dir_tmp, 0);
-	}
-
-	free(last_dir_tmp);
-	free(last_dir);
-}
-
 char *
 parse_usrvar_value(const char *str, const char c)
 {
@@ -1405,6 +1360,71 @@ free_workspaces_filters(void)
 	}
 }
 
+void
+save_last_path(char *last_path_tmp)
+{
+	if (config_ok == 0 || !config_dir || !config_dir_gral)
+		return;
+
+	char *last_path = (char *)xnmalloc(config_dir_len + 7, sizeof(char));
+	snprintf(last_path, config_dir_len + 7, "%s/.last", config_dir);
+
+	int fd = 0;
+	FILE *last_fp = open_fwrite(last_path, &fd);
+	if (!last_fp) {
+		xerror(_("%s: Error saving last visited directory: %s\n"),
+			PROGRAM_NAME, strerror(errno));
+		free(last_path);
+		return;
+	}
+
+	for (size_t i = 0; i < MAX_WS; i++) {
+		if (!workspaces[i].path)
+			continue;
+
+		if ((size_t)cur_ws == i)
+			fprintf(last_fp, "*%zu:%s\n", i, workspaces[i].path);
+		else
+			fprintf(last_fp, "%zu:%s\n", i, workspaces[i].path);
+	}
+
+	fclose(last_fp);
+
+	if (conf.cd_on_quit == 1 && last_path_tmp) {
+		char *cmd[] = {"cp", "-p", last_path, last_path_tmp, NULL};
+		launch_execv(cmd, FOREGROUND, E_NOFLAG);
+	}
+
+	free(last_path);
+}
+
+/* Store last visited directory for the restore-last-path and the
+ * cd-on-quit functions. Current workspace/path will be marked with an
+ * asterisk. It will be read at startup by get_last_path() and at exit by
+ * cd_on_quit.sh, if enabled. */
+static void
+handle_last_path(void)
+{
+	/* The cd_on_quit.sh function changes the shell current directory to the
+	 * directory specifcied in ~/.config/clifm/.last if this file is found.
+	 * Remove the file to prevent the function from changing the directory
+	 * if cd-on-quit is disabled (e.g., not exiting via 'Q'). If necessary,
+	 * it will be recreated by save_last_path() below. */
+	size_t len = strlen(config_dir_gral) + 7;
+	char *last_path_tmp = (char *)xnmalloc(len, sizeof(char));
+	snprintf(last_path_tmp, len, "%s/.last", config_dir_gral);
+
+	struct stat a;
+	if (lstat(last_path_tmp, &a) != -1
+	&& unlinkat(XAT_FDCWD, last_path_tmp, 0) == -1)
+		xerror("unlink: %s: %s\n", last_path_tmp, strerror(errno));
+
+	if (conf.restore_last_path == 1 || conf.cd_on_quit == 1)
+		save_last_path(last_path_tmp);
+
+	free(last_path_tmp);
+}
+
 /* This function is called by atexit() to clear whatever is there at exit
  * time and avoid thus memory leaks */
 void
@@ -1446,8 +1466,7 @@ free_stuff(void)
 	if (xargs.stealth_mode != 1)
 		save_jumpdb();
 
-	if (conf.restore_last_path || conf.cd_on_quit)
-		save_last_path();
+	handle_last_path();
 
 	free(bin_name);
 	free(alt_preview_file);

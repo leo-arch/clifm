@@ -146,8 +146,8 @@ profile_set(const char *prof)
 
 	int i;
 
-	if (conf.restore_last_path)
-		save_last_path();
+	if (conf.restore_last_path == 1)
+		save_last_path(NULL);
 
 	if (alt_profile) {
 		free(alt_profile);
