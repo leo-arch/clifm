@@ -1390,9 +1390,10 @@ save_last_path(char *last_path_tmp)
 
 	fclose(last_fp);
 
-	if (conf.cd_on_quit == 1 && last_path_tmp) {
-		char *cmd[] = {"cp", "-p", last_path, last_path_tmp, NULL};
-		launch_execv(cmd, FOREGROUND, E_NOFLAG);
+	if (conf.cd_on_quit == 1 && last_path_tmp
+	&& symlinkat(last_path, XAT_FDCWD, last_path_tmp) == -1) {
+		xerror(_("%s: cd-on-quit: Cannot create symbolic link '%s': %s\n"),
+			PROGRAM_NAME, last_path_tmp, strerror(errno));
 	}
 
 	free(last_path);
@@ -1406,7 +1407,8 @@ static void
 handle_last_path(void)
 {
 	/* The cd_on_quit.sh function changes the shell current directory to the
-	 * directory specifcied in ~/.config/clifm/.last if this file is found.
+	 * directory specifcied in ~/.config/clifm/.last if this file is found (it
+	 * is actually a symlink to ~/.config/clifm/profiles/PROFILE/.last).
 	 * Remove the file to prevent the function from changing the directory
 	 * if cd-on-quit is disabled (e.g., not exiting via 'Q'). If necessary,
 	 * it will be recreated by save_last_path() below. */
