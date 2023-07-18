@@ -72,7 +72,7 @@ xclearenv(void)
 			exit(EXIT_FAILURE);
 		}
 	}
-#endif /* !__NetBSD__ && !__HAIKU__ && !__APPLE__ */
+#endif /* !__NetBSD__ && !__HAIKU__ && !__APPLE__ && !__TERMUX */
 }
 
 static void
