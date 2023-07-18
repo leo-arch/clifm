@@ -572,7 +572,8 @@ open_fread(char *name, int *fd)
 	return fp;
 }
 
-/* Create a file for writing (truncating it to zero length if it already exists).
+/* Create a file for writing (truncating it to zero length if it already exists,
+ * and with permissions 600).
  * Return a file stream associated to the file named NAME and update FD to hold
  * the corresponding file descriptor.
  * NOTE: As stated here, file streams should be preferred over file descriptors:

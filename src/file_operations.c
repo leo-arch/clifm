@@ -902,9 +902,10 @@ create_file(char *name)
 	char *n = name;
 	int status = EXIT_SUCCESS;
 
-	/* Dir creation mode (777). mkdir(3) will modify this according to the
-	 * current umask value. */
-	mode_t mode = S_IRWXU | S_IRWXG | S_IRWXO;
+	/* Dir creation mode (777, or 700 if running in secure-mode). mkdir(3) will
+	 * modify this according to the current umask value. */
+	mode_t mode = (xargs.secure_env == 1 || xargs.secure_env_full == 1)
+		? S_IRWXU : S_IRWXU | S_IRWXG | S_IRWXO;
 
 	if (*n == '/') /* Skip root dir. */
 		n++;
@@ -928,9 +929,13 @@ CONT:
 	}
 
 	if (*n && status != EXIT_FAILURE) { /* Regular file */
-		/* Regular file creation mode (666). open(3) will modify this according
-		 * to the current umask value. */
-		mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
+		/* Regular file creation mode (666, or 600 in secure-mode). open(3)
+		 * will modify this according to the current umask value. */
+		if (xargs.secure_env == 1 || xargs.secure_env_full == 1)
+			mode = S_IRUSR | S_IWUSR;
+		else
+			mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
+
 		int fd = open(name, O_WRONLY | O_CREAT | O_EXCL, mode);
 		if (fd == -1) {
 			xerror("new: %s: %s\n", name, strerror(errno));

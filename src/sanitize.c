@@ -103,6 +103,7 @@ xsetenv(const char *name, const char *value)
 		xerror("%s: setenv: %s: %s\n", PROGRAM_NAME, name, strerror(errno));
 }
 
+/* See https://www.oreilly.com/library/view/secure-programming-cookbook/0596003943/ch01s09.html */
 static void
 disable_coredumps(void)
 {
@@ -113,16 +114,17 @@ disable_coredumps(void)
 	struct rlimit rlim;
 	rlim.rlim_cur = rlim.rlim_max = 0;
 	if (setrlimit(RLIMIT_CORE, &rlim) == -1)
-		xerror("setrlimit: RLIMIT_CORE: %s\n", strerror(errno));
+		xerror("setrlimit: Cannot set RLIMIT_CORE: %s\n", strerror(errno));
 }
 
 /* Sanitize the environment: set environ to NULL and then set a few
  * environment variables to get a minimally working environment.
- * Core dumps are disabled. */
+ * Core dumps are disabled. Umask is set to the most restrictive value: 077. */
 int
 xsecure_env(const int mode)
 {
 	disable_coredumps();
+	umask(0077);
 
 	char *display = (char *)NULL,
 		 *wayland_display = (char *)NULL,
