@@ -45,7 +45,8 @@
 static void
 xclearenv(void)
 {
-#if !defined(__NetBSD__) && !defined(__HAIKU__) && !defined(__APPLE__)
+#if !defined(__NetBSD__) && !defined(__HAIKU__) && !defined(__APPLE__) \
+&& !defined(__TERMUX__)
 	/* This seems to be enough (it is it according to the Linux/FreeBSD
 	 * manpage for clearenv(3)). */
 	environ = NULL;
