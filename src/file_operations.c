@@ -718,10 +718,10 @@ xchmod(const char *file, const char *mode_str, const int flag)
 int
 toggle_exec(const char *file, mode_t mode)
 {
+	/* Set it only for owner, unset it for every one */
+	(0100 & mode) ? (mode &= (mode_t)~0111) : (mode |= 0100);
 	/* Set or unset S_IXUSR, S_IXGRP, and S_IXOTH */
-	(0100 & mode) ? (mode &= (mode_t)~0111) : (mode |= 0111);
-	// Set it only for owner, unset it for every one
-//	(0100 & mode) ? (mode &= (mode_t)~0111) : (mode |= 0100);
+//	(0100 & mode) ? (mode &= (mode_t)~0111) : (mode |= 0111);
 
 	if (fchmodat(XAT_FDCWD, file, mode, 0) == -1) {
 		xerror("te: Changing permissions of '%s': %s\n",
@@ -929,7 +929,7 @@ CONT:
 	}
 
 	if (*n && status != EXIT_FAILURE) { /* Regular file */
-		/* Regular file creation mode (666, or 600 in secure-mode). open(3)
+		/* Regular file creation mode (666, or 600 in secure-mode). open(2)
 		 * will modify this according to the current umask value. */
 		if (xargs.secure_env == 1 || xargs.secure_env_full == 1)
 			mode = S_IRUSR | S_IWUSR;

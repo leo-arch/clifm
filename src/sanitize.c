@@ -119,7 +119,8 @@ disable_coredumps(void)
 
 /* Sanitize the environment: set environ to NULL and then set a few
  * environment variables to get a minimally working environment.
- * Core dumps are disabled. Umask is set to the most restrictive value: 077. */
+ * Core dumps are disabled.
+ * Umask is set to the most restrictive value: 0077. */
 int
 xsecure_env(const int mode)
 {
