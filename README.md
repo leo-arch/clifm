@@ -239,6 +239,8 @@ For a complete description please consult our [Wiki](https://github.com/leo-arch
 <summary>Click here to expand</summary>
 
 * `Development`
+  - More restrictive values when running in [secure mode](https://github.com/leo-arch/clifm/wiki/Specifics#a-secure-environment).
+* `1.13 (Voodoo Root)`
   - Support for BSD file flags (`p`/`pp` command).
   - Nano-second precision for timestamps (`p`/`pp` command).
   - Ported to Solaris (including doors support). If you experience some issue with the warning prompt, please consult the [troubleshooting section](https://github.com/leo-arch/clifm/wiki/Troubleshooting#warning-prompt).
