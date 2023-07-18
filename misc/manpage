@@ -2886,15 +2886,15 @@ There are two secure\-environment modes, the \fIregular\fR, and the \fIfull\fR o
 \fBa)\fR \fIRegular\fR: in this mode, the inherited environment is cleared, though a few variables are preserved to keep \fBclifm\fR running as stable as possible. These preserved variables are: \fBTERM\fR, \fBDISPLAY\fR, \fBLANG\fR, \fBTZ\fR, and, if FZF TAB completion mode is enabled, \fBFZF_DEFAULT_OPTS\fR.
 .TP
 The following variables are set in an environment agnostic way (that is, securely):
-  \- \fBHOME\fR, \fBSHELL\fR, and \fBUSER\fR are retrieved using \fBgetpwuid(3)\fR
+  \- \fBHOME\fR, \fBSHELL\fR, and \fBUSER\fR are retrieved using \fBgetpwuid\fR(3)
   \- \fBPATH\fR is set consulting \fB_PATH_STDPATH\fR (or \fB_CS_PATH\fR if the former is not available)
-  \- \fBIFS\fR is set to a sane, hard\-coded value: " \\n\\t"
+  \- \fBIFS\fR is set to a sane, hard\-coded value: " \\n\\t" (space, new line char, and horizontal TAB)
 .TP
-\fBb)\fR \fIFull\fR: this mode is just like the regular mode, except that nothing is imported from the environment at all and only \fBPATH\fR and \fBIFS\fR are set (as described above). Everything else remains unset, and is the user's responsibility to set environment variables (via the export function), as needed. In this case, you might want to set, at least, \fBTERM\fR, and, if running in a graphical environment, \fBDISPLAY\fR.
+As a plus, \fBcore dumps are disabled\fR, the \fBumask\fR value is set to \fB0077\fR at startup, and the creation mode (when using the \fInew\fR command) is forced to \fB0700 for directories\fR and \fB0600 for files\fR.
+.TP
+\fBb)\fR \fIFull\fR: this mode is just like the regular mode, except that \fInothing\fR is imported from the environment at all and only \fBPATH\fR and \fBIFS\fR are set (as described above). Everything else remains unset, and is the user's responsibility to set environment variables (via the export function), as needed. In this case, you might want to set, at least, \fBTERM\fR, and, if running in a graphical environment, \fBDISPLAY\fR.
 .TP
 Be aware that enabling secure-environment might break some functions, depending on the system configuration.
-.TP
-If running in any of these modes, \fBcore dumps are disabled\fR.
 .TP
 \fBB) Secure commands\fR
 .TP
