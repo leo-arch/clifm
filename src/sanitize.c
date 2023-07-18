@@ -28,7 +28,9 @@
 #include <paths.h> /* _PATH_STDPATH */
 #include <stdio.h>
 #include <errno.h>
-#include <sys/resource.h> /* setrlimit() */
+#include <sys/resource.h> /* getrlimit(3), setrlimit(3) */
+#include <unistd.h> /* close(2), sysconf(3) */
+#include <limits.h> /* OPEN_MAX */
 
 #include "sanitize.h"
 #include "aux.h"
@@ -117,6 +119,40 @@ disable_coredumps(void)
 		xerror("setrlimit: Cannot set RLIMIT_CORE: %s\n", strerror(errno));
 }
 
+/* Return the maximum number of files a process can have open. */
+static int
+get_open_max(void)
+{
+#ifdef _SC_OPEN_MAX
+	return (int)sysconf(_SC_OPEN_MAX);
+#endif /* _SC_OPEN_MAX */
+
+	/* This is what getdtablesize(3) does */
+	struct rlimit rlim;
+	if (getrlimit(RLIMIT_NOFILE, &rlim) != -1)
+		return (int)rlim.rlim_cur;
+
+#ifdef OPEN_MAX /* Not defined in Linux */
+	return OPEN_MAX;
+#endif /* OPEN_MAX */
+
+#if defined(__linux__) && defined(NR_OPEN)
+	return NR_OPEN;
+#endif /* NR_OPEN */
+
+	return 256; /* Let's fallback to a sane default */
+}
+
+/* Close all non-standard file descriptors (> 2) to avoid FD exhaustion. */
+static void
+sanitize_file_descriptors(void)
+{
+	int fd = 0, fds = get_open_max();
+
+	for (fd = 3; fd < fds; fd++)
+		close(fd);
+}
+
 /* Sanitize the environment: set environ to NULL and then set a few
  * environment variables to get a minimally working environment.
  * Core dumps are disabled.
@@ -124,6 +160,7 @@ disable_coredumps(void)
 int
 xsecure_env(const int mode)
 {
+	sanitize_file_descriptors();
 	disable_coredumps();
 	umask(0077);
 
