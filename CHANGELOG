@@ -38,7 +38,6 @@ Bug fixes
 * Listing files twice upon file removal (Haiku, Cygwin)
 * MinFilenameTrim overriden by MaxFilenameLen in long view.
 * Setting RlEditMode to 1 does not switch back to emacs mode.
-* Ctrl-Alt-j and Ctrl-Alt-m switch to vi editing mode, while Ctrl-Alt-e switches back to emacs mode.
 * Suggestions not properly removed in some cases (type 'bm add Camera/ cm', when suggested string is "bm add Camera/ Camera cm")
 * If running via the cd_on_quit.sh shell function, the shell directory is always changed, even if the exit command was not 'Q'.
 
@@ -65,6 +64,7 @@ New features/improvements
 * A generic file system events monitor using mtimes (for when neither inotify nor kqueue are available).
 * In case of find(1) implementations not supporting regex (OpenBSD/Solaris) try to use gfind(1) instead.
 * Enable secure cmds/environment on NetBSD, Haiku, and MacOS.
+* Ctrl-Alt-j and Ctrl-Alt-m switch to vi editing mode, while Ctrl-Alt-e switches back to emacs mode.
 
 1.12 - Blondebeard
 

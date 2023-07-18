@@ -1411,6 +1411,12 @@ parse_cmdline_args(const int argc, char **argv)
 		}
 	}
 
+#ifdef SECURITY_PARANOID
+	if (xargs.secure_env != 1 && xargs.secure_env_full != 1)
+		xsecure_env(SECURE_ENV_IMPORT);
+	xargs.secure_cmds = xargs.secure_env = 1;
+#endif /* SECURITY_PARANOID */
+
 	if (open_prev_mode != 0) {
 		open_preview_file(open_prev_file, open_prev_mode);
 		exit(EXIT_SUCCESS); /* Never reached */

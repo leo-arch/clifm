@@ -723,11 +723,24 @@ count_dir(const char *dir, const int pop)
 		return (-1);
 
 	DIR *p;
+
 	if ((p = opendir(dir)) == NULL) {
 		if (errno == ENOMEM)
 			exit(ENOMEM);
 		return (-1);
 	}
+/* Let's set the O_NOATIME flag (Linux only) to prevent updating atime, avoiding
+ * thus unnecessary disk writes. */
+/*#ifdef O_NOATIME
+	int fd = dirfd(p);
+	if (fd != -1) {
+		int fflags = fcntl(fd, F_GETFL);
+		if (fflags != -1) {
+			fflags |= O_NOATIME;
+			fcntl(fd, F_SETFL, fflags);
+		}
+	}
+#endif // O_NOATIME */
 
 	unsigned int c = 0;
 

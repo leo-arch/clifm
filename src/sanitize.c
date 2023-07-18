@@ -28,6 +28,7 @@
 #include <paths.h> /* _PATH_STDPATH */
 #include <stdio.h>
 #include <errno.h>
+#include <sys/resource.h> /* setrlimit() */
 
 #include "sanitize.h"
 #include "aux.h"
@@ -102,11 +103,27 @@ xsetenv(const char *name, const char *value)
 		xerror("%s: setenv: %s: %s\n", PROGRAM_NAME, name, strerror(errno));
 }
 
+static void
+disable_coredumps(void)
+{
+#if defined(ALLOW_COREDUMPS)
+	return;
+#endif /* ALLOW_COREDUMPS */
+
+	struct rlimit rlim;
+	rlim.rlim_cur = rlim.rlim_max = 0;
+	if (setrlimit(RLIMIT_CORE, &rlim) == -1)
+		xerror("setrlimit: RLIMIT_CORE: %s\n", strerror(errno));
+}
+
 /* Sanitize the environment: set environ to NULL and then set a few
- * environment variables to get a minimally working environment. */
+ * environment variables to get a minimally working environment.
+ * Core dumps are disabled. */
 int
 xsecure_env(const int mode)
 {
+	disable_coredumps();
+
 	char *display = (char *)NULL,
 		 *wayland_display = (char *)NULL,
 		 *_term = (char *)NULL,

@@ -3421,7 +3421,7 @@ reload_config(void)
 	/* Set up config files and options */
 	init_config();
 
-	/* If some option was not set, set it to the default value*/
+	/* If some option was not set, set it to the default value */
 	check_options();
 	set_sel_file();
 	create_tmp_files();
