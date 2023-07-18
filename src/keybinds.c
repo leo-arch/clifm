@@ -1812,6 +1812,9 @@ print_highlight_string(char *s, const int insert_point)
 static int
 print_cmdhist_line(int n, int beg_line)
 {
+	if (wrong_cmd == 1)
+		recover_from_wrong_cmd();
+
 	curhistindex = (size_t)n;
 
 	HIDE_CURSOR;
