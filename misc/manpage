@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Jul 18, 2023" "clifm 1.13" "CLIFM Manual"
+.TH "CLIFM" "1" "Jul 18, 2023" "clifm 1.13.1" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -2894,6 +2894,8 @@ The following variables are set in an environment agnostic way (that is, securel
 .TP
 Be aware that enabling secure-environment might break some functions, depending on the system configuration.
 .TP
+If running in any of these modes, \fBcore dumps are disabled\fR.
+.TP
 \fBB) Secure commands\fR
 .TP
 Some commands are automatically executed by \fBclifm\fR: (un)mount commands (via the \fInet\fR command), opening applications (via \fILira\fR), just as prompt, profile, and autocommands. These commands are read from a configuration file and then executed. Now, if an attacker has access to any of these files, she might force \fBclifm\fR to run any arbitrary command, and thereby possibly exposing the whole system.
@@ -2910,7 +2912,7 @@ Every time a command is thus automatically executed via the system shell (i.e. w
 .TP
 Commands containing \fIat least one\fR unsafe character will be rejected. Of course, we cannot (and should not) prevent what looks like legitimate, benign commands from being executed. But we can stop commands that, in an untrusted environment, look suspicious. This is specially the case of stream redirection (>), pipes (|), sequential (;) and conditional execution (&&, ||), command substitution ($(cmd)), and environment variables ($VAR).
 .TP
-\fBc)\fR A secure environment is set (\fI\-\-secure\-env\fR is implied; to run on a fully sanitized environment run as follows: \fI\-\-secure\-cmds \-\-secure\-env\-full\fR:
+\fBc)\fR A secure environment is set (\fI\-\-secure\-env\fR is implied; to run on a fully sanitized environment run as follows: \fI\-\-secure\-cmds \-\-secure\-env\-full\fR.
 
 .SH 21. MISCELLANEOUS NOTES
 .sp
