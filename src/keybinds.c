@@ -1812,8 +1812,10 @@ print_highlight_string(char *s, const int insert_point)
 static int
 print_cmdhist_line(int n, int beg_line)
 {
+#ifndef _NO_SUGGESTIONS
 	if (wrong_cmd == 1)
 		recover_from_wrong_cmd();
+#endif /* !_NO_SUGGESTIONS */
 
 	curhistindex = (size_t)n;
 
