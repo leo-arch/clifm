@@ -41,9 +41,9 @@
 #include "aux.h"
 #include "file_operations.h"
 #include "history.h"
-#ifdef NO_FS_EVENTS_MONITOR
+#ifdef GENERIC_FS_MONITOR
 # include "listing.h" /* reload_dirlist() */
-#endif /* NO_FS_EVENTS_MONITOR */
+#endif /* GENERIC_FS_MONITOR */
 #include "messages.h"
 #include "misc.h"
 #include "cleaner_table.h"
@@ -621,7 +621,7 @@ CONFIRM:
 
 	if (f == 0) {
 		/* Just in case either the original or the replacement file name
-		 * was removed from the list by the user, leaving only one of the two */
+		 * was removed from the list by the user, leaving only one of the two. */
 		free(bfiles[0].original);
 		free(bfiles[0].replacement);
 		free(bfiles);
@@ -631,7 +631,7 @@ CONFIRM:
 
 	/* The user entered 'e' to edit the file, but nothing was modified
 	 * Ask for confirmation in case the user just wanted to see what would
-	 * be done */
+	 * be done. */
 	if (_edit == 1) {
 		printf(_("%zu %s will be bleached\n"), f, f > 1 ? _("files") : _("file"));
 		if (rl_get_y_or_n(_("Continue? [y/n] ")) != 1) {
@@ -683,8 +683,15 @@ CONFIRM:
 	if (exit_status == EXIT_FAILURE || total_rename == 0) {
 		printf(_("%s: %d file(s) bleached\n"), FUNC_NAME, total_rename);
 	} else {
-		_err(ERR_NO_LOG, PRINT_PROMPT, _("%s: %d file(s) bleached\n"),
+#ifdef GENERIC_FS_MONITOR
+		if (conf.autols == 1)
+			reload_dirlist();
+		print_reload_msg(_("%s: %d file(s) bleached\n"),
 			FUNC_NAME, total_rename);
+#else
+		_err(ERR_NO_LOG, PRINT_PROMPT, _("%s->%s %s: %d file(s) bleached\n"),
+			mi_c, df_c, FUNC_NAME, total_rename);
+#endif /* GENERIC_FS_MONITOR */
 	}
 
 	return exit_status;

@@ -284,8 +284,8 @@ sanitize_gral(const char *cmd)
 	return EXIT_SUCCESS;
 }
 
-/* Returns 1 if at least one character in CMD is a non-escaped
- * blacklisted char (<>|;&$). Oterwise, returns 0 */
+/* Return EXIT_SUCCESS if at least one character in CMD is a non-escaped
+ * blacklisted char (<>|;&$). Oterwise, return EXIT_FAILURE. */
 static int
 sanitize_blacklist(const char *cmd)
 {
@@ -339,8 +339,8 @@ clean_cmd(const char *str)
 	return EXIT_SUCCESS;
 }
 
-/* Sanitize CMD according to TYPE. Returns zero if command is safe or
- * one if not. */
+/* Sanitize CMD according to TYPE. Returns EXIT_SUCCESS if command is safe or
+ * EXIT_FAILURE if not. */
 int
 sanitize_cmd(const char *str, const int type)
 {

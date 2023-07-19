@@ -3194,8 +3194,8 @@ cmd_takes_edit(const char *str)
 	return 0;
 }
 
-/* Return 1 if command in STR is an internal command and the first subcommand
- * is 'edit'. Otherwise, return 0. */
+/* Return 1 if command in STR is an internal command and takes a text editor as
+ * parameter. Otherwise, return 0. */
 static int
 is_edit(const char *str, const size_t words_n)
 {
