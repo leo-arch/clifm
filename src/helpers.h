@@ -259,9 +259,9 @@ extern time_t curdir_mtime;
 # define XAT_FDCWD AT_FDCWD
 #endif /* __sun */
 
-#if !defined(_BE_POSIX) && !defined(__TERMUX__)
+#if !defined(_BE_POSIX)
 # define HAVE_ARC4RANDOM
-#endif /* !_BE_POSIX && !__TERMUX__ */
+#endif /* !_BE_POSIX */
 
 /* The following flags are used via an integer (FLAGS). If an integer has
  * 4 bytes, then we can use a total of 32 flags (0-31)
