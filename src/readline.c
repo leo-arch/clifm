@@ -3197,10 +3197,13 @@ cmd_takes_edit(const char *str)
 /* Return 1 if command in STR is an internal command and the first subcommand
  * is 'edit'. Otherwise, return 0. */
 static int
-is_edit(const char *str)
+is_edit(const char *str, const size_t words_n)
 {
 	if (!str || !*str)
 		return 0;
+
+	if (words_n > 2 && *str == 'r' && str[1] == 'r' && str[2] == ' ')
+		return 1;
 
 	char *p = strchr(str, ' ');
 	if (!p || *(p + 1) != 'e' || !*(p + 2))
@@ -4161,7 +4164,7 @@ FIRST_WORD_COMP:
 
 #ifndef _NO_LIRA
 	/* #### OPENING APPS FOR INTERNAL CMDS TAKING 'EDIT' AS SUBCOMMAND */
-	if (is_edit(lb) == 1 && config_file) {
+	if (is_edit(lb, words_n) == 1 && config_file) {
 		/* mime_open_with_tab needs a file name to match against the
 		 * mimelist file and get the list of opening applications.
 		 * Now, since here we are listing apps to open config files,
