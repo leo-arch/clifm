@@ -746,10 +746,16 @@ print_tips(const int all)
 		return;
 	}
 
-	srand((unsigned int)time(NULL));
+#ifndef HAVE_ARC4RANDOM
+	srandom((unsigned int)time(NULL));
+	long tip_num = random() % (int)tipsn;
+#else
+	uint32_t tip_num = arc4random_uniform((uint32_t)tipsn);
+#endif /* !HAVE_ARC4RANDOM */
+
 	printf("%s%sTIP%s: %s\n", conf.colorize == 1 ? df_c : "",
-		conf.colorize == 1 ? BOLD : "", conf.colorize == 1 ? df_c : "",
-		TIPS[rand() % (int)tipsn]);
+		conf.colorize == 1 ? BOLD : "", conf.colorize == 1
+		? df_c : "", TIPS[tip_num]);
 }
 
 /* Check whether the conditions to run the new_instance function are
@@ -2489,6 +2495,10 @@ bonus_function(void)
 		NULL};
 
 	size_t num = (sizeof(phrases) / sizeof(phrases[0])) - 1;
-	srand((unsigned int)time(NULL));
-	puts(phrases[rand() % (int)num]);
+#ifndef HAVE_ARC4RANDOM
+	srandom((unsigned int)time(NULL));
+	puts(phrases[random() % (int)num]);
+#else
+	puts(phrases[arc4random_uniform((uint32_t)num)]);
+#endif /* !HAVE_ARC4RANDOM */
 }

@@ -38,7 +38,9 @@
 #include <glob.h>
 #include <stdio.h>
 #include <string.h>
-#include <time.h>
+#ifndef HAVE_ARC4RANDOM
+# include <time.h> /* time(2) */
+#endif /* !HAVE_ARC4RANDOM */
 #include <wchar.h>
 #if !defined(__HAIKU__) && !defined(__OpenBSD__) && !defined(__ANDROID__)
 # define HAVE_WORDEXP
@@ -615,17 +617,23 @@ char *
 gen_rand_str(const size_t len)
 {
 	const char charset[] = "0123456789#%-_"
-			 "abcdefghijklmnopqrstuvwxyz"
-			 "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+		"abcdefghijklmnopqrstuvwxyz"
+		"ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-	srand((unsigned int)time(NULL));
+#ifndef HAVE_ARC4RANDOM
+	srandom((unsigned int)time(NULL));
+#endif /* !HAVE_ARC4RANDOM */
 
 	char *p = (char *)xnmalloc(len + 1, sizeof(char));
 	char *str = p;
 
 	int x = (int)len;
 	while (x--) {
-		int i = rand() % (int)(sizeof(charset) - 1);
+#ifndef HAVE_ARC4RANDOM
+		long i = random() % (int)(sizeof(charset) - 1);
+#else
+		uint32_t i = arc4random_uniform(sizeof(charset) - 1);
+#endif /* !HAVE_ARC4RANDOM */
 		*p = charset[i];
 		p++;
 	}
