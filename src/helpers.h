@@ -223,6 +223,8 @@
 # define ST_BTIME st_birthtimespec
 #elif defined(__FreeBSD__) || defined(__CYGWIN__)
 # define ST_BTIME st_birthtim
+#elif defined(__HAIKU__)
+# define ST_BTIME st_crtim
 #elif defined(__sun) && !defined(_NO_SUN_BIRTHTIME)
 /* In the case of Solaris, ST_BTIME is just a flag telling we should run
  * get_birthtime() to get files creation time. */
