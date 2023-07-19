@@ -541,7 +541,8 @@ static int
 nothing_to_do(char **tmp_file, struct dirent ***a, const int n, const int fd)
 {
 	puts(_("rr: Nothing to do"));
-	unlinkat(fd, *tmp_file, 0);
+	if (unlinkat(fd, *tmp_file, 0) == 1)
+		xerror("rr: unlink: %s: %s\n", *tmp_file, strerror(errno));
 	close(fd);
 	free(*tmp_file);
 
@@ -600,7 +601,10 @@ bulk_remove(char *s1, char *s2)
 	free(rfiles);
 
 END:
-	unlinkat(fd, tmp_file, 0);
+	if (unlinkat(fd, tmp_file, 0) == -1) {
+		_err('w', PRINT_PROMPT, "rr: unlink: %s: %s\n",
+			tmp_file, strerror(errno));
+	}
 	close(fd);
 	free(tmp_file);
 	return ret;
@@ -2165,6 +2169,8 @@ bulk_rename(char **args)
 	int tmp_fd = 0;
 	fp = open_fwrite(bulk_file, &tmp_fd);
 	if (!fp) {
+		if (unlink(bulk_file) == -1)
+			xerror("br: unlink: %s: %s\n", bulk_file, strerror(errno));
 		xerror("br: fopen: %s: %s\n", bulk_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -2224,13 +2230,15 @@ bulk_rename(char **args)
 	close(fd);
 
 	if (counter == 0) { /* No valid file name */
-		if (unlinkat(fd, bulk_file, 0) == -1)
-			xerror("br: unlinkat: %s: %s\n", bulk_file, strerror(errno));
+		if (unlink(bulk_file) == -1)
+			xerror("br: unlink: %s: %s\n", bulk_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
 	fp = open_fread(bulk_file, &fd);
 	if (!fp) {
+		if (unlink(bulk_file) == -1)
+			xerror("br: unlink: %s: %s\n", bulk_file, strerror(errno));
 		xerror("br: %s: %s\n", bulk_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -2255,6 +2263,8 @@ bulk_rename(char **args)
 	fclose(fp);
 	fp = open_fread(bulk_file, &fd);
 	if (!fp) {
+		if (unlink(bulk_file) == -1)
+			xerror("br: unlink: %s: %s\n", bulk_file, strerror(errno));
 		xerror("br: %s: %s\n", bulk_file, strerror(errno));
 		return errno;
 	}
@@ -2390,6 +2400,8 @@ _export(char **filenames, const int open)
 	int tmp_fd = 0;
 	FILE *fp = open_fwrite(tmp_file, &tmp_fd);
 	if (!fp) {
+		if (unlink(tmp_file) == -1)
+			xerror("exp: unlink: %s: %s\n", tmp_file, strerror(errno));
 		xerror("exp: %s: %s\n", tmp_file, strerror(errno));
 		free(tmp_file);
 		return (char *)NULL;
@@ -2428,6 +2440,8 @@ _export(char **filenames, const int open)
 	if (ret == EXIT_SUCCESS)
 		return tmp_file;
 
+	if (unlink(tmp_file) == -1)
+		xerror("exp: unlink: %s: %s\n", tmp_file, strerror(errno));
 	free(tmp_file);
 	return (char *)NULL;
 }

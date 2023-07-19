@@ -346,10 +346,8 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 	*edited_names = 1;
 
 	char f[PATH_MAX];
-	if (xargs.stealth_mode == 1)
-		snprintf(f, sizeof(f), "%s/%s", P_tmpdir, TMP_FILENAME);
-	else
-		snprintf(f, sizeof(f), "%s/%s", tmp_dir, TMP_FILENAME);
+	snprintf(f, sizeof(f), "%s/%s", (xargs.stealth_mode == 1)
+		? P_tmpdir : tmp_dir, TMP_FILENAME);
 
 	int fd = mkstemp(f);
 	if (fd == -1) {
@@ -362,6 +360,8 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 #if defined(__HAIKU__) || defined(__sun)
 	fp = fopen(f, "w");
 	if (!fp) {
+		if (unlink(f) == -1)
+			_err('w', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
 		_err('e', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
 		return (struct bleach_t *)NULL;
 	}
@@ -393,6 +393,8 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 
 	fp = open_fread(f, &fd);
 	if (!fp) {
+		if (unlink(f) == -1)
+			_err('w', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
 		_err('e', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
 		return (struct bleach_t *)NULL;
 	}
@@ -407,8 +409,8 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 	open_in_foreground = 0;
 	if (exit_status != EXIT_SUCCESS) {
 		xerror("bleach: %s: %s\n", f, strerror(errno));
-		if (unlinkat(fd, f, 0) == -1)
-			_err('e', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
+		if (unlink(f) == -1)
+			xerror("bleach: %s: %s\n", f, strerror(errno));
 		fclose(fp);
 		return (struct bleach_t *)NULL;
 	}
@@ -416,16 +418,18 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 	fclose(fp);
 	fp = open_fread(f, &fd);
 	if (!fp) {
+		if (unlink(f) == -1)
+			_err('w', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
 		_err('e', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
 		return (struct bleach_t *)NULL;
 	}
 
 	/* Compare the new modification time to the stored one: if they
-	 * match, nothing was modified */
+	 * match, nothing has been modified. */
 	fstat(fd, &attr);
 	if (mtime_bfr == (time_t)attr.st_mtime) {
 		if (unlinkat(fd, f, 0) == -1)
-			_err('e', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
+			_err('w', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
 		fclose(fp);
 		*edited_names = 0;
 		return bfiles; /* Return the original list of files */
@@ -504,7 +508,7 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 	free(line);
 
 	if (unlinkat(fd, f, 0) == -1)
-		_err('e', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
+		_err('w', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
 	fclose(fp);
 
 	return bfiles;

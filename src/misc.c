@@ -2354,11 +2354,12 @@ quick_help(char *topic)
 		return EXIT_FAILURE;
 	}
 
-	FILE *fp;
-	fp = open_fwrite(tmp_file, &fd);
+	FILE *fp = open_fwrite(tmp_file, &fd);
 	if (!fp) {
 		xerror("%s: fopen: %s: %s\n", PROGRAM_NAME, tmp_file, strerror(errno));
 		free(_pager);
+		if (unlink(tmp_file) == -1)
+			_err('w', PRINT_PROMPT, "help: %s: %s\n", tmp_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -2377,8 +2378,9 @@ quick_help(char *topic)
 		char *cmd[] = {_pager, tmp_file, NULL};
 		ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	}
-	unlink(tmp_file);
 
+	if (unlink(tmp_file) == -1)
+		_err('w', PRINT_PROMPT, "help: %s: %s\n", tmp_file, strerror(errno));
 	fclose(fp);
 	free(_pager);
 
