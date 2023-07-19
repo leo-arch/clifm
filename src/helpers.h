@@ -259,7 +259,7 @@ extern time_t curdir_mtime;
 # define XAT_FDCWD AT_FDCWD
 #endif /* __sun */
 
-#if !defined(_BE_POSIX) && !defined(__HAIKU__)
+#if !defined(_NO_ARC4RANDOM) && !defined(_BE_POSIX) && !defined(__HAIKU__)
 # if !defined(__linux__) || defined(__ANDROID__)
 #  define HAVE_ARC4RANDOM
 # elif defined(__GLIBC__) && (__GLIBC__ > 2 \
