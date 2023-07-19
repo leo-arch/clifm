@@ -259,9 +259,14 @@ extern time_t curdir_mtime;
 # define XAT_FDCWD AT_FDCWD
 #endif /* __sun */
 
-#if !defined(_BE_POSIX)
-# define HAVE_ARC4RANDOM
-#endif /* !_BE_POSIX */
+#if !defined(_BE_POSIX) && !defined(__HAIKU__)
+# if !defined(__linux__) || defined(__ANDROID__)
+#  define HAVE_ARC4RANDOM
+# elif defined(__GLIBC__) && (__GLIBC__ > 2 \
+|| (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 36))
+#   define HAVE_ARC4RANDOM
+# endif /* !__linux__ || __ANDROID__ */
+#endif /* !_BE_POSIX && !__HAIKU__ */
 
 /* The following flags are used via an integer (FLAGS). If an integer has
  * 4 bytes, then we can use a total of 32 flags (0-31)
