@@ -4,7 +4,7 @@
 function p --wraps=clifm --description="Execute a command on the files selected using CliFM"
     set --function clifm_selfile (mktemp "/tmp/clifm_selfile.XXXXXXXXXX")
 
-    clifm --sel-file="$clifm_selfile"
+    clifm $argv --sel-file="$clifm_selfile"
 
     # NOTE: -s returns true if the size of the file is greater than zero
     if test -s "$clifm_selfile"
