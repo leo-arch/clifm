@@ -21,9 +21,11 @@ SRCDIR = src
 SRC = $(SRCDIR)/*.c
 HEADERS = $(SRCDIR)/*.h
 
+osver != uname -r | sed -e 's/\.\([0-9]\{1,1\}\)$$/0\1/' -e 's/\.//'
+
 CFLAGS ?= -O3 -fstack-protector-strong
 CFLAGS += -Wall -Wextra
-CPPFLAGS += -DCLIFM_DATADIR=$(DATADIR)
+CPPFLAGS += -DCLIFM_DATADIR=$(DATADIR) -DSUN_VERSION=$(osver)
 
 LIBS ?= -lreadline -ltermcap -lmagic -lnvpair
 

@@ -103,10 +103,10 @@
 # define MTIMNSEC st_mtim.tv_nsec
 #endif /* __NetBSD__ || __APPLE__ */
 
-#ifndef major
+#ifndef major /* Not defined in Haiku */
 # define major(x) ((x >> 8) & 0x7F)
 #endif /* major */
-#ifndef minor
+#ifndef minor /* Not defined in Haiku */
 # define minor(x) (x & 0xFF)
 #endif /* minor */
 

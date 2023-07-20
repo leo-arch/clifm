@@ -62,7 +62,7 @@ size_t xstrnlen(const char *restrict);
 size_t xstrsncpy(char *restrict, const char *restrict, size_t);
 char * xstrncat(char *restrict dst, const size_t dst_end,
 	const char *restrict src, const size_t dst_len);
-int xstrverscmp(const char *, const char *);
+int  xstrverscmp(const char *, const char *);
 
 __END_DECLS
 

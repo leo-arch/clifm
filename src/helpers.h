@@ -261,14 +261,30 @@ extern time_t curdir_mtime;
 # define XAT_FDCWD AT_FDCWD
 #endif /* __sun */
 
+/* Do we have arc4random_uniform(3). If not, fallback to random(3). */
 #if !defined(_NO_ARC4RANDOM) && !defined(_BE_POSIX) && !defined(__HAIKU__)
-# if !defined(__linux__) || defined(__ANDROID__)
+# if defined(__FreeBSD__) && __FreeBSD_version >= 800041
 #  define HAVE_ARC4RANDOM
-# elif defined(__GLIBC__) && (__GLIBC__ > 2 \
-|| (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 36))
+# elif defined(__NetBSD__)
+#  if __NetBSD_Prereq__(6,0,0)
 #   define HAVE_ARC4RANDOM
-# endif /* !__linux__ || __ANDROID__ */
-#endif /* !_BE_POSIX && !__HAIKU__ */
+#  endif /* NetBSD >= 6.0 */
+# elif defined(__OpenBSD__) && OpenBSD >= 200806 /* version 4.4 */
+#  define HAVE_ARC4RANDOM
+# elif defined(__DragonFly__) && __DragonFly_version >= 400600
+/* At least since 4.6 (Sep 2016). See https://gitweb.dragonflybsd.org/dragonfly.git/commitdiff/a2cdfb90273ff84696f4103580173cce21c12e2b
+ * It might be less though. */
+#  define HAVE_ARC4RANDOM
+# elif defined(__sun) && defined(SUN_VERSION) && SUN_VERSION >= 511
+/* 5.11 at least: it might be less. */
+#  define HAVE_ARC4RANDOM
+# elif defined(__linux__) && defined(__GLIBC__) && (__GLIBC__ > 2 \
+|| (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 36))
+#  define HAVE_ARC4RANDOM
+# elif defined(__CYGWIN__) || (defined(__linux__) && defined(__ANDROID__))
+#  define HAVE_ARC4RANDOM
+# endif /* __FreeBSD__ */
+#endif /* !_NO_ARC4RANDOM && !_BE_POSIX && !__HAIKU__ */
 
 /* The following flags are used via an integer (FLAGS). If an integer has
  * 4 bytes, then we can use a total of 32 flags (0-31)
