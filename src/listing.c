@@ -1933,7 +1933,7 @@ list_dir_light(void)
 #ifdef SOLARIS_DOORS
 		case DT_DOOR: file_info[n].color = oo_c; stats.door++; break;
 #endif /* SOLARIS_DOORS */
-		case DT_UNKNOWN: file_info[n].color = uf_c; stats.unknown++; break;
+		case DT_UNKNOWN: file_info[n].color = no_c; stats.unknown++; break;
 		default: file_info[n].color = df_c; break;
 		}
 
@@ -2558,7 +2558,7 @@ list_dir(void)
 #ifdef SOLARIS_DOORS
 		case DT_DOOR: file_info[n].color = oo_c; break;
 #endif /* SOLARIS_DOORS */
-		case DT_UNKNOWN: file_info[n].color = uf_c; break;
+		case DT_UNKNOWN: file_info[n].color = no_c; break;
 		default: file_info[n].color = df_c; break;
 		}
 

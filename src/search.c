@@ -46,7 +46,7 @@
 
 #define ERR_SKIP_REGEX 2
 
-#if defined(__OpenBSD__) || defined(__sun)
+#if (defined(__OpenBSD__) || defined(__sun)) && !defined(_BE_POSIX)
 /* OpenBSD/Solaris find(1) has neither -regex nor -iregex. We'll try to use
  * gfind(1) instead.*/
 # define FIND_HAS_NO_REGEX
