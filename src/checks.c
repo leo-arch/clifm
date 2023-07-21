@@ -28,17 +28,19 @@
 #include <stdio.h>
 #include <string.h>
 
-#if defined(__NetBSD__)
-# include <sys/param.h>
-# if __NetBSD_Prereq__(9,99,63)
+#ifndef _BE_POSIX
+# if defined(__NetBSD__)
+#  include <sys/param.h>
+#  if __NetBSD_Prereq__(9,99,63)
+#   include <sys/acl.h>
+#   define _ACL_OK
+#  endif /* __NetBSD_Prereq__ */
+# elif !defined(__HAIKU__) && !defined(__OpenBSD__) && !defined(__sun) \
+&& !defined(__DragonFly__)
 #  include <sys/acl.h>
 #  define _ACL_OK
-# endif /* __NetBSD_Prereq__ */
-#elif !defined(__HAIKU__) && !defined(__OpenBSD__) && !defined(__sun) \
-&& !defined(__DragonFly__)
-# include <sys/acl.h>
-# define _ACL_OK
-#endif /* __NetBSD__ */
+# endif /* __NetBSD__ */
+#endif /* _BE_POSIX */
 
 #include <unistd.h>
 

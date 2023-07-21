@@ -204,9 +204,9 @@ get_file_suffix(const mode_t type)
 	case DT_LNK: return LINK_CHR;
 	case DT_SOCK: return SOCK_CHR;
 	case DT_FIFO: return FIFO_CHR;
-#ifdef __sun
+#ifdef SOLARIS_DOORS
 	case DT_DOOR: return DOOR_CHR;
-#endif /* __sun */
+#endif /* SOLARIS_DOORS */
 	case DT_UNKNOWN: return UNKNOWN_CHR;
 	default: return 0;
 	}

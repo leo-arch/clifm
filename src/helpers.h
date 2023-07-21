@@ -241,7 +241,7 @@
 # endif /* _STATX */
 #endif /* !_BE_POSIX */
 
-/* Event handling */
+/* File system events handling */
 #if defined(LINUX_INOTIFY)
 # define NUM_EVENT_SLOTS 32 /* Make room for 32 events */
 # define EVENT_SIZE (sizeof(struct inotify_event))
@@ -267,6 +267,9 @@ extern time_t curdir_mtime;
  * cast, the value gets interpreted as uint (4291925331), which throws compiler
  * warnings. See https://github.com/python/cpython/issues/60169 */
 # define XAT_FDCWD (int)AT_FDCWD
+# ifndef _BE_POSIX
+#  define SOLARIS_DOORS
+# endif /* !_BE_POSIX */
 #else
 # define XAT_FDCWD AT_FDCWD
 #endif /* __sun */

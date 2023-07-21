@@ -227,9 +227,9 @@ wx_parent_check(char *file)
 
 		break;
 
-#ifdef __sun
+#ifdef SOLARIS_DOORS
 	case S_IFDOOR: /* fallthrough */
-#endif /* __sun */
+#endif /* SOLARIS_DOORS */
 	case S_IFSOCK: /* fallthrough */
 	case S_IFIFO: /* fallthrough */
 	case S_IFLNK:

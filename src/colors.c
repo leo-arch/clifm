@@ -856,9 +856,9 @@ reset_filetype_colors(void)
 	*nd_c = '\0';
 	*nf_c = '\0';
 	*no_c = '\0';
-#ifdef __sun
+#ifdef SOLARIS_DOORS
 	*oo_c = '\0';
-#endif /* __sun */
+#endif /* SOLARIS_DOORS */
 	*or_c = '\0';
 	*ow_c = '\0';
 	*pi_c = '\0';
@@ -1207,10 +1207,10 @@ set_filetype_colors(char **colors, const size_t words)
 				set_color(colors[i] + 3, or_c, RL_PRINTABLE);
 			else if (colors[i][1] == 'w')
 				set_color(colors[i] + 3, ow_c, RL_PRINTABLE);
-#ifdef __sun
+#ifdef SOLARIS_DOORS
 			else if (colors[i][1] == 'o') /* oo = Door */
 				set_color(colors[i] + 3, oo_c, RL_PRINTABLE);
-#endif /* __sun */
+#endif /* SOLARIS_DOORS */
 		}
 
 		else if (*colors[i] == 'p' && colors[i][1] == 'i')
@@ -1703,9 +1703,9 @@ set_default_colors(void)
 	if (!*no_c) xstrsncpy(no_c, DEF_NO_C, sizeof(no_c));
 	if (!*uf_c) xstrsncpy(uf_c, DEF_UF_C, sizeof(uf_c));
 	if (!*mh_c) xstrsncpy(mh_c, DEF_MH_C, sizeof(mh_c));
-#ifdef __sun
+#ifdef SOLARIS_DOORS
 	if (!*oo_c) xstrsncpy(oo_c, DEF_OO_C, sizeof(oo_c));
-#endif /* __sun */
+#endif /* SOLARIS_DOORS */
 
 #ifndef _NO_ICONS
 	if (!*dir_ico_c)
@@ -2247,9 +2247,9 @@ disable_bold(void)
 	remove_bold_attr(nd_c);
 	remove_bold_attr(nf_c);
 	remove_bold_attr(no_c);
-#ifdef __sun
+#ifdef SOLARIS_DOORS
 	remove_bold_attr(oo_c);
-#endif /* __sun */
+#endif /* SOLARIS_DOORS */
 	remove_bold_attr(or_c);
 	remove_bold_attr(ow_c);
 	remove_bold_attr(pi_c);
@@ -2527,9 +2527,9 @@ colors_list(char *ent, const int eln, const int pad, const int new_line)
 		case S_IFIFO: color = pi_c; break;
 		case S_IFBLK: color = bd_c; break;
 		case S_IFCHR: color = cd_c; break;
-#ifdef __sun
+#ifdef SOLARIS_DOORS
 		case S_IFDOOR: color = oo_c; break;
-#endif /* __sun */
+#endif /* SOLARIS_DOORS */
 		case S_IFSOCK: color = so_c; break;
 		default: color = no_c; break;
 		}
@@ -2702,9 +2702,9 @@ color_codes(void)
 	printf(_(" %sfile name%s: cd: Character special file\n"), cd_c, df_c);
 	printf(_(" %sfile name%s: so: Socket file\n"), so_c, df_c);
 	printf(_(" %sfile name%s: pi: Pipe or FIFO special file\n"), pi_c, df_c);
-#ifdef __sun
+#ifdef SOLARIS_DOORS
 	printf(_(" %sfile name%s: oo: Door file\n"), oo_c, df_c);
-#endif /* __sun */
+#endif /* SOLARIS_DOORS */
 	printf(_(" %sfile name%s: su: SUID file\n"), su_c, df_c);
 	printf(_(" %sfile name%s: sg: SGID file\n"), sg_c, df_c);
 	printf(_(" %sfile name%s: ca: File with capabilities\n"), ca_c, df_c);

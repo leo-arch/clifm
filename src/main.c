@@ -321,9 +321,9 @@ char
 	nd_c[MAX_COLOR], /* No read directory */
 	nf_c[MAX_COLOR], /* No read file */
 	no_c[MAX_COLOR], /* Unknown */
-#ifdef __sun
+#ifdef SOLARIS_DOORS
 	oo_c[MAX_COLOR], /* Solaris door */
-#endif /* __sun */
+#endif /* SOLARIS_DOORS */
 	or_c[MAX_COLOR], /* Broken symlink */
 	ow_c[MAX_COLOR], /* Other writable */
 	pi_c[MAX_COLOR], /* FIFO, pipe */

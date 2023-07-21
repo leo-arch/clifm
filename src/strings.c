@@ -88,7 +88,7 @@ typedef char *rl_cpvfunc_t;
 #define MAX_STR_LEN 4096
 #define INT_ARRAY_MAX 32
 
-#ifdef __sun
+#ifdef SOLARIS_DOORS
 # define IS_FILE_TYPE_FILTER(x) ((x) == 'b' || (x) == 'c' || (x) == 'C' \
 || (x) == 'd' || (x) == 'f' || (x) == 'g' || (x) == 'h' || (x) == 'l' \
 || (x) == 'o' || (x) == 'p' || (x) == 's' || (x) == 't' || (x) == 'u' \
@@ -98,7 +98,7 @@ typedef char *rl_cpvfunc_t;
 || (x) == 'd' || (x) == 'f' || (x) == 'g' || (x) == 'h' || (x) == 'l' \
 || (x) == 'o' || (x) == 'p' || (x) == 's' || (x) == 't' || (x) == 'u' \
 || (x) == 'x')
-#endif /* __sun */
+#endif /* SOLARIS_DOORS */
 
 #define IS_GLOB(x, y) (((x) == '*' || (x) == '?' || (x) == '{' ) && (y) != ' ')
 
@@ -1347,12 +1347,12 @@ expand_file_type_filter(const char t)
 			if (file_info[i].dir == 1)
 				f[n++] = strdup(name);
 			break;
-#ifdef __sun
+#ifdef SOLARIS_DOORS
 		case 'D':
 			if (file_info[i].type == DT_DOOR)
 				f[n++] = strdup(name);
 			break;
-#endif /* __sun */
+#endif /* SOLARIS_DOORS */
 		case 'f':
 			if (file_info[i].type == DT_REG)
 				f[n++] = strdup(name);

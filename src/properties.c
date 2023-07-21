@@ -287,9 +287,9 @@ get_link_color(const char *name)
 		case S_IFIFO:  color = pi_c; break;
 		case S_IFBLK:  color = bd_c; break;
 		case S_IFCHR:  color = cd_c; break;
-#ifdef __sun
+#ifdef SOLARIS_DOORS
 		case S_IFDOOR: color = oo_c; break;
-#endif /* __sun */
+#endif /* SOLARIS_DOORS */
 		case S_IFREG: {
 			int ext = 0;
 			color = get_regfile_color(name, &a, &ext);
@@ -1149,9 +1149,9 @@ get_file_type_and_color(const char *filename, const struct stat *attr,
 		break;
 
 	case S_IFBLK:  *file_type = 'b'; color = *ctype = bd_c; break;
-#ifdef __sun
+#ifdef SOLARIS_DOORS
 	case S_IFDOOR: *file_type = 'D'; color = *ctype = oo_c; break;
-#endif /* __sun */
+#endif /* SOLARIS_DOORS */
 	case S_IFCHR:  *file_type = 'c'; color = *ctype = cd_c; break;
 	case S_IFIFO:  *file_type = 'p'; color = *ctype = pi_c; break;
 	case S_IFSOCK: *file_type = 's'; color = *ctype = so_c; break;
@@ -1257,9 +1257,9 @@ print_file_details(char *filename, const struct stat *attr, const char file_type
 	case 'b': fputs(_("Block special file"), stdout); break;
 	case 'c': fputs(_("Character special file"), stdout); break;
 	case 'd': fputs(_("Directory"), stdout); break;
-#ifdef __sun
+#ifdef SOLARIS_DOORS
 	case 'D': fputs(_("Door"), stdout); break;
-#endif /* __sun */
+#endif /* SOLARIS_DOORS */
 	case 'l': fputs(_("Symbolic link"), stdout); break;
 	case 'p': fputs(_("Fifo"), stdout); break;
 	case 's': fputs(_("Socket"), stdout); break;
@@ -1955,9 +1955,9 @@ set_file_type_and_color(const mode_t mode, char *type, char **color)
 	case S_IFBLK:  *type = 'b'; *color = bd_c; break;
 	case S_IFCHR:  *type = 'c'; *color = cd_c; break;
 	case S_IFDIR:  *type = 'd'; *color = di_c; break;
-#ifdef __sun
+#ifdef SOLARIS_DOORS
 	case S_IFDOOR: *type = 'D'; *color = oo_c; break;
-#endif /* __sun */
+#endif /* SOLARIS_DOORS */
 	case S_IFIFO:  *type = 'p'; *color = pi_c; break;
 	case S_IFLNK:  *type = 'l'; *color = ln_c; break;
 	case S_IFREG:  *type = '.'; break;

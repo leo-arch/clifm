@@ -586,9 +586,9 @@ get_longest_filename(const size_t n, const int pad)
 					break;
 				case DT_BLK:  /* fallthrough */
 				case DT_CHR:  /* fallthrough */
-#ifdef __sun
+#ifdef SOLARIS_DOORS
 				case DT_DOOR: /* fallthrough */
-#endif /* __sun */
+#endif /* SOLARIS_DOORS */
 				case DT_LNK:  /* fallthrough */
 				case DT_SOCK: /* fallthrough */
 				case DT_FIFO: /* fallthrough */
@@ -1072,9 +1072,9 @@ print_entry_nocolor(int *ind_char, const int i, const int pad,
 
 		case DT_BLK: putchar(BLK_CHR); break;
 		case DT_CHR: putchar(CHR_CHR); break;
-#ifdef __sun
+#ifdef SOLARIS_DOORS
 		case DT_DOOR: putchar(DOOR_CHR); break;
-#endif /* __sun */
+#endif /* SOLARIS_DOORS */
 		case DT_FIFO: putchar(FIFO_CHR); break;
 		case DT_SOCK: putchar(SOCK_CHR); break;
 		case DT_UNKNOWN: putchar(UNKNOWN_CHR); break;
@@ -1238,9 +1238,9 @@ print_entry_nocolor_light(int *ind_char, const int i, const int pad,
 
 		case DT_BLK: putchar(BLK_CHR); break;
 		case DT_CHR: putchar(CHR_CHR); break;
-#ifdef __sun
+#ifdef SOLARIS_DOORS
 		case DT_DOOR: putchar(DOOR_CHR); break;
-#endif /* __sun */
+#endif /* SOLARIS_DOORS */
 		case DT_FIFO: putchar(FIFO_CHR); break;
 		case DT_LNK: putchar(LINK_CHR); break;
 		case DT_SOCK: putchar(SOCK_CHR); break;
@@ -1670,9 +1670,9 @@ exclude_file_type_light(const unsigned char type)
 	case 'c': if (type == DT_CHR) match = 1; break;
 	case 'b': if (type == DT_BLK) match = 1; break;
 	case 'p': if (type == DT_FIFO) match = 1; break;
-#ifdef __sun
+#ifdef SOLARIS_DOORS
 	case 'D': if (type == DT_DOOR) match = 1; break;
-#endif /* __sun */
+#endif /* SOLARIS_DOORS */
 	default: return EXIT_FAILURE;
 	}
 
@@ -1697,9 +1697,9 @@ exclude_file_type(const mode_t mode, const nlink_t links)
 	switch (*(filter.str + 1)) {
 	case 'b': if (S_ISBLK(mode)) match = 1; break;
 	case 'd': if (S_ISDIR(mode)) match = 1; break;
-#ifdef __sun
+#ifdef SOLARIS_DOORS
 	case 'D': if (S_ISDOOR(mode)) match = 1; break;
-#endif /* __sun */
+#endif /* SOLARIS_DOORS */
 	case 'c': if (S_ISCHR(mode)) match = 1; break;
 	case 'f': if (S_ISREG(mode)) match = 1; break;
 	case 'l': if (S_ISLNK(mode)) match = 1; break;
@@ -1930,9 +1930,9 @@ list_dir_light(void)
 		case DT_FIFO: file_info[n].color = pi_c; stats.fifo++; break;
 		case DT_BLK: file_info[n].color = bd_c; stats.block_dev++; break;
 		case DT_CHR: file_info[n].color = cd_c; stats.char_dev++; break;
-#ifdef __sun
+#ifdef SOLARIS_DOORS
 		case DT_DOOR: file_info[n].color = oo_c; stats.door++; break;
-#endif /* __sun */
+#endif /* SOLARIS_DOORS */
 		case DT_UNKNOWN: file_info[n].color = uf_c; stats.unknown++; break;
 		default: file_info[n].color = df_c; break;
 		}
@@ -2085,9 +2085,9 @@ get_link_target_color(const char *name, const struct stat *attr, const size_t i)
 	case S_IFIFO:  file_info[i].color = pi_c; break;
 	case S_IFBLK:  file_info[i].color = bd_c; break;
 	case S_IFCHR:  file_info[i].color = cd_c; break;
-#ifdef __sun
+#ifdef SOLARIS_DOORS
 	case S_IFDOOR: file_info[i].color = oo_c; break;
-#endif /* __sun */
+#endif /* SOLARIS_DOORS */
 	case S_IFREG: {
 		int ext = 0;
 		char *color = get_regfile_color(name, attr, &ext);
@@ -2293,9 +2293,9 @@ list_dir(void)
 			case S_IFBLK: file_info[n].type = DT_BLK; stats.block_dev++; break;
 			case S_IFCHR: file_info[n].type = DT_CHR; stats.char_dev++; break;
 			case S_IFDIR: file_info[n].type = DT_DIR; stats.dir++; break;
-#ifdef __sun
+#ifdef SOLARIS_DOORS
 			case S_IFDOOR: file_info[n].type = DT_DOOR; stats.door++; break;
-#endif /* __sun */
+#endif /* SOLARIS_DOORS */
 			case S_IFIFO: file_info[n].type = DT_FIFO; stats.fifo++; break;
 			case S_IFLNK: file_info[n].type = DT_LNK; stats.link++; break;
 			case S_IFREG: file_info[n].type = DT_REG; stats.reg++; break;
@@ -2555,9 +2555,9 @@ list_dir(void)
 		case DT_FIFO: file_info[n].color = pi_c; break;
 		case DT_BLK: file_info[n].color = bd_c; break;
 		case DT_CHR: file_info[n].color = cd_c; break;
-#ifdef __sun
+#ifdef SOLARIS_DOORS
 		case DT_DOOR: file_info[n].color = oo_c; break;
-#endif /* __sun */
+#endif /* SOLARIS_DOORS */
 		case DT_UNKNOWN: file_info[n].color = uf_c; break;
 		default: file_info[n].color = df_c; break;
 		}

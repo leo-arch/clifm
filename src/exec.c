@@ -1574,9 +1574,9 @@ Unstatable files:            %zu\n\
 	stats.extended, stats.other_writable, stats.sticky, stats.unknown,
 	stats.unstat);
 
-#ifdef __sun
+#ifdef SOLARIS_DOORS
 	printf("Doors:                 %zu\n", stats.door);
-#endif /* __sun */
+#endif /* SOLARIS_DOORS */
 
 	return EXIT_SUCCESS;
 }

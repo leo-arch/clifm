@@ -605,9 +605,9 @@ get_dt(const mode_t mode)
 	case S_IFBLK:  return DT_BLK;
 	case S_IFCHR:  return DT_CHR;
 	case S_IFDIR:  return DT_DIR;
-#ifdef __sun
+#ifdef SOLARIS_DOORS
 	case S_IFDOOR: return DT_DOOR;
-#endif /* __sun */
+#endif /* SOLARIS_DOORS */
 	case S_IFIFO:  return DT_FIFO;
 	case S_IFLNK:  return DT_LNK;
 	case S_IFREG:  return DT_REG;
