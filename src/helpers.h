@@ -96,12 +96,14 @@
 # include <linux/version.h>
 # include <linux/limits.h>
 # include <sys/types.h>
-# ifndef USE_GENERIC_FS_MONITOR
+# if !defined(USE_GENERIC_FS_MONITOR) && (!defined(__GLIBC__) \
+|| (__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 9))) \
+&& LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 27)
 #  include <sys/inotify.h>
 #  define LINUX_INOTIFY
 # else
 #  include <stdint.h> /* uint8_t */
-# endif /* !USE_GENERIC_FS_MONITOR */
+# endif /* !USE_GENERIC_FS_MONITOR && GLIBC >= 2.9 && linux >= 2.6.27 */
 #elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) \
 || defined(__DragonFly__)
 # include <sys/types.h>
@@ -197,7 +199,8 @@
 #   define _STATX
 #  endif /* LINUX_VERSION (4.11) */
 # endif /* __GLIBC__ >= 2.28 */
-# if (__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 3))
+# if !defined(__GLIBC__) || (__GLIBC__ > 2 \
+|| (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 3))
 #  if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 4, 0)
 #   define _LINUX_XATTR
 #  endif /* LINUX_VERSION (2.4) */
