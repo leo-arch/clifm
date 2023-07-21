@@ -25,6 +25,16 @@
 #ifndef HELPERS_H
 #define HELPERS_H
 
+#define PROGRAM_NAME_UPPERCASE "CliFM"
+#define PROGRAM_NAME "clifm"
+#define PROGRAM_DESC "The command line file manager"
+#define VERSION "1.13.1"
+#define DATE "Jul 18, 2023"
+#define AUTHOR "L. Abramovich"
+#define CONTACT "https://github.com/leo-arch/clifm"
+#define LICENSE "GPL2+"
+#define COLORS_REPO "https://github.com/leo-arch/clifm-colors"
+
 #if (defined(__linux__) || defined(__CYGWIN__)) && !defined(_BE_POSIX)
 # define _GNU_SOURCE
 #else
@@ -116,32 +126,31 @@
 # include <sys/param.h>
 # include <sys/syslimits.h>
 # if defined(__FreeBSD__) && __FreeBSD_version >= 410000
-#  define BSD_KQUEUE
+#  define HAVE_KQUEUE
 # elif defined(__NetBSD__)
 #  if __NetBSD_PreReq(2, 0, 0)
-#   define BSD_KQUEUE
+#   define HAVE_KQUEUE
 #  endif /* NetBSD >= 2.0 */
 # elif defined(__OpenBSD__) && OpenBSD >= 200106 /* version 2.9 */
-#  define BSD_KQUEUE
+#  define HAVE_KQUEUE
 # elif defined(__DragonFly__) && __DragonFly_version >= 200800 /* At least 2.8*/
-#  define BSD_KQUEUE
+#  define HAVE_KQUEUE
 # endif /* FreeBSD >= 4.1 */
-# if !defined(USE_GENERIC_FS_MONITOR) && defined(BSD_KQUEUE)
-#  include <sys/event.h>
-# endif /* !USE_GENERIC_FS_MONITOR && BSD_KQUEUE */
 #elif defined(__APPLE__)
 # include <sys/types.h>
 # include <sys/time.h>
-# ifndef USE_GENERIC_FS_MONITOR
-#  include <sys/event.h>
-#  define BSD_KQUEUE
-# endif /* !USE_GENERIC_FS_MONITOR */
+# define HAVE_KQUEUE
 #elif defined(__sun) || defined(__CYGWIN__)
 # include <sys/types.h>
 # include <sys/time.h>
 #elif defined(__HAIKU__)
 # include <stdint.h> /* uint8_t */
 #endif /* __linux__ */
+
+#if !defined(USE_GENERIC_FS_MONITOR) && defined(HAVE_KQUEUE)
+# include <sys/event.h>
+# define BSD_KQUEUE
+#endif /* !USE_GENERIC_FS_MONITOR && HAVE_KQUEUE */
 
 #ifndef __BEGIN_DECLS
 # ifdef __cpluplus
@@ -161,16 +170,6 @@
 
 #include "strings.h"
 #include "settings.h"
-
-#define PROGRAM_NAME_UPPERCASE "CliFM"
-#define PROGRAM_NAME "clifm"
-#define PROGRAM_DESC "The command line file manager"
-#define VERSION "1.13.1"
-#define DATE "Jul 18, 2023"
-#define AUTHOR "L. Abramovich"
-#define CONTACT "https://github.com/leo-arch/clifm"
-#define LICENSE "GPL2+"
-#define COLORS_REPO "https://github.com/leo-arch/clifm-colors"
 
 #define EXIT_SUCCESS 0
 #define EXIT_FAILURE 1
