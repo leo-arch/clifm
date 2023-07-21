@@ -92,6 +92,11 @@
 #include <stdlib.h>
 #include <sys/stat.h> /* S_BLKSIZE */
 
+/* File system event monitors are OS-specific (inotify and kqueue) */
+#ifdef _BE_POSIX
+# define USE_GENERIC_FS_MONITOR
+#endif /* _BE_POSIX */
+
 #if defined(__linux__)
 # include <linux/version.h>
 # include <linux/limits.h>
@@ -216,23 +221,25 @@
 /* Do we have files birth time? If yes, define ST_BTIME. */
 /* ST_BTIME is the timespec struct for files creation time. Valid fields are
  * tv_sec and tv_nsec. */
-#ifdef _STATX
-# define ST_BTIME stx_btime
+#ifndef _BE_POSIX
+# ifdef _STATX
+#  define ST_BTIME stx_btime
 /* OpenBSD defines the interface (see sys/stat.h), but the file system doesn't
  * actually store creation times: the value of __st_birthtim is always zero.
 #elif defined(__OpenBSD__)
 # define ST_BTIME __st_birthtim */
-#elif defined(__NetBSD__) || defined(__APPLE__)
-# define ST_BTIME st_birthtimespec
-#elif defined(__FreeBSD__) || defined(__CYGWIN__)
-# define ST_BTIME st_birthtim
-#elif defined(__HAIKU__)
-# define ST_BTIME st_crtim
-#elif defined(__sun) && !defined(_NO_SUN_BIRTHTIME)
+# elif defined(__NetBSD__) || defined(__APPLE__)
+#  define ST_BTIME st_birthtimespec
+# elif defined(__FreeBSD__) || defined(__CYGWIN__)
+#  define ST_BTIME st_birthtim
+# elif defined(__HAIKU__)
+#  define ST_BTIME st_crtim
+# elif defined(__sun) && !defined(_NO_SUN_BIRTHTIME)
 /* In the case of Solaris, ST_BTIME is just a flag telling we should run
  * get_birthtime() to get files creation time. */
-# define ST_BTIME
-#endif /* _STATX */
+#  define ST_BTIME
+# endif /* _STATX */
+#endif /* !_BE_POSIX */
 
 /* Event handling */
 #if defined(LINUX_INOTIFY)
