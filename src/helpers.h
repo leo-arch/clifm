@@ -115,10 +115,20 @@
 # include <sys/time.h>
 # include <sys/param.h>
 # include <sys/syslimits.h>
-# ifndef USE_GENERIC_FS_MONITOR
-#  include <sys/event.h>
+# if defined(__FreeBSD__) && __FreeBSD_version >= 410000
 #  define BSD_KQUEUE
-# endif /* !USE_GENERIC_FS_MONITOR */
+# elif defined(__NetBSD__)
+#  if __NetBSD_PreReq(2, 0, 0)
+#   define BSD_KQUEUE
+#  endif /* NetBSD >= 2.0 */
+# elif defined(__OpenBSD__) && OpenBSD >= 200106 /* version 2.9 */
+#  define BSD_KQUEUE
+# elif defined(__DragonFly__) && __DragonFly_version >= 200800 /* At least 2.8*/
+#  define BSD_KQUEUE
+# endif /* FreeBSD >= 4.1 */
+# if !defined(USE_GENERIC_FS_MONITOR) && defined(BSD_KQUEUE)
+#  include <sys/event.h>
+# endif /* !USE_GENERIC_FS_MONITOR && BSD_KQUEUE */
 #elif defined(__APPLE__)
 # include <sys/types.h>
 # include <sys/time.h>
