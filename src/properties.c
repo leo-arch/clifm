@@ -71,16 +71,18 @@
 #endif /* _LINUX_XATTR */
 
 /* Do we have BSD file flags support? */
-#if defined(__FreeBSD__) || (defined(__NetBSD__) && !defined(_NO_NETBSD_FFLAGS)) \
+#ifndef _BE_POSIX
+# if defined(__FreeBSD__) || (defined(__NetBSD__) && !defined(_NO_NETBSD_FFLAGS)) \
 || defined(__OpenBSD__) || defined(__DragonFly__) || defined(__APPLE__)
-# define HAVE_BSD_FFLAGS
-# ifdef __NetBSD__
-#  include <util.h> /* flags_to_string() */
-#  define FLAGSTOSTR_FUNC(f) flags_to_string((f), "-")
-# else
-#  define FLAGSTOSTR_FUNC(f) fflagstostr((f)) /* Provided by unistd.h */
-# endif /* __NetBSD__ */
-#endif /* BSD */
+#  define HAVE_BSD_FFLAGS
+#  ifdef __NetBSD__
+#   include <util.h> /* flags_to_string() */
+#   define FLAGSTOSTR_FUNC(f) flags_to_string((f), "-")
+#  else
+#   define FLAGSTOSTR_FUNC(f) fflagstostr((f)) /* Provided by unistd.h */
+#  endif /* __NetBSD__ */
+# endif /* BSD */
+#endif /* !_BE_POSIX */
 
 #include "aux.h"
 #include "checks.h"
