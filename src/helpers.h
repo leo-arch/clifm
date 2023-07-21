@@ -62,9 +62,6 @@
 
 #ifdef __TINYC__
 # define __STDC_NO_VLA__ 1
-/* Compilation fails on TinyC since 2021 due to regex.h.
- * See https://www.mail-archive.com/bug-gnulib@gnu.org/msg41564.html */
-//void *__dso_handle;
 #endif /* __TINYC__ */
 
 /* Setting GLOB_BRACE to ZERO disables support for GLOB_BRACE if not
@@ -102,23 +99,15 @@
 #include <stdlib.h>
 #include <sys/stat.h> /* S_BLKSIZE */
 
-/* File system event monitors are OS-specific (inotify and kqueue) */
-#ifdef _BE_POSIX
-# define USE_GENERIC_FS_MONITOR
-#endif /* _BE_POSIX */
-
 #if defined(__linux__)
 # include <linux/version.h>
 # include <linux/limits.h>
 # include <sys/types.h>
-# if !defined(USE_GENERIC_FS_MONITOR) && (!defined(__GLIBC__) \
-|| (__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 9))) \
+# if !defined(__GLIBC__) || (__GLIBC__ > 2 \
+|| (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 9)) \
 && LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 27)
-#  include <sys/inotify.h>
-#  define LINUX_INOTIFY
-# else
-#  include <stdint.h> /* uint8_t */
-# endif /* !USE_GENERIC_FS_MONITOR && GLIBC >= 2.9 && linux >= 2.6.27 */
+#  define HAVE_INOTIFY
+# endif /* GLIBC >= 2.9 && linux >= 2.6.27 */
 #elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) \
 || defined(__DragonFly__)
 # include <sys/types.h>
@@ -147,10 +136,24 @@
 # include <stdint.h> /* uint8_t */
 #endif /* __linux__ */
 
-#if !defined(USE_GENERIC_FS_MONITOR) && defined(HAVE_KQUEUE)
+/* File system event monitors are OS-specific (inotify and kqueue) */
+#if defined(_BE_POSIX) && !defined(USE_GENERIC_FS_MONITOR)
+# define USE_GENERIC_FS_MONITOR
+#endif /* _BE_POSIX && !USE_GENERIC_FS_MONITOR */
+
+#if defined(__linux__)
+# if defined(HAVE_INOTIFY) && !defined(USE_GENERIC_FS_MONITOR)
+#  include <sys/inotify.h>
+#  define LINUX_INOTIFY
+# else
+#  include <stdint.h> /* uint8_t */
+# endif /* HAVE_INOTIFY && !USE_GENERIC_FS_MONITOR */
+#endif /* __linux__ */
+
+#if defined(HAVE_KQUEUE) && !defined(USE_GENERIC_FS_MONITOR)
 # include <sys/event.h>
 # define BSD_KQUEUE
-#endif /* !USE_GENERIC_FS_MONITOR && HAVE_KQUEUE */
+#endif /* HAVE_KQUEUE && !USE_GENERIC_FS_MONITOR */
 
 #ifndef __BEGIN_DECLS
 # ifdef __cpluplus
@@ -258,6 +261,7 @@
 extern int inotify_fd, inotify_wd;
 extern unsigned int INOTIFY_MASK;
 extern int watch;
+
 #elif defined(BSD_KQUEUE)
 # define NUM_EVENT_SLOTS 10
 # define NUM_EVENT_FDS   10
@@ -266,6 +270,7 @@ extern struct kevent events_to_monitor[];
 extern unsigned int KQUEUE_FFLAGS;
 extern struct timespec timeout;
 extern int watch;
+
 #else
 # define GENERIC_FS_MONITOR
 extern time_t curdir_mtime;
