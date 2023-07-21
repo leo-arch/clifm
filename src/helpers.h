@@ -149,9 +149,9 @@
 #define PROGRAM_NAME "clifm"
 #define PROGRAM_DESC "The command line file manager"
 #define VERSION "1.13.1"
+#define DATE "Jul 18, 2023"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "https://github.com/leo-arch/clifm"
-#define DATE "Jul 18, 2023"
 #define LICENSE "GPL2+"
 #define COLORS_REPO "https://github.com/leo-arch/clifm-colors"
 
@@ -208,7 +208,7 @@
 # ifndef __TERMUX__
 #  define LINUX_FILE_ATTRS
 # endif /* !__TERMUX__ */
-#endif /* _GNU_SOURCE */
+#endif /* __linux__ && !_BE_POSIX */
 
 /* Do we have files birth time? If yes, define ST_BTIME. */
 /* ST_BTIME is the timespec struct for files creation time. Valid fields are
@@ -387,9 +387,6 @@ extern time_t curdir_mtime;
 #define BOLD    ((xargs.no_bold != 1 && conf.colorize == 1) ? "\x1b[1m" : "")
 /* NC: Reset color attributes to terminal defaults */
 #define NC      (conf.colorize == 1 ? "\x1b[0m" : "")
-
-/* Format to use for suggestions when running colorless */
-#define SUG_NO_COLOR "\x1b[0m" /* No color */
 
 /* Colors for the prompt: */
 /* \001 and \002 tell readline that color codes between them are
