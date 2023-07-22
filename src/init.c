@@ -2001,6 +2001,40 @@ cygwin_exclude_file(char *name)
 }
 #endif /* __CYGWIN__ */
 
+/* Check whether the path NAME is a symbolic link to any other path specified
+ * in PATH. Returns 1 if true or 0 otherwise.
+ * Used to avoid scanning paths which are symlinks to another path, for example,
+ * /bin and /sbin, which are usually symlinks to /usr/bin and /usr/sbin
+ * respectively. */
+static int
+skip_this_path(char *name)
+{
+	if (!name || !*name)
+		return 1;
+
+	struct stat a;
+	if (lstat(name, &a) == -1)
+		return 1;
+
+	if (!S_ISLNK(a.st_mode))
+		return 0;
+
+	char *rpath = realpath(name, NULL);
+	if (!rpath)
+		return 1;
+
+	size_t i;
+	for (i = 0; paths[i].path; i++) {
+		if (strcmp(paths[i].path, rpath) == 0) {
+			free(rpath);
+			return 1;
+		}
+	}
+
+	free(rpath);
+	return 0;
+}
+
 /* Get the list of files in PATH, plus CliFM internal commands, and send
  * them into an array to be read by my_rl_completion(). */
 void
@@ -2021,6 +2055,7 @@ get_path_programs(void)
 		i = (int)path_n;
 		while (--i >= 0) {
 			if (!paths[i].path || !*paths[i].path
+			|| skip_this_path(paths[i].path) == 1
 			|| xchdir(paths[i].path, NO_TITLE) == -1) {
 				cmd_n[i] = 0;
 				continue;
@@ -2039,6 +2074,7 @@ get_path_programs(void)
 			if (cmd_n[i] > 0)
 				total_cmd += cmd_n[i];
 		}
+
 		xchdir(cwd, NO_TITLE);
 	}
 
