@@ -440,6 +440,16 @@ rl_prepend_sudo(int count, int key)
 		rl_point = r;
 	}
 #endif /* !_NO_SUGGESTIONS */
+
+#ifndef _NO_HIGHLIGHT
+	if (conf.highlight == 1) {
+		int r = rl_point;
+		rl_point = 0;
+		recolorize_line();
+		rl_point = r;
+	}
+#endif /* !_NO_HIGHLIGHT */
+
 	return EXIT_SUCCESS;
 }
 
