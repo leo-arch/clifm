@@ -3754,6 +3754,7 @@ complete_colorschemes(char *text, const size_t words_n)
 static char **
 complete_desel(const char *text)
 {
+	rl_attempted_completion_over = 1;
 	char **matches = rl_completion_matches(text, &sel_entries_generator);
 
 	if (!matches)
