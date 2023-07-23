@@ -1254,8 +1254,10 @@ calculate_prefix_len(const char *str, const char *query, const char *lw)
 
 	size_t prefix_len = 0, len = strlen(str);
 
-	if (len == 0 || str[len - 1] == '/')
-		return 0;
+	if (len == 0 || str[len - 1] == '/') {
+		if (ct != TCMP_DESEL)
+			return 0;
+	}
 
 	if (ct == TCMP_DESEL)
 		return strlen(query ? query : (lw ? lw : ""));
@@ -1776,7 +1778,8 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 		return EXIT_FAILURE;
 
 	/* Calculate the length of the matching prefix to insert into the
-	 * line buffer only the non-matched part of the string returned by FZF. */
+	 * line buffer only the non-matched part of the string returned by the
+	 * finder. */
 	size_t prefix_len = calculate_prefix_len(matches[0], query, lw);
 
 	do_some_cleanup(&buf, matches, query, &prefix_len);
