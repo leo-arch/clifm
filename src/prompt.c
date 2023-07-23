@@ -580,7 +580,7 @@ gen_shell_level(const int mode)
 
 	size_t len = (MAX_COLOR * 2) + 32;
 	p = (char *)xnmalloc(len, sizeof(char));
-	snprintf(p, len, "(%s%d%s)", BOLD, shell_level, df_c);
+	snprintf(p, len, "(%d)", shell_level);
 
 	return p;
 }
