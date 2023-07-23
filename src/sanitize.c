@@ -34,6 +34,7 @@
 
 #include "sanitize.h"
 #include "aux.h"
+#include "checks.h" /* is_number() */
 #include "misc.h"
 
 #define UNSAFE_CMD "Unsafe command. Consult the manpage for more information"
@@ -154,6 +155,19 @@ sanitize_file_descriptors(void)
 		close(fd);
 }
 
+static int
+sanitize_shell_level(char *str)
+{
+	if (!str || !*str || !is_number(str))
+		return EXIT_FAILURE;
+
+	int a = atoi(str);
+	if (a < 1 || a > MAX_SHELL_LEVEL)
+		return EXIT_FAILURE;
+
+	return EXIT_SUCCESS;
+}
+
 /* Sanitize the environment: set environ to NULL and then set a few
  * environment variables to get a minimally working environment.
  * Core dumps are disabled.
@@ -170,7 +184,10 @@ xsecure_env(const int mode)
 		 *_term = (char *)NULL,
 		 *tz = (char *)NULL,
 		 *lang = (char *)NULL,
-		 *fzfopts = (char *)NULL;
+		 *fzfopts = (char *)NULL,
+		 *clifm_level = (char *)NULL;
+
+	clifm_level = getenv("CLIFMLVL");
 
 	if (mode != SECURE_ENV_FULL) {
 		/* Let's keep these values from the current environment */
@@ -182,6 +199,9 @@ xsecure_env(const int mode)
 		lang = getenv("LANG");
 		if (fzftab)
 			fzfopts = getenv("FZF_DEFAULT_OPTS");
+	} else {
+		if (clifm_level)
+			nesting_level = 2; /* This is a nested instance */
 	}
 
 	xclearenv();
@@ -204,6 +224,9 @@ xsecure_env(const int mode)
 		if (wayland_display)
 			xsetenv("WAYLAND_DISPLAY", wayland_display);
 	}
+
+	if (clifm_level && sanitize_shell_level(clifm_level) == EXIT_SUCCESS)
+		xsetenv("CLIFMLVL", clifm_level);
 
 	if (_term && sanitize_cmd(_term, SNT_MISC) == EXIT_SUCCESS)
 		xsetenv("TERM", _term);

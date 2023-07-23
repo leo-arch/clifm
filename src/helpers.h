@@ -1461,6 +1461,7 @@ extern int
 	kbind_busy,
 	max_files,
 	mime_match,
+	nesting_level, /* Is this a nested instance? */
 	no_log,
 	open_in_foreground, /* Overrides mimelist file value: used by mime_open */
 	prev_ws,
@@ -1475,7 +1476,6 @@ extern int
 	selfile_ok,
 	shell,
 	shell_is_interactive,
-	shell_level,
 	shell_terminal,
 	sort_switch,
 	switch_cscheme,

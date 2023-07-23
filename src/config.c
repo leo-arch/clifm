@@ -633,27 +633,33 @@ setenv_plugins_helper(void)
 static void
 set_shell_level(void)
 {
-	char *lvl = getenv("CLIFMLVL");
 	char *shlvl = getenv("SHLVL");
 
-	if (!lvl) {
-		setenv("CLIFMLVL", "1", 1);
-		goto END;
-	}
-
-	int a = atoi(lvl);
-	if (a < 0 || a >= MAX_SHELL_LEVEL)
-		a = 0;
+	int shlvl_n = shlvl ? atoi(shlvl) : -1;
+	if (shlvl_n > 0 && shlvl_n < MAX_SHELL_LEVEL)
+		shlvl_n++;
+	else
+		shlvl_n = 1;
 
 	char tmp[32];
-	snprintf(tmp, sizeof(tmp), "%d", a + 1);
-	setenv("CLIFMLVL", tmp, 1);
-
-END:
-	a = shlvl ? atoi(shlvl) : 0;
-	snprintf(tmp, sizeof(tmp), "%d", (a < 0 || a >= MAX_SHELL_LEVEL)
-		? 1 : a + 1);
+	snprintf(tmp, sizeof(tmp), "%d", shlvl_n);
 	setenv("SHLVL", tmp, 1);
+
+	char *lvl = getenv("CLIFMLVL");
+	if (!lvl) {
+		setenv("CLIFMLVL", "1", 1);
+		return;
+	}
+
+	int lvl_n = atoi(lvl);
+	if (lvl_n > 0 && lvl_n < (MAX_SHELL_LEVEL - shlvl_n))
+		lvl_n++;
+	else
+		lvl_n = 1;
+
+	nesting_level = lvl_n;
+	snprintf(tmp, sizeof(tmp), "%d", lvl_n);
+	setenv("CLIFMLVL", tmp, 1);
 }
 
 /* Set a few environment variables, mostly useful to run custom scripts

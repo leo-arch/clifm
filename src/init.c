@@ -1585,11 +1585,18 @@ unset_xargs(void)
 static int
 check_shell_level(void)
 {
-	char *lvl = getenv("CLIFMLVL");
-	if (!lvl)
+	/* If running on a fully sanitized environment, no variable is imported
+	 * at all, but CLIFMLVL is nevertheless consulted (by xsecure_env()) to
+	 * know whether we are running a nested instance, in which case
+	 * NESTING_LEVEL is set to 2. */
+	if (xargs.secure_env_full == 1 && nesting_level == 2)
+		return 2;
+
+	char *level = getenv("CLIFMLVL");
+	if (!level)
 		goto FALLBACK;
 
-	int a = atoi(lvl);
+	int a = atoi(level);
 	if (a < 1 || a > MAX_SHELL_LEVEL)
 		goto FALLBACK;
 
@@ -1611,7 +1618,7 @@ init_shell(void)
 		return;
 	}
 
-	if ((shell_level = check_shell_level()) > 1) {
+	if ((nesting_level = check_shell_level()) > 1) {
 		set_signals_to_ignore();
 		own_pid = get_own_pid();
 		tcgetattr(STDIN_FILENO, &shell_tmodes);

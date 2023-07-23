@@ -567,12 +567,12 @@ gen_shell_level(const int mode)
 
 	if (mode == 'i') {
 		p = (char *)xnmalloc(32, sizeof(char));
-		snprintf(p, 32, "%d", shell_level);
+		snprintf(p, 32, "%d", nesting_level);
 		return p;
 	}
 
-	/* I == full mode (nothing if first shell level) */
-	if (shell_level <= 1) {
+	/* I == full mode (nothing if first level) */
+	if (nesting_level <= 1) {
 		p = xnmalloc(1, sizeof(char));
 		*p = '\0';
 		return p;
@@ -580,7 +580,7 @@ gen_shell_level(const int mode)
 
 	size_t len = (MAX_COLOR * 2) + 32;
 	p = (char *)xnmalloc(len, sizeof(char));
-	snprintf(p, len, "(%d)", shell_level);
+	snprintf(p, len, "(%d)", nesting_level);
 
 	return p;
 }
