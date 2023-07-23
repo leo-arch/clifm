@@ -1255,6 +1255,8 @@ free_remotes(const int exit)
 	return EXIT_SUCCESS;
 }
 
+/* Load both regular and warning prompt, if enabled, from the prompt name NAME.
+ * Return EXIT_SUCCESS if found or EXIT_FAILURE if not. */
 int
 expand_prompt_name(char *name)
 {
@@ -1262,7 +1264,7 @@ expand_prompt_name(char *name)
 		return EXIT_FAILURE;
 
 	char *p = remove_quotes(name);
-	if (!p || !*p || strchr(p, '\\'))
+	if (!p || !*p || strchr(p, '\\')) /* Exclude prompt codes. */
 		return EXIT_FAILURE;
 
 	int i = (int)prompts_n;

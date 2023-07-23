@@ -1479,8 +1479,10 @@ load_prompts(void)
 	}
 
 	prompts_n = n;
+
 	if (conf.encoded_prompt)
 		expand_prompt_name(conf.encoded_prompt);
+
 	return EXIT_SUCCESS;
 }
 
@@ -2538,13 +2540,13 @@ check_options(void)
 			hist_status = xargs.history;
 	}
 
-	if (!conf.wprompt_str) {
+/*	if (!conf.wprompt_str) {
 		if (conf.colorize == 1)
 			conf.wprompt_str = savestring(DEF_WPROMPT_STR, sizeof(DEF_WPROMPT_STR) - 1);
 		else
 			conf.wprompt_str = savestring(DEF_WPROMPT_STR_NO_COLOR,
 				sizeof(DEF_WPROMPT_STR_NO_COLOR) - 1);
-	}
+	} */
 
 	/* Do no override command line options */
 	if (xargs.cwd_in_title == UNSET)
@@ -2984,6 +2986,9 @@ check_options(void)
 	if (!conf.term)
 		conf.term = savestring(DEF_TERM_CMD, sizeof(DEF_TERM_CMD) - 1);
 
+	if (conf.colorize == 0)
+		expand_prompt_name(DEF_PROMPT_NO_COLOR_NAME);
+
 	if (!conf.encoded_prompt || !*conf.encoded_prompt) {
 		free(conf.encoded_prompt);
 		if (conf.colorize == 1) {
@@ -2994,6 +2999,14 @@ check_options(void)
 				savestring(DEFAULT_PROMPT_NO_COLOR,
 				sizeof(DEFAULT_PROMPT_NO_COLOR) - 1);
 		}
+	}
+
+	if (!conf.wprompt_str) {
+		if (conf.colorize == 1)
+			conf.wprompt_str = savestring(DEF_WPROMPT_STR, sizeof(DEF_WPROMPT_STR) - 1);
+		else
+			conf.wprompt_str = savestring(DEF_WPROMPT_STR_NO_COLOR,
+				sizeof(DEF_WPROMPT_STR_NO_COLOR) - 1);
 	}
 
 	if ((xargs.stealth_mode == 1 || home_ok == 0 ||

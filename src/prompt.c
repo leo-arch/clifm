@@ -561,7 +561,7 @@ gen_notification(const int flag)
 }
 
 static inline char *
-gen_shell_level(const int mode)
+gen_nesting_level(const int mode)
 {
 	char *p = (char *)NULL;
 
@@ -673,7 +673,7 @@ decode_prompt(char *line)
 
 			case 'i': /* fallthrough */ /* Nest level (number only) */
 			case 'I': /* Nest level (full format) */
-				temp = gen_shell_level(c); goto ADD_STRING;
+				temp = gen_nesting_level(c); goto ADD_STRING;
 
 			case 's': /* Shell name (after last slash)*/
 				if (!user.shell) { line++; break; }
@@ -1063,6 +1063,7 @@ list_prompts(void)
 	for (i = 0; i < prompts_n; i++) {
 		if (!prompts[i].name)
 			continue;
+
 		if (*cur_prompt_name == *prompts[i].name
 		&& strcmp(cur_prompt_name, prompts[i].name) == 0)
 			printf("%s>%s %s\n", mi_c, df_c, prompts[i].name);

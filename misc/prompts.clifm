@@ -105,6 +105,12 @@ RegularPrompt="\[\e[0m\]\I[\[\e[0;36m\]\S\[\e[0m\]]\l \A \u:\H \[\e[0;36m\]\w\n\
 EnableWarningPrompt=true
 WarningPrompt="\[\e[00;02;31m\](!) > "
 
+[clifm-no-color]
+Notifications=true
+RegularPrompt="\[\e[0m\]\I[\S\[\e[0m\]]\l \A \u:\H \w\n<\z> \$ \[\e[0m\]"
+EnableWarningPrompt=true
+WarningPrompt="\[\e[0m\](!) > "
+
 [clifm-box-drawing]
 # The box drawing set isn't supported by all terminals
 Notifications=false

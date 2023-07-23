@@ -352,8 +352,11 @@ xf=1;31:xs=0;32:"
 #define MIN_SCREEN_WIDTH 20
 #define MIN_SCREEN_HEIGHT 5
 
+/* If running colorless, let's try to use this prompt. If not available,
+ * fallback to DEFAULT_PROMPT_NO_COLOR. */
+#define DEF_PROMPT_NO_COLOR_NAME "clifm-no-color"
 #define DEF_PROMPT_NOTIF 1
-#define DEFAULT_PROMPT "\\I\\[\\e[0m\\][\\S\\[\\e[0m\\]]\\l \
+#define DEFAULT_PROMPT "\\[\\e[0m\\]\\I[\\S\\[\\e[0m\\]]\\l \
 \\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0m\\]<\\z\\[\\e[0m\\]\
 >\\[\\e[00;34m\\] \\$\\[\\e[0m\\] "
 #define DEFAULT_PROMPT_NO_COLOR "\\I[\\S]\\l \\A \\u:\\H \\w\\n<\\z> \\$ "
