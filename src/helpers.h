@@ -313,6 +313,11 @@ extern time_t curdir_mtime;
 # endif /* __FreeBSD__ */
 #endif /* !_NO_ARC4RANDOM && !_BE_POSIX && !__HAIKU__ */
 
+/* This is a more or less arbitrary value, but better than some huge value
+ * like INT_MAX (which most likely will cause problems long before reaching
+ * this value). */
+#define MAX_SHELL_LEVEL 1000 /* This is the value used by bash 5.2 */
+
 /* The following flags are used via an integer (FLAGS). If an integer has
  * 4 bytes, then we can use a total of 32 flags (0-31)
  * 4 * 8 == 32 bits == (1 << 31)

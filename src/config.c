@@ -634,20 +634,25 @@ static void
 set_shell_level(void)
 {
 	char *lvl = getenv("CLIFMLVL");
+	char *shlvl = getenv("SHLVL");
+
 	if (!lvl) {
 		setenv("CLIFMLVL", "1", 1);
-		setenv("SHLVL", "2", 1);
-		return;
+		goto END;
 	}
 
 	int a = atoi(lvl);
-	if (a < 1 || a > INT_MAX)
-		return;
+	if (a < 0 || a >= MAX_SHELL_LEVEL)
+		a = 0;
 
 	char tmp[32];
 	snprintf(tmp, sizeof(tmp), "%d", a + 1);
 	setenv("CLIFMLVL", tmp, 1);
-	snprintf(tmp, sizeof(tmp), "%d", a + 2);
+
+END:
+	a = shlvl ? atoi(shlvl) : 0;
+	snprintf(tmp, sizeof(tmp), "%d", (a < 0 || a >= MAX_SHELL_LEVEL)
+		? 1 : a + 1);
 	setenv("SHLVL", tmp, 1);
 }
 

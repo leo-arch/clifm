@@ -1587,13 +1587,16 @@ check_shell_level(void)
 {
 	char *lvl = getenv("CLIFMLVL");
 	if (!lvl)
-		return 1;
+		goto FALLBACK;
 
 	int a = atoi(lvl);
-	if (a < 1 || a > INT_MAX)
-		return 1;
+	if (a < 1 || a > MAX_SHELL_LEVEL)
+		goto FALLBACK;
 
 	return a + 1;
+
+FALLBACK:
+	return (getenv("CLIFM") ? 2 : 1);
 }
 
 /* Keep track of attributes of the shell. Make sure the shell is running
@@ -1608,7 +1611,6 @@ init_shell(void)
 		return;
 	}
 
-//	if (getenv("CLIFM_OWN_CHILD")) {
 	if ((shell_level = check_shell_level()) > 1) {
 		set_signals_to_ignore();
 		own_pid = get_own_pid();
