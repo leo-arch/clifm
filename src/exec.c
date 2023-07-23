@@ -2639,6 +2639,13 @@ exec_cmd(char **comm)
 		if ((exit_code = check_auto_second(comm)) != -1)
 			return exit_code;
 
+		if (xargs.stealth_mode == 1 && bin_name && *bin_name
+		&& *comm[0] == *bin_name && strcmp(comm[0], bin_name) == 0) {
+			fprintf(stderr, _("%s: Nested instances are not allowed in "
+				"stealth mode\n"), PROGRAM_NAME);
+			return (exit_code = EXIT_FAILURE);
+		}
+
 		/* #  EXTERNAL/SHELL COMMANDS # */
 		if ((exit_code = run_shell_cmd(comm)) == EXIT_FAILURE)
 			return EXIT_FAILURE;

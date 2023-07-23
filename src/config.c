@@ -671,10 +671,10 @@ set_env(const int reaload)
 	if (sel_file)
 		setenv("CLIFM_SELFILE", sel_file, 1);
 
+	setenv_plugins_helper();
+
 	if (reaload == 0)
 		set_shell_level();
-
-	setenv_plugins_helper();
 }
 
 /* Define the file for the Selection Box */

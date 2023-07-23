@@ -30,10 +30,6 @@
 
 #include "helpers.h"
 
-// Unrequired on __linux__, __CYGWIN__, __TERMUX__, __sun, __FreeBSD__,
-// __NetBSD__, __HAIKU__, __DragonFly__, and __OpenBSD__ at least
-//#include <ctype.h>
-
 #include <dirent.h>
 #include <errno.h>
 #include <stdio.h>

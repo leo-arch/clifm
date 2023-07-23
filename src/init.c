@@ -2985,8 +2985,6 @@ check_options(void)
 				savestring(DEFAULT_PROMPT_NO_COLOR,
 				sizeof(DEFAULT_PROMPT_NO_COLOR) - 1);
 		}
-/*		char *t = conf.colorize == 1 ? DEFAULT_PROMPT : DEFAULT_PROMPT_NO_COLOR;
-		conf.encoded_prompt = savestring(t, strlen(t)); */
 	}
 
 	if ((xargs.stealth_mode == 1 || home_ok == 0 ||
