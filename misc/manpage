@@ -1766,6 +1766,10 @@ Each prompt is built following almost the same escape codes and rules used by th
 .TP
 \fB\\z\fR: Exit code of the last executed command (colored according to the \fIxs\fR (success) and \fIxf\fR (failure) codes in \fIInterfaceColors\fR in the color scheme file)
 .TP
+\fB\\i\fR: The value of \fBCLIFMLVL\fR (number of nested instances of \fBclifm\fR)
+.TP
+\fB\\I\fR: Same as \fB\\I\fR, but formatted as (\fBn\fR) (nothing is printed if \fBCLIFMLVL\fR is 1)
+.TP
 \fB\\$\fR '#', if the effective user ID is 0, and '$' otherwise
 .TP
 \fB\\nnn\fR: The character whose ASCII code is the octal value nnn
