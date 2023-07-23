@@ -181,6 +181,7 @@ int
 	selfile_ok = 1,
 	shell = SHELL_NONE,
 	shell_is_interactive = 0,
+	shell_level = 0,
 	shell_terminal = 0,
 	sort_switch = 0,
 	switch_cscheme = 0,
@@ -1208,7 +1209,7 @@ main(int argc, char *argv[])
 
 	get_hostname();
 	init_shell();
-	set_env();
+	set_env(0);
 
 	if (config_ok == 1)
 		init_history();

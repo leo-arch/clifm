@@ -895,7 +895,7 @@ launch_new_instance_cmd(char ***cmd, char **self, char **_sudo,
 	sudo = 0;
 #endif /* __HAIKU__ */
 
-	setenv("CLIFM_OWN_CHILD", "1", 1);
+//	setenv("CLIFM_OWN_CHILD", "1", 1);
 
 	if (*cmd) {
 		ret = (sudo == 0 || confirm_sudo_cmd(*cmd) == 1)
@@ -921,7 +921,7 @@ launch_new_instance_cmd(char ***cmd, char **self, char **_sudo,
 	free(*self);
 	free(*dir);
 
-	unsetenv("CLIFM_OWN_CHILD");
+//	unsetenv("CLIFM_OWN_CHILD");
 
 	return ret;
 }

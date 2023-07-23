@@ -1582,6 +1582,20 @@ unset_xargs(void)
 	xargs.warning_prompt = UNSET;
 }
 
+static int
+check_shell_level(void)
+{
+	char *lvl = getenv("CLIFMLVL");
+	if (!lvl)
+		return 1;
+
+	int a = atoi(lvl);
+	if (a < 1 || a > INT_MAX)
+		return 1;
+
+	return a + 1;
+}
+
 /* Keep track of attributes of the shell. Make sure the shell is running
  * interactively as the foreground job before proceeding.
  * Based on https://www.gnu.org/software/libc/manual/html_node/Initializing-the-Shell.html#Initializing-the-Shell
@@ -1594,7 +1608,8 @@ init_shell(void)
 		return;
 	}
 
-	if (getenv("CLIFM_OWN_CHILD")) {
+//	if (getenv("CLIFM_OWN_CHILD")) {
+	if ((shell_level = check_shell_level()) > 1) {
 		set_signals_to_ignore();
 		own_pid = get_own_pid();
 		tcgetattr(STDIN_FILENO, &shell_tmodes);
@@ -2035,8 +2050,9 @@ skip_this_path(char *name)
 	return 0;
 }
 
-/* Get the list of files in PATH, plus CliFM internal commands, and send
- * them into an array to be read by my_rl_completion(). */
+/* Get the list of files in PATH, plus CliFM internal commands, aliases, and
+ * action names, and store them into an array (bin_commands) to be read by
+ * my_rl_completion(). */
 void
 get_path_programs(void)
 {
@@ -2065,12 +2081,12 @@ get_path_programs(void)
 #if defined(__CYGWIN__)
 					NULL, xalphasort);
 #else
-					conf.light_mode ? NULL : skip_nonexec, xalphasort);
+					conf.light_mode == 1 ? NULL : skip_nonexec, xalphasort);
 #endif /* __CYGWIN__ */
 			/* If paths[i] directory does not exist, scandir returns -1.
-			 * Fedora, for example, adds $HOME/bin and $HOME/.local/bin to
+			 * Fedora, for example, adds HOME/bin and HOME/.local/bin to
 			 * PATH disregarding if they exist or not. If paths[i] dir is
-			 * empty do not use it either */
+			 * empty do not use it either. */
 			if (cmd_n[i] > 0)
 				total_cmd += cmd_n[i];
 		}
@@ -2082,8 +2098,8 @@ get_path_programs(void)
 	for (internal_cmds_n = 0; internal_cmds[internal_cmds_n].name;
 		internal_cmds_n++);
 
-	bin_commands = (char **)xnmalloc((size_t)total_cmd + internal_cmds_n +
-			     aliases_n + actions_n + 2, sizeof(char *));
+	bin_commands = (char **)xnmalloc((size_t)total_cmd
+		+ internal_cmds_n + aliases_n + actions_n + 2, sizeof(char *));
 
 	i = (int)internal_cmds_n;
 	while (--i >= 0) {

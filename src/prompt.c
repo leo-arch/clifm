@@ -64,7 +64,6 @@
 #define EMERGENCY_PROMPT_MSG "Error decoding prompt line. Using an \
 emergency prompt"
 #define EMERGENCY_PROMPT "\001\x1b[0m\002> "
-#define EMERGENCY_PROMPT_LEN 8
 
 /* Flag macros to generate files statistic string for the prompt */
 #define STATS_DIR      0
@@ -473,7 +472,7 @@ gen_emergency_prompt(void)
 		f = 1;
 		xerror("%s: %s\n", PROGRAM_NAME, EMERGENCY_PROMPT_MSG);
 	}
-	char *_prompt = savestring(EMERGENCY_PROMPT, EMERGENCY_PROMPT_LEN);
+	char *_prompt = savestring(EMERGENCY_PROMPT, sizeof(EMERGENCY_PROMPT) - 1);
 	return _prompt;
 }
 
@@ -527,13 +526,7 @@ gen_notification(const int flag)
 	char *p;
 	size_t len = 32;
 
-/*	if (user.uid == 0) {
-		p = (char *)xnmalloc(2, sizeof(char));
-		len = 2;
-	} else { */
-//	len = DIGINUM(UINT_MAX) + 2;
 	p = (char *)xnmalloc(len, sizeof(char));
-//	}
 	*p = '\0';
 
 	switch (flag) {
@@ -563,6 +556,31 @@ gen_notification(const int flag)
 		break;
 	default: break;
 	}
+
+	return p;
+}
+
+static inline char *
+gen_shell_level(const int mode)
+{
+	char *p = (char *)NULL;
+
+	if (mode == 'i') {
+		p = (char *)xnmalloc(32, sizeof(char));
+		snprintf(p, 32, "%d", shell_level);
+		return p;
+	}
+
+	/* I == full mode (nothing if first shell level) */
+	if (shell_level <= 1) {
+		p = xnmalloc(1, sizeof(char));
+		*p = '\0';
+		return p;
+	}
+
+	size_t len = (MAX_COLOR * 2) + 32;
+	p = (char *)xnmalloc(len, sizeof(char));
+	snprintf(p, len, "(%s%d%s)", BOLD, shell_level, df_c);
 
 	return p;
 }
@@ -652,6 +670,10 @@ decode_prompt(char *line)
 			case 'h': /* fallthrough */ /* Hostname up to first '.' */
 			case 'H': /* Full hostname */
 				temp = gen_hostname(c); goto ADD_STRING;
+
+			case 'i': /* fallthrough */ /* Nest level (number only) */
+			case 'I': /* Nest level (full format) */
+				temp = gen_shell_level(c); goto ADD_STRING;
 
 			case 's': /* Shell name (after last slash)*/
 				if (!user.shell) { line++; break; }
@@ -826,7 +848,7 @@ setenv_prompt(void)
 
 	/* Set environment variables with CliFM state information
 	 * (sel files, trash, stealth mode, messages) to be handled by
-	 * the prompt itself */
+	 * the prompt itself. */
 	char t[32];
 	snprintf(t, sizeof(t), "%d", (int)sel_n);
 	setenv("CLIFM_STAT_SEL", t, 1);
@@ -1112,9 +1134,9 @@ static int
 set_default_prompt(void)
 {
 	free(conf.encoded_prompt);
-	conf.encoded_prompt = savestring(DEFAULT_PROMPT, strlen(DEFAULT_PROMPT));
+	conf.encoded_prompt = savestring(DEFAULT_PROMPT, sizeof(DEFAULT_PROMPT) - 1);
 	free(conf.wprompt_str);
-	conf.wprompt_str = savestring(DEF_WPROMPT_STR, strlen(DEF_WPROMPT_STR));
+	conf.wprompt_str = savestring(DEF_WPROMPT_STR, sizeof(DEF_WPROMPT_STR) - 1);
 	*cur_prompt_name = '\0';
 	prompt_notif = DEF_PROMPT_NOTIF;
 	return EXIT_SUCCESS;

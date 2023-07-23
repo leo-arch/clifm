@@ -1470,6 +1470,7 @@ extern int
 	selfile_ok,
 	shell,
 	shell_is_interactive,
+	shell_level,
 	shell_terminal,
 	sort_switch,
 	switch_cscheme,

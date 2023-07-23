@@ -353,10 +353,10 @@ xf=1;31:xs=0;32:"
 #define MIN_SCREEN_HEIGHT 5
 
 #define DEF_PROMPT_NOTIF 1
-#define DEFAULT_PROMPT "\\[\\e[0m\\][\\S\\[\\e[0m\\]]\\l \
+#define DEFAULT_PROMPT "\\I\\[\\e[0m\\][\\S\\[\\e[0m\\]]\\l \
 \\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0m\\]<\\z\\[\\e[0m\\]\
 >\\[\\e[00;34m\\] \\$\\[\\e[0m\\] "
-#define DEFAULT_PROMPT_NO_COLOR "[\\S]\\l \\A \\u:\\H \\w\\n<\\z> \\$ "
+#define DEFAULT_PROMPT_NO_COLOR "\\I[\\S]\\l \\A \\u:\\H \\w\\n<\\z> \\$ "
 
 #define DEF_WARNING_PROMPT 1
 #define DEF_WPROMPT_STR_NO_COLOR "(!) > "

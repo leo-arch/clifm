@@ -630,10 +630,31 @@ setenv_plugins_helper(void)
 	return EXIT_FAILURE;
 }
 
+static void
+set_shell_level(void)
+{
+	char *lvl = getenv("CLIFMLVL");
+	if (!lvl) {
+		setenv("CLIFMLVL", "1", 1);
+		setenv("SHLVL", "2", 1);
+		return;
+	}
+
+	int a = atoi(lvl);
+	if (a < 1 || a > INT_MAX)
+		return;
+
+	char tmp[32];
+	snprintf(tmp, sizeof(tmp), "%d", a + 1);
+	setenv("CLIFMLVL", tmp, 1);
+	snprintf(tmp, sizeof(tmp), "%d", a + 2);
+	setenv("SHLVL", tmp, 1);
+}
+
 /* Set a few environment variables, mostly useful to run custom scripts
  * via the actions function */
 void
-set_env(void)
+set_env(const int reaload)
 {
 	if (xargs.stealth_mode == 1)
 		return;
@@ -649,6 +670,9 @@ set_env(void)
 
 	if (sel_file)
 		setenv("CLIFM_SELFILE", sel_file, 1);
+
+	if (reaload == 0)
+		set_shell_level();
 
 	setenv_plugins_helper();
 }
@@ -3091,7 +3115,7 @@ check_colors(void)
 		if (term_caps.color == 0)
 			/* The user is forcing the use of colors even when the terminal
 			 * reports no color capability. Let's assume a highly compatible
-			 * value */
+			 * value. */
 			term_caps.color = 8;
 		conf.colorize = 1;
 	}
@@ -3110,7 +3134,6 @@ check_colors(void)
 
 	reset_filetype_colors();
 	reset_iface_colors();
-//	unset_suggestions_color();
 	cur_color = tx_c;
 }
 
@@ -3472,10 +3495,10 @@ reload_config(void)
 	load_remotes();
 	init_workspaces_opts();
 
-	/* Set the current poistion of the dirhist index to the last entry */
+	/* Set the current position of the dirhist index to the last entry. */
 	dirhist_cur_index = dirhist_total_index - 1;
 
 	dir_changed = 1;
-	set_env();
+	set_env(1);
 	return EXIT_SUCCESS;
 }
