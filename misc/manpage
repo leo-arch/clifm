@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Jul 18, 2023" "clifm 1.13.1" "CLIFM Manual"
+.TH "CLIFM" "1" "Jul 23, 2023" "clifm 1.13.2" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -2838,6 +2838,15 @@ Set to 1 if running colorless (via the \fBNO_COLOR\fR or \fBCLIFM_NO_COLOR\fR en
 This variable contains the path to a pipe by means of which plugins can talk to \fBclifm\fR. See the \fBPLUGINS\fR section for more information..TP
 .B CLIFM_VIRTUAL_DIR
 This variable is set to the path to the currently used virtual directory only if (and while) the virtual directory function is exectued. See the \fBVIRTUAL DIRECTORIES\fR section above.
+.TP
+.B CLIFM_LINE
+When running a plugin via a keybinding, this variable holds the content of the current line buffer. For a usage example see the \fIxclip.sh\fR plugin.
+.TP
+.B SHLVL
+Incremented by one each time a new shell is started.
+.TP
+.B CLIFMLVL
+Same as \fBSHLVL\fR, but specific to \fBclifm\fR.
 .TP
 If \fINotifications\fR is set to \fIfalse\fR for the current prompt, the following variables are exported to the environment to be used, if needed, by your custom prompt:
 .TP
