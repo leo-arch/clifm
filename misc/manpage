@@ -1768,7 +1768,7 @@ Each prompt is built following almost the same escape codes and rules used by th
 .TP
 \fB\\i\fR: The value of \fBCLIFMLVL\fR (number of nested instances of \fBclifm\fR)
 .TP
-\fB\\I\fR: Same as \fB\\I\fR, but formatted as (\fBn\fR) (nothing is printed if \fBCLIFMLVL\fR is 1)
+\fB\\I\fR: Same as \fB\\I\fR, but formatted as "(n)" (nothing is printed if \fBCLIFMLVL\fR is 1)
 .TP
 \fB\\$\fR '#', if the effective user ID is 0, and '$' otherwise
 .TP
