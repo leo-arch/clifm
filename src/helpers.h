@@ -117,7 +117,7 @@
 # if defined(__FreeBSD__) && __FreeBSD_version >= 410000
 #  define HAVE_KQUEUE
 # elif defined(__NetBSD__)
-#  if __NetBSD_PreReq(2, 0, 0)
+#  if __NetBSD_Prereq__(2, 0, 0)
 #   define HAVE_KQUEUE
 #  endif /* NetBSD >= 2.0 */
 # elif defined(__OpenBSD__) && OpenBSD >= 200106 /* version 2.9 */
@@ -1024,9 +1024,10 @@ struct fileinfo {
 	int sel;
 	int xattr;
 	int du_status; /* Exit status of du(1) for dir full sizes */
-//#if defined(__FreeBSD__) || defined(__NetBSD__)
 	int pad2;
-//#endif /* __FreeBSD__ || __NetBSD__ */
+#if defined(__FreeBSD__) || defined(__NetBSD__)
+	int pad3;
+#endif /* __FreeBSD__ || __NetBSD__ */
 };
 
 extern struct fileinfo *file_info;
