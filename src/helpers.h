@@ -1025,9 +1025,9 @@ struct fileinfo {
 	int xattr;
 	int du_status; /* Exit status of du(1) for dir full sizes */
 	int pad2;
-#if defined(__FreeBSD__) || defined(__NetBSD__)
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__DragonFly__)
 	int pad3;
-#endif /* __FreeBSD__ || __NetBSD__ */
+#endif /* __FreeBSD__ || __NetBSD__ || __DragonFly__ */
 };
 
 extern struct fileinfo *file_info;
@@ -1044,14 +1044,14 @@ struct maxes_t {
 
 struct devino_t {
 	ino_t ino;
-	dev_t dev; /* 4 bytes on OpenBSD */
+	dev_t dev; /* 4 bytes on OpenBSD and DragonFly */
 	char mark;
 	char pad1;
 	char pad2;
 	char pad3;
-#if !defined(__OpenBSD__)
+#if !defined(__OpenBSD__) && !defined(__DragonFly__)
 	int pad4;
-#endif /* !__OpenBSD__ */
+#endif /* !__OpenBSD__ && !__DragonFly__ */
 };
 
 extern struct devino_t *sel_devino;
