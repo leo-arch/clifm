@@ -189,8 +189,8 @@ get_birthtime(const char *filename)
 
 	if (nvlist_lookup_uint64_array(response, A_CRTIME, &val, &n) == 0
 	&& n >= 2 && val[0] <= LONG_MAX && val[1] < 1000000000 * 2 /* for leap seconds */) {
-		ts.tv_sec = val[0];
-		ts.tv_nsec = val[1];
+		ts.tv_sec = (time_t)val[0];
+		ts.tv_nsec = (time_t)val[1];
 	}
 
 	nvlist_free(response);
