@@ -28,8 +28,8 @@
 #define PROGRAM_NAME_UPPERCASE "CliFM"
 #define PROGRAM_NAME "clifm"
 #define PROGRAM_DESC "The command line file manager"
-#define VERSION "1.13.3"
-#define DATE "Jul 23, 2023"
+#define VERSION "1.13.4"
+#define DATE "Jul 24, 2023"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "https://github.com/leo-arch/clifm"
 #define LICENSE "GPL2+"
@@ -1018,7 +1018,6 @@ struct fileinfo {
 	int dir;
 	int eln_n;
 	int exec;
-//	int filesn; /* Number of files in subdir. Is a signed integer enough? */
 	int ruser;  /* User read permission for dir */
 	int symlink;
 	int sel;
