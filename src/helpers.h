@@ -139,6 +139,7 @@
 #if defined(__OpenBSD__) || defined(__NetBSD__) \
 || defined(__FreeBSD__) || defined(__APPLE__)
 # include <inttypes.h> /* uintmax_t, intmax_t */
+#endif /* BSD */
 
 /* File system event monitors are OS-specific (inotify and kqueue) */
 #if defined(_BE_POSIX) && !defined(USE_GENERIC_FS_MONITOR)
