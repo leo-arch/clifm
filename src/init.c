@@ -1585,7 +1585,7 @@ unset_xargs(void)
 }
 
 static int
-check_shell_level(void)
+check_nest_level(void)
 {
 	/* If running on a fully sanitized environment, no variable is imported
 	 * at all, but CLIFMLVL is nevertheless consulted (by xsecure_env()) to
@@ -1620,7 +1620,7 @@ init_shell(void)
 		return;
 	}
 
-	if ((nesting_level = check_shell_level()) > 1) {
+	if ((nesting_level = check_nest_level()) > 1) {
 		set_signals_to_ignore();
 		own_pid = get_own_pid();
 		tcgetattr(STDIN_FILENO, &shell_tmodes);

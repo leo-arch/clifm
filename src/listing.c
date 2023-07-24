@@ -2574,7 +2574,7 @@ list_dir(void)
 
 		n++;
 		if (n + 1 > INT_MAX) {
-			/* Though it might seem arbitrary and stretched, an int allows us
+			/* Though it might seem arbitrary and limited, an int allows us
 			 * to store more than 2 billion files per directory. */
 			_err('w', PRINT_PROMPT, _("%s: Integer overflow "
 				"detected (showing only %zu files)\n"), PROGRAM_NAME, n);

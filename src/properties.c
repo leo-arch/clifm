@@ -1222,10 +1222,11 @@ print_file_name(char *filename, const char *color, const char file_type,
 		free(target_name);
 
 	} else { /* Broken link */
-		char target[PATH_MAX] = "";;
-		ssize_t ret = readlinkat(XAT_FDCWD, filename, target, sizeof(target));
+		char target[PATH_MAX + 1];;
+		ssize_t len = readlinkat(XAT_FDCWD, filename, target, sizeof(target) - 1);
 
-		if (ret != -1 && *target) {
+		if (len != -1) {
+			target[len] = '\0';
 			printf(_("\tName: %s%s%s -> %s%s%s (broken link)\n"), or_c,
 				wname ? wname : filename, df_c, uf_c, target, df_c);
 		} else {
@@ -1537,9 +1538,9 @@ err_no_file(const char *filename, const int errnum, const int follow_link)
 	if (lstat(filename, &a) == -1 || !S_ISLNK(a.st_mode))
 		goto END;
 
-	char target[PATH_MAX];
-	ssize_t len = readlinkat(XAT_FDCWD, filename, target, sizeof(target));
-	if (len > 0) {
+	char target[PATH_MAX + 1];
+	ssize_t len = readlinkat(XAT_FDCWD, filename, target, sizeof(target) - 1);
+	if (len != -1) {
 		target[len] = '\0';
 		xerror(_("prop: %s %s->%s %s: Broken symbolic link\n"), filename,
 			mi_c, df_c, target);

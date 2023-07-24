@@ -1478,10 +1478,11 @@ print_current_target(const char *link, char **target)
 		return;
 	}
 
-	char tmp[PATH_MAX] = "";
-	ssize_t ret = readlinkat(XAT_FDCWD, link, tmp, sizeof(tmp));
+	char tmp[PATH_MAX + 1];
+	ssize_t len = readlinkat(XAT_FDCWD, link, tmp, sizeof(tmp) - 1);
 
-	if (ret != -1 && *tmp) {
+	if (len != -1) {
+		tmp[len] = '\0';
 		printf(_("%s%s%s (broken link)\n"), uf_c, tmp, df_c);
 		free(*target);
 		*target = savestring(tmp, strlen(tmp));
