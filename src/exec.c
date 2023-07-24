@@ -1547,7 +1547,7 @@ print_stats(void)
 	if (conf.light_mode == 1)
 		puts(_("Running in light mode: Some files statistics are not available\n"));
 
-	printf(_("Total files:                 %zu\n\
+	printf(_("Total files:                 %jd\n\
 Directories:                 %zu\n\
 Regular files:               %zu\n\
 Executable files:            %zu\n\

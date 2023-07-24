@@ -136,6 +136,10 @@
 # include <stdint.h> /* uint8_t */
 #endif /* __linux__ */
 
+#if defined(__OpenBSD__) || defined(__NetBSD__) \
+|| defined(__FreeBSD__) || defined(__APPLE__)
+# include <inttypes.h> /* uintmax_t, intmax_t */
+
 /* File system event monitors are OS-specific (inotify and kqueue) */
 #if defined(_BE_POSIX) && !defined(USE_GENERIC_FS_MONITOR)
 # define USE_GENERIC_FS_MONITOR

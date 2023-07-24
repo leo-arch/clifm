@@ -52,11 +52,6 @@
 /* For BSD systems, we need sys/types.h, already included in helpers.h */
 #endif /* __linux__ */
 
-#if defined(__OpenBSD__) || defined(__NetBSD__) \
-|| defined(__FreeBSD__) || defined(__APPLE__)
-# include <inttypes.h> /* uintmax_t, intmax_t */
-#endif /* __OpenBSD__ || __NetBSD__ || __FreeBSD__ || __APPLE__ */
-
 #ifdef LINUX_FILE_ATTRS
 # include <sys/ioctl.h>  /* ioctl(3) */
 # ifdef __TINYC__
