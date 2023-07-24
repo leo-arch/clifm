@@ -131,14 +131,14 @@ select_file(char *file)
 static char **
 load_matches_invert_cwd(glob_t gbuf, const mode_t filetype, int *matches)
 {
-	char **list = (char **)xnmalloc(files + 2, sizeof(char *));
+	char **list = (char **)xnmalloc((size_t)files + 2, sizeof(char *));
 
-	int i = (int)files;
+	filesn_t i = files;
 	while (--i >= 0) {
 		if (filetype != 0 && file_info[i].type != filetype)
 			continue;
 
-		int j = (int)gbuf.gl_pathc;
+		filesn_t j = (filesn_t)gbuf.gl_pathc;
 		while (--j >= 0) {
 			if (*file_info[i].name == *gbuf.gl_pathv[j]
 			&& strcmp(file_info[i].name, gbuf.gl_pathv[j]) == 0)
@@ -346,7 +346,7 @@ static int
 sel_regex_cwd(regex_t regex, const mode_t filetype, const int invert)
 {
 	int new_sel = 0;
-	int i = (int)files;
+	filesn_t i = files;
 
 	while (--i >= 0) {
 		if (filetype != 0 && file_info[i].type != filetype)

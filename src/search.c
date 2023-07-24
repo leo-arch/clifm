@@ -387,9 +387,9 @@ get_glob_matches_invert(char **gfiles, const char *search_path,
 	if (search_path)
 		return get_non_matches_from_search_path(search_path, gfiles, file_type);
 
-	int i, j, n = 0;
+	filesn_t i, j, n = 0;
 	struct search_t *matches =
-		(struct search_t *)xnmalloc(files + 1, sizeof(struct search_t));
+		(struct search_t *)xnmalloc((size_t)files + 1, sizeof(struct search_t));
 
 	for (i = 0; file_info[i].name; i++) {
 		int f = 0;
@@ -950,8 +950,8 @@ search_regex(char **args)
 
 	size_t found = 0;
 	int *regex_index = (int *)xnmalloc((search_path ? (size_t)tmp_files
-		: files) + 2, sizeof(int));
-	size_t max = (search_path && *search_path) ? (size_t)tmp_files : files;
+		: (size_t)files) + 2, sizeof(int));
+	size_t max = (search_path && *search_path) ? (size_t)tmp_files : (size_t)files;
 
 	for (i = 0; i < max; i++) {
 		char *name = (search_path && *search_path) ? reg_dirlist[i]->d_name

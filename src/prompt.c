@@ -831,7 +831,7 @@ static inline void
 update_trash_indicator(void)
 {
 	if (trash_ok == 1) {
-		int n = count_dir(trash_files_dir, NO_CPOP);
+		filesn_t n = count_dir(trash_files_dir, NO_CPOP);
 		if (n <= 2)
 			trash_n = 0;
 		else

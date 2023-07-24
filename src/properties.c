@@ -1712,8 +1712,8 @@ construct_and_print_filename(const struct fileinfo *props,
 		plen = wc_xstrlen(wname);
 	}
 
-	size_t n = (max_files > UNSET && files > (size_t)max_files)
-		? (size_t)max_files : files;
+	filesn_t n = (max_files > UNSET && files > (filesn_t)max_files)
+		? (filesn_t)max_files : files;
 
 	size_t cur_len = (size_t)DIGINUM(n) + 1 + plen;
 	if (conf.icons == 1)

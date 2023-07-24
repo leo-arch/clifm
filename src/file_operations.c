@@ -232,7 +232,7 @@ print_file(FILE *fp, const char *name, const mode_t type)
 }
 
 static int
-write_files_to_tmp(struct dirent ***a, int *n, const char *target,
+write_files_to_tmp(struct dirent ***a, filesn_t *n, const char *target,
 	char *tmp_file)
 {
 	int fd = 0;
@@ -245,8 +245,8 @@ write_files_to_tmp(struct dirent ***a, int *n, const char *target,
 
 	fprintf(fp, "%s", _(BULK_RM_TMP_FILE_HEADER));
 
-	size_t i;
 	if (target == workspaces[cur_ws].path) {
+		filesn_t i;
 		for (i = 0; i < files; i++)
 			print_file(fp, file_info[i].name, file_info[i].type);
 	} else {
@@ -265,7 +265,8 @@ write_files_to_tmp(struct dirent ***a, int *n, const char *target,
 			return tmp_err;
 		}
 
-		for (i = 0; i < (size_t)*n; i++) {
+		filesn_t i;
+		for (i = 0; i < *n; i++) {
 			if (SELFORPARENT((*a)[i]->d_name))
 				continue;
 #ifndef _DIRENT_HAVE_D_TYPE
@@ -284,10 +285,10 @@ write_files_to_tmp(struct dirent ***a, int *n, const char *target,
 }
 
 static int
-open_tmp_file(struct dirent ***a, const int n, char *tmp_file, char *app)
+open_tmp_file(struct dirent ***a, const filesn_t n, char *tmp_file, char *app)
 {
 	int exit_status = EXIT_SUCCESS;
-	size_t i;
+	filesn_t i;
 
 	if (!app || !*app) {
 		open_in_foreground = 1;
@@ -308,7 +309,7 @@ open_tmp_file(struct dirent ***a, const int n, char *tmp_file, char *app)
 		return EXIT_SUCCESS;
 
 END:
-	for (i = 0; i < (size_t)n && *a && (*a)[i]; i++)
+	for (i = 0; i < n && *a && (*a)[i]; i++)
 		free((*a)[i]);
 	free(*a);
 
@@ -316,9 +317,9 @@ END:
 }
 
 static char **
-get_files_from_tmp_file(const char *tmp_file, const char *target, const int n)
+get_files_from_tmp_file(const char *tmp_file, const char *target, const filesn_t n)
 {
-	size_t nfiles = (target == workspaces[cur_ws].path) ? files : (size_t)n;
+	size_t nfiles = (target == workspaces[cur_ws].path) ? (size_t)files : (size_t)n;
 	char **tmp_files = (char **)xnmalloc(nfiles + 2, sizeof(char *));
 
 	FILE *fp = fopen(tmp_file, "r");
@@ -376,14 +377,14 @@ remove_this_file(char *file, char **list)
 
 static char **
 get_remove_files(const char *target, char **tmp_files,
-	struct dirent ***a, const int n)
+	struct dirent ***a, const filesn_t n)
 {
 	size_t i, j = 0;
-	size_t l = (target == workspaces[cur_ws].path) ? files : (size_t)n;
+	size_t l = (target == workspaces[cur_ws].path) ? (size_t)files : (size_t)n;
 	char **rem_files = (char **)xnmalloc(l + 2, sizeof(char *));
 
 	if (target == workspaces[cur_ws].path) {
-		for (i = 0; i < files; i++) {
+		for (i = 0; i < (size_t)files; i++) {
 			if (remove_this_file(file_info[i].name, tmp_files) == 1) {
 				rem_files[j] = savestring(file_info[i].name,
 					strlen(file_info[i].name));
@@ -520,13 +521,13 @@ bulk_remove_files(char ***rfiles)
 }
 
 static int
-diff_files(char *tmp_file, const int n)
+diff_files(char *tmp_file, const filesn_t n)
 {
 	FILE *fp = fopen(tmp_file, "r");
 	char line[PATH_MAX + 6];
 	memset(line, '\0', sizeof(line));
 
-	int c = 0;
+	filesn_t c = 0;
 	while (fgets(line, (int)sizeof(line), fp)) {
 		if (*line != '#' && *line != '\n')
 			c++;
@@ -538,7 +539,7 @@ diff_files(char *tmp_file, const int n)
 }
 
 static int
-nothing_to_do(char **tmp_file, struct dirent ***a, const int n, const int fd)
+nothing_to_do(char **tmp_file, struct dirent ***a, const filesn_t n, const int fd)
 {
 	puts(_("rr: Nothing to do"));
 	if (unlinkat(fd, *tmp_file, 0) == 1)
@@ -546,7 +547,7 @@ nothing_to_do(char **tmp_file, struct dirent ***a, const int n, const int fd)
 	close(fd);
 	free(*tmp_file);
 
-	int i = n;
+	filesn_t i = n;
 	while (--i >= 0)
 		free((*a)[i]);
 	free(*a);
@@ -563,7 +564,8 @@ bulk_remove(char *s1, char *s2)
 	}
 
 	char *app = (char *)NULL, *target = (char *)NULL;
-	int fd = 0, n = 0, ret = 0, i = 0;
+	int fd = 0, ret = 0, i = 0;
+	filesn_t n = 0;
 
 	if ((ret = parse_bulk_remove_params(s1, s2, &app, &target)) != EXIT_SUCCESS)
 		return ret;
@@ -584,7 +586,7 @@ bulk_remove(char *s1, char *s2)
 		goto END;
 
 	stat(tmp_file, &attr);
-	int num = (target == workspaces[cur_ws].path) ? (int)files : n - 2;
+	filesn_t num = (target == workspaces[cur_ws].path) ? files : n - 2;
 	if (old_t == attr.st_mtime || diff_files(tmp_file, num) == 0)
 		return nothing_to_do(&tmp_file, &a, n, fd);
 
@@ -625,7 +627,7 @@ run_mime(char *file)
 	/* Convert ELN into file name (rl_line_buffer) */
 	if (p && *p >= '1' && *p <= '9') {
 		int a = atoi(p);
-		if (a > 0 && (size_t)a <= files && file_info[a - 1].name)
+		if (a > 0 && (filesn_t)a <= files && file_info[a - 1].name)
 			p = file_info[a - 1].name;
 	}
 
@@ -756,7 +758,7 @@ get_dup_file_dest_dir(void)
 		/* Expand ELN */
 		if (IS_DIGIT(*dir) && is_number(dir)) {
 			int n = atoi(dir);
-			if (n > 0 && (size_t)n <= files) {
+			if (n > 0 && (filesn_t)n <= files) {
 				free(dir);
 				char *name = file_info[n - 1].name;
 				dir = savestring(name, strlen(name));
@@ -953,14 +955,14 @@ CONT:
 }
 
 static void
-list_created_files(char **nfiles, const size_t nfiles_n)
+list_created_files(char **nfiles, const filesn_t nfiles_n)
 {
 	size_t i;
 	int file_in_cwd = 0;
-	int n = workspaces[cur_ws].path
+	filesn_t n = workspaces[cur_ws].path
 		? count_dir(workspaces[cur_ws].path, NO_CPOP) - 2 : 0;
 
-	if (n > 0 && (size_t)n > files)
+	if (n > 0 && n > files)
 		file_in_cwd = 1;
 
 	if (conf.autols == 1 && file_in_cwd == 1)
@@ -974,7 +976,7 @@ list_created_files(char **nfiles, const size_t nfiles_n)
 			free(f);
 	}
 
-	print_reload_msg("%zu file(s) created\n", nfiles_n);
+	print_reload_msg("%zu file(s) created\n", (size_t)nfiles_n);
 }
 
 static int
@@ -1272,7 +1274,7 @@ create_files(char **args)
 	/* Store pointers to actually created files into a pointers array.
 	 * We'll use this later to print the names of actually created files. */
 	char **new_files = (char **)xnmalloc(args_n + 1, sizeof(char *));
-	size_t new_files_n = 0;
+	filesn_t new_files_n = 0;
 
 	for (i = 0; args[i]; i++) {
 		if (validate_filename(&args[i]) == 0) {
@@ -1761,7 +1763,7 @@ run_cp_mv_cmd(char **cmd, const int skip_force)
 		 * named as a number. Let's check if we have such file name in the
 		 * files list. */
 		if (is_number(cmd[1])) {
-			int i = (int)files;
+			filesn_t i = files;
 			while (--i >= 0) {
 				if (*cmd[1] != *file_info[i].name)
 					continue;

@@ -41,7 +41,7 @@ __BEGIN_DECLS
 int  _expand_eln(const char *);
 char *abbreviate_file_name(char *);
 char *get_cwd(char *, const size_t, const int);
-int  count_dir(const char *, const int);
+filesn_t count_dir(const char *, const int);
 off_t dir_size(char *, const int, int *);
 char from_hex(char);
 char *gen_date_suffix(const struct tm);
@@ -62,7 +62,7 @@ void set_fzf_preview_border_type(void);
 char *url_encode(char *);
 char *url_decode(char *);
 int  xatoi(const char *);
-char *xitoa(int);
+char *xitoa(long long);
 char xgetchar(void);
 int  xmkdir(char *, const mode_t);
 

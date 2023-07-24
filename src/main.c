@@ -191,6 +191,8 @@ int
 	wrong_cmd = 0,
 	xrename = 0;
 
+filesn_t files = 0;
+
 size_t
 	actions_n = 0,
 	aliases_n = 0,
@@ -203,7 +205,6 @@ size_t
 	current_hist_n = 0,
 	curhistindex = 0,
 	ext_colors_n = 0,
-	files = 0,
 	jump_n = 0,
 	kbinds_n = 0,
 	longest = 0,

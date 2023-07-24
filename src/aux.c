@@ -209,7 +209,7 @@ _expand_eln(const char *text)
 		return 0;
 
 	int a = atoi(text); /* Only expand numbers matching ELN's */
-	if (a <= 0 || a > (int)files)
+	if (a <= 0 || (filesn_t)a > files)
 		return 0;
 
 	if (words_num == 1) { /* First word */
@@ -712,8 +712,8 @@ hex2rgb(char *hex)
 /* Count files in the directory DIR, including self and parent. If POP is set
  * to 1, the function will just check if the directory is populated (it has at
  * least 3 files, including self and parent).
- * Returns -1 in case of error or an integer (0-INT_MAX) in case of success. */
-int
+ * Returns -1 in case of error or an integer (0-INTMAX_MAX) in case of success. */
+filesn_t
 count_dir(const char *dir, const int pop)
 {
 	if (!dir)
@@ -739,10 +739,10 @@ count_dir(const char *dir, const int pop)
 	}
 #endif // O_NOATIME */
 
-	unsigned int c = 0;
+	filesn_t c = 0;
 
 	while (readdir(p)) {
-		if (c + 1 > INT_MAX)
+		if (c > INTMAX_MAX - 1)
 			break;
 
 		c++;
@@ -751,7 +751,7 @@ count_dir(const char *dir, const int pop)
 	}
 
 	closedir(p);
-	return (int)c;
+	return c;
 }
 
 /* Get the path of a the command CMD inspecting all paths in the PATH
@@ -952,16 +952,16 @@ get_link_ref(const char *link)
 /* Transform an integer (N) into a string of chars.
  * This exists because some operating systems do not support itoa(3). */
 char *
-xitoa(int n)
+xitoa(long long n)
 {
 	if (!n)
 		return "0";
 
 	static char buf[32] = {0};
-	int i = 30;
+	long long i = 30;
 
 	while (n && i) {
-		int rem = n / 10;
+		long long rem = n / 10;
 		buf[i] = (char)('0' + (n - (rem * 10)));
 		n = rem;
 		--i;

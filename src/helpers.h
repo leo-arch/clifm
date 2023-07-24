@@ -802,6 +802,9 @@ extern time_t curdir_mtime;
 				 *  #    GLOBAL VARIABLES   #
 				 *  ######################### */
 
+typedef intmax_t filesn_t; /* Let's use this to count files */
+extern filesn_t files;
+
 /* User settings (mostly from the config file) */
 struct config_t {
 	char *opener;
@@ -992,6 +995,7 @@ struct fileinfo {
 	char *icon;
 	char *icon_color;
 	char *name;
+	filesn_t filesn;
 	size_t len;
 	time_t ltime; /* For long view mode */
 	time_t time;
@@ -1009,15 +1013,15 @@ struct fileinfo {
 	int dir;
 	int eln_n;
 	int exec;
-	int filesn; /* Number of files in subdir. Is a signed integer enough? */
+//	int filesn; /* Number of files in subdir. Is a signed integer enough? */
 	int ruser;  /* User read permission for dir */
 	int symlink;
 	int sel;
 	int xattr;
 	int du_status; /* Exit status of du(1) for dir full sizes */
-#if defined(__FreeBSD__) || defined(__NetBSD__)
+//#if defined(__FreeBSD__) || defined(__NetBSD__)
 	int pad2;
-#endif /* __FreeBSD__ || __NetBSD__ */
+//#endif /* __FreeBSD__ || __NetBSD__ */
 };
 
 extern struct fileinfo *file_info;
@@ -1499,7 +1503,7 @@ extern size_t
 	current_hist_n,
 	curhistindex,
 	ext_colors_n,
-	files, /* Amount of files in the current dir. Is size_t enough? */
+//	files, /* Amount of files in the current dir. Is size_t enough? */
 	jump_n,
 	kbinds_n,
 	longest,

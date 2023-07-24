@@ -1292,9 +1292,9 @@ expand_mime_type_filter(const char *pattern)
 	if (!pattern || !*pattern)
 		return (char **)NULL;
 
-	char **t = (char **)xnmalloc(files + 1, sizeof(char *));
+	char **t = (char **)xnmalloc((size_t)files + 1, sizeof(char *));
 
-	size_t i, n = 0;
+	filesn_t i, n = 0;
 	for (i = 0; i < files; i++) {
 		char *m = xmagic(file_info[i].name, MIME_TYPE);
 		if (!m) continue;
@@ -1313,7 +1313,7 @@ expand_mime_type_filter(const char *pattern)
 	if (n == 0)
 		{ free(t); return (char **)NULL; }
 
-	t = (char **)xrealloc(t, (n + 1) * sizeof(char *));
+	t = (char **)xrealloc(t, ((size_t)n + 1) * sizeof(char *));
 	return t;
 }
 #endif /* !_NO_MAGIC */
@@ -1324,10 +1324,10 @@ expand_file_type_filter(const char t)
 	if (files == 0)
 		return (char **)NULL;
 
-	size_t i = 0, n = 0;
+	filesn_t i = 0, n = 0;
 
 	char *name = (char *)NULL;
-	char **f = (char **)xnmalloc(files + 1, sizeof(char *));
+	char **f = (char **)xnmalloc((size_t)files + 1, sizeof(char *));
 
 	while (i < files && (name = file_info[i].name)) {
 		switch (t) {
@@ -1407,7 +1407,7 @@ expand_file_type_filter(const char t)
 	}
 
 	f[n] = (char *)NULL;
-	f = (char **)xrealloc(f, (n + 1) * sizeof(char *));
+	f = (char **)xrealloc(f, ((size_t)n + 1) * sizeof(char *));
 
 	return f;
 }
@@ -2074,15 +2074,16 @@ expand_regex(char ***substr)
 {
 	/* Let's store all strings currently in substr plus REGEX expanded
 	 * files, if any, in a temporary array. */
-	char **tmp = (char **)xnmalloc(files + args_n + 2, sizeof(char *));
-	size_t i, j, n = 0;
+	char **tmp = (char **)xnmalloc((size_t)files + args_n + 2, sizeof(char *));
+	filesn_t i, j;
+	size_t n = 0;
 	regex_t regex;
 
 	int reg_flags = conf.case_sens_list == 1 ? (REG_NOSUB | REG_EXTENDED)
 			: (REG_NOSUB | REG_EXTENDED | REG_ICASE);
 
 	for (i = 0; (*substr)[i]; i++) {
-		if (n > (files + args_n))
+		if (n > ((size_t)files + args_n))
 			break;
 
 		/* Ignore the first string of the search function: it will be
@@ -2121,7 +2122,7 @@ expand_regex(char ***substr)
 				continue;
 
 			/* Make sure the matching file name is not already in the tmp array */
-			int m = (int)n, found = 0;
+			filesn_t m = (filesn_t)n, found = 0;
 			while (--m >= 0) {
 				if (*file_info[j].name == *tmp[m]
 				&& strcmp(file_info[j].name, tmp[m]) == 0)
@@ -2851,8 +2852,8 @@ expand_range(char *str, int listdir)
 		return (int *)NULL;
 
 	if (listdir) {
-		if (afirst <= 0 || afirst > (int)files || asecond <= 0
-		|| asecond > (int)files || afirst >= asecond)
+		if (afirst <= 0 || (filesn_t)afirst > files || asecond <= 0
+		|| (filesn_t)asecond > files || afirst >= asecond)
 			return (int *)NULL;
 	} else {
 		if (afirst >= asecond) 

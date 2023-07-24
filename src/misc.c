@@ -345,7 +345,7 @@ read_inotify(void)
 
 		/* A file was renamed */
 		if (event->mask & IN_MOVED_TO) {
-			int j = (int)files;
+			filesn_t j = files;
 			while (--j >= 0) {
 				if (*file_info[j].name == *event->name
 				&& strcmp(file_info[j].name, event->name) == 0)

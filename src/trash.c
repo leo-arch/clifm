@@ -165,7 +165,7 @@ wx_parent_check(char *file)
 			exit_status = EXIT_FAILURE;
 		} else if (access(parent, W_OK | X_OK) == 0) {
 		/* Check the parent for appropriate permissions */
-			int files_n = count_dir(parent, NO_CPOP);
+			filesn_t files_n = count_dir(parent, NO_CPOP);
 
 			if (files_n > 2) {
 				/* I manually check here subdir because recur_perm_check()

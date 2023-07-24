@@ -302,9 +302,10 @@ list_tags(char **args)
 		for (i = 0; tags[i]; i++) {
 			char p[PATH_MAX];
 			snprintf(p, sizeof(p), "%s/%s", tags_dir, tags[i]);
-			int n = count_dir(p, NO_CPOP);
+			filesn_t n = count_dir(p, NO_CPOP);
 			if (n > 2)
-				printf("%-*s [%s%d%s]\n", pad, tags[i], mi_c, n - 2, df_c);
+				printf("%-*s [%s%jd%s]\n", pad, tags[i], mi_c,
+					(intmax_t)n - 2, df_c);
 			else
 				printf("%-*s  -\n", pad, tags[i]);
 		}

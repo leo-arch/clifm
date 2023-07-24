@@ -1343,7 +1343,7 @@ expand_and_deescape(char **arg, char **deq_str)
 }
 
 static inline int
-_open_file(char **args, const int i)
+_open_file(char **args, const filesn_t i)
 {
 	if (conf.autocd && (file_info[i].type == DT_DIR || file_info[i].dir == 1))
 		return cd_function(args[0], CD_PRINT_ERROR);
@@ -1393,7 +1393,7 @@ check_auto_first(char **args)
 		return EXIT_SUCCESS;
 	}
 
-	int i = (int)files;
+	filesn_t i = files;
 	while (--i >= 0) {
 		if (*tmp != *file_info[i].name || strcmp(tmp, file_info[i].name) != 0)
 			continue;
@@ -2081,12 +2081,12 @@ check_fs_changes(void)
 	|| !workspaces[cur_ws].path)
 		return;
 
-	int cur_files = count_dir(workspaces[cur_ws].path, 0) - 2;
+	filesn_t cur_files = count_dir(workspaces[cur_ws].path, 0) - 2;
 	struct stat a;
 
 	if (curdir_mtime != 0 && stat(workspaces[cur_ws].path, &a) != -1
 	&& curdir_mtime != a.st_mtime
-	&& cur_files >= 0 && files != (size_t)cur_files)
+	&& cur_files >= 0 && files != cur_files)
 		reload_dirlist();
 }
 #endif /* GENERIC_FS_MONITOR */

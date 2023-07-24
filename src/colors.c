@@ -448,7 +448,7 @@ get_regfile_color(const char *filename, const struct stat *attr, int *is_ext)
  * count_dir() either). */
 char *
 get_dir_color(const char *filename, const mode_t mode, const nlink_t links,
-	const int count)
+	const filesn_t count)
 {
 	char *color = (char *)NULL;
 	int sticky = 0;
@@ -459,8 +459,8 @@ get_dir_color(const char *filename, const mode_t mode, const nlink_t links,
 	if (mode & S_IWOTH)
 		is_oth_w = 1;
 
-	size_t files_dir = count > -1 ? (size_t)count : (links > 2
-		? (size_t)links : (size_t)count_dir(filename, CPOP));
+	filesn_t files_dir = count > -1 ? count : (links > 2
+		? (filesn_t)links : (filesn_t)count_dir(filename, CPOP));
 
 	color = sticky ? (is_oth_w ? tw_c : st_c) : is_oth_w ? ow_c
 		: ((files_dir == 2 || files_dir == 0) ? ed_c : di_c);
@@ -2588,7 +2588,7 @@ get_colorschemes(void)
 	size_t i = 0;
 
 	if (colors_dir && stat(colors_dir, &attr) != -1
-	&& (schemes_total = count_dir(colors_dir, NO_CPOP) - 2) > 0) {
+	&& (schemes_total = (int)count_dir(colors_dir, NO_CPOP) - 2) > 0) {
 		if (!(dir_p = opendir(colors_dir))) {
 			_err('e', PRINT_PROMPT, "opendir: %s: %s\n", colors_dir,
 				strerror(errno));
@@ -2621,7 +2621,7 @@ get_colorschemes(void)
 		goto END;
 
 	int total_tmp = schemes_total;
-	schemes_total += (count_dir(sys_colors_dir, NO_CPOP) - 2);
+	schemes_total += ((int)count_dir(sys_colors_dir, NO_CPOP) - 2);
 
 	if (schemes_total <= total_tmp)
 		goto END;

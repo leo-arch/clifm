@@ -1835,7 +1835,8 @@ profiles_generator(const char *text, int state)
 static char *
 filenames_gen_text(const char *text, int state)
 {
-	static size_t i, len = 0;
+	static filesn_t i;
+	static size_t len = 0;
 	char *name;
 	rl_filename_completion_desired = 1;
 	if (!state) {
@@ -1879,7 +1880,7 @@ filenames_gen_text(const char *text, int state)
 static char *
 filenames_gen_eln(const char *text, int state)
 {
-	static size_t i;
+	static filesn_t i;
 	char *name;
 	rl_filename_completion_desired = 1;
 
@@ -1913,7 +1914,7 @@ filenames_gen_eln(const char *text, int state)
 static char *
 filenames_gen_ranges(const char *text, int state)
 {
-	static int i;
+	static filesn_t i;
 	char *name;
 	rl_filename_completion_desired = 1;
 
@@ -1933,8 +1934,8 @@ filenames_gen_ranges(const char *text, int state)
 	if (a >= b)
 		return (char *)NULL;
 
-	while (i < (int)files && (name = file_info[i++].name) != NULL) {
-		if (i >= a && i <= b) {
+	while (i < files && (name = file_info[i++].name) != NULL) {
+		if (i >= (filesn_t)a && i <= (filesn_t)b) {
 #ifndef _NO_SUGGESTIONS
 			if (suggestion_buf)
 				clear_suggestion(CS_FREEBUF);
@@ -2288,13 +2289,13 @@ rl_mime_list(void)
 	if (term_caps.suggestions != 0)
 		{ HIDE_CURSOR; fputs(" [wait...]", stdout); fflush(stdout); }
 
-	char **t = (char **)xnmalloc(files + 2, sizeof(char *));
+	char **t = (char **)xnmalloc((size_t)files + 2, sizeof(char *));
 	t[0] = xnmalloc(1, sizeof(char));
 	*t[0] = '\0';
 	t[1] = (char *)NULL;
 
 	size_t n = 1;
-	int i = (int)files;
+	filesn_t i = files;
 	while (--i >= 0) {
 		if (file_info[i].color == nf_c) /* No access to file */
 			continue;
@@ -2342,11 +2343,11 @@ rl_mime_files(const char *text)
 	if (term_caps.suggestions != 0)
 		{ HIDE_CURSOR; fputs(" [wait...]", stdout); fflush(stdout); }
 
-	char **t = (char **)xnmalloc(files + 2, sizeof(char *));
+	char **t = (char **)xnmalloc((size_t)files + 2, sizeof(char *));
 	t[0] = xnmalloc(1, sizeof(char));
 	*t[0] = '\0';
 
-	size_t i, n = 1;
+	filesn_t i, n = 1;
 	for (i = 0; i < files; i++) {
 		char *m = xmagic(file_info[i].name, MIME_TYPE);
 		if (!m) continue;
@@ -2368,7 +2369,7 @@ rl_mime_files(const char *text)
 	if (n == 1)
 		{ free(t[0]); free(t); return (char **)NULL; }
 
-	t = (char **)xrealloc(t, (n + 1) * sizeof(char *));
+	t = (char **)xrealloc(t, ((size_t)n + 1) * sizeof(char *));
 	return t;
 }
 #endif /* !_NO_MAGIC */
@@ -3045,7 +3046,7 @@ file_types_opts_generator(const char *text, int state)
 static char *
 file_types_generator(const char *text, int state)
 {
-	static size_t i;
+	static filesn_t i;
 	const char *name;
 
 	if (!state)
@@ -3302,7 +3303,7 @@ complete_ranges(char *text, int *exit_status)
 	int b = atoi(r + 1);
 	*r = '-';
 
-	if (a < 1 || b < 1 || a >= b || b > (int)files)
+	if (a < 1 || b < 1 || a >= b || (filesn_t)b > files)
 		return (char **)NULL;
 
 	char **matches = rl_completion_matches(text, &filenames_gen_ranges);
@@ -3870,7 +3871,7 @@ complete_eln(char *text, int *exit_status, const size_t words_n)
 	char **matches = (char **)NULL;
 	int n = 0;
 
-	if (!is_number(text) || (n = atoi(text)) < 1 || n > (int)files)
+	if (!is_number(text) || (n = atoi(text)) < 1 || (filesn_t)n > files)
 		return (char **)NULL;
 
 	/* First word */

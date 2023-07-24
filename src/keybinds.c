@@ -2054,7 +2054,7 @@ rl_toggle_virtualdir_full_paths(int count, int key)
 	xchmod(stdin_tmp_dir, "0700", 1);
 	xargs.virtual_dir_full_paths = xargs.virtual_dir_full_paths == 1 ? 0 : 1;
 
-	int i = (int)files;
+	filesn_t i = files;
 	while (--i >= 0) {
 		char *rp = realpath(file_info[i].name, NULL);
 		if (!rp) continue;

@@ -931,7 +931,7 @@ check_completions(char *str, size_t len, const int print)
 }
 
 static inline void
-print_directory_suggestion(const size_t i, const size_t len, char *color)
+print_directory_suggestion(const filesn_t i, const size_t len, char *color)
 {
 	if (conf.suggest_filetype_color == 1)
 		color = file_info[i].color;
@@ -952,7 +952,7 @@ print_directory_suggestion(const size_t i, const size_t len, char *color)
 }
 
 static inline void
-print_reg_file_suggestion(char *str, const size_t i, size_t len,
+print_reg_file_suggestion(char *str, const filesn_t i, size_t len,
 	char *color, const int dot_slash)
 {
 	if (conf.suggest_filetype_color)
@@ -1006,7 +1006,7 @@ check_filenames(char *str, size_t len, const int first_word,
 		? FUZZY_FILES_UTF8 : FUZZY_FILES_ASCII;
 	int best_fz_score = 0;
 
-	size_t i;
+	filesn_t i;
 
 	for (i = 0; i < files; i++) {
 		if (!file_info[i].name)	continue;
@@ -1070,9 +1070,9 @@ check_filenames(char *str, size_t len, const int first_word,
 		suggestion.type = i < files ? FILE_SUG : FUZZY_FILENAME;
 
 		if (file_info[fuzzy_index].dir)
-			print_directory_suggestion((size_t)fuzzy_index, len, color);
+			print_directory_suggestion((filesn_t)fuzzy_index, len, color);
 		else
-			print_reg_file_suggestion(str, (size_t)fuzzy_index, len, color,
+			print_reg_file_suggestion(str, (filesn_t)fuzzy_index, len, color,
 				dot_slash);
 
 		return PARTIAL_MATCH;
@@ -1310,7 +1310,7 @@ check_eln(const char *str, const int print)
 		return NO_MATCH;
 
 	int n = atoi(str);
-	if ( n < 1 || n > (int)files || !file_info[n - 1].name
+	if ( n < 1 || (filesn_t)n > files || !file_info[n - 1].name
 	|| ( words_num == 1 && ( (file_info[n - 1].dir == 1 && conf.autocd == 0)
 	|| (file_info[n - 1].dir == 0 && conf.auto_open == 0) ) ) )
 		return NO_MATCH;
@@ -2576,7 +2576,7 @@ CHECK_FIRST_WORD:
 	} else if (point_is_first_word && rl_point < rl_end
 	&& *word >= '1' && *word <= '9' && is_number(word)) {
 		int a = atoi(word);
-		if (a > 0 && a <= (int)files)
+		if (a > 0 && (filesn_t)a <= files)
 			printed = PARTIAL_MATCH;
 
 	} else if (point_is_first_word && rl_point < rl_end
