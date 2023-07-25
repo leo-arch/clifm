@@ -978,7 +978,16 @@ xatof(const char *s)
 	errno = 0;
 	long long ret = strtoll(s, NULL, 10);
 
+#if FILESN_MAX < LLONG_MAX
+	/* 1 - FILESN_MAX */
 	if (ret < 1 || ret > FILESN_MAX) {
+#elif FILESN_MAX > LLONG_MAX
+	/* 1 - LLONG_MAX-1 */
+	if (ret < 1 || ret == LLONG_MAX) {
+#else
+	/* 1 - FILESN_MAX-1 */
+	if (ret < 1 || ret >= FILESN_MAX) {
+#endif /* FILESN_MAX < LLONG_MAX */
 		errno = ERANGE;
 		return (-1);
 	}
