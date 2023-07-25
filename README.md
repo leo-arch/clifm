@@ -93,6 +93,7 @@ Besides common file operations such as copy, move, remove, etc., _clifm_ provide
   - [Entry list numbers (ELN's)](https://github.com/leo-arch/clifm/wiki/Common-Operations) for file names
   - [Extended color codes](https://github.com/leo-arch/clifm/wiki/Customization#colors) for file-types and -extensions
   - [Files counter](https://github.com/leo-arch/clifm/wiki/Introduction#interface) for directories and symlinks to directories
+  - Support for files attributes, extended attributes, birth time, BSD flags, and Solaris doors.
   - Privacy: Zero data collection and no connection to the outside world at all
   - Security: [Secure environment](https://github.com/leo-arch/clifm/wiki/Specifics#security) and [secure commands](https://github.com/leo-arch/clifm/wiki/Specifics#security). See also the [stealth mode section](https://github.com/leo-arch/clifm/wiki/Specifics#stealth-mode)
 - Navigation and file operations
