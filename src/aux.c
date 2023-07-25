@@ -742,7 +742,7 @@ count_dir(const char *dir, const int pop)
 	filesn_t c = 0;
 
 	while (readdir(p)) {
-		if (c > INTMAX_MAX - 1)
+		if (c > FILESN_MAX - 1)
 			break;
 
 		c++;

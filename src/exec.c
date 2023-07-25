@@ -1568,7 +1568,7 @@ Sticky files:                %zu\n\
 Unknown file types:          %zu\n\
 Unstatable files:            %zu\n\
 "),
-	files, stats.dir, stats.reg, stats.exec, stats.hidden, stats.suid,
+	(intmax_t)files, stats.dir, stats.reg, stats.exec, stats.hidden, stats.suid,
 	stats.sgid, stats.caps, stats.fifo, stats.socket, stats.block_dev,
 	stats.char_dev, stats.link, stats.broken_link, stats.multi_link,
 	stats.extended, stats.other_writable, stats.sticky, stats.unknown,

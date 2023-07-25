@@ -807,7 +807,19 @@ extern time_t curdir_mtime;
 				 *  #    GLOBAL VARIABLES   #
 				 *  ######################### */
 
-typedef intmax_t filesn_t; /* Let's use this to count files */
+/* filesn_t: Let's use this to count files */
+/* ssize_t is a quite convenient data type:
+ * 1. Unlike intmax_t, it's never bigger than size_t (in 32-bit/ARM machines,
+ * INTMAX_MAX is bigger than SIZE_MAX).
+ * 2. Can be safely casted to both intmax_t and size_t (something
+ * we do sometimes).
+ * 3. It's signed; at least one negative number (-1) (something we need for
+ * decrementing loops).
+ *
+ * 32-bit/ARM: INT_MAX == LONG_MAX == SSIZE_MAX < SIZE_MAX < INTMAX_MAX == LLONG_MAX
+ * 64-bit:     INT_MAX < LONG_MAX == LLONG_MAX == INTMAX_MAX == SSIZE_MAX < SIZE_MAX */
+#define FILESN_MAX SSIZE_MAX
+typedef ssize_t filesn_t;
 extern filesn_t files;
 
 /* User settings (mostly from the config file) */
