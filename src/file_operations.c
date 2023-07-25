@@ -871,18 +871,21 @@ dup_file(char **cmd)
 
 		/* 2. Run command. */
 		if (rsync_path) {
-			char *_cmd[] = {"rsync", "-aczvAXHS", "--progress", source, dest, NULL};
+			char *_cmd[] = {"rsync", "-aczvAXHS", "--progress", "--",
+				source, dest, NULL};
 			if (launch_execv(_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 				exit_status = EXIT_FAILURE;
 		} else {
 #ifdef _BE_POSIX
-			char *_cmd[] = {"cp", source, dest, NULL};
+			char *_cmd[] = {"cp", "--", source, dest, NULL};
 #elif defined(__sun)
-			char *name = (bin_flags & BSD_HAVE_COREUTILS) ? "gcp" : "cp";
-			char *opt = (bin_flags & BSD_HAVE_COREUTILS) ? "-a" : "--";
-			char *_cmd[] = {name, opt, source, dest, NULL};
+			int g = (bin_flags & BSD_HAVE_COREUTILS);
+			char *name = g ? "gcp" : "cp";
+			char *opt = g ? "-a" : "--";
+			char *_cmd[] = {name, opt, g ? "--" : source,
+				g ? source : dest, g ? dest : NULL, NULL};
 #else
-			char *_cmd[] = {"cp", "-a", source, dest, NULL};
+			char *_cmd[] = {"cp", "-a", "--", source, dest, NULL};
 #endif /* _BE_POSIX */
 			if (launch_execv(_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 				exit_status = EXIT_FAILURE;
@@ -1806,7 +1809,7 @@ run_cp_mv_cmd(char **cmd, const int skip_force)
 		n++;
 	}
 
-	/* wcp does not support end of options (--) */
+	/* wcp(1) does not support end of options (--) */
 	if (strcmp(cmd[0], "wcp") != 0) {
 		tcmd[n] = savestring("--", 2);
 		n++;
@@ -1907,7 +1910,7 @@ cp_mv_file(char **args, const int copy_and_rename, const int force)
 		n++;
 	}
 
-	/* wcp does not support end of options (--) */
+	/* wcp(1) does not support end of options (--) */
 	if (strcmp(tcmd[0], "wcp") != 0) {
 		tcmd[n] = savestring("--" , 2);
 		n++;
