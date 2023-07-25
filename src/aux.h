@@ -61,6 +61,7 @@ void rl_ring_bell(void);
 void set_fzf_preview_border_type(void);
 char *url_encode(char *);
 char *url_decode(char *);
+filesn_t xatof(const char *s);
 int  xatoi(const char *);
 char *xitoa(long long);
 char xgetchar(void);

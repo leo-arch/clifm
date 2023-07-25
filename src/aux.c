@@ -208,8 +208,8 @@ _expand_eln(const char *text)
 	if (!l || !*l || !is_number(text))
 		return 0;
 
-	int a = atoi(text); /* Only expand numbers matching ELN's */
-	if (a <= 0 || (filesn_t)a > files)
+	filesn_t a = xatof(text);
+	if (a <= 0 || a > files) /* Only expand numbers matching ELN's */
 		return 0;
 
 	if (words_num == 1) { /* First word */
@@ -970,12 +970,29 @@ xitoa(long long n)
 	return &buf[++i];
 }
 
+/* Convert the string S into a number in the range of valid ELN's
+ * (1 - FILESN_MAX). Returns this value if valid or -1 in case of error. */
+filesn_t
+xatof(const char *s)
+{
+	errno = 0;
+	long long ret = strtoll(s, NULL, 10);
+
+	if (ret < 1 || ret > FILESN_MAX) {
+		errno = ERANGE;
+		return (-1);
+	}
+
+	return (filesn_t)ret;
+}
+
 /* A secure atoi implementation to prevent integer under- and over-flow.
  * Returns the corresponding integer, if valid, or INT_MIN if invalid,
  * setting errno to ERANGE. */
 int
 xatoi(const char *s)
 {
+	errno = 0;
 	long ret = strtol(s, NULL, 10);
 
 	if (ret < INT_MIN || ret > INT_MAX) {

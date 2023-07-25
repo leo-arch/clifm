@@ -1488,13 +1488,27 @@ insert_fields(char ***dst, char ***src, const size_t i, size_t *num)
 static void
 eln_expand(char ***substr, const size_t i)
 {
-	int num = atoi((*substr)[i]);
+	filesn_t num = xatof((*substr)[i]);
+	if (num == -1)
+		return;
+
 	/* Because of _expand_eln(), which is called immediately before this
 	 * function, it is guaranteed that NUM won't over/under-flow:
 	 * NUM is > 0 and <= the amount of listed files (and this latter is
-	 * never greater than INT_MAX). */
-	int j = num - 1;
-	char *esc_str = escape_str(file_info[j].name);
+	 * never bigger than FILESN_MAX). */
+	filesn_t j = num - 1;
+
+	/* If file name starts with a dash, and the command is external,
+	 * use the absolute path to the file name, to prevent the command from
+	 * taking the file name as a command option. */
+	char *abs_path = (char *)NULL;
+	if (file_info[j].name && *file_info[j].name == '-'
+	&& !is_internal_c((*substr)[0]))
+		abs_path = realpath(file_info[j].name, NULL);
+
+	char *esc_str = escape_str(abs_path ? abs_path : file_info[j].name);
+	free(abs_path);
+
 	if (!esc_str)
 		return;
 
@@ -2519,9 +2533,9 @@ parse_input_str(char *str)
 		if (*substr[i] == '$') {
 			char *p = getenv(substr[i] + 1);
 			if (p) {
-				size_t plen = strlen(p);
-				substr[i] = (char *)xrealloc(substr[i], (plen + 1) * sizeof(char));
-				xstrsncpy(substr[i], p, plen + 1);
+				size_t plen = strlen(p) + 1;
+				substr[i] = (char *)xrealloc(substr[i], plen * sizeof(char));
+				xstrsncpy(substr[i], p, plen);
 			}
 		}
 

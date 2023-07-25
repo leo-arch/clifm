@@ -780,9 +780,7 @@ run_mime_app(char **app, char **fpath)
 	free(*fpath);
 #endif /* !__CYGWIN */
 
-	if (ret == EXIT_SUCCESS)
-		return EXIT_SUCCESS;
-	return EXIT_FAILURE;
+	return (ret != EXIT_SUCCESS) ? EXIT_FAILURE : ret;
 }
 
 static int

@@ -783,7 +783,7 @@ extern time_t curdir_mtime;
 
 // Safely cast the number N to the type T. The type T is never overflowed:
 // if N is bigger than what T can hold, the maximum value T can hold is
-// returned.
+// returned. What about underflow?
 #define SAFECAST(n, t) ((t)(n) < 0 ? TYPE_MAXIMUM(t) : (t)(n)) */
 
 /*
@@ -1520,7 +1520,7 @@ extern size_t
 	current_hist_n,
 	curhistindex,
 	ext_colors_n,
-//	files, /* Amount of files in the current dir. Is size_t enough? */
+//	files, // Amount of files in the current dir. Is size_t enough?
 	jump_n,
 	kbinds_n,
 	longest,
