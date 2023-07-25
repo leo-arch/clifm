@@ -720,6 +720,12 @@ set_sel_file(void)
 	return;
 }
 
+/* Copy the file SRC_FILENAME from the data directory (DATA_DIR) to the
+ * directory DEST.
+ * The original file will be copied into DEST with AT MOST
+ * 600 permissions (via umask(3)), making sure the user has read/write
+ * permissions (via xchmod()), just in case the original file has no such
+ * permissions. */
 static int
 import_from_data_dir(const char *src_filename, char *dest)
 {
@@ -734,10 +740,12 @@ import_from_data_dir(const char *src_filename, char *dest)
 	if (stat(sys_file, &attr) == -1)
 		return EXIT_FAILURE;
 
-	char *cmd[] = {"cp", sys_file, dest, NULL};
+	mode_t old_umask = umask(0177);
+	char *cmd[] = {"cp", "--", sys_file, dest, NULL};
 	int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
+	umask(old_umask);
+
 	if (ret == EXIT_SUCCESS) {
-		/* Make sure config files have always 600 permissions. */
 		xchmod(dest, "0600", 1);
 		return EXIT_SUCCESS;
 	}
