@@ -239,6 +239,11 @@ For a complete description please consult our [Wiki](https://github.com/leo-arch
 <summary>Click here to expand</summary>
 
 * `Development`
+  - Maximum limit of listed files increased from **INT_MAX** to **SSIZE_MAX**.
+  - Nested instances are now allowed (setting both **SHLVL** and **CLIFMLVL** as appropriate).
+  - Files extended attributes on non-glibc Linux distributions.
+  - Files birth time support on Haiku.
+  - **random**(3) replaced by **arc4random**(3), if available, for increased security. 
   - More restrictive values when running in [secure mode](https://github.com/leo-arch/clifm/wiki/Specifics#a-secure-environment).
 * `1.13 (Voodoo Root)`
   - Support for BSD file flags (`p`/`pp` command).
