@@ -804,10 +804,11 @@ get_cmd_path(const char *cmd)
 /* Convert SIZE to human readeable form (at most 2 decimal places).
  * Returns a string of at most MAX_UNIT_SIZE, defined in aux.h */
 char *
-get_size_unit(const off_t size)
+construct_human_size(const off_t size)
 {
 	/* MAX_UNIT_SIZE == 10 == "1023.99YB\0" */
-	char *str = xnmalloc(MAX_UNIT_SIZE, sizeof(char));
+	static char str[MAX_UNIT_SIZE];
+
 	float base = xargs.si == 1 ? 1000 : 1024;
 	size_t n = 0;
 	float s = (float)size;
@@ -830,7 +831,8 @@ get_size_unit(const off_t size)
 		u[n],
 		(u[n] != 'B' && xargs.si == 1) ? 'B' : 0);
 
-	return str;
+	char *p = str;
+	return p;
 }
 
 /* Return the full size of the directory DIR using du(1).

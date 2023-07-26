@@ -252,8 +252,11 @@ print_disk_usage(void)
 		return;
 	}
 
-	char *free_space = get_size_unit((off_t)(stat.f_bavail * stat.f_frsize));
-	char *size = get_size_unit((off_t)(stat.f_blocks * stat.f_frsize));
+	char *p_free_space = construct_human_size((off_t)(stat.f_bavail * stat.f_frsize));
+	char *free_space = savestring(p_free_space, strlen(p_free_space));
+	char *p_size = construct_human_size((off_t)(stat.f_blocks * stat.f_frsize));
+	char *size = savestring(p_size, strlen(p_size));
+
 	int free_percentage = (int)(((stat.f_bavail * stat.f_frsize) * 100)
 		/ (stat.f_blocks * stat.f_frsize));
 

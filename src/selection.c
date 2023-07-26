@@ -606,14 +606,13 @@ get_sel_file_size(const size_t i, int *status)
 static void
 print_total_size(const off_t total, const int status)
 {
-	char *human_size = get_size_unit(total);
+	char *human_size = construct_human_size(total);
 
 	char err[sizeof(xf_c) + 6]; *err = '\0';
 	if (status != 0)
 		snprintf(err, sizeof(err), "%s%c%s", xf_c, DU_ERR_CHAR, NC);
 
 	printf(_("%s%sTotal size%s: %s%s\n"), df_c, BOLD, df_c, err, human_size);
-	free(human_size);
 }
 
 static void
@@ -897,13 +896,12 @@ show_sel_files(void)
 	flags &= ~IN_SELBOX_SCREEN;
 	tab_offset = t;
 
-	char *human_size = get_size_unit(total);
+	char *human_size = construct_human_size(total);
 	char err[sizeof(xf_c) + 6]; *err = '\0';
 	if (status != 0)
 		snprintf(err, sizeof(err), "%s%c%s", xf_c, DU_ERR_CHAR, NC);
 
 	printf(_("\n%s%sTotal size%s: %s%s\n"), df_c, BOLD, df_c, err, human_size);
-	free(human_size);
 
 	if (reset_pager == 1)
 		conf.pager = 1;

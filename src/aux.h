@@ -38,8 +38,8 @@
 
 __BEGIN_DECLS
 
-int  should_expand_eln(const char *);
 char *abbreviate_file_name(char *);
+char *construct_human_size(const off_t);
 char *get_cwd(char *, const size_t, const int);
 filesn_t count_dir(const char *, const int);
 off_t dir_size(char *, const int, int *);
@@ -51,7 +51,6 @@ int  get_rgb(char *, int *, int *, int *, int *);
 void clear_term_img(void);
 mode_t get_dt(const mode_t);
 int  get_link_ref(const char *);
-char *get_size_unit(const off_t);
 char *hex2rgb(char *);
 char *normalize_path(char *, const size_t);
 FILE *open_fread(char *, int *);
@@ -59,6 +58,7 @@ FILE *open_fwrite(char *, int *);
 int  read_octal(char *);
 void rl_ring_bell(void);
 void set_fzf_preview_border_type(void);
+int  should_expand_eln(const char *);
 char *url_encode(char *);
 char *url_decode(char *);
 filesn_t xatof(const char *s);

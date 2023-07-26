@@ -133,7 +133,7 @@
 
 #define TIME_STR_LEN (MAX_TIME_STR + (MAX_COLOR * 2) + 2) /* construct_timestamp() */
 
-/* get_size_unit() returns a string of at most MAX_UNIT_SIZE chars (see aux.h) */
+/* construct_human_size() returns a string of at most MAX_UNIT_SIZE chars (see aux.h) */
 #define SIZE_STR_LEN (MAX_UNIT_SIZE + (MAX_COLOR * 3) + 1) /* construct_file_size() */
 
 /* Let's suppose that IDs go up to 999 billions (12 digits)
@@ -1435,7 +1435,7 @@ static void
 print_file_size(char *filename, const struct stat *attr, const int file_perm,
 	const int full_dirsize)
 {
-	char *size_unit = get_size_unit(FILE_SIZE_PTR);
+	char *size_unit = construct_human_size(FILE_SIZE_PTR);
 	char *csize = dz_c;
 	char *cend = conf.colorize == 1 ? df_c : "";
 
@@ -1462,11 +1462,11 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 			: _("real"), (xargs.si == 1 && bigger_than_bytes == 1)
 			? " / si" : "");
 
-		goto END;
+		return;
 	}
 
 	if (full_dirsize == 0) /* We're running 'p', not 'pp'. */
-		goto END;
+		return;
 
 	int du_status = 0;
 	off_t total_size = file_perm == 1
@@ -1477,7 +1477,7 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 			printf(_("Total size: \t%s-%s\n"), dn_c, cend);
 		else /* get_total_size returned error (-1) */
 			puts("?");
-		goto END;
+		return;
 	}
 
 	int size_mult_factor = xargs.si == 1 ? 1000 : 1024;
@@ -1495,10 +1495,10 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 		csize = sf;
 	}
 
-	char *human_size = get_size_unit(total_size_kb * size_mult_factor);
+	char *human_size = construct_human_size(total_size_kb * size_mult_factor);
 	if (!human_size) {
 		puts("?");
-		goto END;
+		return;
 	}
 
 	if (bin_flags & (GNU_DU_BIN_DU | GNU_DU_BIN_GDU)) {
@@ -1516,11 +1516,6 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 	} else {
 		printf("%s%s%s\n", csize, human_size, cend);
 	}
-
-	free(human_size);
-
-END:
-	free(size_unit);
 }
 
 static int
@@ -1808,12 +1803,12 @@ construct_file_size(const struct fileinfo *props, char *size_str,
 		return file_perm;
 	}
 
-	char *size_unit = (char *)NULL;
+	char *human_size = (char *)NULL;
 	if (props->dir == 1 && conf.full_dir_size == 1) {
-		size_unit = get_size_unit(props->size *
+		human_size = construct_human_size(props->size *
 			(xargs.si == 1 ? 1000 : 1024));
 	} else {
-		size_unit = get_size_unit(props->size);
+		human_size = construct_human_size(props->size);
 	}
 
 	char err[sizeof(xf_c) + 6]; *err = '\0';
@@ -1822,9 +1817,8 @@ construct_file_size(const struct fileinfo *props, char *size_str,
 		snprintf(err, sizeof(err), "%s%c%s", xf_c, DU_ERR_CHAR, NC);
 
 	snprintf(size_str, SIZE_STR_LEN, "%s%s%s%s",
-		err, csize, size_unit ? size_unit : "?", df_c);
+		err, csize, human_size ? human_size : "?", df_c);
 
-	free(size_unit);
 	return file_perm;
 }
 
@@ -2050,8 +2044,10 @@ print_analysis_stats(const off_t total, const off_t largest,
 	char *l = (char *)NULL;
 
 	if (prop_fields.size == PROP_SIZE_HUMAN) {
-		t = get_size_unit(total);
-		l = get_size_unit(largest);
+		char *p_total = construct_human_size(total);
+		t = savestring(p_total, strlen(p_total));
+		char *p_largest = construct_human_size(largest);
+		l = savestring(p_largest, strlen(p_largest));
 	} else {
 		t = (char *)xnmalloc(32, sizeof(char));
 		l = (char *)xnmalloc(32, sizeof(char));
