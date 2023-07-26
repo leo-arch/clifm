@@ -49,9 +49,6 @@
 #define OP_ISO    1
 #define OP_OTHERS 0
 
-#define QUERY_ARCHIVE 1
-#define QUERY_ISO     0
-
 static char *
 ask_user_for_path(void)
 {

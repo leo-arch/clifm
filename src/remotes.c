@@ -127,7 +127,7 @@ get_remote(char *name)
 }
 
 static inline int
-_create_mountpoint(const int i)
+create_mountpoint(const int i)
 {
 	char *cmd[] = {"mkdir", "-p", remotes[i].mountpoint, NULL};
 
@@ -186,7 +186,7 @@ remotes_mount(char *name)
 	/* If mountpoint doesn't exist, create it */
 	struct stat attr;
 	if (stat(remotes[i].mountpoint, &attr) == -1
-	&& _create_mountpoint(i) == EXIT_FAILURE)
+	&& create_mountpoint(i) == EXIT_FAILURE)
 		return EXIT_FAILURE;
 
 	/* Make sure mountpoint is not populated and run the mount command */
@@ -382,7 +382,7 @@ automount_remotes(void)
 			printf(_("%s: net: %s: Mounting remote...\n"), PROGRAM_NAME,
 				remotes[i].name);
 			if ((ret = launch_execl(remotes[i].mount_cmd)) != EXIT_SUCCESS) {
-				_err('w', PRINT_PROMPT, _("net: %s: Mount command failed with "
+				err('w', PRINT_PROMPT, _("net: %s: Mount command failed with "
 					"error code %d\n"), remotes[i].name, ret);
 				exit_status = EXIT_FAILURE;
 			} else {

@@ -510,20 +510,21 @@ rl_exclude_input(unsigned char c)
 
 	/* Skip control characters (0 - 31) except backspace (8), tab(9),
 	 * enter (13), and escape (27). */
-	if (c < ' ' && c != BS && c != _TAB && c != ENTER && c != _ESC)
+	if (c < ' ' && c != KEY_BACKSPACE && c != KEY_TAB
+	&& c != KEY_ENTER && c != KEY_ESC)
 		return RL_INSERT_CHAR;
 
 	/* Multi-byte (UTF8) char. */
 	if ((c & 0xc0) == 0xc0 || (c & 0xc0) == 0x80)
 		return construct_wide_char(c);
 
-	if (c != _ESC)
+	if (c != KEY_ESC)
 		cmdhist_flag = 0;
 
 	/* Skip ESC, backspace, Enter, and TAB keys. */
 	switch (c) {
-		case DELETE: /* fallthrough */
-		case BS:
+		case KEY_DELETE: /* fallthrough */
+		case KEY_BACKSPACE:
 			_del = (rl_point == 0 && rl_end == 0) ? DEL_EMPTY_LINE : DEL_NON_EMPTY_LINE;
 			xbackspace();
 			if (rl_end == 0 && cur_color != tx_c) {
@@ -532,7 +533,7 @@ rl_exclude_input(unsigned char c)
 			}
 			goto END;
 
-		case ENTER:
+		case KEY_ENTER:
 #ifndef _NO_SUGGESTIONS
 			if (suggestion.printed && suggestion_buf)
 				clear_suggestion(CS_FREEBUF);
@@ -541,10 +542,10 @@ rl_exclude_input(unsigned char c)
 			fputs(tx_c, stdout);
 			return RL_INSERT_CHAR;
 
-		case _ESC:
+		case KEY_ESC:
 			return RL_INSERT_CHAR;
 
-		case _TAB:
+		case KEY_TAB:
 #ifndef _NO_SUGGESTIONS
 			if (suggestion.printed) {
 				if (suggestion.nlines >= 2 || suggestion.type == ELN_SUG
@@ -574,7 +575,7 @@ END:
 	/* Do not take into account final spaces. */
 	if (s >= 0 && !rl_line_buffer[s + 1])
 		s = -1;
-	if (rl_point != rl_end && c != _ESC) {
+	if (rl_point != rl_end && c != KEY_ESC) {
 		if (rl_point < s) {
 			if (suggestion.printed)
 				remove_suggestion_not_end();
@@ -660,7 +661,7 @@ xrl_expand_prompt(char *str)
 		if (!start) {
 			char *end = strchr(str, RL_PROMPT_END_IGNORE);
 			if (end) {
-				_err('w', PRINT_PROMPT, "%s: Malformed prompt: "
+				err('w', PRINT_PROMPT, "%s: Malformed prompt: "
 					"RL_PROMPT_END_IGNORE (\\%d) without "
 					"RL_PROMPT_START_IGNORE (\\%d)\n", PROGRAM_NAME,
 					RL_PROMPT_END_IGNORE, RL_PROMPT_START_IGNORE);
@@ -680,7 +681,7 @@ xrl_expand_prompt(char *str)
 
 		char *end = strchr(start, RL_PROMPT_END_IGNORE);
 		if (!end) {
-			_err('w', PRINT_PROMPT, "%s: Malformed prompt: "
+			err('w', PRINT_PROMPT, "%s: Malformed prompt: "
 				"RL_PROMPT_START_IGNORE (\\%d) without "
 				"RL_PROMPT_END_IGNORE (\\%d)\n", PROGRAM_NAME,
 				RL_PROMPT_START_IGNORE, RL_PROMPT_END_IGNORE);
@@ -723,7 +724,7 @@ fix_rl_point(const unsigned char c)
 	if ((point & 0xc0) != 0x80 && (point & 0xc0) != 0xc0)
 		return;
 
-	int mlen = mblen(rl_line_buffer + rl_point, __MB_LEN_MAX);
+	int mlen = mblen(rl_line_buffer + rl_point, MB_LEN_MAX);
 	rl_point += mlen > 0 ? mlen - 1 : 0;
 }
 
@@ -745,7 +746,7 @@ my_rl_getc(FILE *stream)
 		if (result > 0 && result == sizeof(unsigned char)) {
 			/* Ctrl-d (empty command line only). Let's check the previous
 			 * char wasn't ESC to prevent Ctrl-Alt-d to be taken as Ctrl-d */
-			if (c == 4 && prev != _ESC && rl_nohist == 0
+			if (c == 4 && prev != KEY_ESC && rl_nohist == 0
 			&& (!rl_line_buffer || !*rl_line_buffer))
 				rl_quit(0, 0);
 
@@ -1369,9 +1370,9 @@ my_rl_path_completion(const char *text, int state)
 					&& (r = fuzzy_match(filename, ent->d_name,
 					filename_len, fuzzy_str_type)) > best_fz_score) {
 						if (!dirname || (*dirname == '.' && !*(dirname + 1))) {
-							xstrsncpy(_fmatch, ent->d_name, sizeof(_fmatch));
+							xstrsncpy(fz_match, ent->d_name, sizeof(fz_match));
 						} else {
-							snprintf(_fmatch, sizeof(_fmatch), "%s%s",
+							snprintf(fz_match, sizeof(fz_match), "%s%s",
 								dirname, ent->d_name);
 						}
 
@@ -1966,7 +1967,7 @@ dirhist_generator(const char *text, int state)
 	}
 
 	while ((name = old_pwd[i++]) != NULL) {
-		if (*name == _ESC)
+		if (*name == KEY_ESC)
 			continue;
 
 		if (!text || !*text)
@@ -2163,7 +2164,7 @@ sort_name_generator(const char *text, int state)
 		len = strlen(text);
 	}
 
-	while ((name = _sorts[i++].name) != NULL) {
+	while ((name = sort_methods[i++].name) != NULL) {
 		if (strncmp(name, text, len) == 0)
 			return strdup(name);
 	}
@@ -3000,8 +3001,6 @@ check_file_type_opts(const char c)
 	case 'C': return stats.caps > 0 ? 1 : 0;
 	default: return 0;
 	}
-
-	return 0;
 }
 
 static char *
@@ -3880,7 +3879,7 @@ complete_eln(char *text, int *exit_status, const size_t words_n)
 		|| (file_info[n - 1].dir == 0 && conf.auto_open == 0))
 			return (char **)NULL;
 	} else { /* Second word or more */
-		if (xrename == 1 || xrename == 3 || _expand_eln(text) == 0)
+		if (xrename == 1 || xrename == 3 || should_expand_eln(text) == 0)
 			return (char **)NULL;
 	}
 
@@ -4338,7 +4337,7 @@ set_rl_init_file(void)
 		int fd;
 		FILE *fp = open_fwrite(rl_file, &fd);
 		if (!fp) {
-			_err('w', PRINT_PROMPT, "%s: fopen: %s: %s\n", PROGRAM_NAME,
+			err('w', PRINT_PROMPT, "%s: fopen: %s: %s\n", PROGRAM_NAME,
 				rl_file, strerror(errno));
 			return;
 		}

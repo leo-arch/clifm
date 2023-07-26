@@ -61,9 +61,9 @@
 # include "properties.h" /* XFS_?????_FL flags */
 #endif /* LINUX_FILE_ATTRS */
 
-#ifdef _LINUX_XATTR
+#ifdef LINUX_FILE_XATTRS
 # include <sys/xattr.h>
-#endif /* _LINUX_XATTR */
+#endif /* LINUX_FILE_XATTRS */
 
 /* Do we have BSD file flags support? */
 #ifndef _BE_POSIX
@@ -107,9 +107,9 @@
 # define minor(x) (x & 0xFF)
 #endif /* minor */
 
-#ifndef DT_DIR
-# define DT_DIR 4
-#endif /* DT_DIR */
+//#ifndef DT_DIR
+//# define DT_DIR 4
+//#endif /* DT_DIR */
 
 /* Macros to calculate relative timestamps */
 #define RT_SECOND 1
@@ -1032,7 +1032,7 @@ get_color_age(const time_t t, char *str, const size_t len)
 	}
 }
 
-#if defined(_LINUX_XATTR)
+#if defined(LINUX_FILE_XATTRS)
 static int
 print_extended_attributes(char *s)
 {
@@ -1111,7 +1111,7 @@ print_extended_attributes(char *s)
 	free(buf);
 	return EXIT_SUCCESS;
 }
-#endif /* _LINUX_XATTR */
+#endif /* LINUX_FILE_XATTRS */
 
 static char *
 get_file_type_and_color(const char *filename, const struct stat *attr,
@@ -1217,7 +1217,7 @@ print_file_name(char *filename, const char *color, const char file_type,
 		free(target_name);
 
 	} else { /* Broken link */
-		char target[PATH_MAX + 1];;
+		char target[PATH_MAX + 1];
 		ssize_t len = readlinkat(XAT_FDCWD, filename, target, sizeof(target) - 1);
 
 		if (len != -1) {
@@ -1237,9 +1237,9 @@ static void
 print_file_details(char *filename, const struct stat *attr, const char file_type,
 	const int file_perm)
 {
-#if !defined(LINUX_FILE_ATTRS) && !defined(_LINUX_XATTR)
+#if !defined(LINUX_FILE_ATTRS) && !defined(LINUX_FILE_XATTRS)
 	UNUSED(filename);
-#endif /* !LINUX_FILE_ATTRS && ! _LINUX_XATTR */
+#endif /* !LINUX_FILE_ATTRS && ! LINUX_FILE_XATTRS */
 
 	struct passwd *owner = getpwuid(attr->st_uid);
 	struct group *group = getgrgid(attr->st_gid);
@@ -1303,10 +1303,10 @@ print_file_details(char *filename, const struct stat *attr, const char file_type
 	free(fflags);
 #endif /* LINUX_FILE_ATTRS */
 
-#if defined(_LINUX_XATTR)
+#if defined(LINUX_FILE_XATTRS)
 	fputs(_("Xattributes:\t"), stdout);
 	print_extended_attributes(filename);
-#endif /* _LINUX_XATTR */
+#endif /* LINUX_FILE_XATTRS */
 }
 
 /* Write into BUF, whose size is SIZE, the timestamp TIM, with nanoseconds NSEC,
@@ -1351,9 +1351,9 @@ END:
 static void
 print_timestamps(char *filename, const struct stat *attr)
 {
-#ifndef _STATX
+#ifndef LINUX_STATX
 	UNUSED(filename);
-#endif /* !_STATX */
+#endif /* !LINUX_STATX */
 
 	char *cdate = conf.colorize == 1 ? dd_c : "";
 	char *cend = conf.colorize == 1 ? df_c : "";
@@ -1396,7 +1396,7 @@ print_timestamps(char *filename, const struct stat *attr)
 	char creation_time[MAX_TIME_STR];
 	time_t bt = 0;
 
-# ifdef _STATX
+# ifdef LINUX_STATX
 	struct statx attrx;
 	int ret = statx(AT_FDCWD, filename, AT_SYMLINK_NOFOLLOW,
 		STATX_BTIME, &attrx);
@@ -1420,7 +1420,7 @@ print_timestamps(char *filename, const struct stat *attr)
 	xgen_time_str(creation_time, sizeof(creation_time), attr->ST_BTIME.tv_sec,
 		(size_t)attr->ST_BTIME.tv_nsec);
 	bt = attr->ST_BTIME.tv_sec;
-# endif /* _STATX */
+# endif /* LINUX_STATX */
 
 	if (conf.colorize == 1 && !*dd_c) {
 		get_color_age(bt, btf, sizeof(btf));
@@ -1919,7 +1919,7 @@ construct_id_field(const struct fileinfo *props, char *id_str,
 	int ug_pad = 0, u = 0, g = 0;
 
 	/* Calculate right pad for UID:GID string */
-	u = DIGINUM(props->uid), g = DIGINUM(props->gid);
+	u = DIGINUM(props->uid); g = DIGINUM(props->gid);
 	if (u + g < (int)ug_max)
 		ug_pad = (int)ug_max - u;
 
@@ -2059,7 +2059,7 @@ print_analysis_stats(const off_t total, const off_t largest,
 		snprintf(l, 32, "%ju", (uintmax_t)largest);
 	}
 
-	char *tsize = _BGREEN, *lsize = _BGREEN;
+	char *tsize = BOLD_GREEN, *lsize = BOLD_GREEN;
 
 	char ts[MAX_SHADE_LEN], ls[MAX_SHADE_LEN];
 	if (term_caps.color > 0 && !*dz_c) {

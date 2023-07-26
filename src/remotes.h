@@ -22,8 +22,8 @@
  * MA 02110-1301, USA.
 */
 
-#ifndef _REMOTES_H
-#define _REMOTES_H
+#ifndef REMOTES_H
+#define REMOTES_H
 
 __BEGIN_DECLS
 
@@ -33,4 +33,4 @@ int autounmount_remotes(void);
 
 __END_DECLS
 
-#endif /* _REMOTES_H */
+#endif /* REMOTES_H */

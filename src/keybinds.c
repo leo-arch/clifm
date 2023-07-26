@@ -103,7 +103,7 @@ kbinds_reset(void)
 	}
 
 	if (exit_status == EXIT_SUCCESS)
-		_err('n', PRINT_PROMPT, _("%s: kb: Restart the program for changes "
+		err('n', PRINT_PROMPT, _("%s: kb: Restart the program for changes "
 			"to take effect\n"), PROGRAM_NAME);
 
 	return exit_status;
@@ -145,7 +145,7 @@ kbinds_edit(char *app)
 	if (mtime_bfr == (time_t)attr.st_mtime)
 		return EXIT_SUCCESS;
 
-	_err('n', PRINT_PROMPT, _("%s: kb: Restart the program for changes to "
+	err('n', PRINT_PROMPT, _("%s: kb: Restart the program for changes to "
 			"take effect\n"), PROGRAM_NAME);
 	return EXIT_SUCCESS;
 }
@@ -597,7 +597,7 @@ rl_accept_suggestion(int count, int key)
 	|| suggestion.type == CMD_DESC_SUG) {
 		if (rl_point < rl_end) {
 			/* Just move the cursor forward one column */
-			int mlen = mblen(rl_line_buffer + rl_point, __MB_LEN_MAX);
+			int mlen = mblen(rl_line_buffer + rl_point, MB_LEN_MAX);
 			rl_point += mlen;
 		}
 		return EXIT_SUCCESS;
@@ -2070,7 +2070,7 @@ rl_toggle_virtualdir_full_paths(int count, int key)
 		if (!p || !*p) continue;
 
 		if (renameat(XAT_FDCWD, file_info[i].name, XAT_FDCWD, p) == -1)
-			_err('w', PRINT_PROMPT, "renameat: %s: %s\n",
+			err('w', PRINT_PROMPT, "renameat: %s: %s\n",
 				file_info[i].name, strerror(errno));
 
 		if (xargs.virtual_dir_full_paths == 1) free(p);

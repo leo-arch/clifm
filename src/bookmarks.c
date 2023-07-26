@@ -39,7 +39,7 @@
 #include "readline.h" /* rl_no_hist() */
 #include "messages.h" /* STEALTH_DISABLED */
 #include "listing.h" /* reload_dirlist() */
-#include "misc.h" /* _err(), xerror() */
+#include "misc.h" /* err(), xerror() */
 
 #define NO_BOOKMARKS "bookmarks: No bookmarks\nUse 'bm add dir/ name' \
 to create a bookmark\nTry 'bm --help' for more information"
@@ -220,7 +220,7 @@ print_bookmarks(void)
 }
 
 static int
-_edit_bookmarks(char **arg)
+edit_bookmarks_func(char **arg)
 {
 	edit_bookmarks(arg[1], BM_SCREEN);
 
@@ -306,7 +306,7 @@ open_bookmark(void)
 			continue;
 
 		if (*arg[0] == 'e' && (!arg[0][1] || strcmp(arg[0], "edit") == 0))
-			return _edit_bookmarks(arg);
+			return edit_bookmarks_func(arg);
 
 		if (*arg[0] == 'q' && (!arg[0][1] || strcmp(arg[0], "quit") == 0))
 			break;

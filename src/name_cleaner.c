@@ -54,9 +54,6 @@
 #define DEFAULT_TRANSLATION  '_'
 #define BRACKETS_TRANSLATION '-'
 
-#define UNMOD_NAMES 0
-#define MOD_NAMES   1
-
 #define UTF_8_ENCODED_MASK  0xC0
 #define UTF_8_ENCODED_START 0xC0
 #define UTF_8_ENCODED_CONT  0x80
@@ -351,7 +348,7 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 
 	int fd = mkstemp(f);
 	if (fd == -1) {
-		_err('e', PRINT_PROMPT, "bleach: mkstemp: %s: %s\n", f, strerror(errno));
+		err('e', PRINT_PROMPT, "bleach: mkstemp: %s: %s\n", f, strerror(errno));
 		return (struct bleach_t *)NULL;
 	}
 
@@ -361,8 +358,8 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 	fp = fopen(f, "w");
 	if (!fp) {
 		if (unlink(f) == -1)
-			_err('w', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
-		_err('e', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
+			err('w', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
+		err('e', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
 		return (struct bleach_t *)NULL;
 	}
 #endif /* __HAIKU__ || __sun */
@@ -394,8 +391,8 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 	fp = open_fread(f, &fd);
 	if (!fp) {
 		if (unlink(f) == -1)
-			_err('w', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
-		_err('e', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
+			err('w', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
+		err('e', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
 		return (struct bleach_t *)NULL;
 	}
 
@@ -419,8 +416,8 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 	fp = open_fread(f, &fd);
 	if (!fp) {
 		if (unlink(f) == -1)
-			_err('w', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
-		_err('e', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
+			err('w', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
+		err('e', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
 		return (struct bleach_t *)NULL;
 	}
 
@@ -429,7 +426,7 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 	fstat(fd, &attr);
 	if (mtime_bfr == (time_t)attr.st_mtime) {
 		if (unlinkat(fd, f, 0) == -1)
-			_err('w', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
+			err('w', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
 		fclose(fp);
 		*edited_names = 0;
 		return bfiles; /* Return the original list of files */
@@ -508,7 +505,7 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 	free(line);
 
 	if (unlinkat(fd, f, 0) == -1)
-		_err('w', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
+		err('w', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
 	fclose(fp);
 
 	return bfiles;
@@ -689,7 +686,7 @@ CONFIRM:
 		print_reload_msg(_("%s: %d file(s) bleached\n"),
 			FUNC_NAME, total_rename);
 #else
-		_err(ERR_NO_LOG, PRINT_PROMPT, _("%s->%s %s: %d file(s) bleached\n"),
+		err(ERR_NO_LOG, PRINT_PROMPT, _("%s->%s %s: %d file(s) bleached\n"),
 			mi_c, df_c, FUNC_NAME, total_rename);
 #endif /* GENERIC_FS_MONITOR */
 	}

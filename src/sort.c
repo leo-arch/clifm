@@ -398,12 +398,12 @@ print_sort_method(void)
 	case SATIME:
 		printf(_("atime %s\n"), (conf.sort_reverse) ? "[rev]" : "");	break;
 	case SBTIME:
-#if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE) || defined(_STATX)
+#if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE) || defined(LINUX_STATX)
 		printf(_("btime %s\n"), (conf.sort_reverse) ? "[rev]" : ""); break;
 #else
 		printf(_("btime (not available: using 'ctime') %s\n"),
 		    (conf.sort_reverse) ? "[rev]" : ""); break;
-#endif /* HAVE_ST_BIRTHTIME || __BSD_VISIBLE || _STATX */
+#endif /* HAVE_ST_BIRTHTIME || __BSD_VISIBLE || LINUX_STATX */
 	case SCTIME:
 		printf(_("ctime %s\n"), (conf.sort_reverse) ? "[rev]" : ""); break;
 	case SMTIME:
@@ -450,13 +450,14 @@ re_sort_files_list(void)
  * Return zero if ARG corresponds to a valid sorting method or one
  * otherwise. */
 static inline int
-_set_sort_by_name(char **arg)
+set_sort_by_name(char **arg)
 {
 	size_t i;
 	for (i = 0; i <= SORT_TYPES; i++) {
-		if (*(*arg) == *_sorts[i].name && strcmp(*arg, _sorts[i].name) == 0) {
+		if (*(*arg) == *sort_methods[i].name
+		&& strcmp(*arg, sort_methods[i].name) == 0) {
 			*arg = (char *)xrealloc(*arg, 32 * sizeof(char));
-			snprintf(*arg, 32, "%d", _sorts[i].num);
+			snprintf(*arg, 32, "%d", sort_methods[i].num);
 			return EXIT_SUCCESS;
 		}
 	}
@@ -482,7 +483,7 @@ sort_function(char **arg)
 			return re_sort_files_list();
 		}
 
-		if (_set_sort_by_name(&arg[1]) == EXIT_FAILURE)
+		if (set_sort_by_name(&arg[1]) == EXIT_FAILURE)
 			return EXIT_FAILURE;
 	}
 

@@ -267,7 +267,7 @@ trash_clear(void)
 	int files_n = -1, exit_status = EXIT_SUCCESS;
 
 	if (xchdir(trash_files_dir, NO_TITLE) == -1) {
-		_err(0, NOPRINT_PROMPT, "trash: %s: %s\n",
+		err(0, NOPRINT_PROMPT, "trash: %s: %s\n",
 			trash_files_dir, strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -316,7 +316,7 @@ trash_clear(void)
 	free(trash_files);
 
 	if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
-		_err(0, NOPRINT_PROMPT, "trash: '%s': %s\n",
+		err(0, NOPRINT_PROMPT, "trash: '%s': %s\n",
 			workspaces[cur_ws].path, strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -482,20 +482,20 @@ remove_file_from_trash(const char *name)
 	snprintf(rm_file, sizeof(rm_file), "%s/%s", trash_files_dir, name);
 	snprintf(rm_info, sizeof(rm_info), "%s/%s.trashinfo", trash_info_dir, name);
 
-	int err = 0, err_file = 0, err_info = 0;
+	int tmp_err = 0, err_file = 0, err_info = 0;
 	struct stat a;
 	if (stat(rm_file, &a) == -1) {
 		xerror("trash: %s: %s\n", rm_file, strerror(errno));
-		err_file = err = errno;
+		err_file = tmp_err = errno;
 	}
 	if (stat(rm_info, &a) == -1) {
 		if (err_file == EXIT_SUCCESS)
 			xerror("trash: %s: %s\n", rm_info, strerror(errno));
-		err_info = err = errno;
+		err_info = tmp_err = errno;
 	}
 
 	if (err_file != EXIT_SUCCESS || err_info != EXIT_SUCCESS)
-		return err;
+		return tmp_err;
 
 	char *cmd[] = {"rm", "-rf", "--", rm_file, rm_info, NULL};
 	return launch_execv(cmd, FOREGROUND, E_NOFLAG);
@@ -844,7 +844,7 @@ untrash_all(struct dirent ***trash_files, const int trash_files_n)
 	free(*trash_files);
 
 	if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
-		_err(0, NOPRINT_PROMPT, "undel: %s: %s\n",
+		err(0, NOPRINT_PROMPT, "undel: %s: %s\n",
 		    workspaces[cur_ws].path, strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -908,7 +908,7 @@ untrash_function(char **comm)
 
 	/* Change CWD to the trash directory to make scandir(3) work. */
 	if (xchdir(trash_files_dir, NO_TITLE) == -1) {
-		_err(0, NOPRINT_PROMPT, "undel: %s: %s\n",
+		err(0, NOPRINT_PROMPT, "undel: %s: %s\n",
 			trash_files_dir, strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -922,7 +922,7 @@ untrash_function(char **comm)
 		puts(_("trash: No trashed files"));
 
 		if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
-			_err(0, NOPRINT_PROMPT, "undel: %s: %s\n",
+			err(0, NOPRINT_PROMPT, "undel: %s: %s\n",
 			    workspaces[cur_ws].path, strerror(errno));
 			return EXIT_FAILURE;
 		}
@@ -947,7 +947,7 @@ untrash_function(char **comm)
 
 	/* Go back to previous path */
 	if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
-		_err(0, NOPRINT_PROMPT, "undel: %s: %s\n",
+		err(0, NOPRINT_PROMPT, "undel: %s: %s\n",
 			workspaces[cur_ws].path, strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -1052,7 +1052,7 @@ static int
 list_trashed_files(void)
 {
 	if (xchdir(trash_files_dir, NO_TITLE) == -1) {
-		_err(0, NOPRINT_PROMPT, "trash: %s: %s\n",
+		err(0, NOPRINT_PROMPT, "trash: %s: %s\n",
 			trash_files_dir, strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -1081,7 +1081,7 @@ list_trashed_files(void)
 	free(trash_files);
 
 	if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
-		_err(0, NOPRINT_PROMPT, "trash: %s: %s\n",
+		err(0, NOPRINT_PROMPT, "trash: %s: %s\n",
 			workspaces[cur_ws].path, strerror(errno));
 		return EXIT_FAILURE;
 	}

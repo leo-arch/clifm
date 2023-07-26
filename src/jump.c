@@ -390,7 +390,7 @@ save_jump_suggestion(char *str)
 }
 
 static char *
-_get_dir_color(const char *filename, const struct stat a)
+get_directory_color(const char *filename, const struct stat a)
 {
 	if (check_file_access(a.st_mode, a.st_uid, a.st_gid) == 0)
 		return nd_c;
@@ -518,7 +518,7 @@ print_jump_table(const int reduce, const time_t now)
 		if (lstat(tmp_jump[i].path, &a) == -1)
 			color = uf_c;
 
-		char *dir_color = color == uf_c ? uf_c : _get_dir_color(tmp_jump[i].path, a);
+		char *dir_color = color == uf_c ? uf_c : get_directory_color(tmp_jump[i].path, a);
 
 		printf(" %s%*zu\t%*zu\t%*d\t%*d\t%s%*d%s%s%c%s\t%c%s%s%s\n",
 			color != uf_c ? color : df_c, max_order, i + 1,
@@ -867,6 +867,7 @@ dirjump(char **args, const int mode)
 					if (workspaces[cur_ws].path
 					&& !strstr(jump_db[j].path, workspaces[cur_ws].path))
 						exclude = 1;
+					break;
 
 				case NONE: /* fallthrough */
 				default: break;

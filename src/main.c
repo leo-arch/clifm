@@ -89,7 +89,7 @@ struct shades_t size_shades = {0};
 struct paths_t *paths = (struct paths_t *)NULL;
 struct ext_t *ext_colors = (struct ext_t *)NULL;
 
-const struct sort_t _sorts[] = {
+const struct sort_t sort_methods[] = {
     {"none", 0, 0},
     {"name", 1, 0},
     {"size", 2, 0},
@@ -237,7 +237,7 @@ char
 	finder_in_file[PATH_MAX + 1],
 	finder_out_file[PATH_MAX + 1],
 #endif /* _NO_FZF */
-	_fmatch[PATH_MAX + 1],
+	fz_match[PATH_MAX + 1],
 	prop_fields_str[PROP_FIELDS_SIZE + 1] = "",
 	invalid_time_str[MAX_TIME_STR] = "",
 
@@ -856,6 +856,7 @@ run_and_exit(void)
 	 4 - Grab user input again
 	 See https://brennan.io/2015/01/16/write-a-shell-in-c/
 */
+__attribute__ ((noreturn))
 static inline void
 run_main_loop(void)
 {
@@ -908,14 +909,14 @@ static inline void
 set_root_indicator(void)
 {
 	if (user.uid == 0) {
-		_err(ERR_NO_LOG, PRINT_PROMPT, _("%s->%s Running as root%s\n"),
-			conf.colorize == 1 ? mi_c : "", conf.colorize == 1 ? _RED : "",
+		err(ERR_NO_LOG, PRINT_PROMPT, _("%s->%s Running as root%s\n"),
+			conf.colorize == 1 ? mi_c : "", conf.colorize == 1 ? BOLD_RED : "",
 			conf.colorize == 1 ? df_c : "");
 	}
 }
 
 static inline void
-_list(void)
+list_files(void)
 {
 #ifdef RUN_CMD
 	if (cmd_line_cmd)
@@ -927,13 +928,13 @@ _list(void)
 		/* Initialize inotify */
 		inotify_fd = inotify_init1(IN_NONBLOCK);
 		if (inotify_fd < 0) {
-			_err('w', PRINT_PROMPT, "%s: inotify: %s\n",
+			err('w', PRINT_PROMPT, "%s: inotify: %s\n",
 				PROGRAM_NAME, strerror(errno));
 		}
 #elif defined(BSD_KQUEUE)
 		kq = kqueue();
 		if (kq < 0) {
-			_err('w', PRINT_PROMPT, "%s: kqueue: %s\n",
+			err('w', PRINT_PROMPT, "%s: kqueue: %s\n",
 				PROGRAM_NAME, strerror(errno));
 		}
 #endif /* LINUX_INOTIFY */
@@ -946,7 +947,7 @@ _list(void)
 }
 
 static inline void
-_splash(void)
+print_splash_screen(void)
 {
 	if (conf.splash_screen) {
 		splash();
@@ -957,7 +958,7 @@ _splash(void)
 
 /* Set terminal window title */
 static inline void
-_set_term_title(void)
+set_term_win_title(void)
 {
 	if (!(flags & GUI) || xargs.list_and_quit == 1 || xargs.vt100 == 1)
 		return;
@@ -975,7 +976,7 @@ check_working_directory(void)
 {
 	if (workspaces == (struct ws_t *)NULL || !workspaces[cur_ws].path
 	|| !*workspaces[cur_ws].path) {
-		_err(0, NOPRINT_PROMPT, _("%s: Fatal error! Failure "
+		err(0, NOPRINT_PROMPT, _("%s: Fatal error! Failure "
 			"retrieving current working directory\n"), PROGRAM_NAME);
 		exit(EXIT_FAILURE);
 	}
@@ -987,7 +988,7 @@ static inline void
 check_working_shell(void)
 {
 	if (access(user.shell, X_OK) == -1) {
-		_err('w', PRINT_PROMPT, _("%s: %s: System shell not found. "
+		err('w', PRINT_PROMPT, _("%s: %s: System shell not found. "
 			"Please edit the configuration file to specify a working "
 			"shell.\n"), PROGRAM_NAME, user.shell);
 	}
@@ -1011,7 +1012,7 @@ get_hostname(void)
 	if (gethostname(hostname, sizeof(hostname)) == -1) {
 		hostname[0] = '?';
 		hostname[1] = '\0';
-		_err('e', PRINT_PROMPT, _("%s: Error getting hostname\n"),
+		err('e', PRINT_PROMPT, _("%s: Error getting hostname\n"),
 			PROGRAM_NAME);
 	}
 }
@@ -1039,7 +1040,7 @@ set_locale(void)
 	/* Use the locale specified by the environment */
 	setlocale(LC_ALL, "");
 	if (strcmp(nl_langinfo(CODESET), "UTF-8") != 0) {
-		_err('w', PRINT_PROMPT, _("%s: Locale is not UTF-8. To avoid "
+		err('w', PRINT_PROMPT, _("%s: Locale is not UTF-8. To avoid "
 			"encoding issues you might want to set an UTF-8 locale. Ex: "
 			"export LANG=es_AR.UTF-8\n"), PROGRAM_NAME);
 	}
@@ -1180,17 +1181,17 @@ main(int argc, char *argv[])
 
 	load_remotes();
 	automount_remotes();
-	_splash();
+	print_splash_screen();
 	set_start_path();
 	check_working_directory();
-	_set_term_title();
+	set_term_win_title();
 	exec_profile();
 	load_dirhist();
 	add_to_dirhist(workspaces[cur_ws].path);
 	get_sel_files();
 
 	/* Start listing as soon as possible to speed up startup time */
-	_list();
+	list_files();
 
 	shell = get_sys_shell();
 	create_kbinds_file();
@@ -1227,6 +1228,4 @@ main(int argc, char *argv[])
 
 	/* # 2. MAIN PROGRAM LOOP # */
 	run_main_loop();
-
-	return exit_code; /* Never reached */
 }

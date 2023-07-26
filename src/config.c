@@ -155,7 +155,8 @@ get_tab_comp_mode_str(void)
 	case FNF_TAB: xstrsncpy(s, "fnf", 4); break;
 	case SMENU_TAB: xstrsncpy(s, "smenu", 6); break;
 	case STD_TAB: xstrsncpy(s, "standard", 9); break;
-	default: free(s); s = (char *)NULL; break;
+// 	default: free(s); s = (char *)NULL; break;
+/* The default case is not needed: all cases for TABMODE are covered */
 	}
 
 	return s;
@@ -496,7 +497,7 @@ edit_function(char **args)
 	}
 
 	if (*args[0] == 'e') {
-		_err('n', PRINT_PROMPT, "%s: The 'edit' command is deprecated. "
+		err('n', PRINT_PROMPT, "%s: The 'edit' command is deprecated. "
 			"Use 'config' instead\n", PROGRAM_NAME);
 	}
 
@@ -772,7 +773,7 @@ create_kbinds_file(void)
 	int fd = 0;
 	FILE *fp = open_fwrite(kbinds_file, &fd);
 	if (!fp) {
-		_err('w', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME, kbinds_file,
+		err('w', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME, kbinds_file,
 			strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -943,7 +944,7 @@ create_preview_file(void)
 	int fd = 0;
 	FILE *fp = open_fwrite(file, &fd);
 	if (!fp) {
-		_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, file,
+		err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, file,
 			strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -1036,7 +1037,7 @@ create_actions_file(char *file)
 	int fd = 0;
 	FILE *fp = open_fwrite(file, &fd);
 	if (!fp) {
-		_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, file,
+		err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, file,
 			strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -1152,7 +1153,7 @@ create_tmp_rootdir(void)
 	if (from_env == 0) /* Error creating P_tmpdir */
 		goto END;
 
-	_err('w', PRINT_PROMPT, _("%s: %s: %s.\n"
+	err('w', PRINT_PROMPT, _("%s: %s: %s.\n"
 		"Cannot create temporary directory. Falling back to '%s'.\n"),
 		PROGRAM_NAME, tmp_root_dir, strerror(ret), P_tmpdir);
 
@@ -1196,7 +1197,7 @@ define_selfile(const size_t tmp_rootdir_len)
 		snprintf(sel_file, len, "%s/selbox.clifm", tmp_rootdir);
 	}
 
-	_err('w', PRINT_PROMPT, _("%s: %s: Using a temporary directory for "
+	err('w', PRINT_PROMPT, _("%s: %s: Using a temporary directory for "
 		"the Selection Box. Selected files won't be persistent across "
 		"reboots\n"), PROGRAM_NAME, tmp_dir);
 }
@@ -1231,14 +1232,14 @@ create_tmp_files(void)
 	if (stat(tmp_dir, &attr) == -1
 	&& xmkdir(tmp_dir, S_IRWXU) == EXIT_FAILURE) {
 		selfile_ok = 0;
-		_err('e', PRINT_PROMPT, _("%s: %s: %s\n"), PROGRAM_NAME,
+		err('e', PRINT_PROMPT, _("%s: %s: %s\n"), PROGRAM_NAME,
 			tmp_dir, strerror(errno));
 	}
 
 	/* If the directory exists, check if it is writable. */
 	else if (access(tmp_dir, W_OK) == -1 && !sel_file) {
 		selfile_ok = 0;
-		_err('w', PRINT_PROMPT, "%s: %s: Directory not writable. Selected "
+		err('w', PRINT_PROMPT, "%s: %s: Directory not writable. Selected "
 			"files will be lost after program exit\n",
 			PROGRAM_NAME, tmp_dir);
 	}
@@ -1839,7 +1840,7 @@ create_def_color_scheme(void)
 	int fd;
 	FILE *fp = open_fwrite(cscheme_file, &fd);
 	if (!fp) {
-		_err('w', PRINT_PROMPT, "%s: Error creating default color scheme "
+		err('w', PRINT_PROMPT, "%s: Error creating default color scheme "
 			"file: %s\n", PROGRAM_NAME, strerror(errno));
 		return;
 	}
@@ -1918,7 +1919,7 @@ create_remotes_file(void)
 	int fd = 0;
 	FILE *fp = open_fwrite(remotes_file, &fd);
 	if (!fp) {
-		_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
+		err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
 		    remotes_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -1960,7 +1961,7 @@ create_config_files(void)
 		char *tmp_cmd[] = {"mkdir", "-p", config_dir, NULL};
 		if (launch_execv(tmp_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 			config_ok = 0;
-			_err('e', PRINT_PROMPT, _("%s: mkdir: '%s': Error creating "
+			err('e', PRINT_PROMPT, _("%s: mkdir: '%s': Error creating "
 				"configuration directory. Bookmarks, commands logs, and "
 				"command history are disabled. Program messages won't be "
 				"persistent. Using default options\n"),
@@ -1972,7 +1973,7 @@ create_config_files(void)
 	/* If it exists, check it is writable */
 	else if (access(config_dir, W_OK) == -1) {
 		config_ok = 0;
-		_err('e', PRINT_PROMPT, _("%s: '%s': Directory not writable. Bookmarks, "
+		err('e', PRINT_PROMPT, _("%s: '%s': Directory not writable. Bookmarks, "
 			"commands logs, and commands history are disabled. Program messages "
 			"won't be persistent. Using default options\n"),
 		    PROGRAM_NAME, config_dir);
@@ -1984,7 +1985,7 @@ create_config_files(void)
 				 * #####################*/
 
 	if (stat(tags_dir, &attr) == -1 && xmkdir(tags_dir, S_IRWXU) == EXIT_FAILURE)
-		_err('w', PRINT_PROMPT, _("%s: %s: Error creating tags directory. "
+		err('w', PRINT_PROMPT, _("%s: %s: Error creating tags directory. "
 			"Tag function disabled\n"),	PROGRAM_NAME, tags_dir);
 
 				/* #####################
@@ -2005,7 +2006,7 @@ create_config_files(void)
 		int fd = 0;
 		FILE *profile_fp = open_fwrite(profile_file, &fd);
 		if (!profile_fp) {
-			_err('e', PRINT_PROMPT, "%s: fopen: '%s': %s\n", PROGRAM_NAME,
+			err('e', PRINT_PROMPT, "%s: fopen: '%s': %s\n", PROGRAM_NAME,
 			    profile_file, strerror(errno));
 		} else {
 			fprintf(profile_fp, _("# This is %s's profile file\n#\n"
@@ -2025,7 +2026,7 @@ create_config_files(void)
 
 	if (stat(colors_dir, &attr) == -1
 	&& xmkdir(colors_dir, S_IRWXU) == EXIT_FAILURE)
-		_err('w', PRINT_PROMPT, _("%s: mkdir: Error creating colors "
+		err('w', PRINT_PROMPT, _("%s: mkdir: Error creating colors "
 			"directory. Using the default color scheme\n"), PROGRAM_NAME);
 
 	/* Generate the default color scheme file */
@@ -2037,7 +2038,7 @@ create_config_files(void)
 
 	if (stat(plugins_dir, &attr) == -1
 	&& xmkdir(plugins_dir, S_IRWXU) == EXIT_FAILURE)
-		_err('e', PRINT_PROMPT, _("%s: mkdir: Error creating plugins "
+		err('e', PRINT_PROMPT, _("%s: mkdir: Error creating plugins "
 			"directory. The actions function is disabled\n"), PROGRAM_NAME);
 
 	import_rl_file();
@@ -2053,7 +2054,7 @@ create_mime_file_anew(char *file)
 	int fd;
 	FILE *fp = open_fwrite(file, &fd);
 	if (!fp) {
-		_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, file,
+		err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, file,
 			strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -2204,7 +2205,7 @@ print_mime_file_msg(char *file)
 	int _free = 0;
 	char *f = home_tilde(file, &_free);
 
-	_err('n', PRINT_PROMPT, _("%sNOTE%s: %s created a new MIME list file (%s). "
+	err('n', PRINT_PROMPT, _("%sNOTE%s: %s created a new MIME list file (%s). "
 		"It is recommended to edit this file (entering 'mm edit' or "
 		"pressing F6) to add the programs you use and remove those "
 		"you don't. This will make the process of opening files "
@@ -2246,7 +2247,7 @@ create_bm_file(void)
 	int fd = 0;
 	FILE *fp = open_fwrite(bm_file, &fd);
 	if (!fp) {
-		_err('e', PRINT_PROMPT, "bookmarks: '%s': %s\n", bm_file,
+		err('e', PRINT_PROMPT, "bookmarks: '%s': %s\n", bm_file,
 			strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -2339,7 +2340,7 @@ set_config_bool_value(char *line, int *var)
 }
 
 static void
-_set_colorscheme(char *line)
+set_colorscheme(char *line)
 {
 	if (!line || *line < ' ')
 		return;
@@ -2376,7 +2377,7 @@ set_div_line(char *line)
 }
 
 static inline int
-_set_filter(const char *line)
+set_files_filter(const char *line)
 {
 	char *p = strchr(line, '=');
 	if (!p || !*(++p))
@@ -2586,7 +2587,7 @@ set_starting_path(char *line)
 		return;
 	}
 
-	_err('w', PRINT_PROMPT, _("%s: chdir: %s: %s. Using the "
+	err('w', PRINT_PROMPT, _("%s: chdir: %s: %s. Using the "
 		"current working directory as starting path\n"),
 		PROGRAM_NAME, tmp, strerror(errno));
 }
@@ -2598,7 +2599,7 @@ read_config(void)
 	int fd;
 	FILE *config_fp = open_fread(config_file, &fd);
 	if (!config_fp) {
-		_err('e', PRINT_PROMPT, _("%s: fopen: '%s': %s. Using default "
+		err('e', PRINT_PROMPT, _("%s: fopen: '%s': %s. Using default "
 			"values.\n"), PROGRAM_NAME, config_file, strerror(errno));
 		return;
 	}
@@ -2692,7 +2693,7 @@ read_config(void)
 
 		else if (!conf.usr_cscheme && *line == 'C'
 		&& strncmp(line, "ColorScheme=", 12) == 0) {
-			_set_colorscheme(line + 12);
+			set_colorscheme(line + 12);
 		}
 
 		else if (*line == 'c' && strncmp(line, "cpCmd=", 6) == 0) {
@@ -2737,7 +2738,7 @@ read_config(void)
 
 		else if (!filter.str && *line == 'F'
 		&& strncmp(line, "Filter=", 7) == 0) {
-			if (_set_filter(line) == -1)
+			if (set_files_filter(line) == -1)
 				continue;
 		}
 
@@ -3094,7 +3095,7 @@ read_config(void)
 		regfree(&regex_exp);
 		ret = regcomp(&regex_exp, filter.str, REG_NOSUB | REG_EXTENDED);
 		if (ret != EXIT_SUCCESS) {
-			_err('w', PRINT_PROMPT, _("%s: '%s': Invalid regular "
+			err('w', PRINT_PROMPT, _("%s: '%s': Invalid regular "
 				"expression\n"), PROGRAM_NAME, filter.str);
 			free(filter.str);
 			filter.str = (char *)NULL;
@@ -3183,7 +3184,7 @@ create_trash_dirs(void)
 		return;
 
 	if (xargs.stealth_mode == 1) {
-		_err('w', PRINT_PROMPT, _("%s: %s: %s. Trash function disabled. "
+		err('w', PRINT_PROMPT, _("%s: %s: %s. Trash function disabled. "
 			"If needed, create the directories manually and restart %s.\n"
 			"Ex: mkdir -p ~/.local/share/Trash/{files,info}\n"),
 			PROGRAM_NAME, trash_dir, strerror(errno), PROGRAM_NAME);
@@ -3196,7 +3197,7 @@ create_trash_dirs(void)
 
 	if (ret != EXIT_SUCCESS) {
 		trash_ok = 0;
-		_err('w', PRINT_PROMPT, _("%s: mkdir: %s: Error creating the trash "
+		err('w', PRINT_PROMPT, _("%s: mkdir: %s: Error creating the trash "
 			"directory (or one of its subdirectories: files/ and info/).\n"
 			"Try creating them manually and restart %s.\n"
 			"Ex: mkdir -p ~/.local/share/Trash/{files,info}\n"),
@@ -3240,7 +3241,7 @@ init_config(void)
 	set_trash_dirs();
 #endif /* _NO_TRASH */
 	if (xargs.stealth_mode == 1) {
-		_err(ERR_NO_LOG, PRINT_PROMPT, _("%s: Running in stealth mode: "
+		err(ERR_NO_LOG, PRINT_PROMPT, _("%s: Running in stealth mode: "
 			"persistent selection, bookmarks, jump database and directory "
 			"history, just as plugins, logs and configuration files, are "
 			"disabled.\n"), PROGRAM_NAME);

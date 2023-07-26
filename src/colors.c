@@ -473,22 +473,22 @@ get_file_color(const char *filename, const struct stat *attr)
 {
 	char *color = (char *)NULL;
 
-#ifdef _LINUX_CAP
+#ifdef LINUX_FILE_CAPS
 	cap_t cap;
 #else
 	UNUSED(filename);
-#endif /* _LINUX_CAP */
+#endif /* LINUX_FILE_CAPS */
 	if (attr->st_mode & 04000) { /* SUID */
 		color = su_c;
 	} else if (attr->st_mode & 02000) { /* SGID */
 		color = sg_c;
 	}
-#ifdef _LINUX_CAP
+#ifdef LINUX_FILE_CAPS
 	else if (check_cap && (cap = cap_get_file(filename))) {
 		color = ca_c;
 		cap_free(cap);
 	}
-#endif /* _LINUX_CAP */
+#endif /* LINUX_FILE_CAPS */
 	else if ((attr->st_mode & 00100) /* Exec */
 	|| (attr->st_mode & 00010) || (attr->st_mode & 00001)) {
 		color = FILE_SIZE_PTR == 0 ? ee_c : ex_c;
@@ -595,7 +595,7 @@ update_warning_prompt_text_color(void)
 		snprintf(wp_c, sizeof(wp_c), "\x1b[%sm", start);
 
 		if (rl_readline_version < 0x0700) {
-			_err('w', PRINT_PROMPT, _("%s: Escape sequence detected in the "
+			err('w', PRINT_PROMPT, _("%s: Escape sequence detected in the "
 				"warning prompt string: this might cause a few glichtes in the "
 				"prompt due to some bugs in the current readline library (%s). "
 				"Please consider removing these escape sequences (via either "
@@ -1753,7 +1753,7 @@ get_cur_colorscheme(const char *colorscheme)
 	}
 
 	if (!cur_cscheme) {
-		_err('w', PRINT_PROMPT, _("%s: colors: %s: No such color scheme. "
+		err('w', PRINT_PROMPT, _("%s: colors: %s: No such color scheme. "
 			"Falling back to default\n"), PROGRAM_NAME, colorscheme);
 
 		if (def_cscheme)
@@ -1864,7 +1864,7 @@ set_fzf_opts(char *line)
 	}
 
 	else {
-		_err('w', PRINT_PROMPT, _("%s: FzfTabOptions contains unsafe "
+		err('w', PRINT_PROMPT, _("%s: FzfTabOptions contains unsafe "
 			"characters (<>|;&$`). Falling back to default values.\n"),
 			PROGRAM_NAME);
 		if (conf.colorize == 1) {
@@ -2057,7 +2057,7 @@ read_color_scheme_file(const char *colorscheme, char **filecolors,
 				colorscheme_file, strerror(errno));
 			return EXIT_FAILURE;
 		} else {
-			_err('w', PRINT_PROMPT, _("%s: colors: %s: No such color scheme. "
+			err('w', PRINT_PROMPT, _("%s: colors: %s: No such color scheme. "
 				"Falling back to default\n"), PROGRAM_NAME, colorscheme);
 			return EXIT_SUCCESS;
 		}
@@ -2590,7 +2590,7 @@ get_colorschemes(void)
 	if (colors_dir && stat(colors_dir, &attr) != -1
 	&& (schemes_total = (int)count_dir(colors_dir, NO_CPOP) - 2) > 0) {
 		if (!(dir_p = opendir(colors_dir))) {
-			_err('e', PRINT_PROMPT, "opendir: %s: %s\n", colors_dir,
+			err('e', PRINT_PROMPT, "opendir: %s: %s\n", colors_dir,
 				strerror(errno));
 			return 0;
 		}
@@ -2627,7 +2627,7 @@ get_colorschemes(void)
 		goto END;
 
 	if (!(dir_p = opendir(sys_colors_dir))) {
-		_err('e', PRINT_PROMPT, "opendir: %s: %s\n", sys_colors_dir,
+		err('e', PRINT_PROMPT, "opendir: %s: %s\n", sys_colors_dir,
 			strerror(errno));
 		goto END;
 	}

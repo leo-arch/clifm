@@ -41,9 +41,9 @@
 # include <inttypes.h> /* uintmax_t */
 #endif /* __OpenBSD__ */
 
-#if defined(_LINUX_XATTR)
+#if defined(LINUX_FILE_XATTRS)
 # include <sys/xattr.h>
-#endif /* _LINUX_XATTR */
+#endif /* LINUX_FILE_XATTRS */
 
 #include <limits.h> /* INT_MAX */
 
@@ -248,7 +248,7 @@ print_disk_usage(void)
 
 	struct statvfs stat;
 	if (statvfs(workspaces[cur_ws].path, &stat) != EXIT_SUCCESS) {
-		_err('w', PRINT_PROMPT, "statvfs: %s\n", strerror(errno));
+		err('w', PRINT_PROMPT, "statvfs: %s\n", strerror(errno));
 		return;
 	}
 
@@ -1954,7 +1954,7 @@ list_dir_light(void)
 
 		n++;
 		if (n > FILESN_MAX - 1) {
-			_err('w', PRINT_PROMPT, _("%s: Integer overflow detected "
+			err('w', PRINT_PROMPT, _("%s: Integer overflow detected "
 				"(showing only %jd files)\n"), PROGRAM_NAME, (intmax_t)n);
 			break;
 		}
@@ -2313,12 +2313,12 @@ list_dir(void)
 			file_info[n].mode = attr.st_mode;
 
 			if (conf.long_view == 1) {
-#if defined(_LINUX_XATTR)
+#if defined(LINUX_FILE_XATTRS)
 				if (prop_fields.xattr == 1 && listxattr(ename, NULL, 0)) {
 					file_info[n].xattr = 1;
 					have_xattr = 1;
 				}
-#endif /* _LINUX_XATTR */
+#endif /* LINUX_FILE_XATTRS */
 				switch (prop_fields.time) {
 				case PROP_TIME_ACCESS: file_info[n].ltime = (time_t)attr.st_atime; break;
 				case PROP_TIME_CHANGE: file_info[n].ltime = (time_t)attr.st_ctime; break;
@@ -2340,7 +2340,7 @@ list_dir(void)
 
 		case SBTIME:
 #if defined(ST_BTIME) && !defined(__sun)
-# ifdef _STATX
+# ifdef LINUX_STATX
 		{
 			struct statx attx;
 			if (statx(AT_FDCWD, ename, AT_SYMLINK_NOFOLLOW, STATX_BTIME, &attx) == -1)
@@ -2350,7 +2350,7 @@ list_dir(void)
 		}
 # else
 			file_info[n].time = stat_ok ? (time_t)attr.ST_BTIME.tv_sec : 0;
-# endif /* _STATX */
+# endif /* LINUX_STATX */
 #else
 			/* Let's use change time if birth time is not available */
 			file_info[n].time = stat_ok ? (time_t)attr.st_ctime : 0;
@@ -2455,9 +2455,9 @@ list_dir(void)
 			break;
 
 		case DT_REG: {
-#ifdef _LINUX_CAP
+#ifdef LINUX_FILE_CAPS
 			cap_t cap;
-#endif /* !_LINUX_CAP */
+#endif /* !LINUX_FILE_CAPS */
 			/* Do not perform the access check if the user is root */
 			if (user.uid != 0 && stat_ok == 1
 			&& check_file_access(attr.st_mode, attr.st_uid, attr.st_gid) == 0) {
@@ -2482,13 +2482,13 @@ list_dir(void)
 #endif /* !_NO_ICONS */
 			}
 
-#ifdef _LINUX_CAP
+#ifdef LINUX_FILE_CAPS
 			else if (check_cap == 1 && (cap = cap_get_file(ename))) {
 				file_info[n].color = ca_c;
 				stats.caps++;
 				cap_free(cap);
 			}
-#endif /* !_LINUX_CAP */
+#endif /* !LINUX_FILE_CAPS */
 
 			else if (stat_ok == 1
 			&& ((attr.st_mode & 00100) // Exec
@@ -2577,7 +2577,7 @@ list_dir(void)
 		if (n > FILESN_MAX - 1) {
 			/* Though it might seem arbitrary and limited, an int allows us
 			 * to store more than 2 billion files per directory. */
-			_err('w', PRINT_PROMPT, _("%s: Integer overflow detected "
+			err('w', PRINT_PROMPT, _("%s: Integer overflow detected "
 				"(showing only %jd files)\n"), PROGRAM_NAME, (intmax_t)n);
 			break;
 		}

@@ -29,7 +29,7 @@
 
 #ifdef RL_READLINE_VERSION
 # if RL_READLINE_VERSION >= 0x0801
-#  define _READLINE_HAS_ACTIVATE_MARK
+#  define READLINE_HAS_ACTIVATE_MARK
 # endif /* RL_READLINE_VERSION >= 0x0801 */
 #endif /* RL_READLINE_VERSION */
 
@@ -38,7 +38,7 @@
 
 __BEGIN_DECLS
 
-int  _expand_eln(const char *);
+int  should_expand_eln(const char *);
 char *abbreviate_file_name(char *);
 char *get_cwd(char *, const size_t, const int);
 filesn_t count_dir(const char *, const int);

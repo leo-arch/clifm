@@ -487,7 +487,7 @@ run_shell_cmd(char **args)
 
 /* Free everything and exit the program */
 static void
-_quit(char **args, const int exit_status)
+quit_func(char **args, const int exit_status)
 {
 	if (!args || !args[0])
 		return;
@@ -1021,7 +1021,7 @@ hidden_files_function(const char *arg)
 }
 
 static int
-_toggle_exec(char **args)
+toggle_exec_func(char **args)
 {
 	if (!args[1] || IS_HELP(args[1]))
 		{ puts(_(TE_USAGE)); return EXIT_SUCCESS; }
@@ -1127,7 +1127,7 @@ export_files_function(char **args)
 		return EXIT_SUCCESS;
 	}
 
-	char *ret = _export(args, 1);
+	char *ret = export_files(args, 1);
 	if (ret) {
 		printf(_("Files exported to: %s\n"), ret);
 		free(ret);
@@ -1138,7 +1138,7 @@ export_files_function(char **args)
 }
 
 static int
-_bookmarks_function(char **args)
+bookmarks_func(char **args)
 {
 	if (args[1] && IS_HELP(args[1])) {
 		puts(_(BOOKMARKS_USAGE));
@@ -1240,7 +1240,7 @@ media_function(char *arg, const int mode)
 }
 
 static int
-_cd_function(char *arg)
+chdir_function(char *arg)
 {
 	if (arg && IS_HELP(arg)) {
 		puts(_(CD_USAGE));
@@ -1251,7 +1251,7 @@ _cd_function(char *arg)
 }
 
 static int
-_sort_function(char **args)
+sort_func(char **args)
 {
 	if (args[1] && IS_HELP(args[1])) {
 		puts(_(SORT_USAGE));
@@ -1289,7 +1289,7 @@ check_actions(char **args)
 			// REMOVE ONCE THE DH PLUGIN'S DEPRECATION PERIOD IS OVER
 			if (*usr_actions[i].name == 'd' && usr_actions[i].name[1] == 'h'
 			&& !usr_actions[i].name[2]) {
-				_err('n', PRINT_PROMPT, _("%s: The 'dh' plugin is deprecated. "
+				err('n', PRINT_PROMPT, _("%s: The 'dh' plugin is deprecated. "
 					"Use the built-in 'dh' command instead disabling the "
 					"'dh' plugin ('actions edit'). Once done, run 'dh --help' "
 					"for more information about the new command.\n"),
@@ -1343,7 +1343,7 @@ expand_and_deescape(char **arg, char **deq_str)
 }
 
 static inline int
-_open_file(char **args, const filesn_t i)
+open_file_func(char **args, const filesn_t i)
 {
 	if (conf.autocd && (file_info[i].type == DT_DIR || file_info[i].dir == 1))
 		return cd_function(args[0], CD_PRINT_ERROR);
@@ -1400,7 +1400,7 @@ check_auto_first(char **args)
 
 		free(deq_str);
 		deq_str = (char *)NULL;
-		int ret = _open_file(args, i);
+		int ret = open_file_func(args, i);
 		if (ret != -1)
 			return ret;
 		break;
@@ -1582,7 +1582,7 @@ Unstatable files:            %zu\n\
 }
 
 static int
-_trash_function(char **args, int *_cont)
+trash_func(char **args, int *_cont)
 {
 #ifndef _NO_TRASH
 	if (args[1] && IS_HELP(args[1])) {
@@ -1612,7 +1612,7 @@ _trash_function(char **args, int *_cont)
 }
 
 static int
-_untrash_function(char **args, int *_cont)
+untrash_func(char **args, int *_cont)
 {
 #ifndef _NO_TRASH
 	if (args[1] && IS_HELP(args[1])) {
@@ -1690,35 +1690,35 @@ set_cp_cmd(char **cmd, const int cp_force)
 
 	switch (conf.cp_cmd) {
 	case CP_ADVCP:
-		dst_len = strlen(_DEF_ADVCP_CMD);
+		dst_len = sizeof(DEFAULT_ADVCP_CMD) - 1;
 		*cmd = (char *)xrealloc(*cmd, (dst_len + 1) * sizeof(char));
-		xstrsncpy(*cmd, _DEF_ADVCP_CMD, dst_len + 1);
+		xstrsncpy(*cmd, DEFAULT_ADVCP_CMD, dst_len + 1);
 		break;
 	case CP_ADVCP_FORCE:
-		dst_len = strlen(_DEF_ADVCP_CMD_FORCE);
+		dst_len = sizeof(DEFAULT_ADVCP_CMD_FORCE) - 1;
 		*cmd = (char *)xrealloc(*cmd, (dst_len + 1) * sizeof(char));
-		xstrsncpy(*cmd, _DEF_ADVCP_CMD_FORCE, dst_len + 1);
+		xstrsncpy(*cmd, DEFAULT_ADVCP_CMD_FORCE, dst_len + 1);
 		break;
 	case CP_WCP:
-		dst_len = strlen(_DEF_WCP_CMD);
+		dst_len = sizeof(DEFAULT_WCP_CMD) - 1;
 		*cmd = (char *)xrealloc(*cmd, (dst_len + 1) * sizeof(char));
-		xstrsncpy(*cmd, _DEF_WCP_CMD, dst_len + 1);
+		xstrsncpy(*cmd, DEFAULT_WCP_CMD, dst_len + 1);
 		break;
 	case CP_RSYNC:
-		dst_len = strlen(_DEF_RSYNC_CMD);
+		dst_len = sizeof(DEFAULT_RSYNC_CMD) - 1;
 		*cmd = (char *)xrealloc(*cmd, (dst_len + 1) * sizeof(char));
-		xstrsncpy(*cmd, _DEF_RSYNC_CMD, dst_len + 1);
+		xstrsncpy(*cmd, DEFAULT_RSYNC_CMD, dst_len + 1);
 		break;
 	case CP_CP_FORCE:
-		dst_len = strlen(_DEF_CP_CMD_FORCE);
+		dst_len = sizeof(DEFAULT_CP_CMD_FORCE) - 1;
 		*cmd = (char *)xrealloc(*cmd, (dst_len + 1) * sizeof(char));
-		xstrsncpy(*cmd, _DEF_CP_CMD_FORCE, dst_len + 1);
+		xstrsncpy(*cmd, DEFAULT_CP_CMD_FORCE, dst_len + 1);
 		break;
 	case CP_CP: /* fallthrough */
 	default:
-		dst_len = strlen(_DEF_CP_CMD);
+		dst_len = sizeof(DEFAULT_CP_CMD) - 1;
 		*cmd = (char *)xrealloc(*cmd, (dst_len + 1) * sizeof(char));
-		xstrsncpy(*cmd, _DEF_CP_CMD, dst_len + 1);
+		xstrsncpy(*cmd, DEFAULT_CP_CMD, dst_len + 1);
 		break;
 	}
 
@@ -1740,25 +1740,25 @@ set_mv_cmd(char **cmd, const int mv_force)
 
 	switch (conf.mv_cmd) {
 	case MV_ADVMV:
-		dst_len = strlen(_DEF_ADVMV_CMD);
+		dst_len = sizeof(DEFAULT_ADVMV_CMD) - 1;
 		*cmd = (char *)xrealloc(*cmd, (dst_len + 1) * sizeof(char));
-		xstrsncpy(*cmd, _DEF_ADVMV_CMD, dst_len + 1);
+		xstrsncpy(*cmd, DEFAULT_ADVMV_CMD, dst_len + 1);
 		break;
 	case MV_ADVMV_FORCE:
-		dst_len = strlen(_DEF_ADVMV_CMD);
+		dst_len = sizeof(DEFAULT_ADVMV_CMD) - 1;
 		*cmd = (char *)xrealloc(*cmd, (dst_len + 1) * sizeof(char));
-		xstrsncpy(*cmd, _DEF_ADVMV_CMD_FORCE, dst_len + 1);
+		xstrsncpy(*cmd, DEFAULT_ADVMV_CMD_FORCE, dst_len + 1);
 		break;
 	case MV_MV_FORCE:
-		dst_len = strlen(_DEF_MV_CMD_FORCE);
+		dst_len = sizeof(DEFAULT_MV_CMD_FORCE) - 1;
 		*cmd = (char *)xrealloc(*cmd, (dst_len + 1) * sizeof(char));
-		xstrsncpy(*cmd, _DEF_MV_CMD_FORCE, dst_len + 1);
+		xstrsncpy(*cmd, DEFAULT_MV_CMD_FORCE, dst_len + 1);
 		break;
 	case MV_MV: /* fallthrough */
 	default:
-		dst_len = strlen(_DEF_MV_CMD);
+		dst_len = sizeof(DEFAULT_MV_CMD) - 1;
 		*cmd = (char *)xrealloc(*cmd, (dst_len + 1) * sizeof(char));
-		xstrsncpy(*cmd, _DEF_MV_CMD, dst_len + 1);
+		xstrsncpy(*cmd, DEFAULT_MV_CMD, dst_len + 1);
 		break;
 	}
 
@@ -1863,7 +1863,7 @@ preview_function(char **args)
 	if (tabmode != FZF_TAB) {
 		char *p = get_cmd_path("fzf");
 		if (!p) {
-			_err(0, NOPRINT_PROMPT, "%s: fzf: %s\n", PROGRAM_NAME, NOTFOUND_MSG);
+			err(0, NOPRINT_PROMPT, "%s: fzf: %s\n", PROGRAM_NAME, NOTFOUND_MSG);
 			return EXEC_NOTFOUND; /* 127, as required by exit(1) */
 		}
 		free(p);
@@ -1927,7 +1927,7 @@ dirhist_function(char *dir)
 		}
 
 		n--;
-		if (!old_pwd[n] || *old_pwd[n] == _ESC) {
+		if (!old_pwd[n] || *old_pwd[n] == KEY_ESC) {
 			xerror("%s\n", _("dh: Invalid history entry"));
 			return EXIT_FAILURE;
 		}
@@ -2154,7 +2154,7 @@ exec_cmd(char **comm)
 
 	/*          ############### CD ##################     */
 	if (*comm[0] == 'c' && comm[0][1] == 'd' && !comm[0][2])
-		return (exit_code = _cd_function(comm[1]));
+		return (exit_code = chdir_function(comm[1]));
 
 	/*         ############### OPEN ##################     */
 	else if (*comm[0] == 'o' && (!comm[0][1] || strcmp(comm[0], "open") == 0))
@@ -2183,7 +2183,7 @@ exec_cmd(char **comm)
 	/*     ################# BOOKMARKS ##################     */
 	else if (*comm[0] == 'b' && ((comm[0][1] == 'm' && !comm[0][2])
 	|| strcmp(comm[0], "bookmarks") == 0))
-		return (exit_code = _bookmarks_function(comm));
+		return (exit_code = bookmarks_func(comm));
 
 	/*  ############# BACK, FORTH, and DH (dirhist) ##################     */
 	else if (*comm[0] == 'b' && (!comm[0][1] || strcmp(comm[0], "back") == 0))
@@ -2274,7 +2274,7 @@ exec_cmd(char **comm)
 	else if (*comm[0] == 't' && (!comm[0][1] || strcmp(comm[0], "tr") == 0
 	|| strcmp(comm[0], "trash") == 0)) {
 		int _cont = 1;
-		exit_code = _trash_function(comm, &_cont);
+		exit_code = trash_func(comm, &_cont);
 		if (_cont == 0)
 			return exit_code;
 	}
@@ -2282,7 +2282,7 @@ exec_cmd(char **comm)
 	else if (*comm[0] == 'u' && (!comm[0][1] || strcmp(comm[0], "undel") == 0
 	|| strcmp(comm[0], "untrash") == 0)) {
 		int _cont = 1; /* Tells whether to continue or return right here */
-		exit_code = _untrash_function(comm, &_cont);
+		exit_code = untrash_func(comm, &_cont);
 		if (_cont == 0)
 			return exit_code;
 	}
@@ -2342,7 +2342,7 @@ exec_cmd(char **comm)
 
 	/*    ############## TOGGLE EXEC ##################     */
 	else if (*comm[0] == 't' && comm[0][1] == 'e' && !comm[0][2])
-		return (exit_code = _toggle_exec(comm));
+		return (exit_code = toggle_exec_func(comm));
 
 	/*    ########### OWNERSHIP CHANGER ###############     */
 	else if (*comm[0] == 'o' && comm[0][1] == 'c' && !comm[0][2])
@@ -2396,7 +2396,7 @@ exec_cmd(char **comm)
 	/*      ################ SORT ##################     */
 	else if (*comm[0] == 's' && ((comm[0][1] == 't' && !comm[0][2])
 	|| strcmp(comm[0], "sort") == 0))
-		return (exit_code = _sort_function(comm));
+		return (exit_code = sort_func(comm));
 
 	/*    ############ FILE NAMES CLEANER ############## */
 	else if (*comm[0] == 'b' && ((comm[0][1] == 'b' && !comm[0][2])
@@ -2632,7 +2632,7 @@ exec_cmd(char **comm)
 	else if ((*comm[0] == 'q' && (!comm[0][1] || strcmp(comm[0], "quit") == 0))
 	|| (*comm[0] == 'e' && strcmp(comm[0], "exit") == 0)
 	|| (*comm[0] == 'Q' && !comm[0][1]))
-		_quit(comm, old_exit_code);
+		quit_func(comm, old_exit_code);
 
 	else {
 		/* #  AUTOCD & AUTO-OPEN (2) # */

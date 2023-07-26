@@ -797,7 +797,7 @@ print_welcome_msg(void)
 }
 
 static inline void
-_print_tips(void)
+print_tips_func(void)
 {
 	if (conf.tips == 0)
 		return;
@@ -943,7 +943,7 @@ initialize_prompt_data(void)
 	check_cwd();
 	trim_final_slashes();
 	print_welcome_msg();
-	_print_tips();
+	print_tips_func();
 
 	/* If autols is disabled, and since terminal dimensions are gathered
 	 * in list_dir() via get_term_size(), let's get terminal dimensions

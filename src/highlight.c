@@ -35,8 +35,8 @@ typedef char *rl_cpvfunc_t;
 #include "checks.h"
 
 /* Macros for single and double quotes */
-#define _SINGLE 0
-#define _DOUBLE 1
+#define Q_SINGLE 0
+#define Q_DOUBLE 1
 
 /* Change the color of the word _LAST_WORD, at offset OFFSET, to COLOR
  * in the current input string */
@@ -75,7 +75,7 @@ rl_highlight(char *str, const size_t pos, const int flag)
 		rl_redisplay();
 	}
 
-	if ((rl_end == 0 && c == BS) || prev == '\\') {
+	if ((rl_end == 0 && c == KEY_BACKSPACE) || prev == '\\') {
 		if (prev == '\\')
 			goto END;
 		cl = tx_c;
@@ -118,20 +118,20 @@ rl_highlight(char *str, const size_t pos, const int flag)
 	size_t i;
 	for (i = 0; i < (size_t)rl_point; i++) {
 		if (rl_line_buffer[i] == '\'') {
-			if (quote[_DOUBLE] == 1
+			if (quote[Q_DOUBLE] == 1
 			|| (i > 0 && rl_line_buffer[i - 1] == '\\'))
 				continue;
-			quote[_SINGLE]++;
-			if (quote[_SINGLE] > 2)
-				quote[_SINGLE] = 1;
+			quote[Q_SINGLE]++;
+			if (quote[Q_SINGLE] > 2)
+				quote[Q_SINGLE] = 1;
 		} else {
 			if (rl_line_buffer[i] == '"') {
-				if (quote[_SINGLE] == 1
+				if (quote[Q_SINGLE] == 1
 				|| (i > 0 && rl_line_buffer[i - 1] == '\\'))
 					continue;
-				quote[_DOUBLE]++;
-				if (quote[_DOUBLE] > 2)
-					quote[_DOUBLE] = 1;
+				quote[Q_DOUBLE]++;
+				if (quote[Q_DOUBLE] > 2)
+					quote[Q_DOUBLE] = 1;
 			}
 		}
 	}
@@ -142,11 +142,11 @@ rl_highlight(char *str, const size_t pos, const int flag)
 		case ']': /* fallthrough */
 		case '}': cl = tx_c; break;
 		case '\'':
-			if (cur_color == hq_c && quote[_SINGLE] == 2)
+			if (cur_color == hq_c && quote[Q_SINGLE] == 2)
 				cl = tx_c;
 			break;
 		case '"':
-			if (cur_color == hq_c && quote[_DOUBLE] == 2)
+			if (cur_color == hq_c && quote[Q_DOUBLE] == 2)
 				cl = tx_c;
 			break;
 		default: break;
@@ -175,7 +175,7 @@ rl_highlight(char *str, const size_t pos, const int flag)
 	case '\'': /* fallthrough */
 	case '"': cl = hq_c; break;
 	case '\\': /* fallthrough */
-	case ENTER: cl = tx_c; break;
+	case KEY_ENTER: cl = tx_c; break;
 	case '~': /* fallthrough */
 	case '*': cl = (cur_color != hq_c) ? he_c : cl; break;
 	case '=': /* fallthrough */
@@ -209,9 +209,9 @@ rl_highlight(char *str, const size_t pos, const int flag)
 	}
 
 	if (cur_color == hq_c) {
-		if (quote[_SINGLE] == 1)
+		if (quote[Q_SINGLE] == 1)
 			cl = (char *)NULL;
-		else if (quote[_DOUBLE] == 1)
+		else if (quote[Q_DOUBLE] == 1)
 			cl = (char *)NULL;
 	}
 

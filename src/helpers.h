@@ -218,17 +218,17 @@
 #if defined(__linux__) && !defined(_BE_POSIX)
 # if (__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 28))
 #  if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
-#   define _STATX
+#   define LINUX_STATX
 #  endif /* LINUX_VERSION (4.11) */
 # endif /* __GLIBC__ >= 2.28 */
 # if !defined(__GLIBC__) || (__GLIBC__ > 2 \
 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 3))
 #  if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 4, 0)
-#   define _LINUX_XATTR
+#   define LINUX_FILE_XATTRS
 #  endif /* LINUX_VERSION (2.4) */
 # endif /* __GLIBC__ */
 # if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 24)
-#  define _LINUX_CAP
+#  define LINUX_FILE_CAPS
 # endif /* LINUX_VERSION (2.6.24)*/
 # ifndef __TERMUX__
 #  define LINUX_FILE_ATTRS
@@ -239,7 +239,7 @@
 /* ST_BTIME is the timespec struct for files creation time. Valid fields are
  * tv_sec and tv_nsec. */
 #ifndef _BE_POSIX
-# ifdef _STATX
+# ifdef LINUX_STATX
 #  define ST_BTIME stx_btime
 /* OpenBSD defines the interface (see sys/stat.h), but the file system doesn't
  * actually store creation times: the value of __st_birthtim is always zero.
@@ -255,7 +255,7 @@
 /* In the case of Solaris, ST_BTIME is just a flag telling we should run
  * get_birthtime() to get files creation time. */
 #  define ST_BTIME
-# endif /* _STATX */
+# endif /* LINUX_STATX */
 #endif /* !_BE_POSIX */
 
 /* File system events handling */
@@ -397,9 +397,9 @@ extern time_t curdir_mtime;
 /* Terminal columns taken by the last line of the default prompt */
 #define FALLBACK_PROMPT_OFFSET 6
 
-/* A few macros for the _err function */
-#define ERR_NO_LOG   -1 /* _err prints but doesn't log */
-#define ERR_NO_STORE -2 /* _err prints and logs, but doesn't store the msg into the messages array */
+/* A few macros for the err function */
+#define ERR_NO_LOG   -1 /* err prints but doesn't log */
+#define ERR_NO_STORE -2 /* err prints and logs, but doesn't store the msg into the messages array */
 
 /* Macros for xchdir (for setting term title or not) */
 #define SET_TITLE 1
@@ -418,12 +418,12 @@ extern time_t curdir_mtime;
 #define FOREGROUND 0
 
 /* A few fixed colors */
-#define _RED    (conf.colorize == 1 ? "\x1b[1;31m" : "")
-#define _BGREEN (conf.colorize == 1 ? "\x1b[1;32m" : "")
-#define D_CYAN  (conf.colorize == 1 ? "\x1b[0;36m" : "")
-#define BOLD    ((xargs.no_bold != 1 && conf.colorize == 1) ? "\x1b[1m" : "")
+#define BOLD_RED   (conf.colorize == 1 ? "\x1b[1;31m" : "")
+#define BOLD_GREEN (conf.colorize == 1 ? "\x1b[1;32m" : "")
+#define REG_CYAN   (conf.colorize == 1 ? "\x1b[0;36m" : "")
+#define BOLD       ((xargs.no_bold != 1 && conf.colorize == 1) ? "\x1b[1m" : "")
 /* NC: Reset color attributes to terminal defaults */
-#define NC      (conf.colorize == 1 ? "\x1b[0m" : "")
+#define NC         (conf.colorize == 1 ? "\x1b[0m" : "")
 
 /* Colors for the prompt: */
 /* \001 and \002 tell readline that color codes between them are
@@ -476,11 +476,11 @@ extern time_t curdir_mtime;
 #define PRINT_NEWLINE 1
 
 /* A few key macros used by the auto-suggestions system */
-#define _ESC   27
-#define _TAB   9
-#define BS     8
-#define DELETE 127
-#define ENTER  13
+#define KEY_ESC       27
+#define KEY_TAB       9
+#define KEY_BACKSPACE 8
+#define KEY_DELETE    127
+#define KEY_ENTER     13
 
 /* Macros to specify suggestions type */
 #define NO_SUG         0
@@ -558,7 +558,7 @@ extern time_t curdir_mtime;
 #define TRIM_NO_EXT 1
 #define TRIM_EXT    2
 
-#define __MB_LEN_MAX 16
+#define MB_LEN_MAX 16
 
 /* OpenBSD recommends the use of 10 trailing X's. See mkstemp(3) */
 #if defined(__OpenBSD__)
@@ -626,11 +626,11 @@ extern time_t curdir_mtime;
 #define FILTER_MIME_TYPE 3 /* @query */
 
 /* Macros for properties string fields in long view */
-#if defined(_LINUX_XATTR)
+#if defined(LINUX_FILE_XATTRS)
 # define PROP_FIELDS_SIZE 7 /* Seven available fields */
 #else
 # define PROP_FIELDS_SIZE 6 /* Six available fields */
-#endif /* _LINUX_XATTR */
+#endif /* LINUX_FILE_XATTRS */
 
 #define PERM_SYMBOLIC 1
 #define PERM_NUMERIC  2
@@ -689,7 +689,7 @@ extern time_t curdir_mtime;
 
 /* Log the message and print it to STDERR, but do not store it into the
  * messages array. */
-#define xerror(...) _err(ERR_NO_STORE, NOPRINT_PROMPT, __VA_ARGS__)
+#define xerror(...) err(ERR_NO_STORE, NOPRINT_PROMPT, __VA_ARGS__)
 
 #define ENTRY_N 64
 
@@ -1275,7 +1275,7 @@ struct sort_t {
 	int pad;
 };
 
-extern const struct sort_t _sorts[];
+extern const struct sort_t sort_methods[];
 
 /* Prompts and prompt settings */
 struct prompts_t {
@@ -1557,7 +1557,7 @@ extern char
 	finder_in_file[PATH_MAX + 1],
 	finder_out_file[PATH_MAX + 1],
 #endif /* _NO_FZF */
-	_fmatch[PATH_MAX + 1], /* First regular match if fuzzy matching is enabled */
+	fz_match[PATH_MAX + 1], /* First regular match if fuzzy matching is enabled */
 	prop_fields_str[PROP_FIELDS_SIZE + 1],
 	invalid_time_str[MAX_TIME_STR],
 

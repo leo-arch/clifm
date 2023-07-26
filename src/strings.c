@@ -965,9 +965,9 @@ split_str(const char *str, const int update_args)
 
 /* Return 1 if STR contains only numbers or a range of numbers, or 0 if not. */
 static int
-check_fused_param(const char *str)
+check_fused_param(char *str)
 {
-	char *p = (char *)str;
+	char *p = str;
 	size_t c = 0, i = 0;
 	int ok = 1;
 
@@ -2503,7 +2503,7 @@ parse_input_str(char *str)
 	 * even with external commands, they must be expanded here, before
 	 * sending the input string, in case the command is external, to
 	 * the system shell. */
-	is_sel = 0, sel_is_last = 0;
+	is_sel = 0; sel_is_last = 0;
 
 	int stdin_dir_ok = 0;
 	if (stdin_tmp_dir && strcmp(workspaces[cur_ws].path, stdin_tmp_dir) == 0)
@@ -2523,7 +2523,7 @@ parse_input_str(char *str)
 				 * #   2.1) ELN EXPANSION   #
 				 * ########################## */
 
-		if (_expand_eln(substr[i]) == 1)
+		if (should_expand_eln(substr[i]) == 1)
 			eln_expand(&substr, i);
 
 				/* ################################
@@ -3040,7 +3040,7 @@ get_substr(char *str, const char ifs)
 
 				/* Make sure we have a valid range */
 				if (is_number(first) && is_number(second)) {
-					afirst = atoi(first), asecond = atoi(second);
+					afirst = atoi(first); asecond = atoi(second);
 					if (afirst == INT_MIN || asecond == INT_MIN) {
 						free(first);
 						free(second);

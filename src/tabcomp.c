@@ -179,7 +179,7 @@ get_cursor_position(int *c, int *l)
 		return EXIT_FAILURE;
 
 	/* 3. Parse the response */
-	if (*buf != _ESC || *(buf + 1) != '[' || !*(buf + 2))
+	if (*buf != KEY_ESC || *(buf + 1) != '[' || !*(buf + 2))
 		return EXIT_FAILURE;
 
 	char *p = strchr(buf + 2, ';');
@@ -902,7 +902,7 @@ get_tagged_file_target(char *filename)
 static char *
 print_no_finder_file(void)
 {
-	_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
+	err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
 		finder_out_file, strerror(errno));
 	return (char *)NULL;
 }
@@ -1064,7 +1064,7 @@ store_completions(char **matches)
 	int fd = 0;
 	FILE *fp = open_fwrite(finder_in_file, &fd);
 	if (!fp) {
-		_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
+		err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
 			finder_in_file, strerror(errno));
 		return (size_t)-1;
 	}
@@ -1133,7 +1133,7 @@ store_completions(char **matches)
 			/* If color does not start with escape, then we have a color
 			 * for a file extension. In this case, we need to properly
 			 * construct the color code. */
-			if (cl && *cl != _ESC)
+			if (cl && *cl != KEY_ESC)
 				snprintf(tmp_color, sizeof(tmp_color), "\x1b[%sm", cl);
 
 			color = *tmp_color ? tmp_color : (cl ? cl : "");
@@ -2007,6 +2007,8 @@ AFTER_USUAL_COMPLETION:
 		}
 	}
 
+	int len = 0, count = 0, limit = 0, max = 0;
+
 	switch (what_to_do) {
 	case '!':
 		/* If we are matching filenames, then here is our chance to
@@ -2286,7 +2288,7 @@ AFTER_USUAL_COMPLETION:
 	break;
 
 	case '?': {
-		int len = 0, count = 0, limit = 0, max = 0;
+//		int len = 0, count = 0, limit = 0, max = 0;
 		int j = 0, k = 0, l = 0;
 
 		if (flags & PREVIEWER)
@@ -2500,7 +2502,7 @@ CALC_OFFSET:
 				/* A little pager */
 				fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
 				int c = 0;
-				while ((c = xgetchar()) == _ESC);
+				while ((c = xgetchar()) == KEY_ESC);
 				if (c == 'q') {
 					/* Delete the --Mas-- label */
 					fputs("\x1b[7D\x1b[7X\x1b[1A\n", stdout);
@@ -2595,7 +2597,6 @@ RESTART:
 		xerror("\r\nreadline: %c: Bad value for what_to_do "
 			"in tab_complete\n", what_to_do);
 		exit(EXIT_FAILURE);
-		break;
 	}
 
 	for (i = 0; matches[i]; i++)

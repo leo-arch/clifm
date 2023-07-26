@@ -333,17 +333,17 @@ xf=1;31:xs=0;32:"
 
 /* cp and mv commands
  * All options used for cp(1) and mv(1) are POSIX. No need to check. */
-#define _DEF_CP_CMD "cp -iRp"
-#define _DEF_CP_CMD_FORCE "cp -Rp"
-#define _DEF_ADVCP_CMD "advcp -giRp"
-#define _DEF_ADVCP_CMD_FORCE "advcp -gRp"
-#define _DEF_WCP_CMD "wcp"
-#define _DEF_RSYNC_CMD "rsync -avP"
+#define DEFAULT_CP_CMD "cp -iRp"
+#define DEFAULT_CP_CMD_FORCE "cp -Rp"
+#define DEFAULT_ADVCP_CMD "advcp -giRp"
+#define DEFAULT_ADVCP_CMD_FORCE "advcp -gRp"
+#define DEFAULT_WCP_CMD "wcp"
+#define DEFAULT_RSYNC_CMD "rsync -avP"
 
-#define _DEF_MV_CMD "mv -i"
-#define _DEF_MV_CMD_FORCE "mv"
-#define _DEF_ADVMV_CMD "advmv -gi"
-#define _DEF_ADVMV_CMD_FORCE "advmv -g"
+#define DEFAULT_MV_CMD "mv -i"
+#define DEFAULT_MV_CMD_FORCE "mv"
+#define DEFAULT_ADVMV_CMD "advmv -gi"
+#define DEFAULT_ADVMV_CMD_FORCE "advmv -g"
 
 #define DEF_RM_FORCE 0
 
@@ -363,7 +363,7 @@ xf=1;31:xs=0;32:"
 
 #define DEF_WARNING_PROMPT 1
 #define DEF_WPROMPT_STR_NO_COLOR "(!) > "
-#if RL_READLINE_VERSION < 0x0700
+#if defined(RL_READLINE_VERSION) && RL_READLINE_VERSION < 0x0700
 # define DEF_WPROMPT_STR DEF_WPROMPT_STR_NO_COLOR
 #else
 # define DEF_WPROMPT_STR "\\[\\e[00;02;31m\\](!) > "

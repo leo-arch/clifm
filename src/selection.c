@@ -655,11 +655,11 @@ print_selected_files(void)
 
 static int
 print_sel_results(const int new_sel, const char *sel_path,
-	const char *pattern, const int err)
+	const char *pattern, const int error)
 {
 	if (new_sel > 0 && xargs.stealth_mode != 1 && sel_file
 	&& save_sel() != EXIT_SUCCESS) {
-		_err('e', PRINT_PROMPT, _("sel: Error writing selected files "
+		err('e', PRINT_PROMPT, _("sel: Error writing selected files "
 			"into the selections file\n"));
 		return EXIT_FAILURE;
 	}
@@ -670,14 +670,14 @@ print_sel_results(const int new_sel, const char *sel_path,
 	}
 
 	if (new_sel <= 0) {
-		if (pattern && err == 0)
+		if (pattern && error == 0)
 			fputs(_("sel: No matches found\n"), stderr);
 		return EXIT_FAILURE;
 	}
 
 	get_sel_files();
 
-	if (conf.autols == 1 && err == 0)
+	if (conf.autols == 1 && error == 0)
 		reload_dirlist();
 
 	print_reload_msg(_("%d file(s) selected\n"), new_sel);
@@ -717,7 +717,7 @@ construct_sel_filename(const char *dir, const char *name)
 }
 
 static int
-select_filename(char *arg, char *dir, int *err)
+select_filename(char *arg, char *dir, int *errors)
 {
 	int new_sel = 0;
 
@@ -738,12 +738,12 @@ select_filename(char *arg, char *dir, int *err)
 		struct stat attr;
 		if (lstat(tmp, &attr) == -1) {
 			xerror("sel: %s: %s\n", arg, strerror(errno));
-			(*err)++;
+			(*errors)++;
 		} else {
 			int r = select_file(tmp);
 			new_sel += r;
 			if (r == 0)
-				(*err)++;
+				(*errors)++;
 		}
 		free(tmp);
 		return new_sel;
@@ -752,12 +752,12 @@ select_filename(char *arg, char *dir, int *err)
 	struct stat a;
 	if (lstat(arg, &a) == -1) {
 		xerror("sel: %s: %s\n", name, strerror(errno));
-		(*err)++;
+		(*errors)++;
 	} else {
 		int r = select_file(name);
 		new_sel += r;
 		if (r == 0)
-			(*err)++;
+			(*errors)++;
 	}
 
 	return new_sel;
@@ -870,14 +870,13 @@ show_sel_files(void)
 			case 99: /* fallthrough */  /* 'c' */
 			case 112: /* fallthrough */ /* 'p' */
 			case 113:
-				conf.pager = 0, reset_pager = 1; /* 'q' */
+				conf.pager = 0; reset_pager = 1; /* 'q' */
 				break;
 			/* If another key is pressed, go back one position.
 			 * Otherwise, some file names won't be listed.*/
 			default:
 				i--;
 				continue;
-				break;
 			}
 		}
 
@@ -947,7 +946,7 @@ ERROR:
 }
 
 static int
-deselect_entries(char **desel_path, const size_t desel_n, int *err,
+deselect_entries(char **desel_path, const size_t desel_n, int *error,
 	const int desel_screen)
 {
 	int dn = (int)desel_n;
@@ -971,7 +970,7 @@ deselect_entries(char **desel_path, const size_t desel_n, int *err,
 
 		if (desel_index == -1) {
 			dn--;
-			*err = 1;
+			*error = 1;
 			if (desel_screen == 0) {
 				xerror(_("%s: %s: No such selected file\n"),
 					PROGRAM_NAME, desel_path[i]);

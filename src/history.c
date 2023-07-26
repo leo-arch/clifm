@@ -128,7 +128,7 @@ print_logs(const int flag)
 
 	FILE *log_fp = fopen(file, "r");
 	if (!log_fp) {
-		_err(0, NOPRINT_PROMPT, "log: %s: %s\n", file, strerror(errno));
+		err(0, NOPRINT_PROMPT, "log: %s: %s\n", file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -222,7 +222,7 @@ log_cmd(void)
 
 	log_fp = fopen(cmds_log_file, "a");
 	if (!log_fp) {
-		_err('e', PRINT_PROMPT, "log: %s: %s\n", cmds_log_file, strerror(errno));
+		err('e', PRINT_PROMPT, "log: %s: %s\n", cmds_log_file, strerror(errno));
 		free(full_log);
 		return EXIT_FAILURE;
 	}
@@ -462,9 +462,9 @@ edit_history(char **args)
 {
 	struct stat attr;
 	if (stat(hist_file, &attr) == -1) {
-		int err = errno;
+		int tmp_err = errno;
 		xerror("history: %s: %s\n", hist_file, strerror(errno));
-		return err;
+		return tmp_err;
 	}
 	time_t mtime_bfr = (time_t)attr.st_mtime;
 
@@ -497,12 +497,12 @@ edit_history(char **args)
 }
 
 static int
-_clear_history(char **args)
+clear_history_func(char **args)
 {
 	/* Let's overwrite whatever was there. */
 	FILE *hist_fp = fopen(hist_file, "w+");
 	if (!hist_fp) {
-		_err(0, NOPRINT_PROMPT, "history: %s: %s\n", hist_file, strerror(errno));
+		err(0, NOPRINT_PROMPT, "history: %s: %s\n", hist_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -596,7 +596,7 @@ history_function(char **args)
 		return edit_history(args);
 
 	if (*args[1] == 'c' && strcmp(args[1], "clear") == 0)
-		return _clear_history(args);
+		return clear_history_func(args);
 
 	/* If "history -n [show-time]", print the last -n elements */
 	if (*args[1] == '-' && is_number(args[1] + 1))
@@ -785,7 +785,7 @@ get_history(void)
 
 	FILE *hist_fp = fopen(hist_file, "r");
 	if (!hist_fp) {
-		_err('e', PRINT_PROMPT, "history: %s: %s\n", hist_file, strerror(errno));
+		err('e', PRINT_PROMPT, "history: %s: %s\n", hist_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 

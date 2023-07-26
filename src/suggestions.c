@@ -561,7 +561,7 @@ check_conditions(const size_t offset, const size_t wlen, int *baej,
 }
 
 static inline void
-_print_suggestion(const char *str, const size_t offset, const char *color)
+make_suggestion(const char *str, const size_t offset, const char *color)
 {
 	if (suggestion.type == FUZZY_FILENAME
 	|| (suggestion.type == COMP_SUG && (flags & BAEJ_SUGGESTION)))
@@ -651,7 +651,7 @@ print_suggestion(const char *str, size_t offset, char *color)
 	}
 
 	set_cursor_position(baej);
-	_print_suggestion(str, offset, color);
+	make_suggestion(str, offset, color);
 
 	restore_cursor_position(slines);
 
@@ -674,13 +674,13 @@ get_reg_file_color(const char *filename, const struct stat *attr,
 	if (attr->st_mode & S_ISUID) return su_c;
 	if (attr->st_mode & S_ISGID) return sg_c;
 
-#ifdef _LINUX_CAP
+#ifdef LINUX_FILE_CAPS
 	cap_t cap = cap_get_file(filename);
 	if (cap) {
 		cap_free(cap);
 		return ca_c;
 	}
-#endif /* _LINUX_CAP */
+#endif /* LINUX_FILE_CAPS */
 	if (attr->st_mode & (S_IXUSR | S_IXGRP | S_IXOTH))
 		return (FILE_SIZE_PTR == 0) ? ee_c : ex_c;
 
@@ -732,7 +732,6 @@ get_comp_color(const char *filename, const struct stat *attr, int *free_color)
 		}
 		return or_c;
 		}
-		break;
 
 	case S_IFSOCK: return so_c;
 	case S_IFBLK: return bd_c;
@@ -906,26 +905,26 @@ check_completions(char *str, size_t len, const int print)
 		return NO_MATCH;
 	}
 
-	*_fmatch = '\0';
+	*fz_match = '\0';
 	flags |= STATE_SUGGESTING;
-	char *_match = my_rl_path_completion(str, 0);
+	char *match = my_rl_path_completion(str, 0);
 	flags &= ~STATE_SUGGESTING;
-	if (!_match && !*_fmatch)
+	if (!match && !*fz_match)
 		return NO_MATCH;
 
-	if (print == 0 && _match) {
-		int ret = get_print_status(str, _match, len);
-		free(_match);
+	if (print == 0 && match) {
+		int ret = get_print_status(str, match, len);
+		free(match);
 		cur_comp_type = TCMP_PATH;
 		return ret;
 	}
 
 	cur_comp_type = TCMP_PATH; /* Required by print_match() */
-	printed = print_match(_match ? _match : _fmatch, len);
-	*_fmatch = '\0';
+	printed = print_match(match ? match : fz_match, len);
+	*fz_match = '\0';
 
 	cur_comp_type = printed == NO_MATCH ? TCMP_NONE : TCMP_PATH;
-	free(_match);
+	free(match);
 
 	return printed;
 }
@@ -1643,7 +1642,7 @@ check_sort_methods(const char *str, const size_t len)
 	}
 
 	suggestion.type = SORT_SUG;
-	print_suggestion(_sorts[a].name, 0, sf_c);
+	print_suggestion(sort_methods[a].name, 0, sf_c);
 	return PARTIAL_MATCH;
 }
 
@@ -1971,7 +1970,7 @@ check_dirhist(char *word, const size_t len)
 
 	int i = dirhist_total_index;
 	while (--i >= 0) {
-		if (!old_pwd[i] || !*old_pwd[i] || *old_pwd[i] == _ESC)
+		if (!old_pwd[i] || !*old_pwd[i] || *old_pwd[i] == KEY_ESC)
 			continue;
 
 		if (conf.fuzzy_match == 0 || rl_point < rl_end) {
@@ -2446,7 +2445,7 @@ rl_suggestions(const unsigned char c)
 				clear_suggestion(CS_FREEBUF);
 
 			if (*lb != ';' && *lb != ':' && *word >= '1' && *word <= '9') {
-				if (_expand_eln(word) == 1
+				if (should_expand_eln(word) == 1
 				&& (printed = check_eln(word, flag)) > 0)
 					goto SUCCESS;
 			}
@@ -2616,7 +2615,7 @@ NO_SUGGESTION:
 	 * in the current input sequence. This is mainly to avoid erasing
 	 * the suggestion if moving thought the text via the arrow keys. */
 	if (suggestion.printed) {
-		if (!strchr(word, _ESC)) {
+		if (!strchr(word, KEY_ESC)) {
 //			clear_suggestion(CS_FREEBUF);
 			goto FAIL;
 		} else {

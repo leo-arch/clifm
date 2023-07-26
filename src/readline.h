@@ -22,8 +22,8 @@
  * MA 02110-1301, USA.
 */
 
-#ifndef __READLINE_H
-#define __READLINE_H
+#ifndef READLINE_H
+#define READLINE_H
 
 __BEGIN_DECLS
 
@@ -38,4 +38,4 @@ int  tab_complete(int);
 
 __END_DECLS
 
-#endif /* __READLINE_H */
+#endif /* READLINE_H */

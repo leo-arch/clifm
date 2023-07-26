@@ -27,7 +27,7 @@
 
 __BEGIN_DECLS
 
-int  _err(const int, const int, const char *, ...);
+int  err(const int, const int, const char *, ...);
 int  alias_import(char *);
 void bonus_function(void);
 int  confirm_sudo_cmd(char **);

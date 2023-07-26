@@ -173,7 +173,7 @@ profile_set(const char *prof)
 
 	/* Check whether we have a working shell */
 /*	if (access(user.shell, X_OK) == -1) {
-		_err('w', PRINT_PROMPT, _("pf: %s: System shell not found. Please "
+		err('w', PRINT_PROMPT, _("pf: %s: System shell not found. Please "
 			"edit the configuration file to specify a working shell.\n"),
 			user.shell);
 	} */
@@ -218,7 +218,7 @@ profile_set(const char *prof)
 				fputs("edit\n", hist_fp);
 				fclose(hist_fp);
 			} else {
-				_err('w', PRINT_PROMPT, _("pf: Error opening the "
+				err('w', PRINT_PROMPT, _("pf: Error opening the "
 					"history file\n"));
 			}
 		}

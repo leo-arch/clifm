@@ -39,7 +39,9 @@
 
 #define UNSAFE_CMD "Unsafe command. Consult the manpage for more information"
 /* If PATH cannot be retrieved from any other source, let's use this value */
-#define MINIMAL_PATH "/usr/local/bin:/bin:/usr/bin:/sbin:/usr/sbin"
+#if !defined(_PATH_STDPATH) && !defined(_CS_PATH)
+# define MINIMAL_PATH "/usr/local/bin:/bin:/usr/bin:/sbin:/usr/sbin"
+#endif
 
 /* Unset environ: little implementation of clearenv(3), not available
  * on some systems (not POSIX) */
@@ -73,7 +75,7 @@ xclearenv(void)
 			exit(EXIT_FAILURE);
 		}
 	}
-#endif /* !__NetBSD__ && !__HAIKU__ && !__APPLE__ && !__TERMUX */
+#endif /* !__NetBSD__ && !__HAIKU__ && !__APPLE__ && !__TERMUX__ */
 }
 
 static void
@@ -127,22 +129,20 @@ get_open_max(void)
 {
 #ifdef _SC_OPEN_MAX
 	return (int)sysconf(_SC_OPEN_MAX);
-#endif /* _SC_OPEN_MAX */
-
+#else
 	/* This is what getdtablesize(3) does */
 	struct rlimit rlim;
 	if (getrlimit(RLIMIT_NOFILE, &rlim) != -1)
 		return (int)rlim.rlim_cur;
+#endif /* _SC_OPEN_MAX */
 
 #ifdef OPEN_MAX /* Not defined in Linux */
 	return OPEN_MAX;
-#endif /* OPEN_MAX */
-
-#if defined(__linux__) && defined(NR_OPEN)
+#elif defined(__linux__) && defined(NR_OPEN)
 	return NR_OPEN;
-#endif /* NR_OPEN */
-
+#else
 	return 256; /* Let's fallback to a sane default */
+#endif /* OPEN_MAX */
 }
 
 /* Close all non-standard file descriptors (> 2) to avoid FD exhaustion. */
@@ -353,7 +353,7 @@ clean_cmd(const char *str)
 		*p = ' ';
 
 	if (q) {
-		_err('w', PRINT_PROMPT, _("%s: %s: Only command base names "
+		err('w', PRINT_PROMPT, _("%s: %s: Only command base names "
 			"are allowed. Ex: 'nano' instead of '/usr/bin/nano'\n"),
 			PROGRAM_NAME, str);
 		return EXIT_FAILURE;
@@ -396,7 +396,7 @@ sanitize_cmd(const char *str, const int type)
 	}
 
 	if (exit_status == EXIT_FAILURE) {
-		_err('w', PRINT_PROMPT, "%s: %s: %s\n",
+		err('w', PRINT_PROMPT, "%s: %s: %s\n",
 			PROGRAM_NAME, str, _(UNSAFE_CMD));
 		return EXIT_FAILURE;
 	}

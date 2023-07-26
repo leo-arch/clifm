@@ -400,7 +400,7 @@ fuzzy_match(char *s1, char *s2, const size_t s1_len, const int type)
 		int a = utf8nextcodepoint(s1);
 		int b = utf8nextcodepoint(m);
 
-		cp1 = 0, cp2 = 0;
+		cp1 = 0; cp2 = 0;
 		utf8codepoint(s1 + a, &cp1);
 		utf8codepoint(m + b, &cp2);
 		if (*(s1 + a) && *(m + b) && (cs == 1 ? (cp1 == cp2)

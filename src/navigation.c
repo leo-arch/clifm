@@ -785,10 +785,10 @@ go_home(const int cd_flag)
 	}
 
 	if (xchdir(user.home, SET_TITLE) != EXIT_SUCCESS) {
-		int err = errno;
+		int tmp_err = errno;
 		if (cd_flag == CD_PRINT_ERROR)
-			xerror("cd: %s: %s\n", user.home, strerror(err));
-		return err;
+			xerror("cd: %s: %s\n", user.home, strerror(tmp_err));
+		return tmp_err;
 	}
 
 	if (workspaces) {
@@ -830,9 +830,9 @@ change_to_path(char *new_path, const int cd_flag)
 	free(p);
 
 	if (xchdir(q, SET_TITLE) != EXIT_SUCCESS) {
-		int err = errno;
+		int tmp_err = errno;
 		if (cd_flag == CD_PRINT_ERROR)
-			xerror("cd: %s: %s\n", new_path, strerror(err));
+			xerror("cd: %s: %s\n", new_path, strerror(tmp_err));
 
 		free(q);
 
@@ -840,10 +840,10 @@ change_to_path(char *new_path, const int cd_flag)
 		 * a general error code, is not quite informative. Why not to return the
 		 * actual error code returned by chdir(3)? Note that POSIX only requires
 		 * for cd to return >0 in case of error (see cd(1p)). */
-		if (err == EACCES || err == ENOENT)
+		if (tmp_err == EACCES || tmp_err == ENOENT)
 			return EXIT_FAILURE;
 
-		return err;
+		return tmp_err;
 	}
 
 	if (workspaces) {
@@ -972,7 +972,7 @@ print_dirhist(char *query)
 		? FUZZY_FILES_UTF8 : FUZZY_FILES_ASCII;
 
 	for (i = 0; i < dirhist_total_index; i++) {
-		if (!old_pwd[i] || *old_pwd[i] == _ESC)
+		if (!old_pwd[i] || *old_pwd[i] == KEY_ESC)
 			continue;
 
 		if (query && (conf.fuzzy_match == 1
@@ -1015,7 +1015,7 @@ change_to_dirhist_num(int n)
 	}
 
 	n--;
-	if (!old_pwd[n] || *old_pwd[n] == _ESC) {
+	if (!old_pwd[n] || *old_pwd[n] == KEY_ESC) {
 		xerror("%s\n", _("history: Invalid history entry"));
 		return EXIT_FAILURE;
 	}
@@ -1098,7 +1098,7 @@ back_function(char **args)
 	/* Find the previous non-consecutive equal and valid entry */
 	int i = dirhist_cur_index;
 	while (--i >= 0) {
-		if (old_pwd[i] && *old_pwd[i] != _ESC && (!workspaces[cur_ws].path
+		if (old_pwd[i] && *old_pwd[i] != KEY_ESC && (!workspaces[cur_ws].path
 		|| strcmp(workspaces[cur_ws].path, old_pwd[i]) != 0))
 			break;
 	}
@@ -1115,7 +1115,7 @@ back_function(char **args)
 	xerror("cd: %s: %s\n", old_pwd[dirhist_cur_index], strerror(errno));
 
 	/* Invalidate this entry */
-	*old_pwd[dirhist_cur_index] = _ESC;
+	*old_pwd[dirhist_cur_index] = KEY_ESC;
 	if (dirhist_cur_index > 0)
 		dirhist_cur_index--;
 
@@ -1139,7 +1139,7 @@ forth_function(char **args)
 	/* Find the next valid entry */
 	int i = dirhist_cur_index;
 	while (++i <= dirhist_total_index) {
-		if (old_pwd[i] && (*old_pwd[i] != _ESC && (!workspaces[cur_ws].path
+		if (old_pwd[i] && (*old_pwd[i] != KEY_ESC && (!workspaces[cur_ws].path
 		|| strcmp(workspaces[cur_ws].path, old_pwd[i]) != 0)))
 			break;
 	}
@@ -1156,7 +1156,7 @@ forth_function(char **args)
 	xerror("cd: %s: %s\n", old_pwd[dirhist_cur_index], strerror(errno));
 
 	/* Invalidate this entry */
-	*old_pwd[dirhist_cur_index] = _ESC;
+	*old_pwd[dirhist_cur_index] = KEY_ESC;
 	if (dirhist_cur_index < dirhist_total_index
 	&& old_pwd[dirhist_cur_index + 1])
 		dirhist_cur_index++;

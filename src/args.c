@@ -55,8 +55,10 @@
 #define OPEN_FILE    2
 
 /* Macros to be able to consult the value of a macro string */
-#define STRINGIZE_(x) #x
-#define STRINGIZE(x) STRINGIZE_(x)
+#ifdef CLIFM_DATADIR
+# define STRINGIZE_(x) #x
+# define STRINGIZE(x) STRINGIZE_(x)
+#endif /* CLIFM_DATADIR */
 
 #ifdef RUN_CMD
 # define OPTSTRING "+:aAb:c:C:D:eEfFgGhHiIk:lLmoOp:P:rsStvw:xyz:"
@@ -251,6 +253,7 @@ static const struct option longopts[] = {
     {0, 0, 0, 0}
 };
 
+__attribute__ ((noreturn))
 static void
 err_arg_required(const char *arg)
 {
@@ -260,6 +263,7 @@ err_arg_required(const char *arg)
 	exit(EXIT_FAILURE);
 }
 
+__attribute__ ((noreturn))
 static void
 err_invalid_opt(const char *arg)
 {
@@ -314,7 +318,7 @@ set_start_path(void)
 
 	if (cur_ws > MAX_WS - 1) {
 		cur_ws = DEF_CUR_WS;
-		_err('w', PRINT_PROMPT, _("%s: %zu: Invalid workspace."
+		err('w', PRINT_PROMPT, _("%s: %zu: Invalid workspace."
 			"\nFalling back to workspace %zu\n"),
 			PROGRAM_NAME, cur_ws, cur_ws + 1);
 	}
@@ -331,11 +335,11 @@ set_start_path(void)
 	/* If chdir() fails, set path to PWD, list files and print the
 	 * error message. If no access to PWD either, exit. */
 	if (ret == -1) {
-		_err('e', PRINT_PROMPT, "%s: chdir: '%s': %s\n", PROGRAM_NAME,
+		err('e', PRINT_PROMPT, "%s: chdir: '%s': %s\n", PROGRAM_NAME,
 		    workspaces[cur_ws].path, strerror(errno));
 
 		if (!pwd || !*pwd) {
-			_err(0, NOPRINT_PROMPT, _("%s: Fatal error! Failure "
+			err(0, NOPRINT_PROMPT, _("%s: Fatal error! Failure "
 				"retrieving current working directory\n"), PROGRAM_NAME);
 			exit(EXIT_FAILURE);
 		}
@@ -537,7 +541,7 @@ get_data_dir(void)
 	if (get_data_dir_from_path(argv_bk[0]) == EXIT_SUCCESS)
 		return;
 
-	_err('w', PRINT_PROMPT, _("%s: No data directory found. Data files, "
+	err('w', PRINT_PROMPT, _("%s: No data directory found. Data files, "
 		"such as plugins and color schemes, might not be available.\n"),
 		PROGRAM_NAME);
 }
@@ -550,7 +554,7 @@ get_home_sec_env(void)
 	uid_t u = geteuid();
 	pw = getpwuid(u);
 	if (!pw) {
-		_err('e', PRINT_PROMPT, "%s: getpwuid: %s\n",
+		err('e', PRINT_PROMPT, "%s: getpwuid: %s\n",
 			PROGRAM_NAME, strerror(errno));
 		exit(EXIT_FAILURE);
 	}
@@ -559,6 +563,7 @@ get_home_sec_env(void)
 }
 
 /* Opener function: open FILENAME and exit */
+__attribute__ ((noreturn))
 static void
 open_reg_exit(char *filename, const int url, const int preview)
 {
@@ -608,8 +613,9 @@ set_sort_by_name(const char *name)
 {
 	size_t i;
 	for (i = 0; i <= SORT_TYPES; i++) {
-		if (*name == *_sorts[i].name && strcmp(name, _sorts[i].name) == 0)
-			return _sorts[i].num;
+		if (*name == *sort_methods[i].name
+		&& strcmp(name, sort_methods[i].name) == 0)
+			return sort_methods[i].num;
 	}
 
 	return SNAME;
@@ -634,6 +640,7 @@ set_sort(const char *arg)
 }
 
 /* Open/preview FILE according to MODE: either PREVIEW_FILE or OPEN_FILE */
+__attribute__ ((noreturn))
 static void
 open_preview_file(char *file, const int mode)
 {
@@ -712,7 +719,7 @@ set_custom_selfile(char *file)
 		return;
 	}
 
-	_err('e', PRINT_PROMPT, _("%s: %s: Error setting custom "
+	err('e', PRINT_PROMPT, _("%s: %s: Error setting custom "
 		"selections file\n"), PROGRAM_NAME, file);
 }
 
@@ -727,7 +734,7 @@ set_alt_bm_file(char *file)
 	}
 
 	if (access(file, R_OK) == -1) {
-		_err('e', PRINT_PROMPT, _("%s: %s: %s\n"
+		err('e', PRINT_PROMPT, _("%s: %s: %s\n"
 			"Falling back to the default bookmarks file\n"),
 		    PROGRAM_NAME, file, strerror(errno));
 		free(p);
@@ -735,7 +742,7 @@ set_alt_bm_file(char *file)
 	}
 
 	alt_bm_file = savestring(file, strlen(file));
-	_err(ERR_NO_LOG, PRINT_PROMPT, _("%s: Loaded alternative "
+	err(ERR_NO_LOG, PRINT_PROMPT, _("%s: Loaded alternative "
 		"bookmarks file\n"), PROGRAM_NAME);
 
 	free(p);
@@ -758,7 +765,7 @@ set_alt_config_dir(char *dir)
 		char *tmp_cmd[] = {"mkdir", "-p", dir, NULL};
 		int ret = launch_execv(tmp_cmd, FOREGROUND, E_NOSTDERR);
 		if (ret != EXIT_SUCCESS) {
-			_err('e', PRINT_PROMPT, _("%s: %s: Cannot create directory "
+			err('e', PRINT_PROMPT, _("%s: %s: Cannot create directory "
 				"(error %d)\nFalling back to default configuration "
 				"directory\n"), PROGRAM_NAME, dir, ret);
 			dir_ok = 0;
@@ -767,13 +774,13 @@ set_alt_config_dir(char *dir)
 
 	if (access(dir, W_OK) == -1) {
 		if (dir_ok == 1) {
-			_err('e', PRINT_PROMPT, _("%s: %s: %s\n"
+			err('e', PRINT_PROMPT, _("%s: %s: %s\n"
 				"Falling back to default configuration directory\n"),
 				PROGRAM_NAME, dir, strerror(errno));
 		}
 	} else {
 		alt_config_dir = savestring(dir, strlen(dir));
-		_err(ERR_NO_LOG, PRINT_PROMPT, _("%s: %s: Using alternative "
+		err(ERR_NO_LOG, PRINT_PROMPT, _("%s: %s: Using alternative "
 			"configuration directory\n"), PROGRAM_NAME, alt_config_dir);
 	}
 
@@ -790,12 +797,12 @@ set_alt_kbinds_file(char *file)
 	}
 
 	if (access(file, R_OK) == -1) {
-		_err('e', PRINT_PROMPT, _("%s: %s: %s\n"
+		err('e', PRINT_PROMPT, _("%s: %s: %s\n"
 			"Falling back to the default keybindings file\n"),
 		    PROGRAM_NAME, file, strerror(errno));
 	} else {
 		alt_kbinds_file = savestring(file, strlen(file));
-		_err(ERR_NO_LOG, PRINT_PROMPT, _("%s: Loaded alternative "
+		err(ERR_NO_LOG, PRINT_PROMPT, _("%s: Loaded alternative "
 			"keybindings file\n"), PROGRAM_NAME);
 	}
 
@@ -813,12 +820,12 @@ set_alt_config_file(char *file)
 	}
 
 	if (access(file, R_OK) == -1) {
-		_err('e', PRINT_PROMPT, _("%s: %s: %s\nFalling back to default\n"),
+		err('e', PRINT_PROMPT, _("%s: %s: %s\nFalling back to default\n"),
 			PROGRAM_NAME, file, strerror(errno));
 		xargs.config = -1;
 	} else {
 		alt_config_file = savestring(file, strlen(file));
-		_err(ERR_NO_LOG, PRINT_PROMPT, _("%s: Loaded alternative "
+		err(ERR_NO_LOG, PRINT_PROMPT, _("%s: Loaded alternative "
 			"configuration file\n"), PROGRAM_NAME);
 	}
 
@@ -872,11 +879,8 @@ resolve_starting_path(char *file)
 
 	if (IS_FILE_URI(file)) {
 		_path = savestring(file + 7, strlen(file + 7));
-
 	} else if (is_url(file) == EXIT_SUCCESS) {
-		open_reg_exit(file, 1, 0);
-		exit(EXIT_SUCCESS); /* Never reached */
-
+		open_reg_exit(file, 1, 0); /* noreturn */
 	} else {
 		_path = resolve_path(file);
 	}
@@ -899,7 +903,7 @@ resolve_starting_path(char *file)
 }
 
 static void
-_set_starting_path(char *_path)
+set_starting_path(char *_path)
 {
 	if (xchdir(_path, SET_TITLE) == 0) {
 		if (cur_ws == UNSET)
@@ -914,7 +918,7 @@ _set_starting_path(char *_path)
 			exit(EXIT_FAILURE);
 		}
 
-		_err('w', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
+		err('w', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
 			_path, strerror(errno));
 	}
 }
@@ -935,7 +939,7 @@ set_opener(const char *str)
 		conf.opener = savestring(ep, strlen(ep));
 		free(ep);
 	} else {
-		_err('w', PRINT_PROMPT, _("%s: Error expanding tilde. "
+		err('w', PRINT_PROMPT, _("%s: Error expanding tilde. "
 			"Using default opener.\n"), PROGRAM_NAME);
 	}
 }
@@ -1091,6 +1095,7 @@ set_fzftab(void)
 #endif /* !_NO_FZF */
 }
 
+__attribute__ ((noreturn))
 static void
 set_fzytab(void)
 {
@@ -1209,7 +1214,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case 'F': conf.list_dirs_first = xargs.dirs_first = 1; break;
 		case 'g': conf.pager = xargs.pager = 1; break;
 		case 'G': conf.pager = xargs.pager = 0; break;
-		case 'h': help_function(); exit(EXIT_SUCCESS); break;
+		case 'h': help_function(); exit(EXIT_SUCCESS);
 		case 'H': xargs.horizontal_list = 1; conf.listing_mode = HORLIST; break;
 		case 'i': conf.case_sens_list = xargs.case_sens_list = 0; break;
 		case 'I': conf.case_sens_list = xargs.case_sens_list = 1; break;
@@ -1225,7 +1230,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case 's': conf.splash_screen = xargs.splash = 1; break;
 		case 'S': xargs.stealth_mode = 1; break;
 		case 't': xargs.disk_usage_analyzer = 1; break;
-		case 'v': printf("%s\n", VERSION); exit(EXIT_SUCCESS); break;
+		case 'v': printf("%s\n", VERSION); exit(EXIT_SUCCESS);
 		case 'w': set_workspace(optarg); break;
 		case 'x': conf.ext_cmd_ok = xargs.ext = 0; break;
 		case 'y': conf.light_mode = xargs.light = 1; break;
@@ -1265,7 +1270,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case LOPT_FZFTAB:
 			set_fzftab(); break;
 		case LOPT_FZYTAB:
-			set_fzytab(); break;
+			set_fzytab(); /* noreturn */
 
 #ifndef _NO_ICONS
 		case LOPT_ICONS:
@@ -1403,9 +1408,9 @@ parse_cmdline_args(const int argc, char **argv)
 
 		/* Handle error */
 		case ':':
-			err_arg_required(argv[optind - 1]); exit(EXIT_FAILURE); break;
+			err_arg_required(argv[optind - 1]); /* noreturn */
 		case '?':
-			err_invalid_opt(argv[optind - 1]); exit(EXIT_FAILURE); break;
+			err_invalid_opt(argv[optind - 1]); /* noreturn */
 
 		default: break;
 		}
@@ -1417,10 +1422,8 @@ parse_cmdline_args(const int argc, char **argv)
 	xargs.secure_cmds = xargs.secure_env = 1;
 #endif /* SECURITY_PARANOID */
 
-	if (open_prev_mode != 0) {
-		open_preview_file(open_prev_file, open_prev_mode);
-		exit(EXIT_SUCCESS); /* Never reached */
-	}
+	if (open_prev_mode != 0)
+		open_preview_file(open_prev_file, open_prev_mode); /* noreturn */
 
 	char *spath = (char *)NULL;
 	if (argv[optind]) { /* Starting path passed as positional parameter */
@@ -1431,7 +1434,7 @@ parse_cmdline_args(const int argc, char **argv)
 	}
 
 	if (spath) {
-		_set_starting_path(spath);
+		set_starting_path(spath);
 		free(spath);
 	}
 }

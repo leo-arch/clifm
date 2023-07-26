@@ -33,25 +33,25 @@
 #  include <sys/param.h>
 #  if __NetBSD_Prereq__(9,99,63)
 #   include <sys/acl.h>
-#   define _ACL_OK
+#   define HAVE_ACL
 #  endif /* __NetBSD_Prereq__ */
 # elif !defined(__HAIKU__) && !defined(__OpenBSD__) && !defined(__sun) \
 && !defined(__DragonFly__)
 #  include <sys/acl.h>
-#  define _ACL_OK
+#  define HAVE_ACL
 # endif /* __NetBSD__ */
 #endif /* _BE_POSIX */
 
 #include <unistd.h>
 
-#if defined(LINUX_FILE_ATTRS)
+#if defined(HAVE_FILE_ATTRS)
 # include <linux/fs.h> /* FS_IMMUTABLE_FL */
 # include <sys/ioctl.h> /* ioctl(3) */
 # ifdef __TINYC__
 #  undef SYNC_FILE_RANGE_WRITE_AND_WAIT /* Silence redefinition error */
 # endif
 # include <fcntl.h> /* O_RDONLY */
-#endif /* LINUX_FILE_ATTRS */
+#endif /* HAVE_FILE_ATTRS */
 
 #include "aux.h"
 #include "misc.h"
@@ -197,7 +197,7 @@ check_term_support(const char *_term)
 	}
 
 	if (index == -1) {
-		_err('w', PRINT_PROMPT, _("%s: '%s': Terminal type not supported. "
+		err('w', PRINT_PROMPT, _("%s: '%s': Terminal type not supported. "
 			"Limited functionality is expected.\n"), PROGRAM_NAME, _term);
 	}
 
@@ -210,7 +210,7 @@ check_term(void)
 	char *t = getenv("TERM");
 	if (!t || !*t) {
 		t = "xterm";
-		_err('w', PRINT_PROMPT, _("%s: The TERM environment variable is unset.\n"
+		err('w', PRINT_PROMPT, _("%s: The TERM environment variable is unset.\n"
 			"Running in xterm compatibility mode\n"), PROGRAM_NAME);
 	}
 
@@ -221,7 +221,7 @@ static void
 set_mount_cmd(const int udisks2ok, const int udevilok)
 {
 	if (xargs.mount_cmd == MNT_UDISKS2 && !udisks2ok && udevilok) {
-		_err('w', PRINT_PROMPT, _("%s: udisks2 not found. Falling back to "
+		err('w', PRINT_PROMPT, _("%s: udisks2 not found. Falling back to "
 			"udevil\n"), PROGRAM_NAME);
 		xargs.mount_cmd = MNT_UDEVIL;
 		return;
@@ -244,19 +244,19 @@ check_completion_mode(void)
 {
 	if (fzftab == 1) { /* fzftab is zero only if running with --stdtab */
 		if (!(bin_flags & FZF_BIN_OK) && tabmode == FZF_TAB) {
-			_err('w', PRINT_PROMPT, _("%s: fzf: Command not found. Falling "
+			err('w', PRINT_PROMPT, _("%s: fzf: Command not found. Falling "
 				"back to standard TAB completion\n"), PROGRAM_NAME);
 			tabmode = STD_TAB;
 			fzftab = 0;
 		}
 
 		if (!(bin_flags & FNF_BIN_OK) && tabmode == FNF_TAB) {
-			_err('w', PRINT_PROMPT, _("%s: fnf: Command not found. Falling "
+			err('w', PRINT_PROMPT, _("%s: fnf: Command not found. Falling "
 				"back to the default value (fzf, if found, or standard)\n"),
 				PROGRAM_NAME);
 			tabmode = (bin_flags & FZF_BIN_OK) ? FZF_TAB : STD_TAB;
 		} else if (!(bin_flags & SMENU_BIN_OK) && tabmode == SMENU_TAB) {
-			_err('w', PRINT_PROMPT, _("%s: smenu: Command not found. Falling "
+			err('w', PRINT_PROMPT, _("%s: smenu: Command not found. Falling "
 				"back to the default value (fzf, if found, or standard)\n"),
 				PROGRAM_NAME);
 			tabmode = (bin_flags & FZF_BIN_OK) ? FZF_TAB : STD_TAB;
@@ -524,9 +524,9 @@ is_acl(char *file)
 	if (!file || !*file)
 		return 0;
 
-#ifndef _ACL_OK
+#ifndef HAVE_ACL
 	return 0;
-#else /* _ACL_OK */
+#else
 
 	acl_t acl;
 	acl = acl_get_file(file, ACL_TYPE_ACCESS);
@@ -548,7 +548,7 @@ is_acl(char *file)
 	/* If num > 3 we have something else besides owner, group, and others,
 	 * that is, we have at least one ACL property */
 	return (num > 3 ? 1 : 0);
-#endif /* !_ACL_OK */
+#endif /* !HAVE_ACL */
 }
 
 /* Check whether a given string contains only digits. Returns 1 if true
@@ -951,7 +951,7 @@ truncate_file(char *file, const int max, const int check_dups)
 	if (stat(file, &attr) == -1) {
 		fp = open_fwrite(file, &fd);
 		if (!fp) {
-			_err(0, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, file,
+			err(0, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, file,
 				strerror(errno));
 		} else {
 			fclose(fp);
@@ -963,7 +963,7 @@ truncate_file(char *file, const int max, const int check_dups)
 	/* Once we know the files exists, keep only MAX entries. */
 	fp = open_fread(file, &fd);
 	if (!fp) {
-		_err(0, NOPRINT_PROMPT, "%s: log: %s: %s\n", PROGRAM_NAME,
+		err(0, NOPRINT_PROMPT, "%s: log: %s: %s\n", PROGRAM_NAME,
 		    file, strerror(errno));
 		return;
 	}
@@ -1003,7 +1003,7 @@ truncate_file(char *file, const int max, const int check_dups)
 #if defined(__HAIKU__) || defined(__sun)
 	FILE *fpp = fopen(tmp, "w");
 	if (!fpp) {
-		_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, tmp,
+		err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, tmp,
 			strerror(errno));
 		fclose(fp);
 		free(tmp);

@@ -202,7 +202,7 @@ find_digit(char *str)
 /* Check whether a given command needs ELN's to be expanded/completed/suggested.
  * Returns 1 if yes or 0 if not. */
 int
-_expand_eln(const char *text)
+should_expand_eln(const char *text)
 {
 	char *l = rl_line_buffer;
 	if (!l || !*l || !is_number(text))
@@ -483,7 +483,7 @@ rl_ring_bell(void)
 		fflush(stderr);
 		return;
 
-#ifdef _READLINE_HAS_ACTIVATE_MARK /* Readline >= 8.1 */
+#ifdef READLINE_HAS_ACTIVATE_MARK /* Readline >= 8.1 */
 	case BELL_VISIBLE: {
 		int point = rl_point;
 
@@ -509,7 +509,7 @@ rl_ring_bell(void)
 		rl_point = point;
 		return;
 	}
-#endif /* _READLINE_HAS_ACTIVATE_MARK */
+#endif /* READLINE_HAS_ACTIVATE_MARK */
 
 	case BELL_NONE: /* fallthrough */
 	default: return;
@@ -658,13 +658,13 @@ get_rgb(char *hex, int *attr, int *r, int *g, int *b)
 	char tmp[3];
 	tmp[2] = '\0';
 
-	tmp[0] = *hex, tmp[1] = *(hex + 1);
+	tmp[0] = *hex; tmp[1] = *(hex + 1);
 	*r = hex2int(tmp);
 
-	tmp[0] = *(hex + 2), tmp[1] = *(hex + 3);
+	tmp[0] = *(hex + 2); tmp[1] = *(hex + 3);
 	*g = hex2int(tmp);
 
-	tmp[0] = *(hex + 4), tmp[1] = *(hex + 5);
+	tmp[0] = *(hex + 4); tmp[1] = *(hex + 5);
 	*b = hex2int(tmp);
 
 	*attr = 0;
@@ -808,9 +808,7 @@ get_size_unit(const off_t size)
 {
 	/* MAX_UNIT_SIZE == 10 == "1023.99YB\0" */
 	char *str = xnmalloc(MAX_UNIT_SIZE, sizeof(char));
-
 	float base = xargs.si == 1 ? 1000 : 1024;
-
 	size_t n = 0;
 	float s = (float)size;
 
@@ -820,14 +818,14 @@ get_size_unit(const off_t size)
 	}
 
 	int x = (int)s;
-	/* If (s - x || s - (float)x) == 0, then S has no reminder (zero)
-	 * We don't want to print the reminder when it is zero */
-
-	/* R: Ronnabyte, Q: Quettabyte. It's highly unlikely to have files of
+	/* If (s == 0 || s - (float)x) == 0, then S has no reminder (zero)
+	 * We don't want to print the reminder when it is zero
+     *
+	 * R: Ronnabyte, Q: Quettabyte. It's highly unlikely to have files of
 	 * these huge sizes in the near future, but anyway... */
 	const char *const u = "BKMGTPEZYRQ";
 	snprintf(str, MAX_UNIT_SIZE, "%.*f%c%c",
-		(s == 0 || s - (float)x == 0) ? 0 : 2, /* NOLINT */
+		(s == 0.00f || s - (float)x == 0.00f) ? 0 : 2,
 		(double)s,
 		u[n],
 		(u[n] != 'B' && xargs.si == 1) ? 'B' : 0);
@@ -1019,7 +1017,7 @@ xrealloc(void *ptr, const size_t size)
 	void *p = realloc(ptr, size);
 
 	if (!p) {
-		_err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate %zu bytes\n"),
+		err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate %zu bytes\n"),
 			PROGRAM_NAME, __func__, size);
 		exit(ENOMEM);
 	}
@@ -1033,7 +1031,7 @@ xcalloc(const size_t nmemb, const size_t size)
 	void *p = calloc(nmemb, size);
 
 	if (!p) {
-		_err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate %zu bytes\n"),
+		err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate %zu bytes\n"),
 			PROGRAM_NAME, __func__, nmemb * size);
 		exit(ENOMEM);
 	}
@@ -1047,7 +1045,7 @@ xnmalloc(const size_t nmemb, const size_t size)
 	void *p = malloc(nmemb * size);
 
 	if (!p) {
-		_err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate %zu bytes\n"),
+		err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate %zu bytes\n"),
 			PROGRAM_NAME, __func__, nmemb * size);
 		exit(ENOMEM);
 	}

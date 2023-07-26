@@ -69,8 +69,10 @@
 #define UNSAFE_SYS_KEY   5
 #define UNSAFE_CONTROL   6
 #define UNSAFE_META      7
-#define UNSAFE_NOT_PORTABLE 8
-#define UNSAFE_TOO_LONG  9
+#define UNSAFE_TOO_LONG  8
+#ifdef _BE_POSIX
+# define UNSAFE_NOT_PORTABLE 9
+#endif
 
 static char *const unsafe_name_msgs[] = {
 	"Starts with a dash (-): command option flags collision",
@@ -81,8 +83,8 @@ static char *const unsafe_name_msgs[] = {
 	"Reserved shell/system keyword",
 	"Contains control characters",
 	"Contains shell meta-characters",
-	"Contains characters not in the Portable Filename Character Set",
-	"Too long"
+	"Too long",
+	"Contains characters not in the Portable Filename Character Set"
 };
 
 #ifdef _BE_POSIX
@@ -238,7 +240,7 @@ write_files_to_tmp(struct dirent ***a, filesn_t *n, const char *target,
 	int fd = 0;
 	FILE *fp = open_fwrite(tmp_file, &fd);
 	if (!fp) {
-		_err('e', PRINT_PROMPT, "%s: rr: fopen: %s: %s\n", PROGRAM_NAME,
+		err('e', PRINT_PROMPT, "%s: rr: fopen: %s: %s\n", PROGRAM_NAME,
 			tmp_file, strerror(errno));
 		return errno;
 	}
@@ -604,7 +606,7 @@ bulk_remove(char *s1, char *s2)
 
 END:
 	if (unlinkat(fd, tmp_file, 0) == -1) {
-		_err('w', PRINT_PROMPT, "rr: unlink: %s: %s\n",
+		err('w', PRINT_PROMPT, "rr: unlink: %s: %s\n",
 			tmp_file, strerror(errno));
 	}
 	close(fd);
@@ -690,20 +692,20 @@ int
 xchmod(const char *file, const char *mode_str, const int flag)
 {
 	if (!file || !*file) {
-		_err(flag == 1 ? 'e' : 0, flag == 1 ? PRINT_PROMPT : NOPRINT_PROMPT,
+		err(flag == 1 ? 'e' : 0, flag == 1 ? PRINT_PROMPT : NOPRINT_PROMPT,
 			"xchmod: Empty buffer for file name\n");
 		return EXIT_FAILURE;
 	}
 
 	if (!mode_str || !*mode_str) {
-		_err(flag == 1 ? 'e' : 0, flag == 1 ? PRINT_PROMPT : NOPRINT_PROMPT,
+		err(flag == 1 ? 'e' : 0, flag == 1 ? PRINT_PROMPT : NOPRINT_PROMPT,
 			"xchmod: Empty buffer for mode\n");
 		return EXIT_FAILURE;
 	}
 
 	int fd = open(file, O_RDONLY);
 	if (fd == -1) {
-		_err(flag == 1 ? 'e' : 0, flag == 1 ? PRINT_PROMPT : NOPRINT_PROMPT,
+		err(flag == 1 ? 'e' : 0, flag == 1 ? PRINT_PROMPT : NOPRINT_PROMPT,
 			"xchmod: %s: %s\n", file, strerror(errno));
 		return errno;
 	}
@@ -711,7 +713,7 @@ xchmod(const char *file, const char *mode_str, const int flag)
 	mode_t mode = (mode_t)strtol(mode_str, 0, 8);
 	if (fchmod(fd, mode) == -1) {
 		close(fd);
-		_err(flag == 1 ? 'e' : 0, flag == 1 ? PRINT_PROMPT : NOPRINT_PROMPT,
+		err(flag == 1 ? 'e' : 0, flag == 1 ? PRINT_PROMPT : NOPRINT_PROMPT,
 			"xchmod: %s: %s\n", file, strerror(errno));
 		return errno;
 	}
@@ -2388,7 +2390,7 @@ ERROR:
  * into a temporary file. Return the address of this empt file if
  * success (it must be freed) or NULL in case of error */
 char *
-_export(char **filenames, const int open)
+export_files(char **filenames, const int open)
 {
 	size_t len = strlen(tmp_dir) + 14;
 	char *tmp_file = (char *)xnmalloc(len, sizeof(char));

@@ -251,9 +251,9 @@ set_prop_fields(const char *line)
 		case 'm': prop_fields.time = PROP_TIME_MOD; break;
 		case 's': prop_fields.size = PROP_SIZE_HUMAN; break;
 		case 'S': prop_fields.size = PROP_SIZE_BYTES; break;
-#if defined(_LINUX_XATTR)
+#if defined(LINUX_FILE_XATTRS)
 		case 'x': prop_fields.xattr = 1; break;
-#endif /* _LINUX_XATTR */
+#endif /* LINUX_FILE_XATTRS */
 		default: break;
 		}
 	}
@@ -364,7 +364,7 @@ get_home(void)
 		 * from trying to access any of these directories */
 		home_ok = config_ok = 0;
 
-		_err('e', PRINT_PROMPT, _("%s: Cannot access the home directory. "
+		err('e', PRINT_PROMPT, _("%s: Cannot access the home directory. "
 			"Bookmarks, commands logs, and commands history are "
 			"disabled. Program messages, selected files, and the jump database "
 			"won't be persistent. Using default options\n"), PROGRAM_NAME);
@@ -403,7 +403,7 @@ init_history(void)
 		int fd = 0;
 		FILE *hist_fp = open_fwrite(hist_file, &fd);
 		if (!hist_fp) {
-			_err('w', PRINT_PROMPT, "%s: fopen: '%s': %s\n",
+			err('w', PRINT_PROMPT, "%s: fopen: '%s': %s\n",
 			    PROGRAM_NAME, hist_file, strerror(errno));
 		} else {
 			/* To avoid malloc errors in read_history(), do not
@@ -488,7 +488,7 @@ get_user_groups(const char *name, const gid_t gid, int *ngroups)
 	UNUSED(name); UNUSED(gid);
 	gid_t *g = (gid_t *)xnmalloc(NGROUPS_MAX, sizeof(g));
 	if ((n = getgroups(NGROUPS_MAX, g)) == -1) {
-		_err('e', PRINT_PROMPT, "%s: getgroups: %s\n",
+		err('e', PRINT_PROMPT, "%s: getgroups: %s\n",
 			PROGRAM_NAME, strerror(errno));
 		free(g);
 		return (gid_t *)NULL;
@@ -538,12 +538,12 @@ xgetenv(const char *s, const int alloc)
  * '/etc/shells'.
  * Return EXIT_SUCCESS if found or EXIT_FAILURE if not. */
 static int
-check_etc_shells(const char *file, int *_errno)
+check_etc_shells(const char *file, int *tmp_errno)
 {
 	int fd;
 	FILE *fp = open_fread("/etc/shells", &fd);
 	if (!fp) {
-		*_errno = errno;
+		*tmp_errno = errno;
 		return EXIT_FAILURE;
 	}
 
@@ -571,21 +571,21 @@ check_etc_shells(const char *file, int *_errno)
 static void
 validate_custom_shell(char **file)
 {
-	int _errno = 0;
+	int tmp_errno = 0;
 	errno = 0;
 
-	if (*file && check_etc_shells(*file, &_errno) == EXIT_SUCCESS)
+	if (*file && check_etc_shells(*file, &tmp_errno) == EXIT_SUCCESS)
 		return;
 
 	/* check_etc_shells() sets errno to a positive value only if /etc/shells
 	 * couldn't be found/accessed. */
-	if (_errno == 0) {
-		_err('w', PRINT_PROMPT, _("%s: %s: Invalid shell. Falling back to "
+	if (tmp_errno == 0) {
+		err('w', PRINT_PROMPT, _("%s: %s: Invalid shell. Falling back to "
 			"'/bin/sh'.\nCheck '/etc/shells' for a list of valid shells.\n"),
 			PROGRAM_NAME, *file ? *file : "NULL");
 	} else {
-		_err('w', PRINT_PROMPT, _("%s: /etc/shells: %s.\nCannot validate shell. "
-			"Falling back to '/bin/sh'.\n"), PROGRAM_NAME, strerror(_errno));
+		err('w', PRINT_PROMPT, _("%s: /etc/shells: %s.\nCannot validate shell. "
+			"Falling back to '/bin/sh'.\n"), PROGRAM_NAME, strerror(tmp_errno));
 	}
 
 	free(*file);
@@ -650,7 +650,7 @@ get_user_data(void)
 	tmp_user.uid = geteuid();
 	pw = getpwuid(tmp_user.uid);
 	if (!pw) { /* Fallback to environment variables (if not secure-env) */
-		_err('e', PRINT_PROMPT, "%s: getpwuid: %s\n",
+		err('e', PRINT_PROMPT, "%s: getpwuid: %s\n",
 			PROGRAM_NAME, strerror(errno));
 		return get_user_data_env();
 	}
@@ -679,7 +679,7 @@ get_user_data(void)
 		homedir = p ? p : pw->pw_dir;
 
 		if (homedir == p && p && (stat(p, &a) == -1 || !S_ISDIR(a.st_mode))) {
-			_err('e', PRINT_PROMPT, _("%s: %s: Home directory not found\n"
+			err('e', PRINT_PROMPT, _("%s: %s: Home directory not found\n"
 				"Falling back to %s\n"), PROGRAM_NAME, p, pw->pw_dir);
 			homedir = pw->pw_dir;
 		}
@@ -1644,7 +1644,7 @@ init_shell(void)
 	setpgid(shell_pgid, shell_pgid);
 /*	if (setpgid(shell_pgid, shell_pgid) < 0) {
 		// This fails with EPERM when running as 'term -e clifm'
-		_err(0, NOPRINT_PROMPT, "%s: setpgid: %s\n", PROGRAM_NAME, strerror(errno));
+		err(0, NOPRINT_PROMPT, "%s: setpgid: %s\n", PROGRAM_NAME, strerror(errno));
 		exit(errno);
 	} */
 
@@ -2238,7 +2238,7 @@ get_aliases(void)
 	int fd;
 	FILE *fp = open_fread(config_file, &fd);
 	if (!fp) {
-		_err('e', PRINT_PROMPT, "%s: alias: '%s': %s\n",
+		err('e', PRINT_PROMPT, "%s: alias: '%s': %s\n",
 		    PROGRAM_NAME, config_file, strerror(errno));
 		return;
 	}
@@ -2349,7 +2349,7 @@ get_prompt_cmds(void)
 	int fd;
 	FILE *fp = open_fread(config_file, &fd);
 	if (!fp) {
-		_err('e', PRINT_PROMPT, "%s: prompt: '%s': %s\n",
+		err('e', PRINT_PROMPT, "%s: prompt: '%s': %s\n",
 		    PROGRAM_NAME, config_file, strerror(errno));
 		return;
 	}
@@ -2446,7 +2446,7 @@ set_sudo_cmd(void)
 		return;
 	}
 
-	_err('w', PRINT_PROMPT, _("%s: %s: %s\nInvalid authentication program "
+	err('w', PRINT_PROMPT, _("%s: %s: %s\nInvalid authentication program "
 		"(falling back to '%s')\n"), PROGRAM_NAME, sudo_cmd,
 		strerror(errno), DEF_SUDO_CMD);
 	sudo_cmd = DEF_SUDO_CMD;
@@ -2679,7 +2679,7 @@ check_options(void)
 
 	if (smenutab_options_env
 	&& sanitize_cmd(smenutab_options_env, SNT_BLACKLIST) != 0) {
-		_err('w', PRINT_PROMPT, "%s: CLIFM_SMENU_OPTIONS contains unsafe "
+		err('w', PRINT_PROMPT, "%s: CLIFM_SMENU_OPTIONS contains unsafe "
 			"characters (<>|;&$`). Falling back to default values.\n",
 			PROGRAM_NAME);
 		smenutab_options_env = (char *)NULL;

@@ -22,7 +22,7 @@
  * MA 02110-1301, USA.
 */
 
-/* The _err function is based on littlstar's asprintf implementation
+/* The err function is based on littlstar's asprintf implementation
  * (https://github.com/littlstar/asprintf.c/blob/master/asprintf.c),
  * licensed under MIT.
  * All changes are licensed under GPL-2.0-or-later. */
@@ -179,7 +179,7 @@ __attribute__((__format__(__printf__, 3, 0)))
 /* We use __attribute__ here to silence clang warning: "format string is
  * not a string literal" */
 int
-_err(const int msg_type, const int prompt_flag, const char *format, ...)
+err(const int msg_type, const int prompt_flag, const char *format, ...)
 {
 	va_list arglist, tmp_list;
 
@@ -276,7 +276,7 @@ reset_inotify(void)
 		close(inotify_fd);
 	inotify_fd = inotify_init1(IN_NONBLOCK);
 	if (inotify_fd < 0) {
-		_err('w', PRINT_PROMPT, "%s: inotify: %s\n",
+		err('w', PRINT_PROMPT, "%s: inotify: %s\n",
 			PROGRAM_NAME, strerror(errno));
 		return;
 	}
@@ -290,7 +290,7 @@ reset_inotify(void)
 	if (inotify_wd > 0)
 		watch = 1;
 	else
-		_err('w', PRINT_PROMPT, "%s: inotify: %s: %s\n",
+		err('w', PRINT_PROMPT, "%s: inotify: %s: %s\n",
 			PROGRAM_NAME, rpath, strerror(errno));
 }
 
@@ -962,7 +962,7 @@ new_instance(char *dir, const int sudo)
 
 	int ret = check_dir(&deq_dir);
 	if (ret != EXIT_SUCCESS) {
-		free(deq_dir); free(self), free(_sudo);
+		free(deq_dir); free(self); free(_sudo);
 		return ret;
 	}
 
@@ -1728,10 +1728,10 @@ create_virtual_dir(const int user_provided)
 {
 	if (!stdin_tmp_dir || !*stdin_tmp_dir) {
 		if (user_provided == 1) {
-			_err('e', PRINT_PROMPT, "%s: Empty buffer for virtual "
+			err('e', PRINT_PROMPT, "%s: Empty buffer for virtual "
 				"directory name. Trying with default value\n", PROGRAM_NAME);
 		} else {
-			_err('e', PRINT_PROMPT, "%s: Empty buffer for virtual "
+			err('e', PRINT_PROMPT, "%s: Empty buffer for virtual "
 				"directory name\n", PROGRAM_NAME);
 		}
 		return EXIT_FAILURE;
@@ -1741,10 +1741,10 @@ create_virtual_dir(const int user_provided)
 	int ret = 0;
 	if ((ret = launch_execv(cmd, FOREGROUND, E_MUTE)) != EXIT_SUCCESS) {
 		if (user_provided == 1) {
-			_err('e', PRINT_PROMPT, "%s: mkdir: %s: %s. Trying with "
+			err('e', PRINT_PROMPT, "%s: mkdir: %s: %s. Trying with "
 				"default value\n", PROGRAM_NAME, stdin_tmp_dir, strerror(ret));
 		} else {
-			_err('e', PRINT_PROMPT, "%s: mkdir: %s: %s\n",
+			err('e', PRINT_PROMPT, "%s: mkdir: %s: %s\n",
 				PROGRAM_NAME, stdin_tmp_dir, strerror(ret));
 		}
 		return ret;
@@ -1846,7 +1846,7 @@ handle_stdin(void)
 
 			struct stat attr;
 			if (lstat(q, &attr) == -1) {
-				_err('w', PRINT_PROMPT, "%s: %s: %s\n",
+				err('w', PRINT_PROMPT, "%s: %s: %s\n",
 					PROGRAM_NAME, q, strerror(errno));
 				goto END;
 			}
@@ -1869,7 +1869,7 @@ handle_stdin(void)
 			} else {
 				tmp_file = replace_slashes(q, ':');
 				if (!tmp_file) {
-					_err('w', PRINT_PROMPT, "%s: %s: Error formatting "
+					err('w', PRINT_PROMPT, "%s: %s: Error formatting "
 						"file name\n", PROGRAM_NAME, q);
 					goto END;
 				}
@@ -1893,14 +1893,14 @@ handle_stdin(void)
 					snprintf(tmp, sizeof(tmp), "%s.%s",
 						dest, suffix ? suffix : "#dn7R4");
 					if (symlink(source, tmp) == -1)
-						_err('w', PRINT_PROMPT, "symlink: %s: %s\n",
+						err('w', PRINT_PROMPT, "symlink: %s: %s\n",
 							q, strerror(errno));
 					else
-						_err('w', PRINT_PROMPT, "symlink: %s: Destiny exists. "
+						err('w', PRINT_PROMPT, "symlink: %s: Destiny exists. "
 							"Created as %s\n", q, tmp);
 					free(suffix);
 				} else {
-					_err('w', PRINT_PROMPT, "symlink: %s: %s\n",
+					err('w', PRINT_PROMPT, "symlink: %s: %s\n",
 						q, strerror(errno));
 				}
 			} else {
@@ -1919,7 +1919,7 @@ END:
 
 	if (links_counter == 0) { /* No symlink was created. Exit */
 		dup2(STDOUT_FILENO, STDIN_FILENO);
-		_err(0, NOPRINT_PROMPT, "%s: Empty file names buffer. "
+		err(0, NOPRINT_PROMPT, "%s: Empty file names buffer. "
 			"Nothing to do\n", PROGRAM_NAME);
 		if (getenv("CLIFM_VT_RUNNING")) {
 			fprintf(stderr, "Press any key to continue... ");
@@ -2367,7 +2367,7 @@ quick_help(char *topic)
 		xerror("%s: fopen: %s: %s\n", PROGRAM_NAME, tmp_file, strerror(errno));
 		free(_pager);
 		if (unlink(tmp_file) == -1)
-			_err('w', PRINT_PROMPT, "help: %s: %s\n", tmp_file, strerror(errno));
+			err('w', PRINT_PROMPT, "help: %s: %s\n", tmp_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -2388,7 +2388,7 @@ quick_help(char *topic)
 	}
 
 	if (unlink(tmp_file) == -1)
-		_err('w', PRINT_PROMPT, "help: %s: %s\n", tmp_file, strerror(errno));
+		err('w', PRINT_PROMPT, "help: %s: %s\n", tmp_file, strerror(errno));
 	fclose(fp);
 	free(_pager);
 
@@ -2434,7 +2434,7 @@ void
 splash(void)
 {
 	printf("\n%s%s\n\n%s%s\t\t       %s%s\n           %s\n",
-		conf.colorize ? D_CYAN : "", ASCII_LOGO_BIG, df_c,
+		conf.colorize ? REG_CYAN : "", ASCII_LOGO_BIG, df_c,
 		BOLD, df_c, PROGRAM_NAME_UPPERCASE, _(PROGRAM_DESC));
 
 	if (conf.splash_screen) {
