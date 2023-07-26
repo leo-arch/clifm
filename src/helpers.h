@@ -558,7 +558,7 @@ extern time_t curdir_mtime;
 #define TRIM_NO_EXT 1
 #define TRIM_EXT    2
 
-#define MB_LEN_MAX 16
+#define XMB_LEN_MAX 16
 
 /* OpenBSD recommends the use of 10 trailing X's. See mkstemp(3) */
 #if defined(__OpenBSD__)

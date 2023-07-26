@@ -724,7 +724,7 @@ fix_rl_point(const unsigned char c)
 	if ((point & 0xc0) != 0x80 && (point & 0xc0) != 0xc0)
 		return;
 
-	int mlen = mblen(rl_line_buffer + rl_point, MB_LEN_MAX);
+	int mlen = mblen(rl_line_buffer + rl_point, XMB_LEN_MAX);
 	rl_point += mlen > 0 ? mlen - 1 : 0;
 }
 

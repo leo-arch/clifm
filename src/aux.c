@@ -801,8 +801,8 @@ get_cmd_path(const char *cmd)
 	return (char *)NULL;
 }
 
-/* Convert SIZE to human readeable form (at most 2 decimal places).
- * Returns a string of at most MAX_UNIT_SIZE, defined in aux.h */
+/* Convert SIZE to human readable form (at most 2 decimal places).
+ * Returns a pointer to a string of at most MAX_UNIT_SIZE. */
 char *
 construct_human_size(const off_t size)
 {
