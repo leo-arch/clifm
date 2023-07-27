@@ -35,21 +35,25 @@
 #define LICENSE "GPL2+"
 #define COLORS_REPO "https://github.com/leo-arch/clifm-colors"
 
+#if defined(POSIX_STRICT) /* A more descriptive name for _BE_POSIX */
+# define _BE_POSIX
+#endif /* POSIX_STRICT */
+
 #if (defined(__linux__) || defined(__CYGWIN__)) && !defined(_BE_POSIX)
 # define _GNU_SOURCE
 #else
 # define _POSIX_C_SOURCE 200809L
-# define _DEFAULT_SOURCE
 # if defined(__linux__) || defined(__CYGWIN__)
-#  define _XOPEN_SOURCE /* wcwidth() */
+#  define _XOPEN_SOURCE 500 /* wc(s)width(), realpath(), random() */
+/* glibc <= 2.19 requires _BSD_SOURCE.
+ * Later versions require _DEFAULT_SOURCE instead. */
+#  define _BSD_SOURCE
+#  define _DEFAULT_SOURCE /* str(n)casecmp(), DT_ macros*/
 # elif defined(__FreeBSD__) || defined(__DragonFly__)
-#  define _XOPEN_SOURCE
-#  define __XSI_VISIBLE 700
-#  define __BSD_VISIBLE 1
+#  define _XOPEN_SOURCE 700 /* S_IF macros */
+#  define __BSD_VISIBLE 1 /* DT_ macros, strstr, strcasecmp, strcasestr, arc4random_unform, fflagstostr, u_int (etc) data types */
 # elif defined(__NetBSD__)
-#  define _XOPEN_SOURCE
 #  define _NETBSD_SOURCE
-#  define __BSD_VISIBLE 1
 # elif defined(__OpenBSD__)
 #  define _BSD_SOURCE
 # elif defined(__APPLE__)
@@ -226,7 +230,7 @@
 #  if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 4, 0)
 #   define LINUX_FILE_XATTRS
 #  endif /* LINUX_VERSION (2.4) */
-# endif /* __GLIBC__ */
+# endif /* !__GLIBC__ || __GLIBC__ >= 2.3 */
 # if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 24)
 #  define LINUX_FILE_CAPS
 # endif /* LINUX_VERSION (2.6.24)*/
@@ -558,6 +562,8 @@ extern time_t curdir_mtime;
 #define TRIM_NO_EXT 1
 #define TRIM_EXT    2
 
+/* BSD system usually define MB_LEN_MAX to a small value such as 4, 6, or 8.
+ * Let's follow here Linux and use the highest possible value: 16. */
 #define XMB_LEN_MAX 16
 
 /* OpenBSD recommends the use of 10 trailing X's. See mkstemp(3) */
@@ -580,12 +586,13 @@ extern time_t curdir_mtime;
 # define DT_REG     8
 # define DT_LNK     10
 # define DT_SOCK    12
+//# define DT_WHT     14
 # ifdef __sun
-#  define DT_DOOR   13
+#  define DT_DOOR   16
 # endif /* __sun */
 #endif /* __HAIKU__ || __sun */
 
-#define DT_NONE     14
+#define DT_NONE     18
 
 /* Macros for the get_sys_shell function */
 #define SHELL_NONE 0

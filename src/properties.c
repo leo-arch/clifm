@@ -53,7 +53,7 @@
 #endif /* __linux__ */
 
 #ifdef LINUX_FILE_ATTRS
-# include <sys/ioctl.h>  /* ioctl(3) */
+# include <sys/ioctl.h>  /* ioctl(2) */
 # ifdef __TINYC__
 #  undef SYNC_FILE_RANGE_WRITE_AND_WAIT /* Silence redefinition error */
 # endif /* __TINYC__ */

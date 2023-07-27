@@ -114,7 +114,7 @@ struct wtrim_t {
 };
 
 /* A buffer to store file names to be displayed */
-static char name_buf[NAME_MAX * sizeof(wchar_t)];
+static char name_buf[(NAME_MAX + 1) * sizeof(wchar_t)];
 
 #if !defined(_NO_ICONS)
 static void
@@ -1858,12 +1858,13 @@ list_dir_light(void)
 #else
 		/* If type is unknown, we might be facing a file system not
 		 * supporting d_type, for example, loop devices. In this case,
-		 * try falling back to stat(3) */
+		 * try falling back to lstat(2). */
 		if (ent->d_type == DT_UNKNOWN) {
 			struct stat a;
 			if (lstat(ename, &a) == -1)
 				continue;
 			file_info[n].type = get_dt(a.st_mode);
+//			file_info[n].type = IFTODT(a.st_mode);
 		} else {
 			file_info[n].type = ent->d_type;
 		}
