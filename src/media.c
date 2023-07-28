@@ -22,6 +22,8 @@
  * MA 02110-1301, USA.
 */
 
+#ifndef NO_MEDIA_FUNC
+
 #include "helpers.h"
 
 #include <stdio.h>
@@ -692,3 +694,7 @@ EXIT:
 	free_media();
 	return exit_status;
 }
+
+#else
+void *_skip_me_media;
+#endif /* !NO_MEDIA_FUNC */

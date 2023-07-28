@@ -78,11 +78,17 @@
 # define GLOB_TILDE 0
 #endif /* __CYGWIN__ && _BE_POSIX && !GLOB_TILDE */
 
-/* Support large files on ARM and 32-bit machines */
-#if defined(__arm__) || defined(__i386__)
-# define _FILE_OFFSET_BITS 64
-# define _TIME_BITS 64 /* Address Y2038 problem for 32 bits machines */
-#endif /* __arm__ || __i386__ */
+/* Support large files */
+#define _FILE_OFFSET_BITS 64
+/* Address Y2038 problem in 32 bits machines */
+#define _TIME_BITS 64
+
+#if defined(_BE_POSIX)
+# if !defined(USE_MEDIA)
+#  define NO_MEDIA_FUNC
+# endif /* !USE_MEDIA */
+# define _NO_LIRA
+#endif /* _BE_POSIX */
 
 /* _NO_LIRA implies _NO_MAGIC */
 #if defined(_NO_LIRA) && !defined(_NO_MAGIC)
@@ -145,7 +151,8 @@
 # include <inttypes.h> /* uintmax_t, intmax_t */
 #endif /* BSD */
 
-/* File system event monitors are OS-specific (inotify and kqueue) */
+/* File system event monitors (inotify and kqueue) are OS-specific.
+ * Let's fallback to our own generic monitor. */
 #if defined(_BE_POSIX) && !defined(USE_GENERIC_FS_MONITOR)
 # define USE_GENERIC_FS_MONITOR
 #endif /* _BE_POSIX && !USE_GENERIC_FS_MONITOR */
@@ -577,6 +584,9 @@ extern time_t curdir_mtime;
 # define P_tmpdir "/tmp"
 #endif /* P_tmpdir */
 
+/* Systems not providing a d_type member for the stat struct do not provide
+ * these macros either. We use them to convert an st_mode value to the
+ * appropriate d_type value (via get_dt()). */
 #if defined(__HAIKU__) || defined(__sun)
 # define DT_UNKNOWN 0
 # define DT_FIFO    1

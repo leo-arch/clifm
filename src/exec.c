@@ -81,7 +81,9 @@ typedef char *rl_cpvfunc_t;
 # include "trash.h"
 #endif /* !_NO_TRASH */
 #include "messages.h"
-#include "media.h"
+#ifndef NO_MEDIA_FUNC
+# include "media.h"
+#endif /* NO_MEDIA_FUNC */
 #ifndef _NO_BLEACH
 # include "name_cleaner.h"
 #endif /* !_NO_BLEACH */
@@ -1218,6 +1220,7 @@ reload_function(void)
 	return exit_status;
 }
 
+#ifndef NO_MEDIA_FUNC
 /* MODE could be either MEDIA_LIST (mp command) or MEDIA_MOUNT (media command) */
 static int
 media_function(char *arg, const int mode)
@@ -1238,6 +1241,7 @@ media_function(char *arg, const int mode)
 
 	return exit_status;
 }
+#endif /* NO_MEDIA_FUNC */
 
 static int
 chdir_function(char *arg)
@@ -2505,12 +2509,24 @@ exec_cmd(char **comm)
 
 	/* #### MOUNTPOINTS #### */
 	else if (*comm[0] == 'm' && ((comm[0][1] == 'p' && !comm[0][2])
-	|| strcmp(comm[0], "mountpoints") == 0))
+	|| strcmp(comm[0], "mountpoints") == 0)) {
+#ifndef NO_MEDIA_FUNC
 		return (exit_code = media_function(comm[1], MEDIA_LIST));
+#else
+		fputs(_("mountpoints: Function not available\n"), stderr);
+		return EXIT_FAILURE;
+#endif /* NO_MEDIA_FUNC */
+	}
 
 	/* #### MEDIA #### */
-	else if (*comm[0] == 'm' && strcmp(comm[0], "media") == 0)
+	else if (*comm[0] == 'm' && strcmp(comm[0], "media") == 0) {
+#ifndef NO_MEDIA_FUNC
 		return (exit_code = media_function(comm[1], MEDIA_MOUNT));
+#else
+		fputs(_("media: Function not available\n"), stderr);
+		return EXIT_FAILURE;
+#endif /* NO_MEDIA_FUNC */
+	}
 
 	/* #### MAX FILES #### */
 	else if (*comm[0] == 'm' && comm[0][1] == 'f' && !comm[0][2])

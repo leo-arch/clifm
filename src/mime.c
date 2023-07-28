@@ -411,7 +411,12 @@ get_mime(char *file)
 	fclose(file_fp);
 	fclose(file_fp_err);
 
-	char *cmd[] = {"file", "--mime-type", file, NULL};
+/* --mime-type is only available since file 4.24 (Mar, 2008), while the -i
+ * flag is supported since 3.30 (Apr, 2000).
+ * NOTE: the -i flag in the POSIX file(1) specification is a completely
+ * different thing. */
+/*	char *cmd[] = {"file", "--mime-type", "--brief", file, NULL}; */
+	char *cmd[] = {"file", "-bi", file, NULL};
 	int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 
 	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
@@ -433,23 +438,23 @@ get_mime(char *file)
 
 	char *mime_type = (char *)NULL;
 
-	char line[255] = "";
-	if (fgets(line, (int)sizeof(line), file_fp) == NULL) {
-		fclose(file_fp);
-		unlink(mime_tmp_file);
-		return (char *)NULL;
+	char line[NAME_MAX] = "";
+	if (fgets(line, (int)sizeof(line), file_fp) == NULL)
+		goto END;
+
+	char *s = strrchr(line, ';');
+	if (s)
+		*s = '\0';
+
+	size_t len = strlen(line);
+	if (len > 0 && line[len - 1] == '\n') {
+		line[len - 1] = '\0';
+		len--;
 	}
 
-	char *tmp = strrchr(line, ' ');
-	if (tmp) {
-		size_t len = strlen(tmp);
-		if (len > 0 && tmp[len - 1] == '\n') {
-			tmp[len - 1] = '\0';
-			len--;
-		}
-		mime_type = len > 0 ? savestring(tmp + 1, len - 1) : (char *)NULL;
-	}
+	mime_type = len > 0 ? savestring(line, len) : (char *)NULL;
 
+END:
 	fclose(file_fp);
 	unlink(mime_tmp_file);
 
