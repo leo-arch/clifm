@@ -32,14 +32,11 @@
 
 #include "helpers.h"
 
-//#include <dirent.h>
 #include <fcntl.h>
 #include <glob.h>
 #include <stdio.h>
 #include <string.h>
-//#ifdef __OpenBSD__
-# include <strings.h> // str(n)casecmp()
-//#endif /* __OpenBSD__ */
+#include <strings.h> /* str(n)casecmp() */
 #include <unistd.h>
 #include <errno.h>
 #include <limits.h>

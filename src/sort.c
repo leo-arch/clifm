@@ -24,13 +24,10 @@
 
 #include "helpers.h"
 
-//#include <dirent.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-//#if defined(__OpenBSD__)
-# include <strings.h> // str(n)casecmp()
-//#endif /* __OpenBSD__ */
+#include <strings.h> /* str(n)casecmp() */
 
 #include "checks.h"
 #include "aux.h" /* xatoi */

@@ -32,7 +32,6 @@
 #if defined(__linux__)
 # include <sys/capability.h>
 #endif /* __linux__ */
-//#include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>
@@ -47,9 +46,9 @@
 
 #include <limits.h> /* INT_MAX */
 
-#if defined(_LIST_SPEED)
+#if defined(LIST_SPEED_TEST)
 # include <time.h>
-#endif /* _LIST_SPEED */
+#endif /* LIST_SPEED_TEST */
 
 #if defined(TOURBIN_QSORT)
 # include "qsort.h"
@@ -1753,9 +1752,9 @@ is_utf8_name(const char *name)
 static int
 list_dir_light(void)
 {
-#ifdef _LIST_SPEED
+#ifdef LIST_SPEED_TEST
 	clock_t start = clock();
-#endif /* _LIST_SPEED */
+#endif /* LIST_SPEED_TEST */
 
 	int virtual_dir = 0;
 	if (stdin_tmp_dir && strcmp(stdin_tmp_dir, workspaces[cur_ws].path) == 0)
@@ -2028,10 +2027,10 @@ END:
 	&& conf.full_dir_size == 1)
 		print_analysis_stats(total_size, largest_size, largest_color, largest_name);
 
-#ifdef _LIST_SPEED
+#ifdef LIST_SPEED_TEST
 	clock_t end = clock();
 	printf("list_dir time: %f\n", (double)(end - start) / CLOCKS_PER_SEC);
-#endif /* _LIST_SPEED */
+#endif /* LIST_SPEED_TEST */
 
 	return exit_code;
 }
@@ -2118,9 +2117,9 @@ get_link_target_color(const char *name, const struct stat *attr, const filesn_t 
 int
 list_dir(void)
 {
-#ifdef _LIST_SPEED
+#ifdef LIST_SPEED_TEST
 	clock_t start = clock();
-#endif /* _LIST_SPEED */
+#endif /* LIST_SPEED_TEST */
 
 	if (conf.clear_screen == 1) {
 		CLEAR; fflush(stdout);
@@ -2667,10 +2666,10 @@ END:
 	&& conf.full_dir_size == 1)
 		print_analysis_stats(total_size, largest_size, largest_color, largest_name);
 
-#ifdef _LIST_SPEED
+#ifdef LIST_SPEED_TEST
 	clock_t end = clock();
 	printf("list_dir time: %f\n", (double)(end - start) / CLOCKS_PER_SEC);
-#endif /* _LIST_SPEED */
+#endif /* LIST_SPEED_TEST */
 
 	return exit_code;
 }

@@ -25,8 +25,6 @@
 #ifndef SORT_H
 #define SORT_H
 
-//#include <dirent.h>
-
 /* Needed by qsort(3) to use compare_string() as comparison function */
 typedef int QSFUNC(const void *, const void *);
 

@@ -24,7 +24,6 @@
 
 #include "helpers.h"
 
-//#include <dirent.h>
 #include <errno.h>
 #include <glob.h>
 #include <stdio.h>

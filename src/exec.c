@@ -24,11 +24,6 @@
 
 #include "helpers.h"
 
-#ifdef __OpenBSD__
-# include <sys/dirent.h>
-#endif /* __OpenBSD__ */
-
-//#include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -46,6 +41,7 @@ typedef char *rl_cpvfunc_t;
 #ifdef __TINYC__
 # undef CHAR_MAX /* Silence redefinition error */
 #endif /* __TINYC__ */
+
 #include <limits.h>
 
 #include "actions.h"

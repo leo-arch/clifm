@@ -28,14 +28,11 @@
 #ifdef __linux__
 # include <sys/capability.h>
 #endif /* __linux__ */
-//#include <dirent.h>
 #include <errno.h>
 #include <string.h>
-//////////
 #ifndef CLIFM_SUCKLESS
-# include <strings.h> // str(n)casecmp()
+# include <strings.h> /* str(n)casecmp() */
 #endif /* CLIFM_SUCKLESS */
-///////////
 
 /* Only used to check the readline version */
 #ifdef __OpenBSD__
