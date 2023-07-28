@@ -37,6 +37,10 @@
 #include <string.h>
 #include <sys/ioctl.h>
 
+#ifdef __sun
+# include <sys/termios.h> // TIOCGWINSZ
+#endif // __sun
+
 #if defined(__NetBSD__) || defined(__FreeBSD__)
 # include <sys/param.h>
 # include <sys/sysctl.h>
@@ -68,6 +72,11 @@ typedef char *rl_cpvfunc_t;
 #include "remotes.h"
 #include "messages.h"
 #include "file_operations.h"
+
+#if defined(_BE_POSIX) && !defined(SIGWINCH)
+// On most architectures, including X86 and ARM, the value is 28. See signal(7).
+# define SIGWINCH 28
+#endif // _BE_POSIX && !SIGWINCH
 
 int
 is_blank_name(const char *s)

@@ -28,11 +28,11 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
-#if defined(__OpenBSD__)
-# include <strings.h>
-#endif /* __OpenBSD__ */
+//#if defined(__OpenBSD__)
+# include <strings.h> // str(n)casecmp()
+//#endif /* __OpenBSD__ */
 #include <unistd.h>
-#include <dirent.h>
+//#include <dirent.h>
 #include <pwd.h>
 
 #if defined(__linux__)

@@ -32,7 +32,7 @@
 #if defined(__linux__)
 # include <sys/capability.h>
 #endif /* __linux__ */
-#include <dirent.h>
+//#include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>

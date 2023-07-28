@@ -47,7 +47,7 @@ typedef char *rl_cpvfunc_t;
 # include <string.h>
 #endif /* __NetBSD__ */
 
-#include <dirent.h>
+//#include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
 

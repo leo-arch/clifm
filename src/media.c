@@ -53,7 +53,7 @@
 # endif /* MNTTAB */
 #endif /* __linux__ || __CYGWIN__ */
 
-#include <dirent.h>
+//#include <dirent.h>
 
 #include "aux.h"
 #include "readline.h"

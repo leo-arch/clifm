@@ -47,7 +47,7 @@
 # include <wordexp.h>
 #endif /* !__HAIKU__ && !__OpenBSD && !__ANDROID */
 #include <limits.h>
-#include <dirent.h>
+//#include <dirent.h>
 #include <errno.h>
 
 #if defined(__OpenBSD__)

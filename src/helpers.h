@@ -39,19 +39,52 @@
 # define _BE_POSIX
 #endif /* POSIX_STRICT */
 
+#ifdef _BE_POSIX
+# define _POSIX_C_SOURCE 200809L
+# define _XOPEN_SOURCE 700
+
+# if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) \
+|| defined(__DragonFly__) || defined(__APPLE__)
+typedef unsigned char  u_char;
+typedef unsigned short u_short;
+typedef unsigned int   u_int;
+typedef unsigned long  u_long;
+# elif defined(__sun)
+#  define __EXTENSIONS__
+# endif // BSD
+
+#else
+# if defined(__linux__) || defined(__CYGWIN__)
+#  define _GNU_SOURCE
+//# elif defined(__FreeBSD__) || defined(__DragonFly__)
+//#  define _XOPEN_SOURCE 700
+//#  define __BSD_VISIBLE 1 // DT_ macros, strstr, strcasecmp, strcasestr, arc4random_uniform, fflagstostr, u_int (etc) data types
+# elif defined(__NetBSD__)
+#  define _NETBSD_SOURCE
+# elif defined(__OpenBSD__)
+#  define _BSD_SOURCE
+# elif defined(__APPLE__)
+#  define _DARWIN_C_SOURCE
+//# elif defined(__sun)
+//#  define __EXTENSIONS__
+//#  define BSD_COMP
+# endif // __linux__ || __CYGWIN__
+#endif // _BE_POSIX
+
+/*
 #if (defined(__linux__) || defined(__CYGWIN__)) && !defined(_BE_POSIX)
 # define _GNU_SOURCE
 #else
 # define _POSIX_C_SOURCE 200809L
 # if defined(__linux__) || defined(__CYGWIN__)
-#  define _XOPEN_SOURCE 500 /* wc(s)width(), realpath(), random() */
-/* glibc <= 2.19 requires _BSD_SOURCE.
- * Later versions require _DEFAULT_SOURCE instead. */
-#  define _BSD_SOURCE
-#  define _DEFAULT_SOURCE /* str(n)casecmp(), DT_ macros*/
+#  define _XOPEN_SOURCE 500 // S_IF*, S_ISVTX, wc(s)width, memccpy, realpath, random, srandom, getpwent, endpwent, getgrent, endgrent
+// glibc <= 2.19 requires _BSD_SOURCE.
+// Later versions require _DEFAULT_SOURCE instead.
+//#  define _BSD_SOURCE
+//#  define _DEFAULT_SOURCE // str(n)casecmp(), DT_ macros
 # elif defined(__FreeBSD__) || defined(__DragonFly__)
-#  define _XOPEN_SOURCE 700 /* S_IF macros */
-#  define __BSD_VISIBLE 1 /* DT_ macros, strstr, strcasecmp, strcasestr, arc4random_unform, fflagstostr, u_int (etc) data types */
+#  define _XOPEN_SOURCE 700
+#  define __BSD_VISIBLE 1 // DT_ macros, strstr, strcasecmp, strcasestr, arc4random_uniform, fflagstostr, u_int (etc) data types
 # elif defined(__NetBSD__)
 #  define _NETBSD_SOURCE
 # elif defined(__OpenBSD__)
@@ -61,8 +94,8 @@
 # elif defined(__sun)
 #  define __EXTENSIONS__
 #  define BSD_COMP
-# endif /* __linux__ || __CYGWIN__ */
-#endif /* (__linux__ || __CYGWIN__) && !_BE_POSIX */
+# endif // __linux__ || __CYGWIN__
+#endif // (__linux__ || __CYGWIN__) && !_BE_POSIX */
 
 #ifdef __TINYC__
 # define __STDC_NO_VLA__ 1
@@ -74,29 +107,61 @@
 # define GLOB_BRACE 0
 #endif /* !__TINYC__ && !GLOB_BRACE */
 
-#if defined(__CYGWIN__) && defined(_BE_POSIX) && !defined(GLOB_TILDE)
-# define GLOB_TILDE 0
-#endif /* __CYGWIN__ && _BE_POSIX && !GLOB_TILDE */
+//#if defined(__CYGWIN__) && defined(_BE_POSIX) && !defined(GLOB_TILDE)
+//# define GLOB_TILDE 0
+//#endif // __CYGWIN__ && _BE_POSIX && !GLOB_TILDE */
 
 /* Support large files */
 #define _FILE_OFFSET_BITS 64
 /* Address Y2038 problem in 32 bits machines */
 #define _TIME_BITS 64
 
+/* Included here to test _DIRENT_HAVE_D_TYPE and DT macros. */
+#include <dirent.h>
+
 #define xstrcasestr strcasestr
 
 #ifdef _BE_POSIX
 # undef xstrcasestr
 # define xstrcasestr x_strcasestr
+
 # ifndef ALLOW_MEDIA
 #  define NO_MEDIA_FUNC
 # endif /* !ALLOW_MEDIA */
+
 # ifndef ALLOW_LIRA
 #  define _NO_LIRA
 # endif /* !ALLOW_LIRA */
+
 # ifndef ALLOW_ARCHIVING
 #  define _NO_ARCHIVING
 # endif /* ALLOW_ARCHIVING */
+
+#ifndef GLOB_BRACE
+# define GLOB_BRACE 0
+#endif /* GLOB_BRACE */
+#ifndef GLOB_TILDE
+# define GLOB_TILDE 0
+#endif /* GLOB_TILDE */
+
+# if !defined(_DIRENT_HAVE_D_TYPE) || !defined(DT_DIR)
+/* Systems not providing a d_type member for the stat struct do not provide
+ * these macros either. We use them to convert an st_mode value to the
+ * appropriate d_type value (via get_dt()). */
+#  define DT_UNKNOWN 0
+#  define DT_FIFO    1
+#  define DT_CHR     2
+#  define DT_DIR     4
+#  define DT_BLK     6
+#  define DT_REG     8
+#  define DT_LNK     10
+#  define DT_SOCK    12
+//#  define DT_WHT     14
+#  ifdef __sun
+#   define DT_DOOR   16
+#  endif /* __sun */
+//#  define DT_NONE     18
+# endif /* !_DIRENT_HAVE_D_TYPE || !DT_DIR */
 #endif /* _BE_POSIX */
 
 /* _NO_LIRA implies _NO_MAGIC */
@@ -592,26 +657,6 @@ extern time_t curdir_mtime;
 #ifndef P_tmpdir
 # define P_tmpdir "/tmp"
 #endif /* P_tmpdir */
-
-/* Systems not providing a d_type member for the stat struct do not provide
- * these macros either. We use them to convert an st_mode value to the
- * appropriate d_type value (via get_dt()). */
-#if defined(__HAIKU__) || defined(__sun)
-# define DT_UNKNOWN 0
-# define DT_FIFO    1
-# define DT_CHR     2
-# define DT_DIR     4
-# define DT_BLK     6
-# define DT_REG     8
-# define DT_LNK     10
-# define DT_SOCK    12
-//# define DT_WHT     14
-# ifdef __sun
-#  define DT_DOOR   16
-# endif /* __sun */
-#endif /* __HAIKU__ || __sun */
-
-#define DT_NONE     18
 
 /* Macros for the get_sys_shell function */
 #define SHELL_NONE 0

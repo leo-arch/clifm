@@ -32,14 +32,14 @@
 
 #include "helpers.h"
 
-#include <dirent.h>
+//#include <dirent.h>
 #include <fcntl.h>
 #include <glob.h>
 #include <stdio.h>
 #include <string.h>
-#ifdef __OpenBSD__
-# include <strings.h>
-#endif /* __OpenBSD__ */
+//#ifdef __OpenBSD__
+# include <strings.h> // str(n)casecmp()
+//#endif /* __OpenBSD__ */
 #include <unistd.h>
 #include <errno.h>
 #include <limits.h>
@@ -780,7 +780,7 @@ my_rl_getc(FILE *stream)
 			return (EOF);
 
 		/* read(3) either failed (returned -1) or is > sizeof(unsigned char) */
-#if defined(EWOULDBLOCK)
+#if defined(EWOULDBLOCK) && defined(O_NDELAY)
 		if (errno == EWOULDBLOCK) {
 			int xflags;
 
@@ -844,7 +844,7 @@ alt_rl_getc(FILE *stream)
 			return (EOF);
 
 		/* read(3) either failed (returned -1) or is > sizeof(unsigned char) */
-#if defined(EWOULDBLOCK)
+#if defined(EWOULDBLOCK) && defined(O_NDELAY)
 		if (errno == EWOULDBLOCK) {
 			int xflags;
 

@@ -24,7 +24,7 @@
 
 #include "helpers.h"
 
-#include <dirent.h>
+//#include <dirent.h>
 #include <errno.h>
 #include <glob.h>
 #include <stdio.h>
@@ -40,6 +40,10 @@
 # include <sys/ioctl.h>
 #endif /* __linux__ || __HAIKU__ || __APPLE__ || __sun || __CYGWIN__ */
 #include <limits.h>
+
+#ifdef __sun
+# include <sys/termios.h> // TIOCGWINSZ
+#endif // __sun
 
 #include "aux.h"
 #include "checks.h"

@@ -34,7 +34,7 @@
 #endif /* __TINYC__ */
 #include <limits.h>
 #include <fcntl.h>
-#include <dirent.h>
+//#include <dirent.h>
 
 #include "aux.h"
 #include "checks.h"

@@ -24,13 +24,17 @@
 
 #include "helpers.h"
 
-#include <dirent.h>
+//#include <dirent.h>
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <glob.h>
+
+#ifdef __sun
+# include <sys/termios.h> // TIOCGWINSZ
+#endif // __sun
 
 /* We need rl_line_buffer in case of no matches and no metacharacter */
 #include <readline/readline.h>

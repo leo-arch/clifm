@@ -28,7 +28,7 @@
 # include <sys/dirent.h>
 #endif /* __OpenBSD__ */
 
-#include <dirent.h>
+//#include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
