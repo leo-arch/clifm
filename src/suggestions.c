@@ -1942,7 +1942,7 @@ check_backdir(void)
 
 	/* Find the query string in the list of parent directories */
 	char *p = conf.case_sens_path_comp == 1 ? strstr(bk_cwd, ds)
-	: strcasestr(bk_cwd, ds);
+	: xstrcasestr(bk_cwd, ds);
 	if (p) {
 		char *pp = strchr(p, '/');
 		if (pp)

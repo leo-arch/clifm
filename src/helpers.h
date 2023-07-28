@@ -83,7 +83,11 @@
 /* Address Y2038 problem in 32 bits machines */
 #define _TIME_BITS 64
 
+#define xstrcasestr strcasestr
+
 #ifdef _BE_POSIX
+# undef xstrcasestr
+# define xstrcasestr x_strcasestr
 # ifndef ALLOW_MEDIA
 #  define NO_MEDIA_FUNC
 # endif /* !ALLOW_MEDIA */
@@ -704,10 +708,6 @@ extern time_t curdir_mtime;
 #endif /* !_GETTEXT */
 
 #define strlen(s) xstrnlen(s)
-
-#if (defined(__linux__) || defined(__CYGWIN__)) && defined(_BE_POSIX)
-# define strcasestr xstrcasestr
-#endif /* (__linux || __CYGWIN__) && _BE_POSIX */
 
 /* Log the message and print it to STDERR, but do not store it into the
  * messages array. */

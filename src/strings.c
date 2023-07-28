@@ -195,11 +195,10 @@ xstrrpbrk(char *s, const char *accept)
 	return (char *)NULL;
 }
 
-#if (defined(__linux__) || defined(__CYGWIN__)) && defined(_BE_POSIX)
-/* strcasestr(3) is a GNU extension on Linux. If GNU extensions are not
- * available, let's use this as replacement. */
+#if defined(_BE_POSIX)
+/* strcasestr(3) is a not POSIX: let's use this as replacement. */
 char *
-xstrcasestr(char *a, char *b)
+x_strcasestr(char *a, char *b)
 {
 	if (!a || !b)
 		return (char *)NULL;
@@ -227,7 +226,7 @@ xstrcasestr(char *a, char *b)
 
 	return (char *)NULL;
 }
-#endif /* (__linux__ || __CYGWIN__) && _BE_POSIX */
+#endif /* _BE_POSIX */
 
 /* Just a strlen that sets a read limit in case of non-null terminated string. */
 size_t

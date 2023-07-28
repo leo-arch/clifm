@@ -706,10 +706,10 @@ get_needle(const char *needle, const char *match, const char *query,
 {
 	char *ret = conf.case_sens_dirjump == 1 ? strstr(needle, query)
 #ifdef _BE_POSIX
-		/* strcasestr() calls xstrcasestr(), which does not take consts. */
-		: strcasestr((char *)needle, (char *)query);
+		/* xstrcasestr() calls x_strcasestr(), which does not take consts. */
+		: xstrcasestr((char *)needle, (char *)query);
 #else
-		: strcasestr(needle, query);
+		: xstrcasestr(needle, query);
 #endif /* _BE_POSIX */
 
 	if (!ret || ((segment & LAST_SEGMENT) && strchr(ret, '/')))

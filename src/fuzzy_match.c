@@ -270,7 +270,7 @@ fuzzy_match_v1(char *s1, char *s2, const size_t s1_len)
 	int included = 0;
 	char *p = (char *)NULL;
 
-	if (cs == 1 ? (p = strstr(s2, s1)) : (p = strcasestr(s2, s1))) {
+	if (cs == 1 ? (p = strstr(s2, s1)) : (p = xstrcasestr(s2, s1))) {
 		if (p == s2) {
 			if (!*(s2 + s1_len))
 				return EXACT_MATCH_BONUS;
@@ -473,7 +473,7 @@ fuzzy_match2(char *s1, char *s2, const size_t s1_len, const int type)
 
 	int included = 0;
 	char *p = (char *)NULL;
-	if (conf.case_sens_path_comp == 1 ? (p = strstr(s2, s1)) : (p = strcasestr(s2, s1))) {
+	if (conf.case_sens_path_comp == 1 ? (p = strstr(s2, s1)) : (p = xstrcasestr(s2, s1))) {
 		if (p == s2) {
 			if (!*(s2 + s1_len))
 				return EXACT_MATCH_BONUS;

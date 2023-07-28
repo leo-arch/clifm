@@ -53,9 +53,9 @@ int  u8truncstr(char *restrict, size_t);
 size_t wc_xstrlen(const char *restrict);
 char *xstrrpbrk(char *, const char *);
 
-#if (defined(__linux__) || defined(__CYGWIN__)) && defined(_BE_POSIX)
-char *xstrcasestr(char *, char *);
-#endif /* (__linux__ || __CYGWIN__) && _BE_POSIX */
+#if defined(_BE_POSIX)
+char *x_strcasestr(char *, char *);
+#endif /* _BE_POSIX */
 
 char * xstrcasechr(char *, char);
 size_t xstrnlen(const char *restrict);

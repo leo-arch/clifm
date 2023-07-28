@@ -1766,18 +1766,18 @@ jump_generator(const char *text, int state)
 		/* Filter by parent */
 		if (rl_line_buffer[1] == 'p') {
 			if ((conf.case_sens_dirjump == 1 ? strstr(workspaces[cur_ws].path, name)
-			: strcasestr(workspaces[cur_ws].path, name)) == NULL)
+			: xstrcasestr(workspaces[cur_ws].path, name)) == NULL)
 				continue;
 		}
 		/* Filter by child */
 		else if (rl_line_buffer[1] == 'c') {
 			if ((conf.case_sens_dirjump == 1 ? strstr(name, workspaces[cur_ws].path)
-			: strcasestr(name, workspaces[cur_ws].path)) == NULL)
+			: xstrcasestr(name, workspaces[cur_ws].path)) == NULL)
 				continue;
 		}
 
 		if ((conf.case_sens_dirjump == 1 ? strstr(name, text)
-		: strcasestr(name, (char *)text)) != NULL)
+		: xstrcasestr(name, (char *)text)) != NULL)
 			return strdup(name);
 	}
 
@@ -1979,9 +1979,9 @@ dirhist_generator(const char *text, int state)
 		} else {
 			if ((conf.case_sens_path_comp == 1 ? strstr(name, text)
 #if defined(_BE_POSIX)
-			: strcasestr(name, (char *)text)) != NULL)
+			: xstrcasestr(name, (char *)text)) != NULL)
 #else
-			: strcasestr(name, text)) != NULL)
+			: xstrcasestr(name, text)) != NULL)
 #endif /* _BE_POSIX */
 				return strdup(name);
 		}
