@@ -524,7 +524,7 @@ check_iso(char *file)
  * well: this is the case when called from open_function() or
  * mime_open(), since both need to check compressed and ISOs as
  * well (and there is no need to run two functions (is_compressed and
- * check_iso), when we can run just one) */
+ * check_iso), when we can run just one). */
 int
 is_compressed(char *file, const int test_iso)
 {

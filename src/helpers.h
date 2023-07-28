@@ -83,11 +83,16 @@
 /* Address Y2038 problem in 32 bits machines */
 #define _TIME_BITS 64
 
-#if defined(_BE_POSIX)
-# if !defined(USE_MEDIA)
+#ifdef _BE_POSIX
+# ifndef ALLOW_MEDIA
 #  define NO_MEDIA_FUNC
-# endif /* !USE_MEDIA */
-# define _NO_LIRA
+# endif /* !ALLOW_MEDIA */
+# ifndef ALLOW_LIRA
+#  define _NO_LIRA
+# endif /* !ALLOW_LIRA */
+# ifndef ALLOW_ARCHIVING
+#  define _NO_ARCHIVING
+# endif /* ALLOW_ARCHIVING */
 #endif /* _BE_POSIX */
 
 /* _NO_LIRA implies _NO_MAGIC */

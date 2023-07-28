@@ -334,7 +334,7 @@ xmagic(const char *file, const int query_mime)
 		return (char *)NULL;
 
 	magic_t cookie = magic_open(query_mime ? (MAGIC_MIME_TYPE | MAGIC_ERROR)
-					: MAGIC_ERROR);
+		: MAGIC_ERROR);
 	if (!cookie) {
 //		fprintf(stderr, "%s: xmagic: %s\n", PROGRAM_NAME, strerror(errno));
 		return (char *)NULL;
@@ -521,7 +521,8 @@ mime_import(char *file)
 	const char *const mime_paths[] = {config_path, local_path,
 	    "/usr/local/share/applications/mimeapps.list",
 	    "/usr/share/applications/mimeapps.list",
-	    "/etc/xdg/mimeapps.list", NULL};
+	    "/etc/xdg/mimeapps.list",
+	    NULL};
 
 	/* Check each mimeapps.list file and store its associations into FILE */
 	size_t i;
