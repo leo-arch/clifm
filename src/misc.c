@@ -2411,6 +2411,7 @@ quick_help(char *topic)
 #endif /* __HAIKU || __sun */
 }
 
+__attribute__ ((noreturn))
 void
 help_function(void)
 {
@@ -2425,6 +2426,7 @@ help_function(void)
 	puts(_(CLIFM_COMMANDS));
 	puts(_(CLIFM_KEYBOARD_SHORTCUTS));
 	puts(_(HELP_END_NOTE));
+	exit(EXIT_SUCCESS);
 }
 
 void
@@ -2436,8 +2438,13 @@ free_software(void)
 void
 version_function(void)
 {
-	printf(_("%s %s (%s)\n%s\nLicense %s\nWritten by %s\n"), PROGRAM_NAME,
-		VERSION, DATE, CONTACT, LICENSE, AUTHOR);
+#ifndef _BE_POSIX
+	char *posix = "";
+#else
+	char *posix = "-POSIX";
+#endif /* _BE_POSIX */
+	printf(_("%s %s%s (%s)\n%s\nLicense %s\nWritten by %s\n"), PROGRAM_NAME,
+		VERSION, posix, DATE, CONTACT, LICENSE, AUTHOR);
 }
 
 void

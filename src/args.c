@@ -1175,6 +1175,19 @@ set_vt100(void)
 	fzftab = 0; tabmode = STD_TAB;
 }
 
+__attribute__ ((noreturn))
+static void
+print_version(void)
+{
+#ifdef _BE_POSIX
+	char *posix = "-POSIX";
+#else
+	char *posix = "";
+#endif /* _BE_POSIX */
+	printf("%s%s\n", VERSION, posix);
+	exit(EXIT_SUCCESS);
+}
+
 /* Evaluate command line arguments, if any, and change initial variables to
  * their corresponding values. */
 void
@@ -1218,7 +1231,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case 'F': conf.list_dirs_first = xargs.dirs_first = 1; break;
 		case 'g': conf.pager = xargs.pager = 1; break;
 		case 'G': conf.pager = xargs.pager = 0; break;
-		case 'h': help_function(); exit(EXIT_SUCCESS);
+		case 'h': help_function(); /* noreturn */
 		case 'H': xargs.horizontal_list = 1; conf.listing_mode = HORLIST; break;
 		case 'i': conf.case_sens_list = xargs.case_sens_list = 0; break;
 		case 'I': conf.case_sens_list = xargs.case_sens_list = 1; break;
@@ -1234,7 +1247,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case 's': conf.splash_screen = xargs.splash = 1; break;
 		case 'S': xargs.stealth_mode = 1; break;
 		case 't': xargs.disk_usage_analyzer = 1; break;
-		case 'v': printf("%s\n", VERSION); exit(EXIT_SUCCESS);
+		case 'v': print_version(); /* noreturn */
 		case 'w': set_workspace(optarg); break;
 		case 'x': conf.ext_cmd_ok = xargs.ext = 0; break;
 		case 'y': conf.light_mode = xargs.light = 1; break;
