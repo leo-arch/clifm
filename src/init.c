@@ -52,7 +52,9 @@
 # include <ctype.h>
 #endif /* __NetBSD__ */
 
-#include <paths.h> /* _PATH_STDPATH */
+#ifndef _BE_POSIX
+# include <paths.h> /* _PATH_STDPATH */
+#endif /* _BE_POSIX */
 
 #include "aux.h"
 #include "checks.h" /* truncate_file(), is_number() */
@@ -543,10 +545,10 @@ xgetenv(const char *s, const int alloc)
  * '/etc/shells'.
  * Return EXIT_SUCCESS if found or EXIT_FAILURE if not. */
 static int
-check_etc_shells(const char *file, int *tmp_errno)
+check_etc_shells(const char *file, char *shells_file, int *tmp_errno)
 {
 	int fd;
-	FILE *fp = open_fread("/etc/shells", &fd);
+	FILE *fp = open_fread(shells_file, &fd);
 	if (!fp) {
 		*tmp_errno = errno;
 		return EXIT_FAILURE;
@@ -579,22 +581,36 @@ validate_custom_shell(char **file)
 	int tmp_errno = 0;
 	errno = 0;
 
-	if (*file && check_etc_shells(*file, &tmp_errno) == EXIT_SUCCESS)
+#ifdef _PATH_SHELLS
+	char *shells_file = _PATH_SHELLS;
+#else
+	char *shells_file = "/etc/shells";
+#endif /* _PATH_SHELLS */
+
+#ifdef _PATH_BSHELL
+	char *def_shell = _PATH_BSHELL;
+#else
+	char *def_shell = "/bin/sh";
+#endif
+
+	if (*file && check_etc_shells(*file, shells_file,
+	&tmp_errno) == EXIT_SUCCESS)
 		return;
 
 	/* check_etc_shells() sets errno to a positive value only if /etc/shells
 	 * couldn't be found/accessed. */
 	if (tmp_errno == 0) {
 		err('w', PRINT_PROMPT, _("%s: %s: Invalid shell. Falling back to "
-			"'/bin/sh'.\nCheck '/etc/shells' for a list of valid shells.\n"),
-			PROGRAM_NAME, *file ? *file : "NULL");
+			"'%s'.\nCheck '%s' for a list of valid shells.\n"),
+			PROGRAM_NAME, *file ? *file : "NULL", def_shell, shells_file);
 	} else {
-		err('w', PRINT_PROMPT, _("%s: /etc/shells: %s.\nCannot validate shell. "
-			"Falling back to '/bin/sh'.\n"), PROGRAM_NAME, strerror(tmp_errno));
+		err('w', PRINT_PROMPT, _("%s: %s: %s.\nCannot validate shell. "
+			"Falling back to '%s'.\n"), PROGRAM_NAME, shells_file,
+			strerror(tmp_errno), def_shell);
 	}
 
 	free(*file);
-	*file = savestring("/bin/sh", 7);
+	*file = savestring(def_shell, strlen(def_shell));
 }
 
 /* Get user data from environment variables. Used only in case getpwuid() failed */
@@ -638,7 +654,7 @@ get_user_data_env(void)
 	tmp_user.shell = t ? savestring(t, strlen(t)) : (char *)NULL;
 
 	tmp_user.shell_basename = (char *)NULL;
-	if (p && t == p) // CLIFM_SHELL
+	if (p && t == p) /* CLIFM_SHELL */
 		validate_custom_shell(&tmp_user.shell);
 
 	return tmp_user;

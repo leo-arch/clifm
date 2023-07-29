@@ -50,7 +50,7 @@
    typedef unsigned int   u_int;
    typedef unsigned long  u_long;
 #  ifdef __NetBSD__
-/* scandir, alphasort, and dirfd are POSIX (not even an XSI extension). Why
+/* scandir, alphasort, and dirfd are POSIX (not even XSI extensions). Why
  * hidden behind _NETBSD_SOURCE? */
 #   define _NETBSD_SOURCE
 #  endif /* __NetBSD__ */
@@ -80,21 +80,18 @@
 #ifdef _BE_POSIX
 # undef xstrcasestr
 # define xstrcasestr x_strcasestr
-
+# define _NO_GETTEXT
 # ifndef ALLOW_MEDIA
 #  define NO_MEDIA_FUNC
 # endif /* !ALLOW_MEDIA */
-
 # ifndef ALLOW_LIRA
 #  define _NO_LIRA
 # endif /* !ALLOW_LIRA */
-
 # ifndef ALLOW_ARCHIVING
 #  define _NO_ARCHIVING
 # endif /* ALLOW_ARCHIVING */
-
 /* Setting GLOB_BRACE to ZERO disables support for GLOB_BRACE if not
- * available on current platform. */
+ * available on current platform. Same for GLOB_TILDE. */
 # ifndef GLOB_BRACE
 #  define GLOB_BRACE 0
 # endif /* GLOB_BRACE */

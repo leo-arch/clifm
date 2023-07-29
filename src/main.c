@@ -1115,7 +1115,7 @@ main(int argc, char *argv[])
 
 	check_gui();
 
-	P_tmpdir_len = strlen(P_tmpdir);
+	P_tmpdir_len = sizeof(P_tmpdir) - 1;
 	init_workspaces();
 
 	/* Set all external arguments flags to uninitialized state */

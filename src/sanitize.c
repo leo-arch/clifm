@@ -25,7 +25,9 @@
 #include "helpers.h"
 
 #include <string.h>
-#include <paths.h> /* _PATH_STDPATH */
+#ifndef _BE_POSIX
+# include <paths.h> /* _PATH_STDPATH */
+#endif /* _BE_POSIX */
 #include <stdio.h>
 #include <errno.h>
 #include <sys/resource.h> /* getrlimit(3), setrlimit(3) */
