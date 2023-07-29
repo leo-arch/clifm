@@ -2694,6 +2694,7 @@ check_options(void)
 	tabmode = STD_TAB;
 #endif /* _NO_FZF */
 
+#ifndef _NO_LIRA
 	if (xargs.stealth_mode == 1) {
 		xargs.fzf_preview = conf.fzf_preview = 0;
 	} else if (conf.fzf_preview == UNSET) {
@@ -2702,6 +2703,10 @@ check_options(void)
 		else
 			conf.fzf_preview = xargs.fzf_preview;
 	}
+#else
+	if (conf.fzf_preview == UNSET)
+		xargs.fzf_preview = conf.fzf_preview = 0;
+#endif /* !_NO_LIRA */
 
 #ifndef _NO_ICONS
 	if (conf.icons == UNSET) {

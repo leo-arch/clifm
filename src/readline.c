@@ -844,7 +844,6 @@ alt_rl_getc(FILE *stream)
 #if defined(EWOULDBLOCK) && defined(O_NDELAY)
 		if (errno == EWOULDBLOCK) {
 			int xflags;
-
 			if ((xflags = fcntl(fileno(stream), F_GETFL, 0)) < 0)
 				return (EOF);
 			if (xflags & O_NDELAY) {

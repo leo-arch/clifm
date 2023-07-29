@@ -1844,50 +1844,6 @@ init_defs(void)
 	}
 }
 
-#ifndef _NO_FZF
-static void
-set_fzf_opts(char *line)
-{
-	free(conf.fzftab_options);
-
-	if (!line) {
-		char *p = conf.colorize == 1 ? DEF_FZFTAB_OPTIONS
-			: DEF_FZFTAB_OPTIONS_NO_COLOR;
-		conf.fzftab_options = savestring(p, strlen(p));
-	}
-
-	else if (*line == 'n' && strcmp(line, "none") == 0) {
-		conf.fzftab_options = (char *)xnmalloc(1, sizeof(char));
-		*conf.fzftab_options = '\0';
-	}
-
-	else if (sanitize_cmd(line, SNT_BLACKLIST) == EXIT_SUCCESS) {
-		conf.fzftab_options = savestring(line, strlen(line));
-	}
-
-	else {
-		err('w', PRINT_PROMPT, _("%s: FzfTabOptions contains unsafe "
-			"characters (<>|;&$`). Falling back to default values.\n"),
-			PROGRAM_NAME);
-		if (conf.colorize == 1) {
-			conf.fzftab_options =
-				savestring(DEF_FZFTAB_OPTIONS, strlen(DEF_FZFTAB_OPTIONS));
-		} else {
-			conf.fzftab_options =
-				savestring(DEF_FZFTAB_OPTIONS_NO_COLOR,
-				strlen(DEF_FZFTAB_OPTIONS_NO_COLOR));
-		}
-/*		char *p = conf.colorize == 1 ? DEF_FZFTAB_OPTIONS
-			: DEF_FZFTAB_OPTIONS_NO_COLOR;
-		conf.fzftab_options = savestring(p, strlen(p)); */
-	}
-
-	fzf_height_set = 0;
-	if (strstr(conf.fzftab_options, "--height"))
-		fzf_height_set = 1;
-}
-#endif /* !_NO_FZF */
-
 static void
 set_cs_prompt(char *line)
 {
@@ -1947,6 +1903,51 @@ set_cs_warning_prompt_str(char *line)
 }
 
 #ifndef _NO_FZF
+static void
+set_fzf_opts(char *line)
+{
+	free(conf.fzftab_options);
+
+	if (!line) {
+		char *p = conf.colorize == 1 ? DEF_FZFTAB_OPTIONS
+			: DEF_FZFTAB_OPTIONS_NO_COLOR;
+		conf.fzftab_options = savestring(p, strlen(p));
+	}
+
+	else if (*line == 'n' && strcmp(line, "none") == 0) {
+		conf.fzftab_options = (char *)xnmalloc(1, sizeof(char));
+		*conf.fzftab_options = '\0';
+	}
+
+	else if (sanitize_cmd(line, SNT_BLACKLIST) == EXIT_SUCCESS) {
+		conf.fzftab_options = savestring(line, strlen(line));
+	}
+
+	else {
+		err('w', PRINT_PROMPT, _("%s: FzfTabOptions contains unsafe "
+			"characters (<>|;&$`). Falling back to default values.\n"),
+			PROGRAM_NAME);
+		if (conf.colorize == 1) {
+			conf.fzftab_options =
+				savestring(DEF_FZFTAB_OPTIONS, strlen(DEF_FZFTAB_OPTIONS));
+		} else {
+			conf.fzftab_options =
+				savestring(DEF_FZFTAB_OPTIONS_NO_COLOR,
+				strlen(DEF_FZFTAB_OPTIONS_NO_COLOR));
+		}
+/*		char *p = conf.colorize == 1 ? DEF_FZFTAB_OPTIONS
+			: DEF_FZFTAB_OPTIONS_NO_COLOR;
+		conf.fzftab_options = savestring(p, strlen(p)); */
+	}
+
+	if (strstr(conf.fzftab_options, "--preview "))
+		conf.fzf_preview = FZF_EXTERNAL_PREVIEWER;
+
+	fzf_height_set = 0;
+	if (strstr(conf.fzftab_options, "--height"))
+		fzf_height_set = 1;
+}
+
 static void
 set_cs_fzftabopts(char *line)
 {

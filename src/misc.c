@@ -30,7 +30,7 @@
 #include "helpers.h"
 
 #include <errno.h>
-#include <fcntl.h> /* AT_FDCWD macro */
+#include <fcntl.h> /* AT_FDCWD */
 #include <signal.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -38,8 +38,8 @@
 #include <sys/ioctl.h>
 
 #ifdef __sun
-# include <sys/termios.h> // TIOCGWINSZ
-#endif // __sun
+# include <sys/termios.h> /* TIOCGWINSZ */
+#endif /* __sun */
 
 #if defined(__NetBSD__) || defined(__FreeBSD__)
 # include <sys/param.h>
@@ -72,11 +72,6 @@ typedef char *rl_cpvfunc_t;
 #include "remotes.h"
 #include "messages.h"
 #include "file_operations.h"
-
-#if defined(_BE_POSIX) && !defined(SIGWINCH)
-// On most architectures, including X86 and ARM, the value is 28. See signal(7).
-# define SIGWINCH 28
-#endif // _BE_POSIX && !SIGWINCH
 
 int
 is_blank_name(const char *s)
@@ -589,7 +584,6 @@ print_tips(const int all)
 		"Clear the screen: 'rf', '.', Enter (on empty line), or Ctrl-l",
 		"Try the autocd and auto-open functions: run 'FILE' instead "
 		"of 'cd FILE' or 'open FILE'",
-		"Add a new entry to the mimelist file: 'mm edit' or F6",
 		"Do not forget to take a look at the manpage",
 		"Need more speed? Try the light mode ('lm' or Alt-y)",
 		"The Selection Box is shared among different instances of CliFM",
@@ -603,7 +597,18 @@ print_tips(const int all)
 		"Press TAB to automatically expand an ELN. Ex: 's 2<TAB>' -> 's FILENAME'",
 		"Use ranges (ELN-ELN) to easily move multiple files. Ex: 'm 3-12 dir/'",
 		"Trash files with a simple 't ELN/FILE'",
+#ifndef _BE_POSIX
+		"Add a new entry to the mimelist file: 'mm edit' or F6",
 		"Get mime information for a file. Ex: 'mm info file'",
+		"Manage default associated applications with the 'mime' command",
+		"Customize previewing applications: 'view edit' or F7",
+		"List mountpoints: 'mp' or Alt-m",
+		"Compress and decompress files using the 'ac' and 'ad' "
+		"commands respectively. Ex: 'ac sel' or 'ad file.zip'",
+# ifdef __linux__
+		"Manage removable devices via the 'media' command",
+# endif /* __linux__ */
+#endif /* _BE_POSIX */
 		"If too many files are listed, try enabling the pager: 'pg on'",
 		"Once in the pager, go backwards by pressing the keyboard shortcut "
 		"provided by your terminal emulator",
@@ -614,7 +619,6 @@ print_tips(const int all)
 		"Add a new bookmark: 'bm add FILENAME BM_NAME'",
 		"Use c, l, m, md, and r instead of cp, ln, mv, mkdir, and rm",
 		"Access a remote file system using the 'net' command",
-		"Manage default associated applications with the 'mime' command",
 		"Go back and forth in the directory history with Alt-j and Alt-k "
 		"(also Shift-Left and Shift-Right)",
 		"Run a new instance of CliFM: 'x ELN/DIR'",
@@ -630,7 +634,6 @@ print_tips(const int all)
 		"Get a brief description for each CliFM command: 'cmd<TAB>'",
 		"Print the currently used color codes: 'colors'",
 		"Toggle hidden files on/off: 'hh' or Alt-.",
-		"List mountpoints: 'mp' or Alt-m",
 		"Disallow the use of shell commands with the -x option: 'clifm -x'",
 		"Go to the root directory: Alt-r",
 		"Go to the home directory: Alt-e (or just 'cd')",
@@ -668,15 +671,10 @@ print_tips(const int all)
 		"Launch the default system shell in CWD using ':' or ';'",
 		"Switch files sorting order: Alt-z and Alt-x",
 		"Reverse files sorting order: 'st rev'",
-		"Compress and decompress files using the 'ac' and 'ad' "
-		"commands respectively. Ex: 'ac sel' or 'ad file.zip'",
 		"Rename multiple files at once. Ex: 'br *.txt'",
 		"Need no more tips? Disable this feature in the configuration file",
 		"Need root privileges? Launch a new instance of CliFM as root "
 		"running the 'X' command (note the uppercase)",
-#ifdef __linux__
-		"Manage removable devices via the 'media' command",
-#endif /* __linux__ */
 		"Create a fresh configuration file: 'config reset'",
 		"Use 'ln edit' (or 'le') to edit symbolic links",
 		"Change default keyboard shortcuts: F9 (or 'kb edit')",
@@ -735,7 +733,6 @@ print_tips(const int all)
 		"Disable file previews for TAB completion (fzf mode only) via --no-fzfpreview",
 		"Preview files in the current directory using the 'view' command (requires fzf)",
 		"Press Alt+- to launch the files previewer (requires fzf)",
-		"Customize previewing applications: 'view edit' or F7",
 		"Interactively select files (requires fzf, fnf, or smenu). Ex: 's /dir/*<TAB>'",
 		"Change files permissions/ownership using the 'pc' and 'oc' commands respectively",
 		"Set a custom shell to run external commands. Ex: 'CLIFM_SHELL=/bin/dash clifm'",
@@ -1709,6 +1706,7 @@ get_term_size(void)
 	term_lines = w.ws_row;
 }
 
+#ifndef _BE_POSIX
 /* Get new window size and update/refresh the screen accordingly */
 static void
 sigwinch_handler(int sig)
@@ -1720,6 +1718,7 @@ sigwinch_handler(int sig)
 	get_term_size();
 	flags |= DELAYED_REFRESH;
 }
+#endif /* _BE_POSIX */
 
 void
 set_signals_to_ignore(void)
@@ -1727,7 +1726,9 @@ set_signals_to_ignore(void)
 	signal(SIGINT, SIG_IGN);  /* C-c */
 	signal(SIGQUIT, SIG_IGN); /* C-\ */
 	signal(SIGTSTP, SIG_IGN); /* C-z */
+#ifndef _BE_POSIX
 	signal(SIGWINCH, sigwinch_handler);
+#endif /* _BE_POSIX */
 /*	signal(SIGUSR1, sigusr_handler);
 	signal(SIGUSR2, sigusr_handler); */
 }

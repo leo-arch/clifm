@@ -757,8 +757,11 @@ static int
 run_finder(const size_t height, const int offset, const char *lw,
 	const int multi)
 {
-	int prev = (conf.fzf_preview > 0 && SHOW_PREVIEWS(cur_comp_type) == 1) ? 1 : 0;
+	int prev = (conf.fzf_preview > 0 && SHOW_PREVIEWS(cur_comp_type) == 1)
+		? FZF_INTERNAL_PREVIEWER : 0;
 	int prev_hidden = conf.fzf_preview == 2 ? 1 : 0;
+	if (conf.fzf_preview == FZF_EXTERNAL_PREVIEWER)
+		prev = FZF_EXTERNAL_PREVIEWER;
 
 	/* Some shells, like xonsh (the only one to my knowledge), have problems
 	 * parsing the command constructed below. Let's force launch_execl() to
@@ -798,7 +801,7 @@ run_finder(const size_t height, const int offset, const char *lw,
 		*prev_opts = '\0';
 		char prev_str[] = "--preview \"clifm --preview {}\"";
 
-		if (prev == 1) {
+		if (prev > 0) { /* Either internal of external previewer */
 			set_fzf_env_vars((int)height);
 			size_t s = get_preview_win_width(offset);
 			if (s != (size_t)-1)
@@ -816,8 +819,8 @@ run_finder(const size_t height, const int offset, const char *lw,
 			lw ? lw : "", conf.colorize == 0 ? "--color=bw" : "",
 			multi == 1 ? "--multi --bind tab:toggle+down,ctrl-s:select-all,\
 ctrl-d:deselect-all,ctrl-t:toggle-all" : "",
-			prev == 1 ? prev_str : "",
-			(prev == 1 && prev_hidden == 1)
+			prev == FZF_INTERNAL_PREVIEWER ? prev_str : "",
+			(prev == FZF_INTERNAL_PREVIEWER && prev_hidden == 1)
 				? "--preview-window=hidden --bind alt-p:toggle-preview" : "",
 			*prev_opts ? prev_opts : "",
 			finder_in_file, finder_out_file);

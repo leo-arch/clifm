@@ -95,6 +95,10 @@ gen_time_str(char *buf, const size_t size, const time_t _time)
 void
 set_fzf_preview_border_type(void)
 {
+#ifdef _NO_LIRA
+	return;
+#endif /* _NO_LIRA */
+
 	fzf_preview_border_type = FZF_BORDER_ROUNDED; /* fzf default */
 
 	char *p = (conf.fzftab_options && *conf.fzftab_options)

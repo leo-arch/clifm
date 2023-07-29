@@ -45,10 +45,15 @@
 
 # if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) \
 || defined(__DragonFly__) || defined(__APPLE__)
-typedef unsigned char  u_char;
-typedef unsigned short u_short;
-typedef unsigned int   u_int;
-typedef unsigned long  u_long;
+   typedef unsigned char  u_char;
+   typedef unsigned short u_short;
+   typedef unsigned int   u_int;
+   typedef unsigned long  u_long;
+#  ifdef __NetBSD__
+/* scandir, alphasort, and dirfd are POSIX (not even an XSI extension). Why
+ * hidden behind _NETBSD_SOURCE? */
+#   define _NETBSD_SOURCE
+#  endif /* __NetBSD__ */
 # elif defined(__sun)
 #  define __EXTENSIONS__
 # endif // BSD
@@ -56,10 +61,6 @@ typedef unsigned long  u_long;
 #else
 # if defined(__linux__) || defined(__CYGWIN__)
 #  define _GNU_SOURCE
-# elif defined(__NetBSD__)
-#  define _NETBSD_SOURCE
-# elif defined(__OpenBSD__)
-#  define _BSD_SOURCE
 # elif defined(__APPLE__)
 #  define _DARWIN_C_SOURCE
 # endif // __linux__ || __CYGWIN__
@@ -573,6 +574,12 @@ extern time_t curdir_mtime;
 #define E_NOSTDOUT (1 << 2)
 #define E_NOSTDERR (1 << 3)
 #define E_MUTE     (E_NOSTDOUT | E_NOSTDERR)
+
+
+#define FZF_INTERNAL_PREVIEWER 1 /* clifm itself */
+/* --preview is set from either from FzfOpts in the color scheme file or from
+ * FZF_DEFAULT_OPTS environment variable. */
+#define FZF_EXTERNAL_PREVIEWER 2
 
 /* Macros for the backdir (bd) function */
 #define BD_TAB    1

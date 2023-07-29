@@ -1816,6 +1816,7 @@ remove_backslash(char **s)
 	*s = p;
 }
 
+#ifndef _NO_LIRA
 static int
 preview_edit(char *app)
 {
@@ -1892,11 +1893,11 @@ preview_function(char **args)
 		putchar('\n');
 		reload_dirlist();
 	}
-#if RL_READLINE_VERSION >= 0x0700
+#if defined(RL_READLINE_VERSION) && RL_READLINE_VERSION >= 0x0700
 	else { /* Only available since readline 7.0 */
 		rl_clear_visible_line();
 	}
-#endif /* READLINE < 7.0 */
+#endif /* READLINE >= 7.0 */
 
 	if (sel_n > seln_bk) {
 		print_reload_msg(_("%zu file(s) selected\n"), sel_n - seln_bk);
@@ -1905,6 +1906,7 @@ preview_function(char **args)
 
 	return EXIT_SUCCESS;
 }
+#endif /* !_NO_LIRA */
 
 static int
 dirhist_function(char *dir)
@@ -2337,8 +2339,14 @@ exec_cmd(char **comm)
 		return (exit_code = long_view_function(comm[1]));
 
 	/*    ############# PREVIEW FILES ##################     */
-	else if (*comm[0] == 'v' && strcmp(comm[0], "view") == 0)
+	else if (*comm[0] == 'v' && strcmp(comm[0], "view") == 0) {
+#ifndef _NO_LIRA
 		return (exit_code = preview_function(comm + 1));
+#else
+		fprintf(stderr, "view: %s\n", _(NOT_AVAILABLE));
+		return EXIT_FAILURE;
+#endif /* !_NO_LIRA */
+	}
 
 	/*    ############## TOGGLE EXEC ##################     */
 	else if (*comm[0] == 't' && comm[0][1] == 'e' && !comm[0][2])

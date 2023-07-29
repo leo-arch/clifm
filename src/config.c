@@ -2279,6 +2279,11 @@ get_line_value(char *line)
 static int
 set_fzf_preview_value(const char *line, int *var)
 {
+#ifdef _NO_LIRA
+	UNUSED(line);
+	*var = 0;
+#endif /* _NO_LIRA */
+
 	char *p = strchr(line, '=');
 	if (!p || !*(++p))
 		return (-1);
@@ -3158,19 +3163,19 @@ check_colors(void)
 }
 
 #ifndef _NO_FZF
-/* Just check if --height is set in FZF_DEFAULT_OPTS */
-static int
-get_fzf_win_height(void)
+/* Just check if --height and --preview are set in FZF_DEFAULT_OPTS. */
+static void
+get_fzf_win_height_and_preview(void)
 {
 	char *p = getenv("FZF_DEFAULT_OPTS");
 	if (!p || !*p)
-		return 0;
+		return;
 
-	char *q = strstr(p, "--height");
-	if (!q)
-		return 0;
+	if (conf.fzf_preview == UNSET && strstr(p, "--preview "))
+		conf.fzf_preview = FZF_EXTERNAL_PREVIEWER;
 
-	return 1;
+	if (fzf_height_set == 0 && strstr(p, "--height"))
+		fzf_height_set = 1;
 }
 #endif /* !_NO_FZF */
 
@@ -3279,9 +3284,10 @@ init_config(void)
 
 #ifndef _NO_FZF
 	/* If FZF win height was not defined in the config file,
-	 * check whether it is present in FZF_DEFAULT_OPTS */
-	if (fzftab && fzf_height_set == 0)
-		fzf_height_set = get_fzf_win_height();
+	 * check whether it is present in FZF_DEFAULT_OPTS. Same thing for
+	 * the previewer (--preview option). */
+	if (fzftab)
+		get_fzf_win_height_and_preview();
 #endif /* !_NO_FZF */
 
 	char *t = getenv("TERM");

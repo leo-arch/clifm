@@ -47,7 +47,7 @@
 #include "strings.h"
 
 #if defined(_NO_PROFILES) || defined(_NO_FZF) || defined(_NO_ICONS) \
-|| defined(_NO_TRASH)
+|| defined(_NO_TRASH) || defined(_BE_POSIX)
 # include "messages.h"
 #endif /* _NO_PROFILES || _NO_FZF || _NO_ICONS || _NO_TRASH */
 
@@ -639,6 +639,7 @@ set_sort(const char *arg)
 	xargs.sort = conf.sort;
 }
 
+#ifndef _NO_LIRA
 /* Open/preview FILE according to MODE: either PREVIEW_FILE or OPEN_FILE */
 __attribute__ ((noreturn))
 static void
@@ -680,6 +681,7 @@ RUN:
 
 	open_reg_exit(fpath, url, preview);
 }
+#endif /* _NO_LIRA */
 
 static char *
 stat_file(char *file)
@@ -1071,7 +1073,7 @@ set_fnftab(void)
 static void
 set_fzfpreview(const int optc)
 {
-#ifndef _NO_FZF
+#if !defined(_NO_FZF) && !defined(_NO_LIRA)
 	xargs.fzf_preview = 1;
 	conf.fzf_preview = optc == LOPT_FZFPREVIEW ? 1 : 2;
 	xargs.fzftab = fzftab = 1; tabmode = FZF_TAB;
@@ -1080,7 +1082,7 @@ set_fzfpreview(const int optc)
 	fprintf(stderr, _("%s: fzf-preview: %s\n"),
 		PROGRAM_NAME, _(NOT_AVAILABLE));
 	exit(EXIT_FAILURE);
-#endif /* !_NO_FZF */
+#endif /* !_NO_FZF && !_NO_LIRA */
 }
 
 static void
@@ -1183,9 +1185,11 @@ parse_cmdline_args(const int argc, char **argv)
 	opterr = optind = 0;
 
 	int optc;
-	int open_prev_mode = 0;
 	char *path_value = (char *)NULL;
+#ifndef _NO_LIRA
+	int open_prev_mode = 0;
 	char *open_prev_file = (char *)NULL;
+#endif /* _NO_LIRA */
 
 	while ((optc = getopt_long(argc, argv, OPTSTRING,
 		longopts, (int *)0)) != EOF) {
@@ -1353,7 +1357,13 @@ parse_cmdline_args(const int argc, char **argv)
 		case LOPT_ONLY_DIRS:
 			xargs.only_dirs = conf.only_dirs = 1; break;
 
-		case LOPT_OPEN: { /* --open or --preview */
+		case LOPT_OPEN: /* --open or --preview */
+#ifdef _NO_LIRA
+			fprintf(stderr, "%s: open/preview: %s\n",
+				PROGRAM_NAME, _(NOT_AVAILABLE));
+			exit(EXIT_FAILURE);
+#else
+		{
 			open_prev_file = optarg;
 			int n = *argv[optind - 1] == '-' ? 1 : 2;
 			if (*(argv[optind - n] + 2) == 'p')
@@ -1361,6 +1371,7 @@ parse_cmdline_args(const int argc, char **argv)
 			else
 				open_prev_mode = OPEN_FILE; /* --open */
 		} break;
+#endif /* _NO_LIRA */
 
 		case LOPT_OPENER:
 			set_opener(optarg); break;
@@ -1422,8 +1433,10 @@ parse_cmdline_args(const int argc, char **argv)
 	xargs.secure_cmds = xargs.secure_env = 1;
 #endif /* SECURITY_PARANOID */
 
+#ifndef _NO_LIRA
 	if (open_prev_mode != 0)
 		open_preview_file(open_prev_file, open_prev_mode); /* noreturn */
+#endif /* _NO_LIRA */
 
 	char *spath = (char *)NULL;
 	if (argv[optind]) { /* Starting path passed as positional parameter */
