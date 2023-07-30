@@ -60,12 +60,17 @@
 # define STRINGIZE(x) STRINGIZE_(x)
 #endif /* CLIFM_DATADIR */
 
-#ifdef RUN_CMD
-# define OPTSTRING "+:aAb:c:C:D:eEfFgGhHiIk:lLmoOp:P:rsStvw:xyz:"
+#ifdef _BE_POSIX
+# define OPTSTRING ":aAb:B:c:CdDeEfFgGhHik:lLmMnNo:O:p:P:qQrRsSt:TuvV:w:WxXyYz:Z"
 #else
-# define OPTSTRING "+:aAb:c:D:eEfFgGhHiIk:lLmoOp:P:rsStvw:xyz:"
-#endif /* RUN_CMD */
+# ifdef RUN_CMD
+#  define OPTSTRING "+:aAb:c:C:D:eEfFgGhHiIk:lLmoOp:P:rsStvw:xyz:"
+# else
+#  define OPTSTRING "+:aAb:c:D:eEfFgGhHiIk:lLmoOp:P:rsStvw:xyz:"
+# endif /* RUN_CMD */
+#endif /* _BE_POSIX */
 
+#ifndef _BE_POSIX
 /* Macros for long options. Let's use values >= 200 to avoid conflicts
  * with short options (a-Z == 65-122). */
 #define LOPT_NO_CD_AUTO             200
@@ -252,17 +257,24 @@ static const struct option longopts[] = {
 	{"vt100", no_argument, 0, LOPT_VT100},
     {0, 0, 0, 0}
 };
+#endif /* !_BE_POSIX */
 
 __attribute__ ((noreturn))
 static void
 err_arg_required(const char *arg)
 {
+#ifdef _BE_POSIX
+	char *optname = "-h";
+#else
+	char *optname = "--help";
+#endif /* _BE_POSIX */
 	fprintf(stderr, _("%s: '%s': Option requires an argument\n"
-		"Try '%s --help' for more information.\n"), PROGRAM_NAME,
-		arg, PROGRAM_NAME);
+		"Try '%s %s' for more information.\n"), PROGRAM_NAME,
+		arg, PROGRAM_NAME, optname);
 	exit(EXIT_FAILURE);
 }
 
+#ifndef _BE_POSIX
 __attribute__ ((noreturn))
 static void
 err_invalid_opt(const char *arg)
@@ -272,6 +284,7 @@ err_invalid_opt(const char *arg)
 		PROGRAM_NAME, arg, PROGRAM_NAME);
 	exit(EXIT_FAILURE);
 }
+#endif
 
 /* If path was not set (neither in the config file nor via command line nor
  * via the RestoreLastPath option), set the default (CWD), and if CWD is not
@@ -608,7 +621,7 @@ open_reg_exit(char *filename, const int url, const int preview)
 	exit(ret);
 }
 
-static inline int
+static int
 set_sort_by_name(const char *name)
 {
 	size_t i;
@@ -621,7 +634,7 @@ set_sort_by_name(const char *name)
 	return SNAME;
 }
 
-static inline void
+static void
 set_sort(const char *arg)
 {
 	int n = 0;
@@ -631,12 +644,13 @@ set_sort(const char *arg)
 	else
 		n = atoi(arg);
 
-	if (n < 0 || n > SORT_TYPES)
-		conf.sort = SNAME;
-	else
-		conf.sort = n;
+	if (n < 0 || n > SORT_TYPES) {
+		fprintf(stderr, _("%s: -z: %s: Valid values are 0-%d\n"),
+			PROGRAM_NAME, arg, SORT_TYPES);
+		exit(EXIT_FAILURE);
+	}
 
-	xargs.sort = conf.sort;
+	xargs.sort = conf.sort = n;
 }
 
 #ifndef _NO_LIRA
@@ -681,51 +695,7 @@ RUN:
 
 	open_reg_exit(fpath, url, preview);
 }
-#endif /* _NO_LIRA */
-
-#ifndef _BE_POSIX
-static char *
-stat_file(char *file)
-{
-	if (!file || !*file)
-		exit(EXIT_FAILURE);
-
-	char *p = (char *)NULL;
-	if (*file == '~') {
-		if (!(p = tilde_expand(file))) {
-			xerror(_("%s: %s: Error expanding tilde\n"), PROGRAM_NAME, file);
-			exit(EXIT_FAILURE);
-		}
-	} else {
-		p = savestring(file, strlen(file));
-	}
-
-	struct stat a;
-	if (stat(p, &a) == -1) {
-		xerror("%s: %s: %s\n", PROGRAM_NAME, p, strerror(errno));
-		if (p != file)
-			free(p);
-		exit(errno);
-	}
-
-	return p;
-}
-#endif /* _!BE_POSIX */
-
-static void
-set_custom_selfile(char *file)
-{
-	if (!file || !*file || *file == '-')
-		err_arg_required("--sel-file"); /* noreturn */
-
-	if ( (sel_file = normalize_path(file, strlen(file))) ) {
-		xargs.sel_file = 1;
-		return;
-	}
-
-	err('e', PRINT_PROMPT, _("%s: %s: Error setting custom "
-		"selections file\n"), PROGRAM_NAME, file);
-}
+#endif /* !_NO_LIRA */
 
 static void
 set_alt_bm_file(char *file)
@@ -750,6 +720,79 @@ set_alt_bm_file(char *file)
 		"bookmarks file\n"), PROGRAM_NAME);
 
 	free(p);
+}
+
+#ifndef _BE_POSIX
+static void
+set_vt100(void)
+{
+	xargs.vt100 = 1;
+	xargs.clear_screen = conf.clear_screen = 0;
+	fzftab = 0; tabmode = STD_TAB;
+}
+
+__attribute__ ((noreturn))
+static void
+set_fzytab(void)
+{
+	fprintf(stderr, _("%s: --fzytab: We have migrated to 'fnf'.\n"
+		"Install 'fnf' (https://github.com/leo-arch/fnf) and then "
+		"use --fnftab instead\n"), PROGRAM_NAME);
+	exit(EXIT_FAILURE);
+}
+
+static void
+set_fzfpreview(const int optc)
+{
+#if !defined(_NO_FZF) && !defined(_NO_LIRA)
+	xargs.fzf_preview = 1;
+	conf.fzf_preview = optc == LOPT_FZFPREVIEW ? 1 : 2;
+	xargs.fzftab = fzftab = 1; tabmode = FZF_TAB;
+#else
+	UNUSED(optc);
+	fprintf(stderr, "%s: --fzf-preview: %s\n",
+		PROGRAM_NAME, _(NOT_AVAILABLE));
+	exit(EXIT_FAILURE);
+#endif /* !_NO_FZF && !_NO_LIRA */
+}
+
+static void
+set_datadir(char *opt)
+{
+	if (!opt || !*opt || *opt == '-')
+		err_arg_required("--data-dir"); /* noreturn */
+
+	get_data_dir_from_path(opt);
+}
+
+static void
+set_fuzzy_algo(const char *opt)
+{
+	int a = opt ? atoi(opt) : -1;
+
+	if (a < 1 || a > FUZZY_ALGO_MAX) {
+		fprintf(stderr, _("%s: %s: Invalid fuzzy algorithm. Valid "
+			"values are either 1 or 2.\n"), PROGRAM_NAME, opt ? opt : "NULL");
+		exit(EXIT_FAILURE);
+	}
+
+	xargs.fuzzy_match_algo = conf.fuzzy_match_algo = a;
+}
+
+static void
+set_bell_style(const char *opt)
+{
+	int a = atoi(opt);
+
+	if (!is_number(opt) || a < 0 || a > 3) {
+		fprintf(stderr, _("%s: %s: Invalid bell style. Valid values "
+			"are 0:none, 1:audible, 2:visible (requires readline >= 8.1), "
+			"3:flash. Defaults to 'visible', and, if not possible, 'none'.\n"),
+			PROGRAM_NAME, opt);
+		exit(EXIT_FAILURE);
+	}
+
+	xargs.bell_style = a;
 }
 
 static void
@@ -790,6 +833,58 @@ set_alt_config_dir(char *dir)
 
 	free(dir_exp);
 }
+
+static void
+set_custom_selfile(char *file)
+{
+	if (!file || !*file || *file == '-')
+		err_arg_required("--sel-file"); /* noreturn */
+
+	if ( (sel_file = normalize_path(file, strlen(file))) ) {
+		xargs.sel_file = 1;
+		return;
+	}
+
+	err('e', PRINT_PROMPT, _("%s: %s: Error setting custom "
+		"selections file\n"), PROGRAM_NAME, file);
+}
+
+static char *
+stat_file(char *file)
+{
+	if (!file || !*file)
+		exit(EXIT_FAILURE);
+
+	char *p = (char *)NULL;
+	if (*file == '~') {
+		if (!(p = tilde_expand(file))) {
+			xerror(_("%s: %s: Error expanding tilde\n"), PROGRAM_NAME, file);
+			exit(EXIT_FAILURE);
+		}
+	} else {
+		p = savestring(file, strlen(file));
+	}
+
+	struct stat a;
+	if (stat(p, &a) == -1) {
+		xerror("%s: %s: %s\n", PROGRAM_NAME, p, strerror(errno));
+		if (p != file)
+			free(p);
+		exit(errno);
+	}
+
+	return p;
+}
+
+static void
+set_shotgun_file(char *opt)
+{
+	if (!opt || !*opt || *opt == '-')
+		err_arg_required("--shotgun-file"); /* noreturn */
+
+	alt_preview_file = stat_file(opt);
+}
+#endif /* !_BE_POSIX */
 
 static void
 set_alt_kbinds_file(char *file)
@@ -970,11 +1065,11 @@ set_alt_profile(const char *name)
 }
 
 static void
-set_virtual_dir(const char *str)
+set_virtual_dir(const char *str, const char *optname)
 {
 	if (!str || *str != '/') {
-		fprintf(stderr, _("%s: '--virtual-dir': Absolute path "
-			"is required as argument\n"), PROGRAM_NAME);
+		fprintf(stderr, _("%s: '%s': Absolute path is required "
+			"as argument\n"), PROGRAM_NAME, optname);
 		exit(EXIT_FAILURE);
 	}
 
@@ -1012,51 +1107,21 @@ ERROR:
 }
 
 static void
-set_bell_style(const char *opt)
-{
-	int a = atoi(opt);
-
-	if (!is_number(opt) || a < 0 || a > 3) {
-		fprintf(stderr, _("%s: %s: Invalid bell style. Valid values "
-			"are 0:none, 1:audible, 2:visible (requires readline >= 8.1), "
-			"3:flash. Defaults to 'visible', and, if not possible, 'none'.\n"),
-			PROGRAM_NAME, opt);
-		exit(EXIT_FAILURE);
-	}
-
-	xargs.bell_style = a;
-}
-
-static void
-set_fuzzy_algo(const char *opt)
-{
-	int a = opt ? atoi(opt) : -1;
-
-	if (a < 1 || a > FUZZY_ALGO_MAX) {
-		fprintf(stderr, _("%s: %s: Invalid fuzzy algorithm. Valid "
-			"values are either 1 or 2.\n"), PROGRAM_NAME, opt ? opt : "NULL");
-		exit(EXIT_FAILURE);
-	}
-
-	xargs.fuzzy_match_algo = conf.fuzzy_match_algo = a;
-}
-
-static void
-set_color_scheme(const char *opt)
+set_color_scheme(const char *opt, const char *optname)
 {
 	if (!opt || !*opt || *opt == '-')
-		err_arg_required("--color-scheme"); /* noreturn */
+		err_arg_required(optname); /* noreturn */
 
 	conf.usr_cscheme = savestring(opt, strlen(opt));
 }
 
 static void
-set_datadir(char *opt)
+set_no_colors(void)
 {
-	if (!opt || !*opt || *opt == '-')
-		err_arg_required("--data-dir"); /* noreturn */
-
-	get_data_dir_from_path(opt);
+	xargs.colorize = conf.colorize = 0;
+#ifndef _NO_HIGHLIGHT
+	xargs.highlight = conf.highlight = 0;
+#endif /* !_NO_HIGHLIGHT */
 }
 
 static void
@@ -1071,21 +1136,6 @@ set_fnftab(void)
 }
 
 static void
-set_fzfpreview(const int optc)
-{
-#if !defined(_NO_FZF) && !defined(_NO_LIRA)
-	xargs.fzf_preview = 1;
-	conf.fzf_preview = optc == LOPT_FZFPREVIEW ? 1 : 2;
-	xargs.fzftab = fzftab = 1; tabmode = FZF_TAB;
-#else
-	UNUSED(optc);
-	fprintf(stderr, "%s: fzf-preview: %s\n",
-		PROGRAM_NAME, _(NOT_AVAILABLE));
-	exit(EXIT_FAILURE);
-#endif /* !_NO_FZF && !_NO_LIRA */
-}
-
-static void
 set_fzftab(void)
 {
 #ifndef _NO_FZF
@@ -1096,36 +1146,6 @@ set_fzftab(void)
 	exit(EXIT_FAILURE);
 #endif /* !_NO_FZF */
 }
-
-__attribute__ ((noreturn))
-static void
-set_fzytab(void)
-{
-	fprintf(stderr, _("%s: --fzytab: We have migrated to 'fnf'.\n"
-		"Install 'fnf' (https://github.com/leo-arch/fnf) and then "
-		"use --fnftab instead\n"), PROGRAM_NAME);
-	exit(EXIT_FAILURE);
-}
-
-static void
-set_no_colors(void)
-{
-	xargs.colorize = conf.colorize = 0;
-#ifndef _NO_HIGHLIGHT
-	xargs.highlight = conf.highlight = 0;
-#endif /* !_NO_HIGHLIGHT */
-}
-
-#ifndef _BE_POSIX
-static void
-set_shotgun_file(char *opt)
-{
-	if (!opt || !*opt || *opt == '-')
-		err_arg_required("--shotgun-file"); /* noreturn */
-
-	alt_preview_file = stat_file(opt);
-}
-#endif /* !_BE_POSIX */
 
 static void
 set_smenutab(void)
@@ -1168,14 +1188,6 @@ set_trash_as_rm(void)
 #endif /* !_NO_TRASH */
 }
 
-static void
-set_vt100(void)
-{
-	xargs.vt100 = 1;
-	xargs.clear_screen = conf.clear_screen = 0;
-	fzftab = 0; tabmode = STD_TAB;
-}
-
 __attribute__ ((noreturn))
 static void
 print_version(void)
@@ -1189,8 +1201,169 @@ print_version(void)
 	exit(EXIT_SUCCESS);
 }
 
+#ifdef _BE_POSIX
+static void
+set_tab_mode(const char *opt)
+{
+	if (!opt || !*opt || opt[1])
+		return;
+
+	int n = *opt - '0';
+
+	switch (n) {
+	case 0:	set_stdtab(); break;
+	case 1:	set_fzftab(); break;
+	case 2: set_smenutab(); break;
+	case 3: set_fnftab(); break;
+	default:
+		fprintf(stderr, _("%s: %s: Valid values are 0-3\n"), PROGRAM_NAME, opt);
+		exit(EXIT_FAILURE);
+	}
+}
+#endif /* _BE_POSIX */
+
 /* Evaluate command line arguments, if any, and change initial variables to
  * their corresponding values. */
+#ifdef _BE_POSIX
+/* POSIX version: getopt(3) is used (instead of getopt_long(3)) and only
+ * short options are provided. */
+void
+parse_cmdline_args(const int argc, char **argv)
+{
+	opterr = optind = 0;
+	int optc;
+#ifndef _NO_LIRA
+	int open_prev_mode = 0;
+	char *open_prev_file = (char *)NULL;
+#endif /* !_NO_LIRA */
+
+	while ((optc = getopt(argc, argv, OPTSTRING)) != EOF) {
+		switch (optc) {
+		case 'a': conf.show_hidden = xargs.hidden = 0; break;
+		case 'A': conf.show_hidden = xargs.hidden = 1; break;
+		case 'b': xargs.bm_file = 1; set_alt_bm_file(optarg); break;
+		case 'B': set_tab_mode(optarg); break;
+		case 'c': xargs.config = 1; set_alt_config_file(optarg); break;
+		case 'C': xargs.clear_screen = conf.clear_screen = 0; break;
+		case 'd': xargs.disk_usage = conf.disk_usage = 1; break;
+		case 'D': xargs.only_dirs = conf.only_dirs = 1; break;
+		case 'e': xargs.auto_open = conf.auto_open = 0; break;
+		case 'E': xargs.autocd = conf.autocd = 0; break;
+		case 'f': xargs.full_dir_size = conf.full_dir_size = 1; break;
+		case 'F': xargs.files_counter = conf.files_counter = 0; break;
+		case 'g': xargs.si = 1; break;
+		case 'G': xargs.apparent_size = conf.apparent_size = 0; break;
+		case 'h': help_function(); break; /* noreturn */
+		case 'H':
+#ifndef _NO_HIGHLIGHT
+			xargs.highlight = conf.highlight = 0;
+#endif /* !_NO_HIGHLIGHT */
+			break;
+		case 'i':
+#ifndef _NO_ICONS
+			xargs.icons = conf.icons = 1; break;
+#else
+			fprintf(stderr, "%s: icons: %s\n", PROGRAM_NAME, _(NOT_AVAILABLE));
+			exit(EXIT_FAILURE);
+#endif /* !_NO_ICONS */
+		case 'k': set_alt_kbinds_file(optarg); break;
+		case 'l': conf.long_view = xargs.longview = 1; break;
+		case 'L': xargs.follow_symlinks = follow_symlinks = 0; break;
+		case 'm': xargs.fuzzy_match = conf.fuzzy_match = 1; break;
+		case 'M': set_no_colors(); break;
+		case 'n': xargs.history = 0; break;
+		case 'N': xargs.no_bold = 1; break;
+		case 'o': set_opener(optarg); break;
+		case 'O':
+#ifdef _NO_LIRA
+			fprintf(stderr, "%s: open: %s\n", PROGRAM_NAME, _(NOT_AVAILABLE));
+			exit(EXIT_FAILURE);
+#else
+			open_prev_file = optarg;
+			open_prev_mode = OPEN_FILE;
+			break;
+#endif /* _NO_LIRA */
+		case 'p': set_alt_profile(optarg); break;
+		case 'P':
+#ifdef _NO_LIRA
+			fprintf(stderr, "%s: preview: %s\n", PROGRAM_NAME, _(NOT_AVAILABLE));
+			exit(EXIT_FAILURE);
+#else
+			open_prev_file = optarg;
+			open_prev_mode = PREVIEW_FILE;
+			break;
+#endif /* _NO_LIRA */
+		case 'q': xargs.list_and_quit = 1; break;
+		case 'Q': xargs.cd_on_quit = conf.cd_on_quit = 1; break;
+		case 'r': set_trash_as_rm(); break;
+		case 'R': xargs.classify = conf.classify = 0; break;
+		case 's': xargs.stealth_mode = 1; break;
+		case 'S': set_no_suggestions(); break;
+		case 't': set_color_scheme(optarg, "-t"); break;
+		case 'T': xargs.trim_names = conf.trim_names = 0; break;
+		case 'u': xargs.disk_usage_analyzer = 1; break;
+		case 'v': print_version(); /* noreturn */
+		case 'V': set_virtual_dir(optarg, "-V"); break;
+		case 'w': set_workspace(optarg); break;
+		case 'W': xargs.printsel = conf.print_selfiles = 1; break;
+		case 'x':
+			xargs.secure_env = 1;
+			xsecure_env(SECURE_ENV_IMPORT);
+			break;
+		case 'X':
+			xargs.secure_env_full = 1;
+			xsecure_env(SECURE_ENV_FULL);
+			break;
+		case 'y': conf.light_mode = xargs.light = 1; break;
+		case 'Y':
+			xargs.secure_cmds = xargs.secure_env = 1;
+			xsecure_env(SECURE_ENV_IMPORT);
+			break;
+		case 'z': set_sort(optarg); break;
+		case 'Z':
+			set_max_value(optarg, &xargs.max_files, &max_files);
+			break;
+
+		/* Handle error */
+		case ':':
+			fprintf(stderr, _("%s: Option '-%c' requires an argument.\n"
+				"Try '%s -h' for more information.\n"),
+				PROGRAM_NAME, optopt, PROGRAM_NAME);
+			exit(EXIT_FAILURE);
+		case '?':
+			fprintf(stderr, _("%s: Unrecognized option: '-%c'\n"
+				"Try '%s -h' for more information.\n"),
+				PROGRAM_NAME, optopt, PROGRAM_NAME);
+			exit(EXIT_FAILURE);
+
+		default: break;
+		}
+	}
+
+#ifdef SECURITY_PARANOID
+	if (xargs.secure_env != 1 && xargs.secure_env_full != 1)
+		xsecure_env(SECURE_ENV_IMPORT);
+	xargs.secure_cmds = xargs.secure_env = 1;
+#endif /* SECURITY_PARANOID */
+
+#ifndef _NO_LIRA
+	if (open_prev_mode != 0)
+		open_preview_file(open_prev_file, open_prev_mode); /* noreturn */
+#endif /* !_NO_LIRA */
+
+	if (argv[optind]) { /* Starting path passed as positional parameter */
+		char *spath = resolve_starting_path(argv[optind]);
+		if (spath) {
+			set_starting_path(spath);
+			free(spath);
+		}
+	}
+
+}
+
+#else
+/* Non-POSIX version: getopt_long(3) is used and long options are
+* supported. */
 void
 parse_cmdline_args(const int argc, char **argv)
 {
@@ -1263,7 +1436,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case LOPT_CD_ON_QUIT:
 			xargs.cd_on_quit = conf.cd_on_quit = 1; break;
 		case LOPT_COLOR_SCHEME:
-			set_color_scheme(optarg); break;
+			set_color_scheme(optarg, "--color-scheme"); break;
 		case LOPT_CWD_IN_TITLE:
 			xargs.cwd_in_title = 1; break;
 		case LOPT_DATA_DIR:
@@ -1430,7 +1603,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case LOPT_TRASH_AS_RM:
 			set_trash_as_rm(); break;
 		case LOPT_VIRTUAL_DIR:
-			set_virtual_dir(optarg); break;
+			set_virtual_dir(optarg, "--virtual-dir"); break;
 		case LOPT_VIRTUAL_DIR_FULL_PATHS:
 			xargs.virtual_dir_full_paths = 1; break;
 		case LOPT_VT100:
@@ -1470,3 +1643,4 @@ parse_cmdline_args(const int argc, char **argv)
 		free(spath);
 	}
 }
+#endif /* _BE_POSIX */

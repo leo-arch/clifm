@@ -26,8 +26,7 @@
 #define MESSAGES_H
 
 /* Usage messages */
-#define GRAL_USAGE "[-aAeEfFgGhHiIlLmoOprsStuUvwWxy] [-b FILE] [-c FILE] [-D DIR] \
-[-k FILE] [-P PROFILE] [-z METHOD] [PATH]"
+# define GRAL_USAGE "[OPTIONS] [DIR]"
 
 #define ACTIONS_USAGE "List or edit actions/plugins\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
@@ -1218,6 +1217,56 @@ Page Down: Advance one page\nq: Stop pagging\n"
 # define HELP_MESSAGE "Enter '?' or press F5-F7 for instructions"
 #endif /* !__HAIKU__ */
 
+#ifdef _BE_POSIX
+#define OPTIONS_LIST "\
+\n -a       List hidden files\
+\n -A       Do not list hidden files\
+\n -b FILE  Set an alternative bookmarks file\
+\n -B NUM   Set TAB-completion mode (NUM=[0-3])\
+\n -c FILE  Set an alternative main configuration file\
+\n -C       Do not clear the screen when changing directories\
+\n -d       Print disk usage (free/total)\
+\n -D       List directories only\
+\n -e       Force the use of the 'o/open' command to open files\
+\n -E       Force the use of 'cd' to change directories\
+\n -f       Print full directories size (long view mode only)\
+\n -F       Disable the files counter (directories)\
+\n -g       Print file sizes in powers of 1000 instead of 1024\
+\n -G       Print file sizes as used blocks instead of used bytes\
+\n -h       Print this help and exit\
+\n -H       Disable syntax-highlighting\
+\n -i       Enable icons\
+\n -k FILE  Set an alternative keybindings file\
+\n -l       List files in long view mode\
+\n -L       Do not follow symbolic links\
+\n -m       Enable fuzzy matching\
+\n -M       Disable colors\
+\n -n       Disable commands history\
+\n -N       Disable bold colors\
+\n -o PATH  Set a custom resource opener (instead of the built-in Lira)\
+\n -O FILE  Open FILE (via Lira) and exit\
+\n -p NAME  Set/create the profile NAME\
+\n -P FILE  Generate a preview of FILE and exit\
+\n -q       List files and quit\
+\n -Q       Enable cd-on-quit (consult the manpage)\
+\n -r       Files removed via the 'r' command are sent to the trash can\
+\n -R       Do not append file type indicators\
+\n -s       Run in stealth mode (incognito)\
+\n -S       Disable suggestions\
+\n -t NAME  Use the color scheme NAME\
+\n -T       Do not trim file names\
+\n -u       Run in disk usage analyzer mode\
+\n -v       Print version information and exit\
+\n -V DIR   Set a custom virtual directory\
+\n -w NUM   Start in workspace NUM (1-8)\
+\n -W       Keep the list of selected files in sight\
+\n -x       Run in secure-environment mode\
+\n -X       Run in secure-environment mode (paranoid)\
+\n -y       Run in light mode\
+\n -Y       Run in secure-commands mode\
+\n -z NUM   Set a files sorting method (NUM=[1-11])\
+\n -Z NUM   List only up to NUM files"
+#else
 #define SHORT_OPTIONS "\
 \n  -a, --no-hidden\t\t Do not show hidden files (default)\
 \n  -A, --show-hidden\t\t Show hidden files\
@@ -1329,6 +1378,7 @@ rm(1) to prevent accidental deletions\
 \n      --virtual-dir-full-paths\t Files in virtual directories are listed as full paths instead of target base names\
 \n      --virtual-dir=PATH\t Absolute path to a directory to be used as virtual directory\
 \n      --vt100\t\t\t Run in vt100 compatibility mode\n"
+#endif /* _BE_POSIX */
 
 #define CLIFM_COMMANDS_HEADER "\
 For a complete description of all the below \

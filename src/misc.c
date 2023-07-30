@@ -2415,11 +2415,23 @@ __attribute__ ((noreturn))
 void
 help_function(void)
 {
+#ifdef _BE_POSIX
+	char *posix = "-POSIX";
+#else
+	char *posix = "";
+#endif /* _BE_POSIX */
+
 	fputs(NC, stdout);
 	printf("%s\n", ASCII_LOGO);
-	printf(_("%s %s (%s), by %s\n"), PROGRAM_NAME, VERSION, DATE, AUTHOR);
-	printf("\nUSAGE: %s %s\n%s%s%s", PROGRAM_NAME, GRAL_USAGE, _(SHORT_OPTIONS),
-		_(LONG_OPTIONS_A), _(LONG_OPTIONS_B));
+	printf(_("%s %s%s (%s), by %s\n"), PROGRAM_NAME, VERSION,
+		posix, DATE, AUTHOR);
+#ifdef _BE_POSIX
+	printf("\nUSAGE: %s %s\n%s\n", PROGRAM_NAME, GRAL_USAGE,
+		_(OPTIONS_LIST));
+#else
+	printf("\nUSAGE: %s %s\n%s%s%s", PROGRAM_NAME, GRAL_USAGE,
+		_(SHORT_OPTIONS), _(LONG_OPTIONS_A), _(LONG_OPTIONS_B));
+#endif /* _BE_POSIX */
 
 	puts("\nBUILT-IN COMMANDS:\n");
 	puts(_(CLIFM_COMMANDS_HEADER));
