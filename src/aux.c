@@ -48,29 +48,6 @@
 # include "highlight.h"
 #endif /* !_NO_HIGHLIGHT */
 
-/*
-#if !defined(_BE_POSIX)
-# if defined(__linux__)
-#  if !defined(__GLIBC__) || __GLIBC__ > 2 \
-|| (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 2)
-#   define HAVE_MEMRCHR
-#  endif // GLIBC >= 2.2
-# elif defined(__CYGWIN__)
-#  define HAVE_MEMRCHR
-# elif defined(__OpenBSD__) && OpenBSD >= 200805 // 4.3
-#  define HAVE_MEMRCHR
-# elif defined(__NetBSD__)
-#  if __NetBSD_Prereq__(6, 0, 0)
-#   define HAVE_MEMRCHR
-#  endif
-# elif defined(__FreeBSD__) && __FreeBSD_version >= 604000 // 6.4
-#  define HAVE_MEMRCHR
-# elif defined(__DragonFly__) && __DragonFly_version >= 300900 // 3.9 at least
-#  define HAVE_MEMRCHR
-# endif
-// Since OpenBSD 4.3, FreeBSD 6.4, NetBSD 6.0, linux (glibc 2.2)
-#endif // !_BE_POSIX */
-
 #ifndef _NO_ICONS
 /* Generate a hash of the string STR (case sensitively if CASE_SENTITIVE is
  * set to 1).
@@ -359,10 +336,10 @@ get_cwd(char *buf, const size_t buflen, const int check_workspace)
 	return tmp;
 }
 
-//#ifndef HAVE_MEMRCHR
-/* OpenBSD implementation of memrchr(), licensed MIT. */
-static void *
-xmemrchr(const void *s, int c, size_t n)
+/* OpenBSD implementation of memrchr(), licensed MIT.
+ * Modified code is licensed GPL2+. */
+static const void *
+xmemrchr(const void *s, const int c, size_t n)
 {
 	const unsigned char *cp;
 
@@ -373,9 +350,9 @@ xmemrchr(const void *s, int c, size_t n)
 				return((void *)cp);
 		} while (--n != 0);
 	}
-	return(NULL);
+
+	return (NULL);
 }
-//#endif /* !HAVE_MEMRCHR */
 
 /* Canonicalize/normalize the path SRC without resolving symlinks.
  * SRC is deescaped if necessary.
@@ -476,12 +453,7 @@ normalize_path(char *src, const size_t src_len)
 
 		case 2:
 			if (ptr[0] == '.' && ptr[1] == '.') {
-//#ifdef HAVE_MEMRCHR
-//				const char *slash = memrchr(res, '/', res_len);
-//#else
-//				const char *slash = strrchr(res, '/');
 				const char *slash = xmemrchr(res, '/', res_len);
-//#endif /* HAVE_MEMRCHR */
 				if (slash)
 					res_len = (size_t)(slash - res);
 				continue;
