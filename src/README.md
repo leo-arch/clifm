@@ -299,7 +299,7 @@ make -f misc/GNU/Makefile _NO_GETTEXT=1 _NO_ICONS=1
 
 | Option | Description |
 | --- | --- |
-| `_BE_POSIX` | Build a `POSIX.1-2008` compliant executable<sup>1</sup> |
+| `POSIX_STRICT` | Build a `POSIX.1-2008` compliant executable<sup>1</sup> |
 | `CLIFM_SUCKLESS` | Remove all code aimed at parsing config files. Configuration is done either via `settings.h` (and recompilation) or via [environment variables](https://github.com/leo-arch/clifm/wiki/Specifics#environment)<sup>2</sup> |
 | `_ICONS_IN_TERMINAL` | Use icons-in-terminal for [icons](https://github.com/leo-arch/clifm/wiki/Advanced/#icons-smirk) instead of the default (emoji-icons) |
 | `_NERD` | Use Nerdfonts for [icons](https://github.com/leo-arch/clifm/wiki/Advanced/#icons-smirk) instead of the default (emoji-icons) |
@@ -324,7 +324,7 @@ make -f misc/GNU/Makefile _NO_GETTEXT=1 _NO_ICONS=1
 | `USE_GENERIC_FS_MONITOR` | Use the generic file system events monitor instead of inotify (Linux) or kqueue (BSD) |
 | `_VANILLA_READLINE` | Disable all **clifm** specific features added to readline: syntax highlighting, autosuggestions, TAB completion for **clifm** specific features/commands, and alternative TAB completion modes (fzf, fnf, and smenu) |
 
-<sup>1</sup> By POSIX-compliance `strict-compliance` is understood: features/fuctions _not_ specified in the POSIX.1-2008 standard are avoided _as much as possible_ (i.e. we do not guarantee a 100% strict-POSIX compliant application). Features/functions disabled in POSIX mode: ACLs, files birth time, capabilities, attributes, and extended attributes, BSD file flags, Solaris doors, `Lira` and the archiving functions (`ac`/`ad`) (depend on `libmagic`), `media`/`mp` commands (depend on OS-specific functions), non-POSIX options for shell utilities (rm, cp, mv, etc), `inotify`/`kqueue` (replaced by a built-in file system events monitor), **strcasestr**(3) (replaced by our own x_strcasestr()), and **arc4random**(3) (replaced by the older and less secure **random**(3)). For more information about POSIX compliance see https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap02.html#tag_02_01_04.
+<sup>1</sup> By POSIX-compliance `strict POSIX-1.2008/XSI compliance` is understood: features/fuctions _not_ specified in the POSIX standard are avoided _as much as possible_ (mostly because we still rely heavily on **readline**(3), which is not POSIX). Features/functions disabled in POSIX mode: ACLs, files birth time, capabilities, attributes, and extended attributes, BSD file flags, Solaris doors, `Lira` and the archiving functions (`ac`/`ad`) (depend on `libmagic` - can be enabled via the **ALLOW_LIRA** and **ALLOW_ARCHIVING** flags respectivelly), `media`/`mp` commands (depend on OS-specific functions - can be enabled via **ALLOW_MEDIA**), non-POSIX options for shell utilities (rm, cp, mv, etc), `inotify`/`kqueue` (replaced by a built-in file system events monitor), **strcasestr**(3) and **memrchr**(3) are replaced by built-in functions, and **arc4random**(3) is replaced by the older and less secure **random**(3). For more information about POSIX compliance see https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap02.html#tag_02_01_04.
 
 <sup>2</sup> The [stealth mode](https://github.com/leo-arch/clifm/wiki/Specifics#stealth-mode) achieves basically the same functionality: disabling access to config files. However, there is an important difference: if compiled with `CLIFM_SUCKLESS`, functions handling configuration files are directly removed from the source code, resulting in a smaller binary.
 
