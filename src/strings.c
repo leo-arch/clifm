@@ -248,7 +248,7 @@ xstrnlen(const char *restrict s)
 size_t
 xstrsncpy(char *restrict dst, const char *restrict src, size_t n)
 {
-	char *end = memccpy(dst, src, '\0', n);
+	char *end = xmemccpy(dst, src, '\0', n);
 	if (!end) {
 		dst[n - 1] = '\0';
 		end = dst + n;

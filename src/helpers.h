@@ -76,10 +76,13 @@
 #define _TIME_BITS 64
 
 #define xstrcasestr strcasestr
+#define xmemccpy memccpy
 
 #ifdef _BE_POSIX
-# undef xstrcasestr
+# undef  xstrcasestr
 # define xstrcasestr x_strcasestr
+# undef  xmemccpy
+# define xmemccpy x_memccpy
 # define _NO_GETTEXT
 # ifndef ALLOW_MEDIA
 #  define NO_MEDIA_FUNC
