@@ -412,11 +412,14 @@ get_mime(char *file)
 	fclose(file_fp_err);
 
 /* --mime-type is only available since file 4.24 (Mar, 2008), while the -i
- * flag is supported since 3.30 (Apr, 2000).
+ * flag (-I in MacOS) is supported since 3.30 (Apr, 2000).
  * NOTE: the -i flag in the POSIX file(1) specification is a completely
  * different thing. */
-/*	char *cmd[] = {"file", "--mime-type", "--brief", file, NULL}; */
+#ifdef __APPLE__
+	char *cmd[] = {"file", "-bI", file, NULL};
+#else
 	char *cmd[] = {"file", "-bi", file, NULL};
+#endif /* __APPLE__ */
 	int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 
 	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
