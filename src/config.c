@@ -56,7 +56,7 @@
 #define DUMP_CONFIG_INT  1
 #define DUMP_CONFIG_BOOL 2
 
-/* Regenerate the configuration file and create a back up of the old one */
+/* Regenerate the configuration file and create a back up of the old one. */
 static int
 regen_config(void)
 {
@@ -80,11 +80,13 @@ regen_config(void)
 		char bk[PATH_MAX];
 		snprintf(bk, sizeof(bk), "%s.%s", config_file, date);
 
-		char *cmd[] = {"mv", config_file, bk, NULL};
-		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+		if (renameat(XAT_FDCWD, config_file, XAT_FDCWD, bk) == -1) {
+			xerror(_("Cannot rename file '%s': %s\n"),
+				config_file, strerror(errno));
 			return EXIT_FAILURE;
+		}
 
-		printf(_("Old configuration file stored as '%s'\n"), bk);
+		printf(_("Old configuration file written to '%s'\n"), bk);
 	}
 
 	if (create_main_config_file(config_file) != EXIT_SUCCESS)
