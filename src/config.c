@@ -58,17 +58,29 @@
 
 #ifndef _NO_FZF
 /* Determine input and output files to be used by the fuzzy finder (either
- * fzf or fnf)
+ * fzf or fnf).
  * Let's do this even if fzftab is not enabled at startup, because this feature
- * can be enabled in place editing the config file */
+ * can be enabled in place editing the config file.
+ *
+ * NOTE: Why do the random file extensions have different lengths? If
+ * compiled in POSIX mode, gen_rand_ext() uses srandom(3) and random(3) to
+ * generate the string, but since both extensions are generated at the same
+ * time, they happen to be the same, resulting in both file names being
+ * identical. As a workaround, we use different lengths for both extensions. */
 void
 set_finder_paths(void)
 {
 	char *p = xargs.stealth_mode == 1 ? P_tmpdir : tmp_dir;
-	snprintf(finder_in_file, sizeof(finder_in_file), "%s/%s.finder.in",
-		p, PROGRAM_NAME);
-	snprintf(finder_out_file, sizeof(finder_out_file), "%s/%s.finder.out",
-		p, PROGRAM_NAME);
+
+	char *rand_ext = gen_rand_str(10);
+	snprintf(finder_in_file, sizeof(finder_in_file), "%s/%s.%s",
+		p, PROGRAM_NAME, rand_ext ? rand_ext : "a3_2yu!d43");
+	free(rand_ext);
+
+	rand_ext = gen_rand_str(16);
+	snprintf(finder_out_file, sizeof(finder_out_file), "%s/%s.%s",
+		p, PROGRAM_NAME, rand_ext ? rand_ext : "0rNkds7++@");
+	free(rand_ext);
 }
 #endif /* _NO_FZF */
 
