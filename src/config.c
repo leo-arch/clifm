@@ -1939,10 +1939,10 @@ create_config_files(void)
 				 * #    CONFIG DIR    #
 				 * #################### */
 
-	/* If the config directory doesn't exist, create it */
-	/* Use the mkdir(1) to let it handle parent directories */
+	/* If the config directory doesn't exist, create it. */
+	/* Use the mkdir(1) to let it handle parent directories. */
 	if (stat(config_dir, &attr) == -1) {
-		char *tmp_cmd[] = {"mkdir", "-p", config_dir, NULL};
+		char *tmp_cmd[] = {"mkdir", "-pm700", "--", config_dir, NULL};
 		if (launch_execv(tmp_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 			config_ok = 0;
 			err('e', PRINT_PROMPT, _("%s: mkdir: '%s': Error creating "
@@ -3252,7 +3252,6 @@ init_config(void)
 	split_old_log_file();
 #endif /* !_NO_SPLIT_LOG */
 ///////////////////////
-
 
 #ifndef CLIFM_SUCKLESS
 	cschemes_n = get_colorschemes();
