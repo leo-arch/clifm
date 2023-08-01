@@ -1305,8 +1305,8 @@ check_eln(const char *str, const int print)
 	if (!str || !*str)
 		return NO_MATCH;
 
-	int n = atoi(str);
-	if ( n < 1 || (filesn_t)n > files || !file_info[n - 1].name
+	filesn_t n = xatof(str);
+	if ( n < 1 || n > files || !file_info[n - 1].name
 	|| ( words_num == 1 && ( (file_info[n - 1].dir == 1 && conf.autocd == 0)
 	|| (file_info[n - 1].dir == 0 && conf.auto_open == 0) ) ) )
 		return NO_MATCH;
@@ -2571,8 +2571,8 @@ CHECK_FIRST_WORD:
 
 	} else if (point_is_first_word && rl_point < rl_end
 	&& *word >= '1' && *word <= '9' && is_number(word)) {
-		int a = atoi(word);
-		if (a > 0 && (filesn_t)a <= files)
+		filesn_t a = xatof(word);
+		if (a > 0 && a <= files)
 			printed = PARTIAL_MATCH;
 
 	} else if (point_is_first_word && rl_point < rl_end
@@ -2598,7 +2598,7 @@ CHECK_FIRST_WORD:
 		}
 		goto SUCCESS;
 
-	/* Let's suppose that two slashes do not constitue a search expression */
+	/* Let's assume that two slashes do not constitue a search expression */
 	} else {
 	/* There's no suggestion nor any command name matching the first entered
 	 * word. So, we assume we have an invalid command name. Switch to the
