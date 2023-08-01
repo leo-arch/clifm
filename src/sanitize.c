@@ -172,6 +172,7 @@ sanitize_shell_level(char *str)
 
 /* Sanitize the environment: set environ to NULL and then set a few
  * environment variables to get a minimally working environment.
+ * Non-standard file descriptors are closed.
  * Core dumps are disabled.
  * Umask is set to the most restrictive value: 0077. */
 int

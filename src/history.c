@@ -243,7 +243,7 @@ write_msg_into_logfile(const char *_msg)
 		/* Do not log this error: We might enter into an infinite loop
 		 * trying to access a file that cannot be accessed. Just warn the user
 		 * and print the error to STDERR */
-		xerror("%s: %s: %s\n", PROGRAM_NAME, msgs_log_file, strerror(errno));
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, msgs_log_file, strerror(errno));
 		fputs("Press any key to continue... ", stdout);
 		xgetchar();
 		putchar('\n');
