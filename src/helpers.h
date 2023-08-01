@@ -56,33 +56,28 @@
 #  endif /* __NetBSD__ */
 # elif defined(__sun)
 #  define __EXTENSIONS__
-# endif // BSD
+# endif /* BSD */
 
-#else
+#else /* !POSIX */
 # if defined(__linux__) || defined(__CYGWIN__)
 #  define _GNU_SOURCE
 # elif defined(__APPLE__)
 #  define _DARWIN_C_SOURCE
-# endif // __linux__ || __CYGWIN__
-#endif // _BE_POSIX
+# endif /* __linux__ || __CYGWIN__ */
+#endif /* _BE_POSIX */
 
 #ifdef __TINYC__
 # define __STDC_NO_VLA__ 1
 #endif /* __TINYC__ */
 
-/* Support large files */
-#define _FILE_OFFSET_BITS 64
-/* Address Y2038 problem in 32 bits machines */
-#define _TIME_BITS 64
+#define _FILE_OFFSET_BITS 64 /* Support large files */
+#define _TIME_BITS 64 /* Address Y2038 problem in 32-bit machines */
 
 #define xstrcasestr strcasestr
-#define xmemccpy memccpy
 
 #ifdef _BE_POSIX
 # undef  xstrcasestr
 # define xstrcasestr x_strcasestr
-# undef  xmemccpy
-# define xmemccpy x_memccpy
 # define _NO_GETTEXT
 # ifndef ALLOW_MEDIA
 #  define NO_MEDIA_FUNC

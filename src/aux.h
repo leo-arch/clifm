@@ -66,9 +66,6 @@ int  xatoi(const char *);
 char *xitoa(long long);
 char xgetchar(void);
 int  xmkdir(char *, const mode_t);
-#ifdef _BE_POSIX
-void *x_memccpy(void *, const void *, int, size_t);
-#endif /* _BE_POSIX */
 
 #ifndef _NO_ICONS
 size_t hashme(const char *, const int);

@@ -194,8 +194,9 @@ xstrrpbrk(char *s, const char *accept)
 	return (char *)NULL;
 }
 
-#if defined(_BE_POSIX)
-/* strcasestr(3) is a not POSIX: let's use this as replacement. */
+#ifdef _BE_POSIX
+/* strcasestr(3) is a not POSIX: let's use this as replacement.
+ * Find the first occurrence of the string B in the string A, ignoring case. */
 char *
 x_strcasestr(char *a, char *b)
 {
@@ -204,26 +205,26 @@ x_strcasestr(char *a, char *b)
 
 	size_t f = 0;
 	char *p = (char *)NULL, *bb = b;
-	while (*a) {
+	while (*a && *b) {
 		if (TOUPPER(*a) != TOUPPER(*b)) {
-			if (f == 1)
+			if (f == 1) {
 				b = bb;
-			++a;
+				f = 0;
+			} else {
+				++a;
+			}
+
 			continue;
 		}
 
-		p = a;
+		if (f == 0)
+			p = a;
 		f = 1;
 		++a;
-
-		if (!*(++b))
-			break;
+		++b;
 	}
 
-	if (!*b && f == 1)
-		return p;
-
-	return (char *)NULL;
+	return (!*b && f == 1) ? p : (char *)NULL;
 }
 #endif /* _BE_POSIX */
 
@@ -248,7 +249,7 @@ xstrnlen(const char *restrict s)
 size_t
 xstrsncpy(char *restrict dst, const char *restrict src, size_t n)
 {
-	char *end = xmemccpy(dst, src, '\0', n);
+	char *end = memccpy(dst, src, '\0', n);
 	if (!end) {
 		dst[n - 1] = '\0';
 		end = dst + n;

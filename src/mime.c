@@ -85,7 +85,7 @@ expand_env(char *s)
 		size_t env_len = strlen(env);
 		int rem = buf_size - (int)(p - ret) - 1;
 		if (rem >= (int)env_len) {
-			xmemccpy(p, env, 0, (size_t)rem);
+			memccpy(p, env, 0, (size_t)rem);
 			p += env_len;
 		} else {
 			break;

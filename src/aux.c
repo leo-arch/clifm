@@ -48,25 +48,6 @@
 # include "highlight.h"
 #endif /* !_NO_HIGHLIGHT */
 
-#ifdef _BE_POSIX
-/* OpenBSD implementation of memccpy(), licensed MIT. */
-void *
-x_memccpy(void *t, const void *f, int c, size_t n)
-{
-	if (n) {
-		unsigned char *tp = t;
-		const unsigned char *fp = f;
-		unsigned char uc = (unsigned char)c;
-		do {
-			if ((*tp++ = *fp++) == uc)
-				return (tp);
-		} while (--n != 0);
-	}
-
-	return (0);
-}
-#endif /* _BE_POSIX */
-
 #ifndef _NO_ICONS
 /* Generate a hash of the string STR (case sensitively if CASE_SENTITIVE is
  * set to 1).
