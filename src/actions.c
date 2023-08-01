@@ -104,10 +104,10 @@ run_action(char *action, char **args)
 		 * #    1) CREATE CMD TO BE EXECUTED   #
 		 * ##################################### */
 
-	int s = EXIT_SUCCESS;
-	char *cmd = get_plugin_path(action, &s);
+	int exit_status = EXIT_FAILURE;
+	char *cmd = get_plugin_path(action, &exit_status);
 	if (!cmd)
-		return s;
+		return exit_status;
 
 	size_t cmd_len = strlen(cmd);
 	args[0] = (char *)xrealloc(args[0], (cmd_len + 1) * sizeof(char));
@@ -119,7 +119,7 @@ run_action(char *action, char **args)
 			 * #    2) CREATE A PIPE FILE   #
 			 * ############################## */
 
-	char *rand_ext = gen_rand_str(6);
+	char *rand_ext = gen_rand_str(10);
 	if (!rand_ext)
 		return EXIT_FAILURE;
 
@@ -127,23 +127,25 @@ run_action(char *action, char **args)
 	snprintf(fifo_path, sizeof(fifo_path), "%s/.pipe.%s", tmp_dir, rand_ext); /* NOLINT */
 	free(rand_ext);
 
-	setenv("CLIFM_BUS", fifo_path, 1);
-
-	if (mkfifo(fifo_path, 0600) != EXIT_SUCCESS) {
+	if (mkfifo(fifo_path, 0600) == -1) {
 		xerror("actions: %s: %s\n", fifo_path, strerror(errno));
-		unsetenv("CLIFM_BUS");
 		return EXIT_FAILURE;
 	}
+
+	setenv("CLIFM_BUS", fifo_path, 1);
+	if (xargs.cwd_in_title == 1)
+		set_term_title(action);
 
 	/* ################################################
 	 * #   3) EXEC CMD & LET THE CHILD WRITE TO PIPE  #
 	 * ################################################ */
 
-	/* Set terminal title to plugin name */
-	if (xargs.cwd_in_title == 1)
-		set_term_title(action);
-
 	pid_t pid = fork();
+	if (pid == -1) {
+		exit_status = errno;
+		xerror("actions: fork: %s\n", strerror(errno));
+		goto END;
+	}
 
 	if (pid == 0) {
 		/* Child: write-only end of the pipe */
@@ -164,12 +166,14 @@ run_action(char *action, char **args)
 	/* Parent: read-only end of the pipe */
 	int rfd;
 
-	do
+	do {
 		rfd = open(fifo_path, O_RDONLY);
-	while (rfd == -1 && errno == EINTR);
+	} while (rfd == -1 && errno == EINTR);
 
-	if (rfd == -1)
-		return errno;
+	if (rfd == -1) {
+		exit_status = errno;
+		goto END;
+	}
 
 	char buf[PATH_MAX];
 	*buf = '\0';
@@ -184,7 +188,7 @@ run_action(char *action, char **args)
 
 	/* Wait for the child to finish. Otherwise, the child is left as a
 	 * zombie process. Store plugin exit status in EXIT_STATUS */
-	int status = 0, exit_status = 0;
+	int status = 0;
 	if (waitpid(pid, &status, 0) > 0) {
 		exit_status = get_exit_code(status, EXEC_FG_PROC);
 	} else {
@@ -193,13 +197,8 @@ run_action(char *action, char **args)
 	}
 
 	/* If the pipe is empty */
-	if (!*buf) {
-		unlink(fifo_path);
-		if (xargs.cwd_in_title == 1)
-			set_term_title(workspaces[cur_ws].path);
-		unsetenv("CLIFM_BUS");
-		return exit_status;
-	}
+	if (!*buf)
+		goto END;
 
 	if (buf_len > 0 && buf[buf_len - 1] == '\n')
 		buf[buf_len - 1] = '\0';
@@ -209,7 +208,7 @@ run_action(char *action, char **args)
 		char *o_cmd[] = {"o", buf, NULL};
 		exit_status = open_function(o_cmd);
 
-	} else { /* If not a file, take it as a command*/
+	} else { /* If not a file, take it as a command */
 		size_t old_args = args_n;
 		args_n = 0;
 
@@ -235,7 +234,7 @@ run_action(char *action, char **args)
 		args_n = old_args;
 	}
 
-	/* Remove the pipe file */
+END:
 	unlink(fifo_path);
 
 	if (xargs.cwd_in_title == 1)
