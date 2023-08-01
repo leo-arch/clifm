@@ -1148,9 +1148,6 @@ main(int argc, char *argv[])
 
 	set_sel_file();
 	create_tmp_files();
-#ifndef _NO_FZF
-	set_finder_paths();
-#endif /* _NO_FZF */
 	load_actions();
 	get_aliases();
 

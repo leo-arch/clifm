@@ -1699,6 +1699,32 @@ move_cursor_up(const int total_line_len)
 	MOVE_CURSOR_UP(lines);
 }
 
+/* Determine input and output files to be used by the fuzzy finder (either
+ * fzf or fnf).
+ * Let's do this even if fzftab is not enabled at startup, because this feature
+ * can be enabled in place editing the config file.
+ *
+ * NOTE: Why do the random file extensions have different lengths? If
+ * compiled in POSIX mode, gen_rand_ext() uses srandom(3) and random(3) to
+ * generate the string, but since both extensions are generated at the same
+ * time, they happen to be the same, resulting in both file names being
+ * identical. As a workaround, we use different lengths for both extensions. */
+static void
+set_finder_paths(void)
+{
+	char *p = xargs.stealth_mode == 1 ? P_tmpdir : tmp_dir;
+
+	char *rand_ext = gen_rand_str(10);
+	snprintf(finder_in_file, sizeof(finder_in_file), "%s/%s.%s",
+		p, PROGRAM_NAME, rand_ext ? rand_ext : "a3_2yu!d43");
+	free(rand_ext);
+
+	rand_ext = gen_rand_str(16);
+	snprintf(finder_out_file, sizeof(finder_out_file), "%s/%s.%s",
+		p, PROGRAM_NAME, rand_ext ? rand_ext : "0rNkds7++@");
+	free(rand_ext);
+}
+
 /* Display possible completions using the corresponding finder. If one of these
  * possible completions is selected, insert it into the current line buffer.
  *
@@ -1719,6 +1745,9 @@ move_cursor_up(const int total_line_len)
 static int
 finder_tabcomp(char **matches, const char *text, char *original_query)
 {
+	/* Set random file names for both FINDER_IN_FILE and FINDER_OUT_FILE. */
+	set_finder_paths();
+
 	/* Store possible completions in FINDER_IN_FILE to pass them to the finder. */
 	size_t num_matches = store_completions(matches);
 	if (num_matches == (size_t)-1)
