@@ -438,15 +438,13 @@ check_iso(char *file)
 
 	free(t);
 #else
-	char *rand_ext = gen_rand_str(6);
+	char *rand_ext = gen_rand_str(10);
 	if (!rand_ext)
 		return (-1);
 
 	char iso_tmp_file[PATH_MAX];
-	if (xargs.stealth_mode == 1)
-		snprintf(iso_tmp_file, PATH_MAX - 1, "%s/.temp%s", P_tmpdir, rand_ext);
-	else
-		snprintf(iso_tmp_file, PATH_MAX - 1, "%s/.temp%s", tmp_dir, rand_ext);
+	snprintf(iso_tmp_file, sizeof(iso_tmp_file), "%s/.temp%s",
+		(xargs.stealth_mode == 1) ? P_tmpdir : tmp_dir, rand_ext);
 	free(rand_ext);
 
 	int fd;
@@ -560,17 +558,13 @@ is_compressed(char *file, const int test_iso)
 
 	free(t);
 #else
-	char *rand_ext = gen_rand_str(6);
+	char *rand_ext = gen_rand_str(10);
 	if (!rand_ext)
 		return (-1);
 
 	char archiver_tmp_file[PATH_MAX];
-	if (xargs.stealth_mode == 1)
-		snprintf(archiver_tmp_file, sizeof(archiver_tmp_file), "%s/.clifm%s",
-			P_tmpdir, rand_ext);
-	else
-		snprintf(archiver_tmp_file, sizeof(archiver_tmp_file), "%s/.clifm%s",
-			tmp_dir, rand_ext);
+	snprintf(archiver_tmp_file, sizeof(archiver_tmp_file), "%s/.clifm%s",
+			(xargs.stealth_mode == 1) ? P_tmpdir : tmp_dir, rand_ext);
 	free(rand_ext);
 
 	int fd;

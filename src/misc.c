@@ -1818,12 +1818,12 @@ handle_stdin(void)
 	if (!stdin_tmp_dir || (exit_status = create_virtual_dir(1)) != EXIT_SUCCESS) {
 		free(stdin_tmp_dir);
 
-		suffix = gen_rand_str(6);
+		suffix = gen_rand_str(10);
 		char *temp = tmp_dir ? tmp_dir : P_tmpdir;
 		size_t tmp_len = strlen(temp) + 13;
 		stdin_tmp_dir = (char *)xnmalloc(tmp_len, sizeof(char));
 		snprintf(stdin_tmp_dir, tmp_len, "%s/vdir.%s", temp,
-			suffix ? suffix : "nTmp0B");
+			suffix ? suffix : "nTmp0B9&54");
 		free(suffix);
 
 		if ((exit_status = create_virtual_dir(0)) != EXIT_SUCCESS)
@@ -1898,10 +1898,10 @@ handle_stdin(void)
 			if (symlink(source, dest) == -1) {
 				if (errno == EEXIST && xargs.virtual_dir_full_paths != 1) {
 					/* File already exists: append a random six digits suffix */
-					suffix = gen_rand_str(6);
+					suffix = gen_rand_str(10);
 					char tmp[PATH_MAX + 8];
 					snprintf(tmp, sizeof(tmp), "%s.%s",
-						dest, suffix ? suffix : "#dn7R4");
+						dest, suffix ? suffix : "#dn7R4.d6?");
 					if (symlink(source, tmp) == -1)
 						err('w', PRINT_PROMPT, "symlink: %s: %s\n",
 							q, strerror(errno));

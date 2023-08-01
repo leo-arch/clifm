@@ -365,11 +365,11 @@ get_mime(char *file)
 		return (char *)NULL;
 	}
 
-	char *rand_ext = gen_rand_str(6);
+	char *rand_ext = gen_rand_str(10);
 
 	char mime_tmp_file[PATH_MAX];
 	snprintf(mime_tmp_file, sizeof(mime_tmp_file), "%s/mime.%s", tmp_dir,
-		rand_ext ? rand_ext : "Hu?+65");
+		rand_ext ? rand_ext : "Hu?+6545jk");
 	free(rand_ext);
 
 	if (access(mime_tmp_file, F_OK) == 0)
@@ -1550,9 +1550,9 @@ mime_open_url(char *url)
 static int
 import_mime(void)
 {
-	char *suffix = gen_rand_str(6);
+	char *suffix = gen_rand_str(10);
 	char new[PATH_MAX];
-	snprintf(new, sizeof(new), "%s.%s", mime_file, suffix ? suffix : "5i0TM#");
+	snprintf(new, sizeof(new), "%s.%s", mime_file, suffix ? suffix : "5i0TM#r3j&");
 	free(suffix);
 
 	int mime_defs = mime_import(new);
