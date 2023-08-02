@@ -604,10 +604,6 @@ extern time_t curdir_mtime;
 #define TRIM_NO_EXT 1
 #define TRIM_EXT    2
 
-/* BSD system usually define MB_LEN_MAX to a small value such as 4, 6, or 8.
- * Let's follow here Linux and use the highest possible value: 16. */
-#define XMB_LEN_MAX 16
-
 /* OpenBSD recommends the use of 10 trailing X's. See mkstemp(3) */
 #if defined(__OpenBSD__)
 # define TMP_FILENAME ".tempXXXXXXXXXX"

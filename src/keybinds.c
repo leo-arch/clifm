@@ -596,7 +596,7 @@ rl_accept_suggestion(int count, int key)
 	|| suggestion.type == CMD_DESC_SUG) {
 		if (rl_point < rl_end) {
 			/* Just move the cursor forward one column */
-			int mlen = mblen(rl_line_buffer + rl_point, XMB_LEN_MAX);
+			int mlen = mblen(rl_line_buffer + rl_point, MB_CUR_MAX);
 			rl_point += mlen;
 		}
 		return EXIT_SUCCESS;

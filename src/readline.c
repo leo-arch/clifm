@@ -718,10 +718,11 @@ fix_rl_point(const unsigned char c)
 		return;
 
 	char point = rl_line_buffer[rl_point];
-	if ((point & 0xc0) != 0x80 && (point & 0xc0) != 0xc0)
+	/* Continue only if leading or continuation multi-byte */
+	if ((point & 0xc0) != 0xc0 && (point & 0xc0) != 0x80)
 		return;
 
-	int mlen = mblen(rl_line_buffer + rl_point, XMB_LEN_MAX);
+	int mlen = mblen(rl_line_buffer + rl_point, MB_CUR_MAX);
 	rl_point += mlen > 0 ? mlen - 1 : 0;
 }
 
