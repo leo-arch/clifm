@@ -566,7 +566,8 @@ get_longest_filename(const filesn_t n, const int pad)
 
 		/* In long view, we won't trim file names below MIN_NAME_TRIM. */
 		size_t max =
-			(conf.long_view == 1 && conf.min_name_trim > conf.max_name_len)
+			(conf.long_view == 1 && conf.max_name_len != UNSET
+			&& conf.min_name_trim > conf.max_name_len)
 			? (size_t)conf.min_name_trim : (size_t)conf.max_name_len;
 		if (file_len > max)
 			file_len = max;
