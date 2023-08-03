@@ -934,17 +934,17 @@ print_directory_suggestion(const filesn_t i, const size_t len, char *color)
 
 	suggestion.filetype = DT_DIR;
 
-	char tmp[NAME_MAX + 2];
-	snprintf(tmp, NAME_MAX + 2, "%s/", file_info[i].name);
+	char name[NAME_MAX + 2];
+	snprintf(name, sizeof(name), "%s/", file_info[i].name);
 
-	char *_tmp = escape_str(tmp);
-	if (_tmp) {
-		print_suggestion(_tmp, len, color);
-		free(_tmp);
+	char *tmp = escape_str(name);
+	if (tmp) {
+		print_suggestion(tmp, len, color);
+		free(tmp);
 		return;
 	}
 
-	print_suggestion(tmp, len, color);
+	print_suggestion(name, len, color);
 }
 
 static inline void
@@ -967,7 +967,7 @@ print_reg_file_suggestion(char *str, const filesn_t i, size_t len,
 
 		if (dot_slash) { /* Reinsert './', removed to check file name */
 			char t[NAME_MAX + 2];
-			snprintf(t, NAME_MAX + 1, "./%s", tmp);
+			snprintf(t, sizeof(t), "./%s", tmp);
 			print_suggestion(t, len + 2, color);
 		} else {
 			print_suggestion(tmp, len, color);
@@ -979,7 +979,7 @@ print_reg_file_suggestion(char *str, const filesn_t i, size_t len,
 
 	if (dot_slash) {
 		char t[NAME_MAX + 2];
-		snprintf(t, NAME_MAX + 1, "./%s", file_info[i].name);
+		snprintf(t, sizeof(t), "./%s", file_info[i].name);
 		print_suggestion(t, len + 2, color);
 		return;
 	}
@@ -994,10 +994,11 @@ check_filenames(char *str, size_t len, const int first_word,
 	char *color = (conf.suggest_filetype_color == 1) ? no_c : sf_c;
 
 	skip_leading_backslashes(&str, &len);
-	int dot_slash = skip_leading_dot_slash(&str, &len), fuzzy_index = -1;
+	int dot_slash = skip_leading_dot_slash(&str, &len);
 	skip_trailing_spaces(&str, &len);
 	int removed_slash = remove_trailing_slash(&str, &len);
 
+	filesn_t fuzzy_index = -1;
 	int fuzzy_str_type = (conf.fuzzy_match == 1 && contains_utf8(str) == 1)
 		? FUZZY_FILES_UTF8 : FUZZY_FILES_ASCII;
 	int best_fz_score = 0;
@@ -1051,7 +1052,7 @@ check_filenames(char *str, size_t len, const int first_word,
 		else {
 			int s = fuzzy_match(str, file_info[i].name, len, fuzzy_str_type);
 			if (s > best_fz_score) {
-				fuzzy_index = (int)i;
+				fuzzy_index = i;
 				if (s == TARGET_BEGINNING_BONUS)
 					break;
 				best_fz_score = s;
@@ -1066,9 +1067,9 @@ check_filenames(char *str, size_t len, const int first_word,
 		suggestion.type = i < files ? FILE_SUG : FUZZY_FILENAME;
 
 		if (file_info[fuzzy_index].dir)
-			print_directory_suggestion((filesn_t)fuzzy_index, len, color);
+			print_directory_suggestion(fuzzy_index, len, color);
 		else
-			print_reg_file_suggestion(str, (filesn_t)fuzzy_index, len, color,
+			print_reg_file_suggestion(str, fuzzy_index, len, color,
 				dot_slash);
 
 		return PARTIAL_MATCH;

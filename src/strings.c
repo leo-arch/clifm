@@ -112,6 +112,24 @@ static char len_buf[ARG_MAX * sizeof(wchar_t)] __attribute__((aligned));
 static int quoted_words[INT_ARRAY_MAX];
 #define QWORDS_ARRAY_LEN (sizeof(quoted_words) / sizeof(int))
 
+/* Quote the string STR according to conf.quoting_style, that is, using either
+ * single or double quotes. */
+char *
+quote_str(const char *str)
+{
+	if (!str || !*str || conf.quoting_style == QUOTING_STYLE_BACKSLASH)
+		return (char *)NULL;
+
+	size_t len = strlen(str) + 3;
+	char *p = (char *)xnmalloc(len, sizeof(char));
+	char quote_char =
+		conf.quoting_style == QUOTING_STYLE_DOUBLE_QUOTES ? '"' : '\'';
+
+	snprintf(p, len, "%c%s%c", quote_char, str, quote_char);
+
+	return p;
+}
+
 /* Get the last occurrence of the (non-escaped) character C in STR (whose
  * length is LEN). Return a pointer to it if found or NULL if not. */
 char *

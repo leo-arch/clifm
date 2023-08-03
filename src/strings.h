@@ -39,6 +39,7 @@ char *get_last_chr(char *, const char, const int);
 char **get_substr(char *, const char);
 char *home_tilde(char *, int *);
 char **parse_input_str(char *);
+char *quote_str(const char *);
 char *remove_quotes(char *);
 char *replace_slashes(char *, const char);
 char *replace_substr(const char *, const char *, char *);

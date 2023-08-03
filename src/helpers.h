@@ -699,6 +699,10 @@ extern time_t curdir_mtime;
 #define SHADE_TYPE_TRUECOLOR 3
 #define NUM_SHADES 6
 
+#define QUOTING_STYLE_BACKSLASH     0
+#define QUOTING_STYLE_SINGLE_QUOTES 1
+#define QUOTING_STYLE_DOUBLE_QUOTES 2
+
 /* Function macros */
 #define itoa xitoa /* itoa does not exist in some OS's */
 #define atoi xatoi /* xatoi is just a secure atoi */
@@ -912,6 +916,7 @@ struct config_t {
 	int purge_jumpdb;
 	int print_selfiles;
 	int private_ws_settings;
+	int quoting_style;
 	int relative_time;
 	int restore_last_path;
 	int rm_force;
@@ -933,7 +938,7 @@ struct config_t {
 	int unicode;
 	int warning_prompt;
 	int welcome_message;
-	int pad3;
+//	int pad3;
 };
 
 extern struct config_t conf;

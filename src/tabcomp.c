@@ -75,6 +75,8 @@ typedef char *rl_cpvfunc_t;
 # include "suggestions.h"
 #endif /* !_NO_SUGGESTIONS */
 
+#include "strings.h" // quote_str()
+
 #define CPR     "\x1b[6n" /* Cursor position report */
 #define CPR_LEN (sizeof(CPR) - 1)
 
@@ -1837,6 +1839,18 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 }
 #endif /* !_NO_FZF */
 
+static char *
+gen_escaped_str(const char *str)
+{
+	struct stat a;
+	if (conf.quoting_style == QUOTING_STYLE_BACKSLASH
+	|| cur_comp_type != TCMP_ELN
+	|| (stat(str, &a) != -1 && S_ISDIR(a.st_mode)))
+		return escape_str(str);
+
+	return quote_str(str);
+}
+
 /* Complete the word at or before point.
    WHAT_TO_DO says what to do with the completion.
    `?' means list the possible completions.
@@ -2092,7 +2106,8 @@ AFTER_USUAL_COMPLETION:
 				/* Found an embedded word break character in a potential
 				 match, so we need to prepend a quote character if we
 				 are replacing the completion string. */
-				replacement = escape_str(matches[0]);
+//				replacement = escape_str(matches[0]);
+				replacement = gen_escaped_str(matches[0]);
 			}
 		}
 

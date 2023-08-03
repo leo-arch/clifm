@@ -70,6 +70,8 @@ typedef char *rl_cpvfunc_t;
 # include "highlight.h"
 #endif /* !_NO_HIGHLIGHT */
 
+#include "strings.h" // quote_str()
+
 /* Let's use these word delimiters to print first suggested word
  * and to delete last typed word */
 #define WORD_DELIMITERS " /.-_=,:;@+*&$#<>%~|({[]})¿?¡!"
@@ -675,8 +677,13 @@ rl_accept_suggestion(int count, int key)
 			}
 		}
 
-		if (isquote == 1 && backslash == 0)
-			tmp = escape_str(suggestion_buf);
+		if (isquote == 1 && backslash == 0) {
+			if (suggestion.type == ELN_SUG && suggestion.filetype == DT_REG
+			&& conf.quoting_style != QUOTING_STYLE_BACKSLASH)
+				tmp = quote_str(suggestion_buf);
+			else
+				tmp = escape_str(suggestion_buf);
+		}
 
 		my_insert_text(tmp ? tmp : suggestion_buf, NULL, 0);
 		free(tmp);

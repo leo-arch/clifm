@@ -1885,8 +1885,8 @@ filenames_gen_eln(const char *text, int state)
 	if (!state)
 		i = 0;
 
-	int num_text = atoi(text);
-	if (num_text == INT_MIN)
+	filesn_t num_text = xatof(text);
+	if (num_text < 1 || num_text > files)
 		return (char *)NULL;
 
 	/* Check list of currently displayed files for a match */
@@ -1924,16 +1924,16 @@ filenames_gen_ranges(const char *text, int state)
 		return (char *)NULL;
 
 	*r = '\0';
-	int a = atoi(text);
-	int b = atoi(r + 1);
-	if (a == INT_MIN || b == INT_MIN)
+	filesn_t a = xatof(text);
+	filesn_t b = xatof(r + 1);
+	if (a < 1 || a > files || b < 1 || b > files)
 		return (char *)NULL;
 	*r = '-';
 	if (a >= b)
 		return (char *)NULL;
 
 	while (i < files && (name = file_info[i++].name) != NULL) {
-		if (i >= (filesn_t)a && i <= (filesn_t)b) {
+		if (i >= a && i <= b) {
 #ifndef _NO_SUGGESTIONS
 			if (suggestion_buf)
 				clear_suggestion(CS_FREEBUF);
@@ -3865,9 +3865,9 @@ complete_eln(char *text, int *exit_status, const size_t words_n)
 {
 	*exit_status = EXIT_FAILURE;
 	char **matches = (char **)NULL;
-	int n = 0;
+	filesn_t n = 0;
 
-	if (!is_number(text) || (n = atoi(text)) < 1 || (filesn_t)n > files)
+	if (!is_number(text) || (n = xatof(text)) < 1 || n > files)
 		return (char **)NULL;
 
 	/* First word */

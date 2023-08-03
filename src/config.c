@@ -2583,6 +2583,27 @@ set_starting_path(char *line)
 		PROGRAM_NAME, tmp, strerror(errno));
 }
 
+static void
+set_quoting_style(char *str)
+{
+	conf.quoting_style = DEF_QUOTING_STYLE;
+	if (!str || !str)
+		return;
+
+	char *val = get_line_value(str);
+	if (!val)
+		return;
+
+	if (*val == 'b' && strcmp(val + 1, "ackslash") == 0)
+		conf.quoting_style = QUOTING_STYLE_BACKSLASH;
+	else if (*val == 's' && strcmp(val + 1, "ingle") == 0)
+		conf.quoting_style = QUOTING_STYLE_SINGLE_QUOTES;
+	else if(*val == 'd' && strcmp(val + 1, "ouble") == 0)
+		conf.quoting_style = QUOTING_STYLE_DOUBLE_QUOTES;
+	else
+		return;
+}
+
 /* Read the main configuration file and set options accordingly */
 static void
 read_config(void)
@@ -2921,6 +2942,10 @@ read_config(void)
 
 		else if (*line == 'P' && strncmp(line, "PurgeJumpDB=", 12) == 0) {
 			set_config_bool_value(line + 12, &conf.purge_jumpdb);
+		}
+
+		else if (*line == 'Q' && strncmp(line, "QuotingStyle=", 13) == 0) {
+			set_quoting_style(line + 13);
 		}
 
 		else if (xargs.restore_last_path == UNSET && *line == 'R'

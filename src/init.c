@@ -193,6 +193,9 @@ init_conf_struct(void)
 	conf.pager = UNSET;
 	conf.private_ws_settings = UNSET;
 	conf.purge_jumpdb = UNSET;
+
+	conf.quoting_style = DEF_QUOTING_STYLE;
+
 	conf.relative_time = UNSET;
 	conf.restore_last_path = UNSET;
 	conf.rm_force = UNSET;
