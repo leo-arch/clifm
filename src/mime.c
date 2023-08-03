@@ -757,7 +757,6 @@ run_mime_app(char **app, char **fpath)
 	if (!cmd) {
 		free(*app);
 #ifndef __CYGWIN__
-	// fpath is an argument passed to mime_open(), which should not be freed
 		free(*fpath);
 #endif /* !__CYGWIN__ */
 		return EXIT_FAILURE;
@@ -785,7 +784,6 @@ run_mime_app(char **app, char **fpath)
 
 	free(*app);
 #ifndef __CYGWIN__
-	// fpath is an argument passed to mime_open(), which should not be freed
 	free(*fpath);
 #endif /* !__CYGWIN */
 
@@ -953,6 +951,11 @@ mime_open_with_tab(char *filename, const char *prefix, const int only_names)
 		if (!ename)
 			return (char **)NULL;
 		name = ename;
+	} else {
+		if (*filename == '\'' || *filename == '"') {
+			char *tmp_name = savestring(filename + 1, strlen(filename + 1));
+			name = remove_quotes(tmp_name);
+		}
 	}
 
 	if (strchr(name ? name : filename, '\\')) {

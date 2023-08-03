@@ -43,7 +43,7 @@ char *remove_quotes(char *);
 char *replace_slashes(char *, const char);
 char *replace_substr(const char *, const char *, char *);
 char *savestring(const char *restrict, size_t);
-char **split_str(const char *, const int);
+char **split_str(char *, const int);
 char *strbfrlst(char *, const char);
 char *strbtw(char *, const char, const char);
 int  strcntchr(const char *, const char);

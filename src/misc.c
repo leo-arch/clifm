@@ -1899,7 +1899,7 @@ handle_stdin(void)
 				if (errno == EEXIST && xargs.virtual_dir_full_paths != 1) {
 					/* File already exists: append a random six digits suffix */
 					suffix = gen_rand_str(10);
-					char tmp[PATH_MAX + 8];
+					char tmp[PATH_MAX + 12];
 					snprintf(tmp, sizeof(tmp), "%s.%s",
 						dest, suffix ? suffix : "#dn7R4.d6?");
 					if (symlink(source, tmp) == -1)

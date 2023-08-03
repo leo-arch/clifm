@@ -595,7 +595,7 @@ rl_accept_suggestion(int count, int key)
 	if (!conf.suggestions || rl_point != rl_end || !suggestion_buf
 	|| suggestion.type == CMD_DESC_SUG) {
 		if (rl_point < rl_end) {
-			/* Just move the cursor forward one column */
+			/* Just move the cursor forward one character */
 			int mlen = mblen(rl_line_buffer + rl_point, MB_CUR_MAX);
 			rl_point += mlen;
 		}
@@ -603,7 +603,7 @@ rl_accept_suggestion(int count, int key)
 	}
 
 	/* If accepting the first suggested word, accept only up to next
-	 * word delimiter */
+	 * word delimiter. */
 	char *s = (char *)NULL, _s = 0;
 	int trimmed = 0, accept_first_word_last = 0;
 	if (accept_first_word == 1) {

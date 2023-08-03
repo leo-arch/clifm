@@ -1412,9 +1412,11 @@ static void
 list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 		const size_t columns_n)
 {
+	/* Total amount of files to be listed */
 	filesn_t nn = (max_files != UNSET && (filesn_t)max_files < files)
 		? (filesn_t)max_files : files;
 
+	/* How many lines (rows) do we need to print NN files? */
 	filesn_t rows = nn / (filesn_t)columns_n;
 	if (nn % (filesn_t)columns_n > 0)
 		rows++;
@@ -1439,9 +1441,9 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 		|| term_caps.suggestions == 0) ? 0 : 1;
 
 	size_t cur_cols = 0;
-	size_t cc = columns_n; // Amount of columns actually printed (per line)
+	size_t cc = columns_n; // Current column number
 	filesn_t x = 0; // Index of the file to be actually printed
-	filesn_t xx = 0;
+	filesn_t xx = 0; // Current line number
 	filesn_t i = 0; // Index of the current entry being analyzed
 
 	for ( ; ; i++) {

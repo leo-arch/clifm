@@ -51,10 +51,10 @@
 # include "messages.h"
 #endif /* _NO_PROFILES || _NO_FZF || _NO_ICONS || _NO_TRASH */
 
-#ifndef _BE_POSIX
+#ifndef _NO_LIRA
 # define PREVIEW_FILE 1
 # define OPEN_FILE    2
-#endif
+#endif /* _NO_LIRA */
 
 /* Macros to be able to consult the value of a macro string */
 #ifdef CLIFM_DATADIR

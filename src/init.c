@@ -178,6 +178,7 @@ init_conf_struct(void)
 	conf.max_hist = UNSET;
 	conf.max_log = UNSET;
 	conf.max_jump_total_rank = UNSET;
+
 	conf.max_name_len = DEF_MAX_NAME_LEN;
 
 	conf.max_name_len_bk = 0;

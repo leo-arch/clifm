@@ -731,10 +731,22 @@ is_quoted_word(const size_t index)
 /* Some commands need quotes to be preserved (they'll handle quotes themselves
  * later). Return 1 if true or 0 otherwise. */
 int
-cmd_keeps_quotes(const char *str)
+cmd_keeps_quotes(char *str)
 {
 	if (flags & IN_BOOKMARKS_SCREEN)
 		return 0;
+
+	if (*str == '\'' || *str == '"') /* Quoted first word */
+		return 0;
+
+	char *p = strchr(str, ' ');
+	if (p) {
+		*p = '\0';
+		int ret = is_internal_c(str);
+		*p = ' ';
+		if (ret == 0)
+			return 1;
+	}
 
 	return (strncmp(str, "ft ", 3) == 0 || strncmp(str, "filter ", 7) == 0);
 }
@@ -749,7 +761,7 @@ cmd_keeps_quotes(const char *str)
  * str is NULL or if no substring was found, i.e., if str contains
  * only spaces. */
 char **
-split_str(const char *str, const int update_args)
+split_str(char *str, const int update_args)
 {
 	if (!str)
 		return (char **)NULL;
@@ -2903,9 +2915,9 @@ savestring(const char *restrict str, size_t size)
 	return ptr;
 }
 
-/* Take a string and returns the same string escaped. If nothing to be
- * escaped, the original string is returned. In either cases, the returned
- * string must be free'd by the caller. */
+/* Take a string and returns the same string escaped.
+ * If there is nothing to be escaped, the original string is returned. In
+ * either cases, the returned string must be free'd by the caller. */
 char *
 escape_str(const char *str)
 {
