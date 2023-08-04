@@ -70,7 +70,7 @@ typedef char *rl_cpvfunc_t;
 # include "highlight.h"
 #endif /* !_NO_HIGHLIGHT */
 
-#include "strings.h" // quote_str()
+#include "strings.h" /* quote_str() */
 
 /* Let's use these word delimiters to print first suggested word
  * and to delete last typed word */

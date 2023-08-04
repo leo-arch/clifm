@@ -1535,7 +1535,13 @@ eln_expand(char ***substr, const size_t i)
 	&& !is_internal_c((*substr)[0]))
 		abs_path = realpath(file_info[j].name, NULL);
 
-	char *esc_str = escape_str(abs_path ? abs_path : file_info[j].name);
+	char *esc_str = (char *)NULL;
+	if (conf.quoting_style == QUOTING_STYLE_BACKSLASH
+	|| is_internal_c((*substr)[0]) || is_number((*substr)[0]))
+		esc_str = escape_str(abs_path ? abs_path : file_info[j].name);
+	else
+		esc_str = quote_str(abs_path ? abs_path : file_info[j].name);
+
 	free(abs_path);
 
 	if (!esc_str)

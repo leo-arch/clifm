@@ -75,7 +75,7 @@ typedef char *rl_cpvfunc_t;
 # include "suggestions.h"
 #endif /* !_NO_SUGGESTIONS */
 
-#include "strings.h" // quote_str()
+#include "strings.h" /* quote_str() */
 
 #define CPR     "\x1b[6n" /* Cursor position report */
 #define CPR_LEN (sizeof(CPR) - 1)
@@ -1840,7 +1840,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 #endif /* !_NO_FZF */
 
 static char *
-gen_escaped_str(const char *str)
+gen_quoted_str(const char *str)
 {
 	struct stat a;
 	if (conf.quoting_style == QUOTING_STYLE_BACKSLASH
@@ -2107,7 +2107,7 @@ AFTER_USUAL_COMPLETION:
 				 match, so we need to prepend a quote character if we
 				 are replacing the completion string. */
 //				replacement = escape_str(matches[0]);
-				replacement = gen_escaped_str(matches[0]);
+				replacement = gen_quoted_str(matches[0]);
 			}
 		}
 
