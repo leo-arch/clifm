@@ -2057,11 +2057,16 @@ rm_confirm(char **args, const int have_dirs)
 	size_t i;
 
 	for (i = 1; args[i]; i++) {
-		char *deq_name = dequote_str(args[i], 0);
+		char *deq_name = strchr(args[i], '\\')
+			? dequote_str(args[i], 0) : (char *)NULL;
 		char *name = deq_name ? deq_name : args[i];
 
-		if (stat(name, &a) != -1)
-			printf("%s%c\n", name, S_ISDIR(a.st_mode) ? '/' : 0);
+		if (have_dirs == 0) {
+			printf("%s\n", name);
+		} else {
+			if (stat(name, &a) != -1)
+				printf("%s%c\n", name, S_ISDIR(a.st_mode) ? '/' : 0);
+		}
 
 		free(deq_name);
 	}
