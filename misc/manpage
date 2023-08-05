@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Jul 23, 2023" "clifm 1.13.2" "CLIFM Manual"
+.TH "CLIFM" "1" "Aug 5, 2023" "clifm 1.13.10" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -604,17 +604,15 @@ Each file name will be copied into a temporary file, which will be opened with t
 This built-in bulk rename function won't deal with deletions, replacements, file name conflicts and the like. For a smarter alternative use \fBqmv\fR(1).
 .TP
 \fBc\fR, \fBm\fR, \fBmd\fR, \fBr\fR
-short for the following commands respectively: \fIcp\ \-iRp\fR, \fImv\ \-i\fR, \fImkdir\ \-p\fR, and \fIrm\ \-I\fR (for files) or \fIrm\ \-dIr\fR (for directories).
+short for the following commands respectively: \fIcp\ \-iRp\fR, \fImv\ \-i\fR, \fImkdir\ \-p\fR, and \fIrm\fR (for files) or \fIrm\ \-r\fR (for directories).
 .sp
-Note that, in case of multiple files, the \fIr\fR command executes \fIrm -dIr\fR if at least one file is a directory.
+Note that the \fIr\fR command prompts the user for confirmation (printing the list of files to be removed) if the list of files contains: 1. at least one directory, 2. three or more files, 3. at least one non-explicitly-expanded ELN (ex: \fIr 12\fR).
 .sp
-By default, the \fIc\fR, \fIm\fR, and \fIr\fR commands execute \fBcp\fR(1), \fBmv\fR(1), and \fBrm\fR(1) respectively in interactive mode (using the \fI\-i/\-I\fR switches) to ask for confirmation before operations. Since this might sometimes be quite intrusive (specially when operating on large amount of files), it is possible to turn interactivity off in two different ways:
+By default, the \fIc\fR, \fIm\fR, and \fIr\fR commands ask for confirmation before operations. Since this might sometimes be quite intrusive (specially when operating on large amount of files), it is possible to turn interactivity off in two different ways:
 
   a) For the current command only: via the \fI\-f\fR, \fI\-\-force\fR switch. Example: \fIc \-f sel\fR, \fIm \-f sel\fR, or \fIr \-f *\fR.
 
   b) Permanently. Use the \fIcpCmd\fR, \fImvCmd\fR, and \fIrmForce\fR options in the configuration file to permanently set any of these commands to non-interactive mode.
-.sp
-On NetBSD, OpenBSD, Solaris, and MacOS, \fIgrm\fR (the GNU version of \fIrm\fR) is used if available. If not, the \fIr\fR command executes \fBrm\fR(1) as follows: \fIrm \-drf\fR for directories, and \fIrm \-f\fR for files. Note that, if compiled with _BE_POSIX (or runnin on Solaris), the \fI\-d\fR flag is not available, in which case \fIrm \-rf\fR is used instead.
 .sp
 To use these commands without any of these arguments, or with any other argument you want, use the non-abbreviated (shell) command, for instance, \fIcp\fR instead of \fIc\fR. Of course, you can also create aliases to use you preferred commands, for example, "c='cp \-adp'". Consult the \fIalias\fR command above for more information.
 .sp
