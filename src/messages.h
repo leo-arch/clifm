@@ -1115,6 +1115,66 @@ for cp(1), mv(1),\nmkdir(1), and rm(1) shell commands respectively.\n\n\
 c  -> cp -iRp\n\
 m  -> mv -i\n\
 md -> mkdir -p\n\
+r  -> rm -f ('-rf' for directories) (1)\n\n\
+(1) The user is asked for confirmation if the list of files contains:\n\
+a. At least one directory\n\
+b. Three or more files\n\
+c. At least one non-explicitly-expanded ELN (ex: 'r 12')\n\n\
+The 'paste' command is equivalent to 'c' and exists only for semantic\n\
+reasons. For example, if you want to copy selected files into the current\n\
+directory, it makes sense to write 'paste sel'.\n\n\
+By default, both the 'c' and 'm' commands run cp(1)/mv(1) interactively\n\
+(-i), i.e. prompting before overwriting a file. To run non-interactivelly\n\
+instead, use the -f,--force parameter (see the examples below). You can\n\
+also permanently run in non-interactive mode using the cpCmd/mvCmd options\n\
+in the configuration file ('config' or F10).\n\n\
+Just as 'c' and 'm', the 'r' command accepts -f,--force as paramater to\n\
+prevent 'r' from prompting before removals. Set rmForce to true in the\n\
+configuration file to make this option permanent.\n\n\
+To use different parameters, run the corresponding utility, as usual.\n\
+Example: cp -abf ...\n\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- Create a copy of file1 named file2\n\
+    c file1 file2\n\
+- Create a copy of file1 in the directory dir1 named file2\n\
+    c file1 dir1/file2\n\
+- Copy all selected files into the current directory\n\
+    c sel\n\
+  Note: If destiny directory is omitted, the current directory is assumed\n\
+- Copy all selected files into the current directory (non-interactively):\n\
+    c -f sel\n\
+- Move all selected files into the directory named testdir\n\
+    m sel testdir\n\
+- Rename 'file1' as 'file_test'\n\
+    m file1 file_test\n\
+- Interactively rename 'file1'\n\
+    m file1\n\
+  Note: The user is prompted to enter a new name using the old name as\n\
+  template\n\
+- Move all selected files into the current directory (non-interactively)\n\
+    m -f sel\n\
+- Remove all selected files\n\
+    r sel\n\
+- Remove all selected files (non-interactively)\n\
+    r -f sel\n\
+  Note: Use the 't' command to send files to the trash can. Try 't --help'.\n\
+- Create a directory named 'mydir'\n\
+    md mydir\n\
+  Note: To create files and directories you can use the 'n' command as\n\
+  well. Try 'n --help'.\n\n\
+Use the 'vv' command to copy files into a directory and bulk rename them\n\
+at once. Try 'vv --help'.\n\n\
+Use the 'cr' plugin to send a file to a remote location:\n\
+    cr FILE (run 'cr --edit' before to set up your remotes)\n\n\
+Use the 'l' command to create symbolic links, and 'le' to edit them."
+
+/*
+#define WRAPPERS_USAGE "c, m, md, and r commands are wrappers \
+for cp(1), mv(1),\nmkdir(1), and rm(1) shell commands respectively.\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
+c  -> cp -iRp\n\
+m  -> mv -i\n\
+md -> mkdir -p\n\
 r  -> rm -dIr (for directories) (1)(2)(4)\n\
 r  -> rm -I (for non-directories) (1)(3)(4)\n\n\
 (1) On NetBSD/OpenBSD/MacOS 'grm' (the GNU version of 'rm') is used\n\
@@ -1169,7 +1229,7 @@ Use the 'vv' command to copy files into a directory and bulk rename them\n\
 at once. Try 'vv --help'.\n\n\
 Use the 'cr' plugin to send a file to a remote location:\n\
     cr FILE (run 'cr --edit' before to set up your remotes)\n\n\
-Use the 'l' command to create symbolic links, and 'le' to edit them."
+Use the 'l' command to create symbolic links, and 'le' to edit them." */
 
 #define WS_USAGE "Switch workspaces\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
