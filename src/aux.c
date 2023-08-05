@@ -837,7 +837,7 @@ construct_human_size(const off_t size)
 
 	int x = (int)s;
 	/* If (s == 0 || s - (float)x) == 0, then S has no reminder (zero)
-	 * We don't want to print the reminder when it is zero
+	 * We don't want to print the reminder when it is zero.
      *
 	 * R: Ronnabyte, Q: Quettabyte. It's highly unlikely to have files of
 	 * these huge sizes in the near future, but anyway... */

@@ -2007,6 +2007,7 @@ list_removed_files(char **cmd, const size_t *dirs, const size_t start,
  * 1. The installed version of rm
  * 2. The list of files to be removed contains at least 1 dir (DIRS)
  * 3. We should run interactively (RM_FORCE) */
+/*
 static char *
 set_rm_params(const int dirs, const int rm_force)
 {
@@ -2015,29 +2016,53 @@ set_rm_params(const int dirs, const int rm_force)
 		return (rm_force == 1 ? "-rf" : "-r");
 #elif defined(CHECK_COREUTILS)
 		if (bin_flags & BSD_HAVE_COREUTILS)
-			return (rm_force == 1 ? "-drf" : "-dIr");
+//			return (rm_force == 1 ? "-drf" : "-dIr");
+			return (rm_force == 1 ? "-drf" : "-dr");
 		else
 # if defined(__sun)
 			return (rm_force == 1 ? "-rf" : "-r");
 # else
 			return (rm_force == 1 ? "-drf" : "-dr");
-# endif /* __sun */
+# endif // __sun
 #else
-		return (rm_force == 1 ? "-drf" : "-dIr");
-#endif /* _BE_POSIX */
+//		return (rm_force == 1 ? "-drf" : "-dIr");
+		return (rm_force == 1 ? "-drf" : "-dr");
+#endif // _BE_POSIX
 	}
 
-/* No directories */
-#if defined(_BE_POSIX)
+// No directories
 	return "-f";
-#elif defined(CHECK_COREUTILS)
-	if (bin_flags & BSD_HAVE_COREUTILS)
-		return (rm_force == 1 ? "-f" : "-I");
-	else
-		return "-f";
-#else
-	return (rm_force == 1 ? "-f" : "-I");
-#endif /* _BE_POSIX */
+
+//#if defined(_BE_POSIX)
+//	return "-f";
+//#elif defined(CHECK_COREUTILS)
+//	if (bin_flags & BSD_HAVE_COREUTILS)
+//		return (rm_force == 1 ? "-f" : "-I");
+//	else
+//		return "-f";
+//#else
+//	return (rm_force == 1 ? "-f" : "-I");
+//#endif // _BE_POSIX
+} */
+
+/* Print files to be removed and ask the user for confirmation.
+ * Returns 0 if no or 1 if yes. */
+static int
+rm_confirm(char **args, const int have_dirs)
+{
+	printf(_("r: File(s) to be removed%s:\n"),
+		have_dirs ? _(" (recursively)") : "");
+
+	struct stat a;
+	size_t i;
+
+	for (i = 1; args[i]; i++) {
+		if (stat(args[i], &a) == -1)
+			continue;
+		printf("%s%c\n", args[i], S_ISDIR(a.st_mode) ? '/' : 0);
+	}
+
+	return rl_get_y_or_n(_("Continue? [y/n] "));
 }
 
 int
@@ -2102,9 +2127,11 @@ remove_file(char **args)
 
 	rm_cmd[j] = (char *)NULL;
 
-	if (errs > 0 && j > 3) { /* If errors but at least one file was deleted */
-		fputs(_("Press any key to continue... "), stdout);
-		xgetchar();
+	if (errs > 0 && j > 3) { /* If at least one error, fail anyway. */
+		fputs(_("r: No files were removed\n"), stderr);
+		goto END;
+//		fputs(_("Press any key to continue... "), stdout);
+//		xgetchar();
 	}
 
 	if (j == 3) { /* No file to be deleted */
@@ -2113,12 +2140,17 @@ remove_file(char **args)
 		return EXIT_FAILURE;
 	}
 
+	if (!rm_force && ((flags & REMOVE_ELN) || have_dirs || j > 5)
+	&& rm_confirm(args, have_dirs) == 0)
+		goto END;
+
 #if defined(CHECK_COREUTILS)
 	rm_cmd[0] = (bin_flags & BSD_HAVE_COREUTILS) ? "grm" : "rm";
 #else
 	rm_cmd[0] = "rm";
 #endif /* CHECK_COREUTILS */
-	rm_cmd[1] = set_rm_params(have_dirs, rm_force);
+//	rm_cmd[1] = set_rm_params(have_dirs, rm_force);
+	rm_cmd[1] = have_dirs ? "-rf" : "-f";
 	rm_cmd[2] = "--";
 
 	if (launch_execv(rm_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
@@ -2130,6 +2162,7 @@ remove_file(char **args)
 	if (print_removed_files == 1)
 		list_removed_files(rm_cmd, dirs, 3, cwd);
 
+END:
 	for (i = 3; rm_cmd[i]; i++)
 		free(rm_cmd[i]);
 	free(rm_cmd);

@@ -59,7 +59,7 @@
 
 #define TRUE_COLOR 16777216
 
-/* Check whether parameter S is -f or --force
+/* Check whether parameter S is -f or --force.
  * Returns 1 if yes, and there is no "-f" or "--force" file in the current
  * dir, or 0 otherwise. */
 int
@@ -171,7 +171,7 @@ set_term_caps(const int i)
 
 /* Check whether current terminal (_TERM) supports colors and requesting
  * cursor position (needed to print suggestions). If not, disable the
- * feature accordingly */
+ * feature accordingly. */
 static void
 check_term_support(const char *_term)
 {
@@ -423,8 +423,9 @@ check_user_groups(const gid_t gid)
 	return 0;
 }
 
-/* Return 1 if current user has access to file with mode MODE, uid UID,
- * and gid GID. Otherwise, return zero */
+/* Return 1 if current user has access (read for files and read/exec for dirs)
+ * to the file with mode MODE, uid UID, and gid GID. Otherwise, 0 is
+ * returned. */
 int
 check_file_access(const mode_t mode, const uid_t uid, const gid_t gid)
 {
@@ -527,7 +528,6 @@ is_acl(char *file)
 #ifndef HAVE_ACL
 	return 0;
 #else
-
 	acl_t acl;
 	acl = acl_get_file(file, ACL_TYPE_ACCESS);
 
@@ -552,7 +552,7 @@ is_acl(char *file)
 }
 
 /* Check whether a given string contains only digits. Returns 1 if true
- * and 0 if false. It does not work with negative numbers */
+ * and 0 if false. It does not work with negative numbers. */
 int
 is_number(const char *restrict str)
 {
@@ -565,8 +565,8 @@ is_number(const char *restrict str)
 
 /* Check if command STR contains a digit and this digit is not the first
  * char of STR. Used by find_cmd() (called by is_internal_c()) to check
- * for fused parameters in internal commands
- * Returns the index of the digit in STR or -1 if no digit is found */
+ * for fused parameters in internal commands.
+ * Returns the index of the digit in STR or -1 if no digit is found. */
 static int
 contains_digit(const char *str)
 {
@@ -627,8 +627,8 @@ is_internal_c(char *restrict cmd)
 	return 0;
 }
 
-/* Check whether S is an action name
- * Returns 1 if true or 0 otherwise */
+/* Check whether S is an action name.
+ * Returns 1 if true or 0 otherwise. */
 int
 is_action_name(const char *s)
 {
@@ -647,7 +647,7 @@ is_action_name(const char *s)
 /* Check cmd against a list of internal commands. Used by parse_input_str()
  * to know whether it should perform additional expansions, like glob, regex,
  * tilde, and so on. Only internal commands dealing with ELN/filenames
- * should be checked here */
+ * should be checked here. */
 int
 is_internal(char *restrict cmd)
 {
@@ -717,14 +717,14 @@ is_internal(char *restrict cmd)
 }
 
 /* Check CMD against a list of internal commands taking ELN's or numbers
- * as parameters. Used by split_fusedcmd() */
+ * as parameters. Used by split_fusedcmd(). */
 int
 is_internal_f(const char *restrict cmd)
 {
 	/* If we are completing/suggesting, do not take 'ws', 'mf', and 'st'
 	 * commands into account: they do not take ELN/filenames as parameters,
 	 * but just numbers, in which case no ELN-filename completion should
-	 * be made */
+	 * be made. */
 	if (flags & STATE_COMPLETING
 	&& (*cmd == 'w' || (*cmd == 'm' && *(cmd + 1) == 'f')
 	|| (*cmd == 's' && (*(cmd + 1) == 't' || *(cmd + 1) == 'o')) ) )
@@ -814,7 +814,7 @@ is_internal_f(const char *restrict cmd)
 	return 0;
 }
 
-/* Return one if STR is a command in PATH or zero if not */
+/* Return one if STR is a command in PATH or zero if not. */
 int
 is_bin_cmd(char *str)
 {

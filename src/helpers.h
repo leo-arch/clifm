@@ -393,6 +393,8 @@ extern time_t curdir_mtime;
 #define NO_FIX_RL_POINT     (1 << 13)
 #define FAILED_ALIAS        (1 << 14)
 
+#define REMOVE_ELN          (1 << 15) // non-expanded ELN removed via 'r'
+
 /* Flags for third party binaries */
 #define FZF_BIN_OK     (1 << 0)
 #define FNF_BIN_OK     (1 << 1)

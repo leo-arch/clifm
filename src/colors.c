@@ -462,7 +462,7 @@ get_dir_color(const char *filename, const mode_t mode, const nlink_t links,
 		is_oth_w = 1;
 
 	filesn_t files_dir = count > -1 ? count : (links > 2
-		? (filesn_t)links : (filesn_t)count_dir(filename, CPOP));
+		? (filesn_t)links : count_dir(filename, CPOP));
 
 	color = sticky ? (is_oth_w ? tw_c : st_c) : is_oth_w ? ow_c
 		: ((files_dir == 2 || files_dir == 0) ? ed_c : di_c);
@@ -702,7 +702,7 @@ END:
  * However, at least with the color schemes provided by default, we do know
  * there are no conflicts. In this latter case we can return the first matching
  * entry, which is a performace improvement. But we cannot assume the user
- * is using one of the provided themes and that it has been not modified. */
+ * is using one of the provided themes and that it hasn't been modified. */
 /*
 static char *
 check_ext_hash(const size_t hash, size_t *count)
@@ -790,7 +790,7 @@ get_ext_color(const char *ext)
 		return ret; */
 
 	/* We have a conflict: a single hash is used for two or more extensions.
-	 * Let's try to match the extension name itself */
+	 * Let's try to match the extension name itself. */
 	return check_ext_string(ext);
 }
 
@@ -939,7 +939,7 @@ reset_iface_colors(void)
 	*dz_c = '\0';
 }
 
-/* Import the color scheme NAME from DATADIR (usually /usr/local/share)
+/* Import the color scheme NAME from DATADIR (usually /usr/local/share).
  * Return zero on success or one on failure. */
 int
 import_color_scheme(const char *name)
@@ -984,7 +984,7 @@ list_colorschemes(void)
 }
 
 /* Edit the current color scheme file.
- * If the file is not in the local colors dir, try to copy it from DATADIR
+ * If the file is not in the local colors dir, try to copy it from DATADIR.
  * into the local dir to avoid permission issues. */
 static int
 edit_colorscheme(char *app)
