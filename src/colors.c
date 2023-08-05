@@ -659,6 +659,7 @@ check_defs(const char *str)
 		if (!defs[i].name || !defs[i].value || !*defs[i].name
 		|| !*defs[i].value)
 			continue;
+
 		if (*defs[i].name == *str && strcmp(defs[i].name, str) == 0
 		&& is_color_code(defs[i].value) == 1) {
 			val = defs[i].value;
@@ -845,6 +846,7 @@ void
 reset_filetype_colors(void)
 {
 	*bd_c = '\0';
+	*bk_c = '\0';
 	*ca_c = '\0';
 	*cd_c = '\0';
 	*di_c = '\0';
@@ -1624,6 +1626,11 @@ set_default_colors(void)
 	if (!ext_colors)
 		split_extension_colors(DEF_EXT_COLORS);
 
+	/* If a definition for TEMP exists in the color scheme file, BK_C should
+	 * have been set to this color in store_defintions(). If not, set it here
+	 * to the default file color (fi_c). */
+	if (!*bk_c) xstrsncpy(bk_c, DEF_FI_C, sizeof(bk_c));
+
 	if (!*hb_c) xstrsncpy(hb_c, DEF_HB_C, sizeof(hb_c));
 	if (!*hc_c) xstrsncpy(hc_c, DEF_HC_C, sizeof(hc_c));
 	if (!*hd_c) xstrsncpy(hd_c, DEF_HD_C, sizeof(hd_c));
@@ -1830,6 +1837,12 @@ store_definition(char *str)
 	}
 
 	defs[defs_n].value = savestring(value, val_len);
+
+	/* If we find a definition for TEMP, let's use this color for backup files
+	 * (bk_c color code). */
+	if (!*bk_c && *name == 'T' && strcmp(name + 1, "EMP") == 0)
+		snprintf(bk_c, sizeof(bk_c), "\x1b[0;%sm", value);
+
 	defs_n++;
 }
 

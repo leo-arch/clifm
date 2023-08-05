@@ -310,6 +310,7 @@ char
 char
 	/* File types */
 	bd_c[MAX_COLOR], /* Block device */
+	bk_c[MAX_COLOR], /* Backup files (ending with tilde) */
 	ca_c[MAX_COLOR], /* Cap file */
 	cd_c[MAX_COLOR], /* Char device */
 	di_c[MAX_COLOR], /* Directory */

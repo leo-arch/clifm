@@ -2281,12 +2281,18 @@ list_dir(void)
 
 		file_info[n].name = (char *)xnmalloc(NAME_MAX + 1, sizeof(char));
 
+		size_t len_bytes = 0; /* File name length in bytes (not chars) */
+
 		if (conf.unicode == 0 || is_utf8_name(ename) == 0) {
 			file_info[n].len = xstrsncpy(file_info[n].name, ename, NAME_MAX + 1);
 			if (file_info[n].len > 0)
 				file_info[n].len--; /* Do not count terminating NUL byte */
+			len_bytes = file_info[n].len;
 		} else {
 			xstrsncpy(file_info[n].name, ename, NAME_MAX + 1);
+			len_bytes = xstrsncpy(file_info[n].name, ename, NAME_MAX + 1);
+			if (len_bytes > 0)
+				len_bytes--;
 			file_info[n].len = wc_xstrlen(ename);
 		}
 
@@ -2518,6 +2524,12 @@ list_dir(void)
 				stats.multi_link++;
 			} else { /* Regular file */
 				file_info[n].color = fi_c;
+			}
+
+			/* Backup files */
+			if (len_bytes > 0 && file_info[n].name[len_bytes - 1] == '~') {
+				file_info[n].color = bk_c;
+				break;
 			}
 
 #ifndef _NO_ICONS

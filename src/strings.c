@@ -1513,7 +1513,8 @@ insert_fields(char ***dst, char ***src, const size_t i, size_t *num)
 	return d;
 }
 
-/* Expand the ELN at SUBSTR[I] into the corresponding file name. */
+/* Expand the ELN at SUBSTR[I] into the corresponding file name, which is
+ * quoted, if necessary, according to the value of conf.quoting_style. */
 static void
 eln_expand(char ***substr, const size_t i)
 {
@@ -1521,7 +1522,7 @@ eln_expand(char ***substr, const size_t i)
 	if (num == -1)
 		return;
 
-	/* Because of _expand_eln(), which is called immediately before this
+	/* Because of should_expand_eln(), which is called immediately before this
 	 * function, it is guaranteed that NUM won't over/under-flow:
 	 * NUM is > 0 and <= the amount of listed files (and this latter is
 	 * never bigger than FILESN_MAX). */
@@ -2028,11 +2029,11 @@ check_ranges(char ***substr, int **range_array)
 
 		for (j = 0; (*substr)[i][j]; j++) {
 			/* If some alphabetic char, besides '-', is found in the
-			 * string, we have no range */
+			 * string, we have no range. */
 			if ((*substr)[i][j] != '-' && !IS_DIGIT((*substr)[i][j]))
 				break;
 
-			/* If a range is found, store its index */
+			/* If a range is found, store its index. */
 			if (j > 0 && j < len && (*substr)[i][j] == '-'
 			&& IS_DIGIT((*substr)[i][j - 1])
 			&& IS_DIGIT((*substr)[i][j + 1])) {
