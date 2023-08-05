@@ -2044,7 +2044,7 @@ set_rm_params(const int dirs, const int rm_force)
 /* Print files to be removed and ask the user for confirmation.
  * Returns 0 if no or 1 if yes. */
 static int
-rm_confirm(char **args, const size_t *dirs, const int size_t start,
+rm_confirm(char **args, const size_t *dirs, const size_t start,
 	const int have_dirs)
 {
 	printf(_("r: File(s) to be removed%s:\n"),
