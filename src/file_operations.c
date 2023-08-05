@@ -2016,8 +2016,7 @@ set_rm_params(const int dirs, const int rm_force)
 		return (rm_force == 1 ? "-rf" : "-r");
 #elif defined(CHECK_COREUTILS)
 		if (bin_flags & BSD_HAVE_COREUTILS)
-//			return (rm_force == 1 ? "-drf" : "-dIr");
-			return (rm_force == 1 ? "-drf" : "-dr");
+			return (rm_force == 1 ? "-drf" : "-dIr");
 		else
 # if defined(__sun)
 			return (rm_force == 1 ? "-rf" : "-r");
@@ -2025,51 +2024,35 @@ set_rm_params(const int dirs, const int rm_force)
 			return (rm_force == 1 ? "-drf" : "-dr");
 # endif // __sun
 #else
-//		return (rm_force == 1 ? "-drf" : "-dIr");
-		return (rm_force == 1 ? "-drf" : "-dr");
+		return (rm_force == 1 ? "-drf" : "-dIr");
 #endif // _BE_POSIX
 	}
 
 // No directories
+#if defined(_BE_POSIX)
 	return "-f";
-
-//#if defined(_BE_POSIX)
-//	return "-f";
-//#elif defined(CHECK_COREUTILS)
-//	if (bin_flags & BSD_HAVE_COREUTILS)
-//		return (rm_force == 1 ? "-f" : "-I");
-//	else
-//		return "-f";
-//#else
-//	return (rm_force == 1 ? "-f" : "-I");
-//#endif // _BE_POSIX
+#elif defined(CHECK_COREUTILS)
+	if (bin_flags & BSD_HAVE_COREUTILS)
+		return (rm_force == 1 ? "-f" : "-I");
+	else
+		return "-f";
+#else
+	return (rm_force == 1 ? "-f" : "-I");
+#endif // _BE_POSIX
 } */
 
 /* Print files to be removed and ask the user for confirmation.
  * Returns 0 if no or 1 if yes. */
 static int
-rm_confirm(char **args, const int have_dirs)
+rm_confirm(char **args, const size_t *dirs, const int size_t start,
+	const int have_dirs)
 {
 	printf(_("r: File(s) to be removed%s:\n"),
-		have_dirs ? _(" (recursively)") : "");
+		have_dirs == 1 ? _(" (recursively)") : "");
 
-	struct stat a;
 	size_t i;
-
-	for (i = 1; args[i]; i++) {
-		char *deq_name = strchr(args[i], '\\')
-			? dequote_str(args[i], 0) : (char *)NULL;
-		char *name = deq_name ? deq_name : args[i];
-
-		if (have_dirs == 0) {
-			printf("%s\n", name);
-		} else {
-			if (stat(name, &a) != -1)
-				printf("%s%c\n", name, S_ISDIR(a.st_mode) ? '/' : 0);
-		}
-
-		free(deq_name);
-	}
+	for (i = start; args[i]; i++)
+		printf("%s%c\n", args[i], dirs[i] == 1 ? '/' : 0);
 
 	return rl_get_y_or_n(_("Continue? [y/n] "));
 }
@@ -2149,17 +2132,18 @@ remove_file(char **args)
 		return EXIT_FAILURE;
 	}
 
-	if (!rm_force && ((flags & REMOVE_ELN) || have_dirs || j > 5)
-	&& rm_confirm(args, have_dirs) == 0)
+	if (rm_force == 0 && ((flags & REMOVE_ELN) || have_dirs == 1 || j > 5)
+	&& rm_confirm(rm_cmd, dirs, 3, have_dirs) == 0)
 		goto END;
 
-#if defined(CHECK_COREUTILS)
-	rm_cmd[0] = (bin_flags & BSD_HAVE_COREUTILS) ? "grm" : "rm";
-#else
-	rm_cmd[0] = "rm";
-#endif /* CHECK_COREUTILS */
+//#if defined(CHECK_COREUTILS)
+//	rm_cmd[0] = (bin_flags & BSD_HAVE_COREUTILS) ? "grm" : "rm";
+//#else
+//	rm_cmd[0] = "rm";
+//#endif /* CHECK_COREUTILS */
 //	rm_cmd[1] = set_rm_params(have_dirs, rm_force);
-	rm_cmd[1] = have_dirs ? "-rf" : "-f";
+	rm_cmd[0] = "rm";
+	rm_cmd[1] = have_dirs == 1 ? "-rf" : "-f";
 	rm_cmd[2] = "--";
 
 	if (launch_execv(rm_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
