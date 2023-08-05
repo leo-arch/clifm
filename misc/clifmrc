@@ -283,7 +283,6 @@
 ;mvCmd=0
 
 # If set to true, the 'r' command will never prompt before removals.
-# Note: rm(1) is invoked with the -f flag
 ;rmForce=false
 
 # Choose the resource opener to open files with their default associated
