@@ -2057,9 +2057,13 @@ rm_confirm(char **args, const int have_dirs)
 	size_t i;
 
 	for (i = 1; args[i]; i++) {
-		if (stat(args[i], &a) == -1)
-			continue;
-		printf("%s%c\n", args[i], S_ISDIR(a.st_mode) ? '/' : 0);
+		char *deq_name = dequote_str(args[i], 0);
+		char *name = deq_name ? deq_name : args[i];
+
+		if (stat(name, &a) != -1)
+			printf("%s%c\n", name, S_ISDIR(a.st_mode) ? '/' : 0);
+
+		free(deq_name);
 	}
 
 	return rl_get_y_or_n(_("Continue? [y/n] "));
