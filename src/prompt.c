@@ -1009,6 +1009,7 @@ print_right_prompt(void)
 static int
 expand_history(char **input)
 {
+	/* history_expansion_char defaults to '!' */
 	if (!strchr(*input, history_expansion_char))
 		return EXIT_SUCCESS;
 
@@ -1029,6 +1030,13 @@ expand_history(char **input)
 
 	printf("%s\n", exp_input);
 	free(*input);
+
+	if (ret == 2) { /* Display but do not execute the expanded command (:p) */
+		free(exp_input);
+		return (-1);
+	}
+
+	/* (ret == 1) Display and execute */
 	*input = exp_input;
 
 	return EXIT_SUCCESS;
@@ -1077,7 +1085,7 @@ prompt(void)
 	}
 	flags &= ~DELAYED_REFRESH;
 
-	if (expand_history(&input) == EXIT_FAILURE)
+	if (expand_history(&input) != EXIT_SUCCESS)
 		return (char *)NULL;
 
 	log_and_record(input);
