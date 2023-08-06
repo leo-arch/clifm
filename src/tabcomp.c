@@ -1211,8 +1211,13 @@ get_query_str(char *lw)
 		query = (!tmp || !*(tmp++)) ? (char *)NULL : tmp;
 		break;
 
-	case TCMP_HIST:	/* Skip the leading ! char of the input string. */
-		query = lb + 1;
+	case TCMP_HIST:
+		if (lb && *lb == '/' && lb[1] == '*') { /* Search history */
+			query = lb + 1;
+		} else { /* Commands history */
+			tmp = lb ? strrchr(lb, '!') : (char *)NULL;
+			query = (!tmp || !*(tmp++)) ? (char *)NULL : tmp;
+		}
 		break;
 
 	case TCMP_JUMP:
@@ -1465,7 +1470,13 @@ get_finder_offset(const char *query, const char *text, char **matches,
 	}
 
 	else if (ct == TCMP_HIST) {
-		finder_offset = 1 + prompt_offset - ((query && *query) ? 3 : 4);
+		if (lb && *lb == '/' && lb[1] == '*') { /* Search history */
+			finder_offset = 1 + prompt_offset - ((query && *query) ? 3 : 4);
+		} else { /* Commands history */
+			char *sp = lb ? get_last_chr(lb, '!', rl_point) : (char *)NULL;
+			finder_offset = prompt_offset + (sp ? (int)(sp - lb)
+				- ((query && *query) ? 2 : 3) : -1);
+		}
 	}
 
 	else if (ct == TCMP_JUMP) {
@@ -1584,6 +1595,10 @@ do_some_cleanup(char **buf, char **matches, const char *query,
 {
 	enum comp_type ct = cur_comp_type;
 
+	/* TCMP_HIST might be either search or command history */
+	int cmd_hist = (ct == TCMP_HIST && rl_line_buffer
+		&& (*rl_line_buffer != '/' || rl_line_buffer[1] != '*'));
+
 	if (rl_point < rl_end && ct != TCMP_PATH && ct != TCMP_CMD) {
 		char *s = rl_line_buffer
 			? get_last_chr(rl_line_buffer, ' ', rl_point) : (char *)NULL;
@@ -1601,12 +1616,12 @@ do_some_cleanup(char **buf, char **matches, const char *query,
 		*buf = tmp;
 	}
 
-	else if (ct == TCMP_HIST || ct == TCMP_JUMP) {
+	else if ((ct == TCMP_HIST && cmd_hist == 0) || ct == TCMP_JUMP) {
 		rl_delete_text(0, rl_end);
 		rl_point = rl_end = 0;
 	}
 
-	else if (ct == TCMP_RANGES || ct == TCMP_SEL
+	else if (cmd_hist == 1 || ct == TCMP_RANGES || ct == TCMP_SEL
 	|| ct == TCMP_TAGS_F || ct == TCMP_GLOB
 	|| ct == TCMP_BM_PATHS || ct == TCMP_BM_PREFIX
 	|| ct == TCMP_TAGS_T || ct == TCMP_DIRHIST) {
@@ -1617,7 +1632,7 @@ do_some_cleanup(char **buf, char **matches, const char *query,
 			rl_point = (int)(s - rl_line_buffer + 1);
 			rl_delete_text(rl_point, rl_end);
 			rl_end = rl_point;
-		} else if (ct == TCMP_BM_PATHS || ct == TCMP_TAGS_F
+		} else if (cmd_hist == 1 || ct == TCMP_BM_PATHS || ct == TCMP_TAGS_F
 		|| ct == TCMP_BM_PREFIX || ct == TCMP_TAGS_T
 		|| ct == TCMP_SEL || ct == TCMP_DIRHIST || ct == TCMP_GLOB) {
 			rl_delete_text(0, rl_end);

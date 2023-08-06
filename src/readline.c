@@ -4053,6 +4053,17 @@ my_rl_completion(const char *text, const int start, const int end)
 			return matches;
 	}
 
+	/* ##### HISTORY COMPLETION ("!") ##### */
+	if (xrename == 0 && *text == '!') {
+		char *p = dequote_str((char *)text, 0);
+		matches = rl_completion_matches(p ? p : text, &hist_generator);
+		free(p);
+		if (matches) {
+			cur_comp_type = TCMP_HIST;
+			return matches;
+		}
+	}
+
 FIRST_WORD_COMP:
 	if (start == 0) {
 
@@ -4074,9 +4085,8 @@ FIRST_WORD_COMP:
 			}
 		}
 
-		/* HISTORY CMD AND SEARCH PATTERNS COMPLETION */
-		if (xrename == 0 && (*text == '!'
-		|| (*text == '/' && text[1] == '*'))) {
+		/* SEARCH PATTERNS COMPLETION */
+		if (xrename == 0 && *text == '/' && text[1] == '*') {
 			char *p = dequote_str((char *)text, 0);
 			matches = rl_completion_matches(p ? p : text, &hist_generator);
 			free(p);
