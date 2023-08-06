@@ -525,6 +525,11 @@ static int
 diff_files(char *tmp_file, const filesn_t n)
 {
 	FILE *fp = fopen(tmp_file, "r");
+	if (!fp) {
+		xerror("br: %s: %s\n", tmp_file, strerror(errno));
+		return 0;
+	}
+
 	char line[PATH_MAX + 6];
 	memset(line, '\0', sizeof(line));
 

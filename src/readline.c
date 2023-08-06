@@ -4392,6 +4392,10 @@ initialize_readline(void)
 
 	set_rl_init_file();
 
+	/* The character that introduces a history event. Defaults to '!'.
+	 * Setting this to 0 inhibits history expansion. */
+//	history_expansion_char = '!';
+
 	/* Enable tab auto-completion for commands (in PATH) in case of
 	  * first entered string (if autocd and/or auto-open are enabled, check
 	  * for paths as well). The second and later entered strings will

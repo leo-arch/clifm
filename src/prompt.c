@@ -33,6 +33,7 @@
 # include <wordexp.h>
 #endif /* !__HAIKU__ && !__OpenBSD__ && !__ANDROID__ */
 #include <readline/readline.h>
+#include <readline/history.h> /* history_expand() */
 #include <errno.h>
 
 #include "aux.h"
@@ -1003,6 +1004,28 @@ print_right_prompt(void)
 	free(p);
 } */
 
+static void
+expand_history(char **input)
+{
+	if (!strchr(*input, history_expansion_char))
+		return;
+
+	char *exp_input = (char *)NULL;
+	int ret = history_expand(*input, &exp_input);
+
+	if (ret == -1)
+		return;
+
+	if (ret == 0) {
+		free(exp_input);
+		return;
+	}
+
+	printf("%s\n", exp_input);
+	free(*input);
+	*input = exp_input;
+}
+
 /* Print the prompt and return the string entered by the user, to be
  * parsed later by parse_input_str() */
 char *
@@ -1045,6 +1068,8 @@ prompt(void)
 		return (char *)NULL;
 	}
 	flags &= ~DELAYED_REFRESH;
+
+	expand_history(&input);
 
 	log_and_record(input);
 
@@ -1118,7 +1143,7 @@ set_prompt(char *name)
 	}
 
 	int i = (int)prompts_n;
-	while(--i >= 0) {
+	while (--i >= 0) {
 		if (*p != *prompts[i].name || strcmp(p, prompts[i].name) != 0)
 			continue;
 		free(p);

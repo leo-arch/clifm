@@ -2382,16 +2382,6 @@ exec_cmd(char **comm)
 	&& IS_HELP(comm[1])) )
 		return (exit_code = search_function(comm));
 
-	/*      ############## HISTORY ##################     */
-	else if (*comm[0] == '!' && comm[0][1] != ' ' && comm[0][1] != '\t'
-	&& comm[0][1] != '\n' && comm[0][1] != '=' && comm[0][1] != '(') {
-		if (comm[1] && IS_HELP(comm[1])) {
-			printf("%s\n", HISTEXEC_USAGE);
-			return EXIT_SUCCESS;
-		}
-		exit_code = run_history_cmd(comm[0] + 1);
-	}
-
 	/*    ############### BATCH LINK ##################     */
 	else if (*comm[0] == 'b' && comm[0][1] == 'l' && !comm[0][2])
 		exit_code = batch_link(comm);

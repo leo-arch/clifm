@@ -44,7 +44,6 @@ int  log_cmd(void);
 void log_msg(char *, const int, const int, const int);
 int  print_logs(const int);
 int  record_cmd(char *);
-int  run_history_cmd(const char *);
 
 ////// TEMPORAL CODE
 #ifndef _NO_SPLIT_LOG
