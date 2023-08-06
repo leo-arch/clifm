@@ -1004,26 +1004,34 @@ print_right_prompt(void)
 	free(p);
 } */
 
-static void
+/* Replace history expressions ("!*") in the string INPUT by the corresponding
+ * history entry. */
+static int
 expand_history(char **input)
 {
 	if (!strchr(*input, history_expansion_char))
-		return;
+		return EXIT_SUCCESS;
 
 	char *exp_input = (char *)NULL;
 	int ret = history_expand(*input, &exp_input);
 
-	if (ret == -1)
-		return;
-
-	if (ret == 0) {
+	if (ret == -1) { /* Error in expansion */
+		xerror("%s: %s\n", PROGRAM_NAME, exp_input);
+		free(*input);
 		free(exp_input);
-		return;
+		return EXIT_FAILURE;
+	}
+
+	if (ret == 0) { /* No expansion took place */
+		free(exp_input);
+		return EXIT_SUCCESS;
 	}
 
 	printf("%s\n", exp_input);
 	free(*input);
 	*input = exp_input;
+
+	return EXIT_SUCCESS;
 }
 
 /* Print the prompt and return the string entered by the user, to be
@@ -1069,7 +1077,8 @@ prompt(void)
 	}
 	flags &= ~DELAYED_REFRESH;
 
-	expand_history(&input);
+	if (expand_history(&input) == EXIT_FAILURE)
+		return (char *)NULL;
 
 	log_and_record(input);
 

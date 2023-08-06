@@ -497,7 +497,7 @@ bulk_remove_files(char ***rfiles)
 		return EXIT_FAILURE;
 
 	int i = n;
-	if (rl_get_y_or_n("Continue? [y/n] ") == 0) {
+	if (rl_get_y_or_n(_("Continue? [y/n] ")) == 0) {
 		while (--i >= 0)
 			free((*rfiles)[i]);
 		free(*rfiles);
@@ -632,8 +632,8 @@ run_mime(char *file)
 
 	/* Convert ELN into file name (rl_line_buffer) */
 	if (p && *p >= '1' && *p <= '9') {
-		int a = atoi(p);
-		if (a > 0 && (filesn_t)a <= files && file_info[a - 1].name)
+		filesn_t a = xatof(p);
+		if (a > 0 && a <= files && file_info[a - 1].name)
 			p = file_info[a - 1].name;
 	}
 
@@ -726,7 +726,7 @@ xchmod(const char *file, const char *mode_str, const int flag)
 	return EXIT_SUCCESS;
 }
 
-/* Toggle executable bits on the file named FILE */
+/* Toggle executable bits on the file named FILE. */
 int
 toggle_exec(const char *file, mode_t mode)
 {
