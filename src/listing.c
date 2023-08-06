@@ -59,6 +59,13 @@
 # define ENTSORT(file_info, n, entrycmp) qsort((file_info), (n), sizeof(*(file_info)), (entrycmp))
 #endif /* TOURBIN_QSORT */
 
+/* Check for temporary files:
+ * 1. "*~" Gral purpose temp files (mostly used by text editors)
+ * 2. "#*#" Emacs auto-save temp files */
+#define IS_TEMP_FILE(n, l) ((l) > 0         \
+	&& ((n)[(l) - 1] == '~'                 \
+	|| (*(n) == '#' && (n)[(l) - 1] == '#')))
+
 #include "aux.h"
 #include "colors.h"
 #include "messages.h"
@@ -2039,7 +2046,7 @@ END:
 }
 
 /* Check whether the file in the device DEV with inode INO is selected.
- * Used to mark selected files in the files list */
+ * Used to mark selected files in the files list. */
 static inline int
 check_seltag(const dev_t dev, const ino_t ino, const nlink_t links,
 	const filesn_t index)
@@ -2526,8 +2533,7 @@ list_dir(void)
 				file_info[n].color = fi_c;
 			}
 
-			/* Backup files */
-			if (len_bytes > 0 && file_info[n].name[len_bytes - 1] == '~') {
+			if (IS_TEMP_FILE(file_info[n].name, len_bytes)) {
 				file_info[n].color = bk_c;
 				break;
 			}

@@ -875,7 +875,7 @@ struct config_t {
 	int case_sens_dirjump;
 	int case_sens_path_comp;
 	int case_sens_search;
-	int case_sens_list; // files list
+	int case_sens_list; /* files list */
 	int cd_on_quit;
 	int classify;
 	int clear_screen;
