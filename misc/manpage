@@ -2788,6 +2788,9 @@ Same as \fBCLIFM_DATE_SHADES\fR, but for file sizes
 .B CLIFM_FORCE_COLOR
 Force the use of colors, even if the terminal informs that it does not support colors
 .TP
+.B CLIFM_HISTFILE
+A custom commands history file
+.TP
 .B CLIFM_FILTER
 Define a file filter. If set, this variable overrides the \fIFilter\fR option in the configuration file
 .TP
