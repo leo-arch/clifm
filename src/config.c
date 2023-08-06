@@ -1233,35 +1233,67 @@ create_tmp_files(void)
 	define_selfile(tmp_rootdir_len);
 }
 
+/* Set the main configuration directory. Three sources are examined:
+ * 1. Alternative config dir, from the command line.
+ * 2. XDG_CONFIG_HOME.
+ * 3. user.home: $HOME if not secure-env or pw_dir from the passwd database. */
+static void
+set_main_config_dir(const int secure_mode)
+{
+	if (alt_config_dir) {
+		config_dir_gral = savestring(alt_config_dir, strlen(alt_config_dir));
+		free(alt_config_dir);
+		alt_config_dir = (char *)NULL;
+		return;
+	}
+
+	char *xdg_config_home = secure_mode == 0
+		? getenv("XDG_CONFIG_HOME") : (char *)NULL;
+
+	if (xdg_config_home) {
+		size_t len = strlen(xdg_config_home);
+		size_t tmp_len = len + (sizeof(PROGRAM_NAME) - 1) + 2;
+
+		config_dir_gral = (char *)xnmalloc(tmp_len, sizeof(char));
+		snprintf(config_dir_gral, tmp_len, "%s/%s", xdg_config_home,
+			PROGRAM_NAME);
+		return;
+	}
+
+	size_t tmp_len = user.home_len + (sizeof(PROGRAM_NAME) - 1) + 10;
+	config_dir_gral = (char *)xnmalloc(tmp_len, sizeof(char));
+	snprintf(config_dir_gral, tmp_len, "%s/.config/%s", user.home,
+		PROGRAM_NAME);
+}
+
+/* Set the history file, as defined in CLIFM_HISTFILE environment variable
+ * or, if unset, using the main configuration directory. */
+static void
+set_hist_file(const int secure_mode, const size_t tmp_len)
+{
+	char *env_val = secure_mode == 0 ? getenv("CLIFM_HISTFILE") : (char *)NULL;
+	char *hist_env = env_val && *env_val
+		? normalize_path(env_val, strlen(env_val)) : (char *)NULL;
+
+	size_t hist_len = (hist_env && *hist_env) ? strlen(hist_env) + 1 : tmp_len;
+	hist_file = (char *)xnmalloc(hist_len, sizeof(char));
+
+	if (hist_env && *hist_env)
+		xstrsncpy(hist_file, hist_env, hist_len);
+	else
+		snprintf(hist_file, hist_len, "%s/history.clifm", config_dir);
+
+	free(hist_env);
+}
+
 static void
 define_config_file_names(void)
 {
 	size_t pnl_len = sizeof(PROGRAM_NAME) - 1;
 	size_t tmp_len = 0;
+	int secure_mode = (xargs.secure_env == 1 || xargs.secure_env_full == 1);
 
-	if (alt_config_dir) {
-		config_dir_gral = savestring(alt_config_dir, strlen(alt_config_dir));
-		free(alt_config_dir);
-		alt_config_dir = (char *)NULL;
-	} else {
-		/* If $XDG_CONFIG_HOME is set, use it for the config file.
-		 * Else, fall back to user.home: $HOME if not secure-env or pw_dir
-		 * from a passwd struct) */
-		char *xdg_config_home = getenv("XDG_CONFIG_HOME");
-		if (xdg_config_home) {
-			size_t len = strlen(xdg_config_home);
-			tmp_len = len + pnl_len + 2;
-			config_dir_gral = (char *)xnmalloc(tmp_len, sizeof(char));
-			snprintf(config_dir_gral, tmp_len, "%s/%s", xdg_config_home,
-				PROGRAM_NAME);
-			xdg_config_home = (char *)NULL;
-		} else {
-			tmp_len = user.home_len + pnl_len + 10;
-			config_dir_gral = (char *)xnmalloc(tmp_len, sizeof(char));
-			snprintf(config_dir_gral, tmp_len, "%s/.config/%s", user.home,
-				PROGRAM_NAME);
-		}
-	}
+	set_main_config_dir(secure_mode); /* config_dir_gral is set here */
 
 	size_t config_gral_len = strlen(config_dir_gral);
 
@@ -1324,8 +1356,7 @@ define_config_file_names(void)
 	cmds_log_file = (char *)xnmalloc(tmp_len, sizeof(char));
 	snprintf(cmds_log_file, tmp_len, "%s/cmdlogs.clifm", config_dir);
 
-	hist_file = (char *)xnmalloc(tmp_len, sizeof(char));
-	snprintf(hist_file, tmp_len, "%s/history.clifm", config_dir);
+	set_hist_file(secure_mode, tmp_len);
 
 	if (!alt_config_file) {
 		tmp_len = config_dir_len + pnl_len + 4;
