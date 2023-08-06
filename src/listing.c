@@ -61,7 +61,8 @@
 
 /* Check for temporary files:
  * 1. "*~" Gral purpose temp files (mostly used by text editors)
- * 2. "#*#" Emacs auto-save temp files */
+ * 2. "#*#" Emacs auto-save temp files
+ * Might also add Office lock/temp files: "~$*" and "~*" */
 #define IS_TEMP_FILE(n, l) ((l) > 0         \
 	&& ((n)[(l) - 1] == '~'                 \
 	|| (*(n) == '#' && (n)[(l) - 1] == '#')))
@@ -378,7 +379,7 @@ get_dir_icon(const char *dir, const int n)
 /* Set the icon field to the corresponding icon for EXT. If not found,
  * set the default icon */
 static void
-get_ext_icon(const char *restrict ext, const int n)
+get_ext_icon(const char *restrict ext, const filesn_t n)
 {
 	if (!file_info[n].icon) {
 		file_info[n].icon = DEF_FILE_ICON;
@@ -2533,7 +2534,9 @@ list_dir(void)
 				file_info[n].color = fi_c;
 			}
 
-			if (IS_TEMP_FILE(file_info[n].name, len_bytes)) {
+			if (file_info[n].color != nf_c
+			&& file_info[n].color != ca_c && file_info[n].exec != 1
+			&& IS_TEMP_FILE(file_info[n].name, len_bytes)) {
 				file_info[n].color = bk_c;
 				break;
 			}
@@ -2562,7 +2565,7 @@ list_dir(void)
 				file_info[n].ext_name = ext;
 #ifndef _NO_ICONS
 			if (conf.icons == 1 && name_icon_found == 0)
-				get_ext_icon(ext, (int)n);
+				get_ext_icon(ext, n);
 #endif /* !_NO_ICONS */
 			char *extcolor = get_ext_color(ext);
 			if (!extcolor)
