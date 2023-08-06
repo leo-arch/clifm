@@ -2534,8 +2534,12 @@ list_dir(void)
 				file_info[n].color = fi_c;
 			}
 
-			if (file_info[n].color != nf_c
-			&& file_info[n].color != ca_c && file_info[n].exec != 1
+			/* Unaccessible files, files with capabilities, and executable
+			 * files take precedence over temp and file extension colors. */
+			int no_override_color = (file_info[n].color == nf_c
+			|| file_info[n].color == ca_c || file_info[n].exec == 1);
+
+			if (no_override_color == 0
 			&& IS_TEMP_FILE(file_info[n].name, len_bytes)) {
 				file_info[n].color = bk_c;
 				break;
@@ -2552,11 +2556,9 @@ list_dir(void)
 				name_icon_found = get_name_icon(file_info[n].name, (int)n);
 #endif /* !_NO_ICONS */
 
-			/* Check file extension (only if accessible, has no capabilities
-			 * and is not executable) */
+			/* Check file extension */
 			char *ext = (char *)NULL;
-			if (check_ext == 1 && file_info[n].color != nf_c
-			&& file_info[n].color != ca_c && file_info[n].exec != 1)
+			if (check_ext == 1 && no_override_color == 0)
 				ext = strrchr(file_info[n].name, '.');
 			/* Make sure not to take a hidden file for a file extension */
 			if (!ext || ext == file_info[n].name || !*(ext + 1))
