@@ -329,6 +329,11 @@
 # Keep only the last N lines of the log file
 ;MaxLog=1000
 
+# A regular expression to prevent command lines from being added to the
+# history list. Comment this line out to use the default value. Set it
+# to the empty string to disable history filters.
+;HistIgnore="^[q,Q]$|^quit$|^exit$|^rf$|^history.*|^ .*|^#.*|^[0-9]+$|^\.+$"
+
 # Limit the size of the commands history file to N entries
 ;MaxHistory=1000
 # Limit the size of the directory history file to N entries

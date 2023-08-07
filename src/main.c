@@ -131,6 +131,7 @@ unsigned short
 	term_lines = 0;
 
 regex_t regex_exp;
+regex_t regex_hist;
 
 /* Internal status flags */
 int

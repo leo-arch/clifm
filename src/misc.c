@@ -1523,6 +1523,11 @@ free_stuff(void)
 		free(filter.str);
 	}
 
+	if (conf.histignore_regex) {
+		regfree(&regex_hist);
+		free(conf.histignore_regex);
+	}
+
 	free_workspaces_filters();
 
 	if (profile_names) {

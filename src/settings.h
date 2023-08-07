@@ -260,6 +260,7 @@ xf=1;31:xs=0;32:"
 #define DEF_FZF_PREVIEW 1
 #define DEF_HIGHLIGHT 1
 #define DEF_HIST_STATUS 1
+#define DEF_HISTIGNORE "^[q,Q]$|^quit$|^exit$|^rf$|^history.*|^ .*|^#.*|^[0-9]+$|^\\.+$"
 #define DEF_ICONS 0
 #define DEF_INT_VARS 0
 #define DEF_LIGHT_MODE 0

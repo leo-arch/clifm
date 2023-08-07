@@ -648,11 +648,10 @@ get_history(void)
 		if (!*line_buff)
 			continue;
 
-		/* Store the command timestamp and continue: the next line is the cmd itself */
+		/* Store the command timestamp and continue: the next line is
+		 * the cmd itself. */
 		if (*line_buff == history_comment_char && *(line_buff + 1)
 		&& is_number(line_buff + 1)) {
-//			if (conf.hist_timestamp == 0)
-//				continue;
 			int d = atoi(line_buff + 1);
 			tdate = d == INT_MIN ? -1 : (time_t)d;
 			continue;
@@ -712,94 +711,22 @@ add_to_cmdhist(char *cmd)
 	history[current_hist_n].date = -1;
 }
 
-/* Returns 1 if INPUT should be stored in history and 0 if not */
+/* Returns 1 if INPUT should be saved on history or 0 if not. */
 int
 record_cmd(char *input)
 {
-	/* NULL input, self or parent (. ..), commands starting with space,
-	 * and input generating a BAEJ suggestion */
-	if (!input || !*input || SELFORPARENT(input) || *input == ' ')
+	if (!input || !*input)
 		return 0;
 
-	/* Blank lines */
-	size_t blank = 1;
-	char *p = input;
-
-	while (*p) {
-		if (*p > ' ') {
-			blank = 0;
-			break;
-		}
-		p++;
-	}
-
-	if (blank == 1)
-		return 0;
-
-	/* Rewind the pointer to the beginning of the input line */
-	p = input;
-
-	size_t len = strlen(p), amp_rm = 0;
-	if (len > 0 && p[len - 1] == '&') {
-		p[len - 1] = '\0';
-		amp_rm = 1;
-	}
-
-	/* Do not record single ELN's */
-	if (*p > '0' && *p <= '9' && is_number(p)) {
-		if (amp_rm == 1)
-			p[len - 1] = '&';
-		return 0;
-	}
-
-	if (amp_rm == 1)
-		p[len - 1] = '&';
-
-	switch (*p) {
-	case '.': /* Self, parent, and fastback */
-		if (!*(p + 1) || (*(p + 1) == '.' && (!*(p + 2) || *(p + 2) == '.') ) )
-			return 0;
-		break;
-
-	/* Do not record the history command itself */
-	case 'h':
-		if (*(p + 1) == 'i' && strcmp(p + 2, "story") == 0)
-			return 0;
-		break;
-
-	case 'r': /* rf command */
-		if (*(p + 1) == 'f' && !*(p + 2))
-			return 0;
-		break;
-
-	/* Do not record exit commands */
-	case 'q':
-		if (!*(p + 1) || strcmp(p + 1, "uit") == 0)
-			return 0;
-		break;
-
-	case 'Q':
-		if (!*(p + 1))
-			return 0;
-		break;
-
-	case 'e':
-		if (*(p + 1) == 'x' && strcmp(p + 2, "it") == 0)
-			return 0;
-		break;
-
-	default: break;
-	}
-
-	/* History */
-	if (*p == '!' && (IS_DIGIT(*(p + 1)) || (*(p + 1) == '-'
-	&& IS_DIGIT(*(p + 2))) || ((*(p + 1) == '!') && *(p + 2) == '\0')))
+	/* Ignore entries matching HistIgnore */
+	if (conf.histignore_regex && *conf.histignore_regex
+	&& regexec(&regex_hist, input, 0, NULL, 0) == EXIT_SUCCESS)
 		return 0;
 
 	/* Consequtively equal commands in history */
 	if (history && current_hist_n > 0 && history[current_hist_n - 1].cmd
-	&& *p == *history[current_hist_n - 1].cmd
-	&& strcmp(p, history[current_hist_n - 1].cmd) == 0) {
+	&& *input == *history[current_hist_n - 1].cmd
+	&& strcmp(input, history[current_hist_n - 1].cmd) == 0) {
 		/* Update timestamp */
 		history[current_hist_n - 1].date = time(NULL);
 		return 0;

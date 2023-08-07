@@ -220,6 +220,7 @@ init_conf_struct(void)
 
 	conf.encoded_prompt = (char *)NULL;
 	conf.fzftab_options = (char *)NULL;
+	conf.histignore_regex = (char *)NULL;
 	conf.opener = (char *)NULL;
 #ifndef _NO_SUGGESTIONS
 	conf.suggestion_strategy = (char *)NULL;
@@ -2482,6 +2483,12 @@ void
 check_options(void)
 {
 	set_sudo_cmd();
+
+	if (!conf.histignore_regex) {
+		conf.histignore_regex =
+			savestring(DEF_HISTIGNORE, sizeof(DEF_HISTIGNORE) - 1);
+		regcomp(&regex_hist, conf.histignore_regex, REG_NOSUB | REG_EXTENDED);
+	}
 
 	if (conf.trim_names == UNSET) {
 		if (xargs.trim_names == UNSET)

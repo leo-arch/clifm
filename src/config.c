@@ -2635,6 +2635,35 @@ set_quoting_style(char *str)
 		return;
 }
 
+static void
+set_histignore_pattern(char *str)
+{
+	if (!str || !*str)
+		return;
+
+	char *pattern = get_line_value(str);
+	if (!pattern) {
+		conf.histignore_regex = savestring("", 0);
+		return;
+	}
+
+	if (conf.histignore_regex) {
+		regfree(&regex_hist);
+		free(conf.histignore_regex);
+		conf.histignore_regex = (char *)NULL;
+	}
+
+	int ret = regcomp(&regex_hist, pattern, REG_NOSUB | REG_EXTENDED);
+	if (ret != EXIT_SUCCESS) {
+		err('w', PRINT_PROMPT, "histignore: %s: Invalid regular "
+			"expression\n", pattern);
+		regfree(&regex_hist);
+		return;
+	}
+
+	conf.histignore_regex = savestring(pattern, strlen(pattern));
+}
+
 /* Read the main configuration file and set options accordingly */
 static void
 read_config(void)
@@ -2808,6 +2837,10 @@ read_config(void)
 		&& strncmp(line, "FzfPreview=", 11) == 0) {
 			if (set_fzf_preview_value(line, &conf.fzf_preview) == -1)
 				continue;
+		}
+
+		else if (*line == 'H' && strncmp(line, "HistIgnore=", 11) == 0) {
+			set_histignore_pattern(line + 11);
 		}
 
 #ifndef _NO_ICONS
@@ -3405,6 +3438,12 @@ reset_variables(void)
 		filter.str = (char *)NULL;
 		filter.rev = 0;
 		filter.type = FILTER_NONE;
+	}
+
+	if (conf.histignore_regex) {
+		regfree(&regex_hist);
+		free(conf.histignore_regex);
+		conf.histignore_regex = (char *)NULL;
 	}
 
 	free(conf.opener);
