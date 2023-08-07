@@ -520,7 +520,9 @@ You can also access the commands history via the exclamation mark (!)\n\
 - Execute the command number 'n' in the history list\n\
     !n\n\
 - Execute the 'last - n' command in the history list\n\
-    !-n"
+    !-n\n\n\
+Tip: Use HistIgnore in the configuration file to exclude command lines\n\
+from the history list"
 
 #define ICONS_USAGE "Set icons on/off\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
