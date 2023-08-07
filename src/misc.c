@@ -581,6 +581,35 @@ void
 print_tips(const int all)
 {
 	const char *TIPS[] = {
+#ifndef _BE_POSIX
+		"Add a new entry to the mimelist file: 'mm edit' or F6",
+		"Get mime information for a file. Ex: 'mm info file'",
+		"Manage default associated applications with the 'mime' command",
+		"Customize previewing applications: 'view edit' or F7",
+		"List mountpoints: 'mp' or Alt-m",
+		"Compress and decompress files using the 'ac' and 'ad' "
+		"commands respectively. Ex: 'ac sel' or 'ad file.zip'",
+		"Disallow the use of shell commands with the -x option: 'clifm -x'",
+		"Don't like ELN's? Disable them using the -e command line switch",
+		"Disable file previews for TAB completion (fzf mode only) via --no-fzfpreview",
+# ifdef __linux__
+		"Manage removable devices via the 'media' command",
+# endif /* __linux__ */
+#endif /* _BE_POSIX */
+#ifndef _BE_POSIX
+		"Create a new profile: 'pf add PROFILE' or 'clifm -P PROFILE'",
+		"Run in incognito/private mode (-S, --stealth-mode)",
+		"Running in an untrusted environment? Try the --secure-env and "
+		"--secure-cmds command line switches",
+		"Run in disk usage analyzer mode using the -t command line switch",
+		"Fuzzy suggestions are supported. Ex: 'dwn > Downloads'. Enable them via --fuzzy-matching, or FuzzyMatching in the configuration file",
+#else
+		"Create a new profile: 'pf add PROFILE' or 'clifm -p PROFILE'",
+		"Run in incognito/private mode via the -s flag",
+		"Running in an untrusted environment? Try the -x, -X, and -Y flags",
+		"Run in disk usage analyzer mode using the -u flag",
+		"Fuzzy suggestions are supported. Ex: 'dwn > Downloads'. Enable them via the -m flag (or FuzzyMatching in the configuration file)",
+#endif /* _BE_POSIX */
 		"Clear the screen: 'rf', '.', Enter (on empty line), or Ctrl-l",
 		"Try the autocd and auto-open functions: run 'FILE' instead "
 		"of 'cd FILE' or 'open FILE'",
@@ -597,18 +626,6 @@ print_tips(const int all)
 		"Press TAB to automatically expand an ELN. Ex: 's 2<TAB>' -> 's FILENAME'",
 		"Use ranges (ELN-ELN) to easily move multiple files. Ex: 'm 3-12 dir/'",
 		"Trash files with a simple 't ELN/FILE'",
-#ifndef _BE_POSIX
-		"Add a new entry to the mimelist file: 'mm edit' or F6",
-		"Get mime information for a file. Ex: 'mm info file'",
-		"Manage default associated applications with the 'mime' command",
-		"Customize previewing applications: 'view edit' or F7",
-		"List mountpoints: 'mp' or Alt-m",
-		"Compress and decompress files using the 'ac' and 'ad' "
-		"commands respectively. Ex: 'ac sel' or 'ad file.zip'",
-# ifdef __linux__
-		"Manage removable devices via the 'media' command",
-# endif /* __linux__ */
-#endif /* _BE_POSIX */
 		"If too many files are listed, try enabling the pager: 'pg on'",
 		"Once in the pager, go backwards by pressing the keyboard shortcut "
 		"provided by your terminal emulator",
@@ -625,6 +642,7 @@ print_tips(const int all)
 		"Send a command directly to the system shell. Ex: ';ls -l *'",
 		"Run the last executed command: '!!'",
 		"Access the commands history list: '!<TAB>'",
+		"Exclude commands from history using the HistIgnore option in the configuration file (F10)",
 		"Access the directory history list: 'dh <TAB>'",
 		"List previously used search patterns: '/*<TAB>'",
 		"Import aliases from file: 'alias import FILE'",
@@ -634,7 +652,6 @@ print_tips(const int all)
 		"Get a brief description for each CliFM command: 'cmd<TAB>'",
 		"Print the currently used color codes: 'colors'",
 		"Toggle hidden files on/off: 'hh' or Alt-.",
-		"Disallow the use of shell commands with the -x option: 'clifm -x'",
 		"Go to the root directory: Alt-r",
 		"Go to the home directory: Alt-e (or just 'cd')",
 		"Open and edit the current color scheme file: F8 (or 'cs edit')",
@@ -654,7 +671,6 @@ print_tips(const int all)
 		"Change to a bookmark: 'bm NAME' or 'b:NAME'",
 		"Chain commands using ';' and '&&'. Ex: 's 2 7-10; r sel'",
 		"Add emojis to your prompt by copying them to the prompt line ('prompt edit')",
-		"Create a new profile: 'pf add PROFILE' or 'clifm -P PROFILE'",
 		"Switch profiles: 'pf set PROFILE'",
 		"Delete a profile: 'pf del PROFILE'",
 		"Rename a profile: 'pf rename PROFILE'",
@@ -680,7 +696,6 @@ print_tips(const int all)
 		"Change default keyboard shortcuts: F9 (or 'kb edit')",
 		"Keep in sight previous and next visited directories enabling the "
 		"DirhistMap option in the configuration file (F10)",
-		"Run in incognito/private mode (-S, --stealth-mode)",
 		"Pin a file via the 'pin' command and then use it with the "
 		"period keyword (,). Ex: 'pin DIR' and then 'cd ,'",
 		"Switch color schemes using the 'cs' command",
@@ -692,7 +707,6 @@ print_tips(const int all)
 		"When searching or selecting files, use the exclamation mark "
 		"to negate a pattern. Ex: 's !*.pdf'",
 		"Enable the TrashAsRm option to always send removed files to the trash can",
-		"Don't like ELN's? Disable them using the -e command line switch",
 		"Use the 'n' command to create multiple files/directories. Ex: 'n file dir/'",
 		"Add prompt commands via the 'promptcmd' keyword: 'config' (F10)",
 		"Need git integration? Consult the manpage",
@@ -709,10 +723,7 @@ print_tips(const int all)
 		"Use the 'm' command to interactively rename a file. Ex: 'm 12'",
 		"Set options on a per directory basis via the autocommands function. Try 'help autocommands'",
 		"Clean up non-ASCII file names using the 'bleach' command",
-		"Running in an untrusted environment? Try the --secure-env and "
-		"--secure-cmds command line switches",
 		"Get help for any internal command via the -h or --help parameters: 'p -h'",
-		"Run in disk usage analyzer mode using the -t command line switch",
 		"Enable icons with 'icons on'",
 		"Quickly change to any parent directory using the 'bd' command",
 		"Use 'stats' to print statistics on files in the current directory",
@@ -724,13 +735,11 @@ print_tips(const int all)
 		"Quickly switch prompts via 'prompt NAME' (or 'prompt set <TAB>')",
 		"Press Alt-TAB to toggle the disk usage analyzer mode",
 		"Press Ctrl-Alt-l to toggle max file name length on/off",
-		"Fuzzy suggestions are supported. Ex: 'dwn > Downloads'. Enable them via --fuzzy-matching, or FuzzyMatching in the configuration file",
 		"Wildcards can be expanded via TAB. Ex: 's *.c<TAB>'",
 		"Try the help topics: 'help <TAB>'",
 		"List clifm commands, together with a brief description: 'cmd<TAB>'",
-		"List symlinks in the current directory: '=l<TAB>'. Enter 'help file-filters' for more information",
+		"List symlinks in the current directory: '=l<TAB>'. Try 'help file-filters' for more information",
 		"Use PropFields in the configuration file to customize fields in long view mode",
-		"Disable file previews for TAB completion (fzf mode only) via --no-fzfpreview",
 		"Preview files in the current directory using the 'view' command (requires fzf)",
 		"Press Alt+- to launch the files previewer (requires fzf)",
 		"Interactively select files (requires fzf, fnf, or smenu). Ex: 's /dir/*<TAB>'",
