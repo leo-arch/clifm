@@ -1004,13 +1004,29 @@ print_right_prompt(void)
 	free(p);
 } */
 
+/* Some commands take '!' as parameter modifier: quick search, 'filter',
+ * and 'sel', in which case history expansion must not be performed.
+ * Return 1 if the command should be excluded or 0 otherwise. */
+static int
+exclude_from_history(const char *s)
+{
+	if (*s == '/'
+	|| (*s == 's' && (s[1] == ' ' || strncmp(s + 1, "el ", 3) == 0))
+	|| (*s == 'f' && ((s[1] == 't' && s[2] == ' ')
+	|| strncmp(s + 1, "ilter ", 6) == 0)))
+		return 1;
+
+	return 0;
+}
+
 /* Replace history expressions ("!*") in the string INPUT by the corresponding
  * history entry. */
 static int
 expand_history(char **input)
 {
 	/* history_expansion_char defaults to '!' */
-	if (!strchr(*input, history_expansion_char))
+	if (!strchr(*input, history_expansion_char)
+	|| exclude_from_history(*input) == 1)
 		return EXIT_SUCCESS;
 
 	char *exp_input = (char *)NULL;
