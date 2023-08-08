@@ -632,7 +632,7 @@ run_mime(char *file)
 
 	/* Convert ELN into file name (rl_line_buffer) */
 	if (p && *p >= '1' && *p <= '9') {
-		filesn_t a = xatof(p);
+		const filesn_t a = xatof(p);
 		if (a > 0 && a <= files && file_info[a - 1].name)
 			p = file_info[a - 1].name;
 	}

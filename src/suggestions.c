@@ -490,7 +490,7 @@ calculate_suggestion_lines(int *baej, const size_t suggestion_len)
 
 	if (cucs > term_cols) {
 		slines = cucs / (size_t)term_cols;
-		int cucs_rem = (int)cucs % term_cols;
+		const int cucs_rem = (int)cucs % term_cols;
 		if (cucs_rem > 0)
 			slines++;
 	}
@@ -505,7 +505,7 @@ truncate_name(const char *str)
 
 	if (suggestion.type == ELN_SUG || suggestion.type == COMP_SUG
 	|| suggestion.type == FILE_SUG) {
-		size_t wlen = wc_xstrlen(str);
+		const size_t wlen = wc_xstrlen(str);
 		if (wlen == 0)
 			wname = replace_ctrl_chars(str);
 	}
@@ -544,7 +544,7 @@ check_conditions(const size_t offset, const size_t wlen, int *baej,
 	 * it equals ARG_MAX, in which case we most probably have a truncated
 	 * suggestion (mbstowcs will convert only up to ARG_MAX chars), exit */
 //	size_t suggestion_len = wc_xstrlen(str + offset);
-	size_t suggestion_len = wlen - offset;
+	const size_t suggestion_len = wlen - offset;
 	if (suggestion_len == 0 || suggestion_len == ARG_MAX
 	|| (int)suggestion_len > (term_cols * term_lines) - curcol)
 		return EXIT_FAILURE;
@@ -628,7 +628,8 @@ print_suggestion(const char *str, size_t offset, char *color)
 			curcol -= term_cols;
 	}
 
-	size_t str_len = wc_xstrlen(str), slines = 0;
+	const size_t str_len = wc_xstrlen(str);
+	size_t slines = 0;
 	if (check_conditions(offset, str_len, &baej, &slines) == EXIT_FAILURE) {
 		UNHIDE_CURSOR;
 		return;
@@ -672,7 +673,7 @@ get_reg_file_color(const char *filename, const struct stat *attr,
 	if (attr->st_mode & S_ISGID) return sg_c;
 
 #ifdef LINUX_FILE_CAPS
-	cap_t cap = cap_get_file(filename);
+	const cap_t cap = cap_get_file(filename);
 	if (cap) {
 		cap_free(cap);
 		return ca_c;
@@ -684,7 +685,7 @@ get_reg_file_color(const char *filename, const struct stat *attr,
 	if (FILE_SIZE_PTR == 0)	return ef_c;
 	if (attr->st_nlink > 1)	return mh_c;
 
-	char *ext = check_ext == 1 ? strrchr(filename, '.') : (char *)NULL;
+	const char *ext = check_ext == 1 ? strrchr(filename, '.') : (char *)NULL;
 	if (!ext || ext == filename)
 		return fi_c;
 
@@ -1139,7 +1140,7 @@ check_builtins(const char *str, const size_t len, const int print)
 		if (strncmp(b[i], str, len) != 0)
 			continue;
 
-		size_t blen = strlen(b[i]);
+		const size_t blen = strlen(b[i]);
 		if (blen > len) {
 			suggestion.type = CMD_SUG;
 			print_suggestion(b[i], len, sb_c);
@@ -1704,7 +1705,7 @@ check_workspaces(char *word, size_t wlen)
 		return NO_MATCH;
 
 	if (*word >= '1' && *word <= MAX_WS + '0' && !*(word + 1)) {
-		int a = atoi(word);
+		const int a = atoi(word);
 		if (a > 0 && workspaces[a - 1].name) {
 			suggestion.type = WS_NUM_SUG;
 			print_suggestion(workspaces[a - 1].name, 0, sf_c);
@@ -1940,7 +1941,7 @@ check_backdir(void)
 
 	/* Find the query string in the list of parent directories */
 	char *p = conf.case_sens_path_comp == 1 ? strstr(bk_cwd, ds)
-	: xstrcasestr(bk_cwd, ds);
+		: xstrcasestr(bk_cwd, ds);
 	if (p) {
 		char *pp = strchr(p, '/');
 		if (pp)
@@ -2572,7 +2573,7 @@ CHECK_FIRST_WORD:
 
 	} else if (point_is_first_word && rl_point < rl_end
 	&& *word >= '1' && *word <= '9' && is_number(word)) {
-		filesn_t a = xatof(word);
+		const filesn_t a = xatof(word);
 		if (a > 0 && a <= files)
 			printed = PARTIAL_MATCH;
 

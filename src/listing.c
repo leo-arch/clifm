@@ -333,7 +333,7 @@ print_dirhist_map(void)
 #ifndef _NO_ICONS
 /* Set the icon field to the corresponding icon for FILE */
 static int
-get_name_icon(const char *file, const int n)
+get_name_icon(const char *file, const filesn_t n)
 {
 	if (!file)
 		return 0;
@@ -890,10 +890,10 @@ print_entry_color(int *ind_char, const filesn_t i, const int pad,
 	const int max_namelen)
 {
 	*ind_char = 0;
-	char *end_color = file_info[i].dir == 1 ? fc_c : df_c;
+	const char *end_color = file_info[i].dir == 1 ? fc_c : df_c;
 
 	struct wtrim_t wtrim = (struct wtrim_t){0};
-	char *n = construct_filename(i, &wtrim, max_namelen);
+	const char *n = construct_filename(i, &wtrim, max_namelen);
 
 	char trim_diff[14];
 	*trim_diff = '\0';
@@ -901,7 +901,7 @@ print_entry_color(int *ind_char, const filesn_t i, const int pad,
 		snprintf(trim_diff, sizeof(trim_diff), "\x1b[%dC", wtrim.diff);
 
 	int ind_chr = 0;
-	char *ind_chr_color = get_ind_char(i, &ind_chr);
+	const char *ind_chr_color = get_ind_char(i, &ind_chr);
 
 #ifndef _NO_ICONS
 	if (conf.icons == 1) {
@@ -998,7 +998,7 @@ print_entry_nocolor(int *ind_char, const filesn_t i, const int pad,
 	const int max_namelen)
 {
 	struct wtrim_t wtrim = (struct wtrim_t){0};
-	char *n = construct_filename(i, &wtrim, max_namelen);
+	const char *n = construct_filename(i, &wtrim, max_namelen);
 
 	char trim_diff[14];
 	*trim_diff = '\0';
@@ -1101,10 +1101,10 @@ print_entry_color_light(int *ind_char, const filesn_t i, const int pad,
 	const int max_namelen)
 {
 	*ind_char = 0;
-	char *end_color = file_info[i].dir == 1 ? fc_c : df_c;
+	const char *end_color = file_info[i].dir == 1 ? fc_c : df_c;
 
 	struct wtrim_t wtrim = (struct wtrim_t){0};
-	char *n = construct_filename(i, &wtrim, max_namelen);
+	const char *n = construct_filename(i, &wtrim, max_namelen);
 
 	char trim_diff[14];
 	*trim_diff = '\0';
@@ -1190,7 +1190,7 @@ print_entry_nocolor_light(int *ind_char, const filesn_t i, const int pad,
 	const int max_namelen)
 {
 	struct wtrim_t wtrim = (struct wtrim_t){0};
-	char *n = construct_filename(i, &wtrim, max_namelen);
+	const char *n = construct_filename(i, &wtrim, max_namelen);
 
 	char trim_diff[14];
 	*trim_diff = '\0';
@@ -1284,7 +1284,7 @@ pad_filename(const int ind_char, const filesn_t i, const int pad,
 			cur_len += DIGINUM((int)file_info[i].filesn);
 	}
 
-	int diff = (int)longest - cur_len;
+	const int diff = (int)longest - cur_len;
 	if (termcap_move_right == 0) {
 		int j = diff + 1;
 		while (--j >= 0)
@@ -1315,7 +1315,7 @@ pad_filename_light(const int ind_char, const filesn_t i, const int pad,
 			cur_len += DIGINUM((int)file_info[i].filesn);
 	}
 
-	int diff = (int)longest - cur_len;
+	const int diff = (int)longest - cur_len;
 
 	if (termcap_move_right == 0) {
 		int j = diff + 1;
@@ -1333,7 +1333,7 @@ static void
 list_files_horizontal(size_t *counter, int *reset_pager, const int pad,
 		const size_t columns_n)
 {
-	filesn_t nn = (max_files != UNSET && (filesn_t)max_files < files)
+	const filesn_t nn = (max_files != UNSET && (filesn_t)max_files < files)
 		? (filesn_t)max_files : files;
 
 	void (*print_entry_function)(int *, const filesn_t, const int, const int);
@@ -1348,7 +1348,7 @@ list_files_horizontal(size_t *counter, int *reset_pager, const int pad,
 	pad_filename_function = conf.light_mode == 1
 		? pad_filename_light : pad_filename;
 
-	int termcap_move_right = (xargs.list_and_quit == 1
+	const int termcap_move_right = (xargs.list_and_quit == 1
 		|| term_caps.suggestions == 0) ? 0 : 1;
 
 	size_t cur_cols = 0;
@@ -1365,9 +1365,7 @@ list_files_horizontal(size_t *counter, int *reset_pager, const int pad,
 			last_column = 0;
 		}
 
-		int ind_char = 1;
-		if (conf.classify == 0)
-			ind_char = 0;
+		int ind_char = (conf.classify != 0);
 
 				/* ##########################
 				 * #  MAS: A SIMPLE PAGER   #
@@ -1396,9 +1394,9 @@ list_files_horizontal(size_t *counter, int *reset_pager, const int pad,
 			 * #    PRINT THE CURRENT ENTRY    #
 			 * ################################# */
 
-		int fc = file_info[i].dir != 1 ? (int)longest_fc : 0;
+		const int fc = file_info[i].dir != 1 ? (int)longest_fc : 0;
 		/* Displayed file name will be trimmed to MAX_NAME_LEN. */
-		int max_namelen = conf.max_name_len + fc;
+		const int max_namelen = conf.max_name_len + fc;
 
 		file_info[i].eln_n = conf.no_eln == 1 ? -1 : DIGINUM(i + 1);
 
@@ -1422,7 +1420,7 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 		const size_t columns_n)
 {
 	/* Total amount of files to be listed */
-	filesn_t nn = (max_files != UNSET && (filesn_t)max_files < files)
+	const filesn_t nn = (max_files != UNSET && (filesn_t)max_files < files)
 		? (filesn_t)max_files : files;
 
 	/* How many lines (rows) do we need to print NN files? */
@@ -1446,7 +1444,7 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 	pad_filename_function = conf.light_mode == 1
 		? pad_filename_light : pad_filename;
 
-	int termcap_move_right = (xargs.list_and_quit == 1
+	const int termcap_move_right = (xargs.list_and_quit == 1
 		|| term_caps.suggestions == 0) ? 0 : 1;
 
 	size_t cur_cols = 0;
@@ -1481,9 +1479,7 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 			last_column = 0;
 		}
 
-		int ind_char = 1;
-		if (conf.classify == 0)
-			ind_char = 0;
+		int ind_char = (conf.classify != 0);
 
 		if (x >= nn || !file_info[x].name) {
 			if (last_column == 1)
@@ -1532,9 +1528,9 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 			 * #    PRINT THE CURRENT ENTRY    #
 			 * ################################# */
 
-		int fc = file_info[x].dir != 1 ? (int)longest_fc : 0;
+		const int fc = file_info[x].dir != 1 ? (int)longest_fc : 0;
 		/* Displayed file name will be trimmed to MAX_NAMELEN. */
-		int max_namelen = conf.max_name_len + fc;
+		const int max_namelen = conf.max_name_len + fc;
 
 		file_info[x].eln_n = conf.no_eln == 1 ? -1 : DIGINUM(x + 1);
 
@@ -1618,7 +1614,7 @@ get_largest(const filesn_t i, off_t *size, char **name, char **color, off_t *tot
 	if (file_info[i].type != DT_DIR && file_info[i].type != DT_REG)
 		return;
 
-	int d = (file_info[i].type == DT_DIR ? 1024 : 1);
+	const int d = (file_info[i].type == DT_DIR ? 1024 : 1);
 	if (file_info[i].size * d > *size) {
 		*size = file_info[i].size * d;
 		*name = file_info[i].name;
@@ -1627,7 +1623,7 @@ get_largest(const filesn_t i, off_t *size, char **name, char **color, off_t *tot
 
 	/* Do not recount hardlinks */
 	if (file_info[i].linkn > 1) {
-		int j = (int)i - 1;
+		filesn_t j = i > 0 ? i - 1 : -1;
 		while (--j >= 0)
 			if (file_info[i].inode == file_info[j].inode)
 				return;
@@ -1767,9 +1763,8 @@ list_dir_light(void)
 	clock_t start = clock();
 #endif /* LIST_SPEED_TEST */
 
-	int virtual_dir = 0;
-	if (stdin_tmp_dir && strcmp(stdin_tmp_dir, workspaces[cur_ws].path) == 0)
-		virtual_dir = 1;
+	const int virtual_dir =
+		(stdin_tmp_dir && strcmp(stdin_tmp_dir, workspaces[cur_ws].path) == 0);
 
 	DIR *dir;
 	struct dirent *ent;
@@ -1799,7 +1794,7 @@ list_dir_light(void)
 	file_info = (struct fileinfo *)xnmalloc(ENTRY_N + 2, sizeof(struct fileinfo));
 
 	while ((ent = readdir(dir))) {
-		char *ename = ent->d_name;
+		const char *ename = ent->d_name;
 		/* Skip self and parent directories */
 		if (SELFORPARENT(ename))
 			continue;
@@ -1991,7 +1986,7 @@ list_dir_light(void)
 		goto END;
 	}
 
-	int pad = (max_files != UNSET && files > (filesn_t)max_files)
+	const int pad = (max_files != UNSET && files > (filesn_t)max_files)
 		? DIGINUM(max_files) : DIGINUM(files);
 
 	if (conf.sort != SNONE)
@@ -2061,7 +2056,7 @@ check_seltag(const dev_t dev, const ino_t ino, const nlink_t links,
 			continue;
 		/* Only check hardlinks in case of regular files */
 		if (file_info[index].type != DT_DIR && links > 1) {
-			char *p = strrchr(sel_elements[j].name, '/');
+			const char *p = strrchr(sel_elements[j].name, '/');
 			if (!p || !*(++p))
 				continue;
 			if (*p == *file_info[index].name
@@ -2182,9 +2177,8 @@ list_dir(void)
 	if (conf.light_mode == 1)
 		return list_dir_light();
 
-	int virtual_dir = 0;
-	if (stdin_tmp_dir && strcmp(stdin_tmp_dir, workspaces[cur_ws].path) == 0)
-		virtual_dir = 1;
+	const int virtual_dir =
+		(stdin_tmp_dir && strcmp(stdin_tmp_dir, workspaces[cur_ws].path) == 0);
 
 	DIR *dir;
 	struct dirent *ent;
@@ -2207,7 +2201,7 @@ list_dir(void)
 
 	set_events_checker();
 
-	int fd = dirfd(dir);
+	const int fd = dirfd(dir);
 
 		/* ##########################################
 		 * #    GATHER AND STORE FILE INFORMATION   #
@@ -2221,7 +2215,7 @@ list_dir(void)
 	file_info = (struct fileinfo *)xnmalloc(ENTRY_N + 2, sizeof(struct fileinfo));
 
 	while ((ent = readdir(dir))) {
-		char *ename = ent->d_name;
+		const char *ename = ent->d_name;
 		/* Skip self and parent directories */
 		if (SELFORPARENT(ename))
 			continue;
@@ -2395,7 +2389,7 @@ list_dir(void)
 					file_info[n].icon_color = dir_ico_c;
 			}
 #endif /* !_NO_ICONS */
-			int daccess = (stat_ok == 1 &&
+			const int daccess = (stat_ok == 1 &&
 				check_file_access(attr.st_mode, attr.st_uid, attr.st_gid) == 1);
 
 			file_info[n].filesn = conf.files_counter == 1
@@ -2446,19 +2440,18 @@ list_dir(void)
 			}
 
 			char tmp[PATH_MAX]; *tmp = '\0';
-			char *ret = (char *)NULL;
-			if (conf.color_lnk_as_target == 1)
-				ret = realpath(ename, tmp);
+			const char *ret = (conf.color_lnk_as_target == 1)
+				? realpath(ename, tmp) : (char *)NULL;
 
-			char *lname = (ret && *tmp) ? tmp : ename;
+			const char *lname = (ret && *tmp) ? tmp : ename;
 			if (S_ISDIR(attrl.st_mode)) {
 				file_info[n].dir = 1;
 				file_info[n].filesn = conf.files_counter == 1
 					? (count_dir(ename, NO_CPOP) - 2) : 1;
 
-				filesn_t dfiles = conf.files_counter == 1
+				const filesn_t dfiles = (conf.files_counter == 1)
 					? (file_info[n].filesn == 2 ? 3
-					: file_info[n].filesn) : 3; // 3 == populated
+					: file_info[n].filesn) : 3; /* 3 == populated */
 
 				file_info[n].color = conf.color_lnk_as_target == 1
 					? (check_file_access(attrl.st_mode, attrl.st_uid,
@@ -2536,7 +2529,7 @@ list_dir(void)
 
 			/* Unaccessible files, files with capabilities, and executable
 			 * files take precedence over temp and file extension colors. */
-			int no_override_color = (file_info[n].color == nf_c
+			const int no_override_color = (file_info[n].color == nf_c
 			|| file_info[n].color == ca_c || file_info[n].exec == 1);
 
 			if (no_override_color == 0
@@ -2551,15 +2544,19 @@ list_dir(void)
 			 * 2. extension
 			 * 3. file type */
 			/* Check icons for specific file names */
-			int name_icon_found = 0;
+			const int name_icon_found = (conf.icons == 1)
+				? get_name_icon(file_info[n].name, n) : 0;
+/*			int name_icon_found = 0;
 			if (conf.icons == 1)
-				name_icon_found = get_name_icon(file_info[n].name, (int)n);
+				name_icon_found = get_name_icon(file_info[n].name, (int)n); */
 #endif /* !_NO_ICONS */
 
 			/* Check file extension */
-			char *ext = (char *)NULL;
+			char *ext = (check_ext == 1 && no_override_color == 0)
+				? strrchr(file_info[n].name, '.') : (char *)NULL;
+/*			char *ext = (char *)NULL;
 			if (check_ext == 1 && no_override_color == 0)
-				ext = strrchr(file_info[n].name, '.');
+				ext = strrchr(file_info[n].name, '.'); */
 			/* Make sure not to take a hidden file for a file extension */
 			if (!ext || ext == file_info[n].name || !*(ext + 1))
 				break;
@@ -2569,15 +2566,15 @@ list_dir(void)
 			if (conf.icons == 1 && name_icon_found == 0)
 				get_ext_icon(ext, n);
 #endif /* !_NO_ICONS */
-			char *extcolor = get_ext_color(ext);
+			const char *extcolor = get_ext_color(ext);
 			if (!extcolor)
 				break;
 
-			size_t len = strlen(extcolor) + 4;
+			const size_t len = strlen(extcolor) + 4;
 			file_info[n].ext_color = (char *)xnmalloc(len, sizeof(char));
 			snprintf(file_info[n].ext_color, len, "\x1b[%sm", extcolor);
 			file_info[n].color = file_info[n].ext_color;
-			extcolor = (char *)NULL;
+//			extcolor = (char *)NULL;
 		} /* End of DT_REG block */
 		break;
 
@@ -2633,7 +2630,7 @@ list_dir(void)
 		goto END;
 	}
 
-	int pad = (max_files != UNSET && files > (filesn_t)max_files)
+	const int pad = (max_files != UNSET && files > (filesn_t)max_files)
 		? DIGINUM(max_files) : DIGINUM(files);
 
 		/* #############################################

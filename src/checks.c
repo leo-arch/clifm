@@ -141,7 +141,7 @@ check_truecolor(void)
 static void
 set_term_caps(const int i)
 {
-	int true_color = check_truecolor();
+	const int true_color = check_truecolor();
 
 	if (i == -1) { /* TERM not found in our terminfo database */
 		term_caps.color = true_color == 1 ? TRUE_COLOR : 0;
@@ -651,7 +651,7 @@ is_action_name(const char *s)
 int
 is_internal(char *restrict cmd)
 {
-	const struct cmdslist_t int_cmds[] = {
+	static const struct cmdslist_t int_cmds[] = {
 		{"ac", 2},
 		{"ad", 2},
 		{"bb", 2},
@@ -730,7 +730,7 @@ is_internal_f(const char *restrict cmd)
 	|| (*cmd == 's' && (*(cmd + 1) == 't' || *(cmd + 1) == 'o')) ) )
 		return 0;
 
-	const struct cmdslist_t int_cmds[] = {
+	static const struct cmdslist_t int_cmds[] = {
 		{"ac", 2},
 		{"ad", 2},
 		{"alias", 5}, /* 'alias import' takes file names */
@@ -947,7 +947,7 @@ truncate_file(char *file, const int max, const int check_dups)
 	FILE *fp = (FILE *)NULL;
 	struct stat attr;
 
-	int fd;
+	int fd = 0;
 	if (stat(file, &attr) == -1) {
 		fp = open_fwrite(file, &fd);
 		if (!fp) {

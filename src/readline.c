@@ -1885,7 +1885,7 @@ filenames_gen_eln(const char *text, int state)
 	if (!state)
 		i = 0;
 
-	filesn_t num_text = xatof(text);
+	const filesn_t num_text = xatof(text);
 	if (num_text < 1 || num_text > files)
 		return (char *)NULL;
 
@@ -1924,8 +1924,8 @@ filenames_gen_ranges(const char *text, int state)
 		return (char *)NULL;
 
 	*r = '\0';
-	filesn_t a = xatof(text);
-	filesn_t b = xatof(r + 1);
+	const filesn_t a = xatof(text);
+	const filesn_t b = xatof(r + 1);
 	if (a < 1 || a > files || b < 1 || b > files)
 		return (char *)NULL;
 	*r = '-';

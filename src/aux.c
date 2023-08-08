@@ -55,7 +55,7 @@ void
 xregerror(const char *cmd_name, const char *pattern, const int errcode,
 	const regex_t regexp, const int prompt_err)
 {
-	size_t err_len = regerror(errcode, &regexp, NULL, 0);
+	const size_t err_len = regerror(errcode, &regexp, NULL, 0);
 	char *buf = (char *)xnmalloc(err_len + 1, sizeof(char));
 	regerror(errcode, &regexp, buf, err_len);
 
@@ -230,7 +230,7 @@ should_expand_eln(const char *text)
 	if (!l || !*l || !is_number(text))
 		return 0;
 
-	filesn_t a = xatof(text);
+	const filesn_t a = xatof(text);
 	if (a <= 0 || a > files) /* Only expand numbers matching ELN's */
 		return 0;
 
@@ -265,7 +265,7 @@ should_expand_eln(const char *text)
 /* Sleep for MSEC milliseconds. */
 /* Taken from https://stackoverflow.com/questions/1157209/is-there-an-alternative-sleep-function-in-c-to-milliseconds */
 static int
-msleep(long msec)
+msleep(const long msec)
 {
 	struct timespec ts;
 	int res;
@@ -305,15 +305,15 @@ abbreviate_file_name(char *str)
 		return (char *)NULL;
 
 	char *name = (char *)NULL;
-	size_t len = strlen(str);
-	size_t wlen = (workspaces && workspaces[cur_ws].path)
+	const size_t len = strlen(str);
+	const size_t wlen = (workspaces && workspaces[cur_ws].path)
 		? strlen(workspaces[cur_ws].path) : 0;
 
 	/* If STR is in CWD -> ./STR */
 	if (workspaces && workspaces[cur_ws].path && wlen > 1 && len > wlen
 	&& strncmp(str, workspaces[cur_ws].path, wlen) == 0
 	&& *(str + wlen) == '/') {
-		size_t name_len = strlen(str + wlen + 1) + 3;
+		const size_t name_len = strlen(str + wlen + 1) + 3;
 		name = (char *)xnmalloc(name_len, sizeof(char));
 		snprintf(name, name_len, "./%s", str + wlen + 1);
 		return name;
@@ -385,7 +385,7 @@ normalize_path(char *src, const size_t src_len)
 
 	/* Deescape SRC */
 	char *tmp = (char *)NULL;
-	int is_escaped = *src == '\\';
+	const int is_escaped = *src == '\\';
 
 	if (strchr(src, '\\')) {
 		tmp = dequote_str(src, 0);
@@ -394,7 +394,7 @@ normalize_path(char *src, const size_t src_len)
 			return (char *)NULL;
 		}
 
-		size_t tlen = strlen(tmp);
+		const size_t tlen = strlen(tmp);
 		if (tlen > 0 && tmp[tlen - 1] == '/')
 			tmp[tlen - 1] = '\0';
 
@@ -410,7 +410,7 @@ normalize_path(char *src, const size_t src_len)
 			xerror(_("%s: %s: Error expanding tilde\n"), PROGRAM_NAME, src);
 			return (char *)NULL;
 		}
-		size_t tlen = strlen(tmp);
+		const size_t tlen = strlen(tmp);
 		if (tlen > 0 && tmp[tlen - 1] == '/')
 			tmp[tlen - 1] = '\0';
 
@@ -419,7 +419,7 @@ normalize_path(char *src, const size_t src_len)
 	}
 
 	char *s = tmp ? tmp : src;
-	size_t l = tmp ? strlen(tmp) : src_len;
+	const size_t l = tmp ? strlen(tmp) : src_len;
 
 	/* Resolve references to . and .. */
 	char *res = (char *)NULL;
@@ -435,7 +435,7 @@ normalize_path(char *src, const size_t src_len)
 			return (char *)NULL;
 		}
 
-		size_t pwd_len = strlen(cwd);
+		const size_t pwd_len = strlen(cwd);
 		if (pwd_len == 1 && *cwd == '/') {
 			/* If CWD is root (/) do not copy anything. Just create a buffer
 			 * big enough to hold "/dir", which will be appended next */
@@ -845,7 +845,7 @@ construct_human_size(const off_t size)
 	/* MAX_UNIT_SIZE == 10 == "1023.99YB\0" */
 	static char str[MAX_UNIT_SIZE];
 
-	float base = xargs.si == 1 ? 1000 : 1024;
+	const float base = xargs.si == 1 ? 1000 : 1024;
 	size_t n = 0;
 	float s = (float)size;
 
@@ -1012,7 +1012,7 @@ filesn_t
 xatof(const char *s)
 {
 	errno = 0;
-	long long ret = strtoll(s, NULL, 10);
+	const long long ret = strtoll(s, NULL, 10);
 
 #if FILESN_MAX < LLONG_MAX
 	/* 1 - FILESN_MAX */
@@ -1038,7 +1038,7 @@ int
 xatoi(const char *s)
 {
 	errno = 0;
-	long ret = strtol(s, NULL, 10);
+	const long ret = strtol(s, NULL, 10);
 
 	if (ret < INT_MIN || ret > INT_MAX) {
 		errno = ERANGE;
@@ -1181,9 +1181,8 @@ url_decode(char *str)
 	char *buf = (char *)xnmalloc(strlen(str) + 1, sizeof(char));
 	/* The decoded string will be at most as long as the encoded string */
 
-	char *pstr, *pbuf;
-	pstr = str;
-	pbuf = buf;
+	char *pstr = str, *pbuf = buf;
+
 	for (; *pstr; pstr++) {
 		if (*pstr == '%') {
 			if (pstr[1] && pstr[2]) {

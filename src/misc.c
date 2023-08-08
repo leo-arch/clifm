@@ -490,7 +490,7 @@ validate_file_type_filter(void)
 	|| !*(filter.str + 1) || *(filter.str + 2))
 		return EXIT_FAILURE;
 
-	char c = *(filter.str + 1);
+	const char c = *(filter.str + 1);
 	if (c == 'b' || c == 'c' || c == 'd' || c == 'f'
 	|| c == 'l' || c == 'p' || c == 's')
 		return EXIT_SUCCESS;
@@ -1439,7 +1439,7 @@ handle_last_path(void)
 	 * Remove the file to prevent the function from changing the directory
 	 * if cd-on-quit is disabled (e.g., not exiting via 'Q'). If necessary,
 	 * it will be recreated by save_last_path() below. */
-	size_t len = strlen(config_dir_gral) + 7;
+	const size_t len = strlen(config_dir_gral) + 7;
 	char *last_path_tmp = (char *)xnmalloc(len, sizeof(char));
 	snprintf(last_path_tmp, len, "%s/.last", config_dir_gral);
 
@@ -2295,7 +2295,7 @@ print_trash_topic(void)
 }
 
 static int
-run_help_topic(char *topic)
+run_help_topic(const char *topic)
 {
 	if (*topic == '-' && IS_HELP(topic)) {
 		puts(HELP_USAGE);
@@ -2350,7 +2350,7 @@ run_help_topic(char *topic)
 }
 
 int
-quick_help(char *topic)
+quick_help(const char *topic)
 {
 	if (topic && *topic)
 		return run_help_topic(topic);
@@ -2431,9 +2431,9 @@ void
 help_function(void)
 {
 #ifdef _BE_POSIX
-	char *posix = "-POSIX";
+	const char *posix = "-POSIX";
 #else
-	char *posix = "";
+	const char *posix = "";
 #endif /* _BE_POSIX */
 
 	fputs(NC, stdout);
@@ -2466,9 +2466,9 @@ void
 version_function(void)
 {
 #ifndef _BE_POSIX
-	char *posix = "";
+	const char *posix = "";
 #else
-	char *posix = "-POSIX";
+	const char *posix = "-POSIX";
 #endif /* _BE_POSIX */
 	printf(_("%s %s%s (%s)\n%s\nLicense %s\nWritten by %s\n"), PROGRAM_NAME,
 		VERSION, posix, DATE, CONTACT, LICENSE, AUTHOR);

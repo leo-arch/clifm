@@ -211,7 +211,7 @@ print_file_attrs(const int aflags)
 		return EXIT_FAILURE;
 	}
 
-	char c = '-';
+	const char c = '-';
 	char bits[23];
 
 	bits[0] =  (aflags & XFS_SECRM_FL) ? 's' : c;
@@ -345,7 +345,7 @@ get_file_perms(const mode_t mode)
 	p.cgr = p.cgw = p.cgx = dn_c;
 	p.cor = p.cow = p.cox = dn_c;
 
-	mode_t val = (mode & (mode_t)~S_IFMT);
+	const mode_t val = (mode & (mode_t)~S_IFMT);
 	if (val & S_IRUSR) { p.ur = 'r'; p.cur = dr_c; }
 	if (val & S_IWUSR) { p.uw = 'w'; p.cuw = dw_c; }
 	if (val & S_IXUSR)
@@ -463,7 +463,7 @@ validate_symbolic_perms(const char *s)
 static int
 validate_new_perms(const char *s)
 {
-	size_t l = strlen(s);
+	const size_t l = strlen(s);
 	if (*s >= '0' && *s <= '9')
 		return validate_octal_perms(s, l);
 
@@ -673,7 +673,7 @@ set_file_perms(char **args)
 
 	int ret = EXIT_SUCCESS;
 	size_t n = 0;
-	mode_t mode = (mode_t)strtol(octal_str, 0, 8);
+	const mode_t mode = (mode_t)strtol(octal_str, 0, 8);
 	for (i = 1; args[i]; i++) {
 		if (fchmodat(XAT_FDCWD, args[i], mode, 0) == EXIT_SUCCESS) {
 			n++;
@@ -772,15 +772,15 @@ get_common_ownership(char **args, int *exit_status, int *diff)
 	struct passwd *owner = getpwuid(a.st_uid);
 	struct group *group = getgrgid(a.st_gid);
 
-	size_t owner_len = (common_uid > 0 && owner && owner->pw_name)
+	const size_t owner_len = (common_uid > 0 && owner && owner->pw_name)
 		? wc_xstrlen(owner->pw_name) : 0;
-	size_t group_len = (common_gid > 0 && group && group->gr_name)
+	const size_t group_len = (common_gid > 0 && group && group->gr_name)
 		? wc_xstrlen(group->gr_name) : 0;
 
 	if (owner_len + group_len == 0)
 		return (char *)NULL;
 
-	size_t len = owner_len + group_len + 2;
+	const size_t len = owner_len + group_len + 2;
 	char *p = xnmalloc(len, sizeof(char));
 	snprintf(p, len, "%s%c%s", owner_len > 0 ? owner->pw_name : "",
 		group_len > 0 ? ':' : 0,
@@ -899,7 +899,7 @@ set_file_owner(char **args)
 static void
 get_color_size_truecolor(const off_t s, char *str, const size_t len)
 {
-	long long base = xargs.si == 1 ? 1000 : 1024;
+	const long long base = xargs.si == 1 ? 1000 : 1024;
 	uint8_t n = 0;
 
 	if      (s <                base) n = 1; /* Bytes */
@@ -919,7 +919,7 @@ get_color_size_truecolor(const off_t s, char *str, const size_t len)
 static void
 get_color_age_truecolor(const time_t t, char *str, const size_t len)
 {
-	time_t age = props_now - t;
+	const time_t age = props_now - t;
 	uint8_t n;
 
 	if      (age <             0LL) n = 0;
@@ -940,7 +940,7 @@ get_color_age_truecolor(const time_t t, char *str, const size_t len)
 static void
 get_color_size256(const off_t s, char *str, const size_t len)
 {
-	long long base = xargs.si == 1 ? 1000 : 1024;
+	const long long base = xargs.si == 1 ? 1000 : 1024;
 	uint8_t n = 0;
 
 	if      (s <                base) n = 1; /* Bytes */
@@ -960,7 +960,7 @@ get_color_age256(const time_t t, char *str, const size_t len)
 {
 	/* PROPS_NOW is global. Calculated before by list_dir() and when
 	 * running the 'p' command */
-	time_t age = props_now - t;
+	const time_t age = props_now - t;
 	uint8_t n;
 
 	if      (age <             0LL) n = 0;
@@ -978,7 +978,7 @@ get_color_age256(const time_t t, char *str, const size_t len)
 static void
 get_color_size8(const off_t s, char *str, const size_t len)
 {
-	long long base = xargs.si == 1 ? 1000 : 1024;
+	const long long base = xargs.si == 1 ? 1000 : 1024;
 	uint8_t n;
 
 	if      (s <      base*base) n = 1; /* Byte and Kb */
@@ -993,7 +993,7 @@ get_color_size8(const off_t s, char *str, const size_t len)
 static void
 get_color_age8(const time_t t, char *str, const size_t len)
 {
-	time_t age = props_now - t;
+	const time_t age = props_now - t;
 	uint8_t n;
 
 	if      (age <         0LL) n = 0;
@@ -1218,7 +1218,8 @@ print_file_name(char *filename, const char *color, const char file_type,
 
 	} else { /* Broken link */
 		char target[PATH_MAX + 1];
-		ssize_t len = readlinkat(XAT_FDCWD, filename, target, sizeof(target) - 1);
+		const ssize_t len =
+			readlinkat(XAT_FDCWD, filename, target, sizeof(target) - 1);
 
 		if (len != -1) {
 			target[len] = '\0';
@@ -1244,8 +1245,9 @@ print_file_details(char *filename, const struct stat *attr, const char file_type
 	struct passwd *owner = getpwuid(attr->st_uid);
 	struct group *group = getgrgid(attr->st_gid);
 
-	char *id_color = conf.colorize == 0 ? "" : (file_perm == 1 ? dg_c : BOLD);
-	char *cend = conf.colorize == 1 ? df_c : "";
+	const char *id_color =
+		conf.colorize == 0 ? "" : (file_perm == 1 ? dg_c : BOLD);
+	const char *cend = conf.colorize == 1 ? df_c : "";
 
 	if (conf.colorize == 1)
 		fputs(BOLD, stdout);
@@ -1437,7 +1439,7 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 {
 	char *size_unit = construct_human_size(FILE_SIZE_PTR);
 	char *csize = dz_c;
-	char *cend = conf.colorize == 1 ? df_c : "";
+	const char *cend = conf.colorize == 1 ? df_c : "";
 
 	char sf[MAX_SHADE_LEN];
 	*sf = '\0';
@@ -1480,7 +1482,7 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 		return;
 	}
 
-	int size_mult_factor = xargs.si == 1 ? 1000 : 1024;
+	const int size_mult_factor = xargs.si == 1 ? 1000 : 1024;
 
 	off_t total_size_kb = 0;
 	if (bin_flags & (GNU_DU_BIN_DU | GNU_DU_BIN_GDU)) {
@@ -1559,14 +1561,16 @@ do_stat(char *filename, const int follow_link)
 	/* Check file existence. */
 	struct stat attr, attrb;
 
-	int ret = follow_link == 1 ? stat(filename, &attr) : lstat(filename, &attr);
+	const int ret = follow_link == 1 ? stat(filename, &attr)
+		: lstat(filename, &attr);
 	if (ret == -1)
 		return err_no_file(filename, errno, follow_link);
 
 	char file_type = 0; /* File type char indicator. */
 	char *ctype = dn_c; /* Color for file type char. */
 
-	int file_perm = check_file_access(attr.st_mode, attr.st_uid, attr.st_gid);
+	const int file_perm =
+		check_file_access(attr.st_mode, attr.st_uid, attr.st_gid);
 
 	char *link_target = (char *)NULL;
 	if (follow_link == 1 && lstat(filename, &attrb) != -1
@@ -1666,14 +1670,14 @@ calc_relative_time(const time_t age, char *s)
 	else if (age < RT_MONTH) {
 		/* RT_MONTH is 30 days. But since Feb has only 28, we get 4 weeks
 		 * in some cases, which is weird. Always make 4 weeks into 1 month */
-		long long n = age / RT_WEEK;
+		const long long n = age / RT_WEEK;
 		if (n == 4)
 			snprintf(s, MAX_TIME_STR, " 1  mon");
 		else
 			snprintf(s, MAX_TIME_STR, "%*ju week", 2, (uintmax_t)n);
 	}
 	else if (age < RT_YEAR) {
-		long long n = age / RT_MONTH;
+		const long long n = age / RT_MONTH;
 		if (n == 12)
 			snprintf(s, MAX_TIME_STR, " 1 year");
 		else
@@ -1702,7 +1706,7 @@ construct_and_print_filename(const struct fileinfo *props,
 		plen = wc_xstrlen(wname);
 	}
 
-	filesn_t n = (max_files > UNSET && files > (filesn_t)max_files)
+	const filesn_t n = (max_files > UNSET && files > (filesn_t)max_files)
 		? (filesn_t)max_files : files;
 
 	size_t cur_len = (size_t)DIGINUM(n) + 1 + plen;
@@ -1784,7 +1788,7 @@ construct_file_size(const struct fileinfo *props, char *size_str,
 	}
 
 	/* Let's construct the color for the current file size */
-	char *csize = props->dir == 1 ? dz_c : df_c;
+	const char *csize = props->dir == 1 ? dz_c : df_c;
 	char sf[MAX_SHADE_LEN];
 	if (conf.colorize == 1) {
 		off_t s = props->size;
@@ -1870,7 +1874,7 @@ construct_timestamp(char *time_str, const time_t ltime)
 	if (ltime >= 0 && localtime_r(&ltime, &t)) {
 		/* PROPS_NOW (global) is set by list_dir(), in listing.c before
 		 * calling print_entry_props(), which calls this function. */
-		time_t age = props_now - ltime;
+		const time_t age = props_now - ltime;
 		/* AGE is negative if file time is in the future. */
 
 		if (conf.relative_time == 1) {
@@ -1878,9 +1882,9 @@ construct_timestamp(char *time_str, const time_t ltime)
 		} else {
 			/* If not user defined, let's mimic ls(1) behavior: a file is
 			 * considered recent if it is within the past six months. */
-			uint8_t recent = age >= 0 && age < 14515200LL;
+			const uint8_t recent = age >= 0 && age < 14515200LL;
 			/* 14515200 == 6*4*7*24*60*60 == six months */
-			char *tfmt = conf.time_str ? conf.time_str :
+			const char *tfmt = conf.time_str ? conf.time_str :
 				(recent ? DEF_TIME_STYLE_RECENT : DEF_TIME_STYLE_OLDER);
 
 			/* GCC (not clang) complains about tfmt being not a string
@@ -1989,9 +1993,9 @@ print_entry_props(const struct fileinfo *props,	const struct maxes_t *maxes,
 	/* size_str is either file size or "major,minor" IDs in case of special
 	 * files (char and block devices). */
 	char size_str[SIZE_STR_LEN];
-	int file_perm = construct_file_size(props, size_str, maxes->size);
+	const int file_perm = construct_file_size(props, size_str, maxes->size);
 
-	char *id_color = (file_perm == 1 && conf.colorize == 1) ? dg_c : df_c;
+	const char *id_color = (file_perm == 1 && conf.colorize == 1) ? dg_c : df_c;
 	char id_str[ID_STR_LEN];
 	construct_id_field(props, id_str, id_color, maxes->ids);
 
@@ -2044,9 +2048,9 @@ print_analysis_stats(const off_t total, const off_t largest,
 	char *l = (char *)NULL;
 
 	if (prop_fields.size == PROP_SIZE_HUMAN) {
-		char *p_total = construct_human_size(total);
+		const char *p_total = construct_human_size(total);
 		t = savestring(p_total, strlen(p_total));
-		char *p_largest = construct_human_size(largest);
+		const char *p_largest = construct_human_size(largest);
 		l = savestring(p_largest, strlen(p_largest));
 	} else {
 		t = (char *)xnmalloc(32, sizeof(char));

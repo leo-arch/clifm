@@ -120,7 +120,7 @@ quote_str(const char *str)
 	if (!str || !*str || conf.quoting_style == QUOTING_STYLE_BACKSLASH)
 		return (char *)NULL;
 
-	size_t len = strlen(str) + 3;
+	const size_t len = strlen(str) + 3;
 	char *p = (char *)xnmalloc(len, sizeof(char));
 	char quote_char =
 		conf.quoting_style == QUOTING_STYLE_DOUBLE_QUOTES ? '"' : '\'';
@@ -179,7 +179,7 @@ xstrcasechr(char *s, char c)
 	if (!s || !*s)
 		return (char *)NULL;
 
-	char uc = TOUPPER(c);
+	const char uc = TOUPPER(c);
 	while (*s) {
 		if (TOUPPER(*s) != uc) {
 			s++;
@@ -406,11 +406,10 @@ xstrverscmp(const char *s1, const char *s2)
 size_t
 wc_xstrlen(const char *restrict str)
 {
-	size_t len;
 	wchar_t *const wbuf = (wchar_t *)len_buf;
 
 	/* Convert multi-byte to wide char */
-	len = mbstowcs(wbuf, str, ARG_MAX);
+	const size_t len = mbstowcs(wbuf, str, ARG_MAX);
 	if (len == (size_t)-1) /* Invalid multi-byte sequence found */
 		return 0;
 
@@ -543,7 +542,7 @@ strbfrlst(char *str, const char c)
 
 	*q = '\0';
 
-	size_t buf_len = (size_t)(q - str);
+	const size_t buf_len = (size_t)(q - str);
 	char *buf = (char *)malloc(buf_len + 1);
 	if (!buf) {
 		*q = c;
@@ -581,7 +580,7 @@ strbtw(char *str, const char a, const char b)
 
 	*pb = '\0';
 
-	size_t buf_len = (size_t)(pb - pa);
+	const size_t buf_len = (size_t)(pb - pa);
 	char *buf = (char *)malloc(buf_len + 1);
 
 	if (!buf) {
@@ -611,7 +610,7 @@ replace_substr(const char *haystack, const char *needle, char *rep)
 	size_t new_str_len = 0;
 
 	if (*needle_end) {
-		size_t rem_len = strlen(needle_end);
+		const size_t rem_len = strlen(needle_end);
 		char *rem = (char *)xnmalloc(rem_len + 1, sizeof(char));
 		xstrsncpy(rem, needle_end, rem_len + 1);
 
@@ -633,7 +632,7 @@ replace_substr(const char *haystack, const char *needle, char *rep)
 char *
 gen_rand_str(const size_t len)
 {
-	const char charset[] = "0123456789#%-_"
+	static const char charset[] = "0123456789#%-_"
 		"abcdefghijklmnopqrstuvwxyz"
 		"ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
@@ -647,9 +646,9 @@ gen_rand_str(const size_t len)
 	int x = (int)len;
 	while (x--) {
 #ifndef HAVE_ARC4RANDOM
-		long i = random() % (int)(sizeof(charset) - 1);
+		const long i = random() % (int)(sizeof(charset) - 1);
 #else
-		uint32_t i = arc4random_uniform(sizeof(charset) - 1);
+		const uint32_t i = arc4random_uniform(sizeof(charset) - 1);
 #endif /* !HAVE_ARC4RANDOM */
 		*p = charset[i];
 		p++;
@@ -1026,8 +1025,8 @@ split_fused_param(char *str)
 	if (!str || !*str || *str == ';' || *str == ':' || *str == '\\')
 		return (char *)NULL;
 
-	char *space = strchr(str, ' ');
-	char *slash = strchr(str, '/');
+	const char *space = strchr(str, ' ');
+	const char *slash = strchr(str, '/');
 
 	if (!space && slash) /* If "/some/path/" */
 		return (char *)NULL;
@@ -1079,7 +1078,7 @@ split_fused_param(char *str)
 	*b = '\0';
 
 	/* Readjust the buffer size */
-	size_t len = strlen(buf);
+	const size_t len = strlen(buf);
 	buf = (char *)xrealloc(buf, (len + 1) * sizeof(char));
 	return buf;
 }
@@ -1091,8 +1090,8 @@ check_shell_functions(const char *str)
 		return 0;
 
 	if (int_vars == 0) { /* Take assignements as shell functions */
-		char *s = strchr(str, ' ');
-		char *e = strchr(str, '=');
+		const char *s = strchr(str, ' ');
+		const char *e = strchr(str, '=');
 		if (!s && e)
 			return 1;
 		if (s && e && e < s)
@@ -1518,7 +1517,7 @@ insert_fields(char ***dst, char ***src, const size_t i, size_t *num)
 static void
 eln_expand(char ***substr, const size_t i)
 {
-	filesn_t num = xatof((*substr)[i]);
+	const filesn_t num = xatof((*substr)[i]);
 	if (num == -1)
 		return;
 
@@ -1938,9 +1937,8 @@ expand_word(char ***substr, const int *word_array, const size_t word_n)
 	size_t old_pathc = 0;
 	size_t w = 0, i = 0;
 
-	int is_sel_cmd = 0;
-	if (strcmp((*substr)[0], "s") == 0 || strcmp((*substr)[0], "sel") == 0)
-		is_sel_cmd = 1;
+	const int is_sel_cmd =
+		(strcmp((*substr)[0], "s") == 0 || strcmp((*substr)[0], "sel") == 0);
 
 	for (w = 0; w < word_n; w++) {
 		if (is_sel_cmd == 1) {
@@ -2028,7 +2026,7 @@ check_ranges(char ***substr, int **range_array)
 		if (!(*substr)[i] || is_quoted_word(i) || lstat((*substr)[i], &a) != -1)
 			continue;
 
-		size_t len = strlen((*substr)[i]);
+		const size_t len = strlen((*substr)[i]);
 
 		for (j = 0; (*substr)[i][j]; j++) {
 			/* If some alphabetic char, besides '-', is found in the
@@ -2051,13 +2049,70 @@ check_ranges(char ***substr, int **range_array)
 	return n;
 }
 
+/* Expand a range of numbers given by STR. It will expand the range
+ * provided that both extremes are numbers, bigger than zero, equal or
+ * smaller than the amount of files currently listed on the screen, and
+ * the second (right) extreme is bigger than the first (left). Returns
+ * an array of int's with the expanded range or NULL if one of the
+ * above conditions is not met. */
+static filesn_t *
+expand_range(char *str, int listdir)
+{
+	if (!str || !*str)
+		return (filesn_t *)NULL;
+
+	struct stat a;
+	if (lstat(str, &a) != -1)
+		return (filesn_t *)NULL;
+
+	char *p = strchr(str, '-');
+	if (!p || p == str || *(p - 1) < '0' || *(p - 1) > '9'
+	|| !*(p + 1) || *(p + 1) < '0' || *(p + 1) > '9')
+		return (filesn_t *)NULL;
+
+	*p = '\0';
+	int ret = is_number(str);
+	*p = '-';
+	if (!ret)
+		return (filesn_t *)NULL;
+
+	const filesn_t afirst = xatof(str);
+
+	++p;
+	if (!is_number(p))
+		return (filesn_t *)NULL;
+
+	const filesn_t asecond = xatof(p);
+	if (afirst == -1 || asecond == -1)
+		return (filesn_t *)NULL;
+
+	if (listdir) {
+		if (afirst <= 0 || afirst > files || asecond <= 0
+		|| asecond > files || afirst >= asecond)
+			return (filesn_t *)NULL;
+	} else {
+		if (afirst >= asecond) 
+			return (filesn_t *)NULL;
+	}
+
+	filesn_t *buf = (filesn_t *)xcalloc((size_t)(asecond - afirst) + 2, sizeof(int));
+
+	filesn_t i, j = 0;
+	for (i = afirst; i <= asecond; i++) {
+		buf[j] = (int)i;
+		j++;
+	}
+
+	return buf;
+}
+
 static void
 expand_ranges(char ***substr)
 {
 	size_t i = 0, j = 0;
 
 	int *range_array = (int *)xnmalloc(INT_ARRAY_MAX, sizeof(int));
-	size_t ranges_ok = check_ranges(substr, &range_array);
+	const size_t ranges_ok = check_ranges(substr, &range_array);
 
 	if (ranges_ok == 0) {
 		free(range_array);
@@ -2069,7 +2124,7 @@ expand_ranges(char ***substr)
 
 	for (r = 0; r < ranges_ok; r++) {
 		size_t ranges_n = 0;
-		int *ranges = expand_range((*substr)[range_array[r] +
+		filesn_t *ranges = expand_range((*substr)[range_array[r] +
 			(int)old_ranges_n], 1);
 
 		if (ranges) {
@@ -2091,9 +2146,9 @@ expand_ranges(char ***substr)
 			}
 
 			for (i = 0; i < ranges_n; i++) {
-				size_t len = (size_t)DIGINUM(ranges[i]) + 1;
+				const size_t len = (size_t)DIGINUM(ranges[i]) + 1;
 				ranges_cmd[j] = (char *)xnmalloc(len, sizeof(int));
-				snprintf(ranges_cmd[j], len, "%d", ranges[i]);
+				snprintf(ranges_cmd[j], len, "%zd", ranges[i]);
 				j++;
 			}
 
@@ -2869,64 +2924,6 @@ home_tilde(char *new_path, int *free_buf)
 	return new_path;
 }
 
-/* Expand a range of numbers given by STR. It will expand the range
- * provided that both extremes are numbers, bigger than zero, equal or
- * smaller than the amount of files currently listed on the screen, and
- * the second (right) extreme is bigger than the first (left). Returns
- * an array of int's with the expanded range or NULL if one of the
- * above conditions is not met. */
-int *
-expand_range(char *str, int listdir)
-{
-	if (!str || !*str)
-		return (int *)NULL;
-
-	struct stat a;
-	if (lstat(str, &a) != -1)
-		return (int *)NULL;
-
-	char *p = strchr(str, '-');
-	if (!p || p == str || *(p - 1) < '0' || *(p - 1) > '9'
-	|| !*(p + 1) || *(p + 1) < '0' || *(p + 1) > '9')
-		return (int *)NULL;
-
-	*p = '\0';
-	int ret = is_number(str);
-	*p = '-';
-	if (!ret)
-		return (int *)NULL;
-
-	int afirst = atoi(str);
-
-	++p;
-	if (!is_number(p))
-		return (int *)NULL;
-
-	int asecond = atoi(p);
-	if (afirst == INT_MIN || asecond == INT_MIN)
-		return (int *)NULL;
-
-	if (listdir) {
-		if (afirst <= 0 || (filesn_t)afirst > files || asecond <= 0
-		|| (filesn_t)asecond > files || afirst >= asecond)
-			return (int *)NULL;
-	} else {
-		if (afirst >= asecond) 
-			return (int *)NULL;
-	}
-
-	int *buf = (int *)NULL;
-	buf = (int *)xcalloc((size_t)(asecond - afirst) + 2, sizeof(int));
-
-	size_t i, j = 0;
-	for (i = (size_t)afirst; i <= (size_t)asecond; i++) {
-		buf[j] = (int)i;
-		j++;
-	}
-
-	return buf;
-}
-
 /* Returns a pointer to a copy of the string STR, malloc'ed with size SIZE, or
  * NULL on error. */
 char *
@@ -2987,7 +2984,7 @@ get_substr(char *str, const char ifs)
 
 	char **substr = (char **)NULL;
 	void *p = (char *)NULL;
-	size_t str_len = strlen(str);
+	const size_t str_len = strlen(str);
 	size_t length = 0, substr_n = 0;
 	char *buf = (char *)xnmalloc(str_len + 1, sizeof(char));
 

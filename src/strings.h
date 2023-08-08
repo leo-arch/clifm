@@ -33,7 +33,7 @@ __BEGIN_DECLS
 
 char *dequote_str(char *, int);
 char *escape_str(const char *);
-int  *expand_range(char *, int);
+//int  *expand_range(char *, int);
 char *gen_rand_str(const size_t);
 char *get_last_chr(char *, const char, const int);
 char **get_substr(char *, const char);
