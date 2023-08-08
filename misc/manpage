@@ -81,9 +81,7 @@ If the first non\-option parameter is a directory, \fBclifm\fR will start in thi
 
 .SH OPTIONS
 .TP
-\fBNote\fR: If compiled in POSIX mode \fB(1)\fR, the following list of options do not apply. In this case, run \fIclifm -h\fR to get the actual list of options.
-.TP
-\fB(1)\fR To make sure run \fIclifm -v\fR: if compiled in POSIX mode the version number is followed by "-POSIX".
+\fBNote\fR: If compiled in POSIX mode, the following list of options does not apply. In this case, run \fIclifm -h\fR to get the actual list of options. (To make sure run \fIclifm -v\fR: if compiled in POSIX mode the version number is followed by "-POSIX").
 .TP
 \fB\-a\fR, \fB\-\-no\-hidden\fR
 ignore entries starting with . (default)
