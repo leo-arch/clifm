@@ -871,7 +871,7 @@ run_main_loop(void)
 	/* 1) Infinite loop to keep the program running */
 	while (1) {
 		/* 2) Grab input string from the prompt */
-		char *input = prompt();
+		char *input = prompt(PROMPT_SHOW);
 		if (!input)
 			continue;
 

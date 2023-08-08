@@ -1006,7 +1006,7 @@ print_right_prompt(void)
 
 /* Some commands take '!' as parameter modifier: quick search, 'filter',
  * and 'sel', in which case history expansion must not be performed.
- * Return 1 if the command should be excluded or 0 otherwise. */
+ * Return 1 if we have one of these commands or 0 otherwise. */
 static int
 exclude_from_history(const char *s)
 {
@@ -1025,7 +1025,8 @@ static int
 expand_history(char **input)
 {
 	/* history_expansion_char defaults to '!' */
-	if (!strchr(*input, history_expansion_char)
+	char *hist_c = strchr(*input, history_expansion_char);
+	if (!hist_c || (hist_c != *input && *(hist_c - 1) != ' ')
 	|| exclude_from_history(*input) == 1)
 		return EXIT_SUCCESS;
 
@@ -1061,16 +1062,22 @@ expand_history(char **input)
 /* Print the prompt and return the string entered by the user, to be
  * parsed later by parse_input_str() */
 char *
-prompt(void)
+prompt(const int prompt_flag)
 {
 	initialize_prompt_data();
 
 	/* Generate the prompt string using the prompt line in the config
-	 * file (stored in encoded_prompt at startup) */
+	 * file (stored in encoded_prompt at startup). */
 	char *decoded_prompt = decode_prompt(conf.encoded_prompt);
 	char *the_prompt = construct_prompt(decoded_prompt
 		? decoded_prompt : EMERGENCY_PROMPT);
 	free(decoded_prompt);
+
+	if (prompt_flag == PROMPT_UPDATE) {
+		rl_set_prompt(the_prompt);
+		free(the_prompt);
+		return (char *)NULL;
+	}
 
 	/* Tell my_rl_getc() (readline.c) to recalculate the length
 	 * of the last prompt line, needed to calculate the finder's offset

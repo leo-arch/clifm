@@ -247,17 +247,13 @@ load_keybinds(void)
 	return EXIT_SUCCESS;
 }
 
-/* This call to prompt() just updates the prompt in case it was modified,
- * for example, in case of chdir, files selection, and so on */
+/* This call to prompt() just updates the prompt in case it was modified by
+ * a keybinding, for example, chdir, files selection, and so on. */
 static void
 rl_update_prompt(void)
 {
-	HIDE_CURSOR;
-	int b = xargs.refresh_on_empty_line;
-	xargs.refresh_on_empty_line = 0;
-	char *input = prompt();
-	free(input);
-	xargs.refresh_on_empty_line = b;
+	/* In UPDATE mode prompt() always returns NULL. */
+	prompt(PROMPT_UPDATE);
 	UNHIDE_CURSOR;
 }
 
