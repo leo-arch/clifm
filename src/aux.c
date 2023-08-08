@@ -48,6 +48,25 @@
 # include "highlight.h"
 #endif /* !_NO_HIGHLIGHT */
 
+/* Print the regex error ERRCODE (returned by either regcomp(3) or regexec(3)),
+ * whose compiled regular expression is REGEXP and original pattern PATTERN,
+ * in the next prompt if PROMPT_ERR == 1, or immediately otherwise. */
+void
+xregerror(const char *cmd_name, const char *pattern, const int errcode,
+	const regex_t regexp, const int prompt_err)
+{
+	size_t err_len = regerror(errcode, &regexp, NULL, 0);
+	char *buf = (char *)xnmalloc(err_len + 1, sizeof(char));
+	regerror(errcode, &regexp, buf, err_len);
+
+	if (prompt_err == 1)
+		err('w', PRINT_PROMPT, "%s: %s: %s\n", cmd_name, pattern, buf);
+	else
+		xerror("%s: %s: %s\n", cmd_name, pattern, buf);
+
+	free(buf);
+}
+
 #ifndef _NO_ICONS
 /* Generate a hash of the string STR (case sensitively if CASE_SENTITIVE is
  * set to 1).

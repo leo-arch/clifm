@@ -2655,8 +2655,7 @@ set_histignore_pattern(char *str)
 
 	int ret = regcomp(&regex_hist, pattern, REG_NOSUB | REG_EXTENDED);
 	if (ret != EXIT_SUCCESS) {
-		err('w', PRINT_PROMPT, "histignore: %s: Invalid regular "
-			"expression\n", pattern);
+		xregerror("histignore", pattern, ret, regex_hist, 1);
 		regfree(&regex_hist);
 		return;
 	}

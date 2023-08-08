@@ -2484,10 +2484,10 @@ check_options(void)
 {
 	set_sudo_cmd();
 
-	if (!conf.histignore_regex) {
+	if (!conf.histignore_regex
+	&& regcomp(&regex_hist, DEF_HISTIGNORE, REG_NOSUB | REG_EXTENDED) == 0) {
 		conf.histignore_regex =
 			savestring(DEF_HISTIGNORE, sizeof(DEF_HISTIGNORE) - 1);
-		regcomp(&regex_hist, conf.histignore_regex, REG_NOSUB | REG_EXTENDED);
 	}
 
 	if (conf.trim_names == UNSET) {

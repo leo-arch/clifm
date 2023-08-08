@@ -509,8 +509,9 @@ static int
 compile_filter(void)
 {
 	if (filter.type == FILTER_FILE_NAME) {
-		if (regcomp(&regex_exp, filter.str, REG_NOSUB | REG_EXTENDED) != EXIT_SUCCESS) {
-			xerror("%s\n", _("ft: Invalid regular expression"));
+		int ret = regcomp(&regex_exp, filter.str, REG_NOSUB | REG_EXTENDED);
+		if (ret != EXIT_SUCCESS) {
+			xregerror("ft", filter.str, ret, regex_exp, 0);
 			regfree(&regex_exp);
 			goto ERR;
 		}

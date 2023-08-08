@@ -41,8 +41,8 @@
 #include <limits.h>
 
 #ifdef __sun
-# include <sys/termios.h> // TIOCGWINSZ
-#endif // __sun
+# include <sys/termios.h> /* TIOCGWINSZ */
+#endif /* __sun */
 
 #include "aux.h"
 #include "checks.h"
