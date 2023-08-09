@@ -2518,19 +2518,21 @@ list_dir(void)
 					file_info[n].color = ee_c;
 				else
 					file_info[n].color = ex_c;
-			} else if (file_info[n].size == 0) {
-				file_info[n].color = ef_c;
 			} else if (file_info[n].linkn > 1) { /* Multi-hardlink */
 				file_info[n].color = mh_c;
 				stats.multi_link++;
+			} else if (file_info[n].size == 0) {
+				file_info[n].color = ef_c;
 			} else { /* Regular file */
 				file_info[n].color = fi_c;
 			}
 
-			/* Unaccessible files, files with capabilities, and executable
-			 * files take precedence over temp and file extension colors. */
+			/* Unaccessible files, files with capabilities, multi-hardlink
+			 * and executable files take precedence over temp and file
+			 * extension colors. */
 			const int no_override_color = (file_info[n].color == nf_c
-			|| file_info[n].color == ca_c || file_info[n].exec == 1);
+			|| file_info[n].color == ca_c || file_info[n].color == mh_c
+			|| file_info[n].exec == 1);
 
 			if (no_override_color == 0
 			&& IS_TEMP_FILE(file_info[n].name, len_bytes)) {
