@@ -1067,7 +1067,9 @@ check_gui(void)
 static void
 set_security_paranoid_mode(void)
 {
-# if SECURITY_PARANOID <= 1
+# if SECURITY_PARANOID == 0
+	return;
+# elif SECURITY_PARANOID == 1
 	if (xargs.secure_env != 1 && xargs.secure_env_full != 1) {
 		xsecure_env(SECURE_ENV_IMPORT);
 		xargs.secure_env = 1;
@@ -1078,7 +1080,10 @@ set_security_paranoid_mode(void)
 		xsecure_env(SECURE_ENV_FULL);
 	xargs.secure_cmds = xargs.secure_env_full = 1;
 	xargs.secure_env = UNSET;
-# endif /* SECURITY_PARANOID <= 1 */
+#  if SECURITY_PARANOID > 2
+	xargs.stealth_mode = 1;
+#  endif /* SECURITY_PARANOID > 2 */
+# endif /* SECURITY_PARANOID == 0 */
 }
 #endif /* SECURITY_PARANOID */
 
