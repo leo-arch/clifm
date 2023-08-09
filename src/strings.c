@@ -2095,11 +2095,12 @@ expand_range(char *str, int listdir)
 			return (filesn_t *)NULL;
 	}
 
-	filesn_t *buf = (filesn_t *)xcalloc((size_t)(asecond - afirst) + 2, sizeof(int));
+	filesn_t *buf =
+		(filesn_t *)xcalloc((size_t)(asecond - afirst) + 2, sizeof(filesn_t));
 
 	filesn_t i, j = 0;
 	for (i = afirst; i <= asecond; i++) {
-		buf[j] = (int)i;
+		buf[j] = i;
 		j++;
 	}
 
