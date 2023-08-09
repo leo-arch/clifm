@@ -73,6 +73,14 @@
 # define UNSAFE_NOT_PORTABLE 9
 #endif
 
+/* Struct to store information about files to be removed via the 'r' command. */
+struct rm_info {
+	char   *name;
+	nlink_t links;
+	int     dir;
+	int     exists;
+};
+
 static char *const unsafe_name_msgs[] = {
 	"Starts with a dash (-): command option flags collision",
 	"Reserved (internal: MIME/file type expansion)",
@@ -1960,104 +1968,67 @@ cp_mv_file(char **args, const int copy_and_rename, const int force)
 	return EXIT_SUCCESS;
 }
 
+static void
+print_removed_file_info(const struct rm_info info)
+{
+	char *p = abbreviate_file_name(info.name);
+	fputs(p ? p : info.name, stdout);
+	puts(info.dir >= 1 ? "/" : "");
+
+	/* Name removed, but file is still linked to another name (hardlink) */
+	if (info.dir == 0 && info.links > 1) {
+		const nlink_t l = info.links - 1;
+		xerror(_("r: %s: File might still exist (%jd more "
+			"%s linked to this file before this operation)\n"), info.name,
+			(intmax_t)l, l > 1 ? _("names were") : _("name was"));
+	}
+
+	if (p && p != info.name)
+		free(p);
+}
+
 /* Print the list of files removed via the most recent call to the 'r' command */
 static void
-list_removed_files(char **cmd, const size_t *dirs, const size_t start,
+list_removed_files(struct rm_info *info, const size_t start,
 	const int cwd)
 {
 	size_t i, c = 0;
-	for (i = start; cmd[i]; i++);
-	char **removed_files = (char **)xnmalloc(i + 1, sizeof(char *));
-	size_t *_dirs = (size_t *)xnmalloc(i + 1, sizeof(size_t));
 
 	struct stat a;
-	for (i = start; cmd[i]; i++) {
-		_dirs[c] = 0;
-		if (lstat(cmd[i], &a) == -1 && errno == ENOENT) {
-			removed_files[c] = cmd[i];
-			_dirs[c] = dirs[i];
+	for (i = start; info[i].name; i++) {
+		if (lstat(info[i].name, &a) == -1 && errno == ENOENT) {
+			info[i].exists = 0;
 			c++;
 		}
 	}
-	removed_files[c] = (char *)NULL;
 
-	if (c == 0) { /* No file was removed */
-		free(removed_files);
-		free(_dirs);
+	if (c == 0) /* No file was removed */
 		return;
-	}
 
 	if (conf.autols == 1 && cwd == 1)
 		reload_dirlist();
 
-	for (i = 0; i < c; i++) {
-		if (!removed_files[i] || !*removed_files[i])
+	for (i = start; info[i].name; i++) {
+		if (!info[i].name || !*info[i].name || info[i].exists == 1)
 			continue;
 
-		char *p = abbreviate_file_name(removed_files[i]);
-		fputs(p ? p : removed_files[i], stdout);
-		puts(_dirs[i] == 1 ? "/" : "");
-
-		if (p && p != removed_files[i])
-			free(p);
+		print_removed_file_info(info[i]);
 	}
 
 	print_reload_msg(_("%zu file(s) removed\n"), c);
-
-	free(_dirs);
-	free(removed_files);
 }
-
-/* Return the appropriate parameters for (g)rm(1), depending on:
- * 1. The installed version of rm
- * 2. The list of files to be removed contains at least 1 dir (DIRS)
- * 3. We should run interactively (RM_FORCE) */
-/*
-static char *
-set_rm_params(const int dirs, const int rm_force)
-{
-	if (dirs == 1) {
-#if defined(_BE_POSIX)
-		return (rm_force == 1 ? "-rf" : "-r");
-#elif defined(CHECK_COREUTILS)
-		if (bin_flags & BSD_HAVE_COREUTILS)
-			return (rm_force == 1 ? "-drf" : "-dIr");
-		else
-# if defined(__sun)
-			return (rm_force == 1 ? "-rf" : "-r");
-# else
-			return (rm_force == 1 ? "-drf" : "-dr");
-# endif // __sun
-#else
-		return (rm_force == 1 ? "-drf" : "-dIr");
-#endif // _BE_POSIX
-	}
-
-// No directories
-#if defined(_BE_POSIX)
-	return "-f";
-#elif defined(CHECK_COREUTILS)
-	if (bin_flags & BSD_HAVE_COREUTILS)
-		return (rm_force == 1 ? "-f" : "-I");
-	else
-		return "-f";
-#else
-	return (rm_force == 1 ? "-f" : "-I");
-#endif // _BE_POSIX
-} */
 
 /* Print files to be removed and ask the user for confirmation.
  * Returns 0 if no or 1 if yes. */
 static int
-rm_confirm(char **args, const size_t *dirs, const size_t start,
-	const int have_dirs)
+rm_confirm(struct rm_info *info, const size_t start, const int have_dirs)
 {
 	printf(_("r: File(s) to be removed%s:\n"),
 		have_dirs == 1 ? _(" (recursively)") : "");
 
 	size_t i;
-	for (i = start; args[i]; i++)
-		printf("%s%c\n", args[i], dirs[i] == 1 ? '/' : 0);
+	for (i = start; info[i].name; i++)
+		printf("%s%c\n", info[i].name, info[i].dir >= 1 ? '/' : 0);
 
 	return rl_get_y_or_n(_("Continue? [y/n] "));
 }
@@ -2069,10 +2040,9 @@ remove_file(char **args)
 
 	struct stat a;
 	char **rm_cmd = (char **)xnmalloc(args_n + 4, sizeof(char *));
-	/* Let's remember which removed files were directories. DIRS wil be later
-	 * passed to list_removed_files() to append a slash to directories when
-	 * reporting removed files. A bit convoluted, but it works. */
-	size_t *dirs = (size_t *)xnmalloc(args_n + 4, sizeof(size_t));
+	/* Let's keep information about files to be removed. */
+	struct rm_info *info =
+		(struct rm_info *)xnmalloc(args_n + 4, sizeof(struct rm_info));
 
 	int i, j, have_dirs = 0;
 	int rm_force = conf.rm_force == 1 ? 1 : 0;
@@ -2085,10 +2055,10 @@ remove_file(char **args)
 		/* Let's start storing file names in 3: 0 is for 'rm', and 1
 		 * and 2 for parameters, including end of parameters (--). */
 
-		/* If we have a symlink to dir ending with a slash, stat(3) takes it
+		/* If we have a symlink to dir ending with a slash, stat(2) takes it
 		 * as a directory, and then rm(1) complains that cannot remove it,
 		 * because "Is a directory". So, let's remove the ending slash:
-		 * stat(3) will take it as the symlink it is and rm(1) will remove
+		 * stat(2) will take it as the symlink it is and rm(1) will remove
 		 * the symlink (not the target), without complains. */
 		size_t len = strlen(args[i]);
 		if (len > 0 && args[i][len - 1] == '/')
@@ -2107,12 +2077,12 @@ remove_file(char **args)
 
 		if (lstat(tmp, &a) != -1) {
 			rm_cmd[j] = savestring(tmp, strlen(tmp));
-			if (S_ISDIR(a.st_mode)) {
-				dirs[j] = 1;
-				have_dirs = 1;
-			} else {
-				dirs[j] = 0;
-			}
+			info[j].name = rm_cmd[j];
+			info[j].dir = (S_ISDIR(a.st_mode));
+			info[j].links = a.st_nlink;
+			info[j].exists = 1;
+			if (info[j].dir == 1)
+				have_dirs++;
 			j++;
 		} else {
 			xerror("r: %s: %s\n", tmp, strerror(errno));
@@ -2122,33 +2092,25 @@ remove_file(char **args)
 		free(tmp);
 	}
 
-	rm_cmd[j] = (char *)NULL;
+	rm_cmd[j] = info[j].name = (char *)NULL;
 
 	if (errs > 0 && j > 3) { /* If at least one error, fail anyway. */
 		fputs(_("r: No files were removed\n"), stderr);
 		goto END;
-//		fputs(_("Press any key to continue... "), stdout);
-//		xgetchar();
 	}
 
 	if (j == 3) { /* No file to be deleted */
 		free(rm_cmd);
-		free(dirs);
+		free(info);
 		return EXIT_FAILURE;
 	}
 
-	if (rm_force == 0 && ((flags & REMOVE_ELN) || have_dirs == 1 || j > 5)
-	&& rm_confirm(rm_cmd, dirs, 3, have_dirs) == 0)
+	if (rm_force == 0 && ((flags & REMOVE_ELN) || have_dirs >= 1 || j > 5)
+	&& rm_confirm(info, 3, have_dirs) == 0)
 		goto END;
 
-//#if defined(CHECK_COREUTILS)
-//	rm_cmd[0] = (bin_flags & BSD_HAVE_COREUTILS) ? "grm" : "rm";
-//#else
-//	rm_cmd[0] = "rm";
-//#endif /* CHECK_COREUTILS */
-//	rm_cmd[1] = set_rm_params(have_dirs, rm_force);
 	rm_cmd[0] = "rm";
-	rm_cmd[1] = have_dirs == 1 ? "-rf" : "-f";
+	rm_cmd[1] = have_dirs >= 1 ? "-rf" : "-f";
 	rm_cmd[2] = "--";
 
 	if (launch_execv(rm_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
@@ -2158,15 +2120,14 @@ remove_file(char **args)
 		deselect_all();
 
 	if (print_removed_files == 1)
-		list_removed_files(rm_cmd, dirs, 3, cwd);
+		list_removed_files(info, 3, cwd);
 
 END:
 	for (i = 3; rm_cmd[i]; i++)
 		free(rm_cmd[i]);
 	free(rm_cmd);
 
-	free(dirs);
-
+	free(info);
 	return exit_status;
 }
 
