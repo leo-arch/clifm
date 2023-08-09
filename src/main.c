@@ -54,6 +54,9 @@
 #include "prompt.h"
 #include "readline.h"
 #include "remotes.h"
+#ifdef SECURITY_PARANOID
+# include "sanitize.h"
+#endif /* SECURITY_PARANOID */
 
 /* Globals */
 
@@ -1060,6 +1063,25 @@ check_gui(void)
 	}
 }
 
+#ifdef SECURITY_PARANOID
+static void
+set_security_paranoid_mode(void)
+{
+# if SECURITY_PARANOID <= 1
+	if (xargs.secure_env != 1 && xargs.secure_env_full != 1) {
+		xsecure_env(SECURE_ENV_IMPORT);
+		xargs.secure_env = 1;
+	}
+	xargs.secure_cmds = 1;
+# else
+	if (xargs.secure_env_full != 1)
+		xsecure_env(SECURE_ENV_FULL);
+	xargs.secure_cmds = xargs.secure_env_full = 1;
+	xargs.secure_env = UNSET;
+# endif /* SECURITY_PARANOID <= 1 */
+}
+#endif /* SECURITY_PARANOID */
+
 /*
 static void
 init_file_flags(void)
@@ -1130,6 +1152,9 @@ main(int argc, char *argv[])
 	/* parse_cmdline_args is executed before init_config() because, if
 	 * specified (-P option), it sets the value of alt_profile, which
 	 * is then checked by init_config(). */
+#ifdef SECURITY_PARANOID
+	set_security_paranoid_mode();
+#endif /* SECURITY_PARANOID */
 
 	/* Get paths from PATH environment variable. These paths will be
 	 * used later by get_path_programs (for the autocomplete function)

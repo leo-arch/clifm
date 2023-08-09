@@ -25,6 +25,7 @@
 #ifndef PROMPT_H
 #define PROMPT_H
 
+/* Mode macros for the prompt function */
 #define PROMPT_UPDATE 0
 #define PROMPT_SHOW   1
 
