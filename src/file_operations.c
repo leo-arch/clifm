@@ -179,7 +179,7 @@ static int
 create_tmp_file(char **file, int *fd)
 {
 	size_t tmp_len = strlen(xargs.stealth_mode == 1 ? P_tmpdir : tmp_dir);
-	size_t file_len = tmp_len + strlen(TMP_FILENAME) + 2;
+	size_t file_len = tmp_len + (sizeof(TMP_FILENAME) - 1) + 2;
 
 	*file = (char *)xnmalloc(file_len, sizeof(char));
 	snprintf(*file, file_len, "%s/%s", xargs.stealth_mode == 1

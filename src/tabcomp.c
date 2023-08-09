@@ -1729,16 +1729,16 @@ move_cursor_up(const int total_line_len)
 static void
 set_finder_paths(void)
 {
-	char *p = xargs.stealth_mode == 1 ? P_tmpdir : tmp_dir;
+	const char *p = (xargs.stealth_mode == 1) ? P_tmpdir : tmp_dir;
 
 	char *rand_ext = gen_rand_str(10);
-	snprintf(finder_in_file, sizeof(finder_in_file), "%s/%s.%s",
-		p, PROGRAM_NAME, rand_ext ? rand_ext : "a3_2yu!d43");
+	snprintf(finder_in_file, sizeof(finder_in_file), "%s/.temp%s",
+		p, rand_ext ? rand_ext : "a3_2yu!d43");
 	free(rand_ext);
 
 	rand_ext = gen_rand_str(16);
-	snprintf(finder_out_file, sizeof(finder_out_file), "%s/%s.%s",
-		p, PROGRAM_NAME, rand_ext ? rand_ext : "0rNkds7++@");
+	snprintf(finder_out_file, sizeof(finder_out_file), "%s/.temp%s",
+		p, rand_ext ? rand_ext : "0rNkds7++@");
 	free(rand_ext);
 }
 
