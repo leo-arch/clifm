@@ -320,7 +320,7 @@ make -f misc/GNU/Makefile _NO_GETTEXT=1 _NO_ICONS=1
 | `_NO_TRASH` | Disable [trash](https://github.com/leo-arch/clifm/wiki/Common-Operations#trashing-files) support |
 | `_TOURBIN_QSORT` | Use Alexey Tourbin faster [qsort implementation](https://github.com/svpv/qsort) instead of [qsort(3)](https://www.man7.org/linux/man-pages/man3/qsort.3.html) |
 | `ALLOW_COREDUMPS` | If running in [secure mode](https://github.com/leo-arch/clifm/wiki/Specifics#security), core dumps are disabled. Compile with this flag to allow them. |
-| `SECURITY_PARANOID` | If compiled with this flag, **clifm** always runs in [secure mode](https://github.com/leo-arch/clifm/wiki/Specifics#security) (same as `--secure-cmds`, which implies `--secure-env`) |
+| `SECURITY_PARANOID=1\|2` | If compiled with this flag, **clifm** always runs in [secure mode](https://github.com/leo-arch/clifm/wiki/Specifics#security). If the value is 1, it amounts to `--secure-cmds --secure-env`; otherwise, for any value bigger than 1, it amounts to `--secure-cmds --secure-env-full`. |
 | `USE_GENERIC_FS_MONITOR` | Use the generic file system events monitor instead of inotify (Linux) or kqueue (BSD) |
 | `_VANILLA_READLINE` | Disable all **clifm** specific features added to readline: syntax highlighting, autosuggestions, TAB completion for **clifm** specific features/commands, and alternative TAB completion modes (fzf, fnf, and smenu) |
 
