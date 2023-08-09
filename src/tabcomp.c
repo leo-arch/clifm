@@ -942,8 +942,10 @@ static char *
 get_finder_output(const int multi, char *base)
 {
 	FILE *fp = fopen(finder_out_file, "r");
-	if (!fp)
+	if (!fp) {
+		unlink(finder_out_file);
 		return print_no_finder_file();
+	}
 
 	char *buf = (char *)xnmalloc(1, sizeof(char)), *line = (char *)NULL;
 	*buf = '\0';
@@ -1737,7 +1739,7 @@ set_finder_paths(void)
 		p, rand_ext ? rand_ext : "a3_2yu!d43");
 	free(rand_ext);
 
-	rand_ext = gen_rand_str(sm ? 20 : 16);
+	rand_ext = gen_rand_str(sm ? 20 : 14);
 	snprintf(finder_out_file, sizeof(finder_out_file), "%s/.temp%s",
 		p, rand_ext ? rand_ext : "0rNkds7++@");
 	free(rand_ext);
