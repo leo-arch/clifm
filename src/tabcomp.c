@@ -936,8 +936,9 @@ get_glob_file_target(char *str, const char *initial_path)
 	return p;
 }
 
-/* Recover finder (fzf/fnf/smenu) output from FINDER_OUT_FILE file
- * Return this output (reformated if needed) or NULL in case of error */
+/* Recover finder (fzf/fnf/smenu) output from FINDER_OUT_FILE file.
+ * Return this output (reformated if needed) or NULL in case of error.
+ * FINDER_OUT_FILE is removed immediately after use.  */
 static char *
 get_finder_output(const int multi, char *base)
 {
@@ -1355,11 +1356,11 @@ is_multi_sel(void)
 	}
 }
 
-/* Clean the input buffer in case the user cancelled the completion pressing ESC. */
-/* If all possible completions share a common prefix, this prefix is
- * automatically appended to the query string. However, the user
- * cancelled here the completion (pressing ESC), so that we need to
- * remove this prefix by reinserting the original query string. */
+/* Clean the input buffer in case the user cancelled the completion pressing ESC.
+ * If all possible completions share a common prefix, this prefix is
+ * automatically appended to the query string. However, the user cancelled
+ * here the completion (pressing ESC), so that we need to remove this prefix
+ * by reinserting the original query string. */
 static int
 clean_rl_buffer(const char *text)
 {
@@ -1729,30 +1730,25 @@ move_cursor_up(const int total_line_len)
  * time, they happen to be the same, resulting in both file names being
  * identical. As a workaround, we use different lengths for both extensions.
  *
- * In stealth mode temp files are written to P_tmpdir, which is usually /tmp,
- * a world-writable directory. In this case, we must check out temp files
- * do not exists before using them. */
+ * These files are created immediately after this function returns by
+ * store_completions() with permissions 600 (in a directory to which only the
+ * current has read/write access). These files are then immediately read
+ * by the finder application, and deleted as soon as this latter returns. */
 static void
 set_finder_paths(void)
 {
 	const int sm = (xargs.stealth_mode == 1);
 	const char *p = sm ? P_tmpdir : tmp_dir;
-	char *rand_ext = (char *)NULL;
-	struct stat a;
 
-	do {
-		rand_ext = gen_rand_str(sm ? 16 : 10);
-		snprintf(finder_in_file, sizeof(finder_in_file), "%s/.temp%s",
-			p, rand_ext ? rand_ext : "a3_2yu!d43");
-		free(rand_ext);
-	} while (sm ? (lstat(finder_in_file, &a) == 0 || errno != ENOENT) : 0);
+	char *rand_ext = gen_rand_str(sm ? 16 : 10);
+	snprintf(finder_in_file, sizeof(finder_in_file), "%s/.temp%s",
+		p, rand_ext ? rand_ext : "a3_2yu!d43");
+	free(rand_ext);
 
-	do {
-		rand_ext = gen_rand_str(sm ? 20 : 14);
-		snprintf(finder_out_file, sizeof(finder_out_file), "%s/.temp%s",
-			p, rand_ext ? rand_ext : "0rNkds7++@");
-		free(rand_ext);
-	} while (sm ? (lstat(finder_out_file, &a) == 0 || errno != ENOENT) : 0);
+	rand_ext = gen_rand_str(sm ? 20 : 14);
+	snprintf(finder_out_file, sizeof(finder_out_file), "%s/.temp%s",
+		p, rand_ext ? rand_ext : "0rNkds7++@");
+	free(rand_ext);
 }
 
 /* Display possible completions using the corresponding finder. If one of these
