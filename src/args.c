@@ -851,6 +851,7 @@ set_custom_selfile(char *file)
 		"selections file\n"), PROGRAM_NAME, file);
 }
 
+#ifndef _NO_LIRA
 static char *
 stat_file(char *file)
 {
@@ -886,6 +887,7 @@ set_shotgun_file(char *opt)
 
 	alt_preview_file = stat_file(opt);
 }
+#endif /* !_NO_LIRA */
 #endif /* !_BE_POSIX */
 
 static void

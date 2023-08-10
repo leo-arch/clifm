@@ -1533,7 +1533,6 @@ unset_xargs(void)
 	xargs.colorize = UNSET;
 	xargs.columns = UNSET;
 	xargs.config = UNSET;
-//	xargs.control_d_exits = UNSET;
 	xargs.cwd_in_title = UNSET;
 	xargs.desktop_notifications = UNSET;
 	xargs.dirmap = UNSET;

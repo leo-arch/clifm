@@ -1287,6 +1287,57 @@ set_hist_file(const int secure_mode, const size_t tmp_len)
 }
 
 static void
+check_file_safety(const char *name)
+{
+	int safe = 1;
+	struct stat a;
+
+	if (!name || !*name || lstat(name, &a) == -1)
+		return;
+
+	else if (S_ISLNK(a.st_mode)) {
+		err('w', PRINT_PROMPT, _("%s: Is a symbolic link\n"), name);
+		safe = 0;
+	}
+
+	else if (!S_ISREG(a.st_mode)) {
+		err('w', PRINT_PROMPT, _("%s: Is not a regular file\n"), name);
+		safe = 0;
+	}
+
+	else if (a.st_nlink > 1) {
+		err('w', PRINT_PROMPT, _("%s: There is another name hard linked "
+			"to this file\n"), name);
+		safe = 0;
+	}
+
+	if (safe == 0)
+		err('w', PRINT_PROMPT, _("%s: File might not be safe\n"), name);
+}
+
+static void
+check_config_files_integrity(void)
+{
+	check_file_safety(config_file);
+	check_file_safety(hist_file);
+	check_file_safety(kbinds_file);
+	check_file_safety(dirhist_file);
+	check_file_safety(bm_file);
+	check_file_safety(msgs_log_file);
+	check_file_safety(cmds_log_file);
+	check_file_safety(profile_file);
+	check_file_safety(mime_file);
+	check_file_safety(actions_file);
+	check_file_safety(remotes_file);
+
+	char jump_file[PATH_MAX];
+	snprintf(jump_file, sizeof(jump_file), "%s/jump.clifm", config_dir);
+	check_file_safety(jump_file);
+
+	check_file_safety(prompts_file);
+}
+
+static void
 define_config_file_names(void)
 {
 	size_t pnl_len = sizeof(PROGRAM_NAME) - 1;
@@ -3354,6 +3405,9 @@ init_config(void)
 
 	load_prompts();
 	check_colors();
+
+	if (xargs.secure_env == 1 || xargs.secure_env_full == 1)
+		check_config_files_integrity();
 
 #ifndef _NO_FZF
 	/* If FZF win height was not defined in the config file,
