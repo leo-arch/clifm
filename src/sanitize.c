@@ -340,7 +340,7 @@ sanitize_blacklist(const char *cmd)
 
 /* Check if command name in STR contains slashes. Return 1 if found,
  * zero otherwise. This means: do not allow custom scripts or binaries,
- * but only whatever could be found in the sanitized PATH variable */
+ * but only whatever could be found in the sanitized PATH variable. */
 static int
 clean_cmd(const char *str)
 {

@@ -42,6 +42,7 @@
 #include "init.h"
 #include "messages.h"
 #include "misc.h"
+#include "sanitize.h"
 
 /* Get the executable's path of the action ACTION
  * Returns this path on success or NULL on error, in which case STATUS
@@ -209,6 +210,10 @@ run_action(char *action, char **args)
 		exit_status = open_function(o_cmd);
 
 	} else { /* If not a file, take it as a command */
+		if (xargs.secure_cmds == 1
+		&& sanitize_cmd(buf, SNT_GRAL) != EXIT_SUCCESS)
+			goto END;
+
 		size_t old_args = args_n;
 		args_n = 0;
 
