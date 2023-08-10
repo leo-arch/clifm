@@ -1209,10 +1209,10 @@ create_tmp_files(void)
 	if (stat(tmp_dir, &attr) == -1)
 		xmkdir(tmp_dir, S_IRWXU | S_IRWXG | S_IRWXO | S_ISVTX);
 
-	/* Once TMP_ROOTDIR exists, create the user's directory to store
-	 * the list of selected files: TMP_DIR/clifm/username/.selbox_PROFILE.
+	/* Once TMP_ROOTDIR exists, create the user's specific directory.
 	 * We use here very restrictive permissions (700), since only the
-	 * current user must be able to read and/or modify this list. */
+	 * current user must be able to read and/or modify the contents of this
+	 * directory. */
 	snprintf(tmp_dir, tmp_len, "%s/%s/%s", tmp_rootdir, PROGRAM_NAME,
 		user.name ? user.name : "unknown");
 	if (stat(tmp_dir, &attr) == -1

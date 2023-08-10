@@ -1727,22 +1727,32 @@ move_cursor_up(const int total_line_len)
  * compiled in POSIX mode, gen_rand_ext() uses srandom(3) and random(3) to
  * generate the string, but since both extensions are generated at the same
  * time, they happen to be the same, resulting in both file names being
- * identical. As a workaround, we use different lengths for both extensions. */
+ * identical. As a workaround, we use different lengths for both extensions.
+ *
+ * In stealth mode temp files are written to P_tmpdir, which is usually /tmp,
+ * a world-writable directory. In this case, we must check out temp files
+ * do not exists before using them. */
 static void
 set_finder_paths(void)
 {
 	const int sm = (xargs.stealth_mode == 1);
 	const char *p = sm ? P_tmpdir : tmp_dir;
+	char *rand_ext = (char *)NULL;
+	struct stat a;
 
-	char *rand_ext = gen_rand_str(sm ? 16 : 10);
-	snprintf(finder_in_file, sizeof(finder_in_file), "%s/.temp%s",
-		p, rand_ext ? rand_ext : "a3_2yu!d43");
-	free(rand_ext);
+	do {
+		rand_ext = gen_rand_str(sm ? 16 : 10);
+		snprintf(finder_in_file, sizeof(finder_in_file), "%s/.temp%s",
+			p, rand_ext ? rand_ext : "a3_2yu!d43");
+		free(rand_ext);
+	} while (sm ? (lstat(finder_in_file, &a) == 0 || errno != ENOENT) : 0);
 
-	rand_ext = gen_rand_str(sm ? 20 : 14);
-	snprintf(finder_out_file, sizeof(finder_out_file), "%s/.temp%s",
-		p, rand_ext ? rand_ext : "0rNkds7++@");
-	free(rand_ext);
+	do {
+		rand_ext = gen_rand_str(sm ? 20 : 14);
+		snprintf(finder_out_file, sizeof(finder_out_file), "%s/.temp%s",
+			p, rand_ext ? rand_ext : "0rNkds7++@");
+		free(rand_ext);
+	} while (sm ? (lstat(finder_out_file, &a) == 0 || errno != ENOENT) : 0);
 }
 
 /* Display possible completions using the corresponding finder. If one of these
