@@ -906,13 +906,26 @@ dir_size(char *dir, const int size_in_bytes, int *status)
 			continue;
 		}
 
-		/* According to POSIX, the size of a directory itself should be
-		 * counted, besides the size of its contents. See du(1p). */
-		size += conf.apparent_size == 1 ? a.st_size
-			: (a.st_blocks * S_BLKSIZE);
+		/* Size of symlinks is only included when computing apparent sizes. */
+		if (ent->d_type == DT_LNK && conf.apparent_size != 1)
+			continue;
 
-		if (ent->d_type == DT_DIR)
+		/* According to POSIX, the size of a directory itself should be
+		 * computed, besides the size of its content. See du(1p).
+		 * However, this is so only when computing disk usage, not apparent
+		 * sizes (like du(1) does). */
+		if (ent->d_type == DT_DIR) {
+			size += conf.apparent_size == 1 ? 0
+				: (a.st_blocks * S_BLKSIZE);
 			size += dir_size(buf, size_in_bytes, status);
+		} else {
+			if (a.st_nlink > 1)
+			/* Multi-hardlink found: size might not be accurate, because
+			 * hard-links are recounted. */
+				*status = 1;
+			size += conf.apparent_size == 1 ? a.st_size
+				: (a.st_blocks * S_BLKSIZE);
+		}
 	}
 
 	closedir(p);

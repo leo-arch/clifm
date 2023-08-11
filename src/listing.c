@@ -1612,7 +1612,8 @@ static void
 get_largest(const filesn_t i, off_t *size, char **name, char **color, off_t *total)
 {
 	/* Only directories and regular files should be counted */
-	if (file_info[i].type != DT_DIR && file_info[i].type != DT_REG)
+	if (file_info[i].type != DT_DIR && file_info[i].type != DT_REG
+	&& (file_info[i].type != DT_LNK || conf.apparent_size != 1))
 		return;
 
 //	const int d = (file_info[i].type == DT_DIR ? 1024 : 1);
