@@ -173,13 +173,13 @@ static inline int
 sort_by_size(struct fileinfo *pa, struct fileinfo *pb)
 {
 	off_t as = pa->size, bs = pb->size;
-	if (conf.long_view == 1 && conf.full_dir_size == 1) {
-		const int base = xargs.si == 1 ? 1000 : 1024;
-		if (pa->dir == 1)
-			as = pa->size * base;
-		if (pb->dir == 1)
-			bs = pb->size * base;
-	}
+//	if (conf.long_view == 1 && conf.full_dir_size == 1) {
+//		const int base = xargs.si == 1 ? 1000 : 1024;
+//		if (pa->dir == 1)
+//			as = pa->size * base;
+//		if (pb->dir == 1)
+//			bs = pb->size * base;
+//	}
 
 	if (as > bs)
 		return 1;

@@ -1484,26 +1484,30 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 
 	const int size_mult_factor = xargs.si == 1 ? 1000 : 1024;
 
-	off_t total_size_kb = 0;
-	if (bin_flags & (GNU_DU_BIN_DU | GNU_DU_BIN_GDU)) {
-		total_size_kb = total_size > size_mult_factor
-			? (total_size / size_mult_factor) : total_size;
-	} else {
-		total_size_kb = total_size;
-	}
+//	off_t total_size_kb = 0;
+//	if (bin_flags & (GNU_DU_BIN_DU | GNU_DU_BIN_GDU)) {
+//		total_size_kb = total_size > size_mult_factor
+//			? (total_size / size_mult_factor) : total_size;
+//	} else {
+//		total_size_kb = total_size;
+//	}
 
 	if (!*dz_c) {
-		get_color_size(total_size_kb * size_mult_factor, sf, sizeof(sf));
+//		get_color_size(total_size_kb * size_mult_factor, sf, sizeof(sf));
+		get_color_size(total_size, sf, sizeof(sf));
 		csize = sf;
 	}
 
-	char *human_size = construct_human_size(total_size_kb * size_mult_factor);
+//	char *human_size = construct_human_size(total_size_kb * size_mult_factor);
+	char *human_size = construct_human_size(total_size);
 	if (!human_size) {
 		puts("?");
 		return;
 	}
 
+#ifndef _BE_POSIX
 	if (bin_flags & (GNU_DU_BIN_DU | GNU_DU_BIN_GDU)) {
+#endif
 		char err[sizeof(xf_c) + 6]; *err = '\0';
 		if (du_status != 0)
 			snprintf(err, sizeof(err), "%s%c%s", xf_c, DU_ERR_CHAR, NC);
@@ -1515,9 +1519,11 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 
 		printf("(%s%s)\n", conf.apparent_size == 1 ? _("apparent") : _("real"),
 			xargs.si == 1 ? " / si" : "");
+#ifndef _BE_POSIX
 	} else {
 		printf("%s%s%s\n", csize, human_size, cend);
 	}
+#endif
 }
 
 static int
@@ -1792,8 +1798,8 @@ construct_file_size(const struct fileinfo *props, char *size_str,
 	char sf[MAX_SHADE_LEN];
 	if (conf.colorize == 1) {
 		off_t s = props->size;
-		if (props->dir == 1 && conf.full_dir_size == 1)
-			s = props->size * (xargs.si == 1 ? 1000 : 1024);
+//		if (props->dir == 1 && conf.full_dir_size == 1)
+//			s = props->size * (xargs.si == 1 ? 1000 : 1024);
 
 		if (!*dz_c) {
 			get_color_size(s, sf, sizeof(sf));
@@ -1807,13 +1813,14 @@ construct_file_size(const struct fileinfo *props, char *size_str,
 		return file_perm;
 	}
 
-	char *human_size = (char *)NULL;
-	if (props->dir == 1 && conf.full_dir_size == 1) {
-		human_size = construct_human_size(props->size *
-			(xargs.si == 1 ? 1000 : 1024));
-	} else {
-		human_size = construct_human_size(props->size);
-	}
+	char *human_size = construct_human_size(props->size);
+//	char *human_size = (char *)NULL;
+//	if (props->dir == 1 && conf.full_dir_size == 1) {
+//		human_size = construct_human_size(props->size *
+//			(xargs.si == 1 ? 1000 : 1024));
+//	} else {
+//		human_size = construct_human_size(props->size);
+//	}
 
 	char err[sizeof(xf_c) + 6]; *err = '\0';
 	if (props->dir == 1 && conf.full_dir_size == 1

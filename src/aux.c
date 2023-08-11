@@ -838,7 +838,9 @@ get_cmd_path(const char *cmd)
 }
 
 /* Convert SIZE to human readable form (at most 2 decimal places).
- * Returns a pointer to a string of at most MAX_UNIT_SIZE. */
+ * Returns a pointer to a string of at most MAX_UNIT_SIZE.
+ * We follow here the du(1) notation: K, M, G... for powers of 1024
+ * and KB, MB, KB... for power of 1000. */
 char *
 construct_human_size(const off_t size)
 {
@@ -871,6 +873,50 @@ construct_human_size(const off_t size)
 	return p;
 }
 
+#if defined(USE_XDU) || defined(_BE_POSIX)
+off_t
+dir_size(char *dir, const int size_in_bytes, int *status)
+{
+	UNUSED(size_in_bytes);
+
+	if (!dir || !*dir)
+		return (-1);
+
+	off_t size = 0;
+	DIR *p;
+
+	if ((p = opendir(dir)) == NULL) {
+		*status = errno;
+		return (-1);
+	}
+
+	struct dirent *ent;
+
+	while ((ent = readdir(p)) != NULL) {
+		if (SELFORPARENT(ent->d_name))
+			continue;
+
+		char buf[PATH_MAX + 1];
+		snprintf(buf, sizeof(buf), "%s/%s", dir, ent->d_name);
+
+		struct stat a;
+		if (lstat(buf, &a) == -1
+		|| check_file_access(a.st_mode, a.st_uid, a.st_gid) == 0) {
+			*status = errno;
+			continue;
+		}
+
+		size += conf.apparent_size == 1 ? a.st_size
+			: (a.st_blocks * S_BLKSIZE);
+
+		if (ent->d_type == DT_DIR)
+			size += dir_size(buf, size_in_bytes, status);
+	}
+
+	closedir(p);
+	return size;
+}
+#else
 /* Return the full size of the directory DIR using du(1).
  * The size is reported in bytes if SIZE_IN_BYTES is set to 1.
  * Otherwise, human format is used.
@@ -945,11 +991,8 @@ dir_size(char *dir, const int size_in_bytes, int *status)
 	 * size and usually takes only a few digits: since a yottabyte takes 26
 	 * digits, 32 is more than enough. */
 	char line[32];
-	if (fgets(line, (int)sizeof(line), fp) == NULL) {
-		fclose(fp);
-		unlink(file);
-		return (-1);
-	}
+	if (fgets(line, (int)sizeof(line), fp) == NULL)
+		goto END;
 
 	char *p = strchr(line, '\t');
 	if (p && p != line) {
@@ -957,10 +1000,12 @@ dir_size(char *dir, const int size_in_bytes, int *status)
 		retval = (off_t)atoll(line);
 	}
 
+END:
 	fclose(fp);
 	unlink(file);
 	return retval;
 }
+#endif // USE_XDU || _BE_POSIX
 
 /* Return the file type of the file pointed to by LINK, or -1 in case of
  * error. Possible return values:

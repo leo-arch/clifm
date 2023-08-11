@@ -673,7 +673,8 @@ set_long_attribs(const filesn_t n, const struct stat *attr)
 		if (file_info[n].type == DT_LNK) /* Symlink to directory */
 			snprintf(name, sizeof(name), "%s/", file_info[n].name);
 
-		file_info[n].size = dir_size(*name ? name : file_info[n].name, 0,
+//		file_info[n].size = dir_size(*name ? name : file_info[n].name, 0,
+		file_info[n].size = dir_size(*name ? name : file_info[n].name, 1,
 			&file_info[n].du_status);
 	} else {
 		file_info[n].size = FILE_SIZE_PTR;
@@ -1614,9 +1615,11 @@ get_largest(const filesn_t i, off_t *size, char **name, char **color, off_t *tot
 	if (file_info[i].type != DT_DIR && file_info[i].type != DT_REG)
 		return;
 
-	const int d = (file_info[i].type == DT_DIR ? 1024 : 1);
-	if (file_info[i].size * d > *size) {
-		*size = file_info[i].size * d;
+//	const int d = (file_info[i].type == DT_DIR ? 1024 : 1);
+//	if (file_info[i].size * d > *size) {
+//		*size = file_info[i].size * d;
+	if (file_info[i].size > *size) {
+		*size = file_info[i].size;
 		*name = file_info[i].name;
 		*color = file_info[i].color;
 	}
@@ -1629,7 +1632,8 @@ get_largest(const filesn_t i, off_t *size, char **name, char **color, off_t *tot
 				return;
 	}
 
-	*total += file_info[i].size * d;
+//	*total += file_info[i].size * d;
+	*total += file_info[i].size;
 }
 
 /* Return the lenght of the longest UID:GID string for files listed in
