@@ -874,14 +874,27 @@ construct_human_size(const off_t size)
 }
 
 #ifdef USE_XDU
+/* Read no more than this many directory entries at a time. Without this
+ * limit, processing a directory with 4,000,000 entries requires ~1GiB of
+ * memory, and handling 64M entries would require 16GiB of memory. */
+//#define MAX_READDIR_ENTRIES 100000
+
+/* Hand-made implemetation of du(1) providing only those features required
+ * by clifm.
+ * NOTE: to exclude file systems other than that in which DIR resides, compare
+ * st_dev of DIR and st_dev of the file currently being analyzed. */
 off_t
 dir_size(char *dir, const int size_in_bytes, int *status)
 {
 	UNUSED(size_in_bytes);
 
-	if (!dir || !*dir)
+	if (!dir || !*dir) {
+		*status = ENOENT;
 		return (-1);
+	}
 
+	struct stat a;
+//	const dev_t base_dev = lstat(dir, &a) != -1 ? a.st_dev : 0;
 	off_t size = 0;
 	DIR *p;
 
@@ -899,10 +912,25 @@ dir_size(char *dir, const int size_in_bytes, int *status)
 		char buf[PATH_MAX + 1];
 		snprintf(buf, sizeof(buf), "%s/%s", dir, ent->d_name);
 
-		struct stat a;
-		if (lstat(buf, &a) == -1
-		|| check_file_access(a.st_mode, a.st_uid, a.st_gid) == 0) {
-			*status = errno ? errno : EACCES;
+//		struct stat a;
+		if (lstat(buf, &a) == -1) {
+			*status = errno;
+			continue;
+		}
+
+/*		if (base_dev > 0 && base_dev != a.st_dev) {
+			*status = EXDEV; // File is on a different file system.
+			continue;
+		} */
+
+		/* Even if a directory is unreadable or we can't chdir into it, do
+		 * let its size contribute to the total. */
+		if (ent->d_type == DT_DIR
+		&& check_file_access(a.st_mode, a.st_uid, a.st_gid) == 0) {
+			size += conf.apparent_size == 1 ? 0
+			: (a.st_blocks * S_BLKSIZE);
+
+			*status = EACCES;
 			continue;
 		}
 
