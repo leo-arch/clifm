@@ -873,7 +873,7 @@ construct_human_size(const off_t size)
 	return p;
 }
 
-#if defined(USE_XDU) || defined(_BE_POSIX)
+#ifdef USE_XDU
 off_t
 dir_size(char *dir, const int size_in_bytes, int *status)
 {
@@ -1005,7 +1005,7 @@ END:
 	unlink(file);
 	return retval;
 }
-#endif // USE_XDU || _BE_POSIX
+#endif // USE_XDU
 
 /* Return the file type of the file pointed to by LINK, or -1 in case of
  * error. Possible return values:

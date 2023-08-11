@@ -1505,7 +1505,7 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 		return;
 	}
 
-#ifndef _BE_POSIX
+#ifndef USE_XDU
 	if (bin_flags & (GNU_DU_BIN_DU | GNU_DU_BIN_GDU)) {
 #endif
 		char err[sizeof(xf_c) + 6]; *err = '\0';
@@ -1519,7 +1519,7 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 
 		printf("(%s%s)\n", conf.apparent_size == 1 ? _("apparent") : _("real"),
 			xargs.si == 1 ? " / si" : "");
-#ifndef _BE_POSIX
+#ifndef USE_XDU
 	} else {
 		printf("%s%s%s\n", csize, human_size, cend);
 	}

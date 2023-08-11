@@ -78,6 +78,7 @@
 #ifdef _BE_POSIX
 # undef  xstrcasestr
 # define xstrcasestr x_strcasestr
+# define USE_XDU
 # define _NO_GETTEXT
 # ifndef ALLOW_MEDIA
 #  define NO_MEDIA_FUNC
