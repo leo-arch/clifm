@@ -902,10 +902,12 @@ dir_size(char *dir, const int size_in_bytes, int *status)
 		struct stat a;
 		if (lstat(buf, &a) == -1
 		|| check_file_access(a.st_mode, a.st_uid, a.st_gid) == 0) {
-			*status = errno;
+			*status = errno ? errno : EACCES;
 			continue;
 		}
 
+		/* According to POSIX, the size of a directory itself should be
+		 * counted, besides the size of its contents. See du(1p). */
 		size += conf.apparent_size == 1 ? a.st_size
 			: (a.st_blocks * S_BLKSIZE);
 
