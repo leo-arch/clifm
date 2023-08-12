@@ -874,20 +874,66 @@ construct_human_size(const off_t size)
 }
 
 #ifdef USE_XDU
+struct hlink_t {
+	dev_t dev;
+	ino_t ino;
+};
+
+static struct hlink_t *xdu_hardlinks = {0};
+static size_t xdu_hardlink_n = 0;
+
+static inline int
+check_xdu_hardlinks(const dev_t dev, const ino_t ino)
+{
+	if (!xdu_hardlinks || xdu_hardlink_n == 0)
+		return 0;
+
+	size_t i;
+	for (i = 0; i < xdu_hardlink_n; i++) {
+		if (dev == xdu_hardlinks[i].dev && ino == xdu_hardlinks[i].ino)
+			return 1;
+	}
+
+	return 0;
+}
+
+static inline void
+add_xdu_hardlink(const dev_t dev, const ino_t ino)
+{
+	xdu_hardlinks = (struct hlink_t *)xrealloc(xdu_hardlinks,
+		(xdu_hardlink_n + 1) * sizeof(struct hlink_t));
+
+	xdu_hardlinks[xdu_hardlink_n].dev = dev;
+	xdu_hardlinks[xdu_hardlink_n].ino = ino;
+	xdu_hardlink_n++;
+}
+
+static inline void
+free_xdu_hardlinks(void)
+{
+	free(xdu_hardlinks);
+	xdu_hardlinks = (struct hlink_t *)NULL;
+	xdu_hardlink_n = 0;
+}
+
 /* Read no more than this many directory entries at a time. Without this
  * limit, processing a directory with 4,000,000 entries requires ~1GiB of
  * memory, and handling 64M entries would require 16GiB of memory. */
 //#define MAX_READDIR_ENTRIES 100000
 
-/* Hand-made implemetation of du(1) providing only those features required
+/* Hand-made implementation of du(1) providing only those features required
  * by clifm.
- * NOTE: to exclude file systems other than that in which DIR resides, compare
- * st_dev of DIR and st_dev of the file currently being analyzed. */
+ *
+ * Returns the full size of the directory DIR in bytes, computing apparent
+ * sizes, in conf.apparent_size is set to 1, or disk usage otherwise.
+ *
+ * STATUS is updated to a non-zero value if there was an error.
+ *
+ * FIRST_LEVEL must be always 1 when calling this function (this value will
+ * be zero whenever the function calls itself recursively). */
 off_t
-dir_size(char *dir, const int size_in_bytes, int *status)
+dir_size(char *dir, const int first_level, int *status)
 {
-	UNUSED(size_in_bytes);
-
 	if (!dir || !*dir) {
 		*status = ENOENT;
 		return (-1);
@@ -903,6 +949,12 @@ dir_size(char *dir, const int size_in_bytes, int *status)
 		return (-1);
 	}
 
+	/* Compute the size of the base directory itself */
+	if (conf.apparent_size != 1 && first_level == 1) {
+		if (stat(dir, &a) != -1)
+			size += (a.st_blocks * S_BLKSIZE);
+	}
+
 	struct dirent *ent;
 
 	while ((ent = readdir(p)) != NULL) {
@@ -912,7 +964,6 @@ dir_size(char *dir, const int size_in_bytes, int *status)
 		char buf[PATH_MAX + 1];
 		snprintf(buf, sizeof(buf), "%s/%s", dir, ent->d_name);
 
-//		struct stat a;
 		if (lstat(buf, &a) == -1) {
 			*status = errno;
 			continue;
@@ -923,40 +974,42 @@ dir_size(char *dir, const int size_in_bytes, int *status)
 			continue;
 		} */
 
-		/* Even if a directory is unreadable or we can't chdir into it, do
-		 * let its size contribute to the total. */
-		if (ent->d_type == DT_DIR
-		&& check_file_access(a.st_mode, a.st_uid, a.st_gid) == 0) {
-			size += conf.apparent_size == 1 ? 0
-			: (a.st_blocks * S_BLKSIZE);
+		if (S_ISDIR(a.st_mode)) {
+			/* Even if a subdirectory is unreadable or we can't chdir into
+			 * it, do let its size contribute to the total. */
+			if (conf.apparent_size != 1)
+				size += (a.st_blocks * S_BLKSIZE);
 
-			*status = EACCES;
+			if (user.uid != 0
+			&& check_file_access(a.st_mode, a.st_uid, a.st_gid) == 0)
+				*status = EACCES;
+			else
+				size += dir_size(buf, 0, status);
+
 			continue;
 		}
 
 		/* Size of symlinks is only included when computing apparent sizes. */
-		if (ent->d_type == DT_LNK && conf.apparent_size != 1)
-			continue;
+//		if (S_ISLNK(a.st_mode) && conf.apparent_size != 1)
+//			continue;
 
-		/* According to POSIX, the size of a directory itself should be
-		 * computed, besides the size of its content. See du(1p).
-		 * However, this is so only when computing disk usage, not apparent
-		 * sizes (like du(1) does). */
-		if (ent->d_type == DT_DIR) {
-			size += conf.apparent_size == 1 ? 0
-				: (a.st_blocks * S_BLKSIZE);
-			size += dir_size(buf, size_in_bytes, status);
-		} else {
-			if (a.st_nlink > 1)
-			/* Multi-hardlink found: size might not be accurate, because
-			 * hard-links are recounted. */
-				*status = 1;
-			size += conf.apparent_size == 1 ? a.st_size
-				: (a.st_blocks * S_BLKSIZE);
+		/* Neither directory nor symlink */
+		if (a.st_nlink > 1) {
+			if (check_xdu_hardlinks(a.st_dev, a.st_ino) == 1)
+				continue;
+			else
+				add_xdu_hardlink(a.st_dev, a.st_ino);
 		}
+
+		size += conf.apparent_size == 1 ? a.st_size
+			: (a.st_blocks * S_BLKSIZE);
 	}
 
 	closedir(p);
+
+	if (first_level == 1)
+		free_xdu_hardlinks();
+
 	return size;
 }
 #else

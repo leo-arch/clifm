@@ -310,8 +310,12 @@ get_total_size(char *filename, int *status)
 	if (term_caps.suggestions == 0) {
 		fputs("Scanning... ", stdout);
 		fflush(stdout);
+#ifdef USE_XDU
+		total_size = dir_size(*_path ? _path : filename, 1, status);
+#else
 		total_size = dir_size(*_path ? _path : filename,
 			(bin_flags & (GNU_DU_BIN_DU | GNU_DU_BIN_GDU)) ? 1 : 0, status);
+#endif // USE_XDU
 		fputs("\r           \r", stdout);
 		fputs(_("Total size: \t"), stdout);
 	} else {
@@ -319,8 +323,12 @@ get_total_size(char *filename, int *status)
 		HIDE_CURSOR;
 		fputs("Scanning...", stdout);
 		fflush(stdout);
+#ifdef USE_XDU
+		total_size = dir_size(*_path ? _path : filename, 1, status);
+#else
 		total_size = dir_size(*_path ? _path : filename,
 			(bin_flags & (GNU_DU_BIN_DU | GNU_DU_BIN_GDU)) ? 1 : 0, status);
+#endif // USE_XDU
 		MOVE_CURSOR_LEFT(11);
 		ERASE_TO_RIGHT;
 		UNHIDE_CURSOR;
@@ -1808,8 +1816,9 @@ construct_file_size(const struct fileinfo *props, char *size_str,
 	}
 
 	if (prop_fields.size != PROP_SIZE_HUMAN) {
-		snprintf(size_str, SIZE_STR_LEN, "%s%*ju%s", csize,
-			(int)size_max, (uintmax_t)props->size, df_c);
+		snprintf(size_str, SIZE_STR_LEN, "%s%*ju%s%c", csize,
+			(int)size_max, (uintmax_t)props->size, df_c,
+			props->du_status != 0 ? DU_ERR_CHAR : 0);
 		return file_perm;
 	}
 
@@ -1829,6 +1838,9 @@ construct_file_size(const struct fileinfo *props, char *size_str,
 
 	snprintf(size_str, SIZE_STR_LEN, "%s%s%s%s",
 		err, csize, human_size ? human_size : "?", df_c);
+/*	snprintf(size_str, SIZE_STR_LEN, "%s%s%s%c",
+		csize, human_size ? human_size : "?", df_c,
+		props->du_status != 0 ? DU_ERR_CHAR : 0); */
 
 	return file_perm;
 }

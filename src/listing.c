@@ -668,13 +668,16 @@ set_long_attribs(const filesn_t n, const struct stat *attr)
 	default: file_info[n].ltime = (time_t)attr->st_mtime; break;
 	}
 
-	if (conf.full_dir_size == 1 && file_info[n].dir == 1) {
-		char name[PATH_MAX]; *name = '\0';
-		if (file_info[n].type == DT_LNK) /* Symlink to directory */
-			snprintf(name, sizeof(name), "%s/", file_info[n].name);
+	if (conf.full_dir_size == 1 && file_info[n].dir == 1
+	&& file_info[n].type == DT_DIR) {
+/*		char name[PATH_MAX]; *name = '\0';
+		if (file_info[n].type == DT_LNK) // Symlink to directory
+			snprintf(name, sizeof(name), "%s/", file_info[n].name); */
 
 //		file_info[n].size = dir_size(*name ? name : file_info[n].name, 0,
-		file_info[n].size = dir_size(*name ? name : file_info[n].name, 1,
+/*		file_info[n].size = dir_size(*name ? name : file_info[n].name, 1,
+			&file_info[n].du_status); */
+		file_info[n].size = dir_size(file_info[n].name, 1,
 			&file_info[n].du_status);
 	} else {
 		file_info[n].size = FILE_SIZE_PTR;
