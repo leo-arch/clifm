@@ -856,11 +856,10 @@ whatever prompt you like."
     p sel\n\
 - Print the properties of the directory 'dir' (including total size)\n\
     pp dir\n\n\
-Note that, in case of symbolic links to directories, this command displays\n\
+Note that, in case of symbolic links to directories, the 'p' command displays\n\
 information about the link target if the provided file name ends with a slash.\n\
-Otherwise, information about the link itself is displayed.\n\n\
-Secondly, and unlike 'p', which always provides information about links\n\
-themselves, 'pp' always follows symlinks to their target file."
+Otherwise, information about the link itself is displayed.\n\
+Unlike 'p', however, 'pp' always follows symlinks to their target file."
 
 #define PWD_DESC "Print the name of the current working directory\n\n\
 \x1b[1mUSAGE\x1b[0m\n\

@@ -1816,8 +1816,8 @@ construct_file_size(const struct fileinfo *props, char *size_str,
 	}
 
 	if (prop_fields.size != PROP_SIZE_HUMAN) {
-		snprintf(size_str, SIZE_STR_LEN, "%s%*ju%s%c", csize,
-			(int)size_max, (uintmax_t)props->size, df_c,
+		snprintf(size_str, SIZE_STR_LEN, "%s%*jd%s%c", csize,
+			(int)size_max, (intmax_t)props->size, df_c,
 			props->du_status != 0 ? DU_ERR_CHAR : 0);
 		return file_perm;
 	}
