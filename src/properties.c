@@ -1469,7 +1469,7 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 		}
 
 		printf(" (%s%s)\n", conf.apparent_size == 1 ? _("apparent")
-			: _("real"), (xargs.si == 1 && bigger_than_bytes == 1)
+			: _("disk usage"), (xargs.si == 1 && bigger_than_bytes == 1)
 			? " / si" : "");
 
 		return;
@@ -1515,7 +1515,7 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 
 #ifndef USE_XDU
 	if (bin_flags & (GNU_DU_BIN_DU | GNU_DU_BIN_GDU)) {
-#endif
+#endif // USE_XDU
 		char err[sizeof(xf_c) + 6]; *err = '\0';
 		if (du_status != 0)
 			snprintf(err, sizeof(err), "%s%c%s", xf_c, DU_ERR_CHAR, NC);
@@ -1525,13 +1525,13 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 		if (total_size > size_mult_factor)
 			printf("/ %s%juB%s ", csize, (uintmax_t)total_size, cend);
 
-		printf("(%s%s)\n", conf.apparent_size == 1 ? _("apparent") : _("real"),
-			xargs.si == 1 ? " / si" : "");
+		printf("(%s%s)\n", conf.apparent_size == 1 ? _("apparent")
+			: _("disk usage"), xargs.si == 1 ? " / si" : "");
 #ifndef USE_XDU
 	} else {
 		printf("%s%s%s\n", csize, human_size, cend);
 	}
-#endif
+#endif // USE_XDU
 }
 
 static int

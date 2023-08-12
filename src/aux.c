@@ -936,7 +936,7 @@ dir_size(char *dir, const int first_level, int *status)
 {
 	if (!dir || !*dir) {
 		*status = ENOENT;
-		return (-1);
+		return 0;
 	}
 
 	struct stat a;
@@ -946,7 +946,7 @@ dir_size(char *dir, const int first_level, int *status)
 
 	if ((p = opendir(dir)) == NULL) {
 		*status = errno;
-		return (-1);
+		return 0;
 	}
 
 	/* Compute the size of the base directory itself */
