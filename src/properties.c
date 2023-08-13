@@ -1445,11 +1445,11 @@ static void
 print_file_size(char *filename, const struct stat *attr, const int file_perm,
 	const int full_dirsize)
 {
-	const off_t size = (S_ISDIR(attr->st_mode) || S_ISREG(attr->st_mode)
-		|| S_ISLNK(attr->st_mode)) ? FILE_SIZE_PTR : 0;
+	const off_t size =
+		FILE_TYPE_NON_ZERO_SIZE(attr->st_mode) ? FILE_SIZE_PTR : 0;
 	char *size_unit = construct_human_size(size);
 	char *csize = dz_c;
-	const char *cend = conf.colorize == 1 ? df_c : "";
+	char *cend = conf.colorize == 1 ? df_c : "";
 
 	char sf[MAX_SHADE_LEN];
 	*sf = '\0';
@@ -1490,21 +1490,11 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 
 	const int size_mult_factor = xargs.si == 1 ? 1000 : 1024;
 
-//	off_t total_size_kb = 0;
-//	if (bin_flags & (GNU_DU_BIN_DU | GNU_DU_BIN_GDU)) {
-//		total_size_kb = total_size > size_mult_factor
-//			? (total_size / size_mult_factor) : total_size;
-//	} else {
-//		total_size_kb = total_size;
-//	}
-
 	if (!*dz_c) {
-//		get_color_size(total_size_kb * size_mult_factor, sf, sizeof(sf));
 		get_color_size(total_size, sf, sizeof(sf));
 		csize = sf;
 	}
 
-//	char *human_size = construct_human_size(total_size_kb * size_mult_factor);
 	char *human_size = construct_human_size(total_size);
 	if (!human_size) {
 		puts("?");
@@ -1521,7 +1511,7 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 		printf("%s%s%s%s ", err, csize, human_size, cend);
 
 		if (total_size > size_mult_factor)
-			printf("/ %s%juB%s ", csize, (uintmax_t)total_size, cend);
+			printf("/ %s%jdB%s ", csize, (intmax_t)total_size, cend);
 
 		printf("(%s%s)\n", conf.apparent_size == 1 ? _("apparent")
 			: _("disk usage"), xargs.si == 1 ? " / si" : "");
@@ -1799,8 +1789,7 @@ construct_file_size(const struct fileinfo *props, char *size_str,
 		return file_perm;
 	}
 
-	const off_t size = (props->type == DT_DIR || props->type == DT_REG
-		|| props->type == DT_LNK) ? props->size : 0;
+	const off_t size = FILE_TYPE_NON_ZERO_SIZE(props->mode) ? props->size : 0;
 
 	/* Let's construct the color for the current file size */
 	const char *csize = props->dir == 1 ? dz_c : df_c;

@@ -725,6 +725,15 @@ extern time_t curdir_mtime;
 #define ENTRY_N 64
 
 /* Macros to calculate file sizes */
+/* Directories, regular files, and symbolic links report meaningful sizes
+ * (when the st_size or st_blocks field of the corresponding stat struct is
+ * queried). Other file types, like sockets, block/character devices, etc,
+ * should always report a size of zero. However, this is not guarranteed:
+ * in Solaris, for example, the value of the st_size field for block devices
+ * is unspecified (it might be a big number). Let's use this macro to make
+ * sure we report file sizes only for the appropriate file types. */
+#define FILE_TYPE_NON_ZERO_SIZE(m) (S_ISDIR((m)) || S_ISREG((m)) || S_ISLNK((m)))
+
 #define FILE_SIZE_PTR (conf.apparent_size == 1 ? attr->st_size \
 		: attr->st_blocks * S_BLKSIZE)
 #define FILE_SIZE (conf.apparent_size == 1 ? attr.st_size \
@@ -1051,8 +1060,8 @@ struct fileinfo {
 	time_t time;
 	ino_t inode;
 	off_t size;
-	dev_t rdev; /* 4 bytes on OpenBSD (used to calculate major and minor devs in long view) */
-	nlink_t linkn; /* 4 bytes on Solaris/OpenBSD */
+	dev_t rdev; /* 4 bytes in OpenBSD (used to calculate major and minor devs in long view) */
+	nlink_t linkn; /* 4 bytes in Solaris/OpenBSD */
 #if !defined(__sun)
 	int pad;
 #endif /* __sun */
