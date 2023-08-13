@@ -78,7 +78,6 @@
 #ifdef _BE_POSIX
 # undef  xstrcasestr
 # define xstrcasestr x_strcasestr
-# define USE_XDU
 # define _NO_GETTEXT
 # ifndef ALLOW_MEDIA
 #  define NO_MEDIA_FUNC
@@ -730,9 +729,19 @@ extern time_t curdir_mtime;
  * queried). Other file types, like sockets, block/character devices, etc,
  * should always report a size of zero. However, this is not guarranteed:
  * in Solaris, for example, the value of the st_size field for block devices
- * is unspecified (it might be a big number). Let's use this macro to make
- * sure we report file sizes only for the appropriate file types. */
-#define FILE_TYPE_NON_ZERO_SIZE(m) (S_ISDIR((m)) || S_ISREG((m)) || S_ISLNK((m)))
+ * is unspecified (it might be a big number).
+ * See https://docs.oracle.com/cd/E36784_01/html/E36872/stat-2.html
+ *
+ * Let's use this macro to make sure we report file sizes only for the
+ * appropriate file types.
+ * NOTE: In case of directories themselves (excluding their content), their
+ * apparent size is always zero as well (see 'info du'). */
+#define FILE_TYPE_NON_ZERO_SIZE(m) (S_ISDIR((m)) || S_ISREG((m)) \
+		|| S_ISLNK((m)))
+/* du(1) also checks for
+ * S_TYPEISSHM(struct stat *) // shared memory objects
+ * S_TYPEISTMO(struct stat *) // typed memory objects */
+
 
 #define FILE_SIZE_PTR (conf.apparent_size == 1 ? attr->st_size \
 		: attr->st_blocks * S_BLKSIZE)
