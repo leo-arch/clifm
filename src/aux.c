@@ -925,9 +925,11 @@ free_xdu_hardlinks(void)
  * by clifm.
  *
  * Returns the full size of the directory DIR in bytes, computing apparent
- * sizes, in conf.apparent_size is set to 1, or disk usage otherwise.
- *
- * STATUS is updated to a non-zero value if there was an error.
+ * sizes, in conf.apparent_size is set to 1, or disk usage otherwise. In case
+ * of error, STATUS is set to the appropiate error code (errno): in this case,
+ * the return value may be zero, if DIR couldn't be read for some reason, or
+ * a positive integer representing the size of the entries that have been
+ * actually processed.
  *
  * FIRST_LEVEL must be always 1 when calling this function (this value will
  * be zero whenever the function calls itself recursively). */

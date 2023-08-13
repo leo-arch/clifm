@@ -1050,7 +1050,7 @@ print_extended_attributes(char *s)
 	/* Determine the length of the buffer needed */
 	buflen = listxattr(s, NULL, 0);
 	if (buflen == -1) {
-		xerror("%s\n", strerror(errno));
+		printf("error: %s\n", strerror(errno));
 		return EXIT_FAILURE;
 	}
 
