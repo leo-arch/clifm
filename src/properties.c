@@ -1445,28 +1445,26 @@ static void
 print_file_size(char *filename, const struct stat *attr, const int file_perm,
 	const int full_dirsize)
 {
-	char *size_unit = construct_human_size(FILE_SIZE_PTR);
+	const off_t size = (S_ISDIR(attr->st_mode) || S_ISREG(attr->st_mode)
+		|| S_ISLNK(attr->st_mode)) ? FILE_SIZE_PTR : 0;
+	char *size_unit = construct_human_size(size);
 	char *csize = dz_c;
 	const char *cend = conf.colorize == 1 ? df_c : "";
 
 	char sf[MAX_SHADE_LEN];
 	*sf = '\0';
 	if (conf.colorize == 1 && !*dz_c && !S_ISDIR(attr->st_mode)) {
-		get_color_size(FILE_SIZE_PTR, sf, sizeof(sf));
+		get_color_size(size, sf, sizeof(sf));
 		csize = sf;
 	}
 
 	if (!S_ISDIR(attr->st_mode)) {
 		printf(_("Size: \t\t%s%s%s"), csize, size_unit ? size_unit : "?", cend);
 
-		int bigger_than_bytes = (conf.apparent_size == 1 ? attr->st_size
-			: (attr->st_blocks * S_BLKSIZE)) > (xargs.si == 1 ? 1000 : 1024);
+		int bigger_than_bytes = size > (xargs.si == 1 ? 1000 : 1024);
 
-		if (bigger_than_bytes == 1) {
-			printf(" / %s%juB%s", csize, conf.apparent_size == 1
-				? (uintmax_t)attr->st_size
-				: (uintmax_t)attr->st_blocks * S_BLKSIZE, cend);
-		}
+		if (bigger_than_bytes == 1)
+			printf(" / %s%jdB%s", csize, (intmax_t)size, cend);
 
 		printf(" (%s%s)\n", conf.apparent_size == 1 ? _("apparent")
 			: _("disk usage"), (xargs.si == 1 && bigger_than_bytes == 1)
@@ -1801,35 +1799,27 @@ construct_file_size(const struct fileinfo *props, char *size_str,
 		return file_perm;
 	}
 
+	const off_t size = (props->type == DT_DIR || props->type == DT_REG
+		|| props->type == DT_LNK) ? props->size : 0;
+
 	/* Let's construct the color for the current file size */
 	const char *csize = props->dir == 1 ? dz_c : df_c;
 	char sf[MAX_SHADE_LEN];
 	if (conf.colorize == 1) {
-		off_t s = props->size;
-//		if (props->dir == 1 && conf.full_dir_size == 1)
-//			s = props->size * (xargs.si == 1 ? 1000 : 1024);
-
 		if (!*dz_c) {
-			get_color_size(s, sf, sizeof(sf));
+			get_color_size(size, sf, sizeof(sf));
 			csize = sf;
 		}
 	}
 
 	if (prop_fields.size != PROP_SIZE_HUMAN) {
 		snprintf(size_str, SIZE_STR_LEN, "%s%*jd%s%c", csize,
-			(int)size_max, (intmax_t)props->size, df_c,
+			(int)size_max, (intmax_t)size, df_c,
 			props->du_status != 0 ? DU_ERR_CHAR : 0);
 		return file_perm;
 	}
 
-	char *human_size = construct_human_size(props->size);
-//	char *human_size = (char *)NULL;
-//	if (props->dir == 1 && conf.full_dir_size == 1) {
-//		human_size = construct_human_size(props->size *
-//			(xargs.si == 1 ? 1000 : 1024));
-//	} else {
-//		human_size = construct_human_size(props->size);
-//	}
+	char *human_size = construct_human_size(size);
 
 	char err[sizeof(xf_c) + 6]; *err = '\0';
 	if (props->dir == 1 && conf.full_dir_size == 1
@@ -1838,9 +1828,6 @@ construct_file_size(const struct fileinfo *props, char *size_str,
 
 	snprintf(size_str, SIZE_STR_LEN, "%s%s%s%s",
 		err, csize, human_size ? human_size : "?", df_c);
-/*	snprintf(size_str, SIZE_STR_LEN, "%s%s%s%c",
-		csize, human_size ? human_size : "?", df_c,
-		props->du_status != 0 ? DU_ERR_CHAR : 0); */
 
 	return file_perm;
 }

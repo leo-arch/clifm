@@ -2329,7 +2329,9 @@ list_dir(void)
 			file_info[n].sel = check_seltag(attr.st_dev, attr.st_ino, attr.st_nlink, n);
 			file_info[n].inode = ent->d_ino;
 			file_info[n].linkn = attr.st_nlink;
-			file_info[n].size = FILE_SIZE;
+			file_info[n].size =
+				(S_ISDIR(attr.st_mode) || S_ISREG(attr.st_mode)
+				|| S_ISLNK(attr.st_mode)) ? FILE_SIZE : 0;
 			file_info[n].uid = attr.st_uid;
 			file_info[n].gid = attr.st_gid;
 			file_info[n].mode = attr.st_mode;

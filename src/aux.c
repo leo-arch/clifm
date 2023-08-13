@@ -995,7 +995,10 @@ dir_size(char *dir, const int first_level, int *status)
 //		if (S_ISLNK(a.st_mode) && conf.apparent_size != 1)
 //			continue;
 
-		/* Neither directory nor symlink */
+		if (!S_ISLNK(a.st_mode) && !S_ISREG(a.st_mode))
+			continue;
+
+		/* Either a regular file or a symbolic link */
 		if (a.st_nlink > 1) {
 			if (check_xdu_hardlinks(a.st_dev, a.st_ino) == 1)
 				continue;
