@@ -181,9 +181,10 @@ set_file_type_and_search_path(char **args, mode_t *file_type,
 	case 'b': *file_type = invert == 1 ? DT_BLK : S_IFBLK; break;
 	case 'c': *file_type = invert == 1 ? DT_CHR : S_IFCHR; break;
 	case 'd': *file_type = invert == 1 ? DT_DIR : S_IFDIR; break;
-#ifdef __sun
+#ifdef SOLARIS_DOORS
 	case 'D': *file_type = invert == 1 ? DT_DOOR : S_IFDOOR; break;
-#endif /* __sun */
+	case 'P': *file_type = invert == 1 ? DT_PORT : S_IFPORT; break;
+#endif /* SOLARIS_DOORS */
 	case 'f': *file_type = invert == 1 ? DT_REG : S_IFREG; break;
 	case 'l': *file_type = invert == 1 ? DT_LNK : S_IFLNK; break;
 	case 'p': *file_type = invert == 1 ? DT_FIFO : S_IFIFO; break;
@@ -889,7 +890,7 @@ print_regex_matches(const mode_t file_type, struct dirent **reg_dirlist,
 		print_regex_entry(list[i], name_pad, eln_pad, newline);
 	}
 
-	print_reload_msg("Matches found: %zu\n", count);
+	print_reload_msg(_("Matches found: %zu\n"), count);
 
 END:
 	free(list);
