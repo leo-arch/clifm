@@ -2148,6 +2148,10 @@ get_link_target_color(const char *name, const struct stat *attr,
 static inline void
 check_extra_file_types(mode_t *mode, const struct stat *s)
 {
+	/* If all the below macros are originally undefined, they all expand to
+	 * zero, in which case S is never used. Let's avoid a compiler warning. */
+	UNUSED(s);
+
 	if (S_TYPEISMQ(s))
 		*mode = DT_MQ;
 	else if (S_TYPEISSEM(s))

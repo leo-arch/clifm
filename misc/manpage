@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Aug 5, 2023" "clifm 1.13.10" "CLIFM Manual"
+.TH "CLIFM" "1" "Aug 14, 2023" "clifm 1.13.12" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -1203,6 +1203,7 @@ Available file type characters:
  \fBp\fR: FIFO/pipes (2)
  \fBs\fR: Sockets (2)
  \fBD\fR: Doors (Solaris only)
+ \fBP\fR: Event ports (Solaris only)
  \fBt\fR: Files with the sticky bit set (2)
  \fBu\fR: SUID files (2)
  \fBx\fR: Executable files (2)
@@ -1507,6 +1508,7 @@ This is the list of \fBfile type codes\fR (you'll find them in the \fIFiletypeCo
  ex = executable file
  ee = empty executable file
  ca = file with capabilities
+ oo = door/port (Solaris only)
  no = unknown file type
  uf = unaccessible files (\fBfstatat\fR(3) error)
 
