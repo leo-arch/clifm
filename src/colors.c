@@ -2544,6 +2544,7 @@ colors_list(char *ent, const int eln, const int pad, const int new_line)
 		case S_IFBLK: color = bd_c; break;
 		case S_IFCHR: color = cd_c; break;
 #ifdef SOLARIS_DOORS
+		case S_IFPORT: /* fallthrough */
 		case S_IFDOOR: color = oo_c; break;
 #endif /* SOLARIS_DOORS */
 		case S_IFSOCK: color = so_c; break;
@@ -2719,7 +2720,7 @@ color_codes(void)
 	printf(_(" %sfile name%s: so: Socket file\n"), so_c, df_c);
 	printf(_(" %sfile name%s: pi: Pipe or FIFO special file\n"), pi_c, df_c);
 #ifdef SOLARIS_DOORS
-	printf(_(" %sfile name%s: oo: Door file\n"), oo_c, df_c);
+	printf(_(" %sfile name%s: oo: Door/Port file\n"), oo_c, df_c);
 #endif /* SOLARIS_DOORS */
 	printf(_(" %sfile name%s: su: SUID file\n"), su_c, df_c);
 	printf(_(" %sfile name%s: sg: SGID file\n"), sg_c, df_c);

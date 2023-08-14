@@ -228,6 +228,7 @@ wx_parent_check(char *file)
 
 #ifdef SOLARIS_DOORS
 	case S_IFDOOR: /* fallthrough */
+	case S_IFPORT: /* fallthrough */
 #endif /* SOLARIS_DOORS */
 	case S_IFSOCK: /* fallthrough */
 	case S_IFIFO: /* fallthrough */

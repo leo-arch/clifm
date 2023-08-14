@@ -88,6 +88,7 @@ emergency prompt"
 #define STATS_UNSTAT   18
 #ifdef SOLARIS_DOORS
 # define STATS_DOOR    19
+# define STATS_PORT    20
 #endif /* SOLARIS_DOORS */
 
 #define NOTIF_SEL     0
@@ -490,6 +491,7 @@ gen_stats_str(const int flag)
 	case STATS_DIR: val = stats.dir; break;
 #ifdef SOLARIS_DOORS
 	case STATS_DOOR: val = stats.door; break;
+	case STATS_PORT: val = stats.port; break;
 #endif /* SOLARIS_DOORS */
 	case STATS_EXE: val = stats.exec; break;
 	case STATS_EXTENDED: val = stats.extended; break;

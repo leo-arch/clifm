@@ -2984,6 +2984,7 @@ check_file_type_opts(const char c)
 	case 'd': return stats.dir > 0 ? 1 : 0;
 #ifdef SOLARIS_DOORS
 	case 'D': return stats.door > 0 ? 1 : 0;
+	case 'P': return stats.port > 0 ? 1 : 0;
 #endif /* SOLARIS_DOORS */
 	case 'f': return stats.reg > 0 ? 1 : 0;
 	case 'h': return stats.multi_link > 0 ? 1 : 0;
@@ -3015,6 +3016,7 @@ file_types_opts_generator(const char *text, int state)
 		"d (Directory)",
 #ifdef SOLARIS_DOORS
 		"D (Door)",
+		"P (Port)",
 #endif /* SOLARIS_DOORS */
 		"f (Regular file)",
 		"h (Multi-hardlink file)",
@@ -3070,6 +3072,10 @@ file_types_generator(const char *text, int state)
 #ifdef SOLARIS_DOORS
 		case 'D':
 			if (file_info[i].type == DT_DOOR)
+				ret = strdup(name);
+			break;
+		case 'P':
+			if (file_info[i].type == DT_PORT)
 				ret = strdup(name);
 			break;
 #endif /* SOLARIS_DOORS */

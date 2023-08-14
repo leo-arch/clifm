@@ -134,6 +134,7 @@
 //# define DT_WHT     14
 # ifdef __sun
 #  define DT_DOOR   16
+#  define DT_PORT   18 /* Event port */
 # endif /* __sun */
 #endif /* !_DIRENT_HAVE_D_TYPE || !DT_DIR */
 
@@ -142,8 +143,6 @@
 #define DT_SEM      102 /* Semaphore file */
 #define DT_MQ       104 /* Message queue file */
 #define DT_TPO      106 /* Typed memory object file */
-/* About this extra file type see
- * https://pubs.opengroup.org/onlinepubs/007904875/basedefs/sys/stat.h.html*/
 
 /* If any of these file type checks isn't available, fake it */
 #ifndef S_TYPEISMQ
@@ -158,6 +157,30 @@
 #ifndef S_TYPEISTMO
 # define S_TYPEISTMO(s) 0
 #endif /* !S_TYPEISTMO */
+/* About these extra file types see
+ * https://pubs.opengroup.org/onlinepubs/007904875/basedefs/sys/stat.h.html
+ * NOTE: On Linux/Solaris, all these macros always evaluate to zero (false).
+ * They don't seem to be present on BSD systems either.
+ * However, the following coreutils programs perform checks for these
+ * file types (mostly S_TYPEISSHM): split(1), sort(1), shred(1), dd(1),
+ * du(1), head(1), tail(1), truncate(1), od(1), wc(1), and shuf(1). */
+/* ASCII representation of these file types:
+ * 'F': semaphore
+ * 'Q': message queue
+ * 'S': Shared memory object
+ * 'T': Typed memory object */
+
+/* Other non-standard file types:
+if (S_ISCTG(mode)) return 'C'; high performance (contiguous data) file
+if (S_ISMPB(mode) || S_ISMPC (bits) || S_ISMPX (bits)) return 'm'; // V7
+if (S_ISNWK(mode)) return 'n'; // HP/UX: network special file
+if (S_ISWHT(mode)) return 'w';
+* S_IFNAM // Solaris/XENIX: special named file
+* S_INSEM // Solaris/XENIX: semaphore subtype of IFNAM
+* S_INSHD // Solaris/XENIX: shared data subtype of IFNAM
+*
+* For a quite comphensive link of non-standard file types see:
+* https://github.com/python/cpython/issues/55225#issuecomment-1093532804 */
 
 #if defined(__linux__)
 # include <linux/version.h>
@@ -1335,6 +1358,7 @@ struct stats_t {
 	size_t unstat; /* Non-statable file */
 #ifdef __sun
 	size_t door;
+	size_t port;
 #endif /* __sun */
 };
 
@@ -1725,7 +1749,7 @@ extern char
 	nf_c[MAX_COLOR], /* No read file */
 	no_c[MAX_COLOR], /* Unknown */
 #ifdef __sun
-	oo_c[MAX_COLOR], /* Solaris door */
+	oo_c[MAX_COLOR], /* Solaris door/port */
 #endif /* __sun */
 	or_c[MAX_COLOR], /* Broken symlink */
 	ow_c[MAX_COLOR], /* Other writable */

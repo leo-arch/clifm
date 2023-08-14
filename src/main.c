@@ -329,7 +329,7 @@ char
 	nf_c[MAX_COLOR], /* No read file */
 	no_c[MAX_COLOR], /* Unknown */
 #ifdef SOLARIS_DOORS
-	oo_c[MAX_COLOR], /* Solaris door */
+	oo_c[MAX_COLOR], /* Solaris door/port */
 #endif /* SOLARIS_DOORS */
 	or_c[MAX_COLOR], /* Broken symlink */
 	ow_c[MAX_COLOR], /* Other writable */

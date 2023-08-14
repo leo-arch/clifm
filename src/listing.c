@@ -599,6 +599,7 @@ get_longest_filename(const filesn_t n, const int pad)
 				case DT_CHR:  /* fallthrough */
 #ifdef SOLARIS_DOORS
 				case DT_DOOR: /* fallthrough */
+				case DT_PORT: /* fallthrough */
 #endif /* SOLARIS_DOORS */
 				case DT_LNK:  /* fallthrough */
 				case DT_SOCK: /* fallthrough */
@@ -1089,6 +1090,7 @@ print_entry_nocolor(int *ind_char, const filesn_t i, const int pad,
 		case DT_CHR: putchar(CHR_CHR); break;
 #ifdef SOLARIS_DOORS
 		case DT_DOOR: putchar(DOOR_CHR); break;
+//		case DT_PORT: break;
 #endif /* SOLARIS_DOORS */
 		case DT_FIFO: putchar(FIFO_CHR); break;
 		case DT_SOCK: putchar(SOCK_CHR); break;
@@ -1214,8 +1216,9 @@ print_entry_nocolor_light(int *ind_char, const filesn_t i, const int pad,
 		} else {
 			if (wtrim.type > 0) {
 				xprintf("%s%*jd%s %s %ls%s%c%s", el_c, pad, (intmax_t)i + 1,
-					df_c, file_info[i].icon, (wchar_t *)n, trim_diff, TRIMFILE_CHR,
-					wtrim.type == TRIM_EXT ? file_info[i].ext_name : "");
+					df_c, file_info[i].icon, (wchar_t *)n, trim_diff,
+					TRIMFILE_CHR, wtrim.type == TRIM_EXT
+					? file_info[i].ext_name : "");
 			} else {
 				xprintf("%s%*jd%s %s %s", el_c, pad, (intmax_t)i + 1, df_c,
 					file_info[i].icon, n);
@@ -1255,6 +1258,7 @@ print_entry_nocolor_light(int *ind_char, const filesn_t i, const int pad,
 		case DT_CHR: putchar(CHR_CHR); break;
 #ifdef SOLARIS_DOORS
 		case DT_DOOR: putchar(DOOR_CHR); break;
+//		case DT_DOOR: break;
 #endif /* SOLARIS_DOORS */
 		case DT_FIFO: putchar(FIFO_CHR); break;
 		case DT_LNK: putchar(LINK_CHR); break;
@@ -1612,7 +1616,8 @@ check_autocmd_file(const char *s)
 }
 
 static void
-get_largest(const filesn_t i, off_t *size, char **name, char **color, off_t *total)
+get_largest(const filesn_t i, off_t *size, char **name,
+	char **color, off_t *total)
 {
 	/* Only directories and regular files should be counted */
 	if (file_info[i].type != DT_DIR && file_info[i].type != DT_REG
@@ -1649,7 +1654,8 @@ get_max_ug_str(void)
 	filesn_t i = files;
 
 	while (--i >= 0) {
-		size_t t = (size_t)DIGINUM(file_info[i].uid) + DIGINUM(file_info[i].gid);
+		size_t t = (size_t)DIGINUM(file_info[i].uid)
+			+ DIGINUM(file_info[i].gid);
 		if (t > ug_max)
 			ug_max = t;
 	}
@@ -1690,6 +1696,7 @@ exclude_file_type_light(const unsigned char type)
 	case 'p': if (type == DT_FIFO) match = 1; break;
 #ifdef SOLARIS_DOORS
 	case 'D': if (type == DT_DOOR) match = 1; break;
+	case 'P': if (type == DT_PORT) match = 1; break;
 #endif /* SOLARIS_DOORS */
 	default: return EXIT_FAILURE;
 	}
@@ -1717,6 +1724,7 @@ exclude_file_type(const mode_t mode, const nlink_t links)
 	case 'd': if (S_ISDIR(mode)) match = 1; break;
 #ifdef SOLARIS_DOORS
 	case 'D': if (S_ISDOOR(mode)) match = 1; break;
+	case 'P': if (S_ISPORT(mode)) match = 1; break;
 #endif /* SOLARIS_DOORS */
 	case 'c': if (S_ISCHR(mode)) match = 1; break;
 	case 'f': if (S_ISREG(mode)) match = 1; break;
@@ -1730,7 +1738,8 @@ exclude_file_type(const mode_t mode, const nlink_t links)
 	case 't': if (mode & 01000) match = 1; break; /* Sticky */
 	case 'u': if (mode & 04000) match = 1; break; /* SUID */
 	case 'x': /* Executable */
-		if (S_ISREG(mode) && ((mode & 00100) || (mode & 00010) || (mode & 00001)))
+		if (S_ISREG(mode) && ((mode & 00100) || (mode & 00010)
+		|| (mode & 00001)))
 			match = 1;
 		break;
 	default: return EXIT_FAILURE;
@@ -1799,7 +1808,8 @@ list_dir_light(void)
 	filesn_t n = 0, count = 0;
 	size_t total_dents = 0;
 
-	file_info = (struct fileinfo *)xnmalloc(ENTRY_N + 2, sizeof(struct fileinfo));
+	file_info = (struct fileinfo *)xnmalloc(ENTRY_N + 2,
+		sizeof(struct fileinfo));
 
 	while ((ent = readdir(dir))) {
 		const char *ename = ent->d_name;
@@ -1839,7 +1849,8 @@ list_dir_light(void)
 		/* Filter files according to file type */
 		if (filter.str && filter.type == FILTER_FILE_TYPE
 #ifndef _DIRENT_HAVE_D_TYPE
-		&& exclude_file_type_light((unsigned char)get_dt(attr.st_mode)) == EXIT_SUCCESS) {
+		&& exclude_file_type_light((unsigned char)get_dt(attr.st_mode))
+		== EXIT_SUCCESS) {
 #else
 		&& exclude_file_type_light(ent->d_type) == EXIT_SUCCESS) {
 #endif /* !_DIRENT_HAVE_D_TYPE */
@@ -1850,7 +1861,8 @@ list_dir_light(void)
 		if (count > ENTRY_N) {
 			count = 0;
 			total_dents = (size_t)n + ENTRY_N;
-			file_info = xrealloc(file_info, (total_dents + 2) * sizeof(struct fileinfo));
+			file_info = xrealloc(file_info, (total_dents + 2)
+				* sizeof(struct fileinfo));
 		}
 
 //		init_fileinfo(n);
@@ -1950,6 +1962,7 @@ list_dir_light(void)
 		case DT_CHR: file_info[n].color = cd_c; stats.char_dev++; break;
 #ifdef SOLARIS_DOORS
 		case DT_DOOR: file_info[n].color = oo_c; stats.door++; break;
+		case DT_PORT: file_info[n].color = oo_c; stats.port++; break;
 #endif /* SOLARIS_DOORS */
 		case DT_UNKNOWN: file_info[n].color = no_c; stats.unknown++; break;
 		default: file_info[n].color = df_c; break;
@@ -1966,8 +1979,10 @@ list_dir_light(void)
 				set_long_attribs(n, &_attr);
 		}
 
-		if (xargs.disk_usage_analyzer == 1)
-			get_largest(n, &largest_size, &largest_name, &largest_color, &total_size);
+		if (xargs.disk_usage_analyzer == 1) {
+			get_largest(n, &largest_size, &largest_name,
+				&largest_color, &total_size);
+		}
 
 		n++;
 		if (n > FILESN_MAX - 1) {
@@ -2038,8 +2053,10 @@ END:
 		printf(_("Excluded files: %d\n"), excluded_files);
 
 	if (xargs.disk_usage_analyzer == 1 && conf.long_view == 1
-	&& conf.full_dir_size == 1)
-		print_analysis_stats(total_size, largest_size, largest_color, largest_name);
+	&& conf.full_dir_size == 1) {
+		print_analysis_stats(total_size, largest_size,
+			largest_color, largest_name);
+	}
 
 #ifdef LIST_SPEED_TEST
 	clock_t end = clock();
@@ -2096,7 +2113,8 @@ init_fileinfo(const filesn_t n)
 /* Get the color of a link target NAME, whose file attributes are ATTR,
  * and write the result into the file_info array at index I. */
 static inline void
-get_link_target_color(const char *name, const struct stat *attr, const filesn_t i)
+get_link_target_color(const char *name, const struct stat *attr,
+	const filesn_t i)
 {
 	switch (attr->st_mode & S_IFMT) {
 	case S_IFSOCK: file_info[i].color = so_c; break;
@@ -2105,6 +2123,7 @@ get_link_target_color(const char *name, const struct stat *attr, const filesn_t 
 	case S_IFCHR:  file_info[i].color = cd_c; break;
 #ifdef SOLARIS_DOORS
 	case S_IFDOOR: file_info[i].color = oo_c; break;
+	case S_IFPORT: file_info[i].color = oo_c; break;
 #endif /* SOLARIS_DOORS */
 	case S_IFREG: {
 		int ext = 0;
@@ -2299,7 +2318,8 @@ list_dir(void)
 		if (count > ENTRY_N) {
 			count = 0;
 			total_dents = (size_t)n + ENTRY_N;
-			file_info = xrealloc(file_info, (total_dents + 2) * sizeof(struct fileinfo));
+			file_info = xrealloc(file_info, (total_dents + 2)
+				* sizeof(struct fileinfo));
 		}
 
 		file_info[n].name = (char *)xnmalloc(NAME_MAX + 1, sizeof(char));
@@ -2307,7 +2327,8 @@ list_dir(void)
 		size_t len_bytes = 0; /* File name length in bytes (not chars) */
 
 		if (conf.unicode == 0 || is_utf8_name(ename) == 0) {
-			file_info[n].len = xstrsncpy(file_info[n].name, ename, NAME_MAX + 1);
+			file_info[n].len =
+				xstrsncpy(file_info[n].name, ename, NAME_MAX + 1);
 			if (file_info[n].len > 0)
 				file_info[n].len--; /* Do not count terminating NUL byte */
 			len_bytes = file_info[n].len;
@@ -2331,6 +2352,7 @@ list_dir(void)
 			case S_IFDIR: file_info[n].type = DT_DIR; stats.dir++; break;
 #ifdef SOLARIS_DOORS
 			case S_IFDOOR: file_info[n].type = DT_DOOR; stats.door++; break;
+			case S_IFPORT: file_info[n].type = DT_PORT; stats.port++; break;
 #endif /* SOLARIS_DOORS */
 			case S_IFIFO: file_info[n].type = DT_FIFO; stats.fifo++; break;
 			case S_IFLNK: file_info[n].type = DT_LNK; stats.link++; break;
@@ -2341,7 +2363,8 @@ list_dir(void)
 
 			check_extra_file_types(&file_info[n].type, &attr);
 
-			file_info[n].sel = check_seltag(attr.st_dev, attr.st_ino, attr.st_nlink, n);
+			file_info[n].sel =
+				check_seltag(attr.st_dev, attr.st_ino, attr.st_nlink, n);
 			file_info[n].inode = ent->d_ino;
 			file_info[n].linkn = attr.st_nlink;
 			file_info[n].size =
@@ -2358,9 +2381,12 @@ list_dir(void)
 				}
 #endif /* LINUX_FILE_XATTRS */
 				switch (prop_fields.time) {
-				case PROP_TIME_ACCESS: file_info[n].ltime = (time_t)attr.st_atime; break;
-				case PROP_TIME_CHANGE: file_info[n].ltime = (time_t)attr.st_ctime; break;
-				case PROP_TIME_MOD: file_info[n].ltime = (time_t)attr.st_mtime; break;
+				case PROP_TIME_ACCESS:
+					file_info[n].ltime = (time_t)attr.st_atime; break;
+				case PROP_TIME_CHANGE:
+					file_info[n].ltime = (time_t)attr.st_ctime; break;
+				case PROP_TIME_MOD:
+					file_info[n].ltime = (time_t)attr.st_mtime; break;
 				default: file_info[n].ltime = (time_t)attr.st_mtime; break;
 				}
 			}
@@ -2610,6 +2636,7 @@ list_dir(void)
 		case DT_CHR: file_info[n].color = cd_c; break;
 #ifdef SOLARIS_DOORS
 		case DT_DOOR: file_info[n].color = oo_c; break;
+		case DT_PORT: file_info[n].color = oo_c; break;
 #endif /* SOLARIS_DOORS */
 		case DT_UNKNOWN: file_info[n].color = no_c; break;
 		default: file_info[n].color = df_c; break;
@@ -2623,7 +2650,8 @@ list_dir(void)
 			set_long_attribs(n, &attr);
 
 		if (xargs.disk_usage_analyzer == 1)
-			get_largest(n, &largest_size, &largest_name, &largest_color, &total_size);
+			get_largest(n, &largest_size, &largest_name,
+				&largest_color, &total_size);
 
 		n++;
 		if (n > FILESN_MAX - 1) {
@@ -2712,8 +2740,10 @@ END:
 		printf(_("Excluded files: %d\n"), excluded_files);
 
 	if (xargs.disk_usage_analyzer == 1 && conf.long_view == 1
-	&& conf.full_dir_size == 1)
-		print_analysis_stats(total_size, largest_size, largest_color, largest_name);
+	&& conf.full_dir_size == 1) {
+		print_analysis_stats(total_size, largest_size,
+			largest_color, largest_name);
+	}
 
 #ifdef LIST_SPEED_TEST
 	clock_t end = clock();

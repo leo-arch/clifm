@@ -92,7 +92,7 @@ xf=1;31:xs=0;32:"
 #define DEF_NF_C  "\x1b[2;31m" /* Unaccessible file */
 #define DEF_NO_C  "\x1b[0;31;47m" /* Unknown file type */
 #ifdef __sun
-#define DEF_OO_C  "\x1b[0;35m" /* Solaris door */
+#define DEF_OO_C  "\x1b[0;35m" /* Solaris door/port (ls default is 1;35) */
 #endif /* __sun */
 #define DEF_OR_C  "\x1b[2;4;36m" /* Orphaned/broken symlink */
 #define DEF_OW_C  "\x1b[34;42m" /* Other-writable */

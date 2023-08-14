@@ -725,6 +725,7 @@ check_regex_file_type(struct dirent **reg_dirlist, const int index,
 		case S_IFDIR: type = DT_DIR; break;
 # ifdef SOLARIS_DOORS
 		case S_IFDOOR: type = DT_DOOR; break;
+		case S_IFPORT: type = DT_PORT; break;
 # endif /* SOLARIS_DOORS */
 		case S_IFIFO: type = DT_FIFO; break;
 		case S_IFLNK: type = DT_LNK; break;

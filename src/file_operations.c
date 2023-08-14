@@ -215,6 +215,7 @@ get_file_suffix(const mode_t type)
 	case DT_FIFO: return FIFO_CHR;
 #ifdef SOLARIS_DOORS
 	case DT_DOOR: return DOOR_CHR;
+//	case DT_PORT: return 0;
 #endif /* SOLARIS_DOORS */
 	case DT_UNKNOWN: return UNKNOWN_CHR;
 	default: return 0;

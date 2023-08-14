@@ -1576,6 +1576,7 @@ Unstatable files:            %zu\n\
 
 #ifdef SOLARIS_DOORS
 	printf("Doors:                 %zu\n", stats.door);
+	printf("Ports:                 %zu\n", stats.port);
 #endif /* SOLARIS_DOORS */
 
 	return EXIT_SUCCESS;

@@ -91,7 +91,7 @@ typedef char *rl_cpvfunc_t;
 # define IS_FILE_TYPE_FILTER(x) ((x) == 'b' || (x) == 'c' || (x) == 'C' \
 || (x) == 'd' || (x) == 'f' || (x) == 'g' || (x) == 'h' || (x) == 'l' \
 || (x) == 'o' || (x) == 'p' || (x) == 's' || (x) == 't' || (x) == 'u' \
-|| (x) == 'x' || (x) == 'D')
+|| (x) == 'x' || (x) == 'D' || (x) == 'P')
 #else
 # define IS_FILE_TYPE_FILTER(x) ((x) == 'b' || (x) == 'c' || (x) == 'C' \
 || (x) == 'd' || (x) == 'f' || (x) == 'g' || (x) == 'h' || (x) == 'l' \
@@ -1378,6 +1378,10 @@ expand_file_type_filter(const char t)
 #ifdef SOLARIS_DOORS
 		case 'D':
 			if (file_info[i].type == DT_DOOR)
+				f[n++] = strdup(name);
+			break;
+		case 'P':
+			if (file_info[i].type == DT_PORT)
 				f[n++] = strdup(name);
 			break;
 #endif /* SOLARIS_DOORS */
