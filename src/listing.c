@@ -2126,6 +2126,19 @@ get_link_target_color(const char *name, const struct stat *attr, const filesn_t 
 	}
 }
 
+static inline void
+check_extra_file_types(mode_t *mode, const struct stat *s)
+{
+	if (S_TYPEISMQ(s))
+		*mode = DT_MQ;
+	else if (S_TYPEISSEM(s))
+		*mode = DT_SEM;
+	else if (S_TYPEISSHM(s))
+		*mode = DT_SHM;
+	else if (S_TYPEISTMO(s))
+		*mode = DT_TPO;
+}
+
 /* List files in the current working directory. Uses file type colors
  * and columns. Return 0 on success or 1 on error. */
 int
@@ -2325,6 +2338,8 @@ list_dir(void)
 			case S_IFSOCK: file_info[n].type = DT_SOCK; stats.socket++; break;
 			default: file_info[n].type = DT_UNKNOWN; stats.unknown++; break;
 			}
+
+			check_extra_file_types(&file_info[n].type, &attr);
 
 			file_info[n].sel = check_seltag(attr.st_dev, attr.st_ino, attr.st_nlink, n);
 			file_info[n].inode = ent->d_ino;

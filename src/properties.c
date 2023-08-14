@@ -1446,7 +1446,9 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 	const int full_dirsize)
 {
 	const off_t size =
-		FILE_TYPE_NON_ZERO_SIZE(attr->st_mode) ? FILE_SIZE_PTR : 0;
+		(FILE_TYPE_NON_ZERO_SIZE(attr->st_mode) || S_TYPEISSHM(attr)
+		|| S_TYPEISTMO(attr)) ? FILE_SIZE_PTR : 0;
+
 	char *size_unit = construct_human_size(size);
 	char *csize = dz_c;
 	char *cend = conf.colorize == 1 ? df_c : "";
@@ -1789,7 +1791,9 @@ construct_file_size(const struct fileinfo *props, char *size_str,
 		return file_perm;
 	}
 
-	const off_t size = FILE_TYPE_NON_ZERO_SIZE(props->mode) ? props->size : 0;
+	const off_t size = (FILE_TYPE_NON_ZERO_SIZE(props->mode)
+		|| props->type == DT_SHM || props->type == DT_TPO)
+		? props->size : 0;
 
 	/* Let's construct the color for the current file size */
 	const char *csize = props->dir == 1 ? dz_c : df_c;

@@ -98,6 +98,24 @@
 # endif /* GLOB_TILDE */
 #endif /* _BE_POSIX */
 
+/* _NO_LIRA implies _NO_MAGIC */
+#if defined(_NO_LIRA) && !defined(_NO_MAGIC)
+# define _NO_MAGIC
+#endif /* _NO_LIRA && !_NO_MAGIC */
+
+#if (defined(__linux__) || defined(__CYGWIN__) || defined(__HAIKU__)) \
+&& !defined(_BE_POSIX)
+/* du(1) can report sizes in bytes, apparent sizes, and take custom block sizes */
+# define HAVE_GNU_DU
+#endif /* (__linux__ || __CYGWIN__ || __HAIKU__) && !_BE_POSIX */
+
+#ifndef _NO_GETTEXT
+# include <libintl.h>
+#endif /* !_NO_GETTEXT*/
+
+#include <regex.h>
+#include <stdlib.h>
+#include <sys/stat.h> /* S_BLKSIZE */
 /* Included here to test _DIRENT_HAVE_D_TYPE and DT macros. */
 #include <dirent.h>
 
@@ -119,24 +137,27 @@
 # endif /* __sun */
 #endif /* !_DIRENT_HAVE_D_TYPE || !DT_DIR */
 
-/* _NO_LIRA implies _NO_MAGIC */
-#if defined(_NO_LIRA) && !defined(_NO_MAGIC)
-# define _NO_MAGIC
-#endif /* _NO_LIRA && !_NO_MAGIC */
+/* Some extra file types */
+#define DT_SHM      100 /* Shared memory object file */
+#define DT_SEM      102 /* Semaphore file */
+#define DT_MQ       104 /* Message queue file */
+#define DT_TPO      106 /* Typed memory object file */
+/* About this extra file type see
+ * https://pubs.opengroup.org/onlinepubs/007904875/basedefs/sys/stat.h.html*/
 
-#if (defined(__linux__) || defined(__CYGWIN__) || defined(__HAIKU__)) \
-&& !defined(_BE_POSIX)
-/* du(1) can report sizes in bytes, apparent sizes, and take custom block sizes */
-# define HAVE_GNU_DU
-#endif /* (__linux__ || __CYGWIN__ || __HAIKU__) && !_BE_POSIX */
-
-#ifndef _NO_GETTEXT
-# include <libintl.h>
-#endif /* !_NO_GETTEXT*/
-
-#include <regex.h>
-#include <stdlib.h>
-#include <sys/stat.h> /* S_BLKSIZE */
+/* If any of these file type checks isn't available, fake it */
+#ifndef S_TYPEISMQ
+# define S_TYPEISMQ(s) 0
+#endif /* !S_TYPEISMQ */
+#ifndef S_TYPEISSEM
+# define S_TYPEISSEM(s) 0
+#endif /* !S_TYPEISSEM */
+#ifndef S_TYPEISSHM
+# define S_TYPEISSHM(s) 0
+#endif /* !S_TYPEISSHM */
+#ifndef S_TYPEISTMO
+# define S_TYPEISTMO(s) 0
+#endif /* !S_TYPEISTMO */
 
 #if defined(__linux__)
 # include <linux/version.h>
@@ -741,7 +762,6 @@ extern time_t curdir_mtime;
 /* du(1) also checks for
  * S_TYPEISSHM(struct stat *) // shared memory objects
  * S_TYPEISTMO(struct stat *) // typed memory objects */
-
 
 #define FILE_SIZE_PTR (conf.apparent_size == 1 ? attr->st_size \
 		: attr->st_blocks * S_BLKSIZE)

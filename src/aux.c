@@ -952,10 +952,9 @@ dir_size(char *dir, const int first_level, int *status)
 	}
 
 	/* Compute the size of the base directory itself */
-	if (conf.apparent_size != 1 && first_level == 1) {
-		if (stat(dir, &a) != -1)
-			size += (a.st_blocks * S_BLKSIZE);
-	}
+	if (conf.apparent_size != 1 && first_level == 1
+	&& stat(dir, &a) != -1)
+		size += (a.st_blocks * S_BLKSIZE);
 
 	struct dirent *ent;
 
@@ -991,14 +990,10 @@ dir_size(char *dir, const int first_level, int *status)
 			continue;
 		}
 
-		/* Size of symlinks is only included when computing apparent sizes. */
-//		if (S_ISLNK(a.st_mode) && conf.apparent_size != 1)
-//			continue;
-
-		if (!S_ISLNK(a.st_mode) && !S_ISREG(a.st_mode))
+		if (!S_ISLNK(a.st_mode) && !S_ISREG(a.st_mode)
+		&& !S_TYPEISSHM(&a) && !S_TYPEISTMO(&a))
 			continue;
 
-		/* Either a regular file or a symbolic link */
 		if (a.st_nlink > 1) {
 			if (check_xdu_hardlinks(a.st_dev, a.st_ino) == 1)
 				continue;
