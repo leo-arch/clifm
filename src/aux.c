@@ -637,10 +637,19 @@ get_dt(const mode_t mode)
 	case S_IFBLK:  return DT_BLK;
 	case S_IFCHR:  return DT_CHR;
 	case S_IFDIR:  return DT_DIR;
-#ifdef SOLARIS_DOORS
+#ifndef _BE_POSIX
+# ifdef SOLARIS_DOORS
 	case S_IFDOOR: return DT_DOOR;
 	case S_IFPORT: return DT_PORT;
-#endif /* SOLARIS_DOORS */
+# endif /* SOLARIS_DOORS */
+# ifdef S_IFWHT
+	case S_IFWHT:  return DT_WHT;
+# endif
+# ifdef S_ARCH1
+	case S_ARCH1:  return DT_ARCH1;
+	case S_ARCH2:  return DT_ARCH2;
+# endif
+#endif /* !_BE_POSIX */
 	case S_IFIFO:  return DT_FIFO;
 	case S_IFLNK:  return DT_LNK;
 	case S_IFREG:  return DT_REG;
@@ -1302,9 +1311,9 @@ url_encode(char *str)
 			/* Encode char to URL format. Example: space char to %20 */
 			*pbuf = '%';
 			pbuf++;
-			*pbuf = to_hex(*pstr >> 4); /* Right shift operation */
+			*pbuf = to_hex(*pstr >> 4);
 			pbuf++;
-			*pbuf = to_hex(*pstr & 15); /* Bitwise AND operation */
+			*pbuf = to_hex(*pstr & 15);
 			pbuf++;
 		}
 	}
