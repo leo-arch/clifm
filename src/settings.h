@@ -192,20 +192,34 @@ xf=1;31:xs=0;32:"
 
 #define DEF_DIR_ICO_C "\x1b[0;33m"
 
-/* Characters used to classify files when running colorless and classify
- * is enabled */
+/* Characters used to classify files when running colorless (and classify
+ * is enabled) */
 #define CHR_CHR     '-'
 #define BLK_CHR     '+'
 #define BRK_LNK_CHR '!'
 #define DIR_CHR     '/'
-#ifdef __sun
-# define DOOR_CHR   '>'
-#endif /* __sun */
+#define DOOR_CHR    '>' /* Solaris only */
 #define EXEC_CHR    '*'
 #define FIFO_CHR    '|'
 #define LINK_CHR    '@'
 #define SOCK_CHR    '='
 #define UNKNOWN_CHR '?'
+
+/* Characters used to represent file types in the permissions string
+ * (long view and p/pp command) */
+#define DIR_PCHR     'd'
+#define REG_PCHR     '.'
+#define SOCK_PCHR    's'
+#define BLKDEV_PCHR  'b'
+#define CHARDEV_PCHR 'c'
+#define FIFO_PCHR    'p'
+#define LNK_PCHR     'l'
+#define UNK_PCHR     '?'
+#define WHT_PCHR     'w' /* Whiteouts (BSD) */
+#define ARCH1_PCHR   'a' /* Archive state 1 (NetBSD) */
+#define ARCH2_PCHR   'A' /* Archive state 2 (NetBSD) */
+#define DOOR_PCHR    'D' /* Doors (Solaris) */
+#define PORT_PCHR    'P' /* Event ports (Solaris) */
 
 #define SELFILE_CHR  '*'
 #define TRIMFILE_CHR '~'

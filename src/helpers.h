@@ -143,7 +143,7 @@
 #define DT_SEM      102 /* Semaphore file */
 #define DT_MQ       104 /* Message queue file */
 #define DT_TPO      106 /* Typed memory object file */
-#ifdef S_ARCH1 /* NetBSD */
+#ifdef S_ARCH1
 # define DT_ARCH1   108 /* Archive state 1 (NetBSD) */
 # define DT_ARCH2   110 /* Archive state 2 (NetBSD) */
 #endif /* S_ARCH1 */
@@ -187,7 +187,7 @@ if (S_ISNWK(mode)) return 'n'; // HP/UX: network special file
 * S_INSHD // Solaris/XENIX: shared data subtype of IFNAM
 * S_IFDB  // DragonFly: Database record file (DT_DBF). Recognized by neither ls nor find
 *
-* For a quite comphensive link of non-standard file types see:
+* For a quite comphensive list of non-standard file types see:
 * https://github.com/python/cpython/issues/55225#issuecomment-1093532804 */
 
 #if defined(__linux__)
@@ -1413,10 +1413,10 @@ struct termcaps_t {
 	int suggestions;
 	int pager;
 	int hide_cursor;
-	int home;  // Move cursor to line 1, column 1
-	int clear; // ED (erase display)
-	int del_scrollback; // E3
-	int req_cur_pos; // CPR (cursor position request)
+	int home;  /* Move cursor to line 1, column 1 */
+	int clear; /* ED (erase display) */
+	int del_scrollback; /* E3 */
+	int req_cur_pos; /* CPR (cursor position request) */
 };
 extern struct termcaps_t term_caps;
 

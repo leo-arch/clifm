@@ -1130,7 +1130,7 @@ get_file_type_and_color(const char *filename, const struct stat *attr,
 
 	switch (attr->st_mode & S_IFMT) {
 	case S_IFREG:
-		*file_type = '.';
+		*file_type = REG_PCHR;
 		if (conf.colorize == 1) {
 			int ext = 0;
 			color = get_regfile_color(filename, attr, &ext);
@@ -1138,7 +1138,7 @@ get_file_type_and_color(const char *filename, const struct stat *attr,
 		break;
 
 	case S_IFDIR:
-		*file_type = 'd';
+		*file_type = DIR_PCHR;
 		*ctype = di_c;
 		if (conf.colorize == 0)
 			break;
@@ -1150,26 +1150,26 @@ get_file_type_and_color(const char *filename, const struct stat *attr,
 		break;
 
 	case S_IFLNK:
-		*file_type = 'l';
+		*file_type = LNK_PCHR;
 		*ctype = color = ln_c;
 		break;
 
 #ifdef S_ARCH1
-	case S_ARCH1:  *file_type = 'a'; color = *ctype = fi_c; break;
-	case S_ARCH2:  *file_type = 'A'; color = *ctype = fi_c; break;
+	case S_ARCH1:  *file_type = ARCH1_PCHR; color = *ctype = fi_c; break;
+	case S_ARCH2:  *file_type = ARCH2_PCHR; color = *ctype = fi_c; break;
 #endif /* S_ARCH1 */
-	case S_IFBLK:  *file_type = 'b'; color = *ctype = bd_c; break;
+	case S_IFBLK:  *file_type = BLKDEV_PCHR; color = *ctype = bd_c; break;
 #ifdef SOLARIS_DOORS
-	case S_IFDOOR: *file_type = 'D'; color = *ctype = oo_c; break;
-	case S_IFPORT: *file_type = 'P'; color = *ctype = oo_c; break;
+	case S_IFDOOR: *file_type = DOOR_PCHR; color = *ctype = oo_c; break;
+	case S_IFPORT: *file_type = PORT_PCHR; color = *ctype = oo_c; break;
 #endif /* SOLARIS_DOORS */
-	case S_IFCHR:  *file_type = 'c'; color = *ctype = cd_c; break;
-	case S_IFIFO:  *file_type = 'p'; color = *ctype = pi_c; break;
-	case S_IFSOCK: *file_type = 's'; color = *ctype = so_c; break;
+	case S_IFCHR:  *file_type = CHARDEV_PCHR; color = *ctype = cd_c; break;
+	case S_IFIFO:  *file_type = FIFO_PCHR; color = *ctype = pi_c; break;
+	case S_IFSOCK: *file_type = SOCK_PCHR; color = *ctype = so_c; break;
 #ifdef S_IFWHT
-	case S_IFWHT: *file_type = 'w'; color = *ctype = fi_c; break;
+	case S_IFWHT: *file_type = WHT_PCHR; color = *ctype = fi_c; break;
 #endif /* S_IFWHT */
-	default:       *file_type = '?'; color = no_c; break;
+	default:       *file_type = UNK_PCHR; color = no_c; break;
 	}
 
 	if (conf.colorize == 0)
@@ -1270,23 +1270,23 @@ print_file_details(char *filename, const struct stat *attr, const char file_type
 		fputs(BOLD, stdout);
 
 	switch (file_type) {
-	case '.': fputs(_("Regular file"), stdout); break;
+	case REG_PCHR: fputs(_("Regular file"), stdout); break;
 #ifdef S_ARCH1
-	case 'a': fputs(_("Archive state 1"), stdout); break;
-	case 'A': fputs(_("Archive state 2"), stdout); break;
+	case ARCH1_PCHR: fputs(_("Archive state 1"), stdout); break;
+	case ARCH2_PCHR: fputs(_("Archive state 2"), stdout); break;
 #endif /* S_ARCH1 */
-	case 'b': fputs(_("Block special file"), stdout); break;
-	case 'c': fputs(_("Character special file"), stdout); break;
-	case 'd': fputs(_("Directory"), stdout); break;
+	case BLKDEV_PCHR: fputs(_("Block special file"), stdout); break;
+	case CHARDEV_PCHR: fputs(_("Character special file"), stdout); break;
+	case DIR_PCHR: fputs(_("Directory"), stdout); break;
 #ifdef SOLARIS_DOORS
-	case 'D': fputs(_("Door"), stdout); break;
-	case 'P': fputs(_("Port"), stdout); break;
+	case DOOR_PCHR: fputs(_("Door"), stdout); break;
+	case PORT_PCHR: fputs(_("Port"), stdout); break;
 #endif /* SOLARIS_DOORS */
-	case 'l': fputs(_("Symbolic link"), stdout); break;
-	case 'p': fputs(_("Fifo"), stdout); break;
-	case 's': fputs(_("Socket"), stdout); break;
+	case LNK_PCHR: fputs(_("Symbolic link"), stdout); break;
+	case FIFO_PCHR: fputs(_("Fifo"), stdout); break;
+	case SOCK_PCHR: fputs(_("Socket"), stdout); break;
 #ifdef S_IFWHT
-	case 'w': fputs(_("Whiteout"), stdout); break;
+	case WHT_PCHR: fputs(_("Whiteout"), stdout); break;
 #endif /* S_IFWHT */
 	default: break;
 	}
@@ -1965,24 +1965,24 @@ set_file_type_and_color(const mode_t mode, char *type, char **color)
 {
 	switch (mode & S_IFMT) {
 #ifdef S_ARCH1
-	case S_ARCH1:  *type = 'a'; *color = fi_c; break;
-	case S_ARCH2:  *type = 'A'; *color = fi_c; break;
+	case S_ARCH1:  *type = ARCH1_PCHR; *color = fi_c; break;
+	case S_ARCH2:  *type = ARCH2_PCHR; *color = fi_c; break;
 #endif /* S_ARCH1 */
-	case S_IFBLK:  *type = 'b'; *color = bd_c; break;
-	case S_IFCHR:  *type = 'c'; *color = cd_c; break;
-	case S_IFDIR:  *type = 'd'; *color = di_c; break;
+	case S_IFBLK:  *type = BLKDEV_PCHR; *color = bd_c; break;
+	case S_IFCHR:  *type = CHARDEV_PCHR; *color = cd_c; break;
+	case S_IFDIR:  *type = DIR_PCHR; *color = di_c; break;
 #ifdef SOLARIS_DOORS
-	case S_IFDOOR: *type = 'D'; *color = oo_c; break;
-	case S_IFPORT: *type = 'P'; *color = oo_c; break;
+	case S_IFDOOR: *type = DOOR_PCHR; *color = oo_c; break;
+	case S_IFPORT: *type = PORT_PCHR; *color = oo_c; break;
 #endif /* SOLARIS_DOORS */
-	case S_IFIFO:  *type = 'p'; *color = pi_c; break;
-	case S_IFLNK:  *type = 'l'; *color = ln_c; break;
-	case S_IFREG:  *type = '.'; break;
-	case S_IFSOCK: *type = 's'; *color = so_c; break;
+	case S_IFIFO:  *type = FIFO_PCHR; *color = pi_c; break;
+	case S_IFLNK:  *type = LNK_PCHR; *color = ln_c; break;
+	case S_IFREG:  *type = REG_PCHR; break;
+	case S_IFSOCK: *type = SOCK_PCHR; *color = so_c; break;
 #ifdef S_IFWHT
-	case S_IFWHT:  *type = 'w'; *color = fi_c; break;
+	case S_IFWHT:  *type = WHT_PCHR; *color = fi_c; break;
 #endif /* S_IFWHT */
-	default:       *type = '?'; break;
+	default:       *type = UNK_PCHR; break;
 	}
 
 	if (conf.colorize == 0)
