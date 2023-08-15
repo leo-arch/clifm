@@ -492,7 +492,7 @@ toggle the auto-open function on/off. If set to on, \fIFILE\fR amounts to \fIope
 .B b, back \fR[\fIh\fR, \fIhist\fR] [\fIclear\fR] [\fIW!ELN\fR]
 unlike \fIcd\ ..\fR, which sends you to the parent directory of the current directory, this command (with no argument) sends you back to the previously visited directory.
 .sp
-\fBclifm\fR keeps a record of all visited directories. You can see this list by typing \fIb\ hist\fR or \fIb\ h\fR, and you can access any element in this list by simply passing the corresponding ELN in this list to the \fIback\fR command. Example:
+\fBclifm\fR keeps a record of all visited directories (to prevent a directory from being added to the directory history list use the \fIDirhistIgnore\fR option in the main configuration file). You can see this list by typing \fIb\ hist\fR or \fIb\ h\fR, and you can access any element in this list by simply passing the corresponding ELN in this list to the \fIback\fR command. Example:
         :) > ~ $ bh
         1 /home/user
         2 /etc
@@ -755,7 +755,9 @@ toggle icons on/off
 .B j [\fI\-\-purge\fR [\fINUM\fR]] [\fI\-\-edit\fR], jc, jl, jp \fR[\fISTR\fR]..., \fBje\fR
 \fIj\fR is the fastest way of using \fBKangaroo\fR, a \fBdirectory jumper\fR function used to quickly navigate through the jump database (i.e. a database of visited directories).
 .sp
-With no argument, \fIj\fR just lists the entries in the jump database, printing: \fBa)\fI order number of the corresponding entry, \fBb)\fI total sum of visits, \fBc)\fR days since the first visit, \fBd)\fI hours since the last visit, \fBe)\fR the rank value, and \fBf)\fR the directory name itself. An asterisk next to the rank value means that the corresponding directory will not be removed from the database, despite its rank, either becuase it has been visited in the lasat 24 hours, or because it is bookmarked, pinned, or currently active in some workspace.
+With no argument, \fIj\fR just lists the entries in the jump database \fB(1)\fR, printing: \fBa)\fI order number of the corresponding entry, \fBb)\fI total sum of visits, \fBc)\fR days since the first visit, \fBd)\fI hours since the last visit, \fBe)\fR the rank value, and \fBf)\fR the directory name itself. An asterisk next to the rank value means that the corresponding directory will not be removed from the database, despite its rank, either becuase it has been visited in the lasat 24 hours, or because it is bookmarked, pinned, or currently active in some workspace.
+.sp
+\fB(1)\fR To prevent a directory from being added to the jump database use the \fIDirhistIgnore\fR option in the main configuration file.
 .sp
 Otherwise, if a query string is provided as parameter, \fIj\fR searches for this string in the database and cd into the best ranked matching entry. Example: \fIj\ Down\fR will probably take you to \fI/home/user/Downloads\fR, provided this directory has been already visited and is the best ranked match in the database. For a more detailed description of the matching algorithm see the \fBKANGAROO FRECENCY ALGORITHM\fR section below.
 .sp
