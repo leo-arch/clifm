@@ -144,12 +144,12 @@
 #define DT_MQ       104 /* Message queue file */
 #define DT_TPO      106 /* Typed memory object file */
 #ifdef S_ARCH1 /* NetBSD */
-# define DT_ARCH1   108 /* Archive state 1 */
-# define DT_ARCH2   110 /* Archive state 2 */
+# define DT_ARCH1   108 /* Archive state 1 (NetBSD) */
+# define DT_ARCH2   110 /* Archive state 2 (NetBSD) */
 #endif /* S_ARCH1 */
 
 #ifndef DT_WHT
-#define DT_WHT      14
+# define DT_WHT     14 /* Whiteout (FreeBSD/NetBSD/DragonFly/MacOS)*/
 #endif /* DT_WHT */
 
 /* If any of these file type checks isn't available, fake it */
@@ -182,10 +182,10 @@
 if (S_ISCTG(mode)) return 'C'; high performance (contiguous data) file
 if (S_ISMPB(mode) || S_ISMPC (bits) || S_ISMPX (bits)) return 'm'; // V7
 if (S_ISNWK(mode)) return 'n'; // HP/UX: network special file
-if (S_ISWHT(mode)) return 'w';
 * S_IFNAM // Solaris/XENIX: special named file
 * S_INSEM // Solaris/XENIX: semaphore subtype of IFNAM
 * S_INSHD // Solaris/XENIX: shared data subtype of IFNAM
+* S_IFDB  // DragonFly: Database record file (DT_DBF). Recognized by neither ls nor find
 *
 * For a quite comphensive link of non-standard file types see:
 * https://github.com/python/cpython/issues/55225#issuecomment-1093532804 */

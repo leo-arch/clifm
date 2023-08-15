@@ -3,7 +3,7 @@
 		#      The command line file manager      #
 		###########################################
 
-# This is CliFM's main configuration file
+# This is CliFM's main configuration file.
 
 # Lines starting with either '#' or ';' are commented (ignored).
 # Options starting with a ';' hold the default value, but are commented.
@@ -14,7 +14,7 @@
 #          1. INTERFACE               #
 #=====================================#
 
-# Show hidden files (i.e. files starting with a dot)?
+# Show hidden files (i.e. files starting with a dot).
 ;ShowHiddenFiles=false
 
 # Use a regular expression to filter files from the files list.
@@ -24,7 +24,7 @@
 # Run 'help file-filters' for more information.
 ;Filter=""
 
-# List directories first?
+# List directories first.
 ;ListDirsFirst=true
 
 # The amount of files contained by a directory is informed next
@@ -59,29 +59,29 @@
 
 # Symbolic links are colored as the target file name. An indicator character
 # (by default '@') is placed at the beginning of the name to mark it as a
-# symbolic link
+# symbolic link.
 # The color of this indicator can be customized via the 'lc' code in the
 # color scheme file (InterfaceColors field).
 ;ColorLinksAsTarget=false
 
-# How to list files: 0 = vertically (like ls(1) would), 1 = horizontally
+# How to list files: 0 = vertically (like ls(1) would), 1 = horizontally.
 ;ListingMode=0
 
 # Choose sorting method: 0 = none, 1 = name, 2 = size, 3 = atime
 # 4 = btime (ctime if not available), 5 = ctime, 6 = mtime, 7 = version
 # (name if not available) 8 = extension, 9 = inode, 10 = owner-ID, and
-# 11 = group-ID
+# 11 = group-ID.
 ;Sort=7
 
-# By default, CliFM sorts files from less to more (ex: from 'a' to 'z' if
+# By default, files are sorted from less to more (ex: from 'a' to 'z' if
 # using the "name" method). To invert this ordering, set SortReverse to
-# true (you can also use the --sort-reverse option or the 'st' command)
+# true (you can also use the --sort-reverse option or the 'st' command).
 ;SortReverse=false
 
-# List files properties next to file names instead of just file names
+# List files properties next to file names instead of just file names.
 ;LongViewMode=false
 
-# Properties fields to be printed for each file name in long view mode
+# Properties fields to be printed for each file name in long view mode:
 # f: files counter (for directories)
 # d: inode number
 # p|n = permissions: either symbolic (p) or numeric/octal (n)
@@ -110,7 +110,7 @@
 ## Relative time
 ;TimeStyle=relative
 
-# If running in long view, print directories full size (including contents)
+# If running in long view, print directories full size (i.e. recursively).
 ;FullDirSize=false
 
 # Print files apparent size instead of actual device usage
@@ -125,26 +125,26 @@
 # well, so that the color per extension feature is disabled.
 ;LightMode=false
 
-# If set to true, clear the screen before listing files
+# If set to true, clear the screen before listing files.
 ;ClearScreen=true
 
 # Maximum file name length for listed files. If TrimNames is set to true,
-# names larger than MAXFILENAMELEN will be truncated at MAXFILENAMELEN
+# names larger than MaxFilenameLen will be truncated at MaxFilenameLen
 # using a tilde (~).
 # Set it to -1 (or empty) to remove this limit.
 # If running in long mode, this setting is overriden by MinFilenameTrim
-# whenever MAXFILENAMELEN is smaller than MINFILENAMETRIM.
+# whenever MaxFilenameLen is smaller than MinFilenameTrim.
 ;MaxFilenameLen=20
 
-# Trim file names longer than MAXFILENAMELEN
+# Trim file names longer than MaxFilenameLen.
 ;TrimNames=true
 
 # Minimum length at which a file name can be trimmed in long view mode.
 # When running in long mode, this setting overrides MaxFilenameLen
-# whenever MAXFILENAMELEN is smaller than MINFILENAMETRIM.
+# whenever MaxFilenameLen is smaller than MinFilenameTrim.
 ;MinFilenameTrim=20
 
-# A comma separated list of workspace names in the form NUM=NAME
+# A comma separated list of workspace names in the form NUM=NAME.
 # Example: "1=MAIN,2=EXTRA,3=GIT" or "1=α,2=β,3=γ"
 ;WorkspaceNames=""
 
@@ -155,45 +155,45 @@
 ;PrivateWorkspaceSettings=false
 
 # Print the disk usage of the file system the current directory belongs to
-# in the form FREE/TOTAL
+# in the form FREE/TOTAL.
 ;DiskUsage=false
 
 # If set to true, print a map of the current position in the directory
-# history list, showing previous, current, and next entries
+# history list, showing previous, current, and next entries.
 ;DirhistMap=false
 
 # If set to true, always print the list of selected files. Since this
 # list could become quite extensive, you can limit the number of printed 
-# entries using the MaxPrintSelfiles option below
+# entries using the MaxPrintSelfiles option below.
 ;PrintSelfiles=false
 
 # Maximum amount of selected files to be printed if PrinSelFiles is set
 # to true. Possible values: -1 = no limit, 0 = auto (never print more
-# than half terminal height), or any positive value
+# than half terminal height), or any positive value.
 ;MaxPrintSelfiles=0
 
 # Color schemes (or just themes) are stored in the colors directory
 # ($XDG_DATA_DIRS/clifm/colors, usually /usr/local/share/clifm/colors
 # or /usr/share/clifm/colors). You can place your custom themes in
-# $HOME/.config/clifm/colors
+# $HOME/.config/clifm/colors.
 #
 # Use the 'cs' command or the '--color-scheme' command line option to set
-# a theme
+# a theme.
 #
-# Run 'cs edit' to edit the current theme
+# Run 'cs edit' to edit the current theme.
 #
 # Each theme includes color definitions, just as definitions for the
-# prompt, the warning prompt, the dividing line, and the FZF window
+# prompt, the warning prompt, the dividing line, and the FZF window.
 #
-# Use TAB to list available themes: 'cs TAB'
+# Use TAB to list available themes: 'cs TAB'.
 #
-# Visit https://github.com/leo-arch/clifm-colors to get some extra themes
+# Visit https://github.com/leo-arch/clifm-colors to get a few extra themes.
 #
 # Defaults to 'default-256', or 'default' (16 colors) if 256 colors support
-# is not detected
+# is not detected.
 ;ColorScheme=
 
-# Enable/disable icons.
+# Enable icons.
 # By default, emojis (widely available today) are used as icons.
 # Nerd-fonts and icons-in-terminal are supported as well, though clifm
 # needs to be recompiled in order to enable support. Consult our Wiki
@@ -205,7 +205,7 @@
 #         2. COMMAND LINE             #
 #=====================================#
 
-# Enable fuzzy matching for filename/path completions and suggestions
+# Enable fuzzy matching for filename/path completions and suggestions.
 ;FuzzyMatching=false
 
 # Fuzzy algorithm. Available options are:
@@ -215,14 +215,14 @@
 
 # TAB completion mode: 'standard', 'fzf', 'fnf' or 'smenu'. Defaults
 # to 'fzf' if the binary is found in PATH. Othwerwise, the standard
-# mode is used
+# mode is used.
 ;TabCompletionMode=
 
 # File previews for TAB completion (fzf mode only). Possible values:
-# 'true', 'false', 'hidden' (enabled, but hidden; toggle with Alt-p)
+# 'true', 'false', 'hidden' (enabled, but hidden; toggle with Alt-p).
 ;FzfPreview=true
 
-# If set to true, enable auto-suggestions
+# Enable auto-suggestions
 ;AutoSuggestions=true
 
 # The following checks will be performed in the order specified
@@ -238,17 +238,17 @@
 # check
 ;SuggestionStrategy=ehfj-ac
 
-# If set to true, suggest file names using the corresponding file type
-# color (set via the color scheme file)
+# Suggest file names using the corresponding file type color (set
+# via the color scheme file).
 ;SuggestFiletypeColor=false
 
-# Suggest a brief description for internal commands
+# Suggest a brief description for internal commands.
 ;SuggestCmdDesc=true
 
-# Enable syntax highlighting?
+# Enable syntax highlighting.
 ;SyntaxHighlighting=true
 
-# Should CliFM be allowed to run external, shell commands?
+# Allow external, shell commands.
 ;ExternalCommands=true
 
 
@@ -256,7 +256,7 @@
 #           3. COMMANDS               #
 #=====================================#
 
-# List files automatically after changing current directory
+# List files automatically after changing the current directory.
 ;AutoLs=true
 
 # If set to true, a command name that is the name of a directory or a
@@ -272,14 +272,14 @@
 # Set the default copy command. Available options are:
 # 0 = 'cp -iRp', 1 = 'cp -Rp', 2 = 'advcp -giRp', 3 = 'advcp -gRp',
 # 4 = 'wcp', and 5 = 'rsync -avP'
-# 2-5 include a progress bar
-# Only 0 and 2 will prompt before overwrite
+# 2-5 include a progress bar.
+# Only 0 and 2 will prompt before overwrite.
 ;cpCmd=0
 
 # Set the default move command. Available options are:
 # 0 = 'mv -i', 1 = 'mv', 2 = 'advmv -gi', and 3 = 'advmv -g'
-# 2 and 3 include a progress bar
-# Only 0 and 2 will prompt before overwrite
+# 2 and 3 include a progress bar.
+# Only 0 and 2 will prompt before overwrite.
 ;mvCmd=0
 
 # If set to true, the 'r' command will never prompt before removals.
@@ -296,22 +296,22 @@
 ;TerminalCmd="xterm -e"
 
 # We have three search strategies: 0 = glob-only, 1 = regex-only,
-# and 2 = glob-regex. Used by the quick search function
+# and 2 = glob-regex. Used by the quick search function.
 ;SearchStrategy=2
 
-# When a directory rank in the jump database is below MinJumpRank, it
-# will be removed. If set to 0, directories are kept indefinitely
+# When a directory rank in the jump database falls below MinJumpRank, it
+# will be removed. If set to 0, directories are kept indefinitely.
 ;MinJumpRank=10
 
 # When the sum of all ranks in the jump database reaches MaxJumpTotalRank,
 # all ranks will be reduced using a dynamic factor so that the total sum falls
 # below MaxJumpTotalRank again. Those entries falling below MinJumpRank will
-# be deleted
+# be deleted.
 ;MaxJumpTotalRank=100000
 
 # Automatically purge the jump database from non-existing directories at
 # startup. Note that this will remove paths pointing to unmounted removable
-# devices and remote file systems
+# devices and remote file systems.
 ;PurgeJumpDB=false
 
 
@@ -319,27 +319,30 @@
 #        4. LOGS AND HISTORY          #
 #=====================================#
 
-# Send errors, warnings, and notices to the notification daemon?
+# Send errors, warnings, and notices to the notification daemon.
 ;DesktopNotifications=false
 
-# Log errors and warnings
+# Log errors and warnings.
 ;LogMsgs=false
-# Log commands entered in the command line
+# Log commands entered in the command line.
 ;LogCmds=false
-# Keep only the last N lines of the log file
+# Keep only the last N lines of the log file.
 ;MaxLog=1000
 
 # A regular expression to prevent command lines from being added to the
-# history list. Comment this line out to use the default value. Set it
-# to the empty string to disable history filters.
+# history list. Set this line to the empty string to disable history filters.
 ;HistIgnore="^[q,Q]$|^quit$|^exit$|^ .*|^#.*|^[0-9]+$|^\.+$"
 
-# Same as HistIgnore, but for the directory history list
+# Limit the size of the commands history file to MaxHistory entries.
+;MaxHistory=1000
+
+# Add timestamps to commands history entries.
+;HistoryTimestamps=true
+
+# Same as HistIgnore, but for the directory history list.
 ;DirhistIgnore=""
 
-# Limit the size of the commands history file to N entries
-;MaxHistory=1000
-# Limit the size of the directory history file to N entries
+# Limit the size of the directory history file to MaxDirhist entries.
 ;MaxDirhist=100
 
 
@@ -347,21 +350,21 @@
 #             5. MISC                 #
 #=====================================#
 
-# Enable case sensitive listing for files in the current directory
+# Enable case sensitive listing for files in the current directory.
 ;CaseSensitiveList=false
 
 # Enable case sensitive lookup for the directory jumper function (via 
-# the 'j' command)
+# the 'j' command).
 ;CaseSensitiveDirJump=false
 
-# Enable case sensitive completion for file names
+# Enable case sensitive completion for file names.
 ;CaseSensitivePathComp=false
 
-# Enable case sensitive search
+# Enable case sensitive search.
 ;CaseSensitiveSearch=false
 
 # Whether to be Unicode aware or not. If using a 100% ASCII setup
-# (e.g. English), you can turn this off
+# (e.g. English), you can turn this off.
 ;Unicode=true
 
 # CliFM's starting path. If not specified, it defaults to the current
@@ -385,19 +388,19 @@
 # To enable this feature consult the manpage.
 ;CdOnQuit=false
 
-# Should the Selection Box be shared among different profiles?
+# Share the Selection Box among different profiles.
 ;ShareSelbox=false
 
-# Print a usage tip at startup
+# Print a usage tip at startup.
 ;Tips=true
 
-# Just a kind welcome message at startup
+# Just a kind welcome message at startup.
 ;WelcomeMessage=true
 
-# Set a custom welcome message
+# Set a custom welcome message.
 ;WelcomeMessageStr=""
 
-# Print CliFM's logo screen at startup
+# Print CliFM's logo screen at startup.
 ;SplashScreen=false
 
 
@@ -406,15 +409,15 @@
 #=====================================#
 
 # Bind '?' to the interactive help plugin. Run 'actions' to print the
-# list of available plugins
+# list of available plugins.
 #alias ?='ih'
-# Bind 'b' to the directory history navigation plugin
+# Bind 'b' to the directory history navigation plugin.
 #alias b='dh'
-# Replace the standard deselect command (ds) by the fzfdesel plugin
+# Replace the standard deselect command (ds) by the fzfdesel plugin.
 #alias ds='**'
-# You can use this alias to quickly change to the current virtual directory
+# You can use this alias to quickly change to the current virtual directory.
 #alias vtd='cd $CLIFM_VIRTUAL_DIR'
-# Replace the built-in bulk rename function (br) by vidir(1)
+# Replace the built-in bulk rename function (br) by vidir(1).
 #br='vidir'
 
 #=====================================#
@@ -430,17 +433,17 @@
 #=====================================#
 
 # Control CliFM's settings on a per directory basis. For more information
-# consult the manpage
+# consult the manpage.
 
 # Remote file systems are slow: let's speed this up by enabling the light
-# mode and disabling the files counter
+# mode and disabling the files counter.
 #autocmd /media/remotes/** lm=1,fc=0
 
-# Just a friendly reminder
+# Just a friendly reminder.
 #autocmd ~/important !printf "Keep your fingers outta here!\n" && read -n1
 
-# Plenty of images and vids? Launch the files previewer plugin
+# Plenty of images and vids? Launch the files previewer plugin.
 #autocmd ~/Downloads !/usr/local/share/clifm/plugins/fzfnav.sh
 
-# I want files in the third workspace to be listed in long view
+# I want files in the third workspace to be listed in long view.
 #autocmd @ws3 lv=1
