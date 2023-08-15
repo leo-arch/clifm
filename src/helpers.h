@@ -131,7 +131,7 @@
 # define DT_REG     8
 # define DT_LNK     10
 # define DT_SOCK    12
-//# define DT_WHT     14
+# define DT_WHT     14
 # ifdef __sun
 #  define DT_DOOR   16
 #  define DT_PORT   18 /* Event port */
@@ -143,6 +143,14 @@
 #define DT_SEM      102 /* Semaphore file */
 #define DT_MQ       104 /* Message queue file */
 #define DT_TPO      106 /* Typed memory object file */
+#ifdef S_ARCH1 /* NetBSD */
+# define DT_ARCH1   108 /* Archive state 1 */
+# define DT_ARCH2   110 /* Archive state 2 */
+#endif /* S_ARCH1 */
+
+#ifndef DT_WHT
+#define DT_WHT      14
+#endif /* DT_WHT */
 
 /* If any of these file type checks isn't available, fake it */
 #ifndef S_TYPEISMQ
@@ -1361,6 +1369,13 @@ struct stats_t {
 	size_t door;
 	size_t port;
 #endif /* __sun */
+#ifdef S_ARCH1
+	size_t arch1;
+	size_t arch2;
+#endif /* S_ARCH1 */
+#ifdef S_IFWHT
+	size_t whiteout;
+#endif /* S_IFWHT */
 };
 
 extern struct stats_t stats;

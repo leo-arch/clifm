@@ -1578,6 +1578,13 @@ Unstatable files:            %zu\n\
 	printf("Doors:                 %zu\n", stats.door);
 	printf("Ports:                 %zu\n", stats.port);
 #endif /* SOLARIS_DOORS */
+#ifdef S_ARCH1
+	printf("Archive state 1:       %zu\n", stats.arch1);
+	printf("Archive state 2:       %zu\n", stats.arch2);
+#endif /* S_ARCH1 */
+#ifdef S_IFWHT
+	printf("Whiteout:              %zu\n", stats.whiteout);
+#endif /* S_IFWHT */
 
 	return EXIT_SUCCESS;
 }

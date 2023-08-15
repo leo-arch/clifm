@@ -2362,6 +2362,13 @@ list_dir(void)
 			case S_IFLNK: file_info[n].type = DT_LNK; stats.link++; break;
 			case S_IFREG: file_info[n].type = DT_REG; stats.reg++; break;
 			case S_IFSOCK: file_info[n].type = DT_SOCK; stats.socket++; break;
+#ifdef S_ARCH1
+			case S_ARCH1: file_info[n].type = DT_ARCH1; stats.arch1++; break;
+			case S_ARCH2: file_info[n].type = DT_ARCH2; stats.arch2++; break;
+#endif /* S_ARCH1 */
+#ifdef S_IFWHT
+			case S_IFWHT: file_info[n].type = DT_WHT; stats.whiteout++; break;
+#endif /* S_IFWHT */
 			default: file_info[n].type = DT_UNKNOWN; stats.unknown++; break;
 			}
 

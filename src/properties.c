@@ -1154,6 +1154,10 @@ get_file_type_and_color(const char *filename, const struct stat *attr,
 		*ctype = color = ln_c;
 		break;
 
+#ifdef S_ARCH1
+	case S_ARCH1:  *file_type = 'a'; color = *ctype = fi_c; break;
+	case S_ARCH2:  *file_type = 'A'; color = *ctype = fi_c; break;
+#endif /* S_ARCH1 */
 	case S_IFBLK:  *file_type = 'b'; color = *ctype = bd_c; break;
 #ifdef SOLARIS_DOORS
 	case S_IFDOOR: *file_type = 'D'; color = *ctype = oo_c; break;
@@ -1162,6 +1166,9 @@ get_file_type_and_color(const char *filename, const struct stat *attr,
 	case S_IFCHR:  *file_type = 'c'; color = *ctype = cd_c; break;
 	case S_IFIFO:  *file_type = 'p'; color = *ctype = pi_c; break;
 	case S_IFSOCK: *file_type = 's'; color = *ctype = so_c; break;
+#ifdef S_IFWHT
+	case S_IFWHT: *file_type = 'w'; color = *ctype = fi_c; break;
+#endif /* S_IFWHT */
 	default:       *file_type = '?'; color = no_c; break;
 	}
 
@@ -1264,6 +1271,10 @@ print_file_details(char *filename, const struct stat *attr, const char file_type
 
 	switch (file_type) {
 	case '.': fputs(_("Regular file"), stdout); break;
+#ifdef S_ARCH1
+	case 'a': fputs(_("Archive state 1"), stdout); break;
+	case 'A': fputs(_("Archive state 2"), stdout); break;
+#endif /* S_ARCH1 */
 	case 'b': fputs(_("Block special file"), stdout); break;
 	case 'c': fputs(_("Character special file"), stdout); break;
 	case 'd': fputs(_("Directory"), stdout); break;
@@ -1274,6 +1285,9 @@ print_file_details(char *filename, const struct stat *attr, const char file_type
 	case 'l': fputs(_("Symbolic link"), stdout); break;
 	case 'p': fputs(_("Fifo"), stdout); break;
 	case 's': fputs(_("Socket"), stdout); break;
+#ifdef S_IFWHT
+	case 'w': fputs(_("Whiteout"), stdout); break;
+#endif /* S_IFWHT */
 	default: break;
 	}
 
@@ -1950,6 +1964,10 @@ static void
 set_file_type_and_color(const mode_t mode, char *type, char **color)
 {
 	switch (mode & S_IFMT) {
+#ifdef S_ARCH1
+	case S_ARCH1:  *type = 'a'; *color = fi_c; break;
+	case S_ARCH2:  *type = 'A'; *color = fi_c; break;
+#endif /* S_ARCH1 */
 	case S_IFBLK:  *type = 'b'; *color = bd_c; break;
 	case S_IFCHR:  *type = 'c'; *color = cd_c; break;
 	case S_IFDIR:  *type = 'd'; *color = di_c; break;
@@ -1961,6 +1979,9 @@ set_file_type_and_color(const mode_t mode, char *type, char **color)
 	case S_IFLNK:  *type = 'l'; *color = ln_c; break;
 	case S_IFREG:  *type = '.'; break;
 	case S_IFSOCK: *type = 's'; *color = so_c; break;
+#ifdef S_IFWHT
+	case S_IFSOCK: *type = 'w'; *color = fi_c; break;
+#endif /* S_IFWHT */
 	default:       *type = '?'; break;
 	}
 
