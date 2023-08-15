@@ -2354,21 +2354,23 @@ list_dir(void)
 			case S_IFBLK: file_info[n].type = DT_BLK; stats.block_dev++; break;
 			case S_IFCHR: file_info[n].type = DT_CHR; stats.char_dev++; break;
 			case S_IFDIR: file_info[n].type = DT_DIR; stats.dir++; break;
-#ifdef SOLARIS_DOORS
-			case S_IFDOOR: file_info[n].type = DT_DOOR; stats.door++; break;
-			case S_IFPORT: file_info[n].type = DT_PORT; stats.port++; break;
-#endif /* SOLARIS_DOORS */
 			case S_IFIFO: file_info[n].type = DT_FIFO; stats.fifo++; break;
 			case S_IFLNK: file_info[n].type = DT_LNK; stats.link++; break;
 			case S_IFREG: file_info[n].type = DT_REG; stats.reg++; break;
 			case S_IFSOCK: file_info[n].type = DT_SOCK; stats.socket++; break;
-#ifdef S_ARCH1
+#ifndef _BE_POSIX
+# ifdef SOLARIS_DOORS
+			case S_IFDOOR: file_info[n].type = DT_DOOR; stats.door++; break;
+			case S_IFPORT: file_info[n].type = DT_PORT; stats.port++; break;
+# endif /* SOLARIS_DOORS */
+# ifdef S_ARCH1
 			case S_ARCH1: file_info[n].type = DT_ARCH1; stats.arch1++; break;
 			case S_ARCH2: file_info[n].type = DT_ARCH2; stats.arch2++; break;
-#endif /* S_ARCH1 */
-#ifdef S_IFWHT
+# endif /* S_ARCH1 */
+# ifdef S_IFWHT
 			case S_IFWHT: file_info[n].type = DT_WHT; stats.whiteout++; break;
-#endif /* S_IFWHT */
+# endif /* S_IFWHT */
+#endif /* !_BE_POSIX */
 			default: file_info[n].type = DT_UNKNOWN; stats.unknown++; break;
 			}
 

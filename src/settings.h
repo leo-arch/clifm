@@ -215,11 +215,11 @@ xf=1;31:xs=0;32:"
 #define FIFO_PCHR    'p'
 #define LNK_PCHR     'l'
 #define UNK_PCHR     '?'
-#define WHT_PCHR     'w' /* Whiteouts (BSD) */
+#define WHT_PCHR     'w' /* Whiteout (BSD) */
 #define ARCH1_PCHR   'a' /* Archive state 1 (NetBSD) */
 #define ARCH2_PCHR   'A' /* Archive state 2 (NetBSD) */
-#define DOOR_PCHR    'D' /* Doors (Solaris) */
-#define PORT_PCHR    'P' /* Event ports (Solaris) */
+#define DOOR_PCHR    'D' /* Door (Solaris) */
+#define PORT_PCHR    'P' /* Event port (Solaris) */
 
 #define SELFILE_CHR  '*'
 #define TRIMFILE_CHR '~'
