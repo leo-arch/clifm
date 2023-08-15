@@ -240,6 +240,8 @@ For a complete description please consult our [Wiki](https://github.com/leo-arch
 <summary>Click here to expand</summary>
 
 * `Development`
+  - Exclude commands from the commands history via `HistIgnore` in the config file.
+  - Exclude directories from the directories history (and the jump database) via `DirhistIgnore` in the config file.
   - Maximum limit of listed files increased from **INT_MAX** to **SSIZE_MAX**.
   - Nested instances are now allowed (setting both **SHLVL** and **CLIFMLVL** as appropriate).
   - Files extended attributes on non-glibc Linux distributions.
