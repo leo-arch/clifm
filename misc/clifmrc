@@ -334,6 +334,9 @@
 # to the empty string to disable history filters.
 ;HistIgnore="^[q,Q]$|^quit$|^exit$|^ .*|^#.*|^[0-9]+$|^\.+$"
 
+# Same as HistIgnore, but for the directory history list
+;DirhistIgnore=""
+
 # Limit the size of the commands history file to N entries
 ;MaxHistory=1000
 # Limit the size of the directory history file to N entries
