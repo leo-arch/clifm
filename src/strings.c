@@ -452,7 +452,8 @@ u8truncstr(char *restrict str, const size_t max)
 		len += l;
 	}
 
-	wcsncpy((wchar_t *)str, buf, (size_t)bmax * sizeof(wchar_t));
+	wcsncpy((wchar_t *)str, buf, (size_t)bmax * sizeof(wchar_t)); /* flawfinder: ignore */
+	str[(size_t)len * sizeof(wchar_t)] = L'\0';
 //	wcscpy((wchar_t *)str, buf);
 	return bmax - len;
 }
