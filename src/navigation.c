@@ -855,6 +855,13 @@ change_to_path(char *new_path, const int cd_flag)
 	return EXIT_SUCCESS;
 }
 
+static int
+skip_directory(const char *dir)
+{
+	return (conf.dirhistignore_regex && *conf.dirhistignore_regex
+		&& regexec(&regex_dirhist, dir, 0, NULL, 0) == EXIT_SUCCESS);
+}
+
 /* Change current directory to NEW_PATH, or to HOME if new_path is NULL.
  * Errors are printed only if CD_FLAG is set to CD_PRINT_ERROR (1) */
 int
@@ -881,7 +888,10 @@ cd_function(char *new_path, const int cd_flag)
 			return ret;
 	}
 
-	add_to_dirhist(workspaces[cur_ws].path);
+	const int skip = skip_directory(workspaces[cur_ws].path);
+
+	if (skip == 0)
+		add_to_dirhist(workspaces[cur_ws].path);
 
 	dir_changed = 1;
 	if (conf.autols == 1) {
@@ -890,7 +900,9 @@ cd_function(char *new_path, const int cd_flag)
 			ret = EXIT_FAILURE;
 	}
 
-	add_to_jumpdb(workspaces[cur_ws].path);
+	if (skip == 0)
+		add_to_jumpdb(workspaces[cur_ws].path);
+
 	return ret;
 }
 

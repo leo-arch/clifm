@@ -135,6 +135,7 @@ unsigned short
 
 regex_t regex_exp;
 regex_t regex_hist;
+regex_t regex_dirhist;
 
 /* Internal status flags */
 int

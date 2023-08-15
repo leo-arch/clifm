@@ -628,6 +628,7 @@ decode_prompt(char *line)
 			case '!': temp = gen_stats_str(STATS_UNSTAT); goto ADD_STRING;
 #ifdef SOLARIS_DOORS
 			case '>': temp = gen_stats_str(STATS_DOOR); goto ADD_STRING;
+			case '<': temp = gen_stats_str(STATS_PORT); goto ADD_STRING;
 #endif /* SOLARIS_DOORS */
 
 			case '*': temp = gen_notification(NOTIF_SEL); goto ADD_STRING;

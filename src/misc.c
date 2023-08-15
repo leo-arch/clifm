@@ -1538,6 +1538,11 @@ free_stuff(void)
 		free(conf.histignore_regex);
 	}
 
+	if (conf.dirhistignore_regex) {
+		regfree(&regex_dirhist);
+		free(conf.dirhistignore_regex);
+	}
+
 	free_workspaces_filters();
 
 	if (profile_names) {

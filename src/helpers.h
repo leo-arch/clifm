@@ -917,6 +917,7 @@ extern filesn_t files;
 /* User settings (mostly from the config file) */
 struct config_t {
 	char *opener;
+	char *dirhistignore_regex;
 	char *histignore_regex;
 	char *encoded_prompt;
 	char *term;
@@ -1721,8 +1722,9 @@ extern char
 	**prompt_cmds,
 	**tags;
 
-extern regex_t regex_exp;  // Files list
-extern regex_t regex_hist; // Commands hist
+extern regex_t regex_exp;     /* Files list */
+extern regex_t regex_hist;    /* Commands history */
+extern regex_t regex_dirhist; /* Directory history */
 extern char **environ;
 
 /* To store all the 39 color variables we use, with 46 bytes each, we need

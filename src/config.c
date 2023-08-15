@@ -2714,6 +2714,34 @@ set_histignore_pattern(char *str)
 	conf.histignore_regex = savestring(pattern, strlen(pattern));
 }
 
+static void
+set_dirhistignore_pattern(char *str)
+{
+	if (!str || !*str)
+		return;
+
+	char *pattern = get_line_value(str);
+	if (!pattern) {
+		conf.dirhistignore_regex = savestring("", 0);
+		return;
+	}
+
+	if (conf.dirhistignore_regex) {
+		regfree(&regex_dirhist);
+		free(conf.dirhistignore_regex);
+		conf.dirhistignore_regex = (char *)NULL;
+	}
+
+	int ret = regcomp(&regex_dirhist, pattern, REG_NOSUB | REG_EXTENDED);
+	if (ret != EXIT_SUCCESS) {
+		xregerror("dirhistignore", pattern, ret, regex_dirhist, 1);
+		regfree(&regex_dirhist);
+		return;
+	}
+
+	conf.dirhistignore_regex = savestring(pattern, strlen(pattern));
+}
+
 /* Read the main configuration file and set options accordingly */
 static void
 read_config(void)
@@ -2837,6 +2865,10 @@ read_config(void)
 		else if (xargs.dirmap == UNSET && *line == 'D'
 		&& strncmp(line, "DirhistMap=", 11) == 0) {
 			set_config_bool_value(line + 11, &conf.dirhist_map);
+		}
+
+		else if (*line == 'D' && strncmp(line, "DirhistIgnore=", 14) == 0) {
+			set_dirhistignore_pattern(line + 14);
 		}
 
 		else if (xargs.disk_usage == UNSET && *line == 'D'
