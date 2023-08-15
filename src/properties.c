@@ -1980,7 +1980,7 @@ set_file_type_and_color(const mode_t mode, char *type, char **color)
 	case S_IFREG:  *type = '.'; break;
 	case S_IFSOCK: *type = 's'; *color = so_c; break;
 #ifdef S_IFWHT
-	case S_IFSOCK: *type = 'w'; *color = fi_c; break;
+	case S_IFWHT: *type = 'w'; *color = fi_c; break;
 #endif /* S_IFWHT */
 	default:       *type = '?'; break;
 	}
