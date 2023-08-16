@@ -2127,11 +2127,11 @@ get_link_target_color(const char *name, const struct stat *attr,
 	case S_IFPORT: file_info[i].color = oo_c; break;
 # endif /* SOLARIS_DOORS */
 # ifdef S_ARCH1
-	case S_ARCH1: file_info[n].color = fi_c; break;
-	case S_ARCH2: file_info[n].color = fi_c; break;
+	case S_ARCH1: file_info[i].color = fi_c; break;
+	case S_ARCH2: file_info[i].color = fi_c; break;
 # endif /* S_ARCH1 */
 # ifdef S_IFWHT
-	case S_IFWHT: file_info[n].color = fi_c; break;
+	case S_IFWHT: file_info[i].color = fi_c; break;
 # endif /* S_IFWHT */
 #endif /* !_BE_POSIX */
 	case S_IFREG: {
