@@ -1094,6 +1094,9 @@ struct jump_t {
 	char *path;
 	size_t len;
 	size_t visits;
+#ifdef __arm__
+	char *pad0;
+#endif /* __arm__ */
 	time_t first_visit;
 	time_t last_visit;
 	int keep;
@@ -1150,9 +1153,10 @@ struct fileinfo {
 	int xattr;
 	int du_status; /* Exit status of du(1) for dir full sizes */
 	int pad2;
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__DragonFly__)
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__DragonFly__) \
+|| defined(__arm__)
 	int pad3;
-#endif /* __FreeBSD__ || __NetBSD__ || __DragonFly__ */
+#endif /* __FreeBSD__ || __NetBSD__ || __DragonFly__ || __arm__ */
 };
 
 extern struct fileinfo *file_info;
@@ -1350,6 +1354,9 @@ extern struct suggestions_t suggestion;
 /* Hold information about selected files */
 struct sel_t {
 	char *name;
+#ifdef __arm__
+	char *pad0;
+#endif /* __arm__ */
 	off_t size;
 };
 
@@ -1479,6 +1486,9 @@ extern struct shades_t size_shades;
 
 struct paths_t {
 	char *path;
+#ifdef __arm__
+	char *pad0;
+#endif /* __arm__ */
 	time_t mtime;
 };
 extern struct paths_t *paths;
