@@ -1043,6 +1043,17 @@ get_color_age(const time_t t, char *str, const size_t len)
 
 #if defined(LINUX_FILE_XATTRS)
 static int
+xattr_val_is_printable(const char *val, const size_t len)
+{
+	size_t i;
+	for (i = 0; i < len; i++)
+		if (val[len] < ' ') /* Control char (== non-printable) */
+			return 0;
+
+	return 1;
+}
+
+static int
 print_extended_attributes(char *s)
 {
 	ssize_t buflen = 0, keylen = 0, vallen = 0;
@@ -1087,27 +1098,24 @@ print_extended_attributes(char *s)
 
 		/* Determine length of the value */
 		vallen = getxattr(s, key, NULL, 0);
-		if (vallen == -1)
-			puts(strerror(errno));
-
-		if (vallen > 0) {
-
-			/* Allocate value buffer.
-			 * One extra byte is needed to append the nul byte */
+		if (vallen == -1) {
+			printf("%s\n", strerror(errno));
+		} else if (vallen > 0) {
 			val = (char *)xnmalloc((size_t)vallen + 1, sizeof(char));
 
-			/* Copy value to buffer */
 			vallen = getxattr(s, key, val, (size_t)vallen);
 			if (vallen == -1) {
-				puts(strerror(errno));
+				printf("%s\n", strerror(errno));
 			} else {
-				/* Output attribute value */
 				val[vallen] = '\0';
-				puts(val);
+				if (xattr_val_is_printable(val, (size_t)vallen) == 1)
+					printf("%s\n", val);
+				else
+					putchar('\n');
 			}
 
 			free(val);
-		} else if (vallen == 0) {
+		} else { /* vallen == 0 */
 			puts(_("<no value>"));
 		}
 

@@ -942,7 +942,13 @@ free_xdu_hardlinks(void)
  * actually processed.
  *
  * FIRST_LEVEL must be always 1 when calling this function (this value will
- * be zero whenever the function calls itself recursively). */
+ * be zero whenever the function calls itself recursively).
+ *
+ * NOTE: Old versions of du (at least up to 8.30) count the size of directories
+ * themselves when computing apparent sizes. At least since 9.3, this is not
+ * the case anymore. As stated in 'info du': "Apparent sizes are meaningful
+ * only for regular files and symbolic links. Other file types do not
+ * contribute to apparent size." We follow here the last behavior. */
 off_t
 dir_size(char *dir, const int first_level, int *status)
 {
