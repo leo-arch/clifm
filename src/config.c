@@ -3458,6 +3458,30 @@ init_config(void)
 }
 
 static void
+free_regex_filters(void)
+{
+	if (filter.str && filter.env == 0) {
+		regfree(&regex_exp);
+		free(filter.str);
+		filter.str = (char *)NULL;
+		filter.rev = 0;
+		filter.type = FILTER_NONE;
+	}
+
+	if (conf.histignore_regex) {
+		regfree(&regex_hist);
+		free(conf.histignore_regex);
+		conf.histignore_regex = (char *)NULL;
+	}
+
+	if (conf.dirhistignore_regex) {
+		regfree(&regex_dirhist);
+		free(conf.dirhistignore_regex);
+		conf.dirhistignore_regex = (char *)NULL;
+	}
+}
+
+static void
 reset_variables(void)
 {
 	/* Free everything */
@@ -3516,20 +3540,7 @@ reset_variables(void)
 	free_autocmds();
 	free_tags();
 	free_remotes(0);
-
-	if (filter.str && filter.env == 0) {
-		regfree(&regex_exp);
-		free(filter.str);
-		filter.str = (char *)NULL;
-		filter.rev = 0;
-		filter.type = FILTER_NONE;
-	}
-
-	if (conf.histignore_regex) {
-		regfree(&regex_hist);
-		free(conf.histignore_regex);
-		conf.histignore_regex = (char *)NULL;
-	}
+	free_regex_filters();
 
 	free(conf.opener);
 	free(conf.encoded_prompt);
