@@ -29,7 +29,6 @@
 #include <string.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
-#include <glob.h>
 
 #ifdef __sun
 # include <sys/termios.h> // TIOCGWINSZ

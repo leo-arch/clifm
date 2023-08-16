@@ -319,14 +319,6 @@ fuzzy_match_v1(char *s1, char *s2, const size_t s1_len)
 	score += (consecutive_chars * CONSECUTIVE_CHAR_BONUS);
 	score += ((int)l * SINGLE_CHAR_MATCH_BONUS);
 
-/*
-#include <stdio.h>
-	printf("'%s:%d=%d+%d+%d+%d+%d'", s2, score,
-		word_beginning * WORD_BEGINNING_BONUS,
-		first_char * FIRST_CHAR_BONUS,
-		included * INCLUDED_BONUS,
-		consecutive_chars * CONSECUTIVE_CHAR_BONUS,
-		(int)l * SINGLE_CHAR_MATCH_BONUS); */
 	return score;
 }
 
@@ -430,14 +422,6 @@ fuzzy_match(char *s1, char *s2, const size_t s1_len, const int type)
 	score += (consecutive_chars * CONSECUTIVE_CHAR_BONUS);
 	score += ((int)l * SINGLE_CHAR_MATCH_BONUS);
 
-/*
-#include <stdio.h>
-	printf("'%s:%d=%d+%d+%d+%d+%d'", s2, score,
-		word_beginning * WORD_BEGINNING_BONUS,
-		first_char * FIRST_CHAR_BONUS,
-		included * INCLUDED_BONUS,
-		consecutive_chars * CONSECUTIVE_CHAR_BONUS,
-		(int)l * SINGLE_CHAR_MATCH_BONUS); */
 	return score;
 }
 

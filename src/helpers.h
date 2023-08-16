@@ -88,14 +88,6 @@
 # ifndef ALLOW_ARCHIVING
 #  define _NO_ARCHIVING
 # endif /* ALLOW_ARCHIVING */
-/* Setting GLOB_BRACE to ZERO disables support for GLOB_BRACE if not
- * available on current platform. Same for GLOB_TILDE. */
-# ifndef GLOB_BRACE
-#  define GLOB_BRACE 0
-# endif /* GLOB_BRACE */
-# ifndef GLOB_TILDE
-#  define GLOB_TILDE 0
-# endif /* GLOB_TILDE */
 #endif /* _BE_POSIX */
 
 /* _NO_LIRA implies _NO_MAGIC */
@@ -113,6 +105,7 @@
 # include <libintl.h>
 #endif /* !_NO_GETTEXT*/
 
+#include <glob.h>
 #include <regex.h>
 #include <stdlib.h>
 #include <sys/stat.h> /* S_BLKSIZE */
@@ -189,6 +182,15 @@ if (S_ISNWK(mode)) return 'n'; // HP/UX: network special file
 *
 * For a quite comphensive list of non-standard file types see:
 * https://github.com/python/cpython/issues/55225#issuecomment-1093532804 */
+
+/* Setting GLOB_BRACE to ZERO disables support for GLOB_BRACE if not
+ * available on current platform. Same for GLOB_TILDE. */
+#ifndef GLOB_BRACE
+# define GLOB_BRACE 0
+#endif /* GLOB_BRACE */
+#ifndef GLOB_TILDE
+# define GLOB_TILDE 0
+#endif /* GLOB_TILDE */
 
 #if defined(__linux__)
 # include <linux/version.h>
