@@ -1477,7 +1477,7 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 {
 	const off_t size =
 		(FILE_TYPE_NON_ZERO_SIZE(attr->st_mode) || S_TYPEISSHM(attr)
-		|| S_TYPEISTMO(attr)) ? FILE_SIZE_PTR : 0;
+		|| S_TYPEISTMO(attr)) ? FILE_SIZE_PTR(attr) : 0;
 
 	char *size_unit = construct_human_size(size);
 	char *csize = dz_c;

@@ -493,8 +493,8 @@ get_file_color(const char *filename, const struct stat *attr)
 #endif /* LINUX_FILE_CAPS */
 	else if ((attr->st_mode & 00100) /* Exec */
 	|| (attr->st_mode & 00010) || (attr->st_mode & 00001)) {
-		color = FILE_SIZE_PTR == 0 ? ee_c : ex_c;
-	} else if (FILE_SIZE_PTR == 0) {
+		color = FILE_SIZE_PTR(attr) == 0 ? ee_c : ex_c;
+	} else if (FILE_SIZE_PTR(attr) == 0) {
 		color = ef_c;
 	} else if (attr->st_nlink > 1) { /* Multi-hardlink */
 		color = mh_c;

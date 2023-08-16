@@ -681,7 +681,7 @@ set_long_attribs(const filesn_t n, const struct stat *attr)
 		file_info[n].size = dir_size(file_info[n].name, 1,
 			&file_info[n].du_status);
 	} else {
-		file_info[n].size = FILE_SIZE_PTR;
+		file_info[n].size = FILE_SIZE_PTR(attr);
 	}
 }
 
@@ -2121,10 +2121,19 @@ get_link_target_color(const char *name, const struct stat *attr,
 	case S_IFIFO:  file_info[i].color = pi_c; break;
 	case S_IFBLK:  file_info[i].color = bd_c; break;
 	case S_IFCHR:  file_info[i].color = cd_c; break;
-#ifdef SOLARIS_DOORS
+#ifndef _BE_POSIX
+# ifdef SOLARIS_DOORS
 	case S_IFDOOR: file_info[i].color = oo_c; break;
 	case S_IFPORT: file_info[i].color = oo_c; break;
-#endif /* SOLARIS_DOORS */
+# endif /* SOLARIS_DOORS */
+# ifdef S_ARCH1
+	case S_ARCH1: file_info[n].color = fi_c; break;
+	case S_ARCH2: file_info[n].color = fi_c; break;
+# endif /* S_ARCH1 */
+# ifdef S_IFWHT
+	case S_IFWHT: file_info[n].color = fi_c; break;
+# endif /* S_IFWHT */
+#endif /* !_BE_POSIX */
 	case S_IFREG: {
 		int ext = 0;
 		char *color = get_regfile_color(name, attr, &ext);
@@ -2381,7 +2390,7 @@ list_dir(void)
 			file_info[n].inode = ent->d_ino;
 			file_info[n].linkn = attr.st_nlink;
 			file_info[n].size =
-				FILE_TYPE_NON_ZERO_SIZE(attr.st_mode) ? FILE_SIZE : 0;
+				FILE_TYPE_NON_ZERO_SIZE(attr.st_mode) ? FILE_SIZE(attr) : 0;
 			file_info[n].uid = attr.st_uid;
 			file_info[n].gid = attr.st_gid;
 			file_info[n].mode = attr.st_mode;

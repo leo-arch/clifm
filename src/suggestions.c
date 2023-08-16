@@ -680,9 +680,9 @@ get_reg_file_color(const char *filename, const struct stat *attr,
 	}
 #endif /* LINUX_FILE_CAPS */
 	if (attr->st_mode & (S_IXUSR | S_IXGRP | S_IXOTH))
-		return (FILE_SIZE_PTR == 0) ? ee_c : ex_c;
+		return (FILE_SIZE_PTR(attr) == 0) ? ee_c : ex_c;
 
-	if (FILE_SIZE_PTR == 0)	return ef_c;
+	if (FILE_SIZE_PTR(attr) == 0) return ef_c;
 	if (attr->st_nlink > 1)	return mh_c;
 
 	const char *ext = check_ext == 1 ? strrchr(filename, '.') : (char *)NULL;

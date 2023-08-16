@@ -599,7 +599,7 @@ get_sel_file_size(const size_t i, int *status)
 		sel_elements[i].size = (off_t)(dir_size(sel_elements[i].name,
 			0, status) * base);
 	} else {
-		sel_elements[i].size = (off_t)FILE_SIZE;
+		sel_elements[i].size = (off_t)FILE_SIZE(attr);
 	}
 
 	return sel_elements[i].size;
