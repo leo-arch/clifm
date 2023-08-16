@@ -2351,13 +2351,13 @@ list_dir(void)
 
 		if (stat_ok == 1) {
 			switch (attr.st_mode & S_IFMT) {
+			case S_IFREG: file_info[n].type = DT_REG; stats.reg++; break;
+			case S_IFDIR: file_info[n].type = DT_DIR; stats.dir++; break;
+			case S_IFLNK: file_info[n].type = DT_LNK; stats.link++; break;
+			case S_IFIFO: file_info[n].type = DT_FIFO; stats.fifo++; break;
+			case S_IFSOCK: file_info[n].type = DT_SOCK; stats.socket++; break;
 			case S_IFBLK: file_info[n].type = DT_BLK; stats.block_dev++; break;
 			case S_IFCHR: file_info[n].type = DT_CHR; stats.char_dev++; break;
-			case S_IFDIR: file_info[n].type = DT_DIR; stats.dir++; break;
-			case S_IFIFO: file_info[n].type = DT_FIFO; stats.fifo++; break;
-			case S_IFLNK: file_info[n].type = DT_LNK; stats.link++; break;
-			case S_IFREG: file_info[n].type = DT_REG; stats.reg++; break;
-			case S_IFSOCK: file_info[n].type = DT_SOCK; stats.socket++; break;
 #ifndef _BE_POSIX
 # ifdef SOLARIS_DOORS
 			case S_IFDOOR: file_info[n].type = DT_DOOR; stats.door++; break;

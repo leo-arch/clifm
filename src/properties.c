@@ -1154,6 +1154,10 @@ get_file_type_and_color(const char *filename, const struct stat *attr,
 		*ctype = color = ln_c;
 		break;
 
+	case S_IFIFO:  *file_type = FIFO_PCHR; color = *ctype = pi_c; break;
+	case S_IFSOCK: *file_type = SOCK_PCHR; color = *ctype = so_c; break;
+	case S_IFBLK:  *file_type = BLKDEV_PCHR; color = *ctype = bd_c; break;
+	case S_IFCHR:  *file_type = CHARDEV_PCHR; color = *ctype = cd_c; break;
 #ifndef _BE_POSIX
 # ifdef S_ARCH1
 	case S_ARCH1:  *file_type = ARCH1_PCHR; color = *ctype = fi_c; break;
@@ -1167,10 +1171,6 @@ get_file_type_and_color(const char *filename, const struct stat *attr,
 	case S_IFWHT: *file_type = WHT_PCHR; color = *ctype = fi_c; break;
 # endif /* S_IFWHT */
 #endif /* !_BE_POSIX */
-	case S_IFBLK:  *file_type = BLKDEV_PCHR; color = *ctype = bd_c; break;
-	case S_IFCHR:  *file_type = CHARDEV_PCHR; color = *ctype = cd_c; break;
-	case S_IFIFO:  *file_type = FIFO_PCHR; color = *ctype = pi_c; break;
-	case S_IFSOCK: *file_type = SOCK_PCHR; color = *ctype = so_c; break;
 	default:       *file_type = UNK_PCHR; color = no_c; break;
 	}
 
@@ -1273,6 +1273,12 @@ print_file_details(char *filename, const struct stat *attr, const char file_type
 
 	switch (file_type) {
 	case REG_PCHR: fputs(_("Regular file"), stdout); break;
+	case DIR_PCHR: fputs(_("Directory"), stdout); break;
+	case LNK_PCHR: fputs(_("Symbolic link"), stdout); break;
+	case FIFO_PCHR: fputs(_("Fifo"), stdout); break;
+	case SOCK_PCHR: fputs(_("Socket"), stdout); break;
+	case BLKDEV_PCHR: fputs(_("Block special file"), stdout); break;
+	case CHARDEV_PCHR: fputs(_("Character special file"), stdout); break;
 #ifndef _BE_POSIX
 # ifdef S_ARCH1
 	case ARCH1_PCHR: fputs(_("Archive state 1"), stdout); break;
@@ -1286,12 +1292,6 @@ print_file_details(char *filename, const struct stat *attr, const char file_type
 	case WHT_PCHR: fputs(_("Whiteout"), stdout); break;
 # endif /* S_IFWHT */
 #endif /* !_BE_POSIX */
-	case BLKDEV_PCHR: fputs(_("Block special file"), stdout); break;
-	case CHARDEV_PCHR: fputs(_("Character special file"), stdout); break;
-	case DIR_PCHR: fputs(_("Directory"), stdout); break;
-	case LNK_PCHR: fputs(_("Symbolic link"), stdout); break;
-	case FIFO_PCHR: fputs(_("Fifo"), stdout); break;
-	case SOCK_PCHR: fputs(_("Socket"), stdout); break;
 	default: break;
 	}
 
@@ -1968,6 +1968,13 @@ static void
 set_file_type_and_color(const mode_t mode, char *type, char **color)
 {
 	switch (mode & S_IFMT) {
+	case S_IFREG:  *type = REG_PCHR; break;
+	case S_IFDIR:  *type = DIR_PCHR; *color = di_c; break;
+	case S_IFLNK:  *type = LNK_PCHR; *color = ln_c; break;
+	case S_IFIFO:  *type = FIFO_PCHR; *color = pi_c; break;
+	case S_IFSOCK: *type = SOCK_PCHR; *color = so_c; break;
+	case S_IFBLK:  *type = BLKDEV_PCHR; *color = bd_c; break;
+	case S_IFCHR:  *type = CHARDEV_PCHR; *color = cd_c; break;
 #ifndef _BE_POSIX
 # ifdef S_ARCH1
 	case S_ARCH1:  *type = ARCH1_PCHR; *color = fi_c; break;
@@ -1981,13 +1988,6 @@ set_file_type_and_color(const mode_t mode, char *type, char **color)
 	case S_IFWHT:  *type = WHT_PCHR; *color = fi_c; break;
 # endif /* S_IFWHT */
 #endif /* !_BE_POSIX */
-	case S_IFBLK:  *type = BLKDEV_PCHR; *color = bd_c; break;
-	case S_IFCHR:  *type = CHARDEV_PCHR; *color = cd_c; break;
-	case S_IFDIR:  *type = DIR_PCHR; *color = di_c; break;
-	case S_IFIFO:  *type = FIFO_PCHR; *color = pi_c; break;
-	case S_IFLNK:  *type = LNK_PCHR; *color = ln_c; break;
-	case S_IFREG:  *type = REG_PCHR; break;
-	case S_IFSOCK: *type = SOCK_PCHR; *color = so_c; break;
 	default:       *type = UNK_PCHR; break;
 	}
 

@@ -154,16 +154,16 @@
 
 /* If any of these file type checks isn't available, fake it */
 #ifndef S_TYPEISMQ
-# define S_TYPEISMQ(s) 0
+# define S_TYPEISMQ(s)  (0)
 #endif /* !S_TYPEISMQ */
 #ifndef S_TYPEISSEM
-# define S_TYPEISSEM(s) 0
+# define S_TYPEISSEM(s) (0)
 #endif /* !S_TYPEISSEM */
 #ifndef S_TYPEISSHM
-# define S_TYPEISSHM(s) 0
+# define S_TYPEISSHM(s) (0)
 #endif /* !S_TYPEISSHM */
 #ifndef S_TYPEISTMO
-# define S_TYPEISTMO(s) 0
+# define S_TYPEISTMO(s) (0)
 #endif /* !S_TYPEISTMO */
 /* About these extra file types see
  * https://pubs.opengroup.org/onlinepubs/007904875/basedefs/sys/stat.h.html
@@ -196,7 +196,7 @@ if (S_ISNWK(mode)) return 'n'; // HP/UX: network special file
 # include <sys/types.h>
 # if !defined(__GLIBC__) || (__GLIBC__ > 2 \
 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 9)) \
-&& LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 27)
+&& LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,27)
 #  define HAVE_INOTIFY
 # endif /* GLIBC >= 2.9 && linux >= 2.6.27 */
 #elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) \
@@ -208,7 +208,7 @@ if (S_ISNWK(mode)) return 'n'; // HP/UX: network special file
 # if defined(__FreeBSD__) && __FreeBSD_version >= 410000
 #  define HAVE_KQUEUE
 # elif defined(__NetBSD__)
-#  if __NetBSD_Prereq__(2, 0, 0)
+#  if __NetBSD_Prereq__(2,0,0)
 #   define HAVE_KQUEUE
 #  endif /* NetBSD >= 2.0 */
 # elif defined(__OpenBSD__) && OpenBSD >= 200106 /* version 2.9 */
@@ -295,9 +295,18 @@ if (S_ISNWK(mode)) return 'n'; // HP/UX: network special file
 #endif /* !NAME_MAX */
 
 /* Used by FILE_SIZE and FILE_SIZE_PTR macros to calculate file sizes */
-#ifndef S_BLKSIZE
-# define S_BLKSIZE 512 /* Not defined in Termux */
+#ifndef S_BLKSIZE /* Not defined in Termux/Solaris */
+# include <sys/param.h>
+# ifdef DEV_BSIZE
+#  define S_BLKSIZE DEV_BSIZE
+# else
+#  define S_BLKSIZE 512
+# endif /* DEV_BSIZE */
 #endif /* !S_BLKSIZE */
+/* Linux-glibc/FreeBSD/NetBSD/OpenBSD: S_BLKSIZE/DEV_BSIZE = 512.
+ * CYGWIN: S_BLKSIZE/DEV_BSIZE = 1024.
+ * Solaris/Termux/Linux-musl: S_BLKSIZE is unset, DEV_BSIZE = 512.
+ * DragonFly/MacOS/Haiku: S_BLKSIZE = 512 (DEV_BSIZE is unset). */
 
 #ifndef ARG_MAX
 # ifdef __linux__
@@ -315,11 +324,11 @@ if (S_ISNWK(mode)) return 'n'; // HP/UX: network special file
 # endif /* __GLIBC__ >= 2.28 */
 # if !defined(__GLIBC__) || (__GLIBC__ > 2 \
 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 3))
-#  if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 4, 0)
+#  if LINUX_VERSION_CODE >= KERNEL_VERSION(2,4,0)
 #   define LINUX_FILE_XATTRS
 #  endif /* LINUX_VERSION (2.4) */
 # endif /* !__GLIBC__ || __GLIBC__ >= 2.3 */
-# if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 24)
+# if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24)
 #  define LINUX_FILE_CAPS
 # endif /* LINUX_VERSION (2.6.24)*/
 # ifndef __TERMUX__

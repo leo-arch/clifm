@@ -634,9 +634,13 @@ inline mode_t
 get_dt(const mode_t mode)
 {
 	switch (mode & S_IFMT) {
+	case S_IFREG:  return DT_REG;
+	case S_IFDIR:  return DT_DIR;
+	case S_IFLNK:  return DT_LNK;
+	case S_IFIFO:  return DT_FIFO;
+	case S_IFSOCK: return DT_SOCK;
 	case S_IFBLK:  return DT_BLK;
 	case S_IFCHR:  return DT_CHR;
-	case S_IFDIR:  return DT_DIR;
 #ifndef _BE_POSIX
 # ifdef SOLARIS_DOORS
 	case S_IFDOOR: return DT_DOOR;
@@ -650,10 +654,6 @@ get_dt(const mode_t mode)
 	case S_ARCH2:  return DT_ARCH2;
 # endif
 #endif /* !_BE_POSIX */
-	case S_IFIFO:  return DT_FIFO;
-	case S_IFLNK:  return DT_LNK;
-	case S_IFREG:  return DT_REG;
-	case S_IFSOCK: return DT_SOCK;
 	default:       return DT_UNKNOWN;
 	}
 }
@@ -1035,10 +1035,10 @@ dir_size(char *dir, const int size_in_bytes, int *status)
 
 	char file[PATH_MAX];
 #if !defined(__OpenBSD__)
-	snprintf(file, sizeof(file), "%s/duXXXXXX", xargs.stealth_mode == 1
+	snprintf(file, sizeof(file), "%s/.duXXXXXX", xargs.stealth_mode == 1
 		? P_tmpdir : tmp_dir); /* NOLINT */
 #else
-	snprintf(file, sizeof(file), "%s/duXXXXXXXXXX", xargs.stealth_mode == 1
+	snprintf(file, sizeof(file), "%s/.duXXXXXXXXXX", xargs.stealth_mode == 1
 		? P_tmpdir : tmp_dir); /* NOLINT */
 #endif /* !__OpenBSD__ */
 
