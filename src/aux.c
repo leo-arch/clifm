@@ -926,6 +926,19 @@ free_xdu_hardlinks(void)
 	xdu_hardlink_n = 0;
 }
 
+/* The st_size member of a stat struct is meaningful only:
+ * 1. When computing disk usage (not apparent sizes).
+ * 2. If apparent sizes, only for symlinks and regular files.
+ * NOTE: Here we add shared memory object and typed memory object just to
+ * match the check made by du(1). These objects are not implmented on most
+ * systems, but this might change in the future. */
+static inline int
+usable_st_size(struct stat const *s)
+{
+	return (conf.apparent_size != 1 || S_ISLNK(s->st_mode)
+		|| S_ISREG(s->st_mode) || S_TYPEISSHM(s) || S_TYPEISTMO(s));
+}
+
 /* Read no more than this many directory entries at a time. Without this
  * limit, processing a directory with 4,000,000 entries requires ~1GiB of
  * memory, and handling 64M entries would require 16GiB of memory. */
@@ -946,9 +959,11 @@ free_xdu_hardlinks(void)
  *
  * NOTE: Old versions of du (at least up to 8.30) count the size of directories
  * themselves when computing apparent sizes. At least since 9.3, this is not
- * the case anymore. As stated in 'info du': "Apparent sizes are meaningful
- * only for regular files and symbolic links. Other file types do not
- * contribute to apparent size." We follow here the last behavior. */
+ * the case anymore (See
+ * https://git.savannah.gnu.org/gitweb/?p=coreutils.git;a=commit;h=110bcd28386b1f47a4cd876098acb708fdcbbb25).
+ * As stated in 'info du': "Apparent sizes are meaningful only for regular
+ * files and symbolic links. Other file types do not contribute to apparent
+ * size." We follow here the last behavior. */
 off_t
 dir_size(char *dir, const int first_level, int *status)
 {
@@ -993,7 +1008,8 @@ dir_size(char *dir, const int first_level, int *status)
 
 		if (S_ISDIR(a.st_mode)) {
 			/* Even if a subdirectory is unreadable or we can't chdir into
-			 * it, do let its size contribute to the total. */
+			 * it, do let its size contribute to the total (provided we're
+			 * not computing apparent sizes). */
 			if (conf.apparent_size != 1)
 				size += (a.st_blocks * S_BLKSIZE);
 
@@ -1006,8 +1022,7 @@ dir_size(char *dir, const int first_level, int *status)
 			continue;
 		}
 
-		if (!S_ISLNK(a.st_mode) && !S_ISREG(a.st_mode)
-		&& !S_TYPEISSHM(&a) && !S_TYPEISTMO(&a))
+		if (usable_st_size(&a) == 0)
 			continue;
 
 		if (a.st_nlink > 1) {

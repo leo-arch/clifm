@@ -1101,6 +1101,7 @@ print_extended_attributes(char *s)
 		if (vallen == -1) {
 			printf("%s\n", strerror(errno));
 		} else if (vallen > 0) {
+			/* Output attribute value */
 			val = (char *)xnmalloc((size_t)vallen + 1, sizeof(char));
 
 			vallen = getxattr(s, key, val, (size_t)vallen);
