@@ -1498,9 +1498,10 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 		if (bigger_than_bytes == 1)
 			printf(" / %s%jdB%s", csize, (intmax_t)size, cend);
 
-		printf(" (%s%s)\n", conf.apparent_size == 1 ? _("apparent")
+		printf(" (%s%s%s)\n", conf.apparent_size == 1 ? _("apparent")
 			: _("disk usage"), (xargs.si == 1 && bigger_than_bytes == 1)
-			? " / si" : "");
+			? ",si" : "", (attr->st_blocks * S_BLKSIZE < attr->st_size)
+			? ",sparse" : "");
 
 		return;
 	}
@@ -1642,7 +1643,7 @@ properties_function(char **args, const int follow_link)
 		if (strchr(args[i], '\\')) {
 			char *deq_file = dequote_str(args[i], 0);
 			if (!deq_file) {
-				xerror(_("pr: %s: Error dequoting file name\n"), args[i]);
+				xerror(_("p: %s: Error dequoting file name\n"), args[i]);
 				exit_status = EXIT_FAILURE;
 				continue;
 			}
