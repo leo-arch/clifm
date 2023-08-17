@@ -314,7 +314,7 @@ xf=1;31:xs=0;32:"
 #define DEF_SHARE_SELBOX 0
 #define DEF_SHOW_HIDDEN 0
 #define DEF_SHOW_BACKUP_FILES 1
-#define DEF_SI 0 /* If 1, use sizes in powers of 1000 instead of 1024 */
+#define DEF_SI 0 /* If 1, compute sizes in powers of 1000 instead of 1024 */
 /* Available sort options:
  * SNONE, SNAME, STSIZE, SATIME, SBTIME, SCTIME, SMTIME
  * SVER, SEXT, SINO, SOWN, SGRP */

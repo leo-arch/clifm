@@ -1960,10 +1960,19 @@ list_dir_light(void)
 		case DT_FIFO: file_info[n].color = pi_c; stats.fifo++; break;
 		case DT_BLK: file_info[n].color = bd_c; stats.block_dev++; break;
 		case DT_CHR: file_info[n].color = cd_c; stats.char_dev++; break;
-#ifdef SOLARIS_DOORS
+#ifndef _BE_POSIX
+# ifdef SOLARIS_DOORS
 		case DT_DOOR: file_info[n].color = oo_c; stats.door++; break;
 		case DT_PORT: file_info[n].color = oo_c; stats.port++; break;
-#endif /* SOLARIS_DOORS */
+# endif /* SOLARIS_DOORS */
+# ifdef S_ARCH1
+		case DT_ARCH1: file_info[n].color = fi_c; stats.arch1++; break;
+		case DT_ARCH2: file_info[n].color = fi_c; stats.arch2++; break;
+# endif /* S_ARCH1 */
+# ifdef S_IFWHT
+		case DT_WHT: file_info[n].color = fi_c; stats.whiteout++; break;
+# endif /* DT_WHT */
+#endif /* !_BE_POSIX */
 		case DT_UNKNOWN: file_info[n].color = no_c; stats.unknown++; break;
 		default: file_info[n].color = df_c; break;
 		}
@@ -2346,7 +2355,6 @@ list_dir(void)
 				file_info[n].len--; /* Do not count terminating NUL byte */
 			len_bytes = file_info[n].len;
 		} else {
-			xstrsncpy(file_info[n].name, ename, NAME_MAX + 1);
 			len_bytes = xstrsncpy(file_info[n].name, ename, NAME_MAX + 1);
 			if (len_bytes > 0)
 				len_bytes--;
