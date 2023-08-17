@@ -33,12 +33,14 @@
 # include <sys/capability.h>
 #endif /* __linux__ */
 #include <errno.h>
-#include <fcntl.h>
+//#include <fcntl.h>
 #include <string.h>
 #if defined(__OpenBSD__)
 # include <strings.h>
 # include <inttypes.h> /* uintmax_t */
 #endif /* __OpenBSD__ */
+
+#include <fcntl.h> /* posix_fadvise() */
 
 #if defined(LINUX_FILE_XATTRS)
 # include <sys/xattr.h>
@@ -1801,6 +1803,11 @@ list_dir_light(void)
 		goto END;
 	}
 
+#ifdef POSIX_FADV_SEQUENTIAL
+	const int fd = dirfd(dir);
+	posix_fadvise(fd, 0, 0, POSIX_FADV_SEQUENTIAL);
+#endif /* POSIX_FADV_SEQUENTIAL */
+
 	set_events_checker();
 
 	errno = 0;
@@ -2264,6 +2271,11 @@ list_dir(void)
 	set_events_checker();
 
 	const int fd = dirfd(dir);
+
+#ifdef POSIX_FADV_SEQUENTIAL
+	/* A hint to the kernel to optimize current dir for reading */
+	posix_fadvise(fd, 0, 0, POSIX_FADV_SEQUENTIAL);
+#endif /* POSIX_FADV_SEQUENTIAL */
 
 		/* ##########################################
 		 * #    GATHER AND STORE FILE INFORMATION   #
