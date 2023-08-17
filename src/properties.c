@@ -1547,7 +1547,7 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 			printf("/ %s%jdB%s ", csize, (intmax_t)total_size, cend);
 
 		printf("(%s%s)\n", conf.apparent_size == 1 ? _("apparent")
-			: _("disk usage"), xargs.si == 1 ? " / si" : "");
+			: _("disk usage"), xargs.si == 1 ? ",si" : "");
 #ifndef USE_XDU
 	} else {
 		printf("%s%s%s\n", csize, human_size, cend);
