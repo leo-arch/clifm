@@ -2122,7 +2122,7 @@ init_fileinfo(const filesn_t n)
 	file_info[n].icon_color = DEF_FILE_ICON_COLOR;
 #endif /* !_NO_ICONS */
 	file_info[n].ruser = 1;
-	file_info[n].size = 1;
+	file_info[n].size =  1;
 	file_info[n].linkn = 1;
 }
 
@@ -2643,18 +2643,12 @@ list_dir(void)
 			/* Check icons for specific file names */
 			const int name_icon_found = (conf.icons == 1)
 				? get_name_icon(file_info[n].name, n) : 0;
-/*			int name_icon_found = 0;
-			if (conf.icons == 1)
-				name_icon_found = get_name_icon(file_info[n].name, (int)n); */
 #endif /* !_NO_ICONS */
 
 			/* Check file extension */
 			char *ext = (check_ext == 1 && no_override_color == 0)
 				? strrchr(file_info[n].name, '.') : (char *)NULL;
-/*			char *ext = (char *)NULL;
-			if (check_ext == 1 && no_override_color == 0)
-				ext = strrchr(file_info[n].name, '.'); */
-			/* Make sure not to take a hidden file for a file extension */
+
 			if (!ext || ext == file_info[n].name || !*(ext + 1))
 				break;
 			else
