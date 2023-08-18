@@ -1754,30 +1754,35 @@ exclude_file_type(const mode_t mode, const nlink_t links)
 }
 
 /* Return 1 if NAME contains at least one UTF8 character or control char, or
- * 0 otherwise.
+ * 0 otherwise. BYTES is updated to the number of bytes needed to read the
+ * entire name (excluding the terminating NUL char).
+ *
  * This check is performed over file names to be listed. If the file name is
  * not UTF8, we get its visible length directly from xstrsncpy(), instead of
  * running xstrsncpy() and then wc_xstrlen(). This gives us a little
  * performance improvement: 3% faster over 100000 files. */
 static inline uint8_t
-is_utf8_name(const char *name)
+is_utf8_name(const char *name, size_t *bytes)
 {
+	uint8_t is_utf8 = 0;
+
 	while (*name) {
-//		if ((*name & 0xC0) == 0xC0 || *name < ' ')
 #if !defined(CHAR_MIN) || CHAR_MIN >= 0 /* char is unsigned */
 		if (*name >= 0xC0 || *name < ' ')
 #else /* char is signed */
-		/* If UTF-8 char, the first byte is at least 0xC0, whose decimal
+		/* If UTF-8 char, the first byte is >= 0xC0, whose decimal
 		 * value is 192, which is bigger than CHAR_MAX if char is signed,
 		 * becoming thus a negative value. In this way, the above two-steps
 		 * check can be written using a single comparison. */
 		if (*name < ' ')
 #endif /* CHAR_MIN >= 0 */
-			return 1;
+			is_utf8 = 1;
+
 		name++;
+		(*bytes)++;
 	}
 
-	return 0;
+	return is_utf8;
 }
 
 /* List files in the current working directory (global variable 'path').
@@ -1883,13 +1888,14 @@ list_dir_light(void)
 
 //		init_fileinfo(n);
 
-		file_info[n].name = (char *)xnmalloc(NAME_MAX + 1, sizeof(char));
-		if (conf.unicode == 0 || is_utf8_name(ename) == 0) {
-			file_info[n].len = xstrsncpy(file_info[n].name, ename, NAME_MAX + 1);
-			if (file_info[n].len > 0)
-				file_info[n].len--; /* Do not count terminating NUL byte */
+		size_t name_len = 0;
+		if (is_utf8_name(ename, &name_len) == 0) {
+			file_info[n].name = (char *)xnmalloc(name_len + 1, sizeof(char));
+			xstrsncpy(file_info[n].name, ename, name_len + 1);
+			file_info[n].len = name_len;
 		} else {
-			xstrsncpy(file_info[n].name, ename, NAME_MAX + 1);
+			file_info[n].name = (char *)xnmalloc(name_len + 1, sizeof(char));
+			xstrsncpy(file_info[n].name, ename, name_len + 1);
 			file_info[n].len = wc_xstrlen(ename);
 		}
 
@@ -2365,25 +2371,17 @@ list_dir(void)
 				* sizeof(struct fileinfo));
 		}
 
-		file_info[n].name = (char *)xnmalloc(NAME_MAX + 1, sizeof(char));
-
 		size_t len_bytes = 0; /* File name length in bytes (not chars) */
 
-		if (conf.unicode == 0 || is_utf8_name(ename) == 0) {
-			file_info[n].len =
-				xstrsncpy(file_info[n].name, ename, NAME_MAX + 1);
-			if (file_info[n].len > 0)
-				file_info[n].len--; /* Do not count terminating NUL byte */
-			len_bytes = file_info[n].len;
+		if (is_utf8_name(ename, &len_bytes) == 0) {
+			file_info[n].name = (char *)xnmalloc(len_bytes + 1, sizeof(char));
+			xstrsncpy(file_info[n].name, ename, len_bytes + 1);
+			file_info[n].len = len_bytes;
 		} else {
-			len_bytes = xstrsncpy(file_info[n].name, ename, NAME_MAX + 1);
-			if (len_bytes > 0)
-				len_bytes--;
+			file_info[n].name = (char *)xnmalloc(len_bytes + 1, sizeof(char));
+			xstrsncpy(file_info[n].name, ename, len_bytes + 1);
 			file_info[n].len = wc_xstrlen(ename);
 		}
-
-/*		file_info[n].name =
-			(char *)xrealloc(file_info[n].name, (len_bytes + 1) * sizeof(char)); */
 
 #ifdef _NO_ICONS
 		file_info[n].icon = (char *)NULL;
