@@ -1758,9 +1758,9 @@ exclude_file_type(const mode_t mode, const nlink_t links)
  * entire name (excluding the terminating NUL char).
  *
  * This check is performed over file names to be listed. If the file name is
- * not UTF8, we get its visible length directly from xstrsncpy(), instead of
- * running xstrsncpy() and then wc_xstrlen(). This gives us a little
- * performance improvement: 3% faster over 100000 files. */
+ * not UTF8, we get its visible length from BYTES, instead of running
+ * wc_xstrlen(). This gives us a little performance improvement: 3% faster
+ * over 100,000 files. */
 static inline uint8_t
 is_utf8_name(const char *name, size_t *bytes)
 {
