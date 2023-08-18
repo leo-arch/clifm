@@ -1763,7 +1763,16 @@ static inline uint8_t
 is_utf8_name(const char *name)
 {
 	while (*name) {
-		if ((*name & 0xC0) == 0xC0 || *name < ' ')
+//		if ((*name & 0xC0) == 0xC0 || *name < ' ')
+#if !defined(CHAR_MIN) || CHAR_MIN >= 0 /* char is unsigned */
+		if (*name >= 0xC0 || *name < ' ')
+#else /* char is signed */
+		/* If UTF-8 char, the first byte is at least 0xC0, whose decimal
+		 * value is 192, which is bigger than CHAR_MAX if char is signed,
+		 * becoming thus a negative value. In this way, the above two-steps
+		 * check can be written using a single comparison. */
+		if (*name < ' ')
+#endif /* CHAR_MIN >= 0 */
 			return 1;
 		name++;
 	}
