@@ -1889,15 +1889,10 @@ list_dir_light(void)
 //		init_fileinfo(n);
 
 		size_t name_len = 0;
-		if (is_utf8_name(ename, &name_len) == 0) {
-			file_info[n].name = (char *)xnmalloc(name_len + 1, sizeof(char));
-			xstrsncpy(file_info[n].name, ename, name_len + 1);
-			file_info[n].len = name_len;
-		} else {
-			file_info[n].name = (char *)xnmalloc(name_len + 1, sizeof(char));
-			xstrsncpy(file_info[n].name, ename, name_len + 1);
-			file_info[n].len = wc_xstrlen(ename);
-		}
+		const uint8_t is_utf8 = is_utf8_name(ename, &name_len);
+		file_info[n].name = (char *)xnmalloc(name_len + 1, sizeof(char));
+		xstrsncpy(file_info[n].name, ename, name_len + 1);
+		file_info[n].len = (is_utf8 == 0) ? name_len : wc_xstrlen(ename);
 
 		/* ################  */
 #ifndef _DIRENT_HAVE_D_TYPE
@@ -2372,16 +2367,11 @@ list_dir(void)
 		}
 
 		size_t len_bytes = 0; /* File name length in bytes (not chars) */
-
-		if (is_utf8_name(ename, &len_bytes) == 0) {
-			file_info[n].name = (char *)xnmalloc(len_bytes + 1, sizeof(char));
-			xstrsncpy(file_info[n].name, ename, len_bytes + 1);
-			file_info[n].len = len_bytes;
-		} else {
-			file_info[n].name = (char *)xnmalloc(len_bytes + 1, sizeof(char));
-			xstrsncpy(file_info[n].name, ename, len_bytes + 1);
-			file_info[n].len = wc_xstrlen(ename);
-		}
+		const uint8_t is_utf8 = is_utf8_name(ename, &len_bytes);
+		file_info[n].name = (char *)xnmalloc(len_bytes + 1, sizeof(char));
+		xstrsncpy(file_info[n].name, ename, len_bytes + 1);
+		/* Number of visible characters */
+		file_info[n].len = is_utf8 == 0 ? len_bytes : wc_xstrlen(ename);
 
 #ifdef _NO_ICONS
 		file_info[n].icon = (char *)NULL;
