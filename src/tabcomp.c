@@ -403,7 +403,7 @@ fzftab_color(char *filename, const struct stat *attr)
 		char *ext_cl = (char *)NULL;
 		char *ext = strrchr(filename, '.');
 		if (ext && ext != filename)
-			ext_cl = get_ext_color(ext);
+			ext_cl = get_ext_color(ext, NULL);
 
 		if (te) *te = '.';
 

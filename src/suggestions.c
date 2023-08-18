@@ -689,13 +689,14 @@ get_reg_file_color(const char *filename, const struct stat *attr,
 	if (!ext || ext == filename)
 		return fi_c;
 
-	char *extcolor = get_ext_color(ext);
+	size_t color_len = 0;
+	char *extcolor = get_ext_color(ext, &color_len);
 	if (!extcolor)
 		return fi_c;
 
-	size_t len = strlen(extcolor) + 4;
-	char *ext_color = (char *)xnmalloc(len, sizeof(char));
-	snprintf(ext_color, len, "\x1b[%sm", extcolor);
+	color_len += 4;
+	char *ext_color = (char *)xnmalloc(color_len, sizeof(char));
+	snprintf(ext_color, color_len, "\x1b[%sm", extcolor);
 
 	*free_color = 1;
 	return ext_color;
@@ -706,7 +707,6 @@ get_reg_file_color(const char *filename, const struct stat *attr,
 static char *
 get_comp_color(const char *filename, const struct stat *attr, int *free_color)
 {
-//	char *color = no_c;
 	char *color = (char *)NULL;
 
 	switch (attr->st_mode & S_IFMT) {

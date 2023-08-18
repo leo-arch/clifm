@@ -430,7 +430,7 @@ get_regfile_color(const char *filename, const struct stat *attr, int *is_ext)
 	if (!ext)
 		return color ? color : fi_c;
 
-	char *extcolor = get_ext_color(ext);
+	char *extcolor = get_ext_color(ext, NULL);
 	ext = (char *)NULL;
 	if (!extcolor)
 		return color ? color : fi_c;
@@ -724,8 +724,11 @@ check_ext_hash(const size_t hash, size_t *count)
 	return p;
 } */
 
+
+/* Return the color code associated to the file extension EXT, updating
+ * VAL_LEN, if not NULL, to the length of this code. */
 static char *
-check_ext_string(const char *ext)
+check_ext_string(const char *ext, size_t *val_len)
 {
 	/* Hold extension names. NAME_MAX should be enough: no file name should
 	 * go beyond NAME_MAX, so it's pretty safe to assume that no file extension
@@ -765,6 +768,9 @@ check_ext_string(const char *ext)
 		if (match == 0 || *q != '\0')
 			continue;
 
+		if (val_len)
+			*val_len = ext_colors[i].value_len;
+
 		return ext_colors[i].value;
 	}
 
@@ -772,11 +778,11 @@ check_ext_string(const char *ext)
 }
 
 /* Returns a pointer to the corresponding color code for the file
- * extension EXT.
+ * extension EXT (updating VAL_LEN to the length of this code).
  * The hash table is checked first, and, in case of a conflict, a regular
  * string comparison is performed to resolve it. */
 char *
-get_ext_color(const char *ext)
+get_ext_color(const char *ext, size_t *val_len)
 {
 	if (!ext || !*ext || !*(++ext) || ext_colors_n == 0)
 		return (char *)NULL;
@@ -791,7 +797,7 @@ get_ext_color(const char *ext)
 
 	/* We have a conflict: a single hash is used for two or more extensions.
 	 * Let's try to match the extension name itself. */
-	return check_ext_string(ext);
+	return check_ext_string(ext, val_len);
 }
 
 #ifndef CLIFM_SUCKLESS
@@ -1538,6 +1544,7 @@ store_extension_line(const char *line)
 	size_t elen = strlen(code) + 3;
 	ext_colors[ext_colors_n].value = (char *)xnmalloc(elen, sizeof(char));
 	snprintf(ext_colors[ext_colors_n].value, elen, "0;%s", code);
+	ext_colors[ext_colors_n].value_len = elen - 1;
 //	ext_color[ext_colors_n].hash = hashme(line, 0);
 
 	if (xargs.no_bold == 1)
@@ -1611,6 +1618,8 @@ split_extension_colors(char *extcolors)
 			(ext_colors_n + 1) * sizeof(struct ext_t));
 		ext_colors[ext_colors_n].name = (char *)NULL;
 		ext_colors[ext_colors_n].value = (char *)NULL;
+		ext_colors[ext_colors_n].len = 0;
+		ext_colors[ext_colors_n].value_len = 0;
 	}
 }
 

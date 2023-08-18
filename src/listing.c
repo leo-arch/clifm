@@ -2373,6 +2373,9 @@ list_dir(void)
 			file_info[n].len = wc_xstrlen(ename);
 		}
 
+/*		file_info[n].name =
+			(char *)xrealloc(file_info[n].name, (len_bytes + 1) * sizeof(char)); */
+
 #ifdef _NO_ICONS
 		file_info[n].icon = (char *)NULL;
 		file_info[n].icon_color = df_c;
@@ -2660,15 +2663,15 @@ list_dir(void)
 			if (conf.icons == 1 && name_icon_found == 0)
 				get_ext_icon(ext, n);
 #endif /* !_NO_ICONS */
-			const char *extcolor = get_ext_color(ext);
+			size_t color_len = 0;
+			const char *extcolor = get_ext_color(ext, &color_len);
 			if (!extcolor)
 				break;
 
-			const size_t len = strlen(extcolor) + 4;
-			file_info[n].ext_color = (char *)xnmalloc(len, sizeof(char));
-			snprintf(file_info[n].ext_color, len, "\x1b[%sm", extcolor);
+			color_len += 4;
+			file_info[n].ext_color = (char *)xnmalloc(color_len, sizeof(char));
+			snprintf(file_info[n].ext_color, color_len, "\x1b[%sm", extcolor);
 			file_info[n].color = file_info[n].ext_color;
-//			extcolor = (char *)NULL;
 		} /* End of DT_REG block */
 		break;
 
@@ -2707,9 +2710,9 @@ list_dir(void)
 		count++;
 	}
 
-/*	size_t tdents = total_dents > 0 ? total_dents : ENTRY_N + 2;
+/*	filesn_t tdents = total_dents > 0 ? (filesn_t)total_dents : ENTRY_N + 2;
 	if (tdents > n)
-		file_info = xrealloc(file_info, (n + 1) * sizeof(struct fileinfo)); */
+		file_info = xrealloc(file_info, (size_t)(n + 1) * sizeof(struct fileinfo)); */
 
 	if (xargs.disk_usage_analyzer == 1 || (conf.long_view == 1
 	&& conf.full_dir_size == 1)) {

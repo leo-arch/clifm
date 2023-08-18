@@ -1496,7 +1496,8 @@ extern struct paths_t *paths;
 struct ext_t {
 	char  *name;
 	char  *value;
-	size_t len;
+	size_t len; /* Name length */
+	size_t value_len;
 //	size_t hash;
 };
 extern struct ext_t *ext_colors;
