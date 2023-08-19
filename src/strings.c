@@ -103,8 +103,6 @@ typedef char *rl_cpvfunc_t;
 #define IS_WORD(x, y) (((x) == '$' && ((y) == '(' || (y) == '{')) \
 || ((x) == '`' && (y) != ' ') || (x) == '~' || (x) == '$')
 
-static char len_buf[ARG_MAX * sizeof(wchar_t)] __attribute__((aligned));
-
 /* QUOTED_WORDS stores indices of words quoted in the command line so that we
  * can keep track of them and prevent expanding them when spliting the
  * input string (in parse_input_str()). */
@@ -401,20 +399,21 @@ xstrverscmp(const char *s1, const char *s2)
 	}
 }
 
-/* A strlen implementation able to handle wide chars. */
+/* A strlen implementation able to handle wide chars.
+ * Returns the number of columns needed to print the string STR (instead
+ * of the number of bytes needed to store STR). */
 size_t
 wc_xstrlen(const char *restrict str)
 {
-	wchar_t *const wbuf = (wchar_t *)len_buf;
-
 	/* Convert multi-byte to wide char */
+	static wchar_t wbuf[ARG_MAX];
 	const size_t len = mbstowcs(wbuf, str, ARG_MAX);
 	if (len == (size_t)-1) /* Invalid multi-byte sequence found */
 		return 0;
 
-	int w = wcswidth(wbuf, len);
-	if (w != -1)
-		return (size_t)w;
+	int width = wcswidth(wbuf, len);
+	if (width != -1)
+		return (size_t)width;
 
 	/* A non-printable wide char was found */
 	return 0;

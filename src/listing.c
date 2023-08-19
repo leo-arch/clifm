@@ -1753,8 +1753,8 @@ exclude_file_type(const mode_t mode, const nlink_t links)
 		return filter.rev == 1 ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 
-/* Return 1 if NAME contains at least one UTF8 character or control char, or
- * 0 otherwise. BYTES is updated to the number of bytes needed to read the
+/* Return 1 if NAME contains at least one UTF8/control character, or 0
+ * otherwise. BYTES is updated to the number of bytes needed to read the
  * entire name (excluding the terminating NUL char).
  *
  * This check is performed over file names to be listed. If the file name is
@@ -2366,11 +2366,22 @@ list_dir(void)
 				* sizeof(struct fileinfo));
 		}
 
-		size_t len_bytes = 0; /* File name length in bytes (not chars) */
+		/* Both is_utf8_name() and wc_xstrlen() calculate the number of
+		 * characters needed to print the current file name on the screen
+		 * (the former for ASCII names, where char = byte, and the latter for
+		 * UTF-8 names, i.e. containing at least one non-ASCII character).
+		 * Now, since is_utf8_name() is ~8 times faster than wc_xstrlen()
+		 * (10,000 entries, optimization O3), we only run wc_xstrlen() in
+		 * case of an UTF-8 name.
+		 * However, since is_utf8_name() will be executed anyway, this ends
+		 * up being actually slower whenever the current directory contains
+		 * more UTF-8 than ASCII names. The assumption here is that ASCII
+		 * names are far more common than UTF-8 names. */
+		size_t len_bytes = 0; /* Bytes in file name */
 		const uint8_t is_utf8 = is_utf8_name(ename, &len_bytes);
 		file_info[n].name = (char *)xnmalloc(len_bytes + 1, sizeof(char));
 		xstrsncpy(file_info[n].name, ename, len_bytes + 1);
-		/* Number of visible characters */
+		/* Characters in file name */
 		file_info[n].len = is_utf8 == 0 ? len_bytes : wc_xstrlen(ename);
 
 #ifdef _NO_ICONS
