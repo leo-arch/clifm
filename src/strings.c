@@ -406,6 +406,15 @@ size_t
 wc_xstrlen(const char *restrict str)
 {
 	/* Convert multi-byte to wide char */
+	/* Most of the time we use this function to get the number of characters
+	 * in names: in this case a buffer of NAME_MAX + 1 is enough. However, we
+	 * sometimes use this function to get the number of characters in the
+	 * current command line (rl_line_buffer), which has no size limit beyond
+	 * what an int can hold (INT_MAX), which is huge. ARG_MAX (128k or more),
+	 * though much smaller than INT_MAX, should be enough most of the time.
+	 * Even PATH_MAX, usually 4096, is still too narrow to hold a complete
+	 * command line: a history entry involving several paths might easily be
+	 * longer than PATH_MAX. */
 	static wchar_t wbuf[ARG_MAX];
 	const size_t len = mbstowcs(wbuf, str, ARG_MAX);
 	if (len == (size_t)-1) /* Invalid multi-byte sequence found */
