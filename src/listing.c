@@ -1767,9 +1767,9 @@ is_utf8_name(const char *name, size_t *bytes)
 	uint8_t is_utf8 = 0;
 
 	while (*name) {
-#if !defined(CHAR_MIN) || CHAR_MIN >= 0 /* char is unsigned */
+#if !defined(CHAR_MIN) || CHAR_MIN >= 0 /* char is unsigned (PowerPC/ARM) */
 		if (*name >= 0xC0 || *name < ' ')
-#else /* char is signed */
+#else /* char is signed (X86) */
 		/* If UTF-8 char, the first byte is >= 0xC0, whose decimal
 		 * value is 192, which is bigger than CHAR_MAX if char is signed,
 		 * becoming thus a negative value. In this way, the above two-steps
@@ -1891,7 +1891,7 @@ list_dir_light(void)
 		size_t name_len = 0;
 		const uint8_t is_utf8 = is_utf8_name(ename, &name_len);
 		file_info[n].name = (char *)xnmalloc(name_len + 1, sizeof(char));
-		xstrsncpy(file_info[n].name, ename, name_len + 1);
+		memcpy(file_info[n].name, ename, name_len + 1);
 		file_info[n].len = (is_utf8 == 0) ? name_len : wc_xstrlen(ename);
 
 		/* ################  */
@@ -2367,9 +2367,10 @@ list_dir(void)
 		}
 
 		/* Both is_utf8_name() and wc_xstrlen() calculate the number of
-		 * characters needed to print the current file name on the screen
-		 * (the former for ASCII names, where char = byte, and the latter for
-		 * UTF-8 names, i.e. containing at least one non-ASCII character).
+		 * columns needed to display the current file name on the screen
+		 * (the former for ASCII names, where 1 char = 1 byte = 1 column, and
+		 * the latter for UTF-8 names, i.e. containing at least one non-ASCII
+		 * character).
 		 * Now, since is_utf8_name() is ~8 times faster than wc_xstrlen()
 		 * (10,000 entries, optimization O3), we only run wc_xstrlen() in
 		 * case of an UTF-8 name.
@@ -2380,8 +2381,8 @@ list_dir(void)
 		size_t len_bytes = 0; /* Bytes in file name */
 		const uint8_t is_utf8 = is_utf8_name(ename, &len_bytes);
 		file_info[n].name = (char *)xnmalloc(len_bytes + 1, sizeof(char));
-		xstrsncpy(file_info[n].name, ename, len_bytes + 1);
-		/* Characters in file name */
+		memcpy(file_info[n].name, ename, len_bytes + 1);
+		/* Columns needed to display file name */
 		file_info[n].len = is_utf8 == 0 ? len_bytes : wc_xstrlen(ename);
 
 #ifdef _NO_ICONS
@@ -2713,8 +2714,11 @@ list_dir(void)
 	}
 
 /*	filesn_t tdents = total_dents > 0 ? (filesn_t)total_dents : ENTRY_N + 2;
-	if (tdents > n)
-		file_info = xrealloc(file_info, (size_t)(n + 1) * sizeof(struct fileinfo)); */
+	if (tdents > n) {
+//		printf("%zd:%zd\n", (size_t)tdents * sizeof(struct fileinfo),
+//			(size_t)n * sizeof(struct fileinfo));
+		file_info = xrealloc(file_info, (size_t)(n + 1) * sizeof(struct fileinfo));
+	} */
 
 	if (xargs.disk_usage_analyzer == 1 || (conf.long_view == 1
 	&& conf.full_dir_size == 1)) {
