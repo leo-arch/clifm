@@ -73,6 +73,22 @@ typedef char *rl_cpvfunc_t;
 #include "messages.h"
 #include "file_operations.h"
 
+char *
+gen_diff_str(const int diff)
+{
+	if (diff == 1)
+		return "\x1b[1C";
+	if (diff == 2)
+		return "\x1b[2C";
+	if (diff == 3)
+		return "\x1b[3C";
+
+	static char diff_str[14];
+	snprintf(diff_str, sizeof(diff_str), "\x1b[%dC", diff);
+
+	return diff_str;
+}
+
 int
 is_blank_name(const char *s)
 {

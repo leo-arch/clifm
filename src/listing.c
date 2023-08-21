@@ -69,6 +69,9 @@
 	&& ((n)[(l) - 1] == '~'                 \
 	|| (*(n) == '#' && (n)[(l) - 1] == '#')))
 
+#define IS_EXEC(s) (((s).st_mode & S_IXUSR)            \
+	|| ((s).st_mode & S_IXGRP) || ((s).st_mode & S_IXOTH))
+
 #include "aux.h"
 #include "colors.h"
 #include "messages.h"
@@ -176,6 +179,38 @@ swap_ent(const size_t id1, const size_t id2)
 	*pdent2 = *(&_dent);
 }
 #endif /* TOURBIN_QSORT */
+
+/* Return 1 if NAME contains at least one UTF8/control character, or 0
+ * otherwise. BYTES is updated to the number of bytes needed to read the
+ * entire name (excluding the terminating NUL char).
+ *
+ * This check is performed over file names to be listed. If the file name is
+ * not UTF8, we get its visible length from BYTES, instead of running
+ * wc_xstrlen(). This gives us a little performance improvement: 3% faster
+ * over 100,000 files. */
+static uint8_t
+is_utf8_name(const char *name, size_t *bytes)
+{
+	uint8_t is_utf8 = 0;
+
+	while (*name) {
+#if !defined(CHAR_MIN) || CHAR_MIN >= 0 /* char is unsigned (PowerPC/ARM) */
+		if (*name >= 0xC0 || *name < ' ')
+#else /* char is signed (X86) */
+		/* If UTF-8 char, the first byte is >= 0xC0, whose decimal
+		 * value is 192, which is bigger than CHAR_MAX if char is signed,
+		 * becoming thus a negative value. In this way, the above two-steps
+		 * check can be written using a single comparison. */
+		if (*name < ' ')
+#endif /* CHAR_MIN >= 0 */
+			is_utf8 = 1;
+
+		name++;
+		(*bytes)++;
+	}
+
+	return is_utf8;
+}
 
 /* Set the color of the dividing line: DL, is the color code is set,
  * or the color of the current workspace if not */
@@ -743,7 +778,7 @@ static void
 print_long_mode(size_t *counter, int *reset_pager, const int pad,
 	const size_t ug_max, const size_t ino_max, const uint8_t have_xattr)
 {
-	struct stat lattr;
+//	struct stat lattr;
 
 	size_t fc_max = conf.files_counter == 1 ? get_max_files_counter() : 0;
 	size_t size_max = prop_fields.size == PROP_SIZE_BYTES ? get_max_size() : 0;
@@ -766,8 +801,9 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad,
 	for (i = 0; i < k; i++) {
 		if (max_files != UNSET && i == max_files)
 			break;
+		/* What the heck was doing this here?!
 		if (lstat(file_info[i].name, &lattr) == -1)
-			continue;
+			continue; */
 
 		if (conf.pager == 1 || (*reset_pager == 0 && conf.pager > 1
 		&& files >= (filesn_t)conf.pager)) {
@@ -828,12 +864,12 @@ get_ext_info(const filesn_t i, int *trim_type, size_t *ext_len)
 {
 	if (file_info[i].ext_name) {
 		*trim_type = TRIM_EXT;
-		if (conf.unicode == 0) {
-			*ext_len = file_info[i].len - (size_t)(file_info[i].ext_name
-				- file_info[i].name);
-		} else {
+
+		size_t bytes = 0;
+		if (is_utf8_name(file_info[i].ext_name, &bytes) == 0)
+			*ext_len = bytes;
+		else
 			*ext_len = wc_xstrlen(file_info[i].ext_name);
-		}
 
 		if ((int)*ext_len >= conf.max_name_len || (int)*ext_len <= 0) {
 			*ext_len = 0;
@@ -849,12 +885,11 @@ get_ext_info(const filesn_t i, int *trim_type, size_t *ext_len)
 	file_info[i].ext_name = dot;
 	*trim_type = TRIM_EXT;
 
-	if (conf.unicode == 0) {
-		*ext_len = file_info[i].len - (size_t)(file_info[i].ext_name
-			- file_info[i].name);
-	} else {
+	size_t bytes = 0;
+	if (is_utf8_name(file_info[i].ext_name, &bytes) == 0)
+		*ext_len = bytes;
+	else
 		*ext_len = wc_xstrlen(file_info[i].ext_name);
-	}
 
 	if ((int)*ext_len >= conf.max_name_len || (int)*ext_len <= 0) {
 		*ext_len = 0;
@@ -868,7 +903,8 @@ get_ext_info(const filesn_t i, int *trim_type, size_t *ext_len)
 static char *
 construct_filename(const filesn_t i, struct wtrim_t *wtrim, const int max_namelen)
 {
-	/* wc_xstrlen returns 0 if a non-printable char was found in the file name */
+	/* both wc_xstrlen() and is_utf8_name() return 0 if a non-printable char
+	 * was found in the file name. Let's recalculate the name length. */
 	if (file_info[i].len == 0) {
 		wtrim->wname = replace_ctrl_chars(file_info[i].name);
 		file_info[i].len = wc_xstrlen(wtrim->wname);
@@ -884,8 +920,11 @@ construct_filename(const filesn_t i, struct wtrim_t *wtrim, const int max_namele
 	size_t ext_len = 0;
 	get_ext_info(i, &wtrim->type, &ext_len);
 
-	xstrsncpy(name_buf, wtrim->wname ? wtrim->wname
-		: file_info[i].name, sizeof(name_buf));
+	if (wtrim->wname)
+		xstrsncpy(name_buf, wtrim->wname, sizeof(name_buf));
+	else /* memcpy is faster: use it whenever possible */
+		memcpy(name_buf, file_info[i].name, file_info[i].bytes + 1);
+
 	wtrim->diff = u8truncstr(name_buf, (size_t)max_namelen - 1 - ext_len);
 	file_info[i].len = (size_t)max_namelen;
 
@@ -902,10 +941,7 @@ print_entry_color(int *ind_char, const filesn_t i, const int pad,
 	struct wtrim_t wtrim = (struct wtrim_t){0};
 	const char *n = construct_filename(i, &wtrim, max_namelen);
 
-	char trim_diff[14];
-	*trim_diff = '\0';
-	if (wtrim.diff > 0)
-		snprintf(trim_diff, sizeof(trim_diff), "\x1b[%dC", wtrim.diff);
+	const char *trim_diff = wtrim.diff > 0 ? gen_diff_str(wtrim.diff) : "";
 
 	int ind_chr = 0;
 	const char *ind_chr_color = get_ind_char(i, &ind_chr);
@@ -1007,10 +1043,7 @@ print_entry_nocolor(int *ind_char, const filesn_t i, const int pad,
 	struct wtrim_t wtrim = (struct wtrim_t){0};
 	const char *n = construct_filename(i, &wtrim, max_namelen);
 
-	char trim_diff[14];
-	*trim_diff = '\0';
-	if (wtrim.diff > 0)
-		snprintf(trim_diff, sizeof(trim_diff), "\x1b[%dC", wtrim.diff);
+	const char *trim_diff = wtrim.diff > 0 ? gen_diff_str(wtrim.diff) : "";
 
 #ifndef _NO_ICONS
 	if (conf.icons == 1) {
@@ -1114,10 +1147,7 @@ print_entry_color_light(int *ind_char, const filesn_t i, const int pad,
 	struct wtrim_t wtrim = (struct wtrim_t){0};
 	const char *n = construct_filename(i, &wtrim, max_namelen);
 
-	char trim_diff[14];
-	*trim_diff = '\0';
-	if (wtrim.diff > 0)
-		snprintf(trim_diff, sizeof(trim_diff), "\x1b[%dC", wtrim.diff);
+	const char *trim_diff = wtrim.diff > 0 ? gen_diff_str(wtrim.diff) : "";
 
 #ifndef _NO_ICONS
 	if (conf.icons == 1) {
@@ -1200,10 +1230,7 @@ print_entry_nocolor_light(int *ind_char, const filesn_t i, const int pad,
 	struct wtrim_t wtrim = (struct wtrim_t){0};
 	const char *n = construct_filename(i, &wtrim, max_namelen);
 
-	char trim_diff[14];
-	*trim_diff = '\0';
-	if (wtrim.diff > 0)
-		snprintf(trim_diff, sizeof(trim_diff), "\x1b[%dC", wtrim.diff);
+	const char *trim_diff = wtrim.diff > 0 ? gen_diff_str(wtrim.diff) : "";
 
 #ifndef _NO_ICONS
 	if (conf.icons == 1) {
@@ -1753,36 +1780,19 @@ exclude_file_type(const mode_t mode, const nlink_t links)
 		return filter.rev == 1 ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 
-/* Return 1 if NAME contains at least one UTF8/control character, or 0
- * otherwise. BYTES is updated to the number of bytes needed to read the
- * entire name (excluding the terminating NUL char).
- *
- * This check is performed over file names to be listed. If the file name is
- * not UTF8, we get its visible length from BYTES, instead of running
- * wc_xstrlen(). This gives us a little performance improvement: 3% faster
- * over 100,000 files. */
-static inline uint8_t
-is_utf8_name(const char *name, size_t *bytes)
+/* Initialize the file_info struct, mostly in case stat fails. */
+static inline void
+init_fileinfo(const filesn_t n)
 {
-	uint8_t is_utf8 = 0;
-
-	while (*name) {
-#if !defined(CHAR_MIN) || CHAR_MIN >= 0 /* char is unsigned (PowerPC/ARM) */
-		if (*name >= 0xC0 || *name < ' ')
-#else /* char is signed (X86) */
-		/* If UTF-8 char, the first byte is >= 0xC0, whose decimal
-		 * value is 192, which is bigger than CHAR_MAX if char is signed,
-		 * becoming thus a negative value. In this way, the above two-steps
-		 * check can be written using a single comparison. */
-		if (*name < ' ')
-#endif /* CHAR_MIN >= 0 */
-			is_utf8 = 1;
-
-		name++;
-		(*bytes)++;
-	}
-
-	return is_utf8;
+	file_info[n] = (struct fileinfo){0};
+	file_info[n].color = df_c;
+#ifndef _NO_ICONS
+	file_info[n].icon = DEF_FILE_ICON;
+	file_info[n].icon_color = DEF_FILE_ICON_COLOR;
+#endif /* !_NO_ICONS */
+	file_info[n].ruser = 1;
+	file_info[n].size =  1;
+	file_info[n].linkn = 1;
 }
 
 /* List files in the current working directory (global variable 'path').
@@ -1886,13 +1896,14 @@ list_dir_light(void)
 				* sizeof(struct fileinfo));
 		}
 
-//		init_fileinfo(n);
+		init_fileinfo(n);
 
-		size_t name_len = 0;
-		const uint8_t is_utf8 = is_utf8_name(ename, &name_len);
-		file_info[n].name = (char *)xnmalloc(name_len + 1, sizeof(char));
-		memcpy(file_info[n].name, ename, name_len + 1);
-		file_info[n].len = (is_utf8 == 0) ? name_len : wc_xstrlen(ename);
+		file_info[n].utf8 = is_utf8_name(ename, &file_info[n].bytes);
+		file_info[n].name =
+			(char *)xnmalloc(file_info[n].bytes + 1, sizeof(char));
+		memcpy(file_info[n].name, ename, file_info[n].bytes + 1);
+		file_info[n].len = (file_info[n].utf8 == 0)
+			? file_info[n].bytes : wc_xstrlen(ename);
 
 		/* ################  */
 #ifndef _DIRENT_HAVE_D_TYPE
@@ -1906,7 +1917,6 @@ list_dir_light(void)
 			if (lstat(ename, &a) == -1)
 				continue;
 			file_info[n].type = get_dt(a.st_mode);
-//			file_info[n].type = IFTODT(a.st_mode);
 		} else {
 			file_info[n].type = ent->d_type;
 		}
@@ -2121,21 +2131,6 @@ check_seltag(const dev_t dev, const ino_t ino, const nlink_t links,
 	return 0;
 }
 
-/* Initialize the file_info struct, mostly in case stat fails. */
-static inline void
-init_fileinfo(const filesn_t n)
-{
-	file_info[n] = (struct fileinfo){0};
-	file_info[n].color = df_c;
-#ifndef _NO_ICONS
-	file_info[n].icon = DEF_FILE_ICON;
-	file_info[n].icon_color = DEF_FILE_ICON_COLOR;
-#endif /* !_NO_ICONS */
-	file_info[n].ruser = 1;
-	file_info[n].size =  1;
-	file_info[n].linkn = 1;
-}
-
 /* Get the color of a link target NAME, whose file attributes are ATTR,
  * and write the result into the file_info array at index I. */
 static inline void
@@ -2296,7 +2291,8 @@ list_dir(void)
 	filesn_t n = 0, count = 0;
 	size_t total_dents = 0;
 
-	file_info = (struct fileinfo *)xnmalloc(ENTRY_N + 2, sizeof(struct fileinfo));
+	file_info =
+		(struct fileinfo *)xnmalloc(ENTRY_N + 2, sizeof(struct fileinfo));
 
 	while ((ent = readdir(dir))) {
 		const char *ename = ent->d_name;
@@ -2378,12 +2374,15 @@ list_dir(void)
 		 * up being actually slower whenever the current directory contains
 		 * more UTF-8 than ASCII names. The assumption here is that ASCII
 		 * names are far more common than UTF-8 names. */
-		size_t len_bytes = 0; /* Bytes in file name */
-		const uint8_t is_utf8 = is_utf8_name(ename, &len_bytes);
-		file_info[n].name = (char *)xnmalloc(len_bytes + 1, sizeof(char));
-		memcpy(file_info[n].name, ename, len_bytes + 1);
+		file_info[n].utf8 = is_utf8_name(ename, &file_info[n].bytes);
+
+		file_info[n].name =
+			(char *)xnmalloc(file_info[n].bytes + 1, sizeof(char));
+		memcpy(file_info[n].name, ename, file_info[n].bytes + 1);
+
 		/* Columns needed to display file name */
-		file_info[n].len = is_utf8 == 0 ? len_bytes : wc_xstrlen(ename);
+		file_info[n].len = file_info[n].utf8 == 0
+			? file_info[n].bytes : wc_xstrlen(ename);
 
 #ifdef _NO_ICONS
 		file_info[n].icon = (char *)NULL;
@@ -2461,7 +2460,8 @@ list_dir(void)
 # ifdef LINUX_STATX
 		{
 			struct statx attx;
-			if (statx(AT_FDCWD, ename, AT_SYMLINK_NOFOLLOW, STATX_BTIME, &attx) == -1)
+			if (statx(AT_FDCWD, ename, AT_SYMLINK_NOFOLLOW,
+			STATX_BTIME, &attx) == -1)
 				file_info[n].time = 0;
 			else
 				file_info[n].time = (time_t)attx.ST_BTIME.tv_sec;
@@ -2506,9 +2506,9 @@ list_dir(void)
 				file_info[n].icon_color = YELLOW;
 #endif /* !_NO_ICONS */
 			} else {
-				file_info[n].color = stat_ok == 1 ? ((attr.st_mode & 01000)
-					? ((attr.st_mode & 00002) ? tw_c : st_c)
-					: ((attr.st_mode & 00002) ? ow_c
+				file_info[n].color = stat_ok == 1 ? ((attr.st_mode & S_ISVTX)
+					? ((attr.st_mode & S_IWOTH) ? tw_c : st_c)
+					: ((attr.st_mode & S_IWOTH) ? ow_c
 					: (file_info[n].filesn == 0 ? ed_c : di_c)))
 					: df_c;
 			}
@@ -2583,14 +2583,14 @@ list_dir(void)
 				file_info[n].icon_color = YELLOW;
 #endif /* !_NO_ICONS */
 				file_info[n].color = nf_c;
-			} else if (stat_ok == 1 && (attr.st_mode & 04000)) { /* SUID */
+			} else if (stat_ok == 1 && (attr.st_mode & S_ISUID)) {
 				file_info[n].exec = 1;
 				stats.exec++; stats.suid++;
 				file_info[n].color = su_c;
 #ifndef _NO_ICONS
 				file_info[n].icon = ICON_EXEC;
 #endif /* !_NO_ICONS */
-			} else if (stat_ok == 1 && (attr.st_mode & 02000)) { /* SGID */
+			} else if (stat_ok == 1 && (attr.st_mode & S_ISGID)) {
 				file_info[n].exec = 1;
 				stats.exec++; stats.sgid++;
 				file_info[n].color = sg_c;
@@ -2604,15 +2604,17 @@ list_dir(void)
 				file_info[n].color = ca_c;
 				stats.caps++;
 				cap_free(cap);
+				if (IS_EXEC(attr)) {
+					file_info[n].exec = 1;
+					stats.exec++;
+#ifndef _NO_ICONS
+					file_info[n].icon = ICON_EXEC;
+#endif /* !_NO_ICONS */
+				}
 			}
 #endif /* !LINUX_FILE_CAPS */
 
-			else if (stat_ok == 1
-			&& ((attr.st_mode & 00100) // Exec
-			|| (attr.st_mode & 00010) || (attr.st_mode & 00001))) {
-/*			&& (((attr.st_mode & 00100) && attr.st_uid == user.uid) // Exec
-			|| ((attr.st_mode & 00010) && attr.st_gid == user.gid)
-			|| (attr.st_mode & 00001))) { */
+			else if (stat_ok == 1 && IS_EXEC(attr)) {
 				file_info[n].exec = 1;
 				stats.exec++;
 #ifndef _NO_ICONS
@@ -2639,7 +2641,7 @@ list_dir(void)
 			|| file_info[n].exec == 1);
 
 			if (no_override_color == 0
-			&& IS_TEMP_FILE(file_info[n].name, len_bytes)) {
+			&& IS_TEMP_FILE(file_info[n].name, file_info[n].bytes)) {
 				file_info[n].color = bk_c;
 				break;
 			}
@@ -2678,6 +2680,8 @@ list_dir(void)
 		} /* End of DT_REG block */
 		break;
 
+		/* For the time being, we have no specific colors for DT_ARCH1,
+		 * DT_ARCH2, and DT_WHT. */
 		case DT_SOCK: file_info[n].color = so_c; break;
 		case DT_FIFO: file_info[n].color = pi_c; break;
 		case DT_BLK: file_info[n].color = bd_c; break;
@@ -2703,8 +2707,6 @@ list_dir(void)
 
 		n++;
 		if (n > FILESN_MAX - 1) {
-			/* Though it might seem arbitrary and limited, an int allows us
-			 * to store more than 2 billion files per directory. */
 			err('w', PRINT_PROMPT, _("%s: Integer overflow detected "
 				"(showing only %jd files)\n"), PROGRAM_NAME, (intmax_t)n);
 			break;
@@ -2713,12 +2715,14 @@ list_dir(void)
 		count++;
 	}
 
+	/* Since we allocate memory by chunks, we might have allocated more
+	 * than needed. Reallocate only actually used memory.
+	 * NOTE: Haven't been able to measure any memory usage difference
+	 * running this code. */
 /*	filesn_t tdents = total_dents > 0 ? (filesn_t)total_dents : ENTRY_N + 2;
-	if (tdents > n) {
-//		printf("%zd:%zd\n", (size_t)tdents * sizeof(struct fileinfo),
-//			(size_t)n * sizeof(struct fileinfo));
-		file_info = xrealloc(file_info, (size_t)(n + 1) * sizeof(struct fileinfo));
-	} */
+	if (tdents > n)
+		file_info =
+			xrealloc(file_info, (size_t)(n + 1) * sizeof(struct fileinfo)); */
 
 	if (xargs.disk_usage_analyzer == 1 || (conf.long_view == 1
 	&& conf.full_dir_size == 1)) {

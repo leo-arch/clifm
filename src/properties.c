@@ -1731,7 +1731,7 @@ construct_and_print_filename(const struct fileinfo *props,
 	/* If file name length is greater than max, truncate it to max (later a
 	 * tilde (~) will be appended to let the user know the file name was
 	 * truncated). */
-	char tname[PATH_MAX * sizeof(wchar_t)];
+	static char tname[(NAME_MAX + 1) * sizeof(wchar_t)];
 	int trim = 0;
 
 	/* Handle file names with embedded control characters */
@@ -1757,14 +1757,16 @@ construct_and_print_filename(const struct fileinfo *props,
 		size_t ext_len = 0;
 		ext_name = get_ext_info_long(props->name, plen, &trim, &ext_len);
 
-		xstrsncpy(tname, wname ? wname : props->name, sizeof(tname));
+		if (wname)
+			xstrsncpy(tname, wname, sizeof(tname));
+		else
+			memcpy(tname, props->name, props->bytes + 1);
+
 		int trim_point = (int)plen - rest - 1 - (int)ext_len;
 		if (trim_point < 0)
 			trim_point = 0;
-		if (conf.unicode)
-			diff = u8truncstr(tname, (size_t)trim_point);
-		else
-			tname[trim_point] = '\0';
+
+		diff = u8truncstr(tname, (size_t)trim_point);
 
 		cur_len -= (size_t)rest;
 	}
@@ -1775,14 +1777,11 @@ construct_and_print_filename(const struct fileinfo *props,
 		pad = 0;
 
 	if (!trim || !conf.unicode)
-		mbstowcs((wchar_t *)tname, wname ? wname : props->name, PATH_MAX);
+		mbstowcs((wchar_t *)tname, wname ? wname : props->name, NAME_MAX + 1);
 
 	free(wname);
 
-	char trim_diff[14];
-	*trim_diff = '\0';
-	if (diff > 0)
-		snprintf(trim_diff, sizeof(trim_diff), "\x1b[%dC", diff);
+	char *trim_diff = diff > 0 ? gen_diff_str(diff) : "";
 
 	char trim_s[2] = {0};
 	*trim_s = trim > 0 ? TRIMFILE_CHR : 0;

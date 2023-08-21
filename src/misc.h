@@ -41,6 +41,7 @@ void free_stuff(void);
 int  free_remotes(const int);
 void free_tags(void);
 void free_workspaces_filters(void);
+char *gen_diff_str(const int);
 char *get_newname(const char *, char *, int *);
 void get_term_size(void);
 int  handle_stdin(void);

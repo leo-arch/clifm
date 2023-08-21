@@ -441,9 +441,9 @@ int
 u8truncstr(char *restrict str, const size_t max)
 {
 	int len = 0;
-	wchar_t buf[PATH_MAX];
+	static wchar_t buf[NAME_MAX + 1];
 	*buf = L'\0';
-	if (mbstowcs(buf, str, PATH_MAX) == (size_t)-1)
+	if (mbstowcs(buf, str, NAME_MAX + 1) == (size_t)-1)
 		return 0;
 
 	int i, bmax = (int)max;
@@ -460,8 +460,7 @@ u8truncstr(char *restrict str, const size_t max)
 	}
 
 	wcsncpy((wchar_t *)str, buf, (size_t)bmax * sizeof(wchar_t)); /* flawfinder: ignore */
-//	str[(size_t)len * sizeof(wchar_t)] = L'\0';
-//	wcscpy((wchar_t *)str, buf);
+
 	return bmax - len;
 }
 
