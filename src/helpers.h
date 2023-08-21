@@ -321,11 +321,9 @@ if (S_ISNWK(mode)) return 'n'; // HP/UX: network special file
 #endif /* !ARG_MAX */
 
 #if defined(__linux__) && !defined(_BE_POSIX)
-# if (__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 28))
-#  if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
-#   define LINUX_STATX
-#  endif /* LINUX_VERSION (4.11) */
-# endif /* __GLIBC__ >= 2.28 */
+# ifdef STATX_TYPE /* Defined in sys/stat.h */
+#  define LINUX_STATX
+# endif /* STATX_TYPE */
 # if !defined(__GLIBC__) || (__GLIBC__ > 2 \
 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 3))
 #  if LINUX_VERSION_CODE >= KERNEL_VERSION(2,4,0)

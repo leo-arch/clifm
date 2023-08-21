@@ -2447,6 +2447,7 @@ list_dir(void)
 			file_info[n].type = DT_UNKNOWN;
 			stats.unknown++;
 		}
+
 		file_info[n].dir = (file_info[n].type == DT_DIR) ? 1 : 0;
 		file_info[n].symlink = (file_info[n].type == DT_LNK) ? 1 : 0;
 
