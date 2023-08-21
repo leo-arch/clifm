@@ -1501,7 +1501,7 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 		printf(" (%s%s%s)\n", conf.apparent_size == 1 ? _("apparent")
 			: _("disk usage"), (xargs.si == 1 && bigger_than_bytes == 1)
 			? ",si" : "", (S_ISREG(attr->st_mode)
-			&& (uintmax_t)(attr->st_blocks * S_BLKSIZE) < (uintmax_t)attr->st_size)
+			&& (intmax_t)(attr->st_blocks * S_BLKSIZE) < (intmax_t)attr->st_size)
 			? ",sparse" : "");
 
 		return;

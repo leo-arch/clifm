@@ -946,7 +946,7 @@ struct config_t {
 #ifndef _NO_SUGGESTIONS
 	char *suggestion_strategy;
 #else
-	char *pad1; /* Keep the struct alignment */
+	char *pad0; /* Keep the struct alignment */
 #endif /* !_NO_SUGGESTIONS */
 	char *usr_cscheme;
 	char *fzftab_options;
@@ -1018,12 +1018,11 @@ struct config_t {
 #ifndef _NO_TRASH
 	int tr_as_rm;
 #else
-	int pad2; /* Keep the struct alignment */
+	int pad1; /* Keep the struct alignment */
 #endif /* !_NO_TRASH */
 	int unicode;
 	int warning_prompt;
 	int welcome_message;
-//	int pad3;
 };
 
 extern struct config_t conf;
@@ -1034,7 +1033,7 @@ struct filter_t {
 	int rev;
 	int type;
 	int env;
-	int pad;
+	int pad0;
 };
 
 extern struct filter_t filter;
@@ -1050,7 +1049,7 @@ struct user_t {
 	gid_t gid;     /* Primary user group */
 	gid_t *groups; /* Secondary groups ID's */
 	int ngroups;   /* Number of secondary groups */
-	int pad;
+	int pad0;
 };
 
 extern struct user_t user;
@@ -1076,7 +1075,7 @@ struct ws_t {
 	char *path;
 	char *name;
 	int num;
-	int pad;
+	int pad0;
 };
 
 extern struct ws_t *workspaces;
@@ -1133,7 +1132,7 @@ struct fileinfo {
 	size_t len;   /* File name len (columns needed to display file name) */
 	size_t bytes; /* Bytes consumed by file name */
 #if defined(__arm__) && !defined(__ANDROID__)
-	size_t pad2;
+	size_t pad0;
 #endif /* __arm__ && !__ANDROID__ */
 	time_t ltime; /* For long view mode */
 	time_t time;
@@ -1142,7 +1141,7 @@ struct fileinfo {
 	dev_t rdev; /* 4 bytes in OpenBSD (used to calculate major and minor devs in long view) */
 	nlink_t linkn; /* 4 bytes in Solaris/OpenBSD */
 #if !defined(__sun)
-	int pad;
+	int pad1;
 #endif /* __sun */
 	uid_t uid;
 	gid_t gid;
@@ -1159,7 +1158,7 @@ struct fileinfo {
 	int utf8; /* Name contains at least one UTF-8 character */
 #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__DragonFly__) \
 || defined(__arm__)
-	int pad3;
+	int pad2;
 #endif /* __FreeBSD__ || __NetBSD__ || __DragonFly__ || __arm__ */
 };
 
@@ -1179,11 +1178,11 @@ struct devino_t {
 	ino_t ino;
 	dev_t dev; /* 4 bytes on OpenBSD, DragonFly, and Haiku */
 	char mark;
+	char pad0;
 	char pad1;
 	char pad2;
-	char pad3;
 #if !defined(__OpenBSD__) && !defined(__DragonFly__) && !defined(__HAIKU__)
-	int pad4;
+	int pad3;
 #endif /* !__OpenBSD__ && !__DragonFly__ && !__HAIKU__ */
 };
 
@@ -1221,7 +1220,7 @@ struct opts_t {
 	int show_hidden;
 	int sort;
 	int sort_reverse;
-	int pad;
+	int pad0;
 };
 
 extern struct opts_t opts;
@@ -1337,7 +1336,7 @@ struct remote_t {
 	int auto_mount;
 	int auto_unmount;
 	int mounted;
-	int padding;
+	int pad0;
 };
 
 extern struct remote_t *remotes;
@@ -1405,7 +1404,7 @@ extern struct stats_t stats;
 struct sort_t {
 	const char *name;
 	int num;
-	int pad;
+	int pad0;
 };
 
 extern const struct sort_t sort_methods[];
