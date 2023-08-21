@@ -1132,6 +1132,9 @@ struct fileinfo {
 	filesn_t filesn;
 	size_t len;   /* File name len (columns needed to display file name) */
 	size_t bytes; /* Bytes consumed by file name */
+#if defined(__arm__) && !defined(__ANDROID__)
+	size_t pad2;
+#endif /* __arm__ && !__ANDROID__ */
 	time_t ltime; /* For long view mode */
 	time_t time;
 	ino_t inode;
@@ -1174,14 +1177,14 @@ struct maxes_t {
 
 struct devino_t {
 	ino_t ino;
-	dev_t dev; /* 4 bytes on OpenBSD and DragonFly */
+	dev_t dev; /* 4 bytes on OpenBSD, DragonFly, and Haiku */
 	char mark;
 	char pad1;
 	char pad2;
 	char pad3;
-#if !defined(__OpenBSD__) && !defined(__DragonFly__)
+#if !defined(__OpenBSD__) && !defined(__DragonFly__) && !defined(__HAIKU__)
 	int pad4;
-#endif /* !__OpenBSD__ && !__DragonFly__ */
+#endif /* !__OpenBSD__ && !__DragonFly__ && !__HAIKU__ */
 };
 
 extern struct devino_t *sel_devino;

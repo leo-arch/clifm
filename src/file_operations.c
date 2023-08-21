@@ -79,6 +79,9 @@ struct rm_info {
 	nlink_t links;
 	int     dir;
 	int     exists;
+#if defined(__sun) || defined(__OpenBSD__) || defined(__DragonFly__)
+	int     pad0;
+#endif /* __sun || __OpenBSD__ || __DragonFly__ */
 };
 
 static char *const unsafe_name_msgs[] = {
