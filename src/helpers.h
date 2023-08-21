@@ -202,7 +202,7 @@ if (S_ISNWK(mode)) return 'n'; // HP/UX: network special file
 #  define HAVE_INOTIFY
 # endif /* GLIBC >= 2.9 && linux >= 2.6.27 */
 #elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) \
-|| defined(__DragonFly__)
+|| defined(__DragonFly__) || defined(__APPLE__)
 # include <sys/types.h>
 # include <sys/time.h>
 # include <sys/param.h>
@@ -217,11 +217,9 @@ if (S_ISNWK(mode)) return 'n'; // HP/UX: network special file
 #  define HAVE_KQUEUE
 # elif defined(__DragonFly__) && __DragonFly_version >= 200800 /* At least 2.8*/
 #  define HAVE_KQUEUE
+# elif defined(__APPLE__)
+#  define HAVE_KQUEUE
 # endif /* FreeBSD >= 4.1 */
-#elif defined(__APPLE__)
-# include <sys/types.h>
-# include <sys/time.h>
-# define HAVE_KQUEUE
 #elif defined(__sun) || defined(__CYGWIN__)
 # include <sys/types.h>
 # include <sys/time.h>
@@ -280,7 +278,11 @@ if (S_ISNWK(mode)) return 'n'; // HP/UX: network special file
 # ifdef __linux__
 #  define PATH_MAX 4096
 # else
-#  define PATH_MAX 1024
+#  ifdef MAXPATHLEN
+#   define PATH_MAX MAXPATHLEN
+#  else
+#   define PATH_MAX 1024
+#  endif /* MAXPATHLEN */
 # endif /* __linux__ */
 #endif /* !PATH_MAX */
 
