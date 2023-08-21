@@ -33,14 +33,11 @@
 # include <sys/capability.h>
 #endif /* __linux__ */
 #include <errno.h>
-//#include <fcntl.h>
 #include <string.h>
 #if defined(__OpenBSD__)
 # include <strings.h>
 # include <inttypes.h> /* uintmax_t */
 #endif /* __OpenBSD__ */
-
-#include <fcntl.h> /* posix_fadvise() */
 
 #if defined(LINUX_FILE_XATTRS)
 # include <sys/xattr.h>
@@ -2326,7 +2323,7 @@ list_dir(void)
 		init_fileinfo(n);
 
 		int stat_ok = 1;
-		if (fstatat(fd, ename, &attr, virtual_dir == 1
+		if (xfstatat(fd, ename, &attr, virtual_dir == 1
 		? 0 : AT_SYMLINK_NOFOLLOW) == -1) {
 			if (virtual_dir == 1)
 				continue;
@@ -2537,7 +2534,7 @@ list_dir(void)
 			}
 
 			struct stat attrl;
-			if (fstatat(fd, ename, &attrl, 0) == -1) {
+			if (xfstatat(fd, ename, &attrl, 0) == -1) {
 				file_info[n].color = or_c;
 				file_info[n].xattr = 0;
 				stats.broken_link++;

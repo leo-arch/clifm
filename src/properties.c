@@ -37,7 +37,6 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
-#include <fcntl.h>
 #include <grp.h>
 #include <pwd.h>
 
@@ -684,7 +683,7 @@ set_file_perms(char **args)
 	size_t n = 0;
 	const mode_t mode = (mode_t)strtol(octal_str, 0, 8);
 	for (i = 1; args[i]; i++) {
-		if (fchmodat(XAT_FDCWD, args[i], mode, 0) == EXIT_SUCCESS) {
+		if (xfchmodat(XAT_FDCWD, args[i], mode, 0) == EXIT_SUCCESS) {
 			n++;
 		} else {
 			xerror(_("pc: Changing permissions of '%s': %s\n"),
@@ -1247,7 +1246,7 @@ print_file_name(char *filename, const char *color, const char file_type,
 	} else { /* Broken link */
 		char target[PATH_MAX + 1];
 		const ssize_t len =
-			readlinkat(XAT_FDCWD, filename, target, sizeof(target) - 1);
+			xreadlinkat(XAT_FDCWD, filename, target, sizeof(target) - 1);
 
 		if (len != -1) {
 			target[len] = '\0';
@@ -1567,7 +1566,7 @@ err_no_file(const char *filename, const int errnum, const int follow_link)
 		goto END;
 
 	char target[PATH_MAX + 1];
-	ssize_t len = readlinkat(XAT_FDCWD, filename, target, sizeof(target) - 1);
+	ssize_t len = xreadlinkat(XAT_FDCWD, filename, target, sizeof(target) - 1);
 	if (len != -1) {
 		target[len] = '\0';
 		xerror(_("prop: %s %s->%s %s: Broken symbolic link\n"), filename,

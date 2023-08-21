@@ -35,7 +35,6 @@
 #include <string.h>
 #include <termios.h>
 #include <unistd.h>
-#include <fcntl.h>
 #include <time.h>
 #include <limits.h>
 #include <readline/readline.h>
@@ -201,7 +200,7 @@ clear_term_img(void)
 	struct stat a;
 	if (p && stat(p, &a) != -1) {
 		kitty_clear();
-		unlinkat(XAT_FDCWD, p, 0);
+		xunlinkat(XAT_FDCWD, p, 0);
 	}
 }
 
@@ -572,7 +571,7 @@ int
 xmkdir(char *dir, const mode_t mode)
 {
 	mode_t old_mask = umask(0);
-	int ret = mkdirat(XAT_FDCWD, dir, mode);
+	int ret = xmkdirat(XAT_FDCWD, dir, mode);
 	umask(old_mask);
 
 	if (ret == -1)

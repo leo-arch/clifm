@@ -36,7 +36,6 @@
 #include <string.h>
 #include <time.h>
 #include <errno.h>
-#include <fcntl.h>
 
 #include "aux.h"
 #include "file_operations.h"
@@ -425,7 +424,7 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 	 * match, nothing has been modified. */
 	fstat(fd, &attr);
 	if (mtime_bfr == (time_t)attr.st_mtime) {
-		if (unlinkat(fd, f, 0) == -1)
+		if (xunlinkat(fd, f, 0) == -1)
 			err('w', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
 		fclose(fp);
 		*edited_names = 0;
@@ -504,7 +503,7 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 	*n = j;
 	free(line);
 
-	if (unlinkat(fd, f, 0) == -1)
+	if (xunlinkat(fd, f, 0) == -1)
 		err('w', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
 	fclose(fp);
 
@@ -664,7 +663,7 @@ CONFIRM:
 				rep_suffix++;
 			}
 
-			if (renameat(XAT_FDCWD, o, XAT_FDCWD, r) == -1) {
+			if (xrenameat(XAT_FDCWD, o, XAT_FDCWD, r) == -1) {
 				xerror("bleach: renameat: %s: %s\n", o, strerror(errno));
 				total_rename--;
 				exit_status = EXIT_FAILURE;

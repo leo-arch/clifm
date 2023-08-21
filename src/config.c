@@ -25,7 +25,6 @@
 #include "helpers.h"
 
 #include <errno.h>
-#include <fcntl.h> /* open(2) */
 #include <limits.h>
 #include <stdio.h>
 #include <readline/readline.h>
@@ -80,7 +79,7 @@ regen_config(void)
 		char bk[PATH_MAX];
 		snprintf(bk, sizeof(bk), "%s.%s", config_file, date);
 
-		if (renameat(XAT_FDCWD, config_file, XAT_FDCWD, bk) == -1) {
+		if (xrenameat(XAT_FDCWD, config_file, XAT_FDCWD, bk) == -1) {
 			xerror(_("Cannot rename file '%s': %s\n"),
 				config_file, strerror(errno));
 			return EXIT_FAILURE;

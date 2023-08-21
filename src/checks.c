@@ -50,7 +50,6 @@
 # ifdef __TINYC__
 #  undef SYNC_FILE_RANGE_WRITE_AND_WAIT /* Silence redefinition error */
 # endif
-# include <fcntl.h> /* O_RDONLY */
 #endif /* HAVE_FILE_ATTRS */
 
 #include "aux.h"
@@ -1046,8 +1045,8 @@ truncate_file(char *file, const int max, const int check_dups)
 #endif /* __HAIKU__ || __sun */
 
 	free(line);
-	unlinkat(fd, file, 0);
-	renameat(fdd, tmp, fd, file);
+	xunlinkat(fd, file, 0);
+	xrenameat(fdd, tmp, fd, file);
 	close(fdd);
 	fclose(fp);
 	free(tmp);

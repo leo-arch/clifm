@@ -26,7 +26,6 @@
 
 #include <limits.h> /* INT_MIN */
 #include <errno.h>
-#include <fcntl.h>
 
 #if defined(__linux__) || defined(__HAIKU__) || defined(__sun) \
 || defined(__CYGWIN__)
@@ -1725,7 +1724,7 @@ get_sel_files(void)
 		if (!*line || *line == '#' || len == 0)
 			continue;
 
-		if (fstatat(XAT_FDCWD, line, &a, AT_SYMLINK_NOFOLLOW) == -1)
+		if (xfstatat(XAT_FDCWD, line, &a, AT_SYMLINK_NOFOLLOW) == -1)
 			continue;
 
 		sel_elements = (struct sel_t *)xrealloc(sel_elements,

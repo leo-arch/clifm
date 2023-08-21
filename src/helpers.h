@@ -109,8 +109,33 @@
 #include <regex.h>
 #include <stdlib.h>
 #include <sys/stat.h> /* S_BLKSIZE */
+#include <fcntl.h> /* AT* constants like AT_FDCWD */
 /* Included here to test _DIRENT_HAVE_D_TYPE and DT macros. */
 #include <dirent.h>
+
+#if !defined(AT_FDCWD) && !defined(CLIFM_LEGACY)
+# define CLIFM_LEGACY
+#endif /* !AT_FDCWD && !CLIFM_LEGACY */
+
+#ifdef CLIFM_LEGACY
+/* *AT functions are not available. Replace them by the old versions. */
+# include "compat.h"
+# define xfstatat    old_stat
+# define xfchmodat   old_chmod
+# define xrenameat   old_rename
+# define xmkdirat    old_mkdir
+# define xreadlinkat old_readlink
+# define xsymlinkat  old_symlink
+# define xunlinkat   old_unlink
+#else
+# define xfstatat    fstatat
+# define xfchmodat   fchmodat
+# define xrenameat   renameat
+# define xmkdirat    mkdirat
+# define xreadlinkat readlinkat
+# define xsymlinkat  symlinkat
+# define xunlinkat   unlinkat
+#endif /* CLIFM_LEGACY */
 
 #if !defined(_DIRENT_HAVE_D_TYPE) || !defined(DT_DIR)
 /* Systems not providing a d_type member for the stat struct do not provide
@@ -321,7 +346,7 @@ if (S_ISNWK(mode)) return 'n'; // HP/UX: network special file
 #endif /* !ARG_MAX */
 
 #if defined(__linux__) && !defined(_BE_POSIX)
-# ifdef STATX_TYPE /* Defined in sys/stat.h */
+# ifdef STATX_TYPE /* Defined in sys/stat.h if statx() is available */
 #  define LINUX_STATX
 # endif /* STATX_TYPE */
 # if !defined(__GLIBC__) || (__GLIBC__ > 2 \
@@ -393,7 +418,7 @@ extern time_t curdir_mtime;
 #  define SOLARIS_DOORS
 # endif /* !_BE_POSIX */
 #else
-# define XAT_FDCWD AT_FDCWD
+# define XAT_FDCWD AT_FDCWD /* defined in fcntl.h */
 #endif /* __sun */
 
 /* Do we have arc4random_uniform(3). If not, fallback to random(3). */

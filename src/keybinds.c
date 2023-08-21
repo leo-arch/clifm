@@ -48,7 +48,6 @@ typedef char *rl_cpvfunc_t;
 #endif /* __NetBSD__ */
 
 #include <errno.h>
-#include <fcntl.h>
 
 #include "aux.h"
 #include "config.h"
@@ -2071,7 +2070,7 @@ rl_toggle_virtualdir_full_paths(int count, int key)
 
 		if (!p || !*p) continue;
 
-		if (renameat(XAT_FDCWD, file_info[i].name, XAT_FDCWD, p) == -1)
+		if (xrenameat(XAT_FDCWD, file_info[i].name, XAT_FDCWD, p) == -1)
 			err('w', PRINT_PROMPT, "renameat: %s: %s\n",
 				file_info[i].name, strerror(errno));
 

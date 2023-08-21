@@ -52,7 +52,6 @@ typedef char *rl_cpvfunc_t;
 #endif /* __OpenBSD__ */
 
 #include <errno.h>
-#include <fcntl.h>
 
 #include <termios.h> /* Get cursor position functions */
 #include <limits.h> /* INT_MIN */

@@ -33,7 +33,6 @@
 # undef CHAR_MAX /* Silence redefinition error */
 #endif /* __TINYC__ */
 #include <limits.h>
-#include <fcntl.h>
 
 #include "aux.h"
 #include "checks.h"
@@ -560,7 +559,7 @@ static int
 nothing_to_do(char **tmp_file, struct dirent ***a, const filesn_t n, const int fd)
 {
 	puts(_("rr: Nothing to do"));
-	if (unlinkat(fd, *tmp_file, 0) == 1)
+	if (xunlinkat(fd, *tmp_file, 0) == 1)
 		xerror("rr: unlink: %s: %s\n", *tmp_file, strerror(errno));
 	close(fd);
 	free(*tmp_file);
@@ -621,7 +620,7 @@ bulk_remove(char *s1, char *s2)
 	free(rfiles);
 
 END:
-	if (unlinkat(fd, tmp_file, 0) == -1) {
+	if (xunlinkat(fd, tmp_file, 0) == -1) {
 		err('w', PRINT_PROMPT, "rr: unlink: %s: %s\n",
 			tmp_file, strerror(errno));
 	}
@@ -747,7 +746,7 @@ toggle_exec(const char *file, mode_t mode)
 	/* Set or unset S_IXUSR, S_IXGRP, and S_IXOTH */
 //	(0100 & mode) ? (mode &= (mode_t)~0111) : (mode |= 0111);
 
-	if (fchmodat(XAT_FDCWD, file, mode, 0) == -1) {
+	if (xfchmodat(XAT_FDCWD, file, mode, 0) == -1) {
 		xerror("te: Changing permissions of '%s': %s\n",
 			file, strerror(errno));
 		return EXIT_FAILURE;
@@ -944,7 +943,7 @@ create_file(char *name)
 			goto CONT;
 
 		errno = 0;
-		if (mkdirat(XAT_FDCWD, name, mode) == -1) {
+		if (xmkdirat(XAT_FDCWD, name, mode) == -1) {
 			xerror("new: %s: %s\n", name, strerror(errno));
 			status = EXIT_FAILURE;
 			break;
@@ -1502,7 +1501,7 @@ print_current_target(const char *link, char **target)
 	}
 
 	char tmp[PATH_MAX + 1];
-	ssize_t len = readlinkat(XAT_FDCWD, link, tmp, sizeof(tmp) - 1);
+	ssize_t len = xreadlinkat(XAT_FDCWD, link, tmp, sizeof(tmp) - 1);
 
 	if (len != -1) {
 		tmp[len] = '\0';
@@ -1579,8 +1578,8 @@ edit_link(char *link)
 	}
 
 	/* Finally, remove the link and recreate it as link to new_path. */
-	if (unlinkat(XAT_FDCWD, link, 0) == -1
-	|| symlinkat(new_path, XAT_FDCWD, link) == -1) {
+	if (xunlinkat(XAT_FDCWD, link, 0) == -1
+	|| xsymlinkat(new_path, XAT_FDCWD, link) == -1) {
 		free(new_path);
 		xerror(_("le: Cannot relink symbolic link '%s': %s\n"),
 			link, strerror(errno));
@@ -1644,7 +1643,7 @@ symlink_file(char **args)
 		if (rl_get_y_or_n(_("Overwrite this file? [y/n] ")) == 0)
 			return EXIT_SUCCESS;
 
-		if (unlinkat(XAT_FDCWD, link_name, 0) == -1) {
+		if (xunlinkat(XAT_FDCWD, link_name, 0) == -1) {
 			xerror("link: %s: %s\n", link_name, strerror(errno));
 			return EXIT_FAILURE;
 		}
@@ -1656,7 +1655,7 @@ symlink_file(char **args)
 		return EXIT_FAILURE;
 	}
 
-	int ret = symlinkat(abs_path, XAT_FDCWD, link_name);
+	int ret = xsymlinkat(abs_path, XAT_FDCWD, link_name);
 	free(abs_path);
 
 	if (ret == -1) {
@@ -2350,7 +2349,7 @@ bulk_rename(char **args)
 		if (line[line_len - 1] == '\n')
 			line[line_len - 1] = '\0';
 		if (args[i] && strcmp(args[i], line) != 0) {
-			if (renameat(XAT_FDCWD, args[i], XAT_FDCWD, line) == -1)
+			if (xrenameat(XAT_FDCWD, args[i], XAT_FDCWD, line) == -1)
 				exit_status = errno;
 		}
 
@@ -2359,7 +2358,7 @@ bulk_rename(char **args)
 
 	free(line);
 
-	if (unlinkat(fd, bulk_file, 0) == -1) {
+	if (xunlinkat(fd, bulk_file, 0) == -1) {
 		xerror("br: unlinkat: %s: %s\n", bulk_file, strerror(errno));
 		exit_status = errno;
 	}
@@ -2373,7 +2372,7 @@ bulk_rename(char **args)
 	return exit_status;
 
 ERROR:
-	if (unlinkat(fd, bulk_file, 0) == -1) {
+	if (xunlinkat(fd, bulk_file, 0) == -1) {
 		xerror("br: unlinkat: %s: %s\n", bulk_file, strerror(errno));
 		exit_status = errno;
 	}
@@ -2502,7 +2501,7 @@ batch_link(char **args)
 		}
 
 		char *ptr = strrchr(tmp, '/');
-		if (symlinkat(args[i], XAT_FDCWD, (ptr && ++ptr) ? ptr : tmp) == -1) {
+		if (xsymlinkat(args[i], XAT_FDCWD, (ptr && ++ptr) ? ptr : tmp) == -1) {
 			exit_status = errno;
 			xerror(_("bl: symlinkat: %s: Cannot create symlink: %s\n"),
 				ptr ? ptr : tmp, strerror(errno));
