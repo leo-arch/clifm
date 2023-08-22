@@ -286,7 +286,7 @@ mount_iso(char *file)
 {
 #if !defined(__linux__)
 	UNUSED(file);
-	xerror(_("%s\n", "mount: This feature is for Linux only"));
+	xerror("%s\n", _("mount: This feature is for Linux only"));
 	return EXIT_SUCCESS;
 #else
 	char *mountpoint = create_mountpoint(file);
