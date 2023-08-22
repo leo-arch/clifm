@@ -999,7 +999,7 @@ truncate_file(char *file, const int max, const int check_dups)
 		return;
 	}
 
-#if defined(__HAIKU__) || defined(__sun)
+#ifndef HAVE_DPRINTF
 	FILE *fpp = fopen(tmp, "w");
 	if (!fpp) {
 		err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, tmp,
@@ -1008,7 +1008,7 @@ truncate_file(char *file, const int max, const int check_dups)
 		free(tmp);
 		return;
 	}
-#endif /* __HAIKU__ || __sun */
+#endif /* !HAVE_DPRINTF */
 
 	int i = 1;
 	size_t line_size = 0;
@@ -1025,11 +1025,11 @@ truncate_file(char *file, const int max, const int check_dups)
 
 		/* Delete old entries = copy only new ones */
 		if (i++ >= n - (max - 1))
-#if !defined(__HAIKU__) && !defined(__sun)
+#ifdef HAVE_DPRINTF
 			dprintf(fdd, "%s", line);
 #else
 			fprintf(fpp, "%s", line);
-#endif /* !__HAIKU__ && !__sun */
+#endif /* HAVE_DPRINTF */
 
 		if (check_dups == 1) {
 			free(prev_line);
@@ -1040,9 +1040,9 @@ truncate_file(char *file, const int max, const int check_dups)
 
 	free(prev_line);
 
-#if defined(__HAIKU__) || defined(__sun)
+#ifndef HAVE_DPRINTF
 	fclose(fpp);
-#endif /* __HAIKU__ || __sun */
+#endif /* !HAVE_DPRINTF */
 
 	free(line);
 	xunlinkat(fd, file, 0);

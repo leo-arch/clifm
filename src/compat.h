@@ -1,4 +1,4 @@
-/* compat.h -- replacement *AT functions for legacy systems */
+/* compat.h -- compatibility layer for legacy systems (before POSIX-1.2008) */
 
 /*
  * This file is part of CliFM
@@ -25,9 +25,28 @@
 #ifndef CLIFM_COMPAT_H
 #define CLIFM_COMPAT_H
 
+#ifndef AT_FDCWD
+# define AT_FDCWD -100
+#endif /* !AT_FDCWD */
+
 #ifndef AT_SYMLINK_NOFOLLOW
 # define AT_SYMLINK_NOFOLLOW 0x100
 #endif /* !AT_SYMLINK_NOFOLLOW */
+
+# ifndef O_CLOEXEC
+#  define O_CLOEXEC 0
+# endif /* O_CLOEXEC */
+
+# define xdirfd(d)   0
+# define xfstatat    old_stat
+# define xfchmodat   old_chmod
+# define xrenameat   old_rename
+# define xmkdirat    old_mkdir
+# define xreadlinkat old_readlink
+# define xsymlinkat  old_symlink
+# define xunlinkat   old_unlink
+# define xfchownat   old_chown
+# define strnlen     x_strnlen
 
 __BEGIN_DECLS
 
@@ -38,6 +57,8 @@ int old_mkdir(int, const char *, mode_t);
 ssize_t old_readlink(int, const char *restrict, char *restrict, size_t);
 int old_symlink(const char *, int, const char *);
 int old_unlink(int, const char *, int);
+int old_chown(int, const char *, uid_t, gid_t, int);
+size_t x_strnlen(const char *, size_t);
 
 __END_DECLS
 

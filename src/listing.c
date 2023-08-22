@@ -99,6 +99,8 @@
 #define DIR_IN_NAME  ".cfm.in"
 #define DIR_OUT_NAME ".cfm.out"
 
+#define ENTRY_N 64
+
 /* Amount of digits of the files counter of the longest directory */
 static size_t longest_fc = 0;
 static int pager_bk = 0;
@@ -1825,7 +1827,7 @@ list_dir_light(void)
 	}
 
 #ifdef POSIX_FADV_SEQUENTIAL
-	const int fd = dirfd(dir);
+	const int fd = xdirfd(dir);
 	posix_fadvise(fd, 0, 0, POSIX_FADV_SEQUENTIAL);
 #endif /* POSIX_FADV_SEQUENTIAL */
 
@@ -2272,7 +2274,7 @@ list_dir(void)
 
 	set_events_checker();
 
-	const int fd = dirfd(dir);
+	const int fd = xdirfd(dir);
 
 #ifdef POSIX_FADV_SEQUENTIAL
 	/* A hint to the kernel to optimize current dir for reading */

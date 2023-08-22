@@ -2167,7 +2167,7 @@ bulk_rename(char **args)
 	size_t i, arg_total = 0;
 	FILE *fp = (FILE *)NULL;
 
-#if defined(__HAIKU__) || defined(__sun)
+#ifndef HAVE_DPRINTF
 	int tmp_fd = 0;
 	fp = open_fwrite(bulk_file, &tmp_fd);
 	if (!fp) {
@@ -2176,13 +2176,13 @@ bulk_rename(char **args)
 		xerror("br: fopen: %s: %s\n", bulk_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
-#endif /* __HAIKU__ || __sun */
+#endif /* !HAVE_DPRINTF */
 
-#if !defined(__HAIKU__) && !defined(__sun)
+#ifdef HAVE_DPRINTF
 	dprintf(fd, BULK_RENAME_TMP_FILE_HEADER);
 #else
 	fprintf(fp, BULK_RENAME_TMP_FILE_HEADER);
-#endif /* !__HAIKU__ && !__sun */
+#endif /* HAVE_DPRINTF */
 
 	struct stat attr;
 	size_t counter = 0;
@@ -2219,15 +2219,15 @@ bulk_rename(char **args)
 
 		counter++;
 
-#if !defined(__HAIKU__) && !defined(__sun)
+#ifdef HAVE_DPRINTF
 		dprintf(fd, "%s\n", args[i]);
 #else
 		fprintf(fp, "%s\n", args[i]);
-#endif /* !__HAIKU__ && !__sun */
+#endif /* HAVE_DPRINTF */
 	}
-#if defined(__HAIKU__) || defined(__sun)
+#ifndef HAVE_DPRINTF
 	fclose(fp);
-#endif /* __HAIKU__ || __sun */
+#endif /* !HAVE_DPRINTF */
 	arg_total = i;
 	close(fd);
 
@@ -2398,7 +2398,7 @@ export_files(char **filenames, const int open)
 	}
 	
 	size_t i;
-#if defined(__HAIKU__) || defined(__sun)
+#ifndef HAVE_DPRINTF
 	int tmp_fd = 0;
 	FILE *fp = open_fwrite(tmp_file, &tmp_fd);
 	if (!fp) {
@@ -2408,26 +2408,26 @@ export_files(char **filenames, const int open)
 		free(tmp_file);
 		return (char *)NULL;
 	}
-#endif /* __HAIKU__ || __sun */
+#endif /* !HAVE_DPRINTF */
 
 	/* If no argument, export files in CWD. */
 	if (!filenames[1]) {
 		for (i = 0; file_info[i].name; i++)
-#if !defined(__HAIKU__) && !defined(__sun)
+#ifdef HAVE_DPRINTF
 			dprintf(fd, "%s\n", file_info[i].name);
 #else
 			fprintf(fp, "%s\n", file_info[i].name);
-#endif /* !__HAIKU__ && !__sun */
+#endif /* HAVE_DPRINTF */
 	} else {
 		for (i = 1; filenames[i]; i++) {
 			if (*filenames[i] == '.' && (!filenames[i][1]
 			|| (filenames[i][1] == '.' && !filenames[i][2])))
 				continue;
-#if !defined(__HAIKU__) && !defined(__sun)
+#ifdef HAVE_DPRINTF
 			dprintf(fd, "%s\n", filenames[i]);
 #else
 			fprintf(fp, "%s\n", filenames[i]);
-#endif /* !__HAIKU__ && !__sun */
+#endif /* HAVE_DPRINTF */
 		}
 	}
 #if defined(__HAIKU__) || defined(__sun)

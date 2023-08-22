@@ -2124,7 +2124,7 @@ list_commands(void)
 	return EXIT_SUCCESS;
 }
 
-#if !defined(__HAIKU__) && !defined(__sun)
+#ifdef HAVE_DPRINTF
 /* Retrieve pager path, first from PAGER, then try less(1), and finally
  * more(1). If none is found returns NULL. */
 static char *
@@ -2155,7 +2155,7 @@ get_pager(void)
 
 	return (char *)NULL;
 }
-#endif /* !__HAIKU__ && !__sun */
+#endif /* HAVE_DPRINTF */
 
 /* Help topics */
 static void
@@ -2375,7 +2375,7 @@ quick_help(const char *topic)
 	if (topic && *topic)
 		return run_help_topic(topic);
 
-#if defined(__HAIKU__) || defined(__sun)
+#ifndef HAVE_DPRINTF
 	printf("%s                                %s\n\n%s\n\n%s",
 		ASCII_LOGO, PROGRAM_NAME_UPPERCASE, QUICK_HELP_HEADER,
 		QUICK_HELP_NAVIGATION);
@@ -2383,7 +2383,7 @@ quick_help(const char *topic)
 # ifdef __HAIKU__
 	puts(_("\nNOTE: Some keybindings on Haiku might differ. Take a look "
 		"at your current keybindings via the 'kb' command"));
-# endif /* __HAIKU__ */
+# endif /* !HAVE_DPRINTF */
 	return EXIT_SUCCESS;
 #else
 	char *_pager = (char *)NULL;

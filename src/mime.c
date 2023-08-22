@@ -335,18 +335,13 @@ xmagic(const char *file, const int query_mime)
 
 	magic_t cookie = magic_open(query_mime ? (MAGIC_MIME_TYPE | MAGIC_ERROR)
 		: MAGIC_ERROR);
-	if (!cookie) {
-//		fprintf(stderr, "%s: xmagic: %s\n", PROGRAM_NAME, strerror(errno));
+	if (!cookie)
 		return (char *)NULL;
-	}
 
 	magic_load(cookie, NULL);
 
 	const char *mime = magic_file(cookie, file);
 	if (!mime) {
-/*		const char *err_str = magic_error(cookie);
-		if (err_str)
-			fprintf(stderr, "%s: xmagic: %s\n", PROGRAM_NAME, err_str); */
 		magic_close(cookie);
 		return (char *)NULL;
 	}
@@ -365,51 +360,43 @@ get_mime(char *file)
 		return (char *)NULL;
 	}
 
+	char *mime_type = (char *)NULL;
 	char *rand_ext = gen_rand_str(10);
 
-	char mime_tmp_file[PATH_MAX];
-	snprintf(mime_tmp_file, sizeof(mime_tmp_file), "%s/mime.%s", tmp_dir,
+	char tmp_file[PATH_MAX + 1];
+	snprintf(tmp_file, sizeof(tmp_file), "%s/mime.%s", tmp_dir,
 		rand_ext ? rand_ext : "Hu?+6545jk");
 	free(rand_ext);
 
-	if (access(mime_tmp_file, F_OK) == 0)
-		unlink(mime_tmp_file);
-
 	int fd = 0;
-	FILE *file_fp = open_fwrite(mime_tmp_file, &fd);
-	if (!file_fp) {
-		xerror("%s: fopen: %s: %s\n", err_name, mime_tmp_file, strerror(errno));
+	FILE *fp_out = open_fwrite(tmp_file, &fd);
+	if (!fp_out) {
+		xerror("%s: fopen: %s: %s\n", err_name, tmp_file, strerror(errno));
 		return (char *)NULL;
 	}
 
-	FILE *file_fp_err = fopen("/dev/null", "w");
-	if (!file_fp_err) {
+	FILE *fp_err = fopen("/dev/null", "w");
+	if (!fp_err) {
 		xerror("%s: /dev/null: %s\n", err_name, strerror(errno));
-		fclose(file_fp);
-		return (char *)NULL;
+		goto END;
 	}
 
 	int stdout_bk = dup(STDOUT_FILENO); /* Store original stdout */
 	int stderr_bk = dup(STDERR_FILENO); /* Store original stderr */
 
+	if (stdout_bk == -1 || stderr_bk == -1)
+		goto ERROR;
+
 	/* Redirect stdout to the desired file */
-	if (dup2(fileno(file_fp), STDOUT_FILENO) == -1) {
-		xerror("%s: %s\n", err_name, strerror(errno));
-		fclose(file_fp);
-		fclose(file_fp_err);
-		return (char *)NULL;
-	}
+	if (dup2(fileno(fp_out), STDOUT_FILENO) == -1)
+		goto ERROR;
 
 	/* Redirect stderr to /dev/null */
-	if (dup2(fileno(file_fp_err), STDERR_FILENO) == -1) {
-		xerror("%s: %s\n", err_name, strerror(errno));
-		fclose(file_fp);
-		fclose(file_fp_err);
-		return (char *)NULL;
-	}
+	if (dup2(fileno(fp_err), STDERR_FILENO) == -1)
+		goto ERROR;
 
-	fclose(file_fp);
-	fclose(file_fp_err);
+	fclose(fp_out);
+	fclose(fp_err);
 
 /* --mime-type is only available since file 4.24 (Mar, 2008), while the -i
  * flag (-I in MacOS) is supported since 3.30 (Apr, 2000).
@@ -427,22 +414,19 @@ get_mime(char *file)
 	close(stdout_bk);
 	close(stderr_bk);
 
-	if (ret != EXIT_SUCCESS)
-		return (char *)NULL;
-
-	if (access(mime_tmp_file, F_OK) != 0)
-		return (char *)NULL;
-
-	file_fp = fopen(mime_tmp_file, "r");
-	if (!file_fp) {
-		unlink(mime_tmp_file);
+	if (ret != EXIT_SUCCESS) {
+		unlink(tmp_file);
 		return (char *)NULL;
 	}
 
-	char *mime_type = (char *)NULL;
+	fp_out = fopen(tmp_file, "r");
+	if (!fp_out) {
+		unlink(tmp_file);
+		return (char *)NULL;
+	}
 
 	char line[NAME_MAX] = "";
-	if (fgets(line, (int)sizeof(line), file_fp) == NULL)
+	if (fgets(line, (int)sizeof(line), fp_out) == NULL)
 		goto END;
 
 	char *s = strrchr(line, ';');
@@ -458,10 +442,19 @@ get_mime(char *file)
 	mime_type = len > 0 ? savestring(line, len) : (char *)NULL;
 
 END:
-	fclose(file_fp);
-	unlink(mime_tmp_file);
+	fclose(fp_out);
+	unlink(tmp_file);
 
 	return mime_type;
+
+ERROR:
+	xerror("%s: %s\n", err_name, strerror(errno));
+	fclose(fp_out);
+	fclose(fp_err);
+	unlink(tmp_file);
+	close(stdout_bk);
+	close(stderr_bk);
+	return (char *)NULL;
 }
 #endif /* !_NO_MAGIC */
 

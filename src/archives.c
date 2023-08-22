@@ -286,7 +286,7 @@ mount_iso(char *file)
 {
 #if !defined(__linux__)
 	UNUSED(file);
-	xerror("%s\n", "mount: This feature is for Linux only");
+	xerror(_("%s\n", "mount: This feature is for Linux only"));
 	return EXIT_SUCCESS;
 #else
 	char *mountpoint = create_mountpoint(file);
@@ -432,56 +432,53 @@ check_iso(char *file)
 		return (-1);
 	}
 
-	char *ret = strstr(t, "ISO 9660");
-	if (ret)
+	if (strstr(t, "ISO 9660"))
 		is_iso = 1;
 
 	free(t);
+	return (is_iso == 1 ? EXIT_SUCCESS : EXIT_FAILURE);
+
 #else
 	char *rand_ext = gen_rand_str(10);
 	if (!rand_ext)
 		return (-1);
 
-	char iso_tmp_file[PATH_MAX];
-	snprintf(iso_tmp_file, sizeof(iso_tmp_file), "%s/.temp%s",
+	char tmp_file[PATH_MAX + 1];
+	snprintf(tmp_file, sizeof(tmp_file), "%s/.temp%s",
 		(xargs.stealth_mode == 1) ? P_tmpdir : tmp_dir, rand_ext);
 	free(rand_ext);
 
 	int fd;
-	FILE *fp = open_fwrite(iso_tmp_file, &fd);
-	if (!fp) {
-		xerror("archiver: %s: %s\n", iso_tmp_file, strerror(errno));
+	FILE *fp_out = open_fwrite(tmp_file, &fd);
+	if (!fp_out) {
+		xerror("archiver: %s: %s\n", tmp_file, strerror(errno));
 		return (-1);
 	}
 
-	FILE *fpp = fopen("/dev/null", "w");
-	if (!fpp) {
+	FILE *fp_err = fopen("/dev/null", "w");
+	if (!fp_err) {
 		xerror("archiver: /dev/null: %s\n", strerror(errno));
-		fclose(fp);
+		fclose(fp_out);
+		unlink(tmp_file);
 		return (-1);
 	}
 
 	int stdout_bk = dup(STDOUT_FILENO); /* Store original stdout */
 	int stderr_bk = dup(STDERR_FILENO); /* Store original stderr */
 
+	if (stdout_bk == -1 || stderr_bk == -1)
+		goto ERROR;
+
 	/* Redirect stdout to the desired file */
-	if (dup2(fileno(fp), STDOUT_FILENO) == -1) {
-		xerror("archiver: %s\n", strerror(errno));
-		fclose(fp);
-		fclose(fpp);
-		return (-1);
-	}
+	if (dup2(fileno(fp_out), STDOUT_FILENO) == -1)
+		goto ERROR;
 
 	/* Redirect stderr to /dev/null */
-	if (dup2(fileno(fpp), STDERR_FILENO) == -1) {
-		xerror("archiver: %s\n", strerror(errno));
-		fclose(fp);
-		fclose(fpp);
-		return (-1);
-	}
+	if (dup2(fileno(fp_err), STDERR_FILENO) == -1)
+		goto ERROR;
 
-	fclose(fp);
-	fclose(fpp);
+	fclose(fp_out);
+	fclose(fp_err);
 
 	char *cmd[] = {"file", "-b", file, NULL};
 	int retval = launch_execv(cmd, FOREGROUND, E_NOFLAG);
@@ -491,28 +488,45 @@ check_iso(char *file)
 	close(stdout_bk);
 	close(stderr_bk);
 
-	if (retval != EXIT_SUCCESS)
+	if (retval != EXIT_SUCCESS) {
+		unlink(tmp_file);
 		return (-1);
-
-	if (access(iso_tmp_file, F_OK) == 0) {
-		fp = open_fread(iso_tmp_file, &fd);
-		if (fp) {
-			char line[255] = "";
-			if (fgets(line, (int)sizeof(line), fp) == NULL) {
-				fclose(fp);
-				unlink(iso_tmp_file);
-				return EXIT_FAILURE;
-			}
-			char *ret = strstr(line, "ISO 9660");
-			if (ret)
-				is_iso = 1;
-			fclose(fp);
-		}
-		unlink(iso_tmp_file);
 	}
-#endif /* !_NO_MAGIC */
 
-	return is_iso == 1 ? EXIT_SUCCESS : EXIT_FAILURE;
+	fp_out = open_fread(tmp_file, &fd);
+	if (fp_out) {
+		char line[NAME_MAX] = "";
+		if (fgets(line, (int)sizeof(line), fp_out) == NULL) {
+			fclose(fp_out);
+			unlink(tmp_file);
+			return EXIT_FAILURE;
+		}
+
+		if (strstr(line, "ISO 9660"))
+			is_iso = 1;
+		fclose(fp_out);
+	}
+
+	unlink(tmp_file);
+
+	return (is_iso == 1 ? EXIT_SUCCESS : EXIT_FAILURE);
+
+ERROR:
+	xerror("archiver: %s\n", strerror(errno));
+	fclose(fp_out);
+	fclose(fp_err);
+	unlink(tmp_file);
+	close(stdout_bk);
+	close(stderr_bk);
+	return (-1);
+#endif /* !_NO_MAGIC */
+}
+
+static int
+check_compressed(const char *line, const int test_iso)
+{
+	return (strstr(line, "archive") || strstr(line, "compressed")
+	|| (test_iso && strstr(line, "ISO 9660")));
 }
 
 /* Run the 'file' command on FILE and look for "archive" and
@@ -531,8 +545,6 @@ is_compressed(char *file, const int test_iso)
 		return (-1);
 	}
 
-	int compressed = 0;
-
 #ifndef _NO_MAGIC
 	char *t = xmagic(file, TEXT_DESC);
 	if (!t) {
@@ -540,68 +552,52 @@ is_compressed(char *file, const int test_iso)
 		return (-1);
 	}
 
-	char *ret = strstr(t, "archive");
-	if (ret) {
-		compressed = 1;
-	} else {
-		ret = strstr(t, "compressed");
-		if (ret) {
-			compressed = 1;
-		} else {
-			if (test_iso) {
-				ret = strstr(t, "ISO 9660");
-				if (ret)
-					compressed = 1;
-			}
-		}
-	}
-
+	int compressed = check_compressed(t, test_iso);
 	free(t);
+
+	return (compressed == 1 ? EXIT_SUCCESS : EXIT_FAILURE);
+
 #else
 	char *rand_ext = gen_rand_str(10);
 	if (!rand_ext)
 		return (-1);
 
-	char archiver_tmp_file[PATH_MAX];
-	snprintf(archiver_tmp_file, sizeof(archiver_tmp_file), "%s/.clifm%s",
+	char tmp_file[PATH_MAX + 1];
+	snprintf(tmp_file, sizeof(tmp_file), "%s/.clifm%s",
 			(xargs.stealth_mode == 1) ? P_tmpdir : tmp_dir, rand_ext);
 	free(rand_ext);
 
 	int fd;
-	FILE *fp = open_fwrite(archiver_tmp_file, &fd);
-	if (!fp) {
-		xerror("archiver: %s: %s\n", archiver_tmp_file, strerror(errno));
+	FILE *fp_out = open_fwrite(tmp_file, &fd);
+	if (!fp_out) {
+		xerror("archiver: %s: %s\n", tmp_file, strerror(errno));
 		return (-1);
 	}
 
-	FILE *fpp = fopen("/dev/null", "w");
-	if (!fpp) {
+	FILE *fp_err = fopen("/dev/null", "w");
+	if (!fp_err) {
 		xerror("archiver: /dev/null: %s\n", strerror(errno));
-		fclose(fp);
+		unlink(tmp_file);
+		fclose(fp_out);
 		return (-1);
 	}
 
 	int stdout_bk = dup(STDOUT_FILENO); /* Store original stdout */
 	int stderr_bk = dup(STDERR_FILENO); /* Store original stderr */
 
+	if (stdout_bk == -1 || stderr_bk == -1)
+		goto ERROR;
+
 	/* Redirect stdout to the desired file */
-	if (dup2(fileno(fp), STDOUT_FILENO) == -1) {
-		xerror("archiver: %s\n", strerror(errno));
-		fclose(fp);
-		fclose(fpp);
-		return (-1);
-	}
+	if (dup2(fileno(fp_out), STDOUT_FILENO) == -1)
+		goto ERROR;
 
 	/* Redirect stderr to /dev/null */
-	if (dup2(fileno(fpp), STDERR_FILENO) == -1) {
-		xerror("archiver: %s\n", strerror(errno));
-		fclose(fp);
-		fclose(fpp);
-		return -1;
-	}
+	if (dup2(fileno(fp_err), STDERR_FILENO) == -1)
+		goto ERROR;
 
-	fclose(fp);
-	fclose(fpp);
+	fclose(fp_out);
+	fclose(fp_err);
 
 	char *cmd[] = {"file", "-b", file, NULL};
 	int retval = launch_execv(cmd, FOREGROUND, E_NOFLAG);
@@ -611,46 +607,38 @@ is_compressed(char *file, const int test_iso)
 	close(stdout_bk);
 	close(stderr_bk);
 
-	if (retval != EXIT_SUCCESS)
+	if (retval != EXIT_SUCCESS) {
+		unlink(tmp_file);
 		return (-1);
+	}
 
-	if (access(archiver_tmp_file, F_OK) == 0) {
-		fp = open_fread(archiver_tmp_file, &fd);
-		if (fp) {
-			char line[255];
-			if (fgets(line, (int)sizeof(line), fp) == NULL) {
-				fclose(fp);
-				unlink(archiver_tmp_file);
-				return EXIT_FAILURE;
-			}
-			char *ret = strstr(line, "archive");
-
-			if (ret) {
-				compressed = 1;
-			} else {
-				ret = strstr(line, "compressed");
-				if (ret) {
-					compressed = 1;
-				} else {
-					if (test_iso) {
-						ret = strstr(line, "ISO 9660");
-						if (ret)
-							compressed = 1;
-					}
-				}
-			}
-
-			fclose(fp);
+	int compressed = 0;
+	fp_out = open_fread(tmp_file, &fd);
+	if (fp_out) {
+		char line[255];
+		if (fgets(line, (int)sizeof(line), fp_out) == NULL) {
+			fclose(fp_out);
+			unlink(tmp_file);
+			return EXIT_FAILURE;
 		}
 
-		unlink(archiver_tmp_file);
+		compressed = check_compressed(line, test_iso);
+		fclose(fp_out);
 	}
+
+	unlink(tmp_file);
+
+	return (compressed == 1 ? EXIT_SUCCESS : EXIT_FAILURE);
+
+ERROR:
+	xerror("archiver: %s\n", strerror(errno));
+	unlink(tmp_file);
+	fclose(fp_out);
+	fclose(fp_err);
+	close(stdout_bk);
+	close(stderr_bk);
+	return (-1);
 #endif /* !_NO_MAGIC */
-
-	if (compressed)
-		return EXIT_SUCCESS;
-
-	return EXIT_FAILURE;
 }
 
 static char *

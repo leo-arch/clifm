@@ -363,22 +363,22 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 	}
 #endif /* __HAIKU__ || __sun */
 
-#if !defined(__HAIKU__) && !defined(__sun)
+#ifdef HAVE_DPRINTF
 	dprintf(fd, BLEACH_TMP_HEADER);
 #else
 	fprintf(fp, BLEACH_TMP_HEADER);
-#endif /* !__HAIKU__ && !__sun */
+#endif /* HAVE_DPRINTF */
 
 	size_t i;
 	/* Copy all files to be renamed to the temp file */
 	for (i = 0; i < *n; i++) {
-#if !defined(__HAIKU__) && !defined(__sun)
+#ifdef HAVE_DPRINTF
 		dprintf(fd, "original: %s\nreplacement: %s\n\n",
 			bfiles[i].original, bfiles[i].replacement);
 #else
 		fprintf(fp, "original: %s\nreplacement: %s\n\n",
 			bfiles[i].original, bfiles[i].replacement);
-#endif /* !__HAIKU__ && !__sun */
+#endif /* HAVE_DPRINTF */
 	}
 	size_t total_files = i;
 

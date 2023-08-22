@@ -35,13 +35,18 @@
 #define LICENSE "GPL2+"
 #define COLORS_REPO "https://github.com/leo-arch/clifm-colors"
 
-#if defined(POSIX_STRICT) /* A more descriptive name for _BE_POSIX */
+/* POSIX_STRICT: A more descriptive name for _BE_POSIX */
+#if defined(POSIX_STRICT) || defined(_POSIX_C_SOURCE)
 # define _BE_POSIX
-#endif /* POSIX_STRICT */
+#endif /* POSIX_STRICT || _POSIX_C_SOURCE */
 
 #ifdef _BE_POSIX
-# define _POSIX_C_SOURCE 200809L
-# define _XOPEN_SOURCE 700
+# ifndef _POSIX_C_SOURCE
+#  define _POSIX_C_SOURCE 200809L
+# endif /* _POSIX_C_SOURCE */
+# ifndef _XOPEN_SOURCE
+#  define _XOPEN_SOURCE 700
+# endif /* _XOPEN_SOURCE */
 
 # if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) \
 || defined(__DragonFly__) || defined(__APPLE__)
@@ -109,25 +114,20 @@
 #include <regex.h>
 #include <stdlib.h>
 #include <sys/stat.h> /* S_BLKSIZE */
-#include <fcntl.h> /* AT* constants like AT_FDCWD */
+#include <fcntl.h> /* AT_* constants (like AT_FDCWD) */
 /* Included here to test _DIRENT_HAVE_D_TYPE and DT macros. */
 #include <dirent.h>
 
-#if !defined(AT_FDCWD) && !defined(CLIFM_LEGACY)
+#if (!defined(AT_FDCWD) || (defined(_BE_POSIX) && _POSIX_C_SOURCE < 200809L) \
+&& !defined(CLIFM_LEGACY))
 # define CLIFM_LEGACY
-#endif /* !AT_FDCWD && !CLIFM_LEGACY */
+#endif
 
 #ifdef CLIFM_LEGACY
-/* *AT functions are not available. Replace them by the old versions. */
+/* Let's replace functions not found before POSIX-1.2008 */
 # include "compat.h"
-# define xfstatat    old_stat
-# define xfchmodat   old_chmod
-# define xrenameat   old_rename
-# define xmkdirat    old_mkdir
-# define xreadlinkat old_readlink
-# define xsymlinkat  old_symlink
-# define xunlinkat   old_unlink
 #else
+# define xdirfd      dirfd
 # define xfstatat    fstatat
 # define xfchmodat   fchmodat
 # define xrenameat   renameat
@@ -135,7 +135,24 @@
 # define xreadlinkat readlinkat
 # define xsymlinkat  symlinkat
 # define xunlinkat   unlinkat
+# define xfchownat   fchownat
 #endif /* CLIFM_LEGACY */
+
+#ifdef __sun
+/* Solaris/Illumos defines AT_FDCWD as 0xffd19553 (-3041965); without the int
+ * cast, the value gets interpreted as uint (4291925331), which throws compiler
+ * warnings. See https://github.com/python/cpython/issues/60169 */
+# define XAT_FDCWD (int)AT_FDCWD
+# ifndef _BE_POSIX
+#  define SOLARIS_DOORS
+# endif /* !_BE_POSIX */
+#else
+# define XAT_FDCWD AT_FDCWD /* defined in fcntl.h */
+#endif /* __sun */
+
+#if !defined(__HAIKU__) && !defined(__sun) && !defined(CLIFM_LEGACY)
+# define HAVE_DPRINTF
+#endif /* !__HAIKU__ && !__SUN && !CLIFM_LEGACY */
 
 #if !defined(_DIRENT_HAVE_D_TYPE) || !defined(DT_DIR)
 /* Systems not providing a d_type member for the stat struct do not provide
@@ -408,18 +425,6 @@ extern int watch;
 # define GENERIC_FS_MONITOR
 extern time_t curdir_mtime;
 #endif /* LINUX_INOTIFY */
-
-#ifdef __sun
-/* Solaris/Illumos defines AT_FDCWD as 0xffd19553 (-3041965); without the int
- * cast, the value gets interpreted as uint (4291925331), which throws compiler
- * warnings. See https://github.com/python/cpython/issues/60169 */
-# define XAT_FDCWD (int)AT_FDCWD
-# ifndef _BE_POSIX
-#  define SOLARIS_DOORS
-# endif /* !_BE_POSIX */
-#else
-# define XAT_FDCWD AT_FDCWD /* defined in fcntl.h */
-#endif /* __sun */
 
 /* Do we have arc4random_uniform(3). If not, fallback to random(3). */
 #if !defined(_NO_ARC4RANDOM) && !defined(_BE_POSIX) && !defined(__HAIKU__)
@@ -808,8 +813,6 @@ extern time_t curdir_mtime;
 /* Log the message and print it to STDERR, but do not store it into the
  * messages array. */
 #define xerror(...) err(ERR_NO_STORE, NOPRINT_PROMPT, __VA_ARGS__)
-
-#define ENTRY_N 64
 
 /* Macros to calculate file sizes */
 /* Directories, regular files, and symbolic links report meaningful sizes

@@ -1,4 +1,4 @@
-/* compat.c -- replacement *AT functions for legacy systems */
+/* compat.c -- compatibility later for legacy systems (before POSIX-1.2008) */
 
 /*
  * This file is part of CliFM
@@ -85,4 +85,26 @@ old_unlink(int dirfd, const char *pathname, int lflags)
 {
 	UNUSED(dirfd); UNUSED(lflags);
 	return unlink(pathname);
+}
+
+/* Replacement for fchownat(2) */
+int
+old_chown(int fd, const char *path, uid_t owner, gid_t group, int flag)
+{
+	UNUSED(fd); UNUSED(flag);
+	return chown(path, owner, group);
+}
+
+/* strnlen(3) is not specified in POSIX-1.2001 */
+size_t
+x_strnlen(const char *s, size_t max)
+{
+	size_t n = 0;
+
+	while (*s && n < max) {
+		s++;
+		n++;
+	}
+
+	return n;
 }
