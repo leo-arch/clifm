@@ -1,10 +1,12 @@
 #!/bin/sh
 
-# Image thumbnails plugin for CliFM
-# Written by L. Abramovich
+# Description: Image thumbnails plugin for CliFM
 # Dependencies (any of the following):
 #     sxiv feh pqiv gthumb ristretto gwenview lsix img2sixel
-#     or just your preferred image viewer
+#       (or just your preferred image viewer)
+#     xargs
+#
+# Author: L. Abramovich
 # License: GPL3
 
 # Specify here your preferred image viewer and command line options for it
@@ -31,26 +33,28 @@ if [ -n "$VIEWER" ] && [ "$(type "$VIEWER" 2>/dev/null)" ]; then
 	exit 0
 fi
 
+names="$(echo "$args" | sed 's/\\ /\t/g;s/ /\n/g;s/\t/ /g;s/\\//g')"
+
 if type sxiv > /dev/null 2>&1; then
-	sxiv -aqt -- "$args" && exit 0 || found=1
+	(echo "$names" | xargs -d'\n' sxiv -aqt) && exit 0 || found=1
 elif type feh > /dev/null 2>&1; then
-	feh -tZ -- "$args" && exit 0 || found=1
+	(echo "$names" | xargs -d'\n' feh -tZ) && exit 0 || found=1
 elif type pqiv > /dev/null 2>&1; then
-	pqiv --auto-montage-mode --max-depth=1 --disable-backends="archive,poppler,spectre,wand,webp,libav,archive_cbx" -- "$args" && exit 0 || found=1
+	(echo "$names" | xargs -d'\n' pqiv --auto-montage-mode --max-depth=1 --disable-backends="archive,poppler,spectre,wand,webp,libav,archive_cbx") && exit 0 || found=1
 elif type gthumb > /dev/null 2>&1; then
-	gthumb -- "$args" && exit 0 || found=1
+	(echo "$names" | xargs -d'\n' gthumb) && exit 0 || found=1
 elif type ristretto > /dev/null 2>&1; then
-	ristretto -- "$args" && exit 0 || found=1
+	(echo "$names" | xargs -d'\n' ristretto) && exit 0 || found=1
 elif type gwenview > /dev/null 2>&1; then
-	gwenview -- "$args" && exit 0 || found=1
+	(echo "$names" | xargs -d'\n' gwenview) && exit 0 || found=1
 elif type lsix > /dev/null 2>&1; then
 	if [ -d "$1" ] || [ -h "$1" ]; then
 		lsix "$1"/*.png "$1"/*.jpg && exit 0 || found=1
 	else
-		lsix "$args" && exit 0 || found=1
+		(echo "$names" | xargs -d'\n' lsix) && exit 0 || found=1
 	fi
 elif type img2sixel > /dev/null 2>&1; then
-	img2sixel "$args" && exit 0 || found=1
+	(echo "$names" | xargs -d'\n' img2sizel) && exit 0 || found=1
 fi
 
 if [ "$found" -eq 0 ]; then

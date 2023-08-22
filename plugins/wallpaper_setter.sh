@@ -2,7 +2,7 @@
 
 # Wallpaper setter plugin for CliFM
 # Dependencies:
-#  file, and
+#  file, sed, and
 #    feh, xsetbg (xloadimage), hsetroot, or nitrogen (for X)
 #    swww (https://github.com/Horus645/swww) or swaybg (for Wayland)
 
@@ -27,28 +27,30 @@ if ! type file >/dev/null 2>&1; then
 	exit 127
 fi
 
-if ! file -bi "$1" | grep -q "image/"; then
-	printf "clifm: %s: Not an image file\n" "$1" >&2
+file="$(echo "$1" | sed 's/\\//g')"
+
+if ! file -bi "$file" | grep -q "image/"; then
+	printf "clifm: %s: Not an image file\n" "$file" >&2
 	exit 1
 fi
 
 if [ -n "$WAYLAND_DISPLAY" ]; then
 	if type swww >/dev/null 2>&1; then
-		swww img "$1" && exit 0
+		swww img "$file" && exit 0
 	elif type swaybg >/dev/null 2>&1; then
 		killall swaybg 2>/dev/null
-		swaybg -m fill -i "$1" 2>/dev/null &
+		swaybg -m fill -i "$file" 2>/dev/null &
 		exit 0
 	fi
 else
 	if type feh >/dev/null 2>&1; then
-		feh --no-fehbg --bg-fill "$1" && exit 0
+		feh --no-fehbg --bg-fill "$file" && exit 0
 	elif type xsetbg >/dev/null 2>&1; then
-		xsetbg -center "$1" && exit 0
+		xsetbg -center "$file" && exit 0
 	elif type hsetroot >/dev/null 2>&1; then
-		hsetroot -center "$1" && exit 0
+		hsetroot -center "$file" && exit 0
 	elif type nitrogen >/dev/null 2>&1; then
-		nitrogen --set-zoom-fill --save "$1" && exit 0
+		nitrogen --set-zoom-fill --save "$file" && exit 0
 	fi
 fi
 
