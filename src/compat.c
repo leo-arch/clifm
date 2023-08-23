@@ -49,7 +49,7 @@ int
 old_chmod(int fd, const char *path, mode_t mode, int flag)
 {
 	UNUSED(fd); UNUSED(flag);
-	return chmod(path, mode);
+	return chmod(path, mode); /* flawfinder: ignore */
 }
 
 /* Replacement for renameat(2) */
@@ -57,7 +57,7 @@ int
 old_rename(int olddirfd, const char *oldpath, int newdirfd, const char *newpath)
 {
 	UNUSED(olddirfd); UNUSED(newdirfd);
-	return rename(oldpath, newpath);
+	return rename(oldpath, newpath); /* flawfinder: ignore */
 }
 
 /* Replacement for mkdirat(2) */
@@ -65,7 +65,7 @@ int
 old_mkdir(int dirfd, const char *pathname, mode_t mode)
 {
 	UNUSED(dirfd);
-	return mkdir(pathname, mode);
+	return mkdir(pathname, mode); /* flawfinder: ignore */
 }
 
 /* Replacement for readlinkat(2) */
@@ -74,7 +74,7 @@ old_readlink(int dirfd, const char *restrict pathname,
 	char *restrict buf, size_t bufsiz)
 {
 	UNUSED(dirfd);
-	return readlink(pathname, buf, bufsiz);
+	return readlink(pathname, buf, bufsiz); /* flawfinder: ignore */
 }
 
 /* Replacement for symlinkat(2) */
@@ -82,7 +82,7 @@ int
 old_symlink(const char *target, int newdirfd, const char *linkpath)
 {
 	UNUSED(newdirfd);
-	return symlink(target, linkpath);
+	return symlink(target, linkpath); /* flawfinder: ignore */
 }
 
 /* Replacement for unlinkat(2) */
@@ -90,7 +90,7 @@ int
 old_unlink(int dirfd, const char *pathname, int lflags)
 {
 	UNUSED(dirfd); UNUSED(lflags);
-	return unlink(pathname);
+	return unlink(pathname); /* flawfinder: ignore */
 }
 
 /* Replacement for fchownat(2) */
@@ -98,7 +98,7 @@ int
 old_chown(int fd, const char *path, uid_t owner, gid_t group, int flag)
 {
 	UNUSED(fd); UNUSED(flag);
-	return chown(path, owner, group);
+	return chown(path, owner, group); /* flawfinder: ignore */
 }
 
 /* ----------------- strnlen ------------------------ */
