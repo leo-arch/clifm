@@ -27,6 +27,7 @@
 
 #include "getline.h"
 
+/* Let's fake the following macros: we won't use them anyway */
 #ifndef AT_FDCWD
 # define AT_FDCWD -100
 #endif /* !AT_FDCWD */

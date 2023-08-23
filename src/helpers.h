@@ -118,13 +118,14 @@
 /* Included here to test _DIRENT_HAVE_D_TYPE and DT macros. */
 #include <dirent.h>
 
-#if (!defined(AT_FDCWD) || (defined(_BE_POSIX) && _POSIX_C_SOURCE < 200809L) \
-&& !defined(CLIFM_LEGACY))
+#if (!defined(_ATFILE_SOURCE) || (defined(_POSIX_C_SOURCE) \
+&& _POSIX_C_SOURCE < 200809L) && !defined(CLIFM_LEGACY))
 # define CLIFM_LEGACY
 #endif
 
 #ifdef CLIFM_LEGACY
-/* Let's replace functions not found before POSIX-1.2008 */
+/* Replace functions not found before POSIX-1.2008. More precisely,
+ * let's try to be POSIX-1.2001 compliant. */
 # include "compat.h"
 #else
 # define xdirfd      dirfd
