@@ -118,8 +118,8 @@
 /* Included here to test _DIRENT_HAVE_D_TYPE and DT macros. */
 #include <dirent.h>
 
-#if (!defined(_ATFILE_SOURCE) || (defined(_POSIX_C_SOURCE) \
-&& _POSIX_C_SOURCE < 200809L) && !defined(CLIFM_LEGACY))
+#if ((!defined(_ATFILE_SOURCE) || (defined(_POSIX_C_SOURCE) \
+&& _POSIX_C_SOURCE < 200809L)) && !defined(CLIFM_LEGACY))
 # define CLIFM_LEGACY
 #endif
 
