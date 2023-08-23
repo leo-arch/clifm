@@ -81,7 +81,7 @@ static char **
 get_block_devices(void)
 {
 	struct dirent **blockdev = (struct dirent **)NULL;
-	int block_n = scandir("/dev", &blockdev, NULL, alphasort);
+	int block_n = xscandir("/dev", &blockdev, NULL, alphasort_x);
 	if (block_n == - 1)
 		return (char **)NULL;
 
@@ -175,7 +175,7 @@ get_dev_label(void)
 {
 	size_t n = mp_n;
 	struct dirent **labels = (struct dirent **)NULL;
-	int ln = scandir(DISK_LABELS_PATH, &labels, NULL, alphasort);
+	int ln = xscandir(DISK_LABELS_PATH, &labels, NULL, alphasort_x);
 	if (ln == - 1)
 		return (char *)NULL;
 

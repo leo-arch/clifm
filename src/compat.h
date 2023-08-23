@@ -25,7 +25,7 @@
 #ifndef CLIFM_COMPAT_H
 #define CLIFM_COMPAT_H
 
-#include "getline.h"
+#include <stdio.h> /* FILE */
 
 /* Let's fake the following macros: we won't use them anyway */
 #ifndef AT_FDCWD
@@ -51,6 +51,8 @@
 # define xfchownat   old_chown
 # define xgetline    x_getline
 # define strnlen     x_strnlen
+# define alphasort_x x_alphasort
+# define xscandir    x_scandir
 
 __BEGIN_DECLS
 
@@ -63,6 +65,13 @@ int old_symlink(const char *, int, const char *);
 int old_unlink(int, const char *, int);
 int old_chown(int, const char *, uid_t, gid_t, int);
 size_t x_strnlen(const char *, size_t);
+
+ssize_t x_getline(char **, size_t *, FILE *);
+
+int x_alphasort(const struct dirent **, const struct dirent **);
+int x_scandir(const char *, struct dirent ***,
+	int (*)(const struct dirent *),
+	int (*)(const struct dirent **, const struct dirent **));
 
 __END_DECLS
 

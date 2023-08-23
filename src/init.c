@@ -772,7 +772,7 @@ load_tags(void)
 	if (!tags_dir || !*tags_dir) return;
 
 	struct dirent **t = (struct dirent **)NULL;
-	int i, n = scandir(tags_dir, &t, NULL, alphasort);
+	int i, n = xscandir(tags_dir, &t, NULL, alphasort_x);
 	if (n == -1) return;
 
 	if (n <= 2) {
@@ -2112,7 +2112,7 @@ get_path_programs(void)
 				continue;
 			}
 
-			cmd_n[i] = scandir(paths[i].path, &commands_bin[i],
+			cmd_n[i] = xscandir(paths[i].path, &commands_bin[i],
 #if defined(__CYGWIN__)
 					NULL, xalphasort);
 #else

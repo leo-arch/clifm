@@ -138,6 +138,8 @@
 # define xsymlinkat  symlinkat
 # define xunlinkat   unlinkat
 # define xfchownat   fchownat
+# define alphasort_x alphasort
+# define xscandir    scandir
 #endif /* CLIFM_LEGACY */
 
 #ifdef __sun

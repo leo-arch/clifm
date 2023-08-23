@@ -271,7 +271,7 @@ trash_clear(void)
 		return EXIT_FAILURE;
 	}
 
-	files_n = scandir(trash_files_dir, &trash_files, skip_files, xalphasort);
+	files_n = xscandir(trash_files_dir, &trash_files, skip_files, xalphasort);
 
 	if (!files_n) {
 		puts(_("trash: No trashed files"));
@@ -552,8 +552,8 @@ remove_from_trash(char **args)
 	}
 
 	struct dirent **trash_files = (struct dirent **)NULL;
-	int files_n = scandir(trash_files_dir, &trash_files,
-			skip_files, conf.unicode == 1 ? alphasort
+	int files_n = xscandir(trash_files_dir, &trash_files,
+			skip_files, conf.unicode == 1 ? alphasort_x
 			: (conf.case_sens_list == 1 ? xalphasort : alphasort_insensitive));
 
 	if (files_n <= -1) {
@@ -914,8 +914,8 @@ untrash_function(char **comm)
 
 	/* Get trashed files */
 	struct dirent **trash_files = (struct dirent **)NULL;
-	int trash_files_n = scandir(trash_files_dir, &trash_files,
-	    skip_files, (conf.unicode) ? alphasort : (conf.case_sens_list)
+	int trash_files_n = xscandir(trash_files_dir, &trash_files,
+	    skip_files, (conf.unicode) ? alphasort_x : (conf.case_sens_list)
 			? xalphasort : alphasort_insensitive);
 	if (trash_files_n <= 0) {
 		puts(_("trash: No trashed files"));
@@ -1057,8 +1057,8 @@ list_trashed_files(void)
 	}
 
 	struct dirent **trash_files = (struct dirent **)NULL;
-	int files_n = scandir(trash_files_dir, &trash_files,
-			skip_files, (conf.unicode) ? alphasort : (conf.case_sens_list)
+	int files_n = xscandir(trash_files_dir, &trash_files,
+			skip_files, (conf.unicode) ? alphasort_x : (conf.case_sens_list)
 			? xalphasort : alphasort_insensitive);
 
 	if (files_n == -1) {

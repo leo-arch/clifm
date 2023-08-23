@@ -1203,7 +1203,7 @@ expand_tag(char ***args, const int tag_index)
 	snprintf(dir, sizeof(dir), "%s/%s", tags_dir, tag);
 
 	struct dirent **t = (struct dirent **)NULL;
-	int n = scandir(dir, &t, NULL, conf.case_sens_list
+	int n = xscandir(dir, &t, NULL, conf.case_sens_list
 		? xalphasort : alphasort_insensitive);
 	if (n == -1)
 		return 0;

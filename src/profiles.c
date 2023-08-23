@@ -47,7 +47,7 @@
 #include "messages.h"
 
 /* Get the list of all available profile names and store them in the
- * profile_names global array. Returns zero on success, one otherwise */
+ * profile_names global array. Returns zero on success, one otherwise. */
 int
 get_profile_names(void)
 {
@@ -59,7 +59,7 @@ get_profile_names(void)
 	snprintf(pf_dir, len, "%s/profiles", config_dir_gral);
 
 	struct dirent **profs = (struct dirent **)NULL;
-	int files_n = scandir(pf_dir, &profs, NULL, xalphasort);
+	int files_n = xscandir(pf_dir, &profs, NULL, xalphasort);
 
 	if (files_n == -1) {
 		free(pf_dir);

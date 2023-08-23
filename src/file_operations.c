@@ -269,7 +269,7 @@ write_files_to_tmp(struct dirent ***a, filesn_t *n, const char *target,
 			return tmp_err;
 		}
 
-		*n = scandir(target, a, NULL, alphasort);
+		*n = xscandir(target, a, NULL, alphasort_x);
 		if (*n == -1) {
 			int tmp_err = errno;
 			xerror("rr: %s: %s", target, strerror(errno));
