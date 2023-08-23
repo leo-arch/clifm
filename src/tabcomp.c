@@ -2156,8 +2156,7 @@ AFTER_USUAL_COMPLETION:
 			|| c == TCMP_TAGS_C || c == TCMP_TAGS_S || c == TCMP_TAGS_T
 			|| c == TCMP_TAGS_U || c == TCMP_BOOKMARK || c == TCMP_GLOB
 			|| c == TCMP_PROMPTS || c == TCMP_CSCHEME || c == TCMP_WORKSPACES
-			|| c == TCMP_PROF || c == TCMP_BM_PREFIX)
-			&& !strchr(replacement, '\\')) {
+			|| c == TCMP_BM_PREFIX) && !strchr(replacement, '\\')) {
 				char *r = escape_str(replacement);
 				if (!r) {
 					if (replacement != matches[0])
