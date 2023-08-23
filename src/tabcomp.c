@@ -1461,10 +1461,10 @@ get_finder_offset(const char *query, const char *text, char **matches,
 	}
 
 	if (ct == TCMP_OWNERSHIP && query) {
-		if (query == lb)
-			finder_offset = lb ? (int)wc_xstrlen(lb) - 3 : 0;
+		if (lb && query == lb)
+			finder_offset = (int)wc_xstrlen(lb) - 3;
 		else
-			finder_offset = (int)(query - lb);
+			finder_offset = lb ? (int)(query - lb) : 0;
 	}
 
 	else if (ct == TCMP_DESEL && query) {
