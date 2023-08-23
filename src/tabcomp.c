@@ -953,7 +953,7 @@ get_finder_output(const int multi, char *base)
 	ssize_t line_len = 0;
 	char *initial_path = (cur_comp_type == TCMP_GLOB) ? base : (char *)NULL;
 
-	while ((line_len = getline(&line, &line_size, fp)) > 0) {
+	while ((line_len = xgetline(&line, &line_size, fp)) > 0) {
 		if (line[line_len - 1] == '\n')
 			line[--line_len] = '\0';
 

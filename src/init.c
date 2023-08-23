@@ -894,7 +894,7 @@ load_jumpdb(void)
 	char *line = (char *)NULL;
 	ssize_t line_len = 0;
 
-	while ((line_len = getline(&line, &line_size, fp)) > 0) {
+	while ((line_len = xgetline(&line, &line_size, fp)) > 0) {
 		if (*line < '0')
 			continue;
 
@@ -1043,7 +1043,7 @@ load_bookmarks(void)
 	char *line = (char *)NULL;
 	ssize_t line_len = 0;
 
-	while ((line_len = getline(&line, &line_size, fp)) > 0) {
+	while ((line_len = xgetline(&line, &line_size, fp)) > 0) {
 		if (!*line || *line == '\n' || *line == '#')
 			continue;
 		if (line[line_len - 1] == '\n')
@@ -1170,7 +1170,7 @@ load_actions(void)
 	char *line = (char *)NULL;
 	ssize_t line_len = 0;
 
-	while ((line_len = getline(&line, &line_size, fp)) > 0) {
+	while ((line_len = xgetline(&line, &line_size, fp)) > 0) {
 		if (!line || !*line || *line == '#' || *line == '\n')
 			continue;
 		if (line[line_len - 1] == '\n')
@@ -1229,7 +1229,7 @@ load_remotes(void)
 	size_t line_sz = 0;
 	char *line = (char *)NULL;
 
-	while (getline(&line, &line_sz, fp) > 0) {
+	while (xgetline(&line, &line_sz, fp) > 0) {
 		if (!*line || *line == '#' || *line == '\n')
 			continue;
 		if (*line == '[') {
@@ -1417,7 +1417,7 @@ load_prompts(void)
 	size_t line_sz = 0;
 	char *line = (char *)NULL;
 
-	while (getline(&line, &line_sz, fp) > 0) {
+	while (xgetline(&line, &line_sz, fp) > 0) {
 		if (SKIP_LINE(*line))
 			continue;
 
@@ -2273,7 +2273,7 @@ get_aliases(void)
 	char *line = (char *)NULL;
 	size_t line_size = 0;
 
-	while (getline(&line, &line_size, fp) > 0) {
+	while (xgetline(&line, &line_size, fp) > 0) {
 		if (*line == 'a' && strncmp(line, "alias ", 6) == 0) {
 			char *s = strchr(line, ' ');
 			if (!s || !*(++s))
@@ -2343,7 +2343,7 @@ load_dirhist(void)
 	ssize_t line_len = 0;
 	dirhist_total_index = 0;
 
-	while ((line_len = getline(&line, &line_size, fp)) > 0)
+	while ((line_len = xgetline(&line, &line_size, fp)) > 0)
 		write_dirhist(line, line_len);
 
 	fclose(fp);
@@ -2385,7 +2385,7 @@ get_prompt_cmds(void)
 	size_t line_size = 0;
 	ssize_t line_len = 0;
 
-	while ((line_len = getline(&line, &line_size, fp)) > 0) {
+	while ((line_len = xgetline(&line, &line_size, fp)) > 0) {
 		if (*line != 'p' || strncmp(line, "promptcmd ", 10) != 0)
 			continue;
 		if (line[line_len - 1] == '\n')

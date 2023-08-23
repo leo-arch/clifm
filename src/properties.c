@@ -87,17 +87,23 @@
 
 /* A few macros for nano-second precision.
  * Used to print timestamps with the 'p/pp' command. */
-#define NANO_SEC_MAX 999999999
-
-#if defined(__NetBSD__) || defined(__APPLE__)
-# define ATIMNSEC st_atimespec.tv_nsec
-# define CTIMNSEC st_ctimespec.tv_nsec
-# define MTIMNSEC st_mtimespec.tv_nsec
+#ifndef CLIFM_LEGACY
+# define NANO_SEC_MAX 999999999
+# if defined(__NetBSD__) || defined(__APPLE__)
+#  define ATIMNSEC st_atimespec.tv_nsec
+#  define CTIMNSEC st_ctimespec.tv_nsec
+#  define MTIMNSEC st_mtimespec.tv_nsec
+# else
+#  define ATIMNSEC st_atim.tv_nsec
+#  define CTIMNSEC st_ctim.tv_nsec
+#  define MTIMNSEC st_mtim.tv_nsec
+# endif /* __NetBSD__ || __APPLE__ */
 #else
-# define ATIMNSEC st_atim.tv_nsec
-# define CTIMNSEC st_ctim.tv_nsec
-# define MTIMNSEC st_mtim.tv_nsec
-#endif /* __NetBSD__ || __APPLE__ */
+/* Let's use any valid value: it won't be used anyway */
+#  define ATIMNSEC st_atime
+#  define CTIMNSEC st_ctime
+#  define MTIMNSEC st_mtime
+#endif /* CLIFM_LEGACY */
 
 #ifndef major /* Not defined in Haiku */
 # define major(x) ((x >> 8) & 0x7F)
@@ -1363,7 +1369,12 @@ xgen_time_str(char *buf, const size_t buf_size, const time_t tim,
 		return;
 
 	struct tm t;
+#ifndef CLIFM_LEGACY
 	if (nsec > NANO_SEC_MAX || tim < 0 || !localtime_r(&tim, &t))
+#else
+	UNUSED(nsec);
+	if (tim < 0 || !localtime_r(&tim, &t))
+#endif /* CLIFM_LEGACY */
 		goto END;
 
 	*buf = '\0';
@@ -1372,7 +1383,12 @@ xgen_time_str(char *buf, const size_t buf_size, const time_t tim,
 	if (len == 0) /* Error or exhausted space in BUF. */
 		return;
 
+#ifndef CLIFM_LEGACY
 	len += (size_t)snprintf(buf + len, buf_size - len, ".%09zu ", nsec);
+#else
+	*(buf + len) = ' ';
+	len++;
+#endif /* CLIFM_LEGACY */
 	if (len >= buf_size) /* Error or exhausted space in BUF. */
 		return;
 

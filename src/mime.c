@@ -287,7 +287,7 @@ retrieve_app(char *line)
 
 /* Get application associated to a given MIME type or file name.
  * Returns the first matching line in the MIME file or NULL if none is
- * found */
+ * found. */
 static char *
 get_app(const char *mime, const char *filename)
 {
@@ -304,7 +304,7 @@ get_app(const char *mime, const char *filename)
 	char *line = (char *)NULL, *app = (char *)NULL;
 
 	/* Each line has this form: prefix:pattern=cmd;cmd;cmd... */
-	while (getline(&line, &line_size, defs_fp) > 0) {
+	while (xgetline(&line, &line_size, defs_fp) > 0) {
 		char *pattern = (char *)NULL, *cmds = (char *)NULL;
 		if (skip_line(line, &pattern, &cmds) == 1)
 			continue;
@@ -535,7 +535,7 @@ mime_import(char *file)
 		/* Only store associations in the "Default Applications" section */
 		int header_found = 0;
 
-		while (getline(&line, &line_size, sys_mime_fp) > 0) {
+		while (xgetline(&line, &line_size, sys_mime_fp) > 0) {
 			if (header_found == 0
 			&& (strncmp(line, "[Default Applications]", 22) == 0
 			|| strncmp(line, "[Added Associations]", 20) == 0)) {
@@ -997,7 +997,7 @@ mime_open_with_tab(char *filename, const char *prefix, const int only_names)
 	size_t line_size = 0;
 	char *line = (char *)NULL, *app = (char *)NULL;
 
-	while (getline(&line, &line_size, defs_fp) > 0) {
+	while (xgetline(&line, &line_size, defs_fp) > 0) {
 		if (*line == '#' || *line == '[' || *line == '\n')
 			continue;
 
@@ -1356,7 +1356,7 @@ mime_open_with(char *filename, char **args)
 	size_t line_size = 0;
 	char *line = (char *)NULL, *app = (char *)NULL;
 
-	while (getline(&line, &line_size, defs_fp) > 0) {
+	while (xgetline(&line, &line_size, defs_fp) > 0) {
 		if (*line == '#' || *line == '[' || *line == '\n')
 			continue;
 

@@ -1062,7 +1062,7 @@ alias_import(char *file)
 	size_t alias_found = 0, alias_imported = 0;
 	int first = 1;
 
-	while (getline(&line, &line_size, fp) > 0) {
+	while (xgetline(&line, &line_size, fp) > 0) {
 		if (*line == 'a' && strncmp(line, "alias ", 6) == 0) {
 			alias_found++;
 

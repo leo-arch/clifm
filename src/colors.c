@@ -2099,7 +2099,7 @@ read_color_scheme_file(const char *colorscheme, char **filecolors,
 	size_t line_size = 0;
 	ssize_t line_len = 0;
 
-	while ((line_len = getline(&line, &line_size, fp_colors)) > 0) {
+	while ((line_len = xgetline(&line, &line_size, fp_colors)) > 0) {
 		if (SKIP_LINE(*line))
 			continue;
 

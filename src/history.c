@@ -83,7 +83,7 @@ split_old_log_file(void)
 	size_t line_size = 0;
 	char *line = (char *)NULL;
 
-	while (getline(&line, &line_size, old) > 0) {
+	while (xgetline(&line, &line_size, old) > 0) {
 		if (!line || !*line || (*line != 'c' && *line != 'm')
 		|| line[1] != ':' || !line[2])
 			continue;
@@ -135,7 +135,7 @@ print_logs(const int flag)
 	size_t line_size = 0;
 	char *line_buff = (char *)NULL;
 
-	while (getline(&line_buff, &line_size, log_fp) > 0)
+	while (xgetline(&line_buff, &line_size, log_fp) > 0)
 		fputs(line_buff, stdout);
 
 	free(line_buff);
@@ -643,7 +643,7 @@ get_history(void)
 	ssize_t line_len = 0;
 	time_t tdate = -1;
 
-	while ((line_len = getline(&line_buff, &line_size, hist_fp)) > 0) {
+	while ((line_len = xgetline(&line_buff, &line_size, hist_fp)) > 0) {
 		line_buff[line_len - 1] = '\0';
 		if (!*line_buff)
 			continue;

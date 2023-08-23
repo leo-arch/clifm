@@ -218,7 +218,7 @@ load_keybinds(void)
 	char *line = (char *)NULL;
 	ssize_t line_len = 0;
 
-	while ((line_len = getline(&line, &line_size, fp)) > 0) {
+	while ((line_len = xgetline(&line, &line_size, fp)) > 0) {
 		if (!line || !*line || *line == '#' || *line == '\n')
 			continue;
 

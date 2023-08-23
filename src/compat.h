@@ -25,6 +25,8 @@
 #ifndef CLIFM_COMPAT_H
 #define CLIFM_COMPAT_H
 
+#include "getline.h"
+
 #ifndef AT_FDCWD
 # define AT_FDCWD -100
 #endif /* !AT_FDCWD */
@@ -37,7 +39,7 @@
 #  define O_CLOEXEC 0
 # endif /* O_CLOEXEC */
 
-# define xdirfd(d)   0
+# define xdirfd(d)   (0)
 # define xfstatat    old_stat
 # define xfchmodat   old_chmod
 # define xrenameat   old_rename
@@ -46,6 +48,7 @@
 # define xsymlinkat  old_symlink
 # define xunlinkat   old_unlink
 # define xfchownat   old_chown
+# define xgetline    x_getline
 # define strnlen     x_strnlen
 
 __BEGIN_DECLS

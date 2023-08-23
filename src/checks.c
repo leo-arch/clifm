@@ -1017,7 +1017,7 @@ truncate_file(char *file, const int max, const int check_dups)
 	char *prev_line = (char *)NULL;
 	size_t prev_line_size = 0;
 
-	while (getline(&line, &line_size, fp) > 0) {
+	while (xgetline(&line, &line_size, fp) > 0) {
 		/* Skip consecutive equal entries */
 		if (check_dups == 1 && prev_line && line_size == prev_line_size
 		&& strcmp(line, prev_line) == 0)

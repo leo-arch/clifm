@@ -2797,8 +2797,8 @@ parse_input_str(char *str)
 	 * made here (in the lobby [got it?]) in order to be able to understand
 	 * these expansions at all. */
 
-	/* Let's first mark substrings containing special expansion made by either
-	 * glob(3) and wordexp(3) */
+	/* Let's first mark substrings containing special expansions made by either
+	 * glob(3) and wordexp(3). */
 
 	int *glob_array = (int *)xnmalloc(INT_ARRAY_MAX, sizeof(int));
 	size_t glob_n = 0;
@@ -2815,14 +2815,14 @@ parse_input_str(char *str)
 		 * elements: they are full path file names that, as such, do not
 		 * need any expansion. */
 		if (is_sel > 0) { /* is_sel is true only for the current input and if
-			there was some "sel" keyword in it */
+			there was some "sel" keyword in it. */
 			/* Strings between is_sel and sel_n are selected file names.
 			 * Skip them. */
 			if (i >= (size_t)is_sel && i <= sel_n)
 				continue;
 		}
 
-		/* Ignore the first string of the search function: it will be
+		/* Ignore the first word of the search function: it will be
 		 * expanded by the search function itself. */
 		if (substr[0][0] == '/' && i == 0)
 			continue;

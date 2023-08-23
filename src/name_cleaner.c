@@ -353,7 +353,7 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 
 	FILE *fp = (FILE *)NULL;
 
-#if defined(__HAIKU__) || defined(__sun)
+#ifndef HAVE_DPRINTF
 	fp = fopen(f, "w");
 	if (!fp) {
 		if (unlink(f) == -1)
@@ -361,7 +361,7 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 		err('e', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
 		return (struct bleach_t *)NULL;
 	}
-#endif /* __HAIKU__ || __sun */
+#endif /* !HAVE_DPRINT */
 
 #ifdef HAVE_DPRINTF
 	dprintf(fd, BLEACH_TMP_HEADER);
@@ -454,7 +454,7 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 
 	i = 0;
 	/* Read the temp file and store the new values */
-	while ((line_len = getline(&line, &line_size, fp)) > 0) {
+	while ((line_len = xgetline(&line, &line_size, fp)) > 0) {
 		if (i >= total_files)
 			break;
 

@@ -128,6 +128,7 @@
 # include "compat.h"
 #else
 # define xdirfd      dirfd
+# define xgetline    getline
 # define xfstatat    fstatat
 # define xfchmodat   fchmodat
 # define xrenameat   renameat

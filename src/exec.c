@@ -2133,7 +2133,7 @@ exec_cmd(char **comm)
 	if (check_pinned_file(comm) == EXIT_FAILURE)
 		return (exit_code = EXIT_FAILURE);
 
-	/* User defined actions */
+	/* User defined actions (plugins) */
 	if ((exit_code = check_actions(comm)) != -1)
 		return exit_code;
 
@@ -2789,7 +2789,7 @@ exec_profile(void)
 	char *line = (char *)NULL;
 	ssize_t line_len = 0;
 
-	while ((line_len = getline(&line, &line_size, fp)) > 0) {
+	while ((line_len = xgetline(&line, &line_size, fp)) > 0) {
 		if (!*line || *line == '\n' || *line == '#')
 			continue;
 

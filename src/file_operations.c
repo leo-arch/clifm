@@ -343,7 +343,7 @@ get_files_from_tmp_file(const char *tmp_file, const char *target, const filesn_t
 	ssize_t len = 0;
 
 	i = 0;
-	while ((len = getline(&line, &size, fp)) > 0) {
+	while ((len = xgetline(&line, &size, fp)) > 0) {
 		if (*line == '#' || *line == '\n')
 			continue;
 
@@ -2304,7 +2304,7 @@ bulk_rename(char **args)
 
 	i = 1;
 	/* Print what would be done */
-	while ((line_len = getline(&line, &line_size, fp)) > 0) {
+	while ((line_len = xgetline(&line, &line_size, fp)) > 0) {
 		if (!*line || *line == '\n' || *line == '#')
 			continue;
 		if (line[line_len - 1] == '\n')
@@ -2337,7 +2337,7 @@ bulk_rename(char **args)
 	i = 1;
 
 	/* Rename each file */
-	while ((line_len = getline(&line, &line_size, fp)) > 0) {
+	while ((line_len = xgetline(&line, &line_size, fp)) > 0) {
 		if (!*line || *line == '\n' || *line == '#')
 			continue;
 

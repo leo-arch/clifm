@@ -187,7 +187,7 @@ run_action(char *action, char **args)
 	close(rfd);
 
 	/* Wait for the child to finish. Otherwise, the child is left as a
-	 * zombie process. Store plugin exit status in EXIT_STATUS */
+	 * zombie process. Store plugin exit status in EXIT_STATUS. */
 	int status = 0;
 	if (waitpid(pid, &status, 0) > 0) {
 		exit_status = get_exit_code(status, EXEC_FG_PROC);
