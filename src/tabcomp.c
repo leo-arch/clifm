@@ -1146,7 +1146,7 @@ store_completions(char **matches)
 			color = *tmp_color ? tmp_color : (cl ? cl : "");
 
 			if (ct != TCMP_SEL && ct != TCMP_DESEL && ct != TCMP_BM_PATHS
-			&& ct != TCMP_DIRHIST && ct != TCMP_OPENWITH && ct != TCMP_BACKDIR
+			&& ct != TCMP_DIRHIST && ct != TCMP_OPENWITH
 			&& ct != TCMP_JUMP && ct != TCMP_TAGS_F) {
 				_path = strrchr(entry, '/');
 				entry = (_path && *(++_path)) ? _path : entry;
