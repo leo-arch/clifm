@@ -621,7 +621,7 @@ write_completion(char *buf, const size_t offset, const int multi)
 
 	if (t == TCMP_ENVIRON || t == TCMP_USERS) {
 		/* Skip the leading dollar sign (env vars) and tilde (users) */
-		buf++;
+		rl_insert_text(buf + 1 + offset);
 
 	} else if (t == TCMP_PATH && multi == 0) {
 		char *esc_buf = escape_str(buf);
