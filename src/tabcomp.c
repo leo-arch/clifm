@@ -1258,8 +1258,8 @@ calculate_prefix_len(const char *str, const char *query, const char *lw)
 
 	if (ct == TCMP_FILE_TYPES_OPTS || ct == TCMP_SEL || ct == TCMP_RANGES
 	|| ct == TCMP_TAGS_T || ct == TCMP_BM_PREFIX || ct == TCMP_HIST
-	|| ct == TCMP_JUMP || ct == TCMP_BM_PREFIX || ct == TCMP_BM_PATHS
-	|| ct == TCMP_TAGS_F || ct == TCMP_GLOB || ct == TCMP_DIRHIST
+	|| ct == TCMP_JUMP || ct == TCMP_BM_PATHS || ct == TCMP_TAGS_F
+	|| ct == TCMP_GLOB || ct == TCMP_DIRHIST
 	|| ct == TCMP_FILE_TYPES_FILES || ct == TCMP_CMD_DESC)
 		/* None of these completions produces a partial match (prefix) */
 		return 0;
@@ -1557,10 +1557,6 @@ get_finder_offset(const char *query, const char *text, char **matches,
 			else
 				finder_offset = prompt_offset + (int)(sl - lb) - 2;
 		}
-	}
-
-	else if (ct == TCMP_HIST && *rl_line_buffer == '/') { /* Search patterns */
-		finder_offset--;
 	}
 
 	if ((!query || !*query) && ct != TCMP_RANGES && ct != TCMP_SEL
