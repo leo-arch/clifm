@@ -302,9 +302,10 @@ nx_getdelim_append(char **lineptr, size_t *bufsize, size_t count, char ch)
 	*bufsize = tmp_size;
 
 	/* Remember, the reallocation size calculation might not have
-	 * changed the block size, so we have to check again */
+	 * changed the block size, so we have to check again. */
 	if (tmp && ((count + 2) <= tmp_size)) {
-		tmp[count++] = ch;
+		tmp[count] = ch;
+		count++;
 		tmp[count] = 0;
 		return 1;
 	}
@@ -326,7 +327,6 @@ nx_getdelim(char **lineptr, size_t *n, int delim, FILE *stream)
 	size_t size = 0;
 	size_t count = 0;
 	int err = 0;
-	int ch = 0;
 
 	if (!lineptr || !n)
 		return -EINVAL;
@@ -335,7 +335,7 @@ nx_getdelim(char **lineptr, size_t *n, int delim, FILE *stream)
 	size = *n;
 
 	for (;;) {
-		ch = fgetc(stream);
+		int ch = fgetc(stream);
 
 		if (ch == EOF)
 			break;
