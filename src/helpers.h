@@ -124,7 +124,7 @@
 #endif
 
 #ifdef CLIFM_LEGACY
-/* Replace functions not found before POSIX-1.2008. More precisely,
+/* Replace functions not available before POSIX-1.2008. More precisely,
  * let's try to be POSIX-1.2001 compliant. */
 # include "compat.h"
 #endif /* CLIFM_LEGACY */

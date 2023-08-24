@@ -27,7 +27,7 @@
 
 #include <stdio.h> /* FILE */
 
-/* Let's fake the following macros: we won't use them anyway */
+/* Let's fake the following macros: we won't use them anyway. */
 #ifndef AT_FDCWD
 # define AT_FDCWD -100
 #endif /* !AT_FDCWD */
@@ -36,23 +36,23 @@
 # define AT_SYMLINK_NOFOLLOW 0x100
 #endif /* !AT_SYMLINK_NOFOLLOW */
 
-# ifndef O_CLOEXEC
-#  define O_CLOEXEC 0
-# endif /* O_CLOEXEC */
+#ifndef O_CLOEXEC
+# define O_CLOEXEC 0
+#endif /* O_CLOEXEC */
 
-# define dirfd(d)   (0)
-# define fstatat    old_stat
-# define fchmodat   old_chmod
-# define mkdirat    old_mkdir
-# define getline    x_getline
-# define strnlen    x_strnlen
-# define renameat   old_rename
-# define fchownat   old_chown
-# define alphasort  x_alphasort
-# define scandir    x_scandir
-# define readlinkat old_readlink
-# define symlinkat  old_symlink
-# define unlinkat   old_unlink
+#define dirfd(d)   (0)
+#define fstatat    old_stat
+#define fchmodat   old_chmod
+#define mkdirat    old_mkdir
+#define getline    x_getline
+#define strnlen    x_strnlen
+#define renameat   old_rename
+#define fchownat   old_chown
+#define alphasort  x_alphasort
+#define scandir    x_scandir
+#define readlinkat old_readlink
+#define symlinkat  old_symlink
+#define unlinkat   old_unlink
 
 __BEGIN_DECLS
 

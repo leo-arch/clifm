@@ -5,6 +5,7 @@
 #     sxiv feh pqiv gthumb ristretto gwenview lsix img2sixel
 #       (or just your preferred image viewer)
 #     xargs
+#     tr
 #
 # Author: L. Abramovich
 # License: GPL3
@@ -35,26 +36,26 @@ fi
 
 names="$(echo "$args" | sed 's/\\ /\t/g;s/ /\n/g;s/\t/ /g;s/\\//g')"
 
-if type sxiv > /dev/null 2>&1; then
-	(echo "$names" | xargs -d'\n' sxiv -aqt) && exit 0 || found=1
+if type sxivs > /dev/null 2>&1; then
+	(echo "$names" | tr \\n \\0 | xargs -0 sxiv -aqt) && exit 0 || found=1
 elif type feh > /dev/null 2>&1; then
-	(echo "$names" | xargs -d'\n' feh -tZ) && exit 0 || found=1
+	(echo "$names" | tr \\n \\0 | xargs -0 feh -tZ) && exit 0 || found=1
 elif type pqiv > /dev/null 2>&1; then
-	(echo "$names" | xargs -d'\n' pqiv --auto-montage-mode --max-depth=1 --disable-backends="archive,poppler,spectre,wand,webp,libav,archive_cbx") && exit 0 || found=1
+	(echo "$names" | tr \\n \\0 | xargs -0 pqiv --auto-montage-mode --max-depth=1 --disable-backends="archive,poppler,spectre,wand,webp,libav,archive_cbx") && exit 0 || found=1
 elif type gthumb > /dev/null 2>&1; then
-	(echo "$names" | xargs -d'\n' gthumb) && exit 0 || found=1
+	(echo "$names" | tr \\n \\0 | xargs -0 gthumb) && exit 0 || found=1
 elif type ristretto > /dev/null 2>&1; then
-	(echo "$names" | xargs -d'\n' ristretto) && exit 0 || found=1
+	(echo "$names" | tr \\n \\0 | xargs -0 ristretto) && exit 0 || found=1
 elif type gwenview > /dev/null 2>&1; then
-	(echo "$names" | xargs -d'\n' gwenview) && exit 0 || found=1
+	(echo "$names" | tr \\n \\0 | xargs -0 gwenview) && exit 0 || found=1
 elif type lsix > /dev/null 2>&1; then
 	if [ -d "$1" ] || [ -h "$1" ]; then
 		lsix "$1"/*.png "$1"/*.jpg && exit 0 || found=1
 	else
-		(echo "$names" | xargs -d'\n' lsix) && exit 0 || found=1
+		(echo "$names" | tr \\n \\0 | xargs -0 lsix) && exit 0 || found=1
 	fi
 elif type img2sixel > /dev/null 2>&1; then
-	(echo "$names" | xargs -d'\n' img2sizel) && exit 0 || found=1
+	(echo "$names" | tr \\n \\0 | xargs -0 img2sizel) && exit 0 || found=1
 fi
 
 if [ "$found" -eq 0 ]; then

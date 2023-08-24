@@ -119,9 +119,8 @@ x_strnlen(const char *s, size_t max)
 
 /* ------------------------- scandir ------------------------ */
 
-/* Taken from glibc 2.34, licensed GPL2.1+
- *
- * Modified code is licensed GPL2+ */
+/* Taken from glibc 2.34, licensed GPL2.1+.
+ * Modified code is licensed GPL2+. */
 
 #ifndef _D_ALLOC_NAMLEN
 # ifdef _DIRENT_HAVE_D_NAMLEN
@@ -239,7 +238,7 @@ x_scandir(const char *dir, struct dirent ***namelist,
 	return result;
 }
 
-/* -----------------  getline ------------------------ */
+/* ------------------------ getline ------------------------ */
 
 /* Code originally written by Michael Burr, and released into the public domain
  * https://stackoverflow.com/questions/12167946/how-do-i-read-an-arbitrarily-long-line-in-c/12169132#12169132
