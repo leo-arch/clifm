@@ -716,7 +716,7 @@ del_bookmarks(char **args)
 	char *line = (char *)NULL;
 	size_t line_size = 0;
 
-	while (xgetline(&line, &line_size, fp) > 0) {
+	while (getline(&line, &line_size, fp) > 0) {
 		if (keep_bm_line(line) == 1)
 			fprintf(tmp_fp, "%s", line);
 		else

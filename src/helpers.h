@@ -127,19 +127,6 @@
 /* Replace functions not found before POSIX-1.2008. More precisely,
  * let's try to be POSIX-1.2001 compliant. */
 # include "compat.h"
-#else
-# define xdirfd      dirfd
-# define xgetline    getline
-# define xfstatat    fstatat
-# define xfchmodat   fchmodat
-# define xrenameat   renameat
-# define xmkdirat    mkdirat
-# define xreadlinkat readlinkat
-# define xsymlinkat  symlinkat
-# define xunlinkat   unlinkat
-# define xfchownat   fchownat
-# define alphasort_x alphasort
-# define xscandir    scandir
 #endif /* CLIFM_LEGACY */
 
 #ifdef __sun

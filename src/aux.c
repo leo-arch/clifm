@@ -200,7 +200,7 @@ clear_term_img(void)
 	struct stat a;
 	if (p && stat(p, &a) != -1) {
 		kitty_clear();
-		xunlinkat(XAT_FDCWD, p, 0);
+		unlinkat(XAT_FDCWD, p, 0);
 	}
 }
 
@@ -261,6 +261,7 @@ should_expand_eln(const char *text)
 	return 1;
 }
 
+#if !defined(_POSIX_C_SOURCE) || _POSIX_C_SOURCE >= 199309L
 /* Sleep for MSEC milliseconds. */
 /* Taken from https://stackoverflow.com/questions/1157209/is-there-an-alternative-sleep-function-in-c-to-milliseconds */
 static int
@@ -283,6 +284,7 @@ msleep(const long msec)
 
 	return res;
 }
+#endif /* _POSIX_C_SOURCE >= 199309L */
 
 /* Convert the file named STR (as absolute path) into a more friendly format.
  * Change absolute paths into:
@@ -510,6 +512,7 @@ rl_ring_bell(void)
 	case BELL_AUDIBLE:
 		RING_BELL; fflush(stderr); return;
 
+#if !defined(_POSIX_C_SOURCE) || _POSIX_C_SOURCE >= 199309L
 	case BELL_FLASH:
 		SET_RVIDEO;
 		fflush(stderr);
@@ -518,7 +521,7 @@ rl_ring_bell(void)
 		fflush(stderr);
 		return;
 
-#ifdef READLINE_HAS_ACTIVATE_MARK /* Readline >= 8.1 */
+# ifdef READLINE_HAS_ACTIVATE_MARK /* Readline >= 8.1 */
 	case BELL_VISIBLE: {
 		int point = rl_point;
 
@@ -535,16 +538,17 @@ rl_ring_bell(void)
 		msleep(VISIBLE_BELL_DELAY);
 		rl_deactivate_mark();
 
-# ifndef _NO_HIGHLIGHT
+#  ifndef _NO_HIGHLIGHT
 		if (conf.highlight && !wrong_cmd) {
 			rl_point = rl_mark;
 			recolorize_line();
 		}
-# endif /* !_NO_HIGHLIGHT */
+#  endif /* !_NO_HIGHLIGHT */
 		rl_point = point;
 		return;
 	}
-#endif /* READLINE_HAS_ACTIVATE_MARK */
+# endif /* READLINE_HAS_ACTIVATE_MARK */
+#endif /* _POSIX_C_SOURCE >= 199309L */
 
 	case BELL_NONE: /* fallthrough */
 	default: return;
@@ -571,7 +575,7 @@ int
 xmkdir(char *dir, const mode_t mode)
 {
 	mode_t old_mask = umask(0);
-	int ret = xmkdirat(XAT_FDCWD, dir, mode);
+	int ret = mkdirat(XAT_FDCWD, dir, mode);
 	umask(old_mask);
 
 	if (ret == -1)

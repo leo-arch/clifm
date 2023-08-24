@@ -334,7 +334,7 @@ get_non_matches_from_search_path(const char *search_path, char **gfiles,
 		const mode_t file_type)
 {
 	struct dirent **ent = (struct dirent **)NULL;
-	int dir_entries = xscandir(search_path, &ent, skip_files, xalphasort);
+	int dir_entries = scandir(search_path, &ent, skip_files, xalphasort);
 	if (dir_entries == -1)
 		return (struct search_t *)NULL;
 
@@ -923,7 +923,7 @@ search_regex(char **args)
 		if (chdir_search_path(&search_path, args[1]) == EXIT_FAILURE)
 			return EXIT_FAILURE;
 
-		tmp_files = xscandir(".", &reg_dirlist, skip_files, xalphasort);
+		tmp_files = scandir(".", &reg_dirlist, skip_files, xalphasort);
 		if (tmp_files == -1) {
 			xerror("search: %s: %s\n", search_path, strerror(errno));
 

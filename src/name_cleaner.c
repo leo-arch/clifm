@@ -424,7 +424,7 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 	 * match, nothing has been modified. */
 	fstat(fd, &attr);
 	if (mtime_bfr == (time_t)attr.st_mtime) {
-		if (xunlinkat(fd, f, 0) == -1)
+		if (unlinkat(fd, f, 0) == -1)
 			err('w', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
 		fclose(fp);
 		*edited_names = 0;
@@ -454,7 +454,7 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 
 	i = 0;
 	/* Read the temp file and store the new values */
-	while ((line_len = xgetline(&line, &line_size, fp)) > 0) {
+	while ((line_len = getline(&line, &line_size, fp)) > 0) {
 		if (i >= total_files)
 			break;
 
@@ -503,7 +503,7 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 	*n = j;
 	free(line);
 
-	if (xunlinkat(fd, f, 0) == -1)
+	if (unlinkat(fd, f, 0) == -1)
 		err('w', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
 	fclose(fp);
 
@@ -663,7 +663,7 @@ CONFIRM:
 				rep_suffix++;
 			}
 
-			if (xrenameat(XAT_FDCWD, o, XAT_FDCWD, r) == -1) {
+			if (renameat(XAT_FDCWD, o, XAT_FDCWD, r) == -1) {
 				xerror("bleach: renameat: %s: %s\n", o, strerror(errno));
 				total_rename--;
 				exit_status = EXIT_FAILURE;

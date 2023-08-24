@@ -218,7 +218,7 @@ load_keybinds(void)
 	char *line = (char *)NULL;
 	ssize_t line_len = 0;
 
-	while ((line_len = xgetline(&line, &line_size, fp)) > 0) {
+	while ((line_len = getline(&line, &line_size, fp)) > 0) {
 		if (!line || !*line || *line == '#' || *line == '\n')
 			continue;
 
@@ -2070,7 +2070,7 @@ rl_toggle_virtualdir_full_paths(int count, int key)
 
 		if (!p || !*p) continue;
 
-		if (xrenameat(XAT_FDCWD, file_info[i].name, XAT_FDCWD, p) == -1)
+		if (renameat(XAT_FDCWD, file_info[i].name, XAT_FDCWD, p) == -1)
 			err('w', PRINT_PROMPT, "renameat: %s: %s\n",
 				file_info[i].name, strerror(errno));
 

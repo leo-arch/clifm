@@ -40,19 +40,19 @@
 #  define O_CLOEXEC 0
 # endif /* O_CLOEXEC */
 
-# define xdirfd(d)   (0)
-# define xfstatat    old_stat
-# define xfchmodat   old_chmod
-# define xrenameat   old_rename
-# define xmkdirat    old_mkdir
-# define xreadlinkat old_readlink
-# define xsymlinkat  old_symlink
-# define xunlinkat   old_unlink
-# define xfchownat   old_chown
-# define xgetline    x_getline
-# define strnlen     x_strnlen
-# define alphasort_x x_alphasort
-# define xscandir    x_scandir
+# define dirfd(d)   (0)
+# define fstatat    old_stat
+# define fchmodat   old_chmod
+# define mkdirat    old_mkdir
+# define getline    x_getline
+# define strnlen    x_strnlen
+# define renameat   old_rename
+# define fchownat   old_chown
+# define alphasort  x_alphasort
+# define scandir    x_scandir
+# define readlinkat old_readlink
+# define symlinkat  old_symlink
+# define unlinkat   old_unlink
 
 __BEGIN_DECLS
 

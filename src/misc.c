@@ -1062,7 +1062,7 @@ alias_import(char *file)
 	size_t alias_found = 0, alias_imported = 0;
 	int first = 1;
 
-	while (xgetline(&line, &line_size, fp) > 0) {
+	while (getline(&line, &line_size, fp) > 0) {
 		if (*line == 'a' && strncmp(line, "alias ", 6) == 0) {
 			alias_found++;
 
@@ -1430,7 +1430,7 @@ save_last_path(char *last_path_tmp)
 	fclose(last_fp);
 
 	if (conf.cd_on_quit == 1 && last_path_tmp
-	&& xsymlinkat(last_path, XAT_FDCWD, last_path_tmp) == -1) {
+	&& symlinkat(last_path, XAT_FDCWD, last_path_tmp) == -1) {
 		xerror(_("%s: cd-on-quit: Cannot create symbolic link '%s': %s\n"),
 			PROGRAM_NAME, last_path_tmp, strerror(errno));
 	}
@@ -1460,7 +1460,7 @@ handle_last_path(void)
 
 	struct stat a;
 	if (lstat(last_path_tmp, &a) != -1
-	&& xunlinkat(XAT_FDCWD, last_path_tmp, 0) == -1)
+	&& unlinkat(XAT_FDCWD, last_path_tmp, 0) == -1)
 		xerror("unlink: %s: %s\n", last_path_tmp, strerror(errno));
 
 	if (conf.restore_last_path == 1 || conf.cd_on_quit == 1)

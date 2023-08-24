@@ -314,7 +314,7 @@ sel_glob(char *str, const char *sel_path, const mode_t filetype)
 		if (!sel_path) {
 			list = load_matches_invert_cwd(gbuf, filetype, &matches);
 		} else {
-			ret = xscandir(sel_path, &ent, skip_files, xalphasort);
+			ret = scandir(sel_path, &ent, skip_files, xalphasort);
 			if (ret == -1) {
 				xerror("sel: %s: %s\n", sel_path, strerror(errno));
 				globfree(&gbuf);
@@ -380,7 +380,7 @@ sel_regex_nocwd(regex_t regex, const char *sel_path, const mode_t filetype,
 {
 	int new_sel = 0;
 	struct dirent **list = (struct dirent **)NULL;
-	int filesn = xscandir(sel_path, &list, skip_files, xalphasort);
+	int filesn = scandir(sel_path, &list, skip_files, xalphasort);
 
 	if (filesn == -1) {
 		xerror("sel: %s: %s\n", sel_path, strerror(errno));

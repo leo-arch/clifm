@@ -2454,7 +2454,7 @@ rl_trashed_files(const char *text)
 		return (char **)NULL;
 
 	struct dirent **t = (struct dirent **)NULL;
-	int n = xscandir(trash_files_dir, &t, NULL, alphasort_x);
+	int n = scandir(trash_files_dir, &t, NULL, alphasort);
 
 	xchdir(workspaces[cur_ws].path, NO_TITLE);
 
@@ -2610,7 +2610,7 @@ check_tagged_files(char *tag)
 
 	char dir[PATH_MAX];
 	snprintf(dir, sizeof(dir), "%s/%s", tags_dir, tag);
-	int n = xscandir(dir, &tagged_files, NULL, alphasort_x);
+	int n = scandir(dir, &tagged_files, NULL, alphasort);
 	if (n == -1)
 		return (char **)NULL;
 

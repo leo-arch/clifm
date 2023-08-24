@@ -1827,7 +1827,7 @@ list_dir_light(void)
 	}
 
 #ifdef POSIX_FADV_SEQUENTIAL
-	const int fd = xdirfd(dir);
+	const int fd = dirfd(dir);
 	posix_fadvise(fd, 0, 0, POSIX_FADV_SEQUENTIAL);
 #endif /* POSIX_FADV_SEQUENTIAL */
 
@@ -2274,7 +2274,7 @@ list_dir(void)
 
 	set_events_checker();
 
-	const int fd = xdirfd(dir);
+	const int fd = dirfd(dir);
 
 #ifdef POSIX_FADV_SEQUENTIAL
 	/* A hint to the kernel to optimize current dir for reading */
@@ -2325,7 +2325,7 @@ list_dir(void)
 		init_fileinfo(n);
 
 		int stat_ok = 1;
-		if (xfstatat(fd, ename, &attr, virtual_dir == 1
+		if (fstatat(fd, ename, &attr, virtual_dir == 1
 		? 0 : AT_SYMLINK_NOFOLLOW) == -1) {
 			if (virtual_dir == 1)
 				continue;
@@ -2536,7 +2536,7 @@ list_dir(void)
 			}
 
 			struct stat attrl;
-			if (xfstatat(fd, ename, &attrl, 0) == -1) {
+			if (fstatat(fd, ename, &attrl, 0) == -1) {
 				file_info[n].color = or_c;
 				file_info[n].xattr = 0;
 				stats.broken_link++;

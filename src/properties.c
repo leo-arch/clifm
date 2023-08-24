@@ -689,7 +689,7 @@ set_file_perms(char **args)
 	size_t n = 0;
 	const mode_t mode = (mode_t)strtol(octal_str, 0, 8);
 	for (i = 1; args[i]; i++) {
-		if (xfchmodat(XAT_FDCWD, args[i], mode, 0) == EXIT_SUCCESS) {
+		if (fchmodat(XAT_FDCWD, args[i], mode, 0) == EXIT_SUCCESS) {
 			n++;
 		} else {
 			xerror(_("pc: Changing permissions of '%s': %s\n"),
@@ -876,7 +876,7 @@ set_file_owner(char **args)
 			return errno;
 		}
 
-		if (xfchownat(XAT_FDCWD, args[i],
+		if (fchownat(XAT_FDCWD, args[i],
 		*new_own ? owner->pw_uid : a.st_uid,
 		new_group ? group->gr_gid : a.st_gid,
 		0) == -1) {
@@ -1252,7 +1252,7 @@ print_file_name(char *filename, const char *color, const char file_type,
 	} else { /* Broken link */
 		char target[PATH_MAX + 1];
 		const ssize_t len =
-			xreadlinkat(XAT_FDCWD, filename, target, sizeof(target) - 1);
+			readlinkat(XAT_FDCWD, filename, target, sizeof(target) - 1);
 
 		if (len != -1) {
 			target[len] = '\0';
@@ -1584,7 +1584,7 @@ err_no_file(const char *filename, const int errnum, const int follow_link)
 		goto END;
 
 	char target[PATH_MAX + 1];
-	ssize_t len = xreadlinkat(XAT_FDCWD, filename, target, sizeof(target) - 1);
+	ssize_t len = readlinkat(XAT_FDCWD, filename, target, sizeof(target) - 1);
 	if (len != -1) {
 		target[len] = '\0';
 		xerror(_("prop: %s %s->%s %s: Broken symbolic link\n"), filename,
