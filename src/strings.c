@@ -1186,7 +1186,7 @@ is_fused_param(char *str)
  * ARGS is an array with the current input substrings, and TAG_INDEX
  * is the index of the tag expresion (t:) in this array.
  * The expansion is performed in ARGS array itself.
- * Returns the number of files tagged as ARGS[TAG_INDEX] or zero on error */
+ * Returns the number of files tagged as ARGS[TAG_INDEX] or zero on error. */
 static size_t
 expand_tag(char ***args, const int tag_index)
 {
