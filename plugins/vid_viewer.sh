@@ -3,7 +3,7 @@
 # Video thumbnails plugin for CliFM
 # Written by L. Abramovich
 # License: GPL3
-# Dependencies: ffmpegthumbnailer and sxiv, lsix, or feh
+# Dependencies: sed, tr, head, ffmpegthumbnailer, and sxiv, lsix, or feh
 
 is_vid()
 {
@@ -22,7 +22,7 @@ fi
 if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
 	printf "Display thumbnails of VIDEO(s) or of videos contained in DIR (current working directory if omitted)
-\n\x1b[1mUSAGE\x1b[0m\n  %s [VIDEO... n] [DIR]\n" "$name"
+\n\x1b[1mUSAGE\x1b[0m\n  %s [VIDEO]... [DIR]\n" "$name"
 	exit 0
 fi
 
@@ -30,9 +30,11 @@ TMP_DIR=".vidthumbs.$(tr -dc A-Za-z0-9 </dev/urandom | head -c6)"
 
 mkdir -- "$TMP_DIR" >&2
 
-args="${*:-.}"
+args_tmp="${*:-.}"
+args="$(echo "$args_tmp" | sed 's/\\ /\t/g;s/ /\n/g;s/\t/ /g;s/\\//g')"
 
-for arg in $args; do
+echo "$args" | while read -r arg
+do
 	if [ -d "$arg" ]; then
 		if [ "$(printf "%s" "$arg" | tail -c1)" = '/' ]; then
 			arg="${arg%?}"
