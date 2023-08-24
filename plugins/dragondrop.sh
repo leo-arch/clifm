@@ -14,7 +14,7 @@
 # send to the SelBox
 
 # Dependencies:
-# dragon (https://github.com/mwh/dragon), grep, sed, curl, xargs
+# dragon (https://github.com/mwh/dragon), grep, sed, curl, xargs, tr
 
 
 if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "-h" ]; }; then
@@ -52,6 +52,6 @@ if [ -z "$1" ]; then
 	[ "$ret" = 0 ] && exit 0
 	exit 1
 else
-	echo "$@" | sed 's/\\ /\t/g;s/ /\n/g;s/\t/ /g;s/\\//g' | xargs -d'\n' "$DRAGON"
+	echo "$@" | sed 's/\\ /\t/g;s/ /\n/g;s/\t/ /g;s/\\//g' | tr \\n \\0 | xargs -0 "$DRAGON"
 	exit "$?"
 fi
