@@ -36,7 +36,7 @@ fi
 
 names="$(echo "$args" | sed 's/\\ /\t/g;s/ /\n/g;s/\t/ /g;s/\\//g')"
 
-if type sxivs > /dev/null 2>&1; then
+if type sxiv > /dev/null 2>&1; then
 	(echo "$names" | tr \\n \\0 | xargs -0 sxiv -aqt) && exit 0 || found=1
 elif type feh > /dev/null 2>&1; then
 	(echo "$names" | tr \\n \\0 | xargs -0 feh -tZ) && exit 0 || found=1
@@ -55,7 +55,7 @@ elif type lsix > /dev/null 2>&1; then
 		(echo "$names" | tr \\n \\0 | xargs -0 lsix) && exit 0 || found=1
 	fi
 elif type img2sixel > /dev/null 2>&1; then
-	(echo "$names" | tr \\n \\0 | xargs -0 img2sizel) && exit 0 || found=1
+	(echo "$names" | tr \\n \\0 | xargs -0 img2sixel) && exit 0 || found=1
 fi
 
 if [ "$found" -eq 0 ]; then
