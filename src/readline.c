@@ -2032,7 +2032,8 @@ bin_cmd_generator(const char *text, int state)
 	while ((name = bin_commands[i++]) != NULL) {
 		if (!text || !*text)
 			return strdup(name);
-		if (*text == *name && strncmp(name, text, len) == 0)
+		if (*text == *name && text[1] == name[1]
+		&& strncmp(name + 2, text + 2, len - 2) == 0)
 			return strdup(name);
 	}
 
@@ -2694,7 +2695,8 @@ rl_count_words(void)
 
 	size_t c = 1;
 	while (*p) {
-		if (*p == ' ' && p > rl_line_buffer && *(p - 1) != '\\' && *(p + 1) != ' ')
+		if (*p == ' ' && p > rl_line_buffer
+		&& *(p - 1) != '\\' && *(p + 1) != ' ')
 			c++;
 		p++;
 	}
