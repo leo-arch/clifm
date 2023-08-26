@@ -622,7 +622,7 @@ static struct user_t
 get_user_data_env(void)
 {
 	struct user_t tmp_user = {0};
-//	tmp_user.home = (char *)NULL;
+
 	/* If secure-env, do not fallback to environment variables */
 	int sec_env = is_secure_env();
 	char *t = sec_env == 0 ? xgetenv("HOME", 0) : (char *)NULL;
@@ -1383,7 +1383,7 @@ set_prompts_file(void)
 	if (stat(t, &a) == -1 || !S_ISREG(a.st_mode))
 		goto ERROR;
 
-	char *cmd[] = {"cp", t, f, NULL};
+	char *cmd[] = {"cp", "--", t, f, NULL};
 	int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	if (ret == EXIT_SUCCESS)
 		return f;

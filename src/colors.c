@@ -625,9 +625,10 @@ check_names(const char *str)
 	}
 
 	int found = -1;
+	char up_str = TOUPPER(*str);
 	size_t i;
 	for (i = 0; color_names[i].name; i++) {
-		if (TOUPPER(*str) == TOUPPER(*color_names[i].name)
+		if (up_str == *color_names[i].name /* All names start with upper case */
 		&& strcasecmp(str + 1, color_names[i].name + 1) == 0) {
 			found = (int)i;
 			break;
@@ -962,7 +963,7 @@ import_color_scheme(const char *name)
 	if (stat(dfile, &attr) == -1)
 		return EXIT_FAILURE;
 
-	char *cmd[] = {"cp", dfile, colors_dir, NULL};
+	char *cmd[] = {"cp", "--", dfile, colors_dir, NULL};
 	if (launch_execv(cmd, FOREGROUND, E_NOFLAG) == EXIT_SUCCESS)
 		return EXIT_SUCCESS;
 

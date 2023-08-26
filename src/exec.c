@@ -1361,7 +1361,7 @@ open_file_func(char **args, const filesn_t i)
  * is no second argument or if second argument is "&"
  * If just 'edit', do not try to open a file named 'edit': always run
  * the 'edit' command */
-static inline int
+static int
 check_auto_first(char **args)
 {
 	if (!args || !args[0] || !*args[0])
@@ -1412,7 +1412,7 @@ check_auto_first(char **args)
 	return (-1);
 }
 
-static inline int
+static int
 auto_open_file(char **args, char *tmp)
 {
 	char *cmd[] = {"open", tmp, (args_n >= 1) ? args[1]
@@ -1445,7 +1445,7 @@ autocd_dir(char *tmp)
 /* If there is a second word (parameter, ARGS[1]) and this word starts
  * with a dash, do not take the first word (ARGS[0]) as a file to be
  * opened, but as a command to be executed */
-static inline int
+static int
 check_auto_second(char **args)
 {
 	if (args[1] && *args[1] == '-')
@@ -2143,14 +2143,14 @@ exec_cmd(char **comm)
 		return (exit_code = create_usr_var(comm[0]));
 	}
 
-	/* Check if we need to send input directly to the system shell */
+	/* Check if we need to send input directly to the system shell. */
 	if (*comm[0] == ';' || *comm[0] == ':')
 		if ((exit_code = launch_shell(comm)) != -1)
 			return exit_code;
 
 	/* # AUTOCD & AUTO-OPEN (1) # */
 	/* rl_dispatching is set to 1 if coming from a keybind: we have a
-	 * command, not a file name. So, skip this check */
+	 * command, not a file name. So, skip this check. */
 	if (rl_dispatching == 0 && (exit_code = check_auto_first(comm)) != -1)
 		return exit_code;
 

@@ -2005,7 +2005,8 @@ bin_cmd_generator_ext(const char *text, int state)
 		if (is_internal_c(name) == 1)
 			continue;
 		if (!text || !*text
-		|| (*text == *name && strncmp(name, text, len) == 0))
+		|| (*text == *name && text[1] == name[1]
+		&& strncmp(name + 2, text + 2, len - 2) == 0))
 			return strdup(name);
 	}
 

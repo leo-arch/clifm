@@ -777,8 +777,6 @@ static void
 print_long_mode(size_t *counter, int *reset_pager, const int pad,
 	const size_t ug_max, const size_t ino_max, const uint8_t have_xattr)
 {
-//	struct stat lattr;
-
 	size_t fc_max = conf.files_counter == 1 ? get_max_files_counter() : 0;
 	size_t size_max = prop_fields.size == PROP_SIZE_BYTES ? get_max_size() : 0;
 
@@ -800,9 +798,6 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad,
 	for (i = 0; i < k; i++) {
 		if (max_files != UNSET && i == max_files)
 			break;
-		/* What the heck was doing this here?!
-		if (lstat(file_info[i].name, &lattr) == -1)
-			continue; */
 
 		if (conf.pager == 1 || (*reset_pager == 0 && conf.pager > 1
 		&& files >= (filesn_t)conf.pager)) {
