@@ -1276,13 +1276,17 @@ static void
 print_capabilities(const char *filename)
 {
 	cap_t cap = cap_get_file(filename);
-	if (!cap)
+	if (!cap) {
+		puts("None");
 		return;
+	}
 
 	char *str = cap_to_text(cap, NULL);
 	if (str) {
-		printf(_("Capabilities:\t%s\n"), str);
+		printf("%s\n", str);
 		cap_free(str);
+	} else {
+		printf("%s\n", strerror(errno));
 	}
 
 	cap_free(cap);
@@ -1376,8 +1380,11 @@ print_file_details(char *filename, const struct stat *attr, const char file_type
 #endif /* LINUX_FILE_XATTRS */
 
 #if defined(LINUX_FILE_CAPS)
+	fputs(_("Capabilities:\t"), stdout);
 	if (S_ISREG(attr->st_mode))
 		print_capabilities(filename);
+	else
+		puts(_("Unavailable"));
 #endif /* LINUX_FILE_CAPS */
 }
 
