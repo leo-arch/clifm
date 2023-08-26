@@ -64,6 +64,10 @@
 # include <sys/xattr.h>
 #endif /* LINUX_FILE_XATTRS */
 
+#ifdef LINUX_FILE_CAPS
+# include <sys/capability.h>
+#endif /* LINUX_FILE_CAPS */
+
 /* Do we have BSD file flags support? */
 #ifndef _BE_POSIX
 # if defined(__FreeBSD__) || (defined(__NetBSD__) && !defined(_NO_NETBSD_FFLAGS)) \
@@ -1267,6 +1271,24 @@ print_file_name(char *filename, const char *color, const char file_type,
 	free(wname);
 }
 
+#ifdef LINUX_FILE_CAPS
+static void
+print_capabilities(const char *filename)
+{
+	cap_t cap = cap_get_file(filename);
+	if (!cap)
+		return;
+
+	char *str = cap_to_text(cap, NULL);
+	if (str) {
+		printf(_("Capabilities:\t%s\n"), str);
+		cap_free(str);
+	}
+
+	cap_free(cap);
+}
+#endif /* LINUX_FILE_CAPS */
+
 static void
 print_file_details(char *filename, const struct stat *attr, const char file_type,
 	const int file_perm)
@@ -1352,6 +1374,11 @@ print_file_details(char *filename, const struct stat *attr, const char file_type
 	fputs(_("Xattributes:\t"), stdout);
 	print_extended_attributes(filename);
 #endif /* LINUX_FILE_XATTRS */
+
+#if defined(LINUX_FILE_CAPS)
+	if (S_ISREG(attr->st_mode))
+		print_capabilities(filename);
+#endif /* LINUX_FILE_CAPS */
 }
 
 /* Write into BUF, whose size is SIZE, the timestamp TIM, with nanoseconds NSEC,

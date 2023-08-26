@@ -29,15 +29,16 @@
 #if defined(BSD_KQUEUE)
 # include <unistd.h> /* open(2) */
 #endif /* BSD_KQUEUE */
-#if defined(__linux__)
-# include <sys/capability.h>
-#endif /* __linux__ */
 #include <errno.h>
 #include <string.h>
 #if defined(__OpenBSD__)
 # include <strings.h>
 # include <inttypes.h> /* uintmax_t */
 #endif /* __OpenBSD__ */
+
+#if defined(LINUX_FILE_CAPS)
+# include <sys/capability.h>
+#endif /* LINUX_FILE_CAPS */
 
 #if defined(LINUX_FILE_XATTRS)
 # include <sys/xattr.h>
