@@ -1184,6 +1184,11 @@ main(int argc, char *argv[])
 	if (xargs.stat > 0) /* Running with --stat(-full). Print and exit. */
 		do_stat_and_exit(xargs.stat == FULL_STAT ? 1 : 0);
 
+	if (xargs.list_and_quit == 1) {
+		list_files();
+		exit(EXIT_SUCCESS);
+	}
+
 	set_sel_file();
 	create_tmp_files();
 	load_actions();
