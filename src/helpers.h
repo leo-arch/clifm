@@ -790,6 +790,10 @@ extern time_t curdir_mtime;
 #define QUOTING_STYLE_SINGLE_QUOTES 1
 #define QUOTING_STYLE_DOUBLE_QUOTES 2
 
+/* Macros used for the --stat and --stat-full command line switches. */
+#define SIMPLE_STAT 1
+#define FULL_STAT   2
+
 /* Function macros */
 #define itoa xitoa /* itoa does not exist in some OS's */
 #define atoi xatoi /* xatoi is just a secure atoi */
@@ -1329,6 +1333,7 @@ struct param_t {
 	int sort;
 	int sort_reverse;
 	int splash;
+	int stat;
 	int stealth_mode;
 #ifndef _NO_SUGGESTIONS
 	int suggestions;
@@ -1757,6 +1762,7 @@ extern char
 /*	*right_prompt, */
 	*sel_file,
 	*smenutab_options_env,
+	*stat_filename,
 	*stdin_tmp_dir,
 	*sudo_cmd,
 #ifndef _NO_SUGGESTIONS

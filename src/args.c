@@ -63,7 +63,7 @@
 #endif /* CLIFM_DATADIR */
 
 #ifdef _BE_POSIX
-# define OPTSTRING ":aAb:B:c:CdDeEfFgGhHik:lLmMnNo:O:p:P:qQrRsSt:TuvV:w:WxXyYz:Z"
+# define OPTSTRING ":aAb:B:c:CdDeEfFgGhHij:J:k:lLmMnNo:O:p:P:qQrRsSt:TuvV:w:WxXyYz:Z"
 #else
 # ifdef RUN_CMD
 #  define OPTSTRING "+:aAb:c:C:D:eEfFgGhHiIk:lLmoOp:P:rsStvw:xyz:"
@@ -145,6 +145,9 @@
 #define LOPT_NO_TRIM_NAMES          268
 #define LOPT_NO_BOLD                269
 #define LOPT_FNFTAB                 270
+
+#define LOPT_STAT                   271
+#define LOPT_STAT_FULL              272
 
 /* Link long (--option) and short options (-o) for the getopt_long function. */
 static const struct option longopts[] = {
@@ -253,6 +256,8 @@ static const struct option longopts[] = {
 	{"shotgun-file", required_argument, 0, LOPT_SHOTGUN_FILE},
 	{"si", no_argument, 0, LOPT_SI},
 	{"smenutab", no_argument, 0, LOPT_SMENUTAB},
+	{"stat", required_argument, 0, LOPT_STAT},
+	{"stat-full", required_argument, 0, LOPT_STAT_FULL},
 	{"stdtab", no_argument, 0, LOPT_STDTAB},
 	{"virtual-dir", required_argument, 0, LOPT_VIRTUAL_DIR},
 	{"virtual-dir-full-paths", no_argument, 0, LOPT_VIRTUAL_DIR_FULL_PATHS},
@@ -1192,6 +1197,24 @@ set_trash_as_rm(void)
 #endif /* !_NO_TRASH */
 }
 
+static void
+set_stat(const int optc, const char *optval)
+{
+	if (!optval || !*optval || *optval == '-')
+#ifndef _BE_POSIX
+		err_arg_required(optc == LOPT_STAT ? "--stat" : "--stat-full");
+
+	xargs.stat = (optc == LOPT_STAT ? SIMPLE_STAT : FULL_STAT);
+#else
+		err_arg_required(optc == 'j' ? "-j" : "-J");
+
+	xargs.stat = (optc == 'j' ? SIMPLE_STAT : FULL_STAT);
+#endif /* !_BE_POSIX */
+
+	xargs.restore_last_path = conf.restore_last_path = 0;
+	stat_filename = savestring(optval, strlen(optval));
+}
+
 __attribute__ ((noreturn))
 static void
 print_version(void)
@@ -1270,6 +1293,8 @@ parse_cmdline_args(const int argc, char **argv)
 			fprintf(stderr, "%s: icons: %s\n", PROGRAM_NAME, _(NOT_AVAILABLE));
 			exit(EXIT_FAILURE);
 #endif /* !_NO_ICONS */
+		case 'j': set_stat(optc, optarg); break;
+		case 'J': set_stat(optc, optarg); break;
 		case 'k': set_alt_kbinds_file(optarg); break;
 		case 'l': conf.long_view = xargs.longview = 1; break;
 		case 'L': xargs.follow_symlinks = follow_symlinks = 0; break;
@@ -1596,6 +1621,9 @@ parse_cmdline_args(const int argc, char **argv)
 			set_smenutab(); break;
 		case LOPT_SORT_REVERSE:
 			xargs.sort_reverse = conf.sort_reverse = 1; break;
+		case LOPT_STAT: /* fallthrough */
+		case LOPT_STAT_FULL:
+			set_stat(optc, optarg); break;
 		case LOPT_STDTAB:
 			set_stdtab(); break;
 		case LOPT_TRASH_AS_RM:

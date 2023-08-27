@@ -51,6 +51,8 @@
 /* For BSD systems, we need sys/types.h, already included in helpers.h */
 #endif /* __linux__ */
 
+#include <readline/tilde.h>
+
 #ifdef LINUX_FILE_ATTRS
 # include <sys/ioctl.h>  /* ioctl(2) */
 # ifdef __TINYC__
@@ -325,7 +327,7 @@ get_total_size(char *filename, int *status)
 #else
 		total_size = dir_size(*_path ? _path : filename,
 			(bin_flags & (GNU_DU_BIN_DU | GNU_DU_BIN_GDU)) ? 1 : 0, status);
-#endif // USE_XDU
+#endif /* USE_XDU */
 		fputs("\r           \r", stdout);
 		fputs(_("Total size: \t"), stdout);
 	} else {
@@ -338,7 +340,7 @@ get_total_size(char *filename, int *status)
 #else
 		total_size = dir_size(*_path ? _path : filename,
 			(bin_flags & (GNU_DU_BIN_DU | GNU_DU_BIN_GDU)) ? 1 : 0, status);
-#endif // USE_XDU
+#endif /* USE_XDU */
 		MOVE_CURSOR_LEFT(11);
 		ERASE_TO_RIGHT;
 		UNHIDE_CURSOR;
@@ -1610,6 +1612,10 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 static int
 err_no_file(const char *filename, const int errnum, const int follow_link)
 {
+	/* If stat_filename, we're running with --stat(-full): err with program
+	 * name. */
+	char *errname = stat_filename ? PROGRAM_NAME : "prop";
+
 	if (follow_link == 0)
 		goto END;
 
@@ -1621,13 +1627,13 @@ err_no_file(const char *filename, const int errnum, const int follow_link)
 	ssize_t len = readlinkat(XAT_FDCWD, filename, target, sizeof(target) - 1);
 	if (len != -1) {
 		target[len] = '\0';
-		xerror(_("prop: %s %s->%s %s: Broken symbolic link\n"), filename,
-			mi_c, df_c, target);
+		xerror(_("%s: %s %s->%s %s: Broken symbolic link\n"), errname,
+			filename, mi_c, df_c, target);
 		return EXIT_FAILURE;
 	}
 
 END:
-	xerror("prop: %s: %s\n", filename, strerror(errnum));
+	xerror("%s: %s: %s\n", errname, filename, strerror(errnum));
 	return EXIT_FAILURE;
 }
 
@@ -1709,6 +1715,49 @@ properties_function(char **args, const int follow_link)
 	}
 
 	return exit_status;
+}
+
+/* Print properties of the file specified by the global variable STAT_FILENAME
+ * and exit.
+ * If FULL_STAT is set to 1, run with 'pp'. Otherwise use 'p' instead.
+ * Used when running with either --stat or --stat-full. */
+__attribute__ ((noreturn))
+void
+do_stat_and_exit(const int full_stat)
+{
+	/* This function is called very early from main(), immediately after loading
+	 * settings, so that we need to set up a few things needed to run the
+	 * properties function (do_stat). Namely:
+	 * 1. du(1) binary (or xdu).
+	 * 2. tmp dir (if not xdu).
+	 * 3. Current directory. */
+#ifndef USE_XDU
+# if defined(HAVE_GNU_DU)
+	bin_flags |= GNU_DU_BIN_DU;
+# elif !defined(_BE_POSIX)
+	if ((p = get_cmd_path("gdu")) != NULL)
+		{ free(p); bin_flags |= GNU_DU_BIN_GDU; }
+# endif /* HAVE_GNU_DU */
+
+	if (!tmp_dir)
+		tmp_dir = savestring(P_tmpdir, P_tmpdir_len);
+#endif /* !USE_XDU */
+
+	fputs(df_c, stdout);
+	cur_ws = 0;
+	char tmp[PATH_MAX] = "";
+	char *cwd = get_cwd(tmp, sizeof(tmp), 0);
+	if (cwd)
+		workspaces[cur_ws].path = savestring(cwd, strlen(cwd));
+
+	char *norm_path = *stat_filename == '~'
+		? tilde_expand(stat_filename) : (char *)NULL;
+
+	int ret = do_stat(norm_path ? norm_path : stat_filename, full_stat);
+
+	free(norm_path);
+	free(stat_filename);
+	exit(ret);
 }
 
 /* #################################################################

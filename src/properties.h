@@ -62,6 +62,8 @@ int  print_entry_props(const struct fileinfo *, const struct maxes_t *,
 int  set_file_perms(char **);
 int  set_file_owner(char **);
 
+void do_stat_and_exit(const int);
+
 __END_DECLS
 
 #endif /* PROPERTIES_H */

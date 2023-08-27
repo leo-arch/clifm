@@ -1591,6 +1591,9 @@ unset_xargs(void)
 	xargs.sort = UNSET;
 	xargs.sort_reverse = UNSET;
 	xargs.splash = UNSET;
+
+	xargs.stat = 0;
+
 	xargs.stealth_mode = UNSET;
 
 #ifndef _NO_SUGGESTIONS

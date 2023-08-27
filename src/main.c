@@ -52,6 +52,7 @@
 # include "profiles.h"
 #endif /* !_NO_PROFILES */
 #include "prompt.h"
+#include "properties.h" /* do_stat_and_exit() */
 #include "readline.h"
 #include "remotes.h"
 #ifdef SECURITY_PARANOID
@@ -286,6 +287,7 @@ char
 /*	*right_prompt = (char *)NULL, */
 	*sel_file = (char *)NULL,
 	*smenutab_options_env = (char *)NULL,
+	*stat_filename = (char *)NULL,
 	*stdin_tmp_dir = (char *)NULL,
 	*sudo_cmd = (char *)NULL,
 #ifndef _NO_SUGGESTIONS
@@ -1112,13 +1114,13 @@ main(int argc, char *argv[])
 	/* Quite unlikely to happen, but one never knows. See
 	 * https://lwn.net/SubscriberLink/882799/cb8f313c57c6d8a6/
 	 * and
-	 * https://stackoverflow.com/questions/49817316/can-argc-be-zero-on-a-posix-system*/
+	 * https://stackoverflow.com/questions/49817316/can-argc-be-zero-on-a-posix-system */
 	if (argc == 0) {
 		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(EINVAL));
 		exit(EINVAL);
 	}
 
-	check_term(); /* Let's check terminal capabilities */
+	check_term(); /* Let's check terminal capabilities. */
 
 	/* # 1. INITIALIZE EVERYTHING WE NEED # */
 
@@ -1135,10 +1137,10 @@ main(int argc, char *argv[])
 	/* Store external arguments to be able to rerun parse_cmdline_args()
 	 * in case the user edits the config file, in which case the program
 	 * must rerun init_config(), get_aliases(), get_prompt_cmds(), and
-	 * then parse_cmdline_args() */
+	 * then parse_cmdline_args(). */
 	backup_argv(argc, argv);
 
-	atexit(free_stuff); /* free_stuff does some cleaning */
+	atexit(free_stuff); /* free_stuff does some cleaning. */
 
 	user = get_user_data();
 	get_home();
@@ -1148,11 +1150,11 @@ main(int argc, char *argv[])
 	P_tmpdir_len = sizeof(P_tmpdir) - 1;
 	init_workspaces();
 
-	/* Set all external arguments flags to uninitialized state */
+	/* Set all external arguments flags to uninitialized state. */
 	unset_xargs();
 
-	/* Manage external arguments
-	 * Command line arguments will override initialization values (init_config) */
+	/* Manage external arguments.
+	 * Command line arguments will override initialization values (init_config). */
 	if (argc > 1)
 		parse_cmdline_args(argc, argv);
 	/* parse_cmdline_args is executed before init_config() because, if
@@ -1175,9 +1177,12 @@ main(int argc, char *argv[])
 	/* Initialize program paths and files, set options from the config
 	 * file, if they were not already set via external arguments, and
 	 * load sel elements, if any. All these configurations are made
-	 * per user basis */
+	 * per user basis. */
 	init_config();
 	check_options();
+
+	if (xargs.stat > 0) /* Running with --stat(-full). Print and exit. */
+		do_stat_and_exit(xargs.stat == FULL_STAT ? 1 : 0);
 
 	set_sel_file();
 	create_tmp_files();
@@ -1185,18 +1190,18 @@ main(int argc, char *argv[])
 	get_aliases();
 
 	/* Get the list of available programs in PATH to be used by the
-	 * custom TAB-completion function (tab_complete(), in tabcomp.c) */
+	 * custom TAB-completion function (tab_complete(), in tabcomp.c). */
 	if (!(flags & PATH_PROGRAMS_ALREADY_LOADED))
 		get_path_programs();
 
 	/* Check third-party programs availability: finders (fzf, fnf, smenu),
-	 * udevil, and udisks2 */
+	 * udevil, and udisks2. */
 	check_third_party_cmds();
 #ifndef _NO_FZF
 	check_completion_mode();
 #endif /* _NO_FZF */
 
-	/* Initialize gettext() for translations */
+	/* Initialize gettext() for translations. */
 #ifndef _NO_GETTEXT
 	init_gettext();
 #endif /* !_NO_GETTEXT */
@@ -1205,7 +1210,7 @@ main(int argc, char *argv[])
 	fflush(stdout);
 
 #ifndef __HAIKU__
-	/* No need for this warning on Haiku: it runs as root by default */
+	/* No need for this warning on Haiku: it runs as root by default. */
 	set_root_indicator();
 #endif /* !__HAIKU__ */
 
@@ -1220,7 +1225,7 @@ main(int argc, char *argv[])
 	add_to_dirhist(workspaces[cur_ws].path);
 	get_sel_files();
 
-	/* Start listing as soon as possible to speed up startup time */
+	/* Start listing as soon as possible to speed up startup time. */
 	list_files();
 
 	shell = get_sys_shell();
@@ -1246,7 +1251,7 @@ main(int argc, char *argv[])
 	if (config_ok == 1)
 		init_history();
 
-	/* Store history into an array to be able to manipulate it */
+	/* Store history into an array to be able to manipulate it. */
 	get_history();
 
 #ifndef _NO_PROFILES

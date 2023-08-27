@@ -1297,6 +1297,8 @@ Page Down: Advance one page\nq: Stop pagging\n"
 \n -h       Print this help and exit\
 \n -H       Disable syntax-highlighting\
 \n -i       Enable icons\
+\n -j FILE  Run the 'p' command on FILE and exit\
+\n -J FILE  Run the 'pp' command on FILE and exit\
 \n -k FILE  Set an alternative keybindings file\
 \n -l       List files in long view mode\
 \n -L       Do not follow symbolic links\
@@ -1433,6 +1435,8 @@ CliFM's built-in opener\
       --si\t\t\t Print sizes in powers of 1000 instead of 1024\
 \n      --smenutab\t\t Use smenu to display completion matches\
 \n      --sort-reverse\t\t Sort in reverse order, e.g. z-a instead of a-z\
+\n      --stat=FILE\t\t Run the 'p' command on FILE and exit\
+\n      --stat-full=FILE\t\t Run the 'pp' command on FILE and exit\
 \n      --stdtab\t\t\t Force the use of the standard TAB completion mode (readline)\
 \n      --trash-as-rm\t\t The 'r' command executes 'trash' instead of \
 rm(1) to prevent accidental deletions\
