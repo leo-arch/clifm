@@ -71,6 +71,22 @@
 # endif /* __linux__ || __CYGWIN__ */
 #endif /* _BE_POSIX */
 
+#ifndef __BEGIN_DECLS
+# ifdef __cpluplus
+#  define __BEGIN_DECLS extern "C" {
+# else
+#  define __BEGIN_DECLS
+# endif /* __cplusplus */
+#endif /* !__BEGIN_DECLS */
+
+#ifndef __END_DECLS
+# ifdef __cpluplus
+#  define __END_DECLS }
+# else
+#  define __END_DECLS
+# endif /* __cplusplus */
+#endif /* !__END_DECLS */
+
 #ifdef __TINYC__
 # define __STDC_NO_VLA__ 1
 #endif /* __TINYC__ */
@@ -285,22 +301,6 @@ if (S_ISNWK(mode)) return 'n'; // HP/UX: network special file
 # define BSD_KQUEUE
 #endif /* HAVE_KQUEUE && !USE_GENERIC_FS_MONITOR */
 
-#ifndef __BEGIN_DECLS
-# ifdef __cpluplus
-#  define __BEGIN_DECLS extern "C" {
-# else
-#  define __BEGIN_DECLS
-# endif /* __cplusplus */
-#endif /* !__BEGIN_DECLS */
-
-#ifndef __END_DECLS
-# ifdef __cpluplus
-#  define __END_DECLS }
-# else
-#  define __END_DECLS
-# endif /* __cplusplus */
-#endif /* !__END_DECLS */
-
 #include "strings.h"
 #include "settings.h"
 
@@ -354,7 +354,7 @@ if (S_ISNWK(mode)) return 'n'; // HP/UX: network special file
 #endif /* !ARG_MAX */
 
 #if defined(__linux__) && !defined(_BE_POSIX)
-# ifdef STATX_TYPE /* Defined in sys/stat.h if statx() is available */
+# if defined(STATX_TYPE) && (!defined(__ANDROID__) || __ANDROID_API__ >= 30)
 #  define LINUX_STATX
 # endif /* STATX_TYPE */
 # if !defined(__GLIBC__) || (__GLIBC__ > 2 \
