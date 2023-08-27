@@ -1501,7 +1501,10 @@ parse_cmdline_args(const int argc, char **argv)
 		case LOPT_INT_VARS:
 			xargs.int_vars = int_vars = 1; break;
 		case LOPT_LIST_AND_QUIT:
-			xargs.list_and_quit = 1; break;
+			xargs.list_and_quit = 1;
+			xargs.no_dirjump = 1;
+			xargs.restore_last_path = conf.restore_last_path = 0;
+			break;
 		case LOPT_MAX_DIRHIST:
 			set_max_value(optarg, &xargs.max_dirhist, &conf.max_dirhist);
 			break;
