@@ -240,6 +240,7 @@ For a complete description please consult our [Wiki](https://github.com/leo-arch
 <summary>Click here to expand</summary>
 
 * `Development`
+  - Run as standalone **stat**(1) replacement via `--stat` and `--stat-full` options.
   - Exclude commands from the commands history via `HistIgnore` in the config file.
   - Exclude directories from the directories history (and the jump database) via `DirhistIgnore` in the config file.
   - Maximum limit of listed files increased from **INT_MAX** to **SSIZE_MAX**.
