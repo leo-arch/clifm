@@ -1735,6 +1735,7 @@ do_stat_and_exit(const int full_stat)
 # if defined(HAVE_GNU_DU)
 	bin_flags |= GNU_DU_BIN_DU;
 # elif !defined(_BE_POSIX)
+	char *p = (char *)NULL;
 	if ((p = get_cmd_path("gdu")) != NULL)
 		{ free(p); bin_flags |= GNU_DU_BIN_GDU; }
 # endif /* HAVE_GNU_DU */
