@@ -503,6 +503,12 @@ rl_exclude_input(unsigned char c)
 		goto END;
 	}
 
+	if (c == KEY_KILL) { /* 21 == Ctrl-U (kill line) */
+		if (wrong_cmd == 1)
+			recover_from_wrong_cmd();
+		return RL_INSERT_CHAR;
+	}
+
 	/* Skip control characters (0 - 31) except backspace (8), tab(9),
 	 * enter (13), and escape (27). */
 	if (c < ' ' && c != KEY_BACKSPACE && c != KEY_TAB
