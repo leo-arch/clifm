@@ -40,7 +40,13 @@
 # define O_CLOEXEC 0
 #endif /* O_CLOEXEC */
 
+#ifdef dirfd
+/* Just in case: on some systems (like NetBSD) dirfd is a macro (defined in
+ * dirent.h) */
+# undef dirfd
+#endif /* dirfd */
 #define dirfd(d)   (0)
+
 #define fstatat    old_stat
 #define fchmodat   old_chmod
 #define mkdirat    old_mkdir

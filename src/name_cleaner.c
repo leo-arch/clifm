@@ -658,7 +658,7 @@ CONFIRM:
 			while (lstat(r, &a) == 0) {
 				char tmp[PATH_MAX];
 				xstrsncpy(tmp, r, sizeof(tmp));
-				r = (char *)xrealloc(r,	(PATH_MAX + 32) * sizeof(char));
+				r = (char *)xrealloc(r, (PATH_MAX + 32) * sizeof(char));
 				snprintf(r, PATH_MAX + 31, "%s-%zu", tmp, rep_suffix);
 				rep_suffix++;
 			}
