@@ -22,6 +22,8 @@
  * MA 02110-1301, USA.
 */
 
+#ifdef CLIFM_LEGACY
+
 #include "helpers.h"
 
 #include <unistd.h>
@@ -404,3 +406,7 @@ x_getline(char **lineptr, size_t *n, FILE *stream)
 {
 	return x_getdelim(lineptr, n, '\n', stream);
 }
+
+#else
+void *skip_me_compat;
+#endif /* CLIFM_LEGACY */
