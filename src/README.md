@@ -299,7 +299,7 @@ make -f misc/GNU/Makefile _NO_GETTEXT=1 _NO_ICONS=1
 
 | Option | Description |
 | --- | --- |
-| `POSIX_STRICT` | Build a `POSIX.1-2008` compliant executable<sup>1</sup> |
+| `POSIX_STRICT` | Build a `POSIX.1-2008` compliant executable<sup>1</sup>. Note: combine with `CLIFM_LEGACY` for `POSIX.1-2001` compliance. |
 | `CLIFM_SUCKLESS` | Remove all code aimed at parsing config files. Configuration is done either via `settings.h` (and recompilation) or via [environment variables](https://github.com/leo-arch/clifm/wiki/Specifics#environment)<sup>2</sup> |
 | `_ICONS_IN_TERMINAL` | Use icons-in-terminal for [icons](https://github.com/leo-arch/clifm/wiki/Advanced/#icons-smirk) instead of the default (emoji-icons) |
 | `_NERD` | Use Nerdfonts for [icons](https://github.com/leo-arch/clifm/wiki/Advanced/#icons-smirk) instead of the default (emoji-icons) |
