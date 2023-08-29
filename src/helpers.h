@@ -36,17 +36,17 @@
 #define COLORS_REPO "https://github.com/leo-arch/clifm-colors"
 
 /* POSIX_STRICT: A more descriptive name for _BE_POSIX */
-#if defined(POSIX_STRICT) || defined(_POSIX_C_SOURCE)
+#if defined(POSIX_STRICT) || defined(_POSIX_C_SOURCE) || defined(_XOPEN_SOURCE)
 # define _BE_POSIX
-#endif /* POSIX_STRICT || _POSIX_C_SOURCE */
+#endif /* POSIX_STRICT || _POSIX_C_SOURCE || _XOPEN_SOURCE */
 
 #ifdef _BE_POSIX
 # ifndef _POSIX_C_SOURCE
 #  define _POSIX_C_SOURCE 200809L
-# endif /* _POSIX_C_SOURCE */
+# endif /* !_POSIX_C_SOURCE */
 # ifndef _XOPEN_SOURCE
 #  define _XOPEN_SOURCE 700
-# endif /* _XOPEN_SOURCE */
+# endif /* !_XOPEN_SOURCE */
 
 # if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) \
 || defined(__DragonFly__) || defined(__APPLE__)
@@ -791,7 +791,7 @@ extern time_t curdir_mtime;
 #define QUOTING_STYLE_SINGLE_QUOTES 1
 #define QUOTING_STYLE_DOUBLE_QUOTES 2
 
-/* Macros used for the --stat and --stat-full command line switches. */
+/* Macros used for the --stat and --stat-full command line options. */
 #define SIMPLE_STAT 1
 #define FULL_STAT   2
 

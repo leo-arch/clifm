@@ -2406,9 +2406,9 @@ get_prompt_cmds(void)
 	fclose(fp);
 }
 
-/* Get the length of the current time format
+/* Get the length of the current time format.
  * We need this to construct the time string in case of invalid timestamp (0),
- * and to calculate the space left to print file names in long view */
+ * and to calculate the space left to print file names in long view. */
 
 /* GCC (not clang though) complains about tfmt being not a string literal.
  * Let's silence this warning until we find a better approach.
@@ -2423,13 +2423,13 @@ check_time_str(void)
 		return;
 
 	if (conf.relative_time == 1) {
-	/* +1 = extra space to avoid hitting the screen right edge in long view */
+	/* +1 = extra space to avoid hitting the screen right edge in long view. */
 		prop_fields.len += (7 + 1);
 		xstrsncpy(invalid_time_str, " -     ", sizeof(invalid_time_str));
 		return;
 	}
 
-	/* Get length of the current time format */
+	/* Get length of the current time format. */
 	struct tm tm;
 	time_t t = time(NULL);
 	char tim[MAX_TIME_STR];
@@ -2437,7 +2437,7 @@ check_time_str(void)
 	size_t l = localtime_r(&t, &tm) ? strftime(tim, sizeof(tim), tfmt, &tm) : 0;
 
 	/* Construct the invalid time format string (used when we get an
-	 * invalid file timestamp) */
+	 * invalid file timestamp). */
 	if (l > MAX_TIME_STR)
 		l = MAX_TIME_STR;
 
@@ -2448,7 +2448,7 @@ check_time_str(void)
 	invalid_time_str[i] = '\0';
 
 	/* Append the time string length to the properties total length, so that
-	 * we can better calculate how much space left we have to print file names */
+	 * we can better calculate how much space left we have to print file names. */
 	prop_fields.len += (int)(l + 1);
 }
 #pragma GCC diagnostic pop
