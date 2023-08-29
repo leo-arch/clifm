@@ -101,7 +101,8 @@ print_config_value(const char *option, void *cur_value, void *def_value,
 		const int type)
 {
 	if (type == DUMP_CONFIG_STR) {
-		char *cv = (char *)cur_value, *dv = (char *)def_value;
+		char *cv = (char *)cur_value;
+		char *dv = (char *)def_value;
 		if (!cv || (dv && strcmp(cv, dv) == 0))
 			printf("  %s: \"%s\"\n", option, dv);
 		else
@@ -259,6 +260,10 @@ dump_config(void)
 	print_config_value("DesktopNotifications", &conf.desktop_notifications,
 		&n, DUMP_CONFIG_BOOL);
 
+	s = "";
+	print_config_value("DirhistIgnore", &conf.dirhistignore_regex,
+		s, DUMP_CONFIG_STR);
+
 	n = DEF_DIRHIST_MAP;
 	print_config_value("DirhistMap", &conf.dirhist_map, &n, DUMP_CONFIG_BOOL);
 
@@ -296,6 +301,10 @@ dump_config(void)
 	n = DEF_ICONS;
 	print_config_value("Icons", &conf.icons, &n, DUMP_CONFIG_BOOL);
 #endif /* !_NO_ICONS */
+
+	s = DEF_HISTIGNORE;
+	print_config_value("HistIgnore", conf.histignore_regex,
+		s, DUMP_CONFIG_STR);
 
 	n = DEF_LIGHT_MODE;
 	print_config_value("LightMode", &conf.light_mode, &n, DUMP_CONFIG_BOOL);
@@ -367,6 +376,9 @@ dump_config(void)
 
 	s = DEF_PROP_FIELDS;
 	print_config_value("PropFields", prop_fields_str, s, DUMP_CONFIG_STR);
+
+	s = "";
+	print_config_value("PTimeStyle", conf.ptime_str, s, DUMP_CONFIG_STR);
 
 	n = DEF_PURGE_JUMPDB;
 	print_config_value("PurgeJumpDB", &conf.purge_jumpdb, &n, DUMP_CONFIG_BOOL);
@@ -3089,6 +3101,14 @@ read_config(void)
 			}
 		}
 
+		else if (*line == 'P' && strncmp(line, "PTimeStyle=", 11) == 0) {
+			char *tmp = get_line_value(line + 11);
+			if (!tmp)
+				continue;
+			free(conf.ptime_str);
+			conf.ptime_str = savestring(tmp, strlen(tmp));
+		}
+
 		else if (*line == 'P' && strncmp(line, "PurgeJumpDB=", 12) == 0) {
 			set_config_bool_value(line + 12, &conf.purge_jumpdb);
 		}
@@ -3206,14 +3226,6 @@ read_config(void)
 			conf.time_str = savestring(tmp, strlen(tmp));
 			if (*tmp == 'r' && strcmp(tmp + 1, "elative") == 0)
 				conf.relative_time = 1;
-		}
-
-		else if (*line == 'P' && strncmp(line, "PTimeStyle=", 11) == 0) {
-			char *tmp = get_line_value(line + 11);
-			if (!tmp)
-				continue;
-			free(conf.ptime_str);
-			conf.ptime_str = savestring(tmp, strlen(tmp));
 		}
 
 		else if (xargs.tips == UNSET && *line == 'T'
