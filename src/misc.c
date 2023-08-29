@@ -1487,6 +1487,7 @@ free_stuff(void)
 #endif /* !_NO_ICONS */
 
 	free(conf.time_str);
+	free(conf.ptime_str);
 
 #ifdef LINUX_INOTIFY
 	/* Shutdown inotify */

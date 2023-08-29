@@ -1414,7 +1414,12 @@ xgen_time_str(char *buf, const size_t buf_size, const time_t tim,
 		goto END;
 
 	*buf = '\0';
-//	size_t len = strftime(buf, buf_size, "%a %b %d %T", &t);
+
+	if (conf.ptime_str) { /* User-defined time format */
+		strftime(buf, buf_size, conf.ptime_str, &t);
+		return;
+	}
+
 	size_t len = strftime(buf, buf_size, "%F %T", &t);
 	if (len == 0) /* Error or exhausted space in BUF. */
 		return;
@@ -1428,7 +1433,6 @@ xgen_time_str(char *buf, const size_t buf_size, const time_t tim,
 	if (len >= buf_size) /* Error or exhausted space in BUF. */
 		return;
 
-//	strftime(buf + len, buf_size - len, "%Y %z", &t);
 	strftime(buf + len, buf_size - len, "%z", &t);
 	return;
 

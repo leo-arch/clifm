@@ -226,6 +226,7 @@ init_conf_struct(void)
 #endif /* !_NO_SUGGESTIONS */
 	conf.term = (char *)NULL;
 	conf.time_str = (char *)NULL;
+	conf.ptime_str = (char *)NULL;
 	conf.usr_cscheme = (char *)NULL;
 	conf.wprompt_str = (char *)NULL;
 	conf.welcome_message_str = (char *)NULL;

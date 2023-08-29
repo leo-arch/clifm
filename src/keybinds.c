@@ -1377,16 +1377,32 @@ get_cur_prof(int *cur, int *total)
 	}
 }
 
+/* Old version of rl_update_prompt(). Used only by rl_profile_previous() and
+ * rl_profile_next(): if any of these functions use rl_update_prompt() instead,
+ * it gives no prompt (not sure why). FIX. */
+static void
+rl_update_prompt_old(void)
+{
+	HIDE_CURSOR;
+	int b = xargs.refresh_on_empty_line;
+	xargs.refresh_on_empty_line = 0;
+	char *input = prompt(PROMPT_SHOW);
+	free(input);
+	xargs.refresh_on_empty_line = b;
+}
+
 static int
 rl_profile_previous(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	if (kbind_busy == 1)
 		return EXIT_SUCCESS;
+
 #ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
 		free_suggestion();
 #endif /* !_NO_SUGGESTIONS */
+
 	int prev_prof, cur_prof = -1, total_profs = 0;
 	get_cur_prof(&cur_prof, &total_profs);
 
@@ -1406,8 +1422,10 @@ rl_profile_previous(int count, int key)
 		putchar('\n');
 	}
 
-	if (profile_set(profile_names[prev_prof]) == EXIT_SUCCESS)
-		rl_update_prompt();
+	if (profile_set(profile_names[prev_prof]) == EXIT_SUCCESS) {
+		rl_update_prompt_old();
+//		rl_update_prompt();
+	}
 
 	return EXIT_SUCCESS;
 }
@@ -1418,10 +1436,12 @@ rl_profile_next(int count, int key)
 	UNUSED(count); UNUSED(key);
 	if (kbind_busy == 1)
 		return EXIT_SUCCESS;
+
 #ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
 		free_suggestion();
 #endif /* !_NO_SUGGESTIONS */
+
 	int next_prof, cur_prof = -1, total_profs = 0;
 	get_cur_prof(&cur_prof, &total_profs);
 
@@ -1441,8 +1461,10 @@ rl_profile_next(int count, int key)
 		putchar('\n');
 	}
 
-	if (profile_set(profile_names[next_prof]) == EXIT_SUCCESS)
-		rl_update_prompt();
+	if (profile_set(profile_names[next_prof]) == EXIT_SUCCESS) {
+		rl_update_prompt_old();
+//		rl_update_prompt();
+	}
 
 	return EXIT_SUCCESS;
 }

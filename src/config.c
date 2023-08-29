@@ -1585,6 +1585,8 @@ create_main_config_file(char *file)
 ;TimeStyle=\"\"\n\
 # If you prefer rather relative times\n\
 ;TimeStyle=relative\n\
+# Same as TimeStyle, but for the 'p/pp' command\n\
+;PTimeStyle=\"\"\n\
 # Print files apparent size instead of actual device usage (Linux only)\n\
 ;ApparentSize=%s\n\
 # If running in long view, print directories full size (including contents)\n\
@@ -1797,6 +1799,8 @@ create_main_config_file(char *file)
 	";MaxHistory=%d\n\
 ;MaxDirhist=%d\n\
 ;MaxLog=%d\n\
+;HistIgnore=%s\n\
+;DirhistIgnore=\"\"\n\
 ;Icons=%s\n\
 ;DiskUsage=%s\n\n"
 
@@ -1828,6 +1832,7 @@ create_main_config_file(char *file)
 		DEF_MAX_HIST,
 		DEF_MAX_DIRHIST,
 		DEF_MAX_LOG,
+		DEF_HISTIGNORE,
 		DEF_ICONS == 1 ? "true" : "false",
 		DEF_DISK_USAGE == 1 ? "true" : "false",
 		DEF_PRINTSEL == 1 ? "true" : "false",
@@ -3203,6 +3208,14 @@ read_config(void)
 				conf.relative_time = 1;
 		}
 
+		else if (*line == 'P' && strncmp(line, "PTimeStyle=", 11) == 0) {
+			char *tmp = get_line_value(line + 11);
+			if (!tmp)
+				continue;
+			free(conf.ptime_str);
+			conf.ptime_str = savestring(tmp, strlen(tmp));
+		}
+
 		else if (xargs.tips == UNSET && *line == 'T'
 		&& strncmp(line, "Tips=", 5) == 0) {
 			set_config_bool_value(line + 5, &conf.tips);
@@ -3485,6 +3498,8 @@ reset_variables(void)
 	/* Free everything */
 	free(conf.time_str);
 	conf.time_str = (char *)NULL;
+	free(conf.ptime_str);
+	conf.ptime_str = (char *)NULL;
 
 	free(config_dir_gral);
 	free(config_dir);

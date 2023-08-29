@@ -966,6 +966,7 @@ struct config_t {
 	char *encoded_prompt;
 	char *term;
 	char *time_str;
+	char *ptime_str;
 	char *welcome_message_str;
 	char *wprompt_str;
 #ifndef _NO_SUGGESTIONS

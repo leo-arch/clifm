@@ -110,6 +110,12 @@
 ## Relative time
 ;TimeStyle=relative
 
+# Same as TimeStyle, but for the 'p/pp' command. Note that relative times
+# are not available. Also, nano-second precision is not available for
+# custom styles. If empty, the default style is used ("%F %T %z", including
+# nano-second precision).
+;PTimeStyle=""
+
 # If running in long view, print directories full size (i.e. recursively).
 ;FullDirSize=false
 
