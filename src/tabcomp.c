@@ -292,7 +292,7 @@ print_filename(char *to_print, char *full_pathname)
 
 			s = tilde_expand(full_pathname);
 			if (rl_directory_completion_hook)
-				(*rl_directory_completion_hook) (&s);
+				(*rl_directory_completion_hook)(&s);
 
 			size_t slen = strlen(s);
 			size_t tlen = strlen(to_print);

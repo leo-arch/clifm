@@ -702,7 +702,7 @@ get_reg_file_color(const char *filename, const struct stat *attr,
 }
 
 /* Used by the check_completions function to get file names color
- * according to file type */
+ * according to file type. */
 static char *
 get_comp_color(const char *filename, const struct stat *attr, int *free_color)
 {
