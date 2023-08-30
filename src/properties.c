@@ -1525,7 +1525,7 @@ print_timestamps(char *filename, const struct stat *attr)
 	}
 
 	printf(_("Birth: \t\t%s%s%s\n"), cbdate, creation_time, cend);
-#else /* Birthtime not supported */
+#elif !defined(_BE_POSIX) /* Birthtime not supported */
 	printf(_("Birth: \t\t%s-%s\n"), dn_c, cend);
 #endif /* ST_BTIME */
 }
