@@ -184,9 +184,9 @@ get_start_path_and_ws_names(char **sp, char **ws)
 }
 
 static char *
-get_quoting_style(void)
+get_quoting_style(const int style)
 {
-	switch (conf.quoting_style) {
+	switch (style) {
 	case QUOTING_STYLE_BACKSLASH: return "backslash";
 	case QUOTING_STYLE_DOUBLE_QUOTES: return "double";
 	case QUOTING_STYLE_SINGLE_QUOTES: return "single";
@@ -394,8 +394,8 @@ dump_config(void)
 	n = DEF_PURGE_JUMPDB;
 	print_config_value("PurgeJumpDB", &conf.purge_jumpdb, &n, DUMP_CONFIG_BOOL);
 
-	s = "backslash";
-	char *cur_qs = get_quoting_style();
+	s = get_quoting_style(DEF_QUOTING_STYLE);
+	char *cur_qs = get_quoting_style(conf.quoting_style);
 	print_config_value("QuotingStyle", cur_qs, s, DUMP_CONFIG_STR);
 
 	n = DEF_RESTORE_LAST_PATH;
@@ -1710,7 +1710,7 @@ create_main_config_file(char *file)
 ";SyntaxHighlighting=%s\n\n"
 
 	"# How to quote expanded ELN's (regular files only): backslash, single, double\n\
-;QuotingStyle=backslash\n\n"
+;QuotingStyle=%s\n\n"
 
 		"# We have three search strategies: 0 = glob-only, 1 = regex-only,\n\
 # and 2 = glob-regex\n\
@@ -1723,6 +1723,9 @@ create_main_config_file(char *file)
 		DEF_SUG_FILETYPE_COLOR == 1 ? "true" : "false",
 		DEF_CMD_DESC_SUG == 1 ? "true" : "false",
 		DEF_HIGHLIGHT == 1 ? "true" : "false",
+		DEF_QUOTING_STYLE == QUOTING_STYLE_BACKSLASH ? "backslash"
+			: (DEF_QUOTING_STYLE == QUOTING_STYLE_DOUBLE_QUOTES ? "double"
+			: "single"),
 		DEF_SEARCH_STRATEGY
 		);
 
