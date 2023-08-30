@@ -1,4 +1,6 @@
 1.14 (Jawbreaker)
+Overall, 1.14 brings more preformance (regarding both speed and memory usage), better
+compatibility (POSIX/legacy systems), and improved security.
 
 Bug fixes
 * Crash on Termux when running with --secure-env.
@@ -18,10 +20,10 @@ Bug fixes
 * Wrong full directory sizes below 1K.
 * Mangled output for Xattributes ('p' command) in case of broken symbolic links.
 * Wrong size for block device files on some platforms.
-* The HistoryTimestamps option is missing from the main configuration file.
 * Extended attribute in 'p' command sometimes prints garbage values.
-* Regular file icon for executable file with capabilities.
+* Wrong icon (regular file) for executable files with capabilities.
 * Some plugins not working with file names containing spaces.
+* Properly expand history events ("sudo !!" not working).
 * TAB completion for envrionment variables not working.
 * Error building on MacOS 10.6 (Snow Leopard).
 * Ctrl-u deletes the current line but does not recover from the warning prompt.
@@ -30,15 +32,15 @@ Bug fixes
 
 New features/improvements
 * Secure-mode: disable core dumps; set umask to 0077 at startup; force creation mode 0600 for files and 0700 for dirs ('n command'); close non-standard file descriptors.
-* By default, 'te' sets the executable bit for the file owner only (unsets it for owner, group, and others).
+* By default, the 'te' command sets the executable bit for the file owner only (unsets it for owner, group, and others).
 * If available, use the higher-quality arc4random(3) instead of the old random(3).
-* Use temporary random file names to communicate with the TAB completers.
+* Use temporary random file names to communicate with TAB completers.
 * The SECURITY_PARANOID compilation flag takes now three possible values: 1 = secure-cmds + secure-env; 2 = secure-cmds + secure-env-full; 3 = same as 2, plus stealth-mode.
 * Warn when removing multi-hardlink files: file might still exists.
 * If running in secure mode, check config files for symlinks and multi-hardlinks (see CWE-59 and CWE-62).
 * Drastically reduce memory usage (~50%) under heavy load (100,000 files). (We're now the second most lightweight terminal file manager, only behind NNN!).
 * Increased listing speed in long view (ls(1), here we go!).
-* Increase the limit of files per directory from INT_MAX to SSIZE_MAX (meaningful only in 64-bit machines: these values are the same in 32-bit systems).
+* Increase the limit of files per directory from INT_MAX to SSIZE_MAX (meaningful only for 64-bit machines: these values are the same in 32-bit systems).
 * Lots of improvements to the POSIX version (much more compliant).
 * Improved compatibility with legacy systems (pre-POSIX.2008).
 * Increase file(1) support from 4.24 (Mar, 2008) to 3.30 (Apr, 2000).
@@ -48,17 +50,16 @@ New features/improvements
 * Allow extended file attributes in non-glibc Linux distros. 
 * Allow nested instances. Properly set both SHLVL and CLIFMLVL environment variables.
 * Allow customizing the prompt when running colorless (via the 'clifm-no-color' prompt).
-* Allow using single/double quotes to quote regular file names via ELN expansion (via the 'QuotingStyle' option in the config file).
+* Allow using single/double quotes to quote regular file names via ELN expansion (using the 'QuotingStyle' option in the config file).
 * Colorize backup files (ending with tilde (~) or "#*#" (emacs auto-save)) using the color specified for TEMP in the color scheme file.
 * Improved confirmation prompt for the 'r' command.
-* Properly expand history events ("sudo !!" not working).
 * Set a custom history file via CLIFM_HISTFILE.
 * Exclude commands from history via the 'HistIgnore' option in the config file.
 * Exclude directories from the directory history via the 'DirhistIgnore' option in the config file.
-* Multi-hardlink color takes precedence over empty and file extension colors.
+* Make multi-hardlink color take precedence over empty and file extension colors.
 * Support for Solaris port files, NetBSD archive state files, and whiteouts.
-* p/pp command can now tells whether a file is sparse (has holes), in which case it adds the "sparse" label to the Size field.
-* 'p' cmd: Print file capabilities if available (Linux).
+* p/pp command can now tell whether a file is sparse (has holes), in which case it adds the "sparse" label to the Size field.
+* 'p' cmd: print file capabilities if available (Linux).
 * Run as standalone stat(1) replacement via --stat and --stat-full command line options.
 * Customizable timestamps for the 'p/pp' command via the 'PTimeStyle' option in the config file.
 
