@@ -1339,12 +1339,16 @@ check_config_files_integrity(void)
 	check_file_safety(mime_file);
 	check_file_safety(actions_file);
 	check_file_safety(remotes_file);
+	check_file_safety(prompts_file);
 
 	char jump_file[PATH_MAX];
 	snprintf(jump_file, sizeof(jump_file), "%s/jump.clifm", config_dir);
 	check_file_safety(jump_file);
 
-	check_file_safety(prompts_file);
+	char preview_file[PATH_MAX];
+	snprintf(preview_file, sizeof(preview_file),
+		"%s/preview.clifm", config_dir);
+	check_file_safety(preview_file);
 }
 
 static void
