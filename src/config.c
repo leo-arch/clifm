@@ -183,6 +183,17 @@ get_start_path_and_ws_names(char **sp, char **ws)
 	fclose(fp);
 }
 
+static char *
+get_quoting_style(void)
+{
+	switch (conf.quoting_style) {
+	case QUOTING_STYLE_BACKSLASH: return "backslash";
+	case QUOTING_STYLE_DOUBLE_QUOTES: return "double";
+	case QUOTING_STYLE_SINGLE_QUOTES: return "single";
+	default: return "backslash";
+	}
+}
+
 /* Dump current value of config options (as defined in the config file),
  * highlighting those that differ from default values.
  * Note that values displayed here represent the CURRENT status of the
@@ -297,14 +308,14 @@ dump_config(void)
 	print_config_value("FzfPreview", &conf.fzf_preview, &n, DUMP_CONFIG_BOOL);
 #endif /* !_NO_FZF */
 
+	s = DEF_HISTIGNORE;
+	print_config_value("HistIgnore", conf.histignore_regex,
+		s, DUMP_CONFIG_STR);
+
 #ifndef _NO_ICONS
 	n = DEF_ICONS;
 	print_config_value("Icons", &conf.icons, &n, DUMP_CONFIG_BOOL);
 #endif /* !_NO_ICONS */
-
-	s = DEF_HISTIGNORE;
-	print_config_value("HistIgnore", conf.histignore_regex,
-		s, DUMP_CONFIG_STR);
 
 	n = DEF_LIGHT_MODE;
 	print_config_value("LightMode", &conf.light_mode, &n, DUMP_CONFIG_BOOL);
@@ -382,6 +393,10 @@ dump_config(void)
 
 	n = DEF_PURGE_JUMPDB;
 	print_config_value("PurgeJumpDB", &conf.purge_jumpdb, &n, DUMP_CONFIG_BOOL);
+
+	s = "backslash";
+	char *cur_qs = get_quoting_style();
+	print_config_value("QuotingStyle", cur_qs, s, DUMP_CONFIG_STR);
 
 	n = DEF_RESTORE_LAST_PATH;
 	print_config_value("RestoreLastPath", &conf.restore_last_path, &n,
@@ -1693,6 +1708,9 @@ create_main_config_file(char *file)
 ;SuggestCmdDesc=%s\n\n"
 
 ";SyntaxHighlighting=%s\n\n"
+
+	"# How to quote expanded ELN's (regular files only): backslash, single, double\n\
+;QuotingStyle=backslash\n\n"
 
 		"# We have three search strategies: 0 = glob-only, 1 = regex-only,\n\
 # and 2 = glob-regex\n\

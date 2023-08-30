@@ -211,6 +211,12 @@
 #         2. COMMAND LINE             #
 #=====================================#
 
+# Set quoting style used to expand ELN's (regular files only).
+# Quoting styles: 'backslash' (default), 'single', or 'double' quotes.
+# Useful when using shells not supporting backslashes as quoting
+# mechanisms (ex: nushell or xonsh).
+;QuotingStyle=backslash
+
 # Enable fuzzy matching for filename/path completions and suggestions.
 ;FuzzyMatching=false
 
