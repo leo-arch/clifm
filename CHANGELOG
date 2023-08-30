@@ -1,3 +1,67 @@
+1.14 (Jawbreaker)
+
+Bug fixes
+* Crash on Termux when running with --secure-env.
+* Not recovering from warning prompt when navigating history with Up and Down arrow keys.
+* No screen refresh after renaming files with 'bleach' (if using the generic fs events monitor).
+* Not working on Linux < 2.6.27 (no inotify).
+* Wrong files list color for unknown file types (right color with p/pp command).
+* Highlight color is lost after inserting sudo command (Alt-v).
+* Binary names in PATH loaded multiple times.
+* Wrong inserted match when TAB completing the 'desel' command.
+* 'dup' fails when file name starts with a dash (subsequent characters are taken as command options).
+* Backdir (...) not working in Macos and Haiku.
+* Stack overflow when writing log to profile directory with not write permission.
+* Max name length unset not honored in long view.
+* Compilation with SECURITY_PARANOID does not work if no command line parameter is provided.
+* Commands received via plugins are not sanitized even if running in secure-cmds mode.
+* Wrong full directory sizes below 1K.
+* Mangled output for Xattributes ('p' command) in case of broken symbolic links.
+* Wrong size for block device files on some platforms.
+* The HistoryTimestamps option is missing from the main configuration file.
+* Extended attribute in 'p' command sometimes prints garbage values.
+* Regular file icon for executable file with capabilities.
+* Some plugins not working with file names containing spaces.
+* TAB completion for envrionment variables not working.
+* Error building on MacOS 10.6 (Snow Leopard).
+* Ctrl-u deletes the current line but does not recover from the warning prompt.
+* HistoryTimestamps option in config file has no effect (removed).
+* The 'l' command cannot create link names containing spaces. 
+
+New features/improvements
+* Secure-mode: disable core dumps; set umask to 0077 at startup; force creation mode 0600 for files and 0700 for dirs ('n command'); close non-standard file descriptors.
+* By default, 'te' sets the executable bit for the file owner only (unsets it for owner, group, and others).
+* If available, use the higher-quality arc4random(3) instead of the old random(3).
+* Use temporary random file names to communicate with the TAB completers.
+* The SECURITY_PARANOID compilation flag takes now three possible values: 1 = secure-cmds + secure-env; 2 = secure-cmds + secure-env-full; 3 = same as 2, plus stealth-mode.
+* Warn when removing multi-hardlink files: file might still exists.
+* If running in secure mode, check config files for symlinks and multi-hardlinks (see CWE-59 and CWE-62).
+* Drastically reduce memory usage (~50%) under heavy load (100,000 files). (We're now the second most lightweight terminal file manager, only behind NNN!).
+* Increased listing speed in long view (ls(1), here we go!).
+* Increase the limit of files per directory from INT_MAX to SSIZE_MAX (meaningful only in 64-bit machines: these values are the same in 32-bit systems).
+* Lots of improvements to the POSIX version (much more compliant).
+* Improved compatibility with legacy systems (pre-POSIX.2008).
+* Increase file(1) support from 4.24 (Mar, 2008) to 3.30 (Apr, 2000).
+* TAB complete the third word for the 'rr' command with text editors.
+* Files birth time support in Haiku.
+* Fish versions for cd_on_quit.sh and file_picker.sh shell functions (by @spenserblack).
+* Allow extended file attributes in non-glibc Linux distros. 
+* Allow nested instances. Properly set both SHLVL and CLIFMLVL environment variables.
+* Allow customizing the prompt when running colorless (via the 'clifm-no-color' prompt).
+* Allow using single/double quotes to quote regular file names via ELN expansion (via the 'QuotingStyle' option in the config file).
+* Colorize backup files (ending with tilde (~) or "#*#" (emacs auto-save)) using the color specified for TEMP in the color scheme file.
+* Improved confirmation prompt for the 'r' command.
+* Properly expand history events ("sudo !!" not working).
+* Set a custom history file via CLIFM_HISTFILE.
+* Exclude commands from history via the 'HistIgnore' option in the config file.
+* Exclude directories from the directory history via the 'DirhistIgnore' option in the config file.
+* Multi-hardlink color takes precedence over empty and file extension colors.
+* Support for Solaris port files, NetBSD archive state files, and whiteouts.
+* p/pp command can now tells whether a file is sparse (has holes), in which case it adds the "sparse" label to the Size field.
+* 'p' cmd: Print file capabilities if available (Linux).
+* Run as standalone stat(1) replacement via --stat and --stat-full command line options.
+* Customizable timestamps for the 'p/pp' command via the 'PTimeStyle' option in the config file.
+
 1.13 (Voodoo Root)
 
 Bug fixes
