@@ -1617,6 +1617,14 @@ symlink_file(char **args)
 		}
 	}
 
+	if (args[1] && strchr(args[1], '\\')) {
+		char *deq = dequote_str(args[1], 0);
+		if (deq) {
+			free(args[1]);
+			args[1] = deq;
+		}
+	}
+
 	char *target = args[0];
 	char *link_name = args[1];
 	char tmp[PATH_MAX];
