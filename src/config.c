@@ -1075,11 +1075,11 @@ create_actions_file(char *file)
 		"i=img_viewer.sh\n"
 		"ih=ihelp.sh\n"
 		"kbgen=kbgen\n"
-		"kclip=xclip.sh\n"
 		"kd=decrypt.sh\n"
 		"ke=encrypt.sh\n"
 		"music=music_player.sh\n"
 		"ml=mime_list.sh\n"
+		"plugin1=xclip.sh\n"
 		"ptot=pdf_viewer.sh\n"
 		"update=update.sh\n"
 		"vid=vid_viewer.sh\n"
@@ -1282,7 +1282,7 @@ static void
 set_hist_file(const int secure_mode, const size_t tmp_len)
 {
 	char *env_val = secure_mode == 0 ? getenv("CLIFM_HISTFILE") : (char *)NULL;
-	char *hist_env = env_val && *env_val
+	char *hist_env = (env_val && *env_val)
 		? normalize_path(env_val, strlen(env_val)) : (char *)NULL;
 
 	size_t hist_len = (hist_env && *hist_env) ? strlen(hist_env) + 1 : tmp_len;
@@ -1358,12 +1358,12 @@ define_config_file_names(void)
 	size_t tmp_len = 0;
 	int secure_mode = (xargs.secure_env == 1 || xargs.secure_env_full == 1);
 
-	set_main_config_dir(secure_mode); /* config_dir_gral is set here */
+	set_main_config_dir(secure_mode); /* config_dir_gral is set here. */
 
 	size_t config_gral_len = strlen(config_dir_gral);
 
 	/* alt_profile will not be NULL whenever the -P option is used
-	 * to run clifm under an alternative profile */
+	 * to run clifm under an alternative profile. */
 	if (alt_profile) {
 		tmp_len = config_gral_len + strlen(alt_profile) + 11;
 		config_dir = (char *)xnmalloc(tmp_len, sizeof(char));
