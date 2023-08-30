@@ -342,9 +342,6 @@
 # Limit the size of the commands history file to MaxHistory entries.
 ;MaxHistory=1000
 
-# Add timestamps to commands history entries.
-;HistoryTimestamps=true
-
 # Same as HistIgnore, but for the directory history list.
 ;DirhistIgnore=""
 
