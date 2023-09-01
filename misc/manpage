@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Aug 29, 2023" "clifm 1.14" "CLIFM Manual"
+.TH "CLIFM" "1" "Sep 1, 2023" "clifm 1.14" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -984,7 +984,7 @@ print file properties for ELN/FILE. The output of this function is much like the
 .sp
 By default, directories size is not shown. Use \fIpp\fR instead of just \fIp\fR to print directories size as well (it could take longer depending on the directory's content). On the other side, and unlike \fIp\fR, \fIpp\fR provides information about the dereferenced symlinks (namely, the symlink target) instead of the symlink itself. However, note that, in case of symbolic links to directories, \fIp\fR provides information about the link \fItarget\fR if the provided file name ends with a slash. Otherwise, information about the link \fIitself\fR is displayed.
 .sp
-The time format used to display time information can be customized via the \fIPTimeStyle\fR option in the configuration file (defaults to "%F %T %z", including nano-second precision).
+The time format used to display time information can be customized via the \fIPTimeStyle\fR option in the configuration file (defaults to "%Y-%m-%d %H:%M:%S.%N %z", where %N stands for nano-second precision).
 .sp
 If you need to list the properties of all files in the current directory, try the long view mode (\fIll\fR or \fIAlt-l\fR). Fields displayed in this mode can be customized using the \fIPropFields\fR option in the configuration file. For custom timestamp formats use the \fITimeStyle\fR option.
 .sp
