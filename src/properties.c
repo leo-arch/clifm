@@ -1390,6 +1390,65 @@ print_file_details(char *filename, const struct stat *attr, const char file_type
 #endif /* LINUX_FILE_CAPS */
 }
 
+/* Return a pointer to the beginning of the %N modifier in the format
+ * string FMT. If not found, NULL is returned. */
+static char *
+has_nsec_modifier(char *fmt)
+{
+	if (!fmt || !*fmt)
+		return (char *)NULL;
+
+	while (*fmt) {
+		if (*fmt == '%' && *(fmt + 1) == 'N')
+			return fmt;
+		++fmt;
+	}
+
+	return (char *)NULL;
+}
+
+static void
+gen_user_time_str(char *buf, size_t buf_size, struct tm *t, const size_t nsec)
+{
+	char *ptr = has_nsec_modifier(conf.ptime_str);
+	if (!ptr) {
+		/* GCC (not clang) complains about format being not a string literal.
+		 * Let's silence this warning until we find a better approach. */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+		strftime(buf, buf_size, conf.ptime_str, t);
+#pragma GCC diagnostic pop
+		return;
+	}
+
+	size_t len = 0;
+	*ptr = '\0';
+	if (ptr != conf.ptime_str)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+		len = strftime(buf, buf_size, conf.ptime_str, t);
+#pragma GCC diagnostic pop
+
+	*ptr = '%';
+	if (len == 0 && ptr != conf.ptime_str) /* Error or exhausted space in BUF. */
+		return;
+
+	len += (size_t)snprintf(buf + len, buf_size - len, "%09zu", nsec);
+	if (len >= buf_size) /* Error or exhausted space in BUF. */
+		return;
+
+	ptr += 2; /* Move past the %N modifier in format string */
+	if (!*ptr)
+		return;
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+	strftime(buf + len, buf_size - len, ptr, t);
+#pragma GCC diagnostic pop
+
+	return;
+}
+
 /* Write into BUF, whose size is SIZE, the timestamp TIM, with nanoseconds NSEC,
  * in human readable format.
  * NSEC must be a tv_nsec member of a timespec struct, which, according to the
@@ -1416,15 +1475,11 @@ xgen_time_str(char *buf, const size_t buf_size, const time_t tim,
 	*buf = '\0';
 
 	if (conf.ptime_str) { /* User-defined time format */
-		/* GCC (not clang) complains about format being not a string literal.
-		 * Let's silence this warning until we find a better approach. */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat-nonliteral"
-		strftime(buf, buf_size, conf.ptime_str, &t);
-#pragma GCC diagnostic pop
+		gen_user_time_str(buf, buf_size, &t, nsec);
 		return;
 	}
 
+	/* Default value */
 	size_t len = strftime(buf, buf_size, "%F %T", &t);
 	if (len == 0) /* Error or exhausted space in BUF. */
 		return;
