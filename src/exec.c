@@ -362,7 +362,7 @@ export_var_function(char **args)
 	size_t i;
 	for (i = 0; args[i]; i++) {
 		/* ARG might have been escaped by parse_input_str(), in the command
-		 * and parameter substitution block. Let's deescape it */
+		 * and parameter substitution block. Let's deescape it. */
 		char *ds = dequote_str(args[i], 0);
 		if (!ds) {
 			xerror("%s\n", _("export: Error dequoting argument"));

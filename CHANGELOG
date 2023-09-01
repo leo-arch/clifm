@@ -27,7 +27,6 @@ Bug fixes
 * TAB completion for envrionment variables not working.
 * Error building on MacOS 10.6 (Snow Leopard).
 * Ctrl-u deletes the current line but does not recover from the warning prompt.
-* HistoryTimestamps option in config file has no effect (removed).
 * The 'l' command cannot create link names containing spaces. 
 
 New features/improvements

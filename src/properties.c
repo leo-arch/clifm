@@ -1416,7 +1416,12 @@ xgen_time_str(char *buf, const size_t buf_size, const time_t tim,
 	*buf = '\0';
 
 	if (conf.ptime_str) { /* User-defined time format */
+		/* GCC (not clang) complains about format being not a string literal.
+		 * Let's silence this warning until we find a better approach. */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
 		strftime(buf, buf_size, conf.ptime_str, &t);
+#pragma GCC diagnostic pop
 		return;
 	}
 
