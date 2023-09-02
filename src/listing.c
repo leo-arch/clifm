@@ -1124,6 +1124,9 @@ print_entry_nocolor(int *ind_char, const filesn_t i, const int pad,
 #endif /* SOLARIS_DOORS */
 		case DT_FIFO: putchar(FIFO_CHR); break;
 		case DT_SOCK: putchar(SOCK_CHR); break;
+#ifdef S_IFWHT
+		case DT_WHT: putchar(WHT_CHR); break;
+#endif /* S_IFWHT */
 		case DT_UNKNOWN: putchar(UNKNOWN_CHR); break;
 		default: *ind_char = 0;
 		}
@@ -1287,6 +1290,9 @@ print_entry_nocolor_light(int *ind_char, const filesn_t i, const int pad,
 		case DT_FIFO: putchar(FIFO_CHR); break;
 		case DT_LNK: putchar(LINK_CHR); break;
 		case DT_SOCK: putchar(SOCK_CHR); break;
+#ifdef S_IFWHT
+		case DT_WHT: putchar(WHT_CHR); break;
+#endif /* S_IFWHT */
 		case DT_UNKNOWN: putchar(UNKNOWN_CHR); break;
 		default: *ind_char = 0; break;
 		}

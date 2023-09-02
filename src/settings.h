@@ -203,6 +203,7 @@ xf=1;31:xs=0;32:"
 #define FIFO_CHR    '|'
 #define LINK_CHR    '@'
 #define SOCK_CHR    '='
+#define WHT_CHR     '%' /* BSD whiteout */
 #define UNKNOWN_CHR '?'
 
 /* Characters used to represent file types in the permissions string
