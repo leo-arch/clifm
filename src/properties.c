@@ -192,8 +192,10 @@ get_birthtime(const char *filename)
 	struct timespec ts = {0};
 	nvlist_t *response;
 
-	if (getattrat(XAT_FDCWD, XATTR_VIEW_READWRITE, filename, &response) != 0)
+	if (getattrat(XAT_FDCWD, XATTR_VIEW_READWRITE, filename, &response) != 0) {
+		ts.tv_sec = (time_t)-1;
 		return ts;
+	}
 
 	uint64_t *val;
 	uint_t n;
@@ -1421,6 +1423,12 @@ gen_user_time_str(char *buf, size_t buf_size, struct tm *t, const size_t nsec)
 		return;
 	}
 
+	/* Let's insert nano-seconds in the time format string supplied by the
+	 * user (conf.ptime_str). Note that this is not a full-blown expansion,
+	 * but rather a hack, and as such it's limited: only the first appearance
+	 * of %N (PTR) in the format string will be replaced by the corresponding
+	 * nano-seconds. */
+
 	size_t len = 0;
 	*ptr = '\0';
 	if (ptr != conf.ptime_str)
@@ -1569,9 +1577,14 @@ print_timestamps(char *filename, const struct stat *attr)
 
 # elif defined(__sun)
 	struct timespec birthtim = get_birthtime(filename);
-	xgen_time_str(creation_time, sizeof(creation_time), birthtim.tv_sec,
-		(size_t)birthtim.tv_nsec);
-	bt = birthtim.tv_sec;
+	if (birthtim.tv_sec == (time_t)-1) { /* Error */
+		*creation_time = '-';
+		creation_time[1] = '\0';
+	} else {
+		xgen_time_str(creation_time, sizeof(creation_time), birthtim.tv_sec,
+			(size_t)birthtim.tv_nsec);
+		bt = birthtim.tv_sec;
+	}
 
 # else
 	xgen_time_str(creation_time, sizeof(creation_time), attr->ST_BTIME.tv_sec,
