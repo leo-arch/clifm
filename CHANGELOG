@@ -28,6 +28,7 @@ Bug fixes
 * Error building on MacOS 10.6 (Snow Leopard).
 * Ctrl-u deletes the current line but does not recover from the warning prompt.
 * The 'l' command cannot create link names containing spaces. 
+* Wrong birth time (Unix epoch) in Solaris.
 
 New features/improvements
 * Secure-mode: disable core dumps; set umask to 0077 at startup; force creation mode 0600 for files and 0700 for dirs ('n command'); close non-standard file descriptors.
