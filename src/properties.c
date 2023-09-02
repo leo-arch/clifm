@@ -1577,7 +1577,8 @@ print_timestamps(char *filename, const struct stat *attr)
 
 # elif defined(__sun)
 	struct timespec birthtim = get_birthtime(filename);
-	if (birthtim.tv_sec == (time_t)-1) { /* Error */
+	if (birthtim.tv_sec == (time_t)-1
+	|| (birthtim.tv_sec == 0 && birthtim.tv_nsec == 0)) { /* Error */
 		*creation_time = '-';
 		creation_time[1] = '\0';
 	} else {
