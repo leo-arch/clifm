@@ -206,7 +206,7 @@ stat_char(const char *filename)
 	struct stat attr;
 	int r;
 
-#if defined(S_ISLNK)
+#ifdef S_ISLNK
 	r = lstat(filename, &attr);
 #else
 	r = stat(filename, &attr);
@@ -217,22 +217,34 @@ stat_char(const char *filename)
 
 	int c = 0;
 	if (S_ISDIR(attr.st_mode)) {
-		c = '/';
-#if defined(S_ISLNK)
+		c = DIR_CHR;
+#ifdef S_ISLNK
 	} else if (S_ISLNK(attr.st_mode)) {
-		c = '@';
+		c = LINK_CHR;
 #endif /* S_ISLNK */
-#if defined(S_ISSOCK)
+#ifdef S_ISSOCK
 	} else if (S_ISSOCK(attr.st_mode)) {
-		c = '=';
+		c = SOCK_CHR;
 #endif /* S_ISSOCK */
 	} else if (S_ISREG(attr.st_mode)) {
 		if (access(filename, X_OK) == 0)
-			c = '*';
-#if defined(S_ISFIFO)
+			c = EXEC_CHR;
+	} else if (S_ISBLK(attr.st_mode)) {
+		c = BLK_CHR;
+	} else if (S_ISCHR(attr.st_mode)) {
+		c = CHR_CHR;
+#ifdef SOLARIS_DOORS
+	} else if (S_ISDOOR(attr.st_mode)) {
+		c = DOOR_CHR;
+#endif /* SOLARIS_DOORS */
+#ifdef S_ISWHT
+	} else if (S_ISWHT(attr.st_mode)) {
+		c = WHT_CHR;
+#endif /* S_IFWHT */
+#ifdef S_ISFIFO
 	} else {
 		if (S_ISFIFO(attr.st_mode))
-			c = '|';
+			c = FIFO_CHR;
 #endif /* S_ISFIFO */
 	}
 
