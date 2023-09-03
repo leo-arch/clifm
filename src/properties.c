@@ -189,13 +189,12 @@ struct perms_t {
 static struct timespec
 get_birthtime(const char *filename)
 {
-	struct timespec ts = {0};
+	struct timespec ts;
+	ts.tv_sec = ts.tv_nsec = (time_t)-1;
 	nvlist_t *response;
 
-	if (getattrat(XAT_FDCWD, XATTR_VIEW_READWRITE, filename, &response) != 0) {
-		ts.tv_sec = (time_t)-1;
+	if (getattrat(XAT_FDCWD, XATTR_VIEW_READWRITE, filename, &response) != 0)
 		return ts;
-	}
 
 	uint64_t *val;
 	uint_t n;
@@ -1577,8 +1576,7 @@ print_timestamps(char *filename, const struct stat *attr)
 
 # elif defined(__sun)
 	struct timespec birthtim = get_birthtime(filename);
-	if (birthtim.tv_sec == (time_t)-1
-	|| (birthtim.tv_sec == 0 && birthtim.tv_nsec == 0)) { /* Error */
+	if (birthtim.tv_sec == (time_t)-1) { /* Error */
 		*creation_time = '-';
 		creation_time[1] = '\0';
 	} else {
