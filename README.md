@@ -239,7 +239,7 @@ For a complete description please consult our [Wiki](https://github.com/leo-arch
 <details>
 <summary>Click here to expand</summary>
 
-* `Development`
+* `1.14 (Jawbreaker)`
   - [Run as a **stat**(1) replacement via `--stat` and `--stat-full` options](https://github.com/leo-arch/clifm/wiki/Advanced/#stat1-replacement).
   - Exclude commands from the commands history via `HistIgnore` in the config file.
   - Exclude directories from the directories history (and the jump database) via `DirhistIgnore` in the config file.
