@@ -1991,9 +1991,9 @@ create_def_color_scheme(void)
 			"FzfTabOptions=\"%s\"\n\n",
 
 		PROGRAM_NAME,
-		DEF_FILE_COLORS,
-		DEF_IFACE_COLORS,
-		DEF_EXT_COLORS,
+		term_caps.color >= 256 ? DEF_FILE_COLORS_256 : DEF_FILE_COLORS,
+		term_caps.color >= 256 ? DEF_IFACE_COLORS_256 : DEF_IFACE_COLORS,
+		term_caps.color >= 256 ? DEF_EXT_COLORS_256 : DEF_EXT_COLORS,
 		term_caps.color >= 256 ? DEF_DATE_SHADES_256 : DEF_DATE_SHADES_8,
 		term_caps.color >= 256 ? DEF_SIZE_SHADES_256 : DEF_SIZE_SHADES_8,
 		DEF_DIV_LINE,
