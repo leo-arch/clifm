@@ -137,6 +137,8 @@ _clifm ()
         --si
         --smenutab
         --sort-reverse
+        --stat
+        --stat-full
         --stdtab
         --trash-as-rm
         --virtual-dir

@@ -118,6 +118,8 @@ complete -c clifm -l shotgun-file -r -d 'Set a custom configuration file for sho
 complete -c clifm -l si -d 'Print sizes in powers of 1000 instead of 1024'
 complete -c clifm -l smenutab -d 'Use smenu to display completion matches'
 complete -c clifm -l sort-reverse -d 'Sort in reverse order, e.g. z-a instead of a-z'
+complete -c clifm -l stat -d 'Run the p command on FILE and exit'
+complete -c clifm -l stat-full -d 'Run the pp command on FILE and exit'
 complete -c clifm -l stdtab -d 'Force the use of the standard TAB completion mode (readline)'
 complete -c clifm -l trash-as-rm -d 'The \'r\' command executes \'trash\' instead of \'rm\' to prevent accidental deletions'
 complete -c clifm -l virtual-dir-full-paths -d 'Files in virtual directories are listed as full paths instead of target base names'

@@ -101,6 +101,8 @@ args=(
 	'--si[print sizes in powers of 1000 instead of 1024]'
 	'--smenutab[use smenu to display completion matches]'
 	'--sort-reverse[sort in reverse order]'
+	'--stat=[run the '\''p'\'' command on FILE and exit]:filename:_files'
+	'--stat-full=[run the '\''pp'\'' command on FILE and exit]:filename:_files'
 	'--stdtab[use standard TAB completion]'
 	'--trash-as-rm[the '\''r'\'' command executes '\''trash'\'' instead of '\''rm'\'']'
 	'--virtual-dir=[use PATH as CliFM virtual directory]:directory:_directories'
