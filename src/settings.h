@@ -338,16 +338,16 @@ ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define DEF_HV_C256  "\x1b[0;32m" /* Variables ($VAR) */
 
 /* Colors for the properties and long/detail view functions */
-#define DEF_DD_C256  "\x1b[0;36m"    /* Modification date */
+#define DEF_DD_C256  "\x1b[0;36m"       /* Modification date */
 #define DEF_DG_C256  "\x1b[0;38;5;140m" /* UID, GID */
-#define DEF_DN_C256  "\x1b[0;2;37m" /* Dash (no attribute) */
-#define DEF_DO_C256  "\x1b[0;38;5;79m" /* Perms in octal */
+#define DEF_DN_C256  "\x1b[0;2;37m"     /* Dash (no attribute) */
+#define DEF_DO_C256  "\x1b[0;38;5;79m"  /* Perms in octal */
 #define DEF_DP_C256  "\x1b[0;38;5;140m" /* SUID, SGID, Sticky */
 #define DEF_DR_C256  "\x1b[0;38;5;228m" /* Read perm */
 #define DEF_DW_C256  "\x1b[0;38;5;197m" /* Write perm */
-#define DEF_DXD_C256 "\x1b[0;38;5;77m" /* Execute perm (dirs) */
-#define DEF_DXR_C256 "\x1b[0;38;5;79m" /* Execute perm (reg files) */
-#define DEF_DZ_C256  "\x1b[0;32m" /* Size (only for dirs) */
+#define DEF_DXD_C256 "\x1b[0;38;5;77m"  /* Execute perm (dirs) */
+#define DEF_DXR_C256 "\x1b[0;38;5;79m"  /* Execute perm (reg files) */
+#define DEF_DZ_C256  "\x1b[0;32m"       /* Size (only for dirs) */
 
 /* Default color shades for date field in file properties */
 #define DEF_DATE_SHADES_256 "2,197-2,231,253,250,247,244"

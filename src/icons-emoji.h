@@ -61,6 +61,7 @@
 #define EMOJI_DART EMOJI_CODE
 #define EMOJI_DIFF "📋"
 #define EMOJI_DISK "💿"
+#define EMOJI_DJVU "📎"
 #define EMOJI_DOCKER "🐋"
 #define EMOJI_DOWNLOAD "📥"
 #define EMOJI_ELECTRON "⚛ "
