@@ -464,7 +464,10 @@ u8truncstr(char *restrict str, const size_t max)
 	return bmax - len;
 }
 
-/* Replace control characters in NAME by '^'. */
+/* Replace control characters in NAME by '^'.
+ * This function is called only if wc_xstrlen() returns zero, in which case
+ * we have either a non-printable wide char or an invalid multi-byte
+ * sequence. */
 char *
 replace_ctrl_chars(const char *name)
 {
@@ -475,7 +478,14 @@ replace_ctrl_chars(const char *name)
 	for (i = 0; name[i]; i++) {
 		if (i == NAME_MAX)
 			break;
-		if ((signed char)name[i] >= 0 && (signed char)name[i] < ' ')
+		/* This line causes replcaes only control chars (0-31), but it
+		 * allows invalid UTF-8 characters.
+		if ((signed char)name[i] >= 0 && (signed char)name[i] < ' ') */
+
+		/* This line catches control chars and UTF-8 chars, both valid and
+		 * invalid. Though it's better than skipping invalid ones, it should
+		 * left valid UTF-8 characters alone. FIX! */
+		if ((signed char)name[i] < ' ')
 			*n = '^';
 		else
 			*n = name[i];
