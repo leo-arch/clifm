@@ -178,6 +178,7 @@ xf=1;31:xs=0;32:"
 #define DEF_HR_C  "\x1b[0;31m" /* Redirection operator (>) */
 #define DEF_HS_C  "\x1b[0;32m" /* Process separators (; & |)*/
 #define DEF_HV_C  "\x1b[0;32m" /* Variables ($VAR) */
+#define DEF_HW_C  "\x1b[1;31m" /* Backslash (aka whack) */
 
 /* Colors for the properties and long/detail view functions */
 #define DEF_DD_C  "\x1b[0;36m" /* Modification date */
@@ -336,6 +337,7 @@ ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define DEF_HR_C256  "\x1b[0;31m" /* Redirection operator (>) */
 #define DEF_HS_C256  "\x1b[0;32m" /* Process separators (; & |)*/
 #define DEF_HV_C256  "\x1b[0;32m" /* Variables ($VAR) */
+#define DEF_HW_C256  "\x1b[1;31m" /* Backslash (aka whack) */
 
 /* Colors for the properties and long/detail view functions */
 #define DEF_DD_C256  "\x1b[0;36m"       /* Modification date */

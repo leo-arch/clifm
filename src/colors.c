@@ -1319,6 +1319,8 @@ set_iface_colors(char **colors, const size_t words)
 				set_color(colors[i] + 3, hs_c, RL_PRINTABLE);
 			else if (colors[i][1] == 'v' && colors[i][2] == '=')
 				set_color(colors[i] + 3, hv_c, RL_PRINTABLE);
+			else if (colors[i][1] == 'w' && colors[i][2] == '=')
+				set_color(colors[i] + 3, hw_c, RL_PRINTABLE);
 		}
 
 		else if (*colors[i] == 'l') {
@@ -1645,6 +1647,8 @@ set_default_colors_256(void)
 	if (!*hr_c) xstrsncpy(hr_c, DEF_HR_C256, sizeof(hr_c));
 	if (!*hs_c) xstrsncpy(hs_c, DEF_HS_C256, sizeof(hs_c));
 	if (!*hv_c) xstrsncpy(hv_c, DEF_HV_C256, sizeof(hv_c));
+	if (!*hw_c) xstrsncpy(hw_c, DEF_HW_C256, sizeof(hw_c));
+
 	if (!*tt_c) xstrsncpy(tt_c, DEF_TT_C256, sizeof(tt_c));
 
 	if (!*sb_c) xstrsncpy(sb_c, DEF_SB_C256, sizeof(sb_c));
@@ -1770,6 +1774,8 @@ set_default_colors(void)
 	if (!*hr_c) xstrsncpy(hr_c, DEF_HR_C, sizeof(hr_c));
 	if (!*hs_c) xstrsncpy(hs_c, DEF_HS_C, sizeof(hs_c));
 	if (!*hv_c) xstrsncpy(hv_c, DEF_HV_C, sizeof(hv_c));
+	if (!*hw_c) xstrsncpy(hw_c, DEF_HW_C, sizeof(hw_c));
+
 	if (!*tt_c) xstrsncpy(tt_c, DEF_TT_C, sizeof(tt_c));
 
 	if (!*sb_c) xstrsncpy(sb_c, DEF_SB_C, sizeof(sb_c));

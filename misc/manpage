@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Sep 5, 2023" "clifm 1.14" "CLIFM Manual"
+.TH "CLIFM" "1" "Sep 7, 2023" "clifm 1.14.1" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -1546,6 +1546,7 @@ The following codes are used for different interface elements (in the \fIInterfa
  hr = process redirection (>)
  hs = process separators (; & |)
  hv = variable names (starting with '$')
+ hw = Backslash (aka whack)
 
  \fBPrompt elements\fR
  li = selected files

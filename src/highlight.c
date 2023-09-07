@@ -174,7 +174,7 @@ rl_highlight(char *str, const size_t pos, const int flag)
 	case '/': cl = (cur_color != hq_c) ? hd_c : cl; break;
 	case '\'': /* fallthrough */
 	case '"': cl = hq_c; break;
-	case '\\': /* fallthrough */
+//	case '\\': /* fallthrough */
 	case KEY_ENTER: cl = tx_c; break;
 	case '~': /* fallthrough */
 	case '*': cl = (cur_color != hq_c) ? he_c : cl; break;
@@ -188,6 +188,7 @@ rl_highlight(char *str, const size_t pos, const int flag)
 	case '|': /* fallthrough */
 	case '&': /* fallthrough */
 	case ';': cl = (cur_color != hq_c) ? hs_c : cl; break;
+	case '\\': cl = (cur_color != hq_c) ? hw_c : cl; break;
 	case '<': /* fallthrough */
 	case '>': cl = (cur_color != hq_c) ? hr_c : cl; break;
 	case '$': cl = (cur_color != hq_c) ? hv_c : cl; break;
