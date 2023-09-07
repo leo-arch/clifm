@@ -254,6 +254,9 @@ clean_file_name(char *restrict name)
 
 		/* Extended ASCII and Unicode chars */
 		int dec_value = get_uft8_dec_value(&i, name);
+		if (!name[i])
+			break;
+
 		if (dec_value == -1)
 			continue;
 		if (dec_value == -2) {

@@ -506,7 +506,7 @@ replace_invalid_chars(const char *name)
 
 			if (!*q)
 				break;
-		} while (!mbsinit(&mbstate));
+		} while (mbsinit(&mbstate) == 0);
 	}
 
 	*n = '\0';
