@@ -397,6 +397,10 @@ ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 /* Character used to mark dir sizes for which du(1) reported an error */
 #define DU_ERR_CHAR '!'
 
+/* Character used to replace invalid characters (either a control char or an
+ * invalid UTF-8 char) in file names. */
+#define INVALID_CHR '^'
+
 #define MNT_UDEVIL 	0
 #define MNT_UDISKS2 1
 

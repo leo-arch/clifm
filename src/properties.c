@@ -1226,8 +1226,8 @@ static void
 print_file_name(char *filename, const char *color, const char file_type,
 	const mode_t mode, char *link_target)
 {
-	char *wname = wc_xstrlen(filename) == 0 ? replace_ctrl_chars(filename)
-		: (char *)NULL;
+	char *wname = wc_xstrlen(filename) == 0
+		? replace_invalid_chars(filename) : (char *)NULL;
 
 	char *target_name = (S_ISLNK(mode)) ? realpath(filename, (char *)NULL)
 		: (char *)NULL;
@@ -1917,7 +1917,7 @@ construct_and_print_filename(const struct fileinfo *props,
 	size_t plen = props->len;
 	char *wname = (char *)NULL;
 	if (props->len == 0) {
-		wname = replace_ctrl_chars(props->name);
+		wname = replace_invalid_chars(props->name);
 		plen = wc_xstrlen(wname);
 	}
 

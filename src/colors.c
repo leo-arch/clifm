@@ -2631,8 +2631,8 @@ colors_list(char *ent, const int eln, const int pad, const int new_line)
 
 	char *wname = (char *)NULL;
 	size_t wlen = wc_xstrlen(ent);
-	if (wlen == 0) /* Embedded control chars */
-		wname = replace_ctrl_chars(ent);
+	if (wlen == 0) /* Invalid chars found. */
+		wname = replace_invalid_chars(ent);
 
 	char *color = (char *)NULL;
 

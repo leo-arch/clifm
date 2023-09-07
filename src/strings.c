@@ -464,35 +464,53 @@ u8truncstr(char *restrict str, const size_t max)
 	return bmax - len;
 }
 
-/* Replace control characters in NAME by '^'.
+/* Replace invalid characters in NAME by '^'.
  * This function is called only if wc_xstrlen() returns zero, in which case
- * we have either a non-printable wide char or an invalid multi-byte
- * sequence. */
+ * we have either a non-printable char or an invalid multi-byte sequence. */
 char *
-replace_ctrl_chars(const char *name)
+replace_invalid_chars(const char *name)
 {
-	int i;
-	char *n = (char *)xnmalloc(NAME_MAX, sizeof(char));
+	size_t len = strlen(name);
+	char *n = (char *)xnmalloc(len + 1, sizeof(char));
 	char *p = n;
 
-	for (i = 0; name[i]; i++) {
-		if (i == NAME_MAX)
-			break;
-		/* This line causes replcaes only control chars (0-31), but it
-		 * allows invalid UTF-8 characters.
-		if ((signed char)name[i] >= 0 && (signed char)name[i] < ' ') */
+	mbstate_t mbstate = {0};
+	char *q = (char *)name;
+	char *qlimit = q + len;
 
-		/* This line catches control chars and UTF-8 chars, both valid and
-		 * invalid. Though it's better than skipping invalid ones, it should
-		 * left valid UTF-8 characters alone. FIX! */
-		if ((signed char)name[i] < ' ')
-			*n = '^';
-		else
-			*n = name[i];
-		n++;
+	while (*q) {
+		if (*q >= ' ') { /* Printable ASCII char */
+			*n = *q;
+			n++; q++;
+			continue;
+		}
+
+		if (*q >= '\0' && *q < ' ') { /* Control char */
+			*n = INVALID_CHR;
+			n++; q++;
+			continue;
+		}
+
+		do {
+			wchar_t wc;
+			size_t bytes = mbrtowc(&wc, q, (size_t)(qlimit - q), &mbstate);
+			if (bytes == (size_t)-1 || bytes == (size_t)-2) {
+				*n = INVALID_CHR; /* Invalid UTF-8 */
+				n++; q++;
+			} else { /* Valid UTF-8 */
+				for (; bytes > 0; --bytes) {
+					*n = *q;
+					n++; q++;
+				}
+			}
+
+			if (!*q)
+				break;
+		} while (!mbsinit(&mbstate));
 	}
 
 	*n = '\0';
+
 	return p;
 }
 

@@ -603,8 +603,8 @@ get_longest_filename(const filesn_t n, const int pad)
 
 		size_t file_len = file_info[i].len;
 		if (file_len == 0) {
-			/* Embedded control chars. Reconstruct and recalculate length. */
-			char *wname = replace_ctrl_chars(file_info[i].name);
+			/* Invalid chars found. Reconstruct and recalculate length. */
+			char *wname = replace_invalid_chars(file_info[i].name);
 			file_len = wname ? wc_xstrlen(wname) : 0;
 			free(wname);
 		}
@@ -898,10 +898,10 @@ get_ext_info(const filesn_t i, int *trim_type, size_t *ext_len)
 static char *
 construct_filename(const filesn_t i, struct wtrim_t *wtrim, const int max_namelen)
 {
-	/* both wc_xstrlen() and is_utf8_name() return 0 if a non-printable char
+	/* both wc_xstrlen() and is_utf8_name() return 0 if an invalid char
 	 * was found in the file name. Let's recalculate the name length. */
 	if (file_info[i].len == 0) {
-		wtrim->wname = replace_ctrl_chars(file_info[i].name);
+		wtrim->wname = replace_invalid_chars(file_info[i].name);
 		file_info[i].len = wc_xstrlen(wtrim->wname);
 	}
 
