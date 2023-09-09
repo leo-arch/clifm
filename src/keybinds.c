@@ -1379,7 +1379,7 @@ get_cur_prof(int *cur, int *total)
 
 /* Old version of rl_update_prompt(). Used only by rl_profile_previous() and
  * rl_profile_next(): if any of these functions use rl_update_prompt() instead,
- * it gives no prompt (not sure why). FIX. */
+ * no prompt is printed (not sure why). FIX. */
 static void
 rl_update_prompt_old(void)
 {

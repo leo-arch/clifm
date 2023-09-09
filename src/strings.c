@@ -464,7 +464,7 @@ u8truncstr(char *restrict str, const size_t max)
 	return bmax - len;
 }
 
-/* Replace invalid characters in NAME by '^'.
+/* Replace invalid characters in NAME by INVALID_CHAR ('^').
  * This function is called only if wc_xstrlen() returns zero, in which case
  * we have either a non-printable char or an invalid multi-byte sequence. */
 char *
@@ -479,7 +479,7 @@ replace_invalid_chars(const char *name)
 	char *qlimit = q + len;
 
 	while (*q) {
-		if (*q >= ' ') { /* Printable ASCII char */
+		if (*q >= ' ' && *q < 127) { /* Printable ASCII char */
 			*n = *q;
 			n++; q++;
 			continue;
