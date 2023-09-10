@@ -192,6 +192,7 @@ static uint8_t
 is_utf8_name(const char *name, size_t *bytes)
 {
 	uint8_t is_utf8 = 0;
+	const char *start = name;
 
 	while (*name) {
 #if !defined(CHAR_MIN) || CHAR_MIN >= 0 /* char is unsigned (PowerPC/ARM) */
@@ -206,9 +207,9 @@ is_utf8_name(const char *name, size_t *bytes)
 			is_utf8 = 1;
 
 		name++;
-		(*bytes)++;
 	}
 
+	*bytes = (size_t)(name - start);
 	return is_utf8;
 }
 
