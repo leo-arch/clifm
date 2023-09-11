@@ -91,6 +91,7 @@ args=(
 	'--opener=[resource opener to use instead of '\''Lira'\'', CliFM built-in opener]:opener:_command_names'
 	'--preview=[display a preview of FILE and exit]:filename:_files'
 	'--print-sel[always print the list of selected files]'
+	'--readonly[disable internal commands able to modify the file system]'
 	'--rl-vi-mode[set readline to vi editing mode (defaults to emacs editing mode)]'
 	'--secure-cmds[filter commands to prevent command injection]'
 	'--secure-env[run in a sanitized environment (regular mode)]'

@@ -127,6 +127,7 @@ _clifm ()
         --opener
         --preview
         --print-sel
+        --readonly
         --rl-vi-mode
         --secure-cmds
         --secure-env

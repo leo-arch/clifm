@@ -104,6 +104,7 @@ complete -c clifm -l opener -r -d 'Use APP as resource opener'
 complete -c clifm -l preview -r -d 'Display a preview of FILE (via shotgun) and exit'
 
 complete -c clifm -l print-sel -d 'Keep the list of selected files in sight'
+complete -c clifm -l readonly -d 'Disable internal commands able to modify the file system'
 complete -c clifm -l rl-vi-mode -d 'Set readline to vi editing mode (defaults to emacs mode)'
 complete -c clifm -l secure-cmds -d 'Filter commands to prevent command injection'
 complete -c clifm -l secure-env -d 'Run in a sanitized environment (regular mode)'
