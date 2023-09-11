@@ -276,7 +276,7 @@
 ;Autocd=true
 ;AutoOpen=true
 
-# Run in read-only mode (internal commands able to modofy the file
+# Run in read-only mode (internal commands able to modify the file
 # system are disabled). Consult the manpage for the list of affected
 # commands.
 ;Readonly=false
