@@ -504,8 +504,10 @@ rl_exclude_input(unsigned char c)
 	}
 
 	if (c == KEY_KILL) { /* 21 == Ctrl-U (kill line) */
+#ifndef _NO_SUGGESTIONS
 		if (wrong_cmd == 1)
 			recover_from_wrong_cmd();
+#endif /* !_NO_SUGGESTIONS */
 		return RL_INSERT_CHAR;
 	}
 
