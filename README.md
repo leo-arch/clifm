@@ -240,7 +240,7 @@ For a complete description please consult our [Wiki](https://github.com/leo-arch
 <summary>Click here to expand</summary>
 
 * `Development`
-  - Run in read-only mode via `--readonly` or `Readonly` in the config file: internal commands able to modify the file system are disabled.
+  - Run in [read-only mode](https://github.com/leo-arch/clifm/wiki/Specifics#read-only-mode).
 * `1.14 (Jawbreaker)`
   - [Run as a **stat**(1) replacement via `--stat` and `--stat-full` options](https://github.com/leo-arch/clifm/wiki/Advanced/#stat1-replacement).
   - Exclude commands from the commands history via `HistIgnore` in the config file.
