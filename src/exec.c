@@ -2102,12 +2102,13 @@ check_fs_changes(void)
 }
 #endif /* GENERIC_FS_MONITOR */
 
-/* Check the command CMD against a list of internal commands able to modify
- * the filesystem. Return 1 if CMD is found in the list or zero otherwise. */
+/* Check the command CMD against a list of commands able to modify the
+ * filesystem. Return 1 if CMD is found in the list or zero otherwise. */
 static int
 is_write_cmd(const char *cmd)
 {
 	static struct cmdslist_t wcmds[] = {
+		/* Internal commands */
 		{"ac", 2},
 		{"ad", 2},
 		{"bl", 2},
@@ -2142,20 +2143,42 @@ is_write_cmd(const char *cmd)
 		{"u", 1},
 		{"undel", 5},
 		{"untrash", 7},
-		{"vv", 2},
+		/* Shell commands */
+		{"cp", 2},
+		{"rm", 2},
+		{"mv", 2},
+		{"mkdir", 5},
+		{"rmdir", 5},
+		{"ln", 2},
+		{"link", 4},
+		{"unlink", 6},
+#ifdef CHECK_COREUTILS /* Mostly BSD */
+		{"gcp", 3},
+		{"grm", 3},
+		{"gmv", 3},
+		{"gmkdir", 6},
+		{"grmdir", 6},
+		{"gln", 3},
+		{"glink", 5},
+		{"gunlink", 7},
+#endif /* CHECK_COREUTILS */
 		{NULL, 0}
 	};
 
 	if (!cmd || !*cmd)
 		return 0;
 
-	size_t clen = strlen(cmd);
-	size_t i;
+	static size_t wcmds_n = 0;
+	if (wcmds_n == 0)
+		wcmds_n = (sizeof(wcmds) / sizeof(wcmds[0])) - 1;
 
-	for (i = 0; wcmds[i].name; i++) {
+	size_t clen = strlen(cmd);
+	int i = (int)wcmds_n;
+
+	while (--i >= 0) {
 		if (clen == wcmds[i].len && *cmd == *wcmds[i].name
 		&& strcmp(cmd + 1, wcmds[i].name + 1) == 0) {
-			printf(_("%s: %s: Command not allowed in read-only mode\n"),
+			xerror(_("%s: %s: Command not allowed in read-only mode\n"),
 				PROGRAM_NAME, cmd);
 			return 1;
 		}
@@ -2180,7 +2203,10 @@ exec_cmd(char **comm)
 		check_zombies();
 	fputs(df_c, stdout);
 
-	if (conf.readonly == 1 && is_write_cmd(comm[0]) == 1)
+	if (conf.readonly == 1 && is_write_cmd(
+	((*comm[0] == 's' && strcmp(comm[0] + 1, "udo") == 0)
+	|| (*comm[0] == 'd' && strcmp(comm[0] + 1, "oas") == 0))
+	? comm[1] : comm[0]) == 1)
 		return EXIT_FAILURE;
 
 	int old_exit_code = exit_code;
