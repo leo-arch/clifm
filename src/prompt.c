@@ -59,8 +59,10 @@
 #define ROOT_IND "\001\x1b[1;31m\002R\001\x1b[0m\002"
 #define ROOT_IND_NO_COLOR "R"
 #define ROOT_IND_SIZE 17
+#define RDONLY_IND "RO\001\x1b[0m\002"
+#define RDONLY_IND_SIZE (MAX_COLOR + 8 + 1)
 #define STEALTH_IND "S\001\x1b[0m\002"
-#define STEALTH_IND_SIZE MAX_COLOR + 7 + 1
+#define STEALTH_IND_SIZE (MAX_COLOR + 7 + 1)
 
 #define EMERGENCY_PROMPT_MSG "Error decoding prompt line. Using an \
 emergency prompt"
@@ -896,6 +898,7 @@ set_prompt_length(const size_t decoded_prompt_len)
 		len = (size_t)(decoded_prompt_len
 		+ (xargs.stealth_mode == 1 ? STEALTH_IND_SIZE : 0)
 		+ (user.uid == 0 ? ROOT_IND_SIZE : 0)
+		+ (conf.readonly == 1 ? RDONLY_IND_SIZE : 0)
 		+ ((sel_n > 0) ? N_IND : 0)
 		+ ((trash_n > 0) ? N_IND : 0)
 		+ ((msgs.error > 0) ? N_IND : 0)
@@ -936,8 +939,11 @@ construct_prompt(const char *decoded_prompt)
 
 	if (prompt_notif == 1) {
 		snprintf(the_prompt, prompt_len,
-			"%s%s%s%s%s%s%s%s%s%s\001%s\002",
-			(user.uid == 0) ? (conf.colorize == 1 ? ROOT_IND : ROOT_IND_NO_COLOR) : "",
+			"%s%s%s%s%s%s%s%s%s%s%s%s\001%s\002",
+			(user.uid == 0) ? (conf.colorize == 1
+				? ROOT_IND : ROOT_IND_NO_COLOR) : "",
+			(conf.readonly == 1) ? ro_c : "",
+			(conf.readonly == 1) ? RDONLY_IND : "",
 			(msgs.error > 0) ? err_ind : "",
 			(msgs.warning > 0) ? warn_ind : "",
 			(msgs.notice > 0) ? notice_ind : "",

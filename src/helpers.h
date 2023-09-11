@@ -1904,6 +1904,7 @@ extern char
 	nm_c[MAX_COLOR + 2], /* Notice msg */
 	ti_c[MAX_COLOR + 2], /* Trash indicator */
 	tx_c[MAX_COLOR + 2], /* Text */
+	ro_c[MAX_COLOR + 2], /* Read-only indicator */
 	si_c[MAX_COLOR + 2], /* Stealth indicator */
 	wm_c[MAX_COLOR + 2], /* Warning msg */
 	xs_c[MAX_COLOR + 2], /* Exit code: success */

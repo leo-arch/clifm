@@ -412,7 +412,8 @@ char
 	li_cb[MAX_COLOR], /* Sel indicator color (for the files list) */
 	nm_c[MAX_COLOR + 2], /* Notice msg color */
 	wm_c[MAX_COLOR + 2], /* Warning msg color */
-	si_c[MAX_COLOR + 2], /* stealth indicator color */
+	ro_c[MAX_COLOR + 2], /* read-only indicator color */
+	si_c[MAX_COLOR + 2], /* stealth-mode indicator color */
 	ti_c[MAX_COLOR + 2], /* Trash indicator color */
 	tx_c[MAX_COLOR + 2], /* Text color */
 	xs_c[MAX_COLOR + 2], /* Exit code: success */

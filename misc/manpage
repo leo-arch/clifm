@@ -1557,6 +1557,7 @@ The following codes are used for different interface elements (in the \fIInterfa
  em = error message indicator
  wm = warning message indicator
  nm = notice message indicator
+ ro = read-only mode indicator
  si = stealth mode indicator
  tx = command line text (regular prompt)
 
