@@ -831,16 +831,28 @@ run_prompt_cmds(void)
 }
 
 #ifndef _NO_TRASH
-static inline void
+static void
 update_trash_indicator(void)
 {
-	if (trash_ok == 1) {
-		filesn_t n = count_dir(trash_files_dir, NO_CPOP);
-		if (n <= 2)
-			trash_n = 0;
-		else
-			trash_n = (size_t)n;
-	}
+	static time_t trash_files_dir_mtime = 0;
+
+	if (trash_ok == 0)
+		return;
+
+	struct stat a;
+	if (stat(trash_files_dir, &a) == -1)
+		return;
+
+	if (trash_files_dir_mtime == a.st_mtime)
+		return;
+
+	trash_files_dir_mtime = a.st_mtime;
+
+	filesn_t n = count_dir(trash_files_dir, NO_CPOP);
+	if (n <= 2)
+		trash_n = 0;
+	else
+		trash_n = (size_t)n;
 }
 #endif /* !_NO_TRASH */
 
