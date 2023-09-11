@@ -899,8 +899,8 @@ get_ext_info(const filesn_t i, int *trim_type, size_t *ext_len)
 static char *
 construct_filename(const filesn_t i, struct wtrim_t *wtrim, const int max_namelen)
 {
-	/* both wc_xstrlen() and is_utf8_name() return 0 if an invalid char
-	 * was found in the file name. Let's recalculate the name length. */
+	/* file_info[i].len is zero whenever an invalid character was found in
+	 * the file name. Let's recalculate the name length. */
 	if (file_info[i].len == 0) {
 		wtrim->wname = replace_invalid_chars(file_info[i].name);
 		file_info[i].len = wc_xstrlen(wtrim->wname);
@@ -1814,8 +1814,8 @@ list_dir_light(void)
 	DIR *dir;
 	struct dirent *ent;
 	int reset_pager = 0;
-	int close_dir = 1;
-	int excluded_files = 0;
+	filesn_t excluded_files = 0;
+	uint8_t close_dir = 1;
 	uint8_t have_xattr = 0;
 
 	/* A few variables for the disk usage analyzer mode */
@@ -2088,7 +2088,7 @@ END:
 	if (virtual_dir == 1)
 		print_reload_msg(_("Virtual directory\n"));
 	if (excluded_files > 0)
-		printf(_("Excluded files: %d\n"), excluded_files);
+		printf(_("Excluded files: %zd\n"), excluded_files);
 
 	if (xargs.disk_usage_analyzer == 1 && conf.long_view == 1
 	&& conf.full_dir_size == 1) {
@@ -2166,10 +2166,12 @@ get_link_target_color(const char *name, const struct stat *attr,
 			return;
 		}
 
-		if (ext == 1)
+		if (ext == 1) {
 			file_info[i].ext_color = savestring(color, strlen(color));
-
-		file_info[i].color = ext == 1 ? file_info[i].ext_color : color;
+			file_info[i].color = file_info[i].ext_color;
+		} else {
+			file_info[i].color = color;
+		}
 		}
 		break;
 
@@ -2203,16 +2205,15 @@ list_dir(void)
 	clock_t start = clock();
 #endif /* LIST_SPEED_TEST */
 
-	if (conf.clear_screen == 1) {
-		CLEAR; fflush(stdout);
-	}
+	if (conf.clear_screen == 1)
+		{ CLEAR; fflush(stdout); }
 
 	/* Hide the cursor to minimize flickering: it will be unhidden immediately
 	 * before printing the next prompt (prompt.c) */
 	if (xargs.list_and_quit != 1)
 		HIDE_CURSOR;
 
-	if (dir_changed == 1 && autocmds_n > 0) {
+	if (autocmds_n > 0 && dir_changed == 1) {
 		if (autocmd_set == 1)
 			revert_autocmd_opts();
 		check_autocmds();
@@ -2260,8 +2261,8 @@ list_dir(void)
 	struct dirent *ent;
 	struct stat attr;
 	int reset_pager = 0;
-	int close_dir = 1;
-	int excluded_files = 0;
+	filesn_t excluded_files = 0;
+	uint8_t close_dir = 1;
 	uint8_t have_xattr = 0;
 
 	/* A few variables for the disk usage analyzer mode */
@@ -2327,7 +2328,7 @@ list_dir(void)
 
 		init_fileinfo(n);
 
-		int stat_ok = 1;
+		uint8_t stat_ok = 1;
 		if (fstatat(fd, ename, &attr, virtual_dir == 1
 		? 0 : AT_SYMLINK_NOFOLLOW) == -1) {
 			if (virtual_dir == 1)
@@ -2337,7 +2338,7 @@ list_dir(void)
 		}
 
 		/* Filter files according to file type */
-		if (stat_ok == 1 && filter.str && filter.type == FILTER_FILE_TYPE
+		if (filter.str && filter.type == FILTER_FILE_TYPE && stat_ok == 1
 		&& exclude_file_type(attr.st_mode, attr.st_nlink) == EXIT_SUCCESS) {
 			/* Decrease counters: the file won't be displayed */
 			if (*ename == '.' && stats.hidden > 0)
@@ -2352,7 +2353,7 @@ list_dir(void)
 		if (conf.only_dirs == 1 && ent->d_type != DT_DIR
 		&& (ent->d_type != DT_LNK || get_link_ref(ename) != S_IFDIR))
 #else
-		if (stat_ok == 1 && conf.only_dirs == 1 && !S_ISDIR(attr.st_mode)
+		if (conf.only_dirs == 1 && stat_ok == 1 && !S_ISDIR(attr.st_mode)
 		&& (!S_ISLNK(attr.st_mode) || get_link_ref(ename) != S_IFDIR))
 #endif /* _DIRENT_HAVE_D_TYPE */
 			continue;
@@ -2450,8 +2451,8 @@ list_dir(void)
 			stats.unknown++;
 		}
 
-		file_info[n].dir = (file_info[n].type == DT_DIR) ? 1 : 0;
-		file_info[n].symlink = (file_info[n].type == DT_LNK) ? 1 : 0;
+		file_info[n].dir = (file_info[n].type == DT_DIR);
+		file_info[n].symlink = (file_info[n].type == DT_LNK);
 
 		switch (conf.sort) {
 		case SATIME:
@@ -2546,7 +2547,7 @@ list_dir(void)
 				break;
 			}
 
-			char tmp[PATH_MAX]; *tmp = '\0';
+			static char tmp[PATH_MAX]; *tmp = '\0';
 			const char *ret = (conf.color_lnk_as_target == 1)
 				? realpath(ename, tmp) : (char *)NULL;
 
@@ -2660,7 +2661,7 @@ list_dir(void)
 #endif /* !_NO_ICONS */
 
 			/* Check file extension */
-			char *ext = (check_ext == 1 && no_override_color == 0)
+			char *ext = (no_override_color == 0 && check_ext == 1)
 				? strrchr(file_info[n].name, '.') : (char *)NULL;
 
 			if (!ext || ext == file_info[n].name || !*(ext + 1))
@@ -2795,7 +2796,7 @@ END:
 	if (virtual_dir == 1)
 		print_reload_msg(_("Virtual directory\n"));
 	if (excluded_files > 0)
-		printf(_("Excluded files: %d\n"), excluded_files);
+		printf(_("Excluded files: %zd\n"), excluded_files);
 
 	if (xargs.disk_usage_analyzer == 1 && conf.long_view == 1
 	&& conf.full_dir_size == 1) {

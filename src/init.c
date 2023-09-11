@@ -195,6 +195,7 @@ init_conf_struct(void)
 
 	conf.quoting_style = DEF_QUOTING_STYLE;
 
+	conf.readonly = DEF_READONLY;
 	conf.relative_time = UNSET;
 	conf.restore_last_path = UNSET;
 	conf.rm_force = UNSET;
@@ -1579,6 +1580,7 @@ unset_xargs(void)
 	xargs.pager = UNSET;
 	xargs.path = UNSET;
 	xargs.printsel = UNSET;
+	xargs.readonly = UNSET;
 	xargs.refresh_on_empty_line = UNSET;
 	xargs.refresh_on_resize = UNSET;
 	xargs.restore_last_path = UNSET;

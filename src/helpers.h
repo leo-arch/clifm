@@ -1028,6 +1028,7 @@ struct config_t {
 	int print_selfiles;
 	int private_ws_settings;
 	int quoting_style;
+	int readonly;
 	int relative_time;
 	int restore_last_path;
 	int rm_force;
@@ -1049,6 +1050,7 @@ struct config_t {
 	int unicode;
 	int warning_prompt;
 	int welcome_message;
+	int pad2;
 };
 
 extern struct config_t conf;
@@ -1322,6 +1324,7 @@ struct param_t {
 	int path;
 	int preview;
 	int printsel;
+	int readonly;
 	int refresh_on_empty_line;
 	int refresh_on_resize;
 	int restore_last_path;

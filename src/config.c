@@ -3142,6 +3142,11 @@ read_config(void)
 			set_quoting_style(line + 13);
 		}
 
+		else if (xargs.readonly == UNSET && *line == 'R'
+		&& strncmp(line, "Readonly=", 9) == 0) {
+			set_config_bool_value(line + 9, &conf.readonly);
+		}
+
 		else if (xargs.restore_last_path == UNSET && *line == 'R'
 		&& strncmp(line, "RestoreLastPath=", 16) == 0) {
 			set_config_bool_value(line + 16, &conf.restore_last_path);

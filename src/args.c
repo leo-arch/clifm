@@ -148,6 +148,7 @@
 
 #define LOPT_STAT                   271
 #define LOPT_STAT_FULL              272
+#define LOPT_READONLY               273
 
 /* Link long (--option) and short options (-o) for the getopt_long function. */
 static const struct option longopts[] = {
@@ -245,6 +246,7 @@ static const struct option longopts[] = {
 	{"opener", required_argument, 0, LOPT_OPENER},
 	{"preview", required_argument, 0, LOPT_PREVIEW},
 	{"print-sel", no_argument, 0, LOPT_PRINT_SEL},
+	{"readonly", no_argument, 0, LOPT_READONLY},
 	{"rl-vi-mode", no_argument, 0, LOPT_RL_VI_MODE},
 	{"share-selbox", no_argument, 0, LOPT_SHARE_SELBOX},
 	{"sort-reverse", no_argument, 0, LOPT_SORT_REVERSE},
@@ -1589,6 +1591,7 @@ parse_cmdline_args(const int argc, char **argv)
 			set_opener(optarg); break;
 		case LOPT_PRINT_SEL:
 			xargs.printsel = conf.print_selfiles = 1; break;
+		case LOPT_READONLY: xargs.readonly = conf.readonly = 1; break;
 		case LOPT_RL_VI_MODE:
 			xargs.rl_vi_mode = 1; break;
 		case LOPT_SECURE_CMDS:

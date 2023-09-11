@@ -476,6 +476,7 @@ ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define DEF_PRIVATE_WS_SETTINGS 0
 #define DEF_PROP_FIELDS "fpims" /* Files counter, permissions, owner/grp Ids, mod Time, Size (human readable) */
 #define DEF_PURGE_JUMPDB 0
+#define DEF_READONLY 0
 #define DEF_REFRESH_ON_EMPTY_LINE 1
 #define DEF_REFRESH_ON_RESIZE 1
 #define DEF_RELATIVE_TIME 0

@@ -2102,6 +2102,68 @@ check_fs_changes(void)
 }
 #endif /* GENERIC_FS_MONITOR */
 
+/* Check the command CMD against a list of internal commands able to modify
+ * the filesystem. Return 1 if CMD is found in the list or zero otherwise. */
+static int
+is_write_cmd(const char *cmd)
+{
+	static struct cmdslist_t wcmds[] = {
+		{"ac", 2},
+		{"ad", 2},
+		{"bl", 2},
+		{"bb", 2},
+		{"bleach", 6},
+		{"br", 2},
+		{"bulk", 4},
+		{"c", 1},
+		{"dup", 3},
+		{"l", 1},
+		{"le", 2},
+		{"m", 1},
+		{"md", 2},
+		{"n", 1},
+		{"new", 3},
+		{"oc", 2},
+		{"paste", 5},
+		{"pc", 2},
+		{"r", 1},
+		{"rr", 2},
+		{"t", 1},
+		{"ta", 2},
+		{"td", 2},
+		{"tm", 2},
+		{"tn", 2},
+		{"tu", 2},
+		{"ty", 2},
+		{"tag", 3},
+		{"te", 2},
+		{"tr", 2},
+		{"trash", 5},
+		{"u", 1},
+		{"undel", 5},
+		{"untrash", 7},
+		{"vv", 2},
+		{NULL, 0}
+	};
+
+	if (!cmd || !*cmd)
+		return 0;
+
+	size_t clen = strlen(cmd);
+	size_t i;
+
+	for (i = 0; wcmds[i].name; i++) {
+		if (clen == wcmds[i].len && *cmd == *wcmds[i].name
+		&& strcmp(cmd + 1, wcmds[i].name + 1) == 0) {
+			printf(_("%s: %s: Command not allowed in read-only mode\n"),
+				PROGRAM_NAME, cmd);
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
 /* Take the command entered by the user, already splitted into substrings
  * by parse_input_str(), and call the corresponding function. Return zero
  * in case of success and one in case of error
@@ -2117,6 +2179,9 @@ exec_cmd(char **comm)
 	if (zombies > 0)
 		check_zombies();
 	fputs(df_c, stdout);
+
+	if (conf.readonly == 1 && is_write_cmd(comm[0]) == 1)
+		return EXIT_FAILURE;
 
 	int old_exit_code = exit_code;
 	exit_code = EXIT_SUCCESS;

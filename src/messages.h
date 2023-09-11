@@ -1423,6 +1423,7 @@ and paths\
 CliFM's built-in opener\
 \n      --preview=FILE\t\t Display a preview of FILE (via Shotgun) and exit\
 \n      --print-sel\t\t Keep the list of selected files in sight\
+\n      --readonly\t\t Disable internal commands able to modify the file system\
 \n      --rl-vi-mode\t\t Set readline to vi editing mode (defaults to emacs mode)\
 \n      --secure-cmds\t\t Filter commands to prevent command injection\
 \n      --secure-env\t\t Run in a sanitized environment (regular mode)\
