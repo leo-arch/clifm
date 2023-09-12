@@ -26,9 +26,7 @@
 
 #include <stdio.h>
 #include <sys/statvfs.h>
-#if defined(BSD_KQUEUE)
-# include <unistd.h> /* open(2) */
-#endif /* BSD_KQUEUE */
+#include <unistd.h> /* open(2), readlinkat(2) */
 #include <errno.h>
 #include <string.h>
 #if defined(__OpenBSD__)
@@ -2547,11 +2545,18 @@ list_dir(void)
 				break;
 			}
 
-			static char tmp[PATH_MAX]; *tmp = '\0';
-			const char *ret = (conf.color_lnk_as_target == 1)
-				? realpath(ename, tmp) : (char *)NULL;
+			/* We only need the symlink target name provided the target
+			 * is not a directory, because get_link_target_color() will
+			 * check the file name extension. */
+			static char tmp[PATH_MAX + 1]; *tmp = '\0';
+			const ssize_t ret =
+				(conf.color_lnk_as_target == 1 && !S_ISDIR(attrl.st_mode))
+				? readlinkat(XAT_FDCWD, ename, tmp, sizeof(tmp) - 1)
+				: 0;
+			if (ret > 0)
+				tmp[ret] = '\0';
+			const char *lname = *tmp ? tmp : ename;
 
-			const char *lname = (ret && *tmp) ? tmp : ename;
 			if (S_ISDIR(attrl.st_mode)) {
 				file_info[n].dir = 1;
 				file_info[n].filesn = conf.files_counter == 1
@@ -2561,9 +2566,11 @@ list_dir(void)
 					? (file_info[n].filesn == 2 ? 3
 					: file_info[n].filesn) : 3; /* 3 == populated */
 
+				/* DFILES is negative only if count_dir() failed, which in
+				 * this case only means EACCESS error. */
 				file_info[n].color = conf.color_lnk_as_target == 1
-					? (check_file_access(attrl.st_mode, attrl.st_uid,
-					attrl.st_gid) == 0 ? nd_c
+					? ((dfiles < 0 || check_file_access(attrl.st_mode,
+					attrl.st_uid, attrl.st_gid) == 0) ? nd_c
 					: get_dir_color(lname, attrl.st_mode, attrl.st_nlink,
 					dfiles)) : ln_c;
 			} else {

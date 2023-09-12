@@ -914,6 +914,7 @@ reset_iface_colors(void)
 	*li_cb = '\0';
 	*mi_c = '\0';
 	*nm_c = '\0';
+	*ro_c = '\0';
 	*si_c = '\0';
 	*ti_c = '\0';
 	*tt_c = '\0';
