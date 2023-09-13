@@ -2369,7 +2369,7 @@ glob_expand(char **cmd)
 
 /* Return 0 if CMD should be regex expanded, or 1 otherwise. */
 static int
-regex_expand(char *cmd)
+regex_expand(const char *cmd, const int is_last)
 {
 	if (!cmd || !*cmd)
 		return 0;
@@ -2378,7 +2378,10 @@ regex_expand(char *cmd)
 	|| strcmp(cmd, "u") == 0 || strcmp(cmd, "undel") == 0
 	|| strcmp(cmd, "untrash") == 0
 	|| strcmp(cmd, "s") == 0 || strcmp(cmd, "sel") == 0
-	|| strcmp(cmd, "n") == 0 || strcmp(cmd, "new") == 0)
+	|| strcmp(cmd, "n") == 0 || strcmp(cmd, "new") == 0
+	/* Do not expand the last argument passed to the 'm' command: it's the
+	 * new file name and is not required to exist. */
+	|| (strcmp(cmd, "m") == 0 && is_last == 1))
 		return 0;
 
 	return 1;
@@ -2916,7 +2919,7 @@ parse_input_str(char *str)
 			 * #       3.3) REGEX EXPANSION          #
 			 * ####################################### */
 
-	if (regex_expand(substr[0]) == 1)
+	if (regex_expand(substr[0], !substr[args_n + 1]) == 1)
 		expand_regex(&substr);
 
 	/* #### NULL TERMINATE THE INPUT STRING ARRAY (again) #### */
