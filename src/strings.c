@@ -2266,14 +2266,12 @@ expand_regex(char ***substr)
 		|| regcomp(&regex, rstr, reg_flags) != EXIT_SUCCESS) {
 			if (ret == EXIT_SUCCESS)
 				regfree(&regex);
-//			free(dstr);
 			free(rstr);
 			tmp[n] = (*substr)[i];
 			n++;
 			continue;
 		}
 
-//		free(dstr);
 		free(rstr);
 		int reg_found = 0;
 
