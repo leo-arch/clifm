@@ -721,42 +721,6 @@ set_long_attribs(const filesn_t n, const struct stat *attr)
 	}
 }
 
-/* Returns the lenght of the largest files counter (directories only)
- * This function is used by the long view function to correctly pad
- * the properties string
- * It returns zero if there are no subdirectories in the current dir */
-static size_t
-get_max_files_counter(void)
-{
-	size_t fc_max = 0;
-	filesn_t i = files;
-
-	while (--i >= 0) {
-		if (file_info[i].dir == 0)
-			continue;
-		size_t t = (size_t)DIGINUM(file_info[i].filesn);
-		if (t > fc_max)
-			fc_max = t;
-	}
-
-	return fc_max;
-}
-
-static size_t
-get_max_size(void)
-{
-	size_t size_max = 0;
-	filesn_t i = files;
-
-	while (--i >= 0) {
-		size_t t = (size_t)DIGINUM(file_info[i].size);
-		if (t > size_max)
-			size_max = t;
-	}
-
-	return size_max;
-}
-
 /* Return a pointer to the indicator char color and update IND_CHR to the
  * corresponding indicator character for the file whose index is INDEX. */
 static inline char *
@@ -773,17 +737,58 @@ get_ind_char(const filesn_t index, int *ind_chr)
 		: (print_lnk_char == 1 ? lc_c : "");
 }
 
+/* Return a struct maxes_t with the following information: the largest files
+ * counter, user ID (uid + gid), file size (in bytes), and inode in the
+ * current list of files.
+ * This information is required to build the properties line for each entry
+ * based on each field's length. */
+static struct maxes_t
+compute_maxes(void)
+{
+	struct maxes_t maxes = {0};
+	filesn_t i = files;
+
+	while (--i >= 0) {
+		size_t t = 0;
+		if (file_info[i].dir == 1 && conf.files_counter == 1) {
+			t = (size_t)DIGINUM(file_info[i].filesn);
+			if (t > maxes.files_counter)
+				maxes.files_counter = t;
+		}
+
+		if (prop_fields.size == PROP_SIZE_BYTES) {
+			t = (size_t)DIGINUM(file_info[i].size);
+			if (t > maxes.size)
+				maxes.size = t;
+		}
+
+		if (prop_fields.ids == 1) {
+			t = (size_t)DIGINUM(file_info[i].uid)
+				+ DIGINUM(file_info[i].gid);
+			if (t > maxes.ids)
+				maxes.ids = t;
+		}
+
+		if (prop_fields.inode == 1) {
+			t = DIGINUM(file_info[i].inode);
+			if (t > maxes.inode)
+				maxes.inode = t;
+		}
+	}
+
+	return maxes;
+}
+
 static void
 print_long_mode(size_t *counter, int *reset_pager, const int pad,
-	const size_t ug_max, const size_t ino_max, const uint8_t have_xattr)
+	const uint8_t have_xattr)
 {
-	size_t fc_max = conf.files_counter == 1 ? get_max_files_counter() : 0;
-	size_t size_max = prop_fields.size == PROP_SIZE_BYTES ? get_max_size() : 0;
+	struct maxes_t maxes = compute_maxes();
 
-	/* Available space (term cols) to print the file name */
+	/* Available space (term cols) to print the file name. */
 	int space_left = (int)term_cols - (prop_fields.len + have_xattr
-		+ (int)fc_max + (int)size_max + (int)ug_max + (int)ino_max
-		+ (conf.icons == 1 ? 3 : 0));
+		+ (int)maxes.files_counter + (int)maxes.size + (int)maxes.ids
+		+ (int)maxes.inode + (conf.icons == 1 ? 3 : 0));
 
 	if (space_left < conf.min_name_trim)
 		space_left = conf.min_name_trim;
@@ -793,6 +798,8 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad,
 
 	if (longest < (size_t)space_left)
 		space_left = (int)longest;
+
+	maxes.name = (size_t)space_left + (conf.icons == 1 ? 3 : 0);
 
 	filesn_t i, k = files;
 	for (i = 0; i < k; i++) {
@@ -823,14 +830,7 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad,
 			printf("%s%c%s", ind_chr_color, ind_chr, df_c);
 		}
 
-		struct maxes_t maxes;
-		maxes.name = (size_t)space_left + (conf.icons == 1 ? 3 : 0);
-		maxes.ids = ug_max;
-		maxes.inode = ino_max;
-		maxes.files_counter = fc_max;
-		maxes.size = size_max;
-
-		/* Print the remaining part of the entry */
+		/* Print the remaining part of the entry. */
 		print_entry_props(&file_info[i], &maxes, have_xattr);
 	}
 }
@@ -839,7 +839,7 @@ static size_t
 get_columns(void)
 {
 	size_t n = (size_t)term_cols / (longest + 1);
-	/* +1 for the space between file names */
+	/* +1 for the space between file names. */
 
 	/* If longest is bigger than terminal columns, columns_n will
 	 * be negative or zero. To avoid this: */
@@ -1674,39 +1674,6 @@ get_largest(const filesn_t i, off_t *size, char **name,
 	*total += file_info[i].size;
 }
 
-/* Return the lenght of the longest UID:GID string for files listed in
- * long view mode. */
-static size_t
-get_max_ug_str(void)
-{
-	size_t ug_max = 0;
-	filesn_t i = files;
-
-	while (--i >= 0) {
-		size_t t = (size_t)DIGINUM(file_info[i].uid)
-			+ DIGINUM(file_info[i].gid);
-		if (t > ug_max)
-			ug_max = t;
-	}
-
-	return ug_max;
-}
-
-static size_t
-get_longest_inode(void)
-{
-	size_t l = 0;
-
-	filesn_t i = files;
-	while (--i >= 0) {
-		size_t n = DIGINUM(file_info[i].inode);
-		if (n > l)
-			l = n;
-	}
-
-	return l;
-}
-
 static int
 exclude_file_type_light(const unsigned char type)
 {
@@ -2063,9 +2030,7 @@ list_dir_light(void)
 				 * ######################## */
 
 	if (conf.long_view == 1) {
-		print_long_mode(&counter, &reset_pager, pad,
-			prop_fields.ids == 1 ? get_max_ug_str() : 0,
-			prop_fields.inode == 1 ? get_longest_inode() : 0, have_xattr);
+		print_long_mode(&counter, &reset_pager, pad, have_xattr);
 		goto END;
 	}
 
@@ -2778,9 +2743,7 @@ list_dir(void)
 				 * ######################## */
 
 	if (conf.long_view == 1) {
-		print_long_mode(&counter, &reset_pager, pad,
-			prop_fields.ids == 1 ? get_max_ug_str() : 0,
-			prop_fields.inode == 1 ? get_longest_inode() : 0, have_xattr);
+		print_long_mode(&counter, &reset_pager, pad, have_xattr);
 		goto END;
 	}
 
