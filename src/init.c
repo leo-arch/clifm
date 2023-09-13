@@ -373,7 +373,7 @@ get_home(void)
 	if (!user.home || access(user.home, W_OK) == -1) {
 		/* If no user's home, or if it's not writable, there won't be
 		 * any config directory. These flags are used to prevent functions
-		 * from trying to access any of these directories */
+		 * from trying to access any of these directories. */
 		home_ok = config_ok = 0;
 
 		err('e', PRINT_PROMPT, _("%s: Cannot access the home directory. "
@@ -478,7 +478,11 @@ is_secure_env(void)
 	size_t i;
 	for (i = 0; argv_bk[i]; i++) {
 		if (*argv_bk[i] == '-'
+#ifndef _BE_POSIX
 		&& (strncmp(argv_bk[i], "--secure-", 9) == 0))
+#else
+		&& strcspn(argv_bk[i], "xXY") != strlen(argv_bk[i]))
+#endif /* !_BE_POSIX */
 			return 1;
 	}
 

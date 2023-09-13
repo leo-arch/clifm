@@ -2547,7 +2547,9 @@ list_dir(void)
 
 			/* We only need the symlink target name provided the target
 			 * is not a directory, because get_link_target_color() will
-			 * check the file name extension. */
+			 * check the file name extension. get_dir_color() only needs
+			 * this name to run count_dir(), but we have already executed
+			 * this function. */
 			static char tmp[PATH_MAX + 1]; *tmp = '\0';
 			const ssize_t ret =
 				(conf.color_lnk_as_target == 1 && !S_ISDIR(attrl.st_mode))
@@ -2618,9 +2620,9 @@ list_dir(void)
 				if (IS_EXEC(attr)) {
 					file_info[n].exec = 1;
 					stats.exec++;
-#ifndef _NO_ICONS
+# ifndef _NO_ICONS
 					file_info[n].icon = ICON_EXEC;
-#endif /* !_NO_ICONS */
+# endif /* !_NO_ICONS */
 				}
 			}
 #endif /* !LINUX_FILE_CAPS */
