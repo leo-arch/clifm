@@ -2249,20 +2249,32 @@ expand_regex(char ***substr)
 		if (p)
 			dstr = dequote_str((*substr)[i], 0);
 
-		char *rstr = dstr ? dstr : (*substr)[i];
+		char *t = dstr ? dstr : (*substr)[i];
+
+		/* Prepend an initial '^' and append and ending '$' to prevent
+		 * accidental file expansions. For example, a file named file.txt
+		 * must not be expanded given the pattern "ile.t". In other words,
+		 * we force the use of ".*PATTERN.*" instead of just "PATTERN". */
+		size_t l = strlen(t) + 3;
+		char *rstr = (char *)xnmalloc(l, sizeof(char));
+		snprintf(rstr, l, "^%s$", t);
+		free(dstr);
+
 		int ret = check_regex(rstr);
 
 		if (ret != EXIT_SUCCESS
 		|| regcomp(&regex, rstr, reg_flags) != EXIT_SUCCESS) {
 			if (ret == EXIT_SUCCESS)
 				regfree(&regex);
-			free(dstr);
+//			free(dstr);
+			free(rstr);
 			tmp[n] = (*substr)[i];
 			n++;
 			continue;
 		}
 
-		free(dstr);
+//		free(dstr);
+		free(rstr);
 		int reg_found = 0;
 
 		for (j = 0; j < files; j++) {
@@ -2369,7 +2381,7 @@ glob_expand(char **cmd)
 
 /* Return 0 if CMD should be regex expanded, or 1 otherwise. */
 static int
-regex_expand(const char *cmd, const int is_last)
+regex_expand(const char *cmd)
 {
 	if (!cmd || !*cmd)
 		return 0;
@@ -2378,10 +2390,7 @@ regex_expand(const char *cmd, const int is_last)
 	|| strcmp(cmd, "u") == 0 || strcmp(cmd, "undel") == 0
 	|| strcmp(cmd, "untrash") == 0
 	|| strcmp(cmd, "s") == 0 || strcmp(cmd, "sel") == 0
-	|| strcmp(cmd, "n") == 0 || strcmp(cmd, "new") == 0
-	/* Do not expand the last argument passed to the 'm' command: it's the
-	 * new file name and is not required to exist. */
-	|| (strcmp(cmd, "m") == 0 && is_last == 1))
+	|| strcmp(cmd, "n") == 0 || strcmp(cmd, "new") == 0)
 		return 0;
 
 	return 1;
@@ -2919,7 +2928,7 @@ parse_input_str(char *str)
 			 * #       3.3) REGEX EXPANSION          #
 			 * ####################################### */
 
-	if (regex_expand(substr[0], !substr[args_n + 1]) == 1)
+	if (regex_expand(substr[0]) == 1)
 		expand_regex(&substr);
 
 	/* #### NULL TERMINATE THE INPUT STRING ARRAY (again) #### */

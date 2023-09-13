@@ -744,10 +744,8 @@ xchmod(const char *file, const char *mode_str, const int flag)
 int
 toggle_exec(const char *file, mode_t mode)
 {
-	/* Set it only for owner, unset it for every one */
+	/* Set it only for owner, unset it for every one else. */
 	(0100 & mode) ? (mode &= (mode_t)~0111) : (mode |= 0100);
-	/* Set or unset S_IXUSR, S_IXGRP, and S_IXOTH */
-//	(0100 & mode) ? (mode &= (mode_t)~0111) : (mode |= 0111);
 
 	if (fchmodat(XAT_FDCWD, file, mode, 0) == -1) {
 		xerror("te: Changing permissions of '%s': %s\n",
