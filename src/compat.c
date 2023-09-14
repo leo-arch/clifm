@@ -22,9 +22,9 @@
  * MA 02110-1301, USA.
 */
 
-#if defined(CLIFM_LEGACY) || (defined(_POSIX_C_SOURCE) \
+#if defined(CLIFM_LEGACY) /*|| (defined(_POSIX_C_SOURCE) \
 && _POSIX_C_SOURCE < 200809L) || (defined(_XOPEN_SOURCE) \
-&& _XOPEN_SOURCE < 700)
+&& _XOPEN_SOURCE < 700) */
 
 #include "helpers.h"
 
@@ -411,4 +411,4 @@ x_getline(char **lineptr, size_t *n, FILE *stream)
 
 #else
 void *skip_me_compat;
-#endif /* CLIFM_LEGACY || _POSIX_C_SOURCE < 200809L || _XOPEN_SOURCE < 700 */
+#endif /* CLIFM_LEGACY */
