@@ -1905,7 +1905,7 @@ calc_relative_time(const time_t age, char *s)
 
 static void
 construct_and_print_filename(const struct fileinfo *props,
-	const size_t max_namelen)
+	const int max_namelen)
 {
 	/* If file name length is greater than max, truncate it to max (later a
 	 * tilde (~) will be appended to let the user know the file name was
@@ -1930,8 +1930,8 @@ construct_and_print_filename(const struct fileinfo *props,
 
 	int diff = 0;
 	char *ext_name = (char *)NULL;
-	if (cur_len > max_namelen) {
-		int rest = (int)(cur_len - max_namelen);
+	if (cur_len > (size_t)max_namelen) {
+		int rest = (int)cur_len - max_namelen;
 		trim = TRIM_NO_EXT;
 		size_t ext_len = 0;
 		ext_name = get_ext_info_long(props->name, plen, &trim, &ext_len);
@@ -1951,7 +1951,7 @@ construct_and_print_filename(const struct fileinfo *props,
 	}
 
 	/* Calculate pad for each file name */
-	int pad = (int)(max_namelen - cur_len);
+	int pad = max_namelen - (int)cur_len;
 	if (pad < 0)
 		pad = 0;
 
@@ -1980,7 +1980,7 @@ construct_and_print_filename(const struct fileinfo *props,
 
 static int
 construct_file_size(const struct fileinfo *props, char *size_str,
-	const size_t size_max)
+	const int size_max)
 {
 	int file_perm = check_file_access(props->mode, props->uid, props->gid);
 
@@ -2116,7 +2116,7 @@ construct_timestamp(char *time_str, const time_t ltime)
 
 static void
 construct_id_field(const struct fileinfo *props, char *id_str,
-	const char *id_color, const size_t ug_max)
+	const char *id_color, const int ug_max)
 {
 	if (prop_fields.ids != 1) {
 		*id_str = '\0';
@@ -2136,7 +2136,7 @@ construct_id_field(const struct fileinfo *props, char *id_str,
 
 static void
 construct_files_counter(const struct fileinfo *props, char *fc_str,
-	const size_t fc_max)
+	const int fc_max)
 {
 	/* FC_MAX is zero if there are no subdirs in the current dir */
 	if (conf.files_counter == 0 || fc_max == 0 || prop_fields.counter == 0) {

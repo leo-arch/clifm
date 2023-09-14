@@ -1190,11 +1190,11 @@ extern struct fileinfo *file_info;
 /* Struct to store the length of the longest values in the current list of
  * files (needed to properly construct columns in long view). */
 struct maxes_t {
-	size_t ids;
-	size_t inode;
-	size_t files_counter;
-	size_t name;
-	size_t size;
+	int ids;
+	int inode;
+	int files_counter;
+	int name;
+	int size;
 };
 
 struct devino_t {

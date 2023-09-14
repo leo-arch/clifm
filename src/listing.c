@@ -591,10 +591,15 @@ set_events_checker(void)
 }
 
 static void
-get_longest_filename(const filesn_t n, const int pad)
+get_longest_filename(const filesn_t n, const size_t pad)
 {
-	filesn_t i = (max_files != UNSET && (filesn_t)max_files < n) ? max_files : n;
+	filesn_t c_max_files = (filesn_t)max_files;
+	filesn_t i = (max_files != UNSET && c_max_files < n) ? c_max_files : n;
 	filesn_t longest_index = -1;
+
+	/* Cast only once here instead of hundreds of times in the while loop */
+	size_t c_max_name_len = (size_t)conf.max_name_len;
+	size_t c_min_name_trim = (size_t)conf.min_name_trim;
 
 	while (--i >= 0) {
 		size_t total_len = 0;
@@ -612,11 +617,11 @@ get_longest_filename(const filesn_t n, const int pad)
 		size_t max =
 			(conf.long_view == 1 && conf.max_name_len != UNSET
 			&& conf.min_name_trim > conf.max_name_len)
-			? (size_t)conf.min_name_trim : (size_t)conf.max_name_len;
+			? c_min_name_trim : c_max_name_len;
 		if (file_len > max)
 			file_len = max;
 
-		total_len = (size_t)pad + 1 + file_len;
+		total_len = pad + 1 + file_len;
 
 		if (conf.long_view == 0 && conf.classify == 1) {
 			if (file_info[i].dir)
@@ -649,7 +654,7 @@ get_longest_filename(const filesn_t n, const int pad)
 		if (total_len > longest) {
 			longest_index = i;
 			if (conf.listing_mode == VERTLIST || max_files == UNSET
-			|| i < (filesn_t)max_files)
+			|| i < c_max_files)
 				longest = total_len;
 		}
 	}
@@ -678,10 +683,10 @@ get_longest_filename(const filesn_t n, const int pad)
 		 * and the files counter too. However, in doing this the space
 		 * between the trimmed file name and the next column is too
 		 * tight (only one). By not adding it we get an extra space
-		 * to relax a bit the space between columns */
+		 * to relax a bit the space between columns. */
 /*		longest_fc = DIGINUM(file_info[longest_index].filesn) + 1; */
 		longest_fc = DIGINUM(file_info[longest_index].filesn);
-		size_t t = (size_t)pad + (size_t)conf.max_name_len + 1 + longest_fc;
+		size_t t = pad + c_max_name_len + 1 + longest_fc;
 		if (t > longest)
 			longest_fc -= t - longest;
 		if ((int)longest_fc < 0)
@@ -749,21 +754,21 @@ compute_maxes(void)
 	filesn_t i = files;
 
 	while (--i >= 0) {
-		size_t t = 0;
+		int t = 0;
 		if (file_info[i].dir == 1 && conf.files_counter == 1) {
-			t = (size_t)DIGINUM(file_info[i].filesn);
+			t = DIGINUM(file_info[i].filesn);
 			if (t > maxes.files_counter)
 				maxes.files_counter = t;
 		}
 
 		if (prop_fields.size == PROP_SIZE_BYTES) {
-			t = (size_t)DIGINUM(file_info[i].size);
+			t = DIGINUM(file_info[i].size);
 			if (t > maxes.size)
 				maxes.size = t;
 		}
 
 		if (prop_fields.ids == 1) {
-			t = (size_t)DIGINUM(file_info[i].uid)
+			t = DIGINUM(file_info[i].uid)
 				+ DIGINUM(file_info[i].gid);
 			if (t > maxes.ids)
 				maxes.ids = t;
@@ -787,8 +792,8 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad,
 
 	/* Available space (term cols) to print the file name. */
 	int space_left = (int)term_cols - (prop_fields.len + have_xattr
-		+ (int)maxes.files_counter + (int)maxes.size + (int)maxes.ids
-		+ (int)maxes.inode + (conf.icons == 1 ? 3 : 0));
+		+ maxes.files_counter + maxes.size + maxes.ids
+		+ maxes.inode + (conf.icons == 1 ? 3 : 0));
 
 	if (space_left < conf.min_name_trim)
 		space_left = conf.min_name_trim;
@@ -799,7 +804,7 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad,
 	if (longest < (size_t)space_left)
 		space_left = (int)longest;
 
-	maxes.name = (size_t)space_left + (conf.icons == 1 ? 3 : 0);
+	maxes.name = space_left + (conf.icons == 1 ? 3 : 0);
 
 	filesn_t i, k = files;
 	for (i = 0; i < k; i++) {
@@ -1388,6 +1393,7 @@ list_files_horizontal(size_t *counter, int *reset_pager, const int pad,
 	const int termcap_move_right = (xargs.list_and_quit == 1
 		|| term_caps.suggestions == 0) ? 0 : 1;
 
+	const int int_longest_fc = (int)longest_fc;
 	size_t cur_cols = 0;
 	filesn_t i;
 	int last_column = 0;
@@ -1431,7 +1437,7 @@ list_files_horizontal(size_t *counter, int *reset_pager, const int pad,
 			 * #    PRINT THE CURRENT ENTRY    #
 			 * ################################# */
 
-		const int fc = file_info[i].dir != 1 ? (int)longest_fc : 0;
+		const int fc = file_info[i].dir != 1 ? int_longest_fc : 0;
 		/* Displayed file name will be trimmed to MAX_NAME_LEN. */
 		const int max_namelen = conf.max_name_len + fc;
 
@@ -1484,6 +1490,7 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 	const int termcap_move_right = (xargs.list_and_quit == 1
 		|| term_caps.suggestions == 0) ? 0 : 1;
 
+	const int int_longest_fc = (int)longest_fc;
 	size_t cur_cols = 0;
 	size_t cc = columns_n; // Current column number
 	filesn_t x = 0; // Index of the file to be actually printed
@@ -1565,7 +1572,7 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 			 * #    PRINT THE CURRENT ENTRY    #
 			 * ################################# */
 
-		const int fc = file_info[x].dir != 1 ? (int)longest_fc : 0;
+		const int fc = file_info[x].dir != 1 ? int_longest_fc : 0;
 		/* Displayed file name will be trimmed to MAX_NAMELEN. */
 		const int max_namelen = conf.max_name_len + fc;
 
@@ -1594,7 +1601,6 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 static void
 run_dir_cmd(const int mode)
 {
-	FILE *fp = (FILE *)NULL;
 	char path[PATH_MAX];
 
 	if (mode == DIR_IN) {
@@ -1607,7 +1613,7 @@ run_dir_cmd(const int mode)
 			old_pwd[dirhist_cur_index - 1], DIR_OUT_NAME);
 	}
 
-	fp = fopen(path, "r");
+	FILE *fp = fopen(path, "r");
 	if (!fp)
 		return;
 
@@ -1653,9 +1659,6 @@ get_largest(const filesn_t i, off_t *size, char **name,
 	&& (file_info[i].type != DT_LNK || conf.apparent_size != 1))
 		return;
 
-//	const int d = (file_info[i].type == DT_DIR ? 1024 : 1);
-//	if (file_info[i].size * d > *size) {
-//		*size = file_info[i].size * d;
 	if (file_info[i].size > *size) {
 		*size = file_info[i].size;
 		*name = file_info[i].name;
@@ -1670,7 +1673,6 @@ get_largest(const filesn_t i, off_t *size, char **name,
 				return;
 	}
 
-//	*total += file_info[i].size * d;
 	*total += file_info[i].size;
 }
 
@@ -1989,14 +1991,14 @@ list_dir_light(void)
 		++count;
 	}
 
+	file_info[n].name = (char *)NULL;
+	files = n;
+
 	if (xargs.disk_usage_analyzer == 1
 	|| (conf.long_view == 1 && conf.full_dir_size == 1)) {
 		fputs("\r            \r", stdout); /* Erase the "Scanning ..." message */
 		fflush(stdout);
 	}
-
-	file_info[n].name = (char *)NULL;
-	files = n;
 
 	if (n == 0) {
 		printf("%s. ..%s\n", di_c, df_c);
@@ -2015,7 +2017,7 @@ list_dir_light(void)
 
 	/* Get the longest file name */
 	if (conf.columned == 1 || conf.long_view == 1)
-		get_longest_filename(n, pad);
+		get_longest_filename(n, (size_t)pad);
 
 				/* ########################
 				 * #    LONG VIEW MODE    #
@@ -2694,14 +2696,14 @@ list_dir(void)
 		file_info =
 			xrealloc(file_info, (size_t)(n + 1) * sizeof(struct fileinfo)); */
 
+	file_info[n].name = (char *)NULL;
+	files = n;
+
 	if (xargs.disk_usage_analyzer == 1 || (conf.long_view == 1
 	&& conf.full_dir_size == 1)) {
 		fputs("\r            \r", stdout); /* Erase the "Scanning ..." message */
 		fflush(stdout);
 	}
-
-	file_info[n].name = (char *)NULL;
-	files = n;
 
 	if (n == 0) {
 		printf("%s. ..%s\n", di_c, df_c);
@@ -2728,7 +2730,7 @@ list_dir(void)
 
 	/* Get the longest file name */
 	if (conf.columned == 1 || conf.long_view == 1)
-		get_longest_filename(n, pad);
+		get_longest_filename(n, (size_t)pad);
 
 				/* ########################
 				 * #    LONG VIEW MODE    #
