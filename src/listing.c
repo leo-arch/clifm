@@ -1892,27 +1892,15 @@ list_dir_light(void)
 			file_info[n].type = ent->d_type;
 		}
 #endif /* !_DIRENT_HAVE_D_TYPE */
-		file_info[n].dir = (file_info[n].type == DT_DIR) ? 1 : 0;
-		file_info[n].symlink = (file_info[n].type == DT_LNK) ? 1 : 0;
 
+		file_info[n].dir = (file_info[n].type == DT_DIR);
+		file_info[n].symlink = (file_info[n].type == DT_LNK);
 		file_info[n].inode = ent->d_ino;
-		file_info[n].linkn = 1;
-		file_info[n].size = 1;
-		file_info[n].color = (char *)NULL;
-		file_info[n].ext_color = (char *)NULL;
-		file_info[n].ext_name = (char *)NULL;
-		file_info[n].exec = 0;
-		file_info[n].ruser = 1;
-		file_info[n].filesn = 0;
-		file_info[n].time = 0;
-		file_info[n].sel = 0;
-#ifndef _NO_ICONS
-		file_info[n].icon = DEF_FILE_ICON;
-		file_info[n].icon_color = DEF_FILE_ICON_COLOR;
-#else
+#ifdef _NO_ICONS
 		file_info[n].icon = (char *)NULL;
 		file_info[n].icon_color = df_c;
 #endif /* !_NO_ICONS */
+
 		switch (file_info[n].type) {
 		case DT_DIR:
 #ifndef _NO_ICONS
