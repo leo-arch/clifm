@@ -22,9 +22,7 @@
  * MA 02110-1301, USA.
 */
 
-#if defined(CLIFM_LEGACY) /*|| (defined(_POSIX_C_SOURCE) \
-&& _POSIX_C_SOURCE < 200809L) || (defined(_XOPEN_SOURCE) \
-&& _XOPEN_SOURCE < 700) */
+#if defined(CLIFM_LEGACY)
 
 #include "helpers.h"
 

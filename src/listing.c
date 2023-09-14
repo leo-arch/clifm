@@ -1456,17 +1456,17 @@ static void
 list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 		const size_t columns_n)
 {
-	/* Total amount of files to be listed */
+	/* Total amount of files to be listed. */
 	const filesn_t nn = (max_files != UNSET && (filesn_t)max_files < files)
 		? (filesn_t)max_files : files;
 
 	/* How many lines (rows) do we need to print NN files? */
 	filesn_t rows = nn / (filesn_t)columns_n;
 	if (nn % (filesn_t)columns_n > 0)
-		rows++;
+		++rows;
 
 	int last_column = 0;
-	/* The previous value of LAST_COLUMN. We need this value to run the pager */
+	/* The previous value of LAST_COLUMN. We need this value to run the pager. */
 	int blc = last_column;
 
 	void (*print_entry_function)(int *, const filesn_t, const int, const int);
@@ -1497,12 +1497,12 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 		size_t bcc = cc; // Copy of CC
 		if (cc == columns_n) {
 			x = xx;
-			xx++;
+			++xx;
 			cc = 0;
 		} else {
 			x += rows;
 		}
-		cc++;
+		++cc;
 
 		if (xx > rows)
 			break;
@@ -1556,7 +1556,7 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 					continue;
 				}
 			}
-			(*counter)++;
+			++(*counter);
 		}
 
 		blc = last_column;
@@ -1823,17 +1823,21 @@ list_dir_light(void)
 		if (filter.str && filter.type == FILTER_FILE_NAME) {
 			if (regexec(&regex_exp, ename, 0, NULL, 0) == EXIT_SUCCESS) {
 				if (filter.rev == 1) {
-					excluded_files++;
+					++excluded_files;
 					continue;
 				}
 			} else if (filter.rev == 0) {
-				excluded_files++;
+				++excluded_files;
 				continue;
 			}
 		}
 
-		if (conf.show_hidden == 0 && *ename == '.')
-			continue;
+		if (*ename == '.') {
+			++stats.hidden;
+			if (conf.show_hidden == 0)
+				continue;
+		}
+
 #ifndef _DIRENT_HAVE_D_TYPE
 		struct stat attr;
 		if (lstat(ename, &attr) == -1)
@@ -1852,7 +1856,7 @@ list_dir_light(void)
 #else
 		&& exclude_file_type_light(ent->d_type) == EXIT_SUCCESS) {
 #endif /* !_DIRENT_HAVE_D_TYPE */
-			excluded_files++;
+			++excluded_files;
 			continue;
 		}
 
@@ -1921,7 +1925,7 @@ list_dir_light(void)
 			}
 #endif /* !_NO_ICONS */
 
-			stats.dir++;
+			++stats.dir;
 			if (conf.files_counter == 1)
 				file_info[n].filesn = count_dir(ename, NO_CPOP) - 2;
 			else
@@ -1946,28 +1950,28 @@ list_dir_light(void)
 			file_info[n].icon = ICON_LINK;
 #endif /* !_NO_ICONS */
 			file_info[n].color = ln_c;
-			stats.link++;
+			++stats.link;
 			break;
 
-		case DT_REG: file_info[n].color = fi_c; stats.reg++; break;
-		case DT_SOCK: file_info[n].color = so_c; stats.socket++; break;
-		case DT_FIFO: file_info[n].color = pi_c; stats.fifo++; break;
-		case DT_BLK: file_info[n].color = bd_c; stats.block_dev++; break;
-		case DT_CHR: file_info[n].color = cd_c; stats.char_dev++; break;
+		case DT_REG: file_info[n].color = fi_c; ++stats.reg; break;
+		case DT_SOCK: file_info[n].color = so_c; ++stats.socket; break;
+		case DT_FIFO: file_info[n].color = pi_c; ++stats.fifo; break;
+		case DT_BLK: file_info[n].color = bd_c; ++stats.block_dev; break;
+		case DT_CHR: file_info[n].color = cd_c; ++stats.char_dev; break;
 #ifndef _BE_POSIX
 # ifdef SOLARIS_DOORS
-		case DT_DOOR: file_info[n].color = oo_c; stats.door++; break;
-		case DT_PORT: file_info[n].color = oo_c; stats.port++; break;
+		case DT_DOOR: file_info[n].color = oo_c; ++stats.door; break;
+		case DT_PORT: file_info[n].color = oo_c; ++stats.port; break;
 # endif /* SOLARIS_DOORS */
 # ifdef S_ARCH1
 		case DT_ARCH1: file_info[n].color = fi_c; stats.arch1++; break;
 		case DT_ARCH2: file_info[n].color = fi_c; stats.arch2++; break;
 # endif /* S_ARCH1 */
 # ifdef S_IFWHT
-		case DT_WHT: file_info[n].color = fi_c; stats.whiteout++; break;
+		case DT_WHT: file_info[n].color = fi_c; ++stats.whiteout; break;
 # endif /* DT_WHT */
 #endif /* !_BE_POSIX */
-		case DT_UNKNOWN: file_info[n].color = no_c; stats.unknown++; break;
+		case DT_UNKNOWN: file_info[n].color = no_c; ++stats.unknown; break;
 		default: file_info[n].color = df_c; break;
 		}
 
@@ -1987,14 +1991,14 @@ list_dir_light(void)
 				&largest_color, &total_size);
 		}
 
-		n++;
+		++n;
 		if (n > FILESN_MAX - 1) {
 			err('w', PRINT_PROMPT, _("%s: Integer overflow detected "
 				"(showing only %jd files)\n"), PROGRAM_NAME, (intmax_t)n);
 			break;
 		}
 
-		count++;
+		++count;
 	}
 
 	if (xargs.disk_usage_analyzer == 1
@@ -2274,17 +2278,17 @@ list_dir(void)
 		if (filter.str && filter.type == FILTER_FILE_NAME) {
 			if (regexec(&regex_exp, ename, 0, NULL, 0) == EXIT_SUCCESS) {
 				if (filter.rev == 1) {
-					excluded_files++;
+					++excluded_files;
 					continue;
 				}
 			} else if (filter.rev == 0) {
-				excluded_files++;
+				++excluded_files;
 				continue;
 			}
 		}
 
 		if (*ename == '.') {
-			stats.hidden++;
+			++stats.hidden;
 			if (conf.show_hidden == 0)
 				continue;
 		}
@@ -2297,7 +2301,7 @@ list_dir(void)
 			if (virtual_dir == 1)
 				continue;
 			stat_ok = 0;
-			stats.unstat++;
+			++stats.unstat;
 		}
 
 		/* Filter files according to file type */
@@ -2307,8 +2311,8 @@ list_dir(void)
 			if (*ename == '.' && stats.hidden > 0)
 				stats.hidden--;
 			if (stat_ok == 0 && stats.unstat > 0)
-				stats.unstat--;
-			excluded_files++;
+				--stats.unstat;
+			++excluded_files;
 			continue;
 		}
 
@@ -2411,7 +2415,7 @@ list_dir(void)
 			}
 		} else {
 			file_info[n].type = DT_UNKNOWN;
-			stats.unknown++;
+			++stats.unknown;
 		}
 
 		file_info[n].dir = (file_info[n].type == DT_DIR);
@@ -2482,12 +2486,12 @@ list_dir(void)
 
 			/* Let's gather some file statistics based on the file type color */
 			if (file_info[n].color == tw_c) {
-				stats.other_writable++; stats.sticky++;
+				++stats.other_writable; ++stats.sticky;
 			} else if (file_info[n].color == ow_c) {
-				stats.other_writable++;
+				++stats.other_writable;
 			} else
 				if (file_info[n].color == st_c) {
-					stats.sticky++;
+					++stats.sticky;
 			}
 			}
 
@@ -2506,7 +2510,7 @@ list_dir(void)
 			if (fstatat(fd, ename, &attrl, 0) == -1) {
 				file_info[n].color = or_c;
 				file_info[n].xattr = 0;
-				stats.broken_link++;
+				++stats.broken_link;
 				break;
 			}
 
@@ -2563,14 +2567,14 @@ list_dir(void)
 				file_info[n].color = nf_c;
 			} else if (stat_ok == 1 && (attr.st_mode & S_ISUID)) {
 				file_info[n].exec = 1;
-				stats.exec++; stats.suid++;
+				++stats.exec; ++stats.suid;
 				file_info[n].color = su_c;
 #ifndef _NO_ICONS
 				file_info[n].icon = ICON_EXEC;
 #endif /* !_NO_ICONS */
 			} else if (stat_ok == 1 && (attr.st_mode & S_ISGID)) {
 				file_info[n].exec = 1;
-				stats.exec++; stats.sgid++;
+				++stats.exec; ++stats.sgid;
 				file_info[n].color = sg_c;
 #ifndef _NO_ICONS
 				file_info[n].icon = ICON_EXEC;
@@ -2580,11 +2584,11 @@ list_dir(void)
 #ifdef LINUX_FILE_CAPS
 			else if (check_cap == 1 && (cap = cap_get_file(ename))) {
 				file_info[n].color = ca_c;
-				stats.caps++;
+				++stats.caps;
 				cap_free(cap);
 				if (IS_EXEC(attr)) {
 					file_info[n].exec = 1;
-					stats.exec++;
+					++stats.exec;
 # ifndef _NO_ICONS
 					file_info[n].icon = ICON_EXEC;
 # endif /* !_NO_ICONS */
@@ -2594,7 +2598,7 @@ list_dir(void)
 
 			else if (stat_ok == 1 && IS_EXEC(attr)) {
 				file_info[n].exec = 1;
-				stats.exec++;
+				++stats.exec;
 #ifndef _NO_ICONS
 				file_info[n].icon = ICON_EXEC;
 #endif /* !_NO_ICONS */
@@ -2604,7 +2608,7 @@ list_dir(void)
 					file_info[n].color = ex_c;
 			} else if (file_info[n].linkn > 1) { /* Multi-hardlink */
 				file_info[n].color = mh_c;
-				stats.multi_link++;
+				++stats.multi_link;
 			} else if (file_info[n].size == 0) {
 				file_info[n].color = ef_c;
 			} else { /* Regular file */
@@ -2683,14 +2687,14 @@ list_dir(void)
 			get_largest(n, &largest_size, &largest_name,
 				&largest_color, &total_size);
 
-		n++;
+		++n;
 		if (n > FILESN_MAX - 1) {
 			err('w', PRINT_PROMPT, _("%s: Integer overflow detected "
 				"(showing only %jd files)\n"), PROGRAM_NAME, (intmax_t)n);
 			break;
 		}
 
-		count++;
+		++count;
 	}
 
 	/* Since we allocate memory by chunks, we might have allocated more

@@ -304,7 +304,7 @@ xstrverscmp(const char *s1, const char *s2)
 	/* Jump to first alphanumeric character in both strings */
 	while (*p1) {
 		if (!IS_DIGIT(*p1) && !IS_ALPHA(*p1) && (*p1 < 'A' || *p1 > 'Z')) {
-			p1++;
+			++p1;
 			continue;
 		}
 		break;
@@ -315,7 +315,7 @@ xstrverscmp(const char *s1, const char *s2)
 
 	while (*p2) {
 		if (!IS_DIGIT(*p2) && !IS_ALPHA(*p2) && (*p2 < 'A' || *p2 > 'Z')) {
-			p2++;
+			++p2;
 			continue;
 		}
 		break;
@@ -356,8 +356,8 @@ xstrverscmp(const char *s1, const char *s2)
 	} else {
 		c1 = *p1;
 		c2 = *p2;
-		p1++;
-		p2++;
+		++p1;
+		++p2;
 	}
 
 	/* Hint: '0' is a digit too */
@@ -376,8 +376,8 @@ xstrverscmp(const char *s1, const char *s2)
 		} else {
 			c1 = *p1;
 			c2 = *p2;
-			p1++;
-			p2++;
+			++p1;
+			++p2;
 		}
 		state += (c1 == '0') + (IS_DIGIT(c1) != 0);
 	}
@@ -388,10 +388,10 @@ xstrverscmp(const char *s1, const char *s2)
 	case VCMP: return diff;
 	case VLEN:
 		while (*p1 && IS_DIGIT(*p1)) {
-			p1++;
+			++p1;
 			if (!*p2 || !IS_DIGIT(*p2))
 				return 1;
-			p2++;
+			++p2;
 		}
 		return (*p2 && IS_DIGIT(*p2)) ? -1 : diff;
 
