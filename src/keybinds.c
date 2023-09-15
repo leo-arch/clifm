@@ -251,9 +251,28 @@ load_keybinds(void)
 static void
 rl_update_prompt(void)
 {
-	/* In UPDATE mode prompt() always returns NULL. */
+	if (rl_line_buffer) {
+		memset(rl_line_buffer, '\0', (size_t)rl_end);
+		rl_point = rl_end = 0;
+	}
+
+	/* In UPDATE mode, prompt() always returns NULL. */
 	prompt(PROMPT_UPDATE);
 	UNHIDE_CURSOR;
+}
+
+/* Old version of rl_update_prompt(). Used only by rl_profile_previous() and
+ * rl_profile_next(): if any of these functions use rl_update_prompt() instead,
+ * no prompt is printed (not sure why). FIX. */
+static void
+rl_update_prompt_old(void)
+{
+	HIDE_CURSOR;
+	int b = xargs.refresh_on_empty_line;
+	xargs.refresh_on_empty_line = 0;
+	char *input = prompt(PROMPT_SHOW);
+	free(input);
+	xargs.refresh_on_empty_line = b;
 }
 
 /* Runs any command recognized by CliFM via a keybind. Example:
@@ -1377,20 +1396,6 @@ get_cur_prof(int *cur, int *total)
 	}
 }
 
-/* Old version of rl_update_prompt(). Used only by rl_profile_previous() and
- * rl_profile_next(): if any of these functions use rl_update_prompt() instead,
- * no prompt is printed (not sure why). FIX. */
-static void
-rl_update_prompt_old(void)
-{
-	HIDE_CURSOR;
-	int b = xargs.refresh_on_empty_line;
-	xargs.refresh_on_empty_line = 0;
-	char *input = prompt(PROMPT_SHOW);
-	free(input);
-	xargs.refresh_on_empty_line = b;
-}
-
 static int
 rl_profile_previous(int count, int key)
 {
@@ -1422,10 +1427,8 @@ rl_profile_previous(int count, int key)
 		putchar('\n');
 	}
 
-	if (profile_set(profile_names[prev_prof]) == EXIT_SUCCESS) {
+	if (profile_set(profile_names[prev_prof]) == EXIT_SUCCESS)
 		rl_update_prompt_old();
-//		rl_update_prompt();
-	}
 
 	return EXIT_SUCCESS;
 }
@@ -1461,10 +1464,8 @@ rl_profile_next(int count, int key)
 		putchar('\n');
 	}
 
-	if (profile_set(profile_names[next_prof]) == EXIT_SUCCESS) {
+	if (profile_set(profile_names[next_prof]) == EXIT_SUCCESS)
 		rl_update_prompt_old();
-//		rl_update_prompt();
-	}
 
 	return EXIT_SUCCESS;
 }

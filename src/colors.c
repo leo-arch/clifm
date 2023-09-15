@@ -453,8 +453,8 @@ get_dir_color(const char *filename, const mode_t mode, const nlink_t links,
 	const filesn_t count)
 {
 	char *color = (char *)NULL;
-	int sticky = 0;
-	int is_oth_w = 0;
+	uint8_t sticky = 0;
+	uint8_t is_oth_w = 0;
 	if (mode & S_ISVTX)
 		sticky = 1;
 
@@ -894,6 +894,7 @@ reset_iface_colors(void)
 	*hr_c = '\0';
 	*hs_c = '\0';
 	*hv_c = '\0';
+	*hw_c = '\0';
 
 	*sb_c = '\0';
 	*sc_c = '\0';
