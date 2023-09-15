@@ -1112,8 +1112,7 @@ prompt(const int prompt_flag)
 	UNHIDE_CURSOR;
 
 	/* Print the prompt and get user input */
-	char *input = (char *)NULL;
-	input = readline(the_prompt);
+	char *input = readline(the_prompt);
 	free(the_prompt);
 
 	if (!input || !*input || rl_end == 0) {

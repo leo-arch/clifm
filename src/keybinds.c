@@ -251,11 +251,6 @@ load_keybinds(void)
 static void
 rl_update_prompt(void)
 {
-	if (rl_line_buffer) {
-		memset(rl_line_buffer, '\0', (size_t)rl_end);
-		rl_point = rl_end = 0;
-	}
-
 	/* In UPDATE mode, prompt() always returns NULL. */
 	prompt(PROMPT_UPDATE);
 	UNHIDE_CURSOR;
@@ -298,7 +293,7 @@ keybind_exec_cmd(char *str)
 		/* While in the bookmarks or mountpoints screen, the kbind_busy
 		 * flag will be set to 1 and no keybinding will work. Once the
 		 * corresponding function exited, set the kbind_busy flag to zero,
-		 * so that keybindings work again */
+		 * so that keybindings work again. */
 		if (kbind_busy == 1)
 			kbind_busy = 0;
 
@@ -307,7 +302,8 @@ keybind_exec_cmd(char *str)
 			free(cmd[i]);
 		free(cmd);
 
-		rl_update_prompt();
+//		rl_update_prompt();
+		rl_update_prompt_old();
 	}
 
 	args_n = old_args;
