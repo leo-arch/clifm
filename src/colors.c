@@ -1805,9 +1805,7 @@ set_default_colors(void)
 	if (!*wc_c) xstrsncpy(wc_c, DEF_WC_C, sizeof(wc_c));
 	if (!*tx_c) xstrsncpy(tx_c, DEF_TX_C, sizeof(tx_c));
 
-	if (!*lc_c)
-		xstrsncpy(lc_c, term_caps.color >= 256
-			? DEF_LC_C256 : DEF_LC_C, sizeof(lc_c));
+	if (!*lc_c) xstrsncpy(lc_c, DEF_LC_C, sizeof(lc_c));
 
 	if (!*li_c) xstrsncpy(li_c, DEF_LI_C, sizeof(li_c));
 	if (!*li_cb) xstrsncpy(li_cb, DEF_LI_CB, sizeof(li_cb));
@@ -1864,24 +1862,17 @@ set_default_colors(void)
 		xstrsncpy(dir_ico_c, DEF_DIR_ICO_C, sizeof(dir_ico_c));
 #endif /* !_NO_ICONS */
 
-	if (!*dr_c) xstrsncpy(dr_c, term_caps.color >= 256
-		? DEF_DR_C256 : DEF_DR_C, sizeof(dr_c));
-	if (!*dw_c) xstrsncpy(dw_c, term_caps.color >= 256
-		? DEF_DW_C256 : DEF_DW_C, sizeof(dw_c));
-	if (!*dxd_c) xstrsncpy(dxd_c, term_caps.color >= 256
-		? DEF_DXD_C256 : DEF_DXD_C, sizeof(dxd_c));
-	if (!*dxr_c) xstrsncpy(dxr_c, term_caps.color >= 256
-		? DEF_DXR_C256 : DEF_DXR_C, sizeof(dxr_c));
-	if (!*dg_c) xstrsncpy(dg_c, term_caps.color >= 256
-		? DEF_DG_C256 : DEF_DG_C, sizeof(dg_c));
+	if (!*dr_c) xstrsncpy(dr_c, DEF_DR_C, sizeof(dr_c));
+	if (!*dw_c) xstrsncpy(dw_c, DEF_DW_C, sizeof(dw_c));
+	if (!*dxd_c) xstrsncpy(dxd_c, DEF_DXD_C, sizeof(dxd_c));
+	if (!*dxr_c) xstrsncpy(dxr_c, DEF_DXR_C, sizeof(dxr_c));
+	if (!*dg_c) xstrsncpy(dg_c, DEF_DG_C, sizeof(dg_c));
 /*	if (!*dd_c) // Date color unset: let's use shades
 		xstrsncpy(dd_c, DEF_DD_C, sizeof(dd_c));
 	if (!*dz_c) // Size color unset: let's use shades
 		xstrsncpy(dz_c, DEF_DZ_C, sizeof(dz_c)); */
-	if (!*do_c) xstrsncpy(do_c, term_caps.color >= 256
-		? DEF_DO_C256 : DEF_DO_C, sizeof(do_c));
-	if (!*dp_c) xstrsncpy(dp_c, term_caps.color >= 256
-		? DEF_DP_C256 : DEF_DP_C, sizeof(dp_c));
+	if (!*do_c) xstrsncpy(do_c, DEF_DO_C, sizeof(do_c));
+	if (!*dp_c) xstrsncpy(dp_c, DEF_DP_C, sizeof(dp_c));
 	if (!*dn_c) xstrsncpy(dn_c, DEF_DN_C, sizeof(dn_c));
 }
 
@@ -2457,6 +2448,7 @@ disable_bold(void)
 	remove_bold_attr(hr_c);
 	remove_bold_attr(hs_c);
 	remove_bold_attr(hv_c);
+	remove_bold_attr(hw_c);
 
 	/* File properties */
 	remove_bold_attr(dd_c);
@@ -2485,6 +2477,7 @@ disable_bold(void)
 	remove_bold_attr(li_c);
 	remove_bold_attr(li_cb);
 	remove_bold_attr(nm_c);
+	remove_bold_attr(ro_c);
 	remove_bold_attr(si_c);
 	remove_bold_attr(ti_c);
 	remove_bold_attr(tx_c);
