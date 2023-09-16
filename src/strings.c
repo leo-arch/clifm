@@ -485,7 +485,11 @@ replace_invalid_chars(const char *name)
 			continue;
 		}
 
+#if defined(CHAR_MIN) && CHAR_MIN < 0
 		if (*q >= '\0' && *q < ' ') { /* Control char */
+#else
+		if (*q < ' ') {
+#endif /* CHAR_MIN < 0 */
 			*n = INVALID_CHR;
 			n++; q++;
 			continue;
