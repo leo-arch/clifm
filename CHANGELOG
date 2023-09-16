@@ -1,3 +1,23 @@
+1.14.5
+
+Bug fixes
+* Missing --stat and --stat-full in shell completion files.
+* Wrongly displaying file names with invalid encodings.
+* Out of bounds read when bleaching file names with invalid enconding.
+* POSIX mode: Reading environment variables even if running in secure mode.
+* 'm' wrongly performs regex expansion on the last parameter (new name).
+* Hidden files not counted in light mode ('stats' command).
+* Bookmark name (in the bookmarks screen) is executred as a command name.
+* Crash on some OpenBSD systems.
+
+New features/improvements
+* Add internal 256 color scheme (stealth mode can now run in 256 colors mode).
+* Highlight backslashes to make escaped file names more readable (color code is 'hw').
+* Read-only mode (via --readonly or the Readonly option in the config file).
+* The update_trash_indicator routine is almost 5x faster.
+* Faster symlink resolution when ColorLinkAsTarget is enabled.
+* Harden regex expansion to prevent undesired expansions (prepend '^' and append '$' to queries).
+
 1.14 (Jawbreaker)
 Overall, 1.14 brings more preformance (regarding both speed and memory usage), better
 compatibility (POSIX/legacy systems), and improved security.
