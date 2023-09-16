@@ -1080,6 +1080,20 @@ expand_history(char **input)
 	return EXIT_SUCCESS;
 }
 
+static char *
+handle_empty_line(void)
+{
+	if (conf.autols == 1 && ((flags & DELAYED_REFRESH)
+	|| xargs.refresh_on_empty_line == 1)) {
+		flags &= ~DELAYED_REFRESH;
+		refresh_screen();
+	} else {
+		flags &= ~DELAYED_REFRESH;
+	}
+
+	return (char *)NULL;
+}
+
 /* Print the prompt and return the string entered by the user, to be
  * parsed later by parse_input_str() */
 char *
@@ -1103,7 +1117,7 @@ prompt(const int prompt_flag)
 	/* Tell my_rl_getc() (readline.c) to recalculate the length
 	 * of the last prompt line, needed to calculate the finder's offset
 	 * and the current cursor column. This length might vary if the
-	 * prompt contains dynamic values */
+	 * prompt contains dynamic values. */
 	prompt_offset = UNSET;
 
 /*	if (right_prompt && *right_prompt)
@@ -1117,15 +1131,9 @@ prompt(const int prompt_flag)
 
 	if (!input || !*input || rl_end == 0) {
 		free(input);
-		if (conf.autols == 1 && ((flags & DELAYED_REFRESH)
-		|| xargs.refresh_on_empty_line == 1)) {
-			flags &= ~DELAYED_REFRESH;
-			refresh_screen();
-		} else {
-			flags &= ~DELAYED_REFRESH;
-		}
-		return (char *)NULL;
+		return handle_empty_line();
 	}
+
 	flags &= ~DELAYED_REFRESH;
 
 	if (expand_history(&input) != EXIT_SUCCESS)
