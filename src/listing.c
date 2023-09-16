@@ -577,7 +577,6 @@ set_events_checker(void)
 			EV_ADD | EV_CLEAR, KQUEUE_FFLAGS, 0, workspaces[cur_ws].path);
 		watch = 1;
 		/* Register events */
-//		kevent(kq, events_to_monitor, NUM_EVENT_SLOTS, NULL, NUM_EVENT_FDS, NULL);
 		kevent(kq, events_to_monitor, NUM_EVENT_SLOTS, NULL, 0, NULL);
 	}
 
@@ -861,27 +860,14 @@ get_columns(void)
 static void
 get_ext_info(const filesn_t i, int *trim_type, size_t *ext_len)
 {
-	if (file_info[i].ext_name) {
-		*trim_type = TRIM_EXT;
+	if (!file_info[i].ext_name) {
+		char *dot = strrchr(file_info[i].name, '.');
+		if (!dot || dot == file_info[i].name || !dot[1])
+			return;
 
-		size_t bytes = 0;
-		if (is_utf8_name(file_info[i].ext_name, &bytes) == 0)
-			*ext_len = bytes;
-		else
-			*ext_len = wc_xstrlen(file_info[i].ext_name);
-
-		if ((int)*ext_len >= conf.max_name_len || (int)*ext_len <= 0) {
-			*ext_len = 0;
-			*trim_type = TRIM_NO_EXT;
-		}
-		return;
+		file_info[i].ext_name = dot;
 	}
 
-	char *dot = strrchr(file_info[i].name, '.');
-	if (!dot || dot == file_info[i].name || !dot[1])
-		return;
-
-	file_info[i].ext_name = dot;
 	*trim_type = TRIM_EXT;
 
 	size_t bytes = 0;
@@ -2299,7 +2285,7 @@ list_dir(void)
 		&& exclude_file_type(attr.st_mode, attr.st_nlink) == EXIT_SUCCESS) {
 			/* Decrease counters: the file won't be displayed */
 			if (*ename == '.' && stats.hidden > 0)
-				stats.hidden--;
+				--stats.hidden;
 			if (stat_ok == 0 && stats.unstat > 0)
 				--stats.unstat;
 			++excluded_files;
@@ -2547,7 +2533,7 @@ list_dir(void)
 #ifdef LINUX_FILE_CAPS
 			cap_t cap;
 #endif /* !LINUX_FILE_CAPS */
-			/* Do not perform the access check if the user is root */
+			/* Do not perform the access check if the user is root. */
 			if (user.uid != 0 && stat_ok == 1
 			&& check_file_access(attr.st_mode, attr.st_uid, attr.st_gid) == 0) {
 #ifndef _NO_ICONS
