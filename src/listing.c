@@ -1306,7 +1306,7 @@ pad_filename(const int ind_char, const filesn_t i, const int pad,
 #endif /* !_NO_ICONS */
 
 	if (file_info[i].dir == 1 && conf.classify == 1) {
-		cur_len++;
+		++cur_len;
 		if (file_info[i].filesn > 0 && conf.files_counter == 1
 		&& file_info[i].ruser == 1)
 			cur_len += DIGINUM((int)file_info[i].filesn);
@@ -1337,7 +1337,7 @@ pad_filename_light(const int ind_char, const filesn_t i, const int pad,
 
 	if (conf.classify == 1) {
 		if (file_info[i].dir == 1)
-			cur_len++;
+			++cur_len;
 		if (file_info[i].filesn > 0 && conf.files_counter == 1
 		&& file_info[i].ruser == 1)
 			cur_len += DIGINUM((int)file_info[i].filesn);
@@ -1621,16 +1621,16 @@ run_dir_cmd(const int mode)
 		launch_execl(buf);
 }
 
-/* Check if S is either .cfm.in or .cfm.out */
+/* Check if the file named S is either cfm.in or cfm.out.
+ * We already know it starts with a dot. */
 static void
 check_autocmd_file(const char *s)
 {
-	if (*s == '.' && s[1] == 'c' && s[2] == 'f' && s[3] == 'm'
-	&& s[4] == '.') {
-		if (s[5] == 'o' && s[6] == 'u' && s[7] == 't' && !s[8]) {
+	if (s[0] == 'c' && s[1] == 'f' && s[2] == 'm' && s[3] == '.') {
+		if (s[4] == 'o' && s[5] == 'u' && s[6] == 't' && !s[7]) {
 			dir_out = 1;
 		} else {
-			if (s[5] == 'i' && s[6] == 'n' && !s[7])
+			if (s[4] == 'i' && s[5] == 'n' && !s[6])
 				run_dir_cmd(DIR_IN);
 		}
 	}
@@ -1804,8 +1804,8 @@ list_dir_light(void)
 			continue;
 
 		/* Check .cfm.in and .cfm.out files for the autocommands function */
-		if (dir_changed == 1)
-			check_autocmd_file(ename);
+		if (dir_changed == 1 && *ename == '.')
+			check_autocmd_file(ename + 1);
 
 		/* Skip files according to a regex filter */
 		if (filter.str && filter.type == FILTER_FILE_NAME) {
@@ -2247,8 +2247,8 @@ list_dir(void)
 			continue;
 
 		/* Check .cfm.in and .cfm.out files for the autocommands function */
-		if (dir_changed == 1)
-			check_autocmd_file(ename);
+		if (dir_changed == 1 && *ename == '.')
+			check_autocmd_file(ename + 1);
 
 		/* Filter files according to a regex filter */
 		if (filter.str && filter.type == FILTER_FILE_NAME) {
