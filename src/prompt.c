@@ -1084,13 +1084,14 @@ static char *
 handle_empty_line(void)
 {
 	if (conf.autols == 1 && ((flags & DELAYED_REFRESH)
-	|| xargs.refresh_on_empty_line == 1)) {
+	|| xargs.refresh_on_empty_line == 1) && rl_pending_input == 0) {
 		flags &= ~DELAYED_REFRESH;
 		refresh_screen();
 	} else {
 		flags &= ~DELAYED_REFRESH;
 	}
 
+	rl_pending_input = 0;
 	return (char *)NULL;
 }
 

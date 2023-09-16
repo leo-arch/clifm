@@ -247,10 +247,15 @@ load_keybinds(void)
 }
 
 /* This call to prompt() just updates the prompt in case it was modified by
- * a keybinding, for example, chdir, files selection, and so on. */
+ * a keybinding, for example, chdir, files selection, trash, and so on. */
 static void
 rl_update_prompt(void)
 {
+	if (rl_line_buffer)
+		memset(rl_line_buffer, '\0', (size_t)rl_end);
+
+	/* Set this flag to prevent prompt() from refreshing the screen. */
+	rl_pending_input = 1;
 	/* In UPDATE mode, prompt() always returns NULL. */
 	prompt(PROMPT_UPDATE);
 	UNHIDE_CURSOR;
@@ -302,8 +307,8 @@ keybind_exec_cmd(char *str)
 			free(cmd[i]);
 		free(cmd);
 
-//		rl_update_prompt();
-		rl_update_prompt_old();
+		rl_update_prompt();
+//		rl_update_prompt_old();
 	}
 
 	args_n = old_args;
@@ -347,7 +352,8 @@ find_key(char *function)
 	return (char *)NULL;
 }
 
-int rl_toggle_max_filename_len(int count, int key)
+int
+rl_toggle_max_filename_len(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	if (kbind_busy == 1)
