@@ -869,7 +869,7 @@ construct_human_size(const off_t size)
 	float s = (float)size;
 
 	while (s >= base) {
-		s = s * mult_factor;
+		s = s * mult_factor; /* == (s = s / base), but faster */
 		++n;
 	}
 
@@ -879,15 +879,14 @@ construct_human_size(const off_t size)
      *
 	 * R: Ronnabyte, Q: Quettabyte. It's highly unlikely to have files of
 	 * these huge sizes in the near future, but anyway... */
-	const char *const u = "BKMGTPEZYRQ";
+	static const char *const u = "BKMGTPEZYRQ";
 	snprintf(str, MAX_UNIT_SIZE, "%.*f%c%c",
 		(s == 0.00f || s - (float)x == 0.00f) ? 0 : 2,
 		(double)s,
 		u[n],
 		(u[n] != 'B' && xargs.si == 1) ? 'B' : 0);
 
-	char *p = str;
-	return p;
+	return (char *)str;
 }
 
 #ifdef USE_XDU

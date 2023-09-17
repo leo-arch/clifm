@@ -666,7 +666,7 @@ get_longest_filename(const filesn_t n, const size_t pad)
 	/* longest_fc stores the amount of digits taken by the files counter of
 	 * the longest file name, provided it is a directory
 	 * We use this to trim file names up to MAX_NAME_LEN + LONGEST_FC, so
-	 * that we can make use the the space used by the files counter
+	 * that we can make use the the space used by the files counter.
 	 * Example:
 	 *    longest_dirname/13
 	 *    very_long_file_na~
@@ -821,7 +821,7 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad,
 					*counter = 0;
 				continue;
 			}
-			(*counter)++;
+			++(*counter);
 		}
 
 		int ind_chr = 0;
@@ -1671,12 +1671,12 @@ exclude_file_type_light(const unsigned char type)
 	int match = 0;
 
 	switch (*(filter.str + 1)) {
-	case 'd': if (type == DT_DIR) match = 1; break;
-	case 'f': if (type == DT_REG) match = 1; break;
-	case 'l': if (type == DT_LNK) match = 1; break;
+	case 'd': if (type == DT_DIR)  match = 1; break;
+	case 'f': if (type == DT_REG)  match = 1; break;
+	case 'l': if (type == DT_LNK)  match = 1; break;
 	case 's': if (type == DT_SOCK) match = 1; break;
-	case 'c': if (type == DT_CHR) match = 1; break;
-	case 'b': if (type == DT_BLK) match = 1; break;
+	case 'c': if (type == DT_CHR)  match = 1; break;
+	case 'b': if (type == DT_BLK)  match = 1; break;
 	case 'p': if (type == DT_FIFO) match = 1; break;
 #ifdef SOLARIS_DOORS
 	case 'D': if (type == DT_DOOR) match = 1; break;
@@ -1704,15 +1704,15 @@ exclude_file_type(const mode_t mode, const nlink_t links)
 	int match = 0;
 
 	switch (*(filter.str + 1)) {
-	case 'b': if (S_ISBLK(mode)) match = 1; break;
-	case 'd': if (S_ISDIR(mode)) match = 1; break;
+	case 'b': if (S_ISBLK(mode))  match = 1; break;
+	case 'd': if (S_ISDIR(mode))  match = 1; break;
 #ifdef SOLARIS_DOORS
 	case 'D': if (S_ISDOOR(mode)) match = 1; break;
 	case 'P': if (S_ISPORT(mode)) match = 1; break;
 #endif /* SOLARIS_DOORS */
-	case 'c': if (S_ISCHR(mode)) match = 1; break;
-	case 'f': if (S_ISREG(mode)) match = 1; break;
-	case 'l': if (S_ISLNK(mode)) match = 1; break;
+	case 'c': if (S_ISCHR(mode))  match = 1; break;
+	case 'f': if (S_ISREG(mode))  match = 1; break;
+	case 'l': if (S_ISLNK(mode))  match = 1; break;
 	case 'p': if (S_ISFIFO(mode)) match = 1; break;
 	case 's': if (S_ISSOCK(mode)) match = 1; break;
 
@@ -2631,10 +2631,17 @@ list_dir(void)
 			if (!extcolor)
 				break;
 
-			color_len += 4;
+			char *t = (char *)xnmalloc(color_len + 4, sizeof(char));
+			*t = '\x1b'; t[1] = '[';
+			memcpy(t + 2, extcolor, color_len);
+			t[color_len + 2] = 'm';
+			t[color_len + 3] = '\0';
+			file_info[n].ext_color = file_info[n].color = t;
+
+/*			color_len += 4;
 			file_info[n].ext_color = (char *)xnmalloc(color_len, sizeof(char));
 			snprintf(file_info[n].ext_color, color_len, "\x1b[%sm", extcolor);
-			file_info[n].color = file_info[n].ext_color;
+			file_info[n].color = file_info[n].ext_color; */
 		} /* End of DT_REG block */
 		break;
 
