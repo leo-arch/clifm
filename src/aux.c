@@ -861,11 +861,15 @@ construct_human_size(const off_t size)
 	static char str[MAX_UNIT_SIZE];
 
 	const float base = xargs.si == 1 ? 1000 : 1024;
+	static float mult_factor = 0;
+	if (mult_factor == 0)
+		mult_factor = 1.0f / base;
+
 	size_t n = 0;
 	float s = (float)size;
 
 	while (s >= base) {
-		s = s / base;
+		s = s * mult_factor;
 		++n;
 	}
 

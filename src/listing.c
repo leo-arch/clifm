@@ -1804,7 +1804,7 @@ list_dir_light(void)
 			continue;
 
 		/* Check .cfm.in and .cfm.out files for the autocommands function */
-		if (dir_changed == 1 && *ename == '.')
+		if (*ename == '.' && dir_changed == 1)
 			check_autocmd_file(ename + 1);
 
 		/* Skip files according to a regex filter */
@@ -2247,7 +2247,7 @@ list_dir(void)
 			continue;
 
 		/* Check .cfm.in and .cfm.out files for the autocommands function */
-		if (dir_changed == 1 && *ename == '.')
+		if (*ename == '.' && dir_changed == 1)
 			check_autocmd_file(ename + 1);
 
 		/* Filter files according to a regex filter */
@@ -2443,8 +2443,8 @@ list_dir(void)
 			const int daccess = (stat_ok == 1 &&
 				check_file_access(attr.st_mode, attr.st_uid, attr.st_gid) == 1);
 
-			file_info[n].filesn = conf.files_counter == 1
-				? (count_dir(ename, NO_CPOP) - 2) : 1;
+			file_info[n].filesn = (conf.files_counter == 1
+				? (count_dir(ename, NO_CPOP) - 2) : 1);
 
 			if (daccess == 0 || file_info[n].filesn < 0) {
 				file_info[n].color = nd_c;
@@ -2623,7 +2623,7 @@ list_dir(void)
 			else
 				file_info[n].ext_name = ext;
 #ifndef _NO_ICONS
-			if (conf.icons == 1 && name_icon_found == 0)
+			if (name_icon_found == 0 && conf.icons == 1)
 				get_ext_icon(ext, n);
 #endif /* !_NO_ICONS */
 			size_t color_len = 0;
