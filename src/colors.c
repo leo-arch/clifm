@@ -430,14 +430,21 @@ get_regfile_color(const char *filename, const struct stat *attr, int *is_ext)
 	if (!ext)
 		return color ? color : fi_c;
 
-	char *extcolor = get_ext_color(ext, NULL);
-	ext = (char *)NULL;
+	size_t color_len = 0;
+	char *extcolor = get_ext_color(ext, &color_len);
 	if (!extcolor)
 		return color ? color : fi_c;
 
-	snprintf(tmp_color, sizeof(tmp_color), "\x1b[%sm", extcolor); /* NOLINT */
+	if (color_len + 4 > sizeof(tmp_color)) {
+		*tmp_color = '\0';
+	} else {
+		*tmp_color = '\x1b'; tmp_color[1] = '[';
+		memcpy(tmp_color + 2, extcolor, color_len);
+		tmp_color[color_len + 2] = 'm';
+		tmp_color[color_len + 3] = '\0';
+	}
+
 	color = tmp_color;
-	extcolor = (char *)NULL;
 	*is_ext = 1;
 
 	return color;
@@ -740,7 +747,7 @@ check_ext_string(const char *ext, size_t *val_len)
 	int i;
 	for (i = 0; ext[i] && i < NAME_MAX; i++) {
 		if (ext[i] >= 'A' && ext[i] <= 'Z')
-			tmp_ext[i] = ext[i] + ' '; // tolower
+			tmp_ext[i] = ext[i] + ' '; /* Tolower */
 		else
 			tmp_ext[i] = ext[i];
 	}

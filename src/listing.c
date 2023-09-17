@@ -2637,11 +2637,6 @@ list_dir(void)
 			t[color_len + 2] = 'm';
 			t[color_len + 3] = '\0';
 			file_info[n].ext_color = file_info[n].color = t;
-
-/*			color_len += 4;
-			file_info[n].ext_color = (char *)xnmalloc(color_len, sizeof(char));
-			snprintf(file_info[n].ext_color, color_len, "\x1b[%sm", extcolor);
-			file_info[n].color = file_info[n].ext_color; */
 		} /* End of DT_REG block */
 		break;
 
