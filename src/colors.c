@@ -450,7 +450,7 @@ get_regfile_color(const char *filename, const struct stat *attr, int *is_ext)
 	return color;
 }
 
-/* Retrieve the color corresponding to dir FILENAME with mode MODE
+/* Retrieve the color corresponding to dir FILENAME with mode MODE.
  * If LINKS > 2, we know the directory is populated, so that there's no need
  * to run count_dir(). If COUNT > -1, we already know whether the
  * directory is populatoed or not: use this value for FILES_DIR (do not run
@@ -702,7 +702,7 @@ END:
 #endif /* !CLIFM_SUCKLESS */
 
 /* Look for the hash HASH in the hash table.
- * Return a pointer to the corresponding color if found or NULL
+ * Return a pointer to the corresponding color if found or NULL.
  *
  * NOTE: We check all available hashes to avoid conflicts.
  * The hash table is built on user supplied data (color scheme file)
@@ -734,7 +734,7 @@ check_ext_hash(const size_t hash, size_t *count)
 
 
 /* Return the color code associated to the file extension EXT, updating
- * VAL_LEN, if not NULL, to the length of this code. */
+ * VAL_LEN, if not NULL, to the length of this color code. */
 static char *
 check_ext_string(const char *ext, size_t *val_len)
 {

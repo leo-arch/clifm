@@ -2673,8 +2673,17 @@ parse_input_str(char *str)
 				 * #   2.1) ELN EXPANSION   #
 				 * ########################## */
 
+		/* should_expand_eln() will check rl_line_buffer looking for the
+		 * command name. Now, if the command name has a fused ELN plus space
+		 * and at least a second parameter (ex: CMD1 2), should_expand_eln()
+		 * will fail. Let's redirect rl_line_buffer to the buffered command
+		 * name (CMD) so that the check will be properly performed. */
+		char *lb_tmp = rl_line_buffer;
+		if (rl_dispatching == 0 && fusedcmd_ok == 1)
+			rl_line_buffer = substr[0];
 		if (should_expand_eln(substr[i]) == 1)
 			eln_expand(&substr, i);
+		rl_line_buffer = lb_tmp;
 
 				/* ################################
 				 * #  2.2) ENVIRONEMNT VARIABLES  #
