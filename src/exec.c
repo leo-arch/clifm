@@ -1602,7 +1602,7 @@ trash_func(char **args, int *_cont)
 
 	int exit_status = trash_function(args);
 
-	if (is_sel) { /* If 'tr sel', deselect everything */
+	if (is_sel && sel_n > 0) { /* If 'tr sel', deselect everything */
 		int i = (int)sel_n;
 		while (--i >= 0)
 			free(sel_elements[i].name);
