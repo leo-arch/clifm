@@ -789,6 +789,9 @@ is_quoted_word(const size_t index)
 int
 cmd_keeps_quotes(char *str)
 {
+	if (rl_dispatching == 1)
+		return 0;
+
 	if (flags & IN_BOOKMARKS_SCREEN)
 		return 0;
 
