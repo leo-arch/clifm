@@ -307,8 +307,11 @@ keybind_exec_cmd(char *str)
 			free(cmd[i]);
 		free(cmd);
 
+#ifdef __HAIKU__
+		rl_update_prompt_old();
+#else
 		rl_update_prompt();
-//		rl_update_prompt_old();
+#endif /* __HAIKU__ */
 	}
 
 	args_n = old_args;
