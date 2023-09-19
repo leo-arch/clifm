@@ -714,11 +714,6 @@ set_long_attribs(const filesn_t n, const struct stat *attr)
 		file_info[n].size = dir_size(file_info[n].name, 1,
 			&file_info[n].du_status);
 	} else {
-/*		if (n == 82)
-			file_info[n].size = 16583690616111;
-		else if (n == 84)
-			file_info[n].size = 15116597272;
-		else */
 		file_info[n].size = FILE_SIZE_PTR(attr);
 	}
 }
@@ -1955,9 +1950,13 @@ list_dir_light(void)
 #endif /* !_NO_ICONS */
 
 		if (conf.long_view == 1) {
-			struct stat _attr;
-			if (lstat(file_info[n].name, &_attr) != -1)
-				set_long_attribs(n, &_attr);
+#ifndef _DIRENT_HAVE_D_TYPE
+			set_long_attribs(n, &attr);
+#else
+			struct stat a;
+			if (lstat(file_info[n].name, &a) != -1)
+				set_long_attribs(n, &a);
+#endif /* !_DIRENT_HAVE_D_TYPE */
 		}
 
 		if (xargs.disk_usage_analyzer == 1) {
