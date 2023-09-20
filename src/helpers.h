@@ -867,6 +867,7 @@ extern time_t curdir_mtime;
                                              : 19)
 
 #define IS_DIGIT(c)    ((unsigned int)(c) >= '0' && (unsigned int)(c) <= '9')
+//#define IS_DIGIT(c)    ((unsigned int)(c) - '0' <= '9')
 #define IS_ALPHA(c)    ((unsigned int)(c) >= 'a' && (unsigned int)(c) <= 'z')
 #define IS_COMMENT(c)  ((unsigned int)(c) == '#' || (unsigned int)(c) == ';')
 #define IS_CTRL_CHR(c) ((unsigned int)(c) < ' ')

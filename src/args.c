@@ -1382,8 +1382,12 @@ parse_cmdline_args(const int argc, char **argv)
 			set_starting_path(spath);
 			free(spath);
 		}
+	} else {
+		if (xargs.list_and_quit == 1) {
+			conf.restore_last_path = 0;
+			set_start_path();
+		}
 	}
-
 }
 
 #else
@@ -1667,6 +1671,13 @@ parse_cmdline_args(const int argc, char **argv)
 	if (spath) {
 		set_starting_path(spath);
 		free(spath);
+	} else {
+		if (xargs.list_and_quit == 1) {
+			/* Starting path not specified in the command line, let's use
+			 * the current directory. */
+			conf.restore_last_path = 0;
+			set_start_path();
+		}
 	}
 }
 #endif /* _BE_POSIX */
