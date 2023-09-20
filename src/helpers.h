@@ -29,7 +29,7 @@
 #define PROGRAM_NAME "clifm"
 #define PROGRAM_DESC "The command line file manager"
 #define VERSION "1.14.6"
-#define DATE "Sep 18, 2023"
+#define DATE "Sep 20, 2023"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "https://github.com/leo-arch/clifm"
 #define LICENSE "GPL2+"

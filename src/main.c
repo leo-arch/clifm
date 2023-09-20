@@ -1188,7 +1188,7 @@ main(int argc, char *argv[])
 
 	if (xargs.list_and_quit == 1) {
 		list_files();
-		exit(EXIT_SUCCESS);
+		exit(EXIT_SUCCESS); /* Never reached */
 	}
 
 	set_sel_file();

@@ -1,3 +1,16 @@
+1.14.6
+
+Bug fixes
+* "CMD1 2" not expanding ELNs (1 and 2).
+* Crash with Ctrl-Alt-u keybinding.
+* Wrongly attempting to remove the selections file when running 't sel' and there are no selected files.
+* Wrong alignment for big file sizes in long view (sizes in bytes only).
+* Haiku: infinite "sel *" loop after keybind.
+* Crash when running with --list-and-quit and no parameter is provided.
+
+New features/improvements
+* Properly right-pad dash for unknown file sizes (in bytes) in long view mode.
+
 1.14.5
 
 Bug fixes
