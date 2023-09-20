@@ -867,7 +867,7 @@ run_and_exit(void)
 	 See https://brennan.io/2015/01/16/write-a-shell-in-c/
 */
 __attribute__ ((noreturn))
-static inline void
+static void
 run_main_loop(void)
 {
 #ifdef RUN_CMD

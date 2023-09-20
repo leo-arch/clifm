@@ -886,7 +886,7 @@ construct_human_size(const off_t size)
 		u[n],
 		(u[n] != 'B' && xargs.si == 1) ? 'B' : 0);
 
-	return (char *)str;
+	return str;
 }
 
 #ifdef USE_XDU
