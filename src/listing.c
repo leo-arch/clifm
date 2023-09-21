@@ -60,12 +60,17 @@
 /* Check for temporary files:
  * 1. "*~" Gral purpose temp files (mostly used by text editors)
  * 2. "#*#" Emacs auto-save temp files
+ * 3. ".~*#" Libreoffice lock files
  * Might also add Office lock/temp files: "~$*" and "~*" */
-#define IS_TEMP_FILE(n, l) ((l) > 0         \
+/*#define IS_TEMP_FILE(n, l) ((l) > 0         \
 	&& ((n)[(l) - 1] == '~'                 \
-	|| (*(n) == '#' && (n)[(l) - 1] == '#')))
+	|| (*(n) == '#' && (n)[(l) - 1] == '#'))) */
+#define IS_TEMP_FILE(n, l) ( (l) > 0              \
+	&& ((n)[(l) - 1] == '~'                       \
+	|| ((*(n) == '#' || (*(n) == '.'              \
+	&& (n)[1] == '~')) && (n)[(l) - 1] == '#') ) )
 
-#define IS_EXEC(s) (((s).st_mode & S_IXUSR)            \
+#define IS_EXEC(s) (((s).st_mode & S_IXUSR)               \
 	|| ((s).st_mode & S_IXGRP) || ((s).st_mode & S_IXOTH))
 
 #include "aux.h"
@@ -2372,8 +2377,7 @@ list_dir(void)
 			if (conf.long_view == 1) {
 #if defined(LINUX_FILE_XATTRS)
 				if (prop_fields.xattr == 1 && listxattr(ename, NULL, 0)) {
-					file_info[n].xattr = 1;
-					have_xattr = 1;
+					file_info[n].xattr = have_xattr = 1;
 				}
 #endif /* LINUX_FILE_XATTRS */
 				switch (prop_fields.time) {
@@ -2432,8 +2436,7 @@ list_dir(void)
 			if (conf.icons == 1) {
 				get_dir_icon(file_info[n].name, (int)n);
 
-				/* If set from the color scheme file */
-				if (*dir_ico_c)
+				if (*dir_ico_c)	/* If set from the color scheme file */
 					file_info[n].icon_color = dir_ico_c;
 			}
 #endif /* !_NO_ICONS */
