@@ -234,6 +234,10 @@ ExtColors="*.tar=ARCHIVE:*.tgz=ARCHIVE:*.arc=ARCHIVE:*.arj=ARCHIVE:*.taz=ARCHIVE
 # ERROR is the color used to print bad values
 # SHADEn is the color used for the shade N
 #
+# The meaning of each date shade is (in order):
+# hour, day, weak, month, older (256 colors)
+# hour, day, older (8 colors: only 3 shades available)
+#
 # For 4-bit colors (1), valid colors are in the range 30-37
 # For 8-bit colors (2), valid colors are in the range 0-255
 # For 24-bit colors (3), valid colors have this format: #RRGGBB
@@ -250,7 +254,10 @@ DateShades="1,31-2,36-1,36,36-2"
 
 #NOTE: For DateShades to work, the 'dd' color code (solid color for dates) needs to be unset (default)
 
-# Same as DateShades, but for file sizes
+# Same as DateShades, but for file sizes.
+# type, error, byte, Kb, Mb, Gb, bigger (256 colors)
+# type, error, byte/Kb, Mb, bigger (8 colors: only three shades available)
+
 SizeShades="1,31-2,32,33,31"
 #SizeShades="2,196-2,43,112,227,214,202"
 #SizeShades="3,#ff0000-2,#00d7af,#87d700,#ffff5f,#ffaf00,#ff5f00"
