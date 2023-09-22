@@ -58,17 +58,16 @@
 #endif /* TOURBIN_QSORT */
 
 /* Check for temporary files:
- * 1. "*~" Gral purpose temp files (mostly used by text editors)
- * 2. "#*#" Emacs auto-save temp files
+ * 1. "*~"   Gral purpose temp files (mostly used by text editors)
+ * 2. "#*#"  Emacs auto-save temp files
  * 3. ".~*#" Libreoffice lock files
- * Might also add Office lock/temp files: "~$*" and "~*" */
-/*#define IS_TEMP_FILE(n, l) ((l) > 0         \
-	&& ((n)[(l) - 1] == '~'                 \
-	|| (*(n) == '#' && (n)[(l) - 1] == '#'))) */
-#define IS_TEMP_FILE(n, l) ( (l) > 0              \
-	&& ((n)[(l) - 1] == '~'                       \
-	|| ((*(n) == '#' || (*(n) == '.'              \
-	&& (n)[1] == '~')) && (n)[(l) - 1] == '#') ) )
+ * 4. "~$*"  Office temp files
+ * NOTE: MC seems to take only "*~" and "#*" as temp files. */
+#define IS_TEMP_FILE(n, l) ( (l) > 0               \
+	&& ((n)[(l) - 1] == '~'                        \
+	|| ((*(n) == '#' || (*(n) == '.'               \
+		&& (n)[1] == '~')) && (n)[(l) - 1] == '#') \
+	|| (*(n) == '~' && (n)[1] == '$') ) )
 
 #define IS_EXEC(s) (((s).st_mode & S_IXUSR)               \
 	|| ((s).st_mode & S_IXGRP) || ((s).st_mode & S_IXOTH))
