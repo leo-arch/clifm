@@ -198,7 +198,8 @@ define MARKUP=1;33  # Same as CODE
 # dxr = Execute (reg files)
 # dz =  Size (1)
 
-# (1) If unset, gradient colors will be used (default)
+# (1) If unset, gradient colors will be used (default). See
+# DateShades and SizeShades below for more info.
 
 ## Workspaces
 # wsN = Workspace number N

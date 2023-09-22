@@ -207,7 +207,8 @@ define TEMP=38;5;247   # Dimmed white
 # dxr = Execute (reg files)
 # dz =  Size (1)
 
-# (1) If unset, gradient colors will be used (default)
+# (1) If unset, gradient colors will be used (default). See
+# DateShades and SizeShades below for more information.
 
 ## Workspaces
 # wsN = Workspace number N
