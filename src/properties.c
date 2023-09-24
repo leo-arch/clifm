@@ -86,9 +86,11 @@
 
 #ifndef _BE_POSIX
 # ifdef __linux__
-#  define HAVE_ACL
-#  include <sys/acl.h>
-#  include <acl/libacl.h>
+#  if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,46)
+#   define HAVE_ACL
+#   include <sys/acl.h>
+#   include <acl/libacl.h>
+#  endif // Linux >= 2.5.46
 # endif // __linux__
 /*# if defined(__NetBSD__)
 #  if __NetBSD_Prereq__(9,99,63)
