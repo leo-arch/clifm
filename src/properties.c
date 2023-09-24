@@ -88,10 +88,10 @@
 # ifdef __linux__
 #  if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,46)
 #   define HAVE_ACL
-#   include <sys/acl.h> // acl_get_file(), acl_get_entry()
-#   include <acl/libacl.h> // acl_extended_file_nofollow(), acl_to_any_text()
-#  endif // Linux >= 2.5.46
-# endif // __linux__
+#   include <sys/acl.h> /* acl_get_file(), acl_get_entry() */
+#   include <acl/libacl.h> /* acl_extended_file_nofollow(), acl_to_any_text() */
+#  endif /* Linux >= 2.5.46 */
+# endif /* __linux__ */
 /*# if defined(__NetBSD__)
 #  if __NetBSD_Prereq__(9,99,63)
 #   include <sys/acl.h>
@@ -1420,6 +1420,9 @@ print_file_acl(char *file, const mode_t mode)
 	if (!acl)
 		goto END;
 
+	if ((found = acl_valid(acl)) == -1)
+		goto END;
+
 	list_acl(acl, &found, ACL_TYPE_ACCESS);
 
 	if (!S_ISDIR(mode))
@@ -1433,8 +1436,9 @@ print_file_acl(char *file, const mode_t mode)
 	list_acl(acl, &found, ACL_TYPE_DEFAULT);
 
 END:
-	if (found == 0)
-		puts(_("None"));
+	if (found <= 0)
+		puts(found == 0 ? _("None") : _("Invalid ACL"));
+
 	acl_free(acl);
 #endif /* __linux__ */
 }
