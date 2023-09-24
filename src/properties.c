@@ -1440,7 +1440,7 @@ END:
 		puts(found == 0 ? _("None") : _("Invalid ACL"));
 
 	acl_free(acl);
-#endif /* __linux__ */
+#endif /* !__linux__ */
 }
 #endif /* HAVE_ACL */
 
@@ -1449,9 +1449,9 @@ print_file_details(char *filename, const struct stat *attr, const char file_type
 	const int file_perm)
 {
 #if !defined(LINUX_FILE_ATTRS) && !defined(LINUX_FILE_XATTRS) \
-&& !defined(HAVE_ACL)
+&& !defined(HAVE_ACL) && !defined(LINUX_FILE_CAPS)
 	UNUSED(filename);
-#endif /* !LINUX_FILE_ATTRS && ! LINUX_FILE_XATTRS */
+#endif
 
 	struct passwd *owner = getpwuid(attr->st_uid);
 	struct group *group = getgrgid(attr->st_gid);

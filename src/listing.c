@@ -2377,10 +2377,10 @@ list_dir(void)
 
 			if (conf.long_view == 1) {
 #if defined(LINUX_FILE_XATTRS)
-				if (prop_fields.xattr == 1 && listxattr(ename, NULL, 0)) {
+				if (prop_fields.xattr == 1 && listxattr(ename, NULL, 0))
 					file_info[n].xattr = have_xattr = 1;
-				}
 #endif /* LINUX_FILE_XATTRS */
+
 				switch (prop_fields.time) {
 				case PROP_TIME_ACCESS:
 					file_info[n].ltime = (time_t)attr.st_atime; break;
@@ -2559,7 +2559,9 @@ list_dir(void)
 			}
 
 #ifdef LINUX_FILE_CAPS
-			else if (check_cap == 1 && (cap = cap_get_file(ename))) {
+			else if (check_cap == 1 && (conf.long_view == 0
+			|| prop_fields.xattr == 0 || have_xattr == 1)
+			&& (cap = cap_get_file(ename))) {
 				file_info[n].color = ca_c;
 				++stats.caps;
 				cap_free(cap);
