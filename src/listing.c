@@ -2378,7 +2378,7 @@ list_dir(void)
 			if (conf.long_view == 1) {
 #if defined(LINUX_FILE_XATTRS)
 				if (prop_fields.xattr == 1 && file_info[n].type != DT_LNK
-				&& listxattr(ename, NULL, 0))
+				&& listxattr(ename, NULL, 0) > 0)
 					file_info[n].xattr = have_xattr = 1;
 #endif /* LINUX_FILE_XATTRS */
 

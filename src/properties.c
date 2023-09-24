@@ -1085,10 +1085,10 @@ xattr_val_is_printable(const char *val, const size_t len)
 }
 
 static int
-print_extended_attributes(char *s, const mode_t mode)
+print_extended_attributes(char *s, const mode_t mode, const int xattr)
 {
-	if (S_ISLNK(mode)) {
-		puts(_("Unavailable"));
+	if (xattr == 0 || S_ISLNK(mode)) {
+		puts(S_ISLNK(mode) ? _("Unavailable") : _("None"));
 		return EXIT_SUCCESS;
 	}
 
@@ -1262,8 +1262,8 @@ is_acl(const char *file)
 } */
 
 static void
-print_file_perms(const struct stat *attr,
-	const char file_type_char, const char *file_type_char_color)
+print_file_perms(const struct stat *attr, const char file_type_char,
+	const char *file_type_char_color, const int xattr)
 {
 	char tmp_file_type_char_color[MAX_COLOR + 1];
 	xstrsncpy(tmp_file_type_char_color, file_type_char_color,
@@ -1272,13 +1272,14 @@ print_file_perms(const struct stat *attr,
 		remove_bold_attr(tmp_file_type_char_color);
 
 	struct perms_t perms = get_file_perms(attr->st_mode);
-	printf(_("(%s%04o%s)%s%c%s/%s%c%s%c%s%c%s.%s%c%s%c%s%c%s.%s%c%s%c%s%c%s "
+	printf(_("(%s%04o%s)%s%c%s/%s%c%s%c%s%c%s.%s%c%s%c%s%c%s.%s%c%s%c%s%c%s%s "
 		"Links: %s%zu%s "),
 		do_c, attr->st_mode & 0777, df_c,
 		tmp_file_type_char_color, file_type_char, dn_c,
 		perms.cur, perms.ur, perms.cuw, perms.uw, perms.cux, perms.ux, dn_c,
 		perms.cgr, perms.gr, perms.cgw, perms.gw, perms.cgx, perms.gx, dn_c,
 		perms.cor, perms.or, perms.cow, perms.ow, perms.cox, perms.ox, df_c,
+		xattr == 1 ? "@" : "",
 		BOLD, (size_t)attr->st_nlink, df_c);
 }
 
@@ -1336,9 +1337,9 @@ print_file_name(char *filename, const char *color, const char file_type,
 
 #ifdef LINUX_FILE_CAPS
 static void
-print_capabilities(const char *filename)
+print_capabilities(const char *filename, const int xattr)
 {
-	cap_t cap = cap_get_file(filename);
+	cap_t cap = xattr == 1 ? cap_get_file(filename) : NULL;
 	if (!cap) {
 		puts(_("None"));
 		return;
@@ -1397,7 +1398,7 @@ list_acl(const acl_t acl, int *found, const acl_type_t type)
 /* Print ACLs for FILE, whose mode is MODE.
  * If FILE is a directory, default ACLs are checked besides access ACLs. */
 static void
-print_file_acl(char *file, const mode_t mode)
+print_file_acl(char *file, const mode_t mode, const int xattr)
 {
 #ifndef __linux__
 	UNUSED(file); UNUSED(mode);
@@ -1412,8 +1413,7 @@ print_file_acl(char *file, const mode_t mode)
 	acl_t acl = (acl_t)NULL;
 	int found = 0;
 
-	/* acl_extended_file_nofollow() is Linux-specific */
-	if (!file || !*file || acl_extended_file_nofollow(file) == 0)
+	if (!file || !*file || xattr == 0)
 		goto END;
 
 	acl = acl_get_file(file, ACL_TYPE_ACCESS);
@@ -1446,7 +1446,7 @@ END:
 
 static void
 print_file_details(char *filename, const struct stat *attr, const char file_type,
-	const int file_perm)
+	const int file_perm, const int xattr)
 {
 #if !defined(LINUX_FILE_ATTRS) && !defined(LINUX_FILE_XATTRS) \
 && !defined(HAVE_ACL) && !defined(LINUX_FILE_CAPS)
@@ -1528,18 +1528,18 @@ print_file_details(char *filename, const struct stat *attr, const char file_type
 
 #if defined(LINUX_FILE_XATTRS)
 	fputs(_("Xattributes:\t"), stdout);
-	print_extended_attributes(filename, attr->st_mode);
+	print_extended_attributes(filename, attr->st_mode, xattr);
 #endif /* LINUX_FILE_XATTRS */
 
 #if defined(HAVE_ACL)
 	fputs(_("ACL-extended:\t"), stdout);
-	print_file_acl(filename, attr->st_mode);
+	print_file_acl(filename, attr->st_mode, xattr);
 #endif /* HAVE_ACL */
 
 #if defined(LINUX_FILE_CAPS)
 	fputs(_("Capabilities:\t"), stdout);
 	if (S_ISREG(attr->st_mode))
-		print_capabilities(filename);
+		print_capabilities(filename, xattr);
 	else
 		puts(_("Unavailable"));
 #endif /* LINUX_FILE_CAPS */
@@ -1909,9 +1909,15 @@ do_stat(char *filename, const int follow_link)
 	char *color = get_file_type_and_color(link_target ? link_target : filename,
 		&attr, &file_type, &ctype);
 
-	print_file_perms(&attr, file_type, ctype);
+#if defined(LINUX_FILE_XATTRS)
+	int xattr = llistxattr(link_target ? link_target : filename, NULL, 0) > 0;
+#else
+	int xattr = 0;
+#endif
+
+	print_file_perms(&attr, file_type, ctype, xattr);
 	print_file_name(filename, color, file_type, attr.st_mode, link_target);
-	print_file_details(filename, &attr, file_type, file_perm);
+	print_file_details(filename, &attr, file_type, file_perm, xattr);
 	print_timestamps(link_target ? link_target : filename, &attr);
 	free(link_target);
 	print_file_size(filename, &attr, file_perm, follow_link);
