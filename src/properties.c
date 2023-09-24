@@ -85,20 +85,25 @@
 #endif /* !_BE_POSIX */
 
 #ifndef _BE_POSIX
-# if defined(__NetBSD__)
+# ifdef __linux__
+#  define HAVE_ACL
+#  include <sys/acl.h>
+#  include <acl/libacl.h>
+# endif // __linux__
+/*# if defined(__NetBSD__)
 #  if __NetBSD_Prereq__(9,99,63)
 #   include <sys/acl.h>
 #   define HAVE_ACL
-#  endif /* NetBSD >= 9.99.63 */
+#  endif // NetBSD >= 9.99.63
 # elif !defined(__HAIKU__) && !defined(__OpenBSD__) && !defined(__sun) \
 && !defined(__DragonFly__)
 #  include <sys/acl.h>
 #  if defined(__linux__)
 #   include <acl/libacl.h>
-#  endif /* __linux__ */
+#  endif // __linux__
 #  define HAVE_ACL
-# endif /* __NetBSD__ */
-#endif /* _BE_POSIX */
+# endif // __NetBSD__ */
+#endif /* !_BE_POSIX */
 
 #include "aux.h"
 #include "checks.h"
