@@ -600,7 +600,7 @@ get_longest_filename(const filesn_t n, const size_t pad)
 	filesn_t i = (max_files != UNSET && c_max_files < n) ? c_max_files : n;
 	filesn_t longest_index = -1;
 
-	/* Cast only once here instead of hundreds of times in the while loop */
+	/* Cast only once here instead of hundreds of times in the while loop. */
 	size_t c_max_name_len = (size_t)conf.max_name_len;
 	size_t c_min_name_trim = (size_t)conf.min_name_trim;
 
@@ -663,14 +663,14 @@ get_longest_filename(const filesn_t n, const size_t pad)
 	}
 
 #ifndef _NO_ICONS
-	if (conf.icons == 1 && conf.long_view == 0 && conf.columned == 1)
+	if (conf.long_view == 0 && conf.icons == 1 && conf.columned == 1)
 		longest += 3;
 #endif /* !_NO_ICONS */
 
 	/* longest_fc stores the amount of digits taken by the files counter of
-	 * the longest file name, provided it is a directory
+	 * the longest file name, provided it is a directory.
 	 * We use this to trim file names up to MAX_NAME_LEN + LONGEST_FC, so
-	 * that we can make use the the space used by the files counter.
+	 * that we can make use of the space used by the files counter.
 	 * Example:
 	 *    longest_dirname/13
 	 *    very_long_file_na~
@@ -727,8 +727,8 @@ set_long_attribs(const filesn_t n, const struct stat *attr)
 static inline char *
 get_ind_char(const filesn_t index, int *ind_chr)
 {
-	int print_lnk_char = (conf.color_lnk_as_target == 1
-		&& file_info[index].symlink == 1 && follow_symlinks == 1
+	int print_lnk_char = (file_info[index].symlink == 1
+		&& conf.color_lnk_as_target == 1 && follow_symlinks == 1
 		&& conf.icons == 0 && conf.light_mode == 0);
 
 	*ind_chr = file_info[index].sel == 1 ? SELFILE_CHR
@@ -1450,6 +1450,8 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 		? (filesn_t)max_files : files;
 
 	/* How many lines (rows) do we need to print NN files? */
+	/* Division/modulo is slow, true. But the compiler will make a much
+	 * better job than us at optimizing this code. */
 	filesn_t rows = nn / (filesn_t)columns_n;
 	if (nn % (filesn_t)columns_n > 0)
 		++rows;

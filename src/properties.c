@@ -84,6 +84,22 @@
 # endif /* BSD */
 #endif /* !_BE_POSIX */
 
+#ifndef _BE_POSIX
+# if defined(__NetBSD__)
+#  if __NetBSD_Prereq__(9,99,63)
+#   include <sys/acl.h>
+#   define HAVE_ACL
+#  endif /* NetBSD >= 9.99.63 */
+# elif !defined(__HAIKU__) && !defined(__OpenBSD__) && !defined(__sun) \
+&& !defined(__DragonFly__)
+#  include <sys/acl.h>
+#  if defined(__linux__)
+#   include <acl/libacl.h>
+#  endif /* __linux__ */
+#  define HAVE_ACL
+# endif /* __NetBSD__ */
+#endif /* _BE_POSIX */
+
 #include "aux.h"
 #include "checks.h"
 #include "colors.h"
@@ -117,10 +133,6 @@
 #ifndef minor /* Not defined in Haiku */
 # define minor(x) (x & 0xFF)
 #endif /* minor */
-
-//#ifndef DT_DIR
-//# define DT_DIR 4
-//#endif /* DT_DIR */
 
 /* Macros to calculate relative timestamps */
 #define RT_SECOND 1
@@ -1066,8 +1078,13 @@ xattr_val_is_printable(const char *val, const size_t len)
 }
 
 static int
-print_extended_attributes(char *s)
+print_extended_attributes(char *s, const mode_t mode)
 {
+	if (S_ISLNK(mode)) {
+		puts(_("Unavailable"));
+		return EXIT_SUCCESS;
+	}
+
 	ssize_t buflen = 0, keylen = 0, vallen = 0;
 	char *buf = (char *)NULL, *key = (char *)NULL, *val = (char *)NULL;
 
@@ -1201,8 +1218,43 @@ get_file_type_and_color(const char *filename, const struct stat *attr,
 	return color;
 }
 
+/* Return 1 if FILE has some ACL property and zero if none
+ * See: https://man7.org/tlpi/code/online/diff/acl/acl_view.c.html */
+/*
+static int
+is_acl(const char *file)
+{
+	if (!file || !*file)
+		return 0;
+
+#ifndef HAVE_ACL
+	return 0;
+#else
+	acl_t acl;
+	acl = acl_get_file(file, ACL_TYPE_ACCESS);
+
+	if (!acl)
+		return 0;
+
+	acl_entry_t entry;
+	int entryid, num = 0;
+
+	for (entryid = ACL_FIRST_ENTRY;; entryid = ACL_NEXT_ENTRY) {
+		if (acl_get_entry(acl, entryid, &entry) != 1 || num > 3)
+			break;
+		num++;
+	}
+
+	acl_free(acl);
+
+	// If num > 3 we have something else besides owner, group, and others,
+	// that is, we have at least one ACL property.
+	return (num > 3 ? 1 : 0);
+#endif // !HAVE_ACL
+} */
+
 static void
-print_file_perms(char *filename, const struct stat *attr,
+print_file_perms(const struct stat *attr,
 	const char file_type_char, const char *file_type_char_color)
 {
 	char tmp_file_type_char_color[MAX_COLOR + 1];
@@ -1212,14 +1264,14 @@ print_file_perms(char *filename, const struct stat *attr,
 		remove_bold_attr(tmp_file_type_char_color);
 
 	struct perms_t perms = get_file_perms(attr->st_mode);
-	printf(_("(%s%04o%s)%s%c%s/%s%c%s%c%s%c%s.%s%c%s%c%s%c%s.%s%c%s%c%s%c%s%s "
+	printf(_("(%s%04o%s)%s%c%s/%s%c%s%c%s%c%s.%s%c%s%c%s%c%s.%s%c%s%c%s%c%s "
 		"Links: %s%zu%s "),
 		do_c, attr->st_mode & 0777, df_c,
 		tmp_file_type_char_color, file_type_char, dn_c,
 		perms.cur, perms.ur, perms.cuw, perms.uw, perms.cux, perms.ux, dn_c,
 		perms.cgr, perms.gr, perms.cgw, perms.gw, perms.cgx, perms.gx, dn_c,
 		perms.cor, perms.or, perms.cow, perms.ow, perms.cox, perms.ox, df_c,
-		is_acl(filename) ? "+" : "", BOLD, (size_t)attr->st_nlink, df_c);
+		BOLD, (size_t)attr->st_nlink, df_c);
 }
 
 static void
@@ -1280,7 +1332,7 @@ print_capabilities(const char *filename)
 {
 	cap_t cap = cap_get_file(filename);
 	if (!cap) {
-		puts("None");
+		puts(_("None"));
 		return;
 	}
 
@@ -1296,11 +1348,94 @@ print_capabilities(const char *filename)
 }
 #endif /* LINUX_FILE_CAPS */
 
+#ifdef HAVE_ACL
+static void
+list_acl(const acl_t acl, int *found, const acl_type_t type)
+{
+	acl_entry_t entry;
+	int entryid;
+	int num = 0;
+	int f = *found;
+
+	for (entryid = ACL_FIRST_ENTRY; ; entryid = ACL_NEXT_ENTRY) {
+		if (acl_get_entry(acl, entryid, &entry) != 1)
+			break;
+
+		/* We don't care about base ACL entries (owner, group, and others),
+		 * that is, entries 0, 1, and 2. */
+		if (num == 3) {
+			/* acl_to_any_text() is Linux-specific */
+			char *val = acl_to_any_text(acl,
+				type == ACL_TYPE_DEFAULT ? "default:" : (char *)NULL,
+				',', TEXT_ABBREVIATE);
+
+			if (val) {
+				printf("%s%s\n", f > 0 ? "\t\t" : "", val);
+				f++;
+				acl_free(val);
+			}
+
+			break;
+		}
+
+		num++;
+	}
+
+	*found = f;
+}
+
+/* Print ACLs for FILE, whose mode is MODE.
+ * If FILE is a directory, default ACLs are checked besides access ACLs. */
+static void
+print_file_acl(char *file, const mode_t mode)
+{
+#ifndef __linux__
+	UNUSED(file); UNUSED(mode);
+	puts(_("Unavailable"));
+	return;
+#endif /* __linux__ */
+
+	if (S_ISLNK(mode)) {
+		puts(_("Unavailable"));
+		return;
+	}
+
+	acl_t acl = (acl_t)NULL;
+	int found = 0;
+
+	/* acl_extended_file_nofollow() is Linux-specific */
+	if (!file || !*file || acl_extended_file_nofollow(file) == 0)
+		goto END;
+
+	acl = acl_get_file(file, ACL_TYPE_ACCESS);
+	if (!acl)
+		goto END;
+
+	list_acl(acl, &found, ACL_TYPE_ACCESS);
+
+	if (!S_ISDIR(mode))
+		goto END; /* Only directories have default ACLs */
+
+	acl_free(acl);
+	acl = acl_get_file(file, ACL_TYPE_DEFAULT);
+	if (!acl)
+		goto END;
+
+	list_acl(acl, &found, ACL_TYPE_DEFAULT);
+
+END:
+	if (found == 0)
+		puts(_("None"));
+	acl_free(acl);
+}
+#endif /* HAVE_ACL */
+
 static void
 print_file_details(char *filename, const struct stat *attr, const char file_type,
 	const int file_perm)
 {
-#if !defined(LINUX_FILE_ATTRS) && !defined(LINUX_FILE_XATTRS)
+#if !defined(LINUX_FILE_ATTRS) && !defined(LINUX_FILE_XATTRS) \
+&& !defined(HAVE_ACL)
 	UNUSED(filename);
 #endif /* !LINUX_FILE_ATTRS && ! LINUX_FILE_XATTRS */
 
@@ -1371,7 +1506,7 @@ print_file_details(char *filename, const struct stat *attr, const char file_type
 
 #elif defined(HAVE_BSD_FFLAGS)
 	fputs(_("Flags: \t\t"), stdout);
-	char *fflags = !S_ISDIR(attr->st_mode)
+	char *fflags = (!S_ISDIR(attr->st_mode) && !S_ISLNK(attr->st_mode))
 		? FLAGSTOSTR_FUNC(attr->st_flags) : (char *)NULL;
 	printf("%s\n", (!fflags || !*fflags) ? "-" : fflags);
 	free(fflags);
@@ -1379,8 +1514,13 @@ print_file_details(char *filename, const struct stat *attr, const char file_type
 
 #if defined(LINUX_FILE_XATTRS)
 	fputs(_("Xattributes:\t"), stdout);
-	print_extended_attributes(filename);
+	print_extended_attributes(filename, attr->st_mode);
 #endif /* LINUX_FILE_XATTRS */
+
+#if defined(HAVE_ACL)
+	fputs(_("ACL: \t\t"), stdout);
+	print_file_acl(filename, attr->st_mode);
+#endif /* HAVE_ACL */
 
 #if defined(LINUX_FILE_CAPS)
 	fputs(_("Capabilities:\t"), stdout);
@@ -1755,7 +1895,7 @@ do_stat(char *filename, const int follow_link)
 	char *color = get_file_type_and_color(link_target ? link_target : filename,
 		&attr, &file_type, &ctype);
 
-	print_file_perms(filename, &attr, file_type, ctype);
+	print_file_perms(&attr, file_type, ctype);
 	print_file_name(filename, color, file_type, attr.st_mode, link_target);
 	print_file_details(filename, &attr, file_type, file_perm);
 	print_timestamps(link_target ? link_target : filename, &attr);

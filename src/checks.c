@@ -27,21 +27,6 @@
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
-
-#ifndef _BE_POSIX
-# if defined(__NetBSD__)
-#  include <sys/param.h>
-#  if __NetBSD_Prereq__(9,99,63)
-#   include <sys/acl.h>
-#   define HAVE_ACL
-#  endif /* __NetBSD_Prereq__ */
-# elif !defined(__HAIKU__) && !defined(__OpenBSD__) && !defined(__sun) \
-&& !defined(__DragonFly__)
-#  include <sys/acl.h>
-#  define HAVE_ACL
-# endif /* __NetBSD__ */
-#endif /* _BE_POSIX */
-
 #include <unistd.h>
 
 #if defined(HAVE_FILE_ATTRS)
@@ -514,40 +499,6 @@ check_immutable_bit(char *file)
 
 	return (attr & FS_IMMUTABLE_FL) ? 1 : 0;
 #endif /* !FS_IOC_GETFLAGS || !FS_IMMUTABLE_FL */
-}
-
-/* Return 1 if FILE has some ACL property and zero if none
- * See: https://man7.org/tlpi/code/online/diff/acl/acl_view.c.html */
-int
-is_acl(char *file)
-{
-	if (!file || !*file)
-		return 0;
-
-#ifndef HAVE_ACL
-	return 0;
-#else
-	acl_t acl;
-	acl = acl_get_file(file, ACL_TYPE_ACCESS);
-
-	if (!acl)
-		return 0;
-
-	acl_entry_t entry;
-	int entryid, num = 0;
-
-	for (entryid = ACL_FIRST_ENTRY;; entryid = ACL_NEXT_ENTRY) {
-		if (acl_get_entry(acl, entryid, &entry) != 1)
-			break;
-		num++;
-	}
-
-	acl_free(acl);
-
-	/* If num > 3 we have something else besides owner, group, and others,
-	 * that is, we have at least one ACL property */
-	return (num > 3 ? 1 : 0);
-#endif /* !HAVE_ACL */
 }
 
 /* Check whether a given string contains only digits. Returns 1 if true

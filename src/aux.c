@@ -850,6 +850,37 @@ get_cmd_path(const char *cmd)
 	return (char *)NULL;
 }
 
+/*
+char *
+construct_human_size(const off_t size)
+{
+	static char str[MAX_UNIT_SIZE];
+
+	const off_t base = xargs.si == 1 ? 1000 : 1024;
+	off_t s = size;
+//	uint16_t rem = 0; // much faster than off_t/long, but fails
+	off_t rem = 0;
+	uint8_t n = 0;
+
+	while (s >= base) {
+		rem = s; // reminder (integer form) of the last division
+		s = 0; // quotient part of the last division
+		while (rem >= base) {rem -= base; ++s;}
+		++n; // number of performed divisions
+	}
+
+	float float_rem = rem == 0 ? 0.00f : (float)rem / (float)base;
+
+	static const char *const u = "BKMGTPEZYRQ";
+	snprintf(str, MAX_UNIT_SIZE, "%.*f%c%c",
+		rem == 0 ? 0 : 2,
+		(float)s + float_rem,
+		u[n],
+		(u[n] != 'B' && xargs.si == 1) ? 'B' : 0);
+
+	return str;
+} */
+
 /* Convert SIZE to human readable form (at most 2 decimal places).
  * Returns a pointer to a string of at most MAX_UNIT_SIZE.
  * We follow here the du(1) notation: K, M, G... for powers of 1024
@@ -876,9 +907,9 @@ construct_human_size(const off_t size)
 	int x = (int)s;
 	/* If (s == 0 || s - (float)x) == 0, then S has no reminder (zero)
 	 * We don't want to print the reminder when it is zero.
-     *
+	 *
 	 * R: Ronnabyte, Q: Quettabyte. It's highly unlikely to have files of
-	 * these huge sizes in the near future, but anyway... */
+	 * such huge sizes (and even less) in the near future, but anyway... */
 	static const char *const u = "BKMGTPEZYRQ";
 	snprintf(str, MAX_UNIT_SIZE, "%.*f%c%c",
 		(s == 0.00f || s - (float)x == 0.00f) ? 0 : 2,

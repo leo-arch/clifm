@@ -48,7 +48,6 @@ int  is_internal(const char *);
 int  is_internal_c(const char *restrict);
 int  is_internal_f(const char *restrict);
 int  is_number(const char *restrict);
-int  is_acl(char *);
 int  is_url(const char *);
 void truncate_file(char *, const int, const int);
 
