@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Sep 20, 2023" "clifm 1.14.6" "CLIFM Manual"
+.TH "CLIFM" "1" "Sep 24, 2023" "clifm 1.14.7" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -1827,7 +1827,7 @@ The following files statistics escape codes are also recognized (not available i
 .TP
 \fB\\M\fR: Amount of multi\-link files in the current directory
 .TP
-\fB\\E\fR: Amount of files with extended attributes in the current directory.TP
+\fB\\E\fR: Amount of files with extended attributes in the current directory
 .TP
 \fB\\O\fR: Amount of other\-writable files in the current directory
 .TP
