@@ -88,8 +88,8 @@
 # ifdef __linux__
 #  if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,46)
 #   define HAVE_ACL
-#   include <sys/acl.h>
-#   include <acl/libacl.h>
+#   include <sys/acl.h> // acl_get_file(), acl_get_entry()
+#   include <acl/libacl.h> // acl_extended_file_nofollow(), acl_to_any_text()
 #  endif // Linux >= 2.5.46
 # endif // __linux__
 /*# if defined(__NetBSD__)
@@ -1528,7 +1528,7 @@ print_file_details(char *filename, const struct stat *attr, const char file_type
 #endif /* LINUX_FILE_XATTRS */
 
 #if defined(HAVE_ACL)
-	fputs(_("ACL: \t\t"), stdout);
+	fputs(_("ACL-extended:\t"), stdout);
 	print_file_acl(filename, attr->st_mode);
 #endif /* HAVE_ACL */
 
