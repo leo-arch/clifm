@@ -1219,7 +1219,8 @@ get_file_type_and_color(const char *filename, const struct stat *attr,
 }
 
 /* Return 1 if FILE has some ACL property and zero if none
- * See: https://man7.org/tlpi/code/online/diff/acl/acl_view.c.html */
+ * See: https://man7.org/tlpi/code/online/diff/acl/acl_view.c.html
+ * On Linux, use acl_extended_file_nofollow(3) instead. */
 /*
 static int
 is_acl(const char *file)
@@ -1348,7 +1349,7 @@ print_capabilities(const char *filename)
 }
 #endif /* LINUX_FILE_CAPS */
 
-#ifdef HAVE_ACL
+#if defined(HAVE_ACL) && defined(__linux__)
 static void
 list_acl(const acl_t acl, int *found, const acl_type_t type)
 {
@@ -1383,7 +1384,9 @@ list_acl(const acl_t acl, int *found, const acl_type_t type)
 
 	*found = f;
 }
+#endif /* HAVE_ACL && __linux__ */
 
+#ifdef HAVE_ACL
 /* Print ACLs for FILE, whose mode is MODE.
  * If FILE is a directory, default ACLs are checked besides access ACLs. */
 static void
@@ -1393,8 +1396,7 @@ print_file_acl(char *file, const mode_t mode)
 	UNUSED(file); UNUSED(mode);
 	puts(_("Unavailable"));
 	return;
-#endif /* __linux__ */
-
+#else
 	if (S_ISLNK(mode)) {
 		puts(_("Unavailable"));
 		return;
@@ -1427,6 +1429,7 @@ END:
 	if (found == 0)
 		puts(_("None"));
 	acl_free(acl);
+#endif /* __linux__ */
 }
 #endif /* HAVE_ACL */
 
