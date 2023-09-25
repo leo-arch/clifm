@@ -240,6 +240,7 @@ For a complete description please consult our [Wiki](https://github.com/leo-arch
 <summary>Click here to expand</summary>
 
 * `Development`
+  - List ACLs (`p`/`pp` command) (Linux).
   - Run in [read-only mode](https://github.com/leo-arch/clifm/wiki/Specifics#read-only-mode).
 * `1.14 (Jawbreaker)`
   - [Run as a **stat**(1) replacement via `--stat` and `--stat-full` options](https://github.com/leo-arch/clifm/wiki/Advanced/#stat1-replacement).
