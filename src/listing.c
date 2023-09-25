@@ -782,9 +782,12 @@ compute_maxes(void)
 
 static void
 print_long_mode(size_t *counter, int *reset_pager, const int pad,
-	const uint8_t have_xattr)
+	uint8_t have_xattr)
 {
 	struct maxes_t maxes = compute_maxes();
+
+	if (prop_fields.xattr == 0)
+		have_xattr = 0;
 
 	/* Available space (term cols) to print the file name. */
 	int space_left = (int)term_cols - (prop_fields.len + have_xattr
@@ -2376,8 +2379,8 @@ list_dir(void)
 			file_info[n].mode = attr.st_mode;
 
 #if defined(LINUX_FILE_XATTRS)
-			if (file_info[n].type != DT_LNK && (check_cap == 1
-			|| (conf.long_view == 1 && prop_fields.xattr == 1))
+			if (file_info[n].type != DT_LNK
+			&& (conf.long_view == 1 || check_cap == 1)
 			&& listxattr(ename, NULL, 0) > 0)
 				file_info[n].xattr = have_xattr = 1;
 #endif /* LINUX_FILE_XATTRS */
