@@ -1274,7 +1274,7 @@ print_file_perms(const struct stat *attr, const char file_type_char,
 	struct perms_t perms = get_file_perms(attr->st_mode);
 	printf(_("(%s%04o%s)%s%c%s/%s%c%s%c%s%c%s.%s%c%s%c%s%c%s.%s%c%s%c%s%c%s%s "
 		"Links: %s%zu%s "),
-		do_c, attr->st_mode & 0777, df_c,
+		do_c, attr->st_mode & 07777, df_c,
 		tmp_file_type_char_color, file_type_char, dn_c,
 		perms.cur, perms.ur, perms.cuw, perms.uw, perms.cux, perms.ux, dn_c,
 		perms.cgr, perms.gr, perms.cgw, perms.gw, perms.cgx, perms.gx, dn_c,
@@ -2214,7 +2214,7 @@ construct_file_perms(const mode_t mode, char *perm_str, const char file_type,
 			perms.cor, perms.or, perms.cow, perms.ow, perms.cox, perms.ox, df_c);
 
 	} else if (prop_fields.perm == PERM_NUMERIC) {
-		snprintf(perm_str, PERM_STR_LEN, "%s%04o%s", do_c, mode & 0777, df_c);
+		snprintf(perm_str, PERM_STR_LEN, "%s%04o%s", do_c, mode & 07777, df_c);
 
 	} else {
 		*perm_str = '\0';
