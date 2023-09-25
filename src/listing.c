@@ -2375,13 +2375,14 @@ list_dir(void)
 			file_info[n].gid = attr.st_gid;
 			file_info[n].mode = attr.st_mode;
 
-			if (conf.long_view == 1) {
 #if defined(LINUX_FILE_XATTRS)
-				if (prop_fields.xattr == 1 && file_info[n].type != DT_LNK
-				&& listxattr(ename, NULL, 0) > 0)
-					file_info[n].xattr = have_xattr = 1;
+			if (file_info[n].type != DT_LNK && (check_cap == 1
+			|| (conf.long_view == 1 && prop_fields.xattr == 1))
+			&& listxattr(ename, NULL, 0) > 0)
+				file_info[n].xattr = have_xattr = 1;
 #endif /* LINUX_FILE_XATTRS */
 
+			if (conf.long_view == 1) {
 				switch (prop_fields.time) {
 				case PROP_TIME_ACCESS:
 					file_info[n].ltime = (time_t)attr.st_atime; break;
@@ -2560,9 +2561,9 @@ list_dir(void)
 			}
 
 #ifdef LINUX_FILE_CAPS
-			else if (check_cap == 1 && (conf.long_view == 0
-			|| prop_fields.xattr == 0 || have_xattr == 1)
-			&& (cap = cap_get_file(ename))) {
+			/* Capabilities are stored by the system as extended attributes.
+			 * No xattrs, no caps. */
+			else if (file_info[n].xattr == 1 && (cap = cap_get_file(ename))) {
 				file_info[n].color = ca_c;
 				++stats.caps;
 				cap_free(cap);
@@ -2574,7 +2575,7 @@ list_dir(void)
 # endif /* !_NO_ICONS */
 				}
 			}
-#endif /* !LINUX_FILE_CAPS */
+#endif /* LINUX_FILE_CAPS */
 
 			else if (stat_ok == 1 && IS_EXEC(attr)) {
 				file_info[n].exec = 1;

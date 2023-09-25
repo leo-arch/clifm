@@ -1913,7 +1913,7 @@ do_stat(char *filename, const int follow_link)
 	int xattr = llistxattr(link_target ? link_target : filename, NULL, 0) > 0;
 #else
 	int xattr = 0;
-#endif
+#endif /* LINUX_FILE_XATTRS */
 
 	print_file_perms(&attr, file_type, ctype, xattr);
 	print_file_name(filename, color, file_type, attr.st_mode, link_target);

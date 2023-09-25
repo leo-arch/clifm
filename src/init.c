@@ -1284,6 +1284,7 @@ load_remotes(void)
 			remotes[n].desc = (char *)xrealloc(remotes[n].desc,
 				(ret_len + 1) * sizeof(char));
 			xstrsncpy(remotes[n].desc, ret, ret_len + 1);
+
 		} else if (strncmp(line, "Mountpoint=", 11) == 0) {
 			char *tmp = (char *)NULL;
 			if (*ret == '~')
@@ -1295,6 +1296,7 @@ load_remotes(void)
 			free(tmp);
 			if (count_dir(remotes[n].mountpoint, CPOP) > 2)
 				remotes[n].mounted = 1;
+
 		} else if (strncmp(line, "MountCmd=", 9) == 0) {
 			int replaced = 0;
 			if (remotes[n].mountpoint) {
@@ -1314,6 +1316,7 @@ load_remotes(void)
 					(ret_len + 1) * sizeof(char));
 				xstrsncpy(remotes[n].mount_cmd, ret, ret_len + 1);
 			}
+
 		} else if (strncmp(line, "UnmountCmd=", 11) == 0) {
 			int replaced = 0;
 			if (remotes[n].mountpoint) {
@@ -1333,9 +1336,11 @@ load_remotes(void)
 					(ret_len + 1) * sizeof(char));
 				xstrsncpy(remotes[n].unmount_cmd, ret, ret_len + 1);
 			}
+
 		} else if (strncmp(line, "AutoUnmount=", 12) == 0) {
 			if (strcmp(ret, "true") == 0)
 				remotes[n].auto_unmount = 1;
+
 		} else {
 			if (strncmp(line, "AutoMount=", 10) == 0) {
 				if (strcmp(ret, "true") == 0)
@@ -1689,7 +1694,7 @@ init_shell(void)
 	tcgetattr(STDIN_FILENO, &shell_tmodes);
 }
 
-/* Get current entries in the Selection Box, if any */
+/* Get current entries in the Selection Box, if any. */
 int
 get_sel_files(void)
 {
@@ -1697,7 +1702,7 @@ get_sel_files(void)
 		return EXIT_FAILURE;
 
 	size_t selnbk = sel_n;
-	/* First, clear the sel array, in case it was already used */
+	/* First, clear the sel array, in case it was already used. */
 	if (sel_n > 0) {
 		int i = (int)sel_n;
 		while (--i >= 0)
@@ -1705,7 +1710,7 @@ get_sel_files(void)
 	}
 	sel_n = 0;
 
-	/* Open the tmp sel file and load its contents into the sel array */
+	/* Open the tmp sel file and load its contents into the sel array. */
 	int fd;
 	FILE *fp = open_fread(sel_file, &fd);
 	/*  sel_elements = xcalloc(1, sizeof(char *)); */
@@ -1713,7 +1718,7 @@ get_sel_files(void)
 		return EXIT_FAILURE;
 
 	struct stat a;
-	/* Since this file contains only paths, PATH_MAX should be enough */
+	/* Since this file contains only paths, PATH_MAX should be enough. */
 	char line[PATH_MAX];
 	while (fgets(line, (int)sizeof(line), fp) != NULL) {
 		size_t len = strlen(line);
@@ -1725,7 +1730,7 @@ get_sel_files(void)
 		}
 
 		/* Remove the ending slash: fstatat() won't take a symlink to dir as
-		 * a symlink (but as a dir), if the file name ends with a slash */
+		 * a symlink (but as a dir), if the file name ends with a slash. */
 		if (len > 1 && line[len - 1] == '/') {
 			len--;
 			line[len] = '\0';
@@ -1742,7 +1747,7 @@ get_sel_files(void)
 		sel_elements[sel_n].name = savestring(line, len);
 		sel_elements[sel_n].size = (off_t)UNSET;
 		/* Store device and inode number to identify later selected files
-		 * and mark them in the files list */
+		 * and mark them in the files list. */
 		sel_devino = (struct devino_t *)xrealloc(sel_devino,
 				(sel_n + 1) * sizeof(struct devino_t));
 		sel_devino[sel_n].ino = a.st_ino;
@@ -1755,7 +1760,7 @@ get_sel_files(void)
 	fclose(fp);
 	/* If previous and current amount of sel files don't match (mostly
 	 * because some selected files were removed), recreate the selections
-	 * file to reflect current state */
+	 * file to reflect current state. */
 	if (selnbk != sel_n)
 		save_sel();
 
