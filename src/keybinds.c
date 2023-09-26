@@ -251,8 +251,10 @@ load_keybinds(void)
 static void
 rl_update_prompt(void)
 {
-	if (rl_line_buffer)
+	if (rl_line_buffer) {
 		memset(rl_line_buffer, '\0', (size_t)rl_end);
+		rl_point = rl_end = 0;
+	}
 
 	/* Set this flag to prevent prompt() from refreshing the screen. */
 	rl_pending_input = 1;
@@ -1295,11 +1297,50 @@ rl_lock(int count, int key)
 }
 
 static int
+handle_no_sel(const char *func)
+{
+	if (conf.colorize == 1 && wrong_cmd == 1)
+		recover_from_wrong_cmd();
+
+#ifndef _NO_SUGGESTIONS
+	if (suggestion.printed == 1 && suggestion_buf)
+		clear_suggestion(CS_FREEBUF);
+#endif /* !_NO_SUGGESTIONS */
+
+	if (rl_end > 0) {
+		rl_delete_text(0, rl_end);
+		rl_point = rl_end = 0;
+	}
+
+	printf(_("\n%s: No selected files\n"), func);
+	rl_reset_line_state();
+
+	return EXIT_SUCCESS;
+}
+
+static int
+rl_archive_sel(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	if (kbind_busy == 1)
+		return EXIT_SUCCESS;
+
+	if (sel_n == 0)
+		return handle_no_sel("ac");
+
+	char cmd[] = "ac sel";
+	return run_kb_cmd(cmd);
+}
+
+static int
 rl_remove_sel(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	if (kbind_busy == 1)
 		return EXIT_SUCCESS;
+
+	if (sel_n == 0)
+		return handle_no_sel("r");
 
 	rl_deprep_terminal();
 	char cmd[] = "r sel";
@@ -1316,6 +1357,9 @@ rl_export_sel(int count, int key)
 	if (kbind_busy == 1)
 		return EXIT_SUCCESS;
 
+	if (sel_n == 0)
+		return handle_no_sel("exp");
+
 	char cmd[] = "exp sel";
 	keybind_exec_cmd(cmd);
 	rl_reset_line_state();
@@ -1328,6 +1372,9 @@ rl_move_sel(int count, int key)
 	UNUSED(count); UNUSED(key);
 	if (kbind_busy == 1)
 		return EXIT_SUCCESS;
+
+	if (sel_n == 0)
+		return handle_no_sel("m");
 
 	char cmd[] = "m sel";
 	keybind_exec_cmd(cmd);
@@ -1342,6 +1389,9 @@ rl_rename_sel(int count, int key)
 	if (kbind_busy == 1)
 		return EXIT_SUCCESS;
 
+	if (sel_n == 0)
+		return handle_no_sel("br");
+
 	char cmd[] = "br sel";
 	keybind_exec_cmd(cmd);
 	rl_reset_line_state();
@@ -1354,6 +1404,9 @@ rl_paste_sel(int count, int key)
 	UNUSED(count); UNUSED(key);
 	if (kbind_busy == 1)
 		return EXIT_SUCCESS;
+
+	if (sel_n == 0)
+		return handle_no_sel("c");
 
 	rl_deprep_terminal();
 	char cmd[] = "c sel";
@@ -1485,14 +1538,6 @@ rl_dirhist(int count, int key)
 }
 
 static int
-rl_archive_sel(int count, int key)
-{
-	UNUSED(count); UNUSED(key);
-	char cmd[] = "ac sel";
-	return run_kb_cmd(cmd);
-}
-
-static int
 rl_new_instance(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
@@ -1532,22 +1577,6 @@ rl_open_sel(int count, int key)
 
 	char cmd[PATH_MAX + 3];
 	snprintf(cmd, sizeof(cmd), "o %s", (sel_n && sel_elements[sel_n - 1].name)
-		? sel_elements[sel_n - 1].name : "sel");
-
-	keybind_exec_cmd(cmd);
-	rl_reset_line_state();
-	return EXIT_SUCCESS;
-}
-
-static int
-rl_bm_sel(int count, int key)
-{
-	UNUSED(count); UNUSED(key);
-	if (kbind_busy == 1)
-		return EXIT_SUCCESS;
-
-	char cmd[PATH_MAX + 6];
-	snprintf(cmd, sizeof(cmd), "bm a %s", (sel_n && sel_elements[sel_n - 1].name)
 		? sel_elements[sel_n - 1].name : "sel");
 
 	keybind_exec_cmd(cmd);
@@ -2161,7 +2190,6 @@ set_keybinds_from_file(void)
 
 	/* Operations on files */
 	rl_bind_keyseq(find_key("create-file"), rl_create_file);
-	rl_bind_keyseq(find_key("bookmark-sel"), rl_bm_sel);
 	rl_bind_keyseq(find_key("archive-sel"), rl_archive_sel);
 	rl_bind_keyseq(find_key("open-sel"), rl_open_sel);
 	rl_bind_keyseq(find_key("export-sel"), rl_export_sel);
@@ -2262,7 +2290,6 @@ set_default_keybinds(void)
 
 	/* Operations on files */
 	rl_bind_keyseq("\\M-n", rl_create_file);
-	rl_bind_keyseq("\\C-\\M-b", rl_bm_sel);
 	rl_bind_keyseq("\\C-\\M-a", rl_archive_sel);
 	rl_bind_keyseq("\\C-\\M-g", rl_open_sel);
 	rl_bind_keyseq("\\C-\\M-e", rl_export_sel);

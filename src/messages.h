@@ -1577,7 +1577,6 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  C-M-d         Remove selected files\n\
  C-M-t         Trash selected files\n\
  C-M-u         Restore trashed files\n\
- C-M-b         Bookmark last selected file or directory\n\
  C-M-g         Open/change-into last selected file/directory\n\
  C-M-n         Move selected files into the current working directory\n\
  C-M-v         Copy selected files into the current working directory\n\
