@@ -98,7 +98,6 @@ show-manpage:\eOP
 show-manpage2:\e[11~
 
 archive-sel:\C-\M-a
-bookmark-sel:\C-\M-b
 bookmarks:\M-b
 clear-line:\M-c
 clear-msgs:\M-t

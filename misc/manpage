@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Sep 24, 2023" "clifm 1.14.7" "CLIFM Manual"
+.TH "CLIFM" "1" "Sep 26, 2023" "clifm 1.14.8" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -1345,8 +1345,6 @@ T}	All .txt files (CWD)
 \fBCtrl\-Alt\-t:\fR Trash selected files
 .TP
 \fBCtrl\-Alt\-u:\fR Restore trashed files
-.TP
-\fBCtrl\-Alt\-b:\fR Bookmark last selected file/directory
 .TP
 \fBCtrl\-Alt\-g:\fR Open/change-to last selected file/directory
 .TP
