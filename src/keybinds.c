@@ -103,7 +103,7 @@ kbinds_reset(void)
 	}
 
 	if (exit_status == EXIT_SUCCESS)
-		err('n', PRINT_PROMPT, _("%s: kb: Restart the program for changes "
+		err('n', PRINT_PROMPT, _("kb: Restart %s for changes "
 			"to take effect\n"), PROGRAM_NAME);
 
 	return exit_status;
@@ -145,7 +145,7 @@ kbinds_edit(char *app)
 	if (mtime_bfr == (time_t)attr.st_mtime)
 		return EXIT_SUCCESS;
 
-	err('n', PRINT_PROMPT, _("%s: kb: Restart the program for changes to "
+	err('n', PRINT_PROMPT, _("kb: Restart %s for changes to "
 			"take effect\n"), PROGRAM_NAME);
 	return EXIT_SUCCESS;
 }
@@ -912,37 +912,6 @@ rl_dir_next(int count, int key)
 
 	char cmd[] = "f";
 	return run_kb_cmd(cmd);
-}
-
-static int
-rl_dir_first(int count, int key)
-{
-	UNUSED(count); UNUSED(key);
-	/* If already at the beginning of dir hist, do nothing */
-	if (dirhist_cur_index == 0)
-		return EXIT_SUCCESS;
-
-	char cmd[] = "b !1";
-	return run_kb_cmd(cmd);
-}
-
-static int
-rl_dir_last(int count, int key)
-{
-	UNUSED(count); UNUSED(key);
-	if (kbind_busy == 1)
-		return EXIT_SUCCESS;
-
-	/* If already at the end of dir hist, do nothing */
-	if (dirhist_cur_index + 1 == dirhist_total_index)
-		return EXIT_SUCCESS;
-
-	char cmd[32 + 4]; /* 32 should be more than enough to store a signed int */
-	snprintf(cmd, sizeof(cmd), "b !%d", dirhist_total_index);
-
-	keybind_exec_cmd(cmd);
-	rl_reset_line_state();
-	return EXIT_SUCCESS;
 }
 
 int
@@ -2182,8 +2151,6 @@ set_keybinds_from_file(void)
 	rl_bind_keyseq(find_key("root-dir"), rl_dir_root);
 	rl_bind_keyseq(find_key("root-dir2"), rl_dir_root);
 	rl_bind_keyseq(find_key("root-dir3"), rl_dir_root);
-	rl_bind_keyseq(find_key("first-dir"), rl_dir_first);
-	rl_bind_keyseq(find_key("last-dir"), rl_dir_last);
 	rl_bind_keyseq(find_key("pinned-dir"), rl_dir_pinned);
 	rl_bind_keyseq(find_key("workspace1"), rl_ws1);
 	rl_bind_keyseq(find_key("workspace2"), rl_ws2);
@@ -2282,8 +2249,6 @@ set_default_keybinds(void)
 	rl_bind_keyseq("\\e[H", rl_dir_home);
 	rl_bind_keyseq("\\M-r", rl_dir_root);
 	rl_bind_keyseq("\\e/", rl_dir_root);
-	rl_bind_keyseq("\\C-\\M-j", rl_dir_first);
-	rl_bind_keyseq("\\C-\\M-k", rl_dir_last);
 	rl_bind_keyseq("\\M-p", rl_dir_pinned);
 	rl_bind_keyseq("\\M-1", rl_ws1);
 	rl_bind_keyseq("\\M-2", rl_ws2);

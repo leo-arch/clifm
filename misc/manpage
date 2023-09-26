@@ -1326,10 +1326,6 @@ T}	All .txt files (CWD)
 .TP
 \fBAlt\-k, Shift\-Right:\fR Change to next visited directory
 .TP
-\fBCtrl\-Alt\-j:\fR Change to first visited directory
-.TP
-\fBCtrl\-Alt\-k:\fR Change to last visited directory
-.TP
 \fBCtrl\-Alt\-o:\fR Switch to previous profile
 .TP
 \fBCtrl\-Alt\-p:\fR Switch to next profile

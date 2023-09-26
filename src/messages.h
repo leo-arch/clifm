@@ -1567,8 +1567,6 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  M-p           Change to pinned directory\n\
  M-v           Toggle prepend sudo\n\
  M-[1-4]       Switch to workspace 1-4\n\
- C-M-j         Change to first visited directory\n\
- C-M-k         Change to last visited directory\n\
  C-M-o         Switch to previous profile\n\
  C-M-p         Switch to next profile\n\
  C-M-a         Archive selected files\n\
