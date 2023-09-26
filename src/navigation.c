@@ -1119,7 +1119,6 @@ back_function(char **args)
 
 	dirhist_cur_index = i;
 
-
 	if (xchdir(old_pwd[dirhist_cur_index], SET_TITLE) == EXIT_SUCCESS)
 		return set_path(old_pwd[dirhist_cur_index]);
 

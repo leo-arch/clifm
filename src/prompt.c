@@ -1034,7 +1034,9 @@ exclude_from_history(const char *s)
 	if (*s == '/'
 	|| (*s == 's' && (s[1] == ' ' || strncmp(s + 1, "el ", 3) == 0))
 	|| (*s == 'f' && ((s[1] == 't' && s[2] == ' ')
-	|| strncmp(s + 1, "ilter ", 6) == 0)))
+	|| strncmp(s + 1, "ilter ", 6) == 0))
+	|| (*s == 'd' && s[1] == 'h' && s[2] == ' ')
+	|| (*s == 'b' && s[1] == ' '))
 		return 1;
 
 	return 0;

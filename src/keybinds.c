@@ -329,10 +329,8 @@ run_kb_cmd(char *cmd)
 	if (kbind_busy == 1)
 		return EXIT_SUCCESS;
 
-	if (conf.colorize == 1 && wrong_cmd == 1) {
-		fputs(tx_c, stdout);
-		fflush(stdout);
-	}
+	if (conf.colorize == 1 && wrong_cmd == 1)
+		recover_from_wrong_cmd();
 
 	keybind_exec_cmd(cmd);
 	rl_reset_line_state();
@@ -844,6 +842,9 @@ rl_refresh(int count, int key)
 	if (kbind_busy == 1)
 		return EXIT_SUCCESS;
 
+	if (conf.colorize == 1 && wrong_cmd == 1)
+		recover_from_wrong_cmd();
+
 	char cmd[] = "rf";
 	keybind_exec_cmd(cmd);
 	rl_reset_line_state();
@@ -938,6 +939,7 @@ rl_dir_last(int count, int key)
 
 	char cmd[32 + 4]; /* 32 should be more than enough to store a signed int */
 	snprintf(cmd, sizeof(cmd), "b !%d", dirhist_total_index);
+
 	keybind_exec_cmd(cmd);
 	rl_reset_line_state();
 	return EXIT_SUCCESS;
@@ -1672,7 +1674,7 @@ rl_dir_pinned(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	if (!pinned_dir) {
-		printf(_("%s: No pinned file\n"), PROGRAM_NAME);
+		printf(_("\n%s: No pinned file\n"), PROGRAM_NAME);
 		rl_reset_line_state();
 		return EXIT_SUCCESS;
 	}
