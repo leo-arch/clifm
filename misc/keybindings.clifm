@@ -55,9 +55,6 @@ next-dir3:\e[2C
 # Shift-right (others)
 next-dir4:\e[1;2C
 
-first-dir:\C-\M-j
-last-dir:\C-\M-k
-
 # Alt-u
 parent-dir:\M-u
 # Shift-up (rxvt)
