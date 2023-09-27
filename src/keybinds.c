@@ -1283,7 +1283,7 @@ handle_no_sel(const char *func)
 		rl_point = rl_end = 0;
 	}
 
-	printf(_("\n%s: No selected files\n"), func);
+	printf(_("\n%s: sel: %s\n"), func, strerror(ENOENT));
 	rl_reset_line_state();
 
 	return EXIT_SUCCESS;

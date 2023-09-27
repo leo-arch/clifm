@@ -2399,13 +2399,23 @@ print_entry_props(const struct fileinfo *props,	const struct maxes_t *maxes,
 
 	/* Print stuff */
 
-	printf("%s"    /* Files counter for dirs */
-		   "%s"    /* Inode */
-		   "%s"    /* Permissions */
-		   "%s "   /* Extended attributes (@) */
-		   "%s"    /* User and group ID */
-		   "%s"    /* Time */
-		   "%s\n", /* Size / device info */
+/* This is almost as fast as the printf version below. However, it allows us
+ * to print fields in a different order. */
+/*	if (prop_fields.counter != 0) fputs(fc_str, stdout);
+	if (prop_fields.inode == 1) fputs(ino_str, stdout);
+	if (prop_fields.perm != 0) fputs(perm_str, stdout);
+	if (*xattr_str) putchar(*xattr_str); putchar(' ');
+	if (prop_fields.ids == 1) fputs(id_str, stdout);
+	if (prop_fields.time != 0) fputs(time_str, stdout);
+	if (prop_fields.size != 0) puts(size_str); */
+
+	printf("%s"    // Files counter for dirs
+		   "%s"    // Inode
+		   "%s"    // Permissions
+		   "%s "   // Extended attributes (@)
+		   "%s"    // User and group ID
+		   "%s"    // Time
+		   "%s\n", // Size / device info
 
 		prop_fields.counter != 0 ? fc_str : "",
 		prop_fields.inode == 1 ? ino_str : "",
