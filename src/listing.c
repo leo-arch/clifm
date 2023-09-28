@@ -297,7 +297,8 @@ print_div_line(void)
 # include <linux/magic.h> // FS_MAGIC macros for file system types
 #endif
 
-#if !defined(__NetBSD__) && !defined(__sun)
+#if !defined(__NetBSD__) && !defined(__sun) && !defined(__HAIKU__) \
+&& !defined(__CYGWIN__)
 static char *
 get_fs_type_name(const char *file)
 {
@@ -452,7 +453,7 @@ get_fs_type_name(const char *file)
 	}
 # endif // __linux__
 }
-#endif // !__NetBSD__ && !__sun
+#endif // !__NetBSD__ && !__sun && !__HAIKU__ && !__CYGWIN__
 
 /* Print free/total space for the file system the current directory belongs to,
  * plus fyle system type name if available. */
@@ -484,8 +485,10 @@ print_disk_usage(void)
 		stat.f_fstypename); // provided directly by statvfs(2)
 #elif defined(__sun)
 		stat.f_basetype); // provided directly by statvfs(2)
-#else
+#elif !defined(__HAIKU__) && !defined(__CYGWIN__)
 		get_fs_type_name(workspaces[cur_ws].path)); // get it from statfs(2)
+#else
+		"");
 #endif // __NetBSD__
 
 	free(free_space);
