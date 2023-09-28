@@ -44,6 +44,18 @@
 
 #include <limits.h> /* INT_MAX */
 
+#if defined(__linux__) || defined(__FreeBSD__) || defined(__OpenBSD__) \
+|| defined(__DragonFly__) || defined(__APPLE__)
+# define HAVE_STATFS
+# if defined(__linux__)
+#  include <sys/statfs.h> /* statfs(2) */
+#  include <linux/magic.h> /* FS_MAGIC macros for file system types */
+# else
+#  define HAVE_FSTYPENAME
+#  include <sys/mount.h> /* statfs(2) */
+# endif /* __linux__ */
+#endif /* BSD || linux */
+
 #if defined(LIST_SPEED_TEST)
 # include <time.h>
 #endif /* LIST_SPEED_TEST */
@@ -286,19 +298,7 @@ print_div_line(void)
 	fflush(stdout);
 }
 
-#if defined(__FreeBSD__) || defined(__APPLE__) || defined(__OpenBSD__) \
-|| defined(__DragonFly__)
-# define HAVE_FSTYPENAME
-# include <sys/mount.h> // statfs(2)
-#endif
-
-#ifdef __linux__
-# include <sys/statfs.h> // statfs(2)
-# include <linux/magic.h> // FS_MAGIC macros for file system types
-#endif
-
-#if !defined(__NetBSD__) && !defined(__sun) && !defined(__HAIKU__) \
-&& !defined(__CYGWIN__)
+#ifdef HAVE_STATFS
 static char *
 get_fs_type_name(const char *file)
 {
@@ -313,11 +313,11 @@ get_fs_type_name(const char *file)
 # ifdef HAVE_FSTYPENAME
 	return a.f_fstypename;
 # elif !defined(__linux__)
-	return " "; // Feature not available
+	return " "; /* Feature not available */
 # else
-	switch (a.f_type) { // Macros defined in linux/magic.h
-	// Hex values (not present in linux/magic.h, are taken from statfs(2)
-	// and coreutils stat.c (https://github.com/coreutils/coreutils/blob/master/src/stat.c))
+	switch (a.f_type) { /* Macros defined in linux/magic.h */
+	/* Hex values (not present in linux/magic.h, are taken from statfs(2)
+	 * and coreutils stat.c (https://github.com/coreutils/coreutils/blob/master/src/stat.c)) */
 	case AAFS_MAGIC: return "aafs";
 	case 0x61636673: return "acfs";
 	case ADFS_SUPER_MAGIC: return "adfs";
@@ -356,8 +356,8 @@ get_fs_type_name(const char *file)
 	case EFS_SUPER_MAGIC: return "efs";
 	case EROFS_SUPER_MAGIC_V1: return "erofs";
 	case EXFAT_SUPER_MAGIC: return "exfat";
-	case 0x137D: return "ext"; // Linux 2.0 and earlier
-	case 0xEF51: return "ext2"; // Old ext2
+	case 0x137D: return "ext"; /* Linux 2.0 and earlier */
+	case 0xEF51: return "ext2"; /* Old ext2 */
 //	case EXT2_SUPER_MAGIC: return "ext2"; // same as EXT4
 //	case EXT3_SUPER_MAGIC: return "ext3";
 	case EXT4_SUPER_MAGIC: return "ext2/3/4";
@@ -378,8 +378,8 @@ get_fs_type_name(const char *file)
 	case 0x013111A8: return "ibrix";
 	case 0x2BAD1DEA: return "inotifyfs";
 	case ISOFS_SUPER_MAGIC: return "isofs";
-	case 0x4004: return "isofs"; // ISOFS_R_WIN
-	case 0x4000: return "isofs"; // ISOFS_WIN
+	case 0x4004: return "isofs"; /* ISOFS_R_WIN */
+	case 0x4000: return "isofs"; /* ISOFS_WIN */
 	case 0x07C0: return "jffs";
 	case JFFS2_SUPER_MAGIC: return "jffs2";
 	case 0x3153464a: return "jfs";
@@ -444,16 +444,16 @@ get_fs_type_name(const char *file)
 	case XENFS_SUPER_MAGIC: return "xenfs";
 	case 0x012ff7b4: return "xenix";
 	case XFS_SUPER_MAGIC: return "xfs";
-	case 0x012fd16d: return "xia"; // Linux 2.0 and earlier */
+	case 0x012fd16d: return "xia"; /* Linux 2.0 and earlier */
 	case 0x0033: return "z3fold";
 	case 0x2FC12FC1: return "zfs";
 	case ZONEFS_MAGIC: return "zonefs";
 	case 0x58295829: return "zsmallocfs";
 	default: return "unknown";
 	}
-# endif // __linux__
+# endif /* __linux__ */
 }
-#endif // !__NetBSD__ && !__sun && !__HAIKU__ && !__CYGWIN__
+#endif /* HAVE_STATFS */
 
 /* Print free/total space for the file system the current directory belongs to,
  * plus fyle system type name if available. */
@@ -471,7 +471,7 @@ print_disk_usage(void)
 
 	size_t free_s = stat.f_bavail * stat.f_frsize;
 	size_t total = stat.f_blocks * stat.f_frsize;
-//	if (total == 0) return; // This is what MC does
+/*	if (total == 0) return; // This is what MC does */
 
 	char *p_free_space = construct_human_size((off_t)free_s);
 	char *free_space = savestring(p_free_space, strlen(p_free_space));
@@ -482,14 +482,14 @@ print_disk_usage(void)
 	print_reload_msg(_("%s/%s (%d%% free) %s\n"),
 		free_space ? free_space : "?", size ? size : "?", free_percentage,
 #if defined(__NetBSD__)
-		stat.f_fstypename); // provided directly by statvfs(2)
+		stat.f_fstypename); /* Provided directly by statvfs(2) */
 #elif defined(__sun)
-		stat.f_basetype); // provided directly by statvfs(2)
-#elif !defined(__HAIKU__) && !defined(__CYGWIN__)
-		get_fs_type_name(workspaces[cur_ws].path)); // get it from statfs(2)
+		stat.f_basetype); /* Provided directly by statvfs(2) */
+#elif defined(HAVE_STATFS)
+		get_fs_type_name(workspaces[cur_ws].path)); /* Get it from statfs(2) */
 #else
 		"");
-#endif // __NetBSD__
+#endif /* __NetBSD__ */
 
 	free(free_space);
 }
