@@ -287,9 +287,9 @@ print_div_line(void)
 }
 
 #if defined(__FreeBSD__) || defined(__APPLE__) || defined(__OpenBSD__) \
-|| defined(__NetBSD__) || defined(__DragonFly__)
+|| defined(__DragonFly__)
 # define HAVE_FSTYPENAME
-# include <sys/mount.h>
+# include <sys/mount.h> // statfs(2)
 #endif
 
 #ifdef __linux__
