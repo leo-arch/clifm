@@ -1452,6 +1452,10 @@ print_file_details(char *filename, const struct stat *attr, const char file_type
 && !defined(HAVE_ACL) && !defined(LINUX_FILE_CAPS)
 	UNUSED(filename);
 #endif
+#if !defined(LINUX_FILE_XATTRS) && !defined(HAVE_ACL) \
+&& !defined(LINUX_FILE_CAPS)
+	UNUSED(xattr);
+#endif
 
 	struct passwd *owner = getpwuid(attr->st_uid);
 	struct group *group = getgrgid(attr->st_gid);

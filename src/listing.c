@@ -286,7 +286,175 @@ print_div_line(void)
 	fflush(stdout);
 }
 
-/* Print free/total space for the file system the current directory belongs to */
+#if defined(__FreeBSD__) || defined(__APPLE__) || defined(__OpenBSD__) \
+|| defined(__NetBSD__) || defined(__DragonFly__)
+# define HAVE_FSTYPENAME
+#endif
+
+#ifdef __linux__
+# include <sys/statfs.h> // statfs(2)
+# include <linux/magic.h> // FS_MAGIC macros for file system types
+#endif
+
+#if !defined(__NetBSD__) && !defined(__sun)
+static char *
+get_fs_type_name(const char *file)
+{
+# ifdef HAVE_FSTYPENAME
+	static struct statfs a;
+# else
+	struct statfs a;
+# endif
+	if (statfs(file, &a) == -1)
+		return "?";
+
+# ifdef HAVE_FSTYPENAME
+	return a.f_fstypename;
+# elif !defined(__linux__)
+	return " "; // Feature not available
+# else
+	switch (a.f_type) { // Macros defined in linux/magic.h
+	// Hex values (not present in linux/magic.h, are taken from statfs(2)
+	// and coreutils stat.c (https://github.com/coreutils/coreutils/blob/master/src/stat.c))
+	case AAFS_MAGIC: return "aafs";
+	case 0x61636673: return "acfs";
+	case ADFS_SUPER_MAGIC: return "adfs";
+	case AFFS_SUPER_MAGIC: return "affs";
+	case AFS_FS_MAGIC: return "k-afs";
+	case AFS_SUPER_MAGIC: return "afs";
+	case ANON_INODE_FS_MAGIC: return "anon-inode FS";
+	case 0x61756673: return "aufs";
+	case AUTOFS_SUPER_MAGIC: return "autofs";
+	case 0x13661366: return "ballon-kvm-fs";
+	case 0x42465331: return "befs";
+	case BDEVFS_MAGIC: return "bdevfs";
+	case 0x1badface: return "bfs";
+	case BINDERFS_SUPER_MAGIC: return "binderfs";
+	case BINFMTFS_MAGIC: return "binfmt_misc";
+	case BPF_FS_MAGIC: return "bps_fs";
+	case BTRFS_SUPER_MAGIC: return "btrfs";
+	case BTRFS_TEST_MAGIC: return "btrfs_test";
+	case CEPH_SUPER_MAGIC: return "ceph";
+	case CGROUP_SUPER_MAGIC: return "cgroupfs";
+	case CGROUP2_SUPER_MAGIC: return "cgroup2fs";
+	case CIFS_SUPER_MAGIC: return "cifs";
+	case CODA_SUPER_MAGIC: return "coda";
+	case 0x012ff7b7: return "coh";
+	case 0x62656570: return "configfs";
+	case CRAMFS_MAGIC: return "cramfs";
+	case CRAMFS_MAGIC_WEND: return "cramfs-wend";
+	case DAXFS_MAGIC: return "daxfs";
+	case DEBUGFS_MAGIC: return "debugfs";
+	case 0x1373: return "devfs"; // Linux 2.6.17 and earlier
+	case DEVMEM_MAGIC: return "devmem";
+	case DEVPTS_SUPER_MAGIC: return "devpts";
+	case DMA_BUF_MAGIC: return "dma-buf-fs";
+	case ECRYPTFS_SUPER_MAGIC: return "ecryptfs";
+	case EFIVARFS_MAGIC: return "efivarfs";
+	case EFS_SUPER_MAGIC: return "efs";
+	case EROFS_SUPER_MAGIC_V1: return "erofs";
+	case EXFAT_SUPER_MAGIC: return "exfat";
+	case 0x137D: return "ext"; // Linux 2.0 and earlier
+	case 0xEF51: return "ext2"; // Old ext2
+//	case EXT2_SUPER_MAGIC: return "ext2"; // same as EXT4
+//	case EXT3_SUPER_MAGIC: return "ext3";
+	case EXT4_SUPER_MAGIC: return "ext2/3/4";
+	case F2FS_SUPER_MAGIC: return "f2fs";
+	case 0x4006: return "fat";
+	case 0x19830326: return "fhgfs";
+	case FUSE_SUPER_MAGIC: return "fuseblk";
+	case 0x65735543: return "fusectl";
+	case FUTEXFS_SUPER_MAGIC: return "futexfs";
+	case 0x01161970: return "gfs/gfs2";
+	case 0x47504653: return "gpfs";
+	case 0x4244: return "hfs";
+	case 0x482B: return "hfs+";
+	case 0x4858: return "hfsx";
+	case HOSTFS_SUPER_MAGIC: return "hostfs";
+	case HPFS_SUPER_MAGIC: return "hpfs";
+	case HUGETLBFS_MAGIC: return "hugetlbfs";
+	case 0x013111A8: return "ibrix";
+	case 0x2BAD1DEA: return "inotifyfs";
+	case ISOFS_SUPER_MAGIC: return "isofs";
+	case 0x4004: return "isofs"; // ISOFS_R_WIN
+	case 0x4000: return "isofs"; // ISOFS_WIN
+	case 0x07C0: return "jffs";
+	case JFFS2_SUPER_MAGIC: return "jffs2";
+	case 0x3153464a: return "jfs";
+	case 0xC97E8168: return "logfs";
+	case 0x0BD00BD0: return "lustre";
+	case 0x5346314D: return "m1fs";
+	case MINIX_SUPER_MAGIC: return "minix";
+	case MINIX_SUPER_MAGIC2: return "minix (30 char.)";
+	case MINIX2_SUPER_MAGIC: return "minix v2";
+	case MINIX2_SUPER_MAGIC2: return "minix v2 (30 char.)";
+	case MINIX3_SUPER_MAGIC: return "minix3";
+	case 0x19800202: return "mqueue";
+	case MSDOS_SUPER_MAGIC: return "msdos";
+	case MTD_INODE_FS_MAGIC: return "inodefs";
+	case NCP_SUPER_MAGIC: return "novell";
+	case NFS_SUPER_MAGIC: return "nfs";
+	case 0x6E667364: return "nfsd";
+	case NILFS_SUPER_MAGIC: return "nilfs";
+	case NSFS_MAGIC: return "nsfs";
+	case 0x5346544E: return "ntfs";
+	case OCFS2_SUPER_MAGIC: return "ocfs2";
+	case OPENPROM_SUPER_MAGIC: return "openprom";
+	case OVERLAYFS_SUPER_MAGIC: return "overlayfs";
+	case 0xAAD7AAEA: return "panfs";
+	case PSTOREFS_MAGIC: return "pstorefs";
+	case PIPEFS_MAGIC: return "pipefs";
+	case 0xC7571590: return "ppc-cmm-fs";
+	case 0x7C7C6673: return "prl_fs";
+	case PROC_SUPER_MAGIC: return "procfs";
+	case QNX4_SUPER_MAGIC: return "qnx4";
+	case QNX6_SUPER_MAGIC: return "qnx6";
+	case RAMFS_MAGIC: return "ramfs";
+	case RDTGROUP_SUPER_MAGIC: return "rdt";
+	case REISERFS_SUPER_MAGIC: return "reiserfs";
+	case 0x67596969: return "rpc_pipefs";
+	case 0x5DCA2DF5: return "sdcardfs";
+	case SECRETMEM_MAGIC: return "secretmem";
+	case SECURITYFS_MAGIC: return "securityfs";
+	case SELINUX_MAGIC: return "selinux";
+	case SMACK_MAGIC: return "smackfs";
+	case SMB_SUPER_MAGIC: return "smb";
+	case SMB2_SUPER_MAGIC: return "smb2";
+	case 0xBEEFDEAD: return "snfs";
+	case SOCKFS_MAGIC: return "sockfs";
+	case SQUASHFS_MAGIC: return "squashfs";
+	case STACK_END_MAGIC: return "stack-end";
+	case SYSFS_MAGIC: return "sysfs";
+	case 0x012ff7b6: return "sysv2";
+	case 0x012ff7b5: return "sysv4";
+	case TMPFS_MAGIC: return "tmpfs";
+	case TRACEFS_MAGIC: return "tracefs";
+	case 0x24051905: return "ubifs";
+	case UDF_SUPER_MAGIC: return "udf";
+	case 0x00011954: return "ufs";
+	case USBDEVICE_SUPER_MAGIC: return "usbdevfs";
+	case V9FS_MAGIC: return "v9fs";
+	case 0x786F4256: return "vboxfs";
+	case 0xBACBACBC: return "vmhgfs";
+	case 0xa501fcf5: return "vxfs";
+	case 0x565A4653: return "vzfs";
+	case 0x53464846: return "wslfs";
+	case XENFS_SUPER_MAGIC: return "xenfs";
+	case 0x012ff7b4: return "xenix";
+	case XFS_SUPER_MAGIC: return "xfs";
+	case 0x012fd16d: return "xia"; // Linux 2.0 and earlier */
+	case 0x0033: return "z3fold";
+	case 0x2FC12FC1: return "zfs";
+	case ZONEFS_MAGIC: return "zonefs";
+	case 0x58295829: return "zsmallocfs";
+	default: return "unknown";
+	}
+# endif // __linux__
+}
+#endif // !__NetBSD__ && !__sun
+
+/* Print free/total space for the file system the current directory belongs to,
+ * plus fyle system type name if available. */
 static void
 print_disk_usage(void)
 {
@@ -301,23 +469,25 @@ print_disk_usage(void)
 
 	size_t free_s = stat.f_bavail * stat.f_frsize;
 	size_t total = stat.f_blocks * stat.f_frsize;
-//	if (total == 0)
-//		return;
+//	if (total == 0) return; // This is what MC does
 
 	char *p_free_space = construct_human_size((off_t)free_s);
 	char *free_space = savestring(p_free_space, strlen(p_free_space));
-	char *p_size = construct_human_size((off_t)total);
-	char *size = savestring(p_size, strlen(p_size));
+	char *size = construct_human_size((off_t)total);
 
 	int free_percentage = (int)((free_s * 100) / (total > 0 ? total : 1));
 
-	print_reload_msg(_("%s/%s (%d%% free)\n"),
-		free_space ? free_space : "?", size ? size : "?", free_percentage);
+	print_reload_msg(_("%s/%s (%d%% free) %s\n"),
+		free_space ? free_space : "?", size ? size : "?", free_percentage,
+#if defined(__NetBSD__)
+		stat.f_fstypename); // provided directly by statvfs(2)
+#elif defined(__sun)
+		stat.f_basetype); // provided directly by statvfs(2)
+#else
+		get_fs_type_name(workspaces[cur_ws].path)); // get it from statfs(2)
+#endif // __NetBSD__
 
 	free(free_space);
-	free(size);
-
-	return;
 }
 
 static void
@@ -880,7 +1050,8 @@ get_ext_info(const filesn_t i, int *trim_type, size_t *ext_len)
 	else
 		*ext_len = wc_xstrlen(file_info[i].ext_name);
 
-	if ((int)*ext_len >= conf.max_name_len || (int)*ext_len <= 0) {
+	if ((int)*ext_len >= conf.max_name_len - 1 || (int)*ext_len <= 0) {
+//	if ((int)*ext_len >= conf.max_name_len || (int)*ext_len <= 0) {
 		*ext_len = 0;
 		*trim_type = TRIM_NO_EXT;
 	}
@@ -914,7 +1085,8 @@ construct_filename(const filesn_t i, struct wtrim_t *wtrim, const int max_namele
 	else /* memcpy is faster: use it whenever possible */
 		memcpy(name_buf, file_info[i].name, file_info[i].bytes + 1);
 
-	wtrim->diff = u8truncstr(name_buf, (size_t)max_namelen - 1 - ext_len);
+	int trim_len = max_namelen - 1 - (int)ext_len;
+	wtrim->diff = u8truncstr(name_buf, (size_t)trim_len);
 	file_info[i].len = (size_t)max_namelen;
 
 	return name_buf;

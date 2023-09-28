@@ -2190,8 +2190,6 @@ rl_suggestions(const unsigned char c)
 		else if (lb[1] == 'd' && lb[2] == ' ' && lb[3]) {
 				if (*(lb + 3) == '/' && !*(lb + 4)) {
 					/* The query string is a single slash: do nothing */
-//					if (suggestion.printed)
-//						clear_suggestion(CS_FREEBUF);
 					goto FAIL;
 				}
 				if ((printed = check_backdir()) != NO_MATCH)
@@ -2204,13 +2202,10 @@ rl_suggestions(const unsigned char c)
 			if (lb[1] == 'h' && lb[2] == ' ' && (lb[3] == '-'
 			|| strncmp(lb + 3, "--help", strlen(lb + 3)) == 0))
 				break;
-			if ((printed = check_dirhist(word, wlen)) != NO_MATCH) {
+			if ((printed = check_dirhist(word, wlen)) != NO_MATCH)
 				goto SUCCESS;
-			} else {
-//				if (suggestion.printed)
-//					clear_suggestion(CS_FREEBUF);
+			else
 				goto FAIL;
-			}
 		}
 		break;
 
@@ -2229,13 +2224,10 @@ rl_suggestions(const unsigned char c)
 			break;
 		if (words_num == 2 && old_pwd && dirhist_total_index > 0 && wlen > 0
 		&& lb[1] == 'h' && lb[2] == ' ' && !strchr(word, '/')) {
-			if ((printed = check_dirhist(word, wlen)) != NO_MATCH) {
+			if ((printed = check_dirhist(word, wlen)) != NO_MATCH)
 				goto SUCCESS;
-			} else {
-//				if (suggestion.printed)
-//					clear_suggestion(CS_FREEBUF);
+			else
 				goto FAIL;
-			}
 		}
 		break;
 
@@ -2266,13 +2258,10 @@ rl_suggestions(const unsigned char c)
 		if (profile_names && words_num == 3 && lb[1] == 'f' && lb[2] == ' '
 		&& (strncmp(lb + 3, "set ", 4) == 0 || strncmp(lb + 3, "del ", 4) == 0
 		|| strncmp(lb + 3, "rename ", 7) == 0)) {
-			if ((printed = check_profiles(word, wlen)) != NO_MATCH) {
+			if ((printed = check_profiles(word, wlen)) != NO_MATCH)
 				goto SUCCESS;
-			} else {
-//				if (suggestion.printed)
-//					clear_suggestion(CS_FREEBUF);
+			else
 				goto FAIL;
-			}
 		}
 #endif /* !_NO_PROFILES */
 
@@ -2321,7 +2310,7 @@ rl_suggestions(const unsigned char c)
 	default: break;
 	}
 
-	/* 3.d.1) Variable names, both environment and internal */
+	/* 3.d.1) Variable names, both environment and internal. */
 	if (*word == '$') {
 		if ((printed = check_variables(word + 1, wlen - 1)) != NO_MATCH)
 			goto SUCCESS;
@@ -2349,11 +2338,11 @@ rl_suggestions(const unsigned char c)
 #endif /* _NO_TAGS */
 
 	/* 3.e) Execute the following checks in the order specified by
-	 * suggestion_strategy (the value is taken from the configuration file) */
+	 * suggestion_strategy (the value is taken from the configuration file). */
 	size_t st;
 	int flag = 0;
 
-	/* Let's find out whether the last entered character is escaped */
+	/* Let's find out whether the last entered character is escaped. */
 	int escaped = (wlen > 1 && word[wlen - 2] == '\\') ? 1 : 0;
 
 	for (st = 0; st < SUG_STRATS; st++) {
@@ -2390,10 +2379,8 @@ rl_suggestions(const unsigned char c)
 				wlen = strlen(word);
 			}
 
-			if (wlen > 0 && word[wlen - 1] == ' ' && escaped == 0) {
+			if (wlen > 0 && word[wlen - 1] == ' ' && escaped == 0)
 				word[wlen - 1] = '\0';
-//				wlen--;
-			}
 
 			flag = (c == ' ' && escaped == 0) ? CHECK_MATCH : PRINT_MATCH;
 
@@ -2485,10 +2472,8 @@ rl_suggestions(const unsigned char c)
 				flags &= ~STATE_COMPLETING;
 			}
 
-			if (wlen > 0 && word[wlen - 1] == ' ' && escaped == 0) {
+			if (wlen > 0 && word[wlen - 1] == ' ' && escaped == 0)
 				word[wlen - 1] = '\0';
-//				wlen--;
-			}
 
 			if (c == ' ' && escaped == 0 && suggestion.printed)
 				clear_suggestion(CS_FREEBUF);
@@ -2519,10 +2504,8 @@ rl_suggestions(const unsigned char c)
 				wlen = strlen(word);
 			}
 
-			if (wlen > 0 && word[wlen - 1] == ' ' && escaped == 0) {
+			if (wlen > 0 && word[wlen - 1] == ' ' && escaped == 0)
 				word[wlen - 1] = '\0';
-//				wlen--;
-			}
 
 			flag = (c == ' ' || full_word) ? CHECK_MATCH : PRINT_MATCH;
 
@@ -2539,7 +2522,7 @@ rl_suggestions(const unsigned char c)
 		}
 	}
 
-	/* 3.f) Cmds in PATH and CliFM internals cmds, but only for the first word */
+	/* 3.f) Cmds in PATH and CliFM internals cmds, but only for the first word. */
 	if (words_num > 1)
 		goto NO_SUGGESTION;
 
@@ -2547,7 +2530,7 @@ CHECK_FIRST_WORD:
 
 	word = first_word ? first_word : last_word;
 
-	/* Skip 'b:' (bookmarks), 's:' (sel files) and 't:' (tags) constructs */
+	/* Skip 'b:' (bookmarks), 's:' (sel files) and 't:' (tags) constructs. */
 	if ((*word == 'b' || *word == 's' || *word == 't') && *(word + 1) == ':')
 		goto NO_SUGGESTION;
 
@@ -2555,7 +2538,6 @@ CHECK_FIRST_WORD:
 
 	|| (c == ' ' && (*word == '\''
 	|| *word == '"' || *word == '$' || *word == '#'))
-
 	|| *word == '<' || *word == '>' || *word == '!' || *word == '{'
 	|| *word == '[' || *word == '(' || strchr(word, '=')
 	|| *rl_line_buffer == ' ' || *word == '|' || *word == ';'
@@ -2580,7 +2562,7 @@ CHECK_FIRST_WORD:
 	&& (printed = check_completions(word, wlen, CHECK_MATCH)) != NO_MATCH) {
 		if (c == ' ' && printed != FULL_MATCH)
 			/* We have a partial match for a file name. If not a command
-			 * name, let's return NO_MATCH */
+			 * name, let's return NO_MATCH. */
 			printed = check_cmds(word, wlen, CHECK_MATCH);
 
 	} else {
@@ -2614,7 +2596,6 @@ NO_SUGGESTION:
 	 * the suggestion if moving thought the text via the arrow keys. */
 	if (suggestion.printed) {
 		if (!strchr(word, KEY_ESC)) {
-//			clear_suggestion(CS_FREEBUF);
 			goto FAIL;
 		} else {
 			/* Go to SUCCESS to avoid removing the suggestion buffer. */
@@ -2665,17 +2646,17 @@ SUCCESS:
 	free(first_word);
 	free(last_word);
 	last_word = (char *)NULL;
+
 	return EXIT_SUCCESS;
 
 FAIL:
 	if (suggestion.printed == 1)
 		clear_suggestion(CS_FREEBUF);
-//	suggestion.printed = 0;
+
 	free(first_word);
 	free(last_word);
 	last_word = (char *)NULL;
-//	free(suggestion_buf);
-//	suggestion_buf = (char *)NULL;
+
 	return EXIT_FAILURE;
 }
 #else

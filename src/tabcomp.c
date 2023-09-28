@@ -1906,7 +1906,7 @@ tab_complete(const int what_to_do)
 
 	rl_compentry_func_t *our_func = rl_completion_entry_function;
 
-	/* Only the completion entry function can change these */
+	/* Only the completion entry function can change these. */
 	rl_filename_completion_desired = 0;
 	rl_filename_quoting_desired = 1;
 	rl_sort_completion_matches = 1;
@@ -2017,10 +2017,9 @@ AFTER_USUAL_COMPLETION:
 #ifndef _NO_FZF
 	/* Common prefix for multiple matches is appended to the input query.
 	 * Let's rise a flag to know if we should reinsert the original query
-	 * in case the user cancels the completion (pressing ESC) */
-	int common_prefix_added = 0;
-	if (fzftab == 1 && matches[1] && strcmp(matches[0], text) != 0)
-		common_prefix_added = 1;
+	 * in case the user cancels the completion (pressing ESC). */
+	int common_prefix_added =
+		(fzftab == 1 && matches[1] && strcmp(matches[0], text) != 0);
 #endif /* _NO_FZF */
 
 	size_t i;
@@ -2038,13 +2037,13 @@ AFTER_USUAL_COMPLETION:
 
 		if (cur_comp_type == TCMP_HIST) {// || cur_comp_type == TCMP_EXT_OPTS) {
 			/* Sort the array without matches[0]: we need it to stay in
-			 * place no matter what */
+			 * place no matter what. */
 			for (i = 0; matches[i]; i++);
 			if (i > 0)
 				qsort(matches + 1, i - 1, sizeof(char *), (QSFUNC *)compare_strings);
 		}
 
-		/* Remember the lowest common denominator, for it may be unique */
+		/* Remember the lowest common denominator: it may be unique. */
 		lowest_common = savestring(matches[0], strlen(matches[0]));
 
 		for (i = 0; matches[i + 1]; i++) {
@@ -2057,7 +2056,7 @@ AFTER_USUAL_COMPLETION:
 		}
 
 		/* We have marked all the dead slots with (char *)&dead_slot
-		 * Copy all the non-dead entries into a new array */
+		 * Copy all the non-dead entries into a new array. */
 		temp_array = (char **)xnmalloc(3 + newlen, sizeof (char *));
 		for (i = j = 1; matches[i]; i++) {
 			if (matches[i] != (char *)&dead_slot) {
@@ -2077,7 +2076,7 @@ AFTER_USUAL_COMPLETION:
 		matches[0] = lowest_common;
 
 		/* If there is one string left, and it is identical to the lowest
-		 * common denominator (LCD), then the LCD is the string to insert */
+		 * common denominator (LCD), then the LCD is the string to insert. */
 		if (j == 2 && strcmp(matches[0], matches[1]) == 0) {
 			free(matches[1]);
 			matches[1] = (char *)NULL;
@@ -2117,7 +2116,7 @@ AFTER_USUAL_COMPLETION:
 		rl_filename_completion_desired && rl_filename_quoting_desired;
 
 		if (should_quote)
-			should_quote = should_quote && !quote_char;
+			should_quote = (should_quote && !quote_char);
 
 		if (should_quote) {
 			int do_replace;
@@ -2128,7 +2127,7 @@ AFTER_USUAL_COMPLETION:
 			This also checks whether the common prefix of several
 			matches needs to be quoted.  If the common prefix should
 			not be checked, add !matches[1] to the if clause. */
-			should_quote = rl_strpbrk(matches[0], quote_chars) != 0;
+			should_quote = (rl_strpbrk(matches[0], quote_chars) != 0);
 
 			if (should_quote)
 				do_replace = matches[1] ? MULT_MATCH : SINGLE_MATCH;
@@ -2176,7 +2175,7 @@ AFTER_USUAL_COMPLETION:
 				replacement = r;
 			}
 
-			/* Let's keep the backslash, used to bypass alias names */
+			/* Let's keep the backslash, used to bypass alias names. */
 			if (c == TCMP_CMD && text && *text == '\\' && *(text + 1))
 				start++;
 
@@ -2209,13 +2208,12 @@ AFTER_USUAL_COMPLETION:
 					t[1] = '\0';
 					rl_insert_text(t);
 
-/////////////////////////////////
 					/* WORKAROUND: If we are not at the end of the line,
 					 * redisplay only up to the cursor position, to prevent
 					 * whatever is after it from being printed using the
 					 * last printed color.
 					 * Drawback: there will be no color after the cursor
-					 * position (no color however is better than a wrong color) */
+					 * position (no color however is better than a wrong color). */
 					if (!replacement[k + 1] && rl_point < rl_end && cur_color != tx_c) {
 						int _end = rl_end;
 						rl_end = rl_point;
@@ -2224,7 +2222,6 @@ AFTER_USUAL_COMPLETION:
 						fputs(tx_c, stdout);
 						fflush(stdout);
 					}
-////////////////////////////////
 
 					rl_redisplay();
 
@@ -2262,7 +2259,7 @@ AFTER_USUAL_COMPLETION:
 		 * are at the end of the line, then add a space. */
 		if (matches[1]) {
 			if (what_to_do == '!') {
-				goto DISPLAY_MATCHES;		/* XXX */
+				goto DISPLAY_MATCHES;
 			} else {
 				if (rl_editing_mode != 0) /* vi_mode */
 					rl_ding();	/* There are other matches remaining. */
@@ -2275,7 +2272,7 @@ AFTER_USUAL_COMPLETION:
 			|| cur_comp_type == TCMP_PROF || cur_comp_type == TCMP_BM_PREFIX)
 				break;
 
-			/* Let's append an ending character to the inserted match */
+			/* Let's append an ending character to the inserted match. */
 			if (cur_comp_type == TCMP_OWNERSHIP) {
 				char *sc = rl_line_buffer
 					? strchr(rl_line_buffer, ':') : (char *)NULL;
@@ -2322,13 +2319,12 @@ AFTER_USUAL_COMPLETION:
 							fputs(hd_c, stdout);
 							rl_insert_text("/");
 
-/////////////////////////////////
 					/* WORKAROUND: If we are not at the end of the line,
 					 * redisplay only up to the cursor position, to prevent
 					 * whatever is after it from being printed using the
 					 * last printed color.
 					 * Drawback: there will be no color after the cursor
-					 * position (no color however is better than a wrong color) */
+					 * position (no color however is better than a wrong color). */
 							if (rl_point < rl_end) {
 								int _end = rl_end;
 								rl_end = rl_point;
@@ -2339,10 +2335,7 @@ AFTER_USUAL_COMPLETION:
 							} else {
 								rl_redisplay();
 							}
-/////////////////////////////
 
-//							rl_redisplay();
-//							fputs(cc ? cc : "", stdout);
 							fputs(rl_point < rl_end ? tx_c
 								: (cc ? cc : ""), stdout);
 						} else {
@@ -2365,13 +2358,12 @@ AFTER_USUAL_COMPLETION:
 	break;
 
 	case '?': {
-//		int len = 0, count = 0, limit = 0, max = 0;
 		int j = 0, k = 0, l = 0;
 
 		if (flags & PREVIEWER)
 			goto CALC_OFFSET;
 
-		/* Handle simple case first. Just one match */
+		/* Handle simple case first. Just one match. */
 		if (!matches[1]) {
 			char *temp;
 			temp = printable_part(matches[0]);
@@ -2382,7 +2374,7 @@ AFTER_USUAL_COMPLETION:
 		}
 
 		/* There is more than one match. Find out how many there are, and
-		 * find out what the maximum printed length of a single entry is */
+		 * find out what the maximum printed length of a single entry is. */
 
 DISPLAY_MATCHES:
 #ifndef _NO_FZF
@@ -2403,8 +2395,8 @@ DISPLAY_MATCHES:
 
 			len = (int)i - 1;
 
-			/* If there are multiple items, ask the user if she really
-			 * wants to see them all */
+			/* If there are multiple items, ask the user if they really
+			 * wants to see them all. */
 			if (len >= rl_completion_query_items) {
 				putchar('\n');
 #ifndef _NO_HIGHLIGHT
@@ -2503,7 +2495,7 @@ DISPLAY_MATCHES:
 
 CALC_OFFSET:
 #ifndef _NO_FZF
-		/* Alternative TAB completion: fzf, fnf, smenu */
+		/* Alternative TAB completion: fzf, fnf, smenu. */
 		if (fzftab == 1) {
 			char *t = text ? text : (char *)NULL;
 			if (finder_tabcomp(matches, common_prefix_added == 1 ? t : NULL,
@@ -2552,7 +2544,7 @@ CALC_OFFSET:
 		|| cur_comp_type == TCMP_DIRHIST
 		|| (tabmode == STD_TAB && (cur_comp_type == TCMP_JUMP
 		|| cur_comp_type == TCMP_TAGS_F) ) )
-			/* We don't want to highlight the matching part */
+			/* We don't want to highlight the matching part. */
 			tab_offset = 0;
 
 		if (cur_comp_type == TCMP_HIST && ptr && *ptr == '!' && tab_offset > 0) {
@@ -2564,7 +2556,7 @@ CALC_OFFSET:
 
 #ifndef _NO_TRASH
 		/* If printing trashed files, let's change to the trash dir
-		 * to allow files colorization */
+		 * to allow files colorization. */
 		if ((cur_comp_type == TCMP_UNTRASH || cur_comp_type == TCMP_TRASHDEL)
 		&& conf.colorize == 1 && trash_files_dir) {
 			did_chdir = 1;
@@ -2594,14 +2586,14 @@ CALC_OFFSET:
 					break;
 				} else {
 					if (tab_offset) {
-						/* Print the matching part of the match */
+						/* Print the matching part of the match. */
 						printf("\x1b[0m%s%s\x1b[0m%s",
 							ts_c, qq ? qq : matches[0],
 							(cur_comp_type == TCMP_CMD) ? (conf.colorize
 							? ex_c : "") : fc_c);
 					}
 
-					/* Now print the non-matching part of the match */
+					/* Now print the non-matching part of the match. */
 					char *temp = printable_part(matches[l]);
 					int printed_length = (int)wc_xstrlen(temp);
 					printed_length += print_filename(temp, matches[l]);
