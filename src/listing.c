@@ -49,7 +49,7 @@
 # define HAVE_STATFS
 # if defined(__linux__)
 #  include <sys/statfs.h> /* statfs(2) */
-#  include <linux/magic.h> /* FS_MAGIC macros for file system types */
+#  include "linuxfs.h" /* FS_MAGIC macros for file system types */
 # else
 #  define HAVE_FSTYPENAME
 #  include <sys/mount.h> /* statfs(2) */
@@ -358,8 +358,8 @@ get_fs_type_name(const char *file)
 	case EXFAT_SUPER_MAGIC: return "exfat";
 	case 0x137D: return "ext"; /* Linux 2.0 and earlier */
 	case 0xEF51: return "ext2"; /* Old ext2 */
-//	case EXT2_SUPER_MAGIC: return "ext2"; // same as EXT4
-//	case EXT3_SUPER_MAGIC: return "ext3";
+/*	case EXT2_SUPER_MAGIC: return "ext2"; // same as EXT4
+	case EXT3_SUPER_MAGIC: return "ext3"; */
 	case EXT4_SUPER_MAGIC: return "ext2/3/4";
 	case F2FS_SUPER_MAGIC: return "f2fs";
 	case 0x4006: return "fat";
