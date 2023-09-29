@@ -469,13 +469,13 @@ print_disk_usage(void)
 		return;
 	}
 
-	size_t free_s = stat.f_bavail * stat.f_frsize;
-	size_t total = stat.f_blocks * stat.f_frsize;
+	off_t free_s = (off_t)stat.f_bavail * (off_t)stat.f_frsize;
+	off_t total = (off_t)stat.f_blocks * (off_t)stat.f_frsize;
 /*	if (total == 0) return; // This is what MC does */
 
-	char *p_free_space = construct_human_size((off_t)free_s);
+	char *p_free_space = construct_human_size(free_s);
 	char *free_space = savestring(p_free_space, strlen(p_free_space));
-	char *size = construct_human_size((off_t)total);
+	char *size = construct_human_size(total);
 
 	int free_percentage = (int)((free_s * 100) / (total > 0 ? total : 1));
 
