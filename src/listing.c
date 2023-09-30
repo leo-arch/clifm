@@ -316,9 +316,7 @@ get_fs_type_name(const char *file)
 	return " "; /* Feature not available */
 # else
 
-	switch (a.f_type) { /* Macros defined in linux/magic.h */
-	/* Hex values (not present in linux/magic.h, are taken from statfs(2)
-	 * and coreutils stat.c (https://github.com/coreutils/coreutils/blob/master/src/stat.c)) */
+	switch (a.f_type) {
 	case T_AAFS_MAGIC: return "aafs";
 	case T_ACFS_MAGIC: return "acfs";
 	case T_ADFS_MAGIC: return "adfs";
@@ -333,10 +331,10 @@ get_fs_type_name(const char *file)
 	case T_BDEVFS_MAGIC: return "bdevfs";
 	case T_BFS_MAGIC: return "bfs";
 	case T_BINDERFS_MAGIC: return "binderfs";
-	case T_BINFMTFS_MAGIC: return "binfmt_misc";
-	case T_BPF_FS_MAGIC: return "bps_fs";
+	case T_BINFMTFS_MAGIC: return "binfmt-misc";
+	case T_BPF_FS_MAGIC: return "bps-fs";
 	case T_BTRFS_MAGIC: return "btrfs";
-	case T_BTRFS_TEST_MAGIC: return "btrfs_test";
+	case T_BTRFS_TEST_MAGIC: return "btrfs-test";
 	case T_CEPH_MAGIC: return "ceph";
 	case T_CGROUP_MAGIC: return "cgroupfs";
 	case T_CGROUP2_MAGIC: return "cgroup2fs";
@@ -358,7 +356,7 @@ get_fs_type_name(const char *file)
 	case T_EROFS_MAGIC_V1: return "erofs";
 	case T_EXFAT_MAGIC: return "exfat";
 	case T_EXT_MAGIC: return "ext"; /* Linux 2.0 and earlier */
-	case T_EXT2_MAGIC: return "ext2"; /* Old ext2 */
+	case T_EXT2_OLD_MAGIC: return "ext2";
 /*	case T_EXT2_MAGIC: return "ext2"; // same as EXT4
 	case T_EXT3_MAGIC: return "ext3"; */
 	case T_EXT4_MAGIC: return "ext2/3/4";
@@ -415,7 +413,7 @@ get_fs_type_name(const char *file)
 	case T_RAMFS_MAGIC: return "ramfs";
 	case T_RDTGROUP_MAGIC: return "rdt";
 	case T_REISERFS_MAGIC: return "reiserfs";
-	case T_RPC_PIPEFS_MAGIC: return "rpc_pipefs";
+	case T_RPC_PIPEFS_MAGIC: return "rpc-pipefs";
 	case T_SDCARDFS_MAGIC: return "sdcardfs";
 	case T_SECRETMEM_MAGIC: return "secretmem";
 	case T_SECURITYFS_MAGIC: return "securityfs";
