@@ -92,6 +92,9 @@ struct shades_t date_shades = {0};
 struct shades_t size_shades = {0};
 struct paths_t *paths = (struct paths_t *)NULL;
 struct ext_t *ext_colors = (struct ext_t *)NULL;
+#ifdef __linux__
+struct ext_mnt_t *ext_mnt = (struct ext_mnt_t *)NULL;
+#endif /* __linux__ */
 
 const struct sort_t sort_methods[] = {
     {"none", 0, 0},

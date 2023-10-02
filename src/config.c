@@ -3455,6 +3455,11 @@ init_config(void)
 #ifndef _NO_TRASH
 	set_trash_dirs();
 #endif /* _NO_TRASH */
+
+#ifdef __linux__
+	get_ext_mountpoints();
+#endif /* __linux__ */
+
 	if (xargs.stealth_mode == 1) {
 		err(ERR_NO_LOG, PRINT_PROMPT, _("%s: Running in stealth mode: "
 			"persistent selection, bookmarks, jump database and directory "

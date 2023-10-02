@@ -32,6 +32,9 @@ void check_env_filter(void);
 void check_options(void);
 void get_aliases(void);
 size_t get_cdpath(void);
+#ifdef __linux__
+void get_ext_mountpoints(void);
+#endif // __linux__
 int  get_home(void);
 int  get_last_path(void);
 size_t get_path_env(void);

@@ -55,6 +55,10 @@
 # include <paths.h> /* _PATH_STDPATH */
 #endif /* _BE_POSIX */
 
+#ifdef __linux__
+# include <mntent.h> /* xxxmntent functions, used by get_ext_mountpoints() */
+#endif /* __linux__ */
+
 #include "aux.h"
 #include "checks.h" /* truncate_file(), is_number() */
 #include "config.h"
@@ -79,6 +83,44 @@
 #  define NGROUPS_MAX 1024
 # endif /* __linux__ */
 #endif /* !NGROUPS_MAX */
+
+#ifdef __linux__
+void
+get_ext_mountpoints(void)
+{
+	FILE *fp = setmntent(_PATH_MOUNTED, "r");
+	if (!fp)
+		return;
+
+	size_t n = 0;
+	struct mntent *ent;
+	while ((ent = getmntent(fp)) != NULL) {
+		char *t = ent->mnt_type;
+		if (*t != 'e' || t[1] != 'x' || t[2] != 't' || !t[3] || t[4])
+			continue;
+
+		ext_mnt = (struct ext_mnt_t *)xrealloc(ext_mnt,
+			(n + 2) * sizeof(struct ext_mnt_t));
+		ext_mnt[n].mnt_point = savestring(ent->mnt_dir, strlen(ent->mnt_dir));
+
+		switch (t[3]) {
+		case '2': ext_mnt[n].type = EXT2_FSTYPE; break;
+		case '3': ext_mnt[n].type = EXT3_FSTYPE; break;
+		case '4': ext_mnt[n].type = EXT4_FSTYPE; break;
+		default: ext_mnt[n].type = -1; break;
+		}
+
+		n++;
+	}
+
+	if (n > 0) {
+		ext_mnt[n].mnt_point = (char *)NULL;
+		ext_mnt[n].type = -1;
+	}
+
+	endmntent(fp);
+}
+#endif /* __linux__ */
 
 void
 init_workspaces_opts(void)

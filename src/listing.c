@@ -44,17 +44,9 @@
 
 #include <limits.h> /* INT_MAX */
 
-#if defined(__linux__) || defined(__FreeBSD__) || defined(__OpenBSD__) \
-|| defined(__DragonFly__) || defined(__APPLE__)
-# define HAVE_STATFS
-# if defined(__linux__)
-#  include <sys/statfs.h> /* statfs(2) */
-#  include "linuxfs.h" /* FS_MAGIC macros for file system types */
-# else
-#  define HAVE_FSTYPENAME
-#  include <sys/mount.h> /* statfs(2) */
-# endif /* __linux__ */
-#endif /* BSD || linux */
+#if defined(__linux__) || defined(HAVE_STATFS)
+# include "fsinfo.h"
+#endif /* __linux__ || HAVE_STATFS */
 
 #if defined(LIST_SPEED_TEST)
 # include <time.h>
@@ -298,178 +290,22 @@ print_div_line(void)
 	fflush(stdout);
 }
 
-#ifdef HAVE_STATFS
-static char *
-get_fs_type_name(const char *file)
-{
-# ifdef HAVE_FSTYPENAME
-	static struct statfs a;
-# else
-	struct statfs a;
-# endif
-	if (statfs(file, &a) == -1)
-		return "?";
-
-# ifdef HAVE_FSTYPENAME
-	return a.f_fstypename;
-# elif !defined(__linux__)
-	return " "; /* Feature not available */
-# else
-
-	switch (a.f_type) {
-	case T_AAFS_MAGIC: return "aafs";
-	case T_ACFS_MAGIC: return "acfs";
-	case T_ADFS_MAGIC: return "adfs";
-	case T_AFFS_MAGIC: return "affs";
-	case T_AFS_FS_MAGIC: return "k-afs";
-	case T_AFS_MAGIC: return "afs";
-	case T_ANON_INODE_FS_MAGIC: return "anon-inode FS";
-	case T_AUFS_MAGIC: return "aufs";
-	case T_AUTOFS_MAGIC: return "autofs";
-	case T_BALLONFS_MAGIC: return "ballon-kvm-fs";
-	case T_BEFS_MAGIC: return "befs";
-	case T_BDEVFS_MAGIC: return "bdevfs";
-	case T_BFS_MAGIC: return "bfs";
-	case T_BINDERFS_MAGIC: return "binderfs";
-	case T_BINFMTFS_MAGIC: return "binfmt-misc";
-	case T_BPF_FS_MAGIC: return "bps-fs";
-	case T_BTRFS_MAGIC: return "btrfs";
-	case T_BTRFS_TEST_MAGIC: return "btrfs-test";
-	case T_CEPH_MAGIC: return "ceph";
-	case T_CGROUP_MAGIC: return "cgroupfs";
-	case T_CGROUP2_MAGIC: return "cgroup2fs";
-	case T_CIFS_MAGIC: return "cifs";
-	case T_CODA_MAGIC: return "coda";
-	case T_COH_MAGIC: return "coh";
-	case T_CONFIGFS_MAGIC: return "configfs";
-	case T_CRAMFS_MAGIC: return "cramfs";
-	case T_CRAMFS_MAGIC_WEND: return "cramfs-wend";
-	case T_DAXFS_MAGIC: return "daxfs";
-	case T_DEBUGFS_MAGIC: return "debugfs";
-	case T_DEVFS_MAGIC: return "devfs"; // Linux 2.6.17 and earlier
-	case T_DEVMEM_MAGIC: return "devmem";
-	case T_DEVPTS_MAGIC: return "devpts";
-	case T_DMA_BUF_MAGIC: return "dma-buf-fs";
-	case T_ECRYPTFS_MAGIC: return "ecryptfs";
-	case T_EFIVARFS_MAGIC: return "efivarfs";
-	case T_EFS_MAGIC: return "efs";
-	case T_EROFS_MAGIC_V1: return "erofs";
-	case T_EXFAT_MAGIC: return "exfat";
-	case T_EXT_MAGIC: return "ext"; /* Linux 2.0 and earlier */
-	case T_EXT2_OLD_MAGIC: return "ext2";
-/*	case T_EXT2_MAGIC: return "ext2"; // same as EXT4
-	case T_EXT3_MAGIC: return "ext3"; */
-	case T_EXT4_MAGIC: return "ext2/3/4";
-	case T_F2FS_MAGIC: return "f2fs";
-	case T_FAT_MAGIC: return "fat";
-	case T_FHGFS_MAGIC: return "fhgfs";
-	case T_FUSE_MAGIC: return "fuseblk";
-	case T_FUSECTL_MAGIC: return "fusectl";
-	case T_FUTEXFS_MAGIC: return "futexfs";
-	case T_GFS2_MAGIC: return "gfs/gfs2";
-	case T_GPFS_MAGIC: return "gpfs";
-	case T_HFS_MAGIC: return "hfs";
-	case T_HFS_PLUS_MAGIC: return "hfs+";
-	case T_HFSX_MAGIC: return "hfsx";
-	case T_HOSTFS_MAGIC: return "hostfs";
-	case T_HPFS_MAGIC: return "hpfs";
-	case T_HUGETLBFS_MAGIC: return "hugetlbfs";
-	case T_IBRIX_MAGIC: return "ibrix";
-	case T_INOTIFYFS_MAGIC: return "inotifyfs";
-	case T_ISOFS_MAGIC: return "isofs";
-	case T_ISOFS_R_WIN_MAGIC: return "isofs";
-	case T_ISOFS_WIN_MAGIC: return "isofs";
-	case T_JFFS_MAGIC: return "jffs";
-	case T_JFFS2_MAGIC: return "jffs2";
-	case T_JFS_MAGIC: return "jfs";
-	case T_LOGFS_MAGIC: return "logfs";
-	case T_LUSTRE_MAGIC: return "lustre";
-	case T_M1FS_MAGIC: return "m1fs";
-	case T_MINIX_MAGIC: return "minix";
-	case T_MINIX_MAGIC2: return "minix (30 char.)";
-	case T_MINIX2_MAGIC: return "minix v2";
-	case T_MINIX2_MAGIC2: return "minix v2 (30 char.)";
-	case T_MINIX3_MAGIC: return "minix3";
-	case T_MQUEUE_MAGIC: return "mqueue";
-	case T_MSDOS_MAGIC: return "msdos";
-	case T_MTD_INODE_FS_MAGIC: return "inodefs";
-	case T_NCP_MAGIC: return "novell";
-	case T_NFS_MAGIC: return "nfs";
-	case T_NFSD_MAGIC: return "nfsd";
-	case T_NILFS_MAGIC: return "nilfs";
-	case T_NSFS_MAGIC: return "nsfs";
-	case T_NTFS_MAGIC: return "ntfs";
-	case T_OCFS2_MAGIC: return "ocfs2";
-	case T_OPENPROM_MAGIC: return "openprom";
-	case T_OVERLAYFS_MAGIC: return "overlayfs";
-	case T_PANFS_MAGIC: return "panfs";
-	case T_PSTOREFS_MAGIC: return "pstorefs";
-	case T_PIPEFS_MAGIC: return "pipefs";
-	case T_PPC_CMM_FS_MAGIC: return "ppc-cmm-fs";
-	case T_PRL_FS_MAGIC: return "prl_fs";
-	case T_PROC_MAGIC: return "procfs";
-	case T_QNX4_MAGIC: return "qnx4";
-	case T_QNX6_MAGIC: return "qnx6";
-	case T_RAMFS_MAGIC: return "ramfs";
-	case T_RDTGROUP_MAGIC: return "rdt";
-	case T_REISERFS_MAGIC: return "reiserfs";
-	case T_RPC_PIPEFS_MAGIC: return "rpc-pipefs";
-	case T_SDCARDFS_MAGIC: return "sdcardfs";
-	case T_SECRETMEM_MAGIC: return "secretmem";
-	case T_SECURITYFS_MAGIC: return "securityfs";
-	case T_SELINUX_MAGIC: return "selinux";
-	case T_SMACK_MAGIC: return "smackfs";
-	case T_SMB_MAGIC: return "smb";
-	case T_SMB2_MAGIC: return "smb2";
-	case T_SNFS_MAGIC: return "snfs";
-	case T_SOCKFS_MAGIC: return "sockfs";
-	case T_SQUASHFS_MAGIC: return "squashfs";
-	case T_STACK_END_MAGIC: return "stack-end";
-	case T_SYSFS_MAGIC: return "sysfs";
-	case T_SYSV2_MAGIC: return "sysv2";
-	case T_SYSV4_MAGIC: return "sysv4";
-	case T_TMPFS_MAGIC: return "tmpfs";
-	case T_TRACEFS_MAGIC: return "tracefs";
-	case T_UBIFS_MAGIC: return "ubifs";
-	case T_UDF_MAGIC: return "udf";
-	case T_UFS_MAGIC: return "ufs";
-	case T_USBDEVICE_MAGIC: return "usbdevfs";
-	case T_V9FS_MAGIC: return "v9fs";
-	case T_VBOXSF_MAGIC: return "vboxsf";
-	case T_VMHGFS_MAGIC: return "vmhgfs";
-	case T_VXFS_MAGIC: return "vxfs";
-	case T_VZFS_MAGIC: return "vzfs";
-	case T_WSLFS_MAGIC: return "wslfs";
-	case T_XENFS_MAGIC: return "xenfs";
-	case T_XENIX_MAGIC: return "xenix";
-	case T_XFS_MAGIC: return "xfs";
-	case T_XIA_MAGIC: return "xia"; /* Linux 2.0 and earlier */
-	case T_Z3FOLD_MAGIC: return "z3fold";
-	case T_ZFS_MAGIC: return "zfs";
-	case T_ZONEFS_MAGIC: return "zonefs";
-	case T_ZSMALLOCFS_MAGIC: return "zsmallocfs";
-	default: return "unknown";
-	}
-# endif /* __linux__ */
-}
-#endif /* HAVE_STATFS */
-
-/* Print free/total space for the file system the current directory belongs to,
- * plus fyle system type name if available. */
+/* Print free/total space for the file system to which the current directory
+ * belongs, plus device name and file system type name if available. */
 static void
 print_disk_usage(void)
 {
 	if (!workspaces || !workspaces[cur_ws].path || !*workspaces[cur_ws].path)
 		return;
 
-	struct statvfs stat;
-	if (statvfs(workspaces[cur_ws].path, &stat) != EXIT_SUCCESS) {
+	struct statvfs a;
+	if (statvfs(workspaces[cur_ws].path, &a) != EXIT_SUCCESS) {
 		err('w', PRINT_PROMPT, "statvfs: %s\n", strerror(errno));
 		return;
 	}
 
-	off_t free_s = (off_t)stat.f_bavail * (off_t)stat.f_frsize;
-	off_t total = (off_t)stat.f_blocks * (off_t)stat.f_frsize;
+	off_t free_s = (off_t)a.f_bavail * (off_t)a.f_frsize;
+	off_t total = (off_t)a.f_blocks * (off_t)a.f_frsize;
 /*	if (total == 0) return; // This is what MC does */
 
 	char *p_free_space = construct_human_size(free_s);
@@ -478,17 +314,34 @@ print_disk_usage(void)
 
 	int free_percentage = (int)((free_s * 100) / (total > 0 ? total : 1));
 
-	print_reload_msg(_("%s/%s (%d%% free) %s\n"),
-		free_space ? free_space : "?", size ? size : "?", free_percentage,
-#if defined(__NetBSD__)
-		stat.f_fstypename); /* Provided directly by statvfs(2) */
+	char *devname = (char *)NULL;
+	char *devtype = (char *)NULL;
+
+#ifdef __NetBSD__
+	devtype = a.f_fstypename;
+	devname = a.f_mntfromname;
 #elif defined(__sun)
-		stat.f_basetype); /* Provided directly by statvfs(2) */
+	devtype = a.f_basetype;
+#elif defined(__linux__)
+	int remote = 0;
+	devtype = get_fs_type_name(workspaces[cur_ws].path, &remote);
+	struct stat b;
+	if (remote == 1)
+		devname = get_remote_fs_name(workspaces[cur_ws].path);
+	else if (stat(workspaces[cur_ws].path, &b) != -1)
+		devname = get_dev_name(b.st_dev);
+	else
+		devname = DEV_NO_NAME;
 #elif defined(HAVE_STATFS)
-		get_fs_type_name(workspaces[cur_ws].path)); /* Get it from statfs(2) */
+	get_dev_info(workspaces[cur_ws].path, &devname, &devtype);
 #else
-		"");
+	devtype = DEV_NO_NAME;
+	devname = DEV_NO_NAME;
 #endif /* __NetBSD__ */
+
+	print_reload_msg(_("%s/%s (%d%% free) %s %s\n"),
+		free_space ? free_space : "?", size ? size : "?", free_percentage,
+		devname, devtype);
 
 	free(free_space);
 }
