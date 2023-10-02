@@ -1683,6 +1683,16 @@ expand_sel_keyword(char ***substr)
 			expand_sel(substr);
 		}
 	}
+
+	/* If "sel" is last, and there are selected elements, and the command
+	 * is either "cp" or "mv", emulate "c" or "m" respectivelly: later,
+	 * and final "." will be added to the command, so that we avoid
+	 * overwriting files. */
+	if (sel_n == 0 || is_sel == 0 || sel_is_last == 0)
+		return;
+
+	if (strcmp((*substr)[0], "cp") == 0 || strcmp((*substr)[0], "mv") == 0)
+		(*substr)[0][1] = '\0';
 }
 
 /* Expand the bookmark NAME into the corresponding bookmark path.
