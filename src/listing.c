@@ -52,6 +52,10 @@
 # include <time.h>
 #endif /* LIST_SPEED_TEST */
 
+#if defined(__linux__)
+# include <sys/sysmacros.h> /* major() macro */
+#endif /* __linux__ */
+
 #if defined(TOURBIN_QSORT)
 # include "qsort.h"
 # define ENTLESS(i, j) (entrycmp(file_info + (i), file_info + (j)) < 0)
@@ -326,12 +330,14 @@ print_disk_usage(void)
 	int remote = 0;
 	devtype = get_fs_type_name(workspaces[cur_ws].path, &remote);
 	struct stat b;
-	if (remote == 1)
-		devname = get_remote_fs_name(workspaces[cur_ws].path);
-	else if (stat(workspaces[cur_ws].path, &b) != -1)
-		devname = get_dev_name(b.st_dev);
-	else
+	if (stat(workspaces[cur_ws].path, &b) == -1) {
 		devname = DEV_NO_NAME;
+	} else {
+		if (remote == 1 && major(b.st_dev) == 0)
+			devname = get_remote_fs_name(workspaces[cur_ws].path);
+		else
+			devname = get_dev_name(b.st_dev);
+	}
 #elif defined(HAVE_STATFS)
 	get_dev_info(workspaces[cur_ws].path, &devname, &devtype);
 #else

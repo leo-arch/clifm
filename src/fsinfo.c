@@ -234,18 +234,28 @@ get_remote_fs_name(const char *file)
 	if (!fp)
 		return DEV_NO_NAME;
 
-	static struct mntent *ent;
+	size_t mnt_longest = 0;
+	static char name[PATH_MAX]; *name = '\0';
+	struct mntent *ent;
+
 	while ((ent = getmntent(fp)) != NULL) {
-		char *ptr = strstr(ent->mnt_dir, file);
-		if (!ptr || ptr != ent->mnt_dir)
+		char *ptr = strstr(file, ent->mnt_dir);
+		if (!ptr || ptr != file)
 			continue;
 
-		endmntent(fp);
-		return ent->mnt_fsname;
+		size_t l = strlen(ent->mnt_dir);
+		if (l > mnt_longest) {
+			mnt_longest = l;
+			xstrsncpy(name, ent->mnt_fsname, sizeof(name));
+		}
 	}
 
 	endmntent(fp);
-	return DEV_NO_NAME;
+
+	if (!*name)
+		return DEV_NO_NAME;
+
+	return name;
 }
 
 /* Return a pointer to the name of the block device whose ID is DEV. */
@@ -253,7 +263,7 @@ char *
 get_dev_name(const dev_t dev)
 {
 	int maj = (int)major(dev);
-	if (maj == 0) // special devices (tmp, dev, sys, proc, etc)
+	if (maj == 0) /* special devices (tmp, dev, sys, proc, etc) */
 		return DEV_NO_NAME;
 
 	int min = (int)minor(dev);
