@@ -159,7 +159,7 @@
 ;PrivateWorkspaceSettings=false
 
 # Print the disk usage of the file system the current directory belongs to
-# in the form FREE/TOTAL.
+# in the form "FREE/TOTAL (FREE_PERCENTAGE) DEV_NAME FS_TYPE".
 ;DiskUsage=false
 
 # If set to true, print a map of the current position in the directory

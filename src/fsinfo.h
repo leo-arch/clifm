@@ -33,7 +33,7 @@ char *get_remote_fs_name(const char *);
 char *get_dev_name(const dev_t);
 #elif defined(HAVE_STATFS)
 void get_dev_info(const char *, char **, char **);
-#endif /* __linux__ && !_BE_POSIX */
+#endif /* LINUX_FSINFO */
 
 __END_DECLS
 
