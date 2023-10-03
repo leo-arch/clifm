@@ -68,8 +68,8 @@
 #define T_EXFAT_MAGIC          0x2011bab0
 #define T_EXT_MAGIC            0x137d /* Linux 2.0 and earlier */
 #define T_EXT2_OLD_MAGIC       0xef51 /* Old ext2 */
-//#define T_EXT2_MAGIC           0xef53
-//#define T_EXT3_MAGIC           0xef53
+/*#define T_EXT2_MAGIC           0xef53
+#define T_EXT3_MAGIC           0xef53 */
 #define T_EXT4_MAGIC           0xef53
 #define T_F2FS_MAGIC           0xf2f52010
 #define T_FAT_MAGIC            0x4006

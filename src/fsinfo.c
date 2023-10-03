@@ -43,7 +43,7 @@
  *
  * This function just checks information gathered at startup, which is way
  * faster than performing the whole thing each time it is needed. However,
- * File systems mounted in the current session won't be available here. */
+ * File systems mounted in the current session won't be checked here. */
 static char *
 get_ext_fs_type(const char *file)
 {
@@ -52,20 +52,28 @@ get_ext_fs_type(const char *file)
 	if (!ext_mnt || !file)
 		return type;
 
-	const char *second_slash = strchr(file + 1, '/');
-	int i;
+	size_t mnt_longest = 0;
+	int i, index = -1;
 	for (i = 0; ext_mnt[i].mnt_point; i++) {
 		char *ptr = strstr(file, ext_mnt[i].mnt_point);
-		if (ptr && ptr == file && (ext_mnt[i].mnt_point[1] || !second_slash)) {
-			switch (ext_mnt[i].type) {
-			case EXT2_FSTYPE: type = "ext2"; break;
-			case EXT3_FSTYPE: type = "ext3"; break;
-			case EXT4_FSTYPE: type = "ext4"; break;
-			default: type = "ext?"; break;
-			}
+		if (!ptr || ptr != file)
+			continue;
 
-			break;
+		size_t l = strlen(ext_mnt[i].mnt_point);
+		if (l > mnt_longest) {
+			mnt_longest = l;
+			index = i;
 		}
+	}
+
+	if (index == -1)
+		return type;
+
+	switch (ext_mnt[index].type) {
+	case EXT2_FSTYPE: type = "ext2"; break;
+	case EXT3_FSTYPE: type = "ext3"; break;
+	case EXT4_FSTYPE: type = "ext4"; break;
+	default: type = "ext?"; break;
 	}
 
 	return type;
@@ -122,9 +130,8 @@ get_fs_type_name(const char *file, int *remote)
 	case T_EXFAT_MAGIC: return "exfat";
 	case T_EXT_MAGIC: return "ext"; /* Linux 2.0 and earlier */
 	case T_EXT2_OLD_MAGIC: return "ext2";
-/*	case T_EXT2_MAGIC: return "ext2"; // same as EXT4
-	case T_EXT3_MAGIC: return "ext3"; */
-//	case T_EXT4_MAGIC: return "ext2/3/4";
+/*	case T_EXT2_MAGIC: // ext2/3/4 have the same magic number
+	case T_EXT3_MAGIC: */
 	case T_EXT4_MAGIC: return get_ext_fs_type(file);
 	case T_F2FS_MAGIC: return "f2fs";
 	case T_FAT_MAGIC: return "fat";
