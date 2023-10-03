@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Sep 26, 2023" "clifm 1.14.8" "CLIFM Manual"
+.TH "CLIFM" "1" "Oct 3, 2023" "clifm 1.14.10" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -204,7 +204,7 @@ load data files, such as plugins, color schemes, and default configuration files
 enable desktop notifications. Enter \fIhelp desktop\-notifications\fR in \fBclifm\fR for more information
 .TP
 \fB\-\-disk\-usage\fR
-show disk usage (free/total) for the file system the current directory belongs to
+show disk usage for the file system the current directory belongs to (in the form "free/total (free_percentage) dev_name fs_type")
 .TP
 \fB\-\-full\-dir\-size\fR
 if running in long view, print directories size and their contents
