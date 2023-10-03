@@ -44,9 +44,9 @@
 
 #include <limits.h> /* INT_MAX */
 
-#if defined(__linux__) || defined(HAVE_STATFS)
+#if defined(LINUX_FSINFO) || defined(HAVE_STATFS)
 # include "fsinfo.h"
-#endif /* __linux__ || HAVE_STATFS */
+#endif /* LINUX_FSINFO || HAVE_STATFS */
 
 #if defined(LIST_SPEED_TEST)
 # include <time.h>
@@ -294,6 +294,21 @@ print_div_line(void)
 	fflush(stdout);
 }
 
+#ifdef LINUX_FSINFO
+static char *
+get_devname(const int remote)
+{
+	struct stat b;
+	if (stat(workspaces[cur_ws].path, &b) == -1)
+		return DEV_NO_NAME;
+
+	if (remote == 1 && major(b.st_dev) == 0)
+		return get_remote_fs_name(workspaces[cur_ws].path);
+
+	return get_dev_name(b.st_dev);
+}
+#endif /* LINUX_FSINFO */
+
 /* Print free/total space for the file system to which the current directory
  * belongs, plus device name and file system type name if available. */
 static void
@@ -329,18 +344,11 @@ print_disk_usage(void)
 	devname = a.f_mntfromname;
 #elif defined(__sun)
 	devtype = a.f_basetype;
+	devname = DEV_NO_NAME;
 #elif defined(LINUX_FSINFO)
 	int remote = 0;
 	devtype = get_fs_type_name(workspaces[cur_ws].path, &remote);
-	struct stat b;
-	if (stat(workspaces[cur_ws].path, &b) == -1) {
-		devname = DEV_NO_NAME;
-	} else {
-		if (remote == 1 && major(b.st_dev) == 0)
-			devname = get_remote_fs_name(workspaces[cur_ws].path);
-		else
-			devname = get_dev_name(b.st_dev);
-	}
+	devname = get_devname(remote);
 #elif defined(HAVE_STATFS)
 	get_dev_info(workspaces[cur_ws].path, &devname, &devtype);
 #else
