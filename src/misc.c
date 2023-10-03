@@ -1477,13 +1477,13 @@ free_stuff(void)
 {
 	int i = 0;
 
-#ifdef __linux__
+#ifdef LINUX_FSINFO
 	if (ext_mnt) {
 		for (i = 0; ext_mnt[i].mnt_point; i++)
 			free(ext_mnt[i].mnt_point);
 		free(ext_mnt);
 	}
-#endif /* __linux__ */
+#endif /* LINUX_FSINFO */
 
 #ifdef RUN_CMD
 	free(cmd_line_cmd);

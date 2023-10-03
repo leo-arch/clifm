@@ -24,7 +24,7 @@
 
 #include "helpers.h"
 
-#ifdef __linux__
+#if defined(LINUX_FSINFO)
 # include <stdio.h> /* fclose(3), fgets(3) */
 # include <string.h> /* strnlen(3), strncmp(3) */
 # include <mntent.h> /* xxxmntent(), used by get_remote_fs_name() */
@@ -36,7 +36,7 @@
 # include <sys/mount.h> /* statfs(2) */
 #endif /* __linux__ */
 
-#ifdef __linux__
+#if defined(LINUX_FSINFO)
 /* Given an ext file system, tell whether it is version 2, 3, or 4.
  * Returns a pointer to a constant string with the proper name. If none is
  * found a generic "ext2/3/4" is returned.
@@ -316,4 +316,4 @@ get_dev_info(const char *file, char **devname, char **devtype)
 
 #else
 void *_skip_me_fsinfo;
-#endif // __linux__
+#endif /* __linux__ */

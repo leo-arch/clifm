@@ -55,9 +55,9 @@
 # include <paths.h> /* _PATH_STDPATH */
 #endif /* _BE_POSIX */
 
-#ifdef __linux__
+#ifdef LINUX_FSINFO
 # include <mntent.h> /* xxxmntent functions, used by get_ext_mountpoints() */
-#endif /* __linux__ */
+#endif /* LINUX_FSINFO */
 
 #include "aux.h"
 #include "checks.h" /* truncate_file(), is_number() */
@@ -84,10 +84,18 @@
 # endif /* __linux__ */
 #endif /* !NGROUPS_MAX */
 
-#ifdef __linux__
+#ifdef LINUX_FSINFO
 void
 get_ext_mountpoints(void)
 {
+	if (ext_mnt) {
+		int i;
+		for (i = 0; ext_mnt[i].mnt_point; i++)
+			free(ext_mnt[i].mnt_point);
+		free(ext_mnt);
+		ext_mnt = (struct ext_mnt_t *)NULL;
+	}
+
 	FILE *fp = setmntent(_PATH_MOUNTED, "r");
 	if (!fp)
 		return;
@@ -120,7 +128,7 @@ get_ext_mountpoints(void)
 
 	endmntent(fp);
 }
-#endif /* __linux__ */
+#endif /* LINUX_FSINFO */
 
 void
 init_workspaces_opts(void)

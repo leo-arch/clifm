@@ -27,13 +27,13 @@
 
 __BEGIN_DECLS
 
-#ifdef __linux__
+#if defined(LINUX_FSINFO)
 char *get_fs_type_name(const char *, int *);
 char *get_remote_fs_name(const char *);
 char *get_dev_name(const dev_t);
 #elif defined(HAVE_STATFS)
 void get_dev_info(const char *, char **, char **);
-#endif
+#endif /* __linux__ && !_BE_POSIX */
 
 __END_DECLS
 

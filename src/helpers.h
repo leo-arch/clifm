@@ -439,9 +439,13 @@ extern time_t curdir_mtime;
 # endif /* __FreeBSD__ */
 #endif /* !_NO_ARC4RANDOM && !_BE_POSIX && !__HAIKU__ */
 
-#if defined(__FreeBSD__) || defined(__OpenBSD__) \
-|| defined(__DragonFly__) || defined(__APPLE__)
+#if !defined(_BE_POSIX) && (defined(__FreeBSD__) || defined(__OpenBSD__) \
+|| defined(__DragonFly__) || defined(__APPLE__))
 # define HAVE_STATFS
+#endif
+
+#if !defined(_BE_POSIX) && defined(__linux__)
+# define LINUX_FSINFO
 #endif
 
 #define DEV_NO_NAME "-" /* String used when no file system name/type is found */
@@ -1560,7 +1564,7 @@ struct ext_t {
 };
 extern struct ext_t *ext_colors;
 
-#ifdef __linux__
+#ifdef LINUX_FSINFO
 #define EXT2_FSTYPE 0x002
 #define EXT3_FSTYPE 0x003
 #define EXT4_FSTYPE 0x004
@@ -1571,7 +1575,7 @@ struct ext_mnt_t {
 };
 
 extern struct ext_mnt_t *ext_mnt;
-#endif /* __linux__ */
+#endif /* LINUX_FSINFO */
 
 enum tab_mode {
 	STD_TAB =   0,

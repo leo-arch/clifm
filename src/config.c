@@ -3456,9 +3456,9 @@ init_config(void)
 	set_trash_dirs();
 #endif /* _NO_TRASH */
 
-#ifdef __linux__
+#ifdef LINUX_FSINFO
 	get_ext_mountpoints();
-#endif /* __linux__ */
+#endif /* LINUX_FSINFO */
 
 	if (xargs.stealth_mode == 1) {
 		err(ERR_NO_LOG, PRINT_PROMPT, _("%s: Running in stealth mode: "

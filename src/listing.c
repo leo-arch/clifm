@@ -52,9 +52,9 @@
 # include <time.h>
 #endif /* LIST_SPEED_TEST */
 
-#if defined(__linux__)
+#if defined(LINUX_FSINFO)
 # include <sys/sysmacros.h> /* major() macro */
-#endif /* __linux__ */
+#endif /* LINUX_FSINFO */
 
 #if defined(TOURBIN_QSORT)
 # include "qsort.h"
@@ -321,12 +321,15 @@ print_disk_usage(void)
 	char *devname = (char *)NULL;
 	char *devtype = (char *)NULL;
 
-#ifdef __NetBSD__
+#ifdef _BE_POSIX
+	devtype = DEV_NO_NAME;
+	devname = DEV_NO_NAME;
+#elif defined(__NetBSD__)
 	devtype = a.f_fstypename;
 	devname = a.f_mntfromname;
 #elif defined(__sun)
 	devtype = a.f_basetype;
-#elif defined(__linux__)
+#elif defined(LINUX_FSINFO)
 	int remote = 0;
 	devtype = get_fs_type_name(workspaces[cur_ws].path, &remote);
 	struct stat b;
@@ -343,7 +346,7 @@ print_disk_usage(void)
 #else
 	devtype = DEV_NO_NAME;
 	devname = DEV_NO_NAME;
-#endif /* __NetBSD__ */
+#endif /* _BE_POSIX */
 
 	print_reload_msg(_("%s/%s (%d%% free) %s %s\n"),
 		free_space ? free_space : "?", size ? size : "?", free_percentage,
