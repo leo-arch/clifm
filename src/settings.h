@@ -76,7 +76,7 @@ xf=1;31:xs=0;32:"
 *.ogx=1;35:\
 *.aac=36:*.au=36:*.m4a=36:*.mid=36:*.midi=36:*.mp3=36:*.mka=36:*.ogg=36:\
 *.opus=36:*.spx=36:*.wma=36:*.wv=36:*.wav=36:*.flac=36:*.aif=36:\
-*.pdf=1:*.djvu=1:*.epub=1:*.mobi=1:*.cbr=1:*.cbz=1:*.ps=1:*.sxw=1:\
+*.pdf=1:*.djvu=1:*.epub=1:*.fb2=1:*.mobi=1:*.cbr=1:*.cbz=1:*.ps=1:*.sxw=1:\
 *.doc=1:*.docx=1:*.xls=1:*.xlsx=1:*.xlr=1:*.sxi=1:*.ppt=1:*.pptx=1:\
 *.odt=1:*.ods=1:*.odp=1:*.rtf=1:\
 *.c=1;33:*.c++=1;33:*.h=1;33:*.cc=1;33:*.cpp=1;33:*.h++=1;33:\
@@ -139,7 +139,7 @@ xf=1;31:xs=0;32:"
 #define DEF_WM_C  "\001\x1b[1;33m\002" /* Warning msg indicator */
 
 /* Symlink char indicator (for ColorLinksAsTarget only) */
-#define DEF_LC_C      "\x1b[1;36m"
+#define DEF_LC_C  "\x1b[1;36m"
 //#define DEF_LC_C_256  "\x1b[0;38;5;43m"
 
 #define DEF_TS_C  "\x1b[4;35m" /* Matching prefix for TAB completed possible entries */
@@ -237,7 +237,7 @@ ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 *.mp3=38;5;214:*.mka=38;5;214:*.ogg=38;5;214:*.opus=38;5;214:*.spx=38;5;214:\
 *.wma=38;5;214:*.wv=38;5;214:*.wav=38;5;214:*.flac=38;5;214:*.aif=38;5;214:\
 *.pdf=38;5;223:*.djvu=38;5;223:*.epub=38;5;223:*.mobi=38;5;223:*.cbr=38;5;223:\
-*.cbz=38;5;223:\
+*.cbz=38;5;223:*.fb2=38;5;223:\
 *.ps=38;5;228:*.sxw=38;5;228:*.doc=38;5;228:*.docx=38;5;228:*.xls=38;5;228:\
 *.xlsx=38;5;228:*.xlr=38;5;228:*.sxi=38;5;228:*.ppt=38;5;228:*.pptx=38;5;228:\
 *.odt=38;5;228:*.ods=38;5;228:*.odp=38;5;228:*.odg=38;5;228:*.rtf=38;5;228:\
