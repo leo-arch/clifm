@@ -2244,8 +2244,10 @@ expand_regex(char ***substr)
 	size_t n = 0;
 	regex_t regex;
 
-	int reg_flags = conf.case_sens_list == 1 ? (REG_NOSUB | REG_EXTENDED)
-			: (REG_NOSUB | REG_EXTENDED | REG_ICASE);
+/*	int reg_flags = conf.case_sens_list == 1 ? (REG_NOSUB | REG_EXTENDED)
+			: (REG_NOSUB | REG_EXTENDED | REG_ICASE); */
+
+	int reg_flags = (REG_NOSUB | REG_EXTENDED);
 
 	for (i = 0; (*substr)[i]; i++) {
 		if (n > ((size_t)files + args_n))
@@ -2946,7 +2948,6 @@ parse_input_str(char *str)
 
 	free(word_array);
 #endif /* HAVE_WORDEXP */
-
 
 			/* #######################################
 			 * #       3.3) REGEX EXPANSION          #
