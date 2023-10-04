@@ -83,9 +83,9 @@ X:N:(.*\.clifm$|clifmrc)=$EDITOR;$VISUAL;kak;micro;nvim;vim;vi;mg;emacs;ed;nano;
 
 # Digital books
 X:N:.*\.djvu$=djview;zathura;xreader;evince;atril
-X:N:.*\.epub$=mupdf;zathura;xreader;ebook-viewer;FBReader;foliate
+X:N:.*\.(fb2|epub)$=mupdf;zathura;xreader;ebook-viewer;FBReader;foliate
 X:N:.*\.mobi$=ebook-viewer;FBReader;foliate
-X:N:.*\.(cbr|cbz)$=mcomix;xreader;YACReader;qcomicbook;zathura;foliate
+X:N:.*\.(cbr|cbz|cb7|cbt|cba)$=mcomix;xreader;YACReader;qcomicbook;zathura;foliate
 
 ##################
 #   MIME types   #
