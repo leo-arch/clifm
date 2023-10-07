@@ -765,13 +765,27 @@ select_filename(char *arg, char *dir, int *errors)
 }
 
 static int
+not_just_star(const char *s)
+{
+	while (*s) {
+		if (*s == '?' || *s == '[' || *s == '{' || *s == '^'
+		|| *s == '.' || *s == '|' || *s == '+' || *s == '$')
+			return 1;
+		s++;
+	}
+
+	return 0;
+}
+
+static int
 select_pattern(char *arg, const char *dir, const mode_t filetype, int *err)
 {
 	int ret = sel_glob(arg, dir, filetype);
 
-	/* Glob failed. Try REGEX. */
+	/* Glob failed. Try REGEX (if at least one regex metacharacter not being
+	 * asterisk if found). */
 	if (ret == -1)
-		ret = sel_regex(arg, dir, filetype);
+		ret = not_just_star(arg) == 1 ? sel_regex(arg, dir, filetype) : 0;
 
 	if (ret == -1)
 		(*err)++;

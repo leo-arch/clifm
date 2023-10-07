@@ -818,10 +818,8 @@ check_regex(char *str)
 	}
 
 	/* And if STR is not a file name, take it as a possible regex */
-	if (char_found == 1) {
-		if (access(str, F_OK) == -1)
-			return EXIT_SUCCESS;
-	}
+	if (char_found == 1 && access(str, F_OK) == -1)
+		return EXIT_SUCCESS;
 
 	return EXIT_FAILURE;
 }
