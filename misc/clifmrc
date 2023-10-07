@@ -36,10 +36,10 @@
 ;FilesCounter=true
 
 # Mas, the files list pager. Possible values are:
-# 0/false: Disable the pager
-# 1/true: Run the pager whenever the list of files does not fit on the screen
+# 0/false: Disable the pager.
+# 1/true: Run the pager whenever the list of files does not fit on the screen.
 # >1: Run the pager whenever the amount of files in the current directory is
-# greater than or equal to this value (say, 1000)
+# greater than or equal to this value (say, 1000).
 ;Pager=false
 
 # If running with colors, append directory indicator to directories. If
@@ -117,7 +117,7 @@
 # If running in long view, print directories full size (i.e. recursively).
 ;FullDirSize=false
 
-# Print files apparent size instead of actual device usage
+# Print files apparent size instead of actual device usage.
 ;ApparentSize=true
 
 # In light mode, extra file type checks (except those provided by
@@ -159,7 +159,7 @@
 ;PrivateWorkspaceSettings=false
 
 # Print the disk usage of the file system the current directory belongs to
-# in the form "FREE/TOTAL (FREE_PERCENTAGE) DEV_NAME FS_TYPE".
+# in the form "FREE/TOTAL (FREE_PERCENTAGE) FS_TYPE DEV_NAME".
 ;DiskUsage=false
 
 # If set to true, print a map of the current position in the directory
