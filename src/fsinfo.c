@@ -289,11 +289,9 @@ get_dev_name(const dev_t dev)
 		if (*line != 'D' || strncmp(line + 1, "EVNAME=", 7) != 0)
 			continue;
 
-		size_t l = strnlen(line, sizeof(line));
-		if (l > 0 && line[l - 1] == '\n')
-			line[l - 1] = '\0';
-
-		snprintf(devname, sizeof(devname), "/dev/%s", line + 8);
+		int len = snprintf(devname, sizeof(devname), "/dev/%s", line + 8);
+		if (len > 1)
+			devname[len - 1] = '\0';
 		break;
 	}
 
