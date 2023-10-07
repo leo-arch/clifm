@@ -303,7 +303,7 @@ get_devname(const char *file)
 		return DEV_NO_NAME;
 
 	if (major(b.st_dev) == 0)
-		return get_remote_fs_name(file);
+		return get_dev_name_mntent(file);
 
 	return get_dev_name(b.st_dev);
 }

@@ -29,8 +29,8 @@ __BEGIN_DECLS
 
 #if defined(LINUX_FSINFO)
 char *get_fs_type_name(const char *, int *);
-char *get_remote_fs_name(const char *);
 char *get_dev_name(const dev_t);
+char *get_dev_name_mntent(const char *);
 #elif defined(HAVE_STATFS)
 void get_dev_info(const char *, char **, char **);
 #endif /* LINUX_FSINFO */
