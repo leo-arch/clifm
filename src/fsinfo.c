@@ -104,10 +104,10 @@ get_fs_type_name(const char *file, int *remote)
 	case T_BDEVFS_MAGIC: return "bdevfs";
 	case T_BFS_MAGIC: return "bfs";
 	case T_BINDERFS_MAGIC: return "binderfs";
-	case T_BINFMTFS_MAGIC: return "binfmt-misc";
-	case T_BPF_FS_MAGIC: return "bps-fs";
+	case T_BINFMTFS_MAGIC: return "binfmt_misc";
+	case T_BPF_FS_MAGIC: return "bps_fs";
 	case T_BTRFS_MAGIC: return "btrfs";
-	case T_BTRFS_TEST_MAGIC: return "btrfs-test";
+	case T_BTRFS_TEST_MAGIC: return "btrfs_test";
 	case T_CEPH_MAGIC: *remote = 1; return "ceph";
 	case T_CGROUP_MAGIC: return "cgroupfs";
 	case T_CGROUP2_MAGIC: return "cgroup2fs";
@@ -186,7 +186,7 @@ get_fs_type_name(const char *file, int *remote)
 	case T_RAMFS_MAGIC: return "ramfs";
 	case T_RDTGROUP_MAGIC: return "rdt";
 	case T_REISERFS_MAGIC: return "reiserfs";
-	case T_RPC_PIPEFS_MAGIC: return "rpc-pipefs";
+	case T_RPC_PIPEFS_MAGIC: return "rpc_pipefs";
 	case T_SDCARDFS_MAGIC: return "sdcardfs";
 	case T_SECRETMEM_MAGIC: return "secretmem";
 	case T_SECURITYFS_MAGIC: return "securityfs";
@@ -230,7 +230,7 @@ get_fs_type_name(const char *file, int *remote)
  *
  * NOTE: It performs the same function as get_dev_name(), but it's 3X slower,
  * so that we use it only when the major device number is zero, in which case
- * it cannot be found in /sys/dev/block (consulted by get_dev_name()). */
+ * it cannot be found in /sys/dev/block (as done by get_dev_name()). */
 char *
 get_dev_name_mntent(const char *file)
 {
@@ -247,7 +247,7 @@ get_dev_name_mntent(const char *file)
 		if (!ptr || ptr != file)
 			continue;
 
-		size_t l = strlen(ent->mnt_dir);
+		const size_t l = strlen(ent->mnt_dir);
 		if (l > mnt_longest) {
 			mnt_longest = l;
 			xstrsncpy(name, ent->mnt_fsname, sizeof(name));
@@ -256,47 +256,44 @@ get_dev_name_mntent(const char *file)
 
 	endmntent(fp);
 
-	if (!*name)
-		return DEV_NO_NAME;
-
-	return name;
+	return (!*name ? DEV_NO_NAME : name);
 }
 
 /* Return a pointer to the name of the block device whose ID is DEV. */
 char *
 get_dev_name(const dev_t dev)
 {
-	int maj = (int)major(dev);
+	const unsigned int maj = major(dev);
 	if (maj == 0) /* special devices (tmp, dev, sys, proc, etc) */
 		return DEV_NO_NAME;
 
-	int min = (int)minor(dev);
+	const unsigned int min = minor(dev);
 
 	char dev_path[PATH_MAX];
 	snprintf(dev_path, sizeof(dev_path),
-		"/sys/dev/block/%d:%d/uevent", maj, min);
+		"/sys/dev/block/%u:%u/uevent", maj, min);
 
 	int fd;
 	FILE *fp = open_fread(dev_path, &fd);
 	if (!fp)
 		return DEV_NO_NAME;
 
-	static char devname[NAME_MAX];
-	*devname = DEV_NO_NAME[0]; devname[1] = '\0';
+	static char name[NAME_MAX]; *name = '\0';
 
 	char line[NAME_MAX];
 	while (fgets(line, (int)sizeof(line), fp)) {
 		if (*line != 'D' || strncmp(line + 1, "EVNAME=", 7) != 0)
 			continue;
 
-		int len = snprintf(devname, sizeof(devname), "/dev/%s", line + 8);
-		if (len > 1)
-			devname[len - 1] = '\0';
+		const int len = snprintf(name, sizeof(name), "/dev/%s", line + 8);
+		if (len > 1) /* Remove ending new line char */
+			name[len - 1] = '\0';
 		break;
 	}
 
 	fclose(fp);
-	return devname;
+
+	return (!*name ? DEV_NO_NAME : name);
 }
 
 #elif defined(HAVE_STATFS)
