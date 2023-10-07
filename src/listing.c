@@ -358,7 +358,7 @@ print_disk_usage(void)
 
 	print_reload_msg(_("%s/%s (%d%% free) %s %s\n"),
 		free_space ? free_space : "?", size ? size : "?", free_percentage,
-		devname, devtype);
+		devtype, devname);
 
 	free(free_space);
 }
