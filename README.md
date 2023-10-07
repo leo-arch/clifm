@@ -224,7 +224,7 @@ For more information/supported platforms consult the [installation page](https:/
 
 To start using **clifm** _you don't need to learn anything new_: the usual shell commands will just work. However, there is much more than just shell commands... \
 ✓ The `help` command gives you a quick introduction to **clifm**: once in the **clifm** prompt, enter `help` or `?`. \
-✓ Type `cmd<TAB>` to get the list of available commands and a brief description (since version 1.9.2). \
+✓ Type `cmd<TAB>` to get the list of available commands and a brief description. \
 ✓ Type `help <TAB>` to get the list of available _help topics_. Select the one you want and press <kbd>Enter</kbd>. \
 ✓ To jump into the **COMMANDS** section in the [manpage](https://github.com/leo-arch/clifm/blob/master/misc/clifm.1.pdf), simply enter `cmd` or press <kbd>F2</kbd>. \
 ✓ Press <kbd>F1</kbd> to access the full manpage and <kbd>F3</kbd> to access the keybindings help-page. \
