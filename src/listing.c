@@ -296,14 +296,14 @@ print_div_line(void)
 
 #ifdef LINUX_FSINFO
 static char *
-get_devname(const int remote)
+get_devname(const char *file)
 {
 	struct stat b;
-	if (stat(workspaces[cur_ws].path, &b) == -1)
+	if (stat(file, &b) == -1)
 		return DEV_NO_NAME;
 
-	if (remote == 1 && major(b.st_dev) == 0)
-		return get_remote_fs_name(workspaces[cur_ws].path);
+	if (major(b.st_dev) == 0)
+		return get_remote_fs_name(file);
 
 	return get_dev_name(b.st_dev);
 }
@@ -334,31 +334,31 @@ print_disk_usage(void)
 	int free_percentage = (int)((free_s * 100) / (total > 0 ? total : 1));
 
 	char *devname = (char *)NULL;
-	char *devtype = (char *)NULL;
+	char *fstype = (char *)NULL;
 
 #ifdef _BE_POSIX
-	devtype = DEV_NO_NAME;
+	fstype = DEV_NO_NAME;
 	devname = DEV_NO_NAME;
 #elif defined(__NetBSD__)
-	devtype = a.f_fstypename;
+	fstype = a.f_fstypename;
 	devname = a.f_mntfromname;
 #elif defined(__sun)
-	devtype = a.f_basetype;
+	fstype = a.f_basetype;
 	devname = DEV_NO_NAME;
 #elif defined(LINUX_FSINFO)
 	int remote = 0;
-	devtype = get_fs_type_name(workspaces[cur_ws].path, &remote);
-	devname = get_devname(remote);
+	fstype = get_fs_type_name(workspaces[cur_ws].path, &remote);
+	devname = get_devname(workspaces[cur_ws].path);
 #elif defined(HAVE_STATFS)
-	get_dev_info(workspaces[cur_ws].path, &devname, &devtype);
+	get_dev_info(workspaces[cur_ws].path, &devname, &fstype);
 #else
-	devtype = DEV_NO_NAME;
+	fstype = DEV_NO_NAME;
 	devname = DEV_NO_NAME;
 #endif /* _BE_POSIX */
 
 	print_reload_msg(_("%s/%s (%d%% free) %s %s\n"),
 		free_space ? free_space : "?", size ? size : "?", free_percentage,
-		devtype, devname);
+		fstype, devname);
 
 	free(free_space);
 }
