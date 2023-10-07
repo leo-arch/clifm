@@ -234,7 +234,7 @@ get_fs_type_name(const char *file, int *remote)
 char *
 get_dev_name_mntent(const char *file)
 {
-	FILE *fp = setmntent(_PATH_MOUNTED, "r");
+	FILE *fp = setmntent("/proc/self/mounts", "r");
 	if (!fp)
 		return DEV_NO_NAME;
 
