@@ -4349,9 +4349,9 @@ set_rl_init_file(void)
 	char *rl_file = (char *)xnmalloc(len, sizeof(char));
 	snprintf(rl_file, len, "%s/readline.clifm", config_dir_gral);
 
-	/* This file should have been imported by import_rl_file (config.c)
+	/* This file should have been imported by import_rl_file (config.c).
 	 * In case it wasn't, let's create here a skeleton: if not found,
-	 * readline refuses to colorize history lines */
+	 * readline refuses to colorize history lines. */
 	if (stat(rl_file, &a) == -1) {
 		int fd;
 		FILE *fp = open_fwrite(rl_file, &fd);
@@ -4371,9 +4371,9 @@ set_rl_init_file(void)
 
 #ifdef CLIFM_TEST_INPUT
 /* Use the file specified by CLIFM_TEST_INPUT_FILE environment variable as an
- * alternative input source instead of stdin
+ * alternative input source instead of stdin.
  * Each line in this file will be executed as if it were entered in the
- * command line */
+ * command line. */
 static void
 set_rl_input_file(void)
 {
@@ -4403,9 +4403,9 @@ initialize_readline(void)
 	set_rl_input_file();
 #endif /* CLIFM_TEST_INPUT */
 
-#ifdef _VANILLA_READLINE
+#ifdef VANILLA_READLINE
 	return EXIT_SUCCESS;
-#endif /* _VANILLA_READLINE */
+#endif /* VANILLA_READLINE */
 
 	/* Set the name of the program using readline. Mostly used for
 	 * conditional constructs in the inputrc file */
@@ -4454,22 +4454,22 @@ initialize_readline(void)
 	rl_completer_word_break_characters = " ";
 
 	/* Whenever readline finds any of the following chars, it will call
-	 * the quoting function */
+	 * the quoting function. */
 	rl_filename_quote_characters = " \t\n\"\\'`@$><=,;|&{[()]}?!*^#";
 	/* According to readline documentation, the following string is
-	 * the default and the one used by Bash: " \t\n\"\\'`@$><=;|&{(" */
+	 * the default and the one used by Bash: " \t\n\"\\'`@$><=;|&{(". */
 
 	/* Executed immediately before calling the completer function, it
 	 * tells readline if a space char, which is a word break character
 	 * (see the above rl_completer_word_break_characters variable) is
 	 * quoted or not. If it is, readline then passes the whole string
 	 * to the completer function (ex: "user\ file"), and if not, only
-	 * wathever it found after the space char (ex: "file")
+	 * wathever it found after the space char (ex: "file").
 	 * Thanks to George Brocklehurst for pointing out this function:
-	 * https://thoughtbot.com/blog/tab-completion-in-gnu-readline*/
+	 * https://thoughtbot.com/blog/tab-completion-in-gnu-readline. */
 	rl_char_is_quoted_p = quote_detector;
 
-	/* Define a function to handle suggestions and syntax highlighting */
+	/* Define a function to handle suggestions and syntax highlighting. */
 	rl_getc_function = my_rl_getc;
 
 	/* This function is executed inmediately before path completion. So,
@@ -4477,15 +4477,15 @@ initialize_readline(void)
 	 * the above comment), this function should return the dequoted
 	 * string so it won't conflict with system file names: you want
 	 * "user file", because "user\ file" does not exist, and, in this
-	 * latter case, readline won't find any matches */
+	 * latter case, readline won't find any matches. */
 	rl_filename_dequoting_function = dequote_str;
 
-	/* Initialize the keyboard bindings function */
+	/* Initialize the keyboard bindings function. */
 	readline_kbinds();
 
 	/* Copy the list of quote chars to a global variable to be used
 	 * later by some of the program functions like split_str(),
-	 * my_rl_quote(), is_quote_char(), and my_rl_dequote() */
+	 * my_rl_quote(), is_quote_char(), and my_rl_dequote(). */
 	quote_chars = savestring(rl_filename_quote_characters,
 	    strlen(rl_filename_quote_characters));
 
