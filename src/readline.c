@@ -75,6 +75,9 @@ typedef char *rl_cpvfunc_t;
  * as a C string: 4 bytes plus a trailing nul byte. */
 #define UTF8_MAX_LEN 5
 
+#define RL_EMACS_MODE 1
+#define RL_VI_MODE    0
+
 #define SUGGEST_ONLY             0
 #define RL_INSERT_CHAR           1
 #define SKIP_CHAR                2
@@ -441,23 +444,28 @@ rl_exclude_input(unsigned char c)
 
 	/* Disable suggestions while in vi command mode and reenable them
 	 * when changing back to insert mode. */
-	if (rl_editing_mode == 0) {
-		if (rl_readline_state & RL_STATE_VICMDONCE) {
+	if (rl_editing_mode == RL_VI_MODE) {
+#ifndef _NO_SUGGESTIONS
+		if (suggestion.printed)
+			clear_suggestion(CS_FREEBUF);
+#endif // !_NO_SUGGESTIONS
+		return RL_INSERT_CHAR;
+/*		if (rl_readline_state & RL_STATE_VICMDONCE) {
 			if (c == 'i') {
 #ifdef __sun
 				rl_readline_state &= ~RL_STATE_VICMDONCE;
 #else
 				rl_readline_state &= (unsigned long)~RL_STATE_VICMDONCE;
-#endif /* __sun */
+#endif // __sun
 #ifndef _NO_SUGGESTIONS
 			} else if (suggestion.printed) {
 				clear_suggestion(CS_FREEBUF);
 				return RL_INSERT_CHAR;
-#endif /* !_NO_SUGGESTIONS */
+#endif // !_NO_SUGGESTIONS
 			} else {
 				return RL_INSERT_CHAR;
 			}
-		}
+		} */
 	}
 
 	/* Skip escape sequences, mostly arrow keys. */
