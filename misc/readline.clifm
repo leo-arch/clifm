@@ -46,6 +46,7 @@ $if mode=emacs
 "\x1b\x4f\x63": forward-word
 
 # A few keybinds to avoid conflicts with CliFM specific keybinds
+"\x1b\xd":
 "\C-d":
 "\e\e":
 "\e\C-j": vi-editing-mode

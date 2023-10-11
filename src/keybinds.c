@@ -2305,6 +2305,7 @@ set_default_keybinds(void)
 	rl_bind_keyseq("\\e[24~", rl_quit);
 }
 
+/* Used to disable keybindings. */
 static int
 do_nothing(int count, int key)
 {
