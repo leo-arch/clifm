@@ -2118,6 +2118,14 @@ rl_toggle_virtualdir_full_paths(int count, int key)
 	return EXIT_SUCCESS;
 }
 
+/* Used to disable keybindings. */
+static int
+do_nothing(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	return EXIT_SUCCESS;
+}
+
 static void
 set_keybinds_from_file(void)
 {
@@ -2305,21 +2313,9 @@ set_default_keybinds(void)
 	rl_bind_keyseq("\\e[24~", rl_quit);
 }
 
-/* Used to disable keybindings. */
-static int
-do_nothing(int count, int key)
-{
-	UNUSED(count); UNUSED(key);
-	return EXIT_SUCCESS;
-}
-
 static void
 set_hardcoded_keybinds(void)
 {
-	/* Disable "Esc + Enter". Otherwise, it switches to vi mode, which is not
-	 * intended (for instance, in a secondary prompt). */
-	rl_bind_keyseq("\x1b\xd", do_nothing);
-
 #ifndef __HAIKU__
 	rl_bind_keyseq("\\C-l", rl_refresh);
 	rl_bind_keyseq("\\C-p", rl_cmdhist);
@@ -2353,6 +2349,11 @@ set_hardcoded_keybinds(void)
 void
 readline_kbinds(void)
 {
+	/* Disable "Esc + Enter". Otherwise, it switches to vi mode, which is not
+	 * intended (for instance, in a secondary prompt).
+	 * Disable it here so that the user can rebind it using the config file. */
+	rl_bind_keyseq("\x1b\xd", do_nothing);
+
 	if (kbinds_file)
 		set_keybinds_from_file();
 	else
