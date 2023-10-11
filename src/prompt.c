@@ -960,7 +960,7 @@ construct_prompt(const char *decoded_prompt)
 }
 
 static inline void
-initialize_prompt_data(void)
+initialize_prompt_data(const int prompt_flag)
 {
 	check_cwd();
 	trim_final_slashes();
@@ -977,7 +977,9 @@ initialize_prompt_data(void)
 	fputs(df_c, stdout);
 	fflush(stdout);
 
-	run_prompt_cmds();
+	if (prompt_flag != PROMPT_UPDATE)
+		run_prompt_cmds();
+
 #ifndef _NO_TRASH
 	update_trash_indicator();
 #endif /* !_NO_TRASH */
@@ -1102,7 +1104,7 @@ handle_empty_line(void)
 char *
 prompt(const int prompt_flag)
 {
-	initialize_prompt_data();
+	initialize_prompt_data(prompt_flag);
 
 	/* Generate the prompt string using the prompt line in the config
 	 * file (stored in encoded_prompt at startup). */
