@@ -1702,12 +1702,13 @@ get_largest(const filesn_t i, off_t *size, char **name,
 		*color = file_info[i].color;
 	}
 
-	/* Do not recount hardlinks */
-	if (file_info[i].linkn > 1) {
-		filesn_t j = i > 0 ? i - 1 : -1;
-		while (--j >= 0)
+	/* Do not recount hardlinks in the same directory. */
+	if (file_info[i].linkn > 1 && i > 0) {
+		filesn_t j = i;
+		while (--j >= 0) {
 			if (file_info[i].inode == file_info[j].inode)
 				return;
+		}
 	}
 
 	*total += file_info[i].size;

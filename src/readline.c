@@ -442,30 +442,13 @@ rl_exclude_input(unsigned char c)
 	/* Delete or backspace keys. */
 	int _del = 0;
 
-	/* Disable suggestions while in vi command mode and reenable them
-	 * when changing back to insert mode. */
+	/* Disable suggestions while in vi mode. */
 	if (rl_editing_mode == RL_VI_MODE) {
 #ifndef _NO_SUGGESTIONS
 		if (suggestion.printed)
 			clear_suggestion(CS_FREEBUF);
-#endif // !_NO_SUGGESTIONS
+#endif /* !_NO_SUGGESTIONS */
 		return RL_INSERT_CHAR;
-/*		if (rl_readline_state & RL_STATE_VICMDONCE) {
-			if (c == 'i') {
-#ifdef __sun
-				rl_readline_state &= ~RL_STATE_VICMDONCE;
-#else
-				rl_readline_state &= (unsigned long)~RL_STATE_VICMDONCE;
-#endif // __sun
-#ifndef _NO_SUGGESTIONS
-			} else if (suggestion.printed) {
-				clear_suggestion(CS_FREEBUF);
-				return RL_INSERT_CHAR;
-#endif // !_NO_SUGGESTIONS
-			} else {
-				return RL_INSERT_CHAR;
-			}
-		} */
 	}
 
 	/* Skip escape sequences, mostly arrow keys. */
