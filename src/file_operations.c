@@ -40,6 +40,7 @@
 #include "exec.h"
 #include "file_operations.h"
 #include "history.h"
+#include "init.h" /* get_sel_files() */
 #include "listing.h"
 #include "mime.h"
 #include "misc.h"
@@ -1772,6 +1773,20 @@ get_new_filename(char *cur_name)
 	return n;
 }
 
+/* Return 1 if at least one file is selected in the current directory.
+ * Otherwise, 0 is returned. */
+static int
+have_sel_files(void)
+{
+	filesn_t i = files;
+	while (--i >= 0) {
+		if (file_info[i].sel == 1)
+			return 1;
+	}
+
+	return 0;
+}
+
 /* Run CMD (either cp(1) or mv(1)) via execv().
  * skip_force is true (1) when the -f,--force parameter has been provided to
  * either 'c' or 'm' commands: it intructs cp/mv to run non-interactivelly
@@ -1835,7 +1850,7 @@ run_cp_mv_cmd(char **cmd, const int skip_force)
 		n++;
 	}
 
-	/* wcp(1) does not support end of options (--) */
+	/* wcp(1) does not support end of options (--). */
 	if (strcmp(cmd[0], "wcp") != 0) {
 		tcmd[n] = savestring("--", 2);
 		n++;
@@ -1844,7 +1859,7 @@ run_cp_mv_cmd(char **cmd, const int skip_force)
 	size_t i;
 	for (i = 1; cmd[i]; i++) {
 		/* The -f,--force parameter is internal. Skip it.
-		 * It instructs cp/mv to run non-interactively (no -i param) */
+		 * It instructs cp/mv to run non-interactively (no -i param). */
 		if (skip_force == 1 && i == 1 && is_force_param(cmd[i]) == 1)
 			continue;
 		p = dequote_str(cmd[i], 0);
@@ -1883,9 +1898,9 @@ run_cp_mv_cmd(char **cmd, const int skip_force)
 	if (ret != EXIT_SUCCESS)
 		return ret;
 
-	/* Error messages are printed by launch_execv() itself */
+	/* Error messages are printed by launch_execv() itself. */
 
-	/* If 'rm sel' and command is successful, deselect everything */
+	/* If 'rm sel' and command is successful, deselect everything. */
 	if (is_sel && *cmd[0] == 'r' && cmd[0][1] == 'm' && (!cmd[0][2]
 	|| cmd[0][2] == ' ')) {
 		int j = (int)sel_n;
@@ -1894,6 +1909,10 @@ run_cp_mv_cmd(char **cmd, const int skip_force)
 		sel_n = 0;
 		save_sel();
 	}
+
+	if (sel_n > 0 && *cmd[0] == 'm' && have_sel_files())
+		/* Just in case a selected file in the current dir was renamed. */
+		get_sel_files();
 
 #ifdef GENERIC_FS_MONITOR
 	if (*cmd[0] == 'm')
@@ -2373,6 +2392,10 @@ bulk_rename(char **args)
 	}
 	fclose(fp);
 
+	if (sel_n > 0 && have_sel_files())
+		/* Just in case a selected file in the current dir was renamed. */
+		get_sel_files();
+
 #ifdef GENERIC_FS_MONITOR
 	if (exit_status == EXIT_SUCCESS)
 		reload_dirlist();
@@ -2385,6 +2408,7 @@ ERROR:
 		xerror("br: unlinkat: %s: %s\n", bulk_file, strerror(errno));
 		exit_status = errno;
 	}
+
 	fclose(fp);
 	return exit_status;
 }

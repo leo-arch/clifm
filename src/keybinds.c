@@ -1354,6 +1354,7 @@ rl_move_sel(int count, int key)
 	if (sel_n == 0)
 		return handle_no_sel("m");
 
+	exec_prompt_cmds = 1;
 	char cmd[] = "m sel";
 	keybind_exec_cmd(cmd);
 	rl_reset_line_state();
@@ -1386,6 +1387,7 @@ rl_paste_sel(int count, int key)
 	if (sel_n == 0)
 		return handle_no_sel("c");
 
+	exec_prompt_cmds = 1;
 	rl_deprep_terminal();
 	char cmd[] = "c sel";
 	keybind_exec_cmd(cmd);
@@ -1536,6 +1538,7 @@ rl_trash_sel(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	char cmd[] = "t sel";
+	exec_prompt_cmds = 1;
 	return run_kb_cmd(cmd);
 }
 
@@ -1543,6 +1546,7 @@ static int
 rl_untrash_all(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
+	exec_prompt_cmds = 1;
 	return run_kb_cmd("u *");
 }
 
