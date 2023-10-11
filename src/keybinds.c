@@ -2305,9 +2305,20 @@ set_default_keybinds(void)
 	rl_bind_keyseq("\\e[24~", rl_quit);
 }
 
+static int
+do_nothing(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	return EXIT_SUCCESS;
+}
+
 static void
 set_hardcoded_keybinds(void)
 {
+	/* Disable "Esc + Enter". Otherwise, it switches to vi mode, which is not
+	 * intended (for instance, in a secondary prompt). */
+	rl_bind_keyseq("\x1b\xd", do_nothing);
+
 #ifndef __HAIKU__
 	rl_bind_keyseq("\\C-l", rl_refresh);
 	rl_bind_keyseq("\\C-p", rl_cmdhist);

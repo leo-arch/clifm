@@ -374,7 +374,7 @@ get_files_from_tmp_file(const char *tmp_file, const char *target, const filesn_t
 	return tmp_files;
 }
 
-/* If FILE is not found in LIST, returns one; zero otherwise */
+/* If FILE is not found in LIST, returns one; zero otherwise. */
 static int
 remove_this_file(char *file, char **list)
 {

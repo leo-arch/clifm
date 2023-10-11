@@ -956,14 +956,16 @@ rl_no_hist(const char *prompt)
 {
 	int bk = conf.suggestions;
 	conf.suggestions = 0;
-	rl_nohist = rl_notab = 1;
+	rl_nohist = rl_notab = kbind_busy = 1;
 //	rl_inhibit_completion = 1;
+
 	char *input = readline(prompt);
+
 //	rl_inhibit_completion = 0;
-	rl_notab = rl_nohist = 0;
+	rl_notab = rl_nohist = kbind_busy = 0;
 	conf.suggestions = bk;
 
-	if (!input) // Ctrl-d
+	if (!input) /* Ctrl-d */
 		return savestring("q", 1);
 
 	if (input) {
