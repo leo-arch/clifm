@@ -229,6 +229,11 @@ should_expand_eln(const char *text)
 	if (!l || !*l || !is_number(text))
 		return 0;
 
+	/* Exclude 'ws' and 'st/sort' commands. */
+	if ((*l == 'w' && l[1] == 's' && !l[2])
+	|| (*l == 's' && ((l[1] == 't' && !l[2]) || strcmp(l + 1, "ort") == 0)))
+		return 0;
+
 	const filesn_t a = xatof(text);
 	if (a <= 0 || a > files) /* Only expand numbers matching ELN's */
 		return 0;
@@ -255,6 +260,7 @@ should_expand_eln(const char *text)
 		flags &= ~STATE_COMPLETING;
 		return 0;
 	}
+
 	flags &= ~STATE_COMPLETING;
 	*p = t;
 
