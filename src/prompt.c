@@ -977,9 +977,9 @@ initialize_prompt_data(const int prompt_flag)
 	fputs(df_c, stdout);
 	fflush(stdout);
 
-//	if (prompt_flag != PROMPT_UPDATE)
-	UNUSED(prompt_flag);
-	run_prompt_cmds();
+	if (prompt_flag != PROMPT_UPDATE)
+	/* We're just updating the prompt string: no need to run prompt commands. */
+		run_prompt_cmds();
 
 #ifndef _NO_TRASH
 	update_trash_indicator();
@@ -1114,7 +1114,7 @@ prompt(const int prompt_flag)
 		? decoded_prompt : EMERGENCY_PROMPT);
 	free(decoded_prompt);
 
-	if (prompt_flag == PROMPT_UPDATE) {
+	if (prompt_flag == PROMPT_UPDATE || prompt_flag == PROMPT_UPDATE_RUN_CMDS) {
 		rl_set_prompt(the_prompt);
 		free(the_prompt);
 		return (char *)NULL;

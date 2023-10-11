@@ -79,6 +79,15 @@ typedef char *rl_cpvfunc_t;
 static int accept_first_word = 0;
 #endif /* !_NO_SUGGESTIONS */
 
+/* This is just an ugly workaround. You've been warned!
+ * Long story short: prompt commands are executed after SOME keybindings, but
+ * not after others. I'm not sure why, and this irregularity is what is wrong
+ * in the first place.
+ * In the second case, when prompt commands are not executed, we sometimes do
+ * want to run them (mostly when changing directories): in this case, we set
+ * exec_prompt_cmds to 1. */
+static int exec_prompt_cmds = 0;
+
 static void
 xrl_reset_line_state(void)
 {
@@ -259,7 +268,8 @@ rl_update_prompt(void)
 	/* Set this flag to prevent prompt() from refreshing the screen. */
 	rl_pending_input = 1;
 	/* In UPDATE mode, prompt() always returns NULL. */
-	prompt(PROMPT_UPDATE);
+	prompt(exec_prompt_cmds ? PROMPT_UPDATE_RUN_CMDS : PROMPT_UPDATE);
+	exec_prompt_cmds = 0;
 	UNHIDE_CURSOR;
 }
 
@@ -860,6 +870,7 @@ rl_dir_parent(int count, int key)
 	if (*workspaces[cur_ws].path == '/' && !workspaces[cur_ws].path[1])
 		return EXIT_SUCCESS;
 
+	exec_prompt_cmds = 1;
 	char cmd[] = "cd ..";
 	return run_kb_cmd(cmd);
 }
@@ -885,6 +896,7 @@ rl_dir_home(int count, int key)
 	&& strcmp(workspaces[cur_ws].path, user.home) == 0)
 		return EXIT_SUCCESS;
 
+	exec_prompt_cmds = 1;
 	char cmd[] = "cd";
 	return run_kb_cmd(cmd);
 }
@@ -897,6 +909,7 @@ rl_dir_previous(int count, int key)
 	if (dirhist_cur_index == 0)
 		return EXIT_SUCCESS;
 
+	exec_prompt_cmds = 1;
 	char cmd[] = "b";
 	return run_kb_cmd(cmd);
 }
@@ -910,6 +923,7 @@ rl_dir_next(int count, int key)
 	if (dirhist_cur_index + 1 == dirhist_total_index)
 		return EXIT_SUCCESS;
 
+	exec_prompt_cmds = 1;
 	char cmd[] = "f";
 	return run_kb_cmd(cmd);
 }
@@ -1098,12 +1112,8 @@ rl_mountpoints(int count, int key)
 		return EXIT_SUCCESS;
 
 	UNUSED(count); UNUSED(key);
-	/* Call the function only if it's not already running */
-	kbind_busy = 1;
 	char cmd[] = "mp";
-	keybind_exec_cmd(cmd);
-	rl_reset_line_state();
-	return EXIT_SUCCESS;
+	return run_kb_cmd(cmd);
 }
 
 static int
@@ -1129,11 +1139,8 @@ rl_bookmarks(int count, int key)
 	if (kbind_busy == 1)
 		return EXIT_SUCCESS;
 
-	kbind_busy = 1;
 	char cmd[] = "bm";
-	keybind_exec_cmd(cmd);
-	rl_reset_line_state();
-	return EXIT_SUCCESS;
+	return run_kb_cmd(cmd);
 }
 
 static int
@@ -1659,6 +1666,7 @@ rl_ws1(int count, int key)
 	if (rl_line_buffer && *rl_line_buffer)
 		rl_delete_text(0, rl_end);
 
+	exec_prompt_cmds = 1;
 	if (cur_ws == 0) {
 		/* If the user attempts to switch to the same workspace they're
 		 * currently in, switch rather to the previous workspace. */
@@ -1681,6 +1689,7 @@ rl_ws2(int count, int key)
 	if (rl_line_buffer && *rl_line_buffer)
 		rl_delete_text(0, rl_end);
 
+	exec_prompt_cmds = 1;
 	if (cur_ws == 1) {
 		if (prev_ws != cur_ws) {
 			char t[16];
@@ -1701,6 +1710,7 @@ rl_ws3(int count, int key)
 	if (rl_line_buffer && *rl_line_buffer)
 		rl_delete_text(0, rl_end);
 
+	exec_prompt_cmds = 1;
 	if (cur_ws == 2) {
 		if (prev_ws != cur_ws) {
 			char t[16];
@@ -1721,6 +1731,7 @@ rl_ws4(int count, int key)
 	if (rl_line_buffer && *rl_line_buffer)
 		rl_delete_text(0, rl_end);
 
+	exec_prompt_cmds = 1;
 	if (cur_ws == 3) {
 		if (prev_ws != cur_ws) {
 			char t[16];
@@ -2351,7 +2362,8 @@ readline_kbinds(void)
 {
 	/* Disable "Esc + Enter". Otherwise, it switches to vi mode, which is not
 	 * intended (for instance, in a secondary prompt).
-	 * Disable it here so that the user can rebind it using the config file. */
+	 * Disable it here so that the user can rebind it using the config file
+	 * (readline.clifm or keybindings.clifm). */
 	rl_bind_keyseq("\x1b\xd", do_nothing);
 
 	if (kbinds_file)
