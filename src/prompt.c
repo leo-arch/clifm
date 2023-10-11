@@ -977,8 +977,9 @@ initialize_prompt_data(const int prompt_flag)
 	fputs(df_c, stdout);
 	fflush(stdout);
 
-	if (prompt_flag != PROMPT_UPDATE)
-		run_prompt_cmds();
+//	if (prompt_flag != PROMPT_UPDATE)
+	UNUSED(prompt_flag);
+	run_prompt_cmds();
 
 #ifndef _NO_TRASH
 	update_trash_indicator();
