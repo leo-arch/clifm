@@ -1550,6 +1550,7 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  M-l           Toggle long/detail view mode on/off\n\
  M-.           Toggle hidden files on/off\n\
  M-,           Toggle list only directories on/off\n\
+ M--           Preview files in the current directory (requires fzf)\n\
  M-m           List mountpoints\n\
  M-h           Show directory history\n\
  M-t           Clear messages\n\

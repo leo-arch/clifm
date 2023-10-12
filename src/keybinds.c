@@ -487,8 +487,7 @@ static int
 rl_create_file(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	char cmd[] = "n";
-	return run_kb_cmd(cmd);
+	return run_kb_cmd("n");
 }
 
 #ifndef _NO_SUGGESTIONS
@@ -848,18 +847,8 @@ static int
 rl_refresh(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-
-	if (kbind_busy == 1)
-		return EXIT_SUCCESS;
-
-	if (conf.colorize == 1 && wrong_cmd == 1)
-		recover_from_wrong_cmd();
-
-	char cmd[] = "rf";
-	keybind_exec_cmd(cmd);
-	rl_reset_line_state();
-
-	return EXIT_SUCCESS;
+	exec_prompt_cmds = 1;
+	return run_kb_cmd("rf");
 }
 
 static int
@@ -871,8 +860,7 @@ rl_dir_parent(int count, int key)
 		return EXIT_SUCCESS;
 
 	exec_prompt_cmds = 1;
-	char cmd[] = "cd ..";
-	return run_kb_cmd(cmd);
+	return run_kb_cmd("cd ..");
 }
 
 static int
@@ -883,8 +871,7 @@ rl_dir_root(int count, int key)
 	if (*workspaces[cur_ws].path == '/' && !workspaces[cur_ws].path[1])
 		return EXIT_SUCCESS;
 
-	char cmd[] = "cd /";
-	return run_kb_cmd(cmd);
+	return run_kb_cmd("cd /");
 }
 
 static int
@@ -897,8 +884,7 @@ rl_dir_home(int count, int key)
 		return EXIT_SUCCESS;
 
 	exec_prompt_cmds = 1;
-	char cmd[] = "cd";
-	return run_kb_cmd(cmd);
+	return run_kb_cmd("cd");
 }
 
 static int
@@ -910,8 +896,7 @@ rl_dir_previous(int count, int key)
 		return EXIT_SUCCESS;
 
 	exec_prompt_cmds = 1;
-	char cmd[] = "b";
-	return run_kb_cmd(cmd);
+	return run_kb_cmd("b");
 }
 
 static int
@@ -924,8 +909,7 @@ rl_dir_next(int count, int key)
 		return EXIT_SUCCESS;
 
 	exec_prompt_cmds = 1;
-	char cmd[] = "f";
-	return run_kb_cmd(cmd);
+	return run_kb_cmd("f");
 }
 
 int
@@ -1045,40 +1029,35 @@ static int
 rl_open_config(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	char cmd[] = "config";
-	return run_kb_cmd(cmd);
+	return run_kb_cmd("config");
 }
 
 static int
 rl_open_keybinds(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	char cmd[] = "kb edit";
-	return run_kb_cmd(cmd);
+	return run_kb_cmd("kb edit");
 }
 
 static int
 rl_open_cscheme(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	char cmd[] = "cs edit";
-	return run_kb_cmd(cmd);
+	return run_kb_cmd("cs edit");
 }
 
 static int
 rl_open_bm_file(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	char cmd[] = "bm edit";
-	return run_kb_cmd(cmd);
+	return run_kb_cmd("bm edit");
 }
 
 static int
 rl_open_jump_db(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	char cmd[] = "je";
-	return run_kb_cmd(cmd);
+	return run_kb_cmd("je");
 }
 
 static int
@@ -1101,54 +1080,44 @@ static int
 rl_open_mime(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	char cmd[] = "mm edit";
-	return run_kb_cmd(cmd);
+	return run_kb_cmd("mm edit");
 }
 
 static int
 rl_mountpoints(int count, int key)
 {
-	if (kbind_busy == 1)
-		return EXIT_SUCCESS;
-
 	UNUSED(count); UNUSED(key);
-	char cmd[] = "mp";
-	return run_kb_cmd(cmd);
+	return run_kb_cmd("mp");
 }
 
 static int
 rl_select_all(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	char cmd[] = "s ^";
-	return run_kb_cmd(cmd);
+	exec_prompt_cmds = 1;
+	return run_kb_cmd("s ^");
 }
 
 static int
 rl_deselect_all(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	char cmd[] = "ds *";
-	return run_kb_cmd(cmd);
+	exec_prompt_cmds = 1;
+	return run_kb_cmd("ds *");
 }
 
 static int
 rl_bookmarks(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	if (kbind_busy == 1)
-		return EXIT_SUCCESS;
-
-	char cmd[] = "bm";
-	return run_kb_cmd(cmd);
+	return run_kb_cmd("bm");
 }
 
 static int
 rl_selbox(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	char cmd[] = "ds";
-	return run_kb_cmd(cmd);
+	return run_kb_cmd("ds");
 }
 
 static int
@@ -1306,8 +1275,7 @@ rl_archive_sel(int count, int key)
 	if (sel_n == 0)
 		return handle_no_sel("ac");
 
-	char cmd[] = "ac sel";
-	return run_kb_cmd(cmd);
+	return run_kb_cmd("ac sel");
 }
 
 static int
@@ -1338,10 +1306,7 @@ rl_export_sel(int count, int key)
 	if (sel_n == 0)
 		return handle_no_sel("exp");
 
-	char cmd[] = "exp sel";
-	keybind_exec_cmd(cmd);
-	rl_reset_line_state();
-	return EXIT_SUCCESS;
+	return run_kb_cmd("exp sel");
 }
 
 static int
@@ -1355,10 +1320,7 @@ rl_move_sel(int count, int key)
 		return handle_no_sel("m");
 
 	exec_prompt_cmds = 1;
-	char cmd[] = "m sel";
-	keybind_exec_cmd(cmd);
-	rl_reset_line_state();
-	return EXIT_SUCCESS;
+	return run_kb_cmd("m sel");
 }
 
 static int
@@ -1371,10 +1333,8 @@ rl_rename_sel(int count, int key)
 	if (sel_n == 0)
 		return handle_no_sel("br");
 
-	char cmd[] = "br sel";
-	keybind_exec_cmd(cmd);
-	rl_reset_line_state();
-	return EXIT_SUCCESS;
+	exec_prompt_cmds = 1;
+	return run_kb_cmd("br sel");
 }
 
 static int
@@ -1513,33 +1473,31 @@ static int
 rl_dirhist(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	char cmd[] = "bh";
-	return run_kb_cmd(cmd);
+	return run_kb_cmd("bh");
 }
 
 static int
 rl_new_instance(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	char cmd[] = "x .";
-	return run_kb_cmd(cmd);
+	exec_prompt_cmds = 1;
+	return run_kb_cmd("x .");
 }
 
 static int
 rl_clear_msgs(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	char cmd[] = "msg clear";
-	return run_kb_cmd(cmd);
+	exec_prompt_cmds = 1;
+	return run_kb_cmd("msg clear");
 }
 
 static int
 rl_trash_sel(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	char cmd[] = "t sel";
 	exec_prompt_cmds = 1;
-	return run_kb_cmd(cmd);
+	return run_kb_cmd("t sel");
 }
 
 static int
@@ -1561,9 +1519,7 @@ rl_open_sel(int count, int key)
 	snprintf(cmd, sizeof(cmd), "o %s", (sel_n && sel_elements[sel_n - 1].name)
 		? sel_elements[sel_n - 1].name : "sel");
 
-	keybind_exec_cmd(cmd);
-	rl_reset_line_state();
-	return EXIT_SUCCESS;
+	return run_kb_cmd(cmd);
 }
 
 static int
@@ -1659,8 +1615,7 @@ rl_dir_pinned(int count, int key)
 		return EXIT_SUCCESS;
 	}
 
-	char cmd[] = ",";
-	return run_kb_cmd(cmd);
+	return run_kb_cmd(",");
 }
 
 static int
@@ -1682,8 +1637,7 @@ rl_ws1(int count, int key)
 		return EXIT_SUCCESS;
 	}
 
-	char cmd[] = "ws 1";
-	return run_kb_cmd(cmd);
+	return run_kb_cmd("ws 1");
 }
 
 static int
@@ -1703,8 +1657,7 @@ rl_ws2(int count, int key)
 		return EXIT_SUCCESS;
 	}
 
-	char cmd[] = "ws 2";
-	return run_kb_cmd(cmd);
+	return run_kb_cmd("ws 2");
 }
 
 static int
@@ -1724,8 +1677,7 @@ rl_ws3(int count, int key)
 		return EXIT_SUCCESS;
 	}
 
-	char cmd[] = "ws 3";
-	return run_kb_cmd(cmd);
+	return run_kb_cmd("ws 3");
 }
 
 static int
@@ -1745,8 +1697,7 @@ rl_ws4(int count, int key)
 		return EXIT_SUCCESS;
 	}
 
-	char cmd[] = "ws 4";
-	return run_kb_cmd(cmd);
+	return run_kb_cmd("ws 4");
 }
 
 static int
@@ -1796,8 +1747,8 @@ static int
 rl_launch_view(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	char cmd[] = "view";
-	return run_kb_cmd(cmd);
+	exec_prompt_cmds = 1;
+	return run_kb_cmd("view");
 }
 
 static int
