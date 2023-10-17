@@ -29,10 +29,8 @@
 #ifdef __OpenBSD__
 typedef char *rl_cpvfunc_t;
 # include <ereadline/readline/readline.h>
-//# include <ereadline/readline/history.h> // history_arg_extract
 #else
 # include <readline/readline.h>
-//# include <readline/history.h> // history_arg_extract
 #endif /* __OpenBSD__ */
 
 #ifdef __TINYC__
@@ -929,7 +927,7 @@ rl_toggle_long_view(int count, int key)
 	if (conf.autols == 1) {
 		if (conf.clear_screen == 0)
 		/* Without this putchar(), the first entries of the directories
-		 * list are printed in the prompt line */
+		 * list are printed in the prompt line. */
 			putchar('\n');
 		reload_dirlist();
 	}

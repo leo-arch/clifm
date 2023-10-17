@@ -154,8 +154,8 @@ skip_line(char *line, char **pattern, char **cmds)
 	return 0;
 }
 
-/* Test PATTERN against either FILENAME or the mime-type MIME
- * Returns zero in case of a match, and 1 otherwise */
+/* Test PATTERN against either FILENAME or the mime-type MIME.
+ * Returns zero in case of a match, and 1 otherwise. */
 static int
 test_pattern(const char *pattern, const char *filename, const char *mime)
 {
@@ -164,7 +164,8 @@ test_pattern(const char *pattern, const char *filename, const char *mime)
 
 	if (filename && (*pattern == 'N' || *pattern == 'E')
 	&& *(pattern + 1) == ':') {
-		if (regcomp(&regex, pattern + 2, REG_NOSUB | REG_EXTENDED) == 0
+		if (regcomp(&regex, pattern + 2,
+		REG_NOSUB | REG_EXTENDED | REG_ICASE) == 0
 		&& regexec(&regex, filename, 0, NULL, 0) == 0)
 			ret = EXIT_SUCCESS;
 	} else {
@@ -179,7 +180,7 @@ test_pattern(const char *pattern, const char *filename, const char *mime)
 	return ret;
 }
 
-/* Return 1 if APP is a valid and existent application. Zero otherwise */
+/* Return 1 if APP is a valid and existent application. Zero otherwise. */
 static int
 check_app_existence(char **app, char **arg)
 {
