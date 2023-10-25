@@ -1,3 +1,39 @@
+1.15 (Jolly-Roger)
+
+Bug fixes
+* Extended attributes printed for symlinks (if the target has them) when using the 'p' command (which does not follow symlinks).
+* Symbolic links marked as having extended attributes (@) (if the target has them) in long view.
+* Special permission bits (SUID, SGID, and sticky) are always zero in octal notation (mostly 'p' command).
+* Garbage in the command line after pressing keybind and there's text in the command line.
+* Ctrl-Alt-b, Ctrl-Alt-j, and Ctrl-Alt-k keybindings not working. Removed (didn't make much sense anyway).
+* 'dh !NUM' not working.
+* A few minor keybindings quirks were fixed.
+* --disk-usage crashes on file systems reporting zero total size (ex: /proc).
+* File names wrongly trimmed when file extension has exactly MAX_NAMELEN - 1 chars.
+* Wrong disk usage information (for big sizes) in some 32-bit architectures.
+* Two files with the same name (but different case) are both expanded even if only one is specified.
+* Key remaps for vi command mode not working.
+* Recounting hardlinks in disk usage analyzer mode.
+* Esc+Enter switches to vi mode.
+* Keybindings are executed from within some secondary prompts.
+* 'ws' and 'st' commands not working with fused numbers (ex: 'ws2').
+* Prompt commands executed twice after keybindings.
+* After renaming a selected file it is actually deselected, but still marked as such.
+
+New features/improvements
+* Mark Libreoffice lock files (.~*#) and MS-Office temp files (~$*) as temp files.
+* Document the meaning of each shade in both DateShades and SizeShades.
+* 'p'/'pp': List files ACLs (Linux).
+* 'p'/'pp': Files with extended attributes/caps/ACLs are marked with '@'. This replaces the '+' in previous versions, which was a mark for ACLs only (Linux).
+* Extended attributes enabled by default (long view).
+* Faster file capabilities check (improving thus the overall listing time).
+* Add file system type name and device file name to the disk-usage message (--disk-usage): FREE/TOTAL (FREE_PERC) FS_TYPE_NAME DEV_NAME.
+* 'c'/'m' behavior for 'cp'/'mv': add final "." if last parameter is "sel".
+* fb2, cb7, cbt, and cba files added to the mimelist file as ebook formats.
+* sel: do not try regex if pattern contains just asterisks as metacharacters.
+* Mime: case insensitively match file name patterns (for example, file extensions).
+* Add foot-extra, foot-extra-direct, rio, and rio-base to our internal terminfo database.
+
 1.14.6
 
 Bug fixes
