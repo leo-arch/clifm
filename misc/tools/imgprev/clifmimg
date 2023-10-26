@@ -33,6 +33,7 @@
 #X:.*/pdf$=clifmimg pdf
 #X:^image/vnd.djvu=clifmimg djvu
 #X:^image/svg\+xml$=clifmimg svg;
+#X:^image/gif$=clifmimg gif;
 #X:^image/.*=clifmimg image;
 #X:^video/.*=clifmimg video;
 #X:^audio/.*=clifmimg audio;
@@ -57,13 +58,13 @@
 # The following applications are used to generate thumbnails:
 # ffmpegthumbnailer (Video files)
 # epub-thumbnailer (ePub files)
-# pdftoppm (PDF files, provided by the poppler package)
-# ddjvu (DjVu files, provided by the djvulibre package)
+# pdftoppm (PDF files - provided by the poppler package)
+# ddjvu (DjVu files - provided by the djvulibre package)
 # ffmpeg (Audio files)
 # fontpreview (Font files)
 # libreoffice (Office files: odt, docx, xlsx, etc)
-# gs (Postscript files, provided by the ghostscript package)
-# convert (SVG files and sixel images, provided by the imagemagick package)
+# gs (Postscript files - provided by the ghostscript package)
+# convert (GIF, SVG files, and sixel images - provided by the imagemagick package)
 #
 # Note: The exact package names provinding these programs vary depending
 # on your OS/distribution, but ususally they have the same name as the program
@@ -85,7 +86,7 @@ hash_file() {
 		PCACHE="$CACHE_DIR/$(md5 -q "$1")"
 	else
 		printf "clifm: No hashing application found.\nEither md5sum or md5 \
-are required.\n" >&2
+is required.\n" >&2
 		exit 1
 	fi
 }
@@ -151,6 +152,12 @@ display() {
 main() {
 	case "$type" in
 		"image") display "$file" ;;
+		"gif")
+			hash_file "$file"
+			! [ -f "${PCACHE}.jpg" ] && \
+				convert -coalesce -resize 640x480\> "$file"[0] "${PCACHE}.jpg"
+			display "${PCACHE}.jpg"
+		;;
 		"video")
 			hash_file "$file"
 			! [ -f "${PCACHE}.jpg" ] && \

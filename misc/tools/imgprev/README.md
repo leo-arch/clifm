@@ -54,6 +54,7 @@ The first parameter (thumbnailing method) could be any of the following:
 
 * image
 * video
+* gif
 * epub
 * pdf
 * djvu
@@ -80,6 +81,7 @@ X:^application/epub\+zip$=clifmimg epub;
 X:^application/pdf$=clifmimg pdf;
 X:^image/vnd.djvu=clifmimg djvu;
 X:^image/svg\+xml$=clifmimg svg;
+X:^image/gif$=clifmimg gif;
 X:^image/.*=clifmimg image;
 X:^video/.*=clifmimg video;
 X:^audio/.*=clifmimg audio;
