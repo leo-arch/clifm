@@ -33,6 +33,7 @@ New features/improvements
 * sel: do not try regex if pattern contains just asterisks as metacharacters.
 * Mime: case insensitively match file name patterns (for example, file extensions).
 * Add foot-extra, foot-extra-direct, rio, and rio-base to our internal terminfo database.
+* Add support for image previews using sixel (via fzf). See clifmimg script.
 
 1.14.6
 
