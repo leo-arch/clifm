@@ -13,9 +13,6 @@
 # The first parameter tells what kind of file is to be converted/displayed
 # The second one is the file name to be converted/displayed.
 
-# NOTE: Since the original ueberzug is unmaintained, we recommend using this
-# fork instead: https://github.com/ueber-devel/ueberzug.
-
 ######################
 # Usage
 ######################
@@ -66,13 +63,16 @@
 # fontpreview (Font files)
 # libreoffice (Office files: odt, docx, xlsx, etc)
 # gs (Postscript files, provided by the ghostscript package)
-# convert (SVG files, provided by the imagemagick package)
+# convert (SVG files and sixel images, provided by the imagemagick package)
 #
 # Note: The exact package names provinding these programs vary depending
 # on your OS/distribution, but ususally they have the same name as the program
 
 type="$1"
 file="$2"
+
+default_width=640
+default_height=480
 
 CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/clifm/previews"
 
@@ -93,15 +93,37 @@ are required.\n" >&2
 display() {
 	[ -z "$1" ] && exit 1
 
-## Uncomment any of the following lines to use a character art method (instead of kitty or ueberzug)
-#	chafa -f symbols -s "$((FZF_PREVIEW_COLUMNS - 2))x$((FZF_PREVIEW_LINES))" "$1"; exit 0
-#	pixterm -s 2 -tc "$((FZF_PREVIEW_COLUMNS - 2))" -tr "$FZF_PREVIEW_LINES" "$1"; exit 0
-#   img2txt -H"$FZF_PREVIEW_LINES" -W"$((FZF_PREVIEW_COLUMNS - 2))" "$1"; exit 0
-#	viu -b -h"$FZF_PREVIEW_LINES" -w"$((FZF_PREVIEW_COLUMNS - 2))" "$1"; exit 0
-#	catimg -H"$FZF_PREVIEW_LINES" "$1"; exit 0
-#	tiv -h "$FZF_PREVIEW_LINES" -w "$((FZF_PREVIEW_COLUMNS - 2))" "$1"; exit 0
-#	timg -g "$((FZF_PREVIEW_COLUMNS - 2))x$FZF_PREVIEW_LINES" "$1"; exit 0
-#	explosion -w "$((FZF_PREVIEW_COLUMNS - 2))" -h "$FZF_PREVIEW_LINES" "$1"; exit 0
+	if [ -n "$FZF_PREVIEW_LINES" ]; then
+		W=$((FZF_PREVIEW_PIXEL_WIDTH - 270))
+		H=$((FZF_PREVIEW_PIXEL_HEIGHT - 50))
+		C=$((FZF_PREVIEW_COLUMNS - 2))
+		L=$FZF_PREVIEW_LINES
+	else
+		W=$default_width
+		H=$default_height
+		C=$COLUMNS
+		L=$LINES
+	fi
+
+	if [ -z "$CLIFM_FZF_LINE" ]; then
+		CLIFM_FZF_LINE=0
+		CLIFM_TERM_COLUMNS=$COLUMNS
+	fi
+
+## Uncomment any of the following previewing methods (instead of kitty or ueberzug)
+# New: fzf recently added sixel support (experimental). If using this, there's no need to run via
+# clifmrun. Just run clifm as always.
+#	convert "$1" -resize "${W}x${H}>" -dither FloydSteinberg sixel:-; exit 0
+
+#	chafa -f symbols -s "${C}x${L}" "$1"; exit 0
+#	chafa -s "${C}x${L}" "$1"; exit 0
+#	pixterm -s 2 -tc "${C}" -tr "${L}" "$1"; exit 0
+#	img2txt -H"${L}" -W"${C}" "$1"; exit 0
+#	viu -b -h"${L}" -w"${C}" "$1"; exit 0
+#	catimg -H"${L}" "$1"; exit 0
+#	tiv -h "${L}" -w "${C}" "$1"; exit 0
+#	timg -g "${C}x${L}" "$1"; exit 0
+#	explosion -w "${C}" -h "${L}" "$1"; exit 0
 
 	# CLIFM_TERM_COLUMNS: Number of columns of the current terminal
 	# window (value exported by clifm)
@@ -122,7 +144,7 @@ display() {
 		--place "$FZF_PREVIEW_COLUMNS"x"$FZF_PREVIEW_LINES"@"$X"x"$Y" \
 		--transfer-mode=stream --align=left -- "$1"
 	else
-		printf '{"action": "add", "identifier": "clifm-preview", "x": "%s", "y": "%s", "width": "%s", "height": "%s", "path": "%s"}\n' "$X" "$Y" "$COLUMNS" "$LINES" "$1" > "$CLIFM_FIFO_UEBERZUG"
+		printf '{"action": "add", "identifier": "clifm-preview", "x": "%s", "y": "%s", "width": "%s", "height": "%s", "scaler" : "contain", "path": "%s"}\n' "$X" "$Y" "$COLUMNS" "$LINES" "$1" > "$CLIFM_FIFO_UEBERZUG"
 	fi
 }
 
@@ -144,7 +166,7 @@ main() {
 		"pdf")
 			hash_file "$file"
 			! [ -f "${PCACHE}.jpg" ] && \
-				pdftoppm -jpeg -f 1 -singlefile "$file" "$PCACHE"
+				pdftoppm -jpeg -f 1 -singlefile -scale-to 1920 "$file" "$PCACHE"
 			display "${PCACHE}.jpg"
 			;;
 		"djvu")
