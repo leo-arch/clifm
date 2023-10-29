@@ -86,7 +86,7 @@ hash_file() {
 		PCACHE="$CACHE_DIR/$(md5 -q "$1")"
 	else
 		printf "clifm: No hashing application found.\nEither md5sum or md5 \
-is required.\n" >&2
+are required.\n" >&2
 		exit 1
 	fi
 }
@@ -95,13 +95,9 @@ display() {
 	[ -z "$1" ] && exit 1
 
 	if [ -n "$FZF_PREVIEW_LINES" ]; then
-		W=$((FZF_PREVIEW_PIXEL_WIDTH - 270))
-		H=$((FZF_PREVIEW_PIXEL_HEIGHT - 50))
 		C=$((FZF_PREVIEW_COLUMNS - 2))
 		L=$FZF_PREVIEW_LINES
 	else
-		W=$default_width
-		H=$default_height
 		C=$COLUMNS
 		L=$LINES
 	fi
@@ -111,13 +107,13 @@ display() {
 		CLIFM_TERM_COLUMNS=$COLUMNS
 	fi
 
-## Uncomment any of the following previewing methods (instead of kitty or ueberzug)
-# New: fzf recently added sixel support (experimental). If using this, there's no need to run via
-# clifmrun. Just run clifm as always.
-#	convert "$1" -resize "${W}x${H}>" -dither FloydSteinberg sixel:-; exit 0
+## Uncomment any of the following previewing methods (instead of kitty or ueberzug).
+# If using any of these methods, there is no need to run via clifmrun; just run clifm as always.
+#
+# New: fzf recently added sixel support (experimental).
+#	chafa -f sixel -s "${C}x$((L - 1))" "$1"; exit 0
 
 #	chafa -f symbols -s "${C}x${L}" "$1"; exit 0
-#	chafa -s "${C}x${L}" "$1"; exit 0
 #	pixterm -s 2 -tc "${C}" -tr "${L}" "$1"; exit 0
 #	img2txt -H"${L}" -W"${C}" "$1"; exit 0
 #	viu -b -h"${L}" -w"${C}" "$1"; exit 0
@@ -125,6 +121,7 @@ display() {
 #	tiv -h "${L}" -w "${C}" "$1"; exit 0
 #	timg -g "${C}x${L}" "$1"; exit 0
 #	explosion -w "${C}" -h "${L}" "$1"; exit 0
+##
 
 	# CLIFM_TERM_COLUMNS: Number of columns of the current terminal
 	# window (value exported by clifm)
