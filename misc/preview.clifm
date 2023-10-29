@@ -17,6 +17,26 @@
 # Uncomment and edit this line to use Ranger's scope script:
 #.*=~/.config/ranger/scope.sh %f 120 80 /tmp/clifm/ True
 
+# Image previews
+# 1. Uncomment the below lines to enable image previews for the specified file types.
+# 2. Copy the clifmrun and clifmimg scripts to somewhere in you PATH, say /usr/local/bin.
+# (You can find them in DATADIR/clifm/plugins, usually /usr/local/share/clifm/plugins).
+# NOTE: You can edit clifmimg to change the way in which images are generated and displayed.
+#
+#X:^application/.*(officedocument|msword|ms-excel|opendocument).*=clifmimg doc;
+#X:^text/rtf$=clifmimg doc;
+#X:^application/epub\+zip$=clifmimg epub;
+#X:^application/pdf$=clifmimg pdf;
+#X:^image/vnd.djvu=clifmimg djvu;
+#X:^image/svg\+xml$=clifmimg svg;
+#X:^image/gif$=clifmimg gif;
+#X:^image/.*=clifmimg image;
+#X:^video/.*=clifmimg video;
+#X:^audio/.*=clifmimg audio;
+#X:^application/postscript$=clifmimg postscript;
+#X:N:.*\.otf$=clifmimg font;
+#X:font/.*=clifmimg font;
+
 # Directories
 inode/directory=exa -a --tree --level=1 --;lsd -A --tree --depth=1 --color=always;tree -a -L 1;ls -Ap --color=always --indicator-style=none;
 
