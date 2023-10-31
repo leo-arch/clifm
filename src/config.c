@@ -45,12 +45,6 @@
 #include "file_operations.h"
 #include "autocmds.h"
 
-/* Only for old log file split. Remove when needed */
-#ifndef _NO_SPLIT_LOG
-# include "history.h" // split_old_log_file()
-#endif /* !_NO_SPLIT_LOG */
-////////////////////
-
 #define DUMP_CONFIG_STR  0
 #define DUMP_CONFIG_INT  1
 #define DUMP_CONFIG_BOOL 2
@@ -3477,12 +3471,6 @@ init_config(void)
 
 	define_config_file_names();
 	create_config_files();
-
-///////// TEMPORAL CODE
-#ifndef _NO_SPLIT_LOG
-	split_old_log_file();
-#endif /* !_NO_SPLIT_LOG */
-///////////////////////
 
 #ifndef CLIFM_SUCKLESS
 	cschemes_n = get_colorschemes();

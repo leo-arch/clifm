@@ -45,12 +45,6 @@ void log_msg(char *, const int, const int, const int);
 int  print_logs(const int);
 int  record_cmd(char *);
 
-////// TEMPORAL CODE
-#ifndef _NO_SPLIT_LOG
-void split_old_log_file(void);
-#endif /* !_NO_SPLIT_LOG */
-////////////////////
-
 __END_DECLS
 
 #endif /* HISTORY_H */

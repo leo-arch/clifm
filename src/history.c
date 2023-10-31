@@ -40,68 +40,6 @@
 #include "messages.h"
 #include "file_operations.h"
 
-#ifndef _NO_SPLIT_LOG
-////// TEMPORAL CODE
-/* Split the old log file: messages go into the message logs file, and commands
- * into the command logs file. */
-void
-split_old_log_file(void)
-{
-	/* 1) Create the old file path */
-	char *new_file = msgs_log_file ? msgs_log_file : cmds_log_file;
-	if (!new_file)
-		return;
-
-	char *p = strrchr(new_file, '/');
-	if (!p)
-		return;
-
-	*p = '\0';
-	char old_file[PATH_MAX];
-	snprintf(old_file, sizeof(old_file), "%s/log.clifm", new_file);
-	*p = '/';
-
-	/* 2) Open the 3 files */
-	FILE *old = fopen(old_file, "r");
-	if (!old)
-		return;
-
-	FILE *msg = fopen(msgs_log_file, "a");
-	if (!msg) {
-		fclose(old);
-		return;
-	}
-
-	FILE *cmd = fopen(cmds_log_file, "a");
-	if (!cmd) {
-		fclose(msg);
-		fclose(old);
-		return;
-	}
-
-	/* 3) Read the old file and move lines to the new ones accordingly */
-	size_t line_size = 0;
-	char *line = (char *)NULL;
-
-	while (getline(&line, &line_size, old) > 0) {
-		if (!line || !*line || (*line != 'c' && *line != 'm')
-		|| line[1] != ':' || !line[2])
-			continue;
-
-		fprintf(*line == 'm' ? msg : cmd, "%s", line + 2);
-	}
-
-	free(line);
-	fclose(old);
-	fclose(msg);
-	fclose(cmd);
-
-	/* 4) Remove the old file */
-	remove(old_file);
-}
-////////////////////
-#endif /* _NO_SPLIT_LOG */
-
 /* Return a string with the current date.
  * Used to compose log entries. */
 static char *
