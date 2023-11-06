@@ -340,8 +340,17 @@ run_kb_cmd(char *cmd)
 	if (conf.colorize == 1 && wrong_cmd == 1)
 		recover_from_wrong_cmd();
 
+	int exit_code_bk = exit_code;
+
 	keybind_exec_cmd(cmd);
 	rl_reset_line_state();
+
+	if (exit_code != exit_code_bk)
+		/* The exit code was changed by the executed command. Force the
+		 * input taking function (my_rl_getc) to update the value of
+		 * prompt_offset to correctly calculate the cursor position. */
+		prompt_offset = UNSET;
+
 	return EXIT_SUCCESS;
 }
 
