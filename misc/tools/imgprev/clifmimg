@@ -110,7 +110,7 @@ display() {
 ## Uncomment any of the following previewing methods (instead of kitty or ueberzug).
 # If using any of these methods, there is no need to run via clifmrun; just run clifm as always.
 #
-# New: fzf recently added sixel support (experimental).
+# New: since 0.44, fzf added sixel support (experimental).
 #	chafa -f sixel -s "${C}x$((L - 1))" "$1"; exit 0
 
 #	chafa -f symbols -s "${C}x${L}" "$1"; exit 0
