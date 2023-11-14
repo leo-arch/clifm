@@ -26,6 +26,8 @@
 
 Based on [vifmimg](https://github.com/cirala/vifmimg), these scripts ([clifmimg](https://github.com/leo-arch/clifm/blob/master/misc/tools/imgprev/clifmimg) and [clifmrun](https://github.com/leo-arch/clifm/blob/master/misc/tools/imgprev/clifmrun)) are intended to provide image preview capabilities to **clifm** using either [ueberzug](https://github.com/ueber-devel/ueberzug) (default)<sup>1</sup> or the [kitty image protocol](https://sw.kovidgoyal.net/kitty/graphics-protocol/) (currently experimental and slower). Bear in mind that `ueberzug` only works on X11.
 
+For the Sixel method, consult the [Sixel section](#sixel-graphics-and-fzf) below.
+
 <sup>1</sup> Since the original `ueberzug` is not maintained anymore, we strongly recommend using this fork instead: https://github.com/ueber-devel/ueberzug.
 
 ### clifmrun
@@ -103,6 +105,17 @@ In case you don't want image preview for some of these files types, just comment
 ```sh
 clifmrun
 ```
+
+### Sixel graphics and Fzf
+
+If you have a [sixel capable terminal](https://github.com/saitoha/libsixel#terminal-requirements) and `fzf` version 0.44 or later you can easily take advantage of this capability as follows:
+
+1. See points 1 and 2 in the [Usage section](#usage). Note that, since `ueberzug` isn't required, there's no need to copy the `clifmrun` script.
+2. Edit the `clifmimg.sh` script and uncomment the `chafa` line (used to generate the sixel images):
+```sh
+chafa -f sixel -s "${C}x$((L - 1))" "$1"; exit 0
+```
+3. Run **clifm** as always (again, `clifmrun` is not required).
 
 ### Kitty and Wayland
 
