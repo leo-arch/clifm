@@ -38,7 +38,7 @@
 #X:font/.*=clifmimg font;
 
 # Directories
-inode/directory=exa -a --tree --level=1 --;lsd -A --tree --depth=1 --color=always;tree -a -L 1;ls -Ap --color=always --indicator-style=none;
+inode/directory=exa -a --tree --level=1 --;eza -a --tree --level=1 --;lsd -A --tree --depth=1 --color=always;tree -a -L 1;ls -Ap --color=always --indicator-style=none;
 
 # Text
 ^text/rtf=catdoc --;
