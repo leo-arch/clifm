@@ -2097,7 +2097,9 @@ rl_suggestions(const unsigned char c)
 		 * ######################################*/
 
 	/* Fastback */
-	if (word && *word == '.' && word[1] == '.' && word[2] == '.'
+//	if (word && *word == '.' && word[1] == '.' && word[2] == '.'
+	if (word && *word == '.' && word[1] == '.' && (!word[2] || word[2] == '.')
+//	if (word && *word == '.' && (!word[1] || (word[1] == '.' && (!word[2] || word[2] == '.')))
 	&& (printed = check_fastback(word)) != NO_MATCH)
 		goto SUCCESS;
 

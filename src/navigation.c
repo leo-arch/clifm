@@ -944,8 +944,13 @@ fastback(char *str)
 		p++;
 	}
 
-	if (dots <= 2)
+	if (dots <= 2) {
+		if (dots == 2)
+			return normalize_path("..", 2);
+//		if (dots == 1)
+//			return normalize_path(".", 1);
 		return (char *)NULL;
+	}
 
 	char q[PATH_MAX];
 	q[0] = '.';
