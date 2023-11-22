@@ -108,6 +108,7 @@ X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;v
 !X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;vim;vi;mg;emacs;ed;nano
 
 # Office documents
+^application/.*(open|office)document\.spreadsheet.*=sc-im
 X:^application/.*(open|office)document.*=libreoffice;soffice;ooffice
 
 # Archives
