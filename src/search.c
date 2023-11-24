@@ -66,11 +66,21 @@ exec_find(char *name, char *_path, char *method, char *pattern)
 {
 	if (follow_symlinks == 1) {
 		char *cmd[] = {name, "-L", _path, method, pattern, NULL};
+#ifdef DEBUG_SEARCH
+		printf("Exec cmd: '%s -L %s %s %s'\n", name, _path, method, pattern);
+		return launch_execv(cmd, FOREGROUND, E_NOFLAG);
+#else
 		return launch_execv(cmd, FOREGROUND, E_NOSTDERR);
+#endif
 	}
 
 	char *cmd[] = {name, _path, method, pattern, NULL};
+#ifdef DEBUG_SEARCH
+		printf("Exec cmd: '%s %s %s %s'\n", name, _path, method, pattern);
+		return launch_execv(cmd, FOREGROUND, E_NOFLAG);
+#else
 	return launch_execv(cmd, FOREGROUND, E_NOSTDERR);
+#endif
 }
 
 #ifdef FIND_HAS_NO_REGEX
