@@ -924,7 +924,6 @@ get_ext_info(const filesn_t i, int *trim_type, size_t *ext_len)
 		*ext_len = wc_xstrlen(file_info[i].ext_name);
 
 	if ((int)*ext_len >= conf.max_name_len - 1 || (int)*ext_len <= 0) {
-//	if ((int)*ext_len >= conf.max_name_len || (int)*ext_len <= 0) {
 		*ext_len = 0;
 		*trim_type = TRIM_NO_EXT;
 	}
@@ -949,13 +948,27 @@ construct_filename(const filesn_t i, struct wtrim_t *wtrim, const int max_namele
 	|| (int)file_info[i].len <= max_namelen)
 		return name;
 
+	/* Let's trim the file name (at MAX_NAMELEN, in this example, 11).
+	 * A. If no file extension, just trim at 11:  "long_filen~"
+	 * B. If we have an extension, keep it:       "long_f~.ext"
+	 *
+	 * This is the place to implement an alternative trimming procedure, say,
+	 * to trim names at the middle, like MC does: "long_~ename"
+	 * or, if we have an extension:               "long_~e.ext"
+	 *
+	 * We only need a function similar to get_ext_info(), say, get_suffix_info()
+	 * wtrim->trim should be set to TRIM_EXT
+	 * ext_len to the length of the suffix (either "ename" or "e.ext", i.e. 5)
+	 * file_info[i].ext_name should be a pointer to the beggining of SUFFIX
+	 * in file_info[i].name */
+
 	wtrim->type = TRIM_NO_EXT;
 	size_t ext_len = 0;
 	get_ext_info(i, &wtrim->type, &ext_len);
 
 	if (wtrim->wname)
 		xstrsncpy(name_buf, wtrim->wname, sizeof(name_buf));
-	else /* memcpy is faster: use it whenever possible */
+	else /* memcpy is faster: use it whenever possible. */
 		memcpy(name_buf, file_info[i].name, file_info[i].bytes + 1);
 
 	int trim_len = max_namelen - 1 - (int)ext_len;
