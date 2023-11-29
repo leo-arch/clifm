@@ -960,7 +960,7 @@ construct_filename(const filesn_t i, struct wtrim_t *wtrim, const int max_namele
 	 * wtrim->trim should be set to TRIM_EXT
 	 * ext_len to the length of the suffix (either "ename" or "e.ext", i.e. 5)
 	 * file_info[i].ext_name should be a pointer to the beggining of SUFFIX
-	 * in file_info[i].name */
+	 * in file_info[i].name (this might impact on some later operation!) */
 
 	wtrim->type = TRIM_NO_EXT;
 	size_t ext_len = 0;
@@ -974,6 +974,9 @@ construct_filename(const filesn_t i, struct wtrim_t *wtrim, const int max_namele
 	int trim_len = max_namelen - 1 - (int)ext_len;
 	wtrim->diff = u8truncstr(name_buf, (size_t)trim_len);
 	file_info[i].len = (size_t)max_namelen;
+
+	/* At this point we have truncated name. "~" and ".ext" will be appended
+	 * later by one of the print_entry functions. */
 
 	return name_buf;
 }

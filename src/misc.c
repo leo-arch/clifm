@@ -2533,6 +2533,7 @@ bonus_function(void)
 		"\"I'm so happy, because today I've found my friends, they're in my head\" (K. D. Cobain)",
 		"\"The best code is written with the delete key\" (Someone, somewhere, sometime)",
 		"\"I'm selling these fine leather jackets\" (Indy)",
+		"\"If you've been feeling increasingly stupid lately, you're not alone\" (Zak McKracken)",
 		"\"I pray to God to make me free of God\" (Meister Eckhart)",
 		"¡Truco y quiero retruco mierda!",
 		"\"The are no facts, only interpretations\" (F. Nietzsche)",

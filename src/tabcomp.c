@@ -812,7 +812,7 @@ run_finder(const size_t height, const int offset, const char *lw,
 		/* All fixed parameters are compatible with at least fzf 0.16.11 (Aug 1, 2017) */
 		char prev_opts[18 + 32];
 		*prev_opts = '\0';
-		char prev_str[] = "--preview \"clifm --preview {}\"";
+		const char prev_str[] = "--preview \"clifm --preview {}\"";
 
 		if (prev > 0) { /* Either internal of external previewer */
 			set_fzf_env_vars((int)height);
