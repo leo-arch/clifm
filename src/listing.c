@@ -966,14 +966,14 @@ construct_filename(const filesn_t i, struct wtrim_t *wtrim, const int max_namele
 	size_t ext_len = 0;
 	get_ext_info(i, &wtrim->type, &ext_len);
 
-	if (wtrim->wname)
-		xstrsncpy(name_buf, wtrim->wname, sizeof(name_buf));
-	else /* memcpy is faster: use it whenever possible. */
-		memcpy(name_buf, file_info[i].name, file_info[i].bytes + 1);
-
 	int trim_len = max_namelen - 1 - (int)ext_len;
 
 	if (file_info[i].utf8 == 1) {
+		if (wtrim->wname)
+			xstrsncpy(name_buf, wtrim->wname, sizeof(name_buf));
+		else /* memcpy is faster: use it whenever possible. */
+			memcpy(name_buf, file_info[i].name, file_info[i].bytes + 1);
+
 		wtrim->diff = u8truncstr(name_buf, (size_t)trim_len);
 	} else {
 		/* If not UTF-8, let's avoid u8truncstr(). It's a bit faster this way. */
