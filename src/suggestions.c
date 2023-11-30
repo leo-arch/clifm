@@ -2587,7 +2587,7 @@ CHECK_FIRST_WORD:
 	} else {
 	/* There's no suggestion nor any command name matching the first entered
 	 * word. So, we assume we have an invalid command name. Switch to the
-	 * warning prompt to warn the user */
+	 * warning prompt to warn the user. */
 		if (*word != '/' || strchr(word + 1, '/'))
 			print_warning_prompt(*word, c);
 	}

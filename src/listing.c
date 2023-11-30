@@ -972,7 +972,17 @@ construct_filename(const filesn_t i, struct wtrim_t *wtrim, const int max_namele
 		memcpy(name_buf, file_info[i].name, file_info[i].bytes + 1);
 
 	int trim_len = max_namelen - 1 - (int)ext_len;
-	wtrim->diff = u8truncstr(name_buf, (size_t)trim_len);
+
+	if (file_info[i].utf8 == 1) {
+		wtrim->diff = u8truncstr(name_buf, (size_t)trim_len);
+	} else {
+		/* If not UTF-8, let's avoid u8truncstr(). It's a bit faster this way. */
+		const char c = name[trim_len];
+		name[trim_len] = '\0';
+		mbstowcs((wchar_t *)name_buf, name, NAME_MAX + 1);
+		name[trim_len] = c;
+	}
+
 	file_info[i].len = (size_t)max_namelen;
 
 	/* At this point we have truncated name. "~" and ".ext" will be appended
