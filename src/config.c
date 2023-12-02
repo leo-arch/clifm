@@ -3273,6 +3273,14 @@ read_config(void)
 			set_config_bool_value(line + 8, &conf.unicode);
 		}
 
+		else if (*line == 'U' && strncmp(line, "Umask=", 6) == 0) {
+			int opt_num = -1;
+			ret = sscanf(line + 6, "%o\n", &opt_num);
+			if (ret == -1 || opt_num == -1 || opt_num > MAX_UMASK)
+				continue;
+			umask((mode_t)opt_num);
+		}
+
 		else if (xargs.welcome_message == UNSET && *line == 'W'
 			&& strncmp(line, "WelcomeMessage=", 15) == 0) {
 			set_config_bool_value(line + 15, &conf.welcome_message);

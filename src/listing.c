@@ -966,7 +966,7 @@ construct_filename(const filesn_t i, struct wtrim_t *wtrim, const int max_namele
 	size_t ext_len = 0;
 	get_ext_info(i, &wtrim->type, &ext_len);
 
-	int trim_len = max_namelen - 1 - (int)ext_len;
+	const int trim_len = max_namelen - 1 - (int)ext_len;
 
 	if (file_info[i].utf8 == 1) {
 		if (wtrim->wname)

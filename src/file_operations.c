@@ -129,7 +129,7 @@ umask_function(char *arg)
 		goto ERROR;
 
 	int new_umask = read_octal(arg);
-	if (new_umask < 0 || new_umask > 0777)
+	if (new_umask < 0 || new_umask > MAX_UMASK)
 		goto ERROR;
 
 	umask((mode_t)new_umask);

@@ -455,6 +455,8 @@ extern time_t curdir_mtime;
  * this value). */
 #define MAX_SHELL_LEVEL 1000 /* This is the value used by bash 5.2 */
 
+#define MAX_UMASK 0777
+
 /* The following flags are used via an integer (FLAGS). If an integer has
  * 4 bytes, then we can use a total of 32 flags (0-31)
  * 4 * 8 == 32 bits == (1 << 31)
