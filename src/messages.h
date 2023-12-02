@@ -1071,7 +1071,8 @@ Note: MODE is an octal value from 000 to 777\n\n\
 - Print the current value\n\
     umask\n\
 - Set mask to 077\n\
-    umask 077"
+    umask 077\n\n\
+Note: To permanently set the umask, use the Umask option in the config file."
 
 #define UNSET_USAGE "Delete variables from the environment\n\n\
 \x1b[1mUSAGE\x1b[0m\n\

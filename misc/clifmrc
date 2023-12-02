@@ -310,8 +310,8 @@
 # terminal emulator to run CliFM on it.
 ;TerminalCmd="xterm -e"
 
-# Set the default file creation mask. Defaults to the value inherited
-# from the shell (though 077 is recommended).
+# Set the file mode creation mask. Defaults to the value inherited from
+# the shell (though 077 is recommended).
 ;Umask=077
 
 # We have three search strategies: 0 = glob-only, 1 = regex-only,
