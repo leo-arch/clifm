@@ -3273,7 +3273,8 @@ read_config(void)
 			set_config_bool_value(line + 8, &conf.unicode);
 		}
 
-		else if (*line == 'U' && strncmp(line, "Umask=", 6) == 0) {
+		else if (xargs.secure_env != 1 && xargs.secure_env_full != 1
+		&& *line == 'U' && strncmp(line, "Umask=", 6) == 0) {
 			int opt_num = -1;
 			ret = sscanf(line + 6, "%o\n", &opt_num);
 			if (ret == -1 || opt_num == -1 || opt_num > MAX_UMASK)

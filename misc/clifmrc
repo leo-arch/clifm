@@ -312,6 +312,7 @@
 
 # Set the file mode creation mask. Defaults to the value inherited from
 # the shell (though 077 is recommended).
+# This option is ignored in secure mode (umask is forcefully set to 077).
 ;Umask=077
 
 # We have three search strategies: 0 = glob-only, 1 = regex-only,
