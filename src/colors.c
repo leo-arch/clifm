@@ -2062,6 +2062,7 @@ static void
 set_fzf_opts(char *line)
 {
 	free(conf.fzftab_options);
+	conf.fzftab_options = (char *)NULL;
 
 	if (!line) {
 		char *p = conf.colorize == 1 ? DEF_FZFTAB_OPTIONS
@@ -2090,15 +2091,16 @@ set_fzf_opts(char *line)
 				savestring(DEF_FZFTAB_OPTIONS_NO_COLOR,
 				strlen(DEF_FZFTAB_OPTIONS_NO_COLOR));
 		}
-/*		char *p = conf.colorize == 1 ? DEF_FZFTAB_OPTIONS
-			: DEF_FZFTAB_OPTIONS_NO_COLOR;
-		conf.fzftab_options = savestring(p, strlen(p)); */
 	}
+
+	fzf_height_set = 0;
+
+	if (!conf.fzftab_options)
+		return;
 
 	if (strstr(conf.fzftab_options, "--preview "))
 		conf.fzf_preview = FZF_EXTERNAL_PREVIEWER;
 
-	fzf_height_set = 0;
 	if (strstr(conf.fzftab_options, "--height"))
 		fzf_height_set = 1;
 }

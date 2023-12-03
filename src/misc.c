@@ -583,8 +583,13 @@ filter_function(char *arg)
 	}
 
 	char *p = arg;
-	if (*arg == '\'' || *arg == '"')
+	if (*arg == '\'' || *arg == '"') {
 		p = remove_quotes(arg);
+		if (!p) {
+			xerror("%s\n", _("ft: Error removing quotes: Filter unset"));
+			return EXIT_FAILURE;
+		}
+	}
 
 	set_filter_type(*p);
 	filter.str = savestring(p, strlen(p));

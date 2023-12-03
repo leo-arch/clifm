@@ -1471,6 +1471,9 @@ check_variables(const char *str, const size_t len)
 			continue;
 
 		char *ret = strchr(environ[i], '=');
+		if (!ret)
+			continue;
+
 		*ret = '\0';
 		suggestion.type = VAR_SUG;
 		char t[NAME_MAX + 1];
