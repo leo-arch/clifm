@@ -156,9 +156,7 @@ log_cmd(void)
 	last_cmd = (char *)NULL;
 
 	/* Write the log into LOG_FILE */
-	FILE *log_fp;
-
-	log_fp = fopen(cmds_log_file, "a");
+	FILE *log_fp = open_fappend(cmds_log_file);
 	if (!log_fp) {
 		err('e', PRINT_PROMPT, "log: %s: %s\n", cmds_log_file, strerror(errno));
 		free(full_log);
@@ -176,7 +174,7 @@ log_cmd(void)
 static void
 write_msg_into_logfile(const char *_msg)
 {
-	FILE *msg_fp = fopen(msgs_log_file, "a");
+	FILE *msg_fp = open_fappend(msgs_log_file);
 	if (!msg_fp) {
 		/* Do not log this error: We might enter into an infinite loop
 		 * trying to access a file that cannot be accessed. Just warn the user
@@ -328,7 +326,7 @@ append_to_dirhist_file(const char *dir_path)
 	if (!dirhist_file || !dir_path || !*dir_path || xargs.stealth_mode == 1)
 		return;
 
-	FILE *fp = fopen(dirhist_file, "a");
+	FILE *fp = open_fappend(dirhist_file);
 	if (!fp) {
 		xerror(_("%s: %s: Error saving directory entry: %s\n"),
 			PROGRAM_NAME, dir_path, strerror(errno));
@@ -438,7 +436,8 @@ static int
 clear_history_func(char **args)
 {
 	/* Let's overwrite whatever was there. */
-	FILE *hist_fp = fopen(hist_file, "w+");
+	int fd = 0;
+	FILE *hist_fp = open_fwrite(hist_file, &fd);
 	if (!hist_fp) {
 		err(0, NOPRINT_PROMPT, "history: %s: %s\n", hist_file, strerror(errno));
 		return EXIT_FAILURE;

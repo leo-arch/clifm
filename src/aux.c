@@ -638,6 +638,28 @@ open_fwrite(char *name, int *fd)
 	return fp;
 }
 
+/* Open a file for appending (using permissions 600).
+ * Return a file stream associated to the file named NAME or NULL in case of
+ * error. */
+FILE *
+open_fappend(char *name)
+{
+	if (!name || !*name)
+		return (FILE *)NULL;
+
+	int fd = open(name, O_WRONLY | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR);
+	if (fd == -1)
+		return (FILE *)NULL;
+
+	FILE *fp = fdopen(fd, "a");
+	if (!fp) {
+		close(fd);
+		return (FILE *)NULL;
+	}
+
+	return fp;
+}
+
 /* Transform S_IFXXX (MODE) into the corresponding DT_XXX constant */
 inline mode_t
 get_dt(const mode_t mode)

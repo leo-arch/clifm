@@ -1051,7 +1051,7 @@ alias_import(char *file)
 	}
 
 	/* Open CliFM's config file as well */
-	FILE *config_fp = fopen(config_file, "a");
+	FILE *config_fp = open_fappend(config_file);
 	if (!config_fp) {
 		xerror("%s: %s: %s\n", PROGRAM_NAME, config_file, strerror(errno));
 		fclose(fp);

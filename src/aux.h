@@ -55,6 +55,7 @@ char *hex2rgb(char *);
 char *normalize_path(char *, const size_t);
 FILE *open_fread(char *, int *);
 FILE *open_fwrite(char *, int *);
+FILE *open_fappend(char *);
 int  read_octal(char *);
 void rl_ring_bell(void);
 void set_fzf_preview_border_type(void);

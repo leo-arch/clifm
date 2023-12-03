@@ -501,7 +501,7 @@ bookmark_add(char *file, char *name, char *shortcut)
 
 	/* Once we have path, name and (optionally) shortcut, write it to the
 	 * bookmarks file. */
-	FILE *bm_fp = fopen(bm_file, "a+");
+	FILE *bm_fp = open_fappend(bm_file);
 	if (!bm_fp) {
 		exit_status = errno;
 		xerror("bookmarks: fopen: %s: %s\n", bm_file, strerror(errno));
