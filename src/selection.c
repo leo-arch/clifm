@@ -131,7 +131,7 @@ select_file(char *file)
 }
 
 static char **
-load_matches_invert_cwd(glob_t gbuf, const mode_t filetype, int *matches)
+load_matches_invert_cwd(glob_t *gbuf, const mode_t filetype, int *matches)
 {
 	char **list = (char **)xnmalloc((size_t)files + 2, sizeof(char *));
 
@@ -140,10 +140,10 @@ load_matches_invert_cwd(glob_t gbuf, const mode_t filetype, int *matches)
 		if (filetype != 0 && file_info[i].type != filetype)
 			continue;
 
-		filesn_t j = (filesn_t)gbuf.gl_pathc;
+		filesn_t j = (filesn_t)gbuf->gl_pathc;
 		while (--j >= 0) {
-			if (*file_info[i].name == *gbuf.gl_pathv[j]
-			&& strcmp(file_info[i].name, gbuf.gl_pathv[j]) == 0)
+			if (*file_info[i].name == *gbuf->gl_pathv[j]
+			&& strcmp(file_info[i].name, gbuf->gl_pathv[j]) == 0)
 				break;
 		}
 
@@ -157,7 +157,7 @@ load_matches_invert_cwd(glob_t gbuf, const mode_t filetype, int *matches)
 }
 
 static char **
-load_matches_invert_nocwd(glob_t gbuf, struct dirent **ent,
+load_matches_invert_nocwd(glob_t *gbuf, struct dirent **ent,
 	const mode_t filetype, int *matches, const int ret)
 {
 	char **list = (char **)xnmalloc((size_t)ret + 2, sizeof(char *));
@@ -175,10 +175,10 @@ load_matches_invert_nocwd(glob_t gbuf, struct dirent **ent,
 #endif /* !_DIRENT_HAVE_D_TYPE */
 			continue;
 
-		int j = (int)gbuf.gl_pathc;
+		int j = (int)gbuf->gl_pathc;
 		while (--j >= 0) {
-			if (*ent[i]->d_name == *gbuf.gl_pathv[j]
-			&& strcmp(ent[i]->d_name, gbuf.gl_pathv[j]) == 0)
+			if (*ent[i]->d_name == *gbuf->gl_pathv[j]
+			&& strcmp(ent[i]->d_name, gbuf->gl_pathv[j]) == 0)
 				break;
 		}
 
@@ -207,27 +207,27 @@ convert_filetype_mask(const mode_t filetype)
 }
 
 static char **
-load_matches(glob_t gbuf, const mode_t filetype, int *matches)
+load_matches(glob_t *gbuf, const mode_t filetype, int *matches)
 {
-	char **list = (char **)xnmalloc(gbuf.gl_pathc + 2, sizeof(char *));
+	char **list = (char **)xnmalloc(gbuf->gl_pathc + 2, sizeof(char *));
 	mode_t type = convert_filetype_mask(filetype);
 
-	int i = (int)gbuf.gl_pathc;
+	int i = (int)gbuf->gl_pathc;
 	while (--i >= 0) {
-		char *basename = strrchr(gbuf.gl_pathv[i], '/');
-		if (!basename && SELFORPARENT(gbuf.gl_pathv[i]))
+		char *basename = strrchr(gbuf->gl_pathv[i], '/');
+		if (!basename && SELFORPARENT(gbuf->gl_pathv[i]))
 			continue;
 		if (basename && basename[1] && SELFORPARENT(basename + 1))
 			continue;
 
 		if (filetype != 0) {
 			struct stat attr;
-			if (lstat(gbuf.gl_pathv[i], &attr) == -1
+			if (lstat(gbuf->gl_pathv[i], &attr) == -1
 			|| (attr.st_mode & S_IFMT) != type)
 				continue;
 		}
 
-		list[*matches] = gbuf.gl_pathv[i];
+		list[*matches] = gbuf->gl_pathv[i];
 		(*matches)++;
 	}
 
@@ -312,7 +312,7 @@ sel_glob(char *str, const char *sel_path, const mode_t filetype)
 
 	if (invert == 1) {
 		if (!sel_path) {
-			list = load_matches_invert_cwd(gbuf, filetype, &matches);
+			list = load_matches_invert_cwd(&gbuf, filetype, &matches);
 		} else {
 			ret = scandir(sel_path, &ent, skip_files, xalphasort);
 			if (ret == -1) {
@@ -321,10 +321,10 @@ sel_glob(char *str, const char *sel_path, const mode_t filetype)
 				return (-1);
 			}
 
-			list = load_matches_invert_nocwd(gbuf, ent, filetype, &matches, ret);
+			list = load_matches_invert_nocwd(&gbuf, ent, filetype, &matches, ret);
 		}
 	} else {
-		list = load_matches(gbuf, filetype, &matches);
+		list = load_matches(&gbuf, filetype, &matches);
 	}
 
 	list[matches] = (char *)NULL;

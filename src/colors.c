@@ -745,7 +745,7 @@ check_ext_string(const char *ext, size_t *val_len)
 	char *ptr = tmp_ext;
 
 	int i;
-	for (i = 0; ext[i] && i < NAME_MAX; i++) {
+	for (i = 0; i < NAME_MAX && ext[i]; i++) {
 		if (ext[i] >= 'A' && ext[i] <= 'Z')
 			tmp_ext[i] = ext[i] + ' '; /* Tolower */
 		else

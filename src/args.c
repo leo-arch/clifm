@@ -1095,7 +1095,7 @@ set_max_value(const char *opt, int *xval, int *intval)
 		return;
 
 	int opt_int = atoi(opt);
-	if (opt_int >= 0 && opt_int <= INT_MAX)
+	if (opt_int >= 0)
 		*xval = *intval = opt_int;
 }
 

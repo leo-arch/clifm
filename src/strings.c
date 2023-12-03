@@ -1522,7 +1522,7 @@ insert_fields(char ***dst, char ***src, const size_t i, size_t *num)
 	update_quoted_words_index(i, sn);
 
 	/* 2. Store fields in DST after the field to be expanded (I) */
-	char **tail = args_n - i > 0
+	char **tail = args_n > i /* Substraction must be bigger than zero */
 		? (char **)xnmalloc(args_n - i + 1, sizeof(char *)) : (char **)NULL;
 
 	size_t t, n = 0;
@@ -3278,22 +3278,19 @@ dequote_str(char *text, int mt)
 
 	/* At most, we need as many bytes as in TEXT (in case no escape
 	 * sequence is found). */
-	char *buf = (char *)NULL;
-	buf = (char *)xnmalloc(strlen(text) + 1, sizeof(char));
+	char *buf = (char *)xnmalloc(strlen(text) + 1, sizeof(char));
 	size_t len = 0;
 
 	while (*text) {
-		switch (*text) {
-		case '\\':
+		if (*text == '\\') {
 			++text;
 			buf[len] = *text;
 			len++;
-			break;
-		default:
+		} else {
 			buf[len] = *text;
 			len++;
-			break;
 		}
+
 		if (!*text)
 			break;
 		text++;

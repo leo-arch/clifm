@@ -232,31 +232,31 @@ chdir_search_path(char **search_path, const char *arg)
 }
 
 static char **
-glob_sort_dirs(glob_t globbed_files, size_t *g)
+glob_sort_dirs(glob_t *globbed_files, size_t *g)
 {
-	int *dirs = (int *)xnmalloc(globbed_files.gl_pathc + 1, sizeof(int));
-	char **gfiles = (char **)xnmalloc(globbed_files.gl_pathc + 1, sizeof(char *));
+	int *dirs = (int *)xnmalloc(globbed_files->gl_pathc + 1, sizeof(int));
+	char **gfiles = (char **)xnmalloc(globbed_files->gl_pathc + 1, sizeof(char *));
 	struct stat attr;
 	size_t i, n = 0;
 
-	for (i = 0; globbed_files.gl_pathv[i]; i++) {
-		if (stat(globbed_files.gl_pathv[i], &attr) != -1
+	for (i = 0; globbed_files->gl_pathv[i]; i++) {
+		if (stat(globbed_files->gl_pathv[i], &attr) != -1
 		&& S_ISDIR(attr.st_mode))
 			dirs[i] = 1;
 		else
 			dirs[i] = 0;
 	}
 
-	for (i = 0; globbed_files.gl_pathv[i]; i++) {
+	for (i = 0; globbed_files->gl_pathv[i]; i++) {
 		if (dirs[i] == 1) {
-			gfiles[n] = globbed_files.gl_pathv[i];
+			gfiles[n] = globbed_files->gl_pathv[i];
 			n++;
 		}
 	}
 
-	for (i = 0; globbed_files.gl_pathv[i]; i++) {
+	for (i = 0; globbed_files->gl_pathv[i]; i++) {
 		if (dirs[i] == 0) {
-			gfiles[n] = globbed_files.gl_pathv[i];
+			gfiles[n] = globbed_files->gl_pathv[i];
 			n++;
 		}
 	}
@@ -614,7 +614,7 @@ search_glob(char **args)
 
 	/* glob(3) doesn't sort directories first. Let's do it ourselves */
 	if (conf.list_dirs_first == 1)
-		gfiles = glob_sort_dirs(globbed_files, &g);
+		gfiles = glob_sort_dirs(&globbed_files, &g);
 
 	/* We need to store pointers to matching file names in array of pointers,
 	 * just as the file name length (to construct the columned output), and,

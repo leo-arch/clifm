@@ -393,12 +393,12 @@ save_jump_suggestion(char *str)
 }
 
 static char *
-get_directory_color(const char *filename, const struct stat a)
+get_directory_color(const char *filename, const struct stat *a)
 {
-	if (check_file_access(a.st_mode, a.st_uid, a.st_gid) == 0)
+	if (check_file_access(a->st_mode, a->st_uid, a->st_gid) == 0)
 		return nd_c;
 
-	if (S_ISLNK(a.st_mode)) {
+	if (S_ISLNK(a->st_mode)) {
 		char *linkname = realpath(filename, (char *)NULL);
 		if (linkname) {
 			free(linkname);
@@ -407,7 +407,7 @@ get_directory_color(const char *filename, const struct stat a)
 		return or_c;
 	}
 
-	return get_dir_color(filename, a.st_mode, a.st_nlink, -1);
+	return get_dir_color(filename, a->st_mode, a->st_nlink, -1);
 }
 
 /* Compare ranks A and B (used to sort jump entries by rank)*/
@@ -521,7 +521,7 @@ print_jump_table(const int reduce, const time_t now)
 		if (lstat(tmp_jump[i].path, &a) == -1)
 			color = uf_c;
 
-		char *dir_color = color == uf_c ? uf_c : get_directory_color(tmp_jump[i].path, a);
+		char *dir_color = color == uf_c ? uf_c : get_directory_color(tmp_jump[i].path, &a);
 
 		printf(" %s%*zu\t%*zu\t%*d\t%*d\t%s%*d%s%s%c%s\t%c%s%s%s\n",
 			color != uf_c ? color : df_c, max_order, i + 1,
