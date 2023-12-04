@@ -911,7 +911,7 @@ sync_jumpdb_with_dirhist(void)
 	}
 }
 
-/* Reconstruct the jump database from the database file */
+/* Reconstruct the jump database from the database file. */
 void
 load_jumpdb(void)
 {
@@ -1264,7 +1264,7 @@ reset_remotes_values(const size_t i)
 	remotes[i].mounted = 0;
 }
 
-/* Load remotes information from REMOTES_FILE */
+/* Load remotes information from REMOTES_FILE. */
 int
 load_remotes(void)
 {
@@ -1454,7 +1454,7 @@ ERROR:
 	return (char *)NULL;
 }
 
-/* Load prompts from PROMPTS_FILE */
+/* Load prompts from PROMPTS_FILE. */
 int
 load_prompts(void)
 {

@@ -1259,10 +1259,12 @@ set_filetype_colors(char **colors, const size_t words)
 	free(colors);
 }
 
+/* Set interface colors using colors stored in the COLORS array, which has
+ * NUM_COLORS colors. */
 static void
-set_iface_colors(char **colors, const size_t words)
+set_iface_colors(char **colors, const size_t num_colors)
 {
-	int i = (int)words;
+	int i = (int)num_colors;
 	while (--i >= 0) {
 		if (*colors[i] == 'b' && colors[i][1] == 'm' && colors[i][2] == '=')
 			set_color(colors[i] + 3, bm_c, RL_PRINTABLE);

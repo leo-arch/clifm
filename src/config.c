@@ -760,6 +760,7 @@ import_from_data_dir(const char *src_filename, char *dest)
 	return EXIT_FAILURE;
 }
 
+/* Create the keybindings file. */
 int
 create_kbinds_file(void)
 {
@@ -1477,6 +1478,7 @@ import_rl_file(void)
 	return import_from_data_dir("readline.clifm", dest);
 }
 
+/* Create the main configuration file and store in FILE. */
 int
 create_main_config_file(char *file)
 {
@@ -2150,6 +2152,7 @@ create_config_files(void)
 	create_remotes_file();
 }
 
+/* Create a completely new mimelist file and store it in FILE. */
 static int
 create_mime_file_anew(char *file)
 {
