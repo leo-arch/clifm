@@ -1224,8 +1224,8 @@ err_file_exists(char *name, const int multi, const int is_md)
 	char *n = abbreviate_file_name(name);
 	char *p = n ? n : name;
 
-	xerror("%s: %s: %s\n", is_md ? "md" : "new", (*p == '.' && p[1] == '/' && p[2])
-		? p + 2 : p, strerror(EEXIST));
+	xerror("%s: %s: %s\n", is_md ? "md" : "new",
+		(*p == '.' && p[1] == '/' && p[2]) ? p + 2 : p, strerror(EEXIST));
 
 	if (n && n != name)
 		free(n);
@@ -1355,7 +1355,7 @@ create_dirs(char **args)
 	}
 
 	/* Append an ending slash to all names, so that create_files() will create
-	 * them as directories. */
+	 * them all as directories. */
 	size_t i;
 	for (i = 0; args[i]; i++) {
 		size_t len = strlen(args[i]);

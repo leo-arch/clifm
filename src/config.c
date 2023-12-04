@@ -1835,6 +1835,7 @@ create_main_config_file(char *file)
 ;HistIgnore=%s\n\
 ;DirhistIgnore=\"\"\n\
 ;Icons=%s\n\
+;Umask=077\n\
 ;DiskUsage=%s\n\n"
 
 		"# If set to true, always print the list of selected files. Since this\n\
@@ -2050,6 +2051,44 @@ create_remotes_file(void)
 	return EXIT_SUCCESS;
 }
 
+static int
+create_main_config_dir(void)
+{
+	/* Use the mkdir(1) to let it handle parent directories. */
+	char *tmp_cmd[] = {"mkdir", "-pm700", "--", config_dir, NULL};
+	if (launch_execv(tmp_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
+		config_ok = 0;
+		err('e', PRINT_PROMPT, _("%s: mkdir: '%s': Error creating "
+			"configuration directory. Bookmarks, commands logs, and "
+			"command history are disabled. Program messages won't be "
+			"persistent. Using default options\n"),
+			PROGRAM_NAME, config_dir);
+		return EXIT_FAILURE;
+	}
+
+	return EXIT_SUCCESS;
+}
+
+static void
+create_profile_file(void)
+{
+	int fd = 0;
+	FILE *profile_fp = open_fwrite(profile_file, &fd);
+	if (!profile_fp) {
+		err('e', PRINT_PROMPT, "%s: fopen: '%s': %s\n", PROGRAM_NAME,
+		    profile_file, strerror(errno));
+	} else {
+		fprintf(profile_fp, _("# This is %s's profile file\n#\n"
+			"# Write here the commands you want to be executed at startup\n"
+			"# Ex:\n#echo \"%s, the command line file manager\"; read -r\n#\n"
+			"# Uncommented, non-empty lines are executed line by line. If you\n"
+			"# want a multi-line command, just write a script for it:\n"
+			"#sh /path/to/my/script.sh\n"),
+			PROGRAM_NAME_UPPERCASE, PROGRAM_NAME_UPPERCASE);
+		fclose(profile_fp);
+	}
+}
+
 static void
 create_config_files(void)
 {
@@ -2060,19 +2099,9 @@ create_config_files(void)
 				 * #################### */
 
 	/* If the config directory doesn't exist, create it. */
-	/* Use the mkdir(1) to let it handle parent directories. */
-	if (stat(config_dir, &attr) == -1) {
-		char *tmp_cmd[] = {"mkdir", "-pm700", "--", config_dir, NULL};
-		if (launch_execv(tmp_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
-			config_ok = 0;
-			err('e', PRINT_PROMPT, _("%s: mkdir: '%s': Error creating "
-				"configuration directory. Bookmarks, commands logs, and "
-				"command history are disabled. Program messages won't be "
-				"persistent. Using default options\n"),
-			    PROGRAM_NAME, config_dir);
-			return;
-		}
-	}
+	if (stat(config_dir, &attr) == -1
+	&& create_main_config_dir() == EXIT_FAILURE)
+		return;
 
 	/* If it exists, check it is writable */
 	else if (access(config_dir, W_OK) == -1) {
@@ -2106,23 +2135,8 @@ create_config_files(void)
 				 * #    PROFILE FILE    #
 				 * ###################### */
 
-	if (stat(profile_file, &attr) == -1) {
-		int fd = 0;
-		FILE *profile_fp = open_fwrite(profile_file, &fd);
-		if (!profile_fp) {
-			err('e', PRINT_PROMPT, "%s: fopen: '%s': %s\n", PROGRAM_NAME,
-			    profile_file, strerror(errno));
-		} else {
-			fprintf(profile_fp, _("# This is %s's profile file\n#\n"
-				"# Write here the commands you want to be executed at startup\n"
-				"# Ex:\n#echo \"%s, the command line file manager\"; read -r\n#\n"
-				"# Uncommented, non-empty lines are executed line by line. If you\n"
-				"# want a multi-line command, just write a script for it:\n"
-				"#sh /path/to/my/script.sh\n"),
-				PROGRAM_NAME_UPPERCASE, PROGRAM_NAME_UPPERCASE);
-			fclose(profile_fp);
-		}
-	}
+	if (stat(profile_file, &attr) == -1)
+		create_profile_file();
 
 				/* #####################
 				 * #    COLORS DIR     #
@@ -2314,7 +2328,7 @@ print_mime_file_msg(char *file)
 		"It is recommended to edit this file (entering 'mm edit' or "
 		"pressing F6) to add the programs you use and remove those "
 		"you don't. This will make the process of opening files "
-		"faster and smoother\n"), BOLD, NC, PROGRAM_NAME, f ? f : file);
+		"faster and smoother.\n"), BOLD, NC, PROGRAM_NAME, f ? f : file);
 
 	if (f != file)
 		free(f);
@@ -2336,6 +2350,7 @@ create_mime_file(char *file, const int new_prof)
 
 	if (new_prof == 0 && ret == EXIT_SUCCESS)
 		print_mime_file_msg(file);
+
 	return ret;
 }
 
