@@ -2318,13 +2318,29 @@ exec_cmd(char **comm)
 	}
 #endif /* !_NO_TAGS */
 
-	/*     ################# NEW FILE ##################     */
+	/*     ################# NEW FILE ######################     */
 	else if (*comm[0] == 'n' && (!comm[0][1] || strcmp(comm[0], "new") == 0))
 		exit_code = create_files(comm + 1);
 
 	/*     ############### DUPLICATE FILE ##################     */
 	else if (*comm[0] == 'd' && (!comm[0][1] || strcmp(comm[0], "dup") == 0))
 		exit_code = dup_file(comm);
+
+	/*     ################ REMOVE FILES ###################  */
+	else if (*comm[0] == 'r' && !comm[0][1]) {
+		/* This help is only for c, m, and r commands */
+		if (comm[1] && IS_HELP(comm[1])) {
+			puts(_(WRAPPERS_USAGE));
+			return EXIT_SUCCESS;
+		}
+
+		exit_code = remove_file(comm);
+	}
+
+	/*    ############## CREATE DIRECTORIES ################ */
+	else if (*comm[0] == 'm' && comm[0][1] == 'd' && !comm[0][2]) {
+		exit_code = create_dirs(comm + 1);
+	}
 
 	/*     ############### COPY AND MOVE ##################     */
 	/* c, m, v, vv, and paste commands */
@@ -2413,26 +2429,6 @@ exec_cmd(char **comm)
 	else if (*comm[0] == 'l' && comm[0][1] == 'e' && !comm[0][2]) {
 		exit_code = edit_link(comm[1]);
 		goto CHECK_EVENTS;
-	}
-
-	/*  ########## R and MD commands (SHELL CMD WRAPPERS) ############  */
-	else if (strcmp(comm[0], "r") == 0 || strcmp(comm[0], "md") == 0) {
-		/* This help is only for c, m, r, and md commands */
-		if (comm[1] && IS_HELP(comm[1])) {
-			puts(_(WRAPPERS_USAGE)); return EXIT_SUCCESS;
-		}
-
-		if (*comm[0] == 'r') {
-			exit_code = remove_file(comm);
-			goto CHECK_EVENTS;
-		}
-
-		comm[0] = (char *)xrealloc(comm[0], 9 * sizeof(char));
-		/* -p is POSIX: it should be there for all mkdir implementations. */
-		xstrsncpy(comm[0], "mkdir -p", 9);
-
-		if ((exit_code = run_shell_cmd(comm)) == EXIT_FAILURE)
-			return EXIT_FAILURE;
 	}
 
 	/*    ########### TOGGLE LONG VIEW ##################     */

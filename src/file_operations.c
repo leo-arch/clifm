@@ -1337,6 +1337,33 @@ create_files(char **args)
 	return exit_status;
 }
 
+/* Create one directory for each name specified in ARGS. Parent dirs are
+ * created if required. */
+int
+create_dirs(char **args)
+{
+	if (!args[0] || IS_HELP(args[0])) {
+		puts(_(MD_USAGE));
+		return EXIT_SUCCESS;
+	}
+
+	/* Append an ending slash to all names, so that create_files() will create
+	 * them as directories. */
+	size_t i;
+	for (i = 0; args[i]; i++) {
+		size_t len = strlen(args[i]);
+		if (len > 0 && args[i][len - 1] == '/')
+			continue;
+
+		char *tmp = savestring(args[i], len);
+		args[i] = (char *)xrealloc(args[i], (len + 2) * sizeof(char));
+		snprintf(args[i], len + 2, "%s/", tmp);
+		free(tmp);
+	}
+
+	return create_files(args);
+}
+
 int
 open_function(char **cmd)
 {
