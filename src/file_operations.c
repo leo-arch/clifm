@@ -1218,12 +1218,12 @@ press_key_to_continue(void)
 }
 
 static int
-err_file_exists(char *name, const int multi)
+err_file_exists(char *name, const int multi, const int is_md)
 {
 	char *n = abbreviate_file_name(name);
 	char *p = n ? n : name;
 
-	xerror("new: %s: %s\n", (*p == '.' && p[1] == '/' && p[2])
+	xerror("%s: %s: %s\n", is_md ? "md" : "new", (*p == '.' && p[1] == '/' && p[2])
 		? p + 2 : p, strerror(EEXIST));
 
 	if (n && n != name)
@@ -1263,7 +1263,7 @@ ask_and_create_file(void)
 
 	struct stat a;
 	if (lstat(filename, &a) == 0) {
-		exit_status = err_file_exists(filename, 0);
+		exit_status = err_file_exists(filename, 0, 0);
 		goto ERROR;
 	}
 
@@ -1279,7 +1279,7 @@ ERROR:
 }
 
 int
-create_files(char **args)
+create_files(char **args, const int is_md)
 {
 	if (args[0] && IS_HELP(args[0])) {
 		puts(_(NEW_USAGE));
@@ -1300,7 +1300,7 @@ create_files(char **args)
 
 	for (i = 0; args[i]; i++) {
 		if (validate_filename(&args[i]) == 0) {
-			xerror(_("new: %s: Unsafe file name\n"), args[i]);
+			xerror(_("%s: %s: Unsafe file name\n"), is_md ? "md" : "new", args[i]);
 			if (rl_get_y_or_n(_("Continue? [y/n] ")) == 0)
 				continue;
 		}
@@ -1314,7 +1314,7 @@ create_files(char **args)
 		/* Skip existent files. */
 		struct stat a;
 		if (lstat(args[i], &a) == 0) {
-			exit_status = err_file_exists(args[i], args_n > 1);
+			exit_status = err_file_exists(args[i], args_n > 1, is_md);
 			continue;
 		}
 
@@ -1361,7 +1361,7 @@ create_dirs(char **args)
 		free(tmp);
 	}
 
-	return create_files(args);
+	return create_files(args, 1);
 }
 
 int

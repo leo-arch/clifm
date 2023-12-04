@@ -42,7 +42,7 @@ int  bulk_rename(char **);
 int  bulk_remove(char *, char *);
 void clear_selbox(void);
 int  cp_mv_file(char **, const int, const int);
-int  create_files(char **);
+int  create_files(char **, const int);
 int  create_dirs(char **);
 int  dup_file(char **);
 int  edit_link(char *);

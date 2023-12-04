@@ -2320,7 +2320,7 @@ exec_cmd(char **comm)
 
 	/*     ################# NEW FILE ######################     */
 	else if (*comm[0] == 'n' && (!comm[0][1] || strcmp(comm[0], "new") == 0))
-		exit_code = create_files(comm + 1);
+		exit_code = create_files(comm + 1, 0);
 
 	/*     ############### DUPLICATE FILE ##################     */
 	else if (*comm[0] == 'd' && (!comm[0][1] || strcmp(comm[0], "dup") == 0))
