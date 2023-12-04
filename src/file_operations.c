@@ -1118,14 +1118,15 @@ is_valid_filename(char *name)
  * is an invalid name. Otherwise, it returns 1.
  * If NAME is escaped, it is replaced by the unescaped name. */
 static int
-validate_filename(char **name)
+validate_filename(char **name, const int is_md)
 {
 	if (!*name || !*(*name))
 		return 0;
 
 	char *deq = dequote_str(*name, 0);
 	if (!deq) {
-		xerror(_("new: %s: Error dequoting file name\n"), *name);
+		xerror(_("%s: %s: Error dequoting file name\n"),
+			is_md ? "md" : "new", *name);
 		return 0;
 	}
 
@@ -1235,6 +1236,7 @@ err_file_exists(char *name, const int multi, const int is_md)
 	return EXIT_FAILURE;
 }
 
+/* Ask the user for a new file name and create the file. */
 static int
 ask_and_create_file(void)
 {
@@ -1248,7 +1250,7 @@ ask_and_create_file(void)
 	if (!filename) /* The user pressed Ctrl-d */
 		return EXIT_SUCCESS;
 
-	if (validate_filename(&filename) == 0) {
+	if (validate_filename(&filename, 0) == 0) {
 		xerror(_("new: %s: Unsafe file name\n"), filename);
 		if (rl_get_y_or_n(_("Continue? [y/n] ")) == 0) {
 			free(filename);
@@ -1278,6 +1280,9 @@ ERROR:
 	return exit_status;
 }
 
+/* Create files as specified in ARGS: as directories (if ending with slash)
+ * or as regular files otherwise. If coming from 'md' command, IS_MD is set to
+ * 1 (so that we can fail as such). */
 int
 create_files(char **args, const int is_md)
 {
@@ -1291,6 +1296,7 @@ create_files(char **args, const int is_md)
 
 	/* If no argument provided, ask the user for a filename, create it and exit. */
 	if (!args[0])
+		/* This function is never executed by 'md', but always by 'n'. */
 		return ask_and_create_file();
 
 	/* Store pointers to actually created files into a pointers array.
@@ -1299,8 +1305,9 @@ create_files(char **args, const int is_md)
 	filesn_t new_files_n = 0;
 
 	for (i = 0; args[i]; i++) {
-		if (validate_filename(&args[i]) == 0) {
-			xerror(_("%s: %s: Unsafe file name\n"), is_md ? "md" : "new", args[i]);
+		if (validate_filename(&args[i], is_md) == 0) {
+			xerror(_("%s: %s: Unsafe file name\n"),
+				is_md ? "md" : "new", args[i]);
 			if (rl_get_y_or_n(_("Continue? [y/n] ")) == 0)
 				continue;
 		}
