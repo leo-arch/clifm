@@ -620,8 +620,8 @@ Note: Use the 'le' command to edit a symbolic link. Try 'le --help'."
 - Clear message logs\n\
     log msg clear"
 
-#define MD_USAGE "Create one or more directories (parent directories are \
-created if they do not exist)\n\
+#define MD_USAGE "Create one or more directories\n\
+(parent directories are created if they do not exist)\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   md DIR...\n\n\
 \x1b[1mEXAMPLE\x1b[0m\n\
