@@ -566,8 +566,6 @@ append_ending_char(const enum comp_type ct)
 	if (strchr(lastword, '\\'))
 		deq_str_len = deescape_word(lastword, deq_str, sizeof(deq_str) - 1);
 
-	char _path[PATH_MAX + NAME_MAX];
-	*_path = '\0';
 	char *tmp = *deq_str ? deq_str : lastword;
 
 	size_t len = tmp == deq_str ? deq_str_len : strlen(tmp);

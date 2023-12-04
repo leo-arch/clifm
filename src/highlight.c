@@ -281,7 +281,7 @@ recolorize_line(void)
 	if (!ss || !*ss)
 		goto EXIT;
 
-	// Loop through each char from cursor position onward and colorize it
+	/* Loop through each char from cursor position onward and colorize it. */
 	char t[PATH_MAX];
 	for (;ss[i]; i++) {
 		rl_highlight(ss, i, SET_COLOR);
