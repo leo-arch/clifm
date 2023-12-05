@@ -337,8 +337,10 @@ run_kb_cmd(char *cmd)
 	if (kbind_busy == 1)
 		return EXIT_SUCCESS;
 
+#ifndef _NO_SUGGESTIONS
 	if (conf.colorize == 1 && wrong_cmd == 1)
 		recover_from_wrong_cmd();
+#endif /* _NO_SUGGESTIONS */
 
 	int exit_code_bk = exit_code;
 
@@ -1253,10 +1255,10 @@ rl_lock(int count, int key)
 static int
 handle_no_sel(const char *func)
 {
+#ifndef _NO_SUGGESTIONS
 	if (conf.colorize == 1 && wrong_cmd == 1)
 		recover_from_wrong_cmd();
 
-#ifndef _NO_SUGGESTIONS
 	if (suggestion.printed == 1 && suggestion_buf)
 		clear_suggestion(CS_FREEBUF);
 #endif /* !_NO_SUGGESTIONS */
