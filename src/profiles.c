@@ -171,13 +171,6 @@ profile_set(const char *prof)
 	/* Reset everything */
 	reload_config();
 
-	/* Check whether we have a working shell */
-/*	if (access(user.shell, X_OK) == -1) {
-		err('w', PRINT_PROMPT, _("pf: %s: System shell not found. Please "
-			"edit the configuration file to specify a working shell.\n"),
-			user.shell);
-	} */
-
 	i = (int)usrvar_n;
 	while (--i >= 0) {
 		free(usr_var[i].name);

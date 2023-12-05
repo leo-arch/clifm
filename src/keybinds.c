@@ -1432,8 +1432,8 @@ rl_profile_previous(int count, int key)
 		putchar('\n');
 	}
 
-	if (profile_set(profile_names[prev_prof]) == EXIT_SUCCESS)
-		rl_update_prompt_old();
+	profile_set(profile_names[prev_prof]);
+	rl_update_prompt_old();
 
 	return EXIT_SUCCESS;
 }
@@ -1469,8 +1469,8 @@ rl_profile_next(int count, int key)
 		putchar('\n');
 	}
 
-	if (profile_set(profile_names[next_prof]) == EXIT_SUCCESS)
-		rl_update_prompt_old();
+	profile_set(profile_names[next_prof]);
+	rl_update_prompt_old();
 
 	return EXIT_SUCCESS;
 }
