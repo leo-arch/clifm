@@ -1262,8 +1262,8 @@ set_main_config_dir(const int secure_mode)
 {
 	if (alt_config_dir) {
 		config_dir_gral = savestring(alt_config_dir, strlen(alt_config_dir));
-		free(alt_config_dir);
-		alt_config_dir = (char *)NULL;
+//		free(alt_config_dir);
+//		alt_config_dir = (char *)NULL;
 		return;
 	}
 

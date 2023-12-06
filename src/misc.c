@@ -1482,6 +1482,8 @@ free_stuff(void)
 {
 	int i = 0;
 
+	free(alt_config_dir);
+
 #ifdef LINUX_FSINFO
 	if (ext_mnt) {
 		for (i = 0; ext_mnt[i].mnt_point; i++)
