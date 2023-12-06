@@ -562,21 +562,6 @@ find_cmd(const struct cmdslist_t *cmds_list, const size_t list_size, char *cmd)
 	return found;
 }
 
-int
-is_internal_c(char *restrict cmd)
-{
-	if (find_cmd(internal_cmds, internal_cmds_n, cmd))
-		return 1;
-
-	/* Check for the search and history functions as well */
-	if ((*cmd == '/' && access(cmd, F_OK) != 0) || (*cmd == '!'
-	&& (IS_DIGIT(cmd[1]) || (cmd[1] == '-' && IS_DIGIT(cmd[2]))
-	|| cmd[1] == '!')))
-		return 1;
-
-	return 0;
-}
-
 /* Check whether S is an action name.
  * Returns 1 if true or 0 otherwise. */
 int
@@ -590,6 +575,21 @@ is_action_name(const char *s)
 		if (*s == *usr_actions[n].name && strcmp(s, usr_actions[n].name) == 0)
 			return 1;
 	}
+
+	return 0;
+}
+
+int
+is_internal_c(char *restrict cmd)
+{
+	if (find_cmd(internal_cmds, internal_cmds_n, cmd))
+		return 1;
+
+	/* Check for the search and history functions as well */
+	if ((*cmd == '/' && access(cmd, F_OK) != 0) || (*cmd == '!'
+	&& (IS_DIGIT(cmd[1]) || (cmd[1] == '-' && IS_DIGIT(cmd[2]))
+	|| cmd[1] == '!')))
+		return 1;
 
 	return 0;
 }

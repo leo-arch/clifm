@@ -2284,6 +2284,7 @@ X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;v
 !X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;vim;vi;mg;emacs;ed;nano\n\
 \n\
 # Office documents\n\
+^application/.*(open|office)document\.spreadsheet.*=sc-im\n\
 X:^application/.*(open|office)document.*=libreoffice;soffice;ooffice\n\
 \n\
 # Archives\n\
@@ -2312,9 +2313,9 @@ X:^font/.*=fontforge;fontpreview\n\
 X:application/x-bittorrent=rtorrent;transimission-gtk;transmission-qt;deluge-gtk;ktorrent\n\
 \n\
 # Fallback to another resource opener as last resource\n\
-.*=xdg-open;mimeo;mimeopen -n;whippet -m;open;linopen;\n");
-	fclose(fp);
+.*=handlr open;mimeopen -n;rifle;mimeo;xdg-open;open;\n");
 
+	fclose(fp);
 	return EXIT_SUCCESS;
 }
 
