@@ -2284,7 +2284,7 @@ X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;v
 !X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;vim;vi;mg;emacs;ed;nano\n\
 \n\
 # Office documents\n\
-^application/.*(open|office)document\.spreadsheet.*=sc-im\n\
+^application/.*(open|office)document\\.spreadsheet.*=sc-im\n\
 X:^application/.*(open|office)document.*=libreoffice;soffice;ooffice\n\
 \n\
 # Archives\n\
