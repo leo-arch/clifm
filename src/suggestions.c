@@ -1689,10 +1689,10 @@ get_last_word(const char *last_space)
 			: (rl_line_buffer ? rl_line_buffer : (char *)NULL);
 	if (tmp) {
 		size_t len = strlen(tmp);
-		last_word = (char *)xrealloc(last_word, (len + 1) * sizeof(char));
+		last_word = (char *)xnrealloc(last_word, (len + 1), sizeof(char));
 		xstrsncpy(last_word, tmp, len + 1);
 	} else {
-		last_word = (char *)xrealloc(last_word, 1 * sizeof(char));
+		last_word = (char *)xnrealloc(last_word, 1, sizeof(char));
 		*last_word = '\0';
 	}
 

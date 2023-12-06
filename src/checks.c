@@ -865,8 +865,8 @@ check_for_alias(char **args)
 		/* Add input parameters, if any, to alias_comm */
 		if (args[1]) {
 			for (j = 1; args[j]; j++) {
-				alias_comm = (char **)xrealloc(alias_comm,
-				    (++args_n + 2) * sizeof(char *));
+				alias_comm = (char **)xnrealloc(alias_comm,
+				    (++args_n + 2), sizeof(char *));
 				alias_comm[args_n] = savestring(args[j], strlen(args[j]));
 			}
 		}

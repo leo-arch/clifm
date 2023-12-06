@@ -299,7 +299,7 @@ log_msg(char *_msg, const int print_prompt, const int logme,
 
 	if (add_to_msgs_list == 1) {
 		msgs_n++;
-		messages = (char **)xrealloc(messages, (size_t)(msgs_n + 1) * sizeof(char *));
+		messages = (char **)xnrealloc(messages, (size_t)(msgs_n + 1), sizeof(char *));
 		messages[msgs_n - 1] = savestring(_msg, msg_len);
 		messages[msgs_n] = (char *)NULL;
 	}
@@ -350,8 +350,8 @@ add_to_dirhist(const char *dir_path)
 		&& strcmp(dir_path, old_pwd[dirhist_total_index - 1]) == 0)
 			return;
 
-		old_pwd = (char **)xrealloc(old_pwd,
-		    (size_t)(dirhist_total_index + 2) * sizeof(char *));
+		old_pwd = (char **)xnrealloc(old_pwd,
+		    (size_t)(dirhist_total_index + 2), sizeof(char *));
 
 		dirhist_cur_index = dirhist_total_index;
 		old_pwd[dirhist_total_index] = savestring(dir_path, strlen(dir_path));
@@ -364,8 +364,8 @@ add_to_dirhist(const char *dir_path)
 
 	/* If not at the end of dirhist, add previous AND new entry */
 	else {
-		old_pwd = (char **)xrealloc(old_pwd,
-		    (size_t)(dirhist_total_index + 3) * sizeof(char *));
+		old_pwd = (char **)xnrealloc(old_pwd,
+			(size_t)(dirhist_total_index + 3), sizeof(char *));
 
 		old_pwd[dirhist_total_index] = savestring(
 		    old_pwd[dirhist_cur_index],
@@ -565,7 +565,7 @@ get_history(void)
 		size_t i;
 		for (i = 0; history[i].cmd; i++)
 			free(history[i].cmd);
-		history = (struct history_t *)xrealloc(history, 1 * sizeof(struct history_t));
+		history = (struct history_t *)xnrealloc(history, 1, sizeof(struct history_t));
 		current_hist_n = 0;
 	}
 
@@ -594,8 +594,8 @@ get_history(void)
 			continue;
 		}
 
-		history = (struct history_t *)xrealloc(history,
-				(current_hist_n + 2) * sizeof(struct history_t));
+		history = (struct history_t *)xnrealloc(history,
+				(current_hist_n + 2), sizeof(struct history_t));
 		history[current_hist_n].cmd = savestring(line_buff, (size_t)line_len);
 		history[current_hist_n].len = (size_t)line_len;
 		history[current_hist_n].date = tdate;
@@ -637,8 +637,8 @@ add_to_cmdhist(char *cmd)
 	/* For us */
 	/* Add the new input to the history array */
 	time_t tdate = time(NULL);
-	history = (struct history_t *)xrealloc(history,
-			(size_t)(current_hist_n + 2) * sizeof(struct history_t));
+	history = (struct history_t *)xnrealloc(history,
+			(size_t)(current_hist_n + 2), sizeof(struct history_t));
 	history[current_hist_n].cmd = savestring(cmd, cmd_len);
 	history[current_hist_n].len = cmd_len;
 	history[current_hist_n].date = tdate;

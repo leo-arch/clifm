@@ -1015,7 +1015,7 @@ get_finder_output(const int multi, char *base)
 
 		size_t qlen = (r != line) ? strlen(r) : (size_t)line_len;
 		bsize += qlen + 3;
-		buf = (char *)xrealloc(buf, bsize * sizeof(char));
+		buf = (char *)xnrealloc(buf, bsize, sizeof(char));
 		xstrncat(buf, strlen(buf), r, bsize);
 
 		if (multi == 1) {
@@ -1661,7 +1661,7 @@ do_some_cleanup(char **buf, char **matches, const char *query,
 	else if (ct == TCMP_USERS) {
 		size_t l = strlen(*buf);
 		char *p = savestring(*buf, l);
-		*buf = (char *)xrealloc(*buf, (l + 2) * sizeof(char));
+		*buf = (char *)xnrealloc(*buf, (l + 2), sizeof(char));
 		snprintf(*buf, l + 2, "~%s", p);
 		free(p);
 	}

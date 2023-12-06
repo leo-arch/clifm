@@ -1702,33 +1702,33 @@ set_cp_cmd(char **cmd, const int cp_force)
 	switch (conf.cp_cmd) {
 	case CP_ADVCP:
 		dst_len = sizeof(DEFAULT_ADVCP_CMD) - 1;
-		*cmd = (char *)xrealloc(*cmd, (dst_len + 1) * sizeof(char));
+		*cmd = (char *)xnrealloc(*cmd, (dst_len + 1), sizeof(char));
 		xstrsncpy(*cmd, DEFAULT_ADVCP_CMD, dst_len + 1);
 		break;
 	case CP_ADVCP_FORCE:
 		dst_len = sizeof(DEFAULT_ADVCP_CMD_FORCE) - 1;
-		*cmd = (char *)xrealloc(*cmd, (dst_len + 1) * sizeof(char));
+		*cmd = (char *)xnrealloc(*cmd, (dst_len + 1), sizeof(char));
 		xstrsncpy(*cmd, DEFAULT_ADVCP_CMD_FORCE, dst_len + 1);
 		break;
 	case CP_WCP:
 		dst_len = sizeof(DEFAULT_WCP_CMD) - 1;
-		*cmd = (char *)xrealloc(*cmd, (dst_len + 1) * sizeof(char));
+		*cmd = (char *)xnrealloc(*cmd, (dst_len + 1), sizeof(char));
 		xstrsncpy(*cmd, DEFAULT_WCP_CMD, dst_len + 1);
 		break;
 	case CP_RSYNC:
 		dst_len = sizeof(DEFAULT_RSYNC_CMD) - 1;
-		*cmd = (char *)xrealloc(*cmd, (dst_len + 1) * sizeof(char));
+		*cmd = (char *)xnrealloc(*cmd, (dst_len + 1), sizeof(char));
 		xstrsncpy(*cmd, DEFAULT_RSYNC_CMD, dst_len + 1);
 		break;
 	case CP_CP_FORCE:
 		dst_len = sizeof(DEFAULT_CP_CMD_FORCE) - 1;
-		*cmd = (char *)xrealloc(*cmd, (dst_len + 1) * sizeof(char));
+		*cmd = (char *)xnrealloc(*cmd, (dst_len + 1), sizeof(char));
 		xstrsncpy(*cmd, DEFAULT_CP_CMD_FORCE, dst_len + 1);
 		break;
 	case CP_CP: /* fallthrough */
 	default:
 		dst_len = sizeof(DEFAULT_CP_CMD) - 1;
-		*cmd = (char *)xrealloc(*cmd, (dst_len + 1) * sizeof(char));
+		*cmd = (char *)xnrealloc(*cmd, (dst_len + 1), sizeof(char));
 		xstrsncpy(*cmd, DEFAULT_CP_CMD, dst_len + 1);
 		break;
 	}
@@ -1752,23 +1752,23 @@ set_mv_cmd(char **cmd, const int mv_force)
 	switch (conf.mv_cmd) {
 	case MV_ADVMV:
 		dst_len = sizeof(DEFAULT_ADVMV_CMD) - 1;
-		*cmd = (char *)xrealloc(*cmd, (dst_len + 1) * sizeof(char));
+		*cmd = (char *)xnrealloc(*cmd, (dst_len + 1), sizeof(char));
 		xstrsncpy(*cmd, DEFAULT_ADVMV_CMD, dst_len + 1);
 		break;
 	case MV_ADVMV_FORCE:
 		dst_len = sizeof(DEFAULT_ADVMV_CMD) - 1;
-		*cmd = (char *)xrealloc(*cmd, (dst_len + 1) * sizeof(char));
+		*cmd = (char *)xnrealloc(*cmd, (dst_len + 1), sizeof(char));
 		xstrsncpy(*cmd, DEFAULT_ADVMV_CMD_FORCE, dst_len + 1);
 		break;
 	case MV_MV_FORCE:
 		dst_len = sizeof(DEFAULT_MV_CMD_FORCE) - 1;
-		*cmd = (char *)xrealloc(*cmd, (dst_len + 1) * sizeof(char));
+		*cmd = (char *)xnrealloc(*cmd, (dst_len + 1), sizeof(char));
 		xstrsncpy(*cmd, DEFAULT_MV_CMD_FORCE, dst_len + 1);
 		break;
 	case MV_MV: /* fallthrough */
 	default:
 		dst_len = sizeof(DEFAULT_MV_CMD) - 1;
-		*cmd = (char *)xrealloc(*cmd, (dst_len + 1) * sizeof(char));
+		*cmd = (char *)xnrealloc(*cmd, (dst_len + 1), sizeof(char));
 		xstrsncpy(*cmd, DEFAULT_MV_CMD, dst_len + 1);
 		break;
 	}

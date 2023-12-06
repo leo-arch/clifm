@@ -647,7 +647,7 @@ add_default_extension(char *name)
 	size_t name_len = strlen(name);
 
 	char *t = savestring(name, name_len);
-	name = (char *)xrealloc(name, (name_len + 8) * sizeof(char));
+	name = (char *)xnrealloc(name, (name_len + 8), sizeof(char));
 	snprintf(name, name_len + 8, "%s.tar.gz", t); /* NOLINT */
 	free(t);
 

@@ -239,7 +239,7 @@ load_keybinds(void)
 
 		/* Now copy left and right value of each keybind into the
 		 * keybinds struct */
-		kbinds = xrealloc(kbinds, (kbinds_n + 1) * sizeof(struct kbinds_t));
+		kbinds = xnrealloc(kbinds, (kbinds_n + 1), sizeof(struct kbinds_t));
 		kbinds[kbinds_n].key = savestring(tmp + 1, strlen(tmp + 1));
 
 		*tmp = '\0';

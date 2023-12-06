@@ -114,8 +114,8 @@ select_file(char *file)
 	}
 
 	if (exists == 0) {
-		sel_elements = (struct sel_t *)xrealloc(sel_elements,
-			(sel_n + 2) * sizeof(struct sel_t));
+		sel_elements = (struct sel_t *)xnrealloc(sel_elements,
+			(sel_n + 2), sizeof(struct sel_t));
 		sel_elements[sel_n].name = savestring(file, strlen(file));
 		sel_elements[sel_n].size = (off_t)UNSET;
 		sel_n++;
@@ -998,7 +998,7 @@ deselect_entries(char **desel_path, const size_t desel_n, int *error,
 		for (j = desel_index; j < (int)(sel_n - 1); j++) {
 			size_t len = strlen(sel_elements[j + 1].name);
 			sel_elements[j].name =
-				(char *)xrealloc(sel_elements[j].name, (len + 1) * sizeof(char));
+				(char *)xnrealloc(sel_elements[j].name, (len + 1), sizeof(char));
 
 			xstrsncpy(sel_elements[j].name, sel_elements[j + 1].name, len + 1);
 			sel_elements[j].size = sel_elements[j + 1].size;
@@ -1053,8 +1053,8 @@ desel_entries(char **desel_elements, const size_t desel_n, const int desel_scree
 		sel_n = 0;
 
 	if (sel_n > 0) {
-		sel_elements = (struct sel_t *)xrealloc(sel_elements,
-			sel_n * sizeof(struct sel_t));
+		sel_elements = (struct sel_t *)xnrealloc(sel_elements,
+			sel_n, sizeof(struct sel_t));
 	}
 
 	/* Deallocate local arrays. */

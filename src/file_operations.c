@@ -1203,7 +1203,7 @@ format_new_filename(char **name)
 		return EXIT_FAILURE;
 
 	size_t name_len = strlen(npath) + 2;
-	*name = (char *)xrealloc(*name, name_len * sizeof(char));
+	*name = (char *)xnrealloc(*name, name_len, sizeof(char));
 	snprintf(*name, name_len, "%s%c", npath, is_dir == 1 ? '/' : 0);
 	free(npath);
 
@@ -1363,7 +1363,7 @@ create_dirs(char **args)
 			continue;
 
 		char *tmp = savestring(args[i], len);
-		args[i] = (char *)xrealloc(args[i], (len + 2) * sizeof(char));
+		args[i] = (char *)xnrealloc(args[i], (len + 2), sizeof(char));
 		snprintf(args[i], len + 2, "%s/", tmp);
 		free(tmp);
 	}

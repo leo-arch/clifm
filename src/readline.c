@@ -2325,7 +2325,7 @@ rl_mime_list(void)
 	if (n == 1)
 		{ free(t[0]); free(t); return (char **)NULL; }
 
-	t = (char **)xrealloc(t, (n + 1) * sizeof(char *));
+	t = (char **)xnrealloc(t, (n + 1), sizeof(char *));
 	return t;
 }
 
@@ -2366,7 +2366,7 @@ rl_mime_files(const char *text)
 	if (n == 1)
 		{ free(t[0]); free(t); return (char **)NULL; }
 
-	t = (char **)xrealloc(t, ((size_t)n + 1) * sizeof(char *));
+	t = (char **)xnrealloc(t, ((size_t)n + 1), sizeof(char *));
 	return t;
 }
 #endif /* !_NO_MAGIC */
@@ -2503,7 +2503,7 @@ rl_trashed_files(const char *text)
 		tfiles[1] = (char *)NULL;
 		if (d) {
 			size_t len = strlen(d);
-			tfiles[0] = (char *)xrealloc(tfiles[0], (len + 1) * sizeof(char));
+			tfiles[0] = (char *)xnrealloc(tfiles[0], (len + 1), sizeof(char));
 			xstrsncpy(tfiles[0], d, len + 1);
 			free(d);
 		}
@@ -3161,7 +3161,7 @@ rl_fastback(char *s)
 static void
 rl_swap_fields(char ***a)
 {
-	*a = (char **)xrealloc(*a, 3 * sizeof(char *));
+	*a = (char **)xnrealloc(*a, 3, sizeof(char *));
 	(*a)[1] = strdup((*a)[0]);
 	*(*a)[0] = '\0';
 	(*a)[2] = (char *)NULL;
@@ -3275,7 +3275,7 @@ complete_dirjump_jo(char *text, const int n, int *exit_status)
 
 	char *p = jump_db[n - 1].path;
 	char **matches = (char **)NULL;
-	matches = (char **)xrealloc(matches, 2 * sizeof(char **));
+	matches = (char **)xnrealloc(matches, 2, sizeof(char **));
 	matches[0] = savestring(p, strlen(p));
 	matches[1] = (char *)NULL;
 

@@ -975,8 +975,8 @@ check_xdu_hardlinks(const dev_t dev, const ino_t ino)
 static inline void
 add_xdu_hardlink(const dev_t dev, const ino_t ino)
 {
-	xdu_hardlinks = (struct hlink_t *)xrealloc(xdu_hardlinks,
-		(xdu_hardlink_n + 1) * sizeof(struct hlink_t));
+	xdu_hardlinks = (struct hlink_t *)xnrealloc(xdu_hardlinks,
+		(xdu_hardlink_n + 1), sizeof(struct hlink_t));
 
 	xdu_hardlinks[xdu_hardlink_n].dev = dev;
 	xdu_hardlinks[xdu_hardlink_n].ino = ino;
@@ -1286,6 +1286,36 @@ xatoi(const char *s)
 }
 
 /* Some memory wrapper functions */
+
+#if defined(__has_builtin) && defined(USE_BUILTIN_MUL_OVERFLOW)
+# if __has_builtin(__builtin_mul_overflow)
+#  define HAVE_BUILTIN_MUL_OVERFLOW
+# endif
+#endif
+
+void *
+xnrealloc(void *ptr, const size_t nmemb, const size_t size)
+{
+#ifdef HAVE_BUILTIN_MUL_OVERFLOW
+	size_t r;
+	if (__builtin_mul_overflow(nmemb, size, &r))
+		r = SIZE_MAX;
+
+	void *p = r == SIZE_MAX ? NULL : realloc(ptr, r);
+#else
+	void *p = realloc(ptr, nmemb * size);
+#endif /* HAVE_BUILTIN_MUL_OVERFLOW */
+
+	if (!p) {
+		err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate %zu bytes\n"),
+			PROGRAM_NAME, __func__, nmemb * size);
+		exit(ENOMEM);
+	}
+
+	return p;
+}
+
+/*
 void *
 xrealloc(void *ptr, const size_t size)
 {
@@ -1298,11 +1328,14 @@ xrealloc(void *ptr, const size_t size)
 	}
 
 	return p;
-}
+} */
 
 void *
 xcalloc(const size_t nmemb, const size_t size)
 {
+	/* Most modern calloc implementations, at least Glibc and OpenBSD,
+	 * use __builtin_mul_overflow internally, so that we don't need to
+	 * do it here manually. */
 	void *p = calloc(nmemb, size);
 
 	if (!p) {
@@ -1317,7 +1350,15 @@ xcalloc(const size_t nmemb, const size_t size)
 void *
 xnmalloc(const size_t nmemb, const size_t size)
 {
+#ifdef HAVE_BUILTIN_MUL_OVERFLOW
+	size_t r;
+	if (__builtin_mul_overflow(nmemb, size, &r))
+		r = SIZE_MAX;
+
+	void *p = r == SIZE_MAX ? NULL : malloc(r);
+#else
 	void *p = malloc(nmemb * size);
+#endif /* HAVE_BUILTIN_MUL_OVERFLOW */
 
 	if (!p) {
 		err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate %zu bytes\n"),

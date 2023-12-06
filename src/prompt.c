@@ -408,7 +408,7 @@ add_string(char **tmp, const int c, char **line, char **res, size_t *len)
 		*res = (char *)xnmalloc(l + 1, sizeof(char));
 		*(*res) = '\0';
 	} else {
-		*res = (char *)xrealloc(*res, (l + 1) * sizeof(char));
+		*res = (char *)xnrealloc(*res, (l + 1), sizeof(char));
 	}
 
 	xstrncat(*res, strlen(*res), *tmp, l + 1);
@@ -457,7 +457,7 @@ substitute_cmd(char **line, char **res, size_t *len)
 				*res = (char *)xnmalloc(*len + 2, sizeof(char));
 				*(*res) = '\0';
 			} else {
-				*res = (char *)xrealloc(*res, (*len + 2) * sizeof(char));
+				*res = (char *)xnrealloc(*res, (*len + 2), sizeof(char));
 			}
 			xstrncat(*res, strlen(*res), wordbuf.we_wordv[j], *len + 2);
 		}
@@ -739,7 +739,7 @@ ADD_STRING:
 
 			size_t new_len = result_len + 2
 							+ (wrong_cmd ? (MAX_COLOR + 6) : 0);
-			result = (char *)xrealloc(result, new_len * sizeof(char));
+			result = (char *)xnrealloc(result, new_len, sizeof(char));
 			result[result_len] = (char)c;
 			result_len++;
 			result[result_len] = '\0';

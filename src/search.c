@@ -475,7 +475,7 @@ construct_glob_query(char **arg, const int invert)
 	size_t len = strlen(*arg);
 
 	char *q = savestring(query, len - (invert == 1 ? 2 : 1));
-	*arg = (char *)xrealloc(*arg, (len + 3) * sizeof(char));
+	*arg = (char *)xnrealloc(*arg, (len + 3), sizeof(char));
 
 	snprintf((*arg) + 1, len + 2, "*%s*", q);
 	free(q);
@@ -664,7 +664,7 @@ construct_regex_query(char **arg, const int invert, int *regex_found)
 	size_t len = strlen(*arg);
 
 	char *q = savestring(query, len - (invert == 1 ? 2 : 1));
-	*arg = (char *)xrealloc(*arg, (len + 5) * sizeof(char));
+	*arg = (char *)xnrealloc(*arg, (len + 5), sizeof(char));
 
 	snprintf(*arg + 1, len + 4, ".*%s.*", q);
 	free(q);

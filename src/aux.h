@@ -74,7 +74,8 @@ size_t hashme(const char *, const int);
 #endif /* !_NO_ICONS */
 
 /* Some memory wrapper functions */
-void *xrealloc(void *, const size_t);
+//void *xrealloc(void *, const size_t);
+void *xnrealloc(void *, const size_t, const size_t);
 void *xcalloc(const size_t, const size_t);
 void *xnmalloc(const size_t, const size_t);
 

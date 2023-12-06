@@ -198,7 +198,7 @@ free_jump_database(void)
 static int
 add_new_jump_entry(const char *dir, const size_t dir_len)
 {
-	jump_db = (struct jump_t *)xrealloc(jump_db, (jump_n + 2) * sizeof(struct jump_t));
+	jump_db = (struct jump_t *)xnrealloc(jump_db, (jump_n + 2), sizeof(struct jump_t));
 	jump_db[jump_n].visits = 1;
 	time_t now = time(NULL);
 	jump_db[jump_n].first_visit = now;

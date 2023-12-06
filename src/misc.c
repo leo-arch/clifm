@@ -1233,7 +1233,7 @@ create_usr_var(const char *str)
 		return EXIT_FAILURE;
 	}
 
-	usr_var = xrealloc(usr_var, (size_t)(usrvar_n + 2) * sizeof(struct usrvar_t));
+	usr_var = xnrealloc(usr_var, (size_t)(usrvar_n + 2), sizeof(struct usrvar_t));
 	usr_var[usrvar_n].name = savestring(name, strlen(name));
 	usr_var[usrvar_n].value = savestring(value, strlen(value));
 	usrvar_n++;
@@ -1853,7 +1853,7 @@ handle_stdin(void)
 		chunks_n++;
 
 		/* Append a new chunk of memory to the buffer */
-		buf = (char *)xrealloc(buf, (chunks_n + 1) * chunk);
+		buf = (char *)xnrealloc(buf, (chunks_n + 1), chunk);
 	}
 
 	if (total_len == 0)

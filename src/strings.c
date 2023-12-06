@@ -844,7 +844,7 @@ split_str(char *str, const int update_args)
 			if (*str == '$') {
 				/* If escaped, it has no special meaning */
 				if ((str_len && *(str - 1) == '\\') || *(str + 1) != '(') {
-					buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
+					buf = (char *)xnrealloc(buf, (buf_len + 1), sizeof(char *));
 					buf[buf_len] = *str;
 					buf_len++;
 					break;
@@ -854,7 +854,7 @@ split_str(char *str, const int update_args)
 			} else {
 				/* If escaped, it has no special meaning */
 				if (str_len && *(str - 1) == '\\') {
-					buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
+					buf = (char *)xnrealloc(buf, (buf_len + 1), sizeof(char *));
 					buf[buf_len] = *str;
 					buf_len++;
 					break;
@@ -864,7 +864,7 @@ split_str(char *str, const int update_args)
 					 * what we want */
 					close = *str;
 					str++;
-					buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
+					buf = (char *)xnrealloc(buf, (buf_len + 1), sizeof(char *));
 					buf[buf_len] = '`';
 					buf_len++;
 				}
@@ -872,7 +872,7 @@ split_str(char *str, const int update_args)
 
 			/* Copy everything until null byte or closing char */
 			while (*str && *str != close) {
-				buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
+				buf = (char *)xnrealloc(buf, (buf_len + 1), sizeof(char *));
 				buf[buf_len] = *str;
 				buf_len++;
 				str++;
@@ -896,7 +896,7 @@ split_str(char *str, const int update_args)
 			/* Copy the closing char and add an space: this function
 			 * takes space as word breaking char, so that everything
 			 * in the buffer will be copied as one single word */
-			buf = (char *)xrealloc(buf, (buf_len + 2) * sizeof(char *));
+			buf = (char *)xnrealloc(buf, (buf_len + 2), sizeof(char *));
 			buf[buf_len] = *str;
 			buf_len++;
 			buf[buf_len] = ' ';
@@ -907,7 +907,7 @@ split_str(char *str, const int update_args)
 		case '"':
 			/* If the quote is escaped, keep it. */
 			if (keep_quotes == 1 || (str_len && *(str - 1) == '\\')) {
-				buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
+				buf = (char *)xnrealloc(buf, (buf_len + 1), sizeof(char *));
 				buf[buf_len] = *str;
 				buf_len++;
 				if (update_args == 1)
@@ -925,12 +925,12 @@ split_str(char *str, const int update_args)
 				/* If char has special meaning, escape it */
 				if (!(flags & IN_BOOKMARKS_SCREEN) && (is_quote_char(*str)
 				|| *str == '.')) { // escape '.' to prevent realpath expansions
-					buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
+					buf = (char *)xnrealloc(buf, (buf_len + 1), sizeof(char *));
 					buf[buf_len] = '\\';
 					buf_len++;
 				}
 
-				buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
+				buf = (char *)xnrealloc(buf, (buf_len + 1), sizeof(char *));
 				buf[buf_len] = *str;
 				buf_len++;
 				str++;
@@ -964,7 +964,7 @@ split_str(char *str, const int update_args)
 		case ' ':
 			/* If escaped, just copy it into the buffer */
 			if (str_len && *(str - 1) == '\\') {
-				buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
+				buf = (char *)xnrealloc(buf, (buf_len + 1), sizeof(char *));
 				buf[buf_len] = *str;
 				buf_len++;
 			} else {
@@ -974,7 +974,7 @@ split_str(char *str, const int update_args)
 				buf[buf_len] = '\0';
 
 				if (buf_len > 0) {
-					substr = (char **)xrealloc(substr, (words + 1) * sizeof(char *));
+					substr = (char **)xnrealloc(substr, (words + 1), sizeof(char *));
 					substr[words] = savestring(buf, buf_len);
 					words++;
 				}
@@ -990,7 +990,7 @@ split_str(char *str, const int update_args)
 		default:
 			if (*str == '\\' && (flags & IN_BOOKMARKS_SCREEN))
 				break;
-			buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
+			buf = (char *)xnrealloc(buf, (buf_len + 1), sizeof(char *));
 			buf[buf_len] = *str;
 			buf_len++;
 			break;
@@ -1009,7 +1009,7 @@ split_str(char *str, const int update_args)
 		if (!words)
 			substr = (char **)xcalloc(words + 1, sizeof(char *));
 		else
-			substr = (char **)xrealloc(substr, (words + 1) * sizeof(char *));
+			substr = (char **)xnrealloc(substr, (words + 1), sizeof(char *));
 
 		substr[words] = savestring(buf, buf_len);
 		words++;
@@ -1020,7 +1020,7 @@ split_str(char *str, const int update_args)
 
 	if (words) {
 		/* Add a final null string to the array */
-		substr = (char **)xrealloc(substr, (words + 1) * sizeof(char *));
+		substr = (char **)xnrealloc(substr, (words + 1), sizeof(char *));
 		substr[words] = (char *)NULL;
 
 		if (update_args == 1)
@@ -1121,7 +1121,7 @@ split_fused_param(char *str)
 
 	/* Readjust the buffer size */
 	const size_t len = strlen(buf);
-	buf = (char *)xrealloc(buf, (len + 1) * sizeof(char));
+	buf = (char *)xnrealloc(buf, (len + 1), sizeof(char));
 	return buf;
 }
 
@@ -1328,7 +1328,7 @@ expand_tags(char ***substr)
 	for (i = 0; (*substr)[i]; i++) {
 		if (*(*substr)[i] == 't' && *((*substr)[i] + 1) == ':'
 		&& lstat((*substr)[i], &a) == -1) {
-			tag_index = (int *)xrealloc(tag_index, (ntags + 2) * sizeof(int));
+			tag_index = (int *)xnrealloc(tag_index, (ntags + 2), sizeof(int));
 			tag_index[ntags] = (int)i;
 			ntags++;
 			tag_index[ntags] = -1;
@@ -1383,7 +1383,7 @@ expand_mime_type_filter(const char *pattern)
 	if (n == 0)
 		{ free(t); return (char **)NULL; }
 
-	t = (char **)xrealloc(t, ((size_t)n + 1) * sizeof(char *));
+	t = (char **)xnrealloc(t, ((size_t)n + 1), sizeof(char *));
 	return t;
 }
 #endif /* !_NO_MAGIC */
@@ -1481,7 +1481,7 @@ expand_file_type_filter(const char t)
 	}
 
 	f[n] = (char *)NULL;
-	f = (char **)xrealloc(f, ((size_t)n + 1) * sizeof(char *));
+	f = (char **)xnrealloc(f, ((size_t)n + 1), sizeof(char *));
 
 	return f;
 }
@@ -1600,7 +1600,7 @@ eln_expand(char ***substr, const size_t i)
 	if (file_info[j].type == DT_DIR && file_info[j].name[file_info[j].len > 0
 	? file_info[j].len - 1 : 0] != '/') {
 		size_t len = strlen(esc_str) + 2;
-		(*substr)[i] = (char *)xrealloc((*substr)[i], len * sizeof(char));
+		(*substr)[i] = (char *)xnrealloc((*substr)[i], len, sizeof(char));
 		snprintf((*substr)[i], len, "%s/", esc_str);
 		free(esc_str);
 	} else {
@@ -1713,7 +1713,7 @@ expand_bm_name(char **name)
 		char *q = escape_str(bookmarks[j].path);
 		char *tmp = q ? q : bookmarks[j].path;
 		size_t tmp_len = strlen(tmp);
-		*name = (char *)xrealloc(*name, (tmp_len + 1) * sizeof(char));
+		*name = (char *)xnrealloc(*name, (tmp_len + 1), sizeof(char));
 		xstrsncpy(*name, tmp, tmp_len + 1);
 		free(q);
 		bm_exp = EXIT_SUCCESS;
@@ -1738,7 +1738,7 @@ expand_int_var(char **name)
 			continue;
 
 		size_t val_len = strlen(usr_var[j].value);
-		*name = (char *)xrealloc(*name, (val_len + 1) * sizeof(char));
+		*name = (char *)xnrealloc(*name, (val_len + 1), sizeof(char));
 		xstrsncpy(*name, usr_var[j].value, val_len + 1);
 		break;
 	}
@@ -2362,7 +2362,7 @@ expand_symlink(char **substr)
 	}
 
 	size_t rp_len = strlen(real_path);
-	*substr = (char *)xrealloc(*substr, (rp_len + 1) * sizeof(char));
+	*substr = (char *)xnrealloc(*substr, (rp_len + 1), sizeof(char));
 	xstrsncpy(*substr, real_path, rp_len + 1);
 	free(real_path);
 
@@ -2653,7 +2653,7 @@ parse_input_str(char *str)
 					 * ###################### */
 #ifndef _NO_TRASH
 	if (conf.tr_as_rm && substr[0] && *substr[0] == 'r' && !substr[0][1]) {
-		substr[0] = (char *)xrealloc(substr[0], 2 * sizeof(char));
+		substr[0] = (char *)xnrealloc(substr[0], 2, sizeof(char));
 		*substr[0] = 't';
 		substr[0][1] = '\0';
 	}
@@ -2708,7 +2708,7 @@ parse_input_str(char *str)
 			char *p = getenv(substr[i] + 1);
 			if (p) {
 				size_t plen = strlen(p) + 1;
-				substr[i] = (char *)xrealloc(substr[i], plen * sizeof(char));
+				substr[i] = (char *)xnrealloc(substr[i], plen, sizeof(char));
 				xstrsncpy(substr[i], p, plen);
 			}
 		}
@@ -2768,7 +2768,7 @@ parse_input_str(char *str)
 
 		if (*substr[i] == ',' && !substr[i][1] && pinned_dir) {
 			size_t plen = strlen(pinned_dir);
-			substr[i] = (char *)xrealloc(substr[i], (plen + 1) * sizeof(char));
+			substr[i] = (char *)xnrealloc(substr[i], (plen + 1), sizeof(char));
 			xstrsncpy(substr[i], pinned_dir, plen + 1);
 		}
 
@@ -2844,7 +2844,7 @@ parse_input_str(char *str)
 
 
 	/* #### NULL TERMINATE THE INPUT STRING ARRAY #### */
-	substr = (char **)xrealloc(substr, sizeof(char *) * (args_n + 2));
+	substr = (char **)xnrealloc(substr, (args_n + 2), sizeof(char *));
 	substr[args_n + 1] = (char *)NULL;
 
 	int is_action = is_action_name(substr[0]);
@@ -2957,7 +2957,7 @@ parse_input_str(char *str)
 		expand_regex(&substr);
 
 	/* #### NULL TERMINATE THE INPUT STRING ARRAY (again) #### */
-	substr = (char **)xrealloc(substr, (args_n + 2) * sizeof(char *));
+	substr = (char **)xnrealloc(substr, (args_n + 2), sizeof(char *));
 	substr[args_n + 1] = (char *)NULL;
 
 	return substr;
@@ -3219,7 +3219,7 @@ get_substr(char *str, const char ifs)
 		for (j = 0; substr[j]; j++)
 			free(substr[j]);
 
-		substr = (char **)xrealloc(substr, (substr_n + 1) * sizeof(char *));
+		substr = (char **)xnrealloc(substr, (substr_n + 1), sizeof(char *));
 
 		for (j = 0; j < substr_n; j++) {
 			substr[j] = savestring(rbuf[j], strlen(rbuf[j]));
@@ -3255,14 +3255,14 @@ get_substr(char *str, const char ifs)
 			continue;
 		}
 
-		dstr = (char **)xrealloc(dstr, (len + 1) * sizeof(char *));
+		dstr = (char **)xnrealloc(dstr, (len + 1), sizeof(char *));
 		dstr[len] = savestring(substr[i], strlen(substr[i]));
 		len++;
 		free(substr[i]);
 	}
 
 	free(substr);
-	dstr = (char **)xrealloc(dstr, (len + 1) * sizeof(char *));
+	dstr = (char **)xnrealloc(dstr, (len + 1), sizeof(char *));
 	dstr[len] = (char *)NULL;
 	return dstr;
 }

@@ -107,8 +107,8 @@ get_ext_mountpoints(void)
 		if (*t != 'e' || t[1] != 'x' || t[2] != 't' || !t[3] || t[4])
 			continue;
 
-		ext_mnt = (struct ext_mnt_t *)xrealloc(ext_mnt,
-			(n + 2) * sizeof(struct ext_mnt_t));
+		ext_mnt = (struct ext_mnt_t *)xnrealloc(ext_mnt,
+			(n + 2), sizeof(struct ext_mnt_t));
 		ext_mnt[n].mnt_point = savestring(ent->mnt_dir, strlen(ent->mnt_dir));
 
 		switch (t[3]) {
@@ -560,7 +560,7 @@ get_user_groups(const char *name, const gid_t gid, int *ngroups)
 		return (gid_t *)NULL;
 	}
 	if (NGROUPS_MAX > n) /* Reduce array to actual amount of groups (N) */
-		g = (gid_t *)xrealloc(g, (size_t)n * sizeof(g));
+		g = (gid_t *)xnrealloc(g, (size_t)n, sizeof(g));
 
 #elif defined(__linux__)
 	n = 0;
@@ -577,7 +577,7 @@ get_user_groups(const char *name, const gid_t gid, int *ngroups)
 # endif /* __APPLE__ */
 
 	if (NGROUPS_MAX > n)
-		g = (gid_t *)xrealloc(g, (size_t)n * sizeof(g));
+		g = (gid_t *)xnrealloc(g, (size_t)n, sizeof(g));
 #endif /* __TERMUX__ */
 
 	*ngroups = n;
@@ -1238,8 +1238,8 @@ load_actions(void)
 			continue;
 
 		/* Now copy left and right value of each action into the actions struct */
-		usr_actions = xrealloc(usr_actions, (size_t)(actions_n + 1)
-			* sizeof(struct actions_t));
+		usr_actions = xnrealloc(usr_actions, (size_t)(actions_n + 1),
+			sizeof(struct actions_t));
 		usr_actions[actions_n].value = savestring(tmp + 1, strlen(tmp + 1));
 		*tmp = '\0';
 		usr_actions[actions_n].name = savestring(line, strlen(line));
@@ -1291,8 +1291,8 @@ load_remotes(void)
 		if (*line == '[') {
 			if (remotes[n].name)
 				n++;
-			remotes = (struct remote_t *)xrealloc(
-				remotes, (n + 2) * sizeof(struct remote_t));
+			remotes = (struct remote_t *)xnrealloc(
+				remotes, (n + 2), sizeof(struct remote_t));
 			reset_remotes_values(n);
 
 			char *name = strbtw(line, '[', ']');
@@ -1304,8 +1304,8 @@ load_remotes(void)
 				continue;
 			}
 			size_t name_len = strlen(name);
-			remotes[n].name = (char *)xrealloc(remotes[n].name,
-				(name_len + 1) * sizeof(char));
+			remotes[n].name = (char *)xnrealloc(remotes[n].name,
+				(name_len + 1), sizeof(char));
 			xstrsncpy(remotes[n].name, name, name_len + 1);
 			free(name);
 			name = (char *)NULL;
@@ -1331,8 +1331,8 @@ load_remotes(void)
 			ret = deq_str;
 
 		if (strncmp(line, "Comment=", 8) == 0) {
-			remotes[n].desc = (char *)xrealloc(remotes[n].desc,
-				(ret_len + 1) * sizeof(char));
+			remotes[n].desc = (char *)xnrealloc(remotes[n].desc,
+				(ret_len + 1), sizeof(char));
 			xstrsncpy(remotes[n].desc, ret, ret_len + 1);
 
 		} else if (strncmp(line, "Mountpoint=", 11) == 0) {
@@ -1340,8 +1340,8 @@ load_remotes(void)
 			if (*ret == '~')
 				tmp = tilde_expand(ret);
 			size_t mnt_len = tmp ? strlen(tmp) : ret_len;
-			remotes[n].mountpoint = (char *)xrealloc(remotes[n].mountpoint,
-				(mnt_len + 1) * sizeof(char));
+			remotes[n].mountpoint = (char *)xnrealloc(remotes[n].mountpoint,
+				(mnt_len + 1), sizeof(char));
 			xstrsncpy(remotes[n].mountpoint, tmp ? tmp : ret, mnt_len + 1);
 			free(tmp);
 			if (count_dir(remotes[n].mountpoint, CPOP) > 2)
@@ -1353,8 +1353,8 @@ load_remotes(void)
 				char *rep = replace_substr(ret, "%m", remotes[n].mountpoint);
 				if (rep) {
 					size_t rep_len = strlen(rep);
-					remotes[n].mount_cmd = (char *)xrealloc(
-						remotes[n].mount_cmd, (rep_len + 1) * sizeof(char));
+					remotes[n].mount_cmd = (char *)xnrealloc(
+						remotes[n].mount_cmd, (rep_len + 1), sizeof(char));
 					xstrsncpy(remotes[n].mount_cmd, rep, rep_len + 1);
 					free(rep);
 					replaced = 1;
@@ -1362,8 +1362,8 @@ load_remotes(void)
 			}
 
 			if (!replaced) {
-				remotes[n].mount_cmd = (char *)xrealloc(remotes[n].mount_cmd,
-					(ret_len + 1) * sizeof(char));
+				remotes[n].mount_cmd = (char *)xnrealloc(remotes[n].mount_cmd,
+					(ret_len + 1), sizeof(char));
 				xstrsncpy(remotes[n].mount_cmd, ret, ret_len + 1);
 			}
 
@@ -1373,8 +1373,8 @@ load_remotes(void)
 				char *rep = replace_substr(ret, "%m", remotes[n].mountpoint);
 				if (rep) {
 					size_t rep_len = strlen(rep);
-					remotes[n].unmount_cmd = (char *)xrealloc(
-						remotes[n].unmount_cmd, (rep_len + 1) * sizeof(char));
+					remotes[n].unmount_cmd = (char *)xnrealloc(
+						remotes[n].unmount_cmd, (rep_len + 1), sizeof(char));
 					xstrsncpy(remotes[n].unmount_cmd, rep, rep_len + 1);
 					free(rep);
 					replaced = 1;
@@ -1382,8 +1382,8 @@ load_remotes(void)
 			}
 
 			if (!replaced) {
-				remotes[n].unmount_cmd = (char *)xrealloc(remotes[n].unmount_cmd,
-					(ret_len + 1) * sizeof(char));
+				remotes[n].unmount_cmd = (char *)xnrealloc(remotes[n].unmount_cmd,
+					(ret_len + 1), sizeof(char));
 				xstrsncpy(remotes[n].unmount_cmd, ret, ret_len + 1);
 			}
 
@@ -1485,8 +1485,8 @@ load_prompts(void)
 		if (*line == '[') {
 			if (prompts[n].name)
 				n++;
-			prompts = (struct prompts_t *)xrealloc(
-				prompts, (n + 2) * sizeof(struct prompts_t));
+			prompts = (struct prompts_t *)xnrealloc(
+				prompts, (n + 2), sizeof(struct prompts_t));
 			unset_prompt_values(n);
 
 			char *name = strbtw(line, '[', ']');
@@ -1498,8 +1498,8 @@ load_prompts(void)
 				continue;
 			}
 			size_t name_len = strlen(name);
-			prompts[n].name = (char *)xrealloc(prompts[n].name,
-				(name_len + 1) * sizeof(char));
+			prompts[n].name = (char *)xnrealloc(prompts[n].name,
+				(name_len + 1), sizeof(char));
 			xstrsncpy(prompts[n].name, name, name_len + 1);
 			free(name);
 			name = (char *)NULL;
@@ -1533,8 +1533,8 @@ load_prompts(void)
 			ret = deq_str;
 
 		if (strncmp(line, "RegularPrompt=", 14) == 0) {
-			prompts[n].regular = (char *)xrealloc(prompts[n].regular,
-				(ret_len + 1) * sizeof(char));
+			prompts[n].regular = (char *)xnrealloc(prompts[n].regular,
+				(ret_len + 1), sizeof(char));
 			xstrsncpy(prompts[n].regular, ret, ret_len + 1);
 			continue;
 		}
@@ -1550,8 +1550,8 @@ load_prompts(void)
 		}
 
 		if (strncmp(line, "WarningPrompt=", 14) == 0) {
-			prompts[n].warning = (char *)xrealloc(prompts[n].warning,
-				(ret_len + 1) * sizeof(char));
+			prompts[n].warning = (char *)xnrealloc(prompts[n].warning,
+				(ret_len + 1), sizeof(char));
 			xstrsncpy(prompts[n].warning, ret, ret_len + 1);
 		}
 	}
@@ -1792,14 +1792,14 @@ get_sel_files(void)
 		if (fstatat(XAT_FDCWD, line, &a, AT_SYMLINK_NOFOLLOW) == -1)
 			continue;
 
-		sel_elements = (struct sel_t *)xrealloc(sel_elements,
-				(sel_n + 2) * sizeof(struct sel_t));
+		sel_elements = (struct sel_t *)xnrealloc(sel_elements,
+				(sel_n + 2), sizeof(struct sel_t));
 		sel_elements[sel_n].name = savestring(line, len);
 		sel_elements[sel_n].size = (off_t)UNSET;
 		/* Store device and inode number to identify later selected files
 		 * and mark them in the files list. */
-		sel_devino = (struct devino_t *)xrealloc(sel_devino,
-				(sel_n + 1) * sizeof(struct devino_t));
+		sel_devino = (struct devino_t *)xnrealloc(sel_devino,
+				(sel_n + 1), sizeof(struct devino_t));
 		sel_devino[sel_n].ino = a.st_ino;
 		sel_devino[sel_n].dev = a.st_dev;
 		sel_n++;
@@ -1841,7 +1841,7 @@ get_cdpath(void)
 		buf[len] = '\0';
 
 		/* Make room in cdpaths for a new path */
-		cdpaths = (char **)xrealloc(cdpaths, (n + 2) * sizeof(char *));
+		cdpaths = (char **)xnrealloc(cdpaths, (n + 2), sizeof(char *));
 
 		/* Dump the buffer into the global cdpaths array */
 		cdpaths[n] = savestring(buf, len);
@@ -2281,8 +2281,8 @@ free_aliases(void)
 static void
 write_alias(const char *s, char *p)
 {
-	aliases = (struct alias_t *)xrealloc(aliases, (aliases_n + 2)
-		* sizeof(struct alias_t));
+	aliases = (struct alias_t *)xnrealloc(aliases, (aliases_n + 2),
+		sizeof(struct alias_t));
 	aliases[aliases_n].name = savestring(s, strlen(s));
 	int add = 0;
 	if (*p == '\'') {
@@ -2457,8 +2457,8 @@ get_prompt_cmds(void)
 			line[line_len - 1] = '\0';
 		if (!(*line + 10))
 			continue;
-		prompt_cmds = (char **)xrealloc(prompt_cmds,
-		    (prompt_cmds_n + 1) * sizeof(char *));
+		prompt_cmds = (char **)xnrealloc(prompt_cmds,
+		    (prompt_cmds_n + 1), sizeof(char *));
 		prompt_cmds[prompt_cmds_n] = savestring(
 		    line + 10, (size_t)line_len - 10);
 		prompt_cmds_n++;
