@@ -878,37 +878,6 @@ get_cmd_path(const char *cmd)
 	return (char *)NULL;
 }
 
-/*
-char *
-construct_human_size(const off_t size)
-{
-	static char str[MAX_UNIT_SIZE];
-
-	const off_t base = xargs.si == 1 ? 1000 : 1024;
-	off_t s = size;
-//	uint16_t rem = 0; // much faster than off_t/long, but fails
-	off_t rem = 0;
-	uint8_t n = 0;
-
-	while (s >= base) {
-		rem = s; // reminder (integer form) of the last division
-		s = 0; // quotient part of the last division
-		while (rem >= base) {rem -= base; ++s;}
-		++n; // number of performed divisions
-	}
-
-	float float_rem = rem == 0 ? 0.00f : (float)rem / (float)base;
-
-	static const char *const u = "BKMGTPEZYRQ";
-	snprintf(str, MAX_UNIT_SIZE, "%.*f%c%c",
-		rem == 0 ? 0 : 2,
-		(float)s + float_rem,
-		u[n],
-		(u[n] != 'B' && xargs.si == 1) ? 'B' : 0);
-
-	return str;
-} */
-
 /* Convert SIZE to human readable form (at most 2 decimal places).
  * Returns a pointer to a string of at most MAX_UNIT_SIZE.
  * We follow here the du(1) notation: K, M, G... for powers of 1024
@@ -1283,90 +1252,6 @@ xatoi(const char *s)
 	}
 
 	return (int)ret;
-}
-
-/* Some memory wrapper functions */
-
-#if defined(__has_builtin) && defined(USE_BUILTIN_MUL_OVERFLOW)
-# if __has_builtin(__builtin_mul_overflow)
-#  define HAVE_BUILTIN_MUL_OVERFLOW
-# endif
-#endif
-
-void *
-xnrealloc(void *ptr, const size_t nmemb, const size_t size)
-{
-#ifdef HAVE_BUILTIN_MUL_OVERFLOW
-	size_t r;
-	if (__builtin_mul_overflow(nmemb, size, &r))
-		r = SIZE_MAX;
-
-	void *p = r == SIZE_MAX ? NULL : realloc(ptr, r);
-#else
-	void *p = realloc(ptr, nmemb * size);
-#endif /* HAVE_BUILTIN_MUL_OVERFLOW */
-
-	if (!p) {
-		err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate %zu bytes\n"),
-			PROGRAM_NAME, __func__, nmemb * size);
-		exit(ENOMEM);
-	}
-
-	return p;
-}
-
-/*
-void *
-xrealloc(void *ptr, const size_t size)
-{
-	void *p = realloc(ptr, size);
-
-	if (!p) {
-		err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate %zu bytes\n"),
-			PROGRAM_NAME, __func__, size);
-		exit(ENOMEM);
-	}
-
-	return p;
-} */
-
-void *
-xcalloc(const size_t nmemb, const size_t size)
-{
-	/* Most modern calloc implementations, at least Glibc and OpenBSD,
-	 * use __builtin_mul_overflow internally, so that we don't need to
-	 * do it here manually. */
-	void *p = calloc(nmemb, size);
-
-	if (!p) {
-		err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate %zu bytes\n"),
-			PROGRAM_NAME, __func__, nmemb * size);
-		exit(ENOMEM);
-	}
-
-	return p;
-}
-
-void *
-xnmalloc(const size_t nmemb, const size_t size)
-{
-#ifdef HAVE_BUILTIN_MUL_OVERFLOW
-	size_t r;
-	if (__builtin_mul_overflow(nmemb, size, &r))
-		r = SIZE_MAX;
-
-	void *p = r == SIZE_MAX ? NULL : malloc(r);
-#else
-	void *p = malloc(nmemb * size);
-#endif /* HAVE_BUILTIN_MUL_OVERFLOW */
-
-	if (!p) {
-		err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate %zu bytes\n"),
-			PROGRAM_NAME, __func__, nmemb * size);
-		exit(ENOMEM);
-	}
-
-	return p;
 }
 
 /* Unlike getchar(3) this function does not wait for newline ('\n').

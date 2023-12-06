@@ -26,6 +26,7 @@
 #define AUX_H
 
 #include <time.h>
+#include "mem.h"
 
 #ifdef RL_READLINE_VERSION
 # if RL_READLINE_VERSION >= 0x0801
@@ -75,9 +76,9 @@ size_t hashme(const char *, const int);
 
 /* Some memory wrapper functions */
 //void *xrealloc(void *, const size_t);
-void *xnrealloc(void *, const size_t, const size_t);
-void *xcalloc(const size_t, const size_t);
-void *xnmalloc(const size_t, const size_t);
+//void *xnrealloc(void *, const size_t, const size_t);
+//void *xcalloc(const size_t, const size_t);
+//void *xnmalloc(const size_t, const size_t);
 
 __END_DECLS
 
