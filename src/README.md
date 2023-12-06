@@ -14,7 +14,7 @@ Once this is done, you might want to check and modify a few things from the resu
 
 ### C source
 
-Portability: Though mostly developed in Linux (and this always means better support), we try to keep **clifm** working on \*BSD, MacOS, and Haiku. So, when calling a function make sure it exists on these platforms as well, and, if possible, make sure it is POSIX. Check its syntax as well: some functions might take different parameters on different platforms. For example, **getmntinfo**(3) does not exist in Linux, and, while it takes a `statfs` struct in FreeBsd, OpenBSD, and MacOS, it takes a `statvfs` struct instead in NetBSD.
+Portability: Though mostly developed in Linux (and this always means better support), we try to keep **clifm** working on \*BSD, MacOS, Solaris, and Haiku. So, when calling a function make sure it exists on these platforms as well, and, if possible, make sure it is POSIX. Check its syntax as well: some functions might take different parameters on different platforms. For example, **getmntinfo**(3) does not exist in Linux, and, while it takes a `statfs` struct in FreeBsd, OpenBSD, and MacOS, it takes a `statvfs` struct instead in NetBSD.
 
 Generally, try to stick as closely as possible to the [Linux kernel coding style](https://www.kernel.org/doc/html/v4.10/process/coding-style.html). Also, though we don't follow it strictly, we also like the [Suckless coding style](https://suckless.org/coding_style/).
 
@@ -120,7 +120,7 @@ buf[PATH_MAX];
 xstrsncpy(buf, src, sizeof(buf));
 ```
 
-**Note**: Both `xstrsncpy` and `xnmalloc` are safe implementations of `strcpy(3)` and `malloc(3)` respectively and are provided by **clifm** itself (see `strings.c` and `aux.c` respectivelly).
+**Note**: Both `xstrsncpy` and `xnmalloc` are safe implementations of `strcpy(3)` and `malloc(3)` respectively and are provided by **clifm** itself (see `strings.c` and `mem.c` respectively).
 
 These are just a few examples. There are plenty of resources out there on how to write secure code.
 
