@@ -2323,8 +2323,8 @@ X:application/x-bittorrent=rtorrent;transimission-gtk;transmission-qt;deluge-gtk
 static void
 print_mime_file_msg(char *file)
 {
-	int _free = 0;
-	char *f = home_tilde(file, &_free);
+	int free_mem = 0;
+	char *f = home_tilde(file, &free_mem);
 
 	err('n', PRINT_PROMPT, _("%sNOTE%s: %s created a new MIME list file (%s). "
 		"It is recommended to edit this file (entering 'mm edit' or "
