@@ -5,24 +5,20 @@
 
 # Commented and blank lines are omitted.
 
-# The below settings cover the most common filetypes
+# The below settings cover the most common filetypes.
 # It is recommended to edit this file placing your prefered applications
-# at the beginning of the apps list to speed up the opening process
+# at the beginning of the apps list to speed up the opening process.
 
 # The file is read top to bottom and left to right; the first existent
-# application found will be used
+# application found will be used.
 
 # Applications defined here are NOT desktop files, but commands (arguments
-# could be used as well). Bear in mind that these commands will be executed
+# can be used as well). Bear in mind that these commands will be executed
 # directly without shell intervention, so that no shell goodies (like pipes,
 # conditions, loops, etc) are available. In case you need something more
 # complex than a single command (including shell capabilities) write your
 # own script and place the path to the script in place of the command.
 # For example: X:^text/.*:~/scripts/my_cool_script.sh
-
-# Applications defined here are NOT desktop files, but commands (arguments
-# could be used as well). Write you own handmade scripts to open specific
-# files if necessary. Ex: X:^text/.*:~/scripts/my_cool_script.sh
 
 # Use 'X' to specify a GUI environment and '!X' for non-GUI environments,
 # like the kernel built-in console or a remote SSH session.
@@ -33,9 +29,9 @@
 
 # Use the %f placeholder to specify the position of the file name to be
 # opened in the command. Example:
-# 'mpv %f --terminal=no' -> 'mpv FILE --terminal=no' 
+# 'mpv %f --no-terminal' -> 'mpv FILE --no-terminal' 
 # If %f is not specified, the file name will be added to the end of the
-# command. Ex: 'mpv --terminal=no' -> 'mpv --terminal=no FILE'
+# command. Ex: 'mpv --no-terminal' -> 'mpv --no-terminal FILE'
 
 # Running the opening application in the background:
 # For GUI applications:
@@ -51,15 +47,15 @@
 # To avoid this, instruct the application to run a new instance. For example:
 # geany -i, gedit -s, kate -n, pluma --new-window, and so on.
 
-# To silence STDERR and/or STDOUT use !E and !O respectivelly (they could
-# be used together). Examples:
+# To silence STDERR and/or STDOUT use !E and !O respectively (they can be
+# used together). Examples:
 # Silence STDERR only and run in the foreground:
 #    mpv %f !E
 # Silence both (STDERR and STDOUT) and run in the background:
 #    mpv %f !EO &
 # For Ranger users, "!EO" is equivalent to "flag f" in rifle.conf
 
-# Environment variables could be used as well. Example:
+# Environment variables can be used as well. Example:
 # X:text/plain=$EDITOR %f &;$VISUAL;nano;vi
 
 # Use Ranger's rifle (or whatever opener you prefer) to open all files
@@ -92,8 +88,7 @@ X:N:.*\.(cbr|cbz|cb7|cbt|cba)$=mcomix;xreader;YACReader;qcomicbook;zathura;folia
 #   MIME types   #
 ##################
 
-# Directories - only for the open-with command (ow) and the --open command
-# line option
+# Directories - only for the open-with command (ow) and the --open command line switch
 # In graphical environments directories will be opened in a new window
 X:inode/directory=xterm -e clifm %f &;xterm -e vifm %f &;pcmanfm %f &;thunar %f &;xterm -e ncdu %f &
 !X:inode/directory=vifm;ranger;nnn;ncdu
@@ -103,7 +98,6 @@ X:^text/html$=$BROWSER;surf;vimprobable;vimprobable2;qutebrowser;dwb;jumanji;lua
 !X:^text/html$=$BROWSER;elinks;links2;links;lynx;w3m
 
 # Text
-#X:^text/x-(c|shellscript|perl|script.python|makefile|fortran|java-source|javascript|pascal)$=geany
 X:^text/rtf$=libreoffice;soffice;ooffice
 X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;vim;vi;mg;emacs;ed;nano;mili;leafpad;mousepad;featherpad;nedit;kate;gedit;pluma;io.elementary.code;liri-text;xed;atom;nota;gobby;kwrite;xedit
 !X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;vim;vi;mg;emacs;ed;nano
@@ -114,7 +108,7 @@ X:^application/.*(open|office)document.*=libreoffice;soffice;ooffice
 
 # Archives
 # Note: 'ad' is CliFM's built-in archives utility (based on atool). Remove it if you
-# prefer another application
+# prefer another application.
 X:^application/(zip|gzip|zstd|x-7z-compressed|x-xz|x-bzip*|x-tar|x-iso9660-image)=ad;xarchiver %f &;lxqt-archiver %f &;ark %f &
 !X:^application/(zip|gzip|zstd|x-7z-compressed|x-xz|x-bzip*|x-tar|x-iso9660-image)=ad
 
