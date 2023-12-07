@@ -2183,17 +2183,17 @@ create_mime_file_anew(char *file)
                   #     CliFM's resource opener     #\n\
                   ###################################\n\
 \n\
-# Commented and blank lines are omitted\n\
+# Commented and blank lines are omitted.\n\
 \n\
-# The below settings cover the most common filetypes\n\
+# The below settings cover the most common filetypes.\n\
 # It is recommended to edit this file placing your prefered applications\n\
-# at the beginning of the apps list to speed up the opening process\n\
+# at the beginning of the apps list to speed up the opening process.\n\
 \n\
 # The file is read top to bottom and left to right; the first existent\n\
-# application found will be used\n\
+# application found will be used.\n\
 \n\
 # Applications defined here are NOT desktop files, but commands (arguments\n\
-# could be used as well). Bear in mind that these commands will be executed\n\
+# can be used as well). Bear in mind that these commands will be executed\n\
 # directly without shell intervention, so that no shell goodies (like pipes,\n\
 # conditions, loops, etc) are available. In case you need something more\n\
 # complex than a single command (including shell capabilities) write your\n\
@@ -2227,7 +2227,7 @@ create_mime_file_anew(char *file)
 # application to run a new instance: Ex: geany -i, gedit -s, kate -n,\n\
 # pluma --new-window, and so on.\n\
 \n\
-# To silence STDERR and/or STDOUT use !E and !O respectivelly (they could\n\
+# To silence STDERR and/or STDOUT use !E and !O respectively (they can\n\
 # be used together). Examples:\n\
 # Silence STDERR only and run in the foreground:\n\
 #    mpv %%f !E\n\
@@ -2237,7 +2237,7 @@ create_mime_file_anew(char *file)
 #    mpv %%f !E !O &\n\
 # For Ranger users, \"!EO\" is equivalent to \"flag f\" in rifle.conf\n\
 \n\
-# Environment variables could be used as well. Example:\n\
+# Environment variables can be used as well. Example:\n\
 # X:text/plain=$EDITOR %%f &;$VISUAL;nano;vi\n\
 \n\
 # Use Ranger's rifle (or whatever opener you prefer) to open all files\n\
@@ -2279,7 +2279,6 @@ X:^text/html$=$BROWSER;surf;vimprobable;vimprobable2;qutebrowser;dwb;jumanji;lua
 !X:^text/html$=$BROWSER;elinks;links2;links;lynx;w3m\n\
 \n\
 # Text\n\
-#X:^text/x-(c|shellscript|perl|script.python|makefile|fortran|java-source|javascript|pascal)$=geany\n\
 X:^text/rtf$=libreoffice;soffice;ooffice\n\
 X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;vim;vi;mg;emacs;ed;nano;mili;leafpad;mousepad;featherpad;nedit;kate;gedit;pluma;io.elementary.code;liri-text;xed;atom;nota;gobby;kwrite;xedit\n\
 !X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;vim;vi;mg;emacs;ed;nano\n\
@@ -2290,7 +2289,7 @@ X:^application/.*(open|office)document.*=libreoffice;soffice;ooffice\n\
 \n\
 # Archives\n\
 # Note: 'ad' is CliFM's built-in archives utility (based on atool). Remove it if you\n\
-# prefer another application\n\
+# prefer another application.\n\
 X:^application/(zip|gzip|zstd|x-7z-compressed|x-xz|x-bzip*|x-tar|x-iso9660-image)=ad;xarchiver %%f &;lxqt-archiver %%f &;ark %%f &\n\
 !X:^application/(zip|gzip|zstd|x-7z-compressed|x-xz|x-bzip*|x-tar|x-iso9660-image)=ad\n\
 \n\
@@ -2314,7 +2313,7 @@ X:^font/.*=fontforge;fontpreview\n\
 # Torrent:\n\
 X:application/x-bittorrent=rtorrent;transimission-gtk;transmission-qt;deluge-gtk;ktorrent\n\
 \n\
-# Fallback to another resource opener as last resource\n\
+# Fallback to an external opener as last resource\n\
 .*=handlr open;mimeopen -n;rifle;mimeo;xdg-open;open;\n");
 
 	fclose(fp);
