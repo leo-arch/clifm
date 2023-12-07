@@ -2306,6 +2306,7 @@ X:^image/.*=sxiv;nsxiv;pqiv;gpicview;qview;qimgv;mirage;ristretto;eog;eom;xviewe
 # Video and audio\n\
 X:^video/.*=ffplay;mplayer;mplayer2;mpv;vlc;gmplayer;smplayer;celluloid;qmplayer2;haruna;totem\n\
 X:^audio/.*=ffplay -nodisp -autoexit;mplayer;mplayer2;mpv;vlc;gmplayer;smplayer;totem\n\
+!X:^audio/.*=ffplay -nodisp -autoexit %%f !EO;mplayer %%f !EO;mpv --no-terminal\n\
 \n\
 # Fonts\n\
 X:^font/.*=fontforge;fontpreview\n\

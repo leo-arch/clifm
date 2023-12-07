@@ -130,6 +130,7 @@ X:^image/.*=sxiv;nsxiv;pqiv;gpicview;qview;qimgv;mirage;ristretto;eog;eom;xviewe
 # Video and audio
 X:^video/.*=ffplay;mplayer;mplayer2;mpv;vlc;gmplayer;smplayer;celluloid;qmplayer2;haruna;totem
 X:^audio/.*=ffplay -nodisp -autoexit;mplayer;mplayer2;mpv;vlc;gmplayer;smplayer;totem
+!X:^audio/.*=ffplay -nodisp -autoexit %f !EO;mplayer %f !EO;mpv --no-terminal
 
 # Fonts
 X:^font/.*=fontforge;fontpreview
