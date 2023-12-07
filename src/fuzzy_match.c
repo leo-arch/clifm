@@ -80,8 +80,8 @@ utf8casechr(char *s, char *c)
 	return (char *)NULL;
 }
 
-/* Check whether the string S contains at least one UTF8 codepoint
- * Returns 1 if true or 0 if false */
+/* Check whether the string S contains at least one UTF8 codepoint.
+ * Returns 1 if true or 0 if false. */
 int
 contains_utf8(const char *s)
 {

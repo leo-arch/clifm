@@ -57,6 +57,7 @@
 #    mpv %f !E
 # Silence both (STDERR and STDOUT) and run in the background:
 #    mpv %f !EO &
+# For Ranger users, "!EO" is equivalent to "flag f" in rifle.conf
 
 # Environment variables could be used as well. Example:
 # X:text/plain=$EDITOR %f &;$VISUAL;nano;vi
