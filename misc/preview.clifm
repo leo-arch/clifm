@@ -3,15 +3,19 @@
                   #      CliFM's files previewer       #
                   ######################################
 
+#--------------------------------
+# Description
+#--------------------------------
+
 # Commented and blank lines are omitted.
 
 # It is recommended to edit this file setting your preferred applications
 # first: the previewing process will be smoother and faster this way.
 # You can even remove whatever applications you don't use.
 
-# For syntax details consult the mimelist.clifm file (via 'mm edit').
+# For syntax details consult the mimelist.clifm file (via 'mm edit' or F6).
 
-# Uncomment this line to use pistol (or any other previewing script)
+# Uncomment this line to use pistol (or any other previewing application):
 #.*=pistol
 
 # Uncomment and edit this line to use Ranger's scope script:
@@ -20,7 +24,8 @@
 # Image previews
 # 1. Uncomment the below lines to enable image previews for the specified file types.
 # 2. Copy the clifmrun and clifmimg scripts to somewhere in you PATH, say /usr/local/bin.
-# (You can find them in DATADIR/clifm/plugins, usually /usr/local/share/clifm/plugins).
+#    (You can find them in DATADIR/clifm/plugins, usually /usr/local/share/clifm/plugins).
+# 3. Run clifm via clifmrun (if using fzf 0.44 or later this is not necessary).
 # NOTE: You can edit clifmimg to change the way in which images are generated and displayed.
 #
 #X:^application/.*(officedocument|msword|ms-excel|opendocument).*=clifmimg doc;
@@ -37,41 +42,65 @@
 #X:N:.*\.otf$=clifmimg font;
 #X:font/.*=clifmimg font;
 
+#--------------------------------
 # Directories
+#--------------------------------
+
 inode/directory=exa -a --tree --level=1 --;eza -a --tree --level=1 --;lsd -A --tree --depth=1 --color=always;tree -a -L 1;ls -Ap --color=always --indicator-style=none;
 
+#--------------------------------
 # Text
+#--------------------------------
+
 ^text/rtf=catdoc --;
 N:.*\.json$=jq --color-output . ;python -m json.tool --;
 N:.*\.md$=glow -s dark --;mdcat --;
 ^text/html$=w3m -dump;lynx -dump --;elinks -dump;pandoc -s -t markdown --;
 ^text/.*=highlight -f --out-format=xterm256 --force --;bat --style=plain --color=always --;cat --;
 
+#--------------------------------
 # Office documents
+#--------------------------------
+
 N:.*\.xlsx$=xlsx2csv --;file -b --;
 N:.*\.(odt|ods|odp|sxw)$=odt2txt;pandoc -s -t markdown --;
 ^application/(.*wordprocessingml.document|.*epub+zip|x-fictionbook+xml)=pandoc -s -t markdown --;
 ^application/msword=catdoc --;file -b --;
 ^application/ms-excel=xls2csv --;file -b --;
 
+#--------------------------------
 # Archives
+#--------------------------------
+
 N:.*\.rar=unrar lt -p- --;
 application/zstd=file -b --;true
 application/(zip|gzip|x-7z-compressed|x-xz|x-bzip*|x-tar)=atool --list --;bsdtar --list --file;
 
+#--------------------------------
 # PDF
+#--------------------------------
+
 ^application/pdf$=pdftotext -l 10 -nopgbrk -q -- %f -;mutool draw -F txt -i --;exiftool;
 
+#--------------------------------
 # Image, video, and audio
+#--------------------------------
+
 ^image/vnd.djvu=djvutxt;exiftool;
 ^image/.*=exiftool;
 ^video/.*=mediainfo;exiftool;
 ^audio/.*=mediainfo;exiftool;
 
-# Torrent:
+#--------------------------------
+# Torrent
+#--------------------------------
+
 application/x-bittorrent=transmission-show --;
 
+#--------------------------------
 # Fallback
+#--------------------------------
+
 .*=file -b --;
 # Add true(1) to silence the 'no application found' warning
 #.*=file -b --;true;

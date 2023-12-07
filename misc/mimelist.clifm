@@ -3,6 +3,10 @@
                   #     CliFM's resource opener     #
                   ###################################
 
+#-----------------------------
+# Description
+#-----------------------------
+
 # Commented and blank lines are omitted.
 
 # The below settings cover the most common filetypes.
@@ -55,15 +59,19 @@
 #    mpv %f !EO &
 # For Ranger users, "!EO" is equivalent to "flag f" in rifle.conf
 
+# In the case of GUI apps, you most likely want this:
+#    cmd %f !EO &
+# However, bear in mind that this will hide error messages.
+
 # Environment variables can be used as well. Example:
 # X:text/plain=$EDITOR %f &;$VISUAL;nano;vi
 
 # Use Ranger's rifle (or whatever opener you prefer) to open all files
 #.*=rifle
 
-###########################
-#  File names/extensions  #
-###########################
+################################
+#  1. File names/extensions    #
+################################
 
 # Match a full file name
 #X:N:some_filename=cmd
@@ -74,63 +82,103 @@
 # Match files with extension 'ext'
 #X:N:.*\.ext$=cmd
 
+#-----------------------------
 # Clifm config files
+#-----------------------------
+
 X:N:(.*\.clifm$|clifmrc)=$EDITOR;$VISUAL;kak;micro;nvim;vim;vi;mg;emacs;ed;nano;mili;leafpad;mousepad;featherpad;gedit -s;kate -n;pluma --new-window
 !X:N:(.*\.clifm$|clifmrc)=$EDITOR;$VISUAL;kak;micro;nvim;vim;vi;mg;emacs;ed;nano
 
+#-----------------------------
 # Digital books
+#-----------------------------
+
 X:N:.*\.djvu$=djview;zathura;xreader;evince;atril
 X:N:.*\.(fb2|epub)$=mupdf;zathura;xreader;ebook-viewer;FBReader;foliate
 X:N:.*\.mobi$=ebook-viewer;FBReader;foliate
 X:N:.*\.(cbr|cbz|cb7|cbt|cba)$=mcomix;xreader;YACReader;qcomicbook;zathura;foliate
 
-##################
-#   MIME types   #
-##################
+################################
+# 2. MIME types                #
+################################
 
-# Directories - only for the open-with command (ow) and the --open command line switch
+#-----------------------------
+# Directories
+#-----------------------------
+# Only for the open-with command (ow) and the --open command line switch
 # In graphical environments directories will be opened in a new window
+
 X:inode/directory=xterm -e clifm %f &;xterm -e vifm %f &;pcmanfm %f &;thunar %f &;xterm -e ncdu %f &
 !X:inode/directory=vifm;ranger;nnn;ncdu
 
+#-----------------------------
 # Web content
+#-----------------------------
+
 X:^text/html$=$BROWSER;surf;vimprobable;vimprobable2;qutebrowser;dwb;jumanji;luakit;uzbl;uzbl-tabbed;uzbl-browser;uzbl-core;iceweasel;midori;opera;firefox;seamonkey;brave;chromium-browser;chromium;google-chrome;epiphany;konqueror;elinks;links2;links;lynx;w3m
 !X:^text/html$=$BROWSER;elinks;links2;links;lynx;w3m
 
+#-----------------------------
 # Text
+#-----------------------------
+
 X:^text/rtf$=libreoffice;soffice;ooffice
 X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;vim;vi;mg;emacs;ed;nano;mili;leafpad;mousepad;featherpad;nedit;kate;gedit;pluma;io.elementary.code;liri-text;xed;atom;nota;gobby;kwrite;xedit
 !X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;vim;vi;mg;emacs;ed;nano
 
+#-----------------------------
 # Office documents
+#-----------------------------
+
 ^application/.*(open|office)document\.spreadsheet.*=sc-im
 X:^application/.*(open|office)document.*=libreoffice;soffice;ooffice
 
+#-----------------------------
 # Archives
+#-----------------------------
 # Note: 'ad' is CliFM's built-in archives utility (based on atool). Remove it if you
 # prefer another application.
+
 X:^application/(zip|gzip|zstd|x-7z-compressed|x-xz|x-bzip*|x-tar|x-iso9660-image)=ad;xarchiver %f &;lxqt-archiver %f &;ark %f &
 !X:^application/(zip|gzip|zstd|x-7z-compressed|x-xz|x-bzip*|x-tar|x-iso9660-image)=ad
 
+#-----------------------------
 # PDF
+#-----------------------------
+
 X:.*/pdf$=mupdf;sioyek;llpp;lpdf;zathura;mupdf-x11;apvlv;xpdf;xreader;evince;atril;okular;epdfview;qpdfview
 
+#-----------------------------
 # Images
+#-----------------------------
+
 X:^image/gif$=animate;pqiv;sxiv -a;nsxiv -a
 X:^image/svg=display;inkscape
 X:^image/.*=sxiv;nsxiv;pqiv;gpicview;qview;qimgv;mirage;ristretto;eog;eom;xviewer;viewnior;nomacs;geeqie;gwenview;gthumb;gimp
 !X:^image/.*=fim;img2txt;cacaview;fbi;fbv
 
+#-----------------------------
 # Video and audio
+#-----------------------------
+
 X:^video/.*=ffplay;mplayer;mplayer2;mpv;vlc;gmplayer;smplayer;celluloid;qmplayer2;haruna;totem
 X:^audio/.*=ffplay -nodisp -autoexit;mplayer;mplayer2;mpv;vlc;gmplayer;smplayer;totem
 !X:^audio/.*=ffplay -nodisp -autoexit %f !EO;mplayer %f !EO;mpv --no-terminal
 
+#-----------------------------
 # Fonts
+#-----------------------------
+
 X:^font/.*=fontforge;fontpreview
 
-# Torrent:
+#-----------------------------
+# Torrent
+#-----------------------------
+
 X:application/x-bittorrent=rtorrent;transimission-gtk;transmission-qt;deluge-gtk;ktorrent
 
-# Fallback to another resource opener as last resource
+#-----------------------------
+# Fallback
+#-----------------------------
+# Let's fallback to an external opener as last resource
 .*=handlr open;mimeopen -n;rifle;mimeo;xdg-open;open;
