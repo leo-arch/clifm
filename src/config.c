@@ -2235,6 +2235,7 @@ create_mime_file_anew(char *file)
 #    mpv %%f !EO &\n\
 # or\n\
 #    mpv %%f !E !O &\n\
+# For Ranger users, \"!EO\" is equivalent to \"flag f\" in rifle.conf\n\
 \n\
 # Environment variables could be used as well. Example:\n\
 # X:text/plain=$EDITOR %%f &;$VISUAL;nano;vi\n\
