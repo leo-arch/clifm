@@ -780,7 +780,7 @@ create_kbinds_file(void)
 	int fd = 0;
 	FILE *fp = open_fwrite(kbinds_file, &fd);
 	if (!fp) {
-		err('w', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME, kbinds_file,
+		err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME, kbinds_file,
 			strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -1487,7 +1487,8 @@ create_main_config_file(char *file)
 	FILE *config_fp = open_fwrite(file, &fd);
 
 	if (!config_fp) {
-		xerror("%s: fopen: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
+		err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
+			file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -2797,7 +2798,7 @@ read_config(void)
 	int fd;
 	FILE *config_fp = open_fread(config_file, &fd);
 	if (!config_fp) {
-		err('e', PRINT_PROMPT, _("%s: fopen: '%s': %s. Using default "
+		err('e', PRINT_PROMPT, _("%s: '%s': %s. Using default "
 			"values.\n"), PROGRAM_NAME, config_file, strerror(errno));
 		return;
 	}

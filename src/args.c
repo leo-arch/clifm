@@ -718,9 +718,6 @@ set_alt_bm_file(char *file)
 	}
 
 	alt_bm_file = savestring(file, strlen(file));
-	err(ERR_NO_LOG, PRINT_PROMPT, _("%s: Loaded alternative "
-		"bookmarks file\n"), PROGRAM_NAME);
-
 	free(p);
 }
 
@@ -900,9 +897,6 @@ set_alt_trash_dir(char *file)
 	}
 
 	alt_trash_dir = savestring(file, strlen(file));
-	err(ERR_NO_LOG, PRINT_PROMPT, _("%s: Loaded alternative "
-		"trash directory\n"), PROGRAM_NAME);
-
 	free(trash_exp);
 }
 
@@ -916,9 +910,6 @@ set_alt_kbinds_file(char *file)
 	}
 
 	alt_kbinds_file = savestring(file, strlen(file));
-	err(ERR_NO_LOG, PRINT_PROMPT, _("%s: Loaded alternative "
-		"keybindings file\n"), PROGRAM_NAME);
-
 	free(kbinds_exp);
 }
 
@@ -933,9 +924,6 @@ set_alt_config_file(char *file)
 	}
 
 	alt_config_file = savestring(file, strlen(file));
-	err(ERR_NO_LOG, PRINT_PROMPT, _("%s: Loaded alternative "
-		"configuration file\n"), PROGRAM_NAME);
-
 	free(config_exp);
 }
 
