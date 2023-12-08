@@ -3422,12 +3422,12 @@ create_trash_dirs(void)
 		return;
 	}
 
-	char *cmd[] = {"mkdir", "-p", trash_files_dir, trash_info_dir, NULL};
-	int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
+	char *cmd[] = {"mkdir", "-p", "--", trash_files_dir, trash_info_dir, NULL};
+	int ret = launch_execv(cmd, FOREGROUND, E_NOSTDERR);
 
 	if (ret != EXIT_SUCCESS) {
 		trash_ok = 0;
-		err('w', PRINT_PROMPT, _("%s: mkdir: '%s': Error creating the trash "
+		err('w', PRINT_PROMPT, _("%s: '%s': Error creating the trash "
 			"directory (or one of its subdirectories: files/ and info/).\n"
 			"Try creating them manually and restart %s.\n"
 			"Ex: mkdir -p ~/.local/share/Trash/{files,info}\n"),
