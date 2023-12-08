@@ -162,8 +162,8 @@ X:^image/.*=sxiv;nsxiv;pqiv;gpicview;qview;qimgv;mirage;ristretto;eog;eom;xviewe
 #-----------------------------
 
 X:^video/.*=ffplay;mplayer;mplayer2;mpv;vlc;gmplayer;smplayer;celluloid;qmplayer2;haruna;totem
-X:^audio/.*=ffplay -nodisp -autoexit;mplayer;mplayer2;mpv;vlc;gmplayer;smplayer;totem
-!X:^audio/.*=ffplay -nodisp -autoexit %f !EO;mplayer %f !EO;mpv --no-terminal
+X:^audio/.*=ffplay -nodisp -autoexit -hide_banner;mplayer;mplayer2;mpv;vlc;gmplayer;smplayer;totem
+!X:^audio/.*=ffplay -nodisp -autoexit -hide_banner %f !EO;mplayer %f !EO;mpv --no-terminal
 
 #-----------------------------
 # Fonts
