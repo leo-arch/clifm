@@ -706,6 +706,18 @@ RUN:
 }
 #endif /* !_NO_LIRA */
 
+static int
+create_new_file(const char *name, const mode_t mode)
+{
+	errno = 0;
+	int fd = open(name, O_WRONLY | O_CREAT | O_EXCL, mode);
+	if (fd == -1)
+		return (-1);
+
+	close(fd);
+	return 0;
+}
+
 static void
 set_alt_bm_file(char *file)
 {
@@ -716,7 +728,7 @@ set_alt_bm_file(char *file)
 		file = p;
 	}
 
-	if (access(file, R_OK) == -1) {
+	if (access(file, R_OK) == -1 && create_new_file(file, 0600) == -1) {
 		err('e', PRINT_PROMPT, _("%s: %s: %s\n"
 			"Falling back to the default bookmarks file\n"),
 		    PROGRAM_NAME, file, strerror(errno));
@@ -906,7 +918,7 @@ set_alt_kbinds_file(char *file)
 		file = kbinds_exp;
 	}
 
-	if (access(file, R_OK) == -1) {
+	if (access(file, R_OK) == -1 && create_new_file(file, 0600) == -1) {
 		err('e', PRINT_PROMPT, _("%s: %s: %s\n"
 			"Falling back to the default keybindings file\n"),
 		    PROGRAM_NAME, file, strerror(errno));
@@ -929,7 +941,7 @@ set_alt_config_file(char *file)
 		file = config_exp;
 	}
 
-	if (access(file, R_OK) == -1) {
+	if (access(file, R_OK) == -1 && create_new_file(file, 0600) == -1) {
 		err('e', PRINT_PROMPT, _("%s: %s: %s\nFalling back to default\n"),
 			PROGRAM_NAME, file, strerror(errno));
 		xargs.config = -1;

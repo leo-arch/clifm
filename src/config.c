@@ -1393,8 +1393,6 @@ define_config_file_names(void)
 
 	if (alt_kbinds_file) {
 		kbinds_file = savestring(alt_kbinds_file, strlen(alt_kbinds_file));
-		free(alt_kbinds_file);
-		alt_kbinds_file = (char *)NULL;
 	} else {
 		/* Keybindings per user, not per profile. */
 		tmp_len = config_gral_len + 19;
@@ -1420,8 +1418,6 @@ define_config_file_names(void)
 		snprintf(bm_file, tmp_len, "%s/bookmarks.clifm", config_dir);
 	} else {
 		bm_file = savestring(alt_bm_file, strlen(alt_bm_file));
-		free(alt_bm_file);
-		alt_bm_file = (char *)NULL;
 	}
 
 	tmp_len = config_dir_len + 15;
@@ -1439,8 +1435,6 @@ define_config_file_names(void)
 		snprintf(config_file, tmp_len, "%s/%src", config_dir, PROGRAM_NAME);
 	} else {
 		config_file = savestring(alt_config_file, strlen(alt_config_file));
-		free(alt_config_file);
-		alt_config_file = (char *)NULL;
 	}
 
 	tmp_len = config_dir_len + 15;
@@ -3471,7 +3465,7 @@ set_trash_dirs(void)
 #endif /* _NO_TRASH */
 
 /* Set up CliFM directories and config files. Load the user's
- * configuration from clifmrc */
+ * configuration from clifmrc. */
 void
 init_config(void)
 {
