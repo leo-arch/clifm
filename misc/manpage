@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Oct 25, 2023" "clifm 1.15" "CLIFM Manual"
+.TH "CLIFM" "1" "Dec 8, 2023" "clifm 1.15.6" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -163,6 +163,9 @@ in stealth mode (also known as incognito or private mode) no trace is left on th
 .TP
 \fB\-t\fR, \fB\-\-disk\-usage\-analyzer\fR
 run in disk usage analyzer mode. Equivalent to \fI\-\-sort=size \-\-long\-view \-\-full\-dir\-size \-\-no\-dirs\-first\fR. The total size of the current directory, plus the name and size of the largest file will be printed after the list of files. Press \fICtrl\-Alt\-i\fR (or \fIAlt\-TAB\fR) to toggle this mode on/off in\-place.
+.TP
+\fB\-T\fR, \fB\-\-trash\-dir\fR=\fI\,DIR\/\fR
+use \fIDIR\fR as an alternative trash directory
 .TP
 \fB\-v\fR, \fB\-\-version\fR
 show version details and exit
