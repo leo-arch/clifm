@@ -1777,6 +1777,7 @@ extern char
 
 	*actions_file,
 	*alt_config_dir,
+	*alt_trash_dir,
 	*alt_bm_file,
 	*alt_config_file,
 	*alt_kbinds_file,

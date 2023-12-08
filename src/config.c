@@ -3441,14 +3441,21 @@ create_trash_dirs(void)
 static void
 set_trash_dirs(void)
 {
-	if (!user.home) {
-		trash_ok = 0;
-		return;
-	}
+	size_t len = 0;
 
-	size_t len = user.home_len + 20;
-	trash_dir = (char *)xnmalloc(len, sizeof(char));
-	snprintf(trash_dir, len, "%s/.local/share/Trash", user.home);
+	if (alt_trash_dir) {
+		len = strlen(alt_trash_dir);
+		trash_dir = savestring(alt_trash_dir, len);
+	} else {
+		if (!user.home) {
+			trash_ok = 0;
+			return;
+		}
+
+		len = user.home_len + 20;
+		trash_dir = (char *)xnmalloc(len, sizeof(char));
+		snprintf(trash_dir, len, "%s/.local/share/Trash", user.home);
+	}
 
 	size_t trash_len = strlen(trash_dir);
 

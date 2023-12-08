@@ -63,12 +63,12 @@
 #endif /* CLIFM_DATADIR */
 
 #ifdef _BE_POSIX
-# define OPTSTRING ":aAb:B:c:CdDeEfFgGhHij:J:k:lLmMnNo:O:p:P:qQrRsSt:TuvV:w:WxXyYz:Z"
+# define OPTSTRING ":aAb:B:c:CdDeEfFgGhHiI:j:J:k:lLmMnNo:O:p:P:qQrRsSt:TuvV:w:WxXyYz:Z"
 #else
 # ifdef RUN_CMD
-#  define OPTSTRING "+:aAb:c:C:D:eEfFgGhHiIk:lLmoOp:P:rsStvw:xyz:"
+#  define OPTSTRING "+:aAb:c:C:D:eEfFgGhHiIk:lLmoOp:P:rsStT:vw:xyz:"
 # else
-#  define OPTSTRING "+:aAb:c:D:eEfFgGhHiIk:lLmoOp:P:rsStvw:xyz:"
+#  define OPTSTRING "+:aAb:c:D:eEfFgGhHiIk:lLmoOp:P:rsStT:vw:xyz:"
 # endif /* RUN_CMD */
 #endif /* _BE_POSIX */
 
@@ -184,6 +184,7 @@ static const struct option longopts[] = {
 	{"splash", no_argument, 0, 's'},
 	{"stealth-mode", no_argument, 0, 'S'},
 	{"disk-usage-analyzer", no_argument, 0, 't'},
+	{"trash-dir", required_argument, 0, 'T'},
 	{"version", no_argument, 0, 'v'},
 	{"workspace", required_argument, 0, 'w'},
 	{"no-ext-cmds", no_argument, 0, 'x'},
@@ -890,6 +891,22 @@ set_shotgun_file(char *opt)
 #endif /* !_BE_POSIX */
 
 static void
+set_alt_trash_dir(char *file)
+{
+	char *trash_exp = (char *)NULL;
+	if (*file == '~') {
+		trash_exp = tilde_expand(file);
+		file = trash_exp;
+	}
+
+	alt_trash_dir = savestring(file, strlen(file));
+	err(ERR_NO_LOG, PRINT_PROMPT, _("%s: Loaded alternative "
+		"trash directory\n"), PROGRAM_NAME);
+
+	free(trash_exp);
+}
+
+static void
 set_alt_kbinds_file(char *file)
 {
 	char *kbinds_exp = (char *)NULL;
@@ -1275,6 +1292,7 @@ parse_cmdline_args(const int argc, char **argv)
 			fprintf(stderr, "%s: icons: %s\n", PROGRAM_NAME, _(NOT_AVAILABLE));
 			exit(EXIT_FAILURE);
 #endif /* !_NO_ICONS */
+		case 'i': set_alt_trash_dir(optarg); break;
 		case 'j': set_stat(optc, optarg); break;
 		case 'J': set_stat(optc, optarg); break;
 		case 'k': set_alt_kbinds_file(optarg); break;
@@ -1429,6 +1447,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case 's': conf.splash_screen = xargs.splash = 1; break;
 		case 'S': xargs.stealth_mode = 1; break;
 		case 't': xargs.disk_usage_analyzer = 1; break;
+		case 'T': set_alt_trash_dir(optarg); break;
 		case 'v': print_version(); /* noreturn */
 		case 'w': set_workspace(optarg); break;
 		case 'x': conf.ext_cmd_ok = xargs.ext = 0; break;

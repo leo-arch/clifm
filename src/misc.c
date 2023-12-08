@@ -1483,6 +1483,7 @@ free_stuff(void)
 	int i = 0;
 
 	free(alt_config_dir);
+	free(alt_trash_dir);
 	free(alt_config_file);
 	free(alt_bm_file);
 	free(alt_kbinds_file);

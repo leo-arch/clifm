@@ -1241,6 +1241,7 @@ Page Down: Advance one page\nq: Stop pagging\n"
 \n -h       Print this help and exit\
 \n -H       Disable syntax-highlighting\
 \n -i       Enable icons\
+\n -I DIR   Set an alternative trash directory\
 \n -j FILE  Run the 'p' command on FILE and exit\
 \n -J FILE  Run the 'pp' command on FILE and exit\
 \n -k FILE  Set an alternative keybindings file\
@@ -1304,6 +1305,7 @@ on an empty line\
 \n  -s, --splash\t\t\t Enable the splash screen\
 \n  -S, --stealth-mode\t\t Run in incognito/private mode\
 \n  -t, --disk-usage-analyzer\t Run in disk usage analyzer mode\
+\n  -T, --trash-dir=DIR\t\t Set an alternative trash directory\
 \n  -v, --version\t\t\t Show version details and exit\
 \n  -w, --workspace=NUM\t\t Start in workspace NUM\
 \n  -x, --no-ext-cmds\t\t Disallow the use of external commands\
