@@ -176,16 +176,19 @@ sort_by_size(struct fileinfo *pa, struct fileinfo *pb)
 }
 
 static inline int
-sort_by_extension(const char *n1, const char *n2)
+sort_by_extension(const char *n1, const char *n2, const int n1dir,
+	const int n2dir)
 {
 	int ret = 0;
 	char *aext = (char *)NULL, *bext = (char *)NULL, *val;
 
-	val = strrchr(n1, '.');
+	/* If the entry is a directory, we don't take it as having an extension,
+	 * even if it has a dot in its name. */
+	val = n1dir == 0 ? strrchr(n1, '.') : (char *)NULL;
 	if (val && val != n1)
 		aext = val + 1;
 
-	val = strrchr(n2, '.');
+	val = n2dir == 0 ? strrchr(n2, '.') : (char *)NULL;
 	if (val && val != n2)
 		bext = val + 1;
 
@@ -267,7 +270,7 @@ sort_dirs(const int a, const int b)
 	if (b != a) {
 		if (b)
 			return 1;
-		return -1;
+		return (-1);
 	}
 
 	return 0;
@@ -296,7 +299,8 @@ entrycmp(const void *a, const void *b)
 	case SCTIME: /* fallthrough */
 	case SMTIME: ret = sort_by_time(pa->time, pb->time); break;
 	case SVER: ret = xstrverscmp(pa->name, pb->name); break;
-	case SEXT: ret = sort_by_extension(pa->name, pb->name); break;
+	case SEXT:
+		ret = sort_by_extension(pa->name, pb->name, pa->dir, pb->dir); break;
 	case SINO: ret = sort_by_inode(pa->inode, pb->inode); break;
 	case SOWN: ret = sort_by_owner(pa->uid, pb->uid); break;
 	case SGRP: ret = sort_by_group(pa->gid, pb->gid); break;
@@ -419,7 +423,7 @@ re_sort_files_list(void)
 		return EXIT_SUCCESS;
 
 	/* sort_switch just tells list_dir() to print a line with the current
-	 * sorting order at the end of the files list */
+	 * sorting order at the end of the files list. */
 	sort_switch = 1;
 	free_dirlist();
 	int ret = list_dir();
