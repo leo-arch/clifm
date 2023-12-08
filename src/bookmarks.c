@@ -429,7 +429,7 @@ static int
 check_bm_name(const char *name, const int add)
 {
 	if (bm_n == 0 || !bookmarks)
-		return 1;
+		return (-1);
 
 	if (add == 1 && name_is_reserved_keyword(name) == 1)
 		return 0;
@@ -453,7 +453,7 @@ static int
 check_bm_shortcut(const char *shortcut, const int add)
 {
 	if (bm_n == 0 || !bookmarks)
-		return 1;
+		return (-1);
 
 	if (add == 1 && name_is_reserved_keyword(shortcut) == 1)
 		return 0;
