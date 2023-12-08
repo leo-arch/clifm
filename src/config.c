@@ -749,7 +749,7 @@ import_from_data_dir(const char *src_filename, char *dest)
 
 	mode_t old_umask = umask(0177);
 	char *cmd[] = {"cp", "--", sys_file, dest, NULL};
-	int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
+	int ret = launch_execv(cmd, FOREGROUND, E_NOSTDERR);
 	umask(old_umask);
 
 	if (ret == EXIT_SUCCESS) {
@@ -780,8 +780,8 @@ create_kbinds_file(void)
 	int fd = 0;
 	FILE *fp = open_fwrite(kbinds_file, &fd);
 	if (!fp) {
-		err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME, kbinds_file,
-			strerror(errno));
+		err('e', PRINT_PROMPT, "%s: Cannot create keybindings file "
+			"'%s': %s\n", PROGRAM_NAME, kbinds_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -1485,8 +1485,9 @@ create_main_config_file(char *file)
 	FILE *config_fp = open_fwrite(file, &fd);
 
 	if (!config_fp) {
-		err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
-			file, strerror(errno));
+		err('e', PRINT_PROMPT, "%s: Cannot create configuration "
+			"file '%s': %s\nFalling back to default values\n",
+			PROGRAM_NAME, file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -2048,12 +2049,12 @@ create_main_config_dir(void)
 {
 	/* Use the mkdir(1) to let it handle parent directories. */
 	char *tmp_cmd[] = {"mkdir", "-pm700", "--", config_dir, NULL};
-	if (launch_execv(tmp_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
+	if (launch_execv(tmp_cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS) {
 		config_ok = 0;
-		err('e', PRINT_PROMPT, _("%s: mkdir: '%s': Error creating "
-			"configuration directory. Bookmarks, commands logs, and "
+		err('e', PRINT_PROMPT, _("%s: Cannot create configuration "
+			"directory '%s': Bookmarks, commands logs, and "
 			"command history are disabled. Program messages won't be "
-			"persistent. Using default options\n"),
+			"persistent. Using default options.\n"),
 			PROGRAM_NAME, config_dir);
 		return EXIT_FAILURE;
 	}
@@ -2361,8 +2362,8 @@ create_bm_file(void)
 	int fd = 0;
 	FILE *fp = open_fwrite(bm_file, &fd);
 	if (!fp) {
-		err('e', PRINT_PROMPT, "bookmarks: '%s': %s\n", bm_file,
-			strerror(errno));
+		err('e', PRINT_PROMPT, "%s: Cannot create bookmarks file "
+			"'%s': %s\n", PROGRAM_NAME, bm_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 

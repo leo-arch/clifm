@@ -808,11 +808,11 @@ set_alt_config_dir(char *dir)
 	struct stat attr;
 
 	if (stat(dir, &attr) == -1) {
-		char *tmp_cmd[] = {"mkdir", "-p", dir, NULL};
+		char *tmp_cmd[] = {"mkdir", "-p", "--", dir, NULL};
 		int ret = launch_execv(tmp_cmd, FOREGROUND, E_NOSTDERR);
 		if (ret != EXIT_SUCCESS) {
-			err('e', PRINT_PROMPT, _("%s: %s: Cannot create directory "
-				"(error %d)\nFalling back to default configuration "
+			err('e', PRINT_PROMPT, _("%s: Cannot create directory '%s' "
+				"(error %d)\nFalling back to the default configuration "
 				"directory\n"), PROGRAM_NAME, dir, ret);
 			dir_ok = 0;
 		}
@@ -820,8 +820,8 @@ set_alt_config_dir(char *dir)
 
 	if (access(dir, W_OK) == -1) {
 		if (dir_ok == 1) {
-			err('e', PRINT_PROMPT, _("%s: %s: %s\n"
-				"Falling back to default configuration directory\n"),
+			err('e', PRINT_PROMPT, _("%s: '%s': %s\n"
+				"Falling back to the default configuration directory\n"),
 				PROGRAM_NAME, dir, strerror(errno));
 		}
 	} else {
