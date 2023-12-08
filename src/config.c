@@ -532,7 +532,7 @@ edit_function(char **args)
 
 	/* If, for some reason (like someone erasing the file while the program
 	 * is running) clifmrc doesn't exist, recreate the configuration file.
-	 * Then run 'stat' again to reread the attributes of the file */
+	 * Then run 'stat' again to reread the attributes of the file. */
 	if (stat(config_file, &attr) == -1) {
 		create_main_config_file(config_file);
 		stat(config_file, &attr);
@@ -951,7 +951,7 @@ create_preview_file(void)
 	int fd = 0;
 	FILE *fp = open_fwrite(file, &fd);
 	if (!fp) {
-		err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, file,
+		err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME, file,
 			strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -1044,7 +1044,7 @@ create_actions_file(char *file)
 	int fd = 0;
 	FILE *fp = open_fwrite(file, &fd);
 	if (!fp) {
-		err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, file,
+		err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME, file,
 			strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -1159,7 +1159,7 @@ create_tmp_rootdir(void)
 	if (from_env == 0) /* Error creating P_tmpdir */
 		goto END;
 
-	err('w', PRINT_PROMPT, _("%s: %s: %s.\n"
+	err('w', PRINT_PROMPT, _("%s: '%s': %s.\n"
 		"Cannot create temporary directory. Falling back to '%s'.\n"),
 		PROGRAM_NAME, tmp_root_dir, strerror(ret), P_tmpdir);
 
@@ -1238,14 +1238,14 @@ create_tmp_files(void)
 	if (stat(tmp_dir, &attr) == -1
 	&& xmkdir(tmp_dir, S_IRWXU) == EXIT_FAILURE) {
 		selfile_ok = 0;
-		err('e', PRINT_PROMPT, _("%s: %s: %s\n"), PROGRAM_NAME,
+		err('e', PRINT_PROMPT, _("%s: '%s': %s\n"), PROGRAM_NAME,
 			tmp_dir, strerror(errno));
 	}
 
 	/* If the directory exists, check if it is writable. */
 	else if (access(tmp_dir, W_OK) == -1 && !sel_file) {
 		selfile_ok = 0;
-		err('w', PRINT_PROMPT, "%s: %s: Directory not writable. Selected "
+		err('w', PRINT_PROMPT, "%s: '%s': Directory not writable. Selected "
 			"files will be lost after program exit\n",
 			PROGRAM_NAME, tmp_dir);
 	}
@@ -1262,8 +1262,6 @@ set_main_config_dir(const int secure_mode)
 {
 	if (alt_config_dir) {
 		config_dir_gral = savestring(alt_config_dir, strlen(alt_config_dir));
-//		free(alt_config_dir);
-//		alt_config_dir = (char *)NULL;
 		return;
 	}
 
@@ -1492,7 +1490,6 @@ create_main_config_file(char *file)
 		return EXIT_FAILURE;
 	}
 
-	/* Do not translate anything in the config file */
 	fprintf(config_fp,
 
 "\t\t###########################################\n\
@@ -2070,7 +2067,7 @@ create_profile_file(void)
 	int fd = 0;
 	FILE *profile_fp = open_fwrite(profile_file, &fd);
 	if (!profile_fp) {
-		err('e', PRINT_PROMPT, "%s: fopen: '%s': %s\n", PROGRAM_NAME,
+		err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
 		    profile_file, strerror(errno));
 	} else {
 		fprintf(profile_fp, _("# This is %s's profile file\n#\n"
@@ -2168,7 +2165,7 @@ create_mime_file_anew(char *file)
 	int fd;
 	FILE *fp = open_fwrite(file, &fd);
 	if (!fp) {
-		err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, file,
+		err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME, file,
 			strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -2709,7 +2706,7 @@ set_starting_path(char *line)
 		return;
 	}
 
-	err('w', PRINT_PROMPT, _("%s: chdir: %s: %s. Using the "
+	err('w', PRINT_PROMPT, _("%s: chdir: '%s': %s. Using the "
 		"current working directory as starting path\n"),
 		PROGRAM_NAME, tmp, strerror(errno));
 }
@@ -3417,7 +3414,7 @@ create_trash_dirs(void)
 		return;
 
 	if (xargs.stealth_mode == 1) {
-		err('w', PRINT_PROMPT, _("%s: %s: %s. Trash function disabled. "
+		err('w', PRINT_PROMPT, _("%s: '%s': %s. Trash function disabled. "
 			"If needed, create the directories manually and restart %s.\n"
 			"Ex: mkdir -p ~/.local/share/Trash/{files,info}\n"),
 			PROGRAM_NAME, trash_dir, strerror(errno), PROGRAM_NAME);
@@ -3430,7 +3427,7 @@ create_trash_dirs(void)
 
 	if (ret != EXIT_SUCCESS) {
 		trash_ok = 0;
-		err('w', PRINT_PROMPT, _("%s: mkdir: %s: Error creating the trash "
+		err('w', PRINT_PROMPT, _("%s: mkdir: '%s': Error creating the trash "
 			"directory (or one of its subdirectories: files/ and info/).\n"
 			"Try creating them manually and restart %s.\n"
 			"Ex: mkdir -p ~/.local/share/Trash/{files,info}\n"),
