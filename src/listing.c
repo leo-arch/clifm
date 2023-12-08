@@ -1828,6 +1828,13 @@ init_fileinfo(const filesn_t n)
 	file_info[n].linkn = 1;
 }
 
+static void
+print_excluded_files(const filesn_t excluded)
+{
+	print_reload_msg(_("Showing %jd/%jd files\n"),
+		(intmax_t)files, (intmax_t)(files + excluded));
+}
+
 /* List files in the current working directory (global variable 'path').
  * Unlike list_dir(), however, this function uses no color and runs
  * neither stat() nor count_dir(), which makes it quite faster. Return
@@ -1900,8 +1907,10 @@ list_dir_light(void)
 
 		if (*ename == '.') {
 			++stats.hidden;
-			if (conf.show_hidden == 0)
+			if (conf.show_hidden == 0) {
+				++excluded_files;
 				continue;
+			}
 		}
 
 #ifndef _DIRENT_HAVE_D_TYPE
@@ -1912,7 +1921,10 @@ list_dir_light(void)
 #else
 		if (conf.only_dirs == 1 && ent->d_type != DT_DIR)
 #endif /* !_DIRENT_HAVE_D_TYPE */
+		{
+			++excluded_files;
 			continue;
+		}
 
 		/* Filter files according to file type */
 		if (filter.str && filter.type == FILTER_FILE_TYPE
@@ -2113,7 +2125,7 @@ END:
 	if (virtual_dir == 1)
 		print_reload_msg(_("Virtual directory\n"));
 	if (excluded_files > 0)
-		printf(_("Excluded files: %zd\n"), excluded_files);
+		print_excluded_files(excluded_files);
 
 	if (xargs.disk_usage_analyzer == 1 && conf.long_view == 1
 	&& conf.full_dir_size == 1) {
@@ -2347,8 +2359,10 @@ list_dir(void)
 
 		if (*ename == '.') {
 			++stats.hidden;
-			if (conf.show_hidden == 0)
+			if (conf.show_hidden == 0) {
+				++excluded_files;
 				continue;
+			}
 		}
 
 		init_fileinfo(n);
@@ -2381,7 +2395,10 @@ list_dir(void)
 		if (conf.only_dirs == 1 && stat_ok == 1 && !S_ISDIR(attr.st_mode)
 		&& (!S_ISLNK(attr.st_mode) || get_link_ref(ename) != S_IFDIR))
 #endif /* _DIRENT_HAVE_D_TYPE */
+		{
+			++excluded_files;
 			continue;
+		}
 
 		if (count > ENTRY_N) {
 			count = 0;
@@ -2834,7 +2851,7 @@ END:
 	if (virtual_dir == 1)
 		print_reload_msg(_("Virtual directory\n"));
 	if (excluded_files > 0)
-		printf(_("Excluded files: %zd\n"), excluded_files);
+		print_excluded_files(excluded_files);
 
 	if (xargs.disk_usage_analyzer == 1 && conf.long_view == 1
 	&& conf.full_dir_size == 1) {
