@@ -1636,7 +1636,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case ':':
 			err_arg_required(argv[optind - 1]); /* noreturn */
 		case '?':
-			err_invalid_opt(argv[optind - 1]); /* noreturn */
+			err_invalid_opt(argv[optind] ? argv[optind] : argv[optind - 1]); /* noreturn */
 
 		default: break;
 		}

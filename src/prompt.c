@@ -738,7 +738,7 @@ ADD_STRING:
 #endif /* !__HAIKU__ && !__OpenBSD__ && !__ANDROID__ */
 
 			size_t new_len = result_len + 2
-							+ (wrong_cmd ? (MAX_COLOR + 6) : 0);
+				+ (wrong_cmd ? (MAX_COLOR + 6) : 0);
 			result = (char *)xnrealloc(result, new_len, sizeof(char));
 			result[result_len] = (char)c;
 			result_len++;
