@@ -94,7 +94,7 @@ is_file_in_cwd(char *name)
 	if (strncmp(rpath, cwd, cwd_len) != 0)
 		return 0;
 
-	if (strchr(rpath + cwd_len + 1, '/'))
+	if (rpath_len > cwd_len && strchr(rpath + cwd_len + 1, '/'))
 		return 0;
 
 	return 1;
