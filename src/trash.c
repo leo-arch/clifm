@@ -48,11 +48,11 @@ count_trashed_files(void)
 {
 	size_t n = 0;
 	if (trash_ok == 1 && trash_files_dir) {
-		n = (size_t)count_dir(trash_files_dir, NO_CPOP);
-		if (n <= 2)
+		filesn_t ret = count_dir(trash_files_dir, NO_CPOP);
+		if (ret <= 2)
 			n = 0;
 		else
-			n -= 2;
+			n = (size_t)ret - 2;
 	}
 
 	return n;
@@ -1035,10 +1035,11 @@ untrash_function(char **comm)
 	free(trash_files);
 
 	/* If some trashed file still remains, reload the undel screen */
-	trash_n = (size_t)count_dir(trash_files_dir, NO_CPOP);
-
-	if (trash_n <= 2)
+	filesn_t n = count_dir(trash_files_dir, NO_CPOP);
+	if (n <= 2)
 		trash_n = 0;
+	else
+		trash_n = (size_t)n;
 
 	if (trash_n)
 		untrash_function(comm);
