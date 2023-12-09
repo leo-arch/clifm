@@ -710,6 +710,9 @@ RUN:
 static void
 set_alt_bm_file(char *file)
 {
+	if (!file || !*file || *file == '-')
+		err_arg_required("-b"); /* noreturn */
+
 	char *p = (char *)NULL;
 
 	if (*file == '~') {
@@ -797,6 +800,9 @@ set_bell_style(const char *opt)
 static void
 set_alt_config_dir(char *dir)
 {
+	if (!dir || !*dir || *dir == '-')
+		err_arg_required("--config-dir"); /* noreturn */
+
 	char *dir_exp = (char *)NULL;
 
 	if (*dir == '~') {
@@ -890,7 +896,15 @@ set_shotgun_file(char *opt)
 static void
 set_alt_trash_dir(char *file)
 {
+	if (!file || !*file || *file == '-')
+#ifndef _BE_POSIX
+		err_arg_required("-T"); /* noreturn */
+#else
+		err_arg_required("-i"); /* noreturn */
+#endif
+
 	char *trash_exp = (char *)NULL;
+
 	if (*file == '~') {
 		trash_exp = tilde_expand(file);
 		file = trash_exp;
@@ -903,7 +917,11 @@ set_alt_trash_dir(char *file)
 static void
 set_alt_kbinds_file(char *file)
 {
+	if (!file || !*file || *file == '-')
+		err_arg_required("-k"); /* noreturn */
+
 	char *kbinds_exp = (char *)NULL;
+
 	if (*file == '~') {
 		kbinds_exp = tilde_expand(file);
 		file = kbinds_exp;
@@ -916,6 +934,9 @@ set_alt_kbinds_file(char *file)
 static void
 set_alt_config_file(char *file)
 {
+	if (!file || !*file || *file == '-')
+		err_arg_required("-c"); /* noreturn */
+
 	char *config_exp = (char *)NULL;
 
 	if (*file == '~') {
