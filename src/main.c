@@ -1013,9 +1013,11 @@ static inline void
 init_trash(void)
 {
 	if (trash_ok) {
-		trash_n = (size_t)count_dir(trash_files_dir, NO_CPOP);
-		if (trash_n <= 2)
+		filesn_t ret = count_dir(trash_files_dir, NO_CPOP);
+		if (ret <= 2)
 			trash_n = 0;
+		else
+			trash_n = (size_t)ret;
 	}
 }
 #endif /* _NO_TRASH */
