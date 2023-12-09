@@ -3535,8 +3535,7 @@ init_config(void)
 #ifndef CLIFM_SUCKLESS
 	cschemes_n = get_colorschemes();
 
-	if (config_ok == 1)
-		read_config();
+	read_config();
 #else
 	xstrsncpy(div_line, DEF_DIV_LINE, sizeof(div_line));
 #endif /* !CLIFM_SUCKLESS */
