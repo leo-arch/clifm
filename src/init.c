@@ -1268,7 +1268,7 @@ reset_remotes_values(const size_t i)
 int
 load_remotes(void)
 {
-	if (!remotes_file || !*remotes_file)
+	if (!remotes_file || !*remotes_file || config_ok == 0)
 		return EXIT_FAILURE;
 
 	int fd;

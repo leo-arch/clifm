@@ -277,8 +277,10 @@ remotes_unmount(char *name)
 static int
 remotes_edit(char *app)
 {
-	if (!remotes_file)
+	if (!remotes_file) {
+		xerror(_("net: Remotes file is undefined\n"));
 		return EXIT_FAILURE;
+	}
 
 	struct stat attr;
 	if (stat(remotes_file, &attr) == -1) {

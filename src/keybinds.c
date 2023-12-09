@@ -99,6 +99,11 @@ kbinds_reset(void)
 	int exit_status = EXIT_SUCCESS;
 	struct stat file_attrib;
 
+	if (!kbinds_file) {
+		xerror(_("kb: No keybindings file found\n"));
+		return EXIT_FAILURE;
+	}
+
 	if (stat(kbinds_file, &file_attrib) == -1) {
 		exit_status = create_kbinds_file();
 	} else {
@@ -124,8 +129,10 @@ kbinds_edit(char *app)
 		return EXIT_SUCCESS;
 	}
 
-	if (!kbinds_file)
+	if (!kbinds_file) {
+		xerror(_("kb: No keybindings file found\n"));
 		return EXIT_FAILURE;
+	}
 
 	struct stat attr;
 	if (stat(kbinds_file, &attr) == -1) {

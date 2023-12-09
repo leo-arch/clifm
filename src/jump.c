@@ -327,8 +327,10 @@ save_jumpdb(void)
 int
 edit_jumpdb(char *app)
 {
-	if (config_ok == 0 || !config_dir)
+	if (config_ok == 0 || !config_dir) {
+		xerror(_("je: Configuration directory not found\n"));
 		return EXIT_FAILURE;
+	}
 
 	save_jumpdb();
 

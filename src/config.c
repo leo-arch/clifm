@@ -951,8 +951,8 @@ create_preview_file(void)
 	int fd = 0;
 	FILE *fp = open_fwrite(file, &fd);
 	if (!fp) {
-		err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME, file,
-			strerror(errno));
+		err('e', PRINT_PROMPT, "%s: Cannot create preview file "
+			"'%s': %s\n", PROGRAM_NAME, file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -1044,8 +1044,8 @@ create_actions_file(char *file)
 	int fd = 0;
 	FILE *fp = open_fwrite(file, &fd);
 	if (!fp) {
-		err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME, file,
-			strerror(errno));
+		err('e', PRINT_PROMPT, "%s: Cannot create actions file "
+			"'%s': %s\n", PROGRAM_NAME, file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -1238,8 +1238,8 @@ create_tmp_files(void)
 	if (stat(tmp_dir, &attr) == -1
 	&& xmkdir(tmp_dir, S_IRWXU) == EXIT_FAILURE) {
 		selfile_ok = 0;
-		err('e', PRINT_PROMPT, _("%s: '%s': %s\n"), PROGRAM_NAME,
-			tmp_dir, strerror(errno));
+		err('e', PRINT_PROMPT, _("%s: Cannot create temporary directory "
+			"'%s': %s\n"), PROGRAM_NAME, tmp_dir, strerror(errno));
 	}
 
 	/* If the directory exists, check if it is writable. */
@@ -1938,8 +1938,8 @@ create_def_color_scheme(void)
 	int fd;
 	FILE *fp = open_fwrite(cscheme_file, &fd);
 	if (!fp) {
-		err('w', PRINT_PROMPT, "%s: Error creating default color scheme "
-			"file: %s\n", PROGRAM_NAME, strerror(errno));
+		err('w', PRINT_PROMPT, "%s: Cannot create default color scheme "
+			"file: '%s' : %s\n", PROGRAM_NAME, cscheme_file, strerror(errno));
 		return;
 	}
 
@@ -2017,8 +2017,8 @@ create_remotes_file(void)
 	int fd = 0;
 	FILE *fp = open_fwrite(remotes_file, &fd);
 	if (!fp) {
-		err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
-		    remotes_file, strerror(errno));
+		err('e', PRINT_PROMPT, "%s: Cannot create remotes file "
+			"'%s': %s\n", PROGRAM_NAME, remotes_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -2054,7 +2054,7 @@ create_main_config_dir(void)
 		err('e', PRINT_PROMPT, _("%s: Cannot create configuration "
 			"directory '%s': Bookmarks, commands logs, and "
 			"command history are disabled. Program messages won't be "
-			"persistent. Using default options.\n"),
+			"persistent. Falling back to default options.\n"),
 			PROGRAM_NAME, config_dir);
 		return EXIT_FAILURE;
 	}
@@ -2068,8 +2068,8 @@ create_profile_file(void)
 	int fd = 0;
 	FILE *profile_fp = open_fwrite(profile_file, &fd);
 	if (!profile_fp) {
-		err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
-		    profile_file, strerror(errno));
+		err('e', PRINT_PROMPT, "%s: Cannot create profile file "
+			"'%s': %s\n", PROGRAM_NAME, profile_file, strerror(errno));
 	} else {
 		fprintf(profile_fp, _("# This is %s's profile file\n#\n"
 			"# Write here the commands you want to be executed at startup\n"
@@ -2093,15 +2093,17 @@ create_config_files(void)
 
 	/* If the config directory doesn't exist, create it. */
 	if (stat(config_dir, &attr) == -1
-	&& create_main_config_dir() == EXIT_FAILURE)
+	&& create_main_config_dir() == EXIT_FAILURE) {
+		config_ok = 0;
 		return;
+	}
 
 	/* If it exists, check it is writable */
-	else if (access(config_dir, W_OK) == -1) {
+	if (access(config_dir, W_OK) == -1) {
 		config_ok = 0;
 		err('e', PRINT_PROMPT, _("%s: '%s': Directory not writable. Bookmarks, "
 			"commands logs, and commands history are disabled. Program messages "
-			"won't be persistent. Using default options\n"),
+			"won't be persistent. Falling back to default options.\n"),
 		    PROGRAM_NAME, config_dir);
 		return;
 	}
@@ -2111,7 +2113,7 @@ create_config_files(void)
 				 * #####################*/
 
 	if (stat(tags_dir, &attr) == -1 && xmkdir(tags_dir, S_IRWXU) == EXIT_FAILURE)
-		err('w', PRINT_PROMPT, _("%s: %s: Error creating tags directory. "
+		err('w', PRINT_PROMPT, _("%s: %s: Cannot create tags directory. "
 			"Tag function disabled\n"),	PROGRAM_NAME, tags_dir);
 
 				/* #####################
@@ -2137,8 +2139,9 @@ create_config_files(void)
 
 	if (stat(colors_dir, &attr) == -1
 	&& xmkdir(colors_dir, S_IRWXU) == EXIT_FAILURE)
-		err('w', PRINT_PROMPT, _("%s: mkdir: Error creating colors "
-			"directory. Using the default color scheme\n"), PROGRAM_NAME);
+		err('w', PRINT_PROMPT, _("%s: Cannot create colors "
+		"directory '%s': Falling back to the default color scheme\n"),
+		PROGRAM_NAME, colors_dir);
 
 	/* Generate the default color scheme file */
 	create_def_color_scheme();
@@ -2149,8 +2152,9 @@ create_config_files(void)
 
 	if (stat(plugins_dir, &attr) == -1
 	&& xmkdir(plugins_dir, S_IRWXU) == EXIT_FAILURE)
-		err('e', PRINT_PROMPT, _("%s: mkdir: Error creating plugins "
-			"directory. The actions function is disabled\n"), PROGRAM_NAME);
+		err('e', PRINT_PROMPT, _("%s: Cannot create plugins "
+			"directory '%s': The actions function is disabled\n"),
+			PROGRAM_NAME, plugins_dir);
 
 	import_rl_file();
 	create_actions_file(actions_file);
@@ -2166,8 +2170,8 @@ create_mime_file_anew(char *file)
 	int fd;
 	FILE *fp = open_fwrite(file, &fd);
 	if (!fp) {
-		err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME, file,
-			strerror(errno));
+		err('e', PRINT_PROMPT, "%s: Cannot create mimelist file "
+			"'%s': %s\n", PROGRAM_NAME, file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -3428,7 +3432,7 @@ create_trash_dirs(void)
 
 	if (ret != EXIT_SUCCESS) {
 		trash_ok = 0;
-		err('w', PRINT_PROMPT, _("%s: '%s': Error creating the trash "
+		err('w', PRINT_PROMPT, _("%s: '%s': Cannot create the trash "
 			"directory (or one of its subdirectories: files/ and info/).\n"
 			"Try creating them manually and restart %s.\n"
 			"Ex: mkdir -p ~/.local/share/Trash/{files,info}\n"),
@@ -3470,6 +3474,27 @@ set_trash_dirs(void)
 }
 #endif /* _NO_TRASH */
 
+static void
+undef_config_file_names(void)
+{
+	free(config_dir_gral); config_dir_gral = (char *)NULL;
+	free(config_dir); config_dir = (char *)NULL;
+	free(tags_dir); tags_dir = (char *)NULL;
+	free(kbinds_file); kbinds_file = (char *)NULL;
+	free(colors_dir); colors_dir = (char *)NULL;
+	free(plugins_dir); plugins_dir = (char *)NULL;
+	free(dirhist_file); dirhist_file = (char *)NULL;
+	free(bm_file); bm_file = (char *)NULL;
+	free(msgs_log_file); msgs_log_file = (char *)NULL;
+	free(cmds_log_file); cmds_log_file = (char *)NULL;
+	free(hist_file); hist_file = (char *)NULL;
+	free(config_file); config_file = (char *)NULL;
+	free(profile_file); profile_file = (char *)NULL;
+	free(mime_file); mime_file = (char *)NULL;
+	free(actions_file); actions_file = (char *)NULL;
+	free(remotes_file); remotes_file = (char *)NULL;
+}
+
 /* Set up CliFM directories and config files. Load the user's
  * configuration from clifmrc. */
 void
@@ -3500,6 +3525,12 @@ init_config(void)
 
 	define_config_file_names();
 	create_config_files();
+
+	if (config_ok == 0) {
+		undef_config_file_names();
+		check_colors();
+		return;
+	}
 
 #ifndef CLIFM_SUCKLESS
 	cschemes_n = get_colorschemes();

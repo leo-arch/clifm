@@ -2526,7 +2526,8 @@ set_colors(const char *colorscheme, const int check_env)
 		get_colors_from_env(&filecolors, &extcolors, &ifacecolors);
 
 #ifndef CLIFM_SUCKLESS
-	if (ret == EXIT_SUCCESS && xargs.stealth_mode != 1) {
+	if (ret == EXIT_SUCCESS && xargs.stealth_mode != 1
+	&& config_ok != 0) {
 		if (read_color_scheme_file(cur_cscheme, &filecolors,
 		&extcolors, &ifacecolors, check_env) == EXIT_FAILURE) {
 			clear_defs();

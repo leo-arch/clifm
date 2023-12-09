@@ -1831,8 +1831,10 @@ remove_backslash(char **s)
 static int
 preview_edit(char *app)
 {
-	if (!config_dir)
+	if (!config_dir) {
+		xerror("view: Configuration directory not found\n");
 		return EXIT_FAILURE;
+	}
 
 	size_t len = config_dir_len + 15;
 	char *file = (char *)xnmalloc(len, sizeof(char));
