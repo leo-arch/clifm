@@ -2170,8 +2170,7 @@ remove_file(char **args)
 		return EXIT_FAILURE;
 	}
 
-	if (rm_force == 0 && ((flags & REMOVE_ELN) || have_dirs >= 1 || j > 5)
-	&& rm_confirm(info, 3, have_dirs) == 0)
+	if (rm_force == 0 && rm_confirm(info, 3, have_dirs) == 0)
 		goto END;
 
 	rm_cmd[0] = "rm";

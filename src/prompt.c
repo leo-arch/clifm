@@ -761,19 +761,19 @@ ADD_STRING:
 static inline void
 check_cwd(void)
 {
-	int cwd_mod = 0;
+	int cwd_change = 0;
 
 	while (xchdir(workspaces[cur_ws].path, SET_TITLE) != EXIT_SUCCESS) {
 		char *ret = strrchr(workspaces[cur_ws].path, '/');
 		if (ret && ret != workspaces[cur_ws].path) {
 			*ret = '\0';
-			cwd_mod = 1;
+			cwd_change = 1;
 		} else {
 			break;
 		}
 	}
 
-	if (cwd_mod == 1 && conf.autols == 1)
+	if (cwd_change == 1 && conf.autols == 1)
 		refresh_screen();
 }
 

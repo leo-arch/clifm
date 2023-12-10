@@ -1607,9 +1607,6 @@ eln_expand(char ***substr, const size_t i)
 		free((*substr)[i]);
 		(*substr)[i] = esc_str;
 	}
-
-	if ((*substr)[0][0] == 'r' && !(*substr)[0][1])
-		flags |= REMOVE_ELN;
 }
 
 static void
@@ -2543,7 +2540,6 @@ parse_input_str(char *str)
 	int fusedcmd_ok = 0;
 
 	flags &= ~FIRST_WORD_IS_ELN;
-	flags &= ~REMOVE_ELN;
 	flags &= ~IS_USRVAR_DEF;
 
 	/* If internal command plus fused parameter, split it */
