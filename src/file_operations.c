@@ -2092,8 +2092,12 @@ rm_confirm(struct rm_info *info, const size_t start, const int have_dirs)
 		have_dirs == 1 ? _(" (recursively)") : "");
 
 	size_t i;
-	for (i = start; info[i].name; i++)
-		printf("%s%c\n", info[i].name, info[i].dir >= 1 ? '/' : 0);
+	for (i = start; info[i].name; i++) {
+		if (strchr(info[i].name, '\''))
+			printf("\"%s%s\"\n", info[i].name, info[i].dir >= 1 ? "/" : "");
+		else
+			printf("'%s%s'\n", info[i].name, info[i].dir >= 1 ? "/" : "");
+	}
 
 	return rl_get_y_or_n(_("Continue? [y/n] "));
 }
