@@ -104,7 +104,7 @@ rl_get_y_or_n(const char *_msg)
 		if (!answer)
 			continue;
 
-		if (!*answer || answer[1]) {
+		if (!*answer) {
 			free(answer);
 			answer = (char *)NULL;
 			continue;
@@ -112,9 +112,17 @@ rl_get_y_or_n(const char *_msg)
 
 		switch (*answer) {
 		case 'y': /* fallthrough */
-		case 'Y': free(answer); return 1;
+		case 'Y':
+			if (!answer[1] || strcmp(answer + 1, "es") == 0)
+				{ free(answer); return 1; }
+			else
+				{ free(answer); answer = (char *)NULL; continue; }
 		case 'n': /* fallthrough */
-		case 'N': free(answer); return 0;
+		case 'N':
+			if (!answer[1] || (answer[1] == 'o' && !answer[2]))
+				{ free(answer); return 0; }
+			else
+				{ free(answer); answer = (char *)NULL; continue; }
 		default: free(answer); answer = (char *)NULL; continue;
 		}
 	}
