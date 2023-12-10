@@ -503,10 +503,14 @@ bulk_remove_files(char ***rfiles)
 	if (!*rfiles)
 		return EXIT_FAILURE;
 
-	puts(_("The following files will be removed:"));
+	puts(_("File(s) to be removed:"));
 	int n;
-	for (n = 0; (*rfiles)[n]; n++)
-		printf("%s->%s %s\n", mi_c, df_c, (*rfiles)[n]);
+	for (n = 0; (*rfiles)[n]; n++) {
+		struct stat a;
+		printf("'%s%s'\n", (*rfiles)[n],
+			(lstat((*rfiles)[n], &a) != -1
+			&& (a.st_mode & S_IFDIR)) ? "/" : "");
+	}
 
 	if (n == 0)
 		return EXIT_FAILURE;
@@ -2088,7 +2092,7 @@ list_removed_files(struct rm_info *info, const size_t start,
 static int
 rm_confirm(struct rm_info *info, const size_t start, const int have_dirs)
 {
-	printf(_("r: File(s) to be removed%s:\n"),
+	printf(_("File(s) to be removed%s:\n"),
 		have_dirs == 1 ? _(" (recursively)") : "");
 
 	size_t i;
