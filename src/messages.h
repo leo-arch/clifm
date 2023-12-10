@@ -888,8 +888,8 @@ To enable this feature consult the manpage"
 #define RR_USAGE "Remove files in bulk using a text editor\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   rr [DIR] [EDITOR]\n\n\
-The list of files in DIR (current directory if omitted) is opened via \
-EDITOR (default associated application if omitted). Remove the lines \
+The list of files in DIR (current directory if omitted) is opened via\n\
+EDITOR (default associated application if omitted). Remove the lines\n\
 corresponding to the files you want to delete, save, and quit the editor.\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Bulk remove files/dirs in the current directory using the default editor\n\

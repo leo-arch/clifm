@@ -50,7 +50,7 @@ char *export_files(char **, const int);
 int  symlink_file(char **);
 int  open_file(char *);
 int  open_function(char **);
-int  remove_file(char **);
+int  remove_files(char **);
 int  xchmod(const char *, const char *, const int);
 int  toggle_exec(const char *, mode_t);
 int  umask_function(char *);

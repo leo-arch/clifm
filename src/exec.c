@@ -2336,7 +2336,7 @@ exec_cmd(char **comm)
 			return EXIT_SUCCESS;
 		}
 
-		exit_code = remove_file(comm);
+		exit_code = remove_files(comm);
 	}
 
 	/*    ############## CREATE DIRECTORIES ################ */

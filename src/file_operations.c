@@ -156,7 +156,7 @@ parse_bulk_remove_params(char *s1, char *s2, char **app, char **target)
 		char *p = get_cmd_path(s1);
 		if (!p) { /* S1 is neither a directory nor a valid application */
 			int ec = stat_ret != -1 ? ENOTDIR : ENOENT;
-			xerror("rr: %s: %s\n", s1, strerror(ec));
+			xerror("rr: '%s': %s\n", s1, strerror(ec));
 			return ec;
 		}
 		/* S1 is an application name. TARGET defaults to CWD */
@@ -182,7 +182,7 @@ parse_bulk_remove_params(char *s1, char *s2, char **app, char **target)
 		return EXIT_SUCCESS;
 	}
 	/* S2 is not a valid application name */
-	xerror("rr: %s: %s\n", s2, strerror(ENOENT));
+	xerror("rr: '%s': %s\n", s2, strerror(ENOENT));
 	return ENOENT;
 }
 
@@ -199,7 +199,7 @@ create_tmp_file(char **file, int *fd)
 	errno = 0;
 	*fd = mkstemp(*file);
 	if (*fd == -1) {
-		xerror("rr: mkstemp: %s: %s\n", *file, strerror(errno));
+		xerror("rr: mkstemp: '%s': %s\n", *file, strerror(errno));
 		free(*file);
 		return EXIT_FAILURE;
 	}
@@ -254,7 +254,7 @@ write_files_to_tmp(struct dirent ***a, filesn_t *n, const char *target,
 	int fd = 0;
 	FILE *fp = open_fwrite(tmp_file, &fd);
 	if (!fp) {
-		err('e', PRINT_PROMPT, "%s: rr: fopen: %s: %s\n", PROGRAM_NAME,
+		err('e', PRINT_PROMPT, "%s: rr: fopen: '%s': %s\n", PROGRAM_NAME,
 			tmp_file, strerror(errno));
 		return errno;
 	}
@@ -268,7 +268,7 @@ write_files_to_tmp(struct dirent ***a, filesn_t *n, const char *target,
 	} else {
 		if (count_dir(target, CPOP) <= 2) {
 			int tmp_err = EXIT_FAILURE;
-			xerror(_("%s: %s: Directory empty\n"), PROGRAM_NAME, target);
+			xerror(_("%s: '%s': Directory empty\n"), PROGRAM_NAME, target);
 			fclose(fp);
 			return tmp_err;
 		}
@@ -276,7 +276,7 @@ write_files_to_tmp(struct dirent ***a, filesn_t *n, const char *target,
 		*n = scandir(target, a, NULL, alphasort);
 		if (*n == -1) {
 			int tmp_err = errno;
-			xerror("rr: %s: %s", target, strerror(errno));
+			xerror("rr: '%s': %s", target, strerror(errno));
 			fclose(fp);
 			return tmp_err;
 		}
@@ -314,7 +314,7 @@ open_tmp_file(struct dirent ***a, const filesn_t n, char *tmp_file, char *app)
 		if (exit_status == EXIT_SUCCESS)
 			return EXIT_SUCCESS;
 
-		xerror(_("rr: %s: Cannot open file\n"), tmp_file);
+		xerror(_("rr: '%s': Cannot open file\n"), tmp_file);
 		goto END;
 	}
 
@@ -395,9 +395,10 @@ static char **
 get_remove_files(const char *target, char **tmp_files,
 	struct dirent ***a, const filesn_t n)
 {
-	size_t i, j = 0;
+	size_t i, j = 1;
 	size_t l = (target == workspaces[cur_ws].path) ? (size_t)files : (size_t)n;
-	char **rem_files = (char **)xnmalloc(l + 2, sizeof(char *));
+	char **rem_files = (char **)xnmalloc(l + 3, sizeof(char *));
+	rem_files[0] = savestring("rr", 2);
 
 	if (target == workspaces[cur_ws].path) {
 		for (i = 0; i < (size_t)files; i++) {
@@ -432,120 +433,12 @@ get_remove_files(const char *target, char **tmp_files,
 	return rem_files;
 }
 
-static char *
-get_rm_param(char ***rfiles, const int n)
-{
-	char *_param = (char *)NULL;
-	struct stat a;
-	int i = n;
-
-	while (--i >= 0) {
-		if (lstat((*rfiles)[i], &a) == -1)
-			continue;
-
-	/* We don't need interactivity here: the user already confirmed the
-	 * operation before calling this function. */
-		if (S_ISDIR(a.st_mode)) {
-#if defined(_BE_POSIX)
-			_param = savestring("-rf", 3);
-#elif defined(__sun)
-			if (bin_flags & BSD_HAVE_COREUTILS)
-				_param = savestring("-drf", 4);
-			else
-				_param = savestring("-rf", 3);
-#else
-			_param = savestring("-drf", 4);
-#endif /* _BE_POSIX */
-			break;
-		}
-	}
-
-	if (!_param) /* We have only regular files, no dir */
-		_param = savestring("-f", 2);
-
-	return _param;
-}
-
-static char **
-construct_rm_cmd(char ***rfiles, char *_param, const size_t n)
-{
-	char **cmd = (char **)xnmalloc(n + 4, sizeof(char *));
-
-#ifdef __sun
-	if (bin_flags & BSD_HAVE_COREUTILS)
-		cmd[0] = savestring("grm", 3);
-	else
-		cmd[0] = savestring("rm", 2);
-#else
-	cmd[0] = savestring("rm", 2);
-#endif /* __sun */
-	/* Using strnlen() here avoids a Redhat hardened compilation warning. */
-	/* As returned by get_rm_param(), we know that _param is at most 5 bytes
-	 * (including the terminating NUL byte). */
-	cmd[1] = savestring(_param, strnlen(_param, 5));
-	cmd[2] = savestring("--", 2);
-	free(_param);
-
-	int cmd_n = 3;
-	size_t i;
-	for (i = 0; i < n; i++) {
-		cmd[cmd_n] = savestring((*rfiles)[i], strlen((*rfiles)[i]));
-		cmd_n++;
-	}
-	cmd[cmd_n] = (char *)NULL;
-
-	return cmd;
-}
-
-static int
-bulk_remove_files(char ***rfiles)
-{
-	if (!*rfiles)
-		return EXIT_FAILURE;
-
-	puts(_("File(s) to be removed:"));
-	int n;
-	for (n = 0; (*rfiles)[n]; n++) {
-		struct stat a;
-		printf("'%s%s'\n", (*rfiles)[n],
-			(lstat((*rfiles)[n], &a) != -1
-			&& (a.st_mode & S_IFDIR)) ? "/" : "");
-	}
-
-	if (n == 0)
-		return EXIT_FAILURE;
-
-	int i = n;
-	if (rl_get_y_or_n(_("Continue? [y/n] ")) == 0) {
-		while (--i >= 0)
-			free((*rfiles)[i]);
-		free(*rfiles);
-		return 0;
-	}
-
-	char *_param = get_rm_param(rfiles, n);
-	char **cmd = construct_rm_cmd(rfiles, _param, (size_t)n);
-
-	int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
-
-	i = n;
-	while (--i >= 0)
-		free((*rfiles)[i]);
-	free(*rfiles);
-
-	for (i = 0; cmd[i]; i++)
-		free(cmd[i]);
-	free(cmd);
-
-	return ret;
-}
-
 static int
 diff_files(char *tmp_file, const filesn_t n)
 {
 	FILE *fp = fopen(tmp_file, "r");
 	if (!fp) {
-		xerror("br: %s: %s\n", tmp_file, strerror(errno));
+		xerror("br: '%s': %s\n", tmp_file, strerror(errno));
 		return 0;
 	}
 
@@ -568,7 +461,7 @@ nothing_to_do(char **tmp_file, struct dirent ***a, const filesn_t n, const int f
 {
 	puts(_("rr: Nothing to do"));
 	if (unlinkat(fd, *tmp_file, 0) == 1)
-		xerror("rr: unlink: %s: %s\n", *tmp_file, strerror(errno));
+		xerror("rr: unlink: '%s': %s\n", *tmp_file, strerror(errno));
 	close(fd);
 	free(*tmp_file);
 
@@ -620,18 +513,26 @@ bulk_remove(char *s1, char *s2)
 		goto END;
 
 	char **rem_files = get_remove_files(target, rfiles, &a, n);
+	if (!rem_files)
+		goto FREE_N_EXIT;
 
-	ret = bulk_remove_files(&rem_files);
+	ret = remove_files(rem_files);
 
+	for (i = 0; rem_files[i]; i++)
+		free(rem_files[i]);
+	free(rem_files);
+
+FREE_N_EXIT:
 	for (i = 0; rfiles[i]; i++)
 		free(rfiles[i]);
 	free(rfiles);
 
 END:
 	if (unlinkat(fd, tmp_file, 0) == -1) {
-		err('w', PRINT_PROMPT, "rr: unlink: %s: %s\n",
+		err('w', PRINT_PROMPT, "rr: unlink: '%s': %s\n",
 			tmp_file, strerror(errno));
 	}
+
 	close(fd);
 	free(tmp_file);
 	return ret;
@@ -729,7 +630,7 @@ xchmod(const char *file, const char *mode_str, const int flag)
 	int fd = open(file, O_RDONLY);
 	if (fd == -1) {
 		err(flag == 1 ? 'e' : 0, flag == 1 ? PRINT_PROMPT : NOPRINT_PROMPT,
-			"xchmod: %s: %s\n", file, strerror(errno));
+			"xchmod: '%s': %s\n", file, strerror(errno));
 		return errno;
 	}
 
@@ -737,7 +638,7 @@ xchmod(const char *file, const char *mode_str, const int flag)
 	if (fchmod(fd, mode) == -1) {
 		close(fd);
 		err(flag == 1 ? 'e' : 0, flag == 1 ? PRINT_PROMPT : NOPRINT_PROMPT,
-			"xchmod: %s: %s\n", file, strerror(errno));
+			"xchmod: '%s': %s\n", file, strerror(errno));
 		return errno;
 	}
 
@@ -810,7 +711,7 @@ get_dup_file_dest_dir(void)
 		break;
 
 ERROR:
-		xerror("dup: %s: %s\n", dir, strerror(errno));
+		xerror("dup: '%s': %s\n", dir, strerror(errno));
 		free(dir);
 		dir = (char *)NULL;
 	}
@@ -849,7 +750,7 @@ dup_file(char **cmd)
 		if (strchr(source, '\\')) {
 			char *deq_str = dequote_str(source, 0);
 			if (!deq_str) {
-				xerror("dup: %s: Error dequoting file name\n", source);
+				xerror("dup: '%s': Error dequoting file name\n", source);
 				continue;
 			}
 
@@ -950,7 +851,7 @@ create_file(char *name)
 
 		errno = 0;
 		if (mkdirat(XAT_FDCWD, name, mode) == -1) {
-			xerror("new: %s: %s\n", name, strerror(errno));
+			xerror("new: '%s': %s\n", name, strerror(errno));
 			status = EXIT_FAILURE;
 			break;
 		}
@@ -970,7 +871,7 @@ CONT:
 
 		int fd = open(name, O_WRONLY | O_CREAT | O_EXCL, mode);
 		if (fd == -1) {
-			xerror("new: %s: %s\n", name, strerror(errno));
+			xerror("new: '%s': %s\n", name, strerror(errno));
 			status = EXIT_FAILURE;
 		} else {
 			close(fd);
@@ -1129,7 +1030,7 @@ validate_filename(char **name, const int is_md)
 
 	char *deq = dequote_str(*name, 0);
 	if (!deq) {
-		xerror(_("%s: %s: Error dequoting file name\n"),
+		xerror(_("%s: '%s': Error dequoting file name\n"),
 			is_md ? "md" : "new", *name);
 		return 0;
 	}
@@ -1228,7 +1129,7 @@ err_file_exists(char *name, const int multi, const int is_md)
 	char *n = abbreviate_file_name(name);
 	char *p = n ? n : name;
 
-	xerror("%s: %s: %s\n", is_md ? "md" : "new",
+	xerror("%s: '%s': %s\n", is_md ? "md" : "new",
 		(*p == '.' && p[1] == '/' && p[2]) ? p + 2 : p, strerror(EEXIST));
 
 	if (n && n != name)
@@ -1255,7 +1156,7 @@ ask_and_create_file(void)
 		return EXIT_SUCCESS;
 
 	if (validate_filename(&filename, 0) == 0) {
-		xerror(_("new: %s: Unsafe file name\n"), filename);
+		xerror(_("new: '%s': Unsafe file name\n"), filename);
 		if (rl_get_y_or_n(_("Continue? [y/n] ")) == 0) {
 			free(filename);
 			return EXIT_SUCCESS;
@@ -1310,7 +1211,7 @@ create_files(char **args, const int is_md)
 
 	for (i = 0; args[i]; i++) {
 		if (validate_filename(&args[i], is_md) == 0) {
-			xerror(_("%s: %s: Unsafe file name\n"),
+			xerror(_("%s: '%s': Unsafe file name\n"),
 				is_md ? "md" : "new", args[i]);
 			if (rl_get_y_or_n(_("Continue? [y/n] ")) == 0)
 				continue;
@@ -1390,7 +1291,7 @@ open_function(char **cmd)
 		if (strchr(cmd[1], '\\')) {
 			char *deq_path = dequote_str(cmd[1], 0);
 			if (!deq_path) {
-				xerror(_("open: %s: Error dequoting filename\n"), cmd[1]);
+				xerror(_("open: '%s': Error dequoting filename\n"), cmd[1]);
 				return EXIT_FAILURE;
 			}
 
@@ -1404,7 +1305,7 @@ open_function(char **cmd)
 	/* Check file existence. */
 	struct stat attr;
 	if (lstat(file, &attr) == -1) {
-		xerror("open: %s: %s\n", cmd[1], strerror(errno));
+		xerror("open: '%s': %s\n", cmd[1], strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -1437,7 +1338,7 @@ open_function(char **cmd)
 	case S_IFLNK: {
 		int ret = get_link_ref(file);
 		if (ret == -1) {
-			xerror(_("open: %s: Broken symbolic link\n"), file);
+			xerror(_("open: '%s': Broken symbolic link\n"), file);
 			return EXIT_FAILURE;
 		} else if (ret == S_IFDIR) {
 			return cd_function(file, CD_PRINT_ERROR);
@@ -1464,7 +1365,7 @@ open_function(char **cmd)
 	/* If neither directory nor regular file nor symlink (to directory
 	 * or regular file), print the corresponding error message and exit. */
 	if (no_open_file == 1) {
-		xerror(_("open: %s (%s): Cannot open file\nTry "
+		xerror(_("open: '%s' (%s): Cannot open file\nTry "
 			"'APP FILE' or 'open FILE APP'\n"), cmd[1], file_type);
 		return EXIT_FAILURE;
 	}
@@ -1583,12 +1484,12 @@ edit_link(char *link)
 	/* Check if we have a valid symbolic link */
 	struct stat attr;
 	if (lstat(link, &attr) == -1) {
-		xerror("le: %s: %s\n", link, strerror(errno));
+		xerror("le: '%s': %s\n", link, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
 	if (!S_ISLNK(attr.st_mode)) {
-		xerror(_("le: %s: Not a symbolic link\n"), link);
+		xerror(_("le: '%s': Not a symbolic link\n"), link);
 		return EXIT_FAILURE;
 	}
 
@@ -1610,7 +1511,7 @@ edit_link(char *link)
 
 	/* Check new_path existence and warn the user if it does not exist. */
 	if (lstat(new_path, &attr) == -1) {
-		xerror("%s: %s\n", new_path, strerror(errno));
+		xerror("'%s': %s\n", new_path, strerror(errno));
 		if (rl_get_y_or_n(_("Relink as broken symbolic link? [y/n] ")) == 0) {
 			free(new_path);
 			return EXIT_SUCCESS;
@@ -1681,25 +1582,25 @@ symlink_file(char **args)
 
 	struct stat a;
 	if (lstat(target, &a) == -1) {
-		printf("link: %s: %s\n", target, strerror(errno));
+		printf("link: '%s': %s\n", target, strerror(errno));
 		if (rl_get_y_or_n(_("Create broken symbolic link? [y/n] ")) == 0)
 			return EXIT_SUCCESS;
 	}
 
 	if (lstat(link_name, &a) != -1 && S_ISLNK(a.st_mode)) {
-		printf("link: %s: %s\n", link_name, strerror(EEXIST));
+		printf("link: '%s': %s\n", link_name, strerror(EEXIST));
 		if (rl_get_y_or_n(_("Overwrite this file? [y/n] ")) == 0)
 			return EXIT_SUCCESS;
 
 		if (unlinkat(XAT_FDCWD, link_name, 0) == -1) {
-			xerror("link: %s: %s\n", link_name, strerror(errno));
+			xerror("link: '%s': %s\n", link_name, strerror(errno));
 			return EXIT_FAILURE;
 		}
 	}
 
 	char *abs_path = normalize_path(target, strlen(target));
 	if (!abs_path) {
-		xerror(_("link: %s: Error getting absolute path\n"), target);
+		xerror(_("link: '%s': Error getting absolute path\n"), target);
 		return EXIT_FAILURE;
 	}
 
@@ -1760,12 +1661,12 @@ validate_vv_dest_dir(const char *file)
 
 	struct stat a;
 	if (stat(file, &a) == -1) {
-		xerror("vv: %s: %s\n", file, strerror(errno));
+		xerror("vv: '%s': %s\n", file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
 	if (!S_ISDIR(a.st_mode)) {
-		xerror(_("vv: %s: Not a directory\n"), file);
+		xerror(_("vv: '%s': Not a directory\n"), file);
 		return EXIT_FAILURE;
 	}
 
@@ -2047,7 +1948,7 @@ print_removed_file_info(const struct rm_info info)
 	/* Name removed, but file is still linked to another name (hardlink) */
 	if (info.dir == 0 && info.links > 1) {
 		const nlink_t l = info.links - 1;
-		xerror(_("r: %s: File might still exist (%jd more "
+		xerror(_("r: '%s': File might still exist (%jd more "
 			"%s linked to this file before this operation)\n"), info.name,
 			(intmax_t)l, l > 1 ? _("names were") : _("name was"));
 	}
@@ -2107,17 +2008,23 @@ rm_confirm(struct rm_info *info, const size_t start, const int have_dirs)
 }
 
 int
-remove_file(char **args)
+remove_files(char **args)
 {
 	int cwd = 0, exit_status = EXIT_SUCCESS, errs = 0;
+	char *err_name = (args[0] && *args[0] == 'r' && args[0][1] == 'r')
+		? "rr" : "r";
+
+	int i;
+	for (i = 0; args[i]; i++);
+	size_t num = i > 0 ? (size_t)i - 1 : (size_t)i;
 
 	struct stat a;
-	char **rm_cmd = (char **)xnmalloc(args_n + 4, sizeof(char *));
+	char **rm_cmd = (char **)xnmalloc(num + 4, sizeof(char *));
 	/* Let's keep information about files to be removed. */
 	struct rm_info *info =
-		(struct rm_info *)xnmalloc(args_n + 4, sizeof(struct rm_info));
+		(struct rm_info *)xnmalloc(num + 4, sizeof(struct rm_info));
 
-	int i, j, have_dirs = 0;
+	int j, have_dirs = 0;
 	int rm_force = conf.rm_force == 1 ? 1 : 0;
 
 	i = (is_force_param(args[1]) == 1) ? 2 : 1;
@@ -2144,7 +2051,7 @@ remove_file(char **args)
 
 		char *tmp = dequote_str(args[i], 0);
 		if (!tmp) {
-			xerror(_("r: %s: Error dequoting file name\n"), args[i]);
+			xerror(_("%s: %s: Error dequoting file name\n"), err_name, args[i]);
 			continue;
 		}
 
@@ -2158,7 +2065,7 @@ remove_file(char **args)
 				have_dirs++;
 			j++;
 		} else {
-			xerror("r: %s: %s\n", tmp, strerror(errno));
+			xerror("%s: '%s': %s\n", err_name, tmp, strerror(errno));
 			errs++;
 		}
 
@@ -2168,7 +2075,7 @@ remove_file(char **args)
 	rm_cmd[j] = info[j].name = (char *)NULL;
 
 	if (errs > 0 && j > 3) { /* If at least one error, fail anyway. */
-		fputs(_("r: No files were removed\n"), stderr);
+		fprintf(stderr, _("%s: No files were removed\n"), err_name);
 		goto END;
 	}
 
@@ -2229,7 +2136,7 @@ bulk_rename(char **args)
 
 	int fd = mkstemp(bulk_file);
 	if (fd == -1) {
-		xerror("br: mkstemp: %s: %s\n", bulk_file, strerror(errno));
+		xerror("br: mkstemp: '%s': %s\n", bulk_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -2241,8 +2148,8 @@ bulk_rename(char **args)
 	fp = open_fwrite(bulk_file, &tmp_fd);
 	if (!fp) {
 		if (unlink(bulk_file) == -1)
-			xerror("br: unlink: %s: %s\n", bulk_file, strerror(errno));
-		xerror("br: fopen: %s: %s\n", bulk_file, strerror(errno));
+			xerror("br: unlink: '%s': %s\n", bulk_file, strerror(errno));
+		xerror("br: fopen: '%s': %s\n", bulk_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 #endif /* !HAVE_DPRINTF */
@@ -2274,7 +2181,7 @@ bulk_rename(char **args)
 		&& args[i][2] == '/') ) ) {
 			char *p = realpath(args[i], NULL);
 			if (!p) {
-				xerror("br: %s: %s\n", args[i], strerror(errno));
+				xerror("br: '%s': %s\n", args[i], strerror(errno));
 				continue;
 			}
 			free(args[i]);
@@ -2282,7 +2189,7 @@ bulk_rename(char **args)
 		}
 
 		if (lstat(args[i], &attr) == -1) {
-			xerror("br: %s: %s\n", args[i], strerror(errno));
+			xerror("br: 's': %s\n", args[i], strerror(errno));
 			continue;
 		}
 
@@ -2302,15 +2209,15 @@ bulk_rename(char **args)
 
 	if (counter == 0) { /* No valid file name */
 		if (unlink(bulk_file) == -1)
-			xerror("br: unlink: %s: %s\n", bulk_file, strerror(errno));
+			xerror("br: unlink: '%s': %s\n", bulk_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
 	fp = open_fread(bulk_file, &fd);
 	if (!fp) {
 		if (unlink(bulk_file) == -1)
-			xerror("br: unlink: %s: %s\n", bulk_file, strerror(errno));
-		xerror("br: %s: %s\n", bulk_file, strerror(errno));
+			xerror("br: unlink: '%s': %s\n", bulk_file, strerror(errno));
+		xerror("br: '%s': %s\n", bulk_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -2335,8 +2242,8 @@ bulk_rename(char **args)
 	fp = open_fread(bulk_file, &fd);
 	if (!fp) {
 		if (unlink(bulk_file) == -1)
-			xerror("br: unlink: %s: %s\n", bulk_file, strerror(errno));
-		xerror("br: %s: %s\n", bulk_file, strerror(errno));
+			xerror("br: unlink: '%s': %s\n", bulk_file, strerror(errno));
+		xerror("br: '%s': %s\n", bulk_file, strerror(errno));
 		return errno;
 	}
 
@@ -2428,7 +2335,7 @@ bulk_rename(char **args)
 	free(line);
 
 	if (unlinkat(fd, bulk_file, 0) == -1) {
-		xerror("br: unlinkat: %s: %s\n", bulk_file, strerror(errno));
+		xerror("br: unlinkat: '%s': %s\n", bulk_file, strerror(errno));
 		exit_status = errno;
 	}
 	fclose(fp);
@@ -2446,7 +2353,7 @@ bulk_rename(char **args)
 
 ERROR:
 	if (unlinkat(fd, bulk_file, 0) == -1) {
-		xerror("br: unlinkat: %s: %s\n", bulk_file, strerror(errno));
+		xerror("br: unlinkat: '%s': %s\n", bulk_file, strerror(errno));
 		exit_status = errno;
 	}
 
@@ -2466,7 +2373,7 @@ export_files(char **filenames, const int open)
 
 	int fd = mkstemp(tmp_file);
 	if (fd == -1) {
-		xerror("exp: %s: %s\n", tmp_file, strerror(errno));
+		xerror("exp: '%s': %s\n", tmp_file, strerror(errno));
 		free(tmp_file);
 		return (char *)NULL;
 	}
@@ -2477,7 +2384,7 @@ export_files(char **filenames, const int open)
 	FILE *fp = open_fwrite(tmp_file, &tmp_fd);
 	if (!fp) {
 		if (unlink(tmp_file) == -1)
-			xerror("exp: unlink: %s: %s\n", tmp_file, strerror(errno));
+			xerror("exp: unlink: '%s': %s\n", tmp_file, strerror(errno));
 		xerror("exp: %s: %s\n", tmp_file, strerror(errno));
 		free(tmp_file);
 		return (char *)NULL;
@@ -2517,7 +2424,7 @@ export_files(char **filenames, const int open)
 		return tmp_file;
 
 	if (unlink(tmp_file) == -1)
-		xerror("exp: unlink: %s: %s\n", tmp_file, strerror(errno));
+		xerror("exp: unlink: '%s': %s\n", tmp_file, strerror(errno));
 	free(tmp_file);
 	return (char *)NULL;
 }
@@ -2577,7 +2484,7 @@ batch_link(char **args)
 		char *ptr = strrchr(tmp, '/');
 		if (symlinkat(args[i], XAT_FDCWD, (ptr && ++ptr) ? ptr : tmp) == -1) {
 			exit_status = errno;
-			xerror(_("bl: symlinkat: %s: Cannot create symlink: %s\n"),
+			xerror(_("bl: symlinkat: Cannot create symbolic link '%s': %s\n"),
 				ptr ? ptr : tmp, strerror(errno));
 		}
 	}
