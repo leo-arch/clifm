@@ -761,13 +761,20 @@ ADD_STRING:
 static inline void
 check_cwd(void)
 {
+	int cwd_mod = 0;
+
 	while (xchdir(workspaces[cur_ws].path, SET_TITLE) != EXIT_SUCCESS) {
 		char *ret = strrchr(workspaces[cur_ws].path, '/');
-		if (ret && ret != workspaces[cur_ws].path)
+		if (ret && ret != workspaces[cur_ws].path) {
 			*ret = '\0';
-		else
+			cwd_mod = 1;
+		} else {
 			break;
+		}
 	}
+
+	if (cwd_mod == 1 && conf.autols == 1)
+		refresh_screen();
 }
 
 /* Remove all final slash(es) from path, if any */
@@ -953,7 +960,8 @@ construct_prompt(const char *decoded_prompt)
 			(sel_n > 0) ? sel_ind : "",
 			decoded_prompt, RL_NC, tx_c);
 	} else {
-		snprintf(the_prompt, prompt_len, "%s%s\001%s\002", decoded_prompt, RL_NC, tx_c);
+		snprintf(the_prompt, prompt_len, "%s%s\001%s\002",
+			decoded_prompt, RL_NC, tx_c);
 	}
 
 	return the_prompt;
