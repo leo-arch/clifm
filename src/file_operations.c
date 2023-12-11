@@ -2094,7 +2094,7 @@ remove_files(char **args)
 
 	if (launch_execv(rm_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 		exit_status = EXIT_FAILURE;
-		if (num > 1) /* Only if we have multiple files */
+		if (num > 1 && conf.autols == 1) /* Only if we have multiple files */
 			press_key_to_continue();
 	}
 

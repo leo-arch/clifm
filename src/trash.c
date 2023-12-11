@@ -266,7 +266,7 @@ trash_clear(void)
 	int files_n = -1, exit_status = EXIT_SUCCESS;
 
 	if (xchdir(trash_files_dir, NO_TITLE) == -1) {
-		err(0, NOPRINT_PROMPT, "trash: %s: %s\n",
+		err(0, NOPRINT_PROMPT, "trash: '%s': %s\n",
 			trash_files_dir, strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -302,7 +302,7 @@ trash_clear(void)
 		free(file2);
 
 		if (ret != EXIT_SUCCESS) {
-			xerror(_("trash: %s: Error removing trashed file\n"),
+			xerror(_("trash: '%s': Error removing trashed file\n"),
 				trash_files[i]->d_name);
 			exit_status = ret;
 			/* If there is at least one error, return error */
@@ -400,7 +400,7 @@ trash_file(const char *suffix, const struct tm *tm, char *file)
 		/* If SIZE is a positive value, that is, the trashed file name
 		 * exceeds NAME_MAX by SIZE bytes, reduce the original file name
 		 * SIZE bytes. Terminate the original file name (FILENAME) with
-		 * a tilde (~), to let the user know it is trimmed. */
+		 * a tilde (~), to let the user know it was trimmed. */
 		filename[filename_len - (size_t)size - 1] = '~';
 		filename[filename_len - (size_t)size] = '\0';
 	}
@@ -1231,10 +1231,9 @@ trash_files_args(char **args)
 	if (exit_status == EXIT_SUCCESS) {
 		if (conf.autols == 1 && cwd == 1)
 			reload_dirlist();
-		print_trashed_files(args, successfully_trashed, n);
-		print_reload_msg(_("%zu file(s) trashed\n"), trashed_files);
-		print_reload_msg(_("%zu total trashed file(s)\n"),
-			trash_n + trashed_files);
+
+		goto PRINT_TRASHED;
+
 	} else if (trashed_files > 0) {
 		/* An error occured, but at least one file was trashed as well.
 		 * If this file was in the current dir, the screen will be refreshed
@@ -1246,12 +1245,13 @@ trash_files_args(char **args)
 			xgetchar();
 			reload_dirlist();
 		}
-
-		print_trashed_files(args, successfully_trashed, n);
-		print_reload_msg(_("%zu file(s) trashed\n"), trashed_files);
-		print_reload_msg(_("%zu total trashed file(s)\n"),
-			trash_n + trashed_files);
 	}
+
+PRINT_TRASHED:
+	print_trashed_files(args, successfully_trashed, n);
+	print_reload_msg(_("%zu file(s) trashed\n"), trashed_files);
+	print_reload_msg(_("%zu total trashed file(s)\n"),
+		trash_n + trashed_files);
 
 	free(successfully_trashed);
 	return exit_status;

@@ -1051,7 +1051,7 @@ Mark the files you need via TAB and then press Enter or Right"
 
 #define TRASH_USAGE "Send one or multiple files to the trash can\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  t, trash [ELN/FILE... | list | clear | empty | del]\n\n\
+  t, trash [ELN/FILE... | list | empty | del]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Trash the file whose ELN is 12\n\
     t 12\n\
@@ -1062,7 +1062,7 @@ Mark the files you need via TAB and then press Enter or Right"
 - List currently trashed files\n\
     t (or 't list', or 't <TAB>')\n\
 - Remove/delete trashed files using a menu (permanent removal)\n\
-    t del\n\
+    t del (or 't del <TAB>')\n\
 - Remove/delete all files from the trash can (permanent removal)\n\
     t empty\n\
 - Untrash all trashed files (restore them to their original location)\n\
