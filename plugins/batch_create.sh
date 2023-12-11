@@ -8,7 +8,7 @@
 
 if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
-	printf "Create files in bulk.\n\nOpen a text editor to add files and/or directories to be created (file names endig with a slash will be taken as directory names). After saving the file and closing the editor, files will be created (via mkdir(1) and/or touch(1)).\n\n"
+	printf "Create files in bulk.\n\nOpen a text editor to add files and/or directories to be created (file names\nending with a slash will be taken as directory names). After saving the file\nand closing the editor, files will be created (via mkdir(1) and/or touch(1)).\n\n"
 	printf "\x1b[1mUSAGE\x1b[0m:\n  %s\n" "$name"
 	exit 0
 fi
