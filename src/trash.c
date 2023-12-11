@@ -341,7 +341,7 @@ del_trash_file_and_exit(char **file_suffix, char **info_file)
 	free(trash_file);
 
 	if (ret != EXIT_SUCCESS) {
-		xerror(_("trash: %s/%s: Failed removing trash file\nTry "
+		xerror(_("trash: '%s/%s': Failed removing trash file\nTry "
 			"removing it manually\n"), trash_files_dir, *file_suffix);
 	}
 
@@ -356,7 +356,7 @@ trash_file(const char *suffix, const struct tm *tm, char *file)
 {
 	struct stat attr;
 	if (lstat(file, &attr) == -1) {
-		xerror("trash: %s: %s\n", file, strerror(errno));
+		xerror("trash: '%s': %s\n", file, strerror(errno));
 		return errno;
 	}
 
@@ -382,7 +382,7 @@ trash_file(const char *suffix, const struct tm *tm, char *file)
 	 * current date and time. */
 	char *filename = strrchr(tmpfile, '/');
 	if (!filename || !*(++filename)) {
-		xerror(_("trash: %s: Error getting file name\n"), file);
+		xerror(_("trash: '%s': Error getting file name\n"), file);
 		return EXIT_FAILURE;
 	}
 
@@ -430,9 +430,9 @@ trash_file(const char *suffix, const struct tm *tm, char *file)
 
 	if (ret != EXIT_SUCCESS) {
 		if (mvcmd == 1)
-			xerror(_("trash: %s: Error moving file to Trash\n"), file);
+			xerror(_("trash: '%s': Error moving file to Trash\n"), file);
 		else
-			xerror(_("trash: %s: %s\n"), file, strerror(errno));
+			xerror(_("trash: '%s': %s\n"), file, strerror(errno));
 		free(file_suffix);
 		return errno;
 	}
@@ -445,7 +445,7 @@ trash_file(const char *suffix, const struct tm *tm, char *file)
 	int fd = 0;
 	FILE *info_fp = open_fwrite(info_file, &fd);
 	if (!info_fp) {
-		xerror("trash: %s: %s\n", info_file, strerror(errno));
+		xerror("trash: '%s': %s\n", info_file, strerror(errno));
 		return del_trash_file_and_exit(&file_suffix, &info_file);
 	}
 
@@ -454,7 +454,7 @@ trash_file(const char *suffix, const struct tm *tm, char *file)
 	/* Encode path to URL format (RF 2396) */
 	char *url_str = url_encode(tmpfile);
 	if (!url_str) {
-		xerror(_("trash: %s: Error encoding path\n"), file);
+		xerror(_("trash: '%s': Error encoding path\n"), file);
 		ret = EXIT_FAILURE;
 		goto END;
 	}
@@ -484,12 +484,12 @@ remove_file_from_trash(const char *name)
 	int tmp_err = 0, err_file = 0, err_info = 0;
 	struct stat a;
 	if (stat(rm_file, &a) == -1) {
-		xerror("trash: %s: %s\n", rm_file, strerror(errno));
+		xerror("trash: '%s': %s\n", rm_file, strerror(errno));
 		err_file = tmp_err = errno;
 	}
 	if (stat(rm_info, &a) == -1) {
 		if (err_file == EXIT_SUCCESS)
-			xerror("trash: %s: %s\n", rm_info, strerror(errno));
+			xerror("trash: '%s': %s\n", rm_info, strerror(errno));
 		err_info = tmp_err = errno;
 	}
 
@@ -547,7 +547,7 @@ remove_from_trash(char **args)
 	/* 1) List trashed files */
 	/* Change CWD to the trash directory. Otherwise, scandir(3) will fail */
 	if (xchdir(trash_files_dir, NO_TITLE) == -1) {
-		xerror("trash: %s: %s\n", trash_files_dir, strerror(errno));
+		xerror("trash: '%s': %s\n", trash_files_dir, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -557,7 +557,7 @@ remove_from_trash(char **args)
 			: (conf.case_sens_list == 1 ? xalphasort : alphasort_insensitive));
 
 	if (files_n <= -1) {
-		xerror("trash: %s: %s\n", trash_files_dir, strerror(errno));
+		xerror("trash: '%s': %s\n", trash_files_dir, strerror(errno));
 		return EXIT_FAILURE;
 	} else if (files_n > 0) {
 		printf(_("%sTrashed files%s\n\n"), BOLD, df_c);
@@ -569,14 +569,14 @@ remove_from_trash(char **args)
 		puts(_("trash: No trashed files"));
 		/* Restore CWD and return */
 		if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1)
-			xerror("trash: %s: %s\n", workspaces[cur_ws].path, strerror(errno));
+			xerror("trash: '%s': %s\n", workspaces[cur_ws].path, strerror(errno));
 
 		return EXIT_SUCCESS;
 	}
 
 	/* Restore CWD and continue */
 	if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
-		xerror("trash: %s: %s\n", workspaces[cur_ws].path, strerror(errno));
+		xerror("trash: '%s': %s\n", workspaces[cur_ws].path, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -625,7 +625,7 @@ remove_from_trash(char **args)
 			for (j = 0; j < (size_t)files_n; j++) {
 				ret = remove_file_from_trash(trash_files[j]->d_name);
 				if (ret != EXIT_SUCCESS) {
-					xerror(_("trash: %s: Cannot remove file from the "
+					xerror(_("trash: '%s': Cannot remove file from the "
 						"trash can\n"), trash_files[j]->d_name);
 					exit_status = EXIT_FAILURE;
 				} else {
@@ -680,7 +680,7 @@ remove_from_trash(char **args)
 
 		ret = remove_file_from_trash(trash_files[rm_num - 1]->d_name);
 		if (ret != EXIT_SUCCESS) {
-			xerror(_("trash: %s: Cannot remove file from the trash can\n"),
+			xerror(_("trash: '%s': Cannot remove file from the trash can\n"),
 				trash_files[rm_num - 1]->d_name);
 			exit_status = EXIT_FAILURE;
 		} else {
@@ -757,7 +757,7 @@ untrash_file(char *file)
 	/* Decode original path's URL format */
 	char *url_decoded = url_decode(orig_path);
 	if (!url_decoded) {
-		xerror(_("undel: %s: Error decoding original path\n"), orig_path);
+		xerror(_("undel: '%s': Error decoding original path\n"), orig_path);
 		free(orig_path);
 		return EXIT_FAILURE;
 	}
@@ -783,7 +783,7 @@ untrash_file(char *file)
 	}
 
 	if (access(parent, F_OK | X_OK | W_OK) != 0) {
-		xerror("undel: %s: %s\n", parent, strerror(errno));
+		xerror("undel: '%s': %s\n", parent, strerror(errno));
 		free(parent);
 		free(url_decoded);
 		return errno;
@@ -793,7 +793,7 @@ untrash_file(char *file)
 
 	struct stat a;
 	if (stat(url_decoded, &a) != -1) {
-		xerror(_("undel: %s: Destination file exists\n"), url_decoded);
+		xerror(_("undel: '%s': Destination file exists\n"), url_decoded);
 		free(url_decoded);
 		return EEXIST;
 	}
@@ -810,7 +810,7 @@ untrash_file(char *file)
 				return ret;
 			}
 		} else {
-			xerror("undel: %s: %s\n", undel_file, strerror(errno));
+			xerror("undel: '%s': %s\n", undel_file, strerror(errno));
 			free(url_decoded);
 			return errno;
 		}
@@ -821,7 +821,7 @@ untrash_file(char *file)
 	char *cmd[] = {"rm", "-rf", "--", undel_info, NULL};
 	ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	if (ret != EXIT_SUCCESS) {
-		xerror(_("undel: %s: Error removing info file\n"), undel_info);
+		xerror(_("undel: '%s': Error removing info file\n"), undel_info);
 		return ret;
 	}
 
@@ -907,7 +907,7 @@ untrash_function(char **comm)
 
 	/* Change CWD to the trash directory to make scandir(3) work. */
 	if (xchdir(trash_files_dir, NO_TITLE) == -1) {
-		err(0, NOPRINT_PROMPT, "undel: %s: %s\n",
+		err(0, NOPRINT_PROMPT, "undel: '%s': %s\n",
 			trash_files_dir, strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -921,7 +921,7 @@ untrash_function(char **comm)
 		puts(_("trash: No trashed files"));
 
 		if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
-			err(0, NOPRINT_PROMPT, "undel: %s: %s\n",
+			err(0, NOPRINT_PROMPT, "undel: '%s': %s\n",
 			    workspaces[cur_ws].path, strerror(errno));
 			return EXIT_FAILURE;
 		}
@@ -946,7 +946,7 @@ untrash_function(char **comm)
 
 	/* Go back to previous path */
 	if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
-		err(0, NOPRINT_PROMPT, "undel: %s: %s\n",
+		err(0, NOPRINT_PROMPT, "undel: '%s': %s\n",
 			workspaces[cur_ws].path, strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -1052,7 +1052,7 @@ static int
 list_trashed_files(void)
 {
 	if (xchdir(trash_files_dir, NO_TITLE) == -1) {
-		err(0, NOPRINT_PROMPT, "trash: %s: %s\n",
+		err(0, NOPRINT_PROMPT, "trash: '%s': %s\n",
 			trash_files_dir, strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -1081,7 +1081,7 @@ list_trashed_files(void)
 	free(trash_files);
 
 	if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
-		err(0, NOPRINT_PROMPT, "trash: %s: %s\n",
+		err(0, NOPRINT_PROMPT, "trash: '%s': %s\n",
 			workspaces[cur_ws].path, strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -1126,13 +1126,13 @@ check_trash_file(char *deq_file)
 
 	struct stat a;
 	if (lstat(deq_file, &a) == -1) {
-		xerror(_("trash: %s: %s\n"), deq_file, strerror(errno));
+		xerror(_("trash: '%s': %s\n"), deq_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
 	/* Do not trash block or character devices */
 	if (S_ISBLK(a.st_mode) || S_ISCHR(a.st_mode)) {
-		xerror(_("trash: %s: Cannot trash a %s device\n"), deq_file,
+		xerror(_("trash: '%s': Cannot trash a %s device\n"), deq_file,
 			S_ISCHR(a.st_mode) ? _("character") : _("block"));
 		return EXIT_FAILURE;
 	}
