@@ -2092,8 +2092,10 @@ remove_files(char **args)
 	rm_cmd[1] = have_dirs >= 1 ? "-rf" : "-f";
 	rm_cmd[2] = "--";
 
-	if (launch_execv(rm_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+	if (launch_execv(rm_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 		exit_status = EXIT_FAILURE;
+		press_key_to_continue();
+	}
 
 	if (is_sel && exit_status == EXIT_SUCCESS)
 		deselect_all();
