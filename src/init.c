@@ -660,11 +660,11 @@ validate_custom_shell(char **file)
 	/* check_etc_shells() sets errno to a positive value only if /etc/shells
 	 * couldn't be found/accessed. */
 	if (tmp_errno == 0) {
-		err('w', PRINT_PROMPT, _("%s: %s: Invalid shell. Falling back to "
+		err('w', PRINT_PROMPT, _("%s: '%s': Invalid shell. Falling back to "
 			"'%s'.\nCheck '%s' for a list of valid shells.\n"),
 			PROGRAM_NAME, *file ? *file : "NULL", def_shell, shells_file);
 	} else {
-		err('w', PRINT_PROMPT, _("%s: %s: %s.\nCannot validate shell. "
+		err('w', PRINT_PROMPT, _("%s: '%s': %s.\nCannot validate shell. "
 			"Falling back to '%s'.\n"), PROGRAM_NAME, shells_file,
 			strerror(tmp_errno), def_shell);
 	}
@@ -760,8 +760,8 @@ get_user_data(void)
 		homedir = p ? p : pw->pw_dir;
 
 		if (homedir == p && p && (stat(p, &a) == -1 || !S_ISDIR(a.st_mode))) {
-			err('e', PRINT_PROMPT, _("%s: %s: Home directory not found\n"
-				"Falling back to %s\n"), PROGRAM_NAME, p, pw->pw_dir);
+			err('e', PRINT_PROMPT, _("%s: '%s': Home directory not found\n"
+				"Falling back to '%s'\n"), PROGRAM_NAME, p, pw->pw_dir);
 			homedir = pw->pw_dir;
 		}
 	} else {
@@ -776,7 +776,7 @@ get_user_data(void)
 
 	if (homedir == pw->pw_dir && (!homedir
 	|| stat(homedir, &a) == -1 || !S_ISDIR(a.st_mode))) {
-		xerror(_("%s: %s: Invalid home directory in the password "
+		xerror(_("%s: '%s': Invalid home directory in the password "
 			"database.\nSomething is really wrong. Exiting.\n"), PROGRAM_NAME,
 			homedir ? homedir : "!");
 		exit(errno);
@@ -1274,7 +1274,7 @@ load_remotes(void)
 	int fd;
 	FILE *fp = open_fread(remotes_file, &fd);
 	if (!fp) {
-		xerror("%s: %s\n", remotes_file, strerror(errno));
+		xerror("'%s': %s\n", remotes_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -1467,7 +1467,7 @@ load_prompts(void)
 	int fd;
 	FILE *fp = open_fread(prompts_file, &fd);
 	if (!fp) {
-		xerror("%s: %s\n", prompts_file, strerror(errno));
+		xerror("'%s': %s\n", prompts_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 

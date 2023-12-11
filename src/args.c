@@ -325,7 +325,7 @@ set_cur_workspace(void)
 		return;
 	}
 
-	xerror("%s: /: %s\n", PROGRAM_NAME, strerror(errno));
+	xerror("%s: '/': %s\n", PROGRAM_NAME, strerror(errno));
 	exit(EXIT_FAILURE);
 }
 
@@ -593,7 +593,7 @@ open_reg_exit(char *filename, const int url, const int preview)
 	char *homedir = (xargs.secure_env == 1 || xargs.secure_env_full == 1)
 		? get_home_sec_env() : getenv("HOME");
 	if (!homedir) {
-		xerror(_("%s: Could not retrieve the home directory\n"), PROGRAM_NAME);
+		xerror(_("%s: Cannot retrieve the home directory\n"), PROGRAM_NAME);
 		exit(EXIT_FAILURE);
 	}
 
@@ -655,7 +655,7 @@ set_sort(const char *arg)
 		n = atoi(arg);
 
 	if (n < 0 || n > SORT_TYPES) {
-		fprintf(stderr, _("%s: -z: %s: Valid values are 0-%d\n"),
+		fprintf(stderr, _("%s: -z: '%s': Valid values are 0-%d\n"),
 			PROGRAM_NAME, arg, SORT_TYPES);
 		exit(EXIT_FAILURE);
 	}
@@ -682,7 +682,7 @@ open_preview_file(char *file, const int mode)
 	if (IS_FILE_URI(fpath)) {
 		fpath = file + 7;
 		if (stat(fpath, &attr) == -1) {
-			xerror("%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
+			xerror("%s: '%s': %s\n", PROGRAM_NAME, file, strerror(errno));
 			exit(errno);
 		}
 		url = 0;
@@ -692,7 +692,7 @@ open_preview_file(char *file, const int mode)
 	if (is_url(fpath) == EXIT_FAILURE) {
 		url = 0;
 		if (*fpath != '~' && stat(fpath, &attr) == -1) {
-			xerror("%s: %s: %s\n", PROGRAM_NAME, fpath, strerror(errno));
+			xerror("%s: '%s': %s\n", PROGRAM_NAME, fpath, strerror(errno));
 			exit(errno);
 		}
 	}
@@ -773,7 +773,7 @@ set_fuzzy_algo(const char *opt)
 	int a = opt ? atoi(opt) : -1;
 
 	if (a < 1 || a > FUZZY_ALGO_MAX) {
-		fprintf(stderr, _("%s: %s: Invalid fuzzy algorithm. Valid "
+		fprintf(stderr, _("%s: '%s': Invalid fuzzy algorithm. Valid "
 			"values are either 1 or 2.\n"), PROGRAM_NAME, opt ? opt : "NULL");
 		exit(EXIT_FAILURE);
 	}
@@ -787,7 +787,7 @@ set_bell_style(const char *opt)
 	int a = atoi(opt);
 
 	if (!is_number(opt) || a < 0 || a > 3) {
-		fprintf(stderr, _("%s: %s: Invalid bell style. Valid values "
+		fprintf(stderr, _("%s: '%s': Invalid bell style. Valid values "
 			"are 0:none, 1:audible, 2:visible (requires readline >= 8.1), "
 			"3:flash. Defaults to 'visible', and, if not possible, 'none'.\n"),
 			PROGRAM_NAME, opt);
@@ -832,7 +832,7 @@ set_alt_config_dir(char *dir)
 		}
 	} else {
 		alt_config_dir = savestring(dir, strlen(dir));
-		err(ERR_NO_LOG, PRINT_PROMPT, _("%s: %s: Using alternative "
+		err(ERR_NO_LOG, PRINT_PROMPT, _("%s: '%s': Using alternative "
 			"configuration directory\n"), PROGRAM_NAME, alt_config_dir);
 	}
 
@@ -850,7 +850,7 @@ set_custom_selfile(char *file)
 		return;
 	}
 
-	err('e', PRINT_PROMPT, _("%s: %s: Error setting custom "
+	err('e', PRINT_PROMPT, _("%s: '%s': Error setting custom "
 		"selections file\n"), PROGRAM_NAME, file);
 }
 
@@ -864,7 +864,7 @@ stat_file(char *file)
 	char *p = (char *)NULL;
 	if (*file == '~') {
 		if (!(p = tilde_expand(file))) {
-			xerror(_("%s: %s: Error expanding tilde\n"), PROGRAM_NAME, file);
+			xerror(_("%s: '%s': Error expanding tilde\n"), PROGRAM_NAME, file);
 			exit(EXIT_FAILURE);
 		}
 	} else {
@@ -873,7 +873,7 @@ stat_file(char *file)
 
 	struct stat a;
 	if (stat(p, &a) == -1) {
-		xerror("%s: %s: %s\n", PROGRAM_NAME, p, strerror(errno));
+		xerror("%s: '%s': %s\n", PROGRAM_NAME, p, strerror(errno));
 		if (p != file)
 			free(p);
 		exit(errno);
@@ -956,14 +956,14 @@ resolve_path(char *file)
 	if (*file == '.') {
 		_path = normalize_path(file, strlen(file));
 		if (!_path) {
-			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
+			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, file, strerror(errno));
 			exit(errno);
 		}
 
 	} else if (*file == '~') {
 		_path = tilde_expand(file);
 		if (!_path) {
-			fprintf(stderr, _("%s: %s: Error expanding tilde\n"),
+			fprintf(stderr, _("%s: '%s': Error expanding tilde\n"),
 				PROGRAM_NAME, file);
 			exit(EXIT_FAILURE);
 		}
@@ -976,7 +976,7 @@ resolve_path(char *file)
 		char *cwd = get_cwd(tmp, sizeof(tmp), 0);
 
 		if (!cwd || !*cwd) {
-			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
+			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, file, strerror(errno));
 			exit(errno);
 		}
 
@@ -1003,13 +1003,13 @@ resolve_starting_path(char *file)
 
 	struct stat a;
 	if (stat(_path, &a) == -1) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
+		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, file, strerror(errno));
 		free(_path);
 		exit(errno);
 	}
 
 	if (!S_ISDIR(a.st_mode)) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(ENOTDIR));
+		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, file, strerror(ENOTDIR));
 		free(_path);
 		exit(ENOTDIR);
 	}
@@ -1030,11 +1030,11 @@ set_starting_path(char *_path)
 
 	} else { /* Error changing directory */
 		if (xargs.list_and_quit == 1) {
-			xerror("%s: %s: %s\n", PROGRAM_NAME, _path, strerror(errno));
+			xerror("%s: '%s': %s\n", PROGRAM_NAME, _path, strerror(errno));
 			exit(EXIT_FAILURE);
 		}
 
-		err('w', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
+		err('w', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
 			_path, strerror(errno));
 	}
 }
@@ -1071,7 +1071,7 @@ set_alt_profile(const char *name)
 		return;
 	}
 
-	fprintf(stderr, _("%s: %s: Invalid profile name\n"),
+	fprintf(stderr, _("%s: '%s': Invalid profile name\n"),
 		PROGRAM_NAME, name);
 	exit(EXIT_FAILURE);
 #else
@@ -1118,7 +1118,7 @@ set_workspace(const char *opt)
 	}
 
 ERROR:
-	fprintf(stderr, _("%s: %s: Invalid workspace. Valid "
+	fprintf(stderr, _("%s: '%s': Invalid workspace. Valid "
 		"values are 1-8.\n"), PROGRAM_NAME, opt);
 	exit(EXIT_FAILURE);
 }
@@ -1251,7 +1251,7 @@ set_tab_mode(const char *opt)
 	case 2: set_smenutab(); break;
 	case 3: set_fnftab(); break;
 	default:
-		fprintf(stderr, _("%s: %s: Valid values are 0-3\n"), PROGRAM_NAME, opt);
+		fprintf(stderr, _("%s: '%s': Valid values are 0-3\n"), PROGRAM_NAME, opt);
 		exit(EXIT_FAILURE);
 	}
 }

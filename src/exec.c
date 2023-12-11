@@ -952,7 +952,7 @@ print_alias(const char *name)
 		}
 	}
 
-	xerror(_("%s: %s: No such alias\n"), PROGRAM_NAME, name);
+	xerror(_("%s: '%s': No such alias\n"), PROGRAM_NAME, name);
 	return EXIT_FAILURE;
 }
 
@@ -1036,7 +1036,7 @@ toggle_exec_func(char **args)
 		}
 
 		if (lstat(args[i], &attr) == -1) {
-			xerror("stat: %s: %s\n", args[i], strerror(errno));
+			xerror("stat: '%s': %s\n", args[i], strerror(errno));
 			exit_status = EXIT_FAILURE;
 			continue;
 		}
@@ -1070,7 +1070,7 @@ pin_function(char *arg)
 	}
 
 	if (pinned_dir)
-		printf(_("Pinned file: %s\n"), pinned_dir);
+		printf(_("Pinned file: '%s'\n"), pinned_dir);
 	else
 		puts(_("No pinned file"));
 
@@ -1126,7 +1126,7 @@ export_files_function(char **args)
 
 	char *ret = export_files(args, 1);
 	if (ret) {
-		printf(_("Files exported to: %s\n"), ret);
+		printf(_("Files exported to '%s'\n"), ret);
 		free(ret);
 		return EXIT_SUCCESS;
 	}
@@ -1433,7 +1433,7 @@ autocd_dir(char *tmp)
 	if (conf.autocd) {
 		ret = cd_function(tmp, CD_PRINT_ERROR);
 	} else {
-		xerror(_("%s: cd: %s: Is a directory\n"), PROGRAM_NAME, tmp);
+		xerror(_("%s: cd: '%s': Is a directory\n"), PROGRAM_NAME, tmp);
 		ret = EISDIR;
 	}
 	free(tmp);
@@ -1656,7 +1656,7 @@ toggle_full_dir_size(const char *arg)
 	}
 
 	if (*arg != 'o') {
-		xerror(_("%s: %s: Invalid argument. Try 'fz -h'\n"), PROGRAM_NAME, arg);
+		xerror(_("%s: '%s': Invalid argument. Try 'fz -h'\n"), PROGRAM_NAME, arg);
 		return EXIT_FAILURE;
 	}
 
@@ -1682,7 +1682,7 @@ toggle_full_dir_size(const char *arg)
 		return EXIT_SUCCESS;
 	}
 
-	xerror(_("%s: %s: Invalid argument. Try 'fz -h'\n"), PROGRAM_NAME, arg);
+	xerror(_("%s: '%s': Invalid argument. Try 'fz -h'\n"), PROGRAM_NAME, arg);
 	return EXIT_FAILURE;
 }
 
@@ -1937,7 +1937,7 @@ dirhist_function(char *dir)
 	if (*dir == '!' && is_number(dir + 1)) {
 		int n = atoi(dir + 1);
 		if (n <= 0 || n > dirhist_total_index) {
-			xerror(_("dh: %d: No such entry number\n"), n);
+			xerror(_("dh: '%d': No such entry number\n"), n);
 			return EXIT_FAILURE;
 		}
 
@@ -1998,7 +1998,7 @@ unset_function(char **var)
 	for (i = 0; var[i]; i++) {
 		if (unsetenv(var[i]) == -1) {
 			status = errno;
-			xerror("unset: %s: %s\n", var[i], strerror(errno));
+			xerror("unset: '%s': %s\n", var[i], strerror(errno));
 		}
 	}
 

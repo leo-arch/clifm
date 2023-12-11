@@ -1762,7 +1762,7 @@ expand_file_type(char ***substr)
 			continue;
 		}
 
-		xerror(_("%s: %c: Invalid file type filter. Run 'help "
+		xerror(_("%s: '%c': Invalid file type filter. Run 'help "
 			"file-filters' for more information\n"), PROGRAM_NAME,
 			(*substr)[i][1]);
 	}
@@ -1944,7 +1944,7 @@ expand_glob(char ***substr, const int *glob_array, const size_t glob_n)
 					glob_cmd[j] = esc_str;
 					j++;
 				} else {
-					xerror(_("%s: %s: Error quoting file name\n"),
+					xerror(_("%s: '%s': Error quoting file name\n"),
 						PROGRAM_NAME, globbuf.gl_pathv[i]);
 					size_t k = 0;
 					for (k = 0; k < j; k++)
@@ -2028,7 +2028,7 @@ expand_word(char ***substr, const int *word_array, const size_t word_n)
 					word_cmd[j] = esc_str;
 					j++;
 				} else {
-					xerror(_("%s: %s: Error quoting file name\n"),
+					xerror(_("%s: '%s': Error quoting file name\n"),
 						PROGRAM_NAME, wordbuf.we_wordv[i]);
 
 					size_t k = 0;
@@ -2354,7 +2354,7 @@ expand_symlink(char **substr)
 
 	char *real_path = realpath(*substr, NULL);
 	if (!real_path) {
-		xerror("realpath: %s: %s\n", *substr, strerror(errno));
+		xerror("realpath: '%s': %s\n", *substr, strerror(errno));
 		return (-1);
 	}
 

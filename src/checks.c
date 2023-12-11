@@ -461,7 +461,7 @@ get_sudo_path(void)
 	int ret = errno;
 
 	if (!sudo_path) {
-		xerror("%s: %s: %s\n", PROGRAM_NAME, sudo_cmd, strerror(ENOENT));
+		xerror("%s: '%s': %s\n", PROGRAM_NAME, sudo_cmd, strerror(ENOENT));
 		errno = ret;
 		return (char *)NULL;
 	}
@@ -484,7 +484,7 @@ check_immutable_bit(char *file)
 
 	fd = open(file, O_RDONLY);
 	if (fd == -1) {
-		xerror("open: %s: %s\n", file, strerror(errno));
+		xerror("open: '%s': %s\n", file, strerror(errno));
 		return (-1);
 	}
 
@@ -493,7 +493,7 @@ check_immutable_bit(char *file)
 	close(fd);
 
 	if (ret == -1) {
-		xerror("ioctl: %s: %s\n", file, strerror(saved_errno));
+		xerror("ioctl: '%s': %s\n", file, strerror(saved_errno));
 		return (-1);
 	}
 
@@ -899,7 +899,7 @@ truncate_file(char *file, const int max, const int check_dups)
 	if (stat(file, &attr) == -1) {
 		fp = open_fwrite(file, &fd);
 		if (!fp) {
-			err(0, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, file,
+			err(0, NOPRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME, file,
 				strerror(errno));
 		} else {
 			fclose(fp);
@@ -911,7 +911,7 @@ truncate_file(char *file, const int max, const int check_dups)
 	/* Once we know the files exists, keep only MAX entries. */
 	fp = open_fread(file, &fd);
 	if (!fp) {
-		err(0, NOPRINT_PROMPT, "%s: log: %s: %s\n", PROGRAM_NAME,
+		err(0, NOPRINT_PROMPT, "%s: log: '%s': %s\n", PROGRAM_NAME,
 		    file, strerror(errno));
 		return;
 	}
@@ -951,7 +951,7 @@ truncate_file(char *file, const int max, const int check_dups)
 #ifndef HAVE_DPRINTF
 	FILE *fpp = fopen(tmp, "w");
 	if (!fpp) {
-		err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, tmp,
+		err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME, tmp,
 			strerror(errno));
 		fclose(fp);
 		free(tmp);

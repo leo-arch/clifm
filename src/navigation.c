@@ -60,7 +60,7 @@ pwd_function(const char *arg)
 			puts(PWD_DESC);
 			return EXIT_SUCCESS;
 		} else if (arg[1] != 'L') {
-			xerror("pwd: %s: Invalid option\nUsage: pwd [-LP]\n", arg);
+			xerror("pwd: '%s': Invalid option\nUsage: pwd [-LP]\n", arg);
 			return EXIT_FAILURE;
 		}
 	}
@@ -86,7 +86,7 @@ pwd_function(const char *arg)
 	char p[PATH_MAX]; *p = '\0';
 	char *real_path = realpath(pwd, p);
 	if (!real_path) {
-		xerror("pwd: %s: %s\n", pwd, strerror(errno));
+		xerror("pwd: '%s': %s\n", pwd, strerror(errno));
 		return errno;
 	}
 
@@ -307,7 +307,7 @@ switch_workspace(const int tmp_ws)
 		    strlen(workspaces[cur_ws].path));
 	} else {
 		if (access(workspaces[tmp_ws].path, R_OK | X_OK) != EXIT_SUCCESS) {
-			xerror("ws: %s: %s\n", workspaces[tmp_ws].path, strerror(errno));
+			xerror("ws: '%s': %s\n", workspaces[tmp_ws].path, strerror(errno));
 			free(workspaces[tmp_ws].path);
 			workspaces[tmp_ws].path = savestring(workspaces[cur_ws].path,
 				strlen(workspaces[cur_ws].path));
@@ -315,7 +315,7 @@ switch_workspace(const int tmp_ws)
 	}
 
 	if (xchdir(workspaces[tmp_ws].path, SET_TITLE) == -1) {
-		xerror("ws: %s: %s\n", workspaces[tmp_ws].path, strerror(errno));
+		xerror("ws: '%s': %s\n", workspaces[tmp_ws].path, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -379,7 +379,7 @@ unset_workspace(char *str)
 
 	char *name = dequote_str(str, 0);
 	if (!name) {
-		xerror("ws: %s: Error dequoting name\n", str);
+		xerror("ws: '%s': Error dequoting name\n", str);
 		return EXIT_FAILURE;
 	}
 
@@ -392,23 +392,23 @@ unset_workspace(char *str)
 	}
 
 	if (n < 1 || n > MAX_WS) {
-		xerror(_("ws: %s: No such workspace (valid workspaces: "
+		xerror(_("ws: '%s': No such workspace (valid workspaces: "
 			"1-%d)\n"), name, MAX_WS);
 		goto ERROR;
 	}
 
 	n--;
 	if (n == cur_ws) {
-		xerror(_("ws: %s: Is the current workspace\n"), name);
+		xerror(_("ws: '%s': Is the current workspace\n"), name);
 		goto ERROR;
 	}
 
 	if (!workspaces[n].path) {
-		xerror(_("ws: %s: Already unset\n"), name);
+		xerror(_("ws: '%s': Already unset\n"), name);
 		goto ERROR;
 	}
 
-	printf(_("ws: %s: Workspace unset\n"), name);
+	printf(_("ws: '%s': Workspace unset\n"), name);
 	free(name);
 
 	free(workspaces[n].path);
@@ -583,14 +583,14 @@ static int
 backdir_directory(char *dir, const char *str)
 {
 	if (!dir) {
-		xerror(_("bd: %s: Error dequoting string\n"), str);
+		xerror(_("bd: '%s': Error dequoting string\n"), str);
 		return EXIT_FAILURE;
 	}
 
 	if (*dir == '~') {
 		char *exp_path = tilde_expand(dir);
 		if (!exp_path) {
-			xerror(_("bd: %s: Error expanding tilde\n"), dir);
+			xerror(_("bd: '%s': Error expanding tilde\n"), dir);
 			return EXIT_FAILURE;
 		}
 		dir = exp_path;
@@ -640,7 +640,7 @@ help_or_root(const char *str)
 	}
 
 	if (*workspaces[cur_ws].path == '/' && !workspaces[cur_ws].path[1]) {
-		puts(_("bd: /: No parent directory"));
+		puts(_("bd: '/': No parent directory"));
 		return EXIT_SUCCESS;
 	}
 
@@ -786,7 +786,7 @@ go_home(const int cd_flag)
 	if (xchdir(user.home, SET_TITLE) != EXIT_SUCCESS) {
 		int tmp_err = errno;
 		if (cd_flag == CD_PRINT_ERROR)
-			xerror("cd: %s: %s\n", user.home, strerror(tmp_err));
+			xerror("cd: '%s': %s\n", user.home, strerror(tmp_err));
 		return tmp_err;
 	}
 
@@ -822,7 +822,7 @@ change_to_path(char *new_path, const int cd_flag)
 
 	if (!q) {
 		if (cd_flag == CD_PRINT_ERROR)
-			xerror(_("cd: %s: Error normalizing path\n"), new_path);
+			xerror(_("cd: '%s': Error normalizing path\n"), new_path);
 		free(p);
 		return EXIT_FAILURE;
 	}
@@ -831,7 +831,7 @@ change_to_path(char *new_path, const int cd_flag)
 	if (xchdir(q, SET_TITLE) != EXIT_SUCCESS) {
 		int tmp_err = errno;
 		if (cd_flag == CD_PRINT_ERROR)
-			xerror("cd: %s: %s\n", new_path, strerror(tmp_err));
+			xerror("cd: '%s': %s\n", new_path, strerror(tmp_err));
 
 		free(q);
 
@@ -1038,7 +1038,7 @@ change_to_dirhist_num(int n)
 
 	int ret = xchdir(old_pwd[n], SET_TITLE);
 	if (ret != 0) {
-		xerror("history: %s: %s\n", old_pwd[n], strerror(errno));
+		xerror("history: '%s': %s\n", old_pwd[n], strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -1127,7 +1127,7 @@ back_function(char **args)
 	if (xchdir(old_pwd[dirhist_cur_index], SET_TITLE) == EXIT_SUCCESS)
 		return set_path(old_pwd[dirhist_cur_index]);
 
-	xerror("cd: %s: %s\n", old_pwd[dirhist_cur_index], strerror(errno));
+	xerror("cd: '%s': %s\n", old_pwd[dirhist_cur_index], strerror(errno));
 
 	/* Invalidate this entry */
 	*old_pwd[dirhist_cur_index] = KEY_ESC;
@@ -1168,7 +1168,7 @@ forth_function(char **args)
 	if (xchdir(old_pwd[dirhist_cur_index], SET_TITLE) == EXIT_SUCCESS)
 		return set_path(old_pwd[dirhist_cur_index]);
 
-	xerror("cd: %s: %s\n", old_pwd[dirhist_cur_index], strerror(errno));
+	xerror("cd: '%s': %s\n", old_pwd[dirhist_cur_index], strerror(errno));
 
 	/* Invalidate this entry */
 	*old_pwd[dirhist_cur_index] = KEY_ESC;

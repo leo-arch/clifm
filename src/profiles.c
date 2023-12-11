@@ -131,7 +131,7 @@ profile_set(const char *prof)
 	/* Check if prof is a valid profile */
 	int found = check_profile(prof);
 	if (found == -1) {
-		xerror(_("pf: %s: No such profile\nTo add a new "
+		xerror(_("pf: '%s': No such profile\nTo add a new "
 			"profile enter 'pf add PROFILE'\n"), prof);
 		return EXIT_FAILURE;
 	}
@@ -259,7 +259,7 @@ profile_set(const char *prof)
 	}
 
 	if (xchdir(workspaces[cur_ws].path, SET_TITLE) == -1) {
-		xerror("pf: %s: %s\n", workspaces[cur_ws].path, strerror(errno));
+		xerror("pf: '%s': %s\n", workspaces[cur_ws].path, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -281,12 +281,12 @@ profile_add(const char *prof)
 
 	int found = check_profile(prof);
 	if (found != -1) {
-		xerror(_("pf: %s: Profile already exists\n"), prof);
+		xerror(_("pf: '%s': Profile already exists\n"), prof);
 		return EXIT_FAILURE;
 	}
 
 	if (!home_ok) {
-		xerror(_("pf: %s: Cannot create profile: Home directory "
+		xerror(_("pf: '%s': Cannot create profile: Home directory "
 			"not found\n"), prof);
 		return EXIT_FAILURE;
 	}
@@ -300,7 +300,7 @@ profile_add(const char *prof)
 	/* #### CREATE THE CONFIG DIR #### */
 	char *tmp_cmd[] = {"mkdir", "-p", nconfig_dir, NULL};
 	if (launch_execv(tmp_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
-		xerror(_("pf: mkdir: %s: Error creating "
+		xerror(_("pf: mkdir: '%s': Error creating "
 			"configuration directory\n"), nconfig_dir);
 		free(nconfig_dir);
 		return EXIT_FAILURE;
@@ -358,7 +358,7 @@ profile_add(const char *prof)
 
 		get_profile_names();
 	} else {
-		xerror(_("pf: %s: Error creating profile\n"), prof);
+		xerror(_("pf: 's': Error creating profile\n"), prof);
 	}
 
 	return exit_status;
@@ -379,7 +379,7 @@ profile_del(const char *prof)
 	/* Check if prof is a valid profile */
 	int found = check_profile(prof);
 	if (found == -1) {
-		xerror(_("pf: %s: No such profile\n"), prof);
+		xerror(_("pf: '%s': No such profile\n"), prof);
 		return EXIT_FAILURE;
 	}
 
@@ -392,7 +392,7 @@ profile_del(const char *prof)
 	free(tmp);
 
 	if (ret != EXIT_SUCCESS) {
-		xerror(_("pf: %s: Error removing profile\n"), prof);
+		xerror(_("pf: '%s': Error removing profile\n"), prof);
 		return ret;
 	}
 
@@ -447,7 +447,7 @@ create_profile(const char *name)
 		if (validate_profile_name(name) == EXIT_SUCCESS)
 			return profile_add(name);
 
-		xerror(_("pf: %s: Invalid profile name\n"), name);
+		xerror(_("pf: '%s': Invalid profile name\n"), name);
 		return EXIT_FAILURE;
 	}
 
@@ -492,7 +492,7 @@ rename_profile(char **args)
 	}
 
 	if (validate_profile_name(args[1]) != EXIT_SUCCESS) {
-		xerror(_("pf: %s: Invalid profile name\n"), args[1]);
+		xerror(_("pf: '%s': Invalid profile name\n"), args[1]);
 		return EXIT_FAILURE;
 	}
 
@@ -509,7 +509,7 @@ rename_profile(char **args)
 
 	int src_pf_index = check_profile(args[0]);
 	if (src_pf_index == -1) {
-		xerror(_("pf: %s: No such profile\n"), args[0]);
+		xerror(_("pf: '%s': No such profile\n"), args[0]);
 		return EXIT_FAILURE;
 	}
 
@@ -519,7 +519,7 @@ rename_profile(char **args)
 
 	struct stat a;
 	if (lstat(src_pf_name, &a) == -1) {
-		xerror("pf: %s: %s\n", src_pf_name, strerror(errno));
+		xerror("pf: '%s': %s\n", src_pf_name, strerror(errno));
 		return errno;
 	}
 
@@ -545,7 +545,7 @@ rename_profile(char **args)
 		(len + 1), sizeof(char));
 	xstrsncpy(profile_names[src_pf_index], args[1], len + 1);
 
-	printf(_("pf: %s: Profile successfully renamed to %s%s%s\n"),
+	printf(_("pf: '%s': Profile successfully renamed to %s%s%s\n"),
 		args[0], BOLD, args[1], df_c);
 
 	return EXIT_SUCCESS;

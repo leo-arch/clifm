@@ -72,7 +72,7 @@ xclearenv(void)
 		memcpy(namebuf, environ[0], len);
 		namebuf[len] = '\0';
 		if (unsetenv(namebuf) == -1) {
-			xerror("%s: unsetenv: %s: %s\n", PROGRAM_NAME,
+			xerror("%s: unsetenv: '%s': %s\n", PROGRAM_NAME,
 				namebuf, strerror(errno));
 			exit(EXIT_FAILURE);
 		}
@@ -108,7 +108,7 @@ static void
 xsetenv(const char *name, const char *value)
 {
 	if (setenv(name, value, 1) == -1)
-		xerror("%s: setenv: %s: %s\n", PROGRAM_NAME, name, strerror(errno));
+		xerror("%s: setenv: '%s': %s\n", PROGRAM_NAME, name, strerror(errno));
 }
 
 /* See https://www.oreilly.com/library/view/secure-programming-cookbook/0596003943/ch01s09.html */
@@ -356,7 +356,7 @@ clean_cmd(const char *str)
 		*p = ' ';
 
 	if (q) {
-		err('w', PRINT_PROMPT, _("%s: %s: Only command base names "
+		err('w', PRINT_PROMPT, _("%s: '%s': Only command base names "
 			"are allowed. Ex: 'nano' instead of '/usr/bin/nano'\n"),
 			PROGRAM_NAME, str);
 		return EXIT_FAILURE;
@@ -399,7 +399,7 @@ sanitize_cmd(const char *str, const int type)
 	}
 
 	if (exit_status == EXIT_FAILURE) {
-		err('w', PRINT_PROMPT, "%s: %s: %s\n",
+		err('w', PRINT_PROMPT, "%s: '%s': %s\n",
 			PROGRAM_NAME, str, _(UNSAFE_CMD));
 		return EXIT_FAILURE;
 	}

@@ -1265,7 +1265,7 @@ edit_prompts_file(char *app)
 
 	struct stat a;
 	if (stat(prompts_file, &a) == -1) {
-		xerror("prompt: %s: %s\n", prompts_file, strerror(errno));
+		xerror("prompt: '%s': %s\n", prompts_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 

@@ -1021,7 +1021,7 @@ edit_colorscheme(char *app)
 	snprintf(file, sizeof(file), "%s/%s.clifm", colors_dir, cur_cscheme); /* NOLINT */
 	if (stat(file, &attr) == -1
 	&& import_color_scheme(cur_cscheme) != EXIT_SUCCESS) {
-		xerror(_("cs: %s: No such color scheme\n"), cur_cscheme);
+		xerror(_("cs: '%s': No such color scheme\n"), cur_cscheme);
 		return EXIT_FAILURE;
 	}
 
@@ -1082,7 +1082,7 @@ set_colorscheme(char *arg)
 	}
 
 	if (cs_found == 0)
-		xerror(_("cs: %s: No such color scheme\n"), p);
+		xerror(_("cs: '%s': No such color scheme\n"), p);
 
 	free(p);
 
@@ -1095,7 +1095,7 @@ cschemes_function(char **args)
 {
 #ifdef CLIFM_SUCKLESS
 	UNUSED(args);
-	printf("%s: colors: %s. Edit settings.h in the source code "
+	printf("%s: colors: %s. Edit 'settings.h' in the source code "
 		"and recompile.\n", PROGRAM_NAME, NOT_AVAILABLE);
 	return EXIT_FAILURE;
 #else
@@ -2215,11 +2215,11 @@ read_color_scheme_file(const char *colorscheme, char **filecolors,
 	FILE *fp_colors = fopen(colorscheme_file, "r");
 	if (!fp_colors) {
 		if (!env) {
-			xerror("%s: colors: %s: %s\n", PROGRAM_NAME,
+			xerror("%s: colors: '%s': %s\n", PROGRAM_NAME,
 				colorscheme_file, strerror(errno));
 			return EXIT_FAILURE;
 		} else {
-			err('w', PRINT_PROMPT, _("%s: colors: %s: No such color scheme. "
+			err('w', PRINT_PROMPT, _("%s: colors: '%s': No such color scheme. "
 				"Falling back to default\n"), PROGRAM_NAME, colorscheme);
 			return EXIT_SUCCESS;
 		}

@@ -45,9 +45,9 @@ static int
 print_tag_creation_error(const char *link, const mode_t mode)
 {
 	if (S_ISLNK(mode))
-		xerror(_("tag: %s: File already tagged\n"), link);
+		xerror(_("tag: '%s': File already tagged\n"), link);
 	else
-		xerror(_("tag: %s: Cannot create tag: file already exists\n"), link);
+		xerror(_("tag: '%s': Cannot create tag: file already exists\n"), link);
 
 	return EXIT_FAILURE;
 }
@@ -55,7 +55,7 @@ print_tag_creation_error(const char *link, const mode_t mode)
 static int
 print_symlink_error(const char *name)
 {
-	xerror("tag: %s: %s\n", name, strerror(errno));
+	xerror("tag: '%s': %s\n", name, strerror(errno));
 	return errno;
 }
 
@@ -70,7 +70,7 @@ print_no_tags(void)
 static int
 print_no_such_tag(const char *name)
 {
-	xerror(_("tag: %s: No such tag\n"), name);
+	xerror(_("tag: '%s': No such tag\n"), name);
 	return EXIT_FAILURE;
 }
 
@@ -376,13 +376,13 @@ create_tags(char **args)
 
 		struct stat a;
 		if (lstat(dir, &a) != -1) {
-			xerror(_("tag: %s: Tag already exists\n"), args[i]);
+			xerror(_("tag: '%s': Tag already exists\n"), args[i]);
 			exit_status = EXIT_FAILURE;
 			continue;
 		}
 
 		if (xmkdir(dir, S_IRWXU) == EXIT_FAILURE) {
-			xerror(_("tag: %s: Error creating tag: %s\n"),
+			xerror(_("tag: '%s': Error creating tag: %s\n"),
 				args[i], strerror(errno));
 			exit_status = EXIT_FAILURE;
 			continue;
@@ -423,7 +423,7 @@ remove_tags(char **args)
 
 		char *cmd[] = {"rm", "-r", "--", dir, NULL};
 		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) == EXIT_SUCCESS) {
-			printf(_("%s: Successfully removed tag\n"), args[i]);
+			printf(_("'%s': Successfully removed tag\n"), args[i]);
 			reload_tags();
 		} else {
 			exit_status = EXIT_FAILURE;
@@ -439,7 +439,7 @@ tag_file(char *name, char *tag)
 {
 	struct stat a;
 	if (lstat(name, &a) == -1) {
-		xerror("tag: %s: %s\n", name, strerror(errno));
+		xerror("tag: '%s': %s\n", name, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -452,7 +452,7 @@ tag_file(char *name, char *tag)
 
 	if (stat(dir, &a) == -1) {
 		if (xmkdir(dir, S_IRWXU) != EXIT_SUCCESS) {
-			xerror(_("tag: %s: Cannot create tag: %s\n"),
+			xerror(_("tag: '%s': Cannot create tag: %s\n"),
 				p ? p : tag, strerror(errno));
 			free(p);
 			return EXIT_FAILURE;
@@ -599,12 +599,12 @@ untag(char **args, const size_t n, size_t *t)
 			errno = 0;
 			if (unlinkat(XAT_FDCWD, f, 0) == -1) {
 				exit_status = errno;
-				xerror("tag: %s: %s\n", args[i], strerror(errno));
+				xerror("tag: '%s': %s\n", args[i], strerror(errno));
 			} else {
 				(*t)++;
 			}
 		} else {
-			xerror(_("tag: %s: File not tagged as %s%s%s\n"),
+			xerror(_("tag: '%s': File not tagged as %s%s%s\n"),
 				args[i], conf.colorize ? BOLD : "", args[n] + 1, df_c);
 			continue;
 		}
@@ -677,7 +677,7 @@ recursive_mv_tags(const char *src, const char *dst)
 
 	n = scandir(src_dir, &a, NULL, alphasort);
 	if (n == -1) {
-		xerror("tag: %s: %s\n", src_dir, strerror(errno));
+		xerror("tag: '%s': %s\n", src_dir, strerror(errno));
 		return errno;
 	}
 
@@ -729,7 +729,7 @@ merge_tags(char **args)
 	char src_dir[PATH_MAX];
 	snprintf(src_dir, sizeof(src_dir), "%s/%s", tags_dir, src);
 	if (rmdir(src_dir) == -1) {
-		xerror("tag: %s: %s\n", src_dir, strerror(errno));
+		xerror("tag: '%s': %s\n", src_dir, strerror(errno));
 		return errno;
 	}
 

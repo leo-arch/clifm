@@ -114,7 +114,7 @@ get_remote(char *name)
 	}
 
 	if (found == 0) {
-		xerror(_("net: %s: No such remote\n"), name);
+		xerror(_("net: '%s': No such remote\n"), name);
 		return (-1);
 	}
 
@@ -132,7 +132,7 @@ create_mountpoint(const int i)
 	char *cmd[] = {"mkdir", "-p", remotes[i].mountpoint, NULL};
 
 	if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
-		xerror("net: %s: %s\n", remotes[i].mountpoint, strerror(errno));
+		xerror("net: '%s': %s\n", remotes[i].mountpoint, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -158,7 +158,7 @@ cd_to_mountpoint(const int i)
 static inline int
 print_cd_error(const int i)
 {
-	xerror("net: %s: %s\n", remotes[i].mountpoint, strerror(errno));
+	xerror("net: '%s': %s\n", remotes[i].mountpoint, strerror(errno));
 	return EXIT_FAILURE;
 }
 
@@ -201,7 +201,7 @@ remotes_mount(char *name)
 	if (conf.autols == 1) {
 		exit_status = cd_to_mountpoint(i);
 	} else {
-		printf(_("%s: %s: Remote mounted on %s\n"), PROGRAM_NAME,
+		printf(_("%s: '%s': Remote mounted on %s\n"), PROGRAM_NAME,
 			remotes[i].name, remotes[i].mountpoint);
 	}
 
@@ -217,7 +217,7 @@ remotes_unmount(char *name)
 		return EXIT_FAILURE;
 
 	if (remotes[i].mounted == 0) {
-		xerror(_("net: %s: Not mounted\n"), remotes[i].name);
+		xerror(_("net: '%s': Not mounted\n"), remotes[i].name);
 		return EXIT_FAILURE;
 	}
 
@@ -245,7 +245,7 @@ remotes_unmount(char *name)
 
 		char *p = strrchr(remotes[i].mountpoint, '/');
 		if (!p) {
-			xerror(_("net: %s: Error getting parent directory\n"),
+			xerror(_("net: '%s': Error getting parent directory\n"),
 				remotes[i].mountpoint);
 			return EXIT_FAILURE;
 		}
@@ -254,7 +254,7 @@ remotes_unmount(char *name)
 		errno = 0;
 		if (xchdir(remotes[i].mountpoint, SET_TITLE) == EXIT_FAILURE) {
 			*p = '/';
-			xerror("net: %s: %s\n", remotes[i].mountpoint, strerror(errno));
+			xerror("net: '%s': %s\n", remotes[i].mountpoint, strerror(errno));
 			return EXIT_FAILURE;
 		}
 
@@ -284,7 +284,7 @@ remotes_edit(char *app)
 
 	struct stat attr;
 	if (stat(remotes_file, &attr) == -1) {
-		xerror("net: %s: %s\n", remotes_file, strerror(errno));
+		xerror("net: '%s': %s\n", remotes_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -304,7 +304,7 @@ remotes_edit(char *app)
 		return ret;
 
 	if (stat(remotes_file, &attr) == -1) {
-		xerror("net: %s: %s\n", remotes_file, strerror(errno));
+		xerror("net: '%s': %s\n", remotes_file, strerror(errno));
 		return errno;
 	}
 
@@ -384,7 +384,7 @@ automount_remotes(void)
 			printf(_("%s: net: %s: Mounting remote...\n"), PROGRAM_NAME,
 				remotes[i].name);
 			if ((ret = launch_execl(remotes[i].mount_cmd)) != EXIT_SUCCESS) {
-				err('w', PRINT_PROMPT, _("net: %s: Mount command failed with "
+				err('w', PRINT_PROMPT, _("net: '%s': Mount command failed with "
 					"error code %d\n"), remotes[i].name, ret);
 				exit_status = EXIT_FAILURE;
 			} else {

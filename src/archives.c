@@ -261,7 +261,7 @@ static int
 cd_to_mountpoint(char *file, char *mountpoint)
 {
 	if (xchdir(mountpoint, SET_TITLE) == -1) {
-		xerror("archiver: %s: %s\n", mountpoint, strerror(errno));
+		xerror("archiver: '%s': %s\n", mountpoint, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -391,7 +391,7 @@ create_iso(char *in_file, char *out_file)
 {
 	struct stat attr;
 	if (lstat(in_file, &attr) == -1) {
-		xerror("archiver: %s: %s\n", in_file, strerror(errno));
+		xerror("archiver: '%s': %s\n", in_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -408,7 +408,7 @@ create_iso(char *in_file, char *out_file)
 		return create_iso_from_block_dev(in_file, out_file);
 
 	/* If any other file format */
-	xerror(_("archiver: %s: Invalid file format. File should be either "
+	xerror(_("archiver: '%s': Invalid file format. File should be either "
 		"a directory or a block device\n"), in_file);
 	return EXIT_FAILURE;
 }
@@ -451,13 +451,13 @@ check_iso(char *file)
 	int fd;
 	FILE *fp_out = open_fwrite(tmp_file, &fd);
 	if (!fp_out) {
-		xerror("archiver: %s: %s\n", tmp_file, strerror(errno));
+		xerror("archiver: '%s': %s\n", tmp_file, strerror(errno));
 		return (-1);
 	}
 
 	FILE *fp_err = fopen("/dev/null", "w");
 	if (!fp_err) {
-		xerror("archiver: /dev/null: %s\n", strerror(errno));
+		xerror("archiver: '/dev/null': %s\n", strerror(errno));
 		fclose(fp_out);
 		unlink(tmp_file);
 		return (-1);
@@ -570,13 +570,13 @@ is_compressed(char *file, const int test_iso)
 	int fd;
 	FILE *fp_out = open_fwrite(tmp_file, &fd);
 	if (!fp_out) {
-		xerror("archiver: %s: %s\n", tmp_file, strerror(errno));
+		xerror("archiver: '%s': %s\n", tmp_file, strerror(errno));
 		return (-1);
 	}
 
 	FILE *fp_err = fopen("/dev/null", "w");
 	if (!fp_err) {
-		xerror("archiver: /dev/null: %s\n", strerror(errno));
+		xerror("archiver: '/dev/null': %s\n", strerror(errno));
 		unlink(tmp_file);
 		fclose(fp_out);
 		return (-1);
@@ -901,7 +901,7 @@ check_not_compressed(char **args)
 		}
 
 		if (is_compressed(args[i], 1) != 0) {
-			xerror(_("archiver: %s: Not an archive/compressed file\n"), args[i]);
+			xerror(_("archiver: '%s': Not an archive/compressed file\n"), args[i]);
 			return 1;
 		}
 	}
@@ -1147,7 +1147,7 @@ static int
 list_mounted_files(char *mountpoint)
 {
 	if (xchdir(mountpoint, SET_TITLE) == -1) {
-		xerror("archiver: %s: %s\n", mountpoint, strerror(errno));
+		xerror("archiver: '%s': %s\n", mountpoint, strerror(errno));
 		return EXIT_FAILURE;
 	}
 

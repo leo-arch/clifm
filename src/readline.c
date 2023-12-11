@@ -4388,7 +4388,7 @@ set_rl_input_file(void)
 
 	FILE *fstream = fopen(input_file, "r");
 	if (!fstream) {
-		xerror("%s: %s: %s\n", PROGRAM_NAME, input_file, strerror(errno));
+		xerror("%s: '%s': %s\n", PROGRAM_NAME, input_file, strerror(errno));
 		UNHIDE_CURSOR;
 		exit(EXIT_FAILURE);
 	}

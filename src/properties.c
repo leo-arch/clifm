@@ -437,7 +437,7 @@ validate_octal_perms(const char *s, const size_t l)
 	size_t i;
 	for (i = 0; s[i]; i++) {
 		if (s[i] < '0' || s[i] > '7') {
-			xerror(_("pc: %c: Invalid digit. Values in the range 0-7 "
+			xerror(_("pc: '%c': Invalid digit. Values in the range 0-7 "
 				"are expected for each field\n"), s[i]);
 			return EXIT_FAILURE;
 		}
@@ -661,7 +661,7 @@ get_perm_str(char **s, int *diff)
 	/* Single file */
 	struct stat a;
 	if (stat(s[0], &a) == -1) {
-		xerror("stat: %s: %s\n", s[0], strerror(errno));
+		xerror("stat: '%s': %s\n", s[0], strerror(errno));
 		free(ptr);
 		return (char *)NULL;
 	}
@@ -782,7 +782,7 @@ get_common_ownership(char **args, int *exit_status, int *diff)
 	*exit_status = EXIT_SUCCESS;
 	struct stat a;
 	if (stat(args[0], &a) == -1) {
-		xerror("oc: %s: %s\n", args[0], strerror(errno));
+		xerror("oc: '%s': %s\n", args[0], strerror(errno));
 		*exit_status = errno;
 		return (char *)NULL;
 	}
@@ -793,7 +793,7 @@ get_common_ownership(char **args, int *exit_status, int *diff)
 
 	for (i = 1; args[i]; i++) {
 		if (stat(args[i], &b) == -1) {
-			xerror("oc: %s: %s\n", args[i], strerror(errno));
+			xerror("oc: '%s': %s\n", args[i], strerror(errno));
 			*exit_status = errno;
 			return (char *)NULL;
 		}
@@ -872,7 +872,7 @@ set_file_owner(char **args)
 			owner = getpwnam(new_own);
 
 		if (!owner || !owner->pw_name) {
-			xerror(_("oc: %s: Invalid user\n"), new_own);
+			xerror(_("oc: '%s': Invalid user\n"), new_own);
 			free(new_own);
 			return EXIT_FAILURE;
 		}
@@ -885,7 +885,7 @@ set_file_owner(char **args)
 			group = getgrnam(new_group);
 
 		if (!group || !group->gr_name) {
-			xerror(_("oc: %s: Invalid group\n"), new_group);
+			xerror(_("oc: '%s': Invalid group\n"), new_group);
 			free(new_own);
 			return EXIT_FAILURE;
 		}
@@ -906,7 +906,7 @@ set_file_owner(char **args)
 		*new_own ? owner->pw_uid : a.st_uid,
 		new_group ? group->gr_gid : a.st_gid,
 		0) == -1) {
-			xerror("chown: %s: %s\n", args[i], strerror(errno));
+			xerror("chown: '%s': %s\n", args[i], strerror(errno));
 			exit_status = errno;
 			continue;
 		}
@@ -1869,7 +1869,7 @@ err_no_file(const char *filename, const int errnum, const int follow_link)
 	}
 
 END:
-	xerror("%s: %s: %s\n", errname, filename, strerror(errnum));
+	xerror("%s: '%s': %s\n", errname, filename, strerror(errnum));
 	return EXIT_FAILURE;
 }
 
@@ -1943,7 +1943,7 @@ properties_function(char **args, const int follow_link)
 		if (strchr(args[i], '\\')) {
 			char *deq_file = dequote_str(args[i], 0);
 			if (!deq_file) {
-				xerror(_("p: %s: Error dequoting file name\n"), args[i]);
+				xerror(_("p: '%s': Error dequoting file name\n"), args[i]);
 				exit_status = EXIT_FAILURE;
 				continue;
 			}

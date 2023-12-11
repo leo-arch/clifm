@@ -350,7 +350,7 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 
 	int fd = mkstemp(f);
 	if (fd == -1) {
-		err('e', PRINT_PROMPT, "bleach: mkstemp: %s: %s\n", f, strerror(errno));
+		err('e', PRINT_PROMPT, "bleach: mkstemp: '%s': %s\n", f, strerror(errno));
 		return (struct bleach_t *)NULL;
 	}
 
@@ -360,8 +360,8 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 	fp = fopen(f, "w");
 	if (!fp) {
 		if (unlink(f) == -1)
-			err('w', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
-		err('e', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
+			err('w', PRINT_PROMPT, "bleach: '%s': %s\n", f, strerror(errno));
+		err('e', PRINT_PROMPT, "bleach: '%s': %s\n", f, strerror(errno));
 		return (struct bleach_t *)NULL;
 	}
 #endif /* !HAVE_DPRINT */
@@ -393,8 +393,8 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 	fp = open_fread(f, &fd);
 	if (!fp) {
 		if (unlink(f) == -1)
-			err('w', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
-		err('e', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
+			err('w', PRINT_PROMPT, "bleach: '%s': %s\n", f, strerror(errno));
+		err('e', PRINT_PROMPT, "bleach: '%s': %s\n", f, strerror(errno));
 		return (struct bleach_t *)NULL;
 	}
 
@@ -407,9 +407,9 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 	int exit_status = open_file(f);
 	open_in_foreground = 0;
 	if (exit_status != EXIT_SUCCESS) {
-		xerror("bleach: %s: %s\n", f, strerror(errno));
+		xerror("bleach: '%s': %s\n", f, strerror(errno));
 		if (unlink(f) == -1)
-			xerror("bleach: %s: %s\n", f, strerror(errno));
+			xerror("bleach: '%s': %s\n", f, strerror(errno));
 		fclose(fp);
 		return (struct bleach_t *)NULL;
 	}
@@ -418,8 +418,8 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 	fp = open_fread(f, &fd);
 	if (!fp) {
 		if (unlink(f) == -1)
-			err('w', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
-		err('e', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
+			err('w', PRINT_PROMPT, "bleach: '%s': %s\n", f, strerror(errno));
+		err('e', PRINT_PROMPT, "bleach: '%s': %s\n", f, strerror(errno));
 		return (struct bleach_t *)NULL;
 	}
 
@@ -507,7 +507,7 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 	free(line);
 
 	if (unlinkat(fd, f, 0) == -1)
-		err('w', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
+		err('w', PRINT_PROMPT, "bleach: '%s': %s\n", f, strerror(errno));
 	fclose(fp);
 
 	return bfiles;
@@ -530,7 +530,7 @@ bleach_files(char **names)
 	for (; names[i]; i++) {
 		char *dstr = dequote_str(names[i], 0);
 		if (!dstr) {
-			xerror(_("bleach: %s: Error dequoting file name\n"), names[i]);
+			xerror(_("bleach: '%s': Error dequoting file name\n"), names[i]);
 			continue;
 		}
 
@@ -667,7 +667,7 @@ CONFIRM:
 			}
 
 			if (renameat(XAT_FDCWD, o, XAT_FDCWD, r) == -1) {
-				xerror("bleach: renameat: %s: %s\n", o, strerror(errno));
+				xerror("bleach: renameat: '%s': %s\n", o, strerror(errno));
 				total_rename--;
 				exit_status = EXIT_FAILURE;
 			}

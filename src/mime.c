@@ -297,7 +297,7 @@ get_app(const char *mime, const char *filename)
 
 	FILE *defs_fp = fopen(mime_file, "r");
 	if (!defs_fp) {
-		xerror("%s: %s: %s\n", err_name, mime_file, strerror(errno));
+		xerror("%s: '%s': %s\n", err_name, mime_file, strerror(errno));
 		return (char *)NULL;
 	}
 
@@ -372,13 +372,13 @@ get_mime(char *file)
 	int fd = 0;
 	FILE *fp_out = open_fwrite(tmp_file, &fd);
 	if (!fp_out) {
-		xerror("%s: fopen: %s: %s\n", err_name, tmp_file, strerror(errno));
+		xerror("%s: fopen: '%s': %s\n", err_name, tmp_file, strerror(errno));
 		return (char *)NULL;
 	}
 
 	FILE *fp_err = fopen("/dev/null", "w");
 	if (!fp_err) {
-		xerror("%s: /dev/null: %s\n", err_name, strerror(errno));
+		xerror("%s: '/dev/null': %s\n", err_name, strerror(errno));
 		goto END;
 	}
 
@@ -490,7 +490,7 @@ mime_import(char *file)
 	int fd = 0;
 	FILE *mime_fp = open_fwrite(file, &fd);
 	if (!mime_fp) {
-		xerror("%s: fopen: %s: %s\n", err_name, file, strerror(errno));
+		xerror("%s: fopen: '%s': %s\n", err_name, file, strerror(errno));
 		return (-1);
 	}
 
@@ -597,7 +597,7 @@ mime_edit(char **args)
 			return ENOENT;
 		}
 		if (stat(mime_file, &a) == -1) {
-			xerror("%s: %s: %s\n", err_name, mime_file, strerror(errno));
+			xerror("%s: '%s': %s\n", err_name, mime_file, strerror(errno));
 			return errno;
 		}
 	}
@@ -1555,7 +1555,7 @@ import_mime(void)
 	int mime_defs = mime_import(new);
 	if (mime_defs > 0) {
 		printf(_("%d MIME association(s) imported from the system.\n"
-			"File stored as %s\nAdd these new associations to your mimelist "
+			"File stored as '%s'\nAdd these new associations to your mimelist "
 			"file running 'mm edit'.\n"), mime_defs, new);
 		return EXIT_SUCCESS;
 	}
@@ -1581,13 +1581,13 @@ mime_info(char *arg, char **fpath, char **deq)
 	}
 
 	if (!*fpath) {
-		xerror("%s: %s: %s\n", err_name, arg, (is_number(arg) == 1)
+		xerror("%s: '%s': %s\n", err_name, arg, (is_number(arg) == 1)
 			? _("No such ELN") : strerror(errno));
 		return EXIT_FAILURE;
 	}
 
 	if (access(*fpath, R_OK) == -1) {
-		xerror("%s: %s: %s\n", err_name, *fpath, strerror(errno));
+		xerror("%s: '%s': %s\n", err_name, *fpath, strerror(errno));
 		free(*fpath);
 		return EXIT_FAILURE;
 	}
@@ -1617,13 +1617,13 @@ get_open_file_path(char **args, char **fpath, char **deq)
 	if (!*fpath) {
 		*fpath = realpath(f, NULL);
 		if (!*fpath) {
-			xerror("%s: %s: %s\n", err_name, f, strerror(errno));
+			xerror("%s: '%s': %s\n", err_name, f, strerror(errno));
 			return EXIT_FAILURE;
 		}
 	}
 
 	if (xargs.preview == 0 && access(*fpath, R_OK) == -1) {
-		xerror("%s: %s: %s\n", err_name, *fpath, strerror(errno));
+		xerror("%s: '%s': %s\n", err_name, *fpath, strerror(errno));
 		free(*fpath);
 		return EXIT_FAILURE;
 	}
@@ -1636,7 +1636,7 @@ static int
 handle_no_app(const int info, char **fpath, char **mime, const char *arg)
 {
 	if (xargs.preview == 1) {
-		xerror(_("shotgun: %s: No associated application found\n"
+		xerror(_("shotgun: '%s': No associated application found\n"
 			"Fix this in then configuration file:\n%s\n"), arg, mime_file);
 		return EXIT_FAILURE;
 	}
@@ -1655,11 +1655,12 @@ handle_no_app(const int info, char **fpath, char **mime, const char *arg)
 
 			return exit_status;
 		} else {
-			xerror(_("%s: %s: No associated application found\n"),
+			xerror(_("%s: '%s': No associated application found\n"),
 				err_name, arg);
 		}
 #else
-		xerror(_("%s: %s: No associated application found\n"), err_name, arg);
+		xerror(_("%s: '%s': No associated application found\n"),
+			err_name, arg);
 #endif /* !_NO_ARCHIVING */
 	}
 

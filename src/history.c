@@ -66,7 +66,7 @@ print_logs(const int flag)
 
 	FILE *log_fp = fopen(file, "r");
 	if (!log_fp) {
-		err(0, NOPRINT_PROMPT, "log: %s: %s\n", file, strerror(errno));
+		err(0, NOPRINT_PROMPT, "log: '%s': %s\n", file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -108,7 +108,7 @@ clear_logs(const int flag)
 		return EXIT_SUCCESS;
 
 	if (remove(file) == -1) {
-		xerror("log: %s: %s\n", file, strerror(errno));
+		xerror("log: '%s': %s\n", file, strerror(errno));
 		return errno;
 	}
 
@@ -158,7 +158,7 @@ log_cmd(void)
 	/* Write the log into LOG_FILE */
 	FILE *log_fp = open_fappend(cmds_log_file);
 	if (!log_fp) {
-		err('e', PRINT_PROMPT, "log: %s: %s\n", cmds_log_file, strerror(errno));
+		err('e', PRINT_PROMPT, "log: '%s': %s\n", cmds_log_file, strerror(errno));
 		free(full_log);
 		return EXIT_FAILURE;
 	}
@@ -179,7 +179,8 @@ write_msg_into_logfile(const char *_msg)
 		/* Do not log this error: We might enter into an infinite loop
 		 * trying to access a file that cannot be accessed. Just warn the user
 		 * and print the error to STDERR */
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, msgs_log_file, strerror(errno));
+		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
+			msgs_log_file, strerror(errno));
 		fputs("Press any key to continue... ", stdout);
 		xgetchar();
 		putchar('\n');
@@ -328,7 +329,7 @@ append_to_dirhist_file(const char *dir_path)
 
 	FILE *fp = open_fappend(dirhist_file);
 	if (!fp) {
-		xerror(_("%s: %s: Error saving directory entry: %s\n"),
+		xerror(_("%s: '%s': Error saving directory entry: %s\n"),
 			PROGRAM_NAME, dir_path, strerror(errno));
 		return;
 	}
@@ -399,7 +400,7 @@ edit_history(char **args)
 	struct stat attr;
 	if (stat(hist_file, &attr) == -1) {
 		int tmp_err = errno;
-		xerror("history: %s: %s\n", hist_file, strerror(errno));
+		xerror("history: '%s': %s\n", hist_file, strerror(errno));
 		return tmp_err;
 	}
 	time_t mtime_bfr = (time_t)attr.st_mtime;
@@ -439,7 +440,7 @@ clear_history_func(char **args)
 	int fd = 0;
 	FILE *hist_fp = open_fwrite(hist_file, &fd);
 	if (!hist_fp) {
-		err(0, NOPRINT_PROMPT, "history: %s: %s\n", hist_file, strerror(errno));
+		err(0, NOPRINT_PROMPT, "history: '%s': %s\n", hist_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -571,7 +572,7 @@ get_history(void)
 
 	FILE *hist_fp = fopen(hist_file, "r");
 	if (!hist_fp) {
-		err('e', PRINT_PROMPT, "history: %s: %s\n", hist_file, strerror(errno));
+		err('e', PRINT_PROMPT, "history: '%s': %s\n", hist_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 

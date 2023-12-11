@@ -90,7 +90,7 @@ get_plugin_path(char *action, int *status)
 
 	free(cmd);
 	*status = ENOENT;
-	xerror("actions: %s: %s\n", action, strerror(ENOENT));
+	xerror("actions: '%s': %s\n", action, strerror(ENOENT));
 	return (char *)NULL;
 }
 
@@ -128,7 +128,7 @@ run_action(char *action, char **args)
 	free(rand_ext);
 
 	if (mkfifo(fifo_path, 0600) == -1) {
-		xerror("actions: %s: %s\n", fifo_path, strerror(errno));
+		xerror("actions: '%s': %s\n", fifo_path, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -263,7 +263,7 @@ edit_actions(char *app)
 	/* Get actions file's current modification time */
 	struct stat attr;
 	if (stat(actions_file, &attr) == -1) {
-		xerror("actions: %s: %s\n", actions_file, strerror(errno));
+		xerror("actions: '%s': %s\n", actions_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 

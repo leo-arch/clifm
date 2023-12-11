@@ -204,7 +204,7 @@ chdir_search_path(char **search_path, const char *arg)
 	if (strchr(*search_path, '\\')) {
 		char *deq_dir = dequote_str(*search_path, 0);
 		if (!deq_dir) {
-			xerror(_("search: %s: Error dequoting file name\n"), arg);
+			xerror(_("search: '%s': Error dequoting file name\n"), arg);
 			return EXIT_FAILURE;
 		}
 
@@ -223,7 +223,7 @@ chdir_search_path(char **search_path, const char *arg)
 			*search_path = (char *)NULL;
 	} else {
 		if (xchdir(*search_path, NO_TITLE) == -1) {
-			xerror("search: %s: %s\n", *search_path, strerror(errno));
+			xerror("search: '%s': %s\n", *search_path, strerror(errno));
 			return EXIT_FAILURE;
 		}
 	}
@@ -602,7 +602,7 @@ search_glob(char **args)
 
 		/* Go back to the directory we came from */
 		if (search_path && xchdir(workspaces[cur_ws].path, NO_TITLE) == -1)
-			xerror("search: %s: %s\n", workspaces[cur_ws].path, strerror(errno));
+			xerror("search: '%s': %s\n", workspaces[cur_ws].path, strerror(errno));
 
 		return EXIT_FAILURE;
 	}
@@ -643,7 +643,7 @@ search_glob(char **args)
 
 	/* If needed, go back to the directory we came from */
 	if (search_path && xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
-		xerror("search: %s: %s\n", workspaces[cur_ws].path, strerror(errno));
+		xerror("search: '%s': %s\n", workspaces[cur_ws].path, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -682,7 +682,7 @@ err_regex_no_match(const int regex_found, const char *arg)
 	if (input && input != rl_line_buffer) {
 		/* Input string contains at least two slashes. It looks like a path:
 		 * let's err like it was. */
-		xerror("cd: %s: %s\n", rl_line_buffer, strerror(ENOENT));
+		xerror("cd: '%s': %s\n", rl_line_buffer, strerror(ENOENT));
 	} else if (search_flags & NO_GLOB_CHAR) {
 		fputs(_("search: No matches found\n"), stderr);
 	} else {
@@ -705,7 +705,7 @@ free_regex_dirlist(struct dirent ***dirlist, const int tmp_files)
 	free(*dirlist);
 
 	if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1)
-		xerror("search: %s: %s\n", workspaces[cur_ws].path, strerror(errno));
+		xerror("search: '%s': %s\n", workspaces[cur_ws].path, strerror(errno));
 }
 
 static int
@@ -925,10 +925,11 @@ search_regex(char **args)
 
 		tmp_files = scandir(".", &reg_dirlist, skip_files, xalphasort);
 		if (tmp_files == -1) {
-			xerror("search: %s: %s\n", search_path, strerror(errno));
+			xerror("search: '%s': %s\n", search_path, strerror(errno));
 
 			if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1)
-				xerror("search: %s: %s\n", workspaces[cur_ws].path, strerror(errno));
+				xerror("search: '%s': %s\n", workspaces[cur_ws].path,
+					strerror(errno));
 
 			return EXIT_FAILURE;
 		}
@@ -1004,7 +1005,7 @@ err_glob_no_match(const char *arg)
 	if (input && input != rl_line_buffer) {
 		/* Input string contains two slashes: it looks like a path, so let's
 		 * err like it was. */
-		xerror("cd: %s: %s\n", rl_line_buffer, strerror(ENOENT));
+		xerror("cd: '%s': %s\n", rl_line_buffer, strerror(ENOENT));
 		return EXIT_FAILURE;
 	}
 

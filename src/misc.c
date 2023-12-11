@@ -822,12 +822,12 @@ check_dir(char **dir)
 	int ret = EXIT_SUCCESS;
 	struct stat attr;
 	if (stat(*dir, &attr) == -1) {
-		xerror("%s: %s: %s\n", PROGRAM_NAME, *dir, strerror(errno));
+		xerror("%s: '%s': %s\n", PROGRAM_NAME, *dir, strerror(errno));
 		return errno;
 	}
 
 	if (!S_ISDIR(attr.st_mode)) {
-		xerror(_("%s: %s: Not a directory\n"), PROGRAM_NAME, *dir);
+		xerror(_("%s: '%s': Not a directory\n"), PROGRAM_NAME, *dir);
 		return ENOTDIR;
 	}
 
@@ -986,7 +986,7 @@ new_instance(char *dir, const int sudo)
 	char *deq_dir = dequote_str(dir, 0);
 	if (!deq_dir) {
 		free(_sudo);
-		xerror(_("%s: %s: Error dequoting file name\n"), PROGRAM_NAME, dir);
+		xerror(_("%s: '%s': Error dequoting file name\n"), PROGRAM_NAME, dir);
 		return EXIT_FAILURE;
 	}
 
@@ -1025,25 +1025,25 @@ alias_import(char *file)
 	if (*file == '~') {
 		char *file_exp = tilde_expand(file);
 		if (!file_exp) {
-			xerror("%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
+			xerror("%s: '%s': %s\n", PROGRAM_NAME, file, strerror(errno));
 			return EXIT_FAILURE;
 		}
 
 		if (realpath(file_exp, rfile) == NULL) {
-			xerror("%s: %s: %s\n", PROGRAM_NAME, file_exp, strerror(errno));
+			xerror("%s: '%s': %s\n", PROGRAM_NAME, file_exp, strerror(errno));
 			free(file_exp);
 			return EXIT_FAILURE;
 		}
 		free(file_exp);
 	} else {
 		if (realpath(file, rfile) == NULL) {
-			xerror("%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
+			xerror("%s: '%s': %s\n", PROGRAM_NAME, file, strerror(errno));
 			return EXIT_FAILURE;
 		}
 	}
 
 	if (rfile[0] == '\0') {
-		xerror("%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
+		xerror("%s: '%s': %s\n", PROGRAM_NAME, file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -1058,7 +1058,7 @@ alias_import(char *file)
 	/* Open CliFM's config file as well */
 	FILE *config_fp = open_fappend(config_file);
 	if (!config_fp) {
-		xerror("%s: %s: %s\n", PROGRAM_NAME, config_file, strerror(errno));
+		xerror("%s: '%s': %s\n", PROGRAM_NAME, config_file, strerror(errno));
 		fclose(fp);
 		return EXIT_FAILURE;
 	}
@@ -1079,7 +1079,7 @@ alias_import(char *file)
 				continue;
 
 			if (is_internal_c(alias_name)) {
-				xerror(_("%s: Alias conflicts with internal "
+				xerror(_("'%s': Alias conflicts with internal "
 					"command\n"), alias_name);
 				free(alias_name);
 				continue;
@@ -1125,7 +1125,7 @@ alias_import(char *file)
 				/* Write the new alias into CliFM's config file */
 				fputs(line, config_fp);
 			} else {
-				xerror(_("%s: Alias already exists\n"), alias_name);
+				xerror(_("'%s': Alias already exists\n"), alias_name);
 			}
 
 			free(alias_name);
@@ -1138,7 +1138,7 @@ alias_import(char *file)
 
 	/* No alias was found in FILE */
 	if (alias_found == 0) {
-		xerror(_("%s: %s: No alias found\n"), PROGRAM_NAME, rfile);
+		xerror(_("%s: '%s': No alias found\n"), PROGRAM_NAME, rfile);
 		return EXIT_FAILURE;
 	}
 
@@ -1467,7 +1467,7 @@ handle_last_path(void)
 	struct stat a;
 	if (lstat(last_path_tmp, &a) != -1
 	&& unlinkat(XAT_FDCWD, last_path_tmp, 0) == -1)
-		xerror("unlink: %s: %s\n", last_path_tmp, strerror(errno));
+		xerror("unlink: '%s': %s\n", last_path_tmp, strerror(errno));
 
 	if (conf.restore_last_path == 1 || conf.cd_on_quit == 1)
 		save_last_path(last_path_tmp);
@@ -2002,7 +2002,7 @@ END:
 	/* chdir to tmp dir and update path var */
 	if (xchdir(stdin_tmp_dir, SET_TITLE) == -1) {
 		exit_status = errno;
-		xerror("cd: %s: %s\n", stdin_tmp_dir, strerror(errno));
+		xerror("cd: '%s': %s\n", stdin_tmp_dir, strerror(errno));
 
 		xchmod(stdin_tmp_dir, "0700", 1);
 
@@ -2067,7 +2067,7 @@ pin_directory(char *dir)
 
 	struct stat attr;
 	if (lstat(dir, &attr) == -1) {
-		xerror("%s: %s: %s\n", PROGRAM_NAME, dir, strerror(errno));
+		xerror("%s: '%s': %s\n", PROGRAM_NAME, dir, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -2115,7 +2115,7 @@ unpin_dir(void)
 		char *pin_file = (char *)xnmalloc(config_dir_len + 7, sizeof(char));
 		snprintf(pin_file, config_dir_len + 7, "%s/.pin", config_dir);
 		if (unlink(pin_file) == -1) {
-			xerror("%s: %s: %s\n", PROGRAM_NAME, pin_file, strerror(errno));
+			xerror("%s: '%s': %s\n", PROGRAM_NAME, pin_file, strerror(errno));
 			cmd_error = 1;
 		}
 
@@ -2386,7 +2386,7 @@ run_help_topic(const char *topic)
 	if (*topic == 't' && strcmp(topic, "trash") == 0)
 		return print_trash_topic();
 
-	xerror("%s: help: %s: No such help topic\n", PROGRAM_NAME, topic);
+	xerror("%s: help: '%s': No such help topic\n", PROGRAM_NAME, topic);
 	return EXIT_FAILURE;
 }
 
@@ -2422,7 +2422,7 @@ quick_help(const char *topic)
 
 	int fd = mkstemp(tmp_file);
 	if (fd == -1) {
-		xerror("%s: %s: Error creating temporary file: %s\n",
+		xerror("%s: '%s': Error creating temporary file: %s\n",
 			PROGRAM_NAME, tmp_file, strerror(errno));
 		free(_pager);
 		return EXIT_FAILURE;
@@ -2430,10 +2430,10 @@ quick_help(const char *topic)
 
 	FILE *fp = open_fwrite(tmp_file, &fd);
 	if (!fp) {
-		xerror("%s: fopen: %s: %s\n", PROGRAM_NAME, tmp_file, strerror(errno));
+		xerror("%s: fopen: '%s': %s\n", PROGRAM_NAME, tmp_file, strerror(errno));
 		free(_pager);
 		if (unlink(tmp_file) == -1)
-			err('w', PRINT_PROMPT, "help: %s: %s\n", tmp_file, strerror(errno));
+			err('w', PRINT_PROMPT, "help: '%s': %s\n", tmp_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 

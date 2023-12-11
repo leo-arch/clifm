@@ -339,7 +339,7 @@ edit_jumpdb(char *app)
 
 	struct stat attr;
 	if (stat(jump_file, &attr) == -1) {
-		xerror("jump: %s: %s\n", jump_file, strerror(errno));
+		xerror("jump: '%s': %s\n", jump_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -567,7 +567,8 @@ purge_invalid_entries(void)
 	if (c == 0)
 		puts(_("jump: No invalid entries"));
 	else
-		printf(_("\njump: Purged %d invalid %s\n"), c, c == 1 ? _("entry") : _("entries"));
+		printf(_("\njump: Purged %d invalid %s\n"), c,
+			c == 1 ? _("entry") : _("entries"));
 
 	return EXIT_SUCCESS;
 }
@@ -621,7 +622,7 @@ purge_jump_database(char *arg)
 
 	int n = atoi(arg);
 	if (n < 0) {
-		xerror(_("jump: %s: Invalid value\n"), arg);
+		xerror(_("jump: '%s': Invalid value\n"), arg);
 		return EXIT_FAILURE;
 	}
 

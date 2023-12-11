@@ -109,7 +109,7 @@ edit_bookmarks(char *cmd, const int flag)
 {
 	struct stat a;
 	if (stat(bm_file, &a) == -1) {
-		xerror("bookmarks: %s: %s\n", bm_file, strerror(errno));
+		xerror("bookmarks: '%s': %s\n", bm_file, strerror(errno));
 		return errno;
 	}
 
@@ -393,7 +393,7 @@ check_bm_path(char *file)
 		if (!bookmarks[i].path || strcmp(new_path, bookmarks[i].path) != 0)
 			continue;
 
-		xerror(_("bookmarks: %s: Already bookmarked as '%s'\n"),
+		xerror(_("bookmarks: '%s': Already bookmarked as '%s'\n"),
 			new_path, bookmarks[i].name ? bookmarks[i].name
 			: (bookmarks[i].shortcut ? bookmarks[i].shortcut : _("unnamed")) );
 		free(p);
@@ -441,7 +441,7 @@ check_bm_name(const char *name, const int add)
 			continue;
 
 		if (add == 1)
-			xerror(_("bookmarks: %s: Name already in use\n"), name);
+			xerror(_("bookmarks: '%s': Name already in use\n"), name);
 		return i;
 	}
 
@@ -465,7 +465,7 @@ check_bm_shortcut(const char *shortcut, const int add)
 			continue;
 
 		if (add == 1)
-			xerror(_("bookmarks: %s: Shortcut already in use\n"), shortcut);
+			xerror(_("bookmarks: '%s': Shortcut already in use\n"), shortcut);
 		return i;
 	}
 
@@ -504,13 +504,13 @@ bookmark_add(char *file, char *name, char *shortcut)
 	FILE *bm_fp = open_fappend(bm_file);
 	if (!bm_fp) {
 		exit_status = errno;
-		xerror("bookmarks: fopen: %s: %s\n", bm_file, strerror(errno));
+		xerror("bookmarks: fopen: '%s': %s\n", bm_file, strerror(errno));
 		goto ERROR;
 	}
 
 	if (fseek(bm_fp, 0L, SEEK_END) == -1) {
 		exit_status = errno;
-		xerror("bookmarks: fseek: %s: %s\n", bm_file, strerror(errno));
+		xerror("bookmarks: fseek: '%s': %s\n", bm_file, strerror(errno));
 		fclose(bm_fp);
 		goto ERROR;
 	}
@@ -557,12 +557,12 @@ add_bookmark(char **cmd)
 
 	char *p = dequote_str(cmd[0], 0);
 	if (!p) {
-		xerror(_("bookmarks: %s: Error dequoting file name\n"), cmd[0]);
+		xerror(_("bookmarks: '%s': Error dequoting file name\n"), cmd[0]);
 		return EXIT_FAILURE;
 	}
 
 	if (access(p, F_OK) != 0) {
-		xerror("bookmarks: %s: %s\n", p, strerror(errno));
+		xerror("bookmarks: '%s': %s\n", p, strerror(errno));
 		free(p);
 		return EXIT_FAILURE;
 	}

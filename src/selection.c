@@ -69,7 +69,7 @@ save_sel(void)
 
 	if (sel_n == 0) {
 		if (unlink(sel_file) == -1) {
-			xerror("sel: %s: %s\n", sel_file, strerror(errno));
+			xerror("sel: '%s': %s\n", sel_file, strerror(errno));
 			return EXIT_FAILURE;
 		}
 		return EXIT_SUCCESS;
@@ -78,7 +78,7 @@ save_sel(void)
 	int fd = 0;
 	FILE *fp = open_fwrite(sel_file, &fd);
 	if (!fp) {
-		xerror("sel: %s: %s\n", sel_file, strerror(errno));
+		xerror("sel: '%s': %s\n", sel_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -124,7 +124,7 @@ select_file(char *file)
 
 		new_sel++;
 	} else {
-		xerror(_("sel: %s: Already selected\n"), file);
+		xerror(_("sel: '%s': Already selected\n"), file);
 	}
 
 	return new_sel;
@@ -316,7 +316,7 @@ sel_glob(char *str, const char *sel_path, const mode_t filetype)
 		} else {
 			ret = scandir(sel_path, &ent, skip_files, xalphasort);
 			if (ret == -1) {
-				xerror("sel: %s: %s\n", sel_path, strerror(errno));
+				xerror("sel: '%s': %s\n", sel_path, strerror(errno));
 				globfree(&gbuf);
 				return (-1);
 			}
@@ -383,7 +383,7 @@ sel_regex_nocwd(regex_t regex, const char *sel_path, const mode_t filetype,
 	int filesn = scandir(sel_path, &list, skip_files, xalphasort);
 
 	if (filesn == -1) {
-		xerror("sel: %s: %s\n", sel_path, strerror(errno));
+		xerror("sel: '%s': %s\n", sel_path, strerror(errno));
 		return (-1);
 	}
 
@@ -499,7 +499,7 @@ parse_sel_params(char ***args, int *ifiletype, mode_t *filetype, int *isel_path)
 		if (*(*args)[i] == '~') {
 			char *exp_path = tilde_expand((*args)[i]);
 			if (!exp_path) {
-				xerror("sel: %s: %s\n", (*args)[i], strerror(errno));
+				xerror("sel: '%s': %s\n", (*args)[i], strerror(errno));
 				return (char *)NULL;
 			}
 
@@ -521,7 +521,7 @@ construct_sel_path(char *sel_path)
 	xstrsncpy(tmpdir, sel_path, sizeof(tmpdir));
 
 	if (*sel_path == '.' && realpath(sel_path, tmpdir) == NULL) {
-		xerror("sel: %s: %s\n", sel_path, strerror(errno));
+		xerror("sel: '%s': %s\n", sel_path, strerror(errno));
 		return (char *)NULL;
 	}
 
@@ -568,13 +568,13 @@ check_sel_path(char **sel_path)
 		return (char *)NULL;
 
 	if (access(dir, X_OK) == -1) {
-		xerror("sel: %s: %s\n", dir, strerror(errno));
+		xerror("sel: '%s': %s\n", dir, strerror(errno));
 		free(dir);
 		return (char *)NULL;
 	}
 
 	if (xchdir(dir, NO_TITLE) == -1) {
-		xerror("sel: %s: %s\n", dir, strerror(errno));
+		xerror("sel: '%s': %s\n", dir, strerror(errno));
 		free(dir);
 		return (char *)NULL;
 	}
@@ -666,7 +666,7 @@ print_sel_results(const int new_sel, const char *sel_path,
 	}
 
 	if (sel_path && xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
-		xerror("sel: %s: %s\n", workspaces[cur_ws].path, strerror(errno));
+		xerror("sel: '%s': %s\n", workspaces[cur_ws].path, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -738,7 +738,7 @@ select_filename(char *arg, char *dir, int *errors)
 		char *tmp = construct_sel_filename(dir, name);
 		struct stat attr;
 		if (lstat(tmp, &attr) == -1) {
-			xerror("sel: %s: %s\n", arg, strerror(errno));
+			xerror("sel: '%s': %s\n", arg, strerror(errno));
 			(*errors)++;
 		} else {
 			int r = select_file(tmp);
@@ -752,7 +752,7 @@ select_filename(char *arg, char *dir, int *errors)
 
 	struct stat a;
 	if (lstat(arg, &a) == -1) {
-		xerror("sel: %s: %s\n", name, strerror(errno));
+		xerror("sel: '%s': %s\n", name, strerror(errno));
 		(*errors)++;
 	} else {
 		int r = select_file(name);
@@ -936,7 +936,7 @@ edit_selfile(void)
 	time_t mtime_old = (time_t)attr.st_mtime;
 
 	if (open_file(sel_file) != EXIT_SUCCESS) {
-		xerror("%s\n", _("sel: Could not open the selections file"));
+		xerror("%s\n", _("sel: Cannot open the selections file"));
 		return EXIT_FAILURE;
 	}
 
@@ -955,7 +955,7 @@ edit_selfile(void)
 	return ret;
 
 ERROR:
-	xerror("sel: %s: %s\n", sel_file, strerror(errno));
+	xerror("sel: '%s': %s\n", sel_file, strerror(errno));
 	return EXIT_FAILURE;
 }
 
@@ -986,7 +986,7 @@ deselect_entries(char **desel_path, const size_t desel_n, int *error,
 			dn--;
 			*error = 1;
 			if (desel_screen == 0) {
-				xerror(_("%s: %s: No such selected file\n"),
+				xerror(_("%s: '%s': No such selected file\n"),
 					PROGRAM_NAME, desel_path[i]);
 			}
 			continue;
@@ -1178,7 +1178,7 @@ handle_alpha_entry(const int i, const size_t desel_n, char **desel_elements)
 		return exit_status;
 	}
 
-	printf(_("desel: %s: Invalid entry\n"), desel_elements[i]);
+	printf(_("desel: '%s': Invalid entry\n"), desel_elements[i]);
 	free_desel_elements(desel_n, &desel_elements);
 	return EXIT_FAILURE;
 }
