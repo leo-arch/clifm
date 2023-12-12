@@ -313,7 +313,8 @@ get_app(const char *mime, const char *filename)
 	if (!mime || !mime_file || !*mime_file)
 		return (char *)NULL;
 
-	FILE *defs_fp = fopen(mime_file, "r");
+	int fd = 0;
+	FILE *defs_fp = open_fread(mime_file, &fd);
 	if (!defs_fp) {
 		xerror("%s: '%s': %s\n", err_name, mime_file, strerror(errno));
 		return (char *)NULL;

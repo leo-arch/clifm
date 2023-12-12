@@ -592,10 +592,10 @@ xmkdir(char *dir, const mode_t mode)
 
 /* Open a file for read only. Return a file stream associated to the file
  * named NAME and updates FD to hold the corresponding file descriptor.
- * NOTE: As stated here, file streams should be preferred over file descriptors:
+ * NOTE: As stated here, file streams are to be preferred over file descriptors:
  * https://www.gnu.org/software/libc/manual/html_node/Streams-and-File-Descriptors.html */
 FILE *
-open_fread(char *name, int *fd)
+open_fread(const char *name, int *fd)
 {
 	if (!name || !*name)
 		return (FILE *)NULL;
@@ -616,11 +616,9 @@ open_fread(char *name, int *fd)
 /* Create a file for writing (truncating it to zero length if it already exists,
  * and with permissions 600).
  * Return a file stream associated to the file named NAME and update FD to hold
- * the corresponding file descriptor.
- * NOTE: As stated here, file streams should be preferred over file descriptors:
- * https://www.gnu.org/software/libc/manual/html_node/Streams-and-File-Descriptors.html*/
+ * the corresponding file descriptor. */
 FILE *
-open_fwrite(char *name, int *fd)
+open_fwrite(const char *name, int *fd)
 {
 	if (!name || !*name)
 		return (FILE *)NULL;
@@ -642,7 +640,7 @@ open_fwrite(char *name, int *fd)
  * Return a file stream associated to the file named NAME or NULL in case of
  * error. */
 FILE *
-open_fappend(char *name)
+open_fappend(const char *name)
 {
 	if (!name || !*name)
 		return (FILE *)NULL;
