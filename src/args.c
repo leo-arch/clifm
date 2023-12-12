@@ -151,7 +151,7 @@
 #define LOPT_READONLY               273
 
 /* Link long (--option) and short options (-o) for the getopt_long function. */
-static const struct option longopts[] = {
+static struct option const longopts[] = {
 	{"no-hidden", no_argument, 0, 'a'},
 	{"show-hidden", no_argument, 0, 'A'},
 	{"bookmarks-file", required_argument, 0, 'b'},

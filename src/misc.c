@@ -1487,6 +1487,8 @@ free_stuff(void)
 	free(alt_config_file);
 	free(alt_bm_file);
 	free(alt_kbinds_file);
+	free(alt_preview_file);
+	free(alt_profile);
 
 #ifdef LINUX_FSINFO
 	if (ext_mnt) {
@@ -1534,8 +1536,6 @@ free_stuff(void)
 	handle_last_path();
 
 	free(bin_name);
-	free(alt_preview_file);
-	free(alt_profile);
 	free_bookmarks();
 	free(conf.encoded_prompt);
 /*	free(right_prompt); */

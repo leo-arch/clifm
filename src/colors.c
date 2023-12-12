@@ -1928,19 +1928,19 @@ get_colors_from_env(char **file, char **ext, char **iface)
 	char *env_date_shades = getenv("CLIFM_DATE_SHADES");
 	char *env_size_shades = getenv("CLIFM_SIZE_SHADES");
 
-	if (env_date_shades)
+	if (env_date_shades && *env_date_shades)
 		set_shades(env_date_shades, DATE_SHADES);
 
-	if (env_size_shades)
+	if (env_size_shades && *env_size_shades)
 		set_shades(env_size_shades, SIZE_SHADES);
 
-	if (env_filecolors)
+	if (env_filecolors && *env_filecolors)
 		*file = savestring(env_filecolors, strlen(env_filecolors));
 
-	if (env_extcolors)
+	if (env_extcolors && *env_extcolors)
 		*ext = savestring(env_extcolors, strlen(env_extcolors));
 
-	if (env_ifacecolors)
+	if (env_ifacecolors && *env_ifacecolors)
 		*iface = savestring(env_ifacecolors, strlen(env_ifacecolors));
 }
 
