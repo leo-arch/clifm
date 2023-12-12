@@ -180,7 +180,8 @@ test_pattern(const char *pattern, const char *filename, const char *mime)
 	return ret;
 }
 
-/* Return 1 if APP is a valid and existent application. Zero otherwise. */
+/* Return 1 if APP is a valid and existent application (2 if it's located in
+ * the home directory), or zero otherwise. */
 static int
 check_app_existence(char **app, char **arg)
 {
@@ -191,35 +192,40 @@ check_app_existence(char **app, char **arg)
 	/* Expand tilde */
 	if (*(*app) == '~' && *(*app + 1) == '/' && *(*app + 2)) {
 		size_t len = user.home_len + strlen(*app);
+		size_t cmd_len = len > 0 ? len - 1 : 0;
 		len += *arg ? strlen(*arg) + 1 : 0;
-		char *_path = (char *)xnmalloc(len, sizeof(char));
-		snprintf(_path, len, "%s/%s", user.home, *app + 2);
 
-		if (access(_path, X_OK) == -1) {
-			free(_path);
+		char *tmp_cmd = (char *)xnmalloc(len, sizeof(char));
+		snprintf(tmp_cmd, len, "%s/%s", user.home, *app + 2);
+
+		if (access(tmp_cmd, X_OK) == -1) {
+			free(tmp_cmd);
 			return 0;
 		}
 
-		if (*arg)
-			snprintf(_path, len, "%s/%s %s", user.home, *app + 2, *arg);
+		if (*arg) /* Append arguments */
+			snprintf(tmp_cmd + cmd_len, len, " %s", *arg);
 
-		*app = (char *)xnrealloc(*app, (len + 2), sizeof(char));
-		xstrsncpy(*app, _path, len + 2);
-		free(_path);
+		*app = (char *)xnrealloc(*app, len + 2, sizeof(char));
+		xstrsncpy(*app, tmp_cmd, len + 2);
+		free(tmp_cmd);
 		return 2;
 	}
 
 	/* Either a command name or an absolute path */
-	char *_path = get_cmd_path(*app);
-	if (_path) {
-		free(_path);
+	char *cmd_path = get_cmd_path(*app);
+	if (cmd_path) {
+		free(cmd_path);
 		return 1;
 	}
 
 	return 0;
 }
 
-/* Return the first NULL terminated cmd in LINE or NULL */
+/* Return a copy the first cmd found in LINE (NULL terminated) or NULL.
+ * LINE is modified to point past the end of the returned cmd name.
+ * Example: if LINE is "cmd1;cmd2", "cmd1" is returned and LINE points now
+ * to ";cmd2". */
 static char *
 get_cmd_from_line(char **line)
 {
@@ -250,11 +256,17 @@ retrieve_app(char *line)
 {
 	while (*line) {
 		char *app = get_cmd_from_line(&line);
-		if (!app) { line++; continue; }
+		if (!app) {
+			line++; /* LINE points now to the next app field */
+			continue;
+		}
 
 		if (strchr(app, '$')) { /* Environment variable */
 			char *t = expand_env(app);
-			if (t) { free(app);	app = t; }
+			if (t) {
+				free(app);
+				app = t;
+			}
 		}
 
 		if (xargs.secure_cmds == 1
@@ -264,17 +276,23 @@ retrieve_app(char *line)
 		}
 
 		/* If app contains spaces, the command to check is the string
-		 * before the first space */
+		 * before the first space. */
 		char *ret = strchr(app, ' ');
-		if (ret) *ret = '\0';
-		char *p = (char *)NULL;
-		size_t arg_len = (ret && *(ret + 1)) ? strlen(ret + 1) : 0;
-		if (*app == '~' && arg_len > 0)
-			p = savestring(ret + 1, arg_len);
+		if (ret)
+			*ret = '\0';
 
-		int exists = check_app_existence(&app, &p);
-		free(p);
-		if (exists != 2 && ret) *ret = ' ';
+		size_t param_len = (ret && *(ret + 1)) ? strlen(ret + 1) : 0;
+
+		char *params = (char *)NULL;
+		if (*app == '~' && param_len > 0)
+			params = savestring(ret + 1, param_len);
+
+		int exists = check_app_existence(&app, &params);
+		free(params);
+
+		if (exists != 2 && ret) /* App not in HOME */
+			*ret = ' ';
+
 		if (exists == 0) {
 			free(app);
 			continue;
@@ -310,10 +328,10 @@ get_app(const char *mime, const char *filename)
 		if (skip_line(line, &pattern, &cmds) == 1)
 			continue;
 		/* PATTERN points now to the beginning of the null terminated pattern,
-		 * while CMDS points to the beginning of the list of opening cmds */
+		 * while CMDS points to the beginning of the list of opening cmds. */
 
 		mime_match = 0;
-		/* Global. Are we matching a MIME type? It will be set by test_pattern */
+		/* Global. Are we matching a MIME type? It will be set by test_pattern. */
 		if (test_pattern(pattern, filename, mime) == EXIT_FAILURE)
 			continue;
 
