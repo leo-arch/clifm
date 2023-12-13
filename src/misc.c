@@ -615,6 +615,7 @@ print_tips(const int all)
 		"Disable file previews for TAB completion (fzf mode only) via --no-fzfpreview",
 # ifdef __linux__
 		"Manage removable devices via the 'media' command",
+		"Miss LS_COLORS? Run with --lscolors",
 # endif /* __linux__ */
 #endif /* _BE_POSIX */
 #ifndef _BE_POSIX
