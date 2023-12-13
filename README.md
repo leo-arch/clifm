@@ -240,6 +240,9 @@ For a complete description please consult our [Wiki](https://github.com/leo-arch
 <summary>Click here to expand</summary>
 
 * `Development`
+  - [**LS_COLORS** support](https://github.com/leo-arch/clifm/wiki/Customization#ls_colors-support).
+* `1.15`
+  - Image previews using sixel (requires `fzf` 0.44 or later).
   - List ACLs (`p`/`pp` command) (Linux).
   - Run in [read-only mode](https://github.com/leo-arch/clifm/wiki/Specifics#read-only-mode).
 * `1.14 (Jawbreaker)`
