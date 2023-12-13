@@ -28,8 +28,8 @@
 #define PROGRAM_NAME_UPPERCASE "CliFM"
 #define PROGRAM_NAME "clifm"
 #define PROGRAM_DESC "The command line file manager"
-#define VERSION "1.15.7"
-#define DATE "Dec 11, 2023"
+#define VERSION "1.15.8"
+#define DATE "Dec 13, 2023"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "https://github.com/leo-arch/clifm"
 #define LICENSE "GPL2+"
@@ -1341,6 +1341,7 @@ struct param_t {
 	int list_and_quit;
 	int light;
 	int longview;
+	int lscolors;
 	int max_dirhist;
 	int max_files;
 	int max_path;

@@ -1626,6 +1626,7 @@ unset_xargs(void)
 	xargs.light = UNSET;
 	xargs.list_and_quit = UNSET;
 	xargs.longview = UNSET;
+	xargs.lscolors = UNSET;
 	xargs.max_dirhist = UNSET;
 	xargs.max_path = UNSET;
 	xargs.mount_cmd = UNSET;

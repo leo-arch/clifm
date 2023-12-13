@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Dec 8, 2023" "clifm 1.15.6" "CLIFM Manual"
+.TH "CLIFM" "1" "Dec 13, 2023" "clifm 1.15.8" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -238,6 +238,9 @@ allow the use of internal variables (ex: \fIVAR=/bin; cd $VAR\fR)
 .TP
 \fB\-\-list\-and\-quit\fR
 list files and quit. It may be used in conjunction parameter substitution. Ex: \'clifm \-\-list\-and\-quit /etc\'
+.TP
+\fB\-\-lscolors\fR
+read file colors from \fBLS_COLORS\fR environment variable
 .TP
 \fB\-\-max\-dirhist\fR
 maximum number of visited directories to remember

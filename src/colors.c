@@ -1759,6 +1759,34 @@ set_default_colors_256(void)
 	if (!*dn_c) xstrsncpy(dn_c, DEF_DN_C256, sizeof(dn_c));
 }
 
+/* We're running with --lscolors. Let's disable clifm's specific file type
+ * colors by just using the closest ones provided by LS_COLORS. */
+static void
+set_extra_colors(void)
+{
+	if (*di_c) {
+		xstrsncpy(ed_c, di_c, sizeof(ed_c)); /* Empty dir */
+		xstrsncpy(nd_c, di_c, sizeof(nd_c)); /* No perm dir */
+	} else {
+		xstrsncpy(ed_c, DEF_DI_C, sizeof(ed_c));
+		xstrsncpy(nd_c, DEF_DI_C, sizeof(nd_c));
+
+	}
+
+	if (*fi_c) {
+		xstrsncpy(ef_c, fi_c, sizeof(ef_c)); /* Empty file */
+		xstrsncpy(nf_c, fi_c, sizeof(nf_c)); /* No perm file */
+	} else {
+		xstrsncpy(ef_c, DEF_FI_C, sizeof(ef_c));
+		xstrsncpy(nf_c, DEF_FI_C, sizeof(nf_c));
+	}
+
+	if (*ex_c)
+		xstrsncpy(ee_c, ex_c, sizeof(ee_c)); /* Empty executable */
+	else
+		xstrsncpy(ee_c, DEF_EX_C, sizeof(ee_c));
+}
+
 void
 set_default_colors(void)
 {
@@ -1767,6 +1795,9 @@ set_default_colors(void)
 
 	if (date_shades.type == SHADE_TYPE_UNSET)
 		set_default_date_shades();
+
+	if (xargs.lscolors == 1)
+		set_extra_colors();
 
 	if (term_caps.color >= 256) {
 		set_default_colors_256();
@@ -1918,12 +1949,40 @@ get_cur_colorscheme(const char *colorscheme)
 	return EXIT_SUCCESS;
 }
 
+/* Inspect LS_COLORS variable and assing pointers to ENV_FILECOLORS and
+ * ENV_EXTCOLORS accordingly. */
+static void
+set_lscolors(char **env_filecolors, char **env_extcolors)
+{
+	static char *ls_colors = (char *)NULL;
+	ls_colors = getenv("LS_COLORS");
+	if (!ls_colors || !*ls_colors)
+		return;
+
+	char *ext_ptr = strchr(ls_colors, '*');
+	if (ext_ptr) {
+		*env_extcolors = ext_ptr;
+		if (ext_ptr > ls_colors && *(ext_ptr - 1))
+			*(ext_ptr - 1) = '\0';
+	}
+
+	*env_filecolors = ls_colors;
+}
+
 /* Try to retrieve colors from the environment. */
 static void
 get_colors_from_env(char **file, char **ext, char **iface)
 {
-	char *env_filecolors = getenv("CLIFM_FILE_COLORS");
-	char *env_extcolors = getenv("CLIFM_EXT_COLORS");
+	char *env_filecolors = (char *)NULL;
+	char *env_extcolors = (char *)NULL;
+
+	if (xargs.lscolors == 1) {
+		set_lscolors(&env_filecolors, &env_extcolors);
+	} else {
+		env_filecolors = getenv("CLIFM_FILE_COLORS");
+		env_extcolors = getenv("CLIFM_EXT_COLORS");
+	}
+
 	char *env_ifacecolors = getenv("CLIFM_IFACE_COLORS");
 	char *env_date_shades = getenv("CLIFM_DATE_SHADES");
 	char *env_size_shades = getenv("CLIFM_SIZE_SHADES");
@@ -2396,6 +2455,7 @@ disable_bold(void)
 {
 	/* File types */
 	remove_bold_attr(bd_c);
+	remove_bold_attr(bk_c);
 	remove_bold_attr(ca_c);
 	remove_bold_attr(cd_c);
 	remove_bold_attr(di_c);

@@ -149,6 +149,7 @@
 #define LOPT_STAT                   271
 #define LOPT_STAT_FULL              272
 #define LOPT_READONLY               273
+#define LOPT_LSCOLORS               274
 
 /* Link long (--option) and short options (-o) for the getopt_long function. */
 static struct option const longopts[] = {
@@ -215,6 +216,7 @@ static struct option const longopts[] = {
 	{"icons-use-file-color", no_argument, 0, LOPT_ICONS_USE_FILE_COLOR},
 	{"int-vars", no_argument, 0, LOPT_INT_VARS},
 	{"list-and-quit", no_argument, 0, LOPT_LIST_AND_QUIT},
+	{"lscolors", no_argument, 0, LOPT_LSCOLORS},
 	{"max-dirhist", required_argument, 0, LOPT_MAX_DIRHIST},
 	{"max-files", required_argument, 0, LOPT_MAX_FILES},
 	{"max-path", required_argument, 0, LOPT_MAX_PATH},
@@ -1519,6 +1521,7 @@ parse_cmdline_args(const int argc, char **argv)
 			xargs.no_dirjump = 1;
 			xargs.restore_last_path = conf.restore_last_path = 0;
 			break;
+		case LOPT_LSCOLORS: xargs.lscolors = 1; break;
 		case LOPT_MAX_DIRHIST:
 			set_max_value(optarg, &xargs.max_dirhist, &conf.max_dirhist);
 			break;
