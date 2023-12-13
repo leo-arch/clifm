@@ -615,7 +615,6 @@ print_tips(const int all)
 		"Disable file previews for TAB completion (fzf mode only) via --no-fzfpreview",
 # ifdef __linux__
 		"Manage removable devices via the 'media' command",
-		"Miss LS_COLORS? Run with --lscolors",
 # endif /* __linux__ */
 #endif /* _BE_POSIX */
 #ifndef _BE_POSIX
@@ -626,6 +625,7 @@ print_tips(const int all)
 		"--secure-cmds command line switches",
 		"Run in disk usage analyzer mode using the -t command line switch",
 		"Fuzzy suggestions are supported. Ex: 'dwn > Downloads'. Enable them via --fuzzy-matching, or FuzzyMatching in the configuration file",
+		"Miss LS_COLORS? Run with --lscolors (GNU ls only)",
 #else
 		"Create a new profile: 'pf add PROFILE' or 'clifm -p PROFILE'",
 		"Run in incognito/private mode via the -s flag",
