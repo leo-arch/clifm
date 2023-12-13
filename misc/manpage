@@ -240,7 +240,7 @@ allow the use of internal variables (ex: \fIVAR=/bin; cd $VAR\fR)
 list files and quit. It may be used in conjunction parameter substitution. Ex: \'clifm \-\-list\-and\-quit /etc\'
 .TP
 \fB\-\-lscolors\fR
-read file colors from \fBLS_COLORS\fR environment variable. Note that clifm-specific colors (like empty directory or inaccessible file) will be disabled. Note also that colors for specific file names, as defined in \fBLS_COLORS\fR, are not supported.
+read file colors from \fBLS_COLORS\fR environment variable (GNU ls only). Bear in mind that clifm-specific colors (like empty directory or inaccessible file) will be disabled. Note also that colors for specific file names, as defined in \fBLS_COLORS\fR, are not supported. Consult \fBdircolors\fR(1) for more information.
 .TP
 \fB\-\-max\-dirhist\fR
 maximum number of visited directories to remember
