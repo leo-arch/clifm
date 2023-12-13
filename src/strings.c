@@ -80,10 +80,10 @@ typedef char *rl_cpvfunc_t;
 #define VCMP 2
 #define VLEN 3
 
-/* Max string length for strings passed to xstrnlen()
- * Minimize the danger of non-null terminated strings
- * However, nothing beyond MAX_STR_LEN length will be correctly measured */
-#define MAX_STR_LEN 4096
+/* Max string length for strings passed to xstrnlen().
+ * Minimize the danger of non-null terminated strings.
+ * However, no length beyond MAX_STR_LEN will be correctly measured. */
+#define MAX_STR_LEN   16384
 #define INT_ARRAY_MAX 32
 
 #ifdef SOLARIS_DOORS
