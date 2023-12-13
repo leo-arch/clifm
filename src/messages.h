@@ -217,7 +217,10 @@ change this suffix)"
 - Edit the current color scheme using vi\n\
     cs edit vi\n\
 - Switch to the color scheme named 'mytheme'\n\
-    cs mytheme"
+    cs mytheme\n\n\
+Tip: Theming via LS_COLORS is also possible.\n\
+Run with --lscolors. Consult the Wiki for details:\n\
+https://github.com/leo-arch/clifm/wiki/Customization#ls_colors-support"
 
 #define DESEL_USAGE "Deselect one or more selected files\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
