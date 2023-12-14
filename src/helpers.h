@@ -446,7 +446,7 @@ extern time_t curdir_mtime;
 
 #if !defined(_BE_POSIX) && !defined(NO_PLEDGE) \
 && defined(__OpenBSD__) && OpenBSD >= 201603
-# defined HAVE_PLEDGE
+# define HAVE_PLEDGE
 #endif
 
 #if !defined(_BE_POSIX) && defined(__linux__)
