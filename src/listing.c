@@ -275,7 +275,7 @@ print_div_line(void)
 		putchar('\n');
 	} else {
 		/* Custom line */
-		size_t len = wc_xstrlen(div_line);
+		const size_t len = wc_xstrlen(div_line);
 		if (len <= 2) {
 			/* Extend DIV_LINE to the end of the screen - 1
 			 * We substract 1 to prevent an extra empty line after the
@@ -323,15 +323,15 @@ print_disk_usage(void)
 		return;
 	}
 
-	off_t free_s = (off_t)a.f_bavail * (off_t)a.f_frsize;
-	off_t total = (off_t)a.f_blocks * (off_t)a.f_frsize;
+	const off_t free_s = (off_t)a.f_bavail * (off_t)a.f_frsize;
+	const off_t total = (off_t)a.f_blocks * (off_t)a.f_frsize;
 /*	if (total == 0) return; // This is what MC does */
 
 	char *p_free_space = construct_human_size(free_s);
 	char *free_space = savestring(p_free_space, strlen(p_free_space));
 	char *size = construct_human_size(total);
 
-	int free_percentage = (int)((free_s * 100) / (total > 0 ? total : 1));
+	const int free_percentage = (int)((free_s * 100) / (total > 0 ? total : 1));
 
 	char *devname = (char *)NULL;
 	char *fstype = (char *)NULL;
@@ -425,8 +425,10 @@ get_name_icon(const char *file, const filesn_t n)
 	if (!file)
 		return 0;
 
-	size_t nhash = hashme(file, 0);
+	const size_t nhash = hashme(file, 0);
 
+	/* This division will be replaced by a constant integer at compile
+	 * time, so that it won't even be executed at runtime. */
 	int i = (int)(sizeof(icon_filenames) / sizeof(struct icons_t));
 	while (--i >= 0) {
 		if (nhash != name_icons_hashes[i])
@@ -440,9 +442,9 @@ get_name_icon(const char *file, const filesn_t n)
 }
 
 /* Set the icon field to the corresponding icon for DIR. If not found,
- * set the default icon */
+ * set the default icon. */
 static void
-get_dir_icon(const char *dir, const int n)
+get_dir_icon(const char *dir, const filesn_t n)
 {
 	/* Default values for directories */
 	file_info[n].icon = DEF_DIR_ICON;
@@ -451,7 +453,7 @@ get_dir_icon(const char *dir, const int n)
 	if (!dir)
 		return;
 
-	size_t dhash = hashme(dir, 0);
+	const size_t dhash = hashme(dir, 0);
 
 	int i = (int)(sizeof(icon_dirnames) / sizeof(struct icons_t));
 	while (--i >= 0) {
@@ -464,7 +466,7 @@ get_dir_icon(const char *dir, const int n)
 }
 
 /* Set the icon field to the corresponding icon for EXT. If not found,
- * set the default icon */
+ * set the default icon. */
 static void
 get_ext_icon(const char *restrict ext, const filesn_t n)
 {
@@ -478,12 +480,13 @@ get_ext_icon(const char *restrict ext, const filesn_t n)
 
 	ext++;
 
-	size_t ehash = hashme(ext, 0);
+	const size_t ehash = hashme(ext, 0);
 
 	int i = (int)(sizeof(icon_ext) / sizeof(struct icons_t));
 	while (--i >= 0) {
 		if (ehash != ext_icons_hashes[i])
 			continue;
+
 		file_info[n].icon = icon_ext[i].icon;
 		file_info[n].icon_color = icon_ext[i].color;
 		break;
@@ -664,7 +667,7 @@ get_longest_filename(const filesn_t n, const size_t pad)
 		}
 
 		/* In long view, we won't trim file names below MIN_NAME_TRIM. */
-		size_t max =
+		const size_t max =
 			(conf.long_view == 1 && conf.max_name_len != UNSET
 			&& conf.min_name_trim > conf.max_name_len)
 			? c_min_name_trim : c_max_name_len;
@@ -736,7 +739,7 @@ get_longest_filename(const filesn_t n, const size_t pad)
 		 * to relax a bit the space between columns. */
 /*		longest_fc = DIGINUM(file_info[longest_index].filesn) + 1; */
 		longest_fc = DIGINUM(file_info[longest_index].filesn);
-		size_t t = pad + c_max_name_len + 1 + longest_fc;
+		const size_t t = pad + c_max_name_len + 1 + longest_fc;
 		if (t > longest)
 			longest_fc -= t - longest;
 		if ((int)longest_fc < 0)
@@ -774,7 +777,7 @@ set_long_attribs(const filesn_t n, const struct stat *attr)
 static inline char *
 get_ind_char(const filesn_t index, int *ind_chr)
 {
-	int print_lnk_char = (file_info[index].symlink == 1
+	const int print_lnk_char = (file_info[index].symlink == 1
 		&& conf.color_lnk_as_target == 1 && follow_symlinks == 1
 		&& conf.icons == 0 && conf.light_mode == 0);
 
@@ -2533,7 +2536,7 @@ list_dir(void)
 		case DT_DIR: {
 #ifndef _NO_ICONS
 			if (conf.icons == 1) {
-				get_dir_icon(file_info[n].name, (int)n);
+				get_dir_icon(file_info[n].name, n);
 
 				if (*dir_ico_c)	/* If set from the color scheme file */
 					file_info[n].icon_color = dir_ico_c;
