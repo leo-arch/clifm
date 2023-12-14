@@ -444,6 +444,11 @@ extern time_t curdir_mtime;
 # define HAVE_STATFS
 #endif
 
+#if !defined(_BE_POSIX) && !defined(NO_PLEDGE) \
+&& defined(__OpenBSD__) && OpenBSD >= 201603
+# defined HAVE_PLEDGE
+#endif
+
 #if !defined(_BE_POSIX) && defined(__linux__)
 # define LINUX_FSINFO
 #endif

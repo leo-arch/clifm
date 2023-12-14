@@ -1098,6 +1098,18 @@ set_security_paranoid_mode(void)
 }
 #endif /* SECURITY_PARANOID */
 
+#ifdef HAVE_PLEDGE
+static void
+set_pledge(void)
+{
+	if (pledge("stdio rpath wpath cpath dpath tmppath fattr "
+	"chown flock getpw tty proc exec", NULL) == -1) {
+		fprintf(stderr, "%s: pledge: %s\n", PROGRAM_NAME, strerror(errno));
+		exit(errno);
+	}
+}
+#endif /* HAVE_PLEDGE */
+
 /*
 static void
 init_file_flags(void)
@@ -1119,6 +1131,10 @@ init_file_flags(void)
 int
 main(int argc, char *argv[])
 {
+#ifdef HAVE_PLEDGE
+	set_pledge();
+#endif /* HAVE_PLEDGE */
+
 	/* Quite unlikely to happen, but one never knows. See
 	 * https://lwn.net/SubscriberLink/882799/cb8f313c57c6d8a6/
 	 * and
