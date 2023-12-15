@@ -121,7 +121,7 @@ get_block_devices(void)
 			continue;
 		}
 
-		bd = (char **)xnrealloc(bd, (n + 2), sizeof(char *));
+		bd = (char **)xnrealloc(bd, n + 2, sizeof(char *));
 		bd[n] = (char *)xnmalloc(blen + 6, sizeof(char *));
 		snprintf(bd[n], blen + 6, "/dev/%s", name);
 		n++;
@@ -244,7 +244,7 @@ list_unmounted_devs(void)
 		}
 
 		media = (struct mnt_t *)xnrealloc(media,
-			    (mp_n + 2), sizeof(struct mnt_t));
+			    mp_n + 2, sizeof(struct mnt_t));
 		media[mp_n].dev = savestring(unm_devs[i], strlen(unm_devs[i]));
 		media[mp_n].mnt = (char *)NULL;
 
@@ -292,7 +292,7 @@ list_mounted_devs(const int mode)
 				: nd_c, ent->mnt_dir, df_c);
 		}
 
-		media = (struct mnt_t *)xnrealloc(media, (mp_n + 2), sizeof(struct mnt_t));
+		media = (struct mnt_t *)xnrealloc(media, mp_n + 2, sizeof(struct mnt_t));
 		media[mp_n].mnt = savestring(ent->mnt_dir, strlen(ent->mnt_dir));
 		media[mp_n].dev = savestring(ent->mnt_fsname, strlen(ent->mnt_fsname));
 		media[mp_n].label = (char *)NULL;
@@ -437,7 +437,7 @@ list_mountpoints_bsd(struct statfs *fslist)
 		    df_c, fslist[i].f_mntfromname);
 
 		/* Store the mountpoint into the mounpoints struct */
-		media = (struct mnt_t *)xnrealloc(media, (j + 2), sizeof(struct mnt_t));
+		media = (struct mnt_t *)xnrealloc(media, j + 2, sizeof(struct mnt_t));
 		media[j].mnt = savestring(fslist[i].f_mntonname,
 			strlen(fslist[i].f_mntonname));
 		media[j].label = (char *)NULL;
@@ -547,7 +547,7 @@ xgetmntinfo_sun(void)
 		printf("%s%zu%s %s%s%s [%s]\n", el_c, n + 1, df_c,
 			perm == 1 ? di_c : nd_c, mp, df_c, ent.mnt_special);
 
-		media = (struct mnt_t *)xnrealloc(media, (n + 2), sizeof(struct mnt_t));
+		media = (struct mnt_t *)xnrealloc(media, n + 2, sizeof(struct mnt_t));
 		media[n].mnt = savestring(mp, strlen(mp));
 		media[n].label = (char *)NULL;
 		media[n].dev = (char *)NULL;

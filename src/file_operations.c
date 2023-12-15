@@ -1268,7 +1268,7 @@ create_dirs(char **args)
 			continue;
 
 		char *tmp = savestring(args[i], len);
-		args[i] = (char *)xnrealloc(args[i], (len + 2), sizeof(char));
+		args[i] = (char *)xnrealloc(args[i], len + 2, sizeof(char));
 		snprintf(args[i], len + 2, "%s/", tmp);
 		free(tmp);
 	}

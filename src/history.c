@@ -596,7 +596,7 @@ get_history(void)
 		}
 
 		history = (struct history_t *)xnrealloc(history,
-				(current_hist_n + 2), sizeof(struct history_t));
+			current_hist_n + 2, sizeof(struct history_t));
 		history[current_hist_n].cmd = savestring(line_buff, (size_t)line_len);
 		history[current_hist_n].len = (size_t)line_len;
 		history[current_hist_n].date = tdate;
@@ -639,7 +639,7 @@ add_to_cmdhist(char *cmd)
 	/* Add the new input to the history array */
 	time_t tdate = time(NULL);
 	history = (struct history_t *)xnrealloc(history,
-			(size_t)(current_hist_n + 2), sizeof(struct history_t));
+		(size_t)(current_hist_n + 2), sizeof(struct history_t));
 	history[current_hist_n].cmd = savestring(cmd, cmd_len);
 	history[current_hist_n].len = cmd_len;
 	history[current_hist_n].date = tdate;

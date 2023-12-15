@@ -110,7 +110,7 @@ run_action(char *action, char **args)
 		return exit_status;
 
 	size_t cmd_len = strlen(cmd);
-	args[0] = (char *)xnrealloc(args[0], (cmd_len + 1), sizeof(char));
+	args[0] = (char *)xnrealloc(args[0], cmd_len + 1, sizeof(char));
 	xstrsncpy(args[0], cmd, cmd_len + 1);
 
 	free(cmd);

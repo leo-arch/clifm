@@ -108,7 +108,7 @@ get_ext_mountpoints(void)
 			continue;
 
 		ext_mnt = (struct ext_mnt_t *)xnrealloc(ext_mnt,
-			(n + 2), sizeof(struct ext_mnt_t));
+			n + 2, sizeof(struct ext_mnt_t));
 		ext_mnt[n].mnt_point = savestring(ent->mnt_dir, strlen(ent->mnt_dir));
 
 		switch (t[3]) {
@@ -1292,7 +1292,7 @@ load_remotes(void)
 			if (remotes[n].name)
 				n++;
 			remotes = (struct remote_t *)xnrealloc(
-				remotes, (n + 2), sizeof(struct remote_t));
+				remotes, n + 2, sizeof(struct remote_t));
 			reset_remotes_values(n);
 
 			char *name = strbtw(line, '[', ']');
@@ -1305,7 +1305,7 @@ load_remotes(void)
 			}
 			size_t name_len = strlen(name);
 			remotes[n].name = (char *)xnrealloc(remotes[n].name,
-				(name_len + 1), sizeof(char));
+				name_len + 1, sizeof(char));
 			xstrsncpy(remotes[n].name, name, name_len + 1);
 			free(name);
 			name = (char *)NULL;
@@ -1332,7 +1332,7 @@ load_remotes(void)
 
 		if (strncmp(line, "Comment=", 8) == 0) {
 			remotes[n].desc = (char *)xnrealloc(remotes[n].desc,
-				(ret_len + 1), sizeof(char));
+				ret_len + 1, sizeof(char));
 			xstrsncpy(remotes[n].desc, ret, ret_len + 1);
 
 		} else if (strncmp(line, "Mountpoint=", 11) == 0) {
@@ -1341,7 +1341,7 @@ load_remotes(void)
 				tmp = tilde_expand(ret);
 			size_t mnt_len = tmp ? strlen(tmp) : ret_len;
 			remotes[n].mountpoint = (char *)xnrealloc(remotes[n].mountpoint,
-				(mnt_len + 1), sizeof(char));
+				mnt_len + 1, sizeof(char));
 			xstrsncpy(remotes[n].mountpoint, tmp ? tmp : ret, mnt_len + 1);
 			free(tmp);
 			if (count_dir(remotes[n].mountpoint, CPOP) > 2)
@@ -1354,7 +1354,7 @@ load_remotes(void)
 				if (rep) {
 					size_t rep_len = strlen(rep);
 					remotes[n].mount_cmd = (char *)xnrealloc(
-						remotes[n].mount_cmd, (rep_len + 1), sizeof(char));
+						remotes[n].mount_cmd, rep_len + 1, sizeof(char));
 					xstrsncpy(remotes[n].mount_cmd, rep, rep_len + 1);
 					free(rep);
 					replaced = 1;
@@ -1363,7 +1363,7 @@ load_remotes(void)
 
 			if (!replaced) {
 				remotes[n].mount_cmd = (char *)xnrealloc(remotes[n].mount_cmd,
-					(ret_len + 1), sizeof(char));
+					ret_len + 1, sizeof(char));
 				xstrsncpy(remotes[n].mount_cmd, ret, ret_len + 1);
 			}
 
@@ -1374,7 +1374,7 @@ load_remotes(void)
 				if (rep) {
 					size_t rep_len = strlen(rep);
 					remotes[n].unmount_cmd = (char *)xnrealloc(
-						remotes[n].unmount_cmd, (rep_len + 1), sizeof(char));
+						remotes[n].unmount_cmd, rep_len + 1, sizeof(char));
 					xstrsncpy(remotes[n].unmount_cmd, rep, rep_len + 1);
 					free(rep);
 					replaced = 1;
@@ -1383,7 +1383,7 @@ load_remotes(void)
 
 			if (!replaced) {
 				remotes[n].unmount_cmd = (char *)xnrealloc(remotes[n].unmount_cmd,
-					(ret_len + 1), sizeof(char));
+					ret_len + 1, sizeof(char));
 				xstrsncpy(remotes[n].unmount_cmd, ret, ret_len + 1);
 			}
 
@@ -1486,7 +1486,7 @@ load_prompts(void)
 			if (prompts[n].name)
 				n++;
 			prompts = (struct prompts_t *)xnrealloc(
-				prompts, (n + 2), sizeof(struct prompts_t));
+				prompts, n + 2, sizeof(struct prompts_t));
 			unset_prompt_values(n);
 
 			char *name = strbtw(line, '[', ']');
@@ -1499,7 +1499,7 @@ load_prompts(void)
 			}
 			size_t name_len = strlen(name);
 			prompts[n].name = (char *)xnrealloc(prompts[n].name,
-				(name_len + 1), sizeof(char));
+				name_len + 1, sizeof(char));
 			xstrsncpy(prompts[n].name, name, name_len + 1);
 			free(name);
 			name = (char *)NULL;
@@ -1534,7 +1534,7 @@ load_prompts(void)
 
 		if (strncmp(line, "RegularPrompt=", 14) == 0) {
 			prompts[n].regular = (char *)xnrealloc(prompts[n].regular,
-				(ret_len + 1), sizeof(char));
+				ret_len + 1, sizeof(char));
 			xstrsncpy(prompts[n].regular, ret, ret_len + 1);
 			continue;
 		}
@@ -1551,7 +1551,7 @@ load_prompts(void)
 
 		if (strncmp(line, "WarningPrompt=", 14) == 0) {
 			prompts[n].warning = (char *)xnrealloc(prompts[n].warning,
-				(ret_len + 1), sizeof(char));
+				ret_len + 1, sizeof(char));
 			xstrsncpy(prompts[n].warning, ret, ret_len + 1);
 		}
 	}
@@ -1794,13 +1794,13 @@ get_sel_files(void)
 			continue;
 
 		sel_elements = (struct sel_t *)xnrealloc(sel_elements,
-				(sel_n + 2), sizeof(struct sel_t));
+			sel_n + 2, sizeof(struct sel_t));
 		sel_elements[sel_n].name = savestring(line, len);
 		sel_elements[sel_n].size = (off_t)UNSET;
 		/* Store device and inode number to identify later selected files
 		 * and mark them in the files list. */
 		sel_devino = (struct devino_t *)xnrealloc(sel_devino,
-				(sel_n + 1), sizeof(struct devino_t));
+			sel_n + 1, sizeof(struct devino_t));
 		sel_devino[sel_n].ino = a.st_ino;
 		sel_devino[sel_n].dev = a.st_dev;
 		sel_n++;
@@ -1842,7 +1842,7 @@ get_cdpath(void)
 		buf[len] = '\0';
 
 		/* Make room in cdpaths for a new path */
-		cdpaths = (char **)xnrealloc(cdpaths, (n + 2), sizeof(char *));
+		cdpaths = (char **)xnrealloc(cdpaths, n + 2, sizeof(char *));
 
 		/* Dump the buffer into the global cdpaths array */
 		cdpaths[n] = savestring(buf, len);
@@ -2282,7 +2282,7 @@ free_aliases(void)
 static void
 write_alias(const char *s, char *p)
 {
-	aliases = (struct alias_t *)xnrealloc(aliases, (aliases_n + 2),
+	aliases = (struct alias_t *)xnrealloc(aliases, aliases_n + 2,
 		sizeof(struct alias_t));
 	aliases[aliases_n].name = savestring(s, strlen(s));
 	int add = 0;
@@ -2459,7 +2459,7 @@ get_prompt_cmds(void)
 		if (!(*line + 10))
 			continue;
 		prompt_cmds = (char **)xnrealloc(prompt_cmds,
-		    (prompt_cmds_n + 1), sizeof(char *));
+		    prompt_cmds_n + 1, sizeof(char *));
 		prompt_cmds[prompt_cmds_n] = savestring(
 		    line + 10, (size_t)line_len - 10);
 		prompt_cmds_n++;

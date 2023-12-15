@@ -2333,7 +2333,7 @@ rl_mime_list(void)
 	if (n == 1)
 		{ free(t[0]); free(t); return (char **)NULL; }
 
-	t = (char **)xnrealloc(t, (n + 1), sizeof(char *));
+	t = (char **)xnrealloc(t, n + 1, sizeof(char *));
 	return t;
 }
 
@@ -2374,7 +2374,7 @@ rl_mime_files(const char *text)
 	if (n == 1)
 		{ free(t[0]); free(t); return (char **)NULL; }
 
-	t = (char **)xnrealloc(t, ((size_t)n + 1), sizeof(char *));
+	t = (char **)xnrealloc(t, (size_t)n + 1, sizeof(char *));
 	return t;
 }
 #endif /* !_NO_MAGIC */
@@ -2511,7 +2511,7 @@ rl_trashed_files(const char *text)
 		tfiles[1] = (char *)NULL;
 		if (d) {
 			size_t len = strlen(d);
-			tfiles[0] = (char *)xnrealloc(tfiles[0], (len + 1), sizeof(char));
+			tfiles[0] = (char *)xnrealloc(tfiles[0], len + 1, sizeof(char));
 			xstrsncpy(tfiles[0], d, len + 1);
 			free(d);
 		}

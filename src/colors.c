@@ -1555,7 +1555,7 @@ store_extension_line(const char *line)
 		return EXIT_FAILURE;
 
 	ext_colors = (struct ext_t *)xnrealloc(ext_colors,
-		(ext_colors_n + 1), sizeof(struct ext_t));
+		ext_colors_n + 1, sizeof(struct ext_t));
 
 	size_t len = (size_t)(q - line);
 	ext_colors[ext_colors_n].len = len;
@@ -1620,7 +1620,7 @@ split_extension_colors(char *extcolors)
 			break;
 
 		default:
-			buf = (char *)xnrealloc(buf, (len + 2), sizeof(char));
+			buf = (char *)xnrealloc(buf, len + 2, sizeof(char));
 			buf[len] = *p;
 			len++;
 			p++;
@@ -1634,7 +1634,7 @@ split_extension_colors(char *extcolors)
 
 	if (ext_colors) {
 		ext_colors = (struct ext_t *)xnrealloc(ext_colors,
-			(ext_colors_n + 1), sizeof(struct ext_t));
+			ext_colors_n + 1, sizeof(struct ext_t));
 		ext_colors[ext_colors_n].name = (char *)NULL;
 		ext_colors[ext_colors_n].value = (char *)NULL;
 		ext_colors[ext_colors_n].len = 0;
@@ -2411,7 +2411,7 @@ split_color_line(char *line, const int type)
 			if (!buf)
 				break;
 			buf[len] = '\0';
-			colors = (char **)xnrealloc(colors, (words + 1), sizeof(char *));
+			colors = (char **)xnrealloc(colors, words + 1, sizeof(char *));
 			colors[words] = savestring(buf, len);
 			words++;
 			*buf = '\0';
@@ -2424,7 +2424,7 @@ split_color_line(char *line, const int type)
 			break;
 
 		default:
-			buf = (char *)xnrealloc(buf, (len + 2), sizeof(char));
+			buf = (char *)xnrealloc(buf, len + 2, sizeof(char));
 			buf[len] = *p;
 			len++;
 			p++;
@@ -2439,7 +2439,7 @@ split_color_line(char *line, const int type)
 	if (!colors)
 		return;
 
-	colors = (char **)xnrealloc(colors, (words + 1), sizeof(char *));
+	colors = (char **)xnrealloc(colors, words + 1, sizeof(char *));
 	colors[words] = (char *)NULL;
 
 	/* Set the color variables
@@ -2822,7 +2822,7 @@ get_colorschemes(void)
 		}
 
 		color_schemes = (char **)xnrealloc(color_schemes,
-			((size_t)schemes_total + 2), sizeof(char *));
+			(size_t)schemes_total + 2, sizeof(char *));
 
 		while ((ent = readdir(dir_p)) != NULL && i < (size_t)schemes_total) {
 			if (is_valid_colorscheme_name(ent->d_name) == 0)
@@ -2859,7 +2859,7 @@ get_colorschemes(void)
 	}
 
 	color_schemes = (char **)xnrealloc(color_schemes,
-		((size_t)schemes_total + 2), sizeof(char *));
+		(size_t)schemes_total + 2, sizeof(char *));
 
 	size_t i_tmp = i;
 

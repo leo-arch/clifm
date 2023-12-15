@@ -1943,7 +1943,7 @@ list_dir_light(void)
 		if (count > ENTRY_N) {
 			count = 0;
 			total_dents = (size_t)n + ENTRY_N;
-			file_info = xnrealloc(file_info, (total_dents + 2),
+			file_info = xnrealloc(file_info, total_dents + 2,
 				sizeof(struct fileinfo));
 		}
 
@@ -2405,7 +2405,7 @@ list_dir(void)
 		if (count > ENTRY_N) {
 			count = 0;
 			total_dents = (size_t)n + ENTRY_N;
-			file_info = xnrealloc(file_info, (total_dents + 2),
+			file_info = xnrealloc(file_info, total_dents + 2,
 				sizeof(struct fileinfo));
 		}
 
@@ -2785,7 +2785,7 @@ list_dir(void)
 /*	filesn_t tdents = total_dents > 0 ? (filesn_t)total_dents : ENTRY_N + 2;
 	if (tdents > n)
 		file_info =
-			xnrealloc(file_info, (size_t)(n + 1), sizeof(struct fileinfo)); */
+			xnrealloc(file_info, (size_t)n + 1, sizeof(struct fileinfo)); */
 
 	file_info[n].name = (char *)NULL;
 	files = n;

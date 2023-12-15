@@ -83,7 +83,7 @@ get_profile_names(void)
 #endif /* !_DIRENT_HAVE_D_TYPE */
 		    /* Discard ".", "..", and hidden dirs */
 		    && *profs[i]->d_name != '.') {
-			profile_names = (char **)xnrealloc(profile_names, (pf_n + 1),
+			profile_names = (char **)xnrealloc(profile_names, pf_n + 1,
 				sizeof(char *));
 			profile_names[pf_n] = savestring(profs[i]->d_name,
 			    strlen(profs[i]->d_name));
@@ -96,7 +96,7 @@ get_profile_names(void)
 	free(pf_dir);
 	free(profs);
 
-	profile_names = (char **)xnrealloc(profile_names, (pf_n + 1), sizeof(char *));
+	profile_names = (char **)xnrealloc(profile_names, pf_n + 1, sizeof(char *));
 	profile_names[pf_n] = (char *)NULL;
 
 	return EXIT_SUCCESS;
@@ -542,7 +542,7 @@ rename_profile(char **args)
 
 	size_t len = strlen(args[1]);
 	profile_names[src_pf_index] = (char *)xnrealloc(profile_names[src_pf_index],
-		(len + 1), sizeof(char));
+		len + 1, sizeof(char));
 	xstrsncpy(profile_names[src_pf_index], args[1], len + 1);
 
 	printf(_("pf: '%s': Profile successfully renamed to %s%s%s\n"),

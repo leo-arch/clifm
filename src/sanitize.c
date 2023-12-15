@@ -66,7 +66,7 @@ xclearenv(void)
 			continue;
 		}
 		if (len > lastlen) {
-			namebuf = (char *)xnrealloc(namebuf, (len + 1), sizeof(char));
+			namebuf = (char *)xnrealloc(namebuf, len + 1, sizeof(char));
 			lastlen = len;
 		}
 		memcpy(namebuf, environ[0], len);
