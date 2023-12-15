@@ -1753,14 +1753,15 @@ free_stuff(void)
 }
 
 /* Get current terminal dimensions and store them in TERM_COLS and
- * TERM_LINES (globals). These values will be updated upon SIGWINCH */
+ * TERM_LINES (globals). These values will be updated upon SIGWINCH.
+ * In case of error, we fallback to 80x24. */
 void
 get_term_size(void)
 {
 	struct winsize w;
 	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-	term_cols = w.ws_col;
-	term_lines = w.ws_row;
+	term_cols =  w.ws_col > 0 ? w.ws_col : 80;
+	term_lines = w.ws_row > 0 ? w.ws_row : 24;
 }
 
 #ifndef _BE_POSIX
