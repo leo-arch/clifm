@@ -572,18 +572,13 @@ check_sel_path(char **sel_path)
 	if (!dir)
 		return (char *)NULL;
 
-	if (access(dir, X_OK) == -1)
-		goto ERR;
-
-	if (xchdir(dir, NO_TITLE) == -1)
-		goto ERR;
+	if (xchdir(dir, NO_TITLE) == -1) {
+		xerror("sel: '%s': %s\n", dir, strerror(errno));
+		free(dir);
+		return (char *)NULL;
+	}
 
 	return dir;
-
-ERR:
-	xerror("sel: '%s': %s\n", dir, strerror(errno));
-	free(dir);
-	return (char *)NULL;
 }
 
 static off_t
