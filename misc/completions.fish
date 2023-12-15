@@ -38,6 +38,7 @@ complete -c clifm -s r -l no-refresh-on-empty-line -d 'Do not refresh the screen
 complete -c clifm -s s -l splash -d 'Enable the splash screen'
 complete -c clifm -s S -l stealth-mode -d 'Run in incognito/private mode'
 complete -c clifm -s t -l disk-usage-analyzer -d 'Run in disk usage analyzer mode'
+complete -c clifm -s T -l trash-dir -r -d 'Set an alternative trash directory'
 complete -c clifm -s v -l version -d 'Show version details and exit'
 
 complete -c clifm -s w -l workspace -r -d 'Set the starting workspace' -x -a '1 2 3 4 5 6 7 8'
@@ -68,6 +69,7 @@ complete -c clifm -l icons -d 'Enable icons'
 complete -c clifm -l icons-use-file-color -d 'Icon colors follow file colors'
 complete -c clifm -l int-vars -d 'Enable internal variables'
 complete -c clifm -l list-and-quit -d 'List files and quit'
+complete -c clifm -l lscolors -d 'Read file colors from LS_COLORS'
 
 complete -c clifm -l max-dirhist -r -d 'Maximum number of visited directories to recall'
 complete -c clifm -l max-files -r -d 'Set the maximum number of listed files on screen'

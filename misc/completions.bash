@@ -66,6 +66,8 @@ _clifm ()
         --stealth-mode
         -t
         --disk-usage-analyzer
+        -T
+        --trash-dir
         -v
         --version
         -w
@@ -95,6 +97,7 @@ _clifm ()
         --icons-use-file-color
         --int-vars
         --list-and-quit
+        --lscolors
         --max-dirhist
         --max-files
         --max-path
