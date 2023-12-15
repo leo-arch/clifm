@@ -943,7 +943,7 @@ static inline void
 add_xdu_hardlink(const dev_t dev, const ino_t ino)
 {
 	xdu_hardlinks = (struct hlink_t *)xnrealloc(xdu_hardlinks,
-		(xdu_hardlink_n + 1), sizeof(struct hlink_t));
+		xdu_hardlink_n + 1, sizeof(struct hlink_t));
 
 	xdu_hardlinks[xdu_hardlink_n].dev = dev;
 	xdu_hardlinks[xdu_hardlink_n].ino = ino;
@@ -1164,7 +1164,7 @@ END:
 	unlink(file);
 	return retval;
 }
-#endif // USE_XDU
+#endif /* USE_XDU */
 
 /* Return the file type of the file pointed to by LINK, or -1 in case of
  * error. Possible return values:

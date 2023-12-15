@@ -434,8 +434,9 @@ char
 #define DEF_FILE_ICON_COLOR WHITE
 
 /* Per file extension icons */
-struct icons_t icon_ext[] = {
+struct icons_t const icon_ext[] = {
     {"7z", ICON_ARCHIVE, YELLOW},
+    {"3gp", ICON_VID, BLUE},
 
     {"a", ICON_ARCHIVE, YELLOW},
     {"apk", ICON_ARCHIVE, YELLOW},
@@ -679,7 +680,7 @@ struct icons_t icon_ext[] = {
 };
 
 /* Icons for some specific dir names */
-struct icons_t icon_dirnames[] = {
+struct icons_t const icon_dirnames[] = {
 /* Translated version for these dirs should be added here
  * See https://github.com/alexanderjeurissen/ranger_devicons/blob/main/devicons.py*/
     {"home", ICON_HOME, DEF_DIR_ICON_COLOR},
@@ -699,7 +700,7 @@ struct icons_t icon_dirnames[] = {
 };
 
 /* Icons for some specific file names */
-struct icons_t icon_filenames[] = {
+struct icons_t const icon_filenames[] = {
 /* More specific filenames from here https://github.com/alexanderjeurissen/ranger_devicons/blob/main/devicons.py */
     {".bash_history", ICON_CONF, WHITE},
     {".bash_logout", ICON_CONF, WHITE},

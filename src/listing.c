@@ -407,8 +407,7 @@ print_dirhist_map(void)
 		if (i > 0 && old_pwd[i - 1])
 			printf("%zu %s\n", i, old_pwd[i - 1]);
 
-		printf("%zu %s%s%s\n", i + 1, mi_c,
-		    old_pwd[i], df_c);
+		printf("%zu %s%s%s\n", i + 1, mi_c, old_pwd[i], df_c);
 
 		if (i + 1 < (size_t)dirhist_total_index && old_pwd[i + 1])
 			printf("%zu %s\n", i + 2, old_pwd[i + 1]);
@@ -646,13 +645,13 @@ set_events_checker(void)
 static void
 get_longest_filename(const filesn_t n, const size_t pad)
 {
-	filesn_t c_max_files = (filesn_t)max_files;
+	const filesn_t c_max_files = (filesn_t)max_files;
 	filesn_t i = (max_files != UNSET && c_max_files < n) ? c_max_files : n;
 	filesn_t longest_index = -1;
 
 	/* Cast only once here instead of hundreds of times in the while loop. */
-	size_t c_max_name_len = (size_t)conf.max_name_len;
-	size_t c_min_name_trim = (size_t)conf.min_name_trim;
+	const size_t c_max_name_len = (size_t)conf.max_name_len;
+	const size_t c_min_name_trim = (size_t)conf.min_name_trim;
 
 	while (--i >= 0) {
 		size_t total_len = 0;
