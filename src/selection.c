@@ -529,6 +529,7 @@ construct_sel_path(char *sel_path)
 		char *exp_path = tilde_expand(sel_path);
 		if (!exp_path) {
 			xerror("%s\n", _("sel: Error expanding path"));
+			errno = 1;
 			return (char *)NULL;
 		}
 
@@ -563,23 +564,23 @@ check_sel_path(char **sel_path)
 		}
 	}
 
+	errno = 0;
 	char *dir = construct_sel_path(*sel_path);
 	if (!dir)
 		return (char *)NULL;
 
-	if (access(dir, X_OK) == -1) {
-		xerror("sel: '%s': %s\n", dir, strerror(errno));
-		free(dir);
-		return (char *)NULL;
-	}
+	if (access(dir, X_OK) == -1)
+		goto ERR;
 
-	if (xchdir(dir, NO_TITLE) == -1) {
-		xerror("sel: '%s': %s\n", dir, strerror(errno));
-		free(dir);
-		return (char *)NULL;
-	}
+	if (xchdir(dir, NO_TITLE) == -1)
+		goto ERR;
 
 	return dir;
+
+ERR:
+	xerror("sel: '%s': %s\n", dir, strerror(errno));
+	free(dir);
+	return (char *)NULL;
 }
 
 static off_t
@@ -809,8 +810,13 @@ sel_function(char **args)
 	char *dir = (char *)NULL, *pattern = (char *)NULL;
 	char *sel_path = parse_sel_params(&args, &ifiletype, &filetype, &isel_path);
 
-	if (sel_path)
+	if (sel_path) {
 		dir = check_sel_path(&sel_path);
+		if (!dir || !*dir) {
+			free(dir);
+			return errno;
+		}
+	}
 
 	for (i = 1; args[i]; i++) {
 		if (i == ifiletype || i == isel_path)
