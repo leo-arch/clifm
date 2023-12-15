@@ -164,7 +164,7 @@ change this suffix)"
     bm add /media/mount mnt\n\
   Note: Regular files can be bookmarked too\n\
 - Access the bookmark named 'mnt'\n\
-    bm mnt (also 'b:<TAB>' or 'bm <TAB>' to choose from a list)\n\
+    bm mnt (also 'b:mnt', 'b:<TAB>' or 'bm <TAB>' to choose from a list)\n\
 - Remove the bookmark named 'mnt'\n\
     bm del mnt (or 'bm del <TAB>' to choose from a list)\n\
 - Edit the bookmarks file manually\n\
