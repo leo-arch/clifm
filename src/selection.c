@@ -659,7 +659,7 @@ print_sel_results(const int new_sel, const char *sel_path,
 {
 	if (new_sel > 0 && xargs.stealth_mode != 1 && sel_file
 	&& save_sel() != EXIT_SUCCESS) {
-		err('e', PRINT_PROMPT, _("sel: Error writing selected files "
+		err('e', PRINT_PROMPT, _("sel: Error writing files "
 			"into the selections file\n"));
 		return EXIT_FAILURE;
 	}
@@ -676,6 +676,10 @@ print_sel_results(const int new_sel, const char *sel_path,
 	}
 
 	get_sel_files();
+	if (sel_n == 0) {
+		fputs(_("sel: No matches found\n"), stderr);
+		return EXIT_FAILURE;
+	}
 
 	if (conf.autols == 1 && error == 0)
 		reload_dirlist();
