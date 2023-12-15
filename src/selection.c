@@ -472,8 +472,8 @@ convert_filetype(mode_t *filetype)
 	case 's': *filetype = DT_SOCK; break;
 	case 'p': *filetype = DT_FIFO; break;
 	default:
-		xerror(_("%s: '%c': Unrecognized file type\n"),
-		    PROGRAM_NAME, (char)*filetype);
+		xerror(_("sel: '%c': Unrecognized file type.\n"
+			"Try 'sel --help' for more information.\n"), (char)*filetype);
 		return EXIT_FAILURE;
 	}
 
@@ -499,7 +499,8 @@ parse_sel_params(char ***args, int *ifiletype, mode_t *filetype, int *isel_path)
 		if (*(*args)[i] == '~') {
 			char *exp_path = tilde_expand((*args)[i]);
 			if (!exp_path) {
-				xerror("sel: '%s': %s\n", (*args)[i], strerror(errno));
+				xerror("sel: '%s': Cannot expand tilde\n", (*args)[i]);
+				*filetype = (mode_t)-1;
 				return (char *)NULL;
 			}
 
@@ -508,8 +509,10 @@ parse_sel_params(char ***args, int *ifiletype, mode_t *filetype, int *isel_path)
 		}
 	}
 
-	if (*filetype != 0 && convert_filetype(filetype) == EXIT_FAILURE)
+	if (*filetype != 0 && convert_filetype(filetype) == EXIT_FAILURE) {
+		*filetype = (mode_t)-1;
 		return (char *)NULL;
+	}
 
 	return sel_path;
 }
@@ -816,6 +819,9 @@ sel_function(char **args)
 			free(dir);
 			return errno;
 		}
+	} else if (filetype == (mode_t)-1) { /* parse_sel_params() error */
+		free(dir);
+		return EXIT_FAILURE;
 	}
 
 	for (i = 1; args[i]; i++) {
