@@ -1745,12 +1745,12 @@ set_finder_paths(void)
 	const int sm = (xargs.stealth_mode == 1);
 	const char *p = sm ? P_tmpdir : tmp_dir;
 
-	char *rand_ext = gen_rand_str(sm ? 16 : 10);
+	char *rand_ext = gen_rand_str(sm ? RAND_SUFFIX_LEN + 6 : RAND_SUFFIX_LEN);
 	snprintf(finder_in_file, sizeof(finder_in_file), "%s/.temp%s",
 		p, rand_ext ? rand_ext : "a3_2yu!d43");
 	free(rand_ext);
 
-	rand_ext = gen_rand_str(sm ? 20 : 14);
+	rand_ext = gen_rand_str(sm ? RAND_SUFFIX_LEN + 10 : RAND_SUFFIX_LEN + 4);
 	snprintf(finder_out_file, sizeof(finder_out_file), "%s/.temp%s",
 		p, rand_ext ? rand_ext : "0rNkds7++@");
 	free(rand_ext);

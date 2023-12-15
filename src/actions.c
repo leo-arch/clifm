@@ -119,7 +119,7 @@ run_action(char *action, char **args)
 			 * #    2) CREATE A PIPE FILE   #
 			 * ############################## */
 
-	char *rand_ext = gen_rand_str(10);
+	char *rand_ext = gen_rand_str(RAND_SUFFIX_LEN);
 	if (!rand_ext)
 		return EXIT_FAILURE;
 

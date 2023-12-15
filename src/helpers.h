@@ -715,6 +715,9 @@ extern time_t curdir_mtime;
 # define P_tmpdir "/tmp"
 #endif /* P_tmpdir */
 
+/* Length of random suffix appended to temp files. Used by gen_rand_str() */
+#define RAND_SUFFIX_LEN 10
+
 /* Macros for the get_sys_shell function */
 #define SHELL_NONE 0
 #define SHELL_BASH 1

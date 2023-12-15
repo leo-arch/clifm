@@ -343,7 +343,7 @@ set_start_path(void)
 
 	if (cur_ws > MAX_WS - 1) {
 		cur_ws = DEF_CUR_WS;
-		err('w', PRINT_PROMPT, _("%s: %zu: Invalid workspace."
+		err('w', PRINT_PROMPT, _("%s: '%zu': Invalid workspace."
 			"\nFalling back to workspace %zu\n"),
 			PROGRAM_NAME, cur_ws, cur_ws + 1);
 	}

@@ -309,7 +309,7 @@ reset_inotify(void)
 	if (inotify_wd > 0)
 		watch = 1;
 	else
-		err('w', PRINT_PROMPT, "%s: inotify: %s: %s\n",
+		err('w', PRINT_PROMPT, "%s: inotify: '%s': %s\n",
 			PROGRAM_NAME, rpath, strerror(errno));
 }
 
@@ -1809,10 +1809,10 @@ create_virtual_dir(const int user_provided)
 	int ret = 0;
 	if ((ret = launch_execv(cmd, FOREGROUND, E_MUTE)) != EXIT_SUCCESS) {
 		if (user_provided == 1) {
-			err('e', PRINT_PROMPT, "%s: mkdir: %s: %s. Trying with "
+			err('e', PRINT_PROMPT, "%s: mkdir: '%s': %s. Trying with "
 				"default value\n", PROGRAM_NAME, stdin_tmp_dir, strerror(ret));
 		} else {
-			err('e', PRINT_PROMPT, "%s: mkdir: %s: %s\n",
+			err('e', PRINT_PROMPT, "%s: mkdir: '%s': %s\n",
 				PROGRAM_NAME, stdin_tmp_dir, strerror(ret));
 		}
 		return ret;
@@ -1861,7 +1861,7 @@ handle_stdin(void)
 		chunks_n++;
 
 		/* Append a new chunk of memory to the buffer */
-		buf = (char *)xnrealloc(buf, (chunks_n + 1), chunk);
+		buf = (char *)xnrealloc(buf, chunks_n + 1, chunk);
 	}
 
 	if (total_len == 0)
@@ -1876,7 +1876,7 @@ handle_stdin(void)
 	if (!stdin_tmp_dir || (exit_status = create_virtual_dir(1)) != EXIT_SUCCESS) {
 		free(stdin_tmp_dir);
 
-		suffix = gen_rand_str(10);
+		suffix = gen_rand_str(RAND_SUFFIX_LEN);
 		char *temp = tmp_dir ? tmp_dir : P_tmpdir;
 		size_t tmp_len = strlen(temp) + 13;
 		stdin_tmp_dir = (char *)xnmalloc(tmp_len, sizeof(char));
@@ -1914,7 +1914,7 @@ handle_stdin(void)
 
 			struct stat attr;
 			if (lstat(q, &attr) == -1) {
-				err('w', PRINT_PROMPT, "%s: %s: %s\n",
+				err('w', PRINT_PROMPT, "%s: '%s': %s\n",
 					PROGRAM_NAME, q, strerror(errno));
 				goto END;
 			}
@@ -1937,7 +1937,7 @@ handle_stdin(void)
 			} else {
 				tmp_file = replace_slashes(q, ':');
 				if (!tmp_file) {
-					err('w', PRINT_PROMPT, "%s: %s: Error formatting "
+					err('w', PRINT_PROMPT, "%s: '%s': Error formatting "
 						"file name\n", PROGRAM_NAME, q);
 					goto END;
 				}
@@ -1955,20 +1955,20 @@ handle_stdin(void)
 
 			if (symlink(source, dest) == -1) {
 				if (errno == EEXIST && xargs.virtual_dir_full_paths != 1) {
-					/* File already exists: append a random six digits suffix */
-					suffix = gen_rand_str(10);
+					/* File already exists: append a random suffix */
+					suffix = gen_rand_str(RAND_SUFFIX_LEN);
 					char tmp[PATH_MAX + 12];
 					snprintf(tmp, sizeof(tmp), "%s.%s",
 						dest, suffix ? suffix : "#dn7R4.d6?");
 					if (symlink(source, tmp) == -1)
-						err('w', PRINT_PROMPT, "symlink: %s: %s\n",
+						err('w', PRINT_PROMPT, "symlink: '%s': %s\n",
 							q, strerror(errno));
 					else
-						err('w', PRINT_PROMPT, "symlink: %s: Destiny exists. "
+						err('w', PRINT_PROMPT, "symlink: '%s': Destiny exists. "
 							"Created as %s\n", q, tmp);
 					free(suffix);
 				} else {
-					err('w', PRINT_PROMPT, "symlink: %s: %s\n",
+					err('w', PRINT_PROMPT, "symlink: '%s': %s\n",
 						q, strerror(errno));
 				}
 			} else {
@@ -2456,7 +2456,7 @@ quick_help(const char *topic)
 	}
 
 	if (unlink(tmp_file) == -1)
-		err('w', PRINT_PROMPT, "help: %s: %s\n", tmp_file, strerror(errno));
+		err('w', PRINT_PROMPT, "help: '%s': %s\n", tmp_file, strerror(errno));
 	fclose(fp);
 	free(_pager);
 

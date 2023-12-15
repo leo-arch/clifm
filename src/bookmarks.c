@@ -679,7 +679,7 @@ del_bookmarks(char **args)
 		return EXIT_FAILURE;
 	}
 
-	char *rstr = gen_rand_str(10);
+	char *rstr = gen_rand_str(RAND_SUFFIX_LEN);
 	char tmp_file[PATH_MAX + 12];
 	snprintf(tmp_file, sizeof(tmp_file), "%s.%s", bm_file,
 		rstr ? rstr : "gX6&55#0fa");

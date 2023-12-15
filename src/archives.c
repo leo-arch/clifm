@@ -439,7 +439,7 @@ check_iso(char *file)
 	return (is_iso == 1 ? EXIT_SUCCESS : EXIT_FAILURE);
 
 #else
-	char *rand_ext = gen_rand_str(10);
+	char *rand_ext = gen_rand_str(RAND_SUFFIX_LEN);
 	if (!rand_ext)
 		return (-1);
 
@@ -558,7 +558,7 @@ is_compressed(char *file, const int test_iso)
 	return (compressed == 1 ? EXIT_SUCCESS : EXIT_FAILURE);
 
 #else
-	char *rand_ext = gen_rand_str(10);
+	char *rand_ext = gen_rand_str(RAND_SUFFIX_LEN);
 	if (!rand_ext)
 		return (-1);
 

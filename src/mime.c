@@ -381,7 +381,7 @@ get_mime(char *file)
 	}
 
 	char *mime_type = (char *)NULL;
-	char *rand_ext = gen_rand_str(10);
+	char *rand_ext = gen_rand_str(RAND_SUFFIX_LEN);
 
 	char tmp_file[PATH_MAX + 1];
 	snprintf(tmp_file, sizeof(tmp_file), "%s/mime.%s", tmp_dir,
@@ -1566,7 +1566,7 @@ mime_open_url(char *url)
 static int
 import_mime(void)
 {
-	char *suffix = gen_rand_str(10);
+	char *suffix = gen_rand_str(RAND_SUFFIX_LEN);
 	char new[PATH_MAX];
 	snprintf(new, sizeof(new), "%s.%s", mime_file, suffix ? suffix : "5i0TM#r3j&");
 	free(suffix);

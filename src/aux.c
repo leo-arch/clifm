@@ -397,7 +397,7 @@ normalize_path(char *src, const size_t src_len)
 	if (strchr(src, '\\')) {
 		tmp = dequote_str(src, 0);
 		if (!tmp) {
-			xerror(_("%s: %s: Error deescaping string\n"), PROGRAM_NAME, src);
+			xerror(_("%s: '%s': Error deescaping string\n"), PROGRAM_NAME, src);
 			return (char *)NULL;
 		}
 
@@ -414,7 +414,7 @@ normalize_path(char *src, const size_t src_len)
 	if (is_escaped == 0 && *src == '~') {
 		tmp = tilde_expand(src);
 		if (!tmp) {
-			xerror(_("%s: %s: Error expanding tilde\n"), PROGRAM_NAME, src);
+			xerror(_("%s: '%s': Error expanding tilde\n"), PROGRAM_NAME, src);
 			return (char *)NULL;
 		}
 		const size_t tlen = strlen(tmp);
