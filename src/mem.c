@@ -26,6 +26,7 @@
 
 #include <errno.h> /* ENOMEM */
 #include <stdlib.h> /* malloc(), calloc(), realloc() */
+#include <stdio.h> /* fprintf() */
 
 #include "misc.h" /* err() */
 
@@ -50,8 +51,8 @@ xnrealloc(void *ptr, const size_t nmemb, const size_t size)
 #endif /* HAVE_BUILTIN_MUL_OVERFLOW */
 
 	if (!p) {
-		err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate %zu bytes\n"),
-			PROGRAM_NAME, __func__, nmemb * size);
+		fprintf(stderr, _("%s: %s failed to allocate %zux%zu bytes\n"),
+			PROGRAM_NAME, __func__, nmemb, size);
 		exit(ENOMEM);
 	}
 
@@ -67,8 +68,8 @@ xcalloc(const size_t nmemb, const size_t size)
 	void *p = calloc(nmemb, size);
 
 	if (!p) {
-		err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate %zu bytes\n"),
-			PROGRAM_NAME, __func__, nmemb * size);
+		fprintf(stderr, _("%s: %s failed to allocate %zux%zu bytes\n"),
+			PROGRAM_NAME, __func__, nmemb, size);
 		exit(ENOMEM);
 	}
 
@@ -89,8 +90,8 @@ xnmalloc(const size_t nmemb, const size_t size)
 #endif /* HAVE_BUILTIN_MUL_OVERFLOW */
 
 	if (!p) {
-		err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate %zu bytes\n"),
-			PROGRAM_NAME, __func__, nmemb * size);
+		fprintf(stderr, _("%s: %s failed to allocate %zux%zu bytes\n"),
+			PROGRAM_NAME, __func__, nmemb, size);
 		exit(ENOMEM);
 	}
 
