@@ -52,21 +52,16 @@
 static char *
 ask_user_for_path(void)
 {
-	char *ext_path = (char *)NULL;
+	const char *m = "Extraction path ('q' to quit): ";
 
-	while (!ext_path) {
-		int bk = conf.warning_prompt;
-		conf.warning_prompt = 0;
-		ext_path = readline(_("Extraction path ('q' to quit): "));
-		conf.warning_prompt = bk;
-		if (!ext_path)
-			continue;
-		if (!*ext_path) {
-			free(ext_path);
-			ext_path = (char *)NULL;
-			continue;
-		}
-	}
+	const int poffset_bk = prompt_offset;
+	prompt_offset = (int)strlen(m) + 1;
+	xrename = rl_nohist = 1;
+
+	char *ext_path = secondary_prompt(m, NULL);
+
+	xrename = rl_nohist = 0;
+	prompt_offset = poffset_bk;
 
 	return ext_path;
 }
