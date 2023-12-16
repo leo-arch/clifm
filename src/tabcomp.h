@@ -27,8 +27,8 @@
 
 __BEGIN_DECLS
 
-int  tab_complete(const int);
-void reinsert_slashes(char *);
+int  tab_complete(const int what_to_do);
+void reinsert_slashes(char *str);
 
 __END_DECLS
 

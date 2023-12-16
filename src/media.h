@@ -27,7 +27,7 @@
 
 __BEGIN_DECLS
 
-int media_menu(const int);
+int media_menu(const int mode);
 
 __END_DECLS
 

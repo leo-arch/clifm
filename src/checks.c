@@ -488,8 +488,8 @@ check_immutable_bit(char *file)
 		return (-1);
 	}
 
-	int ret = ioctl(fd, FS_IOC_GETFLAGS, &attr);
-	int saved_errno = errno;
+	const int ret = ioctl(fd, FS_IOC_GETFLAGS, &attr);
+	const int saved_errno = errno;
 	close(fd);
 
 	if (ret == -1) {
@@ -547,7 +547,7 @@ find_cmd(const struct cmdslist_t *cmds_list, const size_t list_size, char *cmd)
 		cmd[d] = '\0';
 	}
 
-	size_t cmd_len = strlen(cmd);
+	const size_t cmd_len = strlen(cmd);
 	while (--i >= 0) {
 		if (*cmd == *cmds_list[i].name && cmd_len == cmds_list[i].len
 		&& strcmp(cmd, cmds_list[i].name) == 0) {
@@ -601,7 +601,7 @@ is_internal_c(char *restrict cmd)
 int
 is_internal(char *restrict cmd)
 {
-	static const struct cmdslist_t int_cmds[] = {
+	static struct cmdslist_t const int_cmds[] = {
 		{"ac", 2},
 		{"ad", 2},
 		{"bb", 2},
@@ -680,7 +680,7 @@ is_internal_f(const char *restrict cmd)
 	|| (*cmd == 's' && (*(cmd + 1) == 't' || *(cmd + 1) == 'o')) ) )
 		return 0;
 
-	static const struct cmdslist_t int_cmds[] = {
+	static struct cmdslist_t const int_cmds[] = {
 		{"ac", 2},
 		{"ad", 2},
 		{"alias", 5}, /* 'alias import' takes file names */
@@ -751,7 +751,7 @@ is_internal_f(const char *restrict cmd)
 	static int n = 0;
 	if (n == 0)
 		n = (int)(sizeof(int_cmds) / sizeof(struct cmdslist_t)) - 1;
-	size_t cmd_len = strlen(cmd);
+	const size_t cmd_len = strlen(cmd);
 
 	int i = n;
 	while (--i >= 0) {

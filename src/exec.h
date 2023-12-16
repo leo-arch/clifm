@@ -40,12 +40,12 @@
 
 __BEGIN_DECLS
 
-int  exec_cmd(char **);
-void exec_chained_cmds(char *);
+int  exec_cmd(char **comm);
+void exec_chained_cmds(char *cmd);
 void exec_profile(void);
-int  get_exit_code(const int, const int);
-int  launch_execv(char **, const int, const int);
-int  launch_execl(const char *);
+int  get_exit_code(const int status, const int exec_flag);
+int  launch_execv(char **cmd, const int bg, const int xflags);
+int  launch_execl(const char *cmd);
 
 __END_DECLS
 

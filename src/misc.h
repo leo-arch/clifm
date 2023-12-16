@@ -27,22 +27,22 @@
 
 __BEGIN_DECLS
 
-int  err(const int, const int, const char *, ...);
-int  alias_import(char *);
+int  err(const int msg_type, const int prompt_flag, const char *format, ...);
+int  alias_import(char *file);
 void bonus_function(void);
-int  confirm_sudo_cmd(char **);
-int  create_usr_var(const char *);
-int  expand_prompt_name(char *);
-int  filter_function(char *);
+int  confirm_sudo_cmd(char **cmd);
+int  create_usr_var(const char *str);
+int  expand_prompt_name(char *name);
+int  filter_function(char *arg);
 void free_autocmds(void);
 void free_prompts(void);
 void free_software(void);
 void free_stuff(void);
-int  free_remotes(const int);
+int  free_remotes(const int exit);
 void free_tags(void);
 void free_workspaces_filters(void);
-char *gen_diff_str(const int);
-char *get_newname(const char *, char *, int *);
+char *gen_diff_str(const int diff);
+char *get_newname(const char *_prompt, char *old_name, int *quoted);
 void get_term_size(void);
 int  handle_stdin(void);
 void help_function(void);
@@ -50,14 +50,15 @@ int  is_blank_name(const char *s);
 int  list_commands(void);
 int  list_mountpoints(void);
 int  new_instance(char *, int);
-int  print_reload_msg(const char *, ...);
-int  pin_directory(char *);
-void print_tips(const int);
-int  quick_help(char *);
-void save_last_path(char *);
+int  print_reload_msg(const char *msg, ...);
+int  pin_directory(char *dir);
+void print_tips(const int all);
+int  quick_help(const char *topic);
+void save_last_path(char *last_path_tmp);
 void set_eln_color(void);
 void set_signals_to_ignore(void);
-void set_term_title(char *);
+void set_filter_type(const char c);
+void set_term_title(char *str);
 void splash(void);
 int  unpin_dir(void);
 void version_function(void);
@@ -68,9 +69,6 @@ void reset_inotify(void);
 #elif defined(BSD_KQUEUE)
 void read_kqueue(void);
 #endif /* LINUX_INOTIFY */
-
-void set_filter_type(const char);
-/*void refresh_files_list(void); */
 
 __END_DECLS
 

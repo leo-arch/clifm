@@ -26,8 +26,8 @@
 
 __BEGIN_DECLS
 
-int is_compressed(char *, const int);
-int archiver(char **, char);
+int is_compressed(char *file, const int test_iso);
+int archiver(char **args, char mode);
 
 __END_DECLS
 

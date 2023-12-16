@@ -55,14 +55,14 @@
 
 __BEGIN_DECLS
 
-int  properties_function(char **, const int);
-void print_analysis_stats(const off_t, const off_t, const char *, const char *);
-int  print_entry_props(const struct fileinfo *, const struct maxes_t *,
-	const uint8_t);
-int  set_file_perms(char **);
-int  set_file_owner(char **);
-
-void do_stat_and_exit(const int);
+void do_stat_and_exit(const int full_stat);
+int  properties_function(char **args, const int follow_link);
+void print_analysis_stats(const off_t total, const off_t largest,
+	const char *color, const char *name);
+int  print_entry_props(const struct fileinfo *props,
+	const struct maxes_t *maxes, const uint8_t have_xattr);
+int  set_file_perms(char **args);
+int  set_file_owner(char **args);
 
 __END_DECLS
 

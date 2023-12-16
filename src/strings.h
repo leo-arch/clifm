@@ -31,39 +31,38 @@
 
 __BEGIN_DECLS
 
-char *dequote_str(char *, int);
-char *escape_str(const char *);
-//int  *expand_range(char *, int);
-char *gen_rand_str(const size_t);
-char *get_last_chr(char *, const char, const int);
-char **get_substr(char *, const char);
-char *home_tilde(char *, int *);
-char **parse_input_str(char *);
-char *quote_str(const char *);
-char *remove_quotes(char *);
-char *replace_slashes(char *, const char);
-char *replace_substr(const char *, const char *, char *);
-char *savestring(const char *restrict, size_t);
-char **split_str(char *, const int);
-char *strbfrlst(char *, const char);
-char *strbtw(char *, const char, const char);
-int  strcntchr(const char *, const char);
-int  strcntchrlst(const char *, const char);
-char *replace_invalid_chars(const char *);
-int  u8truncstr(char *restrict, size_t);
-size_t wc_xstrlen(const char *restrict);
-char *xstrrpbrk(char *, const char *);
+char *dequote_str(char *text, int mt);
+char *escape_str(const char *str);
+char *gen_rand_str(const size_t len);
+char *get_last_chr(char *str, const char c, const int len);
+char **get_substr(char *str, const char ifs);
+char *home_tilde(char *new_path, int *free_buf);
+char **parse_input_str(char *str);
+char *quote_str(const char *str);
+char *remove_quotes(char *str);
+char *replace_invalid_chars(const char *name);
+char *replace_slashes(char *str, const char c);
+char *replace_substr(const char *haystack, const char *needle, char *rep);
+char *savestring(const char *restrict str, size_t size);
+char **split_str(char *str, const int update_args);
+char *strbfrlst(char *str, const char c);
+char *strbtw(char *str, const char a, const char b);
+int  strcntchr(const char *str, const char c);
+int  strcntchrlst(const char *str, const char c);
+int  u8truncstr(char *restrict str, size_t max);
+size_t wc_xstrlen(const char *restrict str);
+char *xstrrpbrk(char *s, const char *accept);
 
 #if defined(_BE_POSIX)
-char *x_strcasestr(char *, char *);
+char *x_strcasestr(char *a, char *b);
 #endif /* _BE_POSIX */
 
-char * xstrcasechr(char *, char);
-size_t xstrnlen(const char *restrict);
-size_t xstrsncpy(char *restrict, const char *restrict, size_t);
+char * xstrcasechr(char *s, char c);
+size_t xstrnlen(const char *restrict s);
+size_t xstrsncpy(char *restrict dst, const char *restrict src, size_t n);
 char * xstrncat(char *restrict dst, const size_t dst_end,
 	const char *restrict src, const size_t dst_len);
-int  xstrverscmp(const char *, const char *);
+int  xstrverscmp(const char *s1, const char *s2);
 
 __END_DECLS
 

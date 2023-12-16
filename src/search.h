@@ -27,7 +27,7 @@
 
 __BEGIN_DECLS
 
-int search_function(char **);
+int search_function(char **args);
 
 __END_DECLS
 

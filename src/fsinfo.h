@@ -28,11 +28,11 @@
 __BEGIN_DECLS
 
 #if defined(LINUX_FSINFO)
-char *get_fs_type_name(const char *, int *);
-char *get_dev_name(const dev_t);
-char *get_dev_name_mntent(const char *);
+char *get_fs_type_name(const char *file, int *remote);
+char *get_dev_name(const dev_t dev);
+char *get_dev_name_mntent(const char *file);
 #elif defined(HAVE_STATFS)
-void get_dev_info(const char *, char **, char **);
+void get_dev_info(const char *file, char **devname, char **devtype);
 #endif /* LINUX_FSINFO */
 
 __END_DECLS

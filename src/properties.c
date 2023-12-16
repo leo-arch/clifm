@@ -2353,7 +2353,7 @@ set_file_type_and_color(const mode_t mode, char *type, char **color)
  * in the current directory when running in long view mode (after
  * printing the corresponding ELN). */
 int
-print_entry_props(const struct fileinfo *props,	const struct maxes_t *maxes,
+print_entry_props(const struct fileinfo *props, const struct maxes_t *maxes,
 	const uint8_t have_xattr)
 {
 	char file_type = 0; /* File type indicator */

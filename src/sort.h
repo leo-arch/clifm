@@ -30,14 +30,14 @@ typedef int QSFUNC(const void *, const void *);
 
 __BEGIN_DECLS
 
-int  alphasort_insensitive(const struct dirent **, const struct dirent **);
-int  compare_strings(char **, char **);
-int  xalphasort(const struct dirent **, const struct dirent **);
-int  sort_function(char **);
-int  entrycmp(const void *, const void *);
-int  skip_nonexec(const struct dirent *);
-int  skip_files(const struct dirent *);
+int  alphasort_insensitive(const struct dirent **a, const struct dirent **b);
+int  compare_strings(char **s1, char **s2);
+int  entrycmp(const void *a, const void *b);
 void print_sort_method(void);
+int  skip_nonexec(const struct dirent *ent);
+int  skip_files(const struct dirent *ent);
+int  sort_function(char **arg);
+int  xalphasort(const struct dirent **a, const struct dirent **b);
 
 __END_DECLS
 

@@ -94,11 +94,11 @@ hashme(const char *str, const int case_sensitive) {
 #endif /* !_NO_ICONS */
 
 void
-gen_time_str(char *buf, const size_t size, const time_t _time)
+gen_time_str(char *buf, const size_t size, const time_t curtime)
 {
 	struct tm t;
 
-	if (_time >= 0 && localtime_r(&_time, &t)) {
+	if (curtime >= 0 && localtime_r(&curtime, &t)) {
 		*buf = '\0';
 		strftime(buf, size, DEF_TIME_STYLE_LONG, &t);
 		return;

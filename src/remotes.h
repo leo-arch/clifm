@@ -27,7 +27,7 @@
 
 __BEGIN_DECLS
 
-int remotes_function(char **);
+int remotes_function(char **args);
 int automount_remotes(void);
 int autounmount_remotes(void);
 

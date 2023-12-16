@@ -32,9 +32,9 @@
 
 __BEGIN_DECLS
 
-char *prompt(const int);
-char *decode_prompt(char *);
-int  prompt_function(char **);
+char *prompt(const int prompt_flag);
+char *decode_prompt(char *line);
+int  prompt_function(char **args);
 
 __END_DECLS
 

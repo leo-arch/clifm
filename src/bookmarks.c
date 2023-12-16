@@ -172,7 +172,7 @@ print_bookmarks(void)
 	printf(_("%sBookmarks Manager%s\n\n"), BOLD, df_c);
 
 	struct stat attr;
-	int eln_pad = DIGINUM(bm_n);
+	const int eln_pad = DIGINUM(bm_n);
 	size_t i, ls = get_largest_shortcut();
 
 	/* Print bookmarks, taking into account shortcut, name, and path */
@@ -242,7 +242,7 @@ get_bm_path(char *arg)
 {
 	/* If an ELN */
 	if (is_number(arg)) {
-		int num = atoi(arg);
+		const int num = atoi(arg);
 		if (num <= 0 || (size_t)num > bm_n) {
 			xerror(_("%s: No such ELN\n"), arg);
 			return (char *)NULL;
@@ -709,7 +709,7 @@ del_bookmarks(char **args)
 	}
 
 	int exit_status = EXIT_SUCCESS;
-	size_t n = mark_bookmarks_for_deletion(args, &exit_status);
+	const size_t n = mark_bookmarks_for_deletion(args, &exit_status);
 
 	if (n == 0) {
 		fclose(fp);

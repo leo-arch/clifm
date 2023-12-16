@@ -27,7 +27,7 @@
 
 __BEGIN_DECLS
 
-int  bookmarks_function(char **);
+int  bookmarks_function(char **cmd);
 int  open_bookmark(void);
 void free_bookmarks(void);
 

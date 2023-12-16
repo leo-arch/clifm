@@ -96,8 +96,8 @@ check_autocmds(void)
 					continue;
 
 				p[plen - n] = (n == 2 ? '*' : '/');
-				size_t tlen = strlen(path);
-				int ret = strncmp(path, workspaces[cur_ws].path, tlen);
+				const size_t tlen = strlen(path);
+				const int ret = strncmp(path, workspaces[cur_ws].path, tlen);
 				free(path);
 
 				if (ret == 0) {
@@ -118,7 +118,7 @@ check_autocmds(void)
 
 		/* Glob expression or plain text for PATTERN */
 		glob_t g;
-		int ret = glob(p, GLOB_NOSORT | GLOB_NOCHECK | GLOB_TILDE
+		const int ret = glob(p, GLOB_NOSORT | GLOB_NOCHECK | GLOB_TILDE
 		| GLOB_BRACE, NULL, &g);
 
 		if (ret != EXIT_SUCCESS) {
@@ -300,7 +300,7 @@ parse_autocmd_line(char *cmd)
 	if (!cmd || !*cmd)
 		return;
 
-	size_t clen = strlen(cmd);
+	const size_t clen = strlen(cmd);
 	if (clen > 0 && cmd[clen - 1] == '\n')
 		cmd[clen - 1] = '\0';
 

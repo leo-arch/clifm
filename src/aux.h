@@ -39,39 +39,40 @@
 
 __BEGIN_DECLS
 
-char *abbreviate_file_name(char *);
-char *construct_human_size(const off_t);
-char *get_cwd(char *, const size_t, const int);
-filesn_t count_dir(const char *, const int);
-off_t dir_size(char *, const int, int *);
-char from_hex(char);
-char *gen_date_suffix(const struct tm);
-void gen_time_str(char *, const size_t, const time_t);
-char *get_cmd_path(const char *);
-int  get_rgb(char *, int *, int *, int *, int *);
+char *abbreviate_file_name(char *str);
+char *construct_human_size(const off_t size);
+char *get_cwd(char *buf, const size_t buflen, const int check_workspace);
+filesn_t count_dir(const char *dir, const int pop);
+off_t dir_size(char *dir, const int first_level, int *status);
+char from_hex(char c);
+char *gen_date_suffix(const struct tm tm);
+void gen_time_str(char *buf, const size_t size, const time_t curtime);
+char *get_cmd_path(const char *cmd);
+int  get_rgb(char *hex, int *attr, int *r, int *g, int *b);
 void clear_term_img(void);
-mode_t get_dt(const mode_t);
-int  get_link_ref(const char *);
-char *hex2rgb(char *);
-char *normalize_path(char *, const size_t);
-FILE *open_fread(const char *, int *);
-FILE *open_fwrite(const char *, int *);
-FILE *open_fappend(const char *);
-int  read_octal(char *);
+mode_t get_dt(const mode_t mode);
+int  get_link_ref(const char *link);
+char *hex2rgb(char *hex);
+char *normalize_path(char *src, const size_t src_len);
+FILE *open_fread(const char *name, int *fd);
+FILE *open_fwrite(const char *name, int *fd);
+FILE *open_fappend(const char *name);
+int  read_octal(char *str);
 void rl_ring_bell(void);
 void set_fzf_preview_border_type(void);
-int  should_expand_eln(const char *);
-char *url_encode(char *);
-char *url_decode(char *);
+int  should_expand_eln(const char *text);
+char *url_encode(char *str);
+char *url_decode(char *str);
 filesn_t xatof(const char *s);
-int  xatoi(const char *);
-char *xitoa(long long);
+int  xatoi(const char *s);
+char *xitoa(long long n);
 char xgetchar(void);
-int  xmkdir(char *, const mode_t);
-void xregerror(const char *, const char *, const int, const regex_t, const int);
+int  xmkdir(char *dir, const mode_t mode);
+void xregerror(const char *cmd_name, const char *pattern, const int errcode,
+	const regex_t regexp, const int prompt_err);
 
 #ifndef _NO_ICONS
-size_t hashme(const char *, const int);
+size_t hashme(const char *str, const int case_sensitive);
 #endif /* !_NO_ICONS */
 
 __END_DECLS

@@ -57,6 +57,7 @@ typedef char *rl_cpvfunc_t;
 #include "prompt.h"
 #include "messages.h"
 #include "readline.h"
+#include "tabcomp.h" /* tab_complete() */
 #include "file_operations.h"
 
 #ifndef _NO_SUGGESTIONS

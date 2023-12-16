@@ -29,8 +29,8 @@
 
 __BEGIN_DECLS
 
-int trash_function(char **);
-int untrash_function(char **);
+int trash_function(char **args);
+int untrash_function(char **comm);
 
 __END_DECLS
 

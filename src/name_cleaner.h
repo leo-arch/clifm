@@ -26,7 +26,7 @@
 
 __BEGIN_DECLS
 
-int bleach_files(char **);
+int bleach_files(char **names);
 
 __END_DECLS
 

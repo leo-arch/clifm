@@ -27,8 +27,8 @@
 
 __BEGIN_DECLS
 
-int is_tag(char *);
-int tags_function(char **);
+int is_tag(char *name);
+int tags_function(char **args);
 
 __END_DECLS
 

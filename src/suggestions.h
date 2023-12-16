@@ -27,12 +27,12 @@
 
 __BEGIN_DECLS
 
-void clear_suggestion(const int);
+void clear_suggestion(const int sflag);
 void free_suggestion(void);
-void print_suggestion(char *, size_t, char *);
+void print_suggestion(char *str, size_t offset, char *color);
 void remove_suggestion_not_end(void);
 int  recover_from_wrong_cmd(void);
-int  rl_suggestions(const unsigned char);
+int  rl_suggestions(const unsigned char c);
 
 __END_DECLS
 

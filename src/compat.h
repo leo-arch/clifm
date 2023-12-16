@@ -47,37 +47,37 @@
 #endif /* dirfd */
 #define dirfd(d)   (0)
 
-#define fstatat    old_stat
-#define fchmodat   old_chmod
-#define mkdirat    old_mkdir
-#define getline    x_getline
-#define strnlen    x_strnlen
-#define renameat   old_rename
-#define fchownat   old_chown
 #define alphasort  x_alphasort
-#define scandir    x_scandir
+#define fchownat   old_chown
+#define fchmodat   old_chmod
+#define fstatat    old_stat
+#define getline    x_getline
+#define mkdirat    old_mkdir
 #define readlinkat old_readlink
+#define renameat   old_rename
+#define scandir    x_scandir
+#define strnlen    x_strnlen
 #define symlinkat  old_symlink
 #define unlinkat   old_unlink
 
 __BEGIN_DECLS
 
-int old_stat(int, const char *restrict, struct stat *, int);
-int old_chmod(int, const char *, mode_t, int);
-int old_rename(int, const char *, int, const char *);
-int old_mkdir(int, const char *, mode_t);
-ssize_t old_readlink(int, const char *restrict, char *restrict, size_t);
-int old_symlink(const char *, int, const char *);
-int old_unlink(int, const char *, int);
-int old_chown(int, const char *, uid_t, gid_t, int);
-size_t x_strnlen(const char *, size_t);
-
-ssize_t x_getline(char **, size_t *, FILE *);
-
-int x_alphasort(const struct dirent **, const struct dirent **);
-int x_scandir(const char *, struct dirent ***,
-	int (*)(const struct dirent *),
-	int (*)(const struct dirent **, const struct dirent **));
+int old_chmod(int fd, const char *path, mode_t mode, int flag);
+int old_chown(int fd, const char *path, uid_t owner, gid_t group, int flag);
+int old_mkdir(int dirfd, const char *pathname, mode_t mode);
+ssize_t old_readlink(int dirfd, const char *restrict pathname,
+	char *restrict buf, size_t bufsiz);
+int old_rename(int olddirfd, const char *oldpath, int newdirfd,
+	const char *newpath);
+int old_stat(int fd, const char *restrict path, struct stat *sb, int flag);
+int old_symlink(const char *target, int newdirfd, const char *linkpath);
+int old_unlink(int dirfd, const char *pathname, int lflags);
+int x_alphasort(const struct dirent **a, const struct dirent **b);
+ssize_t x_getline(char **lineptr, size_t *n, FILE *stream);
+int x_scandir(const char *dir, struct dirent ***namelist,
+	int (*select)(const struct dirent *),
+	int (*cmp)(const struct dirent **, const struct dirent **));
+size_t x_strnlen(const char *s, size_t max);
 
 __END_DECLS
 

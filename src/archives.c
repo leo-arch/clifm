@@ -229,7 +229,7 @@ test_iso(char *file)
 }
 
 /* Create mountpoint for file. Returns the path to the mountpoint in case
- * of success, or NULL in case of error */
+ * of success, or NULL in case of error. */
 static char *
 create_mountpoint(char *file)
 {
@@ -274,7 +274,7 @@ cd_to_mountpoint(char *file, char *mountpoint)
 		reload_dirlist();
 		add_to_dirhist(workspaces[cur_ws].path);
 	} else {
-		printf("%s: Successfully mounted on %s\n", file, mountpoint);
+		printf("'%s': Successfully mounted on '%s'\n", file, mountpoint);
 	}
 
 	return exit_status;
@@ -704,7 +704,7 @@ zstandard(char *in_file, char *out_file, const char mode, const char op)
 	int exit_status = EXIT_SUCCESS;
 	char *deq_file = dequote_str(in_file, 0);
 	if (!deq_file) {
-		xerror(_("archiver: %s: Error dequoting file name\n"), in_file);
+		xerror(_("archiver: '%s': Error dequoting file name\n"), in_file);
 		return EXIT_FAILURE;
 	}
 
@@ -810,7 +810,7 @@ compress_zstandard(char *name, char **args)
 	printf(_("\n%sNOTE%s: Zstandard does not support compression of "
 		 "multiple files into one single compressed file. Files will "
 		 "be compressed rather into multiple compressed files using the "
-		 "original file names\n"), BOLD, df_c);
+		 "original file names.\n"), BOLD, df_c);
 
 	size_t i;
 	for (i = 1; args[i]; i++) {
@@ -1090,7 +1090,7 @@ get_repack_format(void)
 			continue;
 
 		/* Do not allow any of these characters (mitigate command injection) */
-		char invalid_c[] = " \t\n\"\\/'`@$><=;|&{([*?!%";
+		const char invalid_c[] = " \t\n\"\\/'`@$><=;|&{([*?!%";
 		if (!*format || (*format != '.' && *format != 'q')
 		|| strpbrk(format, invalid_c)) {
 			free(format);
@@ -1230,12 +1230,12 @@ decompress_files(char **args)
 		return EXIT_FAILURE;
 
 	/* # ISO 9660 # */
-	char *ret = strrchr(args[1], '.');
+	const char *ret = strrchr(args[1], '.');
 	if ((ret && strcmp(ret, ".iso") == 0) || check_iso(args[1]) == 0)
 		return handle_iso(args[1]);
 
 	/* Check if we have at least one Zstandard file */
-	size_t zst = check_zstandard(args);
+	const size_t zst = check_zstandard(args);
 
 	/* # ZSTANDARD # */
 	if (zst == 1)

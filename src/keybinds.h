@@ -28,15 +28,15 @@
 __BEGIN_DECLS
 
 /*void add_func_to_rl(void); */
-int  keybind_exec_cmd(char *);
-int  kbinds_function(char **);
+int  keybind_exec_cmd(char *str);
+int  kbinds_function(char **args);
 int  load_keybinds(void);
 void readline_kbinds(void);
-int  rl_quit(int, int);
-int  rl_toggle_dirs_first(int, int);
-int  rl_toggle_long_view(int, int);
-int  rl_toggle_hidden_files(int, int);
-int  rl_toggle_light_mode(int, int);
+int  rl_quit(int count, int key);
+int  rl_toggle_dirs_first(int count, int key);
+int  rl_toggle_long_view(int count, int key);
+int  rl_toggle_hidden_files(int count, int key);
+int  rl_toggle_light_mode(int count, int key);
 
 __END_DECLS
 

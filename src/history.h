@@ -35,15 +35,16 @@
 
 __BEGIN_DECLS
 
-void add_to_cmdhist(char *);
-void add_to_dirhist(const char *);
-int  clear_logs(const int);
+void add_to_cmdhist(char *cmd);
+void add_to_dirhist(const char *dir_path);
+int  clear_logs(const int flag);
 int  get_history(void);
-int  history_function(char **);
+int  history_function(char **args);
 int  log_cmd(void);
-void log_msg(char *, const int, const int, const int);
-int  print_logs(const int);
-int  record_cmd(char *);
+void log_msg(char *_msg, const int print_prompt, const int logme,
+	const int add_to_msgs_list);
+int  print_logs(const int flag);
+int  record_cmd(char *input);
 
 __END_DECLS
 

@@ -31,25 +31,25 @@ __BEGIN_DECLS
 void check_completion_mode(void);
 #endif /* !_NO_FZF */
 
-int  check_file_access(const mode_t, const uid_t, const gid_t);
-char **check_for_alias(char **);
-int  check_glob_char(const char *, const int);
-int  check_immutable_bit(char *);
-int  check_regex(char *);
+int  check_file_access(const mode_t mode, const uid_t uid, const gid_t gid);
+char **check_for_alias(char **args);
+int  check_glob_char(const char *str, const int gflag);
+int  check_immutable_bit(char *file);
+int  check_regex(char *str);
 void check_term(void);
 void check_third_party_cmds(void);
 void file_cmd_check(void);
 char *get_sudo_path(void);
-int  is_action_name(const char *);
-int  is_bin_cmd(char *);
-int  is_file_in_cwd(char *);
-int  is_force_param(const char *);
-int  is_internal(const char *);
-int  is_internal_c(const char *restrict);
-int  is_internal_f(const char *restrict);
-int  is_number(const char *restrict);
-int  is_url(const char *);
-void truncate_file(char *, const int, const int);
+int  is_action_name(const char *s);
+int  is_bin_cmd(char *str);
+int  is_file_in_cwd(char *name);
+int  is_force_param(const char *s);
+int  is_internal(const char *restrict cmd);
+int  is_internal_c(const char *restrict cmd);
+int  is_internal_f(const char *restrict cmd);
+int  is_number(const char *restrict str);
+int  is_url(const char *url);
+void truncate_file(char *file, const int max, const int check_dups);
 
 __END_DECLS
 

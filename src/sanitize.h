@@ -59,8 +59,8 @@ ABCDEFGHIJKLMNOPQRSTUVWXYZ\
 
 __BEGIN_DECLS
 
-int sanitize_cmd(const char *, const int);
-int xsecure_env(const int);
+int sanitize_cmd(const char *str, const int type);
+int xsecure_env(const int mode);
 
 __END_DECLS
 

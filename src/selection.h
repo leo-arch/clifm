@@ -32,9 +32,9 @@
 
 __BEGIN_DECLS
 
-int  deselect(char **);
-int  sel_function(char **);
-int  select_file(char *);
+int  deselect(char **args);
+int  sel_function(char **args);
+int  select_file(char *file);
 void show_sel_files(void);
 int  save_sel(void);
 int  deselect_all(void);

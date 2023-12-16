@@ -27,8 +27,8 @@
 
 __BEGIN_DECLS
 
-int actions_function(char **);
-int run_action(char *, char **);
+int actions_function(char **args);
+int run_action(char *action, char **args);
 
 __END_DECLS
 

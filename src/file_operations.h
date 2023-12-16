@@ -37,23 +37,23 @@
 
 __BEGIN_DECLS
 
-int  batch_link(char **);
-int  bulk_rename(char **);
-int  bulk_remove(char *, char *);
+int  batch_link(char **args);
+int  bulk_rename(char **args);
+int  bulk_remove(char *s1, char *s2);
 void clear_selbox(void);
-int  cp_mv_file(char **, const int, const int);
-int  create_files(char **, const int);
-int  create_dirs(char **);
-int  dup_file(char **);
-int  edit_link(char *);
-char *export_files(char **, const int);
-int  symlink_file(char **);
-int  open_file(char *);
-int  open_function(char **);
-int  remove_files(char **);
-int  xchmod(const char *, const char *, const int);
-int  toggle_exec(const char *, mode_t);
-int  umask_function(char *);
+int  cp_mv_file(char **args, const int copy_and_rename, const int force);
+int  create_files(char **args, const int is_md);
+int  create_dirs(char **args);
+int  dup_file(char **cmd);
+int  edit_link(char *link);
+char *export_files(char **filenames, const int open);
+int  open_file(char *file);
+int  open_function(char **cmd);
+int  remove_files(char **args);
+int  symlink_file(char **args);
+int  toggle_exec(const char *file, mode_t mode);
+int  umask_function(char *arg);
+int  xchmod(const char *file, const char *mode_str, const int flag);
 
 __END_DECLS
 

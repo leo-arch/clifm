@@ -26,7 +26,7 @@
 
 __BEGIN_DECLS
 
-void parse_autocmd_line(char *);
+void parse_autocmd_line(char *cmd);
 void reset_opts(void);
 int  check_autocmds(void);
 void revert_autocmd_opts(void);
