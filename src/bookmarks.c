@@ -417,6 +417,12 @@ name_is_reserved_keyword(const char *name)
 		return 1;
 	}
 
+	if (strchr(name, ':') || strchr(name, '[') || strchr(name, ']')) {
+		xerror(_("bookmarks: '%s': Colons and square brackets "
+			"are not allowed\n"), name);
+		return 1;
+	}
+
 	return 0;
 }
 
