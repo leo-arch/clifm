@@ -127,7 +127,7 @@ edit_bookmarks(char *cmd, const int flag)
 
 	if (ret != EXIT_SUCCESS) {
 		if (!cmd)
-			xerror("%s\n", _("bookmarks: Error opening the bookmarks file"));
+			xerror("%s\n", _("bookmarks: Cannot open the bookmarks file"));
 		return ret;
 	}
 
@@ -599,7 +599,7 @@ mark_bookmarks_for_deletion(char **args, int *exit_status)
 			printf("'%s'\n", name);
 			counter++;
 		} else {
-			xerror("'%s': No such bookmark\n", name);
+			xerror(_("'%s': No such bookmark\n"), name);
 			*exit_status = EXIT_FAILURE;
 		}
 
@@ -694,7 +694,7 @@ del_bookmarks(char **args)
 	int fd = 0;
 	FILE *fp = open_fread(bm_file, &fd);
 	if (!fp) {
-		xerror("%s: %s\nbookmarks: Error reading the bookmarks file\n",
+		xerror(_("%s: %s\nbookmarks: Error reading the bookmarks file\n"),
 			bm_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -702,7 +702,7 @@ del_bookmarks(char **args)
 	int tmp_fd = 0;
 	FILE *tmp_fp = open_fwrite(tmp_file, &tmp_fd);
 	if (!tmp_fp) {
-		xerror("%s: %s\nbookmarks: Error creating temporary file\n",
+		xerror(_("%s: %s\nbookmarks: Error creating temporary file\n"),
 			tmp_file, strerror(errno));
 		fclose(fp);
 		return EXIT_FAILURE;
@@ -737,7 +737,7 @@ del_bookmarks(char **args)
 	if (removed > 0) {
 		unlink(bm_file);
 		rename(tmp_file, bm_file);
-		print_reload_msg("Removed %zu bookmark(s)\n", removed);
+		print_reload_msg(_("Removed %zu bookmark(s)\n"), removed);
 	} else {
 		unlink(tmp_file);
 	}
