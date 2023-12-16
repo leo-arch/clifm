@@ -911,7 +911,7 @@ cb_linehandler(char *line)
 	}
 }
 
-int
+static int
 alt_rl_prompt(const char *_prompt, const char *line)
 {
 	cb_running = 1;
@@ -937,6 +937,22 @@ alt_rl_prompt(const char *_prompt, const char *line)
 	kbind_busy = 0;
 	rl_getc_function = my_rl_getc;
 	return EXIT_SUCCESS;
+}
+
+char *
+secondary_prompt(const char *_prompt, const char *line)
+{
+	alt_rl_prompt(_prompt, line);
+
+	if (!rl_callback_handler_input)
+		return (char *)NULL;
+
+	char *input = savestring(rl_callback_handler_input,
+		strlen(rl_callback_handler_input));
+	free(rl_callback_handler_input);
+	rl_callback_handler_input = (char *)NULL;
+
+	return input;
 }
 
 /* Simply check a single chartacter (c) against the quoting characters

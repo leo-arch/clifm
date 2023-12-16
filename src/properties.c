@@ -555,7 +555,8 @@ get_new_perms(const char *str, const int diff)
 {
 	int poffset_bk = prompt_offset;
 	prompt_offset = 3;
-	xrename = 2; /* Completely disable TAB completion */
+	xrename = 2; /* Disable TAB completion for this prompt */
+	rl_nohist = kbind_busy = 1;
 
 	if (diff == 1) {
 		printf(_("%sFiles with different sets of permissions\n"
@@ -566,15 +567,7 @@ get_new_perms(const char *str, const int diff)
 	char m[(MAX_COLOR * 2) + 7];
 	snprintf(m, sizeof(m), "\001%s\002>\001%s\002 ", mi_c, tx_c);
 
-	alt_rl_prompt(m, str);
-
-	char *new_perms = (char *)NULL;
-	if (rl_callback_handler_input) {
-		new_perms = savestring(rl_callback_handler_input,
-			strlen(rl_callback_handler_input));
-		free(rl_callback_handler_input);
-		rl_callback_handler_input = (char *)NULL;
-	}
+	char *new_perms = secondary_prompt(m, str);
 
 	xrename = 0;
 	prompt_offset = poffset_bk;
@@ -741,6 +734,7 @@ get_new_ownership(const char *str, const int diff)
 	int poffset_bk = prompt_offset;
 	prompt_offset = 3;
 	xrename = 3; /* Allow completion only for user and group names */
+	rl_nohist = kbind_busy = 1;
 
 	if (diff == 1) {
 		printf(_("%sFiles with different owners\n"
@@ -751,15 +745,7 @@ get_new_ownership(const char *str, const int diff)
 	char m[(MAX_COLOR * 2) + 7];
 	snprintf(m, sizeof(m), "\001%s\002>\001%s\002 ", mi_c, tx_c);
 
-	alt_rl_prompt(m, str);
-
-	char *new_own = (char *)NULL;
-	if (rl_callback_handler_input) {
-		new_own = savestring(rl_callback_handler_input,
-			strlen(rl_callback_handler_input));
-		free(rl_callback_handler_input);
-		rl_callback_handler_input = (char *)NULL;
-	}
+	char *new_own = secondary_prompt(m, str);
 
 	xrename = 0;
 	prompt_offset = poffset_bk;

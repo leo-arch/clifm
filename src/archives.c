@@ -43,7 +43,7 @@
 #ifndef _NO_MAGIC
 # include "mime.h"
 #else
-# include <unistd.h>
+# include <unistd.h> /* dup(), dup2(), unlink(), STDOUT_FILENO */
 #endif /* !_NO_MAGIC */
 
 #define OP_ISO    1

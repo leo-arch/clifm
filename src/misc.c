@@ -120,22 +120,26 @@ get_newname(const char *_prompt, char *old_name, int *quoted)
 	prompt_offset = 3;
 
 	char *n = (old_name && *old_name) ? dequote_str(old_name, 0) : (char *)NULL;
-	alt_rl_prompt((_prompt && *_prompt) ? _prompt : "> ", n ? n : (char *)NULL);
+	char *input = secondary_prompt((_prompt && *_prompt) ? _prompt : "> ",
+		n ? n : (char *)NULL);
 	free(n);
 
 	char *new_name = (char *)NULL;
-	if (!rl_callback_handler_input)
+	if (!input)
 		goto END;
 
-	char *p = remove_quotes(rl_callback_handler_input);
-	if (!p || !*p) /* Input was "" (empty string) */
-		goto FREE_CALLBACK_AND_EXIT;
+	char *p = remove_quotes(input);
+	if (!p || !*p) { /* Input was "" (empty string) */
+		free(input);
+		goto END;
+	}
 
-	if (p != rl_callback_handler_input) {
+	if (p != input) {
 		/* Quoted: copy input verbatim (without quotes) */
 		*quoted = 1;
 		new_name = savestring(p, strlen(p));
-		goto FREE_CALLBACK_AND_EXIT;
+		free(input);
+		goto END;
 	}
 
 	char *deq = dequote_str(p, 0);
@@ -150,10 +154,6 @@ get_newname(const char *_prompt, char *old_name, int *quoted)
 
 	new_name = savestring(tmp, (size_t)i + 1);
 	free(deq);
-
-FREE_CALLBACK_AND_EXIT:
-	free(rl_callback_handler_input);
-	rl_callback_handler_input = (char *)NULL;
 
 END:
 	xrename = rl_nohist = kbind_busy = 0;

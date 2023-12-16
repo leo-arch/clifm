@@ -30,7 +30,7 @@
 __BEGIN_DECLS
 
 int trash_function(char **args);
-int untrash_function(char **comm);
+int untrash_function(char **args);
 
 __END_DECLS
 
