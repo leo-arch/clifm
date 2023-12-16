@@ -129,16 +129,13 @@ get_newname(const char *_prompt, char *old_name, int *quoted)
 		goto END;
 
 	char *p = remove_quotes(input);
-	if (!p || !*p) { /* Input was "" (empty string) */
-		free(input);
+	if (!p || !*p) /* Input was "" (empty string) */
 		goto END;
-	}
 
 	if (p != input) {
 		/* Quoted: copy input verbatim (without quotes) */
 		*quoted = 1;
 		new_name = savestring(p, strlen(p));
-		free(input);
 		goto END;
 	}
 
@@ -156,6 +153,7 @@ get_newname(const char *_prompt, char *old_name, int *quoted)
 	free(deq);
 
 END:
+	free(input);
 	xrename = rl_nohist = kbind_busy = 0;
 	prompt_offset = poffset_bk;
 
