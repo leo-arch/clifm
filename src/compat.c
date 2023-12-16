@@ -201,8 +201,7 @@ x_scandir(const char *dir, struct dirent ***namelist,
 			else
 				vsize *= 2;
 
-			struct dirent **new =
-				(struct dirent **)realloc(v, vsize * sizeof(*v));
+			struct dirent **new = realloc(v, vsize * sizeof(*v));
 			if (new == NULL)
 				break;
 
@@ -292,7 +291,7 @@ nx_getdelim_append(char **lineptr, size_t *bufsize, size_t count, char ch)
 	if ((count + 2) > tmp_size) {
 		tmp_size = nx_getdelim_get_realloc_size(tmp_size);
 
-		tmp = (char *)realloc(tmp, tmp_size);
+		tmp = realloc(tmp, tmp_size);
 		if (!tmp)
 			return (-1);
 	}

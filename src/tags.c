@@ -498,7 +498,7 @@ get_tags(char **args)
 	int n, i, c = 0;
 
 	for (n = 0; args[n]; n++);
-	int *t = (int *)xnmalloc((size_t)n + 1, sizeof(int));
+	int *t = xnmalloc((size_t)n + 1, sizeof(int));
 
 	for (i = 0; i < n; i++) {
 		if (*args[i] == ':' && *(args[i] + 1)) {
@@ -756,7 +756,7 @@ reconstruct_input(char **args)
 {
 	size_t n = 0, c;
 	for (n = 0; args[n]; n++);
-	char **a = (char **)xnmalloc(n + 2, sizeof(char *));
+	char **a = xnmalloc(n + 2, sizeof(char *));
 
 	a[0] = savestring("tag", 3);
 

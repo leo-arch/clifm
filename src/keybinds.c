@@ -219,7 +219,7 @@ load_keybinds(void)
 		}
 
 		free(kbinds);
-		kbinds = (struct kbinds_t *)xnmalloc(1, sizeof(struct kbinds_t));
+		kbinds = xnmalloc(1, sizeof(struct kbinds_t));
 		kbinds_n = 0;
 	}
 
@@ -439,7 +439,7 @@ rl_prepend_sudo(int count, int key)
 	if (t) {
 		len = strlen(t);
 		if (len > 0 && t[len - 1] != ' ') {
-			s = (char *)xnmalloc(len + 2, sizeof(char));
+			s = xnmalloc(len + 2, sizeof(char));
 			snprintf(s, len + 2, "%s ", t);
 			len++;
 		} else {
@@ -448,7 +448,7 @@ rl_prepend_sudo(int count, int key)
 		}
 	} else {
 		len = strlen(DEF_SUDO_CMD) + 1;
-		s = (char *)xnmalloc(len + 1, sizeof(char));
+		s = xnmalloc(len + 1, sizeof(char));
 		snprintf(s, len + 1, "%s ", DEF_SUDO_CMD);
 	}
 
@@ -1083,7 +1083,7 @@ rl_open_preview(int count, int key)
 	if (!config_dir || kbind_busy == 1)
 		return EXIT_FAILURE;
 
-	char *file = (char *)xnmalloc(config_dir_len + 15, sizeof(char));
+	char *file = xnmalloc(config_dir_len + 15, sizeof(char));
 	snprintf(file, config_dir_len + 15, "%s/preview.clifm", config_dir);
 
 	int ret = open_file(file);
@@ -1545,7 +1545,7 @@ run_man_cmd(char *str)
 	char *p = getenv("MANPAGER");
 	if (p) {
 		size_t len = strlen(p);
-		mp = (char *)xnmalloc(len + 1, sizeof(char *));
+		mp = xnmalloc(len + 1, sizeof(char *));
 		xstrsncpy(mp, p, len + 1);
 		unsetenv("MANPAGER");
 	}

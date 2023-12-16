@@ -540,7 +540,7 @@ perm2octal(const char *s)
 	if (TOUPPER(s[5]) == 'S') a += 2;
 	if (TOUPPER(s[8]) == 'T') a += 1;
 
-	char *p = (char *)xnmalloc(64, sizeof(char));
+	char *p = xnmalloc(64, sizeof(char));
 	snprintf(p, 64, "%d%d%d%d", a, b, c, d);
 
 	return p;
@@ -648,7 +648,7 @@ get_common_perms(char **s, int *diff)
 static char *
 get_perm_str(char **s, int *diff)
 {
-	char *ptr = (char *)xnmalloc(10, sizeof(char));
+	char *ptr = xnmalloc(10, sizeof(char));
 	*diff = 0;
 
 	if (s[1]) { /* Multiple files */
@@ -1108,7 +1108,7 @@ print_extended_attributes(char *s, const mode_t mode, const int xattr)
 	}
 
 	/* Allocate the buffer */
-	buf = (char *)xnmalloc((size_t)buflen, sizeof(char));
+	buf = xnmalloc((size_t)buflen, sizeof(char));
 
 	/* Copy the list of attribute keys to the buffer */
 	buflen = listxattr(s, buf, (size_t)buflen);
@@ -1138,7 +1138,7 @@ print_extended_attributes(char *s, const mode_t mode, const int xattr)
 			printf("%s\n", strerror(errno));
 		} else if (vallen > 0) {
 			/* Output attribute value */
-			val = (char *)xnmalloc((size_t)vallen + 1, sizeof(char));
+			val = xnmalloc((size_t)vallen + 1, sizeof(char));
 
 			vallen = getxattr(s, key, val, (size_t)vallen);
 			if (vallen == -1) {
@@ -2446,8 +2446,8 @@ print_analysis_stats(const off_t total, const off_t largest,
 		const char *p_largest = construct_human_size(largest);
 		l = savestring(p_largest, strlen(p_largest));
 	} else {
-		t = (char *)xnmalloc(32, sizeof(char));
-		l = (char *)xnmalloc(32, sizeof(char));
+		t = xnmalloc(32, sizeof(char));
+		l = xnmalloc(32, sizeof(char));
 		snprintf(t, 32, "%ju", (uintmax_t)total);
 		snprintf(l, 32, "%ju", (uintmax_t)largest);
 	}

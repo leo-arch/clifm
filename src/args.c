@@ -440,7 +440,7 @@ try_datadir(const char *dir)
 	snprintf(p, sizeof(p), "%s/share/%s/%src", dir, PROGRAM_NAME, PROGRAM_NAME);
 	if (stat(p, &a) != -1 && S_ISREG(a.st_mode)) {
 		size_t len = strlen(dir) + 7;
-		char *q = (char *)xnmalloc(len, sizeof(char));
+		char *q = xnmalloc(len, sizeof(char));
 		snprintf(q, len, "%s/share", dir);
 		return q;
 	}
@@ -607,7 +607,7 @@ open_reg_exit(char *filename, const int url, const int preview)
 		size_t mime_file_len = strlen(homedir)
 			+ (alt_profile ? strlen(alt_profile) : 7) + 40;
 
-		mime_file = (char *)xnmalloc(mime_file_len, sizeof(char));
+		mime_file = xnmalloc(mime_file_len, sizeof(char));
 		snprintf(mime_file, mime_file_len,
 			"%s/.config/clifm/profiles/%s/%s.clifm",
 			homedir, alt_profile ? alt_profile : "default",
@@ -983,7 +983,7 @@ resolve_path(char *file)
 		}
 
 		size_t len = strlen(cwd) + strlen(file) + 2;
-		_path = (char *)xnmalloc(len, sizeof(char));
+		_path = xnmalloc(len, sizeof(char));
 		snprintf(_path, len, "%s/%s", cwd, file);
 	}
 

@@ -120,7 +120,7 @@ run_find(char *search_path, char *arg)
 	int ret = EXIT_SUCCESS;
 
 	size_t pattern_len = strlen(arg + 1) + 5;
-	char *pattern = (char *)xnmalloc(pattern_len, sizeof(char));
+	char *pattern = xnmalloc(pattern_len, sizeof(char));
 
 #if !defined(_BE_POSIX)
 	if (conf.search_strategy == REGEX_ONLY) {
@@ -234,8 +234,8 @@ chdir_search_path(char **search_path, const char *arg)
 static char **
 glob_sort_dirs(glob_t *globbed_files, size_t *g)
 {
-	int *dirs = (int *)xnmalloc(globbed_files->gl_pathc + 1, sizeof(int));
-	char **gfiles = (char **)xnmalloc(globbed_files->gl_pathc + 1, sizeof(char *));
+	int *dirs = xnmalloc(globbed_files->gl_pathc + 1, sizeof(int));
+	char **gfiles = xnmalloc(globbed_files->gl_pathc + 1, sizeof(char *));
 	struct stat attr;
 	size_t i, n = 0;
 
@@ -272,8 +272,7 @@ static struct search_t *
 get_glob_matches(char **gfiles, const char *search_path,
 	const mode_t file_type, const size_t g)
 {
-	struct search_t *matches = (struct search_t *)xnmalloc(
-		g + 1, sizeof(struct search_t));
+	struct search_t *matches = xnmalloc(g + 1, sizeof(struct search_t));
 
 	size_t i;
 	int n = 0;
@@ -339,8 +338,8 @@ get_non_matches_from_search_path(const char *search_path, char **gfiles,
 		return (struct search_t *)NULL;
 
 	int i, j, n = 0;
-	struct search_t *matches = (struct search_t *)xnmalloc(
-		(size_t)dir_entries + 1, sizeof(struct search_t));
+	struct search_t *matches = xnmalloc((size_t)dir_entries + 1,
+		sizeof(struct search_t));
 
 	for (i = 0; i < dir_entries; i++) {
 		int f = 0;
@@ -391,8 +390,7 @@ get_glob_matches_invert(char **gfiles, const char *search_path,
 		return get_non_matches_from_search_path(search_path, gfiles, file_type);
 
 	filesn_t i, j, n = 0;
-	struct search_t *matches =
-		(struct search_t *)xnmalloc((size_t)files + 1, sizeof(struct search_t));
+	struct search_t *matches = xnmalloc((size_t)files + 1, sizeof(struct search_t));
 
 	for (i = 0; file_info[i].name; i++) {
 		int f = 0;
@@ -475,7 +473,7 @@ construct_glob_query(char **arg, const int invert)
 	size_t len = strlen(*arg);
 
 	char *q = savestring(query, len - (invert == 1 ? 2 : 1));
-	*arg = (char *)xnrealloc(*arg, (len + 3), sizeof(char));
+	*arg = xnrealloc(*arg, (len + 3), sizeof(char));
 
 	snprintf((*arg) + 1, len + 2, "*%s*", q);
 	free(q);
@@ -664,7 +662,7 @@ construct_regex_query(char **arg, const int invert, int *regex_found)
 	size_t len = strlen(*arg);
 
 	char *q = savestring(query, len - (invert == 1 ? 2 : 1));
-	*arg = (char *)xnrealloc(*arg, (len + 5), sizeof(char));
+	*arg = xnrealloc(*arg, (len + 5), sizeof(char));
 
 	snprintf(*arg + 1, len + 4, ".*%s.*", q);
 	free(q);
@@ -836,8 +834,7 @@ print_regex_matches(const mode_t file_type, struct dirent **reg_dirlist,
 	size_t total; /* Total number of matches (without file type filter) */
 	for (total = 0; regex_index[total] > -1; total++);
 
-	struct search_t *list =
-		(struct search_t *)xnmalloc(total + 1, sizeof(struct search_t));
+	struct search_t *list = xnmalloc(total + 1, sizeof(struct search_t));
 
 	size_t matches = 0; /* Number of filtered matches */
 
@@ -954,7 +951,7 @@ search_regex(char **args)
 	}
 
 	size_t found = 0;
-	int *regex_index = (int *)xnmalloc((search_path ? (size_t)tmp_files
+	int *regex_index = xnmalloc((search_path ? (size_t)tmp_files
 		: (size_t)files) + 2, sizeof(int));
 	size_t max = (search_path && *search_path) ? (size_t)tmp_files : (size_t)files;
 

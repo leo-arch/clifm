@@ -51,7 +51,7 @@ get_date(void)
 		return (char *)NULL;
 
 	size_t date_max = MAX_TIME_STR;
-	char *date = (char *)xnmalloc(date_max + 1, sizeof(char));
+	char *date = xnmalloc(date_max + 1, sizeof(char));
 	*date = '\0';
 
 	strftime(date, date_max, "%Y-%m-%dT%T%z", &t);
@@ -147,7 +147,7 @@ log_cmd(void)
 		+ (workspaces[cur_ws].path ? strlen(workspaces[cur_ws].path) : 2)
 		+ strlen(last_cmd) + 6;
 
-	char *full_log = (char *)xnmalloc(log_len, sizeof(char));
+	char *full_log = xnmalloc(log_len, sizeof(char));
 	snprintf(full_log, log_len, "[%s] %s:%s\n", date ? date : "unknown",
 		workspaces[cur_ws].path ? workspaces[cur_ws].path : "?", last_cmd);
 
@@ -248,7 +248,7 @@ send_desktop_notification(char *msg)
 	ret = launch_execv(cmd, FOREGROUND, E_MUTE);
 #elif defined (__APPLE__)
 	size_t msg_len = strlen(msg) + strlen(type) + strlen(PROGRAM_NAME) + 60;
-	char *_msg = (char *)xnmalloc(msg_len, sizeof(char));
+	char *_msg = xnmalloc(msg_len, sizeof(char));
 	snprintf(_msg, msg_len,
 		"'display notification \"%s\" subtitle \"%s\" with title \"%s\"'",
 		msg, type, PROGRAM_NAME);
@@ -300,7 +300,7 @@ log_msg(char *_msg, const int print_prompt, const int logme,
 
 	if (add_to_msgs_list == 1) {
 		msgs_n++;
-		messages = (char **)xnrealloc(messages, (size_t)(msgs_n + 1), sizeof(char *));
+		messages = xnrealloc(messages, (size_t)(msgs_n + 1), sizeof(char *));
 		messages[msgs_n - 1] = savestring(_msg, msg_len);
 		messages[msgs_n] = (char *)NULL;
 	}
@@ -351,8 +351,8 @@ add_to_dirhist(const char *dir_path)
 		&& strcmp(dir_path, old_pwd[dirhist_total_index - 1]) == 0)
 			return;
 
-		old_pwd = (char **)xnrealloc(old_pwd,
-		    (size_t)(dirhist_total_index + 2), sizeof(char *));
+		old_pwd = xnrealloc(old_pwd, (size_t)(dirhist_total_index + 2),
+			sizeof(char *));
 
 		dirhist_cur_index = dirhist_total_index;
 		old_pwd[dirhist_total_index] = savestring(dir_path, strlen(dir_path));
@@ -365,8 +365,8 @@ add_to_dirhist(const char *dir_path)
 
 	/* If not at the end of dirhist, add previous AND new entry */
 	else {
-		old_pwd = (char **)xnrealloc(old_pwd,
-			(size_t)(dirhist_total_index + 3), sizeof(char *));
+		old_pwd = xnrealloc(old_pwd, (size_t)(dirhist_total_index + 3),
+			sizeof(char *));
 
 		old_pwd[dirhist_total_index] = savestring(
 		    old_pwd[dirhist_cur_index],
@@ -561,12 +561,12 @@ get_history(void)
 	if (config_ok == 0 || !hist_file) return EXIT_FAILURE;
 
 	if (current_hist_n == 0) { /* Coming from main() */
-		history = (struct history_t *)xcalloc(1, sizeof(struct history_t));
+		history = xcalloc(1, sizeof(struct history_t));
 	} else { /* Only true when comming from 'history clear' */
 		size_t i;
 		for (i = 0; history[i].cmd; i++)
 			free(history[i].cmd);
-		history = (struct history_t *)xnrealloc(history, 1, sizeof(struct history_t));
+		history = xnrealloc(history, 1, sizeof(struct history_t));
 		current_hist_n = 0;
 	}
 
@@ -595,8 +595,8 @@ get_history(void)
 			continue;
 		}
 
-		history = (struct history_t *)xnrealloc(history,
-			current_hist_n + 2, sizeof(struct history_t));
+		history = xnrealloc(history, current_hist_n + 2,
+			sizeof(struct history_t));
 		history[current_hist_n].cmd = savestring(line_buff, (size_t)line_len);
 		history[current_hist_n].len = (size_t)line_len;
 		history[current_hist_n].date = tdate;
@@ -638,8 +638,8 @@ add_to_cmdhist(char *cmd)
 	/* For us */
 	/* Add the new input to the history array */
 	time_t tdate = time(NULL);
-	history = (struct history_t *)xnrealloc(history,
-		(size_t)(current_hist_n + 2), sizeof(struct history_t));
+	history = xnrealloc(history, (size_t)(current_hist_n + 2),
+		sizeof(struct history_t));
 	history[current_hist_n].cmd = savestring(cmd, cmd_len);
 	history[current_hist_n].len = cmd_len;
 	history[current_hist_n].date = tdate;

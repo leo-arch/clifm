@@ -554,12 +554,12 @@ bleach_files(char **names)
 			continue;
 		}
 
-		bfiles = (struct bleach_t *)xnrealloc(bfiles, f + 1, sizeof(struct bleach_t));
+		bfiles = xnrealloc(bfiles, f + 1, sizeof(struct bleach_t));
 		bfiles[f].original = savestring(names[i], nlen);
 		if (sl) {
 			*sl = '\0';
 			size_t len = nlen + strlen(p) + 2;
-			bfiles[f].replacement = (char *)xnmalloc(len, sizeof(char));
+			bfiles[f].replacement = xnmalloc(len, sizeof(char));
 			snprintf(bfiles[f].replacement, len, "%s/%s", names[i], p);
 			*sl = '/';
 		} else {
@@ -661,7 +661,7 @@ CONFIRM:
 			while (lstat(r, &a) == 0) {
 				char tmp[PATH_MAX];
 				xstrsncpy(tmp, r, sizeof(tmp));
-				r = (char *)xnrealloc(r, PATH_MAX + 32, sizeof(char));
+				r = xnrealloc(r, PATH_MAX + 32, sizeof(char));
 				snprintf(r, PATH_MAX + 31, "%s-%zu", tmp, rep_suffix);
 				rep_suffix++;
 			}

@@ -694,7 +694,7 @@ get_reg_file_color(const char *filename, const struct stat *attr,
 		return fi_c;
 
 	color_len += 4;
-	char *ext_color = (char *)xnmalloc(color_len, sizeof(char));
+	char *ext_color = xnmalloc(color_len, sizeof(char));
 	snprintf(ext_color, color_len, "\x1b[%sm", extcolor);
 
 	*free_color = 1;
@@ -1689,10 +1689,10 @@ get_last_word(const char *last_space)
 			: (rl_line_buffer ? rl_line_buffer : (char *)NULL);
 	if (tmp) {
 		size_t len = strlen(tmp);
-		last_word = (char *)xnrealloc(last_word, len + 1, sizeof(char));
+		last_word = xnrealloc(last_word, len + 1, sizeof(char));
 		xstrsncpy(last_word, tmp, len + 1);
 	} else {
-		last_word = (char *)xnrealloc(last_word, 1, sizeof(char));
+		last_word = xnrealloc(last_word, 1, sizeof(char));
 		*last_word = '\0';
 	}
 

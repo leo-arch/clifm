@@ -198,7 +198,7 @@ free_jump_database(void)
 static int
 add_new_jump_entry(const char *dir, const size_t dir_len)
 {
-	jump_db = (struct jump_t *)xnrealloc(jump_db, jump_n + 2, sizeof(struct jump_t));
+	jump_db = xnrealloc(jump_db, jump_n + 2, sizeof(struct jump_t));
 	jump_db[jump_n].visits = 1;
 	time_t now = time(NULL);
 	jump_db[jump_n].first_visit = now;
@@ -235,7 +235,7 @@ add_to_jumpdb(char *dir)
 	}
 
 	if (!jump_db) {
-		jump_db = (struct jump_t *)xnmalloc(1, sizeof(struct jump_t));
+		jump_db = xnmalloc(1, sizeof(struct jump_t));
 		jump_n = 0;
 	}
 
@@ -464,7 +464,7 @@ print_jump_table(const int reduce, const time_t now)
 	int max_rank = 0, max_visits = 0, max_first = 0, max_last = 0;
 	int max_order = DIGINUM(jump_n);
 
-	struct jump_t *tmp_jump = (struct jump_t *)xnmalloc(jump_n + 1, sizeof(struct jump_t));
+	struct jump_t *tmp_jump = xnmalloc(jump_n + 1, sizeof(struct jump_t));
 
 	for (i = 0; i < jump_n; i++) {
 		if (!IS_VALID_JUMP_ENTRY(i)) {
@@ -825,8 +825,7 @@ dirjump(char **args, const int mode)
 	size_t i;
 	int j, match = 0;
 
-	struct jump_entry_t *entry = (struct jump_entry_t *)xnmalloc(
-		jump_n + 1, sizeof(struct jump_entry_t));
+	struct jump_entry_t *entry = xnmalloc(jump_n + 1, sizeof(struct jump_entry_t));
 
 	for (i = 1; args[i]; i++) {
 		/* 1) Using the first parameter, get a list of matches in the

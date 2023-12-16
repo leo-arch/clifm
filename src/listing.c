@@ -143,7 +143,7 @@ static void
 set_icon_names_hashes(void)
 {
 	int i = (int)(sizeof(icon_filenames) / sizeof(struct icons_t));
-	name_icons_hashes = (size_t *)xnmalloc((size_t)i + 1, sizeof(size_t));
+	name_icons_hashes = xnmalloc((size_t)i + 1, sizeof(size_t));
 
 	while (--i >= 0)
 		name_icons_hashes[i] = hashme(icon_filenames[i].name, 0);
@@ -153,7 +153,7 @@ static void
 set_dir_names_hashes(void)
 {
 	int i = (int)(sizeof(icon_dirnames) / sizeof(struct icons_t));
-	dir_icons_hashes = (size_t *)xnmalloc((size_t)i + 1, sizeof(size_t));
+	dir_icons_hashes = xnmalloc((size_t)i + 1, sizeof(size_t));
 
 	while (--i >= 0)
 		dir_icons_hashes[i] = hashme(icon_dirnames[i].name, 0);
@@ -163,7 +163,7 @@ static void
 set_ext_names_hashes(void)
 {
 	int i = (int)(sizeof(icon_ext) / sizeof(struct icons_t));
-	ext_icons_hashes = (size_t *)xnmalloc((size_t)i + 1,  sizeof(size_t));
+	ext_icons_hashes = xnmalloc((size_t)i + 1,  sizeof(size_t));
 
 	while (--i >= 0)
 		ext_icons_hashes[i] = hashme(icon_ext[i].name, 0);
@@ -1881,8 +1881,7 @@ list_dir_light(void)
 	filesn_t n = 0, count = 0;
 	size_t total_dents = 0;
 
-	file_info = (struct fileinfo *)xnmalloc(ENTRY_N + 2,
-		sizeof(struct fileinfo));
+	file_info = xnmalloc(ENTRY_N + 2, sizeof(struct fileinfo));
 
 	while ((ent = readdir(dir))) {
 		const char *ename = ent->d_name;
@@ -1950,8 +1949,7 @@ list_dir_light(void)
 		init_fileinfo(n);
 
 		file_info[n].utf8 = is_utf8_name(ename, &file_info[n].bytes);
-		file_info[n].name =
-			(char *)xnmalloc(file_info[n].bytes + 1, sizeof(char));
+		file_info[n].name = xnmalloc(file_info[n].bytes + 1, sizeof(char));
 		memcpy(file_info[n].name, ename, file_info[n].bytes + 1);
 		file_info[n].len = (file_info[n].utf8 == 0)
 			? file_info[n].bytes : wc_xstrlen(ename);
@@ -2333,8 +2331,7 @@ list_dir(void)
 	filesn_t n = 0, count = 0;
 	size_t total_dents = 0;
 
-	file_info =
-		(struct fileinfo *)xnmalloc(ENTRY_N + 2, sizeof(struct fileinfo));
+	file_info = xnmalloc(ENTRY_N + 2, sizeof(struct fileinfo));
 
 	while ((ent = readdir(dir))) {
 		const char *ename = ent->d_name;
@@ -2423,8 +2420,7 @@ list_dir(void)
 		 * names are far more common than UTF-8 names. */
 		file_info[n].utf8 = is_utf8_name(ename, &file_info[n].bytes);
 
-		file_info[n].name =
-			(char *)xnmalloc(file_info[n].bytes + 1, sizeof(char));
+		file_info[n].name = xnmalloc(file_info[n].bytes + 1, sizeof(char));
 		memcpy(file_info[n].name, ename, file_info[n].bytes + 1);
 
 		/* Columns needed to display file name */
@@ -2734,7 +2730,7 @@ list_dir(void)
 			if (!extcolor)
 				break;
 
-			char *t = (char *)xnmalloc(color_len + 4, sizeof(char));
+			char *t = xnmalloc(color_len + 4, sizeof(char));
 			*t = '\x1b'; t[1] = '[';
 			memcpy(t + 2, extcolor, color_len);
 			t[color_len + 2] = 'm';

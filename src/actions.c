@@ -60,7 +60,7 @@ get_plugin_path(char *action, int *status)
 	size_t cmd_len = 0;
 
 	if (strchr(action, '/')) {
-		cmd = (char *)xnmalloc(action_len + 1, sizeof(char));
+		cmd = xnmalloc(action_len + 1, sizeof(char));
 		xstrsncpy(cmd, action, action_len + 1);
 		dir_path = 1;
 	} else { /* If not a path, PLUGINS_DIR is assumed */
@@ -70,7 +70,7 @@ get_plugin_path(char *action, int *status)
 			return (char *)NULL;
 		}
 		cmd_len = action_len + strlen(plugins_dir) + 2;
-		cmd = (char *)xnmalloc(cmd_len, sizeof(char));
+		cmd = xnmalloc(cmd_len, sizeof(char));
 		snprintf(cmd, cmd_len, "%s/%s", plugins_dir, action);
 	}
 
@@ -81,7 +81,7 @@ get_plugin_path(char *action, int *status)
 	/* Not in local dir. Let's check the system data dir as well */
 	if (data_dir && dir_path == 0) {
 		cmd_len = action_len + strlen(data_dir)	+ strlen(PROGRAM_NAME) + 11;
-		cmd = (char *)xnrealloc(cmd, cmd_len, sizeof(char));
+		cmd = xnrealloc(cmd, cmd_len, sizeof(char));
 		snprintf(cmd, cmd_len, "%s/%s/plugins/%s", data_dir,
 			PROGRAM_NAME, action);
 		if (access(cmd, X_OK) == 0)
@@ -110,7 +110,7 @@ run_action(char *action, char **args)
 		return exit_status;
 
 	size_t cmd_len = strlen(cmd);
-	args[0] = (char *)xnrealloc(args[0], cmd_len + 1, sizeof(char));
+	args[0] = xnrealloc(args[0], cmd_len + 1, sizeof(char));
 	xstrsncpy(args[0], cmd, cmd_len + 1);
 
 	free(cmd);

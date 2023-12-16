@@ -1702,33 +1702,33 @@ set_cp_cmd(char **cmd, const int cp_force)
 	switch (conf.cp_cmd) {
 	case CP_ADVCP:
 		dst_len = sizeof(DEFAULT_ADVCP_CMD) - 1;
-		*cmd = (char *)xnrealloc(*cmd, dst_len + 1, sizeof(char));
+		*cmd = xnrealloc(*cmd, dst_len + 1, sizeof(char));
 		xstrsncpy(*cmd, DEFAULT_ADVCP_CMD, dst_len + 1);
 		break;
 	case CP_ADVCP_FORCE:
 		dst_len = sizeof(DEFAULT_ADVCP_CMD_FORCE) - 1;
-		*cmd = (char *)xnrealloc(*cmd, dst_len + 1, sizeof(char));
+		*cmd = xnrealloc(*cmd, dst_len + 1, sizeof(char));
 		xstrsncpy(*cmd, DEFAULT_ADVCP_CMD_FORCE, dst_len + 1);
 		break;
 	case CP_WCP:
 		dst_len = sizeof(DEFAULT_WCP_CMD) - 1;
-		*cmd = (char *)xnrealloc(*cmd, dst_len + 1, sizeof(char));
+		*cmd = xnrealloc(*cmd, dst_len + 1, sizeof(char));
 		xstrsncpy(*cmd, DEFAULT_WCP_CMD, dst_len + 1);
 		break;
 	case CP_RSYNC:
 		dst_len = sizeof(DEFAULT_RSYNC_CMD) - 1;
-		*cmd = (char *)xnrealloc(*cmd, dst_len + 1, sizeof(char));
+		*cmd = xnrealloc(*cmd, dst_len + 1, sizeof(char));
 		xstrsncpy(*cmd, DEFAULT_RSYNC_CMD, dst_len + 1);
 		break;
 	case CP_CP_FORCE:
 		dst_len = sizeof(DEFAULT_CP_CMD_FORCE) - 1;
-		*cmd = (char *)xnrealloc(*cmd, dst_len + 1, sizeof(char));
+		*cmd = xnrealloc(*cmd, dst_len + 1, sizeof(char));
 		xstrsncpy(*cmd, DEFAULT_CP_CMD_FORCE, dst_len + 1);
 		break;
 	case CP_CP: /* fallthrough */
 	default:
 		dst_len = sizeof(DEFAULT_CP_CMD) - 1;
-		*cmd = (char *)xnrealloc(*cmd, dst_len + 1, sizeof(char));
+		*cmd = xnrealloc(*cmd, dst_len + 1, sizeof(char));
 		xstrsncpy(*cmd, DEFAULT_CP_CMD, dst_len + 1);
 		break;
 	}
@@ -1752,23 +1752,23 @@ set_mv_cmd(char **cmd, const int mv_force)
 	switch (conf.mv_cmd) {
 	case MV_ADVMV:
 		dst_len = sizeof(DEFAULT_ADVMV_CMD) - 1;
-		*cmd = (char *)xnrealloc(*cmd, dst_len + 1, sizeof(char));
+		*cmd = xnrealloc(*cmd, dst_len + 1, sizeof(char));
 		xstrsncpy(*cmd, DEFAULT_ADVMV_CMD, dst_len + 1);
 		break;
 	case MV_ADVMV_FORCE:
 		dst_len = sizeof(DEFAULT_ADVMV_CMD) - 1;
-		*cmd = (char *)xnrealloc(*cmd, dst_len + 1, sizeof(char));
+		*cmd = xnrealloc(*cmd, dst_len + 1, sizeof(char));
 		xstrsncpy(*cmd, DEFAULT_ADVMV_CMD_FORCE, dst_len + 1);
 		break;
 	case MV_MV_FORCE:
 		dst_len = sizeof(DEFAULT_MV_CMD_FORCE) - 1;
-		*cmd = (char *)xnrealloc(*cmd, dst_len + 1, sizeof(char));
+		*cmd = xnrealloc(*cmd, dst_len + 1, sizeof(char));
 		xstrsncpy(*cmd, DEFAULT_MV_CMD_FORCE, dst_len + 1);
 		break;
 	case MV_MV: /* fallthrough */
 	default:
 		dst_len = sizeof(DEFAULT_MV_CMD) - 1;
-		*cmd = (char *)xnrealloc(*cmd, dst_len + 1, sizeof(char));
+		*cmd = xnrealloc(*cmd, dst_len + 1, sizeof(char));
 		xstrsncpy(*cmd, DEFAULT_MV_CMD, dst_len + 1);
 		break;
 	}
@@ -1837,7 +1837,7 @@ preview_edit(char *app)
 	}
 
 	size_t len = config_dir_len + 15;
-	char *file = (char *)xnmalloc(len, sizeof(char));
+	char *file = xnmalloc(len, sizeof(char));
 	snprintf(file, len, "%s/preview.clifm", config_dir);
 
 	int ret = EXIT_SUCCESS;
@@ -2814,7 +2814,7 @@ exec_chained_cmds(char *cmd)
 		size_t len = 0, cond_exec = 0, error_code = 0;
 
 		/* Get command */
-		str = (char *)xcalloc(strlen(cmd) + 1, sizeof(char));
+		str = xcalloc(strlen(cmd) + 1, sizeof(char));
 		while (cmd[i] && cmd[i] != '&' && cmd[i] != ';') {
 			str[len] = cmd[i];
 			len++;

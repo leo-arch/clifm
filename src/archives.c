@@ -165,7 +165,7 @@ extract_iso(char *file)
 
 	/* 7z x -oDIR FILE (use FILE as DIR) */
 	size_t flen = strlen(file);
-	char *o_option = (char *)xnmalloc(flen + 7, sizeof(char));
+	char *o_option = xnmalloc(flen + 7, sizeof(char));
 	snprintf(o_option, flen + 7, "-o%s.dir", file); /* NOLINT */
 
 	/* Construct and execute cmd */
@@ -188,7 +188,7 @@ extract_iso_to_dir(char *file)
 		return EXIT_FAILURE;
 
 	size_t len = strlen(ext_path);
-	char *o_option = (char *)xnmalloc(len + 3, sizeof(char));
+	char *o_option = xnmalloc(len + 3, sizeof(char));
 	snprintf(o_option, len + 3, "-o%s", ext_path); /* NOLINT */
 	free(ext_path);
 
@@ -239,11 +239,11 @@ create_mountpoint(char *file)
 
 	if (xargs.stealth_mode == 1) {
 		size_t len = strlen(tfile) + P_tmpdir_len + 15;
-		mountpoint = (char *)xnmalloc(len, sizeof(char));
+		mountpoint = xnmalloc(len, sizeof(char));
 		snprintf(mountpoint, len, "%s/clifm-mounts/%s", P_tmpdir, tfile);
 	} else {
 		size_t len = config_dir_len + strlen(tfile) + 9;
-		mountpoint = (char *)xnmalloc(len, sizeof(char));
+		mountpoint = xnmalloc(len, sizeof(char));
 		snprintf(mountpoint, len, "%s/mounts/%s", config_dir, tfile); /* NOLINT */
 	}
 
@@ -356,11 +356,11 @@ static int
 create_iso_from_block_dev(char *in_file, char *out_file)
 {
 	size_t len = strlen(in_file) + 4;
-	char *if_option = (char *)xnmalloc(len, sizeof(char));
+	char *if_option = xnmalloc(len, sizeof(char));
 	snprintf(if_option, len, "if=%s", in_file); /* NOLINT */
 
 	len = strlen(out_file) + 4;
-	char *of_option = (char *)xnmalloc(len, sizeof(char));
+	char *of_option = xnmalloc(len, sizeof(char));
 	snprintf(of_option, len, "of=%s", out_file); /* NOLINT */
 
 	char *sudo = get_sudo_path();
@@ -647,7 +647,7 @@ add_default_extension(char *name)
 	size_t name_len = strlen(name);
 
 	char *t = savestring(name, name_len);
-	name = (char *)xnrealloc(name, name_len + 8, sizeof(char));
+	name = xnrealloc(name, name_len + 8, sizeof(char));
 	snprintf(name, name_len + 8, "%s.tar.gz", t); /* NOLINT */
 	free(t);
 
@@ -828,11 +828,11 @@ compress_others(char **args, char *name)
 	for (i = 1; args[i]; i++);
 
 	char *ext_ok = strrchr(name, '.');
-	char **tcmd = (char **)xnmalloc(3 + i + 1, sizeof(char *));
+	char **tcmd = xnmalloc(3 + i + 1, sizeof(char *));
 	tcmd[0] = savestring("atool", 5);
 	tcmd[1] = savestring("-a", 2);
 	size_t len = strlen(name) + (!ext_ok ? 7 : 0) + 1;
-	tcmd[2] = (char *)xnmalloc(len, sizeof(char *));
+	tcmd[2] = xnmalloc(len, sizeof(char *));
 	snprintf(tcmd[2], len, "%s%s", name, !ext_ok ? ".tar.gz" : ""); /* NOLINT */
 	n += 3;
 
@@ -1055,7 +1055,7 @@ extract_others(char **args)
 	for (i = 1; args[i]; i++);
 
 	/* Construct the cmd */
-	tcmd = (char **)xnmalloc(3 + i + 1, sizeof(char *));
+	tcmd = xnmalloc(3 + i + 1, sizeof(char *));
 	tcmd[0] = savestring("atool", 5);
 	tcmd[1] = savestring("-x", 2);
 	tcmd[2] = savestring("-e", 2);
@@ -1119,7 +1119,7 @@ repack_others(char **args)
 	size_t n = 0, i;
 	for (i = 1; args[i]; i++);
 
-	char **tcmd = (char **)xnmalloc(4 + i + 1, sizeof(char *));
+	char **tcmd = xnmalloc(4 + i + 1, sizeof(char *));
 	tcmd[0] = savestring("arepack", 7);
 	tcmd[1] = savestring("-F", 2);
 	tcmd[2] = savestring(format, strlen(format));

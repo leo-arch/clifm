@@ -142,7 +142,7 @@ wx_parent_check(char *file)
 		 * simply because in this case there's nothing before the last
 		 * slash. So, check if file's parent dir is root */
 		if (file[0] == '/' && strcntchr(file + 1, '/') == -1) {
-			parent = (char *)xnmalloc(2, sizeof(char));
+			parent = xnmalloc(2, sizeof(char));
 			parent[0] = '/';
 			parent[1] = '\0';
 		} else {
@@ -282,17 +282,17 @@ trash_clear(void)
 	size_t i;
 	for (i = 0; i < (size_t)files_n; i++) {
 		size_t len = strlen(trash_files[i]->d_name) + 11;
-		char *info_file = (char *)xnmalloc(len, sizeof(char));
+		char *info_file = xnmalloc(len, sizeof(char));
 		snprintf(info_file, len, "%s.trashinfo", trash_files[i]->d_name);
 
 		char *file1 = (char *)NULL;
 		len = strlen(trash_files_dir) + strlen(trash_files[i]->d_name) + 2;
-		file1 = (char *)xnmalloc(len, sizeof(char));
+		file1 = xnmalloc(len, sizeof(char));
 		snprintf(file1, len, "%s/%s", trash_files_dir, trash_files[i]->d_name);
 
 		char *file2 = (char *)NULL;
 		len = strlen(trash_info_dir) + strlen(info_file) + 2;
-		file2 = (char *)xnmalloc(len, sizeof(char));
+		file2 = xnmalloc(len, sizeof(char));
 		snprintf(file2, len, "%s/%s", trash_info_dir, info_file);
 
 		char *tmp_cmd[] = {"rm", "-rf", "--", file1, file2, NULL};
@@ -333,7 +333,7 @@ static int
 del_trash_file_and_exit(char **file_suffix, char **info_file)
 {
 	size_t len = strlen(trash_files_dir) + strlen(*file_suffix) + 2;
-	char *trash_file = (char *)xnmalloc(len, sizeof(char));
+	char *trash_file = xnmalloc(len, sizeof(char));
 	snprintf(trash_file, len, "%s/%s", trash_files_dir, *file_suffix);
 
 	char *tmp_cmd[] = {"rm", "-rf", "--", trash_file, NULL};
@@ -406,14 +406,14 @@ trash_file(const char *suffix, const struct tm *tm, char *file)
 	}
 
 	size_t len = filename_len + suffix_len + 2;
-	char *file_suffix = (char *)xnmalloc(len, sizeof(char));
+	char *file_suffix = xnmalloc(len, sizeof(char));
 	snprintf(file_suffix, len, "%s.%s", filename, suffix);
 
 	/* Move the original file into the trash directory. */
 	/* NOTE: It is guaranteed (by check_trash_file()) that FILE does not
 	 * end with a slash. */
 	len = strlen(trash_files_dir) + strlen(file_suffix) + 2;
-	char *dest = (char *)xnmalloc(len, sizeof(char));
+	char *dest = xnmalloc(len, sizeof(char));
 	snprintf(dest, len, "%s/%s", trash_files_dir, file_suffix);
 
 	int mvcmd = 0;
@@ -439,7 +439,7 @@ trash_file(const char *suffix, const struct tm *tm, char *file)
 
 	/* Generate the info file */
 	len = strlen(trash_info_dir) + strlen(file_suffix) + 12;
-	char *info_file = (char *)xnmalloc(len, sizeof(char));
+	char *info_file = xnmalloc(len, sizeof(char));
 	snprintf(info_file, len, "%s/%s.trashinfo", trash_info_dir, file_suffix);
 
 	int fd = 0;
@@ -773,7 +773,7 @@ untrash_file(char *file)
 		 * because there's nothing before last slash in this case).
 		 * So, check if file's parent is root. Else return */
 		if (url_decoded[0] == '/' && strcntchr(url_decoded + 1, '/') == -1) {
-			parent = (char *)xnmalloc(2, sizeof(char));
+			parent = xnmalloc(2, sizeof(char));
 			parent[0] = '/';
 			parent[1] = '\0';
 		} else {
@@ -1191,7 +1191,7 @@ trash_files_args(char **args)
 	int exit_status = EXIT_SUCCESS, cwd = 0;
 	size_t i, trashed_files = 0, n = 0;
 	for (i = 1; args[i]; i++);
-	int *successfully_trashed = (int *)xnmalloc(i + 1, sizeof(int));
+	int *successfully_trashed = xnmalloc(i + 1, sizeof(int));
 
 	for (i = 1; args[i]; i++) {
 		char *deq_file = dequote_str(args[i], 0);

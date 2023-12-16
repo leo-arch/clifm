@@ -107,8 +107,7 @@ get_ext_mountpoints(void)
 		if (*t != 'e' || t[1] != 'x' || t[2] != 't' || !t[3] || t[4])
 			continue;
 
-		ext_mnt = (struct ext_mnt_t *)xnrealloc(ext_mnt,
-			n + 2, sizeof(struct ext_mnt_t));
+		ext_mnt = xnrealloc(ext_mnt, n + 2, sizeof(struct ext_mnt_t));
 		ext_mnt[n].mnt_point = savestring(ent->mnt_dir, strlen(ent->mnt_dir));
 
 		switch (t[3]) {
@@ -407,7 +406,7 @@ backup_argv(const int argc, char **argv)
 int
 init_workspaces(void)
 {
-	workspaces = (struct ws_t *)xnmalloc(MAX_WS, sizeof(struct ws_t));
+	workspaces = xnmalloc(MAX_WS, sizeof(struct ws_t));
 	int i = MAX_WS;
 	while (--i >= 0) {
 		workspaces[i].path = (char *)NULL;
@@ -552,7 +551,7 @@ get_user_groups(const char *name, const gid_t gid, int *ngroups)
 
 #if defined(__TERMUX__) || defined(_BE_POSIX)
 	UNUSED(name); UNUSED(gid);
-	gid_t *g = (gid_t *)xnmalloc(NGROUPS_MAX, sizeof(g));
+	gid_t *g = xnmalloc(NGROUPS_MAX, sizeof(g));
 	if ((n = getgroups(NGROUPS_MAX, g)) == -1) {
 		err('e', PRINT_PROMPT, "%s: getgroups: %s\n",
 			PROGRAM_NAME, strerror(errno));
@@ -560,16 +559,16 @@ get_user_groups(const char *name, const gid_t gid, int *ngroups)
 		return (gid_t *)NULL;
 	}
 	if (NGROUPS_MAX > n) /* Reduce array to actual amount of groups (N) */
-		g = (gid_t *)xnrealloc(g, (size_t)n, sizeof(g));
+		g = xnrealloc(g, (size_t)n, sizeof(g));
 
 #elif defined(__linux__)
 	n = 0;
 	getgrouplist(name, gid, NULL, &n);
-	gid_t *g = (gid_t *)xnmalloc((size_t)n, sizeof(g));
+	gid_t *g = xnmalloc((size_t)n, sizeof(g));
 	getgrouplist(name, gid, g, &n);
 #else
 	n = NGROUPS_MAX;
-	gid_t *g = (gid_t *)xnmalloc((size_t)n, sizeof(g));
+	gid_t *g = xnmalloc((size_t)n, sizeof(g));
 # if defined(__APPLE__)
 	getgrouplist(name, (int)gid, (int *)g, &n);
 # else
@@ -577,7 +576,7 @@ get_user_groups(const char *name, const gid_t gid, int *ngroups)
 # endif /* __APPLE__ */
 
 	if (NGROUPS_MAX > n)
-		g = (gid_t *)xnrealloc(g, (size_t)n, sizeof(g));
+		g = xnrealloc(g, (size_t)n, sizeof(g));
 #endif /* __TERMUX__ */
 
 	*ngroups = n;
@@ -839,7 +838,7 @@ load_tags(void)
 	}
 
 	tags_n = 0;
-	tags = (char **)xnmalloc((size_t)n + 2, sizeof(char **));
+	tags = xnmalloc((size_t)n + 2, sizeof(char **));
 	for (i = 0; i < n; i++) {
 #ifdef _DIRENT_HAVE_D_TYPE
 		if (t[i]->d_type != DT_DIR) {
@@ -918,7 +917,7 @@ load_jumpdb(void)
 	if (xargs.no_dirjump == 1 || config_ok == 0 || !config_dir)
 		return;
 
-	char *jump_file = (char *)xnmalloc(config_dir_len + 12, sizeof(char));
+	char *jump_file = xnmalloc(config_dir_len + 12, sizeof(char));
 	snprintf(jump_file, config_dir_len + 12, "%s/jump.clifm", config_dir);
 
 	int fd;
@@ -942,7 +941,7 @@ load_jumpdb(void)
 		return;
 	}
 
-	jump_db = (struct jump_t *)xnmalloc(jump_lines + 2, sizeof(struct jump_t));
+	jump_db = xnmalloc(jump_lines + 2, sizeof(struct jump_t));
 
 	fseek(fp, 0L, SEEK_SET);
 
@@ -1093,8 +1092,7 @@ load_bookmarks(void)
 
 	fseek(fp, 0L, SEEK_SET);
 
-	bookmarks = (struct bookmarks_t *)xnmalloc(bm_total + 1,
-	    sizeof(struct bookmarks_t));
+	bookmarks = xnmalloc(bm_total + 1, sizeof(struct bookmarks_t));
 	size_t line_size = 0;
 	char *line = (char *)NULL;
 	ssize_t line_len = 0;
@@ -1212,7 +1210,7 @@ load_actions(void)
 		}
 
 		free(usr_actions);
-		usr_actions = (struct actions_t *)xnmalloc(1, sizeof(struct actions_t));
+		usr_actions = xnmalloc(1, sizeof(struct actions_t));
 		actions_n = 0;
 	}
 
@@ -1279,7 +1277,7 @@ load_remotes(void)
 	}
 
 	size_t n = 0;
-	remotes = (struct remote_t *)xnmalloc(n + 1, sizeof(struct remote_t));
+	remotes = xnmalloc(n + 1, sizeof(struct remote_t));
 	reset_remotes_values(n);
 
 	size_t line_sz = 0;
@@ -1291,8 +1289,7 @@ load_remotes(void)
 		if (*line == '[') {
 			if (remotes[n].name)
 				n++;
-			remotes = (struct remote_t *)xnrealloc(
-				remotes, n + 2, sizeof(struct remote_t));
+			remotes = xnrealloc(remotes, n + 2, sizeof(struct remote_t));
 			reset_remotes_values(n);
 
 			char *name = strbtw(line, '[', ']');
@@ -1304,7 +1301,7 @@ load_remotes(void)
 				continue;
 			}
 			size_t name_len = strlen(name);
-			remotes[n].name = (char *)xnrealloc(remotes[n].name,
+			remotes[n].name = xnrealloc(remotes[n].name,
 				name_len + 1, sizeof(char));
 			xstrsncpy(remotes[n].name, name, name_len + 1);
 			free(name);
@@ -1331,7 +1328,7 @@ load_remotes(void)
 			ret = deq_str;
 
 		if (strncmp(line, "Comment=", 8) == 0) {
-			remotes[n].desc = (char *)xnrealloc(remotes[n].desc,
+			remotes[n].desc = xnrealloc(remotes[n].desc,
 				ret_len + 1, sizeof(char));
 			xstrsncpy(remotes[n].desc, ret, ret_len + 1);
 
@@ -1340,7 +1337,7 @@ load_remotes(void)
 			if (*ret == '~')
 				tmp = tilde_expand(ret);
 			size_t mnt_len = tmp ? strlen(tmp) : ret_len;
-			remotes[n].mountpoint = (char *)xnrealloc(remotes[n].mountpoint,
+			remotes[n].mountpoint = xnrealloc(remotes[n].mountpoint,
 				mnt_len + 1, sizeof(char));
 			xstrsncpy(remotes[n].mountpoint, tmp ? tmp : ret, mnt_len + 1);
 			free(tmp);
@@ -1353,7 +1350,7 @@ load_remotes(void)
 				char *rep = replace_substr(ret, "%m", remotes[n].mountpoint);
 				if (rep) {
 					size_t rep_len = strlen(rep);
-					remotes[n].mount_cmd = (char *)xnrealloc(
+					remotes[n].mount_cmd = xnrealloc(
 						remotes[n].mount_cmd, rep_len + 1, sizeof(char));
 					xstrsncpy(remotes[n].mount_cmd, rep, rep_len + 1);
 					free(rep);
@@ -1362,7 +1359,7 @@ load_remotes(void)
 			}
 
 			if (!replaced) {
-				remotes[n].mount_cmd = (char *)xnrealloc(remotes[n].mount_cmd,
+				remotes[n].mount_cmd = xnrealloc(remotes[n].mount_cmd,
 					ret_len + 1, sizeof(char));
 				xstrsncpy(remotes[n].mount_cmd, ret, ret_len + 1);
 			}
@@ -1373,7 +1370,7 @@ load_remotes(void)
 				char *rep = replace_substr(ret, "%m", remotes[n].mountpoint);
 				if (rep) {
 					size_t rep_len = strlen(rep);
-					remotes[n].unmount_cmd = (char *)xnrealloc(
+					remotes[n].unmount_cmd = xnrealloc(
 						remotes[n].unmount_cmd, rep_len + 1, sizeof(char));
 					xstrsncpy(remotes[n].unmount_cmd, rep, rep_len + 1);
 					free(rep);
@@ -1382,7 +1379,7 @@ load_remotes(void)
 			}
 
 			if (!replaced) {
-				remotes[n].unmount_cmd = (char *)xnrealloc(remotes[n].unmount_cmd,
+				remotes[n].unmount_cmd = xnrealloc(remotes[n].unmount_cmd,
 					ret_len + 1, sizeof(char));
 				xstrsncpy(remotes[n].unmount_cmd, ret, ret_len + 1);
 			}
@@ -1430,7 +1427,7 @@ set_prompts_file(void)
 	struct stat a;
 
 	size_t len = strlen(config_dir_gral) + 15;
-	char *f = (char *)xnmalloc(len, sizeof(char));
+	char *f = xnmalloc(len, sizeof(char));
 	snprintf(f, len, "%s/prompts.clifm", config_dir_gral);
 
 	if (stat(f, &a) != -1 && S_ISREG(a.st_mode))
@@ -1472,7 +1469,7 @@ load_prompts(void)
 	}
 
 	size_t n = 0;
-	prompts = (struct prompts_t *)xnmalloc(n + 1, sizeof(struct prompts_t));
+	prompts = xnmalloc(n + 1, sizeof(struct prompts_t));
 	unset_prompt_values(n);
 
 	size_t line_sz = 0;
@@ -1485,8 +1482,7 @@ load_prompts(void)
 		if (*line == '[') {
 			if (prompts[n].name)
 				n++;
-			prompts = (struct prompts_t *)xnrealloc(
-				prompts, n + 2, sizeof(struct prompts_t));
+			prompts = xnrealloc(prompts, n + 2, sizeof(struct prompts_t));
 			unset_prompt_values(n);
 
 			char *name = strbtw(line, '[', ']');
@@ -1498,7 +1494,7 @@ load_prompts(void)
 				continue;
 			}
 			size_t name_len = strlen(name);
-			prompts[n].name = (char *)xnrealloc(prompts[n].name,
+			prompts[n].name = xnrealloc(prompts[n].name,
 				name_len + 1, sizeof(char));
 			xstrsncpy(prompts[n].name, name, name_len + 1);
 			free(name);
@@ -1533,7 +1529,7 @@ load_prompts(void)
 			ret = deq_str;
 
 		if (strncmp(line, "RegularPrompt=", 14) == 0) {
-			prompts[n].regular = (char *)xnrealloc(prompts[n].regular,
+			prompts[n].regular = xnrealloc(prompts[n].regular,
 				ret_len + 1, sizeof(char));
 			xstrsncpy(prompts[n].regular, ret, ret_len + 1);
 			continue;
@@ -1550,7 +1546,7 @@ load_prompts(void)
 		}
 
 		if (strncmp(line, "WarningPrompt=", 14) == 0) {
-			prompts[n].warning = (char *)xnrealloc(prompts[n].warning,
+			prompts[n].warning = xnrealloc(prompts[n].warning,
 				ret_len + 1, sizeof(char));
 			xstrsncpy(prompts[n].warning, ret, ret_len + 1);
 		}
@@ -1793,14 +1789,13 @@ get_sel_files(void)
 		if (fstatat(XAT_FDCWD, line, &a, AT_SYMLINK_NOFOLLOW) == -1)
 			continue;
 
-		sel_elements = (struct sel_t *)xnrealloc(sel_elements,
+		sel_elements = xnrealloc(sel_elements,
 			sel_n + 2, sizeof(struct sel_t));
 		sel_elements[sel_n].name = savestring(line, len);
 		sel_elements[sel_n].size = (off_t)UNSET;
 		/* Store device and inode number to identify later selected files
 		 * and mark them in the files list. */
-		sel_devino = (struct devino_t *)xnrealloc(sel_devino,
-			sel_n + 1, sizeof(struct devino_t));
+		sel_devino = xnrealloc(sel_devino, sel_n + 1, sizeof(struct devino_t));
 		sel_devino[sel_n].ino = a.st_ino;
 		sel_devino[sel_n].dev = a.st_dev;
 		sel_n++;
@@ -1842,7 +1837,7 @@ get_cdpath(void)
 		buf[len] = '\0';
 
 		/* Make room in cdpaths for a new path */
-		cdpaths = (char **)xnrealloc(cdpaths, n + 2, sizeof(char *));
+		cdpaths = xnrealloc(cdpaths, n + 2, sizeof(char *));
 
 		/* Dump the buffer into the global cdpaths array */
 		cdpaths[n] = savestring(buf, len);
@@ -1909,7 +1904,7 @@ get_path_env(void)
 		ptr = savestring(_PATH_STDPATH, sizeof(_PATH_STDPATH) - 1);
 #else
 		size_t s = confstr(_CS_PATH, NULL, 0); /* Get value's size */
-		char *p = (char *)xnmalloc(s, sizeof(char)); /* Allocate space */
+		char *p = xnmalloc(s, sizeof(char)); /* Allocate space */
 		confstr(_CS_PATH, p, s);               /* Get value */
 		ptr = p;
 #endif /* !_PATH_STDPATH */
@@ -1927,7 +1922,7 @@ get_path_env(void)
 	char *path_tmp = malloced_ptr == 1 ? ptr : savestring(ptr, strlen(ptr));
 
 	size_t c = count_chars(path_tmp, ':') + 1;
-	paths = (struct paths_t *)xnmalloc(c + 1, sizeof(struct paths_t));
+	paths = xnmalloc(c + 1, sizeof(struct paths_t));
 
 	/* Get each path in PATH */
 	size_t n = 0;
@@ -1998,7 +1993,7 @@ get_last_path(void)
 	if (!config_dir)
 		return EXIT_FAILURE;
 
-	char *last_file = (char *)xnmalloc(config_dir_len + 7, sizeof(char));
+	char *last_file = xnmalloc(config_dir_len + 7, sizeof(char));
 	snprintf(last_file, config_dir_len + 7, "%s/.last", config_dir);
 
 	int fd;
@@ -2037,7 +2032,7 @@ load_pinned_dir(void)
 	if (config_ok == 0 || !config_dir)
 		return EXIT_FAILURE;
 
-	char *pin_file = (char *)xnmalloc(config_dir_len + 6, sizeof(char));
+	char *pin_file = xnmalloc(config_dir_len + 6, sizeof(char));
 	snprintf(pin_file, config_dir_len + 6, "%s/.pin", config_dir);
 
 	int fd;
@@ -2165,9 +2160,8 @@ get_path_programs(void)
 		char tmp[PATH_MAX] = "";
 		char *cwd = get_cwd(tmp, sizeof(tmp), 0);
 
-		commands_bin = (struct dirent ***)xnmalloc(path_n,
-			sizeof(struct dirent));
-		cmd_n = (int *)xnmalloc(path_n, sizeof(int));
+		commands_bin = xnmalloc(path_n, sizeof(struct dirent));
+		cmd_n = xnmalloc(path_n, sizeof(int));
 
 		i = (int)path_n;
 		while (--i >= 0) {
@@ -2199,7 +2193,7 @@ get_path_programs(void)
 	for (internal_cmds_n = 0; internal_cmds[internal_cmds_n].name;
 		internal_cmds_n++);
 
-	bin_commands = (char **)xnmalloc((size_t)total_cmd
+	bin_commands = xnmalloc((size_t)total_cmd
 		+ internal_cmds_n + aliases_n + actions_n + 2, sizeof(char *));
 
 	i = (int)internal_cmds_n;
@@ -2275,15 +2269,14 @@ free_aliases(void)
 	}
 
 	free(aliases);
-	aliases = (struct alias_t *)xnmalloc(1, sizeof(struct alias_t));
+	aliases = xnmalloc(1, sizeof(struct alias_t));
 	aliases_n = 0;
 }
 
 static void
 write_alias(const char *s, char *p)
 {
-	aliases = (struct alias_t *)xnrealloc(aliases, aliases_n + 2,
-		sizeof(struct alias_t));
+	aliases = xnrealloc(aliases, aliases_n + 2,	sizeof(struct alias_t));
 	aliases[aliases_n].name = savestring(s, strlen(s));
 	int add = 0;
 	if (*p == '\'') {
@@ -2370,8 +2363,7 @@ write_dirhist(char *line, ssize_t len)
 		len--;
 	}
 
-	old_pwd[dirhist_total_index] = (char *)xnmalloc((size_t)len + 1,
-		sizeof(char));
+	old_pwd[dirhist_total_index] = xnmalloc((size_t)len + 1, sizeof(char));
 	xstrsncpy(old_pwd[dirhist_total_index], line, (size_t)len + 1);
 	dirhist_total_index++;
 }
@@ -2400,7 +2392,7 @@ load_dirhist(void)
 		return EXIT_SUCCESS;
 	}
 
-	old_pwd = (char **)xnmalloc(dirs + 2, sizeof(char *));
+	old_pwd = xnmalloc(dirs + 2, sizeof(char *));
 
 	fseek(fp, 0L, SEEK_SET);
 
@@ -2458,8 +2450,7 @@ get_prompt_cmds(void)
 			line[line_len - 1] = '\0';
 		if (!(*line + 10))
 			continue;
-		prompt_cmds = (char **)xnrealloc(prompt_cmds,
-		    prompt_cmds_n + 1, sizeof(char *));
+		prompt_cmds = xnrealloc(prompt_cmds, prompt_cmds_n + 1, sizeof(char *));
 		prompt_cmds[prompt_cmds_n] = savestring(
 		    line + 10, (size_t)line_len - 10);
 		prompt_cmds_n++;

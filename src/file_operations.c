@@ -192,7 +192,7 @@ create_tmp_file(char **file, int *fd)
 	size_t tmp_len = strlen(xargs.stealth_mode == 1 ? P_tmpdir : tmp_dir);
 	size_t file_len = tmp_len + (sizeof(TMP_FILENAME) - 1) + 2;
 
-	*file = (char *)xnmalloc(file_len, sizeof(char));
+	*file = xnmalloc(file_len, sizeof(char));
 	snprintf(*file, file_len, "%s/%s", xargs.stealth_mode == 1
 		? P_tmpdir : tmp_dir, TMP_FILENAME);
 
@@ -336,7 +336,7 @@ static char **
 get_files_from_tmp_file(const char *tmp_file, const char *target, const filesn_t n)
 {
 	size_t nfiles = (target == workspaces[cur_ws].path) ? (size_t)files : (size_t)n;
-	char **tmp_files = (char **)xnmalloc(nfiles + 2, sizeof(char *));
+	char **tmp_files = xnmalloc(nfiles + 2, sizeof(char *));
 
 	FILE *fp = fopen(tmp_file, "r");
 	if (!fp)
@@ -397,7 +397,7 @@ get_remove_files(const char *target, char **tmp_files,
 {
 	size_t i, j = 1;
 	size_t l = (target == workspaces[cur_ws].path) ? (size_t)files : (size_t)n;
-	char **rem_files = (char **)xnmalloc(l + 3, sizeof(char *));
+	char **rem_files = xnmalloc(l + 3, sizeof(char *));
 	rem_files[0] = savestring("rr", 2);
 
 	if (target == workspaces[cur_ws].path) {
@@ -1108,7 +1108,7 @@ format_new_filename(char **name)
 		return EXIT_FAILURE;
 
 	size_t name_len = strlen(npath) + 2;
-	*name = (char *)xnrealloc(*name, name_len, sizeof(char));
+	*name = xnrealloc(*name, name_len, sizeof(char));
 	snprintf(*name, name_len, "%s%c", npath, is_dir == 1 ? '/' : 0);
 	free(npath);
 
@@ -1206,7 +1206,7 @@ create_files(char **args, const int is_md)
 
 	/* Store pointers to actually created files into a pointers array.
 	 * We'll use this later to print the names of actually created files. */
-	char **new_files = (char **)xnmalloc(args_n + 1, sizeof(char *));
+	char **new_files = xnmalloc(args_n + 1, sizeof(char *));
 	filesn_t new_files_n = 0;
 
 	for (i = 0; args[i]; i++) {
@@ -1268,7 +1268,7 @@ create_dirs(char **args)
 			continue;
 
 		char *tmp = savestring(args[i], len);
-		args[i] = (char *)xnrealloc(args[i], len + 2, sizeof(char));
+		args[i] = xnrealloc(args[i], len + 2, sizeof(char));
 		snprintf(args[i], len + 2, "%s/", tmp);
 		free(tmp);
 	}
@@ -1619,7 +1619,7 @@ symlink_file(char **args)
 static int
 vv_rename_files(char **args)
 {
-	char **tmp = (char **)xnmalloc(args_n + 2, sizeof(char *));
+	char **tmp = xnmalloc(args_n + 2, sizeof(char *));
 	tmp[0] = savestring("br", 2);
 
 	size_t i, l = strlen(args[args_n]), c = 1;
@@ -1881,7 +1881,7 @@ cp_mv_file(char **args, const int copy_and_rename, const int force)
 		return run_cp_mv_cmd(args, force);
 
 	size_t n = 0;
-	char **tcmd = (char **)xnmalloc(3 + args_n + 2, sizeof(char *));
+	char **tcmd = xnmalloc(3 + args_n + 2, sizeof(char *));
 	char *p = strchr(args[0], ' ');
 	if (p && *(p + 1)) {
 		*p = '\0';
@@ -2019,10 +2019,9 @@ remove_files(char **args)
 	size_t num = i > 0 ? (size_t)i - 1 : (size_t)i;
 
 	struct stat a;
-	char **rm_cmd = (char **)xnmalloc(num + 4, sizeof(char *));
+	char **rm_cmd = xnmalloc(num + 4, sizeof(char *));
 	/* Let's keep information about files to be removed. */
-	struct rm_info *info =
-		(struct rm_info *)xnmalloc(num + 4, sizeof(struct rm_info));
+	struct rm_info *info = xnmalloc(num + 4, sizeof(struct rm_info));
 
 	int j, have_dirs = 0;
 	int rm_force = conf.rm_force == 1 ? 1 : 0;
@@ -2371,7 +2370,7 @@ char *
 export_files(char **filenames, const int open)
 {
 	size_t len = strlen(tmp_dir) + 14;
-	char *tmp_file = (char *)xnmalloc(len, sizeof(char));
+	char *tmp_file = xnmalloc(len, sizeof(char));
 	snprintf(tmp_file, len, "%s/%s", tmp_dir, TMP_FILENAME);
 
 	int fd = mkstemp(tmp_file);

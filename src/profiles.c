@@ -55,7 +55,7 @@ get_profile_names(void)
 		return EXIT_FAILURE;
 
 	size_t len = strlen(config_dir_gral) + 10;
-	char *pf_dir = (char *)xnmalloc(len, sizeof(char));
+	char *pf_dir = xnmalloc(len, sizeof(char));
 	snprintf(pf_dir, len, "%s/profiles", config_dir_gral);
 
 	struct dirent **profs = (struct dirent **)NULL;
@@ -83,8 +83,7 @@ get_profile_names(void)
 #endif /* !_DIRENT_HAVE_D_TYPE */
 		    /* Discard ".", "..", and hidden dirs */
 		    && *profs[i]->d_name != '.') {
-			profile_names = (char **)xnrealloc(profile_names, pf_n + 1,
-				sizeof(char *));
+			profile_names = xnrealloc(profile_names, pf_n + 1, sizeof(char *));
 			profile_names[pf_n] = savestring(profs[i]->d_name,
 			    strlen(profs[i]->d_name));
 			pf_n++;
@@ -96,7 +95,7 @@ get_profile_names(void)
 	free(pf_dir);
 	free(profs);
 
-	profile_names = (char **)xnrealloc(profile_names, pf_n + 1, sizeof(char *));
+	profile_names = xnrealloc(profile_names, pf_n + 1, sizeof(char *));
 	profile_names[pf_n] = (char *)NULL;
 
 	return EXIT_SUCCESS;
@@ -294,7 +293,7 @@ profile_add(const char *prof)
 	size_t pnl_len = strlen(PROGRAM_NAME);
 	size_t tmp_len = strlen(config_dir_gral) + strlen(prof) + 11;
 	/* ### GENERATE PROGRAM'S CONFIG DIRECTORY NAME ### */
-	char *nconfig_dir = (char *)xnmalloc(tmp_len, sizeof(char));
+	char *nconfig_dir = xnmalloc(tmp_len, sizeof(char));
 	snprintf(nconfig_dir, tmp_len, "%s/profiles/%s", config_dir_gral, prof);
 
 	/* #### CREATE THE CONFIG DIR #### */
@@ -311,13 +310,13 @@ profile_add(const char *prof)
 	size_t config_len = strlen(nconfig_dir);
 
 	tmp_len = config_len + pnl_len + 4;
-	char *nconfig_file = (char *)xnmalloc(tmp_len, sizeof(char));
+	char *nconfig_file = xnmalloc(tmp_len, sizeof(char));
 	snprintf(nconfig_file, tmp_len, "%s/%src", nconfig_dir, PROGRAM_NAME);
 	tmp_len = config_len + 15;
-	char *nhist_file = (char *)xnmalloc(tmp_len, sizeof(char));
+	char *nhist_file = xnmalloc(tmp_len, sizeof(char));
 	snprintf(nhist_file, tmp_len, "%s/history.clifm", nconfig_dir);
 	tmp_len = config_len + 16;
-	char *nmime_file = (char *)xnmalloc(tmp_len, sizeof(char));
+	char *nmime_file = xnmalloc(tmp_len, sizeof(char));
 	snprintf(nmime_file, tmp_len, "%s/mimelist.clifm", nconfig_dir);
 
 	/* Create config files */
@@ -384,7 +383,7 @@ profile_del(const char *prof)
 	}
 
 	size_t len = strlen(config_dir_gral) + strlen(prof) + 11;
-	char *tmp = (char *)xnmalloc(len, sizeof(char));
+	char *tmp = xnmalloc(len, sizeof(char));
 	snprintf(tmp, len, "%s/profiles/%s", config_dir_gral, prof);
 
 	char *cmd[] = {"rm", "-r", "--", tmp, NULL};
@@ -541,7 +540,7 @@ rename_profile(char **args)
 	}
 
 	size_t len = strlen(args[1]);
-	profile_names[src_pf_index] = (char *)xnrealloc(profile_names[src_pf_index],
+	profile_names[src_pf_index] = xnrealloc(profile_names[src_pf_index],
 		len + 1, sizeof(char));
 	xstrsncpy(profile_names[src_pf_index], args[1], len + 1);
 

@@ -212,7 +212,7 @@ err(const int msg_type, const int prompt_flag, const char *format, ...)
 		return EXIT_FAILURE;
 	}
 
-	char *buf = (char *)xnmalloc((size_t)size + 1, sizeof(char));
+	char *buf = xnmalloc((size_t)size + 1, sizeof(char));
 	vsnprintf(buf, (size_t)size + 1, format, arglist);
 	va_end(arglist);
 
@@ -269,7 +269,7 @@ print_reload_msg(const char *msg, ...)
 	if (conf.autols == 1)
 		printf("%s->%s ", mi_c, df_c);
 
-	char *buf = (char *)xnmalloc((size_t)size + 1, sizeof(char));
+	char *buf = xnmalloc((size_t)size + 1, sizeof(char));
 
 	vsnprintf(buf, (size_t)size + 1, msg, arglist);
 	va_end(arglist);
@@ -843,7 +843,7 @@ get_path_dir(char **dir)
 
 	if (*(*dir) != '/') {
 		size_t len = strlen(workspaces[cur_ws].path) + strlen(*dir) + 2;
-		path_dir = (char *)xnmalloc(len, sizeof(char));
+		path_dir = xnmalloc(len, sizeof(char));
 		snprintf(path_dir, len, "%s/%s", workspaces[cur_ws].path, *dir);
 		free(*dir);
 		*dir = (char *)NULL;
@@ -871,7 +871,7 @@ get_cmd(char *dir, char *_sudo, char *self, const int sudo)
 	for (i = 0; tmp_term[i]; i++);
 
 	int num = i;
-	char **cmd = (char **)xnmalloc((size_t)i + (sudo == 1 ? 4 : 3), sizeof(char *));
+	char **cmd = xnmalloc((size_t)i + (sudo == 1 ? 4 : 3), sizeof(char *));
 
 	for (i = 0; tmp_term[i]; i++) {
 		cmd[i] = savestring(tmp_term[i], strlen(tmp_term[i]));
@@ -885,17 +885,17 @@ get_cmd(char *dir, char *_sudo, char *self, const int sudo)
 	size_t len = 0;
 	if (sudo == 1) {
 		len = strlen(self);
-		cmd[i + plus] = (char *)xnmalloc(len + 1, sizeof(char));
+		cmd[i + plus] = xnmalloc(len + 1, sizeof(char));
 		xstrsncpy(cmd[i + plus], _sudo, len + 1);
 		plus++;
 	}
 
 	len = strlen(self);
-	cmd[i + plus] = (char *)xnmalloc(len + 1, sizeof(char));
+	cmd[i + plus] = xnmalloc(len + 1, sizeof(char));
 	xstrsncpy(cmd[i + plus], self, len + 1);
 	plus++;
 	len = strlen(dir);
-	cmd[i + plus] = (char *)xnmalloc(len + 1, sizeof(char));
+	cmd[i + plus] = xnmalloc(len + 1, sizeof(char));
 	xstrsncpy(cmd[i + plus], dir, len + 1);
 	plus++;
 	cmd[i + plus] = (char *)NULL;
@@ -1222,7 +1222,7 @@ create_usr_var(const char *str)
 
 	*p = '\0';
 	size_t len = (size_t)(p - str);
-	char *name = (char *)xnmalloc(len + 1, sizeof(char));
+	char *name = xnmalloc(len + 1, sizeof(char));
 	xstrsncpy(name, str, len + 1);
 	*p = '=';
 
@@ -1412,7 +1412,7 @@ save_last_path(char *last_path_tmp)
 	if (config_ok == 0 || !config_dir || !config_dir_gral)
 		return;
 
-	char *last_path = (char *)xnmalloc(config_dir_len + 7, sizeof(char));
+	char *last_path = xnmalloc(config_dir_len + 7, sizeof(char));
 	snprintf(last_path, config_dir_len + 7, "%s/.last", config_dir);
 
 	int fd = 0;
@@ -1462,7 +1462,7 @@ handle_last_path(void)
 	 * if cd-on-quit is disabled (e.g., not exiting via 'Q'). If necessary,
 	 * it will be recreated by save_last_path() below. */
 	const size_t len = strlen(config_dir_gral) + 7;
-	char *last_path_tmp = (char *)xnmalloc(len, sizeof(char));
+	char *last_path_tmp = xnmalloc(len, sizeof(char));
 	snprintf(last_path_tmp, len, "%s/.last", config_dir_gral);
 
 	struct stat a;
@@ -1842,7 +1842,7 @@ handle_stdin(void)
 	ssize_t input_len = 0;
 
 	/* Initial buffer allocation == 1 chunk */
-	char *buf = (char *)xnmalloc(chunk, sizeof(char));
+	char *buf = xnmalloc(chunk, sizeof(char));
 
 	while (chunks_n < max_chunks) {
 		input_len = read(STDIN_FILENO, buf + total_len, chunk);
@@ -1861,7 +1861,7 @@ handle_stdin(void)
 		chunks_n++;
 
 		/* Append a new chunk of memory to the buffer */
-		buf = (char *)xnrealloc(buf, chunks_n + 1, chunk);
+		buf = xnrealloc(buf, chunks_n + 1, chunk);
 	}
 
 	if (total_len == 0)
@@ -1879,7 +1879,7 @@ handle_stdin(void)
 		suffix = gen_rand_str(RAND_SUFFIX_LEN);
 		char *temp = tmp_dir ? tmp_dir : P_tmpdir;
 		size_t tmp_len = strlen(temp) + 13;
-		stdin_tmp_dir = (char *)xnmalloc(tmp_len, sizeof(char));
+		stdin_tmp_dir = xnmalloc(tmp_len, sizeof(char));
 		snprintf(stdin_tmp_dir, tmp_len, "%s/vdir.%s", temp,
 			suffix ? suffix : "nTmp0B9&54");
 		free(suffix);
@@ -2044,7 +2044,7 @@ save_pinned_dir(void)
 	if (!pinned_dir || config_ok == 0)
 		return EXIT_FAILURE;
 
-	char *pin_file = (char *)xnmalloc(config_dir_len + 7, sizeof(char));
+	char *pin_file = xnmalloc(config_dir_len + 7, sizeof(char));
 	snprintf(pin_file, config_dir_len + 7, "%s/.pin", config_dir);
 
 	int fd = 0;
@@ -2083,11 +2083,11 @@ pin_directory(char *dir)
 		pinned_dir = savestring(dir, dir_len);
 	} else { /* If relative path */
 		if (strcmp(workspaces[cur_ws].path, "/") == 0) {
-			pinned_dir = (char *)xnmalloc(dir_len + 2, sizeof(char));
+			pinned_dir = xnmalloc(dir_len + 2, sizeof(char));
 			snprintf(pinned_dir, dir_len + 2, "/%s", dir);
 		} else {
 			size_t plen = dir_len + strlen(workspaces[cur_ws].path) + 2;
-			pinned_dir = (char *)xnmalloc(plen, sizeof(char));
+			pinned_dir = xnmalloc(plen, sizeof(char));
 			snprintf(pinned_dir, plen, "%s/%s", workspaces[cur_ws].path, dir);
 		}
 	}
@@ -2114,7 +2114,7 @@ unpin_dir(void)
 
 	if (config_dir && xargs.stealth_mode != 1) {
 		int cmd_error = 0;
-		char *pin_file = (char *)xnmalloc(config_dir_len + 7, sizeof(char));
+		char *pin_file = xnmalloc(config_dir_len + 7, sizeof(char));
 		snprintf(pin_file, config_dir_len + 7, "%s/.pin", config_dir);
 		if (unlink(pin_file) == -1) {
 			xerror("%s: '%s': %s\n", PROGRAM_NAME, pin_file, strerror(errno));

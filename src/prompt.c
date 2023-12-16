@@ -238,7 +238,7 @@ gen_exit_status(void)
 	size_t code_len = (size_t)DIGINUM(exit_code);
 	size_t len = code_len + 3 + (MAX_COLOR * 2);
 
-	char *temp = (char *)xnmalloc(len, sizeof(char));
+	char *temp = xnmalloc(len, sizeof(char));
 	snprintf(temp, len, "%s%d\001%s\002",
 		(exit_code == 0) ? (conf.colorize == 1 ? xs_c : "")
 		: (conf.colorize == 1 ? xf_c : ""), exit_code, df_c);
@@ -252,7 +252,7 @@ gen_escape_char(char **line, int *c)
 	(*line)++;
 	*c = 0;
 	/* 27 (dec) == 033 (octal) == 0x1b (hex) == \e */
-	char *temp = (char *)xnmalloc(2, sizeof(char));
+	char *temp = xnmalloc(2, sizeof(char));
 	*temp = '\033';
 	temp[1] = '\0';
 
@@ -269,7 +269,7 @@ gen_octal(char **line, int *c)
 	octal_string[3] = '\0';
 
 	n = read_octal(octal_string);
-	char *temp = (char *)xnmalloc(3, sizeof(char));
+	char *temp = xnmalloc(3, sizeof(char));
 
 	if (n == CTLESC || n == CTLNUL) {
 		*line += 3;
@@ -334,7 +334,7 @@ gen_hostname(const int c)
 static inline char *
 gen_user_flag(void)
 {
-	char *temp = (char *)xnmalloc(2, sizeof(char));
+	char *temp = xnmalloc(2, sizeof(char));
 	*temp = user.uid == 0 ? '#' : '$';
 	temp[1] = '\0';
 
@@ -344,7 +344,7 @@ gen_user_flag(void)
 static inline char *
 gen_mode(void)
 {
-	char *temp = (char *)xnmalloc(2, sizeof(char));
+	char *temp = xnmalloc(2, sizeof(char));
 
 	if (conf.light_mode == 1) {
 		*temp = 'L';
@@ -359,7 +359,7 @@ gen_mode(void)
 static inline char*
 gen_misc(const int c)
 {
-	char *temp = (char *)xnmalloc(2, sizeof(char));
+	char *temp = xnmalloc(2, sizeof(char));
 
 	if (c == 'n')
 		*temp = '\n';
@@ -376,7 +376,7 @@ gen_misc(const int c)
 static inline char *
 gen_non_print_sequence(const int c)
 {
-	char *temp = (char *)xnmalloc(2, sizeof(char));
+	char *temp = xnmalloc(2, sizeof(char));
 	*temp = (c == '[') ? RL_PROMPT_START_IGNORE : RL_PROMPT_END_IGNORE;
 	temp[1] = '\0';
 
@@ -405,10 +405,10 @@ add_string(char **tmp, const int c, char **line, char **res, size_t *len)
 
 	size_t l = *len + 2	+ (wrong_cmd ? (MAX_COLOR + 6) : 0);
 	if (!*res) {
-		*res = (char *)xnmalloc(l + 1, sizeof(char));
+		*res = xnmalloc(l + 1, sizeof(char));
 		*(*res) = '\0';
 	} else {
-		*res = (char *)xnrealloc(*res, l + 1, sizeof(char));
+		*res = xnrealloc(*res, l + 1, sizeof(char));
 	}
 
 	xstrncat(*res, strlen(*res), *tmp, l + 1);
@@ -432,7 +432,7 @@ substitute_cmd(char **line, char **res, size_t *len)
 	if (tmp == -1) return; /* No ending bracket */
 
 	size_t tmp_len = strlen(*line) + 2;
-	char *tmp_str = (char *)xnmalloc(tmp_len, sizeof(char));
+	char *tmp_str = xnmalloc(tmp_len, sizeof(char));
 	snprintf(tmp_str, tmp_len, "$%s", *line);
 
 	tmp_str[tmp + 2] = '\0';
@@ -454,10 +454,10 @@ substitute_cmd(char **line, char **res, size_t *len)
 		for (size_t j = 0; j < wordbuf.we_wordc; j++) {
 			*len += strlen(wordbuf.we_wordv[j]);
 			if (!*res) {
-				*res = (char *)xnmalloc(*len + 2, sizeof(char));
+				*res = xnmalloc(*len + 2, sizeof(char));
 				*(*res) = '\0';
 			} else {
-				*res = (char *)xnrealloc(*res, *len + 2, sizeof(char));
+				*res = xnrealloc(*res, *len + 2, sizeof(char));
 			}
 			xstrncat(*res, strlen(*res), wordbuf.we_wordv[j], *len + 2);
 		}
@@ -514,10 +514,10 @@ gen_stats_str(const int flag)
 
 	char *p = (char *)NULL;
 	if (val != 0) {
-		p = (char *)xnmalloc(32, sizeof(char));
+		p = xnmalloc(32, sizeof(char));
 		snprintf(p, 32, "%zu", val);
 	} else {
-		p = (char *)xnmalloc(2, sizeof(char));
+		p = xnmalloc(2, sizeof(char));
 		*p = '-';
 		p[1] = '\0';
 	}
@@ -531,7 +531,7 @@ gen_notification(const int flag)
 	char *p;
 	size_t len = 32;
 
-	p = (char *)xnmalloc(len, sizeof(char));
+	p = xnmalloc(len, sizeof(char));
 	*p = '\0';
 
 	switch (flag) {
@@ -571,7 +571,7 @@ gen_nesting_level(const int mode)
 	char *p = (char *)NULL;
 
 	if (mode == 'i') {
-		p = (char *)xnmalloc(32, sizeof(char));
+		p = xnmalloc(32, sizeof(char));
 		snprintf(p, 32, "%d", nesting_level);
 		return p;
 	}
@@ -584,7 +584,7 @@ gen_nesting_level(const int mode)
 	}
 
 	size_t len = (MAX_COLOR * 2) + 32;
-	p = (char *)xnmalloc(len, sizeof(char));
+	p = xnmalloc(len, sizeof(char));
 	snprintf(p, len, "(%d)", nesting_level);
 
 	return p;
@@ -739,7 +739,7 @@ ADD_STRING:
 
 			size_t new_len = result_len + 2
 				+ (wrong_cmd ? (MAX_COLOR + 6) : 0);
-			result = (char *)xnrealloc(result, new_len, sizeof(char));
+			result = xnrealloc(result, new_len, sizeof(char));
 			result[result_len] = (char)c;
 			result_len++;
 			result[result_len] = '\0';
@@ -942,7 +942,7 @@ construct_prompt(const char *decoded_prompt)
 	}
 
 	size_t prompt_len = set_prompt_length(strlen(decoded_prompt));
-	char *the_prompt = (char *)xnmalloc(prompt_len, sizeof(char));
+	char *the_prompt = xnmalloc(prompt_len, sizeof(char));
 
 	if (prompt_notif == 1) {
 		snprintf(the_prompt, prompt_len,

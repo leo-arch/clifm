@@ -442,7 +442,7 @@ set_sort_by_name(char **arg)
 	for (i = 0; i <= SORT_TYPES; i++) {
 		if (*(*arg) == *sort_methods[i].name
 		&& strcmp(*arg, sort_methods[i].name) == 0) {
-			*arg = (char *)xnrealloc(*arg, 32, sizeof(char));
+			*arg = xnrealloc(*arg, 32, sizeof(char));
 			snprintf(*arg, 32, "%d", sort_methods[i].num);
 			return EXIT_SUCCESS;
 		}

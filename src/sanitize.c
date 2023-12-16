@@ -66,7 +66,7 @@ xclearenv(void)
 			continue;
 		}
 		if (len > lastlen) {
-			namebuf = (char *)xnrealloc(namebuf, len + 1, sizeof(char));
+			namebuf = xnrealloc(namebuf, len + 1, sizeof(char));
 			lastlen = len;
 		}
 		memcpy(namebuf, environ[0], len);
@@ -90,7 +90,7 @@ set_path_env(void)
 #elif defined(_CS_PATH)
 	char *p = (char *)NULL;
 	size_t n = confstr(_CS_PATH, NULL, 0); /* Get value's size */
-	p = (char *)xnmalloc(n, sizeof(char)); /* Allocate space */
+	p = xnmalloc(n, sizeof(char)); /* Allocate space */
 	confstr(_CS_PATH, p, n);               /* Get value */
 	ret = setenv("PATH", p, 1);            /* Set it */
 	free(p);

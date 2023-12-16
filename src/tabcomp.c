@@ -308,7 +308,7 @@ print_filename(char *to_print, char *full_pathname)
 
 			size_t slen = strlen(s);
 			size_t tlen = strlen(to_print);
-			char *new_full_pathname = (char *)xnmalloc(slen + tlen + 2, sizeof(char));
+			char *new_full_pathname = xnmalloc(slen + tlen + 2, sizeof(char));
 			snprintf(new_full_pathname, slen + tlen + 2, "%s/%s", s, to_print);
 
 			extension_char = stat_char(new_full_pathname);
@@ -939,7 +939,7 @@ get_glob_file_target(char *str, const char *initial_path)
 		return str;
 
 	size_t len = strlen(initial_path) + strlen(str) + 1;
-	char *p = (char *)xnmalloc(len, sizeof(char));
+	char *p = xnmalloc(len, sizeof(char));
 	snprintf(p, len, "%s%s", initial_path, str);
 
 	return p;
@@ -957,7 +957,7 @@ get_finder_output(const int multi, char *base)
 		return print_no_finder_file();
 	}
 
-	char *buf = (char *)xnmalloc(1, sizeof(char)), *line = (char *)NULL;
+	char *buf = xnmalloc(1, sizeof(char)), *line = (char *)NULL;
 	*buf = '\0';
 	size_t bsize = 0, line_size = 0;
 	ssize_t line_len = 0;
@@ -994,11 +994,11 @@ get_finder_output(const int multi, char *base)
 				s = get_tagged_file_target(line);
 			} else if (cur_comp_type == TCMP_BM_PREFIX) {
 				size_t len = strlen(line) + 3;
-				s = (char *)xnmalloc(len, sizeof(char));
+				s = xnmalloc(len, sizeof(char));
 				snprintf(s, len, "b:%s", line);
 			} else if (cur_comp_type == TCMP_TAGS_T) {
 				size_t len = strlen(line) + 3;
-				s = (char *)xnmalloc(len, sizeof(char));
+				s = xnmalloc(len, sizeof(char));
 				snprintf(s, len, "t:%s", line);
 			}
 			q = escape_str(s);
@@ -1015,7 +1015,7 @@ get_finder_output(const int multi, char *base)
 
 		size_t qlen = (r != line) ? strlen(r) : (size_t)line_len;
 		bsize += qlen + 3;
-		buf = (char *)xnrealloc(buf, bsize, sizeof(char));
+		buf = xnrealloc(buf, bsize, sizeof(char));
 		xstrncat(buf, strlen(buf), r, bsize);
 
 		if (multi == 1) {
@@ -1618,7 +1618,7 @@ do_some_cleanup(char **buf, char **matches, const char *query,
 	else if (ct == TCMP_OPENWITH && strchr(*buf, ' ')) {
 		/* We have multiple words ("CMD ARG..."): quote the string. */
 		size_t len = strlen(*buf) + 3;
-		char *tmp = (char *)xnmalloc(len, sizeof(char));
+		char *tmp = xnmalloc(len, sizeof(char));
 		snprintf(tmp, len, "\"%s\"", *buf);
 		free(*buf);
 		*buf = tmp;
@@ -1661,7 +1661,7 @@ do_some_cleanup(char **buf, char **matches, const char *query,
 	else if (ct == TCMP_USERS) {
 		size_t l = strlen(*buf);
 		char *p = savestring(*buf, l);
-		*buf = (char *)xnrealloc(*buf, (l + 2), sizeof(char));
+		*buf = xnrealloc(*buf, (l + 2), sizeof(char));
 		snprintf(*buf, l + 2, "~%s", p);
 		free(p);
 	}
@@ -2055,7 +2055,7 @@ AFTER_USUAL_COMPLETION:
 
 		/* We have marked all the dead slots with (char *)&dead_slot
 		 * Copy all the non-dead entries into a new array. */
-		temp_array = (char **)xnmalloc(3 + newlen, sizeof (char *));
+		temp_array = xnmalloc(3 + newlen, sizeof (char *));
 		for (i = j = 1; matches[i]; i++) {
 			if (matches[i] != (char *)&dead_slot) {
 				temp_array[j] = matches[i];
@@ -2462,7 +2462,7 @@ DISPLAY_MATCHES:
 				dd = normalize_path(matches[0], strlen(matches[0]));
 				if (dd) {
 					size_t ddlen = strlen(dd) + 2;
-					char *ddd = (char *)xnmalloc(ddlen, sizeof(char *));
+					char *ddd = xnmalloc(ddlen, sizeof(char *));
 					snprintf(ddd, ddlen, "%s/", dd);
 					free(dd);
 					dd = ddd;

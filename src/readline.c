@@ -1040,7 +1040,7 @@ my_rl_quote(char *text, int mt, char *qp)
 	size_t text_len = strlen(text);
 	/* Worst case: every character of text needs to be escaped. In this
 	 * case we need 2x text's bytes plus the NULL byte. */
-	p = (char *)xnmalloc((text_len * 2) + 1, sizeof(char));
+	p = xnmalloc((text_len * 2) + 1, sizeof(char));
 	r = p;
 
 	if (r == NULL)
@@ -1126,7 +1126,7 @@ my_rl_path_completion(const char *text, int state)
 		if (text_len) {
 			dirname = savestring(p, text_len);
 		} else {
-			dirname = (char *)xnmalloc(2, sizeof(char));
+			dirname = xnmalloc(2, sizeof(char));
 			*dirname = '\0';
 			dirname[1] = '\0';
 //			dirname = savestring("", 1);
@@ -1522,7 +1522,7 @@ my_rl_path_completion(const char *text, int state)
 				}
 			} else { */
 			size_t temp_len = strlen(users_dirname) + strlen(ent->d_name) + 1;
-			temp = (char *)xnmalloc(temp_len, sizeof(char));
+			temp = xnmalloc(temp_len, sizeof(char));
 			snprintf(temp, temp_len, "%s%s", users_dirname, ent->d_name);
 //			strcpy(temp, users_dirname);
 			/* If fast_back == 1 and filename is empty, we have the
@@ -2280,7 +2280,7 @@ expand_tilde_glob(char *text)
 
 	char *g = *(ls + 1) ? ls + 1 : (char *)NULL;
 	size_t len = strlen(q) + 2 + (g ? strlen(g) : 0);
-	char *tmp = (char *)xnmalloc(len, sizeof(char));
+	char *tmp = xnmalloc(len, sizeof(char));
 	snprintf(tmp, len, "%s/%s", q, g);
 	free(q);
 
@@ -2294,7 +2294,7 @@ rl_mime_list(void)
 	if (term_caps.suggestions != 0)
 		{ HIDE_CURSOR; fputs(" [wait...]", stdout); fflush(stdout); }
 
-	char **t = (char **)xnmalloc((size_t)files + 2, sizeof(char *));
+	char **t = xnmalloc((size_t)files + 2, sizeof(char *));
 	t[0] = xnmalloc(1, sizeof(char));
 	*t[0] = '\0';
 	t[1] = (char *)NULL;
@@ -2333,7 +2333,7 @@ rl_mime_list(void)
 	if (n == 1)
 		{ free(t[0]); free(t); return (char **)NULL; }
 
-	t = (char **)xnrealloc(t, n + 1, sizeof(char *));
+	t = xnrealloc(t, n + 1, sizeof(char *));
 	return t;
 }
 
@@ -2348,7 +2348,7 @@ rl_mime_files(const char *text)
 	if (term_caps.suggestions != 0)
 		{ HIDE_CURSOR; fputs(" [wait...]", stdout); fflush(stdout); }
 
-	char **t = (char **)xnmalloc((size_t)files + 2, sizeof(char *));
+	char **t = xnmalloc((size_t)files + 2, sizeof(char *));
 	t[0] = xnmalloc(1, sizeof(char));
 	*t[0] = '\0';
 
@@ -2374,7 +2374,7 @@ rl_mime_files(const char *text)
 	if (n == 1)
 		{ free(t[0]); free(t); return (char **)NULL; }
 
-	t = (char **)xnrealloc(t, (size_t)n + 1, sizeof(char *));
+	t = xnrealloc(t, (size_t)n + 1, sizeof(char *));
 	return t;
 }
 #endif /* !_NO_MAGIC */
@@ -2395,7 +2395,7 @@ rl_glob(char *text)
 	free(tmp);
 
 	if (globbuf.gl_pathc == 1) {
-		char **t = (char **)xnmalloc(globbuf.gl_pathc + 2, sizeof(char *));
+		char **t = xnmalloc(globbuf.gl_pathc + 2, sizeof(char *));
 		char *p = strrchr(globbuf.gl_pathv[0], '/');
 		if (p && *(++p)) {
 			char c = *p;
@@ -2413,7 +2413,7 @@ rl_glob(char *text)
 	}
 
 	size_t i, j = 1;
-	char **t = (char **)xnmalloc(globbuf.gl_pathc + 3, sizeof(char *));
+	char **t = xnmalloc(globbuf.gl_pathc + 3, sizeof(char *));
 
 	/* If /path/to/dir/GLOB<TAB>, /path/to/dir goes to slot 0 */
 	int c = -1;
@@ -2480,11 +2480,11 @@ rl_trashed_files(const char *text)
 	char *p = dequote_str((char *)text, 0);
 	char *f = p ? p : (char *)text;
 
-	char **tfiles = (char **)xnmalloc((size_t)n + 2, sizeof(char *));
+	char **tfiles = xnmalloc((size_t)n + 2, sizeof(char *));
 	if (f) {
 		tfiles[0] = savestring(f, strlen(f));
 	} else {
-		tfiles[0] = (char *)xnmalloc(1, sizeof(char));
+		tfiles[0] = xnmalloc(1, sizeof(char));
 		*tfiles[0] = '\0';
 	}
 
@@ -2511,7 +2511,7 @@ rl_trashed_files(const char *text)
 		tfiles[1] = (char *)NULL;
 		if (d) {
 			size_t len = strlen(d);
-			tfiles[0] = (char *)xnrealloc(tfiles[0], len + 1, sizeof(char));
+			tfiles[0] = xnrealloc(tfiles[0], len + 1, sizeof(char));
 			xstrsncpy(tfiles[0], d, len + 1);
 			free(d);
 		}
@@ -3154,7 +3154,7 @@ rl_fastback(char *s)
 		return (char **)NULL;
 	}
 
-	char **matches = (char **)xnmalloc(2, sizeof(char *));
+	char **matches = xnmalloc(2, sizeof(char *));
 	matches[0] = savestring(p, strlen(p));
 	matches[1] = (char *)NULL;
 
@@ -3169,7 +3169,7 @@ rl_fastback(char *s)
 static void
 rl_swap_fields(char ***a)
 {
-	*a = (char **)xnrealloc(*a, 3, sizeof(char *));
+	*a = xnrealloc(*a, 3, sizeof(char *));
 	(*a)[1] = strdup((*a)[0]);
 	*(*a)[0] = '\0';
 	(*a)[2] = (char *)NULL;
@@ -3283,7 +3283,7 @@ complete_dirjump_jo(char *text, const int n, int *exit_status)
 
 	char *p = jump_db[n - 1].path;
 	char **matches = (char **)NULL;
-	matches = (char **)xnrealloc(matches, 2, sizeof(char **));
+	matches = xnrealloc(matches, 2, sizeof(char **));
 	matches[0] = savestring(p, strlen(p));
 	matches[1] = (char *)NULL;
 
@@ -4347,7 +4347,7 @@ set_rl_init_file(void)
 		return;
 
 	size_t len = strlen(config_dir_gral) + 16;
-	char *rl_file = (char *)xnmalloc(len, sizeof(char));
+	char *rl_file = xnmalloc(len, sizeof(char));
 	snprintf(rl_file, len, "%s/readline.clifm", config_dir_gral);
 
 	/* This file should have been imported by import_rl_file (config.c).

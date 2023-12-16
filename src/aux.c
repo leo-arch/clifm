@@ -55,7 +55,7 @@ xregerror(const char *cmd_name, const char *pattern, const int errcode,
 	const regex_t regexp, const int prompt_err)
 {
 	const size_t err_len = regerror(errcode, &regexp, NULL, 0);
-	char *buf = (char *)xnmalloc(err_len + 1, sizeof(char));
+	char *buf = xnmalloc(err_len + 1, sizeof(char));
 	regerror(errcode, &regexp, buf, err_len);
 
 	if (prompt_err == 1)
@@ -321,7 +321,7 @@ abbreviate_file_name(char *str)
 	&& strncmp(str, workspaces[cur_ws].path, wlen) == 0
 	&& *(str + wlen) == '/') {
 		const size_t name_len = strlen(str + wlen + 1) + 3;
-		name = (char *)xnmalloc(name_len, sizeof(char));
+		name = xnmalloc(name_len, sizeof(char));
 		snprintf(name, name_len, "./%s", str + wlen + 1);
 		return name;
 	}
@@ -446,15 +446,15 @@ normalize_path(char *src, const size_t src_len)
 		if (pwd_len == 1 && *cwd == '/') {
 			/* If CWD is root (/) do not copy anything. Just create a buffer
 			 * big enough to hold "/dir", which will be appended next */
-			res = (char *)xnmalloc(l + 2, sizeof(char));
+			res = xnmalloc(l + 2, sizeof(char));
 			res_len = 0;
 		} else {
-			res = (char *)xnmalloc(pwd_len + 1 + l + 1, sizeof(char));
+			res = xnmalloc(pwd_len + 1 + l + 1, sizeof(char));
 			memcpy(res, cwd, pwd_len);
 			res_len = pwd_len;
 		}
 	} else {
-		res = (char *)xnmalloc(l + 1, sizeof(char));
+		res = xnmalloc(l + 1, sizeof(char));
 		res_len = 0;
 	}
 
@@ -568,7 +568,7 @@ rl_ring_bell(void)
 char *
 gen_date_suffix(const struct tm tm)
 {
-	char *suffix = (char *)xnmalloc(68, sizeof(char));
+	char *suffix = xnmalloc(68, sizeof(char));
 	snprintf(suffix, 67, "%04d%02d%02d%02d%02d%02d", tm.tm_year + 1900,
 	    tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
 
@@ -857,7 +857,7 @@ get_cmd_path(const char *cmd)
 		return cmd_path;
 	}
 
-	cmd_path = (char *)xnmalloc(PATH_MAX + 1, sizeof(char));
+	cmd_path = xnmalloc(PATH_MAX + 1, sizeof(char));
 
 	size_t i;
 	for (i = 0; i < path_n; i++) { /* Check each path in PATH */
@@ -942,8 +942,8 @@ check_xdu_hardlinks(const dev_t dev, const ino_t ino)
 static inline void
 add_xdu_hardlink(const dev_t dev, const ino_t ino)
 {
-	xdu_hardlinks = (struct hlink_t *)xnrealloc(xdu_hardlinks,
-		xdu_hardlink_n + 1, sizeof(struct hlink_t));
+	xdu_hardlinks = xnrealloc(xdu_hardlinks, xdu_hardlink_n + 1,
+		sizeof(struct hlink_t));
 
 	xdu_hardlinks[xdu_hardlink_n].dev = dev;
 	xdu_hardlinks[xdu_hardlink_n].ino = ino;
@@ -1296,7 +1296,7 @@ url_encode(char *str)
 	if (!str || !*str)
 		return (char *)NULL;
 
-	char *buf = (char *)xnmalloc((strlen(str) * 3) + 1, sizeof(char));
+	char *buf = xnmalloc((strlen(str) * 3) + 1, sizeof(char));
 	/* The max lenght of our buffer is 3 times the length of STR plus
 	 * 1 extra byte for the null byte terminator: each char in STR will
 	 * be, if encoded, %XX (3 chars) */
@@ -1339,7 +1339,7 @@ url_decode(char *str)
 	if (!str || !*str)
 		return (char *)NULL;
 
-	char *buf = (char *)xnmalloc(strlen(str) + 1, sizeof(char));
+	char *buf = xnmalloc(strlen(str) + 1, sizeof(char));
 	/* The decoded string will be at most as long as the encoded string */
 
 	char *pstr = str, *pbuf = buf;

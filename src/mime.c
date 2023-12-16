@@ -62,7 +62,7 @@ expand_env(char *s)
 	if (!p) return (char *)NULL;
 
 	int buf_size = PATH_MAX;
-	p = (char *)xnmalloc((size_t)buf_size, sizeof(char));
+	p = xnmalloc((size_t)buf_size, sizeof(char));
 	char *ret = p;
 
 	while (*s) {
@@ -195,7 +195,7 @@ check_app_existence(char **app, char **arg)
 		size_t cmd_len = len > 0 ? len - 1 : 0;
 		len += *arg ? strlen(*arg) + 1 : 0;
 
-		char *tmp_cmd = (char *)xnmalloc(len, sizeof(char));
+		char *tmp_cmd = xnmalloc(len, sizeof(char));
 		snprintf(tmp_cmd, len, "%s/%s", user.home, *app + 2);
 
 		if (access(tmp_cmd, X_OK) == -1) {
@@ -206,7 +206,7 @@ check_app_existence(char **app, char **arg)
 		if (*arg) /* Append arguments */
 			snprintf(tmp_cmd + cmd_len, len, " %s", *arg);
 
-		*app = (char *)xnrealloc(*app, len + 2, sizeof(char));
+		*app = xnrealloc(*app, len + 2, sizeof(char));
 		xstrsncpy(*app, tmp_cmd, len + 2);
 		free(tmp_cmd);
 		return 2;
@@ -517,8 +517,8 @@ mime_import(char *file)
 	 * specified by the Freedesktop specification */
 	size_t home_len = strlen(user.home);
 	char *config_path = (char *)NULL, *local_path = (char *)NULL;
-	config_path = (char *)xnmalloc(home_len + 23, sizeof(char));
-	local_path = (char *)xnmalloc(home_len + 41, sizeof(char));
+	config_path = xnmalloc(home_len + 23, sizeof(char));
+	local_path = xnmalloc(home_len + 41, sizeof(char));
 	/* xnmalloc will exit in case of error. However, GCC-13's analyzer
 	 * complains about both vars not being checked for NULL. So, let's add
 	 * the corresponding checks to silence the warning. */
@@ -724,7 +724,7 @@ expand_app_fields(char ***cmd, size_t *n, char *fpath, int *exec_flags)
 		/* Expand %f pĺaceholder */
 		if (*a[i] == '%' && *(a[i] + 1) == 'f') {
 			size_t fpath_len = strlen(fpath);
-			a[i] = (char *)xnrealloc(a[i], fpath_len + 1, sizeof(char));
+			a[i] = xnrealloc(a[i], fpath_len + 1, sizeof(char));
 			xstrsncpy(a[i], fpath, fpath_len + 1);
 			f = 1;
 			continue;
@@ -744,7 +744,7 @@ expand_app_fields(char ***cmd, size_t *n, char *fpath, int *exec_flags)
 				continue;
 
 			size_t p_len = strlen(p);
-			a[i] = (char *)xnrealloc(a[i], p_len + 1, sizeof(char *));
+			a[i] = xnrealloc(a[i], p_len + 1, sizeof(char *));
 			xstrsncpy(a[i], p, p_len + 1);
 			free(p);
 			continue;
@@ -782,7 +782,7 @@ run_mime_app(char **app, char **fpath)
 
 	/* If no %f placeholder was found, append file name */
 	if (f == 0) {
-		cmd = (char **)xnrealloc(cmd, i + 2, sizeof(char *));
+		cmd = xnrealloc(cmd, i + 2, sizeof(char *));
 		cmd[i] = savestring(*fpath, strlen(*fpath));
 		cmd[i + 1] = (char *)NULL;
 		n++;
@@ -827,7 +827,7 @@ mime_list_open(char **apps, char *file)
 		if (rep == 1)
 			continue;
 
-		n = (char **)xnrealloc(n, nn + 1, sizeof(char *));
+		n = xnrealloc(n, nn + 1, sizeof(char *));
 		n[nn] = apps[i];
 		nn++;
 	}
@@ -882,7 +882,7 @@ mime_list_open(char **apps, char *file)
 			}
 			if (*cmd[i] == '%' && cmd[i][1] == 'f') {
 				size_t file_len = strlen(file);
-				cmd[i] = (char *)xnrealloc(cmd[i], file_len + 1, sizeof(char));
+				cmd[i] = xnrealloc(cmd[i], file_len + 1, sizeof(char));
 				xstrsncpy(cmd[i], file, file_len + 1);
 				f = 1;
 			}
@@ -898,7 +898,7 @@ mime_list_open(char **apps, char *file)
 		/* If file to be opened was not specified via %f, append
 		 * it to the cmd array */
 		if (f == 0) {
-			cmd = (char **)xnrealloc(cmd, i + 2, sizeof(char *));
+			cmd = xnrealloc(cmd, i + 2, sizeof(char *));
 			cmd[i] = savestring(file, strlen(file));
 			cmd[i + 1] = (char *)NULL;
 		}
@@ -1004,11 +1004,11 @@ mime_open_with_tab(char *filename, const char *prefix, const int only_names)
 
 	/* This is the first element in the matches array, which contains
 	 * the already matched string. */
-	apps = (char **)xnmalloc(appsn + 1, sizeof(char *));
+	apps = xnmalloc(appsn + 1, sizeof(char *));
 	if (prefix) {
 		apps[0] = savestring(prefix, strlen(prefix));
 	} else {
-		apps[0] = (char *)xnmalloc(1, sizeof(char));
+		apps[0] = xnmalloc(1, sizeof(char));
 		*apps[0] = '\0';
 	}
 
@@ -1051,7 +1051,7 @@ mime_open_with_tab(char *filename, const char *prefix, const int only_names)
 		tmp++; /* We don't want the '=' char */
 
 		size_t tmp_len = strlen(tmp);
-		app = (char *)xnrealloc(app, tmp_len + 1, sizeof(char));
+		app = xnrealloc(app, tmp_len + 1, sizeof(char));
 
 		while (*tmp) {
 			size_t app_len = 0;
@@ -1100,7 +1100,7 @@ mime_open_with_tab(char *filename, const char *prefix, const int only_names)
 					app_env = savestring(app, strlen(app));
 					/* app: the expanded value */
 					size_t tlen = strlen(t);
-					app = (char *)xnrealloc(app, app_len + tlen + 1, sizeof(char));
+					app = xnrealloc(app, app_len + tlen + 1, sizeof(char));
 					xstrsncpy(app, t, app_len + tlen + 1);
 					free(t);
 				} else {
@@ -1149,7 +1149,7 @@ mime_open_with_tab(char *filename, const char *prefix, const int only_names)
 				file_path = (char *)NULL;
 			}
 
-			apps = (char **)xnrealloc(apps, appsn + 2, sizeof(char *));
+			apps = xnrealloc(apps, appsn + 2, sizeof(char *));
 			/* app_env is not NULL if we have an environment variable */
 			if (app_env) {
 				apps[appsn] = savestring(app_env, strlen(app_env));
@@ -1168,7 +1168,7 @@ mime_open_with_tab(char *filename, const char *prefix, const int only_names)
 	/* If only one match */
 	if (appsn == 2) {
 		size_t src_len = strlen(apps[1]);
-		apps[0] = (char *)xnrealloc(apps[0], src_len + 1, sizeof(char));
+		apps[0] = xnrealloc(apps[0], src_len + 1, sizeof(char));
 		xstrsncpy(apps[0], apps[1], src_len + 1);
 		free(apps[1]);
 		apps[1] = (char *)NULL;
@@ -1265,7 +1265,7 @@ run_cmd_plus_args(char **args, char *name)
 	size_t i;
 	for (i = 0; args[i]; i++);
 
-	char **cmd = (char **)xnmalloc(i + 2, sizeof(char *));
+	char **cmd = xnmalloc(i + 2, sizeof(char *));
 	cmd[0] = savestring(args[0], strlen(args[0]));
 
 	int exec_flags = E_NOFLAG;
@@ -1411,7 +1411,7 @@ mime_open_with(char *filename, char **args)
 		tmp++; /* We don't want the '=' char */
 
 		size_t tmp_len = strlen(tmp);
-		app = (char *)xnrealloc(app, tmp_len + 1, sizeof(char));
+		app = xnrealloc(app, tmp_len + 1, sizeof(char));
 
 		while (*tmp) {
 			size_t app_len = 0;
@@ -1447,7 +1447,7 @@ mime_open_with(char *filename, char **args)
 				appb = savestring(app, strlen(app));
 				/* app: the expanded value */
 				size_t tlen = strlen(t);
-				app = (char *)xnrealloc(app, app_len + tlen + 1, sizeof(char));
+				app = xnrealloc(app, app_len + tlen + 1, sizeof(char));
 				xstrsncpy(app, t, app_len + tlen + 1);
 				free(t);
 			}
@@ -1490,7 +1490,7 @@ mime_open_with(char *filename, char **args)
 				free(file_path);
 				file_path = (char *)NULL;
 			}
-			apps = (char **)xnrealloc(apps, appsn + 2, sizeof(char *));
+			apps = xnrealloc(apps, appsn + 2, sizeof(char *));
 			/* appb is not NULL if we have an environment variable */
 			if (appb) {
 				apps[appsn] = savestring(appb, strlen(appb));

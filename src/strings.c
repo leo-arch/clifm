@@ -118,7 +118,7 @@ quote_str(const char *str)
 		return (char *)NULL;
 
 	const size_t len = strlen(str) + 3;
-	char *p = (char *)xnmalloc(len, sizeof(char));
+	char *p = xnmalloc(len, sizeof(char));
 	char quote_char =
 		conf.quoting_style == QUOTING_STYLE_DOUBLE_QUOTES ? '"' : '\'';
 
@@ -471,7 +471,7 @@ char *
 replace_invalid_chars(const char *name)
 {
 	size_t len = strlen(name);
-	char *n = (char *)xnmalloc(len + 1, sizeof(char));
+	char *n = xnmalloc(len + 1, sizeof(char));
 	char *p = n;
 
 	mbstate_t mbstate = {0};
@@ -582,7 +582,7 @@ strbfrlst(char *str, const char c)
 	*q = '\0';
 
 	const size_t buf_len = (size_t)(q - str);
-	char *buf = (char *)malloc(buf_len + 1);
+	char *buf = malloc(buf_len + 1);
 	if (!buf) {
 		*q = c;
 		return (char *)NULL;
@@ -620,7 +620,7 @@ strbtw(char *str, const char a, const char b)
 	*pb = '\0';
 
 	const size_t buf_len = (size_t)(pb - pa);
-	char *buf = (char *)malloc(buf_len + 1);
+	char *buf = malloc(buf_len + 1);
 
 	if (!buf) {
 		*pb = b;
@@ -650,18 +650,18 @@ replace_substr(const char *haystack, const char *needle, char *rep)
 
 	if (*needle_end) {
 		const size_t rem_len = strlen(needle_end);
-		char *rem = (char *)xnmalloc(rem_len + 1, sizeof(char));
+		char *rem = xnmalloc(rem_len + 1, sizeof(char));
 		xstrsncpy(rem, needle_end, rem_len + 1);
 
 		new_str_len = strlen(haystack) + strlen(rep) + rem_len + 1;
-		char *new_str = (char *)xnmalloc(new_str_len, sizeof(char));
+		char *new_str = xnmalloc(new_str_len, sizeof(char));
 		snprintf(new_str, new_str_len, "%s%s%s", haystack, rep, rem);
 		free(rem);
 		return new_str;
 	}
 
 	new_str_len = strlen(haystack) + strlen(rep) + 1;
-	char *new_str = (char *)xnmalloc(new_str_len, sizeof(char));
+	char *new_str = xnmalloc(new_str_len, sizeof(char));
 	snprintf(new_str, new_str_len, "%s%s", haystack, rep);
 
 	return new_str;
@@ -679,7 +679,7 @@ gen_rand_str(const size_t len)
 	srandom((unsigned int)time(NULL));
 #endif /* !HAVE_ARC4RANDOM */
 
-	char *p = (char *)xnmalloc(len + 1, sizeof(char));
+	char *p = xnmalloc(len + 1, sizeof(char));
 	char *str = p;
 
 	int x = (int)len;
@@ -829,7 +829,7 @@ split_str(char *str, const int update_args)
 
 	size_t buf_len = 0, words = 0, str_len = 0;
 	char *buf = (char *)NULL;
-	buf = (char *)xnmalloc(1, sizeof(char));
+	buf = xnmalloc(1, sizeof(char));
 	int quote = 0, close = 0;
 	char **substr = (char **)NULL;
 
@@ -844,7 +844,7 @@ split_str(char *str, const int update_args)
 			if (*str == '$') {
 				/* If escaped, it has no special meaning */
 				if ((str_len && *(str - 1) == '\\') || *(str + 1) != '(') {
-					buf = (char *)xnrealloc(buf, buf_len + 1, sizeof(char *));
+					buf = xnrealloc(buf, buf_len + 1, sizeof(char *));
 					buf[buf_len] = *str;
 					buf_len++;
 					break;
@@ -854,7 +854,7 @@ split_str(char *str, const int update_args)
 			} else {
 				/* If escaped, it has no special meaning */
 				if (str_len && *(str - 1) == '\\') {
-					buf = (char *)xnrealloc(buf, buf_len + 1, sizeof(char *));
+					buf = xnrealloc(buf, buf_len + 1, sizeof(char *));
 					buf[buf_len] = *str;
 					buf_len++;
 					break;
@@ -864,7 +864,7 @@ split_str(char *str, const int update_args)
 					 * what we want */
 					close = *str;
 					str++;
-					buf = (char *)xnrealloc(buf, buf_len + 1, sizeof(char *));
+					buf = xnrealloc(buf, buf_len + 1, sizeof(char *));
 					buf[buf_len] = '`';
 					buf_len++;
 				}
@@ -872,7 +872,7 @@ split_str(char *str, const int update_args)
 
 			/* Copy everything until null byte or closing char */
 			while (*str && *str != close) {
-				buf = (char *)xnrealloc(buf, buf_len + 1, sizeof(char *));
+				buf = xnrealloc(buf, buf_len + 1, sizeof(char *));
 				buf[buf_len] = *str;
 				buf_len++;
 				str++;
@@ -896,7 +896,7 @@ split_str(char *str, const int update_args)
 			/* Copy the closing char and add an space: this function
 			 * takes space as word breaking char, so that everything
 			 * in the buffer will be copied as one single word */
-			buf = (char *)xnrealloc(buf, buf_len + 2, sizeof(char *));
+			buf = xnrealloc(buf, buf_len + 2, sizeof(char *));
 			buf[buf_len] = *str;
 			buf_len++;
 			buf[buf_len] = ' ';
@@ -907,7 +907,7 @@ split_str(char *str, const int update_args)
 		case '"':
 			/* If the quote is escaped, keep it. */
 			if (keep_quotes == 1 || (str_len && *(str - 1) == '\\')) {
-				buf = (char *)xnrealloc(buf, buf_len + 1, sizeof(char *));
+				buf = xnrealloc(buf, buf_len + 1, sizeof(char *));
 				buf[buf_len] = *str;
 				buf_len++;
 				if (update_args == 1)
@@ -925,12 +925,12 @@ split_str(char *str, const int update_args)
 				/* If char has special meaning, escape it */
 				if (!(flags & IN_BOOKMARKS_SCREEN) && (is_quote_char(*str)
 				|| *str == '.')) { // escape '.' to prevent realpath expansions
-					buf = (char *)xnrealloc(buf, buf_len + 1, sizeof(char *));
+					buf = xnrealloc(buf, buf_len + 1, sizeof(char *));
 					buf[buf_len] = '\\';
 					buf_len++;
 				}
 
-				buf = (char *)xnrealloc(buf, buf_len + 1, sizeof(char *));
+				buf = xnrealloc(buf, buf_len + 1, sizeof(char *));
 				buf[buf_len] = *str;
 				buf_len++;
 				str++;
@@ -964,7 +964,7 @@ split_str(char *str, const int update_args)
 		case ' ':
 			/* If escaped, just copy it into the buffer */
 			if (str_len && *(str - 1) == '\\') {
-				buf = (char *)xnrealloc(buf, buf_len + 1, sizeof(char *));
+				buf = xnrealloc(buf, buf_len + 1, sizeof(char *));
 				buf[buf_len] = *str;
 				buf_len++;
 			} else {
@@ -974,7 +974,7 @@ split_str(char *str, const int update_args)
 				buf[buf_len] = '\0';
 
 				if (buf_len > 0) {
-					substr = (char **)xnrealloc(substr, words + 1, sizeof(char *));
+					substr = xnrealloc(substr, words + 1, sizeof(char *));
 					substr[words] = savestring(buf, buf_len);
 					words++;
 				}
@@ -990,7 +990,7 @@ split_str(char *str, const int update_args)
 		default:
 			if (*str == '\\' && (flags & IN_BOOKMARKS_SCREEN))
 				break;
-			buf = (char *)xnrealloc(buf, buf_len + 1, sizeof(char *));
+			buf = xnrealloc(buf, buf_len + 1, sizeof(char *));
 			buf[buf_len] = *str;
 			buf_len++;
 			break;
@@ -1007,9 +1007,9 @@ split_str(char *str, const int update_args)
 
 	if (buf_len > 0) {
 		if (!words)
-			substr = (char **)xcalloc(words + 1, sizeof(char *));
+			substr = xcalloc(words + 1, sizeof(char *));
 		else
-			substr = (char **)xnrealloc(substr, words + 1, sizeof(char *));
+			substr = xnrealloc(substr, words + 1, sizeof(char *));
 
 		substr[words] = savestring(buf, buf_len);
 		words++;
@@ -1020,7 +1020,7 @@ split_str(char *str, const int update_args)
 
 	if (words) {
 		/* Add a final null string to the array */
-		substr = (char **)xnrealloc(substr, words + 1, sizeof(char *));
+		substr = xnrealloc(substr, words + 1, sizeof(char *));
 		substr[words] = (char *)NULL;
 
 		if (update_args == 1)
@@ -1078,7 +1078,7 @@ split_fused_param(char *str)
 
 	/* The buffer size is the double of STR, just in case each subtr
 	 * needs to be splitted */
-	char *buf = (char *)xnmalloc(((strlen(str) * 2) + 2), sizeof(char));
+	char *buf = xnmalloc(((strlen(str) * 2) + 2), sizeof(char));
 
 	size_t c = 0;
 	char *p = str, *pp = str, *b = buf;
@@ -1121,7 +1121,7 @@ split_fused_param(char *str)
 
 	/* Readjust the buffer size */
 	const size_t len = strlen(buf);
-	buf = (char *)xnrealloc(buf, len + 1, sizeof(char));
+	buf = xnrealloc(buf, len + 1, sizeof(char));
 	return buf;
 }
 
@@ -1252,7 +1252,7 @@ expand_tag(char ***args, const int tag_index)
 	}
 
 	size_t len = args_n + 1 + ((size_t)n - 2) + 1;
-	char **p = (char **)xnmalloc(len, sizeof(char *));
+	char **p = xnmalloc(len, sizeof(char *));
 
 	/* Copy whatever is before the tag expression */
 	for (i = 0; i < (size_t)tag_index; i++) {
@@ -1328,7 +1328,7 @@ expand_tags(char ***substr)
 	for (i = 0; (*substr)[i]; i++) {
 		if (*(*substr)[i] == 't' && *((*substr)[i] + 1) == ':'
 		&& lstat((*substr)[i], &a) == -1) {
-			tag_index = (int *)xnrealloc(tag_index, ntags + 2, sizeof(int));
+			tag_index = xnrealloc(tag_index, ntags + 2, sizeof(int));
 			tag_index[ntags] = (int)i;
 			ntags++;
 			tag_index[ntags] = -1;
@@ -1362,7 +1362,7 @@ expand_mime_type_filter(const char *pattern)
 	if (!pattern || !*pattern)
 		return (char **)NULL;
 
-	char **t = (char **)xnmalloc((size_t)files + 1, sizeof(char *));
+	char **t = xnmalloc((size_t)files + 1, sizeof(char *));
 
 	filesn_t i, n = 0;
 	for (i = 0; i < files; i++) {
@@ -1383,7 +1383,7 @@ expand_mime_type_filter(const char *pattern)
 	if (n == 0)
 		{ free(t); return (char **)NULL; }
 
-	t = (char **)xnrealloc(t, (size_t)n + 1, sizeof(char *));
+	t = xnrealloc(t, (size_t)n + 1, sizeof(char *));
 	return t;
 }
 #endif /* !_NO_MAGIC */
@@ -1397,7 +1397,7 @@ expand_file_type_filter(const char t)
 	filesn_t i = 0, n = 0;
 
 	char *name = (char *)NULL;
-	char **f = (char **)xnmalloc((size_t)files + 1, sizeof(char *));
+	char **f = xnmalloc((size_t)files + 1, sizeof(char *));
 
 	while (i < files && (name = file_info[i].name)) {
 		switch (t) {
@@ -1481,7 +1481,7 @@ expand_file_type_filter(const char t)
 	}
 
 	f[n] = (char *)NULL;
-	f = (char **)xnrealloc(f, (size_t)n + 1, sizeof(char *));
+	f = xnrealloc(f, (size_t)n + 1, sizeof(char *));
 
 	return f;
 }
@@ -1492,7 +1492,7 @@ get_bm_paths(void)
 	if (bm_n == 0)
 		return (char **)NULL;
 
-	char **b = (char **)xnmalloc(bm_n + 1, sizeof(char *));
+	char **b = xnmalloc(bm_n + 1, sizeof(char *));
 
 	size_t i;
 	for (i = 0; i < bm_n && bookmarks[i].path; i++)
@@ -1523,7 +1523,7 @@ insert_fields(char ***dst, char ***src, const size_t i, size_t *num)
 
 	/* 2. Store fields in DST after the field to be expanded (I) */
 	char **tail = args_n > i /* Substraction must be bigger than zero */
-		? (char **)xnmalloc(args_n - i + 1, sizeof(char *)) : (char **)NULL;
+		? xnmalloc(args_n - i + 1, sizeof(char *)) : (char **)NULL;
 
 	size_t t, n = 0;
 	if (tail) {
@@ -1533,7 +1533,7 @@ insert_fields(char ***dst, char ***src, const size_t i, size_t *num)
 	}
 
 	/* 3. Append SRC fields, plus TAIL fields, to DST */
-	char **d = (char **)xnmalloc(args_n + sn + 1, sizeof(char *));
+	char **d = xnmalloc(args_n + sn + 1, sizeof(char *));
 
 	size_t c;
 	for (c = 0; c < i; c++)
@@ -1600,7 +1600,7 @@ eln_expand(char ***substr, const size_t i)
 	if (file_info[j].type == DT_DIR && file_info[j].name[file_info[j].len > 0
 	? file_info[j].len - 1 : 0] != '/') {
 		size_t len = strlen(esc_str) + 2;
-		(*substr)[i] = (char *)xnrealloc((*substr)[i], len, sizeof(char));
+		(*substr)[i] = xnrealloc((*substr)[i], len, sizeof(char));
 		snprintf((*substr)[i], len, "%s/", esc_str);
 		free(esc_str);
 	} else {
@@ -1618,7 +1618,7 @@ expand_sel(char ***substr)
 		return;
 
 	size_t j = 0;
-	char **sel_array = (char **)xnmalloc(args_n + sel_n + 2, sizeof(char *));
+	char **sel_array = xnmalloc(args_n + sel_n + 2, sizeof(char *));
 
 	/* 1. Copy all words before 'sel' */
 	for (i = 0; i < (size_t)is_sel; i++) {
@@ -1710,7 +1710,7 @@ expand_bm_name(char **name)
 		char *q = escape_str(bookmarks[j].path);
 		char *tmp = q ? q : bookmarks[j].path;
 		size_t tmp_len = strlen(tmp);
-		*name = (char *)xnrealloc(*name, tmp_len + 1, sizeof(char));
+		*name = xnrealloc(*name, tmp_len + 1, sizeof(char));
 		xstrsncpy(*name, tmp, tmp_len + 1);
 		free(q);
 		bm_exp = EXIT_SUCCESS;
@@ -1735,7 +1735,7 @@ expand_int_var(char **name)
 			continue;
 
 		size_t val_len = strlen(usr_var[j].value);
-		*name = (char *)xnrealloc(*name, val_len + 1, sizeof(char));
+		*name = xnrealloc(*name, val_len + 1, sizeof(char));
 		xstrsncpy(*name, usr_var[j].value, val_len + 1);
 		break;
 	}
@@ -1747,7 +1747,7 @@ expand_file_type(char ***substr)
 	size_t i = 0;
 	struct stat a;
 
-	int *file_type_array = (int *)xnmalloc(INT_ARRAY_MAX, sizeof(int));
+	int *file_type_array = xnmalloc(INT_ARRAY_MAX, sizeof(int));
 	size_t file_type_n = 0;
 
 	for (i = 0; (*substr)[i]; i++) {
@@ -1805,7 +1805,7 @@ static void
 expand_mime_type(char ***substr)
 {
 	size_t i = 0;
-	int *mime_type_array = (int *)xnmalloc(INT_ARRAY_MAX, sizeof(int));
+	int *mime_type_array = xnmalloc(INT_ARRAY_MAX, sizeof(int));
 	size_t mime_type_n = 0;
 	struct stat a;
 
@@ -1868,7 +1868,7 @@ expand_bookmarks(char ***substr)
 	size_t i = 0;
 	struct stat a;
 
-	int *bm_array = (int *)xnmalloc(INT_ARRAY_MAX, sizeof(int));
+	int *bm_array = xnmalloc(INT_ARRAY_MAX, sizeof(int));
 	size_t bn = 0;
 
 	for (i = 0; (*substr)[i]; i++) {
@@ -1926,8 +1926,7 @@ expand_glob(char ***substr, const int *glob_array, const size_t glob_n)
 		if (globbuf.gl_pathc) {
 			size_t j = 0;
 			char **glob_cmd = (char **)NULL;
-			glob_cmd = (char **)xcalloc(args_n + globbuf.gl_pathc + 1,
-				sizeof(char *));
+			glob_cmd = xcalloc(args_n + globbuf.gl_pathc + 1, sizeof(char *));
 
 			for (i = 0; i < ((size_t)glob_array[g] + old_pathc); i++) {
 				glob_cmd[j] = savestring((*substr)[i], strlen((*substr)[i]));
@@ -2013,8 +2012,8 @@ expand_word(char ***substr, const int *word_array, const size_t word_n)
 
 		if (wordbuf.we_wordc) {
 			size_t j = 0;
-			char **word_cmd = (char **)xcalloc(args_n + wordbuf.we_wordc + 1,
-					sizeof(char *));
+			char **word_cmd = xcalloc(args_n + wordbuf.we_wordc + 1,
+				sizeof(char *));
 
 			for (i = 0; i < ((size_t)word_array[w] + old_pathc); i++) {
 				word_cmd[j] = savestring((*substr)[i], strlen((*substr)[i]));
@@ -2148,8 +2147,7 @@ expand_range(char *str, int listdir)
 			return (filesn_t *)NULL;
 	}
 
-	filesn_t *buf =
-		(filesn_t *)xcalloc((size_t)(asecond - afirst) + 2, sizeof(filesn_t));
+	filesn_t *buf = xcalloc((size_t)(asecond - afirst) + 2, sizeof(filesn_t));
 
 	filesn_t i, j = 0;
 	for (i = afirst; i <= asecond; i++) {
@@ -2165,7 +2163,7 @@ expand_ranges(char ***substr)
 {
 	size_t i = 0, j = 0;
 
-	int *range_array = (int *)xnmalloc(INT_ARRAY_MAX, sizeof(int));
+	int *range_array = xnmalloc(INT_ARRAY_MAX, sizeof(int));
 	const size_t ranges_ok = check_ranges(substr, &range_array);
 
 	if (ranges_ok == 0) {
@@ -2189,8 +2187,7 @@ expand_ranges(char ***substr)
 				+ old_ranges_n, ranges_n);
 
 			char **ranges_cmd = (char **)NULL;
-			ranges_cmd = (char **)xcalloc(args_n + ranges_n + 2,
-					sizeof(char *));
+			ranges_cmd = xcalloc(args_n + ranges_n + 2, sizeof(char *));
 
 			for (i = 0; i < (size_t)range_array[r] + old_ranges_n; i++) {
 				if (!(*substr)[i])
@@ -2201,7 +2198,7 @@ expand_ranges(char ***substr)
 
 			for (i = 0; i < ranges_n; i++) {
 				const size_t len = (size_t)DIGINUM(ranges[i]) + 1;
-				ranges_cmd[j] = (char *)xnmalloc(len, sizeof(int));
+				ranges_cmd[j] = xnmalloc(len, sizeof(int));
 				snprintf(ranges_cmd[j], len, "%zd", ranges[i]);
 				j++;
 			}
@@ -2236,7 +2233,7 @@ expand_regex(char ***substr)
 {
 	/* Let's store all strings currently in substr plus REGEX expanded
 	 * files, if any, in a temporary array. */
-	char **tmp = (char **)xnmalloc((size_t)files + args_n + 2, sizeof(char *));
+	char **tmp = xnmalloc((size_t)files + args_n + 2, sizeof(char *));
 	filesn_t i, j;
 	size_t n = 0;
 	regex_t regex;
@@ -2272,7 +2269,7 @@ expand_regex(char ***substr)
 		 * must not be expanded given the pattern "ile.t". In other words,
 		 * we force the use of ".*PATTERN.*" instead of just "PATTERN". */
 		size_t l = strlen(t) + 3;
-		char *rstr = (char *)xnmalloc(l, sizeof(char));
+		char *rstr = xnmalloc(l, sizeof(char));
 		snprintf(rstr, l, "^%s$", t);
 		free(dstr);
 
@@ -2322,7 +2319,7 @@ expand_regex(char ***substr)
 	if (n > 0) {
 		tmp[n] = (char *)NULL;
 
-		char **tmp_files = (char **)xnmalloc(n + 2, sizeof(char *));
+		char **tmp_files = xnmalloc(n + 2, sizeof(char *));
 
 		size_t k = 0;
 		for (j = 0; tmp[j]; j++) {
@@ -2359,7 +2356,7 @@ expand_symlink(char **substr)
 	}
 
 	size_t rp_len = strlen(real_path);
-	*substr = (char *)xnrealloc(*substr, rp_len + 1, sizeof(char));
+	*substr = xnrealloc(*substr, rp_len + 1, sizeof(char));
 	xstrsncpy(*substr, real_path, rp_len + 1);
 	free(real_path);
 
@@ -2420,7 +2417,7 @@ gen_full_line(char **str, const int fusedcmd_ok)
 
 	args_n = 0;
 
-	char **cmd = (char **)xnmalloc(2, sizeof(char *));
+	char **cmd = xnmalloc(2, sizeof(char *));
 	cmd[0] = savestring(p, strlen(p));
 	cmd[1] = (char *)NULL;
 
@@ -2483,7 +2480,7 @@ check_chained_cmds(char *str)
 	char *buf = (char *)NULL;
 
 	/* Get each word (cmd) in STR */
-	buf = (char *)xnmalloc(str_len + 1, sizeof(char));
+	buf = xnmalloc(str_len + 1, sizeof(char));
 	for (i = 0; i < str_len; i++) {
 		while (str[i] && str[i] != ' ' && str[i] != ';' && str[i] != '&') {
 			buf[len] = str[i];
@@ -2649,7 +2646,7 @@ parse_input_str(char *str)
 					 * ###################### */
 #ifndef _NO_TRASH
 	if (conf.tr_as_rm && substr[0] && *substr[0] == 'r' && !substr[0][1]) {
-		substr[0] = (char *)xnrealloc(substr[0], 2, sizeof(char));
+		substr[0] = xnrealloc(substr[0], 2, sizeof(char));
 		*substr[0] = 't';
 		substr[0][1] = '\0';
 	}
@@ -2704,7 +2701,7 @@ parse_input_str(char *str)
 			char *p = getenv(substr[i] + 1);
 			if (p) {
 				size_t plen = strlen(p) + 1;
-				substr[i] = (char *)xnrealloc(substr[i], plen, sizeof(char));
+				substr[i] = xnrealloc(substr[i], plen, sizeof(char));
 				xstrsncpy(substr[i], p, plen);
 			}
 		}
@@ -2764,7 +2761,7 @@ parse_input_str(char *str)
 
 		if (*substr[i] == ',' && !substr[i][1] && pinned_dir) {
 			size_t plen = strlen(pinned_dir);
-			substr[i] = (char *)xnrealloc(substr[i], plen + 1, sizeof(char));
+			substr[i] = xnrealloc(substr[i], plen + 1, sizeof(char));
 			xstrsncpy(substr[i], pinned_dir, plen + 1);
 		}
 
@@ -2840,7 +2837,7 @@ parse_input_str(char *str)
 
 
 	/* #### NULL TERMINATE THE INPUT STRING ARRAY #### */
-	substr = (char **)xnrealloc(substr, args_n + 2, sizeof(char *));
+	substr = xnrealloc(substr, args_n + 2, sizeof(char *));
 	substr[args_n + 1] = (char *)NULL;
 
 	int is_action = is_action_name(substr[0]);
@@ -2862,11 +2859,11 @@ parse_input_str(char *str)
 	/* Let's first mark substrings containing special expansions made by either
 	 * glob(3) and wordexp(3). */
 
-	int *glob_array = (int *)xnmalloc(INT_ARRAY_MAX, sizeof(int));
+	int *glob_array = xnmalloc(INT_ARRAY_MAX, sizeof(int));
 	size_t glob_n = 0;
 
 #ifdef HAVE_WORDEXP
-	int *word_array = (int *)xnmalloc(INT_ARRAY_MAX, sizeof(int));
+	int *word_array = xnmalloc(INT_ARRAY_MAX, sizeof(int));
 	size_t word_n = 0;
 #endif /* HAVE_WORDEXP */
 
@@ -2953,7 +2950,7 @@ parse_input_str(char *str)
 		expand_regex(&substr);
 
 	/* #### NULL TERMINATE THE INPUT STRING ARRAY (again) #### */
-	substr = (char **)xnrealloc(substr, args_n + 2, sizeof(char *));
+	substr = xnrealloc(substr, args_n + 2, sizeof(char *));
 	substr[args_n + 1] = (char *)NULL;
 
 	return substr;
@@ -2973,7 +2970,7 @@ home_tilde(char *new_path, int *free_buf)
 	/* If new_path == HOME */
 	if (new_path[1] && user.home[1] && new_path[1] == user.home[1]
 	&& strcmp(new_path, user.home) == 0) {
-		char *path_tilde = (char *)xnmalloc(2, sizeof(char));
+		char *path_tilde = xnmalloc(2, sizeof(char));
 		path_tilde[0] = '~';
 		path_tilde[1] = '\0';
 		*free_buf = 1;
@@ -2987,7 +2984,7 @@ home_tilde(char *new_path, int *free_buf)
 	|| *(new_path + user.home_len) == '/') ) {
 		/* If new_path == HOME/file */
 		size_t len = strlen(new_path + user.home_len + 1) + 3;
-		char *path_tilde = (char *)xnmalloc(len, sizeof(char));
+		char *path_tilde = xnmalloc(len, sizeof(char));
 		snprintf(path_tilde, len, "~/%s", new_path + user.home_len + 1);
 
 		*free_buf = 1;
@@ -3006,7 +3003,7 @@ savestring(const char *restrict str, size_t size)
 		return (char *)NULL;
 
 	char *ptr = (char *)NULL;
-	ptr = (char *)malloc((size + 1) * sizeof(char));
+	ptr = malloc((size + 1) * sizeof(char));
 
 	if (!ptr)
 		return (char *)NULL;
@@ -3027,7 +3024,7 @@ escape_str(const char *str)
 	size_t len = 0;
 	char *buf = (char *)NULL;
 
-	buf = (char *)xnmalloc(strlen(str) * 2 + 1, sizeof(char));
+	buf = xnmalloc(strlen(str) * 2 + 1, sizeof(char));
 
 	while (*str) {
 		if (is_quote_char(*str)) {
@@ -3059,7 +3056,7 @@ get_substr(char *str, const char ifs)
 	void *p = (char *)NULL;
 	const size_t str_len = strlen(str);
 	size_t length = 0, substr_n = 0;
-	char *buf = (char *)xnmalloc(str_len + 1, sizeof(char));
+	char *buf = xnmalloc(str_len + 1, sizeof(char));
 
 	while (*str) {
 		while (*str != ifs && *str != '\0' && length < (str_len + 1)) {
@@ -3069,7 +3066,7 @@ get_substr(char *str, const char ifs)
 		}
 		if (length) {
 			buf[length] = '\0';
-			p = (char *)realloc(substr, (substr_n + 1) * sizeof(char *));
+			p = realloc(substr, (substr_n + 1) * sizeof(char *));
 			if (!p) {
 				/* Free whatever was allocated so far */
 				size_t i;
@@ -3079,7 +3076,7 @@ get_substr(char *str, const char ifs)
 				return (char **)NULL;
 			}
 			substr = (char **)p;
-			p = (char *)malloc(length + 1);
+			p = malloc(length + 1);
 
 			if (!p) {
 				size_t i;
@@ -3105,7 +3102,7 @@ get_substr(char *str, const char ifs)
 		return (char **)NULL;
 
 	size_t i = 0, j = 0;
-	p = (char *)realloc(substr, (substr_n + 1) * sizeof(char *));
+	p = realloc(substr, (substr_n + 1) * sizeof(char *));
 	if (!p) {
 		for (i = 0; i < substr_n; i++)
 			free(substr[i]);
@@ -3180,8 +3177,8 @@ get_substr(char *str, const char ifs)
 		/* If a valid range */
 		size_t k = 0, next = 0;
 		char **rbuf = (char **)NULL;
-		rbuf = (char **)xnmalloc((substr_n + (size_t)(asecond - afirst) + 1),
-								sizeof(char *));
+		rbuf = xnmalloc((substr_n + (size_t)(asecond - afirst) + 1),
+			sizeof(char *));
 		/* Copy everything before the range expression into the buffer */
 		for (j = 0; j < i; j++) {
 			rbuf[k] = savestring(substr[j], strlen(substr[j]));
@@ -3191,7 +3188,7 @@ get_substr(char *str, const char ifs)
 		/* Copy the expanded range into the buffer */
 		for (j = (size_t)afirst; j <= (size_t)asecond; j++) {
 			size_t len = (size_t)DIGINUM((int)j) + 1;
-			rbuf[k] = (char *)xnmalloc(len, sizeof(char));
+			rbuf[k] = xnmalloc(len, sizeof(char));
 			snprintf(rbuf[k], len, "%zu", j);
 			k++;
 		}
@@ -3215,7 +3212,7 @@ get_substr(char *str, const char ifs)
 		for (j = 0; substr[j]; j++)
 			free(substr[j]);
 
-		substr = (char **)xnrealloc(substr, substr_n + 1, sizeof(char *));
+		substr = xnrealloc(substr, substr_n + 1, sizeof(char *));
 
 		for (j = 0; j < substr_n; j++) {
 			substr[j] = savestring(rbuf[j], strlen(rbuf[j]));
@@ -3251,14 +3248,14 @@ get_substr(char *str, const char ifs)
 			continue;
 		}
 
-		dstr = (char **)xnrealloc(dstr, len + 1, sizeof(char *));
+		dstr = xnrealloc(dstr, len + 1, sizeof(char *));
 		dstr[len] = savestring(substr[i], strlen(substr[i]));
 		len++;
 		free(substr[i]);
 	}
 
 	free(substr);
-	dstr = (char **)xnrealloc(dstr, len + 1, sizeof(char *));
+	dstr = xnrealloc(dstr, len + 1, sizeof(char *));
 	dstr[len] = (char *)NULL;
 	return dstr;
 }
@@ -3274,7 +3271,7 @@ dequote_str(char *text, int mt)
 
 	/* At most, we need as many bytes as in TEXT (in case no escape
 	 * sequence is found). */
-	char *buf = (char *)xnmalloc(strlen(text) + 1, sizeof(char));
+	char *buf = xnmalloc(strlen(text) + 1, sizeof(char));
 	size_t len = 0;
 
 	while (*text) {

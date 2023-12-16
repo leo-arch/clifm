@@ -865,7 +865,7 @@ check_for_alias(char **args)
 		/* Add input parameters, if any, to alias_comm */
 		if (args[1]) {
 			for (j = 1; args[j]; j++) {
-				alias_comm = (char **)xnrealloc(alias_comm,
+				alias_comm = xnrealloc(alias_comm,
 				    ++args_n + 2, sizeof(char *));
 				alias_comm[args_n] = savestring(args[j], strlen(args[j]));
 			}
@@ -933,10 +933,10 @@ truncate_file(char *file, const int max, const int check_dups)
 	fseek(fp, 0, SEEK_SET);
 
 #if !defined(__OpenBSD__)
-	char *tmp = (char *)xnmalloc(config_dir_len + 12, sizeof(char));
+	char *tmp = xnmalloc(config_dir_len + 12, sizeof(char));
 	snprintf(tmp, config_dir_len + 12, "%s/log.XXXXXX", config_dir);
 #else
-	char *tmp = (char *)xnmalloc(config_dir_len + 16, sizeof(char));
+	char *tmp = xnmalloc(config_dir_len + 16, sizeof(char));
 	snprintf(tmp, config_dir_len + 16, "%s/log.XXXXXXXXXX", config_dir);
 #endif /* !__OpenBSD__ */
 
