@@ -596,10 +596,10 @@ mark_bookmarks_for_deletion(char **args, int *exit_status)
 		|| (index = check_bm_shortcut(name, 0)) != -1)
 		&& *bookmarks[index].path) {
 			*bookmarks[index].path = '\0';
-			printf("%s: Bookmark removed\n", name);
+			printf("'%s'\n", name);
 			counter++;
 		} else {
-			xerror("%s: No such bookmark\n", name);
+			xerror("'%s': No such bookmark\n", name);
 			*exit_status = EXIT_FAILURE;
 		}
 
