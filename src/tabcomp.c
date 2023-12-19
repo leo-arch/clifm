@@ -898,7 +898,7 @@ get_tagged_file_target(char *filename)
 	char dir[PATH_MAX];
 	char *p = (char *)NULL;
 	if (strchr(filename, '\\'))
-		p = dequote_str(filename, 0);
+		p = unescape_str(filename, 0);
 
 	snprintf(dir, sizeof(dir), "%s/%s/%s", tags_dir, cur_tag, p ? p : filename);
 	free(p);
@@ -1816,7 +1816,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 		q = (char *)NULL;
 	}
 
-	char *deq = q ? (strchr(q, '\\') ? dequote_str(q, 0) : q) : (char *)NULL;
+	char *deq = q ? (strchr(q, '\\') ? unescape_str(q, 0) : q) : (char *)NULL;
 
 	/* Run the finder application and store the ouput into FINDER_OUT_FILE. */
 	int ret = run_finder(height, finder_offset, deq, multi);

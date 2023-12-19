@@ -79,12 +79,12 @@ dequote_remote_name(char *name)
 {
 	char *deq = (char *)NULL;
 	if (strchr(name, '\\')) {
-		deq = dequote_str(name, 0);
+		deq = unescape_str(name, 0);
 		if (deq) {
 			xstrsncpy(name, deq, strlen(deq) + 1);
 			free(deq);
 		} else {
-			xerror("net: %s: Error dequoting resource name\n", name);
+			xerror("net: %s: Error unescaping resource name\n", name);
 			return EXIT_FAILURE;
 		}
 	}

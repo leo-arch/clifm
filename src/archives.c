@@ -330,7 +330,7 @@ handle_iso(char *file)
 	char sel_op = get_operation(OP_ISO);
 
 	if (strchr(file, '\\')) {
-		char *deq_file = dequote_str(file, 0);
+		char *deq_file = unescape_str(file, 0);
 		if (deq_file) {
 			xstrsncpy(file, deq_file, strlen(deq_file) + 1);
 			free(deq_file);
@@ -697,7 +697,7 @@ static int
 zstandard(char *in_file, char *out_file, const char mode, const char op)
 {
 	int exit_status = EXIT_SUCCESS;
-	char *deq_file = dequote_str(in_file, 0);
+	char *deq_file = unescape_str(in_file, 0);
 	if (!deq_file) {
 		xerror(_("archiver: '%s': Error dequoting file name\n"), in_file);
 		return EXIT_FAILURE;
@@ -832,7 +832,7 @@ compress_others(char **args, char *name)
 	n += 3;
 
 	for (i = 1; args[i]; i++) {
-		char *p = dequote_str(args[i], 0);
+		char *p = unescape_str(args[i], 0);
 		if (!p)
 			continue;
 		tcmd[n] = savestring(p, strlen(p));
@@ -890,7 +890,7 @@ check_not_compressed(char **args)
 	for (i = 1; args[i]; i++) {
 		char *deq = (char *)NULL;
 		if (strchr(args[i], '\\')) {
-			deq = dequote_str(args[i], 0);
+			deq = unescape_str(args[i], 0);
 			xstrsncpy(args[i], deq, strlen(deq) + 1);
 			free(deq);
 		}

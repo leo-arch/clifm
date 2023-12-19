@@ -395,7 +395,7 @@ normalize_path(char *src, const size_t src_len)
 	const int is_escaped = *src == '\\';
 
 	if (strchr(src, '\\')) {
-		tmp = dequote_str(src, 0);
+		tmp = unescape_str(src, 0);
 		if (!tmp) {
 			xerror(_("%s: '%s': Error deescaping string\n"), PROGRAM_NAME, src);
 			return (char *)NULL;

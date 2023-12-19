@@ -528,9 +528,9 @@ bleach_files(char **names)
 
 	size_t f = 0, i = 1;
 	for (; names[i]; i++) {
-		char *dstr = dequote_str(names[i], 0);
+		char *dstr = unescape_str(names[i], 0);
 		if (!dstr) {
-			xerror(_("bleach: '%s': Error dequoting file name\n"), names[i]);
+			xerror(_("bleach: '%s': Error unescaping file name\n"), names[i]);
 			continue;
 		}
 

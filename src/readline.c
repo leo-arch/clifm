@@ -1086,7 +1086,7 @@ my_rl_path_completion(const char *text, int state)
 
 	if (strchr(text, '\\')) {
 		char *p = savestring(text, strlen(text));
-		tmp_text = dequote_str(p, 0);
+		tmp_text = unescape_str(p, 0);
 		free(p);
 		if (!tmp_text)
 			return (char *)NULL;
@@ -2423,7 +2423,7 @@ rl_glob(char *text)
 	/* If /path/to/dir/GLOB<TAB>, /path/to/dir goes to slot 0 */
 	int c = -1;
 	char *ls = get_last_chr(rl_line_buffer, ' ', rl_point), *q = (char *)NULL;
-	char *ds = ls ? dequote_str(ls, 0) : (char *)NULL;
+	char *ds = ls ? unescape_str(ls, 0) : (char *)NULL;
 	char *p = ds ? ds : (ls ? ls : (char *)NULL);
 
 	if (p && *(++p)) {
@@ -2482,7 +2482,7 @@ rl_trashed_files(const char *text)
 		return (char **)NULL;
 	}
 
-	char *p = dequote_str((char *)text, 0);
+	char *p = unescape_str((char *)text, 0);
 	char *f = p ? p : (char *)text;
 
 	char **tfiles = xnmalloc((size_t)n + 2, sizeof(char *));
@@ -2588,7 +2588,7 @@ tag_entries_generator(const char *text, int state)
 
 		char *p = (char *)NULL, *q = name;
 		if (strchr(name, '\\')) {
-			p = dequote_str(name, 0);
+			p = unescape_str(name, 0);
 			q = p;
 		}
 
@@ -3261,7 +3261,7 @@ complete_bookmark_names(char *text, const size_t words_n, int *exit_status)
 	if (suggestion.type != FILE_SUG)
 		rl_attempted_completion_over = 1;
 #endif /* !_NO_SUGGESTIONS */
-	char *p = dequote_str((char *)text, 0);
+	char *p = unescape_str((char *)text, 0);
 	char **matches = rl_completion_matches(p ? p : text, &bookmarks_generator);
 	free(p);
 
@@ -3513,7 +3513,7 @@ complete_tag_names_t(char *text, int *exit_status)
 	*exit_status = EXIT_FAILURE;
 	cur_comp_type = TCMP_TAGS_T;
 
-	char *p = dequote_str(text, 0);
+	char *p = unescape_str(text, 0);
 	char **matches = rl_completion_matches(p ? p : text, &tags_generator);
 	free(p);
 
@@ -3555,7 +3555,7 @@ static char **
 complete_bookmark_paths(char *text, int *exit_status)
 {
 	char *t = text + 2;
-	char *p = dequote_str(t, 0);
+	char *p = unescape_str(t, 0);
 	char **matches = rl_completion_matches(p ? p : t, &bm_paths_generator);
 	free(p);
 
@@ -3576,7 +3576,7 @@ static char **
 complete_bookmark_names_b(char *text, int *exit_status)
 {
 	*exit_status = EXIT_FAILURE;
-	char *p = dequote_str(text, 0);
+	char *p = unescape_str(text, 0);
 	char **matches = rl_completion_matches(p ? p : text, &bookmarks_generator);
 	free(p);
 
@@ -3618,7 +3618,7 @@ complete_dirhist(char *text, const size_t words_n)
 	if (words_n > 2)
 		return (char **)NULL;
 
-	char *p = dequote_str(text, 0);
+	char *p = unescape_str(text, 0);
 	char **matches = rl_completion_matches(p ? p : text, &dirhist_generator);
 	free(p);
 
@@ -3639,7 +3639,7 @@ complete_backdir(char *text, const size_t words_n)
 		return (char **)NULL;
 
 	int n = 0;
-	char *p = dequote_str((char *)text, 0);
+	char *p = unescape_str((char *)text, 0);
 	char **matches = get_bd_matches(p ? p : text, &n, BD_TAB);
 	free(p);
 
@@ -3655,7 +3655,7 @@ complete_workspaces(char *text)
 {
 	rl_sort_completion_matches = 0;
 	rl_attempted_completion_over = 1;
-	char *p = dequote_str(text, 0);
+	char *p = unescape_str(text, 0);
 
 	char **matches = rl_completion_matches(p ? p : text, &workspaces_generator);
 	free(p);
@@ -3694,7 +3694,7 @@ int_cmd_no_filename(void)
 static char **
 complete_net(char *text)
 {
-	char *p = dequote_str(text, 0);
+	char *p = unescape_str(text, 0);
 	char **matches = rl_completion_matches(p ? p : text, &nets_generator);
 	free(p);
 
@@ -3737,7 +3737,7 @@ complete_profiles(char *text, const size_t words_n)
 	if (suggestion.type != FILE_SUG)
 		rl_attempted_completion_over = 1;
 # endif /* _NO_SUGGESTIONS */
-	char *p = dequote_str((char *)text, 0);
+	char *p = unescape_str((char *)text, 0);
 	char **matches = rl_completion_matches(p ? p : text, &profiles_generator);
 	free(p);
 
@@ -3755,7 +3755,7 @@ complete_colorschemes(char *text, const size_t words_n)
 	if (words_n != 2)
 		return (char **)NULL;
 
-	char *p = dequote_str(text, 0);
+	char *p = unescape_str(text, 0);
 	char **matches = rl_completion_matches(p ? p : text, &cschemes_generator);
 	free(p);
 
@@ -3804,7 +3804,7 @@ complete_prompt_names(char *text, const size_t words_n)
 	if (words_n > 3)
 		return (char **)NULL;
 
-	char *p = dequote_str((char *)text, 0);
+	char *p = unescape_str((char *)text, 0);
 	char **matches = rl_completion_matches(p ? p : text, &prompts_generator);
 	free(p);
 
@@ -4073,7 +4073,7 @@ my_rl_completion(const char *text, const int start, const int end)
 
 	/* ##### HISTORY COMPLETION ("!") ##### */
 	if (xrename == 0 && *text == '!') {
-		char *p = dequote_str((char *)text, 0);
+		char *p = unescape_str((char *)text, 0);
 		matches = rl_completion_matches(p ? p : text, &hist_generator);
 		free(p);
 		if (matches) {
@@ -4105,7 +4105,7 @@ FIRST_WORD_COMP:
 
 		/* SEARCH PATTERNS COMPLETION */
 		if (xrename == 0 && *text == '/' && text[1] == '*') {
-			char *p = dequote_str((char *)text, 0);
+			char *p = unescape_str((char *)text, 0);
 			matches = rl_completion_matches(p ? p : text, &hist_generator);
 			free(p);
 			if (matches) {
@@ -4484,7 +4484,7 @@ initialize_readline(void)
 	 * string so it won't conflict with system file names: you want
 	 * "user file", because "user\ file" does not exist, and, in this
 	 * latter case, readline won't find any matches. */
-	rl_filename_dequoting_function = dequote_str;
+	rl_filename_dequoting_function = unescape_str;
 
 	/* Initialize the keyboard bindings function. */
 	readline_kbinds();

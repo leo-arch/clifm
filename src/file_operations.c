@@ -748,9 +748,9 @@ dup_file(char **cmd)
 		/* 1. Construct file names. */
 		char *source = cmd[i];
 		if (strchr(source, '\\')) {
-			char *deq_str = dequote_str(source, 0);
+			char *deq_str = unescape_str(source, 0);
 			if (!deq_str) {
-				xerror("dup: '%s': Error dequoting file name\n", source);
+				xerror("dup: '%s': Error escaping file name\n", source);
 				continue;
 			}
 
@@ -1028,9 +1028,9 @@ validate_filename(char **name, const int is_md)
 	if (!*name || !*(*name))
 		return 0;
 
-	char *deq = dequote_str(*name, 0);
+	char *deq = unescape_str(*name, 0);
 	if (!deq) {
-		xerror(_("%s: '%s': Error dequoting file name\n"),
+		xerror(_("%s: '%s': Error escaping file name\n"),
 			is_md ? "md" : "new", *name);
 		return 0;
 	}
@@ -1289,9 +1289,9 @@ open_function(char **cmd)
 
 	if (*cmd[0] == 'o' && (!cmd[0][1] || strcmp(cmd[0], "open") == 0)) {
 		if (strchr(cmd[1], '\\')) {
-			char *deq_path = dequote_str(cmd[1], 0);
+			char *deq_path = unescape_str(cmd[1], 0);
 			if (!deq_path) {
-				xerror(_("open: '%s': Error dequoting filename\n"), cmd[1]);
+				xerror(_("open: '%s': Error escaping filename\n"), cmd[1]);
 				return EXIT_FAILURE;
 			}
 
@@ -1467,9 +1467,9 @@ edit_link(char *link)
 
 	/* Dequote the file name, if necessary. */
 	if (strchr(link, '\\')) {
-		char *tmp = dequote_str(link, 0);
+		char *tmp = unescape_str(link, 0);
 		if (!tmp) {
-			xerror(_("le: %s: Error dequoting file\n"), link);
+			xerror(_("le: '%s': Error escaping file\n"), link);
 			return EXIT_FAILURE;
 		}
 
@@ -1551,7 +1551,7 @@ symlink_file(char **args)
 		args[0][len - 1] = '\0';
 
 	if (strchr(args[0], '\\')) {
-		char *deq = dequote_str(args[0], 0);
+		char *deq = unescape_str(args[0], 0);
 		if (deq) {
 			free(args[0]);
 			args[0] = deq;
@@ -1559,7 +1559,7 @@ symlink_file(char **args)
 	}
 
 	if (args[1] && strchr(args[1], '\\')) {
-		char *deq = dequote_str(args[1], 0);
+		char *deq = unescape_str(args[1], 0);
 		if (deq) {
 			free(args[1]);
 			args[1] = deq;
@@ -1759,7 +1759,7 @@ run_cp_mv_cmd(char **cmd, const int skip_force)
 				return ENOENT;
 			}
 		} else {
-			char *p = dequote_str(cmd[1], 0);
+			char *p = unescape_str(cmd[1], 0);
 			struct stat a;
 			int ret = lstat(p ? p : cmd[1], &a);
 			free(p);
@@ -1801,7 +1801,7 @@ run_cp_mv_cmd(char **cmd, const int skip_force)
 		 * It instructs cp/mv to run non-interactively (no -i param). */
 		if (skip_force == 1 && i == 1 && is_force_param(cmd[i]) == 1)
 			continue;
-		p = dequote_str(cmd[i], 0);
+		p = unescape_str(cmd[i], 0);
 		if (!p)
 			continue;
 		tcmd[n] = savestring(p, strlen(p));
@@ -1902,7 +1902,7 @@ cp_mv_file(char **args, const int copy_and_rename, const int force)
 
 	size_t i = force == 1 ? 2 : 1;
 	for (; args[i]; i++) {
-		p = dequote_str(args[i], 0);
+		p = unescape_str(args[i], 0);
 		if (!p)
 			continue;
 		tcmd[n] = savestring(p, strlen(p));
@@ -2048,9 +2048,9 @@ remove_files(char **args)
 		if (cwd == 0)
 			cwd = is_file_in_cwd(args[i]);
 
-		char *tmp = dequote_str(args[i], 0);
+		char *tmp = unescape_str(args[i], 0);
 		if (!tmp) {
-			xerror(_("%s: %s: Error dequoting file name\n"), err_name, args[i]);
+			xerror(_("%s: '%s': Error escaping file name\n"), err_name, args[i]);
 			continue;
 		}
 
@@ -2168,9 +2168,9 @@ bulk_rename(char **args)
 	for (i = 1; args[i]; i++) {
 		/* Dequote file name, if necessary */
 		if (strchr(args[i], '\\')) {
-			char *deq_file = dequote_str(args[i], 0);
+			char *deq_file = unescape_str(args[i], 0);
 			if (!deq_file) {
-				xerror(_("br: %s: Error dequoting file name\n"), args[i]);
+				xerror(_("br: '%s': Error escaping file name\n"), args[i]);
 				continue;
 			}
 

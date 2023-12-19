@@ -679,7 +679,7 @@ set_file_perms(char **args)
 	for (i = 1; args[i]; i++) {
 		if (!strchr(args[i], '\\'))
 			continue;
-		char *t = dequote_str(args[i], 0);
+		char *t = unescape_str(args[i], 0);
 		if (t) {
 			free(args[i]);
 			args[i] = t;
@@ -1927,9 +1927,9 @@ properties_function(char **args, const int follow_link)
 
 	for (i = 0; args[i]; i++) {
 		if (strchr(args[i], '\\')) {
-			char *deq_file = dequote_str(args[i], 0);
+			char *deq_file = unescape_str(args[i], 0);
 			if (!deq_file) {
-				xerror(_("p: '%s': Error dequoting file name\n"), args[i]);
+				xerror(_("p: '%s': Cannot unescape file name\n"), args[i]);
 				exit_status = EXIT_FAILURE;
 				continue;
 			}

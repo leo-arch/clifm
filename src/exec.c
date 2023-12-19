@@ -363,7 +363,7 @@ export_var_function(char **args)
 	for (i = 0; args[i]; i++) {
 		/* ARG might have been escaped by parse_input_str(), in the command
 		 * and parameter substitution block. Let's deescape it. */
-		char *ds = dequote_str(args[i], 0);
+		char *ds = unescape_str(args[i], 0);
 		if (!ds) {
 			xerror("%s\n", _("export: Error dequoting argument"));
 			status = EXIT_FAILURE;
@@ -1028,7 +1028,7 @@ toggle_exec_func(char **args)
 	for (i = 1; args[i]; i++) {
 		struct stat attr;
 		if (strchr(args[i], '\\')) {
-			char *tmp = dequote_str(args[i], 0);
+			char *tmp = unescape_str(args[i], 0);
 			if (tmp) {
 				xstrsncpy(args[i], tmp, strlen(tmp) + 1);
 				free(tmp);
@@ -1338,7 +1338,7 @@ expand_and_deescape(char **arg, char **deq_str)
 
 	/* Deescape the string (only if file name) */
 	if (strchr(*arg, '\\'))
-		*deq_str = dequote_str(*arg, 0);
+		*deq_str = unescape_str(*arg, 0);
 }
 
 static inline int
@@ -1456,7 +1456,7 @@ check_auto_second(char **args)
 		return (-1);
 
 	if (strchr(tmp, '\\')) {
-		char *dstr = dequote_str(tmp, 0);
+		char *dstr = unescape_str(tmp, 0);
 		if (dstr) {
 			free(tmp);
 			tmp = dstr;
@@ -1793,7 +1793,7 @@ is_path(char *str)
 	if (!str || !*str)
 		return 0;
 	if (strchr(str, '\\')) {
-		char *p = dequote_str(str, 0);
+		char *p = unescape_str(str, 0);
 		if (!p)
 			return 0;
 		int ret = access(p, F_OK);

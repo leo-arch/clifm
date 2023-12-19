@@ -119,7 +119,7 @@ get_newname(const char *_prompt, char *old_name, int *quoted)
 	int poffset_bk = prompt_offset;
 	prompt_offset = 3;
 
-	char *n = (old_name && *old_name) ? dequote_str(old_name, 0) : (char *)NULL;
+	char *n = (old_name && *old_name) ? unescape_str(old_name, 0) : (char *)NULL;
 	char *input = secondary_prompt((_prompt && *_prompt) ? _prompt : "> ",
 		n ? n : (char *)NULL);
 	free(n);
@@ -139,7 +139,7 @@ get_newname(const char *_prompt, char *old_name, int *quoted)
 		goto END;
 	}
 
-	char *deq = dequote_str(p, 0);
+	char *deq = unescape_str(p, 0);
 	char *tmp = deq ? deq : p;
 
 	size_t len = strlen(tmp);
@@ -982,10 +982,10 @@ new_instance(char *dir, const int sudo)
 		return errno;
 #endif /* !__HAIKU__ */
 
-	char *deq_dir = dequote_str(dir, 0);
+	char *deq_dir = unescape_str(dir, 0);
 	if (!deq_dir) {
 		free(_sudo);
-		xerror(_("%s: '%s': Error dequoting file name\n"), PROGRAM_NAME, dir);
+		xerror(_("%s: '%s': Cannot escape file name\n"), PROGRAM_NAME, dir);
 		return EXIT_FAILURE;
 	}
 

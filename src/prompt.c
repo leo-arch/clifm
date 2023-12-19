@@ -1218,7 +1218,7 @@ set_prompt(char *name)
 		return EXIT_FAILURE;
 	}
 
-	char *p = dequote_str(name, 0);
+	char *p = unescape_str(name, 0);
 	if (!p) {
 		xerror(_("prompt: %s: Error dequoting string\n"), name);
 		return EXIT_FAILURE;

@@ -350,7 +350,7 @@ get_workspace_by_name(char *name, const int check_current)
 
 	/* CHECK_CURRENT is zero when coming from unset_workspace(), in which
 	 * case name is already dequoted */
-	char *p = check_current == 1 ? dequote_str(name, 0) : (char *)NULL;
+	char *p = check_current == 1 ? unescape_str(name, 0) : (char *)NULL;
 	char *q = p ? p : name;
 
 	int n = MAX_WS;
@@ -377,9 +377,9 @@ unset_workspace(char *str)
 {
 	int n = -1;
 
-	char *name = dequote_str(str, 0);
+	char *name = unescape_str(str, 0);
 	if (!name) {
-		xerror("ws: '%s': Error dequoting name\n", str);
+		xerror("ws: '%s': Error unescaping name\n", str);
 		return EXIT_FAILURE;
 	}
 
@@ -654,7 +654,7 @@ backdir(char* str)
 	if (help_or_root(str) == EXIT_SUCCESS)
 		return EXIT_SUCCESS;
 
-	char *deq_str = str ? dequote_str(str, 0) : (char *)NULL;
+	char *deq_str = str ? unescape_str(str, 0) : (char *)NULL;
 	if (str) {
 		int ret = backdir_directory(deq_str, str);
 		if (ret != BD_CONTINUE) {
@@ -808,7 +808,7 @@ change_to_path(char *new_path, const int cd_flag)
 	}
 
 	if (strchr(new_path, '\\')) {
-		char *deq_path = dequote_str(new_path, 0);
+		char *deq_path = unescape_str(new_path, 0);
 		if (deq_path) {
 			xstrsncpy(new_path, deq_path, strlen(deq_path) + 1);
 			free(deq_path);

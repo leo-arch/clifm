@@ -345,7 +345,7 @@ static int
 bm_open(char **cmd)
 {
 	int exit_status = EXIT_FAILURE;
-	char *p = dequote_str(cmd[1], 0);
+	char *p = unescape_str(cmd[1], 0);
 	if (!p)
 		p = cmd[1];
 
@@ -489,7 +489,7 @@ bookmark_add(char *file, char *name, char *shortcut)
 		return EXIT_FAILURE;
 
 	int exit_status = EXIT_FAILURE;
-	char *p = dequote_str(name, 0);
+	char *p = unescape_str(name, 0);
 	char *n = p ? p : name;
 	char *q = (char *)NULL;
 	char *s = (char *)NULL;
@@ -498,7 +498,7 @@ bookmark_add(char *file, char *name, char *shortcut)
 		goto ERROR;
 
 	if (shortcut) {
-		q = dequote_str(shortcut, 0);
+		q = unescape_str(shortcut, 0);
 		s = q ? q : shortcut;
 
 		if (check_bm_shortcut(s, 1) != -1)
@@ -561,7 +561,7 @@ add_bookmark(char **cmd)
 		return EXIT_SUCCESS;
 	}
 
-	char *p = dequote_str(cmd[0], 0);
+	char *p = unescape_str(cmd[0], 0);
 	if (!p) {
 		xerror(_("bookmarks: '%s': Error dequoting file name\n"), cmd[0]);
 		return EXIT_FAILURE;
@@ -588,7 +588,7 @@ mark_bookmarks_for_deletion(char **args, int *exit_status)
 	size_t i, counter = 0;
 
 	for (i = 0; args[i]; i++) {
-		char *p = dequote_str(args[i], 0);
+		char *p = unescape_str(args[i], 0);
 		char *name = p ? p : args[i];
 		int index = -1;
 

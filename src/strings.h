@@ -31,7 +31,6 @@
 
 __BEGIN_DECLS
 
-char *dequote_str(char *text, int mt);
 char *escape_str(const char *str);
 char *gen_rand_str(const size_t len);
 char *get_last_chr(char *str, const char c, const int len);
@@ -50,6 +49,7 @@ char *strbtw(char *str, const char a, const char b);
 int  strcntchr(const char *str, const char c);
 int  strcntchrlst(const char *str, const char c);
 int  u8truncstr(char *restrict str, size_t max);
+char *unescape_str(char *text, int mt);
 size_t wc_xstrlen(const char *restrict str);
 char *xstrrpbrk(char *s, const char *accept);
 

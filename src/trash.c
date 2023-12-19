@@ -513,7 +513,7 @@ remove_from_trash_params(char **args)
 
 		char *d = (char *)NULL;
 		if (strchr(args[i], '\\'))
-			d = dequote_str(args[i], 0);
+			d = unescape_str(args[i], 0);
 
 		if (remove_file_from_trash(d ? d : args[i]) != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
@@ -865,7 +865,7 @@ untrash_files(char **args)
 	for (i = 0; args[i]; i++) {
 		char *d = (char *)NULL;
 		if (strchr(args[i], '\\'))
-			d = dequote_str(args[i], 0);
+			d = unescape_str(args[i], 0);
 
 		if (untrash_file(d ? d : args[i]) != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
@@ -1151,14 +1151,14 @@ print_trashed_files(char **args, const int *trashed, const size_t trashed_n)
 
 		char *p = args[trashed[i]];
 		if (strchr(args[trashed[i]], '\\')
-		&& !(p = dequote_str(args[trashed[i]], 0)) ) {
-			xerror("trash: %s: Error dequoting file name\n", args[trashed[i]]);
+		&& !(p = unescape_str(args[trashed[i]], 0)) ) {
+			xerror("trash: '%s': Error unescaping file name\n", args[trashed[i]]);
 			continue;
 		}
 
 		char *tmp = abbreviate_file_name(p);
 		if (!tmp) {
-			xerror("trash: %s: Error abbreviating file name\n", p);
+			xerror("trash: '%s': Error abbreviating file name\n", p);
 			if (p && p != args[trashed[i]])
 				free(p);
 			continue;
@@ -1191,9 +1191,9 @@ trash_files_args(char **args)
 	int *successfully_trashed = xnmalloc(i + 1, sizeof(int));
 
 	for (i = 1; args[i]; i++) {
-		char *deq_file = dequote_str(args[i], 0);
+		char *deq_file = unescape_str(args[i], 0);
 		if (!deq_file) {
-			xerror("trash: %s: Error dequoting file\n", args[i]);
+			xerror("trash: '%s': Error unescaping file\n", args[i]);
 			continue;
 		}
 

@@ -698,7 +698,7 @@ gen_rand_str(const size_t len)
 }
 
 /* Removes end of line char and quotes (single and double) from STR.
- * Returns a pointer to the modified STR if the result is non-blank
+ * Returns a pointer to the modified STR if the result is non-blank,
  * or NULL. */
 char *
 remove_quotes(char *str)
@@ -1699,7 +1699,7 @@ expand_bm_name(char **name)
 {
 	size_t j;
 	int bm_exp = EXIT_FAILURE;
-	char *p = dequote_str(*name + 2, 0);
+	char *p = unescape_str(*name + 2, 0);
 	char *n = p ? p : *name + 2;
 
 	for (j = 0; j < bm_n; j++) {
@@ -2260,7 +2260,7 @@ expand_regex(char ***substr)
 		char *p = strchr((*substr)[i], '\\');
 		char *dstr = (char *)NULL;
 		if (p)
-			dstr = dequote_str((*substr)[i], 0);
+			dstr = unescape_str((*substr)[i], 0);
 
 		char *t = dstr ? dstr : (*substr)[i];
 
@@ -3260,10 +3260,10 @@ get_substr(char *str, const char ifs)
 	return dstr;
 }
 
-/* This function simply deescapes whatever escaped chars it founds in
+/* This function simply unescapes whatever escaped chars it founds in
  * TEXT. Returns a string containing TEXT without escape sequences. */
 char *
-dequote_str(char *text, int mt)
+unescape_str(char *text, int mt)
 {
 	UNUSED(mt);
 	if (!text || !*text)

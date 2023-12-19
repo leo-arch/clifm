@@ -1057,7 +1057,7 @@ set_colorscheme(char *arg)
 	if (!arg || !*arg)
 		return EXIT_FAILURE;
 
-	char *p = dequote_str(arg, 0);
+	char *p = unescape_str(arg, 0);
 	char *q = p ? p : arg;
 
 	size_t i, cs_found = 0;

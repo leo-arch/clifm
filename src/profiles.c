@@ -500,7 +500,7 @@ rename_profile(char **args)
 		return EXIT_FAILURE;
 	}
 
-	char *p = dequote_str(args[0], 0);
+	char *p = unescape_str(args[0], 0);
 	if (p) {
 		free(args[0]);
 		args[0] = p;
@@ -522,7 +522,7 @@ rename_profile(char **args)
 		return errno;
 	}
 
-	p = dequote_str(args[1], 0);
+	p = unescape_str(args[1], 0);
 	if (p) {
 		free(args[1]);
 		args[1] = p;
@@ -574,7 +574,7 @@ profile_function(char **args)
 		return print_profiles();
 
 	if (args[2]) {
-		char *p = dequote_str(args[2], 0);
+		char *p = unescape_str(args[2], 0);
 		if (p) {
 			free(args[2]);
 			args[2] = p;

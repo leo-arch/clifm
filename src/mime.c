@@ -972,7 +972,7 @@ mime_open_with_tab(char *filename, const char *prefix, const int only_names)
 	}
 
 	if (strchr(name ? name : filename, '\\')) {
-		deq_file = dequote_str(name ? name : filename, 0);
+		deq_file = unescape_str(name ? name : filename, 0);
 		if (!deq_file)
 			goto FAIL;
 		free(name);
@@ -1292,7 +1292,7 @@ join_and_run(char **args, char *name)
 		return run_cmd_noargs(args[0], name);
 
 	/* Command is a quoted string: 'ow FILE "CMD ARG ARG..."' */
-	char *deq_str = dequote_str(args[0], 0);
+	char *deq_str = unescape_str(args[0], 0);
 	char **ss = split_str(deq_str ? deq_str : args[0], NO_UPDATE_ARGS);
 	free(deq_str);
 
@@ -1328,7 +1328,7 @@ mime_open_with(char *filename, char **args)
 	size_t appsn = 0;
 
 	if (strchr(filename, '\\')) {
-		deq_file = dequote_str(filename, 0);
+		deq_file = unescape_str(filename, 0);
 		name = realpath(deq_file, NULL);
 		free(deq_file);
 		deq_file = (char *)NULL;
@@ -1591,7 +1591,7 @@ mime_info(char *arg, char **fpath, char **deq)
 	}
 
 	if (strchr(arg, '\\')) {
-		*deq = dequote_str(arg, 0);
+		*deq = unescape_str(arg, 0);
 		*fpath = realpath(*deq, NULL);
 		free(*deq);
 		*deq = (char *)NULL;
@@ -1627,7 +1627,7 @@ get_open_file_path(char **args, char **fpath, char **deq)
 
 	/* Only dequote the file name if coming from the mime command */
 	if (*args[0] == 'm' && strchr(f, '\\')) {
-		*deq = dequote_str(f, 0);
+		*deq = unescape_str(f, 0);
 		*fpath = realpath(*deq, NULL);
 		free(*deq);
 		*deq = (char *)NULL;
