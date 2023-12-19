@@ -1151,10 +1151,8 @@ list_mounted_files(char *mountpoint)
 	add_to_jumpdb(workspaces[cur_ws].path);
 
 	int exit_status = EXIT_SUCCESS;
-	if (conf.autols) {
-		free_dirlist();
-		if (list_dir() != EXIT_SUCCESS)
-			exit_status = EXIT_FAILURE;
+	if (conf.autols == 1) {
+		reload_dirlist();
 		add_to_dirhist(workspaces[cur_ws].path);
 	}
 

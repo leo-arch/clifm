@@ -915,8 +915,9 @@ untrash_function(char **comm)
 	/* Get trashed files */
 	struct dirent **trash_files = (struct dirent **)NULL;
 	int trash_files_n = scandir(trash_files_dir, &trash_files,
-	    skip_files, (conf.unicode) ? alphasort : (conf.case_sens_list)
+	    skip_files, conf.unicode ? alphasort : conf.case_sens_list
 			? xalphasort : alphasort_insensitive);
+
 	if (trash_files_n <= 0) {
 		puts(_("trash: No trashed files"));
 
@@ -959,19 +960,17 @@ untrash_function(char **comm)
 	snprintf(up, sizeof(up), "\001%s\002>\001%s\002 ", mi_c, tx_c);
 
 	int undel_n = 0;
-	char *line = (char *)NULL, **undel_elements = (char **)NULL;
+	char *line = (char *)NULL;
 	while (!line)
 		line = rl_no_hist(up);
 
-	undel_elements = get_substr(line, ' ');
+	char **undel_elements = get_substr(line, ' ');
 	free(line);
-	line = (char *)NULL;
-	if (undel_elements) {
-		for (i = 0; undel_elements[i]; i++)
-			undel_n++;
-	} else {
+
+	if (!undel_elements)
 		return EXIT_FAILURE;
-	}
+
+	for (undel_n = 0; undel_elements[undel_n]; undel_n++);
 
 	/* First check for quit, *, and non-number args */
 	int free_and_return = 0, reload_files = 0;
@@ -979,6 +978,7 @@ untrash_function(char **comm)
 	for (i = 0; i < (size_t)undel_n; i++) {
 		if (strcmp(undel_elements[i], "q") == 0) {
 			free_and_return = reload_files = 1;
+
 		} else if (strcmp(undel_elements[i], "*") == 0) {
 			size_t j;
 			for (j = 0; j < (size_t)trash_files_n; j++)
@@ -986,6 +986,7 @@ untrash_function(char **comm)
 					exit_status = EXIT_FAILURE;
 
 			free_and_return = 1;
+
 		} else if (!is_number(undel_elements[i])) {
 			xerror(_("undel: %s: Invalid ELN\n"), undel_elements[i]);
 			exit_status = EXIT_FAILURE;
@@ -995,13 +996,12 @@ untrash_function(char **comm)
 
 	/* Free and return if any of the above conditions is true. */
 	if (free_and_return == 1) {
-		size_t j = 0;
-		for (j = 0; j < (size_t)undel_n; j++)
-			free(undel_elements[j]);
+		for (i = 0; i < (size_t)undel_n; i++)
+			free(undel_elements[i]);
 		free(undel_elements);
 
-		for (j = 0; j < (size_t)trash_files_n; j++)
-			free(trash_files[j]);
+		for (i = 0; i < (size_t)trash_files_n; i++)
+			free(trash_files[i]);
 		free(trash_files);
 
 		if (conf.autols == 1 && reload_files == 1)
@@ -1036,12 +1036,9 @@ untrash_function(char **comm)
 
 	/* If some trashed file still remains, reload the undel screen */
 	filesn_t n = count_dir(trash_files_dir, NO_CPOP);
-	if (n <= 2)
-		trash_n = 0;
-	else
-		trash_n = (size_t)n;
+	trash_n = (n <= 2) ? 0 : (size_t)n;
 
-	if (trash_n)
+	if (trash_n > 0)
 		untrash_function(comm);
 
 	return exit_status;

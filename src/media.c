@@ -566,7 +566,7 @@ xgetmntinfo_sun(void)
 /* If MODE is MEDIA_MOUNT (used by the 'media' command) list mounted and
  * unmounted devices allowing the user to mount or unmount any of them.
  * If MODE is rather MEDIA_LIST (used by the 'mp' command), just list
- * available mountpoints and allow the user to cd into the selected one */
+ * available mountpoints and allow the user to cd into the selected one. */
 int
 media_menu(const int mode)
 {
@@ -673,7 +673,7 @@ media_menu(const int mode)
 #endif /* HAVE_PROC_MOUNTS */
 
 	if (xchdir(media[n].mnt, SET_TITLE) != EXIT_SUCCESS) {
-		xerror("%s: %s: %s\n", PROGRAM_NAME, media[n].mnt, strerror(errno));
+		xerror("%s: '%s': %s\n", PROGRAM_NAME, media[n].mnt, strerror(errno));
 		exit_status = EXIT_FAILURE;
 		goto EXIT;
 	}
