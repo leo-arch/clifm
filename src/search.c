@@ -204,7 +204,7 @@ chdir_search_path(char **search_path, const char *arg)
 	if (strchr(*search_path, '\\')) {
 		char *deq_dir = unescape_str(*search_path, 0);
 		if (!deq_dir) {
-			xerror(_("search: '%s': Error dequoting file name\n"), arg);
+			xerror(_("search: %s: Error unescaping file name\n"), arg);
 			return EXIT_FAILURE;
 		}
 

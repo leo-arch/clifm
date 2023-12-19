@@ -583,7 +583,7 @@ static int
 backdir_directory(char *dir, const char *str)
 {
 	if (!dir) {
-		xerror(_("bd: '%s': Error dequoting string\n"), str);
+		xerror(_("bd: '%s': Error unescaping string\n"), str);
 		return EXIT_FAILURE;
 	}
 
@@ -649,7 +649,7 @@ help_or_root(const char *str)
 
 /* Change to parent directory matching STR */
 int
-backdir(char* str)
+backdir(char *str)
 {
 	if (help_or_root(str) == EXIT_SUCCESS)
 		return EXIT_SUCCESS;

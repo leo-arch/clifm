@@ -563,7 +563,7 @@ add_bookmark(char **cmd)
 
 	char *p = unescape_str(cmd[0], 0);
 	if (!p) {
-		xerror(_("bookmarks: '%s': Error dequoting file name\n"), cmd[0]);
+		xerror(_("bookmarks: '%s': Error unescaping file name\n"), cmd[0]);
 		return EXIT_FAILURE;
 	}
 

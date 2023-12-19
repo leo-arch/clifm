@@ -2170,7 +2170,7 @@ bulk_rename(char **args)
 		if (strchr(args[i], '\\')) {
 			char *deq_file = unescape_str(args[i], 0);
 			if (!deq_file) {
-				xerror(_("br: '%s': Error escaping file name\n"), args[i]);
+				xerror(_("br: '%s': Error unescaping file name\n"), args[i]);
 				continue;
 			}
 

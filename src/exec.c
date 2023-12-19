@@ -365,7 +365,7 @@ export_var_function(char **args)
 		 * and parameter substitution block. Let's deescape it. */
 		char *ds = unescape_str(args[i], 0);
 		if (!ds) {
-			xerror("%s\n", _("export: Error dequoting argument"));
+			xerror("%s\n", _("export: Error unescaping argument"));
 			status = EXIT_FAILURE;
 			continue;
 		}

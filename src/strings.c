@@ -2427,7 +2427,7 @@ gen_full_line(char **str, const int fusedcmd_ok)
 	/* If ";cmd" or ":cmd" the whole input line will be send to
 	 * exec_cmd() and will be executed by the system shell via
 	 * execl(). Since we don't run split_str() here, dequoting
-	 * and deescaping is performed directly by the system shell. */
+	 * and unescaping is performed directly by the system shell. */
 	return cmd;
 }
 
@@ -2514,7 +2514,7 @@ check_chained_cmds(char *str)
  * This function is one of the keys of CliFM. It will perform a series of
  * actions:
  * 1) Take the string stored by readline and get its substrings without
- * leading and trailing spaces (dequoting/deescaping if necessary).
+ * leading and trailing spaces (dequoting/unescaping if necessary).
  * 2) In case of user defined variables (var=value), it will pass the
  * whole string to exec_cmd(), which will take care of storing the
  * variable;

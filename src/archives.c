@@ -692,14 +692,14 @@ get_archive_filename(void)
  * file named OUT_FILE. If MODE is 'd', extract, test or get
  * information about IN_FILE. OP is used only for the 'd' mode: it
  * tells if we have one or multiple file. Returns zero on success and
- * one on error */
+ * one on error. */
 static int
 zstandard(char *in_file, char *out_file, const char mode, const char op)
 {
 	int exit_status = EXIT_SUCCESS;
 	char *deq_file = unescape_str(in_file, 0);
 	if (!deq_file) {
-		xerror(_("archiver: '%s': Error dequoting file name\n"), in_file);
+		xerror(_("archiver: '%s': Error unescaping file name\n"), in_file);
 		return EXIT_FAILURE;
 	}
 
