@@ -63,6 +63,20 @@ ask_user_for_path(void)
 	xrename = rl_nohist = 0;
 	prompt_offset = poffset_bk;
 
+	if (!ext_path)
+		return (char *)NULL;
+
+	char *p = (char *)NULL;
+	if ((*ext_path == '"' || *ext_path == '\'')
+	&& (p = remove_quotes(ext_path)))
+		memmove(ext_path, p, strlen(p) + 1);
+
+	char *unesc_path = unescape_str(ext_path, 0);
+	if (unesc_path) {
+		free(ext_path);
+		ext_path = unesc_path;
+	}
+
 	return ext_path;
 }
 
@@ -1035,7 +1049,6 @@ extract_to_dir_others(char **args)
 			exit_status = EXIT_FAILURE;
 
 		free(ext_path);
-		ext_path = (char *)NULL;
 	}
 
 	return exit_status;
