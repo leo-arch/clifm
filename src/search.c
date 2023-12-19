@@ -680,7 +680,9 @@ err_regex_no_match(const int regex_found, const char *arg)
 	if (input && input != rl_line_buffer) {
 		/* Input string contains at least two slashes. It looks like a path:
 		 * let's err like it was. */
-		xerror("cd: '%s': %s\n", rl_line_buffer, strerror(ENOENT));
+		char *p = dequote_str(rl_line_buffer, 0);
+		xerror("cd: '%s': %s\n", p ? p : rl_line_buffer, strerror(ENOENT));
+		free(p);
 	} else if (search_flags & NO_GLOB_CHAR) {
 		fputs(_("search: No matches found\n"), stderr);
 	} else {
@@ -1002,7 +1004,9 @@ err_glob_no_match(const char *arg)
 	if (input && input != rl_line_buffer) {
 		/* Input string contains two slashes: it looks like a path, so let's
 		 * err like it was. */
-		xerror("cd: '%s': %s\n", rl_line_buffer, strerror(ENOENT));
+		char *p = dequote_str(rl_line_buffer, 0);
+		xerror("cd: '%s': %s\n", p ? p : rl_line_buffer, strerror(ENOENT));
+		free(p);
 		return EXIT_FAILURE;
 	}
 
