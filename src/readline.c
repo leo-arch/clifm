@@ -978,47 +978,36 @@ is_quote_char(const char c)
 char *
 rl_no_hist(const char *prompt)
 {
-	int bk = conf.suggestions;
-	conf.suggestions = 0;
-	rl_nohist = rl_notab = kbind_busy = 1;
-//	rl_inhibit_completion = 1;
-
-	char *input = readline(prompt);
-
-//	rl_inhibit_completion = 0;
-	rl_notab = rl_nohist = kbind_busy = 0;
-	conf.suggestions = bk;
+	rl_nohist = rl_notab = 1;
+	char *input = secondary_prompt(prompt, NULL);
+	rl_nohist = rl_notab = 0;
 
 	if (!input) /* Ctrl-d */
 		return savestring("q", 1);
 
-	if (input) {
-		if (!*input) {
-			free(input);
-			return (char *)NULL;
-		}
-
-		/* Do we have some non-blank char? */
-		int blank = 1;
-		char *p = input;
-
-		while (*p) {
-			if (*p != ' ' && *p != '\n' && *p != '\t') {
-				blank = 0;
-				break;
-			}
-			p++;
-		}
-
-		if (blank == 1) {
-			free(input);
-			return (char *)NULL;
-		}
-
-		return input;
+	if (!*input) {
+		free(input);
+		return (char *)NULL;
 	}
 
-	return (char *)NULL;
+	/* Do we have some non-blank char? */
+	int blank = 1;
+	char *p = input;
+
+	while (*p) {
+		if (*p != ' ' && *p != '\n' && *p != '\t') {
+			blank = 0;
+			break;
+		}
+		p++;
+	}
+
+	if (blank == 1) {
+		free(input);
+		return (char *)NULL;
+	}
+
+	return input;
 }
 
 /* Used by readline to check if a char in the string being completed is
