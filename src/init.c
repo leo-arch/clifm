@@ -703,10 +703,12 @@ get_user_data_env(void)
 
 	tmp_user.gid = getgid();
 	tmp_user.ngroups = 0;
-	if (tmp_user.name && tmp_user.gid != (gid_t)-1)
-		tmp_user.groups = get_user_groups(tmp_user.name, tmp_user.gid, &tmp_user.ngroups);
-	else
+	if (tmp_user.name && tmp_user.gid != (gid_t)-1) {
+		tmp_user.groups = get_user_groups(tmp_user.name,
+			tmp_user.gid, &tmp_user.ngroups);
+	} else {
 		tmp_user.groups = (gid_t *)NULL;
+	}
 
 	char *p = xgetenv("CLIFM_SHELL", 0);
 	t = sec_env == 0 ? (p ? p : xgetenv("SHELL", 0)) : (char *)NULL;

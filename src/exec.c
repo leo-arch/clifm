@@ -30,6 +30,15 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#ifndef _BE_POSIX
+# include <paths.h>
+# ifndef _PATH_DEVNULL
+#  define _PATH_DEVNULL "/dev/null"
+# endif /* _PATH_DEVNULL */
+#else
+# define _PATH_DEVNULL "/dev/null"
+#endif /* !_BE_POSIX */
+
 #ifdef __OpenBSD__
 typedef char *rl_cpvfunc_t;
 # include <ereadline/readline/readline.h>
@@ -219,7 +228,12 @@ launch_execv(char **cmd, const int bg, const int xflags)
 		}
 
 		if (xflags) {
-			int fd = open("/dev/null", O_WRONLY, 0200);
+			int fd = open(_PATH_DEVNULL, O_WRONLY, 0200);
+			if (fd == -1) {
+				xerror("%s: '%s': %s\n", PROGRAM_NAME,
+					_PATH_DEVNULL, strerror(errno));
+				_exit(errno);
+			}
 
 			if (xflags & E_NOSTDIN)
 				dup2(fd, STDIN_FILENO);

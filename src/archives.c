@@ -30,6 +30,15 @@
 #include <string.h>
 #include <readline/readline.h>
 
+#if defined(_NO_MAGIC) && !defined(_BE_POSIX)
+# include <paths.h>
+# ifndef _PATH_DEVNULL
+#  define _PATH_DEVNULL "/dev/null"
+# endif /* _PATH_DEVNULL */
+#else
+# define _PATH_DEVNULL "/dev/null"
+#endif /* _NO_MAGIC && !_BE_POSIX */
+
 #include "aux.h"
 #include "checks.h"
 #include "exec.h"
@@ -464,9 +473,9 @@ check_iso(char *file)
 		return (-1);
 	}
 
-	FILE *fp_err = fopen("/dev/null", "w");
+	FILE *fp_err = fopen(_PATH_DEVNULL, "w");
 	if (!fp_err) {
-		xerror("archiver: '/dev/null': %s\n", strerror(errno));
+		xerror("archiver: '%s': %s\n", _PATH_DEVNULL, strerror(errno));
 		fclose(fp_out);
 		unlink(tmp_file);
 		return (-1);

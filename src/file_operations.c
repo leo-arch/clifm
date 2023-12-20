@@ -573,7 +573,7 @@ RUN: {
 
 /* Open a file via OPENER, if set, or via LIRA. If not compiled with
  * Lira support, fallback to open (Haiku), or xdg-open. Returns zero
- * on success and one on failure */
+ * on success or one on failure. */
 int
 open_file(char *file)
 {

@@ -36,6 +36,15 @@
 # include <magic.h>
 #endif /* !_NO_MAGIC */
 
+#if defined(_NO_MAGIC) && !defined(_BE_POSIX)
+# include <paths.h>
+# ifndef _PATH_DEVNULL
+#  define _PATH_DEVNULL "/dev/null"
+# endif /* _PATH_DEVNULL */
+#else
+# define _PATH_DEVNULL "/dev/null"
+#endif /* _NO_MAGIC && !_BE_POSIX */
+
 #ifndef _NO_ARCHIVING
 #include "archives.h"
 #endif /* !_NO_ARCHIVING */
@@ -395,9 +404,9 @@ get_mime(char *file)
 		return (char *)NULL;
 	}
 
-	FILE *fp_err = fopen("/dev/null", "w");
+	FILE *fp_err = fopen(_PATH_DEVNULL, "w");
 	if (!fp_err) {
-		xerror("%s: '/dev/null': %s\n", err_name, strerror(errno));
+		xerror("%s: '%s': %s\n", err_name, _PATH_DEVNULL, strerror(errno));
 		goto END;
 	}
 
