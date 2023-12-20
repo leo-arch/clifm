@@ -935,6 +935,9 @@ untrash_function(char **comm)
 	|| strcmp(comm[1], "all") == 0))
 		return untrash_all(&trash_files, trash_files_n);
 
+	if (conf.clear_screen == 1)
+		CLEAR;
+
 	/* List trashed files */
 	printf(_("%sTrashed files%s\n\n"), BOLD, df_c);
 	size_t i;
@@ -1038,8 +1041,11 @@ untrash_function(char **comm)
 	filesn_t n = count_dir(trash_files_dir, NO_CPOP);
 	trash_n = (n <= 2) ? 0 : (size_t)n;
 
-	if (trash_n > 0)
+	if (trash_n > 0) {
+		if (conf.clear_screen == 1)
+			CLEAR;
 		untrash_function(comm);
+	}
 
 	return exit_status;
 }
