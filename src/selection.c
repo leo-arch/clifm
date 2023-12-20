@@ -1062,9 +1062,8 @@ desel_entries(char **desel_elements, const size_t desel_n, const int desel_scree
 	if ((int)sel_n < 0)
 		sel_n = 0;
 
-	if (sel_n > 0) {
+	if (sel_n > 0)
 		sel_elements = xnrealloc(sel_elements, sel_n, sizeof(struct sel_t));
-	}
 
 	/* Deallocate local arrays. */
 	i = (int)desel_n;
@@ -1192,7 +1191,7 @@ handle_alpha_entry(const int i, const size_t desel_n, char **desel_elements)
 	return EXIT_FAILURE;
 }
 
-static inline int
+static int
 valid_desel_eln(const int i, const size_t desel_n, char **desel_elements)
 {
 	int n = atoi(desel_elements[i]);
@@ -1206,7 +1205,7 @@ valid_desel_eln(const int i, const size_t desel_n, char **desel_elements)
 	return EXIT_SUCCESS;
 }
 
-static inline int
+static int
 end_deselect(const int err, char ***args)
 {
 	int exit_status = EXIT_SUCCESS;
@@ -1228,9 +1227,9 @@ end_deselect(const int err, char ***args)
 	get_sel_files();
 
 	/* There is still some selected file and we are in the desel
-	 * screen: reload this screen */
-	if (sel_n && argsbk == 0 && deselect(*args) != 0)
-		exit_status = EXIT_FAILURE;
+	 * screen: reload this screen. */
+	if (sel_n > 0 && argsbk == 0)
+		return deselect(*args);
 
 	if (err)
 		return EXIT_FAILURE;
@@ -1248,6 +1247,29 @@ end_deselect(const int err, char ***args)
 	return exit_status;
 }
 
+static int
+handle_desel_args(char **args)
+{
+	if (strcmp(args[1], "*") == 0 || strcmp(args[1], "a") == 0
+	|| strcmp(args[1], "all") == 0) {
+		size_t n = sel_n;
+		int ret = deselect_all();
+
+		if (conf.autols == 1)
+			reload_dirlist();
+
+		if (ret == EXIT_SUCCESS) {
+			print_reload_msg(_("%zu file(s) deselected\n"), n);
+			print_reload_msg(_("0 total selected file(s)\n"));
+		}
+		return ret;
+
+	} else {
+		int err = deselect_from_args(args);
+		return end_deselect(err, &args);
+	}
+}
+
 int
 deselect(char **args)
 {
@@ -1259,26 +1281,10 @@ deselect(char **args)
 		return EXIT_SUCCESS;
 	}
 
-	int err = 0;
+	if (args[1] && *args[1])
+		return handle_desel_args(args);
 
-	if (args[1] && *args[1]) {
-		if (strcmp(args[1], "*") == 0 || strcmp(args[1], "a") == 0
-		|| strcmp(args[1], "all") == 0) {
-			size_t n = sel_n;
-			int ret = deselect_all();
-			if (conf.autols == 1)
-				reload_dirlist();
-			if (ret == EXIT_SUCCESS) {
-				print_reload_msg(_("%zu file(s) deselected\n"), n);
-				print_reload_msg(_("0 total selected file(s)\n"));
-			}
-			return ret;
-		} else {
-			err = deselect_from_args(args);
-			return end_deselect(err, &args);
-		}
-	}
-
+	/* No arguments: print the deselection screen. */
 	print_selected_files();
 
 	size_t desel_n = 0;
@@ -1294,5 +1300,5 @@ deselect(char **args)
 	}
 
 	desel_entries(desel_elements, desel_n, 1);
-	return end_deselect(err, &args);
+	return end_deselect(0, &args);
 }
