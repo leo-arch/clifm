@@ -1303,7 +1303,7 @@ parse_cmdline_args(const int argc, char **argv)
 			fprintf(stderr, "%s: icons: %s\n", PROGRAM_NAME, _(NOT_AVAILABLE));
 			exit(EXIT_FAILURE);
 #endif /* !_NO_ICONS */
-		case 'i': set_alt_trash_dir(optarg); break;
+		case 'I': set_alt_trash_dir(optarg); break;
 		case 'j': set_stat(optc, optarg); break;
 		case 'J': set_stat(optc, optarg); break;
 		case 'k': set_alt_kbinds_file(optarg); break;

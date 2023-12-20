@@ -1163,7 +1163,7 @@ free_desel_elements(const size_t desel_n, char ***desel_elements)
 	free(*desel_elements);
 }
 
-static inline int
+static int
 handle_alpha_entry(const int i, const size_t desel_n, char **desel_elements)
 {
 	if (*desel_elements[i] == 'e' && !desel_elements[i][1]) {
