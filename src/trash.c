@@ -565,6 +565,9 @@ remove_from_trash(char **args)
 		xerror("trash: '%s': %s\n", trash_files_dir, strerror(errno));
 		return EXIT_FAILURE;
 	} else if (files_n > 0) {
+		if (conf.clear_screen == 1)
+			CLEAR;
+
 		printf(_("%sTrashed files%s\n\n"), BOLD, df_c);
 		for (i = 0; i < (size_t)files_n; i++) {
 			colors_list(trash_files[i]->d_name, (int)i + 1, NO_PAD,
