@@ -170,16 +170,58 @@ sanitize_shell_level(char *str)
 	return EXIT_SUCCESS;
 }
 
+/* Drop SUID/SGID privileges, if set. */
+static void
+drop_privs(void)
+{
+	uid_t ruid = getuid();
+	uid_t euid = geteuid();
+	gid_t rgid = getgid();
+	gid_t egid = getegid();
+
+	if (rgid != egid) {
+		int err = 0;
+#ifndef __linux__
+		setegid(rgid);
+		if (setgid(rgid) == -1) err = 1;
+#else
+		if (setregid(rgid, rgid) == -1) err = 1;
+#endif /* __linux__ */
+		if (err == 1 || setegid(egid) != -1 || getegid() != rgid) {
+			fprintf(stderr, _("%s: Error dropping group privileges. "
+				"Aborting.\n"), PROGRAM_NAME);
+			exit(EXIT_FAILURE);
+		}
+	}
+
+	if (ruid != euid) {
+		int err = 0;
+#ifndef __linux__
+		seteuid(ruid);
+		if (setuid(ruid) == -1) err = 1;
+#else
+		if (setreuid(ruid, ruid) == -1) err = 1;
+#endif /* __linux__ */
+		if (err == 1 || seteuid(euid) != -1 || geteuid() != ruid) {
+			fprintf(stderr, _("%s: Error dropping user privileges. "
+				"Aborting.\n"), PROGRAM_NAME);
+			exit(EXIT_FAILURE);
+		}
+	}
+}
+
 /* Sanitize the environment: set environ to NULL and then set a few
  * environment variables to get a minimally working environment.
  * Non-standard file descriptors are closed.
  * Core dumps are disabled.
+ * SUID/SGID privileges, if any, are dropped.
  * Umask is set to the most restrictive value: 0077. */
 int
 xsecure_env(const int mode)
 {
 	sanitize_file_descriptors();
 	disable_coredumps();
+	drop_privs();
 	umask(0077);
 
 	char *display = (char *)NULL,
