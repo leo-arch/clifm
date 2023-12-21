@@ -259,71 +259,68 @@ wx_parent_check(char *file)
 	return exit_status;
 }
 
+/* Empty the trash can. */
 static int
 trash_clear(void)
 {
-	struct dirent **trash_files = (struct dirent **)NULL;
-	int files_n = -1, exit_status = EXIT_SUCCESS;
-
-	if (xchdir(trash_files_dir, NO_TITLE) == -1) {
-		err(0, NOPRINT_PROMPT, "trash: '%s': %s\n",
-			trash_files_dir, strerror(errno));
-		return EXIT_FAILURE;
+	DIR *dir = opendir(trash_files_dir);
+	if (!dir) {
+		xerror("trash: '%s': %s\n", trash_files_dir, strerror(errno));
+		return errno;
 	}
 
-	files_n = scandir(trash_files_dir, &trash_files, skip_files, xalphasort);
+	int exit_status = EXIT_SUCCESS;
+	size_t n = 0;
+	struct dirent *ent;
 
-	if (!files_n) {
-		puts(_("trash: No trashed files"));
-		return EXIT_SUCCESS;
-	}
+	while ((ent = readdir(dir))) {
+		if (SELFORPARENT(ent->d_name))
+			continue;
 
-	int ret = EXIT_SUCCESS;
-	size_t i;
-	for (i = 0; i < (size_t)files_n; i++) {
-		size_t len = strlen(trash_files[i]->d_name) + 11;
+		int ret = EXIT_SUCCESS;
+
+		size_t len = strlen(ent->d_name) + 11;
 		char *info_file = xnmalloc(len, sizeof(char));
-		snprintf(info_file, len, "%s.trashinfo", trash_files[i]->d_name);
+		snprintf(info_file, len, "%s.trashinfo", ent->d_name);
 
-		char *file1 = (char *)NULL;
-		len = strlen(trash_files_dir) + strlen(trash_files[i]->d_name) + 2;
-		file1 = xnmalloc(len, sizeof(char));
-		snprintf(file1, len, "%s/%s", trash_files_dir, trash_files[i]->d_name);
+		len = strlen(trash_files_dir) + strlen(ent->d_name) + 2;
+		char *file1 = xnmalloc(len, sizeof(char));
+		snprintf(file1, len, "%s/%s", trash_files_dir, ent->d_name);
 
-		char *file2 = (char *)NULL;
 		len = strlen(trash_info_dir) + strlen(info_file) + 2;
-		file2 = xnmalloc(len, sizeof(char));
+		char *file2 = xnmalloc(len, sizeof(char));
 		snprintf(file2, len, "%s/%s", trash_info_dir, info_file);
 
-		char *tmp_cmd[] = {"rm", "-rf", "--", file1, file2, NULL};
-		ret = launch_execv(tmp_cmd, FOREGROUND, E_NOFLAG);
+		if (unlinkat(XAT_FDCWD, file1, 0) == -1) {
+			ret = errno;
+			xerror("trash: '%s': %s\n", file1, strerror(errno));
+		}
+		if (unlinkat(XAT_FDCWD, file2, 0) == -1) {
+			ret = errno;
+			xerror("trash: '%s': %s\n", file2, strerror(errno));
+		}
 
 		free(file1);
 		free(file2);
+		free(info_file);
 
 		if (ret != EXIT_SUCCESS) {
-			xerror(_("trash: '%s': Error removing trashed file\n"),
-				trash_files[i]->d_name);
+			xerror(_("trash: '%s': Error removing trashed file\n"), ent->d_name);
 			exit_status = ret;
 			/* If there is at least one error, return error */
 		}
 
-		free(info_file);
-		free(trash_files[i]);
+		n++;
 	}
 
-	free(trash_files);
+	closedir(dir);
 
-	if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
-		err(0, NOPRINT_PROMPT, "trash: '%s': %s\n",
-			workspaces[cur_ws].path, strerror(errno));
-		return EXIT_FAILURE;
-	}
-
-	if (ret == EXIT_SUCCESS) {
+	if (n == 0) {
+		puts(_("trash: No trashed files"));
+	} else if (exit_status == EXIT_SUCCESS) {
 		if (conf.autols == 1)
 			reload_dirlist();
-		print_reload_msg(_("Trash can emptied\n"));
+		print_reload_msg(_("Trash can emptied (%zu file(s) deleted)\n"), n);
 	}
 
 	return exit_status;
@@ -336,15 +333,14 @@ del_trash_file_and_exit(char **file_suffix, char **info_file)
 	char *trash_file = xnmalloc(len, sizeof(char));
 	snprintf(trash_file, len, "%s/%s", trash_files_dir, *file_suffix);
 
-	char *tmp_cmd[] = {"rm", "-rf", "--", trash_file, NULL};
-	int ret = launch_execv(tmp_cmd, FOREGROUND, E_NOFLAG);
-	free(trash_file);
-
-	if (ret != EXIT_SUCCESS) {
-		xerror(_("trash: '%s/%s': Failed removing trash file\nTry "
-			"removing it manually\n"), trash_files_dir, *file_suffix);
+	int ret = EXIT_SUCCESS;
+	if (unlinkat(XAT_FDCWD, trash_file, 0) == -1) {
+		ret = errno;
+		xerror(_("trash: '%s': %s\nTry removing the "
+			"file manually\n"), trash_file, strerror(errno));
 	}
 
+	free(trash_file);
 	free(*file_suffix);
 	free(*info_file);
 
@@ -496,8 +492,17 @@ remove_file_from_trash(const char *name)
 	if (err_file != EXIT_SUCCESS || err_info != EXIT_SUCCESS)
 		return tmp_err;
 
-	char *cmd[] = {"rm", "-rf", "--", rm_file, rm_info, NULL};
-	return launch_execv(cmd, FOREGROUND, E_NOFLAG);
+	int ret = EXIT_SUCCESS;
+	if (unlinkat(XAT_FDCWD, rm_file, 0) == -1) {
+		ret = errno;
+		xerror("trash: '%s': %s\n", rm_file, strerror(errno));
+	}
+	if (unlinkat(XAT_FDCWD, rm_info, 0) == -1) {
+		ret = errno;
+		xerror("trash: '%s': %s\n", rm_info, strerror(errno));
+	}
+
+	return ret;
 }
 
 static int
@@ -726,8 +731,7 @@ untrash_file(char *file)
 
 	char *orig_path = (char *)NULL;
 	/* The max length for line is Path=(5) + PATH_MAX + \n(1) */
-	char line[PATH_MAX + 6];
-	memset(line, '\0', sizeof(line));
+	char line[PATH_MAX + 6] = "";
 
 	while (fgets(line, (int)sizeof(line), info_fp)) {
 		if (strncmp(line, "Path=", 5) == 0) {
@@ -763,7 +767,6 @@ untrash_file(char *file)
 	}
 
 	free(orig_path);
-	orig_path = (char *)NULL;
 
 	/* Check existence and permissions of parent directory */
 	char *parent = (char *)NULL;
@@ -818,11 +821,9 @@ untrash_file(char *file)
 
 	free(url_decoded);
 
-	char *cmd[] = {"rm", "-rf", "--", undel_info, NULL};
-	ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
-	if (ret != EXIT_SUCCESS) {
-		xerror(_("undel: '%s': Error removing info file\n"), undel_info);
-		return ret;
+	if (unlinkat(XAT_FDCWD, undel_info, 0) == -1) {
+		xerror(_("undel: '%s': %s\n"), undel_info, strerror(errno));
+		return errno;
 	}
 
 	return EXIT_SUCCESS;
@@ -1062,8 +1063,8 @@ list_trashed_files(void)
 
 	struct dirent **trash_files = (struct dirent **)NULL;
 	int files_n = scandir(trash_files_dir, &trash_files,
-			skip_files, (conf.unicode) ? alphasort : (conf.case_sens_list)
-			? xalphasort : alphasort_insensitive);
+			skip_files, conf.unicode ? alphasort : (conf.case_sens_list
+			? xalphasort : alphasort_insensitive));
 
 	if (files_n == -1) {
 		xerror("trash: %s\n", strerror(errno));
@@ -1288,9 +1289,8 @@ trash_function(char **args)
 	if ((*args[1] == 'c' && strcmp(args[1], "clear") == 0)
 	|| (*args[1] == 'e' && strcmp(args[1], "empty") == 0))
 		return trash_clear();
-	else {
+	else
 		return trash_files_args(args);
-	}
 }
 #else
 void *_skip_me_trash;
