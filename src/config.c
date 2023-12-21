@@ -2420,14 +2420,14 @@ set_fzf_preview_value(const char *line, int *var)
 }
 
 static void
-set_pager_value(char *line, int *var)
+set_pager_value(char *line, int *var, const size_t buflen)
 {
 	char *p = line;
 	if (!p || *p < '0')
 		return;
 
 	if (*p >= '0' && *p <= '9') {
-		size_t l = strlen(p);
+		size_t l = strnlen(p, buflen);
 		if (l > 0 && p[l - 1] == '\n')
 			p[l - 1] = '\0';
 
@@ -2827,7 +2827,7 @@ read_config(void)
 		}
 
 		else if (*line == 'a' && strncmp(line, "autocmd ", 8) == 0) {
-			parse_autocmd_line(line + 8);
+			parse_autocmd_line(line + 8, sizeof(line) - 8);
 		}
 
 		else if (xargs.autocd == UNSET && *line == 'A'
@@ -3116,7 +3116,7 @@ read_config(void)
 
 		else if (xargs.pager == UNSET && *line == 'P'
 		&& strncmp(line, "Pager=", 6) == 0) {
-			set_pager_value(line + 6, &conf.pager);
+			set_pager_value(line + 6, &conf.pager, sizeof(line) - 6);
 		}
 
 		else if (xargs.printsel == UNSET && *line == 'P'

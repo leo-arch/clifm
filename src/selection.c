@@ -541,11 +541,12 @@ construct_sel_path(char *sel_path)
 
 	char *dir = (char *)NULL;
 	if (*tmpdir != '/') {
-		size_t dir_len = strlen(workspaces[cur_ws].path) + strlen(tmpdir) + 2;
+		size_t dir_len = strlen(workspaces[cur_ws].path)
+			+ strnlen(tmpdir, sizeof(tmpdir)) + 2;
 		dir = xnmalloc(dir_len, sizeof(char));
 		snprintf(dir, dir_len, "%s/%s", workspaces[cur_ws].path, tmpdir);
 	} else {
-		dir = savestring(tmpdir, strlen(tmpdir));
+		dir = savestring(tmpdir, strnlen(tmpdir, sizeof(tmpdir)));
 	}
 
 	return dir;

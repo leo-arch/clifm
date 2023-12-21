@@ -87,7 +87,7 @@ is_file_in_cwd(char *name)
 
 	char *cwd = workspaces[cur_ws].path;
 	size_t cwd_len = strlen(cwd);
-	size_t rpath_len = strlen(rpath);
+	size_t rpath_len = strnlen(rpath, sizeof(rpath));
 	if (rpath_len < cwd_len)
 		return 0;
 

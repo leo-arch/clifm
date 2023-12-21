@@ -421,7 +421,7 @@ get_remove_files(const char *target, char **tmp_files,
 				snprintf(p, sizeof(p), "%s/%s/%s", workspaces[cur_ws].path,
 					target, (*a)[i]->d_name);
 			}
-			rem_files[j] = savestring(p, strlen(p));
+			rem_files[j] = savestring(p, strnlen(p, sizeof(p)));
 			j++;
 		}
 		free((*a)[i]);
@@ -788,7 +788,7 @@ dup_file(char **cmd)
 			snprintf(bk, sizeof(bk), "%s-%zu", tmp_dest, suffix);
 			suffix++;
 		}
-		char *dest = savestring(bk, strlen(bk));
+		char *dest = savestring(bk, strnlen(bk, sizeof(bk)));
 
 		if (rem_slash == 1)
 			source[source_len - 1] = '/';
@@ -1448,7 +1448,7 @@ print_current_target(const char *link, char **target)
 		tmp[len] = '\0';
 		printf(_("%s%s%s (broken link)\n"), uf_c, tmp, df_c);
 		free(*target);
-		*target = savestring(tmp, strlen(tmp));
+		*target = savestring(tmp, strnlen(tmp, sizeof(tmp)));
 		return;
 	}
 
@@ -1637,7 +1637,7 @@ vv_rename_files(char **args)
 		char *s = strrchr(args[i], '/');
 		snprintf(p, sizeof(p), "%s/%s", dest, (s && *(++s)) ? s : args[i]);
 
-		tmp[c] = savestring(p, strlen(p));
+		tmp[c] = savestring(p, strnlen(p, sizeof(p)));
 		c++;
 	}
 

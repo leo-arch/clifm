@@ -734,7 +734,7 @@ untrash_file(char *file)
 			char *p = strchr(line, '=');
 			if (!p || !*(++p))
 				break;
-			orig_path = savestring(p, strlen(p));
+			orig_path = savestring(p, strnlen(p, sizeof(line) - 1));
 		}
 	}
 
@@ -1104,7 +1104,7 @@ check_trash_file(char *deq_file)
 			workspaces[cur_ws].path, deq_file);
 
 	/* Do not trash any of the parent directories of TRASH_DIR */
-	if (strncmp(tmp_cmd, trash_dir, strlen(tmp_cmd)) == 0) {
+	if (strncmp(tmp_cmd, trash_dir, strnlen(tmp_cmd, sizeof(tmp_cmd))) == 0) {
 		xerror(_("trash: Cannot trash '%s'\n"), tmp_cmd);
 		return EXIT_FAILURE;
 	}

@@ -295,12 +295,12 @@ init_autocmd_opts(void)
 /* Take an autocmd line (from the config file) and store parameters
  * in a struct. */
 void
-parse_autocmd_line(char *cmd)
+parse_autocmd_line(char *cmd, const size_t buflen)
 {
 	if (!cmd || !*cmd)
 		return;
 
-	const size_t clen = strlen(cmd);
+	const size_t clen = strnlen(cmd, buflen);
 	if (clen > 0 && cmd[clen - 1] == '\n')
 		cmd[clen - 1] = '\0';
 
@@ -311,7 +311,7 @@ parse_autocmd_line(char *cmd)
 	*p = '\0';
 
 	autocmds = xnrealloc(autocmds, autocmds_n + 1, sizeof(struct autocmds_t));
-	autocmds[autocmds_n].pattern = savestring(cmd, strlen(cmd));
+	autocmds[autocmds_n].pattern = savestring(cmd, strnlen(cmd, buflen));
 
 	init_autocmd_opts();
 

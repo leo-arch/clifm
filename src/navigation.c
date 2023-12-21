@@ -973,7 +973,7 @@ fastback(char *str)
 			i++;
 		}
 
-		xstrncat(q, strlen(q), rem, sizeof(q));
+		xstrncat(q, strnlen(q, sizeof(q)), rem, sizeof(q));
 	}
 
 	return normalize_path(q, i);

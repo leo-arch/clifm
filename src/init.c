@@ -620,7 +620,7 @@ check_etc_shells(const char *file, char *shells_file, int *tmp_errno)
 		if (*line != '/')
 			continue;
 
-		size_t len = strlen(line);
+		size_t len = strnlen(line, sizeof(line));
 		if (len > 0 && line[len - 1] == '\n')
 			line[len - 1] = '\0';
 
@@ -1770,7 +1770,7 @@ get_sel_files(void)
 	/* Since this file contains only paths, PATH_MAX should be enough. */
 	char line[PATH_MAX];
 	while (fgets(line, (int)sizeof(line), fp) != NULL) {
-		size_t len = strlen(line);
+		size_t len = strnlen(line, sizeof(line));
 		if (len == 0) continue;
 
 		if (line[len - 1] == '\n') {
@@ -1960,8 +1960,8 @@ get_path_env(void)
 	return n;
 }
 
-static inline int
-validate_line(char *line, char **p)
+static int
+validate_line(char *line, char **p, const size_t buflen)
 {
 	char *s = line;
 
@@ -1970,7 +1970,7 @@ validate_line(char *line, char **p)
 	if (!strchr(s, ':'))
 		return (-1);
 
-	size_t len = strlen(s);
+	size_t len = strnlen(s, buflen);
 	if (len > 0 && s[len - 1] == '\n')
 		s[len - 1] = '\0';
 
@@ -2008,7 +2008,7 @@ get_last_path(void)
 	char line[PATH_MAX + 2] = "";
 	while (fgets(line, (int)sizeof(line), fp)) {
 		char *p = (char *)NULL;
-		int cur = validate_line(line, &p);
+		int cur = validate_line(line, &p, sizeof(line));
 		if (cur == -1)
 			continue;
 		int ws_n = *p - '0';
