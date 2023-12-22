@@ -57,6 +57,7 @@ char *normalize_path(char *src, const size_t src_len);
 FILE *open_fread(const char *name, int *fd);
 FILE *open_fwrite(const char *name, int *fd);
 FILE *open_fappend(const char *name);
+void press_any_key_to_continue(const int init_newline);
 int  read_octal(char *str);
 void rl_ring_bell(void);
 void set_fzf_preview_border_type(void);

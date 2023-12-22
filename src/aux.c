@@ -47,6 +47,18 @@
 # include "highlight.h"
 #endif /* !_NO_HIGHLIGHT */
 
+void
+press_any_key_to_continue(const int init_newline)
+{
+	HIDE_CURSOR;
+	fprintf(stderr, _("%sPress any key to continue... "),
+		init_newline == 1 ? "\n" : "");
+	fflush(stderr);
+	xgetchar();
+	putchar('\n');
+	UNHIDE_CURSOR;
+}
+
 /* Print the regex error ERRCODE (returned by either regcomp(3) or regexec(3)),
  * whose compiled regular expression is REGEXP and original pattern PATTERN,
  * in the next prompt if PROMPT_ERR == 1, or immediately otherwise. */

@@ -1987,10 +1987,8 @@ END:
 		dup2(STDOUT_FILENO, STDIN_FILENO);
 		err(0, NOPRINT_PROMPT, "%s: Empty file names buffer. "
 			"Nothing to do\n", PROGRAM_NAME);
-		if (getenv("CLIFM_VT_RUNNING")) {
-			fprintf(stderr, "Press any key to continue... ");
-			xgetchar();
-		}
+		if (getenv("CLIFM_VT_RUNNING"))
+			press_any_key_to_continue(0);
 
 		free(buf);
 		exit(EXIT_FAILURE);
@@ -2522,13 +2520,16 @@ splash(void)
 		conf.colorize ? REG_CYAN : "", ASCII_LOGO_BIG, df_c,
 		BOLD, df_c, PROGRAM_NAME_UPPERCASE, _(PROGRAM_DESC));
 
+	HIDE_CURSOR;
 	if (conf.splash_screen) {
-		fputs(_("\n            Press any key to continue... "), stdout);
-		xgetchar();
-		putchar('\n');
+		printf("\n            ");
+		fflush(stdout);
+		press_any_key_to_continue(0);
 	} else {
 		putchar('\n');
 	}
+
+	UNHIDE_CURSOR;
 }
 
 void

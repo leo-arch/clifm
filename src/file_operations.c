@@ -1115,14 +1115,6 @@ format_new_filename(char **name)
 	return EXIT_SUCCESS;
 }
 
-static void
-press_key_to_continue(void)
-{
-	fputs(_("Press any key to continue ..."), stdout);
-	xgetchar();
-	putchar('\n');
-}
-
 static int
 err_file_exists(char *name, const int multi, const int is_md)
 {
@@ -1136,7 +1128,7 @@ err_file_exists(char *name, const int multi, const int is_md)
 		free(n);
 
 	if (multi == 1)
-		press_key_to_continue();
+		press_any_key_to_continue(0);
 
 	return EXIT_FAILURE;
 }
@@ -1236,7 +1228,7 @@ create_files(char **args, const int is_md)
 			new_files_n++;
 		} else if (args_n > 1) {
 			exit_status = EXIT_FAILURE;
-			press_key_to_continue();
+			press_any_key_to_continue(0);
 		}
 	}
 
@@ -2094,7 +2086,7 @@ remove_files(char **args)
 	if (launch_execv(rm_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 		exit_status = EXIT_FAILURE;
 		if (num > 1 && conf.autols == 1) /* Only if we have multiple files */
-			press_key_to_continue();
+			press_any_key_to_continue(0);
 	}
 
 	if (is_sel && exit_status == EXIT_SUCCESS)

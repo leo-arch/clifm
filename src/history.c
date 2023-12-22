@@ -181,9 +181,7 @@ write_msg_into_logfile(const char *_msg)
 		 * and print the error to STDERR */
 		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
 			msgs_log_file, strerror(errno));
-		fputs("Press any key to continue... ", stdout);
-		xgetchar();
-		putchar('\n');
+		press_any_key_to_continue(0);
 		return;
 	}
 

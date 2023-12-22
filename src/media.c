@@ -510,11 +510,8 @@ print_mnt_info(const int n)
 {
 	int exit_status = print_dev_info(n);
 
-	if (exit_status == EXIT_SUCCESS) {
-		printf("\nPress any key to continue... ");
-		xgetchar();
-		putchar('\n');
-	}
+	if (exit_status == EXIT_SUCCESS)
+		press_any_key_to_continue(1);
 
 	free_media();
 	return exit_status;
