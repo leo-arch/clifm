@@ -55,7 +55,6 @@ count_trashed_files(void)
 			n = (size_t)ret - 2;
 	}
 
-	trash_n = n; /* Update the global trash files indicator */
 	return n;
 }
 
@@ -1002,9 +1001,11 @@ untrash_function(char **args)
 	size_t n = count_trashed_files();
 
 	if (n > 0) {
-		if (conf.clear_screen == 1)
-			CLEAR;
+		if (conf.clear_screen == 1) CLEAR;
 		untrash_function(args);
+	} else {
+		if (conf.autols == 1) reload_dirlist();
+		print_reload_msg(_("%zu trashed file(s)\n"), count_trashed_files());
 	}
 
 	return exit_status;
