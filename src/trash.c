@@ -696,7 +696,6 @@ remove_from_trash(char **args)
 	}
 
 	/* At this point we now all input fields are valid ELNs */
-	size_t removed_files = 0;
 	/* If all args are numbers, and neither 'q' nor wildcard */
 	for (i = 0; input[i]; i++) {
 		int num = atoi(input[i]);
@@ -706,19 +705,18 @@ remove_from_trash(char **args)
 			xerror(_("trash: '%s': Cannot remove file from the trash can\n"),
 				trash_files[num - 1]->d_name);
 			exit_status = EXIT_FAILURE;
-		} else {
-			removed_files++;
 		}
 	}
 
 	free_files_and_input(&input, &trash_files, files_n);
 
-	if (conf.autols == 1)
-		reload_dirlist();
-
-	print_reload_msg(_("%zu file(s) removed from the trash can\n"),
-		removed_files);
-	print_reload_msg(_("%zu trashed file(s)\n"), count_trashed_files());
+	size_t n = count_trashed_files();
+	if (n > 0) {
+		remove_from_trash(args);
+	} else {
+		if (conf.autols == 1) reload_dirlist();
+		print_reload_msg(_("0 trashed file(s)\n"));
+	}
 
 	return exit_status;
 }
