@@ -1068,9 +1068,9 @@ Mark the files you need via TAB and then press Enter or Right"
     t del (or 't del <TAB>')\n\
 - Remove/delete all files from the trash can (permanent removal)\n\
     t empty\n\
-- Untrash all trashed files (restore them to their original location)\n\
+- Restore all trashed files (to their original location)\n\
     u *\n\
-- Untrash files selectively using a menu\n\
+- Restore trashed files selectively using a menu\n\
     u\n\
   or\n\
     'u <TAB>' to choose from a list (multi-selection is allowed)"
@@ -1094,9 +1094,9 @@ Note: To permanently set the umask, use the Umask option in the config file."
 \x1b[1mUSAGE\x1b[0m\n\
   u, undel, untrash [FILE... | *, a, all]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
-- Untrash all trashed files (restore them to their original location)\n\
+- Restore all trashed files (to their original location)\n\
     u *\n\
-- Untrash files selectively using a menu\n\
+- Restore trashed files selectively using a menu\n\
     u\n\
   or\n\
     'u <TAB>' to choose from a list (multi-selection is allowed)\n\n\
