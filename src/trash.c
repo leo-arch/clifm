@@ -328,11 +328,11 @@ trash_clear(void)
 }
 
 static int
-del_trash_file_and_exit(char **file_suffix, char **info_file)
+del_trash_file(const char *suffix)
 {
-	size_t len = strlen(trash_files_dir) + strlen(*file_suffix) + 2;
+	size_t len = strlen(trash_files_dir) + strlen(suffix) + 2;
 	char *trash_file = xnmalloc(len, sizeof(char));
-	snprintf(trash_file, len, "%s/%s", trash_files_dir, *file_suffix);
+	snprintf(trash_file, len, "%s/%s", trash_files_dir, suffix);
 
 	int ret = EXIT_SUCCESS;
 	if (unlinkat(XAT_FDCWD, trash_file, 0) == -1) {
@@ -342,10 +342,42 @@ del_trash_file_and_exit(char **file_suffix, char **info_file)
 	}
 
 	free(trash_file);
-	free(*file_suffix);
-	free(*info_file);
-
 	return ret;
+}
+
+static int
+gen_trashinfo_file(char *file, const char *suffix, const struct tm *tm)
+{
+	size_t len = strlen(trash_info_dir) + strlen(suffix) + 12;
+	char *info_file = xnmalloc(len, sizeof(char));
+	snprintf(info_file, len, "%s/%s.trashinfo", trash_info_dir, suffix);
+
+	int fd = 0;
+	FILE *fp = open_fwrite(info_file, &fd);
+	if (!fp) {
+		xerror("trash: '%s': %s\n", info_file, strerror(errno));
+		free(info_file);
+		return del_trash_file(suffix);
+	}
+
+	/* Encode path to URL format (RF 2396) */
+	char *url_str = url_encode(file);
+	if (!url_str) {
+		xerror(_("trash: '%s': Error encoding path\n"), file);
+		free(info_file);
+		return EXIT_FAILURE;
+	}
+
+	fprintf(fp,
+	    "[Trash Info]\nPath=%s\nDeletionDate=%d-%d-%dT%d:%d:%d\n",
+	    url_str, tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
+	    tm->tm_hour, tm->tm_min, tm->tm_sec);
+
+	free(url_str);
+	free(info_file);
+	fclose(fp);
+
+	return EXIT_SUCCESS;
 }
 
 static int
@@ -439,38 +471,8 @@ trash_file(const char *suffix, const struct tm *tm, char *file)
 		return errno;
 	}
 
-	/* Generate the info file */
-	len = strlen(trash_info_dir) + strlen(file_suffix) + 12;
-	char *info_file = xnmalloc(len, sizeof(char));
-	snprintf(info_file, len, "%s/%s.trashinfo", trash_info_dir, file_suffix);
+	ret = gen_trashinfo_file(tmpfile, file_suffix, tm);
 
-	int fd = 0;
-	FILE *info_fp = open_fwrite(info_file, &fd);
-	if (!info_fp) {
-		xerror("trash: '%s': %s\n", info_file, strerror(errno));
-		return del_trash_file_and_exit(&file_suffix, &info_file);
-	}
-
-	ret = EXIT_SUCCESS;
-
-	/* Encode path to URL format (RF 2396) */
-	char *url_str = url_encode(tmpfile);
-	if (!url_str) {
-		xerror(_("trash: '%s': Error encoding path\n"), file);
-		ret = EXIT_FAILURE;
-		goto END;
-	}
-
-	fprintf(info_fp,
-	    "[Trash Info]\nPath=%s\nDeletionDate=%d-%d-%dT%d:%d:%d\n",
-	    url_str, tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
-	    tm->tm_hour, tm->tm_min, tm->tm_sec);
-
-	free(url_str);
-
-END:
-	fclose(info_fp);
-	free(info_file);
 	free(file_suffix);
 	return ret;
 }
@@ -479,7 +481,8 @@ END:
 static int
 remove_file_from_trash(const char *name)
 {
-	char rm_file[PATH_MAX], rm_info[PATH_MAX];
+	char rm_file[PATH_MAX];
+	char rm_info[PATH_MAX];
 	snprintf(rm_file, sizeof(rm_file), "%s/%s", trash_files_dir, name);
 	snprintf(rm_info, sizeof(rm_info), "%s/%s.trashinfo", trash_info_dir, name);
 
