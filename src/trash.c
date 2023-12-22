@@ -368,7 +368,7 @@ gen_trashinfo_file(char *file, const char *suffix, const struct tm *tm)
 	}
 
 	fprintf(fp,
-	    "[Trash Info]\nPath=%s\nDeletionDate=%d-%d-%dT%d:%d:%d\n",
+	    "[Trash Info]\nPath=%s\nDeletionDate=%d-%.2d-%.2dT%.2d:%.2d:%.2d\n",
 	    url_str, tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
 	    tm->tm_hour, tm->tm_min, tm->tm_sec);
 
