@@ -1052,29 +1052,33 @@ list_trashed_files(void)
 
 /* Make sure we are trashing a valid (trashable) file */
 static int
-check_trash_file(char *deq_file)
+check_trash_file(char *file)
 {
-	char tmp_cmd[PATH_MAX];
-	if (*deq_file == '/') /* If absolute path */
-		xstrsncpy(tmp_cmd, deq_file, sizeof(tmp_cmd));
-	else /* If relative path, add path to check against TRASH_DIR */
-		snprintf(tmp_cmd, sizeof(tmp_cmd), "%s/%s",
-			workspaces[cur_ws].path, deq_file);
+	char tmp_file[PATH_MAX];
+	if (*file == '/') /* If absolute path */
+		xstrsncpy(tmp_file, file, sizeof(tmp_file));
+	else { /* If relative path, add path to check against TRASH_DIR */
+		if (*workspaces[cur_ws].path == '/' && !workspaces[cur_ws].path[1])
+			snprintf(tmp_file, sizeof(tmp_file), "/%s", file);
+		else
+			snprintf(tmp_file, sizeof(tmp_file), "%s/%s",
+				workspaces[cur_ws].path, file);
+	}
 
 	/* Do not trash any of the parent directories of TRASH_DIR */
-	if (strncmp(tmp_cmd, trash_dir, strnlen(tmp_cmd, sizeof(tmp_cmd))) == 0) {
-		xerror(_("trash: Cannot trash '%s'\n"), tmp_cmd);
+	if (strncmp(tmp_file, trash_dir, strnlen(tmp_file, sizeof(tmp_file))) == 0) {
+		xerror(_("trash: Cannot trash '%s'\n"), tmp_file);
 		return EXIT_FAILURE;
 	}
 
 	/* Do no trash TRASH_DIR itself nor anything inside it (trashed files) */
-	if (strncmp(tmp_cmd, trash_dir, strlen(trash_dir)) == 0) {
-		puts(_("trash: Use 'trash del' to remove trashed files"));
+	if (strncmp(tmp_file, trash_dir, strlen(trash_dir)) == 0) {
+		fputs(_("trash: Use 'trash del' to remove trashed files"), stderr);
 		return EXIT_FAILURE;
 	}
 
-	size_t l = strlen(deq_file);
-	if (l > 0 && deq_file[l - 1] == '/')
+	size_t l = strlen(file);
+	if (l > 0 && file[l - 1] == '/')
 		/* Do not trash (move) symlinks ending with a slash. According to 'info mv':
 		 * "_Warning_: Avoid specifying a source name with a trailing slash, when
 		 * it might be a symlink to a directory. Otherwise, 'mv' may do something
@@ -1083,17 +1087,17 @@ check_trash_file(char *deq_file)
 		 * with 'errno=ENOTDIR'.  However, on other systems (at least FreeBSD 6.1
 		 * and Solaris 10) it silently renames not the symlink but rather the
 		 * directory referenced by the symlink." */
-		deq_file[l - 1] = '\0';
+		file[l - 1] = '\0';
 
 	struct stat a;
-	if (lstat(deq_file, &a) == -1) {
-		xerror(_("trash: '%s': %s\n"), deq_file, strerror(errno));
+	if (lstat(file, &a) == -1) {
+		xerror(_("trash: '%s': %s\n"), file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
 	/* Do not trash block or character devices */
 	if (S_ISBLK(a.st_mode) || S_ISCHR(a.st_mode)) {
-		xerror(_("trash: '%s': Cannot trash a %s device\n"), deq_file,
+		xerror(_("trash: '%s': Cannot trash a %s device\n"), file,
 			S_ISCHR(a.st_mode) ? _("character") : _("block"));
 		return EXIT_FAILURE;
 	}
