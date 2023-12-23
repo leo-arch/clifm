@@ -1177,6 +1177,25 @@ ERROR:
 	return exit_status;
 }
 
+static int
+check_file_existence(char *file)
+{
+	int s = 0;
+	size_t l = strlen(file);
+	if (l > 0 && file[l - 1] == '/') {
+		file[l - 1] = '\0';
+		s = 1;
+	}
+
+	struct stat a;
+	int ret = lstat(file, &a);
+
+	if (s == 1)
+		file[l - 1] = '/';
+
+	return ret;
+}
+
 /* Create files as specified in ARGS: as directories (if ending with slash)
  * or as regular files otherwise. If coming from 'md' command, IS_MD is set to
  * 1 (so that we can fail as such). */
@@ -1196,9 +1215,12 @@ create_files(char **args, const int is_md)
 		/* This function is never executed by 'md', but always by 'n'. */
 		return ask_and_create_file();
 
+	size_t argsn;
+	for (argsn = 0; args[argsn]; argsn++);
+
 	/* Store pointers to actually created files into a pointers array.
 	 * We'll use this later to print the names of actually created files. */
-	char **new_files = xnmalloc(args_n + 1, sizeof(char *));
+	char **new_files = xnmalloc(argsn + 1, sizeof(char *));
 	filesn_t new_files_n = 0;
 
 	for (i = 0; args[i]; i++) {
@@ -1216,9 +1238,8 @@ create_files(char **args, const int is_md)
 		}
 
 		/* Skip existent files. */
-		struct stat a;
-		if (lstat(args[i], &a) == 0) {
-			exit_status = err_file_exists(args[i], args_n > 1, is_md);
+		if (check_file_existence(args[i]) == 0) {
+			exit_status = err_file_exists(args[i], argsn > 1, is_md);
 			continue;
 		}
 
@@ -1226,7 +1247,7 @@ create_files(char **args, const int is_md)
 		if (ret == EXIT_SUCCESS) {
 			new_files[new_files_n] = args[i];
 			new_files_n++;
-		} else if (args_n > 1) {
+		} else if (argsn > 1) {
 			exit_status = EXIT_FAILURE;
 			press_any_key_to_continue(0);
 		}
