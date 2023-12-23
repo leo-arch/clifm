@@ -330,17 +330,17 @@ static int
 del_trash_file(const char *suffix)
 {
 	size_t len = strlen(trash_files_dir) + strlen(suffix) + 2;
-	char *trash_file = xnmalloc(len, sizeof(char));
-	snprintf(trash_file, len, "%s/%s", trash_files_dir, suffix);
+	char *tfile = xnmalloc(len, sizeof(char));
+	snprintf(tfile, len, "%s/%s", trash_files_dir, suffix);
 
 	int ret = EXIT_SUCCESS;
-	if (unlinkat(XAT_FDCWD, trash_file, 0) == -1) {
+	if (unlinkat(XAT_FDCWD, tfile, 0) == -1) {
 		ret = errno;
 		xerror(_("trash: '%s': %s\nTry removing the "
-			"file manually\n"), trash_file, strerror(errno));
+			"file manually\n"), tfile, strerror(errno));
 	}
 
-	free(trash_file);
+	free(tfile);
 	return ret;
 }
 
@@ -779,6 +779,14 @@ read_original_path(const char *file, const char *src, int *status)
 }
 
 static int
+create_trash_parent(char *dir)
+{
+	/* NOTE: We should be using our own create_dirs() here, but it fails! */
+	char *cmd[] = {"mkdir", "-p", "--", dir, NULL};
+	return launch_execv(cmd, FOREGROUND, E_NOFLAG);
+}
+
+static int
 check_untrash_dest(char *file)
 {
 	if (!file || !*file) {
@@ -798,9 +806,16 @@ check_untrash_dest(char *file)
 
 	int ret = access(parent_dir, F_OK | X_OK | W_OK);
 	if (ret != 0) {
-		xerror("undel: '%s': %s\n", parent_dir, strerror(errno));
-		*(p + 1) = c;
-		return errno;
+		if (errno == ENOENT) {
+			if (create_trash_parent(parent_dir) != EXIT_SUCCESS) {
+				*(p + 1) = c;
+				return EXIT_FAILURE;
+			}
+		} else {
+			xerror("undel: '%s': %s\n", parent_dir, strerror(errno));
+			*(p + 1) = c;
+			return errno;
+		}
 	}
 
 	*(p + 1) = c;
@@ -846,12 +861,15 @@ untrash_file(char *file)
 			char *cmd[] = {"mv", "--", undel_file, orig_path, NULL};
 			ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 			if (ret != EXIT_SUCCESS) {
+				if (conf.autols == 1)
+					press_any_key_to_continue(0);
 				free(orig_path);
 				return ret;
 			}
 		} else {
 			xerror("undel: '%s': %s\n", undel_file, strerror(errno));
-			press_any_key_to_continue(0);
+			if (conf.autols == 1)
+				press_any_key_to_continue(0);
 			free(orig_path);
 			return errno;
 		}
