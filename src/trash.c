@@ -368,7 +368,7 @@ gen_trashinfo_file(char *file, const char *suffix, const struct tm *tm)
 	}
 
 	fprintf(fp,
-	    "[Trash Info]\nPath=%s\nDeletionDate=%d-%.2d-%.2dT%.2d:%.2d:%.2d\n",
+	    "[Trash Info]\nPath=%s\nDeletionDate=%d-%02d-%02dT%02d:%02d:%02d\n",
 	    url_str, tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
 	    tm->tm_hour, tm->tm_min, tm->tm_sec);
 
@@ -438,16 +438,24 @@ trash_file(const char *suffix, const struct tm *tm, char *file)
 		filename[filename_len - (size_t)size] = '\0';
 	}
 
-	size_t len = filename_len + suffix_len + 2;
-	char *file_suffix = xnmalloc(len, sizeof(char));
-	snprintf(file_suffix, len, "%s.%s", filename, suffix);
+	size_t slen = filename_len + suffix_len + 2 + 16;
+	char *file_suffix = xnmalloc(slen, sizeof(char));
+	snprintf(file_suffix, slen, "%s.%s", filename, suffix);
 
 	/* Move the original file into the trash directory. */
 	/* NOTE: It is guaranteed (by check_trash_file()) that FILE does not
 	 * end with a slash. */
-	len = strlen(trash_files_dir) + strlen(file_suffix) + 2;
-	char *dest = xnmalloc(len, sizeof(char));
-	snprintf(dest, len, "%s/%s", trash_files_dir, file_suffix);
+	size_t dlen = strlen(trash_files_dir) + strlen(file_suffix) + 2 + 16;
+	char *dest = xnmalloc(dlen, sizeof(char));
+	snprintf(dest, dlen, "%s/%s", trash_files_dir, file_suffix);
+
+	/* If destiny file exists, append an integer until it is made unique */
+	int inc = 1;
+	while (lstat(dest, &attr) == 0 && inc > 0) {
+		snprintf(file_suffix, slen, "%s.%s-%d", filename, suffix, inc);
+		snprintf(dest, dlen, "%s/%s", trash_files_dir, file_suffix);
+		inc++;
+	}
 
 	int mvcmd = 0;
 	ret = renameat(XAT_FDCWD, file, XAT_FDCWD, dest);

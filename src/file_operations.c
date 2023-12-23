@@ -1177,6 +1177,9 @@ ERROR:
 	return exit_status;
 }
 
+/* (l)stat(2), just as access(2), sees "file" and "file/" as different
+ * file names. So, let's check the existence of the file FILE ignoring the
+ * trailing slash, if any. */
 static int
 check_file_existence(char *file)
 {
