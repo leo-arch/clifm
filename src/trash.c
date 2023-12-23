@@ -379,6 +379,59 @@ gen_trashinfo_file(char *file, const char *suffix, const struct tm *tm)
 	return EXIT_SUCCESS;
 }
 
+static char *
+gen_dest_file(const char *file, const char *suffix, char **file_suffix)
+{
+	/* Create the trashed file name: orig_filename.suffix, where SUFFIX is
+	 * the current date and time (plus an integer in case of dups). */
+	char *filename = strrchr(file, '/');
+	if (!filename || !*(++filename)) {
+		xerror(_("trash: '%s': Error getting file name\n"), file);
+		return (char *)NULL;
+	}
+
+	/* If the length of the trashed file name (orig_filename.suffix) is
+	 * longer than NAME_MAX (255), trim the original filename, so that
+	 * (original_filename_len + 1 (dot) + suffix_len) won't be longer
+	 * than NAME_MAX. */
+	size_t filename_len = strlen(filename);
+	size_t suffix_len = strlen(suffix);
+	int size = (int)(filename_len + suffix_len + 11) - NAME_MAX;
+	/* len = filename.suffix.trashinfo */
+
+	if (size > 0) {
+		/* THIS IS NOT UNICODE AWARE */
+		/* If SIZE is a positive value, that is, the trashed file name
+		 * exceeds NAME_MAX by SIZE bytes, reduce the original file name
+		 * SIZE bytes. Terminate the original file name (FILENAME) with
+		 * a tilde (~), to let the user know it was trimmed. */
+		filename[filename_len - (size_t)size - 1] = '~';
+		filename[filename_len - (size_t)size] = '\0';
+	}
+
+	size_t slen = filename_len + suffix_len + 2 + 16;
+	*file_suffix = xnmalloc(slen, sizeof(char));
+	snprintf(*file_suffix, slen, "%s.%s", filename, suffix);
+
+	/* NOTE: It is guaranteed (by check_trash_file()) that FILE does not
+	 * end with a slash. */
+	size_t dlen = strlen(trash_files_dir) + strlen(*file_suffix) + 2 + 16;
+	char *dest = xnmalloc(dlen, sizeof(char));
+	snprintf(dest, dlen, "%s/%s", trash_files_dir, *file_suffix);
+
+	/* If destiny file exists (there's already a trashed file with this name),
+	 * append an integer until it is made unique. */
+	struct stat a;
+	int inc = 1;
+	while (lstat(dest, &a) == 0 && inc > 0) {
+		snprintf(*file_suffix, slen, "%s.%s-%d", filename, suffix, inc);
+		snprintf(dest, dlen, "%s/%s", trash_files_dir, *file_suffix);
+		inc++;
+	}
+
+	return dest;
+}
+
 static int
 trash_file(const char *suffix, const struct tm *tm, char *file)
 {
@@ -409,56 +462,17 @@ trash_file(const char *suffix, const struct tm *tm, char *file)
 	if (wx_parent_check(tmpfile) != 0)
 		return EXIT_FAILURE;
 
-	int ret = -1;
-
-	/* Create the trashed file name: orig_filename.suffix, where SUFFIX is
-	 * the current date and time. */
-	char *filename = strrchr(tmpfile, '/');
-	if (!filename || !*(++filename)) {
-		xerror(_("trash: '%s': Error getting file name\n"), file);
+	char *file_suffix = (char *)NULL;
+	char *dest = gen_dest_file(tmpfile, suffix, &file_suffix);
+	if (!dest || !file_suffix) {
+		free(dest);
+		free(file_suffix);
 		return EXIT_FAILURE;
 	}
 
-	/* If the length of the trashed file name (orig_filename.suffix) is
-	 * longer than NAME_MAX (255), trim the original filename, so that
-	 * (original_filename_len + 1 (dot) + suffix_len) won't be longer
-	 * than NAME_MAX. */
-	size_t filename_len = strlen(filename);
-	size_t suffix_len = strlen(suffix);
-	int size = (int)(filename_len + suffix_len + 11) - NAME_MAX;
-	/* len = filename.suffix.trashinfo */
-
-	if (size > 0) {
-		/* THIS IS NOT UNICODE AWARE */
-		/* If SIZE is a positive value, that is, the trashed file name
-		 * exceeds NAME_MAX by SIZE bytes, reduce the original file name
-		 * SIZE bytes. Terminate the original file name (FILENAME) with
-		 * a tilde (~), to let the user know it was trimmed. */
-		filename[filename_len - (size_t)size - 1] = '~';
-		filename[filename_len - (size_t)size] = '\0';
-	}
-
-	size_t slen = filename_len + suffix_len + 2 + 16;
-	char *file_suffix = xnmalloc(slen, sizeof(char));
-	snprintf(file_suffix, slen, "%s.%s", filename, suffix);
-
 	/* Move the original file into the trash directory. */
-	/* NOTE: It is guaranteed (by check_trash_file()) that FILE does not
-	 * end with a slash. */
-	size_t dlen = strlen(trash_files_dir) + strlen(file_suffix) + 2 + 16;
-	char *dest = xnmalloc(dlen, sizeof(char));
-	snprintf(dest, dlen, "%s/%s", trash_files_dir, file_suffix);
-
-	/* If destiny file exists, append an integer until it is made unique */
-	int inc = 1;
-	while (lstat(dest, &attr) == 0 && inc > 0) {
-		snprintf(file_suffix, slen, "%s.%s-%d", filename, suffix, inc);
-		snprintf(dest, dlen, "%s/%s", trash_files_dir, file_suffix);
-		inc++;
-	}
-
 	int mvcmd = 0;
-	ret = renameat(XAT_FDCWD, file, XAT_FDCWD, dest);
+	int ret = renameat(XAT_FDCWD, file, XAT_FDCWD, dest);
 	if (ret != EXIT_SUCCESS && errno == EXDEV) {
 		/* Destination file is on a different file system, which is why
 		 * renameat(2) doesn't work: let's try with mv(1). */
@@ -479,8 +493,8 @@ trash_file(const char *suffix, const struct tm *tm, char *file)
 	}
 
 	ret = gen_trashinfo_file(tmpfile, file_suffix, tm);
-
 	free(file_suffix);
+
 	return ret;
 }
 
@@ -787,7 +801,7 @@ read_original_path(const char *file, const char *src, int *status)
 }
 
 static int
-create_trash_parent(char *dir)
+create_untrash_parent(char *dir)
 {
 	/* NOTE: We should be using our own create_dirs() here, but it fails! */
 	char *cmd[] = {"mkdir", "-p", "--", dir, NULL};
@@ -815,7 +829,7 @@ check_untrash_dest(char *file)
 	int ret = access(parent_dir, F_OK | X_OK | W_OK);
 	if (ret != 0) {
 		if (errno == ENOENT) {
-			if (create_trash_parent(parent_dir) != EXIT_SUCCESS) {
+			if (create_untrash_parent(parent_dir) != EXIT_SUCCESS) {
 				*(p + 1) = c;
 				return EXIT_FAILURE;
 			}
