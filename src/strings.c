@@ -2088,8 +2088,7 @@ check_ranges(char ***substr, int **range_array)
 
 			/* If a range is found, store its index. */
 			if (j > 0 && j < len && (*substr)[i][j] == '-'
-			&& IS_DIGIT((*substr)[i][j - 1])
-			&& IS_DIGIT((*substr)[i][j + 1])) {
+			&& IS_DIGIT((*substr)[i][j - 1])) {
 				if (n >= INT_ARRAY_MAX)
 					break;
 				(*range_array)[n] = (int)i;
@@ -2118,8 +2117,7 @@ expand_range(char *str, int listdir)
 		return (filesn_t *)NULL;
 
 	char *p = strchr(str, '-');
-	if (!p || p == str || *(p - 1) < '0' || *(p - 1) > '9'
-	|| !*(p + 1) || *(p + 1) < '0' || *(p + 1) > '9')
+	if (!p || p == str || *(p - 1) < '0' || *(p - 1) > '9')
 		return (filesn_t *)NULL;
 
 	*p = '\0';
@@ -2131,10 +2129,15 @@ expand_range(char *str, int listdir)
 	const filesn_t afirst = xatof(str);
 
 	++p;
-	if (!is_number(p))
-		return (filesn_t *)NULL;
+	filesn_t asecond = 0;
+	if (!*p) { /* No second field: assume last listed file */
+		asecond = files;
+	} else {
+		if (!is_number(p))
+			return (filesn_t *)NULL;
+		asecond = xatof(p);
+	}
 
-	const filesn_t asecond = xatof(p);
 	if (afirst == -1 || asecond == -1)
 		return (filesn_t *)NULL;
 

@@ -964,8 +964,10 @@ get_finder_output(const int multi, char *base)
 	char *initial_path = (cur_comp_type == TCMP_GLOB) ? base : (char *)NULL;
 
 	while ((line_len = getline(&line, &line_size, fp)) > 0) {
-		if (line[line_len - 1] == '\n')
-			line[--line_len] = '\0';
+		if (line[line_len - 1] == '\n') {
+			line_len--;
+			line[line_len] = '\0';
+		}
 
 		if (cur_comp_type == TCMP_FILE_TYPES_OPTS && *line && *(line + 1)) {
 			*(line + 1) = '\0';
