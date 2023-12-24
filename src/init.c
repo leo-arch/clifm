@@ -1889,8 +1889,8 @@ get_paths_timestamps(const size_t n)
 }
 
 /* Store all paths in the PATH environment variable into a globally
- * declared array (paths)
- * Returns the number of stored paths  */
+ * declared array (paths), skipping duplicates.
+ * Returns the number of stored paths. */
 size_t
 get_path_env(void)
 {
@@ -1942,6 +1942,13 @@ get_path_env(void)
 				len--;
 			}
 
+			/* Skip duplicate entries */
+			size_t i;
+			for (i = 0; i < n; i++) {
+				if (strcmp(paths[i].path, p) == 0)
+					goto CONT;
+			}
+
 			paths[n].path = savestring(p, len);
 			n++;
 		}
@@ -1949,6 +1956,7 @@ get_path_env(void)
 		if (!d || n == c)
 			break;
 
+CONT:
 		p = ++q;
 	}
 
@@ -2184,8 +2192,8 @@ get_path_programs(void)
 			 * Fedora, for example, adds HOME/bin and HOME/.local/bin to
 			 * PATH disregarding if they exist or not. If paths[i] dir is
 			 * empty do not use it either. */
-			if (cmd_n[i] > 0)
-				total_cmd += cmd_n[i];
+			if (cmd_n[i] > 2)
+				total_cmd += cmd_n[i] - 2;
 		}
 
 		xchdir(cwd, NO_TITLE);
@@ -2234,11 +2242,17 @@ get_path_programs(void)
 
 			int j = cmd_n[i];
 			while (--j >= 0) {
+#ifdef _DIRENT_HAVE_D_TYPE
+				if (SELFORPARENT(commands_bin[i][j]->d_name)
+				|| (commands_bin[i][j]->d_type != DT_REG
+				&& commands_bin[i][j]->d_type != DT_LNK)) {
+#else
 				if (SELFORPARENT(commands_bin[i][j]->d_name)) {
+#endif /* _DIRENT_HAVE_D_TYPE */
 					free(commands_bin[i][j]);
 					continue;
 				}
-#if defined(__CYGWIN__)
+#ifdef __CYGWIN__
 				if (cygwin_exclude_file(commands_bin[i][j]->d_name) == 1) {
 					free(commands_bin[i][j]);
 					continue;
