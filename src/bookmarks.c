@@ -260,12 +260,12 @@ get_bm_path(char *arg)
 			if (bookmarks[i].path)
 				return bookmarks[i].path;
 
-			xerror(_("%s: Invalid bookmark\n"), arg);
+			xerror(_("'%s': Invalid bookmark\n"), arg);
 			return (char *)NULL;
 		}
 	}
 
-	xerror(_("%s: No such bookmark\n"), arg);
+	xerror(_("'%s': No such bookmark\n"), arg);
 	return (char *)NULL;
 }
 
@@ -359,7 +359,7 @@ bm_open(char **cmd)
 			continue;
 
 		if (!bookmarks[i].path) {
-			xerror(_("%s: Invalid bookmark\n"), p);
+			xerror(_("'%s': Invalid bookmark\n"), p);
 			goto END;
 		}
 
@@ -368,7 +368,7 @@ bm_open(char **cmd)
 		goto END;
 	}
 
-	xerror(_("%s: No such bookmark\n"), p);
+	xerror(_("'%s': No such bookmark\n"), p);
 
 END:
 	if (p != cmd[1])
@@ -510,13 +510,13 @@ bookmark_add(char *file, char *name, char *shortcut)
 	FILE *bm_fp = open_fappend(bm_file);
 	if (!bm_fp) {
 		exit_status = errno;
-		xerror("bookmarks: fopen: '%s': %s\n", bm_file, strerror(errno));
+		xerror("bookmarks: '%s': %s\n", bm_file, strerror(errno));
 		goto ERROR;
 	}
 
 	if (fseek(bm_fp, 0L, SEEK_END) == -1) {
 		exit_status = errno;
-		xerror("bookmarks: fseek: '%s': %s\n", bm_file, strerror(errno));
+		xerror("bookmarks: '%s': %s\n", bm_file, strerror(errno));
 		fclose(bm_fp);
 		goto ERROR;
 	}
@@ -694,7 +694,7 @@ del_bookmarks(char **args)
 	int fd = 0;
 	FILE *fp = open_fread(bm_file, &fd);
 	if (!fp) {
-		xerror(_("%s: %s\nbookmarks: Error reading the bookmarks file\n"),
+		xerror(_("'%s': %s\nbookmarks: Error reading the bookmarks file\n"),
 			bm_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -702,7 +702,7 @@ del_bookmarks(char **args)
 	int tmp_fd = 0;
 	FILE *tmp_fp = open_fwrite(tmp_file, &tmp_fd);
 	if (!tmp_fp) {
-		xerror(_("%s: %s\nbookmarks: Error creating temporary file\n"),
+		xerror(_("'%s': %s\nbookmarks: Error creating temporary file\n"),
 			tmp_file, strerror(errno));
 		fclose(fp);
 		return EXIT_FAILURE;

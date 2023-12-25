@@ -1355,7 +1355,7 @@ expand_and_deescape(char **arg, char **deq_str)
 		*deq_str = unescape_str(*arg, 0);
 }
 
-static inline int
+static int
 open_file_func(char **args, const filesn_t i)
 {
 	if (conf.autocd && (file_info[i].type == DT_DIR || file_info[i].dir == 1))
