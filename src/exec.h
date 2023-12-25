@@ -32,7 +32,6 @@
 #define EXEC_BG_PROC 0
 #define EXEC_FG_PROC 1
 
-#define EXEC_NULLPARAM EXIT_FAILURE
 #define EXEC_NOTFOUND  127
 #define EXEC_SIGINT    128
 

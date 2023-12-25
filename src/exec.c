@@ -186,7 +186,7 @@ int
 launch_execl(const char *cmd)
 {
 	if (!cmd || !*cmd)
-		return EXEC_NULLPARAM;
+		return EINVAL;
 
 	int status = xsystem(cmd);
 
@@ -210,7 +210,7 @@ int
 launch_execv(char **cmd, const int bg, const int xflags)
 {
 	if (!cmd)
-		return EXEC_NULLPARAM;
+		return EINVAL;
 
 	int status = 0;
 	pid_t pid = fork();

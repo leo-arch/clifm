@@ -1898,7 +1898,7 @@ get_path_env(void)
 	int malloced_ptr = 0;
 
 	/* If running on a sanitized environment, or PATH cannot be retrieved for
-	 * whatever reason, get PATH value from a secure source */
+	 * whatever reason, get PATH value from a secure source. */
 	if (xargs.secure_cmds == 1 || xargs.secure_env == 1
 	|| xargs.secure_env_full == 1 || !(ptr = getenv("PATH")) || !*ptr) {
 		malloced_ptr = 1;
@@ -1906,10 +1906,10 @@ get_path_env(void)
 		ptr = savestring(_PATH_STDPATH, sizeof(_PATH_STDPATH) - 1);
 #else
 		size_t s = confstr(_CS_PATH, NULL, 0); /* Get value's size */
-		char *p = xnmalloc(s, sizeof(char)); /* Allocate space */
+		char *p = xnmalloc(s, sizeof(char));   /* Allocate space */
 		confstr(_CS_PATH, p, s);               /* Get value */
 		ptr = p;
-#endif /* !_PATH_STDPATH */
+#endif /* _PATH_STDPATH */
 	}
 
 	if (!ptr)
@@ -2191,10 +2191,10 @@ get_path_programs(void)
 #else
 					conf.light_mode == 1 ? NULL : skip_nonexec, xalphasort);
 #endif /* __CYGWIN__ */
-			/* If paths[i] directory does not exist, scandir returns -1.
+			/* If paths[i] directory is empty, 2 is returned. If it does not
+			 * exist, scandir returns -1.
 			 * Fedora, for example, adds HOME/bin and HOME/.local/bin to
-			 * PATH disregarding if they exist or not. If paths[i] dir is
-			 * empty do not use it either. */
+			 * PATH disregarding if they exist or not. */
 			if (cmd_n[i] > 2)
 				total_cmd += cmd_n[i] - 2;
 		}
