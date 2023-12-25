@@ -1881,7 +1881,7 @@ get_paths_timestamps(const size_t n)
 	struct stat a;
 	int i = (int)n;
 	while (--i >= 0) {
-		if (paths[i].path && stat(paths[i].path, &a) != -1)
+		if (paths[i].path && *paths[i].path && stat(paths[i].path, &a) != -1)
 			paths[i].mtime = a.st_mtime;
 		else
 			paths[i].mtime = 0;
@@ -1935,6 +1935,7 @@ get_path_env(void)
 
 		char d = *q;
 		*q = '\0';
+
 		if (*p && (q - p) > 0) {
 			size_t len = (size_t)(q - p);
 			if (len > 1 && p[len - 1] == '/') {
@@ -2146,7 +2147,7 @@ skip_this_path(char *name)
 
 	size_t i;
 	for (i = 0; paths[i].path; i++) {
-		if (strcmp(paths[i].path, rpath) == 0) {
+		if (*paths[i].path && strcmp(paths[i].path, rpath) == 0) {
 			free(rpath);
 			return 1;
 		}
@@ -2167,6 +2168,7 @@ get_path_programs(void)
 	struct dirent ***commands_bin = (struct dirent ***)NULL;
 
 	if (conf.ext_cmd_ok == 1) {
+		/* NOTE: xchdir() is only required by skip_nonexec() */
 		char tmp[PATH_MAX] = "";
 		char *cwd = get_cwd(tmp, sizeof(tmp), 0);
 
@@ -2175,15 +2177,16 @@ get_path_programs(void)
 
 		i = (int)path_n;
 		while (--i >= 0) {
+			cmd_n[i] = 0;
+			commands_bin[i] = (struct dirent **)NULL;
+
 			if (!paths[i].path || !*paths[i].path
 			|| skip_this_path(paths[i].path) == 1
-			|| xchdir(paths[i].path, NO_TITLE) == -1) {
-				cmd_n[i] = 0;
+			|| xchdir(paths[i].path, NO_TITLE) == -1)
 				continue;
-			}
 
 			cmd_n[i] = scandir(paths[i].path, &commands_bin[i],
-#if defined(__CYGWIN__)
+#ifdef __CYGWIN__
 					NULL, xalphasort);
 #else
 					conf.light_mode == 1 ? NULL : skip_nonexec, xalphasort);
@@ -2233,11 +2236,11 @@ get_path_programs(void)
 		}
 	}
 
-	if (conf.ext_cmd_ok == 1 && total_cmd > 0) {
+	if (total_cmd > 0) {
 		/* And finally, add commands in PATH */
 		i = (int)path_n;
 		while (--i >= 0) {
-			if (cmd_n[i] <= 0)
+			if (cmd_n[i] <= 0 || !commands_bin[i])
 				continue;
 
 			int j = cmd_n[i];

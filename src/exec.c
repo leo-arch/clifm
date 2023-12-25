@@ -315,7 +315,7 @@ check_paths_timestamps(void)
 	int status = EXIT_SUCCESS;
 
 	while (--i >= 0) {
-		if (paths[i].path && stat(paths[i].path, &a) != -1
+		if (paths[i].path && *paths[i].path && stat(paths[i].path, &a) != -1
 		&& a.st_mtime != paths[i].mtime) {
 			paths[i].mtime = a.st_mtime;
 			status = EXIT_FAILURE;

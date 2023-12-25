@@ -873,9 +873,12 @@ get_cmd_path(const char *cmd)
 
 	size_t i;
 	for (i = 0; i < path_n; i++) { /* Check each path in PATH */
+		if (!paths[i].path || !*paths[i].path)
+			continue;
+
 		/* Skip '.' (CWD) if running with secure environment */
 		if ((xargs.secure_env == 1 || xargs.secure_env_full == 1)
-		&& paths[i].path && *paths[i].path == '.' && !paths[i].path[1])
+		&& *paths[i].path == '.' && !paths[i].path[1])
 			continue;
 
 		snprintf(cmd_path, PATH_MAX, "%s/%s", paths[i].path, cmd); /* NOLINT */
