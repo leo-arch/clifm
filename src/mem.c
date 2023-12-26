@@ -30,7 +30,7 @@
 
 #include "misc.h" /* err() */
 
-#if defined(__has_builtin) && defined(USE_BUILTIN_MUL_OVERFLOW)
+#if defined(__has_builtin) && !defined(NO_BUILTIN_MUL_OVERFLOW)
 # if __has_builtin(__builtin_mul_overflow)
 #  define HAVE_BUILTIN_MUL_OVERFLOW
 # endif
