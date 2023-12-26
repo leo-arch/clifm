@@ -84,18 +84,7 @@ typedef char *rl_cpvfunc_t;
 || (c) == TCMP_TAGS_F || (c) == TCMP_GLOB || (c) == TCMP_FILE_TYPES_FILES \
 || (c) == TCMP_BM_PATHS)
 
-#define PUTX(c) \
-	if (CTRL_CHAR(c)) { \
-          putc('^', rl_outstream); \
-          putc(UNCTRL(c), rl_outstream); \
-	} else if (c == RUBOUT) { \
-		putc('^', rl_outstream); \
-		putc('?', rl_outstream); \
-	} else \
-		putc(c, rl_outstream)
-
 #ifndef _NO_FZF
-
 /* We need to know the longest entry (if previewing files) to correctly
  * calculate the width of the preview window. */
 static size_t longest_prev_entry;
@@ -282,9 +271,8 @@ print_filename(char *to_print, char *full_pathname)
 	|| t == TCMP_TRASHDEL)) {
 		colors_list(to_print, NO_ELN, NO_PAD, NO_NEWLINE);
 	} else {
-		for (s = to_print + tab_offset; *s; s++) {
-			PUTX(*s);
-		}
+		for (s = to_print + tab_offset; *s; s++)
+			putchar(*s);
 	}
 
 	if (rl_filename_completion_desired && conf.colorize == 0) {
