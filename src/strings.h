@@ -59,6 +59,7 @@ char *x_strcasestr(char *a, char *b);
 
 char * xstrcasechr(char *s, char c);
 size_t xstrnlen(const char *restrict s);
+size_t strlen_l(const char *restrict s);
 size_t xstrsncpy(char *restrict dst, const char *restrict src, size_t n);
 char * xstrncat(char *restrict dst, const size_t dst_end,
 	const char *restrict src, const size_t dst_len);

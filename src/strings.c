@@ -83,7 +83,8 @@ typedef char *rl_cpvfunc_t;
 /* Max string length for strings passed to xstrnlen().
  * Minimize the danger of non-null terminated strings.
  * However, no length beyond MAX_STR_LEN will be correctly measured. */
-#define MAX_STR_LEN   16384
+#define MAX_STR_LEN        4096
+#define MAX_STR_LEN_LONG   16384
 #define INT_ARRAY_MAX 32
 
 #ifdef SOLARIS_DOORS
@@ -249,6 +250,16 @@ xstrnlen(const char *restrict s)
 {
 	// cppcheck-suppress nullPointer
 	return (size_t)((char *)memchr(s, '\0', MAX_STR_LEN) - s);
+}
+
+/* Just xstrnlen(), but with a bigger string length limit.
+ * For the time being, only used for LS_COLORS (some versions take up to
+ * 9,000 bytes, which is why we cannot use here MAX_STR_LEN). */
+size_t
+strlen_l(const char *restrict s)
+{
+	// cppcheck-suppress nullPointer
+	return (size_t)((char *)memchr(s, '\0', MAX_STR_LEN_LONG) - s);
 }
 
 /* Modified version of strlcpy(3) using memccpy(3), as suggested here:
