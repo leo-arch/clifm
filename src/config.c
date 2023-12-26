@@ -2294,7 +2294,7 @@ X:^application/(zip|gzip|zstd|x-7z-compressed|x-xz|x-bzip*|x-tar|x-iso9660-image
 X:.*/pdf$=mupdf;sioyek;llpp;lpdf;zathura;mupdf-x11;apvlv;xpdf;xreader;evince;atril;okular;epdfview;qpdfview\n\
 \n\
 # Images\n\
-X:^image/gif$=animate;pqiv;sxiv -a;nsxiv -a\n\
+X:^image/gif$=animate;pqiv;sxiv -a;nsxiv -a;feh\n\
 X:^image/svg=display;inkscape\n\
 X:^image/.*=sxiv;nsxiv;pqiv;gpicview;qview;qimgv;mirage;ristretto;eog;eom;xviewer;viewnior;nomacs;geeqie;gwenview;gthumb;gimp\n\
 !X:^image/.*=fim;img2txt;cacaview;fbi;fbv\n\
