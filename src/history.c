@@ -178,7 +178,7 @@ write_msg_into_logfile(const char *_msg)
 	if (!msg_fp) {
 		/* Do not log this error: We might enter into an infinite loop
 		 * trying to access a file that cannot be accessed. Just warn the user
-		 * and print the error to STDERR */
+		 * and print the error to STDERR. */
 		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
 			msgs_log_file, strerror(errno));
 		press_any_key_to_continue(0);
@@ -244,15 +244,16 @@ send_desktop_notification(char *msg)
 #if defined(__HAIKU__)
 	char *cmd[] = {"notify", "--type", type, "--title", PROGRAM_NAME, p, NULL};
 	ret = launch_execv(cmd, FOREGROUND, E_MUTE);
-#elif defined (__APPLE__)
-	size_t msg_len = strlen(msg) + strlen(type) + strlen(PROGRAM_NAME) + 60;
-	char *_msg = xnmalloc(msg_len, sizeof(char));
-	snprintf(_msg, msg_len,
+#elif defined(__APPLE__)
+	size_t msg_len = strlen(msg) + strlen(type)
+		+ (sizeof(PROGRAM_NAME) - 1) + 60;
+	char *tmp_msg = xnmalloc(msg_len, sizeof(char));
+	snprintf(tmp_msg, msg_len,
 		"'display notification \"%s\" subtitle \"%s\" with title \"%s\"'",
 		msg, type, PROGRAM_NAME);
-	char *cmd[] = {"osascript", "-e", _msg, NULL};
+	char *cmd[] = {"osascript", "-e", tmp_msg, NULL};
 	ret = launch_execv(cmd, FOREGROUND, E_MUTE);
-	free(_msg);
+	free(tmp_msg);
 #else
 	char *cmd[] = {"notify-send", "-u", type, PROGRAM_NAME, p, NULL};
 	ret = launch_execv(cmd, FOREGROUND, E_MUTE);
@@ -265,9 +266,10 @@ send_desktop_notification(char *msg)
 	xerror(_("%s: Notification daemon error: %s\n"
 		"Disable desktop notifications (run 'help desktop-notifications' "
 		"for details) or %s to silence this "
-		"warning (original message printed below)\n"), PROGRAM_NAME,
-		strerror(ret), ret == ENOENT ? _("install a notification daemon")
-		: _("fix this error (consult your daemon's documentation)"));
+		"warning (original message printed below)\n"),
+		PROGRAM_NAME, strerror(ret),
+		ret == ENOENT ? _("install a notification daemon")
+		: _("fix the error (consult your daemon's documentation)"));
 	xerror("%s\n", msg);
 }
 
