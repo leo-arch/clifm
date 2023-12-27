@@ -301,7 +301,7 @@ get_link_color(const char *name)
 	struct stat a;
 	char *color = no_c;
 
-	if (stat(name, &a) == -1)
+	if (lstat(name, &a) == -1)
 		return color;
 
 	if (S_ISDIR(a.st_mode)) {
@@ -311,6 +311,7 @@ get_link_color(const char *name)
 			color = nd_c;
 	} else {
 		switch (a.st_mode & S_IFMT) {
+		case S_IFLNK:  color = stat(name, &a) == -1 ? or_c : ln_c; break;
 		case S_IFSOCK: color = so_c; break;
 		case S_IFIFO:  color = pi_c; break;
 		case S_IFBLK:  color = bd_c; break;
@@ -1276,11 +1277,8 @@ print_file_name(char *filename, const char *color, const char file_type,
 	char *wname = wc_xstrlen(filename) == 0
 		? replace_invalid_chars(filename) : (char *)NULL;
 
-	char *target_name = (S_ISLNK(mode)) ? realpath(filename, (char *)NULL)
-		: (char *)NULL;
-
-	if (file_type != 'l') {
-		if (link_target) { /* 'pp' on a symlink */
+	if (file_type != 'l') { /* 'pp' or 'p' on non-symlink file */
+		if (link_target) { /* 'pp' on symlink file */
 			char *tmp = abbreviate_file_name(link_target);
 			printf(_("\tName: %s%s%s <- %s%s%s\n"), file_type == 0
 				? no_c : color, tmp ? tmp : link_target, df_c, ln_c,
@@ -1292,7 +1290,20 @@ print_file_name(char *filename, const char *color, const char file_type,
 				wname ? wname : filename, df_c);
 		}
 
-	} else if (target_name) {
+		free(wname);
+		return;
+	}
+
+	/* 'p' on symlink file */
+
+	char target_name[PATH_MAX + 1]; *target_name = '\0';
+	ssize_t tlen = S_ISLNK(mode) ? readlinkat(XAT_FDCWD, filename,
+		target_name, sizeof(target_name) - 1) : -1;
+	if (tlen != -1)
+		target_name[tlen] = '\0';
+
+	struct stat a;
+	if (*target_name && lstat(target_name, &a) != -1) {
 		char *link_color = get_link_color(target_name);
 		char *name = abbreviate_file_name(target_name);
 
@@ -1301,17 +1312,11 @@ print_file_name(char *filename, const char *color, const char file_type,
 
 		if (name != target_name)
 			free(name);
-		free(target_name);
 
 	} else { /* Broken link */
-		char target[PATH_MAX + 1];
-		const ssize_t len =
-			readlinkat(XAT_FDCWD, filename, target, sizeof(target) - 1);
-
-		if (len != -1) {
-			target[len] = '\0';
+		if (*target_name) {
 			printf(_("\tName: %s%s%s -> %s%s%s (broken link)\n"), or_c,
-				wname ? wname : filename, df_c, uf_c, target, df_c);
+				wname ? wname : filename, df_c, uf_c, target_name, df_c);
 		} else {
 			printf(_("\tName: %s%s%s -> ???\n"), or_c, wname ? wname
 				: filename, df_c);
