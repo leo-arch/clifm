@@ -1271,22 +1271,22 @@ print_file_perms(const struct stat *attr, const char file_type_char,
 }
 
 static void
-print_file_name(char *filename, const char *color, const char file_type,
+print_file_name(char *filename, const char *color, const int follow_link,
 	const mode_t mode, char *link_target)
 {
 	char *wname = wc_xstrlen(filename) == 0
 		? replace_invalid_chars(filename) : (char *)NULL;
 
-	if (file_type != 'l') { /* 'pp' or 'p' on non-symlink file */
-		if (link_target) { /* 'pp' on symlink file */
+	if (follow_link == 1) { /* 'pp' command */
+		if (link_target && *link_target) {
 			char *tmp = abbreviate_file_name(link_target);
-			printf(_("\tName: %s%s%s <- %s%s%s\n"), file_type == 0
-				? no_c : color, tmp ? tmp : link_target, df_c, ln_c,
+			printf(_("\tName: %s%s%s <- %s%s%s\n"), color,
+				tmp ? tmp : link_target, df_c, ln_c,
 				wname ? wname : filename, df_c);
 			if (tmp != link_target)
 				free(tmp);
 		} else {
-			printf(_("\tName: %s%s%s\n"), file_type == 0 ? no_c : color,
+			printf(_("\tName: %s%s%s\n"), color,
 				wname ? wname : filename, df_c);
 		}
 
@@ -1294,29 +1294,33 @@ print_file_name(char *filename, const char *color, const char file_type,
 		return;
 	}
 
-	/* 'p' on symlink file */
+	/* 'p' command */
+	if (!S_ISLNK(mode)) {
+		printf(_("\tName: %s%s%s\n"), color, wname ? wname : filename, df_c);
+		free(wname);
+		return;
+	}
 
-	char target_name[PATH_MAX + 1]; *target_name = '\0';
-	ssize_t tlen = S_ISLNK(mode) ? readlinkat(XAT_FDCWD, filename,
-		target_name, sizeof(target_name) - 1) : -1;
+	char target[PATH_MAX + 1]; *target = '\0';
+	ssize_t tlen = readlinkat(XAT_FDCWD, filename, target, sizeof(target) - 1);
 	if (tlen != -1)
-		target_name[tlen] = '\0';
+		target[tlen] = '\0';
 
 	struct stat a;
-	if (*target_name && lstat(target_name, &a) != -1) {
-		char *link_color = get_link_color(target_name);
-		char *name = abbreviate_file_name(target_name);
+	if (*target && lstat(target, &a) != -1) {
+		char *link_color = get_link_color(target);
+		char *name = abbreviate_file_name(target);
 
 		printf(_("\tName: %s%s%s -> %s%s%s\n"), ln_c, wname ? wname
-			: filename, df_c, link_color, name ? name : target_name, df_c);
+			: filename, df_c, link_color, name ? name : target, df_c);
 
-		if (name != target_name)
+		if (name != target)
 			free(name);
 
 	} else { /* Broken link */
-		if (*target_name) {
+		if (*target) {
 			printf(_("\tName: %s%s%s -> %s%s%s (broken link)\n"), or_c,
-				wname ? wname : filename, df_c, uf_c, target_name, df_c);
+				wname ? wname : filename, df_c, uf_c, target, df_c);
 		} else {
 			printf(_("\tName: %s%s%s -> ???\n"), or_c, wname ? wname
 				: filename, df_c);
@@ -1837,31 +1841,20 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 }
 
 static int
-err_no_file(const char *filename, const int errnum, const int follow_link)
+err_no_file(const char *filename, const char *target, const int errnum)
 {
 	/* If stat_filename, we're running with --stat(-full): err with program
 	 * name. */
 	char *errname = stat_filename ? PROGRAM_NAME : "prop";
 
-	if (follow_link == 0)
-		goto END;
-
-	struct stat a;
-	if (lstat(filename, &a) == -1 || !S_ISLNK(a.st_mode))
-		goto END;
-
-	char target[PATH_MAX + 1];
-	ssize_t len = readlinkat(XAT_FDCWD, filename, target, sizeof(target) - 1);
-	if (len != -1) {
-		target[len] = '\0';
+	if (*target) {
 		xerror(_("%s: %s %s->%s %s: Broken symbolic link\n"), errname,
 			filename, mi_c, df_c, target);
-		return EXIT_FAILURE;
+	} else {
+		xerror("%s: '%s': %s\n", errname, filename, strerror(errnum));
 	}
 
-END:
-	xerror("%s: '%s': %s\n", errname, filename, strerror(errnum));
-	return EXIT_FAILURE;
+	return errnum;
 }
 
 /* Retrieve information for the file named FILENAME in a stat(1)-like fashion.
@@ -1879,12 +1872,26 @@ do_stat(char *filename, const int follow_link)
 		filename += 2;
 
 	/* Check file existence. */
-	struct stat attr, attrb;
+	struct stat attr;
+	int ret = lstat(filename, &attr);
 
-	const int ret = follow_link == 1 ? stat(filename, &attr)
-		: lstat(filename, &attr);
+	char link_target[PATH_MAX + 1]; *link_target = '\0';
+	if (follow_link == 1 && ret != -1 && S_ISLNK(attr.st_mode)) {
+		/* pp: In case of a symlink we want both the symlink name (FILENAME)
+		 * and the target name (LINK_TARGET): the Name field in the output
+		 * will be printed as follows: "Name: target <- link_name". */
+		ssize_t tlen = readlinkat(XAT_FDCWD, filename,
+			link_target, sizeof(link_target) - 1);
+		if (tlen != -1) {
+			link_target[tlen] = '\0';
+			ret = lstat(link_target, &attr);
+		} else {
+			ret = -1;
+		}
+	}
+
 	if (ret == -1)
-		return err_no_file(filename, errno, follow_link);
+		return err_no_file(filename, link_target, errno);
 
 	char file_type = 0; /* File type char indicator. */
 	char *ctype = dn_c; /* Color for file type char. */
@@ -1892,29 +1899,19 @@ do_stat(char *filename, const int follow_link)
 	const int file_perm =
 		check_file_access(attr.st_mode, attr.st_uid, attr.st_gid);
 
-	char *link_target = (char *)NULL;
-	if (follow_link == 1 && lstat(filename, &attrb) != -1
-	&& S_ISLNK(attrb.st_mode)) {
-		/* pp: In case of a symlink we want both the symlink name (FILENAME)
-		 * and the target name (LINK_TARGET): the Name field in the output
-		 * will be printed as follows: "Name: target <- link_name". */
-		link_target = realpath(filename, (char *)NULL);
-	}
-
-	char *color = get_file_type_and_color(link_target ? link_target : filename,
+	char *color = get_file_type_and_color(*link_target ? link_target : filename,
 		&attr, &file_type, &ctype);
 
 #if defined(LINUX_FILE_XATTRS)
-	int xattr = llistxattr(link_target ? link_target : filename, NULL, 0) > 0;
+	int xattr = llistxattr(*link_target ? link_target : filename, NULL, 0) > 0;
 #else
 	int xattr = 0;
 #endif /* LINUX_FILE_XATTRS */
 
 	print_file_perms(&attr, file_type, ctype, xattr);
-	print_file_name(filename, color, file_type, attr.st_mode, link_target);
+	print_file_name(filename, color, follow_link, attr.st_mode, link_target);
 	print_file_details(filename, &attr, file_type, file_perm, xattr);
-	print_timestamps(link_target ? link_target : filename, &attr);
-	free(link_target);
+	print_timestamps(*link_target ? link_target : filename, &attr);
 	print_file_size(filename, &attr, file_perm, follow_link);
 
 	return EXIT_SUCCESS;
