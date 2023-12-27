@@ -409,7 +409,7 @@ normalize_path(char *src, const size_t src_len)
 	if (strchr(src, '\\')) {
 		tmp = unescape_str(src, 0);
 		if (!tmp) {
-			xerror(_("%s: '%s': Error deescaping string\n"), PROGRAM_NAME, src);
+			xerror(_("%s: '%s': Error unescaping string\n"), PROGRAM_NAME, src);
 			return (char *)NULL;
 		}
 
@@ -1194,6 +1194,7 @@ S_IFIFO: 10000 / 4096
 int
 get_link_ref(const char *link)
 {
+	errno = 0;
 	if (!link || !*link)
 		return (-1);
 

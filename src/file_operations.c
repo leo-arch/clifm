@@ -750,7 +750,7 @@ dup_file(char **cmd)
 		if (strchr(source, '\\')) {
 			char *deq_str = unescape_str(source, 0);
 			if (!deq_str) {
-				xerror("dup: '%s': Error escaping file name\n", source);
+				xerror("dup: '%s': Error unescaping file name\n", source);
 				continue;
 			}
 
@@ -1030,7 +1030,7 @@ validate_filename(char **name, const int is_md)
 
 	char *deq = unescape_str(*name, 0);
 	if (!deq) {
-		xerror(_("%s: '%s': Error escaping file name\n"),
+		xerror(_("%s: '%s': Error unescaping file name\n"),
 			is_md ? "md" : "new", *name);
 		return 0;
 	}
@@ -1292,6 +1292,20 @@ create_dirs(char **args)
 	return create_files(args, 1);
 }
 
+static int
+err_no_link(const char *file)
+{
+	char target[PATH_MAX + 1]; *target = '\0';
+	ssize_t tlen = readlinkat(XAT_FDCWD, file, target, sizeof(target) - 1);
+	if (tlen != -1)
+		target[tlen] = '\0';
+
+	xerror(_("open: '%s': Broken symbolic link to %s\n"), file,
+		*target ? target : "???");
+
+	return errno > 0 ? errno : EXIT_FAILURE;
+}
+
 int
 open_function(char **cmd)
 {
@@ -1307,7 +1321,7 @@ open_function(char **cmd)
 		if (strchr(cmd[1], '\\')) {
 			char *deq_path = unescape_str(cmd[1], 0);
 			if (!deq_path) {
-				xerror(_("open: '%s': Error escaping filename\n"), cmd[1]);
+				xerror(_("open: '%s': Error unescaping file name\n"), cmd[1]);
 				return EXIT_FAILURE;
 			}
 
@@ -1356,8 +1370,7 @@ open_function(char **cmd)
 	case S_IFLNK: {
 		int ret = get_link_ref(file);
 		if (ret == -1) {
-			xerror(_("open: '%s': Broken symbolic link\n"), file);
-			return EXIT_FAILURE;
+			return err_no_link(file);
 		} else if (ret == S_IFDIR) {
 			return cd_function(file, CD_PRINT_ERROR);
 		} else {
@@ -2062,7 +2075,7 @@ remove_files(char **args)
 
 		char *tmp = unescape_str(args[i], 0);
 		if (!tmp) {
-			xerror(_("%s: '%s': Error escaping file name\n"), err_name, args[i]);
+			xerror(_("%s: '%s': Error unescaping file name\n"), err_name, args[i]);
 			continue;
 		}
 
