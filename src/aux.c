@@ -1195,8 +1195,10 @@ int
 get_link_ref(const char *link)
 {
 	errno = 0;
-	if (!link || !*link)
+	if (!link || !*link) {
+		errno = EINVAL;
 		return (-1);
+	}
 
 	struct stat a;
 	if (stat(link, &a) == -1)

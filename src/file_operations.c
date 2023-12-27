@@ -609,7 +609,8 @@ open_file(char *file)
 #endif /* _NO_LIRA */
 	}
 
-	return exit_status;
+	/* run_mime() may return -1 */
+	return exit_status >= 0 ? exit_status : EXIT_FAILURE;
 }
 
 int
@@ -1292,9 +1293,12 @@ create_dirs(char **args)
 	return create_files(args, 1);
 }
 
+/* FILE is a broken symbolic link (stat(2) failed). Err appropriately. */
 static int
 err_no_link(const char *file)
 {
+	int saved_errno = errno;
+
 	char target[PATH_MAX + 1]; *target = '\0';
 	ssize_t tlen = readlinkat(XAT_FDCWD, file, target, sizeof(target) - 1);
 	if (tlen != -1)
@@ -1303,7 +1307,7 @@ err_no_link(const char *file)
 	xerror(_("open: '%s': Broken symbolic link to %s\n"), file,
 		*target ? target : "???");
 
-	return errno > 0 ? errno : EXIT_FAILURE;
+	return saved_errno;
 }
 
 int
@@ -1409,9 +1413,9 @@ open_function(char **cmd)
 	if (!cmd[2] || (*cmd[2] == '&' && !cmd[2][1])) {
 		ret = open_file(file);
 		if (!conf.opener && ret == EXIT_FAILURE) {
-			xerror(_("%s: Add a new entry to the mimelist file "
-				"('mime edit' or F6) or run 'APP FILE' or 'open FILE APP'\n"),
-				PROGRAM_NAME);
+/*			xerror(_("%s: Add a new entry to the mimelist file "
+ *				"('mime edit' or F6) or run 'APP FILE' or 'open FILE APP'\n"),
+ *				PROGRAM_NAME); */
 			return EXIT_FAILURE;
 		}
 		return ret;
