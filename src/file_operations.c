@@ -2341,6 +2341,7 @@ bulk_rename(char **args)
 	/* Once again */
 	fseek(fp, 0L, SEEK_SET);
 
+	size_t renamed = 0;
 	i = 1;
 
 	/* Rename each file */
@@ -2359,6 +2360,10 @@ bulk_rename(char **args)
 			if (renameat(XAT_FDCWD, args[i], XAT_FDCWD, line) == -1) {
 				exit_status = errno;
 				xerror("br: '%s': %s\n", args[i], strerror(errno));
+				if (conf.autols == 1)
+					press_any_key_to_continue(0);
+			} else {
+				renamed++;
 			}
 		}
 
@@ -2368,8 +2373,8 @@ bulk_rename(char **args)
 	free(line);
 
 	if (unlinkat(fd, bulk_file, 0) == -1) {
-		xerror("br: unlinkat: '%s': %s\n", bulk_file, strerror(errno));
 		exit_status = errno;
+		xerror("br: unlinkat: '%s': %s\n", bulk_file, strerror(errno));
 	}
 	fclose(fp);
 
@@ -2377,10 +2382,9 @@ bulk_rename(char **args)
 		/* Just in case a selected file in the current dir was renamed. */
 		get_sel_files();
 
-#ifdef GENERIC_FS_MONITOR
-	if (exit_status == EXIT_SUCCESS)
+	if (renamed > 0 && conf.autols == 1)
 		reload_dirlist();
-#endif /* GENERIC_FS_MONITOR */
+	print_reload_msg(_("%zu file(s) renamed\n"), renamed);
 
 	return exit_status;
 
