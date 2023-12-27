@@ -1181,10 +1181,13 @@ get_file_type_and_color(const char *filename, const struct stat *attr,
 			color = get_dir_color(filename, attr->st_mode, attr->st_nlink, -1);
 		break;
 
-	case S_IFLNK:
+	case S_IFLNK: {
 		*file_type = LNK_PCHR;
-		*ctype = color = ln_c;
+		struct stat a;
+		*ctype = ln_c;
+		color = stat(filename, &a) == -1 ? or_c : ln_c;
 		break;
+	}
 
 	case S_IFIFO:  *file_type = FIFO_PCHR; color = *ctype = pi_c; break;
 	case S_IFSOCK: *file_type = SOCK_PCHR; color = *ctype = so_c; break;
