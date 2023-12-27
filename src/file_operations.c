@@ -1450,27 +1450,19 @@ get_new_link_target(char *cur_target)
 }
 
 static void
-print_current_target(const char *link, char **target)
+print_current_target(char *target)
 {
 	fputs(_("Current target -> "), stdout);
 
-	if (*target) {
-		colors_list(*target, NO_ELN, NO_PAD, PRINT_NEWLINE);
-		return;
+	struct stat a;
+	if (lstat(target, &a) != -1) {
+		colors_list(target, NO_ELN, NO_PAD, PRINT_NEWLINE);
+	} else if (*target) {
+		printf(_("%s%s%s (broken link)\n"), uf_c, target, df_c);
+	} else {
+		puts(_("??? (broken link)"));
 	}
 
-	char tmp[PATH_MAX + 1];
-	ssize_t len = readlinkat(XAT_FDCWD, link, tmp, sizeof(tmp) - 1);
-
-	if (len != -1) {
-		tmp[len] = '\0';
-		printf(_("%s%s%s (broken link)\n"), uf_c, tmp, df_c);
-		free(*target);
-		*target = savestring(tmp, strnlen(tmp, sizeof(tmp)));
-		return;
-	}
-
-	puts(_("??? (broken link)"));
 	return;
 }
 
@@ -1487,7 +1479,7 @@ edit_link(char *link)
 	if (strchr(link, '\\')) {
 		char *tmp = unescape_str(link, 0);
 		if (!tmp) {
-			xerror(_("le: '%s': Error escaping file\n"), link);
+			xerror(_("le: '%s': Error unescaping file name\n"), link);
 			return EXIT_FAILURE;
 		}
 
@@ -1512,18 +1504,20 @@ edit_link(char *link)
 	}
 
 	/* Get file pointed to by symlink and report to the user */
-	char *real_path = realpath(link, NULL);
-	print_current_target(link, &real_path);
+	char target[PATH_MAX + 1]; *target = '\0';
+	ssize_t tlen = readlinkat(XAT_FDCWD, link, target, sizeof(target) - 1);
+	if (tlen != -1)
+		target[tlen] = '\0';
 
-	char *new_path = get_new_link_target(real_path);
-	if (new_path && strcmp(new_path, real_path) == 0) {
-		free(real_path);
+	print_current_target(target);
+
+	char *new_path = get_new_link_target(target);
+	if (new_path && strcmp(new_path, target) == 0) {
 		free(new_path);
 		puts(_("le: Nothing to do"));
 		return (EXIT_SUCCESS);
 	}
 
-	free(real_path);
 	if (!new_path) /* The user pressed C-d */
 		return EXIT_SUCCESS;
 
