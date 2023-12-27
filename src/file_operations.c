@@ -2356,8 +2356,10 @@ bulk_rename(char **args)
 		if (line[line_len - 1] == '\n')
 			line[line_len - 1] = '\0';
 		if (args[i] && strcmp(args[i], line) != 0) {
-			if (renameat(XAT_FDCWD, args[i], XAT_FDCWD, line) == -1)
+			if (renameat(XAT_FDCWD, args[i], XAT_FDCWD, line) == -1) {
 				exit_status = errno;
+				xerror("br: '%s': %s\n", args[i], strerror(errno));
+			}
 		}
 
 		i++;
