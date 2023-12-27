@@ -2289,7 +2289,7 @@ bulk_rename(char **args)
 	/* Make sure there are as many lines in the bulk file as files
 	 * to be renamed */
 	size_t file_total = 1;
-	char tmp_line[256];
+	char tmp_line[PATH_MAX];
 	while (fgets(tmp_line, (int)sizeof(tmp_line), fp)) {
 		if (!*tmp_line || *tmp_line == '\n' || *tmp_line == '#')
 			continue;
@@ -2342,6 +2342,7 @@ bulk_rename(char **args)
 	fseek(fp, 0L, SEEK_SET);
 
 	size_t renamed = 0;
+	int is_cwd = 0;
 	i = 1;
 
 	/* Rename each file */
@@ -2363,6 +2364,9 @@ bulk_rename(char **args)
 				if (conf.autols == 1)
 					press_any_key_to_continue(0);
 			} else {
+				if (is_cwd == 0 && (is_file_in_cwd(args[i])
+				|| is_file_in_cwd(line)))
+					is_cwd = 1;
 				renamed++;
 			}
 		}
@@ -2382,7 +2386,7 @@ bulk_rename(char **args)
 		/* Just in case a selected file in the current dir was renamed. */
 		get_sel_files();
 
-	if (renamed > 0 && conf.autols == 1)
+	if (renamed > 0 && is_cwd == 1 && conf.autols == 1)
 		reload_dirlist();
 	print_reload_msg(_("%zu file(s) renamed\n"), renamed);
 
