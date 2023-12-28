@@ -2277,7 +2277,7 @@ bulk_rename(char **args)
 
 	fclose(fp);
 
-	/* Open the bulk file with associated text editor */
+	/* Open the bulk file with the associated text editor */
 	open_in_foreground = 1;
 	exit_status = open_file(bulk_file);
 	open_in_foreground = 0;
@@ -2285,7 +2285,9 @@ bulk_rename(char **args)
 	if (exit_status != EXIT_SUCCESS) {
 		xerror("br: %s\n", errno != 0
 			? strerror(errno) : _("Error opening temporary file"));
-		goto ERROR;
+		if (unlink(bulk_file) == -1)
+			xerror("br: unlink: '%s': %s\n", bulk_file, strerror(errno));
+		return exit_status;
 	}
 
 	if (!(fp = open_fread(bulk_file, &fd)))
