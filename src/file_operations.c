@@ -2334,7 +2334,11 @@ bulk_rename(char **args)
 			line[line_len - 1] = '\0';
 
 		if (args[i] && strcmp(args[i], line) != 0) {
-			printf("%s %s->%s %s\n", args[i], mi_c, df_c, line);
+			char *a = abbreviate_file_name(args[i]);
+			char *b = abbreviate_file_name(line);
+			printf("%s %s->%s %s\n", a ? a : args[i], mi_c, df_c, b ? b : line);
+			if (a && a != args[i]) free(a);
+			if (b && b != line) free(b);
 			modified++;
 		}
 
