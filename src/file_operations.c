@@ -2152,25 +2152,28 @@ err_open_tmp_file(const char *file, const int fd)
 	return errno;
 }
 
-/* Rename OLDPATH as NEWPATH.
- * Returns:
- * 0:   success
- * > 1: renameat(2) error. Error message should be printed by the caller
- * -1:  mv(1) error. Error message is printed by mv(1) itself. */
+/* Rename OLDPATH as NEWPATH. */
 static int
 rename_file(char *oldpath, char *newpath)
 {
+	/* Some rename(3) implementations (DragonFly) do not like NEWPATH to
+	 * end with a slash (in case of renaming directories). */
+	size_t len = strlen(newpath);
+	if (len > 1 && newpath[len - 1] == '/')
+		newpath[len - 1] = '\0';
+
 	int ret = renameat(XAT_FDCWD, oldpath, XAT_FDCWD, newpath);
 	if (ret == 0)
 		return 0;
 
-	if (errno != EXDEV)
+	if (errno != EXDEV) {
+		xerror(_("br: Cannot rename '%s' to '%s': %s\n"), oldpath,
+			newpath, strerror(errno));
 		return errno;
+	}
 
 	char *cmd[] = {"mv", "--", oldpath, newpath, NULL};
-	ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
-
-	return (ret == 0 ? 0 : -1);
+	return launch_execv(cmd, FOREGROUND, E_NOFLAG);
 }
 
 /* Rename a bulk of files (ARGS) at once. Takes files to be renamed
@@ -2223,6 +2226,7 @@ bulk_rename(char **args)
 			char *deq_file = unescape_str(args[i], 0);
 			if (!deq_file) {
 				xerror(_("br: '%s': Error unescaping file name\n"), args[i]);
+				press_any_key_to_continue(0);
 				continue;
 			}
 
@@ -2236,6 +2240,7 @@ bulk_rename(char **args)
 			char *p = realpath(args[i], NULL);
 			if (!p) {
 				xerror("br: '%s': %s\n", args[i], strerror(errno));
+				press_any_key_to_continue(0);
 				continue;
 			}
 			free(args[i]);
@@ -2244,6 +2249,7 @@ bulk_rename(char **args)
 
 		if (lstat(args[i], &attr) == -1) {
 			xerror("br: '%s': %s\n", args[i], strerror(errno));
+			press_any_key_to_continue(0);
 			continue;
 		}
 
@@ -2369,12 +2375,11 @@ bulk_rename(char **args)
 
 		if (line[line_len - 1] == '\n')
 			line[line_len - 1] = '\0';
+
 		if (args[i] && strcmp(args[i], line) != 0) {
 			int ret = rename_file(args[i], line);
 			if (ret != 0) {
-				exit_status = ret > 0 ? ret : EXIT_FAILURE;
-				if (ret > 0)
-					xerror("br: '%s': %s\n", args[i], strerror(errno));
+				exit_status = ret;
 				if (conf.autols == 1 && modified > 1)
 					press_any_key_to_continue(0);
 			} else {
