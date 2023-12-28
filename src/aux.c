@@ -609,8 +609,11 @@ xmkdir(char *dir, const mode_t mode)
 FILE *
 open_fread(const char *name, int *fd)
 {
-	if (!name || !*name)
+	errno = 0;
+	if (!name || !*name) {
+		errno = EINVAL;
 		return (FILE *)NULL;
+	}
 
 	*fd = open(name, O_RDONLY);
 	if (*fd == -1)
@@ -632,8 +635,11 @@ open_fread(const char *name, int *fd)
 FILE *
 open_fwrite(const char *name, int *fd)
 {
-	if (!name || !*name)
+	errno = 0;
+	if (!name || !*name) {
+		errno = EINVAL;
 		return (FILE *)NULL;
+	}
 
 	*fd = open(name, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
 	if (*fd == -1)
@@ -654,8 +660,11 @@ open_fwrite(const char *name, int *fd)
 FILE *
 open_fappend(const char *name)
 {
-	if (!name || !*name)
+	errno = 0;
+	if (!name || !*name) {
+		errno = EINVAL;
 		return (FILE *)NULL;
+	}
 
 	int fd = open(name, O_WRONLY | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR);
 	if (fd == -1)

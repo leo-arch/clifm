@@ -2141,6 +2141,38 @@ END:
 	return exit_status;
 }
 
+/* Error opening tmp file FILE. Err accordingly. */
+static int
+err_open_tmp_file(const char *file, const int fd)
+{
+	xerror("br: open: '%s': %s\n", file, strerror(errno));
+	if (unlinkat(fd, file, 0) == -1)
+		xerror("br: unlink: '%s': %s\n", file, strerror(errno));
+
+	return errno;
+}
+
+/* Rename OLDPATH as NEWPATH.
+ * Returns:
+ * 0:   success
+ * > 1: renameat(2) error. Error message should be printed by the caller
+ * -1:  mv(1) error. Error message is printed by mv(1) itself. */
+static int
+rename_file(char *oldpath, char *newpath)
+{
+	int ret = renameat(XAT_FDCWD, oldpath, XAT_FDCWD, newpath);
+	if (ret == 0)
+		return 0;
+
+	if (errno != EXDEV)
+		return errno;
+
+	char *cmd[] = {"mv", "--", oldpath, newpath, NULL};
+	ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
+
+	return (ret == 0 ? 0 : -1);
+}
+
 /* Rename a bulk of files (ARGS) at once. Takes files to be renamed
  * as arguments, and returns zero on success and one on error. The
  * procedude is quite simple: file names to be renamed are copied into
@@ -2172,18 +2204,9 @@ bulk_rename(char **args)
 	}
 
 	size_t i, arg_total = 0;
-	FILE *fp = (FILE *)NULL;
-
-#ifndef HAVE_DPRINTF
-	int tmp_fd = 0;
-	fp = open_fwrite(bulk_file, &tmp_fd);
-	if (!fp) {
-		if (unlink(bulk_file) == -1)
-			xerror("br: unlink: '%s': %s\n", bulk_file, strerror(errno));
-		xerror("br: fopen: '%s': %s\n", bulk_file, strerror(errno));
-		return EXIT_FAILURE;
-	}
-#endif /* !HAVE_DPRINTF */
+	FILE *fp = fdopen(fd, "w");
+	if (!fp)
+		return err_open_tmp_file(bulk_file, fd);
 
 #ifdef HAVE_DPRINTF
 	dprintf(fd, BULK_RENAME_TMP_FILE_HEADER);
@@ -2220,7 +2243,7 @@ bulk_rename(char **args)
 		}
 
 		if (lstat(args[i], &attr) == -1) {
-			xerror("br: 's': %s\n", args[i], strerror(errno));
+			xerror("br: '%s': %s\n", args[i], strerror(errno));
 			continue;
 		}
 
@@ -2232,23 +2255,13 @@ bulk_rename(char **args)
 		fprintf(fp, "%s\n", args[i]);
 #endif /* HAVE_DPRINTF */
 	}
-#ifndef HAVE_DPRINTF
-	fclose(fp);
-#endif /* !HAVE_DPRINTF */
+
 	arg_total = i;
-	close(fd);
 
 	if (counter == 0) { /* No valid file name */
-		if (unlink(bulk_file) == -1)
+		if (unlinkat(fd, bulk_file, 0) == -1)
 			xerror("br: unlink: '%s': %s\n", bulk_file, strerror(errno));
-		return EXIT_FAILURE;
-	}
-
-	fp = open_fread(bulk_file, &fd);
-	if (!fp) {
-		if (unlink(bulk_file) == -1)
-			xerror("br: unlink: '%s': %s\n", bulk_file, strerror(errno));
-		xerror("br: '%s': %s\n", bulk_file, strerror(errno));
+		fclose(fp);
 		return EXIT_FAILURE;
 	}
 
@@ -2270,17 +2283,15 @@ bulk_rename(char **args)
 	}
 
 	fclose(fp);
-	fp = open_fread(bulk_file, &fd);
-	if (!fp) {
-		if (unlink(bulk_file) == -1)
-			xerror("br: unlink: '%s': %s\n", bulk_file, strerror(errno));
-		xerror("br: '%s': %s\n", bulk_file, strerror(errno));
-		return errno;
-	}
+	if (!(fp = open_fread(bulk_file, &fd)))
+		return err_open_tmp_file(bulk_file, fd);
 
 	/* Compare the new modification time to the stored one: if they
 	 * match, nothing was modified */
-	fstat(fd, &attr);
+	if (fstat(fd, &attr) == -1) {
+		xerror("br: '%s': %s\n", bulk_file, strerror(errno));
+		goto ERROR;
+	}
 	if (mtime_bfr == (time_t)attr.st_mtime) {
 		puts(_("br: Nothing to do"));
 		goto ERROR;
@@ -2297,11 +2308,12 @@ bulk_rename(char **args)
 	}
 
 	if (arg_total != file_total) {
-		xerror("%s\n", _("br: Line mismatch in renaming file"));
+		xerror("%s\n", _("br: Line mismatch in temporary file"));
+		exit_status = EXIT_FAILURE;
 		goto ERROR;
 	}
 
-	/* Go back to the beginning of the bulk file, again */
+	/* Rewind to the beginning of the bulk file */
 	fseek(fp, 0L, SEEK_SET);
 
 	size_t line_size = 0;
@@ -2338,7 +2350,7 @@ bulk_rename(char **args)
 		goto ERROR;
 	}
 
-	/* Once again */
+	/* Rewind again */
 	fseek(fp, 0L, SEEK_SET);
 
 	size_t renamed = 0;
@@ -2358,10 +2370,12 @@ bulk_rename(char **args)
 		if (line[line_len - 1] == '\n')
 			line[line_len - 1] = '\0';
 		if (args[i] && strcmp(args[i], line) != 0) {
-			if (renameat(XAT_FDCWD, args[i], XAT_FDCWD, line) == -1) {
-				exit_status = errno;
-				xerror("br: '%s': %s\n", args[i], strerror(errno));
-				if (conf.autols == 1)
+			int ret = rename_file(args[i], line);
+			if (ret != 0) {
+				exit_status = ret > 0 ? ret : EXIT_FAILURE;
+				if (ret > 0)
+					xerror("br: '%s': %s\n", args[i], strerror(errno));
+				if (conf.autols == 1 && modified > 1)
 					press_any_key_to_continue(0);
 			} else {
 				if (is_cwd == 0 && (is_file_in_cwd(args[i])
@@ -2378,8 +2392,10 @@ bulk_rename(char **args)
 
 	if (unlinkat(fd, bulk_file, 0) == -1) {
 		exit_status = errno;
-		xerror("br: unlinkat: '%s': %s\n", bulk_file, strerror(errno));
+		err('w', PRINT_PROMPT, "br: unlink: '%s': %s\n",
+			bulk_file, strerror(errno));
 	}
+
 	fclose(fp);
 
 	if (sel_n > 0 && have_sel_files())
