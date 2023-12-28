@@ -63,8 +63,6 @@ endif
 CFLAGS += -DCLIFM_DATADIR=$(DATADIR)
 
 build: ${OBJS}
-	@printf "Detected operating system: ";
-	@echo "$(OS)"
 	$(CC) -o $(BIN) ${OBJS} $(LIBS) $(CFLAGS)
 
 clean:
