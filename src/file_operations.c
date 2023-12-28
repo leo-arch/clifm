@@ -2156,7 +2156,7 @@ err_open_tmp_file(const char *file, const int fd)
 static int
 rename_file(char *oldpath, char *newpath)
 {
-	/* Some rename(3) implementations (DragonFly) do not like NEWPATH to
+	/* Some renameat(2) implementations (DragonFly) do not like NEWPATH to
 	 * end with a slash (in case of renaming directories). */
 	size_t len = strlen(newpath);
 	if (len > 1 && newpath[len - 1] == '/')
@@ -2271,11 +2271,13 @@ bulk_rename(char **args)
 
 	/* Store the last modification time of the bulk file. This time
 	 * will be later compared to the modification time of the same
-	 * file after shown to the user */
+	 * file after shown to the user. */
 	fstat(fd, &attr);
 	time_t mtime_bfr = (time_t)attr.st_mtime;
 
-	/* Open the bulk file */
+	fclose(fp);
+
+	/* Open the bulk file with associated text editor */
 	open_in_foreground = 1;
 	exit_status = open_file(bulk_file);
 	open_in_foreground = 0;
@@ -2286,7 +2288,6 @@ bulk_rename(char **args)
 		goto ERROR;
 	}
 
-	fclose(fp);
 	if (!(fp = open_fread(bulk_file, &fd)))
 		return err_open_tmp_file(bulk_file, fd);
 
@@ -2302,7 +2303,7 @@ bulk_rename(char **args)
 	}
 
 	/* Make sure there are as many lines in the bulk file as files
-	 * to be renamed */
+	 * to be renamed. */
 	size_t total_modified = 0;
 	char tmp_line[PATH_MAX];
 	while (fgets(tmp_line, (int)sizeof(tmp_line), fp)) {
@@ -2395,6 +2396,7 @@ bulk_rename(char **args)
 		i++;
 	}
 
+	/* Clean stuff, report, and exit */
 	free(line);
 
 	if (unlinkat(fd, bulk_file, 0) == -1) {
