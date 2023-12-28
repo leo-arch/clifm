@@ -2206,7 +2206,7 @@ bulk_rename(char **args)
 		return EXIT_FAILURE;
 	}
 
-	size_t i, arg_total = 0;
+	size_t i;
 	FILE *fp = fdopen(fd, "w");
 	if (!fp)
 		return err_open_tmp_file(bulk_file, fd);
@@ -2218,8 +2218,8 @@ bulk_rename(char **args)
 #endif /* HAVE_DPRINTF */
 
 	struct stat attr;
-	size_t counter = 0;
-	/* Copy all files to be renamed to the bulk file */
+	size_t total_input = 0;
+	/* Copy all files to be renamed into the bulk file */
 	for (i = 1; args[i]; i++) {
 		/* Dequote file name, if necessary */
 		if (strchr(args[i], '\\')) {
@@ -2253,7 +2253,7 @@ bulk_rename(char **args)
 			continue;
 		}
 
-		counter++;
+		total_input++;
 
 #ifdef HAVE_DPRINTF
 		dprintf(fd, "%s\n", args[i]);
@@ -2262,9 +2262,7 @@ bulk_rename(char **args)
 #endif /* HAVE_DPRINTF */
 	}
 
-	arg_total = i;
-
-	if (counter == 0) { /* No valid file name */
+	if (total_input == 0) { /* No valid file name */
 		if (unlinkat(fd, bulk_file, 0) == -1)
 			xerror("br: unlink: '%s': %s\n", bulk_file, strerror(errno));
 		fclose(fp);
@@ -2305,15 +2303,15 @@ bulk_rename(char **args)
 
 	/* Make sure there are as many lines in the bulk file as files
 	 * to be renamed */
-	size_t file_total = 1;
+	size_t total_modified = 0;
 	char tmp_line[PATH_MAX];
 	while (fgets(tmp_line, (int)sizeof(tmp_line), fp)) {
 		if (!*tmp_line || *tmp_line == '\n' || *tmp_line == '#')
 			continue;
-		file_total++;
+		total_modified++;
 	}
 
-	if (arg_total != file_total) {
+	if (total_input != total_modified) {
 		xerror("%s\n", _("br: Line mismatch in temporary file"));
 		exit_status = EXIT_FAILURE;
 		goto ERROR;
