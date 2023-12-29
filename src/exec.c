@@ -280,7 +280,7 @@ launch_execv(char **cmd, const int bg, const int xflags)
  * 'pkill' or 'killall' commands, from within CliFM itself.
  * Otherwise, the program will be forcefully terminated without
  * freeing allocated memory. */
-static inline int
+static int
 graceful_quit(char **args)
 {
 	if (!args || !args[0])

@@ -159,15 +159,14 @@ count_modified_names(char **args, FILE *fp)
 {
 	size_t modified = 0;
 	size_t i = 1;
+	char line[PATH_MAX];
 
 	/* Print what would be done */
-	char line[PATH_MAX];
 	while (fgets(line, (int)sizeof(line), fp)) {
 		if (!*line || *line == '\n' || *line == '#')
 			continue;
 
 		size_t len = strlen(line);
-
 		if (line[len - 1] == '\n')
 			line[len - 1] = '\0';
 
@@ -181,13 +180,13 @@ count_modified_names(char **args, FILE *fp)
 				free(a);
 			if (b && b != line)
 				free(b);
+
 			modified++;
 		}
 
 		i++;
 	}
 
-	/* If no file name was modified */
 	if (modified == 0) {
 		puts(_("br: Nothing to do"));
 		return 0;

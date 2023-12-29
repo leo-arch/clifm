@@ -24,7 +24,6 @@
 
 /* The following functions are taken from Bash (1.14.7), licensed GPL-1.0-or-later,
  * and modified if needed:
- * PUTX
  * stat_char
  * get_y_or_n
  * print_filename
@@ -510,10 +509,10 @@ get_last_input_word(void)
 	return lastword;
 }
 
-/* Store the deescaped string STR into the buffer BUF (only up to MAX bytes).
+/* Store the unescaped string STR into the buffer BUF (only up to MAX bytes).
  * Returns the number of copied bytes. */
 static size_t
-deescape_word(char *str, char *buf, const size_t max)
+unescape_word(char *str, char *buf, const size_t max)
 {
 	size_t i = 0;
 	char *p = str;
@@ -552,7 +551,7 @@ append_ending_char(const enum comp_type ct)
 	size_t deq_str_len = 0;
 
 	if (strchr(lastword, '\\'))
-		deq_str_len = deescape_word(lastword, deq_str, sizeof(deq_str) - 1);
+		deq_str_len = unescape_word(lastword, deq_str, sizeof(deq_str) - 1);
 
 	char *tmp = *deq_str ? deq_str : lastword;
 

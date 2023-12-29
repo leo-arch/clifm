@@ -1524,8 +1524,8 @@ set_default_size_shades(void)
 }
 
 /* Check if LINE contains a valid color code, and store it into the
- * ext_colors global array
- * If LINE contains a color variable, expand it, check it, and store it */
+ * ext_colors global array.
+ * If LINE contains a color variable, expand it, check it, and store it. */
 static int
 store_extension_line(const char *line)
 {

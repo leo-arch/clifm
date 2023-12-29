@@ -298,7 +298,7 @@ get_dev_name(const dev_t dev)
 
 #elif defined(HAVE_STATFS)
 /* Update DEVNAME and DEVTYPE to make it point to the device name and device
- * type of the file system wo which the file FILE belongs. */
+ * type of the file system to which the file FILE belongs. */
 void
 get_dev_info(const char *file, char **devname, char **devtype)
 {

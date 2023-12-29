@@ -1665,7 +1665,7 @@ handle_no_app(const int info, char **fpath, char **mime, const char *arg)
 {
 	if (xargs.preview == 1) {
 		xerror(_("shotgun: '%s': No associated application found\n"
-			"Fix this in then configuration file:\n%s\n"), arg, mime_file);
+			"Fix this in the configuration file:\n%s\n"), arg, mime_file);
 		return EXIT_FAILURE;
 	}
 

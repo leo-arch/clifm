@@ -152,13 +152,13 @@ write_name(FILE *fp, const char *name, const mode_t type)
 
 static int
 write_files_to_tmp(struct dirent ***a, filesn_t *n, const char *target,
-	char *tmp_file)
+	char *tmpfile)
 {
 	int fd = 0;
-	FILE *fp = open_fwrite(tmp_file, &fd);
+	FILE *fp = open_fwrite(tmpfile, &fd);
 	if (!fp) {
 		err('e', PRINT_PROMPT, "%s: rr: fopen: '%s': %s\n", PROGRAM_NAME,
-			tmp_file, strerror(errno));
+			tmpfile, strerror(errno));
 		return errno;
 	}
 
@@ -203,24 +203,24 @@ write_files_to_tmp(struct dirent ***a, filesn_t *n, const char *target,
 }
 
 static int
-open_tmp_file(struct dirent ***a, const filesn_t n, char *tmp_file, char *app)
+open_tmp_file(struct dirent ***a, const filesn_t n, char *tmpfile, char *app)
 {
 	int exit_status = EXIT_SUCCESS;
 	filesn_t i;
 
 	if (!app || !*app) {
 		open_in_foreground = 1;
-		exit_status = open_file(tmp_file);
+		exit_status = open_file(tmpfile);
 		open_in_foreground = 0;
 
 		if (exit_status == EXIT_SUCCESS)
 			return EXIT_SUCCESS;
 
-		xerror(_("rr: '%s': Cannot open file\n"), tmp_file);
+		xerror(_("rr: '%s': Cannot open file\n"), tmpfile);
 		goto END;
 	}
 
-	char *cmd[] = {app, tmp_file, NULL};
+	char *cmd[] = {app, tmpfile, NULL};
 	exit_status = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 
 	if (exit_status == EXIT_SUCCESS)
@@ -235,12 +235,13 @@ END:
 }
 
 static char **
-get_files_from_tmp_file(const char *tmp_file, const char *target, const filesn_t n)
+get_files_from_tmp_file(const char *tmpfile, const char *target, const filesn_t n)
 {
-	size_t nfiles = (target == workspaces[cur_ws].path) ? (size_t)files : (size_t)n;
+	size_t nfiles = (target == workspaces[cur_ws].path)
+		? (size_t)files : (size_t)n;
 	char **tmp_files = xnmalloc(nfiles + 2, sizeof(char *));
 
-	FILE *fp = fopen(tmp_file, "r");
+	FILE *fp = fopen(tmpfile, "r");
 	if (!fp)
 		return (char **)NULL;
 
@@ -307,6 +308,7 @@ get_remove_files(const char *target, char **tmp_files,
 				j++;
 			}
 		}
+
 		rem_files[j] = (char *)NULL;
 		return rem_files;
 	}
@@ -320,6 +322,7 @@ get_remove_files(const char *target, char **tmp_files,
 				snprintf(p, sizeof(p), "%s/%s/%s", workspaces[cur_ws].path,
 					target, (*a)[i]->d_name);
 			}
+
 			rem_files[j] = savestring(p, strnlen(p, sizeof(p)));
 			j++;
 		}

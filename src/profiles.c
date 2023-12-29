@@ -474,9 +474,9 @@ switch_profile(const char *name)
 	return EXIT_FAILURE;
 }
 
-/* Rename profile named as first ARG and second ARG
- * The corresponding profile file is renamed, just the the corresponding
- * entry in the PROFILE_NAMES array */
+/* Rename profile named ARG[0] to ARG[1].
+ * The corresponding profile file is renamed, just as the corresponding
+ * entry in the PROFILE_NAMES array. */
 static int
 rename_profile(char **args)
 {
@@ -532,11 +532,11 @@ rename_profile(char **args)
 	snprintf(dst_pf_name, sizeof(dst_pf_name), "%s/profiles/%s",
 		config_dir_gral, args[1]);
 
-	char *cmd[] = {"mv", "--", src_pf_name, dst_pf_name, NULL};
-	int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
-	if (ret != EXIT_SUCCESS) {
-		xerror(_("pf: Error renaming profile\n"));
-		return ret;
+	if (rename(src_pf_name, dst_pf_name) == -1) {
+		int saved_errno = errno;
+		xerror(_("pf: Cannot rename profile '%s': %s\n"),
+			args[0], strerror(errno));
+		return saved_errno;
 	}
 
 	size_t len = strlen(args[1]);
