@@ -26,6 +26,7 @@
 #define FILE_OPERATIONS_H
 
 #include "bulk_rename.h"
+#include "bulk_remove.h"
 
 /* Macros for open_function */
 #define OPEN_BLK     0
@@ -40,7 +41,6 @@
 __BEGIN_DECLS
 
 int  batch_link(char **args);
-int  bulk_remove(char *s1, char *s2);
 void clear_selbox(void);
 int  cp_mv_file(char **args, const int copy_and_rename, const int force);
 int  create_files(char **args, const int is_md);
