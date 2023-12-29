@@ -25,6 +25,8 @@
 #ifndef FILE_OPERATIONS_H
 #define FILE_OPERATIONS_H
 
+#include "bulk_rename.h"
+
 /* Macros for open_function */
 #define OPEN_BLK     0
 #define OPEN_CHR     1
@@ -38,7 +40,6 @@
 __BEGIN_DECLS
 
 int  batch_link(char **args);
-int  bulk_rename(char **args);
 int  bulk_remove(char *s1, char *s2);
 void clear_selbox(void);
 int  cp_mv_file(char **args, const int copy_and_rename, const int force);
@@ -47,6 +48,7 @@ int  create_dirs(char **args);
 int  dup_file(char **cmd);
 int  edit_link(char *link);
 char *export_files(char **filenames, const int open);
+int  have_sel_files(void);
 int  open_file(char *file);
 int  open_function(char **cmd);
 int  remove_files(char **args);
