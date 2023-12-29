@@ -1571,7 +1571,7 @@ print_removed_file_info(const struct rm_info info)
 	/* Name removed, but file is still linked to another name (hardlink) */
 	if (info.dir == 0 && info.links > 1) {
 		const nlink_t l = info.links - 1;
-		xerror(_("r: '%s': File might still exist (%jd more "
+		xerror(_("r: '%s': File may still exist (%jd more "
 			"%s linked to this file before this operation)\n"), info.name,
 			(intmax_t)l, l > 1 ? _("names were") : _("name was"));
 	}

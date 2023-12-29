@@ -87,21 +87,17 @@ rename_file(char *oldpath, char *newpath)
 }
 
 static int
-write_renfiles_to_tmp(char ***args, const char *bulk_file, const int fd,
-	time_t *mtime_bfr, size_t *total_input)
+write_renfiles_to_tmp(char ***args, const char *tmpfile, const int fd,
+	time_t *mtime, size_t *written)
 {
 	size_t i;
 	struct stat attr;
 
 	FILE *fp = fdopen(fd, "w");
 	if (!fp)
-		return err_open_tmp_file(bulk_file, fd);
+		return err_open_tmp_file(tmpfile, fd);
 
-#ifdef HAVE_DPRINTF
-	dprintf(fd, BULK_RENAME_TMP_FILE_HEADER);
-#else
 	fprintf(fp, BULK_RENAME_TMP_FILE_HEADER);
-#endif /* HAVE_DPRINTF */
 
 	/* Copy all files to be renamed into the bulk file */
 	for (i = 1; (*args)[i]; i++) {
@@ -137,27 +133,22 @@ write_renfiles_to_tmp(char ***args, const char *bulk_file, const int fd,
 			continue;
 		}
 
-		(*total_input)++;
-
-#ifdef HAVE_DPRINTF
-		dprintf(fd, "%s\n", (*args)[i]);
-#else
 		fprintf(fp, "%s\n", (*args)[i]);
-#endif /* HAVE_DPRINTF */
+		(*written)++;
 	}
 
-	if (*total_input == 0) { /* No valid file name */
-		if (unlinkat(fd, bulk_file, 0) == -1)
-			xerror("br: unlink: '%s': %s\n", bulk_file, strerror(errno));
+	if (*written == 0) { /* No valid file name */
+		if (unlinkat(fd, tmpfile, 0) == -1)
+			xerror("br: unlink: '%s': %s\n", tmpfile, strerror(errno));
 		fclose(fp);
 		return EXIT_FAILURE;
 	}
 
-	/* Store the last modification time of the bulk file. This time
+	/* Store the last modification time of the tmp file. This time
 	 * will be later compared to the modification time of the same
 	 * file after shown to the user. */
 	fstat(fd, &attr);
-	*mtime_bfr = (time_t)attr.st_mtime;
+	*mtime = (time_t)attr.st_mtime;
 
 	fclose(fp);
 	return EXIT_SUCCESS;
@@ -175,10 +166,10 @@ count_modified_names(char **args, FILE *fp)
 		if (!*line || *line == '\n' || *line == '#')
 			continue;
 
-		size_t line_len = strlen(line);
+		size_t len = strlen(line);
 
-		if (line[line_len - 1] == '\n')
-			line[line_len - 1] = '\0';
+		if (line[len - 1] == '\n')
+			line[len - 1] = '\0';
 
 		if (args[i] && strcmp(args[i], line) != 0) {
 			char *a = abbreviate_file_name(args[i]);
@@ -206,17 +197,17 @@ count_modified_names(char **args, FILE *fp)
 }
 
 static int
-open_bulk_file(char *bulk_file)
+open_tmpfile(char *file)
 {
 	open_in_foreground = 1;
-	int exit_status = open_file(bulk_file);
+	int exit_status = open_file(file);
 	open_in_foreground = 0;
 
 	if (exit_status != EXIT_SUCCESS) {
 		xerror("br: %s\n", errno != 0
 			? strerror(errno) : _("Error opening temporary file"));
-		if (unlink(bulk_file) == -1)
-			xerror("br: unlink: '%s': %s\n", bulk_file, strerror(errno));
+		if (unlink(file) == -1)
+			xerror("br: unlink: '%s': %s\n", file, strerror(errno));
 		return exit_status;
 	}
 
@@ -224,19 +215,19 @@ open_bulk_file(char *bulk_file)
 }
 
 static int
-check_line_mismatch(FILE *fp, const size_t total_input)
+check_line_mismatch(FILE *fp, const size_t total)
 {
-	size_t total_modified = 0;
-	char tmp_line[PATH_MAX];
+	size_t modified = 0;
+	char line[PATH_MAX];
 
-	while (fgets(tmp_line, (int)sizeof(tmp_line), fp)) {
-		if (!*tmp_line || *tmp_line == '\n' || *tmp_line == '#')
+	while (fgets(line, (int)sizeof(line), fp)) {
+		if (!*line || *line == '\n' || *line == '#')
 			continue;
 
-		total_modified++;
+		modified++;
 	}
 
-	if (total_input != total_modified) {
+	if (total != modified) {
 		xerror("%s\n", _("br: Line mismatch in temporary file"));
 		return EXIT_FAILURE;
 	}
@@ -277,6 +268,7 @@ rename_bulk_files(char **args, FILE *fp, int *is_cwd, size_t *renamed,
 		if (*is_cwd == 0 && (is_file_in_cwd(args[i])
 		|| is_file_in_cwd(line)))
 			*is_cwd = 1;
+
 		(*renamed)++;
 
 CONT:
@@ -306,48 +298,48 @@ bulk_rename(char **args)
 
 	int exit_status = EXIT_SUCCESS;
 
-	char bulk_file[PATH_MAX];
-	snprintf(bulk_file, sizeof(bulk_file), "%s/%s",
+	char tmpfile[PATH_MAX];
+	snprintf(tmpfile, sizeof(tmpfile), "%s/%s",
 		xargs.stealth_mode == 1 ? P_tmpdir : tmp_dir, TMP_FILENAME);
 
-	int fd = mkstemp(bulk_file);
+	int fd = mkstemp(tmpfile);
 	if (fd == -1) {
-		xerror("br: mkstemp: '%s': %s\n", bulk_file, strerror(errno));
+		xerror("br: mkstemp: '%s': %s\n", tmpfile, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
 	/* Write files to be renamed into a tmp file */
-	size_t total_input = 0;
-	time_t mtime_bfr = 0;
-	int ret = write_renfiles_to_tmp(&args, bulk_file, fd,
-		&mtime_bfr, &total_input);
+	size_t written = 0;
+	time_t mtime_bk = 0;
+	int ret = write_renfiles_to_tmp(&args, tmpfile, fd,
+		&mtime_bk, &written);
 	if (ret != EXIT_SUCCESS)
 		return ret;
 
-	/* Open the bulk file with the associated text editor */
-	if ((ret = open_bulk_file(bulk_file)) != EXIT_SUCCESS)
+	/* Open the tmp file with the associated text editor */
+	if ((ret = open_tmpfile(tmpfile)) != EXIT_SUCCESS)
 		return ret;
 
 	FILE *fp;
 	struct stat attr;
 
-	if (!(fp = open_fread(bulk_file, &fd)))
-		return err_open_tmp_file(bulk_file, fd);
+	if (!(fp = open_fread(tmpfile, &fd)))
+		return err_open_tmp_file(tmpfile, fd);
 
 	/* Compare the new modification time to the stored one: if they
 	 * match, nothing was modified. */
 	if (fstat(fd, &attr) == -1) {
-		xerror("br: '%s': %s\n", bulk_file, strerror(errno));
+		xerror("br: '%s': %s\n", tmpfile, strerror(errno));
 		goto ERROR;
 	}
-	if (mtime_bfr == (time_t)attr.st_mtime) {
+	if (mtime_bk == (time_t)attr.st_mtime) {
 		puts(_("br: Nothing to do"));
 		goto ERROR;
 	}
 
 	/* Make sure there are as many lines in the bulk file as files
 	 * to be renamed. */
-	if (check_line_mismatch(fp, total_input) != EXIT_SUCCESS) {
+	if (check_line_mismatch(fp, written) != EXIT_SUCCESS) {
 		exit_status = EXIT_FAILURE;
 		goto ERROR;
 	}
@@ -372,10 +364,10 @@ bulk_rename(char **args)
 		exit_status = ret;
 
 	/* Clean stuff, report, and exit */
-	if (unlinkat(fd, bulk_file, 0) == -1) {
+	if (unlinkat(fd, tmpfile, 0) == -1) {
 		exit_status = errno;
 		err('w', PRINT_PROMPT, "br: unlink: '%s': %s\n",
-			bulk_file, strerror(errno));
+			tmpfile, strerror(errno));
 	}
 
 	fclose(fp);
@@ -391,8 +383,8 @@ bulk_rename(char **args)
 	return exit_status;
 
 ERROR:
-	if (unlinkat(fd, bulk_file, 0) == -1) {
-		xerror("br: unlinkat: '%s': %s\n", bulk_file, strerror(errno));
+	if (unlinkat(fd, tmpfile, 0) == -1) {
+		xerror("br: unlinkat: '%s': %s\n", tmpfile, strerror(errno));
 		exit_status = errno;
 	}
 

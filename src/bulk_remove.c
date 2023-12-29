@@ -53,12 +53,12 @@ parse_bulk_remove_params(char *s1, char *s2, char **app, char **target)
 		return EXIT_SUCCESS;
 	}
 
-	int stat_ret = 0;
+	int ret = 0;
 	struct stat a;
-	if ((stat_ret = stat(s1, &a)) == -1 || !S_ISDIR(a.st_mode)) {
+	if ((ret = stat(s1, &a)) == -1 || !S_ISDIR(a.st_mode)) {
 		char *p = get_cmd_path(s1);
 		if (!p) { /* S1 is neither a directory nor a valid application */
-			int ec = stat_ret != -1 ? ENOTDIR : ENOENT;
+			int ec = ret != -1 ? ENOTDIR : ENOENT;
 			xerror("rr: '%s': %s\n", s1, strerror(ec));
 			return ec;
 		}
@@ -132,7 +132,7 @@ get_file_suffix(const mode_t type)
 }
 
 static void
-print_file(FILE *fp, const char *name, const mode_t type)
+write_name(FILE *fp, const char *name, const mode_t type)
 {
 #ifndef _DIRENT_HAVE_D_TYPE
 	UNUSED(type);
@@ -167,13 +167,12 @@ write_files_to_tmp(struct dirent ***a, filesn_t *n, const char *target,
 	if (target == workspaces[cur_ws].path) {
 		filesn_t i;
 		for (i = 0; i < files; i++)
-			print_file(fp, file_info[i].name, file_info[i].type);
+			write_name(fp, file_info[i].name, file_info[i].type);
 	} else {
 		if (count_dir(target, CPOP) <= 2) {
-			int tmp_err = EXIT_FAILURE;
-			xerror(_("%s: '%s': Directory empty\n"), PROGRAM_NAME, target);
+			xerror(_("rr: '%s': Directory empty\n"), target);
 			fclose(fp);
-			return tmp_err;
+			return EXIT_FAILURE;
 		}
 
 		*n = scandir(target, a, NULL, alphasort);
@@ -192,9 +191,9 @@ write_files_to_tmp(struct dirent ***a, filesn_t *n, const char *target,
 			struct stat attr;
 			if (stat((*a)[i]->d_name, &attr) == -1)
 				continue;
-			print_file(fp, (*a)[i]->d_name, get_dt(attr.st_mode));
+			write_name(fp, (*a)[i]->d_name, get_dt(attr.st_mode));
 #else
-			print_file(fp, (*a)[i]->d_name, (*a)[i]->d_type);
+			write_name(fp, (*a)[i]->d_name, (*a)[i]->d_type);
 #endif /* !_DIRENT_HAVE_D_TYPE */
 		}
 	}
@@ -245,15 +244,14 @@ get_files_from_tmp_file(const char *tmp_file, const char *target, const filesn_t
 	if (!fp)
 		return (char **)NULL;
 
-	size_t size = 0, i;
-	char *line = (char *)NULL;
-	ssize_t len = 0;
+	size_t i = 0;
+	char line[PATH_MAX];
 
-	i = 0;
-	while ((len = getline(&line, &size, fp)) > 0) {
+	while (fgets(line, (int)sizeof(line), fp)) {
 		if (*line == '#' || *line == '\n')
 			continue;
 
+		size_t len = strlen(line);
 		if (line[len - 1] == '\n') {
 			line[len - 1] = '\0';
 			len--;
@@ -266,13 +264,11 @@ get_files_from_tmp_file(const char *tmp_file, const char *target, const filesn_t
 			len--;
 		}
 
-		tmp_files[i] = savestring(line, (size_t)len);
+		tmp_files[i] = savestring(line, len);
 		i++;
 	}
 
 	tmp_files[i] = (char *)NULL;
-
-	free(line);
 	fclose(fp);
 
 	return tmp_files;
@@ -363,6 +359,7 @@ static int
 nothing_to_do(char **tmp_file, struct dirent ***a, const filesn_t n, const int fd)
 {
 	puts(_("rr: Nothing to do"));
+
 	if (unlinkat(fd, *tmp_file, 0) == 1)
 		xerror("rr: unlink: '%s': %s\n", *tmp_file, strerror(errno));
 	close(fd);
