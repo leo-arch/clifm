@@ -463,8 +463,9 @@ extern time_t curdir_mtime;
 
 #define MAX_UMASK 0777
 
-#define MAX_SEL   INT_MAX
-#define MAX_TRASH INT_MAX
+#define MAX_SEL       INT_MAX
+#define MAX_TRASH     INT_MAX
+#define MAX_BOOKMARKS INT_MAX
 
 /* The following flags are used via an integer (FLAGS). If an integer has
  * 4 bytes, then we can use a total of 32 flags (0-31)
@@ -1217,7 +1218,7 @@ struct fileinfo {
 	mode_t mode; /* Store st_mode (for long view mode) */
 	mode_t type; /* Store d_type value */
 	int dir;
-	int eln_n;
+	int eln_n; /* Amount of digits in ELN */
 	int exec;
 	int ruser;  /* User read permission for dir */
 	int symlink;

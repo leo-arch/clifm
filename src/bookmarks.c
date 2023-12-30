@@ -547,6 +547,11 @@ add_bookmark(char **cmd)
 		return EXIT_SUCCESS;
 	}
 
+	if (bm_n == MAX_BOOKMARKS) {
+		xerror("%s\n", _("bookmarks: Cannot add any more bookmarks"));
+		return EXIT_FAILURE;
+	}
+
 	char *p = unescape_str(cmd[0], 0);
 	if (!p) {
 		xerror(_("bookmarks: '%s': Error unescaping file name\n"), cmd[0]);
@@ -672,7 +677,7 @@ del_bookmarks(char **args)
 	}
 
 	char *rstr = gen_rand_str(RAND_SUFFIX_LEN);
-	char tmp_file[PATH_MAX + 12];
+	char tmp_file[PATH_MAX + 2 + RAND_SUFFIX_LEN];
 	snprintf(tmp_file, sizeof(tmp_file), "%s.%s", bm_file,
 		rstr ? rstr : "gX6&55#0fa");
 	free(rstr);
