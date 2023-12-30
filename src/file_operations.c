@@ -32,7 +32,6 @@
 #ifdef __TINYC__
 # undef CHAR_MAX /* Silence redefinition error */
 #endif /* __TINYC__ */
-#include <limits.h>
 
 #include "aux.h"
 #include "checks.h"

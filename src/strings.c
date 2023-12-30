@@ -45,7 +45,6 @@
 # define HAVE_WORDEXP
 # include <wordexp.h>
 #endif /* !__HAIKU__ && !__OpenBSD && !__ANDROID */
-#include <limits.h>
 #include <errno.h>
 
 #if defined(__OpenBSD__)

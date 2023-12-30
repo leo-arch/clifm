@@ -28,7 +28,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <getopt.h>
-#include <limits.h> /* INT_MAX */
 #include <pwd.h> /* getpwuid() */
 #include <errno.h>
 #include <readline/tilde.h> /* tilde_expand() */

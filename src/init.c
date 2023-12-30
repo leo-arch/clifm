@@ -24,7 +24,6 @@
 
 #include "helpers.h"
 
-#include <limits.h> /* INT_MIN */
 #include <errno.h>
 
 #if defined(__linux__) || defined(__HAIKU__) || defined(__sun) \

@@ -1199,9 +1199,15 @@ trash_files_args(char **args)
 	int *successfully_trashed = xnmalloc(i + 1, sizeof(int));
 
 	for (i = 1; args[i]; i++) {
+		if (trash_n + trashed_files >= MAX_TRASH) {
+			xerror("%s\n", "trash: Cannot trash any more files");
+			exit_status = EXIT_FAILURE;
+			break;
+		}
+
 		char *deq_file = unescape_str(args[i], 0);
 		if (!deq_file) {
-			xerror("trash: '%s': Error unescaping file\n", args[i]);
+			xerror("trash: '%s': Error unescaping file name\n", args[i]);
 			continue;
 		}
 

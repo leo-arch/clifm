@@ -31,8 +31,8 @@
 #include <unistd.h>
 
 #ifdef __sun
-# include <sys/termios.h> // TIOCGWINSZ
-#endif // __sun
+# include <sys/termios.h> /* TIOCGWINSZ */
+#endif /* __sun */
 
 /* We need rl_line_buffer in case of no matches and no metacharacter */
 #include <readline/readline.h>

@@ -36,7 +36,6 @@
 #include <termios.h>
 #include <unistd.h>
 #include <time.h>
-#include <limits.h>
 #include <readline/readline.h>
 
 #include "aux.h"

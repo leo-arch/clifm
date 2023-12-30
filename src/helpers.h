@@ -127,6 +127,7 @@
 #endif /* !_NO_GETTEXT*/
 
 #include <glob.h>
+#include <limits.h>
 #include <regex.h>
 #include <stdlib.h>
 #include <sys/stat.h> /* S_BLKSIZE */
@@ -461,6 +462,9 @@ extern time_t curdir_mtime;
 #define MAX_SHELL_LEVEL 1000 /* This is the value used by bash 5.2 */
 
 #define MAX_UMASK 0777
+
+#define MAX_SEL   INT_MAX
+#define MAX_TRASH INT_MAX
 
 /* The following flags are used via an integer (FLAGS). If an integer has
  * 4 bytes, then we can use a total of 32 flags (0-31)

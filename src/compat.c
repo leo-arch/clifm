@@ -31,7 +31,6 @@
 #include <dirent.h>
 #include <string.h>
 #include <errno.h>
-#include <limits.h>
 
 /* -------------------- *AT functions -------------------------- */
 

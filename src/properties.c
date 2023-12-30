@@ -45,7 +45,6 @@
 #elif defined(__sun)
 # if defined(ST_BTIME) /* Undefined if compiled with _NO_SUN_BIRTHTIME */
 #  include <attr.h> /* getattrat, nvlist_lookup_uint64_array, nvlist_free */
-#  include <limits.h> /* LONG_MAX */
 # endif /* ST_BTIME */
 # include <sys/mkdev.h> /* minor(), major() */
 /* For BSD systems, we need sys/types.h, already included in helpers.h */

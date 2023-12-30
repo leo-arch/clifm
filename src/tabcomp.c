@@ -53,7 +53,6 @@ typedef char *rl_cpvfunc_t;
 #include <errno.h>
 
 #include <termios.h> /* Get cursor position functions */
-#include <limits.h> /* INT_MIN */
 
 #include "aux.h"
 #include "checks.h"

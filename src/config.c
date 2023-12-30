@@ -25,7 +25,6 @@
 #include "helpers.h"
 
 #include <errno.h>
-#include <limits.h>
 #include <stdio.h>
 #include <readline/readline.h>
 #include <string.h>

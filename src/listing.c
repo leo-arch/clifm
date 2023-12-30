@@ -42,8 +42,6 @@
 # include <sys/xattr.h>
 #endif /* LINUX_FILE_XATTRS */
 
-#include <limits.h> /* INT_MAX */
-
 #if defined(LINUX_FSINFO) || defined(HAVE_STATFS)
 # include "fsinfo.h"
 #endif /* LINUX_FSINFO || HAVE_STATFS */

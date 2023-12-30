@@ -37,7 +37,6 @@
 # endif /* __TINYC__ */
 # include <sys/ioctl.h>
 #endif /* __linux__ || __HAIKU__ || __APPLE__ || __sun || __CYGWIN__ */
-#include <limits.h>
 
 #ifdef __sun
 # include <sys/termios.h> /* TIOCGWINSZ */
@@ -97,6 +96,11 @@ select_file(char *file)
 {
 	if (!file || !*file)
 		return 0;
+
+	if (sel_n == MAX_SEL) {
+		xerror("%s\n", _("sel: Cannot select any more files"));
+		return 0;
+	}
 
 	int exists = 0, new_sel = 0, j;
 	size_t flen = strlen(file);

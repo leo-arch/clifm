@@ -29,7 +29,6 @@
 #include <string.h>
 #include <time.h>
 #include <readline/history.h>
-#include <limits.h> /* INT_MIN */
 
 #include "aux.h"
 #include "checks.h"

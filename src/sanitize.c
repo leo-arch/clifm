@@ -32,7 +32,6 @@
 #include <errno.h>
 #include <sys/resource.h> /* getrlimit(3), setrlimit(3) */
 #include <unistd.h> /* close(2), sysconf(3) */
-#include <limits.h> /* OPEN_MAX */
 
 #include "aux.h"
 #include "checks.h" /* is_number() */
