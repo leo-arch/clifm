@@ -504,8 +504,8 @@ gen_notification(const int flag)
 			snprintf(p, len, "*%zu", sel_n);
 		break;
 	case NOTIF_TRASH:
-		if (trash_n > 2)
-			snprintf(p, len, "T%zu", trash_n - 2);
+		if (trash_n > 0)
+			snprintf(p, len, "T%zu", trash_n);
 		break;
 	default: break;
 	}
@@ -809,7 +809,7 @@ update_trash_indicator(void)
 	if (n <= 2)
 		trash_n = 0;
 	else
-		trash_n = (size_t)n;
+		trash_n = (size_t)n - 2;
 }
 #endif /* !_NO_TRASH */
 
@@ -826,7 +826,7 @@ setenv_prompt(void)
 	snprintf(t, sizeof(t), "%d", (int)sel_n);
 	setenv("CLIFM_STAT_SEL", t, 1);
 #ifndef _NO_TRASH
-	snprintf(t, sizeof(t), "%d", trash_n > 2 ? (int)trash_n - 2 : 0);
+	snprintf(t, sizeof(t), "%d", trash_n > 0 ? (int)trash_n : 0);
 	setenv("CLIFM_STAT_TRASH", t, 1);
 #endif /* !_NO_TRASH */
 	snprintf(t, sizeof(t), "%d", (int)msgs.error);
@@ -882,9 +882,9 @@ construct_prompt(const char *decoded_prompt)
 			snprintf(warn_ind, N_IND, "%sW%zu%s", wm_c, msgs.warning, RL_NC);
 		if (msgs.notice > 0)
 			snprintf(notice_ind, N_IND, "%sN%zu%s", nm_c, msgs.notice, RL_NC);
-		if (trash_n > 2)
+		if (trash_n > 0)
 			snprintf(trash_ind, N_IND, "%sT%zu%s",
-				ti_c, (size_t)trash_n - 2, RL_NC);
+				ti_c, (size_t)trash_n, RL_NC);
 		if (sel_n > 0)
 			snprintf(sel_ind, N_IND, "%s*%zu%s", li_c, sel_n, RL_NC);
 	}
