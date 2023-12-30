@@ -25,6 +25,21 @@
 #ifndef COLORS_H
 #define COLORS_H
 
+#define RL_PRINTABLE    1
+#define RL_NO_PRINTABLE 0 /* Add non-printing flags (\001 and \002)*/
+
+/* Tell split_color_line weather we're dealing with interface or file
+ * type colors */
+#define SPLIT_INTERFACE_COLORS 0
+#define SPLIT_FILETYPE_COLORS  1
+
+/* Max amount of custom color variables in the color scheme file */
+#define MAX_DEFS 128
+
+/* Macros for the set_shades function */
+#define DATE_SHADES 0
+#define SIZE_SHADES 1
+
 __BEGIN_DECLS
 
 void color_codes(void);

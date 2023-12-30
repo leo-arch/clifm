@@ -43,19 +43,18 @@ typedef char *rl_cpvfunc_t;
 #endif /* __OpenBSD__ */
 
 #include "aux.h"
+#include "builtins.h"
 #include "checks.h"
 #include "colors.h"
 #include "fuzzy_match.h"
-#include "jump.h"
-#include "messages.h"
-#include "navigation.h" /* fastback() */
-#include "readline.h"
-#include "builtins.h"
-#include "prompt.h"
-
 #ifndef _NO_HIGHLIGHT
 # include "highlight.h"
 #endif /* !_NO_HIGHLIGHT */
+#include "jump.h"
+#include "messages.h"
+#include "navigation.h" /* fastback() */
+#include "prompt.h"
+#include "readline.h"
 
 #define NO_MATCH      0
 #define PARTIAL_MATCH 1

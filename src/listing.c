@@ -80,20 +80,19 @@
 #define IS_EXEC(s) (((s).st_mode & S_IXUSR)               \
 	|| ((s).st_mode & S_IXGRP) || ((s).st_mode & S_IXOTH))
 
-#include "aux.h"
-#include "colors.h"
-#include "messages.h"
-#include "misc.h"
-#include "properties.h"
-#include "sort.h"
-#include "checks.h"
-#include "exec.h"
 #include "autocmds.h"
-#include "sanitize.h"
-
+#include "aux.h"
+#include "checks.h"
+#include "colors.h"
+#include "exec.h"
 #ifndef _NO_ICONS
 # include "icons.h"
 #endif /* !_NO_ICONS */
+#include "messages.h"
+#include "misc.h"
+#include "properties.h"
+#include "sanitize.h"
+#include "sort.h"
 
 /* In case we want to try some faster printf implementation */
 /*#if defined(_PALAND_PRINTF)

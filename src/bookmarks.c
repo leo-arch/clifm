@@ -36,24 +36,10 @@
 #include "exec.h" /* launch_execv() */
 #include "file_operations.h" /* open_function() */
 #include "init.h" /* load_bookmarks() */
-#include "readline.h" /* rl_no_hist() */
 #include "messages.h" /* STEALTH_DISABLED */
-#include "listing.h" /* reload_dirlist() */
 #include "misc.h" /* err(), xerror() */
-
-#define NO_BOOKMARKS "bookmarks: No bookmarks\nUse 'bm add dir/ name' \
-to create a bookmark\nTry 'bm --help' for more information"
-
-#define BM_ADD_NO_PARAM "bookmarks: A file and a name are required\n\
-Example: 'bm add dir/ name'\nTry 'bm --help' for more information"
-
-#define BM_DEL_NO_PARAM "bookmarks: A name is required\n\
-Example: 'bm del name'\nTry 'bm --help' for more information"
-
-#define PRINT_BM_HEADER 1
-#define NO_BM_HEADER    0
-#define BM_SCREEN       1 /* The edit function is called from the bookmarks screen */
-#define NO_BM_SCREEN    0
+#include "listing.h" /* reload_dirlist() */
+#include "readline.h" /* rl_no_hist() */
 
 void
 free_bookmarks(void)

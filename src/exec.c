@@ -68,8 +68,15 @@ typedef char *rl_cpvfunc_t;
 #include "jump.h"
 #include "keybinds.h"
 #include "listing.h"
+#include "messages.h"
+#ifndef NO_MEDIA_FUNC
+# include "media.h"
+#endif /* NO_MEDIA_FUNC */
 #include "mime.h"
 #include "misc.h"
+#ifndef _NO_BLEACH
+# include "name_cleaner.h"
+#endif /* !_NO_BLEACH */
 #include "navigation.h"
 #ifndef _NO_PROFILES
 # include "profiles.h"
@@ -84,16 +91,9 @@ typedef char *rl_cpvfunc_t;
 #ifndef _NO_TRASH
 # include "trash.h"
 #endif /* !_NO_TRASH */
-#include "messages.h"
-#ifndef NO_MEDIA_FUNC
-# include "media.h"
-#endif /* NO_MEDIA_FUNC */
-#ifndef _NO_BLEACH
-# include "name_cleaner.h"
-#endif /* !_NO_BLEACH */
 #include "sanitize.h"
-#include "tags.h"
 #include "tabcomp.h"
+#include "tags.h"
 
 int
 get_exit_code(const int status, const int exec_flag)
@@ -214,10 +214,14 @@ launch_execv(char **cmd, const int bg, const int xflags)
 
 	int status = 0;
 	pid_t pid = fork();
+
 	if (pid < 0) {
+		int saved_errno = errno;
 		xerror("%s: fork: %s\n", PROGRAM_NAME, strerror(errno));
-		return errno;
-	} else if (pid == 0) {
+		return saved_errno;
+	}
+
+	if (pid == 0) {
 		if (bg == 0) {
 			/* If the program runs in the foreground, reenable signals only
 			 * for the child, in case they were disabled for the parent. */
@@ -291,8 +295,7 @@ graceful_quit(char **args)
 		if ((strcmp(args[0], "kill") == 0 && atoi(args[i]) == (int)own_pid)
 		|| ((strcmp(args[0], "killall") == 0 || strcmp(args[0], "pkill") == 0)
 		&& bin_name && strcmp(args[i], bin_name) == 0)) {
-			fprintf(stderr, _("%s: To gracefully quit enter 'q'\n"),
-				PROGRAM_NAME);
+			xerror(_("%s: To gracefully quit enter 'q'\n"), PROGRAM_NAME);
 			return EXIT_FAILURE;
 		}
 	}
@@ -578,7 +581,7 @@ dirs_first_function(const char *arg)
 	if (*arg == 's' && strcmp(arg, "status") == 0) {
 		printf(_("Directories first is %s\n"),
 			conf.list_dirs_first == 1 ? _("enabled") : _("disabled"));
-	}  else if (*arg == 'o' && strcmp(arg, "on") == 0) {
+	} else if (*arg == 'o' && strcmp(arg, "on") == 0) {
 		conf.list_dirs_first = 1;
 		if (conf.autols == 1) reload_dirlist();
 		print_reload_msg(_("Directories first enabled\n"));
@@ -796,16 +799,14 @@ icons_function(const char *arg)
 
 	if (*arg == 'o' && arg[1] == 'n' && !arg[2]) {
 		conf.icons = 1;
-		int ret = EXIT_SUCCESS;
-		if (conf.autols == 1) { free_dirlist(); ret = list_dir(); }
+		if (conf.autols == 1) reload_dirlist();
 		print_reload_msg(_("Icons enabled\n"));
-		return ret;
+		return EXIT_SUCCESS;
 	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
 		conf.icons = 0;
-		int ret = EXIT_SUCCESS;
-		if (conf.autols == 1) { free_dirlist(); ret = list_dir(); }
+		if (conf.autols == 1) reload_dirlist();
 		print_reload_msg(_("Icons disabled\n"));
-		return ret;
+		return EXIT_SUCCESS;
 	} else {
 		fprintf(stderr, "%s\n", _(ICONS_USAGE));
 		return EXIT_FAILURE;
@@ -1009,17 +1010,13 @@ hidden_files_function(const char *arg)
 		return EXIT_SUCCESS;
 	}
 
-	int exit_status = EXIT_SUCCESS;
-
 	if (strcmp(arg, "status") == 0) {
 		printf(_("Show-hidden-files is %s\n"), conf.show_hidden
 			? _("enabled") : _("disabled"));
 	} else if (strcmp(arg, "off") == 0) {
 		conf.show_hidden = 0;
-		if (conf.autols == 1) {
-			free_dirlist();
-			exit_status = list_dir();
-		}
+		if (conf.autols == 1)
+			reload_dirlist();
 		print_reload_msg(_("Hidden files disabled\n"));
 	} else if (strcmp(arg, "on") == 0) {
 		conf.show_hidden = 1;
@@ -1028,7 +1025,7 @@ hidden_files_function(const char *arg)
 		print_reload_msg(_("Hidden files enabled\n"));
 	}
 
-	return exit_status;
+	return EXIT_SUCCESS;
 }
 
 static int
@@ -1219,13 +1216,10 @@ reload_function(void)
 	int exit_status = reload_config();
 	conf.welcome_message = 0;
 
-	if (conf.autols == 1) {
-		free_dirlist();
-		if (list_dir() != EXIT_SUCCESS)
-			exit_status = EXIT_FAILURE;
-		print_reload_msg("Configuration file reloaded\n");
-	}
+	if (conf.autols == 1)
+		reload_dirlist();
 
+	print_reload_msg("Configuration file reloaded\n");
 	return exit_status;
 }
 
@@ -1857,7 +1851,7 @@ preview_edit(char *app)
 
 	int ret = EXIT_SUCCESS;
 	if (app) {
-		char *cmd[] = { app, file, NULL };
+		char *cmd[] = {app, file, NULL};
 		ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	} else {
 		ret = open_file(file);

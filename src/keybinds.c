@@ -50,15 +50,15 @@ typedef char *rl_cpvfunc_t;
 #include "aux.h"
 #include "config.h"
 #include "exec.h"
+#include "file_operations.h"
 #include "keybinds.h"
 #include "listing.h"
+#include "messages.h"
 #include "misc.h"
 #include "profiles.h"
 #include "prompt.h"
-#include "messages.h"
 #include "readline.h"
 #include "tabcomp.h" /* tab_complete() */
-#include "file_operations.h"
 
 #ifndef _NO_SUGGESTIONS
 # include "suggestions.h"
@@ -69,10 +69,6 @@ typedef char *rl_cpvfunc_t;
 #endif /* !_NO_HIGHLIGHT */
 
 #include "strings.h" /* quote_str() */
-
-/* Let's use these word delimiters to print first suggested word
- * and to delete last typed word */
-#define WORD_DELIMITERS " /.-_=,:;@+*&$#<>%~|({[]})¿?¡!"
 
 #ifndef _NO_SUGGESTIONS
 static int accept_first_word = 0;

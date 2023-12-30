@@ -28,6 +28,21 @@
 #include "bulk_rename.h"
 #include "bulk_remove.h"
 
+/* Macros and array used to print unsafe names description messages.
+ * Used by validate_filename(). */
+#define UNSAFE_DASH      0
+#define UNSAFE_MIME      1
+#define UNSAFE_ELN       2
+#define UNSAFE_FASTBACK  3
+#define UNSAFE_BTS_CONST 4
+#define UNSAFE_SYS_KEY   5
+#define UNSAFE_CONTROL   6
+#define UNSAFE_META      7
+#define UNSAFE_TOO_LONG  8
+#ifdef _BE_POSIX
+# define UNSAFE_NOT_PORTABLE 9
+#endif
+
 /* Macros for open_function */
 #define OPEN_BLK     0
 #define OPEN_CHR     1

@@ -38,6 +38,7 @@
 #include <errno.h>
 
 #include "aux.h"
+#include "cleaner_table.h"
 #include "file_operations.h"
 #include "history.h"
 #ifdef GENERIC_FS_MONITOR
@@ -45,7 +46,6 @@
 #endif /* GENERIC_FS_MONITOR */
 #include "messages.h"
 #include "misc.h"
-#include "cleaner_table.h"
 #include "readline.h"
 #include "selection.h"
 

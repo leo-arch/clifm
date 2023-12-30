@@ -37,9 +37,9 @@
 #include "history.h"
 #include "jump.h"
 #include "listing.h"
+#include "messages.h"
 #include "misc.h"
 #include "navigation.h"
-#include "messages.h"
 #include "readline.h"
 
 #define BD_CONTINUE 2

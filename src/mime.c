@@ -48,17 +48,16 @@
 #ifndef _NO_ARCHIVING
 #include "archives.h"
 #endif /* !_NO_ARCHIVING */
-
 #include "aux.h"
 #include "checks.h"
 #include "config.h"
 #include "exec.h"
-#include "mime.h"
-#include "messages.h"
-#include "readline.h"
-#include "misc.h"
-#include "sanitize.h"
 #include "listing.h"
+#include "messages.h"
+#include "mime.h"
+#include "misc.h"
+#include "readline.h"
+#include "sanitize.h"
 
 static char *err_name = (char *)NULL;
 

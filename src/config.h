@@ -25,6 +25,10 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#define DUMP_CONFIG_STR  0
+#define DUMP_CONFIG_INT  1
+#define DUMP_CONFIG_BOOL 2
+
 __BEGIN_DECLS
 
 int  create_bm_file(void);

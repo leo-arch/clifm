@@ -32,22 +32,18 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "autocmds.h"
 #include "aux.h"
 #include "checks.h"
 #include "colors.h"
 #include "config.h"
 #include "exec.h"
+#include "file_operations.h"
 #include "init.h"
 #include "listing.h"
 #include "messages.h"
 #include "misc.h"
 #include "navigation.h"
-#include "file_operations.h"
-#include "autocmds.h"
-
-#define DUMP_CONFIG_STR  0
-#define DUMP_CONFIG_INT  1
-#define DUMP_CONFIG_BOOL 2
 
 /* Regenerate the configuration file and create a back up of the old one. */
 static int

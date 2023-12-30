@@ -30,14 +30,14 @@
 
 #include "aux.h"
 #include "exec.h"
-#include "init.h"
-#include "listing.h"
-#include "navigation.h"
-#include "history.h"
-#include "misc.h"
-#include "jump.h"
-#include "messages.h"
 #include "file_operations.h"
+#include "history.h"
+#include "init.h"
+#include "jump.h"
+#include "listing.h"
+#include "messages.h"
+#include "misc.h"
+#include "navigation.h"
 #include "sanitize.h"
 
 static int

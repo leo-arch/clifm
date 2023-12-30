@@ -30,8 +30,8 @@
 # include <mntent.h> /* xxxmntent(), used by get_remote_fs_name() */
 # include <sys/statfs.h> /* statfs(2) */
 # include <sys/sysmacros.h> /* major() and minor(), used by get_dev_name() */
-# include "linuxfs.h" /* FS_MAGIC macros for file system types */
 # include "aux.h" /* open_fread() */
+# include "linuxfs.h" /* FS_MAGIC macros for file system types */
 #elif defined(HAVE_STATFS)
 # include <sys/mount.h> /* statfs(2) */
 #endif /* __linux__ */

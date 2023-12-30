@@ -36,12 +36,12 @@
 #include "checks.h"
 #include "colors.h"
 #include "exec.h"
+#include "listing.h"
 #include "misc.h"
 #include "navigation.h"
 #include "readline.h"
 #include "sort.h"
 #include "trash.h"
-#include "listing.h"
 
 static size_t
 count_trashed_files(void)

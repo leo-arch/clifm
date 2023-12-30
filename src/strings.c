@@ -58,15 +58,14 @@ typedef char *rl_cpvfunc_t;
 #include "aux.h"
 #include "checks.h"
 #include "exec.h"
+#ifndef _NO_MAGIC
+# include "mime.h" /* MIME-type filter expansion */
+#endif /* _NO_MAGIC */
 #include "misc.h"
 #include "navigation.h"
 #include "readline.h"
 #include "sort.h"
 #include "tags.h"
-
-#ifndef _NO_MAGIC
-# include "mime.h" /* MIME-type filter expansion */
-#endif /* _NO_MAGIC */
 
 /* Macros for xstrverscmp() */
 /* states: S_N: normal, S_I: comparing integral part, S_F: comparing

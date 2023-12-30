@@ -54,17 +54,16 @@
 #endif /* __linux__ || __CYGWIN__ */
 
 #include "aux.h"
-#include "readline.h"
-#include "navigation.h"
-#include "exec.h"
-#include "listing.h"
-#include "jump.h"
-#include "misc.h"
-#include "history.h"
-
 #ifdef __sun
 # include "checks.h" /* check_file_access() */
 #endif /* __sun */
+#include "exec.h"
+#include "history.h"
+#include "jump.h"
+#include "listing.h"
+#include "misc.h"
+#include "navigation.h"
+#include "readline.h"
 
 /* Information about devices */
 struct mnt_t {

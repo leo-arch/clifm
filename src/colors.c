@@ -45,12 +45,12 @@
 #include "aux.h"
 #include "checks.h"
 #include "colors.h"
-#include "listing.h"
-#include "misc.h"
-#include "messages.h"
-#include "file_operations.h"
-#include "exec.h"
 #include "config.h" /* set_div_line() */
+#include "exec.h"
+#include "file_operations.h"
+#include "listing.h"
+#include "messages.h"
+#include "misc.h"
 #include "sanitize.h"
 
 #ifndef CLIFM_SUCKLESS
@@ -58,21 +58,6 @@
  * if CLIFM_SUCKLESS is defined */
 # include "sort.h" /* compare_string() (used by qsort(3)) */
 #endif /* !CLIFM_SUCKLESS */
-
-#define RL_PRINTABLE    1
-#define RL_NO_PRINTABLE 0 /* Add non-printing flags (\001 and \002)*/
-
-/* Tell split_color_line weather we're dealing with interface or file
- * type colors */
-#define SPLIT_INTERFACE_COLORS 0
-#define SPLIT_FILETYPE_COLORS  1
-
-/* Max amount of custom color variables in the color scheme file */
-#define MAX_DEFS 128
-
-/* Macros for the set_shades function */
-#define DATE_SHADES 0
-#define SIZE_SHADES 1
 
 #ifndef CLIFM_SUCKLESS
 /* A struct to hold color variables */
@@ -809,8 +794,8 @@ get_ext_color(const char *ext, size_t *val_len)
 }
 
 #ifndef CLIFM_SUCKLESS
-/* Strip color lines from the config file (FiletypeColors, if mode is
- * 't', and ExtColors, if mode is 'x') returning the same string
+/* Strip color line from the config file (FiletypeColors, if MODE is
+ * 't', and ExtColors, if MODE is 'x') returning the same string
  * containing only allowed characters. */
 static char *
 strip_color_line(const char *str, const char mode)
@@ -1769,7 +1754,6 @@ set_extra_colors(void)
 	} else {
 		xstrsncpy(ed_c, DEF_DI_C, sizeof(ed_c));
 		xstrsncpy(nd_c, DEF_DI_C, sizeof(nd_c));
-
 	}
 
 	if (*fi_c) {
@@ -2236,7 +2220,6 @@ set_cs_dir_icon_color(char *line, const ssize_t line_len)
 		line[line_len - 1] = '\0';
 
 	char *c = (char *)NULL;
-
 	if (is_color_code(p) == 0 && (c = check_defs(p)) == NULL)
 		return;
 
@@ -2284,7 +2267,7 @@ read_color_scheme_file(const char *colorscheme, char **filecolors,
 	}
 
 	/* If called from the color scheme function, reset all color values
-	 * before proceeding */
+	 * before proceeding. */
 	if (!env) {
 		reset_filetype_colors();
 		reset_iface_colors();
@@ -2483,25 +2466,25 @@ disable_bold(void)
 
 	/* Interface */
 	remove_bold_attr(bm_c);
-	remove_bold_attr(fc_c);
 	remove_bold_attr(df_c);
 	remove_bold_attr(dl_c);
 	remove_bold_attr(el_c);
+	remove_bold_attr(fc_c);
 	remove_bold_attr(lc_c);
 	remove_bold_attr(mi_c);
 	remove_bold_attr(ts_c);
+	remove_bold_attr(tt_c);
 	remove_bold_attr(wc_c);
 	remove_bold_attr(wp_c);
-	remove_bold_attr(tt_c);
 
 	/* Suggestions */
 	remove_bold_attr(sb_c);
 	remove_bold_attr(sc_c);
 	remove_bold_attr(sd_c);
-	remove_bold_attr(sh_c);
 	remove_bold_attr(sf_c);
-	remove_bold_attr(sx_c);
+	remove_bold_attr(sh_c);
 	remove_bold_attr(sp_c);
+	remove_bold_attr(sx_c);
 	remove_bold_attr(sz_c);
 
 #ifndef _NO_ICONS

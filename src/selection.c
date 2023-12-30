@@ -46,15 +46,15 @@
 #include "aux.h"
 #include "checks.h"
 #include "colors.h"
+#include "file_operations.h"
+#include "init.h"
 #include "listing.h"
+#include "messages.h"
 #include "misc.h"
 #include "navigation.h"
 #include "readline.h"
 #include "selection.h"
 #include "sort.h"
-#include "messages.h"
-#include "file_operations.h"
-#include "init.h"
 
 /* Save selected elements into a tmp file. Returns 1 if success and 0
  * if error. This function allows the user to work with multiple

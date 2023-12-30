@@ -59,6 +59,7 @@
 # include <mntent.h> /* xxxmntent functions, used by get_ext_mountpoints() */
 #endif /* LINUX_FSINFO */
 
+#include "autocmds.h"
 #include "aux.h"
 #include "checks.h" /* truncate_file(), is_number() */
 #include "config.h"
@@ -66,15 +67,14 @@
 #include "jump.h" /* add_to_jumpdb() */
 #include "misc.h"
 #include "navigation.h"
-#include "sort.h"
-#include "autocmds.h"
 #include "sanitize.h"
 #include "selection.h"
+#include "sort.h"
 
 /* We need this for get_user_groups() */
 #if !defined(NGROUPS_MAX)
 # if defined(__linux__)
-#  if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 4)
+#  if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,4)
 #   define NGROUPS_MAX 65536
 #  else
 #   define NGROUPS_MAX 32

@@ -55,25 +55,22 @@ typedef char *rl_cpvfunc_t;
 #include <termios.h> /* Get cursor position functions */
 #include <limits.h> /* INT_MIN */
 
-#include "exec.h"
 #include "aux.h"
-#include "misc.h"
 #include "checks.h"
 #include "colors.h"
+#include "exec.h"
+#ifndef _NO_HIGHLIGHT
+# include "highlight.h"
+#endif /* !_NO_HIGHLIGHT */
+#include "misc.h"
 #include "navigation.h"
 #include "readline.h"
 #include "selection.h"
 #include "sort.h"
-
-#ifndef _NO_HIGHLIGHT
-# include "highlight.h"
-#endif /* !_NO_HIGHLIGHT */
-
+#include "strings.h" /* quote_str() */
 #ifndef _NO_SUGGESTIONS
 # include "suggestions.h"
 #endif /* !_NO_SUGGESTIONS */
-
-#include "strings.h" /* quote_str() */
 
 #define CPR     "\x1b[6n" /* Cursor position report */
 #define CPR_LEN (sizeof(CPR) - 1)

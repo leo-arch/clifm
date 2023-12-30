@@ -25,6 +25,10 @@
 #ifndef KEYBINDS_H
 #define KEYBINDS_H
 
+/* Let's use these word delimiters to print first suggested word
+ * and to delete last typed word */
+#define WORD_DELIMITERS " /.-_=,:;@+*&$#<>%~|({[]})¿?¡!"
+
 __BEGIN_DECLS
 
 /*void add_func_to_rl(void); */

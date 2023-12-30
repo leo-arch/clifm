@@ -34,10 +34,10 @@
 
 #include "aux.h"
 #include "colors.h" /* colors_list() */
-#include "misc.h"
 #include "exec.h"
 #include "init.h"
 #include "messages.h"
+#include "misc.h"
 #include "sort.h"
 
 /* A few printing functions */

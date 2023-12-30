@@ -40,11 +40,11 @@
 #include "history.h"
 #include "init.h"
 #include "listing.h"
+#include "messages.h"
 #include "misc.h"
 #include "navigation.h"
 #include "profiles.h"
 #include "sort.h"
-#include "messages.h"
 
 /* Get the list of all available profile names and store them in the
  * profile_names global array. Returns zero on success, one otherwise. */

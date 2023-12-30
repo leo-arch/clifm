@@ -30,6 +30,57 @@
 #define PROMPT_SHOW   1
 #define PROMPT_UPDATE_RUN_CMDS 2
 
+#define CTLESC '\001'
+#define CTLNUL '\177'
+
+#define ROOT_IND "\001\x1b[1;31m\002R\001\x1b[0m\002"
+#define ROOT_IND_NO_COLOR "R"
+#define ROOT_IND_SIZE 17
+#define RDONLY_IND "RO\001\x1b[0m\002"
+#define RDONLY_IND_SIZE (MAX_COLOR + 8 + 1)
+#define STEALTH_IND "S\001\x1b[0m\002"
+#define STEALTH_IND_SIZE (MAX_COLOR + 7 + 1)
+
+#define EMERGENCY_PROMPT_MSG "Error decoding prompt line. Using an \
+emergency prompt"
+#define EMERGENCY_PROMPT "\001\x1b[0m\002> "
+
+/* Flag macros to generate files statistic string for the prompt */
+#define STATS_DIR      0
+#define STATS_REG      1
+#define STATS_EXE      2
+#define STATS_HIDDEN   3
+#define STATS_SUID     4
+#define STATS_SGID     5
+#define STATS_FIFO     6
+#define STATS_SOCK     7
+#define STATS_BLK      8
+#define STATS_CHR      9
+#define STATS_CAP      10
+#define STATS_LNK      11
+#define STATS_BROKEN_L 12 /* Broken link */
+#define STATS_MULTI_L  13 /* Multi-link */
+#define STATS_OTHER_W  14 /* Other writable */
+#define STATS_STICKY   15
+#define STATS_EXTENDED 16 /* Extended attributes (acl) */
+#define STATS_UNKNOWN  17
+#define STATS_UNSTAT   18
+#ifdef SOLARIS_DOORS
+# define STATS_DOOR    19
+# define STATS_PORT    20
+#endif /* SOLARIS_DOORS */
+
+#define NOTIF_SEL     0
+#define NOTIF_TRASH   1
+#define NOTIF_WARNING 2
+#define NOTIF_ERROR   3
+#define NOTIF_NOTICE  4
+#define NOTIF_ROOT    5
+
+/* Size of the indicator for msgs, trash, and sel */
+#define N_IND MAX_COLOR + 1 + sizeof(size_t) + 6 + 1 + 13
+/* Color + 1 letter + plus unsigned integer + RL_NC size + nul char */
+
 __BEGIN_DECLS
 
 char *prompt(const int prompt_flag);

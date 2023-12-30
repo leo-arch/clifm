@@ -34,10 +34,10 @@
 #include <unistd.h> /* close(2), sysconf(3) */
 #include <limits.h> /* OPEN_MAX */
 
-#include "sanitize.h"
 #include "aux.h"
 #include "checks.h" /* is_number() */
 #include "misc.h"
+#include "sanitize.h"
 
 #define UNSAFE_CMD "Unsafe command. Consult the manpage for more information"
 /* If PATH cannot be retrieved from any other source, let's use this value */

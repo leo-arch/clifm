@@ -185,7 +185,7 @@ fuzzy_match(char *s1, char *s2, const size_t s1_len, const int type)
 			return 0;
 	}
 
-	if (conf.fuzzy_match_algo == 1 || type == FUZZY_FILES_ASCII)
+	if (type == FUZZY_FILES_ASCII || conf.fuzzy_match_algo == 1)
 		return fuzzy_match_v1(s1, s2, s1_len);
 
 	int cs = conf.case_sens_path_comp;
