@@ -58,8 +58,9 @@ err_open_tmp_file(const char *file, const int fd)
 	xerror("br: open: '%s': %s\n", file, strerror(errno));
 	if (unlinkat(fd, file, 0) == -1)
 		xerror("br: unlink: '%s': %s\n", file, strerror(errno));
+	close(fd);
 
-	return errno;
+	return EXIT_FAILURE;
 }
 
 /* Rename OLDPATH as NEWPATH. */
@@ -86,13 +87,15 @@ rename_file(char *oldpath, char *newpath)
 	return launch_execv(cmd, FOREGROUND, E_NOFLAG);
 }
 
+/* Write file names in ARGS into the temporary file TMPFILE, whose file
+ * descriptor is FD. Update WRITTEN to the number of actually written
+ * file names, and make ATTR hold the stat attributes of the temporary
+ * file after writing into it all file names. */
 static int
-write_renfiles_to_tmp(char ***args, const char *tmpfile, const int fd,
-	time_t *mtime, size_t *written)
+write_files_to_tmp(char ***args, const char *tmpfile, const int fd,
+	struct stat *attr, size_t *written)
 {
 	size_t i;
-	struct stat attr;
-
 	FILE *fp = fdopen(fd, "w");
 	if (!fp)
 		return err_open_tmp_file(tmpfile, fd);
@@ -127,7 +130,8 @@ write_renfiles_to_tmp(char ***args, const char *tmpfile, const int fd,
 			(*args)[i] = p;
 		}
 
-		if (lstat((*args)[i], &attr) == -1) {
+		struct stat a;
+		if (lstat((*args)[i], &a) == -1) {
 			xerror("br: '%s': %s\n", (*args)[i], strerror(errno));
 			press_any_key_to_continue(0);
 			continue;
@@ -137,18 +141,12 @@ write_renfiles_to_tmp(char ***args, const char *tmpfile, const int fd,
 		(*written)++;
 	}
 
-	if (*written == 0) { /* No valid file name */
+	if (*written == 0 || fstat(fd, attr) == -1) {
 		if (unlinkat(fd, tmpfile, 0) == -1)
 			xerror("br: unlink: '%s': %s\n", tmpfile, strerror(errno));
 		fclose(fp);
 		return EXIT_FAILURE;
 	}
-
-	/* Store the last modification time of the tmp file. This time
-	 * will be later compared to the modification time of the same
-	 * file after shown to the user. */
-	fstat(fd, &attr);
-	*mtime = (time_t)attr.st_mtime;
 
 	fclose(fp);
 	return EXIT_SUCCESS;
@@ -296,6 +294,8 @@ bulk_rename(char **args)
 	}
 
 	int exit_status = EXIT_SUCCESS;
+	struct stat attra; /* Original temp file */
+	struct stat attrb; /* Edited temp file */
 
 	char tmpfile[PATH_MAX];
 	snprintf(tmpfile, sizeof(tmpfile), "%s/%s",
@@ -307,11 +307,9 @@ bulk_rename(char **args)
 		return EXIT_FAILURE;
 	}
 
-	/* Write files to be renamed into a tmp file */
+	/* Write files to be renamed into a tmp file and store stat info in attra */
 	size_t written = 0;
-	time_t mtime_bk = 0;
-	int ret = write_renfiles_to_tmp(&args, tmpfile, fd,
-		&mtime_bk, &written);
+	int ret = write_files_to_tmp(&args, tmpfile, fd, &attra, &written);
 	if (ret != EXIT_SUCCESS)
 		return ret;
 
@@ -320,40 +318,49 @@ bulk_rename(char **args)
 		return ret;
 
 	FILE *fp;
-	struct stat attr;
-
 	if (!(fp = open_fread(tmpfile, &fd)))
 		return err_open_tmp_file(tmpfile, fd);
 
 	/* Compare the new modification time to the stored one: if they
 	 * match, nothing was modified. */
-	if (fstat(fd, &attr) == -1) {
+	if (fstat(fd, &attrb) == -1) {
 		xerror("br: '%s': %s\n", tmpfile, strerror(errno));
 		goto ERROR;
 	}
-	if (mtime_bk == (time_t)attr.st_mtime) {
+	if (attra.st_mtime == attrb.st_mtime) {
 		puts(_("br: Nothing to do"));
 		goto ERROR;
 	}
 
-	/* Make sure there are as many lines in the bulk file as files
+	/* Modification time after edition */
+	time_t mtime_bk = attrb.st_mtime;
+
+	/* Make sure there are as many lines in the tmp file as files
 	 * to be renamed. */
 	if (check_line_mismatch(fp, written) != EXIT_SUCCESS) {
 		exit_status = EXIT_FAILURE;
 		goto ERROR;
 	}
 
-	/* Rewind to the beginning of the bulk file */
+	/* Rewind to the beginning of the tmp file */
 	fseek(fp, 0L, SEEK_SET);
-
+	/* Print and count files */
 	size_t modified = count_modified_names(args, fp);
+	fseek(fp, 0L, SEEK_SET); /* Rewind again */
 
 	/* Ask the user for confirmation */
 	if (rl_get_y_or_n("Continue? [y/n] ") == 0)
 		goto ERROR;
 
-	/* Rewind again */
-	fseek(fp, 0L, SEEK_SET);
+	/* Make sure the tmp file we're about to read is the same we originally
+	 * created, and that it was not modified since the user edited it
+	 * (via open_tmp_file()). */
+	if (fstat(fd, &attrb) == -1 || !S_ISREG(attrb.st_mode)
+	|| attra.st_ino != attrb.st_ino || attra.st_dev != attrb.st_dev
+	|| mtime_bk != attrb.st_mtime) {
+		xerror("%s\n", _("br: Temporary file tampered! Aborting."));
+		goto ERROR;
+	}
 
 	int is_cwd = 0;
 	size_t renamed = 0;

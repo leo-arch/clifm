@@ -90,7 +90,7 @@ parse_bulk_remove_params(char *s1, char *s2, char **app, char **target)
 }
 
 static int
-create_tmp_file(char **file, int *fd)
+create_tmp_file(char **file, int *fd, struct stat *attr)
 {
 	size_t tmp_len = strlen(xargs.stealth_mode == 1 ? P_tmpdir : tmp_dir);
 	size_t file_len = tmp_len + (sizeof(TMP_FILENAME) - 1) + 2;
@@ -99,10 +99,17 @@ create_tmp_file(char **file, int *fd)
 	snprintf(*file, file_len, "%s/%s", xargs.stealth_mode == 1
 		? P_tmpdir : tmp_dir, TMP_FILENAME);
 
-	errno = 0;
 	*fd = mkstemp(*file);
 	if (*fd == -1) {
 		xerror("rr: mkstemp: '%s': %s\n", *file, strerror(errno));
+		free(*file);
+		return EXIT_FAILURE;
+	}
+
+	if (fstat(*fd, attr) == -1) {
+		xerror("rr: fstat: '%s': %s\n", *file, strerror(errno));
+		unlink(*file);
+		close(*fd);
 		free(*file);
 		return EXIT_FAILURE;
 	}
@@ -344,10 +351,9 @@ diff_files(char *tmp_file, const filesn_t n)
 		return 0;
 	}
 
-	char line[PATH_MAX + 6];
-	memset(line, '\0', sizeof(line));
-
+	char line[PATH_MAX + 6]; *line = '\0';
 	filesn_t c = 0;
+
 	while (fgets(line, (int)sizeof(line), fp)) {
 		if (*line != '#' && *line != '\n')
 			c++;
@@ -358,20 +364,27 @@ diff_files(char *tmp_file, const filesn_t n)
 	return (c < n ? 1 : 0);
 }
 
-static int
-nothing_to_do(char **tmp_file, struct dirent ***a, const filesn_t n, const int fd)
+static void
+free_dirent(struct dirent ***a, const filesn_t n)
 {
-	puts(_("rr: Nothing to do"));
-
-	if (unlinkat(fd, *tmp_file, 0) == 1)
-		xerror("rr: unlink: '%s': %s\n", *tmp_file, strerror(errno));
-	close(fd);
-	free(*tmp_file);
-
 	filesn_t i = n;
 	while (--i >= 0)
 		free((*a)[i]);
 	free(*a);
+}
+
+static int
+nothing_to_do(char **tmp_file, struct dirent ***a,
+	const filesn_t n, const int fd)
+{
+	puts(_("rr: Nothing to do"));
+
+	if (unlink(*tmp_file) == 1)
+		xerror("rr: unlink: '%s': %s\n", *tmp_file, strerror(errno));
+
+	close(fd);
+	free(*tmp_file);
+	free_dirent(a, n);
 
 	return EXIT_SUCCESS;
 }
@@ -384,31 +397,41 @@ bulk_remove(char *s1, char *s2)
 		return EXIT_SUCCESS;
 	}
 
-	char *app = (char *)NULL, *target = (char *)NULL;
+	char *app = (char *)NULL;
+	char *target = (char *)NULL;
 	int fd = 0, ret = 0, i = 0;
 	filesn_t n = 0;
 
 	if ((ret = parse_bulk_remove_params(s1, s2, &app, &target)) != EXIT_SUCCESS)
 		return ret;
 
+	struct stat attr;
 	char *tmp_file = (char *)NULL;
-	if ((ret = create_tmp_file(&tmp_file, &fd)) != EXIT_SUCCESS)
+	if ((ret = create_tmp_file(&tmp_file, &fd, &attr)) != EXIT_SUCCESS)
 		return ret;
+
+	const time_t old_mtime = attr.st_mtime;
+	const ino_t old_ino = attr.st_ino;
+	const dev_t old_dev = attr.st_dev;
 
 	struct dirent **a = (struct dirent **)NULL;
 	if ((ret = write_files_to_tmp(&a, &n, target, tmp_file)) != EXIT_SUCCESS)
 		goto END;
 
-	struct stat attr;
-	stat(tmp_file, &attr);
-	time_t old_t = attr.st_mtime;
-
 	if ((ret = open_tmp_file(&a, n, tmp_file, app)) != EXIT_SUCCESS)
 		goto END;
 
-	stat(tmp_file, &attr);
-	filesn_t num = (target == workspaces[cur_ws].path) ? files : n - 2;
-	if (old_t == attr.st_mtime || diff_files(tmp_file, num) == 0)
+	/* Make sure the tmp file we're about to read is the same as the one
+	 * we originally created. */
+	if (lstat(tmp_file, &attr) == -1 || !S_ISREG(attr.st_mode)
+	|| attr.st_ino != old_ino || attr.st_dev != old_dev) {
+		xerror("%s\n", _("rr: Temporary file tampered! Aborting."));
+		free_dirent(&a, n);
+		goto END;
+	}
+
+	const filesn_t num = (target == workspaces[cur_ws].path) ? files : n - 2;
+	if (old_mtime == attr.st_mtime || diff_files(tmp_file, num) == 0)
 		return nothing_to_do(&tmp_file, &a, n, fd);
 
 	char **rfiles = get_files_from_tmp_file(tmp_file, target, n);
@@ -431,12 +454,11 @@ FREE_N_EXIT:
 	free(rfiles);
 
 END:
-	if (unlinkat(fd, tmp_file, 0) == -1) {
+	if (unlink(tmp_file) == -1) {
 		err('w', PRINT_PROMPT, "rr: unlink: '%s': %s\n",
 			tmp_file, strerror(errno));
 	}
 
-	close(fd);
 	free(tmp_file);
 	return ret;
 }
