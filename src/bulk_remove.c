@@ -172,15 +172,15 @@ write_files_to_tmp(struct dirent ***a, filesn_t *n, const char *target,
 	fprintf(fp, "%s", _(BULK_RM_TMP_FILE_HEADER));
 
 	if (target == workspaces[cur_ws].path) {
+		if (files == 0)
+			goto EMPTY_DIR;
+
 		filesn_t i;
 		for (i = 0; i < files; i++)
 			write_name(fp, file_info[i].name, file_info[i].type);
 	} else {
-		if (count_dir(target, CPOP) <= 2) {
-			xerror(_("rr: '%s': Directory empty\n"), target);
-			fclose(fp);
-			return EXIT_FAILURE;
-		}
+		if (count_dir(target, CPOP) <= 2)
+			goto EMPTY_DIR;
 
 		*n = scandir(target, a, NULL, alphasort);
 		if (*n == -1) {
@@ -207,6 +207,11 @@ write_files_to_tmp(struct dirent ***a, filesn_t *n, const char *target,
 
 	fclose(fp);
 	return EXIT_SUCCESS;
+
+EMPTY_DIR:
+	xerror(_("rr: '%s': Directory empty\n"), target);
+	fclose(fp);
+	return EXIT_FAILURE;
 }
 
 static int
