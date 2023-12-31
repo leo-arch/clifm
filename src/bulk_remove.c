@@ -53,18 +53,23 @@ parse_bulk_remove_params(char *s1, char *s2, char **app, char **target)
 		return EXIT_SUCCESS;
 	}
 
+#define BULK_APP(s) ((*(s) == ':' && (s)[1]) ? (s) + 1 : (s))
+
 	int ret = 0;
 	struct stat a;
 	if ((ret = stat(s1, &a)) == -1 || !S_ISDIR(a.st_mode)) {
-		char *p = get_cmd_path(s1);
+		char *p = get_cmd_path(BULK_APP(s1));
 		if (!p) { /* S1 is neither a directory nor a valid application */
-			int ec = ret != -1 ? ENOTDIR : ENOENT;
-			xerror("rr: '%s': %s\n", s1, strerror(ec));
+			int ec = (ret == -1 && *s1 == ':') ? EXEC_NOTFOUND : ENOTDIR;
+			if (ec == ENOTDIR)
+				xerror("rr: '%s': %s\n", s1, strerror(ec));
+			else
+				xerror("rr: '%s': %s\n", BULK_APP(s1), NOTFOUND_MSG);
 			return ec;
 		}
 		/* S1 is an application name. TARGET defaults to CWD */
 		*target = workspaces[cur_ws].path;
-		*app = s1;
+		*app = BULK_APP(s1);
 		free(p);
 		return EXIT_SUCCESS;
 	}
@@ -78,15 +83,16 @@ parse_bulk_remove_params(char *s1, char *s2, char **app, char **target)
 	if (!s2 || !*s2) /* No S2. APP defaults to default associated app */
 		return EXIT_SUCCESS;
 
-	char *p = get_cmd_path(s2);
+	char *p = get_cmd_path(BULK_APP(s2));
 	if (p) { /* S2 is a valid application name */
-		*app = s2;
+		*app = BULK_APP(s2);
 		free(p);
 		return EXIT_SUCCESS;
 	}
+
 	/* S2 is not a valid application name */
-	xerror("rr: '%s': %s\n", s2, strerror(ENOENT));
-	return ENOENT;
+	xerror("rr: '%s': %s\n", BULK_APP(s2), NOTFOUND_MSG);
+	return EXEC_NOTFOUND;
 }
 
 static int

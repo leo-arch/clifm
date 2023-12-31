@@ -42,7 +42,7 @@
 #include "file_operations.h" /* open_file() */
 #include "init.h" /* get_sel_files() */
 #include "listing.h" /* reload_dirlist() */
-#include "messages.h" /* BULK_USAGE */
+#include "messages.h" /* BULK_RENAME_USAGE */
 #include "misc.h" /* xerror(), print_reload_msg() */
 #include "readline.h" /* rl_get_y_or_n() */
 
@@ -132,8 +132,11 @@ write_files_to_tmp(char ***args, const char *tmpfile, const int fd,
 
 		struct stat a;
 		if (lstat((*args)[i], &a) == -1) {
-			xerror("br: '%s': %s\n", (*args)[i], strerror(errno));
-			press_any_key_to_continue(0);
+			/* Last parameter may be opening app (:APP) */
+			if (i != args_n || *(*args)[i] != ':') {
+				xerror("br: '%s': %s\n", (*args)[i], strerror(errno));
+				press_any_key_to_continue(0);
+			}
 			continue;
 		}
 
@@ -185,17 +188,31 @@ count_modified_names(char **args, FILE *fp)
 		i++;
 	}
 
-	if (modified == 0) {
+	if (modified == 0)
 		puts(_("br: Nothing to do"));
-		return 0;
-	}
 
 	return modified;
 }
 
+/* Open FILE via APP (default associated application for text files if
+ * omitted). */
 static int
-open_tmpfile(char *file)
+open_tmpfile(char *app, char *file)
 {
+	char *application = (char *)NULL;
+	struct stat a;
+
+	if (app && *app == ':' && app[1] && lstat(app, &a) == -1)
+		application = app + 1;
+
+	if (application) {
+		char *cmd[] = {application, file, NULL};
+		int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
+		if (ret != EXIT_SUCCESS)
+			unlink(file);
+		return ret;
+	}
+
 	open_in_foreground = 1;
 	int exit_status = open_file(file);
 	open_in_foreground = 0;
@@ -289,7 +306,7 @@ int
 bulk_rename(char **args)
 {
 	if (!args || !args[1] || IS_HELP(args[1])) {
-		puts(_(BULK_USAGE));
+		puts(_(BULK_RENAME_USAGE));
 		return EXIT_SUCCESS;
 	}
 
@@ -314,7 +331,7 @@ bulk_rename(char **args)
 		return ret;
 
 	/* Open the tmp file with the associated text editor */
-	if ((ret = open_tmpfile(tmpfile)) != EXIT_SUCCESS)
+	if ((ret = open_tmpfile(args[args_n], tmpfile)) != EXIT_SUCCESS)
 		return ret;
 
 	FILE *fp;
@@ -346,6 +363,8 @@ bulk_rename(char **args)
 	fseek(fp, 0L, SEEK_SET);
 	/* Print and count files */
 	size_t modified = count_modified_names(args, fp);
+	if (modified == 0)
+		goto ERROR;
 	fseek(fp, 0L, SEEK_SET); /* Rewind again */
 
 	/* Ask the user for confirmation */
@@ -378,7 +397,7 @@ bulk_rename(char **args)
 
 	fclose(fp);
 
-	if (sel_n > 0 && have_sel_files())
+	if (sel_n > 0 && cwd_has_sel_files())
 		/* Just in case a selected file in the current dir was renamed. */
 		get_sel_files();
 

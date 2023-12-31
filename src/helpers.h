@@ -561,6 +561,14 @@ extern time_t curdir_mtime;
 #define BACKGROUND 1
 #define FOREGROUND 0
 
+#define EXEC_BG_PROC 0
+#define EXEC_FG_PROC 1
+
+#define EXEC_NOTFOUND  127
+#define EXEC_SIGINT    128
+
+#define NOTFOUND_MSG "Command not found"
+
 /* A few fixed colors */
 #define BOLD_RED   (conf.colorize == 1 ? "\x1b[1;31m" : "")
 #define BOLD_GREEN (conf.colorize == 1 ? "\x1b[1;32m" : "")

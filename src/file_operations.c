@@ -1322,7 +1322,7 @@ get_new_filename(char *cur_name)
 /* Return 1 if at least one file is selected in the current directory.
  * Otherwise, 0 is returned. */
 int
-have_sel_files(void)
+cwd_has_sel_files(void)
 {
 	filesn_t i = files;
 	while (--i >= 0) {
@@ -1456,7 +1456,7 @@ run_cp_mv_cmd(char **cmd, const int skip_force)
 		save_sel();
 	}
 
-	if (sel_n > 0 && *cmd[0] == 'm' && have_sel_files())
+	if (sel_n > 0 && *cmd[0] == 'm' && cwd_has_sel_files())
 		/* Just in case a selected file in the current dir was renamed. */
 		get_sel_files();
 

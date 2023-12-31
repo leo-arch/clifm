@@ -176,16 +176,21 @@ change this suffix)"
 - Select all bookmarks at once\n\
     s b:"
 
-#define BULK_USAGE "Bulk rename files\n\n\
+#define BULK_RENAME_USAGE "Bulk rename files\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  br, bulk ELN/FILE...\n\n\
+  br, bulk ELN/FILE... [:EDITOR]\n\n\
+The list of files to be renamed is opened via EDITOR (default associated\n\
+application for text files if omitted). Edit the file names you want to \n\
+rename, save, and quit the editor.\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Bulk rename all files ending with .pdf in the current directory\n\
     br *.pdf\n\
   or\n\
     'br <TAB>' to choose from a list (mutli-selection is allowed)\n\
 - Bulk rename all selected files\n\
-    br sel"
+    br sel\n\
+  or, using vi:\n\
+    br sel :vi"
 
 #define CD_USAGE "Change the current working directory\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
@@ -890,17 +895,18 @@ To enable this feature consult the manpage"
 
 #define RR_USAGE "Remove files in bulk using a text editor\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  rr [DIR] [EDITOR]\n\n\
+  rr [DIR] [:EDITOR]\n\n\
 The list of files in DIR (current directory if omitted) is opened via\n\
-EDITOR (default associated application if omitted). Remove the lines\n\
-corresponding to the files you want to delete, save, and quit the editor.\n\n\
+EDITOR (default associated application for text files if omitted). Remove\n\
+the lines corresponding to the files you want to delete, save, and quit\n\
+the editor.\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Bulk remove files/dirs in the current directory using the default editor\n\
     rr\n\
 - Bulk remove files/dirs in the current directory using nano\n\
-    rr nano\n\
+    rr :nano\n\
 - Bulk remove files/dirs in the directory 'mydir' using vi\n\
-    rr mydir vi"
+    rr mydir :vi"
 
 #define SEARCH_USAGE "Search for files using either glob or regular expressions\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
