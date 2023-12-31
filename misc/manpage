@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Dec 24, 2023" "clifm 1.15.11" "CLIFM Manual"
+.TH "CLIFM" "1" "Dec 31, 2023" "clifm 1.16" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -613,10 +613,10 @@ T}	Select all bookmarks at once
 .sp
  \fB(1)\fR If your are not sure about where a bookmark points to, type \fIb:NAME<TAB>\fR.
 .TP
-.B br, bulk \fIELN/FILE\fR...
+.B br, bulk \fIELN/FILE\fR... [:EDITOR]
 rename at once all files passed as arguments to the function. It accepts single and multiple file names, wildcards, ELN ranges, and the \fIsel\fR keyword. Example: \fIbr\ myfile\ 4\-10\ sel\fR.
 .sp
-Each file name will be copied into a temporary file, which will be opened with the default text editor (via the \fImime\fR function), letting the user modify it. Once the file has been modified and saved, the modifications are printed on the screen and the user is asked whether to proceed with the actual bulk renaming or not.
+Each file name will be copied into a temporary file, which will be opened via EDITOR (default associated application for plain text files if omitted), letting the user modify it. Once the file has been modified and saved, the modifications are printed on the screen and the user is asked for confirmation.
 .sp
 This built\-in bulk rename function won\'t deal with deletions, replacements, file name conflicts and the like. For a smarter alternative use \fBqmv\fR(1).
 .TP
