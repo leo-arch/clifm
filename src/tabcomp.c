@@ -80,6 +80,9 @@ typedef char *rl_cpvfunc_t;
 || (c) == TCMP_BM_PATHS)
 
 #ifndef _NO_FZF
+static char finder_in_file[PATH_MAX + 1];
+static char finder_out_file[PATH_MAX + 1];
+
 /* We need to know the longest entry (if previewing files) to correctly
  * calculate the width of the preview window. */
 static size_t longest_prev_entry;
@@ -2361,7 +2364,7 @@ AFTER_USUAL_COMPLETION:
 
 DISPLAY_MATCHES:
 #ifndef _NO_FZF
-		if (fzftab != 1) {
+		if (fzftab != 1)
 #endif /* !_NO_FZF */
 		{
 			max = 0;
@@ -2406,11 +2409,7 @@ DISPLAY_MATCHES:
 
 			/* How many iterations of the printing loop? */
 			count = (len + (limit - 1)) / limit;
-
 		}
-#ifndef _NO_FZF
-		}
-#endif /* !_NO_FZF */
 
 		putchar('\n');
 #ifndef _NO_HIGHLIGHT

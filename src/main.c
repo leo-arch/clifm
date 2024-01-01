@@ -242,10 +242,6 @@ char
 	cur_prompt_name[NAME_MAX + 1] = "",
 	div_line[NAME_MAX + 1],
 	hostname[HOST_NAME_MAX + 1],
-#ifndef _NO_FZF
-	finder_in_file[PATH_MAX + 1],
-	finder_out_file[PATH_MAX + 1],
-#endif /* _NO_FZF */
 	fz_match[PATH_MAX + 1],
 	prop_fields_str[PROP_FIELDS_SIZE + 1] = "",
 	invalid_time_str[MAX_TIME_STR] = "",
