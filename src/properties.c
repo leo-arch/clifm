@@ -2096,8 +2096,10 @@ construct_and_print_filename(const struct fileinfo *props,
 			memcpy(tname, props->name, props->bytes + 1);
 
 		int trim_point = (int)plen - rest - 1 - (int)ext_len;
-		if (trim_point < 0)
-			trim_point = 0;
+		if (trim_point <= 0) {
+			trim_point = (int)plen - rest - 1;
+			trim = TRIM_NO_EXT;
+		}
 
 		diff = u8truncstr(tname, (size_t)trim_point);
 
