@@ -2043,7 +2043,7 @@ static int
 create_main_config_dir(void)
 {
 	/* Use the mkdir(1) to let it handle parent directories. */
-	char *tmp_cmd[] = {"mkdir", "-pm700", "--", config_dir, NULL};
+	char *tmp_cmd[] = {"mkdir", "-p", "--", config_dir, NULL};
 	if (launch_execv(tmp_cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS) {
 		config_ok = 0;
 		err('e', PRINT_PROMPT, _("%s: Cannot create configuration "

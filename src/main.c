@@ -1140,6 +1140,9 @@ main(int argc, char *argv[])
 		exit(EINVAL);
 	}
 
+	/* Make sure all initialization is made with restrictive permissions. */
+	const mode_t old_mask = umask(0077);
+
 	check_term(); /* Let's check terminal capabilities. */
 
 	/* # 1. INITIALIZE EVERYTHING WE NEED # */
@@ -1285,6 +1288,9 @@ main(int argc, char *argv[])
 
 	load_pinned_dir();
 	init_workspaces_opts();
+
+	/* Restore user umask */
+	umask(old_mask);
 
 	/* # 2. MAIN PROGRAM LOOP # */
 	run_main_loop();
