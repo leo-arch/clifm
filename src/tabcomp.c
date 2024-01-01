@@ -2485,6 +2485,8 @@ CALC_OFFSET:
 				goto RESTART;
 			goto RESET_PATH;
 		}
+#else
+		if (1) {} /* This just silences a warning */
 #endif /* !_NO_FZF */
 
 		/* Standard TAB completion */

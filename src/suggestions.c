@@ -2074,6 +2074,7 @@ rl_suggestions(const unsigned char c)
 		goto SUCCESS;
 	}
 
+	/* First word is an assignment */
 	if (c == '=' && words_num == 1 && wrong_cmd == 1) {
 		recover_from_wrong_cmd();
 		goto SUCCESS;
