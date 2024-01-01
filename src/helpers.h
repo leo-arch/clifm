@@ -99,14 +99,16 @@
 #ifdef _BE_POSIX
 # undef  xstrcasestr
 # define xstrcasestr x_strcasestr
-# define _NO_GETTEXT
-# ifndef ALLOW_MEDIA
+# ifndef _NO_GETTEXT
+#  define _NO_GETTEXT
+# endif /* !_NO_GETTEXT */
+# if !defined(ALLOW_MEDIA) && !defined(NO_MEDIA_FUNC)
 #  define NO_MEDIA_FUNC
 # endif /* !ALLOW_MEDIA */
-# ifndef ALLOW_LIRA
+# if !defined(ALLOW_LIRA) && !defined(_NO_LIRA)
 #  define _NO_LIRA
 # endif /* !ALLOW_LIRA */
-# ifndef ALLOW_ARCHIVING
+# if !defined(ALLOW_ARCHIVING) && !defined(_NO_ARCHIVING)
 #  define _NO_ARCHIVING
 # endif /* ALLOW_ARCHIVING */
 #endif /* _BE_POSIX */

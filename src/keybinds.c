@@ -275,6 +275,7 @@ rl_update_prompt(void)
 	UNHIDE_CURSOR;
 }
 
+#if defined(__HAIKU__) || !defined(_NO_PROFILES)
 /* Old version of rl_update_prompt(). Used only by rl_profile_previous() and
  * rl_profile_next(): if any of these functions use rl_update_prompt() instead,
  * no prompt is printed (not sure why). FIX. */
@@ -288,6 +289,7 @@ rl_update_prompt_old(void)
 	free(input);
 	xargs.refresh_on_empty_line = b;
 }
+#endif /* __HAIKU__ || !_NO_PROFILES */
 
 /* Runs any command recognized by CliFM via a keybind. Example:
  * keybind_exec_cmd("sel *") */
