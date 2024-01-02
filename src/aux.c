@@ -586,12 +586,12 @@ gen_date_suffix(const struct tm tm)
 	return suffix;
 }
 
-/* Create directory DIR with permissions set to MODE (ignoring the current
- * umask value). */
+/* Create directory DIR with permissions set to MODE (this latter modified
+ * by a restrictive umask value: 077). */
 int
 xmkdir(char *dir, const mode_t mode)
 {
-	mode_t old_mask = umask(0);
+	mode_t old_mask = umask(0077);
 	int ret = mkdirat(XAT_FDCWD, dir, mode);
 	umask(old_mask);
 

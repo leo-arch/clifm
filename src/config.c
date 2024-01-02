@@ -1218,27 +1218,15 @@ create_tmp_files(void)
 
 	size_t tmp_len = tmp_rootdir_len + pnl_len + user_len + 3;
 	tmp_dir = xnmalloc(tmp_len, sizeof(char));
-	snprintf(tmp_dir, tmp_len, "%s/%s", tmp_rootdir, PROGRAM_NAME);
+	snprintf(tmp_dir, tmp_len, "%s/%s-%s", tmp_rootdir,
+		PROGRAM_NAME, user.name ? user.name : "unknown");
 
 	struct stat attr;
-	if (stat(tmp_dir, &attr) == -1)
-		xmkdir(tmp_dir, S_IRWXU | S_IRWXG | S_IRWXO | S_ISVTX);
-
-	/* Once TMP_ROOTDIR exists, create the user's specific directory.
-	 * We use here very restrictive permissions (700), since only the
-	 * current user must be able to read and/or modify the contents of this
-	 * directory. */
-	snprintf(tmp_dir, tmp_len, "%s/%s/%s", tmp_rootdir, PROGRAM_NAME,
-		user.name ? user.name : "unknown");
-	if (stat(tmp_dir, &attr) == -1
-	&& xmkdir(tmp_dir, S_IRWXU) == EXIT_FAILURE) {
-		selfile_ok = 0;
-		err('e', PRINT_PROMPT, _("%s: Cannot create temporary directory "
-			"'%s': %s\n"), PROGRAM_NAME, tmp_dir, strerror(errno));
-	}
+	if (stat(tmp_dir, &attr) == -1) {
+		xmkdir(tmp_dir, S_IRWXU);
 
 	/* If the directory exists, check if it is writable. */
-	else if (access(tmp_dir, W_OK) == -1 && !sel_file) {
+	} else if (access(tmp_dir, W_OK) == -1 && !sel_file) {
 		selfile_ok = 0;
 		err('w', PRINT_PROMPT, "%s: '%s': Directory not writable. Selected "
 			"files will be lost after program exit\n",
