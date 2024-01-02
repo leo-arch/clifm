@@ -845,7 +845,9 @@ ctrl-d:deselect-all,ctrl-t:toggle-all" : "",
 
 	int dr = (flags & DELAYED_REFRESH) ? 1 : 0;
 	flags &= ~DELAYED_REFRESH;
+	const mode_t old_mask = umask(0077);
 	int ret = launch_execl(cmd);
+	umask(old_mask);
 
 	/* Restore the user's shell to its original value. */
 	user.shell = shell_bk;
