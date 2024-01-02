@@ -953,6 +953,7 @@ truncate_file(char *file, const int max, const int check_dups)
 	if (!fpp) {
 		err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME, tmp,
 			strerror(errno));
+		close(fdd);
 		fclose(fp);
 		free(tmp);
 		return;

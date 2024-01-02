@@ -2240,8 +2240,8 @@ X:N:.*\\.djvu$=djview;zathura;xreader;evince;atril\n\
 X:N:.*\\.epub$=mupdf;zathura;xreader;ebook-viewer;FBReader\n\
 X:N:.*\\.mobi$=ebook-viewer;FBReader\n\
 X:N:.*\\.(cbr|cbz)$=mcomix;xreader;YACReader;qcomicbook;zathura\n\
-X:N:(.*\\.clifm$|clifmrc)=$EDITOR;$VISUAL;kak;micro;nvim;vim;vi;mg;emacs;ed;nano;mili;leafpad;mousepad;featherpad;gedit;kate;pluma\n\
-!X:N:(.*\\.clifm$|clifmrc)=$EDITOR;$VISUAL;kak;micro;nvim;vim;vi;mg;emacs;ed;nano\n\
+X:N:(.*\\.clifm$|clifmrc)=$EDITOR;$VISUAL;kak;micro;nvim;vim;vi;mg;emacs;nano;mili;leafpad;mousepad;featherpad;gedit;kate;pluma\n\
+!X:N:(.*\\.clifm$|clifmrc)=$EDITOR;$VISUAL;kak;micro;nvim;vim;vi;mg;emacs;nano\n\
 \n\n");
 
 	fprintf(fp, "##################\n\
@@ -2260,8 +2260,8 @@ X:^text/html$=$BROWSER;surf;vimprobable;vimprobable2;qutebrowser;dwb;jumanji;lua
 \n\
 # Text\n\
 X:^text/rtf$=libreoffice;soffice;ooffice\n\
-X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;vim;vi;mg;emacs;ed;nano;mili;leafpad;mousepad;featherpad;nedit;kate;gedit;pluma;io.elementary.code;liri-text;xed;atom;nota;gobby;kwrite;xedit\n\
-!X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;vim;vi;mg;emacs;ed;nano\n\
+X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;vim;vi;mg;emacs;nano;mili;leafpad;mousepad;featherpad;nedit;kate;gedit;pluma;io.elementary.code;liri-text;xed;atom;nota;gobby;kwrite;xedit\n\
+!X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;vim;vi;mg;emacs;nano\n\
 \n\
 # Office documents\n\
 ^application/.*(open|office)document\\.spreadsheet.*=sc-im\n\
