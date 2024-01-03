@@ -1172,7 +1172,7 @@ dir_size(char *dir, const int size_in_bytes, int *status)
 	/* We only need here the first field of the line, which is a file
 	 * size and usually takes only a few digits: since a yottabyte takes 26
 	 * digits, 32 is more than enough. */
-	char line[32];
+	char line[32]; *line = '\0';
 	if (fgets(line, (int)sizeof(line), fp) == NULL)
 		goto END;
 

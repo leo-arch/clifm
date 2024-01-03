@@ -613,7 +613,7 @@ check_etc_shells(const char *file, char *shells_file, int *tmp_errno)
 	}
 
 	int ret = EXIT_FAILURE;
-	char line[PATH_MAX + 1];
+	char line[PATH_MAX + 1]; *line = '\0';
 
 	while (fgets(line, (int)sizeof(line), fp)) {
 		if (*line != '/')
@@ -928,7 +928,7 @@ load_jumpdb(void)
 		return;
 	}
 
-	char tmp_line[PATH_MAX + 32];
+	char tmp_line[PATH_MAX + 32]; *tmp_line = '\0';
 	size_t jump_lines = 0;
 
 	while (fgets(tmp_line, (int)sizeof(tmp_line), fp)) {
@@ -1084,7 +1084,7 @@ load_bookmarks(void)
 	 * In case this line is longer than PATH_MAX + 64, fgets will count an
 	 * extra line, and we'll allocate more memory than necessary, which
 	 * doesn't hurt. */
-	char tmp_line[PATH_MAX + 64];
+	char tmp_line[PATH_MAX + 64]; *tmp_line = '\0';
 	while (fgets(tmp_line, (int)sizeof(tmp_line), fp)) {
 		if (!*tmp_line || *tmp_line == '#' || *tmp_line == '\n')
 			continue;
@@ -1772,9 +1772,9 @@ get_sel_files(void)
 
 	struct stat a;
 	/* Since this file contains only paths, PATH_MAX should be enough. */
-	char line[PATH_MAX + 1];
+	char line[PATH_MAX + 1]; *line = '\0';
 	while (fgets(line, (int)sizeof(line), fp) != NULL) {
-		size_t len = strnlen(line, sizeof(line));
+		size_t len = *line ? strnlen(line, sizeof(line)) : 0;
 		if (len == 0) continue;
 
 		if (line[len - 1] == '\n') {
@@ -2020,7 +2020,7 @@ get_last_path(void)
 
 	/* A line in .last has this form: *WS_NUM:PATH, where WS_NUM is a number
 	 * between 0 and 7 (eight workspaces). */
-	char line[PATH_MAX + 4] = "";
+	char line[PATH_MAX + 4]; *line = '\0';
 	while (fgets(line, (int)sizeof(line), fp) != NULL) {
 		char *p = (char *)NULL;
 		int cur = validate_line(line, &p, sizeof(line));
@@ -2059,7 +2059,7 @@ load_pinned_dir(void)
 		return EXIT_FAILURE;
 	}
 
-	char line[PATH_MAX + 1] = "";
+	char line[PATH_MAX + 1]; *line = '\0';
 	if (fgets(line, (int)sizeof(line), fp) == NULL) {
 		free(pin_file);
 		fclose(fp);
@@ -2409,7 +2409,7 @@ load_dirhist(void)
 	size_t dirs = 0;
 
 	/* A dirhist line is just a path, so that PATH_MAX should be enough */
-	char tmp_line[PATH_MAX + 1];
+	char tmp_line[PATH_MAX + 1]; *tmp_line = '\0';
 	while (fgets(tmp_line, (int)sizeof(tmp_line), fp))
 		dirs++;
 

@@ -457,7 +457,7 @@ get_mime(char *file)
 	 * be longer than 127 characters each, So adding the separating slash, we
 	 * get a max of 255 characters.
 	 * See https://datatracker.ietf.org/doc/html/rfc4288#section-4.2 */
-	char line[NAME_MAX + 1];
+	char line[NAME_MAX + 1]; *line = '\0';
 	if (fgets(line, (int)sizeof(line), fp_out) == NULL)
 		goto END;
 

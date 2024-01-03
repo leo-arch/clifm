@@ -255,7 +255,7 @@ rename_bulk_files(char **args, FILE *fp, int *is_cwd, size_t *renamed,
 {
 	size_t i = 1;
 	int exit_status = EXIT_SUCCESS;
-	char line[PATH_MAX + 1];
+	char line[PATH_MAX + 1]; *line = '\0';
 
 	while (fgets(line, (int)sizeof(line), fp)) {
 		if (!*line || *line == '\n' || *line == '#')

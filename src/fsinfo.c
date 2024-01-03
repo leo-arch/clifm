@@ -280,7 +280,7 @@ get_dev_name(const dev_t dev)
 
 	static char name[NAME_MAX]; *name = '\0';
 
-	char line[NAME_MAX];
+	char line[NAME_MAX]; *line = '\0';
 	while (fgets(line, (int)sizeof(line), fp)) {
 		if (*line != 'D' || strncmp(line + 1, "EVNAME=", 7) != 0)
 			continue;

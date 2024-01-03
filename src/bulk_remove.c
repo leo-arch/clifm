@@ -264,10 +264,10 @@ get_files_from_tmp_file(const char *tmpfile, const char *target, const filesn_t 
 		return (char **)NULL;
 
 	size_t i = 0;
-	char line[PATH_MAX + 1];
+	char line[PATH_MAX + 1]; *line = '\0';
 
 	while (fgets(line, (int)sizeof(line), fp)) {
-		if (*line == '#' || *line == '\n')
+		if (!*line || *line == '#' || *line == '\n')
 			continue;
 
 		size_t len = strlen(line);
@@ -366,7 +366,7 @@ diff_files(char *tmp_file, const filesn_t n)
 	filesn_t c = 0;
 
 	while (fgets(line, (int)sizeof(line), fp)) {
-		if (*line != '#' && *line != '\n')
+		if (*line != '\0' && *line != '#' && *line != '\n')
 			c++;
 	}
 
