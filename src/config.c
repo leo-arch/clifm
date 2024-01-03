@@ -2430,7 +2430,7 @@ set_pager_value(char *line, int *var, const size_t buflen)
 	}
 }
 
-/* Get boolean value from LINE and set VAR accordingly */
+/* Get boolean value from LINE and set VAR accordingly. */
 static void
 set_config_bool_value(char *line, int *var)
 {
@@ -2444,6 +2444,21 @@ set_config_bool_value(char *line, int *var)
 		if (*p == 'f' && strncmp(p, "false", 5) == 0)
 			*var = 0;
 	}
+}
+
+/* Get an integer (between MIN and MAX inclusively) from LINE and store
+ * it in VAR. In case of error or out of range integer, VAR is left
+ * unchanged. */
+static void
+set_config_int_value(char *line, int *var, const int min, const int max)
+{
+	if (!line || !*line)
+		return;
+
+	int num = 0;
+	int ret = sscanf(line, "%d\n", &num);
+	if (ret > 0 && num >= min && num <= max)
+		*var = num;
 }
 
 static void
@@ -2548,21 +2563,6 @@ set_search_strategy(const char *line)
 	case '2': conf.search_strategy = GLOB_REGEX; break;
 	default: break;
 	}
-}
-
-static inline int
-set_max_filename_len(const char *line)
-{
-	char *p = strchr(line, '=');
-	if (!p || !*p || !*(++p))
-		return (conf.max_name_len = UNSET);
-
-	int n = atoi(p);
-	if (n <= 0)
-		return (conf.max_name_len = UNSET);
-
-	conf.max_name_len = n;
-	return EXIT_SUCCESS;
 }
 
 static void
@@ -2882,14 +2882,8 @@ read_config(void)
 		}
 
 		else if (*line == 'c' && strncmp(line, "cpCmd=", 6) == 0) {
-			int opt_num = 0;
-			ret = sscanf(line + 6, "%d\n", &opt_num);
-			if (ret == -1)
-				continue;
-			if (opt_num >= 0 && opt_num < CP_CMD_AVAILABLE)
-				conf.cp_cmd = opt_num;
-			else
-				conf.cp_cmd = DEF_CP_CMD;
+			set_config_int_value(line + 6, &conf.cp_cmd,
+				0, CP_CMD_AVAILABLE - 1);
 		}
 
 		else if (xargs.desktop_notifications == UNSET && *line == 'D'
@@ -2938,11 +2932,8 @@ read_config(void)
 
 		else if (xargs.fuzzy_match_algo == UNSET && *line == 'F'
 		&& strncmp(line, "FuzzyAlgorithm=", 15) == 0) {
-			int opt_num = 0;
-			ret = sscanf(line + 15, "%d\n", &opt_num);
-			if (ret == -1 || opt_num < 1 || opt_num > FUZZY_ALGO_MAX)
-				continue;
-			conf.fuzzy_match_algo = opt_num;
+			set_config_int_value(line + 15, &conf.fuzzy_match_algo,
+				1, FUZZY_ALGO_MAX);
 		}
 
 		else if (xargs.fuzzy_match == UNSET && *line == 'F'
@@ -3003,90 +2994,47 @@ read_config(void)
 
 		else if (xargs.max_dirhist == UNSET && *line == 'M'
 		&& strncmp(line, "MaxDirhist=", 11) == 0) {
-			int opt_num = 0;
-			ret = sscanf(line + 11, "%d\n", &opt_num);
-			if (ret == -1)
-				continue;
-			if (opt_num >= 0)
-				conf.max_dirhist = opt_num;
-			else /* default */
-				conf.max_dirhist = DEF_MAX_DIRHIST;
+			set_config_int_value(line + 11, &conf.max_dirhist, 0, INT_MAX);
 		}
 
 		else if (*line == 'M' && strncmp(line, "MaxFilenameLen=", 15) == 0) {
-			if (set_max_filename_len(line) == -1)
-				continue;
+			set_config_int_value(line + 15, &conf.max_name_len, 1, INT_MAX);
 		}
 
 		else if (*line == 'M' && strncmp(line, "MaxHistory=", 11) == 0) {
-			int opt_num = 0;
-			sscanf(line + 11, "%d\n", &opt_num);
-			if (opt_num <= 0)
-				continue;
-			conf.max_hist = opt_num;
+			set_config_int_value(line + 11, &conf.max_hist, 1, INT_MAX);
 		}
 
 		else if (*line == 'M' && strncmp(line, "MaxJumpTotalRank=", 17) == 0) {
-			int opt_num = 0;
-			ret = sscanf(line + 17, "%d\n", &opt_num);
-			if (opt_num <= 0)
-				continue;
-			conf.max_jump_total_rank = opt_num;
+			set_config_int_value(line + 17, &conf.max_jump_total_rank,
+				1, INT_MAX);
 		}
 
 		else if (*line == 'M' && strncmp(line, "MaxLog=", 7) == 0) {
-			int opt_num = 0;
-			sscanf(line + 7, "%d\n", &opt_num);
-			if (opt_num <= 0)
-				continue;
-			conf.max_log = opt_num;
+			set_config_int_value(line + 7, &conf.max_log, 1, INT_MAX);
 		}
 
 		else if (xargs.max_path == UNSET && *line == 'M'
 		&& strncmp(line, "MaxPath=", 8) == 0) {
-			int opt_num = 0;
-			sscanf(line + 8, "%d\n", &opt_num);
-			if (opt_num <= 0)
-				continue;
-			conf.max_path = opt_num;
+			set_config_int_value(line + 8, &conf.max_path, 1, INT_MAX);
 		}
 
 		else if (*line == 'M' && strncmp(line, "MaxPrintSelfiles=", 17) == 0) {
-			int opt_num = 0;
-			ret = sscanf(line + 17, "%d\n", &opt_num);
-			if (ret == -1)
-				continue;
-			conf.max_printselfiles = opt_num;
+			set_config_int_value(line + 17, &conf.max_printselfiles,
+				-1, INT_MAX);
 		}
 
 		else if (*line == 'M' && strncmp(line, "MinFilenameTrim=", 16) == 0) {
-			int opt_num = 0;
-			ret = sscanf(line + 16, "%d\n", &opt_num);
-			if (ret == -1)
-				continue;
-			if (opt_num > 0)
-				conf.min_name_trim = opt_num;
-			else /* default */
-				conf.min_name_trim = DEF_MIN_NAME_TRIM;
+			set_config_int_value(line + 16, &conf.min_name_trim, 1, INT_MAX);
 		}
 
 		else if (*line == 'M' && strncmp(line, "MinJumpRank=", 12) == 0) {
-			int opt_num = 0;
-			ret = sscanf(line + 12, "%d\n", &opt_num);
-			if (ret == -1)
-				continue;
-			conf.min_jump_rank = opt_num;
+			set_config_int_value(line + 12, &conf.min_jump_rank, -1, INT_MAX);
 		}
 
 		else if (*line == 'm' && strncmp(line, "mvCmd=", 6) == 0) {
-			int opt_num = 0;
-			ret = sscanf(line + 6, "%d\n", &opt_num);
-			if (ret == -1)
-				continue;
-			if (opt_num >= 0 && opt_num < MV_CMD_AVAILABLE)
-				conf.mv_cmd = opt_num;
-			else
-				conf.mv_cmd = DEF_MV_CMD;
+			set_config_int_value(line + 6, &conf.mv_cmd,
+				0, MV_CMD_AVAILABLE - 1);
 		}
 
 		else if (!conf.opener && *line == 'O'
@@ -3174,14 +3122,7 @@ read_config(void)
 
 		else if (xargs.sort == UNSET && *line == 'S'
 		&& strncmp(line, "Sort=", 5) == 0) {
-			int opt_num = 0;
-			ret = sscanf(line + 5, "%d\n", &opt_num);
-			if (ret == -1)
-				continue;
-			if (opt_num >= 0 && opt_num <= SORT_TYPES)
-				conf.sort = opt_num;
-			else /* default (sort by name) */
-				conf.sort = DEF_SORT;
+			set_config_int_value(line + 5, &conf.sort, 0, SORT_TYPES);
 		}
 
 		else if (xargs.sort_reverse == UNSET && *line == 'S'
