@@ -3029,7 +3029,7 @@ read_config(void)
 		else if (*line == 'M' && strncmp(line, "MaxJumpTotalRank=", 17) == 0) {
 			int opt_num = 0;
 			ret = sscanf(line + 17, "%d\n", &opt_num);
-			if (ret == -1)
+			if (opt_num <= 0)
 				continue;
 			conf.max_jump_total_rank = opt_num;
 		}

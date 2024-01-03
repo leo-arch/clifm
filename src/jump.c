@@ -167,7 +167,7 @@ static int
 rank_entry(const int i, const time_t now, int *days_since_first,
 	int *hours_since_last)
 {
-	/* 86400 = 60 secs / 60 misc / 24 hours */
+	/* 86400 = 60 secs / 60 mins / 24 hours */
 	*days_since_first = (int)(now - jump_db[i].first_visit) / 86400;
 	/* 3600 = 60 secs / 60 mins */
 	*hours_since_last = (int)(now - jump_db[i].last_visit) / 3600;
@@ -295,8 +295,8 @@ save_jumpdb(void)
 	}
 
 	/* Once we have the total rank, check if we need to reduce ranks,
-	 * and then write entries into the database */
-	if (total_rank > conf.max_jump_total_rank)
+	 * and then write entries into the database. */
+	if (total_rank > conf.max_jump_total_rank && conf.max_jump_total_rank > 0)
 		reduce = (total_rank / conf.max_jump_total_rank) + 1;
 
 	for (i = 0; i < (int)jump_n; i++) {
