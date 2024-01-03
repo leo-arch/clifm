@@ -585,9 +585,9 @@ extern time_t curdir_mtime;
  * when passing color codes to readline */
 #define RL_NC "\001\x1b[0m\002"
 
-#define UNSET -1
-/* MinJumpRank takes -1 as a valid value. So, let's use -2 to mark it unset */
-#define JUMP_UNSET -2
+#define UNSET  -1
+/* Some options take -1 as a valid value. So, let's use -2 to mark it unset */
+#define UNSET2 -2
 
 /* Macros for the cp and mv cmds */
 #define CP_CP            0 /* cp -iRp */

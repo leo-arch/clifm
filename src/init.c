@@ -231,8 +231,8 @@ init_conf_struct(void)
 	conf.max_name_len_bk = 0;
 
 	conf.max_path = UNSET;
-	conf.max_printselfiles = -2; /* -1 is a valid value */
-	conf.min_jump_rank = JUMP_UNSET; /* UNSET (-1) is a valid value for MinJumpRank */
+	conf.max_printselfiles = UNSET2; /* -1 is a valid value */
+	conf.min_jump_rank = UNSET2; /* UNSET (-1) is a valid value for MinJumpRank */
 	conf.min_name_trim = UNSET;
 	conf.mv_cmd = UNSET;
 	conf.no_eln = UNSET;
@@ -2692,7 +2692,7 @@ check_options(void)
 	if (conf.min_name_trim == UNSET)
 		conf.min_name_trim = DEF_MIN_NAME_TRIM;
 
-	if (conf.min_jump_rank == JUMP_UNSET)
+	if (conf.min_jump_rank == UNSET2)
 		conf.min_jump_rank = DEF_MIN_JUMP_RANK;
 
 	if (conf.max_jump_total_rank == UNSET)
@@ -2854,7 +2854,7 @@ check_options(void)
 			conf.print_selfiles = xargs.printsel;
 	}
 
-	if (conf.max_printselfiles < UNSET) /* -1 (UNSET) is a valid value */
+	if (conf.max_printselfiles == UNSET2) /* -1 (UNSET) is a valid value */
 		conf.max_printselfiles = DEF_MAX_PRINTSEL;
 
 	if (conf.case_sens_list == UNSET) {

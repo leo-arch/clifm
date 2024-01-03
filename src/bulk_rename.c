@@ -48,8 +48,8 @@
 
 #define BULK_RENAME_TMP_FILE_HEADER "# CliFM - Rename files in bulk\n\
 # Edit file names, save, and quit the editor (you will be\n\
-# asked for confirmation)\n\
-# Just quit the editor without any edit to cancel the operation\n\n"
+# asked for confirmation).\n\
+# Quit the editor without any edit to cancel the operation.\n\n"
 
 /* Error opening tmp file FILE. Err accordingly. */
 static int
