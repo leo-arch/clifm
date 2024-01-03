@@ -202,10 +202,7 @@ write_files_to_tmp(struct dirent ***a, filesn_t *n, const char *target,
 			if (SELFORPARENT((*a)[i]->d_name))
 				continue;
 #ifndef _DIRENT_HAVE_D_TYPE
-			struct stat attr;
-			if (stat((*a)[i]->d_name, &attr) == -1)
-				continue;
-			write_name(fp, (*a)[i]->d_name, get_dt(attr.st_mode));
+			write_name(fp, (*a)[i]->d_name, 0);
 #else
 			write_name(fp, (*a)[i]->d_name, (*a)[i]->d_type);
 #endif /* !_DIRENT_HAVE_D_TYPE */
