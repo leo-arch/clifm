@@ -346,7 +346,7 @@ mount_dev(const int n)
 		return EXIT_FAILURE;
 	}
 
-	char out_line[PATH_MAX];
+	char out_line[PATH_MAX + 1];
 	if (fgets(out_line, (int)sizeof(out_line), fp) == NULL) {
 		/* Error is printed by the mount command itself */
 		fclose(fp);

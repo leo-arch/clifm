@@ -760,7 +760,7 @@ read_original_path(const char *file, const char *src, int *status)
 	}
 
 	char *orig_path = (char *)NULL;
-	/* The max length for line is Path=(5) + PATH_MAX + \n(1) */
+	/* The max length for line is: Path=(5) + PATH_MAX + \n(1) */
 	char line[PATH_MAX + 6] = "";
 
 	while (fgets(line, (int)sizeof(line), fp)) {

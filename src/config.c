@@ -148,7 +148,7 @@ get_start_path_and_ws_names(char **sp, char **ws)
 	if (!fp)
 		return;
 
-	char line[PATH_MAX + 15];
+	char line[PATH_MAX + 16];
 	while (fgets(line, (int)sizeof(line), fp)) {
 		if (*line == 'W' && strncmp(line, "WorkspaceNames=", 15) == 0
 		&& *(line + 15)) {
@@ -2796,7 +2796,8 @@ read_config(void)
 	int ret = -1;
 	conf.max_name_len = DEF_MAX_NAME_LEN;
 	*div_line = *DEF_DIV_LINE;
-	char line[PATH_MAX + 15];
+	/* The longest possible line in the config file is StartingPath="PATH" */
+	char line[PATH_MAX + 16];
 
 	*prop_fields_str = '\0';
 

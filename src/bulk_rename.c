@@ -160,7 +160,7 @@ count_modified_names(char **args, FILE *fp)
 {
 	size_t modified = 0;
 	size_t i = 1;
-	char line[PATH_MAX];
+	char line[PATH_MAX + 1];
 
 	/* Print what would be done */
 	while (fgets(line, (int)sizeof(line), fp)) {
@@ -232,7 +232,7 @@ static int
 check_line_mismatch(FILE *fp, const size_t total)
 {
 	size_t modified = 0;
-	char line[PATH_MAX];
+	char line[PATH_MAX + 1];
 
 	while (fgets(line, (int)sizeof(line), fp)) {
 		if (!*line || *line == '\n' || *line == '#')
@@ -255,7 +255,7 @@ rename_bulk_files(char **args, FILE *fp, int *is_cwd, size_t *renamed,
 {
 	size_t i = 1;
 	int exit_status = EXIT_SUCCESS;
-	char line[PATH_MAX];
+	char line[PATH_MAX + 1];
 
 	while (fgets(line, (int)sizeof(line), fp)) {
 		if (!*line || *line == '\n' || *line == '#')

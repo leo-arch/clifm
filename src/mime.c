@@ -453,7 +453,11 @@ get_mime(char *file)
 		return (char *)NULL;
 	}
 
-	char line[NAME_MAX] = "";
+	/* According to the RFC-4288, both type and subtype of a MIME type cannot
+	 * be longer than 127 characters each, So adding the separating slash, we
+	 * get a max of 255 characters.
+	 * See https://datatracker.ietf.org/doc/html/rfc4288#section-4.2 */
+	char line[NAME_MAX + 1];
 	if (fgets(line, (int)sizeof(line), fp_out) == NULL)
 		goto END;
 

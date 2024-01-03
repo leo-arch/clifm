@@ -613,7 +613,7 @@ check_etc_shells(const char *file, char *shells_file, int *tmp_errno)
 	}
 
 	int ret = EXIT_FAILURE;
-	char line[PATH_MAX];
+	char line[PATH_MAX + 1];
 
 	while (fgets(line, (int)sizeof(line), fp)) {
 		if (*line != '/')
@@ -1079,7 +1079,12 @@ load_bookmarks(void)
 		return EXIT_FAILURE;
 
 	size_t bm_total = 0;
-	char tmp_line[256];
+
+	/* A bookmark line looks like this: [shortcut]name:path
+	 * In case this line is longer than PATH_MAX + 64, fgets will count an
+	 * extra line, and we'll allocate more memory than necessary, which
+	 * doesn't hurt. */
+	char tmp_line[PATH_MAX + 64];
 	while (fgets(tmp_line, (int)sizeof(tmp_line), fp)) {
 		if (!*tmp_line || *tmp_line == '#' || *tmp_line == '\n')
 			continue;
@@ -1767,7 +1772,7 @@ get_sel_files(void)
 
 	struct stat a;
 	/* Since this file contains only paths, PATH_MAX should be enough. */
-	char line[PATH_MAX];
+	char line[PATH_MAX + 1];
 	while (fgets(line, (int)sizeof(line), fp) != NULL) {
 		size_t len = strnlen(line, sizeof(line));
 		if (len == 0) continue;
@@ -2013,8 +2018,10 @@ get_last_path(void)
 		return EXIT_FAILURE;
 	}
 
-	char line[PATH_MAX + 2] = "";
-	while (fgets(line, (int)sizeof(line), fp)) {
+	/* A line in .last has this form: *WS_NUM:PATH, where WS_NUM is a number
+	 * between 0 and 7 (eight workspaces). */
+	char line[PATH_MAX + 4] = "";
+	while (fgets(line, (int)sizeof(line), fp) != NULL) {
 		char *p = (char *)NULL;
 		int cur = validate_line(line, &p, sizeof(line));
 		if (cur == -1)
@@ -2052,7 +2059,7 @@ load_pinned_dir(void)
 		return EXIT_FAILURE;
 	}
 
-	char line[PATH_MAX] = "";
+	char line[PATH_MAX + 1] = "";
 	if (fgets(line, (int)sizeof(line), fp) == NULL) {
 		free(pin_file);
 		fclose(fp);
@@ -2401,7 +2408,8 @@ load_dirhist(void)
 
 	size_t dirs = 0;
 
-	char tmp_line[PATH_MAX];
+	/* A dirhist line is just a path, so that PATH_MAX should be enough */
+	char tmp_line[PATH_MAX + 1];
 	while (fgets(tmp_line, (int)sizeof(tmp_line), fp))
 		dirs++;
 

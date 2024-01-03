@@ -264,7 +264,7 @@ get_files_from_tmp_file(const char *tmpfile, const char *target, const filesn_t 
 		return (char **)NULL;
 
 	size_t i = 0;
-	char line[PATH_MAX];
+	char line[PATH_MAX + 1];
 
 	while (fgets(line, (int)sizeof(line), fp)) {
 		if (*line == '#' || *line == '\n')
