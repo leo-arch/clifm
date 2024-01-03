@@ -1704,7 +1704,7 @@ move_cursor_up(const int total_line_len)
 {
 	int lines = 1;
 
-	if (total_line_len > term_cols) {
+	if (total_line_len > term_cols && term_cols > 0) {
 		lines = total_line_len / term_cols;
 		int rem = (int)total_line_len % term_cols;
 		if (rem > 0)
@@ -2406,7 +2406,7 @@ DISPLAY_MATCHES:
 			if (limit != 1 && (limit * max == term_cols))
 				limit--;
 
-			if (limit == 0)
+			if (limit <= 0)
 			  limit = 1;
 
 			/* How many iterations of the printing loop? */

@@ -274,11 +274,11 @@ print_div_line(void)
 		/* Custom line */
 		const size_t len = wc_xstrlen(div_line);
 		if (len <= 2) {
-			/* Extend DIV_LINE to the end of the screen - 1
+			/* Extend DIV_LINE to the end of the screen - 1.
 			 * We substract 1 to prevent an extra empty line after the
-			 * dividing line in some terminals (e.g. cons25) */
-			int i;
-			for (i = (int)(term_cols / len); i > 1; i--)
+			 * dividing line in some terminals (e.g. cons25). */
+			int i = len > 0 ? (int)(term_cols / len) : 0;
+			for (; i > 1; i--)
 				fputs(div_line, stdout);
 			putchar('\n');
 		} else {
@@ -888,11 +888,12 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad,
 static size_t
 get_columns(void)
 {
+	/* LONGEST is size_t: it will never be less than zero. */
 	size_t n = (size_t)term_cols / (longest + 1);
 	/* +1 for the space between file names. */
 
-	/* If longest is bigger than terminal columns, columns_n will
-	 * be negative or zero. To avoid this: */
+	/* If longest is bigger than terminal columns, N will zero.
+	 * To avoid this: */
 	if (n < 1)
 		n = 1;
 
@@ -1529,6 +1530,7 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 	/* How many lines (rows) do we need to print NN files? */
 	/* Division/modulo is slow, true. But the compiler will make a much
 	 * better job than us at optimizing this code. */
+	/* COLUMNS_N is guarranteed to be >0 by get_columns() */
 	filesn_t rows = nn / (filesn_t)columns_n;
 	if (nn % (filesn_t)columns_n > 0)
 		++rows;

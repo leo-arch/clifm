@@ -791,7 +791,7 @@ calc_columns(const size_t largest_file, const size_t matches)
 {
 	struct winsize w;
 	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-	unsigned short termcols = w.ws_col;
+	unsigned short termcols = w.ws_col > 0 ? w.ws_col : 80;
 
 	size_t columns;
 	if (largest_file == 0 || largest_file > termcols)

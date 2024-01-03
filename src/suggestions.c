@@ -486,7 +486,7 @@ calculate_suggestion_lines(int *baej, const size_t suggestion_len)
 	 * the current line */
 	size_t slines = 1;
 
-	if (cucs > term_cols) {
+	if (cucs > term_cols && term_cols > 0) {
 		slines = cucs / (size_t)term_cols;
 		const int cucs_rem = (int)cucs % term_cols;
 		if (cucs_rem > 0)

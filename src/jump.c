@@ -790,7 +790,7 @@ dirjump(char **args, const int mode)
 
 	/* If the sum total of ranks is greater than max, divide each entry
 	 * to make the sum total less than or equal to max. */
-	if (jump_total_rank > conf.max_jump_total_rank)
+	if (jump_total_rank > conf.max_jump_total_rank && conf.max_jump_total_rank > 0)
 		reduce = (jump_total_rank / conf.max_jump_total_rank) + 1;
 
 	if (mode == NO_SUG_JUMP) {
