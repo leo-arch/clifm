@@ -1977,13 +1977,13 @@ get_colors_from_env(char **file, char **ext, char **iface)
 		set_shades(env_size_shades, SIZE_SHADES);
 
 	if (env_filecolors && *env_filecolors)
-		*file = savestring(env_filecolors, strlen_l(env_filecolors));
+		*file = strdup(env_filecolors);
 
 	if (env_extcolors && *env_extcolors)
-		*ext = savestring(env_extcolors, strlen_l(env_extcolors));
+		*ext = strdup(env_extcolors);
 
 	if (env_ifacecolors && *env_ifacecolors)
-		*iface = savestring(env_ifacecolors, strlen(env_ifacecolors));
+		*iface = strdup(env_ifacecolors);
 }
 
 #ifndef CLIFM_SUCKLESS

@@ -1925,7 +1925,11 @@ get_path_env(void)
 		return 0;
 	}
 
-	char *path_tmp = malloced_ptr == 1 ? ptr : savestring(ptr, strlen(ptr));
+	char *path_tmp = malloced_ptr == 1 ? ptr : strdup(ptr);
+	if (!path_tmp || !*path_tmp) {
+		free(path_tmp);
+		return 0;
+	}
 
 	size_t c = count_chars(path_tmp, ':') + 1;
 	paths = xnmalloc(c + 1, sizeof(struct paths_t));
