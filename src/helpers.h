@@ -143,6 +143,10 @@
 # endif /* !__sun && !__HAIKU__ */
 #endif /* !__GLIBC__ && !_DIRENT_HAVE_D_TYPE */
 
+#if defined(_BE_POSIX) && defined(_DIRENT_HAVE_D_TYPE)
+# undef _DIRENT_HAVE_D_TYPE
+#endif /* _BE_POSIX && _DIRENT_HAVE_D_TYPE */
+
 #ifdef CLIFM_LEGACY
 /* Replace functions not available before POSIX-1.2008. More precisely,
  * let's try to be POSIX-1.2001 compliant. This is still experimental:
