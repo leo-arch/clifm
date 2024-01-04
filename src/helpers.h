@@ -845,7 +845,7 @@ extern time_t curdir_mtime;
 # define _(String) String
 #endif /* !_GETTEXT */
 
-#define strlen(s) xstrnlen(s)
+//#define strlen(s) xstrlen(s)
 
 /* Log the message and print it to STDERR, but do not store it into the
  * messages array. */

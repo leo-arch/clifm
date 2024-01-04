@@ -78,10 +78,6 @@ typedef char *rl_cpvfunc_t;
 #define VCMP 2
 #define VLEN 3
 
-/* Max string length for strings passed to xstrnlen().
- * Minimize the danger of non-null terminated strings.
- * However, no length beyond MAX_STR_LEN will be correctly measured. */
-#define MAX_STR_LEN        4096
 #define INT_ARRAY_MAX 32
 
 #ifdef SOLARIS_DOORS
@@ -241,13 +237,17 @@ x_strcasestr(char *a, char *b)
 }
 #endif /* _BE_POSIX */
 
-/* Just a strlen that sets a read limit in case of non-null terminated string. */
+/*
 size_t
-xstrnlen(const char *restrict s)
+xstrlen(const char *restrict s)
 {
 	// cppcheck-suppress nullPointer
-	return (size_t)((char *)memchr(s, '\0', MAX_STR_LEN) - s);
-}
+#if !defined(__GLIBC__) || defined(_BE_POSIX)
+	return (size_t)((char *)memchr(s, '\0', INT_MAX) - s);
+#else
+	return (size_t)((char *)rawmemchr(s, '\0') - s); // NOLINT
+#endif
+} */
 
 /* Modified version of strlcpy(3) using memccpy(3), as suggested here:
  * https://www.open-std.org/jtc1/sc22/wg14/www/docs/n2349.htm
@@ -1267,11 +1267,7 @@ expand_tag(char ***args, const int tag_index)
 		char filename[PATH_MAX + NAME_MAX + 1];
 		snprintf(filename, sizeof(filename), "%s/%s", dir, t[i]->d_name);
 
-		/* If PATH_MAX isn't MAX_STR_LEN (4096), for example on BSD, where
-		 * it is 1024, we get a compilation warning about xstrnlen(),
-		 * called by escape_str() here. Let's use MAX_STR_LEN directly to
-		 * silence this warning. */
-		char rpath[MAX_STR_LEN];
+		char rpath[PATH_MAX + 1];
 		*rpath = '\0';
 		char *ret = realpath(filename, rpath);
 		if (!ret || !*rpath) {
