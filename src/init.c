@@ -592,7 +592,7 @@ xgetenv(const char *s, const int alloc)
 
 	char *p = getenv(s);
 	if (p && *p)
-		return alloc == 1 ? savestring(p, strlen(p)) : p;
+		return alloc == 1 ? strdup(p) : p;
 
 	return (char *)NULL;
 }
@@ -1828,14 +1828,16 @@ get_cdpath(void)
 	if (!p || !*p)
 		return 0;
 
-	char *t = savestring(p, strlen(p));
+	char *t = strdup(p);
+	if (!t)
+		return 0;
 
 	/* Get each path in CDPATH */
 	size_t i, n = 0, len = 0;
 	for (i = 0; t[i]; i++) {
 		/* Store path in CDPATH in a tmp buffer */
-		char buf[PATH_MAX];
-		while (t[i] && t[i] != ':') {
+		char buf[PATH_MAX + 1];
+		while (t[i] && t[i] != ':' && len < sizeof(buf)) {
 			buf[len] = t[i];
 			len++;
 			i++;

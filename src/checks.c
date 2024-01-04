@@ -157,23 +157,23 @@ set_term_caps(const int i)
  * cursor position (needed to print suggestions). If not, disable the
  * feature accordingly. */
 static void
-check_term_support(const char *_term)
+check_term_support(const char *env_term)
 {
-	if (!_term || !*_term) {
+	if (!env_term || !*env_term) {
 		set_term_caps(-1);
 		return;
 	}
 
-	size_t i, len = strlen(_term);
+	size_t i, len = strlen(env_term);
 	/* Color and cursor position request support */
 	int index = -1;
 
-	if (*_term == 'x' && strcmp(_term, "xterm-kitty") == 0)
+	if (*env_term == 'x' && strcmp(env_term, "xterm-kitty") == 0)
 		flags |= KITTY_TERM;
 
 	for (i = 0; TERM_INFO[i].name; i++) {
-		if (*_term != *TERM_INFO[i].name || len != TERM_INFO[i].len
-		|| strcmp(_term, TERM_INFO[i].name) != 0)
+		if (*env_term != *TERM_INFO[i].name || len != TERM_INFO[i].len
+		|| strcmp(env_term, TERM_INFO[i].name) != 0)
 			continue;
 
 		index = (int)i;
@@ -182,7 +182,7 @@ check_term_support(const char *_term)
 
 	if (index == -1) {
 		err('w', PRINT_PROMPT, _("%s: '%s': Terminal type not supported. "
-			"Limited functionality is expected.\n"), PROGRAM_NAME, _term);
+			"Limited functionality is expected.\n"), PROGRAM_NAME, env_term);
 	}
 
 	set_term_caps(index);
