@@ -1958,10 +1958,10 @@ get_path_env(void)
 			n++;
 		}
 
+CONT:
 		if (!d || n == c)
 			break;
 
-CONT:
 		p = ++q;
 	}
 
