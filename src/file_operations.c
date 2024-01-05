@@ -52,14 +52,17 @@
 struct rm_info {
 	char   *name;
 	nlink_t links;
-	time_t  mtime;
-	dev_t   dev;
-	ino_t   ino;
-	int     dir;
-	int     exists;
 #if defined(__sun) || defined(__OpenBSD__) || defined(__DragonFly__)
 	int     pad0;
 #endif /* __sun || __OpenBSD__ || __DragonFly__ */
+	time_t  mtime;
+	ino_t   ino;
+	dev_t   dev;
+	int     dir;
+	int     exists;
+#if defined(__OpenBSD__) || defined(__DragonFly__)
+	int     pad1;
+#endif /* __OpenBSD__ || __DragonFly__ */
 };
 
 static char *const unsafe_name_msgs[] = {
