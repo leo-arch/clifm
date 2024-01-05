@@ -1837,7 +1837,7 @@ get_cdpath(void)
 	for (i = 0; t[i]; i++) {
 		/* Store path in CDPATH in a tmp buffer */
 		char buf[PATH_MAX + 1];
-		while (t[i] && t[i] != ':' && len < sizeof(buf)) {
+		while (t[i] && t[i] != ':' && len < sizeof(buf) - 1) {
 			buf[len] = t[i];
 			len++;
 			i++;
