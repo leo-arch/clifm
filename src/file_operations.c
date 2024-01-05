@@ -202,13 +202,13 @@ xchmod(const char *file, const char *mode_str, const int flag)
 {
 	if (!file || !*file) {
 		err(flag == 1 ? 'e' : 0, flag == 1 ? PRINT_PROMPT : NOPRINT_PROMPT,
-			"xchmod: Empty buffer for file name\n");
+			_("xchmod: Empty buffer for file name\n"));
 		return EXIT_FAILURE;
 	}
 
 	if (!mode_str || !*mode_str) {
 		err(flag == 1 ? 'e' : 0, flag == 1 ? PRINT_PROMPT : NOPRINT_PROMPT,
-			"xchmod: Empty buffer for mode\n");
+			_("xchmod: Empty buffer for mode\n"));
 		return EXIT_FAILURE;
 	}
 
@@ -239,7 +239,7 @@ toggle_exec(const char *file, mode_t mode)
 	(0100 & mode) ? (mode &= (mode_t)~0111) : (mode |= 0100);
 
 	if (fchmodat(XAT_FDCWD, file, mode, 0) == -1) {
-		xerror("te: Changing permissions of '%s': %s\n",
+		xerror(_("te: Changing permissions of '%s': %s\n"),
 			file, strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -335,7 +335,7 @@ dup_file(char **cmd)
 		if (strchr(source, '\\')) {
 			char *deq_str = unescape_str(source, 0);
 			if (!deq_str) {
-				xerror("dup: '%s': Error unescaping file name\n", source);
+				xerror(_("dup: '%s': Error unescaping file name\n"), source);
 				continue;
 			}
 
@@ -488,7 +488,7 @@ list_created_files(char **nfiles, const filesn_t nfiles_n)
 			free(f);
 	}
 
-	print_reload_msg("%zu file(s) created\n", (size_t)nfiles_n);
+	print_reload_msg(_("%zu file(s) created\n"), (size_t)nfiles_n);
 }
 
 static int
@@ -1012,8 +1012,8 @@ open_function(char **cmd)
 		return EXIT_SUCCESS;
 
 	if (ret == EXEC_NOTFOUND || ret == EACCES) {
-		xerror("open: %s: %s\nTry 'open --help' for more "
-			"information\n", cmd[2], NOTFOUND_MSG);
+		xerror(_("open: %s: %s\nTry 'open --help' for more "
+			"information\n"), cmd[2], NOTFOUND_MSG);
 		return EXEC_NOTFOUND;
 	}
 
@@ -1024,7 +1024,7 @@ open_function(char **cmd)
 static char *
 get_new_link_target(char *cur_target)
 {
-	puts("Edit target (Ctrl-d to quit)");
+	puts(_("Edit target (Ctrl-d to quit)"));
 	char _prompt[NAME_MAX];
 	snprintf(_prompt, sizeof(_prompt), "\001%s\002>\001%s\002 ", mi_c, tx_c);
 
@@ -1849,7 +1849,7 @@ batch_link(char **args)
 		return EXIT_SUCCESS;
 	}
 
-	puts("Suffix defaults to '.link'");
+	puts(_("Suffix defaults to '.link'"));
 	flags |= NO_FIX_RL_POINT;
 	char *suffix = rl_no_hist(_("Enter links suffix ('q' to quit): "));
 	flags &= ~NO_FIX_RL_POINT;
