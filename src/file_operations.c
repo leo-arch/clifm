@@ -1700,7 +1700,13 @@ remove_files(char **args)
 
 	if (launch_execv(rm_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 		exit_status = EXIT_FAILURE;
+#ifndef BSD_KQUEUE
 		if (num > 1 && conf.autols == 1) /* Only if we have multiple files */
+#else
+		/* Kqueue refreshes the screen even if there was only one file
+		 * to be modified and it failed. */
+		if (conf.autols == 1)
+#endif /* !BSD_KQUEUE */
 			press_any_key_to_continue(0);
 	}
 
