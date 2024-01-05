@@ -182,7 +182,7 @@ open_file(char *file)
 # else
 		char *cmd[] = {"xdg-open", file, NULL};
 # endif /* __HAIKU__ */
-		if (launch_execv(cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS)
+		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
 #endif /* _NO_LIRA */
 	}

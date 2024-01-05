@@ -633,7 +633,7 @@ is_compressed(char *file, const int test_iso)
 	int compressed = 0;
 	fp_out = open_fread(tmp_file, &fd);
 	if (fp_out) {
-		char line[NAME_MAX]; *line = '\0';
+		char line[NAME_MAX + 1]; *line = '\0';
 		if (fgets(line, (int)sizeof(line), fp_out) == NULL) {
 			fclose(fp_out);
 			unlink(tmp_file);

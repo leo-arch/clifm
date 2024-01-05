@@ -442,13 +442,8 @@ get_mime(char *file)
 	close(stdout_bk);
 	close(stderr_bk);
 
-	if (ret != EXIT_SUCCESS) {
-		unlink(tmp_file);
-		return (char *)NULL;
-	}
-
-	fp_out = fopen(tmp_file, "r");
-	if (!fp_out) {
+	if (ret != EXIT_SUCCESS
+	|| (fp_out = fopen(tmp_file, "r")) == NULL) {
 		unlink(tmp_file);
 		return (char *)NULL;
 	}
@@ -1755,7 +1750,8 @@ check_file_cmd(void)
 {
 	char *p = get_cmd_path("file");
 	if (!p) {
-		xerror(_("%s: file: Command not found\n"), err_name);
+		xerror("%s: Cannot retrieve MIME type: 'file' command "
+			"not found\n", err_name);
 		return EXIT_FAILURE;
 	}
 
