@@ -1637,8 +1637,8 @@ check_rm_files(struct rm_info *info, const size_t start, const char *errname)
 	}
 
 	if (ret == EXIT_FAILURE) {
-		puts(_("Operation cancelled"));
-		press_any_key_to_continue(0);
+		return (rl_get_y_or_n(_("Remove files anyway? [y/n] ")) == 0
+			? EXIT_FAILURE : EXIT_SUCCESS);
 	}
 
 	return ret;
