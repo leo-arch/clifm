@@ -1757,7 +1757,12 @@ void
 get_term_size(void)
 {
 	struct winsize w;
-	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+	if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) == -1) {
+		term_cols = 80;
+		term_lines = 24;
+		return;
+	}
+
 	term_cols =  w.ws_col > 0 ? w.ws_col : 80;
 	term_lines = w.ws_row > 0 ? w.ws_row : 24;
 }
