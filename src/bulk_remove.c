@@ -463,11 +463,12 @@ FREE_N_EXIT:
 	free(rfiles);
 
 END:
-	if (unlink(tmp_file) == -1) {
-		err('w', PRINT_PROMPT, "rr: unlink: '%s': %s\n",
+	if (unlinkat(fd, tmp_file, 0) == -1) {
+		err('w', PRINT_PROMPT, "rr: unlinkat: '%s': %s\n",
 			tmp_file, strerror(errno));
 	}
 
+	close(fd);
 	free(tmp_file);
 	return ret;
 }
