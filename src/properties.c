@@ -1978,7 +1978,7 @@ do_stat_and_exit(const int full_stat)
 
 	fputs(df_c, stdout);
 	cur_ws = 0;
-	char tmp[PATH_MAX] = "";
+	char tmp[PATH_MAX + 1] = "";
 	char *cwd = get_cwd(tmp, sizeof(tmp), 0);
 	if (cwd)
 		workspaces[cur_ws].path = savestring(cwd, strlen(cwd));

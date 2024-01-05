@@ -37,7 +37,6 @@
 #include <strings.h> /* str(n)casecmp() */
 #include <unistd.h>
 #include <errno.h>
-#include <limits.h>
 #include <pwd.h>
 #include <grp.h> /* Needed by groups_generator(): getgrent(3) */
 
@@ -53,20 +52,18 @@ typedef char *rl_cpvfunc_t;
 #include "checks.h"
 #include "exec.h"
 #include "fuzzy_match.h"
-#include "keybinds.h"
-#include "navigation.h"
-#include "readline.h"
-#include "tabcomp.h"
-#include "mime.h"
-#include "tags.h"
-
-#ifndef _NO_SUGGESTIONS
-# include "suggestions.h"
-#endif /* !_NO_SUGGESTIONS */
-
 #ifndef _NO_HIGHLIGHT
 # include "highlight.h"
 #endif /* !_NO_HIGHLIGHT */
+#include "keybinds.h"
+#include "mime.h"
+#include "navigation.h"
+#include "readline.h"
+#ifndef _NO_SUGGESTIONS
+# include "suggestions.h"
+#endif /* !_NO_SUGGESTIONS */
+#include "tabcomp.h"
+#include "tags.h"
 
 #define DEL_EMPTY_LINE     1
 #define DEL_NON_EMPTY_LINE 2
@@ -250,7 +247,7 @@ gen_shell_cmd_comp(char *cmd)
 }
 
 /* Get short and long options for command CMD, store them in the EXT_OPTS
- * array and return the number of options found */
+ * array and return the number of options found. */
 static int
 get_shell_cmd_opts(char *cmd)
 {
@@ -265,6 +262,7 @@ get_shell_cmd_opts(char *cmd)
 
 	struct stat a;
 	if (stat(p, &a) == -1) {
+		/* Comp file does not exist. Try to generate via manpages_comp_gen.py */
 		if (gen_shell_cmd_comp(cmd) == EXIT_FAILURE || stat(p, &a) == -1)
 			return EXIT_FAILURE;
 	}
@@ -275,7 +273,7 @@ get_shell_cmd_opts(char *cmd)
 		return EXIT_FAILURE;
 
 	int n = 0;
-	char line[NAME_MAX];
+	char line[NAME_MAX]; *line = '\0';
 	while (fgets(line, (int)sizeof(line), fp)) {
 		if (n >= MAX_EXT_OPTS)
 			break;
@@ -885,6 +883,7 @@ alt_rl_getc(FILE *stream)
 }
 
 static int cb_running = 0;
+
 /* Callback function called for each line when accept-line executed, EOF
  * seen, or EOF character read. This sets a flag and returns; it could
  * also call exit(3). */
@@ -4384,7 +4383,7 @@ static void
 set_rl_input_file(void)
 {
 	char *input_file = getenv("CLIFM_TEST_INPUT_FILE");
-	if (!input_file) {
+	if (!input_file || !*input_file) {
 		xerror(_("%s: An input file must be provided via the "
 			"CLIFM_TEST_INPUT_FILE environment variable\n"), PROGRAM_NAME);
 		UNHIDE_CURSOR;
