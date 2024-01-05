@@ -747,15 +747,19 @@ check_cdpath(const char *name)
 		return (char *)NULL;
 
 	size_t i;
-	char tmp[PATH_MAX];
+	size_t namelen = strlen(name);
 	char *p = (char *)NULL;
 	struct stat a;
+
 	for (i = 0; cdpaths[i]; i++) {
 		size_t len = strlen(cdpaths[i]);
+		size_t tmp_len = len + namelen + 2;
+		char *tmp = xnmalloc(tmp_len, sizeof(char));
+
 		if (len > 0 && cdpaths[i][len - 1] == '/')
-			snprintf(tmp, sizeof(tmp), "%s%s", cdpaths[i], name);
+			snprintf(tmp, tmp_len, "%s%s", cdpaths[i], name);
 		else
-			snprintf(tmp, sizeof(tmp), "%s/%s", cdpaths[i], name);
+			snprintf(tmp, tmp_len, "%s/%s", cdpaths[i], name);
 
 		char *exp_path = (char *)NULL;
 		if (*tmp == '~')
@@ -764,9 +768,12 @@ check_cdpath(const char *name)
 		char *dir = exp_path ? exp_path : tmp;
 		if (stat(dir, &a) != -1 && S_ISDIR(a.st_mode)) {
 			p = savestring(dir, strlen(dir));
+			free(tmp);
 			free(exp_path);
 			break;
 		}
+
+		free(tmp);
 		free(exp_path);
 	}
 
