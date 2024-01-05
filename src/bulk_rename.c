@@ -377,7 +377,7 @@ bulk_rename(char **args)
 	if (fstat(fd, &attrb) == -1 || !S_ISREG(attrb.st_mode)
 	|| attra.st_ino != attrb.st_ino || attra.st_dev != attrb.st_dev
 	|| mtime_bk != attrb.st_mtime) {
-		xerror("%s\n", _("br: Temporary file tampered! Aborting."));
+		xerror("%s\n", _("br: Temporary file changed on disk! Aborting."));
 		goto ERROR;
 	}
 

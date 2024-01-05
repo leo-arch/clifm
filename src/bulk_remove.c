@@ -434,7 +434,7 @@ bulk_remove(char *s1, char *s2)
 	 * we originally created. */
 	if (lstat(tmp_file, &attr) == -1 || !S_ISREG(attr.st_mode)
 	|| attr.st_ino != old_ino || attr.st_dev != old_dev) {
-		xerror("%s\n", _("rr: Temporary file tampered! Aborting."));
+		xerror("%s\n", _("rr: Temporary file changed on disk! Aborting."));
 		free_dirent(&a, n);
 		goto END;
 	}

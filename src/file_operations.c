@@ -52,6 +52,9 @@
 struct rm_info {
 	char   *name;
 	nlink_t links;
+	time_t  mtime;
+	dev_t   dev;
+	ino_t   ino;
 	int     dir;
 	int     exists;
 #if defined(__sun) || defined(__OpenBSD__) || defined(__DragonFly__)
@@ -1614,6 +1617,33 @@ rm_confirm(struct rm_info *info, const size_t start, const int have_dirs)
 	return rl_get_y_or_n(_("Continue? [y/n] "));
 }
 
+static int
+check_rm_files(struct rm_info *info, const size_t start, const char *errname)
+{
+	struct stat a;
+	size_t i;
+	int ret = EXIT_SUCCESS;
+
+	for (i = start; info[i].name; i++) {
+		if (lstat(info[i].name, &a) == -1)
+			continue;
+
+		if (info[i].mtime != a.st_mtime || info[i].dev != a.st_dev
+		|| info[i].ino != a.st_ino) {
+			xerror(_("%s: '%s': File changed on disk!\n"),
+				errname, info[i].name);
+			ret = EXIT_FAILURE;
+		}
+	}
+
+	if (ret == EXIT_FAILURE) {
+		puts(_("Operation cancelled"));
+		press_any_key_to_continue(0);
+	}
+
+	return ret;
+}
+
 int
 remove_files(char **args)
 {
@@ -1666,6 +1696,9 @@ remove_files(char **args)
 			info[j].name = rm_cmd[j];
 			info[j].dir = (S_ISDIR(a.st_mode));
 			info[j].links = a.st_nlink;
+			info[j].mtime = a.st_mtime;
+			info[j].dev = a.st_dev;
+			info[j].ino = a.st_ino;
 			info[j].exists = 1;
 			if (info[j].dir == 1)
 				have_dirs++;
@@ -1692,6 +1725,11 @@ remove_files(char **args)
 	}
 
 	if (rm_force == 0 && rm_confirm(info, 3, have_dirs) == 0)
+		goto END;
+
+	/* Make sure that files to be removed do not changed between the
+	 * beginning of the operation and the user confirmation. */
+	if (check_rm_files(info, 3, err_name) == EXIT_FAILURE)
 		goto END;
 
 	rm_cmd[0] = "rm";
