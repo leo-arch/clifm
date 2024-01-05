@@ -512,15 +512,22 @@ rename_profile(char **args)
 		return EXIT_FAILURE;
 	}
 
+	if (strcmp(args[0], alt_profile ? alt_profile : "default") == 0) {
+		xerror(_("pf: '%s': Is the current profile\n"), args[0]);
+		return EXIT_FAILURE;
+	}
+
 	char src_pf_name[PATH_MAX + NAME_MAX + 11];
 	snprintf(src_pf_name, sizeof(src_pf_name), "%s/profiles/%s",
 		config_dir_gral, args[0]);
 
-	struct stat a;
-	if (lstat(src_pf_name, &a) == -1) {
+	DIR *dir = opendir(src_pf_name);
+	if (!dir) {
 		xerror("pf: '%s': %s\n", src_pf_name, strerror(errno));
 		return errno;
 	}
+
+	int fd = dirfd(dir);
 
 	p = unescape_str(args[1], 0);
 	if (p) {
@@ -532,7 +539,10 @@ rename_profile(char **args)
 	snprintf(dst_pf_name, sizeof(dst_pf_name), "%s/profiles/%s",
 		config_dir_gral, args[1]);
 
-	if (rename(src_pf_name, dst_pf_name) == -1) {
+	int ret = renameat(fd, src_pf_name, XAT_FDCWD, dst_pf_name);
+	closedir(dir);
+
+	if (ret == -1) {
 		int saved_errno = errno;
 		xerror(_("pf: Cannot rename profile '%s': %s\n"),
 			args[0], strerror(errno));

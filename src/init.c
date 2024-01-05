@@ -777,14 +777,14 @@ get_user_data(void)
 	if (homedir == pw->pw_dir && (!homedir
 	|| stat(homedir, &a) == -1 || !S_ISDIR(a.st_mode))) {
 		xerror(_("%s: '%s': Invalid home directory in the password "
-			"database.\nSomething is really wrong. Exiting.\n"), PROGRAM_NAME,
-			homedir ? homedir : "!");
+			"database.\nSomething is really wrong! Exiting.\n"), PROGRAM_NAME,
+			homedir ? homedir : "?");
 		exit(errno);
 	}
 
 	if (!homedir) {
 		xerror(_("%s: Home directory not found.\n"
-			"Something is really wrong. Exiting.\n"), PROGRAM_NAME);
+			"Something is really wrong! Exiting.\n"), PROGRAM_NAME);
 		exit(errno);
 	}
 
