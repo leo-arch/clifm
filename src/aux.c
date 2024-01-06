@@ -237,7 +237,8 @@ int
 should_expand_eln(const char *text)
 {
 	char *l = rl_line_buffer;
-	if (!l || !*l || !is_number(text))
+	             /* Do not expand numbers starting with zero */
+	if (!l || !*l || *text == '0' || !is_number(text))
 		return 0;
 
 	/* Exclude 'ws' and 'st/sort' commands. */
