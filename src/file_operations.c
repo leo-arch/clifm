@@ -498,11 +498,11 @@ is_range(const char *str)
 		return 0;
 
 	char *p = strchr(str, '-');
-	if (!p || !*(p + 1))
+	if (!p)
 		return 0;
 
 	*p = '\0';
-	if (is_number(str) && is_number(p + 1)) {
+	if (is_number(str) && (!p[1] || is_number(p + 1))) {
 		*p = '-';
 		return 1;
 	}
