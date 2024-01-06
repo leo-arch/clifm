@@ -1647,6 +1647,22 @@ check_rm_files(struct rm_info *info, const size_t start, const char *errname)
 	return ret;
 }
 
+static struct rm_info
+fill_rm_info_struct(char **filename, struct stat *a)
+{
+	struct rm_info info;
+
+	info.name = *filename;
+	info.dir = (S_ISDIR(a->st_mode));
+	info.links = a->st_nlink;
+	info.mtime = a->st_mtime;
+	info.dev = a->st_dev;
+	info.ino = a->st_ino;
+	info.exists = 1;
+
+	return info;
+}
+
 int
 remove_files(char **args)
 {
@@ -1678,7 +1694,7 @@ remove_files(char **args)
 		 * as a directory, and then rm(1) complains that cannot remove it,
 		 * because "Is a directory". So, let's remove the ending slash:
 		 * stat(2) will take it as the symlink it is and rm(1) will remove
-		 * the symlink (not the target), without complains. */
+		 * the symlink (not the target) without complains. */
 		size_t len = strlen(args[i]);
 		if (len > 0 && args[i][len - 1] == '/')
 			args[i][len - 1] = '\0';
@@ -1696,13 +1712,7 @@ remove_files(char **args)
 
 		if (lstat(tmp, &a) != -1) {
 			rm_cmd[j] = savestring(tmp, strlen(tmp));
-			info[j].name = rm_cmd[j];
-			info[j].dir = (S_ISDIR(a.st_mode));
-			info[j].links = a.st_nlink;
-			info[j].mtime = a.st_mtime;
-			info[j].dev = a.st_dev;
-			info[j].ino = a.st_ino;
-			info[j].exists = 1;
+			info[j] = fill_rm_info_struct(&rm_cmd[j], &a);
 			if (info[j].dir == 1)
 				have_dirs++;
 			j++;
