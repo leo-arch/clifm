@@ -1040,8 +1040,7 @@ check_fused_param(char *str)
 	int ok = 1;
 
 	while (*p) {
-		if (i && *p == '-' && *(p - 1) >= '0' && *(p - 1) <= '9'
-		&& *(p + 1) >= '1' && *(p + 1) <= '9') {
+		if (i > 0 && *p == '-' && *(p - 1) >= '0' && *(p - 1) <= '9') {
 			c++;
 		} else if (*p == ' ') {
 			break;
@@ -1053,10 +1052,7 @@ check_fused_param(char *str)
 		i++;
 	}
 
-	if (ok && c <= 1)
-		return 1;
-
-	return 0;
+	return (ok == 1 && c <= 1);
 }
 
 static char *
@@ -1081,6 +1077,7 @@ split_fused_param(char *str)
 	size_t c = 0;
 	char *p = str, *pp = str, *b = buf;
 	size_t words = 1;
+
 	while (*p) {
 		switch (*p) {
 		case ' ': /* We only allow splitting for first command word */
@@ -1099,6 +1096,7 @@ split_fused_param(char *str)
 			break;
 		default: break;
 		}
+
 		if (words == 1 && c && *p >= '0' && *p <= '9'
 		&& (*(p - 1) < '0' || *(p - 1) > '9')) {
 			if (check_fused_param(p)) {
@@ -1111,6 +1109,7 @@ split_fused_param(char *str)
 				*p = t;
 			}
 		}
+
 		*b = *p;
 		b++; p++; c++;
 	}
