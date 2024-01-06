@@ -545,7 +545,7 @@ is_valid_filename(char *name)
 	}
 
 	/* Reserved (internal: ELN/range expansion) */
-	if (is_number(n) || is_range(n)) {
+	if ((*n > '0' && is_number(n)) || is_range(n)) {
 		printf("%s: %s\n", name, unsafe_name_msgs[UNSAFE_ELN]);
 		return 0;
 	}
