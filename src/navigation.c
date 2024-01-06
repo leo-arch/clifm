@@ -761,7 +761,8 @@ check_cdpath(const char *name)
 		free(exp_path);
 	}
 
-	/* Print message to let the user know they changed to a dir in CDPATH */
+	/* Print message (post_listing(), in listing.c) to let the user
+	 * know they changed to a dir in CDPATH. */
 	if (p)
 		is_cdpath = 1;
 
