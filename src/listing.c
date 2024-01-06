@@ -490,6 +490,16 @@ get_ext_icon(const char *restrict ext, const filesn_t n)
 }
 #endif /* _NO_ICONS */
 
+static void
+print_cdpath(void)
+{
+	if (workspaces && workspaces[cur_ws].path
+	&& *workspaces[cur_ws].path)
+		print_reload_msg("cdpath: %s\n", workspaces[cur_ws].path);
+
+	is_cdpath = 0;
+}
+
 static int
 post_listing(DIR *dir, const int close_dir, const int reset_pager)
 {
@@ -520,6 +530,9 @@ post_listing(DIR *dir, const int close_dir, const int reset_pager)
 
 	if (conf.disk_usage == 1)
 		print_disk_usage();
+
+	if (is_cdpath == 1)
+		print_cdpath();
 
 	if (sort_switch == 1) {
 		print_reload_msg(_("Sorted by "));

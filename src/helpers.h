@@ -1723,6 +1723,7 @@ extern int
 	int_vars,
 	internal_cmd,
 	is_sel,
+	is_cdpath,
 	jump_total_rank,
 	kbind_busy,
 	max_files,

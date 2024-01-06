@@ -60,7 +60,7 @@ pwd_function(const char *arg)
 			puts(PWD_DESC);
 			return EXIT_SUCCESS;
 		} else if (arg[1] != 'L') {
-			xerror("pwd: '%s': Invalid option\nUsage: pwd [-LP]\n", arg);
+			xerror(_("pwd: '%s': Invalid option\nUsage: pwd [-LP]\n"), arg);
 			return EXIT_FAILURE;
 		}
 	}
@@ -114,26 +114,6 @@ get_longest_workspace_name(void)
 	return longest_ws;
 }
 
-/*
-static char *
-get_workspace_color(const uint8_t num)
-{
-	if (conf.colorize == 0)
-		return df_c;
-
-	switch (num + 1) {
-	case 1: return *ws1_c ? ws1_c : DEF_WS1_C;
-	case 2: return *ws2_c ? ws2_c : DEF_WS2_C;
-	case 3: return *ws3_c ? ws3_c : DEF_WS3_C;
-	case 4: return *ws4_c ? ws4_c : DEF_WS4_C;
-	case 5: return *ws5_c ? ws5_c : DEF_WS5_C;
-	case 6: return *ws6_c ? ws6_c : DEF_WS6_C;
-	case 7: return *ws7_c ? ws7_c : DEF_WS7_C;
-	case 8: return *ws8_c ? ws8_c : DEF_WS8_C;
-	default: return df_c;
-	}
-} */
-
 static char *
 get_workspace_path_color(const uint8_t num)
 {
@@ -141,7 +121,8 @@ get_workspace_path_color(const uint8_t num)
 		return df_c;
 
 	if (!workspaces[num].path)
-		return DEF_DL_C; /* Unset. DL (dividing line) defaults to gray: let's use this */
+		/* Unset. DL (dividing line) defaults to gray: let's use this */
+		return DEF_DL_C;
 
 	struct stat a;
 	if (lstat(workspaces[num].path, &a) == -1)
@@ -174,8 +155,6 @@ list_workspaces(void)
 		else
 			fputs("  ", stdout);
 
-//		char *p = get_workspace_color(i);
-//		char *ws_color = p ? p : df_c;
 		char *ws_color = df_c;
 
 		if (workspaces[i].name) {
@@ -484,6 +463,7 @@ get_bd_matches(const char *str, int *n, const int mode)
 			if (!p)
 				break;
 		}
+
 		char *q = strchr(p ? p : cwd, '/');
 		if (!q) {
 			if (!*(++cwd))
@@ -491,6 +471,7 @@ get_bd_matches(const char *str, int *n, const int mode)
 			continue;
 		}
 		*q = '\0';
+
 		matches = xnrealloc(matches, (size_t)(*n + 2), sizeof(char *));
 		if (mode == BD_TAB) {
 			/* Print only the path base name */
@@ -509,6 +490,7 @@ get_bd_matches(const char *str, int *n, const int mode)
 			}
 			(*n)++;
 		}
+
 		*q = '/';
 		cwd = q + 1;
 
@@ -548,14 +530,13 @@ grab_bd_input(const int n)
 	char *input = (char *)NULL;
 	putchar('\n');
 	while (!input) {
-		input = rl_no_hist("Choose a directory ('q' to quit): ");
-		if (!input)
-			continue;
-		if (!*input) {
+		input = rl_no_hist(_("Choose a directory ('q' to quit): "));
+		if (!input || !*input) {
 			free(input);
 			input = (char *)NULL;
 			continue;
 		}
+
 		if (is_number(input)) {
 			int a = atoi(input);
 			if (a > 0 && a <= n) {
@@ -566,9 +547,11 @@ grab_bd_input(const int n)
 				input = (char *)NULL;
 				continue;
 			}
+
 		} else if (*input == 'q' && !*(input + 1)) {
 			free(input);
 			return (-1);
+
 		} else {
 			free(input);
 			input = (char *)NULL;
@@ -686,6 +669,7 @@ backdir(char *str)
 	while (--i >= 0)
 		free(matches[i]);
 	free(matches);
+
 	return exit_status;
 }
 
@@ -777,6 +761,10 @@ check_cdpath(const char *name)
 		free(exp_path);
 	}
 
+	/* Print message to let the user know they changed to a dir in CDPATH */
+	if (p)
+		is_cdpath = 1;
+
 	return p;
 }
 
@@ -791,10 +779,10 @@ go_home(const int cd_flag)
 	}
 
 	if (xchdir(user.home, SET_TITLE) != EXIT_SUCCESS) {
-		int tmp_err = errno;
+		int saved_errno = errno;
 		if (cd_flag == CD_PRINT_ERROR)
-			xerror("cd: '%s': %s\n", user.home, strerror(tmp_err));
-		return tmp_err;
+			xerror("cd: '%s': %s\n", user.home, strerror(saved_errno));
+		return saved_errno;
 	}
 
 	if (workspaces) {
@@ -833,12 +821,13 @@ change_to_path(char *new_path, const int cd_flag)
 		free(p);
 		return EXIT_FAILURE;
 	}
+
 	free(p);
 
 	if (xchdir(q, SET_TITLE) != EXIT_SUCCESS) {
-		int tmp_err = errno;
+		int saved_errno = errno;
 		if (cd_flag == CD_PRINT_ERROR)
-			xerror("cd: '%s': %s\n", new_path, strerror(tmp_err));
+			xerror("cd: '%s': %s\n", new_path, strerror(saved_errno));
 
 		free(q);
 
@@ -846,10 +835,10 @@ change_to_path(char *new_path, const int cd_flag)
 		 * a general error code, is not quite informative. Why not to return the
 		 * actual error code returned by chdir(3)? Note that POSIX only requires
 		 * for cd to return >0 in case of error (see cd(1p)). */
-		if (tmp_err == EACCES || tmp_err == ENOENT)
+		if (saved_errno == EACCES || saved_errno == ENOENT)
 			return EXIT_FAILURE;
 
-		return tmp_err;
+		return saved_errno;
 	}
 
 	if (workspaces) {
@@ -876,9 +865,11 @@ cd_function(char *new_path, const int cd_flag)
 {
 	/* If no argument, change to home */
 	int ret = EXIT_SUCCESS;
+
 	if (!new_path || !*new_path) {
 		if ((ret = go_home(cd_flag)) != EXIT_SUCCESS)
 			return ret;
+
 	} else if (*new_path == '-' && !new_path[1]) {
 		/* Implementation of the shell 'cd -' command */
 		static int state = 0;
@@ -890,6 +881,7 @@ cd_function(char *new_path, const int cd_flag)
 			state = 0;
 			return forth_function(c);
 		}
+
 	} else {
 		if ((ret = change_to_path(new_path, cd_flag)) != EXIT_SUCCESS)
 			return ret;
@@ -901,11 +893,8 @@ cd_function(char *new_path, const int cd_flag)
 		add_to_dirhist(workspaces[cur_ws].path);
 
 	dir_changed = 1;
-	if (conf.autols == 1) {
-		free_dirlist();
-		if (list_dir() != EXIT_SUCCESS)
-			ret = EXIT_FAILURE;
-	}
+	if (conf.autols == 1)
+		reload_dirlist();
 
 	if (skip == 0)
 		add_to_jumpdb(workspaces[cur_ws].path);
@@ -954,8 +943,6 @@ fastback(char *str)
 	if (dots <= 2) {
 		if (dots == 2)
 			return normalize_path("..", 2);
-//		if (dots == 1)
-//			return normalize_path(".", 1);
 		return (char *)NULL;
 	}
 
@@ -1022,7 +1009,7 @@ clear_dirhist(void)
 	dirhist_cur_index = dirhist_total_index = 0;
 	add_to_dirhist(workspaces[cur_ws].path);
 
-	printf("%s: Directory history cleared\n", PROGRAM_NAME);
+	printf(_("%s: Directory history cleared\n"), PROGRAM_NAME);
 
 	return EXIT_SUCCESS;
 }
@@ -1055,10 +1042,8 @@ change_to_dirhist_num(int n)
 	dirhist_cur_index = n;
 	ret = EXIT_SUCCESS;
 
-	if (conf.autols == 1) {
-		free_dirlist();
-		ret = list_dir();
-	}
+	if (conf.autols == 1)
+		reload_dirlist();
 
 	return ret;
 }
@@ -1096,10 +1081,8 @@ set_path(const char *new_path)
 	int exit_status = EXIT_SUCCESS;
 
 	dir_changed = 1;
-	if (conf.autols == 1) {
-		free_dirlist();
-		exit_status = list_dir();
-	}
+	if (conf.autols == 1)
+		reload_dirlist();
 
 	return exit_status;
 }

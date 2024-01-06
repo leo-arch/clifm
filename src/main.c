@@ -170,6 +170,7 @@ int
 	int_vars = UNSET,
 	internal_cmd = 0,
 	is_sel = 0,
+	is_cdpath = 0,
 	jump_total_rank = 0,
 	kbind_busy = 0,
 	list_dirs_first = UNSET,
