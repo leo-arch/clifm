@@ -871,6 +871,7 @@ opener_function(const char *arg)
 
 	if (strcmp(arg, "default") != 0 && strcmp(arg, "lira") != 0)
 		conf.opener = savestring(arg, strlen(arg));
+
 	printf(_("Opener set to '%s'\n"), conf.opener
 		? conf.opener : "lira (built-in)");
 
@@ -960,7 +961,7 @@ print_alias(const char *name)
 		if (aliases[i].name && *name == *aliases[i].name
 		&& strcmp(name, aliases[i].name) == 0) {
 			printf("alias %s='%s'\n", aliases[i].name,
-				aliases[i].cmd ? aliases[i].cmd : 0);
+				aliases[i].cmd ? aliases[i].cmd : "");
 			return EXIT_SUCCESS;
 		}
 	}
@@ -1153,7 +1154,7 @@ bookmarks_func(char **args)
 
 	/* Disable keyboard shortcuts. Otherwise, the function will
 	 * still be waiting for input while the screen have been taken
-	 * by another function */
+	 * by another function. */
 	kbind_busy = 1;
 	/* Disable TAB completion while in Bookmarks */
 	rl_attempted_completion_function = NULL;
@@ -1312,9 +1313,9 @@ check_actions(char **args)
 }
 
 static int
-launch_shell(char **args)
+launch_shell(const char *arg)
 {
-	if (!args[0][1]) {
+	if (!arg[1]) {
 		/* If just ":" or ";", launch the default shell */
 		char *cmd[] = {user.shell, NULL};
 		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
@@ -1322,9 +1323,9 @@ launch_shell(char **args)
 		return EXIT_SUCCESS;
 	}
 
-	if (args[0][1] == ';' || args[0][1] == ':') {
+	if (arg[1] == ';' || arg[1] == ':') {
 		/* If double semi colon or colon (or ";:" or ":;") */
-		xerror(_("%s: '%s': Syntax error\n"), PROGRAM_NAME, args[0]);
+		xerror(_("%s: '%s': Syntax error\n"), PROGRAM_NAME, arg);
 		return EXIT_FAILURE;
 	}
 
@@ -2118,7 +2119,7 @@ check_fs_changes(void)
 static int
 is_write_cmd(const char *cmd)
 {
-	static struct cmdslist_t wcmds[] = {
+	static struct cmdslist_t const wcmds[] = {
 		/* Internal commands */
 		{"ac", 2},
 		{"ad", 2},
@@ -2247,7 +2248,7 @@ exec_cmd(char **comm)
 
 	/* Check if we need to send input directly to the system shell. */
 	if (*comm[0] == ';' || *comm[0] == ':')
-		if ((exit_code = launch_shell(comm)) != -1)
+		if ((exit_code = launch_shell(comm[0])) != -1)
 			return exit_code;
 
 	/* # AUTOCD & AUTO-OPEN (1) # */

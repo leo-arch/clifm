@@ -1018,7 +1018,7 @@ alias_import(char *file)
 	if (!file)
 		return EXIT_FAILURE;
 
-	char rfile[PATH_MAX] = "";
+	char rfile[PATH_MAX + 1];
 	rfile[0] = '\0';
 
 	if (*file == '~') {
@@ -1068,67 +1068,67 @@ alias_import(char *file)
 	int first = 1;
 
 	while (getline(&line, &line_size, fp) > 0) {
-		if (*line == 'a' && strncmp(line, "alias ", 6) == 0) {
-			alias_found++;
+		if (*line != 'a' || strncmp(line, "alias ", 6) != 0)
+			continue;
 
-			/* If alias name conflicts with some internal command,
-			 * skip it */
-			char *alias_name = strbtw(line, ' ', '=');
-			if (!alias_name)
-				continue;
+		alias_found++;
 
-			if (is_internal_c(alias_name)) {
-				xerror(_("'%s': Alias conflicts with internal "
-					"command\n"), alias_name);
-				free(alias_name);
-				continue;
-			}
+		/* If alias name conflicts with some internal command, skip it */
+		char *alias_name = strbtw(line, ' ', '=');
+		if (!alias_name)
+			continue;
 
-			char *p = line + 6; /* p points now to the beginning of the
-			alias name (because "alias " == 6) */
-
-			char *tmp = strchr(p, '=');
-			if (!tmp) {
-				free(alias_name);
-				continue;
-			}
-			if (!*(++tmp)) {
-				free(alias_name);
-				continue;
-			}
-			if (*tmp != '\'' && *tmp != '"') {
-				free(alias_name);
-				continue;
-			}
-
-			*(tmp - 1) = '\0';
-			/* If alias already exists, skip it too */
-			int exists = 0;
-			for (i = 0; i < aliases_n; i++) {
-				if (*p == *aliases[i].name && strcmp(aliases[i].name, p) == 0) {
-					exists = 1;
-					break;
-				}
-			}
-
-			*(tmp - 1) = '=';
-
-			if (exists == 0) {
-				if (first == 1) {
-					first = 0;
-					fputs("\n\n", config_fp);
-				}
-
-				alias_imported++;
-
-				/* Write the new alias into CliFM's config file */
-				fputs(line, config_fp);
-			} else {
-				xerror(_("'%s': Alias already exists\n"), alias_name);
-			}
-
+		if (is_internal_c(alias_name)) {
+			xerror(_("'%s': Alias conflicts with internal "
+				"command\n"), alias_name);
 			free(alias_name);
+			continue;
 		}
+
+		char *p = line + 6; /* p points now to the beginning of the
+		alias name (because "alias " == 6) */
+
+		char *tmp = strchr(p, '=');
+		if (!tmp) {
+			free(alias_name);
+			continue;
+		}
+		if (!*(++tmp)) {
+			free(alias_name);
+			continue;
+		}
+		if (*tmp != '\'' && *tmp != '"') {
+			free(alias_name);
+			continue;
+		}
+
+		*(tmp - 1) = '\0';
+		/* If alias already exists, skip it too */
+		int exists = 0;
+		for (i = 0; i < aliases_n; i++) {
+			if (*p == *aliases[i].name && strcmp(aliases[i].name, p) == 0) {
+				exists = 1;
+				break;
+			}
+		}
+
+		*(tmp - 1) = '=';
+
+		if (exists == 0) {
+			if (first == 1) {
+				first = 0;
+				fputs("\n\n", config_fp);
+			}
+
+			alias_imported++;
+
+			/* Write the new alias into CliFM's config file */
+			fputs(line, config_fp);
+		} else {
+			xerror(_("'%s': Alias already exists\n"), alias_name);
+		}
+
+		free(alias_name);
 	}
 
 	free(line);
@@ -1152,13 +1152,8 @@ alias_import(char *file)
 	}
 
 	/* If some alias was found and imported, print the corresponding
-	 * message and update the aliases array */
-	if (alias_imported > 1) {
-		printf(_("%s: %zu aliases were successfully imported\n"),
-				PROGRAM_NAME, alias_imported);
-	} else {
-		printf(_("%s: 1 alias was successfully imported\n"), PROGRAM_NAME);
-	}
+	 * message and update the aliases array. */
+	printf(_("%s: %zu alias(es) imported\n"), PROGRAM_NAME, alias_imported);
 
 	/* Add new aliases to the internal list of aliases */
 	get_aliases();
@@ -1170,8 +1165,8 @@ alias_import(char *file)
 		free(bin_commands);
 		bin_commands = (char **)NULL;
 	}
-
 	get_path_programs();
+
 	return EXIT_SUCCESS;
 }
 
