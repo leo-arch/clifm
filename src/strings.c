@@ -1040,7 +1040,7 @@ check_fused_param(char *str)
 	int ok = 1;
 
 	while (*p) {
-		if (i > 0 && *p == '-' && *(p - 1) >= '0' && *(p - 1) <= '9') {
+		if (i > 0 && *p == '-' && *(p - 1) >= '1' && *(p - 1) <= '9') {
 			c++;
 		} else if (*p == ' ') {
 			break;
@@ -1074,13 +1074,14 @@ split_fused_param(char *str)
 	 * needs to be splitted */
 	char *buf = xnmalloc(((strlen(str) * 2) + 2), sizeof(char));
 
-	size_t c = 0;
-	char *p = str, *pp = str, *b = buf;
-	size_t words = 1;
+	size_t c = 0; /* Bytes counter */
+	char *p = str, *pp = str; /* Pointers to original string */
+	char *b = buf; /* Pointer to our buffer */
+	size_t words = 1; /* Number of words in str */
 
 	while (*p) {
 		switch (*p) {
-		case ' ': /* We only allow splitting for first command word */
+		case ' ': /* We only allow splitting the first command word */
 			if (c && *(p - 1) != ' ' && *(p - 1) != '|'
 			&& *(p - 1) != '&' && *(p - 1) != ';')
 				words++;
@@ -1097,21 +1098,21 @@ split_fused_param(char *str)
 		default: break;
 		}
 
-		if (words == 1 && c && *p >= '0' && *p <= '9'
-		&& (*(p - 1) < '0' || *(p - 1) > '9')) {
-			if (check_fused_param(p)) {
-				char t = *p;
-				*p = '\0';
-				if (is_internal_f(pp)) {
-					*b = ' ';
-					b++;
-				}
-				*p = t;
+		if (words == 1 && c && *p >= '1' && *p <= '9'
+		&& (*(p - 1) < '0' || *(p - 1) > '9')
+		&& check_fused_param(p)) {
+			char t = *p;
+			*p = '\0';
+			if (is_internal_f(pp)) {
+				*b = ' ';
+				b++;
 			}
+			*p = t;
 		}
 
 		*b = *p;
-		b++; p++; c++;
+		b++; p++;
+		c++;
 	}
 
 	*b = '\0';
