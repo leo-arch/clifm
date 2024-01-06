@@ -1740,7 +1740,7 @@ remove_files(char **args)
 	if (rm_force == 0 && rm_confirm(info, 3, have_dirs) == 0)
 		goto END;
 
-	/* Make sure that files to be removed do not changed between the
+	/* Make sure that files to be removed have not changed between the
 	 * beginning of the operation and the user confirmation. */
 	if (check_rm_files(info, 3, err_name) == EXIT_FAILURE)
 		goto END;
