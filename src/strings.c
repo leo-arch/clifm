@@ -2622,6 +2622,10 @@ parse_input_str(char *str)
 	if (!substr)
 		return (char **)NULL;
 
+	/* Do not perform expansions for the 'n/new' command */
+	if (*substr[0] == 'n' && (!substr[0][1] || strcmp(substr[0], "new") == 0))
+		return substr;
+
 	/* Handle background/foreground process */
 	bg_proc = 0;
 
