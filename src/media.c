@@ -89,7 +89,7 @@ get_block_devices(void)
 
 	for (i = 0; (int)i < block_n; i++) {
 # ifndef _DIRENT_HAVE_D_TYPE
-		char bpath[PATH_MAX];
+		char bpath[PATH_MAX + 1];
 		snprintf(bpath, sizeof(bpath), "/dev/%s", blockdev[i]->d_name);
 		struct stat a;
 		if (stat(bpath, &a) == -1) {
@@ -188,7 +188,7 @@ get_dev_label(void)
 		}
 
 		char *name = labels[i]->d_name;
-		char lpath[PATH_MAX];
+		char lpath[PATH_MAX + 1];
 		snprintf(lpath, sizeof(lpath), "%s/%s", DISK_LABELS_PATH, name);
 		char *rpath = realpath(lpath, NULL);
 		if (!rpath) {
@@ -317,7 +317,7 @@ mount_dev(const int n)
 		return EXIT_FAILURE;
 	}
 
-	char file[PATH_MAX];
+	char file[PATH_MAX + 1];
 	snprintf(file, sizeof(file), "%s/%s", xargs.stealth_mode == 1
 		? P_tmpdir : tmp_dir, TMP_FILENAME);
 

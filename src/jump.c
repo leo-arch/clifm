@@ -269,7 +269,7 @@ save_jumpdb(void)
 	|| jump_n == 0)
 		return;
 
-	char jump_file[PATH_MAX];
+	char jump_file[PATH_MAX + 1];
 	snprintf(jump_file, sizeof(jump_file), "%s/jump.clifm", config_dir);
 
 	int fd = 0;
@@ -334,7 +334,7 @@ edit_jumpdb(char *app)
 
 	save_jumpdb();
 
-	char jump_file[PATH_MAX];
+	char jump_file[PATH_MAX + 1];
 	snprintf(jump_file, sizeof(jump_file), "%s/jump.clifm", config_dir);
 
 	struct stat attr;

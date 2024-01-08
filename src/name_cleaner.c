@@ -344,7 +344,7 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 
 	*edited_names = 1;
 
-	char f[PATH_MAX];
+	char f[PATH_MAX + 1];
 	snprintf(f, sizeof(f), "%s/%s", (xargs.stealth_mode == 1)
 		? P_tmpdir : tmp_dir, TMP_FILENAME);
 
@@ -659,7 +659,7 @@ CONFIRM:
 			 * it does, append REP_SUFFIX and try again. */
 			struct stat a;
 			while (lstat(r, &a) == 0) {
-				char tmp[PATH_MAX];
+				char tmp[PATH_MAX + 1];
 				xstrsncpy(tmp, r, sizeof(tmp));
 				r = xnrealloc(r, PATH_MAX + 32, sizeof(char));
 				snprintf(r, PATH_MAX + 31, "%s-%zu", tmp, rep_suffix);

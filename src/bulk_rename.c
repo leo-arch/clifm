@@ -314,7 +314,7 @@ bulk_rename(char **args)
 	struct stat attra; /* Original temp file */
 	struct stat attrb; /* Edited temp file */
 
-	char tmpfile[PATH_MAX];
+	char tmpfile[PATH_MAX + 1];
 	snprintf(tmpfile, sizeof(tmpfile), "%s/%s",
 		xargs.stealth_mode == 1 ? P_tmpdir : tmp_dir, TMP_FILENAME);
 

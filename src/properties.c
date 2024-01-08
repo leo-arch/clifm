@@ -336,7 +336,7 @@ get_total_size(char *filename, int *status)
 {
 	off_t total_size = 0;
 
-	char _path[PATH_MAX]; *_path = '\0';
+	char _path[PATH_MAX + 1]; *_path = '\0';
 	snprintf(_path, sizeof(_path), "%s/", filename);
 
 	if (term_caps.suggestions == 0) {

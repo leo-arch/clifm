@@ -77,7 +77,7 @@ is_file_in_cwd(char *name)
 	if (!s || !*(s + 1)) /* 'name' or 'name/' */
 		return 1;
 
-	char rpath[PATH_MAX];
+	char rpath[PATH_MAX + 1];
 	*rpath = '\0';
 	char *ret = realpath(name, rpath);
 	if (!ret || !*rpath)

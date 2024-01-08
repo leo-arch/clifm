@@ -65,7 +65,7 @@ regen_config(void)
 		char date[18] = "";
 		strftime(date, sizeof(date), "%Y%m%d@%H:%M:%S", &t);
 
-		char bk[PATH_MAX];
+		char bk[PATH_MAX + 1];
 		snprintf(bk, sizeof(bk), "%s.%s", config_file, date);
 
 		if (renameat(XAT_FDCWD, config_file, XAT_FDCWD, bk) == -1) {
@@ -551,16 +551,19 @@ edit_function(char **args)
 		return ret;
 
 	/* Get modification time after opening the config file */
-	stat(config_file, &attr);
+	if (stat(config_file, &attr) == -1) {
+		int saved_errno = errno;
+		xerror("%s: %s: %s\n", PROGRAM_NAME, config_file, strerror(errno));
+		return saved_errno;
+	}
+
 	/* If modification times differ, the file was modified after being opened */
 	if (mtime_bfr != (time_t)attr.st_mtime) {
 		/* Reload configuration only if the config file was modified */
 		reload_config();
 
-		if (conf.autols == 1) {
-			free_dirlist();
-			ret = list_dir();
-		}
+		if (conf.autols == 1)
+			reload_dirlist();
 		print_reload_msg(_(CONFIG_FILE_UPDATED));
 	}
 
@@ -581,7 +584,7 @@ setenv_plugins_helper(void)
 
 	struct stat attr;
 	if (plugins_dir && *plugins_dir) {
-		char _path[PATH_MAX];
+		char _path[PATH_MAX + 1];
 		snprintf(_path, sizeof(_path), "%s/plugins-helper", plugins_dir);
 
 		if (stat(_path, &attr) != -1
@@ -590,7 +593,7 @@ setenv_plugins_helper(void)
 	}
 
 	if (data_dir && *data_dir) {
-		char _path[PATH_MAX];
+		char _path[PATH_MAX + 1];
 		snprintf(_path, sizeof(_path), "%s/%s/plugins/plugins-helper",
 			data_dir, PROGRAM_NAME);
 
@@ -599,7 +602,7 @@ setenv_plugins_helper(void)
 			return EXIT_SUCCESS;
 	}
 
-	char home_local[PATH_MAX];
+	char home_local[PATH_MAX + 1];
 	*home_local = '\0';
 	if (user.home && *user.home) {
 		snprintf(home_local, sizeof(home_local),
@@ -736,7 +739,7 @@ import_from_data_dir(const char *src_filename, char *dest)
 		return EXIT_FAILURE;
 
 	struct stat attr;
-	char sys_file[PATH_MAX];
+	char sys_file[PATH_MAX + 1];
 	snprintf(sys_file, sizeof(sys_file), "%s/%s/%s", data_dir, PROGRAM_NAME,
 		src_filename);
 	if (stat(sys_file, &attr) == -1)
@@ -930,7 +933,7 @@ plugin1:\\C-y\n\n\
 static int
 create_preview_file(void)
 {
-	char file[PATH_MAX];
+	char file[PATH_MAX + 1];
 	snprintf(file, sizeof(file), "%s/preview.clifm", config_dir);
 
 	struct stat attr;
@@ -1332,11 +1335,11 @@ check_config_files_integrity(void)
 	check_file_safety(remotes_file);
 	check_file_safety(prompts_file);
 
-	char jump_file[PATH_MAX];
+	char jump_file[PATH_MAX + 1];
 	snprintf(jump_file, sizeof(jump_file), "%s/jump.clifm", config_dir);
 	check_file_safety(jump_file);
 
-	char preview_file[PATH_MAX];
+	char preview_file[PATH_MAX + 1];
 	snprintf(preview_file, sizeof(preview_file),
 		"%s/preview.clifm", config_dir);
 	check_file_safety(preview_file);
@@ -1444,7 +1447,7 @@ import_rl_file(void)
 	if (!data_dir || !config_dir_gral)
 		return EXIT_FAILURE;
 
-	char dest[PATH_MAX];
+	char dest[PATH_MAX + 1];
 	snprintf(dest, sizeof(dest), "%s/readline.clifm", config_dir_gral);
 	struct stat attr;
 	if (lstat(dest, &attr) == 0)
@@ -1879,7 +1882,7 @@ create_main_config_file(char *file)
 static int
 create_def_color_scheme256(void)
 {
-	char cscheme_file[PATH_MAX];
+	char cscheme_file[PATH_MAX + 1];
 	snprintf(cscheme_file, sizeof(cscheme_file), "%s/%s.clifm", colors_dir,
 		DEF_COLOR_SCHEME_256);
 
@@ -1904,7 +1907,7 @@ create_def_color_scheme(void)
 	if (term_caps.color >= 256)
 		create_def_color_scheme256();
 
-	char cscheme_file[PATH_MAX];
+	char cscheme_file[PATH_MAX + 1];
 	snprintf(cscheme_file, sizeof(cscheme_file), "%s/%s.clifm", colors_dir,
 		DEF_COLOR_SCHEME);
 

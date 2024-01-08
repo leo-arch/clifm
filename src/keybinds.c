@@ -571,7 +571,7 @@ my_insert_text(char *text, char *s, const char _s)
 			}
 		}
 
-		char q[PATH_MAX];
+		char q[PATH_MAX + 1];
 		int l = 0;
 		for (i = 0; t[i]; i++) {
 			rl_highlight(t, i, SET_COLOR);
@@ -1530,7 +1530,7 @@ rl_open_sel(int count, int key)
 	if (kbind_busy == 1)
 		return EXIT_SUCCESS;
 
-	char cmd[PATH_MAX + 3];
+	char cmd[PATH_MAX + 4];
 	snprintf(cmd, sizeof(cmd), "o %s", (sel_n && sel_elements[sel_n - 1].name)
 		? sel_elements[sel_n - 1].name : "sel");
 
@@ -1803,7 +1803,7 @@ print_highlight_string(char *s, const int insert_point)
 	fputs(tx_c, stdout);
 	cur_color = tx_c;
 
-	char q[PATH_MAX];
+	char q[PATH_MAX + 1];
 	for (i = 0; s[i]; i++) {
 		rl_highlight(s, i, SET_COLOR);
 

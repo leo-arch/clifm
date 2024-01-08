@@ -68,7 +68,7 @@ pwd_function(const char *arg)
 	if (workspaces && workspaces[cur_ws].path) {
 		pwd = workspaces[cur_ws].path;
 	} else {
-		char p[PATH_MAX]; *p = '\0';
+		char p[PATH_MAX + 1]; *p = '\0';
 		pwd = get_cwd(p, sizeof(p), 0);
 	}
 
@@ -83,7 +83,7 @@ pwd_function(const char *arg)
 		return EXIT_SUCCESS;
 	}
 
-	char p[PATH_MAX]; *p = '\0';
+	char p[PATH_MAX + 1]; *p = '\0';
 	char *real_path = realpath(pwd, p);
 	if (!real_path) {
 		xerror("pwd: '%s': %s\n", pwd, strerror(errno));
@@ -132,7 +132,7 @@ get_workspace_path_color(const uint8_t num)
 		return nd_c;
 
 	if (S_ISLNK(a.st_mode)) {
-		char p[PATH_MAX];
+		char p[PATH_MAX + 1];
 		*p = '\0';
 		char *ret = realpath(workspaces[num].path, p);
 		return (ret && *p) ? ln_c : or_c;
@@ -703,7 +703,7 @@ xchdir(char *dir, const int cd_flag)
 	int ret = chdir(dir);
 
 	if (ret == 0 && cd_flag == SET_TITLE) {
-		char tmp[PATH_MAX]; *tmp = '\0';
+		char tmp[PATH_MAX + 1]; *tmp = '\0';
 		char *p = get_cwd(tmp, sizeof(tmp), 0);
 
 		/* Do not set OLDPWD if changing to the same directory ("cd ."

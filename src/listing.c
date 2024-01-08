@@ -1678,7 +1678,7 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 static void
 run_dir_cmd(const int mode)
 {
-	char path[PATH_MAX];
+	char path[PATH_MAX + 1];
 
 	if (mode == DIR_IN) {
 		snprintf(path, sizeof(path), "%s/%s",
@@ -1694,7 +1694,7 @@ run_dir_cmd(const int mode)
 	if (!fp)
 		return;
 
-	char buf[PATH_MAX];
+	char buf[PATH_MAX + 1];
 	*buf = '\0';
 	char *ret = fgets(buf, sizeof(buf), fp);
 	if (!ret) {

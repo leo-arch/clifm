@@ -123,7 +123,7 @@ run_action(char *action, char **args)
 	if (!rand_ext)
 		return EXIT_FAILURE;
 
-	char fifo_path[PATH_MAX];
+	char fifo_path[PATH_MAX + 1];
 	snprintf(fifo_path, sizeof(fifo_path), "%s/.pipe.%s", tmp_dir, rand_ext); /* NOLINT */
 	free(rand_ext);
 
@@ -177,7 +177,7 @@ run_action(char *action, char **args)
 		goto END;
 	}
 
-	char buf[PATH_MAX];
+	char buf[PATH_MAX + 1];
 	*buf = '\0';
 	ssize_t buf_len = 0;
 

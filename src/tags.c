@@ -88,7 +88,7 @@ static int
 check_tagged_file(const char *tag, const char *name)
 {
 	struct stat a;
-	char tmp[PATH_MAX];
+	char tmp[PATH_MAX + 1];
 	snprintf(tmp, sizeof(tmp), "%s/%s/%s", tags_dir, tag, name);
 
 	if (SELFORPARENT(name) || lstat(tmp, &a) == -1 || !S_ISLNK(a.st_mode))
@@ -102,8 +102,10 @@ check_tagged_file(const char *tag, const char *name)
 static void
 print_tagged_file(char *name, const char *tag)
 {
-	char dir[PATH_MAX], tmp[PATH_MAX];
+	char dir[PATH_MAX + 1];
+	char tmp[PATH_MAX + 1];
 	*tmp = '\0';
+
 	snprintf(dir, sizeof(dir), "%s/%s/%s", tags_dir, tag, name);
 	char *ret = realpath(dir, tmp);
 	if (!ret)
@@ -149,7 +151,7 @@ list_files_in_tag(char *name)
 		}
 	}
 
-	char tmp[PATH_MAX];
+	char tmp[PATH_MAX + 1];
 	snprintf(tmp, sizeof(tmp), "%s/%s", tags_dir, name);
 
 	struct dirent **t = (struct dirent **)NULL;
@@ -209,7 +211,7 @@ list_tags_having_file(const dev_t dev, const ino_t ino)
 
 	size_t i;
 	for (i = 0; tags[i]; i++) {
-		char tmp[PATH_MAX];
+		char tmp[PATH_MAX + 1];
 		snprintf(tmp, sizeof(tmp), "%s/%s", tags_dir, tags[i]);
 
 		DIR *dir = opendir(tmp);
@@ -299,7 +301,7 @@ list_tags(char **args)
 		int pad = (int)get_longest_tag();
 
 		for (i = 0; tags[i]; i++) {
-			char p[PATH_MAX];
+			char p[PATH_MAX + 1];
 			snprintf(p, sizeof(p), "%s/%s", tags_dir, tags[i]);
 			filesn_t n = count_dir(p, NO_CPOP);
 			if (n > 2)
@@ -363,7 +365,8 @@ create_tags(char **args)
 	int exit_status = EXIT_SUCCESS;
 
 	for (i = 2; args[i]; i++) {
-		char *p = strchr(args[i], '\\'), dir[PATH_MAX];
+		char dir[PATH_MAX + 1];
+		char *p = strchr(args[i], '\\');
 		if (p) {
 			char *deq = unescape_str(args[i], 0);
 			if (deq) {
@@ -414,7 +417,7 @@ remove_tags(char **args)
 			}
 		}
 
-		char dir[PATH_MAX];
+		char dir[PATH_MAX + 1];
 		snprintf(dir, sizeof(dir), "%s/%s", tags_dir, args[i]);
 
 		struct stat a;
@@ -447,7 +450,7 @@ tag_file(char *name, char *tag)
 	char *p = (char *)NULL;
 	if (strchr(tag, '\\'))
 		p = unescape_str(tag, 0);
-	char dir[PATH_MAX];
+	char dir[PATH_MAX + 1];
 	snprintf(dir, sizeof(dir), "%s/%s", tags_dir, p ? p : tag);
 
 	if (stat(dir, &a) == -1) {
@@ -467,7 +470,7 @@ tag_file(char *name, char *tag)
 	}
 	free(p);
 
-	char name_path[PATH_MAX];
+	char name_path[PATH_MAX + 1];
 	*name_path = '\0';
 	if (*name != '/') {
 		snprintf(name_path, sizeof(name_path), "%s/%s",
@@ -573,7 +576,7 @@ untag(char **args, const size_t n, size_t *t)
 			continue;
 
 		char *ds = unescape_str(args[n] + 1, 0);
-		char dir[PATH_MAX];
+		char dir[PATH_MAX + 1];
 		snprintf(dir, sizeof(dir), "%s/%s", tags_dir, ds ? ds : args[n] + 1);
 		free(ds);
 
@@ -648,10 +651,10 @@ rename_tag(char **args)
 		return EXIT_FAILURE;
 	}
 
-	char old_dir[PATH_MAX];
+	char old_dir[PATH_MAX + 1];
 	snprintf(old_dir, sizeof(old_dir), "%s/%s", tags_dir, old);
 
-	char new_dir[PATH_MAX];
+	char new_dir[PATH_MAX + 1];
 	snprintf(new_dir, sizeof(new_dir), "%s/%s", tags_dir, new);
 
 	if (rename(old_dir, new_dir) == -1) {
@@ -670,7 +673,8 @@ static int
 recursive_mv_tags(const char *src, const char *dst)
 {
 	int i, n, exit_status = EXIT_SUCCESS, ret;
-	char src_dir[PATH_MAX], dst_dir[PATH_MAX];
+	char src_dir[PATH_MAX + 1];
+	char dst_dir[PATH_MAX + 1];
 	struct dirent **a = (struct dirent **)NULL;
 
 	snprintf(src_dir, sizeof(src_dir), "%s/%s", tags_dir, src);
@@ -726,7 +730,7 @@ merge_tags(char **args)
 		return exit_status;
 	}
 
-	char src_dir[PATH_MAX];
+	char src_dir[PATH_MAX + 1];
 	snprintf(src_dir, sizeof(src_dir), "%s/%s", tags_dir, src);
 	if (rmdir(src_dir) == -1) {
 		xerror("tag: '%s': %s\n", src_dir, strerror(errno));

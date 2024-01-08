@@ -461,7 +461,7 @@ check_iso(char *file)
 	if (!rand_ext)
 		return (-1);
 
-	char tmp_file[PATH_MAX];
+	char tmp_file[PATH_MAX + 1];
 	snprintf(tmp_file, sizeof(tmp_file), "%s/.temp%s",
 		(xargs.stealth_mode == 1) ? P_tmpdir : tmp_dir, rand_ext);
 	free(rand_ext);

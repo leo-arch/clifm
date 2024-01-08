@@ -1890,7 +1890,7 @@ handle_stdin(void)
 		setenv("CLIFM_VIRTUAL_DIR", stdin_tmp_dir, 1);
 
 	/* Get CWD: we need it to prepend it to relative paths. */
-	char t[PATH_MAX] = "";
+	char t[PATH_MAX + 1] = "";
 	char *cwd = get_cwd(t, sizeof(t), 0);
 
 	if (!cwd || !*cwd) {
@@ -2414,7 +2414,7 @@ quick_help(const char *topic)
 		return EXIT_SUCCESS;
 	}
 
-	char tmp_file[PATH_MAX];
+	char tmp_file[PATH_MAX + 1];
 	snprintf(tmp_file, sizeof(tmp_file), "%s/%s", xargs.stealth_mode == 1
 		? P_tmpdir : tmp_dir, TMP_FILENAME);
 

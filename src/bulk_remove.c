@@ -331,7 +331,7 @@ get_remove_files(const char *target, char **tmp_files,
 
 	for (i = 0; i < (size_t)n; i++) {
 		if (remove_this_file((*a)[i]->d_name, tmp_files) == 1) {
-			char p[PATH_MAX];
+			char p[PATH_MAX + 1];
 			if (*target == '/') {
 				snprintf(p, sizeof(p), "%s/%s", target, (*a)[i]->d_name);
 			} else {

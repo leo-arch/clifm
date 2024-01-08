@@ -105,15 +105,6 @@
 # ifndef _NO_MAGIC
 #  define _NO_MAGIC
 # endif /* !_NO_MAGIC */
-/*# if !defined(ALLOW_MEDIA) && !defined(NO_MEDIA_FUNC)
-#  define NO_MEDIA_FUNC
-# endif // !ALLOW_MEDIA
-# if !defined(ALLOW_LIRA) && !defined(_NO_LIRA)
-#  define _NO_LIRA
-# endif // !ALLOW_LIRA
-# if !defined(ALLOW_ARCHIVING) && !defined(_NO_ARCHIVING)
-#  define _NO_ARCHIVING
-# endif // !ALLOW_ARCHIVING */
 #endif /* _BE_POSIX */
 
 /* _NO_LIRA implies _NO_MAGIC */

@@ -358,7 +358,7 @@ dup_file(char **cmd)
 
 		source_name = (tmp && *(tmp + 1)) ? tmp + 1 : source;
 
-		char tmp_dest[PATH_MAX];
+		char tmp_dest[PATH_MAX + 1];
 		if (*dest_dir == '/' && !dest_dir[1]) // root dir
 			snprintf(tmp_dest, sizeof(tmp_dest), "/%s.copy", source_name);
 		else
@@ -1181,7 +1181,7 @@ symlink_file(char **args)
 
 	char *target = args[0];
 	char *link_name = args[1];
-	char tmp[PATH_MAX];
+	char tmp[PATH_MAX + 1];
 
 	if (!link_name || !*link_name) {
 		char *p = strrchr(target, '/');
@@ -1246,7 +1246,7 @@ vv_rename_files(char **args)
 		if (l > 0 && args[i][l - 1] == '/')
 			args[i][l - 1] = '\0';
 
-		char p[PATH_MAX];
+		char p[PATH_MAX + 1];
 		char *s = strrchr(args[i], '/');
 		snprintf(p, sizeof(p), "%s/%s", dest, (s && *(++s)) ? s : args[i]);
 

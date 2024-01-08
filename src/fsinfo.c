@@ -239,7 +239,7 @@ get_dev_name_mntent(const char *file)
 		return DEV_NO_NAME;
 
 	size_t mnt_longest = 0;
-	static char name[PATH_MAX]; *name = '\0';
+	static char name[PATH_MAX + 1]; *name = '\0';
 	struct mntent *ent;
 
 	while ((ent = getmntent(fp)) != NULL) {
@@ -269,7 +269,7 @@ get_dev_name(const dev_t dev)
 
 	const unsigned int min = minor(dev);
 
-	char dev_path[PATH_MAX];
+	char dev_path[PATH_MAX + 1];
 	snprintf(dev_path, sizeof(dev_path),
 		"/sys/dev/block/%u:%u/uevent", maj, min);
 

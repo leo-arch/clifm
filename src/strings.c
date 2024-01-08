@@ -1232,7 +1232,7 @@ expand_tag(char ***args, const int tag_index)
 	if (!tag || !*tag || !tags_dir || is_tag(tag) == 0)
 		return 0;
 
-	char dir[PATH_MAX];
+	char dir[PATH_MAX + 1];
 	snprintf(dir, sizeof(dir), "%s/%s", tags_dir, tag);
 
 	struct dirent **t = (struct dirent **)NULL;
@@ -1264,7 +1264,7 @@ expand_tag(char ***args, const int tag_index)
 		if (SELFORPARENT(t[i]->d_name))
 			continue;
 
-		char filename[PATH_MAX + NAME_MAX + 1];
+		char filename[PATH_MAX + NAME_MAX + 2];
 		snprintf(filename, sizeof(filename), "%s/%s", dir, t[i]->d_name);
 
 		char rpath[PATH_MAX + 1];
@@ -2726,7 +2726,7 @@ parse_input_str(char *str)
 
 		size_t slen = strlen(substr[i]);
 		if (slen > FILE_URI_PREFIX_LEN && IS_FILE_URI(substr[i])) {
-			char tmp[PATH_MAX];
+			char tmp[PATH_MAX + 1];
 			xstrsncpy(tmp, substr[i], sizeof(tmp));
 			xstrsncpy(substr[i], tmp + FILE_URI_PREFIX_LEN, slen + 1);
 		}

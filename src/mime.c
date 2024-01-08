@@ -1574,7 +1574,7 @@ static int
 import_mime(void)
 {
 	char *suffix = gen_rand_str(RAND_SUFFIX_LEN);
-	char new[PATH_MAX];
+	char new[PATH_MAX + 1];
 	snprintf(new, sizeof(new), "%s.%s", mime_file, suffix ? suffix : "5i0TM#r3j&");
 	free(suffix);
 

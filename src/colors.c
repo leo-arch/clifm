@@ -949,7 +949,7 @@ import_color_scheme(const char *name)
 	|| !name || !*name)
 		return EXIT_FAILURE;
 
-	char dfile[PATH_MAX];
+	char dfile[PATH_MAX + 1];
 	snprintf(dfile, sizeof(dfile), "%s/%s/colors/%s.clifm", data_dir,
 		PROGRAM_NAME, name);
 
@@ -1001,7 +1001,7 @@ edit_colorscheme(char *app)
 	}
 
 	struct stat attr;
-	char file[PATH_MAX];
+	char file[PATH_MAX + 1];
 
 	snprintf(file, sizeof(file), "%s/%s.clifm", colors_dir, cur_cscheme); /* NOLINT */
 	if (stat(file, &attr) == -1
@@ -2237,7 +2237,7 @@ read_color_scheme_file(const char *colorscheme, char **filecolors,
 	defs_n = 0;
 	init_defs();
 
-	char colorscheme_file[PATH_MAX];
+	char colorscheme_file[PATH_MAX + 1];
 	*colorscheme_file = '\0';
 	if (config_ok == 1 && colors_dir) {
 		snprintf(colorscheme_file, sizeof(colorscheme_file), "%s/%s.clifm",
@@ -2667,7 +2667,7 @@ colors_list(char *ent, const int eln, const int pad, const int new_line)
 		index[0] = '\0';
 
 	struct stat attr;
-	char *p = ent, *q = ent, t[PATH_MAX];
+	char *p = ent, *q = ent, t[PATH_MAX + 1];
 	char *eln_color = *index == '?' ? mi_c : el_c;
 
 	if (*q == '~') {
@@ -2821,7 +2821,7 @@ get_colorschemes(void)
 	if (!data_dir)
 		goto END;
 
-	char sys_colors_dir[PATH_MAX];
+	char sys_colors_dir[PATH_MAX + 1];
 	snprintf(sys_colors_dir, sizeof(sys_colors_dir), "%s/%s/colors",
 		data_dir, PROGRAM_NAME); /* NOLINT */
 

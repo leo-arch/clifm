@@ -308,7 +308,7 @@ set_cur_workspace(void)
 	if (workspaces[cur_ws].path)
 		return;
 
-	char p[PATH_MAX] = "";
+	char p[PATH_MAX + 1] = "";
 	char *cwd = get_cwd(p, sizeof(p), 0);
 
 	if (cwd && *cwd) {
@@ -353,7 +353,7 @@ set_start_path(void)
 	/* Make path the CWD. */
 	int ret = xchdir(workspaces[cur_ws].path, NO_TITLE);
 
-	char tmp[PATH_MAX] = "";
+	char tmp[PATH_MAX + 1] = "";
 	char *pwd = get_cwd(tmp, sizeof(tmp), 0);
 
 	/* If chdir() fails, set path to PWD, list files and print the
@@ -384,7 +384,7 @@ set_start_path(void)
 static int
 try_standard_data_dirs(void)
 {
-	char home_local[PATH_MAX];
+	char home_local[PATH_MAX + 1];
 	*home_local = '\0';
 	if (user.home && *user.home)
 		snprintf(home_local, sizeof(home_local), "%s/.local/share", user.home);
@@ -433,7 +433,7 @@ try_datadir(const char *dir)
 
 	struct stat a;
 
-	char p[PATH_MAX];
+	char p[PATH_MAX + 1];
 
 	/* Try DIR/share/clifm/clifmrc */
 	snprintf(p, sizeof(p), "%s/share/%s/%src", dir, PROGRAM_NAME, PROGRAM_NAME);
@@ -548,7 +548,7 @@ get_data_dir(void)
 
 #ifdef CLIFM_DATADIR
 	struct stat a;
-	char p[PATH_MAX];
+	char p[PATH_MAX + 1];
 	snprintf(p, sizeof(p), "%s/%s/%src", STRINGIZE(CLIFM_DATADIR),
 		PROGRAM_NAME, PROGRAM_NAME);
 
@@ -973,7 +973,7 @@ resolve_path(char *file)
 		_path = savestring(file, strlen(file));
 
 	} else {
-		char tmp[PATH_MAX] = "";
+		char tmp[PATH_MAX + 1] = "";
 		char *cwd = get_cwd(tmp, sizeof(tmp), 0);
 
 		if (!cwd || !*cwd) {

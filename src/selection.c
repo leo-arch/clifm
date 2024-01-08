@@ -357,7 +357,7 @@ sel_regex_cwd(regex_t regex, const mode_t filetype, const int invert)
 		if (filetype != 0 && file_info[i].type != filetype)
 			continue;
 
-		char tmp_path[PATH_MAX];
+		char tmp_path[PATH_MAX + 1];
 		if (*workspaces[cur_ws].path == '/'
 		&& !*(workspaces[cur_ws].path + 1)) {
 			snprintf(tmp_path, sizeof(tmp_path), "/%s", file_info[i].name);
@@ -523,7 +523,7 @@ parse_sel_params(char ***args, int *ifiletype, mode_t *filetype, int *isel_path)
 static char *
 construct_sel_path(char *sel_path)
 {
-	char tmpdir[PATH_MAX];
+	char tmpdir[PATH_MAX + 1];
 	xstrsncpy(tmpdir, sel_path, sizeof(tmpdir));
 
 	if (*sel_path == '.' && realpath(sel_path, tmpdir) == NULL) {

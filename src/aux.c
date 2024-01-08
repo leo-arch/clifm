@@ -446,7 +446,7 @@ normalize_path(char *src, const size_t src_len)
 
 	if (l == 0 || *s != '/') {
 		/* Relative path */
-		char p[PATH_MAX]; *p = '\0';
+		char p[PATH_MAX + 1]; *p = '\0';
 		char *cwd = get_cwd(p, sizeof(p), 1);
 		if (!cwd || !*cwd) {
 			xerror(_("%s: Error getting current directory\n"), PROGRAM_NAME);
@@ -878,7 +878,7 @@ get_cmd_path(const char *cmd)
 		return cmd_path;
 	}
 
-	cmd_path = xnmalloc(PATH_MAX + 1, sizeof(char));
+	cmd_path = xnmalloc(PATH_MAX + 2, sizeof(char));
 
 	size_t i;
 	for (i = 0; i < path_n; i++) { /* Check each path in PATH */
@@ -890,7 +890,7 @@ get_cmd_path(const char *cmd)
 		&& *paths[i].path == '.' && !paths[i].path[1])
 			continue;
 
-		snprintf(cmd_path, PATH_MAX, "%s/%s", paths[i].path, cmd); /* NOLINT */
+		snprintf(cmd_path, PATH_MAX + 1, "%s/%s", paths[i].path, cmd); /* NOLINT */
 		if (access(cmd_path, X_OK) == 0)
 			return cmd_path;
 	}
@@ -1110,7 +1110,7 @@ dir_size(char *dir, const int size_in_bytes, int *status)
 	if (!dir || !*dir)
 		return (-1);
 
-	char file[PATH_MAX];
+	char file[PATH_MAX + 1];
 #if !defined(__OpenBSD__)
 	snprintf(file, sizeof(file), "%s/.duXXXXXX", xargs.stealth_mode == 1
 		? P_tmpdir : tmp_dir); /* NOLINT */

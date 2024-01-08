@@ -73,8 +73,8 @@ get_profile_names(void)
 
 	for (i = 0; i < (size_t)files_n; i++) {
 #if !defined(_DIRENT_HAVE_D_TYPE)
-		char tmp[PATH_MAX];
-		snprintf(tmp, PATH_MAX - 1, "%s/%s", pf_dir, profs[i]->d_name);
+		char tmp[PATH_MAX + 1];
+		snprintf(tmp, sizeof(tmp), "%s/%s", pf_dir, profs[i]->d_name);
 		if (lstat(tmp, &attr) == -1)
 			continue;
 		if (S_ISDIR(attr.st_mode)
@@ -247,7 +247,7 @@ profile_set(const char *prof)
 		cur_ws = DEF_CUR_WS;
 
 	if (!workspaces[cur_ws].path) {
-		char tmp[PATH_MAX] = "";
+		char tmp[PATH_MAX + 1] = "";
 		char *cwd = get_cwd(tmp, sizeof(tmp), 0);
 
 		if (!cwd || !*cwd) {

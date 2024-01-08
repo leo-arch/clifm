@@ -238,7 +238,7 @@ gen_shell_cmd_comp(char *cmd)
 	if (!cmd || !*cmd || !data_dir || !*data_dir)
 		return EXIT_FAILURE;
 
-	char manpage_parser_file[PATH_MAX];
+	char manpage_parser_file[PATH_MAX + 1];
 	snprintf(manpage_parser_file, sizeof(manpage_parser_file),
 		"%s/%s/tools/manpages_comp_gen.py", data_dir, PROGRAM_NAME);
 
@@ -256,7 +256,7 @@ get_shell_cmd_opts(char *cmd)
 	|| (conf.suggestions == 1 && wrong_cmd == 1))
 		return EXIT_FAILURE;
 
-	char p[PATH_MAX];
+	char p[PATH_MAX + 1];
 	snprintf(p, sizeof(p), "%s/.local/share/%s/completions/%s.clifm",
 		user.home, PROGRAM_NAME, cmd);
 
@@ -1103,7 +1103,7 @@ my_rl_path_completion(const char *text, int state)
 	struct dirent *ent = (struct dirent *)NULL;
 	static int exec = 0, exec_path = 0;
 	static char *dir_tmp = (char *)NULL;
-	static char tmp[PATH_MAX];
+	static char tmp[PATH_MAX + 1];
 
 	/* If we don't have any state, then do some initialization. */
 	if (!state) {
@@ -2593,7 +2593,7 @@ tag_entries_generator(const char *text, int state)
 
 		reinsert_slashes(q);
 
-		char tmp[PATH_MAX], *r = (char *)NULL;
+		char tmp[PATH_MAX + 1], *r = (char *)NULL;
 		snprintf(tmp, sizeof(tmp), "/%s", q);
 		int free_tmp = 0;
 		r = home_tilde(tmp, &free_tmp);
@@ -2621,7 +2621,7 @@ check_tagged_files(char *tag)
 
 	tagged_files_n = 0;
 
-	char dir[PATH_MAX];
+	char dir[PATH_MAX + 1];
 	snprintf(dir, sizeof(dir), "%s/%s", tags_dir, tag);
 	int n = scandir(dir, &tagged_files, NULL, alphasort);
 	if (n == -1)

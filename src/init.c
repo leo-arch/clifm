@@ -344,7 +344,7 @@ get_sys_shell(void)
 	if (!user.shell)
 		return SHELL_POSIX;
 
-	char tmp[PATH_MAX];
+	char tmp[PATH_MAX + 1];
 	*tmp = '\0';
 	char *ret = realpath(user.shell, tmp);
 	if (!ret || !*tmp)
@@ -374,7 +374,7 @@ get_sys_shell(void)
 int
 init_gettext(void)
 {
-	char locale_dir[PATH_MAX];
+	char locale_dir[PATH_MAX + 1];
 	snprintf(locale_dir, sizeof(locale_dir), "%s/locale", data_dir
 		? data_dir : "/usr/local/share");
 	bindtextdomain(PROGRAM_NAME, locale_dir);
@@ -811,7 +811,7 @@ check_tag(const char *name)
 	if (!name || !*name)
 		return EXIT_FAILURE;
 
-	char dir[PATH_MAX];
+	char dir[PATH_MAX + 1];
 	snprintf(dir, sizeof(dir), "%s/%s", tags_dir, name);
 
 	struct stat a;
@@ -1442,7 +1442,7 @@ set_prompts_file(void)
 	if (!data_dir || !*data_dir)
 		goto ERROR;
 
-	char t[PATH_MAX];
+	char t[PATH_MAX + 1];
 	snprintf(t, sizeof(t), "%s/%s/prompts.clifm", data_dir, PROGRAM_NAME);
 	if (stat(t, &a) == -1 || !S_ISREG(a.st_mode))
 		goto ERROR;
@@ -2181,7 +2181,7 @@ get_path_programs(void)
 
 	if (conf.ext_cmd_ok == 1) {
 		/* NOTE: xchdir() is only required by skip_nonexec() */
-		char tmp[PATH_MAX] = "";
+		char tmp[PATH_MAX + 1] = "";
 		char *cwd = get_cwd(tmp, sizeof(tmp), 0);
 
 		commands_bin = xnmalloc(path_n, sizeof(struct dirent));

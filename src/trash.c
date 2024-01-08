@@ -241,7 +241,7 @@ trash_file(const char *suffix, const struct tm *tm, char *file)
 	}
 
 	char *tmpfile = file;
-	char full_path[PATH_MAX];
+	char full_path[PATH_MAX + 1];
 
 	if (*file != '/') { /* If relative path, make it absolute. */
 		if (!workspaces[cur_ws].path)
@@ -296,8 +296,8 @@ trash_file(const char *suffix, const struct tm *tm, char *file)
 static int
 remove_file_from_trash(const char *name)
 {
-	char rm_file[PATH_MAX];
-	char rm_info[PATH_MAX];
+	char rm_file[PATH_MAX + 1];
+	char rm_info[PATH_MAX + 1];
 	snprintf(rm_file, sizeof(rm_file), "%s/%s", trash_files_dir, name);
 	snprintf(rm_info, sizeof(rm_info), "%s/%s.trashinfo", trash_info_dir, name);
 
@@ -651,7 +651,8 @@ untrash_file(char *file)
 	if (!file)
 		return EXIT_FAILURE;
 
-	char undel_file[PATH_MAX], undel_info[PATH_MAX];
+	char undel_file[PATH_MAX + 1];
+	char undel_info[PATH_MAX + 1];
 	snprintf(undel_file, sizeof(undel_file), "%s/%s", trash_files_dir, file);
 	snprintf(undel_info, sizeof(undel_info), "%s/%s.trashinfo",
 		trash_info_dir, file);
@@ -888,7 +889,7 @@ list_trashed_files(void)
 static int
 check_trash_file(char *file)
 {
-	char tmp_file[PATH_MAX];
+	char tmp_file[PATH_MAX + 1];
 	if (*file == '/') /* If absolute path */
 		xstrsncpy(tmp_file, file, sizeof(tmp_file));
 	else { /* If relative path, add path to check against TRASH_DIR */
