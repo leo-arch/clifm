@@ -107,20 +107,20 @@ is_blank_name(const char *s)
 	return blank;
 }
 
-/* Prompt for a new name using _PROMPT as prompt.
+/* Prompt for a new name using MSG as prompt.
  * If OLD_NAME is not NULL, it will be used as template for the new name.
  * If the entered name is quoted, it will be returned verbatim (without quotes),
  * and QUOTED will be set to 1 (the caller should not perform expansions on
  * this name). */
 char *
-get_newname(const char *_prompt, char *old_name, int *quoted)
+get_newname(const char *msg, char *old_name, int *quoted)
 {
 	xrename = rl_nohist = 1;
 	int poffset_bk = prompt_offset;
 	prompt_offset = 3;
 
 	char *n = (old_name && *old_name) ? unescape_str(old_name, 0) : (char *)NULL;
-	char *input = secondary_prompt((_prompt && *_prompt) ? _prompt : "> ",
+	char *input = secondary_prompt((msg && *msg) ? msg : "> ",
 		n ? n : (char *)NULL);
 	free(n);
 
@@ -226,7 +226,7 @@ err(const int msg_type, const int prompt_flag, const char *format, ...)
 			case 'e': pmsg = ERROR; msgs.error++; break;
 			case 'w': pmsg = WARNING; msgs.warning++; break;
 			case 'n': pmsg = NOTICE; msgs.notice++; break;
-			default: pmsg = NOMSG; break;
+			default:  pmsg = NOMSG; break;
 			}
 		}
 
@@ -235,7 +235,6 @@ err(const int msg_type, const int prompt_flag, const char *format, ...)
 		if (msg_type == ERR_NO_STORE) {
 			add_to_msgs_list = 0;
 			logme = 1;
-//			prompt_flag = NOPRINT_PROMPT;
 		}
 		log_msg(buf, prompt_flag, logme, add_to_msgs_list);
 
@@ -251,7 +250,7 @@ err(const int msg_type, const int prompt_flag, const char *format, ...)
 /* Print format string MSG, as "> MSG" (colored), if autols is on, or just
  * as "MSG" if off.
  * This function is used to inform the user about changes that require a
- * a files list reload (either upon files or interface modifications) */
+ * a files list reload (either upon files or interface modifications). */
 __attribute__((__format__(__printf__, 1, 0)))
 int
 print_reload_msg(const char *msg, ...)
@@ -304,7 +303,7 @@ reset_inotify(void)
 
 	/* If CWD is a symlink to a directory and it does not end with a slash,
 	 * inotify_add_watch(3) fails with ENOTDIR. */
-	char rpath[PATH_MAX];
+	char rpath[PATH_MAX + 1];
 	snprintf(rpath, sizeof(rpath), "%s/", workspaces[cur_ws].path);
 
 	inotify_wd = inotify_add_watch(inotify_fd, rpath, INOTIFY_MASK);
@@ -325,8 +324,8 @@ read_inotify(void)
 	struct inotify_event *event;
 	char inotify_buf[EVENT_BUF_LEN];
 
-	memset((void *)inotify_buf, '\0', EVENT_BUF_LEN);
-	i = (int)read(inotify_fd, inotify_buf, EVENT_BUF_LEN);
+	memset((void *)inotify_buf, '\0', sizeof(inotify_buf));
+	i = (int)read(inotify_fd, inotify_buf, sizeof(inotify_buf));
 
 	if (i <= 0) {
 # ifdef INOTIFY_DEBUG
@@ -366,6 +365,9 @@ read_inotify(void)
 
 		/* A file was renamed */
 		if (event->mask & IN_MOVED_TO) {
+# ifdef INOTIFY_DEBUG
+			puts("IN_MOVED_TO");
+# endif /* INOTIFY_DEBUG */
 			filesn_t j = files;
 			while (--j >= 0) {
 				if (*file_info[j].name == *event->name
@@ -1789,8 +1791,6 @@ set_signals_to_ignore(void)
 #ifndef _BE_POSIX
 	signal(SIGWINCH, sigwinch_handler);
 #endif /* _BE_POSIX */
-/*	signal(SIGUSR1, sigusr_handler);
-	signal(SIGUSR2, sigusr_handler); */
 }
 
 static int
@@ -2140,7 +2140,7 @@ list_commands(void)
 {
 	char cmd[PATH_MAX];
 	snprintf(cmd, sizeof(cmd), "export PAGER=\"less -p '^[0-9]+\\.[[:space:]]COMMANDS'\"; man %s\n",
-			PROGRAM_NAME);
+		PROGRAM_NAME);
 	if (launch_execl(cmd) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 

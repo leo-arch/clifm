@@ -385,7 +385,7 @@ list_and_get_input(struct dirent ***trash_files, const int files_n,
 	/* Get input */
 	printf(_("\n%sEnter 'q' to quit\n"
 		"File(s) to be %s (ex: 1 2-6, or *):\n"), df_c,
-		is_undel == 1 ? _("undeleted") : _("removed"));
+		is_undel == 1 ? _("restored") : _("removed"));
 
 	char *line = (char *)NULL;
 	char tprompt[(MAX_COLOR * 2) + 7];
@@ -701,22 +701,33 @@ untrash_file(char *file)
 	return EXIT_SUCCESS;
 }
 
-/* Untrash all trashed files. */
+/* Untrash/restore all trashed files. */
 static int
 untrash_all(struct dirent ***tfiles, const int tfiles_n, const int free_files)
 {
 	size_t i;
+	size_t untrashed = 0;
 	int status = EXIT_SUCCESS;
 
 	for (i = 0; i < (size_t)tfiles_n; i++) {
 		if (untrash_file((*tfiles)[i]->d_name) != 0)
 			status = EXIT_FAILURE;
-		if (free_files == 1) free((*tfiles)[i]);
+		else
+			untrashed++;
+		if (free_files == 1)
+			free((*tfiles)[i]);
 	}
-	if (free_files == 1) free(*tfiles);
 
-	if (conf.autols == 1) reload_dirlist();
-	print_reload_msg(_("%zu trashed file(s)\n"), count_trashed_files());
+	if (free_files == 1)
+		free(*tfiles);
+
+	if (status == EXIT_SUCCESS) {
+		if (conf.autols == 1) reload_dirlist();
+
+		size_t n = count_trashed_files();
+		print_reload_msg(_("%zu file(s) restored\n"), untrashed);
+		print_reload_msg(_("%zu total trashed file(s)\n"), n);
+	}
 
 	return status;
 }
@@ -727,7 +738,7 @@ untrash_files(char **args)
 {
 	int status = EXIT_SUCCESS;
 	size_t i;
-	size_t untrashed_files = 0;
+	size_t untrashed = 0;
 
 	for (i = 0; args[i]; i++) {
 		char *d = (char *)NULL;
@@ -737,7 +748,7 @@ untrash_files(char **args)
 		if (untrash_file(d ? d : args[i]) != EXIT_SUCCESS)
 			status = EXIT_FAILURE;
 		else
-			untrashed_files++;
+			untrashed++;
 
 		free(d);
 	}
@@ -746,7 +757,7 @@ untrash_files(char **args)
 		if (conf.autols == 1) reload_dirlist();
 
 		size_t n = count_trashed_files();
-		print_reload_msg(_("%zu file(s) untrashed\n"), untrashed_files);
+		print_reload_msg(_("%zu file(s) restored\n"), untrashed);
 		print_reload_msg(_("%zu total trashed file(s)\n"), n);
 	}
 
@@ -773,6 +784,9 @@ untrash_function(char **args)
 	/* Get trashed files */
 	int files_n = 0;
 	struct dirent **trash_files = load_trashed_files(&files_n, &exit_status);
+
+	if (files_n <= 0)
+		return exit_status;
 
 	/* if "undel all" (or "u a" or "u *") */
 	if (args[1] && (strcmp(args[1], "*") == 0 || strcmp(args[1], "a") == 0

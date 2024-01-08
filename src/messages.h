@@ -1060,7 +1060,7 @@ Mark the files you need via TAB and then press Enter or Right"
 
 #define TRASH_USAGE "Send one or multiple files to the trash can\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  t, trash [ELN/FILE... | list | empty | del]\n\n\
+  t, trash [FILE... | del | empty | list]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Trash the file whose ELN is 12\n\
     t 12\n\
@@ -1079,7 +1079,8 @@ Mark the files you need via TAB and then press Enter or Right"
 - Restore trashed files selectively using a menu\n\
     u\n\
   or\n\
-    'u <TAB>' to choose from a list (multi-selection is allowed)"
+    'u <TAB>' to choose from a list (multi-selection is allowed)\n\n\
+Note: For more information try 'u --help'."
 
 #define UMASK_USAGE "Print/set the file mode creation mask\n\n\
 \x1b[1mUSAGE\x1b[0m\n\

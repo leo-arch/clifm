@@ -824,7 +824,7 @@ time_t curdir_mtime = 0;
 #endif /* LINUX_INOTIFY */
 
 #ifdef RUN_CMD
-// Run the command passed via --cmd and exit
+/* Run the command passed via --cmd and exit */
 static void
 run_and_exit(void)
 {
