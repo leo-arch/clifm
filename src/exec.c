@@ -214,9 +214,8 @@ launch_execv(char **cmd, const int bg, const int xflags)
 	pid_t pid = fork();
 
 	if (pid < 0) {
-		int saved_errno = errno;
 		xerror("%s: fork: %s\n", PROGRAM_NAME, strerror(errno));
-		return saved_errno;
+		return errno;
 	}
 
 	if (pid == 0) {

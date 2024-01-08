@@ -924,9 +924,8 @@ open_function(char **cmd)
 	struct stat attr;
 	errno = 0;
 	if (lstat(file, &attr) == -1) {
-		int saved_errno = errno;
 		xerror("open: '%s': %s\n", cmd[1], strerror(errno));
-		return saved_errno;
+		return errno;
 	}
 
 	/* Check file type: only directories, symlinks, and regular files

@@ -780,10 +780,9 @@ go_home(const int cd_flag)
 	}
 
 	if (xchdir(user.home, SET_TITLE) != EXIT_SUCCESS) {
-		int saved_errno = errno;
 		if (cd_flag == CD_PRINT_ERROR)
-			xerror("cd: '%s': %s\n", user.home, strerror(saved_errno));
-		return saved_errno;
+			xerror("cd: '%s': %s\n", user.home, strerror(errno));
+		return errno;
 	}
 
 	if (workspaces) {
@@ -826,9 +825,8 @@ change_to_path(char *new_path, const int cd_flag)
 	free(p);
 
 	if (xchdir(q, SET_TITLE) != EXIT_SUCCESS) {
-		int saved_errno = errno;
 		if (cd_flag == CD_PRINT_ERROR)
-			xerror("cd: '%s': %s\n", new_path, strerror(saved_errno));
+			xerror("cd: '%s': %s\n", new_path, strerror(errno));
 
 		free(q);
 
@@ -836,10 +834,10 @@ change_to_path(char *new_path, const int cd_flag)
 		 * a general error code, is not quite informative. Why not to return the
 		 * actual error code returned by chdir(3)? Note that POSIX only requires
 		 * for cd to return >0 in case of error (see cd(1p)). */
-		if (saved_errno == EACCES || saved_errno == ENOENT)
+		if (errno == EACCES || errno == ENOENT)
 			return EXIT_FAILURE;
 
-		return saved_errno;
+		return errno;
 	}
 
 	if (workspaces) {

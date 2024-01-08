@@ -552,9 +552,8 @@ edit_function(char **args)
 
 	/* Get modification time after opening the config file */
 	if (stat(config_file, &attr) == -1) {
-		int saved_errno = errno;
 		xerror("%s: %s: %s\n", PROGRAM_NAME, config_file, strerror(errno));
-		return saved_errno;
+		return errno;
 	}
 
 	/* If modification times differ, the file was modified after being opened */

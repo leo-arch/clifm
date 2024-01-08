@@ -49,6 +49,7 @@
 void
 press_any_key_to_continue(const int init_newline)
 {
+	int saved_errno = errno;
 	HIDE_CURSOR;
 	fprintf(stderr, _("%sPress any key to continue... "),
 		init_newline == 1 ? "\n" : "");
@@ -56,6 +57,7 @@ press_any_key_to_continue(const int init_newline)
 	xgetchar();
 	putchar('\n');
 	UNHIDE_CURSOR;
+	errno = saved_errno;
 }
 
 /* Print the regex error ERRCODE (returned by either regcomp(3) or regexec(3)),

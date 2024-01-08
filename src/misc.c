@@ -198,6 +198,7 @@ __attribute__((__format__(__printf__, 3, 0)))
 int
 err(const int msg_type, const int prompt_flag, const char *format, ...)
 {
+	int saved_errno = errno;
 	va_list arglist, tmp_list;
 
 	va_start(arglist, format);
@@ -207,6 +208,7 @@ err(const int msg_type, const int prompt_flag, const char *format, ...)
 
 	if (size < 0) {
 		va_end(arglist);
+		errno = saved_errno;
 		return EXIT_FAILURE;
 	}
 
@@ -216,7 +218,7 @@ err(const int msg_type, const int prompt_flag, const char *format, ...)
 
 	/* If the new message is the same as the last message, skip it */
 	if (msgs_n > 0 && msg_type != 'f' && strcmp(messages[msgs_n - 1], buf) == 0)
-		{free(buf); return EXIT_SUCCESS;}
+		{free(buf); errno = saved_errno; return EXIT_SUCCESS;}
 
 	if (buf) {
 		if (msg_type >= 'e') {
@@ -238,9 +240,11 @@ err(const int msg_type, const int prompt_flag, const char *format, ...)
 		log_msg(buf, prompt_flag, logme, add_to_msgs_list);
 
 		free(buf);
+		errno = saved_errno;
 		return EXIT_SUCCESS;
 	}
 
+	errno = saved_errno;
 	return EXIT_FAILURE;
 }
 

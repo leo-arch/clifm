@@ -129,9 +129,8 @@ run_action(char *action, char **args)
 
 	errno = 0;
 	if (mkfifo(fifo_path, 0600) == -1) {
-		int saved_errno = errno;
 		xerror("actions: '%s': %s\n", fifo_path, strerror(errno));
-		return saved_errno;
+		return errno;
 	}
 
 	setenv("CLIFM_BUS", fifo_path, 1);

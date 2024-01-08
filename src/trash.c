@@ -279,11 +279,10 @@ trash_file(const char *suffix, const struct tm *tm, char *file)
 	free(dest);
 
 	if (ret != EXIT_SUCCESS) {
-		int saved_errno = errno;
 		if (mvcmd == 0)
 			xerror(_("trash: '%s': %s\n"), file, strerror(errno));
 		free(file_suffix);
-		return (mvcmd == 1 ? ret : saved_errno);
+		return (mvcmd == 1 ? ret : errno);
 	}
 
 	ret = gen_trashinfo_file(tmpfile, file_suffix, tm);
@@ -927,7 +926,7 @@ check_trash_file(char *file)
 	struct stat a;
 	if (lstat(file, &a) == -1) {
 		xerror(_("trash: '%s': %s\n"), file, strerror(errno));
-		return EXIT_FAILURE;
+		return errno;
 	}
 
 	return EXIT_SUCCESS;
@@ -1001,7 +1000,7 @@ trash_files_args(char **args)
 		}
 
 		/* Make sure we are trashing a valid file */
-		if (check_trash_file(deq_file) == EXIT_FAILURE) {
+		if (check_trash_file(deq_file) != EXIT_SUCCESS) {
 			exit_status = EXIT_FAILURE;
 			free(deq_file);
 			continue;

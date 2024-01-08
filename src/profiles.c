@@ -543,10 +543,9 @@ rename_profile(char **args)
 	closedir(dir);
 
 	if (ret == -1) {
-		int saved_errno = errno;
 		xerror(_("pf: Cannot rename profile '%s': %s\n"),
 			args[0], strerror(errno));
-		return saved_errno;
+		return errno;
 	}
 
 	size_t len = strlen(args[1]);
