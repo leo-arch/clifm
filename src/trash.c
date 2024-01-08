@@ -58,207 +58,6 @@ count_trashed_files(void)
 	return n;
 }
 
-/* Recursively check directory permissions (write and execute). Returns
- * zero if OK, and one if at least one subdirectory does not have
- * write/execute permissions */
-static int
-recur_perm_check(const char *dirname)
-{
-	DIR *dir;
-	struct dirent *ent;
-#if !defined(_DIRENT_HAVE_D_TYPE)
-	struct stat attr;
-#endif /* !_DIRENT_HAVE_D_TYPE */
-
-	if (!(dir = opendir(dirname)))
-		return EXIT_FAILURE;
-
-	while ((ent = readdir(dir)) != NULL) {
-#if !defined(_DIRENT_HAVE_D_TYPE)
-		if (lstat(ent->d_name, &attr) == -1)
-			continue;
-		if (S_ISDIR(attr.st_mode)) {
-#else
-		if (ent->d_type == DT_DIR) {
-#endif /* !_DIRENT_HAVE_D_TYPE */
-			char dirpath[PATH_MAX] = "";
-
-			if (*ent->d_name == '.' && (!ent->d_name[1]
-			|| (ent->d_name[1] == '.' && !ent->d_name[2])))
-				continue;
-
-			snprintf(dirpath, PATH_MAX, "%s/%s", dirname, ent->d_name);
-
-			if (access(dirpath, W_OK | X_OK) != 0) {
-				/* recur_perm_error_flag needs to be a global variable.
-				  * Otherwise, since this function calls itself
-				  * recursivelly, the flag would be reset upon every
-				  * new call, without preserving the error code, which
-				  * is what the flag is aimed to do. On the other side,
-				  * if I use a local static variable for this flag, it
-				  * will never drop the error value, and all subsequent
-				  * calls to the function will allways return error
-				  * (even if there's no actual error) */
-				recur_perm_error_flag = 1;
-				xerror(_("%s: Permission denied\n"), dirpath);
-			}
-
-			recur_perm_check(dirpath);
-		}
-	}
-
-	closedir(dir);
-
-	if (recur_perm_error_flag)
-		return EXIT_FAILURE;
-
-	return EXIT_SUCCESS;
-}
-
-/* Check whether the current user has enough permissions (write, execute)
- * to modify the contents of the parent directory of 'file'. 'file' needs
- * to be an absolute path. Returns zero if yes and one if no. Useful to
- * know if a file can be removed from or copied into the parent. In case
- * FILE is a directory, the function checks all its subdirectories for
- * appropriate permissions, including the immutable bit */
-static int
-wx_parent_check(char *file)
-{
-	struct stat attr;
-	int exit_status = -1, ret = -1;
-	size_t file_len = strlen(file);
-
-	if (file_len > 0 && file[file_len - 1] == '/')
-		file[file_len - 1] = '\0';
-
-	if (lstat(file, &attr) == -1) {
-		xerror("'%s': %s\n", file, strerror(errno));
-		return EXIT_FAILURE;
-	}
-
-	char *parent = strbfrlst(file, '/');
-	if (!parent) {
-		/* strbfrlst() will return NULL if file's parent is root (/),
-		 * simply because in this case there's nothing before the last
-		 * slash. So, check if file's parent dir is root */
-		if (file[0] == '/' && strcntchr(file + 1, '/') == -1) {
-			parent = xnmalloc(2, sizeof(char));
-			parent[0] = '/';
-			parent[1] = '\0';
-		} else {
-			xerror(_("trash: '%s': Error getting parent directory\n"), file);
-			return EXIT_FAILURE;
-		}
-	}
-
-	switch (attr.st_mode & S_IFMT) {
-	case S_IFDIR:
-		ret = check_immutable_bit(file);
-
-		if (ret == -1) {
-			/* Error message is printed by check_immutable_bit() itself */
-			exit_status = EXIT_FAILURE;
-		} else if (ret == 1) {
-			xerror(_("'%s': Directory is immutable\n"), file);
-			exit_status = EXIT_FAILURE;
-		} else if (access(parent, W_OK | X_OK) == 0) {
-		/* Check the parent for appropriate permissions */
-			filesn_t files_n = count_dir(parent, NO_CPOP);
-
-			if (files_n > 2) {
-				/* I manually check here subdir because recur_perm_check()
-				 * will only check the contents of subdir, but not subdir
-				 * itself */
-				/* If the parent is ok and not empty, check subdir */
-				if (access(file, W_OK | X_OK) == 0) {
-					/* If subdir is ok and not empty, recusivelly check
-					 * subdir */
-					files_n = count_dir(file, NO_CPOP);
-
-					if (files_n > 2) {
-						/* Reset the recur_perm_check() error flag. See
-						 * the note in the function block. */
-						recur_perm_error_flag = 0;
-
-						if (recur_perm_check(file) == 0) {
-							exit_status = EXIT_SUCCESS;
-						} else {
-							/* recur_perm_check itself will print the
-							 * error messages */
-							exit_status = EXIT_FAILURE;
-						}
-					} else { /* Subdir is ok and empty */
-						exit_status = EXIT_SUCCESS;
-					}
-				} else { /* No permission for subdir */
-					xerror(_("'%s': Permission denied\n"), file);
-					exit_status = EXIT_FAILURE;
-				}
-			} else {
-				exit_status = EXIT_SUCCESS;
-			}
-		} else { /* No permission for parent */
-			xerror(_("'%s': Permission denied\n"), parent);
-			exit_status = EXIT_FAILURE;
-		}
-		break;
-
-	case S_IFREG:
-		ret = check_immutable_bit(file);
-
-		if (ret == -1) {
-			/* Error message is printed by check_immutable_bit() itself */
-			exit_status = EXIT_FAILURE;
-		} else if (ret == 1) {
-			xerror(_("'%s': File is immutable\n"), file);
-			exit_status = EXIT_FAILURE;
-		} else {
-			if (parent) {
-				if (access(parent, W_OK | X_OK) == 0) {
-					exit_status = EXIT_SUCCESS;
-				} else {
-					xerror(_("'%s': Permission denied\n"), parent);
-					exit_status = EXIT_FAILURE;
-				}
-			}
-		}
-
-		break;
-
-#ifdef SOLARIS_DOORS
-	case S_IFDOOR: /* fallthrough */
-	case S_IFPORT: /* fallthrough */
-#endif /* SOLARIS_DOORS */
-	case S_IFSOCK: /* fallthrough */
-	case S_IFIFO: /* fallthrough */
-	case S_IFLNK:
-		/* Symlinks, sockets and pipes do not support immutable bit */
-		if (parent) {
-			if (access(parent, W_OK | X_OK) == 0) {
-				exit_status = EXIT_SUCCESS;
-			} else {
-				xerror(_("'%s': Permission denied\n"), parent);
-				exit_status = EXIT_FAILURE;
-			}
-		}
-		break;
-
-	/* DO NOT TRASH BLOCK AND CHAR DEVICES */
-	default:
-		xerror(_("trash: '%s' (%s): Unsupported file type\n"),
-			file, S_ISBLK(attr.st_mode) ? "Block device"
-		    : (S_ISCHR(attr.st_mode) ? _("Character device")
-		    : _("Unknown file type")));
-		exit_status = EXIT_FAILURE;
-		break;
-	}
-
-	if (parent)
-		free(parent);
-
-	return exit_status;
-}
-
 /* Empty the trash can. */
 static int
 trash_clear(void)
@@ -458,10 +257,6 @@ trash_file(const char *suffix, const struct tm *tm, char *file)
 		tmpfile = full_path;
 	}
 
-	/* Check whether the user has enough permissions to remove file */
-	if (wx_parent_check(tmpfile) != 0)
-		return EXIT_FAILURE;
-
 	char *file_suffix = (char *)NULL;
 	char *dest = gen_dest_file(tmpfile, suffix, &file_suffix);
 	if (!dest || !file_suffix) {
@@ -484,12 +279,11 @@ trash_file(const char *suffix, const struct tm *tm, char *file)
 	free(dest);
 
 	if (ret != EXIT_SUCCESS) {
-		if (mvcmd == 1)
-			xerror(_("trash: '%s': Error moving file to Trash\n"), file);
-		else
+		int saved_errno = errno;
+		if (mvcmd == 0)
 			xerror(_("trash: '%s': %s\n"), file, strerror(errno));
 		free(file_suffix);
-		return errno;
+		return (mvcmd == 1 ? ret : saved_errno);
 	}
 
 	ret = gen_trashinfo_file(tmpfile, file_suffix, tm);
@@ -1064,7 +858,7 @@ list_trashed_files(void)
 	}
 	if (files_n <= 0) {
 		puts(_("trash: No trashed files"));
-		return (-1);
+		return EXIT_SUCCESS;
 	}
 
 	/* Let's change to the trash dir to get the correct file colors */
@@ -1113,12 +907,12 @@ check_trash_file(char *file)
 
 	/* Do no trash TRASH_DIR itself nor anything inside it (trashed files) */
 	if (strncmp(tmp_file, trash_dir, strlen(trash_dir)) == 0) {
-		fputs(_("trash: Use 'trash del' to remove trashed files"), stderr);
+		fputs(_("trash: Use 'trash del' to remove trashed files\n"), stderr);
 		return EXIT_FAILURE;
 	}
 
 	size_t l = strlen(file);
-	if (l > 0 && file[l - 1] == '/')
+	if (l > 1 && file[l - 1] == '/')
 		/* Do not trash (move) symlinks ending with a slash. According to 'info mv':
 		 * "_Warning_: Avoid specifying a source name with a trailing slash, when
 		 * it might be a symlink to a directory. Otherwise, 'mv' may do something
@@ -1132,13 +926,6 @@ check_trash_file(char *file)
 	struct stat a;
 	if (lstat(file, &a) == -1) {
 		xerror(_("trash: '%s': %s\n"), file, strerror(errno));
-		return EXIT_FAILURE;
-	}
-
-	/* Do not trash block or character devices */
-	if (S_ISBLK(a.st_mode) || S_ISCHR(a.st_mode)) {
-		xerror(_("trash: '%s': Cannot trash a %s device\n"), file,
-			S_ISCHR(a.st_mode) ? _("character") : _("block"));
 		return EXIT_FAILURE;
 	}
 
@@ -1160,13 +947,14 @@ print_trashed_files(char **args, const int *trashed, const size_t trashed_n)
 		char *p = args[trashed[i]];
 		if (strchr(args[trashed[i]], '\\')
 		&& !(p = unescape_str(args[trashed[i]], 0)) ) {
-			xerror("trash: '%s': Error unescaping file name\n", args[trashed[i]]);
+			xerror(_("trash: '%s': Error unescaping file name\n"),
+				args[trashed[i]]);
 			continue;
 		}
 
 		char *tmp = abbreviate_file_name(p);
 		if (!tmp) {
-			xerror("trash: '%s': Error abbreviating file name\n", p);
+			xerror(_("trash: '%s': Error abbreviating file name\n"), p);
 			if (p && p != args[trashed[i]])
 				free(p);
 			continue;
@@ -1200,14 +988,14 @@ trash_files_args(char **args)
 
 	for (i = 1; args[i]; i++) {
 		if (trash_n + trashed_files >= MAX_TRASH) {
-			xerror("%s\n", "trash: Cannot trash any more files");
+			xerror("%s\n", _("trash: Cannot trash any more files"));
 			exit_status = EXIT_FAILURE;
 			break;
 		}
 
 		char *deq_file = unescape_str(args[i], 0);
 		if (!deq_file) {
-			xerror("trash: '%s': Error unescaping file name\n", args[i]);
+			xerror(_("trash: '%s': Error unescaping file name\n"), args[i]);
 			continue;
 		}
 
@@ -1280,12 +1068,8 @@ trash_function(char **args)
 
 	/* List trashed files ('tr' or 'tr ls') */
 	if (!args[1] || (*args[1] == 'l'
-	&& (strcmp(args[1], "ls") == 0 || strcmp(args[1], "list") == 0))) {
-		int ret = list_trashed_files();
-		if (ret == -1 || ret == EXIT_SUCCESS)
-			return EXIT_SUCCESS;
-		return EXIT_FAILURE;
-	}
+	&& (strcmp(args[1], "ls") == 0 || strcmp(args[1], "list") == 0)))
+		return list_trashed_files();
 
 	trash_n = count_trashed_files();
 

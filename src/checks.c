@@ -469,38 +469,6 @@ get_sudo_path(void)
 	return sudo_path;
 }
 
-/* Check a file's immutable bit. Returns 1 if true, zero if false, and
- * -1 in case of error */
-int
-check_immutable_bit(char *file)
-{
-	if (!file || !*file)
-		return (-1);
-
-#if !defined(FS_IOC_GETFLAGS) || !defined(FS_IMMUTABLE_FL)
-	return 0;
-#else
-	int attr = 0, fd;
-
-	fd = open(file, O_RDONLY);
-	if (fd == -1) {
-		xerror("open: '%s': %s\n", file, strerror(errno));
-		return (-1);
-	}
-
-	const int ret = ioctl(fd, FS_IOC_GETFLAGS, &attr);
-	const int saved_errno = errno;
-	close(fd);
-
-	if (ret == -1) {
-		xerror("ioctl: '%s': %s\n", file, strerror(saved_errno));
-		return (-1);
-	}
-
-	return (attr & FS_IMMUTABLE_FL) ? 1 : 0;
-#endif /* !FS_IOC_GETFLAGS || !FS_IMMUTABLE_FL */
-}
-
 /* Check whether a given string contains only digits. Returns 1 if true
  * and 0 if false. It does not work with negative numbers. */
 int

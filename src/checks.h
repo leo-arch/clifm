@@ -34,7 +34,6 @@ void check_completion_mode(void);
 int  check_file_access(const mode_t mode, const uid_t uid, const gid_t gid);
 char **check_for_alias(char **args);
 int  check_glob_char(const char *str, const int gflag);
-int  check_immutable_bit(char *file);
 int  check_regex(char *str);
 void check_term(void);
 void check_third_party_cmds(void);
