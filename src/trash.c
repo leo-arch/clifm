@@ -29,19 +29,19 @@
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
-#include <time.h>
-#include <unistd.h>
+#include <unistd.h> /* access, unlinkat */
+/* <time.h>, required by time(2) and localtime_r(2), is included by "aux.h" */
 
-#include "aux.h"
-#include "checks.h"
-#include "colors.h"
-#include "exec.h"
-#include "listing.h"
-#include "misc.h"
-#include "navigation.h"
-#include "readline.h"
-#include "sort.h"
-#include "trash.h"
+#include "aux.h"        /* gen_date_suffix, count_dir, open_fwrite, open_fread,
+xatoi, url_encode, xnmalloc */
+#include "checks.h"     /* is_file_in_cwd, is_number */
+#include "colors.h"     /* colors_list */
+#include "exec.h"       /* launch_execv */
+#include "listing.h"    /* reload_dirlist */
+#include "misc.h"       /* xerror, print_reload_msg */
+#include "navigation.h" /* xchdir */
+#include "readline.h"   /* rl_no_hist, rl_get_y_or_n */
+#include "sort.h"       /* skip_files, xalphasort, alphasort_insensitive */
 
 static size_t
 count_trashed_files(void)

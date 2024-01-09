@@ -25,8 +25,6 @@
 #ifndef TRASH_H
 #define TRASH_H
 
-#include <time.h>
-
 __BEGIN_DECLS
 
 int trash_function(char **args);
