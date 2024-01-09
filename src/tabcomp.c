@@ -758,7 +758,7 @@ cd_trashdir(const int prev)
 	return (prev == 1 && (cur_comp_type == TCMP_UNTRASH
 	|| cur_comp_type == TCMP_TRASHDEL) && trash_files_dir
 	&& *trash_files_dir && trash_n > 0 && workspaces
-	&& workspaces[cur_ws].path
+	&& cur_ws >= 0 && workspaces[cur_ws].path
 	&& xchdir(trash_files_dir, NO_TITLE) == 0);
 }
 
