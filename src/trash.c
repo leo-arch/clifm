@@ -119,7 +119,7 @@ trash_clear(void)
 	} else if (exit_status == EXIT_SUCCESS) {
 		if (conf.autols == 1)
 			reload_dirlist();
-		print_reload_msg(_("Trash can emptied (%zu file(s) deleted)\n"), n);
+		print_reload_msg(_("Trash can emptied [%zu file(s) deleted]\n"), n);
 	}
 
 	return exit_status;
@@ -374,8 +374,13 @@ list_and_get_input(struct dirent ***trash_files, const int files_n,
 	}
 
 	printf(_("%sTrashed files%s\n\n"), BOLD, df_c);
-	for (int i = 0; i < files_n; i++)
-		colors_list((*trash_files)[i]->d_name, i + 1, NO_PAD, PRINT_NEWLINE);
+
+	size_t i;
+	uint8_t tpad = DIGINUM(files_n);
+	for (i = 0; i < (size_t)files_n; i++) {
+		printf("%s%*zu%s ", el_c, tpad, i + 1, df_c);
+		colors_list((*trash_files)[i]->d_name, NO_ELN, NO_PAD, PRINT_NEWLINE);
+	}
 
 	if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
 		xerror("trash: '%s': %s\n", workspaces[cur_ws].path, strerror(errno));
@@ -857,6 +862,20 @@ untrash_function(char **args)
 	return exit_status;
 }
 
+static void
+print_trashdir_size(void)
+{
+	int base = xargs.si == 1 ? 1000 : 1024;
+	int status = 0;
+	const off_t full_size = dir_size(trash_files_dir, 0, &status) * base;
+	char *human_size = construct_human_size(full_size);
+	char err[sizeof(xf_c) + 6]; *err = '\0';
+	if (status != 0)
+		snprintf(err, sizeof(err), "%s%c%s", xf_c, DU_ERR_CHAR, NC);
+
+	printf(_("\n%s%sTotal size%s: %s%s\n"), df_c, BOLD, df_c, err, human_size);
+}
+
 /* List files currently in the trash can */
 static int
 list_trashed_files(void)
@@ -874,6 +893,8 @@ list_trashed_files(void)
 		puts(_("trash: No trashed files"));
 		return EXIT_SUCCESS;
 	}
+
+	printf(_("%s%sTrashed files%s\n\n"), df_c, BOLD, df_c);
 
 	/* Let's change to the trash dir to get the correct file colors */
 	if (xchdir(trash_files_dir, NO_TITLE) == -1) {
@@ -894,6 +915,8 @@ list_trashed_files(void)
 		xerror("trash: '%s': %s\n", workspaces[cur_ws].path, strerror(errno));
 		return EXIT_FAILURE;
 	}
+
+	print_trashdir_size();
 
 	return EXIT_SUCCESS;
 }
