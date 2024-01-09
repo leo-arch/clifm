@@ -1091,8 +1091,14 @@ trash_function(char **args)
 		return remove_from_trash(args);
 
 	if ((*args[1] == 'c' && strcmp(args[1], "clear") == 0)
-	|| (*args[1] == 'e' && strcmp(args[1], "empty") == 0))
+	|| (*args[1] == 'e' && strcmp(args[1], "empty") == 0)) {
+		struct stat a;
+		if (trash_n > 0 && lstat(*args[1] == 'c' ? "clear" : "empty", &a) == 0
+		&& rl_get_y_or_n(_("Empty the trash can? [y/n] ")) == 0)
+			return EXIT_SUCCESS;
 		return trash_clear();
+	}
+
 	else
 		return trash_files_args(args);
 }
