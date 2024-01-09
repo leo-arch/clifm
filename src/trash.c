@@ -360,6 +360,40 @@ remove_from_trash_params(char **args)
 	return exit_status;
 }
 
+static int
+print_trashfiles(struct dirent ***ent, const int files_n)
+{
+	/* Let's change to the trash dir to get the correct file colors */
+	if (xchdir(trash_files_dir, NO_TITLE) == -1) {
+		xerror("trash: '%s': %s\n", trash_files_dir, strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	printf(_("%s%sTrashed files%s\n\n"), df_c, BOLD, df_c);
+
+	/* Enable trash suffix removal in colors_list() to get correct file
+	 * color by extension. */
+	flags |= STATE_COMPLETING;
+	cur_comp_type = TCMP_UNTRASH;
+
+	uint8_t tpad = DIGINUM(files_n);
+	size_t i;
+	for (i = 0; i < (size_t)files_n; i++) {
+		printf("%s%*zu%s ", el_c, tpad, i + 1, df_c);
+		colors_list((*ent)[i]->d_name, NO_ELN, NO_PAD, PRINT_NEWLINE);
+	}
+
+	flags &= ~STATE_COMPLETING;
+	cur_comp_type = TCMP_NONE;
+
+	if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
+		xerror("trash: '%s': %s\n", workspaces[cur_ws].path, strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	return EXIT_SUCCESS;
+}
+
 static char **
 list_and_get_input(struct dirent ***trash_files, const int files_n,
 	const int is_undel)
@@ -367,25 +401,9 @@ list_and_get_input(struct dirent ***trash_files, const int files_n,
 	if (conf.clear_screen == 1)
 		CLEAR;
 
-	/* Change to the trash directory to get correct file colors */
-	if (xchdir(trash_files_dir, NO_TITLE) == -1) {
-		xerror("trash: '%s': %s\n", trash_files_dir, strerror(errno));
+	int ret = print_trashfiles(trash_files, files_n);
+	if (ret != EXIT_SUCCESS)
 		return (char **)NULL;
-	}
-
-	printf(_("%sTrashed files%s\n\n"), BOLD, df_c);
-
-	size_t i;
-	uint8_t tpad = DIGINUM(files_n);
-	for (i = 0; i < (size_t)files_n; i++) {
-		printf("%s%*zu%s ", el_c, tpad, i + 1, df_c);
-		colors_list((*trash_files)[i]->d_name, NO_ELN, NO_PAD, PRINT_NEWLINE);
-	}
-
-	if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
-		xerror("trash: '%s': %s\n", workspaces[cur_ws].path, strerror(errno));
-		return (char **)NULL;
-	}
 
 	/* Get input */
 	printf(_("\n%sEnter 'q' to quit\n"
@@ -867,8 +885,10 @@ print_trashdir_size(void)
 {
 	int base = xargs.si == 1 ? 1000 : 1024;
 	int status = 0;
+
 	const off_t full_size = dir_size(trash_files_dir, 0, &status) * base;
 	char *human_size = construct_human_size(full_size);
+
 	char err[sizeof(xf_c) + 6]; *err = '\0';
 	if (status != 0)
 		snprintf(err, sizeof(err), "%s%c%s", xf_c, DU_ERR_CHAR, NC);
@@ -880,6 +900,11 @@ print_trashdir_size(void)
 static int
 list_trashed_files(void)
 {
+	if (!trash_files_dir || !*trash_files_dir) {
+		xerror("%s\n", _("trash: The trash directory is undefined\n"));
+		return EXIT_FAILURE;
+	}
+
 	struct dirent **trash_files = (struct dirent **)NULL;
 	int files_n = scandir(trash_files_dir, &trash_files,
 			skip_files, conf.unicode ? alphasort : (conf.case_sens_list
@@ -894,27 +919,14 @@ list_trashed_files(void)
 		return EXIT_SUCCESS;
 	}
 
-	printf(_("%s%sTrashed files%s\n\n"), df_c, BOLD, df_c);
+	int ret = print_trashfiles(&trash_files, files_n);
 
-	/* Let's change to the trash dir to get the correct file colors */
-	if (xchdir(trash_files_dir, NO_TITLE) == -1) {
-		xerror("trash: '%s': %s\n", trash_files_dir, strerror(errno));
-		return EXIT_FAILURE;
-	}
-
-	uint8_t tpad = DIGINUM(files_n);
-	size_t i;
-	for (i = 0; i < (size_t)files_n; i++) {
-		printf("%s%*zu%s ", el_c, tpad, i + 1, df_c);
-		colors_list(trash_files[i]->d_name, NO_ELN, NO_PAD, PRINT_NEWLINE);
+	for (size_t i = 0; i < (size_t)files_n; i++)
 		free(trash_files[i]);
-	}
 	free(trash_files);
 
-	if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
-		xerror("trash: '%s': %s\n", workspaces[cur_ws].path, strerror(errno));
-		return EXIT_FAILURE;
-	}
+	if (ret != EXIT_SUCCESS)
+		return ret;
 
 	print_trashdir_size();
 
@@ -969,9 +981,9 @@ check_trash_file(char *file)
 	return EXIT_SUCCESS;
 }
 
-/* Print the list of successfully trashed files. */
+/* List successfully trashed files. */
 static void
-print_trashed_files(char **args, const int *trashed, const size_t trashed_n)
+list_ok_trashed_files(char **args, const int *trashed, const size_t trashed_n)
 {
 	if (print_removed_files == 0)
 		return;
@@ -1083,7 +1095,7 @@ trash_files_args(char **args)
 	}
 
 PRINT_TRASHED:
-	print_trashed_files(args, successfully_trashed, n);
+	list_ok_trashed_files(args, successfully_trashed, n);
 	print_reload_msg(_("%zu file(s) trashed\n"), trashed_files);
 	print_reload_msg(_("%zu total trashed file(s)\n"),
 		trash_n + trashed_files);
