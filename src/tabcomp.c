@@ -77,7 +77,7 @@ typedef char *rl_cpvfunc_t;
 #define SHOW_PREVIEWS(c) ((c) == TCMP_PATH || (c) == TCMP_SEL \
 || (c) == TCMP_RANGES || (c) == TCMP_DESEL || (c) == TCMP_JUMP \
 || (c) == TCMP_TAGS_F || (c) == TCMP_GLOB || (c) == TCMP_FILE_TYPES_FILES \
-|| (c) == TCMP_BM_PATHS)
+|| (c) == TCMP_BM_PATHS || (c) == TCMP_UNTRASH || (c) == TCMP_TRASHDEL)
 
 #ifndef _NO_FZF
 static char finder_in_file[PATH_MAX + 1];
@@ -750,12 +750,27 @@ get_preview_win_width(const int offset)
 	return (size_t)-1;
 }
 
+/* Change to the trash directory so that we can generate file previews.
+ * Only for the 'u' and 't del' commands. */
+static int
+cd_trashdir(const int prev)
+{
+	return (prev == 1 && (cur_comp_type == TCMP_UNTRASH
+	|| cur_comp_type == TCMP_TRASHDEL) && trash_files_dir
+	&& *trash_files_dir && trash_n > 0 && workspaces
+	&& workspaces[cur_ws].path
+	&& xchdir(trash_files_dir, NO_TITLE) == 0);
+}
+
 static int
 run_finder(const size_t height, const int offset, const char *lw,
 	const int multi)
 {
 	int prev = (conf.fzf_preview > 0 && SHOW_PREVIEWS(cur_comp_type) == 1)
 		? FZF_INTERNAL_PREVIEWER : 0;
+
+	int restore_cwd = cd_trashdir(prev);
+
 	int prev_hidden = conf.fzf_preview == 2 ? 1 : 0;
 	if (conf.fzf_preview == FZF_EXTERNAL_PREVIEWER)
 		prev = FZF_EXTERNAL_PREVIEWER;
@@ -848,6 +863,9 @@ ctrl-d:deselect-all,ctrl-t:toggle-all" : "",
 	const mode_t old_mask = umask(0077);
 	int ret = launch_execl(cmd);
 	umask(old_mask);
+
+	if (restore_cwd == 1)
+		xchdir(workspaces[cur_ws].path, NO_TITLE);
 
 	/* Restore the user's shell to its original value. */
 	user.shell = shell_bk;
