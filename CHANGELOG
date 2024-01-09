@@ -1,3 +1,59 @@
+1.16 (Big Whoop) - Jan 9, 2024
+
+BUG FIXES
+* Wrong cursor position after keybind if the last exit code was error.
+* Black screen when changing profile via keybind and starting path does not exist. Trying to access a file immediately after the black screen segfaults.
+* When sorting files by extension, dir names containing a dot are sorted by their "extension" (but dirs do not have extensions).
+* Cannot create bookmarks if there are zero bookmarks.
+* Alternative config files (-c, -b, and -k) and config dir (-D) ignored after editing the main config file.
+* Wrong error message when valid command line option is followed by an invalid one.
+* Trash counter underflowed when there's no trash directory.
+* 'clifm -c -V' wrongly assumes that -V is a parameter to -c.
+* Error message not shown when removing files.
+* Freeze when CLIFM_FILE_COLORS is set to empty string.
+* 's *.conf :/dir': .conf files selected in the CWD if /dir does not exist.
+* Prompts for 'pc' and 'oc' commands allow commands history.
+* The extraction path prompt ('ad' command) is broken.
+* 'n file file/' reports two created files, but only one was actually created.
+* Cannot trash 'file' and 'dir/file' at the same time (name colition).
+* Binaries loaded multiple times if there are dups in PATH.
+* Directories in paths (in PATH) taken for actual binaries.
+* 'p/pp' and 'le' commands do not properly handle symlink to symlink.
+* No error message on bulk rename error ('br' command).
+* Cannot bulk rename directories on DragonFly BSD.
+* No (or wrong) trash indicator after error trashing a file.
+* "rr" opens temp file even if the current directory is empty. 
+* Some config files not created with restrictive permissions.
+* Long view: file names with long extensions are not trimmed correctly.
+* Crash (divide by zero) when MaxJumpTotalRank is set to zero.
+* MaxPrintSelfiles not working with -1.
+* Segfault when PATH is longer than 4096.
+* "s01" selects the first listed file, but triggers the warning prompt.
+* "n 1" takes "1" as an ELN (and attempts to create the corresponding file) instead as a new file name.
+
+NEW FEATURES/IMPROVEMENTS
+* ".." now suggests the parent directory (this makes it more consistent with the fastback function).
+* Allow setting the umask from the config file via the 'Umask' option.
+* 'md' now runs 'n' internally instead of mkdir(1).
+* Added .3gp file extension to default color schemes (as VIDEO) and .vsix as ARCHIVE.
+* Sort file extensions alphabetically in default color schemes.
+* Inform the user whenever at least one file is excluded from the files list (hidden, filtered, only dirs).
+* If an alternative config file does not exist, create it.
+* Allow setting an alternative trash directory via '-T','--trash-dir'.
+* Make the 'r' command always ask for confirmation before removing files.
+* LS_COLORS support via '--lscolors' (GNU ls style only).
+* Security: use pledge(2) on OpenBSD.
+* Security: Check temporary files consistency when bulk renaming/removing.
+* Security: Check files consistency before removals.
+* Clear the screen when (re)loading the 'untrash' and the 'trash del' screens.
+* When restoring a trashed file, create parent directories as needed.
+* If the second field of a range of ELNs is omitted, the ELN of the last listed file is assumed.
+* Inform amount of renamed files when bulk renaming ('br' command).
+* Allow rename across devices when bulk renaming.
+* No more sticky bit: temporary directory now created as "/tmp/clifm-USER" (700 permissions).
+* Let the user know when changing to a directory in CDPATH.
+* Generate previews for trashed files ('u' and 't del' commands).
+
 1.15 (Jolly-Roger)
 
 Bug fixes
