@@ -98,6 +98,8 @@ display() {
 		C=$((FZF_PREVIEW_COLUMNS - 2))
 		L=$FZF_PREVIEW_LINES
 	else
+		[ -z $COLUMNS ] && COLUMNS=80
+		[ -z $LINES ] && LINES=24
 		C=$COLUMNS
 		L=$LINES
 	fi
