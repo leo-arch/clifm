@@ -111,6 +111,7 @@
 #include "colors.h"
 #include "messages.h"
 #include "misc.h"
+#include "properties.h"
 #include "readline.h" /* Required by the 'pc' command */
 
 /* A few macros for nano-second precision.
