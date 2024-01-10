@@ -457,6 +457,7 @@ print_jump_table(const int reduce, const time_t now)
 		return EXIT_SUCCESS;
 	}
 
+	HIDE_CURSOR;
 	print_jump_table_header();
 
 	size_t i;
@@ -543,6 +544,7 @@ print_jump_table(const int reduce, const time_t now)
 	printf(_("\nTotal rank: %d/%d\nTotal visits: %d\n"), ranks_sum,
 	    conf.max_jump_total_rank, visits_sum);
 
+	UNHIDE_CURSOR;
 	return EXIT_SUCCESS;
 }
 

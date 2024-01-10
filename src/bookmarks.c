@@ -155,6 +155,7 @@ get_largest_shortcut(void)
 static void
 print_bookmarks(void)
 {
+	HIDE_CURSOR;
 	printf(_("%sBookmarks Manager%s\n\n"), BOLD, df_c);
 
 	struct stat attr;
@@ -203,6 +204,8 @@ print_bookmarks(void)
 		    name_ok == 1 ? bookmarks[i].name
 		    : bookmarks[i].path, df_c); /* Path */
 	}
+
+	UNHIDE_CURSOR;
 }
 
 static int

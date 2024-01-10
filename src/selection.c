@@ -864,6 +864,8 @@ show_sel_files(void)
 	if (conf.clear_screen == 1)
 		CLEAR;
 
+	HIDE_CURSOR;
+
 	printf(_("%s%sSelection Box%s\n"), df_c, BOLD, df_c);
 
 	int reset_pager = 0;
@@ -942,6 +944,8 @@ show_sel_files(void)
 		get_color_size(total, s, sizeof(s));
 
 	printf(_("\n%sTotal size: %s%s%s%s\n"), df_c, err, s, human_size, df_c);
+
+	UNHIDE_CURSOR;
 
 	if (reset_pager == 1)
 		conf.pager = 1;

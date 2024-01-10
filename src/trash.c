@@ -887,6 +887,10 @@ print_trashdir_size(void)
 	int base = xargs.si == 1 ? 1000 : 1024;
 	int status = 0;
 
+	printf(_("\n%sTotal size: "), df_c);
+	if (term_caps.suggestions == 1)
+		{fputs("Calculating...", stdout); fflush(stdout);}
+
 	const off_t full_size = dir_size(trash_files_dir, 0, &status) * base;
 	char *human_size = construct_human_size(full_size);
 
@@ -898,7 +902,10 @@ print_trashdir_size(void)
 	if (conf.colorize == 1)
 		get_color_size(full_size, s, sizeof(s));
 
-	printf(_("\n%sTotal size: %s%s%s%s\n"), df_c, err, s, human_size, df_c);
+	if (term_caps.suggestions == 1)
+		{MOVE_CURSOR_LEFT(14); ERASE_TO_RIGHT; fflush(stdout);}
+
+	printf(_("%s%s%s%s\n"), err, s, human_size, df_c);
 }
 
 /* List files currently in the trash can */
@@ -927,11 +934,15 @@ list_trashed_files(void)
 	if (conf.clear_screen == 1)
 		CLEAR;
 
+	HIDE_CURSOR;
+
 	int ret = print_trashfiles(&trash_files, files_n);
 
 	for (size_t i = 0; i < (size_t)files_n; i++)
 		free(trash_files[i]);
 	free(trash_files);
+
+	UNHIDE_CURSOR;
 
 	if (ret != EXIT_SUCCESS)
 		return ret;
