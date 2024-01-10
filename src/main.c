@@ -1269,6 +1269,7 @@ main(int argc, char *argv[])
 	if (!jump_db || xargs.path == 1)
 		add_to_jumpdb(workspaces[cur_ws].path);
 
+	init_shell();
 	initialize_readline();
 	get_prompt_cmds();
 
@@ -1277,7 +1278,7 @@ main(int argc, char *argv[])
 #endif /* !_NO_TRASH */
 
 	get_hostname();
-	init_shell();
+//	init_shell();
 	set_env(0);
 
 	if (config_ok == 1)
