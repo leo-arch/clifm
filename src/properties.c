@@ -149,8 +149,6 @@
 #define RT_MONTH  (30  * RT_DAY)
 #define RT_YEAR   (365 * RT_DAY)
 
-#define MAX_SHADE_LEN 26 /* "\x1b[0;x;38;2;xxx;xxx;xxxm\0" */
-
 /* These macros define the max length for each properties field (long view).
  * These lengths are construed based on how each field is built (i,.e. displayed).
  * We first construct and store (in the stack, to avoid expensive heap
@@ -1034,7 +1032,7 @@ get_color_age8(const time_t t, char *str, const size_t len)
 
 /* Get color shade (based on size) for the file whose size is S.
  * Store color in STR, whose len is LEN. */
-static void
+void
 get_color_size(const off_t s, char *str, const size_t len)
 {
 	switch (size_shades.type) {

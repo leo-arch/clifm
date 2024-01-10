@@ -25,6 +25,9 @@
 #ifndef PROPERTIES_H
 #define PROPERTIES_H
 
+/* Max size for a file size color (used by get_color_size()) */
+#define MAX_SHADE_LEN 26 /* "\x1b[0;x;38;2;xxx;xxx;xxxm\0" */
+
 #ifdef LINUX_FILE_ATTRS
 /* On some Linux distros, some of these flags are not defined (in linux/fs.h).
  * On Debian, for example, FS_DAX_FL, FS_CASEFOLD_FL, and FS_VERITY_FL are undefined.
@@ -54,8 +57,8 @@
 #endif /* LINUX_FILE_ATTRS */
 
 __BEGIN_DECLS
-
 void do_stat_and_exit(const int full_stat);
+void get_color_size(const off_t s, char *str, const size_t len);
 int  properties_function(char **args, const int follow_link);
 void print_analysis_stats(const off_t total, const off_t largest,
 	const char *color, const char *name);

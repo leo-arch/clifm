@@ -40,6 +40,7 @@ xatoi, url_encode, xnmalloc */
 #include "listing.h"    /* reload_dirlist */
 #include "misc.h"       /* xerror, print_reload_msg */
 #include "navigation.h" /* xchdir */
+#include "properties.h" /* get_color_size */
 #include "readline.h"   /* rl_no_hist, rl_get_y_or_n */
 #include "sort.h"       /* skip_files, xalphasort, alphasort_insensitive */
 
@@ -893,7 +894,11 @@ print_trashdir_size(void)
 	if (status != 0)
 		snprintf(err, sizeof(err), "%s%c%s", xf_c, DU_ERR_CHAR, NC);
 
-	printf(_("\n%s%sTotal size%s: %s%s\n"), df_c, BOLD, df_c, err, human_size);
+	char s[MAX_SHADE_LEN]; *s = '\0';
+	if (conf.colorize == 1)
+		get_color_size(full_size, s, sizeof(s));
+
+	printf(_("\n%sTotal size: %s%s%s%s\n"), df_c, err, s, human_size, df_c);
 }
 
 /* List files currently in the trash can */

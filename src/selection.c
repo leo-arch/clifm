@@ -51,6 +51,7 @@
 #include "messages.h"
 #include "misc.h"
 #include "navigation.h"
+#include "properties.h" /* get_size_color() */
 #include "readline.h"
 #include "selection.h"
 #include "sort.h"
@@ -868,11 +869,15 @@ show_sel_files(void)
 	int reset_pager = 0;
 
 	putchar('\n');
+
 	struct winsize w;
-	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-	size_t counter = 0;
-	int t_lines = (int)w.ws_row;
+	if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) == -1)
+		w.ws_row = 24;
+
+	int t_lines = w.ws_row > 0 ? (int)w.ws_row : 24;;
 	t_lines -= 2;
+
+	size_t counter = 0;
 	size_t i;
 	off_t total = 0;
 
@@ -932,7 +937,11 @@ show_sel_files(void)
 	if (status != 0)
 		snprintf(err, sizeof(err), "%s%c%s", xf_c, DU_ERR_CHAR, NC);
 
-	printf(_("\n%s%sTotal size%s: %s%s\n"), df_c, BOLD, df_c, err, human_size);
+	char s[MAX_SHADE_LEN]; *s = '\0';
+	if (conf.colorize == 1)
+		get_color_size(total, s, sizeof(s));
+
+	printf(_("\n%sTotal size: %s%s%s%s\n"), df_c, err, s, human_size, df_c);
 
 	if (reset_pager == 1)
 		conf.pager = 1;
