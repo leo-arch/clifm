@@ -1897,11 +1897,13 @@ get_paths_timestamps(const size_t n)
 	}
 }
 
-/* Store all paths in the PATH environment variable into a globally
- * declared array (paths), skipping duplicates.
+/* Store all paths in the PATH environment variable into the path field of
+ * the paths_t struct paths, skipping duplicates.
+ * If CHECK_TIMESTAMPS is set to 1, modification time for each path in PATH
+ * is stored in the mtime field of the paths struct.
  * Returns the number of stored paths. */
 size_t
-get_path_env(void)
+get_path_env(const int check_timestamps)
 {
 	char *ptr = (char *)NULL;
 	int malloced_ptr = 0;
@@ -1977,7 +1979,8 @@ CONT:
 	paths[n].path = (char *)NULL;
 	free(path_tmp);
 
-	get_paths_timestamps(n);
+	if (check_timestamps == 1)
+		get_paths_timestamps(n);
 
 	return n;
 }

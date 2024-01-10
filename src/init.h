@@ -37,7 +37,7 @@ void get_ext_mountpoints(void);
 #endif /* LINUX_FSINFO */
 int  get_home(void);
 int  get_last_path(void);
-size_t get_path_env(void);
+size_t get_path_env(const int check_timestamps);
 void get_path_programs(void);
 void get_prompt_cmds(void);
 int  get_sel_files(void);

@@ -603,7 +603,7 @@ open_reg_exit(char *filename, const int url, const int preview)
 	if (alt_preview_file && preview == 1) {
 		mime_file = savestring(alt_preview_file, strlen(alt_preview_file));
 	} else {
-		size_t mime_file_len = strlen(homedir)
+		const size_t mime_file_len = strlen(homedir)
 			+ (alt_profile ? strlen(alt_profile) : 7) + 40;
 
 		mime_file = xnmalloc(mime_file_len, sizeof(char));
@@ -614,7 +614,7 @@ open_reg_exit(char *filename, const int url, const int preview)
 	}
 
 	if (path_n == 0)
-		path_n = get_path_env();
+		path_n = get_path_env(0);
 
 #ifndef _NO_LIRA
 	if (url == 1 && mime_open_url(filename) == EXIT_SUCCESS)
@@ -627,7 +627,7 @@ open_reg_exit(char *filename, const int url, const int preview)
 	if (*filename == '~')
 		p = tilde_expand(filename);
 
-	int ret = open_file(p ? p : filename);
+	const int ret = open_file(p ? p : filename);
 	free(p);
 	exit(ret);
 }

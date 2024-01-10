@@ -1195,7 +1195,7 @@ main(int argc, char *argv[])
 	 * used later by get_path_programs (for the autocomplete function)
 	 * and get_cmd_path(). */
 	if (!(flags & PATH_PROGRAMS_ALREADY_LOADED))
-		path_n = get_path_env();
+		path_n = get_path_env(1);
 	cdpath_n = get_cdpath();
 
 	check_env_filter();

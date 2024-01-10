@@ -200,10 +200,10 @@ launch_execl(const char *cmd)
 
 /* Execute a command and return the corresponding exit status. The exit
  * status could be: zero, if everything went fine, or a non-zero value
- * in case of error. The function takes as first arguement an array of
+ * in case of error. The function takes as first argument an array of
  * strings containing the command name to be executed and its arguments
  * (cmd), an integer (bg) specifying if the command should be
- * backgrounded (1) or not (0), and a flag to control file descriptors */
+ * backgrounded (1) or not (0), and a flag to control file descriptors. */
 int
 launch_execv(char **cmd, const int bg, const int xflags)
 {
@@ -351,7 +351,7 @@ reload_binaries(void)
 		free(paths);
 	}
 
-	path_n = (size_t)get_path_env();
+	path_n = (size_t)get_path_env(1);
 	get_path_programs();
 }
 #endif /* !__CYGWIN__ */

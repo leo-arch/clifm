@@ -311,7 +311,7 @@ edit_actions(char *app)
 		free(paths);
 	}
 
-	path_n = (size_t)get_path_env();
+	path_n = (size_t)get_path_env(1);
 	get_path_programs();
 
 	print_reload_msg(_("File modified. Actions reloaded\n"));
