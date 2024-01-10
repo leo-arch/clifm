@@ -1749,6 +1749,10 @@ free_stuff(void)
 	/* Restore the color of the running terminal */
 	if (conf.colorize == 1 && xargs.list_and_quit != 1)
 		RESTORE_COLOR;
+// TESTING_RESET_TERM
+#include <termios.h>
+	if (reset_term == 1)
+		tcsetattr(STDIN_FILENO, TCSANOW, (const struct termios *)&shell_tmodes);
 }
 
 /* Get current terminal dimensions and store them in TERM_COLS and

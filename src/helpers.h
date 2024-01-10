@@ -1782,6 +1782,8 @@ extern size_t *dir_icons_hashes;
 extern size_t *ext_icons_hashes;
 #endif /* !_NO_ICONS */
 
+// TESTING_RESET_TERM
+extern int reset_term;
 extern struct termios shell_tmodes;
 extern pid_t own_pid;
 extern time_t props_now;

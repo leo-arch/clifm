@@ -1712,6 +1712,9 @@ init_shell(void)
 		return;
 	}
 
+// TESTING_RESET_TERM
+	reset_term = 1;
+
 	if ((nesting_level = check_nest_level()) > 1) {
 		set_signals_to_ignore();
 		own_pid = get_own_pid();

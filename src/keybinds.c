@@ -1383,7 +1383,8 @@ rl_quit(int count, int key)
 
 	/* Reset terminal attributes before exiting. Without this line, the program
 	 * quits, but terminal input is not printed to STDOUT. */
-	tcsetattr(STDIN_FILENO, TCSANOW, &shell_tmodes);
+// TESTING_RESET_TERM
+//	tcsetattr(STDIN_FILENO, TCSANOW, &shell_tmodes);
 	exit(EXIT_SUCCESS);
 }
 
