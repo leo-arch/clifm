@@ -129,7 +129,7 @@ trash_clear(void)
 static int
 del_trash_file(const char *suffix)
 {
-	size_t len = strlen(trash_files_dir) + strlen(suffix) + 2;
+	const size_t len = strlen(trash_files_dir) + strlen(suffix) + 2;
 	char *tfile = xnmalloc(len, sizeof(char));
 	snprintf(tfile, len, "%s/%s", trash_files_dir, suffix);
 
@@ -147,7 +147,7 @@ del_trash_file(const char *suffix)
 static int
 gen_trashinfo_file(char *file, const char *suffix, const struct tm *tm)
 {
-	size_t len = strlen(trash_info_dir) + strlen(suffix) + 12;
+	const size_t len = strlen(trash_info_dir) + strlen(suffix) + 12;
 	char *info_file = xnmalloc(len, sizeof(char));
 	snprintf(info_file, len, "%s/%s.trashinfo", trash_info_dir, suffix);
 
@@ -194,9 +194,9 @@ gen_dest_file(const char *file, const char *suffix, char **file_suffix)
 	 * longer than NAME_MAX (255), trim the original filename, so that
 	 * (original_filename_len + 1 (dot) + suffix_len) won't be longer
 	 * than NAME_MAX. */
-	size_t filename_len = strlen(filename);
-	size_t suffix_len = strlen(suffix);
-	int size = (int)(filename_len + suffix_len + 11) - NAME_MAX;
+	const size_t filename_len = strlen(filename);
+	const size_t suffix_len = strlen(suffix);
+	const int size = (int)(filename_len + suffix_len + 11) - NAME_MAX;
 	/* len = filename.suffix.trashinfo */
 
 	if (size > 0) {
@@ -209,13 +209,13 @@ gen_dest_file(const char *file, const char *suffix, char **file_suffix)
 		filename[filename_len - (size_t)size] = '\0';
 	}
 
-	size_t slen = filename_len + suffix_len + 2 + 16;
+	const size_t slen = filename_len + suffix_len + 2 + 16;
 	*file_suffix = xnmalloc(slen, sizeof(char));
 	snprintf(*file_suffix, slen, "%s.%s", filename, suffix);
 
 	/* NOTE: It is guaranteed (by check_trash_file()) that FILE does not
 	 * end with a slash. */
-	size_t dlen = strlen(trash_files_dir) + strlen(*file_suffix) + 2 + 16;
+	const size_t dlen = strlen(trash_files_dir) + strlen(*file_suffix) + 2 + 16;
 	char *dest = xnmalloc(dlen, sizeof(char));
 	snprintf(dest, dlen, "%s/%s", trash_files_dir, *file_suffix);
 
@@ -377,7 +377,7 @@ print_trashfiles(struct dirent ***ent, const int files_n)
 	flags |= STATE_COMPLETING;
 	cur_comp_type = TCMP_UNTRASH;
 
-	uint8_t tpad = DIGINUM(files_n);
+	const uint8_t tpad = DIGINUM(files_n);
 	size_t i;
 	for (i = 0; i < (size_t)files_n; i++) {
 		printf("%s%*zu%s ", el_c, tpad, i + 1, df_c);
@@ -402,7 +402,7 @@ list_and_get_input(struct dirent ***trash_files, const int files_n,
 	if (conf.clear_screen == 1)
 		CLEAR;
 
-	int ret = print_trashfiles(trash_files, files_n);
+	const int ret = print_trashfiles(trash_files, files_n);
 	if (ret != EXIT_SUCCESS)
 		return (char **)NULL;
 
@@ -517,7 +517,8 @@ remove_from_trash(char **args)
 		}
 
 		if (strcmp(input[i], "*") == 0) { /* Asterisk */
-			size_t n = remove_from_trash_all(&trash_files, files_n, &exit_status);
+			const size_t n =
+				remove_from_trash_all(&trash_files, files_n, &exit_status);
 			free_files_and_input(&input, &trash_files, files_n);
 			if (conf.autols == 1) reload_dirlist();
 			print_reload_msg(_("%zu file(s) removed from the trash can\n"), n);
@@ -526,7 +527,7 @@ remove_from_trash(char **args)
 		}
 
 		/* Non-number or invalid ELN */
-		int num = atoi(input[i]);
+		const int num = atoi(input[i]);
 		if (!is_number(input[i]) || num <= 0 || num > files_n) {
 			xerror(_("trash: %s: Invalid ELN\n"), input[i]);
 			free_files_and_input(&input, &trash_files, files_n);
@@ -537,9 +538,9 @@ remove_from_trash(char **args)
 	/* At this point we now all input fields are valid ELNs */
 	/* If all args are numbers, and neither 'q' nor wildcard */
 	for (i = 0; input[i]; i++) {
-		int num = atoi(input[i]);
+		const int num = atoi(input[i]);
 
-		int ret = remove_file_from_trash(trash_files[num - 1]->d_name);
+		const int ret = remove_file_from_trash(trash_files[num - 1]->d_name);
 		if (ret != EXIT_SUCCESS) {
 			xerror(_("trash: '%s': Cannot remove file from the trash can\n"),
 				trash_files[num - 1]->d_name);
@@ -549,7 +550,7 @@ remove_from_trash(char **args)
 
 	free_files_and_input(&input, &trash_files, files_n);
 
-	size_t n = count_trashed_files();
+	const size_t n = count_trashed_files();
 	if (n > 0) {
 		remove_from_trash(args);
 	} else {
@@ -599,7 +600,7 @@ read_original_path(const char *file, const char *src, int *status)
 	}
 
 	/* Remove new line char from original path, if any */
-	size_t orig_path_len = strlen(orig_path);
+	const size_t orig_path_len = strlen(orig_path);
 	if (orig_path_len > 0 && orig_path[orig_path_len - 1] == '\n')
 		orig_path[orig_path_len - 1] = '\0';
 
@@ -643,7 +644,7 @@ check_untrash_dest(char *file)
 	*(p + 1) = '\0';
 	char *parent_dir = file;
 
-	int ret = access(parent_dir, F_OK | X_OK | W_OK);
+	const int ret = access(parent_dir, F_OK | X_OK | W_OK);
 	if (ret != 0) {
 		if (errno == ENOENT) {
 			if (create_untrash_parent(parent_dir) != EXIT_SUCCESS) {
@@ -748,7 +749,7 @@ untrash_all(struct dirent ***tfiles, const int tfiles_n, const int free_files)
 	if (status == EXIT_SUCCESS) {
 		if (conf.autols == 1) reload_dirlist();
 
-		size_t n = count_trashed_files();
+		const size_t n = count_trashed_files();
 		print_reload_msg(_("%zu file(s) restored\n"), untrashed);
 		print_reload_msg(_("%zu total trashed file(s)\n"), n);
 	}
@@ -780,7 +781,7 @@ untrash_files(char **args)
 	if (status == EXIT_SUCCESS) {
 		if (conf.autols == 1) reload_dirlist();
 
-		size_t n = count_trashed_files();
+		const size_t n = count_trashed_files();
 		print_reload_msg(_("%zu file(s) restored\n"), untrashed);
 		print_reload_msg(_("%zu total trashed file(s)\n"), n);
 	}
@@ -818,9 +819,11 @@ untrash_function(char **args)
 		return untrash_all(&trash_files, files_n, 1);
 
 	/* List files and get input */
+	size_t i;
 	char **input = list_and_get_input(&trash_files, files_n, 1);
+
 	if (!input) {
-		for (size_t i = 0; i < (size_t)files_n; i++)
+		for (i = 0; i < (size_t)files_n; i++)
 			free(trash_files[i]);
 		free(trash_files);
 		return EXIT_FAILURE;
@@ -830,7 +833,6 @@ untrash_function(char **args)
 	int free_and_return = 0;
 	int reload_files = 0;
 
-	size_t i;
 	for (i = 0; input[i]; i++) {
 		if (strcmp(input[i], "q") == 0) {
 			free_and_return = reload_files = 1;
@@ -868,14 +870,13 @@ untrash_function(char **args)
 	free_files_and_input(&input, &trash_files, files_n);
 
 	/* If some trashed file still remains, reload the undel screen */
-	size_t n = count_trashed_files();
-
+	const size_t n = count_trashed_files();
 	if (n > 0) {
 		if (conf.clear_screen == 1) CLEAR;
 		untrash_function(args);
 	} else {
 		if (conf.autols == 1) reload_dirlist();
-		print_reload_msg(_("%zu trashed file(s)\n"), count_trashed_files());
+		print_reload_msg(_("%zu trashed file(s)\n"), n);
 	}
 
 	return exit_status;
@@ -884,7 +885,7 @@ untrash_function(char **args)
 static void
 print_trashdir_size(void)
 {
-	int base = xargs.si == 1 ? 1000 : 1024;
+	const int base = xargs.si == 1 ? 1000 : 1024;
 	int status = 0;
 
 	printf(_("\n%sTotal size: "), df_c);
@@ -918,7 +919,7 @@ list_trashed_files(void)
 	}
 
 	struct dirent **trash_files = (struct dirent **)NULL;
-	int files_n = scandir(trash_files_dir, &trash_files,
+	const int files_n = scandir(trash_files_dir, &trash_files,
 			skip_files, conf.unicode ? alphasort : (conf.case_sens_list
 			? xalphasort : alphasort_insensitive));
 
@@ -936,9 +937,9 @@ list_trashed_files(void)
 
 	HIDE_CURSOR;
 
-	int ret = print_trashfiles(&trash_files, files_n);
+	const int ret = print_trashfiles(&trash_files, files_n);
 
-	for (size_t i = 0; i < (size_t)files_n; i++)
+	for (int i = 0; i < files_n; i++)
 		free(trash_files[i]);
 	free(trash_files);
 
@@ -979,7 +980,7 @@ check_trash_file(char *file)
 		return EXIT_FAILURE;
 	}
 
-	size_t l = strlen(file);
+	const size_t l = strlen(file);
 	if (l > 1 && file[l - 1] == '/')
 		/* Do not trash (move) symlinks ending with a slash. According to 'info mv':
 		 * "_Warning_: Avoid specifying a source name with a trailing slash, when

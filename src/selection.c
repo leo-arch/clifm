@@ -629,12 +629,13 @@ print_selected_files(void)
 
 	printf(_("%sSelection Box%s\n\n"), BOLD, df_c);
 
-	size_t t = tab_offset, i;
+	const size_t t = tab_offset;
+	size_t i;
 	off_t total = 0;
 	tab_offset = 0;
 
 	int status = 0;
-	uint8_t epad = DIGINUM(sel_n);
+	const uint8_t epad = DIGINUM(sel_n);
 
 	flags |= IN_SELBOX_SCREEN;
 	for (i = 0; i < sel_n; i++) {

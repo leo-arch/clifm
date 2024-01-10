@@ -160,7 +160,8 @@ print_bookmarks(void)
 
 	struct stat attr;
 	const int eln_pad = DIGINUM(bm_n);
-	size_t i, ls = get_largest_shortcut();
+	const size_t ls = get_largest_shortcut();
+	size_t i;
 
 	/* Print bookmarks, taking into account shortcut, name, and path */
 	for (i = 0; i < bm_n; i++) {
