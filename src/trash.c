@@ -924,6 +924,9 @@ list_trashed_files(void)
 		return EXIT_SUCCESS;
 	}
 
+	if (conf.clear_screen == 1)
+		CLEAR;
+
 	int ret = print_trashfiles(&trash_files, files_n);
 
 	for (size_t i = 0; i < (size_t)files_n; i++)
