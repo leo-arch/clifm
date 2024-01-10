@@ -1985,7 +1985,7 @@ do_stat_and_exit(const int full_stat)
 	char *norm_path = *stat_filename == '~'
 		? tilde_expand(stat_filename) : (char *)NULL;
 
-	int ret = do_stat(norm_path ? norm_path : stat_filename, full_stat);
+	const int ret = do_stat(norm_path ? norm_path : stat_filename, full_stat);
 
 	free(norm_path);
 	free(stat_filename);

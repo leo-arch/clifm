@@ -677,7 +677,8 @@ open_preview_file(char *file, const int mode)
 	}
 
 	char *fpath = file;
-	int url = 1, preview = mode == PREVIEW_FILE ? 1 : 0;
+	int url = 1;
+	const int preview = mode == PREVIEW_FILE ? 1 : 0;
 
 	struct stat attr;
 	if (IS_FILE_URI(fpath)) {
