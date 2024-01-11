@@ -1385,6 +1385,7 @@ rl_quit(int count, int key)
 	 * quits, but terminal input is not printed to STDOUT. */
 // TESTING_RESET_TERM
 //	tcsetattr(STDIN_FILENO, TCSANOW, &shell_tmodes);
+	rl_deprep_terminal();
 	exit(EXIT_SUCCESS);
 }
 
