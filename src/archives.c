@@ -182,7 +182,7 @@ extract_iso(char *file)
 	int exit_status = EXIT_SUCCESS;
 
 	/* 7z x -oDIR FILE (use FILE as DIR) */
-	size_t flen = strlen(file);
+	const size_t flen = strlen(file);
 	char *o_option = xnmalloc(flen + 7, sizeof(char));
 	snprintf(o_option, flen + 7, "-o%s.dir", file); /* NOLINT */
 
@@ -205,7 +205,7 @@ extract_iso_to_dir(char *file)
 	if (!ext_path)
 		return EXIT_FAILURE;
 
-	size_t len = strlen(ext_path);
+	const size_t len = strlen(ext_path);
 	char *o_option = xnmalloc(len + 3, sizeof(char));
 	snprintf(o_option, len + 3, "-o%s", ext_path); /* NOLINT */
 	free(ext_path);
@@ -256,11 +256,11 @@ create_mountpoint(char *file)
 	char *tfile = (p && *(++p)) ? p : file;
 
 	if (xargs.stealth_mode == 1) {
-		size_t len = strlen(tfile) + P_tmpdir_len + 15;
+		const size_t len = strlen(tfile) + P_tmpdir_len + 15;
 		mountpoint = xnmalloc(len, sizeof(char));
 		snprintf(mountpoint, len, "%s/clifm-mounts/%s", P_tmpdir, tfile);
 	} else {
-		size_t len = config_dir_len + strlen(tfile) + 9;
+		const size_t len = config_dir_len + strlen(tfile) + 9;
 		mountpoint = xnmalloc(len, sizeof(char));
 		snprintf(mountpoint, len, "%s/mounts/%s", config_dir, tfile); /* NOLINT */
 	}
@@ -570,7 +570,7 @@ is_compressed(char *file, const int test_iso)
 		return (-1);
 	}
 
-	int compressed = check_compressed(t, test_iso);
+	const int compressed = check_compressed(t, test_iso);
 	free(t);
 
 	return (compressed == 1 ? EXIT_SUCCESS : EXIT_FAILURE);
@@ -662,7 +662,7 @@ ERROR:
 static char *
 add_default_extension(char *name)
 {
-	size_t name_len = strlen(name);
+	const size_t name_len = strlen(name);
 
 	char *t = savestring(name, name_len);
 	name = xnrealloc(name, name_len + 8, sizeof(char));
@@ -849,7 +849,7 @@ compress_others(char **args, char *name)
 	char **tcmd = xnmalloc(3 + i + 1, sizeof(char *));
 	tcmd[0] = savestring("atool", 5);
 	tcmd[1] = savestring("-a", 2);
-	size_t len = strlen(name) + (!ext_ok ? 7 : 0) + 1;
+	const size_t len = strlen(name) + (!ext_ok ? 7 : 0) + 1;
 	tcmd[2] = xnmalloc(len, sizeof(char *));
 	snprintf(tcmd[2], len, "%s%s", name, !ext_ok ? ".tar.gz" : ""); /* NOLINT */
 	n += 3;
@@ -864,7 +864,7 @@ compress_others(char **args, char *name)
 	}
 	tcmd[n] = (char *)NULL;
 
-	int ret = launch_execv(tcmd, FOREGROUND, E_NOFLAG);
+	const int ret = launch_execv(tcmd, FOREGROUND, E_NOFLAG);
 
 	for (i = 0; tcmd[i]; i++)
 		free(tcmd[i]);

@@ -106,7 +106,7 @@ get_longest_workspace_name(void)
 	while (--i >= 0) {
 		if (!workspaces[i].name)
 			continue;
-		size_t l = wc_xstrlen(workspaces[i].name);
+		const size_t l = wc_xstrlen(workspaces[i].name);
 		if (l > longest_ws)
 			longest_ws = l;
 	}
@@ -417,7 +417,7 @@ handle_workspaces(char **args)
 	int tmp_ws = 0;
 
 	if (is_number(args[0])) {
-		int ret = check_workspace_num(args[0], &tmp_ws);
+		const int ret = check_workspace_num(args[0], &tmp_ws);
 		if (ret != 2)
 			return ret;
 	} else if (*args[0] == '+' && !args[0][1]) {
@@ -538,7 +538,7 @@ grab_bd_input(const int n)
 		}
 
 		if (is_number(input)) {
-			int a = atoi(input);
+			const int a = atoi(input);
 			if (a > 0 && a <= n) {
 				free(input);
 				return a - 1;
@@ -607,7 +607,7 @@ backdir_menu(char **matches)
 		}
 	}
 
-	int choice = grab_bd_input(i);
+	const int choice = grab_bd_input(i);
 	if (choice != -1)
 		return cd_function(matches[choice], CD_PRINT_ERROR);
 
@@ -639,7 +639,7 @@ backdir(char *str)
 
 	char *deq_str = str ? unescape_str(str, 0) : (char *)NULL;
 	if (str) {
-		int ret = backdir_directory(deq_str, str);
+		const int ret = backdir_directory(deq_str, str);
 		if (ret != BD_CONTINUE) {
 			free(deq_str);
 			return ret;
@@ -700,7 +700,7 @@ xchdir(char *dir, const int cd_flag)
 
 	closedir(dirp);
 
-	int ret = chdir(dir);
+	const int ret = chdir(dir);
 
 	if (ret == 0 && cd_flag == SET_TITLE) {
 		char tmp[PATH_MAX + 1]; *tmp = '\0';
@@ -731,7 +731,7 @@ check_cdpath(const char *name)
 		return (char *)NULL;
 
 	size_t i;
-	size_t namelen = strlen(name);
+	const size_t namelen = strlen(name);
 	char *p = (char *)NULL;
 	struct stat a;
 
@@ -976,7 +976,7 @@ void
 print_dirhist(char *query)
 {
 	int n = DIGINUM(dirhist_total_index), i;
-	size_t len = (query && conf.fuzzy_match == 1) ? strlen(query) : 0;
+	const size_t len = (query && conf.fuzzy_match == 1) ? strlen(query) : 0;
 	int fuzzy_str_type = (len > 0 && contains_utf8(query) == 1)
 		? FUZZY_FILES_UTF8 : FUZZY_FILES_ASCII;
 
@@ -1063,7 +1063,7 @@ surf_hist(char **args)
 		return EXIT_FAILURE;
 	}
 
-	int n = atoi(args[1] + 1);
+	const int n = atoi(args[1] + 1);
 	return change_to_dirhist_num(n);
 }
 
@@ -1077,13 +1077,12 @@ set_path(const char *new_path)
 		return EXIT_FAILURE;
 
 	add_to_jumpdb(workspaces[cur_ws].path);
-	int exit_status = EXIT_SUCCESS;
 
 	dir_changed = 1;
 	if (conf.autols == 1)
 		reload_dirlist();
 
-	return exit_status;
+	return EXIT_SUCCESS;
 }
 
 /* Go back one entry in dirhist */

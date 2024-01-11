@@ -351,7 +351,7 @@ set_start_path(void)
 	set_cur_workspace();
 
 	/* Make path the CWD. */
-	int ret = xchdir(workspaces[cur_ws].path, NO_TITLE);
+	const int ret = xchdir(workspaces[cur_ws].path, NO_TITLE);
 
 	char tmp[PATH_MAX + 1] = "";
 	char *pwd = get_cwd(tmp, sizeof(tmp), 0);
@@ -438,7 +438,7 @@ try_datadir(const char *dir)
 	/* Try DIR/share/clifm/clifmrc */
 	snprintf(p, sizeof(p), "%s/share/%s/%src", dir, PROGRAM_NAME, PROGRAM_NAME);
 	if (stat(p, &a) != -1 && S_ISREG(a.st_mode)) {
-		size_t len = strlen(dir) + 7;
+		const size_t len = strlen(dir) + 7;
 		char *q = xnmalloc(len, sizeof(char));
 		snprintf(q, len, "%s/share", dir);
 		return q;
@@ -458,7 +458,9 @@ resolve_absolute_path(const char *s)
 	if (!s || !*s)
 		return (char *)NULL;
 
-	char *p = strrchr(s, '/'), *t = (char *)NULL;
+	char *p = strrchr(s, '/');
+	char *t = (char *)NULL;
+
 	if (p && p != s)
 		*p = '\0';
 	else
@@ -817,7 +819,7 @@ set_alt_config_dir(char *dir)
 
 	if (stat(dir, &attr) == -1) {
 		char *tmp_cmd[] = {"mkdir", "-p", "--", dir, NULL};
-		int ret = launch_execv(tmp_cmd, FOREGROUND, E_NOSTDERR);
+		const int ret = launch_execv(tmp_cmd, FOREGROUND, E_NOSTDERR);
 		if (ret != EXIT_SUCCESS) {
 			err('e', PRINT_PROMPT, _("%s: Cannot create directory '%s' "
 				"(error %d)\nFalling back to the default configuration "
@@ -982,7 +984,7 @@ resolve_path(char *file)
 			exit(errno);
 		}
 
-		size_t len = strlen(cwd) + strlen(file) + 2;
+		const size_t len = strlen(cwd) + strlen(file) + 2;
 		_path = xnmalloc(len, sizeof(char));
 		snprintf(_path, len, "%s/%s", cwd, file);
 	}
@@ -1245,7 +1247,7 @@ set_tab_mode(const char *opt)
 	if (!opt || !*opt || opt[1])
 		return;
 
-	int n = *opt - '0';
+	const int n = *opt - '0';
 
 	switch (n) {
 	case 0:	set_stdtab(); break;

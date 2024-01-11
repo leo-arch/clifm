@@ -279,13 +279,13 @@ get_file_attrs(const char *file)
 	UNUSED(file);
 	return (-1);
 # else
-	int attr, fd, ret = 0;
+	int attr;
 
-	fd = open(file, O_RDONLY);
+	const int fd = open(file, O_RDONLY);
 	if (fd == -1)
 		return (-1);
 
-	ret = ioctl(fd, FS_IOC_GETFLAGS, &attr);
+	const int ret = ioctl(fd, FS_IOC_GETFLAGS, &attr);
 	close(fd);
 
 	return (ret == -1 ? -1 : attr);
@@ -552,7 +552,7 @@ perm2octal(const char *s)
 static char *
 get_new_perms(const char *str, const int diff)
 {
-	int poffset_bk = prompt_offset;
+	const int poffset_bk = prompt_offset;
 	prompt_offset = 3;
 	xrename = 2; /* Disable TAB completion for this prompt */
 	rl_nohist = 1;
@@ -603,7 +603,7 @@ get_common_perms(char **s, int *diff)
 		if (stat_ready == 1 && a.st_mode != b.st_mode)
 			*diff = 1;
 
-		mode_t val = (a.st_mode & (mode_t)~S_IFMT);
+		const mode_t val = (a.st_mode & (mode_t)~S_IFMT);
 		if (!(val & S_IRUSR)) p.ur = '-';
 		if (!(val & S_IWUSR)) p.uw = '-';
 		if (!(val & S_IXUSR)) p.ux = '-';
@@ -730,7 +730,7 @@ set_file_perms(char **args)
 static char *
 get_new_ownership(const char *str, const int diff)
 {
-	int poffset_bk = prompt_offset;
+	const int poffset_bk = prompt_offset;
 	prompt_offset = 3;
 	xrename = 3; /* Allow completion only for user and group names */
 	rl_nohist = 1;
@@ -822,8 +822,10 @@ set_file_owner(char **args)
 		return EXIT_SUCCESS;
 	}
 
-	int exit_status = EXIT_SUCCESS, diff = 0;
+	int exit_status = EXIT_SUCCESS;
+	int diff = 0;
 	char *own = get_common_ownership(args + 1, &exit_status, &diff);
+
 	if (!own)
 		return exit_status;
 
@@ -1303,7 +1305,8 @@ print_file_name(char *filename, const char *color, const int follow_link,
 	}
 
 	char target[PATH_MAX + 1]; *target = '\0';
-	ssize_t tlen = readlinkat(XAT_FDCWD, filename, target, sizeof(target) - 1);
+	const ssize_t tlen =
+		readlinkat(XAT_FDCWD, filename, target, sizeof(target) - 1);
 	if (tlen != -1)
 		target[tlen] = '\0';
 
@@ -1673,8 +1676,8 @@ print_timestamps(char *filename, const struct stat *attr)
 	UNUSED(filename);
 #endif /* !LINUX_STATX */
 
-	char *cdate = conf.colorize == 1 ? dd_c : "";
-	char *cend = conf.colorize == 1 ? df_c : "";
+	const char *cdate = conf.colorize == 1 ? dd_c : "";
+	const char *cend = conf.colorize == 1 ? df_c : "";
 
 	char access_time[MAX_TIME_STR];
 	char change_time[MAX_TIME_STR];
@@ -1687,9 +1690,9 @@ print_timestamps(char *filename, const struct stat *attr)
 	xgen_time_str(mod_time, sizeof(mod_time), attr->st_mtime,
 		(size_t)attr->MTIMNSEC);
 
-	char *cadate = cdate;
-	char *ccdate = cdate;
-	char *cmdate = cdate;
+	const char *cadate = cdate;
+	const char *ccdate = cdate;
+	const char *cmdate = cdate;
 
 	char atf[MAX_SHADE_LEN], mtf[MAX_SHADE_LEN], ctf[MAX_SHADE_LEN];
 	*atf = *mtf = *ctf = '\0';
@@ -1708,7 +1711,7 @@ print_timestamps(char *filename, const struct stat *attr)
 	printf(_("Change: \t%s%s%s\n"), ccdate, change_time, cend);
 
 #ifdef ST_BTIME
-	char *cbdate = cdate;
+	const char *cbdate = cdate;
 	char btf[MAX_SHADE_LEN];
 	*btf = '\0';
 	char creation_time[MAX_TIME_STR];
@@ -1716,7 +1719,7 @@ print_timestamps(char *filename, const struct stat *attr)
 
 # ifdef LINUX_STATX
 	struct statx attrx;
-	int ret = statx(AT_FDCWD, filename, AT_SYMLINK_NOFOLLOW,
+	const int ret = statx(AT_FDCWD, filename, AT_SYMLINK_NOFOLLOW,
 		STATX_BTIME, &attrx);
 	if (ret == 0 && attrx.stx_mask & STATX_BTIME) {
 		xgen_time_str(creation_time, sizeof(creation_time),
@@ -1796,7 +1799,7 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 		return;
 
 	int du_status = 0;
-	off_t total_size = file_perm == 1
+	const off_t total_size = file_perm == 1
 		? get_total_size(filename, &du_status) : (-2);
 
 	if (total_size < 0) {
@@ -1881,7 +1884,7 @@ do_stat(char *filename, const int follow_link)
 		/* pp: In case of a symlink we want both the symlink name (FILENAME)
 		 * and the target name (LINK_TARGET): the Name field in the output
 		 * will be printed as follows: "Name: target <- link_name". */
-		ssize_t tlen = readlinkat(XAT_FDCWD, filename,
+		const ssize_t tlen = readlinkat(XAT_FDCWD, filename,
 			link_target, sizeof(link_target) - 1);
 		if (tlen != -1) {
 			link_target[tlen] = '\0';
@@ -1904,9 +1907,10 @@ do_stat(char *filename, const int follow_link)
 		&attr, &file_type, &ctype);
 
 #if defined(LINUX_FILE_XATTRS)
-	int xattr = llistxattr(*link_target ? link_target : filename, NULL, 0) > 0;
+	const int xattr =
+		llistxattr(*link_target ? link_target : filename, NULL, 0) > 0;
 #else
-	int xattr = 0;
+	const int xattr = 0;
 #endif /* LINUX_FILE_XATTRS */
 
 	print_file_perms(&attr, file_type, ctype, xattr);

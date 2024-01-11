@@ -246,7 +246,7 @@ get_y_or_n(void)
 		int c = fgetc(stdin);
 		if (c == 'y' || c == 'Y' || c == ' ')
 			return (1);
-		 if (c == 'n' || c == 'N' || c == RUBOUT || c == EOF) {
+		if (c == 'n' || c == 'N' || c == RUBOUT || c == EOF) {
 			putchar('\n');
 			return (0);
 		}

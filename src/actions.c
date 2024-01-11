@@ -49,7 +49,7 @@
 static char *
 get_plugin_path(char *action, int *status)
 {
-	size_t action_len = strlen(action);
+	const size_t action_len = strlen(action);
 
 	/* Remove terminating new line char */
 	if (action_len > 0 && action[action_len - 1] == '\n')
@@ -109,7 +109,7 @@ run_action(char *action, char **args)
 	if (!cmd)
 		return exit_status;
 
-	size_t cmd_len = strlen(cmd);
+	const size_t cmd_len = strlen(cmd);
 	args[0] = xnrealloc(args[0], cmd_len + 1, sizeof(char));
 	xstrsncpy(args[0], cmd, cmd_len + 1);
 
@@ -150,11 +150,11 @@ run_action(char *action, char **args)
 
 	if (pid == 0) {
 		/* Child: write-only end of the pipe */
-		int wfd = open(fifo_path, O_WRONLY | O_CLOEXEC);
+		const int wfd = open(fifo_path, O_WRONLY | O_CLOEXEC);
 		if (wfd == -1)
 			_exit(EXIT_FAILURE);
 
-		int ret = launch_execv(args, FOREGROUND, E_NOFLAG);
+		const int ret = launch_execv(args, FOREGROUND, E_NOFLAG);
 		/* RET will be read later by waitpid(3) to get plugin exit status */
 		close(wfd);
 		_exit(ret);
@@ -268,7 +268,7 @@ edit_actions(char *app)
 		return EXIT_FAILURE;
 	}
 
-	time_t mtime_bfr = (time_t)attr.st_mtime;
+	const time_t mtime_bfr = attr.st_mtime;
 
 	int ret = EXIT_SUCCESS;
 
@@ -287,7 +287,7 @@ edit_actions(char *app)
 	/* Get modification time after opening the file */
 	stat(actions_file, &attr);
 
-	if (mtime_bfr == (time_t)attr.st_mtime)
+	if (mtime_bfr == attr.st_mtime)
 		return EXIT_SUCCESS;
 
 	/* If modification times differ, the file was modified after being opened */

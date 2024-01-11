@@ -61,15 +61,16 @@
 
 static char *err_name = (char *)NULL;
 
-/* Expand all environment variables in the string S
- * Returns the expanded string or NULL on error */
+/* Expand all environment variables in the string S.
+ * Returns the expanded string or NULL on error. */
 static char *
 expand_env(char *s)
 {
 	char *p = strchr(s, '$');
-	if (!p) return (char *)NULL;
+	if (!p)
+		return (char *)NULL;
 
-	int buf_size = PATH_MAX;
+	const int buf_size = PATH_MAX;
 	p = xnmalloc((size_t)buf_size, sizeof(char));
 	char *ret = p;
 
@@ -90,8 +91,8 @@ expand_env(char *s)
 			return (char *)NULL;
 		}
 
-		size_t env_len = strlen(env);
-		int rem = buf_size - (int)(p - ret) - 1;
+		const size_t env_len = strlen(env);
+		const int rem = buf_size - (int)(p - ret) - 1;
 		if (rem >= (int)env_len) {
 			memccpy(p, env, 0, (size_t)rem);
 			p += env_len;
@@ -200,7 +201,7 @@ check_app_existence(char **app, char **arg)
 	/* Expand tilde */
 	if (*(*app) == '~' && *(*app + 1) == '/' && *(*app + 2)) {
 		size_t len = user.home_len + strlen(*app);
-		size_t cmd_len = len > 0 ? len - 1 : 0;
+		const size_t cmd_len = len > 0 ? len - 1 : 0;
 		len += *arg ? strlen(*arg) + 1 : 0;
 
 		char *tmp_cmd = xnmalloc(len, sizeof(char));
@@ -289,7 +290,7 @@ retrieve_app(char *line)
 		if (ret)
 			*ret = '\0';
 
-		size_t param_len = (ret && *(ret + 1)) ? strlen(ret + 1) : 0;
+		const size_t param_len = (ret && *(ret + 1)) ? strlen(ret + 1) : 0;
 
 		char *params = (char *)NULL;
 		if (*app == '~' && param_len > 0)
@@ -522,7 +523,7 @@ mime_import(char *file)
 
 	/* Create a list of possible paths for the 'mimeapps.list' file as
 	 * specified by the Freedesktop specification */
-	size_t home_len = strlen(user.home);
+	const size_t home_len = strlen(user.home);
 	char *config_path = (char *)NULL, *local_path = (char *)NULL;
 	config_path = xnmalloc(home_len + 23, sizeof(char));
 	local_path = xnmalloc(home_len + 41, sizeof(char));
@@ -576,7 +577,7 @@ mime_import(char *file)
 				if (*line == '#' || *line == '\n')
 					continue;
 
-				int index = strcntchr(line, '.');
+				const int index = strcntchr(line, '.');
 				if (index != -1)
 					line[index] = '\0';
 
@@ -628,7 +629,7 @@ mime_edit(char **args)
 		}
 	}
 
-	time_t prev = a.st_mtime;
+	const time_t prev = a.st_mtime;
 
 	if (!args[2]) {
 		char *cmd[] = {"mime", mime_file, NULL};
@@ -750,7 +751,7 @@ expand_app_fields(char ***cmd, size_t *n, char *fpath, int *exec_flags)
 			if (!p)
 				continue;
 
-			size_t p_len = strlen(p);
+			const size_t p_len = strlen(p);
 			a[i] = xnrealloc(a[i], p_len + 1, sizeof(char *));
 			xstrsncpy(a[i], p, p_len + 1);
 			free(p);
@@ -784,7 +785,7 @@ run_mime_app(char **app, char **fpath)
 
 	int exec_flags = 0;
 	size_t i = 0;
-	size_t f = expand_app_fields(&cmd, &i, *fpath, &exec_flags);
+	const size_t f = expand_app_fields(&cmd, &i, *fpath, &exec_flags);
 	size_t n = i;
 
 	/* If no %f placeholder was found, append file name */
@@ -795,7 +796,7 @@ run_mime_app(char **app, char **fpath)
 		n++;
 	}
 
-	int ret = launch_execv(cmd, (bg_proc && !open_in_foreground)
+	const int ret = launch_execv(cmd, (bg_proc && !open_in_foreground)
 			? BACKGROUND : FOREGROUND, exec_flags);
 
 	for (i = 0; i < n; i++)
@@ -888,7 +889,7 @@ mime_list_open(char **apps, char *file)
 				continue;
 			}
 			if (*cmd[i] == '%' && cmd[i][1] == 'f') {
-				size_t file_len = strlen(file);
+				const size_t file_len = strlen(file);
 				cmd[i] = xnrealloc(cmd[i], file_len + 1, sizeof(char));
 				xstrsncpy(cmd[i], file, file_len + 1);
 				f = 1;
@@ -1174,7 +1175,7 @@ mime_open_with_tab(char *filename, const char *prefix, const int only_names)
 
 	/* If only one match */
 	if (appsn == 2) {
-		size_t src_len = strlen(apps[1]);
+		const size_t src_len = strlen(apps[1]);
 		apps[0] = xnrealloc(apps[0], src_len + 1, sizeof(char));
 		xstrsncpy(apps[0], apps[1], src_len + 1);
 		free(apps[1]);
@@ -1417,7 +1418,7 @@ mime_open_with(char *filename, char **args)
 
 		tmp++; /* We don't want the '=' char */
 
-		size_t tmp_len = strlen(tmp);
+		const size_t tmp_len = strlen(tmp);
 		app = xnrealloc(app, tmp_len + 1, sizeof(char));
 
 		while (*tmp) {
@@ -1453,7 +1454,7 @@ mime_open_with(char *filename, char **args)
 				 * value */
 				appb = savestring(app, strlen(app));
 				/* app: the expanded value */
-				size_t tlen = strlen(t);
+				const size_t tlen = strlen(t);
 				app = xnrealloc(app, app_len + tlen + 1, sizeof(char));
 				xstrsncpy(app, t, app_len + tlen + 1);
 				free(t);
@@ -1524,7 +1525,7 @@ mime_open_with(char *filename, char **args)
 
 	apps[appsn] = (char *)NULL;
 
-	int ret = mime_list_open(apps, name);
+	const int ret = mime_list_open(apps, name);
 
 	size_t i;
 	for (i = 0; apps[i]; i++)
@@ -1561,7 +1562,7 @@ mime_open_url(char *url)
 		*p = '\0';
 
 	char *cmd[] = {app, url, NULL};
-	int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
+	const int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	free(app);
 
 	if (ret != EXIT_SUCCESS)
@@ -1575,10 +1576,11 @@ import_mime(void)
 {
 	char *suffix = gen_rand_str(RAND_SUFFIX_LEN);
 	char new[PATH_MAX + 1];
-	snprintf(new, sizeof(new), "%s.%s", mime_file, suffix ? suffix : "5i0TM#r3j&");
+	snprintf(new, sizeof(new), "%s.%s", mime_file,
+		suffix ? suffix : "5i0TM#r3j&");
 	free(suffix);
 
-	int mime_defs = mime_import(new);
+	const int mime_defs = mime_import(new);
 	if (mime_defs > 0) {
 		printf(_("%d MIME association(s) imported from the system.\n"
 			"File stored as '%s'\nAdd these new associations to your mimelist "
@@ -1734,7 +1736,7 @@ static int
 run_archiver(char **fpath, char **app)
 {
 	char *cmd[] = {"ad", *fpath, NULL};
-	int exit_status = archiver(cmd, 'd');
+	const int exit_status = archiver(cmd, 'd');
 
 	free(*fpath);
 	free(*app);

@@ -56,7 +56,7 @@ static inline char *
 gen_time(const int c)
 {
 	char *temp = (char *)NULL;
-	time_t rawtime = time(NULL);
+	const time_t rawtime = time(NULL);
 	struct tm tm;
 
 	if (!localtime_r(&rawtime, &tm)) {
@@ -89,8 +89,8 @@ gen_time(const int c)
 static inline char *
 get_dir_basename(const char *_path)
 {
-	char *temp = (char *)NULL,
-		 *ret = (char *)NULL;
+	char *temp = (char *)NULL;
+	char *ret = (char *)NULL;
 
 	/* If not root dir (/), get last path component */
 	if (!(*_path == '/' && !*(_path + 1)))
@@ -183,8 +183,8 @@ gen_workspace(void)
 static inline char *
 gen_exit_status(void)
 {
-	size_t code_len = (size_t)DIGINUM(exit_code);
-	size_t len = code_len + 3 + (MAX_COLOR * 2);
+	const size_t code_len = (size_t)DIGINUM(exit_code);
+	const size_t len = code_len + 3 + (MAX_COLOR * 2);
 
 	char *temp = xnmalloc(len, sizeof(char));
 	snprintf(temp, len, "%s%d\001%s\002",
@@ -211,12 +211,11 @@ static inline char *
 gen_octal(char **line, int *c)
 {
 	char octal_string[4];
-	int n;
 
 	xstrsncpy(octal_string, *line, sizeof(octal_string));
 	octal_string[3] = '\0';
 
-	n = read_octal(octal_string);
+	const int n = read_octal(octal_string);
 	char *temp = xnmalloc(3, sizeof(char));
 
 	if (n == CTLESC || n == CTLNUL) {
@@ -351,7 +350,7 @@ add_string(char **tmp, const int c, char **line, char **res, size_t *len)
 
 	*len += strlen(*tmp);
 
-	size_t l = *len + 2	+ (wrong_cmd ? (MAX_COLOR + 6) : 0);
+	const size_t l = *len + 2	+ (wrong_cmd ? (MAX_COLOR + 6) : 0);
 	if (!*res) {
 		*res = xnmalloc(l + 1, sizeof(char));
 		*(*res) = '\0';
@@ -376,10 +375,10 @@ reset_ifs(const char *value)
 static inline void
 substitute_cmd(char **line, char **res, size_t *len)
 {
-	int tmp = strcntchr(*line, ')');
+	const int tmp = strcntchr(*line, ')');
 	if (tmp == -1) return; /* No ending bracket */
 
-	size_t tmp_len = strlen(*line) + 2;
+	const size_t tmp_len = strlen(*line) + 2;
 	char *tmp_str = xnmalloc(tmp_len, sizeof(char));
 	snprintf(tmp_str, tmp_len, "$%s", *line);
 
@@ -424,6 +423,7 @@ gen_emergency_prompt(void)
 		f = 1;
 		xerror("%s: %s\n", PROGRAM_NAME, EMERGENCY_PROMPT_MSG);
 	}
+
 	char *_prompt = savestring(EMERGENCY_PROMPT, sizeof(EMERGENCY_PROMPT) - 1);
 	return _prompt;
 }
@@ -476,10 +476,9 @@ gen_stats_str(const int flag)
 static inline char *
 gen_notification(const int flag)
 {
-	char *p;
-	size_t len = 32;
+	const size_t len = 32;
 
-	p = xnmalloc(len, sizeof(char));
+	char *p = xnmalloc(len, sizeof(char));
 	*p = '\0';
 
 	switch (flag) {
@@ -531,7 +530,7 @@ gen_nesting_level(const int mode)
 		return p;
 	}
 
-	size_t len = (MAX_COLOR * 2) + 32;
+	const size_t len = (MAX_COLOR * 2) + 32;
 	p = xnmalloc(len, sizeof(char));
 	snprintf(p, len, "(%d)", nesting_level);
 
@@ -685,7 +684,7 @@ ADD_STRING:
 			}
 #endif /* !__HAIKU__ && !__OpenBSD__ && !__ANDROID__ */
 
-			size_t new_len = result_len + 2
+			const size_t new_len = result_len + 2
 				+ (wrong_cmd ? (MAX_COLOR + 6) : 0);
 			result = xnrealloc(result, new_len, sizeof(char));
 			result[result_len] = (char)c;
@@ -729,7 +728,8 @@ check_cwd(void)
 static inline void
 trim_final_slashes(void)
 {
-	size_t path_len = strlen(workspaces[cur_ws].path), i;
+	const size_t path_len = strlen(workspaces[cur_ws].path);
+	size_t i;
 
 	for (i = path_len - 1; workspaces[cur_ws].path[i] && i > 0; i--) {
 		if (workspaces[cur_ws].path[i] != '/')
@@ -776,14 +776,16 @@ run_prompt_cmds(void)
 	if (conf.ext_cmd_ok == 0 || prompt_cmds_n == 0)
 		return;
 
-	int tflags = flags;
+	const int tflags = flags;
 	flags &= ~DELAYED_REFRESH;
 	size_t i;
+
 	for (i = 0; i < prompt_cmds_n; i++) {
 		if (xargs.secure_cmds == 0
 		|| sanitize_cmd(prompt_cmds[i], SNT_PROMPT) == EXIT_SUCCESS)
 			launch_execl(prompt_cmds[i]);
 	}
+
 	flags = tflags;
 }
 
@@ -805,7 +807,7 @@ update_trash_indicator(void)
 
 	trash_files_dir_mtime = a.st_mtime;
 
-	filesn_t n = count_dir(trash_files_dir, NO_CPOP);
+	const filesn_t n = count_dir(trash_files_dir, NO_CPOP);
 	if (n <= 2)
 		trash_n = 0;
 	else
@@ -889,7 +891,7 @@ construct_prompt(const char *decoded_prompt)
 			snprintf(sel_ind, N_IND, "%s*%zu%s", li_c, sel_n, RL_NC);
 	}
 
-	size_t prompt_len = set_prompt_length(strlen(decoded_prompt));
+	const size_t prompt_len = set_prompt_length(strlen(decoded_prompt));
 	char *the_prompt = xnmalloc(prompt_len, sizeof(char));
 
 	if (prompt_notif == 1) {
@@ -1013,7 +1015,7 @@ expand_history(char **input)
 		return EXIT_SUCCESS;
 
 	char *exp_input = (char *)NULL;
-	int ret = history_expand(*input, &exp_input);
+	const int ret = history_expand(*input, &exp_input);
 
 	if (ret == -1) { /* Error in expansion */
 		xerror("%s: %s\n", PROGRAM_NAME, exp_input);
@@ -1217,7 +1219,7 @@ edit_prompts_file(char *app)
 		return EXIT_FAILURE;
 	}
 
-	time_t old_time = a.st_mtime;
+	const time_t old_time = a.st_mtime;
 
 	int ret = EXIT_FAILURE;
 	if (app && *app) {
@@ -1232,16 +1234,23 @@ edit_prompts_file(char *app)
 	if (ret != EXIT_SUCCESS)
 		return ret;
 
-	stat(prompts_file, &a);
+	if (stat(prompts_file, &a) == -1) {
+		xerror("prompt: '%s': %s\n", prompts_file, strerror(errno));
+		return EXIT_FAILURE;
+	}
+
 	if (conf.autols == 1)
 		reload_dirlist();
+
 	if (old_time == a.st_mtime)
 		return EXIT_SUCCESS;
 
 	ret = load_prompts();
 	print_reload_msg(_("File modified. Prompts reloaded\n"));
+
 	if (*cur_prompt_name)
 		set_prompt(cur_prompt_name);
+
 	return ret;
 }
 
@@ -1264,7 +1273,7 @@ prompt_function(char **args)
 		return edit_prompts_file(args[1]);
 
 	if (*args[0] == 'r' && strcmp(args[0], "reload") == 0) {
-		int ret = load_prompts();
+		const int ret = load_prompts();
 		if (ret == EXIT_SUCCESS) {
 			printf(_("%s: Prompts successfully reloaded\n"), PROGRAM_NAME);
 			return EXIT_SUCCESS;

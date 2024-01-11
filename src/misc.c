@@ -198,12 +198,12 @@ __attribute__((__format__(__printf__, 3, 0)))
 int
 err(const int msg_type, const int prompt_flag, const char *format, ...)
 {
-	int saved_errno = errno;
+	const int saved_errno = errno;
 	va_list arglist, tmp_list;
 
 	va_start(arglist, format);
 	va_copy(tmp_list, arglist);
-	int size = vsnprintf((char *)NULL, 0, format, tmp_list);
+	const int size = vsnprintf((char *)NULL, 0, format, tmp_list);
 	va_end(tmp_list);
 
 	if (size < 0) {
@@ -259,7 +259,7 @@ print_reload_msg(const char *msg, ...)
 
 	va_start(arglist, msg);
 	va_copy(tmp_list, arglist);
-	int size = vsnprintf((char *)NULL, 0, msg, tmp_list);
+	const int size = vsnprintf((char *)NULL, 0, msg, tmp_list);
 	va_end(tmp_list);
 
 	if (size < 0) {
@@ -334,7 +334,9 @@ read_inotify(void)
 		return;
 	}
 
-	int ignore_event = 0, refresh = 0;
+	int ignore_event = 0;
+	int refresh = 0;
+
 	for (char *ptr = inotify_buf;
 	ptr + ((struct inotify_event *)ptr)->len < inotify_buf + i;
 	ptr += sizeof(struct inotify_event) + event->len) {
@@ -445,7 +447,7 @@ read_kqueue(void)
 	memset((void *)event_data, '\0', sizeof(struct kevent) * NUM_EVENT_SLOTS);
 
 	int i;
-	int count = kevent(kq, NULL, 0, event_data, 4096, &timeout);
+	const int count = kevent(kq, NULL, 0, event_data, 4096, &timeout);
 
 	for (i = 0; i < count; i++) {
 		if (event_data[i].fflags & KQUEUE_FFLAGS) {
@@ -460,8 +462,7 @@ void
 set_term_title(char *str)
 {
 	int free_tmp = 0;
-	char *tmp = (char *)NULL;
-	tmp = home_tilde(str, &free_tmp);
+	char *tmp = home_tilde(str, &free_tmp);
 
 	printf("\033]2;%s - %s\007", PROGRAM_NAME, tmp ? tmp : str);
 	fflush(stdout);
@@ -528,7 +529,8 @@ static int
 compile_filter(void)
 {
 	if (filter.type == FILTER_FILE_NAME) {
-		int ret = regcomp(&regex_exp, filter.str, REG_NOSUB | REG_EXTENDED);
+		const int ret =
+			regcomp(&regex_exp, filter.str, REG_NOSUB | REG_EXTENDED);
 		if (ret != EXIT_SUCCESS) {
 			xregerror("ft", filter.str, ret, regex_exp, 0);
 			regfree(&regex_exp);
@@ -775,11 +777,11 @@ print_tips(const int all)
 		"Print all tips: 'tips'",
 		NULL};
 
-	size_t tipsn = (sizeof(TIPS) / sizeof(TIPS[0])) - 1;
+	const size_t tipsn = (sizeof(TIPS) / sizeof(TIPS[0])) - 1;
 
 	if (all == 1) {
 		size_t i;
-		int l = DIGINUM(tipsn);
+		const int l = DIGINUM(tipsn);
 		for (i = 0; i < tipsn; i++) {
 			printf("%s%sTIP %*zu%s: %s\n",
 				conf.colorize == 1 ? df_c : "", conf.colorize == 1 ? BOLD : "",
@@ -790,9 +792,9 @@ print_tips(const int all)
 
 #ifndef HAVE_ARC4RANDOM
 	srandom((unsigned int)time(NULL));
-	long tip_num = random() % (int)tipsn;
+	const long tip_num = random() % (int)tipsn;
 #else
-	uint32_t tip_num = arc4random_uniform((uint32_t)tipsn);
+	const uint32_t tip_num = arc4random_uniform((uint32_t)tipsn);
 #endif /* !HAVE_ARC4RANDOM */
 
 	printf("%s%sTIP%s: %s\n", conf.colorize == 1 ? df_c : "",
@@ -846,7 +848,7 @@ get_path_dir(char **dir)
 	char *path_dir = (char *)NULL;
 
 	if (*(*dir) != '/') {
-		size_t len = strlen(workspaces[cur_ws].path) + strlen(*dir) + 2;
+		const size_t len = strlen(workspaces[cur_ws].path) + strlen(*dir) + 2;
 		path_dir = xnmalloc(len, sizeof(char));
 		snprintf(path_dir, len, "%s/%s", workspaces[cur_ws].path, *dir);
 		free(*dir);
@@ -1002,7 +1004,7 @@ new_instance(char *dir, const int sudo)
 		return errno;
 	}
 
-	int ret = check_dir(&deq_dir);
+	const int ret = check_dir(&deq_dir);
 	if (ret != EXIT_SUCCESS) {
 		free(deq_dir); free(self); free(_sudo);
 		return ret;
@@ -1192,7 +1194,8 @@ parse_usrvar_value(const char *str, const char c)
 		tmp++;
 
 	/* Remove trailing spaces, tabs, new line chars, and quotes */
-	size_t tmp_len = strlen(tmp), i;
+	const size_t tmp_len = strlen(tmp);
+	size_t i;
 
 	for (i = tmp_len - 1; tmp[i] && i > 0; i--) {
 		if (tmp[i] != ' ' && tmp[i] != '\t' && tmp[i] != '"' && tmp[i] != '\''
@@ -1220,7 +1223,7 @@ create_usr_var(const char *str)
 		return EXIT_FAILURE;
 
 	*p = '\0';
-	size_t len = (size_t)(p - str);
+	const size_t len = (size_t)(p - str);
 	char *name = xnmalloc(len + 1, sizeof(char));
 	xstrsncpy(name, str, len + 1);
 	*p = '=';
@@ -1356,7 +1359,7 @@ remove_virtual_dir(void)
 		xchmod(stdin_tmp_dir, "0700", 1);
 
 		char *rm_cmd[] = {"rm", "-r", "--", stdin_tmp_dir, NULL};
-		int ret = launch_execv(rm_cmd, FOREGROUND, E_NOFLAG);
+		const int ret = launch_execv(rm_cmd, FOREGROUND, E_NOFLAG);
 		if (ret != EXIT_SUCCESS)
 			exit_code = ret;
 		free(stdin_tmp_dir);
@@ -1888,7 +1891,7 @@ handle_stdin(void)
 
 		suffix = gen_rand_str(RAND_SUFFIX_LEN);
 		char *temp = tmp_dir ? tmp_dir : P_tmpdir;
-		size_t tmp_len = strlen(temp) + 13;
+		const size_t tmp_len = strlen(temp) + 13;
 		stdin_tmp_dir = xnmalloc(tmp_len, sizeof(char));
 		snprintf(stdin_tmp_dir, tmp_len, "%s/vdir.%s", temp,
 			suffix ? suffix : "nTmp0B9&54");
@@ -1932,7 +1935,7 @@ handle_stdin(void)
 			/* Construct source and destiny files */
 
 			/* symlink(3) doesn't like file names ending with slash */
-			size_t slen = strlen(q);
+			const size_t slen = strlen(q);
 			if (slen > 1 && q[slen - 1] == '/')
 				q[slen - 1] = '\0';
 
@@ -2084,7 +2087,7 @@ pin_directory(char *dir)
 	if (pinned_dir)
 		{free(pinned_dir); pinned_dir = (char *)NULL;}
 
-	size_t dir_len = strlen(dir);
+	const size_t dir_len = strlen(dir);
 
 	/* If absolute path */
 	if (*dir == '/') {
@@ -2094,7 +2097,7 @@ pin_directory(char *dir)
 			pinned_dir = xnmalloc(dir_len + 2, sizeof(char));
 			snprintf(pinned_dir, dir_len + 2, "/%s", dir);
 		} else {
-			size_t plen = dir_len + strlen(workspaces[cur_ws].path) + 2;
+			const size_t plen = dir_len + strlen(workspaces[cur_ws].path) + 2;
 			pinned_dir = xnmalloc(plen, sizeof(char));
 			snprintf(pinned_dir, plen, "%s/%s", workspaces[cur_ws].path, dir);
 		}
@@ -2595,7 +2598,7 @@ bonus_function(void)
 		"\"Leave my loneliness unbroken!, quit the bust above my door! Quoth the raven: Nevermore.\" (E. A. Poe)",
 		NULL};
 
-	size_t num = (sizeof(phrases) / sizeof(phrases[0])) - 1;
+	const size_t num = (sizeof(phrases) / sizeof(phrases[0])) - 1;
 #ifndef HAVE_ARC4RANDOM
 	srandom((unsigned int)time(NULL));
 	puts(phrases[random() % (int)num]);

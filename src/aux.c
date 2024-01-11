@@ -49,7 +49,7 @@
 void
 press_any_key_to_continue(const int init_newline)
 {
-	int saved_errno = errno;
+	const int saved_errno = errno;
 	HIDE_CURSOR;
 	fprintf(stderr, _("%sPress any key to continue... "),
 		init_newline == 1 ? "\n" : "");
