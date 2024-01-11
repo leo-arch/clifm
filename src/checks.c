@@ -854,7 +854,7 @@ check_for_alias(char **args)
 void
 truncate_file(char *file, const int max, const int check_dups)
 {
-	if (config_ok == 0 || !file)
+	if (config_ok == 0 || !file || !*file)
 		return;
 
 	/* Create the file, if it doesn't exist */
@@ -885,7 +885,7 @@ truncate_file(char *file, const int max, const int check_dups)
 	int n = 0, c;
 
 	/* Count newline chars to get amount of lines in the file */
-	while ((c = fgetc(fp)) != EOF) {
+	while ((c = fgetc(fp)) != EOF && n < INT_MAX) {
 		if (c == '\n')
 			n++;
 	}
