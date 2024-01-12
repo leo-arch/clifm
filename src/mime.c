@@ -323,18 +323,21 @@ get_app(const char *mime, const char *filename)
 		return (char *)NULL;
 
 	int fd = 0;
-	FILE *defs_fp = open_fread(mime_file, &fd);
-	if (!defs_fp) {
+	FILE *fp = open_fread(mime_file, &fd);
+	if (!fp) {
 		xerror("%s: '%s': %s\n", err_name, mime_file, strerror(errno));
 		return (char *)NULL;
 	}
 
 	size_t line_size = 0;
-	char *line = (char *)NULL, *app = (char *)NULL;
+	char *line = (char *)NULL;
+	char *app = (char *)NULL;
 
 	/* Each line has this form: prefix:pattern=cmd;cmd;cmd... */
-	while (getline(&line, &line_size, defs_fp) > 0) {
-		char *pattern = (char *)NULL, *cmds = (char *)NULL;
+	while (getline(&line, &line_size, fp) > 0) {
+		char *pattern = (char *)NULL;
+		char *cmds = (char *)NULL;
+
 		if (skip_line(line, &pattern, &cmds) == 1)
 			continue;
 		/* PATTERN points now to the beginning of the null terminated pattern,
@@ -350,7 +353,7 @@ get_app(const char *mime, const char *filename)
 	}
 
 	free(line);
-	fclose(defs_fp);
+	fclose(fp);
 	return app;
 }
 
@@ -646,8 +649,7 @@ mime_edit(char **args)
 			return exit_status;
 	}
 
-	stat(mime_file, &a);
-	if (a.st_mtime != prev) {
+	if (stat(mime_file, &a) != -1 && a.st_mtime != prev) {
 		reload_dirlist();
 		print_reload_msg(_(CONFIG_FILE_UPDATED));
 	}
@@ -656,7 +658,7 @@ mime_edit(char **args)
 }
 
 static char *
-get_filename(char *file_path)
+get_basename(char *file_path)
 {
 	char *f = strrchr(file_path, '/');
 	if (f && *(++f))
@@ -665,27 +667,25 @@ get_filename(char *file_path)
 	return (char *)NULL;
 }
 
-/* Get user input for the 'open with' function
- * A is a pointer to an integer storing the item selected by the user
- * NN is the amount of available items */
-static char *
-get_user_input(int *a, const size_t *nn)
+/* Get user input for the 'open with' function.
+ * NUM is a pointer to an integer storing the item selected by the user.
+ * MAX is the amount of available items. */
+static int
+get_user_input(const size_t max)
 {
 	char *input = (char *)NULL;
+
 	while (!input) {
 		input = rl_no_hist(_("Choose an application ('q' to quit): "));
-		if (!input)
-			continue;
-		if (!*input) {
+		if (!input || !*input) {
 			free(input);
 			input = (char *)NULL;
 			continue;
 		}
-		if (*input == 'q' && !*(input + 1)) {
+
+		if (*input == 'q' && !input[1]) {
 			free(input);
-			input = (char *)NULL;
-			*a = -1;
-			break;
+			return (-1);
 		}
 
 		if (!is_number(input)) {
@@ -694,15 +694,18 @@ get_user_input(int *a, const size_t *nn)
 			continue;
 		}
 
-		*a = atoi(input);
-		if (*a <= 0 || *a > (int)*nn) {
+		int num = atoi(input);
+		if (num <= 0 || num > (int)max) {
 			free(input);
 			input = (char *)NULL;
 			continue;
 		}
+
+		free(input);
+		return num;
 	}
 
-	return input;
+	return (-1);
 }
 
 static void
@@ -817,57 +820,25 @@ mime_list_open(char **apps, char *file)
 	if (!apps || !file)
 		return EXIT_FAILURE;
 
-	char **n = (char **)NULL;
-	size_t nn = 0;
+	size_t i;
+	for (i = 0; apps[i]; i++);
+	const int pad = DIGINUM(i + 1);
 
-	size_t i, j = 0;
-	for (i = 0; apps[i]; i++) {
-		int rep = 0;
+	for (i = 0; apps[i]; i++)
+		printf("%s%*zu%s %s\n", el_c, pad, i + 1, df_c, apps[i]);
 
-		/* Do not list duplicated entries */
-		for (j = 0; j < i; j++) {
-			if (*apps[i] == *apps[j] && strcmp(apps[i], apps[j]) == 0) {
-				rep = 1;
-				break;
-			}
-		}
-
-		if (rep == 1)
-			continue;
-
-		n = xnrealloc(n, nn + 1, sizeof(char *));
-		n[nn] = apps[i];
-		nn++;
+	int n = get_user_input(i);
+	if (n == -1) {
+		if (conf.autols == 1)
+			reload_dirlist();
+		return EXIT_SUCCESS;
 	}
 
-	if (!n)
+	char *app = apps[n - 1];
+	if (!app)
 		return EXIT_FAILURE;
 
-	int pad = DIGINUM(nn + 1);
-	for (i = 0; i < nn; i++)
-		printf("%s%*zu%s %s\n", el_c, pad, i + 1, df_c, n[i]);
-
-	int a = 0;
-	char *input = get_user_input(&a, &nn);
-
 	int ret = EXIT_FAILURE;
-
-	if (!input || a <= 0) {
-		free(input);
-		free(n);
-		if (!input && a == -1 && conf.autols == 1) {
-			reload_dirlist();
-			return 0;
-		}
-		return ret;
-	}
-
-	char *app = n[a - 1];
-	if (!app) {
-		free(input);
-		free(n);
-		return ret;
-	}
 
 	if (strchr(app, ' ')) {
 		size_t f = 0;
@@ -940,92 +911,40 @@ mime_list_open(char **apps, char *file)
 		}
 	}
 
-/*	bg_proc = 0; */
-
-	free(input);
-	free(n);
-
 	return ret;
 }
 
-/* Return available applications, taken from the mimelist file, to open
- * the file FILENAME, where PREFIX is the partially entered word.
- * If ONLY_NAMES is set to 1 (which is the case when completing opening
- * applications for the 'edit' subcommand), only command names are returned
- * (not parameters). */
-char **
-mime_open_with_tab(char *filename, const char *prefix, const int only_names)
+static int
+is_dup_entry(const char *prefix, char **apps, const char *app)
 {
-	if (!filename || !mime_file)
-		return (char **)NULL;
+	size_t i;
 
-	err_name = (xargs.open == 1 || xargs.preview == 1) ? PROGRAM_NAME : "mime";
-
-	char *name = (char *)NULL,
-		 *deq_file = (char *)NULL,
-		 *mime = (char *)NULL,
-		 *file_name = (char *)NULL,
-		 **apps = (char **)NULL;
-
-	if (*filename == '~') {
-		char *ename = tilde_expand(filename);
-		if (!ename)
-			return (char **)NULL;
-		name = ename;
-	} else {
-		if (*filename == '\'' || *filename == '"') {
-			char *tmp_name = savestring(filename + 1, strlen(filename + 1));
-			name = remove_quotes(tmp_name);
-		}
+	for (i = prefix ? 1 : 0; apps && apps[i]; i++) {
+		if (*app == *apps[i] && strcmp(app, apps[i]) == 0)
+			return 1;
 	}
 
-	if (strchr(name ? name : filename, '\\')) {
-		deq_file = unescape_str(name ? name : filename, 0);
-		if (!deq_file)
-			goto FAIL;
-		free(name);
-		name = realpath(deq_file, NULL);
-		free(deq_file);
-	}
+	return 0;
+}
 
-	if (!name) {
-		name = realpath(filename, NULL);
-		if (!name)
-			goto FAIL;
-	}
-
-#ifndef _NO_MAGIC
-	mime = xmagic(name, MIME_TYPE);
-#else
-	mime = get_mime(name);
-#endif /* !_NO_MAGIC */
-	if (!mime)
-		goto FAIL;
-
-	file_name = get_filename(name);
-
-	FILE *defs_fp = fopen(mime_file, "r");
-	if (!defs_fp)
-		goto FAIL;
-
-	size_t appsn = 1;
-
-	/* This is the first element in the matches array, which contains
-	 * the already matched string. */
-	apps = xnmalloc(appsn + 1, sizeof(char *));
-	if (prefix) {
-		apps[0] = savestring(prefix, strlen(prefix));
-	} else {
-		apps[0] = xnmalloc(1, sizeof(char));
-		*apps[0] = '\0';
-	}
-
-	size_t prefix_len = prefix ? strlen(prefix) : 0;
-
+/* Return the list of opening apps for FILE_NAME, whose MIME type is MIME,
+ * reading the file whose file pointer is FP.
+ * If PREFIX is not NULL, we're TAB completing.
+ * If ONLY_NAMES is 1, we're TAB completing for 'edit' subcommands. */
+static char **
+get_apps_from_file(FILE *fp, char *file_name, const char *mime,
+	const char *prefix, const int only_names)
+{
 	size_t line_size = 0;
-	char *line = (char *)NULL, *app = (char *)NULL;
+	char *line = (char *)NULL;
+	char *app = (char *)NULL;
+	char **apps = (char **)NULL;
+	size_t appsn = prefix != NULL ? 1 : 0;
+	const size_t prefix_len = prefix ? strlen(prefix) : 0;
 
-	while (getline(&line, &line_size, defs_fp) > 0) {
+	char *base_name = get_basename(file_name);
+
+	while (getline(&line, &line_size, fp) > 0) {
 		if (*line == '#' || *line == '[' || *line == '\n')
 			continue;
 
@@ -1039,33 +958,19 @@ mime_open_with_tab(char *filename, const char *prefix, const int only_names)
 
 		/* Truncate line in '=' to get only the ext/mimetype pattern/string */
 		*tmp = '\0';
-		regex_t regex;
 
-		int found = 0;
-		if (file_name && (*p == 'N' || *p == 'E') && *(p + 1) == ':') {
-			if (regcomp(&regex, p + 2, REG_NOSUB | REG_EXTENDED) == 0
-			&& regexec(&regex, file_name, 0, NULL, 0) == 0)
-				found = 1;
-		} else if (regcomp(&regex, p, REG_NOSUB | REG_EXTENDED) == 0
-		&& regexec(&regex, mime, 0, NULL, 0) == 0) {
-			found = 1;
-		}
-
-		regfree(&regex);
-
-		if (found == 0)
+		if (test_pattern(p, base_name, mime) != 0)
 			continue;
 
 		tmp++; /* We don't want the '=' char */
 
-		size_t tmp_len = strlen(tmp);
-		app = xnrealloc(app, tmp_len + 1, sizeof(char));
+		app = xnrealloc(app, strlen(tmp) + 1, sizeof(char));
 
 		while (*tmp) {
 			size_t app_len = 0;
-			/* Split the applications line into substrings, if any. */
-			while (*tmp != '\0' && *tmp != ';'
-			&& *tmp != '\n' && *tmp != '\'' && *tmp != '"') {
+			/* Split the appplications line into substrings, if any */
+			while (*tmp != '\0' && *tmp != ';' && *tmp != '\n' && *tmp != '\''
+			&& *tmp != '"') {
 				app[app_len] = *tmp;
 				app_len++;
 				tmp++;
@@ -1079,41 +984,33 @@ mime_open_with_tab(char *filename, const char *prefix, const int only_names)
 				continue;
 			}
 
-			if (prefix && strncmp(prefix, app, prefix_len) != 0)
-				continue;
-
 			app[app_len] = '\0';
 
+			if (prefix_len > 0 && strncmp(prefix, app, prefix_len) != 0)
+				continue;
+
 			/* Do not list duplicated entries */
-			size_t i, dup = 0;
-			for (i = 0; i < appsn; i++) {
-				if (*app == *apps[i] && strcmp(app, apps[i]) == 0) {
-					dup = 1;
-					break;
-				}
-			}
-			if (dup == 1)
+			if (is_dup_entry(prefix, apps, app) == 1)
 				continue;
 
 			/* Check each application existence */
 			char *file_path = (char *)NULL;
 
 			/* Expand environment variables */
-			char *app_env = (char *)NULL;
+			char *appb = (char *)NULL;
 			if (strchr(app, '$')) {
 				char *t = expand_env(app);
-				if (t) {
-					/* app_env: A copy of the original string: let's display the
-					 * env var name itself instead of its expanded value. */
-					app_env = savestring(app, strlen(app));
-					/* app: the expanded value */
-					size_t tlen = strlen(t);
-					app = xnrealloc(app, app_len + tlen + 1, sizeof(char));
-					xstrsncpy(app, t, app_len + tlen + 1);
-					free(t);
-				} else {
+				if (!t)
 					continue;
-				}
+				/* appb: A copy of the original string: let's display
+				 * the env var name itself instead of its expanded
+				 * value. */
+				appb = savestring(app, strlen(app));
+				/* app: the expanded value. */
+				const size_t tlen = strlen(t);
+				app = xnrealloc(app, app_len + tlen + 1, sizeof(char));
+				xstrsncpy(app, t, app_len + tlen + 1);
+				free(t);
 			}
 
 			/* If app contains spaces, the command to check is
@@ -1124,27 +1021,26 @@ mime_open_with_tab(char *filename, const char *prefix, const int only_names)
 
 			if (*app == '~') {
 				file_path = tilde_expand(app);
-				if (access(file_path, X_OK) != 0) {
+				if (file_path && access(file_path, X_OK) != 0) {
 					free(file_path);
 					file_path = (char *)NULL;
 				}
 			}
+
 			/* Do not allow APP to be plain "clifm", since
 			 * nested executions of clifm are not allowed. */
 			else if (*app == PROGRAM_NAME[0] && strcmp(app, PROGRAM_NAME) == 0) {
 				;
 			} else if (*app == '/') {
-				if (access(app, X_OK) == 0)
+				if (access(app, X_OK) == 0) {
 					file_path = app;
-			/* 'ad' is an internal command, no need to check it. */
-			} else if (*app == 'a' && app[1] == 'd' && !app[2]){
+				}
+			} else if (*app == 'a' && app[1] == 'd' && !app[2]) {
 				file_path = savestring("ad", 2);
 			} else {
 				file_path = get_cmd_path(app);
 			}
 
-			/* We are completing the 'edit' subcommand. Return command
-			 * names only (not parameters). */
 			if (ret && only_names == 0)
 				*ret = ' ';
 
@@ -1156,22 +1052,122 @@ mime_open_with_tab(char *filename, const char *prefix, const int only_names)
 				free(file_path);
 				file_path = (char *)NULL;
 			}
-
 			apps = xnrealloc(apps, appsn + 2, sizeof(char *));
-			/* app_env is not NULL if we have an environment variable */
-			if (app_env) {
-				apps[appsn] = savestring(app_env, strlen(app_env));
-				free(app_env);
+
+			/* appb is not NULL if we have an environment variable. */
+			if (appb) {
+				apps[appsn] = savestring(appb, strlen(appb));
+				free(appb);
 			} else {
 				apps[appsn] = savestring(app, strlen(app));
 			}
 
 			appsn++;
+			apps[appsn] = (char *)NULL;
+
 			tmp++;
 		}
 	}
 
-	apps[appsn] = (char *)NULL;
+	free(line);
+	free(app);
+
+	return apps;
+}
+
+static char *
+construct_filename(char *filename)
+{
+	char *name = (char *)NULL;
+
+	if (*filename == '~') {
+		char *tmp = tilde_expand(filename);
+		if (!tmp)
+			return (char *)NULL;
+		name = tmp;
+	} else {
+		if (*filename == '\'' || *filename == '"') {
+			char *tmp = savestring(filename + 1, strlen(filename + 1));
+			name = remove_quotes(tmp);
+		}
+	}
+
+	if (strchr(name ? name : filename, '\\')) {
+		char *deq_file = unescape_str(name ? name : filename, 0);
+		if (!deq_file) {
+			free(name);
+			return (char *)NULL;
+		}
+
+		free(name);
+		name = realpath(deq_file, NULL);
+		free(deq_file);
+	}
+
+	if (!name) {
+		name = realpath(filename, NULL);
+		if (!name)
+			return (char *)NULL;
+	}
+
+	return name;
+}
+
+/* Return available applications, taken from the mimelist file, to open
+ * the file FILENAME, where PREFIX is the partially entered word.
+ * If ONLY_NAMES is set to 1 (which is the case when completing opening
+ * applications for the 'edit' subcommand), only command names are returned
+ * (not parameters). */
+char **
+mime_open_with_tab(char *filename, const char *prefix, const int only_names)
+{
+	if (!filename || !mime_file)
+		return (char **)NULL;
+
+	char *name = construct_filename(filename);
+	if (!name)
+		return (char **)NULL;
+
+#ifndef _NO_MAGIC
+	char *mime = xmagic(name, MIME_TYPE);
+#else
+	char *mime = get_mime(name);
+#endif /* !_NO_MAGIC */
+	if (!mime) {
+		free(name);
+		return (char **)NULL;
+	}
+
+	FILE *fp = fopen(mime_file, "r");
+	if (!fp) {
+		free(name);
+		free(mime);
+		return (char **)NULL;
+	}
+
+	char **apps = get_apps_from_file(fp, name, mime,
+		prefix ? prefix : "", only_names);
+
+	fclose(fp);
+	free(mime);
+	free(name);
+
+	/* The first element in the matches array must contains the
+	 * already matched string. */
+	if (!apps) {
+		apps = xnmalloc(2, sizeof(char *));
+		apps[1] = (char *)NULL;
+	}
+
+	if (prefix) {
+		apps[0] = savestring(prefix, strlen(prefix));
+	} else {
+		apps[0] = xnmalloc(1, sizeof(char));
+		*apps[0] = '\0';
+	}
+
+	size_t appsn;
+	for (appsn = 0; apps[appsn]; appsn++);
 
 	/* If only one match */
 	if (appsn == 2) {
@@ -1182,20 +1178,7 @@ mime_open_with_tab(char *filename, const char *prefix, const int only_names)
 		apps[1] = (char *)NULL;
 	}
 
-	free(line);
-	fclose(defs_fp);
-
-	free(app);
-	free(mime);
-	free(name);
-
 	return apps;
-
-FAIL:
-	free(mime);
-	free(name);
-
-	return (char **)NULL;
 }
 
 static int
@@ -1279,7 +1262,8 @@ run_cmd_plus_args(char **args, char *name)
 	int exec_flags = E_NOFLAG;
 	append_params(args, name, &cmd, &exec_flags);
 
-	int ret = launch_execv(cmd, bg_proc ? BACKGROUND : FOREGROUND, exec_flags);
+	const int ret =
+		launch_execv(cmd, bg_proc ? BACKGROUND : FOREGROUND, exec_flags);
 
 	for (i = 0; cmd[i]; i++)
 		free(cmd[i]);
@@ -1307,7 +1291,7 @@ join_and_run(char **args, char *name)
 	if (!ss)
 		return EXIT_FAILURE;
 
-	int ret = run_cmd_plus_args(ss, name);
+	const int ret = run_cmd_plus_args(ss, name);
 
 	size_t i;
 	for (i = 0; ss[i]; i++)
@@ -1318,49 +1302,29 @@ join_and_run(char **args, char *name)
 }
 
 /* Display available opening applications for FILENAME, get user input,
- * and open the file */
+ * and open the file. */
 int
 mime_open_with(char *filename, char **args)
 {
 	if (!filename || !mime_file)
 		return EXIT_FAILURE;
 
-	err_name = (xargs.open == 1 || xargs.preview == 1) ? PROGRAM_NAME : "mime";
+	char *name = normalize_path(filename, strlen(filename));
+	if (!name)
+		return EXIT_FAILURE;
 
-	char *name = (char *)NULL,
-		 *deq_file = (char *)NULL,
-		 *mime = (char *)NULL,
-		 *file_name = (char *)NULL,
-		 **apps = (char **)NULL;
-
-	size_t appsn = 0;
-
-	if (strchr(filename, '\\')) {
-		deq_file = unescape_str(filename, 0);
-		name = realpath(deq_file, NULL);
-		free(deq_file);
-		deq_file = (char *)NULL;
-	}
-
-	if ((name && *name == '~') || *filename == '~') {
-		char *ename = tilde_expand(name ? name : filename);
-		if (!ename)
-			goto FAIL;
+	struct stat a;
+	if (lstat(name, &a) == -1) {
+		xerror("open: '%s': %s\n", filename, strerror(errno));
 		free(name);
-		name = ename;
-	}
-
-	if (!name) {
-		name = realpath(filename, NULL);
-		if (!name)
-			return EXIT_FAILURE;
+		return errno;
 	}
 
 	/* ow FILE APP [ARGS]
 	 * We already have the opening app. Just join the app, option
 	 * parameters, and file name, and execute the command */
 	if (args && args[0]) {
-		int ret = join_and_run(args, name);
+		const int ret = join_and_run(args, name);
 		free(name);
 		return ret;
 	}
@@ -1368,162 +1332,26 @@ mime_open_with(char *filename, char **args)
 	/* Find out the appropriate opening application via either mime type
 	 * or file name */
 #ifndef _NO_MAGIC
-	mime = xmagic(name, MIME_TYPE);
+	char *mime = xmagic(name, MIME_TYPE);
 #else
-	mime = get_mime(name);
+	char *mime = get_mime(name);
 #endif /* !_NO_MAGIC */
 	if (!mime)
 		goto FAIL;
 
-	file_name = get_filename(name);
-
-	FILE *defs_fp = fopen(mime_file, "r");
-	if (!defs_fp)
+	FILE *fp = fopen(mime_file, "r");
+	if (!fp)
 		goto FAIL;
 
-	size_t line_size = 0;
-	char *line = (char *)NULL, *app = (char *)NULL;
+	char **apps = get_apps_from_file(fp, name, mime, NULL, 0);
 
-	while (getline(&line, &line_size, defs_fp) > 0) {
-		if (*line == '#' || *line == '[' || *line == '\n')
-			continue;
-
-		char *p = skip_line_prefix(line);
-		if (!p)
-			continue;
-
-		char *tmp = strchr(p, '=');
-		if (!tmp || !*(tmp + 1))
-			continue;
-
-		/* Truncate line in '=' to get only the ext/mimetype pattern/string */
-		*tmp = '\0';
-		regex_t regex;
-
-		int found = 0;
-		if (file_name && (*p == 'N' || *p == 'E') && *(p + 1) == ':') {
-			if (regcomp(&regex, p + 2, REG_NOSUB | REG_EXTENDED) == 0
-			&& regexec(&regex, file_name, 0, NULL, 0) == 0)
-				found = 1;
-		} else {
-			if (regcomp(&regex, p, REG_NOSUB | REG_EXTENDED) == 0
-			&& regexec(&regex, mime, 0, NULL, 0) == 0)
-				found = 1;
-		}
-
-		regfree(&regex);
-
-		if (!found)
-			continue;
-
-		tmp++; /* We don't want the '=' char */
-
-		const size_t tmp_len = strlen(tmp);
-		app = xnrealloc(app, tmp_len + 1, sizeof(char));
-
-		while (*tmp) {
-			size_t app_len = 0;
-			/* Split the appplications line into substrings, if any */
-			while (*tmp != '\0' && *tmp != ';' && *tmp != '\n' && *tmp != '\''
-			&& *tmp != '"') {
-				app[app_len] = *tmp;
-				app_len++;
-				tmp++;
-			}
-
-			while (*tmp == ' ') /* Remove leading spaces */
-				tmp++;
-
-			if (app_len == 0) {
-				tmp++;
-				continue;
-			}
-
-			app[app_len] = '\0';
-			/* Check each application existence */
-			char *file_path = (char *)NULL;
-
-			/* Expand environment variables */
-			char *appb = (char *)NULL;
-			if (strchr(app, '$')) {
-				char *t = expand_env(app);
-				if (!t)
-					continue;
-				/* appb: A copy of the original string: let's display
-				 * the env var name itself instead of its expanded
-				 * value */
-				appb = savestring(app, strlen(app));
-				/* app: the expanded value */
-				const size_t tlen = strlen(t);
-				app = xnrealloc(app, app_len + tlen + 1, sizeof(char));
-				xstrsncpy(app, t, app_len + tlen + 1);
-				free(t);
-			}
-
-			/* If app contains spaces, the command to check is
-			 * the string before the first space */
-			char *ret = strchr(app, ' ');
-			if (ret)
-				*ret = '\0';
-
-			if (*app == '~') {
-				file_path = tilde_expand(app);
-				if (file_path && access(file_path, X_OK) != 0) {
-					free(file_path);
-					file_path = (char *)NULL;
-				}
-			}
-			/* Do not allow APP to be plain "clifm", since
-			 * nested executions of clifm are not allowed */
-			else if (*app == PROGRAM_NAME[0] && strcmp(app, PROGRAM_NAME) == 0) {
-				;
-			} else if (*app == '/') {
-				if (access(app, X_OK) == 0) {
-					file_path = app;
-				}
-			} else if (*app == 'a' && app[1] == 'd' && !app[2]) {
-				file_path = savestring("ad", 2);
-			} else {
-				file_path = get_cmd_path(app);
-			}
-
-			if (ret)
-				*ret = ' ';
-
-			if (!file_path)
-				continue;
-
-			/* If the app exists, store it into the APPS array */
-			if (*app != '/') {
-				free(file_path);
-				file_path = (char *)NULL;
-			}
-			apps = xnrealloc(apps, appsn + 2, sizeof(char *));
-			/* appb is not NULL if we have an environment variable */
-			if (appb) {
-				apps[appsn] = savestring(appb, strlen(appb));
-				free(appb);
-			} else {
-				apps[appsn] = savestring(app, strlen(app));
-			}
-
-			appsn++;
-			tmp++;
-		}
-	}
-
-	free(line);
-	fclose(defs_fp);
-
-	free(app);
+	fclose(fp);
 	free(mime);
 
 	if (!apps) {
 		free(name);
 		return EXIT_FAILURE;
 	}
-
-	apps[appsn] = (char *)NULL;
 
 	const int ret = mime_list_open(apps, name);
 
@@ -1821,7 +1649,7 @@ mime_open(char **args)
 	if (!mime)
 		return print_error_no_mime(&file_path);
 
-	char *filename = get_filename(file_path);
+	char *filename = get_basename(file_path);
 
 	if (info)
 		print_info_name_mime(filename, mime);

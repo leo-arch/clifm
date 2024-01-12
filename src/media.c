@@ -114,7 +114,7 @@ get_block_devices(void)
 		}
 
 		/* Get only partition names, normally ending with a number */
-		size_t blen = strlen(name);
+		const size_t blen = strlen(name);
 		if (blen > 0 && (name[blen - 1] < '1' || name[blen - 1] > '9')) {
 			free(blockdev[i]);
 			continue;
@@ -150,7 +150,7 @@ unmount_dev(const size_t i, const int n)
 	int exit_status = EXIT_SUCCESS;
 
 	/* Get out of mountpoint before unmounting */
-	size_t mlen = strlen(mnt);
+	const size_t mlen = strlen(mnt);
 	if (strncmp(mnt, workspaces[cur_ws].path, mlen) == 0) {
 		char *cmd[] = {"b", NULL};
 		if (back_function(cmd) == EXIT_FAILURE)
@@ -172,9 +172,9 @@ unmount_dev(const size_t i, const int n)
 static char *
 get_dev_label(void)
 {
-	size_t n = mp_n;
+	const size_t n = mp_n;
 	struct dirent **labels = (struct dirent **)NULL;
-	int ln = scandir(DISK_LABELS_PATH, &labels, NULL, alphasort);
+	const int ln = scandir(DISK_LABELS_PATH, &labels, NULL, alphasort);
 	if (ln == - 1)
 		return (char *)NULL;
 
@@ -187,7 +187,7 @@ get_dev_label(void)
 			continue;
 		}
 
-		char *name = labels[i]->d_name;
+		const char *name = labels[i]->d_name;
 		char lpath[PATH_MAX + 1];
 		snprintf(lpath, sizeof(lpath), "%s/%s", DISK_LABELS_PATH, name);
 		char *rpath = realpath(lpath, NULL);
@@ -196,7 +196,7 @@ get_dev_label(void)
 			continue;
 		}
 
-		int ret = strcmp(rpath, media[n].dev);
+		const int ret = strcmp(rpath, media[n].dev);
 		free(rpath);
 		if (ret == 0) {
 			/* Device label is encoded using hex. Let's decode it */
@@ -221,7 +221,7 @@ static void
 list_unmounted_devs(void)
 {
 	int i;
-	size_t mp_n_bk = mp_n;
+	const size_t mp_n_bk = mp_n;
 	char **unm_devs = get_block_devices();
 	if (!unm_devs)
 		return;
@@ -489,7 +489,7 @@ get_mnt_input(const int mode, int *info)
 			++p;
 		}
 
-		int atoi_num = atoi(p);
+		const int atoi_num = atoi(p);
 		if (atoi_num <= 0 || atoi_num > (int)mp_n) {
 			xerror("%s: %s: Invalid ELN\n", PROGRAM_NAME, input);
 			free(input);
@@ -507,7 +507,7 @@ get_mnt_input(const int mode, int *info)
 static int
 print_mnt_info(const int n)
 {
-	int exit_status = print_dev_info(n);
+	const int exit_status = print_dev_info(n);
 
 	if (exit_status == EXIT_SUCCESS)
 		press_any_key_to_continue(1);
@@ -538,7 +538,7 @@ xgetmntinfo_sun(void)
 		if (stat(mp, &a) == -1 || !S_ISDIR(a.st_mode))
 			continue;
 
-		int perm = check_file_access(a.st_mode, a.st_uid, a.st_gid);
+		const int perm = check_file_access(a.st_mode, a.st_uid, a.st_gid);
 		printf("%s%zu%s %s%s%s [%s]\n", el_c, n + 1, df_c,
 			perm == 1 ? di_c : nd_c, mp, df_c, ent.mnt_special);
 
@@ -602,7 +602,7 @@ media_menu(const int mode)
 		return EXIT_FAILURE;
 	}
 
-	size_t mp_n_bk = mp_n;
+	const size_t mp_n_bk = mp_n;
 
 	if (mode == MEDIA_MOUNT)
 		list_unmounted_devs();
@@ -638,7 +638,7 @@ media_menu(const int mode)
 
 	putchar('\n');
 	int info = 0;
-	int n = get_mnt_input(mode, &info);
+	const int n = get_mnt_input(mode, &info);
 
 	int exit_status = EXIT_SUCCESS;
 	if (n == -1)

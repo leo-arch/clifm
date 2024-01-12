@@ -395,7 +395,7 @@ xmemrchr(const void *s, const int c, size_t n)
 }
 
 /* Canonicalize/normalize the path SRC without resolving symlinks.
- * SRC is deescaped if necessary.
+ * SRC is unescaped if necessary.
  * ~/./.. are resolved.
  * The resolved path is returned and must be free'd by the caller. */
 char *
