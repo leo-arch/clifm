@@ -4203,7 +4203,7 @@ FIRST_WORD_COMP:
 
 	/* #### OPEN WITH #### */
 	if (rl_end > 4 && *lb == 'o' && lb[1] == 'w' && lb[2] == ' '
-	&& lb[3] && lb[3] != ' ')
+	&& lb[3] && lb[3] != ' ' && words_n >= 3)
 		return complete_open_with((char *)text);
 #endif /* _NO_LIRA */
 
