@@ -930,7 +930,8 @@ is_dup_entry(const char *prefix, char **apps, const char *app)
 /* Return the list of opening apps for FILE_NAME, whose MIME type is MIME,
  * reading the file whose file pointer is FP.
  * If PREFIX is not NULL, we're TAB completing.
- * If ONLY_NAMES is 1, we're TAB completing for 'edit' subcommands. */
+ * If ONLY_NAMES is 1, we're TAB completing for 'edit' subcommands (in which
+ * case we want only command names, not parameters). */
 static char **
 get_apps_from_file(FILE *fp, char *file_name, const char *mime,
 	const char *prefix, const int only_names)
@@ -1113,7 +1114,8 @@ construct_filename(char *filename)
 	return name;
 }
 
-/* Return available applications, taken from the mimelist file, to open
+/* "ow FILENAME <TAB>" or "CMD edit <TAB>"
+ * Return available applications, taken from the mimelist file, to open
  * the file FILENAME, where PREFIX is the partially entered word.
  * If ONLY_NAMES is set to 1 (which is the case when completing opening
  * applications for the 'edit' subcommand), only command names are returned
@@ -1131,6 +1133,7 @@ mime_open_with_tab(char *filename, const char *prefix, const int only_names)
 #ifndef _NO_MAGIC
 	char *mime = xmagic(name, MIME_TYPE);
 #else
+	err_name = "open";
 	char *mime = get_mime(name);
 #endif /* !_NO_MAGIC */
 	if (!mime) {
@@ -1145,6 +1148,8 @@ mime_open_with_tab(char *filename, const char *prefix, const int only_names)
 		return (char **)NULL;
 	}
 
+	/* Do not let PREFIX be NULL, so that get_apps_from_file() knows
+	 * we're TAB completing. */
 	char **apps = get_apps_from_file(fp, name, mime,
 		prefix ? prefix : "", only_names);
 
@@ -1200,8 +1205,10 @@ run_cmd_noargs(char *arg, char *name)
 	if (ret == EXIT_SUCCESS)
 		return EXIT_SUCCESS;
 
-	xerror("%s: %s: %s\n", err_name, arg, strerror(ret));
-	return EXIT_FAILURE;
+	xerror("%s: %s: %s\n", err_name, arg,
+		ret == EXEC_NOTFOUND ? NOTFOUND_MSG : strerror(ret));
+
+	return ret;
 }
 
 static void
@@ -1269,7 +1276,7 @@ run_cmd_plus_args(char **args, char *name)
 		free(cmd[i]);
 	free(cmd);
 
-	return ret == EXIT_SUCCESS ? ret : EXIT_FAILURE;
+	return ret;
 }
 
 static int
@@ -1301,7 +1308,8 @@ join_and_run(char **args, char *name)
 	return ret;
 }
 
-/* Display available opening applications for FILENAME, get user input,
+/* "ow" command (open-with).
+ * Display available opening applications for FILENAME, get user input,
  * and open the file. */
 int
 mime_open_with(char *filename, char **args)
@@ -1309,20 +1317,22 @@ mime_open_with(char *filename, char **args)
 	if (!filename || !mime_file)
 		return EXIT_FAILURE;
 
+	err_name = "open";
+
 	char *name = normalize_path(filename, strlen(filename));
 	if (!name)
 		return EXIT_FAILURE;
 
 	struct stat a;
 	if (lstat(name, &a) == -1) {
-		xerror("open: '%s': %s\n", filename, strerror(errno));
+		xerror("%s: '%s': %s\n", err_name, filename, strerror(errno));
 		free(name);
 		return errno;
 	}
 
 	/* ow FILE APP [ARGS]
 	 * We already have the opening app. Just join the app, option
-	 * parameters, and file name, and execute the command */
+	 * parameters, and file name, and execute the command. */
 	if (args && args[0]) {
 		const int ret = join_and_run(args, name);
 		free(name);
@@ -1330,7 +1340,7 @@ mime_open_with(char *filename, char **args)
 	}
 
 	/* Find out the appropriate opening application via either mime type
-	 * or file name */
+	 * or file name. */
 #ifndef _NO_MAGIC
 	char *mime = xmagic(name, MIME_TYPE);
 #else
@@ -1372,17 +1382,18 @@ FAIL:
 }
 
 /* Open URL using the application associated to text/html MIME-type in
- * the mimelist file. Returns zero if success and 1 on error */
+ * the mimelist file. Returns zero on success and >0 on error.
+ * This function is only executed via --open or --preview. */
 int
 mime_open_url(char *url)
 {
 	if (!url || !*url)
 		return EXIT_FAILURE;
 
-	err_name = (xargs.open == 1 || xargs.preview == 1) ? PROGRAM_NAME : "mime";
+	err_name = (xargs.open == 1 || xargs.preview == 1) ? PROGRAM_NAME : "open";
 
 	char *app = get_app("text/html", 0);
-	if (!app)
+	if (!app) /* The error message may be printed by get_app() or not. Fix. */
 		return EXIT_FAILURE;
 
 	char *p = strchr(app, ' ');
@@ -1393,10 +1404,7 @@ mime_open_url(char *url)
 	const int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	free(app);
 
-	if (ret != EXIT_SUCCESS)
-		return EXIT_FAILURE;
-
-	return EXIT_SUCCESS;
+	return ret;
 }
 
 static int
@@ -1615,7 +1623,8 @@ mime_open(char **args)
 	if (*args[1] == 'e' && strcmp(args[1], "edit") == 0)
 		return mime_edit(args);
 
-	char *file_path = (char *)NULL, *deq_file = (char *)NULL;
+	char *file_path = (char *)NULL;
+	char *deq_file = (char *)NULL;
 	int info = 0, file_index = 0;
 
 	if (*args[1] == 'i' && strcmp(args[1], "info") == 0) {
