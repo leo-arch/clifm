@@ -799,7 +799,7 @@ change_to_path(char *new_path, const int cd_flag)
 {
 	if (!new_path || !*new_path) {
 		xerror("%s\n", _("cd: Path is NULL or empty"));
-		return ENOENT;
+		return EINVAL;
 	}
 
 	if (strchr(new_path, '\\')) {

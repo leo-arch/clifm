@@ -400,11 +400,11 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 
 	struct stat attr;
 	fstat(fd, &attr);
-	time_t mtime_bfr = (time_t)attr.st_mtime;
+	const time_t mtime_bfr = (time_t)attr.st_mtime;
 
 	/* Open the temp file */
 	open_in_foreground = 1;
-	int exit_status = open_file(f);
+	const int exit_status = open_file(f);
 	open_in_foreground = 0;
 	if (exit_status != EXIT_SUCCESS) {
 		xerror("bleach: '%s': %s\n", f, strerror(errno));

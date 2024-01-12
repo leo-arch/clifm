@@ -811,7 +811,7 @@ run_mime_app(char **app, char **fpath)
 	free(*fpath);
 #endif /* !__CYGWIN */
 
-	return (ret != EXIT_SUCCESS) ? EXIT_FAILURE : ret;
+	return ret;
 }
 
 static int
@@ -1133,7 +1133,7 @@ mime_open_with_tab(char *filename, const char *prefix, const int only_names)
 #ifndef _NO_MAGIC
 	char *mime = xmagic(name, MIME_TYPE);
 #else
-	err_name = "open";
+	err_name = "lira";
 	char *mime = get_mime(name);
 #endif /* !_NO_MAGIC */
 	if (!mime) {
@@ -1308,7 +1308,7 @@ join_and_run(char **args, char *name)
 	return ret;
 }
 
-/* "ow" command (open-with).
+/* "ow FILE [APP]" command (open-with).
  * Display available opening applications for FILENAME, get user input,
  * and open the file. */
 int
@@ -1317,7 +1317,7 @@ mime_open_with(char *filename, char **args)
 	if (!filename || !mime_file)
 		return EXIT_FAILURE;
 
-	err_name = "open";
+	err_name = "lira";
 
 	char *name = normalize_path(filename, strlen(filename));
 	if (!name)
@@ -1383,17 +1383,17 @@ FAIL:
 
 /* Open URL using the application associated to text/html MIME-type in
  * the mimelist file. Returns zero on success and >0 on error.
- * This function is only executed via --open or --preview. */
+ * For the time being, this function is only executed via --open or --preview. */
 int
 mime_open_url(char *url)
 {
 	if (!url || !*url)
 		return EXIT_FAILURE;
 
-	err_name = (xargs.open == 1 || xargs.preview == 1) ? PROGRAM_NAME : "open";
+	err_name = (xargs.open == 1 || xargs.preview == 1) ? PROGRAM_NAME : "lira";
 
 	char *app = get_app("text/html", 0);
-	if (!app) /* The error message may be printed by get_app() or not. Fix. */
+	if (!app) /* The error message might not be printed by get_app(). Fix. */
 		return EXIT_FAILURE;
 
 	char *p = strchr(app, ' ');
@@ -1445,15 +1445,17 @@ mime_info(char *arg, char **fpath, char **deq)
 	}
 
 	if (!*fpath) {
-		xerror("%s: '%s': %s\n", err_name, arg, (is_number(arg) == 1)
+		const int isnum = is_number(arg);
+		xerror("%s: '%s': %s\n", err_name, arg, isnum == 1
 			? _("No such ELN") : strerror(errno));
-		return EXIT_FAILURE;
+		return isnum == 1 ? EXIT_FAILURE : errno;
 	}
 
 	if (access(*fpath, R_OK) == -1) {
 		xerror("%s: '%s': %s\n", err_name, *fpath, strerror(errno));
 		free(*fpath);
-		return EXIT_FAILURE;
+		*fpath = (char *)NULL;
+		return errno;
 	}
 
 	return EXIT_SUCCESS;
@@ -1482,14 +1484,15 @@ get_open_file_path(char **args, char **fpath, char **deq)
 		*fpath = realpath(f, NULL);
 		if (!*fpath) {
 			xerror("%s: '%s': %s\n", err_name, f, strerror(errno));
-			return EXIT_FAILURE;
+			return errno;
 		}
 	}
 
 	if (xargs.preview == 0 && access(*fpath, R_OK) == -1) {
 		xerror("%s: '%s': %s\n", err_name, *fpath, strerror(errno));
 		free(*fpath);
-		return EXIT_FAILURE;
+		*fpath = (char *)NULL;
+		return errno;
 	}
 
 	return EXIT_SUCCESS;
@@ -1500,6 +1503,8 @@ static int
 handle_no_app(const int info, char **fpath, char **mime, const char *arg)
 {
 	if (xargs.preview == 1) {
+		/* When running the previewer, MIME_FILE points to the path to
+		 * preview.clifm file. */
 		xerror(_("shotgun: '%s': No associated application found\n"
 			"Fix this in the configuration file:\n%s\n"), arg, mime_file);
 		return EXIT_FAILURE;
@@ -1512,12 +1517,12 @@ handle_no_app(const int info, char **fpath, char **mime, const char *arg)
 		/* If an archive/compressed file, run the archiver function */
 		if (is_compressed(*fpath, 1) == 0) {
 			char *tmp_cmd[] = {"ad", *fpath, NULL};
-			int exit_status = archiver(tmp_cmd, 'd');
+			const int ret = archiver(tmp_cmd, 'd');
 
 			free(*fpath);
 			free(*mime);
 
-			return exit_status;
+			return ret;
 		} else {
 			xerror(_("%s: '%s': No associated application found\n"),
 				err_name, arg);
@@ -1615,7 +1620,7 @@ mime_open(char **args)
 	if (!args[1] || IS_HELP(args[1]))
 		return print_mime_help();
 
-	err_name = (xargs.open == 1 || xargs.preview == 1) ? PROGRAM_NAME : "mime";
+	err_name = (xargs.open == 1 || xargs.preview == 1) ? PROGRAM_NAME : "lira";
 
 	if (*args[1] == 'i' && strcmp(args[1], "import") == 0)
 		return import_mime();
@@ -1628,14 +1633,16 @@ mime_open(char **args)
 	int info = 0, file_index = 0;
 
 	if (*args[1] == 'i' && strcmp(args[1], "info") == 0) {
-		if (mime_info(args[2], &file_path, &deq_file) == EXIT_FAILURE)
-			return EXIT_FAILURE;
+		const int ret = mime_info(args[2], &file_path, &deq_file);
+		if (ret != EXIT_SUCCESS)
+			return ret;
 		info = 1;
 		file_index = 2;
+
 	} else {
-		if (get_open_file_path(args, &file_path, &deq_file) == EXIT_FAILURE)
-			/* Return -1 to prevent the caller from printing the error message */
-			return (-1);
+		const int ret = get_open_file_path(args, &file_path, &deq_file);
+		if (ret != EXIT_SUCCESS)
+			return ret;
 		file_index = 1;
 	}
 
@@ -1660,7 +1667,7 @@ mime_open(char **args)
 
 	char *filename = get_basename(file_path);
 
-	if (info)
+	if (info == 1)
 		print_info_name_mime(filename, mime);
 
 	/* Get default application for MIME or filename */
@@ -1668,7 +1675,7 @@ mime_open(char **args)
 	if (!app)
 		return handle_no_app(info, &file_path, &mime, args[1]);
 
-	if (info)
+	if (info == 1)
 		return print_mime_info(&app, &file_path, &mime);
 
 	free(mime);

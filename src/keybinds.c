@@ -137,7 +137,7 @@ kbinds_edit(char *app)
 		stat(kbinds_file, &attr);
 	}
 
-	time_t mtime_bfr = (time_t)attr.st_mtime;
+	const time_t mtime_bfr = attr.st_mtime;
 
 	int ret = EXIT_SUCCESS;
 	if (app && *app) {
@@ -153,7 +153,7 @@ kbinds_edit(char *app)
 		return ret;
 
 	stat(kbinds_file, &attr);
-	if (mtime_bfr == (time_t)attr.st_mtime)
+	if (mtime_bfr == attr.st_mtime)
 		return EXIT_SUCCESS;
 
 	err('n', PRINT_PROMPT, _("kb: Restart %s for changes to "

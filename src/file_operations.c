@@ -164,21 +164,19 @@ open_file(char *file)
 	if (!file || !*file)
 		return EXIT_FAILURE;
 
-	int exit_status = EXIT_SUCCESS;
+	int ret = EXIT_SUCCESS;
 
 	if (conf.opener) {
 		if (*conf.opener == 'g' && strcmp(conf.opener, "gio") == 0) {
 			char *cmd[] = {"gio", "open", file, NULL};
-			if (launch_execv(cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS)
-				exit_status = EXIT_FAILURE;
+			ret = launch_execv(cmd, FOREGROUND, E_NOSTDERR);
 		} else {
 			char *cmd[] = {conf.opener, file, NULL};
-			if (launch_execv(cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS)
-				exit_status = EXIT_FAILURE;
+			ret = launch_execv(cmd, FOREGROUND, E_NOSTDERR);
 		}
 	} else {
 #ifndef _NO_LIRA
-		exit_status = run_mime(file);
+		ret = run_mime(file);
 #else
 		/* Fallback to (xdg-)open */
 # if defined(__HAIKU__)
@@ -188,13 +186,11 @@ open_file(char *file)
 # else
 		char *cmd[] = {"xdg-open", file, NULL};
 # endif /* __HAIKU__ */
-		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
-			exit_status = EXIT_FAILURE;
+		ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 #endif /* _NO_LIRA */
 	}
 
-	/* run_mime() may return -1 */
-	return exit_status >= 0 ? exit_status : EXIT_FAILURE;
+	return ret;
 }
 
 int
@@ -905,11 +901,14 @@ open_function(char **cmd)
 		return EXIT_SUCCESS;
 	}
 
+	const char *const errname = "lira";
+
 	if (*cmd[0] == 'o' && (!cmd[0][1] || strcmp(cmd[0], "open") == 0)) {
 		if (strchr(cmd[1], '\\')) {
 			char *deq_path = unescape_str(cmd[1], 0);
 			if (!deq_path) {
-				xerror(_("open: '%s': Error unescaping file name\n"), cmd[1]);
+				xerror(_("%s: '%s': Error unescaping file name\n"),
+					errname, cmd[1]);
 				return EXIT_FAILURE;
 			}
 
@@ -924,7 +923,7 @@ open_function(char **cmd)
 	struct stat attr;
 	errno = 0;
 	if (lstat(file, &attr) == -1) {
-		xerror("open: '%s': %s\n", cmd[1], strerror(errno));
+		xerror("%s: '%s': %s\n", errname, cmd[1], strerror(errno));
 		return errno;
 	}
 
@@ -955,7 +954,7 @@ open_function(char **cmd)
 	case S_IFDIR: return cd_function(file, CD_PRINT_ERROR);
 
 	case S_IFLNK: {
-		int ret = get_link_ref(file);
+		const int ret = get_link_ref(file);
 		if (ret == -1) {
 			return err_no_link(file);
 		} else if (ret == S_IFDIR) {
@@ -983,40 +982,32 @@ open_function(char **cmd)
 	/* If neither directory nor regular file nor symlink (to directory
 	 * or regular file), print the corresponding error message and exit. */
 	if (no_open_file == 1) {
-		xerror(_("open: '%s' (%s): Cannot open file\nTry "
-			"'APP FILE' or 'open FILE APP'\n"), cmd[1], file_type);
+		xerror(_("%s: '%s' (%s): Cannot open file\nTry "
+			"'APP FILE' or 'open FILE APP'\n"), errname, cmd[1], file_type);
 		return EXIT_FAILURE;
 	}
-
-	int ret = EXIT_SUCCESS;
 
 	/* At this point we know that the file to be openend is either a regular
 	 * file or a symlink to a regular file. So, just open the file. */
 
-	if (!cmd[2] || (*cmd[2] == '&' && !cmd[2][1])) {
-		ret = open_file(file);
-		if (!conf.opener && ret == EXIT_FAILURE) {
-/*			xerror(_("%s: Add a new entry to the mimelist file "
- *				"('mime edit' or F6) or run 'APP FILE' or 'open FILE APP'\n"),
- *				PROGRAM_NAME); */
-			return EXIT_FAILURE;
-		}
-		return ret;
-	}
+	if (!cmd[2] || (*cmd[2] == '&' && !cmd[2][1]))
+		return open_file(file);
 
 	/* Some application was specified to open the file. Use it. */
 	char *tmp_cmd[] = {cmd[2], file, NULL};
-	ret = launch_execv(tmp_cmd, bg_proc ? BACKGROUND : FOREGROUND, E_NOSTDERR);
+	const int ret =
+		launch_execv(tmp_cmd, bg_proc ? BACKGROUND : FOREGROUND, E_NOSTDERR);
+
 	if (ret == EXIT_SUCCESS)
 		return EXIT_SUCCESS;
 
 	if (ret == EXEC_NOTFOUND || ret == EACCES) {
-		xerror(_("open: %s: %s\nTry 'open --help' for more "
-			"information\n"), cmd[2], NOTFOUND_MSG);
+		xerror(_("%s: %s: %s\nTry 'open --help' for more "
+			"information\n"), errname, cmd[2], NOTFOUND_MSG);
 		return EXEC_NOTFOUND;
 	}
 
-	xerror("open: %s: %s\n", cmd[2], strerror(ret));
+	xerror("%s: %s: %s\n", errname, cmd[2], strerror(ret));
 	return ret;
 }
 

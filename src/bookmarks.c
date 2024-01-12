@@ -99,7 +99,7 @@ edit_bookmarks(char *cmd, const int flag)
 		return errno;
 	}
 
-	time_t prev = a.st_mtime;
+	const time_t prev = a.st_mtime;
 	int ret = EXIT_SUCCESS;
 
 	if (!cmd) {

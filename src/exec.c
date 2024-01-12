@@ -1518,8 +1518,7 @@ static int
 lira_function(char **args)
 {
 #ifndef _NO_LIRA
-	int ret = mime_open(args);
-	return (ret >= 0) ? ret : EXIT_FAILURE;
+	return mime_open(args);
 #else
 	UNUSED(args);
 	xerror("%s: lira: %s\n", PROGRAM_NAME, _(NOT_AVAILABLE));

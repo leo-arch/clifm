@@ -207,14 +207,14 @@ open_tmpfile(char *app, char *file)
 
 	if (application) {
 		char *cmd[] = {application, file, NULL};
-		int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
+		const int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 		if (ret != EXIT_SUCCESS)
 			unlink(file);
 		return ret;
 	}
 
 	open_in_foreground = 1;
-	int exit_status = open_file(file);
+	const int exit_status = open_file(file);
 	open_in_foreground = 0;
 
 	if (exit_status != EXIT_SUCCESS) {

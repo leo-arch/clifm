@@ -547,9 +547,9 @@ check_compressed(const char *line, const int test_iso)
 	|| (test_iso && strstr(line, "ISO 9660")));
 }
 
-/* Run the 'file' command on FILE and look for "archive" and
- * "compressed" strings in its output. Returns zero if compressed,
- * one if not, and -1 in case of error.
+/* Check the MIME type of the file names FILE and look for "archive" and
+ * "compressed" strings. Returns zero if compressed, one if not, and -1
+ * in case of error.
  * test_iso is used to determine if ISO files should be checked as
  * well: this is the case when called from open_function() or
  * mime_open(), since both need to check compressed and ISOs as
