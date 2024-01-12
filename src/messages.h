@@ -779,7 +779,7 @@ Note: Use the 'pc' command to edit files permissions"
 
 #define OW_USAGE "Open a file with a specific application\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  ow ELN/FILE\n\n\
+  ow FILE [APP]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Choose opening application for the file 'test.c' from a menu\n\
     ow test.c\n\
