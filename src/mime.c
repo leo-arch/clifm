@@ -815,6 +815,84 @@ run_mime_app(char **app, char **fpath)
 }
 
 static int
+split_and_run(char *app, char *file)
+{
+	size_t f = 0;
+	size_t i;
+	char **cmd = split_str(app, NO_UPDATE_ARGS);
+	int exec_flags = E_NOFLAG;
+
+	for (i = 0; cmd[i]; i++) {
+		if (*cmd[i] == '!' && (cmd[i][1] == 'E' || cmd[i][1] == 'O')) {
+			set_exec_flags(cmd[i] + 1, &exec_flags);
+			free(cmd[i]);
+			cmd[i] = (char *)NULL;
+			continue;
+		}
+
+		if (*cmd[i] == '&') {
+			bg_proc = 1;
+			free(cmd[i]);
+			cmd[i] = (char *)NULL;
+			continue;
+		}
+		if (*cmd[i] == '%' && cmd[i][1] == 'f') {
+			const size_t file_len = strlen(file);
+			cmd[i] = xnrealloc(cmd[i], file_len + 1, sizeof(char));
+			xstrsncpy(cmd[i], file, file_len + 1);
+			f = 1;
+		}
+		if (*cmd[i] == '$' && cmd[i][1] >= 'A' && cmd[i][1] <= 'Z') {
+			char *env = expand_env(cmd[i]);
+			if (env) {
+				free(cmd[i]);
+				cmd[i] = env;
+			}
+		}
+	}
+
+	/* If file to be opened was not specified via %f, append
+	 * it to the cmd array. */
+	if (f == 0) {
+		cmd = xnrealloc(cmd, i + 2, sizeof(char *));
+		cmd[i] = savestring(file, strlen(file));
+		cmd[i + 1] = (char *)NULL;
+	}
+
+	const int ret =
+		launch_execv(cmd, bg_proc ? BACKGROUND : FOREGROUND, exec_flags);
+
+	for (i = 0; cmd[i]; i++)
+		free(cmd[i]);
+	free(cmd);
+
+	return ret;
+}
+
+static int
+run_cmd(char *app, char *file)
+{
+#ifndef _NO_ARCHIVING
+	if (*app == 'a' && app[1] == 'd' && !app[2]) {
+		/* 'ad' is the internal archiver command */
+		char *cmd[] = {"ad", file, NULL};
+		return archiver(cmd, 'd');
+	}
+#endif /* !_NO_ARCHIVING */
+
+	char *env = (char *)NULL;
+	if (*app == '$' && app[1] >= 'A' && app[1] <= 'Z')
+		env = expand_env(app);
+
+	char *cmd[] = {env ? env : app, file, NULL};
+	const int ret = launch_execv(cmd, bg_proc ? BACKGROUND : FOREGROUND,
+		bg_proc ? E_NOSTDERR : E_NOFLAG);
+
+	free(env);
+	return ret;
+}
+
+static int
 mime_list_open(char **apps, char *file)
 {
 	if (!apps || !file)
@@ -840,76 +918,10 @@ mime_list_open(char **apps, char *file)
 
 	int ret = EXIT_FAILURE;
 
-	if (strchr(app, ' ')) {
-		size_t f = 0;
-		char **cmd = split_str(app, NO_UPDATE_ARGS);
-		int exec_flags = E_NOFLAG;
-
-		for (i = 0; cmd[i]; i++) {
-			if (*cmd[i] == '!' && (cmd[i][1] == 'E' || cmd[i][1] == 'O')) {
-				set_exec_flags(cmd[i] + 1, &exec_flags);
-				free(cmd[i]);
-				cmd[i] = (char *)NULL;
-				continue;
-			}
-
-			if (*cmd[i] == '&') {
-				bg_proc = 1;
-				free(cmd[i]);
-				cmd[i] = (char *)NULL;
-				continue;
-			}
-			if (*cmd[i] == '%' && cmd[i][1] == 'f') {
-				const size_t file_len = strlen(file);
-				cmd[i] = xnrealloc(cmd[i], file_len + 1, sizeof(char));
-				xstrsncpy(cmd[i], file, file_len + 1);
-				f = 1;
-			}
-			if (*cmd[i] == '$' && cmd[i][1] >= 'A' && cmd[i][1] <= 'Z') {
-				char *env = expand_env(cmd[i]);
-				if (env) {
-					free(cmd[i]);
-					cmd[i] = env;
-				}
-			}
-		}
-
-		/* If file to be opened was not specified via %f, append
-		 * it to the cmd array */
-		if (f == 0) {
-			cmd = xnrealloc(cmd, i + 2, sizeof(char *));
-			cmd[i] = savestring(file, strlen(file));
-			cmd[i + 1] = (char *)NULL;
-		}
-
-		if (launch_execv(cmd, bg_proc ? BACKGROUND : FOREGROUND,
-		exec_flags) == EXIT_SUCCESS)
-			ret = EXIT_SUCCESS;
-
-		for (i = 0; cmd[i]; i++)
-			free(cmd[i]);
-		free(cmd);
-	} else {
-#ifndef _NO_ARCHIVING
-		/* We have just a command name: no parameter, no placeholder */
-		if (*app == 'a' && app[1] == 'd' && !app[2]) {
-			/* 'ad' is the internal archiver command */
-			char *cmd[] = {"ad", file, NULL};
-			ret = archiver(cmd, 'd');
-		} else
-#endif /* _NO_ARCHIVING */
-		{
-			char *env = (char *)NULL;
-			if (*app == '$' && app[1] >= 'A' && app[2] <= 'Z')
-				env = expand_env(app);
-
-			char *cmd[] = {env ? env : app, file, NULL};
-			if (launch_execv(cmd, bg_proc ? BACKGROUND : FOREGROUND,
-			bg_proc ? E_NOSTDERR : E_NOFLAG) == EXIT_SUCCESS)
-				ret = EXIT_SUCCESS;
-			free(env);
-		}
-	}
+	if (strchr(app, ' '))
+		ret = split_and_run(app, file);
+	else /* We have just a command name: no parameter nor placeholder */
+		ret = run_cmd(app, file);
 
 	return ret;
 }
@@ -1369,7 +1381,6 @@ mime_open_with(char *filename, char **args)
 	for (i = 0; apps[i]; i++)
 		free(apps[i]);
 	free(apps);
-
 	free(name);
 
 	return ret;
@@ -1377,7 +1388,6 @@ mime_open_with(char *filename, char **args)
 FAIL:
 	free(mime);
 	free(name);
-
 	return EXIT_FAILURE;
 }
 
