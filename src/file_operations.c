@@ -1001,13 +1001,13 @@ open_function(char **cmd)
 	if (ret == EXIT_SUCCESS)
 		return EXIT_SUCCESS;
 
-	if (ret == EXEC_NOTFOUND || ret == EACCES) {
-		xerror(_("%s: %s: %s\nTry 'open --help' for more "
-			"information\n"), errname, cmd[2], NOTFOUND_MSG);
-		return EXEC_NOTFOUND;
-	}
+	if (ret == E_NOEXEC) /* EACCESS && ENOEXEC */
+		xerror("%s: %s: %s\n", errname, cmd[2], NOEXEC_MSG);
+	else if (ret == E_NOTFOUND) /* ENOENT */
+		xerror("%s: %s: %s\n", errname, cmd[2], NOTFOUND_MSG);
+	else
+		xerror("%s: %s: %s\n", errname, cmd[2], strerror(errno));
 
-	xerror("%s: %s: %s\n", errname, cmd[2], strerror(ret));
 	return ret;
 }
 

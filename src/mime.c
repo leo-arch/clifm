@@ -1169,7 +1169,7 @@ mime_open_with_tab(char *filename, const char *prefix, const int only_names)
 	free(mime);
 	free(name);
 
-	/* The first element in the matches array must contains the
+	/* The first element in the matches array must contain the
 	 * already matched string. */
 	if (!apps) {
 		apps = xnmalloc(2, sizeof(char *));
@@ -1218,7 +1218,9 @@ run_cmd_noargs(char *arg, char *name)
 		return EXIT_SUCCESS;
 
 	xerror("%s: %s: %s\n", err_name, arg,
-		ret == EXEC_NOTFOUND ? NOTFOUND_MSG : strerror(ret));
+		ret == E_NOTFOUND ? NOTFOUND_MSG
+		: (ret == E_NOEXEC ? NOEXEC_MSG
+		: strerror(ret)));
 
 	return ret;
 }
@@ -1496,13 +1498,6 @@ get_open_file_path(char **args, char **fpath, char **deq)
 			xerror("%s: '%s': %s\n", err_name, f, strerror(errno));
 			return errno;
 		}
-	}
-
-	if (xargs.preview == 0 && access(*fpath, R_OK) == -1) {
-		xerror("%s: '%s': %s\n", err_name, *fpath, strerror(errno));
-		free(*fpath);
-		*fpath = (char *)NULL;
-		return errno;
 	}
 
 	return EXIT_SUCCESS;

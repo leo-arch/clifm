@@ -61,7 +61,7 @@ parse_bulk_remove_params(char *s1, char *s2, char **app, char **target)
 	if ((ret = stat(s1, &a)) == -1 || !S_ISDIR(a.st_mode)) {
 		char *p = get_cmd_path(BULK_APP(s1));
 		if (!p) { /* S1 is neither a directory nor a valid application */
-			int ec = (ret == -1 && *s1 == ':') ? EXEC_NOTFOUND : ENOTDIR;
+			int ec = (ret == -1 && *s1 == ':') ? E_NOTFOUND : ENOTDIR;
 			if (ec == ENOTDIR)
 				xerror("rr: '%s': %s\n", s1, strerror(ec));
 			else
@@ -93,7 +93,7 @@ parse_bulk_remove_params(char *s1, char *s2, char **app, char **target)
 
 	/* S2 is not a valid application name */
 	xerror("rr: '%s': %s\n", BULK_APP(s2), NOTFOUND_MSG);
-	return EXEC_NOTFOUND;
+	return E_NOTFOUND;
 }
 
 static int

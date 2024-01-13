@@ -97,8 +97,8 @@ int
 get_exit_code(const int status, const int exec_flag)
 {
 	if (WIFSIGNALED(status))
-	/* As required by exit(1p), we return a value greater than 128 (EXEC_SIGINT) */
-		return (EXEC_SIGINT + WTERMSIG(status));
+	/* As required by exit(1p), we return a value greater than 128 (E_SIGINT) */
+		return (E_SIGINT + WTERMSIG(status));
 	if (WIFEXITED(status))
 		return WEXITSTATUS(status);
 
@@ -251,10 +251,13 @@ launch_execv(char **cmd, const int bg, const int xflags)
 		 * Otherwise, the caller should print the error messages itself. */
 		if (errno == ENOENT) {
 			xerror("%s: %s: %s\n", PROGRAM_NAME, cmd[0], NOTFOUND_MSG);
-			_exit(EXEC_NOTFOUND); /* 127, as required by exit(1p). */
+			_exit(E_NOTFOUND); /* 127, as required by exit(1p). */
 		} else {
 			xerror("%s: %s: %s\n", PROGRAM_NAME, cmd[0], strerror(errno));
-			_exit(errno);
+			if (errno == EACCES || errno == ENOEXEC)
+				_exit(E_NOEXEC); /* 126 */
+			else
+				_exit(errno);
 		}
 	}
 
@@ -454,7 +457,7 @@ check_shell_cmd_conditions(char **args)
 	if (len > 0 && args[0][len - 1] == '/') {
 		xerror("%s: %s: %s\n", conf.autocd == 1 ? "cd" : "open",
 			args[0], strerror(ENOENT));
-		return conf.autocd == 1 ? EXIT_FAILURE : EXEC_NOTFOUND;
+		return conf.autocd == 1 ? EXIT_FAILURE : E_NOTFOUND;
 	}
 
 	/* Prevent ungraceful exit */
@@ -1884,7 +1887,7 @@ preview_function(char **args)
 		char *p = get_cmd_path("fzf");
 		if (!p) {
 			err(0, NOPRINT_PROMPT, "%s: fzf: %s\n", PROGRAM_NAME, NOTFOUND_MSG);
-			return EXEC_NOTFOUND; /* 127, as required by exit(1) */
+			return E_NOTFOUND; /* 127, as required by exit(1) */
 		}
 		free(p);
 	}

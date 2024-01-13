@@ -570,10 +570,12 @@ extern time_t curdir_mtime;
 #define EXEC_BG_PROC 0
 #define EXEC_FG_PROC 1
 
-#define EXEC_NOTFOUND  127
-#define EXEC_SIGINT    128
+#define E_NOEXEC    126
+#define E_NOTFOUND  127
+#define E_SIGINT    128
 
 #define NOTFOUND_MSG "Command not found"
+#define NOEXEC_MSG   "Permission denied"
 
 /* A few fixed colors */
 #define BOLD_RED   (conf.colorize == 1 ? "\x1b[1;31m" : "")
