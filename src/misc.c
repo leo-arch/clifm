@@ -1821,12 +1821,17 @@ create_virtual_dir(const int user_provided)
 	char *cmd[] = {"mkdir", "-p", "--", stdin_tmp_dir, NULL};
 	int ret = 0;
 	if ((ret = launch_execv(cmd, FOREGROUND, E_MUTE)) != EXIT_SUCCESS) {
+		char *errmsg = (ret == E_NOTFOUND ? NOTFOUND_MSG
+			: (ret == E_NOEXEC ? NOEXEC_MSG : (char *)NULL));
+
 		if (user_provided == 1) {
 			err('e', PRINT_PROMPT, "%s: mkdir: '%s': %s. Trying with "
-				"default value\n", PROGRAM_NAME, stdin_tmp_dir, strerror(ret));
+				"default value\n", PROGRAM_NAME, stdin_tmp_dir,
+				errmsg ? errmsg : strerror(ret));
 		} else {
 			err('e', PRINT_PROMPT, "%s: mkdir: '%s': %s\n",
-				PROGRAM_NAME, stdin_tmp_dir, strerror(ret));
+				PROGRAM_NAME, stdin_tmp_dir,
+				errmsg ? errmsg : strerror(ret));
 		}
 		return ret;
 	}

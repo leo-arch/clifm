@@ -264,14 +264,14 @@ rename_bulk_files(char **args, FILE *fp, int *is_cwd, size_t *renamed,
 		if (!args[i])
 			goto CONT;
 
-		size_t len = strlen(line);
+		const size_t len = strlen(line);
 		if (line[len - 1] == '\n')
 			line[len - 1] = '\0';
 
 		if (strcmp(args[i], line) == 0)
 			goto CONT;
 
-		int ret = rename_file(args[i], line);
+		const int ret = rename_file(args[i], line);
 		if (ret != 0) {
 			exit_status = ret;
 			if (conf.autols == 1 && modified > 1)
