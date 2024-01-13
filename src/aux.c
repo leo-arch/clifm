@@ -1294,6 +1294,7 @@ xgetchar(void)
 		xerror("%s: tcgetattr: %s\n", PROGRAM_NAME, strerror(errno));
 		return 0;
 	}
+
 	newt = oldt;
 	newt.c_lflag &= (tcflag_t)~(ICANON | ECHO);
 	tcsetattr(STDIN_FILENO, TCSANOW, &newt);

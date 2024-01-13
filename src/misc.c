@@ -862,7 +862,7 @@ get_path_dir(char **dir)
 
 /* Get command to be executed by the new_instance function, only if
  * CONF.TERM (global) contains spaces. Otherwise, new_instance will try
- * "CONF.TERM clifm" */
+ * "CONF.TERM clifm". */
 static char **
 get_cmd(char *dir, char *_sudo, char *self, const int sudo)
 {

@@ -1128,7 +1128,7 @@ deselect_all(void)
 
 /* Deselect files passed as parameters to the desel command
  * Returns zero on success or 1 on error. */
-static inline int
+static int
 deselect_from_args(char **args)
 {
 	char **ds = xnmalloc(args_n + 1, sizeof(char *));

@@ -190,7 +190,7 @@ xstrrpbrk(char *s, const char *accept)
 	if (!s || !*s || !accept || !*accept)
 		return (char *)NULL;
 
-	size_t l = strlen(s);
+	const size_t l = strlen(s);
 
 	int i = (int)l, j;
 	while (--i >= 0) {
@@ -418,7 +418,7 @@ wc_xstrlen(const char *restrict str)
 	if (len == (size_t)-1) /* Invalid multi-byte sequence found */
 		return 0;
 
-	int width = wcswidth(wbuf, len);
+	const int width = wcswidth(wbuf, len);
 	if (width != -1)
 		return (size_t)width;
 
@@ -732,7 +732,7 @@ remove_quotes(char *str)
 		q++;
 	}
 
-	if (!blank)
+	if (blank == 0)
 		return p;
 
 	return (char *)NULL;
@@ -761,8 +761,8 @@ init_quoted_words(void)
 static void
 update_quoted_words_index(const size_t start, const size_t added_items)
 {
-	size_t s = start + 1;
-	size_t n = added_items - (added_items > 0 ? 1 : 0);
+	const size_t s = start + 1;
+	const size_t n = added_items - (added_items > 0 ? 1 : 0);
 
 	size_t i;
 	for (i = 0; i < QWORDS_ARRAY_LEN; i++)
@@ -1168,7 +1168,7 @@ check_shell_functions(const char *str)
 
 	size_t i;
 	for (i = 0; funcs[i]; i++) {
-		size_t f_len = strlen(funcs[i]);
+		const size_t f_len = strlen(funcs[i]);
 		if (*str == *funcs[i] && strncmp(str, funcs[i], f_len) == 0)
 			return 1;
 	}
@@ -1205,7 +1205,7 @@ is_fused_param(char *str)
 	char c = *q;
 	*q = '\0';
 
-	int ret = is_internal_f(str);
+	const int ret = is_internal_f(str);
 	*q = c;
 
 	if (ret == 0)
@@ -1236,7 +1236,7 @@ expand_tag(char ***args, const int tag_index)
 	snprintf(dir, sizeof(dir), "%s/%s", tags_dir, tag);
 
 	struct dirent **t = (struct dirent **)NULL;
-	int n = scandir(dir, &t, NULL, conf.case_sens_list
+	const int n = scandir(dir, &t, NULL, conf.case_sens_list
 		? xalphasort : alphasort_insensitive);
 	if (n == -1)
 		return 0;
@@ -1249,7 +1249,7 @@ expand_tag(char ***args, const int tag_index)
 		return 0;
 	}
 
-	size_t len = args_n + 1 + ((size_t)n - 2) + 1;
+	const size_t len = args_n + 1 + ((size_t)n - 2) + 1;
 	char **p = xnmalloc(len, sizeof(char *));
 
 	/* Copy whatever is before the tag expression */
@@ -1333,7 +1333,7 @@ expand_tags(char ***substr)
 		return;
 
 	for (i = 0; i < ntags; i++) {
-		size_t tn = expand_tag(substr, tag_index[i]);
+		const size_t tn = expand_tag(substr, tag_index[i]);
 		/* TN is the amount of files tagged as SUBSTR[TAG_INDEX[I]]
 		 * Let's update the index of the next tag expression using this
 		 * value: if the next tag expression was at index 2, and if
@@ -1565,7 +1565,7 @@ eln_expand(char ***substr, const size_t i)
 	 * function, it is guaranteed that NUM won't over/under-flow:
 	 * NUM is > 0 and <= the amount of listed files (and this latter is
 	 * never bigger than FILESN_MAX). */
-	filesn_t j = num - 1;
+	const filesn_t j = num - 1;
 
 	/* If file name starts with a dash, and the command is external,
 	 * use the absolute path to the file name, to prevent the command from
@@ -1593,7 +1593,7 @@ eln_expand(char ***substr, const size_t i)
 	/* Replace the ELN by the corresponding escaped file name */
 	if (file_info[j].type == DT_DIR && file_info[j].name[file_info[j].len > 0
 	? file_info[j].len - 1 : 0] != '/') {
-		size_t len = strlen(esc_str) + 2;
+		const size_t len = strlen(esc_str) + 2;
 		(*substr)[i] = xnrealloc((*substr)[i], len, sizeof(char));
 		snprintf((*substr)[i], len, "%s/", esc_str);
 		free(esc_str);
@@ -1703,7 +1703,7 @@ expand_bm_name(char **name)
 
 		char *q = escape_str(bookmarks[j].path);
 		char *tmp = q ? q : bookmarks[j].path;
-		size_t tmp_len = strlen(tmp);
+		const size_t tmp_len = strlen(tmp);
 		*name = xnrealloc(*name, tmp_len + 1, sizeof(char));
 		xstrsncpy(*name, tmp, tmp_len + 1);
 		free(q);
@@ -1728,7 +1728,7 @@ expand_int_var(char **name)
 		|| strcmp(var_name, usr_var[j].name) != 0 || !usr_var[j].value)
 			continue;
 
-		size_t val_len = strlen(usr_var[j].value);
+		const size_t val_len = strlen(usr_var[j].value);
 		*name = xnrealloc(*name, val_len + 1, sizeof(char));
 		xstrsncpy(*name, usr_var[j].value, val_len + 1);
 		break;
@@ -2115,7 +2115,7 @@ expand_range(char *str, int listdir)
 		return (filesn_t *)NULL;
 
 	*p = '\0';
-	int ret = is_number(str);
+	const int ret = is_number(str);
 	*p = '-';
 	if (!ret)
 		return (filesn_t *)NULL;
@@ -2238,7 +2238,7 @@ expand_regex(char ***substr)
 /*	int reg_flags = conf.case_sens_list == 1 ? (REG_NOSUB | REG_EXTENDED)
 			: (REG_NOSUB | REG_EXTENDED | REG_ICASE); */
 
-	int reg_flags = (REG_NOSUB | REG_EXTENDED);
+	const int reg_flags = (REG_NOSUB | REG_EXTENDED);
 
 	for (i = 0; (*substr)[i]; i++) {
 		if (n > ((size_t)files + args_n))
@@ -2265,7 +2265,7 @@ expand_regex(char ***substr)
 		 * accidental file expansions. For example, a file named file.txt
 		 * must not be expanded given the pattern "ile.t". In other words,
 		 * we force the use of ".*PATTERN.*" instead of just "PATTERN". */
-		size_t l = strlen(t) + 3;
+		const size_t l = strlen(t) + 3;
 		char *rstr = xnmalloc(l, sizeof(char));
 		snprintf(rstr, l, "^%s$", t);
 		free(dstr);
@@ -2340,8 +2340,8 @@ static int
 expand_symlink(char **substr)
 {
 	struct stat a;
-	int ret = lstat(*substr, &a);
-	int link_ok = (ret != -1 && S_ISLNK(a.st_mode)) ? 1 : 0;
+	const int ret = lstat(*substr, &a);
+	const int link_ok = (ret != -1 && S_ISLNK(a.st_mode)) ? 1 : 0;
 
 	if (link_ok == 0)
 		return 0;
@@ -2352,7 +2352,7 @@ expand_symlink(char **substr)
 		return (-1);
 	}
 
-	size_t rp_len = strlen(real_path);
+	const size_t rp_len = strlen(real_path);
 	*substr = xnrealloc(*substr, rp_len + 1, sizeof(char));
 	xstrsncpy(*substr, real_path, rp_len + 1);
 	free(real_path);
@@ -2473,7 +2473,8 @@ check_chained_cmds(char *str)
 	}
 
 	size_t i = 0;
-	size_t str_len = strlen(str), len = 0, internal_ok = 0;
+	const size_t str_len = strlen(str);
+	size_t len = 0, internal_ok = 0;
 	char *buf = (char *)NULL;
 
 	/* Get each word (cmd) in STR */
@@ -2635,7 +2636,7 @@ parse_input_str(char *str)
 		substr[args_n] = (char *)NULL;
 		args_n--;
 	} else {
-		size_t len = strlen(substr[args_n]);
+		const size_t len = strlen(substr[args_n]);
 		if (len > 0 && substr[args_n][len - 1] == '&' && !substr[args_n][len]) {
 			substr[args_n][len - 1] = '\0';
 			bg_proc = 1;
@@ -2701,7 +2702,7 @@ parse_input_str(char *str)
 		if (*substr[i] == '$') {
 			char *p = getenv(substr[i] + 1);
 			if (p) {
-				size_t plen = strlen(p) + 1;
+				const size_t plen = strlen(p) + 1;
 				substr[i] = xnrealloc(substr[i], plen, sizeof(char));
 				xstrsncpy(substr[i], p, plen);
 			}
@@ -2761,7 +2762,7 @@ parse_input_str(char *str)
 			 * ###################################### */
 
 		if (*substr[i] == ',' && !substr[i][1] && pinned_dir) {
-			size_t plen = strlen(pinned_dir);
+			const size_t plen = strlen(pinned_dir);
 			substr[i] = xnrealloc(substr[i], plen + 1, sizeof(char));
 			xstrsncpy(substr[i], pinned_dir, plen + 1);
 		}
@@ -2841,7 +2842,7 @@ parse_input_str(char *str)
 	substr = xnrealloc(substr, args_n + 2, sizeof(char *));
 	substr[args_n + 1] = (char *)NULL;
 
-	int is_action = is_action_name(substr[0]);
+	const int is_action = is_action_name(substr[0]);
 	if (is_internal(substr[0]) == 0 && is_action == 0)
 		return substr;
 
@@ -2984,7 +2985,7 @@ home_tilde(char *new_path, int *free_buf)
 	&& (user.home[user.home_len - 1] == '/'
 	|| *(new_path + user.home_len) == '/') ) {
 		/* If new_path == HOME/file */
-		size_t len = strlen(new_path + user.home_len + 1) + 3;
+		const size_t len = strlen(new_path + user.home_len + 1) + 3;
 		char *path_tilde = xnmalloc(len, sizeof(char));
 		snprintf(path_tilde, len, "~/%s", new_path + user.home_len + 1);
 
@@ -3172,7 +3173,7 @@ get_substr(char *str, const char ifs)
 			}
 		}
 
-		if (!ranges_ok)
+		if (ranges_ok == 0)
 			continue;
 
 		/* If a valid range */
@@ -3188,7 +3189,7 @@ get_substr(char *str, const char ifs)
 
 		/* Copy the expanded range into the buffer */
 		for (j = (size_t)afirst; j <= (size_t)asecond; j++) {
-			size_t len = (size_t)DIGINUM((int)j) + 1;
+			const size_t len = (size_t)DIGINUM((int)j) + 1;
 			rbuf[k] = xnmalloc(len, sizeof(char));
 			snprintf(rbuf[k], len, "%zu", j);
 			k++;

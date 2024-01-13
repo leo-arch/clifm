@@ -1,4 +1,4 @@
-/* exec.h */
+/* spawn.h */
 
 /*
  * This file is part of CliFM
@@ -22,17 +22,15 @@
  * MA 02110-1301, USA.
 */
 
-#ifndef EXEC_H
-#define EXEC_H
-
-#include "spawn.h"
+#ifndef SPAWN_H
+#define SPAWN_H
 
 __BEGIN_DECLS
 
-int  exec_cmd(char **comm);
-void exec_chained_cmds(char *cmd);
-void exec_profile(void);
+int get_exit_code(const int status, const int exec_flag);
+int launch_execl(const char *cmd);
+int launch_execv(char **cmd, const int bg, const int xflags);
 
 __END_DECLS
 
-#endif /* EXEC_H */
+#endif /* SPAWN_H */
