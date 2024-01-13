@@ -231,7 +231,7 @@ int_cmds_generator(const char *text, int state)
 }
 
 /* Generate completions for command CMD using a modified version of
- * fish's manpages parser */
+ * fish's manpages parser. */
 static int
 gen_shell_cmd_comp(char *cmd)
 {
@@ -263,7 +263,7 @@ get_shell_cmd_opts(char *cmd)
 	struct stat a;
 	if (stat(p, &a) == -1) {
 		/* Comp file does not exist. Try to generate via manpages_comp_gen.py */
-		if (gen_shell_cmd_comp(cmd) == EXIT_FAILURE || stat(p, &a) == -1)
+		if (gen_shell_cmd_comp(cmd) != EXIT_SUCCESS || stat(p, &a) == -1)
 			return EXIT_FAILURE;
 	}
 

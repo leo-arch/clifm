@@ -622,7 +622,7 @@ mime_edit(char **args)
 	struct stat a;
 	if (stat(mime_file, &a) == -1) {
 		if (create_mime_file(mime_file, 1) != EXIT_SUCCESS) {
-			xerror("%s: Cannot access the mimelist file. %s\n",
+			xerror("%s: Cannot access the mimelist file: %s\n",
 				err_name, strerror(ENOENT));
 			return ENOENT;
 		}
@@ -645,7 +645,8 @@ mime_edit(char **args)
 
 	} else {
 		char *cmd[] = {args[2], mime_file, NULL};
-		if ((exit_status = launch_execv(cmd, FOREGROUND, E_NOFLAG)) != EXIT_SUCCESS)
+		exit_status = launch_execv(cmd, FOREGROUND, E_NOFLAG);
+		if (exit_status != EXIT_SUCCESS)
 			return exit_status;
 	}
 

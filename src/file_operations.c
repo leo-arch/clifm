@@ -169,10 +169,10 @@ open_file(char *file)
 	if (conf.opener) {
 		if (*conf.opener == 'g' && strcmp(conf.opener, "gio") == 0) {
 			char *cmd[] = {"gio", "open", file, NULL};
-			ret = launch_execv(cmd, FOREGROUND, E_NOSTDERR);
+			ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 		} else {
 			char *cmd[] = {conf.opener, file, NULL};
-			ret = launch_execv(cmd, FOREGROUND, E_NOSTDERR);
+			ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 		}
 	} else {
 #ifndef _NO_LIRA
