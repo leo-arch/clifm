@@ -247,7 +247,7 @@ launch_execv(char **cmd, const int bg, const int xflags)
 		}
 
 		execvp(cmd[0], cmd);
-		/* These error messages will be printed only if E_NOSTDERR is not set.
+		/* These error messages will be printed only if E_NOSTDERR is unset.
 		 * Otherwise, the caller should print the error messages itself. */
 		if (errno == ENOENT) {
 			xerror("%s: %s: %s\n", PROGRAM_NAME, cmd[0], NOTFOUND_MSG);
@@ -255,7 +255,7 @@ launch_execv(char **cmd, const int bg, const int xflags)
 		} else {
 			xerror("%s: %s: %s\n", PROGRAM_NAME, cmd[0], strerror(errno));
 			if (errno == EACCES || errno == ENOEXEC)
-				_exit(E_NOEXEC); /* 126 */
+				_exit(E_NOEXEC); /* 126, as required by exit(1p). */
 			else
 				_exit(errno);
 		}
@@ -418,7 +418,7 @@ construct_shell_cmd(char **args)
 
 	/* If the command starts with either ':' or ';', it has bypassed all clifm
 	 * expansions. At this point we don't care about it: skip this char. */
-	int bypass = (*args[0] == ';' || *args[0] == ':');
+	const int bypass = (*args[0] == ';' || *args[0] == ':');
 	size_t i;
 	size_t total_len = bg_proc == 1 ? 2 : 0; /* 2 == '&' + NUL byte */
 	size_t cmd_len = 0;
@@ -453,7 +453,7 @@ check_shell_cmd_conditions(char **args)
 		return EXIT_FAILURE;
 
 	/* No command name ends with a slash */
-	size_t len = (args && args[0]) ? strlen(args[0]) : 0;
+	const size_t len = (args && args[0]) ? strlen(args[0]) : 0;
 	if (len > 0 && args[0][len - 1] == '/') {
 		xerror("%s: %s: %s\n", conf.autocd == 1 ? "cd" : "open",
 			args[0], strerror(ENOENT));
@@ -479,7 +479,7 @@ check_shell_cmd_conditions(char **args)
 static int
 run_shell_cmd(char **args)
 {
-	int ret = check_shell_cmd_conditions(args);
+	const int ret = check_shell_cmd_conditions(args);
 	if (ret != EXIT_SUCCESS)
 		return ret;
 
@@ -488,7 +488,7 @@ run_shell_cmd(char **args)
 	/* Calling the system shell is vulnerable to command injection, true.
 	 * But it is the user here who is directly running the command: this
 	 * should not be taken as an untrusted source. */
-	int exit_status = launch_execl(cmd);
+	const int exit_status = launch_execl(cmd);
 	free(cmd);
 
 /* For the time being, this is too slow on Cygwin. */
@@ -549,7 +549,7 @@ set_max_files(char **args)
 		return EXIT_SUCCESS;
 	}
 
-	long inum = strtol(args[1], NULL, 10);
+	const long inum = strtol(args[1], NULL, 10);
 	if (inum == LONG_MAX || inum == LONG_MIN || inum <= 0) {
 		xerror(_("%s: %s: Invalid number\n"), PROGRAM_NAME, args[1]);
 		return (exit_code = EXIT_FAILURE);
@@ -576,8 +576,6 @@ dirs_first_function(const char *arg)
 		return EXIT_SUCCESS;
 	}
 
-	int exit_status = EXIT_SUCCESS;
-
 	if (*arg == 's' && strcmp(arg, "status") == 0) {
 		printf(_("Directories first is %s\n"),
 			conf.list_dirs_first == 1 ? _("enabled") : _("disabled"));
@@ -591,7 +589,7 @@ dirs_first_function(const char *arg)
 		print_reload_msg(_("Directories first disabled\n"));
 	}
 
-	return exit_status;
+	return EXIT_SUCCESS;
 }
 
 static int
@@ -647,7 +645,7 @@ pager_function(const char *arg)
 	}
 
 	if (is_number(arg)) {
-		int n = atoi(arg);
+		const int n = atoi(arg);
 		if (n == INT_MIN) {
 			xerror("%s\n", _("pg: xatoi: Error converting to integer"));
 			return EXIT_FAILURE;
@@ -682,6 +680,7 @@ ext_cmds_function(const char *arg)
 	}
 
 	int exit_status = EXIT_SUCCESS;
+
 	if (*arg == 's' && strcmp(arg, "status") == 0) {
 		printf(_("External commands are %s\n"),
 			conf.ext_cmd_ok ? _("allowed") : _("not allowed"));
@@ -760,28 +759,20 @@ columns_function(const char *arg)
 		return EXIT_SUCCESS;
 	}
 
-	int exit_status = EXIT_SUCCESS;
-
 	if (*arg == 'o' && arg[1] == 'n' && !arg[2]) {
 		conf.columned = 1;
-		if (conf.autols == 1) {
-			free_dirlist();
-			exit_status = list_dir();
-		}
+		if (conf.autols == 1) reload_dirlist();
 		print_reload_msg(_("Columns enabled\n"));
 	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
 		conf.columned = 0;
-		if (conf.autols == 1) {
-			free_dirlist();
-			exit_status = list_dir();
-		}
+		if (conf.autols == 1) reload_dirlist();
 		print_reload_msg(_("Columns disabled\n"));
 	} else {
 		fprintf(stderr, "%s\n", _(COLUMNS_USAGE));
 		return EXIT_FAILURE;
 	}
 
-	return exit_status;
+	return EXIT_SUCCESS;
 }
 
 static int
@@ -866,10 +857,8 @@ opener_function(const char *arg)
 		return EXIT_SUCCESS;
 	}
 
-	if (conf.opener) {
-		free(conf.opener);
-		conf.opener = (char *)NULL;
-	}
+	free(conf.opener);
+	conf.opener = (char *)NULL;
 
 	if (strcmp(arg, "default") != 0 && strcmp(arg, "lira") != 0)
 		conf.opener = savestring(arg, strlen(arg));
@@ -897,8 +886,7 @@ lightmode_function(const char *arg)
 			return EXIT_SUCCESS;
 		}
 		conf.light_mode = 1;
-		if (conf.autols == 1)
-			reload_dirlist();
+		if (conf.autols == 1) reload_dirlist();
 		print_reload_msg(_("Light mode enabled\n"));
 	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
 		if (conf.light_mode == 0) {
@@ -906,8 +894,7 @@ lightmode_function(const char *arg)
 			return EXIT_SUCCESS;
 		}
 		conf.light_mode = 0;
-		if (conf.autols == 1)
-			reload_dirlist();
+		if (conf.autols == 1) reload_dirlist();
 		print_reload_msg(_("Light mode disabled\n"));
 	} else {
 		puts(LM_USAGE);
@@ -922,7 +909,7 @@ get_largest_alias_name(void)
 	int i = (int)aliases_n;
 	size_t largest = 0;
 	while (--i >= 0) {
-		size_t len = strlen(aliases[i].name);
+		const size_t len = strlen(aliases[i].name);
 		if (len > largest)
 			largest = len;
 	}
@@ -938,7 +925,9 @@ list_aliases(void)
 		return EXIT_SUCCESS;
 	}
 
-	size_t i, largest = get_largest_alias_name();
+	size_t i;
+	const size_t largest = get_largest_alias_name();
+
 	for (i = 0; i < aliases_n; i++) {
 		printf("%-*s %s->%s %s\n", (int)largest,
 			aliases[i].name, mi_c, df_c, aliases[i].cmd);
@@ -1016,13 +1005,11 @@ hidden_files_function(const char *arg)
 			? _("enabled") : _("disabled"));
 	} else if (strcmp(arg, "off") == 0) {
 		conf.show_hidden = 0;
-		if (conf.autols == 1)
-			reload_dirlist();
+		if (conf.autols == 1) reload_dirlist();
 		print_reload_msg(_("Hidden files disabled\n"));
 	} else if (strcmp(arg, "on") == 0) {
 		conf.show_hidden = 1;
-		if (conf.autols == 1)
-			reload_dirlist();
+		if (conf.autols == 1) reload_dirlist();
 		print_reload_msg(_("Hidden files enabled\n"));
 	}
 
@@ -1037,6 +1024,7 @@ toggle_exec_func(char **args)
 
 	int exit_status = EXIT_SUCCESS;
 	size_t i, n = 0;
+
 	for (i = 1; args[i]; i++) {
 		struct stat attr;
 		if (strchr(args[i], '\\')) {
@@ -1097,7 +1085,7 @@ props_function(char **args)
 		return EXIT_SUCCESS;
 	}
 
-	int full_dirsize = args[0][1] == 'p'; /* Command is 'pp' */
+	const int full_dirsize = args[0][1] == 'p'; /* Command is 'pp' */
 	return properties_function(args + 1, full_dirsize);
 }
 
@@ -1160,7 +1148,7 @@ bookmarks_func(char **args)
 	kbind_busy = 1;
 	/* Disable TAB completion while in Bookmarks */
 	rl_attempted_completion_function = NULL;
-	int exit_status = bookmarks_function(args);
+	const int exit_status = bookmarks_function(args);
 	/* Reenable TAB completion */
 	rl_attempted_completion_function = my_rl_completion;
 	/* Reenable keyboard shortcuts */
@@ -1179,7 +1167,7 @@ desel_function(char **args)
 
 	kbind_busy = 1;
 	rl_attempted_completion_function = NULL;
-	int exit_status = deselect(args);
+	const int exit_status = deselect(args);
 	rl_attempted_completion_function = my_rl_completion;
 	kbind_busy = 0;
 
@@ -1214,7 +1202,7 @@ new_instance_function(char **args)
 static int
 reload_function(void)
 {
-	int exit_status = reload_config();
+	const int exit_status = reload_config();
 	conf.welcome_message = 0;
 
 	if (conf.autols == 1)
@@ -1239,7 +1227,7 @@ media_function(char *arg, const int mode)
 
 	kbind_busy = 1;
 	rl_attempted_completion_function = NULL;
-	int exit_status = media_menu(mode);
+	const int exit_status = media_menu(mode);
 	rl_attempted_completion_function = my_rl_completion;
 	kbind_busy = 0;
 
@@ -1305,7 +1293,7 @@ check_actions(char **args)
 			}
 
 			setenv("CLIFM_PLUGIN_NAME", usr_actions[i].name, 1);
-			int ret = run_action(usr_actions[i].value, args);
+			const int ret = run_action(usr_actions[i].value, args);
 			unsetenv("CLIFM_PLUGIN_NAME");
 			return ret;
 		}
@@ -1389,7 +1377,7 @@ check_auto_first(char **args)
 		expand_and_deescape(&args[0], &deq_str);
 
 	char *tmp = deq_str ? deq_str : args[0];
-	size_t len = strlen(tmp);
+	const size_t len = strlen(tmp);
 	int rem_slash = 0;
 	if (len > 0 && tmp[len - 1] == '/') {
 		rem_slash = 1;
@@ -1428,14 +1416,14 @@ auto_open_file(char **args, char *tmp)
 	char *cmd[] = {"open", tmp, (args_n >= 1) ? args[1]
 		: NULL, (args_n >= 2) ? args[2] : NULL, NULL};
 	args_n++;
-	int ret = open_function(cmd);
+	const int ret = open_function(cmd);
 	args_n--;
 	free(tmp);
 
 	return ret;
 }
 
-static inline int
+static int
 autocd_dir(char *tmp)
 {
 	int ret = EXIT_SUCCESS;
@@ -1474,7 +1462,7 @@ check_auto_second(char **args)
 	}
 
 	if (conf.autocd == 1 && cdpath_n > 0 && !args[1]) {
-		int ret = cd_function(tmp, CD_NO_PRINT_ERROR);
+		const int ret = cd_function(tmp, CD_NO_PRINT_ERROR);
 		if (ret == EXIT_SUCCESS)
 			{ free(tmp); return EXIT_SUCCESS; }
 	}
@@ -1486,8 +1474,8 @@ check_auto_second(char **args)
 	if (conf.autocd == 1 && S_ISDIR(attr.st_mode) && !args[1])
 		return autocd_dir(tmp);
 
-	/* Regular, non-executable file, or exec file not in PATH
-	 * not ./file and not /path/to/file */
+	/* Regular, non-executable file, or exec file not in PATH,
+	 * not ./file, and not /path/to/file */
 	if (conf.auto_open == 1 && S_ISREG(attr.st_mode)
 	&& (!(attr.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH))
 	|| (!is_bin_cmd(tmp) && !(*tmp == '.' && *(tmp + 1) == '/')
@@ -1512,7 +1500,7 @@ static int
 ls_function(void)
 {
 	free_dirlist();
-	int ret = list_dir();
+	const int ret = list_dir();
 	get_sel_files();
 
 	return ret;
@@ -1644,7 +1632,7 @@ untrash_func(char **args, int *_cont)
 
 	kbind_busy = 1;
 	rl_attempted_completion_function = NULL;
-	int exit_status = untrash_function(args);
+	const int exit_status = untrash_function(args);
 	rl_attempted_completion_function = my_rl_completion;
 	kbind_busy = 0;
 
@@ -1699,7 +1687,7 @@ toggle_full_dir_size(const char *arg)
 static void
 set_cp_cmd(char **cmd, const int cp_force)
 {
-	int bk_cp_cmd = conf.cp_cmd;
+	const int bk_cp_cmd = conf.cp_cmd;
 	if (cp_force == 1) {
 		if (conf.cp_cmd == CP_ADVCP)
 			conf.cp_cmd = CP_ADVCP_FORCE;
@@ -1802,11 +1790,12 @@ is_path(char *str)
 {
 	if (!str || !*str)
 		return 0;
+
 	if (strchr(str, '\\')) {
 		char *p = unescape_str(str, 0);
 		if (!p)
 			return 0;
-		int ret = access(p, F_OK);
+		const int ret = access(p, F_OK);
 		free(p);
 		if (ret != 0)
 			return 0;
@@ -1846,7 +1835,7 @@ preview_edit(char *app)
 		return EXIT_FAILURE;
 	}
 
-	size_t len = config_dir_len + 15;
+	const size_t len = config_dir_len + 15;
 	char *file = xnmalloc(len, sizeof(char));
 	snprintf(file, len, "%s/preview.clifm", config_dir);
 
@@ -1879,9 +1868,9 @@ preview_function(char **args)
 			return preview_edit(args[1]);
 	}
 
-	size_t seln_bk = sel_n;
+	const size_t seln_bk = sel_n;
 
-	int fzf_preview_bk = conf.fzf_preview;
+	const int fzf_preview_bk = conf.fzf_preview;
 	enum tab_mode tabmode_bk = tabmode;
 
 	if (tabmode != FZF_TAB) {
@@ -2106,7 +2095,7 @@ check_fs_changes(void)
 	|| !workspaces[cur_ws].path)
 		return;
 
-	filesn_t cur_files = count_dir(workspaces[cur_ws].path, 0) - 2;
+	const filesn_t cur_files = count_dir(workspaces[cur_ws].path, 0) - 2;
 	struct stat a;
 
 	if (curdir_mtime != 0 && stat(workspaces[cur_ws].path, &a) != -1
@@ -2186,7 +2175,7 @@ is_write_cmd(const char *cmd)
 	if (wcmds_n == 0)
 		wcmds_n = (sizeof(wcmds) / sizeof(wcmds[0])) - 1;
 
-	size_t clen = strlen(cmd);
+	const size_t clen = strlen(cmd);
 	int i = (int)wcmds_n;
 
 	while (--i >= 0) {
@@ -2223,7 +2212,7 @@ exec_cmd(char **comm)
 	? comm[1] : comm[0]) == 1)
 		return EXIT_FAILURE;
 
-	int old_exit_code = exit_code;
+	const int old_exit_code = exit_code;
 	exit_code = EXIT_SUCCESS;
 
 	/* Remove backslash in front of command names: used to bypass alias names */
@@ -2816,9 +2805,12 @@ run_chained_cmd(char **cmd, size_t *err_code)
 void
 exec_chained_cmds(char *cmd)
 {
-	if (!cmd) return;
+	if (!cmd)
+		return;
 
-	size_t i = 0, cmd_len = strlen(cmd);
+	size_t i = 0;
+	const size_t cmd_len = strlen(cmd);
+
 	for (i = 0; i < cmd_len; i++) {
 		char *str = (char *)NULL;
 		size_t len = 0, cond_exec = 0, error_code = 0;
@@ -2846,7 +2838,7 @@ exec_chained_cmds(char *cmd)
 		run_chained_cmd(tmp_cmd, &error_code);
 
 		/* Do not continue if the execution was condtional and
-		 * the previous command failed */
+		 * the previous command failed. */
 		if (cond_exec && error_code)
 			break;
 	}
