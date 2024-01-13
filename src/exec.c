@@ -1365,11 +1365,11 @@ open_file_func(char **args, const filesn_t i)
 	return (-1);
 }
 
-/* Try to autocd or auto-open dir/file
+/* Try to autocd or auto-open dir/file.
  * Only autocd or auto-open here if not absolute path and if there
  * is no second argument or if second argument is "&"
- * If just 'edit', do not try to open a file named 'edit': always run
- * the 'edit' command */
+ * If just 'edit' or 'config', do not try to open a file named 'edit' or
+ * 'config': always run the 'edit/config' command. */
 static int
 check_auto_first(char **args)
 {
@@ -1380,7 +1380,8 @@ check_auto_first(char **args)
 	|| (args[1] && (*args[1] != '&' || args[1][1])))
 		return (-1);
 
-	if (*args[0] == 'e' && strcmp(args[0], "edit") == 0)
+	if ((*args[0] == 'e' && strcmp(args[0], "edit") == 0)
+	|| (*args[0] == 'c' && strcmp(args[0], "config") == 0))
 		return (-1);
 
 	char *deq_str = (char *)NULL;
@@ -1408,7 +1409,7 @@ check_auto_first(char **args)
 
 		free(deq_str);
 		deq_str = (char *)NULL;
-		int ret = open_file_func(args, i);
+		const int ret = open_file_func(args, i);
 		if (ret != -1)
 			return ret;
 		break;

@@ -95,7 +95,7 @@ int
 umask_function(char *arg)
 {
 	if (!arg) {
-		mode_t old_umask = umask(0);
+		const mode_t old_umask = umask(0);
 		printf("%04o\n", old_umask);
 		umask(old_umask);
 		return EXIT_SUCCESS;
@@ -208,14 +208,14 @@ xchmod(const char *file, const char *mode_str, const int flag)
 		return EXIT_FAILURE;
 	}
 
-	int fd = open(file, O_RDONLY);
+	const int fd = open(file, O_RDONLY);
 	if (fd == -1) {
 		err(flag == 1 ? 'e' : 0, flag == 1 ? PRINT_PROMPT : NOPRINT_PROMPT,
 			"xchmod: '%s': %s\n", file, strerror(errno));
 		return errno;
 	}
 
-	mode_t mode = (mode_t)strtol(mode_str, 0, 8);
+	const mode_t mode = (mode_t)strtol(mode_str, 0, 8);
 	if (fchmod(fd, mode) == -1) {
 		close(fd);
 		err(flag == 1 ? 'e' : 0, flag == 1 ? PRINT_PROMPT : NOPRINT_PROMPT,
@@ -262,7 +262,7 @@ get_dup_file_dest_dir(void)
 
 		/* Expand ELN */
 		if (IS_DIGIT(*dir) && is_number(dir)) {
-			int n = atoi(dir);
+			const int n = atoi(dir);
 			if (n > 0 && (filesn_t)n <= files) {
 				free(dir);
 				char *name = file_info[n - 1].name;
@@ -341,7 +341,7 @@ dup_file(char **cmd)
 
 		/* Use source as destiny file name: source.copy, and, if already
 		 * exists, source.copy-n, where N is an integer greater than zero */
-		size_t source_len = strlen(source);
+		const size_t source_len = strlen(source);
 		int rem_slash = 0;
 		if (strcmp(source, "/") != 0 && source_len > 0
 		&& source[source_len - 1] == '/') {
@@ -450,7 +450,7 @@ CONT:
 		else
 			mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
 
-		int fd = open(name, O_WRONLY | O_CREAT | O_EXCL, mode);
+		const int fd = open(name, O_WRONLY | O_CREAT | O_EXCL, mode);
 		if (fd == -1) {
 			xerror("new: '%s': %s\n", name, strerror(errno));
 			status = EXIT_FAILURE;
@@ -666,8 +666,8 @@ format_new_filename(char **name)
 	if (!p || !*p)
 		return EXIT_FAILURE;
 
-	size_t flen = strlen(p);
-	int is_dir = (flen > 1 && p[flen - 1] == '/') ? 1 : 0;
+	const size_t flen = strlen(p);
+	const int is_dir = (flen > 1 && p[flen - 1] == '/') ? 1 : 0;
 	if (is_dir == 1)
 		p[flen - 1 ] = '\0'; /* Remove ending slash */
 
@@ -677,7 +677,7 @@ format_new_filename(char **name)
 		if (*p == '~')
 			tilde = tilde_expand(p);
 
-		size_t len = tilde ? strlen(tilde) : flen;
+		const size_t len = tilde ? strlen(tilde) : flen;
 		npath = normalize_path(tilde ? tilde : p, len);
 		free(tilde);
 
@@ -688,7 +688,7 @@ format_new_filename(char **name)
 	if (!npath)
 		return EXIT_FAILURE;
 
-	size_t name_len = strlen(npath) + 2;
+	const size_t name_len = strlen(npath) + 2;
 	*name = xnrealloc(*name, name_len, sizeof(char));
 	snprintf(*name, name_len, "%s%c", npath, is_dir == 1 ? '/' : 0);
 	free(npath);
@@ -765,14 +765,14 @@ static int
 check_file_existence(char *file)
 {
 	int s = 0;
-	size_t l = strlen(file);
+	const size_t l = strlen(file);
 	if (l > 0 && file[l - 1] == '/') {
 		file[l - 1] = '\0';
 		s = 1;
 	}
 
 	struct stat a;
-	int ret = lstat(file, &a);
+	const int ret = lstat(file, &a);
 
 	if (s == 1)
 		file[l - 1] = '/';
@@ -827,7 +827,7 @@ create_files(char **args, const int is_md)
 			continue;
 		}
 
-		int ret = create_file(args[i]);
+		const int ret = create_file(args[i]);
 		if (ret == EXIT_SUCCESS) {
 			new_files[new_files_n] = args[i];
 			new_files_n++;
@@ -860,7 +860,7 @@ create_dirs(char **args)
 	 * them all as directories. */
 	size_t i;
 	for (i = 0; args[i]; i++) {
-		size_t len = strlen(args[i]);
+		const size_t len = strlen(args[i]);
 		if (len > 0 && args[i][len - 1] == '/')
 			continue;
 
@@ -877,10 +877,11 @@ create_dirs(char **args)
 static int
 err_no_link(const char *file)
 {
-	int saved_errno = errno;
+	const int saved_errno = errno;
 
 	char target[PATH_MAX + 1]; *target = '\0';
-	ssize_t tlen = readlinkat(XAT_FDCWD, file, target, sizeof(target) - 1);
+	const ssize_t tlen =
+		readlinkat(XAT_FDCWD, file, target, sizeof(target) - 1);
 	if (tlen != -1)
 		target[tlen] = '\0';
 
@@ -1078,7 +1079,7 @@ edit_link(char *link)
 		free(tmp);
 	}
 
-	size_t len = strlen(link);
+	const size_t len = strlen(link);
 	if (len > 0 && link[len - 1] == '/')
 		link[len - 1] = '\0';
 
@@ -1096,7 +1097,7 @@ edit_link(char *link)
 
 	/* Get file pointed to by symlink and report to the user */
 	char target[PATH_MAX + 1]; *target = '\0';
-	ssize_t tlen = readlinkat(XAT_FDCWD, link, target, sizeof(target) - 1);
+	const ssize_t tlen = readlinkat(XAT_FDCWD, link, target, sizeof(target) - 1);
 	if (tlen != -1)
 		target[tlen] = '\0';
 
@@ -1207,7 +1208,7 @@ symlink_file(char **args)
 		return EXIT_FAILURE;
 	}
 
-	int ret = symlinkat(abs_path, XAT_FDCWD, link_name);
+	const int ret = symlinkat(abs_path, XAT_FDCWD, link_name);
 	free(abs_path);
 
 	if (ret == -1) {
@@ -1226,6 +1227,7 @@ vv_rename_files(char **args)
 	tmp[0] = savestring("br", 2);
 
 	size_t i, l = strlen(args[args_n]), c = 1;
+
 	if (l > 0 && args[args_n][l - 1] == '/')
 		args[args_n][l - 1] = '\0';
 
@@ -1245,7 +1247,7 @@ vv_rename_files(char **args)
 	}
 
 	tmp[c] = (char *)NULL;
-	int ret = bulk_rename(tmp);
+	const int ret = bulk_rename(tmp);
 
 	for (i = 0; tmp[i]; i++)
 		free(tmp[i]);
@@ -1364,7 +1366,7 @@ run_cp_mv_cmd(char **cmd, const int skip_force)
 		} else {
 			char *p = unescape_str(cmd[1], 0);
 			struct stat a;
-			int ret = lstat(p ? p : cmd[1], &a);
+			const int ret = lstat(p ? p : cmd[1], &a);
 			free(p);
 			if (ret == -1) {
 				xrename = 0;
@@ -1431,7 +1433,7 @@ run_cp_mv_cmd(char **cmd, const int skip_force)
 	}
 
 	tcmd[n] = (char *)NULL;
-	int ret = launch_execv(tcmd, FOREGROUND, E_NOFLAG);
+	const int ret = launch_execv(tcmd, FOREGROUND, E_NOFLAG);
 
 	for (i = 0; i < n; i++)
 		free(tcmd[i]);
@@ -1475,7 +1477,7 @@ cp_mv_file(char **args, const int copy_and_rename, const int force)
 		return EXIT_FAILURE;
 
 	if (*args[0] == 'm' && args[1]) {
-		size_t len = strlen(args[1]);
+		const size_t len = strlen(args[1]);
 		if (len > 0 && args[1][len - 1] == '/')
 			args[1][len - 1] = '\0';
 	}
@@ -1520,7 +1522,7 @@ cp_mv_file(char **args, const int copy_and_rename, const int force)
 
 	tcmd[n] = (char *)NULL;
 
-	int ret = launch_execv(tcmd, FOREGROUND, E_NOFLAG);
+	const int ret = launch_execv(tcmd, FOREGROUND, E_NOFLAG);
 
 	for (i = 0; tcmd[i]; i++)
 		free(tcmd[i]);
@@ -1662,7 +1664,7 @@ remove_files(char **args)
 
 	int i;
 	for (i = 0; args[i]; i++);
-	size_t num = i > 0 ? (size_t)i - 1 : (size_t)i;
+	const size_t num = i > 0 ? (size_t)i - 1 : (size_t)i;
 
 	struct stat a;
 	char **rm_cmd = xnmalloc(num + 4, sizeof(char *));
@@ -1685,7 +1687,7 @@ remove_files(char **args)
 		 * because "Is a directory". So, let's remove the ending slash:
 		 * stat(2) will take it as the symlink it is and rm(1) will remove
 		 * the symlink (not the target) without complains. */
-		size_t len = strlen(args[i]);
+		const size_t len = strlen(args[i]);
 		if (len > 0 && args[i][len - 1] == '/')
 			args[i][len - 1] = '\0';
 
@@ -1772,11 +1774,11 @@ END:
 char *
 export_files(char **filenames, const int open)
 {
-	size_t len = strlen(tmp_dir) + 14;
+	const size_t len = strlen(tmp_dir) + 14;
 	char *tmp_file = xnmalloc(len, sizeof(char));
 	snprintf(tmp_file, len, "%s/%s", tmp_dir, TMP_FILENAME);
 
-	int fd = mkstemp(tmp_file);
+	const int fd = mkstemp(tmp_file);
 	if (fd == -1) {
 		xerror("exp: '%s': %s\n", tmp_file, strerror(errno));
 		free(tmp_file);
@@ -1824,7 +1826,7 @@ export_files(char **filenames, const int open)
 	if (!open)
 		return tmp_file;
 
-	int ret = open_file(tmp_file);
+	const int ret = open_file(tmp_file);
 	if (ret == EXIT_SUCCESS)
 		return tmp_file;
 
