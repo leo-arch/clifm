@@ -27,7 +27,8 @@
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/wait.h> /* waitpid, access */
+#include <sys/wait.h> /* waitpid */
+#include <unistd.h> /* access */
 
 #ifdef __OpenBSD__
 typedef char *rl_cpvfunc_t;
