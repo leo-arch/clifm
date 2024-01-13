@@ -402,7 +402,7 @@ name_is_reserved_keyword(const char *name)
 
 	if ( ((*name == 'e' || *name == 'd' || *name == 'a') && !*(name + 1))
 	|| strcmp(name, "edit") == 0 || strcmp(name, "del") == 0
-	|| strcmp(name, "add") == 0) {
+	|| strcmp(name, "add") == 0 || strcmp(name, "reload") == 0) {
 		xerror(_("bookmarks: '%s': Reserved bookmark keyword\n"), name);
 		return 1;
 	}
