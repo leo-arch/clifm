@@ -27,8 +27,8 @@
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>   /* access */
 #include <sys/wait.h> /* waitpid */
-#include <unistd.h> /* access */
 
 #ifdef __OpenBSD__
 typedef char *rl_cpvfunc_t;
@@ -620,7 +620,7 @@ msgs_function(const char *arg)
 	}
 
 	if (arg && strcmp(arg, "clear") == 0) {
-		if (!msgs_n) {
+		if (msgs_n == 0) {
 			printf(_("%s: No messages\n"), PROGRAM_NAME);
 			return EXIT_SUCCESS;
 		}
@@ -637,7 +637,7 @@ msgs_function(const char *arg)
 		return EXIT_SUCCESS;
 	}
 
-	if (msgs_n) {
+	if (msgs_n > 0) {
 		size_t i;
 		for (i = 0; i < (size_t)msgs_n; i++)
 			printf("%s", messages[i]);

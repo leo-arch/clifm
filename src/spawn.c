@@ -22,6 +22,8 @@
  * MA 02110-1301, USA.
 */
 
+#include "helpers.h"
+
 #include <errno.h>    /* errno */
 #ifndef _BE_POSIX
 # include <paths.h>
@@ -38,7 +40,6 @@
 #include <unistd.h>   /* fork, execl, execvp, dup2, close, _exit */
 #include <sys/wait.h> /* waitpid */
 
-#include "helpers.h"
 #include "listing.h"  /* reload_dirlist */
 #include "misc.h"     /* xerror */
 
@@ -75,7 +76,7 @@ run_in_background(const pid_t pid)
 	int status = 0;
 
 	if (waitpid(pid, &status, WNOHANG) == -1) {
-		int ret = errno;
+		const int ret = errno;
 		xerror("%s: waitpid: %s\n", PROGRAM_NAME, strerror(errno));
 		return ret;
 	}

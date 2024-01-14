@@ -173,8 +173,8 @@ log_cmd(void)
 static void
 write_msg_into_logfile(const char *_msg)
 {
-	FILE *msg_fp = open_fappend(msgs_log_file);
-	if (!msg_fp) {
+	FILE *fp = open_fappend(msgs_log_file);
+	if (!fp) {
 		/* Do not log this error: We might enter into an infinite loop
 		 * trying to access a file that cannot be accessed. Just warn the user
 		 * and print the error to STDERR. */
@@ -185,8 +185,8 @@ write_msg_into_logfile(const char *_msg)
 	}
 
 	char *date = get_date();
-	fprintf(msg_fp, "[%s] %s", date ? date : "unknown", _msg);
-	fclose(msg_fp);
+	fprintf(fp, "[%s] %s", date ? date : "unknown", _msg);
+	fclose(fp);
 	free(date);
 }
 
@@ -200,6 +200,7 @@ send_desktop_notification(char *msg)
 
 	char type[12];
 	*type = '\0';
+
 	switch (pmsg) {
 #if defined(__HAIKU__)
 	case ERROR: snprintf(type, sizeof(type), "error"); break;
@@ -232,7 +233,7 @@ send_desktop_notification(char *msg)
 	char name[NAME_MAX];
 	snprintf(name, sizeof(name), "%s: ", PROGRAM_NAME);
 	char *p = msg;
-	size_t nlen = strnlen(name, sizeof(name));
+	const size_t nlen = strnlen(name, sizeof(name));
 	int ret = strncmp(p, name, nlen);
 	if (ret == 0) {
 		if (mlen <= nlen)
