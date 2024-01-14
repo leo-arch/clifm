@@ -191,7 +191,10 @@ set_eln_color(void)
  *
  * PROMPT_FLAG tells whether to print the message immediately before the next
  * prompt or rather in place.
- *  */
+ *
+ * This function guarantees not to modify the value of errno, usually passed
+ * as part of the format string to print error messages.
+ * */
 __attribute__((__format__(__printf__, 3, 0)))
 /* We use __attribute__ here to silence clang warning: "format string is
  * not a string literal" */
@@ -199,50 +202,53 @@ int
 err(const int msg_type, const int prompt_flag, const char *format, ...)
 {
 	const int saved_errno = errno;
-	va_list arglist, tmp_list;
+	va_list arglist;
 
 	va_start(arglist, format);
-	va_copy(tmp_list, arglist);
-	const int size = vsnprintf((char *)NULL, 0, format, tmp_list);
-	va_end(tmp_list);
-
-	if (size < 0) {
-		va_end(arglist);
-		errno = saved_errno;
-		return EXIT_FAILURE;
-	}
-
-	char *buf = xnmalloc((size_t)size + 1, sizeof(char));
-	vsnprintf(buf, (size_t)size + 1, format, arglist);
+	int size = vsnprintf((char *)NULL, 0, format, arglist);
 	va_end(arglist);
 
-	/* If the new message is the same as the last message, skip it */
-	if (msgs_n > 0 && msg_type != 'f' && strcmp(messages[msgs_n - 1], buf) == 0)
-		{free(buf); errno = saved_errno; return EXIT_SUCCESS;}
+	if (size < 0)
+		goto ERROR;
 
-	if (buf) {
-		if (msg_type >= 'e') {
-			switch (msg_type) {
-			case 'e': pmsg = ERROR; msgs.error++; break;
-			case 'w': pmsg = WARNING; msgs.warning++; break;
-			case 'n': pmsg = NOTICE; msgs.notice++; break;
-			default:  pmsg = NOMSG; break;
-			}
+	const size_t n = (size_t)size + 1;
+	char *buf = xnmalloc(n, sizeof(char));
+	va_start(arglist, format);
+	size = vsnprintf(buf, n, format, arglist);
+	va_end(arglist);
+
+	if (size < 0 || !buf || !*buf)
+		{free(buf); goto ERROR;}
+
+	// If the new message is the same as the last message, skip it.
+	if (msgs_n > 0 && msg_type != 'f' && *messages[msgs_n - 1] == *buf
+	&& strcmp(messages[msgs_n - 1], buf) == 0)
+		{free(buf); goto ERROR;}
+
+	if (msg_type >= 'e') {
+		switch (msg_type) {
+		case 'e': pmsg = ERROR; msgs.error++; break;
+		case 'w': pmsg = WARNING; msgs.warning++; break;
+		case 'n': pmsg = NOTICE; msgs.notice++; break;
+		default:  pmsg = NOMSG; break;
 		}
-
-		int logme = msg_type == ERR_NO_LOG ? 0 : (msg_type == 'n' ? -1 : 1);
-		int add_to_msgs_list = 1;
-		if (msg_type == ERR_NO_STORE) {
-			add_to_msgs_list = 0;
-			logme = 1;
-		}
-		log_msg(buf, prompt_flag, logme, add_to_msgs_list);
-
-		free(buf);
-		errno = saved_errno;
-		return EXIT_SUCCESS;
 	}
 
+	int logme = msg_type == ERR_NO_LOG ? 0 : (msg_type == 'n' ? -1 : 1);
+	int add_to_msgs_list = 1;
+
+	if (msg_type == ERR_NO_STORE) {
+		add_to_msgs_list = 0;
+		logme = 1;
+	}
+
+	log_msg(buf, prompt_flag, logme, add_to_msgs_list);
+
+	free(buf);
+	errno = saved_errno;
+	return EXIT_SUCCESS;
+
+ERROR:
 	errno = saved_errno;
 	return EXIT_FAILURE;
 }
