@@ -1011,8 +1011,12 @@ edit_colorscheme(char *app)
 		return EXIT_FAILURE;
 	}
 
-	stat(file, &attr);
-	time_t mtime_bfr = (time_t)attr.st_mtime;
+	if (stat(file, &attr) == -1) {
+		xerror("cs: '%s': %s\n", file, strerror(errno));
+		return errno;
+	}
+
+	const time_t mtime_bfr = attr.st_mtime;
 
 	int ret = EXIT_FAILURE;
 	if (app && *app) {
@@ -1027,11 +1031,16 @@ edit_colorscheme(char *app)
 	if (ret != EXIT_SUCCESS)
 		return ret;
 
-	stat(file, &attr);
-	if (mtime_bfr != (time_t)attr.st_mtime
-	&& set_colors(cur_cscheme, 0) == EXIT_SUCCESS && conf.autols == 1) {
+	if (stat(file, &attr) == -1) {
+		xerror("cs: '%s': %s\n", file, strerror(errno));
+		return errno;
+	}
+
+	if (mtime_bfr != attr.st_mtime
+	&& set_colors(cur_cscheme, 0) == EXIT_SUCCESS) {
 		set_fzf_preview_border_type();
-		reload_dirlist();
+		if (conf.autols == 1)
+			reload_dirlist();
 	}
 
 	return ret;
