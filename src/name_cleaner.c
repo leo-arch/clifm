@@ -349,87 +349,57 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 		? P_tmpdir : tmp_dir, TMP_FILENAME);
 
 	int fd = mkstemp(f);
-	if (fd == -1) {
-		err('e', PRINT_PROMPT, "bleach: mkstemp: '%s': %s\n", f, strerror(errno));
-		return (struct bleach_t *)NULL;
-	}
+	if (fd == -1)
+		goto ERROR;
 
-	FILE *fp = (FILE *)NULL;
+	FILE *fp = fdopen(fd, "w");
+	if (!fp)
+		goto ERROR;
 
-#ifndef HAVE_DPRINTF
-	fp = fopen(f, "w");
-	if (!fp) {
-		if (unlink(f) == -1)
-			err('w', PRINT_PROMPT, "bleach: '%s': %s\n", f, strerror(errno));
-		err('e', PRINT_PROMPT, "bleach: '%s': %s\n", f, strerror(errno));
-		return (struct bleach_t *)NULL;
-	}
-#endif /* !HAVE_DPRINT */
-
-#ifdef HAVE_DPRINTF
-	dprintf(fd, BLEACH_TMP_HEADER);
-#else
 	fprintf(fp, BLEACH_TMP_HEADER);
-#endif /* HAVE_DPRINTF */
 
 	size_t i;
 	/* Copy all files to be renamed to the temp file */
 	for (i = 0; i < *n; i++) {
-#ifdef HAVE_DPRINTF
-		dprintf(fd, "original: %s\nreplacement: %s\n\n",
-			bfiles[i].original, bfiles[i].replacement);
-#else
 		fprintf(fp, "original: %s\nreplacement: %s\n\n",
 			bfiles[i].original, bfiles[i].replacement);
-#endif /* HAVE_DPRINTF */
 	}
 	size_t total_files = i;
 
-#if defined(__HAIKU__) || defined(__sun)
 	fclose(fp);
-#endif /* __HAIKU__ || __sun */
-	close(fd);
 
 	fp = open_fread(f, &fd);
-	if (!fp) {
-		if (unlink(f) == -1)
-			err('w', PRINT_PROMPT, "bleach: '%s': %s\n", f, strerror(errno));
-		err('e', PRINT_PROMPT, "bleach: '%s': %s\n", f, strerror(errno));
-		return (struct bleach_t *)NULL;
-	}
+	if (!fp)
+		goto ERROR;
 
 	struct stat attr;
-	fstat(fd, &attr);
-	const time_t mtime_bfr = (time_t)attr.st_mtime;
+	if (fstat(fd, &attr) == -1)
+		goto ERROR_CLOSE;
+	const time_t mtime_bfr = attr.st_mtime;
+
+	fclose(fp);
 
 	/* Open the temp file */
 	open_in_foreground = 1;
 	const int exit_status = open_file(f);
 	open_in_foreground = 0;
-	if (exit_status != EXIT_SUCCESS) {
-		xerror("bleach: '%s': %s\n", f, strerror(errno));
-		if (unlink(f) == -1)
-			xerror("bleach: '%s': %s\n", f, strerror(errno));
-		fclose(fp);
-		return (struct bleach_t *)NULL;
-	}
+	if (exit_status != EXIT_SUCCESS)
+		goto ERROR;
 
-	fclose(fp);
 	fp = open_fread(f, &fd);
-	if (!fp) {
-		if (unlink(f) == -1)
-			err('w', PRINT_PROMPT, "bleach: '%s': %s\n", f, strerror(errno));
-		err('e', PRINT_PROMPT, "bleach: '%s': %s\n", f, strerror(errno));
-		return (struct bleach_t *)NULL;
-	}
+	if (!fp)
+		goto ERROR;
 
 	/* Compare the new modification time to the stored one: if they
 	 * match, nothing has been modified. */
-	fstat(fd, &attr);
-	if (mtime_bfr == (time_t)attr.st_mtime) {
-		if (unlinkat(fd, f, 0) == -1)
-			err('w', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
+	if (fstat(fd, &attr) == -1)
+		goto ERROR_CLOSE;
+
+	if (mtime_bfr == attr.st_mtime) {
 		fclose(fp);
+		if (unlinkat(fd, f, 0) == -1)
+			err('w', PRINT_PROMPT, "bleach: Cannot remove '%s': %s\n",
+				f, strerror(errno));
 		*edited_names = 0;
 		return bfiles; /* Return the original list of files */
 	}
@@ -507,9 +477,19 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 	free(line);
 
 	if (unlinkat(fd, f, 0) == -1)
-		err('w', PRINT_PROMPT, "bleach: '%s': %s\n", f, strerror(errno));
+		err('w', PRINT_PROMPT, "bleach: Cannot remove '%s': %s\n",
+			f, strerror(errno));
 	fclose(fp);
 
+	return bfiles;
+
+ERROR_CLOSE:
+	fclose(fp);
+ERROR:
+	*edited_names = -1;
+	xerror("bleach: '%s': %s\n", f, strerror(errno));
+	if (unlink(f) == -1)
+		xerror("bleach: Cannot remove '%s': %s\n", f, strerror(errno));
 	return bfiles;
 }
 
@@ -558,7 +538,7 @@ bleach_files(char **names)
 		bfiles[f].original = savestring(names[i], nlen);
 		if (sl) {
 			*sl = '\0';
-			size_t len = nlen + strlen(p) + 2;
+			const size_t len = nlen + strlen(p) + 2;
 			bfiles[f].replacement = xnmalloc(len, sizeof(char));
 			snprintf(bfiles[f].replacement, len, "%s/%s", names[i], p);
 			*sl = '/';
@@ -601,7 +581,7 @@ CONFIRM:
 		case 'e':
 			_edit = 1;
 			bfiles = edit_replacements(bfiles, &f, &edited_names);
-			if (!bfiles)
+			if (!bfiles || edited_names == -1)
 				break;
 
 			if (edited_names == 1 && f > 0) {
@@ -626,6 +606,15 @@ CONFIRM:
 		free(bfiles);
 		printf(_("%s: Nothing to do\n"), FUNC_NAME);
 		return EXIT_SUCCESS;
+	}
+
+	if (edited_names == -1) { /* ERROR */
+		for (i = 0; i < f; i++) {
+			free(bfiles[i].original);
+			free(bfiles[i].replacement);
+		}
+		free(bfiles);
+		return EXIT_FAILURE;
 	}
 
 	/* The user entered 'e' to edit the file, but nothing was modified
