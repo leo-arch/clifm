@@ -285,10 +285,10 @@ remotes_edit(char *app)
 	struct stat attr;
 	if (stat(remotes_file, &attr) == -1) {
 		xerror("net: '%s': %s\n", remotes_file, strerror(errno));
-		return EXIT_FAILURE;
+		return errno;
 	}
 
-	time_t mtime_bfr = (time_t)attr.st_mtime;
+	const time_t mtime_bfr = attr.st_mtime;
 
 	int ret = EXIT_SUCCESS;
 	if (app && *app) {
@@ -308,7 +308,7 @@ remotes_edit(char *app)
 		return errno;
 	}
 
-	if (mtime_bfr != (time_t)attr.st_mtime) {
+	if (mtime_bfr != attr.st_mtime) {
 		free_remotes(0);
 		load_remotes();
 		print_reload_msg(_("File modified. Remotes reloaded\n"));

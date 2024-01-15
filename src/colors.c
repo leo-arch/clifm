@@ -1551,10 +1551,10 @@ store_extension_line(const char *line)
 
 	ext_colors = xnrealloc(ext_colors, ext_colors_n + 1, sizeof(struct ext_t));
 
-	size_t len = (size_t)(q - line);
+	const size_t len = (size_t)(q - line);
 	ext_colors[ext_colors_n].len = len;
 	ext_colors[ext_colors_n].name = savestring(line, len);
-	size_t elen = strlen(code) + 3;
+	const size_t elen = strlen(code) + 3;
 	ext_colors[ext_colors_n].value = xnmalloc(elen, sizeof(char));
 	snprintf(ext_colors[ext_colors_n].value, elen, "0;%s", code);
 	ext_colors[ext_colors_n].value_len = elen - 1;
@@ -2697,12 +2697,12 @@ colors_list(char *ent, const int eln, const int pad, const int new_line)
 		rem_slash = 1;
 	}
 
-	int ret = lstat(p, &attr);
+	const int ret = lstat(p, &attr);
 	if (rem_slash == 1)
 		p[len - 1] = '/';
 
 	char *wname = (char *)NULL;
-	size_t wlen = wc_xstrlen(ent);
+	const size_t wlen = wc_xstrlen(ent);
 	if (wlen == 0) /* Invalid chars found. */
 		wname = replace_invalid_chars(ent);
 
@@ -2878,7 +2878,7 @@ print_color_blocks(void)
 {
 	UNSET_LINE_WRAP;
 
-	int pad = (term_cols - 24) / 2;
+	const int pad = (term_cols - 24) / 2;
 	printf("\x1b[%dC\x1b[0;40m   \x1b[0m\x1b[0;41m   \x1b[0m\x1b[0;42m   "
 		"\x1b[0m\x1b[0;43m   \x1b[0m\x1b[0;44m   \x1b[0m\x1b[0;45m   "
 		"\x1b[0m\x1b[0;46m   \x1b[0m\x1b[0;47m   \x1b[0m\n", pad);

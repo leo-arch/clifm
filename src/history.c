@@ -399,11 +399,11 @@ edit_history(char **args)
 {
 	struct stat attr;
 	if (stat(hist_file, &attr) == -1) {
-		int tmp_err = errno;
 		xerror("history: '%s': %s\n", hist_file, strerror(errno));
-		return tmp_err;
+		return errno;
 	}
-	time_t mtime_bfr = (time_t)attr.st_mtime;
+
+	const time_t mtime_bfr = attr.st_mtime;
 
 	int ret = EXIT_SUCCESS;
 
@@ -421,10 +421,14 @@ edit_history(char **args)
 		return ret;
 
 	/* Get modification time after opening the config file. */
-	stat(hist_file, &attr);
+	if (stat(hist_file, &attr) == -1) {
+		xerror("history: '%s': %s\n", hist_file, strerror(errno));
+		return errno;
+	}
+
 	/* If modification times differ, the file was modified after being
 	 * opened. */
-	if (mtime_bfr != (time_t)attr.st_mtime) {
+	if (mtime_bfr != attr.st_mtime) {
 		ret = reload_history();
 		print_reload_msg(_("File modified. History entries reloaded\n"));
 		return ret;

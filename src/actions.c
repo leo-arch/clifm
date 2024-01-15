@@ -265,7 +265,7 @@ edit_actions(char *app)
 	struct stat attr;
 	if (stat(actions_file, &attr) == -1) {
 		xerror("actions: '%s': %s\n", actions_file, strerror(errno));
-		return EXIT_FAILURE;
+		return errno;
 	}
 
 	const time_t mtime_bfr = attr.st_mtime;
@@ -285,7 +285,10 @@ edit_actions(char *app)
 		return ret;
 
 	/* Get modification time after opening the file */
-	stat(actions_file, &attr);
+	if (stat(actions_file, &attr) == -1) {
+		xerror("actions: '%s': %s\n", actions_file, strerror(errno));
+		return errno;
+	}
 
 	if (mtime_bfr == attr.st_mtime)
 		return EXIT_SUCCESS;

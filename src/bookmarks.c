@@ -117,7 +117,11 @@ edit_bookmarks(char *cmd, const int flag)
 		return ret;
 	}
 
-	stat(bm_file, &a);
+	if (stat(bm_file, &a) == -1) {
+		xerror("bookmarks: '%s': %s\n", bm_file, strerror(errno));
+		return errno;
+	}
+
 	if (prev != a.st_mtime) {
 		reload_bookmarks();
 

@@ -340,10 +340,10 @@ edit_jumpdb(char *app)
 	struct stat attr;
 	if (stat(jump_file, &attr) == -1) {
 		xerror("jump: '%s': %s\n", jump_file, strerror(errno));
-		return EXIT_FAILURE;
+		return errno;
 	}
 
-	time_t mtime_bfr = (time_t)attr.st_mtime;
+	const time_t mtime_bfr = attr.st_mtime;
 
 	int ret = EXIT_FAILURE;
 	if (app && *app) {
@@ -358,7 +358,10 @@ edit_jumpdb(char *app)
 	if (ret != EXIT_SUCCESS)
 		return ret;
 
-	stat(jump_file, &attr);
+	if (stat(jump_file, &attr) == -1) {
+		xerror("jump: '%s': %s\n", jump_file, strerror(errno));
+		return errno;
+	}
 
 	if (mtime_bfr == (time_t)attr.st_mtime)
 		return EXIT_SUCCESS;
