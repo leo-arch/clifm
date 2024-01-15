@@ -84,8 +84,8 @@ is_file_in_cwd(char *name)
 		return 0;
 
 	char *cwd = workspaces[cur_ws].path;
-	size_t cwd_len = strlen(cwd);
-	size_t rpath_len = strnlen(rpath, sizeof(rpath));
+	const size_t cwd_len = strlen(cwd);
+	const size_t rpath_len = strnlen(rpath, sizeof(rpath));
 	if (rpath_len < cwd_len)
 		return 0;
 
@@ -162,8 +162,9 @@ check_term_support(const char *env_term)
 		return;
 	}
 
-	size_t i, len = strlen(env_term);
-	/* Color and cursor position request support */
+	size_t i;
+	const size_t len = strlen(env_term);
+	/* Color and cursor position request support. */
 	int index = -1;
 
 	if (*env_term == 'x' && strcmp(env_term, "xterm-kitty") == 0)
@@ -416,7 +417,7 @@ check_file_access(const mode_t mode, const uid_t uid, const gid_t gid)
 
 	int f = 0; /* Hold file ownership flags */
 
-	mode_t val = (mode & (mode_t)~S_IFMT);
+	const mode_t val = (mode & (mode_t)~S_IFMT);
 	if (val & S_IRUSR) f |= R_USR;
 	if (val & S_IXUSR) f |= X_USR;
 

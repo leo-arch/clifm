@@ -683,9 +683,8 @@ get_archive_filename(void)
 		flags |= NO_FIX_RL_POINT;
 		name = rl_no_hist(_("File name ('q' to quit): "));
 		flags &= ~NO_FIX_RL_POINT;
-		if (!name)
-			continue;
-		if (!*name) {
+
+		if (!name || !*name) {
 			free(name);
 			name = (char *)NULL;
 			continue;
@@ -745,7 +744,7 @@ zstandard(char *in_file, char *out_file, const char mode, const char op)
 	/* mode == 'd' */
 
 	/* op is non-zero when multiple files, including at least one
-	 * zst file, are passed to the archiver function */
+	 * zst file, are passed to the archiver function. */
 	if (op != 0) {
 		char option[3] = "";
 
@@ -882,23 +881,23 @@ compress_files(char **args)
 	if (!name)
 		return exit_status;
 
-	/* # ZSTANDARD # */
 	char *ret = strrchr(name, '.');
-	if (strcmp(ret, ".zst") == 0) {
+
+	/* # ZSTANDARD # */
+	if (ret && strcmp(ret, ".zst") == 0) {
 		exit_status = compress_zstandard(name, args);
 		free(name);
 		return exit_status;
 	}
 
 	/* # ISO 9660 # */
-	if (strcmp(ret, ".iso") == 0) {
+	if (ret && strcmp(ret, ".iso") == 0) {
 		exit_status = create_iso(args[1], name);
 		free(name);
 		return exit_status;
 	}
 
 	/* # OTHER FORMATS # */
-	/* Construct the command */
 	exit_status = compress_others(args, name);
 	free(name);
 

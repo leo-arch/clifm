@@ -276,17 +276,17 @@ send_desktop_notification(char *msg)
 /* Handle the error message MSG.
  *
  * If ADD_TO_MSGS_LIST is 1, store MSG into the messages array: MSG will be
- * accessible to the user via the 'msg' command
+ * accessible to the user via the 'msg' command.
  *
  * If PRINT_PROMPT is 1, either raise a flag to tell the next prompt to print
  * the message itself, or, if desktop notifications are enabled and LOGME is
- * not zero (ERR_NO_LOG), send the notification to the notification daemon
- * NOTE: if not zero, LOGME could be either 1 (error/warning) or -1 (notice)
+ * not zero (ERR_NO_LOG), send the notification to the notification daemon.
+ * NOTE: if not zero, LOGME could be either 1 (error/warning) or -1 (notice).
  *
- * If PRINT_PROMPT is not 1, MSG is printed directly here
+ * If PRINT_PROMPT is not 1, MSG is printed directly here.
  *
  * Finally, if logs are enabled and LOGME is 1, write the message into the log
- * file as follows: "m:[date] msg", where 'date' is YYYY-MM-DDTHH:MM:SS */
+ * file as follows: "m:[date] msg", where 'date' is YYYY-MM-DDTHH:MM:SS. */
 void
 log_msg(char *_msg, const int print_prompt, const int logme,
 	const int add_to_msgs_list)

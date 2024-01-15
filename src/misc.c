@@ -220,7 +220,7 @@ err(const int msg_type, const int prompt_flag, const char *format, ...)
 	if (size < 0 || !buf || !*buf)
 		{free(buf); goto ERROR;}
 
-	// If the new message is the same as the last message, skip it.
+	/* If the new message is the same as the last message, skip it. */
 	if (msgs_n > 0 && msg_type != 'f' && *messages[msgs_n - 1] == *buf
 	&& strcmp(messages[msgs_n - 1], buf) == 0)
 		{free(buf); goto ERROR;}

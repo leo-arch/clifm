@@ -738,7 +738,7 @@ check_ext_string(const char *ext, size_t *val_len)
 	}
 	tmp_ext[i] = '\0';
 
-	size_t len = (size_t)i;
+	const size_t len = (size_t)i;
 
 	i = (int)ext_colors_n;
 	while (--i >= 0) {
@@ -953,15 +953,16 @@ import_color_scheme(const char *name)
 	snprintf(dfile, sizeof(dfile), "%s/%s/colors/%s.clifm", data_dir,
 		PROGRAM_NAME, name);
 
-	struct stat attr;
-	if (stat(dfile, &attr) == -1)
+	struct stat a;
+	if (stat(dfile, &a) == -1 || !S_ISREG(a.st_mode))
 		return EXIT_FAILURE;
 
 	char *cmd[] = {"cp", "--", dfile, colors_dir, NULL};
-	if (launch_execv(cmd, FOREGROUND, E_NOFLAG) == EXIT_SUCCESS)
-		return EXIT_SUCCESS;
+	const mode_t old_mask = umask(0077);
+	const int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
+	umask(old_mask);
 
-	return EXIT_FAILURE;
+	return ret == EXIT_SUCCESS ? ret : EXIT_FAILURE;
 }
 
 #ifndef CLIFM_SUCKLESS
