@@ -2226,6 +2226,7 @@ exec_cmd(char **comm)
 	|| strcmp(comm[0], "desel") == 0))
 		return (exit_code = desel_function(comm));
 
+	/*   ############# CREATE SYMLINK ###############     */
 	else if (*comm[0] == 'l' && !comm[0][1]) {
 		exit_code = symlink_file(comm + 1);
 		goto CHECK_EVENTS;
@@ -2270,11 +2271,11 @@ exec_cmd(char **comm)
 	else if (*comm[0] == 'u' && strcmp(comm[0], "unpin") == 0)
 		return (exit_code = unpin_dir());
 
-	/*    ############### PROMPT ##################     */
+	/*    ############### PROMPT ####################    */
 	else if (*comm[0] == 'p' && strcmp(comm[0], "prompt") == 0)
 		return (exit_code = prompt_function(comm + 1));
 
-	/*    ############### PROPERTIES ##################     */
+	/*    ############# PROPERTIES ##################     */
 	else if (*comm[0] == 'p' && (!comm[0][1] || strcmp(comm[0], "pr") == 0
 	|| strcmp(comm[0], "pp") == 0 || strcmp(comm[0], "prop") == 0))
 		return (exit_code = props_function(comm));

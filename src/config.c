@@ -52,12 +52,12 @@ regen_config(void)
 	struct stat attr;
 
 	if (stat(config_file, &attr) == -1) {
-		puts(_("No configuration file found"));
+		puts(_("Configuration file not found"));
 		config_found = 0;
 	}
 
 	if (config_found == 1) {
-		time_t rawtime = time(NULL);
+		const time_t rawtime = time(NULL);
 		struct tm t;
 		if (!localtime_r(&rawtime, &t))
 			return EXIT_FAILURE;
@@ -71,7 +71,7 @@ regen_config(void)
 		if (renameat(XAT_FDCWD, config_file, XAT_FDCWD, bk) == -1) {
 			xerror(_("Cannot rename file '%s': %s\n"),
 				config_file, strerror(errno));
-			return EXIT_FAILURE;
+			return errno;
 		}
 
 		printf(_("Old configuration file written to '%s'\n"), bk);
@@ -530,10 +530,13 @@ edit_function(char **args)
 	 * Then run 'stat' again to reread the attributes of the file. */
 	if (stat(config_file, &attr) == -1) {
 		create_main_config_file(config_file);
-		stat(config_file, &attr);
+		if (stat(config_file, &attr) == -1) {
+			xerror("%s: '%s': %s\n", PROGRAM_NAME, config_file, strerror(errno));
+			return errno;
+		}
 	}
 
-	time_t mtime_bfr = (time_t)attr.st_mtime;
+	const time_t prev_mtime = attr.st_mtime;
 	int ret = EXIT_SUCCESS;
 
 	/* If there is an argument... */
@@ -557,7 +560,7 @@ edit_function(char **args)
 	}
 
 	/* If modification times differ, the file was modified after being opened */
-	if (mtime_bfr != (time_t)attr.st_mtime) {
+	if (prev_mtime != attr.st_mtime) {
 		/* Reload configuration only if the config file was modified */
 		reload_config();
 
@@ -744,7 +747,7 @@ import_from_data_dir(const char *src_filename, char *dest)
 	if (stat(sys_file, &attr) == -1)
 		return EXIT_FAILURE;
 
-	mode_t old_umask = umask(0177);
+	const mode_t old_umask = umask(0177);
 	char *cmd[] = {"cp", "--", sys_file, dest, NULL};
 	int ret = launch_execv(cmd, FOREGROUND, E_NOSTDERR);
 	umask(old_umask);
@@ -1214,11 +1217,11 @@ create_tmp_files(void)
 	free(tmp_rootdir); /* In case we come from reload_config() */
 	tmp_rootdir = create_tmp_rootdir();
 
-	size_t tmp_rootdir_len = strlen(tmp_rootdir);
-	size_t pnl_len = sizeof(PROGRAM_NAME) - 1;
-	size_t user_len = user.name ? strlen(user.name) : 7; /* 7: len of "unknown" */
+	const size_t tmp_rootdir_len = strlen(tmp_rootdir);
+	const size_t pnl_len = sizeof(PROGRAM_NAME) - 1;
+	const size_t user_len = user.name ? strlen(user.name) : 7; /* 7: len of "unknown" */
 
-	size_t tmp_len = tmp_rootdir_len + pnl_len + user_len + 3;
+	const size_t tmp_len = tmp_rootdir_len + pnl_len + user_len + 3;
 	tmp_dir = xnmalloc(tmp_len, sizeof(char));
 	snprintf(tmp_dir, tmp_len, "%s/%s-%s", tmp_rootdir,
 		PROGRAM_NAME, user.name ? user.name : "unknown");
@@ -1254,8 +1257,8 @@ set_main_config_dir(const int secure_mode)
 		? getenv("XDG_CONFIG_HOME") : (char *)NULL;
 
 	if (xdg_config_home) {
-		size_t len = strlen(xdg_config_home);
-		size_t tmp_len = len + (sizeof(PROGRAM_NAME) - 1) + 2;
+		const size_t len = strlen(xdg_config_home);
+		const size_t tmp_len = len + (sizeof(PROGRAM_NAME) - 1) + 2;
 
 		config_dir_gral = xnmalloc(tmp_len, sizeof(char));
 		snprintf(config_dir_gral, tmp_len, "%s/%s", xdg_config_home,
@@ -1263,7 +1266,7 @@ set_main_config_dir(const int secure_mode)
 		return;
 	}
 
-	size_t tmp_len = user.home_len + (sizeof(PROGRAM_NAME) - 1) + 10;
+	const size_t tmp_len = user.home_len + (sizeof(PROGRAM_NAME) - 1) + 10;
 	config_dir_gral = xnmalloc(tmp_len, sizeof(char));
 	snprintf(config_dir_gral, tmp_len, "%s/.config/%s", user.home,
 		PROGRAM_NAME);
@@ -1278,7 +1281,8 @@ set_hist_file(const int secure_mode, const size_t tmp_len)
 	char *hist_env = (env_val && *env_val)
 		? normalize_path(env_val, strlen(env_val)) : (char *)NULL;
 
-	size_t hist_len = (hist_env && *hist_env) ? strlen(hist_env) + 1 : tmp_len;
+	const size_t hist_len =
+		(hist_env && *hist_env) ? strlen(hist_env) + 1 : tmp_len;
 	hist_file = xnmalloc(hist_len, sizeof(char));
 
 	if (hist_env && *hist_env)
@@ -1347,13 +1351,13 @@ check_config_files_integrity(void)
 static void
 define_config_file_names(void)
 {
-	size_t pnl_len = sizeof(PROGRAM_NAME) - 1;
+	const size_t pnl_len = sizeof(PROGRAM_NAME) - 1;
 	size_t tmp_len = 0;
 	int secure_mode = (xargs.secure_env == 1 || xargs.secure_env_full == 1);
 
 	set_main_config_dir(secure_mode); /* config_dir_gral is set here. */
 
-	size_t config_gral_len = strlen(config_dir_gral);
+	const size_t config_gral_len = strlen(config_dir_gral);
 
 	/* alt_profile will not be NULL whenever the -P option is used
 	 * to run clifm under an alternative profile. */
@@ -2412,7 +2416,7 @@ set_pager_value(char *line, int *var, const size_t buflen)
 		return;
 
 	if (*p >= '0' && *p <= '9') {
-		size_t l = strnlen(p, buflen);
+		const size_t l = strnlen(p, buflen);
 		if (l > 0 && p[l - 1] == '\n')
 			p[l - 1] = '\0';
 
@@ -2458,7 +2462,7 @@ set_config_int_value(char *line, int *var, const int min, const int max)
 		return;
 
 	int num = 0;
-	int ret = sscanf(line, "%d\n", &num);
+	const int ret = sscanf(line, "%d\n", &num);
 	if (ret > 0 && num >= min && num <= max)
 		*var = num;
 }
@@ -2539,7 +2543,7 @@ set_listing_mode(const char *line)
 	if (!p || !*p || !*(++p))
 		goto END;
 
-	int n = atoi(p);
+	const int n = atoi(p);
 	if (n == INT_MIN)
 		goto END;
 
@@ -2607,7 +2611,7 @@ set_workspace_names(char *line)
 		if (!is_number(t))
 			goto CONT;
 
-		int a = atoi(t);
+		const int a = atoi(t);
 		if (a <= 0 || a > MAX_WS)
 			goto CONT;
 
@@ -3355,7 +3359,7 @@ create_trash_dirs(void)
 	}
 
 	char *cmd[] = {"mkdir", "-p", "--", trash_files_dir, trash_info_dir, NULL};
-	int ret = launch_execv(cmd, FOREGROUND, E_NOSTDERR);
+	const int ret = launch_execv(cmd, FOREGROUND, E_NOSTDERR);
 
 	if (ret != EXIT_SUCCESS) {
 		trash_ok = 0;
@@ -3387,7 +3391,7 @@ set_trash_dirs(void)
 		snprintf(trash_dir, len, "%s/.local/share/Trash", user.home);
 	}
 
-	size_t trash_len = strlen(trash_dir);
+	const size_t trash_len = strlen(trash_dir);
 
 	len = trash_len + 7;
 	trash_files_dir = xnmalloc(len, sizeof(char));
