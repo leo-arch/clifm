@@ -180,7 +180,7 @@ list_workspaces(void)
 static int
 check_workspace_num(char *str, int *tmp_ws)
 {
-	int istr = atoi(str);
+	const int istr = atoi(str);
 	if (istr <= 0 || istr > MAX_WS) {
 		xerror(_("ws: %d: No such workspace (valid workspaces: "
 			"1-%d)\n"), istr, MAX_WS);
@@ -455,7 +455,7 @@ get_bd_matches(const char *str, int *n, const int mode)
 		matches = xnmalloc(2, sizeof(char *));
 	}
 
-	while(1) {
+	while (1) {
 		char *p = (char *)NULL;
 		if (str && *str) { /* Non-empty query string */
 			p = conf.case_sens_path_comp
@@ -529,6 +529,7 @@ grab_bd_input(const int n)
 {
 	char *input = (char *)NULL;
 	putchar('\n');
+
 	while (!input) {
 		input = rl_no_hist(_("Choose a directory ('q' to quit): "));
 		if (!input || !*input) {
@@ -736,8 +737,8 @@ check_cdpath(const char *name)
 	struct stat a;
 
 	for (i = 0; cdpaths[i]; i++) {
-		size_t len = strlen(cdpaths[i]);
-		size_t tmp_len = len + namelen + 2;
+		const size_t len = strlen(cdpaths[i]);
+		const size_t tmp_len = len + namelen + 2;
 		char *tmp = xnmalloc(tmp_len, sizeof(char));
 
 		if (len > 0 && cdpaths[i][len - 1] == '/')

@@ -113,13 +113,11 @@ run_find(char *search_path, char *arg)
 # endif /* FIND_HAS_NO_REGEX */
 #endif /* _BE_POSIX */
 
-	int glob_char = check_glob_char(arg + 1, GLOB_REGEX);
+	const int glob_char = check_glob_char(arg + 1, GLOB_REGEX);
 	if (glob_char == 1)
 		return exec_find(name, _path, method, arg + 1);
 
-	int ret = EXIT_SUCCESS;
-
-	size_t pattern_len = strlen(arg + 1) + 5;
+	const size_t pattern_len = strlen(arg + 1) + 5;
 	char *pattern = xnmalloc(pattern_len, sizeof(char));
 
 #if !defined(_BE_POSIX)
@@ -139,7 +137,7 @@ run_find(char *search_path, char *arg)
 	snprintf(pattern, pattern_len, "*%s*", arg + 1);
 #endif /* !_BE_POSIX */
 
-	ret = exec_find(name, _path, method, pattern);
+	const int ret = exec_find(name, _path, method, pattern);
 	free(pattern);
 
 	return ret;
@@ -212,7 +210,7 @@ chdir_search_path(char **search_path, const char *arg)
 		free(deq_dir);
 	}
 
-	size_t path_len = strlen(*search_path);
+	const size_t path_len = strlen(*search_path);
 	if (path_len > 1 && (*search_path)[path_len - 1] == '/')
 		(*search_path)[path_len - 1] = '\0';
 
@@ -355,12 +353,11 @@ get_non_matches_from_search_path(const char *search_path, char **gfiles,
 			continue;
 
 #if !defined(_DIRENT_HAVE_D_TYPE)
-		mode_t type;
 		struct stat attr;
 		if (lstat(ent[i]->d_name, &attr) == -1)
 			continue;
 
-		type = get_dt(attr.st_mode);
+		const mode_t type = get_dt(attr.st_mode);
 		if (file_type && type != file_type)
 #else
 		if (file_type && ent[i]->d_type != file_type)
@@ -470,7 +467,7 @@ construct_glob_query(char **arg, const int invert)
 	}
 
 	/* Search strategy is glob-only */
-	size_t len = strlen(*arg);
+	const size_t len = strlen(*arg);
 
 	char *q = savestring(query, len - (invert == 1 ? 2 : 1));
 	*arg = xnrealloc(*arg, (len + 3), sizeof(char));
@@ -518,7 +515,7 @@ print_glob_matches(struct search_t *matches, const char *search_path)
 	int columns_n = calculate_glob_output_columns(flongest, found);
 
 	/* colors_list() makes use of TAB_OFFSET. We don't want it here. */
-	size_t tab_offset_bk = tab_offset;
+	const size_t tab_offset_bk = tab_offset;
 	tab_offset = 0;
 
 	int last_column = 0, i;
@@ -659,7 +656,7 @@ construct_regex_query(char **arg, const int invert, int *regex_found)
 	if (*regex_found == EXIT_SUCCESS)
 		return query;
 
-	size_t len = strlen(*arg);
+	const size_t len = strlen(*arg);
 
 	char *q = savestring(query, len - (invert == 1 ? 2 : 1));
 	*arg = xnrealloc(*arg, (len + 5), sizeof(char));
@@ -830,7 +827,7 @@ print_regex_matches(const mode_t file_type, struct dirent **reg_dirlist,
 	int *regex_index)
 {
 	/* colors_list() makes use of TAB_OFFSET. We don't need it here. */
-	size_t tab_offset_bk = tab_offset;
+	const size_t tab_offset_bk = tab_offset;
 	tab_offset = 0;
 
 	size_t total; /* Total number of matches (without file type filter) */
@@ -859,8 +856,8 @@ print_regex_matches(const mode_t file_type, struct dirent **reg_dirlist,
 	}
 
 	int eln_pad = -1;
-	size_t largest_file = get_regex_largest(list, (int)matches, &eln_pad);
-	size_t columns = calc_columns(largest_file, matches);
+	const size_t largest_file = get_regex_largest(list, (int)matches, &eln_pad);
+	const size_t columns = calc_columns(largest_file, matches);
 
 	size_t last_col = 0, cur_col = 0;
 
@@ -955,7 +952,8 @@ search_regex(char **args)
 	size_t found = 0;
 	int *regex_index = xnmalloc((search_path ? (size_t)tmp_files
 		: (size_t)files) + 2, sizeof(int));
-	size_t max = (search_path && *search_path) ? (size_t)tmp_files : (size_t)files;
+	const size_t max =
+		(search_path && *search_path) ? (size_t)tmp_files : (size_t)files;
 
 	for (i = 0; i < max; i++) {
 		char *name = (search_path && *search_path) ? reg_dirlist[i]->d_name
@@ -985,7 +983,8 @@ search_regex(char **args)
 	}
 
 	/* We have matches: print them. */
-	size_t matches = print_regex_matches(file_type, reg_dirlist, regex_index);
+	const size_t matches =
+		print_regex_matches(file_type, reg_dirlist, regex_index);
 
 	free(regex_index);
 	free_regex_dirlist(&reg_dirlist, tmp_files);
@@ -1029,7 +1028,7 @@ search_function(char **args)
 	if (conf.search_strategy == REGEX_ONLY)
 		return search_regex(args);
 
-	int ret = search_glob(args);
+	const int ret = search_glob(args);
 	if (ret != EXIT_FAILURE)
 		return (ret == ERR_SKIP_REGEX ? 1 : ret);
 

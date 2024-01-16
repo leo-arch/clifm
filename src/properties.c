@@ -1781,7 +1781,7 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 	if (!S_ISDIR(attr->st_mode)) {
 		printf(_("Size: \t\t%s%s%s"), csize, size_unit ? size_unit : "?", cend);
 
-		int bigger_than_bytes = size > (xargs.si == 1 ? 1000 : 1024);
+		const int bigger_than_bytes = size > (xargs.si == 1 ? 1000 : 1024);
 
 		if (bigger_than_bytes == 1)
 			printf(" / %s%jdB%s", csize, (intmax_t)size, cend);

@@ -350,7 +350,7 @@ add_string(char **tmp, const int c, char **line, char **res, size_t *len)
 
 	*len += strlen(*tmp);
 
-	const size_t l = *len + 2	+ (wrong_cmd ? (MAX_COLOR + 6) : 0);
+	const size_t l = *len + 2 + (wrong_cmd ? (MAX_COLOR + 6) : 0);
 	if (!*res) {
 		*res = xnmalloc(l + 1, sizeof(char));
 		*(*res) = '\0';
@@ -545,7 +545,8 @@ decode_prompt(char *line)
 	if (!line)
 		return (char *)NULL;
 
-	char *temp = (char *)NULL, *result = (char *)NULL;
+	char *temp = (char *)NULL;
+	char *result = (char *)NULL;
 	size_t result_len = 0;
 	int c;
 
@@ -1209,14 +1210,14 @@ edit_prompts_file(char *app)
 	}
 
 	if (!prompts_file || !*prompts_file) {
-		xerror("%s\n", _("prompt: No prompts file found"));
+		xerror("%s\n", _("prompt: Prompts file not found"));
 		return EXIT_FAILURE;
 	}
 
 	struct stat a;
 	if (stat(prompts_file, &a) == -1) {
 		xerror("prompt: '%s': %s\n", prompts_file, strerror(errno));
-		return EXIT_FAILURE;
+		return errno;
 	}
 
 	const time_t old_time = a.st_mtime;
@@ -1236,7 +1237,7 @@ edit_prompts_file(char *app)
 
 	if (stat(prompts_file, &a) == -1) {
 		xerror("prompt: '%s': %s\n", prompts_file, strerror(errno));
-		return EXIT_FAILURE;
+		return errno;
 	}
 
 	if (conf.autols == 1)

@@ -54,7 +54,7 @@ get_profile_names(void)
 	if (!config_dir_gral)
 		return EXIT_FAILURE;
 
-	size_t len = strlen(config_dir_gral) + 10;
+	const size_t len = strlen(config_dir_gral) + 10;
 	char *pf_dir = xnmalloc(len, sizeof(char));
 	snprintf(pf_dir, len, "%s/profiles", config_dir_gral);
 
@@ -262,13 +262,11 @@ profile_set(const char *prof)
 		return EXIT_FAILURE;
 	}
 
-	int exit_status = EXIT_SUCCESS;
-
 	if (conf.autols == 1)
 		reload_dirlist();
 
 	print_reload_msg(_("Switched to profile %s%s%s\n"), BOLD, prof, NC);
-	return exit_status;
+	return EXIT_SUCCESS;
 }
 
 /* Add a new profile named PROF */
@@ -278,7 +276,7 @@ profile_add(const char *prof)
 	if (!prof)
 		return EXIT_FAILURE;
 
-	int found = check_profile(prof);
+	const int found = check_profile(prof);
 	if (found != -1) {
 		xerror(_("pf: '%s': Profile already exists\n"), prof);
 		return EXIT_FAILURE;
@@ -290,7 +288,7 @@ profile_add(const char *prof)
 		return EXIT_FAILURE;
 	}
 
-	size_t pnl_len = strlen(PROGRAM_NAME);
+	const size_t pnl_len = strlen(PROGRAM_NAME);
 	size_t tmp_len = strlen(config_dir_gral) + strlen(prof) + 11;
 	/* ### GENERATE PROGRAM'S CONFIG DIRECTORY NAME ### */
 	char *nconfig_dir = xnmalloc(tmp_len, sizeof(char));
@@ -307,7 +305,7 @@ profile_add(const char *prof)
 
 	/* If the config dir is fine, generate config file names */
 	int exit_status = EXIT_SUCCESS;
-	size_t config_len = strlen(nconfig_dir);
+	const size_t config_len = strlen(nconfig_dir);
 
 	tmp_len = config_len + pnl_len + 4;
 	char *nconfig_file = xnmalloc(tmp_len, sizeof(char));
@@ -376,18 +374,18 @@ profile_del(const char *prof)
 		return EXIT_FAILURE;
 
 	/* Check if prof is a valid profile */
-	int found = check_profile(prof);
+	const int found = check_profile(prof);
 	if (found == -1) {
 		xerror(_("pf: '%s': No such profile\n"), prof);
 		return EXIT_FAILURE;
 	}
 
-	size_t len = strlen(config_dir_gral) + strlen(prof) + 11;
+	const size_t len = strlen(config_dir_gral) + strlen(prof) + 11;
 	char *tmp = xnmalloc(len, sizeof(char));
 	snprintf(tmp, len, "%s/profiles/%s", config_dir_gral, prof);
 
 	char *cmd[] = {"rm", "-r", "--", tmp, NULL};
-	int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
+	const int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	free(tmp);
 
 	if (ret != EXIT_SUCCESS) {
@@ -539,7 +537,7 @@ rename_profile(char **args)
 	snprintf(dst_pf_name, sizeof(dst_pf_name), "%s/profiles/%s",
 		config_dir_gral, args[1]);
 
-	int ret = renameat(fd, src_pf_name, XAT_FDCWD, dst_pf_name);
+	const int ret = renameat(fd, src_pf_name, XAT_FDCWD, dst_pf_name);
 	closedir(dir);
 
 	if (ret == -1) {
@@ -548,7 +546,7 @@ rename_profile(char **args)
 		return errno;
 	}
 
-	size_t len = strlen(args[1]);
+	const size_t len = strlen(args[1]);
 	profile_names[src_pf_index] = xnrealloc(profile_names[src_pf_index],
 		len + 1, sizeof(char));
 	xstrsncpy(profile_names[src_pf_index], args[1], len + 1);
