@@ -57,10 +57,9 @@ int  load_pinned_dir(void);
 int  load_prompts(void);
 int  load_remotes(void);
 void load_tags(void);
+int  restore_shell(void);
 void set_prop_fields(const char *line);
-//int  set_start_path(void);
 void unset_xargs(void);
-/*int xsecure_env(const int mode); */
 
 __END_DECLS
 

@@ -1758,10 +1758,10 @@ free_stuff(void)
 	if (conf.colorize == 1 && xargs.list_and_quit != 1)
 		RESTORE_COLOR;
 
-	if (reset_term == 1 && tcsetattr(STDIN_FILENO,
-	TCSANOW, (const struct termios *)&shell_tmodes) < 0) {
-		fprintf(stderr, "%s: tcsetattr: %s\n", PROGRAM_NAME, strerror(errno));
-		exit(errno);
+	int ret = 0;
+	if (reset_term == 1 && (ret = restore_shell()) < 0) {
+		fprintf(stderr, "%s: tcsetattr: %s\n", PROGRAM_NAME, strerror(ret));
+		exit(ret);
 	}
 }
 

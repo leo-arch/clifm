@@ -83,6 +83,8 @@
 # endif /* __linux__ */
 #endif /* !NGROUPS_MAX */
 
+static struct termios orig_term_attrs;
+
 #ifdef LINUX_FSINFO
 void
 get_ext_mountpoints(void)
@@ -1717,7 +1719,7 @@ init_shell(void)
 	if ((nesting_level = check_nest_level()) > 1) {
 		set_signals_to_ignore();
 		own_pid = get_own_pid();
-		tcgetattr(STDIN_FILENO, &shell_tmodes);
+		tcgetattr(STDIN_FILENO, &orig_term_attrs);
 		return;
 	}
 
@@ -1746,7 +1748,14 @@ init_shell(void)
 	tcsetpgrp(STDIN_FILENO, shell_pgid);
 
 	/* Save default terminal attributes for shell */
-	tcgetattr(STDIN_FILENO, &shell_tmodes);
+	tcgetattr(STDIN_FILENO, &orig_term_attrs);
+}
+
+int
+restore_shell(void)
+{
+	return tcsetattr(STDIN_FILENO,
+	TCSANOW, (const struct termios *)&orig_term_attrs);
 }
 
 /* Get current entries in the Selection Box, if any. */
