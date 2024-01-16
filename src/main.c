@@ -126,9 +126,7 @@ int
 	bin_flags = 0,
 	search_flags = 0;
 
-struct termios
-	orig_termios,
-	shell_tmodes;
+struct termios shell_tmodes;
 
 pid_t own_pid = 0;
 time_t props_now = 0;

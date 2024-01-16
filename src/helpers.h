@@ -1681,8 +1681,6 @@ enum comp_type {
 
 extern enum comp_type cur_comp_type;
 
-extern struct termios orig_termios;
-
 /* Bit flag holders */
 extern int
 	flags,

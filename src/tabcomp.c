@@ -91,6 +91,8 @@ static size_t longest_prev_entry;
  * (both vertical and horizontal), needed by TAB completion in fzf mode
  * with previews enabled */
 
+static struct termios orig_termios;
+
 /* Set the terminal into raw mode. Return 0 on success and -1 on error */
 static int
 enable_raw_mode(const int fd)
@@ -126,15 +128,15 @@ enable_raw_mode(const int fd)
 
 FAIL:
 	errno = ENOTTY;
-	return -1;
+	return (-1);
 }
 
 static int
 disable_raw_mode(const int fd)
 {
-	if (tcsetattr(fd, TCSAFLUSH, &orig_termios) != -1)
-		return EXIT_SUCCESS;
-	return EXIT_FAILURE;
+	if (tcsetattr(fd, TCSAFLUSH, &orig_termios) == -1)
+		return EXIT_FAILURE;
+	return EXIT_SUCCESS;
 }
 
 /* Use the "ESC [6n" escape sequence to query the cursor position (both
@@ -685,7 +687,8 @@ get_last_word(char *str, const int original_query)
 static void
 set_fzf_env_vars(const int height)
 {
-	int col = 0, line = 0;
+	int col = 0;
+	int line = 0;
 
 	if (!(flags & PREVIEWER) && term_caps.req_cur_pos == 1) {
 		get_cursor_position(&col, &line);
@@ -695,7 +698,9 @@ set_fzf_env_vars(const int height)
 
 	/* Let's correct image coordinates on the screen based on the preview
 	 * window style. */
-	int x = term_cols, y = line;
+	int x = term_cols;
+	int y = line;
+
 	switch (fzf_preview_border_type) {
 	case FZF_BORDER_BOTTOM: /* fallthrough */
 	case FZF_BORDER_NONE:   /* fallthrough */
