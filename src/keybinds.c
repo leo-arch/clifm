@@ -1381,10 +1381,7 @@ rl_quit(int count, int key)
 	conf.cd_on_quit = 0;
 	puts("\n");
 
-	/* Reset terminal attributes before exiting. Without this line, the program
-	 * quits, but terminal input is not printed to STDOUT. */
-// TESTING_RESET_TERM
-//	tcsetattr(STDIN_FILENO, TCSANOW, &shell_tmodes);
+	/* Reset terminal attributes before exiting. */
 	rl_deprep_terminal();
 	exit(EXIT_SUCCESS);
 }

@@ -35,6 +35,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/ioctl.h>
+#include <termios.h> /* tcsetattr */
 
 #ifdef __sun
 # include <sys/termios.h> /* TIOCGWINSZ */
@@ -1757,8 +1758,6 @@ free_stuff(void)
 	if (conf.colorize == 1 && xargs.list_and_quit != 1)
 		RESTORE_COLOR;
 
-// TESTING_RESET_TERM
-#include <termios.h>
 	if (reset_term == 1 && tcsetattr(STDIN_FILENO,
 	TCSANOW, (const struct termios *)&shell_tmodes) < 0) {
 		fprintf(stderr, "%s: tcsetattr: %s\n", PROGRAM_NAME, strerror(errno));
