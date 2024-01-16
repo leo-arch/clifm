@@ -261,23 +261,21 @@ __attribute__((__format__(__printf__, 1, 0)))
 int
 print_reload_msg(const char *msg, ...)
 {
-	va_list arglist, tmp_list;
+	va_list arglist;
 
 	va_start(arglist, msg);
-	va_copy(tmp_list, arglist);
-	const int size = vsnprintf((char *)NULL, 0, msg, tmp_list);
-	va_end(tmp_list);
+	const int size = vsnprintf((char *)NULL, 0, msg, arglist);
+	va_end(arglist);
 
-	if (size < 0) {
-		va_end(arglist);
+	if (size < 0)
 		return EXIT_FAILURE;
-	}
 
 	if (conf.autols == 1)
 		printf("%s->%s ", mi_c, df_c);
 
 	char *buf = xnmalloc((size_t)size + 1, sizeof(char));
 
+	va_start(arglist, msg);
 	vsnprintf(buf, (size_t)size + 1, msg, arglist);
 	va_end(arglist);
 
