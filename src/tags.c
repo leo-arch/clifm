@@ -83,7 +83,7 @@ print_usage(const int retval)
 
 #ifndef _DIRENT_HAVE_D_TPYE
 /* Check whether NAME is actually tagged as TAG.
- * Returns 1 if true and zero otherwise. */
+ * Returns 1 if true or 0 otherwise. */
 static int
 check_tagged_file(const char *tag, const char *name)
 {
@@ -155,10 +155,12 @@ list_files_in_tag(char *name)
 	snprintf(tmp, sizeof(tmp), "%s/%s", tags_dir, name);
 
 	struct dirent **t = (struct dirent **)NULL;
-	int n = scandir(tmp, &t, NULL, conf.case_sens_list
+	const int n = scandir(tmp, &t, NULL, conf.case_sens_list
 		? xalphasort : alphasort_insensitive);
-	if (n == -1)
+	if (n == -1) {
+		xerror("tag: '%s': %s\n", tmp, strerror(errno));
 		return errno;
+	}
 
 	size_t i;
 	if (n <= 2) {
@@ -193,7 +195,7 @@ get_longest_tag(void)
 	size_t i, _longest = 0;
 
 	for (i = 0; i < tags_n; i++) {
-		size_t l = strlen(tags[i]);
+		const size_t l = strlen(tags[i]);
 		if (l > (size_t)_longest)
 			_longest = l;
 	}
@@ -275,8 +277,8 @@ list_tags_full(void)
 	int exit_status = EXIT_SUCCESS;
 
 	for (i = 0; tags[i]; i++) {
-		printf(_("Files tagged as %s%s%s:\n"), conf.colorize == 1 ? BOLD : "'",
-			tags[i], conf.colorize == 1 ? NC : "'");
+		printf(_("Files tagged as %s%s%s:\n"), conf.colorize == 1
+			? BOLD : "'", tags[i], conf.colorize == 1 ? NC : "'");
 		if (list_files_in_tag(tags[i]) != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
 
@@ -298,12 +300,12 @@ list_tags(char **args)
 
 	if (!args || !args[0] || !args[1] || !args[2]) {
 		/* 'tag list': list all tags */
-		int pad = (int)get_longest_tag();
+		const int pad = (int)get_longest_tag();
 
 		for (i = 0; tags[i]; i++) {
 			char p[PATH_MAX + 1];
 			snprintf(p, sizeof(p), "%s/%s", tags_dir, tags[i]);
-			filesn_t n = count_dir(p, NO_CPOP);
+			const filesn_t n = count_dir(p, NO_CPOP);
 			if (n > 2)
 				printf("%-*s [%s%jd%s]\n", pad, tags[i], mi_c,
 					(intmax_t)n - 2, df_c);
@@ -334,8 +336,9 @@ list_tags(char **args)
 
 		} else {
 			/* 'tag list TAG' */
-			printf(_("Files tagged as %s%s%s:\n"), conf.colorize == 1 ? BOLD : "'",
-				args[i], conf.colorize == 1 ? BOLD : "'");
+			printf(_("Files tagged as %s%s%s%s:\n"), conf.colorize == 1 ? BOLD : "'",
+				args[i], conf.colorize == 1 ? BOLD : "'",
+				conf.colorize == 1 ? NC : "'");
 			if (list_files_in_tag(args[i]) == EXIT_FAILURE)
 				exit_status = EXIT_FAILURE;
 		}
@@ -533,7 +536,7 @@ tag_files(char **args)
 	}
 
 	size_t i, j, n = 0;
-	size_t start = (args[1] && strcmp(args[1], "add") == 0) ? 2 : 1;
+	const size_t start = (args[1] && strcmp(args[1], "add") == 0) ? 2 : 1;
 
 	for (i = start; args[i]; i++) {
 		if (*args[i] != ':')

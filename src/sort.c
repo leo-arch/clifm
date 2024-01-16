@@ -32,7 +32,7 @@
 #include "checks.h"
 #include "aux.h" /* xatoi */
 #include "listing.h"
-#include "messages.h"
+#include "messages.h" /* SORT_USAGE */
 
 int
 skip_nonexec(const struct dirent *ent)
@@ -104,9 +104,7 @@ compare_strings(char **s1, char **s2)
 #if defined(HAVE_STRCOLL)
 	return strcoll(*s2, *s2);
 #else
-	int ret;
-
-	ret = **s1 - **s2;
+	int ret = **s1 - **s2;
 	if (ret == 0)
 		ret = strcmp(*s1, *s2);
 
@@ -123,8 +121,8 @@ namecmp(char *s1, char *s2)
 	/* If both strings start with number, sort them as numbers, not as strings */
 	if (IS_DIGIT(*s1) && IS_DIGIT(*s2)) {
 		char *p1, *p2;
-		long long n1 = strtoll(s1, &p1, 10);
-		long long n2 = strtoll(s2, &p2, 10);
+		const long long n1 = strtoll(s1, &p1, 10);
+		const long long n2 = strtoll(s2, &p2, 10);
 		if (n2 > n1)
 			return -1;
 		if (n2 < n1)
@@ -157,7 +155,7 @@ namecmp(char *s1, char *s2)
 static inline int
 sort_by_size(struct fileinfo *pa, struct fileinfo *pb)
 {
-	off_t as = pa->size, bs = pb->size;
+	const off_t as = pa->size, bs = pb->size;
 //	if (conf.long_view == 1 && conf.full_dir_size == 1) {
 //		const int base = xargs.si == 1 ? 1000 : 1024;
 //		if (pa->dir == 1)
@@ -348,7 +346,7 @@ xalphasort(const struct dirent **a, const struct dirent **b)
 int
 alphasort_insensitive(const struct dirent **a, const struct dirent **b)
 {
-	int ret = strcasecmp(((*a)->d_name[0] == '.') ? (*a)->d_name + 1
+	const int ret = strcasecmp(((*a)->d_name[0] == '.') ? (*a)->d_name + 1
 	: (*a)->d_name, ((*b)->d_name[0] == '.') ? (*b)->d_name + 1 : (*b)->d_name);
 
 	if (!conf.sort_reverse)
@@ -426,7 +424,7 @@ re_sort_files_list(void)
 	 * sorting order at the end of the files list. */
 	sort_switch = 1;
 	free_dirlist();
-	int ret = list_dir();
+	const int ret = list_dir();
 	sort_switch = 0;
 
 	return ret;
@@ -474,7 +472,7 @@ sort_function(char **arg)
 	}
 
 	/* Argument is a number */
-	int n = atoi(arg[1]);
+	const int n = atoi(arg[1]);
 
 	if (n >= 0 && n <= SORT_TYPES) {
 		conf.sort = n;

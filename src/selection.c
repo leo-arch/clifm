@@ -104,7 +104,7 @@ select_file(char *file)
 	}
 
 	int exists = 0, new_sel = 0, j;
-	size_t flen = strlen(file);
+	const size_t flen = strlen(file);
 	if (flen > 1 && file[flen - 1] == '/')
 		file[flen - 1] = '\0';
 
@@ -172,7 +172,7 @@ load_matches_invert_nocwd(glob_t *gbuf, struct dirent **ent,
 		struct stat attr;
 		if (lstat(ent[i]->d_name, &attr) == -1)
 			continue;
-		mode_t type = get_dt(attr.st_mode);
+		const mode_t type = get_dt(attr.st_mode);
 		if (filetype != 0 && type != filetype)
 #else
 		if (filetype != 0 && ent[i]->d_type != filetype)
@@ -214,7 +214,7 @@ static char **
 load_matches(glob_t *gbuf, const mode_t filetype, int *matches)
 {
 	char **list = xnmalloc(gbuf->gl_pathc + 2, sizeof(char *));
-	mode_t type = convert_filetype_mask(filetype);
+	const mode_t type = convert_filetype_mask(filetype);
 
 	int i = (int)gbuf->gl_pathc;
 	while (--i >= 0) {
@@ -249,7 +249,7 @@ select_matches(char **list, const char *sel_path, const int matches)
 			continue;
 
 		if (sel_path) {
-			size_t tmp_len = strlen(sel_path) + strlen(list[i]) + 2;
+			const size_t tmp_len = strlen(sel_path) + strlen(list[i]) + 2;
 			char *tmp = xnmalloc(tmp_len, sizeof(char));
 			snprintf(tmp, tmp_len, "%s/%s", sel_path, list[i]);
 
@@ -271,11 +271,11 @@ select_matches(char **list, const char *sel_path, const int matches)
 		if (*workspaces[cur_ws].path == '/'
 		&& !*(workspaces[cur_ws].path + 1)) {
 			/* CWD is root */
-			size_t tmp_len = strlen(list[i]) + 2;
+			const size_t tmp_len = strlen(list[i]) + 2;
 			tmp = xnmalloc(tmp_len, sizeof(char));
 			snprintf(tmp, tmp_len, "/%s", list[i]);
 		} else {
-			size_t tmp_len = strlen(workspaces[cur_ws].path)
+			const size_t tmp_len = strlen(workspaces[cur_ws].path)
 				+ strlen(list[i]) + 2;
 			tmp = xnmalloc(tmp_len, sizeof(char));
 			snprintf(tmp, tmp_len, "%s/%s",
@@ -384,14 +384,14 @@ sel_regex_nocwd(regex_t regex, const char *sel_path, const mode_t filetype,
 {
 	int new_sel = 0;
 	struct dirent **list = (struct dirent **)NULL;
-	int filesn = scandir(sel_path, &list, skip_files, xalphasort);
+	const int filesn = scandir(sel_path, &list, skip_files, xalphasort);
 
 	if (filesn == -1) {
 		xerror("sel: '%s': %s\n", sel_path, strerror(errno));
 		return (-1);
 	}
 
-	mode_t type = convert_filetype_mask(filetype);
+	const mode_t type = convert_filetype_mask(filetype);
 
 	int i = (int)filesn;
 	while (--i >= 0) {
@@ -404,7 +404,7 @@ sel_regex_nocwd(regex_t regex, const char *sel_path, const mode_t filetype,
 			}
 		}
 
-		size_t tmp_len = strlen(sel_path) + strlen(list[i]->d_name) + 2;
+		const size_t tmp_len = strlen(sel_path) + strlen(list[i]->d_name) + 2;
 		char *tmp_path = xnmalloc(tmp_len, sizeof(char));
 		snprintf(tmp_path, tmp_len, "%s/%s", sel_path, list[i]->d_name);
 
@@ -546,7 +546,7 @@ construct_sel_path(char *sel_path)
 
 	char *dir = (char *)NULL;
 	if (*tmpdir != '/') {
-		size_t dir_len = strlen(workspaces[cur_ws].path)
+		const size_t dir_len = strlen(workspaces[cur_ws].path)
 			+ strnlen(tmpdir, sizeof(tmpdir)) + 2;
 		dir = xnmalloc(dir_len, sizeof(char));
 		snprintf(dir, dir_len, "%s/%s", workspaces[cur_ws].path, tmpdir);
@@ -560,7 +560,7 @@ construct_sel_path(char *sel_path)
 static char *
 check_sel_path(char **sel_path)
 {
-	size_t len = strlen(*sel_path);
+	const size_t len = strlen(*sel_path);
 	if (len > 0 && (*sel_path)[len - 1] == '/')
 		(*sel_path)[len - 1] = '\0';
 
@@ -598,7 +598,7 @@ get_sel_file_size(const size_t i, int *status)
 	if (lstat(sel_elements[i].name, &attr) == -1)
 		return (off_t)-1;
 
-	int base = xargs.si == 1 ? 1000 : 1024;
+	const int base = xargs.si == 1 ? 1000 : 1024;
 	if (S_ISDIR(attr.st_mode)) {
 		sel_elements[i].size = (off_t)(dir_size(sel_elements[i].name,
 			0, status) * base);
@@ -644,7 +644,7 @@ print_selected_files(void)
 
 		fputs(_("Calculating file size... "), stdout); fflush(stdout);
 		int ret = 0;
-		off_t s = get_sel_file_size(i, &ret);
+		const off_t s = get_sel_file_size(i, &ret);
 		if (ret != 0)
 			status = ret;
 		putchar('\r'); ERASE_TO_RIGHT; fflush(stdout);
@@ -750,7 +750,7 @@ select_filename(char *arg, char *dir, int *errors)
 			xerror("sel: '%s': %s\n", arg, strerror(errno));
 			(*errors)++;
 		} else {
-			int r = select_file(tmp);
+			const int r = select_file(tmp);
 			new_sel += r;
 			if (r == 0)
 				(*errors)++;
@@ -764,7 +764,7 @@ select_filename(char *arg, char *dir, int *errors)
 		xerror("sel: '%s': %s\n", name, strerror(errno));
 		(*errors)++;
 	} else {
-		int r = select_file(name);
+		const int r = select_file(name);
 		new_sel += r;
 		if (r == 0)
 			(*errors)++;
@@ -885,9 +885,9 @@ show_sel_files(void)
 	size_t i;
 	off_t total = 0;
 
-	size_t t = tab_offset;
+	const size_t t = tab_offset;
 	tab_offset = 0;
-	uint8_t epad = DIGINUM(sel_n);
+	const uint8_t epad = DIGINUM(sel_n);
 	int status = 0;
 
 	flags |= IN_SELBOX_SCREEN;
@@ -926,7 +926,7 @@ show_sel_files(void)
 
 		fputs(_("Calculating file size... "), stdout); fflush(stdout);
 		int ret = 0;
-		off_t s = get_sel_file_size(i, &ret);
+		const off_t s = get_sel_file_size(i, &ret);
 		if (ret != 0)
 			status = ret;
 		putchar('\r'); ERASE_TO_RIGHT; fflush(stdout);
@@ -964,7 +964,7 @@ edit_selfile(void)
 	if (stat(sel_file, &attr) == -1)
 		goto ERROR;
 
-	time_t mtime_old = (time_t)attr.st_mtime;
+	const time_t prev_mtime = attr.st_mtime;
 
 	if (open_file(sel_file) != EXIT_SUCCESS) {
 		xerror("%s\n", _("sel: Cannot open the selections file"));
@@ -975,10 +975,10 @@ edit_selfile(void)
 	if (stat(sel_file, &attr) == -1)
 		goto ERROR;
 
-	if (mtime_old == (time_t)attr.st_mtime)
+	if (prev_mtime == attr.st_mtime)
 		return EXIT_SUCCESS;
 
-	int ret = get_sel_files();
+	const int ret = get_sel_files();
 	if (conf.autols == 1)
 		reload_dirlist();
 
@@ -1027,7 +1027,7 @@ deselect_entries(char **desel_path, const size_t desel_n, int *error,
 		 * deselected element (actually, moving each string after it to
 		 * the previous position). */
 		for (j = desel_index; j < (int)(sel_n - 1); j++) {
-			size_t len = strlen(sel_elements[j + 1].name);
+			const size_t len = strlen(sel_elements[j + 1].name);
 			sel_elements[j].name =
 				xnrealloc(sel_elements[j].name, len + 1, sizeof(char));
 
@@ -1040,7 +1040,7 @@ deselect_entries(char **desel_path, const size_t desel_n, int *error,
 	 * be used anymore, since they contain the same value as the last
 	 * non-deselected element due to the above array rearrangement. */
 	for (i = 1; i <= dn; i++) {
-		int sel_index = (int)sel_n - i;
+		const int sel_index = (int)sel_n - i;
 
 		if (sel_index >= 0 && sel_elements[sel_index].name) {
 			free(sel_elements[sel_index].name);
@@ -1061,7 +1061,7 @@ desel_entries(char **desel_elements, const size_t desel_n, const int desel_scree
 	if (desel_screen == 1) { /* Coming from the deselect screen */
 		desel_path = xnmalloc(desel_n, sizeof(char *));
 		while (--i >= 0) {
-			int desel_int = atoi(desel_elements[i]);
+			const int desel_int = atoi(desel_elements[i]);
 			if (desel_int == INT_MIN) {
 				desel_path[i] = (char *)NULL;
 				continue;
@@ -1074,7 +1074,7 @@ desel_entries(char **desel_elements, const size_t desel_n, const int desel_scree
 	}
 
 	int err = 0;
-	int dn = deselect_entries(desel_path, desel_n, &err, desel_screen);
+	const int dn = deselect_entries(desel_path, desel_n, &err, desel_screen);
 
 	/* Update the number of selected files according to the number of
 	 * deselected files. */
@@ -1201,7 +1201,7 @@ handle_alpha_entry(const int i, const size_t desel_n, char **desel_elements)
 
 	if (*desel_elements[i] == '*' && !desel_elements[i][1]) {
 		free_desel_elements(desel_n, &desel_elements);
-		int exit_status = deselect_all();
+		const int exit_status = deselect_all();
 		if (conf.autols == 1)
 			reload_dirlist();
 		return exit_status;
@@ -1215,7 +1215,7 @@ handle_alpha_entry(const int i, const size_t desel_n, char **desel_elements)
 static int
 valid_desel_eln(const int i, const size_t desel_n, char **desel_elements)
 {
-	int n = atoi(desel_elements[i]);
+	const int n = atoi(desel_elements[i]);
 
 	if (n <= 0 || (size_t)n > sel_n) {
 		printf(_("desel: %s: Invalid ELN\n"), desel_elements[i]);
@@ -1230,8 +1230,9 @@ static int
 end_deselect(const int err, char ***args)
 {
 	int exit_status = EXIT_SUCCESS;
+	const size_t argsbk = args_n;
+	size_t desel_files = 0;
 
-	size_t argsbk = args_n, desel_files = 0;
 	if (args_n > 0) {
 		size_t i;
 		for (i = 1; i <= args_n; i++) {
@@ -1273,8 +1274,8 @@ handle_desel_args(char **args)
 {
 	if (strcmp(args[1], "*") == 0 || strcmp(args[1], "a") == 0
 	|| strcmp(args[1], "all") == 0) {
-		size_t n = sel_n;
-		int ret = deselect_all();
+		const size_t n = sel_n;
+		const int ret = deselect_all();
 
 		if (conf.autols == 1)
 			reload_dirlist();
@@ -1286,7 +1287,7 @@ handle_desel_args(char **args)
 		return ret;
 
 	} else {
-		int err = deselect_from_args(args);
+		const int err = deselect_from_args(args);
 		return end_deselect(err, &args);
 	}
 }
