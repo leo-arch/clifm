@@ -182,7 +182,6 @@ int
 	prompt_offset = UNSET,
 	prompt_notif = UNSET,
 	recur_perm_error_flag = 0,
-	reset_term = 0,
 
 	rl_nohist = 0,
 	rl_notab = 0,

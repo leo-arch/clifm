@@ -84,6 +84,7 @@
 #endif /* !NGROUPS_MAX */
 
 static struct termios orig_term_attrs;
+static int reset_term = 0;
 
 #ifdef LINUX_FSINFO
 void
@@ -1754,8 +1755,11 @@ init_shell(void)
 int
 restore_shell(void)
 {
+	if (reset_term == 0)
+		return 0;
+
 	return tcsetattr(STDIN_FILENO,
-	TCSANOW, (const struct termios *)&orig_term_attrs);
+		TCSANOW, (const struct termios *)&orig_term_attrs);
 }
 
 /* Get current entries in the Selection Box, if any. */

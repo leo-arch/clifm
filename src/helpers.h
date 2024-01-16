@@ -1782,7 +1782,6 @@ extern size_t *dir_icons_hashes;
 extern size_t *ext_icons_hashes;
 #endif /* !_NO_ICONS */
 
-extern int reset_term;
 extern pid_t own_pid;
 extern time_t props_now;
 

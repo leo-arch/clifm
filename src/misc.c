@@ -1759,7 +1759,7 @@ free_stuff(void)
 		RESTORE_COLOR;
 
 	int ret = 0;
-	if (reset_term == 1 && (ret = restore_shell()) < 0) {
+	if ((ret = restore_shell()) < 0) {
 		fprintf(stderr, "%s: tcsetattr: %s\n", PROGRAM_NAME, strerror(ret));
 		exit(ret);
 	}
