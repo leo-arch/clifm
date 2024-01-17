@@ -1836,66 +1836,77 @@ export_files(char **filenames, const int open)
 	return (char *)NULL;
 }
 
-/* Create a symlink for each file in ARGS + 1
- * Ask the user for a custom suffix for new symlinks (defaults to .link)
- * If the destiny file exists, append a positive integer suffix to make
- * it unique */
+/* Create a symlink in CWD for each file name in ARGS.
+ * If the destiny file exists, a positive integer suffix is appended to
+ * make the file name unique. */
 int
 batch_link(char **args)
 {
-	if (!args)
-		return EXIT_FAILURE;
-
-	if (!args[1] || IS_HELP(args[1])) {
+	if (!args || !args[0] || IS_HELP(args[0])) {
 		puts(_(BL_USAGE));
 		return EXIT_SUCCESS;
 	}
 
-	puts(_("Suffix defaults to '.link'"));
-	flags |= NO_FIX_RL_POINT;
-	char *suffix = rl_no_hist(_("Enter links suffix ('q' to quit): "));
-	flags &= ~NO_FIX_RL_POINT;
-
-	if (suffix && *suffix == 'q' && !*(suffix + 1)) {
-		free(suffix);
-		return EXIT_SUCCESS;
-	}
-
 	size_t i;
+	size_t symlinked = 0;
 	int exit_status = EXIT_SUCCESS;
-	char tmp[NAME_MAX];
 
-	for (i = 1; args[i]; i++) {
-		if (!suffix || !*suffix) {
-			snprintf(tmp, sizeof(tmp), "%s.link", args[i]);
-		} else {
-			if (*suffix == '.')
-				snprintf(tmp, sizeof(tmp), "%s%s", args[i], suffix);
-			else
-				snprintf(tmp, sizeof(tmp), "%s.%s", args[i], suffix);
+	for (i = 0; args[i]; i++) {
+		char *filename = unescape_str(args[i], 0);
+		if (!filename) {
+			exit_status = EXIT_FAILURE;
+			xerror(_("bl: '%s': Error unescaping name\n"), args[i]);
+			if (conf.autols == 1 && args[i + 1])
+				press_any_key_to_continue(0);
+			continue;
 		}
+
+		/* Remove ending slash */
+		const size_t l = strlen(filename);
+		if (l > 1 && filename[l - 1] == '/')
+			filename[l - 1] = '\0';
 
 		struct stat a;
-		size_t added_suffix = 1;
-		char cur_suffix[24];
-		while (stat(tmp, &a) == EXIT_SUCCESS) {
-			char *d = strrchr(tmp, '-');
-			if (d && *(d + 1) && is_number(d + 1))
-				*d = '\0';
-			snprintf(cur_suffix, sizeof(cur_suffix), "-%zu", added_suffix);
-			/* Using strnlen() here avoids a Redhat hardened compilation warning. */
-			xstrncat(tmp, strnlen(tmp, sizeof(tmp)), cur_suffix, sizeof(tmp));
-			added_suffix++;
+		if (lstat(filename, &a) == -1) {
+			exit_status = errno;
+			xerror("bl: '%s': %s\n", filename, strerror(errno));
+			if (conf.autols == 1 && args[i + 1])
+				press_any_key_to_continue(0);
+			free(filename);
+			continue;
 		}
 
-		char *ptr = strrchr(tmp, '/');
-		if (symlinkat(args[i], XAT_FDCWD, (ptr && ++ptr) ? ptr : tmp) == -1) {
-			exit_status = errno;
-			xerror(_("bl: symlinkat: Cannot create symbolic link '%s': %s\n"),
-				ptr ? ptr : tmp, strerror(errno));
+		char *s = strrchr(filename, '/');
+		char *basename = s && *(++s) ? s : filename;
+
+		/* + 64 = Make some room for suffix */
+		const size_t tmp_len = strlen(basename) + 64;
+		char *tmp = xnmalloc(tmp_len, sizeof(char));
+		xstrsncpy(tmp, basename, tmp_len);
+
+		size_t suffix = 1;
+		while (lstat(tmp, &a) != -1) {
+			snprintf(tmp, tmp_len, "%s-%zu", basename, suffix);
+			suffix++;
 		}
+
+		if (symlinkat(filename, XAT_FDCWD, tmp) == -1) {
+			exit_status = errno;
+			xerror(_("bl: Cannot create symbolic link '%s': %s\n"),
+				tmp, strerror(errno));
+			if (conf.autols == 1)
+				press_any_key_to_continue(0);
+		} else {
+			symlinked++;
+		}
+
+		free(filename);
+		free(tmp);
 	}
 
-	free(suffix);
+	if (conf.autols == 1 && symlinked > 0)
+		reload_dirlist();
+	print_reload_msg(_("%zu symbolic link(s) created\n"), symlinked);
+
 	return exit_status;
 }

@@ -140,12 +140,14 @@ NAME is not specified, print the list of all parent directories\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   bl FILE...\n\n\
 \x1b[1mEXAMPLE\x1b[0m\n\
-- Symlink files file1 file2 file3 and file4 at once\n\
+- Symlink files 'file1', 'file2', 'file3', and 'file4' at once\n\
     bl file* (or 'bl <TAB>' to choose from a list - multi-selection is\n\
-  allowed)\n\n\
-Note: Links are created in the current directory.\n\
-By default links are named FILE.link (you will be given the option to\n\
-change this suffix)"
+  allowed)\n\
+- Create symbolic links in the directory 'dir' for all .png files\n\
+    s *.png\n\
+    cd dir\n\
+    bl sel\n\n\
+Note: Links are always created in the current directory."
 
 #define BLEACH_USAGE "Clean up file names from non-ASCII characters\n\n\
 \x1b[1mUSAGE\x1b[0m\n\

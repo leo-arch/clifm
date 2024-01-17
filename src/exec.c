@@ -214,7 +214,7 @@ export_var_function(char **args)
 	return status;
 }
 
-static inline char *
+static char *
 construct_shell_cmd(char **args)
 {
 	if (!args || !args[0])
@@ -250,7 +250,7 @@ construct_shell_cmd(char **args)
 	return cmd;
 }
 
-static inline int
+static int
 check_shell_cmd_conditions(char **args)
 {
 	if (!args || !args[0])
@@ -1112,9 +1112,7 @@ launch_shell(const char *arg)
 	if (!arg[1]) {
 		/* If just ":" or ";", launch the default shell */
 		char *cmd[] = {user.shell, NULL};
-		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
-			return EXIT_FAILURE;
-		return EXIT_SUCCESS;
+		return launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	}
 
 	if (arg[1] == ';' || arg[1] == ':') {
@@ -2288,7 +2286,7 @@ exec_cmd(char **comm)
 
 	/*    ############### BATCH LINK ##################     */
 	else if (*comm[0] == 'b' && comm[0][1] == 'l' && !comm[0][2])
-		exit_code = batch_link(comm);
+		exit_code = batch_link(comm + 1);
 
 	/*    ############### BULK RENAME ##################     */
 	else if (*comm[0] == 'b' && ((comm[0][1] == 'r' && !comm[0][2])
