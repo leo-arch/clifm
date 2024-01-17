@@ -49,7 +49,9 @@
 #define BULK_RENAME_TMP_FILE_HEADER "# CliFM - Rename files in bulk\n\
 # Edit file names, save, and quit the editor (you will be\n\
 # asked for confirmation).\n\
-# Quit the editor without any edit to cancel the operation.\n\n"
+# Quit the editor without saving to cancel the operation.\n\n"
+
+#define IS_BR_COMMENT(l) (*(l) == '#' && (l)[1] == ' ')
 
 /* Error opening tmp file FILE. Err accordingly. */
 static int
@@ -69,7 +71,7 @@ rename_file(char *oldpath, char *newpath)
 {
 	/* Some renameat(2) implementations (DragonFly) do not like NEWPATH to
 	 * end with a slash (in case of renaming directories). */
-	size_t len = strlen(newpath);
+	const size_t len = strlen(newpath);
 	if (len > 1 && newpath[len - 1] == '/')
 		newpath[len - 1] = '\0';
 
@@ -164,10 +166,10 @@ count_modified_names(char **args, FILE *fp)
 
 	/* Print what would be done */
 	while (fgets(line, (int)sizeof(line), fp)) {
-		if (!*line || *line == '\n' || *line == '#')
+		if (!*line || *line == '\n' || IS_BR_COMMENT(line))
 			continue;
 
-		size_t len = strlen(line);
+		const size_t len = strlen(line);
 		if (line[len - 1] == '\n')
 			line[len - 1] = '\0';
 
@@ -235,13 +237,14 @@ check_line_mismatch(FILE *fp, const size_t total)
 	char line[PATH_MAX + 1];
 
 	while (fgets(line, (int)sizeof(line), fp)) {
-		if (!*line || *line == '\n' || *line == '#')
+		if (!*line || *line == '\n' || IS_BR_COMMENT(line))
 			continue;
 
 		modified++;
 	}
 
 	if (total != modified) {
+		printf("%zu:%zu\n", total, modified);
 		xerror("%s\n", _("br: Line mismatch in temporary file"));
 		return EXIT_FAILURE;
 	}
@@ -258,7 +261,7 @@ rename_bulk_files(char **args, FILE *fp, int *is_cwd, size_t *renamed,
 	char line[PATH_MAX + 1]; *line = '\0';
 
 	while (fgets(line, (int)sizeof(line), fp)) {
-		if (!*line || *line == '\n' || *line == '#')
+		if (!*line || *line == '\n' || IS_BR_COMMENT(line))
 			continue;
 
 		if (!args[i])

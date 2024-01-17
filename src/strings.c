@@ -271,7 +271,7 @@ xstrsncpy(char *restrict dst, const char *restrict src, size_t n)
 	return (size_t)(end - dst);
 }
 
-/* A safe strcat(1). Append the string SRC to the buffer DST, always null
+/* A safe strcat(3). Append the string SRC to the buffer DST, always null
  * terminating DST. */
 char *
 xstrncat(char *restrict dst, const size_t dst_len, const char *restrict src,

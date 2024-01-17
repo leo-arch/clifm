@@ -43,7 +43,7 @@
 #define BULK_RM_TMP_FILE_HEADER "# CliFM - Remove files in bulk\n\
 # Remove the file names you want to be deleted, save, and quit the\n\
 # editor (you will be asked for confirmation).\n\
-# Quit the editor without any edit to cancel the operation.\n\n"
+# Quit the editor without saving to cancel the operation.\n\n"
 
 static int
 parse_bulk_remove_params(char *s1, char *s2, char **app, char **target)
