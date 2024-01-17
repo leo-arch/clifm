@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Jan 9, 2024" "clifm 1.16" "CLIFM Manual"
+.TH "CLIFM" "1" "Jan 17, 2024" "clifm 1.16.4" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -555,8 +555,8 @@ Note that there is no need to type the entire directory name; if the query is un
 .sp
 The query string could match any part of a directory name: \fIbd er\fR, for instance, will take you to \fI/home/user\fR, since it is an unambiguous query.
 .TP
-.B bl \fIELN/FILE\fR...
-Create symbolic links (in the current directory) for each specified file. The user will be asked to enter a specific suffix for the symlinks. If none is specified, the basename of the corresponding file is used.
+.B bl \fIFILE\fR...
+Create symbolic links (in the current directory) for each specified file. For example, to create symbolic links in the directory \fIdir\fR for all PNG files in the current directory, issue these commands: \fIs *.png\fR, \fIcd dir\fR, and then \fIbl sel\fR.
 .TP
 .B bm, bookmarks \fR[\fIa\fR, \fIadd\fR \fIFILENAME\fR \fINAME\fR [\fISHORTCUT\fR]] [\fId\fR, \fIdel\fR [\fINAME\fR]] [\fIe, edit\fR [\fIAPP\fR]] [\fINAME\fR, \fISHORTCUT\fR]
 Bookmarks can be manager either from the bookmarks manager screen or from the command line.
