@@ -78,7 +78,7 @@ typedef char *rl_cpvfunc_t;
 #define VCMP 2
 #define VLEN 3
 
-#define INT_ARRAY_MAX 32
+#define INT_ARRAY_MAX 256
 
 #ifdef SOLARIS_DOORS
 # define IS_FILE_TYPE_FILTER(x) ((x) == 'b' || (x) == 'c' || (x) == 'C' \
@@ -826,8 +826,7 @@ split_str(char *str, const int update_args)
 	init_quoted_words();
 
 	size_t buf_len = 0, words = 0, str_len = 0;
-	char *buf = (char *)NULL;
-	buf = xnmalloc(1, sizeof(char));
+	char *buf = xnmalloc(1, sizeof(char));
 	int quote = 0, close = 0;
 	char **substr = (char **)NULL;
 
@@ -908,8 +907,10 @@ split_str(char *str, const int update_args)
 				buf = xnrealloc(buf, buf_len + 1, sizeof(char *));
 				buf[buf_len] = *str;
 				buf_len++;
-				if (update_args == 1)
+
+				if (update_args == 1 && words < QWORDS_ARRAY_LEN)
 					quoted_words[words] = (int)words;
+
 				break;
 			}
 
@@ -977,14 +978,14 @@ split_str(char *str, const int update_args)
 					words++;
 				}
 
-				/* Clear te buffer to get a new string */
+				/* Clear the buffer to get a new string */
 				memset(buf, '\0', buf_len);
 				buf_len = 0;
 			}
 			break;
 
 		/* If neither a quote nor a breaking word char nor command substitution,
-		 * just dump it into the buffer */
+		 * just dump it into the buffer. */
 		default:
 			if (*str == '\\' && (flags & IN_BOOKMARKS_SCREEN))
 				break;
@@ -1744,7 +1745,7 @@ expand_file_type(char ***substr)
 	int *file_type_array = xnmalloc(INT_ARRAY_MAX, sizeof(int));
 	size_t file_type_n = 0;
 
-	for (i = 0; (*substr)[i]; i++) {
+	for (i = 0; (*substr)[i] && file_type_n < INT_ARRAY_MAX; i++) {
 		if (*(*substr)[i] != '=' || !(*substr)[i][1])
 			continue;
 
@@ -1803,7 +1804,7 @@ expand_mime_type(char ***substr)
 	size_t mime_type_n = 0;
 	struct stat a;
 
-	for (i = 0; (*substr)[i]; i++) {
+	for (i = 0; (*substr)[i] && mime_type_n < INT_ARRAY_MAX; i++) {
 		if (*(*substr)[i] == '@' && *((*substr)[i] + 1)
 		&& lstat((*substr)[i], &a) == -1) {
 			mime_type_array[mime_type_n] = (int)i;
@@ -1865,7 +1866,7 @@ expand_bookmarks(char ***substr)
 	int *bm_array = xnmalloc(INT_ARRAY_MAX, sizeof(int));
 	size_t bn = 0;
 
-	for (i = 0; (*substr)[i]; i++) {
+	for (i = 0; (*substr)[i] && bn < INT_ARRAY_MAX; i++) {
 		if (*(*substr)[i] == 'b' && *((*substr)[i] + 1) == ':'
 		&& !*((*substr)[i] + 2) && lstat((*substr)[i], &a) == -1) {
 			bm_array[bn] = (int)i;

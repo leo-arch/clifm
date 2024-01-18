@@ -1687,7 +1687,7 @@ get_last_word(const char *last_space)
 	const char *tmp = (last_space && *(last_space + 1)) ? last_space + 1
 			: (rl_line_buffer ? rl_line_buffer : (char *)NULL);
 	if (tmp) {
-		size_t len = strlen(tmp);
+		const size_t len = strlen(tmp);
 		last_word = xnrealloc(last_word, len + 1, sizeof(char));
 		xstrsncpy(last_word, tmp, len + 1);
 	} else {

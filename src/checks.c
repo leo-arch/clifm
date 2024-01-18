@@ -502,7 +502,7 @@ contains_digit(const char *str)
 	return (-1);
 }
 
-/* Return 1 if CMD is found in CMDS_LIST and zero otherwise. */
+/* Return 1 if CMD is found in CMDS_LIST or zero otherwise. */
 static int
 find_cmd(const struct cmdslist_t *cmds_list, const size_t list_size, char *cmd)
 {
