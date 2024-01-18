@@ -799,8 +799,9 @@ cmd_keeps_quotes(char *str)
 	char *p = strchr(str, ' ');
 	if (p) {
 		*p = '\0';
-		int ret = is_internal_c(str);
+		const int ret = is_internal_c(str);
 		*p = ' ';
+		/* Let's keep quotes for external commands */
 		if (ret == 0)
 			return 1;
 	}
@@ -827,7 +828,7 @@ split_str(char *str, const int update_args)
 
 	size_t buf_len = 0, words = 0, str_len = 0;
 	char *buf = xnmalloc(1, sizeof(char));
-	int quote = 0, close = 0;
+	int close = 0;
 	char **substr = (char **)NULL;
 
 	int keep_quotes = cmd_keeps_quotes(str);
@@ -901,29 +902,26 @@ split_str(char *str, const int update_args)
 			break;
 
 		case '\'': /* fallthrough */
-		case '"':
+		case '"': {
+			const int is_quoted = (keep_quotes == 1
+				|| (str_len > 0 && *(str - 1) == '\\'));
 			/* If the quote is escaped, keep it. */
-			if (keep_quotes == 1 || (str_len && *(str - 1) == '\\')) {
+			if (is_quoted == 1) {
 				buf = xnrealloc(buf, buf_len + 1, sizeof(char *));
 				buf[buf_len] = *str;
 				buf_len++;
-
-				if (update_args == 1 && words < QWORDS_ARRAY_LEN)
-					quoted_words[words] = (int)words;
-
-				break;
 			}
 
-			/* If not escaped, move on to the next char */
-			quote = *str;
-			str++;
+			const char quote = *str; /* A copy of the opening quote. */
+			str++; /* Move on to the next char. */
 
-			/* Copy into the buffer whatever is after the first quote up to
-			 * the last quote or NULL */
+			/* Copy into the buffer whatever is after the first quote up
+			 * to the last quote or NULL. */
 			while (*str && *str != quote) {
-				/* If char has special meaning, escape it */
-				if (!(flags & IN_BOOKMARKS_SCREEN) && (is_quote_char(*str)
-				|| *str == '.')) { // escape '.' to prevent realpath expansions
+				/* If char has special meaning, escape it. */
+				if (!(flags & IN_BOOKMARKS_SCREEN) && is_quoted == 0
+				&& (is_quote_char(*str) || *str == '.')) {
+					/* Escape '.' to prevent realpath expansions. */
 					buf = xnrealloc(buf, buf_len + 1, sizeof(char *));
 					buf[buf_len] = '\\';
 					buf_len++;
@@ -936,10 +934,11 @@ split_str(char *str, const int update_args)
 			}
 
 			/* The above while breaks with NULL or quote, so that if
-			 * *STR is a null byte there was not ending quote */
+			 * *STR is a null byte there was not ending quote. */
 			if (!*str) {
-				xerror(_("%s: Missing '%c'\n"), PROGRAM_NAME, quote);
-				/* Free the current buffer and whatever was already allocated */
+				xerror(_("%s: Missing closing quote: '%c'\n"),
+					PROGRAM_NAME, quote);
+				/* Free stuff and return. */
 				free(buf);
 				buf = (char *)NULL;
 				int i = (int)words;
@@ -950,10 +949,17 @@ split_str(char *str, const int update_args)
 				return (char **)NULL;
 			}
 
+			if (is_quoted == 1) { /* Add closing quote. */
+				buf = xnrealloc(buf, buf_len + 1, sizeof(char *));
+				buf[buf_len] = (char)quote;
+				buf_len++;
+			}
+
 			/* If coming from parse_input_str (main command line), mark
 			 * quoted words: no expansion will be made on these words. */
-			if (update_args == 1)
+			if (update_args == 1 && words < QWORDS_ARRAY_LEN)
 				quoted_words[words] = (int)words;
+			}
 
 			break;
 

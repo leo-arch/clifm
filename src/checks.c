@@ -546,6 +546,7 @@ is_action_name(const char *s)
 	return 0;
 }
 
+/* Return 1 if CMD is an internal command, or zero otherwise. */
 int
 is_internal_c(char *restrict cmd)
 {
