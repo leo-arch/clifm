@@ -82,10 +82,22 @@ bm_prompt(const int print_header)
 	while (!bm)
 		bm = rl_no_hist(bm_str);
 
-	flags |= IN_BOOKMARKS_SCREEN;
-	char **cmd = split_str(bm, NO_UPDATE_ARGS);
-	flags &= ~IN_BOOKMARKS_SCREEN;
-	free(bm);
+	char **cmd = (char **)NULL;
+	/* "e/edit" is the only command that needs to split the input string:
+	 * the second field may be an opening application. */
+	if (*bm == 'e' && (bm[1] == ' ' || strncmp(bm, "edit ", 5) == 0)) {
+		flags |= IN_BOOKMARKS_SCREEN;
+		cmd = split_str(bm, NO_UPDATE_ARGS);
+		flags &= ~IN_BOOKMARKS_SCREEN;
+		free(bm);
+	} else {
+		char *tmp = strchr(bm, '\\') ? unescape_str(bm, 0) : (char *)NULL;
+		cmd = xnmalloc(2, sizeof(char *));
+		cmd[0] = tmp ? tmp : bm;
+		cmd[1] = (char *)NULL;
+		if (tmp)
+			free(bm);
+	}
 
 	return cmd;
 }
@@ -404,7 +416,8 @@ name_is_reserved_keyword(const char *name)
 	if (!name || !*name)
 		return 0;
 
-	if ( ((*name == 'e' || *name == 'd' || *name == 'a') && !*(name + 1))
+	if ( ((*name == 'e' || *name == 'd' || *name == 'a' || *name == 'q')
+	&& !*(name + 1)) || strcmp(name, "quit") == 0
 	|| strcmp(name, "edit") == 0 || strcmp(name, "del") == 0
 	|| strcmp(name, "add") == 0 || strcmp(name, "reload") == 0) {
 		xerror(_("bookmarks: '%s': Reserved bookmark keyword\n"), name);
