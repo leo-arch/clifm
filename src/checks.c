@@ -859,74 +859,62 @@ truncate_file(char *file, const int max, const int check_dups)
 	if (config_ok == 0 || !file || !*file)
 		return;
 
-	/* Create the file, if it doesn't exist */
-	FILE *fp = (FILE *)NULL;
+	char *tmp_name = (char *)NULL;
+	FILE *orig_fp = (FILE *)NULL;
 	struct stat attr;
 
-	int fd = 0;
+	int orig_fd = 0;
 	if (stat(file, &attr) == -1) {
-		fp = open_fwrite(file, &fd);
-		if (!fp) {
-			err(0, NOPRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME, file,
+		/* File doesn't exist: create it and exit. */
+		if (!(orig_fp = open_fwrite(file, &orig_fd))) {
+			err('w', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME, file,
 				strerror(errno));
 		} else {
-			fclose(fp);
+			fclose(orig_fp);
 		}
 
-		return; /* Exit: we do not need to truncate a new empty file */
+		return;
 	}
 
-	/* Once we know the files exists, keep only MAX entries. */
-	fp = open_fread(file, &fd);
-	if (!fp) {
-		err(0, NOPRINT_PROMPT, "%s: log: '%s': %s\n", PROGRAM_NAME,
-		    file, strerror(errno));
+	/* Open the original file for read. */
+	if (!(orig_fp = open_fread(file, &orig_fd))) {
+		err('w', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME, file,
+			strerror(errno));
 		return;
 	}
 
 	int n = 0, c;
 
-	/* Count newline chars to get amount of lines in the file */
-	while ((c = fgetc(fp)) != EOF && n < INT_MAX) {
+	/* Count newline chars to get the amount of lines in the file. */
+	while ((c = fgetc(orig_fp)) != EOF && n < INT_MAX) {
 		if (c == '\n')
 			n++;
 	}
 
-	if (n <= max) {
-		fclose(fp);
-		return;
-	}
+	if (n <= max)
+		goto EXIT;
 
-	/* Set the file pointer to the beginning of the log file */
-	fseek(fp, 0, SEEK_SET);
+	/* Set the file pointer to the beginning of the original file. */
+	fseek(orig_fp, 0, SEEK_SET);
 
-#if !defined(__OpenBSD__)
-	char *tmp = xnmalloc(config_dir_len + 12, sizeof(char));
-	snprintf(tmp, config_dir_len + 12, "%s/log.XXXXXX", config_dir);
-#else
-	char *tmp = xnmalloc(config_dir_len + 16, sizeof(char));
-	snprintf(tmp, config_dir_len + 16, "%s/log.XXXXXXXXXX", config_dir);
-#endif /* !__OpenBSD__ */
+	const size_t len = config_dir_len + (sizeof(TMP_FILENAME) - 1) + 2;
+	tmp_name = xnmalloc(len, sizeof(char));
+	snprintf(tmp_name, len, "%s/%s", config_dir, TMP_FILENAME);
 
-	int fdd = mkstemp(tmp);
-	if (fdd == -1) {
-		xerror("log: %s: %s", tmp, strerror(errno));
-		fclose(fp);
-		free(tmp);
-		return;
-	}
-
-#ifndef HAVE_DPRINTF
-	FILE *fpp = fopen(tmp, "w");
-	if (!fpp) {
-		err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME, tmp,
+	int tmp_fd = mkstemp(tmp_name);
+	if (tmp_fd == -1) {
+		err('w', PRINT_PROMPT, "%s: '%s': %s", PROGRAM_NAME, tmp_name,
 			strerror(errno));
-		close(fdd);
-		fclose(fp);
-		free(tmp);
-		return;
+		goto EXIT;
 	}
-#endif /* !HAVE_DPRINTF */
+
+	FILE *tmp_fp = fdopen(tmp_fd, "w");
+	if (!tmp_fp) {
+		err('w', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME, tmp_name,
+			strerror(errno));
+		close(tmp_fd);
+		goto EXIT;
+	}
 
 	int i = 1;
 	size_t line_size = 0;
@@ -935,19 +923,15 @@ truncate_file(char *file, const int max, const int check_dups)
 	char *prev_line = (char *)NULL;
 	size_t prev_line_size = 0;
 
-	while (getline(&line, &line_size, fp) > 0) {
-		/* Skip consecutive equal entries */
+	while (getline(&line, &line_size, orig_fp) > 0) {
+		/* Skip consecutive equal entries. */
 		if (check_dups == 1 && prev_line && line_size == prev_line_size
 		&& strcmp(line, prev_line) == 0)
 			continue;
 
-		/* Delete old entries = copy only new ones */
+		/* Delete old entries, i.e., copy only new ones. */
 		if (i++ >= n - (max - 1))
-#ifdef HAVE_DPRINTF
-			dprintf(fdd, "%s", line);
-#else
-			fprintf(fpp, "%s", line);
-#endif /* HAVE_DPRINTF */
+			fprintf(tmp_fp, "%s", line);
 
 		if (check_dups == 1) {
 			free(prev_line);
@@ -957,15 +941,12 @@ truncate_file(char *file, const int max, const int check_dups)
 	}
 
 	free(prev_line);
-
-#ifndef HAVE_DPRINTF
-	fclose(fpp);
-#endif /* !HAVE_DPRINTF */
-
 	free(line);
-	unlinkat(fd, file, 0);
-	renameat(fdd, tmp, fd, file);
-	close(fdd);
-	fclose(fp);
-	free(tmp);
+
+	renameat(tmp_fd, tmp_name, orig_fd, file);
+	fclose(tmp_fp);
+
+EXIT:
+	free(tmp_name);
+	fclose(orig_fp);
 }
