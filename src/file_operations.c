@@ -1769,12 +1769,12 @@ END:
 }
 
 /* Export files in CWD (if FILENAMES is NULL), or files in FILENAMES,
- * into a temporary file. Return the address of this empt file if
- * success (it must be freed) or NULL in case of error */
+ * into a temporary file. Return the address of this empty file if
+ * success (it must be freed) or NULL in case of error. */
 char *
 export_files(char **filenames, const int open)
 {
-	const size_t len = strlen(tmp_dir) + 14;
+	const size_t len = strlen(tmp_dir) + (sizeof(TMP_FILENAME) - 1) + 2;
 	char *tmp_file = xnmalloc(len, sizeof(char));
 	snprintf(tmp_file, len, "%s/%s", tmp_dir, TMP_FILENAME);
 
@@ -1786,44 +1786,31 @@ export_files(char **filenames, const int open)
 	}
 	
 	size_t i;
-#ifndef HAVE_DPRINTF
-	int tmp_fd = 0;
-	FILE *fp = open_fwrite(tmp_file, &tmp_fd);
+	FILE *fp = fdopen(fd, "w");
 	if (!fp) {
-		if (unlink(tmp_file) == -1)
+		xerror("exp: '%s': %s\n", tmp_file, strerror(errno));
+		if (unlinkat(fd, tmp_file, 0) == -1)
 			xerror("exp: unlink: '%s': %s\n", tmp_file, strerror(errno));
-		xerror("exp: %s: %s\n", tmp_file, strerror(errno));
 		free(tmp_file);
 		return (char *)NULL;
 	}
-#endif /* !HAVE_DPRINTF */
 
 	/* If no argument, export files in CWD. */
 	if (!filenames[1]) {
 		for (i = 0; file_info[i].name; i++)
-#ifdef HAVE_DPRINTF
-			dprintf(fd, "%s\n", file_info[i].name);
-#else
 			fprintf(fp, "%s\n", file_info[i].name);
-#endif /* HAVE_DPRINTF */
 	} else {
 		for (i = 1; filenames[i]; i++) {
-			if (*filenames[i] == '.' && (!filenames[i][1]
-			|| (filenames[i][1] == '.' && !filenames[i][2])))
+			if (SELFORPARENT(filenames[i]))
 				continue;
-#ifdef HAVE_DPRINTF
-			dprintf(fd, "%s\n", filenames[i]);
-#else
+
 			fprintf(fp, "%s\n", filenames[i]);
-#endif /* HAVE_DPRINTF */
 		}
 	}
-#if defined(__HAIKU__) || defined(__sun)
-	fclose(fp);
-#endif /* __HAIKU__ || __sun */
-	close(fd);
 
-	if (!open)
+	fclose(fp);
+
+	if (open == 0)
 		return tmp_file;
 
 	const int ret = open_file(tmp_file);

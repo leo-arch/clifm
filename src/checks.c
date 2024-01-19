@@ -910,6 +910,7 @@ truncate_file(char *file, const int max, const int check_dups)
 
 	FILE *tmp_fp = fdopen(tmp_fd, "w");
 	if (!tmp_fp) {
+		unlinkat(tmp_fd, tmp_name, 0);
 		err('w', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME, tmp_name,
 			strerror(errno));
 		close(tmp_fd);

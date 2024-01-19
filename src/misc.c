@@ -2166,7 +2166,6 @@ list_commands(void)
 	return EXIT_SUCCESS;
 }
 
-#ifdef HAVE_DPRINTF
 /* Retrieve pager path, first from PAGER, then try less(1), and finally
  * more(1). If none is found returns NULL. */
 static char *
@@ -2197,7 +2196,6 @@ get_pager(void)
 
 	return (char *)NULL;
 }
-#endif /* HAVE_DPRINTF */
 
 /* Help topics */
 static void
@@ -2417,19 +2415,8 @@ quick_help(const char *topic)
 	if (topic && *topic)
 		return run_help_topic(topic);
 
-#ifndef HAVE_DPRINTF
-	printf("%s                                %s\n\n%s\n\n%s",
-		ASCII_LOGO, PROGRAM_NAME_UPPERCASE, QUICK_HELP_HEADER,
-		QUICK_HELP_NAVIGATION);
-	printf("\n\n%s\n\n%s\n", QUICK_HELP_BASIC_OPERATIONS, QUICK_HELP_MISC);
-# ifdef __HAIKU__
-	puts(_("\nNOTE: Some keybindings on Haiku might differ. Take a look "
-		"at your current keybindings via the 'kb' command"));
-# endif /* !HAVE_DPRINTF */
-	return EXIT_SUCCESS;
-#else
-	char *_pager = (char *)NULL;
-	if (xargs.stealth_mode == 1 || !(_pager = get_pager())) {
+	char *pager_app = (char *)NULL;
+	if (xargs.stealth_mode == 1 || !(pager_app = get_pager())) {
 		printf("%s                                %s\n\n%s\n\n%s",
 			ASCII_LOGO, PROGRAM_NAME_UPPERCASE, QUICK_HELP_HEADER,
 			QUICK_HELP_NAVIGATION);
@@ -2443,49 +2430,50 @@ quick_help(const char *topic)
 
 	int fd = mkstemp(tmp_file);
 	if (fd == -1) {
-		xerror("%s: '%s': Error creating temporary file: %s\n",
+		xerror("%s: Error creating temporary file '%s': %s\n",
 			PROGRAM_NAME, tmp_file, strerror(errno));
-		free(_pager);
+		free(pager_app);
 		return EXIT_FAILURE;
 	}
 
-	FILE *fp = open_fwrite(tmp_file, &fd);
+	FILE *fp = fdopen(fd, "w");
 	if (!fp) {
-		xerror("%s: fopen: '%s': %s\n", PROGRAM_NAME, tmp_file, strerror(errno));
-		free(_pager);
-		if (unlink(tmp_file) == -1)
-			err('w', PRINT_PROMPT, "help: '%s': %s\n", tmp_file, strerror(errno));
+		xerror("%s: '%s': %s\n", PROGRAM_NAME, tmp_file, strerror(errno));
+		free(pager_app);
+		if (unlinkat(fd, tmp_file, 0) == -1)
+			xerror("%s: '%s': %s\n", PROGRAM_NAME, tmp_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
-	dprintf(fd, "%s                                %s\n\n%s\n\n%s",
-			ASCII_LOGO, PROGRAM_NAME_UPPERCASE, QUICK_HELP_HEADER,
-			QUICK_HELP_NAVIGATION);
-	dprintf(fd, "\n\n%s\n\n%s", QUICK_HELP_BASIC_OPERATIONS, QUICK_HELP_MISC);
+	fprintf(fp, "%s                                %s\n\n%s\n\n%s",
+		ASCII_LOGO, PROGRAM_NAME_UPPERCASE, QUICK_HELP_HEADER,
+		QUICK_HELP_NAVIGATION);
+	fprintf(fp, "\n\n%s\n\n%s", QUICK_HELP_BASIC_OPERATIONS, QUICK_HELP_MISC);
 
-	int ret;
-	char *n = strrchr(_pager, '/');
-	char *p = (n && *(++n)) ? n : _pager;
+	int ret = 0;
+	char *s = strrchr(pager_app, '/');
+	char *p = (s && *(++s)) ? s : pager_app;
+
 	if (*p == 'l' && strcmp(p, "less") == 0) {
-		char *cmd[] = {_pager, "-FIRXP?e\\(END\\):CLIFM", tmp_file, NULL};
+		char *cmd[] = {pager_app, "-FIRXP?e\\(END\\):CLIFM", tmp_file, NULL};
 		ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	} else {
-		char *cmd[] = {_pager, tmp_file, NULL};
+		char *cmd[] = {pager_app, tmp_file, NULL};
 		ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	}
 
-	if (unlink(tmp_file) == -1)
+	if (unlinkat(fd, tmp_file, 0) == -1)
 		err('w', PRINT_PROMPT, "help: '%s': %s\n", tmp_file, strerror(errno));
 	fclose(fp);
-	free(_pager);
+	free(pager_app);
 
 	if (ret != EXIT_SUCCESS)
 		return ret;
 
 	if (conf.autols == 1)
 		reload_dirlist();
+
 	return EXIT_SUCCESS;
-#endif /* __HAIKU || __sun */
 }
 
 __attribute__ ((noreturn))

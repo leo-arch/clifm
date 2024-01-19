@@ -160,10 +160,6 @@
 # define XAT_FDCWD AT_FDCWD /* defined in fcntl.h */
 #endif /* __sun */
 
-#if !defined(__HAIKU__) && !defined(__sun) && !defined(CLIFM_LEGACY)
-# define HAVE_DPRINTF
-#endif /* !__HAIKU__ && !__SUN && !CLIFM_LEGACY */
-
 #if !defined(_DIRENT_HAVE_D_TYPE) || !defined(DT_DIR)
 /* Systems not providing a d_type member for the stat struct do not provide
  * these macros either. We use them to convert an st_mode value to the
