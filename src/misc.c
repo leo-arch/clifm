@@ -2450,6 +2450,8 @@ quick_help(const char *topic)
 		QUICK_HELP_NAVIGATION);
 	fprintf(fp, "\n\n%s\n\n%s", QUICK_HELP_BASIC_OPERATIONS, QUICK_HELP_MISC);
 
+	fclose(fp);
+
 	int ret = 0;
 	char *s = strrchr(pager_app, '/');
 	char *p = (s && *(++s)) ? s : pager_app;
@@ -2462,10 +2464,10 @@ quick_help(const char *topic)
 		ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	}
 
-	if (unlinkat(fd, tmp_file, 0) == -1)
-		err('w', PRINT_PROMPT, "help: '%s': %s\n", tmp_file, strerror(errno));
-	fclose(fp);
 	free(pager_app);
+
+	if (unlink(tmp_file) == -1)
+		err('w', PRINT_PROMPT, "help: '%s': %s\n", tmp_file, strerror(errno));
 
 	if (ret != EXIT_SUCCESS)
 		return ret;
