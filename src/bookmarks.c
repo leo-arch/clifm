@@ -492,8 +492,8 @@ bookmark_add(char *file, char *name, char *shortcut)
 	/* FILE and NAME are guarranteed to be non-NULL.
 	 * FILE is already dequoted. */
 
-	if (check_bm_path(file) == 1)
-		return EXIT_FAILURE;
+	if (check_bm_path(file) == 1 && rl_get_y_or_n("Continue? [y/n] ") == 0)
+		return EXIT_SUCCESS;
 
 	int exit_status = EXIT_FAILURE;
 	char *p = unescape_str(name, 0);
