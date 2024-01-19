@@ -256,22 +256,24 @@ get_bm_path(char *arg)
 		return bookmarks[num - 1].path;
 	}
 
+	char *name = remove_quotes(arg);
+
 	/* If string, check shortcuts and names */
 	size_t i;
 	for (i = 0; i < bm_n; i++) {
-		if ((bookmarks[i].shortcut && *arg == *bookmarks[i].shortcut
-		&& strcmp(arg, bookmarks[i].shortcut) == 0)
-		|| (bookmarks[i].name && *arg == *bookmarks[i].name
-		&& strcmp(arg, bookmarks[i].name) == 0)) {
+		if ((bookmarks[i].shortcut && *name == *bookmarks[i].shortcut
+		&& strcmp(name, bookmarks[i].shortcut) == 0)
+		|| (bookmarks[i].name && *name == *bookmarks[i].name
+		&& strcmp(name, bookmarks[i].name) == 0)) {
 			if (bookmarks[i].path)
 				return bookmarks[i].path;
 
-			xerror(_("'%s': Invalid bookmark\n"), arg);
+			xerror(_("'%s': Invalid bookmark\n"), name);
 			return (char *)NULL;
 		}
 	}
 
-	xerror(_("'%s': No such bookmark\n"), arg);
+	xerror(_("'%s': No such bookmark\n"), name);
 	return (char *)NULL;
 }
 
