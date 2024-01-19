@@ -219,7 +219,8 @@ print_bookmarks(void)
 		    ? uf_c : "\x1b[0m\x1b[4m")
 		    : (is_dir == 0 ? fi_c : (name_ok == 1 ? bm_c : di_c)),
 		    name_ok == 1 ? bookmarks[i].name
-		    : bookmarks[i].path, df_c); /* Path */
+		    : bookmarks[i].path, conf.colorize == 1 /* Path */
+		    ? df_c : "\x1b[0m");
 	}
 
 	UNHIDE_CURSOR;
