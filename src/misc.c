@@ -821,6 +821,8 @@ new_instance(char *dir, const int sudo)
 	return launch_new_instance_cmd(&cmd, &self, &_sudo, &path_dir, sudo);
 }
 
+/* Import (copy to main config file) aliases from the file named FILE.
+ * Returns 0 on success or >0 on error. */
 int
 alias_import(char *file)
 {
@@ -834,11 +836,11 @@ alias_import(char *file)
 
 	char *npath = normalize_path(file, strlen(file));
 	if (!npath) {
-		xerror("alias: '%s': Error normalizing file name\n", file);
+		xerror(_("alias: '%s': Error normalizing file name\n"), file);
 		return EXIT_FAILURE;
 	}
 
-	char rfile[PATH_MAX + 1];
+	char rfile[PATH_MAX + 1]; *rfile = '\0';
 	xstrsncpy(rfile, npath, sizeof(rfile));
 	free(npath);
 
