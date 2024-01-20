@@ -244,7 +244,6 @@ check_line_mismatch(FILE *fp, const size_t total)
 	}
 
 	if (total != modified) {
-		printf("%zu:%zu\n", total, modified);
 		xerror("%s\n", _("br: Line mismatch in temporary file"));
 		return EXIT_FAILURE;
 	}
@@ -380,6 +379,7 @@ bulk_rename(char **args)
 	if (fstat(fd, &attrb) == -1 || !S_ISREG(attrb.st_mode)
 	|| attra.st_ino != attrb.st_ino || attra.st_dev != attrb.st_dev
 	|| mtime_bk != attrb.st_mtime) {
+		exit_status = EXIT_FAILURE;
 		xerror("%s\n", _("br: Temporary file changed on disk! Aborting."));
 		goto ERROR;
 	}
