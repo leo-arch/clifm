@@ -204,8 +204,8 @@ static void
 set_mount_cmd(const int udisks2ok, const int udevilok)
 {
 	if (xargs.mount_cmd == MNT_UDISKS2 && !udisks2ok && udevilok) {
-		err('w', PRINT_PROMPT, _("%s: udisks2 not found. Falling back to "
-			"udevil\n"), PROGRAM_NAME);
+		err('w', PRINT_PROMPT, _("%s: udisks2: Command not found. Falling "
+			"back to udevil\n"), PROGRAM_NAME);
 		xargs.mount_cmd = MNT_UDEVIL;
 		return;
 	}
@@ -393,7 +393,7 @@ check_third_party_cmds(void)
 }
 
 /* Return 1 if at least one of the user's groups match the file gid GID.
- * Otherwise, return 0 */
+ * Otherwise, return 0. */
 static int
 check_user_groups(const gid_t gid)
 {
@@ -580,7 +580,6 @@ is_internal(char *restrict cmd)
 		{"br", 2},
 		{"bulk", 4},
 		{"c", 1},
-//		{"cp", 2},
 		{"cd", 2},
 		{"d", 1},
 		{"dup", 3},
@@ -591,7 +590,6 @@ is_internal(char *restrict cmd)
 		{"l", 1},
 		{"le", 2},
 		{"m", 1},
-//		{"mv", 2},
 		{"mm", 2},
 		{"mime", 4},
 		{"n", 1},
@@ -639,7 +637,7 @@ is_internal(char *restrict cmd)
 int
 is_internal_f(const char *restrict cmd)
 {
-	/* If we are completing/suggesting, do not take 'ws', 'mf', and 'st'
+	/* If we are completing/suggesting, do not take 'ws', 'mf', and 'st/sort'
 	 * commands into account: they do not take ELN/filenames as parameters,
 	 * but just numbers, in which case no ELN-filename completion should
 	 * be made. */
@@ -663,7 +661,6 @@ is_internal_f(const char *restrict cmd)
 		{"br", 2},
 		{"bulk", 4},
 		{"c", 1},
-//		{"cp", 2},
 		{"cd", 2},
 		{"d", 1},
 		{"dup", 3},
@@ -676,9 +673,7 @@ is_internal_f(const char *restrict cmd)
 		{"m", 1},
 		{"mime", 4},
 		{"mm", 2},
-//		{"mv", 2},
 		{"md", 2},
-//		{"mkdir", 5},
 		{"mf", 2},
 		{"n", 1},
 		{"new", 3},
@@ -694,7 +689,6 @@ is_internal_f(const char *restrict cmd)
 		{"paste", 5},
 		{"pin", 3},
 		{"r", 1},
-//		{"rm", 2},
 		{"rr", 2},
 		{"s", 1},
 		{"sel", 3},
@@ -707,7 +701,6 @@ is_internal_f(const char *restrict cmd)
 		{"ta", 2},
 		{"te", 2},
 		{"tl", 2},
-		{"unlink", 6},
 		{"v", 1},
 		{"vv", 2},
 		{"ws", 2},
