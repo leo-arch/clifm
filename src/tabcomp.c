@@ -755,6 +755,7 @@ get_preview_win_width(const int offset)
 	return (size_t)-1;
 }
 
+#ifndef _NO_TRASH
 /* Change to the trash directory so that we can generate file previews.
  * Only for the 'u' and 't del' commands. */
 static int
@@ -766,6 +767,7 @@ cd_trashdir(const int prev)
 	&& cur_ws >= 0 && workspaces[cur_ws].path
 	&& xchdir(trash_files_dir, NO_TITLE) == 0);
 }
+#endif /* !_NO_TRASH */
 
 static int
 run_finder(const size_t height, const int offset, const char *lw,
@@ -774,7 +776,9 @@ run_finder(const size_t height, const int offset, const char *lw,
 	int prev = (conf.fzf_preview > 0 && SHOW_PREVIEWS(cur_comp_type) == 1)
 		? FZF_INTERNAL_PREVIEWER : 0;
 
+#ifndef _NO_TRASH
 	int restore_cwd = cd_trashdir(prev);
+#endif /* !_NO_TRASH */
 
 	int prev_hidden = conf.fzf_preview == 2 ? 1 : 0;
 	if (conf.fzf_preview == FZF_EXTERNAL_PREVIEWER)
@@ -869,8 +873,10 @@ ctrl-d:deselect-all,ctrl-t:toggle-all" : "",
 	int ret = launch_execl(cmd);
 	umask(old_mask);
 
+#ifndef _NO_TRASH
 	if (restore_cwd == 1)
 		xchdir(workspaces[cur_ws].path, NO_TITLE);
+#endif /* !_NO_TRASH */
 
 	/* Restore the user's shell to its original value. */
 	user.shell = shell_bk;

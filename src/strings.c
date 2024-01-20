@@ -56,7 +56,7 @@ typedef char *rl_cpvfunc_t;
 
 #include "aux.h"
 #include "checks.h"
-#include "exec.h" // exec_chained_cmds
+#include "exec.h"  /* exec_chained_cmds */
 #ifndef _NO_MAGIC
 # include "mime.h" /* MIME-type filter expansion */
 #endif /* _NO_MAGIC */
