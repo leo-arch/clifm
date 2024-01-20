@@ -38,7 +38,6 @@
 
 #include "aux.h"
 #include "colors.h" /* update_warning_prompt_text_color() */
-#include "exec.h"
 #include "file_operations.h"
 #include "history.h"
 #include "init.h"
@@ -48,6 +47,7 @@
 #include "navigation.h"
 #include "prompt.h"
 #include "sanitize.h"
+#include "spawn.h"
 #ifndef _NO_SUGGESTIONS
 # include "suggestions.h"
 #endif /* !_NO_SUGGESTIONS */

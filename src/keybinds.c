@@ -58,6 +58,7 @@ typedef char *rl_cpvfunc_t;
 #include "profiles.h"
 #include "prompt.h"
 #include "readline.h"
+#include "spawn.h"
 #include "tabcomp.h" /* tab_complete() */
 
 #ifndef _NO_SUGGESTIONS

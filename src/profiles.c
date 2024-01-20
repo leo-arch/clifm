@@ -36,7 +36,7 @@
 #include "bookmarks.h"
 #include "checks.h"
 #include "config.h"
-#include "exec.h"
+#include "exec.h" // exec_profile
 #include "history.h"
 #include "init.h"
 #include "listing.h"
@@ -45,6 +45,7 @@
 #include "navigation.h"
 #include "profiles.h"
 #include "sort.h"
+#include "spawn.h"
 
 /* Get the list of all available profile names and store them in the
  * profile_names global array. Returns zero on success, one otherwise. */

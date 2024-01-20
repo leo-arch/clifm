@@ -33,13 +33,13 @@
 #include "aux.h" /* xatoi(), normalize_path(), open_fread(), open_fwrite() */
 #include "bookmarks.h" /* bookmarks_function() */
 #include "checks.h" /* is_number() */
-#include "exec.h" /* launch_execv() */
 #include "file_operations.h" /* open_function() */
 #include "init.h" /* load_bookmarks() */
 #include "messages.h" /* STEALTH_DISABLED */
 #include "misc.h" /* err(), xerror() */
 #include "listing.h" /* reload_dirlist() */
 #include "readline.h" /* rl_no_hist() */
+#include "spawn.h" /* launch_execv() */
 
 void
 free_bookmarks(void)

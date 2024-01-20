@@ -36,13 +36,13 @@
 #include "checks.h"
 #include "colors.h"
 #include "config.h"
-#include "exec.h"
 #include "file_operations.h"
 #include "init.h"
 #include "listing.h"
 #include "messages.h"
 #include "misc.h"
 #include "navigation.h"
+#include "spawn.h"
 
 /* Regenerate the configuration file and create a back up of the old one. */
 static int

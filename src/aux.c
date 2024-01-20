@@ -39,12 +39,12 @@
 #include <readline/readline.h>
 
 #include "aux.h"
-#include "exec.h"
 #include "misc.h"
 #include "checks.h"
 #ifndef _NO_HIGHLIGHT
 # include "highlight.h"
 #endif /* !_NO_HIGHLIGHT */
+#include "spawn.h"
 
 void
 press_any_key_to_continue(const int init_newline)

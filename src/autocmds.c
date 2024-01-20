@@ -30,8 +30,8 @@
 
 #include "aux.h"
 #include "colors.h"
-#include "exec.h"
 #include "sanitize.h"
+#include "spawn.h"
 
 /* The opts struct contains option values previous to any autocommand call */
 void

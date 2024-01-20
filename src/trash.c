@@ -36,13 +36,13 @@
 xatoi, url_encode, xnmalloc */
 #include "checks.h"     /* is_file_in_cwd, is_number */
 #include "colors.h"     /* colors_list */
-#include "exec.h"       /* launch_execv */
 #include "listing.h"    /* reload_dirlist */
 #include "misc.h"       /* xerror, print_reload_msg */
 #include "navigation.h" /* xchdir */
 #include "properties.h" /* get_color_size */
 #include "readline.h"   /* rl_no_hist, rl_get_y_or_n */
 #include "sort.h"       /* skip_files, xalphasort, alphasort_insensitive */
+#include "spawn.h"      /* launch_execv */
 
 static size_t
 count_trashed_files(void)

@@ -29,7 +29,6 @@
 #include <string.h>
 
 #include "aux.h"
-#include "exec.h"
 #include "file_operations.h"
 #include "history.h"
 #include "init.h"
@@ -39,6 +38,7 @@
 #include "misc.h"
 #include "navigation.h"
 #include "sanitize.h"
+#include "spawn.h"
 
 static int
 remotes_list(void)

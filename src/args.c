@@ -35,7 +35,6 @@
 
 #include "aux.h"
 #include "checks.h"
-#include "exec.h"
 #include "file_operations.h"
 #include "init.h"
 #include "mime.h"
@@ -43,6 +42,7 @@
 #include "navigation.h"
 #include "profiles.h"
 #include "sanitize.h"
+#include "spawn.h"
 #include "strings.h"
 
 #if defined(_NO_PROFILES) || defined(_NO_FZF) || defined(_NO_ICONS) \

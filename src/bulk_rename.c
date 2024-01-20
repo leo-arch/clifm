@@ -38,13 +38,13 @@
 
 #include "aux.h" /* press_any_key_to_continue(), abbreviate_file_name(), open_fread() */
 #include "checks.h" /* is_file_in_cwd() */
-#include "exec.h" /* launch_execv() */
 #include "file_operations.h" /* open_file() */
 #include "init.h" /* get_sel_files() */
 #include "listing.h" /* reload_dirlist() */
 #include "messages.h" /* BULK_RENAME_USAGE */
 #include "misc.h" /* xerror(), print_reload_msg() */
 #include "readline.h" /* rl_get_y_or_n() */
+#include "spawn.h" /* launch_execv() */
 
 #define BULK_RENAME_TMP_FILE_HEADER "# CliFM - Rename files in bulk\n\
 # Edit file names, save, and quit the editor (you will be\n\

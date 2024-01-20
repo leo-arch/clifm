@@ -25,8 +25,6 @@
 #ifndef EXEC_H
 #define EXEC_H
 
-#include "spawn.h"
-
 __BEGIN_DECLS
 
 int  exec_cmd(char **comm);

@@ -38,12 +38,12 @@
 #include "aux.h"
 #include "checks.h"
 #include "colors.h" /* get_dir_color() */
-#include "exec.h"
 #include "file_operations.h"
 #include "init.h"
 #include "messages.h"
 #include "misc.h"
 #include "navigation.h"
+#include "spawn.h"
 
 /* Macros to calculate directories rank extra points */
 #define BASENAME_BONUS 	300

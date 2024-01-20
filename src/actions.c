@@ -42,6 +42,7 @@
 #include "messages.h"
 #include "misc.h"
 #include "sanitize.h"
+#include "spawn.h"
 
 /* Get the executable's path of the action ACTION
  * Returns this path on success or NULL on error, in which case STATUS

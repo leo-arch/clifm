@@ -62,7 +62,6 @@ typedef char *rl_cpvfunc_t;
 #include "aux.h"
 #include "bookmarks.h"
 #include "checks.h"
-#include "exec.h"
 #include "file_operations.h"
 #include "history.h"
 #include "init.h"
@@ -72,6 +71,7 @@ typedef char *rl_cpvfunc_t;
 #include "navigation.h"
 #include "readline.h"
 #include "remotes.h"
+#include "spawn.h"
 
 char *
 gen_diff_str(const int diff)

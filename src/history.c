@@ -32,12 +32,12 @@
 
 #include "aux.h"
 #include "checks.h"
-#include "exec.h"
 #include "file_operations.h"
 #include "history.h"
 #include "init.h"
 #include "messages.h"
 #include "misc.h"
+#include "spawn.h"
 
 /* Return a string with the current date.
  * Used to compose log entries. */

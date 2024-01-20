@@ -57,7 +57,6 @@ typedef char *rl_cpvfunc_t;
 #include "aux.h"
 #include "checks.h"
 #include "colors.h"
-#include "exec.h"
 #ifndef _NO_HIGHLIGHT
 # include "highlight.h"
 #endif /* !_NO_HIGHLIGHT */
@@ -66,6 +65,7 @@ typedef char *rl_cpvfunc_t;
 #include "readline.h"
 #include "selection.h"
 #include "sort.h"
+#include "spawn.h"
 #include "strings.h" /* quote_str() */
 #ifndef _NO_SUGGESTIONS
 # include "suggestions.h"

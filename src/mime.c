@@ -51,13 +51,13 @@
 #include "aux.h"
 #include "checks.h"
 #include "config.h"
-#include "exec.h"
 #include "listing.h"
 #include "messages.h"
 #include "mime.h"
 #include "misc.h"
 #include "readline.h"
 #include "sanitize.h"
+#include "spawn.h"
 
 static char *err_name = (char *)NULL;
 

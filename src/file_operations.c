@@ -36,7 +36,6 @@
 #include "aux.h"
 #include "checks.h"
 #include "colors.h"
-#include "exec.h"
 #include "file_operations.h"
 #include "history.h"
 #include "init.h" /* get_sel_files() */
@@ -47,6 +46,7 @@
 #include "navigation.h"
 #include "readline.h"
 #include "selection.h"
+#include "spawn.h"
 
 /* Struct to store information about files to be removed via the 'r' command. */
 struct rm_info {

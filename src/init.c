@@ -62,13 +62,13 @@
 #include "aux.h"
 #include "checks.h" /* truncate_file(), is_number() */
 #include "config.h"
-#include "exec.h"
 #include "jump.h" /* add_to_jumpdb() */
 #include "misc.h"
 #include "navigation.h"
 #include "sanitize.h"
 #include "selection.h"
 #include "sort.h"
+#include "spawn.h"
 
 /* We need this for get_user_groups() */
 #if !defined(NGROUPS_MAX)

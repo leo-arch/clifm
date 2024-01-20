@@ -82,7 +82,6 @@
 #include "aux.h"
 #include "checks.h"
 #include "colors.h"
-#include "exec.h"
 #ifndef _NO_ICONS
 # include "icons.h"
 #endif /* !_NO_ICONS */
@@ -91,6 +90,7 @@
 #include "properties.h"
 #include "sanitize.h"
 #include "sort.h"
+#include "spawn.h"
 
 /* In case we want to try some faster printf implementation */
 /*#if defined(_PALAND_PRINTF)

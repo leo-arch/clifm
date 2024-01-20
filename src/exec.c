@@ -81,6 +81,7 @@ typedef char *rl_cpvfunc_t;
 # include "trash.h"
 #endif /* !_NO_TRASH */
 #include "sanitize.h"
+#include "spawn.h"
 #include "tabcomp.h"
 #include "tags.h"
 

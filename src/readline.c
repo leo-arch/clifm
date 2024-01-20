@@ -50,7 +50,6 @@ typedef char *rl_cpvfunc_t;
 #include "misc.h"
 #include "aux.h"
 #include "checks.h"
-#include "exec.h"
 #include "fuzzy_match.h"
 #ifndef _NO_HIGHLIGHT
 # include "highlight.h"
@@ -59,6 +58,7 @@ typedef char *rl_cpvfunc_t;
 #include "mime.h"
 #include "navigation.h"
 #include "readline.h"
+#include "spawn.h"
 #ifndef _NO_SUGGESTIONS
 # include "suggestions.h"
 #endif /* !_NO_SUGGESTIONS */

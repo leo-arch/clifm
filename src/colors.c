@@ -46,12 +46,12 @@
 #include "checks.h"
 #include "colors.h"
 #include "config.h" /* set_div_line() */
-#include "exec.h"
 #include "file_operations.h"
 #include "listing.h"
 #include "messages.h"
 #include "misc.h"
 #include "sanitize.h"
+#include "spawn.h"
 
 #ifndef CLIFM_SUCKLESS
 /* qsort(3) is used only by get_colorschemes(), which is not included

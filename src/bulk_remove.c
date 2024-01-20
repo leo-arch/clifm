@@ -35,10 +35,10 @@
 
 #include "aux.h" /* xnmalloc, open_fwrite(), get_cmd_path(), count_dir() */
 #include "checks.h" /* is_internal() */
-#include "exec.h" /* launch_execv() */
 #include "file_operations.h" // open_file() */
 #include "messages.h" /* RR_USAGE */
 #include "misc.h" /* xerror() */
+#include "spawn.h" /* launch_execv() */
 
 #define BULK_RM_TMP_FILE_HEADER "# CliFM - Remove files in bulk\n\
 # Remove the file names you want to be deleted, save, and quit the\n\

@@ -34,11 +34,11 @@
 
 #include "aux.h"
 #include "colors.h" /* colors_list() */
-#include "exec.h"
 #include "init.h"
 #include "messages.h"
 #include "misc.h"
 #include "sort.h"
+#include "spawn.h"
 
 /* A few printing functions */
 static int

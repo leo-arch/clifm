@@ -41,13 +41,13 @@
 
 #include "aux.h"
 #include "checks.h"
-#include "exec.h"
 #include "history.h"
 #include "jump.h"
 #include "listing.h"
 #include "misc.h"
 #include "navigation.h"
 #include "readline.h"
+#include "spawn.h"
 
 #ifndef _NO_MAGIC
 # include "mime.h"
