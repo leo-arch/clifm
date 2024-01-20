@@ -832,48 +832,30 @@ alias_import(char *file)
 	if (!file)
 		return EXIT_FAILURE;
 
-	char rfile[PATH_MAX + 1];
-	rfile[0] = '\0';
-
-	if (*file == '~') {
-		char *file_exp = tilde_expand(file);
-		if (!file_exp) {
-			xerror("%s: '%s': %s\n", PROGRAM_NAME, file, strerror(errno));
-			return EXIT_FAILURE;
-		}
-
-		if (realpath(file_exp, rfile) == NULL) {
-			xerror("%s: '%s': %s\n", PROGRAM_NAME, file_exp, strerror(errno));
-			free(file_exp);
-			return EXIT_FAILURE;
-		}
-		free(file_exp);
-	} else {
-		if (realpath(file, rfile) == NULL) {
-			xerror("%s: '%s': %s\n", PROGRAM_NAME, file, strerror(errno));
-			return EXIT_FAILURE;
-		}
-	}
-
-	if (rfile[0] == '\0') {
-		xerror("%s: '%s': %s\n", PROGRAM_NAME, file, strerror(errno));
+	char *npath = normalize_path(file, strlen(file));
+	if (!npath) {
+		xerror("alias: '%s': Error normalizing file name\n", file);
 		return EXIT_FAILURE;
 	}
 
-	/* Open the file to import aliases from */
+	char rfile[PATH_MAX + 1];
+	xstrsncpy(rfile, npath, sizeof(rfile));
+	free(npath);
+
+	/* Open the file to import aliases from. */
 	int fd;
 	FILE *fp = open_fread(rfile, &fd);
 	if (!fp) {
-		xerror("%s: '%s': %s\n", PROGRAM_NAME, rfile, strerror(errno));
-		return EXIT_FAILURE;
+		xerror("alias: '%s': %s\n", rfile, strerror(errno));
+		return errno;
 	}
 
-	/* Open CliFM's config file as well */
+	/* Open CliFM's config file as well. */
 	FILE *config_fp = open_fappend(config_file);
 	if (!config_fp) {
-		xerror("%s: '%s': %s\n", PROGRAM_NAME, config_file, strerror(errno));
+		xerror("alias: '%s': %s\n", config_file, strerror(errno));
 		fclose(fp);
-		return EXIT_FAILURE;
+		return errno;
 	}
 
 	size_t line_size = 0, i;
@@ -887,7 +869,7 @@ alias_import(char *file)
 
 		alias_found++;
 
-		/* If alias name conflicts with some internal command, skip it */
+		/* If alias name conflicts with some internal command, skip it. */
 		char *alias_name = strbtw(line, ' ', '=');
 		if (!alias_name)
 			continue;
@@ -899,25 +881,18 @@ alias_import(char *file)
 			continue;
 		}
 
-		char *p = line + 6; /* p points now to the beginning of the
-		alias name (because "alias " == 6) */
+		char *p = line + 6;
+		/* p points now to the beginning of the alias name
+		 * (because "alias " == 6). */
 
 		char *tmp = strchr(p, '=');
-		if (!tmp) {
-			free(alias_name);
-			continue;
-		}
-		if (!*(++tmp)) {
-			free(alias_name);
-			continue;
-		}
-		if (*tmp != '\'' && *tmp != '"') {
+		if (!tmp || !tmp[1] || (tmp[1] != '\'' && tmp[1] != '"')) {
 			free(alias_name);
 			continue;
 		}
 
-		*(tmp - 1) = '\0';
-		/* If alias already exists, skip it too */
+		*tmp = '\0';
+		/* If the alias name already exists, skip it too. */
 		int exists = 0;
 		for (i = 0; i < aliases_n; i++) {
 			if (*p == *aliases[i].name && strcmp(aliases[i].name, p) == 0) {
@@ -926,7 +901,7 @@ alias_import(char *file)
 			}
 		}
 
-		*(tmp - 1) = '=';
+		*tmp = '=';
 
 		if (exists == 0) {
 			if (first == 1) {
@@ -951,28 +926,26 @@ alias_import(char *file)
 
 	/* No alias was found in FILE */
 	if (alias_found == 0) {
-		xerror(_("%s: '%s': No alias found\n"), PROGRAM_NAME, rfile);
+		xerror(_("alias: No alias found in '%s'\n"), rfile);
 		return EXIT_FAILURE;
 	}
 
 	/* Aliases were found in FILE, but none was imported (either because
 	 * they conflicted with internal commands or the alias already
 	 * existed). */
-	else {
-		if (alias_imported == 0) {
-			xerror(_("%s: No alias imported\n"), PROGRAM_NAME);
-			return EXIT_FAILURE;
-		}
+	if (alias_imported == 0) {
+		xerror(_("alias: No alias imported\n"));
+		return EXIT_FAILURE;
 	}
 
 	/* If some alias was found and imported, print the corresponding
 	 * message and update the aliases array. */
-	printf(_("%s: %zu alias(es) imported\n"), PROGRAM_NAME, alias_imported);
+	printf(_("alias: %zu alias(es) imported\n"), alias_imported);
 
-	/* Add new aliases to the internal list of aliases */
+	/* Add new aliases to the internal list of aliases. */
 	get_aliases();
 
-	/* Add new aliases to the commands list for TAB completion */
+	/* Add new aliases to the commands list for TAB completion. */
 	if (bin_commands) {
 		for (i = 0; bin_commands[i]; i++)
 			free(bin_commands[i]);
