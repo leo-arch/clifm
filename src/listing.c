@@ -196,7 +196,7 @@ swap_ent(const size_t id1, const size_t id2)
  * wc_xstrlen(). This gives us a little performance improvement: 3% faster
  * over 100,000 files. */
 static uint8_t
-is_utf8_name(const char *name, size_t *bytes)
+is_utf8_name(const char *restrict name, size_t *restrict bytes)
 {
 	uint8_t is_utf8 = 0;
 	const char *start = name;
@@ -416,7 +416,7 @@ print_dirhist_map(void)
 #ifndef _NO_ICONS
 /* Set the icon field to the corresponding icon for FILE */
 static int
-get_name_icon(const char *file, const filesn_t n)
+get_name_icon(const char *restrict file, const filesn_t n)
 {
 	if (!file)
 		return 0;
@@ -440,7 +440,7 @@ get_name_icon(const char *file, const filesn_t n)
 /* Set the icon field to the corresponding icon for DIR. If not found,
  * set the default icon. */
 static void
-get_dir_icon(const char *dir, const filesn_t n)
+get_dir_icon(const char *restrict dir, const filesn_t n)
 {
 	/* Default values for directories */
 	file_info[n].icon = DEF_DIR_ICON;
@@ -946,7 +946,8 @@ get_ext_info(const filesn_t i, int *trim_type, size_t *ext_len)
  * The file name is trimmed if longer than MAX_NAMELEN (if conf.max_name_len
  * is set). */
 static char *
-construct_filename(const filesn_t i, struct wtrim_t *wtrim, const int max_namelen)
+construct_filename(const filesn_t i, struct wtrim_t *wtrim,
+	const int max_namelen)
 {
 	/* file_info[i].len is zero whenever an invalid character was found in
 	 * the file name. Let's recalculate the name length. */
@@ -1214,8 +1215,8 @@ print_entry_nocolor(int *ind_char, const filesn_t i, const int pad,
 }
 
 static void
-print_entry_color_light(int *ind_char, const filesn_t i, const int pad,
-	const int max_namelen)
+print_entry_color_light(int *ind_char, const filesn_t i,
+	const int pad, const int max_namelen)
 {
 	*ind_char = 0;
 	const char *end_color = file_info[i].dir == 1 ? fc_c : df_c;
@@ -1300,8 +1301,8 @@ print_entry_color_light(int *ind_char, const filesn_t i, const int pad,
 }
 
 static void
-print_entry_nocolor_light(int *ind_char, const filesn_t i, const int pad,
-	const int max_namelen)
+print_entry_nocolor_light(int *ind_char, const filesn_t i,
+	const int pad, const int max_namelen)
 {
 	struct wtrim_t wtrim = (struct wtrim_t){0};
 	const char *n = construct_filename(i, &wtrim, max_namelen);
@@ -1446,8 +1447,8 @@ pad_filename_light(const int ind_char, const filesn_t i, const int pad,
  * 1 AAA	2 AAB	3 AAC
  * 4 AAD	5 AAE	6 AAF */
 static void
-list_files_horizontal(size_t *counter, int *reset_pager, const int pad,
-		const size_t columns_n)
+list_files_horizontal(size_t *counter, int *reset_pager,
+	const int pad, const size_t columns_n)
 {
 	const filesn_t nn = (max_files != UNSET && (filesn_t)max_files < files)
 		? (filesn_t)max_files : files;
@@ -1533,8 +1534,8 @@ list_files_horizontal(size_t *counter, int *reset_pager, const int pad,
  * 1 AAA	3 AAC	5 AAE
  * 2 AAB	4 AAD	6 AAF */
 static void
-list_files_vertical(size_t *counter, int *reset_pager, const int pad,
-		const size_t columns_n)
+list_files_vertical(size_t *counter, int *reset_pager,
+	const int pad, const size_t columns_n)
 {
 	/* Total amount of files to be listed. */
 	const filesn_t nn = (max_files != UNSET && (filesn_t)max_files < files)
@@ -2155,7 +2156,7 @@ END:
 
 /* Check whether the file in the device DEV with inode INO is selected.
  * Used to mark selected files in the files list. */
-static inline int
+static int
 check_seltag(const dev_t dev, const ino_t ino, const nlink_t links,
 	const filesn_t index)
 {

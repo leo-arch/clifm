@@ -1113,13 +1113,8 @@ dir_size(char *dir, const int size_in_bytes, int *status)
 		return (-1);
 
 	char file[PATH_MAX + 1];
-#if !defined(__OpenBSD__)
-	snprintf(file, sizeof(file), "%s/.duXXXXXX", xargs.stealth_mode == 1
-		? P_tmpdir : tmp_dir); /* NOLINT */
-#else
-	snprintf(file, sizeof(file), "%s/.duXXXXXXXXXX", xargs.stealth_mode == 1
-		? P_tmpdir : tmp_dir); /* NOLINT */
-#endif /* !__OpenBSD__ */
+	snprintf(file, sizeof(file), "%s/%s", xargs.stealth_mode == 1
+		? P_tmpdir : tmp_dir, TMP_FILENAME); /* NOLINT */
 
 	int fd = mkstemp(file);
 	if (fd == -1)
@@ -1127,8 +1122,8 @@ dir_size(char *dir, const int size_in_bytes, int *status)
 
 	int stdout_bk = dup(STDOUT_FILENO); /* Save original stdout */
 	if (stdout_bk == -1) {
+		unlinkat(fd, file, 0);
 		close(fd);
-		unlink(file);
 		return (-1);
 	}
 
@@ -1186,8 +1181,8 @@ dir_size(char *dir, const int size_in_bytes, int *status)
 	}
 
 END:
+	unlinkat(fd, file, 0);
 	fclose(fp);
-	unlink(file);
 	return retval;
 }
 #endif /* USE_XDU */

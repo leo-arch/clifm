@@ -1791,6 +1791,7 @@ export_files(char **filenames, const int open)
 		xerror("exp: '%s': %s\n", tmp_file, strerror(errno));
 		if (unlinkat(fd, tmp_file, 0) == -1)
 			xerror("exp: unlink: '%s': %s\n", tmp_file, strerror(errno));
+		close(fd);
 		free(tmp_file);
 		return (char *)NULL;
 	}

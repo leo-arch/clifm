@@ -349,13 +349,13 @@ mount_dev(const int n)
 	char out_line[PATH_MAX + 1]; *out_line = '\0';
 	if (fgets(out_line, (int)sizeof(out_line), fp) == NULL) {
 		/* Error is printed by the mount command itself */
+		unlinkat(fd, file, 0);
 		fclose(fp);
-		unlink(file);
 		return FUNC_FAILURE;
 	}
 
+	unlinkat(fd, file, 0);
 	fclose(fp);
-	unlink(file);
 
 	/* Recover the mountpoint used by the mounting command. */
 	char *p = strstr(out_line, " at ");

@@ -115,7 +115,7 @@ create_tmp_file(char **file, int *fd, struct stat *attr)
 
 	if (fstat(*fd, attr) == -1) {
 		xerror("rr: fstat: '%s': %s\n", *file, strerror(errno));
-		unlink(*file);
+		unlinkat(*fd, *file, 0);
 		close(*fd);
 		free(*file);
 		return FUNC_FAILURE;

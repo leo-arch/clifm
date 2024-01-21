@@ -237,18 +237,6 @@ x_strcasestr(char *a, char *b)
 }
 #endif /* _BE_POSIX */
 
-/*
-size_t
-xstrlen(const char *restrict s)
-{
-	// cppcheck-suppress nullPointer
-#if !defined(__GLIBC__) || defined(_BE_POSIX)
-	return (size_t)((char *)memchr(s, '\0', INT_MAX) - s);
-#else
-	return (size_t)((char *)rawmemchr(s, '\0') - s); // NOLINT
-#endif
-} */
-
 /* Modified version of strlcpy(3) using memccpy(3), as suggested here:
  * https://www.open-std.org/jtc1/sc22/wg14/www/docs/n2349.htm
  *
@@ -1078,7 +1066,7 @@ split_fused_param(char *str)
 		return (char *)NULL;
 
 	/* The buffer size is the double of STR, just in case each subtr
-	 * needs to be splitted */
+	 * needs to be splitted. */
 	char *buf = xnmalloc(((strlen(str) * 2) + 2), sizeof(char));
 
 	size_t c = 0; /* Bytes counter */
