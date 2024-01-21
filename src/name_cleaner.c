@@ -41,9 +41,7 @@
 #include "cleaner_table.h"
 #include "file_operations.h"
 #include "history.h"
-#ifdef GENERIC_FS_MONITOR
-# include "listing.h" /* reload_dirlist() */
-#endif /* GENERIC_FS_MONITOR */
+#include "listing.h" /* reload_dirlist() */
 #include "messages.h"
 #include "misc.h"
 #include "readline.h"
@@ -366,12 +364,6 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 	}
 	size_t total_files = i;
 
-	fclose(fp);
-
-	fp = open_fread(f, &fd);
-	if (!fp)
-		goto ERROR;
-
 	struct stat attr;
 	if (fstat(fd, &attr) == -1)
 		goto ERROR_CLOSE;
@@ -413,7 +405,7 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 	/* Allocate memory for the new list */
 	free(bfiles);
 	bfiles = (struct bleach_t *)xnmalloc(total_files + 1,
-			sizeof(struct bleach_t));
+		sizeof(struct bleach_t));
 
 	/* Initialize all values */
 	for (i = 0; i < total_files; i++) {
@@ -621,7 +613,7 @@ CONFIRM:
 	 * Ask for confirmation in case the user just wanted to see what would
 	 * be done. */
 	if (_edit == 1) {
-		printf(_("%zu %s will be bleached\n"), f, f > 1 ? _("files") : _("file"));
+		printf(_("%zu file name(s) will be bleached\n"), f);
 		if (rl_get_y_or_n(_("Continue? [y/n] ")) != 1) {
 			for (i = 0; i < f; i++) {
 				free(bfiles[i].original);
@@ -656,7 +648,8 @@ CONFIRM:
 			}
 
 			if (renameat(XAT_FDCWD, o, XAT_FDCWD, r) == -1) {
-				xerror("bleach: renameat: '%s': %s\n", o, strerror(errno));
+				xerror("bleach: Cannot rename '%s' to '%s': %s\n",
+					o, r, strerror(errno));
 				total_rename--;
 				exit_status = FUNC_FAILURE;
 			}
@@ -669,17 +662,11 @@ CONFIRM:
 	free(bfiles);
 
 	if (exit_status == FUNC_FAILURE || total_rename == 0) {
-		printf(_("%s: %d file(s) bleached\n"), FUNC_NAME, total_rename);
+		printf(_("%s: %d file names(s) bleached\n"), FUNC_NAME, total_rename);
 	} else {
-#ifdef GENERIC_FS_MONITOR
 		if (conf.autols == 1)
 			reload_dirlist();
-		print_reload_msg(_("%s: %d file(s) bleached\n"),
-			FUNC_NAME, total_rename);
-#else
-		err(ERR_NO_LOG, PRINT_PROMPT, _("%s->%s %s: %d file(s) bleached\n"),
-			mi_c, df_c, FUNC_NAME, total_rename);
-#endif /* GENERIC_FS_MONITOR */
+		print_reload_msg(_("%d file name(s) bleached\n"), total_rename);
 	}
 
 	return exit_status;

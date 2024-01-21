@@ -304,8 +304,8 @@ if (S_ISNWK(mode)) return 'n'; // HP/UX: network special file
 #include "settings.h"
 
 /* General exit codes for functions */
-#define FUNC_SUCCESS 0
-#define FUNC_FAILURE 1
+#define FUNC_SUCCESS 0 /* True/success */
+#define FUNC_FAILURE 1 /* False/error */
 
 #ifndef PATH_MAX
 # ifdef __linux__
