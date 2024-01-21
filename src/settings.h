@@ -405,6 +405,10 @@ ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
  * invalid UTF-8 char) in file names. */
 #define INVALID_CHR '^'
 
+/* String used for the messages pointer (ex: "-> 2 file(s) removed")
+ * Note: The color used for this string is 'mi' (in the color scheme file). */
+#define MSG_PTR "->"
+
 #define MNT_UDEVIL 	0
 #define MNT_UDISKS2 1
 
