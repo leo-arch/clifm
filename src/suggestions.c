@@ -382,7 +382,7 @@ recover_from_wrong_cmd(void)
 	|| (words_num > 1 && point_is_first_word == 0))) {
 		char *p = (strrchr(rl_line_buffer, ' '));
 		if (p && p != rl_line_buffer && *(p - 1) != '\\' && *(p + 1) != ' ')
-			return EXIT_FAILURE;
+			return FUNC_FAILURE;
 	}
 
 	fputs(NC, stdout);
@@ -400,7 +400,7 @@ recover_from_wrong_cmd(void)
 #endif /* !_NO_HIGHLIGHT */
 	wrong_cmd = 0;
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* This function is only used before running a keybind command. We don't
@@ -535,7 +535,7 @@ check_conditions(const size_t offset, const size_t wlen, int *baej,
 	size_t *slines)
 {
 	if (offset > wlen)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	/* Do not print suggestions bigger than what the current terminal
 	 * window size can hold. If length is zero (invalid wide char), or if
@@ -545,14 +545,14 @@ check_conditions(const size_t offset, const size_t wlen, int *baej,
 	const size_t suggestion_len = wlen - offset;
 	if (suggestion_len == 0 || suggestion_len == ARG_MAX
 	|| (int)suggestion_len > (term_cols * term_lines) - curcol)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	*slines = calculate_suggestion_lines(baej, suggestion_len - 1);
 
 	if (*slines > (size_t)term_lines || (xargs.vt100 == 1 && *slines > 1))
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static inline void
@@ -628,7 +628,7 @@ print_suggestion(const char *str, size_t offset, char *color)
 
 	const size_t str_len = wc_xstrlen(str);
 	size_t slines = 0;
-	if (check_conditions(offset, str_len, &baej, &slines) == EXIT_FAILURE) {
+	if (check_conditions(offset, str_len, &baej, &slines) == FUNC_FAILURE) {
 		UNHIDE_CURSOR;
 		return;
 	} else {
@@ -2011,7 +2011,7 @@ rl_suggestions(const unsigned char c)
 		/* No suggestion at all if comment */
 		if (suggestion.printed)
 			clear_suggestion(CS_FREEBUF);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	int printed = 0, zero_offset = 0;
@@ -2023,7 +2023,7 @@ rl_suggestions(const unsigned char c)
 		suggestion_buf = (char *)NULL;
 		if (wrong_cmd)
 			recover_from_wrong_cmd();
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	suggestion.full_line_len = (size_t)rl_end + 1;
@@ -2652,7 +2652,7 @@ SUCCESS:
 	free(last_word);
 	last_word = (char *)NULL;
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 
 FAIL:
 	if (suggestion.printed == 1)
@@ -2662,7 +2662,7 @@ FAIL:
 	free(last_word);
 	last_word = (char *)NULL;
 
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 }
 #else
 void *_skip_me_suggestions;

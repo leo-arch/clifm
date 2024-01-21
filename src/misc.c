@@ -247,11 +247,11 @@ err(const int msg_type, const int prompt_flag, const char *format, ...)
 
 	free(buf);
 	errno = saved_errno;
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 
 ERROR:
 	errno = saved_errno;
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 }
 
 /* Print format string MSG, as "> MSG" (colored), if autols is on, or just
@@ -269,7 +269,7 @@ print_reload_msg(const char *msg, ...)
 	va_end(arglist);
 
 	if (size < 0)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	if (conf.autols == 1)
 		printf("%s->%s ", mi_c, df_c);
@@ -283,7 +283,7 @@ print_reload_msg(const char *msg, ...)
 	fputs(buf, stdout);
 	free(buf);
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 #ifdef LINUX_INOTIFY
@@ -414,7 +414,7 @@ read_inotify(void)
 			refresh = 1;
 	}
 
-	if (refresh == 1 && exit_code == EXIT_SUCCESS) {
+	if (refresh == 1 && exit_code == FUNC_SUCCESS) {
 # ifdef INOTIFY_DEBUG
 		puts("INOTIFY_REFRESH");
 # endif /* INOTIFY_DEBUG */
@@ -492,7 +492,7 @@ unset_filter(void)
 {
 	if (!filter.str) {
 		puts(_("No filter set"));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	free(filter.str);
@@ -505,7 +505,7 @@ unset_filter(void)
 		reload_dirlist();
 
 	puts(_("Filter unset"));
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -513,21 +513,21 @@ validate_file_type_filter(void)
 {
 	if (!filter.str || !*filter.str || *filter.str != '='
 	|| !*(filter.str + 1) || *(filter.str + 2))
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	const char c = *(filter.str + 1);
 	if (c == 'b' || c == 'c' || c == 'd' || c == 'f'
 	|| c == 'l' || c == 'p' || c == 's')
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	if (conf.light_mode == 1)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	if (c == 'g' || c == 'h' || c == 'o' || c == 't'
 	|| c == 'u' || c == 'x')
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 }
 
 static int
@@ -536,13 +536,13 @@ compile_filter(void)
 	if (filter.type == FILTER_FILE_NAME) {
 		const int ret =
 			regcomp(&regex_exp, filter.str, REG_NOSUB | REG_EXTENDED);
-		if (ret != EXIT_SUCCESS) {
+		if (ret != FUNC_SUCCESS) {
 			xregerror("ft", filter.str, ret, regex_exp, 0);
 			regfree(&regex_exp);
 			goto ERR;
 		}
 	} else if (filter.type == FILTER_FILE_TYPE) {
-		if (validate_file_type_filter() != EXIT_SUCCESS) {
+		if (validate_file_type_filter() != FUNC_SUCCESS) {
 			xerror("%s\n", _("ft: Invalid file type filter"));
 			goto ERR;
 		}
@@ -557,13 +557,13 @@ compile_filter(void)
 	print_reload_msg(_("%s%s: New filter successfully set\n"),
 		filter.rev == 1 ? "!" : "", filter.str);
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 
 ERR:
 	free(filter.str);
 	filter.str = (char *)NULL;
 	filter.type = FILTER_NONE;
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 }
 
 int
@@ -572,12 +572,12 @@ filter_function(char *arg)
 	if (!arg) {
 		printf(_("Current filter: %c%s\n"), filter.rev == 1 ? '!' : 0,
 			filter.str ? filter.str : "none");
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (IS_HELP(arg)) {
 		puts(_(FILTER_USAGE));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (*arg == 'u' && strcmp(arg, "unset") == 0)
@@ -598,7 +598,7 @@ filter_function(char *arg)
 		p = remove_quotes(arg);
 		if (!p) {
 			xerror("%s\n", _("ft: Error removing quotes: Filter unset"));
-			return EXIT_FAILURE;
+			return FUNC_FAILURE;
 		}
 	}
 
@@ -616,23 +616,23 @@ check_new_instance_init_conditions(void)
 	if (!conf.term) {
 		xerror(_("%s: Default terminal not set. Use the "
 			"configuration file (F10) to set it\n"), PROGRAM_NAME);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	if (!(flags & GUI)) {
 		xerror(_("%s: Function only available for graphical "
 			"environments\n"), PROGRAM_NAME);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Just check that DIR exists and is a directory */
 static inline int
 check_dir(char **dir)
 {
-	int ret = EXIT_SUCCESS;
+	int ret = FUNC_SUCCESS;
 	struct stat attr;
 	if (stat(*dir, &attr) == -1) {
 		xerror("%s: '%s': %s\n", PROGRAM_NAME, *dir, strerror(errno));
@@ -750,7 +750,7 @@ launch_new_instance_cmd(char ***cmd, char **self, char **_sudo,
 	if (*cmd) {
 		ret = (sudo == 0 || confirm_sudo_cmd(*cmd) == 1)
 			? launch_execv(*cmd, BACKGROUND, E_NOFLAG)
-			: EXIT_SUCCESS;
+			: FUNC_SUCCESS;
 		size_t i;
 		for (i = 0; (*cmd)[i]; i++)
 			free((*cmd)[i]);
@@ -760,7 +760,7 @@ launch_new_instance_cmd(char ***cmd, char **self, char **_sudo,
 			char *tcmd[] = {conf.term, *_sudo, *self, *dir, NULL};
 			ret = (confirm_sudo_cmd(tcmd) == 1)
 				? launch_execv(tcmd, BACKGROUND, E_NOFLAG)
-				: EXIT_SUCCESS;
+				: FUNC_SUCCESS;
 		} else {
 			char *tcmd[] = {conf.term, *self, *dir, NULL};
 			ret = launch_execv(tcmd, BACKGROUND, E_NOFLAG);
@@ -784,8 +784,8 @@ launch_new_instance_cmd(char ***cmd, char **self, char **_sudo,
 int
 new_instance(char *dir, const int sudo)
 {
-	if (check_new_instance_init_conditions() == EXIT_FAILURE)
-		return EXIT_FAILURE;
+	if (check_new_instance_init_conditions() == FUNC_FAILURE)
+		return FUNC_FAILURE;
 
 	if (!dir)
 		return EINVAL;
@@ -800,7 +800,7 @@ new_instance(char *dir, const int sudo)
 	if (!deq_dir) {
 		free(_sudo);
 		xerror(_("%s: '%s': Cannot escape file name\n"), PROGRAM_NAME, dir);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	char *self = get_cmd_path(PROGRAM_NAME);
@@ -811,7 +811,7 @@ new_instance(char *dir, const int sudo)
 	}
 
 	const int ret = check_dir(&deq_dir);
-	if (ret != EXIT_SUCCESS) {
+	if (ret != FUNC_SUCCESS) {
 		free(deq_dir); free(self); free(_sudo);
 		return ret;
 	}
@@ -828,16 +828,16 @@ alias_import(char *file)
 {
 	if (xargs.stealth_mode == 1) {
 		printf("%s: alias: %s\n", PROGRAM_NAME, STEALTH_DISABLED);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (!file)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	char *npath = normalize_path(file, strlen(file));
 	if (!npath) {
 		xerror(_("alias: '%s': Error normalizing file name\n"), file);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	char rfile[PATH_MAX + 1]; *rfile = '\0';
@@ -929,7 +929,7 @@ alias_import(char *file)
 	/* No alias was found in FILE */
 	if (alias_found == 0) {
 		xerror(_("alias: No alias found in '%s'\n"), rfile);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	/* Aliases were found in FILE, but none was imported (either because
@@ -937,7 +937,7 @@ alias_import(char *file)
 	 * existed). */
 	if (alias_imported == 0) {
 		xerror(_("alias: No alias imported\n"));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	/* If some alias was found and imported, print the corresponding
@@ -956,7 +956,7 @@ alias_import(char *file)
 	}
 	get_path_programs();
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 char *
@@ -997,11 +997,11 @@ int
 create_usr_var(const char *str)
 {
 	if (!str || !*str)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	char *p = strchr(str, '=');
 	if (!p || p == str)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	*p = '\0';
 	const size_t len = (size_t)(p - str);
@@ -1014,7 +1014,7 @@ create_usr_var(const char *str)
 	if (!value) {
 		free(name);
 		xerror(_("%s: Error getting variable value\n"), PROGRAM_NAME);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	usr_var = xnrealloc(usr_var, (size_t)(usrvar_n + 2), sizeof(struct usrvar_t));
@@ -1027,7 +1027,7 @@ create_usr_var(const char *str)
 
 	free(name);
 	free(value);
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 void
@@ -1073,20 +1073,20 @@ free_remotes(const int exit)
 	free(remotes);
 	remotes_n = 0;
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Load both regular and warning prompt, if enabled, from the prompt name NAME.
- * Return EXIT_SUCCESS if found or EXIT_FAILURE if not. */
+ * Return FUNC_SUCCESS if found or FUNC_FAILURE if not. */
 int
 expand_prompt_name(char *name)
 {
 	if (!name || !*name || prompts_n == 0)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	char *p = remove_quotes(name);
 	if (!p || !*p || strchr(p, '\\')) /* Exclude prompt codes. */
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	int i = (int)prompts_n;
 	while (--i >= 0) {
@@ -1112,10 +1112,10 @@ expand_prompt_name(char *name)
 
 		xstrsncpy(cur_prompt_name, prompts[i].name, sizeof(cur_prompt_name));
 
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 }
 
 void
@@ -1141,7 +1141,7 @@ remove_virtual_dir(void)
 
 		char *rm_cmd[] = {"rm", "-r", "--", stdin_tmp_dir, NULL};
 		const int ret = launch_execv(rm_cmd, FOREGROUND, E_NOFLAG);
-		if (ret != EXIT_SUCCESS)
+		if (ret != FUNC_SUCCESS)
 			exit_code = ret;
 		free(stdin_tmp_dir);
 	}
@@ -1594,12 +1594,12 @@ create_virtual_dir(const int user_provided)
 			err('e', PRINT_PROMPT, "%s: Empty buffer for virtual "
 				"directory name\n", PROGRAM_NAME);
 		}
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	char *cmd[] = {"mkdir", "-p", "--", stdin_tmp_dir, NULL};
 	int ret = 0;
-	if ((ret = launch_execv(cmd, FOREGROUND, E_MUTE)) != EXIT_SUCCESS) {
+	if ((ret = launch_execv(cmd, FOREGROUND, E_MUTE)) != FUNC_SUCCESS) {
 		char *errmsg = (ret == E_NOTFOUND ? NOTFOUND_MSG
 			: (ret == E_NOEXEC ? NOEXEC_MSG : (char *)NULL));
 
@@ -1615,7 +1615,7 @@ create_virtual_dir(const int user_provided)
 		return ret;
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 int
@@ -1624,7 +1624,7 @@ handle_stdin(void)
 	/* If files are passed via stdin, we need to disable restore
 	 * last path in order to correctly understand relative paths */
 	conf.restore_last_path = 0;
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 
 	/* Max input size: 512 * (512 * 1024)
 	 * 512 chunks of 524288 bytes (512KiB) each
@@ -1647,7 +1647,7 @@ handle_stdin(void)
 		/* Error */
 		if (input_len < 0) {
 			free(buf);
-			return EXIT_FAILURE;
+			return FUNC_FAILURE;
 		}
 
 		/* Nothing else to be read */
@@ -1670,7 +1670,7 @@ handle_stdin(void)
 	/* Create tmp dir to store links to files */
 	char *suffix = (char *)NULL;
 
-	if (!stdin_tmp_dir || (exit_status = create_virtual_dir(1)) != EXIT_SUCCESS) {
+	if (!stdin_tmp_dir || (exit_status = create_virtual_dir(1)) != FUNC_SUCCESS) {
 		free(stdin_tmp_dir);
 
 		suffix = gen_rand_str(RAND_SUFFIX_LEN);
@@ -1681,7 +1681,7 @@ handle_stdin(void)
 			suffix ? suffix : "nTmp0B9&54");
 		free(suffix);
 
-		if ((exit_status = create_virtual_dir(0)) != EXIT_SUCCESS)
+		if ((exit_status = create_virtual_dir(0)) != FUNC_SUCCESS)
 			goto FREE_N_EXIT;
 	}
 
@@ -1790,7 +1790,7 @@ END:
 			press_any_key_to_continue(0);
 
 		free(buf);
-		exit(EXIT_FAILURE);
+		exit(FUNC_FAILURE);
 	}
 
 	/* Make the virtual dir read only */
@@ -1805,7 +1805,7 @@ END:
 
 		char *rm_cmd[] = {"rm", "-r", "--", stdin_tmp_dir, NULL};
 		int ret = launch_execv(rm_cmd, FOREGROUND, E_NOFLAG);
-		if (ret != EXIT_SUCCESS)
+		if (ret != FUNC_SUCCESS)
 			exit_status = ret;
 
 		free(cwd);
@@ -1837,7 +1837,7 @@ static int
 save_pinned_dir(void)
 {
 	if (!pinned_dir || config_ok == 0)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	char *pin_file = xnmalloc(config_dir_len + 7, sizeof(char));
 	snprintf(pin_file, config_dir_len + 7, "%s/.pin", config_dir);
@@ -1854,18 +1854,18 @@ save_pinned_dir(void)
 
 	free(pin_file);
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 int
 pin_directory(char *dir)
 {
-	if (!dir || !*dir) return EXIT_FAILURE;
+	if (!dir || !*dir) return FUNC_FAILURE;
 
 	struct stat attr;
 	if (lstat(dir, &attr) == -1) {
 		xerror("%s: '%s': %s\n", PROGRAM_NAME, dir, strerror(errno));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	if (pinned_dir)
@@ -1887,16 +1887,16 @@ pin_directory(char *dir)
 		}
 	}
 
-	if (xargs.stealth_mode == 1 || save_pinned_dir() == EXIT_SUCCESS)
+	if (xargs.stealth_mode == 1 || save_pinned_dir() == FUNC_SUCCESS)
 		goto END;
 
 	free(pinned_dir);
 	pinned_dir = (char *)NULL;
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 
 END:
 	printf(_("%s: Succesfully pinned '%s'\n"), PROGRAM_NAME, dir);
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 int
@@ -1904,7 +1904,7 @@ unpin_dir(void)
 {
 	if (!pinned_dir) {
 		printf(_("%s: No pinned file\n"), PROGRAM_NAME);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (config_dir && xargs.stealth_mode != 1) {
@@ -1918,14 +1918,14 @@ unpin_dir(void)
 
 		free(pin_file);
 		if (cmd_error == 1)
-			return EXIT_FAILURE;
+			return FUNC_FAILURE;
 	}
 
 	printf(_("Succesfully unpinned %s\n"), pinned_dir);
 
 	free(pinned_dir);
 	pinned_dir = (char *)NULL;
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 void

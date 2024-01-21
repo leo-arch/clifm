@@ -66,7 +66,7 @@ print_logs(const int flag)
 	FILE *log_fp = fopen(file, "r");
 	if (!log_fp) {
 		err(0, NOPRINT_PROMPT, "log: '%s': %s\n", file, strerror(errno));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	size_t line_size = 0;
@@ -77,7 +77,7 @@ print_logs(const int flag)
 
 	free(line_buff);
 	fclose(log_fp);
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -88,10 +88,10 @@ gen_file(char *file)
 
 	fp = open_fwrite(file, &fd);
 	if (!fp)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	fclose(fp);
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Clear logs (the message logs if FLAG is CLR_MSG_LOGS, or the command logs
@@ -104,7 +104,7 @@ clear_logs(const int flag)
 	char *file = flag == MSG_LOGS ? msgs_log_file : cmds_log_file;
 
 	if (!file || !*file)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	if (remove(file) == -1) {
 		xerror("log: '%s': %s\n", file, strerror(errno));
@@ -112,8 +112,8 @@ clear_logs(const int flag)
 	}
 
 	int ret = gen_file(file);
-	if (ret != EXIT_SUCCESS)
-		return EXIT_FAILURE;
+	if (ret != FUNC_SUCCESS)
+		return FUNC_FAILURE;
 
 	free(last_cmd);
 	last_cmd = savestring(flag == MSG_LOGS
@@ -123,7 +123,7 @@ clear_logs(const int flag)
 	log_cmd();
 	conf.log_cmds = bk;
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Log LAST_CMD (global) into LOG_FILE */
@@ -133,11 +133,11 @@ log_cmd(void)
 	if (xargs.stealth_mode == 1 || !last_cmd || conf.log_cmds == 0) {
 		free(last_cmd);
 		last_cmd = (char *)NULL;
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (config_ok == 0 || !cmds_log_file)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	/* Construct the log line */
 	char *date = get_date();
@@ -159,14 +159,14 @@ log_cmd(void)
 	if (!log_fp) {
 		err('e', PRINT_PROMPT, "log: '%s': %s\n", cmds_log_file, strerror(errno));
 		free(full_log);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	fputs(full_log, log_fp);
 	free(full_log);
 	fclose(log_fp);
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Write _MSG into the log file: [date] _MSG */
@@ -259,7 +259,7 @@ send_desktop_notification(char *msg)
 	ret = launch_execv(cmd, FOREGROUND, E_MUTE);
 #endif /* __HAIKU__ */
 
-	if (ret == EXIT_SUCCESS)
+	if (ret == FUNC_SUCCESS)
 		return;
 
 	/* Error: warn and print the original message */
@@ -405,7 +405,7 @@ edit_history(char **args)
 
 	const time_t mtime_bfr = attr.st_mtime;
 
-	int ret = EXIT_SUCCESS;
+	int ret = FUNC_SUCCESS;
 
 	/* If we have an opening application (2nd argument) */
 	if (args[2]) {
@@ -417,7 +417,7 @@ edit_history(char **args)
 		open_in_foreground = 0;
 	}
 
-	if (ret != EXIT_SUCCESS)
+	if (ret != FUNC_SUCCESS)
 		return ret;
 
 	/* Get modification time after opening the config file. */
@@ -434,7 +434,7 @@ edit_history(char **args)
 		return ret;
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -445,7 +445,7 @@ clear_history_func(char **args)
 	FILE *hist_fp = open_fwrite(hist_file, &fd);
 	if (!hist_fp) {
 		err(0, NOPRINT_PROMPT, "history: '%s': %s\n", hist_file, strerror(errno));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	/* Do not create an empty file */
@@ -470,7 +470,7 @@ print_history_list(const int timestamp)
 		printf(" %s%-*zu%s %s\n", el_c, n, i + 1, df_c, history[i].cmd);
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -492,28 +492,28 @@ print_last_items(char *str, const int timestamp)
 		printf(" %s%-*zu%s %s\n", el_c, n, i + 1, df_c, history[i].cmd);
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
 print_hist_status(void)
 {
 	printf(_("History is %s\n"), hist_status == 1 ? "enabled" : "disabled");
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
 toggle_history(const char *arg)
 {
 	if (!arg || !*arg)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	switch (*arg) {
 	case 'o':
 		hist_status = (*(arg + 1) == 'n' ? 1 : 0);
 		return print_hist_status();
 	case 's': return print_hist_status();
-	default: puts(_(HISTORY_USAGE)); return EXIT_FAILURE;
+	default: puts(_(HISTORY_USAGE)); return FUNC_FAILURE;
 	}
 }
 
@@ -522,12 +522,12 @@ history_function(char **args)
 {
 	if (xargs.stealth_mode == 1) {
 		printf(_("%s: history: %s\n"), PROGRAM_NAME, STEALTH_DISABLED);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (config_ok == 0) {
 		xerror(_("%s: History function disabled\n"), PROGRAM_NAME);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	/* If no arguments, print the history list */
@@ -556,13 +556,13 @@ history_function(char **args)
 
 	/* None of the above */
 	puts(_(HISTORY_USAGE));
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 int
 get_history(void)
 {
-	if (config_ok == 0 || !hist_file) return EXIT_FAILURE;
+	if (config_ok == 0 || !hist_file) return FUNC_FAILURE;
 
 	if (current_hist_n == 0) { /* Coming from main() */
 		history = xcalloc(1, sizeof(struct history_t));
@@ -577,7 +577,7 @@ get_history(void)
 	FILE *hist_fp = fopen(hist_file, "r");
 	if (!hist_fp) {
 		err('e', PRINT_PROMPT, "history: '%s': %s\n", hist_file, strerror(errno));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	size_t line_size = 0;
@@ -614,7 +614,7 @@ get_history(void)
 	history[current_hist_n].date = -1;
 	free(line_buff);
 	fclose(hist_fp);
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 void
@@ -662,7 +662,7 @@ record_cmd(char *input)
 
 	/* Ignore entries matching HistIgnore */
 	if (conf.histignore_regex && *conf.histignore_regex
-	&& regexec(&regex_hist, input, 0, NULL, 0) == EXIT_SUCCESS)
+	&& regexec(&regex_hist, input, 0, NULL, 0) == FUNC_SUCCESS)
 		return 0;
 
 	/* Consequtively equal commands in history */

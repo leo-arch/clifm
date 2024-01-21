@@ -55,7 +55,7 @@ int
 check_autocmds(void)
 {
 	if (!autocmds || autocmds_n == 0)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	size_t i;
 	int found = 0;
@@ -120,7 +120,7 @@ check_autocmds(void)
 		const int ret = glob(p, GLOB_NOSORT | GLOB_NOCHECK | GLOB_TILDE
 		| GLOB_BRACE, NULL, &g);
 
-		if (ret != EXIT_SUCCESS) {
+		if (ret != FUNC_SUCCESS) {
 			globfree(&g);
 			continue;
 		}
@@ -189,7 +189,7 @@ RUN_AUTOCMD:
 			set_colors(autocmds[i].color_scheme, 0);
 		if (autocmds[i].cmd) {
 			if (xargs.secure_cmds == 0
-			|| sanitize_cmd(autocmds[i].cmd, SNT_AUTOCMD) == EXIT_SUCCESS)
+			|| sanitize_cmd(autocmds[i].cmd, SNT_AUTOCMD) == FUNC_SUCCESS)
 				launch_execl(autocmds[i].cmd);
 		}
 

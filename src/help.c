@@ -45,10 +45,10 @@ list_commands(void)
 	char cmd[PATH_MAX];
 	snprintf(cmd, sizeof(cmd), "export PAGER=\"less -p '^[0-9]+\\.[[:space:]]COMMANDS'\"; man %s\n",
 		PROGRAM_NAME);
-	if (launch_execl(cmd) != EXIT_SUCCESS)
-		return EXIT_FAILURE;
+	if (launch_execl(cmd) != FUNC_SUCCESS)
+		return FUNC_FAILURE;
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Print either all tips (if ALL == 1) or just a random one (ALL == 0) */
@@ -292,7 +292,7 @@ print_more_info(void)
 static int
 print_archives_topic(void)
 {
-	puts(ARCHIVE_USAGE); return EXIT_SUCCESS;
+	puts(ARCHIVE_USAGE); return FUNC_SUCCESS;
 }
 
 static int
@@ -301,7 +301,7 @@ print_autocmds_topic(void)
 	puts(AUTOCMDS_USAGE);
 	putchar('\n');
 	print_more_info();
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -310,37 +310,37 @@ print_basics_topic(void)
 	puts(_("Run '?' and consult the BASIC FILE OPERATIONS section\n"
 		"Try also 'c --help' for more information about basic "
 		"file management commands"));
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
 print_bookmarks_topic(void)
 {
-	puts(BOOKMARKS_USAGE); return EXIT_SUCCESS;
+	puts(BOOKMARKS_USAGE); return FUNC_SUCCESS;
 }
 
 static int
 print_commands_topic(void)
 {
-	printf("%s%s", CLIFM_COMMANDS_HEADER, CLIFM_COMMANDS); return EXIT_SUCCESS;
+	printf("%s%s", CLIFM_COMMANDS_HEADER, CLIFM_COMMANDS); return FUNC_SUCCESS;
 }
 
 static int
 print_desktop_notifications_topic(void)
 {
-	puts(DESKTOP_NOTIFICATIONS_USAGE); return EXIT_SUCCESS;
+	puts(DESKTOP_NOTIFICATIONS_USAGE); return FUNC_SUCCESS;
 }
 
 static int
 print_dir_jumper_topic(void)
 {
-	puts(JUMP_USAGE); return EXIT_SUCCESS;
+	puts(JUMP_USAGE); return FUNC_SUCCESS;
 }
 
 static int
 print_file_tags_topic(void)
 {
-	puts(TAG_USAGE); return EXIT_SUCCESS;
+	puts(TAG_USAGE); return FUNC_SUCCESS;
 }
 
 static int
@@ -351,13 +351,13 @@ print_file_attributes_topic(void)
 	puts(FILE_SIZE_USAGE);
 	putchar('\n');
 	puts(FILTER_USAGE);
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
 print_file_filters_topic(void)
 {
-	puts(FILTER_USAGE); return EXIT_SUCCESS;
+	puts(FILTER_USAGE); return FUNC_SUCCESS;
 }
 
 static int
@@ -366,14 +366,14 @@ print_file_previews_topic(void)
 	puts(FILE_PREVIEWS);
 	putchar('\n');
 	print_more_info();
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
 print_navigation_topic(void)
 {
 	puts(_("Run '?' and consult the NAVIGATION section"));
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -382,25 +382,25 @@ print_plugins_topic(void)
 	puts(ACTIONS_USAGE);
 	putchar('\n');
 	print_more_info();
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
 print_profiles_topic(void)
 {
-	puts(PROFILES_USAGE); return EXIT_SUCCESS;
+	puts(PROFILES_USAGE); return FUNC_SUCCESS;
 }
 
 static int
 print_remotes_topic(void)
 {
-	puts(NET_USAGE); return EXIT_SUCCESS;
+	puts(NET_USAGE); return FUNC_SUCCESS;
 }
 
 static int
 print_resource_opener_topic(void)
 {
-	puts(MIME_USAGE); return EXIT_SUCCESS;
+	puts(MIME_USAGE); return FUNC_SUCCESS;
 }
 
 static int
@@ -409,19 +409,19 @@ print_security_topic(void)
 	puts(SECURITY_USAGE);
 	putchar('\n');
 	print_more_info();
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
 print_selection_topic(void)
 {
-	puts(SEL_USAGE); return EXIT_SUCCESS;
+	puts(SEL_USAGE); return FUNC_SUCCESS;
 }
 
 static int
 print_search_topic(void)
 {
-	puts(SEARCH_USAGE); return EXIT_SUCCESS;
+	puts(SEARCH_USAGE); return FUNC_SUCCESS;
 }
 
 static int
@@ -429,13 +429,13 @@ print_theming_topic(void)
 {
 	puts(_("Take a look at the 'colorschemes', 'prompt', and 'config' commands"));
 	print_more_info();
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
 print_trash_topic(void)
 {
-	puts(TRASH_USAGE); return EXIT_SUCCESS;
+	puts(TRASH_USAGE); return FUNC_SUCCESS;
 }
 
 static int
@@ -443,7 +443,7 @@ run_help_topic(const char *topic)
 {
 	if (*topic == '-' && IS_HELP(topic)) {
 		puts(HELP_USAGE);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (*topic == 'a' && strcmp(topic, "archives") == 0)
@@ -490,7 +490,7 @@ run_help_topic(const char *topic)
 		return print_trash_topic();
 
 	xerror("%s: help: '%s': No such help topic\n", PROGRAM_NAME, topic);
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 }
 
 int
@@ -505,7 +505,7 @@ quick_help(const char *topic)
 			ASCII_LOGO, PROGRAM_NAME_UPPERCASE, QUICK_HELP_HEADER,
 			QUICK_HELP_NAVIGATION);
 		printf("\n\n%s\n\n%s\n", QUICK_HELP_BASIC_OPERATIONS, QUICK_HELP_MISC);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	char tmp_file[PATH_MAX + 1];
@@ -517,7 +517,7 @@ quick_help(const char *topic)
 		xerror("%s: Error creating temporary file '%s': %s\n",
 			PROGRAM_NAME, tmp_file, strerror(errno));
 		free(pager_app);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	FILE *fp = fdopen(fd, "w");
@@ -526,7 +526,7 @@ quick_help(const char *topic)
 		free(pager_app);
 		if (unlinkat(fd, tmp_file, 0) == -1)
 			xerror("%s: '%s': %s\n", PROGRAM_NAME, tmp_file, strerror(errno));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	fprintf(fp, "%s                                %s\n\n%s\n\n%s",
@@ -553,13 +553,13 @@ quick_help(const char *topic)
 	if (unlink(tmp_file) == -1)
 		err('w', PRINT_PROMPT, "help: '%s': %s\n", tmp_file, strerror(errno));
 
-	if (ret != EXIT_SUCCESS)
+	if (ret != FUNC_SUCCESS)
 		return ret;
 
 	if (conf.autols == 1)
 		reload_dirlist();
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 __attribute__ ((noreturn))
@@ -589,5 +589,5 @@ help_function(void)
 	puts(_(CLIFM_COMMANDS));
 	puts(_(CLIFM_KEYBOARD_SHORTCUTS));
 	puts(_(HELP_END_NOTE));
-	exit(EXIT_SUCCESS);
+	exit(FUNC_SUCCESS);
 }

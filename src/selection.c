@@ -65,21 +65,21 @@ int
 save_sel(void)
 {
 	if (selfile_ok == 0 || config_ok == 0 || !sel_file)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	if (sel_n == 0) {
 		if (unlink(sel_file) == -1) {
 			xerror("sel: '%s': %s\n", sel_file, strerror(errno));
-			return EXIT_FAILURE;
+			return FUNC_FAILURE;
 		}
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	int fd = 0;
 	FILE *fp = open_fwrite(sel_file, &fd);
 	if (!fp) {
 		xerror("sel: '%s': %s\n", sel_file, strerror(errno));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	size_t i;
@@ -89,7 +89,7 @@ save_sel(void)
 	}
 
 	fclose(fp);
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 int
@@ -305,7 +305,7 @@ sel_glob(char *str, const char *sel_path, const mode_t filetype)
 	}
 
 	int ret = glob(pattern, GLOB_BRACE, NULL, &gbuf);
-	if (ret != EXIT_SUCCESS) {
+	if (ret != FUNC_SUCCESS) {
 		globfree(&gbuf);
 		return (-1);
 	}
@@ -367,7 +367,7 @@ sel_regex_cwd(regex_t regex, const mode_t filetype, const int invert)
 				workspaces[cur_ws].path, file_info[i].name);
 		}
 
-		if (regexec(&regex, file_info[i].name, 0, NULL, 0) == EXIT_SUCCESS) {
+		if (regexec(&regex, file_info[i].name, 0, NULL, 0) == FUNC_SUCCESS) {
 			if (invert == 0)
 				new_sel += select_file(tmp_path);
 		} else if (invert == 1) {
@@ -408,7 +408,7 @@ sel_regex_nocwd(regex_t regex, const char *sel_path, const mode_t filetype,
 		char *tmp_path = xnmalloc(tmp_len, sizeof(char));
 		snprintf(tmp_path, tmp_len, "%s/%s", sel_path, list[i]->d_name);
 
-		if (regexec(&regex, list[i]->d_name, 0, NULL, 0) == EXIT_SUCCESS) {
+		if (regexec(&regex, list[i]->d_name, 0, NULL, 0) == FUNC_SUCCESS) {
 			if (invert == 0)
 				new_sel += select_file(tmp_path);
 		} else if (invert == 1) {
@@ -443,7 +443,7 @@ sel_regex(char *str, const char *sel_path, const mode_t filetype)
 	int reg_flags = conf.case_sens_list == 1 ? (REG_NOSUB | REG_EXTENDED)
 			: (REG_NOSUB | REG_EXTENDED | REG_ICASE);
 
-	if (regcomp(&regex, pattern, reg_flags) != EXIT_SUCCESS) {
+	if (regcomp(&regex, pattern, reg_flags) != FUNC_SUCCESS) {
 		xerror(_("sel: %s: Invalid regular expression\n"), str);
 		regfree(&regex);
 		return (-1);
@@ -478,10 +478,10 @@ convert_filetype(mode_t *filetype)
 	default:
 		xerror(_("sel: '%c': Unrecognized file type.\n"
 			"Try 'sel --help' for more information.\n"), (char)*filetype);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static char *
@@ -513,7 +513,7 @@ parse_sel_params(char ***args, int *ifiletype, mode_t *filetype, int *isel_path)
 		}
 	}
 
-	if (*filetype != 0 && convert_filetype(filetype) == EXIT_FAILURE) {
+	if (*filetype != 0 && convert_filetype(filetype) == FUNC_FAILURE) {
 		*filetype = (mode_t)-1;
 		return (char *)NULL;
 	}
@@ -664,27 +664,27 @@ print_sel_results(const int new_sel, const char *sel_path,
 	const char *pattern, const int error)
 {
 	if (new_sel > 0 && xargs.stealth_mode != 1 && sel_file
-	&& save_sel() != EXIT_SUCCESS) {
+	&& save_sel() != FUNC_SUCCESS) {
 		err('e', PRINT_PROMPT, _("sel: Error writing files "
 			"into the selections file\n"));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	if (sel_path && xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
 		xerror("sel: '%s': %s\n", workspaces[cur_ws].path, strerror(errno));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	if (new_sel <= 0) {
 		if (pattern && error == 0)
 			fputs(_("sel: No matches found\n"), stderr);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	get_sel_files();
 	if (sel_n == 0) {
 		fputs(_("sel: No matches found\n"), stderr);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	if (conf.autols == 1 && error == 0)
@@ -693,7 +693,7 @@ print_sel_results(const int new_sel, const char *sel_path,
 	print_reload_msg(_("%d file(s) selected\n"), new_sel);
 	print_reload_msg(_("%zu total selected file(s)\n"), sel_n);
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static char *
@@ -805,11 +805,11 @@ select_pattern(char *arg, const char *dir, const mode_t filetype, int *err)
 int
 sel_function(char **args)
 {
-	if (!args) return EXIT_FAILURE;
+	if (!args) return FUNC_FAILURE;
 
 	if (!args[1] || IS_HELP(args[1])) {
 		puts(_(SEL_USAGE));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	mode_t filetype = 0;
@@ -826,7 +826,7 @@ sel_function(char **args)
 		}
 	} else if (filetype == (mode_t)-1) { /* parse_sel_params() error */
 		free(dir);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	for (i = 1; args[i]; i++) {
@@ -835,7 +835,7 @@ sel_function(char **args)
 		f++;
 
 		pattern = (char *)NULL;
-		if (check_regex(args[i]) == EXIT_SUCCESS) {
+		if (check_regex(args[i]) == FUNC_SUCCESS) {
 			pattern = args[i];
 			if (*pattern == '!')
 				pattern++;
@@ -958,7 +958,7 @@ static int
 edit_selfile(void)
 {
 	if (!sel_file || !*sel_file || sel_n == 0)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	struct stat attr;
 	if (stat(sel_file, &attr) == -1)
@@ -966,9 +966,9 @@ edit_selfile(void)
 
 	const time_t prev_mtime = attr.st_mtime;
 
-	if (open_file(sel_file) != EXIT_SUCCESS) {
+	if (open_file(sel_file) != FUNC_SUCCESS) {
 		xerror("%s\n", _("sel: Cannot open the selections file"));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	/* Compare new and old modification times: if they match, nothing was modified */
@@ -976,7 +976,7 @@ edit_selfile(void)
 		goto ERROR;
 
 	if (prev_mtime == attr.st_mtime)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	const int ret = get_sel_files();
 	if (conf.autols == 1)
@@ -987,7 +987,7 @@ edit_selfile(void)
 
 ERROR:
 	xerror("sel: '%s': %s\n", sel_file, strerror(errno));
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 }
 
 static int
@@ -1104,10 +1104,10 @@ desel_entries(char **desel_elements, const size_t desel_n, const int desel_scree
 
 	if (err == 1) {
 		save_sel();
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Deselect all selected files */
@@ -1144,10 +1144,10 @@ deselect_from_args(char **args)
 	}
 	ds[k] = (char *)NULL;
 
-	if (desel_entries(ds, args_n, 0) == EXIT_FAILURE)
-		return EXIT_FAILURE;
+	if (desel_entries(ds, args_n, 0) == FUNC_FAILURE)
+		return FUNC_FAILURE;
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static char **
@@ -1196,7 +1196,7 @@ handle_alpha_entry(const int i, const size_t desel_n, char **desel_elements)
 		free_desel_elements(desel_n, &desel_elements);
 		if (conf.autols == 1)
 			reload_dirlist();
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (*desel_elements[i] == '*' && !desel_elements[i][1]) {
@@ -1209,7 +1209,7 @@ handle_alpha_entry(const int i, const size_t desel_n, char **desel_elements)
 
 	printf(_("desel: '%s': Invalid entry\n"), desel_elements[i]);
 	free_desel_elements(desel_n, &desel_elements);
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 }
 
 static int
@@ -1220,16 +1220,16 @@ valid_desel_eln(const int i, const size_t desel_n, char **desel_elements)
 	if (n <= 0 || (size_t)n > sel_n) {
 		printf(_("desel: %s: Invalid ELN\n"), desel_elements[i]);
 		free_desel_elements(desel_n, &desel_elements);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
 end_deselect(const int err, char ***args)
 {
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 	const size_t argsbk = args_n;
 	size_t desel_files = 0;
 
@@ -1244,7 +1244,7 @@ end_deselect(const int err, char ***args)
 	}
 
 	if (!err && save_sel() != 0)
-		exit_status = EXIT_FAILURE;
+		exit_status = FUNC_FAILURE;
 
 	get_sel_files();
 
@@ -1254,9 +1254,9 @@ end_deselect(const int err, char ***args)
 		return deselect(*args);
 
 	if (err)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
-	if (conf.autols == 1 && exit_status == EXIT_SUCCESS)
+	if (conf.autols == 1 && exit_status == FUNC_SUCCESS)
 		reload_dirlist();
 
 	if (argsbk > 0) {
@@ -1280,7 +1280,7 @@ handle_desel_args(char **args)
 		if (conf.autols == 1)
 			reload_dirlist();
 
-		if (ret == EXIT_SUCCESS) {
+		if (ret == FUNC_SUCCESS) {
 			print_reload_msg(_("%zu file(s) deselected\n"), n);
 			print_reload_msg(_("0 total selected file(s)\n"));
 		}
@@ -1296,11 +1296,11 @@ int
 deselect(char **args)
 {
 	if (!args)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	if (sel_n == 0) {
 		puts(_("desel: No selected files"));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (args[1] && *args[1])
@@ -1317,8 +1317,8 @@ deselect(char **args)
 		if (!is_number(desel_elements[i])) /* Only for 'q', 'e', and '*' */
 			return handle_alpha_entry(i, desel_n, desel_elements);
 
-		if (valid_desel_eln(i, desel_n, desel_elements) == EXIT_FAILURE)
-			return EXIT_FAILURE;
+		if (valid_desel_eln(i, desel_n, desel_elements) == FUNC_FAILURE)
+			return FUNC_FAILURE;
 	}
 
 	desel_entries(desel_elements, desel_n, 1);

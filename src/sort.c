@@ -66,7 +66,7 @@ skip_files(const struct dirent *ent)
 	/* Skip files matching FILTER */
 	// ADD FILTER TYPE CHECK!
 	if (filter.str
-	&& regexec(&regex_exp, ent->d_name, 0, NULL, 0) == EXIT_SUCCESS)
+	&& regexec(&regex_exp, ent->d_name, 0, NULL, 0) == FUNC_SUCCESS)
 		return 0;
 
 	/* If not hidden files */
@@ -418,7 +418,7 @@ static inline int
 re_sort_files_list(void)
 {
 	if (conf.autols == 0)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	/* sort_switch just tells list_dir() to print a line with the current
 	 * sorting order at the end of the files list. */
@@ -442,12 +442,12 @@ set_sort_by_name(char **arg)
 		&& strcmp(*arg, sort_methods[i].name) == 0) {
 			*arg = xnrealloc(*arg, 32, sizeof(char));
 			snprintf(*arg, 32, "%d", sort_methods[i].num);
-			return EXIT_SUCCESS;
+			return FUNC_SUCCESS;
 		}
 	}
 
 	fprintf(stdout, _("st: %s: No such sorting order\n"), *arg);
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 }
 
 int
@@ -457,7 +457,7 @@ sort_function(char **arg)
 	if (!arg[1]) {
 		fputs(_("Sorting order: "), stdout);
 		print_sort_method();
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	/* Argument is alphanumerical string */
@@ -467,8 +467,8 @@ sort_function(char **arg)
 			return re_sort_files_list();
 		}
 
-		if (set_sort_by_name(&arg[1]) == EXIT_FAILURE)
-			return EXIT_FAILURE;
+		if (set_sort_by_name(&arg[1]) == FUNC_FAILURE)
+			return FUNC_FAILURE;
 	}
 
 	/* Argument is a number */
@@ -485,5 +485,5 @@ sort_function(char **arg)
 
 	/* If arg1 is a number but is not in the range 0-SORT_TYPES, error */
 	fprintf(stderr, "%s\n", _(SORT_USAGE));
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 }

@@ -67,7 +67,7 @@ get_plugin_path(char *action, int *status)
 	} else { /* If not a path, PLUGINS_DIR is assumed */
 		if (!plugins_dir || !*plugins_dir) {
 			xerror("%s\n", _("actions: Plugins directory not defined"));
-			*status = EXIT_FAILURE;
+			*status = FUNC_FAILURE;
 			return (char *)NULL;
 		}
 		cmd_len = action_len + strlen(plugins_dir) + 2;
@@ -99,13 +99,13 @@ int
 run_action(char *action, char **args)
 {
 	if (!action || !*action)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 		/* #####################################
 		 * #    1) CREATE CMD TO BE EXECUTED   #
 		 * ##################################### */
 
-	int exit_status = EXIT_FAILURE;
+	int exit_status = FUNC_FAILURE;
 	char *cmd = get_plugin_path(action, &exit_status);
 	if (!cmd)
 		return exit_status;
@@ -122,7 +122,7 @@ run_action(char *action, char **args)
 
 	char *rand_ext = gen_rand_str(RAND_SUFFIX_LEN);
 	if (!rand_ext)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	char fifo_path[PATH_MAX + 1];
 	snprintf(fifo_path, sizeof(fifo_path), "%s/.pipe.%s", tmp_dir, rand_ext); /* NOLINT */
@@ -212,7 +212,7 @@ run_action(char *action, char **args)
 
 	} else { /* If not a file, take it as a command */
 		if (xargs.secure_cmds == 1
-		&& sanitize_cmd(buf, SNT_GRAL) != EXIT_SUCCESS)
+		&& sanitize_cmd(buf, SNT_GRAL) != FUNC_SUCCESS)
 			goto END;
 
 		size_t old_args = args_n;
@@ -256,11 +256,11 @@ edit_actions(char *app)
 	if (xargs.stealth_mode == 1) {
 		puts(_("actions: Access to configuration files is not allowed "
 			"in stealth mode"));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (!actions_file)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	/* Get actions file's current modification time */
 	struct stat attr;
@@ -271,7 +271,7 @@ edit_actions(char *app)
 
 	const time_t mtime_bfr = attr.st_mtime;
 
-	int ret = EXIT_SUCCESS;
+	int ret = FUNC_SUCCESS;
 
 	if (app && *app) {
 		char *cmd[] = {app, actions_file, NULL};
@@ -282,7 +282,7 @@ edit_actions(char *app)
 		open_in_foreground = 0;
 	}
 
-	if (ret != EXIT_SUCCESS)
+	if (ret != FUNC_SUCCESS)
 		return ret;
 
 	/* Get modification time after opening the file */
@@ -292,12 +292,12 @@ edit_actions(char *app)
 	}
 
 	if (mtime_bfr == attr.st_mtime)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	/* If modification times differ, the file was modified after being opened */
 	/* Reload the array of available actions */
-	if (load_actions() != EXIT_SUCCESS)
-		return EXIT_FAILURE;
+	if (load_actions() != FUNC_SUCCESS)
+		return FUNC_FAILURE;
 
 	/* Reload PATH commands as well to add new action(s) */
 	if (bin_commands) {
@@ -319,7 +319,7 @@ edit_actions(char *app)
 	get_path_programs();
 
 	print_reload_msg(_("File modified. Actions reloaded\n"));
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static size_t
@@ -349,7 +349,7 @@ actions_function(char **args)
 				printf("%-*s %s->%s %s\n", (int)largest, usr_actions[i].name,
 				    mi_c, df_c, usr_actions[i].value);
 			}
-			return EXIT_SUCCESS;
+			return FUNC_SUCCESS;
 		}
 
 		if (xargs.stealth_mode == 1) {
@@ -359,7 +359,7 @@ actions_function(char **args)
 			fputs(_("actions: No actions defined. Use the 'actions edit' "
 				"command to add new actions\n"), stdout);
 		}
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (strcmp(args[1], "edit") == 0) {
@@ -367,10 +367,10 @@ actions_function(char **args)
 
 	} else if (IS_HELP(args[1])) {
 		puts(_(ACTIONS_USAGE));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	} else {
 		fprintf(stderr, "%s\n", _(ACTIONS_USAGE));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 }

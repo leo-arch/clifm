@@ -135,8 +135,8 @@ static int
 disable_raw_mode(const int fd)
 {
 	if (tcsetattr(fd, TCSAFLUSH, &orig_termios) == -1)
-		return EXIT_FAILURE;
-	return EXIT_SUCCESS;
+		return FUNC_FAILURE;
+	return FUNC_SUCCESS;
 }
 
 /* Use the "ESC [6n" escape sequence to query the cursor position (both
@@ -148,11 +148,11 @@ get_cursor_position(int *c, int *l)
 	char buf[32];
 	unsigned int i = 0;
 
-	if (enable_raw_mode(STDIN_FILENO) == -1) return EXIT_FAILURE;
+	if (enable_raw_mode(STDIN_FILENO) == -1) return FUNC_FAILURE;
 
 	/* 1. Ask the terminal about cursor position */
 	if (write(STDOUT_FILENO, CPR, CPR_LEN) != CPR_LEN)
-		{ disable_raw_mode(STDIN_FILENO); return EXIT_FAILURE; }
+		{ disable_raw_mode(STDIN_FILENO); return FUNC_FAILURE; }
 
 	/* 2. Read the response: "ESC [ rows ; cols R" */
 	int read_err = 0;
@@ -166,21 +166,21 @@ get_cursor_position(int *c, int *l)
 	buf[i] = '\0';
 
 	if (disable_raw_mode(STDIN_FILENO) == -1 || read_err == 1)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	/* 3. Parse the response */
 	if (*buf != KEY_ESC || *(buf + 1) != '[' || !*(buf + 2))
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	char *p = strchr(buf + 2, ';');
-	if (!p || !*(p + 1)) return EXIT_FAILURE;
+	if (!p || !*(p + 1)) return FUNC_FAILURE;
 
 	*p = '\0';
 	*l = atoi(buf + 2); *c = atoi(p + 1);
 	if (*l == INT_MIN || *c == INT_MIN)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 #endif /* !_NO_FZF */
 
@@ -1392,10 +1392,10 @@ static int
 clean_rl_buffer(const char *text)
 {
 	if (!text || !*text)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	if (rl_point != rl_end)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	/* If the previous char is not space, then a common prefix was appended:
 	 * remove it. */
@@ -1426,7 +1426,7 @@ clean_rl_buffer(const char *text)
 
 	rl_insert_text(text);
 
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 }
 
 /* Calculate the offset (left padding) of the finder's window based on
@@ -1714,7 +1714,7 @@ do_completion(char *buf, const size_t prefix_len, const int multi)
 	&& cur_comp_type != TCMP_HIST && !multi) {
 		p = escape_str(buf);
 		if (!p)
-			return EXIT_FAILURE;
+			return FUNC_FAILURE;
 	} else {
 		p = savestring(buf, blen);
 	}
@@ -1722,7 +1722,7 @@ do_completion(char *buf, const size_t prefix_len, const int multi)
 	write_completion(p, prefix_len, multi);
 	free(p);
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Calculate currently used lines to go back to the correct cursor
@@ -1800,7 +1800,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	/* Store possible completions in FINDER_IN_FILE to pass them to the finder. */
 	size_t num_matches = store_completions(matches);
 	if (num_matches == (size_t)-1)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	/* Set a pointer to the last word in the query string. We use this to
 	 * highlight the matching prefix in the list of matches. */
@@ -1848,7 +1848,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 		move_cursor_up(total_line_len);
 
 	/* No results (the user pressed ESC or the Left arrow key). */
-	if (ret != EXIT_SUCCESS) {
+	if (ret != FUNC_SUCCESS) {
 		unlink(finder_out_file);
 		return clean_rl_buffer(text);
 	}
@@ -1856,7 +1856,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	/* Retrieve finder's output from FINDER_OUT_FILE. */
 	char *buf = get_finder_output(multi, matches[0]);
 	if (!buf)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	/* Calculate the length of the matching prefix to insert into the
 	 * line buffer only the non-matched part of the string returned by the
@@ -1866,9 +1866,9 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	do_some_cleanup(&buf, matches, query, &prefix_len);
 
 	/* Let's insert the selected match(es): BUF. */
-	if (buf && *buf && do_completion(buf, prefix_len, multi) == EXIT_FAILURE) {
+	if (buf && *buf && do_completion(buf, prefix_len, multi) == FUNC_FAILURE) {
 		free(buf);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	free(buf);
@@ -1882,7 +1882,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	}
 #endif /* !_NO_SUGGESTIONS */
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 #endif /* !_NO_FZF */
 
@@ -1909,7 +1909,7 @@ int
 tab_complete(const int what_to_do)
 {
 	if (rl_notab == 1)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	if (*rl_line_buffer == '#' || cur_color == hc_c) {
 		/* No completion at all if comment */
@@ -1917,7 +1917,7 @@ tab_complete(const int what_to_do)
 		if (suggestion.printed)
 			clear_suggestion(CS_FREEBUF);
 #endif /* _NO_SUGGESTIONS */
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	rl_compentry_func_t *our_func = rl_completion_entry_function;
@@ -2027,7 +2027,7 @@ AFTER_USUAL_COMPLETION:
 	if (!matches || !matches[0]) {
 		rl_ring_bell();
 		free(text);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 #ifndef _NO_FZF
@@ -2679,7 +2679,7 @@ RESTART:
 	default:
 		xerror("\r\nreadline: %c: Bad value for what_to_do "
 			"in tab_complete\n", what_to_do);
-		exit(EXIT_FAILURE);
+		exit(FUNC_FAILURE);
 	}
 
 	for (i = 0; matches[i]; i++)
@@ -2687,5 +2687,5 @@ RESTART:
 	free(matches);
 	free(text);
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }

@@ -1184,12 +1184,12 @@ check_shell_functions(const char *str)
 }
 
 /* Check whether STR is an internal command with a fused parameter (CMDNUMBER).
- * Returns EXIT_SUCCESS if true or EXIT_FAILURE otherwise. */
+ * Returns FUNC_SUCCESS if true or FUNC_FAILURE otherwise. */
 static int
 is_fused_param(char *str)
 {
 	if (!str || !*str || !*(str + 1))
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	char *p = str, *q = (char *)NULL;
 	int d = 0;
@@ -1200,14 +1200,14 @@ is_fused_param(char *str)
 			d = 1;
 		}
 		if (d == 1 && IS_ALPHA(*p))
-			return EXIT_FAILURE;
+			return FUNC_FAILURE;
 		p++;
 	}
 
 	if (d == 0)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	if (!q)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	char c = *q;
 	*q = '\0';
@@ -1216,9 +1216,9 @@ is_fused_param(char *str)
 	*q = c;
 
 	if (ret == 0)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 #ifndef _NO_TAGS
@@ -1694,12 +1694,12 @@ expand_sel_keyword(char ***substr)
 }
 
 /* Expand the bookmark NAME into the corresponding bookmark path.
- * Returns EXIT_SUCCESS if the expansion took place or EXIT_FAILURE otherwise */
+ * Returns FUNC_SUCCESS if the expansion took place or FUNC_FAILURE otherwise */
 static int
 expand_bm_name(char **name)
 {
 	size_t j;
-	int bm_exp = EXIT_FAILURE;
+	int bm_exp = FUNC_FAILURE;
 	char *p = unescape_str(*name + 2, 0);
 	char *n = p ? p : *name + 2;
 
@@ -1714,7 +1714,7 @@ expand_bm_name(char **name)
 		*name = xnrealloc(*name, tmp_len + 1, sizeof(char));
 		xstrsncpy(*name, tmp, tmp_len + 1);
 		free(q);
-		bm_exp = EXIT_SUCCESS;
+		bm_exp = FUNC_SUCCESS;
 
 		break;
 	}
@@ -1919,7 +1919,7 @@ expand_glob(char ***substr, const int *glob_array, const size_t glob_n)
 		glob_t globbuf;
 
 		if (glob((*substr)[glob_array[g] + (int)old_pathc],
-			GLOB_BRACE | GLOB_TILDE, NULL, &globbuf) != EXIT_SUCCESS) {
+			GLOB_BRACE | GLOB_TILDE, NULL, &globbuf) != FUNC_SUCCESS) {
 			globfree(&globbuf);
 			continue;
 		}
@@ -2006,7 +2006,7 @@ expand_word(char ***substr, const int *word_array, const size_t word_n)
 
 		wordexp_t wordbuf;
 		if (wordexp((*substr)[word_array[w] + (int)old_pathc],
-			&wordbuf, 0) != EXIT_SUCCESS) {
+			&wordbuf, 0) != FUNC_SUCCESS) {
 			wordfree(&wordbuf);
 			continue;
 		}
@@ -2279,9 +2279,9 @@ expand_regex(char ***substr)
 
 		int ret = check_regex(rstr);
 
-		if (ret != EXIT_SUCCESS
-		|| regcomp(&regex, rstr, reg_flags) != EXIT_SUCCESS) {
-			if (ret == EXIT_SUCCESS)
+		if (ret != FUNC_SUCCESS
+		|| regcomp(&regex, rstr, reg_flags) != FUNC_SUCCESS) {
+			if (ret == FUNC_SUCCESS)
 				regfree(&regex);
 			free(rstr);
 			tmp[n] = (*substr)[i];
@@ -2293,7 +2293,7 @@ expand_regex(char ***substr)
 		int reg_found = 0;
 
 		for (j = 0; j < files; j++) {
-			if (regexec(&regex, file_info[j].name, 0, NULL, 0) != EXIT_SUCCESS)
+			if (regexec(&regex, file_info[j].name, 0, NULL, 0) != FUNC_SUCCESS)
 				continue;
 
 			/* Make sure the matching file name is not already in the tmp array */
@@ -2545,7 +2545,7 @@ parse_input_str(char *str)
 	flags &= ~IS_USRVAR_DEF;
 
 	/* If internal command plus fused parameter, split it */
-	if (is_fused_param(str) == EXIT_SUCCESS) {
+	if (is_fused_param(str) == FUNC_SUCCESS) {
 		char *p = split_fused_param(str);
 		if (p) {
 			fusedcmd_ok = 1;
@@ -2780,7 +2780,7 @@ parse_input_str(char *str)
 
 		/* Expand bookmark name (b:NAME) into the corresponding path */
 		if (*substr[i] == 'b' && substr[i][1] == ':' && substr[i][2]) {
-			if (expand_bm_name(&substr[i]) == EXIT_SUCCESS)
+			if (expand_bm_name(&substr[i]) == FUNC_SUCCESS)
 				continue;
 		}
 

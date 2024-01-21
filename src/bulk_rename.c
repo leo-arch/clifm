@@ -62,7 +62,7 @@ err_open_tmp_file(const char *file, const int fd)
 		xerror("br: unlink: '%s': %s\n", file, strerror(errno));
 	close(fd);
 
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 }
 
 /* Rename OLDPATH as NEWPATH. */
@@ -150,11 +150,11 @@ write_files_to_tmp(char ***args, const char *tmpfile, const int fd,
 		if (unlinkat(fd, tmpfile, 0) == -1)
 			xerror("br: unlink: '%s': %s\n", tmpfile, strerror(errno));
 		fclose(fp);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	fclose(fp);
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static size_t
@@ -210,7 +210,7 @@ open_tmpfile(char *app, char *file)
 	if (application) {
 		char *cmd[] = {application, file, NULL};
 		const int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
-		if (ret != EXIT_SUCCESS)
+		if (ret != FUNC_SUCCESS)
 			unlink(file);
 		return ret;
 	}
@@ -219,7 +219,7 @@ open_tmpfile(char *app, char *file)
 	const int exit_status = open_file(file);
 	open_in_foreground = 0;
 
-	if (exit_status != EXIT_SUCCESS) {
+	if (exit_status != FUNC_SUCCESS) {
 		xerror("br: %s\n", errno != 0
 			? strerror(errno) : _("Error opening temporary file"));
 		if (unlink(file) == -1)
@@ -227,7 +227,7 @@ open_tmpfile(char *app, char *file)
 		return exit_status;
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -245,10 +245,10 @@ check_line_mismatch(FILE *fp, const size_t total)
 
 	if (total != modified) {
 		xerror("%s\n", _("br: Line mismatch in temporary file"));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -256,7 +256,7 @@ rename_bulk_files(char **args, FILE *fp, int *is_cwd, size_t *renamed,
 	const size_t modified)
 {
 	size_t i = 1;
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 	char line[PATH_MAX + 1]; *line = '\0';
 
 	while (fgets(line, (int)sizeof(line), fp)) {
@@ -309,10 +309,10 @@ bulk_rename(char **args)
 {
 	if (!args || !args[1] || IS_HELP(args[1])) {
 		puts(_(BULK_RENAME_USAGE));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 	struct stat attra; /* Original temp file */
 	struct stat attrb; /* Edited temp file */
 
@@ -323,17 +323,17 @@ bulk_rename(char **args)
 	int fd = mkstemp(tmpfile);
 	if (fd == -1) {
 		xerror("br: mkstemp: '%s': %s\n", tmpfile, strerror(errno));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	/* Write files to be renamed into a tmp file and store stat info in attra */
 	size_t written = 0;
 	int ret = write_files_to_tmp(&args, tmpfile, fd, &attra, &written);
-	if (ret != EXIT_SUCCESS)
+	if (ret != FUNC_SUCCESS)
 		return ret;
 
 	/* Open the tmp file with the associated text editor */
-	if ((ret = open_tmpfile(args[args_n], tmpfile)) != EXIT_SUCCESS)
+	if ((ret = open_tmpfile(args[args_n], tmpfile)) != FUNC_SUCCESS)
 		return ret;
 
 	FILE *fp;
@@ -356,8 +356,8 @@ bulk_rename(char **args)
 
 	/* Make sure there are as many lines in the tmp file as files
 	 * to be renamed. */
-	if (check_line_mismatch(fp, written) != EXIT_SUCCESS) {
-		exit_status = EXIT_FAILURE;
+	if (check_line_mismatch(fp, written) != FUNC_SUCCESS) {
+		exit_status = FUNC_FAILURE;
 		goto ERROR;
 	}
 
@@ -379,7 +379,7 @@ bulk_rename(char **args)
 	if (fstat(fd, &attrb) == -1 || !S_ISREG(attrb.st_mode)
 	|| attra.st_ino != attrb.st_ino || attra.st_dev != attrb.st_dev
 	|| mtime_bk != attrb.st_mtime) {
-		exit_status = EXIT_FAILURE;
+		exit_status = FUNC_FAILURE;
 		xerror("%s\n", _("br: Temporary file changed on disk! Aborting."));
 		goto ERROR;
 	}
@@ -388,7 +388,7 @@ bulk_rename(char **args)
 	size_t renamed = 0;
 
 	if ((ret = rename_bulk_files(args, fp, &is_cwd,
-	&renamed, modified)) != EXIT_SUCCESS)
+	&renamed, modified)) != FUNC_SUCCESS)
 		exit_status = ret;
 
 	/* Clean stuff, report, and exit */

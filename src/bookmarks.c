@@ -112,7 +112,7 @@ edit_bookmarks(char *cmd, const int flag)
 	}
 
 	const time_t prev = a.st_mtime;
-	int ret = EXIT_SUCCESS;
+	int ret = FUNC_SUCCESS;
 
 	if (!cmd) {
 		open_in_foreground = 1;
@@ -123,7 +123,7 @@ edit_bookmarks(char *cmd, const int flag)
 		ret = launch_execv(tmp_cmd, FOREGROUND, E_NOFLAG);
 	}
 
-	if (ret != EXIT_SUCCESS) {
+	if (ret != FUNC_SUCCESS) {
 		if (!cmd)
 			xerror("%s\n", _("bookmarks: Cannot open the bookmarks file"));
 		return ret;
@@ -143,7 +143,7 @@ edit_bookmarks(char *cmd, const int flag)
 		}
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static size_t
@@ -238,7 +238,7 @@ edit_bookmarks_func(char **arg)
 
 	char *tmp_cmd[] = {"bm", NULL};
 	bookmarks_function(tmp_cmd);
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Return a pointer to the bookmark path (in the bookmarks array)
@@ -297,13 +297,13 @@ open_bookmark(void)
 {
 	if (!bookmarks || bm_n == 0) {
 		puts(_(NO_BOOKMARKS));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (conf.clear_screen == 1)
 		CLEAR;
 
-	int exit_status = EXIT_SUCCESS, header_printed = 0,	is_dir = 0;
+	int exit_status = FUNC_SUCCESS, header_printed = 0,	is_dir = 0;
 
 	print_bookmarks();
 
@@ -333,7 +333,7 @@ open_bookmark(void)
 		char *tmp_cmd[] = {"o", tmp_path, arg[1], NULL};
 		exit_status = open_function(tmp_cmd);
 
-		if (exit_status != EXIT_SUCCESS) {
+		if (exit_status != FUNC_SUCCESS) {
 			free_bm_input(&arg);
 			continue;
 		}
@@ -346,14 +346,14 @@ open_bookmark(void)
 	if (conf.autols == 1 && is_dir == 0)
 		reload_dirlist();
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Open a bookmark by either shortcut or name. */
 static int
 bm_open(char **cmd)
 {
-	int exit_status = EXIT_FAILURE;
+	int exit_status = FUNC_FAILURE;
 	char *p = unescape_str(cmd[1], 0);
 	if (!p)
 		p = cmd[1];
@@ -496,9 +496,9 @@ bookmark_add(char *file, char *name, char *shortcut)
 	 * FILE is already dequoted. */
 
 	if (check_bm_path(file) == 1 && rl_get_y_or_n("Continue? [y/n] ") == 0)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
-	int exit_status = EXIT_FAILURE;
+	int exit_status = FUNC_FAILURE;
 	char *p = unescape_str(name, 0);
 	char *n = p ? p : name;
 	char *q = (char *)NULL;
@@ -553,7 +553,7 @@ bookmark_add(char *file, char *name, char *shortcut)
 
 	reload_bookmarks(); /* Update bookmarks for TAB completion */
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 
 ERROR:
 	free(p);
@@ -568,24 +568,24 @@ add_bookmark(char **cmd)
 {
 	if (!cmd || !cmd[0] || !cmd[1]) {
 		puts(BM_ADD_NO_PARAM);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (bm_n == MAX_BOOKMARKS) {
 		xerror("%s\n", _("bookmarks: Cannot add any more bookmarks"));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	char *p = unescape_str(cmd[0], 0);
 	if (!p) {
 		xerror(_("bookmarks: '%s': Error unescaping file name\n"), cmd[0]);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	if (access(p, F_OK) != 0) {
 		xerror("bookmarks: '%s': %s\n", p, strerror(errno));
 		free(p);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	int ret = bookmark_add(p, cmd[1], cmd[2]);
@@ -599,7 +599,7 @@ add_bookmark(char **cmd)
 static size_t
 mark_bookmarks_for_deletion(char **args, int *exit_status)
 {
-	*exit_status = EXIT_SUCCESS;
+	*exit_status = FUNC_SUCCESS;
 	size_t i, counter = 0;
 
 	for (i = 0; args[i]; i++) {
@@ -615,7 +615,7 @@ mark_bookmarks_for_deletion(char **args, int *exit_status)
 			counter++;
 		} else {
 			xerror(_("'%s': No such bookmark\n"), name);
-			*exit_status = EXIT_FAILURE;
+			*exit_status = FUNC_FAILURE;
 		}
 
 		free(p);
@@ -692,12 +692,12 @@ del_bookmarks(char **args)
 {
 	if (!bookmarks || bm_n == 0) {
 		puts(NO_BOOKMARKS);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (!args || !args[0]) {
 		xerror("%s\n", BM_DEL_NO_PARAM);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	char *rstr = gen_rand_str(RAND_SUFFIX_LEN);
@@ -711,7 +711,7 @@ del_bookmarks(char **args)
 	if (!fp) {
 		xerror(_("'%s': %s\nbookmarks: Error reading the bookmarks file\n"),
 			bm_file, strerror(errno));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	int tmp_fd = 0;
@@ -720,10 +720,10 @@ del_bookmarks(char **args)
 		xerror(_("'%s': %s\nbookmarks: Error creating temporary file\n"),
 			tmp_file, strerror(errno));
 		fclose(fp);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 	const size_t n = mark_bookmarks_for_deletion(args, &exit_status);
 
 	if (n == 0) {
@@ -767,12 +767,12 @@ bookmarks_function(char **cmd)
 {
 	if (xargs.stealth_mode == 1) {
 		printf("%s: bookamrks: %s\n", PROGRAM_NAME, STEALTH_DISABLED);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (config_ok == 0) {
 		xerror(_("%s: Bookmarks function disabled\n"), PROGRAM_NAME);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	if (!cmd[1]) /* No arguments: load the bookmarks screen. */
@@ -789,7 +789,7 @@ bookmarks_function(char **cmd)
 
 	if (*cmd[1] == 'r' && (!cmd[1][1] || strcmp(cmd[1], "reload") == 0)) {
 		reload_bookmarks();
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	/* Shortcut or bm name: open it. */

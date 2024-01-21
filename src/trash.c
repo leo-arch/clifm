@@ -69,7 +69,7 @@ trash_clear(void)
 		return errno;
 	}
 
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 	size_t n = 0;
 	struct dirent *ent;
 
@@ -77,7 +77,7 @@ trash_clear(void)
 		if (SELFORPARENT(ent->d_name))
 			continue;
 
-		int ret = EXIT_SUCCESS;
+		int ret = FUNC_SUCCESS;
 
 		size_t len = strlen(ent->d_name) + 11;
 		char *info_file = xnmalloc(len, sizeof(char));
@@ -104,7 +104,7 @@ trash_clear(void)
 		free(file2);
 		free(info_file);
 
-		if (ret != EXIT_SUCCESS) {
+		if (ret != FUNC_SUCCESS) {
 			xerror(_("trash: '%s': Error removing trashed file\n"), ent->d_name);
 			exit_status = ret;
 			/* If there is at least one error, return error */
@@ -117,7 +117,7 @@ trash_clear(void)
 
 	if (n == 0) {
 		puts(_("trash: No trashed files"));
-	} else if (exit_status == EXIT_SUCCESS) {
+	} else if (exit_status == FUNC_SUCCESS) {
 		if (conf.autols == 1)
 			reload_dirlist();
 		print_reload_msg(_("Trash can emptied [%zu file(s) deleted]\n"), n);
@@ -133,7 +133,7 @@ del_trash_file(const char *suffix)
 	char *tfile = xnmalloc(len, sizeof(char));
 	snprintf(tfile, len, "%s/%s", trash_files_dir, suffix);
 
-	int ret = EXIT_SUCCESS;
+	int ret = FUNC_SUCCESS;
 	if (unlinkat(XAT_FDCWD, tfile, 0) == -1) {
 		ret = errno;
 		xerror(_("trash: '%s': %s\nTry removing the "
@@ -164,7 +164,7 @@ gen_trashinfo_file(char *file, const char *suffix, const struct tm *tm)
 	if (!url_str) {
 		xerror(_("trash: '%s': Error encoding path\n"), file);
 		free(info_file);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	fprintf(fp,
@@ -176,7 +176,7 @@ gen_trashinfo_file(char *file, const char *suffix, const struct tm *tm)
 	free(info_file);
 	fclose(fp);
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static char *
@@ -246,7 +246,7 @@ trash_file(const char *suffix, const struct tm *tm, char *file)
 
 	if (*file != '/') { /* If relative path, make it absolute. */
 		if (!workspaces[cur_ws].path)
-			return EXIT_FAILURE;
+			return FUNC_FAILURE;
 
 		if (*workspaces[cur_ws].path == '/' && !workspaces[cur_ws].path[1]) {
 			/* We're in the root dir */
@@ -263,13 +263,13 @@ trash_file(const char *suffix, const struct tm *tm, char *file)
 	if (!dest || !file_suffix) {
 		free(dest);
 		free(file_suffix);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	/* Move the original file into the trash directory. */
 	int mvcmd = 0;
 	int ret = renameat(XAT_FDCWD, file, XAT_FDCWD, dest);
-	if (ret != EXIT_SUCCESS && errno == EXDEV) {
+	if (ret != FUNC_SUCCESS && errno == EXDEV) {
 		/* Destination file is on a different file system, which is why
 		 * renameat(2) doesn't work: let's try with mv(1). */
 		char *tmp_cmd[] = {"mv", "--", file, dest, NULL};
@@ -279,7 +279,7 @@ trash_file(const char *suffix, const struct tm *tm, char *file)
 
 	free(dest);
 
-	if (ret != EXIT_SUCCESS) {
+	if (ret != FUNC_SUCCESS) {
 		if (mvcmd == 0)
 			xerror(_("trash: '%s': %s\n"), file, strerror(errno));
 		free(file_suffix);
@@ -308,15 +308,15 @@ remove_file_from_trash(const char *name)
 		err_file = tmp_err = errno;
 	}
 	if (stat(rm_info, &a) == -1) {
-		if (err_file == EXIT_SUCCESS)
+		if (err_file == FUNC_SUCCESS)
 			xerror("trash: '%s': %s\n", rm_info, strerror(errno));
 		err_info = tmp_err = errno;
 	}
 
-	if (err_file != EXIT_SUCCESS || err_info != EXIT_SUCCESS)
+	if (err_file != FUNC_SUCCESS || err_info != FUNC_SUCCESS)
 		return tmp_err;
 
-	int ret = EXIT_SUCCESS;
+	int ret = FUNC_SUCCESS;
 	if (unlinkat(XAT_FDCWD, rm_file, 0) == -1) {
 		ret = errno;
 		xerror("trash: '%s': %s\n", rm_file, strerror(errno));
@@ -334,7 +334,7 @@ remove_from_trash_params(char **args)
 {
 	size_t rem_files = 0;
 	size_t i;
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 
 	for (i = 0; args[i]; i++) {
 		if (*args[i] == '*' && !args[i][1])
@@ -344,15 +344,15 @@ remove_from_trash_params(char **args)
 		if (strchr(args[i], '\\'))
 			d = unescape_str(args[i], 0);
 
-		if (remove_file_from_trash(d ? d : args[i]) != EXIT_SUCCESS)
-			exit_status = EXIT_FAILURE;
+		if (remove_file_from_trash(d ? d : args[i]) != FUNC_SUCCESS)
+			exit_status = FUNC_FAILURE;
 		else
 			rem_files++;
 
 		free(d);
 	}
 
-	if (conf.autols == 1 && exit_status == EXIT_SUCCESS)
+	if (conf.autols == 1 && exit_status == FUNC_SUCCESS)
 		reload_dirlist();
 
 	print_reload_msg(_("%zu file(s) removed from the trash can\n"), rem_files);
@@ -367,7 +367,7 @@ print_trashfiles(struct dirent ***ent, const int files_n)
 	/* Let's change to the trash dir to get the correct file colors */
 	if (xchdir(trash_files_dir, NO_TITLE) == -1) {
 		xerror("trash: '%s': %s\n", trash_files_dir, strerror(errno));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	printf(_("%s%sTrashed files%s\n\n"), df_c, BOLD, df_c);
@@ -389,10 +389,10 @@ print_trashfiles(struct dirent ***ent, const int files_n)
 
 	if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
 		xerror("trash: '%s': %s\n", workspaces[cur_ws].path, strerror(errno));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static char **
@@ -403,7 +403,7 @@ list_and_get_input(struct dirent ***trash_files, const int files_n,
 		CLEAR;
 
 	const int ret = print_trashfiles(trash_files, files_n);
-	if (ret != EXIT_SUCCESS)
+	if (ret != FUNC_SUCCESS)
 		return (char **)NULL;
 
 	/* Get input */
@@ -446,10 +446,10 @@ remove_from_trash_all(struct dirent ***tfiles, const int tfiles_n,
 
 	for (i = 0; i < (size_t)tfiles_n; i++) {
 		int ret = remove_file_from_trash((*tfiles)[i]->d_name);
-		if (ret != EXIT_SUCCESS) {
+		if (ret != FUNC_SUCCESS) {
 			xerror(_("trash: '%s': Cannot remove file from the "
 				"trash can\n"), (*tfiles)[i]->d_name);
-			*status = EXIT_FAILURE;
+			*status = FUNC_FAILURE;
 		} else {
 			n++;
 		}
@@ -461,7 +461,7 @@ remove_from_trash_all(struct dirent ***tfiles, const int tfiles_n,
 static struct dirent **
 load_trashed_files(int *n, int *status)
 {
-	*status = EXIT_SUCCESS;
+	*status = FUNC_SUCCESS;
 
 	struct dirent **tfiles = (struct dirent **)NULL;
 	*n = scandir(trash_files_dir, &tfiles,
@@ -495,7 +495,7 @@ remove_from_trash(char **args)
 	if (files_n <= 0)
 		return exit_status;
 
-	exit_status = EXIT_SUCCESS;
+	exit_status = FUNC_SUCCESS;
 	size_t i;
 
 	char **input = list_and_get_input(&trash_files, files_n, 0);
@@ -503,7 +503,7 @@ remove_from_trash(char **args)
 		for (i = 0; i < (size_t)files_n; i++)
 			free(trash_files[i]);
 		free(trash_files);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	/* Remove files */
@@ -531,7 +531,7 @@ remove_from_trash(char **args)
 		if (!is_number(input[i]) || num <= 0 || num > files_n) {
 			xerror(_("trash: %s: Invalid ELN\n"), input[i]);
 			free_files_and_input(&input, &trash_files, files_n);
-			return EXIT_FAILURE;
+			return FUNC_FAILURE;
 		}
 	}
 
@@ -541,10 +541,10 @@ remove_from_trash(char **args)
 		const int num = atoi(input[i]);
 
 		const int ret = remove_file_from_trash(trash_files[num - 1]->d_name);
-		if (ret != EXIT_SUCCESS) {
+		if (ret != FUNC_SUCCESS) {
 			xerror(_("trash: '%s': Cannot remove file from the trash can\n"),
 				trash_files[num - 1]->d_name);
-			exit_status = EXIT_FAILURE;
+			exit_status = FUNC_FAILURE;
 		}
 	}
 
@@ -566,7 +566,7 @@ remove_from_trash(char **args)
 static char *
 read_original_path(const char *file, const char *src, int *status)
 {
-	*status = EXIT_SUCCESS;
+	*status = FUNC_SUCCESS;
 
 	int fd = 0;
 	FILE *fp = open_fread(file, &fd);
@@ -595,7 +595,7 @@ read_original_path(const char *file, const char *src, int *status)
 	/* If original path is NULL or empty, return error */
 	if (!orig_path || !*orig_path) {
 		free(orig_path);
-		*status = EXIT_FAILURE;
+		*status = FUNC_FAILURE;
 		return (char *)NULL;
 	}
 
@@ -610,7 +610,7 @@ read_original_path(const char *file, const char *src, int *status)
 	if (!url_decoded) {
 		xerror(_("undel: '%s': Error decoding original path\n"), orig_path);
 		free(orig_path);
-		*status = EXIT_FAILURE;
+		*status = FUNC_FAILURE;
 		return (char *)NULL;
 	}
 
@@ -631,13 +631,13 @@ check_untrash_dest(char *file)
 {
 	if (!file || !*file) {
 		xerror(_("undel: File name is NULL or empty\n"));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	char *p = strrchr(file, '/');
 	if (!p) {
 		xerror(_("undel: '%s': No directory specified\n"), file);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	char c = *(p + 1);
@@ -647,9 +647,9 @@ check_untrash_dest(char *file)
 	const int ret = access(parent_dir, F_OK | X_OK | W_OK);
 	if (ret != 0) {
 		if (errno == ENOENT) {
-			if (create_untrash_parent(parent_dir) != EXIT_SUCCESS) {
+			if (create_untrash_parent(parent_dir) != FUNC_SUCCESS) {
 				*(p + 1) = c;
-				return EXIT_FAILURE;
+				return FUNC_FAILURE;
 			}
 		} else {
 			xerror("undel: '%s': %s\n", parent_dir, strerror(errno));
@@ -666,14 +666,14 @@ check_untrash_dest(char *file)
 		return EEXIST;
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
 untrash_file(char *file)
 {
 	if (!file)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	char undel_file[PATH_MAX + 1];
 	char undel_info[PATH_MAX + 1];
@@ -681,13 +681,13 @@ untrash_file(char *file)
 	snprintf(undel_info, sizeof(undel_info), "%s/%s.trashinfo",
 		trash_info_dir, file);
 
-	int ret = EXIT_SUCCESS;
+	int ret = FUNC_SUCCESS;
 	char *orig_path = read_original_path(undel_info, file, &ret);
 	if (!orig_path)
 		return ret;
 
 	ret = check_untrash_dest(orig_path);
-	if (ret != EXIT_SUCCESS) {
+	if (ret != FUNC_SUCCESS) {
 		if (conf.autols == 1)
 			press_any_key_to_continue(0);
 		free(orig_path);
@@ -701,7 +701,7 @@ untrash_file(char *file)
 			 * rename(3) doesn't work: let's try with mv(1). */
 			char *cmd[] = {"mv", "--", undel_file, orig_path, NULL};
 			ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
-			if (ret != EXIT_SUCCESS) {
+			if (ret != FUNC_SUCCESS) {
 				if (conf.autols == 1)
 					press_any_key_to_continue(0);
 				free(orig_path);
@@ -723,7 +723,7 @@ untrash_file(char *file)
 		return errno;
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Untrash/restore all trashed files. */
@@ -732,11 +732,11 @@ untrash_all(struct dirent ***tfiles, const int tfiles_n, const int free_files)
 {
 	size_t i;
 	size_t untrashed = 0;
-	int status = EXIT_SUCCESS;
+	int status = FUNC_SUCCESS;
 
 	for (i = 0; i < (size_t)tfiles_n; i++) {
 		if (untrash_file((*tfiles)[i]->d_name) != 0)
-			status = EXIT_FAILURE;
+			status = FUNC_FAILURE;
 		else
 			untrashed++;
 		if (free_files == 1)
@@ -746,7 +746,7 @@ untrash_all(struct dirent ***tfiles, const int tfiles_n, const int free_files)
 	if (free_files == 1)
 		free(*tfiles);
 
-	if (status == EXIT_SUCCESS) {
+	if (status == FUNC_SUCCESS) {
 		if (conf.autols == 1) reload_dirlist();
 
 		const size_t n = count_trashed_files();
@@ -761,7 +761,7 @@ untrash_all(struct dirent ***tfiles, const int tfiles_n, const int free_files)
 static int
 untrash_files(char **args)
 {
-	int status = EXIT_SUCCESS;
+	int status = FUNC_SUCCESS;
 	size_t i;
 	size_t untrashed = 0;
 
@@ -770,15 +770,15 @@ untrash_files(char **args)
 		if (strchr(args[i], '\\'))
 			d = unescape_str(args[i], 0);
 
-		if (untrash_file(d ? d : args[i]) != EXIT_SUCCESS)
-			status = EXIT_FAILURE;
+		if (untrash_file(d ? d : args[i]) != FUNC_SUCCESS)
+			status = FUNC_FAILURE;
 		else
 			untrashed++;
 
 		free(d);
 	}
 
-	if (status == EXIT_SUCCESS) {
+	if (status == FUNC_SUCCESS) {
 		if (conf.autols == 1) reload_dirlist();
 
 		const size_t n = count_trashed_files();
@@ -793,14 +793,14 @@ int
 untrash_function(char **args)
 {
 	if (!args)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	if (trash_ok == 0 || !trash_dir || !trash_files_dir || !trash_info_dir) {
 		xerror(_("%s: Trash function disabled\n"), PROGRAM_NAME);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 
 	if (args[1] && *args[1] != '*' && strcmp(args[1], "a") != 0
 	&& strcmp(args[1], "all") != 0)
@@ -826,7 +826,7 @@ untrash_function(char **args)
 		for (i = 0; i < (size_t)files_n; i++)
 			free(trash_files[i]);
 		free(trash_files);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	/* First check for quit, *, and non-number args */
@@ -848,7 +848,7 @@ untrash_function(char **args)
 		int num = atoi(input[i]);
 		if (!is_number(input[i]) || num <= 0 || num > files_n) {
 			xerror(_("undel: %s: Invalid ELN\n"), input[i]);
-			exit_status = EXIT_FAILURE;
+			exit_status = FUNC_FAILURE;
 			free_and_return = 1;
 		}
 	}
@@ -863,8 +863,8 @@ untrash_function(char **args)
 	/* Undelete trashed files */
 	for (i = 0; input[i]; i++) {
 		int num = atoi(input[i]);
-		if (untrash_file(trash_files[num - 1]->d_name) != EXIT_SUCCESS)
-			exit_status = EXIT_FAILURE;
+		if (untrash_file(trash_files[num - 1]->d_name) != FUNC_SUCCESS)
+			exit_status = FUNC_FAILURE;
 	}
 
 	free_files_and_input(&input, &trash_files, files_n);
@@ -915,7 +915,7 @@ list_trashed_files(void)
 {
 	if (!trash_files_dir || !*trash_files_dir) {
 		xerror("%s\n", _("trash: The trash directory is undefined\n"));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	struct dirent **trash_files = (struct dirent **)NULL;
@@ -925,11 +925,11 @@ list_trashed_files(void)
 
 	if (files_n == -1) {
 		xerror("trash: %s\n", strerror(errno));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 	if (files_n <= 0) {
 		puts(_("trash: No trashed files"));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (conf.clear_screen == 1)
@@ -945,12 +945,12 @@ list_trashed_files(void)
 
 	UNHIDE_CURSOR;
 
-	if (ret != EXIT_SUCCESS)
+	if (ret != FUNC_SUCCESS)
 		return ret;
 
 	print_trashdir_size();
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Make sure we are trashing a valid (trashable) file */
@@ -971,13 +971,13 @@ check_trash_file(char *file)
 	/* Do not trash any of the parent directories of TRASH_DIR */
 	if (strncmp(tmp_file, trash_dir, strnlen(tmp_file, sizeof(tmp_file))) == 0) {
 		xerror(_("trash: Cannot trash '%s'\n"), tmp_file);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	/* Do no trash TRASH_DIR itself nor anything inside it (trashed files) */
 	if (strncmp(tmp_file, trash_dir, strlen(trash_dir)) == 0) {
 		fputs(_("trash: Use 'trash del' to remove trashed files\n"), stderr);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	const size_t l = strlen(file);
@@ -998,7 +998,7 @@ check_trash_file(char *file)
 		return errno;
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* List successfully trashed files. */
@@ -1048,9 +1048,9 @@ trash_files_args(char **args)
 	struct tm t;
 	char *suffix = localtime_r(&rawtime, &t) ? gen_date_suffix(t) : (char *)NULL;
 	if (!suffix)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
-	int exit_status = EXIT_SUCCESS, cwd = 0;
+	int exit_status = FUNC_SUCCESS, cwd = 0;
 	size_t i, trashed_files = 0, n = 0;
 	for (i = 1; args[i]; i++);
 	int *successfully_trashed = xnmalloc(i + 1, sizeof(int));
@@ -1058,7 +1058,7 @@ trash_files_args(char **args)
 	for (i = 1; args[i]; i++) {
 		if (trash_n + trashed_files >= MAX_TRASH) {
 			xerror("%s\n", _("trash: Cannot trash any more files"));
-			exit_status = EXIT_FAILURE;
+			exit_status = FUNC_FAILURE;
 			break;
 		}
 
@@ -1069,8 +1069,8 @@ trash_files_args(char **args)
 		}
 
 		/* Make sure we are trashing a valid file */
-		if (check_trash_file(deq_file) != EXIT_SUCCESS) {
-			exit_status = EXIT_FAILURE;
+		if (check_trash_file(deq_file) != FUNC_SUCCESS) {
+			exit_status = FUNC_FAILURE;
 			free(deq_file);
 			continue;
 		}
@@ -1079,7 +1079,7 @@ trash_files_args(char **args)
 			cwd = is_file_in_cwd(deq_file);
 
 		/* Once here, everything is fine: trash the file */
-		if (trash_file(suffix, &t, deq_file) == EXIT_SUCCESS) {
+		if (trash_file(suffix, &t, deq_file) == FUNC_SUCCESS) {
 			trashed_files++;
 			if (print_removed_files == 1) {
 				/* Store indices of successfully trashed files */
@@ -1088,7 +1088,7 @@ trash_files_args(char **args)
 			}
 		} else {
 			cwd = 0;
-			exit_status = EXIT_FAILURE;
+			exit_status = FUNC_FAILURE;
 		}
 
 		free(deq_file);
@@ -1096,7 +1096,7 @@ trash_files_args(char **args)
 
 	free(suffix);
 
-	if (exit_status == EXIT_SUCCESS) {
+	if (exit_status == FUNC_SUCCESS) {
 		if (conf.autols == 1 && cwd == 1)
 			reload_dirlist();
 
@@ -1128,11 +1128,11 @@ int
 trash_function(char **args)
 {
 	if (!args)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	if (trash_ok == 0 || !trash_dir || !trash_info_dir || !trash_files_dir) {
 		xerror(_("%s: Trash function disabled\n"), PROGRAM_NAME);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	/* List trashed files ('tr' or 'tr ls') */
@@ -1150,7 +1150,7 @@ trash_function(char **args)
 		struct stat a;
 		if (trash_n > 0 && lstat(*args[1] == 'c' ? "clear" : "empty", &a) == 0
 		&& rl_get_y_or_n(_("Empty the trash can? [y/n] ")) == 0)
-			return EXIT_SUCCESS;
+			return FUNC_SUCCESS;
 		return trash_clear();
 	}
 

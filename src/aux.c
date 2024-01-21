@@ -599,9 +599,9 @@ xmkdir(char *dir, const mode_t mode)
 	umask(old_mask);
 
 	if (ret == -1)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Open a file for read only. Return a file stream associated to the file

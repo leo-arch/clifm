@@ -947,7 +947,7 @@ import_color_scheme(const char *name)
 {
 	if (!data_dir || !*data_dir || !colors_dir || !*colors_dir
 	|| !name || !*name)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	char dfile[PATH_MAX + 1];
 	snprintf(dfile, sizeof(dfile), "%s/%s/colors/%s.clifm", data_dir,
@@ -955,14 +955,14 @@ import_color_scheme(const char *name)
 
 	struct stat a;
 	if (stat(dfile, &a) == -1 || !S_ISREG(a.st_mode))
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	char *cmd[] = {"cp", "--", dfile, colors_dir, NULL};
 	const mode_t old_mask = umask(0077);
 	const int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	umask(old_mask);
 
-	return ret == EXIT_SUCCESS ? ret : EXIT_FAILURE;
+	return ret == FUNC_SUCCESS ? ret : FUNC_FAILURE;
 }
 
 #ifndef CLIFM_SUCKLESS
@@ -971,7 +971,7 @@ list_colorschemes(void)
 {
 	if (cschemes_n == 0) {
 		puts(_("cs: No color scheme found"));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	size_t i;
@@ -982,7 +982,7 @@ list_colorschemes(void)
 			printf("  %s\n", color_schemes[i]);
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Edit the current color scheme file.
@@ -993,12 +993,12 @@ edit_colorscheme(char *app)
 {
 	if (!colors_dir) {
 		xerror("%s\n", _("cs: No color scheme found"));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	if (!cur_cscheme) {
 		xerror("%s\n", _("cs: Current color scheme is unknown"));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	struct stat attr;
@@ -1006,9 +1006,9 @@ edit_colorscheme(char *app)
 
 	snprintf(file, sizeof(file), "%s/%s.clifm", colors_dir, cur_cscheme); /* NOLINT */
 	if (stat(file, &attr) == -1
-	&& import_color_scheme(cur_cscheme) != EXIT_SUCCESS) {
+	&& import_color_scheme(cur_cscheme) != FUNC_SUCCESS) {
 		xerror(_("cs: '%s': No such color scheme\n"), cur_cscheme);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	if (stat(file, &attr) == -1) {
@@ -1018,7 +1018,7 @@ edit_colorscheme(char *app)
 
 	const time_t mtime_bfr = attr.st_mtime;
 
-	int ret = EXIT_FAILURE;
+	int ret = FUNC_FAILURE;
 	if (app && *app) {
 		char *cmd[] = {app, file, NULL};
 		ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
@@ -1028,7 +1028,7 @@ edit_colorscheme(char *app)
 		open_in_foreground = 0;
 	}
 
-	if (ret != EXIT_SUCCESS)
+	if (ret != FUNC_SUCCESS)
 		return ret;
 
 	if (stat(file, &attr) == -1) {
@@ -1037,7 +1037,7 @@ edit_colorscheme(char *app)
 	}
 
 	if (mtime_bfr != attr.st_mtime
-	&& set_colors(cur_cscheme, 0) == EXIT_SUCCESS) {
+	&& set_colors(cur_cscheme, 0) == FUNC_SUCCESS) {
 		set_fzf_preview_border_type();
 		if (conf.autols == 1)
 			reload_dirlist();
@@ -1050,7 +1050,7 @@ static int
 set_colorscheme(char *arg)
 {
 	if (!arg || !*arg)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	char *p = unescape_str(arg, 0);
 	char *q = p ? p : arg;
@@ -1062,7 +1062,7 @@ set_colorscheme(char *arg)
 			continue;
 		cs_found = 1;
 
-		if (set_colors(q, 0) != EXIT_SUCCESS)
+		if (set_colors(q, 0) != FUNC_SUCCESS)
 			continue;
 		cur_cscheme = color_schemes[i];
 
@@ -1073,7 +1073,7 @@ set_colorscheme(char *arg)
 
 		free(p);
 
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (cs_found == 0)
@@ -1081,7 +1081,7 @@ set_colorscheme(char *arg)
 
 	free(p);
 
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 }
 #endif /* !CLIFM_SUCKLESS */
 
@@ -1092,26 +1092,26 @@ cschemes_function(char **args)
 	UNUSED(args);
 	printf("%s: colors: %s. Edit 'settings.h' in the source code "
 		"and recompile.\n", PROGRAM_NAME, NOT_AVAILABLE);
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 #else
 	if (xargs.stealth_mode == 1) {
 		xerror(_("%s: colors: %s\nTIP: To change the "
 			"current color scheme use the following environment "
 			"variables: CLIFM_FILE_COLORS, CLIFM_IFACE_COLORS, "
 			"and CLIFM_EXT_COLORS\n"), PROGRAM_NAME, STEALTH_DISABLED);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	if (conf.colorize == 0) {
 		printf(_("%s: Colors are disabled\n"), PROGRAM_NAME);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
-	if (!args) return EXIT_FAILURE;
+	if (!args) return FUNC_FAILURE;
 
 	if (!args[1]) return list_colorschemes();
 
-	if (IS_HELP(args[1])) { puts(_(CS_USAGE)); return EXIT_SUCCESS;	}
+	if (IS_HELP(args[1])) { puts(_(CS_USAGE)); return FUNC_SUCCESS;	}
 
 	if (*args[1] == 'e' && (!args[1][1] || strcmp(args[1], "edit") == 0))
 		return edit_colorscheme(args[2]);
@@ -1119,7 +1119,7 @@ cschemes_function(char **args)
 	if (*args[1] == 'n' && (!args[1][1] || strcmp(args[1], "name") == 0)) {
 		printf(_("cs: Current color scheme is '%s'\n"),
 			cur_cscheme ? cur_cscheme : "?");
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	return set_colorscheme(args[1]);
@@ -1526,13 +1526,13 @@ store_extension_line(const char *line)
 {
 	/* Remove the leading "*." from the extension line */
 	if (!line || *line != '*' || *(line + 1) != '.' || !*(line + 2))
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	line += 2;
 
 	char *q = strchr(line, '=');
 	if (!q || !*(q + 1) || q == line)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	*q = '\0';
 
@@ -1542,12 +1542,12 @@ store_extension_line(const char *line)
 #else
 	if (is_color_code(q + 1) == 0)
 #endif /* !CLIFM_SUCKLESS */
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	char *tmp = (def && *def) ? def : q + 1;
 	char *code = *tmp == '#' ? hex2rgb(tmp) : tmp;
 	if (!code || !*code)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	ext_colors = xnrealloc(ext_colors, ext_colors_n + 1, sizeof(struct ext_t));
 
@@ -1566,7 +1566,7 @@ store_extension_line(const char *line)
 	*q = '=';
 	ext_colors_n++;
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static void
@@ -1603,7 +1603,7 @@ split_extension_colors(char *extcolors)
 			}
 
 			buf[len] = '\0';
-			if (store_extension_line(buf) == EXIT_SUCCESS)
+			if (store_extension_line(buf) == FUNC_SUCCESS)
 				*buf = '\0';
 
 			if (!*p)
@@ -1936,10 +1936,10 @@ get_cur_colorscheme(const char *colorscheme)
 		if (def_cscheme)
 			cur_cscheme = def_cscheme;
 		else
-			return EXIT_FAILURE;
+			return FUNC_FAILURE;
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Inspect LS_COLORS variable and assing pointers to ENV_FILECOLORS and
@@ -2063,7 +2063,7 @@ set_cs_prompt(char *line)
 	if (!p || !*p)
 		return;
 
-	if (expand_prompt_name(p) != EXIT_SUCCESS) {
+	if (expand_prompt_name(p) != FUNC_SUCCESS) {
 		free(conf.encoded_prompt);
 		conf.encoded_prompt = savestring(p, strlen(p));
 	}
@@ -2129,7 +2129,7 @@ set_fzf_opts(char *line)
 		*conf.fzftab_options = '\0';
 	}
 
-	else if (sanitize_cmd(line, SNT_BLACKLIST) == EXIT_SUCCESS) {
+	else if (sanitize_cmd(line, SNT_BLACKLIST) == FUNC_SUCCESS) {
 		conf.fzftab_options = savestring(line, strlen(line));
 	}
 
@@ -2268,11 +2268,11 @@ read_color_scheme_file(const char *colorscheme, char **filecolors,
 		if (!env) {
 			xerror("%s: colors: '%s': %s\n", PROGRAM_NAME,
 				colorscheme_file, strerror(errno));
-			return EXIT_FAILURE;
+			return FUNC_FAILURE;
 		} else {
 			err('w', PRINT_PROMPT, _("%s: colors: '%s': No such color scheme. "
 				"Falling back to default\n"), PROGRAM_NAME, colorscheme);
-			return EXIT_SUCCESS;
+			return FUNC_SUCCESS;
 		}
 	}
 
@@ -2380,7 +2380,7 @@ read_color_scheme_file(const char *colorscheme, char **filecolors,
 	free(line);
 	fclose(fp_colors);
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 #endif /* !CLIFM_SUCKLESS */
 
@@ -2568,22 +2568,22 @@ set_colors(const char *colorscheme, const int check_env)
 	*dir_ico_c = '\0';
 #endif /* !_NO_ICONS */
 
-	int ret = EXIT_SUCCESS;
+	int ret = FUNC_SUCCESS;
 	if (colorscheme && *colorscheme && color_schemes)
 		ret = get_cur_colorscheme(colorscheme);
 
 	/* CHECK_ENV is true only when this function is called from
 	 * check_colors() (config.c) */
-	if (ret == EXIT_SUCCESS && check_env == 1)
+	if (ret == FUNC_SUCCESS && check_env == 1)
 		get_colors_from_env(&filecolors, &extcolors, &ifacecolors);
 
 #ifndef CLIFM_SUCKLESS
-	if (ret == EXIT_SUCCESS && xargs.stealth_mode != 1
+	if (ret == FUNC_SUCCESS && xargs.stealth_mode != 1
 	&& config_ok != 0) {
 		if (read_color_scheme_file(cur_cscheme, &filecolors,
-		&extcolors, &ifacecolors, check_env) == EXIT_FAILURE) {
+		&extcolors, &ifacecolors, check_env) == FUNC_FAILURE) {
 			clear_defs();
-			return EXIT_FAILURE;
+			return FUNC_FAILURE;
 		}
 	}
 #endif /* CLIFM_SUCKLESS */
@@ -2623,7 +2623,7 @@ set_colors(const char *colorscheme, const int check_env)
 	if (xargs.no_bold == 1)
 		disable_bold();
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* If completing trashed files (regular only) we need to remove the trash

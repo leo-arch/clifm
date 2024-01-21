@@ -383,7 +383,7 @@ init_gettext(void)
 	bindtextdomain(PROGRAM_NAME, locale_dir);
 	textdomain(PROGRAM_NAME);
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 
 }
 #endif /* !_NO_GETTEXT */
@@ -402,7 +402,7 @@ backup_argv(const int argc, char **argv)
 	else
 		bin_name = savestring(argv[0], strlen(argv[0]));
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 int
@@ -415,7 +415,7 @@ init_workspaces(void)
 		workspaces[i].name = (char *)NULL;
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 int
@@ -431,10 +431,10 @@ get_home(void)
 			"Bookmarks, commands logs, and commands history are "
 			"disabled. Program messages, selected files, and the jump database "
 			"won't be persistent. Using default options\n"), PROGRAM_NAME);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 int
@@ -447,7 +447,7 @@ init_history(void)
 		truncate_file(cmds_log_file, conf.max_log, 0);
 
 	if (!hist_file)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	/* Get history */
 	history_comment_char = '#';
@@ -478,7 +478,7 @@ init_history(void)
 		}
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 void
@@ -604,7 +604,7 @@ xgetenv(const char *s, const int alloc)
  * Since this will be used to run shell commands, it's better to make sure
  * we have a valid shell, that is, one of the shells specified in
  * '/etc/shells'.
- * Return EXIT_SUCCESS if found or EXIT_FAILURE if not. */
+ * Return FUNC_SUCCESS if found or FUNC_FAILURE if not. */
 static int
 check_etc_shells(const char *file, char *shells_file, int *tmp_errno)
 {
@@ -612,10 +612,10 @@ check_etc_shells(const char *file, char *shells_file, int *tmp_errno)
 	FILE *fp = open_fread(shells_file, &fd);
 	if (!fp) {
 		*tmp_errno = errno;
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
-	int ret = EXIT_FAILURE;
+	int ret = FUNC_FAILURE;
 	char line[PATH_MAX + 1]; *line = '\0';
 
 	while (fgets(line, (int)sizeof(line), fp)) {
@@ -627,7 +627,7 @@ check_etc_shells(const char *file, char *shells_file, int *tmp_errno)
 			line[len - 1] = '\0';
 
 		if (strcmp(line, file) == 0) {
-			ret = EXIT_SUCCESS;
+			ret = FUNC_SUCCESS;
 			break;
 		}
 	}
@@ -655,7 +655,7 @@ validate_custom_shell(char **file)
 #endif
 
 	if (*file && check_etc_shells(*file, shells_file,
-	&tmp_errno) == EXIT_SUCCESS)
+	&tmp_errno) == FUNC_SUCCESS)
 		return;
 
 	/* check_etc_shells() sets errno to a positive value only if /etc/shells
@@ -696,7 +696,7 @@ get_user_data_env(void)
 	|| !S_ISDIR(a.st_mode)) {
 		free(tmp_user.home);
 		xerror("%s: Home directory not found. Exiting.\n", PROGRAM_NAME);
-		exit(EXIT_FAILURE);
+		exit(FUNC_FAILURE);
 	}
 
 	tmp_user.home_len = strlen(tmp_user.home);
@@ -812,16 +812,16 @@ static int
 check_tag(const char *name)
 {
 	if (!name || !*name)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	char dir[PATH_MAX + 1];
 	snprintf(dir, sizeof(dir), "%s/%s", tags_dir, name);
 
 	struct stat a;
 	if (stat(dir, &a) == -1 || !S_ISDIR(a.st_mode))
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 #endif /* _DIRENT_HAVE_D_TYPE */
 
@@ -850,7 +850,7 @@ load_tags(void)
 			continue;
 		}
 #else
-		if (check_tag(t[i]->d_name) == EXIT_FAILURE)
+		if (check_tag(t[i]->d_name) == FUNC_FAILURE)
 			continue;
 #endif /* _DIRENT_HAVE_D_TYPE */
 		if (SELFORPARENT(t[i]->d_name)) {
@@ -1070,16 +1070,16 @@ save_bm_path(char *file)
 int
 load_bookmarks(void)
 {
-	if (create_bm_file() == EXIT_FAILURE)
-		return EXIT_FAILURE;
+	if (create_bm_file() == FUNC_FAILURE)
+		return FUNC_FAILURE;
 
 	if (!bm_file)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	int fd;
 	FILE *fp = open_fread(bm_file, &fd);
 	if (!fp)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	size_t bm_total = 0;
 
@@ -1096,7 +1096,7 @@ load_bookmarks(void)
 
 	if (bm_total == 0) {
 		fclose(fp);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	fseek(fp, 0L, SEEK_SET);
@@ -1193,14 +1193,14 @@ load_bookmarks(void)
 	if (bm_n == 0) {
 		free(bookmarks);
 		bookmarks = (struct bookmarks_t *)NULL;
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	bookmarks[bm_n].name = (char *)NULL;
 	bookmarks[bm_n].path = (char *)NULL;
 	bookmarks[bm_n].shortcut = (char *)NULL;
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Load actions from the actions file */
@@ -1208,7 +1208,7 @@ int
 load_actions(void)
 {
 	if (config_ok == 0 || !actions_file)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	/* Free the actions struct array */
 	if (actions_n > 0) {
@@ -1227,7 +1227,7 @@ load_actions(void)
 	int fd;
 	FILE *fp = open_fread(actions_file, &fd);
 	if (!fp)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	size_t line_size = 0;
 	char *line = (char *)NULL;
@@ -1255,7 +1255,7 @@ load_actions(void)
 
 	free(line);
 	fclose(fp);
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static inline void
@@ -1276,13 +1276,13 @@ int
 load_remotes(void)
 {
 	if (!remotes_file || !*remotes_file || config_ok == 0)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	int fd;
 	FILE *fp = open_fread(remotes_file, &fd);
 	if (!fp) {
 		xerror("'%s': %s\n", remotes_file, strerror(errno));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	size_t n = 0;
@@ -1414,7 +1414,7 @@ load_remotes(void)
 	}
 
 	remotes_n = n;
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static void
@@ -1452,7 +1452,7 @@ set_prompts_file(void)
 
 	char *cmd[] = {"cp", "--", t, f, NULL};
 	int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
-	if (ret == EXIT_SUCCESS)
+	if (ret == FUNC_SUCCESS)
 		return f;
 
 ERROR:
@@ -1468,13 +1468,13 @@ load_prompts(void)
 	free(prompts_file);
 	prompts_file = set_prompts_file();
 	if (!prompts_file || !*prompts_file)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	int fd;
 	FILE *fp = open_fread(prompts_file, &fd);
 	if (!fp) {
 		xerror("'%s': %s\n", prompts_file, strerror(errno));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	size_t n = 0;
@@ -1574,7 +1574,7 @@ load_prompts(void)
 	if (conf.encoded_prompt)
 		expand_prompt_name(conf.encoded_prompt);
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 void
@@ -1767,7 +1767,7 @@ int
 get_sel_files(void)
 {
 	if (selfile_ok == 0 || config_ok == 0 || !sel_file)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	size_t selnbk = sel_n;
 	/* First, clear the sel array, in case it was already used. */
@@ -1783,7 +1783,7 @@ get_sel_files(void)
 	FILE *fp = open_fread(sel_file, &fd);
 	/*  sel_elements = xcalloc(1, sizeof(char *)); */
 	if (!fp)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	struct stat a;
 	/* Since this file contains only paths, PATH_MAX should be enough. */
@@ -1831,7 +1831,7 @@ get_sel_files(void)
 	if (selnbk != sel_n)
 		save_sel();
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Store each path in CDPATH env variable into an array (CDPATHS)
@@ -2030,7 +2030,7 @@ int
 get_last_path(void)
 {
 	if (!config_dir)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	char *last_file = xnmalloc(config_dir_len + 7, sizeof(char));
 	snprintf(last_file, config_dir_len + 7, "%s/.last", config_dir);
@@ -2039,7 +2039,7 @@ get_last_path(void)
 	FILE *fp = open_fread(last_file, &fd);
 	if (!fp) {
 		free(last_file);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	/* A line in .last has this form: *WS_NUM:PATH, where WS_NUM is a number
@@ -2063,7 +2063,7 @@ get_last_path(void)
 
 	fclose(fp);
 	free(last_file);
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Restore pinned dir from file */
@@ -2071,7 +2071,7 @@ int
 load_pinned_dir(void)
 {
 	if (config_ok == 0 || !config_dir)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	char *pin_file = xnmalloc(config_dir_len + 6, sizeof(char));
 	snprintf(pin_file, config_dir_len + 6, "%s/.pin", config_dir);
@@ -2080,20 +2080,20 @@ load_pinned_dir(void)
 	FILE *fp = open_fread(pin_file, &fd);
 	if (!fp) {
 		free(pin_file);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	char line[PATH_MAX + 1]; *line = '\0';
 	if (fgets(line, (int)sizeof(line), fp) == NULL) {
 		free(pin_file);
 		fclose(fp);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	if (!*line || !strchr(line, '/')) {
 		free(pin_file);
 		fclose(fp);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	if (pinned_dir) {
@@ -2104,7 +2104,7 @@ load_pinned_dir(void)
 	pinned_dir = savestring(line, strlen(line));
 	fclose(fp);
 	free(pin_file);
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 #if defined(__CYGWIN__)
@@ -2421,14 +2421,14 @@ int
 load_dirhist(void)
 {
 	if (config_ok == 0 || !dirhist_file)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	truncate_file(dirhist_file, conf.max_dirhist, 1);
 
 	int fd;
 	FILE *fp = open_fread(dirhist_file, &fd);
 	if (!fp)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	size_t dirs = 0;
 
@@ -2439,7 +2439,7 @@ load_dirhist(void)
 
 	if (dirs == 0) {
 		fclose(fp);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	old_pwd = xnmalloc(dirs + 2, sizeof(char *));
@@ -2458,7 +2458,7 @@ load_dirhist(void)
 	old_pwd[dirhist_total_index] = (char *)NULL;
 	free(line);
 	dirhist_cur_index = dirhist_total_index - 1;
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static void

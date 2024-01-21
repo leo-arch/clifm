@@ -161,7 +161,7 @@ get_operation(const int mode)
 		case 'q': /* fallthrough */
 		case 'Q':
 			free(op);
-			return EXIT_SUCCESS;
+			return FUNC_SUCCESS;
 
 		default:
 			free(op);
@@ -179,7 +179,7 @@ get_operation(const int mode)
 static int
 extract_iso(char *file)
 {
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 
 	/* 7z x -oDIR FILE (use FILE as DIR) */
 	const size_t flen = strlen(file);
@@ -188,8 +188,8 @@ extract_iso(char *file)
 
 	/* Construct and execute cmd */
 	char *cmd[] = {"7z", "x", o_option, file, NULL};
-	if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
-		exit_status = EXIT_FAILURE;
+	if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
+		exit_status = FUNC_FAILURE;
 
 	free(o_option);
 	return exit_status;
@@ -199,11 +199,11 @@ static int
 extract_iso_to_dir(char *file)
 {
 	/* 7z x -oDIR FILE (ask for DIR) */
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 
 	char *ext_path = get_extraction_path();
 	if (!ext_path)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	const size_t len = strlen(ext_path);
 	char *o_option = xnmalloc(len + 3, sizeof(char));
@@ -212,8 +212,8 @@ extract_iso_to_dir(char *file)
 
 	/* Construct and execute cmd */
 	char *cmd[] = {"7z", "x", o_option, file, NULL};
-	if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
-		exit_status = EXIT_FAILURE;
+	if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
+		exit_status = FUNC_FAILURE;
 
 	free(o_option);
 
@@ -223,12 +223,12 @@ extract_iso_to_dir(char *file)
 static int
 list_iso_contents(char *file)
 {
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 
 	/* 7z l FILE */
 	char *cmd[] = {"7z", "l", file, NULL};
-	if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
-		exit_status = EXIT_FAILURE;
+	if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
+		exit_status = FUNC_FAILURE;
 
 	return exit_status;
 }
@@ -236,12 +236,12 @@ list_iso_contents(char *file)
 static int
 test_iso(char *file)
 {
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 
 	/* 7z t FILE */
 	char *cmd[] = {"7z", "t", file, NULL};
-	if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
-		exit_status = EXIT_FAILURE;
+	if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
+		exit_status = FUNC_FAILURE;
 
 	return exit_status;
 }
@@ -266,7 +266,7 @@ create_mountpoint(char *file)
 	}
 
 	char *dir_cmd[] = {"mkdir", "-pm700", mountpoint, NULL};
-	if (launch_execv(dir_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
+	if (launch_execv(dir_cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS) {
 		free(mountpoint);
 		mountpoint = (char *)NULL;
 	}
@@ -280,14 +280,14 @@ cd_to_mountpoint(char *file, char *mountpoint)
 {
 	if (xchdir(mountpoint, SET_TITLE) == -1) {
 		xerror("archiver: '%s': %s\n", mountpoint, strerror(errno));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	free(workspaces[cur_ws].path);
 	workspaces[cur_ws].path = savestring(mountpoint, strlen(mountpoint));
 	add_to_jumpdb(workspaces[cur_ws].path);
 
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 	if (conf.autols == 1) {
 		reload_dirlist();
 		add_to_dirhist(workspaces[cur_ws].path);
@@ -305,30 +305,30 @@ mount_iso(char *file)
 #if !defined(__linux__)
 	UNUSED(file);
 	xerror("%s\n", _("mount: This feature is for Linux only"));
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 #else
 	char *mountpoint = create_mountpoint(file);
 	if (!mountpoint)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	/* Construct and execute the cmd */
 	char *sudo = get_sudo_path();
 	if (!sudo) {
 		free(mountpoint);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	char *cmd[] = {sudo, "mount", "-o", "loop", file, mountpoint, NULL};
 	if (confirm_sudo_cmd(cmd) == 0) {
 		free(mountpoint);
 		free(sudo);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
-	if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
+	if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS) {
 		free(mountpoint);
 		free(sudo);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 	free(sudo);
 
@@ -366,7 +366,7 @@ handle_iso(char *file)
 	case 'l': return list_iso_contents(file);
 	case 'm': return mount_iso(file);
 	case 't': return test_iso(file);
-	default: return EXIT_SUCCESS;
+	default: return FUNC_SUCCESS;
 	}
 }
 
@@ -385,16 +385,16 @@ create_iso_from_block_dev(char *in_file, char *out_file)
 	if (!sudo) {
 		free(if_option);
 		free(of_option);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 	char *cmd[] = {sudo, "dd", if_option, of_option, "bs=64k",
 	    "conv=noerror,sync", "status=progress", NULL};
 
 	if (confirm_sudo_cmd(cmd) == 1) {
-		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
-			exit_status = EXIT_FAILURE;
+		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
+			exit_status = FUNC_FAILURE;
 	}
 
 	free(sudo);
@@ -410,15 +410,15 @@ create_iso(char *in_file, char *out_file)
 	struct stat attr;
 	if (lstat(in_file, &attr) == -1) {
 		xerror("archiver: '%s': %s\n", in_file, strerror(errno));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	/* If IN_FILE is a directory */
 	if (S_ISDIR(attr.st_mode)) {
 		char *cmd[] = {"mkisofs", "-R", "-o", out_file, in_file, NULL};
-		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
-			return EXIT_FAILURE;
-		return EXIT_SUCCESS;
+		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
+			return FUNC_FAILURE;
+		return FUNC_SUCCESS;
 	}
 
 	/* If IN_FILE is a block device */
@@ -428,7 +428,7 @@ create_iso(char *in_file, char *out_file)
 	/* If any other file format */
 	xerror(_("archiver: '%s': Invalid file format. File should be either "
 		"a directory or a block device\n"), in_file);
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 }
 
 /* Check the MIME type of the file named FILE and look for "ISO 9660" in its
@@ -454,7 +454,7 @@ check_iso(char *file)
 		is_iso = 1;
 
 	free(t);
-	return (is_iso == 1 ? EXIT_SUCCESS : EXIT_FAILURE);
+	return (is_iso == 1 ? FUNC_SUCCESS : FUNC_FAILURE);
 
 #else
 	char *rand_ext = gen_rand_str(RAND_SUFFIX_LEN);
@@ -506,7 +506,7 @@ check_iso(char *file)
 	close(stdout_bk);
 	close(stderr_bk);
 
-	if (retval != EXIT_SUCCESS) {
+	if (retval != FUNC_SUCCESS) {
 		unlink(tmp_file);
 		return (-1);
 	}
@@ -517,7 +517,7 @@ check_iso(char *file)
 		if (fgets(line, (int)sizeof(line), fp_out) == NULL) {
 			fclose(fp_out);
 			unlink(tmp_file);
-			return EXIT_FAILURE;
+			return FUNC_FAILURE;
 		}
 
 		if (strstr(line, "ISO 9660"))
@@ -527,7 +527,7 @@ check_iso(char *file)
 
 	unlink(tmp_file);
 
-	return (is_iso == 1 ? EXIT_SUCCESS : EXIT_FAILURE);
+	return (is_iso == 1 ? FUNC_SUCCESS : FUNC_FAILURE);
 
 ERROR:
 	xerror("archiver: %s\n", strerror(errno));
@@ -573,7 +573,7 @@ is_compressed(char *file, const int test_iso)
 	const int compressed = check_compressed(t, test_iso);
 	free(t);
 
-	return (compressed == 1 ? EXIT_SUCCESS : EXIT_FAILURE);
+	return (compressed == 1 ? FUNC_SUCCESS : FUNC_FAILURE);
 
 #else
 	char *rand_ext = gen_rand_str(RAND_SUFFIX_LEN);
@@ -625,7 +625,7 @@ is_compressed(char *file, const int test_iso)
 	close(stdout_bk);
 	close(stderr_bk);
 
-	if (retval != EXIT_SUCCESS) {
+	if (retval != FUNC_SUCCESS) {
 		unlink(tmp_file);
 		return (-1);
 	}
@@ -637,7 +637,7 @@ is_compressed(char *file, const int test_iso)
 		if (fgets(line, (int)sizeof(line), fp_out) == NULL) {
 			fclose(fp_out);
 			unlink(tmp_file);
-			return EXIT_FAILURE;
+			return FUNC_FAILURE;
 		}
 
 		compressed = check_compressed(line, test_iso);
@@ -646,7 +646,7 @@ is_compressed(char *file, const int test_iso)
 
 	unlink(tmp_file);
 
-	return (compressed == 1 ? EXIT_SUCCESS : EXIT_FAILURE);
+	return (compressed == 1 ? FUNC_SUCCESS : FUNC_FAILURE);
 
 ERROR:
 	xerror("archiver: %s\n", strerror(errno));
@@ -718,23 +718,23 @@ get_archive_filename(void)
 static int
 zstandard(char *in_file, char *out_file, const char mode, const char op)
 {
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 	char *deq_file = unescape_str(in_file, 0);
 	if (!deq_file) {
 		xerror(_("archiver: '%s': Error unescaping file name\n"), in_file);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	if (mode == 'c') {
 		if (out_file) {
 			char *cmd[] = {"zstd", "-zo", out_file, deq_file, NULL};
-			if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
-				exit_status = EXIT_FAILURE;
+			if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
+				exit_status = FUNC_FAILURE;
 		} else {
 			char *cmd[] = {"zstd", "-z", deq_file, NULL};
 
-			if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
-				exit_status = EXIT_FAILURE;
+			if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
+				exit_status = FUNC_FAILURE;
 		}
 
 		free(deq_file);
@@ -759,10 +759,10 @@ zstandard(char *in_file, char *out_file, const char mode, const char op)
 		exit_status = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 		free(deq_file);
 
-		if (exit_status != EXIT_SUCCESS)
-			return EXIT_FAILURE;
+		if (exit_status != FUNC_SUCCESS)
+			return FUNC_FAILURE;
 
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	printf(_("%s[e]%sxtract %s[t]%sest %s[i]%snfo %s[q]%suit\n"),
@@ -782,26 +782,26 @@ zstandard(char *in_file, char *out_file, const char mode, const char op)
 		switch (*operation) {
 		case 'e': {
 			char *cmd[] = {"zstd", "-d", deq_file, NULL};
-			if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
-				exit_status = EXIT_FAILURE;
+			if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
+				exit_status = FUNC_FAILURE;
 		} break;
 
 		case 't': {
 			char *cmd[] = {"zstd", "-t", deq_file, NULL};
-			if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
-				exit_status = EXIT_FAILURE;
+			if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
+				exit_status = FUNC_FAILURE;
 		} break;
 
 		case 'i': {
 			char *cmd[] = {"zstd", "-l", deq_file, NULL};
-			if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
-				exit_status = EXIT_FAILURE;
+			if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
+				exit_status = FUNC_FAILURE;
 		} break;
 
 		case 'q':
 			free(operation);
 			free(deq_file);
-			return EXIT_SUCCESS;
+			return FUNC_SUCCESS;
 
 		default:
 			free(operation);
@@ -821,7 +821,7 @@ compress_zstandard(char *name, char **args)
 	if (!args[2]) /* Only one file */
 		return zstandard(args[1], name, 'c', 0);
 
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 
 	/* Multiple files */
 	printf(_("\n%sNOTE%s: Zstandard does not support compression of "
@@ -831,8 +831,8 @@ compress_zstandard(char *name, char **args)
 
 	size_t i;
 	for (i = 1; args[i]; i++) {
-		if (zstandard(args[i], NULL, 'c', 0) != EXIT_SUCCESS)
-			exit_status = EXIT_FAILURE;
+		if (zstandard(args[i], NULL, 'c', 0) != FUNC_SUCCESS)
+			exit_status = FUNC_FAILURE;
 	}
 
 	return exit_status;
@@ -875,7 +875,7 @@ compress_others(char **args, char *name)
 static int
 compress_files(char **args)
 {
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 
 	char *name = get_archive_filename();
 	if (!name)
@@ -995,26 +995,26 @@ get_zstandard_operation(void)
 static int
 decompress_zstandard(char **args)
 {
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 
 	size_t files_num = 0, i;
 	for (i = 1; args[i]; i++)
 		files_num++;
 
 	if (files_num == 1) {
-		if (zstandard(args[1], NULL, 'd', 0) != EXIT_SUCCESS)
-			exit_status = EXIT_FAILURE;
+		if (zstandard(args[1], NULL, 'd', 0) != FUNC_SUCCESS)
+			exit_status = FUNC_FAILURE;
 		return exit_status;
 	}
 
 	/* Multiple files */
 	char sel_op = get_zstandard_operation();
 	if (sel_op == 0) /* quit */
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	for (i = 1; args[i]; i++) {
-		if (zstandard(args[i], NULL, 'd', sel_op) != EXIT_SUCCESS)
-			exit_status = EXIT_FAILURE;
+		if (zstandard(args[i], NULL, 'd', sel_op) != FUNC_SUCCESS)
+			exit_status = FUNC_FAILURE;
 	}
 
 	return exit_status;
@@ -1023,15 +1023,15 @@ decompress_zstandard(char **args)
 static int
 list_others(char **args)
 {
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 
 	size_t i;
 	for (i = 1; args[i]; i++) {
 		printf(_("%s%sFile%s: %s\n"), (i > 1) ? "\n" : "", BOLD, df_c, args[i]);
 
 		char *cmd[] = {"atool", "-l", args[i], NULL};
-		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
-			exit_status = EXIT_FAILURE;
+		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
+			exit_status = FUNC_FAILURE;
 	}
 
 	return exit_status;
@@ -1040,7 +1040,7 @@ list_others(char **args)
 static int
 extract_to_dir_others(char **args)
 {
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 
 	size_t i;
 	for (i = 1; args[i]; i++) {
@@ -1053,8 +1053,8 @@ extract_to_dir_others(char **args)
 
 		/* Construct and execute cmd */
 		char *cmd[] = {"atool", "-X", ext_path, args[i], NULL};
-		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
-			exit_status = EXIT_FAILURE;
+		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
+			exit_status = FUNC_FAILURE;
 
 		free(ext_path);
 	}
@@ -1083,9 +1083,9 @@ extract_others(char **args)
 	tcmd[n] = (char *)NULL;
 
 	/* Launch it */
-	int exit_status = EXIT_SUCCESS;
-	if (launch_execv(tcmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
-		exit_status = EXIT_FAILURE;
+	int exit_status = FUNC_SUCCESS;
+	if (launch_execv(tcmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
+		exit_status = FUNC_FAILURE;
 
 	for (i = 0; tcmd[i]; i++)
 		free(tcmd[i]);
@@ -1129,7 +1129,7 @@ repack_others(char **args)
 	/* Ask for new archive/compression format */
 	char *format = get_repack_format();
 	if (!format) /* quit */
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	/* Construct and execute the cmd */
 	size_t n = 0, i;
@@ -1147,9 +1147,9 @@ repack_others(char **args)
 	}
 	tcmd[n] = (char *)NULL;
 
-	int exit_status = EXIT_SUCCESS;
-	if (launch_execv(tcmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
-		exit_status = EXIT_FAILURE;
+	int exit_status = FUNC_SUCCESS;
+	if (launch_execv(tcmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
+		exit_status = FUNC_FAILURE;
 
 	for (i = 0; tcmd[i]; i++)
 		free(tcmd[i]);
@@ -1164,14 +1164,14 @@ list_mounted_files(char *mountpoint)
 {
 	if (xchdir(mountpoint, SET_TITLE) == -1) {
 		xerror("archiver: '%s': %s\n", mountpoint, strerror(errno));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	free(workspaces[cur_ws].path);
 	workspaces[cur_ws].path = savestring(mountpoint, strlen(mountpoint)); /* NOLINT */
 	add_to_jumpdb(workspaces[cur_ws].path);
 
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 	if (conf.autols == 1) {
 		reload_dirlist();
 		add_to_dirhist(workspaces[cur_ws].path);
@@ -1183,7 +1183,7 @@ list_mounted_files(char *mountpoint)
 static int
 mount_others(char **args)
 {
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 	size_t files_num = 0, i;
 	for (i = 1; args[i]; i++)
 		files_num++;
@@ -1195,7 +1195,7 @@ mount_others(char **args)
 
 		/* Construct and execute cmd */
 		char *cmd[] = {"archivemount", args[i], mountpoint, NULL};
-		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
+		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS) {
 			free(mountpoint);
 			continue;
 		}
@@ -1208,8 +1208,8 @@ mount_others(char **args)
 			continue;
 		}
 
-		if (list_mounted_files(mountpoint) == EXIT_FAILURE)
-			exit_status = EXIT_FAILURE;
+		if (list_mounted_files(mountpoint) == FUNC_FAILURE)
+			exit_status = FUNC_FAILURE;
 		free(mountpoint);
 	}
 
@@ -1234,14 +1234,14 @@ decompress_others(char **args)
 	default: break;
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
 decompress_files(char **args)
 {
 	if (check_not_compressed(args) == 1)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	/* # ISO 9660 # */
 	const char *ret = strrchr(args[1], '.');
@@ -1269,7 +1269,7 @@ int
 archiver(char **args, const char mode)
 {
 	if (!args[1])
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	if (mode == 'c')
 		return compress_files(args);

@@ -383,7 +383,7 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 	open_in_foreground = 1;
 	const int exit_status = open_file(f);
 	open_in_foreground = 0;
-	if (exit_status != EXIT_SUCCESS)
+	if (exit_status != FUNC_SUCCESS)
 		goto ERROR;
 
 	fp = open_fread(f, &fd);
@@ -501,7 +501,7 @@ bleach_files(char **names)
 {
 	if (!names || !names[1] || IS_HELP(names[1])) {
 		puts(_(BLEACH_USAGE));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	struct bleach_t *bfiles = (struct bleach_t *)NULL;
@@ -553,7 +553,7 @@ bleach_files(char **names)
 
 	if (f == 0 || !bfiles) {
 		printf(_("%s: Nothing to do\n"), FUNC_NAME);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	int rename = 0;
@@ -605,7 +605,7 @@ CONFIRM:
 		free(bfiles[0].replacement);
 		free(bfiles);
 		printf(_("%s: Nothing to do\n"), FUNC_NAME);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (edited_names == -1) { /* ERROR */
@@ -614,7 +614,7 @@ CONFIRM:
 			free(bfiles[i].replacement);
 		}
 		free(bfiles);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	/* The user entered 'e' to edit the file, but nothing was modified
@@ -628,7 +628,7 @@ CONFIRM:
 				free(bfiles[i].replacement);
 			}
 			free(bfiles);
-			return EXIT_SUCCESS;
+			return FUNC_SUCCESS;
 		}
 	}
 
@@ -638,7 +638,7 @@ CONFIRM:
 
 	int total_rename = rename == 1 ? (int)f : 0;
 	size_t rep_suffix = 1;
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 
 	for (i = 0; i < f; i++) {
 		char *o = bfiles[i].original ? bfiles[i].original : (char *)NULL;
@@ -658,7 +658,7 @@ CONFIRM:
 			if (renameat(XAT_FDCWD, o, XAT_FDCWD, r) == -1) {
 				xerror("bleach: renameat: '%s': %s\n", o, strerror(errno));
 				total_rename--;
-				exit_status = EXIT_FAILURE;
+				exit_status = FUNC_FAILURE;
 			}
 		}
 
@@ -668,7 +668,7 @@ CONFIRM:
 
 	free(bfiles);
 
-	if (exit_status == EXIT_FAILURE || total_rename == 0) {
+	if (exit_status == FUNC_FAILURE || total_rename == 0) {
 		printf(_("%s: %d file(s) bleached\n"), FUNC_NAME, total_rename);
 	} else {
 #ifdef GENERIC_FS_MONITOR

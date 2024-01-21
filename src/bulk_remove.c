@@ -51,7 +51,7 @@ parse_bulk_remove_params(char *s1, char *s2, char **app, char **target)
 	if (!s1 || !*s1) { /* No parameters */
 		/* TARGET defaults to CWD and APP to default associated app */
 		*target = workspaces[cur_ws].path;
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 #define BULK_APP(s) ((*(s) == ':' && (s)[1]) ? (s) + 1 : (s))
@@ -72,7 +72,7 @@ parse_bulk_remove_params(char *s1, char *s2, char **app, char **target)
 		*target = workspaces[cur_ws].path;
 		*app = BULK_APP(s1);
 		free(p);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	/* S1 is a valid directory */
@@ -82,13 +82,13 @@ parse_bulk_remove_params(char *s1, char *s2, char **app, char **target)
 	*target = s1;
 
 	if (!s2 || !*s2) /* No S2. APP defaults to default associated app */
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	char *p = get_cmd_path(BULK_APP(s2));
 	if (p) { /* S2 is a valid application name */
 		*app = BULK_APP(s2);
 		free(p);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	/* S2 is not a valid application name */
@@ -110,7 +110,7 @@ create_tmp_file(char **file, int *fd, struct stat *attr)
 	if (*fd == -1) {
 		xerror("rr: mkstemp: '%s': %s\n", *file, strerror(errno));
 		free(*file);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	if (fstat(*fd, attr) == -1) {
@@ -118,10 +118,10 @@ create_tmp_file(char **file, int *fd, struct stat *attr)
 		unlink(*file);
 		close(*fd);
 		free(*file);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static char
@@ -210,18 +210,18 @@ write_files_to_tmp(struct dirent ***a, filesn_t *n, const char *target,
 	}
 
 	fclose(fp);
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 
 EMPTY_DIR:
 	xerror(_("rr: '%s': Directory empty\n"), target);
 	fclose(fp);
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 }
 
 static int
 open_tmp_file(struct dirent ***a, const filesn_t n, char *tmpfile, char *app)
 {
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 	filesn_t i;
 
 	if (!app || !*app) {
@@ -229,8 +229,8 @@ open_tmp_file(struct dirent ***a, const filesn_t n, char *tmpfile, char *app)
 		exit_status = open_file(tmpfile);
 		open_in_foreground = 0;
 
-		if (exit_status == EXIT_SUCCESS)
-			return EXIT_SUCCESS;
+		if (exit_status == FUNC_SUCCESS)
+			return FUNC_SUCCESS;
 
 		xerror(_("rr: '%s': Cannot open file\n"), tmpfile);
 		goto END;
@@ -239,8 +239,8 @@ open_tmp_file(struct dirent ***a, const filesn_t n, char *tmpfile, char *app)
 	char *cmd[] = {app, tmpfile, NULL};
 	exit_status = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 
-	if (exit_status == EXIT_SUCCESS)
-		return EXIT_SUCCESS;
+	if (exit_status == FUNC_SUCCESS)
+		return FUNC_SUCCESS;
 
 END:
 	for (i = 0; i < n && *a && (*a)[i]; i++)
@@ -395,7 +395,7 @@ nothing_to_do(char **tmp_file, struct dirent ***a,
 	free(*tmp_file);
 	free_dirent(a, n);
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 int
@@ -403,7 +403,7 @@ bulk_remove(char *s1, char *s2)
 {
 	if (s1 && IS_HELP(s1)) {
 		puts(_(RR_USAGE));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	char *app = (char *)NULL;
@@ -411,12 +411,12 @@ bulk_remove(char *s1, char *s2)
 	int fd = 0, ret = 0, i = 0;
 	filesn_t n = 0;
 
-	if ((ret = parse_bulk_remove_params(s1, s2, &app, &target)) != EXIT_SUCCESS)
+	if ((ret = parse_bulk_remove_params(s1, s2, &app, &target)) != FUNC_SUCCESS)
 		return ret;
 
 	struct stat attr;
 	char *tmp_file = (char *)NULL;
-	if ((ret = create_tmp_file(&tmp_file, &fd, &attr)) != EXIT_SUCCESS)
+	if ((ret = create_tmp_file(&tmp_file, &fd, &attr)) != FUNC_SUCCESS)
 		return ret;
 
 	const time_t old_mtime = attr.st_mtime;
@@ -424,17 +424,17 @@ bulk_remove(char *s1, char *s2)
 	const dev_t old_dev = attr.st_dev;
 
 	struct dirent **a = (struct dirent **)NULL;
-	if ((ret = write_files_to_tmp(&a, &n, target, tmp_file)) != EXIT_SUCCESS)
+	if ((ret = write_files_to_tmp(&a, &n, target, tmp_file)) != FUNC_SUCCESS)
 		goto END;
 
-	if ((ret = open_tmp_file(&a, n, tmp_file, app)) != EXIT_SUCCESS)
+	if ((ret = open_tmp_file(&a, n, tmp_file, app)) != FUNC_SUCCESS)
 		goto END;
 
 	/* Make sure the tmp file we're about to read is the same as the one
 	 * we originally created. */
 	if (lstat(tmp_file, &attr) == -1 || !S_ISREG(attr.st_mode)
 	|| attr.st_ino != old_ino || attr.st_dev != old_dev) {
-		ret = EXIT_FAILURE;
+		ret = FUNC_FAILURE;
 		xerror("%s\n", _("rr: Temporary file changed on disk! Aborting."));
 		free_dirent(&a, n);
 		goto END;

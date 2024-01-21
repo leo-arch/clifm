@@ -236,7 +236,7 @@ static int
 gen_shell_cmd_comp(char *cmd)
 {
 	if (!cmd || !*cmd || !data_dir || !*data_dir)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	char manpage_parser_file[PATH_MAX + 1];
 	snprintf(manpage_parser_file, sizeof(manpage_parser_file),
@@ -254,7 +254,7 @@ get_shell_cmd_opts(char *cmd)
 	*ext_opts[0] = '\0';
 	if (!cmd || !*cmd || !user.home
 	|| (conf.suggestions == 1 && wrong_cmd == 1))
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	char p[PATH_MAX + 1];
 	snprintf(p, sizeof(p), "%s/.local/share/%s/completions/%s.clifm",
@@ -263,14 +263,14 @@ get_shell_cmd_opts(char *cmd)
 	struct stat a;
 	if (stat(p, &a) == -1) {
 		/* Comp file does not exist. Try to generate via manpages_comp_gen.py */
-		if (gen_shell_cmd_comp(cmd) != EXIT_SUCCESS || stat(p, &a) == -1)
-			return EXIT_FAILURE;
+		if (gen_shell_cmd_comp(cmd) != FUNC_SUCCESS || stat(p, &a) == -1)
+			return FUNC_FAILURE;
 	}
 
 	int fd;
 	FILE *fp = open_fread(p, &fd);
 	if (!fp)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	int n = 0;
 	char line[NAME_MAX]; *line = '\0';
@@ -935,7 +935,7 @@ alt_rl_prompt(const char *_prompt, const char *line)
 	conf.highlight = highlight_bk;
 	kbind_busy = 0;
 	rl_getc_function = my_rl_getc;
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 char *
@@ -2390,7 +2390,7 @@ rl_glob(char *text)
 	char *tmp = expand_tilde_glob(text);
 	glob_t globbuf;
 
-	if (glob(tmp ? tmp : text, 0, NULL, &globbuf) != EXIT_SUCCESS) {
+	if (glob(tmp ? tmp : text, 0, NULL, &globbuf) != FUNC_SUCCESS) {
 		globfree(&globbuf);
 		free(tmp);
 		return (char **)NULL;
@@ -3240,7 +3240,7 @@ is_edit(const char *str, const size_t words_n)
 static char **
 complete_bookmark_names(char *text, const size_t words_n, int *exit_status)
 {
-	*exit_status = EXIT_SUCCESS;
+	*exit_status = FUNC_SUCCESS;
 
 	// rl_line_buffer is either "bm " or "bookmarks "
 	char *q = rl_line_buffer + (rl_line_buffer[1] == 'o' ? 9 : 2);
@@ -3250,7 +3250,7 @@ complete_bookmark_names(char *text, const size_t words_n, int *exit_status)
 		if (words_n > 3) // Do not complete anything after "bm add FILE"
 			rl_attempted_completion_over = 1;
 		else // 'bm add': complete with path completion
-			*exit_status = EXIT_FAILURE;
+			*exit_status = FUNC_FAILURE;
 
 		return (char **)NULL;
 	}
@@ -3275,7 +3275,7 @@ complete_bookmark_names(char *text, const size_t words_n, int *exit_status)
 static char **
 complete_dirjump_jo(char *text, const int n, int *exit_status)
 {
-	*exit_status = EXIT_FAILURE;
+	*exit_status = FUNC_FAILURE;
 	char *lb = rl_line_buffer;
 
 	if (*lb != 'j' || lb[1] != 'o' || lb[2] != ' ')
@@ -3293,7 +3293,7 @@ complete_dirjump_jo(char *text, const int n, int *exit_status)
 
 	cur_comp_type = TCMP_PATH;
 	rl_filename_completion_desired = 1;
-	*exit_status = EXIT_SUCCESS;
+	*exit_status = FUNC_SUCCESS;
 
 	return matches;
 } */
@@ -3301,7 +3301,7 @@ complete_dirjump_jo(char *text, const int n, int *exit_status)
 static char **
 complete_ranges(char *text, int *exit_status)
 {
-	*exit_status = EXIT_FAILURE;
+	*exit_status = FUNC_FAILURE;
 	char *r = strchr(text, '-');
 	if (!r || *(r + 1) < '0' || *(r + 1) > '9')
 		return (char **)NULL;
@@ -3323,7 +3323,7 @@ complete_ranges(char *text, int *exit_status)
 	if (!matches)
 		return (char **)NULL;
 
-	*exit_status = EXIT_SUCCESS;
+	*exit_status = FUNC_SUCCESS;
 	cur_comp_type = TCMP_RANGES;
 	return matches;
 }
@@ -3353,7 +3353,7 @@ complete_open_with(char *text)
 static char **
 complete_file_type_filter(char *text, int *exit_status)
 {
-	*exit_status = EXIT_FAILURE;
+	*exit_status = FUNC_FAILURE;
 	char **matches = (char **)NULL;
 
 	if (!*(text + 1)) {
@@ -3364,7 +3364,7 @@ complete_file_type_filter(char *text, int *exit_status)
 		if (!matches[1])
 			rl_swap_fields(&matches);
 
-		*exit_status = EXIT_SUCCESS;
+		*exit_status = FUNC_SUCCESS;
 		cur_comp_type = TCMP_FILE_TYPES_OPTS;
 		return matches;
 	}
@@ -3381,7 +3381,7 @@ complete_file_type_filter(char *text, int *exit_status)
 	else
 		flags |= MULTI_SEL;
 
-	*exit_status = EXIT_SUCCESS;
+	*exit_status = FUNC_SUCCESS;
 	cur_comp_type = TCMP_FILE_TYPES_FILES;
 	return matches;
 }
@@ -3390,7 +3390,7 @@ complete_file_type_filter(char *text, int *exit_status)
 static char **
 complete_mime_type_filter(char *text, int *exit_status)
 {
-	*exit_status = EXIT_FAILURE;
+	*exit_status = FUNC_FAILURE;
 	char **matches = (char **)NULL;
 
 	if (*(text + 1)) {
@@ -3400,14 +3400,14 @@ complete_mime_type_filter(char *text, int *exit_status)
 		cur_comp_type = TCMP_MIME_FILES; // Same as TCMP_FILE_TYPES_FILES
 		rl_filename_completion_desired = 1;
 		flags |= MULTI_SEL;
-		*exit_status = EXIT_SUCCESS;
+		*exit_status = FUNC_SUCCESS;
 		return matches;
 	}
 
 	if ((matches = rl_mime_list()) == NULL)
 		return (char **)NULL;
 
-	*exit_status = EXIT_SUCCESS;
+	*exit_status = FUNC_SUCCESS;
 	cur_comp_type = TCMP_MIME_LIST;
 	return matches;
 }
@@ -3416,7 +3416,7 @@ complete_mime_type_filter(char *text, int *exit_status)
 static char **
 complete_glob(char *text, int *exit_status)
 {
-	*exit_status = EXIT_FAILURE;
+	*exit_status = FUNC_FAILURE;
 	char **matches = (char **)NULL;
 
 	char *p = (*rl_line_buffer == '/' && rl_end > 1
@@ -3441,14 +3441,14 @@ complete_glob(char *text, int *exit_status)
 	if (words_num > 1)
 		flags |= MULTI_SEL;
 
-	*exit_status = EXIT_SUCCESS;
+	*exit_status = FUNC_SUCCESS;
 	return matches;
 }
 
 static char **
 complete_shell_cmd_opts(char *text, int *exit_status)
 {
-	*exit_status = EXIT_FAILURE;
+	*exit_status = FUNC_FAILURE;
 	char **matches = (char **)NULL;
 
 	char lw[NAME_MAX + 1]; *lw = '\0'; /* Last word before the dash */
@@ -3463,7 +3463,7 @@ complete_shell_cmd_opts(char *text, int *exit_status)
 
 	if (*lw && get_shell_cmd_opts(lw) > 0
 	&& (matches = rl_completion_matches(text, &ext_options_generator)) ) {
-		*exit_status = EXIT_SUCCESS;
+		*exit_status = FUNC_SUCCESS;
 		return matches;
 	}
 
@@ -3474,7 +3474,7 @@ complete_shell_cmd_opts(char *text, int *exit_status)
 static char **
 complete_tag_names(char *text, int *exit_status)
 {
-	*exit_status = EXIT_FAILURE;
+	*exit_status = FUNC_FAILURE;
 	char **matches = (char **)NULL;
 
 	int comp = tag_complete(text);
@@ -3488,7 +3488,7 @@ complete_tag_names(char *text, int *exit_status)
 			return (char **)NULL;
 		}
 
-		*exit_status = EXIT_SUCCESS;
+		*exit_status = FUNC_SUCCESS;
 		return matches;
 	}
 
@@ -3501,7 +3501,7 @@ complete_tag_names(char *text, int *exit_status)
 	if (!matches)
 		return (char **)NULL;
 
-	*exit_status = EXIT_SUCCESS;
+	*exit_status = FUNC_SUCCESS;
 	cur_comp_type = TCMP_TAGS_F;
 	return matches;
 }
@@ -3509,7 +3509,7 @@ complete_tag_names(char *text, int *exit_status)
 static char **
 complete_tag_names_t(char *text, int *exit_status)
 {
-	*exit_status = EXIT_FAILURE;
+	*exit_status = FUNC_FAILURE;
 	cur_comp_type = TCMP_TAGS_T;
 
 	char *p = unescape_str(text, 0);
@@ -3521,7 +3521,7 @@ complete_tag_names_t(char *text, int *exit_status)
 		return (char **)NULL;
 	}
 
-	*exit_status = EXIT_SUCCESS;
+	*exit_status = FUNC_SUCCESS;
 	flags |= MULTI_SEL;
 	return matches;
 }
@@ -3529,7 +3529,7 @@ complete_tag_names_t(char *text, int *exit_status)
 static char **
 complete_tagged_file_names(char *text, int *exit_status)
 {
-	*exit_status = EXIT_FAILURE;
+	*exit_status = FUNC_FAILURE;
 
 	free(cur_tag);
 	cur_tag = savestring(text + 2, strlen(text + 2));
@@ -3544,7 +3544,7 @@ complete_tagged_file_names(char *text, int *exit_status)
 	if (!matches[1])
 		rl_swap_fields(&matches);
 
-	*exit_status = EXIT_SUCCESS;
+	*exit_status = FUNC_SUCCESS;
 	cur_comp_type = TCMP_TAGS_F;
 	return matches;
 }
@@ -3559,14 +3559,14 @@ complete_bookmark_paths(char *text, int *exit_status)
 	free(p);
 
 	if (!matches) {
-		*exit_status = EXIT_FAILURE;
+		*exit_status = FUNC_FAILURE;
 		return (char **)NULL;
 	}
 
 	if (!matches[1])
 		rl_swap_fields(&matches);
 
-	*exit_status = EXIT_SUCCESS;
+	*exit_status = FUNC_SUCCESS;
 	cur_comp_type = TCMP_BM_PATHS;
 	return matches;
 }
@@ -3574,7 +3574,7 @@ complete_bookmark_paths(char *text, int *exit_status)
 static char **
 complete_bookmark_names_b(char *text, int *exit_status)
 {
-	*exit_status = EXIT_FAILURE;
+	*exit_status = FUNC_FAILURE;
 	char *p = unescape_str(text, 0);
 	char **matches = rl_completion_matches(p ? p : text, &bookmarks_generator);
 	free(p);
@@ -3584,7 +3584,7 @@ complete_bookmark_names_b(char *text, int *exit_status)
 
 	flags |= MULTI_SEL;
 	cur_comp_type = TCMP_BM_PREFIX;
-	*exit_status = EXIT_SUCCESS;
+	*exit_status = FUNC_SUCCESS;
 	return matches;
 }
 
@@ -3860,7 +3860,7 @@ complete_jump(const char *text)
 static char **
 complete_sel_keyword(const char *text, int *exit_status, const size_t words_n)
 {
-	*exit_status = EXIT_FAILURE;
+	*exit_status = FUNC_FAILURE;
 
 	if (words_n == 1 && text[1] != ':') /* Only "s:" is allowed as first word */
 		return (char **)NULL;
@@ -3872,7 +3872,7 @@ complete_sel_keyword(const char *text, int *exit_status, const size_t words_n)
 	if (!matches[1])
 		rl_swap_fields(&matches);
 
-	*exit_status = EXIT_SUCCESS;
+	*exit_status = FUNC_SUCCESS;
 	cur_comp_type = TCMP_SEL;
 	return matches;
 }
@@ -3880,7 +3880,7 @@ complete_sel_keyword(const char *text, int *exit_status, const size_t words_n)
 static char **
 complete_eln(char *text, int *exit_status, const size_t words_n)
 {
-	*exit_status = EXIT_FAILURE;
+	*exit_status = FUNC_FAILURE;
 	char **matches = (char **)NULL;
 	filesn_t n = 0;
 
@@ -3901,7 +3901,7 @@ complete_eln(char *text, int *exit_status, const size_t words_n)
 	if (!matches)
 		return (char **)NULL;
 
-	*exit_status = EXIT_SUCCESS;
+	*exit_status = FUNC_SUCCESS;
 	cur_comp_type = TCMP_ELN;
 	return matches;
 }
@@ -3928,7 +3928,7 @@ my_rl_completion(const char *text, const int start, const int end)
 	cur_comp_type = TCMP_NONE;
 	flags &= ~MULTI_SEL;
 
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 	char **matches = (char **)NULL;
 	char *lb = rl_line_buffer;
 	size_t words_n = rl_count_words();
@@ -3965,7 +3965,7 @@ my_rl_completion(const char *text, const int start, const int end)
 	/* ##### ELN EXPANSION ##### */
 	if (escaped == 0 && *text >= '1' && *text <= '9') {
 		matches = complete_eln((char *)text, &exit_status, words_n);
-		if (exit_status == EXIT_SUCCESS)
+		if (exit_status == FUNC_SUCCESS)
 			return matches;
 	}
 
@@ -3976,7 +3976,7 @@ my_rl_completion(const char *text, const int start, const int end)
 	/* #### FILE TYPE EXPANSION #### */
 	if (*text == '=') {
 		matches = complete_file_type_filter((char *)text, &exit_status);
-		if (exit_status == EXIT_SUCCESS)
+		if (exit_status == FUNC_SUCCESS)
 			return matches;
 	}
 
@@ -3984,7 +3984,7 @@ my_rl_completion(const char *text, const int start, const int end)
 	/* #### MIME TYPE EXPANSION #### */
 	if (*text == '@') {
 		matches = complete_mime_type_filter((char *)text, &exit_status);
-		if (exit_status == EXIT_SUCCESS)
+		if (exit_status == FUNC_SUCCESS)
 			return matches;
 	}
 #endif /* !_NO_MAGIC */
@@ -4006,7 +4006,7 @@ my_rl_completion(const char *text, const int start, const int end)
 	&& *(rl_line_buffer + 1) == '*') && !strchr(g, '/')
 	&& access(text, F_OK) != 0) {
 		matches = complete_glob((char *)text, &exit_status);
-		if (exit_status == EXIT_SUCCESS)
+		if (exit_status == FUNC_SUCCESS)
 			return matches;
 	}
 
@@ -4035,14 +4035,14 @@ my_rl_completion(const char *text, const int start, const int end)
 	if (tags_n > 0 && *text == 't'
 	&& text[1] == ':' && text[2]) {
 		matches = complete_tagged_file_names((char *)text, &exit_status);
-		if (exit_status == EXIT_SUCCESS)
+		if (exit_status == FUNC_SUCCESS)
 			return matches;
 	}
 
 	/* ##### 2. TAG NAMES (t:<TAB>) ##### */
 	if (tags_n > 0 && *text == 't' && text[1] == ':') {
 		matches = complete_tag_names_t((char *)text, &exit_status);
-		if (exit_status == EXIT_SUCCESS)
+		if (exit_status == FUNC_SUCCESS)
 			return matches;
 	}
 #endif /* !_NO_TAGS */
@@ -4050,7 +4050,7 @@ my_rl_completion(const char *text, const int start, const int end)
 	/* #### BOOKMARK PATH (b:FULLNAME) #### */
 	if (*text == 'b' && text[1] == ':' && text[2]) {
 		matches = complete_bookmark_paths((char *)text, &exit_status);
-		if (exit_status == EXIT_SUCCESS)
+		if (exit_status == FUNC_SUCCESS)
 			return matches;
 	}
 
@@ -4058,7 +4058,7 @@ my_rl_completion(const char *text, const int start, const int end)
 	if ((words_n > 1 || conf.autocd == 1 || conf.auto_open == 1)
 	&& *text == 'b' && text[1] == ':') {
 		matches = complete_bookmark_names_b((char *)text, &exit_status);
-		if (exit_status == EXIT_SUCCESS)
+		if (exit_status == FUNC_SUCCESS)
 			return matches;
 	}
 
@@ -4066,7 +4066,7 @@ my_rl_completion(const char *text, const int start, const int end)
 	if (sel_n > 0 && *text == 's' && (text[1] == ':'
 	|| strcmp(text + 1, "el") == 0)) {
 		matches = complete_sel_keyword(text, &exit_status, words_n);
-		if (exit_status == EXIT_SUCCESS)
+		if (exit_status == FUNC_SUCCESS)
 			return matches;
 	}
 
@@ -4173,7 +4173,7 @@ FIRST_WORD_COMP:
 	/* 't? TAG' and 't? :tag' */
 	if (tags_n > 0 && *lb == 't' && rl_end > 2) {
 		matches = complete_tag_names((char *)text, &exit_status);
-		if (exit_status == EXIT_SUCCESS)
+		if (exit_status == FUNC_SUCCESS)
 			return matches;
 	}
 #endif /* !_NO_TAGS */
@@ -4233,7 +4233,7 @@ FIRST_WORD_COMP:
 	if (*text >= '0' && *text <= '9') {
 		/* Ranges */
 		matches = complete_ranges((char *)text, &exit_status);
-		if (exit_status == EXIT_SUCCESS)
+		if (exit_status == FUNC_SUCCESS)
 			return matches;
 
 		int n = atoi(text);
@@ -4242,7 +4242,7 @@ FIRST_WORD_COMP:
 
 		/* Dirjump: jo command */
 /*		matches = complete_dirjump_jo((char *)text, n, &exit_status);
-		if (exit_status == EXIT_SUCCESS)
+		if (exit_status == FUNC_SUCCESS)
 			return matches; */
 
 		/* Sort number */
@@ -4267,7 +4267,7 @@ FIRST_WORD_COMP:
 	if (*lb == 'b' && (lb[1] == 'm' || lb[1] == 'o')
 	&& (strncmp(lb, "bm ", 3) == 0 || strncmp(lb, "bookmarks ", 10) == 0)) {
 		matches = complete_bookmark_names((char *)text, words_n, &exit_status);
-		if (exit_status == EXIT_SUCCESS)
+		if (exit_status == FUNC_SUCCESS)
 			return matches;
 	}
 
@@ -4313,7 +4313,7 @@ FIRST_WORD_COMP:
 	/* Let's try to complete arguments for shell commands. */
 	if (*text == '-') {
 		matches = complete_shell_cmd_opts((char *)text, &exit_status);
-		if (exit_status == EXIT_SUCCESS)
+		if (exit_status == FUNC_SUCCESS)
 			return matches;
 	}
 
@@ -4387,14 +4387,14 @@ set_rl_input_file(void)
 		xerror(_("%s: An input file must be provided via the "
 			"CLIFM_TEST_INPUT_FILE environment variable\n"), PROGRAM_NAME);
 		UNHIDE_CURSOR;
-		exit(EXIT_FAILURE);
+		exit(FUNC_FAILURE);
 	}
 
 	FILE *fstream = fopen(input_file, "r");
 	if (!fstream) {
 		xerror("%s: '%s': %s\n", PROGRAM_NAME, input_file, strerror(errno));
 		UNHIDE_CURSOR;
-		exit(EXIT_FAILURE);
+		exit(FUNC_FAILURE);
 	}
 
 	rl_instream = fstream;
@@ -4409,7 +4409,7 @@ initialize_readline(void)
 #endif /* CLIFM_TEST_INPUT */
 
 #ifdef VANILLA_READLINE
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 #endif /* VANILLA_READLINE */
 
 	/* Set the name of the program using readline. Mostly used for
@@ -4494,5 +4494,5 @@ initialize_readline(void)
 	quote_chars = savestring(rl_filename_quote_characters,
 	    strlen(rl_filename_quote_characters));
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }

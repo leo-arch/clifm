@@ -98,12 +98,12 @@ umask_function(char *arg)
 		const mode_t old_umask = umask(0);
 		printf("%04o\n", old_umask);
 		umask(old_umask);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (IS_HELP(arg)) {
 		puts(UMASK_USAGE);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (!IS_DIGIT(*arg) || !is_number(arg))
@@ -115,11 +115,11 @@ umask_function(char *arg)
 
 	umask((mode_t)new_umask);
 	printf(_("File-creation mask set to '%04o'\n"), new_umask);
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 
 ERROR:
 	xerror(_("umask: %s: Out of range (valid values are 000-777)\n"), arg);
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 }
 
 #ifndef _NO_LIRA
@@ -127,7 +127,7 @@ static int
 run_mime(char *file)
 {
 	if (!file || !*file)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	if (xargs.preview == 1 || xargs.open == 1)
 		goto RUN;
@@ -162,9 +162,9 @@ int
 open_file(char *file)
 {
 	if (!file || !*file)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
-	int ret = EXIT_SUCCESS;
+	int ret = FUNC_SUCCESS;
 
 	if (conf.opener) {
 		if (*conf.opener == 'g' && strcmp(conf.opener, "gio") == 0) {
@@ -199,13 +199,13 @@ xchmod(const char *file, const char *mode_str, const int flag)
 	if (!file || !*file) {
 		err(flag == 1 ? 'e' : 0, flag == 1 ? PRINT_PROMPT : NOPRINT_PROMPT,
 			_("xchmod: Empty buffer for file name\n"));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	if (!mode_str || !*mode_str) {
 		err(flag == 1 ? 'e' : 0, flag == 1 ? PRINT_PROMPT : NOPRINT_PROMPT,
 			_("xchmod: Empty buffer for mode\n"));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	const int fd = open(file, O_RDONLY);
@@ -224,7 +224,7 @@ xchmod(const char *file, const char *mode_str, const int flag)
 	}
 
 	close(fd);
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Toggle executable bits on the file named FILE. */
@@ -237,10 +237,10 @@ toggle_exec(const char *file, mode_t mode)
 	if (fchmodat(XAT_FDCWD, file, mode, 0) == -1) {
 		xerror(_("te: Changing permissions of '%s': %s\n"),
 			file, strerror(errno));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static char *
@@ -305,12 +305,12 @@ dup_file(char **cmd)
 {
 	if (!cmd[1] || IS_HELP(cmd[1])) {
 		puts(_(DUP_USAGE));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	char *dest_dir = get_dup_file_dest_dir();
 	if (!dest_dir)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	size_t dlen = strlen(dest_dir);
 	if (dlen > 1 && dest_dir[dlen - 1] == '/') {
@@ -319,7 +319,7 @@ dup_file(char **cmd)
 	}
 
 	char *rsync_path = get_cmd_path("rsync");
-	int exit_status =  EXIT_SUCCESS;
+	int exit_status =  FUNC_SUCCESS;
 
 	size_t i;
 	for (i = 1; cmd[i]; i++) {
@@ -365,7 +365,7 @@ dup_file(char **cmd)
 		xstrsncpy(bk, tmp_dest, sizeof(bk));
 		struct stat attr;
 		size_t suffix = 1;
-		while (stat(bk, &attr) == EXIT_SUCCESS) {
+		while (stat(bk, &attr) == FUNC_SUCCESS) {
 			snprintf(bk, sizeof(bk), "%s-%zu", tmp_dest, suffix);
 			suffix++;
 		}
@@ -378,8 +378,8 @@ dup_file(char **cmd)
 		if (rsync_path) {
 			char *_cmd[] = {"rsync", "-aczvAXHS", "--progress", "--",
 				source, dest, NULL};
-			if (launch_execv(_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
-				exit_status = EXIT_FAILURE;
+			if (launch_execv(_cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
+				exit_status = FUNC_FAILURE;
 		} else {
 #ifdef _BE_POSIX
 			char *_cmd[] = {"cp", "--", source, dest, NULL};
@@ -392,8 +392,8 @@ dup_file(char **cmd)
 #else
 			char *_cmd[] = {"cp", "-a", "--", source, dest, NULL};
 #endif /* _BE_POSIX */
-			if (launch_execv(_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
-				exit_status = EXIT_FAILURE;
+			if (launch_execv(_cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
+				exit_status = FUNC_FAILURE;
 		}
 
 		free(dest);
@@ -407,14 +407,14 @@ dup_file(char **cmd)
 /* Create the file named NAME, as a directory, if ending wit a slash, or as
  * a regular file otherwise.
  * Parent directories are created if they do not exist.
- * Returns EXIT_SUCCESS on success or EXIT_FAILURE on error. */
+ * Returns FUNC_SUCCESS on success or FUNC_FAILURE on error. */
 static int
 create_file(char *name)
 {
 	struct stat a;
 	char *ret = (char *)NULL;
 	char *n = name;
-	int status = EXIT_SUCCESS;
+	int status = FUNC_SUCCESS;
 
 	/* Dir creation mode (777, or 700 if running in secure-mode). mkdir(3) will
 	 * modify this according to the current umask value. */
@@ -433,7 +433,7 @@ create_file(char *name)
 		errno = 0;
 		if (mkdirat(XAT_FDCWD, name, mode) == -1) {
 			xerror("new: '%s': %s\n", name, strerror(errno));
-			status = EXIT_FAILURE;
+			status = FUNC_FAILURE;
 			break;
 		}
 
@@ -442,7 +442,7 @@ CONT:
 		n = ret + 1;
 	}
 
-	if (*n && status != EXIT_FAILURE) { /* Regular file */
+	if (*n && status != FUNC_FAILURE) { /* Regular file */
 		/* Regular file creation mode (666, or 600 in secure-mode). open(2)
 		 * will modify this according to the current umask value. */
 		if (xargs.secure_env == 1 || xargs.secure_env_full == 1)
@@ -453,7 +453,7 @@ CONT:
 		const int fd = open(name, O_WRONLY | O_CREAT | O_EXCL, mode);
 		if (fd == -1) {
 			xerror("new: '%s': %s\n", name, strerror(errno));
-			status = EXIT_FAILURE;
+			status = FUNC_FAILURE;
 		} else {
 			close(fd);
 		}
@@ -591,7 +591,7 @@ is_valid_filename(char *name)
 	}
 
 #ifdef _BE_POSIX
-	if (is_portable_filename(name, (size_t)(s - name)) != EXIT_SUCCESS) {
+	if (is_portable_filename(name, (size_t)(s - name)) != FUNC_SUCCESS) {
 		printf("%s: %s\n", name, unsafe_name_msgs[UNSAFE_NOT_PORTABLE]);
 		return 0;
 	}
@@ -664,7 +664,7 @@ format_new_filename(char **name)
 		p = remove_quotes(*name);
 
 	if (!p || !*p)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	const size_t flen = strlen(p);
 	const int is_dir = (flen > 1 && p[flen - 1] == '/') ? 1 : 0;
@@ -686,14 +686,14 @@ format_new_filename(char **name)
 	}
 
 	if (!npath)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	const size_t name_len = strlen(npath) + 2;
 	*name = xnrealloc(*name, name_len, sizeof(char));
 	snprintf(*name, name_len, "%s%c", npath, is_dir == 1 ? '/' : 0);
 	free(npath);
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -711,7 +711,7 @@ err_file_exists(char *name, const int multi, const int is_md)
 	if (multi == 1)
 		press_any_key_to_continue(0);
 
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 }
 
 /* Ask the user for a new file name and create the file. */
@@ -726,19 +726,19 @@ ask_and_create_file(void)
 	int quoted = 0;
 	char *filename = get_newname(_prompt, (char *)NULL, &quoted);
 	if (!filename) /* The user pressed Ctrl-d */
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	if (validate_filename(&filename, 0) == 0) {
 		xerror(_("new: '%s': Unsafe file name\n"), filename);
 		if (rl_get_y_or_n(_("Continue? [y/n] ")) == 0) {
 			free(filename);
-			return EXIT_SUCCESS;
+			return FUNC_SUCCESS;
 		}
 	}
 
 	int exit_status = quoted == 0 ? format_new_filename(&filename)
-		: EXIT_SUCCESS;
-	if (exit_status == EXIT_FAILURE)
+		: FUNC_SUCCESS;
+	if (exit_status != FUNC_SUCCESS)
 		goto ERROR;
 
 	struct stat a;
@@ -748,7 +748,7 @@ ask_and_create_file(void)
 	}
 
 	exit_status = create_file(filename);
-	if (exit_status == EXIT_SUCCESS) {
+	if (exit_status == FUNC_SUCCESS) {
 		char *f[] = { filename, (char *)NULL };
 		list_created_files(f, 1);
 	}
@@ -788,10 +788,10 @@ create_files(char **args, const int is_md)
 {
 	if (args[0] && IS_HELP(args[0])) {
 		puts(_(NEW_USAGE));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 	size_t i;
 
 	/* If no argument provided, ask the user for a filename, create it and exit. */
@@ -816,8 +816,8 @@ create_files(char **args, const int is_md)
 		}
 
 		/* Properly format filename. */
-		if (format_new_filename(&args[i]) == EXIT_FAILURE) {
-			exit_status = EXIT_FAILURE;
+		if (format_new_filename(&args[i]) == FUNC_FAILURE) {
+			exit_status = FUNC_FAILURE;
 			continue;
 		}
 
@@ -828,11 +828,11 @@ create_files(char **args, const int is_md)
 		}
 
 		const int ret = create_file(args[i]);
-		if (ret == EXIT_SUCCESS) {
+		if (ret == FUNC_SUCCESS) {
 			new_files[new_files_n] = args[i];
 			new_files_n++;
 		} else if (argsn > 1) {
-			exit_status = EXIT_FAILURE;
+			exit_status = FUNC_FAILURE;
 			press_any_key_to_continue(0);
 		}
 	}
@@ -853,7 +853,7 @@ create_dirs(char **args)
 {
 	if (!args[0] || IS_HELP(args[0])) {
 		puts(_(MD_USAGE));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	/* Append an ending slash to all names, so that create_files() will create
@@ -895,11 +895,11 @@ int
 open_function(char **cmd)
 {
 	if (!cmd)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	if (!cmd[1] || IS_HELP(cmd[1])) {
 		puts(_(OPEN_USAGE));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	const char *const errname = "lira";
@@ -910,7 +910,7 @@ open_function(char **cmd)
 			if (!deq_path) {
 				xerror(_("%s: '%s': Error unescaping file name\n"),
 					errname, cmd[1]);
-				return EXIT_FAILURE;
+				return FUNC_FAILURE;
 			}
 
 			xstrsncpy(cmd[1], deq_path, strlen(deq_path) + 1);
@@ -985,7 +985,7 @@ open_function(char **cmd)
 	if (no_open_file == 1) {
 		xerror(_("%s: '%s' (%s): Cannot open file\nTry "
 			"'APP FILE' or 'open FILE APP'\n"), errname, cmd[1], file_type);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	/* At this point we know that the file to be openend is either a regular
@@ -999,8 +999,8 @@ open_function(char **cmd)
 	const int ret =
 		launch_execv(tmp_cmd, bg_proc ? BACKGROUND : FOREGROUND, E_NOSTDERR);
 
-	if (ret == EXIT_SUCCESS)
-		return EXIT_SUCCESS;
+	if (ret == FUNC_SUCCESS)
+		return FUNC_SUCCESS;
 
 	if (ret == E_NOEXEC) /* EACCESS && ENOEXEC */
 		xerror("%s: %s: %s\n", errname, cmd[2], NOEXEC_MSG);
@@ -1064,7 +1064,7 @@ edit_link(char *link)
 {
 	if (!link || !*link || IS_HELP(link)) {
 		puts(LE_USAGE);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	/* Dequote the file name, if necessary. */
@@ -1072,7 +1072,7 @@ edit_link(char *link)
 		char *tmp = unescape_str(link, 0);
 		if (!tmp) {
 			xerror(_("le: '%s': Error unescaping file name\n"), link);
-			return EXIT_FAILURE;
+			return FUNC_FAILURE;
 		}
 
 		xstrsncpy(link, tmp, strlen(tmp) + 1);
@@ -1087,12 +1087,12 @@ edit_link(char *link)
 	struct stat attr;
 	if (lstat(link, &attr) == -1) {
 		xerror("le: '%s': %s\n", link, strerror(errno));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	if (!S_ISLNK(attr.st_mode)) {
 		xerror(_("le: '%s': Not a symbolic link\n"), link);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	/* Get file pointed to by symlink and report to the user */
@@ -1107,18 +1107,18 @@ edit_link(char *link)
 	if (new_path && strcmp(new_path, target) == 0) {
 		free(new_path);
 		puts(_("le: Nothing to do"));
-		return (EXIT_SUCCESS);
+		return (FUNC_SUCCESS);
 	}
 
 	if (!new_path) /* The user pressed C-d */
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	/* Check new_path existence and warn the user if it does not exist. */
 	if (lstat(new_path, &attr) == -1) {
 		xerror("'%s': %s\n", new_path, strerror(errno));
 		if (rl_get_y_or_n(_("Relink as broken symbolic link? [y/n] ")) == 0) {
 			free(new_path);
-			return EXIT_SUCCESS;
+			return FUNC_SUCCESS;
 		}
 	}
 
@@ -1128,7 +1128,7 @@ edit_link(char *link)
 		free(new_path);
 		xerror(_("le: Cannot relink symbolic link '%s': %s\n"),
 			link, strerror(errno));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	printf(_("'%s' relinked to "), link);
@@ -1136,7 +1136,7 @@ edit_link(char *link)
 	colors_list(new_path, NO_ELN, NO_PAD, PRINT_NEWLINE);
 	free(new_path);
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Create a symbolic link to ARGS[0] named ARGS[1]. If args[1] is not specified,
@@ -1147,7 +1147,7 @@ symlink_file(char **args)
 {
 	if (!args[0] || !*args[0] || IS_HELP(args[0])) {
 		puts(LINK_USAGE);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	size_t len = strlen(args[0]);
@@ -1188,24 +1188,24 @@ symlink_file(char **args)
 	if (lstat(target, &a) == -1) {
 		printf("link: '%s': %s\n", target, strerror(errno));
 		if (rl_get_y_or_n(_("Create broken symbolic link? [y/n] ")) == 0)
-			return EXIT_SUCCESS;
+			return FUNC_SUCCESS;
 	}
 
 	if (lstat(link_name, &a) != -1 && S_ISLNK(a.st_mode)) {
 		printf("link: '%s': %s\n", link_name, strerror(EEXIST));
 		if (rl_get_y_or_n(_("Overwrite this file? [y/n] ")) == 0)
-			return EXIT_SUCCESS;
+			return FUNC_SUCCESS;
 
 		if (unlinkat(XAT_FDCWD, link_name, 0) == -1) {
 			xerror("link: '%s': %s\n", link_name, strerror(errno));
-			return EXIT_FAILURE;
+			return FUNC_FAILURE;
 		}
 	}
 
 	char *abs_path = normalize_path(target, strlen(target));
 	if (!abs_path) {
 		xerror(_("link: '%s': Error getting absolute path\n"), target);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	const int ret = symlinkat(abs_path, XAT_FDCWD, link_name);
@@ -1214,10 +1214,10 @@ symlink_file(char **args)
 	if (ret == -1) {
 		xerror(_("link: Cannot create symbolic link '%s': %s\n"),
 			link_name, strerror(errno));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -1261,26 +1261,26 @@ validate_vv_dest_dir(const char *file)
 {
 	if (args_n == 0) {
 		fprintf(stderr, "%s\n", VV_USAGE);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	struct stat a;
 	if (stat(file, &a) == -1) {
 		xerror("vv: '%s': %s\n", file, strerror(errno));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	if (!S_ISDIR(a.st_mode)) {
 		xerror(_("vv: '%s': Not a directory\n"), file);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	if (strcmp(workspaces[cur_ws].path, file) == 0) {
 		xerror("%s\n", _("vv: Destiny directory is the current directory"));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static char *
@@ -1339,7 +1339,7 @@ static int
 run_cp_mv_cmd(char **cmd, const int skip_force)
 {
 	if (!cmd)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	char *new_name = (char *)NULL;
 	if (xrename == 1) {
@@ -1377,7 +1377,7 @@ run_cp_mv_cmd(char **cmd, const int skip_force)
 
 		new_name = get_new_filename(cmd[1]);
 		if (!new_name)
-			return EXIT_SUCCESS;
+			return FUNC_SUCCESS;
 	}
 
 	char **tcmd = xnmalloc(3 + args_n + 2, sizeof(char *));
@@ -1439,7 +1439,7 @@ run_cp_mv_cmd(char **cmd, const int skip_force)
 		free(tcmd[i]);
 	free(tcmd);
 
-	if (ret != EXIT_SUCCESS)
+	if (ret != FUNC_SUCCESS)
 		return ret;
 
 	/* Error messages are printed by launch_execv() itself. */
@@ -1463,7 +1463,7 @@ run_cp_mv_cmd(char **cmd, const int skip_force)
 		reload_dirlist();
 #endif /* GENERIC_FS_MONITOR */
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Launch the command associated to 'c' (also 'v' and 'vv') or 'm'
@@ -1473,8 +1473,8 @@ cp_mv_file(char **args, const int copy_and_rename, const int force)
 {
 	/* vv command */
 	if (copy_and_rename == 1
-	&& validate_vv_dest_dir(args[args_n]) == EXIT_FAILURE)
-		return EXIT_FAILURE;
+	&& validate_vv_dest_dir(args[args_n]) == FUNC_FAILURE)
+		return FUNC_FAILURE;
 
 	if (*args[0] == 'm' && args[1]) {
 		const size_t len = strlen(args[1]);
@@ -1528,7 +1528,7 @@ cp_mv_file(char **args, const int copy_and_rename, const int force)
 		free(tcmd[i]);
 	free(tcmd);
 
-	if (ret != EXIT_SUCCESS)
+	if (ret != FUNC_SUCCESS)
 		return ret;
 
 	if (copy_and_rename == 1) /* vv command */
@@ -1540,7 +1540,7 @@ cp_mv_file(char **args, const int copy_and_rename, const int force)
 	&& (!args[0][2] || args[0][2] == ' '))
 		deselect_all();
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static void
@@ -1617,7 +1617,7 @@ check_rm_files(struct rm_info *info, const size_t start, const char *errname)
 {
 	struct stat a;
 	size_t i;
-	int ret = EXIT_SUCCESS;
+	int ret = FUNC_SUCCESS;
 
 	for (i = start; info[i].name; i++) {
 		if (lstat(info[i].name, &a) == -1)
@@ -1627,13 +1627,13 @@ check_rm_files(struct rm_info *info, const size_t start, const char *errname)
 		|| info[i].ino != a.st_ino) {
 			xerror(_("%s: '%s': File changed on disk!\n"),
 				errname, info[i].name);
-			ret = EXIT_FAILURE;
+			ret = FUNC_FAILURE;
 		}
 	}
 
-	if (ret == EXIT_FAILURE) {
+	if (ret == FUNC_FAILURE) {
 		return (rl_get_y_or_n(_("Remove files anyway? [y/n] ")) == 0
-			? EXIT_FAILURE : EXIT_SUCCESS);
+			? FUNC_FAILURE : FUNC_SUCCESS);
 	}
 
 	return ret;
@@ -1658,7 +1658,7 @@ fill_rm_info_struct(char **filename, struct stat *a)
 int
 remove_files(char **args)
 {
-	int cwd = 0, exit_status = EXIT_SUCCESS, errs = 0;
+	int cwd = 0, exit_status = FUNC_SUCCESS, errs = 0;
 	char *err_name = (args[0] && *args[0] == 'r' && args[0][1] == 'r')
 		? "rr" : "r";
 
@@ -1726,7 +1726,7 @@ remove_files(char **args)
 	if (j == 3) { /* No file to be deleted */
 		free(rm_cmd);
 		free(info);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	if (rm_force == 0 && rm_confirm(info, 3, have_dirs) == 0)
@@ -1734,15 +1734,15 @@ remove_files(char **args)
 
 	/* Make sure that files to be removed have not changed between the
 	 * beginning of the operation and the user confirmation. */
-	if (check_rm_files(info, 3, err_name) == EXIT_FAILURE)
+	if (check_rm_files(info, 3, err_name) == FUNC_FAILURE)
 		goto END;
 
 	rm_cmd[0] = "rm";
 	rm_cmd[1] = have_dirs >= 1 ? "-rf" : "-f";
 	rm_cmd[2] = "--";
 
-	if (launch_execv(rm_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
-		exit_status = EXIT_FAILURE;
+	if (launch_execv(rm_cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS) {
+		exit_status = FUNC_FAILURE;
 #ifndef BSD_KQUEUE
 		if (num > 1 && conf.autols == 1) /* Only if we have multiple files */
 #else
@@ -1753,7 +1753,7 @@ remove_files(char **args)
 			press_any_key_to_continue(0);
 	}
 
-	if (is_sel && exit_status == EXIT_SUCCESS)
+	if (is_sel && exit_status == FUNC_SUCCESS)
 		deselect_all();
 
 	if (print_removed_files == 1)
@@ -1814,7 +1814,7 @@ export_files(char **filenames, const int open)
 		return tmp_file;
 
 	const int ret = open_file(tmp_file);
-	if (ret == EXIT_SUCCESS)
+	if (ret == FUNC_SUCCESS)
 		return tmp_file;
 
 	if (unlink(tmp_file) == -1)
@@ -1831,17 +1831,17 @@ batch_link(char **args)
 {
 	if (!args || !args[0] || IS_HELP(args[0])) {
 		puts(_(BL_USAGE));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	size_t i;
 	size_t symlinked = 0;
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 
 	for (i = 0; args[i]; i++) {
 		char *filename = unescape_str(args[i], 0);
 		if (!filename) {
-			exit_status = EXIT_FAILURE;
+			exit_status = FUNC_FAILURE;
 			xerror(_("bl: '%s': Error unescaping name\n"), args[i]);
 			if (conf.autols == 1 && args[i + 1])
 				press_any_key_to_continue(0);

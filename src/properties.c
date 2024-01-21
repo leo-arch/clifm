@@ -237,7 +237,7 @@ print_file_attrs(const int aflags)
 {
 	if (aflags == -1) {
 		puts(_("Unavailable"));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	const char c = '-';
@@ -269,7 +269,7 @@ print_file_attrs(const int aflags)
 
 	puts(bits);
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -422,15 +422,15 @@ get_file_perms(const mode_t mode)
 	return p;
 }
 
-/* Returns EXIT_SUCCESS if the permissions string S (in octal notation)
- * is a valid permissions string, or EXIT_FAILURE otherwise. */
+/* Returns FUNC_SUCCESS if the permissions string S (in octal notation)
+ * is a valid permissions string, or FUNC_FAILURE otherwise. */
 static int
 validate_octal_perms(const char *s, const size_t l)
 {
 	if (l > 4 || l < 3) {
 		xerror(_("pc: %s digits. Either 3 or 4 are "
 			"expected\n"), l > 4 ? _("Too many") : _("Too few"));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	size_t i;
@@ -438,15 +438,15 @@ validate_octal_perms(const char *s, const size_t l)
 		if (s[i] < '0' || s[i] > '7') {
 			xerror(_("pc: '%c': Invalid digit. Values in the range 0-7 "
 				"are expected for each field\n"), s[i]);
-			return EXIT_FAILURE;
+			return FUNC_FAILURE;
 		}
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Validate each field of a symbolic permissions string.
- * Returns EXIT_SUCCESS on success and EXIT_FAILURE on error. */
+ * Returns FUNC_SUCCESS on success and FUNC_FAILURE on error. */
 static int
 validate_symbolic_perms(const char *s)
 {
@@ -459,7 +459,7 @@ validate_symbolic_perms(const char *s)
 			if (s[i] != '-' && s[i] != 'r') {
 				xerror(_("pc: Invalid character in field %zu: "
 					"%s-r%s are expected\n"), i + 1, BOLD, NC);
-				return EXIT_FAILURE;
+				return FUNC_FAILURE;
 			}
 			break;
 
@@ -469,7 +469,7 @@ validate_symbolic_perms(const char *s)
 			if (s[i] != '-' && s[i] != 'w') {
 				xerror(_("pc: Invalid character in field %zu: "
 					"%s-w%s are expected\n"), i + 1, BOLD, NC);
-				return EXIT_FAILURE;
+				return FUNC_FAILURE;
 			}
 			break;
 
@@ -478,7 +478,7 @@ validate_symbolic_perms(const char *s)
 			if (s[i] != '-' && s[i] != 'x' && TOUPPER(s[i]) != 'S') {
 				xerror(_("pc: Invalid character in field %zu: "
 					"%s-xsS%s are expected\n"), i + 1, BOLD, NC);
-				return EXIT_FAILURE;
+				return FUNC_FAILURE;
 			}
 			break;
 
@@ -486,19 +486,19 @@ validate_symbolic_perms(const char *s)
 			if (s[i] != '-' && s[i] != 'x' && TOUPPER(s[i]) != 'T') {
 				xerror(_("pc: Invalid character in field %zu: "
 					"%s-xtT%s are expected\n"), i + 1, BOLD, NC);
-				return EXIT_FAILURE;
+				return FUNC_FAILURE;
 			}
 			break;
 
-		default: return EXIT_FAILURE;
+		default: return FUNC_FAILURE;
 		}
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
-/* Returns EXIT_SUCCESS if the permissions string S is a valid permissions
- * string, or EXIT_FAILURE otherwise. */
+/* Returns FUNC_SUCCESS if the permissions string S is a valid permissions
+ * string, or FUNC_FAILURE otherwise. */
 static int
 validate_new_perms(const char *s)
 {
@@ -509,7 +509,7 @@ validate_new_perms(const char *s)
 	if (l != 9) {
 		xerror(_("pc: %s characters: 9 are expected\n"),
 			l < 9 ? _("Too few") : _("Too many"));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	return validate_symbolic_perms(s);
@@ -671,7 +671,7 @@ set_file_perms(char **args)
 {
 	if (!args || !args[1] || IS_HELP(args[1])) {
 		puts(PC_USAGE);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	size_t i;
@@ -694,20 +694,20 @@ set_file_perms(char **args)
 	free(pstr);
 
 	if (!new_perms)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
-	if (validate_new_perms(new_perms) != EXIT_SUCCESS) {
+	if (validate_new_perms(new_perms) != FUNC_SUCCESS) {
 		free(new_perms);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	char *octal_str = IS_DIGIT(*new_perms) ? new_perms : perm2octal(new_perms);
 
-	int ret = EXIT_SUCCESS;
+	int ret = FUNC_SUCCESS;
 	size_t n = 0;
 	const mode_t mode = (mode_t)strtol(octal_str, 0, 8);
 	for (i = 1; args[i]; i++) {
-		if (fchmodat(XAT_FDCWD, args[i], mode, 0) == EXIT_SUCCESS) {
+		if (fchmodat(XAT_FDCWD, args[i], mode, 0) == FUNC_SUCCESS) {
 			n++;
 		} else {
 			xerror(_("pc: Changing permissions of '%s': %s\n"),
@@ -764,7 +764,7 @@ get_common_ownership(char **args, int *exit_status, int *diff)
 	if (!args || !args[0])
 		return (char *)NULL;
 
-	*exit_status = EXIT_SUCCESS;
+	*exit_status = FUNC_SUCCESS;
 	struct stat a;
 	if (stat(args[0], &a) == -1) {
 		xerror("oc: '%s': %s\n", args[0], strerror(errno));
@@ -819,10 +819,10 @@ set_file_owner(char **args)
 {
 	if (!args || !args[1] || IS_HELP(args[1])) {
 		puts(OC_USAGE);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 	int diff = 0;
 	char *own = get_common_ownership(args + 1, &exit_status, &diff);
 
@@ -838,7 +838,7 @@ set_file_owner(char **args)
 
 	if (!new_own || !*new_own) {
 		free(new_own);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	char *new_group = (strchr(new_own, ':'));
@@ -861,7 +861,7 @@ set_file_owner(char **args)
 		if (!owner || !owner->pw_name) {
 			xerror(_("oc: '%s': Invalid user\n"), new_own);
 			free(new_own);
-			return EXIT_FAILURE;
+			return FUNC_FAILURE;
 		}
 	}
 
@@ -874,7 +874,7 @@ set_file_owner(char **args)
 		if (!group || !group->gr_name) {
 			xerror(_("oc: '%s': Invalid group\n"), new_group);
 			free(new_own);
-			return EXIT_FAILURE;
+			return FUNC_FAILURE;
 		}
 	}
 
@@ -1076,7 +1076,7 @@ print_extended_attributes(char *s, const mode_t mode, const int xattr)
 {
 	if (xattr == 0 || S_ISLNK(mode)) {
 		puts(S_ISLNK(mode) ? _("Unavailable") : _("None"));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	ssize_t buflen = 0, keylen = 0, vallen = 0;
@@ -1086,12 +1086,12 @@ print_extended_attributes(char *s, const mode_t mode, const int xattr)
 	buflen = listxattr(s, NULL, 0);
 	if (buflen == -1) {
 		printf("error: %s\n", strerror(errno));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	if (buflen == 0) {
 		puts(_("None"));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	/* Allocate the buffer */
@@ -1102,7 +1102,7 @@ print_extended_attributes(char *s, const mode_t mode, const int xattr)
 	if (buflen == -1) {
 		xerror("%s\n", strerror(errno));
 		free(buf);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	/* Loop over the list of zero terminated strings with the
@@ -1150,7 +1150,7 @@ print_extended_attributes(char *s, const mode_t mode, const int xattr)
 	}
 
 	free(buf);
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 #endif /* LINUX_FILE_XATTRS */
 
@@ -1869,7 +1869,7 @@ static int
 do_stat(char *filename, const int follow_link)
 {
 	if (!filename || !*filename)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	/* Remove leading "./" */
 	if (*filename == '.' && *(filename + 1) == '/' && *(filename + 2))
@@ -1919,7 +1919,7 @@ do_stat(char *filename, const int follow_link)
 	print_timestamps(*link_target ? link_target : filename, &attr);
 	print_file_size(filename, &attr, file_perm, follow_link);
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Print file properties (in a stat(1) fashion) for all files passed via ARGS. */
@@ -1927,17 +1927,17 @@ int
 properties_function(char **args, const int follow_link)
 {
 	if (!args)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	size_t i;
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 
 	for (i = 0; args[i]; i++) {
 		if (strchr(args[i], '\\')) {
 			char *deq_file = unescape_str(args[i], 0);
 			if (!deq_file) {
 				xerror(_("p: '%s': Cannot unescape file name\n"), args[i]);
-				exit_status = EXIT_FAILURE;
+				exit_status = FUNC_FAILURE;
 				continue;
 			}
 
@@ -1946,7 +1946,7 @@ properties_function(char **args, const int follow_link)
 		}
 
 		if (do_stat(args[i], follow_link) != 0)
-			exit_status = EXIT_FAILURE;
+			exit_status = FUNC_FAILURE;
 	}
 
 	return exit_status;
@@ -2424,7 +2424,7 @@ print_entry_props(const struct fileinfo *props, const struct maxes_t *maxes,
 		prop_fields.time != 0 ? time_str : "",
 		prop_fields.size != 0 ? size_str : "");
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Print final stats for the disk usage analyzer mode: total and largest file. */

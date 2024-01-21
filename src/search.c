@@ -170,7 +170,7 @@ set_file_type_and_search_path(char **args, mode_t *file_type,
 	}
 
 	if (*file_type == 0)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	/* Convert file type into a macro that can be decoded by stat(). If
 	 * file type is specified, matches will be checked against this value. */
@@ -186,14 +186,14 @@ set_file_type_and_search_path(char **args, mode_t *file_type,
 	case 'l': *file_type = invert == 1 ? DT_LNK : S_IFLNK; break;
 	case 'p': *file_type = invert == 1 ? DT_FIFO : S_IFIFO; break;
 	case 's': *file_type = invert == 1 ? DT_SOCK : S_IFSOCK; break;
-	case 'x': run_find(*search_path, args[0]); return EXIT_SUCCESS;
+	case 'x': run_find(*search_path, args[0]); return FUNC_SUCCESS;
 	default:
 		fprintf(stderr, _("search: '%c': Unrecognized file "
 			"type\n"), (char)*file_type);
 		break;
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -203,7 +203,7 @@ chdir_search_path(char **search_path, const char *arg)
 		char *deq_dir = unescape_str(*search_path, 0);
 		if (!deq_dir) {
 			xerror(_("search: %s: Error unescaping file name\n"), arg);
-			return EXIT_FAILURE;
+			return FUNC_FAILURE;
 		}
 
 		xstrsncpy(*search_path, deq_dir, strlen(deq_dir) + 1);
@@ -222,11 +222,11 @@ chdir_search_path(char **search_path, const char *arg)
 	} else {
 		if (xchdir(*search_path, NO_TITLE) == -1) {
 			xerror("search: '%s': %s\n", *search_path, strerror(errno));
-			return EXIT_FAILURE;
+			return FUNC_FAILURE;
 		}
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static char **
@@ -564,7 +564,7 @@ static int
 search_glob(char **args)
 {
 	if (!args || !args[0])
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	int invert = (args[0][1] == '!');
 
@@ -572,22 +572,22 @@ search_glob(char **args)
 	mode_t file_type = 0;
 
 	if (set_file_type_and_search_path(args, &file_type,
-	&search_path, invert) == EXIT_FAILURE) {
+	&search_path, invert) == FUNC_FAILURE) {
 		return ERR_SKIP_REGEX;
 	}
 
 	if (file_type == 'x') /* Recursive search via find(1) */
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	/* If we have a path ("/str /path"), chdir into it, since glob(3)
 	 * works on CWD. */
 	if (search_path && *search_path
-	&& chdir_search_path(&search_path, args[1]) == EXIT_FAILURE)
+	&& chdir_search_path(&search_path, args[1]) == FUNC_FAILURE)
 		return ERR_SKIP_REGEX;
 
 	search_query = construct_glob_query(&args[0], invert);
 	if (!search_query && conf.search_strategy != GLOB_ONLY)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	/* Get matches, if any. */
 	glob_t globbed_files;
@@ -599,7 +599,7 @@ search_glob(char **args)
 		if (search_path && xchdir(workspaces[cur_ws].path, NO_TITLE) == -1)
 			xerror("search: '%s': %s\n", workspaces[cur_ws].path, strerror(errno));
 
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	/* We have matches */
@@ -639,10 +639,10 @@ search_glob(char **args)
 	/* If needed, go back to the directory we came from */
 	if (search_path && xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
 		xerror("search: '%s': %s\n", workspaces[cur_ws].path, strerror(errno));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
-	return (matches == 0 ? EXIT_FAILURE : EXIT_SUCCESS);
+	return (matches == 0 ? FUNC_FAILURE : FUNC_SUCCESS);
 }
 
 /* Original string is either "/QUERY" or "/!QUERY". Let's extract QUERY.
@@ -653,7 +653,7 @@ construct_regex_query(char **arg, const int invert, int *regex_found)
 	char *query = *arg + (invert == 1 ? 2 : 1);
 
 	*regex_found = check_regex(query);
-	if (*regex_found == EXIT_SUCCESS)
+	if (*regex_found == FUNC_SUCCESS)
 		return query;
 
 	const size_t len = strlen(*arg);
@@ -670,7 +670,7 @@ construct_regex_query(char **arg, const int invert, int *regex_found)
 static void
 err_regex_no_match(const int regex_found, const char *arg)
 {
-	char *input = (conf.autocd == 1 && !arg && (regex_found == EXIT_FAILURE
+	char *input = (conf.autocd == 1 && !arg && (regex_found == FUNC_FAILURE
 			|| (search_flags & NO_GLOB_CHAR)) && rl_line_buffer)
 			? strrchr(rl_line_buffer, '/') : (char *)NULL;
 
@@ -714,7 +714,7 @@ check_regex_file_type(struct dirent **reg_dirlist, const int index,
 		mode_t type;
 		struct stat attr;
 		if (lstat(reg_dirlist[index]->d_name, &attr) == -1)
-			return EXIT_FAILURE;
+			return FUNC_FAILURE;
 
 		switch (attr.st_mode & S_IFMT) {
 		case S_IFBLK: type = DT_BLK; break;
@@ -735,13 +735,13 @@ check_regex_file_type(struct dirent **reg_dirlist, const int index,
 #else
 		if (reg_dirlist[index]->d_type != file_type)
 #endif /* !_DIRENT_HAVE_D_TYPE */
-			return EXIT_FAILURE;
+			return FUNC_FAILURE;
 	} else { /* Searching in CWD. */
 		if (file_info[index].type != file_type)
-			return EXIT_FAILURE;
+			return FUNC_FAILURE;
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static struct search_t
@@ -842,7 +842,7 @@ print_regex_matches(const mode_t file_type, struct dirent **reg_dirlist,
 		int index = regex_index[i];
 
 		if (file_type != 0 && check_regex_file_type(reg_dirlist,
-		index, file_type) == EXIT_FAILURE)
+		index, file_type) == FUNC_FAILURE)
 			continue;
 
 		list[matches] = load_entry_info(reg_dirlist, index);
@@ -899,25 +899,25 @@ static int
 search_regex(char **args)
 {
 	if (!args || !args[0])
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	int invert = (args[0][1] == '!');
 	char *search_query = (char *)NULL, *search_path = (char *)NULL;
 	mode_t file_type = 0;
 
 	if (set_file_type_and_search_path(args, &file_type,
-	&search_path, 1) == EXIT_FAILURE)
-		return EXIT_FAILURE;
+	&search_path, 1) == FUNC_FAILURE)
+		return FUNC_FAILURE;
 
 	if (file_type == 'x') /* Recursive search via find(1) */
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	struct dirent **reg_dirlist = (struct dirent **)NULL;
 	int tmp_files = - 1;
 
 	if (search_path && *search_path) {
-		if (chdir_search_path(&search_path, args[1]) == EXIT_FAILURE)
-			return EXIT_FAILURE;
+		if (chdir_search_path(&search_path, args[1]) == FUNC_FAILURE)
+			return FUNC_FAILURE;
 
 		tmp_files = scandir(".", &reg_dirlist, skip_files, xalphasort);
 		if (tmp_files == -1) {
@@ -927,7 +927,7 @@ search_regex(char **args)
 				xerror("search: '%s': %s\n", workspaces[cur_ws].path,
 					strerror(errno));
 
-			return EXIT_FAILURE;
+			return FUNC_FAILURE;
 		}
 	}
 
@@ -942,11 +942,11 @@ search_regex(char **args)
 		: (REG_NOSUB | REG_EXTENDED | REG_ICASE);
 	int ret = regcomp(&regex_files, search_query, reg_flags);
 
-	if (ret != EXIT_SUCCESS) {
+	if (ret != FUNC_SUCCESS) {
 		xerror(_("'%s': Invalid regular expression\n"), search_query);
 		regfree(&regex_files);
 		free_regex_dirlist(&reg_dirlist, tmp_files);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	size_t found = 0;
@@ -959,7 +959,7 @@ search_regex(char **args)
 		char *name = (search_path && *search_path) ? reg_dirlist[i]->d_name
 		: file_info[i].name;
 
-		if (regexec(&regex_files, name, 0, NULL, 0) == EXIT_SUCCESS) {
+		if (regexec(&regex_files, name, 0, NULL, 0) == FUNC_SUCCESS) {
 			if (invert == 0) {
 				regex_index[found] = (int)i;
 				found++;
@@ -979,7 +979,7 @@ search_regex(char **args)
 		err_regex_no_match(regex_found, args[1]);
 		free(regex_index);
 		free_regex_dirlist(&reg_dirlist, tmp_files);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	/* We have matches: print them. */
@@ -989,7 +989,7 @@ search_regex(char **args)
 	free(regex_index);
 	free_regex_dirlist(&reg_dirlist, tmp_files);
 
-	return matches == 0 ? EXIT_FAILURE : EXIT_SUCCESS;
+	return matches == 0 ? FUNC_FAILURE : FUNC_SUCCESS;
 }
 
 static int
@@ -1006,11 +1006,11 @@ err_glob_no_match(const char *arg)
 		char *p = unescape_str(rl_line_buffer, 0);
 		xerror("cd: '%s': %s\n", p ? p : rl_line_buffer, strerror(ENOENT));
 		free(p);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	fputs(_("search: No matches found\n"), stderr);
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 }
 
 /* We have three search strategies:
@@ -1022,14 +1022,14 @@ search_function(char **args)
 {
 	if (args[1] && IS_HELP(args[1])) {
 		puts(SEARCH_USAGE);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (conf.search_strategy == REGEX_ONLY)
 		return search_regex(args);
 
 	const int ret = search_glob(args);
-	if (ret != EXIT_FAILURE)
+	if (ret != FUNC_FAILURE)
 		return (ret == ERR_SKIP_REGEX ? 1 : ret);
 
 	if (conf.search_strategy == GLOB_ONLY)

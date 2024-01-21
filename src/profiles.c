@@ -53,7 +53,7 @@ int
 get_profile_names(void)
 {
 	if (!config_dir_gral)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	const size_t len = strlen(config_dir_gral) + 10;
 	char *pf_dir = xnmalloc(len, sizeof(char));
@@ -64,7 +64,7 @@ get_profile_names(void)
 
 	if (files_n == -1) {
 		free(pf_dir);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	size_t i, pf_n = 0;
@@ -99,7 +99,7 @@ get_profile_names(void)
 	profile_names = xnrealloc(profile_names, pf_n + 1, sizeof(char *));
 	profile_names[pf_n] = (char *)NULL;
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Check if NAME is an existing profile name.
@@ -122,18 +122,18 @@ profile_set(const char *prof)
 {
 	if (xargs.stealth_mode == 1) {
 		printf("%s: profiles: %s\n", PROGRAM_NAME, STEALTH_DISABLED);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (!prof)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	/* Check if prof is a valid profile */
 	int found = check_profile(prof);
 	if (found == -1) {
 		xerror(_("pf: '%s': No such profile\nTo add a new "
 			"profile enter 'pf add PROFILE'\n"), prof);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	/* If changing to the current profile, do nothing */
@@ -141,7 +141,7 @@ profile_set(const char *prof)
 	|| (alt_profile && *prof == *alt_profile
 	&& strcmp(prof, alt_profile) == 0)) {
 		printf(_("pf: '%s' is the current profile\n"), prof);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	int i;
@@ -253,21 +253,21 @@ profile_set(const char *prof)
 
 		if (!cwd || !*cwd) {
 			xerror("pf: %s\n", strerror(errno));
-			exit(EXIT_FAILURE);
+			exit(FUNC_FAILURE);
 		}
 		workspaces[cur_ws].path = savestring(cwd, strlen(cwd));
 	}
 
 	if (xchdir(workspaces[cur_ws].path, SET_TITLE) == -1) {
 		xerror("pf: '%s': %s\n", workspaces[cur_ws].path, strerror(errno));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	if (conf.autols == 1)
 		reload_dirlist();
 
 	print_reload_msg(_("Switched to profile %s%s%s\n"), BOLD, prof, NC);
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Add a new profile named PROF */
@@ -275,18 +275,18 @@ static int
 profile_add(const char *prof)
 {
 	if (!prof)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	const int found = check_profile(prof);
 	if (found != -1) {
 		xerror(_("pf: '%s': Profile already exists\n"), prof);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	if (!home_ok) {
 		xerror(_("pf: '%s': Cannot create profile: Home directory "
 			"not found\n"), prof);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	const size_t pnl_len = strlen(PROGRAM_NAME);
@@ -297,15 +297,15 @@ profile_add(const char *prof)
 
 	/* #### CREATE THE CONFIG DIR #### */
 	char *tmp_cmd[] = {"mkdir", "-p", nconfig_dir, NULL};
-	if (launch_execv(tmp_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
+	if (launch_execv(tmp_cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS) {
 		xerror(_("pf: mkdir: '%s': Error creating "
 			"configuration directory\n"), nconfig_dir);
 		free(nconfig_dir);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	/* If the config dir is fine, generate config file names */
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 	const size_t config_len = strlen(nconfig_dir);
 
 	tmp_len = config_len + pnl_len + 4;
@@ -325,7 +325,7 @@ profile_add(const char *prof)
 	FILE *hist_fp = open_fwrite(nhist_file, &fd);
 	if (!hist_fp) {
 		xerror("pf: fopen: %s: %s\n", nhist_file, strerror(errno));
-		exit_status = EXIT_FAILURE;
+		exit_status = FUNC_FAILURE;
 	} else {
 		/* To avoid malloc errors in read_history(), do not create
 		 * an empty file */
@@ -334,12 +334,12 @@ profile_add(const char *prof)
 	}
 
 	/* #### CREATE THE MIME CONFIG FILE #### */
-	if (create_mime_file(nmime_file, 1) != EXIT_SUCCESS)
-		exit_status = EXIT_FAILURE;
+	if (create_mime_file(nmime_file, 1) != FUNC_SUCCESS)
+		exit_status = FUNC_FAILURE;
 
 	/* #### CREATE THE MAIN CONFIG FILE #### */
-	if (create_main_config_file(nconfig_file) != EXIT_SUCCESS)
-		exit_status = EXIT_FAILURE;
+	if (create_main_config_file(nconfig_file) != FUNC_SUCCESS)
+		exit_status = FUNC_FAILURE;
 
 	/* Free stuff */
 	free(nconfig_dir);
@@ -347,7 +347,7 @@ profile_add(const char *prof)
 	free(nhist_file);
 	free(nmime_file);
 
-	if (exit_status == EXIT_SUCCESS) {
+	if (exit_status == FUNC_SUCCESS) {
 		printf(_("Succesfully created profile %s%s%s\n"), BOLD, prof, df_c);
 
 		size_t i;
@@ -368,17 +368,17 @@ profile_del(const char *prof)
 {
 	if (xargs.stealth_mode == 1) {
 		printf("%s: profiles: %s\n", PROGRAM_NAME, STEALTH_DISABLED);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (!prof)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	/* Check if prof is a valid profile */
 	const int found = check_profile(prof);
 	if (found == -1) {
 		xerror(_("pf: '%s': No such profile\n"), prof);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	const size_t len = strlen(config_dir_gral) + strlen(prof) + 11;
@@ -389,7 +389,7 @@ profile_del(const char *prof)
 	const int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	free(tmp);
 
-	if (ret != EXIT_SUCCESS) {
+	if (ret != FUNC_SUCCESS) {
 		xerror(_("pf: '%s': Error removing profile\n"), prof);
 		return ret;
 	}
@@ -400,7 +400,7 @@ profile_del(const char *prof)
 		free(profile_names[i]);
 
 	get_profile_names();
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -417,7 +417,7 @@ print_profiles(void)
 			printf("  %s\n", profile_names[i]);
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -425,7 +425,7 @@ print_current_profile(void)
 {
 	printf("Current profile: %s%s%s\n", BOLD, alt_profile
 		? alt_profile : "default", df_c);
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 int
@@ -433,24 +433,24 @@ validate_profile_name(const char *name)
 {
 	if (!name || !*name || *name == '.' || *name == '~' || *name == '$'
 	|| strchr(name, '/'))
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
 create_profile(const char *name)
 {
 	if (name) {
-		if (validate_profile_name(name) == EXIT_SUCCESS)
+		if (validate_profile_name(name) == FUNC_SUCCESS)
 			return profile_add(name);
 
 		xerror(_("pf: '%s': Invalid profile name\n"), name);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	fprintf(stderr, "%s\n", PROFILES_USAGE);
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 }
 
 static int
@@ -460,7 +460,7 @@ delete_profile(const char *name)
 		return profile_del(name);
 
 	fprintf(stderr, "%s\n", PROFILES_USAGE);
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 }
 
 static int
@@ -470,7 +470,7 @@ switch_profile(const char *name)
 		return profile_set(name);
 
 	fprintf(stderr, "%s\n", PROFILES_USAGE);
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 }
 
 /* Rename profile named ARG[0] to ARG[1].
@@ -481,22 +481,22 @@ rename_profile(char **args)
 {
 	if (!args || !args[0] || !args[1]) {
 		fprintf(stderr, "%s\n", PROFILES_USAGE);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	if (!config_dir_gral) {
 		xerror(_("pf: Configuration directory is not set\n"));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
-	if (validate_profile_name(args[1]) != EXIT_SUCCESS) {
+	if (validate_profile_name(args[1]) != FUNC_SUCCESS) {
 		xerror(_("pf: '%s': Invalid profile name\n"), args[1]);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	if (*args[0] == *args[1] && strcmp(args[0], args[1]) == 0) {
 		puts(_("pf: Nothing to do. Source and destination names are the same."));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	char *p = unescape_str(args[0], 0);
@@ -508,12 +508,12 @@ rename_profile(char **args)
 	int src_pf_index = check_profile(args[0]);
 	if (src_pf_index == -1) {
 		xerror(_("pf: '%s': No such profile\n"), args[0]);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	if (strcmp(args[0], alt_profile ? alt_profile : "default") == 0) {
 		xerror(_("pf: '%s': Is the current profile\n"), args[0]);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	char src_pf_name[PATH_MAX + NAME_MAX + 11];
@@ -555,7 +555,7 @@ rename_profile(char **args)
 	printf(_("pf: '%s': Profile successfully renamed to %s%s%s\n"),
 		args[0], BOLD, args[1], df_c);
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Main profiles function. Call the operation specified by the first
@@ -565,7 +565,7 @@ profile_function(char **args)
 {
 	if (xargs.stealth_mode == 1) {
 		printf("%s: profiles: %s\n", PROGRAM_NAME, STEALTH_DISABLED);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (!args[1])
@@ -573,7 +573,7 @@ profile_function(char **args)
 
 	if (IS_HELP(args[1])) {
 		puts(_(PROFILES_USAGE));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	/* List profiles */
@@ -606,7 +606,7 @@ profile_function(char **args)
 		return switch_profile(args[2]);
 
 	fprintf(stderr, "%s\n", PROFILES_USAGE);
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 }
 
 #else

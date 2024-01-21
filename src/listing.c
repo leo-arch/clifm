@@ -315,7 +315,7 @@ print_disk_usage(void)
 		return;
 
 	struct statvfs a;
-	if (statvfs(workspaces[cur_ws].path, &a) != EXIT_SUCCESS) {
+	if (statvfs(workspaces[cur_ws].path, &a) != FUNC_SUCCESS) {
 		err('w', PRINT_PROMPT, "statvfs: %s\n", strerror(errno));
 		return;
 	}
@@ -504,7 +504,7 @@ static int
 post_listing(DIR *dir, const int close_dir, const int reset_pager)
 {
 	if (close_dir == 1 && closedir(dir) == -1)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 /* Let plugins and external programs running in clifm know whether
  * we have changed the current directory (last command) or not. */
@@ -545,7 +545,7 @@ post_listing(DIR *dir, const int close_dir, const int reset_pager)
 	if (conf.print_selfiles == 1 && sel_n > 0)
 		print_sel_files(term_lines);
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* A basic pager for directories containing large amount of files.
@@ -1708,7 +1708,7 @@ run_dir_cmd(const int mode)
 		return;
 
 	if (xargs.secure_cmds == 0
-	|| sanitize_cmd(buf, SNT_AUTOCMD) == EXIT_SUCCESS)
+	|| sanitize_cmd(buf, SNT_AUTOCMD) == FUNC_SUCCESS)
 		launch_execl(buf);
 }
 
@@ -1758,7 +1758,7 @@ static int
 exclude_file_type_light(const unsigned char type)
 {
 	if (!*(filter.str + 1))
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	int match = 0;
 
@@ -1774,24 +1774,24 @@ exclude_file_type_light(const unsigned char type)
 	case 'D': if (type == DT_DOOR) match = 1; break;
 	case 'P': if (type == DT_PORT) match = 1; break;
 #endif /* SOLARIS_DOORS */
-	default: return EXIT_FAILURE;
+	default: return FUNC_FAILURE;
 	}
 
 	if (match == 1)
-		return filter.rev == 1 ? EXIT_SUCCESS : EXIT_FAILURE;
+		return filter.rev == 1 ? FUNC_SUCCESS : FUNC_FAILURE;
 	else
-		return filter.rev == 1 ? EXIT_FAILURE : EXIT_SUCCESS;
+		return filter.rev == 1 ? FUNC_FAILURE : FUNC_SUCCESS;
 }
 
-/* Returns EXIT_SUCCESS if the file with mode MODE and LINKS number
- * of links must be excluded from the files list, or EXIT_FAILURE */
+/* Returns FUNC_SUCCESS if the file with mode MODE and LINKS number
+ * of links must be excluded from the files list, or FUNC_FAILURE */
 static int
 exclude_file_type(const mode_t mode, const nlink_t links)
 {
 /* ADD: C = Files with capabilities */
 
 	if (!*(filter.str + 1))
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	int match = 0;
 
@@ -1818,13 +1818,13 @@ exclude_file_type(const mode_t mode, const nlink_t links)
 		|| (mode & 00001)))
 			match = 1;
 		break;
-	default: return EXIT_FAILURE;
+	default: return FUNC_FAILURE;
 	}
 
 	if (match == 1)
-		return filter.rev == 1 ? EXIT_SUCCESS : EXIT_FAILURE;
+		return filter.rev == 1 ? FUNC_SUCCESS : FUNC_FAILURE;
 	else
-		return filter.rev == 1 ? EXIT_FAILURE : EXIT_SUCCESS;
+		return filter.rev == 1 ? FUNC_FAILURE : FUNC_SUCCESS;
 }
 
 /* Initialize the file_info struct, mostly in case stat fails. */
@@ -1907,7 +1907,7 @@ list_dir_light(void)
 
 		/* Skip files according to a regex filter */
 		if (filter.str && filter.type == FILTER_FILE_NAME) {
-			if (regexec(&regex_exp, ename, 0, NULL, 0) == EXIT_SUCCESS) {
+			if (regexec(&regex_exp, ename, 0, NULL, 0) == FUNC_SUCCESS) {
 				if (filter.rev == 1) {
 					++excluded_files;
 					continue;
@@ -1943,9 +1943,9 @@ list_dir_light(void)
 		if (filter.str && filter.type == FILTER_FILE_TYPE
 #ifndef _DIRENT_HAVE_D_TYPE
 		&& exclude_file_type_light((unsigned char)get_dt(attr.st_mode))
-		== EXIT_SUCCESS) {
+		== FUNC_SUCCESS) {
 #else
-		&& exclude_file_type_light(ent->d_type) == EXIT_SUCCESS) {
+		&& exclude_file_type_light(ent->d_type) == FUNC_SUCCESS) {
 #endif /* !_DIRENT_HAVE_D_TYPE */
 			++excluded_files;
 			continue;
@@ -2357,7 +2357,7 @@ list_dir(void)
 
 		/* Filter files according to a regex filter */
 		if (filter.str && filter.type == FILTER_FILE_NAME) {
-			if (regexec(&regex_exp, ename, 0, NULL, 0) == EXIT_SUCCESS) {
+			if (regexec(&regex_exp, ename, 0, NULL, 0) == FUNC_SUCCESS) {
 				if (filter.rev == 1) {
 					++excluded_files;
 					continue;
@@ -2389,7 +2389,7 @@ list_dir(void)
 
 		/* Filter files according to file type */
 		if (filter.str && filter.type == FILTER_FILE_TYPE && stat_ok == 1
-		&& exclude_file_type(attr.st_mode, attr.st_nlink) == EXIT_SUCCESS) {
+		&& exclude_file_type(attr.st_mode, attr.st_nlink) == FUNC_SUCCESS) {
 			/* Decrease counters: the file won't be displayed */
 			if (*ename == '.' && stats.hidden > 0)
 				--stats.hidden;

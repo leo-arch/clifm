@@ -94,25 +94,25 @@ xrl_reset_line_state(void)
 int
 kbinds_reset(void)
 {
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 	struct stat file_attrib;
 
 	if (!kbinds_file) {
 		xerror(_("kb: No keybindings file found\n"));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	if (stat(kbinds_file, &file_attrib) == -1) {
 		exit_status = create_kbinds_file();
 	} else {
 		char *cmd[] = {"rm", "--", kbinds_file, NULL};
-		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) == EXIT_SUCCESS)
+		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) == FUNC_SUCCESS)
 			exit_status = create_kbinds_file();
 		else
-			exit_status = EXIT_FAILURE;
+			exit_status = FUNC_FAILURE;
 	}
 
-	if (exit_status == EXIT_SUCCESS)
+	if (exit_status == FUNC_SUCCESS)
 		err('n', PRINT_PROMPT, _("kb: Restart %s for changes "
 			"to take effect\n"), PROGRAM_NAME);
 
@@ -124,12 +124,12 @@ kbinds_edit(char *app)
 {
 	if (xargs.stealth_mode == 1) {
 		printf("%s: kb: %s\n", PROGRAM_NAME, STEALTH_DISABLED);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (!kbinds_file) {
 		xerror(_("kb: No keybindings file found\n"));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	struct stat attr;
@@ -140,7 +140,7 @@ kbinds_edit(char *app)
 
 	const time_t mtime_bfr = attr.st_mtime;
 
-	int ret = EXIT_SUCCESS;
+	int ret = FUNC_SUCCESS;
 	if (app && *app) {
 		char *cmd[] = {app, kbinds_file, NULL};
 		ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
@@ -150,39 +150,39 @@ kbinds_edit(char *app)
 		open_in_foreground = 0;
 	}
 
-	if (ret != EXIT_SUCCESS)
+	if (ret != FUNC_SUCCESS)
 		return ret;
 
 	stat(kbinds_file, &attr);
 	if (mtime_bfr == attr.st_mtime)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	err('n', PRINT_PROMPT, _("kb: Restart %s for changes to "
 			"take effect\n"), PROGRAM_NAME);
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 int
 kbinds_function(char **args)
 {
 	if (!args)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	if (!args[1] || strcmp(args[1], "list") == 0) {
 		if (kbinds_n == 0) {
 			printf(_("%s: kb: No keybindings defined\n"), PROGRAM_NAME);
-			return EXIT_SUCCESS;
+			return FUNC_SUCCESS;
 		}
 		size_t i;
 		for (i = 0; i < kbinds_n; i++)
 			printf("%s: %s\n", kbinds[i].key, kbinds[i].function);
 
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (IS_HELP(args[1])) {
 		puts(_(KB_USAGE));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (*args[1] == 'e' && strcmp(args[1], "edit") == 0)
@@ -193,11 +193,11 @@ kbinds_function(char **args)
 
 	if (*args[1] == 'r' && strcmp(args[1], "readline") == 0) {
 		rl_function_dumper(1);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	fprintf(stderr, "%s\n", _(KB_USAGE));
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 }
 
 /* Store keybinds from the keybinds file into a struct */
@@ -205,7 +205,7 @@ int
 load_keybinds(void)
 {
 	if (config_ok == 0 || !kbinds_file)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	/* Free the keybinds struct array */
 	if (kbinds_n > 0) {
@@ -224,7 +224,7 @@ load_keybinds(void)
 	/* Open the keybinds file */
 	FILE *fp = fopen(kbinds_file, "r");
 	if (!fp)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	size_t line_size = 0;
 	char *line = (char *)NULL;
@@ -255,7 +255,7 @@ load_keybinds(void)
 
 	fclose(fp);
 	free(line);
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* This call to prompt() just updates the prompt in case it was modified by
@@ -305,7 +305,7 @@ keybind_exec_cmd(char *str)
 		clear_suggestion(CS_FREEBUF);
 #endif /* !_NO_SUGGESTIONS */
 
-	int exit_status = EXIT_FAILURE;
+	int exit_status = FUNC_FAILURE;
 	char **cmd = parse_input_str(str);
 	putchar('\n');
 
@@ -339,10 +339,10 @@ static int
 run_kb_cmd(char *cmd)
 {
 	if (!cmd || !*cmd)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	if (kbind_busy == 1)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 #ifndef _NO_SUGGESTIONS
 	if (conf.colorize == 1 && wrong_cmd == 1)
@@ -360,7 +360,7 @@ run_kb_cmd(char *cmd)
 		 * prompt_offset to correctly calculate the cursor position. */
 		prompt_offset = UNSET;
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Retrieve the key sequence associated to FUNCTION */
@@ -386,7 +386,7 @@ rl_toggle_max_filename_len(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	if (kbind_busy == 1)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	static int mnl_bk = 0, flag = 0;
 
@@ -415,7 +415,7 @@ rl_toggle_max_filename_len(int count, int key)
 		print_reload_msg(_("Max name length set to %d\n"), conf.max_name_len);
 
 	xrl_reset_line_state();
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Prepend authentication program name (usually sudo or doas) to the current
@@ -496,7 +496,7 @@ rl_prepend_sudo(int count, int key)
 	}
 #endif /* !_NO_HIGHLIGHT */
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -628,7 +628,7 @@ rl_accept_suggestion(int count, int key)
 		 * forward one column */
 		if (rl_point < rl_end)
 			rl_point++;
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (!wrong_cmd && cur_color != hq_c) {
@@ -645,7 +645,7 @@ rl_accept_suggestion(int count, int key)
 			int mlen = mblen(rl_line_buffer + rl_point, MB_CUR_MAX);
 			rl_point += mlen;
 		}
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	/* If accepting the first suggested word, accept only up to next
@@ -836,7 +836,7 @@ rl_accept_suggestion(int count, int key)
 	}
 
 	flags &= ~BAEJ_SUGGESTION;
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -873,7 +873,7 @@ rl_dir_parent(int count, int key)
 	UNUSED(count); UNUSED(key);
 	/* If already root dir, do nothing */
 	if (*workspaces[cur_ws].path == '/' && !workspaces[cur_ws].path[1])
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	exec_prompt_cmds = 1;
 	return run_kb_cmd("cd ..");
@@ -885,7 +885,7 @@ rl_dir_root(int count, int key)
 	UNUSED(count); UNUSED(key);
 	/* If already root dir, do nothing */
 	if (*workspaces[cur_ws].path == '/' && !workspaces[cur_ws].path[1])
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	return run_kb_cmd("cd /");
 }
@@ -897,7 +897,7 @@ rl_dir_home(int count, int key)
 	/* If already in home, do nothing */
 	if (*workspaces[cur_ws].path == *user.home
 	&& strcmp(workspaces[cur_ws].path, user.home) == 0)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	exec_prompt_cmds = 1;
 	return run_kb_cmd("cd");
@@ -909,7 +909,7 @@ rl_dir_previous(int count, int key)
 	UNUSED(count); UNUSED(key);
 	/* If already at the beginning of dir hist, do nothing */
 	if (dirhist_cur_index == 0)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	exec_prompt_cmds = 1;
 	return run_kb_cmd("b");
@@ -922,7 +922,7 @@ rl_dir_next(int count, int key)
 
 	/* If already at the end of dir hist, do nothing */
 	if (dirhist_cur_index + 1 == dirhist_total_index)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	exec_prompt_cmds = 1;
 	return run_kb_cmd("f");
@@ -933,7 +933,7 @@ rl_toggle_long_view(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	if (kbind_busy == 1 || xargs.disk_usage_analyzer == 1)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 #ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
@@ -953,7 +953,7 @@ rl_toggle_long_view(int count, int key)
 	print_reload_msg(_("Long view %s\n"),
 		conf.long_view == 1 ? _("enabled") : _("disabled"));
 	xrl_reset_line_state();
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 int
@@ -961,7 +961,7 @@ rl_toggle_dirs_first(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	if (kbind_busy == 1)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 #ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
@@ -979,7 +979,7 @@ rl_toggle_dirs_first(int count, int key)
 	print_reload_msg(_("Directories first %s\n"),
 		conf.list_dirs_first ? _("enabled") : _("disabled"));
 	xrl_reset_line_state();
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 int
@@ -987,7 +987,7 @@ rl_toggle_light_mode(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	if (kbind_busy == 1)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 #ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
@@ -1012,7 +1012,7 @@ rl_toggle_light_mode(int count, int key)
 	if (rl_dispatching == 1)
 		rl_update_prompt();
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 int
@@ -1020,7 +1020,7 @@ rl_toggle_hidden_files(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	if (kbind_busy == 1)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 #ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
@@ -1038,7 +1038,7 @@ rl_toggle_hidden_files(int count, int key)
 	print_reload_msg(_("Hidden files %s\n"),
 		conf.show_hidden == 1 ? "enabled" : "disabled");
 	xrl_reset_line_state();
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -1081,7 +1081,7 @@ rl_open_preview(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	if (!config_dir || kbind_busy == 1)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	char *file = xnmalloc(config_dir_len + 15, sizeof(char));
 	snprintf(file, config_dir_len + 15, "%s/preview.clifm", config_dir);
@@ -1141,7 +1141,7 @@ rl_clear_line(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	if (kbind_busy == 1 && xrename == 0)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	words_num = 0;
 
@@ -1159,7 +1159,7 @@ rl_clear_line(int count, int key)
 	}
 	if (suggestion.nlines > term_lines) {
 		rl_on_new_line();
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (suggestion_buf) {
@@ -1171,7 +1171,7 @@ rl_clear_line(int count, int key)
 	curhistindex = current_hist_n;
 	rl_kill_text(0, rl_end);
 	rl_point = rl_end = 0;
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -1179,7 +1179,7 @@ rl_sort_next(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	if (kbind_busy == 1)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 #ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
@@ -1198,7 +1198,7 @@ rl_sort_next(int count, int key)
 	}
 
 	xrl_reset_line_state();
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -1206,7 +1206,7 @@ rl_sort_previous(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	if (kbind_busy == 1)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 #ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
@@ -1225,14 +1225,14 @@ rl_sort_previous(int count, int key)
 	}
 
 	xrl_reset_line_state();
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
 rl_lock(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	int ret = EXIT_SUCCESS;
+	int ret = FUNC_SUCCESS;
 #ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
 		free_suggestion();
@@ -1254,9 +1254,9 @@ rl_lock(int count, int key)
 	rl_prep_terminal(0);
 	xrl_reset_line_state();
 
-	if (ret != EXIT_SUCCESS)
-		return EXIT_FAILURE;
-	return EXIT_SUCCESS;
+	if (ret != FUNC_SUCCESS)
+		return FUNC_FAILURE;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -1278,7 +1278,7 @@ handle_no_sel(const char *func)
 	printf(_("\n%s: sel: %s\n"), func, strerror(ENOENT));
 	rl_reset_line_state();
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -1286,7 +1286,7 @@ rl_archive_sel(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	if (kbind_busy == 1)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	if (sel_n == 0)
 		return handle_no_sel("ac");
@@ -1299,7 +1299,7 @@ rl_remove_sel(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	if (kbind_busy == 1)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	if (sel_n == 0)
 		return handle_no_sel("r");
@@ -1309,7 +1309,7 @@ rl_remove_sel(int count, int key)
 	keybind_exec_cmd(cmd);
 	rl_prep_terminal(0);
 	rl_reset_line_state();
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -1317,7 +1317,7 @@ rl_export_sel(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	if (kbind_busy == 1)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	if (sel_n == 0)
 		return handle_no_sel("exp");
@@ -1330,7 +1330,7 @@ rl_move_sel(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	if (kbind_busy == 1)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	if (sel_n == 0)
 		return handle_no_sel("m");
@@ -1344,7 +1344,7 @@ rl_rename_sel(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	if (kbind_busy == 1)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	if (sel_n == 0)
 		return handle_no_sel("br");
@@ -1358,7 +1358,7 @@ rl_paste_sel(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	if (kbind_busy == 1)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	if (sel_n == 0)
 		return handle_no_sel("c");
@@ -1369,7 +1369,7 @@ rl_paste_sel(int count, int key)
 	keybind_exec_cmd(cmd);
 	rl_prep_terminal(0);
 	rl_reset_line_state();
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 int
@@ -1377,14 +1377,14 @@ rl_quit(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	if (kbind_busy == 1)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	conf.cd_on_quit = 0;
 	puts("\n");
 
 	/* Reset terminal attributes before exiting. */
 	rl_deprep_terminal();
-	exit(EXIT_SUCCESS);
+	exit(FUNC_SUCCESS);
 }
 
 #ifndef _NO_PROFILES
@@ -1414,7 +1414,7 @@ rl_profile_previous(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	if (kbind_busy == 1)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 #ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
@@ -1426,7 +1426,7 @@ rl_profile_previous(int count, int key)
 
 	if (cur_prof == -1 || !profile_names[cur_prof]
 	|| total_profs <= 1)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	prev_prof = cur_prof - 1;
 	total_profs--;
@@ -1443,7 +1443,7 @@ rl_profile_previous(int count, int key)
 	profile_set(profile_names[prev_prof]);
 	rl_update_prompt_old();
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -1451,7 +1451,7 @@ rl_profile_next(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	if (kbind_busy == 1)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 #ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
@@ -1462,7 +1462,7 @@ rl_profile_next(int count, int key)
 	get_cur_prof(&cur_prof, &total_profs);
 
 	if (cur_prof == -1 || !profile_names[cur_prof])
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	next_prof = cur_prof + 1;
 	total_profs--;
@@ -1480,7 +1480,7 @@ rl_profile_next(int count, int key)
 	profile_set(profile_names[next_prof]);
 	rl_update_prompt_old();
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 #endif /* _NO_PROFILES */
 
@@ -1528,7 +1528,7 @@ rl_open_sel(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	if (kbind_busy == 1)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	char cmd[PATH_MAX + 4];
 	snprintf(cmd, sizeof(cmd), "o %s", (sel_n && sel_elements[sel_n - 1].name)
@@ -1549,7 +1549,7 @@ run_man_cmd(char *str)
 		unsetenv("MANPAGER");
 	}
 
-	int ret = launch_execl(str) != EXIT_SUCCESS;
+	int ret = launch_execl(str) != FUNC_SUCCESS;
 
 	if (mp) {
 		setenv("MANPAGER", mp, 1);
@@ -1563,7 +1563,7 @@ static int
 rl_kbinds_help(int count, int key)
 {
 	if (kbind_busy == 1)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	UNUSED(count); UNUSED(key);
 #ifndef _NO_SUGGESTIONS
@@ -1577,15 +1577,15 @@ rl_kbinds_help(int count, int key)
 		PROGRAM_NAME);
 	int ret = run_man_cmd(cmd);
 	if (!ret)
-		return EXIT_FAILURE;
-	return EXIT_SUCCESS;
+		return FUNC_FAILURE;
+	return FUNC_SUCCESS;
 }
 
 static int
 rl_cmds_help(int count, int key)
 {
 	if (kbind_busy == 1)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	UNUSED(count); UNUSED(key);
 #ifndef _NO_SUGGESTIONS
@@ -1599,15 +1599,15 @@ rl_cmds_help(int count, int key)
 		PROGRAM_NAME);
 	int ret = run_man_cmd(cmd);
 	if (!ret)
-		return EXIT_FAILURE;
-	return EXIT_SUCCESS;
+		return FUNC_FAILURE;
+	return FUNC_SUCCESS;
 }
 
 static int
 rl_manpage(int count, int key)
 {
 	if (kbind_busy == 1)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	UNUSED(count); UNUSED(key);
 #ifndef _NO_SUGGESTIONS
@@ -1615,9 +1615,9 @@ rl_manpage(int count, int key)
 		free_suggestion();
 #endif /* !_NO_SUGGESTIONS */
 	char *cmd[] = {"man", PROGRAM_NAME, NULL};
-	if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
-		return EXIT_FAILURE;
-	return EXIT_SUCCESS;
+	if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
+		return FUNC_FAILURE;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -1627,7 +1627,7 @@ rl_dir_pinned(int count, int key)
 	if (!pinned_dir) {
 		printf(_("\n%s: No pinned file\n"), PROGRAM_NAME);
 		rl_reset_line_state();
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	return run_kb_cmd(",");
@@ -1649,7 +1649,7 @@ rl_ws1(int count, int key)
 			snprintf(t, sizeof(t), "ws %d", prev_ws + 1);
 			return run_kb_cmd(t);
 		}
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	return run_kb_cmd("ws 1");
@@ -1669,7 +1669,7 @@ rl_ws2(int count, int key)
 			snprintf(t, sizeof(t), "ws %d", prev_ws + 1);
 			return run_kb_cmd(t);
 		}
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	return run_kb_cmd("ws 2");
@@ -1689,7 +1689,7 @@ rl_ws3(int count, int key)
 			snprintf(t, sizeof(t), "ws %d", prev_ws + 1);
 			return run_kb_cmd(t);
 		}
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	return run_kb_cmd("ws 3");
@@ -1709,7 +1709,7 @@ rl_ws4(int count, int key)
 			snprintf(t, sizeof(t), "ws %d", prev_ws + 1);
 			return run_kb_cmd(t);
 		}
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	return run_kb_cmd("ws 4");
@@ -1772,7 +1772,7 @@ rl_toggle_only_dirs(int count, int key)
 	UNUSED(count); UNUSED(key);
 
 	if (kbind_busy == 1)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	conf.only_dirs = conf.only_dirs ? 0 : 1;
 
@@ -1856,7 +1856,7 @@ print_cmdhist_line(int n, int beg_line)
 	cur_color = df_c;
 	fputs(df_c, stdout);
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static inline int
@@ -1867,19 +1867,19 @@ handle_cmdhist_beginning(int key)
 
 	if (key == 65) { /* Up arrow key */
 		if (--p < 0)
-			return EXIT_FAILURE;
+			return FUNC_FAILURE;
 	} else { /* Down arrow key */
 		if (rl_end == 0)
-			return EXIT_SUCCESS;
+			return FUNC_SUCCESS;
 		if (++p >= (int)current_hist_n) {
 			rl_replace_line("", 1);
 			curhistindex++;
-			return EXIT_SUCCESS;
+			return FUNC_SUCCESS;
 		}
 	}
 
 	if (!history[p].cmd)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	curhistindex = (size_t)p;
 
@@ -1892,7 +1892,7 @@ handle_cmdhist_middle(int key)
 	int found = 0, p = (int)curhistindex;
 
 	if (key == 65) { /* Up arrow key */
-		if (--p < 0) return EXIT_FAILURE;
+		if (--p < 0) return FUNC_FAILURE;
 
 		while (p >= 0 && history[p].cmd) {
 			if (strncmp(rl_line_buffer, history[p].cmd, (size_t)rl_point) == 0
@@ -1902,7 +1902,7 @@ handle_cmdhist_middle(int key)
 			p--;
 		}
 	} else { /* Down arrow key */
-		if (++p >= (int)current_hist_n)	return EXIT_FAILURE;
+		if (++p >= (int)current_hist_n)	return FUNC_FAILURE;
 
 		while (history[p].cmd) {
 			if (strncmp(rl_line_buffer, history[p].cmd, (size_t)rl_point) == 0
@@ -1915,7 +1915,7 @@ handle_cmdhist_middle(int key)
 
 	if (found == 0) {
 		rl_ring_bell();
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	return print_cmdhist_line(p, 0);
@@ -1927,7 +1927,7 @@ rl_cmdhist(int count, int key)
 {
 	UNUSED(count);
 	if (rl_nohist == 1)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 #ifndef _NO_SUGGESTIONS
 	if (suggestion_buf) {
@@ -1942,7 +1942,7 @@ rl_cmdhist(int count, int key)
 		key = 66;  /* Down */
 
 	if (key != 65 && key != 66)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	/* If the cursor is at the beginning of the line */
 	if (rl_point == 0 || cmdhist_flag == 1)
@@ -2001,7 +2001,7 @@ rl_tab_comp(int count, int key)
 	UNUSED(count); UNUSED(key);
 
 	tab_complete('!');
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -2014,7 +2014,7 @@ rl_del_last_word(int count, int key)
 	UNUSED(count); UNUSED(key);
 
 	if (rl_point == 0)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	char *end_buf = (char *)NULL;
 	if (rl_point < rl_end) { /* Somewhere before the end of the line */
@@ -2051,7 +2051,7 @@ rl_del_last_word(int count, int key)
 		recover_from_wrong_cmd();
 #endif /* !_NO_SUGGESTIONS */
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -2059,7 +2059,7 @@ rl_toggle_virtualdir_full_paths(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	if (!stdin_tmp_dir || strcmp(stdin_tmp_dir, workspaces[cur_ws].path) != 0)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	xchmod(stdin_tmp_dir, "0700", 1);
 	xargs.virtual_dir_full_paths = xargs.virtual_dir_full_paths == 1 ? 0 : 1;
@@ -2096,7 +2096,7 @@ rl_toggle_virtualdir_full_paths(int count, int key)
 	print_reload_msg(_("Switched to %s names\n"),
 		xargs.virtual_dir_full_paths == 1 ? _("long") : _("short"));
 	xrl_reset_line_state();
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Used to disable keybindings. */
@@ -2104,7 +2104,7 @@ static int
 do_nothing(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static void

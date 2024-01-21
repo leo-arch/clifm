@@ -60,7 +60,7 @@ regen_config(void)
 		const time_t rawtime = time(NULL);
 		struct tm t;
 		if (!localtime_r(&rawtime, &t))
-			return EXIT_FAILURE;
+			return FUNC_FAILURE;
 
 		char date[18] = "";
 		strftime(date, sizeof(date), "%Y%m%d@%H:%M:%S", &t);
@@ -77,12 +77,12 @@ regen_config(void)
 		printf(_("Old configuration file written to '%s'\n"), bk);
 	}
 
-	if (create_main_config_file(config_file) != EXIT_SUCCESS)
-		return EXIT_FAILURE;
+	if (create_main_config_file(config_file) != FUNC_SUCCESS)
+		return FUNC_FAILURE;
 
 	printf(_("New configuration file written to '%s'\n"), config_file);
 	reload_config();
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static void
@@ -483,7 +483,7 @@ dump_config(void)
 	print_config_value("WorkspaceNames", ws_names, s, DUMP_CONFIG_STR);
 	free(ws_names);
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Edit the config file, either via the mime function or via the first
@@ -494,7 +494,7 @@ edit_function(char **args)
 {
 	if (xargs.stealth_mode == 1) {
 		printf("%s: %s\n", PROGRAM_NAME, STEALTH_DISABLED);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (*args[0] == 'e') {
@@ -504,7 +504,7 @@ edit_function(char **args)
 
 	if (args[1] && IS_HELP(args[1])) {
 		printf("%s\n", EDIT_USAGE);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (args[1] && *args[1] == 'd' && strcmp(args[1], "dump") == 0)
@@ -515,7 +515,7 @@ edit_function(char **args)
 
 	if (config_ok == 0) {
 		xerror(_("%s: Cannot access the configuration file\n"), PROGRAM_NAME);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	char *opening_app = args[1];
@@ -537,7 +537,7 @@ edit_function(char **args)
 	}
 
 	const time_t prev_mtime = attr.st_mtime;
-	int ret = EXIT_SUCCESS;
+	int ret = FUNC_SUCCESS;
 
 	/* If there is an argument... */
 	if (opening_app) {
@@ -550,7 +550,7 @@ edit_function(char **args)
 		open_in_foreground = 0;
 	}
 
-	if (ret != EXIT_SUCCESS)
+	if (ret != FUNC_SUCCESS)
 		return ret;
 
 	/* Get modification time after opening the config file */
@@ -582,7 +582,7 @@ static int
 setenv_plugins_helper(void)
 {
 	if (getenv("CLIFM_PLUGINS_HELPER"))
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	struct stat attr;
 	if (plugins_dir && *plugins_dir) {
@@ -591,7 +591,7 @@ setenv_plugins_helper(void)
 
 		if (stat(_path, &attr) != -1
 		&& setenv("CLIFM_PLUGINS_HELPER", _path, 1) == 0)
-			return EXIT_SUCCESS;
+			return FUNC_SUCCESS;
 	}
 
 	if (data_dir && *data_dir) {
@@ -601,7 +601,7 @@ setenv_plugins_helper(void)
 
 		if (stat(_path, &attr) != -1
 		&& setenv("CLIFM_PLUGINS_HELPER", _path, 1) == 0)
-			return EXIT_SUCCESS;
+			return FUNC_SUCCESS;
 	}
 
 	char home_local[PATH_MAX + 1];
@@ -631,10 +631,10 @@ setenv_plugins_helper(void)
 	for (i = 0; _paths[i]; i++) {
 		if (stat(_paths[i], &attr) != -1
 		&& setenv("CLIFM_PLUGINS_HELPER", _paths[i], 1) == 0)
-			return EXIT_SUCCESS;
+			return FUNC_SUCCESS;
 	}
 
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 }
 
 static void
@@ -738,26 +738,26 @@ import_from_data_dir(const char *src_filename, char *dest)
 {
 	if (!data_dir || !src_filename || !dest
 	|| !*data_dir || !*src_filename || !*dest)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	struct stat attr;
 	char sys_file[PATH_MAX + 1];
 	snprintf(sys_file, sizeof(sys_file), "%s/%s/%s", data_dir, PROGRAM_NAME,
 		src_filename);
 	if (stat(sys_file, &attr) == -1)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	const mode_t old_umask = umask(0177);
 	char *cmd[] = {"cp", "--", sys_file, dest, NULL};
 	int ret = launch_execv(cmd, FOREGROUND, E_NOSTDERR);
 	umask(old_umask);
 
-	if (ret == EXIT_SUCCESS) {
+	if (ret == FUNC_SUCCESS) {
 		xchmod(dest, "0600", 1);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 }
 
 /* Create the keybindings file. */
@@ -765,16 +765,16 @@ int
 create_kbinds_file(void)
 {
 	if (config_ok == 0 || !kbinds_file)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	struct stat attr;
 	/* If the file already exists, do nothing */
-	if (stat(kbinds_file, &attr) == EXIT_SUCCESS)
-		return EXIT_SUCCESS;
+	if (stat(kbinds_file, &attr) == FUNC_SUCCESS)
+		return FUNC_SUCCESS;
 
 	/* If not, try to import it from DATADIR */
-	if (import_from_data_dir("keybindings.clifm", kbinds_file) == EXIT_SUCCESS)
-		return EXIT_SUCCESS;
+	if (import_from_data_dir("keybindings.clifm", kbinds_file) == FUNC_SUCCESS)
+		return FUNC_SUCCESS;
 
 	/* Else, create it */
 	int fd = 0;
@@ -782,7 +782,7 @@ create_kbinds_file(void)
 	if (!fp) {
 		err('e', PRINT_PROMPT, "%s: Cannot create keybindings file "
 			"'%s': %s\n", PROGRAM_NAME, kbinds_file, strerror(errno));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	fprintf(fp, "# Keybindings file for %s\n\n\
@@ -929,7 +929,7 @@ plugin1:\\C-y\n\n\
 	    PROGRAM_NAME);
 
 	fclose(fp);
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -939,13 +939,13 @@ create_preview_file(void)
 	snprintf(file, sizeof(file), "%s/preview.clifm", config_dir);
 
 	struct stat attr;
-	if (stat(file, &attr) == EXIT_SUCCESS)
-		return EXIT_SUCCESS;
+	if (stat(file, &attr) == FUNC_SUCCESS)
+		return FUNC_SUCCESS;
 
 #if !defined(__FreeBSD__) && !defined(__OpenBSD__) && !defined(__NetBSD__) \
 && !defined(__DragonFly__) && !defined(__APPLE__)
-	if (import_from_data_dir("preview.clifm", file) == EXIT_SUCCESS)
-		return EXIT_SUCCESS;
+	if (import_from_data_dir("preview.clifm", file) == FUNC_SUCCESS)
+		return FUNC_SUCCESS;
 #endif /* !BSD */
 
 	int fd = 0;
@@ -953,7 +953,7 @@ create_preview_file(void)
 	if (!fp) {
 		err('e', PRINT_PROMPT, "%s: Cannot create preview file "
 			"'%s': %s\n", PROGRAM_NAME, file, strerror(errno));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 #if defined(_BE_POSIX)
@@ -1025,7 +1025,7 @@ application/x-bittorrent=transmission-show --;\n\
 	lscmd);
 
 	fclose(fp);
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -1033,12 +1033,12 @@ create_actions_file(char *file)
 {
 	struct stat attr;
 	/* If the file already exists, do nothing */
-	if (stat(file, &attr) == EXIT_SUCCESS)
-		return EXIT_SUCCESS;
+	if (stat(file, &attr) == FUNC_SUCCESS)
+		return FUNC_SUCCESS;
 
 	/* If not, try to import it from DATADIR */
-	if (import_from_data_dir("actions.clifm", file) == EXIT_SUCCESS)
-		return EXIT_SUCCESS;
+	if (import_from_data_dir("actions.clifm", file) == FUNC_SUCCESS)
+		return FUNC_SUCCESS;
 
 	/* Else, create it */
 	int fd = 0;
@@ -1046,7 +1046,7 @@ create_actions_file(char *file)
 	if (!fp) {
 		err('e', PRINT_PROMPT, "%s: Cannot create actions file "
 			"'%s': %s\n", PROGRAM_NAME, file, strerror(errno));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	fprintf(fp, "######################\n"
@@ -1098,7 +1098,7 @@ create_actions_file(char *file)
 	    PROGRAM_NAME, PROGRAM_NAME);
 
 	fclose(fp);
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static char *
@@ -1151,9 +1151,9 @@ create_tmp_rootdir(void)
 	if (stat(tmp_root_dir, &a) != -1)
 		return tmp_root_dir;
 
-	int ret = EXIT_SUCCESS;
+	int ret = FUNC_SUCCESS;
 	char *cmd[] = {"mkdir", "-p", "--", tmp_root_dir, NULL};
-	if ((ret = launch_execv(cmd, FOREGROUND, E_NOSTDERR)) == EXIT_SUCCESS)
+	if ((ret = launch_execv(cmd, FOREGROUND, E_NOSTDERR)) == FUNC_SUCCESS)
 		return tmp_root_dir;
 
 	if (from_env == 0) /* Error creating P_tmpdir */
@@ -1170,7 +1170,7 @@ create_tmp_rootdir(void)
 		return tmp_root_dir;
 
 	char *cmd2[] = {"mkdir", "-p", "--", tmp_root_dir, NULL};
-	if (launch_execv(cmd2, FOREGROUND, E_NOSTDERR) == EXIT_SUCCESS)
+	if (launch_execv(cmd2, FOREGROUND, E_NOSTDERR) == FUNC_SUCCESS)
 		return tmp_root_dir;
 
 END: /* If everything fails, fallback to /tmp */
@@ -1448,13 +1448,13 @@ static int
 import_rl_file(void)
 {
 	if (!data_dir || !config_dir_gral)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	char dest[PATH_MAX + 1];
 	snprintf(dest, sizeof(dest), "%s/readline.clifm", config_dir_gral);
 	struct stat attr;
 	if (lstat(dest, &attr) == 0)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	return import_from_data_dir("readline.clifm", dest);
 }
@@ -1466,8 +1466,8 @@ create_main_config_file(char *file)
 	/* First, try to import it from DATADIR */
 	char src_filename[NAME_MAX];
 	snprintf(src_filename, sizeof(src_filename), "%src", PROGRAM_NAME);
-	if (import_from_data_dir(src_filename, file) == EXIT_SUCCESS)
-		return EXIT_SUCCESS;
+	if (import_from_data_dir(src_filename, file) == FUNC_SUCCESS)
+		return FUNC_SUCCESS;
 
 	/* If not found, create it */
 	int fd;
@@ -1477,7 +1477,7 @@ create_main_config_file(char *file)
 		err('e', PRINT_PROMPT, "%s: Cannot create configuration "
 			"file '%s': %s\nFalling back to default values\n",
 			PROGRAM_NAME, file, strerror(errno));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	fprintf(config_fp,
@@ -1879,7 +1879,7 @@ create_main_config_file(char *file)
 	    config_fp);
 
 	fclose(config_fp);
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -1892,13 +1892,13 @@ create_def_color_scheme256(void)
 	/* If the file already exists, do nothing */
 	struct stat attr;
 	if (stat(cscheme_file, &attr) != -1)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	/* Try to import it from data dir */
-	if (import_color_scheme(DEF_COLOR_SCHEME_256) == EXIT_SUCCESS)
-		return EXIT_SUCCESS;
+	if (import_color_scheme(DEF_COLOR_SCHEME_256) == FUNC_SUCCESS)
+		return FUNC_SUCCESS;
 
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 }
 
 static void
@@ -1920,7 +1920,7 @@ create_def_color_scheme(void)
 		return;
 
 	/* Try to import it from data dir */
-	if (import_color_scheme(DEF_COLOR_SCHEME) == EXIT_SUCCESS)
+	if (import_color_scheme(DEF_COLOR_SCHEME) == FUNC_SUCCESS)
 		return;
 
 	/* If cannot be imported either, create it with default values */
@@ -1990,17 +1990,17 @@ static int
 create_remotes_file(void)
 {
 	if (!remotes_file || !*remotes_file)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	struct stat attr;
 
 	/* If the file already exists, do nothing */
-	if (stat(remotes_file, &attr) == EXIT_SUCCESS)
-		return EXIT_SUCCESS;
+	if (stat(remotes_file, &attr) == FUNC_SUCCESS)
+		return FUNC_SUCCESS;
 
 	/* Let's try to copy the file from DATADIR */
-	if (import_from_data_dir("nets.clifm", remotes_file) == EXIT_SUCCESS)
-		return EXIT_SUCCESS;
+	if (import_from_data_dir("nets.clifm", remotes_file) == FUNC_SUCCESS)
+		return FUNC_SUCCESS;
 
 	/* If not in DATADIR, let's create a minimal file here */
 	int fd = 0;
@@ -2008,7 +2008,7 @@ create_remotes_file(void)
 	if (!fp) {
 		err('e', PRINT_PROMPT, "%s: Cannot create remotes file "
 			"'%s': %s\n", PROGRAM_NAME, remotes_file, strerror(errno));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	fprintf(fp, "#####################################\n"
@@ -2030,7 +2030,7 @@ create_remotes_file(void)
 		"# AutoUnmount=true\n\n", PROGRAM_NAME);
 
 	fclose(fp);
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -2038,17 +2038,17 @@ create_main_config_dir(void)
 {
 	/* Use the mkdir(1) to let it handle parent directories. */
 	char *tmp_cmd[] = {"mkdir", "-p", "--", config_dir, NULL};
-	if (launch_execv(tmp_cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS) {
+	if (launch_execv(tmp_cmd, FOREGROUND, E_NOSTDERR) != FUNC_SUCCESS) {
 		config_ok = 0;
 		err('e', PRINT_PROMPT, _("%s: Cannot create configuration "
 			"directory '%s': Bookmarks, commands logs, and "
 			"command history are disabled. Program messages won't be "
 			"persistent. Falling back to default options.\n"),
 			PROGRAM_NAME, config_dir);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static void
@@ -2082,7 +2082,7 @@ create_config_files(void)
 
 	/* If the config directory doesn't exist, create it. */
 	if (stat(config_dir, &attr) == -1
-	&& create_main_config_dir() == EXIT_FAILURE) {
+	&& create_main_config_dir() == FUNC_FAILURE) {
 		config_ok = 0;
 		return;
 	}
@@ -2101,7 +2101,7 @@ create_config_files(void)
 				 * #     TAGS DIR      #
 				 * #####################*/
 
-	if (stat(tags_dir, &attr) == -1 && xmkdir(tags_dir, S_IRWXU) == EXIT_FAILURE)
+	if (stat(tags_dir, &attr) == -1 && xmkdir(tags_dir, S_IRWXU) == FUNC_FAILURE)
 		err('w', PRINT_PROMPT, _("%s: %s: Cannot create tags directory. "
 			"Tag function disabled\n"),	PROGRAM_NAME, tags_dir);
 
@@ -2110,7 +2110,7 @@ create_config_files(void)
 				 * #####################*/
 
 	if (stat(config_file, &attr) == -1)
-		config_ok = create_main_config_file(config_file) == EXIT_SUCCESS ? 1 : 0;
+		config_ok = create_main_config_file(config_file) == FUNC_SUCCESS ? 1 : 0;
 
 	if (config_ok == 0)
 		return;
@@ -2127,7 +2127,7 @@ create_config_files(void)
 				 * ##################### */
 
 	if (stat(colors_dir, &attr) == -1
-	&& xmkdir(colors_dir, S_IRWXU) == EXIT_FAILURE)
+	&& xmkdir(colors_dir, S_IRWXU) == FUNC_FAILURE)
 		err('w', PRINT_PROMPT, _("%s: Cannot create colors "
 		"directory '%s': Falling back to the default color scheme\n"),
 		PROGRAM_NAME, colors_dir);
@@ -2140,7 +2140,7 @@ create_config_files(void)
 				 * #####################*/
 
 	if (stat(plugins_dir, &attr) == -1
-	&& xmkdir(plugins_dir, S_IRWXU) == EXIT_FAILURE)
+	&& xmkdir(plugins_dir, S_IRWXU) == FUNC_FAILURE)
 		err('e', PRINT_PROMPT, _("%s: Cannot create plugins "
 			"directory '%s': The actions function is disabled\n"),
 			PROGRAM_NAME, plugins_dir);
@@ -2161,7 +2161,7 @@ create_mime_file_anew(char *file)
 	if (!fp) {
 		err('e', PRINT_PROMPT, "%s: Cannot create mimelist file "
 			"'%s': %s\n", PROGRAM_NAME, file, strerror(errno));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	fprintf(fp, "                  ###################################\n\
@@ -2303,7 +2303,7 @@ X:application/x-bittorrent=rtorrent;transimission-gtk;transmission-qt;deluge-gtk
 .*=handlr open;mimeopen -n;rifle;mimeo;xdg-open;open;\n");
 
 	fclose(fp);
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static void
@@ -2326,17 +2326,17 @@ int
 create_mime_file(char *file, const int new_prof)
 {
 	if (!file || !*file)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	struct stat attr;
-	if (stat(file, &attr) == EXIT_SUCCESS)
-		return EXIT_SUCCESS;
+	if (stat(file, &attr) == FUNC_SUCCESS)
+		return FUNC_SUCCESS;
 
 	int ret = import_from_data_dir("mimelist.clifm", file);
-	if (ret != EXIT_SUCCESS)
+	if (ret != FUNC_SUCCESS)
 		ret = create_mime_file_anew(file);
 
-	if (new_prof == 0 && ret == EXIT_SUCCESS)
+	if (new_prof == 0 && ret == FUNC_SUCCESS)
 		print_mime_file_msg(file);
 
 	return ret;
@@ -2346,18 +2346,18 @@ int
 create_bm_file(void)
 {
 	if (!bm_file)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	struct stat attr;
 	if (stat(bm_file, &attr) != -1)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	int fd = 0;
 	FILE *fp = open_fwrite(bm_file, &fd);
 	if (!fp) {
 		err('e', PRINT_PROMPT, "%s: Cannot create bookmarks file "
 			"'%s': %s\n", PROGRAM_NAME, bm_file, strerror(errno));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	fprintf(fp, "### This is the bookmarks file for %s ###\n\n"
@@ -2371,7 +2371,7 @@ create_bm_file(void)
 		PROGRAM_NAME, config_dir ? config_dir : "/path/to/file");
 
 	fclose(fp);
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 #ifndef CLIFM_SUCKLESS
@@ -2405,7 +2405,7 @@ set_fzf_preview_value(const char *line, int *var)
 			*var = 0;
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static void
@@ -2533,7 +2533,7 @@ set_files_filter(const char *line)
 	free(filter.str);
 	filter.str = savestring(q, l);
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static inline void
@@ -2745,7 +2745,7 @@ set_histignore_pattern(char *str)
 	}
 
 	int ret = regcomp(&regex_hist, pattern, REG_NOSUB | REG_EXTENDED);
-	if (ret != EXIT_SUCCESS) {
+	if (ret != FUNC_SUCCESS) {
 		xregerror("histignore", pattern, ret, regex_hist, 1);
 		regfree(&regex_hist);
 		return;
@@ -2773,7 +2773,7 @@ set_dirhistignore_pattern(char *str)
 	}
 
 	int ret = regcomp(&regex_dirhist, pattern, REG_NOSUB | REG_EXTENDED);
-	if (ret != EXIT_SUCCESS) {
+	if (ret != FUNC_SUCCESS) {
 		xregerror("dirhistignore", pattern, ret, regex_dirhist, 1);
 		regfree(&regex_dirhist);
 		return;
@@ -3260,7 +3260,7 @@ read_config(void)
 	if (filter.str && filter.type == FILTER_FILE_NAME) {
 		regfree(&regex_exp);
 		ret = regcomp(&regex_exp, filter.str, REG_NOSUB | REG_EXTENDED);
-		if (ret != EXIT_SUCCESS) {
+		if (ret != FUNC_SUCCESS) {
 			err('w', PRINT_PROMPT, _("%s: '%s': Invalid regular "
 				"expression\n"), PROGRAM_NAME, filter.str);
 			free(filter.str);
@@ -3361,7 +3361,7 @@ create_trash_dirs(void)
 	char *cmd[] = {"mkdir", "-p", "--", trash_files_dir, trash_info_dir, NULL};
 	const int ret = launch_execv(cmd, FOREGROUND, E_NOSTDERR);
 
-	if (ret != EXIT_SUCCESS) {
+	if (ret != FUNC_SUCCESS) {
 		trash_ok = 0;
 		err('w', PRINT_PROMPT, _("%s: '%s': Cannot create the trash "
 			"directory (or one of its subdirectories: files/ and info/).\n"
@@ -3740,5 +3740,5 @@ reload_config(void)
 
 	dir_changed = 1;
 	set_env(1);
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }

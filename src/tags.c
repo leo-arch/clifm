@@ -49,7 +49,7 @@ print_tag_creation_error(const char *link, const mode_t mode)
 	else
 		xerror(_("tag: '%s': Cannot create tag: file already exists\n"), link);
 
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 }
 
 static int
@@ -64,14 +64,14 @@ print_no_tags(void)
 {
 	printf(_("%s: No tags found, Use 'tag new' to create new "
 		"tags\n"), PROGRAM_NAME);
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
 print_no_such_tag(const char *name)
 {
 	xerror(_("tag: '%s': No such tag\n"), name);
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 }
 
 static int
@@ -167,7 +167,7 @@ list_files_in_tag(char *name)
 		for (i = 0; i < (size_t)n; i++)
 			free(t[i]);
 		free(t);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	for (i = 0; i < (size_t)n; i++) {
@@ -184,7 +184,7 @@ list_files_in_tag(char *name)
 	}
 	free(t);
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Return the length of longest tag name.
@@ -270,17 +270,17 @@ list_tags_full(void)
 {
 	if (tags_n == 0) {
 		puts(_("tag: No tags"));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	size_t i;
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 
 	for (i = 0; tags[i]; i++) {
 		printf(_("Files tagged as %s%s%s:\n"), conf.colorize == 1
 			? BOLD : "'", tags[i], conf.colorize == 1 ? NC : "'");
-		if (list_files_in_tag(tags[i]) != EXIT_SUCCESS)
-			exit_status = EXIT_FAILURE;
+		if (list_files_in_tag(tags[i]) != FUNC_SUCCESS)
+			exit_status = FUNC_FAILURE;
 
 		if (tags[i + 1])
 			putchar('\n');
@@ -296,7 +296,7 @@ list_tags(char **args)
 		return print_no_tags();
 
 	size_t i;
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 
 	if (!args || !args[0] || !args[1] || !args[2]) {
 		/* 'tag list': list all tags */
@@ -313,7 +313,7 @@ list_tags(char **args)
 				printf("%-*s  -\n", pad, tags[i]);
 		}
 
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	for (i = 2; args[i]; i++) {
@@ -339,8 +339,8 @@ list_tags(char **args)
 			printf(_("Files tagged as %s%s%s%s:\n"), conf.colorize == 1 ? BOLD : "'",
 				args[i], conf.colorize == 1 ? BOLD : "'",
 				conf.colorize == 1 ? NC : "'");
-			if (list_files_in_tag(args[i]) == EXIT_FAILURE)
-				exit_status = EXIT_FAILURE;
+			if (list_files_in_tag(args[i]) == FUNC_FAILURE)
+				exit_status = FUNC_FAILURE;
 		}
 
 		if (args[i + 1])
@@ -362,10 +362,10 @@ static int
 create_tags(char **args)
 {
 	if (!args || !args[1] || !args[2])
-		return print_usage(EXIT_FAILURE);
+		return print_usage(FUNC_FAILURE);
 
 	size_t i;
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 
 	for (i = 2; args[i]; i++) {
 		char dir[PATH_MAX + 1];
@@ -383,14 +383,14 @@ create_tags(char **args)
 		struct stat a;
 		if (lstat(dir, &a) != -1) {
 			xerror(_("tag: '%s': Tag already exists\n"), args[i]);
-			exit_status = EXIT_FAILURE;
+			exit_status = FUNC_FAILURE;
 			continue;
 		}
 
-		if (xmkdir(dir, S_IRWXU) == EXIT_FAILURE) {
+		if (xmkdir(dir, S_IRWXU) == FUNC_FAILURE) {
 			xerror(_("tag: '%s': Error creating tag: %s\n"),
 				args[i], strerror(errno));
-			exit_status = EXIT_FAILURE;
+			exit_status = FUNC_FAILURE;
 			continue;
 		}
 
@@ -408,7 +408,7 @@ remove_tags(char **args)
 	if (tags_n == 0)
 		return print_no_tags();
 
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 	size_t i;
 	for (i = 2; args[i]; i++) {
 		char *p = strchr(args[i], '\\');
@@ -428,11 +428,11 @@ remove_tags(char **args)
 			return print_no_such_tag(args[i]);
 
 		char *cmd[] = {"rm", "-r", "--", dir, NULL};
-		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) == EXIT_SUCCESS) {
+		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) == FUNC_SUCCESS) {
 			printf(_("'%s': Successfully removed tag\n"), args[i]);
 			reload_tags();
 		} else {
-			exit_status = EXIT_FAILURE;
+			exit_status = FUNC_FAILURE;
 		}
 	}
 
@@ -446,7 +446,7 @@ tag_file(char *name, char *tag)
 	struct stat a;
 	if (lstat(name, &a) == -1) {
 		xerror("tag: '%s': %s\n", name, strerror(errno));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	int new_tag = 0;
@@ -457,11 +457,11 @@ tag_file(char *name, char *tag)
 	snprintf(dir, sizeof(dir), "%s/%s", tags_dir, p ? p : tag);
 
 	if (stat(dir, &a) == -1) {
-		if (xmkdir(dir, S_IRWXU) != EXIT_SUCCESS) {
+		if (xmkdir(dir, S_IRWXU) != FUNC_SUCCESS) {
 			xerror(_("tag: '%s': Cannot create tag: %s\n"),
 				p ? p : tag, strerror(errno));
 			free(p);
-			return EXIT_FAILURE;
+			return FUNC_FAILURE;
 		}
 		new_tag = 1;
 	}
@@ -492,7 +492,7 @@ tag_file(char *name, char *tag)
 	if (symlink(*name_path ? name_path : name, link) == -1)
 		return print_symlink_error(name);
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Return an array with indices of tag names (:TAG) found in the ARGS array.
@@ -532,7 +532,7 @@ tag_files(char **args)
 		free(tag_names);
 		xerror("%s\n", _("tag: No tag specified. Specify a tag via :TAG. "
 			"E.g. 'tag add FILE1 FILE2 :TAG'"));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	size_t i, j, n = 0;
@@ -552,7 +552,7 @@ tag_files(char **args)
 			if (strchr(args[j], '\\'))
 				p = unescape_str(args[j], 0);
 
-			if (tag_file(p ? p : args[j], args[tag_names[i]] + 1) != EXIT_SUCCESS)
+			if (tag_file(p ? p : args[j], args[tag_names[i]] + 1) != FUNC_SUCCESS)
 				if (n > 0) --n;
 			free(p);
 		}
@@ -562,7 +562,7 @@ tag_files(char **args)
 
 	if (n > 0)
 		printf(_("Successfully tagged %zu file(s)\n"), n);
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Untag file names found in ARGS tagged as ARGS[N]. */
@@ -570,9 +570,9 @@ static int
 untag(char **args, const size_t n, size_t *t)
 {
 	if (!args || !args[1])
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 	size_t i;
 	for (i = 2; args[i]; i++) {
 		if (i == n || (*args[i] == ':' && *(args[1] + 1)))
@@ -623,13 +623,13 @@ untag(char **args, const size_t n, size_t *t)
 static int
 untag_files(char **args)
 {
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 	size_t i, n = 0;
 
 	for (i = 1; args[i]; i++) {
 		if (*args[i] == ':' && *(args[i] + 1)
-		&& untag(args, i, &n) == EXIT_FAILURE)
-			exit_status = EXIT_FAILURE;
+		&& untag(args, i, &n) == FUNC_FAILURE)
+			exit_status = FUNC_FAILURE;
 	}
 
 	if (n > 0)
@@ -643,7 +643,7 @@ static int
 rename_tag(char **args)
 {
 	if (!args || !args[1] || !args[2] || !args[3])
-		return print_usage(EXIT_FAILURE);
+		return print_usage(FUNC_FAILURE);
 
 	char *old = args[2], *new = args[3];
 	if (!is_tag(old))
@@ -651,7 +651,7 @@ rename_tag(char **args)
 
 	if (*old == *new && strcmp(old, new) == 0) {
 		xerror("%s\n", "tag: New and old file names are the same");
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	char old_dir[PATH_MAX + 1];
@@ -667,7 +667,7 @@ rename_tag(char **args)
 
 	puts("Successfully renamed tag");
 	reload_tags();
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Move all (tagged) files (symlinks) in SRC into DST.
@@ -675,7 +675,7 @@ rename_tag(char **args)
 static int
 recursive_mv_tags(const char *src, const char *dst)
 {
-	int i, n, exit_status = EXIT_SUCCESS, ret;
+	int i, n, exit_status = FUNC_SUCCESS, ret;
 	char src_dir[PATH_MAX + 1];
 	char dst_dir[PATH_MAX + 1];
 	struct dirent **a = (struct dirent **)NULL;
@@ -698,7 +698,7 @@ recursive_mv_tags(const char *src, const char *dst)
 		char src_file[PATH_MAX + NAME_MAX + 2];
 		snprintf(src_file, sizeof(src_file), "%s/%s", src_dir, a[i]->d_name);
 		char *cmd[] = {"mv", "--", src_file, dst_dir, NULL};
-		if ((ret = launch_execv(cmd, FOREGROUND, E_NOFLAG)) != EXIT_SUCCESS)
+		if ((ret = launch_execv(cmd, FOREGROUND, E_NOFLAG)) != FUNC_SUCCESS)
 			exit_status = ret;
 		free(a[i]);
 	}
@@ -712,7 +712,7 @@ static int
 merge_tags(char **args)
 {
 	if (!args || !args[1] || !args[2] || !args[3])
-		return print_usage(EXIT_FAILURE);
+		return print_usage(FUNC_FAILURE);
 
 	if (!is_tag(args[2]))
 		return print_no_such_tag(args[2]);
@@ -723,12 +723,12 @@ merge_tags(char **args)
 
 	if (strcmp(src, dst) == 0) {
 		xerror("%s\n", _("tag: Source and destiny are the same tag"));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	errno = 0;
 	int exit_status = recursive_mv_tags(src, dst);
-	if (exit_status != EXIT_SUCCESS) {
+	if (exit_status != FUNC_SUCCESS) {
 		xerror("%s\n", _("tag: Cannot merge tags: error moving tagged files"));
 		return exit_status;
 	}
@@ -745,7 +745,7 @@ merge_tags(char **args)
 		conf.colorize == 1 ? BOLD : "", src, df_c,
 		conf.colorize == 1 ? BOLD : "", dst, df_c);
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Perform the following expansions:
@@ -818,7 +818,7 @@ is_tag_help(char **args)
 int
 tags_function(char **args)
 {
-	int exit_status = EXIT_SUCCESS, free_args = 0;
+	int exit_status = FUNC_SUCCESS, free_args = 0;
 	char **a = args;
 
 	if (is_tag_help(a))

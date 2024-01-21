@@ -103,8 +103,8 @@ is_url(const char *url)
 {
 	if ((*url == 'w' && url[1] == 'w' && url[2] == 'w' && url[3] == '.'
 	&& url[4]) || strstr(url, "://") != NULL)
-		return EXIT_SUCCESS;
-	return EXIT_FAILURE;
+		return FUNC_SUCCESS;
+	return FUNC_FAILURE;
 }
 
 /* See https://github.com/termstandard/colors#truecolor-detection */
@@ -762,7 +762,7 @@ int
 check_regex(char *str)
 {
 	if (!str || !*str)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	int char_found = 0;
 	char *p = str;
@@ -780,9 +780,9 @@ check_regex(char *str)
 
 	/* And if STR is not a file name, take it as a possible regex */
 	if (char_found == 1 && access(str, F_OK) == -1)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 }
 
 /* Returns the parsed aliased command in an array of strings if

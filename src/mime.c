@@ -168,7 +168,7 @@ skip_line(char *line, char **pattern, char **cmds)
 static int
 test_pattern(const char *pattern, const char *filename, const char *mime)
 {
-	int ret = EXIT_FAILURE;
+	int ret = FUNC_FAILURE;
 	regex_t regex;
 
 	if (filename && (*pattern == 'N' || *pattern == 'E')
@@ -176,12 +176,12 @@ test_pattern(const char *pattern, const char *filename, const char *mime)
 		if (regcomp(&regex, pattern + 2,
 		REG_NOSUB | REG_EXTENDED | REG_ICASE) == 0
 		&& regexec(&regex, filename, 0, NULL, 0) == 0)
-			ret = EXIT_SUCCESS;
+			ret = FUNC_SUCCESS;
 	} else {
 		if (regcomp(&regex, pattern, REG_NOSUB | REG_EXTENDED) == 0
 		&& regexec(&regex, mime, 0, NULL, 0) == 0) {
 			mime_match = 1;
-			ret = EXIT_SUCCESS;
+			ret = FUNC_SUCCESS;
 		}
 	}
 
@@ -279,7 +279,7 @@ retrieve_app(char *line)
 		}
 
 		if (xargs.secure_cmds == 1
-		&& sanitize_cmd(app, SNT_MIME) != EXIT_SUCCESS) {
+		&& sanitize_cmd(app, SNT_MIME) != FUNC_SUCCESS) {
 			free(app);
 			continue;
 		}
@@ -345,7 +345,7 @@ get_app(const char *mime, const char *filename)
 
 		mime_match = 0;
 		/* Global. Are we matching a MIME type? It will be set by test_pattern. */
-		if (test_pattern(pattern, filename, mime) == EXIT_FAILURE)
+		if (test_pattern(pattern, filename, mime) == FUNC_FAILURE)
 			continue;
 
 		if ((app = retrieve_app(cmds)))
@@ -446,7 +446,7 @@ get_mime(char *file)
 	close(stdout_bk);
 	close(stderr_bk);
 
-	if (ret != EXIT_SUCCESS
+	if (ret != FUNC_SUCCESS
 	|| (fp_out = fopen(tmp_file, "r")) == NULL) {
 		unlink(tmp_file);
 		return (char *)NULL;
@@ -610,18 +610,18 @@ mime_edit(char **args)
 {
 	if (xargs.stealth_mode == 1) {
 		printf("%s: mime: %s\n", PROGRAM_NAME, STEALTH_DISABLED);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (!mime_file || !*mime_file) {
 		xerror("%s: The mimelist file name is undefined\n", err_name);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 	struct stat a;
 	if (stat(mime_file, &a) == -1) {
-		if (create_mime_file(mime_file, 1) != EXIT_SUCCESS) {
+		if (create_mime_file(mime_file, 1) != FUNC_SUCCESS) {
 			xerror("%s: Cannot access the mimelist file: %s\n",
 				err_name, strerror(ENOENT));
 			return ENOENT;
@@ -639,14 +639,14 @@ mime_edit(char **args)
 		open_in_foreground = 1;
 		if (mime_open(cmd) != 0) {
 			fputs(_("Try 'mm edit APPLICATION'\n"), stderr);
-			exit_status = EXIT_FAILURE;
+			exit_status = FUNC_FAILURE;
 		}
 		open_in_foreground = 0;
 
 	} else {
 		char *cmd[] = {args[2], mime_file, NULL};
 		exit_status = launch_execv(cmd, FOREGROUND, E_NOFLAG);
-		if (exit_status != EXIT_SUCCESS)
+		if (exit_status != FUNC_SUCCESS)
 			return exit_status;
 	}
 
@@ -784,7 +784,7 @@ run_mime_app(char **app, char **fpath)
 #ifndef __CYGWIN__
 		free(*fpath);
 #endif /* !__CYGWIN__ */
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	int exec_flags = 0;
@@ -897,7 +897,7 @@ static int
 mime_list_open(char **apps, char *file)
 {
 	if (!apps || !file)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	size_t i;
 	for (i = 0; apps[i]; i++);
@@ -910,14 +910,14 @@ mime_list_open(char **apps, char *file)
 	if (n == -1) {
 		if (conf.autols == 1)
 			reload_dirlist();
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	char *app = apps[n - 1];
 	if (!app)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
-	int ret = EXIT_FAILURE;
+	int ret = FUNC_FAILURE;
 
 	if (strchr(app, ' '))
 		ret = split_and_run(app, file);
@@ -1204,7 +1204,7 @@ run_cmd_noargs(char *arg, char *name)
 {
 	errno = 0;
 	char *cmd[] = {arg, name, NULL};
-	int ret = EXIT_SUCCESS;
+	int ret = FUNC_SUCCESS;
 
 #ifndef _NO_ARCHIVING
 	if (*arg == 'a' && arg[1] == 'd' && !arg[2])
@@ -1215,8 +1215,8 @@ run_cmd_noargs(char *arg, char *name)
 	ret = launch_execv(cmd, bg_proc ? BACKGROUND : FOREGROUND, E_NOSTDERR);
 #endif /* !_NO_ARCHIVING */
 
-	if (ret == EXIT_SUCCESS)
-		return EXIT_SUCCESS;
+	if (ret == FUNC_SUCCESS)
+		return FUNC_SUCCESS;
 
 	xerror("%s: %s: %s\n", err_name, arg,
 		ret == E_NOTFOUND ? NOTFOUND_MSG
@@ -1273,7 +1273,7 @@ static int
 run_cmd_plus_args(char **args, char *name)
 {
 	if (!args || !args[0])
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	size_t i;
 	for (i = 0; args[i]; i++);
@@ -1311,7 +1311,7 @@ join_and_run(char **args, char *name)
 	free(deq_str);
 
 	if (!ss)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	const int ret = run_cmd_plus_args(ss, name);
 
@@ -1330,13 +1330,13 @@ int
 mime_open_with(char *filename, char **args)
 {
 	if (!filename || !mime_file)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	err_name = "lira";
 
 	char *name = normalize_path(filename, strlen(filename));
 	if (!name)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	struct stat a;
 	if (lstat(name, &a) == -1) {
@@ -1375,7 +1375,7 @@ mime_open_with(char *filename, char **args)
 
 	if (!apps) {
 		free(name);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	const int ret = mime_list_open(apps, name);
@@ -1391,7 +1391,7 @@ mime_open_with(char *filename, char **args)
 FAIL:
 	free(mime);
 	free(name);
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 }
 
 /* Open URL using the application associated to text/html MIME-type in
@@ -1401,13 +1401,13 @@ int
 mime_open_url(char *url)
 {
 	if (!url || !*url)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	err_name = (xargs.open == 1 || xargs.preview == 1) ? PROGRAM_NAME : "lira";
 
 	char *app = get_app("text/html", 0);
 	if (!app) /* The error message might not be printed by get_app(). Fix. */
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	char *p = strchr(app, ' ');
 	if (p)
@@ -1434,10 +1434,10 @@ import_mime(void)
 		printf(_("%d MIME association(s) imported from the system.\n"
 			"File stored as '%s'\nAdd these new associations to your mimelist "
 			"file running 'mm edit'.\n"), mime_defs, new);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 }
 
 static int
@@ -1445,7 +1445,7 @@ mime_info(char *arg, char **fpath, char **deq)
 {
 	if (!arg) {
 		fprintf(stderr, "%s\n", _(MIME_USAGE));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	if (strchr(arg, '\\')) {
@@ -1461,7 +1461,7 @@ mime_info(char *arg, char **fpath, char **deq)
 		const int isnum = is_number(arg);
 		xerror("%s: '%s': %s\n", err_name, arg, isnum == 1
 			? _("No such ELN") : strerror(errno));
-		return isnum == 1 ? EXIT_FAILURE : errno;
+		return isnum == 1 ? FUNC_FAILURE : errno;
 	}
 
 	if (access(*fpath, R_OK) == -1) {
@@ -1471,7 +1471,7 @@ mime_info(char *arg, char **fpath, char **deq)
 		return errno;
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Get the full path of the file to be opened by mime
@@ -1501,7 +1501,7 @@ get_open_file_path(char **args, char **fpath, char **deq)
 		}
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Handle mime when no opening app has been found */
@@ -1513,7 +1513,7 @@ handle_no_app(const int info, char **fpath, char **mime, const char *arg)
 		 * preview.clifm file. */
 		xerror(_("shotgun: '%s': No associated application found\n"
 			"Fix this in the configuration file:\n%s\n"), arg, mime_file);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	if (info) {
@@ -1542,7 +1542,7 @@ handle_no_app(const int info, char **fpath, char **mime, const char *arg)
 	free(*fpath);
 	free(*mime);
 
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 }
 
 static int
@@ -1550,7 +1550,7 @@ print_error_no_mime(char **fpath)
 {
 	xerror(_("%s: Error getting mime-type\n"), err_name);
 	free(*fpath);
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 }
 
 static void
@@ -1575,7 +1575,7 @@ print_mime_info(char **app, char **fpath, char **mime)
 	free(*mime);
 	free(*app);
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 #ifndef _NO_ARCHIVING
@@ -1601,11 +1601,11 @@ check_file_cmd(void)
 	if (!p) {
 		xerror("%s: Cannot retrieve MIME type: 'file' command "
 			"not found\n", err_name);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	free(p);
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 #endif /* _NO_MAGIC */
 
@@ -1613,7 +1613,7 @@ static int
 print_mime_help(void)
 {
 	puts(_(MIME_USAGE));
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Open a file according to the application associated to its MIME type
@@ -1640,30 +1640,30 @@ mime_open(char **args)
 
 	if (*args[1] == 'i' && strcmp(args[1], "info") == 0) {
 		const int ret = mime_info(args[2], &file_path, &deq_file);
-		if (ret != EXIT_SUCCESS)
+		if (ret != FUNC_SUCCESS)
 			return ret;
 		info = 1;
 		file_index = 2;
 
 	} else {
 		const int ret = get_open_file_path(args, &file_path, &deq_file);
-		if (ret != EXIT_SUCCESS)
+		if (ret != FUNC_SUCCESS)
 			return ret;
 		file_index = 1;
 	}
 
 	if (!file_path) {
 		xerror("%s: %s\n", args[file_index], strerror(errno));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	/* Get file's MIME type */
 #ifndef _NO_MAGIC
 	char *mime = xmagic(file_path, MIME_TYPE);
 #else
-	if (check_file_cmd() == EXIT_FAILURE) {
+	if (check_file_cmd() == FUNC_FAILURE) {
 		free(file_path);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 	char *mime = get_mime(file_path);
 #endif /* !_NO_MAGIC */

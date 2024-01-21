@@ -138,32 +138,32 @@ unmount_dev(const size_t i, const int n)
 	if (xargs.mount_cmd == UNSET) {
 		xerror(_("%s: No mount application found. Install either "
 			"udevil or udisks2\n"), PROGRAM_NAME);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	if ((unsigned int)n + (unsigned int)1 < (unsigned int)1 || n + 1 > (int)i) {
 		xerror(_("%s: %d: Invalid ELN\n"), PROGRAM_NAME, n + 1);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	char *mnt = media[n].mnt;
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 
 	/* Get out of mountpoint before unmounting */
 	const size_t mlen = strlen(mnt);
 	if (strncmp(mnt, workspaces[cur_ws].path, mlen) == 0) {
 		char *cmd[] = {"b", NULL};
-		if (back_function(cmd) == EXIT_FAILURE)
+		if (back_function(cmd) == FUNC_FAILURE)
 			cd_function(NULL, CD_PRINT_ERROR);
 		exit_status = (-1);
 	}
 
 	char *cmd[] = {xargs.mount_cmd == MNT_UDISKS2 ? "udisksctl" : "udevil",
 			"unmount", "-b", media[n].dev, NULL};
-	if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
-		exit_status = EXIT_FAILURE;
+	if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
+		exit_status = FUNC_FAILURE;
 
-	if (exit_status != EXIT_FAILURE && xargs.mount_cmd == MNT_UDEVIL)
+	if (exit_status != FUNC_FAILURE && xargs.mount_cmd == MNT_UDEVIL)
 		printf(_("%s: Unmounted %s\n"), PROGRAM_NAME, media[n].dev);
 
 	return exit_status;
@@ -272,7 +272,7 @@ list_mounted_devs(const int mode)
 	FILE *fp = setmntent(_PATH_MOUNTED, "r");
 	if (!fp) {
 		xerror("mp: setmntent: %s: %s\n", _PATH_MOUNTED, strerror(errno));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	while ((ent = getmntent(fp)) != NULL) {
@@ -304,7 +304,7 @@ list_mounted_devs(const int mode)
 	media[mp_n].mnt = (char *)NULL;
 	media[mp_n].label = (char *)NULL;
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Mount device and store mountpoint (at media[N]). */
@@ -314,7 +314,7 @@ mount_dev(const int n)
 	if (xargs.mount_cmd == UNSET) {
 		xerror(_("%s: No mount application found. Install either "
 			"udevil or udisks2\n"), PROGRAM_NAME);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	char file[PATH_MAX + 1];
@@ -323,7 +323,7 @@ mount_dev(const int n)
 
 	int fd = mkstemp(file);
 	if (fd == -1)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	int stdout_bk = dup(STDOUT_FILENO); /* Save original stdout */
 	dup2(fd, STDOUT_FILENO); /* Redirect stdout to the desired file */
@@ -343,7 +343,7 @@ mount_dev(const int n)
 	FILE *fp = open_fread(file, &fd);
 	if (!fp) {
 		unlink(file);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	char out_line[PATH_MAX + 1]; *out_line = '\0';
@@ -351,7 +351,7 @@ mount_dev(const int n)
 		/* Error is printed by the mount command itself */
 		fclose(fp);
 		unlink(file);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	fclose(fp);
@@ -361,7 +361,7 @@ mount_dev(const int n)
 	char *p = strstr(out_line, " at ");
 	if (!p || !p[1] || !p[2] || !p[3] || p[4] != '/') {
 		xerror(_("%s: Error retrieving mountpoint\n"), PROGRAM_NAME);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 	p += 4;
 
@@ -374,7 +374,7 @@ mount_dev(const int n)
 
 	media[n].mnt = savestring(p, plen);
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 #endif /* HAVE_PROC_MOUNTS */
 
@@ -396,17 +396,17 @@ static int
 print_dev_info(const int n)
 {
 	if (!media[n].dev || xargs.mount_cmd == UNSET)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 	if (xargs.mount_cmd == MNT_UDEVIL) {
 		char *cmd[] = {"udevil", "info", media[n].dev, NULL};
-		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
-			exit_status = EXIT_FAILURE;
+		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
+			exit_status = FUNC_FAILURE;
 	} else {
 		char *cmd[] = {"udisksctl", "info", "-b", media[n].dev, NULL};
-		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
-			exit_status = EXIT_FAILURE;
+		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
+			exit_status = FUNC_FAILURE;
 	}
 
 	return exit_status;
@@ -509,7 +509,7 @@ print_mnt_info(const int n)
 {
 	const int exit_status = print_dev_info(n);
 
-	if (exit_status == EXIT_SUCCESS)
+	if (exit_status == FUNC_SUCCESS)
 		press_any_key_to_continue(1);
 
 	free_media();
@@ -569,20 +569,20 @@ media_menu(const int mode)
 #if defined(__HAIKU__)
 	xerror(_("%s: This feature is not available on Haiku\n"),
 		mode == MEDIA_LIST ? _("mountpoints") : _("media"));
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 #endif /* __HAIKU__ */
 
 #ifndef HAVE_PROC_MOUNTS
 	if (mode == MEDIA_MOUNT) {
 		xerror("%s\n", _("media: Function only available on Linux systems"));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 #endif /* HAVE_PROC_MOUNTS */
 
 	if (mode == MEDIA_MOUNT && xargs.mount_cmd == UNSET) {
 		xerror("%s\n", _("media: No mount application found. Install either "
 			"udevil or udisks2"));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 #ifdef HAVE_PROC_MOUNTS
@@ -596,10 +596,10 @@ media_menu(const int mode)
 	mp_n = 0;
 
 #ifdef HAVE_PROC_MOUNTS
-	if (list_mounted_devs(mode) == EXIT_FAILURE) {
+	if (list_mounted_devs(mode) == FUNC_FAILURE) {
 		free(media);
 		media = (struct mnt_t *)NULL;
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	const size_t mp_n_bk = mp_n;
@@ -628,7 +628,7 @@ media_menu(const int mode)
 #else
 		fputs(_("mp: There are no available mountpoints\n"), stdout);
 #endif /* HAVE_PROC_MOUNTS */
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) \
@@ -640,7 +640,7 @@ media_menu(const int mode)
 	int info = 0;
 	const int n = get_mnt_input(mode, &info);
 
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 	if (n == -1)
 		goto EXIT;
 
@@ -654,23 +654,23 @@ media_menu(const int mode)
 	if (mode == MEDIA_MOUNT) {
 		if (!media[n].mnt) {
 			/* The device is unmounted: mount it */
-			if (mount_dev(n) == EXIT_FAILURE) {
-				exit_status = EXIT_FAILURE;
+			if (mount_dev(n) == FUNC_FAILURE) {
+				exit_status = FUNC_FAILURE;
 				goto EXIT;
 			}
 		} else {
 			/* The device is mounted: unmount it */
 			int ret = unmount_dev(mp_n_bk, n);
-			if (ret == EXIT_FAILURE)
-				exit_status = EXIT_FAILURE;
+			if (ret == FUNC_FAILURE)
+				exit_status = FUNC_FAILURE;
 			goto EXIT;
 		}
 	}
 #endif /* HAVE_PROC_MOUNTS */
 
-	if (xchdir(media[n].mnt, SET_TITLE) != EXIT_SUCCESS) {
+	if (xchdir(media[n].mnt, SET_TITLE) != FUNC_SUCCESS) {
 		xerror("%s: '%s': %s\n", PROGRAM_NAME, media[n].mnt, strerror(errno));
-		exit_status = EXIT_FAILURE;
+		exit_status = FUNC_FAILURE;
 		goto EXIT;
 	}
 

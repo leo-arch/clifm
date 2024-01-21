@@ -378,7 +378,7 @@ set_start_path(void)
 		setenv("OLDPWD", pwd, 1);
 
 	dir_changed = 1;
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -414,10 +414,10 @@ try_standard_data_dirs(void)
 			continue;
 
 		data_dir = savestring(data_dirs[i], strlen(data_dirs[i]));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 }
 
 static char *
@@ -515,7 +515,7 @@ static int
 get_data_dir_from_path(char *arg)
 {
 	if (!arg || !*arg)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	char *datadir = (char *)NULL;
 	char *name = *arg == '~' ? tilde_expand(arg) : arg;
@@ -533,10 +533,10 @@ END:
 		free(name);
 
 	if (!datadir)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	data_dir = datadir;
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Get the system data directory (usually /usr/local/share),
@@ -561,10 +561,10 @@ get_data_dir(void)
 	}
 #endif /* CLIFM_DATADIR */
 
-	if (try_standard_data_dirs() == EXIT_SUCCESS)
+	if (try_standard_data_dirs() == FUNC_SUCCESS)
 		return;
 
-	if (get_data_dir_from_path(argv_bk[0]) == EXIT_SUCCESS)
+	if (get_data_dir_from_path(argv_bk[0]) == FUNC_SUCCESS)
 		return;
 
 	err('w', PRINT_PROMPT, _("%s: No data directory found. Data files, "
@@ -619,7 +619,7 @@ open_reg_exit(char *filename, const int url, const int preview)
 		path_n = get_path_env(0);
 
 #ifndef _NO_LIRA
-	if (url == 1 && mime_open_url(filename) == EXIT_SUCCESS)
+	if (url == 1 && mime_open_url(filename) == FUNC_SUCCESS)
 		exit(EXIT_SUCCESS);
 #else
 	UNUSED(url);
@@ -693,7 +693,7 @@ open_preview_file(char *file, const int mode)
 		goto RUN;
 	}
 
-	if (is_url(fpath) == EXIT_FAILURE) {
+	if (is_url(fpath) == FUNC_FAILURE) {
 		url = 0;
 		if (*fpath != '~' && stat(fpath, &attr) == -1) {
 			xerror("%s: '%s': %s\n", PROGRAM_NAME, fpath, strerror(errno));
@@ -820,7 +820,7 @@ set_alt_config_dir(char *dir)
 	if (stat(dir, &attr) == -1) {
 		char *tmp_cmd[] = {"mkdir", "-p", "--", dir, NULL};
 		const int ret = launch_execv(tmp_cmd, FOREGROUND, E_NOSTDERR);
-		if (ret != EXIT_SUCCESS) {
+		if (ret != FUNC_SUCCESS) {
 			err('e', PRINT_PROMPT, _("%s: Cannot create directory '%s' "
 				"(error %d)\nFalling back to the default configuration "
 				"directory\n"), PROGRAM_NAME, dir, ret);
@@ -999,7 +999,7 @@ resolve_starting_path(char *file)
 
 	if (IS_FILE_URI(file)) {
 		_path = savestring(file + 7, strlen(file + 7));
-	} else if (is_url(file) == EXIT_SUCCESS) {
+	} else if (is_url(file) == FUNC_SUCCESS) {
 		open_reg_exit(file, 1, 0); /* noreturn */
 	} else {
 		_path = resolve_path(file);
@@ -1070,7 +1070,7 @@ set_alt_profile(const char *name)
 #ifndef _NO_PROFILES
 	free(alt_profile);
 
-	if (validate_profile_name(name) == EXIT_SUCCESS) {
+	if (validate_profile_name(name) == FUNC_SUCCESS) {
 		alt_profile = savestring(name, strlen(name));
 		return;
 	}

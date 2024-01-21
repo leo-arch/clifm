@@ -46,7 +46,7 @@ remotes_list(void)
 	if (remotes_n == 0) {
 		printf(_("%s: No remotes defined. Run 'net edit' to add one.\n"),
 			PROGRAM_NAME);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	size_t i;
@@ -71,7 +71,7 @@ remotes_list(void)
 		if (i < remotes_n - 1)
 			puts("");
 	}
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -85,11 +85,11 @@ dequote_remote_name(char *name)
 			free(deq);
 		} else {
 			xerror("net: %s: Error unescaping resource name\n", name);
-			return EXIT_FAILURE;
+			return FUNC_FAILURE;
 		}
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Get the index of the remote named NAME from the remotes list. Returns
@@ -100,7 +100,7 @@ get_remote(char *name)
 	if (!name || !*name)
 		return (-1);
 
-	if (dequote_remote_name(name) == EXIT_FAILURE)
+	if (dequote_remote_name(name) == FUNC_FAILURE)
 		return (-1);
 
 	int i = (int)remotes_n,
@@ -131,12 +131,12 @@ create_mountpoint(const int i)
 {
 	char *cmd[] = {"mkdir", "-p", remotes[i].mountpoint, NULL};
 
-	if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
+	if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS) {
 		xerror("net: '%s': %s\n", remotes[i].mountpoint, strerror(errno));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static inline int
@@ -149,24 +149,24 @@ cd_to_mountpoint(const int i)
 	add_to_dirhist(workspaces[cur_ws].path);
 
 	free_dirlist();
-	if (list_dir() != EXIT_SUCCESS)
-		return EXIT_FAILURE;
+	if (list_dir() != FUNC_SUCCESS)
+		return FUNC_FAILURE;
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static inline int
 print_cd_error(const int i)
 {
 	xerror("net: '%s': %s\n", remotes[i].mountpoint, strerror(errno));
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 }
 
 static inline int
 print_no_mount_cmd_error(const int i)
 {
 	xerror(_("net: No mount command specified for '%s'\n"), remotes[i].name);
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 }
 
 static int
@@ -174,30 +174,30 @@ remotes_mount(char *name)
 {
 	int i = get_remote(name);
 	if (i == -1)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	if (!remotes[i].mount_cmd)
 		return print_no_mount_cmd_error(i);
 
 	if (xargs.secure_cmds == 1
-	&& sanitize_cmd(remotes[i].mount_cmd, SNT_NET) != EXIT_SUCCESS)
-		return EXIT_FAILURE;
+	&& sanitize_cmd(remotes[i].mount_cmd, SNT_NET) != FUNC_SUCCESS)
+		return FUNC_FAILURE;
 
 	/* If mountpoint doesn't exist, create it */
 	struct stat attr;
 	if (stat(remotes[i].mountpoint, &attr) == -1
-	&& create_mountpoint(i) == EXIT_FAILURE)
-		return EXIT_FAILURE;
+	&& create_mountpoint(i) == FUNC_FAILURE)
+		return FUNC_FAILURE;
 
 	/* Make sure mountpoint is not populated and run the mount command */
 	if (count_dir(remotes[i].mountpoint, CPOP) <= 2
-	&& launch_execl(remotes[i].mount_cmd) != EXIT_SUCCESS)
-		return EXIT_FAILURE;
+	&& launch_execl(remotes[i].mount_cmd) != FUNC_SUCCESS)
+		return FUNC_FAILURE;
 
 	if (xchdir(remotes[i].mountpoint, SET_TITLE) == -1)
 		return print_cd_error(i);
 
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 	if (conf.autols == 1) {
 		exit_status = cd_to_mountpoint(i);
 	} else {
@@ -214,26 +214,26 @@ remotes_unmount(char *name)
 {
 	int i = get_remote(name);
 	if (i == -1)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	if (remotes[i].mounted == 0) {
 		xerror(_("net: '%s': Not mounted\n"), remotes[i].name);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	if (!remotes[i].mountpoint) {
 		xerror(_("net: Error getting mountpoint for '%s'\n"), remotes[i].name);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	if (!remotes[i].unmount_cmd) {
 		xerror(_("net: No unmount command for '%s'\n"), remotes[i].name);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	if (xargs.secure_cmds == 1
-	&& sanitize_cmd(remotes[i].unmount_cmd, SNT_NET) != EXIT_SUCCESS)
-		return EXIT_FAILURE;
+	&& sanitize_cmd(remotes[i].unmount_cmd, SNT_NET) != FUNC_SUCCESS)
+		return FUNC_FAILURE;
 
 	/* Get out of mountpoint before unmounting */
 	size_t mlen = strlen(remotes[i].mountpoint);
@@ -247,15 +247,15 @@ remotes_unmount(char *name)
 		if (!p) {
 			xerror(_("net: '%s': Error getting parent directory\n"),
 				remotes[i].mountpoint);
-			return EXIT_FAILURE;
+			return FUNC_FAILURE;
 		}
 
 		*p = '\0';
 		errno = 0;
-		if (xchdir(remotes[i].mountpoint, SET_TITLE) == EXIT_FAILURE) {
+		if (xchdir(remotes[i].mountpoint, SET_TITLE) == FUNC_FAILURE) {
 			*p = '/';
 			xerror("net: '%s': %s\n", remotes[i].mountpoint, strerror(errno));
-			return EXIT_FAILURE;
+			return FUNC_FAILURE;
 		}
 
 		free(workspaces[cur_ws].path);
@@ -267,11 +267,11 @@ remotes_unmount(char *name)
 			reload_dirlist();
 	}
 
-	if (launch_execl(remotes[i].unmount_cmd) != EXIT_SUCCESS)
-		return EXIT_FAILURE;
+	if (launch_execl(remotes[i].unmount_cmd) != FUNC_SUCCESS)
+		return FUNC_FAILURE;
 
 	remotes[i].mounted = 0;
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -279,7 +279,7 @@ remotes_edit(char *app)
 {
 	if (!remotes_file) {
 		xerror(_("net: Remotes file is undefined\n"));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	struct stat attr;
@@ -290,7 +290,7 @@ remotes_edit(char *app)
 
 	const time_t mtime_bfr = attr.st_mtime;
 
-	int ret = EXIT_SUCCESS;
+	int ret = FUNC_SUCCESS;
 	if (app && *app) {
 		char *cmd[] = {app, remotes_file, NULL};
 		ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
@@ -300,7 +300,7 @@ remotes_edit(char *app)
 		open_in_foreground = 0;
 	}
 
-	if (ret != EXIT_SUCCESS)
+	if (ret != FUNC_SUCCESS)
 		return ret;
 
 	if (stat(remotes_file, &attr) == -1) {
@@ -314,7 +314,7 @@ remotes_edit(char *app)
 		print_reload_msg(_("File modified. Remotes reloaded\n"));
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 int
@@ -322,14 +322,14 @@ remotes_function(char **args)
 {
 	if (xargs.stealth_mode == 1) {
 		printf("%s: net: %s\n", PROGRAM_NAME, STEALTH_DISABLED);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (!args[1] || (*args[1] == 'l' && strcmp(args[1], "list") == 0))
 		return remotes_list();
 
 	if (IS_HELP(args[1]))
-		{ puts(_(NET_USAGE)); return EXIT_SUCCESS; }
+		{ puts(_(NET_USAGE)); return FUNC_SUCCESS; }
 
 	if (*args[1] == 'e' && strcmp(args[1], "edit") == 0)
 		return remotes_edit(args[2]);
@@ -337,7 +337,7 @@ remotes_function(char **args)
 	if (*args[1] == 'u' && (!*(args[1] + 1) || strcmp(args[1], "unmount") == 0)) {
 		if (!args[2]) {
 			fprintf(stderr, "%s\n", _(NET_USAGE));
-			return EXIT_FAILURE;
+			return FUNC_FAILURE;
 		}
 		return remotes_unmount(args[2]);
 	}
@@ -345,7 +345,7 @@ remotes_function(char **args)
 	if (*args[1] == 'm' && (!*(args[1] + 1) || strcmp(args[1], "mount") == 0)) {
 		if (!args[2]) {
 			fprintf(stderr, "%s\n", _(NET_USAGE));
-			return EXIT_FAILURE;
+			return FUNC_FAILURE;
 		}
 		return remotes_mount(args[2]);
 	}
@@ -357,23 +357,23 @@ int
 automount_remotes(void)
 {
 	if (remotes_n == 0)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	int i = (int)remotes_n;
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 
 	while (--i >= 0) {
 		if (remotes[i].name && remotes[i].auto_mount == 1
 		&& remotes[i].mountpoint && remotes[i].mount_cmd) {
 
 			if (xargs.secure_cmds == 1
-			&& sanitize_cmd(remotes[i].mount_cmd, SNT_NET) != EXIT_SUCCESS)
+			&& sanitize_cmd(remotes[i].mount_cmd, SNT_NET) != FUNC_SUCCESS)
 				continue;
 
 			struct stat attr;
 			if (stat(remotes[i].mountpoint, &attr) == -1) {
 				char *cmd[] = {"mkdir", "-p", remotes[i].mountpoint, NULL};
-				if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+				if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
 					continue;
 			} else {
 				if (count_dir(remotes[i].mountpoint, CPOP) > 2)
@@ -383,10 +383,10 @@ automount_remotes(void)
 			int ret = 0;
 			printf(_("%s: net: %s: Mounting remote...\n"), PROGRAM_NAME,
 				remotes[i].name);
-			if ((ret = launch_execl(remotes[i].mount_cmd)) != EXIT_SUCCESS) {
+			if ((ret = launch_execl(remotes[i].mount_cmd)) != FUNC_SUCCESS) {
 				err('w', PRINT_PROMPT, _("net: '%s': Mount command failed with "
 					"error code %d\n"), remotes[i].name, ret);
-				exit_status = EXIT_FAILURE;
+				exit_status = FUNC_FAILURE;
 			} else {
 				remotes[i].mounted = 1;
 			}
@@ -400,16 +400,16 @@ int
 autounmount_remotes(void)
 {
 	if (remotes_n == 0)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
-	int i = (int)remotes_n, exit_status = EXIT_SUCCESS;
+	int i = (int)remotes_n, exit_status = FUNC_SUCCESS;
 
 	while (--i >= 0) {
 		if (remotes[i].name && remotes[i].auto_unmount == 1
 		&& remotes[i].mountpoint && remotes[i].unmount_cmd) {
 
 			if (xargs.secure_cmds == 1
-			&& sanitize_cmd(remotes[i].unmount_cmd, SNT_NET) != EXIT_SUCCESS)
+			&& sanitize_cmd(remotes[i].unmount_cmd, SNT_NET) != FUNC_SUCCESS)
 				continue;
 
 			if (count_dir(remotes[i].mountpoint, CPOP) <= 2)
@@ -425,10 +425,10 @@ autounmount_remotes(void)
 			int ret = 0;
 			printf(_("%s: net: %s: Unmounting remote...\n"), PROGRAM_NAME,
 				remotes[i].name);
-			if ((ret = launch_execl(remotes[i].unmount_cmd)) != EXIT_SUCCESS) {
+			if ((ret = launch_execl(remotes[i].unmount_cmd)) != FUNC_SUCCESS) {
 				xerror(_("%s: net: %s: Unmount command failed with "
 					"error code %d\n"), PROGRAM_NAME, remotes[i].name, ret);
-				exit_status = EXIT_FAILURE;
+				exit_status = FUNC_FAILURE;
 			}
 
 			if (dir_change == 1)

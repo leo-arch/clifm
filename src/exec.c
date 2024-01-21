@@ -93,7 +93,7 @@ static int
 graceful_quit(char **args)
 {
 	if (!args || !args[0])
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	size_t i;
 	for (i = 1; args[i]; i++) {
@@ -101,11 +101,11 @@ graceful_quit(char **args)
 		|| ((strcmp(args[0], "killall") == 0 || strcmp(args[0], "pkill") == 0)
 		&& bin_name && strcmp(args[i], bin_name) == 0)) {
 			xerror(_("%s: To gracefully quit enter 'q'\n"), PROGRAM_NAME);
-			return EXIT_FAILURE;
+			return FUNC_FAILURE;
 		}
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 #if !defined(__CYGWIN__)
@@ -116,17 +116,17 @@ static int
 check_paths_timestamps(void)
 {
 	if (path_n == 0)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	struct stat a;
 	int i = (int)path_n;
-	int status = EXIT_SUCCESS;
+	int status = FUNC_SUCCESS;
 
 	while (--i >= 0) {
 		if (paths[i].path && *paths[i].path && stat(paths[i].path, &a) != -1
 		&& a.st_mtime != paths[i].mtime) {
 			paths[i].mtime = a.st_mtime;
-			status = EXIT_FAILURE;
+			status = FUNC_FAILURE;
 		}
 	}
 
@@ -141,7 +141,7 @@ check_paths_timestamps(void)
 static inline void
 reload_binaries(void)
 {
-	if (check_paths_timestamps() == EXIT_SUCCESS)
+	if (check_paths_timestamps() == FUNC_SUCCESS)
 		return;
 
 	if (bin_commands) {
@@ -172,15 +172,15 @@ export_var_function(char **args)
 	if (!args || !args[0] || !*args[0]) {
 		xerror("%s\n", _("export: A parameter, in the form VAR=VALUE, "
 			"is required"));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	if (IS_HELP(args[0])) {
 		puts(EXPORT_VAR_USAGE);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
-	int status = EXIT_SUCCESS;
+	int status = FUNC_SUCCESS;
 	size_t i;
 	for (i = 0; args[i]; i++) {
 		/* ARG might have been escaped by parse_input_str(), in the command
@@ -188,7 +188,7 @@ export_var_function(char **args)
 		char *ds = unescape_str(args[i], 0);
 		if (!ds) {
 			xerror("%s\n", _("export: Error unescaping argument"));
-			status = EXIT_FAILURE;
+			status = FUNC_FAILURE;
 			continue;
 		}
 
@@ -196,7 +196,7 @@ export_var_function(char **args)
 		if (!p || !*(p + 1)) {
 			xerror(_("export: %s: Empty assignement\n"), ds);
 			free(ds);
-			status = EXIT_FAILURE;
+			status = FUNC_FAILURE;
 			continue;
 		}
 
@@ -255,37 +255,37 @@ static int
 check_shell_cmd_conditions(char **args)
 {
 	if (!args || !args[0])
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	/* No command name ends with a slash */
 	const size_t len = (args && args[0]) ? strlen(args[0]) : 0;
 	if (len > 0 && args[0][len - 1] == '/') {
 		xerror("%s: %s: %s\n", conf.autocd == 1 ? "cd" : "open",
 			args[0], strerror(ENOENT));
-		return conf.autocd == 1 ? EXIT_FAILURE : E_NOTFOUND;
+		return conf.autocd == 1 ? FUNC_FAILURE : E_NOTFOUND;
 	}
 
 	/* Prevent ungraceful exit */
 	if ((*args[0] == 'k' || *args[0] == 'p') && (strcmp(args[0], "kill") == 0
 	|| strcmp(args[0], "killall") == 0 || strcmp(args[0], "pkill") == 0)) {
-		if (graceful_quit(args) != EXIT_SUCCESS)
-			return EXIT_FAILURE;
+		if (graceful_quit(args) != FUNC_SUCCESS)
+			return FUNC_FAILURE;
 	}
 
 	if (conf.ext_cmd_ok == 0) {
 		xerror(_("%s: External commands are not allowed. "
 			"Run 'ext on' to enable them.\n"), PROGRAM_NAME);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
 run_shell_cmd(char **args)
 {
 	const int ret = check_shell_cmd_conditions(args);
-	if (ret != EXIT_SUCCESS)
+	if (ret != FUNC_SUCCESS)
 		return ret;
 
 	char *cmd = construct_shell_cmd(args);
@@ -335,50 +335,50 @@ set_max_files(char **args)
 			puts(_("Max files: unset"));
 		else
 			printf(_("Max files: %d\n"), max_files);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
-	if (IS_HELP(args[1])) { puts(_(MF_USAGE)); return EXIT_SUCCESS;	}
+	if (IS_HELP(args[1])) { puts(_(MF_USAGE)); return FUNC_SUCCESS;	}
 
 	if (*args[1] == 'u' && strcmp(args[1], "unset") == 0) {
 		max_files = -1;
 		if (conf.autols == 1) reload_dirlist();
 		print_reload_msg(_("Max files unset\n"));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (*args[1] == '0' && !args[1][1]) {
 		max_files = 0;
 		if (conf.autols == 1) reload_dirlist();
 		print_reload_msg(_("Max files set to %d\n"), max_files);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	const long inum = strtol(args[1], NULL, 10);
 	if (inum == LONG_MAX || inum == LONG_MIN || inum <= 0) {
 		xerror(_("%s: %s: Invalid number\n"), PROGRAM_NAME, args[1]);
-		return (exit_code = EXIT_FAILURE);
+		return (exit_code = FUNC_FAILURE);
 	}
 
 	max_files = (int)inum;
 	if (conf.autols == 1) reload_dirlist();
 	print_reload_msg(_("Max files set to %d\n"), max_files);
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
 dirs_first_function(const char *arg)
 {
 	if (conf.autols == 0)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	if (!arg)
 		return rl_toggle_dirs_first(0, 0);
 
 	if (IS_HELP(arg)) {
 		puts(_(FF_USAGE));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (*arg == 's' && strcmp(arg, "status") == 0) {
@@ -394,7 +394,7 @@ dirs_first_function(const char *arg)
 		print_reload_msg(_("Directories first disabled\n"));
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -402,21 +402,21 @@ filescounter_function(const char *arg)
 {
 	if (!arg) {
 		puts(_(FC_USAGE));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (*arg == 'o' && strcmp(arg, "on") == 0) {
 		conf.files_counter = 1;
 		if (conf.autols == 1) reload_dirlist();
 		print_reload_msg(_("Files counter enabled\n"));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (*arg == 'o' && strcmp(arg, "off") == 0) {
 		conf.files_counter = 0;
 		if (conf.autols == 1) reload_dirlist();
 		print_reload_msg(_("Files counter disabled\n"));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (*arg == 's' && strcmp(arg, "status") == 0) {
@@ -424,11 +424,11 @@ filescounter_function(const char *arg)
 			puts(_("The files counter is enabled"));
 		else
 			puts(_("The files counter is disabled"));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	fprintf(stderr, "%s\n", _(FC_USAGE));
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 }
 
 static int
@@ -436,7 +436,7 @@ pager_function(const char *arg)
 {
 	if (!arg || IS_HELP(arg)) {
 		puts(_(PAGER_USAGE));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (*arg == 's' && strcmp(arg, "status") == 0) {
@@ -446,34 +446,34 @@ pager_function(const char *arg)
 		default: printf(_("The pager is set to %d\n"), conf.pager); break;
 		}
 
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (is_number(arg)) {
 		const int n = atoi(arg);
 		if (n == INT_MIN) {
 			xerror("%s\n", _("pg: xatoi: Error converting to integer"));
-			return EXIT_FAILURE;
+			return FUNC_FAILURE;
 		}
 		conf.pager = n;
 		printf(_("Pager set to %d\n"), n);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (*arg == 'o' && strcmp(arg, "on") == 0) {
 		conf.pager = 1;
 		puts(_("Pager enabled"));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (*arg == 'o' && strcmp(arg, "off") == 0) {
 		conf.pager = 0;
 		puts(_("Pager disabled"));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	fprintf(stderr, "%s\n", _(PAGER_USAGE));
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 }
 
 static int
@@ -481,10 +481,10 @@ ext_cmds_function(const char *arg)
 {
 	if (!arg || IS_HELP(arg)) {
 		puts(_(EXT_USAGE));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 
 	if (*arg == 's' && strcmp(arg, "status") == 0) {
 		printf(_("External commands are %s\n"),
@@ -497,7 +497,7 @@ ext_cmds_function(const char *arg)
 		puts(_("External commands disallowed"));
 	} else {
 		fprintf(stderr, "%s\n", _(EXT_USAGE));
-		exit_status = EXIT_FAILURE;
+		exit_status = FUNC_FAILURE;
 	}
 
 	return exit_status;
@@ -508,7 +508,7 @@ autocd_function(const char *arg)
 {
 	if (!arg) {
 		fprintf(stderr, "%s\n", _(AUTOCD_USAGE));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	if (strcmp(arg, "on") == 0) {
@@ -524,10 +524,10 @@ autocd_function(const char *arg)
 		puts(_(AUTOCD_USAGE));
 	} else {
 		fprintf(stderr, "%s\n", _(AUTOCD_USAGE));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -535,7 +535,7 @@ auto_open_function(const char *arg)
 {
 	if (!arg) {
 		fprintf(stderr, "%s\n", _(AUTO_OPEN_USAGE));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	if (strcmp(arg, "on") == 0) {
@@ -551,9 +551,9 @@ auto_open_function(const char *arg)
 		puts(_(AUTO_OPEN_USAGE));
 	} else {
 		fprintf(stderr, "%s\n", _(AUTO_OPEN_USAGE));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -561,7 +561,7 @@ columns_function(const char *arg)
 {
 	if (!arg || IS_HELP(arg)) {
 		puts(_(COLUMNS_USAGE));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (*arg == 'o' && arg[1] == 'n' && !arg[2]) {
@@ -574,10 +574,10 @@ columns_function(const char *arg)
 		print_reload_msg(_("Columns disabled\n"));
 	} else {
 		fprintf(stderr, "%s\n", _(COLUMNS_USAGE));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -586,29 +586,29 @@ icons_function(const char *arg)
 #ifdef _NO_ICONS
 	UNUSED(arg);
 	xerror(_("%s: icons: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 #else
 	if (!arg || IS_HELP(arg)) {
 		puts(_(ICONS_USAGE));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (*arg == 'o' && arg[1] == 'n' && !arg[2]) {
 		conf.icons = 1;
 		if (conf.autols == 1) reload_dirlist();
 		print_reload_msg(_("Icons enabled\n"));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
 		conf.icons = 0;
 		if (conf.autols == 1) reload_dirlist();
 		print_reload_msg(_("Icons disabled\n"));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	} else {
 		fprintf(stderr, "%s\n", _(ICONS_USAGE));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 #endif /* _NO_ICONS */
 }
 
@@ -617,13 +617,13 @@ msgs_function(const char *arg)
 {
 	if (arg && IS_HELP(arg)) {
 		puts(_(MSG_USAGE));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (arg && strcmp(arg, "clear") == 0) {
 		if (msgs_n == 0) {
 			printf(_("%s: No messages\n"), PROGRAM_NAME);
-			return EXIT_SUCCESS;
+			return FUNC_SUCCESS;
 		}
 
 		size_t i;
@@ -635,7 +635,7 @@ msgs_function(const char *arg)
 		print_reload_msg(_("Messages cleared\n"));
 		msgs_n = msgs.error = msgs.warning = msgs.notice = 0;
 		pmsg = NOMSG;
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (msgs_n > 0) {
@@ -646,7 +646,7 @@ msgs_function(const char *arg)
 		printf(_("%s: No messages\n"), PROGRAM_NAME);
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -654,12 +654,12 @@ opener_function(const char *arg)
 {
 	if (!arg) {
 		printf("opener: %s\n", conf.opener ? conf.opener : "lira (built-in)");
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (IS_HELP(arg)) {
 		puts(_(OPENER_USAGE));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	free(conf.opener);
@@ -671,7 +671,7 @@ opener_function(const char *arg)
 	printf(_("Opener set to '%s'\n"), conf.opener
 		? conf.opener : "lira (built-in)");
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -682,13 +682,13 @@ lightmode_function(const char *arg)
 
 	if (IS_HELP(arg)) {
 		puts(LM_USAGE);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (*arg == 'o' && strcmp(arg, "on") == 0) {
 		if (conf.light_mode == 1) {
 			puts(_("Light mode already on"));
-			return EXIT_SUCCESS;
+			return FUNC_SUCCESS;
 		}
 		conf.light_mode = 1;
 		if (conf.autols == 1) reload_dirlist();
@@ -696,7 +696,7 @@ lightmode_function(const char *arg)
 	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
 		if (conf.light_mode == 0) {
 			puts(_("Light mode already off"));
-			return EXIT_SUCCESS;
+			return FUNC_SUCCESS;
 		}
 		conf.light_mode = 0;
 		if (conf.autols == 1) reload_dirlist();
@@ -705,7 +705,7 @@ lightmode_function(const char *arg)
 		puts(LM_USAGE);
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static size_t
@@ -727,7 +727,7 @@ list_aliases(void)
 {
 	if (aliases_n == 0) {
 		printf(_("%s: No aliases found\n"), PROGRAM_NAME);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	size_t i;
@@ -738,18 +738,18 @@ list_aliases(void)
 			aliases[i].name, mi_c, df_c, aliases[i].cmd);
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
 print_alias(const char *name)
 {
 	if (!name || !*name)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	if (aliases_n == 0) {
 		printf(_("%s: No aliases found\n"), PROGRAM_NAME);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	int i = (int)aliases_n;
@@ -758,12 +758,12 @@ print_alias(const char *name)
 		&& strcmp(name, aliases[i].name) == 0) {
 			printf("alias %s='%s'\n", aliases[i].name,
 				aliases[i].cmd ? aliases[i].cmd : "");
-			return EXIT_SUCCESS;
+			return FUNC_SUCCESS;
 		}
 	}
 
 	xerror(_("%s: '%s': No such alias\n"), PROGRAM_NAME, name);
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 }
 
 static int
@@ -771,18 +771,18 @@ alias_function(char **args)
 {
 	if (!args[1]) {
 		list_aliases();
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (IS_HELP(args[1])) {
 		puts(_(ALIAS_USAGE));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (*args[1] == 'i' && strcmp(args[1], "import") == 0) {
 		if (!args[2]) {
 			puts(_(ALIAS_USAGE));
-			return EXIT_SUCCESS;
+			return FUNC_SUCCESS;
 		}
 		return alias_import(args[2]);
 	}
@@ -802,7 +802,7 @@ hidden_files_function(const char *arg)
 
 	if (IS_HELP(arg)) {
 		puts(_(HF_USAGE));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (strcmp(arg, "status") == 0) {
@@ -818,16 +818,16 @@ hidden_files_function(const char *arg)
 		print_reload_msg(_("Hidden files enabled\n"));
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
 toggle_exec_func(char **args)
 {
 	if (!args[1] || IS_HELP(args[1]))
-		{ puts(_(TE_USAGE)); return EXIT_SUCCESS; }
+		{ puts(_(TE_USAGE)); return FUNC_SUCCESS; }
 
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 	size_t i, n = 0;
 
 	for (i = 1; args[i]; i++) {
@@ -842,18 +842,18 @@ toggle_exec_func(char **args)
 
 		if (lstat(args[i], &attr) == -1) {
 			xerror("stat: '%s': %s\n", args[i], strerror(errno));
-			exit_status = EXIT_FAILURE;
+			exit_status = FUNC_FAILURE;
 			continue;
 		}
 
-		if (toggle_exec(args[i], attr.st_mode) == EXIT_FAILURE)
-			exit_status = EXIT_FAILURE;
+		if (toggle_exec(args[i], attr.st_mode) == FUNC_FAILURE)
+			exit_status = FUNC_FAILURE;
 		else
 			n++;
 	}
 
 	if (n > 0) {
-		if (conf.autols == 1 && exit_status == EXIT_SUCCESS)
+		if (conf.autols == 1 && exit_status == FUNC_SUCCESS)
 			reload_dirlist();
 
 		print_reload_msg(_("Toggled executable bit on %zu %s\n"),
@@ -869,7 +869,7 @@ pin_function(char *arg)
 	if (arg) {
 		if (IS_HELP(arg)) {
 			puts(PIN_USAGE);
-			return EXIT_SUCCESS;
+			return FUNC_SUCCESS;
 		}
 		return pin_directory(arg);
 	}
@@ -879,7 +879,7 @@ pin_function(char *arg)
 	else
 		puts(_("No pinned file"));
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -887,7 +887,7 @@ props_function(char **args)
 {
 	if (!args[1] || IS_HELP(args[1])) {
 		fprintf(stderr, "%s\n", _(PROP_USAGE));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	const int full_dirsize = args[0][1] == 'p'; /* Command is 'pp' */
@@ -901,16 +901,16 @@ ow_function(char **args)
 	if (args[1]) {
 		if (IS_HELP(args[1])) {
 			puts(_(OW_USAGE));
-			return EXIT_SUCCESS;
+			return FUNC_SUCCESS;
 		}
 		return mime_open_with(args[1], args[2] ? args + 2 : NULL);
 	}
 	puts(_(OW_USAGE));
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 #else
 	UNUSED(args);
 	xerror("%s: %s\n", PROGRAM_NAME, _(NOT_AVAILABLE));
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 #endif /* !_NO_LIRA */
 }
 
@@ -926,17 +926,17 @@ export_files_function(char **args)
 {
 	if (args[1] && IS_HELP(args[1])) {
 		puts(_(EXPORT_FILES_USAGE));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	char *ret = export_files(args, 1);
 	if (ret) {
 		printf(_("Files exported to '%s'\n"), ret);
 		free(ret);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 }
 
 static int
@@ -944,7 +944,7 @@ bookmarks_func(char **args)
 {
 	if (args[1] && IS_HELP(args[1])) {
 		puts(_(BOOKMARKS_USAGE));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	/* Disable keyboard shortcuts. Otherwise, the function will
@@ -967,7 +967,7 @@ desel_function(char **args)
 {
 	if (args[1] && IS_HELP(args[1])) {
 		puts(_(DESEL_USAGE));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	kbind_busy = 1;
@@ -982,12 +982,12 @@ desel_function(char **args)
 static int
 new_instance_function(char **args)
 {
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 
 	if (args[1]) {
 		if (IS_HELP(args[1])) {
 			puts(_(X_USAGE));
-			return EXIT_SUCCESS;
+			return FUNC_SUCCESS;
 		} else if (*args[0] == 'x') {
 			exit_status = new_instance(args[1], 0);
 		} else { /* Run as root */
@@ -1027,7 +1027,7 @@ media_function(char *arg, const int mode)
 			puts(_(MOUNTPOINTS_USAGE));
 		else
 			puts(_(MEDIA_USAGE));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	kbind_busy = 1;
@@ -1045,7 +1045,7 @@ chdir_function(char *arg)
 {
 	if (arg && IS_HELP(arg)) {
 		puts(_(CD_USAGE));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	return cd_function(arg, CD_PRINT_ERROR);
@@ -1056,7 +1056,7 @@ sort_func(char **args)
 {
 	if (args[1] && IS_HELP(args[1])) {
 		puts(_(SORT_USAGE));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	return sort_function(args);
@@ -1069,11 +1069,11 @@ check_pinned_file(char **args)
 	while (--i >= 0) {
 		if (*args[i] == ',' && !args[i][1]) {
 			xerror(_("%s: No pinned file\n"), PROGRAM_NAME);
-			return EXIT_FAILURE;
+			return FUNC_FAILURE;
 		}
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static inline int
@@ -1119,7 +1119,7 @@ launch_shell(const char *arg)
 	if (arg[1] == ';' || arg[1] == ':') {
 		/* If double semi colon or colon (or ";:" or ":;") */
 		xerror(_("%s: '%s': Syntax error\n"), PROGRAM_NAME, arg);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	return (-1);
@@ -1188,9 +1188,9 @@ check_auto_first(char **args)
 	}
 
 	if (conf.autocd == 1 && cdpath_n > 0 && !args[1]
-	&& cd_function(tmp, CD_NO_PRINT_ERROR) == EXIT_SUCCESS) {
+	&& cd_function(tmp, CD_NO_PRINT_ERROR) == FUNC_SUCCESS) {
 		free(deq_str);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	filesn_t i = files;
@@ -1229,7 +1229,7 @@ auto_open_file(char **args, char *tmp)
 static int
 autocd_dir(char *tmp)
 {
-	int ret = EXIT_SUCCESS;
+	int ret = FUNC_SUCCESS;
 
 	if (conf.autocd) {
 		ret = cd_function(tmp, CD_PRINT_ERROR);
@@ -1266,8 +1266,8 @@ check_auto_second(char **args)
 
 	if (conf.autocd == 1 && cdpath_n > 0 && !args[1]) {
 		const int ret = cd_function(tmp, CD_NO_PRINT_ERROR);
-		if (ret == EXIT_SUCCESS)
-			{ free(tmp); return EXIT_SUCCESS; }
+		if (ret == FUNC_SUCCESS)
+			{ free(tmp); return FUNC_SUCCESS; }
 	}
 
 	struct stat attr;
@@ -1296,7 +1296,7 @@ colors_function(char *arg)
 		puts(_(COLORS_USAGE));
 	else
 		color_codes();
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -1317,7 +1317,7 @@ lira_function(char **args)
 #else
 	UNUSED(args);
 	xerror("%s: lira: %s\n", PROGRAM_NAME, _(NOT_AVAILABLE));
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 #endif /* !_NO_LIRA */
 }
 
@@ -1325,22 +1325,22 @@ static inline int
 check_comments(const char *name)
 {
 	if (*name != '#')
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	/* Skip lines starting with '#' if there is no such file name
 	 * in the current directory. This implies that no command starting
 	 * with '#' will be executed */
 	struct stat a;
 	if (lstat(name, &a) == -1)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	if (conf.autocd == 1 && S_ISDIR(a.st_mode))
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	if (conf.auto_open == 1 && !S_ISDIR(a.st_mode))
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -1390,7 +1390,7 @@ Unstatable files:            %zu\n\
 # endif /* S_IFWHT */
 #endif /* _BE_POSIX */
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -1400,7 +1400,7 @@ trash_func(char **args, int *_cont)
 	if (args[1] && IS_HELP(args[1])) {
 		puts(_(TRASH_USAGE));
 		*_cont = 0;
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	int exit_status = trash_function(args);
@@ -1411,7 +1411,7 @@ trash_func(char **args, int *_cont)
 			free(sel_elements[i].name);
 		sel_n = 0;
 		if (save_sel() != 0)
-			exit_status = EXIT_FAILURE;
+			exit_status = FUNC_FAILURE;
 	}
 
 	return exit_status;
@@ -1419,7 +1419,7 @@ trash_func(char **args, int *_cont)
 	UNUSED(args);
 	xerror(_("%s: trash: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
 	*_cont = 0;
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 #endif /* !_NO_TRASH */
 }
 
@@ -1430,7 +1430,7 @@ untrash_func(char **args, int *_cont)
 	if (args[1] && IS_HELP(args[1])) {
 		puts(_(UNTRASH_USAGE));
 		*_cont = 0;
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	kbind_busy = 1;
@@ -1444,7 +1444,7 @@ untrash_func(char **args, int *_cont)
 	UNUSED(args);
 	xerror("%s: trash: %s\n", PROGRAM_NAME, _(NOT_AVAILABLE));
 	*_cont = 0;
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 #endif /* !_NO_TRASH */
 }
 
@@ -1453,12 +1453,12 @@ toggle_full_dir_size(const char *arg)
 {
 	if (!arg || !*arg || IS_HELP(arg)) {
 		puts(_(FZ_USAGE));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (*arg != 'o') {
 		xerror(_("%s: '%s': Invalid argument. Try 'fz -h'\n"), PROGRAM_NAME, arg);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	if (*(arg + 1) == 'n' && !*(arg + 2)) {
@@ -1469,7 +1469,7 @@ toggle_full_dir_size(const char *arg)
 			if (conf.autols == 1) reload_dirlist();
 			print_reload_msg(_("Full directory size enabled\n"));
 		}
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (*(arg + 1) == 'f' && *(arg + 2) == 'f' && !*(arg + 3)) {
@@ -1480,11 +1480,11 @@ toggle_full_dir_size(const char *arg)
 			if (conf.autols == 1) reload_dirlist();
 			print_reload_msg(_("Full directory size disabled\n"));
 		}
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	xerror(_("%s: '%s': Invalid argument. Try 'fz -h'\n"), PROGRAM_NAME, arg);
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 }
 
 static void
@@ -1635,14 +1635,14 @@ preview_edit(char *app)
 {
 	if (!config_dir) {
 		xerror("view: Configuration directory not found\n");
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	const size_t len = config_dir_len + 15;
 	char *file = xnmalloc(len, sizeof(char));
 	snprintf(file, len, "%s/preview.clifm", config_dir);
 
-	int ret = EXIT_SUCCESS;
+	int ret = FUNC_SUCCESS;
 	if (app) {
 		char *cmd[] = {app, file, NULL};
 		ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
@@ -1659,13 +1659,13 @@ preview_function(char **args)
 {
 #ifdef _NO_FZF
 	xerror("%s: view: fzf: %s\n", PROGRAM_NAME, _(NOT_AVAILABLE));
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 #endif /* _NO_FZF */
 
 	if (args && args[0]) {
 		if (IS_HELP(args[0])) {
 			puts(VIEW_USAGE);
-			return EXIT_SUCCESS;
+			return FUNC_SUCCESS;
 		}
 		if (*args[0] == 'e' && strcmp(args[0], "edit") == 0)
 			return preview_edit(args[1]);
@@ -1719,7 +1719,7 @@ preview_function(char **args)
 		print_reload_msg(_("%zu total selected file(s)\n"), sel_n);
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 #endif /* !_NO_LIRA */
 
@@ -1728,25 +1728,25 @@ dirhist_function(char *dir)
 {
 	if (!dir || !*dir) {
 		print_dirhist(NULL);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (IS_HELP(dir)) {
 		puts(DH_USAGE);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (*dir == '!' && is_number(dir + 1)) {
 		int n = atoi(dir + 1);
 		if (n <= 0 || n > dirhist_total_index) {
 			xerror(_("dh: '%d': No such entry number\n"), n);
-			return EXIT_FAILURE;
+			return FUNC_FAILURE;
 		}
 
 		n--;
 		if (!old_pwd[n] || *old_pwd[n] == KEY_ESC) {
 			xerror("%s\n", _("dh: Invalid history entry"));
-			return EXIT_FAILURE;
+			return FUNC_FAILURE;
 		}
 
 		return cd_function(old_pwd[n], CD_PRINT_ERROR);
@@ -1754,7 +1754,7 @@ dirhist_function(char *dir)
 
 	if (*dir != '/' || !strchr(dir + 1, '/')) {
 		print_dirhist(dir);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	return cd_function(dir, CD_PRINT_ERROR);
@@ -1768,7 +1768,7 @@ long_view_function(const char *arg)
 
 	if (IS_HELP(arg) || (strcmp(arg, "on") != 0 && strcmp(arg, "off") != 0)) {
 		puts(LL_USAGE);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	conf.long_view = arg[1] == 'n' ? 1 : 0;
@@ -1778,7 +1778,7 @@ long_view_function(const char *arg)
 	print_reload_msg(_("Long view %s\n"), arg[1] == 'n'
 		? _("enabled") : _("disabled"));
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Remove variables specificied in VAR from the environment */
@@ -1787,15 +1787,15 @@ unset_function(char **var)
 {
 	if (!var || !var[0]) {
 		printf("unset: A variable name is required\n");
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (IS_HELP(var[0])) {
 		puts(UNSET_USAGE);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
-	int status = EXIT_SUCCESS;
+	int status = FUNC_SUCCESS;
 	size_t i;
 	for (i = 0; var[i]; i++) {
 		if (unsetenv(var[i]) == -1) {
@@ -1812,12 +1812,12 @@ run_log_cmd(char **args)
 {
 	if (config_ok == 0) {
 		xerror(_("%s: Log function disabled\n"), PROGRAM_NAME);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	if (!args[0] || IS_HELP(args[0])) {
 		puts(LOG_USAGE);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (*args[0] == 'c' && strcmp(args[0], "cmd") == 0) {
@@ -1827,24 +1827,24 @@ run_log_cmd(char **args)
 		if (*args[1] == 's' && strcmp(args[1], "status") == 0) {
 			printf(_("log: Command logs are %s\n"), (conf.log_cmds == 1)
 				? _("enabled") : _("disabled"));
-			return EXIT_SUCCESS;
+			return FUNC_SUCCESS;
 		}
 
 		if (*args[1] == 'o' && strcmp(args[1], "on") == 0) {
 			conf.log_cmds = 1;
 			puts(_("log: Command logs enabled"));
-			return EXIT_SUCCESS;
+			return FUNC_SUCCESS;
 		}
 
 		if (*args[1] == 'o' && strcmp(args[1], "off") == 0) {
 			conf.log_cmds = 0;
 			puts(_("log: Command logs disabled"));
-			return EXIT_SUCCESS;
+			return FUNC_SUCCESS;
 		}
 
 		if (*args[1] == 'c' && strcmp(args[1], "clear") == 0) {
 			int ret = clear_logs(CMD_LOGS);
-			if (ret == EXIT_SUCCESS)
+			if (ret == FUNC_SUCCESS)
 				printf("log: Command logs cleared\n");
 			return ret;
 		}
@@ -1857,31 +1857,31 @@ run_log_cmd(char **args)
 		if (*args[1] == 's' && strcmp(args[1], "status") == 0) {
 			printf(_("log: Message logs are %s\n"), (conf.log_msgs == 1)
 				? _("enabled") : _("disabled"));
-			return EXIT_SUCCESS;
+			return FUNC_SUCCESS;
 		}
 
 		if (*args[1] == 'o' && strcmp(args[1], "on") == 0) {
 			conf.log_msgs = 1;
 			puts(_("log: Message logs enabled"));
-			return EXIT_SUCCESS;
+			return FUNC_SUCCESS;
 		}
 
 		if (*args[1] == 'o' && strcmp(args[1], "off") == 0) {
 			conf.log_msgs = 0;
 			puts(_("log: Message logs disabled"));
-			return EXIT_SUCCESS;
+			return FUNC_SUCCESS;
 		}
 
 		if (*args[1] == 'c' && strcmp(args[1], "clear") == 0) {
 			int ret = clear_logs(MSG_LOGS);
-			if (ret == EXIT_SUCCESS)
+			if (ret == FUNC_SUCCESS)
 				puts(_("log: Message logs cleared"));
 			return ret;
 		}
 	}
 
 	fprintf(stderr, "%s\n", LOG_USAGE);
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 }
 
 #ifdef GENERIC_FS_MONITOR
@@ -2013,22 +2013,22 @@ exec_cmd(char **comm)
 	((*comm[0] == 's' && strcmp(comm[0] + 1, "udo") == 0)
 	|| (*comm[0] == 'd' && strcmp(comm[0] + 1, "oas") == 0))
 	? comm[1] : comm[0]) == 1)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	const int old_exit_code = exit_code;
-	exit_code = EXIT_SUCCESS;
+	exit_code = FUNC_SUCCESS;
 
 	/* Remove backslash in front of command names: used to bypass alias names */
 	if (*comm[0] == '\\' && *(comm[0] + 1))
 		remove_backslash(&comm[0]);
 
 	/* Skip comments */
-	if (check_comments(comm[0]) == EXIT_SUCCESS)
-		return EXIT_SUCCESS;
+	if (check_comments(comm[0]) == FUNC_SUCCESS)
+		return FUNC_SUCCESS;
 
 	/* Warn when using the ',' keyword and there's no pinned file */
-	if (check_pinned_file(comm) == EXIT_FAILURE)
-		return (exit_code = EXIT_FAILURE);
+	if (check_pinned_file(comm) == FUNC_FAILURE)
+		return (exit_code = FUNC_FAILURE);
 
 	/* User defined actions (plugins) */
 	if ((exit_code = check_actions(comm)) != -1)
@@ -2051,7 +2051,7 @@ exec_cmd(char **comm)
 	if (rl_dispatching == 0 && (exit_code = check_auto_first(comm)) != -1)
 		return exit_code;
 
-	exit_code = EXIT_SUCCESS;
+	exit_code = FUNC_SUCCESS;
 
 	/* The more often a function is used, the more on top should it be
 	 * in this if...else chain. It will be found faster this way. */
@@ -2118,7 +2118,7 @@ exec_cmd(char **comm)
 #else
 	{
 		xerror("%s: tag: %s\n", PROGRAM_NAME, NOT_AVAILABLE);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 #endif /* !_NO_TAGS */
 
@@ -2135,7 +2135,7 @@ exec_cmd(char **comm)
 		/* This help is only for c, m, and r commands */
 		if (comm[1] && IS_HELP(comm[1])) {
 			puts(_(WRAPPERS_USAGE));
-			return EXIT_SUCCESS;
+			return FUNC_SUCCESS;
 		}
 
 		exit_code = remove_files(comm);
@@ -2168,7 +2168,7 @@ exec_cmd(char **comm)
 					puts(_(VV_USAGE));
 				else
 					puts(_(WRAPPERS_USAGE));
-				return EXIT_SUCCESS;
+				return FUNC_SUCCESS;
 			}
 
 			if (*comm[0] == 'v' && comm[0][1] == 'v' && !comm[0][2])
@@ -2180,7 +2180,7 @@ exec_cmd(char **comm)
 		} else if (*comm[0] == 'm' && !comm[0][1]) {
 			if (comm[1] && IS_HELP(comm[1])) {
 				puts(_(WRAPPERS_USAGE));
-				return EXIT_SUCCESS;
+				return FUNC_SUCCESS;
 			}
 			if (!sel_is_last && comm[1] && !comm[2])
 				xrename = 1;
@@ -2218,7 +2218,7 @@ exec_cmd(char **comm)
 
 	else if (*comm[0] == 's' && (strcmp(comm[0], "sb") == 0
 	|| strcmp(comm[0], "selbox") == 0)) {
-		show_sel_files(); return EXIT_SUCCESS;
+		show_sel_files(); return FUNC_SUCCESS;
 	}
 
 	else if (*comm[0] == 'd' && (strcmp(comm[0], "ds") == 0
@@ -2247,7 +2247,7 @@ exec_cmd(char **comm)
 		return (exit_code = preview_function(comm + 1));
 #else
 		fprintf(stderr, "view: %s\n", _(NOT_AVAILABLE));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 #endif /* !_NO_LIRA */
 	}
 
@@ -2306,7 +2306,7 @@ exec_cmd(char **comm)
 		exit_code = bleach_files(comm);
 #else
 		xerror("%s: bleach: %s\n", PROGRAM_NAME, NOT_AVAILABLE);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 #endif /* !_NO_BLEACH */
 	}
 
@@ -2316,13 +2316,13 @@ exec_cmd(char **comm)
 #ifndef _NO_ARCHIVING
 		if (!comm[1] || IS_HELP(comm[1])) {
 			puts(_(ARCHIVE_USAGE));
-			return EXIT_SUCCESS;
+			return FUNC_SUCCESS;
 		}
                                   /* Either 'c' or 'd' */
 		exit_code = archiver(comm, comm[0][1]);
 #else
 		xerror("%s: archiver: %s\n", PROGRAM_NAME, _(NOT_AVAILABLE));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 #endif /* !_NO_ARCHIVING */
 	}
 
@@ -2365,7 +2365,7 @@ exec_cmd(char **comm)
 		return (exit_code = opener_function(comm[1]));
 
 	else if (*comm[0] == 't' && strcmp(comm[0], "tips") == 0)
-		{ print_tips(1); return EXIT_SUCCESS; }
+		{ print_tips(1); return FUNC_SUCCESS; }
 
 	else if (*comm[0] == 'a' && strcmp(comm[0], "actions") == 0)
 		return (exit_code = actions_function(comm));
@@ -2401,7 +2401,7 @@ exec_cmd(char **comm)
 		return (exit_code = profile_function(comm));
 #else
 		{ xerror("%s: prof: %s\n", PROGRAM_NAME, NOT_AVAILABLE);
-		return EXIT_FAILURE; }
+		return FUNC_FAILURE; }
 #endif /* !_NO_PROFILES */
 
 	/* #### MOUNTPOINTS #### */
@@ -2411,7 +2411,7 @@ exec_cmd(char **comm)
 		return (exit_code = media_function(comm[1], MEDIA_LIST));
 #else
 		fputs(_("mountpoints: Function not available\n"), stderr);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 #endif /* NO_MEDIA_FUNC */
 	}
 
@@ -2421,7 +2421,7 @@ exec_cmd(char **comm)
 		return (exit_code = media_function(comm[1], MEDIA_MOUNT));
 #else
 		fputs(_("media: Function not available\n"), stderr);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 #endif /* NO_MEDIA_FUNC */
 	}
 
@@ -2521,24 +2521,24 @@ exec_cmd(char **comm)
 	/* These functions just print stuff, so that the value of exit_code
 	 * is always zero, that is to say, success */
 	else if (*comm[0] == 'c' && strcmp(comm[0], "colors") == 0) {
-		colors_function(comm[1]); return EXIT_SUCCESS;
+		colors_function(comm[1]); return FUNC_SUCCESS;
 	}
 
 	else if (*comm[0] == 'v' && (strcmp(comm[0], "ver") == 0
 	|| strcmp(comm[0], "version") == 0)) {
-		version_function();	return EXIT_SUCCESS;
+		version_function();	return FUNC_SUCCESS;
 	}
 
 	else if (*comm[0] == 'f' && comm[0][1] == 's' && !comm[0][2]) {
-		free_software(); return EXIT_SUCCESS;
+		free_software(); return FUNC_SUCCESS;
 	}
 
 	else if (*comm[0] == 'b' && strcmp(comm[0], "bonus") == 0) {
-		bonus_function(); return EXIT_SUCCESS;
+		bonus_function(); return FUNC_SUCCESS;
 	}
 
 	else if (*comm[0] == 's' && strcmp(comm[0], "splash") == 0) {
-		splash(); return EXIT_SUCCESS;
+		splash(); return FUNC_SUCCESS;
 	}
 
 	/* #### QUIT #### */
@@ -2556,12 +2556,12 @@ exec_cmd(char **comm)
 		&& strcmp(comm[0], bin_name) == 0) {
 			fprintf(stderr, _("%s: Nested instances are not allowed in "
 				"stealth mode\n"), PROGRAM_NAME);
-			return (exit_code = EXIT_FAILURE);
+			return (exit_code = FUNC_FAILURE);
 		}
 
 		/* #  EXTERNAL/SHELL COMMANDS # */
-		if ((exit_code = run_shell_cmd(comm)) == EXIT_FAILURE)
-			return EXIT_FAILURE;
+		if ((exit_code = run_shell_cmd(comm)) == FUNC_FAILURE)
+			return FUNC_FAILURE;
 	}
 
 CHECK_EVENTS:
@@ -2652,7 +2652,7 @@ static inline void
 run_profile_line(char *cmd)
 {
 	if (xargs.secure_cmds == 1
-	&& sanitize_cmd(cmd, SNT_PROFILE) != EXIT_SUCCESS)
+	&& sanitize_cmd(cmd, SNT_PROFILE) != FUNC_SUCCESS)
 		return;
 
 	args_n = 0;

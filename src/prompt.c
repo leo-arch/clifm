@@ -389,7 +389,7 @@ substitute_cmd(char **line, char **res, size_t *len)
 	setenv("IFS", "", 1);
 
 	wordexp_t wordbuf;
-	if (wordexp(tmp_str, &wordbuf, 0) != EXIT_SUCCESS) {
+	if (wordexp(tmp_str, &wordbuf, 0) != FUNC_SUCCESS) {
 		free(tmp_str);
 		reset_ifs(old_value);
 		return;
@@ -711,7 +711,7 @@ check_cwd(void)
 {
 	int cwd_change = 0;
 
-	while (xchdir(workspaces[cur_ws].path, SET_TITLE) != EXIT_SUCCESS) {
+	while (xchdir(workspaces[cur_ws].path, SET_TITLE) != FUNC_SUCCESS) {
 		char *ret = strrchr(workspaces[cur_ws].path, '/');
 		if (ret && ret != workspaces[cur_ws].path) {
 			*ret = '\0';
@@ -783,7 +783,7 @@ run_prompt_cmds(void)
 
 	for (i = 0; i < prompt_cmds_n; i++) {
 		if (xargs.secure_cmds == 0
-		|| sanitize_cmd(prompt_cmds[i], SNT_PROMPT) == EXIT_SUCCESS)
+		|| sanitize_cmd(prompt_cmds[i], SNT_PROMPT) == FUNC_SUCCESS)
 			launch_execl(prompt_cmds[i]);
 	}
 
@@ -1013,7 +1013,7 @@ expand_history(char **input)
 	char *hist_c = strchr(*input, history_expansion_char);
 	if (!hist_c || (hist_c != *input && *(hist_c - 1) != ' ')
 	|| exclude_from_history(*input) == 1)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	char *exp_input = (char *)NULL;
 	const int ret = history_expand(*input, &exp_input);
@@ -1022,12 +1022,12 @@ expand_history(char **input)
 		xerror("%s: %s\n", PROGRAM_NAME, exp_input);
 		free(*input);
 		free(exp_input);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	if (ret == 0) { /* No expansion took place */
 		free(exp_input);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	printf("%s\n", exp_input);
@@ -1041,7 +1041,7 @@ expand_history(char **input)
 	/* (ret == 1) Display and execute */
 	*input = exp_input;
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static char *
@@ -1101,7 +1101,7 @@ prompt(const int prompt_flag)
 
 	flags &= ~DELAYED_REFRESH;
 
-	if (expand_history(&input) != EXIT_SUCCESS)
+	if (expand_history(&input) != FUNC_SUCCESS)
 		return (char *)NULL;
 
 	log_and_record(input);
@@ -1114,7 +1114,7 @@ list_prompts(void)
 {
 	if (prompts_n == 0) {
 		puts(_("prompt: No extra prompts found. Using the default prompt"));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	size_t i;
@@ -1129,7 +1129,7 @@ list_prompts(void)
 			printf("  %s\n", prompts[i].name);
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -1148,31 +1148,31 @@ switch_prompt(const size_t n)
 	prompt_notif = prompts[n].notifications;
 
 	if (xargs.warning_prompt == 0)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	conf.warning_prompt = prompts[n].warning_prompt_enabled;
 
 	update_warning_prompt_text_color();
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
 set_prompt(char *name)
 {
 	if (!name || !*name)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	if (prompts_n == 0) {
 		xerror("%s\n", _("prompt: No extra prompts defined. Using the "
 			"default prompt"));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	char *p = unescape_str(name, 0);
 	if (!p) {
 		xerror(_("prompt: %s: Error unescaping string\n"), name);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	int i = (int)prompts_n;
@@ -1186,7 +1186,7 @@ set_prompt(char *name)
 
 	xerror(_("prompt: %s: No such prompt\n"), p);
 	free(p);
-	return EXIT_FAILURE;
+	return FUNC_FAILURE;
 }
 
 static int
@@ -1198,7 +1198,7 @@ set_default_prompt(void)
 	conf.wprompt_str = savestring(DEF_WPROMPT_STR, sizeof(DEF_WPROMPT_STR) - 1);
 	*cur_prompt_name = '\0';
 	prompt_notif = DEF_PROMPT_NOTIF;
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -1206,12 +1206,12 @@ edit_prompts_file(char *app)
 {
 	if (xargs.stealth_mode == 1) {
 		printf("%s: prompt: %s\n", PROGRAM_NAME, STEALTH_DISABLED);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (!prompts_file || !*prompts_file) {
 		xerror("%s\n", _("prompt: Prompts file not found"));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	struct stat a;
@@ -1222,7 +1222,7 @@ edit_prompts_file(char *app)
 
 	const time_t old_time = a.st_mtime;
 
-	int ret = EXIT_FAILURE;
+	int ret = FUNC_FAILURE;
 	if (app && *app) {
 		char *cmd[] = {app, prompts_file, NULL};
 		ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
@@ -1232,7 +1232,7 @@ edit_prompts_file(char *app)
 		open_in_foreground = 0;
 	}
 
-	if (ret != EXIT_SUCCESS)
+	if (ret != FUNC_SUCCESS)
 		return ret;
 
 	if (stat(prompts_file, &a) == -1) {
@@ -1244,7 +1244,7 @@ edit_prompts_file(char *app)
 		reload_dirlist();
 
 	if (old_time == a.st_mtime)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	ret = load_prompts();
 	print_reload_msg(_("File modified. Prompts reloaded\n"));
@@ -1264,7 +1264,7 @@ prompt_function(char **args)
 
 	if (IS_HELP(args[0])) {
 		puts(PROMPT_USAGE);
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (*args[0] == 'u' && strcmp(args[0], "unset") == 0)
@@ -1275,9 +1275,9 @@ prompt_function(char **args)
 
 	if (*args[0] == 'r' && strcmp(args[0], "reload") == 0) {
 		const int ret = load_prompts();
-		if (ret == EXIT_SUCCESS) {
+		if (ret == FUNC_SUCCESS) {
 			printf(_("%s: Prompts successfully reloaded\n"), PROGRAM_NAME);
-			return EXIT_SUCCESS;
+			return FUNC_SUCCESS;
 		}
 		return ret;
 	}

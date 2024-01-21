@@ -52,7 +52,7 @@ get_exit_code(const int status, const int exec_flag)
 	if (WIFEXITED(status))
 		return WEXITSTATUS(status);
 
-	return exec_flag == EXEC_BG_PROC ? EXIT_SUCCESS : EXIT_FAILURE;
+	return exec_flag == EXEC_BG_PROC ? FUNC_SUCCESS : FUNC_FAILURE;
 }
 
 static int
@@ -224,7 +224,7 @@ launch_execv(char **cmd, const int bg, const int xflags)
 		}
 	}
 
-	if (bg == 1 && status == EXIT_SUCCESS && xargs.open != 1)
+	if (bg == 1 && status == FUNC_SUCCESS && xargs.open != 1)
 		reload_dirlist();
 
 	return status;

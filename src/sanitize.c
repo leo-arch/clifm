@@ -73,7 +73,7 @@ xclearenv(void)
 		if (unsetenv(namebuf) == -1) {
 			xerror("%s: unsetenv: '%s': %s\n", PROGRAM_NAME,
 				namebuf, strerror(errno));
-			exit(EXIT_FAILURE);
+			exit(FUNC_FAILURE);
 		}
 	}
 #endif /* !__NetBSD__ && !__HAIKU__ && !__APPLE__ && !__TERMUX__ */
@@ -99,7 +99,7 @@ set_path_env(void)
 
 	if (ret == -1) {
 		xerror("%s: setenv: PATH: %s\n", PROGRAM_NAME, strerror(errno));
-		exit(EXIT_FAILURE);
+		exit(FUNC_FAILURE);
 	}
 }
 
@@ -160,13 +160,13 @@ static int
 sanitize_shell_level(char *str)
 {
 	if (!str || !*str || !is_number(str))
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	int a = atoi(str);
 	if (a < 1 || a > MAX_SHELL_LEVEL)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Drop SUID/SGID privileges, if set. */
@@ -189,7 +189,7 @@ drop_privs(void)
 		if (err == 1 || setegid(egid) != -1 || getegid() != rgid) {
 			fprintf(stderr, _("%s: Error dropping group privileges. "
 				"Aborting.\n"), PROGRAM_NAME);
-			exit(EXIT_FAILURE);
+			exit(FUNC_FAILURE);
 		}
 	}
 
@@ -204,7 +204,7 @@ drop_privs(void)
 		if (err == 1 || seteuid(euid) != -1 || geteuid() != ruid) {
 			fprintf(stderr, _("%s: Error dropping user privileges. "
 				"Aborting.\n"), PROGRAM_NAME);
-			exit(EXIT_FAILURE);
+			exit(FUNC_FAILURE);
 		}
 	}
 }
@@ -253,7 +253,7 @@ xsecure_env(const int mode)
 	xsetenv("IFS", " \t\n");
 
 	if (mode == SECURE_ENV_FULL)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	if (user.name)
 		xsetenv("USER", user.name);
@@ -262,23 +262,23 @@ xsecure_env(const int mode)
 	if (user.shell)
 		xsetenv("SHELL", user.shell);
 
-	if (display && sanitize_cmd(display, SNT_DISPLAY) == EXIT_SUCCESS) {
+	if (display && sanitize_cmd(display, SNT_DISPLAY) == FUNC_SUCCESS) {
 		xsetenv("DISPLAY", display);
 	} else {
 		if (wayland_display)
 			xsetenv("WAYLAND_DISPLAY", wayland_display);
 	}
 
-	if (clifm_level && sanitize_shell_level(clifm_level) == EXIT_SUCCESS)
+	if (clifm_level && sanitize_shell_level(clifm_level) == FUNC_SUCCESS)
 		xsetenv("CLIFMLVL", clifm_level);
 
-	if (_term && sanitize_cmd(_term, SNT_MISC) == EXIT_SUCCESS)
+	if (_term && sanitize_cmd(_term, SNT_MISC) == FUNC_SUCCESS)
 		xsetenv("TERM", _term);
 
-	if (tz && sanitize_cmd(tz, SNT_MISC) == EXIT_SUCCESS)
+	if (tz && sanitize_cmd(tz, SNT_MISC) == FUNC_SUCCESS)
 		xsetenv("TZ", tz);
 
-	if (lang && sanitize_cmd(lang, SNT_MISC) == EXIT_SUCCESS) {
+	if (lang && sanitize_cmd(lang, SNT_MISC) == FUNC_SUCCESS) {
 		xsetenv("LANG", lang);
 		xsetenv("LC_ALL", lang);
 	} else {
@@ -288,7 +288,7 @@ xsecure_env(const int mode)
 	if (fzfopts)
 		xsetenv("FZF_DEFAULT_OPTS", fzfopts);
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Sanitize cmd string coming from the mimelist file */
@@ -298,17 +298,17 @@ sanitize_mime(const char *cmd)
 	/* Only %f is allowed */
 	char *p = strchr(cmd, '%');
 	if (p && *(p + 1) != 'f')
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	/* Disallow double ampersand */
 	p = strchr(cmd, '&');
 	if (p && *(p + 1) == '&')
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	if (strlen(cmd) > strspn(cmd, ALLOWED_CHARS_MIME))
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Sanitize cmd string coming from the net file */
@@ -316,9 +316,9 @@ static int
 sanitize_net(const char *cmd)
 {
 	if (strlen(cmd) > strspn(cmd, ALLOWED_CHARS_NET))
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Sanitize value of DISPLAY env var */
@@ -326,9 +326,9 @@ static int
 sanitize_misc(const char *str)
 {
 	if (strlen(str) > strspn(str, ALLOWED_CHARS_MISC))
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Sanitize value of DISPLAY env var */
@@ -336,9 +336,9 @@ static int
 sanitize_display(const char *str)
 {
 	if (strlen(str) > strspn(str, ALLOWED_CHARS_DISPLAY))
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Sanitize cmd string coming from profile, prompt, and autocmds */
@@ -346,18 +346,18 @@ static int
 sanitize_gral(const char *cmd)
 {
 	if (strlen(cmd) > strspn(cmd, ALLOWED_CHARS_GRAL))
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
-/* Return EXIT_SUCCESS if at least one character in CMD is a non-escaped
- * blacklisted char (<>|;&$). Oterwise, return EXIT_FAILURE. */
+/* Return FUNC_SUCCESS if at least one character in CMD is a non-escaped
+ * blacklisted char (<>|;&$). Oterwise, return FUNC_FAILURE. */
 static int
 sanitize_blacklist(const char *cmd)
 {
 	if (!cmd || !*cmd)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	size_t i;
 	for (i = 0; cmd[i]; i++) {
@@ -370,13 +370,13 @@ sanitize_blacklist(const char *cmd)
 		case '$': /* fallthrough */
 		case '`':
 			if (i == 0 || cmd[i - 1] != '\\')
-				return EXIT_FAILURE;
+				return FUNC_FAILURE;
 			break;
 		default: break;
 		}
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Check if command name in STR contains slashes. Return 1 if found,
@@ -386,7 +386,7 @@ static int
 clean_cmd(const char *str)
 {
 	if (!str || !*str)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	char *p = strchr(str, ' ');
 	if (p)
@@ -400,27 +400,27 @@ clean_cmd(const char *str)
 		err('w', PRINT_PROMPT, _("%s: '%s': Only command base names "
 			"are allowed. Ex: 'nano' instead of '/usr/bin/nano'\n"),
 			PROGRAM_NAME, str);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
-/* Sanitize CMD according to TYPE. Returns EXIT_SUCCESS if command is safe or
- * EXIT_FAILURE if not. */
+/* Sanitize CMD according to TYPE. Returns FUNC_SUCCESS if command is safe or
+ * FUNC_FAILURE if not. */
 int
 sanitize_cmd(const char *str, const int type)
 {
 	if (!str || !*str)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
-	int exit_status = EXIT_FAILURE;
+	int exit_status = FUNC_FAILURE;
 
 	switch (type) {
 	case SNT_MIME:
-		if (clean_cmd(str) != EXIT_SUCCESS)
+		if (clean_cmd(str) != FUNC_SUCCESS)
 			/* Error message already pŕinted by clean_cmd() */
-			return EXIT_FAILURE;
+			return FUNC_FAILURE;
 		exit_status = sanitize_mime(str);
 		break;
 	case SNT_NET: exit_status = sanitize_net(str); break;
@@ -430,20 +430,20 @@ sanitize_cmd(const char *str, const int type)
 	case SNT_PROMPT:  /* fallthrough */
 	case SNT_AUTOCMD: /* fallthrough */
 	case SNT_GRAL:
-		if (clean_cmd(str) != EXIT_SUCCESS)
-			return EXIT_FAILURE;
+		if (clean_cmd(str) != FUNC_SUCCESS)
+			return FUNC_FAILURE;
 		exit_status = sanitize_gral(str);
 		break;
 	case SNT_BLACKLIST: return sanitize_blacklist(str);
-	case SNT_NONE: return EXIT_SUCCESS;
-	default: return EXIT_SUCCESS;
+	case SNT_NONE: return FUNC_SUCCESS;
+	default: return FUNC_SUCCESS;
 	}
 
-	if (exit_status == EXIT_FAILURE) {
+	if (exit_status == FUNC_FAILURE) {
 		err('w', PRINT_PROMPT, "%s: '%s': %s\n",
 			PROGRAM_NAME, str, _(UNSAFE_CMD));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }

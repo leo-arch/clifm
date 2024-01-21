@@ -217,7 +217,7 @@ add_new_jump_entry(const char *dir, const size_t dir_len)
 	jump_db[jump_n].first_visit = -1;
 	jump_db[jump_n].last_visit = -1;
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Add DIR to the jump database. If already there, just update the number of
@@ -226,7 +226,7 @@ int
 add_to_jumpdb(char *dir)
 {
 	if (xargs.no_dirjump == 1 || !dir || !*dir)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	size_t dir_len = strlen(dir);
 	if (dir_len > 1 && dir[dir_len - 1] == '/') {
@@ -256,7 +256,7 @@ add_to_jumpdb(char *dir)
 	}
 
 	if (new_entry == 0)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	return add_new_jump_entry(dir, dir_len);
 }
@@ -329,7 +329,7 @@ edit_jumpdb(char *app)
 {
 	if (config_ok == 0 || !config_dir) {
 		xerror(_("je: Configuration directory not found\n"));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	save_jumpdb();
@@ -345,7 +345,7 @@ edit_jumpdb(char *app)
 
 	const time_t mtime_bfr = attr.st_mtime;
 
-	int ret = EXIT_FAILURE;
+	int ret = FUNC_FAILURE;
 	if (app && *app) {
 		char *cmd[] = {app, jump_file, NULL};
 		ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
@@ -355,7 +355,7 @@ edit_jumpdb(char *app)
 		open_in_foreground = 0;
 	}
 
-	if (ret != EXIT_SUCCESS)
+	if (ret != FUNC_SUCCESS)
 		return ret;
 
 	if (stat(jump_file, &attr) == -1) {
@@ -364,13 +364,13 @@ edit_jumpdb(char *app)
 	}
 
 	if (mtime_bfr == (time_t)attr.st_mtime)
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 
 	if (jump_db)
 		free_jump_database();
 
 	load_jumpdb();
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 /* Save jump entry into the suggestions buffer. */
@@ -378,7 +378,7 @@ static int
 save_jump_suggestion(char *str)
 {
 	if (!str || !*str)
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 
 	free(jump_suggestion);
 	size_t len = strlen(str);
@@ -394,7 +394,7 @@ save_jump_suggestion(char *str)
 	else
 		xstrsncpy(jump_suggestion, str, jump_sug_len);
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static char *
@@ -457,7 +457,7 @@ print_jump_table(const int reduce, const time_t now)
 {
 	if (jump_n == 0) {
 		printf("jump: Database still empty\n");
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	HIDE_CURSOR;
@@ -548,7 +548,7 @@ print_jump_table(const int reduce, const time_t now)
 	    conf.max_jump_total_rank, visits_sum);
 
 	UNHIDE_CURSOR;
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -575,7 +575,7 @@ purge_invalid_entries(void)
 		printf(_("\njump: Purged %d invalid %s\n"), c,
 			c == 1 ? _("entry") : _("entries"));
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -611,7 +611,7 @@ purge_low_ranked_entries(const int limit)
 		printf(_("\njump: Purged %d %s\n"),
 			c, c == 1 ? _("entry") : _("entries"));
 
-	return EXIT_SUCCESS;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -622,13 +622,13 @@ purge_jump_database(char *arg)
 
 	if (!is_number(arg)) {
 		puts(JUMP_USAGE);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	int n = atoi(arg);
 	if (n < 0) {
 		xerror(_("jump: '%s': Invalid value\n"), arg);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	return purge_low_ranked_entries(n);
@@ -641,14 +641,14 @@ handle_jump_order(char *arg, const int mode)
 	if (!arg) {
 		if (mode == NO_SUG_JUMP)
 			fprintf(stderr, "%s\n", _(JUMP_USAGE));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	if (!is_number(arg)) {
 		if (mode == NO_SUG_JUMP)
 			return cd_function(arg, CD_PRINT_ERROR);
 
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	int int_order = atoi(arg);
@@ -656,7 +656,7 @@ handle_jump_order(char *arg, const int mode)
 	|| !jump_db || !jump_db[int_order - 1].path) {
 		if (mode == NO_SUG_JUMP)
 			xerror(_("jump: %s: No such order number\n"), arg);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	if (mode == NO_SUG_JUMP)
@@ -676,7 +676,7 @@ check_jump_params(char **args, const time_t now, const int reduce)
 
 	if (IS_HELP(args[1])) {
 		puts(_(JUMP_USAGE));
-		return EXIT_SUCCESS;
+		return FUNC_SUCCESS;
 	}
 
 	if (*args[1] == '-' && strcmp(args[1], "--edit") == 0)
@@ -787,7 +787,7 @@ dirjump(char **args, const int mode)
 {
 	if (xargs.no_dirjump == 1 && mode == NO_SUG_JUMP) {
 		printf(_("%s: Directory jumper function disabled\n"), PROGRAM_NAME);
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	time_t now = time(NULL);
@@ -815,7 +815,7 @@ dirjump(char **args, const int mode)
 	default:
 		xerror(_("jump: '%c': Invalid option\n"), args[0][1]);
 		fprintf(stderr, "%s\n", _(JUMP_USAGE));
-		return EXIT_FAILURE;
+		return FUNC_FAILURE;
 	}
 
 	/* If ARG is an actual directory, just cd into it. */
@@ -924,7 +924,7 @@ dirjump(char **args, const int mode)
 	/* 3) Further filter the list of matches by frecency, so that only
 	 * the best ranked directory will be returned. */
 
-	int found = 0, exit_status = EXIT_FAILURE, max = -1;
+	int found = 0, exit_status = FUNC_FAILURE, max = -1;
 	char *best_ranked = (char *)NULL;
 
 	j = match;
@@ -951,12 +951,12 @@ dirjump(char **args, const int mode)
 	if (found == 0) {
 		if (mode == NO_SUG_JUMP)
 			puts(_("jump: No matches found"));
-		exit_status = EXIT_FAILURE;
+		exit_status = FUNC_FAILURE;
 		goto END;
 	}
 
 	if (jump_opt == JLIST) {
-		exit_status = EXIT_SUCCESS;
+		exit_status = FUNC_SUCCESS;
 		goto END;
 	}
 
