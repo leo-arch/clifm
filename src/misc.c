@@ -1219,6 +1219,10 @@ save_last_path(char *last_path_tmp)
 
 	fclose(last_fp);
 
+	/* Last visited path is stored in the profile directory, but the
+	 * cd-on-quit script cannot know what our profile was. So, let's
+	 * symlink the .last file in our profile directory to the clifm
+	 * gral config dir, so that the script knows where to look for. */
 	if (conf.cd_on_quit == 1 && last_path_tmp
 	&& symlinkat(last_path, XAT_FDCWD, last_path_tmp) == -1) {
 		xerror(_("%s: cd-on-quit: Cannot create symbolic link '%s': %s\n"),

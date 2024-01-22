@@ -199,7 +199,6 @@ int_cmds_generator(const char *text, int state)
 		"pp      (print files properties - follow links/full dir size)",
 		"prompt  (switch/edit prompt)",
 		"q       (quit)",
-		"Q       (exit - cd on quit)",
 		"r       (remove files)",
 		"rf      (refresh/clear the screen)",
 		"rl      (reload the configuration file)",
