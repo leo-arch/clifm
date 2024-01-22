@@ -44,6 +44,7 @@ xatoi, url_encode, xnmalloc */
 #include "sort.h"       /* skip_files, xalphasort, alphasort_insensitive */
 #include "spawn.h"      /* launch_execv */
 
+/* Return the amount of currently trashed files. */
 static size_t
 count_trashed_files(void)
 {
@@ -59,14 +60,17 @@ count_trashed_files(void)
 	return n;
 }
 
+/* Confirm the removal of N files from the trash can.
+ * Return 1 if yes or 0 if not. */
 static int
 confirm_removal(const size_t n)
 {
 	if (conf.rm_force == 1)
-		return 1;
+		return 1; /* Yes */
 
-	char msg[128]; /* Big enough, in case of translations. */
+	char msg[256]; /* Big enough, in case of translations. */
 	snprintf(msg, sizeof(msg), _("Remove %zu file(s)? [y/n] "), n);
+
 	return rl_get_y_or_n(msg);
 }
 
@@ -91,8 +95,6 @@ trash_clear(void)
 		if (SELFORPARENT(ent->d_name))
 			continue;
 
-		int ret = FUNC_SUCCESS;
-
 		size_t len = strlen(ent->d_name) + 11;
 		char *info_file = xnmalloc(len, sizeof(char));
 		snprintf(info_file, len, "%s.trashinfo", ent->d_name);
@@ -105,14 +107,8 @@ trash_clear(void)
 		char *file2 = xnmalloc(len, sizeof(char));
 		snprintf(file2, len, "%s/%s", trash_info_dir, info_file);
 
-		if (unlinkat(XAT_FDCWD, file1, 0) == -1) {
-			ret = errno;
-			xerror("trash: '%s': %s\n", file1, strerror(errno));
-		}
-		if (unlinkat(XAT_FDCWD, file2, 0) == -1) {
-			ret = errno;
-			xerror("trash: '%s': %s\n", file2, strerror(errno));
-		}
+		char *cmd[] = {"rm", "-r", "--", file1, file2, NULL};
+		int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 
 		free(file1);
 		free(file2);
@@ -306,7 +302,7 @@ trash_file(const char *suffix, const struct tm *tm, char *file)
 	return ret;
 }
 
-/* Remove NAME file and the corresponding .trashinfo file from the trash can */
+/* Remove NAME file and the corresponding .trashinfo file from the trash can. */
 static int
 remove_file_from_trash(const char *name)
 {
@@ -317,30 +313,22 @@ remove_file_from_trash(const char *name)
 
 	int tmp_err = 0, err_file = 0, err_info = 0;
 	struct stat a;
+
 	if (stat(rm_file, &a) == -1) {
 		xerror("trash: '%s': %s\n", rm_file, strerror(errno));
 		err_file = tmp_err = errno;
 	}
+
 	if (stat(rm_info, &a) == -1) {
-		if (err_file == FUNC_SUCCESS)
-			xerror("trash: '%s': %s\n", rm_info, strerror(errno));
+		xerror("trash: '%s': %s\n", rm_info, strerror(errno));
 		err_info = tmp_err = errno;
 	}
 
-	if (err_file != FUNC_SUCCESS || err_info != FUNC_SUCCESS)
+	if (err_file != 0 || err_info != 0)
 		return tmp_err;
 
-	int ret = FUNC_SUCCESS;
-	if (unlinkat(XAT_FDCWD, rm_file, 0) == -1) {
-		ret = errno;
-		xerror("trash: '%s': %s\n", rm_file, strerror(errno));
-	}
-	if (unlinkat(XAT_FDCWD, rm_info, 0) == -1) {
-		ret = errno;
-		xerror("trash: '%s': %s\n", rm_info, strerror(errno));
-	}
-
-	return ret;
+	char *cmd[] = {"rm", "-r", "--", rm_file, rm_info, NULL};
+	return launch_execv(cmd, FOREGROUND, E_NOFLAG);
 }
 
 static int
