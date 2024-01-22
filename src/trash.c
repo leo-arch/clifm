@@ -59,10 +59,21 @@ count_trashed_files(void)
 	return n;
 }
 
+static int
+confirm_removal(const size_t n)
+{
+	char msg[128]; /* Big enough, in case of translations. */
+	snprintf(msg, sizeof(msg), _("Remove %zu file(s)? [y/n] "), n);
+	return rl_get_y_or_n(msg);
+}
+
 /* Empty the trash can. */
 static int
 trash_clear(void)
 {
+	if (trash_n > 0 && confirm_removal(trash_n) == 0)
+		return FUNC_SUCCESS;
+
 	DIR *dir = opendir(trash_files_dir);
 	if (!dir) {
 		xerror("trash: '%s': %s\n", trash_files_dir, strerror(errno));
@@ -335,11 +346,23 @@ remove_from_trash_params(char **args)
 	size_t rem_files = 0;
 	size_t i;
 	int exit_status = FUNC_SUCCESS;
+	int all = 0;
 
 	for (i = 0; args[i]; i++) {
-		if (*args[i] == '*' && !args[i][1])
-			return trash_clear();
+		if (*args[i] == '*' && !args[i][1]) {
+			all = 1;
+			break;
+		}
+	}
 
+	if (all == 1)
+		return trash_clear();
+
+	if (i > 0 && confirm_removal(i) == 0)
+		return FUNC_SUCCESS;
+
+
+	for (i = 0; args[i]; i++) {
 		char *d = (char *)NULL;
 		if (strchr(args[i], '\\'))
 			d = unescape_str(args[i], 0);
@@ -437,12 +460,15 @@ free_files_and_input(char ***input, struct dirent ***tfiles, const int tfiles_n)
 	free(*tfiles);
 }
 
-static size_t
+static int
 remove_from_trash_all(struct dirent ***tfiles, const int tfiles_n,
 	int *status)
 {
-	size_t n = 0;
+	int n = 0;
 	size_t i;
+
+	if (tfiles_n > 0 && confirm_removal((size_t)tfiles_n) == 0)
+		return (-1);
 
 	for (i = 0; i < (size_t)tfiles_n; i++) {
 		int ret = remove_file_from_trash((*tfiles)[i]->d_name);
@@ -508,20 +534,22 @@ remove_from_trash(char **args)
 
 	/* Remove files */
 
-	/* First check for exit, wildcard, and non-number args */
+	/* First check for exit, wildcard, and non-number args. */
 	for (i = 0; input[i]; i++) {
-		if (strcmp(input[i], "q") == 0) { /* Quit */
+		if (strcmp(input[i], "q") == 0) {
 			free_files_and_input(&input, &trash_files, files_n);
 			if (conf.autols == 1) reload_dirlist();
 			return exit_status;
 		}
 
-		if (strcmp(input[i], "*") == 0) { /* Asterisk */
-			const size_t n =
+		if (strcmp(input[i], "*") == 0) {
+			const int n =
 				remove_from_trash_all(&trash_files, files_n, &exit_status);
 			free_files_and_input(&input, &trash_files, files_n);
 			if (conf.autols == 1) reload_dirlist();
-			print_reload_msg(_("%zu file(s) removed from the trash can\n"), n);
+			if (n == -1) /* The user rejected the operation. */
+				return FUNC_SUCCESS;
+			print_reload_msg(_("%d file(s) removed from the trash can\n"), n);
 			print_reload_msg(_("%zu trashed file(s)\n"), count_trashed_files());
 			return exit_status;
 		}
@@ -535,8 +563,16 @@ remove_from_trash(char **args)
 		}
 	}
 
-	/* At this point we now all input fields are valid ELNs */
-	/* If all args are numbers, and neither 'q' nor wildcard */
+	/* Ask for confirmation */
+	for (i = 0; input[i]; i++);
+
+	if (i > 0 && confirm_removal(i) == 0) {
+		free_files_and_input(&input, &trash_files, files_n);
+		if (conf.autols == 1) reload_dirlist();
+		return FUNC_SUCCESS;
+	}
+
+	/* At this point we now all input fields are valid ELNs. */
 	for (i = 0; input[i]; i++) {
 		const int num = atoi(input[i]);
 
@@ -1146,16 +1182,10 @@ trash_function(char **args)
 		return remove_from_trash(args);
 
 	if ((*args[1] == 'c' && strcmp(args[1], "clear") == 0)
-	|| (*args[1] == 'e' && strcmp(args[1], "empty") == 0)) {
-		struct stat a;
-		if (trash_n > 0 && lstat(*args[1] == 'c' ? "clear" : "empty", &a) == 0
-		&& rl_get_y_or_n(_("Empty the trash can? [y/n] ")) == 0)
-			return FUNC_SUCCESS;
+	|| (*args[1] == 'e' && strcmp(args[1], "empty") == 0))
 		return trash_clear();
-	}
 
-	else
-		return trash_files_args(args);
+	return trash_files_args(args);
 }
 #else
 void *_skip_me_trash;
