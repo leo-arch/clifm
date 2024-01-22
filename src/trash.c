@@ -74,6 +74,23 @@ confirm_removal(const size_t n)
 	return rl_get_y_or_n(msg);
 }
 
+/* We have removed N files from the trash can. Print the results. */
+static void
+print_removal_result(const size_t n)
+{
+	if (conf.autols == 1)
+		reload_dirlist();
+
+	const size_t cur = (n <= trash_n ? (trash_n - n) : 0);
+
+	if (cur == 0) {
+		print_reload_msg(_("Trash can emptied: %zu file(s) removed\n"), n);
+	} else {
+		print_reload_msg(_("%zu file(s) removed from the trash can\n"), n);
+		print_reload_msg(_("%zu total trashed file(s)\n"), cur);
+	}
+}
+
 /* Remove the file named NAME and the corresponding .trashinfo file from
  * the trash can.
  * Return 0 on success or >0 on error. */
@@ -106,7 +123,12 @@ remove_file_from_trash(const char *name)
 static int
 trash_clear(void)
 {
-	if (trash_n > 0 && confirm_removal(trash_n) == 0)
+	if (trash_n == 0) {
+		puts(_("trash: No trashed files"));
+		return FUNC_SUCCESS;
+	}
+
+	if (confirm_removal(trash_n) == 0)
 		return FUNC_SUCCESS;
 
 	DIR *dir = opendir(trash_files_dir);
@@ -117,6 +139,7 @@ trash_clear(void)
 
 	int exit_status = FUNC_SUCCESS;
 	size_t n = 0;
+	size_t removed = 0;
 	struct dirent *ent;
 
 	while ((ent = readdir(dir))) {
@@ -124,12 +147,10 @@ trash_clear(void)
 			continue;
 
 		const int ret = remove_file_from_trash(ent->d_name);
-
-		if (ret != FUNC_SUCCESS) {
-			xerror(_("trash: '%s': Error removing trashed file\n"), ent->d_name);
-			/* If there is at least one error, return error */
+		if (ret != FUNC_SUCCESS)
 			exit_status = ret;
-		}
+		else
+			removed++;
 
 		n++;
 	}
@@ -138,10 +159,10 @@ trash_clear(void)
 
 	if (n == 0) {
 		puts(_("trash: No trashed files"));
-	} else if (exit_status == FUNC_SUCCESS) {
-		if (conf.autols == 1)
-			reload_dirlist();
-		print_reload_msg(_("Trash can emptied: %zu file(s) removed\n"), n);
+	} else {
+		if (exit_status != FUNC_SUCCESS && conf.autols == 1)
+			press_any_key_to_continue(0);
+		print_removal_result(removed);
 	}
 
 	return exit_status;
@@ -154,12 +175,10 @@ del_trash_file(const char *suffix)
 	char *tfile = xnmalloc(len, sizeof(char));
 	snprintf(tfile, len, "%s/%s", trash_files_dir, suffix);
 
-	int ret = FUNC_SUCCESS;
-	if (unlinkat(XAT_FDCWD, tfile, 0) == -1) {
-		ret = errno;
-		xerror(_("trash: '%s': %s\nTry removing the "
-			"file manually\n"), tfile, strerror(errno));
-	}
+	char *cmd[] = {"rm", "-r", "--", tfile, NULL};
+	int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
+	if (ret != FUNC_SUCCESS)
+		xerror(_("trash: Try removing the file manually\n"));
 
 	free(tfile);
 	return ret;
@@ -168,6 +187,13 @@ del_trash_file(const char *suffix)
 static int
 gen_trashinfo_file(char *file, const char *suffix, const struct tm *tm)
 {
+	/* Encode path to URL format (RF 2396) */
+	char *url_str = url_encode(file);
+	if (!url_str) {
+		xerror(_("trash: '%s': Error encoding path\n"), file);
+		return FUNC_FAILURE;
+	}
+
 	const size_t len = strlen(trash_info_dir) + strlen(suffix) + 12;
 	char *info_file = xnmalloc(len, sizeof(char));
 	snprintf(info_file, len, "%s/%s.trashinfo", trash_info_dir, suffix);
@@ -178,14 +204,6 @@ gen_trashinfo_file(char *file, const char *suffix, const struct tm *tm)
 		xerror("trash: '%s': %s\n", info_file, strerror(errno));
 		free(info_file);
 		return del_trash_file(suffix);
-	}
-
-	/* Encode path to URL format (RF 2396) */
-	char *url_str = url_encode(file);
-	if (!url_str) {
-		xerror(_("trash: '%s': Error encoding path\n"), file);
-		free(info_file);
-		return FUNC_FAILURE;
 	}
 
 	fprintf(fp,
@@ -200,14 +218,16 @@ gen_trashinfo_file(char *file, const char *suffix, const struct tm *tm)
 	return FUNC_SUCCESS;
 }
 
+/* Create the trashed file name: orig_filename.suffix, where SUFFIX is
+ * the current date and time (plus an integer in case of dups).
+ * Returns the absolute path to this file and updates FILE_SUFFIX to
+ * its basename. */
 static char *
 gen_dest_file(const char *file, const char *suffix, char **file_suffix)
 {
-	/* Create the trashed file name: orig_filename.suffix, where SUFFIX is
-	 * the current date and time (plus an integer in case of dups). */
 	char *filename = strrchr(file, '/');
 	if (!filename || !*(++filename)) {
-		xerror(_("trash: '%s': Error getting file name\n"), file);
+		xerror(_("trash: '%s': Error getting file base name\n"), file);
 		return (char *)NULL;
 	}
 
@@ -234,8 +254,8 @@ gen_dest_file(const char *file, const char *suffix, char **file_suffix)
 	*file_suffix = xnmalloc(slen, sizeof(char));
 	snprintf(*file_suffix, slen, "%s.%s", filename, suffix);
 
-	/* NOTE: It is guaranteed (by check_trash_file()) that FILE does not
-	 * end with a slash. */
+	/* NOTE: It is guaranteed (by check_trash_file(), called before from
+	 * trash_file_args()) that FILE does not end with a slash. */
 	const size_t dlen = strlen(trash_files_dir) + strlen(*file_suffix) + 2 + 16;
 	char *dest = xnmalloc(dlen, sizeof(char));
 	snprintf(dest, dlen, "%s/%s", trash_files_dir, *file_suffix);
@@ -313,6 +333,7 @@ trash_file(const char *suffix, const struct tm *tm, char *file)
 	return ret;
 }
 
+/* 't del FILE...' */
 static int
 remove_from_trash_params(char **args)
 {
@@ -340,20 +361,19 @@ remove_from_trash_params(char **args)
 		if (strchr(args[i], '\\'))
 			d = unescape_str(args[i], 0);
 
-		if (remove_file_from_trash(d ? d : args[i]) != FUNC_SUCCESS)
-			exit_status = FUNC_FAILURE;
+		const int ret = remove_file_from_trash(d ? d : args[i]);
+		if (ret != FUNC_SUCCESS)
+			exit_status = ret;
 		else
 			rem_files++;
 
 		free(d);
 	}
 
-	if (conf.autols == 1 && exit_status == FUNC_SUCCESS)
-		reload_dirlist();
+	if (exit_status != FUNC_SUCCESS && conf.autols == 1)
+		press_any_key_to_continue(0);
 
-	print_reload_msg(_("%zu file(s) removed from the trash can\n"), rem_files);
-	print_reload_msg(_("%zu total trashed file(s)\n"), trash_n - rem_files);
-
+	print_removal_result(rem_files);
 	return exit_status;
 }
 
@@ -440,19 +460,23 @@ remove_from_trash_all(struct dirent ***tfiles, const int tfiles_n,
 	int n = 0;
 	size_t i;
 
-	if (tfiles_n > 0 && confirm_removal((size_t)tfiles_n) == 0)
+	if (tfiles_n > 0 && confirm_removal((size_t)tfiles_n) == 0) {
+		if (conf.autols == 1)
+			reload_dirlist();
 		return (-1);
+	}
 
 	for (i = 0; i < (size_t)tfiles_n; i++) {
 		int ret = remove_file_from_trash((*tfiles)[i]->d_name);
-		if (ret != FUNC_SUCCESS) {
-			xerror(_("trash: '%s': Cannot remove file from the "
-				"trash can\n"), (*tfiles)[i]->d_name);
+		if (ret != FUNC_SUCCESS)
 			*status = FUNC_FAILURE;
-		} else {
+		else
 			n++;
-		}
 	}
+
+	if (*status != FUNC_SUCCESS && conf.autols == 1)
+		press_any_key_to_continue(0);
+	print_removal_result((size_t)n);
 
 	return n;
 }
@@ -524,12 +548,8 @@ remove_from_trash(char **args)
 			const int n =
 				remove_from_trash_all(&trash_files, files_n, &exit_status);
 			free_files_and_input(&input, &trash_files, files_n);
-			if (conf.autols == 1) reload_dirlist();
-			if (n == -1) /* The user rejected the operation. */
-				return FUNC_SUCCESS;
-			print_reload_msg(_("%d file(s) removed from the trash can\n"), n);
-			print_reload_msg(_("%zu trashed file(s)\n"), count_trashed_files());
-			return exit_status;
+			/* n == -1: User cancelled operation. */
+			return (n == -1 ? FUNC_SUCCESS : exit_status);
 		}
 
 		/* Non-number or invalid ELN */
@@ -551,6 +571,7 @@ remove_from_trash(char **args)
 	}
 
 	/* At this point we now all input fields are valid ELNs. */
+	size_t removed = 0;
 	for (i = 0; input[i]; i++) {
 		const int num = atoi(input[i]);
 
@@ -558,20 +579,15 @@ remove_from_trash(char **args)
 		if (ret != FUNC_SUCCESS) {
 			xerror(_("trash: '%s': Cannot remove file from the trash can\n"),
 				trash_files[num - 1]->d_name);
-			exit_status = FUNC_FAILURE;
+			if (conf.autols == 1) press_any_key_to_continue(0);
+			exit_status = ret;
+		} else {
+			removed++;
 		}
 	}
 
 	free_files_and_input(&input, &trash_files, files_n);
-
-	const size_t n = count_trashed_files();
-	if (n > 0) {
-		remove_from_trash(args);
-	} else {
-		if (conf.autols == 1) reload_dirlist();
-		print_reload_msg(_("0 trashed file(s)\n"));
-	}
-
+	print_removal_result(removed);
 	return exit_status;
 }
 
