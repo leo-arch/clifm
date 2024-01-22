@@ -62,6 +62,9 @@ count_trashed_files(void)
 static int
 confirm_removal(const size_t n)
 {
+	if (conf.rm_force == 1)
+		return 1;
+
 	char msg[128]; /* Big enough, in case of translations. */
 	snprintf(msg, sizeof(msg), _("Remove %zu file(s)? [y/n] "), n);
 	return rl_get_y_or_n(msg);
