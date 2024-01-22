@@ -168,21 +168,6 @@ trash_clear(void)
 	return exit_status;
 }
 
-static void
-del_trash_file(const char *suffix)
-{
-	const size_t len = strlen(trash_files_dir) + strlen(suffix) + 2;
-	char *tfile = xnmalloc(len, sizeof(char));
-	snprintf(tfile, len, "%s/%s", trash_files_dir, suffix);
-
-	char *cmd[] = {"rm", "-r", "--", tfile, NULL};
-	int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
-	if (ret != FUNC_SUCCESS)
-		xerror(_("trash: Try removing the file manually\n"));
-
-	free(tfile);
-}
-
 static int
 gen_trashinfo_file(char *file, const char *suffix, const struct tm *tm)
 {
@@ -197,13 +182,13 @@ gen_trashinfo_file(char *file, const char *suffix, const struct tm *tm)
 	char *info_file = xnmalloc(len, sizeof(char));
 	snprintf(info_file, len, "%s/%s.trashinfo", trash_info_dir, suffix);
 
-	int fd = 0;
-	FILE *fp = open_fwrite(info_file, &fd);
-	if (!fp) {
+	int fd = open(info_file, O_WRONLY | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
+	FILE *fp;
+	if (fd == -1 || !(fp = fdopen(fd, "w"))) {
 		const int saved_errno = errno;
-		xerror("trash: '%s': %s\n", info_file, strerror(errno));
+		if (fd != -1) close(fd);
+		xerror("trash: '%s': %s\n", info_file, strerror(saved_errno));
 		free(info_file);
-		del_trash_file(suffix);
 		return saved_errno;
 	}
 
