@@ -1,7 +1,7 @@
 # CliFM CD on quit
 
 # Description
-# Run CliFM and, if the exit command is "Q" (not "q"), read the .last file and cd into it.
+# Run Clifm, read the .last file, and cd into it.
 #
 # 1) Customize this function as needed and copy it into your fish functions directory as a .fish file with the same name.
 #    For example, with the default name, the file should be c.fish.

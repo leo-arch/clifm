@@ -3,7 +3,7 @@
 # CliFM CD on quit function
 
 # Description
-# Run CliFM and, if the exit command is "Q" (not "q"), read the .last file and cd into it.
+# Run Clifm, read the .last file, and cd into it.
 
 # 1) Customize this function as you need and copy it or source it from your shell configuration file (e.g., .bashrc, .zshrc, etc)
 # 2) Restart your shell (for changes to take effect)
