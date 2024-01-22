@@ -37,6 +37,7 @@
 #include "init.h"
 #include "messages.h"
 #include "misc.h"
+#include "readline.h" /* rl_get_y_or_n */
 #include "spawn.h"
 
 /* Return a string with the current date.
@@ -440,6 +441,9 @@ edit_history(char **args)
 static int
 clear_history_func(char **args)
 {
+	if (rl_get_y_or_n("Clear history? [y/n] ") == 0)
+		return FUNC_SUCCESS;
+
 	/* Let's overwrite whatever was there. */
 	int fd = 0;
 	FILE *hist_fp = open_fwrite(hist_file, &fd);
