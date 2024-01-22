@@ -74,6 +74,34 @@ confirm_removal(const size_t n)
 	return rl_get_y_or_n(msg);
 }
 
+/* Remove the file named NAME and the corresponding .trashinfo file from
+ * the trash can.
+ * Return 0 on success or >0 on error. */
+static int
+remove_file_from_trash(const char *name)
+{
+	size_t len = strlen(name) + 11;
+	char *info_file = xnmalloc(len, sizeof(char));
+	snprintf(info_file, len, "%s.trashinfo", name);
+
+	len = strlen(trash_files_dir) + strlen(name) + 2;
+	char *file1 = xnmalloc(len, sizeof(char));
+	snprintf(file1, len, "%s/%s", trash_files_dir, name);
+
+	len = strlen(trash_info_dir) + strlen(info_file) + 2;
+	char *file2 = xnmalloc(len, sizeof(char));
+	snprintf(file2, len, "%s/%s", trash_info_dir, info_file);
+
+	char *cmd[] = {"rm", "-r", "--", file1, file2, NULL};
+	int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
+
+	free(file1);
+	free(file2);
+	free(info_file);
+
+	return ret;
+}
+
 /* Empty the trash can. */
 static int
 trash_clear(void)
@@ -95,29 +123,12 @@ trash_clear(void)
 		if (SELFORPARENT(ent->d_name))
 			continue;
 
-		size_t len = strlen(ent->d_name) + 11;
-		char *info_file = xnmalloc(len, sizeof(char));
-		snprintf(info_file, len, "%s.trashinfo", ent->d_name);
-
-		len = strlen(trash_files_dir) + strlen(ent->d_name) + 2;
-		char *file1 = xnmalloc(len, sizeof(char));
-		snprintf(file1, len, "%s/%s", trash_files_dir, ent->d_name);
-
-		len = strlen(trash_info_dir) + strlen(info_file) + 2;
-		char *file2 = xnmalloc(len, sizeof(char));
-		snprintf(file2, len, "%s/%s", trash_info_dir, info_file);
-
-		char *cmd[] = {"rm", "-r", "--", file1, file2, NULL};
-		int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
-
-		free(file1);
-		free(file2);
-		free(info_file);
+		const int ret = remove_file_from_trash(ent->d_name);
 
 		if (ret != FUNC_SUCCESS) {
 			xerror(_("trash: '%s': Error removing trashed file\n"), ent->d_name);
-			exit_status = ret;
 			/* If there is at least one error, return error */
+			exit_status = ret;
 		}
 
 		n++;
@@ -130,7 +141,7 @@ trash_clear(void)
 	} else if (exit_status == FUNC_SUCCESS) {
 		if (conf.autols == 1)
 			reload_dirlist();
-		print_reload_msg(_("Trash can emptied [%zu file(s) deleted]\n"), n);
+		print_reload_msg(_("Trash can emptied: %zu file(s) removed\n"), n);
 	}
 
 	return exit_status;
@@ -302,35 +313,6 @@ trash_file(const char *suffix, const struct tm *tm, char *file)
 	return ret;
 }
 
-/* Remove NAME file and the corresponding .trashinfo file from the trash can. */
-static int
-remove_file_from_trash(const char *name)
-{
-	char rm_file[PATH_MAX + 1];
-	char rm_info[PATH_MAX + 1];
-	snprintf(rm_file, sizeof(rm_file), "%s/%s", trash_files_dir, name);
-	snprintf(rm_info, sizeof(rm_info), "%s/%s.trashinfo", trash_info_dir, name);
-
-	int tmp_err = 0, err_file = 0, err_info = 0;
-	struct stat a;
-
-	if (stat(rm_file, &a) == -1) {
-		xerror("trash: '%s': %s\n", rm_file, strerror(errno));
-		err_file = tmp_err = errno;
-	}
-
-	if (stat(rm_info, &a) == -1) {
-		xerror("trash: '%s': %s\n", rm_info, strerror(errno));
-		err_info = tmp_err = errno;
-	}
-
-	if (err_file != 0 || err_info != 0)
-		return tmp_err;
-
-	char *cmd[] = {"rm", "-r", "--", rm_file, rm_info, NULL};
-	return launch_execv(cmd, FOREGROUND, E_NOFLAG);
-}
-
 static int
 remove_from_trash_params(char **args)
 {
@@ -499,6 +481,11 @@ load_trashed_files(int *n, int *status)
 static int
 remove_from_trash(char **args)
 {
+	if (trash_n == 0) {
+		puts(_("trash: No trashed files"));
+		return FUNC_SUCCESS;
+	}
+
 	/* Remove from trash files passed as parameters */
 	if (args[2])
 		return remove_from_trash_params(args + 2);
