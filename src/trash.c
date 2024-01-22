@@ -168,7 +168,7 @@ trash_clear(void)
 	return exit_status;
 }
 
-static int
+static void
 del_trash_file(const char *suffix)
 {
 	const size_t len = strlen(trash_files_dir) + strlen(suffix) + 2;
@@ -181,7 +181,6 @@ del_trash_file(const char *suffix)
 		xerror(_("trash: Try removing the file manually\n"));
 
 	free(tfile);
-	return ret;
 }
 
 static int
@@ -201,9 +200,11 @@ gen_trashinfo_file(char *file, const char *suffix, const struct tm *tm)
 	int fd = 0;
 	FILE *fp = open_fwrite(info_file, &fd);
 	if (!fp) {
+		const int saved_errno = errno;
 		xerror("trash: '%s': %s\n", info_file, strerror(errno));
 		free(info_file);
-		return del_trash_file(suffix);
+		del_trash_file(suffix);
+		return saved_errno;
 	}
 
 	fprintf(fp,
@@ -301,7 +302,10 @@ trash_file(const char *suffix, const struct tm *tm, char *file)
 
 	char *file_suffix = (char *)NULL;
 	char *dest = gen_dest_file(tmpfile, suffix, &file_suffix);
-	if (!dest || !file_suffix) {
+
+	/* As per the FreeDesktop specification, generate the info file first. */
+	if (!dest || !file_suffix
+	|| gen_trashinfo_file(tmpfile, file_suffix, tm) != FUNC_SUCCESS) {
 		free(dest);
 		free(file_suffix);
 		return FUNC_FAILURE;
@@ -327,9 +331,7 @@ trash_file(const char *suffix, const struct tm *tm, char *file)
 		return (mvcmd == 1 ? ret : errno);
 	}
 
-	ret = gen_trashinfo_file(tmpfile, file_suffix, tm);
 	free(file_suffix);
-
 	return ret;
 }
 
@@ -617,6 +619,7 @@ read_original_path(const char *file, const char *src, int *status)
 			if (!p || !*(++p))
 				break;
 			orig_path = savestring(p, strnlen(p, sizeof(line) - 1));
+			break;
 		}
 	}
 
