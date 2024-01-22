@@ -204,6 +204,21 @@ gen_trashinfo_file(char *file, const char *suffix, const struct tm *tm)
 	return FUNC_SUCCESS;
 }
 
+static void
+remove_trashinfo_file(const char *name)
+{
+	const size_t len = strlen(trash_info_dir) + strlen(name) + 12;
+	char *info_file = xnmalloc(len, sizeof(char));
+	snprintf(info_file, len, "%s/%s.trashinfo", trash_info_dir, name);
+
+	if (unlink(info_file) == -1) {
+		err('w', PRINT_PROMPT, "trash: Cannot remove info file '%s': %s\n",
+			info_file, strerror(errno));
+	}
+
+	free(info_file);
+}
+
 /* Create the trashed file name: orig_filename.suffix, where SUFFIX is
  * the current date and time (plus an integer in case of dups).
  * Returns the absolute path to this file and updates FILE_SUFFIX to
@@ -264,7 +279,7 @@ trash_file(const char *suffix, const struct tm *tm, char *file)
 {
 	struct stat attr;
 	if (lstat(file, &attr) == -1) {
-		xerror("trash: '%s': %s\n", file, strerror(errno));
+		xerror(_("trash: Cannot trash '%s': %s\n"), file, strerror(errno));
 		return errno;
 	}
 
@@ -310,9 +325,10 @@ trash_file(const char *suffix, const struct tm *tm, char *file)
 	free(dest);
 
 	if (ret != FUNC_SUCCESS) {
-		if (mvcmd == 0)
-			xerror(_("trash: '%s': %s\n"), file, strerror(errno));
+		remove_trashinfo_file(file_suffix);
 		free(file_suffix);
+		if (mvcmd == 0)
+			xerror(_("trash: Cannot trash '%s': %s\n"), file, strerror(errno));
 		return (mvcmd == 1 ? ret : errno);
 	}
 
@@ -1012,7 +1028,7 @@ check_trash_file(char *file)
 
 	struct stat a;
 	if (lstat(file, &a) == -1) {
-		xerror(_("trash: '%s': %s\n"), file, strerror(errno));
+		xerror(_("trash: Cannot trash '%s': %s\n"), file, strerror(errno));
 		return errno;
 	}
 
@@ -1130,6 +1146,9 @@ trash_files_args(char **args)
 			press_any_key_to_continue(0);
 			reload_dirlist();
 		}
+	} else { /* Error and no trashed file. */
+		free(successfully_trashed);
+		return exit_status;
 	}
 
 PRINT_TRASHED:
