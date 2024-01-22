@@ -407,7 +407,7 @@ ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 
 /* String used for the messages pointer (ex: "-> 2 file(s) removed")
  * Note: The color used for this string is 'mi' (in the color scheme file). */
-#define MSG_PTR "->"
+#define MSG_PTR_STR "->"
 
 #define MNT_UDEVIL 	0
 #define MNT_UDISKS2 1
