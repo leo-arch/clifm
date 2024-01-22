@@ -441,7 +441,7 @@ edit_history(char **args)
 static int
 clear_history_func(char **args)
 {
-	if (rl_get_y_or_n("Clear history? [y/n] ") == 0)
+	if (rl_get_y_or_n(_("Clear history? [y/n] ")) == 0)
 		return FUNC_SUCCESS;
 
 	/* Let's overwrite whatever was there. */
