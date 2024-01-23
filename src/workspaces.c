@@ -39,12 +39,11 @@
 #include "history.h"    /* add_to_dirhist */
 #include "strings.h"    /* wc_xstrlen */
 
+#define IS_VALID_WS(n) ((n) >= 0 && (n) < MAX_WS && workspaces[(n)].path)
+
 static size_t
 get_longest_workspace_name(void)
 {
-	if (!workspaces)
-		return 0;
-
 	size_t longest_ws = 0;
 	int i = MAX_WS;
 
@@ -192,7 +191,8 @@ set_ws_filter(const int n)
 	if (filter.type != FILTER_FILE_NAME)
 		return;
 
-	if (regcomp(&regex_exp, filter.str, REG_NOSUB | REG_EXTENDED) != FUNC_SUCCESS)
+	if (regcomp(&regex_exp, filter.str, REG_NOSUB | REG_EXTENDED)
+	!= FUNC_SUCCESS)
 		unset_ws_filter();
 }
 
@@ -228,16 +228,28 @@ switch_workspace(const int tmp_ws)
 {
 	/* If new workspace has no path yet, copy the path of the current workspace */
 	if (!workspaces[tmp_ws].path) {
+		if (!IS_VALID_WS(cur_ws)) {
+			xerror(_("ws: Current workspace is invalid\n"));
+			return FUNC_FAILURE;
+		}
+
 		workspaces[tmp_ws].path = savestring(workspaces[cur_ws].path,
 		    strlen(workspaces[cur_ws].path));
+
 	} else if (tmp_ws != cur_ws) {
 		if (access(workspaces[tmp_ws].path, R_OK | X_OK) != FUNC_SUCCESS) {
+			if (!IS_VALID_WS(cur_ws)) {
+				xerror(_("ws: Current workspace is invalid\n"));
+				return FUNC_FAILURE;
+			}
+
 			xerror("ws: '%s': %s\n", workspaces[tmp_ws].path, strerror(errno));
 			if (conf.autols == 1) press_any_key_to_continue(0);
 			free(workspaces[tmp_ws].path);
 			workspaces[tmp_ws].path = savestring(workspaces[cur_ws].path,
 				strlen(workspaces[cur_ws].path));
 		}
+
 	} else {
 		xerror(_("ws: %d: Is the current workspace\n"), tmp_ws + 1);
 		return FUNC_SUCCESS;
@@ -274,7 +286,7 @@ switch_workspace(const int tmp_ws)
 static int
 get_workspace_by_name(char *name, const int check_current)
 {
-	if (!workspaces || !name || !*name)
+	if (!name || !*name)
 		return (-1);
 
 	/* CHECK_CURRENT is zero when coming from unset_workspace(), in which
@@ -353,6 +365,11 @@ ERROR:
 int
 handle_workspaces(char **args)
 {
+	if (!workspaces) { /* This should never happen. */
+		xerror(_("ws: There are no defined workspaces\n"));
+		return FUNC_FAILURE;
+	}
+
 	if (!args[0] || !*args[0])
 		return list_workspaces();
 
@@ -370,14 +387,21 @@ handle_workspaces(char **args)
 		const int ret = check_workspace_num(args[0], &tmp_ws);
 		if (ret != 2)
 			return ret;
+
 	} else if (*args[0] == '+' && !args[0][1]) {
-		if ((cur_ws + 1) >= MAX_WS)
+		if ((cur_ws + 1) >= MAX_WS) {
+			xerror(_("ws: This is already the last workspace\n"));
 			return FUNC_FAILURE;
+		}
 		tmp_ws = cur_ws + 1;
+
 	} else if (*args[0] == '-' && !args[0][1]) {
-			if ((cur_ws - 1) < 0)
-				return FUNC_FAILURE;
-			tmp_ws = cur_ws - 1;
+		if ((cur_ws - 1) < 0) {
+			xerror(_("ws: This is already the first workspace\n"));
+			return FUNC_FAILURE;
+		}
+		tmp_ws = cur_ws - 1;
+
 	} else {
 		tmp_ws = get_workspace_by_name(args[0], 1);
 		if (tmp_ws == -1)
