@@ -284,13 +284,17 @@ switch_workspace(const int tmp_ws)
 	if (!workspaces[tmp_ws].path) {
 		workspaces[tmp_ws].path = savestring(workspaces[cur_ws].path,
 		    strlen(workspaces[cur_ws].path));
-	} else {
+	} else if (tmp_ws != cur_ws) {
 		if (access(workspaces[tmp_ws].path, R_OK | X_OK) != FUNC_SUCCESS) {
 			xerror("ws: '%s': %s\n", workspaces[tmp_ws].path, strerror(errno));
+			if (conf.autols == 1) press_any_key_to_continue(0);
 			free(workspaces[tmp_ws].path);
 			workspaces[tmp_ws].path = savestring(workspaces[cur_ws].path,
 				strlen(workspaces[cur_ws].path));
 		}
+	} else {
+		xerror(_("ws: %d: Is the current workspace\n"), tmp_ws + 1);
+		return FUNC_SUCCESS;
 	}
 
 	if (xchdir(workspaces[tmp_ws].path, SET_TITLE) == -1) {
@@ -328,7 +332,7 @@ get_workspace_by_name(char *name, const int check_current)
 		return (-1);
 
 	/* CHECK_CURRENT is zero when coming from unset_workspace(), in which
-	 * case name is already dequoted */
+	 * case name is already unescapeed. */
 	char *p = check_current == 1 ? unescape_str(name, 0) : (char *)NULL;
 	char *q = p ? p : name;
 
