@@ -465,7 +465,7 @@ FREE_N_EXIT:
 
 END:
 	if (unlinkat(fd, tmp_file, 0) == -1) {
-		err('w', PRINT_PROMPT, "rr: unlinkat: '%s': %s\n",
+		err('w', PRINT_PROMPT, "rr: unlink: '%s': %s\n",
 			tmp_file, strerror(errno));
 	}
 

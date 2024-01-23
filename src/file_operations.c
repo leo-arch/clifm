@@ -319,7 +319,7 @@ dup_file(char **cmd)
 	}
 
 	char *rsync_path = get_cmd_path("rsync");
-	int exit_status =  FUNC_SUCCESS;
+	int exit_status = FUNC_SUCCESS;
 
 	size_t i;
 	for (i = 1; cmd[i]; i++) {
@@ -340,7 +340,7 @@ dup_file(char **cmd)
 		}
 
 		/* Use source as destiny file name: source.copy, and, if already
-		 * exists, source.copy-n, where N is an integer greater than zero */
+		 * exists, source.copy-n, where N is an integer greater than zero. */
 		const size_t source_len = strlen(source);
 		int rem_slash = 0;
 		if (strcmp(source, "/") != 0 && source_len > 0
@@ -355,7 +355,7 @@ dup_file(char **cmd)
 		source_name = (tmp && *(tmp + 1)) ? tmp + 1 : source;
 
 		char tmp_dest[PATH_MAX + 1];
-		if (*dest_dir == '/' && !dest_dir[1]) // root dir
+		if (*dest_dir == '/' && !dest_dir[1]) /* Root dir */
 			snprintf(tmp_dest, sizeof(tmp_dest), "/%s.copy", source_name);
 		else
 			snprintf(tmp_dest, sizeof(tmp_dest), "%s/%s.copy",
@@ -376,23 +376,23 @@ dup_file(char **cmd)
 
 		/* 2. Run command. */
 		if (rsync_path) {
-			char *_cmd[] = {"rsync", "-aczvAXHS", "--progress", "--",
+			char *dup_cmd[] = {"rsync", "-aczvAXHS", "--progress", "--",
 				source, dest, NULL};
-			if (launch_execv(_cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
+			if (launch_execv(dup_cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
 				exit_status = FUNC_FAILURE;
 		} else {
 #ifdef _BE_POSIX
-			char *_cmd[] = {"cp", "--", source, dest, NULL};
+			char *dup_cmd[] = {"cp", "--", source, dest, NULL};
 #elif defined(__sun)
 			int g = (bin_flags & BSD_HAVE_COREUTILS);
 			char *name = g ? "gcp" : "cp";
 			char *opt = g ? "-a" : "--";
-			char *_cmd[] = {name, opt, g ? "--" : source,
+			char *dup_cmd[] = {name, opt, g ? "--" : source,
 				g ? source : dest, g ? dest : NULL, NULL};
 #else
-			char *_cmd[] = {"cp", "-a", "--", source, dest, NULL};
+			char *dup_cmd[] = {"cp", "-a", "--", source, dest, NULL};
 #endif /* _BE_POSIX */
-			if (launch_execv(_cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
+			if (launch_execv(dup_cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
 				exit_status = FUNC_FAILURE;
 		}
 
@@ -1200,7 +1200,7 @@ symlink_file(char **args)
 			return FUNC_SUCCESS;
 
 		if (unlinkat(XAT_FDCWD, link_name, 0) == -1) {
-			xerror("link: '%s': %s\n", link_name, strerror(errno));
+			xerror("link: unlink: '%s': %s\n", link_name, strerror(errno));
 			return FUNC_FAILURE;
 		}
 	}
@@ -1274,7 +1274,7 @@ validate_vv_dest_dir(const char *file)
 	}
 
 	if (!S_ISDIR(a.st_mode)) {
-		xerror(_("vv: '%s': Not a directory\n"), file);
+		xerror("vv: '%s': %s\n", file, strerror(ENOTDIR));
 		return FUNC_FAILURE;
 	}
 

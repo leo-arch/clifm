@@ -75,8 +75,7 @@ rename_file(char *oldpath, char *newpath)
 	if (len > 1 && newpath[len - 1] == '/')
 		newpath[len - 1] = '\0';
 
-	int ret = renameat(XAT_FDCWD, oldpath, XAT_FDCWD, newpath);
-	if (ret == 0)
+	if (renameat(XAT_FDCWD, oldpath, XAT_FDCWD, newpath) == 0)
 		return 0;
 
 	if (errno != EXDEV) {
@@ -276,8 +275,6 @@ rename_bulk_files(char **args, FILE *fp, int *is_cwd, size_t *renamed,
 		const int ret = rename_file(args[i], line);
 		if (ret != 0) {
 			exit_status = ret;
-			if (conf.autols == 1 && modified > 1)
-				press_any_key_to_continue(0);
 			goto CONT;
 		}
 
@@ -290,6 +287,9 @@ rename_bulk_files(char **args, FILE *fp, int *is_cwd, size_t *renamed,
 CONT:
 		i++;
 	}
+
+	if (conf.autols == 1 && exit_status != 0 && modified > 1)
+		press_any_key_to_continue(0);
 
 	return exit_status;
 }
@@ -412,7 +412,7 @@ bulk_rename(char **args)
 
 ERROR:
 	if (unlinkat(fd, tmpfile, 0) == -1) {
-		xerror("br: unlinkat: '%s': %s\n", tmpfile, strerror(errno));
+		xerror("br: unlink: '%s': %s\n", tmpfile, strerror(errno));
 		exit_status = errno;
 	}
 
