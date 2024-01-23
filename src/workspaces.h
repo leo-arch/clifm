@@ -1,4 +1,4 @@
-/* navigation.h */
+/* workspaces.h */
 
 /*
  * This file is part of CliFM
@@ -22,23 +22,13 @@
  * MA 02110-1301, USA.
 */
 
-#ifndef NAVIGATION_H
-#define NAVIGATION_H
-
-#include "workspaces.h"
+#ifndef WORKSPACES_H
+#define WORKSPACES_H
 
 __BEGIN_DECLS
 
-int  back_function(char **args);
-int  backdir(char *str);
-int  cd_function(char *new_path, const int cd_flag);
-char *fastback(char *str);
-int  forth_function(char **args);
-char **get_bd_matches(const char *str, int *n, const int mode);
-void print_dirhist(char *query);
-int  pwd_function(const char *arg);
-int  xchdir(char *dir, const int cd_flag);
+int handle_workspaces(char **args);
 
 __END_DECLS
 
-#endif /* NAVIGATION_H */
+#endif /* WORKSPACES_H */
