@@ -409,11 +409,12 @@ dup_file(char **cmd)
  * Parent directories are created if they do not exist.
  * Returns FUNC_SUCCESS on success or FUNC_FAILURE on error. */
 static int
-create_file(char *name)
+create_file(char *name, const int is_md)
 {
 	struct stat a;
 	char *ret = (char *)NULL;
 	char *n = name;
+	char *errname = is_md == 1 ? "md" : "new";
 	int status = FUNC_SUCCESS;
 
 	/* Dir creation mode (777, or 700 if running in secure-mode). mkdir(3) will
@@ -432,7 +433,7 @@ create_file(char *name)
 
 		errno = 0;
 		if (mkdirat(XAT_FDCWD, name, mode) == -1) {
-			xerror("new: '%s': %s\n", name, strerror(errno));
+			xerror("%s: '%s': %s\n", errname, name, strerror(errno));
 			status = FUNC_FAILURE;
 			break;
 		}
@@ -452,7 +453,7 @@ CONT:
 
 		const int fd = open(name, O_WRONLY | O_CREAT | O_EXCL, mode);
 		if (fd == -1) {
-			xerror("new: '%s': %s\n", name, strerror(errno));
+			xerror("%s: '%s': %s\n", errname, name, strerror(errno));
 			status = FUNC_FAILURE;
 		} else {
 			close(fd);
@@ -747,7 +748,7 @@ ask_and_create_file(void)
 		goto ERROR;
 	}
 
-	exit_status = create_file(filename);
+	exit_status = create_file(filename, 0);
 	if (exit_status == FUNC_SUCCESS) {
 		char *f[] = { filename, (char *)NULL };
 		list_created_files(f, 1);
@@ -823,24 +824,26 @@ create_files(char **args, const int is_md)
 
 		/* Skip existent files. */
 		if (check_file_existence(args[i]) == 0) {
-			exit_status = err_file_exists(args[i], argsn > 1, is_md);
+			exit_status = err_file_exists(args[i], 0, is_md);
 			continue;
 		}
 
-		const int ret = create_file(args[i]);
+		const int ret = create_file(args[i], is_md);
 		if (ret == FUNC_SUCCESS) {
 			new_files[new_files_n] = args[i];
 			new_files_n++;
 		} else if (argsn > 1) {
 			exit_status = FUNC_FAILURE;
-			press_any_key_to_continue(0);
 		}
 	}
 
 	new_files[new_files_n] = (char *)NULL;
 
-	if (new_files_n > 0)
+	if (new_files_n > 0) {
+		if (exit_status != FUNC_SUCCESS && conf.autols == 1)
+			press_any_key_to_continue(0);
 		list_created_files(new_files, new_files_n);
+	}
 
 	free(new_files);
 	return exit_status;
