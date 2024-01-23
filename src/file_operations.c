@@ -1718,16 +1718,14 @@ remove_files(char **args)
 
 	rm_cmd[j] = info[j].name = (char *)NULL;
 
-	if (errs > 0 && j > 3) { /* If at least one error, fail anyway. */
-		fprintf(stderr, _("%s: No files were removed\n"), err_name);
-		goto END;
-	}
-
 	if (j == 3) { /* No file to be deleted */
 		free(rm_cmd);
 		free(info);
 		return FUNC_FAILURE;
 	}
+
+	if (rm_force == 1 && errs > 0 && j > 3 && conf.autols == 1)
+		press_any_key_to_continue(0);
 
 	if (rm_force == 0 && rm_confirm(info, 3, have_dirs) == 0)
 		goto END;
@@ -1741,8 +1739,8 @@ remove_files(char **args)
 	rm_cmd[1] = have_dirs >= 1 ? "-rf" : "-f";
 	rm_cmd[2] = "--";
 
-	if (launch_execv(rm_cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS) {
-		exit_status = FUNC_FAILURE;
+	exit_status = launch_execv(rm_cmd, FOREGROUND, E_NOFLAG);
+	if (exit_status != FUNC_SUCCESS) {
 #ifndef BSD_KQUEUE
 		if (num > 1 && conf.autols == 1) /* Only if we have multiple files */
 #else
@@ -1844,8 +1842,6 @@ batch_link(char **args)
 		if (!filename) {
 			exit_status = FUNC_FAILURE;
 			xerror(_("bl: '%s': Error unescaping name\n"), args[i]);
-			if (conf.autols == 1 && args[i + 1])
-				press_any_key_to_continue(0);
 			continue;
 		}
 
@@ -1858,8 +1854,6 @@ batch_link(char **args)
 		if (lstat(filename, &a) == -1) {
 			exit_status = errno;
 			xerror("bl: '%s': %s\n", filename, strerror(errno));
-			if (conf.autols == 1 && args[i + 1])
-				press_any_key_to_continue(0);
 			free(filename);
 			continue;
 		}
@@ -1882,8 +1876,6 @@ batch_link(char **args)
 			exit_status = errno;
 			xerror(_("bl: Cannot create symbolic link '%s': %s\n"),
 				tmp, strerror(errno));
-			if (conf.autols == 1)
-				press_any_key_to_continue(0);
 		} else {
 			symlinked++;
 		}
@@ -1892,8 +1884,11 @@ batch_link(char **args)
 		free(tmp);
 	}
 
-	if (conf.autols == 1 && symlinked > 0)
+	if (conf.autols == 1 && symlinked > 0) {
+		if (exit_status != FUNC_SUCCESS)
+			press_any_key_to_continue(0);
 		reload_dirlist();
+	}
 	print_reload_msg(_("%zu symbolic link(s) created\n"), symlinked);
 
 	return exit_status;
