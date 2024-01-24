@@ -3040,11 +3040,10 @@ escape_str(const char *str)
 	return buf;
 }
 
-/* Get all substrings from STR using IFS as substring separator, and, if there
- * is a range, expand it. Returns an array containing all substrings in STR
- * plus expanded ranges (duplicates are removed), or NULL if: STR is NULL or
- * empty, STR contains only IFS(s), or in case of memory allocation error.
- * If FPROC is set to 1, ranges are expanded and duplicates removed. */
+/* Get all substrings in STR using IFS as substring separator.
+ * If FPROC is set to 1, some further processing is performed: ranges
+ * are expanded and duplicates removed.
+ * Returns an array containing all substrings in STR. */
 char **
 get_substr(char *str, const char ifs, const int fproc)
 {
