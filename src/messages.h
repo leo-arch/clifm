@@ -183,7 +183,8 @@ Note: Links are always created in the current directory."
   br, bulk ELN/FILE... [:EDITOR]\n\n\
 The list of files to be renamed is opened via EDITOR (default associated\n\
 application for text files if omitted). Edit the file names you want to \n\
-rename, save, and quit the editor.\n\n\
+rename, save, and quit the editor (quit without saving to cancel the \n\
+operation).\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Bulk rename all files ending with .pdf in the current directory\n\
     br *.pdf\n\
@@ -901,7 +902,7 @@ To enable this feature consult the manpage"
 The list of files in DIR (current directory if omitted) is opened via\n\
 EDITOR (default associated application for text files if omitted). Remove\n\
 the lines corresponding to the files you want to delete, save, and quit\n\
-the editor.\n\n\
+the editor (quit without saving to cancel the operation).\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Bulk remove files/dirs in the current directory using the default editor\n\
     rr\n\
