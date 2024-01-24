@@ -832,8 +832,8 @@ create_files(char **args, const int is_md)
 		if (ret == FUNC_SUCCESS) {
 			new_files[new_files_n] = args[i];
 			new_files_n++;
-		} else if (argsn > 1) {
-			exit_status = FUNC_FAILURE;
+		} else {
+			exit_status = ret;
 		}
 	}
 
