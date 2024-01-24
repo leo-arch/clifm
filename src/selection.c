@@ -1162,7 +1162,7 @@ get_desel_input(size_t *n)
 	while (!line)
 		line = rl_no_hist(dp);
 
-	char **entries = get_substr(line, ' ');
+	char **entries = get_substr(line, ' ', 1);
 	free(line);
 
 	if (!entries)

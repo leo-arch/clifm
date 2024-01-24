@@ -999,7 +999,7 @@ split_str(char *str, const int update_args)
 	buf[buf_len] = '\0';
 
 	if (buf_len > 0) {
-		if (!words)
+		if (words == 0)
 			substr = xcalloc(words + 1, sizeof(char *));
 		else
 			substr = xnrealloc(substr, words + 1, sizeof(char *));
@@ -1011,7 +1011,7 @@ split_str(char *str, const int update_args)
 	free(buf);
 	buf = (char *)NULL;
 
-	if (words) {
+	if (words > 0) {
 		/* Add a final null string to the array */
 		substr = xnrealloc(substr, words + 1, sizeof(char *));
 		substr[words] = (char *)NULL;
@@ -1652,6 +1652,9 @@ expand_sel(char ***substr)
 static void
 expand_sel_keyword(char ***substr)
 {
+	if (!(*substr) || !(*substr)[0])
+		return;
+
 	struct stat a;
 	size_t i;
 
@@ -3040,54 +3043,34 @@ escape_str(const char *str)
 /* Get all substrings from STR using IFS as substring separator, and, if there
  * is a range, expand it. Returns an array containing all substrings in STR
  * plus expanded ranges (duplicates are removed), or NULL if: STR is NULL or
- * empty, STR contains only IFS(s), or in case of memory allocation error. */
+ * empty, STR contains only IFS(s), or in case of memory allocation error.
+ * If FPROC is set to 1, ranges are expanded and duplicates removed. */
 char **
-get_substr(char *str, const char ifs)
+get_substr(char *str, const char ifs, const int fproc)
 {
-	if (!str || *str == '\0')
+	if (!str || !*str)
 		return (char **)NULL;
 
-	/* ############## SPLIT THE STRING #######################*/
-
+	/* a. SPLIT THE STRING */
 	char **substr = (char **)NULL;
-	void *p = (char *)NULL;
+	size_t len = 0;
+	size_t substr_n = 0;
 	const size_t str_len = strlen(str);
-	size_t length = 0, substr_n = 0;
 	char *buf = xnmalloc(str_len + 1, sizeof(char));
 
 	while (*str) {
-		while (*str != ifs && *str != '\0' && length < (str_len + 1)) {
-			buf[length] = *str;
-			length++;
+		while (*str != ifs && *str != '\0' && len < (str_len + 1)) {
+			buf[len] = *str;
+			len++;
 			str++;
 		}
-		if (length) {
-			buf[length] = '\0';
-			p = realloc(substr, (substr_n + 1) * sizeof(char *));
-			if (!p) {
-				/* Free whatever was allocated so far */
-				size_t i;
-				for (i = 0; i < substr_n; i++)
-					free(substr[i]);
-				free(substr);
-				return (char **)NULL;
-			}
-			substr = (char **)p;
-			p = malloc(length + 1);
 
-			if (!p) {
-				size_t i;
-				for (i = 0; i < substr_n; i++)
-					free(substr[i]);
-				free(substr);
-				return (char **)NULL;
-			}
-
-			substr[substr_n] = p;
-			p = (char *)NULL;
-			xstrsncpy(substr[substr_n], buf, length + 1);
+		if (len > 0) {
+			buf[len] = '\0';
+			substr = xnrealloc(substr, substr_n + 2, sizeof(char *));
+			substr[substr_n] = savestring(buf, len);
 			substr_n++;
-			length = 0;
+			len = 0;
 		} else {
 			str++;
 		}
@@ -3095,165 +3078,52 @@ get_substr(char *str, const char ifs)
 
 	free(buf);
 
-	if (!substr_n)
+	if (substr_n == 0)
 		return (char **)NULL;
 
-	size_t i = 0, j = 0;
-	p = realloc(substr, (substr_n + 1) * sizeof(char *));
-	if (!p) {
-		for (i = 0; i < substr_n; i++)
-			free(substr[i]);
-		free(substr);
-		substr = (char **)NULL;
-		return (char **)NULL;
-	}
-
-	substr = (char **)p;
-	p = (char *)NULL;
 	substr[substr_n] = (char *)NULL;
 
-	/* ################### EXPAND RANGES ######################*/
+	if (fproc == 0)
+		return substr;
 
-	int afirst = 0, asecond = 0;
+	/* b. EXPAND RANGES */
+	const size_t argsbk = args_n;
+	args_n = substr_n;
+	expand_ranges(&substr);
+	args_n = argsbk;
 
-	for (i = 0; substr[i]; i++) {
-		/* Check if substr is a valid range */
-		int ranges_ok = 0;
-		/* If range, get both extremes of it */
-		for (j = 1; substr[i][j]; j++) {
-			if (substr[i][j] == '-') {
-				/* Get strings before and after the dash */
-				char *q = strchr(substr[i], '-');
-				if (!q || !*q || q == substr[i] || *(q - 1) < '1'
-				|| *(q - 1) > '9' || !*(q + 1) || *(q + 1) < '1'
-				|| *(q + 1) > '9')
-					break;
-
-				*q = '\0';
-				char *first = savestring(substr[i], strlen(substr[i]));
-				*q = '-';
-				q++;
-
-				if (!first)
-					break;
-
-				char *second = savestring(q, strlen(q));
-				if (!second) {
-					free(first);
-					break;
-				}
-
-				/* Make sure we have a valid range */
-				if (is_number(first) && is_number(second)) {
-					afirst = atoi(first); asecond = atoi(second);
-					if (afirst == INT_MIN || asecond == INT_MIN) {
-						free(first);
-						free(second);
-						break;
-					}
-					if (asecond <= afirst) {
-						free(first);
-						free(second);
-						break;
-					}
-
-					ranges_ok = 1;
-					free(first);
-					free(second);
-				} else {
-					free(first);
-					free(second);
-					break;
-				}
-			}
-		}
-
-		if (ranges_ok == 0)
-			continue;
-
-		/* If a valid range */
-		size_t k = 0, next = 0;
-		char **rbuf = (char **)NULL;
-		rbuf = xnmalloc((substr_n + (size_t)(asecond - afirst) + 1),
-			sizeof(char *));
-		/* Copy everything before the range expression into the buffer */
-		for (j = 0; j < i; j++) {
-			rbuf[k] = savestring(substr[j], strlen(substr[j]));
-			k++;
-		}
-
-		/* Copy the expanded range into the buffer */
-		for (j = (size_t)afirst; j <= (size_t)asecond; j++) {
-			const size_t len = (size_t)DIGINUM((int)j) + 1;
-			rbuf[k] = xnmalloc(len, sizeof(char));
-			snprintf(rbuf[k], len, "%zu", j);
-			k++;
-		}
-
-		/* Copy everything after the range expression into
-		 * the buffer, if anything. */
-		if (substr[i + 1]) {
-			next = k;
-			for (j = (i + 1); substr[j]; j++) {
-				rbuf[k] = savestring(substr[j], strlen(substr[j]));
-				k++;
-			}
-		} else { /* If there's nothing after last range, there's no next
-		either. */
-			next = 0;
-		}
-
-		/* Repopulate the original array with the expanded range and
-		 * remaining strings. */
-		substr_n = k;
-		for (j = 0; substr[j]; j++)
-			free(substr[j]);
-
-		substr = xnrealloc(substr, substr_n + 1, sizeof(char *));
-
-		for (j = 0; j < substr_n; j++) {
-			substr[j] = savestring(rbuf[j], strlen(rbuf[j]));
-			free(rbuf[j]);
-		}
-		free(rbuf);
-
-		substr[j] = (char *)NULL;
-
-		/* Proceede only if there's something after the last range */
-		if (next)
-			i = next;
-		else
-			break;
+	/* c. REMOVE DUPLICATES */
+	for (substr_n = 0; substr[substr_n]; substr_n++);
+	if (substr_n == 0) {
+		free(substr);
+		return (char **)NULL;
 	}
 
-	/* ############## REMOVE DUPLICATES ###############*/
-
 	char **dstr = (char **)NULL;
-	size_t len = 0, d;
+	size_t i, j;
+	size_t n = 0;
 
 	for (i = 0; i < substr_n; i++) {
-		int duplicate = 0;
-		for (d = (i + 1); d < substr_n; d++) {
-			if (*substr[i] == *substr[d] && strcmp(substr[i], substr[d]) == 0) {
-				duplicate = 1;
+		int dup = 0;
+		for (j = (i + 1); j < substr_n; j++) {
+			if (*substr[i] == *substr[j] && strcmp(substr[i], substr[j]) == 0) {
+				dup = 1;
 				break;
 			}
 		}
 
-		if (duplicate) {
-			free(substr[i]);
-			continue;
+		if (dup == 0) {
+			dstr = xnrealloc(dstr, n + 2, sizeof(char *));
+			dstr[n] = savestring(substr[i], strlen(substr[i]));
+			n++;
 		}
 
-		dstr = xnrealloc(dstr, len + 1, sizeof(char *));
-		dstr[len] = savestring(substr[i], strlen(substr[i]));
-		len++;
 		free(substr[i]);
 	}
 
 	free(substr);
-	dstr = xnrealloc(dstr, len + 1, sizeof(char *));
-	dstr[len] = (char *)NULL;
+
+	dstr[n] = (char *)NULL;
 	return dstr;
 }
 

@@ -675,7 +675,7 @@ get_cmd(char *dir, char *_sudo, char *self, const int sudo)
 	if (!conf.term || !strchr(conf.term, ' '))
 		return (char **)NULL;
 
-	char **tmp_term = get_substr(conf.term, ' ');
+	char **tmp_term = get_substr(conf.term, ' ', 0);
 	if (!tmp_term)
 		return (char **)NULL;
 

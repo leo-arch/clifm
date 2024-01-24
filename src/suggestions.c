@@ -1380,7 +1380,7 @@ check_jcmd(char *line)
 		clear_suggestion(CS_FREEBUF);
 
 	/* Split line into an array of substrings */
-	char **substr = line ? get_substr(line, ' ') : (char **)NULL;
+	char **substr = line ? get_substr(line, ' ', 0) : (char **)NULL;
 	if (!substr)
 		return NO_MATCH;
 
