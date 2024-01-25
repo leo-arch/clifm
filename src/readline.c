@@ -2691,22 +2691,22 @@ ext_options_generator(const char *text, int state)
 	return (char *)NULL;
 }
 
-size_t
-rl_count_words(char *line, const char ifs)
+static size_t
+rl_count_words(void)
 {
-	if (!line || !*line)
+	if (!rl_line_buffer)
 		return 0;
 
-	char *p = line;
-	while (*p == ifs)
+	char *p = rl_line_buffer;
+	while (*p == ' ')
 		++p;
 	if (!*p)
 		return 0;
 
 	size_t c = 1;
 	while (*p) {
-		if (*p == ifs && p > line
-		&& *(p - 1) != '\\' && *(p + 1) != ifs)
+		if (*p == ' ' && p > rl_line_buffer
+		&& *(p - 1) != '\\' && *(p + 1) != ' ')
 			c++;
 		p++;
 	}
@@ -2730,7 +2730,7 @@ options_generator(const char *text, int state)
 	if (state == 0) {
 		i = 0;
 		len = strlen(text);
-		w = rl_count_words(l, ' ');
+		w = rl_count_words();
 	}
 
 #define MAX_OPTS 22
@@ -3931,7 +3931,7 @@ my_rl_completion(const char *text, const int start, const int end)
 	int exit_status = FUNC_SUCCESS;
 	char **matches = (char **)NULL;
 	char *lb = rl_line_buffer;
-	size_t words_n = rl_count_words(rl_line_buffer, ' ');
+	size_t words_n = rl_count_words();
 
 	static size_t sudo_len = 0;
 	if (sudo_len == 0)
