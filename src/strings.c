@@ -3047,26 +3047,26 @@ escape_str(const char *str)
 char **
 get_substr(char *str, const char ifs, const int fproc)
 {
-	if (!str || !*str)
+	const size_t words = rl_count_words(str, ifs);
+	if (words == 0)
 		return (char **)NULL;
 
 	/* a. SPLIT THE STRING */
-	char **substr = (char **)NULL;
 	size_t len = 0;
 	size_t substr_n = 0;
 	const size_t str_len = strlen(str);
 	char *buf = xnmalloc(str_len + 1, sizeof(char));
+	char **substr = xnmalloc(words + 1, sizeof(char *));
 
 	while (*str) {
-		while (*str != ifs && *str != '\0' && len < (str_len + 1)) {
+		while (*str != ifs && *str != '\0' && len <= str_len) {
 			buf[len] = *str;
 			len++;
 			str++;
 		}
 
-		if (len > 0) {
+		if (len > 0 && substr_n <= words) {
 			buf[len] = '\0';
-			substr = xnrealloc(substr, substr_n + 2, sizeof(char *));
 			substr[substr_n] = savestring(buf, len);
 			substr_n++;
 			len = 0;
@@ -3077,8 +3077,10 @@ get_substr(char *str, const char ifs, const int fproc)
 
 	free(buf);
 
-	if (substr_n == 0)
+	if (substr_n == 0) {
+		free(substr);
 		return (char **)NULL;
+	}
 
 	substr[substr_n] = (char *)NULL;
 

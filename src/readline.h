@@ -31,6 +31,7 @@ int  initialize_readline(void);
 int  is_quote_char(const char c);
 char **my_rl_completion(const char *text, int start, int end);
 char *my_rl_path_completion(const char *text, int state);
+size_t rl_count_words(char *line, const char ifs);
 int  rl_get_y_or_n(const char *_msg);
 char *rl_no_hist(const char *prompt);
 char *secondary_prompt(const char *_prompt, const char *line);
