@@ -1162,15 +1162,22 @@ get_desel_input(size_t *n)
 	while (!line)
 		line = rl_no_hist(dp);
 
+	/* get_substr() will try to expand ranges, in which case a range with
+	 * no second field is expanded from the value of the first field to the
+	 * ELN of the last listed file in the CWD (value taken from the global
+	 * variable FILES). But, since we are deselecting files, FILES must be the
+	 * number of selected files (SEL_N), and not that of listed files in
+	 * the CWD. */
+	const filesn_t files_bk = files;
+	files = (filesn_t)sel_n;
 	char **entries = get_substr(line, ' ', 1);
+	files = files_bk;
 	free(line);
 
 	if (!entries)
 		return (char **)NULL;
 
-	size_t i;
-	for (i = 0; entries[i]; i++)
-		(*n)++;
+	for (*n = 0; entries[*n]; (*n)++);
 
 	return entries;
 }
