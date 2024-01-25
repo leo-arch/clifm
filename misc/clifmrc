@@ -50,6 +50,8 @@
 # '=' for sockets
 # '|' for FIFO/pipes
 # '*' for for executable files
+# '+' for block special files
+# '-' for character special files
 # '?' for unknown file types
 # Bear in mind that when running in light mode the check for executable
 # files won't be performed, and thereby no indicator will be added to
