@@ -3065,7 +3065,7 @@ get_substr(char *str, const char ifs, const int fproc)
 			str++;
 		}
 
-		if (len > 0 && substr_n <= words) {
+		if (len > 0 && substr_n < words) {
 			buf[len] = '\0';
 			substr[substr_n] = savestring(buf, len);
 			substr_n++;
