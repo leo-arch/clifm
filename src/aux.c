@@ -1277,7 +1277,7 @@ xatoi(const char *s)
 }
 
 /* Unlike getchar(3) this function does not wait for newline ('\n').
-https://stackoverflow.com/questions/12710582/how-can-i-capture-a-key-stroke-immediately-in-linux 
+https://stackoverflow.com/questions/12710582/how-can-i-capture-a-key-stroke-immediately-in-linux
 */
 char
 xgetchar(void)

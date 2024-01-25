@@ -161,13 +161,13 @@ fuzzy_match_v1(char *s1, char *s2, const size_t s1_len)
 
 /* A basic fuzzy matcher. It returns a score based on how much the
  * pattern (S1) matches the item (S2), taking into account:
- * 
+ *
  * Initial character
  * Word beginnings
  * Consecutive characters
  *
  * fuzzy_match_v1() will be used whenever the pattern contains no UTF8 char
- * 
+ *
  * The caller can decide whether the returned score is enough. If not,
  * a new item must be inspected until we get the desired score. Previous
  * values should be stored in case the desired score is never reached.

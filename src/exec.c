@@ -2199,7 +2199,7 @@ exec_cmd(char **comm)
 		if (_cont == 0)
 			return exit_code;
 	}
-	
+
 	else if (*comm[0] == 'u' && (!comm[0][1] || strcmp(comm[0], "undel") == 0
 	|| strcmp(comm[0], "untrash") == 0)) {
 		int _cont = 1; /* Tells whether to continue or return right here */

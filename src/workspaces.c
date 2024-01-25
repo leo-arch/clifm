@@ -2,7 +2,7 @@
 
 /*
  * This file is part of CliFM
- * 
+ *
  * Copyright (C) 2016-2024, L. Abramovich <leo.clifm@outlook.com>
  * All rights reserved.
 

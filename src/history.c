@@ -287,7 +287,8 @@ send_desktop_notification(char *msg)
  * If PRINT_PROMPT is not 1, MSG is printed directly here.
  *
  * Finally, if logs are enabled and LOGME is 1, write the message into the log
- * file as follows: "m:[date] msg", where 'date' is YYYY-MM-DDTHH:MM:SS. */
+ * file as follows: "m:[date] msg", where 'date' is YYYY-MM-DDTHH:MM:SS.
+ * */
 void
 log_msg(char *_msg, const int print_prompt, const int logme,
 	const int add_to_msgs_list)

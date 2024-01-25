@@ -1785,7 +1785,7 @@ export_files(char **filenames, const int open)
 		free(tmp_file);
 		return (char *)NULL;
 	}
-	
+
 	size_t i;
 	FILE *fp = fdopen(fd, "w");
 	if (!fp) {
