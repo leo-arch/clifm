@@ -127,208 +127,6 @@ rl_get_y_or_n(const char *_msg)
 	return 0; /* Never reached */
 }
 
-/* Generate a list of internal commands and a brief description
- * for cmd<TAB> */
-static char *
-int_cmds_generator(const char *text, int state)
-{
-	UNUSED(text);
-	static int i;
-
-	if (!state)
-		i = 0;
-
-	static char *const cmd_desc[] = {
-		"/       (search for files)",
-		"ac      (archive-compress files)",
-		"acd     (set autocd on/off)",
-		"actions (manage actions-plugins)",
-		"ad      (dearchive-decompress files)",
-		"alias   (list aliases)",
-		"ao      (set auto-open on/off)",
-		"b       (go back in the directory history list)",
-		"bd      (change to a parent directory)",
-		"bl      (create symbolic links in bulk)",
-		"bb      (clean up non-ASCII file names)",
-		"bm      (manage bookmarks)",
-		"br      (batch rename files)",
-		"c       (copy files)",
-		"cd      (change directory)",
-		"cl      (set columns on/off)",
-		"cmd     (jump to the COMMANDS section in the manpage)",
-		"colors  (print currently used file type colors)",
-		"config  (edit the main configuration file)",
-		"cs      (manage color schemes)",
-		"dup     (duplicate files)",
-		"ds      (deselect files)",
-		"exp     (export file names to a temporary file)",
-		"ext     (set external-shell commands on/off)",
-		"f       (go forth in the directory history list)",
-		"fc      (set the files counter on/off)",
-		"ff      (toggle list-directories-first on/off)",
-		"ft      (set a files filter)",
-		"fz      (print directories full size - long view only)",
-		"hh      (toggle show-hidden-files on/off)",
-		"history (manage the commands history)",
-		"icons   (set icons on/off)",
-		"j       (jump to a visited directory)",
-		"kb      (manage keybindings)",
-		"l       (create a symbolic link)",
-		"le      (edit a symbolic link)",
-		"ll      (toggle long/detail view on/off)",
-		"lm      (toggle light mode on/off)",
-		"log     (manage logs)",
-		"m       (move files)",
-		"md      (create directories)",
-		"media   (mount-unmount storage devices)",
-		"mf      (limit the number of listed files)",
-		"mm      (manage default opening applications)",
-		"mp      (change to a mountpoint)",
-		"msg     (print system messages)",
-		"n       (create files/directories)",
-		"net     (manage remote resources)",
-		"o       (open file)",
-		"oc      (change files ownership)",
-		"opener  (set a custom resource opener)",
-		"ow      (open file with...)",
-		"p       (print files properties)",
-		"pc      (change files permissions)",
-		"pf      (manage profiles)",
-		"pg      (set the files pager on/off)",
-		"pin     (pin a directory)",
-		"pp      (print files properties - follow links/full dir size)",
-		"prompt  (switch/edit prompt)",
-		"q       (quit)",
-		"r       (remove files)",
-		"rf      (refresh/clear the screen)",
-		"rl      (reload the configuration file)",
-		"rr      (remove files in bulk)",
-		"sb      (access the selection box)",
-		"s       (select files)",
-		"st      (change files sorting order)",
-		"stats   (print files statistics)",
-		"tag     (tag files)",
-		"te      (toggle the executable bit on files)",
-		"tips    (print tips)",
-		"t       (trash files)",
-		"u       (restore trashed files using a menu)",
-		"unpin   (unpin the pinned directory)",
-		"ver     (print version information)",
-		"view    (preview files in the current directory)",
-		"vv      (copy and rename files in bulk at once)",
-		"ws      (switch workspaces)",
-		"x       (launch a new instance of clifm)",
-		"X       (launch a new instance of clifm as root)",
-		NULL
-	};
-
-	char *name;
-	while ((name = cmd_desc[i++]))
-		return strdup(name);
-
-	return (char *)NULL;
-}
-
-/* Generate completions for command CMD using a modified version of
- * fish's manpages parser. */
-static int
-gen_shell_cmd_comp(char *cmd)
-{
-	if (!cmd || !*cmd || !data_dir || !*data_dir)
-		return FUNC_FAILURE;
-
-	char manpage_parser_file[PATH_MAX + 1];
-	snprintf(manpage_parser_file, sizeof(manpage_parser_file),
-		"%s/%s/tools/manpages_comp_gen.py", data_dir, PROGRAM_NAME);
-
-	char *c[] = {manpage_parser_file, "-k", cmd, NULL};
-	return launch_execv(c, FOREGROUND, E_MUTE);
-}
-
-/* Get short and long options for command CMD, store them in the EXT_OPTS
- * array and return the number of options found. */
-static int
-get_shell_cmd_opts(char *cmd)
-{
-	*ext_opts[0] = '\0';
-	if (!cmd || !*cmd || !user.home
-	|| (conf.suggestions == 1 && wrong_cmd == 1))
-		return FUNC_FAILURE;
-
-	char p[PATH_MAX + 1];
-	snprintf(p, sizeof(p), "%s/.local/share/%s/completions/%s.clifm",
-		user.home, PROGRAM_NAME, cmd);
-
-	struct stat a;
-	if (stat(p, &a) == -1) {
-		/* Comp file does not exist. Try to generate via manpages_comp_gen.py */
-		if (gen_shell_cmd_comp(cmd) != FUNC_SUCCESS || stat(p, &a) == -1)
-			return FUNC_FAILURE;
-	}
-
-	int fd;
-	FILE *fp = open_fread(p, &fd);
-	if (!fp)
-		return FUNC_FAILURE;
-
-	int n = 0;
-	char line[NAME_MAX]; *line = '\0';
-	while (fgets(line, (int)sizeof(line), fp)) {
-		if (n >= MAX_EXT_OPTS)
-			break;
-		if (!*line || *line == '#' || *line == '\n')
-			continue;
-
-		size_t l = strnlen(line, sizeof(line));
-		if (l > 0) {
-			while (line[l - 1] == '\n')
-				line[l - 1] = '\0';
-		}
-
-		/* Get short option */
-		char *q = strstr(line, "-s "), *qq = (char *)NULL;
-		if (q && *(q + 1) && *(q + 2) && *(q + 3)) {
-			qq = strchr(q + 3, ' ');
-			if (qq) *qq = '\0';
-			snprintf(ext_opts[n], MAX_EXT_OPTS_LEN, "-%s", q + 3);
-			if (qq)	*qq = ' ';
-			n++;
-		}
-
-		/* Get long option (-OPT or --OPT) */
-		q = strstr((qq && *(qq + 1)) ? qq + 1 : line, "-l ");
-		if (!q)
-			q = strstr((qq && *(qq + 1)) ? qq + 1 : line, "-o ");
-		if (q && *(q + 1) && *(q + 2) && *(q + 3)) {
-			qq = strchr(q + 3, ' ');
-			if (qq)	*qq = '\0';
-
-			/* Some long opts are written as optOPT: remove OPT */
-			/* q + 3 is the beginning of the option name, so that OPT could
-			 * begin at q + 4, but not before */
-			char *t = *(q + 4) ? q + 4 : (char *)NULL;
-			while (t && *t) {
-				if (*t >= 'A' && *t <= 'Z') {
-					*t = '\0';
-					break;
-				}
-				t++;
-			}
-
-			if (*(q + 1) == 'o')
-				snprintf(ext_opts[n], MAX_EXT_OPTS_LEN, "-%s", q + 3);
-			else
-				snprintf(ext_opts[n], MAX_EXT_OPTS_LEN, "--%s", q + 3);
-			if (qq)	*qq = ' ';
-			n++;
-		}
-	}
-
-	*ext_opts[n] = '\0'; /* Mark the end of the options array */
-	fclose(fp);
-	return n;
-}
-
 /* Delete key implementation */
 static void
 xdelete(void)
@@ -1597,6 +1395,208 @@ bookmarks_generator(const char *text, int state)
 	}
 
 	return (char *)NULL;
+}
+
+/* Generate a list of internal commands and a brief description
+ * for cmd<TAB> */
+static char *
+int_cmds_generator(const char *text, int state)
+{
+	UNUSED(text);
+	static int i;
+
+	if (!state)
+		i = 0;
+
+	static char *const cmd_desc[] = {
+		"/       (search for files)",
+		"ac      (archive-compress files)",
+		"acd     (set autocd on/off)",
+		"actions (manage actions-plugins)",
+		"ad      (dearchive-decompress files)",
+		"alias   (list aliases)",
+		"ao      (set auto-open on/off)",
+		"b       (go back in the directory history list)",
+		"bd      (change to a parent directory)",
+		"bl      (create symbolic links in bulk)",
+		"bb      (clean up non-ASCII file names)",
+		"bm      (manage bookmarks)",
+		"br      (batch rename files)",
+		"c       (copy files)",
+		"cd      (change directory)",
+		"cl      (set columns on/off)",
+		"cmd     (jump to the COMMANDS section in the manpage)",
+		"colors  (print currently used file type colors)",
+		"config  (edit the main configuration file)",
+		"cs      (manage color schemes)",
+		"dup     (duplicate files)",
+		"ds      (deselect files)",
+		"exp     (export file names to a temporary file)",
+		"ext     (set external-shell commands on/off)",
+		"f       (go forth in the directory history list)",
+		"fc      (set the files counter on/off)",
+		"ff      (toggle list-directories-first on/off)",
+		"ft      (set a files filter)",
+		"fz      (print directories full size - long view only)",
+		"hh      (toggle show-hidden-files on/off)",
+		"history (manage the commands history)",
+		"icons   (set icons on/off)",
+		"j       (jump to a visited directory)",
+		"kb      (manage keybindings)",
+		"l       (create a symbolic link)",
+		"le      (edit a symbolic link)",
+		"ll      (toggle long/detail view on/off)",
+		"lm      (toggle light mode on/off)",
+		"log     (manage logs)",
+		"m       (move files)",
+		"md      (create directories)",
+		"media   (mount-unmount storage devices)",
+		"mf      (limit the number of listed files)",
+		"mm      (manage default opening applications)",
+		"mp      (change to a mountpoint)",
+		"msg     (print system messages)",
+		"n       (create files/directories)",
+		"net     (manage remote resources)",
+		"o       (open file)",
+		"oc      (change files ownership)",
+		"opener  (set a custom resource opener)",
+		"ow      (open file with...)",
+		"p       (print files properties)",
+		"pc      (change files permissions)",
+		"pf      (manage profiles)",
+		"pg      (set the files pager on/off)",
+		"pin     (pin a directory)",
+		"pp      (print files properties - follow links/full dir size)",
+		"prompt  (switch/edit prompt)",
+		"q       (quit)",
+		"r       (remove files)",
+		"rf      (refresh/clear the screen)",
+		"rl      (reload the configuration file)",
+		"rr      (remove files in bulk)",
+		"sb      (access the selection box)",
+		"s       (select files)",
+		"st      (change files sorting order)",
+		"stats   (print files statistics)",
+		"tag     (tag files)",
+		"te      (toggle the executable bit on files)",
+		"tips    (print tips)",
+		"t       (trash files)",
+		"u       (restore trashed files using a menu)",
+		"unpin   (unpin the pinned directory)",
+		"ver     (print version information)",
+		"view    (preview files in the current directory)",
+		"vv      (copy and rename files in bulk at once)",
+		"ws      (switch workspaces)",
+		"x       (launch a new instance of clifm)",
+		"X       (launch a new instance of clifm as root)",
+		NULL
+	};
+
+	char *name;
+	while ((name = cmd_desc[i++]))
+		return strdup(name);
+
+	return (char *)NULL;
+}
+
+/* Generate completions for command CMD using a modified version of
+ * fish's manpages parser. */
+static int
+gen_shell_cmd_comp(char *cmd)
+{
+	if (!cmd || !*cmd || !data_dir || !*data_dir)
+		return FUNC_FAILURE;
+
+	char manpage_parser_file[PATH_MAX + 1];
+	snprintf(manpage_parser_file, sizeof(manpage_parser_file),
+		"%s/%s/tools/manpages_comp_gen.py", data_dir, PROGRAM_NAME);
+
+	char *c[] = {manpage_parser_file, "-k", cmd, NULL};
+	return launch_execv(c, FOREGROUND, E_MUTE);
+}
+
+/* Get short and long options for command CMD, store them in the EXT_OPTS
+ * array and return the number of options found. */
+static int
+get_shell_cmd_opts(char *cmd)
+{
+	*ext_opts[0] = '\0';
+	if (!cmd || !*cmd || !user.home
+	|| (conf.suggestions == 1 && wrong_cmd == 1))
+		return FUNC_FAILURE;
+
+	char p[PATH_MAX + 1];
+	snprintf(p, sizeof(p), "%s/.local/share/%s/completions/%s.clifm",
+		user.home, PROGRAM_NAME, cmd);
+
+	struct stat a;
+	if (stat(p, &a) == -1) {
+		/* Comp file does not exist. Try to generate via manpages_comp_gen.py */
+		if (gen_shell_cmd_comp(cmd) != FUNC_SUCCESS || stat(p, &a) == -1)
+			return FUNC_FAILURE;
+	}
+
+	int fd;
+	FILE *fp = open_fread(p, &fd);
+	if (!fp)
+		return FUNC_FAILURE;
+
+	int n = 0;
+	char line[NAME_MAX]; *line = '\0';
+	while (fgets(line, (int)sizeof(line), fp)) {
+		if (n >= MAX_EXT_OPTS)
+			break;
+		if (!*line || *line == '#' || *line == '\n')
+			continue;
+
+		size_t l = strnlen(line, sizeof(line));
+		if (l > 0) {
+			while (line[l - 1] == '\n')
+				line[l - 1] = '\0';
+		}
+
+		/* Get short option */
+		char *q = strstr(line, "-s "), *qq = (char *)NULL;
+		if (q && *(q + 1) && *(q + 2) && *(q + 3)) {
+			qq = strchr(q + 3, ' ');
+			if (qq) *qq = '\0';
+			snprintf(ext_opts[n], MAX_EXT_OPTS_LEN, "-%s", q + 3);
+			if (qq)	*qq = ' ';
+			n++;
+		}
+
+		/* Get long option (-OPT or --OPT) */
+		q = strstr((qq && *(qq + 1)) ? qq + 1 : line, "-l ");
+		if (!q)
+			q = strstr((qq && *(qq + 1)) ? qq + 1 : line, "-o ");
+		if (q && *(q + 1) && *(q + 2) && *(q + 3)) {
+			qq = strchr(q + 3, ' ');
+			if (qq)	*qq = '\0';
+
+			/* Some long opts are written as optOPT: remove OPT */
+			/* q + 3 is the beginning of the option name, so that OPT could
+			 * begin at q + 4, but not before */
+			char *t = *(q + 4) ? q + 4 : (char *)NULL;
+			while (t && *t) {
+				if (*t >= 'A' && *t <= 'Z') {
+					*t = '\0';
+					break;
+				}
+				t++;
+			}
+
+			if (*(q + 1) == 'o')
+				snprintf(ext_opts[n], MAX_EXT_OPTS_LEN, "-%s", q + 3);
+			else
+				snprintf(ext_opts[n], MAX_EXT_OPTS_LEN, "--%s", q + 3);
+			if (qq)	*qq = ' ';
+			n++;
+		}
+	}
+
+	*ext_opts[n] = '\0'; /* Mark the end of the options array */
+	fclose(fp);
+	return n;
 }
 
 /* Used for history and search pattern completion */

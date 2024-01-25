@@ -1,4 +1,4 @@
-/* highlight.h */
+/* help.h */
 
 /*
  * This file is part of CliFM
