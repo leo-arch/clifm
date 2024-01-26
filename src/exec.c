@@ -2215,7 +2215,7 @@ exec_cmd(char **comm)
 
 	else if (*comm[0] == 's' && (strcmp(comm[0], "sb") == 0
 	|| strcmp(comm[0], "selbox") == 0)) {
-		show_sel_files(); return FUNC_SUCCESS;
+		list_selected_files(); return FUNC_SUCCESS;
 	}
 
 	else if (*comm[0] == 'd' && (strcmp(comm[0], "ds") == 0

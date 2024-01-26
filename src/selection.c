@@ -600,63 +600,15 @@ get_sel_file_size(const size_t i, int *status)
 
 	const int base = xargs.si == 1 ? 1000 : 1024;
 	if (S_ISDIR(attr.st_mode)) {
+		fputs(_("Calculating file size... "), stdout); fflush(stdout);
 		sel_elements[i].size = (off_t)(dir_size(sel_elements[i].name,
 			0, status) * base);
+		putchar('\r'); ERASE_TO_RIGHT; fflush(stdout);
 	} else {
 		sel_elements[i].size = (off_t)FILE_SIZE(attr);
 	}
 
 	return sel_elements[i].size;
-}
-
-static void
-print_total_size(const off_t total, const int status)
-{
-	char *human_size = construct_human_size(total);
-
-	char err[sizeof(xf_c) + 6]; *err = '\0';
-	if (status != 0)
-		snprintf(err, sizeof(err), "%s%c%s", xf_c, DU_ERR_CHAR, NC);
-
-	printf(_("%s%sTotal size%s: %s%s\n"), df_c, BOLD, df_c, err, human_size);
-}
-
-static void
-print_selected_files(void)
-{
-	if (conf.clear_screen == 1)
-		CLEAR;
-
-	printf(_("%sSelection Box%s\n\n"), BOLD, df_c);
-
-	const size_t t = tab_offset;
-	size_t i;
-	off_t total = 0;
-	tab_offset = 0;
-
-	int status = 0;
-	const uint8_t epad = DIGINUM(sel_n);
-
-	flags |= IN_SELBOX_SCREEN;
-	for (i = 0; i < sel_n; i++) {
-		printf("%s%*zu%s ", el_c, epad, i + 1, df_c);
-		colors_list(sel_elements[i].name, NO_ELN, NO_PAD, PRINT_NEWLINE);
-
-		fputs(_("Calculating file size... "), stdout); fflush(stdout);
-		int ret = 0;
-		const off_t s = get_sel_file_size(i, &ret);
-		if (ret != 0)
-			status = ret;
-		putchar('\r'); ERASE_TO_RIGHT; fflush(stdout);
-
-		if (s != (off_t)-1)
-			total += s;
-	}
-	flags &= ~IN_SELBOX_SCREEN;
-	tab_offset = t;
-
-	putchar('\n');
-	print_total_size(total, status);
 }
 
 static int
@@ -855,7 +807,7 @@ sel_function(char **args)
 }
 
 void
-show_sel_files(void)
+list_selected_files(void)
 {
 	if (sel_n == 0) {
 		puts(_("sel: No selected files"));
@@ -878,7 +830,7 @@ show_sel_files(void)
 	if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) == -1)
 		w.ws_row = 24;
 
-	int t_lines = w.ws_row > 0 ? (int)w.ws_row : 24;;
+	int t_lines = w.ws_row > 0 ? (int)w.ws_row : 24;
 	t_lines -= 2;
 
 	size_t counter = 0;
@@ -924,12 +876,11 @@ show_sel_files(void)
 		printf("%s%*zu%s ", el_c, epad, i + 1, df_c);
 		colors_list(sel_elements[i].name, NO_ELN, NO_PAD, PRINT_NEWLINE);
 
-		fputs(_("Calculating file size... "), stdout); fflush(stdout);
 		int ret = 0;
 		const off_t s = get_sel_file_size(i, &ret);
 		if (ret != 0)
 			status = ret;
-		putchar('\r'); ERASE_TO_RIGHT; fflush(stdout);
+
 		if (s != (off_t)-1)
 			total += s;
 	}
@@ -1150,6 +1101,8 @@ deselect_from_args(char **args)
 	return FUNC_SUCCESS;
 }
 
+/* Desel screen: take user input and return an array of input substrings,
+ * updating N to the number of substrings. */
 static char **
 get_desel_input(size_t *n)
 {
@@ -1314,7 +1267,7 @@ deselect(char **args)
 		return handle_desel_args(args);
 
 	/* No arguments: print the deselection screen. */
-	print_selected_files();
+	list_selected_files();
 
 	size_t desel_n = 0;
 	char **desel_elements = get_desel_input(&desel_n);

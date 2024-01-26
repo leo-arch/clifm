@@ -33,9 +33,9 @@
 __BEGIN_DECLS
 
 int  deselect(char **args);
+void list_selected_files(void);
 int  sel_function(char **args);
 int  select_file(char *file);
-void show_sel_files(void);
 int  save_sel(void);
 int  deselect_all(void);
 
