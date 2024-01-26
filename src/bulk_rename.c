@@ -307,6 +307,12 @@ CONT:
 int
 bulk_rename(char **args)
 {
+	if (virtual_dir == 1) {
+		xerror(_("%s: br: Feature not allowed in virtual "
+			"directories\n"), PROGRAM_NAME);
+		return FUNC_SUCCESS;
+	}
+
 	if (!args || !args[1] || IS_HELP(args[1])) {
 		puts(_(BULK_RENAME_USAGE));
 		return FUNC_SUCCESS;
