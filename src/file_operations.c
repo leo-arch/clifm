@@ -1799,8 +1799,17 @@ export_files(char **filenames, const int open)
 
 	/* If no argument, export files in CWD. */
 	if (!filenames[1]) {
-		for (i = 0; file_info[i].name; i++)
-			fprintf(fp, "%s\n", file_info[i].name);
+		for (i = 0; file_info[i].name; i++) {
+			char *name = virtual_dir == 0 ? file_info[i].name
+				: realpath(file_info[i].name, NULL);
+			if (!name)
+				continue;
+
+			fprintf(fp, "%s\n", name);
+
+			if (virtual_dir == 1)
+				free(name);
+		}
 	} else {
 		for (i = 1; filenames[i]; i++) {
 			if (SELFORPARENT(filenames[i]))

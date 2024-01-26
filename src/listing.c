@@ -1861,7 +1861,7 @@ list_dir_light(void)
 	clock_t start = clock();
 #endif /* LIST_SPEED_TEST */
 
-	const int virtual_dir =
+	virtual_dir =
 		(stdin_tmp_dir && strcmp(stdin_tmp_dir, workspaces[cur_ws].path) == 0);
 
 	DIR *dir;
@@ -2304,7 +2304,7 @@ list_dir(void)
 	if (conf.light_mode == 1)
 		return list_dir_light();
 
-	const int virtual_dir =
+	virtual_dir =
 		(stdin_tmp_dir && strcmp(stdin_tmp_dir, workspaces[cur_ws].path) == 0);
 
 	DIR *dir;
@@ -2904,7 +2904,7 @@ reload_dirlist(void)
 #endif /* RUN_CMD */
 
 	free_dirlist();
-	int bk = exit_code;
+	const int bk = exit_code;
 	list_dir();
 	exit_code = bk;
 }

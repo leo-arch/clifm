@@ -1355,16 +1355,21 @@ expand_mime_type_filter(const char *pattern)
 
 	filesn_t i, n = 0;
 	for (i = 0; i < files; i++) {
-		char *m = xmagic(file_info[i].name, MIME_TYPE);
-		if (!m) continue;
+		char *name = virtual_dir == 0 ? file_info[i].name
+			: realpath(file_info[i].name, NULL);
+		char *m = name ? xmagic(name, MIME_TYPE) : (char *)NULL;
+		if (!m) goto CONT;
 
 		char *p = strstr(m, pattern);
 		free(m);
 
-		if (!p) continue;
+		if (!p) goto CONT;
 
-		t[n] = savestring(file_info[i].name, strlen(file_info[i].name));
+		t[n] = savestring(name, strlen(name));
 		n++;
+CONT:
+		if (virtual_dir == 1)
+			free(name);
 	}
 
 	t[n] = (char *)NULL;
@@ -1388,7 +1393,12 @@ expand_file_type_filter(const char t)
 	char *name = (char *)NULL;
 	char **f = xnmalloc((size_t)files + 1, sizeof(char *));
 
-	while (i < files && (name = file_info[i].name)) {
+	while (i < files) {
+		name = virtual_dir == 0 ? file_info[i].name
+			: realpath(file_info[i].name, NULL);
+		if (!name)
+			continue;
+
 		switch (t) {
 		case 'b':
 			if (file_info[i].type == DT_BLK)
@@ -1460,6 +1470,9 @@ expand_file_type_filter(const char t)
 			break;
 		default: break;
 		}
+
+		if (virtual_dir == 1)
+			free(name);
 
 		i++;
 	}
@@ -1587,7 +1600,7 @@ eln_expand(char ***substr, const size_t i)
 
 	/* Replace the ELN by the corresponding escaped file name */
 	if (file_info[j].type == DT_DIR && file_info[j].name[file_info[j].len > 0
-	? file_info[j].len - 1 : 0] != '/') {
+	? file_info[j].len - 1 : 0] != '/' && virtual_dir == 0) {
 		const size_t len = strlen(esc_str) + 2;
 		(*substr)[i] = xnrealloc((*substr)[i], len, sizeof(char));
 		snprintf((*substr)[i], len, "%s/", esc_str);
@@ -1763,7 +1776,8 @@ expand_file_type(char ***substr)
 	for (i = 0; i < file_type_n; i++) {
 		int index = file_type_array[i] + (int)old_ft;
 
-		char **p = (*substr)[index][1] ? expand_file_type_filter((*substr)[index][1])
+		char **p =
+			(*substr)[index][1] ? expand_file_type_filter((*substr)[index][1])
 			: (char **)NULL;
 
 		size_t c = 0;
@@ -2338,17 +2352,26 @@ static int
 expand_symlink(char **substr)
 {
 	struct stat a;
-	const int ret = lstat(*substr, &a);
-	const int link_ok = (ret != -1 && S_ISLNK(a.st_mode)) ? 1 : 0;
-
-	if (link_ok == 0)
+	char *name = strchr(*substr, '\\') ? unescape_str(*substr, 0) : *substr;
+	if (!name)
 		return 0;
 
-	char *real_path = realpath(*substr, NULL);
+	const int ret = lstat(name, &a);
+	const int link_ok = (ret != -1 && S_ISLNK(a.st_mode));
+
+	if (link_ok == 0) {
+		if (name != *substr) free(name);
+		return 0;
+	}
+
+	char *real_path = realpath(name, NULL);
 	if (!real_path) {
-		xerror("realpath: '%s': %s\n", *substr, strerror(errno));
+		xerror("realpath: '%s': %s\n", name, strerror(errno));
+		if (name != *substr) free(name);
 		return (-1);
 	}
+
+	if (name != *substr) free(name);
 
 	const size_t rp_len = strlen(real_path);
 	*substr = xnrealloc(*substr, rp_len + 1, sizeof(char));
@@ -2363,7 +2386,7 @@ expand_symlink(char **substr)
 static int
 glob_expand(char **cmd)
 {
-	if (!cmd || !cmd[0] || !*cmd[0])
+	if (!cmd || !cmd[0] || !*cmd[0] || virtual_dir == 1)
 		return 0;
 
 	/* Do not expand if command is deselect, sel or untrash, just to
@@ -2378,7 +2401,7 @@ glob_expand(char **cmd)
 	&& strcmp(cmd[0], "untrash") != 0
 
 	&& !( *cmd[0] == 't' && (!cmd[0][1] || strcmp(cmd[0], "tr") == 0
-	|| strcmp(cmd[0], "trash") == 0) && *cmd[1] == 'd'
+	|| strcmp(cmd[0], "trash") == 0) && cmd[1] && *cmd[1] == 'd'
 	&& strcmp(cmd[1], "del") == 0 ) )
 		return 1;
 
@@ -2389,7 +2412,7 @@ glob_expand(char **cmd)
 static int
 regex_expand(const char *cmd)
 {
-	if (!cmd || !*cmd)
+	if (!cmd || !*cmd || virtual_dir == 1)
 		return 0;
 
 	if (strcmp(cmd, "ds") == 0 || strcmp(cmd, "desel") == 0

@@ -195,6 +195,7 @@ int
 #ifndef _NO_TRASH
 	trash_ok = 1,
 #endif /* !_NO_TRASH */
+	virtual_dir = 0,
 	wrong_cmd = 0,
 	xrename = 0;
 

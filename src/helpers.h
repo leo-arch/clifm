@@ -1737,6 +1737,7 @@ extern int
 #ifndef _NO_TRASH
 	trash_ok,
 #endif /* !_NO_TRASH */
+	virtual_dir,
 	wrong_cmd,
 	xrename; /* We're running a secondary prompt for the rename function */
 

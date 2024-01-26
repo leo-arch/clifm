@@ -146,22 +146,31 @@ get_file_suffix(const mode_t type)
 }
 
 static void
-write_name(FILE *fp, const char *name, const mode_t type)
+write_name(FILE *fp, char *name, const mode_t type)
 {
+	char *tmp_name = name;
+	if (virtual_dir == 1) {
+		if (!(tmp_name = realpath(name, NULL)))
+			return;
+	}
+
 #ifndef _DIRENT_HAVE_D_TYPE
 	UNUSED(type);
 	char s = 0;
 	struct stat a;
-	if (lstat(name, &a) != -1)
+	if (lstat(tmp_name, &a) != -1)
 		s = get_file_suffix(a.st_mode);
 #else
 	char s = get_file_suffix(type);
 #endif /* !_DIRENT_HAVE_D_TYPE */
 
 	if (s)
-		fprintf(fp, "%s%c\n", name, s);
+		fprintf(fp, "%s%c\n", tmp_name, s);
 	else
-		fprintf(fp, "%s\n", name);
+		fprintf(fp, "%s\n", tmp_name);
+
+	if (virtual_dir == 1)
+		free(tmp_name);
 }
 
 static int

@@ -2307,7 +2307,10 @@ rl_mime_list(void)
 	while (--i >= 0) {
 		if (file_info[i].color == nf_c) /* No access to file */
 			continue;
-		char *m = xmagic(file_info[i].name, MIME_TYPE);
+
+		char *name = virtual_dir == 0 ? file_info[i].name
+			: realpath(file_info[i].name, NULL);
+		char *m = name ? xmagic(name, MIME_TYPE) : (char *)NULL;
 		if (!m)
 			continue;
 
@@ -2321,6 +2324,7 @@ rl_mime_list(void)
 
 		if (found == 1) {
 			free(m);
+			if (virtual_dir == 1) free(name);
 			continue;
 		} else {
 			t[n] = savestring(m, strlen(m));
@@ -2328,6 +2332,8 @@ rl_mime_list(void)
 			n++;
 			t[n] = (char *)NULL;
 		}
+
+		if (virtual_dir == 1) free(name);
 	}
 
 	if (term_caps.suggestions != 0)
