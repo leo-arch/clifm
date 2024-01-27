@@ -753,7 +753,7 @@ secondary_prompt(const char *_prompt, const char *line)
 
 /* Simply check a single chartacter (c) against the quoting characters
  * list defined in the quote_chars global array (which takes its values from
- * rl_filename_quote_characters */
+ * rl_filename_quote_characters. */
 int
 is_quote_char(const char c)
 {

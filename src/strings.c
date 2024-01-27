@@ -2377,9 +2377,14 @@ expand_symlink(char **substr)
 
 	if (name != *substr) free(name);
 
-	const size_t rp_len = strlen(real_path);
+	char *estr = escape_str(real_path);
+	name = estr ? estr : real_path;
+
+	const size_t rp_len = strlen(name);
 	*substr = xnrealloc(*substr, rp_len + 1, sizeof(char));
-	xstrsncpy(*substr, real_path, rp_len + 1);
+	xstrsncpy(*substr, name, rp_len + 1);
+
+	free(estr);
 	free(real_path);
 
 	return 0;
@@ -2700,8 +2705,7 @@ parse_input_str(char *str)
 
 	for (i = 0; i <= args_n; i++) {
 		if (!substr[i] || (is_quoted_word(i)
-		&& (virtual_dir == 0 || is_file_in_cwd(substr[i]) == 0
-		|| is_internal(substr[0]) == 0)))
+		&& (virtual_dir == 0 || is_file_in_cwd(substr[i]) == 0)))
 			continue;
 
 		/* The following expansions expand into a SINGLE field */
