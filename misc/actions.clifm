@@ -45,5 +45,6 @@ ptot=pdf_viewer.sh
 rrm=recur_rm.sh
 update=update.sh
 vid=vid_viewer.sh
+vt=virtualize.sh
 wall=wallpaper_setter.sh
 plugin1=xclip.sh
