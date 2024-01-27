@@ -1600,7 +1600,7 @@ eln_expand(char ***substr, const size_t i)
 
 	/* Replace the ELN by the corresponding escaped file name */
 	if (file_info[j].type == DT_DIR && file_info[j].name[file_info[j].len > 0
-	? file_info[j].len - 1 : 0] != '/' && virtual_dir == 0) {
+	? file_info[j].len - 1 : 0] != '/') {
 		const size_t len = strlen(esc_str) + 2;
 		(*substr)[i] = xnrealloc((*substr)[i], len, sizeof(char));
 		snprintf((*substr)[i], len, "%s/", esc_str);
@@ -2356,6 +2356,10 @@ expand_symlink(char **substr)
 	if (!name)
 		return 0;
 
+	const size_t l = strlen(name);
+	if (l > 0 && name[l - 1] == '/')
+		name[l - 1] = '\0';
+
 	const int ret = lstat(name, &a);
 	const int link_ok = (ret != -1 && S_ISLNK(a.st_mode));
 
@@ -2695,7 +2699,9 @@ parse_input_str(char *str)
 	expand_ranges(&substr);
 
 	for (i = 0; i <= args_n; i++) {
-		if (!substr[i] || is_quoted_word(i))
+		if (!substr[i] || (is_quoted_word(i)
+		&& (virtual_dir == 0 || is_file_in_cwd(substr[i]) == 0
+		|| is_internal(substr[0]) == 0)))
 			continue;
 
 		/* The following expansions expand into a SINGLE field */
@@ -2813,13 +2819,11 @@ parse_input_str(char *str)
 			 * ################################### */
 
 		/* We are in STDIN_TMP_DIR: Expand symlinks to target */
-		if (stdin_dir_ok == 1) {
-			if (expand_symlink(&substr[i]) == -1) {
-				for (i = 0; i <= args_n; i++)
-					free(substr[i]);
-				free(substr);
-				return (char **)NULL;
-			}
+		if (stdin_dir_ok == 1 && expand_symlink(&substr[i]) == -1) {
+			for (i = 0; i <= args_n; i++)
+				free(substr[i]);
+			free(substr);
+			return (char **)NULL;
 		}
 	}
 
