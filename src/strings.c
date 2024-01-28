@@ -1929,58 +1929,57 @@ expand_glob(char ***substr, const int *glob_array, const size_t glob_n)
 			continue;
 		}
 
-		if (globbuf.gl_pathc) {
-			size_t j = 0;
-			char **glob_cmd = (char **)NULL;
-			glob_cmd = xcalloc(args_n + globbuf.gl_pathc + 1, sizeof(char *));
+		if (globbuf.gl_pathc == 0)
+			goto CONT;
 
-			for (i = 0; i < ((size_t)glob_array[g] + old_pathc); i++) {
-				glob_cmd[j] = savestring((*substr)[i], strlen((*substr)[i]));
-				j++;
-			}
+		size_t j = 0;
+		char **glob_cmd = (char **)NULL;
+		glob_cmd = xcalloc(args_n + globbuf.gl_pathc + 1, sizeof(char *));
 
-			for (i = 0; i < globbuf.gl_pathc; i++) {
-				if (SELFORPARENT(globbuf.gl_pathv[i]))
-					continue;
-
-				/* Escape the globbed file name and copy it */
-				char *esc_str = escape_str(globbuf.gl_pathv[i]);
-				if (esc_str) {
-					glob_cmd[j] = esc_str;
-					j++;
-				} else {
-					xerror(_("%s: '%s': Error quoting file name\n"),
-						PROGRAM_NAME, globbuf.gl_pathv[i]);
-					size_t k = 0;
-					for (k = 0; k < j; k++)
-						free(glob_cmd[k]);
-					free(glob_cmd);
-					glob_cmd = (char **)NULL;
-
-					for (k = 0; k <= args_n; k++)
-						free((*substr)[k]);
-					free((*substr));
-					globfree(&globbuf);
-					return (-1);
-				}
-			}
-
-			for (i = (size_t)glob_array[g] + old_pathc + 1; i <= args_n; i++) {
-				glob_cmd[j] = savestring((*substr)[i], strlen((*substr)[i]));
-				j++;
-			}
-
-			glob_cmd[j] = (char *)NULL;
-
-			for (i = 0; i <= args_n; i++)
-				free((*substr)[i]);
-			free((*substr));
-
-			(*substr) = glob_cmd;
-			glob_cmd = (char **)NULL;
-			args_n = j - 1;
+		for (i = 0; i < ((size_t)glob_array[g] + old_pathc); i++) {
+			glob_cmd[j] = savestring((*substr)[i], strlen((*substr)[i]));
+			j++;
 		}
 
+		for (i = 0; i < globbuf.gl_pathc; i++) {
+			if (SELFORPARENT(globbuf.gl_pathv[i]))
+				continue;
+
+			/* Escape the globbed file name and copy it */
+			char *rpath = (char *)NULL;
+			if (virtual_dir == 1 && is_file_in_cwd(globbuf.gl_pathv[i])
+			&& !(rpath = realpath(globbuf.gl_pathv[i], NULL)))
+				continue;
+
+			char *esc_str = escape_str(rpath ? rpath : globbuf.gl_pathv[i]);
+			free(rpath);
+
+			if (esc_str) {
+				glob_cmd[j] = esc_str;
+				j++;
+			} else {
+				xerror(_("%s: '%s': Error quoting file name\n"),
+					PROGRAM_NAME, globbuf.gl_pathv[i]);
+				continue;
+			}
+		}
+
+		for (i = (size_t)glob_array[g] + old_pathc + 1; i <= args_n; i++) {
+			glob_cmd[j] = savestring((*substr)[i], strlen((*substr)[i]));
+			j++;
+		}
+
+		glob_cmd[j] = (char *)NULL;
+
+		for (i = 0; i <= args_n; i++)
+			free((*substr)[i]);
+		free((*substr));
+
+		(*substr) = glob_cmd;
+		glob_cmd = (char **)NULL;
+		args_n = j - 1;
+
+CONT:
 		old_pathc += (globbuf.gl_pathc - 1);
 		globfree(&globbuf);
 	}
@@ -2332,7 +2331,18 @@ expand_regex(char ***substr)
 
 		size_t k = 0;
 		for (j = 0; tmp[j]; j++) {
-			tmp_files[k] = savestring(tmp[j], strlen(tmp[j]));
+			struct stat a;
+			if (virtual_dir == 1 && lstat(tmp[j], &a) == 0
+			&& S_ISLNK(a.st_mode) && is_file_in_cwd(tmp[j])) {
+				char *p = realpath(tmp[j], NULL);
+				if (!p)
+					continue;
+				tmp_files[k] = savestring(p, strlen(p));
+				free(p);
+			} else {
+				tmp_files[k] = savestring(tmp[j], strlen(tmp[j]));
+			}
+
 			k++;
 		}
 		tmp_files[k] = (char *)NULL;
@@ -2342,7 +2352,7 @@ expand_regex(char ***substr)
 		free((*substr));
 
 		(*substr) = tmp_files;
-		args_n = k - 1;
+		args_n = (k > 0 ? k - 1 : k);
 	}
 
 	free(tmp);
@@ -2395,7 +2405,8 @@ expand_symlink(char **substr)
 static int
 glob_expand(char **cmd)
 {
-	if (!cmd || !cmd[0] || !*cmd[0] || virtual_dir == 1)
+//	if (!cmd || !cmd[0] || !*cmd[0] || virtual_dir == 1)
+	if (!cmd || !cmd[0] || !*cmd[0])
 		return 0;
 
 	/* Do not expand if command is deselect, sel or untrash, just to
@@ -2421,14 +2432,15 @@ glob_expand(char **cmd)
 static int
 regex_expand(const char *cmd)
 {
-	if (!cmd || !*cmd || virtual_dir == 1)
+//	if (!cmd || !*cmd || virtual_dir == 1)
+	if (!cmd || !*cmd)
 		return 0;
 
 	if (strcmp(cmd, "ds") == 0 || strcmp(cmd, "desel") == 0
 	|| strcmp(cmd, "u") == 0 || strcmp(cmd, "undel") == 0
 	|| strcmp(cmd, "untrash") == 0
-	|| strcmp(cmd, "s") == 0 || strcmp(cmd, "sel") == 0
-	|| strcmp(cmd, "n") == 0 || strcmp(cmd, "new") == 0)
+	|| strcmp(cmd, "s") == 0 || strcmp(cmd, "sel") == 0)
+//	|| strcmp(cmd, "n") == 0 || strcmp(cmd, "new") == 0)
 		return 0;
 
 	return 1;
