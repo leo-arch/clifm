@@ -22,7 +22,7 @@ if [ -z "$1" ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
 \n\x1b[1mEXAMPLES\x1b[0m
   'vt sel'          Send all selected files to a virtual directory\n\
   'vt file1 file2'  Send file1 and file2 to a virtual directory\n\
-  'vt -d'           If navigating the file system, use the -d option to quickly go back to the virtual directory\n" "$name" >&2
+  'vt -d'           If navigating the file system, use the -d option to change back to the virtual directory\n" "$name" >&2
 
 	exit 0
 fi
