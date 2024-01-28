@@ -2405,7 +2405,6 @@ expand_symlink(char **substr)
 static int
 glob_expand(char **cmd)
 {
-//	if (!cmd || !cmd[0] || !*cmd[0] || virtual_dir == 1)
 	if (!cmd || !cmd[0] || !*cmd[0])
 		return 0;
 
@@ -2432,7 +2431,6 @@ glob_expand(char **cmd)
 static int
 regex_expand(const char *cmd)
 {
-//	if (!cmd || !*cmd || virtual_dir == 1)
 	if (!cmd || !*cmd)
 		return 0;
 
@@ -2440,7 +2438,6 @@ regex_expand(const char *cmd)
 	|| strcmp(cmd, "u") == 0 || strcmp(cmd, "undel") == 0
 	|| strcmp(cmd, "untrash") == 0
 	|| strcmp(cmd, "s") == 0 || strcmp(cmd, "sel") == 0)
-//	|| strcmp(cmd, "n") == 0 || strcmp(cmd, "new") == 0)
 		return 0;
 
 	return 1;
