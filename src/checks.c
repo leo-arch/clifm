@@ -73,28 +73,26 @@ is_file_in_cwd(char *name)
 	if (!name || !*name || !workspaces[cur_ws].path)
 		return 0;
 
-	char *s = strchr(name, '/');
+	const char *s = strchr(name, '/');
 	if (!s || !*(s + 1)) /* 'name' or 'name/' */
 		return 1;
 
-	char rpath[PATH_MAX + 1];
-	*rpath = '\0';
-	char *ret = realpath(name, rpath);
-	if (!ret || !*rpath)
+	char *rpath = normalize_path(name, strlen(name));
+	if (!rpath)
 		return 0;
 
-	char *cwd = workspaces[cur_ws].path;
+	const char *cwd = workspaces[cur_ws].path;
 	const size_t cwd_len = strlen(cwd);
-	const size_t rpath_len = strnlen(rpath, sizeof(rpath));
-	if (rpath_len < cwd_len)
-		return 0;
+	const size_t rpath_len = strlen(rpath);
 
-	if (strncmp(rpath, cwd, cwd_len) != 0)
+	if (rpath_len < cwd_len
+	|| strncmp(rpath, cwd, cwd_len) != 0
+	|| (rpath_len > cwd_len && strchr(rpath + cwd_len + 1, '/'))) {
+		free(rpath);
 		return 0;
+	}
 
-	if (rpath_len > cwd_len && strchr(rpath + cwd_len + 1, '/'))
-		return 0;
-
+	free(rpath);
 	return 1;
 }
 

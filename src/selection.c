@@ -99,20 +99,30 @@ select_file(char *file)
 		return 0;
 
 	if (sel_n == MAX_SEL) {
-		xerror("%s\n", _("sel: Cannot select any more files"));
+		xerror(_("sel: Cannot select any more files"));
 		return 0;
 	}
 
-	int exists = 0, new_sel = 0, j;
+	char *tfile = file;
+	struct stat a;
+	int exists = 0, new_sel = 0;
+
 	const size_t flen = strlen(file);
 	if (flen > 1 && file[flen - 1] == '/')
 		file[flen - 1] = '\0';
 
+	/* If we are in a virtual directory, dereference symlinks */
+	if (virtual_dir == 1 && lstat(file, &a) == 0 && S_ISLNK(a.st_mode)
+	&& is_file_in_cwd(file) && !(tfile = realpath(file, NULL))) {
+		xerror(_("sel: Cannot select file '%s': %s\n"), file, strerror(errno));
+		return 0;
+	}
+
 	/* Check if FILE is already in the selection box */
-	j = (int)sel_n;
+	filesn_t j = (filesn_t)sel_n;
 	while (--j >= 0) {
-		if (*file == *sel_elements[j].name
-		&& strcmp(sel_elements[j].name, file) == 0) {
+		if (*tfile == *sel_elements[j].name
+		&& strcmp(sel_elements[j].name, tfile) == 0) {
 			exists = 1;
 			break;
 		}
@@ -120,7 +130,7 @@ select_file(char *file)
 
 	if (exists == 0) {
 		sel_elements = xnrealloc(sel_elements, sel_n + 2, sizeof(struct sel_t));
-		sel_elements[sel_n].name = savestring(file, strlen(file));
+		sel_elements[sel_n].name = savestring(tfile, strlen(tfile));
 		sel_elements[sel_n].size = (off_t)UNSET;
 		sel_n++;
 		sel_elements[sel_n].name = (char *)NULL;
@@ -128,8 +138,11 @@ select_file(char *file)
 
 		new_sel++;
 	} else {
-		xerror(_("sel: '%s': Already selected\n"), file);
+		xerror(_("sel: '%s': Already selected\n"), tfile);
 	}
+
+	if (tfile != file)
+		free(tfile);
 
 	return new_sel;
 }
