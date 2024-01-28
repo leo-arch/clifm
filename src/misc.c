@@ -1646,14 +1646,22 @@ construct_name(char *file, const size_t flen)
 		return (char *)NULL;
 	}
 
+	/* Prohibited names */
 	if (*name == '/' && !name[1]) {
 		name = xnrealloc(name, 5, sizeof(char));
 		xstrsncpy(name, "root", 5);
 	}
 
-	if (*name == '~' && !name[1]) {
+	else if (*name == '.' && !name[1]) {
 		name = xnrealloc(name, 5, sizeof(char));
-		xstrsncpy(name, "home", 5);
+		xstrsncpy(name, "self", 5);
+	}
+
+	else {
+		if (*name == '.' && name[1] == '.' && !name[2]) {
+			name = xnrealloc(name, 7, sizeof(char));
+			xstrsncpy(name, "parent", 7);
+		}
 	}
 
 	return name;
