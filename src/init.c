@@ -1710,7 +1710,8 @@ FALLBACK:
 void
 init_shell(void)
 {
-	if (!isatty(STDIN_FILENO)) { /* Shell is not interactive */
+	if (isatty(STDIN_FILENO) == 0) { /* Shell is not interactive */
+		errno = 0;
 		exit_code = handle_stdin();
 		return;
 	}

@@ -1273,7 +1273,6 @@ main(int argc, char *argv[])
 #endif /* !_NO_TRASH */
 
 	get_hostname();
-//	init_shell();
 	set_env(0);
 
 	if (config_ok == 1)

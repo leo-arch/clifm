@@ -45,6 +45,8 @@
 # editor (you will be asked for confirmation).\n\
 # Quit the editor without saving to cancel the operation.\n\n"
 
+#define BULK_APP(s) ((*(s) == ':' && (s)[1]) ? (s) + 1 : (s))
+
 static int
 parse_bulk_remove_params(char *s1, char *s2, char **app, char **target)
 {
@@ -53,8 +55,6 @@ parse_bulk_remove_params(char *s1, char *s2, char **app, char **target)
 		*target = workspaces[cur_ws].path;
 		return FUNC_SUCCESS;
 	}
-
-#define BULK_APP(s) ((*(s) == ':' && (s)[1]) ? (s) + 1 : (s))
 
 	int ret = 0;
 	struct stat a;
@@ -171,7 +171,7 @@ write_files_to_tmp(struct dirent ***a, filesn_t *n, const char *target,
 	int fd = 0;
 	FILE *fp = open_fwrite(tmpfile, &fd);
 	if (!fp) {
-		err('e', PRINT_PROMPT, "%s: rr: fopen: '%s': %s\n", PROGRAM_NAME,
+		err('e', PRINT_PROMPT, "rr: fopen: '%s': %s\n",
 			tmpfile, strerror(errno));
 		return errno;
 	}

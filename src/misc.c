@@ -1622,11 +1622,107 @@ create_virtual_dir(const int user_provided)
 	return FUNC_SUCCESS;
 }
 
+static char *
+construct_name(char *file, const size_t flen)
+{
+	char *name = (char *)NULL;
+
+	/* Should we construct destiny file as full path or using only the
+	 * last path component (the file's basename)? */
+	if (xargs.virtual_dir_full_paths != 1) {
+		char *p = strrchr(file, '/');
+		if (!p || !*(++p))
+			name = savestring(file, flen);
+		else
+			name = savestring(p, strlen(p));
+	} else {
+		name = replace_slashes(file, ':');
+	}
+
+	if (!name || !*name) {
+		free(name);
+		err('w', PRINT_PROMPT, "%s: '%s': Error constructing "
+			"file name\n", PROGRAM_NAME, file);
+		return (char *)NULL;
+	}
+
+	if (*name == '/' && !name[1]) {
+		name = xnrealloc(name, 5, sizeof(char));
+		xstrsncpy(name, "root", 5);
+	}
+
+	if (*name == '~' && !name[1]) {
+		name = xnrealloc(name, 5, sizeof(char));
+		xstrsncpy(name, "home", 5);
+	}
+
+	return name;
+}
+
+static size_t
+gen_symlink(char *file, const char *cwd)
+{
+	if (SELFORPARENT(file))
+		return 0;
+
+	struct stat attr;
+	if (lstat(file, &attr) == -1) {
+		err('w', PRINT_PROMPT, "%s: '%s': %s\n",
+			PROGRAM_NAME, file, strerror(errno));
+		return 0;
+	}
+
+	/* Construct source and destiny files */
+
+	/* symlink(3) doesn't like file names ending with slash */
+	size_t file_len = strlen(file);
+	if (file_len > 1 && file[file_len - 1] == '/') {
+		file[file_len - 1] = '\0';
+		file_len--;
+	}
+
+	char source[PATH_MAX + 1];
+	if (*file != '/')
+		snprintf(source, sizeof(source), "%s/%s", cwd, file);
+	else
+		xstrsncpy(source, file, sizeof(source));
+
+	char *name = construct_name(file, file_len);
+	if (!name)
+		return 0;
+
+	char dest[PATH_MAX + 32];
+	snprintf(dest, sizeof(dest), "%s/%s", stdin_tmp_dir, name);
+
+	errno = 0;
+	int suffix = 1;
+	while (symlink(source, dest) == -1 && errno == EEXIST) {
+		snprintf(dest, sizeof(dest), "%s/%s-%d", stdin_tmp_dir,
+			name, suffix);
+		suffix++;
+		errno = 0;
+		if (suffix == INT_MAX) {
+			free(name);
+			return 0;
+		}
+	}
+
+	free(name);
+
+	if (errno != 0) {
+		err('w', PRINT_PROMPT, "%s: Cannot create symbolic "
+			"link '%s': %s\n", PROGRAM_NAME, dest, strerror(errno));
+		return 0;
+	}
+
+	return 1;
+}
+
 int
 handle_stdin(void)
 {
-	/* If files are passed via stdin, we need to disable restore
-	 * last path in order to correctly understand relative paths */
+	/* If files are passed via stdin, we need to disable restore-
+	 * last-path in order to correctly understand relative paths. */
 	conf.restore_last_path = 0;
 	int exit_status = FUNC_SUCCESS;
 
@@ -1710,76 +1806,7 @@ handle_stdin(void)
 			*p = '\0';
 
 			/* Create symlinks (in tmp dir) to each valid file in the buffer */
-			if (SELFORPARENT(q))
-				goto END;
-
-			struct stat attr;
-			if (lstat(q, &attr) == -1) {
-				err('w', PRINT_PROMPT, "%s: '%s': %s\n",
-					PROGRAM_NAME, q, strerror(errno));
-				goto END;
-			}
-
-			/* Construct source and destiny files */
-
-			/* symlink(3) doesn't like file names ending with slash */
-			const size_t slen = strlen(q);
-			if (slen > 1 && q[slen - 1] == '/')
-				q[slen - 1] = '\0';
-
-			/* Should we construct destiny file as full path or using only the
-			 * last path component (the file's basename)? */
-			char *tmp_file = (char *)NULL;
-			int free_tmp_file = 0;
-			if (xargs.virtual_dir_full_paths != 1) {
-				tmp_file = strrchr(q, '/');
-				if (!tmp_file || !*(++tmp_file))
-					tmp_file = q;
-			} else {
-				tmp_file = replace_slashes(q, ':');
-				if (!tmp_file) {
-					err('w', PRINT_PROMPT, "%s: '%s': Error formatting "
-						"file name\n", PROGRAM_NAME, q);
-					goto END;
-				}
-				free_tmp_file = 1;
-			}
-
-			char source[PATH_MAX + 1];
-			if (*q != '/' || !q[1])
-				snprintf(source, sizeof(source), "%s/%s", cwd, q);
-			else
-				xstrsncpy(source, q, sizeof(source));
-
-			char dest[PATH_MAX + 1];
-			snprintf(dest, sizeof(dest), "%s/%s", stdin_tmp_dir, tmp_file);
-
-			if (symlink(source, dest) == -1) {
-				if (errno == EEXIST && xargs.virtual_dir_full_paths != 1) {
-					/* File already exists: append a random suffix */
-					suffix = gen_rand_str(RAND_SUFFIX_LEN);
-					char tmp[PATH_MAX + 12];
-					snprintf(tmp, sizeof(tmp), "%s.%s",
-						dest, suffix ? suffix : "#dn7R4.d6?");
-					if (symlink(source, tmp) == -1)
-						err('w', PRINT_PROMPT, "symlink: '%s': %s\n",
-							q, strerror(errno));
-					else
-						err('w', PRINT_PROMPT, "symlink: '%s': Destiny exists. "
-							"Created as %s\n", q, tmp);
-					free(suffix);
-				} else {
-					err('w', PRINT_PROMPT, "symlink: '%s': %s\n",
-						q, strerror(errno));
-				}
-			} else {
-				links_counter++;
-			}
-
-			if (free_tmp_file == 1)
-				free(tmp_file);
-
-END:
+			links_counter += gen_symlink(q, cwd);
 			q = p + 1;
 		}
 
@@ -1788,8 +1815,7 @@ END:
 
 	if (links_counter == 0) { /* No symlink was created. Exit */
 		dup2(STDOUT_FILENO, STDIN_FILENO);
-		err(0, NOPRINT_PROMPT, "%s: Empty file names buffer. "
-			"Nothing to do\n", PROGRAM_NAME);
+		xerror(_("%s: Empty file names buffer. Nothing to do\n"), PROGRAM_NAME);
 		if (getenv("CLIFM_VT_RUNNING"))
 			press_any_key_to_continue(0);
 
@@ -1808,7 +1834,7 @@ END:
 		xchmod(stdin_tmp_dir, "0700", 1);
 
 		char *rm_cmd[] = {"rm", "-r", "--", stdin_tmp_dir, NULL};
-		int ret = launch_execv(rm_cmd, FOREGROUND, E_NOFLAG);
+		const int ret = launch_execv(rm_cmd, FOREGROUND, E_NOFLAG);
 		if (ret != FUNC_SUCCESS)
 			exit_status = ret;
 
@@ -1816,11 +1842,8 @@ END:
 		goto FREE_N_EXIT;
 	}
 
-	if (workspaces[cur_ws].path)
-		free(workspaces[cur_ws].path);
-
+	free(workspaces[cur_ws].path);
 	workspaces[cur_ws].path = savestring(stdin_tmp_dir, strlen(stdin_tmp_dir));
-	goto FREE_N_EXIT;
 
 FREE_N_EXIT:
 	free(buf);
