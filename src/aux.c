@@ -607,7 +607,8 @@ xmkdir(char *dir, const mode_t mode)
 /* Same as readlinkat(3), but resolves relative symbolic links and NUL
  * terminates the returned string (BUF). */
 ssize_t
-xreadlink(int fd, char *restrict path, char *restrict buf, size_t bufsize)
+xreadlink(const int fd, char *restrict path, char *restrict buf,
+	const size_t bufsize)
 {
 	buf[0] = '\0';
 	ssize_t buf_len = readlinkat(fd, path, buf, bufsize - 1);

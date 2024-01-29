@@ -1454,7 +1454,7 @@ int_cmds_generator(const char *text, int state)
 		"mf      (limit the number of listed files)",
 		"mm      (manage default opening applications)",
 		"mp      (change to a mountpoint)",
-		"msg     (print system messages)",
+		"msg     (print program messages)",
 		"n       (create files/directories)",
 		"net     (manage remote resources)",
 		"o       (open file)",

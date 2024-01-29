@@ -545,6 +545,9 @@ post_listing(DIR *dir, const int close_dir, const int reset_pager)
 	if (conf.print_selfiles == 1 && sel_n > 0)
 		print_sel_files(term_lines);
 
+	if (virtual_dir == 1)
+		print_reload_msg(_("Virtual directory\n"));
+
 	return FUNC_SUCCESS;
 }
 
@@ -2135,8 +2138,6 @@ list_dir_light(void)
 
 END:
 	exit_code = post_listing(dir, close_dir, reset_pager);
-	if (virtual_dir == 1)
-		print_reload_msg(_("Virtual directory\n"));
 	if (excluded_files > 0)
 		print_excluded_files(excluded_files);
 
@@ -2859,8 +2860,6 @@ list_dir(void)
 
 END:
 	exit_code = post_listing(dir, close_dir, reset_pager);
-	if (virtual_dir == 1)
-		print_reload_msg(_("Virtual directory\n"));
 	if (excluded_files > 0)
 		print_excluded_files(excluded_files);
 

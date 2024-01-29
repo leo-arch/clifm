@@ -69,8 +69,8 @@ int  xatoi(const char *s);
 char *xitoa(long long n);
 char xgetchar(void);
 int  xmkdir(char *dir, const mode_t mode);
-ssize_t xreadlink(int fd, char *restrict path, char *restrict buf,
-	size_t bufsize);
+ssize_t xreadlink(const int fd, char *restrict path, char *restrict buf,
+	const size_t bufsize);
 void xregerror(const char *cmd_name, const char *pattern, const int errcode,
 	const regex_t regexp, const int prompt_err);
 
