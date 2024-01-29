@@ -604,7 +604,7 @@ xmkdir(char *dir, const mode_t mode)
 	return FUNC_SUCCESS;
 }
 
-/* Same as readlink(3), but resolves relative symbolic links and NUL
+/* Same as readlinkat(3), but resolves relative symbolic links and NUL
  * terminates the returned string (BUF). */
 ssize_t
 xreadlink(int fd, char *restrict path, char *restrict buf, size_t bufsize)

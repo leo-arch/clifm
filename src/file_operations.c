@@ -1038,10 +1038,7 @@ get_new_link_target(char *cur_target)
 		new_target[l] = '\0';
 	}
 
-	char *n = normalize_path(new_target, l);
-	free(new_target);
-
-	return n;
+	return new_target;
 }
 
 static void
@@ -1205,14 +1202,7 @@ symlink_file(char **args)
 		}
 	}
 
-	char *abs_path = normalize_path(target, strlen(target));
-	if (!abs_path) {
-		xerror(_("link: '%s': Error getting absolute path\n"), target);
-		return FUNC_FAILURE;
-	}
-
-	const int ret = symlinkat(abs_path, XAT_FDCWD, link_name);
-	free(abs_path);
+	const int ret = symlinkat(target, XAT_FDCWD, link_name);
 
 	if (ret == -1) {
 		xerror(_("link: Cannot create symbolic link '%s': %s\n"),
