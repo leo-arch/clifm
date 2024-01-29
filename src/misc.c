@@ -1681,6 +1681,12 @@ gen_symlink(char *file, const char *cwd)
 		return 0;
 	}
 
+	if (S_ISLNK(attr.st_mode)) {
+		err('w', PRINT_PROMPT, _("%s: '%s': Is a symbolic link\n"),
+			PROGRAM_NAME, file);
+		return 0;
+	}
+
 	/* Construct source and destiny files */
 
 	/* symlink(3) doesn't like file names ending with slash */
