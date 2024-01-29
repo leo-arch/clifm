@@ -604,6 +604,49 @@ xmkdir(char *dir, const mode_t mode)
 	return FUNC_SUCCESS;
 }
 
+/* Same as readlink(3), but resolves relative symbolic links and NUL
+ * terminates the returned string (BUF). */
+ssize_t
+xreadlink(int fd, char *restrict path, char *restrict buf, size_t bufsize)
+{
+	buf[0] = '\0';
+	ssize_t buf_len = readlinkat(fd, path, buf, bufsize - 1);
+	if (buf_len == -1)
+		return (-1);
+
+	buf[buf_len] = '\0';
+
+	if (buf_len > 1 && buf[buf_len - 1] == '/')
+		buf[buf_len - 1] = '\0';
+
+	int rem_slash = 0;
+	size_t path_len = strlen(path);
+	if (path_len > 1 && path[path_len - 1] == '/') {
+		path[path_len - 1] = '\0';
+		rem_slash = 1;
+	}
+
+	char *p = (char *)NULL;
+	if (*buf != '/' && (p = strrchr(path, '/'))) { /* Relative link */
+		*p = '\0';
+
+		char *temp = savestring(buf, strlen(buf));
+
+		if (p == path) /* Root */
+			snprintf(buf, bufsize, "/%s", temp);
+		else
+			snprintf(buf, bufsize, "%s/%s", path, temp);
+
+		*p = '/';
+		free(temp);
+	}
+
+	if (rem_slash == 1)
+		path[path_len - 1] = '/';
+
+	return buf_len;
+}
+
 /* Open a file for read only. Return a file stream associated to the file
  * named NAME and updates FD to hold the corresponding file descriptor.
  * NOTE: As stated here, file streams are to be preferred over file descriptors:

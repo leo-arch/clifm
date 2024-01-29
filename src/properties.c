@@ -1304,14 +1304,12 @@ print_file_name(char *filename, const char *color, const int follow_link,
 		return;
 	}
 
-	char target[PATH_MAX + 1]; *target = '\0';
+	char target[PATH_MAX + 1];
 	const ssize_t tlen =
-		readlinkat(XAT_FDCWD, filename, target, sizeof(target) - 1);
-	if (tlen != -1)
-		target[tlen] = '\0';
+		xreadlink(XAT_FDCWD, filename, target, sizeof(target));
 
 	struct stat a;
-	if (*target && lstat(target, &a) != -1) {
+	if (tlen != -1 && *target && lstat(target, &a) != -1) {
 		char *link_color = get_link_color(target);
 		char *name = abbreviate_file_name(target);
 
@@ -1322,7 +1320,7 @@ print_file_name(char *filename, const char *color, const int follow_link,
 			free(name);
 
 	} else { /* Broken link */
-		if (*target) {
+		if (tlen != -1 && *target) {
 			printf(_("\tName: %s%s%s -> %s%s%s (broken link)\n"), or_c,
 				wname ? wname : filename, df_c, uf_c, target, df_c);
 		} else {
@@ -1852,8 +1850,8 @@ err_no_file(const char *filename, const char *target, const int errnum)
 	char *errname = stat_filename ? PROGRAM_NAME : "prop";
 
 	if (*target) {
-		xerror(_("%s: %s %s->%s %s: Broken symbolic link\n"), errname,
-			filename, mi_c, df_c, target);
+		xerror(_("%s: %s %s->%s %s: Broken symbolic link\n"),
+			errname, filename, mi_c, df_c);
 	} else {
 		xerror("%s: '%s': %s\n", errname, filename, strerror(errnum));
 	}
@@ -1884,14 +1882,12 @@ do_stat(char *filename, const int follow_link)
 		/* pp: In case of a symlink we want both the symlink name (FILENAME)
 		 * and the target name (LINK_TARGET): the Name field in the output
 		 * will be printed as follows: "Name: target <- link_name". */
-		const ssize_t tlen = readlinkat(XAT_FDCWD, filename,
-			link_target, sizeof(link_target) - 1);
-		if (tlen != -1) {
-			link_target[tlen] = '\0';
+		const ssize_t tlen = xreadlink(XAT_FDCWD, filename, link_target,
+			sizeof(link_target));
+		if (tlen != -1)
 			ret = lstat(link_target, &attr);
-		} else {
+		else
 			ret = -1;
-		}
 	}
 
 	if (ret == -1)
