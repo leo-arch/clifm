@@ -1675,6 +1675,7 @@ gen_symlink(char *file, const char *cwd)
 
 	struct stat attr;
 	if (lstat(file, &attr) == -1) {
+		/* "~" fails here. No need to check in construct_name() */
 		err('w', PRINT_PROMPT, "%s: '%s': %s\n",
 			PROGRAM_NAME, file, strerror(errno));
 		return 0;

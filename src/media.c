@@ -585,6 +585,9 @@ media_menu(const int mode)
 		return FUNC_FAILURE;
 	}
 
+	if (conf.clear_screen == 1)
+		CLEAR;
+
 #ifdef HAVE_PROC_MOUNTS
 	printf("%s%s%s\n\n", BOLD, mode == MEDIA_LIST ? _("Mountpoints")
 			: _("Mounted devices"), df_c);
