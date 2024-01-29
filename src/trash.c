@@ -437,7 +437,10 @@ list_and_get_input(struct dirent ***trash_files, const int files_n,
 	while (!line)
 		line = rl_no_hist(tprompt);
 
+	const filesn_t tfiles = files;
+	files = (filesn_t)trash_n;
 	char **input = get_substr(line, ' ', 1);
+	files = tfiles;
 	free(line);
 
 	return input;
