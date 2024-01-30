@@ -711,16 +711,17 @@ del_bookmarks(char **args)
 	if (!fp) {
 		xerror(_("'%s': %s\nbookmarks: Error reading the bookmarks file\n"),
 			bm_file, strerror(errno));
-		return FUNC_FAILURE;
+		return errno;
 	}
 
 	int tmp_fd = 0;
 	FILE *tmp_fp = open_fwrite(tmp_file, &tmp_fd);
 	if (!tmp_fp) {
+		const int saved_errno = errno;
 		xerror(_("'%s': %s\nbookmarks: Error creating temporary file\n"),
 			tmp_file, strerror(errno));
 		fclose(fp);
-		return FUNC_FAILURE;
+		return saved_errno;
 	}
 
 	int exit_status = FUNC_SUCCESS;
@@ -750,9 +751,13 @@ del_bookmarks(char **args)
 	fclose(tmp_fp);
 
 	if (removed > 0) {
-		unlink(bm_file);
-		rename(tmp_file, bm_file);
-		print_reload_msg(_("Removed %zu bookmark(s)\n"), removed);
+		if (rename(tmp_file, bm_file) == 0) {
+			print_reload_msg(_("Removed %zu bookmark(s)\n"), removed);
+		} else {
+			xerror(_("bookmarks: Error updating bookmarks\nCannot rename "
+				"temporary file '%s': %s\n"), tmp_file, strerror(errno));
+			return errno;
+		}
 	} else {
 		unlink(tmp_file);
 	}
