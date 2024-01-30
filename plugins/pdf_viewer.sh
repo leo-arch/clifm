@@ -18,11 +18,13 @@ if ! type pdftotext >/dev/null 2>&1; then
 	exit 127
 fi
 
-if [ "$(head -c4 "$1")" != "%PDF" ]; then
+file="$(echo "$1" | sed 's/\\//g')"
+
+if [ "$(head -c4 "$file")" != "%PDF" ]; then
 	printf "clifm: Not a PDF file\n" >&2
 	exit 1
 fi
 
-pdftotext -nopgbrk -layout "$1" - | ${PAGER:=less}
+pdftotext -nopgbrk -layout "$file" - | ${PAGER:=less}
 
 exit 0

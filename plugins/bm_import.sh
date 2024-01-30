@@ -13,7 +13,8 @@ if [ -z "$1" ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
 	exit 0
 fi
 
-file="$1"
+file="$(echo $1 | sed 's/\\//g')"
+
 if ! [ -f "$file" ]; then
 	printf "clifm: %s: No such file or directory\n" "$file" >&2
 	exit 1

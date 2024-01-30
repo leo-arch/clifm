@@ -49,7 +49,7 @@ stty erase ^H
 
 # 2. Decrypt the file
 
-file="$(echo "$1" | sed 's/\\ / /g')"
+file="$(echo "$1" | sed 's/\\//g')"
 
 case "$file" in
 *".gpg")
