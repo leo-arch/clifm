@@ -121,8 +121,11 @@ run_action(char *action, char **args)
 	size_t i;
 	for (i = 1; args[i]; i++) {
 		struct stat a;
+		/* If the file name is already escaped, lstat(2) will fail, so that
+		 * it won't be reescaped. */
 		if (!strchr(args[i], ' ') || lstat(args[i], &a) == -1)
 			continue;
+
 		char *p = escape_str(args[i]);
 		if (p) {
 			free(args[i]);
