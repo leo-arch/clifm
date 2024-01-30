@@ -416,12 +416,12 @@ print_dirhist_map(void)
 #ifndef _NO_ICONS
 /* Set the icon field to the corresponding icon for FILE */
 static int
-get_name_icon(const char *restrict file, const filesn_t n)
+get_name_icon(const filesn_t n)
 {
-	if (!file)
+	if (!file_info[n].name)
 		return 0;
 
-	const size_t nhash = hashme(file, 0);
+	const size_t nhash = hashme(file_info[n].name, 0);
 
 	/* This division will be replaced by a constant integer at compile
 	 * time, so that it won't even be executed at runtime. */
@@ -440,16 +440,16 @@ get_name_icon(const char *restrict file, const filesn_t n)
 /* Set the icon field to the corresponding icon for DIR. If not found,
  * set the default icon. */
 static void
-get_dir_icon(const char *restrict dir, const filesn_t n)
+get_dir_icon(const filesn_t n)
 {
 	/* Default values for directories */
 	file_info[n].icon = DEF_DIR_ICON;
 	file_info[n].icon_color = DEF_DIR_ICON_COLOR;
 
-	if (!dir)
+	if (!file_info[n].name)
 		return;
 
-	const size_t dhash = hashme(dir, 0);
+	const size_t dhash = hashme(file_info[n].name, 0);
 
 	int i = (int)(sizeof(icon_dirnames) / sizeof(struct icons_t));
 	while (--i >= 0) {
@@ -2560,7 +2560,7 @@ list_dir(void)
 		case DT_DIR: {
 #ifndef _NO_ICONS
 			if (conf.icons == 1) {
-				get_dir_icon(file_info[n].name, n);
+				get_dir_icon(n);
 
 				if (*dir_ico_c)	/* If set from the color scheme file */
 					file_info[n].icon_color = dir_ico_c;
@@ -2739,7 +2739,7 @@ list_dir(void)
 			 * 3. file type */
 			/* Check icons for specific file names */
 			const int name_icon_found = (conf.icons == 1)
-				? get_name_icon(file_info[n].name, n) : 0;
+				? get_name_icon(n) : 0;
 #endif /* !_NO_ICONS */
 
 			/* Check file extension */

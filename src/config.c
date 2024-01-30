@@ -66,7 +66,7 @@ regen_config(void)
 		strftime(date, sizeof(date), "%Y%m%d@%H:%M:%S", &t);
 
 		char bk[PATH_MAX + 1];
-		snprintf(bk, sizeof(bk), "%s.%s", config_file, date);
+		snprintf(bk, sizeof(bk), "%s-%s", config_file, date);
 
 		if (renameat(XAT_FDCWD, config_file, XAT_FDCWD, bk) == -1) {
 			xerror(_("Cannot rename file '%s': %s\n"),
