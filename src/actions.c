@@ -105,6 +105,7 @@ run_action(char *action, char **args)
 		 * #    1) CREATE CMD TO BE EXECUTED   #
 		 * ##################################### */
 
+	/* 1.a Insert plugin's absolute path as command name */
 	int exit_status = FUNC_FAILURE;
 	char *cmd = get_plugin_path(action, &exit_status);
 	if (!cmd)
@@ -115,6 +116,19 @@ run_action(char *action, char **args)
 	xstrsncpy(args[0], cmd, cmd_len + 1);
 
 	free(cmd);
+
+	/* 1.b Escape non-escaped file names */
+	size_t i;
+	for (i = 1; args[i]; i++) {
+		struct stat a;
+		if (!strchr(args[i], ' ') || lstat(args[i], &a) == -1)
+			continue;
+		char *p = escape_str(args[i]);
+		if (p) {
+			free(args[i]);
+			args[i] = p;
+		}
+	}
 
 			/* ##############################
 			 * #    2) CREATE A PIPE FILE   #
@@ -220,7 +234,6 @@ run_action(char *action, char **args)
 
 		char **_cmd = parse_input_str(buf);
 		if (_cmd) {
-			size_t i;
 			char **alias_cmd = check_for_alias(_cmd);
 			if (alias_cmd) {
 				exit_status = exec_cmd(alias_cmd);
