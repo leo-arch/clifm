@@ -2247,6 +2247,21 @@ check_extra_file_types(mode_t *mode, const struct stat *s)
 		*mode = DT_TPO;
 }
 
+static int
+vt_stat(const int fd, char *restrict path, struct stat *attr)
+{
+	static char buf[PATH_MAX + 1];
+	*buf = '\0';
+
+	if (xreadlink(fd, path, buf, sizeof(buf)) == -1)
+		return (-1);
+
+	if (!*buf || fstatat(fd, buf, attr, AT_SYMLINK_NOFOLLOW) == -1)
+		return (-1);
+
+	return 0;
+}
+
 /* List files in the current working directory. Uses file type colors
  * and columns. Return 0 on success or 1 on error. */
 int
@@ -2381,8 +2396,8 @@ list_dir(void)
 		init_fileinfo(n);
 
 		uint8_t stat_ok = 1;
-		if (fstatat(fd, ename, &attr, virtual_dir == 1
-		? 0 : AT_SYMLINK_NOFOLLOW) == -1) {
+		if ((virtual_dir == 1 ? vt_stat(fd, ent->d_name, &attr)
+		: fstatat(fd, ename, &attr, AT_SYMLINK_NOFOLLOW)) == -1) {
 			if (virtual_dir == 1)
 				continue;
 			stat_ok = 0;

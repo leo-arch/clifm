@@ -2301,6 +2301,7 @@ rl_mime_list(void)
 	t[0] = xnmalloc(1, sizeof(char));
 	*t[0] = '\0';
 	t[1] = (char *)NULL;
+	char buf[PATH_MAX + 1];
 
 	size_t n = 1;
 	filesn_t i = files;
@@ -2308,9 +2309,16 @@ rl_mime_list(void)
 		if (file_info[i].color == nf_c) /* No access to file */
 			continue;
 
-		char *name = virtual_dir == 0 ? file_info[i].name
-			: realpath(file_info[i].name, NULL);
-		char *m = name ? xmagic(name, MIME_TYPE) : (char *)NULL;
+		char *name = file_info[i].name;
+		if (virtual_dir == 1) {
+			*buf = '\0';
+			if (xreadlink(XAT_FDCWD, file_info[i].name, buf, sizeof(buf)) == -1
+			|| !*buf)
+				continue;
+			name = buf;
+		}
+
+		char *m = (name && *name) ? xmagic(name, MIME_TYPE) : (char *)NULL;
 		if (!m)
 			continue;
 
@@ -2324,7 +2332,6 @@ rl_mime_list(void)
 
 		if (found == 1) {
 			free(m);
-			if (virtual_dir == 1) free(name);
 			continue;
 		} else {
 			t[n] = savestring(m, strlen(m));
@@ -2332,8 +2339,6 @@ rl_mime_list(void)
 			n++;
 			t[n] = (char *)NULL;
 		}
-
-		if (virtual_dir == 1) free(name);
 	}
 
 	if (term_caps.suggestions != 0)
@@ -2360,10 +2365,20 @@ rl_mime_files(const char *text)
 	char **t = xnmalloc((size_t)files + 2, sizeof(char *));
 	t[0] = xnmalloc(1, sizeof(char));
 	*t[0] = '\0';
+	char buf[PATH_MAX + 1];
 
 	filesn_t i, n = 1;
 	for (i = 0; i < files; i++) {
-		char *m = xmagic(file_info[i].name, MIME_TYPE);
+		char *name = file_info[i].name;
+		if (virtual_dir == 1) {
+			*buf = '\0';
+			if (xreadlink(XAT_FDCWD, file_info[i].name, buf, sizeof(buf)) == -1
+			|| !*buf)
+				continue;
+			name = buf;
+		}
+
+		char *m = (name && *name) ? xmagic(name, MIME_TYPE) : (char *)NULL;
 		if (!m) continue;
 
 		char *p = strstr(m, text);
@@ -2371,7 +2386,7 @@ rl_mime_files(const char *text)
 
 		if (!p) continue;
 
-		t[n] = savestring(file_info[i].name, strlen(file_info[i].name));
+		t[n] = savestring(name, strlen(name));
 		n++;
 	}
 

@@ -1145,6 +1145,7 @@ remove_virtual_dir(void)
 			exit_code = ret;
 		free(stdin_tmp_dir);
 	}
+
 	unsetenv("CLIFM_VIRTUAL_DIR");
 }
 
@@ -1681,12 +1682,6 @@ gen_symlink(char *file, const char *cwd)
 		return 0;
 	}
 
-	if (S_ISLNK(attr.st_mode)) {
-		err('w', PRINT_PROMPT, _("%s: '%s': Is a symbolic link\n"),
-			PROGRAM_NAME, file);
-		return 0;
-	}
-
 	/* Construct source and destiny files */
 
 	/* symlink(3) doesn't like file names ending with slash */
@@ -1739,6 +1734,9 @@ handle_stdin(void)
 	/* If files are passed via stdin, we need to disable restore-
 	 * last-path in order to correctly understand relative paths. */
 	conf.restore_last_path = 0;
+	/* In light mode, stat(2) is not executed, so that we cannot dereference
+	 * symlinks created in virtual directories. */
+	conf.light_mode = 0;
 	int exit_status = FUNC_SUCCESS;
 
 	/* Max input size: 512 * (512 * 1024)

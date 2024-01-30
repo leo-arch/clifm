@@ -1789,16 +1789,21 @@ export_files(char **filenames, const int open)
 
 	/* If no argument, export files in CWD. */
 	if (!filenames[1]) {
+		char buf[PATH_MAX + 1];
 		for (i = 0; file_info[i].name; i++) {
-			char *name = virtual_dir == 0 ? file_info[i].name
-				: realpath(file_info[i].name, NULL);
-			if (!name)
+			char *name = file_info[i].name;
+			if (virtual_dir == 1) {
+				*buf = '\0';
+				if (xreadlink(XAT_FDCWD, name, buf,	sizeof(buf)) == -1
+				|| !*buf)
+					continue;
+				name = buf;
+			}
+
+			if (!name || !*name)
 				continue;
 
 			fprintf(fp, "%s\n", name);
-
-			if (virtual_dir == 1)
-				free(name);
 		}
 	} else {
 		for (i = 1; filenames[i]; i++) {

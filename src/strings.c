@@ -1352,24 +1352,29 @@ expand_mime_type_filter(const char *pattern)
 		return (char **)NULL;
 
 	char **t = xnmalloc((size_t)files + 1, sizeof(char *));
+	char buf[PATH_MAX + 1];
 
 	filesn_t i, n = 0;
 	for (i = 0; i < files; i++) {
-		char *name = virtual_dir == 0 ? file_info[i].name
-			: realpath(file_info[i].name, NULL);
-		char *m = name ? xmagic(name, MIME_TYPE) : (char *)NULL;
-		if (!m) goto CONT;
+		char *name = file_info[i].name;
+		if (virtual_dir == 1) {
+			*buf = '\0';
+			if (xreadlink(XAT_FDCWD, file_info[i].name, buf, sizeof(buf)) == -1
+			|| !*buf)
+				continue;
+			name = buf;
+		}
+
+		char *m = (name && *name) ? xmagic(name, MIME_TYPE) : (char *)NULL;
+		if (!m) continue;
 
 		char *p = strstr(m, pattern);
 		free(m);
 
-		if (!p) goto CONT;
+		if (!p) continue;
 
 		t[n] = savestring(name, strlen(name));
 		n++;
-CONT:
-		if (virtual_dir == 1)
-			free(name);
 	}
 
 	t[n] = (char *)NULL;
@@ -1390,13 +1395,20 @@ expand_file_type_filter(const char t)
 
 	filesn_t i = 0, n = 0;
 
-	char *name = (char *)NULL;
 	char **f = xnmalloc((size_t)files + 1, sizeof(char *));
+	char buf[PATH_MAX + 1];
 
 	while (i < files) {
-		name = virtual_dir == 0 ? file_info[i].name
-			: realpath(file_info[i].name, NULL);
-		if (!name)
+		char *name = file_info[i].name;
+		if (virtual_dir == 1) {
+			*buf = '\0';
+			if (xreadlink(XAT_FDCWD, file_info[i].name, buf, sizeof(buf)) == -1
+			|| !*buf)
+				continue;
+			name = buf;
+		}
+
+		if (!name || !*name)
 			continue;
 
 		switch (t) {
@@ -1470,9 +1482,6 @@ expand_file_type_filter(const char t)
 			break;
 		default: break;
 		}
-
-		if (virtual_dir == 1)
-			free(name);
 
 		i++;
 	}
@@ -1945,14 +1954,17 @@ expand_glob(char ***substr, const int *glob_array, const size_t glob_n)
 			if (SELFORPARENT(globbuf.gl_pathv[i]))
 				continue;
 
+			char *esc_str = (char *)NULL;
 			/* Escape the globbed file name and copy it */
-			char *rpath = (char *)NULL;
-			if (virtual_dir == 1 && is_file_in_cwd(globbuf.gl_pathv[i])
-			&& !(rpath = realpath(globbuf.gl_pathv[i], NULL)))
-				continue;
-
-			char *esc_str = escape_str(rpath ? rpath : globbuf.gl_pathv[i]);
-			free(rpath);
+			if (virtual_dir == 1 && is_file_in_cwd(globbuf.gl_pathv[i])) {
+				char buf[PATH_MAX + 1]; *buf = '\0';
+				if (xreadlink(XAT_FDCWD, globbuf.gl_pathv[i], buf,
+				sizeof(buf)) == -1 || !*buf)
+					continue;
+				esc_str = escape_str(buf);
+			} else {
+				esc_str = escape_str(globbuf.gl_pathv[i]);
+			}
 
 			if (esc_str) {
 				glob_cmd[j] = esc_str;
@@ -2334,11 +2346,12 @@ expand_regex(char ***substr)
 			struct stat a;
 			if (virtual_dir == 1 && lstat(tmp[j], &a) == 0
 			&& S_ISLNK(a.st_mode) && is_file_in_cwd(tmp[j])) {
-				char *p = realpath(tmp[j], NULL);
-				if (!p)
+				char buf[PATH_MAX]; *buf = '\0';
+				const ssize_t buf_len =
+					xreadlink(XAT_FDCWD, tmp[j], buf, sizeof(buf));
+				if (buf_len == -1 || !*buf)
 					continue;
-				tmp_files[k] = savestring(p, strlen(p));
-				free(p);
+				tmp_files[k] = savestring(buf, (size_t)buf_len);
 			} else {
 				tmp_files[k] = savestring(tmp[j], strlen(tmp[j]));
 			}
@@ -2378,8 +2391,8 @@ expand_symlink(char **substr)
 		return 0;
 	}
 
-	char *real_path = realpath(name, NULL);
-	if (!real_path) {
+	char target[PATH_MAX + 1]; *target = '\0';
+	if (xreadlink(XAT_FDCWD, name, target, sizeof(target)) == -1) {
 		xerror("realpath: '%s': %s\n", name, strerror(errno));
 		if (name != *substr) free(name);
 		return (-1);
@@ -2387,15 +2400,14 @@ expand_symlink(char **substr)
 
 	if (name != *substr) free(name);
 
-	char *estr = escape_str(real_path);
-	name = estr ? estr : real_path;
+	char *estr = escape_str(target);
+	name = estr ? estr : target;
 
 	const size_t rp_len = strlen(name);
 	*substr = xnrealloc(*substr, rp_len + 1, sizeof(char));
 	xstrsncpy(*substr, name, rp_len + 1);
 
 	free(estr);
-	free(real_path);
 
 	return 0;
 }
@@ -2704,9 +2716,8 @@ parse_input_str(char *str)
 	 * the system shell. */
 	is_sel = 0; sel_is_last = 0;
 
-	int stdin_dir_ok = 0;
-	if (stdin_tmp_dir && strcmp(workspaces[cur_ws].path, stdin_tmp_dir) == 0)
-		stdin_dir_ok = 1;
+	const int stdin_dir_ok = (stdin_tmp_dir
+		&& strcmp(workspaces[cur_ws].path, stdin_tmp_dir) == 0);
 
 	/* Let's expand ranges first: the numbers resulting from the expanded range
 	 * will be expanded into the corresponding file names by eln_expand() below. */

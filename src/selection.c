@@ -103,6 +103,7 @@ select_file(char *file)
 		return 0;
 	}
 
+	static char buf[PATH_MAX + 1];
 	char *tfile = file;
 	struct stat a;
 	int exists = 0, new_sel = 0;
@@ -113,9 +114,15 @@ select_file(char *file)
 
 	/* If we are in a virtual directory, dereference symlinks */
 	if (virtual_dir == 1 && lstat(file, &a) == 0 && S_ISLNK(a.st_mode)
-	&& is_file_in_cwd(file) && !(tfile = realpath(file, NULL))) {
-		xerror(_("sel: Cannot select file '%s': %s\n"), file, strerror(errno));
-		return 0;
+	&& is_file_in_cwd(file)) {
+		*buf = '\0';
+		const ssize_t ret = xreadlink(XAT_FDCWD, file, buf, sizeof(buf));
+		if (ret == -1) {
+			xerror(_("sel: Cannot select file '%s': %s\n"),
+				file, strerror(errno));
+			return 0;
+		}
+		tfile = buf;
 	}
 
 	/* Check if FILE is already in the selection box */
@@ -140,9 +147,6 @@ select_file(char *file)
 	} else {
 		xerror(_("sel: '%s': Already selected\n"), tfile);
 	}
-
-	if (tfile != file)
-		free(tfile);
 
 	return new_sel;
 }
