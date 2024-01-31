@@ -53,7 +53,7 @@ char *get_dir_color(const char *filename, const mode_t mode,
 char *get_ext_color(const char *ext, size_t *val_len);
 char *get_file_color(const char *filename, const struct stat *attr);
 char *get_regfile_color(const char *filename, const struct stat *attr,
-	int *is_ext);
+	size_t *is_ext);
 int  import_color_scheme(const char *name);
 void update_warning_prompt_text_color(void);
 void remove_bold_attr(char *str);

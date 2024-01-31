@@ -1871,8 +1871,8 @@ list_dir_light(void)
 	struct dirent *ent;
 	int reset_pager = 0;
 	filesn_t excluded_files = 0;
-	uint8_t close_dir = 1;
-	uint8_t have_xattr = 0;
+	int close_dir = 1;
+	int have_xattr = 0;
 
 	/* A few variables for the disk usage analyzer mode */
 	off_t largest_size = 0, total_size = 0;
@@ -2204,16 +2204,16 @@ get_link_target_color(const char *name, const struct stat *attr,
 # endif /* S_IFWHT */
 #endif /* !_BE_POSIX */
 	case S_IFREG: {
-		int ext = 0;
-		char *color = get_regfile_color(name, attr, &ext);
+		size_t clen = 0;
+		char *color = get_regfile_color(name, attr, &clen);
 
 		if (!color) {
 			file_info[i].color = fi_c;
 			return;
 		}
 
-		if (ext == 1) {
-			file_info[i].ext_color = savestring(color, strlen(color));
+		if (clen > 0) { /* We have an extension color */
+			file_info[i].ext_color = savestring(color, clen);
 			file_info[i].color = file_info[i].ext_color;
 		} else {
 			file_info[i].color = color;

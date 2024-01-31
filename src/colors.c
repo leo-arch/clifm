@@ -396,8 +396,11 @@ remove_bold_attr(char *str)
 	}
 }
 
+/* Return the color for the regular file FILENAME, whose attributes are ATTR.
+ * IF the color comes from the file extension, IS_EXT is updated to the length
+ * of the color (otherwise, it is set to zero). */
 char *
-get_regfile_color(const char *filename, const struct stat *attr, int *is_ext)
+get_regfile_color(const char *filename, const struct stat *attr, size_t *is_ext)
 {
 	*is_ext = 0;
 	if (conf.colorize == 0)
@@ -417,22 +420,16 @@ get_regfile_color(const char *filename, const struct stat *attr, int *is_ext)
 
 	size_t color_len = 0;
 	char *extcolor = get_ext_color(ext, &color_len);
-	if (!extcolor)
+	if (!extcolor || color_len == 0 || color_len + 4 > sizeof(tmp_color))
 		return color ? color : fi_c;
 
-	if (color_len + 4 > sizeof(tmp_color)) {
-		*tmp_color = '\0';
-	} else {
-		*tmp_color = '\x1b'; tmp_color[1] = '[';
-		memcpy(tmp_color + 2, extcolor, color_len);
-		tmp_color[color_len + 2] = 'm';
-		tmp_color[color_len + 3] = '\0';
-	}
+	*tmp_color = '\x1b'; tmp_color[1] = '[';
+	memcpy(tmp_color + 2, extcolor, color_len);
+	tmp_color[color_len + 2] = 'm';
+	tmp_color[color_len + 3] = '\0';
+	*is_ext = color_len + 3;
 
-	color = tmp_color;
-	*is_ext = 1;
-
-	return color;
+	return tmp_color;
 }
 
 /* Retrieve the color corresponding to dir FILENAME with mode MODE.
@@ -2713,7 +2710,7 @@ colors_list(char *ent, const int eln, const int pad, const int new_line)
 	} else {
 		switch (attr.st_mode & S_IFMT) {
 		case S_IFREG: {
-			int ext = 0;
+			size_t ext = 0;
 			char *d = remove_trash_ext(&ent);
 			color = get_regfile_color(ent, &attr, &ext);
 			if (d)

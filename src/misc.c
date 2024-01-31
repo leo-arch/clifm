@@ -1736,7 +1736,11 @@ handle_stdin(void)
 	conf.restore_last_path = 0;
 	/* In light mode, stat(2) is not executed, so that we cannot dereference
 	 * symlinks created in virtual directories. */
+	if (conf.light_mode == 1)
+		err('n', PRINT_PROMPT, _("%s: Light mode is not supported "
+			"in virtual directories\n"), PROGRAM_NAME);
 	conf.light_mode = 0;
+
 	int exit_status = FUNC_SUCCESS;
 
 	/* Max input size: 512 * (512 * 1024)

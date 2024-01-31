@@ -319,7 +319,7 @@ get_link_color(const char *name)
 		case S_IFPORT: color = oo_c; break;
 #endif /* SOLARIS_DOORS */
 		case S_IFREG: {
-			int ext = 0;
+			size_t ext = 0;
 			color = get_regfile_color(name, &a, &ext);
 			}
 			break;
@@ -1164,7 +1164,7 @@ get_file_type_and_color(const char *filename, const struct stat *attr,
 	case S_IFREG:
 		*file_type = REG_PCHR;
 		if (conf.colorize == 1) {
-			int ext = 0;
+			size_t ext = 0;
 			color = get_regfile_color(filename, attr, &ext);
 		}
 		break;
