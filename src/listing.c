@@ -75,8 +75,8 @@
 		&& (n)[1] == '~')) && (n)[(l) - 1] == '#') \
 	|| (*(n) == '~' && (n)[1] == '$') ) )
 
-#define IS_EXEC(s) (((s).st_mode & S_IXUSR)               \
-	|| ((s).st_mode & S_IXGRP) || ((s).st_mode & S_IXOTH))
+#define IS_EXEC(s) (((s)->st_mode & S_IXUSR)               \
+	|| ((s)->st_mode & S_IXGRP) || ((s)->st_mode & S_IXOTH))
 
 #include "autocmds.h"
 #include "aux.h"
@@ -1837,10 +1837,13 @@ init_fileinfo(const filesn_t n)
 {
 	file_info[n] = (struct fileinfo){0};
 	file_info[n].color = df_c;
-#ifndef _NO_ICONS
+#ifdef _NO_ICONS
+	file_info[n].icon = (char *)NULL;
+	file_info[n].icon_color = df_c;
+#else
 	file_info[n].icon = DEF_FILE_ICON;
 	file_info[n].icon_color = DEF_FILE_ICON_COLOR;
-#endif /* !_NO_ICONS */
+#endif /* _NO_ICONS */
 	file_info[n].ruser = 1;
 	file_info[n].size =  1;
 	file_info[n].linkn = 1;
@@ -1913,19 +1916,19 @@ list_dir_light(void)
 		if (filter.str && filter.type == FILTER_FILE_NAME) {
 			if (regexec(&regex_exp, ename, 0, NULL, 0) == FUNC_SUCCESS) {
 				if (filter.rev == 1) {
-					++excluded_files;
+					excluded_files++;
 					continue;
 				}
 			} else if (filter.rev == 0) {
-				++excluded_files;
+				excluded_files++;
 				continue;
 			}
 		}
 
 		if (*ename == '.') {
-			++stats.hidden;
+			stats.hidden++;
 			if (conf.show_hidden == 0) {
-				++excluded_files;
+				excluded_files++;
 				continue;
 			}
 		}
@@ -1939,7 +1942,7 @@ list_dir_light(void)
 		if (conf.only_dirs == 1 && ent->d_type != DT_DIR)
 #endif /* !_DIRENT_HAVE_D_TYPE */
 		{
-			++excluded_files;
+			excluded_files++;
 			continue;
 		}
 
@@ -1951,7 +1954,7 @@ list_dir_light(void)
 #else
 		&& exclude_file_type_light(ent->d_type) == FUNC_SUCCESS) {
 #endif /* !_DIRENT_HAVE_D_TYPE */
-			++excluded_files;
+			excluded_files++;
 			continue;
 		}
 
@@ -1990,10 +1993,6 @@ list_dir_light(void)
 		file_info[n].dir = (file_info[n].type == DT_DIR);
 		file_info[n].symlink = (file_info[n].type == DT_LNK);
 		file_info[n].inode = ent->d_ino;
-#ifdef _NO_ICONS
-		file_info[n].icon = (char *)NULL;
-		file_info[n].icon_color = df_c;
-#endif /* !_NO_ICONS */
 
 		switch (file_info[n].type) {
 		case DT_DIR:
@@ -2007,7 +2006,7 @@ list_dir_light(void)
 			}
 #endif /* !_NO_ICONS */
 
-			++stats.dir;
+			stats.dir++;
 			if (conf.files_counter == 1)
 				file_info[n].filesn = count_dir(ename, NO_CPOP) - 2;
 			else
@@ -2032,28 +2031,28 @@ list_dir_light(void)
 			file_info[n].icon = ICON_LINK;
 #endif /* !_NO_ICONS */
 			file_info[n].color = ln_c;
-			++stats.link;
+			stats.link++;
 			break;
 
-		case DT_REG: file_info[n].color = fi_c; ++stats.reg; break;
-		case DT_SOCK: file_info[n].color = so_c; ++stats.socket; break;
-		case DT_FIFO: file_info[n].color = pi_c; ++stats.fifo; break;
-		case DT_BLK: file_info[n].color = bd_c; ++stats.block_dev; break;
-		case DT_CHR: file_info[n].color = cd_c; ++stats.char_dev; break;
+		case DT_REG: file_info[n].color = fi_c; stats.reg++; break;
+		case DT_SOCK: file_info[n].color = so_c; stats.socket++; break;
+		case DT_FIFO: file_info[n].color = pi_c; stats.fifo++; break;
+		case DT_BLK: file_info[n].color = bd_c; stats.block_dev++; break;
+		case DT_CHR: file_info[n].color = cd_c; stats.char_dev++; break;
 #ifndef _BE_POSIX
 # ifdef SOLARIS_DOORS
-		case DT_DOOR: file_info[n].color = oo_c; ++stats.door; break;
-		case DT_PORT: file_info[n].color = oo_c; ++stats.port; break;
+		case DT_DOOR: file_info[n].color = oo_c; stats.door++; break;
+		case DT_PORT: file_info[n].color = oo_c; stats.port++; break;
 # endif /* SOLARIS_DOORS */
 # ifdef S_ARCH1
 		case DT_ARCH1: file_info[n].color = fi_c; stats.arch1++; break;
 		case DT_ARCH2: file_info[n].color = fi_c; stats.arch2++; break;
 # endif /* S_ARCH1 */
 # ifdef S_IFWHT
-		case DT_WHT: file_info[n].color = fi_c; ++stats.whiteout; break;
+		case DT_WHT: file_info[n].color = fi_c; stats.whiteout++; break;
 # endif /* DT_WHT */
 #endif /* !_BE_POSIX */
-		case DT_UNKNOWN: file_info[n].color = no_c; ++stats.unknown; break;
+		case DT_UNKNOWN: file_info[n].color = no_c; stats.unknown++; break;
 		default: file_info[n].color = df_c; break;
 		}
 
@@ -2077,14 +2076,14 @@ list_dir_light(void)
 				&largest_color, &total_size);
 		}
 
-		++n;
+		n++;
 		if (n > FILESN_MAX - 1) {
 			err('w', PRINT_PROMPT, _("%s: Integer overflow detected "
 				"(showing only %jd files)\n"), PROGRAM_NAME, (intmax_t)n);
 			break;
 		}
 
-		++count;
+		count++;
 	}
 
 	file_info[n].name = (char *)NULL;
@@ -2231,20 +2230,318 @@ get_link_target_color(const char *name, const struct stat *attr,
 }
 
 static inline void
-check_extra_file_types(mode_t *mode, const struct stat *s)
+check_extra_file_types(mode_t *mode, const struct stat *a)
 {
 	/* If all the below macros are originally undefined, they all expand to
 	 * zero, in which case S is never used. Let's avoid a compiler warning. */
-	UNUSED(s);
+	UNUSED(a);
 
-	if (S_TYPEISMQ(s))
+	if (S_TYPEISMQ(a))
 		*mode = DT_MQ;
-	else if (S_TYPEISSEM(s))
+	else if (S_TYPEISSEM(a))
 		*mode = DT_SEM;
-	else if (S_TYPEISSHM(s))
+	else if (S_TYPEISSHM(a))
 		*mode = DT_SHM;
-	else if (S_TYPEISTMO(s))
+	else if (S_TYPEISTMO(a))
 		*mode = DT_TPO;
+}
+
+static inline void
+load_file_gral_info(const struct stat *a, const filesn_t n)
+{
+	switch (a->st_mode & S_IFMT) {
+	case S_IFREG: file_info[n].type = DT_REG; stats.reg++; break;
+	case S_IFDIR: file_info[n].type = DT_DIR; stats.dir++; break;
+	case S_IFLNK: file_info[n].type = DT_LNK; stats.link++; break;
+	case S_IFIFO: file_info[n].type = DT_FIFO; stats.fifo++; break;
+	case S_IFSOCK: file_info[n].type = DT_SOCK; stats.socket++; break;
+	case S_IFBLK: file_info[n].type = DT_BLK; stats.block_dev++; break;
+	case S_IFCHR: file_info[n].type = DT_CHR; stats.char_dev++; break;
+#ifndef _BE_POSIX
+# ifdef SOLARIS_DOORS
+	case S_IFDOOR: file_info[n].type = DT_DOOR; stats.door++; break;
+	case S_IFPORT: file_info[n].type = DT_PORT; stats.port++; break;
+# endif /* SOLARIS_DOORS */
+# ifdef S_ARCH1
+	case S_ARCH1: file_info[n].type = DT_ARCH1; stats.arch1++; break;
+	case S_ARCH2: file_info[n].type = DT_ARCH2; stats.arch2++; break;
+# endif /* S_ARCH1 */
+# ifdef S_IFWHT
+	case S_IFWHT: file_info[n].type = DT_WHT; stats.whiteout++; break;
+# endif /* S_IFWHT */
+#endif /* !_BE_POSIX */
+	default: file_info[n].type = DT_UNKNOWN; stats.unknown++; break;
+	}
+
+	check_extra_file_types(&file_info[n].type, a);
+
+	file_info[n].sel = check_seltag(a->st_dev, a->st_ino, a->st_nlink, n);
+	file_info[n].inode = a->st_ino;
+	file_info[n].linkn = a->st_nlink;
+	file_info[n].size = FILE_TYPE_NON_ZERO_SIZE(a->st_mode) ? FILE_SIZE(*a) : 0;
+	file_info[n].uid = a->st_uid;
+	file_info[n].gid = a->st_gid;
+	file_info[n].mode = a->st_mode;
+
+#if defined(LINUX_FILE_XATTRS)
+	if (file_info[n].type != DT_LNK
+	&& (conf.long_view == 1 || check_cap == 1)
+	&& listxattr(file_info[n].name, NULL, 0) > 0)
+		file_info[n].xattr = 1;
+#else
+#endif /* LINUX_FILE_XATTRS */
+
+	if (conf.long_view == 1) {
+		switch (prop_fields.time) {
+		case PROP_TIME_ACCESS: file_info[n].ltime = a->st_atime; break;
+		case PROP_TIME_CHANGE: file_info[n].ltime = a->st_ctime; break;
+		case PROP_TIME_MOD: file_info[n].ltime = a->st_mtime; break;
+		default: file_info[n].ltime = a->st_mtime; break;
+		}
+	}
+
+	switch (conf.sort) {
+	case SATIME: file_info[n].time = a->st_atime; break;
+
+	case SBTIME:
+#if defined(ST_BTIME) && !defined(__sun)
+# ifdef LINUX_STATX
+	{
+		struct statx attx;
+		if (statx(AT_FDCWD, file_info[n].name, AT_SYMLINK_NOFOLLOW,
+		STATX_BTIME, &attx) == -1)
+			file_info[n].time = 0;
+		else
+			file_info[n].time = attx.ST_BTIME.tv_sec;
+	}
+# else
+		file_info[n].time = a->ST_BTIME->tv_sec;
+# endif /* LINUX_STATX */
+#else
+		/* Let's use change time if birth time is not available */
+		file_info[n].time = a->st_ctime;
+#endif /* ST_BTIME && !__sun */
+		break;
+
+	case SCTIME: file_info[n].time = a->st_ctime; break;
+	case SMTIME: file_info[n].time = a->st_mtime; break;
+	default: file_info[n].time = 0; break;
+	}
+}
+
+static inline void
+load_dir_info(const int stat_ok, const struct stat *a, const filesn_t n)
+{
+#ifndef _NO_ICONS
+	if (conf.icons == 1) {
+		get_dir_icon(n);
+
+		if (*dir_ico_c)	/* If set from the color scheme file */
+			file_info[n].icon_color = dir_ico_c;
+	}
+#endif /* !_NO_ICONS */
+
+	const int daccess = (stat_ok == 1 &&
+		check_file_access(a->st_mode, a->st_uid, a->st_gid) == 1);
+
+	file_info[n].filesn = (conf.files_counter == 1
+		? (count_dir(file_info[n].name, NO_CPOP) - 2) : 1);
+
+	if (daccess == 0 || file_info[n].filesn < 0) {
+		file_info[n].color = nd_c;
+#ifndef _NO_ICONS
+		file_info[n].icon = ICON_LOCK;
+		file_info[n].icon_color = YELLOW;
+#endif /* !_NO_ICONS */
+	} else {
+		file_info[n].color = stat_ok == 1 ? ((a->st_mode & S_ISVTX)
+			? ((a->st_mode & S_IWOTH) ? tw_c : st_c)
+			: ((a->st_mode & S_IWOTH) ? ow_c
+			: (file_info[n].filesn == 0 ? ed_c : di_c)))
+			: df_c;
+	}
+
+	/* Let's gather some file statistics based on the file type color */
+	if (file_info[n].color == tw_c) {
+		stats.other_writable++;
+		stats.sticky++;
+	} else if (file_info[n].color == ow_c) {
+		stats.other_writable++;
+	} else
+		if (file_info[n].color == st_c) {
+			stats.sticky++;
+	}
+}
+
+static inline void
+load_link_info(const int fd, const filesn_t n)
+{
+#ifndef _NO_ICONS
+	file_info[n].icon = ICON_LINK;
+#endif // !_NO_ICONS
+
+	if (follow_symlinks == 0) {
+		file_info[n].color = ln_c;
+		return;
+	}
+
+	struct stat attrl;
+	if (fstatat(fd, file_info[n].name, &attrl, 0) == -1) {
+		file_info[n].color = or_c;
+		file_info[n].xattr = 0;
+		stats.broken_link++;
+		return;
+	}
+
+	/* We only need the symlink target name provided the target
+	 * is not a directory, because get_link_target_color() will
+	 * check the file name extension. get_dir_color() only needs
+	 * this name to run count_dir(), but we have already executed
+	 * this function. */
+	static char tmp[PATH_MAX + 1]; *tmp = '\0';
+	const ssize_t ret =
+		(conf.color_lnk_as_target == 1 && !S_ISDIR(attrl.st_mode))
+		? readlinkat(XAT_FDCWD, file_info[n].name, tmp, sizeof(tmp) - 1)
+		: 0;
+	if (ret > 0)
+		tmp[ret] = '\0';
+
+	const char *lname = *tmp ? tmp : file_info[n].name;
+
+	if (S_ISDIR(attrl.st_mode)) {
+		file_info[n].dir = 1;
+		file_info[n].filesn = conf.files_counter == 1
+			? (count_dir(file_info[n].name, NO_CPOP) - 2) : 1;
+
+		const filesn_t dfiles = (conf.files_counter == 1)
+			? (file_info[n].filesn == 2 ? 3
+			: file_info[n].filesn) : 3; /* 3 == populated */
+
+		/* DFILES is negative only if count_dir() failed, which in
+		 * this case only means EACCESS error. */
+		file_info[n].color = conf.color_lnk_as_target == 1
+			? ((dfiles < 0 || check_file_access(attrl.st_mode,
+			attrl.st_uid, attrl.st_gid) == 0) ? nd_c
+			: get_dir_color(lname, attrl.st_mode, attrl.st_nlink,
+			dfiles)) : ln_c;
+	} else {
+		if (conf.color_lnk_as_target == 1)
+			get_link_target_color(lname, &attrl, n);
+		else
+			file_info[n].color = ln_c;
+	}
+}
+
+static inline void
+load_regfile_info(const int stat_ok, const struct stat *a, const filesn_t n)
+{
+#ifdef LINUX_FILE_CAPS
+	cap_t cap;
+#endif /* !LINUX_FILE_CAPS */
+
+	/* Do not perform the access check if the user is root. */
+	if (user.uid != 0 && stat_ok == 1
+	&& check_file_access(a->st_mode, a->st_uid, a->st_gid) == 0) {
+#ifndef _NO_ICONS
+		file_info[n].icon = ICON_LOCK;
+		file_info[n].icon_color = YELLOW;
+#endif /* !_NO_ICONS */
+		file_info[n].color = nf_c;
+	} else if (stat_ok == 1 && (a->st_mode & S_ISUID)) {
+		file_info[n].exec = 1;
+		stats.exec++;
+		stats.suid++;
+		file_info[n].color = su_c;
+	} else if (stat_ok == 1 && (a->st_mode & S_ISGID)) {
+		file_info[n].exec = 1;
+		stats.exec++;
+		stats.sgid++;
+		file_info[n].color = sg_c;
+	}
+
+#ifdef LINUX_FILE_CAPS
+	/* Capabilities are stored by the system as extended attributes.
+	 * No xattrs, no caps. */
+	else if (file_info[n].xattr == 1
+	&& (cap = cap_get_file(file_info[n].name))) {
+		file_info[n].color = ca_c;
+		stats.caps++;
+		cap_free(cap);
+		if (stat_ok == 1 && IS_EXEC(a)) {
+			file_info[n].exec = 1;
+			stats.exec++;
+		}
+	}
+#endif /* LINUX_FILE_CAPS */
+
+	else if (stat_ok == 1 && IS_EXEC(a)) {
+		file_info[n].exec = 1;
+		stats.exec++;
+		if (file_info[n].size == 0)
+			file_info[n].color = ee_c;
+		else
+			file_info[n].color = ex_c;
+	} else if (file_info[n].linkn > 1) { /* Multi-hardlink */
+		file_info[n].color = mh_c;
+		stats.multi_link++;
+	} else if (file_info[n].size == 0) {
+		file_info[n].color = ef_c;
+	} else { /* Regular file */
+		file_info[n].color = fi_c;
+	}
+
+#ifndef _NO_ICONS
+	if (file_info[n].exec == 1)
+		file_info[n].icon = ICON_EXEC;
+#endif /* !_NO_ICONS */
+
+	/* Unaccessible files, files with capabilities, multi-hardlink
+	 * and executable files take precedence over temp and file
+	 * extension colors. */
+	const int no_override_color = (file_info[n].color == nf_c
+	|| file_info[n].color == ca_c || file_info[n].color == mh_c
+	|| file_info[n].exec == 1);
+
+	if (no_override_color == 0
+	&& IS_TEMP_FILE(file_info[n].name, file_info[n].bytes)) {
+		file_info[n].color = bk_c;
+		return;
+	}
+
+#ifndef _NO_ICONS
+	/* The icons check precedence order is this:
+	 * 1. filename or filename.extension
+	 * 2. extension
+	 * 3. file type */
+	/* Check icons for specific file names */
+	const int name_icon_found = (conf.icons == 1)
+		? get_name_icon(n) : 0;
+#endif /* !_NO_ICONS */
+
+	/* Check file extension */
+	char *ext = (no_override_color == 0 && check_ext == 1)
+		? strrchr(file_info[n].name, '.') : (char *)NULL;
+
+	if (!ext || ext == file_info[n].name || !*(ext + 1))
+		return;
+
+	file_info[n].ext_name = ext;
+#ifndef _NO_ICONS
+	if (name_icon_found == 0 && conf.icons == 1)
+		get_ext_icon(ext, n);
+#endif /* !_NO_ICONS */
+
+	size_t color_len = 0;
+	const char *extcolor = get_ext_color(ext, &color_len);
+	if (!extcolor)
+		return;
+
+	char *t = xnmalloc(color_len + 4, sizeof(char));
+	*t = '\x1b'; t[1] = '[';
+	memcpy(t + 2, extcolor, color_len);
+	t[color_len + 2] = 'm';
+	t[color_len + 3] = '\0';
+	file_info[n].ext_color = file_info[n].color = t;
 }
 
 static int
@@ -2376,32 +2673,33 @@ list_dir(void)
 		if (filter.str && filter.type == FILTER_FILE_NAME) {
 			if (regexec(&regex_exp, ename, 0, NULL, 0) == FUNC_SUCCESS) {
 				if (filter.rev == 1) {
-					++excluded_files;
+					excluded_files++;
 					continue;
 				}
 			} else if (filter.rev == 0) {
-				++excluded_files;
+				excluded_files++;
 				continue;
 			}
 		}
 
 		if (*ename == '.') {
-			++stats.hidden;
+			stats.hidden++;
 			if (conf.show_hidden == 0) {
-				++excluded_files;
+				excluded_files++;
 				continue;
 			}
 		}
 
 		init_fileinfo(n);
 
-		uint8_t stat_ok = 1;
-		if ((virtual_dir == 1 ? vt_stat(fd, ent->d_name, &attr)
-		: fstatat(fd, ename, &attr, AT_SYMLINK_NOFOLLOW)) == -1) {
+		const uint_fast8_t stat_ok =
+			((virtual_dir == 1 ? vt_stat(fd, ent->d_name, &attr)
+			: fstatat(fd, ename, &attr, AT_SYMLINK_NOFOLLOW)) == 0);
+
+		if (stat_ok == 0) {
 			if (virtual_dir == 1)
 				continue;
-			stat_ok = 0;
-			++stats.unstat;
+			stats.unstat++;
 		}
 
 		/* Filter files according to file type */
@@ -2409,10 +2707,10 @@ list_dir(void)
 		&& exclude_file_type(attr.st_mode, attr.st_nlink) == FUNC_SUCCESS) {
 			/* Decrease counters: the file won't be displayed */
 			if (*ename == '.' && stats.hidden > 0)
-				--stats.hidden;
+				stats.hidden--;
 			if (stat_ok == 0 && stats.unstat > 0)
-				--stats.unstat;
-			++excluded_files;
+				stats.unstat--;
+			excluded_files++;
 			continue;
 		}
 
@@ -2424,7 +2722,7 @@ list_dir(void)
 		&& (!S_ISLNK(attr.st_mode) || get_link_ref(ename) != S_IFDIR))
 #endif /* _DIRENT_HAVE_D_TYPE */
 		{
-			++excluded_files;
+			excluded_files++;
 			continue;
 		}
 
@@ -2456,317 +2754,22 @@ list_dir(void)
 		file_info[n].len = file_info[n].utf8 == 0
 			? file_info[n].bytes : wc_xstrlen(ename);
 
-#ifdef _NO_ICONS
-		file_info[n].icon = (char *)NULL;
-		file_info[n].icon_color = df_c;
-#endif /* _NO_ICONS */
-
 		if (stat_ok == 1) {
-			switch (attr.st_mode & S_IFMT) {
-			case S_IFREG: file_info[n].type = DT_REG; stats.reg++; break;
-			case S_IFDIR: file_info[n].type = DT_DIR; stats.dir++; break;
-			case S_IFLNK: file_info[n].type = DT_LNK; stats.link++; break;
-			case S_IFIFO: file_info[n].type = DT_FIFO; stats.fifo++; break;
-			case S_IFSOCK: file_info[n].type = DT_SOCK; stats.socket++; break;
-			case S_IFBLK: file_info[n].type = DT_BLK; stats.block_dev++; break;
-			case S_IFCHR: file_info[n].type = DT_CHR; stats.char_dev++; break;
-#ifndef _BE_POSIX
-# ifdef SOLARIS_DOORS
-			case S_IFDOOR: file_info[n].type = DT_DOOR; stats.door++; break;
-			case S_IFPORT: file_info[n].type = DT_PORT; stats.port++; break;
-# endif /* SOLARIS_DOORS */
-# ifdef S_ARCH1
-			case S_ARCH1: file_info[n].type = DT_ARCH1; stats.arch1++; break;
-			case S_ARCH2: file_info[n].type = DT_ARCH2; stats.arch2++; break;
-# endif /* S_ARCH1 */
-# ifdef S_IFWHT
-			case S_IFWHT: file_info[n].type = DT_WHT; stats.whiteout++; break;
-# endif /* S_IFWHT */
-#endif /* !_BE_POSIX */
-			default: file_info[n].type = DT_UNKNOWN; stats.unknown++; break;
-			}
-
-			check_extra_file_types(&file_info[n].type, &attr);
-
-			file_info[n].sel =
-				check_seltag(attr.st_dev, attr.st_ino, attr.st_nlink, n);
-			file_info[n].inode = ent->d_ino;
-			file_info[n].linkn = attr.st_nlink;
-			file_info[n].size =
-				FILE_TYPE_NON_ZERO_SIZE(attr.st_mode) ? FILE_SIZE(attr) : 0;
-			file_info[n].uid = attr.st_uid;
-			file_info[n].gid = attr.st_gid;
-			file_info[n].mode = attr.st_mode;
-
-#if defined(LINUX_FILE_XATTRS)
-			if (file_info[n].type != DT_LNK
-			&& (conf.long_view == 1 || check_cap == 1)
-			&& listxattr(ename, NULL, 0) > 0)
-				file_info[n].xattr = have_xattr = 1;
-#endif /* LINUX_FILE_XATTRS */
-
-			if (conf.long_view == 1) {
-				switch (prop_fields.time) {
-				case PROP_TIME_ACCESS:
-					file_info[n].ltime = (time_t)attr.st_atime; break;
-				case PROP_TIME_CHANGE:
-					file_info[n].ltime = (time_t)attr.st_ctime; break;
-				case PROP_TIME_MOD:
-					file_info[n].ltime = (time_t)attr.st_mtime; break;
-				default: file_info[n].ltime = (time_t)attr.st_mtime; break;
-				}
-			}
+			load_file_gral_info(&attr, n);
+			if (file_info[n].xattr == 1)
+				have_xattr = 1;
 		} else {
 			file_info[n].type = DT_UNKNOWN;
-			++stats.unknown;
+			stats.unknown++;
 		}
 
 		file_info[n].dir = (file_info[n].type == DT_DIR);
 		file_info[n].symlink = (file_info[n].type == DT_LNK);
 
-		switch (conf.sort) {
-		case SATIME:
-			file_info[n].time = stat_ok ? (time_t)attr.st_atime : 0;
-			break;
-
-		case SBTIME:
-#if defined(ST_BTIME) && !defined(__sun)
-# ifdef LINUX_STATX
-		{
-			struct statx attx;
-			if (statx(AT_FDCWD, ename, AT_SYMLINK_NOFOLLOW,
-			STATX_BTIME, &attx) == -1)
-				file_info[n].time = 0;
-			else
-				file_info[n].time = (time_t)attx.ST_BTIME.tv_sec;
-		}
-# else
-			file_info[n].time = stat_ok ? (time_t)attr.ST_BTIME.tv_sec : 0;
-# endif /* LINUX_STATX */
-#else
-			/* Let's use change time if birth time is not available */
-			file_info[n].time = stat_ok ? (time_t)attr.st_ctime : 0;
-#endif /* ST_BTIME && !__sun */
-			break;
-
-		case SCTIME: file_info[n].time = stat_ok ? (time_t)attr.st_ctime : 0;
-			break;
-		case SMTIME: file_info[n].time = stat_ok ? (time_t)attr.st_mtime : 0;
-			break;
-		default: file_info[n].time = 0; break;
-		}
-
 		switch (file_info[n].type) {
-		case DT_DIR: {
-#ifndef _NO_ICONS
-			if (conf.icons == 1) {
-				get_dir_icon(n);
-
-				if (*dir_ico_c)	/* If set from the color scheme file */
-					file_info[n].icon_color = dir_ico_c;
-			}
-#endif /* !_NO_ICONS */
-			const int daccess = (stat_ok == 1 &&
-				check_file_access(attr.st_mode, attr.st_uid, attr.st_gid) == 1);
-
-			file_info[n].filesn = (conf.files_counter == 1
-				? (count_dir(ename, NO_CPOP) - 2) : 1);
-
-			if (daccess == 0 || file_info[n].filesn < 0) {
-				file_info[n].color = nd_c;
-#ifndef _NO_ICONS
-				file_info[n].icon = ICON_LOCK;
-				file_info[n].icon_color = YELLOW;
-#endif /* !_NO_ICONS */
-			} else {
-				file_info[n].color = stat_ok == 1 ? ((attr.st_mode & S_ISVTX)
-					? ((attr.st_mode & S_IWOTH) ? tw_c : st_c)
-					: ((attr.st_mode & S_IWOTH) ? ow_c
-					: (file_info[n].filesn == 0 ? ed_c : di_c)))
-					: df_c;
-			}
-
-			/* Let's gather some file statistics based on the file type color */
-			if (file_info[n].color == tw_c) {
-				++stats.other_writable; ++stats.sticky;
-			} else if (file_info[n].color == ow_c) {
-				++stats.other_writable;
-			} else
-				if (file_info[n].color == st_c) {
-					++stats.sticky;
-			}
-			}
-
-			break;
-
-		case DT_LNK: {
-#ifndef _NO_ICONS
-			file_info[n].icon = ICON_LINK;
-#endif /* !_NO_ICONS */
-			if (follow_symlinks == 0) {
-				file_info[n].color = ln_c;
-				break;
-			}
-
-			struct stat attrl;
-			if (fstatat(fd, ename, &attrl, 0) == -1) {
-				file_info[n].color = or_c;
-				file_info[n].xattr = 0;
-				++stats.broken_link;
-				break;
-			}
-
-			/* We only need the symlink target name provided the target
-			 * is not a directory, because get_link_target_color() will
-			 * check the file name extension. get_dir_color() only needs
-			 * this name to run count_dir(), but we have already executed
-			 * this function. */
-			static char tmp[PATH_MAX + 1]; *tmp = '\0';
-			const ssize_t ret =
-				(conf.color_lnk_as_target == 1 && !S_ISDIR(attrl.st_mode))
-				? readlinkat(XAT_FDCWD, ename, tmp, sizeof(tmp) - 1)
-				: 0;
-			if (ret > 0)
-				tmp[ret] = '\0';
-			const char *lname = *tmp ? tmp : ename;
-
-			if (S_ISDIR(attrl.st_mode)) {
-				file_info[n].dir = 1;
-				file_info[n].filesn = conf.files_counter == 1
-					? (count_dir(ename, NO_CPOP) - 2) : 1;
-
-				const filesn_t dfiles = (conf.files_counter == 1)
-					? (file_info[n].filesn == 2 ? 3
-					: file_info[n].filesn) : 3; /* 3 == populated */
-
-				/* DFILES is negative only if count_dir() failed, which in
-				 * this case only means EACCESS error. */
-				file_info[n].color = conf.color_lnk_as_target == 1
-					? ((dfiles < 0 || check_file_access(attrl.st_mode,
-					attrl.st_uid, attrl.st_gid) == 0) ? nd_c
-					: get_dir_color(lname, attrl.st_mode, attrl.st_nlink,
-					dfiles)) : ln_c;
-			} else {
-				if (conf.color_lnk_as_target == 1)
-					get_link_target_color(lname, &attrl, n);
-				else
-					file_info[n].color = ln_c;
-			}
-			}
-			break;
-
-		case DT_REG: {
-#ifdef LINUX_FILE_CAPS
-			cap_t cap;
-#endif /* !LINUX_FILE_CAPS */
-			/* Do not perform the access check if the user is root. */
-			if (user.uid != 0 && stat_ok == 1
-			&& check_file_access(attr.st_mode, attr.st_uid, attr.st_gid) == 0) {
-#ifndef _NO_ICONS
-				file_info[n].icon = ICON_LOCK;
-				file_info[n].icon_color = YELLOW;
-#endif /* !_NO_ICONS */
-				file_info[n].color = nf_c;
-			} else if (stat_ok == 1 && (attr.st_mode & S_ISUID)) {
-				file_info[n].exec = 1;
-				++stats.exec; ++stats.suid;
-				file_info[n].color = su_c;
-#ifndef _NO_ICONS
-				file_info[n].icon = ICON_EXEC;
-#endif /* !_NO_ICONS */
-			} else if (stat_ok == 1 && (attr.st_mode & S_ISGID)) {
-				file_info[n].exec = 1;
-				++stats.exec; ++stats.sgid;
-				file_info[n].color = sg_c;
-#ifndef _NO_ICONS
-				file_info[n].icon = ICON_EXEC;
-#endif /* !_NO_ICONS */
-			}
-
-#ifdef LINUX_FILE_CAPS
-			/* Capabilities are stored by the system as extended attributes.
-			 * No xattrs, no caps. */
-			else if (file_info[n].xattr == 1 && (cap = cap_get_file(ename))) {
-				file_info[n].color = ca_c;
-				++stats.caps;
-				cap_free(cap);
-				if (IS_EXEC(attr)) {
-					file_info[n].exec = 1;
-					++stats.exec;
-# ifndef _NO_ICONS
-					file_info[n].icon = ICON_EXEC;
-# endif /* !_NO_ICONS */
-				}
-			}
-#endif /* LINUX_FILE_CAPS */
-
-			else if (stat_ok == 1 && IS_EXEC(attr)) {
-				file_info[n].exec = 1;
-				++stats.exec;
-#ifndef _NO_ICONS
-				file_info[n].icon = ICON_EXEC;
-#endif /* !_NO_ICONS */
-				if (file_info[n].size == 0)
-					file_info[n].color = ee_c;
-				else
-					file_info[n].color = ex_c;
-			} else if (file_info[n].linkn > 1) { /* Multi-hardlink */
-				file_info[n].color = mh_c;
-				++stats.multi_link;
-			} else if (file_info[n].size == 0) {
-				file_info[n].color = ef_c;
-			} else { /* Regular file */
-				file_info[n].color = fi_c;
-			}
-
-			/* Unaccessible files, files with capabilities, multi-hardlink
-			 * and executable files take precedence over temp and file
-			 * extension colors. */
-			const int no_override_color = (file_info[n].color == nf_c
-			|| file_info[n].color == ca_c || file_info[n].color == mh_c
-			|| file_info[n].exec == 1);
-
-			if (no_override_color == 0
-			&& IS_TEMP_FILE(file_info[n].name, file_info[n].bytes)) {
-				file_info[n].color = bk_c;
-				break;
-			}
-
-#ifndef _NO_ICONS
-			/* The icons check precedence order is this:
-			 * 1. filename or filename.extension
-			 * 2. extension
-			 * 3. file type */
-			/* Check icons for specific file names */
-			const int name_icon_found = (conf.icons == 1)
-				? get_name_icon(n) : 0;
-#endif /* !_NO_ICONS */
-
-			/* Check file extension */
-			char *ext = (no_override_color == 0 && check_ext == 1)
-				? strrchr(file_info[n].name, '.') : (char *)NULL;
-
-			if (!ext || ext == file_info[n].name || !*(ext + 1))
-				break;
-			else
-				file_info[n].ext_name = ext;
-#ifndef _NO_ICONS
-			if (name_icon_found == 0 && conf.icons == 1)
-				get_ext_icon(ext, n);
-#endif /* !_NO_ICONS */
-			size_t color_len = 0;
-			const char *extcolor = get_ext_color(ext, &color_len);
-			if (!extcolor)
-				break;
-
-			char *t = xnmalloc(color_len + 4, sizeof(char));
-			*t = '\x1b'; t[1] = '[';
-			memcpy(t + 2, extcolor, color_len);
-			t[color_len + 2] = 'm';
-			t[color_len + 3] = '\0';
-			file_info[n].ext_color = file_info[n].color = t;
-		} /* End of DT_REG block */
-		break;
+		case DT_DIR: load_dir_info(stat_ok, &attr, n); break;
+		case DT_LNK: load_link_info(fd, n); break;
+		case DT_REG: load_regfile_info(stat_ok, &attr, n); break;
 
 		/* For the time being, we have no specific colors for DT_ARCH1,
 		 * DT_ARCH2, and DT_WHT. */
@@ -2793,14 +2796,14 @@ list_dir(void)
 			get_largest(n, &largest_size, &largest_name,
 				&largest_color, &total_size);
 
-		++n;
+		n++;
 		if (n > FILESN_MAX - 1) {
 			err('w', PRINT_PROMPT, _("%s: Integer overflow detected "
 				"(showing only %jd files)\n"), PROGRAM_NAME, (intmax_t)n);
 			break;
 		}
 
-		++count;
+		count++;
 	}
 
 	/* Since we allocate memory by chunks, we might have allocated more

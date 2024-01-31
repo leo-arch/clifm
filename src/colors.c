@@ -725,7 +725,7 @@ check_ext_string(const char *ext, size_t *val_len)
 {
 	/* Hold extension names. NAME_MAX should be enough: no file name should
 	 * go beyond NAME_MAX, so it's pretty safe to assume that no file extension
-	 * will be larger. */
+	 * will be larger than this. */
 	static char tmp_ext[NAME_MAX];
 	char *ptr = tmp_ext;
 
