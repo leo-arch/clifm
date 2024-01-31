@@ -2315,7 +2315,7 @@ load_file_gral_info(const struct stat *a, const filesn_t n)
 			file_info[n].time = attx.ST_BTIME.tv_sec;
 	}
 # else
-		file_info[n].time = a->ST_BTIME->tv_sec;
+		file_info[n].time = a->ST_BTIME.tv_sec;
 # endif /* LINUX_STATX */
 #else
 		/* Let's use change time if birth time is not available */
@@ -2330,7 +2330,7 @@ load_file_gral_info(const struct stat *a, const filesn_t n)
 }
 
 static inline void
-load_dir_info(const int stat_ok, const struct stat *a, const filesn_t n)
+load_dir_info(const struct stat *a, const filesn_t n)
 {
 #ifndef _NO_ICONS
 	if (conf.icons == 1) {
@@ -2341,7 +2341,7 @@ load_dir_info(const int stat_ok, const struct stat *a, const filesn_t n)
 	}
 #endif /* !_NO_ICONS */
 
-	const int daccess = (stat_ok == 1 &&
+	const int daccess = (a &&
 		check_file_access(a->st_mode, a->st_uid, a->st_gid) == 1);
 
 	file_info[n].filesn = (conf.files_counter == 1
@@ -2354,7 +2354,7 @@ load_dir_info(const int stat_ok, const struct stat *a, const filesn_t n)
 		file_info[n].icon_color = YELLOW;
 #endif /* !_NO_ICONS */
 	} else {
-		file_info[n].color = stat_ok == 1 ? ((a->st_mode & S_ISVTX)
+		file_info[n].color = a ? ((a->st_mode & S_ISVTX)
 			? ((a->st_mode & S_IWOTH) ? tw_c : st_c)
 			: ((a->st_mode & S_IWOTH) ? ow_c
 			: (file_info[n].filesn == 0 ? ed_c : di_c)))
@@ -2433,26 +2433,26 @@ load_link_info(const int fd, const filesn_t n)
 }
 
 static inline void
-load_regfile_info(const int stat_ok, const struct stat *a, const filesn_t n)
+load_regfile_info(const struct stat *a, const filesn_t n)
 {
 #ifdef LINUX_FILE_CAPS
 	cap_t cap;
 #endif /* !LINUX_FILE_CAPS */
 
 	/* Do not perform the access check if the user is root. */
-	if (user.uid != 0 && stat_ok == 1
+	if (user.uid != 0 && a
 	&& check_file_access(a->st_mode, a->st_uid, a->st_gid) == 0) {
 #ifndef _NO_ICONS
 		file_info[n].icon = ICON_LOCK;
 		file_info[n].icon_color = YELLOW;
 #endif /* !_NO_ICONS */
 		file_info[n].color = nf_c;
-	} else if (stat_ok == 1 && (a->st_mode & S_ISUID)) {
+	} else if (a && (a->st_mode & S_ISUID)) {
 		file_info[n].exec = 1;
 		stats.exec++;
 		stats.suid++;
 		file_info[n].color = su_c;
-	} else if (stat_ok == 1 && (a->st_mode & S_ISGID)) {
+	} else if (a && (a->st_mode & S_ISGID)) {
 		file_info[n].exec = 1;
 		stats.exec++;
 		stats.sgid++;
@@ -2467,14 +2467,14 @@ load_regfile_info(const int stat_ok, const struct stat *a, const filesn_t n)
 		file_info[n].color = ca_c;
 		stats.caps++;
 		cap_free(cap);
-		if (stat_ok == 1 && IS_EXEC(a)) {
+		if (a && IS_EXEC(a)) {
 			file_info[n].exec = 1;
 			stats.exec++;
 		}
 	}
 #endif /* LINUX_FILE_CAPS */
 
-	else if (stat_ok == 1 && IS_EXEC(a)) {
+	else if (a && IS_EXEC(a)) {
 		file_info[n].exec = 1;
 		stats.exec++;
 		if (file_info[n].size == 0)
@@ -2767,9 +2767,9 @@ list_dir(void)
 		file_info[n].symlink = (file_info[n].type == DT_LNK);
 
 		switch (file_info[n].type) {
-		case DT_DIR: load_dir_info(stat_ok, &attr, n); break;
+		case DT_DIR: load_dir_info(stat_ok == 1 ? &attr : NULL, n); break;
 		case DT_LNK: load_link_info(fd, n); break;
-		case DT_REG: load_regfile_info(stat_ok, &attr, n); break;
+		case DT_REG: load_regfile_info(stat_ok == 1 ? &attr : NULL, n); break;
 
 		/* For the time being, we have no specific colors for DT_ARCH1,
 		 * DT_ARCH2, and DT_WHT. */
