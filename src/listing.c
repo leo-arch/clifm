@@ -501,9 +501,9 @@ print_cdpath(void)
 }
 
 static int
-post_listing(DIR *dir, const int close_dir, const int reset_pager)
+post_listing(DIR *dir, const int reset_pager, const filesn_t excluded_files)
 {
-	if (close_dir == 1 && closedir(dir) == -1)
+	if (dir && closedir(dir) == -1)
 		return FUNC_FAILURE;
 
 /* Let plugins and external programs running in clifm know whether
@@ -547,6 +547,10 @@ post_listing(DIR *dir, const int close_dir, const int reset_pager)
 
 	if (virtual_dir == 1)
 		print_reload_msg(_("Virtual directory\n"));
+
+	if (excluded_files > 0)
+		print_reload_msg(_("Showing %jd/%jd files\n"),
+			(intmax_t)files, (intmax_t)(files + excluded_files));
 
 	return FUNC_SUCCESS;
 }
@@ -844,7 +848,7 @@ compute_maxes(void)
 
 static void
 print_long_mode(size_t *counter, int *reset_pager, const int pad,
-	uint8_t have_xattr)
+	int have_xattr)
 {
 	struct maxes_t maxes = compute_maxes();
 
@@ -1849,13 +1853,6 @@ init_fileinfo(const filesn_t n)
 	file_info[n].linkn = 1;
 }
 
-static void
-print_excluded_files(const filesn_t excluded)
-{
-	print_reload_msg(_("Showing %jd/%jd files\n"),
-		(intmax_t)files, (intmax_t)(files + excluded));
-}
-
 /* List files in the current working directory (global variable 'path').
  * Unlike list_dir(), however, this function uses no color and runs
  * neither stat() nor count_dir(), which makes it quite faster. Return
@@ -2136,9 +2133,8 @@ list_dir_light(void)
 		list_files_horizontal(&counter, &reset_pager, pad, columns_n);
 
 END:
-	exit_code = post_listing(dir, close_dir, reset_pager);
-	if (excluded_files > 0)
-		print_excluded_files(excluded_files);
+	exit_code =
+		post_listing(close_dir == 1 ? dir : NULL, reset_pager, excluded_files);
 
 	if (xargs.disk_usage_analyzer == 1 && conf.long_view == 1
 	&& conf.full_dir_size == 1) {
@@ -2625,8 +2621,8 @@ list_dir(void)
 	struct stat attr;
 	int reset_pager = 0;
 	filesn_t excluded_files = 0;
-	uint8_t close_dir = 1;
-	uint8_t have_xattr = 0;
+	int close_dir = 1;
+	int have_xattr = 0;
 
 	/* A few variables for the disk usage analyzer mode */
 	off_t largest_size = 0, total_size = 0;
@@ -2692,7 +2688,7 @@ list_dir(void)
 
 		init_fileinfo(n);
 
-		const uint_fast8_t stat_ok =
+		const int stat_ok =
 			((virtual_dir == 1 ? vt_stat(fd, ent->d_name, &attr)
 			: fstatat(fd, ename, &attr, AT_SYMLINK_NOFOLLOW)) == 0);
 
@@ -2877,9 +2873,8 @@ list_dir(void)
 				 * ######################### */
 
 END:
-	exit_code = post_listing(dir, close_dir, reset_pager);
-	if (excluded_files > 0)
-		print_excluded_files(excluded_files);
+	exit_code =
+		post_listing(close_dir == 1 ? dir : NULL, reset_pager, excluded_files);
 
 	if (xargs.disk_usage_analyzer == 1 && conf.long_view == 1
 	&& conf.full_dir_size == 1) {

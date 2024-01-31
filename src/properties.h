@@ -63,7 +63,7 @@ int  properties_function(char **args, const int follow_link);
 void print_analysis_stats(const off_t total, const off_t largest,
 	const char *color, const char *name);
 int  print_entry_props(const struct fileinfo *props,
-	const struct maxes_t *maxes, const uint8_t have_xattr);
+	const struct maxes_t *maxes, const int have_xattr);
 int  set_file_perms(char **args);
 int  set_file_owner(char **args);
 
