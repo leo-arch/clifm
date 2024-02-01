@@ -1697,7 +1697,6 @@ extern int
 	curcol,
 	dequoted,
 	dir_changed, /* flag to know is dir was changed: used by autocmds */
-	dir_out, /* Autocommands: A .cfm.out file was found in CWD*/
 	dirhist_cur_index,
 	dirhist_total_index,
 	exit_code,

@@ -102,16 +102,17 @@
 #define xprintf printf
 
 /* Macros for run_dir_cmd function */
-#define DIR_IN  0
-#define DIR_OUT 1
-#define DIR_IN_NAME  ".cfm.in"
-#define DIR_OUT_NAME ".cfm.out"
+#define AUTOCMD_DIR_IN  0
+#define AUTOCMD_DIR_OUT 1
+#define AUTOCMD_DIR_IN_FILE  ".cfm.in"
+#define AUTOCMD_DIR_OUT_FILE ".cfm.out"
 
 #define ENTRY_N 64
 
 /* Amount of digits of the files counter of the longest directory */
 static size_t longest_fc = 0;
 static int pager_bk = 0;
+static int dir_out = 0;
 
 /* Struct to store information about trimmed file names. Used only when
  * Unicode is disabled */
@@ -1679,24 +1680,24 @@ list_files_vertical(size_t *counter, int *reset_pager,
 		putchar('\n');
 }
 
-/* Execute commands in either DIR_IN_NAME or DIR_OUT_NAME files.
- * MODE (either DIR_IN or DIR_OUT) tells the function whether to check
- * for DIR_IN_NAME or DIR_OUT_NAME files.
+/* Execute commands in either AUTOCMD_DIR_IN_FILE or AUTOCMD_DIR_OUT_FILE files.
+ * MODE (either AUTOCMD_DIR_IN or AUTOCMD_DIR_OUT) tells the function
+ * whether to check for AUTOCMD_DIR_IN_FILE or AUTOCMD_DIR_OUT_FILE files.
  * Used by the autocommands function. */
 static void
 run_dir_cmd(const int mode)
 {
 	char path[PATH_MAX + 1];
 
-	if (mode == DIR_IN) {
+	if (mode == AUTOCMD_DIR_IN) {
 		snprintf(path, sizeof(path), "%s/%s",
-			workspaces[cur_ws].path, DIR_IN_NAME);
-	} else { /* DIR_OUT */
+			workspaces[cur_ws].path, AUTOCMD_DIR_IN_FILE);
+	} else { /* AUTOCMD_DIR_OUT */
 		if (dirhist_cur_index <= 0 || !old_pwd
 		|| !old_pwd[dirhist_cur_index - 1])
 			return;
 		snprintf(path, sizeof(path), "%s/%s",
-			old_pwd[dirhist_cur_index - 1], DIR_OUT_NAME);
+			old_pwd[dirhist_cur_index - 1], AUTOCMD_DIR_OUT_FILE);
 	}
 
 	/* Non-regular files, empty regular files, or bigger than PATH_MAX bytes,
@@ -1742,7 +1743,7 @@ check_autocmd_file(const char *s)
 			dir_out = 1;
 		} else {
 			if (s[4] == 'i' && s[5] == 'n' && !s[6])
-				run_dir_cmd(DIR_IN);
+				run_dir_cmd(AUTOCMD_DIR_IN);
 		}
 	}
 }
@@ -2591,7 +2592,7 @@ list_dir(void)
 	}
 
 	if (dir_changed == 1 && dir_out == 1) {
-		run_dir_cmd(DIR_OUT);
+		run_dir_cmd(AUTOCMD_DIR_OUT);
 		dir_out = 0;
 	}
 

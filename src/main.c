@@ -153,7 +153,6 @@ int
 	curcol = 0,
 	dequoted = 0,
 	dir_changed = 0,
-	dir_out = 0,
 	dirhist_cur_index = 0,
 	dirhist_total_index = 0,
 	exit_code = 0,
