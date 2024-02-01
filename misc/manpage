@@ -2506,10 +2506,10 @@ If a directory contains a file named \fI.cfm.in\fR, \fBclifm\fR will execute (vi
 For example, if you want a simple notification whenever you enter or leave your home directory, create both \fI.cfm.in\fR and \fI.cfm.out\fR files in the home directory with the following content:
 .sp
 For \fI.cfm.in\fR:
-   printf "Entering %s ...\\n" "$PWD" && read \-n1
+   printf "Entering %s ..." "$PWD" && read \-n1 && clear
 .sp
 For \fI.cfm.out\fR:
-   printf "Leaving %s ...\\n" "$OLDPWD" && read \-n1
+   printf "Leaving %s ..." "$OLDPWD" && read \-n1
 
 .SH 15. FILE TAGS
 .sp
