@@ -240,8 +240,10 @@ For a complete description please consult our [Wiki](https://github.com/leo-arch
 <summary>Click here to expand</summary>
 
 * `Development`
+  - [Autocommand files](https://github.com/leo-arch/clifm/wiki/Specifics#autocommand-files-cfmin-and-cfmout) won't be read unless `ReadAutocmdFiles` is set to `true` in the main configuration file.
+* `1.16 (Big Whoop)`
   - [**LS_COLORS** support](https://github.com/leo-arch/clifm/wiki/Customization#ls_colors-support).
-* `1.15`
+* `1.15 (Jolly Rogger)`
   - Image previews using sixel (requires `fzf` 0.44 or later).
   - List ACLs (`p`/`pp` command) (Linux).
   - Run in [read-only mode](https://github.com/leo-arch/clifm/wiki/Specifics#read-only-mode).
