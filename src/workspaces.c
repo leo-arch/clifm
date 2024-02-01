@@ -237,7 +237,7 @@ switch_workspace(const int tmp_ws)
 		    strlen(workspaces[cur_ws].path));
 
 	} else if (tmp_ws != cur_ws) {
-		if (access(workspaces[tmp_ws].path, R_OK | X_OK) != FUNC_SUCCESS) {
+		if (access(workspaces[tmp_ws].path, R_OK | X_OK) == -1) {
 			if (!IS_VALID_WS(cur_ws)) {
 				xerror(_("ws: Current workspace is invalid\n"));
 				return FUNC_FAILURE;
@@ -257,7 +257,7 @@ switch_workspace(const int tmp_ws)
 
 	if (xchdir(workspaces[tmp_ws].path, SET_TITLE) == -1) {
 		xerror("ws: '%s': %s\n", workspaces[tmp_ws].path, strerror(errno));
-		return FUNC_FAILURE;
+		return errno;
 	}
 
 	if (conf.private_ws_settings == 1)
