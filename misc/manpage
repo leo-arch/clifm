@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Jan 22, 2024" "clifm 1.16.5" "CLIFM Manual"
+.TH "CLIFM" "1" "Feb 1, 2024" "clifm 1.16.11" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -2495,7 +2495,9 @@ Since the first directive is evaluated before the second one, this latter will a
 .sp
 \fBAutocommand files: \fI.cfm.in\fB and \fI.cfm.out\fR
 .sp
-Two files are specifically checked by the autocommands function: \fI.cfm.in\fR and \fI.cfm.out\fR.
+To use this feature, you must first set \fIReadAutocmdFiles\fR to \fItrue\fR in the main configuration file.
+.sp
+Two files are specifically checked by the autocommands function: \fI.cfm.in\fR and \fI.cfm.out\fR (they must be non-empty regular files of at most \fBPATH_MAX\fR (usually 4096) bytes, and no NUL byte must be contained in them).
 .sp
 The content of these files is a single instruction, either a shell command or, if you need more elaborated stuff, a script (or custom binary). Note that codes to modify \fBclifm\fR's settings (as described above) are not available here.
 .sp
@@ -2504,10 +2506,10 @@ If a directory contains a file named \fI.cfm.in\fR, \fBclifm\fR will execute (vi
 For example, if you want a simple notification whenever you enter or leave your home directory, create both \fI.cfm.in\fR and \fI.cfm.out\fR files in the home directory with the following content:
 .sp
 For \fI.cfm.in\fR:
-   printf "Entering %s ...\\n" "$PWD"
+   printf "Entering %s ...\\n" "$PWD" && read \-n1
 .sp
 For \fI.cfm.out\fR:
-   printf "Leaving %s ...\\n" "$OLDPWD"
+   printf "Leaving %s ...\\n" "$OLDPWD" && read \-n1
 
 .SH 15. FILE TAGS
 .sp
