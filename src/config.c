@@ -1663,6 +1663,9 @@ create_main_config_file(char *file)
 ;Autocd=%s\n\
 ;AutoOpen=%s\n\n"
 
+		"# Enable autocommand files (.cfm.in and .cfm.out)\n\
+;ReadAutocmdFiles=%s\n\n"
+
 	    "# If set to true, enable auto-suggestions.\n\
 ;AutoSuggestions=%s\n\n"
 
@@ -1696,6 +1699,7 @@ create_main_config_file(char *file)
 
 		DEF_AUTOCD == 1 ? "true" : "false",
 		DEF_AUTO_OPEN == 1 ? "true" : "false",
+		DEF_READ_AUTOCMD_FILES == 1 ? "true" : "false",
 		DEF_SUGGESTIONS == 1 ? "true" : "false",
 		DEF_SUG_STRATEGY,
 		DEF_SUG_FILETYPE_COLOR == 1 ? "true" : "false",
@@ -3089,6 +3093,10 @@ read_config(void)
 
 		else if (*line == 'Q' && strncmp(line, "QuotingStyle=", 13) == 0) {
 			set_quoting_style(line + 13);
+		}
+
+		else if (*line == 'R' && strncmp(line, "ReadAutocmdFiles=", 17) == 0) {
+			set_config_bool_value(line + 17, &conf.read_autocmd_files);
 		}
 
 		else if (xargs.readonly == UNSET && *line == 'R'

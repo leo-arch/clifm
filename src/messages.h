@@ -90,24 +90,26 @@ atool(1)          Extraction/decompression, listing, and repacking of archives"
 #define AUTOCMDS_USAGE "Tweak settings or run custom commands on a per directory basis\n\n\
 There are two ways to set autocommands:\n\
   1) Via the 'autocmd' keyword in the configuration file\n\
-  2) By placing a '.cfm.in' and/or a '.cfm.out' file in the corresponding\n\
-  directory\n\n\
+  2) Via specifically named files in the corresponding directory\n\n\
 Example using the first method:\n\
 Edit the configuration file ('config' or F10) and add the following line:\n\n\
   autocmd /media/remotes/** fc=0,lm=1\n\n\
 This instructs clifm to always disable the files counter and to run in\n\
-light mode whenever you enter the /media/remotes directory (or any\n\
+light mode whenever you enter the '/media/remotes' directory (or any\n\
 subdirectory).\n\n\
 Example using the second method:\n\
-Create a .cfm.in file in the ~/Important directory with the following\n\
+a. Set 'ReadAutocmdFiles' to 'true' in the configuration file.\n\
+b. Create a '.cfm.in' file in the '~/Important' directory with the following\n\
 content:\n\n\
   echo \"Please keep me in sync with work files\" && read -n1\n\n\
-This little reminder will be printed every time you enter the Important\n\
-directory.\n\
-If the file is named rather .cfm.out, the command will be executed when\n\
+This little reminder will be printed every time you enter the 'Important'\n\
+directory.\n\n\
+If the file is named rather '.cfm.out', the command will be executed when\n\
 leaving, instead of entering, the directory.\n\n\
 Note: Only single-line commands are allowed. If you need more advanced\n\
-stuff, set here the path to a script doing whatever needs to be done."
+stuff, set here the path to a script doing whatever needs to be done.\n\n\
+Note 2: Codes to modify clifm's settings (as described in the first method)\n\
+are not available here."
 
 #define AUTO_OPEN_USAGE "Turn auto-open on/off\n\n\
 \x1b[1mUSAGE\x1b[0m\n\

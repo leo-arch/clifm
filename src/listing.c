@@ -1692,11 +1692,19 @@ run_dir_cmd(const int mode)
 		snprintf(path, sizeof(path), "%s/%s",
 			workspaces[cur_ws].path, DIR_IN_NAME);
 	} else { /* DIR_OUT */
-		if (dirhist_cur_index <= 0 || !old_pwd[dirhist_cur_index - 1])
+		if (dirhist_cur_index <= 0 || !old_pwd
+		|| !old_pwd[dirhist_cur_index - 1])
 			return;
 		snprintf(path, sizeof(path), "%s/%s",
 			old_pwd[dirhist_cur_index - 1], DIR_OUT_NAME);
 	}
+
+	/* Non-regular files, empty regular files, or bigger than PATH_MAX bytes,
+	 * are rejected. */
+	struct stat a;
+	if (lstat(path, &a) == -1 || !S_ISREG(a.st_mode) || a.st_size == 0
+	|| a.st_size > PATH_MAX)
+		return;
 
 	FILE *fp = fopen(path, "r");
 	if (!fp)
@@ -1705,15 +1713,19 @@ run_dir_cmd(const int mode)
 	char buf[PATH_MAX + 1];
 	*buf = '\0';
 	char *ret = fgets(buf, sizeof(buf), fp);
-	if (!ret) {
+	size_t buf_len = *buf ? strnlen(buf, sizeof(buf)) : 0;
+	if (buf_len > 0 && buf[buf_len - 1] == '\n') {
+		buf[buf_len - 1] = '\0';
+		buf_len--;
+	}
+
+	if (!ret || buf_len == 0 || memchr(buf, '\0', buf_len)) {
+		/* Empty line, or it contains a NUL byte (probably binary): reject it. */
 		fclose(fp);
 		return;
 	}
 
 	fclose(fp);
-
-	if (!*buf)
-		return;
 
 	if (xargs.secure_cmds == 0
 	|| sanitize_cmd(buf, SNT_AUTOCMD) == FUNC_SUCCESS)
@@ -1906,7 +1918,7 @@ list_dir_light(void)
 			continue;
 
 		/* Check .cfm.in and .cfm.out files for the autocommands function */
-		if (*ename == '.' && dir_changed == 1)
+		if (conf.read_autocmd_files == 1 && *ename == '.' && dir_changed == 1)
 			check_autocmd_file(ename + 1);
 
 		/* Skip files according to a regex filter */
@@ -2662,7 +2674,7 @@ list_dir(void)
 			continue;
 
 		/* Check .cfm.in and .cfm.out files for the autocommands function */
-		if (*ename == '.' && dir_changed == 1)
+		if (conf.read_autocmd_files == 1 && *ename == '.' && dir_changed == 1)
 			check_autocmd_file(ename + 1);
 
 		/* Filter files according to a regex filter */

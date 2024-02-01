@@ -829,7 +829,6 @@ extern time_t curdir_mtime;
 #define FULL_STAT   2
 
 /* Function macros */
-#define itoa xitoa /* itoa does not exist in some OS's */
 #define atoi xatoi /* xatoi is just a secure atoi */
 
 #ifndef _NO_GETTEXT
@@ -1083,6 +1082,7 @@ struct config_t {
 	int print_selfiles;
 	int private_ws_settings;
 	int quoting_style;
+	int read_autocmd_files;
 	int readonly;
 	int relative_time;
 	int restore_last_path;
@@ -1105,7 +1105,6 @@ struct config_t {
 	int unicode;
 	int warning_prompt;
 	int welcome_message;
-	int pad2;
 };
 
 extern struct config_t conf;

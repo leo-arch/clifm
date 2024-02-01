@@ -1258,24 +1258,25 @@ get_link_ref(const char *link)
 }
 
 /* Transform an integer (N) into a string of chars.
- * This exists because some operating systems do not support itoa(3). */
+ * This exists because most operating systems do not provide itoa(3).
+ * It handles integer numbers between 0 and LLONG_MAX. */
 char *
 xitoa(long long n)
 {
-	if (!n)
+	if (n == 0)
 		return "0";
 
 	static char buf[32] = {0};
 	long long i = 30;
 
-	while (n && i) {
+	while (n > 0 && i > 0) {
 		long long rem = n / 10;
 		buf[i] = (char)('0' + (n - (rem * 10)));
 		n = rem;
 		--i;
 	}
 
-	return &buf[++i];
+	return &buf[i + 1];
 }
 
 /* Convert the string S into a number in the range of valid ELN's

@@ -398,7 +398,7 @@ remove_bold_attr(char *str)
 
 /* Return the color for the regular file FILENAME, whose attributes are ATTR.
  * IF the color comes from the file extension, IS_EXT is updated to the length
- * of the color (otherwise, it is set to zero). */
+ * of the color code (otherwise, it is set to zero). */
 char *
 get_regfile_color(const char *filename, const struct stat *attr, size_t *is_ext)
 {
@@ -427,8 +427,8 @@ get_regfile_color(const char *filename, const struct stat *attr, size_t *is_ext)
 	memcpy(tmp_color + 2, extcolor, color_len);
 	tmp_color[color_len + 2] = 'm';
 	tmp_color[color_len + 3] = '\0';
-	*is_ext = color_len + 3;
 
+	*is_ext = color_len + 3;
 	return tmp_color;
 }
 
