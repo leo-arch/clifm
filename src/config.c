@@ -387,6 +387,10 @@ dump_config(void)
 	char *cur_qs = get_quoting_style(conf.quoting_style);
 	print_config_value("QuotingStyle", cur_qs, s, DUMP_CONFIG_STR);
 
+	n = DEF_READ_AUTOCMD_FILES;
+	print_config_value("ReadAutocmdFiles", &conf.read_autocmd_files, &n,
+		DUMP_CONFIG_BOOL);
+
 	n = DEF_RESTORE_LAST_PATH;
 	print_config_value("RestoreLastPath", &conf.restore_last_path, &n,
 		DUMP_CONFIG_BOOL);
