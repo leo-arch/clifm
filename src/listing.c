@@ -2297,7 +2297,6 @@ load_file_gral_info(const struct stat *a, const filesn_t n)
 	&& (conf.long_view == 1 || check_cap == 1)
 	&& listxattr(file_info[n].name, NULL, 0) > 0)
 		file_info[n].xattr = 1;
-#else
 #endif /* LINUX_FILE_XATTRS */
 
 	if (conf.long_view == 1) {
@@ -2723,14 +2722,9 @@ list_dir(void)
 			continue;
 		}
 
-#if defined(_DIRENT_HAVE_D_TYPE)
-		if (conf.only_dirs == 1 && ent->d_type != DT_DIR
-		&& (ent->d_type != DT_LNK || get_link_ref(ename) != S_IFDIR))
-#else
 		if (conf.only_dirs == 1 && stat_ok == 1 && !S_ISDIR(attr.st_mode)
-		&& (!S_ISLNK(attr.st_mode) || get_link_ref(ename) != S_IFDIR))
-#endif /* _DIRENT_HAVE_D_TYPE */
-		{
+		&& (follow_symlinks == 0 || !S_ISLNK(attr.st_mode)
+		|| get_link_ref(ename) != S_IFDIR)) {
 			excluded_files++;
 			continue;
 		}
