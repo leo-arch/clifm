@@ -148,6 +148,7 @@ Besides common file operations such as copy, move, remove, etc., _clifm_ provide
   - [Disk usage analyzer mode](https://github.com/leo-arch/clifm/wiki/Specifics#disk-usage-analyzer)
   - [Files lister (ls-mode)](https://github.com/leo-arch/clifm/wiki/Advanced#files-lister-ls-mode)
 - Customization
+  - [Custom commands](https://github.com/leo-arch/clifm/wiki/Customization#custom-commands)
   - [User profiles](https://github.com/leo-arch/clifm/wiki/Specifics#profiles)
   - [Customizable keyboard shortcuts](https://github.com/leo-arch/clifm/wiki/Customization#keybindings)
   - [Theming support](https://github.com/leo-arch/clifm/wiki/Customization#theming) (more than a dozen color schemes)
