@@ -959,9 +959,10 @@ load_jumpdb(void)
 		if (*line < '0' && *line != JUMP_ENTRY_KEEP_ALWAYS_CHR)
 			continue;
 
+		if (line[line_len - 1] == '\n')
+			line[line_len - 1] = '\0';
+
 		if (*line == '@') {
-			if (line[line_len - 1] == '\n')
-				line[line_len - 1] = '\0';
 			if (is_number(line + 1)) {
 				int a = atoi(line + 1);
 				jump_total_rank = a == INT_MIN ? 0 : a;
@@ -971,14 +972,14 @@ load_jumpdb(void)
 
 		const int keep = *line == JUMP_ENTRY_KEEP_ALWAYS_CHR
 			? JUMP_ENTRY_KEEP_ALWAYS : 0;
+		/* Advance the line pointer one char if marked as permanent, i.e.
+		 * starting with '+' */
+		char *kline = line + (keep > 0);
 
-		if (*(line + (keep > 0)) < '0' || *(line + (keep > 0)) > '9')
+		if (*(kline) < '0' || *(kline) > '9')
 			continue;
 
-		if (line[line_len - 1] == '\n')
-			line[line_len - 1] = '\0';
-
-		char *tmp = strchr(line, ':');
+		char *tmp = strchr(kline, ':');
 		if (!tmp)
 			continue;
 
@@ -987,9 +988,8 @@ load_jumpdb(void)
 			continue;
 
 		int visits = 1;
-
-		if (is_number(line)) {
-			visits = atoi(line);
+		if (is_number(kline)) {
+			visits = atoi(kline);
 			if (visits == INT_MIN)
 				visits = 0;
 		}
