@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Feb 2, 2024" "clifm 1.17" "CLIFM Manual"
+.TH "CLIFM" "1" "Feb 4, 2024" "clifm 1.17" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -805,7 +805,11 @@ T}	Print all entries in the database containing the word "foo"
 .sp
 Use the \fI\-\-purge\fR option to shrink the database. Without further parameters, \fI\-\-purge\fR removes all non\-existent (un\-stat\'able) directories from the database. If a numeric parameter is passed, by contrast, all entries ranked below this number will be removed from the database. For example, \fIj \-\-purge 100\fR will remove all entries ranked below 100.
 .sp
-You can also manually edit the database file using the \fIje\fR (or \fIj \-\-edit\fR) command: edit whatever needs to be edited, save changes, and close the editor. This is useful, for example, to remove a specific entry/directory from the database.
+You can also manually edit the database file using the \fIje\fR (or \fIj \-\-edit\fR) command: edit whatever needs to be edited, save changes, and close the editor. This is useful, for example, to remove a specific entry/directory from the database (however, bear in mind that if the directory is in the directory history, it won't be removed from the jump database).
+.sp
+To mark an entry as permanent (prevent it from being removed from the database), follow any of these procedures:
+ a. Bookmark it.
+ b. Edit the jump database (\fIje\fR or \fIj --edit\fR) and prepend a plus sign (+) to the corresponding entry.
 .sp
 An alternative way of navigating the jump database is using the jumper plugin (located in the plugins directory and bound by default to the "++" action name), which uses \fIfzf\fR to enable fuzzy searches. Enter \fI++\fR to perform a fuzzy search over the jump database.
 .sp

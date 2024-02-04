@@ -560,6 +560,11 @@ For information about the matching algorithm consult the manpage\n\n\
     jp str\n\
 - Jump to the best ranked CHILD directory matching \"str\"\n\
     jc str\n\
+- Mark an entry as permanent\n\
+    You can accomplish this in two different ways:\n\
+    a. Bookmark it.\n\
+    b. Edit the database (see below) and prepend a plus sign (+) to the\n\
+       corresponding entry.\n\
 - Open/edit the jump database\n\
     je (also 'j --edit')\n\
 - Open/edit the jump database using vim\n\
@@ -567,11 +572,12 @@ For information about the matching algorithm consult the manpage\n\n\
 - Purge the database from non-existent directories\n\
     j --purge\n\
   Note: To automatically purge the database from non-existent directories\n\
-  at startup, set PurgeJumpDB to true in the configuration file\n\
+  at startup, set PurgeJumpDB to true in the configuration file.\n\
 - Purge the database from entries ranked below 100\n\
     j --purge 100\n\
   Note: To remove a specific entry, delete the corresponding line\n\
-  from the database ('je' or 'j --edit')"
+  from the database ('je' or 'j --edit'). Note that if the directory\n\
+  is in the directory history, it won't be removed from the database."
 
 #define KB_USAGE "Manage key bindings\n\n\
 \x1b[1mUSAGE\x1b[0m\n\

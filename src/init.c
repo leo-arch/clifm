@@ -936,7 +936,8 @@ load_jumpdb(void)
 	size_t jump_lines = 0;
 
 	while (fgets(tmp_line, (int)sizeof(tmp_line), fp)) {
-		if (*tmp_line >= '0' && *tmp_line <= '9')
+		if (*tmp_line == JUMP_ENTRY_KEEP_ALWAYS_CHR
+		|| (*tmp_line >= '0' && *tmp_line <= '9'))
 			jump_lines++;
 	}
 

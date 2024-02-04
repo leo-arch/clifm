@@ -201,7 +201,7 @@ add_new_jump_entry(const char *dir, const size_t dir_len)
 {
 	jump_db = xnrealloc(jump_db, jump_n + 2, sizeof(struct jump_t));
 	jump_db[jump_n].visits = 1;
-	time_t now = time(NULL);
+	const time_t now = time(NULL);
 	jump_db[jump_n].first_visit = now;
 	jump_db[jump_n].last_visit = now;
 	jump_db[jump_n].rank = 0;
@@ -451,6 +451,9 @@ print_jump_table_header(void)
 		"either because it was visited in the last 24 hours, or because "
 		"it is bookmarked, pinned, or currently active in some "
 		"workspace.\n"), item);
+	printf(_("%s A plus sign next rank values means that the "
+		"corresponding entry is marked as permanent (it won't be "
+		"removed).\n"), item);
 
 	if (conf.min_jump_rank <= 0) {
 		printf(_("%s MinJumpRank is set to %d: entries will not be removed "
@@ -554,7 +557,8 @@ print_jump_table(const int reduce, const time_t now)
 			max_last, (int)tmp_jump[i].last_visit,
 		    conf.colorize == 1 ? BOLD : "", max_rank, tmp_jump[i].rank,
 		    color != uf_c ? color : "",
-		    keep > 0 ? li_c : "", keep > 0 ? keep_char : 0,
+		    keep == 1 ? li_c : (keep == 2 ? mi_c : ""),
+		    keep > 0 ? keep_char : 0,
 		    (keep > 0 && color != uf_c) ? color : "",
 		    (conf.colorize == 0 && color == uf_c) ? '!' : 0,
 		    dir_color, tmp_jump[i].path, df_c);
