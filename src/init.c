@@ -894,7 +894,7 @@ sync_jumpdb_with_dirhist(void)
 		if (!old_pwd[i] || !*old_pwd[i])
 			continue;
 
-		size_t old_pwd_len = strlen(old_pwd[i]);
+		const size_t old_pwd_len = strlen(old_pwd[i]);
 
 		int found = 0;
 		for (j = 0; j < jump_n; j++) {

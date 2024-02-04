@@ -279,9 +279,9 @@ save_jumpdb(void)
 		return;
 
 	int i, reduce = 0, total_rank = 0;
-	time_t now = time(NULL);
+	const time_t now = time(NULL);
 
-	/* Calculate both total rank sum, and rank for each entry */
+	/* Calculate both total rank sum, and rank for each entry. */
 	i = (int)jump_n;
 	while (--i >= 0) {
 		if (!IS_VALID_JUMP_ENTRY(i))
@@ -310,10 +310,10 @@ save_jumpdb(void)
 			}
 		}
 
-		/* Forget directories ranked below MIN_JUMP_RANK */
+		/* Forget directories ranked below MIN_JUMP_RANK. */
 		if (jump_db[i].keep < 1 && jump_db[i].rank < conf.min_jump_rank) {
 			/* Discount from TOTAL_RANK the rank of the now forgotten
-			 * directory to keep this total up to date */
+			 * directory to keep this total up to date. */
 			total_rank -= jump_db[i].rank;
 			continue;
 		}
