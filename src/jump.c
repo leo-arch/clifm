@@ -300,6 +300,8 @@ save_jumpdb(void)
 	if (total_rank > conf.max_jump_total_rank && conf.max_jump_total_rank > 0)
 		reduce = (total_rank / conf.max_jump_total_rank) + 1;
 
+	char keep_always_str[2] = "";
+
 	for (i = 0; i < (int)jump_n; i++) {
 		if (total_rank > conf.max_jump_total_rank) {
 			if (reduce) {
@@ -316,8 +318,10 @@ save_jumpdb(void)
 			continue;
 		}
 
+		keep_always_str[0] = jump_db[i].keep == JUMP_ENTRY_KEEP_ALWAYS
+			? JUMP_ENTRY_KEEP_ALWAYS_CHR : '\0';
 		fprintf(fp, "%s%zu:%jd:%jd:%s\n",
-			jump_db[i].keep == JUMP_ENTRY_KEEP_ALWAYS ? "+" : "",
+			keep_always_str,
 			jump_db[i].visits,
 			(intmax_t)jump_db[i].first_visit,
 			(intmax_t)jump_db[i].last_visit, jump_db[i].path);
@@ -540,7 +544,8 @@ print_jump_table(const int reduce, const time_t now)
 		char *dir_color = color == uf_c ? uf_c : get_directory_color(tmp_jump[i].path, &a);
 		const int keep = tmp_jump[i].keep;
 		const char keep_char = keep == 1 ? '*'
-			: ((keep == JUMP_ENTRY_KEEP_ALWAYS) ? '+' : 0);
+			: ((keep == JUMP_ENTRY_KEEP_ALWAYS)
+			? JUMP_ENTRY_KEEP_ALWAYS_CHR : 0);
 
 		printf(" %s%*zu\t%*zu\t%*d\t%*d\t%s%*d%s%s%c%s\t%c%s%s%s\n",
 			color != uf_c ? color : df_c, max_order, i + 1,

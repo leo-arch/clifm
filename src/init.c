@@ -955,7 +955,7 @@ load_jumpdb(void)
 	ssize_t line_len = 0;
 
 	while ((line_len = getline(&line, &line_size, fp)) > 0) {
-		if (*line < '0' && *line != '+')
+		if (*line < '0' && *line != JUMP_ENTRY_KEEP_ALWAYS_CHR)
 			continue;
 
 		if (*line == '@') {
@@ -968,7 +968,8 @@ load_jumpdb(void)
 			continue;
 		}
 
-		const int keep = *line == '+' ? JUMP_ENTRY_KEEP_ALWAYS : 0;
+		const int keep = *line == JUMP_ENTRY_KEEP_ALWAYS_CHR
+			? JUMP_ENTRY_KEEP_ALWAYS : 0;
 
 		if (*(line + (keep > 0)) < '0' || *(line + (keep > 0)) > '9')
 			continue;
