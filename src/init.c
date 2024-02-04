@@ -976,7 +976,7 @@ load_jumpdb(void)
 		 * starting with '+' */
 		char *kline = line + (keep > 0);
 
-		if (*(kline) < '0' || *(kline) > '9')
+		if (*kline < '0' || *kline > '9')
 			continue;
 
 		char *tmp = strchr(kline, ':');
