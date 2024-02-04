@@ -955,7 +955,7 @@ load_jumpdb(void)
 	ssize_t line_len = 0;
 
 	while ((line_len = getline(&line, &line_size, fp)) > 0) {
-		if (*line < '0')
+		if (*line < '0' && *line != '+')
 			continue;
 
 		if (*line == '@') {
@@ -968,7 +968,9 @@ load_jumpdb(void)
 			continue;
 		}
 
-		if (*line < '0' || *line > '9')
+		const int keep = *line == '+' ? JUMP_ENTRY_KEEP_ALWAYS : 0;
+
+		if (*(line + (keep > 0)) < '0' || *(line + (keep > 0)) > '9')
 			continue;
 
 		if (line[line_len - 1] == '\n')
@@ -1029,7 +1031,7 @@ load_jumpdb(void)
 			jump_db[jump_n].last_visit = 0; /* UNIX Epoch */
 		}
 
-		jump_db[jump_n].keep = 0;
+		jump_db[jump_n].keep = keep;
 		jump_db[jump_n].rank = 0;
 		jump_db[jump_n].len = strlen(tmpc);
 		jump_db[jump_n].path = savestring(tmpc, jump_db[jump_n].len);

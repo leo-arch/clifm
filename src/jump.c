@@ -177,7 +177,8 @@ rank_entry(const int i, const time_t now, int *days_since_first,
 		(int)jump_db[i].visits, &keep);
 
 	rank += calculate_bonus_credit(jump_db[i].path, (char *)NULL, &keep);
-	jump_db[i].keep = keep;
+	if (jump_db[i].keep != JUMP_ENTRY_KEEP_ALWAYS)
+		jump_db[i].keep = keep;
 
 	return rank;
 }
@@ -308,14 +309,16 @@ save_jumpdb(void)
 		}
 
 		/* Forget directories ranked below MIN_JUMP_RANK */
-		if (jump_db[i].keep != 1 && jump_db[i].rank < conf.min_jump_rank) {
+		if (jump_db[i].keep < 1 && jump_db[i].rank < conf.min_jump_rank) {
 			/* Discount from TOTAL_RANK the rank of the now forgotten
 			 * directory to keep this total up to date */
 			total_rank -= jump_db[i].rank;
 			continue;
 		}
 
-		fprintf(fp, "%zu:%jd:%jd:%s\n", jump_db[i].visits,
+		fprintf(fp, "%s%zu:%jd:%jd:%s\n",
+			jump_db[i].keep == JUMP_ENTRY_KEEP_ALWAYS ? "+" : "",
+			jump_db[i].visits,
 			(intmax_t)jump_db[i].first_visit,
 			(intmax_t)jump_db[i].last_visit, jump_db[i].path);
 	}
@@ -422,6 +425,12 @@ rank_cmp(const void *a, const void *b)
 	struct jump_t *pa = (struct jump_t *)a;
 	struct jump_t *pb = (struct jump_t *)b;
 
+	if (!pa->path)
+		return 0;
+
+	if (!pb->path)
+		return 1;
+
 	return (pa->rank > pb->rank);
 }
 
@@ -478,8 +487,8 @@ print_jump_table(const int reduce, const time_t now)
 
 		int days_since_first = 0, hours_since_last = 0;
 		int rank = rank_entry((int)i, now, &days_since_first, &hours_since_last);
-		int keep = jump_db[i].keep;
-		jump_db[i].keep = 0;
+//		int keep = jump_db[i].keep;
+//		jump_db[i].keep = 0;
 
 		if (reduce) {
 			int tmp_rank = rank;
@@ -490,7 +499,8 @@ print_jump_table(const int reduce, const time_t now)
 		visits_sum += (int)jump_db[i].visits;
 
 		tmp_jump[i].path = jump_db[i].path;
-		tmp_jump[i].keep = keep;
+		tmp_jump[i].keep = jump_db[i].keep;
+//		tmp_jump[i].keep = keep;
 		tmp_jump[i].rank = rank;
 		tmp_jump[i].len = jump_db[i].len;
 		tmp_jump[i].visits = jump_db[i].visits;
@@ -528,6 +538,9 @@ print_jump_table(const int reduce, const time_t now)
 			color = uf_c;
 
 		char *dir_color = color == uf_c ? uf_c : get_directory_color(tmp_jump[i].path, &a);
+		const int keep = tmp_jump[i].keep;
+		const char keep_char = keep == 1 ? '*'
+			: ((keep == JUMP_ENTRY_KEEP_ALWAYS) ? '+' : 0);
 
 		printf(" %s%*zu\t%*zu\t%*d\t%*d\t%s%*d%s%s%c%s\t%c%s%s%s\n",
 			color != uf_c ? color : df_c, max_order, i + 1,
@@ -536,8 +549,8 @@ print_jump_table(const int reduce, const time_t now)
 			max_last, (int)tmp_jump[i].last_visit,
 		    conf.colorize == 1 ? BOLD : "", max_rank, tmp_jump[i].rank,
 		    color != uf_c ? color : "",
-		    tmp_jump[i].keep == 1 ? li_c : "", tmp_jump[i].keep == 1
-		    ? '*' : 0, (tmp_jump[i].keep == 1 && color != uf_c) ? color : "",
+		    keep > 0 ? li_c : "", keep > 0 ? keep_char : 0,
+		    (keep > 0 && color != uf_c) ? color : "",
 		    (conf.colorize == 0 && color == uf_c) ? '!' : 0,
 		    dir_color, tmp_jump[i].path, df_c);
 	}
@@ -560,6 +573,9 @@ purge_invalid_entries(void)
 	struct stat a;
 	while (--i >= 0) {
 		if (!IS_VALID_JUMP_ENTRY(i))
+			continue;
+
+		if (jump_db[i].keep == JUMP_ENTRY_KEEP_ALWAYS)
 			continue;
 
 		if (stat(jump_db[i].path, &a) == -1) {
@@ -587,6 +603,9 @@ purge_low_ranked_entries(const int limit)
 
 	while (--i >= 0) {
 		if (!IS_VALID_JUMP_ENTRY(i))
+			continue;
+
+		if (jump_db[i].keep == JUMP_ENTRY_KEEP_ALWAYS)
 			continue;
 
 		int days_since_first = 0, hours_since_last = 0;
