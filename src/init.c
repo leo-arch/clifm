@@ -1883,22 +1883,6 @@ get_cdpath(void)
 	return n;
 }
 
-static size_t
-count_chars(const char *s, const char c)
-{
-	if (!s || !*s)
-		return 0;
-
-	size_t n = 0;
-	while (*s) {
-		if (*s == c)
-			n++;
-		s++;
-	}
-
-	return n;
-}
-
 static void
 get_paths_timestamps(const size_t n)
 {

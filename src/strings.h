@@ -31,6 +31,7 @@
 
 __BEGIN_DECLS
 
+size_t count_chars(const char *s, const char c);
 char *escape_str(const char *str);
 char *gen_rand_str(const size_t len);
 char *get_last_chr(char *str, const char c, const int len);

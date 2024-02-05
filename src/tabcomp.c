@@ -1472,10 +1472,13 @@ get_finder_offset(const char *query, const char *text, char **matches,
 	 * (readline.c)). */
 
 	if (text && conf.fuzzy_match == 1 && ct != TCMP_TAGS_F
-	&& ct != TCMP_DIRHIST)
+	&& ct != TCMP_DIRHIST) {
 		/* TEXT is not NULL whenever a common prefix was added, replacing
 		 * the original query string. */
-		finder_offset -= (int)(wc_xstrlen(matches[0]) - wc_xstrlen(text));
+		const size_t bslashes = count_chars(text, '\\');
+		finder_offset -=
+			(int)(wc_xstrlen(matches[0]) - wc_xstrlen(text) + bslashes);
+	}
 
 	if (!lw) {
 		finder_offset++;

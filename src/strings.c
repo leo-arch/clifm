@@ -121,6 +121,23 @@ quote_str(const char *str)
 	return p;
 }
 
+/* Return the number of times the character C is found in the string S. */
+size_t
+count_chars(const char *restrict s, const char c)
+{
+	if (!s || !*s)
+		return 0;
+
+	size_t n = 0;
+	while (*s) {
+		if (*s == c)
+			n++;
+		s++;
+	}
+
+	return n;
+}
+
 /* Get the last occurrence of the (non-escaped) character C in STR (whose
  * length is LEN). Return a pointer to it if found or NULL if not. */
 char *
