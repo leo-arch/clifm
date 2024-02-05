@@ -2744,10 +2744,11 @@ If using Xterm, a nice speed boost is provided by the fast scroll option: set \f
 The directory jumper function is designed to learn the navigation habits of the user. The information is stored in a database (see the \fBFILES\fR section below) used to get the best match for a given string provided by the user. In this sense, Kangaroo is like a quick, smart, and evolved cd function.
 .sp
 The information stored in the database, always per directory, is:
- a) Number of visits
- b) Date of first visit (seconds since the Unix epoch)
- c) Date of the last visit (seconds since Unix epoch)
- d) The full path to each visited directory
+ a) Permanent entry ('+'): this directory won't be removed from the database, no matter its rank
+ b) Number of visits
+ c) Date of first visit (seconds since the Unix epoch)
+ d) Date of the last visit (seconds since Unix epoch)
+ e) The full path to each visited directory
 .sp
 With this information it is possible to build a ranking of directories to offer the user the most accurate matches for each query string. The matching algorithm takes into account mainly two factors: frequency and recency (which is why this kind of algorithm is often called a \fBfrecency\fR algorithm).
 .sp
@@ -2765,9 +2766,9 @@ Extra credits or penalties are assigned based on the directories \fBlast access 
 .sp
 If the last query string matches the \fBbasename\fR of a directory, the entry for this directory has 300 extra credits. This is done simply because users normally use directory basenames as query strings: they are easier to remember.
 .sp
-In the same way, \fBpinned\fR directories get 1000 extra credits, \fBbookmarked directories\fR 500 credits, and directories currently in a \fBworkspace\fR 300 credits.
+In the same way, \fBpinned\fR directories get 1000 extra credits, \fBbookmarked directories\fR 500 credits, directories active in a \fBworkspace\fR 300 credits, and directories marked as \fBpermanent\fR 300 credits.
 .sp
-For example: if the query string is "test", \fI/media/data/test\fR will be matched. Now, if this directory was accessed within the last hour, and its rank was 200, it becomes 800. But, because the search string matches its basename, it gets 300 extra credits, and, if this directory is in addition bookmarked and pinned, it gets 1500 extra credits. In this way the total rank of this directory in the matching process is 2600. In doing this, we have more chances of matching what the user actually wanted to match.
+For example: if the query string is "test", \fI/media/data/test\fR will be matched. Now, if this directory was accessed within the last hour, and its rank was 200, it becomes 800. But, because the search string matches its basename, it gets 300 extra credits, and, if this directory is in addition bookmarked, pinned, and marked as permanent, it gets 1800 extra credits. In this way the total rank of this directory in the matching process is 2900. In doing so, we have more chances of matching what the user actually wanted to match.
 .sp
 Once all entries in the initial list of matches have been filtered via the above procedure and ranked, we can return the best ranked entry. The higher rank a directory has, the more priority it has over the remaining entries in the initial list of matches.
 .sp
@@ -2779,7 +2780,7 @@ Automatic maintenance is done on the database applying a few simple procedures:
 
  c) Once the sum total of ranks reaches \fIMaxJumpTotalRank\fR (by default 100000), each individual rank is divided by a dynamic factor so that the total rank becomes less than or equal to \fIMaxJumpTotalRank\fR. If some rank falls in the process below \fIMinJumpRank\fR (and provided this latter is not 0), it is removed from the database. \fIMaxJumpTotalRank\fR can be modified in the configuration file. The higher the value of \fIMaxJumpTotalRank\fR, the more time directories will be kept in the database.
 
-NOTE: Directories visited in the last 24 hours, just as pinned, bookmarked directories, and directories currently used in some workspace, will not be removed from the database, no matter what their rank is. In other words, if you want to indefinitely keep a given directory in the jump database, bookmark it.
+NOTE: Directories visited in the last 24 hours, just as pinned, bookmarked directories, and directories currently used in some workspace, will not be removed from the database, no matter what their rank is. In other words, if you want to indefinitely keep a given directory in the jump database, bookmark it, or mark it as permanent (edit the database, via \fIje\fR or \fIj --edit\fR, and prepend a plus sign (+) to the corresponding entry).
 .sp
 The idea of 'frecency' was, as far as I know, first devised and designed by Mozilla. See \fIhttps://wiki.mozilla.org/User:Mconnor/Past/PlacesFrecency\fR. However, it is also implemented, though using different algorithms, by different projects like \fBautojump\fR, \fBz.lua\fR, and \fBzoxide\fR.
 
