@@ -810,9 +810,9 @@ extern time_t curdir_mtime;
 #define FUZZY_HISTORY     3
 #define FUZZY_ALGO_MAX    2 /* We have two fuzzy algorithms */
 
-#define JUMP_ENTRY_PURGED          -1
-#define JUMP_ENTRY_KEEP_ALWAYS     2
-#define JUMP_ENTRY_KEEP_ALWAYS_CHR '+'
+#define JUMP_ENTRY_PURGED        -1
+#define JUMP_ENTRY_PERMANENT     2
+#define JUMP_ENTRY_PERMANENT_CHR '+'
 
 #define MAX_TIME_STR 256
 

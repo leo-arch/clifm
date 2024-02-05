@@ -936,7 +936,7 @@ load_jumpdb(void)
 	size_t jump_lines = 0;
 
 	while (fgets(tmp_line, (int)sizeof(tmp_line), fp)) {
-		if (*tmp_line == JUMP_ENTRY_KEEP_ALWAYS_CHR
+		if (*tmp_line == JUMP_ENTRY_PERMANENT_CHR
 		|| (*tmp_line >= '0' && *tmp_line <= '9'))
 			jump_lines++;
 	}
@@ -956,7 +956,7 @@ load_jumpdb(void)
 	ssize_t line_len = 0;
 
 	while ((line_len = getline(&line, &line_size, fp)) > 0) {
-		if (*line < '0' && *line != JUMP_ENTRY_KEEP_ALWAYS_CHR)
+		if (*line < '0' && *line != JUMP_ENTRY_PERMANENT_CHR)
 			continue;
 
 		if (line[line_len - 1] == '\n')
@@ -970,8 +970,8 @@ load_jumpdb(void)
 			continue;
 		}
 
-		const int keep = *line == JUMP_ENTRY_KEEP_ALWAYS_CHR
-			? JUMP_ENTRY_KEEP_ALWAYS : 0;
+		const int keep = *line == JUMP_ENTRY_PERMANENT_CHR
+			? JUMP_ENTRY_PERMANENT : 0;
 		/* Advance the line pointer one char if marked as permanent, i.e.
 		 * starting with '+' */
 		char *kline = line + (keep > 0);

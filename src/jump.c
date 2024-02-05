@@ -48,6 +48,7 @@
 /* Macros to calculate directories rank extra points */
 #define BASENAME_BONUS 	300
 #define BOOKMARK_BONUS  500
+#define PERMANENT_BONUS 300
 #define PINNED_BONUS    1000
 #define WORKSPACE_BONUS 300
 #define VISIT_BONUS     200
@@ -64,6 +65,7 @@
 struct jump_entry_t {
 	char *match;
 	char *needle;
+	size_t keep; // CHECK PADDING!!!!
 	size_t visits;
 #ifdef __arm__
 	char *pad0;
@@ -177,7 +179,9 @@ rank_entry(const int i, const time_t now, int *days_since_first,
 		(int)jump_db[i].visits, &keep);
 
 	rank += calculate_bonus_credit(jump_db[i].path, (char *)NULL, &keep);
-	if (jump_db[i].keep != JUMP_ENTRY_KEEP_ALWAYS)
+	if (jump_db[i].keep == JUMP_ENTRY_PERMANENT)
+		rank += PERMANENT_BONUS;
+	else
 		jump_db[i].keep = keep;
 
 	return rank;
@@ -300,7 +304,7 @@ save_jumpdb(void)
 	if (total_rank > conf.max_jump_total_rank && conf.max_jump_total_rank > 0)
 		reduce = (total_rank / conf.max_jump_total_rank) + 1;
 
-	char keep_always_str[2] = "";
+	char perm_chr_str[2] = "";
 
 	for (i = 0; i < (int)jump_n; i++) {
 		if (total_rank > conf.max_jump_total_rank) {
@@ -318,11 +322,10 @@ save_jumpdb(void)
 			continue;
 		}
 
-		keep_always_str[0] = jump_db[i].keep == JUMP_ENTRY_KEEP_ALWAYS
-			? JUMP_ENTRY_KEEP_ALWAYS_CHR : '\0';
+		perm_chr_str[0] = jump_db[i].keep == JUMP_ENTRY_PERMANENT
+			? JUMP_ENTRY_PERMANENT_CHR : '\0';
 		fprintf(fp, "%s%zu:%jd:%jd:%s\n",
-			keep_always_str,
-			jump_db[i].visits,
+			perm_chr_str, jump_db[i].visits,
 			(intmax_t)jump_db[i].first_visit,
 			(intmax_t)jump_db[i].last_visit, jump_db[i].path);
 	}
@@ -388,13 +391,11 @@ save_jump_suggestion(char *str)
 		return FUNC_FAILURE;
 
 	free(jump_suggestion);
-	size_t len = strlen(str);
+	const size_t len = strlen(str);
 
-	int slash = 0;
-	if (len > 0 && str[len - 1] == '/')
-		slash = 1;
+	const int slash = (len > 0 && str[len - 1] == '/');
 
-	size_t jump_sug_len = len + (slash == 1 ? 1 : 2);
+	const size_t jump_sug_len = len + (slash == 1 ? 1 : 2);
 	jump_suggestion = xnmalloc(jump_sug_len, sizeof(char));
 	if (slash == 0)
 		snprintf(jump_suggestion, jump_sug_len, "%s/", str);
@@ -482,7 +483,7 @@ print_jump_table(const int reduce, const time_t now)
 	size_t i;
 	int ranks_sum = 0, visits_sum = 0;
 	int max_rank = 0, max_visits = 0, max_first = 0, max_last = 0;
-	int max_order = DIGINUM(jump_n);
+	const int max_order = DIGINUM(jump_n);
 
 	struct jump_t *tmp_jump = xnmalloc(jump_n + 1, sizeof(struct jump_t));
 
@@ -547,8 +548,8 @@ print_jump_table(const int reduce, const time_t now)
 		char *dir_color = color == uf_c ? uf_c : get_directory_color(tmp_jump[i].path, &a);
 		const int keep = tmp_jump[i].keep;
 		const char keep_char = keep == 1 ? '*'
-			: ((keep == JUMP_ENTRY_KEEP_ALWAYS)
-			? JUMP_ENTRY_KEEP_ALWAYS_CHR : 0);
+			: ((keep == JUMP_ENTRY_PERMANENT)
+			? JUMP_ENTRY_PERMANENT_CHR : 0);
 
 		printf(" %s%*zu\t%*zu\t%*d\t%*d\t%s%*d%s%s%c%s\t%c%s%s%s\n",
 			color != uf_c ? color : df_c, max_order, i + 1,
@@ -584,7 +585,7 @@ purge_invalid_entries(void)
 		if (!IS_VALID_JUMP_ENTRY(i))
 			continue;
 
-		if (jump_db[i].keep == JUMP_ENTRY_KEEP_ALWAYS)
+		if (jump_db[i].keep == JUMP_ENTRY_PERMANENT)
 			continue;
 
 		if (stat(jump_db[i].path, &a) == -1) {
@@ -614,11 +615,12 @@ purge_low_ranked_entries(const int limit)
 		if (!IS_VALID_JUMP_ENTRY(i))
 			continue;
 
-		if (jump_db[i].keep == JUMP_ENTRY_KEEP_ALWAYS)
+		if (jump_db[i].keep == JUMP_ENTRY_PERMANENT)
 			continue;
 
 		int days_since_first = 0, hours_since_last = 0;
-		int rank = rank_entry(i, now, &days_since_first, &hours_since_last);
+		const int rank =
+			rank_entry(i, now, &days_since_first, &hours_since_last);
 		UNUSED(days_since_first); UNUSED(hours_since_last);
 
 		if (rank < limit) {
@@ -653,7 +655,7 @@ purge_jump_database(char *arg)
 		return FUNC_FAILURE;
 	}
 
-	int n = atoi(arg);
+	const int n = atoi(arg);
 	if (n < 0) {
 		xerror(_("jump: '%s': Invalid value\n"), arg);
 		return FUNC_FAILURE;
@@ -719,7 +721,7 @@ check_jump_params(char **args, const time_t now, const int reduce)
 static inline int
 mark_target_segment(char *str)
 {
-	size_t len = strlen(str);
+	const size_t len = strlen(str);
 	int segment = 0;
 
 	if (len > 0 && str[len - 1] == '/') {
@@ -755,7 +757,7 @@ get_needle(const char *needle, const char *match, const char *query,
 		return (char *)NULL;
 
 	if (segment & FIRST_SEGMENT) {
-		char p = *ret;
+		const char p = *ret;
 		*ret = '\0';
 
 		if (strrchr(match, '/') != match) {
@@ -770,23 +772,26 @@ get_needle(const char *needle, const char *match, const char *query,
 }
 
 static inline int
-rank_tmp_entry(const struct jump_entry_t entry, const time_t now,
+rank_tmp_entry(const struct jump_entry_t *entry, const time_t now,
 	const int reduce, const char *query)
 {
 	/* 86400 = 60 secs / 60 misc / 24 hours */
-	int days_since_first = (int)(now - entry.first) / 86400;
+	const int days_since_first = (int)(now - entry->first) / 86400;
 	/* 3600 = 60 secs / 60 mins */
-	int hours_since_last = (int)(now - entry.last) / 3600;
+	const int hours_since_last = (int)(now - entry->last) / 3600;
 
 	int keep = 0;
 	int rank = calculate_base_credit(days_since_first, hours_since_last,
-		(int)entry.visits, &keep);
+		(int)entry->visits, &keep);
 
-	rank += calculate_bonus_credit(entry.match, query, &keep);
+	rank += calculate_bonus_credit(entry->match, query, &keep);
+	if (entry->keep == JUMP_ENTRY_PERMANENT)
+		rank += PERMANENT_BONUS;
+
 	UNUSED(keep);
 
 	if (reduce > 0) {
-		int tmp_rank = rank;
+		const int tmp_rank = rank;
 		rank = tmp_rank / reduce;
 	}
 
@@ -818,7 +823,7 @@ dirjump(char **args, const int mode)
 		return FUNC_FAILURE;
 	}
 
-	time_t now = time(NULL);
+	const time_t now = time(NULL);
 	int reduce = 0;
 
 	/* If the sum total of ranks is greater than max, divide each entry
@@ -858,7 +863,8 @@ dirjump(char **args, const int mode)
 	size_t i;
 	int j, match = 0;
 
-	struct jump_entry_t *entry = xnmalloc(jump_n + 1, sizeof(struct jump_entry_t));
+	struct jump_entry_t *entry =
+		xnmalloc(jump_n + 1, sizeof(struct jump_entry_t));
 
 	for (i = 1; args[i]; i++) {
 		/* 1) Using the first parameter, get a list of matches in the
@@ -868,7 +874,7 @@ dirjump(char **args, const int mode)
 		 * string to match only the LAST segment of the path, and if it ends
 		 * with a backslash instead, we want this query to match only the
 		 * FIRST segment of the path. */
-		int segment = mark_target_segment(args[i]);
+		const int segment = mark_target_segment(args[i]);
 
 		if (match == 0) {
 			j = (int)jump_n;
@@ -919,6 +925,7 @@ dirjump(char **args, const int mode)
 				entry[match].last = jump_db[j].last_visit;
 				entry[match].needle = needle;
 				entry[match].match = jump_db[j].path;
+				entry[match].keep = (size_t)jump_db[j].keep;
 				match++;
 			}
 		}
@@ -968,7 +975,7 @@ dirjump(char **args, const int mode)
 			continue;
 		}
 
-		int rank = rank_tmp_entry(entry[j], now, reduce, args[args_n]);
+		const int rank = rank_tmp_entry(&entry[j], now, reduce, args[args_n]);
 
 		if (rank > max) {
 			max = rank;
