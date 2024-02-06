@@ -931,10 +931,10 @@ list_files(void)
 		return;
 #endif /* RUN_CMD */
 
-	if (xargs.list_and_quit == 1)
-		goto LIST;
-
 	if (conf.autols == 1 && isatty(STDIN_FILENO)) {
+		if (xargs.list_and_quit == 1)
+			goto LIST;
+
 #ifdef LINUX_INOTIFY
 		/* Initialize inotify */
 		inotify_fd = inotify_init1(IN_NONBLOCK);
