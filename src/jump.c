@@ -65,7 +65,7 @@
 struct jump_entry_t {
 	char *match;
 	char *needle;
-	size_t keep; // CHECK PADDING!!!!
+	size_t keep;
 	size_t visits;
 #ifdef __arm__
 	char *pad0;
