@@ -931,6 +931,9 @@ list_files(void)
 		return;
 #endif /* RUN_CMD */
 
+	if (xargs.list_and_quit == 1)
+		goto LIST;
+
 	if (conf.autols == 1 && isatty(STDIN_FILENO)) {
 #ifdef LINUX_INOTIFY
 		/* Initialize inotify */
@@ -947,6 +950,7 @@ list_files(void)
 		}
 #endif /* LINUX_INOTIFY */
 
+LIST:
 		if (conf.colorize == 1 && xargs.eln_use_workspace_color == 1)
 			set_eln_color();
 

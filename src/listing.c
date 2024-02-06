@@ -627,6 +627,9 @@ run_pager(const int columns_n, int *reset_pager, filesn_t *i, size_t *counter)
 static void
 set_events_checker(void)
 {
+	if (xargs.list_and_quit == 1)
+		return;
+
 #if defined(LINUX_INOTIFY)
 	reset_inotify();
 
