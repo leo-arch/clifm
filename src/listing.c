@@ -415,7 +415,7 @@ print_dirhist_map(void)
 }
 
 #ifndef _NO_ICONS
-/* Set the icon field to the corresponding icon for FILE */
+/* Set the icon field to the corresponding icon for the file file_info[N].name */
 static int
 get_name_icon(const filesn_t n)
 {
@@ -438,8 +438,8 @@ get_name_icon(const filesn_t n)
 	return 0;
 }
 
-/* Set the icon field to the corresponding icon for DIR. If not found,
- * set the default icon. */
+/* Set the icon field to the corresponding icon for the directory
+ * file_info[N].name. If not found, set the default icon. */
 static void
 get_dir_icon(const filesn_t n)
 {

@@ -1588,7 +1588,7 @@ struct ext_t {
 	char  *value;
 	size_t len; /* Name length */
 	size_t value_len;
-//	size_t hash;
+	size_t hash;
 };
 extern struct ext_t *ext_colors;
 

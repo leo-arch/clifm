@@ -412,7 +412,7 @@ get_regfile_color(const char *filename, const struct stat *attr, size_t *is_ext)
 	char *color = get_file_color(filename, attr);
 	if (color == ee_c || color == ex_c || color == su_c || color == sg_c
 	|| color == ca_c)
-		return color ? color : fi_c;
+		return color;
 
 	char *ext = check_ext == 1 ? strrchr(filename, '.') : (char *)NULL;
 	if (!ext)
@@ -442,8 +442,8 @@ get_dir_color(const char *filename, const mode_t mode, const nlink_t links,
 	const filesn_t count)
 {
 	char *color = (char *)NULL;
-	uint8_t sticky = 0;
-	uint8_t is_oth_w = 0;
+	int sticky = 0;
+	int is_oth_w = 0;
 	if (mode & S_ISVTX)
 		sticky = 1;
 
@@ -683,36 +683,25 @@ END:
 }
 #endif /* !CLIFM_SUCKLESS */
 
-/* Look for the hash HASH in the hash table.
- * Return a pointer to the corresponding color if found or NULL.
- *
- * NOTE: We check all available hashes to avoid conflicts.
- * The hash table is built on user supplied data (color scheme file)
- * so that we cannot assume in advance that there will be no conflicts.
- * However, at least with the color schemes provided by default, we do know
- * there are no conflicts. In this latter case we can return the first matching
- * entry, which is a performace improvement. But we cannot assume the user
- * is using one of the provided themes and that it hasn't been modified. */
-/*
+/* Look for the hash HASH in the hash table for file name extensions.
+ * Return a pointer to the corresponding color if found, or NULL. */
 static char *
-check_ext_hash(const size_t hash, size_t *count)
+check_ext_hash(const size_t hash, size_t *val_len)
 {
-	char *p = (char *)NULL;
 	size_t i;
 	for (i = 0; i < ext_colors_n; i++) {
 		if (!ext_colors[i].name || !ext_colors[i].value
 		|| hash != ext_colors[i].hash)
 			continue;
 
-//		(*count)++;
-//		return ext_colors[i].value; // No conflicts check: faster, but might fail
+		if (val_len)
+			*val_len = ext_colors[i].value_len;
 
-		p = ext_colors[i].value;
-		(*count)++;
+		return ext_colors[i].value;
 	}
 
-	return p;
-} */
+	return (char *)NULL;
+}
 
 
 /* Return the color code associated to the file extension EXT, updating
@@ -769,24 +758,20 @@ check_ext_string(const char *ext, size_t *val_len)
 
 /* Returns a pointer to the corresponding color code for the file
  * extension EXT (updating VAL_LEN to the length of this code).
- * The hash table is checked first, and, in case of a conflict, a regular
- * string comparison is performed to resolve it. */
+ * The hash table is checked first if we have no hashes conflict. Otherwise,
+ * a regular string comparison is performed to resolve it. */
 char *
 get_ext_color(const char *ext, size_t *val_len)
 {
 	if (!ext || !*ext || !*(++ext) || ext_colors_n == 0)
 		return (char *)NULL;
 
-/*	size_t count = 0;
-	char *ret = check_ext_hash(hashme(ext, 0), &count);
-	if (count == 0)
-		return (char *)NULL;
+	/* If the hash field at index 0 of the ext_colors struct is set to zero,
+	 * we have hash conflicts, in which case we fallback to regular string
+	 * comparison. */
+	if (ext_colors[0].hash != 0)
+		return check_ext_hash(hashme(ext, 0), val_len);
 
-	if (ret && count == 1)
-		return ret; */
-
-	/* We have a conflict: a single hash is used for two or more extensions.
-	 * Let's try to match the extension name itself. */
 	return check_ext_string(ext, val_len);
 }
 
@@ -1555,7 +1540,7 @@ store_extension_line(const char *line)
 	ext_colors[ext_colors_n].value = xnmalloc(elen, sizeof(char));
 	snprintf(ext_colors[ext_colors_n].value, elen, "0;%s", code);
 	ext_colors[ext_colors_n].value_len = elen - 1;
-//	ext_color[ext_colors_n].hash = hashme(line, 0);
+	ext_colors[ext_colors_n].hash = hashme(line, 0);
 
 	if (xargs.no_bold == 1)
 		remove_bold_attr(ext_colors[ext_colors_n].value);
@@ -1577,6 +1562,25 @@ free_extension_colors(void)
 	free(ext_colors);
 	ext_colors = (struct ext_t *)NULL;
 	ext_colors_n = 0;
+}
+
+/* Make sure hashes for file name extensions do not conflict.
+ * If they do, the hash field at index zero (of the ext_colors struct) is set
+ * to 0 to indicate that we have hash conflicts (in which case regular string
+ * comparison must be used instead). */
+static void
+check_ext_color_hash_conflicts(void)
+{
+	size_t i, j;
+
+	for (i = 0; i < ext_colors_n; i++) {
+		for (j = 0; j < ext_colors_n; j++) {
+			if (i != j && ext_colors[i].hash == ext_colors[j].hash) {
+				ext_colors[0].hash = 0;
+				return;
+			}
+		}
+	}
 }
 
 static void
@@ -1630,6 +1634,9 @@ split_extension_colors(char *extcolors)
 		ext_colors[ext_colors_n].value = (char *)NULL;
 		ext_colors[ext_colors_n].len = 0;
 		ext_colors[ext_colors_n].value_len = 0;
+
+		ext_colors[ext_colors_n].hash = 0;
+		check_ext_color_hash_conflicts();
 	}
 }
 

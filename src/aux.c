@@ -85,7 +85,7 @@ xregerror(const char *cmd_name, const char *pattern, const int errcode,
  * Based on the sdbm algorithm (see http://www.cse.yorku.ca/~oz/hash.html),
  * released under the public-domain. */
 size_t
-hashme(const char *str, const int case_sensitive) {
+hashme(const char *restrict str, const int case_sensitive) {
 	size_t hash = 0;
 
 	/* Two while loops, so that we don't need to check CASE_SENSITIVE for
