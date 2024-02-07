@@ -2701,7 +2701,11 @@ colors_list(char *ent, const int eln, const int pad, const int new_line)
 		rem_slash = 1;
 	}
 
-	const int ret = lstat(p, &attr);
+	char vt_file[PATH_MAX + 1]; *vt_file = '\0';
+	if (virtual_dir == 1 && is_file_in_cwd(p))
+		xreadlink(XAT_FDCWD, p, vt_file, sizeof(vt_file));
+
+	const int ret = lstat(*vt_file ? vt_file : p, &attr);
 	if (rem_slash == 1)
 		p[len - 1] = '/';
 

@@ -424,6 +424,10 @@ get_entry_color(char *entry, const char *norm_prefix)
 	if (conf.colorize == 0)
 		return (char *)NULL;
 
+	char vt_file[PATH_MAX + 1]; *vt_file = '\0';
+	if (virtual_dir == 1 && is_file_in_cwd(entry))
+		xreadlink(XAT_FDCWD, entry, vt_file, sizeof(vt_file));
+
 	struct stat attr;
 
 	/* Normalize URI file scheme */
@@ -431,9 +435,9 @@ get_entry_color(char *entry, const char *norm_prefix)
 	if (len > FILE_URI_PREFIX_LEN && IS_FILE_URI(entry))
 		entry += FILE_URI_PREFIX_LEN;
 
-	if (norm_prefix) {
+	if (norm_prefix && !*vt_file) {
 		char *s = strrchr(entry, '/');
-		char tmp[PATH_MAX];
+		char tmp[PATH_MAX + 1];
 		snprintf(tmp, sizeof(tmp), "%s/%s", norm_prefix,
 			(s && *(++s)) ? s : entry);
 		if (lstat(tmp, &attr) != -1)
@@ -446,8 +450,9 @@ get_entry_color(char *entry, const char *norm_prefix)
 	if ( (*entry == '/' || (*entry == '.' && entry[1] == '/') )
 	&& (t == TCMP_PATH || t == TCMP_SEL || t == TCMP_DESEL
 	|| t == TCMP_BM_PATHS || t == TCMP_DIRHIST || t == TCMP_JUMP) ) {
-		if (lstat(entry, &attr) != -1)
-			return fzftab_color(entry, &attr);
+		char *f = *vt_file ? vt_file : entry;
+		if (lstat(f, &attr) != -1)
+			return fzftab_color(f, &attr);
 		return uf_c;
 	}
 
@@ -465,10 +470,16 @@ get_entry_color(char *entry, const char *norm_prefix)
 	}
 
 	if (t == TCMP_PATH || t == TCMP_RANGES) {
-		char tmp[PATH_MAX];
-		snprintf(tmp, sizeof(tmp), "%s/%s", workspaces[cur_ws].path, entry);
-		if (lstat(tmp, &attr) != -1)
-			return fzftab_color(tmp, &attr);
+		if (*vt_file) {
+			if (lstat(vt_file, &attr) != -1)
+				return fzftab_color(vt_file, &attr);
+		} else {
+			char tmp[PATH_MAX + 1];
+			snprintf(tmp, sizeof(tmp), "%s/%s", workspaces[cur_ws].path, entry);
+			if (lstat(tmp, &attr) != -1)
+				return fzftab_color(tmp, &attr);
+		}
+
 		return uf_c;
 	}
 
