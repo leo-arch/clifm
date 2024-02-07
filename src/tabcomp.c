@@ -485,8 +485,9 @@ get_entry_color(char *entry, const char *norm_prefix)
 
 	if (t == TCMP_UNTRASH || t == TCMP_TRASHDEL || t == TCMP_GLOB
 	|| t == TCMP_TAGS_F || t == TCMP_FILE_TYPES_FILES) {
-		if (lstat(entry, &attr) != -1)
-			return fzftab_color(entry, &attr);
+		char *f = (t == TCMP_GLOB && *vt_file) ? vt_file : entry;
+		if (lstat(f, &attr) != -1)
+			return fzftab_color(f, &attr);
 		return uf_c;
 	}
 
