@@ -46,6 +46,7 @@ set(BIN "clifm")
 set(_MANDIR "share/man/man1")
 set(_BASHDIR "share/bash-completion/completions")
 set(_ZSHDIR "share/zsh/site-functions")
+set(_FISHDIR "share/fish/vendor_completions.d")
 set(_DESKTOPPREFIX "share/applications")
 set(_DESKTOPICONPREFIX "share/icons/hicolor/scalable/apps")
 set(_PROG_DATADIR "share/${BIN}")
@@ -84,7 +85,7 @@ install(DIRECTORY misc/tools DESTINATION "${_PROG_DATADIR}"
 
 install(FILES plugins/BFG.cfg plugins/kbgen.c plugins/plugins-helper DESTINATION "${_PLUGINSDIR}")
 
-install(FILES misc/actions.clifm misc/keybindings.clifm misc/mimelist.clifm misc/nets.clifm misc/prompts.clifm misc/readline.clifm misc/clifmrc DESTINATION "${_PROG_DATADIR}")
+install(FILES misc/actions.clifm misc/keybindings.clifm misc/mimelist.clifm misc/preview.clifm misc/nets.clifm misc/prompts.clifm misc/readline.clifm misc/clifmrc DESTINATION "${_PROG_DATADIR}")
 
 install(DIRECTORY misc/colors functions DESTINATION "${_PROG_DATADIR}")
 
@@ -99,3 +100,4 @@ install(FILES misc/manpage DESTINATION "${_MANDIR}" RENAME "${BIN}.1"
 
 install(FILES misc/completions.bash DESTINATION "${_BASHDIR}" RENAME "${BIN}")
 install(FILES misc/completions.zsh DESTINATION "${_ZSHDIR}" RENAME "_${BIN}")
+install(FILES misc/completions.fish DESTINATION "${_FISHDIR}" RENAME "${BIN}.fish")
