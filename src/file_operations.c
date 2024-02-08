@@ -53,17 +53,17 @@ struct rm_info {
 	char   *name;
 	nlink_t links;
 #if defined(__sun) || defined(__OpenBSD__) || defined(__DragonFly__) \
-|| defined(__NetBSD__)
+|| defined(__NetBSD__) || defined(__HAIKU__)
 	int     pad0;
-#endif /* __sun || __OpenBSD__ || __DragonFly__ || __NetBSD__ */
+#endif /* __sun || __OpenBSD__ || __DragonFly__ || __NetBSD__ || __HAIKU__ */
 	time_t  mtime;
 	ino_t   ino;
 	dev_t   dev;
 	int     dir;
 	int     exists;
-#if defined(__OpenBSD__) || defined(__DragonFly__)
+#if defined(__OpenBSD__) || defined(__DragonFly__) || defined(__HAIKU__)
 	int     pad1;
-#endif /* __OpenBSD__ || __DragonFly__ */
+#endif /* __OpenBSD__ || __DragonFly__ || __HAIKU__ */
 };
 
 static char *const unsafe_name_msgs[] = {
