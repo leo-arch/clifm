@@ -92,6 +92,10 @@
 # s|S = size (either human readable (s) or bytes (S))
 # x = extended attributes/capabilities/ACLs (marked as '@')
 # A single dash ("-") disables all fields
+#
+# Note that, exception made of 'x', fields will be printed in the order
+# specified here.
+#
 # Example: print only permissions (numeric) and size (human readable):
 #PropFields="ns"
 ;PropFields="xfpims"
