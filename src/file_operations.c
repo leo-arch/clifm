@@ -52,9 +52,10 @@
 struct rm_info {
 	char   *name;
 	nlink_t links;
-#if defined(__sun) || defined(__OpenBSD__) || defined(__DragonFly__)
+#if defined(__sun) || defined(__OpenBSD__) || defined(__DragonFly__) \
+|| defined(__NetBSD__)
 	int     pad0;
-#endif /* __sun || __OpenBSD__ || __DragonFly__ */
+#endif /* __sun || __OpenBSD__ || __DragonFly__ || __NetBSD__ */
 	time_t  mtime;
 	ino_t   ino;
 	dev_t   dev;
