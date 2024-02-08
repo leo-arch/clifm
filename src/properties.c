@@ -2212,7 +2212,7 @@ construct_timestamp(char *time_str, const time_t ltime)
 		} else {
 			/* If not user defined, let's mimic ls(1) behavior: a file is
 			 * considered recent if it is within the past six months. */
-			const uint8_t recent = age >= 0 && age < 14515200LL;
+			const int recent = age >= 0 && age < 14515200LL;
 			/* 14515200 == 6*4*7*24*60*60 == six months */
 			const char *tfmt = conf.time_str ? conf.time_str :
 				(recent ? DEF_TIME_STYLE_RECENT : DEF_TIME_STYLE_OLDER);
@@ -2231,7 +2231,7 @@ construct_timestamp(char *time_str, const time_t ltime)
 		xstrsncpy(file_time, invalid_time_str, sizeof(file_time));
 	}
 
-	snprintf(time_str, TIME_STR_LEN, "%s%s%s ", cdate, *file_time
+	snprintf(time_str, TIME_STR_LEN, "%s%s%s", cdate, *file_time
 		? file_time : "?", df_c);
 }
 
@@ -2251,7 +2251,7 @@ construct_id_field(const struct fileinfo *props, char *id_str,
 	if (u + g < (int)ug_max)
 		ug_pad = (int)ug_max - u;
 
-	snprintf(id_str, ID_STR_LEN, "%s%u:%-*u%s ", id_color, props->uid,
+	snprintf(id_str, ID_STR_LEN, "%s%u:%-*u%s", id_color, props->uid,
 		ug_pad, props->gid, df_c);
 }
 
@@ -2266,10 +2266,10 @@ construct_files_counter(const struct fileinfo *props, char *fc_str,
 	}
 
 	if (props->dir == 1 && props->filesn > 0) {
-		snprintf(fc_str, FC_STR_LEN, "%s%*d%s ", fc_c, (int)fc_max,
+		snprintf(fc_str, FC_STR_LEN, "%s%*d%s", fc_c, (int)fc_max,
 			(int)props->filesn, df_c);
 	} else {
-		snprintf(fc_str, FC_STR_LEN, "%s%*c%s ", dn_c, (int)fc_max,
+		snprintf(fc_str, FC_STR_LEN, "%s%*c%s", dn_c, (int)fc_max,
 			'-', df_c);
 	}
 }
@@ -2343,7 +2343,7 @@ print_entry_props(const struct fileinfo *props, const struct maxes_t *maxes,
 	char ino_str[INO_STR_LEN];
 	*ino_str = '\0';
 	if (prop_fields.inode == 1) {
-		snprintf(ino_str, INO_STR_LEN, "\x1b[0m%s%*ju %s", tx_c,
+		snprintf(ino_str, INO_STR_LEN, "\x1b[0m%s%*ju%s", tx_c,
 			(int)maxes->inode, (uintmax_t)props->inode, df_c);
 	}
 
@@ -2360,32 +2360,25 @@ print_entry_props(const struct fileinfo *props, const struct maxes_t *maxes,
 	*xattr_str = have_xattr == 1 ? (props->xattr == 1 ? XATTR_CHAR : ' ') : 0;
 
 	/* Print stuff */
-
-/* This is almost as fast as the printf version below. However, it allows us
- * to print fields in a different order. */
-/*	if (prop_fields.counter != 0) fputs(fc_str, stdout);
-	if (prop_fields.inode == 1) fputs(ino_str, stdout);
-	if (prop_fields.perm != 0) fputs(perm_str, stdout);
-	if (*xattr_str) putchar(*xattr_str); putchar(' ');
-	if (prop_fields.ids == 1) fputs(id_str, stdout);
-	if (prop_fields.time != 0) fputs(time_str, stdout);
-	if (prop_fields.size != 0) puts(size_str); */
-
-	printf("%s"    // Files counter for dirs
-		   "%s"    // Inode
-		   "%s"    // Permissions
-		   "%s "   // Extended attributes (@)
-		   "%s"    // User and group ID
-		   "%s"    // Time
-		   "%s\n", // Size / device info
-
-		prop_fields.counter != 0 ? fc_str : "",
-		prop_fields.inode == 1 ? ino_str : "",
-		prop_fields.perm != 0 ? perm_str : "",
-		xattr_str,
-		prop_fields.ids == 1 ? id_str : "",
-		prop_fields.time != 0 ? time_str : "",
-		prop_fields.size != 0 ? size_str : "");
+	for (size_t i = 0; prop_fields_str[i] && i < PROP_FIELDS_SIZE; i++) {
+		int print_space = prop_fields_str[i + 1] ? 1 : 0;
+		switch(prop_fields_str[i]) {
+		case 'f': fputs(fc_str, stdout); break;
+		case 'd': fputs(ino_str, stdout); break;
+		case 'p': /* fallthrough */
+		case 'n': fputs(perm_str, stdout); fputs(xattr_str, stdout); break;
+		case 'i': fputs(id_str, stdout); break;
+		case 'a': /* fallthrough */
+		case 'm': /* fallthrough */
+		case 'c': fputs(time_str, stdout); break;
+		case 's': /* fallthrough */
+		case 'S': fputs(size_str, stdout); break;
+		default: print_space = 0; break;
+		}
+		if (print_space == 1)
+			putchar(' ');
+	}
+	putchar('\n');
 
 	return FUNC_SUCCESS;
 }

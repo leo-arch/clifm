@@ -1268,11 +1268,9 @@ struct devino_t {
 	ino_t ino;
 	dev_t dev; /* 4 bytes on OpenBSD, DragonFly, and Haiku */
 	char mark;
-	char pad0;
-	char pad1;
-	char pad2;
+	char pad0[3];
 #if !defined(__OpenBSD__) && !defined(__DragonFly__) && !defined(__HAIKU__)
-	int pad3;
+	int pad1;
 #endif /* !__OpenBSD__ && !__DragonFly__ && !__HAIKU__ */
 };
 
