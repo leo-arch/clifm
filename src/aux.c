@@ -970,13 +970,13 @@ construct_human_size(const off_t size)
 	}
 
 	int x = (int)s;
-	/* If (s == 0 || s - (float)x) == 0, then S has no reminder (zero)
+	/* If (s == 0 || s - (float)x == 0), then S has no reminder (zero)
 	 * We don't want to print the reminder when it is zero.
 	 *
 	 * R: Ronnabyte, Q: Quettabyte. It's highly unlikely to have files of
 	 * such huge sizes (and even less) in the near future, but anyway... */
 	static const char *const u = "BKMGTPEZYRQ";
-	snprintf(str, MAX_UNIT_SIZE, "%.*f%c%c",
+	snprintf(str, sizeof(str), "%.*f%c%c",
 		(s == 0.00f || s - (float)x == 0.00f) ? 0 : 2,
 		(double)s,
 		u[n],
