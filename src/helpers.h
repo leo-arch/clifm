@@ -470,6 +470,9 @@ extern time_t curdir_mtime;
 #define MAX_TRASH     INT_MAX
 #define MAX_BOOKMARKS INT_MAX
 
+/* Max length of a file size in human format */
+#define MAX_HUMAN_SIZE 10 /* "1023.99YB\0" */
+
 /* The following flags are used via an integer (FLAGS). If an integer has
  * 4 bytes, then we can use a total of 32 flags (0-31)
  * 4 * 8 == 32 bits == (1 << 31)
@@ -1212,7 +1215,9 @@ struct fileinfo {
 	char *icon;
 	char *icon_color;
 	char *name;
+	char *human_size;
 	filesn_t filesn;
+	size_t human_size_len;
 	size_t len;   /* File name len (columns needed to display file name) */
 	size_t bytes; /* Bytes consumed by file name */
 #if defined(__arm__) && !defined(__ANDROID__)
@@ -1256,6 +1261,7 @@ struct maxes_t {
 	int files_counter;
 	int name;
 	int size;
+	int size_human;
 };
 
 struct devino_t {

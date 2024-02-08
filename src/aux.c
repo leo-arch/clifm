@@ -953,8 +953,7 @@ get_cmd_path(const char *cmd)
 char *
 construct_human_size(const off_t size)
 {
-	/* MAX_UNIT_SIZE == 10 == "1023.99YB\0" */
-	static char str[MAX_UNIT_SIZE];
+	static char str[MAX_HUMAN_SIZE];
 
 	const float base = xargs.si == 1 ? 1000 : 1024;
 	static float mult_factor = 0;
@@ -969,7 +968,7 @@ construct_human_size(const off_t size)
 		++n;
 	}
 
-	int x = (int)s;
+	const int x = (int)s;
 	/* If (s == 0 || s - (float)x == 0), then S has no reminder (zero)
 	 * We don't want to print the reminder when it is zero.
 	 *

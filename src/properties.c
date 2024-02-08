@@ -161,8 +161,8 @@
 
 #define TIME_STR_LEN (MAX_TIME_STR + (MAX_COLOR * 2) + 2) /* construct_timestamp() */
 
-/* construct_human_size() returns a string of at most MAX_UNIT_SIZE chars (see aux.h) */
-#define SIZE_STR_LEN (MAX_UNIT_SIZE + (MAX_COLOR * 3) + 1) /* construct_file_size() */
+/* construct_human_size() returns a string of at most MAX_HUMAN_SIZE chars (helpers.h) */
+#define SIZE_STR_LEN (MAX_HUMAN_SIZE + (MAX_COLOR * 3) + 1) /* construct_file_size() */
 
 /* Let's suppose that IDs go up to 999 billions (12 digits)
  * * 2 IDs + pad (at most 12 more digits) == 36
@@ -1215,42 +1215,6 @@ get_file_type_and_color(const char *filename, const struct stat *attr,
 	return color;
 }
 
-/* Return 1 if FILE has some ACL property and zero if none
- * See: https://man7.org/tlpi/code/online/diff/acl/acl_view.c.html
- * On Linux, use acl_extended_file_nofollow(3) instead. */
-/*
-static int
-is_acl(const char *file)
-{
-	if (!file || !*file)
-		return 0;
-
-#ifndef HAVE_ACL
-	return 0;
-#else
-	acl_t acl;
-	acl = acl_get_file(file, ACL_TYPE_ACCESS);
-
-	if (!acl)
-		return 0;
-
-	acl_entry_t entry;
-	int entryid, num = 0;
-
-	for (entryid = ACL_FIRST_ENTRY;; entryid = ACL_NEXT_ENTRY) {
-		if (acl_get_entry(acl, entryid, &entry) != 1 || num > 3)
-			break;
-		num++;
-	}
-
-	acl_free(acl);
-
-	// If num > 3 we have something else besides owner, group, and others,
-	// that is, we have at least one ACL property.
-	return (num > 3 ? 1 : 0);
-#endif // !HAVE_ACL
-} */
-
 static void
 print_file_perms(const struct stat *attr, const char file_type_char,
 	const char *file_type_char_color, const int xattr)
@@ -2172,20 +2136,22 @@ construct_file_size(const struct fileinfo *props, char *size_str,
 
 	if (prop_fields.size != PROP_SIZE_HUMAN) {
 		snprintf(size_str, SIZE_STR_LEN, "%s%*jd%s%c", csize,
-			(int)size_max, (intmax_t)size, df_c,
+			size_max, (intmax_t)size, df_c,
 			props->du_status != 0 ? DU_ERR_CHAR : 0);
 		return file_perm;
 	}
-
-	char *human_size = construct_human_size(size);
 
 	char err[sizeof(xf_c) + 6]; *err = '\0';
 	if (props->dir == 1 && conf.full_dir_size == 1
 	&& props->du_status != 0)
 		snprintf(err, sizeof(err), "%s%c%s", xf_c, DU_ERR_CHAR, NC);
 
-	snprintf(size_str, SIZE_STR_LEN, "%s%s%s%s",
-		err, csize, human_size ? human_size : "?", df_c);
+	snprintf(size_str, SIZE_STR_LEN, "%s%s%*s%s",
+		err, csize,
+		/* In case of du error, substract from the padding (size_max) the
+		 * space used by the error character ('!'). */
+		(*err && size_max > 0) ? size_max - 1 : size_max,
+		props->human_size ? props->human_size : "?", df_c);
 
 	return file_perm;
 }
@@ -2367,7 +2333,8 @@ print_entry_props(const struct fileinfo *props, const struct maxes_t *maxes,
 	/* size_str is either file size or "major,minor" IDs in case of special
 	 * files (char and block devices). */
 	char size_str[SIZE_STR_LEN];
-	const int file_perm = construct_file_size(props, size_str, maxes->size);
+	const int file_perm = construct_file_size(props, size_str,
+		prop_fields.size == PROP_SIZE_BYTES ? maxes->size : maxes->size_human);
 
 	const char *id_color = (file_perm == 1 && conf.colorize == 1) ? dg_c : df_c;
 	char id_str[ID_STR_LEN];

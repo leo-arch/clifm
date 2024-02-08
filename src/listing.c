@@ -831,6 +831,10 @@ compute_maxes(void)
 			t = DIGINUM_BIG(file_info[i].size);
 			if (t > maxes.size)
 				maxes.size = t;
+		} else { /* PROP_SIZE_HUMAN */
+			t = (int)file_info[i].human_size_len;
+			if (t > maxes.size_human)
+				maxes.size_human = t;
 		}
 
 		if (prop_fields.ids == 1) {
@@ -1869,6 +1873,55 @@ init_fileinfo(const filesn_t n)
 	file_info[n].linkn = 1;
 }
 
+/* Construct human readable sizes for all files in the current directory
+ * and store them in the human_size field of the file_info struct. The length
+ * of each human size is stored in the human_size_len field of the same struct. */
+static void
+construct_human_sizes(void)
+{
+	const off_t ibase = xargs.si == 1 ? 1000 : 1024;
+	const float base = (float)ibase;
+	static const char *const u = "BKMGTPEZYRQ";
+	static float mult_factor = 0;
+	if (mult_factor == 0)
+		mult_factor = 1.0f / base;
+
+	filesn_t i = files;
+	while (--i >= 0) {
+		file_info[i].human_size = xnmalloc(MAX_HUMAN_SIZE, sizeof(char));
+
+		if (file_info[i].size < ibase) {
+			const int ret = snprintf(file_info[i].human_size,
+				MAX_HUMAN_SIZE, "%jdB", (intmax_t)file_info[i].size);
+			file_info[i].human_size_len = ret > 0 ? (size_t)ret : 0;
+			continue;
+		}
+
+		size_t n = 0;
+		float s = (float)file_info[i].size;
+
+		while (s >= base) {
+			s = s * mult_factor; /* == (s = s / base), but faster */
+			++n;
+		}
+
+		const int x = (int)s;
+		/* If (s == 0 || s - (float)x == 0), then S has no reminder (zero)
+		 * We don't want to print the reminder when it is zero.
+		 *
+		 * R: Ronnabyte, Q: Quettabyte. It's highly unlikely to have files of
+		 * such huge sizes (and even less) in the near future, but anyway... */
+		const int ret =
+			snprintf(file_info[i].human_size, MAX_HUMAN_SIZE, "%.*f%c%s",
+				(s == 0.00f || s - (float)x == 0.00f) ? 0 : 2,
+				(double)s,
+				u[n],
+				(u[n] != 'B' && xargs.si == 1) ? "B" : "");
+
+		file_info[i].human_size_len = ret > 0 ? (size_t)ret : 0;
+	}
+}
+
 /* List files in the current working directory (global variable 'path').
  * Unlike list_dir(), however, this function uses no color and runs
  * neither stat() nor count_dir(), which makes it quite faster. Return
@@ -2132,6 +2185,8 @@ list_dir_light(void)
 				 * ######################## */
 
 	if (conf.long_view == 1) {
+		if (prop_fields.size == PROP_SIZE_HUMAN)
+			construct_human_sizes();
 		print_long_mode(&counter, &reset_pager, pad, have_xattr);
 		goto END;
 	}
@@ -2862,6 +2917,8 @@ list_dir(void)
 				 * ######################## */
 
 	if (conf.long_view == 1) {
+		if (prop_fields.size == PROP_SIZE_HUMAN)
+			construct_human_sizes();
 		print_long_mode(&counter, &reset_pager, pad, have_xattr);
 		goto END;
 	}
@@ -2909,8 +2966,8 @@ free_dirlist(void)
 	filesn_t i = files;
 	while (--i >= 0) {
 		free(file_info[i].name);
-		if (file_info[i].ext_color)
-			free(file_info[i].ext_color);
+		free(file_info[i].ext_color);
+		free(file_info[i].human_size);
 	}
 
 	free(file_info);

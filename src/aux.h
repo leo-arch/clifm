@@ -34,9 +34,6 @@
 # endif /* RL_READLINE_VERSION >= 0x0801 */
 #endif /* RL_READLINE_VERSION */
 
-/* Max size type length for the value returned by get_size_type() */
-#define MAX_UNIT_SIZE 10 /* "1023.99YB\0" */
-
 __BEGIN_DECLS
 
 char *abbreviate_file_name(char *str);
