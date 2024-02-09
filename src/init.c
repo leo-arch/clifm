@@ -25,12 +25,7 @@
 #include "helpers.h"
 
 #include <errno.h>
-
-#if defined(__linux__) || defined(__HAIKU__) || defined(__sun) \
-|| defined(__CYGWIN__)
-# include <grp.h> /* getgrouplist(3) */
-#endif /* __linux__ || __HAIKU__ || __sun || __CYGWIN__ */
-
+#include <grp.h> /* getgrouplist(), getgrent(), setgrent(), endgrent() */
 #include <pwd.h>
 #include <signal.h>
 #include <stdio.h>
