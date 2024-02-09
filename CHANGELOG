@@ -1,3 +1,49 @@
+1.17 (Lechuck) - Feb 9, 2024
+
+BUG FIXES
+* When quitting via a keybinding, clifm breaks pasting into the terminal from the clipboard.
+* Files not colored by extension in the 'trash list' screen.
+* $COLUMNS and $LINES not set in 'clifmimg' script if running with '--preview'.
+* "ow dir/<TAB>" inserts space char instead of listing subsdirs in dir.
+* "ow FILE APP" fails with "Key has expired" when APP does not exist.
+* No error message when using a custom resource opener.
+* Opening a file named 'config' (in the CWD) instead of running the command 'config'.
+* Segfault when bleach temp file is removed in the middle of the operation.
+* 'bl sel' command creates broken symbolic links when directory in path contains spaces.
+* Bookmarks named "q" or "quit" cannot be opened in the bookmarks screen (these names are now disallowed).
+* Segfault when processing more than 32 quoted words in the command line.
+* Expanding quoted ELNs for external commands.
+* Underlined color attribute for non-existent bookarmks takes files list after bookmarks screen.
+* Cannot import aliases from file name containing spaces.
+* Success exit code (0) when temp file changed on disk while bulk renaming/removing.
+* Cannot remove directories from the trash can.
+* 'md' sometimes fails as 'new'.
+* Success exit code when 'new' fails to create file.
+* Desel screen not working with incomplete ranges (no second field).
+* Virtual directories: directories, file type and MIME type expansions, file names containing spaces, selection, and globbing/regex not working. Also, cannot virtualize files names containing spaces and passed by ELN.
+* 'p/pp' cannot handle relative symbolic links.
+* 'l/le' do not allow creating relative symbolic links.
+* Some plugins not working with file names containing spaces.
+* Symlinks to directory shown when both 'only-dirs' and 'no-follow-symlinks' are enabled.
+* Wrong finder offset for paths containing spaces when running with --fuzzy-matching.
+* Quick-help not opened via pager (Solaris/Haiku).
+
+NEW FEATURES/IMPROVEMENTS
+* Add total size to 'trash list' screen.
+* Implement exit code 126 (as defined by POSIX: see exit(1p)).
+* Print amount of symbolic links created with the 'bl' command.
+* 'bl': Do not ask for links suffix: use the original filename (plus integer suffix to make it unique).
+* Bookmarks screen: Allow entering bookmark names containing spaces without using backslashes.
+* Allow bookmarking the same path multiple times.
+* Make cd-on-quit work with plain 'q' command. 'Q' (uppercase) command is deprecated.
+* Confirmation dialog for 'history clear'.
+* Confirmation dialog when removing files from trash.
+* Autocommand files ('.cfm.in' and '.cfm.out') won't be read unless 'ReadAutocmdFiles' is set to 'true' in the main config file.
+* Hardened autocommand files: They will be read only provided they are: non-empty regular files of at most PATH_MAX bytes, and no NUL byte is contained in them (to minimize the chances of executing random content from a binary file).
+* Allow marking specific jump entries as permanent. Consult the manpage for more information.
+* Properly right pad human sizes in long view.
+* Allow properties fields order customization in long view mode via PropFields.
+
 1.16 (Big Whoop) - Jan 9, 2024
 
 BUG FIXES
