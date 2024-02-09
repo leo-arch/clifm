@@ -831,7 +831,7 @@ compute_maxes(void)
 			t = DIGINUM_BIG(file_info[i].size);
 			if (t > maxes.size)
 				maxes.size = t;
-		} else { /* PROP_SIZE_HUMAN */
+		} else if (prop_fields.size == PROP_SIZE_HUMAN) {
 			t = (int)file_info[i].human_size_len;
 			if (t > maxes.size_human)
 				maxes.size_human = t;
