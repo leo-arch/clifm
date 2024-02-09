@@ -95,6 +95,7 @@ struct ext_t *ext_colors = (struct ext_t *)NULL;
 #ifdef LINUX_FSINFO
 struct ext_mnt_t *ext_mnt = (struct ext_mnt_t *)NULL;
 #endif /* LINUX_FSINFO */
+struct groups_t *sys_groups = (struct groups_t *)NULL;
 
 const struct sort_t sort_methods[] = {
     {"none", 0, 0},

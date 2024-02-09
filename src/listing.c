@@ -837,9 +837,13 @@ compute_maxes(void)
 				maxes.size_human = t;
 		}
 
-		if (prop_fields.ids == 1) {
+		if (prop_fields.ids == PROP_ID_NUM) {
 			t = DIGINUM(file_info[i].uid)
 				+ DIGINUM(file_info[i].gid);
+			if (t > maxes.ids)
+				maxes.ids = t;
+		} else if (prop_fields.ids == PROP_ID_NAME) {
+			t = (int)file_info[i].uid_i.namlen + (int)file_info[i].gid_i.namlen;
 			if (t > maxes.ids)
 				maxes.ids = t;
 		}
@@ -2314,6 +2318,24 @@ check_extra_file_types(mode_t *mode, const struct stat *a)
 }
 
 static inline void
+get_ids_info(const filesn_t n)
+{
+	if (!sys_groups)
+		return;
+
+	for (size_t i = 0; sys_groups[i].name; i++) {
+		if (file_info[n].uid == sys_groups[i].id) {
+			file_info[n].uid_i.name = sys_groups[i].name;
+			file_info[n].uid_i.namlen = sys_groups[i].namlen;
+		}
+		if (file_info[n].gid == sys_groups[i].id) {
+			file_info[n].gid_i.name = sys_groups[i].name;
+			file_info[n].gid_i.namlen = sys_groups[i].namlen;
+		}
+	}
+}
+
+static inline void
 load_file_gral_info(const struct stat *a, const filesn_t n)
 {
 	switch (a->st_mode & S_IFMT) {
@@ -2346,8 +2368,13 @@ load_file_gral_info(const struct stat *a, const filesn_t n)
 	file_info[n].inode = a->st_ino;
 	file_info[n].linkn = a->st_nlink;
 	file_info[n].size = FILE_TYPE_NON_ZERO_SIZE(a->st_mode) ? FILE_SIZE(*a) : 0;
+
 	file_info[n].uid = a->st_uid;
 	file_info[n].gid = a->st_gid;
+
+	if (conf.long_view == 1 && prop_fields.ids == PROP_ID_NAME)
+		get_ids_info(n);
+
 	file_info[n].mode = a->st_mode;
 
 #if defined(LINUX_FILE_XATTRS)

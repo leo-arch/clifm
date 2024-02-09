@@ -167,7 +167,8 @@
 /* Let's suppose that IDs go up to 999 billions (12 digits)
  * * 2 IDs + pad (at most 12 more digits) == 36
  * 39 == 36 + colon + space + NUL byte */
-#define ID_STR_LEN   ((MAX_COLOR * 2) + 39) /* construct_id_field() */
+//#define ID_STR_LEN   ((MAX_COLOR * 2) + 39) /* construct_id_field() */
+#define ID_STR_LEN   ((MAX_COLOR * 2) + (NAME_MAX * 2) + 2 + 4)
 
 /* Max inode number able to hold: 999 billions! Padding could be as long
  * as max inode lenght - 1 */
@@ -2239,20 +2240,30 @@ static void
 construct_id_field(const struct fileinfo *props, char *id_str,
 	const char *id_color, const int ug_max)
 {
-	if (prop_fields.ids != 1) {
+	if (prop_fields.ids == 0) {
 		*id_str = '\0';
 		return;
 	}
 
 	int ug_pad = 0, u = 0, g = 0;
+	char *dim = conf.colorize == 0 ? "" : "\x1b[2m";
 
 	/* Calculate right pad for UID:GID string */
-	u = DIGINUM(props->uid); g = DIGINUM(props->gid);
-	if (u + g < (int)ug_max)
-		ug_pad = (int)ug_max - u;
+	if (prop_fields.ids == PROP_ID_NUM) {
+		u = DIGINUM(props->uid); g = DIGINUM(props->gid);
+		if (u + g < (int)ug_max)
+			ug_pad = (int)ug_max - u;
 
-	snprintf(id_str, ID_STR_LEN, "%s%u:%-*u%s", id_color, props->uid,
-		ug_pad, props->gid, df_c);
+		snprintf(id_str, ID_STR_LEN, "%s%u %s%-*u%s", id_color,
+			props->uid, dim, ug_pad, props->gid, df_c);
+	} else {
+		u = (int)props->uid_i.namlen; g = (int)props->gid_i.namlen;
+		if (u + g < (int)ug_max)
+			ug_pad = (int)ug_max - u;
+
+		snprintf(id_str, ID_STR_LEN, "%s%s %s%-*s%s", id_color,
+			props->uid_i.name, dim, ug_pad, props->gid_i.name, df_c);
+	}
 }
 
 static void
@@ -2367,7 +2378,8 @@ print_entry_props(const struct fileinfo *props, const struct maxes_t *maxes,
 		case 'd': fputs(ino_str, stdout); break;
 		case 'p': /* fallthrough */
 		case 'n': fputs(perm_str, stdout); fputs(xattr_str, stdout); break;
-		case 'i': fputs(id_str, stdout); break;
+		case 'i': /* fallthrough */
+		case 'I': fputs(id_str, stdout); break;
 		case 'a': /* fallthrough */
 		case 'm': /* fallthrough */
 		case 'c': fputs(time_str, stdout); break;

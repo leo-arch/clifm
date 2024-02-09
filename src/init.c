@@ -287,6 +287,38 @@ init_conf_struct(void)
 	init_shades();
 }
 
+static void
+get_sysgroups(void)
+{
+	size_t n = 0;
+	while (getgrent())
+		n++;
+
+	if (n == 0) {
+		endgrent();
+		sys_groups = (struct groups_t *)NULL;
+		return;
+	}
+
+	setgrent();
+	sys_groups = xnmalloc(n + 1, sizeof(struct groups_t));
+
+	struct group *g;
+	n = 0;
+	while ((g = getgrent())) {
+		const size_t namlen = strlen(g->gr_name);
+		sys_groups[n].name = savestring(g->gr_name, namlen);
+		sys_groups[n].namlen = namlen;
+		sys_groups[n].id = g->gr_gid;
+		n++;
+	}
+
+	endgrent();
+	sys_groups[n].name = (char *)NULL;
+	sys_groups[n].namlen = 0;
+	sys_groups[n].id = 0;
+}
+
 void
 set_prop_fields(const char *line)
 {
@@ -309,7 +341,8 @@ set_prop_fields(const char *line)
 		case 'd': prop_fields.inode = 1; break;
 		case 'p': prop_fields.perm = PERM_SYMBOLIC; break;
 		case 'n': prop_fields.perm = PERM_NUMERIC; break;
-		case 'i': prop_fields.ids = 1; break;
+		case 'i': prop_fields.ids =  PROP_ID_NUM; break;
+		case 'I': prop_fields.ids =  PROP_ID_NAME; break;
 		case 'a': prop_fields.time = PROP_TIME_ACCESS; break;
 		case 'c': prop_fields.time = PROP_TIME_CHANGE; break;
 		case 'm': prop_fields.time = PROP_TIME_MOD; break;
@@ -337,8 +370,11 @@ set_prop_fields(const char *line)
 		prop_fields.len++;
 	if (prop_fields.inode != 0)
 		prop_fields.len++;
-	if (prop_fields.ids != 0)
+	if (prop_fields.ids != 0) {
+		if (prop_fields.ids == PROP_ID_NAME && !sys_groups)
+			get_sysgroups();
 		prop_fields.len++;
+	}
 	/* The length of the date field is calculated by check_time_str() */
 }
 

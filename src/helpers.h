@@ -787,6 +787,9 @@ extern time_t curdir_mtime;
 #define PERM_SYMBOLIC 1
 #define PERM_NUMERIC  2
 
+#define PROP_ID_NUM  1
+#define PROP_ID_NAME 2
+
 #define PROP_TIME_ACCESS 1
 #define PROP_TIME_MOD    2
 #define PROP_TIME_CHANGE 3
@@ -1207,6 +1210,15 @@ struct alias_t {
 
 extern struct alias_t *aliases;
 
+struct groups_t {
+	char *name;
+	size_t namlen;
+	gid_t id;
+	int pad0;
+};
+
+extern struct groups_t *sys_groups;
+
 /* Struct to store files information */
 struct fileinfo {
 	char *color;
@@ -1214,6 +1226,8 @@ struct fileinfo {
 	char *ext_name;
 	char *icon;
 	char *icon_color;
+	struct groups_t uid_i;
+	struct groups_t gid_i;
 	char *name;
 	char *human_size;
 	filesn_t filesn;

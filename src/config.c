@@ -1588,7 +1588,7 @@ create_main_config_file(char *file)
 # f = files counter for directories\n\
 # d = inode number\n\
 # p|n = permissions: either symbolic (p) or numeric/octal (n)\n\
-# i = user/group IDs (numeric)\n\
+# i|I = user/group IDs: as number (i) or name (I)\n\
 # a|m|c = either last (a)ccess, (m)odification or status (c)hange time\n\
 # s|S = size (either human readable (s) or bytes (S))\n\
 # x = extended attributes (marked as '@')\n\

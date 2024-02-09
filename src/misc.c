@@ -1279,6 +1279,12 @@ free_stuff(void)
 	free(alt_preview_file);
 	free(alt_profile);
 
+	if (sys_groups) {
+		for (i = 0; sys_groups[i].name; i++)
+			free(sys_groups[i].name);
+		free(sys_groups);
+	}
+
 #ifdef LINUX_FSINFO
 	if (ext_mnt) {
 		for (i = 0; ext_mnt[i].mnt_point; i++)
