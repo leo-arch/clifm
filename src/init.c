@@ -282,6 +282,68 @@ init_conf_struct(void)
 	init_shades();
 }
 
+#if defined(__DragonFly__)
+/* For some reason, getpwent(3) fails on DragonFly. As a last resort, let's
+ * parse the passwd database ourselves. */
+static void
+get_sysusers_alt(void)
+{
+	int fd = 0;
+	FILE *fp = open_fread("/etc/passwd", &fd);
+	if (!fp)
+		return;
+
+	char buf[PATH_MAX];
+	size_t n = 0;
+
+	while (fgets(buf, 2, fp) != NULL)
+		n++;
+	fseek(fp, 0L, SEEK_SET);
+
+	sys_users = xnmalloc(n + 1, sizeof(struct groups_t));
+	n = 0;
+
+	while (fgets(buf, sizeof(buf), fp) != NULL) {
+		char *p = strchr(buf, ':');
+		if (!p)
+			continue;
+
+		*p = '\0';
+		p++;
+
+		char *q = strchr(p, ':');
+		if (!q)
+			continue;
+
+		q++;
+		char *r = strchr(q, ':');
+		if (!r)
+			continue;
+		*r = '\0';
+
+		const int uid = atoi(q);
+		if (uid < 0)
+			continue;
+
+		sys_users[n].id = (gid_t)uid;
+		char *name = buf;
+		if (uid == 0)
+			name = "root";
+
+		const size_t namlen = strlen(name);
+		sys_users[n].name = savestring(name, namlen);
+		sys_users[n].namlen = namlen;
+		n++;
+	}
+
+	sys_users[n].name = (char *)NULL;
+	sys_users[n].namlen = 0;
+	sys_users[n].id = 0;
+
+	fclose(fp);
+}
+#endif /* __DragonFly__ */
+
 static void
 get_sysusers(void)
 {
@@ -296,6 +358,9 @@ get_sysusers(void)
 	if (n == 0) {
 		endpwent();
 		sys_users = (struct groups_t *)NULL;
+#if defined(__DragonFly__)
+		get_sysusers_alt();
+#endif /* __DragonFly__ */
 		return;
 	}
 

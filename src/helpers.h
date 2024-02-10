@@ -788,11 +788,11 @@ extern time_t curdir_mtime;
 #define PERM_NUMERIC  2
 
 #define PROP_ID_NUM  1
-#if defined(__ANDROID__) || defined(__DragonFly__)
+#if defined(__ANDROID__)
 # define PROP_ID_NAME PROP_ID_NUM
 #else
 # define PROP_ID_NAME 2
-#endif
+#endif /* __ANDROID__ */
 
 #define PROP_TIME_ACCESS 1
 #define PROP_TIME_MOD    2
