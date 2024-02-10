@@ -26,7 +26,7 @@
 
 #include <errno.h>
 #include <grp.h> /* getgrouplist(), getgrent(), setgrent(), endgrent() */
-#include <pwd.h>
+#include <pwd.h> /* getpwent(), setpwent(), endpwent() */
 #include <signal.h>
 #include <stdio.h>
 #include <string.h>
@@ -285,6 +285,10 @@ init_conf_struct(void)
 static void
 get_sysusers(void)
 {
+#if defined(__ANDROID__)
+	sys_users = (struct groups_t *)NULL;
+	return;
+#else
 	size_t n = 0;
 	while (getpwent())
 		n++;
@@ -301,8 +305,10 @@ get_sysusers(void)
 	struct passwd *p;
 	n = 0;
 	while ((p = getpwent())) {
-		const size_t namlen = strlen(p->pw_name);
-		sys_users[n].name = savestring(p->pw_name, namlen);
+		/* BSD has a second UID 0: "toor". Let's always use "root" for UID 0. */
+		const char *name = p->pw_uid == 0 ? "root" : p->pw_name;
+		const size_t namlen = strlen(name);
+		sys_users[n].name = savestring(name, namlen);
 		sys_users[n].namlen = namlen;
 		sys_users[n].id = p->pw_uid;
 		n++;
@@ -312,6 +318,7 @@ get_sysusers(void)
 	sys_users[n].name = (char *)NULL;
 	sys_users[n].namlen = 0;
 	sys_users[n].id = 0;
+#endif /* __ANDROID__ */
 }
 
 static void
