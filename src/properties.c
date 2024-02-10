@@ -2111,8 +2111,15 @@ construct_file_size(const struct fileinfo *props, char *size_str,
 
 	if ((S_ISCHR(props->mode) || S_ISBLK(props->mode))
 	&& xargs.disk_usage_analyzer != 1) {
+#if !defined(__DragonFly__)
 		snprintf(size_str, SIZE_STR_LEN, "%ju,%ju",
 			(uintmax_t)major(props->rdev), (uintmax_t)minor(props->rdev));
+#else
+		/* This is what ls(1) does on DragonFly. Otherwise, minor dev number
+		 * could be huge. */
+		snprintf(size_str, SIZE_STR_LEN, "%ju,0x%.8x",
+			(uintmax_t)major(props->rdev), minor(props->rdev));
+#endif /* !__DragonFly__ */
 		return file_perm;
 	}
 
@@ -2256,7 +2263,7 @@ construct_id_field(const struct fileinfo *props, char *id_str,
 
 		snprintf(id_str, ID_STR_LEN, "%s%u %s%-*u%s", id_color,
 			props->uid, dim, ug_pad, props->gid, df_c);
-	} else {
+	} else { /* PROPS_ID_NAME */
 		u = (int)props->uid_i.namlen; g = (int)props->gid_i.namlen;
 		if (u + g < (int)ug_max)
 			ug_pad = (int)ug_max - u;
