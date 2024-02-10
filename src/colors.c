@@ -1647,9 +1647,12 @@ set_default_colors_256(void)
 		split_extension_colors(DEF_EXT_COLORS_256);
 
 	/* If a definition for TEMP exists in the color scheme file, BK_C should
-	 * have been set to this color in store_defintions(). If not, set it here
-	 * to the default file color (fi_c). */
-	if (!*bk_c) xstrsncpy(bk_c, DEF_FI_C256, sizeof(bk_c));
+	 * have been set to this color in store_defintions(). If not, let's try
+	 * with EF_C (empty file color). Otherwise, fallback to the default
+	 * color for empty files (DEF_EF_C256). */
+	if (!*bk_c)
+		xstrsncpy(bk_c, *ef_c ? ef_c : DEF_EF_C256, sizeof(bk_c));
+
 
 	if (!*hb_c) xstrsncpy(hb_c, DEF_HB_C256, sizeof(hb_c));
 	if (!*hc_c) xstrsncpy(hc_c, DEF_HC_C256, sizeof(hc_c));
@@ -1805,9 +1808,11 @@ set_default_colors(void)
 		split_extension_colors(DEF_EXT_COLORS);
 
 	/* If a definition for TEMP exists in the color scheme file, BK_C should
-	 * have been set to this color in store_defintions(). If not, set it here
-	 * to the default file color (fi_c). */
-	if (!*bk_c) xstrsncpy(bk_c, DEF_FI_C, sizeof(bk_c));
+	 * have been set to this color in store_defintions(). If not, let's try
+	 * with EF_C (empty file color). Otherwise, fallback to the default
+	 * color for empty files (DEF_EF_C). */
+	if (!*bk_c)
+		xstrsncpy(bk_c, *ef_c ? ef_c : DEF_EF_C, sizeof(bk_c));
 
 	if (!*hb_c) xstrsncpy(hb_c, DEF_HB_C, sizeof(hb_c));
 	if (!*hc_c) xstrsncpy(hc_c, DEF_HC_C, sizeof(hc_c));

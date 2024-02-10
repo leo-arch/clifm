@@ -290,7 +290,7 @@ get_sysusers(void)
 	return;
 #else
 	/* It may happen (for example on DragonFly) that the passwd database
-	 * if not properly rewinded (for whatever reason). Let's make sure it is. */
+	 * is not properly rewound (for whatever reason). Let's make sure it is. */
 	setpwent();
 	size_t n = 0;
 	while (getpwent())
