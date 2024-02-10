@@ -1279,6 +1279,11 @@ free_stuff(void)
 	free(alt_preview_file);
 	free(alt_profile);
 
+	if (sys_users) {
+		for (i = 0; sys_users[i].name; i++)
+			free(sys_users[i].name);
+		free(sys_users);
+	}
 	if (sys_groups) {
 		for (i = 0; sys_groups[i].name; i++)
 			free(sys_groups[i].name);

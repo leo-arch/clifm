@@ -1217,6 +1217,7 @@ struct groups_t {
 	int pad0;
 };
 
+extern struct groups_t *sys_users;
 extern struct groups_t *sys_groups;
 
 /* Struct to store files information */

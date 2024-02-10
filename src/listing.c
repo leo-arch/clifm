@@ -2320,15 +2320,21 @@ check_extra_file_types(mode_t *mode, const struct stat *a)
 static inline void
 get_ids_info(const filesn_t n)
 {
-	if (!sys_groups)
-		return;
+	size_t i;
 
-	for (size_t i = 0; sys_groups[i].name; i++) {
-		if (file_info[n].uid == sys_groups[i].id) {
-			file_info[n].uid_i.name = sys_groups[i].name;
-			file_info[n].uid_i.namlen = sys_groups[i].namlen;
+	if (sys_users) {
+		for (i = 0; sys_users[i].name; i++) {
+			if (file_info[n].uid != sys_users[i].id)
+				continue;
+			file_info[n].uid_i.name = sys_users[i].name;
+			file_info[n].uid_i.namlen = sys_users[i].namlen;
 		}
-		if (file_info[n].gid == sys_groups[i].id) {
+	}
+
+	if (sys_groups) {
+		for (i = 0; sys_groups[i].name; i++) {
+			if (file_info[n].gid != sys_groups[i].id)
+				continue;
 			file_info[n].gid_i.name = sys_groups[i].name;
 			file_info[n].gid_i.namlen = sys_groups[i].namlen;
 		}

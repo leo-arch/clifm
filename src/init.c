@@ -283,6 +283,38 @@ init_conf_struct(void)
 }
 
 static void
+get_sysusers(void)
+{
+	size_t n = 0;
+	while (getpwent())
+		n++;
+
+	if (n == 0) {
+		endpwent();
+		sys_users = (struct groups_t *)NULL;
+		return;
+	}
+
+	setpwent();
+	sys_users = xnmalloc(n + 1, sizeof(struct groups_t));
+
+	struct passwd *p;
+	n = 0;
+	while ((p = getpwent())) {
+		const size_t namlen = strlen(p->pw_name);
+		sys_users[n].name = savestring(p->pw_name, namlen);
+		sys_users[n].namlen = namlen;
+		sys_users[n].id = p->pw_uid;
+		n++;
+	}
+
+	endpwent();
+	sys_users[n].name = (char *)NULL;
+	sys_users[n].namlen = 0;
+	sys_users[n].id = 0;
+}
+
+static void
 get_sysgroups(void)
 {
 	size_t n = 0;
@@ -366,8 +398,10 @@ set_prop_fields(const char *line)
 	if (prop_fields.inode != 0)
 		prop_fields.len++;
 	if (prop_fields.ids != 0) {
-		if (prop_fields.ids == PROP_ID_NAME && !sys_groups)
+		if (prop_fields.ids == PROP_ID_NAME && !sys_groups) {
+			get_sysusers();
 			get_sysgroups();
+		}
 		prop_fields.len++;
 	}
 	/* The length of the date field is calculated by check_time_str() */
