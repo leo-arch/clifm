@@ -2382,9 +2382,11 @@ print_entry_props(const struct fileinfo *props, const struct maxes_t *maxes,
 		int print_space = prop_fields_str[i + 1] ? 1 : 0;
 		switch(prop_fields_str[i]) {
 		case 'f': fputs(fc_str, stdout); break;
-		case 'd': fputs(ino_str, stdout); break;
+		case 'd': if (*ino_str) fputs(ino_str, stdout); break;
 		case 'p': /* fallthrough */
-		case 'n': fputs(perm_str, stdout); fputs(xattr_str, stdout); break;
+		case 'n': fputs(perm_str, stdout);
+			if (*xattr_str) fputs(xattr_str, stdout);
+			break;
 		case 'i': /* fallthrough */
 		case 'I': fputs(id_str, stdout); break;
 		case 'a': /* fallthrough */
