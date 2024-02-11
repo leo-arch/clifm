@@ -1246,7 +1246,6 @@ struct fileinfo {
 	time_t time;
 	ino_t inode;
 	off_t size;
-	dev_t rdev; /* 4 bytes in OpenBSD (used to calculate major and minor devs in long view) */
 	nlink_t linkn; /* 4 bytes in Solaris/OpenBSD */
 #if !defined(__sun)
 	int pad1;

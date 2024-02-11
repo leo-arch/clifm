@@ -774,7 +774,6 @@ set_long_attribs(const filesn_t n, const struct stat *attr)
 	file_info[n].uid = attr->st_uid;
 	file_info[n].gid = attr->st_gid;
 	file_info[n].mode = attr->st_mode;
-	file_info[n].rdev = attr->st_rdev;
 
 	switch (prop_fields.time) {
 	case PROP_TIME_ACCESS: file_info[n].ltime = (time_t)attr->st_atime; break;
