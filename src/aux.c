@@ -89,7 +89,7 @@ hashme(const char *restrict str, const int case_sensitive) {
 	size_t hash = 0;
 
 	/* Two while loops, so that we don't need to check CASE_SENSITIVE for
-	 * each character in STR */
+	 * each character in STR. */
 	if (case_sensitive == 1) {
 		while (*str) {
 			hash = (size_t)*str	+ (hash << 6) + (hash << 16) - hash;

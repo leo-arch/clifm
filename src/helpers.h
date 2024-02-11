@@ -1554,8 +1554,8 @@ extern struct termcaps_t term_caps;
 /* Data to be displayed in the properties string in long mode */
 struct props_t {
 	int counter; /* Files counter */
-	int perm; /* File permissions; either NUMERIC or SYMBOLIC */
-	int ids; /* User and group IDs */
+	int perm; /* File permissions: either NUMERIC or SYMBOLIC */
+	int ids; /* User and group IDs: either NUMBER or NAME */
 	int time; /* Time: either ACCESS, MOD, or CHANGE */
 	int size; /* File size: either HUMAN or BYTES */
 	int inode; /* File inode number */
@@ -1895,7 +1895,7 @@ extern char **environ;
 extern char
 	/* File types */
 	bd_c[MAX_COLOR], /* Block device */
-	bk_c[MAX_COLOR], /* Backup files (ending with tilde) */
+	bk_c[MAX_COLOR], /* Backup/temp files */
 	ca_c[MAX_COLOR], /* Cap file */
 	cd_c[MAX_COLOR], /* Char device */
 	ed_c[MAX_COLOR], /* Empty dir */
