@@ -328,6 +328,8 @@ get_sysusers(void)
 static void
 get_sysgroups(void)
 {
+	setgrent();
+
 	size_t n = 0;
 	while (getgrent())
 		n++;
