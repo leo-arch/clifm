@@ -2245,7 +2245,7 @@ construct_timestamp(char *time_str, const time_t ltime)
 
 static void
 construct_id_field(const struct fileinfo *props, char *id_str,
-	const char *id_color, const int ug_max)
+	const char *id_color, const struct maxes_t *maxes)
 {
 	if (prop_fields.ids == 0) {
 		*id_str = '\0';
@@ -2255,21 +2255,24 @@ construct_id_field(const struct fileinfo *props, char *id_str,
 	int ug_pad = 0, u = 0, g = 0;
 	char *dim = conf.colorize == 0 ? "" : "\x1b[2m";
 
-	/* Calculate right pad for UID:GID string */
 	if (prop_fields.ids == PROP_ID_NUM) {
 		u = DIGINUM(props->uid); g = DIGINUM(props->gid);
-		if (u + g < (int)ug_max)
-			ug_pad = (int)ug_max - u;
+		if (u + g < (int)maxes->ids)
+			ug_pad = (int)maxes->ids - u;
+		ug_pad -= (maxes->id_username - u);
 
-		snprintf(id_str, ID_STR_LEN, "%s%u %s%-*u%s", id_color,
-			props->uid, dim, ug_pad, props->gid, df_c);
+		snprintf(id_str, ID_STR_LEN, "%s%-*u %s%-*u%s", id_color,
+			maxes->id_username, props->uid, dim, ug_pad, props->gid, df_c);
+
 	} else { /* PROPS_ID_NAME */
 		u = (int)props->uid_i.namlen; g = (int)props->gid_i.namlen;
-		if (u + g < (int)ug_max)
-			ug_pad = (int)ug_max - u;
+		if (u + g < (int)maxes->ids)
+			ug_pad = (int)maxes->ids - u;
+		ug_pad -= (maxes->id_username - u);
 
-		snprintf(id_str, ID_STR_LEN, "%s%s %s%-*s%s", id_color,
-			props->uid_i.name, dim, ug_pad, props->gid_i.name, df_c);
+		snprintf(id_str, ID_STR_LEN, "%s%-*s %s%-*s%s", id_color,
+			maxes->id_username, props->uid_i.name, dim, ug_pad,
+			props->gid_i.name, df_c);
 	}
 }
 
@@ -2356,7 +2359,7 @@ print_entry_props(const struct fileinfo *props, const struct maxes_t *maxes,
 
 	const char *id_color = (file_perm == 1 && conf.colorize == 1) ? dg_c : df_c;
 	char id_str[ID_STR_LEN];
-	construct_id_field(props, id_str, id_color, maxes->ids);
+	construct_id_field(props, id_str, id_color, maxes);
 
 	char ino_str[INO_STR_LEN];
 	*ino_str = '\0';

@@ -838,14 +838,18 @@ compute_maxes(void)
 		}
 
 		if (prop_fields.ids == PROP_ID_NUM) {
-			t = DIGINUM(file_info[i].uid)
-				+ DIGINUM(file_info[i].gid);
+			const int uid_len = DIGINUM(file_info[i].uid);
+			t = uid_len + DIGINUM(file_info[i].gid);
 			if (t > maxes.ids)
 				maxes.ids = t;
+			if (uid_len > maxes.id_username)
+				maxes.id_username = uid_len;
 		} else if (prop_fields.ids == PROP_ID_NAME) {
 			t = (int)file_info[i].uid_i.namlen + (int)file_info[i].gid_i.namlen;
 			if (t > maxes.ids)
 				maxes.ids = t;
+			if (file_info[i].uid_i.namlen > (size_t)maxes.id_username)
+				maxes.id_username = (int)file_info[i].uid_i.namlen;
 		}
 
 		if (prop_fields.inode == 1) {
