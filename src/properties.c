@@ -2109,21 +2109,8 @@ construct_file_size(const struct fileinfo *props, char *size_str,
 		return file_perm;
 	}
 
-	if ((S_ISCHR(props->mode) || S_ISBLK(props->mode))
-	&& xargs.disk_usage_analyzer != 1) {
-#if !defined(__DragonFly__)
-		snprintf(size_str, SIZE_STR_LEN, "%ju,%ju",
-			(uintmax_t)major(props->rdev), (uintmax_t)minor(props->rdev));
-#else
-		/* This is what ls(1) does on DragonFly. Otherwise, minor dev number
-		 * could be huge. */
-		snprintf(size_str, SIZE_STR_LEN, "%ju,0x%.8x",
-			(uintmax_t)major(props->rdev), minor(props->rdev));
-#endif /* !__DragonFly__ */
-		return file_perm;
-	}
-
-	if (file_perm == 0 && props->dir == 1 && conf.full_dir_size == 1) {
+	if (S_ISCHR(props->mode) || S_ISBLK(props->mode)
+	|| (file_perm == 0 && props->dir == 1 && conf.full_dir_size == 1)) {
 		snprintf(size_str, SIZE_STR_LEN, "%s%*s%s", dn_c, size_max, "-", df_c);
 		return file_perm;
 	}
