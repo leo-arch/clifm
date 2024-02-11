@@ -98,7 +98,7 @@
 #
 # Example: print only permissions (numeric) and size (human readable):
 #PropFields="ns"
-;PropFields="xfpims"
+;PropFields="xfpIms"
 
 # Format used to display timestamps in long view mode.
 # Consult strftime(3) for information about time format specifiers.
