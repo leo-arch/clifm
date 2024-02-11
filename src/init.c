@@ -398,24 +398,24 @@ set_prop_fields(const char *line)
 	/* How much space needs to be reserved to print enabled fields?
 	 * Only fixed values are counted: dinamical values are calculated
 	 * and added in place: for these values we only count here the space
-	 * that follows each of them, if enabled */
+	 * that follows each of them, if enabled. */
 	/* Static lengths */
 	if (prop_fields.perm != 0)
 		prop_fields.len += ((prop_fields.perm == PERM_NUMERIC ? 4 : 13) + 1);
-	if (prop_fields.size != 0)
-		prop_fields.len += prop_fields.size == PROP_SIZE_HUMAN ? (8 + 1) : 1;
 
 	/* Dynamic lengths */
+	if (prop_fields.size != 0)
+		prop_fields.len++;
 	if (prop_fields.counter != 0)
 		prop_fields.len++;
 	if (prop_fields.inode != 0)
 		prop_fields.len++;
 	if (prop_fields.ids != 0) {
+		prop_fields.len++;
 		if (prop_fields.ids == PROP_ID_NAME && !sys_groups) {
 			get_sysusers();
 			get_sysgroups();
 		}
-		prop_fields.len++;
 	}
 	/* The length of the date field is calculated by check_time_str() */
 }
