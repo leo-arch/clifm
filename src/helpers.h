@@ -1275,14 +1275,12 @@ extern struct fileinfo *file_info;
 /* Struct to store the length of the longest values in the current list of
  * files (needed to properly construct columns in long view). */
 struct maxes_t {
-	int ids; /* Length of both user/owner and main group */
-	int id_username; /* Length of user/owner only */
+	int id_group;
+	int id_user;
 	int inode;
 	int files_counter;
 	int name;
 	int size;
-	int size_human;
-	int pad0;
 };
 
 struct devino_t {

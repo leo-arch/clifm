@@ -2252,27 +2252,16 @@ construct_id_field(const struct fileinfo *props, char *id_str,
 		return;
 	}
 
-	int ug_pad = 0, u = 0, g = 0;
-	char *dim = conf.colorize == 0 ? "" : "\x1b[2m";
+	const char *dim = conf.colorize == 0 ? "" : "\x1b[2m";
 
 	if (prop_fields.ids == PROP_ID_NUM) {
-		u = DIGINUM(props->uid); g = DIGINUM(props->gid);
-		if (u + g < (int)maxes->ids)
-			ug_pad = (int)maxes->ids - u;
-		ug_pad -= (maxes->id_username - u);
-
 		snprintf(id_str, ID_STR_LEN, "%s%-*u %s%-*u%s", id_color,
-			maxes->id_username, props->uid, dim, ug_pad, props->gid, df_c);
-
+			maxes->id_user, props->uid, dim, maxes->id_group,
+			props->gid, df_c);
 	} else { /* PROPS_ID_NAME */
-		u = (int)props->uid_i.namlen; g = (int)props->gid_i.namlen;
-		if (u + g < (int)maxes->ids)
-			ug_pad = (int)maxes->ids - u;
-		ug_pad -= (maxes->id_username - u);
-
 		snprintf(id_str, ID_STR_LEN, "%s%-*s %s%-*s%s", id_color,
-			maxes->id_username, props->uid_i.name, dim, ug_pad,
-			props->gid_i.name, df_c);
+			maxes->id_user, props->uid_i.name, dim,
+			maxes->id_group, props->gid_i.name, df_c);
 	}
 }
 
@@ -2354,8 +2343,7 @@ print_entry_props(const struct fileinfo *props, const struct maxes_t *maxes,
 	/* size_str is either file size or "major,minor" IDs in case of special
 	 * files (char and block devices). */
 	char size_str[SIZE_STR_LEN];
-	const int file_perm = construct_file_size(props, size_str,
-		prop_fields.size == PROP_SIZE_BYTES ? maxes->size : maxes->size_human);
+	const int file_perm = construct_file_size(props, size_str, maxes->size);
 
 	const char *id_color = (file_perm == 1 && conf.colorize == 1) ? dg_c : df_c;
 	char id_str[ID_STR_LEN];

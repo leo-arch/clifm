@@ -833,23 +833,22 @@ compute_maxes(void)
 				maxes.size = t;
 		} else if (prop_fields.size == PROP_SIZE_HUMAN) {
 			t = (int)file_info[i].human_size_len;
-			if (t > maxes.size_human)
-				maxes.size_human = t;
+			if (t > maxes.size)
+				maxes.size = t;
 		}
 
 		if (prop_fields.ids == PROP_ID_NUM) {
 			const int uid_len = DIGINUM(file_info[i].uid);
-			t = uid_len + DIGINUM(file_info[i].gid);
-			if (t > maxes.ids)
-				maxes.ids = t;
-			if (uid_len > maxes.id_username)
-				maxes.id_username = uid_len;
+			const int gid_len = DIGINUM(file_info[i].gid);
+			if (gid_len > maxes.id_group)
+				maxes.id_group = gid_len;
+			if (uid_len > maxes.id_user)
+				maxes.id_user = uid_len;
 		} else if (prop_fields.ids == PROP_ID_NAME) {
-			t = (int)file_info[i].uid_i.namlen + (int)file_info[i].gid_i.namlen;
-			if (t > maxes.ids)
-				maxes.ids = t;
-			if (file_info[i].uid_i.namlen > (size_t)maxes.id_username)
-				maxes.id_username = (int)file_info[i].uid_i.namlen;
+			if (file_info[i].gid_i.namlen > (size_t)maxes.id_group)
+				maxes.id_group = (int)file_info[i].gid_i.namlen;
+			if (file_info[i].uid_i.namlen > (size_t)maxes.id_user)
+				maxes.id_user = (int)file_info[i].uid_i.namlen;
 		}
 
 		if (prop_fields.inode == 1) {
@@ -873,8 +872,8 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad,
 
 	/* Available space (term cols) to print the file name. */
 	int space_left = (int)term_cols - (prop_fields.len + have_xattr
-		+ maxes.files_counter + maxes.size + maxes.ids
-		+ maxes.inode + (conf.icons == 1 ? 3 : 0));
+		+ maxes.files_counter + maxes.size + maxes.id_user
+		+ maxes.id_group + maxes.inode + (conf.icons == 1 ? 3 : 0));
 
 	if (space_left < conf.min_name_trim)
 		space_left = conf.min_name_trim;
