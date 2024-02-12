@@ -106,6 +106,33 @@ hashme(const char *restrict str, const int case_sensitive) {
 }
 #endif /* !_NO_ICONS */
 
+#if defined(__sun) && defined(ST_BTIME)
+# include <attr.h> /* getattrat, nvlist_lookup_uint64_array, nvlist_free */
+struct timespec
+get_birthtime(const char *filename)
+{
+	struct timespec ts;
+	ts.tv_sec = ts.tv_nsec = (time_t)-1;
+	nvlist_t *response;
+
+	if (getattrat(XAT_FDCWD, XATTR_VIEW_READWRITE, filename, &response) != 0)
+		return ts;
+
+	uint64_t *val;
+	uint_t n;
+
+	if (nvlist_lookup_uint64_array(response, A_CRTIME, &val, &n) == 0
+	&& n >= 2 && val[0] <= LONG_MAX && val[1] < 1000000000 * 2 /* for leap seconds */) {
+		ts.tv_sec = (time_t)val[0];
+		ts.tv_nsec = (time_t)val[1];
+	}
+
+	nvlist_free(response);
+
+	return ts;
+}
+#endif // __sun && ST_BTIME
+
 void
 gen_time_str(char *buf, const size_t size, const time_t curtime)
 {

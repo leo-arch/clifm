@@ -285,8 +285,10 @@ init_conf_struct(void)
 static void
 get_sysusers(void)
 {
+	if (sys_users)
+		return;
+
 #if defined(__ANDROID__)
-	sys_users = (struct groups_t *)NULL;
 	return;
 #else
 	/* It may happen (for example on DragonFly) that the passwd database
@@ -328,6 +330,9 @@ get_sysusers(void)
 static void
 get_sysgroups(void)
 {
+	if (sys_groups)
+		return;
+
 	setgrent();
 
 	size_t n = 0;
@@ -385,7 +390,8 @@ set_prop_fields(const char *line)
 		case 'I': prop_fields.ids =  PROP_ID_NAME; break;
 		case 'a': prop_fields.time = PROP_TIME_ACCESS; break;
 		case 'b':
-#if defined(ST_BTIME) && !defined(__sun)
+//#if defined(ST_BTIME) && !defined(__sun)
+#if defined(ST_BTIME)
 			prop_fields.time = PROP_TIME_BIRTH; break;
 #else
 			err('w', PRINT_PROMPT, _("%s: Birth time is not supported on "
@@ -393,7 +399,7 @@ set_prop_fields(const char *line)
 				PROGRAM_NAME);
 			prop_fields.time = PROP_TIME_MOD;
 			break;
-#endif /* ST_BTIME && !__sun */
+#endif /* ST_BTIME */
 		case 'c': prop_fields.time = PROP_TIME_CHANGE; break;
 		case 'm': prop_fields.time = PROP_TIME_MOD; break;
 		case 's': prop_fields.size = PROP_SIZE_HUMAN; break;
@@ -422,7 +428,7 @@ set_prop_fields(const char *line)
 		prop_fields.len++;
 	if (prop_fields.ids != 0) {
 		prop_fields.len++;
-		if (prop_fields.ids == PROP_ID_NAME && !sys_groups) {
+		if (prop_fields.ids == PROP_ID_NAME) {
 			get_sysusers();
 			get_sysgroups();
 		}

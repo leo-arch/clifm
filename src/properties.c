@@ -43,12 +43,12 @@
 #if defined(__linux__) || defined(__CYGWIN__)
 # include <sys/sysmacros.h> /* minor(), major() */
 #elif defined(__sun)
-# if defined(ST_BTIME) /* Undefined if compiled with _NO_SUN_BIRTHTIME */
-#  include <attr.h> /* getattrat, nvlist_lookup_uint64_array, nvlist_free */
-# endif /* ST_BTIME */
+//# if defined(ST_BTIME) /* Undefined if compiled with _NO_SUN_BIRTHTIME */
+//#  include <attr.h> /* getattrat, nvlist_lookup_uint64_array, nvlist_free */
+//# endif /* ST_BTIME */
 # include <sys/mkdev.h> /* minor(), major() */
 /* For BSD systems, we need sys/types.h, already included in helpers.h */
-#endif /* __linux__ */
+#endif /* __linux__ || __CYGWIN__ */
 
 #include <readline/tilde.h>
 
@@ -203,6 +203,7 @@ struct perms_t {
 	int  pad4;
 };
 
+/*
 #if defined(__sun) && defined(ST_BTIME)
 static struct timespec
 get_birthtime(const char *filename)
@@ -218,7 +219,7 @@ get_birthtime(const char *filename)
 	uint_t n;
 
 	if (nvlist_lookup_uint64_array(response, A_CRTIME, &val, &n) == 0
-	&& n >= 2 && val[0] <= LONG_MAX && val[1] < 1000000000 * 2 /* for leap seconds */) {
+	&& n >= 2 && val[0] <= LONG_MAX && val[1] < 1000000000 * 2 // for leap seconds) {
 		ts.tv_sec = (time_t)val[0];
 		ts.tv_nsec = (time_t)val[1];
 	}
@@ -227,7 +228,7 @@ get_birthtime(const char *filename)
 
 	return ts;
 }
-#endif /* __sun && ST_BTIME */
+#endif // __sun && ST_BTIME */
 
 #if defined(LINUX_FILE_ATTRS)
 /* Print file attributes as lsattr(1) would.

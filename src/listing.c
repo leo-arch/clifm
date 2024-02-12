@@ -2171,8 +2171,8 @@ list_dir_light(void)
 			if (lstat(file_info[n].name, &a) != -1)
 				set_long_attribs(n, &a);
 #endif /* !_DIRENT_HAVE_D_TYPE */
-		if (prop_fields.ids == PROP_ID_NAME)
-			get_ids_info(n);
+			if (prop_fields.ids == PROP_ID_NAME)
+				get_ids_info(n);
 		}
 
 		if (xargs.disk_usage_analyzer == 1) {
@@ -2403,7 +2403,8 @@ load_file_gral_info(const struct stat *a, const filesn_t n)
 	time_t btime = 0;
 	if (conf.sort == SBTIME || (conf.long_view == 1
 	&& prop_fields.time == PROP_TIME_BIRTH)) {
-#if defined(ST_BTIME) && !defined(__sun)
+//#if defined(ST_BTIME) && !defined(__sun)
+#if defined(ST_BTIME)
 # ifdef LINUX_STATX
 		struct statx attx;
 		if (statx(AT_FDCWD, file_info[n].name, AT_SYMLINK_NOFOLLOW,
@@ -2411,12 +2412,13 @@ load_file_gral_info(const struct stat *a, const filesn_t n)
 			btime = 0;
 		else
 			btime = attx.ST_BTIME.tv_sec;
+# elif defined(__sun)
+		struct timespec birthtim = get_birthtime(file_info[n].name);
+		btime = birthtim.tv_sec != (time_t)-1 ? birthtim.tv_sec : 0;
 # else
 		btime = a->ST_BTIME.tv_sec;
 # endif /* LINUX_STATX */
-#else
-		btime = 0;
-#endif /* ST_BTIME && !__sun */
+#endif /* ST_BTIME */
 	}
 
 	if (conf.long_view == 1) {

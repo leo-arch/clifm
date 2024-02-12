@@ -44,6 +44,9 @@ off_t dir_size(char *dir, const int first_level, int *status);
 char from_hex(char c);
 char *gen_date_suffix(const struct tm tm);
 void gen_time_str(char *buf, const size_t size, const time_t curtime);
+#if defined(__sun) && defined(ST_BTIME)
+struct timespec get_birthtime(const char *filename);
+#endif /* __sun && ST_BTIME */
 char *get_cmd_path(const char *cmd);
 int  get_rgb(char *hex, int *attr, int *r, int *g, int *b);
 void clear_term_img(void);
