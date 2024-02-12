@@ -43,9 +43,6 @@
 #if defined(__linux__) || defined(__CYGWIN__)
 # include <sys/sysmacros.h> /* minor(), major() */
 #elif defined(__sun)
-//# if defined(ST_BTIME) /* Undefined if compiled with _NO_SUN_BIRTHTIME */
-//#  include <attr.h> /* getattrat, nvlist_lookup_uint64_array, nvlist_free */
-//# endif /* ST_BTIME */
 # include <sys/mkdev.h> /* minor(), major() */
 /* For BSD systems, we need sys/types.h, already included in helpers.h */
 #endif /* __linux__ || __CYGWIN__ */
@@ -202,33 +199,6 @@ struct perms_t {
 	char pad3;
 	int  pad4;
 };
-
-/*
-#if defined(__sun) && defined(ST_BTIME)
-static struct timespec
-get_birthtime(const char *filename)
-{
-	struct timespec ts;
-	ts.tv_sec = ts.tv_nsec = (time_t)-1;
-	nvlist_t *response;
-
-	if (getattrat(XAT_FDCWD, XATTR_VIEW_READWRITE, filename, &response) != 0)
-		return ts;
-
-	uint64_t *val;
-	uint_t n;
-
-	if (nvlist_lookup_uint64_array(response, A_CRTIME, &val, &n) == 0
-	&& n >= 2 && val[0] <= LONG_MAX && val[1] < 1000000000 * 2 // for leap seconds) {
-		ts.tv_sec = (time_t)val[0];
-		ts.tv_nsec = (time_t)val[1];
-	}
-
-	nvlist_free(response);
-
-	return ts;
-}
-#endif // __sun && ST_BTIME */
 
 #if defined(LINUX_FILE_ATTRS)
 /* Print file attributes as lsattr(1) would.
@@ -2197,7 +2167,7 @@ construct_timestamp(char *time_str, const time_t ltime)
 	char file_time[MAX_TIME_STR];
 	struct tm t;
 
-	if (ltime >= 0 && localtime_r(&ltime, &t)) {
+	if (ltime >= 0 && ltime != (time_t)-1 && localtime_r(&ltime, &t)) {
 		/* PROPS_NOW (global) is set by list_dir(), in listing.c before
 		 * calling print_entry_props(), which calls this function. */
 		const time_t age = props_now - ltime;

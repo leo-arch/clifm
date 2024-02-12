@@ -30,6 +30,9 @@
 
 #include "helpers.h"
 
+#if defined(__sun) && defined(ST_BTIME)
+# include <attr.h> /* getattrat, nvlist_lookup_uint64_array, nvlist_free */
+#endif /* __sun && ST_BTIME */
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
@@ -107,7 +110,6 @@ hashme(const char *restrict str, const int case_sensitive) {
 #endif /* !_NO_ICONS */
 
 #if defined(__sun) && defined(ST_BTIME)
-# include <attr.h> /* getattrat, nvlist_lookup_uint64_array, nvlist_free */
 struct timespec
 get_birthtime(const char *filename)
 {
@@ -131,7 +133,7 @@ get_birthtime(const char *filename)
 
 	return ts;
 }
-#endif // __sun && ST_BTIME
+#endif /* __sun && ST_BTIME */
 
 void
 gen_time_str(char *buf, const size_t size, const time_t curtime)

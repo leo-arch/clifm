@@ -2403,18 +2403,17 @@ load_file_gral_info(const struct stat *a, const filesn_t n)
 	time_t btime = 0;
 	if (conf.sort == SBTIME || (conf.long_view == 1
 	&& prop_fields.time == PROP_TIME_BIRTH)) {
-//#if defined(ST_BTIME) && !defined(__sun)
 #if defined(ST_BTIME)
 # ifdef LINUX_STATX
 		struct statx attx;
 		if (statx(AT_FDCWD, file_info[n].name, AT_SYMLINK_NOFOLLOW,
 		STATX_BTIME, &attx) == -1)
-			btime = 0;
+			btime = (time_t)-1;
 		else
 			btime = attx.ST_BTIME.tv_sec;
 # elif defined(__sun)
 		struct timespec birthtim = get_birthtime(file_info[n].name);
-		btime = birthtim.tv_sec != (time_t)-1 ? birthtim.tv_sec : 0;
+		btime = birthtim.tv_sec;
 # else
 		btime = a->ST_BTIME.tv_sec;
 # endif /* LINUX_STATX */
