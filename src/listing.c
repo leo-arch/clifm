@@ -2171,6 +2171,8 @@ list_dir_light(void)
 			if (lstat(file_info[n].name, &a) != -1)
 				set_long_attribs(n, &a);
 #endif /* !_DIRENT_HAVE_D_TYPE */
+		if (prop_fields.ids == PROP_ID_NAME)
+			get_ids_info(n);
 		}
 
 		if (xargs.disk_usage_analyzer == 1) {
