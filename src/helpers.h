@@ -1265,7 +1265,7 @@ struct fileinfo {
 	int du_status; /* Exit status of du(1) for dir full sizes */
 	int utf8; /* Name contains at least one UTF-8 character */
 #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__DragonFly__) \
-|| defined(__arm__)
+|| defined(__OpenBSD__) || defined(__arm__)
 	int pad2;
 #endif /* __FreeBSD__ || __NetBSD__ || __DragonFly__ || __arm__ */
 };
