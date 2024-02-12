@@ -384,6 +384,16 @@ set_prop_fields(const char *line)
 		case 'i': prop_fields.ids =  PROP_ID_NUM; break;
 		case 'I': prop_fields.ids =  PROP_ID_NAME; break;
 		case 'a': prop_fields.time = PROP_TIME_ACCESS; break;
+		case 'b':
+#if defined(ST_BTIME) && !defined(__sun)
+			prop_fields.time = PROP_TIME_BIRTH; break;
+#else
+			err('w', PRINT_PROMPT, _("%s: Birth time is not supported on "
+				"this platform. Falling back to modification time.\n"),
+				PROGRAM_NAME);
+			prop_fields.time = PROP_TIME_MOD;
+			break;
+#endif /* ST_BTIME && !__sun */
 		case 'c': prop_fields.time = PROP_TIME_CHANGE; break;
 		case 'm': prop_fields.time = PROP_TIME_MOD; break;
 		case 's': prop_fields.size = PROP_SIZE_HUMAN; break;

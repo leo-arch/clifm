@@ -2368,6 +2368,7 @@ print_entry_props(const struct fileinfo *props, const struct maxes_t *maxes,
 		case 'i': /* fallthrough */
 		case 'I': fputs(id_str, stdout); break;
 		case 'a': /* fallthrough */
+		case 'b': /* fallthrough */
 		case 'm': /* fallthrough */
 		case 'c': fputs(time_str, stdout); break;
 		case 's': /* fallthrough */

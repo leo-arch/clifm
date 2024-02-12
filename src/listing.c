@@ -775,11 +775,13 @@ set_long_attribs(const filesn_t n, const struct stat *attr)
 	file_info[n].gid = attr->st_gid;
 	file_info[n].mode = attr->st_mode;
 
-	switch (prop_fields.time) {
-	case PROP_TIME_ACCESS: file_info[n].ltime = (time_t)attr->st_atime; break;
-	case PROP_TIME_CHANGE: file_info[n].ltime = (time_t)attr->st_ctime; break;
-	case PROP_TIME_MOD: file_info[n].ltime = (time_t)attr->st_mtime; break;
-	default: file_info[n].ltime = (time_t)attr->st_mtime; break;
+	if (conf.light_mode == 1) {
+		switch (prop_fields.time) {
+		case PROP_TIME_ACCESS: file_info[n].ltime = attr->st_atime; break;
+		case PROP_TIME_CHANGE: file_info[n].ltime = attr->st_ctime; break;
+		case PROP_TIME_MOD: file_info[n].ltime = attr->st_mtime; break;
+		default: file_info[n].ltime = attr->st_mtime; break;
+		}
 	}
 
 	if (conf.full_dir_size == 1 && file_info[n].dir == 1
@@ -1879,6 +1881,30 @@ init_fileinfo(const filesn_t n)
 	file_info[n].linkn = 1;
 }
 
+static inline void
+get_ids_info(const filesn_t n)
+{
+	size_t i;
+
+	if (sys_users) {
+		for (i = 0; sys_users[i].name; i++) {
+			if (file_info[n].uid != sys_users[i].id)
+				continue;
+			file_info[n].uid_i.name = sys_users[i].name;
+			file_info[n].uid_i.namlen = sys_users[i].namlen;
+		}
+	}
+
+	if (sys_groups) {
+		for (i = 0; sys_groups[i].name; i++) {
+			if (file_info[n].gid != sys_groups[i].id)
+				continue;
+			file_info[n].gid_i.name = sys_groups[i].name;
+			file_info[n].gid_i.namlen = sys_groups[i].namlen;
+		}
+	}
+}
+
 /* Construct human readable sizes for all files in the current directory
  * and store them in the human_size field of the file_info struct. The length
  * of each human size is stored in the human_size_len field of the same struct. */
@@ -1938,6 +1964,10 @@ list_dir_light(void)
 #ifdef LIST_SPEED_TEST
 	clock_t start = clock();
 #endif /* LIST_SPEED_TEST */
+
+	if (conf.long_view == 1 && prop_fields.time == PROP_TIME_BIRTH)
+		err('w', PRINT_PROMPT, _("%s: Birth time is not available in "
+			"light mode. Falling back to modification time.\n"), PROGRAM_NAME);
 
 	virtual_dir =
 		(stdin_tmp_dir && strcmp(stdin_tmp_dir, workspaces[cur_ws].path) == 0);
@@ -2320,30 +2350,6 @@ check_extra_file_types(mode_t *mode, const struct stat *a)
 }
 
 static inline void
-get_ids_info(const filesn_t n)
-{
-	size_t i;
-
-	if (sys_users) {
-		for (i = 0; sys_users[i].name; i++) {
-			if (file_info[n].uid != sys_users[i].id)
-				continue;
-			file_info[n].uid_i.name = sys_users[i].name;
-			file_info[n].uid_i.namlen = sys_users[i].namlen;
-		}
-	}
-
-	if (sys_groups) {
-		for (i = 0; sys_groups[i].name; i++) {
-			if (file_info[n].gid != sys_groups[i].id)
-				continue;
-			file_info[n].gid_i.name = sys_groups[i].name;
-			file_info[n].gid_i.namlen = sys_groups[i].namlen;
-		}
-	}
-}
-
-static inline void
 load_file_gral_info(const struct stat *a, const filesn_t n)
 {
 	switch (a->st_mode & S_IFMT) {
@@ -2392,38 +2398,38 @@ load_file_gral_info(const struct stat *a, const filesn_t n)
 		file_info[n].xattr = 1;
 #endif /* LINUX_FILE_XATTRS */
 
+	time_t btime = 0;
+	if (conf.sort == SBTIME || (conf.long_view == 1
+	&& prop_fields.time == PROP_TIME_BIRTH)) {
+#if defined(ST_BTIME) && !defined(__sun)
+# ifdef LINUX_STATX
+		struct statx attx;
+		if (statx(AT_FDCWD, file_info[n].name, AT_SYMLINK_NOFOLLOW,
+		STATX_BTIME, &attx) == -1)
+			btime = 0;
+		else
+			btime = attx.ST_BTIME.tv_sec;
+# else
+		btime = a->ST_BTIME.tv_sec;
+# endif /* LINUX_STATX */
+#else
+		btime = 0;
+#endif /* ST_BTIME && !__sun */
+	}
+
 	if (conf.long_view == 1) {
 		switch (prop_fields.time) {
 		case PROP_TIME_ACCESS: file_info[n].ltime = a->st_atime; break;
 		case PROP_TIME_CHANGE: file_info[n].ltime = a->st_ctime; break;
 		case PROP_TIME_MOD: file_info[n].ltime = a->st_mtime; break;
+		case PROP_TIME_BIRTH: file_info[n].ltime = btime; break;
 		default: file_info[n].ltime = a->st_mtime; break;
 		}
 	}
 
 	switch (conf.sort) {
 	case SATIME: file_info[n].time = a->st_atime; break;
-
-	case SBTIME:
-#if defined(ST_BTIME) && !defined(__sun)
-# ifdef LINUX_STATX
-	{
-		struct statx attx;
-		if (statx(AT_FDCWD, file_info[n].name, AT_SYMLINK_NOFOLLOW,
-		STATX_BTIME, &attx) == -1)
-			file_info[n].time = 0;
-		else
-			file_info[n].time = attx.ST_BTIME.tv_sec;
-	}
-# else
-		file_info[n].time = a->ST_BTIME.tv_sec;
-# endif /* LINUX_STATX */
-#else
-		/* Let's use change time if birth time is not available */
-		file_info[n].time = a->st_ctime;
-#endif /* ST_BTIME && !__sun */
-		break;
-
+	case SBTIME: file_info[n].time = btime; break;
 	case SCTIME: file_info[n].time = a->st_ctime; break;
 	case SMTIME: file_info[n].time = a->st_mtime; break;
 	default: file_info[n].time = 0; break;

@@ -797,6 +797,7 @@ extern time_t curdir_mtime;
 #define PROP_TIME_ACCESS 1
 #define PROP_TIME_MOD    2
 #define PROP_TIME_CHANGE 3
+#define PROP_TIME_BIRTH  4
 
 #define PROP_SIZE_BYTES  1
 #define PROP_SIZE_HUMAN  2
