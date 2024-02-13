@@ -474,5 +474,9 @@
 # Plenty of images and vids? Launch the files previewer plugin.
 #autocmd ~/Downloads !/usr/local/share/clifm/plugins/fzfnav.sh
 
+# Use the nord color scheme and disable hidden files in the ~/Documents
+# directory.
+#autocmd ~/Documents/** cs=nord,hf=0
+
 # I want files in the third workspace to be listed in long view.
 #autocmd @ws3 lv=1

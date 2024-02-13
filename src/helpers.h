@@ -1552,12 +1552,12 @@ extern struct termcaps_t term_caps;
 /* Data to be displayed in the properties string in long mode */
 struct props_t {
 	int counter; /* Files counter */
-	int no_group; /* Should we display group if IDS is set? */
 	int ids; /* User/group IDs: either NUMBER or NAME */
 	int inode; /* File inode number */
 	int len; /* Approx len of the entire properties string taking into account
 			  * the all fields and their length. */
 	int links; /* File links */
+	int no_group; /* Should we display group if IDS is set? */
 	int perm; /* File permissions: either NUMERIC or SYMBOLIC */
 	int size; /* File size: either HUMAN or BYTES */
 	int time; /* Time: either ACCESS, MOD, CHANGE, or BIRTH */

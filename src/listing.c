@@ -810,7 +810,7 @@ get_ind_char(const filesn_t index, int *ind_chr)
 }
 
 /* Return a struct maxes_t with the following information: the largest files
- * counter, user ID (uid + gid), file size (in bytes), and inode in the
+ * counter, user ID, group ID, file size, inode, and file links in the
  * current list of files.
  * This information is required to build the properties line for each entry
  * based on each field's length. */
