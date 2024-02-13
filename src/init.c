@@ -330,7 +330,7 @@ get_sysusers(void)
 static void
 get_sysgroups(void)
 {
-	if (sys_groups)
+	if (sys_groups || prop_fields.no_group == 1)
 		return;
 
 	setgrent();
