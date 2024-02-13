@@ -384,16 +384,16 @@ char
 	hv_c[MAX_COLOR], /* Variables: $ */
 	hw_c[MAX_COLOR], /* Backslash (aka whack) */
 
+	dd_c[MAX_COLOR],  /* Date (fixed color: no shading) */
+	dg_c[MAX_COLOR],  /* UID, GID */
+	dn_c[MAX_COLOR],  /* dash (none) */
+	do_c[MAX_COLOR],  /* Octal perms */
+	dp_c[MAX_COLOR],  /* Special files (SUID, SGID, etc) */
 	dr_c[MAX_COLOR],  /* Read */
 	dw_c[MAX_COLOR],  /* Write */
 	dxd_c[MAX_COLOR], /* Execute (dirs) */
 	dxr_c[MAX_COLOR], /* Execute (reg files) */
-	dg_c[MAX_COLOR],  /* UID, GID */
-	dd_c[MAX_COLOR],  /* Date */
-	dz_c[MAX_COLOR],  /* Size (dirs) > */
-	do_c[MAX_COLOR],  /* Octal representation > */
-	dp_c[MAX_COLOR],  /* Special files (SUID, SGID, etc) */
-	dn_c[MAX_COLOR],  /* Dash (none) */
+	dz_c[MAX_COLOR],  /* Size (dirs) */
 
 	/* Colors used in the prompt, so that \001 and \002 needs to
 	 * be added. This is why MAX_COLOR + 2 */

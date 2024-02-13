@@ -857,6 +857,12 @@ compute_maxes(void)
 			if (t > maxes.inode)
 				maxes.inode = t;
 		}
+
+		if (prop_fields.links == 1) {
+			t = DIGINUM(file_info[i].linkn);
+			if (t > maxes.links)
+				maxes.links = t;
+		}
 	}
 
 	return maxes;
@@ -873,8 +879,8 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad,
 
 	/* Available space (term cols) to print the file name. */
 	int space_left = (int)term_cols - (prop_fields.len + have_xattr
-		+ maxes.files_counter + maxes.size + maxes.id_user
-		+ maxes.id_group + maxes.inode + (conf.icons == 1 ? 3 : 0));
+		+ maxes.files_counter + maxes.size + maxes.links + maxes.inode
+		+ maxes.id_user + maxes.id_group + (conf.icons == 1 ? 3 : 0));
 
 	if (space_left < conf.min_name_trim)
 		space_left = conf.min_name_trim;

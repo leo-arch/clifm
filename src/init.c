@@ -376,6 +376,7 @@ set_prop_fields(const char *line)
 	prop_fields.time =    0;
 	prop_fields.size =    0;
 	prop_fields.inode =   0;
+	prop_fields.links =   0;
 	prop_fields.xattr =   0;
 	prop_fields.len =     2; /* Two spaces between file name and props string */
 
@@ -384,13 +385,13 @@ set_prop_fields(const char *line)
 		switch (line[i]) {
 		case 'f': prop_fields.counter = 1; break;
 		case 'd': prop_fields.inode = 1; break;
+		case 'l': prop_fields.links = 1; break;
 		case 'p': prop_fields.perm = PERM_SYMBOLIC; break;
 		case 'n': prop_fields.perm = PERM_NUMERIC; break;
 		case 'i': prop_fields.ids =  PROP_ID_NUM; break;
 		case 'I': prop_fields.ids =  PROP_ID_NAME; break;
 		case 'a': prop_fields.time = PROP_TIME_ACCESS; break;
 		case 'b':
-//#if defined(ST_BTIME) && !defined(__sun)
 #if defined(ST_BTIME)
 			prop_fields.time = PROP_TIME_BIRTH; break;
 #else
@@ -425,6 +426,8 @@ set_prop_fields(const char *line)
 	if (prop_fields.counter != 0)
 		prop_fields.len++;
 	if (prop_fields.inode != 0)
+		prop_fields.len++;
+	if (prop_fields.links != 0)
 		prop_fields.len++;
 	if (prop_fields.ids != 0) {
 		prop_fields.len++;

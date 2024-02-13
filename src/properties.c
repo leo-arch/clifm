@@ -88,19 +88,6 @@
 #   include <acl/libacl.h> /* acl_extended_file_nofollow(), acl_to_any_text() */
 #  endif /* Linux >= 2.5.46 */
 # endif /* __linux__ */
-/*# if defined(__NetBSD__)
-#  if __NetBSD_Prereq__(9,99,63)
-#   include <sys/acl.h>
-#   define HAVE_ACL
-#  endif // NetBSD >= 9.99.63
-# elif !defined(__HAIKU__) && !defined(__OpenBSD__) && !defined(__sun) \
-&& !defined(__DragonFly__)
-#  include <sys/acl.h>
-#  if defined(__linux__)
-#   include <acl/libacl.h>
-#  endif // __linux__
-#  define HAVE_ACL
-# endif // __NetBSD__ */
 #endif /* !_BE_POSIX */
 
 #include "aux.h"
@@ -154,24 +141,26 @@
  * (print_entry_props()). */
 
 /* 14 colors + 15 single chars + NUL byte */
-#define PERM_STR_LEN ((MAX_COLOR * 14) + 16) /* construct_file_perms() */
+#define PERM_STR_LEN  ((MAX_COLOR * 14) + 16) /* construct_file_perms() */
 
-#define TIME_STR_LEN (MAX_TIME_STR + (MAX_COLOR * 2) + 2) /* construct_timestamp() */
+#define TIME_STR_LEN  (MAX_TIME_STR + (MAX_COLOR * 2) + 2) /* construct_timestamp() */
 
 /* construct_human_size() returns a string of at most MAX_HUMAN_SIZE chars (helpers.h) */
-#define SIZE_STR_LEN (MAX_HUMAN_SIZE + (MAX_COLOR * 3) + 1) /* construct_file_size() */
+#define SIZE_STR_LEN  (MAX_HUMAN_SIZE + (MAX_COLOR * 3) + 1) /* construct_file_size() */
 
 /* Let's suppose that IDs go up to 999 billions (12 digits)
  * * 2 IDs + pad (at most 12 more digits) == 36
  * 39 == 36 + colon + space + NUL byte */
 //#define ID_STR_LEN   ((MAX_COLOR * 2) + 39) /* construct_id_field() */
-#define ID_STR_LEN   ((MAX_COLOR * 2) + (NAME_MAX * 2) + 2 + 4)
+#define ID_STR_LEN    ((MAX_COLOR * 2) + (NAME_MAX * 2) + 2 + 4)
 
 /* Max inode number able to hold: 999 billions! Padding could be as long
  * as max inode lenght - 1 */
-#define INO_STR_LEN  ((MAX_COLOR * 2) + ((12 + 1) * 2) + 4)
+#define INO_STR_LEN   ((MAX_COLOR * 2) + ((12 + 1) * 2) + 4)
 
-#define FC_STR_LEN   ((MAX_COLOR * 2) + 32) /* construct_files_counter() */
+#define LINKS_STR_LEN ((MAX_COLOR * 2) + 32)
+/* Files counter */
+#define FC_STR_LEN    ((MAX_COLOR * 2) + 32)
 
 struct perms_t {
 	/* Field colors */
@@ -2298,8 +2287,6 @@ print_entry_props(const struct fileinfo *props, const struct maxes_t *maxes,
 	char time_str[TIME_STR_LEN];
 	construct_timestamp(time_str, props->ltime);
 
-	/* size_str is either file size or "major,minor" IDs in case of special
-	 * files (char and block devices). */
 	char size_str[SIZE_STR_LEN];
 	const int file_perm = construct_file_size(props, size_str, maxes->size);
 
@@ -2307,11 +2294,17 @@ print_entry_props(const struct fileinfo *props, const struct maxes_t *maxes,
 	char id_str[ID_STR_LEN];
 	construct_id_field(props, id_str, id_color, maxes);
 
-	char ino_str[INO_STR_LEN];
-	*ino_str = '\0';
+	char links_str[LINKS_STR_LEN]; *links_str = '\0';
+	if (prop_fields.links == 1) {
+		snprintf(links_str, LINKS_STR_LEN, "\x1b[0m%s%s%*ju%s",
+			tx_c, props->linkn > 1 ? BOLD : "",
+			maxes->links, (uintmax_t)props->linkn, df_c);
+	}
+
+	char ino_str[INO_STR_LEN]; *ino_str = '\0';
 	if (prop_fields.inode == 1) {
 		snprintf(ino_str, INO_STR_LEN, "\x1b[0m%s%*ju%s", tx_c,
-			(int)maxes->inode, (uintmax_t)props->inode, df_c);
+			maxes->inode, (uintmax_t)props->inode, df_c);
 	}
 
 	char fc_str[FC_STR_LEN];
@@ -2338,6 +2331,7 @@ print_entry_props(const struct fileinfo *props, const struct maxes_t *maxes,
 			break;
 		case 'i': /* fallthrough */
 		case 'I': fputs(id_str, stdout); break;
+		case 'l': fputs(links_str, stdout); break;
 		case 'a': /* fallthrough */
 		case 'b': /* fallthrough */
 		case 'm': /* fallthrough */

@@ -779,9 +779,9 @@ extern time_t curdir_mtime;
 
 /* Macros for properties string fields in long view */
 #if defined(LINUX_FILE_XATTRS)
-# define PROP_FIELDS_SIZE 7 /* Seven available fields */
+# define PROP_FIELDS_SIZE 8 /* Eight available fields */
 #else
-# define PROP_FIELDS_SIZE 6 /* Six available fields */
+# define PROP_FIELDS_SIZE 7 /* Seven available fields */
 #endif /* LINUX_FILE_XATTRS */
 
 #define PERM_SYMBOLIC 1
@@ -1279,8 +1279,10 @@ struct maxes_t {
 	int id_user;
 	int inode;
 	int files_counter;
+	int links;
 	int name;
 	int size;
+	int pad0;
 };
 
 struct devino_t {
@@ -1554,14 +1556,15 @@ extern struct termcaps_t term_caps;
 /* Data to be displayed in the properties string in long mode */
 struct props_t {
 	int counter; /* Files counter */
-	int perm; /* File permissions: either NUMERIC or SYMBOLIC */
 	int ids; /* User and group IDs: either NUMBER or NAME */
-	int time; /* Time: either ACCESS, MOD, or CHANGE */
-	int size; /* File size: either HUMAN or BYTES */
 	int inode; /* File inode number */
-	int xattr; /* Extended attributes */
 	int len; /* Approx len of the entire properties string taking into account
-	the above values */
+			  * the all fields and their length. */
+	int links; /* File links */
+	int perm; /* File permissions: either NUMERIC or SYMBOLIC */
+	int size; /* File size: either HUMAN or BYTES */
+	int time; /* Time: either ACCESS, MOD, CHANGE, or BIRTH */
+	int xattr; /* Extended attributes */
 };
 extern struct props_t prop_fields;
 
@@ -1963,16 +1966,16 @@ extern char
 	hw_c[MAX_COLOR], /* Backslash (aka whack) */
 
 	/* File properties */
+	dd_c[MAX_COLOR],  /* Date (fixed color: no shading) */
+	dg_c[MAX_COLOR],  /* UID, GID */
+	dn_c[MAX_COLOR],  /* dash (none) */
+	do_c[MAX_COLOR],  /* Octal perms */
+	dp_c[MAX_COLOR],  /* Special files (SUID, SGID, etc) */
 	dr_c[MAX_COLOR],  /* Read */
 	dw_c[MAX_COLOR],  /* Write */
 	dxd_c[MAX_COLOR], /* Execute (dirs) */
 	dxr_c[MAX_COLOR], /* Execute (reg files) */
-	dg_c[MAX_COLOR],  /* UID, GID */
-	dd_c[MAX_COLOR],  /* Date */
 	dz_c[MAX_COLOR],  /* Size (dirs) */
-	do_c[MAX_COLOR],  /* Octal representation */
-	dp_c[MAX_COLOR],  /* Special files (SUID, SGID, etc) */
-	dn_c[MAX_COLOR],  /* dash (none) */
 
     /* Colors used in the prompt, so that \001 and \002 needs to
 	 * be added. This is why MAX_COLOR + 2 */
