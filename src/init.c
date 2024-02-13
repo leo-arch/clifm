@@ -370,20 +370,22 @@ set_prop_fields(const char *line)
 	if (!line || !*line)
 		return;
 
-	prop_fields.counter = 0;
-	prop_fields.perm =    0;
-	prop_fields.ids =     0;
-	prop_fields.time =    0;
-	prop_fields.size =    0;
-	prop_fields.inode =   0;
-	prop_fields.links =   0;
-	prop_fields.xattr =   0;
-	prop_fields.len =     2; /* Two spaces between file name and props string */
+	prop_fields.counter =  0;
+	prop_fields.perm =     0;
+	prop_fields.no_group = 0;
+	prop_fields.ids =      0;
+	prop_fields.time =     0;
+	prop_fields.size =     0;
+	prop_fields.inode =    0;
+	prop_fields.links =    0;
+	prop_fields.xattr =    0;
+	prop_fields.len =      2; /* Two spaces between file name and props string */
 
 	size_t i;
 	for (i = 0; i < PROP_FIELDS_SIZE && line[i]; i++) {
 		switch (line[i]) {
 		case 'f': prop_fields.counter = 1; break;
+		case 'G': prop_fields.no_group = 1; break;
 		case 'd': prop_fields.inode = 1; break;
 		case 'l': prop_fields.links = 1; break;
 		case 'p': prop_fields.perm = PERM_SYMBOLIC; break;

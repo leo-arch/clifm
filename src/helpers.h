@@ -778,11 +778,7 @@ extern time_t curdir_mtime;
 #define FILTER_MIME_TYPE 3 /* @query */
 
 /* Macros for properties string fields in long view */
-#if defined(LINUX_FILE_XATTRS)
-# define PROP_FIELDS_SIZE 8 /* Eight available fields */
-#else
-# define PROP_FIELDS_SIZE 7 /* Seven available fields */
-#endif /* LINUX_FILE_XATTRS */
+#define PROP_FIELDS_SIZE 9 /* Nine available fields */
 
 #define PERM_SYMBOLIC 1
 #define PERM_NUMERIC  2
@@ -1556,7 +1552,8 @@ extern struct termcaps_t term_caps;
 /* Data to be displayed in the properties string in long mode */
 struct props_t {
 	int counter; /* Files counter */
-	int ids; /* User and group IDs: either NUMBER or NAME */
+	int no_group; /* Should we display group if IDS is set? */
+	int ids; /* User/group IDs: either NUMBER or NAME */
 	int inode; /* File inode number */
 	int len; /* Approx len of the entire properties string taking into account
 			  * the all fields and their length. */

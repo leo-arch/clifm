@@ -2199,16 +2199,25 @@ construct_id_field(const struct fileinfo *props, char *id_str,
 		return;
 	}
 
-	const char *dim = conf.colorize == 0 ? "" : "\x1b[2m";
-
-	if (prop_fields.ids == PROP_ID_NUM) {
-		snprintf(id_str, ID_STR_LEN, "%s%-*u %s%-*u%s", id_color,
-			maxes->id_user, props->uid, dim, maxes->id_group,
-			props->gid, df_c);
-	} else { /* PROPS_ID_NAME */
-		snprintf(id_str, ID_STR_LEN, "%s%-*s %s%-*s%s", id_color,
-			maxes->id_user, props->uid_i.name, dim,
-			maxes->id_group, props->gid_i.name, df_c);
+	if (prop_fields.no_group == 1) {
+		if (prop_fields.ids == PROP_ID_NUM) {
+			snprintf(id_str, ID_STR_LEN, "%s%-*u%s", id_color,
+				maxes->id_user, props->uid, df_c);
+		} else { /* PROPS_ID_NAME */
+			snprintf(id_str, ID_STR_LEN, "%s%-*s%s", id_color,
+				maxes->id_user, props->uid_i.name, df_c);
+		}
+	} else {
+		const char *dim = conf.colorize == 0 ? "" : "\x1b[2m";
+		if (prop_fields.ids == PROP_ID_NUM) {
+			snprintf(id_str, ID_STR_LEN, "%s%-*u %s%-*u%s", id_color,
+				maxes->id_user, props->uid, dim, maxes->id_group,
+				props->gid, df_c);
+		} else { /* PROPS_ID_NAME */
+			snprintf(id_str, ID_STR_LEN, "%s%-*s %s%-*s%s", id_color,
+				maxes->id_user, props->uid_i.name, dim,
+				maxes->id_group, props->gid_i.name, df_c);
+		}
 	}
 }
 
