@@ -241,8 +241,10 @@ For a complete description please consult our [Wiki](https://github.com/leo-arch
 <summary>Click here to expand</summary>
 
 * `Development`
+  - [Disable the group ID field in long view](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode).
+  - [Hard links number in long view](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode).
   - [Birth time support in long view](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode).
-  - [User/group ID names (instead of just numbers) in long view](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode).
+  - [User/group ID **names** (instead of just numbers) in long view](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode).
 * `1.17 (Lechuck)`
   - [Allow properties fields order customization in long view](https://github.com/leo-arch/clifm/wiki/Common-Operations#file-details).
   - [Autocommand files](https://github.com/leo-arch/clifm/wiki/Specifics#autocommand-files-cfmin-and-cfmout) won't be read unless `ReadAutocmdFiles` is set to `true` in the main configuration file.
