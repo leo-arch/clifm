@@ -1587,6 +1587,7 @@ create_main_config_file(char *file)
 # Properties fields to be printed in long view mode\n\
 # f = files counter for directories\n\
 # d = inode number\n\
+# l = number of hard links\n\
 # p|n = permissions: either symbolic (p) or numeric/octal (n)\n\
 # i|I = user/group IDs: as number (i) or name (I)\n\
 # a|b|m|c = last (a)ccess, (b)irth, (m)odification, or status (c)hange time\n\

@@ -86,6 +86,7 @@
 # Properties fields to be printed for each file name in long view mode:
 # f: files counter (for directories)
 # d: inode number
+# l: number of hard links
 # p|n = permissions: either symbolic (p) or numeric/octal (n)
 # i|I = user/group IDs: either as number (i) or name (I)
 # a|b|m|c = last (a)ccess, (b)irth, (m)odification, or status (c)hange time
