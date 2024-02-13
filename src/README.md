@@ -199,11 +199,11 @@ This is the basic structure of **clifm**: generally speaking, it is just a shell
 | Tweak how we select files | `selection.c` | `sel_function` and `deselect` | |
 | Tweak the quick search function | `search.c` | `search_glob` and `search_regex` | |
 | Tweak how we handle profiles | `profiles.c` | `profile_function` |
-| Tweak how we process file properties | `properties.c` | `print_entry_props` (long view) and `properties_function` (`p` command) | |
+| Tweak how we process file properties | `properties.c` | `properties_function` (`p/pp` command) | This file also handles the `pc`, `po`, and `stats` commands |
 | Modify/add keybindings | `keybindings.c` | `readline_kbinds` |
 | Icons | `icons.h`, `listing.c` | `list_dir` | Consult the [customizing icons](https://github.com/leo-arch/clifm/wiki/Advanced#customizing-icons) section |
 | TAB completion (including alternative completers) | `readline.c` and `tabcomp.c` | `my_rl_completion` and `tab_complete` respectively | |
-| Interface | `listing.c` and `colors.c` | `list_dir` and `set_colors` respectively | See also `sort.c` for our files sorting algorithms|
+| Interface | `listing.c`, `long_view.c` and `colors.c` | `list_dir`, `print_entry_props` and `set_colors` respectively | See also `sort.c` for our files sorting algorithms |
 | Directory jumper | `jump.c` | `dirjump` | |
 | Suggestions | `suggestions.c` and `keybinds.c` | `rl_suggestions` and `rl_accept_suggestion` respectively | |
 | Syntax highlighting | `highlight.c` | `rl_highlight` | See also `readline.c` and `keybinds.c` |
