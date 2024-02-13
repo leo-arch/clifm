@@ -151,7 +151,7 @@ Besides common file operations such as copy, move, remove, etc., _clifm_ provide
   - [Custom commands](https://github.com/leo-arch/clifm/wiki/Customization#custom-commands)
   - [User profiles](https://github.com/leo-arch/clifm/wiki/Specifics#profiles)
   - [Customizable keyboard shortcuts](https://github.com/leo-arch/clifm/wiki/Customization#keybindings)
-  - [Theming support](https://github.com/leo-arch/clifm/wiki/Customization#theming) (more than a dozen color schemes)
+  - [Theming](https://github.com/leo-arch/clifm/wiki/Customization#theming) (including [bundled color schemes](https://github.com/leo-arch/clifm/tree/master/misc/colors) and [**LS_COLORS** support](https://github.com/leo-arch/clifm/wiki/Customization#ls_colors-support))
   - [Prompt customization](https://github.com/leo-arch/clifm/wiki/Customization#the-prompt)
   - [Four customizable keybindings for custom plugins](https://github.com/leo-arch/clifm/wiki/Customization#keybindings)
   - [Compile features in/out](https://github.com/leo-arch/clifm/blob/master/src/README.md#compiling-features-inout)
