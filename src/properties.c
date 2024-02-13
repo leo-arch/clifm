@@ -148,10 +148,7 @@
 /* construct_human_size() returns a string of at most MAX_HUMAN_SIZE chars (helpers.h) */
 #define SIZE_STR_LEN  (MAX_HUMAN_SIZE + (MAX_COLOR * 3) + 1) /* construct_file_size() */
 
-/* Let's suppose that IDs go up to 999 billions (12 digits)
- * * 2 IDs + pad (at most 12 more digits) == 36
- * 39 == 36 + colon + space + NUL byte */
-//#define ID_STR_LEN   ((MAX_COLOR * 2) + 39) /* construct_id_field() */
+/* 2 colors + 2 names + (space + NUL byte) + DIM */
 #define ID_STR_LEN    ((MAX_COLOR * 2) + (NAME_MAX * 2) + 2 + 4)
 
 /* Max inode number able to hold: 999 billions! Padding could be as long
@@ -2081,7 +2078,7 @@ construct_file_size(const struct fileinfo *props, char *size_str,
 
 	/* Let's construct the color for the current file size */
 	const char *csize = props->dir == 1 ? dz_c : df_c;
-	char sf[MAX_SHADE_LEN];
+	static char sf[MAX_SHADE_LEN];
 	if (conf.colorize == 1) {
 		if (!*dz_c) {
 			get_color_size(size, sf, sizeof(sf));
@@ -2096,7 +2093,7 @@ construct_file_size(const struct fileinfo *props, char *size_str,
 		return file_perm;
 	}
 
-	char err[sizeof(xf_c) + 6]; *err = '\0';
+	static char err[sizeof(xf_c) + 6]; *err = '\0';
 	if (props->dir == 1 && conf.full_dir_size == 1
 	&& props->du_status != 0)
 		snprintf(err, sizeof(err), "%s%c%s", xf_c, DU_ERR_CHAR, NC);
@@ -2115,7 +2112,12 @@ static void
 construct_file_perms(const mode_t mode, char *perm_str, const char file_type,
 	const char *ctype)
 {
-	char tmp_ctype[MAX_COLOR + 1];
+	if (prop_fields.perm == 0) {
+		*perm_str = '\0';
+		return;
+	}
+
+	static char tmp_ctype[MAX_COLOR + 1];
 	xstrsncpy(tmp_ctype, ctype, sizeof(tmp_ctype));
 	if (xargs.no_bold != 1)
 		remove_bold_attr(tmp_ctype);
@@ -2129,11 +2131,9 @@ construct_file_perms(const mode_t mode, char *perm_str, const char file_type,
 			perms.cgr, perms.gr, perms.cgw, perms.gw, perms.cgx, perms.gx, dn_c,
 			perms.cor, perms.or, perms.cow, perms.ow, perms.cox, perms.ox, df_c);
 
-	} else if (prop_fields.perm == PERM_NUMERIC) {
+	} else /* PERM_NUMERIC */ {
 		snprintf(perm_str, PERM_STR_LEN, "%s%04o%s", do_c, mode & 07777, df_c);
 
-	} else {
-		*perm_str = '\0';
 	}
 }
 
@@ -2147,13 +2147,13 @@ construct_timestamp(char *time_str, const time_t ltime)
 
 	/* Let's construct the color for the current timestamp. */
 	char *cdate = dd_c;
-	char df[MAX_SHADE_LEN];
+	static char df[MAX_SHADE_LEN];
 	if (conf.colorize == 1 && !*dd_c) {
 		get_color_age(ltime, df, sizeof(df));
 		cdate = df;
 	}
 
-	char file_time[MAX_TIME_STR];
+	static char file_time[MAX_TIME_STR];
 	struct tm t;
 
 	if (ltime > 0 && ltime != (time_t)-1 && localtime_r(&ltime, &t)) {
@@ -2290,33 +2290,33 @@ print_entry_props(const struct fileinfo *props, const struct maxes_t *maxes,
 
 	construct_and_print_filename(props, maxes->name);
 
-	char perm_str[PERM_STR_LEN];
+	static char perm_str[PERM_STR_LEN];
 	construct_file_perms(props->mode, perm_str, file_type, ctype);
 
-	char time_str[TIME_STR_LEN];
+	static char time_str[TIME_STR_LEN];
 	construct_timestamp(time_str, props->ltime);
 
-	char size_str[SIZE_STR_LEN];
+	static char size_str[SIZE_STR_LEN];
 	const int file_perm = construct_file_size(props, size_str, maxes->size);
 
 	const char *id_color = (file_perm == 1 && conf.colorize == 1) ? dg_c : df_c;
-	char id_str[ID_STR_LEN];
+	static char id_str[ID_STR_LEN];
 	construct_id_field(props, id_str, id_color, maxes);
 
-	char links_str[LINKS_STR_LEN]; *links_str = '\0';
+	static char links_str[LINKS_STR_LEN]; *links_str = '\0';
 	if (prop_fields.links == 1) {
 		snprintf(links_str, LINKS_STR_LEN, "\x1b[0m%s%s%*ju%s",
 			tx_c, props->linkn > 1 ? BOLD : "",
 			maxes->links, (uintmax_t)props->linkn, df_c);
 	}
 
-	char ino_str[INO_STR_LEN]; *ino_str = '\0';
+	static char ino_str[INO_STR_LEN]; *ino_str = '\0';
 	if (prop_fields.inode == 1) {
 		snprintf(ino_str, INO_STR_LEN, "\x1b[0m%s%*ju%s", tx_c,
 			maxes->inode, (uintmax_t)props->inode, df_c);
 	}
 
-	char fc_str[FC_STR_LEN];
+	static char fc_str[FC_STR_LEN];
 	construct_files_counter(props, fc_str, maxes->files_counter);
 
 	/* We only need a single character to print the xattributes indicator,
@@ -2325,7 +2325,7 @@ print_entry_props(const struct fileinfo *props, const struct maxes_t *maxes,
 	 * However, some terminals, like 'cons25', print the 0 above graphically,
 	 * as a space, which is not what we want here. To fix this, let's
 	 * construct this char as a string. */
-	char xattr_str[2] = {0};
+	static char xattr_str[2] = {0};
 	*xattr_str = have_xattr == 1 ? (props->xattr == 1 ? XATTR_CHAR : ' ') : 0;
 
 	/* Print stuff */
