@@ -89,9 +89,10 @@
 # l: number of hard links
 # p|n = permissions: either symbolic (p) or numeric/octal (n)
 # i|I = user/group IDs: either as number (i) or name (I)
+# G = if i|I is set, don't print groups
 # a|b|m|c = last (a)ccess, (b)irth, (m)odification, or status (c)hange time
 # s|S = size (either human readable (s) or bytes (S))
-# x = extended attributes/capabilities/ACLs (marked as '@')
+# x = extended attributes/capabilities/ACLs (marked as '@') (requires p|n)
 # A single dash ("-") disables all fields
 #
 # Note that, exception made of 'x', fields will be printed in the order

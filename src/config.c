@@ -1590,9 +1590,10 @@ create_main_config_file(char *file)
 # l = number of hard links\n\
 # p|n = permissions: either symbolic (p) or numeric/octal (n)\n\
 # i|I = user/group IDs: as number (i) or name (I)\n\
+# G = if i|I is set, don't print group\n\
 # a|b|m|c = last (a)ccess, (b)irth, (m)odification, or status (c)hange time\n\
 # s|S = size (either human readable (s) or bytes (S))\n\
-# x = extended attributes (marked as '@')\n\
+# x = extended attributes/ACL/capabilities (marked as '@') (requires p|n)\n\
 # A single dash (\'-\') disables all fields\n\
 ;PropFields=\"%s\"\n\
 # Format used to print timestamps in long view (see strftime(3))\n\
