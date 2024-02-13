@@ -310,9 +310,13 @@ get_sysusers(void)
 	struct passwd *p;
 	n = 0;
 	while ((p = getpwent())) {
+#ifndef __HAIKU__
 		/* Some systems (BSD) may have multiple UIDs 0 (ex: "root" and "toor").
-		 * Let's always use "root" for UID 0. */
+		 * This is known as a root alias. Let's always use "root" for UID 0. */
 		const char *name = p->pw_uid == 0 ? "root" : p->pw_name;
+#else
+		const char *name = p->pw_name;
+#endif /* !__HAIKU__ */
 		const size_t namlen = strlen(name);
 		sys_users[n].name = savestring(name, namlen);
 		sys_users[n].namlen = namlen;
