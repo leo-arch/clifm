@@ -162,9 +162,9 @@ If not obvious, comment what your code is trying to achieve: there is no good so
 
 **Clifm**'s source code consists of multiple C source files, being `main.c` the starting point and `helpers.h` the main header file. In `main.c` you'll find:
 
-**A)** Initialization stuff, like loading config files (see `config.c`), command line options (parsed by the `parse_cmdline_args()` function, in `init.c`), readline and keybindings initialization (see `readline.c` and `keybindings.c`), bookmarks, workspaces, history, and the like.
+**A)** Initialization stuff, like loading config files (see `config.c` and `init.c`), command line options (parsed by the `parse_cmdline_args()`, in `args.c`), readline and keybindings initialization (see `readline.c` and `keybindings.c`), bookmarks, workspaces, history, and the like.
 
-**B)** Once everything is correctly initialized, an infinite loop (`run_main_loop`, in `main.c`), structured as a basic shell, takes place:
+**B)** Once everything is correctly initialized, an infinite loop (`run_main_loop()`, in `main.c`), structured as a basic shell, takes place:
 1)  Take input
 
 2)  Parse input
