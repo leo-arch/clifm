@@ -959,7 +959,8 @@ list_colorschemes(void)
 	size_t i;
 	for (i = 0; color_schemes[i]; i++) {
 		if (cur_cscheme == color_schemes[i])
-			printf("%s>%s %s\n", mi_c, df_c, color_schemes[i]);
+			printf("%s>%s %s%s\n", mi_c, df_c, color_schemes[i],
+				xargs.lscolors == 1 ? _(" (on LS_COLORS)") : "");
 		else
 			printf("  %s\n", color_schemes[i]);
 	}
