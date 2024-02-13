@@ -1,4 +1,4 @@
-/* properties.h -- Functions to generate/handle file properties */
+/* properties.h -- Home of the p/pp, pc, oc, and stats commands */
 
 /*
  * This file is part of CliFM
@@ -24,9 +24,6 @@
 
 #ifndef PROPERTIES_H
 #define PROPERTIES_H
-
-/* Max size for a file size color (used by get_color_size()) */
-#define MAX_SHADE_LEN 26 /* "\x1b[0;x;38;2;xxx;xxx;xxxm\0" */
 
 #ifdef LINUX_FILE_ATTRS
 /* On some Linux distros, some of these flags are not defined (in linux/fs.h).
@@ -56,14 +53,56 @@
 # define XFS_CASEFOLD_FL     0x40000000 /* Folder is case insensitive */
 #endif /* LINUX_FILE_ATTRS */
 
+/* Max size for a file size color (used by get_color_size()) */
+#define MAX_SHADE_LEN 26 /* "\x1b[0;x;38;2;xxx;xxx;xxxm\0" */
+
+/* Macros to calculate relative timestamps (used by get_color_age()) */
+#define RT_SECOND 1
+#define RT_MINUTE (60  * RT_SECOND)
+#define RT_HOUR   (60  * RT_MINUTE)
+#define RT_DAY    (24  * RT_HOUR)
+#define RT_WEEK   (7   * RT_DAY)
+#define RT_MONTH  (30  * RT_DAY)
+#define RT_YEAR   (365 * RT_DAY)
+
+/* Struct used by get_file_perms() */
+struct perms_t {
+	/* Field colors */
+	char *cur;
+	char *cuw;
+	char *cux;
+	char *cgr;
+	char *cgw;
+	char *cgx;
+	char *cor;
+	char *cow;
+	char *cox;
+	/* Field values */
+	char ur;
+	char uw;
+	char ux;
+	char gr;
+	char gw;
+	char gx;
+	char or;
+	char ow;
+	char ox;
+	char pad1;
+	char pad2;
+	char pad3;
+	int  pad4;
+};
+
 __BEGIN_DECLS
+
 void do_stat_and_exit(const int full_stat);
+void get_color_age(const time_t t, char *str, const size_t len);
 void get_color_size(const off_t s, char *str, const size_t len);
+struct perms_t
+     get_file_perms(const mode_t mode);
 int  properties_function(char **args, const int follow_link);
 void print_analysis_stats(const off_t total, const off_t largest,
 	const char *color, const char *name);
-int  print_entry_props(const struct fileinfo *props,
-	const struct maxes_t *maxes, const int have_xattr);
 int  set_file_perms(char **args);
 int  set_file_owner(char **args);
 

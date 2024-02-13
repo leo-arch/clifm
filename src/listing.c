@@ -87,7 +87,8 @@
 #endif /* !_NO_ICONS */
 #include "messages.h"
 #include "misc.h"
-#include "properties.h"
+#include "properties.h" /* print_analysis_stats() */
+#include "long_view.h"  /* print_entry_props() */
 #include "sanitize.h"
 #include "sort.h"
 #include "spawn.h"
