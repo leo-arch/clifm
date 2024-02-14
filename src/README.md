@@ -58,16 +58,16 @@ Assignements and comparissons (spaces around equal sign):
 x = y
 ```
 
-Proper casting. For example, if the function resturns a pointer to a string, do not write:
+Proper casting. For example, if initializing a pointer to a string, do not write:
 
 ```c
-return NULL;
+char *str = NULL;
 ```
 
 But,
 
 ```c
-return (char *)NULL;
+char *str = (char *)NULL;
 ```
 
 Prefer ASCII instead of Hex: Ex: `'\0'` instead of `0x00`
@@ -78,7 +78,7 @@ Max line legnth: `80 characters/columns`. If an statement exceeds this number, s
 
 ```c
 if (condition)
-	printk(KERN_WARNING "Warning this is a long printk with "
+	printf("Warning: this is a long printf with "
 		"3 parameters a: %u b: %u "
 		"c: %u \n", a, b, c);
 ```
@@ -89,46 +89,115 @@ Make sure blank/empty lines do not contains TABS or spaces. In the same way, rem
 
 A program should not only provide working features, but also well written, performant, and easily understandable code:
 
-### 1. Resources
+### 1. Performance and security
 
-Use the proper tool (and in the proper way) for the job: be as simple as possible and do not waste resources (they are highly valuable). For example: `strcmp(3)` is a standard and quite useful function. However, it is a good idea to prevent calling this function (possibily hundreds of times in a loop) if not needed. Before calling `strcmp` compare the first byte of the strings to be compared. If they do not match, there is no need to call the function:
+**a)** Use the proper tool (and in the proper way) for the job: be as simple as possible and do not waste resources (they are highly valuable). For example: `strcmp(3)` is a standard and quite useful function. However, it is a good idea to prevent calling this function (possibily hundreds of times in a loop) if not needed. Before calling `strcmp` compare the first byte of the strings to be compared. If they do not match, there is no need to call the function:
 
 ```c
-if (*str == *str2 && strcmp(str, str2) == 0)
+if (*str == *str2 && strcmp(str + 1, str2 + 1) == 0)
 ```
 
-In the same way, and for the same reason, use the cheapest function. If you do not need formatting, prefer `write(3)` or `fputs(3)` over `printf(3)`: they're faster.
+**b)** In the same way, and for the same reason, use the cheapest function. If you do not need formatting, prefer `write(3)` or `fputs(3)` over `printf(3)`: they're faster.
 
-Use pointers whenever possible: this is one of the greatest advantages of C. For instance, if you need to get the basename of a directory, there is no need to copy the string in any way, neither manually nor via some other function. Just get a pointer to the last slash in the original string using `strrchr(3)`:
+**c)** Pass structs by address (`function(&my_struct)`) intead of by value (`function(my_struct)`): passing an address to a function is faster than duplicating the value of each struct member and then pass it to the function.
+
+**d)** Use `static` and `const` as much as possible. For example, if a variable won't be modified after the initial assignment, make it constant, i.e. reead-only (`const int var = 12`). Likewise, if a function won't be invoked outside the current compilation unit (source file and its corresponding header file), declare it as `static`: `static int my_func()`. In the same line, limit the scope of your variables as much as possible. For example, do not write:
 
 ```c
-char *ret = strrchr(str, '/');
+int n = 0;
+while (cond) {
+    n = atoi(str);
+    printf("%d\n", n);
+}
+```
+
+but,
+
+```c
+while (cond) {
+    const int n = atoi(str);
+    printf("%d\n", n);
+}
+```
+
+**e)** Use pointers whenever possible: this is one of the greatest advantages of C. For instance, if you need to get the basename of a directory, there is no need to copy the string in any way, neither manually nor via some other function. Just get a pointer to the last slash in the original string using `strrchr(3)`:
+
+```c
+char *ret = strrchr(path, '/');
 if (ret && *(++ret))
 	/* We have the directory basename */
 ```
 
-Always perform bound checks. Either make sure the destination buffer is big enough to hold the source string or truncate the source string to fit your buffer via some of the `n` functions (`strncpy(3)`, `strncat(3)`, `snprintf(3)`, etc):
+**f)** **Always** perform bound checks:
 
 ```c
-char *buf = (char *)xnmalloc(strlen(src) + 1, sizeof(char));
+/* Dinamically allocate enough memory to hold the source string */
+char *buf = xnmalloc(strlen(src) + 1, sizeof(char));
 strcpy(buf, src);
 ```
 
-or (using a safe version of `strncpy(3)`)
+or
 ```c
-buf[PATH_MAX];
+/* If the buffer has a fixed size, make sure it won't be overflowed by a longer source string */
+buf[PATH_MAX + 1];
 xstrsncpy(buf, src, sizeof(buf));
 ```
 
 **Note**: Both `xstrsncpy` and `xnmalloc` are safe implementations of `strcpy(3)` and `malloc(3)` respectively and are provided by **clifm** itself (see `strings.c` and `mem.c` respectively).
 
-These are just a few examples. There are plenty of resources out there on how to write secure code.
+**g)** Also, be careful not to under/overflow your data types. For example, the following code:
 
-### 2. Memory
+```c
+int c = 0;
+while (cond)
+    c++;
+```
+might easily overflow `c` _if `cond` allows `c` going beyond **INT_MAX**_ (in which case `c` becomes negative). A safer way of writing this is:
+
+```c
+int c = 0;
+while (cond && c < INT_MAX)
+    c++;
+```
+
+**h)** **Always, always** check the return value of functions. This code:
+
+```c
+char *file_ext = strrchr(filename, '.');
+size_t len = strlen(file_ext);
+```
+will quite probably crash your program (if there's no dot in `filename`).
+
+Rewrite it as follows to avoid a NULL pointer dereference (and probably a crash).
+
+```c
+char *file_ext = strrchr(filename, '.');
+size_t len = file_ext ? strlen(file_ext) : 0;
+```
+
+**i)** Keep your functions short (ideally, make them do one thing -and do it well). This helps to make more readable and deduggable code. For the same reason, split code into separate source files whenever possible.
+
+These are just a few advices (most of which I learned the hard way). There are plenty of resources out there on how to write secure/performant code.
+
+### 2. Portability
+
+We do care about portability. If possible, avoid non-portable functions, or, if absolutely required, use it only on the supported platform and use some replacement for the remaining ones. For example, in the case of a glibc-only function:
+
+```c
+#if !defined(__GLIBC__)
+    portable_func();
+#else
+   non_portable_func();
+#endif /* !__GLIBC__ */
+```
+
+Also, make sure to write [POSIX.1-2008](https://pubs.opengroup.org/onlinepubs/9699919799.2008edition/basedefs/V1_chap01.html) compliant code.
+
+### 3. Memory
 
 Manual memory management is another of the greatest (dis)advantages of C. Use a tool like `valgrind` to make sure your code is not leaking memory. Free `malloc`'ed memory as soon as you don't need it any more. As a plus, compile with `clang` using the following flags to detect undefined behavior and integer overflow at run-time: `-fsanitize=integer -fsanitize=undefined`.
 
-### 3. Static analysis
+### 4. Static analysis
 
 Static analysis tools are an invaluable resource: use them! **Always** check your code via tools like `cppcheck`, GCC's analyzer (`-fanalyzer`),<sup>1</sup> Clang's `scan-build`, `flawfinder`, or `splint`. Use them all if necessary. Once done, fix all warnings and errors (provided they are not false positives, of course). This said, we use three online platforms to check our code quality: [Codacy](https://app.codacy.com/gh/leo-arch/clifm/dashboard), [~~Codiga~~](https://app.codiga.io/project/30518/dashboard), and [CodeQL](https://github.com/leo-arch/clifm/actions/workflows/codeql-analysis.yml).
 
@@ -136,7 +205,7 @@ Static analysis tools are an invaluable resource: use them! **Always** check you
 
 When it comes to plugins, we mostly use `POSIX shell scripts`. In this case, always use `shellcheck` to check your plugins.
 
-### 4. Compiling
+### 5. Compiling
 
 Submitted code must be compiled without any warning/error using the following compiler flags:
 
@@ -154,7 +223,7 @@ gcc -O2 -flto=auto -ffat-lto-objects -fexceptions -g -grecord-gcc-switches -pipe
 
 Finally, purge the code from unused headers. An execellent tool specifically desinged for this purpose is [include-what-you-use](https://github.com/include-what-you-use/include-what-you-use).
 
-### 5. Comments
+### 6. Comments
 
 If not obvious, comment what your code is trying to achieve: there is no good software without good documentation.
 
