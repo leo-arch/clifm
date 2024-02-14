@@ -446,13 +446,13 @@ print_entry_props(const struct fileinfo *props, const struct maxes_t *maxes,
 	static char links_str[LINKS_STR_LEN]; *links_str = '\0';
 	if (prop_fields.links == 1) {
 		snprintf(links_str, LINKS_STR_LEN, "\x1b[0m%s%s%*ju%s",
-			tx_c, props->linkn > 1 ? BOLD : "",
+			dk_c, props->linkn > 1 ? BOLD : "",
 			maxes->links, (uintmax_t)props->linkn, df_c);
 	}
 
 	static char ino_str[INO_STR_LEN]; *ino_str = '\0';
 	if (prop_fields.inode == 1) {
-		snprintf(ino_str, INO_STR_LEN, "\x1b[0m%s%*ju%s", tx_c,
+		snprintf(ino_str, INO_STR_LEN, "\x1b[0m%s%*ju%s", de_c,
 			maxes->inode, (uintmax_t)props->inode, df_c);
 	}
 

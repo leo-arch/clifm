@@ -1898,12 +1898,12 @@ extern char
 	bk_c[MAX_COLOR], /* Backup/temp files */
 	ca_c[MAX_COLOR], /* Cap file */
 	cd_c[MAX_COLOR], /* Char device */
+	di_c[MAX_COLOR], /* Directory */
 	ed_c[MAX_COLOR], /* Empty dir */
 	ee_c[MAX_COLOR], /* Empty executable */
 	ex_c[MAX_COLOR], /* Executable */
 	ef_c[MAX_COLOR], /* Empty reg file */
 	fi_c[MAX_COLOR], /* Reg file */
-	di_c[MAX_COLOR], /* Directory */
 	ln_c[MAX_COLOR], /* Symlink */
 	mh_c[MAX_COLOR], /* Multi-hardlink file */
 	nd_c[MAX_COLOR], /* No read directory */
@@ -1924,10 +1924,10 @@ extern char
 
 	/* Interface */
 	bm_c[MAX_COLOR], /* Bookmarked directory */
-	fc_c[MAX_COLOR], /* Files counter */
 	df_c[MAX_COLOR], /* Default color */
 	dl_c[MAX_COLOR], /* Dividing line */
 	el_c[MAX_COLOR], /* ELN color */
+	fc_c[MAX_COLOR], /* Files counter */
 	lc_c[MAX_COLOR], /* Symlink character (ColorLinkAsTarget only) */
 	mi_c[MAX_COLOR], /* Misc indicators */
 	ts_c[MAX_COLOR], /* TAB completion suffix */
@@ -1964,7 +1964,9 @@ extern char
 
 	/* File properties */
 	dd_c[MAX_COLOR],  /* Date (fixed color: no shading) */
+	de_c[MAX_COLOR],  /* Inode number */
 	dg_c[MAX_COLOR],  /* UID, GID */
+	dk_c[MAX_COLOR],  /* Number of links */
 	dn_c[MAX_COLOR],  /* dash (none) */
 	do_c[MAX_COLOR],  /* Octal perms */
 	dp_c[MAX_COLOR],  /* Special files (SUID, SGID, etc) */

@@ -346,10 +346,10 @@ char
 
 	/* Interface */
 	bm_c[MAX_COLOR], /* Bookmarked directory */
-	fc_c[MAX_COLOR], /* Files counter */
 	df_c[MAX_COLOR], /* Default color */
 	dl_c[MAX_COLOR], /* Dividing line index */
 	el_c[MAX_COLOR], /* ELN */
+	fc_c[MAX_COLOR], /* Files counter */
 	lc_c[MAX_COLOR], /* Symlink character (ColorLinkAsTarget only) */
 	mi_c[MAX_COLOR], /* Misc indicators */
 	ts_c[MAX_COLOR], /* TAB completion suffix */
@@ -385,7 +385,9 @@ char
 	hw_c[MAX_COLOR], /* Backslash (aka whack) */
 
 	dd_c[MAX_COLOR],  /* Date (fixed color: no shading) */
+	de_c[MAX_COLOR],  /* Inode number */
 	dg_c[MAX_COLOR],  /* UID, GID */
+	dk_c[MAX_COLOR],  /* Number of links */
 	dn_c[MAX_COLOR],  /* dash (none) */
 	do_c[MAX_COLOR],  /* Octal perms */
 	dp_c[MAX_COLOR],  /* Special files (SUID, SGID, etc) */

@@ -911,7 +911,9 @@ reset_iface_colors(void)
 	*ws8_c = '\0';
 
 	*dd_c = '\0';
+	*de_c = '\0';
 	*dg_c = '\0';
+	*dk_c = '\0';
 	*dn_c = '\0';
 	*do_c = '\0';
 	*dp_c = '\0';
@@ -1250,10 +1252,14 @@ set_iface_colors(char **colors, const size_t num_colors)
 		else if (*colors[i] == 'd') {
 			if (colors[i][1] == 'd' && colors[i][2] == '=')
 				set_color(colors[i] + 3, dd_c, RL_PRINTABLE);
+			else if (colors[i][1] == 'e' && colors[i][2] == '=')
+				set_color(colors[i] + 3, de_c, RL_PRINTABLE);
 			else if (colors[i][1] == 'f' && colors[i][2] == '=')
 				set_color(colors[i] + 3, df_c, RL_PRINTABLE);
 			else if (colors[i][1] == 'g' && colors[i][2] == '=')
 				set_color(colors[i] + 3, dg_c, RL_PRINTABLE);
+			else if (colors[i][1] == 'k' && colors[i][2] == '=')
+				set_color(colors[i] + 3, dk_c, RL_PRINTABLE);
 			else if (colors[i][1] == 'l' && colors[i][2] == '=')
 				set_color(colors[i] + 3, dl_c, RL_PRINTABLE);
 			else if (colors[i][1] == 'n' && colors[i][2] == '=')
@@ -1756,6 +1762,8 @@ set_default_colors_256(void)
 		xstrsncpy(dd_c, DEF_DD_C, sizeof(dd_c));
 	if (!*dz_c) // Size color unset: let's use shades
 		xstrsncpy(dz_c, DEF_DZ_C, sizeof(dz_c)); */
+	if (!*de_c) xstrsncpy(de_c, DEF_DE_C256, sizeof(de_c));
+	if (!*dk_c) xstrsncpy(dk_c, DEF_DK_C256, sizeof(dk_c));
 	if (!*do_c) xstrsncpy(do_c, DEF_DO_C256, sizeof(do_c));
 	if (!*dp_c) xstrsncpy(dp_c, DEF_DP_C256, sizeof(dp_c));
 	if (!*dn_c) xstrsncpy(dn_c, DEF_DN_C256, sizeof(dn_c));
@@ -1915,6 +1923,8 @@ set_default_colors(void)
 		xstrsncpy(dd_c, DEF_DD_C, sizeof(dd_c));
 	if (!*dz_c) // Size color unset: let's use shades
 		xstrsncpy(dz_c, DEF_DZ_C, sizeof(dz_c)); */
+	if (!*de_c) xstrsncpy(de_c, DEF_DE_C, sizeof(de_c));
+	if (!*dk_c) xstrsncpy(dk_c, DEF_DK_C, sizeof(dk_c));
 	if (!*do_c) xstrsncpy(do_c, DEF_DO_C, sizeof(do_c));
 	if (!*dp_c) xstrsncpy(dp_c, DEF_DP_C, sizeof(dp_c));
 	if (!*dn_c) xstrsncpy(dn_c, DEF_DN_C, sizeof(dn_c));
@@ -2526,7 +2536,9 @@ disable_bold(void)
 
 	/* File properties */
 	remove_bold_attr(dd_c);
+	remove_bold_attr(de_c);
 	remove_bold_attr(dg_c);
+	remove_bold_attr(dk_c);
 	remove_bold_attr(dn_c);
 	remove_bold_attr(do_c);
 	remove_bold_attr(dp_c);
