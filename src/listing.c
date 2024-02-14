@@ -863,7 +863,7 @@ compute_maxes(void)
 		}
 
 		if (prop_fields.links == 1) {
-			t = DIGINUM(file_info[i].linkn);
+			t = DIGINUM((int)file_info[i].linkn);
 			if (t > maxes.links)
 				maxes.links = t;
 		}
