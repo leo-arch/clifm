@@ -175,7 +175,7 @@ char *file_ext = strrchr(filename, '.');
 size_t len = file_ext ? strlen(file_ext) : 0;
 ```
 
-**i)** **Validate input**: when it comes to untrsuted input (user supplied parameters, config files, etc), be extra distrustful. Soon or later the user will enter exactly what you never expected (and the program will misbehave, or directly crash). For example, do not do this:
+**i)** **Validate input**: when it comes to untrsuted input (user supplied parameters, config files, etc), be extra distrustful. Sooner or later the user will enter exactly what you never expected (and the program will misbehave, or directly crash). For example, do not do this:
 ```c
 const char *param = get_param();
 return atoi(param);
