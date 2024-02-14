@@ -1901,6 +1901,11 @@ get_ids_info(const filesn_t n)
 			file_info[n].uid_i.name = sys_users[i].name;
 			file_info[n].uid_i.namlen = sys_users[i].namlen;
 		}
+
+		if (!file_info[n].uid_i.name) {
+			file_info[n].uid_i.name = UNKNOWN_VAL;
+			file_info[n].uid_i.namlen = UNKNOWN_VAL_LEN;
+		}
 	}
 
 	if (sys_groups) {
@@ -1909,6 +1914,11 @@ get_ids_info(const filesn_t n)
 				continue;
 			file_info[n].gid_i.name = sys_groups[i].name;
 			file_info[n].gid_i.namlen = sys_groups[i].namlen;
+		}
+
+		if (!file_info[n].gid_i.name) {
+			file_info[n].gid_i.name = UNKNOWN_VAL;
+			file_info[n].gid_i.namlen = UNKNOWN_VAL_LEN;
 		}
 	}
 }
