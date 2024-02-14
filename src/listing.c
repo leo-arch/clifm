@@ -78,6 +78,9 @@
 #define IS_EXEC(s) (((s)->st_mode & S_IXUSR)               \
 	|| ((s)->st_mode & S_IXGRP) || ((s)->st_mode & S_IXOTH))
 
+#define UNKNOWN_VAL     "?"
+#define UNKNOWN_VAL_LEN 1
+
 #include "autocmds.h"
 #include "aux.h"
 #include "checks.h"
