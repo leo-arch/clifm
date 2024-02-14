@@ -99,7 +99,7 @@ if (*str == *str2 && strcmp(str + 1, str2 + 1) == 0)
 
 **b)** In the same way, and for the same reason, use the cheapest function. If you do not need formatting, prefer `write(3)` or `fputs(3)` over `printf(3)`: they're faster.
 
-**c)** Pass structs by address (`function(&my_struct)`) intead of by value (`function(my_struct)`): passing an address to a function is faster than duplicating the value of each struct member and then pass it to the function.
+**c)** Pass structs by address (`function(&my_struct)`) intead of by value (`function(my_struct)`): passing an address to a function is faster than duplicating the value of each struct member and then pass it to the function. Also, try not to pass more than 4 parameters to functions.
 
 **d)** Use `static` and `const` as much as possible. For example, if a variable won't be modified after the initial assignment, make it constant, i.e. reead-only (`const int var = 12`). Likewise, if a function won't be invoked outside the current compilation unit (source file and its corresponding header file), declare it as `static`: `static int my_func()`. In the same line, limit the scope of your variables as much as possible. For example, do not write:
 
@@ -120,12 +120,12 @@ while (cond) {
 }
 ```
 
-**e)** Use pointers whenever possible: this is one of the greatest advantages of C. For instance, if you need to get the basename of a directory, there is no need to copy the string in any way, neither manually nor via some other function. Just get a pointer to the last slash in the original string using `strrchr(3)`:
+**e)** Use pointers whenever possible (they're fast): this is one of the greatest advantages of C. For instance, if you need to get the basename of a path, there is no need to copy the string in any way, neither manually nor via some other function. Just get a pointer to the last slash in the original string using `strrchr(3)`:
 
 ```c
 char *ret = strrchr(path, '/');
 if (ret && *(++ret))
-	/* We have the directory basename */
+	/* RET now points to the path basename */
 ```
 
 **f)** **Always** perform bound checks:
@@ -160,7 +160,7 @@ while (cond && c < INT_MAX)
     c++;
 ```
 
-**h)** **Always, always** check the return value of functions. This code:
+**h)** **Always, always** check the return value of functions. This code, for instance:
 
 ```c
 char *file_ext = strrchr(filename, '.');
@@ -175,9 +175,27 @@ char *file_ext = strrchr(filename, '.');
 size_t len = file_ext ? strlen(file_ext) : 0;
 ```
 
-**i)** Keep your functions short (ideally, make them do one thing -and do it well). This helps to make more readable and deduggable code. For the same reason, split code into separate source files whenever possible.
+**i)** **Validate input**: when it comes to untrsuted input (user supplied parameters, config files, etc), be extra distrustful. Soon or later the user will enter exactly what you never expected (and the program will misbehave, or directly crash). For example, do not do this:
+```c
+const char *param = get_param();
+return atoi(param);
+```
+but this
+```c
+const char *param = get_param();
+const int n = param ? atoi(param) : -1;
+if (n >= PARAM_MIN && n <= PARAM_MAX) /* Let's say PARM_MIN = 1 and PARAM_MAX = 10 */
+	return n;
+else
+	/* Handle error */
+```
 
-These are just a few advices (most of which I learned the hard way). There are plenty of resources out there on how to write secure/performant code.
+
+**j)** Keep your functions short (ideally, make them do one thing -and do it well). This helps to make more readable and deduggable code. For the same reason, split code into separate source files whenever possible.
+
+**k)** Do not repeat yourself: reuse code.
+
+These are just a few advices (most of which I learned the hard way). There are plenty of resources out there on how to write secure/performant code: consult them.
 
 ### 2. Portability
 
