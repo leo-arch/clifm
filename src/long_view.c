@@ -199,9 +199,9 @@ static int
 construct_file_size(const struct fileinfo *props, char *size_str,
 	const int size_max)
 {
-	int file_perm = check_file_access(props->mode, props->uid, props->gid);
+	const int file_perm = check_file_access(props->mode, props->uid, props->gid);
 
-	if (prop_fields.size < 1) {
+	if (prop_fields.size == 0) {
 		*size_str = '\0';
 		return file_perm;
 	}
