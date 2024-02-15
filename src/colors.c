@@ -2056,8 +2056,12 @@ store_definition(char *str)
 
 	/* If we find a definition for TEMP, let's use this color for backup files
 	 * (bk_c color code). */
-	if (!*bk_c && *name == 'T' && strcmp(name + 1, "EMP") == 0)
-		snprintf(bk_c, sizeof(bk_c), "\x1b[0;%sm", value);
+	if (!*bk_c && *name == 'T' && strcmp(name + 1, "EMP") == 0) {
+		char *v = *value == '#' ? hex2rgb(value) : value;
+		snprintf(bk_c, sizeof(bk_c), "\x1b[0;%sm", v);
+		if (v != value)
+			free(v);
+	}
 
 	defs_n++;
 }
