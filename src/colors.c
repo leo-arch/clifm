@@ -2059,8 +2059,6 @@ store_definition(char *str)
 	if (!*bk_c && *name == 'T' && strcmp(name + 1, "EMP") == 0) {
 		char *v = *value == '#' ? hex2rgb(value) : value;
 		snprintf(bk_c, sizeof(bk_c), "\x1b[0;%sm", v);
-		if (v != value)
-			free(v);
 	}
 
 	defs_n++;
