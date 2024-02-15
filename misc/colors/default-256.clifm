@@ -65,7 +65,6 @@
 # For the complete list of color names consult the manpage.
 
 define D=0   # Default terminal color
-define BD=1  # Bold
 define DIM=2 # Dimmed
 
 define R4=31    # Red (4-bit)
