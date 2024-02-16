@@ -140,7 +140,7 @@ define MARKUP=1;33  # Same as CODE
 # ne = Empty directory with no read permission
 # nf = Regular file with no read permission
 # no = Unknown
-# oo = Door (Solaris only)
+# oo = Door (Solaris)
 # or = Broken symlink
 # ow = Other-writable
 # pi = FIFO/pipe
@@ -200,8 +200,7 @@ define MARKUP=1;33  # Same as CODE
 # dxr = Execute (reg files)
 # dz =  Size (1)
 
-# (1) If unset, gradient colors will be used (default). See
-# DateShades and SizeShades below for more info.
+# (1) If unset, gradient colors will be used (default)
 
 ## Workspaces
 # wsN = Workspace number N
@@ -212,7 +211,6 @@ define MARKUP=1;33  # Same as CODE
 # nm = Notices
 # ti = Trash indicator
 # tx = Command line text
-# ro = Read-only mode indicator
 # si = Stealth mode indicator
 # wm = Warnings
 # xs = Exit code: success
@@ -237,8 +235,7 @@ ExtColors="*.7z=ARCHIVE:*.ace=ARCHIVE:*.alz=ARCHIVE:*.apk=ARCHIVE:*.arc=ARCHIVE:
 # SHADEn is the color used for the shade N
 #
 # The meaning of each date shade is (in order, excluding COLOR-TYPE and ERROR):
-# hour, day, weak, month, older (256 colors)
-# hour, day, older (8 colors: only 3 shades available)
+# hour, day, weak, month, older
 #
 # For 4-bit colors (1), valid colors are in the range 30-37
 # For 8-bit colors (2), valid colors are in the range 0-255
@@ -250,18 +247,17 @@ ExtColors="*.7z=ARCHIVE:*.ace=ARCHIVE:*.alz=ARCHIVE:*.apk=ARCHIVE:*.arc=ARCHIVE:
 #    "226-2"      -> "dimmed yellow"     (8-bit colors notation)
 #    "#ffaff00-4" -> "underlined orange" (24-bit colors notation)
 
-DateShades="1,31-2,36-1,36,36-2"
+DateShades="1,31-2,36-1,36,36-2,36-2,36-2"
 #DateShades="2,196-2,231,253,250,247,244"
 #DateShades="3,#ff0000-2,#ffffff,#dadada,#bcbcbc,#9e9e9e,#808080"
 
 #NOTE: For DateShades to work, the 'dd' color code (solid color for dates) needs to be unset (default)
 
 # Same as DateShades, but for file sizes.
-# The meaning of each size shade is (in order, excluding COLOR-TYPE and ERROR)
-# byte, Kb, Mb, Gb, bigger (256 colors)
-# byte/Kb, Mb, bigger (8 colors: only 3 shades available)
+# The meaning of each size shade is (in order, excluding COLOR-TYPE and ERROR):
+# byte, Kb, Mb, Gb, bigger
 
-SizeShades="1,31-2,32,33,31"
+SizeShades="1,31-2,36,32,33,31,35"
 #SizeShades="2,196-2,43,112,227,214,202"
 #SizeShades="3,#ff0000-2,#00d7af,#87d700,#ffff5f,#ffaf00,#ff5f00"
 
