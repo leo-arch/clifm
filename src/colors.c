@@ -1487,6 +1487,12 @@ set_shades(char *line, const int type)
 NEXT:
 		c++;
 	}
+
+	/* Handle old-style 8 color shades (only 3 available) */
+	if (type == DATE_SHADES)
+		date_shades_old_style = (c - 1 == 3);
+	else
+		size_shades_old_style = (c - 1 == 3);
 }
 
 static void

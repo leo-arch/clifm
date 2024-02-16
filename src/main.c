@@ -128,6 +128,10 @@ int
 	bin_flags = 0,
 	search_flags = 0;
 
+int
+	date_shades_old_style = 0,
+	size_shades_old_style = 0;
+
 pid_t own_pid = 0;
 time_t props_now = 0;
 

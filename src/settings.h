@@ -196,10 +196,10 @@ xf=1;31:xs=0;32:"
 #define DEF_DZ_C  "\x1b[0;32m" /* Size (only for dirs) */
 
 /* Default color shades for date field in file properties */
-#define DEF_DATE_SHADES_8   "1,31-2,36-1,36,36-2"
+#define DEF_DATE_SHADES_8   "1,31-2,36-1,36,36-2,36-2,36-2"
 
 /* Default color shades for size field in file properties */
-#define DEF_SIZE_SHADES_8   "1,31-2,32,33,31"
+#define DEF_SIZE_SHADES_8   "1,31-2,36,32,33,31,35"
 
 #define DEF_DIR_ICO_C "\x1b[0;33m"
 

@@ -819,139 +819,96 @@ set_file_owner(char **args)
 	return exit_status;
 }
 
-/* Get color shade based on file size (true colors version). */
-static void
-get_color_size_truecolor(const off_t s, char *str, const size_t len)
-{
-	const long long base = xargs.si == 1 ? 1000 : 1024;
-	uint8_t n = 0;
-
-	if      (s <                base) n = 1; /* Bytes */
-	else if (s <           base*base) n = 2; /* Kb */
-	else if (s <      base*base*base) n = 3; /* Mb */
-	else if (s < base*base*base*base) n = 4; /* Gb */
-	else				              n = 5; /* Larger */
-
-	snprintf(str, len, "\x1b[0;%d;38;2;%d;%d;%dm",
-		size_shades.shades[n].attr,
-		size_shades.shades[n].R,
-		size_shades.shades[n].G,
-		size_shades.shades[n].B);
-}
-
-/* Get color shade based on file time (true colors version). */
-static void
-get_color_age_truecolor(const time_t t, char *str, const size_t len)
-{
-	const time_t age = props_now - t;
-	uint8_t n;
-
-	if      (age <             0LL) n = 0;
-	else if (age <=        60*60LL) n = 1; /* One hour or less */
-	else if (age <=     24*60*60LL) n = 2; /* One day or less */
-	else if (age <=   7*24*60*60LL) n = 3; /* One weak or less */
-	else if (age <= 4*7*24*60*60LL) n = 4; /* One month or less */
-	else                            n = 5; /* Older */
-
-	snprintf(str, len, "\x1b[0;%d;38;2;%d;%d;%dm",
-		date_shades.shades[n].attr,
-		date_shades.shades[n].R,
-		date_shades.shades[n].G,
-		date_shades.shades[n].B);
-}
-
-/* Get color shade based on file size (256 colors version). */
-static void
-get_color_size256(const off_t s, char *str, const size_t len)
-{
-	const long long base = xargs.si == 1 ? 1000 : 1024;
-	uint8_t n = 0;
-
-	if      (s <                base) n = 1; /* Bytes */
-	else if (s <           base*base) n = 2; /* Kb */
-	else if (s <      base*base*base) n = 3; /* Mb */
-	else if (s < base*base*base*base) n = 4; /* Gb */
-	else				              n = 5; /* Larger */
-
-	snprintf(str, len, "\x1b[0;%d;38;5;%dm",
-		size_shades.shades[n].attr,
-		size_shades.shades[n].R);
-}
-
-/* Get color shade based on file time (256 colors version). */
-static void
-get_color_age256(const time_t t, char *str, const size_t len)
-{
-	/* PROPS_NOW is global. Calculated before by list_dir() and when
-	 * running the 'p' command */
-	const time_t age = props_now - t;
-	uint8_t n;
-
-	if      (age <             0LL) n = 0;
-	else if (age <=        60*60LL) n = 1; /* One hour or less */
-	else if (age <=     24*60*60LL) n = 2; /* One day or less */
-	else if (age <=   7*24*60*60LL) n = 3; /* One weak or less */
-	else if (age <= 4*7*24*60*60LL) n = 4; /* One month or less */
-	else                            n = 5; /* Older */
-
-	snprintf(str, len, "\x1b[0;%d;38;5;%dm",
-		date_shades.shades[n].attr,
-		date_shades.shades[n].R);
-}
-
-static void
-get_color_size8(const off_t s, char *str, const size_t len)
-{
-	const long long base = xargs.si == 1 ? 1000 : 1024;
-	uint8_t n;
-
-	if      (s <      base*base) n = 1; /* Byte and Kb */
-	else if (s < base*base*base) n = 2; /* Mb */
-	else		                 n = 3; /* Larger */
-
-	snprintf(str, len, "\x1b[0;%d;%dm",
-		size_shades.shades[n].attr,
-		size_shades.shades[n].R);
-}
-
-static void
-get_color_age8(const time_t t, char *str, const size_t len)
-{
-	const time_t age = props_now - t;
-	uint8_t n;
-
-	if      (age <         0LL) n = 0;
-	else if (age <=    60*60LL) n = 1; /* One hour or less */
-	else if (age <= 24*60*60LL) n = 2; /* One day or less */
-	else                        n = 3; /* Older */
-
-	snprintf(str, len, "\x1b[0;%d;%dm",
-		date_shades.shades[n].attr,
-		date_shades.shades[n].R);
-}
-
-/* Get color shade (based on size) for the file whose size is S.
- * Store color in STR, whose len is LEN. */
+/* Get color shade based on file size. */
 void
 get_color_size(const off_t s, char *str, const size_t len)
 {
+	const long long base = xargs.si == 1 ? 1000 : 1024;
+	int n = 0;
+
+	/* Keep compatibility with old-style config, which only accepted 3 shades
+	 * for 8 color shades type. This check should be removed in the future. */
+	if (size_shades_old_style == 1) {
+		if      (s <      base*base) n = 1; /* Byte and Kb */
+		else if (s < base*base*base) n = 2; /* Mb */
+		else		                 n = 3; /* Larger */
+	} else {
+		if      (s <                base) n = 1; /* Bytes */
+		else if (s <           base*base) n = 2; /* Kb */
+		else if (s <      base*base*base) n = 3; /* Mb */
+		else if (s < base*base*base*base) n = 4; /* Gb */
+		else				              n = 5; /* Larger */
+	}
+
 	switch (size_shades.type) {
-	case SHADE_TYPE_8COLORS: get_color_size8(s, str, len); break;
-	case SHADE_TYPE_256COLORS: get_color_size256(s, str, len); break;
-	case SHADE_TYPE_TRUECOLOR: get_color_size_truecolor(s, str, len); break;
+	case SHADE_TYPE_8COLORS:
+		snprintf(str, len, "\x1b[0;%d;%dm",
+			size_shades.shades[n].attr,
+			size_shades.shades[n].R);
+		break;
+
+	case SHADE_TYPE_256COLORS:
+		snprintf(str, len, "\x1b[0;%d;38;5;%dm",
+			size_shades.shades[n].attr,
+			size_shades.shades[n].R);
+		break;
+
+	case SHADE_TYPE_TRUECOLOR:
+		snprintf(str, len, "\x1b[0;%d;38;2;%d;%d;%dm",
+			size_shades.shades[n].attr,
+			size_shades.shades[n].R,
+			size_shades.shades[n].G,
+			size_shades.shades[n].B);
+		break;
+
 	default: break;
 	}
 }
 
-/* Get color shade (based on time) for the file whose time is T.
- * Store color in STR, whose len is LEN. */
+/* Get color shade based on file time. */
 void
 get_color_age(const time_t t, char *str, const size_t len)
 {
+	const time_t age = props_now - t;
+	int n;
+
+	/* Keep compatibility with old-style config, which only accepted 3 shades
+	 * for 8 color shades type. This check should be removed in the future. */
+	if (date_shades_old_style == 1) {
+		if      (age <         0LL) n = 0;
+		else if (age <=    60*60LL) n = 1; /* One hour or less */
+		else if (age <= 24*60*60LL) n = 2; /* One day or less */
+		else                        n = 3; /* Older */
+	} else {
+		if      (age <             0LL) n = 0;
+		else if (age <=        60*60LL) n = 1; /* One hour or less */
+		else if (age <=     24*60*60LL) n = 2; /* One day or less */
+		else if (age <=   7*24*60*60LL) n = 3; /* One weak or less */
+		else if (age <= 4*7*24*60*60LL) n = 4; /* One month or less */
+		else                            n = 5; /* Older */
+	}
+
 	switch (date_shades.type) {
-	case SHADE_TYPE_8COLORS: get_color_age8(t, str, len); break;
-	case SHADE_TYPE_256COLORS: get_color_age256(t, str, len); break;
-	case SHADE_TYPE_TRUECOLOR: get_color_age_truecolor(t, str, len); break;
+	case SHADE_TYPE_8COLORS:
+		snprintf(str, len, "\x1b[0;%d;%dm",
+			date_shades.shades[n].attr,
+			date_shades.shades[n].R);
+		break;
+
+	case SHADE_TYPE_256COLORS:
+		snprintf(str, len, "\x1b[0;%d;38;5;%dm",
+			date_shades.shades[n].attr,
+			date_shades.shades[n].R);
+		break;
+
+	case SHADE_TYPE_TRUECOLOR:
+		snprintf(str, len, "\x1b[0;%d;38;2;%d;%d;%dm",
+			date_shades.shades[n].attr,
+			date_shades.shades[n].R,
+			date_shades.shades[n].G,
+			date_shades.shades[n].B);
+		break;
+
 	default: break;
 	}
 }

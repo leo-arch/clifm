@@ -1708,6 +1708,10 @@ extern int
 	bin_flags,
 	search_flags;
 
+extern int
+	date_shades_old_style,
+	size_shades_old_style;
+
 /* Internal state flags */
 extern int
 	argc_bk, /* A copy of argc taken from main() */
