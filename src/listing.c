@@ -2416,7 +2416,7 @@ load_file_gral_info(const struct stat *a, const filesn_t n)
 
 #if defined(LINUX_FILE_XATTRS)
 	if (file_info[n].type != DT_LNK
-	&& (conf.long_view == 1 || check_cap == 1)
+	&& ((conf.long_view == 1 && prop_fields.xattr == 1) || check_cap == 1)
 	&& listxattr(file_info[n].name, NULL, 0) > 0)
 		file_info[n].xattr = 1;
 #endif /* LINUX_FILE_XATTRS */

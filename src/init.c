@@ -2291,7 +2291,7 @@ get_path_programs(void)
 	int *cmd_n = (int *)0;
 	struct dirent ***commands_bin = (struct dirent ***)NULL;
 
-	if (conf.ext_cmd_ok == 1) {
+	if (conf.ext_cmd_ok == 1 && xargs.list_and_quit != 1) {
 		/* NOTE: xchdir() is only required by skip_nonexec() */
 		char tmp[PATH_MAX + 1] = "";
 		char *cwd = get_cwd(tmp, sizeof(tmp), 0);
