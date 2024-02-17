@@ -54,7 +54,7 @@ InterfaceColors="bm=BC:de=C:df=W:dk=R:dl=B:dd=:dg=Y:dn=DW:dr=Y:do=C:dp=M:dw=R:dx
 ExtColors="*.tar=R:*.tgz=R:*.taz=R:*.lha=R:*.lz4=R:*.lzh=R:*.lzma=R:*.tlz=R:*.txz=R:*.tzo=R:*.t7z=R:*.zip=R:*.z=R:*.dz=R:*.gz=R:*.lrz=R:*.lz=R:*.lzo=R:*.xz=R:*.zst=R:*.tzst=R:*.bz2=R:*.bz=R:*.tbz=R:*.tbz2=R:*.tz=R:*.deb=R:*.rpm=R:*.rar=R:*.cpio=R:*.7z=R:*.rz=R:*.cab=R:*.jpg=M:*.jpeg=M:*.mjpg=M:*.mjpeg=M:*.gif=M:*.bmp=M:*.xbm=M:*.xpm=M:*.png=M:*.svg=M:*.pcx=M:*.mov=M:*.mpg=M:*.mpeg=M:*.m2v=M:*.mkv=M:*.webm=M:*.webp=M:*.ogm=M:*.mp4=M:*.m4v=M:*.mp4v=M:*.vob=M:*.wmv=M:*.flc=M:*.avi=M:*.flv=M:*.m4a=C:*.mid=C:*.midi=C:*.mp3=C:*.ogg=C:*.wav=C:"
 
 DateShades="3,#ff0000-2,#ffffff,#dadada,#bcbcbc,#9e9e9e,#808080"
-SizeShades="3,#dc322f-2,#859900,#748409,#b58900,#cb4b16,#dc322f"
+SizeShades="3,#dc322f-2,#2aa1a2,#748409,#b58900,#cb4b16,#dc322f"
 
 DirIconColor=1;38;2;181;137;00
 
