@@ -1893,7 +1893,7 @@ init_fileinfo(const filesn_t n)
 }
 
 static inline void
-get_ids_info(const filesn_t n)
+get_id_names(const filesn_t n)
 {
 	size_t i;
 
@@ -2193,7 +2193,7 @@ list_dir_light(void)
 				set_long_attribs(n, &a);
 #endif /* !_DIRENT_HAVE_D_TYPE */
 			if (prop_fields.ids == PROP_ID_NAME)
-				get_ids_info(n);
+				get_id_names(n);
 		}
 
 		if (xargs.disk_usage_analyzer == 1) {
@@ -2410,7 +2410,7 @@ load_file_gral_info(const struct stat *a, const filesn_t n)
 	file_info[n].gid = a->st_gid;
 
 	if (conf.long_view == 1 && prop_fields.ids == PROP_ID_NAME)
-		get_ids_info(n);
+		get_id_names(n);
 
 	file_info[n].mode = a->st_mode;
 
