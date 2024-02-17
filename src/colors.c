@@ -1666,7 +1666,7 @@ set_default_colors_256(void)
 	if (!*bk_c)
 		xstrsncpy(bk_c, *ef_c ? ef_c : DEF_EF_C256, sizeof(bk_c));
 
-
+	/* Highlight */
 	if (!*hb_c) xstrsncpy(hb_c, DEF_HB_C256, sizeof(hb_c));
 	if (!*hc_c) xstrsncpy(hc_c, DEF_HC_C256, sizeof(hc_c));
 	if (!*hd_c) xstrsncpy(hd_c, DEF_HD_C256, sizeof(hd_c));
@@ -1679,45 +1679,39 @@ set_default_colors_256(void)
 	if (!*hv_c) xstrsncpy(hv_c, DEF_HV_C256, sizeof(hv_c));
 	if (!*hw_c) xstrsncpy(hw_c, DEF_HW_C256, sizeof(hw_c));
 
-	if (!*tt_c) xstrsncpy(tt_c, DEF_TT_C256, sizeof(tt_c));
-
+	/* Suggestions */
 	if (!*sb_c) xstrsncpy(sb_c, DEF_SB_C256, sizeof(sb_c));
 	if (!*sc_c) xstrsncpy(sc_c, DEF_SC_C256, sizeof(sc_c));
 	if (!*sd_c) xstrsncpy(sd_c, DEF_SD_C256, sizeof(sd_c));
-	if (!*sh_c) xstrsncpy(sh_c, DEF_SH_C256, sizeof(sh_c));
 	if (!*sf_c) xstrsncpy(sf_c, DEF_SF_C256, sizeof(sf_c));
-	if (!*sx_c) xstrsncpy(sx_c, DEF_SX_C256, sizeof(sx_c));
+	if (!*sh_c) xstrsncpy(sh_c, DEF_SH_C256, sizeof(sh_c));
 	if (!*sp_c) xstrsncpy(sp_c, DEF_SP_C256, sizeof(sp_c));
+	if (!*sx_c) xstrsncpy(sx_c, DEF_SX_C256, sizeof(sx_c));
 	if (!*sz_c) xstrsncpy(sz_c, DEF_SZ_C256, sizeof(sz_c));
 
-	if (!*el_c) xstrsncpy(el_c, DEF_EL_C256, sizeof(el_c));
-	if (!*mi_c) xstrsncpy(mi_c, DEF_MI_C256, sizeof(mi_c));
-	/* If unset from the config file, use current workspace color */
-	if (!*dl_c && config_ok == 0)
-		xstrsncpy(dl_c, DEF_DL_C256, sizeof(dl_c));
-
+	/* Interface */
+	if (!*bm_c) xstrsncpy(bm_c, DEF_BM_C256, sizeof(bm_c));
 	if (!*df_c) xstrsncpy(df_c, DEF_DF_C256, sizeof(df_c));
+
+	/* If unset from the config file, use current workspace color */
+	if (!*dl_c && config_ok == 0) xstrsncpy(dl_c, DEF_DL_C256, sizeof(dl_c));
+
+	if (!*el_c) xstrsncpy(el_c, DEF_EL_C256, sizeof(el_c));
+	if (!*em_c) xstrsncpy(em_c, DEF_EM_C256, sizeof(em_c));
 	if (!*fc_c) xstrsncpy(fc_c, DEF_FC_C256, sizeof(fc_c));
-	if (!*wc_c) xstrsncpy(wc_c, DEF_WC_C256, sizeof(wc_c));
-	if (!*tx_c) xstrsncpy(tx_c, DEF_TX_C256, sizeof(tx_c));
-
-	if (!*lc_c)
-		xstrsncpy(lc_c, DEF_LC_C256, sizeof(lc_c));
-
+	if (!*lc_c) xstrsncpy(lc_c, DEF_LC_C256, sizeof(lc_c));
 	if (!*li_c) xstrsncpy(li_c, DEF_LI_C256, sizeof(li_c));
 	if (!*li_cb) xstrsncpy(li_cb, DEF_LI_CB256, sizeof(li_cb));
-	if (!*ti_c) xstrsncpy(ti_c, DEF_TI_C256, sizeof(ti_c));
-	if (!*em_c) xstrsncpy(em_c, DEF_EM_C256, sizeof(em_c));
-	if (!*wm_c) xstrsncpy(wm_c, DEF_WM_C256, sizeof(wm_c));
+	if (!*mi_c) xstrsncpy(mi_c, DEF_MI_C256, sizeof(mi_c));
 	if (!*nm_c) xstrsncpy(nm_c, DEF_NM_C256, sizeof(nm_c));
 	if (!*ro_c) xstrsncpy(ro_c, DEF_RO_C256, sizeof(ro_c));
 	if (!*si_c) xstrsncpy(si_c, DEF_SI_C256, sizeof(si_c));
-	if (!*bm_c) xstrsncpy(bm_c, DEF_BM_C256, sizeof(bm_c));
+	if (!*ti_c) xstrsncpy(ti_c, DEF_TI_C256, sizeof(ti_c));
 	if (!*ts_c) xstrsncpy(ts_c, DEF_TS_C256, sizeof(ts_c));
+	if (!*tt_c) xstrsncpy(tt_c, DEF_TT_C256, sizeof(tt_c));
+	if (!*tx_c) xstrsncpy(tx_c, DEF_TX_C256, sizeof(tx_c));
+	if (!*wm_c) xstrsncpy(wm_c, DEF_WM_C256, sizeof(wm_c));
 	if (!*wp_c) xstrsncpy(wp_c, DEF_WP_C256, sizeof(wp_c));
-	if (!*xs_c) xstrsncpy(xs_c, DEF_XS_C256, sizeof(xs_c));
-	if (!*xf_c) xstrsncpy(xf_c, DEF_XF_C256, sizeof(xf_c));
-
 	if (!*ws1_c) xstrsncpy(ws1_c, DEF_WS1_C256, sizeof(ws1_c));
 	if (!*ws2_c) xstrsncpy(ws2_c, DEF_WS2_C256, sizeof(ws2_c));
 	if (!*ws3_c) xstrsncpy(ws3_c, DEF_WS3_C256, sizeof(ws3_c));
@@ -1726,53 +1720,58 @@ set_default_colors_256(void)
 	if (!*ws6_c) xstrsncpy(ws6_c, DEF_WS6_C256, sizeof(ws6_c));
 	if (!*ws7_c) xstrsncpy(ws7_c, DEF_WS7_C256, sizeof(ws7_c));
 	if (!*ws8_c) xstrsncpy(ws8_c, DEF_WS8_C256, sizeof(ws8_c));
+	if (!*wc_c) xstrsncpy(wc_c, DEF_WC_C256, sizeof(wc_c));
+	if (!*xs_c) xstrsncpy(xs_c, DEF_XS_C256, sizeof(xs_c));
+	if (!*xf_c) xstrsncpy(xf_c, DEF_XF_C256, sizeof(xf_c));
 
-	if (!*di_c) xstrsncpy(di_c, DEF_DI_C256, sizeof(di_c));
-	if (!*nd_c) xstrsncpy(nd_c, DEF_ND_C256, sizeof(nd_c));
-	if (!*ed_c) xstrsncpy(ed_c, DEF_ED_C256, sizeof(ed_c));
-	if (!*fi_c) xstrsncpy(fi_c, DEF_FI_C256, sizeof(fi_c));
-	if (!*ef_c) xstrsncpy(ef_c, DEF_EF_C256, sizeof(ef_c));
-	if (!*nf_c) xstrsncpy(nf_c, DEF_NF_C256, sizeof(nf_c));
-	if (!*ln_c) xstrsncpy(ln_c, DEF_LN_C256, sizeof(ln_c));
-	if (!*or_c) xstrsncpy(or_c, DEF_OR_C256, sizeof(or_c));
-	if (!*pi_c) xstrsncpy(pi_c, DEF_PI_C256, sizeof(pi_c));
-	if (!*so_c) xstrsncpy(so_c, DEF_SO_C256, sizeof(so_c));
+	/* File types */
 	if (!*bd_c) xstrsncpy(bd_c, DEF_BD_C256, sizeof(bd_c));
-	if (!*cd_c) xstrsncpy(cd_c, DEF_CD_C256, sizeof(cd_c));
-	if (!*su_c) xstrsncpy(su_c, DEF_SU_C256, sizeof(su_c));
-	if (!*sg_c) xstrsncpy(sg_c, DEF_SG_C256, sizeof(sg_c));
-	if (!*st_c) xstrsncpy(st_c, DEF_ST_C256, sizeof(st_c));
-	if (!*tw_c) xstrsncpy(tw_c, DEF_TW_C256, sizeof(tw_c));
-	if (!*ow_c) xstrsncpy(ow_c, DEF_OW_C256, sizeof(ow_c));
-	if (!*ex_c) xstrsncpy(ex_c, DEF_EX_C256, sizeof(ex_c));
-	if (!*ee_c) xstrsncpy(ee_c, DEF_EE_C256, sizeof(ee_c));
 	if (!*ca_c) xstrsncpy(ca_c, DEF_CA_C256, sizeof(ca_c));
-	if (!*no_c) xstrsncpy(no_c, DEF_NO_C256, sizeof(no_c));
-	if (!*uf_c) xstrsncpy(uf_c, DEF_UF_C256, sizeof(uf_c));
+	if (!*cd_c) xstrsncpy(cd_c, DEF_CD_C256, sizeof(cd_c));
+	if (!*di_c) xstrsncpy(di_c, DEF_DI_C256, sizeof(di_c));
+	if (!*ed_c) xstrsncpy(ed_c, DEF_ED_C256, sizeof(ed_c));
+	if (!*ee_c) xstrsncpy(ee_c, DEF_EE_C256, sizeof(ee_c));
+	if (!*ef_c) xstrsncpy(ef_c, DEF_EF_C256, sizeof(ef_c));
+	if (!*ex_c) xstrsncpy(ex_c, DEF_EX_C256, sizeof(ex_c));
+	if (!*fi_c) xstrsncpy(fi_c, DEF_FI_C256, sizeof(fi_c));
+	if (!*ln_c) xstrsncpy(ln_c, DEF_LN_C256, sizeof(ln_c));
 	if (!*mh_c) xstrsncpy(mh_c, DEF_MH_C256, sizeof(mh_c));
+	if (!*nd_c) xstrsncpy(nd_c, DEF_ND_C256, sizeof(nd_c));
+	if (!*nf_c) xstrsncpy(nf_c, DEF_NF_C256, sizeof(nf_c));
+	if (!*no_c) xstrsncpy(no_c, DEF_NO_C256, sizeof(no_c));
 #ifdef SOLARIS_DOORS
 	if (!*oo_c) xstrsncpy(oo_c, DEF_OO_C256, sizeof(oo_c));
 #endif /* SOLARIS_DOORS */
+	if (!*or_c) xstrsncpy(or_c, DEF_OR_C256, sizeof(or_c));
+	if (!*ow_c) xstrsncpy(ow_c, DEF_OW_C256, sizeof(ow_c));
+	if (!*pi_c) xstrsncpy(pi_c, DEF_PI_C256, sizeof(pi_c));
+	if (!*sg_c) xstrsncpy(sg_c, DEF_SG_C256, sizeof(sg_c));
+	if (!*so_c) xstrsncpy(so_c, DEF_SO_C256, sizeof(so_c));
+	if (!*st_c) xstrsncpy(st_c, DEF_ST_C256, sizeof(st_c));
+	if (!*su_c) xstrsncpy(su_c, DEF_SU_C256, sizeof(su_c));
+	if (!*tw_c) xstrsncpy(tw_c, DEF_TW_C256, sizeof(tw_c));
+	if (!*uf_c) xstrsncpy(uf_c, DEF_UF_C256, sizeof(uf_c));
+
+	/* Properties */
+/*	if (!*dd_c) // Date color unset: let's use shades
+		xstrsncpy(dd_c, DEF_DD_C, sizeof(dd_c)); */
+	if (!*de_c) xstrsncpy(de_c, DEF_DE_C256, sizeof(de_c));
+	if (!*dg_c) xstrsncpy(dg_c, DEF_DG_C256, sizeof(dg_c));
+	if (!*dk_c) xstrsncpy(dk_c, DEF_DK_C256, sizeof(dk_c));
+	if (!*dn_c) xstrsncpy(dn_c, DEF_DN_C256, sizeof(dn_c));
+	if (!*do_c) xstrsncpy(do_c, DEF_DO_C256, sizeof(do_c));
+	if (!*dp_c) xstrsncpy(dp_c, DEF_DP_C256, sizeof(dp_c));
+	if (!*dr_c) xstrsncpy(dr_c, DEF_DR_C256, sizeof(dr_c));
+	if (!*dw_c) xstrsncpy(dw_c, DEF_DW_C256, sizeof(dw_c));
+	if (!*dxd_c) xstrsncpy(dxd_c, DEF_DXD_C256, sizeof(dxd_c));
+	if (!*dxr_c) xstrsncpy(dxr_c, DEF_DXR_C256, sizeof(dxr_c));
+/*	if (!*dz_c) // Size color unset: let's use shades
+		xstrsncpy(dz_c, DEF_DZ_C, sizeof(dz_c)); */
 
 #ifndef _NO_ICONS
 	if (!*dir_ico_c)
 		xstrsncpy(dir_ico_c, DEF_DIR_ICO_C256, sizeof(dir_ico_c));
 #endif /* !_NO_ICONS */
-
-	if (!*dr_c) xstrsncpy(dr_c, DEF_DR_C256, sizeof(dr_c));
-	if (!*dw_c) xstrsncpy(dw_c, DEF_DW_C256, sizeof(dw_c));
-	if (!*dxd_c) xstrsncpy(dxd_c, DEF_DXD_C256, sizeof(dxd_c));
-	if (!*dxr_c) xstrsncpy(dxr_c, DEF_DXR_C256, sizeof(dxr_c));
-	if (!*dg_c) xstrsncpy(dg_c, DEF_DG_C256, sizeof(dg_c));
-/*	if (!*dd_c) // Date color unset: let's use shades
-		xstrsncpy(dd_c, DEF_DD_C, sizeof(dd_c));
-	if (!*dz_c) // Size color unset: let's use shades
-		xstrsncpy(dz_c, DEF_DZ_C, sizeof(dz_c)); */
-	if (!*de_c) xstrsncpy(de_c, DEF_DE_C256, sizeof(de_c));
-	if (!*dk_c) xstrsncpy(dk_c, DEF_DK_C256, sizeof(dk_c));
-	if (!*do_c) xstrsncpy(do_c, DEF_DO_C256, sizeof(do_c));
-	if (!*dp_c) xstrsncpy(dp_c, DEF_DP_C256, sizeof(dp_c));
-	if (!*dn_c) xstrsncpy(dn_c, DEF_DN_C256, sizeof(dn_c));
 }
 
 /* We're running with --lscolors. Let's disable clifm's specific file type
@@ -1784,22 +1783,27 @@ set_extra_colors(void)
 		xstrsncpy(ed_c, di_c, sizeof(ed_c)); /* Empty dir */
 		xstrsncpy(nd_c, di_c, sizeof(nd_c)); /* No perm dir */
 	} else {
-		xstrsncpy(ed_c, DEF_DI_C, sizeof(ed_c));
-		xstrsncpy(nd_c, DEF_DI_C, sizeof(nd_c));
-	}
-
-	if (*fi_c) {
-		xstrsncpy(ef_c, fi_c, sizeof(ef_c)); /* Empty file */
-		xstrsncpy(nf_c, fi_c, sizeof(nf_c)); /* No perm file */
-	} else {
-		xstrsncpy(ef_c, DEF_FI_C, sizeof(ef_c));
-		xstrsncpy(nf_c, DEF_FI_C, sizeof(nf_c));
+		xstrsncpy(ed_c, term_caps.color >= 256
+			? DEF_DI_C256 : DEF_DI_C, sizeof(ed_c));
+		xstrsncpy(nd_c, term_caps.color >= 256
+			? DEF_DI_C256 : DEF_DI_C, sizeof(nd_c));
 	}
 
 	if (*ex_c)
 		xstrsncpy(ee_c, ex_c, sizeof(ee_c)); /* Empty executable */
 	else
-		xstrsncpy(ee_c, DEF_EX_C, sizeof(ee_c));
+		xstrsncpy(ee_c, term_caps.color >= 256
+			? DEF_EX_C256 : DEF_EX_C, sizeof(ee_c));
+
+	if (*fi_c) {
+		xstrsncpy(ef_c, fi_c, sizeof(ef_c)); /* Empty file */
+		xstrsncpy(nf_c, fi_c, sizeof(nf_c)); /* No perm file */
+	} else {
+		xstrsncpy(ef_c, term_caps.color >= 256
+			? DEF_FI_C256 : DEF_FI_C, sizeof(ef_c));
+		xstrsncpy(nf_c, term_caps.color >= 256
+			? DEF_FI_C256 : DEF_FI_C, sizeof(nf_c));
+	}
 }
 
 void
@@ -1829,6 +1833,7 @@ set_default_colors(void)
 	if (!*bk_c)
 		xstrsncpy(bk_c, *ef_c ? ef_c : DEF_EF_C, sizeof(bk_c));
 
+	/* Highlight */
 	if (!*hb_c) xstrsncpy(hb_c, DEF_HB_C, sizeof(hb_c));
 	if (!*hc_c) xstrsncpy(hc_c, DEF_HC_C, sizeof(hc_c));
 	if (!*hd_c) xstrsncpy(hd_c, DEF_HD_C, sizeof(hd_c));
@@ -1841,8 +1846,7 @@ set_default_colors(void)
 	if (!*hv_c) xstrsncpy(hv_c, DEF_HV_C, sizeof(hv_c));
 	if (!*hw_c) xstrsncpy(hw_c, DEF_HW_C, sizeof(hw_c));
 
-	if (!*tt_c) xstrsncpy(tt_c, DEF_TT_C, sizeof(tt_c));
-
+	/* Suggestions */
 	if (!*sb_c) xstrsncpy(sb_c, DEF_SB_C, sizeof(sb_c));
 	if (!*sc_c) xstrsncpy(sc_c, DEF_SC_C, sizeof(sc_c));
 	if (!*sd_c) xstrsncpy(sd_c, DEF_SD_C, sizeof(sd_c));
@@ -1852,33 +1856,30 @@ set_default_colors(void)
 	if (!*sp_c) xstrsncpy(sp_c, DEF_SP_C, sizeof(sp_c));
 	if (!*sz_c) xstrsncpy(sz_c, DEF_SZ_C, sizeof(sz_c));
 
-	if (!*el_c) xstrsncpy(el_c, DEF_EL_C, sizeof(el_c));
-	if (!*mi_c) xstrsncpy(mi_c, DEF_MI_C, sizeof(mi_c));
-	/* If unset from the config file, use current workspace color */
-	if (!*dl_c && config_ok == 0)
-		xstrsncpy(dl_c, DEF_DL_C, sizeof(dl_c));
-
+	/* Interface */
+	if (!*bm_c) xstrsncpy(bm_c, DEF_BM_C, sizeof(bm_c));
 	if (!*df_c) xstrsncpy(df_c, DEF_DF_C, sizeof(df_c));
+
+	/* If unset from the config file, use current workspace color */
+	if (!*dl_c && config_ok == 0) xstrsncpy(dl_c, DEF_DL_C, sizeof(dl_c));
+
+	if (!*el_c) xstrsncpy(el_c, DEF_EL_C, sizeof(el_c));
+	if (!*em_c) xstrsncpy(em_c, DEF_EM_C, sizeof(em_c));
 	if (!*fc_c) xstrsncpy(fc_c, DEF_FC_C, sizeof(fc_c));
-	if (!*wc_c) xstrsncpy(wc_c, DEF_WC_C, sizeof(wc_c));
-	if (!*tx_c) xstrsncpy(tx_c, DEF_TX_C, sizeof(tx_c));
-
 	if (!*lc_c) xstrsncpy(lc_c, DEF_LC_C, sizeof(lc_c));
-
 	if (!*li_c) xstrsncpy(li_c, DEF_LI_C, sizeof(li_c));
 	if (!*li_cb) xstrsncpy(li_cb, DEF_LI_CB, sizeof(li_cb));
-	if (!*ti_c) xstrsncpy(ti_c, DEF_TI_C, sizeof(ti_c));
-	if (!*em_c) xstrsncpy(em_c, DEF_EM_C, sizeof(em_c));
-	if (!*wm_c) xstrsncpy(wm_c, DEF_WM_C, sizeof(wm_c));
+	if (!*mi_c) xstrsncpy(mi_c, DEF_MI_C, sizeof(mi_c));
 	if (!*nm_c) xstrsncpy(nm_c, DEF_NM_C, sizeof(nm_c));
+	if (!*ti_c) xstrsncpy(ti_c, DEF_TI_C, sizeof(ti_c));
+	if (!*tx_c) xstrsncpy(tx_c, DEF_TX_C, sizeof(tx_c));
+	if (!*wm_c) xstrsncpy(wm_c, DEF_WM_C, sizeof(wm_c));
 	if (!*ro_c) xstrsncpy(ro_c, DEF_RO_C, sizeof(ro_c));
 	if (!*si_c) xstrsncpy(si_c, DEF_SI_C, sizeof(si_c));
-	if (!*bm_c) xstrsncpy(bm_c, DEF_BM_C, sizeof(bm_c));
 	if (!*ts_c) xstrsncpy(ts_c, DEF_TS_C, sizeof(ts_c));
+	if (!*tt_c) xstrsncpy(tt_c, DEF_TT_C, sizeof(tt_c));
+	if (!*wc_c) xstrsncpy(wc_c, DEF_WC_C, sizeof(wc_c));
 	if (!*wp_c) xstrsncpy(wp_c, DEF_WP_C, sizeof(wp_c));
-	if (!*xs_c) xstrsncpy(xs_c, DEF_XS_C, sizeof(xs_c));
-	if (!*xf_c) xstrsncpy(xf_c, DEF_XF_C, sizeof(xf_c));
-
 	if (!*ws1_c) xstrsncpy(ws1_c, DEF_WS1_C, sizeof(ws1_c));
 	if (!*ws2_c) xstrsncpy(ws2_c, DEF_WS2_C, sizeof(ws2_c));
 	if (!*ws3_c) xstrsncpy(ws3_c, DEF_WS3_C, sizeof(ws3_c));
@@ -1887,53 +1888,57 @@ set_default_colors(void)
 	if (!*ws6_c) xstrsncpy(ws6_c, DEF_WS6_C, sizeof(ws6_c));
 	if (!*ws7_c) xstrsncpy(ws7_c, DEF_WS7_C, sizeof(ws7_c));
 	if (!*ws8_c) xstrsncpy(ws8_c, DEF_WS8_C, sizeof(ws8_c));
+	if (!*xs_c) xstrsncpy(xs_c, DEF_XS_C, sizeof(xs_c));
+	if (!*xf_c) xstrsncpy(xf_c, DEF_XF_C, sizeof(xf_c));
 
+	/* File types */
+	if (!*bd_c) xstrsncpy(bd_c, DEF_BD_C, sizeof(bd_c));
+	if (!*ca_c) xstrsncpy(ca_c, DEF_CA_C, sizeof(ca_c));
+	if (!*cd_c) xstrsncpy(cd_c, DEF_CD_C, sizeof(cd_c));
 	if (!*di_c) xstrsncpy(di_c, DEF_DI_C, sizeof(di_c));
-	if (!*nd_c) xstrsncpy(nd_c, DEF_ND_C, sizeof(nd_c));
 	if (!*ed_c) xstrsncpy(ed_c, DEF_ED_C, sizeof(ed_c));
+	if (!*ee_c) xstrsncpy(ee_c, DEF_EE_C, sizeof(ee_c));
+	if (!*ex_c) xstrsncpy(ex_c, DEF_EX_C, sizeof(ex_c));
 	if (!*fi_c) xstrsncpy(fi_c, DEF_FI_C, sizeof(fi_c));
 	if (!*ef_c) xstrsncpy(ef_c, DEF_EF_C, sizeof(ef_c));
-	if (!*nf_c) xstrsncpy(nf_c, DEF_NF_C, sizeof(nf_c));
 	if (!*ln_c) xstrsncpy(ln_c, DEF_LN_C, sizeof(ln_c));
-	if (!*or_c) xstrsncpy(or_c, DEF_OR_C, sizeof(or_c));
-	if (!*pi_c) xstrsncpy(pi_c, DEF_PI_C, sizeof(pi_c));
-	if (!*so_c) xstrsncpy(so_c, DEF_SO_C, sizeof(so_c));
-	if (!*bd_c) xstrsncpy(bd_c, DEF_BD_C, sizeof(bd_c));
-	if (!*cd_c) xstrsncpy(cd_c, DEF_CD_C, sizeof(cd_c));
-	if (!*su_c) xstrsncpy(su_c, DEF_SU_C, sizeof(su_c));
-	if (!*sg_c) xstrsncpy(sg_c, DEF_SG_C, sizeof(sg_c));
-	if (!*st_c) xstrsncpy(st_c, DEF_ST_C, sizeof(st_c));
-	if (!*tw_c) xstrsncpy(tw_c, DEF_TW_C, sizeof(tw_c));
-	if (!*ow_c) xstrsncpy(ow_c, DEF_OW_C, sizeof(ow_c));
-	if (!*ex_c) xstrsncpy(ex_c, DEF_EX_C, sizeof(ex_c));
-	if (!*ee_c) xstrsncpy(ee_c, DEF_EE_C, sizeof(ee_c));
-	if (!*ca_c) xstrsncpy(ca_c, DEF_CA_C, sizeof(ca_c));
-	if (!*no_c) xstrsncpy(no_c, DEF_NO_C, sizeof(no_c));
-	if (!*uf_c) xstrsncpy(uf_c, DEF_UF_C, sizeof(uf_c));
 	if (!*mh_c) xstrsncpy(mh_c, DEF_MH_C, sizeof(mh_c));
+	if (!*nd_c) xstrsncpy(nd_c, DEF_ND_C, sizeof(nd_c));
+	if (!*nf_c) xstrsncpy(nf_c, DEF_NF_C, sizeof(nf_c));
+	if (!*no_c) xstrsncpy(no_c, DEF_NO_C, sizeof(no_c));
 #ifdef SOLARIS_DOORS
 	if (!*oo_c) xstrsncpy(oo_c, DEF_OO_C, sizeof(oo_c));
 #endif /* SOLARIS_DOORS */
+	if (!*or_c) xstrsncpy(or_c, DEF_OR_C, sizeof(or_c));
+	if (!*ow_c) xstrsncpy(ow_c, DEF_OW_C, sizeof(ow_c));
+	if (!*pi_c) xstrsncpy(pi_c, DEF_PI_C, sizeof(pi_c));
+	if (!*sg_c) xstrsncpy(sg_c, DEF_SG_C, sizeof(sg_c));
+	if (!*so_c) xstrsncpy(so_c, DEF_SO_C, sizeof(so_c));
+	if (!*st_c) xstrsncpy(st_c, DEF_ST_C, sizeof(st_c));
+	if (!*su_c) xstrsncpy(su_c, DEF_SU_C, sizeof(su_c));
+	if (!*tw_c) xstrsncpy(tw_c, DEF_TW_C, sizeof(tw_c));
+	if (!*uf_c) xstrsncpy(uf_c, DEF_UF_C, sizeof(uf_c));
+
+	/* Interface */
+/*	if (!*dd_c) // Date color unset: let's use shades
+		xstrsncpy(dd_c, DEF_DD_C, sizeof(dd_c)); */
+	if (!*de_c) xstrsncpy(de_c, DEF_DE_C, sizeof(de_c));
+	if (!*dg_c) xstrsncpy(dg_c, DEF_DG_C, sizeof(dg_c));
+	if (!*dk_c) xstrsncpy(dk_c, DEF_DK_C, sizeof(dk_c));
+	if (!*dn_c) xstrsncpy(dn_c, DEF_DN_C, sizeof(dn_c));
+	if (!*do_c) xstrsncpy(do_c, DEF_DO_C, sizeof(do_c));
+	if (!*dp_c) xstrsncpy(dp_c, DEF_DP_C, sizeof(dp_c));
+	if (!*dr_c) xstrsncpy(dr_c, DEF_DR_C, sizeof(dr_c));
+	if (!*dw_c) xstrsncpy(dw_c, DEF_DW_C, sizeof(dw_c));
+	if (!*dxd_c) xstrsncpy(dxd_c, DEF_DXD_C, sizeof(dxd_c));
+	if (!*dxr_c) xstrsncpy(dxr_c, DEF_DXR_C, sizeof(dxr_c));
+/*	if (!*dz_c) // Size color unset: let's use shades
+		xstrsncpy(dz_c, DEF_DZ_C, sizeof(dz_c)); */
 
 #ifndef _NO_ICONS
 	if (!*dir_ico_c)
 		xstrsncpy(dir_ico_c, DEF_DIR_ICO_C, sizeof(dir_ico_c));
 #endif /* !_NO_ICONS */
-
-	if (!*dr_c) xstrsncpy(dr_c, DEF_DR_C, sizeof(dr_c));
-	if (!*dw_c) xstrsncpy(dw_c, DEF_DW_C, sizeof(dw_c));
-	if (!*dxd_c) xstrsncpy(dxd_c, DEF_DXD_C, sizeof(dxd_c));
-	if (!*dxr_c) xstrsncpy(dxr_c, DEF_DXR_C, sizeof(dxr_c));
-	if (!*dg_c) xstrsncpy(dg_c, DEF_DG_C, sizeof(dg_c));
-/*	if (!*dd_c) // Date color unset: let's use shades
-		xstrsncpy(dd_c, DEF_DD_C, sizeof(dd_c));
-	if (!*dz_c) // Size color unset: let's use shades
-		xstrsncpy(dz_c, DEF_DZ_C, sizeof(dz_c)); */
-	if (!*de_c) xstrsncpy(de_c, DEF_DE_C, sizeof(de_c));
-	if (!*dk_c) xstrsncpy(dk_c, DEF_DK_C, sizeof(dk_c));
-	if (!*do_c) xstrsncpy(do_c, DEF_DO_C, sizeof(do_c));
-	if (!*dp_c) xstrsncpy(dp_c, DEF_DP_C, sizeof(dp_c));
-	if (!*dn_c) xstrsncpy(dn_c, DEF_DN_C, sizeof(dn_c));
 }
 
 /* Set a pointer to the current color scheme */
