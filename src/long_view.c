@@ -296,7 +296,7 @@ construct_timestamp(char *time_str, const time_t ltime)
 	static char file_time[MAX_TIME_STR];
 	struct tm t;
 
-	if (ltime > 0 && ltime != (time_t)-1 && localtime_r(&ltime, &t)) {
+	if (ltime >= 0 && ltime != (time_t)-1 && localtime_r(&ltime, &t)) {
 		/* PROPS_NOW (global) is set by list_dir(), in listing.c before
 		 * calling print_entry_props(), which calls this function. */
 		const time_t age = props_now - ltime;

@@ -2428,10 +2428,10 @@ load_file_gral_info(const struct stat *a, const filesn_t n)
 # ifdef LINUX_STATX
 		struct statx attx;
 		if (statx(AT_FDCWD, file_info[n].name, AT_SYMLINK_NOFOLLOW,
-		STATX_BTIME, &attx) == -1)
-			btime = (time_t)-1;
-		else
+		STATX_BTIME, &attx) == 0 && (attx.stx_mask & STATX_BTIME))
 			btime = attx.ST_BTIME.tv_sec;
+		else
+			btime = (time_t)-1;
 # elif defined(__sun)
 		struct timespec birthtim = get_birthtime(file_info[n].name);
 		btime = birthtim.tv_sec;
