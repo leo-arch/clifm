@@ -823,6 +823,7 @@ compute_maxes(void)
 {
 	struct maxes_t maxes = {0};
 	filesn_t i = files;
+	int dir_size_err = 0;
 
 	while (--i >= 0) {
 		int t = 0;
@@ -831,6 +832,9 @@ compute_maxes(void)
 			if (t > maxes.files_counter)
 				maxes.files_counter = t;
 		}
+
+		if (file_info[i].du_status != 0)
+			dir_size_err = 1;
 
 		if (prop_fields.size == PROP_SIZE_BYTES) {
 			t = DIGINUM_BIG(file_info[i].size);
@@ -869,6 +873,8 @@ compute_maxes(void)
 		}
 	}
 
+	/* Make room for dir size error char (!) */
+	maxes.size += (conf.full_dir_size == 1 && dir_size_err == 1);
 	return maxes;
 }
 
