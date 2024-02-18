@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Feb 14, 2024" "clifm 1.17.4" "CLIFM Manual"
+.TH "CLIFM" "1" "Feb 18, 2024" "clifm 1.17.5" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -346,7 +346,10 @@ specify a resource opener to use (say \fIrifle\fR or \fIxdg\-open\fR). If \fIope
 display a preview of \fIFILE\fR (via \fIShotgun\fR) and exit. If running as a standalone files previewer, you can set an alternative confiuguration file via \fI\-\-shotgun\-file\fR. Consult the \fBSHOTGUN\fR section below for more information
 .TP
 \fB\-\-print\-sel\fR
-always print the list of selected files. Since this list could be quite extensive, the maximum number of selected files to print could be specified via the \fBMaxPrintSelfiles\fR option in the configuration file. Defaults to 0 (auto, i.e. never take more than half terminal height). Use \-1 to remove the limit or any other positive value.
+always print the list of selected files. Since this list could be quite extensive, the maximum number of selected files to print could be specified via the \fIMaxPrintSelfiles\fR option in the configuration file. Defaults to 0 (auto, i.e. never take more than half terminal height). Use \-1 to remove the limit or any other positive value.
+.TP
+\fB\-\-prop\-fields\fR=\fI\,FORMAT\/\fR
+set a custom format string for long view. For information about how to construct this format string consult the \fIPropFields\fR option in the configuration file.
 .TP
 \fB\-\-readonly\fR
 run in read\-only mode (internal commands able to modify the file system are disabled). Disabled commands are: ac, ad, bb, bl/bleach, br/bulk, c, dup, l, le, m, md, n/new, oc, paste, pc, r, rr, t/trash, tag, te, u/undel/untrash, and vv, plus the shell commands cp, rm, mv, ln, mkdir, rmdir, link, and unlink.  
@@ -373,7 +376,7 @@ make the Selection Box common (that is, accessible) to different profiles. By de
 Set \fIFILE\fR as shotgun\'s configuration file. Only effective if running as a standalone files previewer via the \fI\-\-preview\fR switch. See the \fBSHOTGUN\fR section below for more information
 .TP
 \fB\-\-si\fR
-print sizes in powers of 1000, as defined in the International System of Units (SI), instead of 1024
+print sizes in powers of 1000, as defined by the International System of Units (SI), instead of 1024
 .TP
 \fB\-\-smenutab\fR
 use \fIsmenu\fR to display completion matches
