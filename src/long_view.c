@@ -491,8 +491,13 @@ print_entry_props(const struct fileinfo *props, const struct maxes_t *maxes,
 		default: print_space = 0; break;
 		}
 
-		if (print_space == 1)
+		if (print_space == 0)
+			continue;
+
+		if (conf.prop_fields_gap <= 1)
 			putchar(' ');
+		else
+			MOVE_CURSOR_RIGHT(conf.prop_fields_gap);
 	}
 	putchar('\n');
 

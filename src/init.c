@@ -189,9 +189,7 @@ init_conf_struct(void)
 	conf.clear_screen = UNSET;
 	conf.cmd_desc_sug = UNSET;
 	conf.colorize = UNSET;
-
 	conf.color_lnk_as_target = DEF_COLOR_LNK_AS_TARGET;
-
 	conf.columned = UNSET;
 	conf.cp_cmd = UNSET;
 	conf.desktop_notifications = UNSET;
@@ -223,11 +221,8 @@ init_conf_struct(void)
 	conf.max_hist = UNSET;
 	conf.max_log = UNSET;
 	conf.max_jump_total_rank = UNSET;
-
 	conf.max_name_len = DEF_MAX_NAME_LEN;
-
 	conf.max_name_len_bk = 0;
-
 	conf.max_path = UNSET;
 	conf.max_printselfiles = UNSET2; /* -1 is a valid value */
 	conf.min_jump_rank = UNSET2; /* UNSET (-1) is a valid value for MinJumpRank */
@@ -237,10 +232,9 @@ init_conf_struct(void)
 	conf.only_dirs = UNSET;
 	conf.pager = UNSET;
 	conf.private_ws_settings = UNSET;
+	conf.prop_fields_gap = UNSET;
 	conf.purge_jumpdb = UNSET;
-
 	conf.quoting_style = DEF_QUOTING_STYLE;
-
 	conf.read_autocmd_files = DEF_READ_AUTOCMD_FILES;
 	conf.readonly = DEF_READONLY;
 	conf.relative_time = UNSET;
@@ -255,9 +249,7 @@ init_conf_struct(void)
 	conf.suggest_filetype_color = UNSET;
 	conf.suggestions = UNSET;
 	conf.tips = UNSET;
-
 	conf.trim_names = UNSET;
-
 #ifndef _NO_TRASH
 	conf.tr_as_rm = UNSET;
 #endif /* !_NO_TRASH */
@@ -425,19 +417,20 @@ set_prop_fields(const char *line)
 	 * that follows each of them, if enabled. */
 	/* Static lengths */
 	if (prop_fields.perm != 0)
-		prop_fields.len += ((prop_fields.perm == PERM_NUMERIC ? 4 : 13) + 1);
+		prop_fields.len += ((prop_fields.perm == PERM_NUMERIC ? 4 : 13)
+		+ conf.prop_fields_gap);
 
 	/* Dynamic lengths */
 	if (prop_fields.size != 0)
-		prop_fields.len++;
+		prop_fields.len += conf.prop_fields_gap;
 	if (prop_fields.counter != 0)
-		prop_fields.len++;
+		prop_fields.len += conf.prop_fields_gap;
 	if (prop_fields.inode != 0)
-		prop_fields.len++;
+		prop_fields.len += conf.prop_fields_gap;
 	if (prop_fields.links != 0)
-		prop_fields.len++;
+		prop_fields.len += conf.prop_fields_gap;
 	if (prop_fields.ids != 0) {
-		prop_fields.len++;
+		prop_fields.len += conf.prop_fields_gap;
 		if (prop_fields.ids == PROP_ID_NAME) {
 			get_sysusers();
 			get_sysgroups();
@@ -2734,10 +2727,12 @@ check_options(void)
 			conf.desktop_notifications = xargs.desktop_notifications;
 	}
 
-	if (!*prop_fields_str) {
+	if (conf.prop_fields_gap == UNSET)
+		conf.prop_fields_gap = DEF_PROP_FIELDS_GAP;
+
+	if (!*prop_fields_str)
 		xstrsncpy(prop_fields_str, DEF_PROP_FIELDS, sizeof(prop_fields_str));
-		set_prop_fields(prop_fields_str);
-	}
+	set_prop_fields(prop_fields_str);
 	check_time_str();
 
 	if (conf.search_strategy == UNSET)

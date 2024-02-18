@@ -1090,6 +1090,7 @@ struct config_t {
 	int purge_jumpdb;
 	int print_selfiles;
 	int private_ws_settings;
+	int prop_fields_gap;
 	int quoting_style;
 	int read_autocmd_files;
 	int readonly;
@@ -1114,6 +1115,7 @@ struct config_t {
 	int unicode;
 	int warning_prompt;
 	int welcome_message;
+	int pad2;
 };
 
 extern struct config_t conf;

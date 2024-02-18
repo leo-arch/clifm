@@ -3081,10 +3081,12 @@ read_config(void)
 		else if (!*prop_fields_str && *line == 'P'
 		&& strncmp(line, "PropFields=", 11) == 0) {
 			char *tmp = get_line_value(line + 11);
-			if (tmp) {
+			if (tmp)
 				xstrsncpy(prop_fields_str, tmp, sizeof(prop_fields_str));
-				set_prop_fields(prop_fields_str);
-			}
+		}
+
+		else if (*line == 'P' && strncmp(line, "PropFieldsGap=", 14) == 0) {
+			set_config_int_value(line + 14, &conf.prop_fields_gap, 1, 2);
 		}
 
 		else if (*line == 'P' && strncmp(line, "PTimeStyle=", 11) == 0) {
