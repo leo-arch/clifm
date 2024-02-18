@@ -1218,6 +1218,8 @@ main(int argc, char *argv[])
 		do_stat_and_exit(xargs.stat == FULL_STAT ? 1 : 0);
 
 	if (xargs.list_and_quit == 1) {
+		if (xargs.full_dir_size == 1)
+			tmp_dir = savestring(P_tmpdir, P_tmpdir_len);
 		list_files();
 		exit(EXIT_SUCCESS); /* Never reached */
 	}
