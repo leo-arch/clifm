@@ -104,6 +104,10 @@
 #PropFields="pmS"
 ;PropFields="xfpIms"
 
+# Number of spaces between fields in long view.
+# Possible values: 1-2.
+;PropFieldsGap=1
+
 # Format used to display timestamps in long view mode.
 # Consult strftime(3) for information about time format specifiers.
 # Defaults to "%b %e %H:%M" for recent files (< 6 months) and "%b %e  %Y"

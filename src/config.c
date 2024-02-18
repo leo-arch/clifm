@@ -1596,6 +1596,8 @@ create_main_config_file(char *file)
 # x = extended attributes/ACL/capabilities (marked as '@') (requires p|n)\n\
 # A single dash (\'-\') disables all fields\n\
 ;PropFields=\"%s\"\n\
+# Number of spaces between fields in long view (1-2)\n\
+;PropFieldsGap=%d\n\
 # Format used to print timestamps in long view (see strftime(3))\n\
 ;TimeStyle=\"\"\n\
 # If you prefer rather relative times\n\
@@ -1649,6 +1651,7 @@ create_main_config_file(char *file)
 		DEF_SHOW_HIDDEN == 1 ? "true" : "false",
 		DEF_LONG_VIEW == 1 ? "true" : "false",
 		DEF_PROP_FIELDS,
+		DEF_PROP_FIELDS_GAP,
 		DEF_APPARENT_SIZE == 1 ? "true" : "false",
 		DEF_FULL_DIR_SIZE == 1 ? "true" : "false",
 		DEF_LOG_MSGS == 1 ? "true" : "false",
