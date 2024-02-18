@@ -1402,6 +1402,7 @@ struct param_t {
 	int path;
 	int preview;
 	int printsel;
+	int prop_fields_str;
 	int readonly;
 	int refresh_on_empty_line;
 	int refresh_on_resize;

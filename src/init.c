@@ -1744,9 +1744,7 @@ unset_xargs(void)
 	xargs.max_dirhist = UNSET;
 	xargs.max_path = UNSET;
 	xargs.mount_cmd = UNSET;
-
 	xargs.no_bold = UNSET;
-
 	xargs.no_dirjump = UNSET;
 	xargs.noeln = UNSET;
 	xargs.only_dirs = UNSET;
@@ -1754,6 +1752,7 @@ unset_xargs(void)
 	xargs.pager = UNSET;
 	xargs.path = UNSET;
 	xargs.printsel = UNSET;
+	xargs.prop_fields_str = UNSET;
 	xargs.readonly = UNSET;
 	xargs.refresh_on_empty_line = UNSET;
 	xargs.refresh_on_resize = UNSET;

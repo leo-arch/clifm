@@ -149,6 +149,7 @@
 #define LOPT_STAT_FULL              272
 #define LOPT_READONLY               273
 #define LOPT_LSCOLORS               274
+#define LOPT_PROP_FIELDS            275
 
 /* Link long (--option) and short options (-o) for the getopt_long function. */
 static struct option const longopts[] = {
@@ -192,7 +193,6 @@ static struct option const longopts[] = {
 	{"sort", required_argument, 0, 'z'},
 
 	/* Only-long options */
-//		{"autojump", no_argument, 0, LOPT_NO_AUTOJUMP},
 	{"bell", required_argument, 0, LOPT_BELL},
 	{"case-sens-dirjump", no_argument, 0, LOPT_CASE_SENS_DIRJUMP},
 	{"case-sens-path-comp", no_argument, 0, LOPT_CASE_SENS_PATH_COMP},
@@ -202,7 +202,6 @@ static struct option const longopts[] = {
 	{"data-dir", required_argument, 0, LOPT_DATA_DIR},
 	{"desktop-notifications", no_argument, 0, LOPT_DESKTOP_NOTIFICATIONS},
 	{"disk-usage", no_argument, 0, LOPT_DISK_USAGE},
-//		{"enable-logs", no_argument, 0, LOPT_ENABLE_LOGS},
 	{"fnftab", no_argument, 0, LOPT_FNFTAB},
 	{"full-dir-size", no_argument, 0, LOPT_FULL_DIR_SIZE},
 	{"fuzzy-matching", no_argument, 0, LOPT_FUZZY_MATCHING},
@@ -248,6 +247,7 @@ static struct option const longopts[] = {
 	{"opener", required_argument, 0, LOPT_OPENER},
 	{"preview", required_argument, 0, LOPT_PREVIEW},
 	{"print-sel", no_argument, 0, LOPT_PRINT_SEL},
+	{"prop-fields", required_argument, 0, LOPT_PROP_FIELDS},
 	{"readonly", no_argument, 0, LOPT_READONLY},
 	{"rl-vi-mode", no_argument, 0, LOPT_RL_VI_MODE},
 	{"share-selbox", no_argument, 0, LOPT_SHARE_SELBOX},
@@ -1227,6 +1227,18 @@ set_stat(const int optc, const char *optval)
 	stat_filename = savestring(optval, strlen(optval));
 }
 
+static void
+xset_prop_fields(const char *optval)
+{
+	/* --prop-fields accepts a single dash (-) as argument. */
+	if (!optval || !*optval || (*optval == '-' && optval[1]))
+		err_arg_required("--prop-fields");
+
+	xargs.prop_fields_str = 1;
+	xstrsncpy(prop_fields_str, optval, sizeof(prop_fields_str));
+	set_prop_fields(prop_fields_str);
+}
+
 __attribute__ ((noreturn))
 static void
 print_version(void)
@@ -1608,6 +1620,7 @@ parse_cmdline_args(const int argc, char **argv)
 			set_opener(optarg); break;
 		case LOPT_PRINT_SEL:
 			xargs.printsel = conf.print_selfiles = 1; break;
+		case LOPT_PROP_FIELDS: xset_prop_fields(optarg); break;
 		case LOPT_READONLY: xargs.readonly = conf.readonly = 1; break;
 		case LOPT_RL_VI_MODE:
 			xargs.rl_vi_mode = 1; break;

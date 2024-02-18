@@ -2815,7 +2815,8 @@ read_config(void)
 	/* The longest possible line in the config file is StartingPath="PATH" */
 	char line[PATH_MAX + 16]; *line = '\0';
 
-	*prop_fields_str = '\0';
+	if (xargs.prop_fields_str != 1)
+		*prop_fields_str = '\0';
 
 	while (fgets(line, (int)sizeof(line), config_fp)) {
 		if (*line < 'A' || *line > 'z')
@@ -3077,7 +3078,8 @@ read_config(void)
 			set_config_bool_value(line + 25, &conf.private_ws_settings);
 		}
 
-		else if (*line == 'P' && strncmp(line, "PropFields=", 11) == 0) {
+		else if (!*prop_fields_str && *line == 'P'
+		&& strncmp(line, "PropFields=", 11) == 0) {
 			char *tmp = get_line_value(line + 11);
 			if (tmp) {
 				xstrsncpy(prop_fields_str, tmp, sizeof(prop_fields_str));
