@@ -823,7 +823,6 @@ compute_maxes(void)
 {
 	struct maxes_t maxes = {0};
 	filesn_t i = files;
-	int dir_size_err = 0;
 
 	while (--i >= 0) {
 		int t = 0;
@@ -832,9 +831,6 @@ compute_maxes(void)
 			if (t > maxes.files_counter)
 				maxes.files_counter = t;
 		}
-
-		if (file_info[i].du_status != 0)
-			dir_size_err = 1;
 
 		if (prop_fields.size == PROP_SIZE_BYTES) {
 			t = DIGINUM_BIG(file_info[i].size);
@@ -873,8 +869,27 @@ compute_maxes(void)
 		}
 	}
 
-	/* Make room for dir size error char (!) */
-	maxes.size += (conf.full_dir_size == 1 && dir_size_err == 1);
+	if (conf.full_dir_size != 1)
+		return maxes;
+
+	/* If at least one directory size length equals the maxmimum size lenght
+	 * in the current directory, and we have a du(1) error for this directory,
+	 * we need to make room for the du error char (!). */
+	i = files;
+	while (--i >= 0) {
+		if (file_info[i].du_status == 0)
+			continue;
+
+		const int t = prop_fields.size == PROP_SIZE_BYTES
+			? DIGINUM_BIG(file_info[i].size)
+			: (int)file_info[i].human_size_len;
+
+		if (t == maxes.size) {
+			maxes.size++;
+			break;
+		}
+	}
+
 	return maxes;
 }
 
@@ -2411,7 +2426,6 @@ load_file_gral_info(const struct stat *a, const filesn_t n)
 	file_info[n].inode = a->st_ino;
 	file_info[n].linkn = a->st_nlink;
 	file_info[n].size = FILE_TYPE_NON_ZERO_SIZE(a->st_mode) ? FILE_SIZE(*a) : 0;
-
 	file_info[n].uid = a->st_uid;
 	file_info[n].gid = a->st_gid;
 
