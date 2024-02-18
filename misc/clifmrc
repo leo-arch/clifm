@@ -95,11 +95,13 @@
 # x = extended attributes/capabilities/ACLs (marked as '@') (requires p|n)
 # A single dash ("-") disables all fields
 #
-# Note that, exception made of 'x', fields will be printed in the order
-# specified here.
+# Note that, exception made of 'x' and 'G', fields will be printed in the
+# order specified here.
 #
 # Example: print only permissions (numeric) and size (human readable):
 #PropFields="ns"
+# or, to print file permissions, modification time, and size (in bytes):
+#PropFields="pmS"
 ;PropFields="xfpIms"
 
 # Format used to display timestamps in long view mode.
