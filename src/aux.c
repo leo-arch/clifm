@@ -82,7 +82,6 @@ xregerror(const char *cmd_name, const char *pattern, const int errcode,
 	free(buf);
 }
 
-#ifndef _NO_ICONS
 /* Generate a hash of the string STR (case sensitively if CASE_SENTITIVE is
  * set to 1).
  * Based on the sdbm algorithm (see http://www.cse.yorku.ca/~oz/hash.html),
@@ -107,7 +106,6 @@ hashme(const char *restrict str, const int case_sensitive) {
 
 	return hash;
 }
-#endif /* !_NO_ICONS */
 
 #if defined(__sun) && defined(ST_BTIME)
 struct timespec

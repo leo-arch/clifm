@@ -44,6 +44,7 @@ off_t dir_size(char *dir, const int first_level, int *status);
 char from_hex(char c);
 char *gen_date_suffix(const struct tm tm);
 void gen_time_str(char *buf, const size_t size, const time_t curtime);
+size_t hashme(const char *str, const int case_sensitive);
 #if defined(__sun) && defined(ST_BTIME)
 struct timespec get_birthtime(const char *filename);
 #endif /* __sun && ST_BTIME */
@@ -73,10 +74,6 @@ ssize_t xreadlink(const int fd, char *restrict path, char *restrict buf,
 	const size_t bufsize);
 void xregerror(const char *cmd_name, const char *pattern, const int errcode,
 	const regex_t regexp, const int prompt_err);
-
-#ifndef _NO_ICONS
-size_t hashme(const char *str, const int case_sensitive);
-#endif /* !_NO_ICONS */
 
 __END_DECLS
 
