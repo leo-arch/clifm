@@ -1391,17 +1391,18 @@ and paths\
 CliFM's built-in opener\
 \n      --preview=FILE\t\t Display a preview of FILE (via Shotgun) and exit\
 \n      --print-sel\t\t Keep the list of selected files in sight\
+\n      --prop-fields=FORMAT\t Set a custom format string for long view\
 \n      --readonly\t\t Disable internal commands able to modify the file system\
 \n      --rl-vi-mode\t\t Set readline to vi editing mode (defaults to emacs mode)\
 \n      --secure-cmds\t\t Filter commands to prevent command injection\
 \n      --secure-env\t\t Run in a sanitized environment (regular mode)\
 \n      --secure-env-full\t\t Run in a sanitized environment (full mode)\
-\n      --sel-file=FILE\t\t Set FILE as custom selections file\
-\n      --share-selbox\t\t Make the Selection Box common to different profiles\
-\n      --shotgun-file=FILE\t Set FILE as shotgun configuration file\n"
+\n      --sel-file=FILE\t\t Set FILE as custom selections file\n"
 
 #define LONG_OPTIONS_B "\
-      --si\t\t\t Print sizes in powers of 1000 instead of 1024\
+      --share-selbox\t\t Make the Selection Box common to different profiles\
+\n      --shotgun-file=FILE\t Set FILE as shotgun configuration file\
+\n      --si\t\t\t Print sizes in powers of 1000 instead of 1024\
 \n      --smenutab\t\t Use smenu to display completion matches\
 \n      --sort-reverse\t\t Sort in reverse order, e.g. z-a instead of a-z\
 \n      --stat=FILE\t\t Run the 'p' command on FILE and exit\
