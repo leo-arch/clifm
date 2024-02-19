@@ -135,11 +135,8 @@ case\-sensitive files listing
 \fB\-k\fR, \fB\-\-keybindings\-file\fR=\fI\,FILE\/\fR
 set an alternative keybindings file
 .TP
-\fB\-l\fR, \fB\-\-no\-long\-view\fR
-disable the long view mode (default)
-.TP
-\fB\-L\fR, \fB\-\-long\-view\fR
-enable the long-view mode to list files and their properties. By default, the following information is provided for each file: file name, file permissions (symbolic notation), owner and primary group, last modification time, and size. These fields can be customized using the \fIPropFields\fR option in the configuration file (use \fITimeStyle\fR to customize timestamp format). To get more detailed information about files use the \fIp\fR command (see below).
+\fB\-l\fR, \fB\-\-long\-view\fR
+enable the long-view mode to list files and their properties. By default, the following information is provided for each file: file name, file permissions (symbolic notation), owner and primary group (names), last modification time, and size. These fields can be customized using the \fIPropFields\fR option in the configuration file (use \fITimeStyle\fR to customize timestamp format). To get more detailed information about files use the \fIp\fR command (see below).
 .TP
 \fB\-m\fR, \fB\-\-dirhist\-map\fR
 enable the directory history map to keep in view previous, current and next entries in the directory history list

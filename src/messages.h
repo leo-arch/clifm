@@ -1313,8 +1313,7 @@ Page Down: Advance one page\nq: Stop pagging\n"
 \n  -i, --no-case-sensitive\t No case-sensitive files listing (default)\
 \n  -I, --case-sensitive\t\t Case-sensitive files listing\
 \n  -k, --keybindings-file=FILE\t Set an alternative keybindings file\
-\n  -l, --no-long-view\t\t Disable long/detail view mode (default)\
-\n  -L, --long-view\t\t Enable long/detail view mode\
+\n  -l, --long-view\t\t Enable long/detail view mode\
 \n  -m, --dirhist-map\t\t Enable the directory history map\
 \n  -o, --no-autols\t\t Do not list files automatically\
 \n  -O, --autols\t\t\t List files automatically (default)\

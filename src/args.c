@@ -174,6 +174,8 @@ static struct option const longopts[] = {
 	{"no-case-sensitive", no_argument, 0, 'i'},
 	{"case-sensitive", no_argument, 0, 'I'},
 	{"keybindings-file", required_argument, 0, 'k'},
+	/* Both l and L are now the same thing: enable long view.
+	 * Kept for compatibility reasons. */
 	{"no-long-view", no_argument, 0, 'l'},
 	{"long-view", no_argument, 0, 'L'},
 	{"dirhist-map", no_argument, 0, 'm'},
@@ -1461,7 +1463,9 @@ parse_cmdline_args(const int argc, char **argv)
 		case 'i': conf.case_sens_list = xargs.case_sens_list = 0; break;
 		case 'I': conf.case_sens_list = xargs.case_sens_list = 1; break;
 		case 'k': set_alt_kbinds_file(optarg); break;
-		case 'l': conf.long_view = xargs.longview = 0; break;
+		/* Make -l work like in ls(1) and other files listers. */
+//		case 'l': conf.long_view = xargs.longview = 0; break;
+		case 'l': conf.long_view = xargs.longview = 1; break;
 		case 'L': conf.long_view = xargs.longview = 1; break;
 		case 'm': conf.dirhist_map = xargs.dirmap = 1; break;
 		case 'o': conf.autols = xargs.autols = 0; break;
