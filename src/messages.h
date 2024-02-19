@@ -1318,8 +1318,6 @@ Page Down: Advance one page\nq: Stop pagging\n"
 \n  -m, --dirhist-map\t\t Enable the directory history map\
 \n  -o, --no-autols\t\t Do not list files automatically\
 \n  -O, --autols\t\t\t List files automatically (default)\
-\n  -p, --path=PATH\t\t Use PATH as CliFM's starting path (deprecated: use positional \
-parameters instead)\
 \n  -P, --profile=PROFILE\t\t Use (or create) PROFILE as profile\
 \n  -r, --no-refresh-on-empty-line Do not refresh the list of files when pressing Enter \
 on an empty line\
