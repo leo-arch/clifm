@@ -153,8 +153,8 @@
 
 /* Link long (--option) and short options (-o) for the getopt_long function. */
 static struct option const longopts[] = {
-	{"no-hidden", no_argument, 0, 'a'},
-	{"show-hidden", no_argument, 0, 'A'},
+	{"show-hidden", no_argument, 0, 'a'},
+	{"no-hidden", no_argument, 0, 'A'},
 	{"bookmarks-file", required_argument, 0, 'b'},
 	{"config-file", required_argument, 0, 'c'},
 
@@ -165,8 +165,8 @@ static struct option const longopts[] = {
 	{"config-dir", required_argument, 0, 'D'},
 	{"no-eln", no_argument, 0, 'e'},
 	{"eln-use-workspace-color", no_argument, 0, 'E'},
-	{"no-dirs-first", no_argument, 0, 'f'},
-	{"dirs-first", no_argument, 0, 'F'},
+	{"dirs-first", no_argument, 0, 'f'},
+	{"no-dirs-first", no_argument, 0, 'F'},
 	{"pager", no_argument, 0, 'g'},
 	{"no-pager", no_argument, 0, 'G'},
 	{"help", no_argument, 0, 'h'},
@@ -174,13 +174,11 @@ static struct option const longopts[] = {
 	{"no-case-sensitive", no_argument, 0, 'i'},
 	{"case-sensitive", no_argument, 0, 'I'},
 	{"keybindings-file", required_argument, 0, 'k'},
-	/* Both l and L are now the same thing: enable long view.
-	 * Kept for compatibility reasons. */
-	{"no-long-view", no_argument, 0, 'l'},
-	{"long-view", no_argument, 0, 'L'},
+	{"long-view", no_argument, 0, 'l'},
+	{"no-long-view", no_argument, 0, 'L'},
 	{"dirhist-map", no_argument, 0, 'm'},
-	{"no-autols", no_argument, 0, 'o'},
-	{"autols", no_argument, 0, 'O'},
+	{"autols", no_argument, 0, 'o'},
+	{"no-autols", no_argument, 0, 'O'},
 	{"path", required_argument, 0, 'p'},
 	{"profile", required_argument, 0, 'P'},
 	{"no-refresh-on-emtpy-line", no_argument, 0, 'r'},
@@ -1292,8 +1290,8 @@ parse_cmdline_args(const int argc, char **argv)
 
 	while ((optc = getopt(argc, argv, OPTSTRING)) != EOF) {
 		switch (optc) {
-		case 'a': conf.show_hidden = xargs.hidden = 0; break;
-		case 'A': conf.show_hidden = xargs.hidden = 1; break;
+		case 'a': conf.show_hidden = xargs.hidden = 1; break;
+		case 'A': conf.show_hidden = xargs.hidden = 0; break;
 		case 'b': xargs.bm_file = 1; set_alt_bm_file(optarg); break;
 		case 'B': set_tab_mode(optarg); break;
 		case 'c': xargs.config = 1; set_alt_config_file(optarg); break;
@@ -1437,8 +1435,8 @@ parse_cmdline_args(const int argc, char **argv)
 
 		switch (optc) {
 		/* Short options */
-		case 'a': conf.show_hidden = xargs.hidden = 0; break;
-		case 'A': conf.show_hidden = xargs.hidden = 1; break;
+		case 'a': conf.show_hidden = xargs.hidden = 1; break;
+		case 'A': conf.show_hidden = xargs.hidden = 0; break;
 		case 'b': xargs.bm_file = 1; set_alt_bm_file(optarg); break;
 		case 'c': xargs.config = 1; set_alt_config_file(optarg); break;
 
@@ -1454,8 +1452,8 @@ parse_cmdline_args(const int argc, char **argv)
 		case 'D': set_alt_config_dir(optarg); break;
 		case 'e': xargs.noeln = conf.no_eln = 1; break;
 		case 'E': xargs.eln_use_workspace_color = 1; break;
-		case 'f': conf.list_dirs_first = xargs.dirs_first = 0; break;
-		case 'F': conf.list_dirs_first = xargs.dirs_first = 1; break;
+		case 'f': conf.list_dirs_first = xargs.dirs_first = 1; break;
+		case 'F': conf.list_dirs_first = xargs.dirs_first = 0; break;
 		case 'g': conf.pager = xargs.pager = 1; break;
 		case 'G': conf.pager = xargs.pager = 0; break;
 		case 'h': help_function(); break; /* noreturn */
@@ -1463,13 +1461,11 @@ parse_cmdline_args(const int argc, char **argv)
 		case 'i': conf.case_sens_list = xargs.case_sens_list = 0; break;
 		case 'I': conf.case_sens_list = xargs.case_sens_list = 1; break;
 		case 'k': set_alt_kbinds_file(optarg); break;
-		/* Make -l work like in ls(1) and other files listers. */
-//		case 'l': conf.long_view = xargs.longview = 0; break;
 		case 'l': conf.long_view = xargs.longview = 1; break;
-		case 'L': conf.long_view = xargs.longview = 1; break;
+		case 'L': conf.long_view = xargs.longview = 0; break;
 		case 'm': conf.dirhist_map = xargs.dirmap = 1; break;
-		case 'o': conf.autols = xargs.autols = 0; break;
-		case 'O': conf.autols = xargs.autols = 1; break;
+		case 'o': conf.autols = xargs.autols = 1; break;
+		case 'O': conf.autols = xargs.autols = 0; break;
 		case 'p': path_value = optarg; xargs.path = 1; break;
 		case 'P': set_alt_profile(optarg); break;
 		case 'r': xargs.refresh_on_empty_line = 0; break;

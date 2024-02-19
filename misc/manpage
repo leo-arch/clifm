@@ -87,11 +87,11 @@ If no positional parameter, and the \fI\-w\fR option is not used, \fBclifm\fR st
 .TP
 \fBNote\fR: If compiled in POSIX mode, the following list of options does not apply. In this case, run \fIclifm \-h\fR to get the actual list of options. (To make sure run \fIclifm \-v\fR: if compiled in POSIX mode the version number is followed by "\-POSIX").
 .TP
-\fB\-a\fR, \fB\-\-no\-hidden\fR
-ignore entries starting with . (default)
-.TP
-\fB\-A\fR, \fB\-\-show\-hidden\fR
+\fB\-a\fR, \fB\-\-show\-hidden\fR
 do not ignore entries starting with .
+.TP
+\fB\-A\fR, \fB\-\-no\-hidden\fR
+ignore entries starting with . (default)
 .TP
 \fB\-b\fR, \fB\-\-bookmarks\-file\fR=\fI\,FILE\/\fR
 set an alternative bookmarks file
@@ -108,11 +108,11 @@ do not print ELN's (entry list number) at the left of file names. Bear in mind, 
 \fB\-E\fR, \fB\-\-eln\-use\-workspace\-color\fR
 ELN's use the current workspace color
 .TP
-\fB\-f\fR, \fB\-\-no\-dirs\-first\fR
-do not list directories first
-.TP
-\fB\-F\fR, \fB\-\-dirs\-first\fR
+\fB\-f\fR, \fB\-\-dirs\-first\fR
 list directories first (default)
+.TP
+\fB\-F\fR, \fB\-\-no\-dirs\-first\fR
+do not list directories first
 .TP
 \fB\-g\fR, \fB\-\-pager\fR
 enable \fIMas\fR, the built-in pager for files listing
@@ -127,10 +127,10 @@ show this help and exit
 list files horizontally instead of vertically
 .TP
 \fB\-i\fR, \fB\-\-no\-case\-sensitive\fR
-no case\-sensitive files listing (default)
+ignore case distinctions when listing files (default)
 .TP
 \fB\-I\fR, \fB\-\-case\-sensitive\fR
-case\-sensitive files listing
+do not ignore case distinctions when listing files
 .TP
 \fB\-k\fR, \fB\-\-keybindings\-file\fR=\fI\,FILE\/\fR
 set an alternative keybindings file
@@ -138,14 +138,17 @@ set an alternative keybindings file
 \fB\-l\fR, \fB\-\-long\-view\fR
 enable the long-view mode to list files and their properties. By default, the following information is provided for each file: file name, file permissions (symbolic notation), owner and primary group (names), last modification time, and size. These fields can be customized using the \fIPropFields\fR option in the configuration file (use \fITimeStyle\fR to customize timestamp format). To get more detailed information about files use the \fIp\fR command (see below).
 .TP
+\fB\-L\fR, \fB\-\-no\-long\-view\fR
+disable long-view mode (default)
+.TP
 \fB\-m\fR, \fB\-\-dirhist\-map\fR
 enable the directory history map to keep in view previous, current and next entries in the directory history list
 .TP
-\fB\-o\fR, \fB\-\-no\-autols\fR
-the internal \fIcd\fR command works like the shell \fIcd\fR command: change directory but do not list files automatically
-.TP
-\fB\-O\fR, \fB\-\-autols\fR
+\fB\-o\fR, \fB\-\-autols\fR
 the \fIcd\fR command changes directory AND lists files automatically (default)
+.TP
+\fB\-O\fR, \fB\-\-no\-autols\fR
+the internal \fIcd\fR command works like the shell \fIcd\fR command: change directory but do not list files automatically
 .TP
 \fB\-P\fR, \fB\-\-profile\fR=\fI\,PROFILE\/\fR
 use \fIPROFILE\fR as profile. If \fIPROFILE\fR does not exist, it will be created. The default profile is \fIdefault\fR.

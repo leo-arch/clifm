@@ -1258,7 +1258,7 @@ Page Down: Advance one page\nq: Stop pagging\n"
 \n -f       Print full directories size (long view mode only)\
 \n -F       Disable the files counter (directories)\
 \n -g       Print file sizes in powers of 1000 instead of 1024\
-\n -G       Print file sizes as used blocks instead of used bytes\
+\n -G       Print file sizes as used blocks instead of apparent size (used bytes)\
 \n -h       Print this help and exit\
 \n -H       Disable syntax-highlighting\
 \n -i       Enable icons\
@@ -1297,26 +1297,27 @@ Page Down: Advance one page\nq: Stop pagging\n"
 \n -Z NUM   List only up to NUM files"
 #else
 #define SHORT_OPTIONS "\
-\n  -a, --no-hidden\t\t Do not show hidden files (default)\
-\n  -A, --show-hidden\t\t Show hidden files\
+\n  -a, --show-hidden\t\t Show hidden files\
+\n  -A, --no-hidden\t\t Do not show hidden files\
 \n  -b, --bookmarks-file=FILE\t Set an alternative bookmarks file\
 \n  -c, --config-file=FILE\t Set an alternative configuration file\
 \n  -D, --config-dir=DIR\t\t Set an alternative configuration directory\
 \n  -e, --no-eln\t\t\t Do not print ELN's (entry list number)\
 \n  -E, --eln-use-workspace-color\t ELN's use the current workspace color\
-\n  -f, --no-dirs-first\t\t Do not list directories first\
-\n  -F, --dirs-first\t\t List directories first (default)\
+\n  -f, --dirs-first\t\t List directories first (default)\
+\n  -F, --no-dirs-first\t\t Do not list directories first\
 \n  -g, --pager\t\t\t Enable the pager\
 \n  -G, --no-pager\t\t Disable the pager (default)\
 \n  -h, --help\t\t\t Show this help and exit\
 \n  -H, --horizontal-list\t\t List files horizontally\
-\n  -i, --no-case-sensitive\t No case-sensitive files listing (default)\
-\n  -I, --case-sensitive\t\t Case-sensitive files listing\
+\n  -i, --no-case-sensitive\t Ignore case distinctions when listing files (default)\
+\n  -I, --case-sensitive\t\t Do not ignore case distinctions when listing files\
 \n  -k, --keybindings-file=FILE\t Set an alternative keybindings file\
 \n  -l, --long-view\t\t Enable long/detail view mode\
+\n  -L, --no-long-view\t\t Disable long/detail view mode\
 \n  -m, --dirhist-map\t\t Enable the directory history map\
-\n  -o, --no-autols\t\t Do not list files automatically\
-\n  -O, --autols\t\t\t List files automatically (default)\
+\n  -o, --autols\t\t\t List files automatically (default)\
+\n  -O, --no-autols\t\t Do not list files automatically\
 \n  -P, --profile=PROFILE\t\t Use (or create) PROFILE as profile\
 \n  -r, --no-refresh-on-empty-line Do not refresh the list of files when pressing Enter \
 on an empty line\
