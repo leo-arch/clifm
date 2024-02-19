@@ -214,6 +214,7 @@ static struct option const longopts[] = {
 	{"icons-use-file-color", no_argument, 0, LOPT_ICONS_USE_FILE_COLOR},
 	{"int-vars", no_argument, 0, LOPT_INT_VARS},
 	{"list-and-quit", no_argument, 0, LOPT_LIST_AND_QUIT},
+	{"ls", no_argument, 0, LOPT_LIST_AND_QUIT},
 	{"lscolors", no_argument, 0, LOPT_LSCOLORS},
 	{"max-dirhist", required_argument, 0, LOPT_MAX_DIRHIST},
 	{"max-files", required_argument, 0, LOPT_MAX_FILES},
