@@ -247,6 +247,7 @@ For a complete description please consult our [Wiki](https://github.com/leo-arch
   - [User/group ID **names** (instead of just numbers) in long view](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode).
   - [Customize long view fields via `--prop-fields`](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode).
   - [Allow double spacing for fields in long view](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode).
+  - The `-l` command line switch now **enables** the long view mode (instead of disabling it). `-L` has been kept for compatibility reasons.
 * `1.17 (Lechuck)`
   - [Allow properties fields order customization in long view](https://github.com/leo-arch/clifm/wiki/Common-Operations#file-details).
   - [Autocommand files](https://github.com/leo-arch/clifm/wiki/Specifics#autocommand-files-cfmin-and-cfmout) won't be read unless `ReadAutocmdFiles` is set to `true` in the main configuration file.
