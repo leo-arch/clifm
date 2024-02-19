@@ -77,7 +77,11 @@ Simply put, with \fBclifm\fR the command\-line is still there, never hidden, but
 .SH 3. PARAMETERS
 .SH POSITIONAL PARAMETERS
 .TP
-If the first non\-option parameter is a directory, \fBclifm\fR will start in this directory. For example, the command \fIclifm\ /etc\fR instructs \fBclifm\fR to start in the directory \fI/etc\fR. If not specified, the first workspace will be used. To start in a different workspace use the \fI\-w\fR option. For instance: \fIclifm\ \-w4\ /etc\fR.
+If the first non\-option parameter is a directory, \fBclifm\fR will start in this directory (for example, the command \fIclifm\ /etc\fR instructs \fBclifm\fR to start in the directory \fI/etc\fR).
+.TP
+If not specified, the first workspace is used. To start in a different workspace use the \fI\-w\fR option (for instance, \fIclifm\ \-w4\ /etc\fR).
+.TP
+If no positional parameter, and the \fI\-w\fR option is not used, \fBclifm\fR starts by default in the last visited directory (and in the last active workspace). To disable this behavior use \fI\-\-no\-restore\-last\-path\fR (see below).
 
 .SH OPTIONS
 .TP
@@ -146,11 +150,8 @@ the internal \fIcd\fR command works like the shell \fIcd\fR command: change dire
 \fB\-O\fR, \fB\-\-autols\fR
 the \fIcd\fR command changes directory AND lists files automatically (default)
 .TP
-\fB\-p\fR, \fB\-\-path\fR=\fI\,PATH\/\fR
-use \fIPATH\fR as \fBclifm\fR starting path. Default starting path is the current working directory. If no workspace is specified via the \fB\-\-workspace\fR option (see below), the first workspace (1) is used. This option is deprecated: use positional parameters instead.
-.TP
 \fB\-P\fR, \fB\-\-profile\fR=\fI\,PROFILE\/\fR
-use \fIPROFILE\fR as profile. If \fIPROFILE\fR does not exist, it will be created. Default profile is \'default\'
+use \fIPROFILE\fR as profile. If \fIPROFILE\fR does not exist, it will be created. The default profile is \fIdefault\fR.
 .TP
 \fB\-r\fR, \fB\-\-no\-refresh\-on\-empty\-line\fR
 do not refresh the current list of files when pressing the Enter key on an empty line
@@ -192,13 +193,13 @@ do not ignore case when consulting the jump database (via the \fIj\fR command)
 enable case sensitive path completion
 .TP
 \fB\-\-cd\-on\-quit\fR
-write last visited directory to \fI$XDG_CONFIG_HOME/clifm/.last\fR to be later accessed by the corresponding shell function at program exit. See the \fBSHELL FUNCTIONS\fR section below.
+write the last visited directory to \fI$XDG_CONFIG_HOME/clifm/.last\fR to be later accessed by the corresponding shell function at program exit. See the \fBSHELL FUNCTIONS\fR section below.
 .TP
 \fB\-\-color\-scheme\fR=\fI\,NAME\/\fR
-set \fINAME\fR as color scheme
+use the color scheme named \fINAME\fR
 .TP
 \fB\-\-cwd\-in\-title\fR
-print current working directory in terminal window title. Otherwise, only the program name is printed
+print the current working directory in the terminal window title (otherwise, only the program name is printed)
 .TP
 \fB\-\-data\-dir=\fI\,DIR\/\fR
 load data files, such as plugins, color schemes, and default configuration files, from \fIDIR\fR 
@@ -207,13 +208,13 @@ load data files, such as plugins, color schemes, and default configuration files
 enable desktop notifications. Enter \fIhelp desktop\-notifications\fR in \fBclifm\fR for more information
 .TP
 \fB\-\-disk\-usage\fR
-show disk usage for the file system the current directory belongs to (in the form "free/total (free_percentage) fs_type dev_name")
+show disk usage for the file system the current directory belongs to (in the form "free/total (free-percentage) fs-type dev-name")
 .TP
 \fB\-\-full\-dir\-size\fR
-if running in long view, print directories size and their contents
+if running in long view, print the full (or total) size of directories
 .TP
 \fB\-\-fuzzy\-algo\fR=\fI\,VER\/\fR
-fuzzy matching algorithm, where \fIVER\fR is either \fI1\fR (faster, but not Unicode aware), or \fI2\fR (slower, Unicode aware)
+fuzzy matching algorithm, where \fIVER\fR is either \fI1\fR (faster, but not Unicode aware), or \fI2\fR (slower, Unicode aware). Bear in mind however that the second algorithm will fallback to the first one (because it's faster) whenever the query string contains only ASCII characters, to minimize the performance penalty.
 .TP
 \fB\-\-fuzzy\-matching\fR
 enable fuzzy matches for filename/path completions and suggestions
@@ -237,7 +238,7 @@ instead of a specific color, icons take the color of the corresponding file name
 allow the use of internal variables (ex: \fIVAR=/bin; cd $VAR\fR)
 .TP
 \fB\-\-list\-and\-quit\fR
-list files and quit. It may be used in conjunction parameter substitution. Ex: \'clifm \-\-list\-and\-quit /etc\'
+list files and quit. Useful in conjunction with positional parameters. Ex: \'clifm \-\-list\-and\-quit /etc\'
 .TP
 \fB\-\-lscolors\fR
 read file colors from \fBLS_COLORS\fR environment variable (GNU ls only). Bear in mind that clifm-specific colors (like empty directory or inaccessible file) will be disabled. Note also that colors for specific file names, as defined in \fBLS_COLORS\fR, are not supported. Consult \fBdircolors\fR(1) for more information.
@@ -261,7 +262,7 @@ print file sizes as used blocks instead of used bytes (apparent size)
 disable bold colors (applies to all color schemes)
 .TP
 \fB\-\-no\-cd\-auto\fR
-by default, \fBclifm\fR changes directories by just specifying the corresponding ELN (e.g. \'12\' instead of \'cd 12\'). This option forces the use of \fIcd\fR
+by default, \fBclifm\fR changes directories by just specifying the corresponding ELN (e.g. \'12\' instead of \'cd 12\'). This option forces the use of \fIcd\fR.
 .TP
 \fB\-\-no\-classify\fR
 by default, \fBclifm\fR appends a file type indicator character to file names when running with no colors (see the \fB\-\-no\-color\fR option below) and a directory indicator (plus a files counter) when running with colors. Classification characters are: 
@@ -283,19 +284,19 @@ do not clear the screen before listing files
 disable colors
 .TP
 \fB\-\-no\-columns\fR
-disable columns for files listing
+disable columns for files listing (use a single column)
 .TP
 \fB\-\-no\-dir\-jumper\fR
 disable the directory jumper function
 .TP
 \fB\-\-no\-file\-cap\fR
-do not check files capabilities when listing files
+do not check file capabilities when listing files
 .TP
 \fB\-\-no\-file\-ext\fR
-do not check files extension when listing files
+do not check file extensions when listing files
 .TP
 \fB\-\-no\-files\-counter\fR
-disable the files counter for directories. This option is especially useful to speed up the listing process; counting files in directories is particularly expensive
+disable the files counter for directories. This option is especially useful to speed up the listing process; counting files in directories is particularly expensive.
 .TP
 \fB\-\-no\-follow\-symlinks\fR
 do not follow symbolic links when listing files
@@ -477,15 +478,15 @@ toggle the autocd function on/off. If set to on, \fIDIR\fR amounts to \fIcd\ DIR
 .B actions \fR[\fIlist\fR] [\fIedit\fR [\fIAPP\fR]]
 to list available actions (or plugins) use the \fIlist\fR subcommand. Note that, since \fIlist\fR is the default action, it can be omitted.
 .sp
-Use the \fIedit\fR subcommand to add, remove or modify custom actions (using APP if specified or the default associated application otherwise).
+Use the \fIedit\fR subcommand to add, remove or modify custom actions (using APP if specified or the default associated application for text files otherwise).
 .sp
 The aim of this function is to allow the user to easily add custom commands and functions to \fBclifm\fR. In other words, the actions function is a plugins capability.
 .sp
-The general procedure is quite simple: a) bind a custom action name to an executable file written in any language you want, be it a shell or Python script, a C program or whatever you like (using the \fIactions.clifm\fR file located in the configuration directory). Example: "myaction=myscript.sh". b) Now, drop the corresponding script (in our example, myscript.sh) into the plugins directory (see the \fBFILES\fR section below). 3) Once this is done, you can call the script using the custom action name defined before as if it were any other command: run \fImyaction\fR, and myscript.sh will be executed.
+The general procedure is quite simple: a) edit the actions file (via \fIactions edit\fR) and bind a custom action name to an executable file (written in any language you want, be it a shell or Python script, a C program or whatever you like). Example: "myaction=myscript.sh". b) Now, drop the corresponding script (in our example, \fImyscript.sh\fR) into the plugins directory (see the \fBFILES\fR section below). 3) Once this is done, you can call the script using the custom action name defined before as if it were any other command: run \fImyaction\fR, and \fImyscript.sh\fR will be executed.
 .sp
-All arguments passed to the action command are passed to the script or program as well (which is run via the system shell).
+All arguments passed to the action command are passed to the script or program as well (which is executed via the system shell).
 .sp
-The plugins provided with \fBclifm\fR (take a look at the plugins directory) could be used as a starting point to create custom plugins.
+The plugins bundled with \fBclifm\fR (take a look at the plugins directory) could be used as a starting point to create new plugins.
 .TP
 .B alias \fR[\fIimport FILE\fR] [\fIls\fR,\fIlist\fR] [\fINAME\fR]
 with no argument (or with \fIls,list\fR parameters), it prints the list of available aliases, if any. To get the description of a specific alias enter \fIalias\fR followed by the alias name. To write a new alias simply enter \fIedit\fR (or press F10) to open the configuration file and add a line like this: "alias name=\'command args...\'" or "alias name=\'directory\'".
