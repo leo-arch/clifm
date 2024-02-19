@@ -35,13 +35,6 @@
 # Note: Classify (see below) must be set to true.
 ;FilesCounter=true
 
-# Mas, the files list pager. Possible values are:
-# 0/false: Disable the pager.
-# 1/true: Run the pager whenever the list of files does not fit on the screen.
-# >1: Run the pager whenever the amount of files in the current directory is
-# greater than or equal to this value (say, 1000).
-;Pager=false
-
 # If running with colors, append directory indicator to directories. If
 # running without colors (via the --no-color option), append file type
 # indicator at the end of file names:
@@ -66,6 +59,13 @@
 # color scheme file (InterfaceColors field).
 ;ColorLinksAsTarget=false
 
+# Mas, the files list pager. Possible values are:
+# 0/false: Disable the pager.
+# 1/true: Run the pager whenever the list of files does not fit on the screen.
+# >1: Run the pager whenever the amount of files in the current directory is
+# greater than or equal to this value (say, 1000).
+;Pager=false
+
 # How to list files: 0 = vertically (like ls(1) would), 1 = horizontally.
 ;ListingMode=0
 
@@ -80,10 +80,10 @@
 # true (you can also use the --sort-reverse option or the 'st' command).
 ;SortReverse=false
 
-# List files properties next to file names instead of just file names.
+# List file properties next to file names instead of just file names.
 ;LongViewMode=false
 
-# Properties fields to be printed for each file name in long view mode:
+# Properties fields to be displayed for each file name in long view mode:
 # f: files counter (for directories)
 # d: inode number
 # l: number of hard links
@@ -95,17 +95,16 @@
 # x = extended attributes/capabilities/ACLs (marked as '@') (requires p|n)
 # A single dash ("-") disables all fields
 #
-# Note that, exception made of 'x' and 'G', fields will be printed in the
+# Note that, exception made of 'x' and 'G', fields will be displayed in the
 # order specified here.
 #
-# Example: print only permissions (numeric) and size (human readable):
+# Example: display only permissions (numeric) and size (human readable):
 #PropFields="ns"
-# or, to print file permissions, modification time, and size (in bytes):
+# or, to display file permissions, modification time, and size (in bytes):
 #PropFields="pmS"
 ;PropFields="xfpIms"
 
-# Number of spaces between fields in long view.
-# Possible values: 1-2.
+# Number of spaces between fields in long view. Possible values: 1-2.
 ;PropFieldsGap=1
 
 # Format used to display timestamps in long view mode.
@@ -143,7 +142,7 @@
 # well, so that the color per extension feature is disabled.
 ;LightMode=false
 
-# If set to true, clear the screen before listing files.
+# Clear the screen before listing files.
 ;ClearScreen=true
 
 # Maximum file name length for listed files. If TrimNames is set to true,
@@ -176,11 +175,11 @@
 # in the form "FREE/TOTAL (FREE_PERCENTAGE) FS_TYPE DEV_NAME".
 ;DiskUsage=false
 
-# If set to true, print a map of the current position in the directory
-# history list, showing previous, current, and next entries.
+# Print a map of the current position in the directory history list,
+# showing previous, current, and next entries.
 ;DirhistMap=false
 
-# If set to true, always print the list of selected files. Since this
+# Print the list of selected files after the files list. Since this
 # list could become quite extensive, you can limit the number of printed 
 # entries using the MaxPrintSelfiles option below.
 ;PrintSelfiles=false
@@ -211,7 +210,7 @@
 # is not detected.
 ;ColorScheme=
 
-# Enable icons.
+# Enable/disable icons.
 # By default, emojis (widely available today) are used as icons.
 # Nerd-fonts and icons-in-terminal are supported as well, though clifm
 # needs to be recompiled in order to enable support. Consult our Wiki
@@ -234,7 +233,10 @@
 
 # Fuzzy algorithm. Available options are:
 # 1 = faster, not Unicode aware
-# 2 = slower, Unicode aware
+# 2 = slower, Unicode aware (note that this second algorithm will
+# nonetheless fallback to the first one whenever the query string
+# does not contain unicode characters, minimizing thus the performance
+# penalty).
 ;FuzzyAlgorithm=2
 
 # TAB completion mode: 'standard', 'fzf', 'fnf' or 'smenu'. Defaults
@@ -259,7 +261,7 @@
 # h = Commands history\n\
 # j = Jump database\n\
 # Use a dash (-) to skip a check. Ex: 'ehfj-ac' to skip the bookmarks
-# check
+# check.
 ;SuggestionStrategy=ehfj-ac
 
 # Suggest file names using the corresponding file type color (set
@@ -284,9 +286,9 @@
 ;AutoLs=true
 
 # If set to true, a command name that is the name of a directory or a
-# file is executed as if it were the argument to the the 'cd' or the 
-# 'open' commands respectivelly: 'cd DIR' works the same as just 'DIR'
-# and 'open FILE' works the same as just 'FILE'.
+# file, is executed as if it were the argument to the the 'cd' or the 
+# 'open' commands respectively: 'DIR' is equivalent 'cd DIR' and
+# 'FILE' to 'open FILE'.
 ;Autocd=true
 ;AutoOpen=true
 
@@ -299,8 +301,13 @@
 # commands.
 ;Readonly=false
 
-# If set to true, the 'r' command executes 'trash' instead of rm(1).
+# Make the 'r' command trash files instead of removing them.
 ;TrashAsRm=false
+
+# If set to true, the 'r' command will never prompt before removals.
+# Note: use the '-f' parameter to turn this option on for a single
+# command. Example: 'r -f FILE'.
+;rmForce=false
 
 # Set the default copy command. Available options are:
 # 0 = 'cp -iRp', 1 = 'cp -Rp', 2 = 'advcp -giRp', 3 = 'advcp -gRp',
@@ -314,9 +321,6 @@
 # 2 and 3 include a progress bar.
 # Only 0 and 2 will prompt before overwrite.
 ;mvCmd=0
-
-# If set to true, the 'r' command will never prompt before removals.
-;rmForce=false
 
 # Choose the resource opener to open files with their default associated
 # application (e.g. Ranger's rifle or xdg-open). If not set, 'lira',
@@ -402,17 +406,18 @@
 # (e.g. English), you can turn this off.
 ;Unicode=true
 
-# CliFM's starting path. If not specified, it defaults to the current
+# Set a custom starting path. If not specified, it defaults to the current
 # working directory. If set, it overrides RestoreLastPath.
 ;StartingPath=
 
-# If set to true, start CliFM in the last visited directory (and in the
-# last used workspace). This option is overriden by StartingPath (if set).
+# Start CliFM in the last visited directory (and in the last used
+# workspace). This option is overriden by StartingPath (if set).
 ;RestoreLastPath=true
 
-# MaxPath is only used for the /p option of the prompt: the current
-# working directory will be abbreviated to its basename (everything after
-# the last slash) whenever the current path is longer than MaxPath.
+# This option is only used by the /p option in the prompt string (see the
+# prompts.clifm file): the current working directory will be abbreviated
+# to its basename (everything after the last slash) whenever the current
+# path is longer than MaxPath.
 ;MaxPath=40
 
 # Set readline editing mode: 0 for vi and 1 for emacs (default).
