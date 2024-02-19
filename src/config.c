@@ -377,6 +377,9 @@ dump_config(void)
 	s = DEF_PROP_FIELDS;
 	print_config_value("PropFields", prop_fields_str, s, DUMP_CONFIG_STR);
 
+	n = DEF_PROP_FIELDS_GAP;
+	print_config_value("PropFieldsGap", &conf.prop_fields_gap, &n, DUMP_CONFIG_INT);
+
 	s = "";
 	print_config_value("PTimeStyle", conf.ptime_str, s, DUMP_CONFIG_STR);
 
