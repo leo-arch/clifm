@@ -754,7 +754,8 @@ get_longest_filename(const filesn_t n, const size_t pad)
 	 * */
 
 	longest_fc = 0;
-	if (conf.max_name_len != UNSET && file_info[longest_index].dir == 1
+	if (conf.max_name_len != UNSET && longest_index != -1
+	&& file_info[longest_index].dir == 1
 	&& file_info[longest_index].filesn > 0 && conf.files_counter == 1) {
 		/* We add 1 here to count the slash between the dir name
 		 * and the files counter too. However, in doing this the space
