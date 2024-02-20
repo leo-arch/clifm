@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Feb 19, 2024" "clifm 1.17.6" "CLIFM Manual"
+.TH "CLIFM" "1" "Feb 20, 2024" "clifm 1.17.6" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -388,11 +388,11 @@ use \fIsmenu\fR to display completion matches
 \fB\-\-sort\-reverse\fR
 sort in reverse order, for example: z\-a instead of a\-z, which is the default order
 .TP
-\fB\-\-stat\fR=\fI\,FILE\/\fR
-run the \fIp\fR command on \fIFILE\fR and exit
+\fB\-\-stat\fR \fI\,FILE...\/\fR
+run the \fIp\fR command on FILE(s) and exit. This must be the \fBlast option\fR on the command line.
 .TP
-\fB\-\-stat\-full\fR=\fI\,FILE\/\fR
-run the \fIpp\fR command on \fIFILE\fR and exit
+\fB\-\-stat\-full\fR \fI\,FILE..\/\fR
+run the \fIpp\fR command on FILE(s) and exit. This must be the \fBlast option\fR on the command line.
 .TP
 \fB\-\-stdtab\fR
 use the standard mode (readline\'s built\-in) for TAB completion
