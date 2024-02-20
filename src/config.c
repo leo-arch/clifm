@@ -2088,22 +2088,16 @@ create_profile_file(void)
 }
 
 static void
-create_config_files(void)
+create_config_files(const int just_listing)
 {
 	struct stat attr;
 
-				/* ####################
-				 * #    CONFIG DIR    #
-				 * #################### */
-
-	/* If the config directory doesn't exist, create it. */
 	if (stat(config_dir, &attr) == -1
 	&& create_main_config_dir() == FUNC_FAILURE) {
 		config_ok = 0;
 		return;
 	}
 
-	/* If it exists, check it is writable */
 	if (access(config_dir, W_OK) == -1) {
 		config_ok = 0;
 		err('e', PRINT_PROMPT, _("%s: '%s': Directory not writable. Bookmarks, "
@@ -2113,34 +2107,14 @@ create_config_files(void)
 		return;
 	}
 
-				/* #####################
-				 * #     TAGS DIR      #
-				 * #####################*/
-
-	if (stat(tags_dir, &attr) == -1 && xmkdir(tags_dir, S_IRWXU) == FUNC_FAILURE)
-		err('w', PRINT_PROMPT, _("%s: %s: Cannot create tags directory. "
-			"Tag function disabled\n"),	PROGRAM_NAME, tags_dir);
-
-				/* #####################
-				 * #    CONFIG FILE    #
-				 * #####################*/
-
 	if (stat(config_file, &attr) == -1)
 		config_ok = create_main_config_file(config_file) == FUNC_SUCCESS ? 1 : 0;
 
 	if (config_ok == 0)
 		return;
 
-				/* ######################
-				 * #    PROFILE FILE    #
-				 * ###################### */
-
 	if (stat(profile_file, &attr) == -1)
 		create_profile_file();
-
-				/* #####################
-				 * #    COLORS DIR     #
-				 * ##################### */
 
 	if (stat(colors_dir, &attr) == -1
 	&& xmkdir(colors_dir, S_IRWXU) == FUNC_FAILURE)
@@ -2148,12 +2122,14 @@ create_config_files(void)
 		"directory '%s': Falling back to the default color scheme\n"),
 		PROGRAM_NAME, colors_dir);
 
-	/* Generate the default color scheme file */
 	create_def_color_scheme();
 
-				/* #####################
-				 * #      PLUGINS      #
-				 * #####################*/
+	if (just_listing == 1)
+		return;
+
+	if (stat(tags_dir, &attr) == -1 && xmkdir(tags_dir, S_IRWXU) == FUNC_FAILURE)
+		err('w', PRINT_PROMPT, _("%s: %s: Cannot create tags directory. "
+			"Tag function disabled\n"),	PROGRAM_NAME, tags_dir);
 
 	if (stat(plugins_dir, &attr) == -1
 	&& xmkdir(plugins_dir, S_IRWXU) == FUNC_FAILURE)
@@ -3455,12 +3431,18 @@ undef_config_file_names(void)
 void
 init_config(void)
 {
+	/* If just listing (--list-and-quit or --stat(-full)), we only need to
+	 * load the main config file and colors. */
+	const int just_listing = (xargs.stat > 0 || xargs.list_and_quit == 1);
+
 #ifndef _NO_TRASH
-	set_trash_dirs();
+	if (just_listing == 0)
+		set_trash_dirs();
 #endif /* _NO_TRASH */
 
 #ifdef LINUX_FSINFO
-	get_ext_mountpoints();
+	if (just_listing == 0)
+		get_ext_mountpoints();
 #endif /* LINUX_FSINFO */
 
 	if (xargs.stealth_mode == 1) {
@@ -3479,7 +3461,7 @@ init_config(void)
 	}
 
 	define_config_file_names();
-	create_config_files();
+	create_config_files(just_listing);
 
 	if (config_ok == 0) {
 		undef_config_file_names();
@@ -3495,7 +3477,8 @@ init_config(void)
 	xstrsncpy(div_line, DEF_DIV_LINE, sizeof(div_line));
 #endif /* !CLIFM_SUCKLESS */
 
-	load_prompts();
+	if (just_listing == 0)
+		load_prompts();
 	check_colors();
 
 	if (xargs.secure_env == 1 || xargs.secure_env_full == 1)
@@ -3505,13 +3488,15 @@ init_config(void)
 	/* If FZF win height was not defined in the config file,
 	 * check whether it is present in FZF_DEFAULT_OPTS. Same thing for
 	 * the previewer (--preview option). */
-	if (fzftab)
+	if (fzftab && just_listing == 0)
 		get_fzf_win_height_and_preview();
 #endif /* !_NO_FZF */
 
+	if (just_listing == 1)
+		return;
+
 	char *t = getenv("TERM");
-	if (xargs.list_and_quit != 1 && t && *t == 'x'
-	&& strncmp(t, "xterm", 5) == 0)
+	if (t && *t == 'x' && strncmp(t, "xterm", 5) == 0)
 		/* If running Xterm, instruct it to send an escape code (27) for
 		 * Meta (Alt) key sequences. Otherwise, Alt keybindings won't work */
 		META_SENDS_ESC;
