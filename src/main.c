@@ -291,7 +291,6 @@ char
 /*	*right_prompt = (char *)NULL, */
 	*sel_file = (char *)NULL,
 	*smenutab_options_env = (char *)NULL,
-	*stat_filename = (char *)NULL,
 	*stdin_tmp_dir = (char *)NULL,
 	*sudo_cmd = (char *)NULL,
 #ifndef _NO_SUGGESTIONS

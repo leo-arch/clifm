@@ -1862,7 +1862,6 @@ extern char
 /*	*right_prompt, */
 	*sel_file,
 	*smenutab_options_env,
-	*stat_filename,
 	*stdin_tmp_dir,
 	*sudo_cmd,
 #ifndef _NO_SUGGESTIONS

@@ -1404,8 +1404,8 @@ CliFM's built-in opener\
 \n      --si\t\t\t Print sizes in powers of 1000 instead of 1024\
 \n      --smenutab\t\t Use smenu to display completion matches\
 \n      --sort-reverse\t\t Sort in reverse order, e.g. z-a instead of a-z\
-\n      --stat=FILE\t\t Run the 'p' command on FILE and exit\
-\n      --stat-full=FILE\t\t Run the 'pp' command on FILE and exit\
+\n      --stat FILE...\t\t Run the 'p' command on FILE(s) and exit\
+\n      --stat-full FILE...\t Run the 'pp' command on FILE(s) and exit\
 \n      --stdtab\t\t\t Force the use of the standard TAB completion mode (readline)\
 \n      --trash-as-rm\t\t The 'r' command executes 'trash' instead of \
 rm(1) to prevent accidental deletions\

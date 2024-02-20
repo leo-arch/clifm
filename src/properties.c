@@ -1663,9 +1663,7 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 static int
 err_no_file(const char *filename, const char *target, const int errnum)
 {
-	/* If stat_filename, we're running with --stat(-full): err with program
-	 * name. */
-	char *errname = stat_filename ? PROGRAM_NAME : "prop";
+	char *errname = xargs.stat > 0 ? PROGRAM_NAME : "prop";
 
 	if (*target) {
 		xerror(_("%s: %s %s->%s %s: Broken symbolic link\n"),
@@ -1800,14 +1798,38 @@ do_stat_and_exit(const int full_stat)
 	if (cwd)
 		workspaces[cur_ws].path = savestring(cwd, strlen(cwd));
 
-	char *norm_path = *stat_filename == '~'
-		? tilde_expand(stat_filename) : (char *)NULL;
+	int status = 0;
+	int start = -1;
+	int i;
 
-	const int ret = do_stat(norm_path ? norm_path : stat_filename, full_stat);
+	for (i = 0; i < argc_bk; i++) {
+		if (argv_bk[i] && strncmp(argv_bk[i], "--stat", 6) == 0
+		&& argv_bk[i + 1] && *argv_bk[i + 1]) {
+			start = i + 1;
+			break;
+		}
+	}
 
-	free(norm_path);
-	free(stat_filename);
-	exit(ret);
+	if (start <= 0) {
+		fprintf(stderr, _("%s: '--stat': Option requires an argument\n"
+			"Try '%s --help' for more information.\n"),
+			PROGRAM_NAME, PROGRAM_NAME);
+		exit(EXIT_FAILURE);
+	}
+
+	for (i = start; i < argc_bk; i++) {
+		char *norm_path = *argv_bk[i] == '~'
+			? tilde_expand(argv_bk[i]) : (char *)NULL;
+
+		 const int ret =
+			do_stat(norm_path ? norm_path : argv_bk[i], full_stat);
+		if (ret != 0)
+			status = ret;
+
+		free(norm_path);
+	}
+
+	exit(status);
 }
 
 /* Print final stats for the disk usage analyzer mode: total and largest file. */

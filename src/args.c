@@ -1225,7 +1225,6 @@ set_stat(const int optc, const char *optval)
 #endif /* !_BE_POSIX */
 
 	xargs.restore_last_path = conf.restore_last_path = 0;
-	stat_filename = savestring(optval, strlen(optval));
 }
 
 static void
@@ -1688,7 +1687,7 @@ parse_cmdline_args(const int argc, char **argv)
 #endif /* !_NO_LIRA */
 
 	char *spath = (char *)NULL;
-	if (argv[optind]) { /* Starting path passed as positional parameter */
+	if (xargs.stat == 0 && argv[optind]) { /* Starting path passed as positional parameter */
 		spath = resolve_starting_path(argv[optind]);
 	} else {
 		if (path_value) /* Starting path passed via -p */
