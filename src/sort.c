@@ -372,28 +372,23 @@ print_sort_method(void)
 	switch (conf.sort) {
 	case SNONE:	puts(_("none")); break;
 	case SNAME:
-		printf(_("name %s\n"), (conf.sort_reverse) ? "[rev]" : ""); break;
+		printf(_("name %s\n"), conf.sort_reverse ? "[rev]" : ""); break;
 	case STSIZE:
-		printf(_("size %s\n"), (conf.sort_reverse) ? "[rev]" : ""); break;
+		printf(_("size %s\n"), conf.sort_reverse ? "[rev]" : ""); break;
 	case SATIME:
-		printf(_("atime %s\n"), (conf.sort_reverse) ? "[rev]" : "");	break;
+		printf(_("atime %s\n"), conf.sort_reverse ? "[rev]" : "");	break;
 	case SBTIME:
-#if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE) || defined(LINUX_STATX)
-		printf(_("btime %s\n"), (conf.sort_reverse) ? "[rev]" : ""); break;
-#else
-		printf(_("btime (not available: using 'ctime') %s\n"),
-		    (conf.sort_reverse) ? "[rev]" : ""); break;
-#endif /* HAVE_ST_BIRTHTIME || __BSD_VISIBLE || LINUX_STATX */
+		printf(_("btime %s\n"), conf.sort_reverse ? "[rev]" : ""); break;
 	case SCTIME:
-		printf(_("ctime %s\n"), (conf.sort_reverse) ? "[rev]" : ""); break;
+		printf(_("ctime %s\n"), conf.sort_reverse ? "[rev]" : ""); break;
 	case SMTIME:
-		printf(_("mtime %s\n"), (conf.sort_reverse) ? "[rev]" : ""); break;
+		printf(_("mtime %s\n"), conf.sort_reverse ? "[rev]" : ""); break;
 	case SVER:
-		printf(_("version %s\n"), (conf.sort_reverse) ? "[rev]" : ""); break;
+		printf(_("version %s\n"), conf.sort_reverse ? "[rev]" : ""); break;
 	case SEXT:
-		printf(_("extension %s\n"), (conf.sort_reverse) ? "[rev]" : "");	break;
+		printf(_("extension %s\n"), conf.sort_reverse ? "[rev]" : "");	break;
 	case SINO:
-		printf(_("inode %s\n"), (conf.sort_reverse) ? "[rev]" : "");	break;
+		printf(_("inode %s\n"), conf.sort_reverse ? "[rev]" : "");	break;
 	case SOWN: print_owner_group_sort(SOWN); break;
 	case SGRP: print_owner_group_sort(SGRP); break;
 	default: fputs("unknown sorting order\n", stdout); break;
@@ -470,6 +465,13 @@ sort_function(char **arg)
 
 	/* Argument is a number */
 	const int n = atoi(arg[1]);
+
+#ifndef ST_BTIME
+	if (n == SBTIME) {
+		puts(_("st: Birth time is not available on this platform"));
+		return FUNC_FAILURE;
+	}
+#endif /* !ST_BTIME */
 
 	if (n >= 0 && n <= SORT_TYPES) {
 		conf.sort = n;

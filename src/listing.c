@@ -785,6 +785,12 @@ set_long_attribs(const filesn_t n, const struct stat *attr)
 		case PROP_TIME_ACCESS: file_info[n].ltime = attr->st_atime; break;
 		case PROP_TIME_CHANGE: file_info[n].ltime = attr->st_ctime; break;
 		case PROP_TIME_MOD: file_info[n].ltime = attr->st_mtime; break;
+		case PROP_TIME_BIRTH:
+#if defined(ST_BTIME) && !defined(LINUX_STATX) && !defined(__sun)
+			file_info[n].ltime = attr->ST_BTIME.tv_sec; break;
+#else
+			file_info[n].ltime = (time_t)-1; break;
+#endif /* ST_BTIME && !LINUX_STATX && !__sun */
 		default: file_info[n].ltime = attr->st_mtime; break;
 		}
 	}
@@ -2009,10 +2015,6 @@ list_dir_light(void)
 	clock_t start = clock();
 #endif /* LIST_SPEED_TEST */
 
-	if (conf.long_view == 1 && prop_fields.time == PROP_TIME_BIRTH)
-		err('w', PRINT_PROMPT, _("%s: Birth time is not available in "
-			"light mode. Falling back to modification time.\n"), PROGRAM_NAME);
-
 	virtual_dir =
 		(stdin_tmp_dir && strcmp(stdin_tmp_dir, workspaces[cur_ws].path) == 0);
 
@@ -2443,7 +2445,7 @@ load_file_gral_info(const struct stat *a, const filesn_t n)
 		file_info[n].xattr = 1;
 #endif /* LINUX_FILE_XATTRS */
 
-	time_t btime = 0;
+	time_t btime = (time_t)-1;
 	if (conf.sort == SBTIME || (conf.long_view == 1
 	&& prop_fields.time == PROP_TIME_BIRTH)) {
 #if defined(ST_BTIME)
@@ -2452,8 +2454,6 @@ load_file_gral_info(const struct stat *a, const filesn_t n)
 		if (statx(AT_FDCWD, file_info[n].name, AT_SYMLINK_NOFOLLOW,
 		STATX_BTIME, &attx) == 0 && (attx.stx_mask & STATX_BTIME))
 			btime = attx.ST_BTIME.tv_sec;
-		else
-			btime = (time_t)-1;
 # elif defined(__sun)
 		struct timespec birthtim = get_birthtime(file_info[n].name);
 		btime = birthtim.tv_sec;

@@ -645,7 +645,11 @@ set_sort_by_name(const char *name)
 			return sort_methods[i].num;
 	}
 
-	return SNAME;
+	fprintf(stderr, _("%s: --sort: '%s': Invalid value\n"
+		"Valid values: atime, btime, ctime, mtime, extension, group, "
+		"inode, name,\n              none, owner, size, version.\n"),
+		PROGRAM_NAME, name);
+	exit(EXIT_FAILURE);
 }
 
 static void
@@ -658,8 +662,16 @@ set_sort(const char *arg)
 	else
 		n = atoi(arg);
 
+#ifndef ST_BTIME
+	if (n == SBTIME) {
+		fprintf(stderr, _("%s: --sort: Birth time is not available "
+			"on this platform\n"), PROGRAM_NAME);
+		exit(EXIT_FAILURE);
+	}
+#endif /* !ST_BTIME */
+
 	if (n < 0 || n > SORT_TYPES) {
-		fprintf(stderr, _("%s: -z: '%s': Valid values are 0-%d\n"),
+		fprintf(stderr, _("%s: --sort: '%s': Valid values are 0-%d\n"),
 			PROGRAM_NAME, arg, SORT_TYPES);
 		exit(EXIT_FAILURE);
 	}
