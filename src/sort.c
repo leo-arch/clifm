@@ -135,8 +135,8 @@ namecmp(char *s1, char *s2)
 	/* None of the strings starts with a unicode char: compare the first
 	 * byte of both strings */
 		if (!conf.case_sens_list) {
-			ac = (char)TOUPPER(*s1);
-			bc = (char)TOUPPER(*s2);
+			ac = (char)TOLOWER(*s1);
+			bc = (char)TOLOWER(*s2);
 		}
 
 		if (bc > ac)
