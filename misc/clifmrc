@@ -402,6 +402,10 @@
 # Enable case sensitive search.
 ;CaseSensitiveSearch=false
 
+# When sorting files (either by 'version' or 'name'), skip
+# non-alphanumeric characters. Ex: '__file' is sorted as 'file'.
+;SkipNonAlnumPrefix=true
+
 # Whether to be Unicode aware or not. If using a 100% ASCII setup
 # (e.g. English), you can turn this off.
 ;Unicode=true
