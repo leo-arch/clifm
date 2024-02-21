@@ -404,6 +404,8 @@
 
 # When sorting files (either by 'version' or 'name'), skip
 # non-alphanumeric characters. Ex: '__file' is sorted as 'file'.
+# This also applies to hidden files: if set to false, '.hidden' will
+# be listed before 'afile', otherwise, after 'gfile'.
 ;SkipNonAlnumPrefix=true
 
 # Whether to be Unicode aware or not. If using a 100% ASCII setup
