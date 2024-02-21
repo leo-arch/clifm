@@ -84,11 +84,9 @@ skip_name_prefixes(char **name)
 	char *s = *name;
 
 	while (*s) {
-		if (!IS_DIGIT(*s) && !IS_ALPHA(*s) && (*s < 'A' || *s > 'Z')) {
-			s++;
-			continue;
-		}
-		break;
+		if (IS_ALNUM(*s))
+			break;
+		s++;
 	}
 
 	if (!*s)
@@ -115,8 +113,10 @@ compare_strings(char **s1, char **s2)
 static int
 namecmp(char *s1, char *s2)
 {
-	skip_name_prefixes(&s1);
-	skip_name_prefixes(&s2);
+	if (conf.skip_non_alnum_prefix == 1) {
+		skip_name_prefixes(&s1);
+		skip_name_prefixes(&s2);
+	}
 
 	/* If both strings start with number, sort them as numbers, not as strings */
 	if (IS_DIGIT(*s1) && IS_DIGIT(*s2)) {
@@ -156,13 +156,6 @@ static inline int
 sort_by_size(struct fileinfo *pa, struct fileinfo *pb)
 {
 	const off_t as = pa->size, bs = pb->size;
-//	if (conf.long_view == 1 && conf.full_dir_size == 1) {
-//		const int base = xargs.si == 1 ? 1000 : 1024;
-//		if (pa->dir == 1)
-//			as = pa->size * base;
-//		if (pb->dir == 1)
-//			bs = pb->size * base;
-//	}
 
 	if (as > bs)
 		return 1;
@@ -310,7 +303,8 @@ entrycmp(const void *a, const void *b)
 	if (!conf.sort_reverse)
 		return ret;
 
-	return (ret - (ret * 2));
+//	return (ret - (ret * 2));
+	return (-ret);
 }
 
 /* Same as alphasort, but is uses strcmp instead of sctroll, which is
@@ -336,7 +330,8 @@ xalphasort(const struct dirent **a, const struct dirent **b)
 		return ret;
 
 	/* If sort_reverse, return the opposite value */
-	return (ret - (ret * 2));
+	return (-ret);
+//	return (ret - (ret * 2));
 }
 
 /* This is a modification of the alphasort function that makes it case
@@ -352,7 +347,8 @@ alphasort_insensitive(const struct dirent **a, const struct dirent **b)
 	if (!conf.sort_reverse)
 		return ret;
 
-	return (ret - (ret * 2));
+	return (-ret);
+//	return (ret - (ret * 2));
 }
 
 static inline void
@@ -402,6 +398,7 @@ print_sort_method(void)
 	case SGRP: print_owner_group_sort(SGRP); break;
 	default: fputs("unknown sorting order\n", stdout); break;
 	}
+
 	fputs(NC, stdout);
 }
 

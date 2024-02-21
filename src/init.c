@@ -243,6 +243,7 @@ init_conf_struct(void)
 	conf.search_strategy = UNSET;
 	conf.share_selbox = UNSET;
 	conf.show_hidden = UNSET;
+	conf.skip_non_alnum_prefix = DEF_SKIP_NON_ALNUM_PREFIX;
 	conf.sort = UNSET;
 	conf.sort_reverse = 0;
 	conf.splash_screen = UNSET;

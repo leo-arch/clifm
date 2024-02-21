@@ -304,28 +304,26 @@ xstrverscmp(const char *s1, const char *s2)
 	const unsigned char *p1 = (const unsigned char *)s1;
 	const unsigned char *p2 = (const unsigned char *)s2;
 
-	/* Jump to first alphanumeric character in both strings */
-	while (*p1) {
-		if (!IS_DIGIT(*p1) && !IS_ALPHA(*p1) && (*p1 < 'A' || *p1 > 'Z')) {
-			++p1;
-			continue;
+	if (conf.skip_non_alnum_prefix == 1) {
+		/* Jump to first alphanumeric character in both strings */
+		while (*p1) {
+			if (IS_ALNUM(*p1))
+				break;
+			p1++;
 		}
-		break;
-	}
 
-	if (!*p1)
-		p1 = (const unsigned char *)s1;
+		if (!*p1)
+			p1 = (const unsigned char *)s1;
 
-	while (*p2) {
-		if (!IS_DIGIT(*p2) && !IS_ALPHA(*p2) && (*p2 < 'A' || *p2 > 'Z')) {
-			++p2;
-			continue;
+		while (*p2) {
+			if (IS_ALNUM(*p2))
+				break;
+			p2++;
 		}
-		break;
-	}
 
-	if (!*p2)
-		p2 = (const unsigned char *)s2;
+		if (!*p2)
+			p2 = (const unsigned char *)s2;
+	}
 
 	/* Symbol(s)    0       [1-9]   others
 	 Transition   (10) 0  (01) d  (00) x   */

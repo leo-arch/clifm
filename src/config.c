@@ -415,6 +415,10 @@ dump_config(void)
 	print_config_value("ShowHiddenFiles", &conf.show_hidden, &n,
 		DUMP_CONFIG_BOOL);
 
+	n = DEF_SKIP_NON_ALNUM_PREFIX;
+	print_config_value("SkipNonAlnumPrefix", &conf.skip_non_alnum_prefix, &n,
+		DUMP_CONFIG_BOOL);
+
 	n = DEF_SORT;
 	print_config_value("Sort", &conf.sort, &n, DUMP_CONFIG_INT);
 
@@ -1787,7 +1791,9 @@ create_main_config_file(char *file)
 # Enable case sensitive completion for file names\n\
 ;CaseSensitivePathComp=%s\n\n\
 # Enable case sensitive search\n\
-;CaseSensitiveSearch=%s\n\n\
+;CaseSensitiveSearch=%s\n\
+# Skip non-alphanumeric characters when sorting files ('version' or 'name')\n\
+;SkipNonAlnumPrefix=%s\n\n\
 ;Unicode=%s\n\n\
 # Mas, the files list pager. Possible values are:\n\
 # 0/false: Disable the pager\n\
@@ -1820,6 +1826,7 @@ create_main_config_file(char *file)
 		DEF_CASE_SENS_DIRJUMP == 1 ? "true" : "false",
 		DEF_CASE_SENS_PATH_COMP == 1 ? "true" : "false",
 		DEF_CASE_SENS_SEARCH == 1 ? "true" : "false",
+		DEF_SKIP_NON_ALNUM_PREFIX == 1 ? "true" : "false",
 		DEF_UNICODE == 1 ? "true" : "false",
 		DEF_PAGER == 1 ? "true" : "false",
 		DEF_MAX_NAME_LEN,
@@ -3124,6 +3131,11 @@ read_config(void)
 		else if (xargs.hidden == UNSET && *line == 'S'
 		&& strncmp(line, "ShowHiddenFiles=", 16) == 0) {
 			set_config_bool_value(line + 16, &conf.show_hidden);
+		}
+
+		else if (*line == 'S'
+		&& strncmp(line, "SkipNonAlnumPrefix=", 19) == 0) {
+			set_config_bool_value(line + 19, &conf.skip_non_alnum_prefix);
 		}
 
 		else if (xargs.sort == UNSET && *line == 'S'
