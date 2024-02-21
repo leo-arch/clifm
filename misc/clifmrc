@@ -70,9 +70,8 @@
 ;ListingMode=0
 
 # Choose sorting method: 0 = none, 1 = name, 2 = size, 3 = atime
-# 4 = btime (ctime if not available), 5 = ctime, 6 = mtime, 7 = version
-# (name if not available) 8 = extension, 9 = inode, 10 = owner-ID, and
-# 11 = group-ID.
+# 4 = btime, 5 = ctime, 6 = mtime, 7 = version 8 = extension,
+# 9 = inode, 10 = owner-ID, and 11 = group-ID.
 ;Sort=7
 
 # By default, files are sorted from less to more (ex: from 'a' to 'z' if
