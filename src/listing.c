@@ -786,11 +786,11 @@ set_long_attribs(const filesn_t n, const struct stat *attr)
 		case PROP_TIME_CHANGE: file_info[n].ltime = attr->st_ctime; break;
 		case PROP_TIME_MOD: file_info[n].ltime = attr->st_mtime; break;
 		case PROP_TIME_BIRTH:
-#if defined(ST_BTIME) && !defined(LINUX_STATX) && !defined(__sun)
+#ifdef ST_BTIME_LIGHT
 			file_info[n].ltime = attr->ST_BTIME.tv_sec; break;
 #else
-			file_info[n].ltime = (time_t)-1; break;
-#endif /* ST_BTIME && !LINUX_STATX && !__sun */
+			file_info[n].ltime = attr->st_mtime; break;
+#endif /* ST_BTIME_LIGHT */
 		default: file_info[n].ltime = attr->st_mtime; break;
 		}
 	}
@@ -2290,6 +2290,12 @@ list_dir_light(void)
 END:
 	exit_code =
 		post_listing(close_dir == 1 ? dir : NULL, reset_pager, excluded_files);
+
+#ifndef ST_BTIME_LIGHT
+	if (conf.long_view == 1 && prop_fields.time == PROP_TIME_BIRTH)
+		print_reload_msg("Long view: Birth time not supported in light "
+			"mode. Using %smodification time%s instead.\n", BOLD, NC);
+#endif /* !ST_BTIME_LIGHT */
 
 	if (xargs.disk_usage_analyzer == 1 && conf.long_view == 1
 	&& conf.full_dir_size == 1) {

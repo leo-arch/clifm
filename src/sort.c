@@ -34,6 +34,10 @@
 #include "listing.h"
 #include "messages.h" /* SORT_USAGE */
 
+/* Do we have the sort method S in light mode? */
+#define ST_IN_LIGHT_MODE(s) ((s) == SNAME || (s) == SVER || (s) == SINO \
+		|| (s) == SEXT || (s) == SNONE)
+
 int
 skip_nonexec(const struct dirent *ent)
 {
@@ -280,7 +284,7 @@ entrycmp(const void *a, const void *b)
 			return ret;
 	}
 
-	if (conf.light_mode == 1 && (st == SOWN || st == SGRP))
+	if (conf.light_mode == 1 && !ST_IN_LIGHT_MODE(st))
 		st = SNAME;
 
 	switch (st) {
@@ -351,50 +355,34 @@ alphasort_insensitive(const struct dirent **a, const struct dirent **b)
 //	return (ret - (ret * 2));
 }
 
-static inline void
-print_owner_group_sort(const int mode)
-{
-	if (conf.light_mode == 1) {
-		printf(_("%s (not available: using 'name') %s\n"),
-			(mode == SOWN) ? "owner" : "group",
-			(conf.sort_reverse == 1) ? "[rev]" : "");
-		return;
-	}
-
-	printf(_("%s %s\n"), (mode == SOWN) ? "owner" : "group",
-		(conf.sort_reverse == 1) ? "[rev]" : "");
-}
-
 void
 print_sort_method(void)
 {
-	fputs(BOLD, stdout);
+	char *name = (char *)NULL;
+
 	switch (conf.sort) {
-	case SNONE:	puts(_("none")); break;
-	case SNAME:
-		printf(_("name %s\n"), conf.sort_reverse ? "[rev]" : ""); break;
-	case STSIZE:
-		printf(_("size %s\n"), conf.sort_reverse ? "[rev]" : ""); break;
-	case SATIME:
-		printf(_("atime %s\n"), conf.sort_reverse ? "[rev]" : "");	break;
-	case SBTIME:
-		printf(_("btime %s\n"), conf.sort_reverse ? "[rev]" : ""); break;
-	case SCTIME:
-		printf(_("ctime %s\n"), conf.sort_reverse ? "[rev]" : ""); break;
-	case SMTIME:
-		printf(_("mtime %s\n"), conf.sort_reverse ? "[rev]" : ""); break;
-	case SVER:
-		printf(_("version %s\n"), conf.sort_reverse ? "[rev]" : ""); break;
-	case SEXT:
-		printf(_("extension %s\n"), conf.sort_reverse ? "[rev]" : "");	break;
-	case SINO:
-		printf(_("inode %s\n"), conf.sort_reverse ? "[rev]" : "");	break;
-	case SOWN: print_owner_group_sort(SOWN); break;
-	case SGRP: print_owner_group_sort(SGRP); break;
-	default: fputs("unknown sorting order\n", stdout); break;
+	case SNONE:	 name = "none"; break;
+	case SNAME:  name = "name"; break;
+	case STSIZE: name = "size"; break;
+	case SATIME: name = "atime"; break;
+	case SBTIME: name = "btime"; break;
+	case SCTIME: name = "ctime"; break;
+	case SMTIME: name = "mtime"; break;
+	case SVER:   name = "version"; break;
+	case SEXT:   name = "extension"; break;
+	case SINO:   name = "inode"; break;
+	case SOWN:   name = "owner"; break;
+	case SGRP:   name = "group"; break;
+	default:     name = "unknown"; break;
 	}
 
-	fputs(NC, stdout);
+	printf("%s%s%s%s", BOLD, name, NC,
+		(conf.sort_reverse == 1) ? " [rev]" : "");
+
+	if (conf.light_mode == 1 && !ST_IN_LIGHT_MODE(conf.sort))
+		printf(_(" (not available in light mode: using %sname%s)\n"), BOLD, NC);
+	else
+		putchar('\n');
 }
 
 static inline void

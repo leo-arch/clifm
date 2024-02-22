@@ -395,6 +395,14 @@ if (S_ISNWK(mode)) return 'n'; // HP/UX: network special file
 # endif /* LINUX_STATX */
 #endif /* !_BE_POSIX */
 
+/* Do we have birth time when running in long view AND light mode? Only if
+ * the timestamp is provided directly by stat(2).
+ * For the time being, we need an extra call (statx(2)) on Linux. This should
+ * be fixed. */
+#if defined(ST_BTIME) && !defined(LINUX_STATX) && !defined(__sun)
+# define ST_BTIME_LIGHT
+#endif /* ST_BTIME && !LINUX_STATX && !__sun */
+
 /* File system events handling */
 #if defined(LINUX_INOTIFY)
 # define NUM_EVENT_SLOTS 32 /* Make room for 32 events */
