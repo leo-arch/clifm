@@ -1244,8 +1244,8 @@ xset_prop_fields(const char *optval)
 
 #ifndef ST_BTIME
 	if (prop_fields.time == PROP_TIME_BIRTH) {
-		fprintf(stderr, _("%s: --prop-fields: Birth time is not available "
-			"on this platform\n"), PROGRAM_NAME);
+		fprintf(stderr, _("%s: --prop-fields: 'b': Birth time is not "
+			"available on this platform\n"), PROGRAM_NAME);
 		exit(EXIT_FAILURE);
 	}
 #endif /* !ST_BTIME*/

@@ -1488,9 +1488,9 @@ END:
 static void
 print_timestamps(char *filename, const struct stat *attr)
 {
-#ifndef LINUX_STATX
+#if !defined(ST_BTIME) || (!defined(LINUX_STATX) && !defined(__sun))
 	UNUSED(filename);
-#endif /* !LINUX_STATX */
+#endif /* !ST_BIME || (!LINUX_STAT && !__sun) */
 
 	const char *cdate = conf.colorize == 1 ? dd_c : "";
 	const char *cend = conf.colorize == 1 ? df_c : "";
