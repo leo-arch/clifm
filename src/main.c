@@ -1115,6 +1115,22 @@ set_pledge(void)
 }
 #endif /* HAVE_PLEDGE */
 
+__attribute__ ((noreturn))
+static void
+list_files_and_quit(void)
+{
+	if (conf.light_mode == 1 && conf.long_view == 1
+	&& prop_fields.time == PROP_TIME_BIRTH)
+		/* Avoid falling back to modification time without warning the user. */
+		conf.light_mode = 0;
+
+	if (xargs.full_dir_size == 1)
+		tmp_dir = savestring(P_tmpdir, P_tmpdir_len);
+
+	list_files();
+	exit(EXIT_SUCCESS); /* Never reached. */
+}
+
 /*
 static void
 init_file_flags(void)
@@ -1216,12 +1232,8 @@ main(int argc, char *argv[])
 	if (xargs.stat > 0) /* Running with --stat(-full). Print and exit. */
 		do_stat_and_exit(xargs.stat == FULL_STAT ? 1 : 0);
 
-	if (xargs.list_and_quit == 1) {
-		if (xargs.full_dir_size == 1)
-			tmp_dir = savestring(P_tmpdir, P_tmpdir_len);
-		list_files();
-		exit(EXIT_SUCCESS); /* Never reached */
-	}
+	if (xargs.list_and_quit == 1)
+		list_files_and_quit();
 
 	set_sel_file();
 	create_tmp_files();
