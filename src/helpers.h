@@ -885,9 +885,8 @@ extern time_t curdir_mtime;
 		: (s).st_blocks * S_BLKSIZE)
 
 #define UNUSED(x) (void)(x) /* Just silence the compiler's warning */
-//#define TOUPPER(c) (((c) >= 'a' && (c) <= 'z') ? ((c) - 'a' + 'A') : (c))
-#define TOUPPER(c) (((c) >= 'a' && (c) <= 'z') ? ((c) - ' ') : (c))
-#define TOLOWER(c) (((c) >= 'A' && (c) <= 'Z') ? ((c) + ' ') : (c))
+#define TOUPPER(c) (((c) >= 'a' && (c) <= 'z') ? ((c) - 'a' + 'A') : (c))
+#define TOLOWER(c) (((c) >= 'A' && (c) <= 'Z') ? ((c) - 'A' + 'a') : (c))
 
 /* UINT_MAX is 4294967295 == 10 digits */
 #define DIGINUM(n) (((n) < 10) ? 1 \
@@ -924,8 +923,8 @@ extern time_t curdir_mtime;
 
 #define IS_DIGIT(c)    ((unsigned int)(c) >= '0' && (unsigned int)(c) <= '9')
 #define IS_ALPHA(c)    ((unsigned int)(c) >= 'a' && (unsigned int)(c) <= 'z')
-#define IS_ALPHA_UP(c) ((unsigned int)(c) >= 'Z' && (unsigned int)(c) <= 'Z')
-#define IS_ALNUM(c)    (IS_ALPHA((c)) || (IS_ALPHA_UP(c)) || IS_DIGIT((c)))
+#define IS_ALPHA_UP(c) ((unsigned int)(c) >= 'A' && (unsigned int)(c) <= 'Z')
+#define IS_ALNUM(c)    (IS_ALPHA((c)) || IS_ALPHA_UP((c)) || IS_DIGIT((c)))
 
 #define IS_COMMENT(c)  ((unsigned int)(c) == '#' || (unsigned int)(c) == ';')
 #define IS_CTRL_CHR(c) ((unsigned int)(c) < ' ')
