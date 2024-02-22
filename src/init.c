@@ -3259,7 +3259,7 @@ Falling back to modification time."
 		conf.sort = SMTIME;
 	}
 	if (prop_fields.time == PROP_TIME_BIRTH) {
-		err('w', PRINT_PROMPT, "PropStr: %s\n", BTIME_NOT_AVAIL);
+		err('w', PRINT_PROMPT, "PropFields: %s\n", BTIME_NOT_AVAIL);
 		prop_fields.time = PROP_TIME_MOD;
 	}
 #endif /* !ST_BTIME */

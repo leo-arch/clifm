@@ -1241,6 +1241,14 @@ xset_prop_fields(const char *optval)
 	xargs.prop_fields_str = 1;
 	xstrsncpy(prop_fields_str, optval, sizeof(prop_fields_str));
 	set_prop_fields(prop_fields_str);
+
+#ifndef ST_BTIME
+	if (prop_fields.time == PROP_TIME_BIRTH) {
+		fprintf(stderr, _("%s: --prop-fields: Birth time is not available "
+			"on this platform\n"), PROGRAM_NAME);
+		exit(EXIT_FAILURE);
+	}
+#endif /* !ST_BTIME*/
 }
 
 __attribute__ ((noreturn))
