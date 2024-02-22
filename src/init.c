@@ -3251,5 +3251,18 @@ check_options(void)
 	if (term_caps.pager == 0)
 		xargs.pager = conf.pager = 0;
 
+#ifndef ST_BTIME
+# define BTIME_NOT_AVAIL "Birth time is not available on this platform. \
+Falling back to modification time."
+	if (conf.sort == SBTIME) {
+		err('w', PRINT_PROMPT, "Sort: %s\n", BTIME_NOT_AVAIL);
+		conf.sort = SMTIME;
+	}
+	if (prop_fields.time == PROP_TIME_BIRTH) {
+		err('w', PRINT_PROMPT, "PropStr: %s\n", BTIME_NOT_AVAIL);
+		prop_fields.time = PROP_TIME_MOD;
+	}
+#endif /* !ST_BTIME */
+
 	reset_opts();
 }

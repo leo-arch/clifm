@@ -662,14 +662,6 @@ set_sort(const char *arg)
 	else
 		n = atoi(arg);
 
-#ifndef ST_BTIME
-	if (n == SBTIME) {
-		fprintf(stderr, _("%s: --sort: Birth time is not available "
-			"on this platform\n"), PROGRAM_NAME);
-		exit(EXIT_FAILURE);
-	}
-#endif /* !ST_BTIME */
-
 	if (n < 0 || n > SORT_TYPES) {
 		fprintf(stderr, _("%s: --sort: '%s': Valid values are 0-%d\n"),
 			PROGRAM_NAME, arg, SORT_TYPES);

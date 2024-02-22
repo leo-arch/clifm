@@ -1185,6 +1185,12 @@ rl_sort_next(int count, int key)
 	if (suggestion.printed && suggestion_buf)
 		free_suggestion();
 #endif /* !_NO_SUGGESTIONS */
+
+#ifndef ST_BTIME
+	if (conf.sort + 1 == SBTIME)
+		conf.sort++;
+#endif /* !ST_BTIME */
+
 	conf.sort++;
 	if (conf.sort > SORT_TYPES)
 		conf.sort = 0;
@@ -1212,6 +1218,12 @@ rl_sort_previous(int count, int key)
 	if (suggestion.printed && suggestion_buf)
 		free_suggestion();
 #endif /* !_NO_SUGGESTIONS */
+
+#ifndef ST_BTIME
+	if (conf.sort - 1 == SBTIME)
+		conf.sort--;
+#endif /* !ST_BTIME */
+
 	conf.sort--;
 	if (conf.sort < 0)
 		conf.sort = SORT_TYPES;
