@@ -1119,10 +1119,20 @@ __attribute__ ((noreturn))
 static void
 list_files_and_quit(void)
 {
-	if (conf.light_mode == 1 && conf.long_view == 1
-	&& prop_fields.time == PROP_TIME_BIRTH)
-		/* Avoid falling back to modification time without warning the user. */
-		conf.light_mode = 0;
+	if (conf.light_mode == 1) {
+		if (conf.long_view == 1 && prop_fields.time == PROP_TIME_BIRTH) {
+			fprintf(stderr, _("%s: PropFields: 'b': Birth time is not "
+				"allowed in light mode\n"), PROGRAM_NAME);
+			exit(EXIT_FAILURE);
+		}
+		const int s = conf.sort;
+		if (s != SNONE && s != SNAME && s != SEXT && s != SVER && s != SINO) {
+			fprintf(stderr, _("%s: Invalid sort value: only none, "
+				"name, extension, version, and inode are allowed in "
+				"light mode\n"), PROGRAM_NAME);
+			exit(EXIT_FAILURE);
+		}
+	}
 
 	if (xargs.full_dir_size == 1)
 		tmp_dir = savestring(P_tmpdir, P_tmpdir_len);

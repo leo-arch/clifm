@@ -2293,8 +2293,8 @@ END:
 
 #ifndef ST_BTIME_LIGHT
 	if (conf.long_view == 1 && prop_fields.time == PROP_TIME_BIRTH)
-		print_reload_msg("Long view: Birth time not supported in light "
-			"mode. Using %smodification time%s instead.\n", BOLD, NC);
+		print_reload_msg("Long view: Birth time not available in light "
+			"mode. Using %smodification time%s.\n", BOLD, NC);
 #endif /* !ST_BTIME_LIGHT */
 
 	if (xargs.disk_usage_analyzer == 1 && conf.long_view == 1
