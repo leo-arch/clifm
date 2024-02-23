@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Feb 20, 2024" "clifm 1.17.6" "CLIFM Manual"
+.TH "CLIFM" "1" "Feb 23, 2024" "clifm 1.17.7" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -2508,7 +2508,7 @@ Since the first directive is evaluated before the second one, this latter will a
 .sp
 \fBAutocommand files: \fI.cfm.in\fB and \fI.cfm.out\fR
 .sp
-To use this feature, you must first set \fIReadAutocmdFiles\fR to \fItrue\fR in the main configuration file.
+To use this feature, you must first set \fIReadAutocmdFiles\fR to \fItrue\fR in the main configuration file. However, bear in mind that autocommand files won't ever be read if running on an untrusted environment (i.e. if running with \fI\-\-secure\-cmds\fR, \fI\-\-secure\-env\fR, or \fI\-\-secure\-env\-full\fR).
 .sp
 Two files are specifically checked by the autocommands function: \fI.cfm.in\fR and \fI.cfm.out\fR (they must be non-empty regular files of at most \fBPATH_MAX\fR (usually 4096) bytes, and no NUL byte must be contained in them).
 .sp
@@ -2939,7 +2939,7 @@ The following variables are set in an environment agnostic way (that is, securel
   \- \fBPATH\fR is set consulting \fB_PATH_STDPATH\fR (or \fB_CS_PATH\fR if the former is not available)
   \- \fBIFS\fR is set to a sane, hard\-coded value: " \\n\\t" (space, new line char, and horizontal TAB)
 .TP
-As a plus, \fB1)\fR core dumps are disabled, \fB2)\fR the umask value is set to \fI0077\fR at startup and the creation mode (when using the \fInew\fR command) is forced to \fI0700\fR for directories and \fI0600\fR for files, and \fB3)\fR non\-standard file descriptors (>2) are closed.
+As a plus, \fB1)\fR core dumps are disabled, \fB2)\fR the umask value is set to \fI0077\fR at startup and the creation mode (when using the \fInew\fR command) is forced to \fI0700\fR for directories and \fI0600\fR for files, \fB3)\fR non\-standard file descriptors (>2) are closed, \fB4)\fR SUID/SGID privileges, if any, are dropped, and \fB5)\fR autocommand files aren't read at all (even if \fIReadAutocmdFiles\fR is set to true).
 .TP
 \fBb)\fR \fIFull\fR: this mode is just like the regular mode, except that \fInothing\fR is imported from the environment at all and only \fBPATH\fR and \fBIFS\fR are set (as described above). Everything else remains unset, and is the user's responsibility to set environment variables (via the export function), as needed. In this case, you might want to set, at least, \fBTERM\fR, and, if running in a graphical environment, \fBDISPLAY\fR.
 .TP
