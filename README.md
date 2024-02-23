@@ -144,9 +144,11 @@ Besides common file operations such as copy, move, remove, etc., _clifm_ provide
 - Modes
   - [Stealth mode](https://github.com/leo-arch/clifm/wiki/Specifics#stealth-mode), also known as incognito or private mode
   - [Light mode](https://github.com/leo-arch/clifm/wiki/Specifics#light-mode) (just in case it is not fast enough for you)
-  - [Resource opener](https://github.com/leo-arch/clifm/wiki/Specifics#using-clifm-as-a-standalone-resource-opener)
+  - [Resource opener/files launcher](https://github.com/leo-arch/clifm/wiki/Specifics#using-clifm-as-a-standalone-resource-opener) (similar to `xdg` and Ranger's `rifle`)
+  - [File previewer](https://github.com/leo-arch/clifm/wiki/Advanced#shotgun) (similar to [`pistol`](https://github.com/yonasBSD/pistol) and Ranger's `scope.sh`)
   - [Disk usage analyzer mode](https://github.com/leo-arch/clifm/wiki/Specifics#disk-usage-analyzer)
   - [Files lister (ls-mode)](https://github.com/leo-arch/clifm/wiki/Advanced#files-lister-ls-mode)
+  - [Stat mode](https://github.com/leo-arch/clifm/wiki/Advanced/#stat1-replacement) (just like **stat**(1))
 - Customization
   - [Custom commands](https://github.com/leo-arch/clifm/wiki/Customization#custom-commands)
   - [User profiles](https://github.com/leo-arch/clifm/wiki/Specifics#profiles)
