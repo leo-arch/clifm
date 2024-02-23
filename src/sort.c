@@ -34,10 +34,6 @@
 #include "listing.h"
 #include "messages.h" /* SORT_USAGE */
 
-/* Do we have the sort method S in light mode? */
-#define ST_IN_LIGHT_MODE(s) ((s) == SNAME || (s) == SVER || (s) == SINO \
-		|| (s) == SEXT || (s) == SNONE)
-
 int
 skip_nonexec(const struct dirent *ent)
 {
@@ -355,26 +351,30 @@ alphasort_insensitive(const struct dirent **a, const struct dirent **b)
 //	return (ret - (ret * 2));
 }
 
+static char *
+num_to_sort_name(const int n)
+{
+	switch (n) {
+	case SNONE:	 return "none";
+	case SNAME:  return "name";
+	case STSIZE: return "size";
+	case SATIME: return "atime";
+	case SBTIME: return "btime";
+	case SCTIME: return "ctime";
+	case SMTIME: return "mtime";
+	case SVER:   return "version";
+	case SEXT:   return "extension";
+	case SINO:   return "inode";
+	case SOWN:   return "owner";
+	case SGRP:   return "group";
+	default:     return "unknown";
+	}
+}
+
 void
 print_sort_method(void)
 {
-	char *name = (char *)NULL;
-
-	switch (conf.sort) {
-	case SNONE:	 name = "none"; break;
-	case SNAME:  name = "name"; break;
-	case STSIZE: name = "size"; break;
-	case SATIME: name = "atime"; break;
-	case SBTIME: name = "btime"; break;
-	case SCTIME: name = "ctime"; break;
-	case SMTIME: name = "mtime"; break;
-	case SVER:   name = "version"; break;
-	case SEXT:   name = "extension"; break;
-	case SINO:   name = "inode"; break;
-	case SOWN:   name = "owner"; break;
-	case SGRP:   name = "group"; break;
-	default:     name = "unknown"; break;
-	}
+	char *name = num_to_sort_name(conf.sort);
 
 	printf("%s%s%s%s", BOLD, name, NC,
 		(conf.sort_reverse == 1) ? " [rev]" : "");
@@ -420,6 +420,13 @@ set_sort_by_name(char **arg)
 	for (i = 0; i <= SORT_TYPES; i++) {
 		if (*(*arg) == *sort_methods[i].name
 		&& strcmp(*arg, sort_methods[i].name) == 0) {
+			if (conf.light_mode == 1
+			&& !ST_IN_LIGHT_MODE(sort_methods[i].num)) {
+				fprintf(stderr, _("st: '%s': Not available in light mode\n"),
+					sort_methods[i].name);
+				return FUNC_FAILURE;
+			}
+
 			*arg = xnrealloc(*arg, 32, sizeof(char));
 			snprintf(*arg, 32, "%d", sort_methods[i].num);
 			return FUNC_SUCCESS;
@@ -454,9 +461,15 @@ sort_function(char **arg)
 	/* Argument is a number */
 	const int n = atoi(arg[1]);
 
+	if (conf.light_mode == 1 && !ST_IN_LIGHT_MODE(n)) {
+		fprintf(stderr, _("st: %d (%s): Not available in light mode\n"),
+			n, num_to_sort_name(n));
+		return FUNC_FAILURE;
+	}
+
 #ifndef ST_BTIME
 	if (n == SBTIME) {
-		puts(_("st: Birth time is not available on this platform"));
+		fputs(_("st: Birth time is not available on this platform"), stderr);
 		return FUNC_FAILURE;
 	}
 #endif /* !ST_BTIME */

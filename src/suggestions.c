@@ -1635,7 +1635,8 @@ check_sort_methods(const char *str, const size_t len)
 	}
 
 	int a = atoi(str);
-	if (a < 0 || a > SORT_TYPES) {
+	if (a < 0 || a > SORT_TYPES
+	|| (conf.light_mode == 1 && !ST_IN_LIGHT_MODE(a))) {
 		if (suggestion.printed)
 			clear_suggestion(CS_FREEBUF);
 		return NO_MATCH;

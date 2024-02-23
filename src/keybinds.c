@@ -1191,6 +1191,10 @@ rl_sort_next(int count, int key)
 		conf.sort++;
 #endif /* !ST_BTIME */
 
+	if (conf.light_mode == 1)
+		while (!ST_IN_LIGHT_MODE(conf.sort + 1) && conf.sort + 1 <= SORT_TYPES)
+			conf.sort++;
+
 	conf.sort++;
 	if (conf.sort > SORT_TYPES)
 		conf.sort = 0;
@@ -1224,9 +1228,13 @@ rl_sort_previous(int count, int key)
 		conf.sort--;
 #endif /* !ST_BTIME */
 
+	if (conf.light_mode == 1)
+		while (!ST_IN_LIGHT_MODE(conf.sort - 1) && conf.sort - 1 >= 0)
+			conf.sort--;
+
 	conf.sort--;
 	if (conf.sort < 0)
-		conf.sort = SORT_TYPES;
+		conf.sort = conf.light_mode == 1 ? SINO : SORT_TYPES;
 
 	if (conf.autols == 1) {
 		sort_switch = 1;

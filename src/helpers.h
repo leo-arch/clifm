@@ -884,6 +884,10 @@ extern time_t curdir_mtime;
 #define FILE_SIZE(s) (conf.apparent_size == 1 ? (s).st_size \
 		: (s).st_blocks * S_BLKSIZE)
 
+/* Do we have the sort method S in light mode? */
+#define ST_IN_LIGHT_MODE(s) ((s) == SNAME || (s) == SVER || (s) == SINO \
+		|| (s) == SEXT || (s) == SNONE)
+
 #define UNUSED(x) (void)(x) /* Just silence the compiler's warning */
 #define TOUPPER(c) (((c) >= 'a' && (c) <= 'z') ? ((c) - 'a' + 'A') : (c))
 #define TOLOWER(c) (((c) >= 'A' && (c) <= 'Z') ? ((c) - 'A' + 'a') : (c))

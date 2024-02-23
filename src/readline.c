@@ -2061,7 +2061,8 @@ sort_num_generator(const char *text, int state)
 		i = 0;
 
 	int num_text = atoi(text);
-	if (num_text == INT_MIN)
+	if (num_text == INT_MIN
+	|| (conf.light_mode == 1 && !ST_IN_LIGHT_MODE(num_text)))
 		return (char *)NULL;
 
 	static char *const sorts[] = {
@@ -2172,6 +2173,9 @@ sort_name_generator(const char *text, int state)
 	}
 
 	while ((name = sort_methods[i++].name) != NULL) {
+		if (conf.light_mode == 1 && i > 0
+		&& !ST_IN_LIGHT_MODE(sort_methods[i - 1].num))
+			continue;
 		if (strncmp(name, text, len) == 0)
 			return strdup(name);
 	}
@@ -4269,8 +4273,10 @@ FIRST_WORD_COMP:
 		/* Sort number */
 		if (*lb == 's' && (strncmp(lb, "st ", 3) == 0
 		|| strncmp(lb, "sort ", 5) == 0)
-		&& is_number(text) && n >= 0 && n <= SORT_TYPES)
+		&& is_number(text) && n >= 0 && n <= SORT_TYPES) {
+			rl_attempted_completion_over = 1;
 			return complete_sort_num(text, words_n);
+		}
 	}
 
 	/* ### DESELECT COMPLETION ### */
