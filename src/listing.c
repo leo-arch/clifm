@@ -1755,16 +1755,19 @@ run_dir_cmd(const int mode)
 			old_pwd[dirhist_cur_index - 1], AUTOCMD_DIR_OUT_FILE);
 	}
 
+	int fd = 0;
+	FILE *fp;
+	struct stat a;
+
 	/* Non-regular files, empty regular files, or bigger than PATH_MAX bytes,
 	 * are rejected. */
-	struct stat a;
-	if (lstat(path, &a) == -1 || !S_ISREG(a.st_mode) || a.st_size == 0
-	|| a.st_size > PATH_MAX)
+	if (!(fp = open_fread(path, &fd))
+	|| fstatat(fd, path, &a, AT_SYMLINK_NOFOLLOW) == -1 || !S_ISREG(a.st_mode)
+	|| a.st_size == 0 || a.st_size > PATH_MAX) {
+		if (fp)
+			fclose(fp);
 		return;
-
-	FILE *fp = fopen(path, "r");
-	if (!fp)
-		return;
+	}
 
 	char buf[PATH_MAX + 1];
 	*buf = '\0';
