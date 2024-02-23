@@ -45,7 +45,7 @@
 #endif
 
 /* Unset environ: little implementation of clearenv(3), not available
- * on some systems (not POSIX) */
+ * on some systems (not POSIX). */
 static void
 xclearenv(void)
 {

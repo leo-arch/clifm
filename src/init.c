@@ -2670,6 +2670,9 @@ check_options(void)
 {
 	set_sudo_cmd();
 
+	if (xargs.secure_env == 1 || xargs.secure_env_full == 1)
+		conf.read_autocmd_files = 0;
+
 	if (!conf.histignore_regex
 	&& regcomp(&regex_hist, DEF_HISTIGNORE, REG_NOSUB | REG_EXTENDED) == 0) {
 		conf.histignore_regex =
