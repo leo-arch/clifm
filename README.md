@@ -243,6 +243,7 @@ For a complete description please consult our [Wiki](https://github.com/leo-arch
 <summary>Click here to expand</summary>
 
 * `Development`
+  - [Support for `.hidden` files, including wildcards](https://github.com/leo-arch/clifm/wiki/Advanced#1b-hidden-files).
   - [Disable the group ID field in long view](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode).
   - [Hard links number in long view](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode).
   - [Birth time support in long view](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode).
