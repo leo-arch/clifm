@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Feb 23, 2024" "clifm 1.17.7" "CLIFM Manual"
+.TH "CLIFM" "1" "Feb 24, 2024" "clifm 1.17.8" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -1191,7 +1191,9 @@ open DIR, or the current working directory if DIR is not specified, in a new ins
 .SH 5. FILE FILTERS
 \fBClifm\fR provides multiple ways to filter the current list of files:
 .sp
-\fBa)\fR Hidden files: via the \fB\-A\fR and \fB\-a\fR command line flags, the \fIhf\fR command, and the \fIAlt\-.\fR keybinding.
+\fBa)\fR Hidden files: via the \fB\-A\fR and \fB\-a\fR command line flags, the \fIhh\fR command, and the \fIAlt\-.\fR keybinding.
+.sp
+Files listed in a file named \fI.hidden\fR in the current directory will hidden as well whenever dotfiles are not shown. Wildcards are supported.
 .sp
 \fBb)\fR Directories: via the \fI\-\-only\-dirs\fR command line switch and the \fIAlt\-,\fR keybinding.
 .sp
