@@ -1,8 +1,9 @@
 /* dothidden.c */
 
 /* DESCRIPTION: files named in a .hidden file in the current directory
- * are not shown when ShowHiddenFiles is set to false.
- * This feature is implemented by at least Nautilus and Dolphin.
+ * are hidden when dotfiles are not shown (ShowHiddenFiles is set to false).
+ * This feature is supported by most major GUI file managers, like Dolphin
+ * and Nautilus (though haven't seen it in any terminal file manager).
  * Our implementation, however, does support wildcards. */
 
 /*
@@ -33,13 +34,13 @@
 #include <string.h> /* strcmp, strlen */
 
 #include "aux.h"       /* xnmalloc, open_fread */
+#include "checks.h"    /* check_glob_char */
 #include "dothidden.h" /* dothidden_t, DOTHIDDEN_FILE */
 #include "strings.h"   /* savestring */
-#include "checks.h"    /* check_glob_char */
 
 /* Read .hidden file in the current directory and return a struct containing
  * the names of the files listed in it, expanding wildacards, if any.
- * Empty lines and lines starting with a slash are ignored.
+ * Empty lines and lines containing a slash are ignored.
  * The length of each entry is stored in the "len" field of the struct. */
 struct dothidden_t *
 load_dothidden(void)
