@@ -808,11 +808,11 @@ hidden_files_function(const char *arg)
 	} else if (strcmp(arg, "off") == 0) {
 		conf.show_hidden = 0;
 		if (conf.autols == 1) reload_dirlist();
-		print_reload_msg(_("Hidden files disabled\n"));
+		print_reload_msg(_("Hiding dotfiles\n"));
 	} else if (strcmp(arg, "on") == 0) {
 		conf.show_hidden = 1;
 		if (conf.autols == 1) reload_dirlist();
-		print_reload_msg(_("Hidden files enabled\n"));
+		print_reload_msg(_("Showing dotfiles\n"));
 	}
 
 	return FUNC_SUCCESS;

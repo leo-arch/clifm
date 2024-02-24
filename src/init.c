@@ -236,6 +236,7 @@ init_conf_struct(void)
 	conf.purge_jumpdb = UNSET;
 	conf.quoting_style = DEF_QUOTING_STYLE;
 	conf.read_autocmd_files = DEF_READ_AUTOCMD_FILES;
+	conf.read_dothidden = DEF_READ_DOTHIDDEN;
 	conf.readonly = DEF_READONLY;
 	conf.relative_time = UNSET;
 	conf.restore_last_path = UNSET;

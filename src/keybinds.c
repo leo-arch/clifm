@@ -1035,8 +1035,11 @@ rl_toggle_hidden_files(int count, int key)
 		reload_dirlist();
 	}
 
-	print_reload_msg(_("Hidden files %s\n"),
-		conf.show_hidden == 1 ? "enabled" : "disabled");
+	if (conf.show_hidden == 1)
+		print_reload_msg(_("Showing dotfiles\n"));
+	else
+		print_reload_msg(_("Hiding dotfiles\n"));
+
 	xrl_reset_line_state();
 	return FUNC_SUCCESS;
 }

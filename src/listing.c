@@ -85,6 +85,7 @@
 #include "aux.h"
 #include "checks.h"
 #include "colors.h"
+#include "dothidden.h" /* load_dothidden, check_dothidden, free_dothidden */
 #ifndef _NO_ICONS
 # include "icons.h"
 #endif /* !_NO_ICONS */
@@ -1761,13 +1762,10 @@ run_dir_cmd(const int mode)
 
 	/* Non-regular files, empty regular files, or bigger than PATH_MAX bytes,
 	 * are rejected. */
-	if (!(fp = open_fread(path, &fd))
-	|| fstatat(fd, path, &a, AT_SYMLINK_NOFOLLOW) == -1 || !S_ISREG(a.st_mode)
-	|| a.st_size == 0 || a.st_size > PATH_MAX) {
-		if (fp)
-			fclose(fp);
+	if (lstat(path, &a) == -1 || !S_ISREG(a.st_mode)
+	|| a.st_size == 0 || a.st_size > PATH_MAX
+	|| !(fp = open_fread(path, &fd)))
 		return;
-	}
 
 	char buf[PATH_MAX + 1];
 	*buf = '\0';
@@ -2018,6 +2016,10 @@ list_dir_light(void)
 	clock_t start = clock();
 #endif /* LIST_SPEED_TEST */
 
+	struct dothidden_t *hidden_list =
+		(conf.read_dothidden == 1 && conf.show_hidden == 0)
+		? load_dothidden() : NULL;
+
 	virtual_dir =
 		(stdin_tmp_dir && strcmp(stdin_tmp_dir, workspaces[cur_ws].path) == 0);
 
@@ -2084,6 +2086,12 @@ list_dir_light(void)
 			}
 		}
 
+		if (hidden_list	&& check_dothidden(ename, &hidden_list) == 1) {
+			stats.hidden++;
+			excluded_files++;
+			continue;
+		}
+
 #ifndef _DIRENT_HAVE_D_TYPE
 		struct stat attr;
 		if (lstat(ename, &attr) == -1)
@@ -2101,10 +2109,11 @@ list_dir_light(void)
 		if (filter.str && filter.type == FILTER_FILE_TYPE
 #ifndef _DIRENT_HAVE_D_TYPE
 		&& exclude_file_type_light((unsigned char)get_dt(attr.st_mode))
-		== FUNC_SUCCESS) {
+		== FUNC_SUCCESS)
 #else
-		&& exclude_file_type_light(ent->d_type) == FUNC_SUCCESS) {
+		&& exclude_file_type_light(ent->d_type) == FUNC_SUCCESS)
 #endif /* !_DIRENT_HAVE_D_TYPE */
+		{
 			excluded_files++;
 			continue;
 		}
@@ -2241,6 +2250,9 @@ list_dir_light(void)
 
 	file_info[n].name = (char *)NULL;
 	files = n;
+
+	if (hidden_list)
+		free_dothidden(&hidden_list);
 
 	if (xargs.disk_usage_analyzer == 1
 	|| (conf.long_view == 1 && conf.full_dir_size == 1)) {
@@ -2779,6 +2791,10 @@ list_dir(void)
 	if (conf.light_mode == 1)
 		return list_dir_light();
 
+	struct dothidden_t *hidden_list =
+		(conf.read_dothidden == 1 && conf.show_hidden == 0)
+		? load_dothidden() : NULL;
+
 	virtual_dir =
 		(stdin_tmp_dir && strcmp(stdin_tmp_dir, workspaces[cur_ws].path) == 0);
 
@@ -2850,6 +2866,12 @@ list_dir(void)
 				excluded_files++;
 				continue;
 			}
+		}
+
+		if (hidden_list	&& check_dothidden(ename, &hidden_list) == 1) {
+			stats.hidden++;
+			excluded_files++;
+			continue;
 		}
 
 		init_fileinfo(n);
@@ -2962,6 +2984,9 @@ list_dir(void)
 
 		count++;
 	}
+
+	if (hidden_list)
+		free_dothidden(&hidden_list);
 
 	/* Since we allocate memory by chunks, we might have allocated more
 	 * than needed. Reallocate only actually used memory.

@@ -394,6 +394,10 @@ dump_config(void)
 	print_config_value("ReadAutocmdFiles", &conf.read_autocmd_files, &n,
 		DUMP_CONFIG_BOOL);
 
+	n = DEF_READ_DOTHIDDEN;
+	print_config_value("ReadDotHidden", &conf.read_dothidden, &n,
+		DUMP_CONFIG_BOOL);
+
 	n = DEF_RESTORE_LAST_PATH;
 	print_config_value("RestoreLastPath", &conf.restore_last_path, &n,
 		DUMP_CONFIG_BOOL);
@@ -1503,17 +1507,10 @@ create_main_config_file(char *file)
 		"# Lines starting with '#' or ';' are commented (ignored)\n\
 # Uncomment an option to override the default value\n\n"
 
-	    "# Color schemes (or just themes) are stored in the colors directory.\n\
-# Available themes: base16, default, dracula, dracula-vivid, gruvbox,\n\
-# jellybeans-vivid, light, molokai, nocolor, nord, one-dark, solarized, zenburn\n\
-# Visit %s to get some extra themes\n\
+	    "# Set the color scheme\n\
 ;ColorScheme=%s\n\n"
 
-	    "# The amount of files contained by a directory is informed next\n\
-# to the directory name. However, this feature might slow things down when,\n\
-# for example, listing files on a remote server. The filescounter can be\n\
-# disabled here, via the --no-files-counter option, or using the 'fc'\n\
-# command while in the program itself.\n\
+	    "# Inform amount of files contained by a directories when listing files\n\
 ;FilesCounter=%s\n\n"
 
 		"# How to list files: 0 = vertically (like ls(1) would), 1 = horizontally\n\
@@ -1525,14 +1522,11 @@ create_main_config_file(char *file)
 		"# Send errors, warnings, and notices to the notification daemon?\n\
 ;DesktopNotifications=%s\n\n"
 
-	    "# If set to true, print a map of the current position in the directory\n\
+	    "# Print a map of the current position in the directory\n\
 # history list, showing previous, current, and next entries\n\
 ;DirhistMap=%s\n\n"
 
 		"# Use a regex expression to filter file names when listing files.\n\
-# Example: \"!.*~$\" to exclude backup files (ending with ~), or \"^\\.\" to list \n\
-# only hidden files. File type filters are also supported. Example: \"=d\" to\n\
-# list directories only, or \"!=l\" to exclude all symlinks.\n\
 # Run 'help file-filters' for more information.\n\
 ;Filter=""\n\n"
 
@@ -1553,7 +1547,6 @@ create_main_config_file(char *file)
 # rm(1) is invoked with the -f flag.\n\
 ;rmForce=%s\n\n",
 
-	    COLORS_REPO,
 		DEF_COLOR_SCHEME,
 		DEF_FILES_COUNTER == 1 ? "true" : "false",
 		DEF_LISTING_MODE,
@@ -1572,7 +1565,7 @@ create_main_config_file(char *file)
 ;FuzzyAlgorithm=%d\n\n"
 
 		"# TAB completion mode: 'standard', 'fzf', 'fnf', or 'smenu'. Defaults to\n\
-# 'fzf' if the binary is found in PATH. Otherwise, the standard mode is used\n\
+# 'fzf' if the binary is found in PATH. Otherwise, the standard mode is used.\n\
 ;TabCompletionMode=\n\n"
 
 		"# File previews for TAB completion (fzf mode only). Possible values:\n\
@@ -1611,9 +1604,9 @@ create_main_config_file(char *file)
 ;TimeStyle=relative\n\
 # Same as TimeStyle, but for the 'p/pp' command\n\
 ;PTimeStyle=\"\"\n\
-# Print files apparent size instead of actual device usage (Linux only)\n\
+# Print files apparent size instead of actual device usage\n\
 ;ApparentSize=%s\n\
-# If running in long view, print directories full size (including contents)\n\
+# If running in long view, print directories total size\n\
 ;FullDirSize=%s\n\n\
 # Log errors and warnings\n\
 ;LogMsgs=%s\n\
@@ -1626,24 +1619,22 @@ create_main_config_file(char *file)
 ;MinFilenameTrim=%d\n\n"
 
 	    "# When a directory rank in the jump database is below MinJumpRank, it\n\
-# is removed. If set to 0, directories are kept indefinitely\n\
+# is removed. If set to 0, directories are kept indefinitely.\n\
 ;MinJumpRank=%d\n\n"
 
 	    "# When the sum of all ranks in the jump database reaches MaxJumpTotalRank,\n\
 # all ranks will be reduced using a dynamic factor so that the total sum falls\n\
 # below MaxJumpTotalRank again. Those entries falling below MinJumpRank will\n\
-# be deleted\n\
+# be deleted.\n\
 ;MaxJumpTotalRank=%d\n\n"
 
-		"# Automatically purge the jump database from non-existing directories at\n\
-# startup. Note that this will remove paths pointing to unmounted removable\n\
-# devices and remote file systems\n\
+		"# Automatically purge the jump database from non-existing directories.\n\
 ;PurgeJumpDB=%s\n\n"
 
 	    "# Should CliFM be allowed to run external, shell commands?\n\
 ;ExternalCommands=%s\n\n"
 
-	    "# Write the last visited directory to $XDG_CONFIG_HOME/clifm/.last to be\n\
+	    "# Write the last visited directory to ~/.config/clifm/.last to be\n\
 # later accessed by the corresponding shell function at program exit.\n\
 # To enable this feature consult the manpage.\n\
 ;CdOnQuit=%s\n\n",
@@ -1682,6 +1673,9 @@ create_main_config_file(char *file)
 		"# Enable autocommand files (.cfm.in and .cfm.out)\n\
 ;ReadAutocmdFiles=%s\n\n"
 
+		"# Read .hidden files\n\
+;ReadDotHidden=%s\n\n"
+
 	    "# If set to true, enable auto-suggestions.\n\
 ;AutoSuggestions=%s\n\n"
 
@@ -1697,8 +1691,8 @@ create_main_config_file(char *file)
 # Use a dash (-) to skip a check. Ex: 'eahfj-c' to skip the bookmarks check\n\
 ;SuggestionStrategy=%s\n\n"
 
-	    "# If set to true, suggest file names using the corresponding\n\
-# file type color (set via the color scheme file).\n\
+	    "# Suggest file names using the corresponding file type color\n\
+# (set via the color scheme file).\n\
 ;SuggestFiletypeColor=%s\n\n"
 
 		"# Suggest a brief decription for internal commands\n\
@@ -1716,6 +1710,7 @@ create_main_config_file(char *file)
 		DEF_AUTOCD == 1 ? "true" : "false",
 		DEF_AUTO_OPEN == 1 ? "true" : "false",
 		DEF_READ_AUTOCMD_FILES == 1 ? "true" : "false",
+		DEF_READ_DOTHIDDEN == 1 ? "true" : "false",
 		DEF_SUGGESTIONS == 1 ? "true" : "false",
 		DEF_SUG_STRATEGY,
 		DEF_SUG_FILETYPE_COLOR == 1 ? "true" : "false",
@@ -1737,12 +1732,8 @@ create_main_config_file(char *file)
 ;LightMode=%s\n\n"
 
 	    "# If running with colors, append directory indicator\n\
-# to directories. If running without colors (via the --no-colors option),\n\
-# append file type indicator at the end of file names: '/' for directories,\n\
-# '@' for symbolic links, '=' for sockets, '|' for FIFO/pipes, '*'\n\
-# for for executable files, and '?' for unknown file types. Bear in mind\n\
-# that when running in light mode the check for executable files won't be\n\
-# performed, and thereby no indicator will be added to executable files.\n\
+# to directories. If running without colors (via the --no-color option),\n\
+# append file type indicator at the end of file names.\n\
 ;Classify=%s\n\n"
 
 		"# Color links as target file name\n\
@@ -1760,7 +1751,7 @@ create_main_config_file(char *file)
 # terminal emulator to run CliFM on it.\n\
 ;TerminalCmd='%s'\n\n"
 
-	    "# Choose sorting method: 0 = none, 1 = name, 2 = size, 3 = atime\n\
+	    "# Sorting method: 0 = none, 1 = name, 2 = size, 3 = atime\n\
 # 4 = btime, 5 = ctime, 6 = mtime, 7 = version, 8 = extension, 9 = inode,\n\
 # 10 = owner-ID, 11 = group-ID\n\
 # NOTE: the 'version' method is not available on FreeBSD\n\
@@ -1843,8 +1834,7 @@ create_main_config_file(char *file)
 ;Umask=077\n\
 ;DiskUsage=%s\n\n"
 
-		"# If set to true, always print the list of selected files. Since this\n\
-# list could become quite extensive, you can limit the number of printed \n\
+		"# Print the list of selected files. You can limit the number of printed \n\
 # entries using the MaxPrintSelfiles option (-1 = no limit, 0 = auto (never\n\
 # print more than half terminal height), or any custom value)\n\
 ;PrintSelfiles=%s\n\
@@ -3096,6 +3086,10 @@ read_config(void)
 
 		else if (*line == 'R' && strncmp(line, "ReadAutocmdFiles=", 17) == 0) {
 			set_config_bool_value(line + 17, &conf.read_autocmd_files);
+		}
+
+		else if (*line == 'R' && strncmp(line, "ReadDotHidden=", 14) == 0) {
+			set_config_bool_value(line + 14, &conf.read_dothidden);
 		}
 
 		else if (xargs.readonly == UNSET && *line == 'R'

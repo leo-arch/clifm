@@ -490,6 +490,7 @@ ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define DEF_PROP_FIELDS_GAP 1 /* Spaces between columns in long view */
 #define DEF_PURGE_JUMPDB 0
 #define DEF_READ_AUTOCMD_FILES 0
+#define DEF_READ_DOTHIDDEN 0
 #define DEF_READONLY 0
 #define DEF_REFRESH_ON_EMPTY_LINE 1
 #define DEF_REFRESH_ON_RESIZE 1
