@@ -69,7 +69,7 @@ load_dothidden(void)
 
 	size_t counter = 0;
 	while (fgets(line, sizeof(line), fp) != NULL) {
-		if (!*line || *line == '\n' || *line == '/')
+		if (!*line || *line == '\n' || strchr(line, '/'))
 			continue;
 
 		size_t len = strlen(line);
