@@ -17,6 +17,11 @@
 # Show hidden files (i.e. files starting with a dot).
 ;ShowHiddenFiles=false
 
+# Files listed in a '.hidden' file in the current directory will be hidden
+# whenever hidden files are not shown (i.e. ShowHiddenFiles is set to false).
+# Both plain file names and wildcards are supported.
+;ReadDotHidden=false
+
 # Use a regular expression to filter files from the files list.
 # Example: "!.*~$" to exclude backup files (ending with ~), or "^\." to
 # list only hidden files. File type filters are also supported. Example:
