@@ -99,7 +99,7 @@ Besides common file operations such as copy, move, remove, etc., _clifm_ provide
 - Navigation and file operations
   - [Bookmarks](https://github.com/leo-arch/clifm/wiki/Common-Operations#bookmarks)
   - [File tags](https://github.com/leo-arch/clifm/wiki/Common-Operations#tagging-files)
-  - [File filters](https://github.com/leo-arch/clifm/wiki/Advanced#files-filters)
+  - [File filters](https://github.com/leo-arch/clifm/wiki/Advanced#files-filters) (including support for [`.hidden` files](https://github.com/leo-arch/clifm/wiki/Advanced#1b-hidden-files))
   - [Files selection](https://github.com/leo-arch/clifm/wiki/Common-Operations#selection) (supports both glob and regular expressions and works even across multiple instances of the program)
   - [Files search](https://github.com/leo-arch/clifm/wiki/Common-Operations#searching) (supports both glob and regular expressions)
   - [copy(-as), move(-as)](https://github.com/leo-arch/clifm/wiki/Introduction#c-l-e-edit-m-md-r), [interactive rename](https://github.com/leo-arch/clifm/wiki/Introduction#c-l-e-edit-m-md-r), and [open-with](https://github.com/leo-arch/clifm/wiki/Introduction#ow) functions
