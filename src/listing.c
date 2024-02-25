@@ -878,7 +878,8 @@ compute_maxes(void)
 		}
 	}
 
-	if (conf.full_dir_size != 1)
+
+	if (conf.full_dir_size != 1 || prop_fields.size == PROP_SIZE_HUMAN)
 		return maxes;
 
 	/* If at least one directory size length equals the maxmimum size lenght
@@ -1980,7 +1981,7 @@ construct_human_sizes(void)
 		if (file_info[i].size < ibase) {
 			const int ret = snprintf(file_info[i].human_size.str,
 				MAX_HUMAN_SIZE, "%jd", (intmax_t)file_info[i].size);
-			file_info[i].human_size.len = (ret > 0 ? (size_t)ret : 0) + 1;
+			file_info[i].human_size.len = ret > 0 ? (size_t)ret : 0;
 			file_info[i].human_size.unit = 'B';
 			continue;
 		}
@@ -2002,8 +2003,7 @@ construct_human_sizes(void)
 				(double)s);
 
 		/* + 1 to take the size prefix (B, K, M, etc) into account */
-		file_info[i].human_size.len = (ret > 0 ? (size_t)ret : 0) + 1;
-
+		file_info[i].human_size.len = ret > 0 ? (size_t)ret : 0;
 		/* Let's follow du(1) in using 'k' (lowercase) instead of 'K'
 		 * (uppercase) when using powers of 1000 (--si). */
 		file_info[i].human_size.unit = (xargs.si == 1 && u[n] == 'K')
