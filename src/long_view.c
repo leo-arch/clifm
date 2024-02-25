@@ -208,7 +208,8 @@ construct_file_size(const struct fileinfo *props, char *size_str,
 
 	if (S_ISCHR(props->mode) || S_ISBLK(props->mode)
 	|| (file_perm == 0 && props->dir == 1 && conf.full_dir_size == 1)) {
-		snprintf(size_str, SIZE_STR_LEN, "%s%*s%s", dn_c, size_max, "-", df_c);
+		snprintf(size_str, SIZE_STR_LEN, "%s%*s%s", dn_c, size_max
+			+ (prop_fields.size == PROP_SIZE_HUMAN), "-", df_c);
 		return file_perm;
 	}
 
