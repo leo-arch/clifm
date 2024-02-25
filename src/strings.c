@@ -2803,7 +2803,8 @@ parse_input_str(char *str)
 			 * ############################### */
 
 		if ((*substr[i] == '.' && (!substr[i][1] || (substr[i][1] == '.'
-		&& !substr[i][2]))) || strstr(substr[i], "/..")) {
+		&& (!substr[i][2] || substr[i][2] == '/'))))
+		|| strstr(substr[i], "/..")) {
 			char *tmp = normalize_path(substr[i], strlen(substr[i]));
 			if (tmp) {
 				free(substr[i]);
