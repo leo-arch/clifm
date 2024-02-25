@@ -95,7 +95,9 @@ load_dothidden(void)
 
 		lines += gbuf.gl_pathc;
 		h = xnrealloc(h, lines, sizeof(struct dothidden_t));
-		for (size_t i = 0; i < gbuf.gl_pathc; i++) {
+		size_t i;
+
+		for (i = 0; i < gbuf.gl_pathc; i++) {
 			/* Exclude self and parent dirs, just as dot-files */
 			if (!gbuf.gl_pathv[i] || !*gbuf.gl_pathv[i]
 			|| *gbuf.gl_pathv[i] == '.')
@@ -125,7 +127,7 @@ check_dothidden(const char *restrict name, struct dothidden_t **h)
 	if (!name || !*name || !*h)
 		return 0;
 
-	size_t namelen = strlen(name);
+	const size_t namelen = strlen(name);
 	size_t i;
 
 	for (i = 0; (*h)[i].name; i++) {

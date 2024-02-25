@@ -45,7 +45,7 @@
 #define TIME_STR_LEN  (MAX_TIME_STR + (MAX_COLOR * 2) + 2) /* construct_timestamp() */
 
 /* construct_human_size() returns a string of at most MAX_HUMAN_SIZE chars (helpers.h) */
-#define SIZE_STR_LEN  (MAX_HUMAN_SIZE + (MAX_COLOR * 3) + 1) /* construct_file_size() */
+#define SIZE_STR_LEN  (MAX_HUMAN_SIZE + (MAX_COLOR * 3) + 10) /* construct_file_size() */
 
 /* 2 colors + 2 names + (space + NUL byte) + DIM */
 #define ID_STR_LEN    ((MAX_COLOR * 2) + (NAME_MAX * 2) + 2 + 4)
@@ -228,22 +228,22 @@ construct_file_size(const struct fileinfo *props, char *size_str,
 
 	if (prop_fields.size != PROP_SIZE_HUMAN) {
 		snprintf(size_str, SIZE_STR_LEN, "%s%*jd%s%c", csize,
-			size_max, (intmax_t)size, df_c,
+			(props->du_status != 0 && size_max > 0) ? size_max - 1 : size_max,
+			(intmax_t)size, df_c,
 			props->du_status != 0 ? DU_ERR_CHAR : 0);
 		return file_perm;
 	}
 
-	static char err[sizeof(xf_c) + 6]; *err = '\0';
-	if (props->dir == 1 && conf.full_dir_size == 1
-	&& props->du_status != 0)
-		snprintf(err, sizeof(err), "%s%c%s", xf_c, DU_ERR_CHAR, NC);
+	const int du_err = (props->dir == 1 && conf.full_dir_size == 1
+		&& props->du_status != 0);
+	const char *unit_color = conf.colorize == 0
+		? (du_err == 1 ? "\x1b[1m" : "")
+		: (du_err == 1 ? xf_c : "\x1b[2m");
 
-	snprintf(size_str, SIZE_STR_LEN, "%s%s%*s%s",
-		err, csize,
-		/* In case of du error, substract from the padding (size_max) the
-		 * space used by the error character ('!'). */
-		(*err && size_max > 0) ? size_max - 1 : size_max,
-		props->human_size ? props->human_size : "?", df_c);
+	snprintf(size_str, SIZE_STR_LEN, "%s%*s%s%c\x1b[0m%s",
+		csize, size_max,
+		*props->human_size.str ? props->human_size.str : "?",
+		unit_color, props->human_size.unit, df_c);
 
 	return file_perm;
 }

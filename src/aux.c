@@ -980,7 +980,7 @@ get_cmd_path(const char *cmd)
 char *
 construct_human_size(const off_t size)
 {
-	static char str[MAX_HUMAN_SIZE];
+	static char str[MAX_HUMAN_SIZE + 2];
 
 	const float base = xargs.si == 1 ? 1000 : 1024;
 	static float mult_factor = 0;
@@ -1002,11 +1002,11 @@ construct_human_size(const off_t size)
 	 * R: Ronnabyte, Q: Quettabyte. It's highly unlikely to have files of
 	 * such huge sizes (and even less) in the near future, but anyway... */
 	static const char *const u = "BKMGTPEZYRQ";
-	snprintf(str, sizeof(str), "%.*f%c%c",
+	snprintf(str, sizeof(str), "%.*f %c%s",
 		(s == 0.00f || s - (float)x == 0.00f) ? 0 : 2,
 		(double)s,
 		u[n],
-		(u[n] != 'B' && xargs.si == 1) ? 'B' : 0);
+		u[n] != 'B' ? (xargs.si == 1 ? "B" : "iB") : "");
 
 	return str;
 }

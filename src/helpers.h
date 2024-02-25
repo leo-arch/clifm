@@ -1241,6 +1241,13 @@ struct groups_t {
 extern struct groups_t *sys_users;
 extern struct groups_t *sys_groups;
 
+struct human_size_t {
+	char   str[MAX_HUMAN_SIZE + 6];
+	size_t len;
+	int    unit;
+	int    pad;
+};
+
 /* Struct to store files information */
 struct fileinfo {
 	char *color;
@@ -1250,10 +1257,9 @@ struct fileinfo {
 	char *icon_color;
 	struct groups_t uid_i;
 	struct groups_t gid_i;
+	struct human_size_t human_size;
 	char *name;
-	char *human_size;
 	filesn_t filesn;
-	size_t human_size_len;
 	size_t len;   /* File name len (columns needed to display file name) */
 	size_t bytes; /* Bytes consumed by file name */
 #if defined(__arm__) && !defined(__ANDROID__)

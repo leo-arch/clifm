@@ -846,7 +846,7 @@ compute_maxes(void)
 			if (t > maxes.size)
 				maxes.size = t;
 		} else if (prop_fields.size == PROP_SIZE_HUMAN) {
-			t = (int)file_info[i].human_size_len;
+			t = (int)file_info[i].human_size.len;
 			if (t > maxes.size)
 				maxes.size = t;
 		}
@@ -891,7 +891,7 @@ compute_maxes(void)
 
 		const int t = prop_fields.size == PROP_SIZE_BYTES
 			? DIGINUM_BIG(file_info[i].size)
-			: (int)file_info[i].human_size_len;
+			: (int)file_info[i].human_size.len;
 
 		if (t == maxes.size) {
 			maxes.size++;
@@ -1917,9 +1917,12 @@ init_fileinfo(const filesn_t n)
 	file_info[n].icon = DEF_FILE_ICON;
 	file_info[n].icon_color = DEF_FILE_ICON_COLOR;
 #endif /* _NO_ICONS */
+	file_info[n].human_size.str[0] = '\0';
+	file_info[n].human_size.len = 0;
+	file_info[n].human_size.unit = 0;
+	file_info[n].linkn = 1;
 	file_info[n].ruser = 1;
 	file_info[n].size =  1;
-	file_info[n].linkn = 1;
 }
 
 static inline void
@@ -1957,13 +1960,16 @@ get_id_names(const filesn_t n)
 }
 
 /* Construct human readable sizes for all files in the current directory
- * and store them in the human_size field of the file_info struct. The length
- * of each human size is stored in the human_size_len field of the same struct. */
+ * and store them in the human_size struct field of the file_info struct. The
+ * length of each human size is stored in the human_size.len field of the
+ * same struct. */
 static void
 construct_human_sizes(void)
 {
 	const off_t ibase = xargs.si == 1 ? 1000 : 1024;
 	const float base = (float)ibase;
+	/* R: Ronnabyte, Q: Quettabyte. It's highly unlikely to have files of
+	 * such huge sizes (and even less) in the near future, but anyway... */
 	static const char *const u = "BKMGTPEZYRQ";
 	static float mult_factor = 0;
 	if (mult_factor == 0)
@@ -1971,12 +1977,11 @@ construct_human_sizes(void)
 
 	filesn_t i = files;
 	while (--i >= 0) {
-		file_info[i].human_size = xnmalloc(MAX_HUMAN_SIZE, sizeof(char));
-
 		if (file_info[i].size < ibase) {
-			const int ret = snprintf(file_info[i].human_size,
-				MAX_HUMAN_SIZE, "%jdB", (intmax_t)file_info[i].size);
-			file_info[i].human_size_len = ret > 0 ? (size_t)ret : 0;
+			const int ret = snprintf(file_info[i].human_size.str,
+				MAX_HUMAN_SIZE, "%jd", (intmax_t)file_info[i].size);
+			file_info[i].human_size.len = (ret > 0 ? (size_t)ret : 0) + 1;
+			file_info[i].human_size.unit = 'B';
 			continue;
 		}
 
@@ -1989,19 +1994,16 @@ construct_human_sizes(void)
 		}
 
 		const int x = (int)s;
-		/* If (s == 0 || s - (float)x == 0), then S has no reminder (zero)
-		 * We don't want to print the reminder when it is zero.
-		 *
-		 * R: Ronnabyte, Q: Quettabyte. It's highly unlikely to have files of
-		 * such huge sizes (and even less) in the near future, but anyway... */
+		/* If (s == 0 || s - (float)x == 0), then S has no reminder (zero).
+		 * We don't want to print the reminder when it is zero. */
 		const int ret =
-			snprintf(file_info[i].human_size, MAX_HUMAN_SIZE, "%.*f%c%s",
+			snprintf(file_info[i].human_size.str, MAX_HUMAN_SIZE, "%.*f",
 				(s == 0.00f || s - (float)x == 0.00f) ? 0 : 2,
-				(double)s,
-				u[n],
-				(u[n] != 'B' && xargs.si == 1) ? "B" : "");
+				(double)s);
 
-		file_info[i].human_size_len = ret > 0 ? (size_t)ret : 0;
+		/* + 1 to take the size unit into account */
+		file_info[i].human_size.len = (ret > 0 ? (size_t)ret : 0) + 1;
+		file_info[i].human_size.unit = u[n];
 	}
 }
 
@@ -3088,7 +3090,6 @@ free_dirlist(void)
 	while (--i >= 0) {
 		free(file_info[i].name);
 		free(file_info[i].ext_color);
-		free(file_info[i].human_size);
 	}
 
 	free(file_info);

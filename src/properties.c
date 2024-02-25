@@ -1600,7 +1600,7 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 		const int bigger_than_bytes = size > (xargs.si == 1 ? 1000 : 1024);
 
 		if (bigger_than_bytes == 1)
-			printf(" / %s%jdB%s", csize, (intmax_t)size, cend);
+			printf(" / %s%jd B%s", csize, (intmax_t)size, cend);
 
 		printf(" (%s%s%s)\n", conf.apparent_size == 1 ? _("apparent")
 			: _("disk usage"), (xargs.si == 1 && bigger_than_bytes == 1)
@@ -1649,7 +1649,7 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 		printf("%s%s%s%s ", err, csize, human_size, cend);
 
 		if (total_size > size_mult_factor)
-			printf("/ %s%jdB%s ", csize, (intmax_t)total_size, cend);
+			printf("/ %s%jd B%s ", csize, (intmax_t)total_size, cend);
 
 		printf("(%s%s)\n", conf.apparent_size == 1 ? _("apparent")
 			: _("disk usage"), xargs.si == 1 ? ",si" : "");
