@@ -107,7 +107,7 @@ define UDW4=4;2;37 # Underlined dimmed white (4-bit)
 define O=38;5;214    # Orange
 define BO=1;38;5;214 # Bold orange
 
-define P=38;5;140  # Purple
+define P=#af87d7   # Purple
 define AM=38;5;79  # AquaMarine3
 define PG=38;5;77  # PaleGreen3
 define DP=38;5;197 # DeepPink2
@@ -272,8 +272,8 @@ DateShades="2,197-2,231,253,250,247,244"
 # byte, Kb, Mb, Gb, bigger
 
 #SizeShades="1,31-2,32,33,31,31,31"
-SizeShades="2,197-2,79,77,228,215,203"
-#SizeShades="3,#ff005f-2,#5fd7af,#5fd75f,#ffff87,#ffaf5f,#ff5f5f"
+#SizeShades="2,197-2,79,77,228,215,203"
+SizeShades="3,#ff005f-2,#5fd7af,#5fd75f,#ffff87,#ffaf5f,#ff5f5f"
 
 #NOTE: For SizeShades to work, the 'dz' color code (solid color for sizes) needs to be unset (default)
 
