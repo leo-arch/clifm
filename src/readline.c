@@ -981,7 +981,7 @@ my_rl_path_completion(const char *text, int state)
 
 		/* Resolve special expression in the resulting directory */
 		char *e = (char *)NULL;
-		if (strstr(d, "/.."))
+		if ((*d == '.' && d[1] == '.' && d[2] == '/') || strstr(d, "/.."))
 			e = normalize_path(d, strlen(d));
 		if (!e)
 			e = d;

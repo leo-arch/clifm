@@ -1125,7 +1125,9 @@ store_completions(char **matches)
 		no_file_comp = 1; /* We're not completing file names. */
 
 	char *norm_prefix = (char *)NULL;
-	if (ct == TCMP_PATH && ((*matches[0] == '.' && matches[0][1] == '/')
+	/* "./_", "../_", and "_/.._" */
+	if (ct == TCMP_PATH && ((*matches[0] == '.' && (matches[0][1] == '/'
+	|| (matches[0][1] == '.' && matches[0][2] == '/')))
 	|| strstr(matches[0], "/..")))
 		norm_prefix = normalize_prefix(matches[0]);
 
