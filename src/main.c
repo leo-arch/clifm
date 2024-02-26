@@ -423,7 +423,9 @@ char
 	tx_c[MAX_COLOR + 2], /* Text color */
 	xs_c[MAX_COLOR + 2], /* Exit code: success */
 	xf_c[MAX_COLOR + 2], /* Exit code: failure */
-	tmp_color[MAX_COLOR + 2]; /* A temp buffer to store color codes */
+
+	tmp_color[MAX_COLOR + 2], /* A temp buffer to store color codes */
+	dim_c[5] = "\x1b[2m";
 
 /* A list of all internal commands, with short and long formats.
  * We use two more lists of commands: one of commands dealing with file names

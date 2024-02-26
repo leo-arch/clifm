@@ -125,6 +125,8 @@ set_term_caps(const int i)
 
 	if (i == -1) { /* TERM not found in our terminfo database */
 		term_caps.color = true_color == 1 ? TRUE_COLOR : 0;
+		if (term_caps.color <= 8)
+			memset(dim_c, '\0', sizeof(dim_c));
 		term_caps.suggestions = 0;
 		term_caps.pager = 0;
 		term_caps.hide_cursor = 0;
@@ -142,6 +144,8 @@ set_term_caps(const int i)
 
 	term_caps.color = true_color == 1 ? TRUE_COLOR
 		: (TERM_INFO[i].color > 0 ? TERM_INFO[i].color : 0);
+	if (term_caps.color <= 8)
+		memset(dim_c, '\0', sizeof(dim_c));
 
 	term_caps.suggestions = (TERM_INFO[i].cub == 1 && TERM_INFO[i].ed == 1
 		&& TERM_INFO[i].el == 1) ? 1 : 0;

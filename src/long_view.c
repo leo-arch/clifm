@@ -239,7 +239,7 @@ construct_file_size(const struct fileinfo *props, char *size_str,
 		&& props->du_status != 0);
 	const char *unit_color = conf.colorize == 0
 		? (du_err == 1 ? "\x1b[1m" : "")
-		: (du_err == 1 ? xf_c : "\x1b[2m");
+		: (du_err == 1 ? xf_c : dim_c);
 
 	snprintf(size_str, SIZE_STR_LEN, "%s%*s%s%c\x1b[0m%s",
 		csize, size_max,
@@ -349,7 +349,7 @@ construct_id_field(const struct fileinfo *props, char *id_str,
 				maxes->id_user, props->uid_i.name, df_c);
 		}
 	} else {
-		const char *dim = conf.colorize == 0 ? "" : "\x1b[2m";
+		const char *dim = conf.colorize == 0 ? "" : dim_c;
 		if (prop_fields.ids == PROP_ID_NUM) {
 			snprintf(id_str, ID_STR_LEN, "%s%-*u %s%-*u%s", id_color,
 				maxes->id_user, props->uid, dim, maxes->id_group,
