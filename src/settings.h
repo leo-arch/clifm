@@ -485,8 +485,8 @@ ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define DEF_PRINT_REMOVED_FILES 1
 #define DEF_PRIVATE_WS_SETTINGS 0
 /* "xfpims" =
- * xattrs/caps/ACLs, files counter, perms, owner/grp names, mod time, size (human) */
-#define DEF_PROP_FIELDS "xfpIms"
+ * xattrs/caps/ACLs, files counter, perms, owner/grp names, size (human), mtime */
+#define DEF_PROP_FIELDS "xfpIsm"
 #define DEF_PROP_FIELDS_GAP 1 /* Spaces between columns in long view */
 #define DEF_PURGE_JUMPDB 0
 #define DEF_READ_AUTOCMD_FILES 0

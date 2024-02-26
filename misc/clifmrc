@@ -106,7 +106,7 @@
 #PropFields="ns"
 # or, to display file permissions, modification time, and size (in bytes):
 #PropFields="pmS"
-;PropFields="xfpIms"
+;PropFields="xfpIsm"
 
 # Number of spaces between fields in long view. Possible values: 1-2.
 ;PropFieldsGap=1
