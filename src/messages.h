@@ -162,8 +162,8 @@ Note: Links are always created in the current directory."
 \x1b[1mUSAGE\x1b[0m\n\
   bm, bookmarks [a, add FILENAME NAME | d, del [NAME] | e, edit [APP] | NAME]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
-- Open the bookmarks screen\n\
-    bm (Alt-b)\n\
+- List bookmarks\n\
+    bm (also Alt-b, 'bm <TAB>' or 'b:<TAB>')\n\
 - Bookmark the directory /media/mount as 'mnt'\n\
     bm add /media/mount mnt\n\
   Note: Regular files can be bookmarked too\n\
