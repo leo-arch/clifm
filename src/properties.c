@@ -266,6 +266,22 @@ get_total_size(char *filename, int *status)
 	return total_size;
 }
 
+static struct perms_t
+set_invalid_file_perms(void)
+{
+	struct perms_t p = {0};
+
+	p.ur = p.uw = p.ux = UNKNOWN_CHR;
+	p.gr = p.gw = p.gx = UNKNOWN_CHR;
+	p.or = p.ow = p.ox = UNKNOWN_CHR;
+
+	p.cur = p.cuw = p.cux = df_c;
+	p.cgr = p.cgw = p.cgx = df_c;
+	p.cor = p.cow = p.cox = df_c;
+
+	return p;
+}
+
 /* Returns a struct perms_t with the symbolic value and color for each
  * properties field of a file with mode MODE */
 struct perms_t
@@ -273,13 +289,16 @@ get_file_perms(const mode_t mode)
 {
 	struct perms_t p = {0};
 
-	p.ur = p.uw = p.ux = '-';
-	p.gr = p.gw = p.gx = '-';
-	p.or = p.ow = p.ox = '-';
+	if (!(mode & (mode_t)~S_IFMT))
+		return set_invalid_file_perms();
 
 	p.cur = p.cuw = p.cux = dn_c;
 	p.cgr = p.cgw = p.cgx = dn_c;
 	p.cor = p.cow = p.cox = dn_c;
+
+	p.ur = p.uw = p.ux = '-';
+	p.gr = p.gw = p.gx = '-';
+	p.or = p.ow = p.ox = '-';
 
 	const mode_t val = (mode & (mode_t)~S_IFMT);
 	if (val & S_IRUSR) { p.ur = 'r'; p.cur = dr_c; }
@@ -1087,7 +1106,7 @@ print_file_perms(const struct stat *attr, const char file_type_char,
 		perms.cur, perms.ur, perms.cuw, perms.uw, perms.cux, perms.ux, dn_c,
 		perms.cgr, perms.gr, perms.cgw, perms.gw, perms.cgx, perms.gx, dn_c,
 		perms.cor, perms.or, perms.cow, perms.ow, perms.cox, perms.ox, df_c,
-		xattr == 1 ? "@" : "",
+		xattr == 1 ? XATTR_STR : "",
 		BOLD, (size_t)attr->st_nlink, df_c);
 }
 
@@ -1622,7 +1641,7 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 		if (total_size == -2) /* No access */
 			printf(_("Total size: \t%s-%s\n"), dn_c, cend);
 		else /* get_total_size returned error (-1) */
-			puts("?");
+			puts(UNKNOWN_STR);
 		return;
 	}
 
@@ -1635,7 +1654,7 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 
 	char *human_size = construct_human_size(total_size);
 	if (!human_size) {
-		puts("?");
+		puts(UNKNOWN_STR);
 		return;
 	}
 
@@ -1864,9 +1883,9 @@ print_analysis_stats(const off_t total, const off_t largest,
 
 	printf(_("Total size:   %s%s%s\n"
 		"Largest file: %s%s%s %c%s%s%s%c\n"),
-		conf.colorize == 1 ? tsize : "" , t ? t : "?",
+		conf.colorize == 1 ? tsize : "" , t ? t : UNKNOWN_STR,
 		conf.colorize == 1 ? tx_c : "",
-		conf.colorize == 1 ? lsize : "" , l ? l : "?",
+		conf.colorize == 1 ? lsize : "" , l ? l : UNKNOWN_STR,
 		conf.colorize == 1 ? tx_c : "",
 		name ? '[' : 0,
 		(conf.colorize == 1 && color) ? color : "",
@@ -1876,5 +1895,3 @@ print_analysis_stats(const off_t total, const off_t largest,
 	free(t);
 	free(l);
 }
-
-

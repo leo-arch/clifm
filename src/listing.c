@@ -78,9 +78,6 @@
 #define IS_EXEC(s) (((s)->st_mode & S_IXUSR)               \
 	|| ((s)->st_mode & S_IXGRP) || ((s)->st_mode & S_IXOTH))
 
-#define UNKNOWN_VAL     "?"
-#define UNKNOWN_VAL_LEN 1
-
 #include "autocmds.h"
 #include "aux.h"
 #include "checks.h"
@@ -838,7 +835,7 @@ compute_maxes(void)
 	while (--i >= 0) {
 		int t = 0;
 		if (file_info[i].dir == 1 && conf.files_counter == 1) {
-			t = DIGINUM(file_info[i].filesn);
+			t = DIGINUM_BIG(file_info[i].filesn);
 			if (t > maxes.files_counter)
 				maxes.files_counter = t;
 		}
@@ -1273,7 +1270,7 @@ print_entry_nocolor(int *ind_char, const filesn_t i, const int pad,
 #ifdef S_IFWHT
 		case DT_WHT: putchar(WHT_CHR); break;
 #endif /* S_IFWHT */
-		case DT_UNKNOWN: putchar(UNKNOWN_CHR); break;
+		case DT_UNKNOWN: putchar(UNK_CHR); break;
 		default: *ind_char = 0;
 		}
 	}
@@ -1926,6 +1923,9 @@ init_fileinfo(const filesn_t n)
 	file_info[n].linkn = 1;
 	file_info[n].ruser = 1;
 	file_info[n].size =  1;
+
+	file_info[n].uid_i.name = UNKNOWN_STR;
+	file_info[n].gid_i.name = UNKNOWN_STR;
 }
 
 static inline void
@@ -1942,8 +1942,8 @@ get_id_names(const filesn_t n)
 		}
 
 		if (!file_info[n].uid_i.name) {
-			file_info[n].uid_i.name = UNKNOWN_VAL;
-			file_info[n].uid_i.namlen = UNKNOWN_VAL_LEN;
+			file_info[n].uid_i.name = UNKNOWN_STR;
+			file_info[n].uid_i.namlen = UNKNOWN_STR_LEN;
 		}
 	}
 
@@ -1956,8 +1956,8 @@ get_id_names(const filesn_t n)
 		}
 
 		if (!file_info[n].gid_i.name) {
-			file_info[n].gid_i.name = UNKNOWN_VAL;
-			file_info[n].gid_i.namlen = UNKNOWN_VAL_LEN;
+			file_info[n].gid_i.name = UNKNOWN_STR;
+			file_info[n].gid_i.namlen = UNKNOWN_STR_LEN;
 		}
 	}
 }
@@ -2236,8 +2236,10 @@ list_dir_light(void)
 			struct stat a;
 			if (lstat(file_info[n].name, &a) != -1)
 				set_long_attribs(n, &a);
+			else
+				file_info[n].stat_err = 1;
 #endif /* !_DIRENT_HAVE_D_TYPE */
-			if (prop_fields.ids == PROP_ID_NAME)
+			if (prop_fields.ids == PROP_ID_NAME && file_info[n].stat_err == 0)
 				get_id_names(n);
 		}
 
@@ -2892,6 +2894,7 @@ list_dir(void)
 			if (virtual_dir == 1)
 				continue;
 			stats.unstat++;
+			file_info[n].stat_err = 1;
 		}
 
 		/* Filter files according to file type */

@@ -365,6 +365,11 @@ ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 
 #define DEF_DIR_ICO_C256 "\x1b[0;33m"
 
+/* Character used to print unkonwn/wrong values */
+#define UNKNOWN_CHR     '?'
+/* Same as UNKNOWN_CHR, but as a string */
+#define UNKNOWN_STR     "?"
+#define UNKNOWN_STR_LEN 1
 
 /* Characters used to classify files when running colorless (and classify
  * is enabled) */
@@ -378,7 +383,7 @@ ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define LINK_CHR    '@'
 #define SOCK_CHR    '='
 #define WHT_CHR     '%' /* BSD whiteout */
-#define UNKNOWN_CHR '?'
+#define UNK_CHR     UNKNOWN_CHR
 
 /* Characters used to represent file types in the permissions string
  * (long view and p/pp command) */
@@ -389,20 +394,21 @@ ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define CHARDEV_PCHR 'c'
 #define FIFO_PCHR    'p'
 #define LNK_PCHR     'l'
-#define UNK_PCHR     '?'
 #define WHT_PCHR     'w' /* Whiteout (BSD) */
 #define ARCH1_PCHR   'a' /* Archive state 1 (NetBSD) */
 #define ARCH2_PCHR   'A' /* Archive state 2 (NetBSD) */
 #define DOOR_PCHR    'D' /* Door (Solaris) */
 #define PORT_PCHR    'P' /* Event port (Solaris) */
+#define UNK_PCHR     UNKNOWN_CHR
 
 #define SELFILE_CHR  '*'
 #define TRIMFILE_CHR '~'
 
 /* Character used to mark files with extended attributes (long view) */
 #define XATTR_CHAR '@'
+#define XATTR_STR  "@"
 
-/* Character used to mark dir sizes for which du(1) reported an error */
+/* Character used to mark dir sizes for which du(1) reported an error. */
 #define DU_ERR_CHAR '!'
 
 /* Character used to replace invalid characters (either a control char or an

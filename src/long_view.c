@@ -28,6 +28,7 @@
 #include <string.h> /* memcpy(3), strrchr(3) */
 #include <time.h>   /* strftime(3) */
 
+#include "aux.h"    /* xitoa() */
 #include "checks.h" /* check_file_access() */
 #include "colors.h" /* remove_bold_attr() */
 #include "misc.h"   /* gen_diff_str() */
@@ -206,6 +207,12 @@ construct_file_size(const struct fileinfo *props, char *size_str,
 		return file_perm;
 	}
 
+	if (props->stat_err == 1) {
+		snprintf(size_str, SIZE_STR_LEN, "%*s", size_max
+			+ (prop_fields.size == PROP_SIZE_HUMAN), UNKNOWN_STR);
+		return file_perm;
+	}
+
 	if (S_ISCHR(props->mode) || S_ISBLK(props->mode)
 	|| (file_perm == 0 && props->dir == 1 && conf.full_dir_size == 1)) {
 		snprintf(size_str, SIZE_STR_LEN, "%s%*s%s", dn_c, size_max
@@ -243,7 +250,7 @@ construct_file_size(const struct fileinfo *props, char *size_str,
 
 	snprintf(size_str, SIZE_STR_LEN, "%s%*s%s%c\x1b[0m%s",
 		csize, size_max,
-		*props->human_size.str ? props->human_size.str : "?",
+		*props->human_size.str ? props->human_size.str : UNKNOWN_STR,
 		unit_color, props->human_size.unit, df_c);
 
 	return file_perm;
@@ -259,7 +266,8 @@ construct_file_perms(const mode_t mode, char *perm_str, const char file_type,
 	}
 
 	static char tmp_ctype[MAX_COLOR + 1];
-	xstrsncpy(tmp_ctype, ctype, sizeof(tmp_ctype));
+	xstrsncpy(tmp_ctype, (file_type == UNK_PCHR ? df_c : ctype),
+		sizeof(tmp_ctype));
 	if (xargs.no_bold != 1)
 		remove_bold_attr(tmp_ctype);
 
@@ -279,28 +287,37 @@ construct_file_perms(const mode_t mode, char *perm_str, const char file_type,
 }
 
 static void
-construct_timestamp(char *time_str, const time_t ltime)
+construct_timestamp(char *time_str, const struct fileinfo *props)
 {
 	if (prop_fields.time == 0) {
 		*time_str = '\0';
 		return;
 	}
 
+	const time_t t = props->ltime;
+
 	/* Let's construct the color for the current timestamp. */
 	char *cdate = dd_c;
 	static char df[MAX_SHADE_LEN];
 	if (conf.colorize == 1 && !*dd_c) {
-		get_color_age(ltime, df, sizeof(df));
+		get_color_age(t, df, sizeof(df));
 		cdate = df;
 	}
 
 	static char file_time[MAX_TIME_STR];
-	struct tm t;
+	struct tm tm;
 
-	if (ltime >= 0 && ltime != (time_t)-1 && localtime_r(&ltime, &t)) {
+	if (props->stat_err == 1) {
+		/* Let' use the same string we use for invalid times, but
+		 * replace '-' by '?'. */
+		xstrsncpy(file_time, invalid_time_str, sizeof(file_time));
+		const int index = conf.relative_time == 1 ? 1 : 0;
+		file_time[index] = UNKNOWN_CHR;
+		cdate = df_c;
+	} else if (t >= 0 && t != (time_t)-1 && localtime_r(&t, &tm)) {
 		/* PROPS_NOW (global) is set by list_dir(), in listing.c before
 		 * calling print_entry_props(), which calls this function. */
-		const time_t age = props_now - ltime;
+		const time_t age = props_now - t;
 		/* AGE is negative if file time is in the future. */
 
 		if (conf.relative_time == 1) {
@@ -318,7 +335,7 @@ construct_timestamp(char *time_str, const time_t ltime)
 			 * approach. */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-nonliteral"
-			strftime(file_time, sizeof(file_time), tfmt, &t);
+			strftime(file_time, sizeof(file_time), tfmt, &tm);
 #pragma GCC diagnostic pop
 		}
 	} else {
@@ -328,7 +345,7 @@ construct_timestamp(char *time_str, const time_t ltime)
 	}
 
 	snprintf(time_str, TIME_STR_LEN, "%s%s%s", cdate, *file_time
-		? file_time : "?", df_c);
+		? file_time : UNKNOWN_STR, df_c);
 }
 
 static void
@@ -342,23 +359,34 @@ construct_id_field(const struct fileinfo *props, char *id_str,
 
 	if (prop_fields.no_group == 1) {
 		if (prop_fields.ids == PROP_ID_NUM) {
-			snprintf(id_str, ID_STR_LEN, "%s%*u%s", id_color,
-				maxes->id_user, props->uid, df_c);
+			if (props->stat_err == 1) {
+				snprintf(id_str, ID_STR_LEN, "%s%*s%s", id_color,
+					maxes->id_user, UNKNOWN_STR, df_c);
+			} else {
+				snprintf(id_str, ID_STR_LEN, "%s%*u%s", id_color,
+					maxes->id_user, props->uid, df_c);
+			}
 		} else { /* PROPS_ID_NAME */
 			snprintf(id_str, ID_STR_LEN, "%s%-*s%s", id_color,
 				maxes->id_user, props->uid_i.name, df_c);
 		}
-	} else {
-		const char *dim = conf.colorize == 0 ? "" : dim_c;
-		if (prop_fields.ids == PROP_ID_NUM) {
-			snprintf(id_str, ID_STR_LEN, "%s%*u %s%*u%s", id_color,
-				maxes->id_user, props->uid, dim, maxes->id_group,
-				props->gid, df_c);
-		} else { /* PROPS_ID_NAME */
-			snprintf(id_str, ID_STR_LEN, "%s%-*s %s%-*s%s", id_color,
-				maxes->id_user, props->uid_i.name, dim,
-				maxes->id_group, props->gid_i.name, df_c);
-		}
+
+		return;
+	}
+
+	const char *dim = conf.colorize == 0 ? "" : dim_c;
+	if (prop_fields.ids == PROP_ID_NUM) {
+		snprintf(id_str, ID_STR_LEN, "%s%*s %s%*s%s", id_color,
+			maxes->id_user,
+			props->stat_err == 1 ? UNKNOWN_STR : xitoa(props->uid),
+			props->stat_err == 1 ? "" : dim, maxes->id_group,
+			props->stat_err == 1 ? UNKNOWN_STR : xitoa(props->gid),
+			df_c);
+	} else { /* PROPS_ID_NAME */
+		snprintf(id_str, ID_STR_LEN, "%s%-*s %s%-*s%s", id_color,
+			maxes->id_user, props->uid_i.name,
+			props->stat_err == 1 ? "" : dim,
+			maxes->id_group, props->gid_i.name, df_c);
 	}
 }
 
@@ -412,6 +440,41 @@ set_file_type_and_color(const mode_t mode, char *type, char **color)
 		*color = df_c;
 }
 
+static void
+construct_inode_num(const struct fileinfo *props, char *ino_str, const int max)
+{
+	if (prop_fields.inode == 0) {
+		*ino_str = '\0';
+		return;
+	}
+
+	if (props->stat_err == 1) {
+		snprintf(ino_str, INO_STR_LEN, "\x1b[0m%*s%s", max, UNKNOWN_STR, df_c);
+		return;
+	}
+
+	snprintf(ino_str, INO_STR_LEN, "\x1b[0m%s%*ju%s", de_c,
+		max, (uintmax_t)props->inode, df_c);
+}
+
+static void
+construct_links_str(const struct fileinfo *props, char *links_str, const int max)
+{
+	if (prop_fields.links == 0) {
+		*links_str = '\0';
+		return;
+	}
+
+	if (props->stat_err == 1) {
+		snprintf(links_str, LINKS_STR_LEN, "\x1b[0m%*s%s",
+			max, UNKNOWN_STR, df_c);
+		return;
+	}
+
+	snprintf(links_str, LINKS_STR_LEN, "\x1b[0m%s%s%*ju%s",
+		dk_c, props->linkn > 1 ? BOLD : "", max, (uintmax_t)props->linkn, df_c);
+}
+
 /* Compose the properties line for the current file name.
  * This function is called by list_dir(), in listing.c, for each file name
  * in the current directory when running in long view mode (after
@@ -435,7 +498,7 @@ print_entry_props(const struct fileinfo *props, const struct maxes_t *maxes,
 	construct_file_perms(props->mode, perm_str, file_type, ctype);
 
 	static char time_str[TIME_STR_LEN];
-	construct_timestamp(time_str, props->ltime);
+	construct_timestamp(time_str, props);
 
 	static char size_str[SIZE_STR_LEN];
 	const int file_perm = construct_file_size(props, size_str, maxes->size);
@@ -444,18 +507,11 @@ print_entry_props(const struct fileinfo *props, const struct maxes_t *maxes,
 	static char id_str[ID_STR_LEN];
 	construct_id_field(props, id_str, id_color, maxes);
 
-	static char links_str[LINKS_STR_LEN]; *links_str = '\0';
-	if (prop_fields.links == 1) {
-		snprintf(links_str, LINKS_STR_LEN, "\x1b[0m%s%s%*ju%s",
-			dk_c, props->linkn > 1 ? BOLD : "",
-			maxes->links, (uintmax_t)props->linkn, df_c);
-	}
+	static char links_str[LINKS_STR_LEN];
+	construct_links_str(props, links_str, maxes->links);
 
-	static char ino_str[INO_STR_LEN]; *ino_str = '\0';
-	if (prop_fields.inode == 1) {
-		snprintf(ino_str, INO_STR_LEN, "\x1b[0m%s%*ju%s", de_c,
-			maxes->inode, (uintmax_t)props->inode, df_c);
-	}
+	static char ino_str[INO_STR_LEN];
+	construct_inode_num(props, ino_str, maxes->inode);
 
 	static char fc_str[FC_STR_LEN];
 	construct_files_counter(props, fc_str, maxes->files_counter);

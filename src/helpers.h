@@ -1260,12 +1260,12 @@ struct fileinfo {
 	struct human_size_t human_size;
 	char *name;
 	filesn_t filesn;
-	size_t len;   /* File name len (columns needed to display file name) */
-	size_t bytes; /* Bytes consumed by file name */
+	size_t len;    /* File name len (columns needed to display file name) */
+	size_t bytes;  /* Bytes consumed by file name */
 #if defined(__arm__) && !defined(__ANDROID__)
 	size_t pad0;
 #endif /* __arm__ && !__ANDROID__ */
-	time_t ltime; /* For long view mode */
+	time_t ltime;  /* For long view mode */
 	time_t time;
 	ino_t inode;
 	off_t size;
@@ -1275,20 +1275,22 @@ struct fileinfo {
 #endif /* __sun */
 	uid_t uid;
 	gid_t gid;
-	mode_t mode; /* Store st_mode (for long view mode) */
-	mode_t type; /* Store d_type value */
+	mode_t mode;   /* Store st_mode (for long view mode) */
+	mode_t type;   /* Store d_type value */
 	int dir;
-	int eln_n; /* Amount of digits in ELN */
+	int eln_n;     /* Amount of digits in ELN */
 	int exec;
-	int ruser;  /* User read permission for dir */
+	int ruser;     /* User read permission for dir */
 	int symlink;
 	int sel;
 	int xattr;
 	int du_status; /* Exit status of du(1) for dir full sizes */
-	int utf8; /* Name contains at least one UTF-8 character */
+	int utf8;      /* Name contains at least one UTF-8 character */
+	int stat_err;  /* stat(2) failed for this entry */
+	int pad2;
 #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__DragonFly__) \
 || defined(__OpenBSD__) || defined(__arm__)
-	int pad2;
+	int pad3;
 #endif /* __FreeBSD__ || __NetBSD__ || __DragonFly__ || __arm__ */
 };
 
