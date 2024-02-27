@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Feb 26, 2024" "clifm 1.17.9" "CLIFM Manual"
+.TH "CLIFM" "1" "Feb 27, 2024" "clifm 1.17.10" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -138,8 +138,8 @@ set an alternative keybindings file
 \fB\-l\fR, \fB\-\-long\-view\fR
 enable the long-view mode to list files and their properties. By default, the following information is provided for each file: file name, file permissions (symbolic notation), owner and primary group (names), last modification time, and size. These fields can be customized using the \fIPropFields\fR option in the configuration file (use \fITimeStyle\fR to customize timestamp format). To get more detailed information about files use the \fIp\fR command (see below).
 .TP
-\fB\-L\fR, \fB\-\-no\-long\-view\fR
-disable long-view mode (default)
+\fB\-L\fR, \fB\-\-follow\-symlinks\-long\fR
+if running in long view, show information for the file symbolic links reference rather than for the symbolic links themselves
 .TP
 \fB\-m\fR, \fB\-\-dirhist\-map\fR
 enable the directory history map to keep in view previous, current and next entries in the directory history list
