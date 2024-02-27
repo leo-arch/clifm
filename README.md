@@ -243,6 +243,7 @@ For a complete description please consult our [Wiki](https://github.com/leo-arch
 <summary>Click here to expand</summary>
 
 * `Development`
+  - Dereference symbolic links in long view via `-L,--follow-symlinks-long`.
   - [Support for `.hidden` files, including wildcards](https://github.com/leo-arch/clifm/wiki/Advanced#1b-hidden-files).
   - [Disable the group ID field in long view](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode).
   - [Hard links number in long view](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode).
@@ -253,8 +254,9 @@ For a complete description please consult our [Wiki](https://github.com/leo-arch
   - Since **1)** it was unintuitive to have `-a` and `-l` options to **disable** hidden files and long view respectively (instead of enabling these features, like most files listers do (ex: `ls`, `exa`, `eza`, `lsd`)), and **2)** we were using uppercase options sometimes to enable and sometimes to disable features (which is not consistent), we made the following changes:
     - `-a` enables hidden files and `-A` disables it
     - `-f` enables dirs-first and `-F` disables it
-    - `-l` enables long-view and `-L` disables it
-    - `-o` enables autocd and `-O` disables it
+    - `-l` enables long-view and
+    - `-L` follow symbolic links in long view (lonf form: `--follow-symlinks-long`)
+	- `-o` enables autocd and `-O` disables it
 * `1.17 (Lechuck)`
   - [Allow properties fields order customization in long view](https://github.com/leo-arch/clifm/wiki/Common-Operations#file-details).
   - [Autocommand files](https://github.com/leo-arch/clifm/wiki/Specifics#autocommand-files-cfmin-and-cfmout) won't be read unless `ReadAutocmdFiles` is set to `true` in the main configuration file.
