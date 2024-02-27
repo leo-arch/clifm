@@ -95,21 +95,22 @@ int
 kbinds_reset(void)
 {
 	int exit_status = FUNC_SUCCESS;
-	struct stat file_attrib;
+	struct stat attr;
 
-	if (!kbinds_file) {
+	if (!kbinds_file || !*kbinds_file) {
 		xerror(_("kb: No keybindings file found\n"));
 		return FUNC_FAILURE;
 	}
 
-	if (stat(kbinds_file, &file_attrib) == -1) {
+	if (stat(kbinds_file, &attr) == -1) {
 		exit_status = create_kbinds_file();
 	} else {
-		char *cmd[] = {"rm", "--", kbinds_file, NULL};
-		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) == FUNC_SUCCESS)
+		if (unlink(kbinds_file) == 0) {
 			exit_status = create_kbinds_file();
-		else
+		} else {
+			xerror("kb: '%s': %s\n", kbinds_file, strerror(errno));
 			exit_status = FUNC_FAILURE;
+		}
 	}
 
 	if (exit_status == FUNC_SUCCESS)
@@ -968,7 +969,7 @@ rl_toggle_follow_link_long(int count, int key)
 		free_suggestion();
 #endif /* !_NO_SUGGESTIONS */
 
-	xargs.follow_symlinks_long = xargs.follow_symlinks_long == 1 ? 0 : 1;
+	conf.follow_symlinks_long = conf.follow_symlinks_long == 1 ? 0 : 1;
 
 	if (conf.autols == 1) {
 		if (conf.clear_screen == 0)
@@ -979,7 +980,7 @@ rl_toggle_follow_link_long(int count, int key)
 	}
 
 	print_reload_msg(_("Follow links %s\n"),
-		xargs.follow_symlinks_long == 1 ? _("enabled") : _("disabled"));
+		conf.follow_symlinks_long == 1 ? _("enabled") : _("disabled"));
 	xrl_reset_line_state();
 	return FUNC_SUCCESS;
 }

@@ -197,6 +197,7 @@ init_conf_struct(void)
 	conf.disk_usage = UNSET;
 	conf.ext_cmd_ok = UNSET;
 	conf.files_counter = UNSET;
+	conf.follow_symlinks_long = DEF_FOLLOW_SYMLINKS_LONG;
 	conf.full_dir_size = UNSET;
 	conf.fuzzy_match = UNSET;
 	conf.fuzzy_match_algo = UNSET;

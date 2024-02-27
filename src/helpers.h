@@ -1077,6 +1077,7 @@ struct config_t {
 	int disk_usage;
 	int ext_cmd_ok;
 	int files_counter;
+	int follow_symlinks_long;
 	int full_dir_size;
 	int fuzzy_match;
 	int fuzzy_match_algo;
@@ -1133,7 +1134,6 @@ struct config_t {
 	int unicode;
 	int warning_prompt;
 	int welcome_message;
-	int pad2;
 };
 
 extern struct config_t conf;

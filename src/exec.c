@@ -1998,12 +1998,12 @@ toggle_follow_links(void)
 		return FUNC_SUCCESS;
 	}
 
-	xargs.follow_symlinks_long = xargs.follow_symlinks_long == 1 ? 0 : 1;
+	conf.follow_symlinks_long = conf.follow_symlinks_long == 1 ? 0 : 1;
 
 	if (conf.autols == 1)
 		reload_dirlist();
 
-	print_reload_msg(_("Follow links %s\n"), xargs.follow_symlinks_long == 1
+	print_reload_msg(_("Follow links %s\n"), conf.follow_symlinks_long == 1
 		? _("enabled") : _("disabled"));
 
 	return FUNC_SUCCESS;

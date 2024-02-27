@@ -1334,7 +1334,8 @@ parse_cmdline_args(const int argc, char **argv)
 		case 'J': set_stat(optc, optarg); break;
 		case 'k': set_alt_kbinds_file(optarg); break;
 		case 'l': conf.long_view = xargs.longview = 1; break;
-		case 'L': xargs.follow_symlinks_long = 0; break;
+		case 'L':
+			xargs.follow_symlinks_long = conf.follow_symlinks_long = 1; break;
 		case 'm': xargs.fuzzy_match = conf.fuzzy_match = 1; break;
 		case 'M': set_no_colors(); break;
 		case 'n': xargs.history = 0; break;
@@ -1474,7 +1475,8 @@ parse_cmdline_args(const int argc, char **argv)
 		case 'I': conf.case_sens_list = xargs.case_sens_list = 1; break;
 		case 'k': set_alt_kbinds_file(optarg); break;
 		case 'l': conf.long_view = xargs.longview = 1; break;
-		case 'L': xargs.follow_symlinks_long = 1; break;
+		case 'L':
+			xargs.follow_symlinks_long = conf.follow_symlinks_long = 1; break;
 		case 'm': conf.dirhist_map = xargs.dirmap = 1; break;
 		case 'o': conf.autols = xargs.autols = 1; break;
 		case 'O': conf.autols = xargs.autols = 0; break;

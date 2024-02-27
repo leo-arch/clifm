@@ -2849,7 +2849,7 @@ list_dir(void)
 
 	const int stat_flag =
 		(follow_symlinks == 1 && conf.long_view == 1
-		&& xargs.follow_symlinks_long == 1) ? 0 : AT_SYMLINK_NOFOLLOW;
+		&& conf.follow_symlinks_long == 1) ? 0 : AT_SYMLINK_NOFOLLOW;
 
 	while ((ent = readdir(dir))) {
 		const char *ename = ent->d_name;
