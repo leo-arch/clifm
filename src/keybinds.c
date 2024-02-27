@@ -2234,7 +2234,7 @@ set_keybinds_from_file(void)
 	rl_bind_keyseq(find_key("toggle-hidden"), rl_toggle_hidden_files);
 	rl_bind_keyseq(find_key("toggle-hidden2"), rl_toggle_hidden_files);
 	rl_bind_keyseq(find_key("toggle-long"), rl_toggle_long_view);
-	rl_bind_keyseq(find_key("toggle-follow-link"), rl_toggle_follow_link_long);
+	rl_bind_keyseq(find_key("toggle-follow-links-long"), rl_toggle_follow_link_long);
 	rl_bind_keyseq(find_key("toggle-light"), rl_toggle_light_mode);
 	rl_bind_keyseq(find_key("dirs-first"), rl_toggle_dirs_first);
 	rl_bind_keyseq(find_key("sort-previous"), rl_sort_previous);

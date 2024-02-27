@@ -914,7 +914,7 @@ toggle-hidden:\\M-i\n\
 toggle-hidden2:\\M-.\n\
 toggle-light:\\M-y\n\
 toggle-long:\\M-l\n\
-toggle-follow-link:\\M-+\n\
+toggle-follow-links-long:\\M-+\n\
 toggle-max-name-len:\\C-\\M-l\n\
 toggle-disk-usage:\\C-\\M-i\n\
 toggle-virtualdir-full-paths:\\M-w\n\
