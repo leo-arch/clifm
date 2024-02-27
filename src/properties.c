@@ -1686,7 +1686,7 @@ err_no_file(const char *filename, const char *target, const int errnum)
 
 	if (*target) {
 		xerror(_("%s: %s %s->%s %s: Broken symbolic link\n"),
-			errname, filename, mi_c, df_c);
+			errname, filename, mi_c, df_c, target);
 	} else {
 		xerror("%s: '%s': %s\n", errname, filename, strerror(errnum));
 	}
