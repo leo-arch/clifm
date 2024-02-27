@@ -13,9 +13,9 @@ _clifm ()
     local -a opts
     opts=(
         -a
-        --no-hidden
-        -A
         --show-hidden
+        -A
+        --no-hidden
         -b
         --bookmarks-file
         -c
@@ -27,9 +27,9 @@ _clifm ()
         -E
         --eln-use-workspace-color
         -f
-        --no-dirs-first
-        -F
         --dirs-first
+        -F
+        --no-dirs-first
         -g
         --pager
         -G
@@ -45,15 +45,15 @@ _clifm ()
         -k
         --keybindings-file
         -l
-        --no-long-view
-        -L
         --long-view
+        -L
+        --follow-symlinks-long
         -m
         --dirhist-map
         -o
-        --no-autols
-        -O
         --autols
+        -O
+        --no-autols
         -p
         --path
         -P
