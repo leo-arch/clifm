@@ -244,7 +244,7 @@ For a complete description please consult our [Wiki](https://github.com/leo-arch
 
 * `Development`
   - Dereference symbolic links in long view via `-L,--follow-symlinks-long`.
-  - Toggle `follow-symlinks-long` via the [`k` command](https://github.com/leo-arch/clifm/wiki/Introduction#k) and the <kbd>Alt-+</kbd> keybinding.
+  - Toggle `follow-symlinks-long` via the [`k` command](https://github.com/leo-arch/clifm/wiki/Introduction#k) and the <kbd>Alt-+</kbd> keybinding (edit your keybindings file -via `kb edit`- and add this line to enable this new keybinding: `toggle-follow-links-long:\M-+`).
   - [Support for `.hidden` files, including wildcards](https://github.com/leo-arch/clifm/wiki/Advanced#1b-hidden-files).
   - [Disable the group ID field in long view](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode).
   - [Hard links number in long view](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode).
