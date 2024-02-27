@@ -794,6 +794,8 @@ set_long_attribs(const filesn_t n, const struct stat *attr)
 #endif /* ST_BTIME_LIGHT */
 		default: file_info[n].ltime = attr->st_mtime; break;
 		}
+
+		file_info[n].linkn = attr->st_nlink;
 	}
 
 	if (conf.full_dir_size == 1 && file_info[n].dir == 1
