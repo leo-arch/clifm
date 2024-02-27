@@ -1295,6 +1295,8 @@ T}	All .txt files (CWD)
 .TP
 \fBAlt\-l:\fR Toggle long view mode on/off
 .TP
+\fBAlt\-+:\fR Toggle follow links (long view only)
+.TP
 \fBAlt\-g:\fR Toggle list\-directories\-first on/off
 .TP
 \fBAlt\-,:\fR Toggle list only directories on/off
