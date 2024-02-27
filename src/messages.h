@@ -1459,6 +1459,7 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  hh, hidden         Toggle hidden files on/off\n\
  history            Manage the commands history\n\
  icons              Set icons on/off\n\
+ k                  Toggle follow links (long view only)\n\
  j                  Jump to a visited directory\n\
  kb, keybinds       Manage keybindings\n\
  le                 Edit symbolic link target\n\
@@ -1516,6 +1517,7 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  M-q           Delete the last entered word\n\
  M-g           Toggle list directories first on/off\n\
  M-l           Toggle long/detail view mode on/off\n\
+ M-+           Toggle follow links (long view only)\n\
  M-.           Toggle hidden files on/off\n\
  M-,           Toggle list only directories on/off\n\
  M--           Preview files in the current directory (requires fzf)\n\
