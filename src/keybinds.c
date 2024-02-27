@@ -957,6 +957,34 @@ rl_toggle_long_view(int count, int key)
 }
 
 int
+rl_toggle_follow_link_long(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	if (kbind_busy == 1 || conf.long_view == 0)
+		return FUNC_SUCCESS;
+
+#ifndef _NO_SUGGESTIONS
+	if (suggestion.printed && suggestion_buf)
+		free_suggestion();
+#endif /* !_NO_SUGGESTIONS */
+
+	xargs.follow_symlinks_long = xargs.follow_symlinks_long == 1 ? 0 : 1;
+
+	if (conf.autols == 1) {
+		if (conf.clear_screen == 0)
+		/* Without this putchar(), the first entries of the directories
+		 * list are printed in the prompt line. */
+			putchar('\n');
+		reload_dirlist();
+	}
+
+	print_reload_msg(_("Follow links %s\n"),
+		xargs.follow_symlinks_long == 1 ? _("enabled") : _("disabled"));
+	xrl_reset_line_state();
+	return FUNC_SUCCESS;
+}
+
+int
 rl_toggle_dirs_first(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
@@ -2206,6 +2234,7 @@ set_keybinds_from_file(void)
 	rl_bind_keyseq(find_key("toggle-hidden"), rl_toggle_hidden_files);
 	rl_bind_keyseq(find_key("toggle-hidden2"), rl_toggle_hidden_files);
 	rl_bind_keyseq(find_key("toggle-long"), rl_toggle_long_view);
+	rl_bind_keyseq(find_key("toggle-follow-link"), rl_toggle_follow_link_long);
 	rl_bind_keyseq(find_key("toggle-light"), rl_toggle_light_mode);
 	rl_bind_keyseq(find_key("dirs-first"), rl_toggle_dirs_first);
 	rl_bind_keyseq(find_key("sort-previous"), rl_sort_previous);
@@ -2299,6 +2328,7 @@ set_default_keybinds(void)
 	rl_bind_keyseq("\\M-i", rl_toggle_hidden_files);
 	rl_bind_keyseq("\\M-.", rl_toggle_hidden_files);
 	rl_bind_keyseq("\\M-l", rl_toggle_long_view);
+	rl_bind_keyseq("\\M-+", rl_toggle_follow_link_long);
 	rl_bind_keyseq("\\M-y", rl_toggle_light_mode);
 	rl_bind_keyseq("\\M-g", rl_toggle_dirs_first);
 	rl_bind_keyseq("\\M-z", rl_sort_previous);
