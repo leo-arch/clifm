@@ -1990,6 +1990,25 @@ is_write_cmd(const char *cmd)
 	return 0;
 }
 
+static int
+toggle_follow_links(void)
+{
+	if (conf.long_view == 0) {
+		puts(_("k: Not in long view"));
+		return FUNC_SUCCESS;
+	}
+
+	xargs.follow_symlinks_long = xargs.follow_symlinks_long == 1 ? 0 : 1;
+
+	if (conf.autols == 1)
+		reload_dirlist();
+
+	print_reload_msg(_("Follow links %s\n"), xargs.follow_symlinks_long == 1
+		? _("enabled") : _("disabled"));
+
+	return FUNC_SUCCESS;
+}
+
 /* Take the command entered by the user, already splitted into substrings
  * by parse_input_str(), and call the corresponding function. Return zero
  * in case of success and one in case of error
@@ -2237,6 +2256,10 @@ exec_cmd(char **comm)
 	else if (*comm[0] == 'l' && (comm[0][1] == 'v' || comm[0][1] == 'l')
 	&& !comm[0][2])
 		return (exit_code = long_view_function(comm[1]));
+
+	else if (*comm[0] == 'k' && !comm[0][1]) {
+		return (exit_code = toggle_follow_links());
+	}
 
 	/*    ############# PREVIEW FILES ##################     */
 	else if (*comm[0] == 'v' && strcmp(comm[0], "view") == 0) {

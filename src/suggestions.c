@@ -100,6 +100,7 @@ check_int_cmd_desc(const char *s, const size_t l)
 		if (*s == 'd') return D_DESC;
 		if (*s == 'f') return F_DESC;
 		if (*s == 'j') return J_DESC;
+		if (*s == 'k') return K_DESC;
 		if (*s == 'l') return L_DESC;
 		if (*s == 'm') return M_DESC;
 		if (*s == 'n') return N_DESC;

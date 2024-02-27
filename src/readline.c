@@ -1442,6 +1442,7 @@ int_cmds_generator(const char *text, int state)
 		"history (manage the commands history)",
 		"icons   (set icons on/off)",
 		"j       (jump to a visited directory)",
+		"k       (toggle follow links - long view only)",
 		"kb      (manage keybindings)",
 		"l       (create a symbolic link)",
 		"le      (edit a symbolic link)",
