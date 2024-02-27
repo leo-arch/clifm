@@ -129,6 +129,7 @@ print_tips(const int all)
 		"Get a brief description for each CliFM command: 'cmd<TAB>'",
 		"Print the currently used color codes: 'colors'",
 		"Toggle hidden files on/off: 'hh' or Alt-.",
+		"Toggle follow-links (long view only) on/off: 'k' or Alt-+",
 		"Go to the root directory: Alt-r",
 		"Go to the home directory: Alt-e (or just 'cd')",
 		"Open and edit the current color scheme file: F8 (or 'cs edit')",
