@@ -256,7 +256,7 @@ For a complete description please consult our [Wiki](https://github.com/leo-arch
     - `-a` enables hidden files and `-A` disables it
     - `-f` enables dirs-first and `-F` disables it
     - `-l` enables long-view and
-    - `-L` follow symbolic links in long view (lonf form: `--follow-symlinks-long`)
+    - `-L` follow symbolic links in long view (short for `--follow-symlinks-long`)
 	- `-o` enables autocd and `-O` disables it
 * `1.17 (Lechuck)`
   - [Allow properties fields order customization in long view](https://github.com/leo-arch/clifm/wiki/Common-Operations#file-details).
