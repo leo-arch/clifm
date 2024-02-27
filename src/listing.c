@@ -2847,6 +2847,10 @@ list_dir(void)
 
 	file_info = xnmalloc(ENTRY_N + 2, sizeof(struct fileinfo));
 
+	const int stat_flag =
+		(follow_symlinks == 1 && conf.long_view == 1
+		&& xargs.follow_symlinks_long == 1) ? 0 : AT_SYMLINK_NOFOLLOW;
+
 	while ((ent = readdir(dir))) {
 		const char *ename = ent->d_name;
 		/* Skip self and parent directories */
@@ -2888,7 +2892,7 @@ list_dir(void)
 
 		const int stat_ok =
 			((virtual_dir == 1 ? vt_stat(fd, ent->d_name, &attr)
-			: fstatat(fd, ename, &attr, AT_SYMLINK_NOFOLLOW)) == 0);
+			: fstatat(fd, ename, &attr, stat_flag)) == 0);
 
 		if (stat_ok == 0) {
 			if (virtual_dir == 1)

@@ -1393,6 +1393,7 @@ struct param_t {
 	int dirs_first;
 	int files_counter;
 	int follow_symlinks;
+	int follow_symlinks_long;
 	int full_dir_size;
 	int fuzzy_match;
 	int fuzzy_match_algo;

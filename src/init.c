@@ -1703,6 +1703,7 @@ unset_xargs(void)
 	xargs.dirs_first = UNSET;
 	xargs.files_counter = UNSET;
 	xargs.follow_symlinks = UNSET;
+	xargs.follow_symlinks_long = UNSET;
 	xargs.full_dir_size = UNSET;
 	xargs.fuzzy_match = UNSET;
 	xargs.fuzzy_match_algo = UNSET;
