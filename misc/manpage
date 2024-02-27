@@ -822,6 +822,9 @@ An alternative way of navigating the jump database is using the jumper plugin (l
 .sp
 Take a look at the \fIdh\fR command as well.
 .TP
+.B k
+If running in long view, toggle follow-links (\fIAlt\-+\fR is also available). See the \fI\-L,\-\-follow\-symlinks\-long\fR command line switch.
+.TP
 .B kb, keybinds \fR[\fIlist\fR] [\fIedit\fR [\fIAPP\fR]] [\fIreset\fR] [\fIreadline\fR]
 with no argument (or if the argument is \fIlist\fR), prints the current keyboard codes and their associated functions. To edit the keybindings file, use the \fIedit\fR option (the file will be opened with APP, if specified, or with the default associated application otherwise). If you somehow messed up your keybindings, use the \'reset\' option to create a fresh keybindings file with the default values. To list readline keybindings, use the \fIreadline\fR option. Bear in mind that these keybindings are not provided by \fBclifm\fR, but by readline itself, and as such depend on the system settings (they can be customized however via the \fI~/.inputrc\fR file).
 .TP
