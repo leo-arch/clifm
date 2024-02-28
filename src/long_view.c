@@ -59,6 +59,9 @@
 /* Files counter */
 #define FC_STR_LEN    ((MAX_COLOR * 2) + 32)
 
+/* File allocated blocks */
+#define BLK_STR_LEN   ((MAX_COLOR * 2) + 32)
+
 static char *
 get_ext_info_long(const char *name, const size_t name_len, int *trim,
 	size_t *ext_len)
@@ -484,6 +487,24 @@ construct_links_str(const struct fileinfo *props, char *links_str, const int max
 		dk_c, props->linkn > 1 ? BOLD : "", max, (uintmax_t)props->linkn, df_c);
 }
 
+static void
+construct_blocks_str(const struct fileinfo *props, char *blk_str, const int max)
+{
+	if (prop_fields.blocks == 0) {
+		*blk_str = '\0';
+		return;
+	}
+
+	if (props->stat_err == 1) {
+		snprintf(blk_str, BLK_STR_LEN, "\x1b[0m%*s%s",
+			max, UNKNOWN_STR, df_c);
+		return;
+	}
+
+	snprintf(blk_str, BLK_STR_LEN, "\x1b[0m%s%*jd%s",
+		db_c, max, (intmax_t)props->blocks, df_c);
+}
+
 /* Compose the properties line for the current file name.
  * This function is called by list_dir(), in listing.c, for each file name
  * in the current directory when running in long view mode (after
@@ -522,6 +543,9 @@ print_entry_props(const struct fileinfo *props, const struct maxes_t *maxes,
 	static char ino_str[INO_STR_LEN];
 	construct_inode_num(props, ino_str, maxes->inode);
 
+	static char blocks_str[BLK_STR_LEN];
+	construct_blocks_str(props, blocks_str, maxes->blocks);
+
 	static char fc_str[FC_STR_LEN];
 	construct_files_counter(props, fc_str, maxes->files_counter);
 
@@ -539,6 +563,7 @@ print_entry_props(const struct fileinfo *props, const struct maxes_t *maxes,
 		int print_space = prop_fields_str[i + 1] ? 1 : 0;
 
 		switch (prop_fields_str[i]) {
+		case 'B': if (*blocks_str) fputs(blocks_str, stdout); break;
 		case 'f': fputs(fc_str, stdout); break;
 		case 'd': if (*ino_str) fputs(ino_str, stdout); break;
 		case 'p': /* fallthrough */

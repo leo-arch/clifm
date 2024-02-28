@@ -774,10 +774,6 @@ get_longest_filename(const filesn_t n, const size_t pad)
 static void
 set_long_attribs(const filesn_t n, const struct stat *attr)
 {
-	file_info[n].uid = attr->st_uid;
-	file_info[n].gid = attr->st_gid;
-	file_info[n].mode = attr->st_mode;
-
 	if (conf.light_mode == 1) {
 		switch (prop_fields.time) {
 		case PROP_TIME_ACCESS: file_info[n].ltime = attr->st_atime; break;
@@ -792,7 +788,11 @@ set_long_attribs(const filesn_t n, const struct stat *attr)
 		default: file_info[n].ltime = attr->st_mtime; break;
 		}
 
+		file_info[n].blocks = attr->st_blocks;
 		file_info[n].linkn = attr->st_nlink;
+		file_info[n].mode = attr->st_mode;
+		file_info[n].uid = attr->st_uid;
+		file_info[n].gid = attr->st_gid;
 	}
 
 	if (conf.full_dir_size == 1 && file_info[n].dir == 1
@@ -875,6 +875,12 @@ compute_maxes(void)
 			if (t > maxes.links)
 				maxes.links = t;
 		}
+
+		if (prop_fields.blocks == 1) {
+			t = DIGINUM((int)file_info[i].blocks);
+			if (t > maxes.blocks)
+				maxes.blocks = t;
+		}
 	}
 
 
@@ -915,7 +921,7 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad,
 	int space_left = (int)term_cols - (prop_fields.len + have_xattr
 		+ maxes.files_counter + maxes.size + maxes.links + maxes.inode
 		+ maxes.id_user + (prop_fields.no_group == 0 ? maxes.id_group : 0)
-		+ (conf.icons == 1 ? 3 : 0));
+		+ maxes.blocks + (conf.icons == 1 ? 3 : 0));
 
 	if (space_left < conf.min_name_trim)
 		space_left = conf.min_name_trim;
@@ -2457,17 +2463,17 @@ load_file_gral_info(const struct stat *a, const filesn_t n)
 
 	check_extra_file_types(&file_info[n].type, a);
 
-	file_info[n].sel = check_seltag(a->st_dev, a->st_ino, a->st_nlink, n);
+	file_info[n].blocks = a->st_blocks;
 	file_info[n].inode = a->st_ino;
 	file_info[n].linkn = a->st_nlink;
+	file_info[n].mode = a->st_mode;
+	file_info[n].sel = check_seltag(a->st_dev, a->st_ino, a->st_nlink, n);
 	file_info[n].size = FILE_TYPE_NON_ZERO_SIZE(a->st_mode) ? FILE_SIZE(*a) : 0;
 	file_info[n].uid = a->st_uid;
 	file_info[n].gid = a->st_gid;
 
 	if (conf.long_view == 1 && prop_fields.ids == PROP_ID_NAME)
 		get_id_names(n);
-
-	file_info[n].mode = a->st_mode;
 
 #if defined(LINUX_FILE_XATTRS)
 	if (file_info[n].type != DT_LNK

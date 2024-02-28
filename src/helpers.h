@@ -786,7 +786,7 @@ extern time_t curdir_mtime;
 #define FILTER_MIME_TYPE 3 /* @query */
 
 /* Macros for properties string fields in long view */
-#define PROP_FIELDS_SIZE 9 /* Nine available fields */
+#define PROP_FIELDS_SIZE 10 /* Ten available fields */
 
 #define PERM_SYMBOLIC 1
 #define PERM_NUMERIC  2
@@ -1277,6 +1277,8 @@ struct fileinfo {
 	gid_t gid;
 	mode_t mode;   /* Store st_mode (for long view mode) */
 	mode_t type;   /* Store d_type value */
+	int pad2;
+	blkcnt_t blocks;
 	int dir;
 	int eln_n;     /* Amount of digits in ELN */
 	int exec;
@@ -1287,7 +1289,6 @@ struct fileinfo {
 	int du_status; /* Exit status of du(1) for dir full sizes */
 	int utf8;      /* Name contains at least one UTF-8 character */
 	int stat_err;  /* stat(2) failed for this entry */
-	int pad2;
 #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__DragonFly__) \
 || defined(__OpenBSD__) || defined(__arm__)
 	int pad3;
@@ -1306,7 +1307,7 @@ struct maxes_t {
 	int links;
 	int name;
 	int size;
-	int pad0;
+	int blocks;
 };
 
 struct devino_t {
@@ -1587,11 +1588,13 @@ struct props_t {
 	int len; /* Approx len of the entire properties string taking into account
 			  * the all fields and their length. */
 	int links; /* File links */
+	int blocks;
 	int no_group; /* Should we display group if IDS is set? */
 	int perm; /* File permissions: either NUMERIC or SYMBOLIC */
 	int size; /* File size: either HUMAN or BYTES */
 	int time; /* Time: either ACCESS, MOD, CHANGE, or BIRTH */
 	int xattr; /* Extended attributes */
+	int pad0;
 };
 extern struct props_t prop_fields;
 
@@ -1996,6 +1999,7 @@ extern char
 	hw_c[MAX_COLOR], /* Backslash (aka whack) */
 
 	/* File properties */
+	db_c[MAX_COLOR],  /* File allocated blocks */
 	dd_c[MAX_COLOR],  /* Date (fixed color: no shading) */
 	de_c[MAX_COLOR],  /* Inode number */
 	dg_c[MAX_COLOR],  /* UID, GID */

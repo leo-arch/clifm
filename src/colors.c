@@ -910,6 +910,7 @@ reset_iface_colors(void)
 	*ws7_c = '\0';
 	*ws8_c = '\0';
 
+	*db_c = '\0';
 	*dd_c = '\0';
 	*de_c = '\0';
 	*dg_c = '\0';
@@ -1250,7 +1251,9 @@ set_iface_colors(char **colors, const size_t num_colors)
 			set_color(colors[i] + 3, bm_c, RL_PRINTABLE);
 
 		else if (*colors[i] == 'd') {
-			if (colors[i][1] == 'd' && colors[i][2] == '=')
+			if (colors[i][1] == 'b' && colors[i][2] == '=')
+				set_color(colors[i] + 3, db_c, RL_PRINTABLE);
+			else if (colors[i][1] == 'd' && colors[i][2] == '=')
 				set_color(colors[i] + 3, dd_c, RL_PRINTABLE);
 			else if (colors[i][1] == 'e' && colors[i][2] == '=')
 				set_color(colors[i] + 3, de_c, RL_PRINTABLE);
@@ -1755,6 +1758,7 @@ set_default_colors_256(void)
 	/* Properties */
 /*	if (!*dd_c) // Date color unset: let's use shades
 		xstrsncpy(dd_c, DEF_DD_C, sizeof(dd_c)); */
+	if (!*db_c) xstrsncpy(db_c, DEF_DB_C256, sizeof(db_c));
 	if (!*de_c) xstrsncpy(de_c, DEF_DE_C256, sizeof(de_c));
 	if (!*dg_c) xstrsncpy(dg_c, DEF_DG_C256, sizeof(dg_c));
 	if (!*dk_c) xstrsncpy(dk_c, DEF_DK_C256, sizeof(dk_c));
@@ -1922,6 +1926,7 @@ set_default_colors(void)
 	/* Interface */
 /*	if (!*dd_c) // Date color unset: let's use shades
 		xstrsncpy(dd_c, DEF_DD_C, sizeof(dd_c)); */
+	if (!*db_c) xstrsncpy(db_c, DEF_DB_C, sizeof(db_c));
 	if (!*de_c) xstrsncpy(de_c, DEF_DE_C, sizeof(de_c));
 	if (!*dg_c) xstrsncpy(dg_c, DEF_DG_C, sizeof(dg_c));
 	if (!*dk_c) xstrsncpy(dk_c, DEF_DK_C, sizeof(dk_c));
@@ -2548,6 +2553,7 @@ disable_bold(void)
 	remove_bold_attr(hw_c);
 
 	/* File properties */
+	remove_bold_attr(db_c);
 	remove_bold_attr(dd_c);
 	remove_bold_attr(de_c);
 	remove_bold_attr(dg_c);

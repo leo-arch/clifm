@@ -387,6 +387,7 @@ char
 	hv_c[MAX_COLOR], /* Variables: $ */
 	hw_c[MAX_COLOR], /* Backslash (aka whack) */
 
+	db_c[MAX_COLOR],  /* File allocated blocks */
 	dd_c[MAX_COLOR],  /* Date (fixed color: no shading) */
 	de_c[MAX_COLOR],  /* Inode number */
 	dg_c[MAX_COLOR],  /* UID, GID */
