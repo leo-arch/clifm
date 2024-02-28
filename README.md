@@ -247,6 +247,7 @@ For a complete description please consult our [Wiki](https://github.com/leo-arch
   - Toggle `follow-symlinks-long` via the [`k` command](https://github.com/leo-arch/clifm/wiki/Introduction#k) and the <kbd>Alt-+</kbd> keybinding (edit your keybindings file -via `kb edit`- and add this line to enable this new keybinding: `toggle-follow-links-long:\M-+`).
   - [Support for `.hidden` files, including wildcards](https://github.com/leo-arch/clifm/wiki/Advanced#1b-hidden-files).
   - [Disable the group ID field in long view](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode).
+  - [File allocated blocks in long view](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode).
   - [Hard links number in long view](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode).
   - [Birth time support in long view](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode).
   - [User/group ID **names** (instead of just numbers) in long view](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode).
