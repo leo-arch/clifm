@@ -410,9 +410,18 @@ construct_files_counter(const struct fileinfo *props, char *fc_str,
 }
 
 static void
-set_file_type_and_color(const mode_t mode, char *type, char **color)
+set_file_type_and_color(const struct fileinfo *props, char *type, char **color)
 {
-	switch (mode & S_IFMT) {
+	struct stat a;
+	if (props->stat_err == 1 && conf.follow_symlinks_long == 1
+	&& conf.long_view == 1 && follow_symlinks == 1
+	&& lstat(props->name, &a) == 0 && S_ISLNK(a.st_mode)) {
+		*type = LNK_PCHR;
+		*color = conf.colorize == 1 ? ln_c : df_c;
+		return;
+	}
+
+	switch (props->mode & S_IFMT) {
 	case S_IFREG:  *type = REG_PCHR; break;
 	case S_IFDIR:  *type = DIR_PCHR; *color = di_c; break;
 	case S_IFLNK:  *type = LNK_PCHR; *color = ln_c; break;
@@ -486,7 +495,7 @@ print_entry_props(const struct fileinfo *props, const struct maxes_t *maxes,
 	char file_type = 0; /* File type indicator */
 	char *ctype = dn_c; /* Color for file type indicator */
 
-	set_file_type_and_color(props->mode, &file_type, &ctype);
+	set_file_type_and_color(props, &file_type, &ctype);
 
 	/* Let's compose each properties field individually to be able to
 	 * print only the desired ones. This is specified via the PropFields
