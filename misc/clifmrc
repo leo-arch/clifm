@@ -84,7 +84,7 @@
 # true (you can also use the --sort-reverse option or the 'st' command).
 ;SortReverse=false
 
-# List file properties next to file names instead of just file names.
+# Display extended file metadata next to file names (long listing format).
 ;LongViewMode=false
 
 # Properties fields to be displayed for each file name in long view mode:

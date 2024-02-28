@@ -1266,7 +1266,7 @@ Page Down: Advance one page\nq: Stop pagging\n"
 \n -j FILE  Run the 'p' command on FILE and exit\
 \n -J FILE  Run the 'pp' command on FILE and exit\
 \n -k FILE  Set an alternative keybindings file\
-\n -l       List files in long view (file details)\
+\n -l       Display extended file metadata (long listing format)\
 \n -L       Follow symbolic links when running in long view\
 \n -m       Enable fuzzy matching\
 \n -M       Disable colors\
@@ -1313,7 +1313,7 @@ Page Down: Advance one page\nq: Stop pagging\n"
 \n  -i, --no-case-sensitive\t Ignore case distinctions when listing files (default)\
 \n  -I, --case-sensitive\t\t Do not ignore case distinctions when listing files\
 \n  -k, --keybindings-file=FILE\t Set an alternative keybindings file\
-\n  -l, --long-view\t\t Enable long/detail view mode\
+\n  -l, --long-view\t\t Display extended file metadata (long listing format)\
 \n  -L, --follow-symlinks-long\t Follow symbolic links when running in long view\
 \n  -m, --dirhist-map\t\t Enable the directory history map\
 \n  -o, --autols\t\t\t List files automatically (default)\

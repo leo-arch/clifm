@@ -1517,14 +1517,14 @@ create_main_config_file(char *file)
 		"# How to list files: 0 = vertically (like ls(1) would), 1 = horizontally\n\
 ;ListingMode=%d\n\n"
 
-		"# List files automatically after changing current directory\n\
+		"# List files automatically after changing the current directory.\n\
 ;AutoLs=%s\n\n"
 
-		"# Send errors, warnings, and notices to the notification daemon?\n\
+		"# Send errors, warnings, and notices to the notification daemon.\n\
 ;DesktopNotifications=%s\n\n"
 
 	    "# Print a map of the current position in the directory\n\
-# history list, showing previous, current, and next entries\n\
+# history list, showing previous, current, and next entries.\n\
 ;DirhistMap=%s\n\n"
 
 		"# Use a regex expression to filter file names when listing files.\n\
@@ -1583,7 +1583,7 @@ create_main_config_file(char *file)
 # Print %s's logo screen at startup\n\
 ;SplashScreen=%s\n\n\
 ;ShowHiddenFiles=%s\n\n\
-# List file properties next to file names instead of just file names\n\
+# Display extended file metadata next to file names (long listing format)\n\
 ;LongViewMode=%s\n\
 # Properties fields to be printed in long view mode\n\
 # f = files counter for directories\n\
