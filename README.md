@@ -243,15 +243,17 @@ For a complete description please consult our [Wiki](https://github.com/leo-arch
 <summary>Click here to expand</summary>
 
 * `Development`
-  - Dereference symbolic links in long view via `-L,--follow-symlinks-long`.
-  - Toggle `follow-symlinks-long` via the [`k` command](https://github.com/leo-arch/clifm/wiki/Introduction#k) and the <kbd>Alt-+</kbd> keybinding (edit your keybindings file -via `kb edit`- and add this line to enable this new keybinding: `toggle-follow-links-long:\M-+`).
   - [Support for `.hidden` files, including wildcards](https://github.com/leo-arch/clifm/wiki/Advanced#1b-hidden-files).
-  - [Disable the group ID field in long view](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode).
-  - [Hard links number in long view](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode).
-  - [Birth time support in long view](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode).
-  - [User/group ID **names** (instead of just numbers) in long view](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode).
-  - [Customize long view fields via `--prop-fields`](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode).
-  - [Allow double spacing for fields in long view](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode).
+  - Several improvements to the long view
+    - Dereference symbolic links via `-L,--follow-symlinks-long`.
+    - Toggle `follow-symlinks-long` via the [`k` command](https://github.com/leo-arch/clifm/wiki/Introduction#k) and the <kbd>Alt-+</kbd> keybinding (edit your keybindings file -via `kb edit`- and add this line to enable this new keybinding: `toggle-follow-links-long:\M-+`).
+    - [Disable the group ID field](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode).
+    - [File allocated blocks support](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode).
+    - [Hard links number support](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode).
+    - [Birth time support](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode).
+    - [User/group ID **names** (instead of just numbers)](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode).
+    - [Customize displayed fields via `--prop-fields`](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode).
+    - [Allow double spacing for fields](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode).
   - Since **1)** it was unintuitive to have `-a` and `-l` options to **disable** hidden files and long view respectively (instead of enabling these features, like most files listers do (ex: `ls`, `exa`, `eza`, `lsd`)), and **2)** we were using uppercase options sometimes to enable and sometimes to disable features (which is not consistent), we made the following changes:
     - `-a` enables hidden files and `-A` disables it
     - `-f` enables dirs-first and `-F` disables it
