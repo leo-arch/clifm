@@ -88,9 +88,10 @@
 ;LongViewMode=false
 
 # Properties fields to be displayed for each file name in long view mode:
-# f: files counter (for directories)
-# d: inode number
-# l: number of hard links
+# f = files counter (for directories)
+# B = file allocated blocks
+# d = inode number
+# l = number of hard links
 # p|n = permissions: either symbolic (p) or numeric/octal (n)
 # i|I = user/group IDs: either as number (i) or name (I)
 # G = if i|I is set, don't print groups

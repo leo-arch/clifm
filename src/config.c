@@ -1587,6 +1587,7 @@ create_main_config_file(char *file)
 ;LongViewMode=%s\n\
 # Properties fields to be printed in long view mode\n\
 # f = files counter for directories\n\
+# B = file allocated blocks\n\
 # d = inode number\n\
 # l = number of hard links\n\
 # p|n = permissions: either symbolic (p) or numeric/octal (n)\n\
