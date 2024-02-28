@@ -1580,6 +1580,7 @@ The following codes are used for different interface elements (in the \fIInterfa
  tx = command line text (regular prompt)
 
  \fBFile properties\fR
+ db  = file allocated blocks
  dd  = last access/change/modification time \fB(1)\fR
  de  = file inode number (long view only)
  dg  = file ID (UID, GID) whenever the current user owns the file or is in the file\'s group
