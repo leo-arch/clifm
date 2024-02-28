@@ -579,6 +579,12 @@ For information about the matching algorithm consult the manpage\n\n\
   from the database ('je' or 'j --edit'). Note that if the directory\n\
   is in the directory history, it won't be removed from the database."
 
+#define K_USAGE "Toggle follow-links in long view mode\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
+  k\n\n\
+If enabled, when running in long view information for the file a symbolic\n\
+link points to (instead of for the link itself) is displayed."
+
 #define KB_USAGE "Manage key bindings\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   kb, keybinds [list | edit [APP] | reset | readline]\n\n\

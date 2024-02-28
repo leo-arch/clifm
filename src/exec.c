@@ -1991,8 +1991,13 @@ is_write_cmd(const char *cmd)
 }
 
 static int
-toggle_follow_links(void)
+toggle_follow_links(const char *arg)
 {
+	if (arg && IS_HELP(arg)) {
+		puts(K_USAGE);
+		return FUNC_SUCCESS;
+	}
+
 	if (conf.long_view == 0) {
 		puts(_("k: Not in long view"));
 		return FUNC_SUCCESS;
@@ -2258,7 +2263,7 @@ exec_cmd(char **comm)
 		return (exit_code = long_view_function(comm[1]));
 
 	else if (*comm[0] == 'k' && !comm[0][1]) {
-		return (exit_code = toggle_follow_links());
+		return (exit_code = toggle_follow_links(comm[1]));
 	}
 
 	/*    ############# PREVIEW FILES ##################     */
