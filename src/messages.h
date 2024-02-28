@@ -1396,7 +1396,8 @@ and paths\
 CliFM's built-in opener\
 \n      --preview=FILE\t\t Display a preview of FILE (via Shotgun) and exit\
 \n      --print-sel\t\t Keep the list of selected files in sight\
-\n      --prop-fields=FORMAT\t Set a custom format string for long view\
+\n      --prop-fields=FORMAT\t Set a custom format string for the long view (see \
+PropFields in the config file)\
 \n      --readonly\t\t Disable internal commands able to modify the file system\
 \n      --rl-vi-mode\t\t Set readline to vi editing mode (defaults to emacs mode)\
 \n      --secure-cmds\t\t Filter commands to prevent command injection\
