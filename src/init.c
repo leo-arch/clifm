@@ -280,7 +280,8 @@ init_conf_struct(void)
 static void
 get_sysusers(void)
 {
-	if (sys_users)
+	if (sys_users || xargs.stat > 0 || prop_fields.ids != PROP_ID_NAME
+	|| (xargs.list_and_quit == 1 && conf.long_view != 1))
 		return;
 
 #if defined(__ANDROID__)
@@ -330,7 +331,9 @@ get_sysusers(void)
 static void
 get_sysgroups(void)
 {
-	if (sys_groups || prop_fields.no_group == 1)
+	if (sys_groups || prop_fields.ids != PROP_ID_NAME
+	|| prop_fields.no_group == 1 || xargs.stat > 0
+	|| (xargs.list_and_quit == 1 && conf.long_view != 1))
 		return;
 
 	setgrent();
