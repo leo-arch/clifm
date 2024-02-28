@@ -961,7 +961,7 @@ int
 rl_toggle_follow_link_long(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	if (kbind_busy == 1 || conf.long_view == 0)
+	if (kbind_busy == 1 || conf.long_view == 0 || conf.light_mode == 1)
 		return FUNC_SUCCESS;
 
 #ifndef _NO_SUGGESTIONS

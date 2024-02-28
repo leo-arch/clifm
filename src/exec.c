@@ -2003,6 +2003,11 @@ toggle_follow_links(const char *arg)
 		return FUNC_SUCCESS;
 	}
 
+	if (conf.light_mode == 1) {
+		puts(_("k: Feature not available in light mode"));
+		return FUNC_SUCCESS;
+	}
+
 	conf.follow_symlinks_long = conf.follow_symlinks_long == 1 ? 0 : 1;
 
 	if (conf.autols == 1)
