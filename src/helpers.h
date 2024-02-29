@@ -1250,6 +1250,38 @@ struct human_size_t {
 
 /* Struct to store files information */
 struct fileinfo {
+/*	struct human_size_t human_size;
+	struct groups_t uid_i;
+	struct groups_t gid_i;
+	char *color;
+	char *ext_color;
+	char *ext_name;
+	char *icon;
+	char *icon_color;
+	char *name;
+	filesn_t filesn;
+	blkcnt_t blocks;
+	size_t len;    // File name len (columns needed to display file name)
+	size_t bytes;  // Bytes consumed by file name
+	time_t ltime;  // For long view mode
+	time_t time;
+	ino_t inode;
+	off_t size;
+	nlink_t linkn; // 4 bytes in Solaris
+	uid_t uid;
+	gid_t gid;
+	mode_t mode;   // Store st_mode (for long view mode)
+	mode_t type;   // Store d_type value
+	int dir;
+	int eln_n;     // Amount of digits in ELN
+	int exec;
+	int ruser;     // User read permission for dir
+	int symlink;
+	int sel;
+	int xattr;
+	int du_status; // Exit status of du(1) for dir full sizes
+	int utf8;      // Name contains at least one UTF-8 character
+	int stat_err;  // stat(2) failed for this entry */
 	char *color;
 	char *ext_color;
 	char *ext_name;
@@ -1260,41 +1292,41 @@ struct fileinfo {
 	struct human_size_t human_size;
 	char *name;
 	filesn_t filesn;
-	size_t len;    /* File name len (columns needed to display file name) */
-	size_t bytes;  /* Bytes consumed by file name */
-	time_t ltime;  /* For long view mode */
+	size_t len;    // File name len (columns needed to display file name)
+	size_t bytes;  // Bytes consumed by file name
+	time_t ltime;  // For long view mode
 	time_t time;
 	ino_t inode;
 #if defined(__TERMUX__)
 	int pad0;
-#endif /* __TERMUX__ */
+#endif // __TERMUX__
 	off_t size;
-	nlink_t linkn; /* 4 bytes in Solaris */
+	nlink_t linkn; // 4 bytes in Solaris
 #if !defined(__sun)
 	int pad1;
-#endif /* __sun */
+#endif // __sun
 	uid_t uid;
 	gid_t gid;
-	mode_t mode;   /* Store st_mode (for long view mode) */
-	mode_t type;   /* Store d_type value */
+	mode_t mode;   // Store st_mode (for long view mode)
+	mode_t type;   // Store d_type value
 #if !defined(__OpenBSD__) && !defined(__FreeBSD__) && !defined(__NetBSD__) \
 && !defined(__HAIKU__) && (!defined(__arm__) || defined(__TERMUX__))
 	int pad2;
 #endif
 	blkcnt_t blocks;
 	int dir;
-	int eln_n;     /* Amount of digits in ELN */
+	int eln_n;     // Amount of digits in ELN
 	int exec;
-	int ruser;     /* User read permission for dir */
+	int ruser;     // User read permission for dir
 	int symlink;
 	int sel;
 	int xattr;
-	int du_status; /* Exit status of du(1) for dir full sizes */
-	int utf8;      /* Name contains at least one UTF-8 character */
-	int stat_err;  /* stat(2) failed for this entry */
+	int du_status; // Exit status of du(1) for dir full sizes
+	int utf8;      // Name contains at least one UTF-8 character
+	int stat_err;  // stat(2) failed for this entry
 #if defined(__TERMUX__)
 	int pad3;
-#endif /* __TERMUX__ */
+#endif // __TERMUX__
 };
 
 extern struct fileinfo *file_info;

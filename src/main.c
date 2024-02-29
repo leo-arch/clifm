@@ -1179,6 +1179,25 @@ main(int argc, char *argv[])
 		exit(EINVAL);
 	}
 
+#ifdef DTYPES_CHECK
+	printf("human_size_t: %zu\n", sizeof(struct human_size_t));
+	printf("groups_t:     %zu\n", sizeof(struct groups_t));
+	printf("char *:       %zu\n", sizeof(char *));
+	printf("filesn_t:     %zu\n", sizeof(filesn_t));
+	printf("blkcnt_t:     %zu\n", sizeof(blkcnt_t));
+	printf("size_t:       %zu\n", sizeof(size_t));
+	printf("time_t:       %zu\n", sizeof(time_t));
+	printf("ino_t:        %zu\n", sizeof(ino_t));
+	printf("off_t:        %zu\n", sizeof(off_t));
+	printf("nlink_t:      %zu\n", sizeof(nlink_t));
+	printf("uid_t:        %zu\n", sizeof(uid_t));
+	printf("gid_t:        %zu\n", sizeof(gid_t));
+	printf("mode_t:       %zu\n", sizeof(mode_t));
+	printf("int:          %zu\n", sizeof(int));
+
+	press_any_key_to_continue(0);
+#endif
+
 	/* Make sure all initialization is made with restrictive permissions. */
 	const mode_t old_mask = umask(0077);
 
