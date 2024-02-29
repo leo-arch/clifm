@@ -496,8 +496,7 @@ construct_blocks_str(const struct fileinfo *props, char *blk_str, const int max)
 	}
 
 	if (props->stat_err == 1) {
-		snprintf(blk_str, BLK_STR_LEN, "\x1b[0m%*s%s",
-			max, UNKNOWN_STR, df_c);
+		snprintf(blk_str, BLK_STR_LEN, "\x1b[0m%*s%s", max, UNKNOWN_STR, df_c);
 		return;
 	}
 

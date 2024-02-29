@@ -67,9 +67,6 @@ struct jump_entry_t {
 	char *needle;
 	size_t keep;
 	size_t visits;
-#ifdef __arm__
-	char *pad0;
-#endif /* __arm__ */
 	time_t first;
 	time_t last;
 };
