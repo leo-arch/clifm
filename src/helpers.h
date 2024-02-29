@@ -1202,11 +1202,11 @@ extern struct kbinds_t *kbinds;
 /* Struct to store the dirjump database values */
 struct jump_t {
 	char *path;
+#if defined(__arm__) && !defined(__ANDROID__)
+	char *pad0;
+#endif /* __arm__ && !__ANDROID__ */
 	size_t len;
 	size_t visits;
-#ifdef __arm__
-	char *pad0;
-#endif /* __arm__ */
 	time_t first_visit;
 	time_t last_visit;
 	int keep;
