@@ -112,25 +112,20 @@
 # Number of spaces between fields in long view. Possible values: 1-2.
 ;PropFieldsGap=1
 
-# Format used to display timestamps in long view mode.
-# Consult strftime(3) for information about time format specifiers.
-# Defaults to "%b %e %H:%M" for recent files (< 6 months) and "%b %e  %Y"
+# Style used to print timestamps in long view mode.
+# Available styles: default, relative, iso, long-iso, full-iso, +FORMAT
+# FORMAT is interpreted like in strftime(3).
+# Defaults to "+%b %e %H:%M" for recent files (< 6 months) and "+%b %e  %Y"
 # for older files.
 # Examples:
-## ISO
-;TimeStyle="%Y-%m-%d"
-## Long ISO
-;TimeStyle="%Y-%m-%d %H:%M"
-## Full ISO
-;TimeStyle="%Y-%m-%d %H:%M:%S %z"
-## Legacy style (old versions)
-;TimeStyle="%F %T"
-## Relative time
-;TimeStyle=relative
+;TimeStyle="full-iso"
+;TimeStyle="relative"
+;TimeStyle="+%F %T"
 
-# Same as TimeStyle, but for the 'p/pp' command. Note that relative times
-# are not supported. Nano-second precision is available via the %N modifier.
-;PTimeStyle="%Y-%m-%d %H:%M:%S.%N %z"
+# Same as TimeStyle, but for the 'p/pp' command.
+# Available styles: default, iso, long-iso, full-iso, full-iso-nano, +FORMAT
+# Nano-second precision is available via the %N modifier.
+;PTimeStyle="+%Y-%m-%d %H:%M:%S.%N %z"
 
 # If running in long view, print directories full size (i.e. recursively).
 ;FullDirSize=false
