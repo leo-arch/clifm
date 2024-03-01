@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Feb 27, 2024" "clifm 1.17.10" "CLIFM Manual"
+.TH "CLIFM" "1" "Mar 1, 2024" "clifm 1.17.11" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -136,7 +136,7 @@ do not ignore case distinctions when listing files
 set an alternative keybindings file
 .TP
 \fB\-l\fR, \fB\-\-long\-view\fR
-print file extended metadata next to file names. By default, the following information is provided for each file: file name, files counter (for directories), file permissions (symbolic notation), owner and primary group (names), size (human readable), and last modification time. These fields can be customized via \fI\-\-prop\-fields\fR in the command line or the \fIPropFields\fR option in the configuration file (use \fITimeStyle\fR to customize timestamp format). To get more detailed information about files use the \fIp\fR command (see below).
+print file extended metadata next to file names. By default, the following information is provided for each file: file name, files counter (for directories), file permissions (symbolic notation), owner and primary group (names), size (human readable), and last modification time. These fields can be customized via \fI\-\-prop\-fields\fR in the command line or the \fIPropFields\fR option in the configuration file (use \fITimeStyle\fR to customize the timestamp format). To get more detailed information about files use the \fIp\fR command (see below).
 .TP
 \fB\-L\fR, \fB\-\-follow\-symlinks\-long\fR
 if running in long view, show information for the file symbolic links reference rather than for the symbolic links themselves
@@ -355,6 +355,9 @@ always print the list of selected files. Since this list could be quite extensiv
 \fB\-\-prop\-fields\fR=\fI\,FORMAT\/\fR
 set a custom format string for the long view mode. For information on how to construct this format string consult the \fIPropFields\fR option in the configuration file.
 .TP
+\fB\-\-ptime\-style\fR=\fI\,STYLE\/\fR
+time/date style used with the \fIp/pp\fR command and the \fI\-\-stat\fR[\fI\-full\fR] command line options. Available styles: \fBdefault\fR, \fBiso\fR, \fBlong-iso\fR, \fBfull-iso\fR, \fBfull\-iso\-nano\fR, \fB+FORMAT\fR. FORMAT is interpreted like in \fBstrftime\fR(3). Nano-second precision is available via the %N modifier (like in \fBdate\fR(1)).
+.TP
 \fB\-\-readonly\fR
 run in read\-only mode (internal commands able to modify the file system are disabled). Disabled commands are: ac, ad, bb, bl/bleach, br/bulk, c, dup, l, le, m, md, n/new, oc, paste, pc, r, rr, t/trash, tag, te, u/undel/untrash, and vv, plus the shell commands cp, rm, mv, ln, mkdir, rmdir, link, and unlink.  
 .TP
@@ -396,6 +399,9 @@ run the \fIpp\fR command on FILE(s) and exit. This must be the \fBlast option\fR
 .TP
 \fB\-\-stdtab\fR
 use the standard mode (readline\'s built\-in) for TAB completion
+.TP
+\fB\-\-time\-style\fR=\fI\,STYLE\/\fR
+time/date style used in long view. Available styles: \fBdefault\fR, \fBrelative\fR, \fBiso\fR, \fBlong-iso\fR, \fBfull-iso\fR, \fB+FORMAT\fR. FORMAT is interpreted like in \fBstrftime\fR(3).
 .TP
 \fB\-\-trash\-as\-rm\fR
 the \fIr\fR command executes the built-in \'trash\' (see the \fIt\fR command) instead of \fBrm\fR(1) to prevent accidental deletions
@@ -2857,6 +2863,12 @@ Terminal type for which output is to be prepared
 .TP
 .B FZF_DEFAULT_OPTS
 A quoted list of options to be passed to FZF (if used for TAB completion)
+.TP
+.B TIME_STYLE
+If set from neither \fI\-\-time\-style\fR nor \fITimeStyle\fR (in the configuration file), use this timestamp style for the long view
+.TP
+.B PTIME_STYLE
+If set from neither \fI\-\-ptime\-style\fR nor \fIPTimeStyle\fR (in the configuration file), use this timestamp style for the \fIp/pp\fR command and the \fI\-\-stat\fR/\fI\-\-stat\-full\fR command line options
 .TP
 .TP
 Except when running in stealth mode, \fBclifm\fR sets the following environment variables:
