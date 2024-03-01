@@ -384,10 +384,13 @@ construct_files_counter(const struct fileinfo *props, char *fc_str,
 	const int max)
 {
 	if (props->filesn > 0) {
-		snprintf(fc_str, FC_STR_LEN, "%s%*d%s", fc_c, (int)max,
+		snprintf(fc_str, FC_STR_LEN, "%s%*d%s", fc_c, max,
 			(int)props->filesn, df_c);
 	} else {
-		snprintf(fc_str, FC_STR_LEN, "%s%*c%s", dn_c, (int)max, '-', df_c);
+		snprintf(fc_str, FC_STR_LEN, "%s%*c%s", dn_c, max,
+		props->filesn < 0 ? '?' /* Dir with no read permission */
+		: (props->dir == 1 ? '0' : '-'),
+		df_c);
 	}
 }
 
