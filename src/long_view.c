@@ -199,28 +199,26 @@ construct_and_print_filename(const struct fileinfo *props,
 		trim == TRIM_EXT ? df_c : "");
 }
 
-static int
+static void
 construct_file_size(const struct fileinfo *props, char *size_str,
-	const int size_max)
+	const int size_max, const int file_perm)
 {
-	const int file_perm = check_file_access(props->mode, props->uid, props->gid);
-
 	if (prop_fields.size == 0) {
 		*size_str = '\0';
-		return file_perm;
+		return;
 	}
 
 	if (props->stat_err == 1) {
 		snprintf(size_str, SIZE_STR_LEN, "%*s", size_max
 			+ (prop_fields.size == PROP_SIZE_HUMAN), UNKNOWN_STR);
-		return file_perm;
+		return;
 	}
 
 	if (S_ISCHR(props->mode) || S_ISBLK(props->mode)
 	|| (file_perm == 0 && props->dir == 1 && conf.full_dir_size == 1)) {
 		snprintf(size_str, SIZE_STR_LEN, "%s%*s%s", dn_c, size_max
 			+ (prop_fields.size == PROP_SIZE_HUMAN), "-", df_c);
-		return file_perm;
+		return;
 	}
 
 	const off_t size = (FILE_TYPE_NON_ZERO_SIZE(props->mode)
@@ -242,7 +240,7 @@ construct_file_size(const struct fileinfo *props, char *size_str,
 			(props->du_status != 0 && size_max > 0) ? size_max - 1 : size_max,
 			(intmax_t)size, df_c,
 			props->du_status != 0 ? DU_ERR_CHAR : 0);
-		return file_perm;
+		return;
 	}
 
 	const int du_err = (props->dir == 1 && conf.full_dir_size == 1
@@ -255,19 +253,12 @@ construct_file_size(const struct fileinfo *props, char *size_str,
 		csize, size_max,
 		*props->human_size.str ? props->human_size.str : UNKNOWN_STR,
 		unit_color, props->human_size.unit, df_c);
-
-	return file_perm;
 }
 
 static void
 construct_file_perms(const mode_t mode, char *perm_str, const char file_type,
 	const char *ctype)
 {
-	if (prop_fields.perm == 0) {
-		*perm_str = '\0';
-		return;
-	}
-
 	static char tmp_ctype[MAX_COLOR + 1];
 	xstrsncpy(tmp_ctype, (file_type == UNK_PCHR ? df_c : ctype),
 		sizeof(tmp_ctype));
@@ -292,11 +283,6 @@ construct_file_perms(const mode_t mode, char *perm_str, const char file_type,
 static void
 construct_timestamp(char *time_str, const struct fileinfo *props)
 {
-	if (prop_fields.time == 0) {
-		*time_str = '\0';
-		return;
-	}
-
 	const time_t t = props->ltime;
 
 	/* Let's construct the color for the current timestamp. */
@@ -355,12 +341,10 @@ construct_timestamp(char *time_str, const struct fileinfo *props)
 
 static void
 construct_id_field(const struct fileinfo *props, char *id_str,
-	const char *id_color, const struct maxes_t *maxes)
+	const struct maxes_t *maxes, const int file_perm)
 {
-	if (prop_fields.ids == 0) {
-		*id_str = '\0';
-		return;
-	}
+	const char *id_color =
+		(file_perm == 1 && conf.colorize == 1) ? dg_c : df_c;
 
 	if (prop_fields.no_group == 1) {
 		if (prop_fields.ids == PROP_ID_NUM) {
@@ -397,20 +381,13 @@ construct_id_field(const struct fileinfo *props, char *id_str,
 
 static void
 construct_files_counter(const struct fileinfo *props, char *fc_str,
-	const int fc_max)
+	const int max)
 {
-	/* FC_MAX is zero if there are no subdirs in the current dir */
-	if (conf.files_counter == 0 || fc_max == 0 || prop_fields.counter == 0) {
-		*fc_str = '\0';
-		return;
-	}
-
-	if (props->dir == 1 && props->filesn > 0) {
-		snprintf(fc_str, FC_STR_LEN, "%s%*d%s", fc_c, (int)fc_max,
+	if (props->filesn > 0) {
+		snprintf(fc_str, FC_STR_LEN, "%s%*d%s", fc_c, (int)max,
 			(int)props->filesn, df_c);
 	} else {
-		snprintf(fc_str, FC_STR_LEN, "%s%*c%s", dn_c, (int)fc_max,
-			'-', df_c);
+		snprintf(fc_str, FC_STR_LEN, "%s%*c%s", dn_c, (int)max, '-', df_c);
 	}
 }
 
@@ -457,11 +434,6 @@ set_file_type_and_color(const struct fileinfo *props, char *type, char **color)
 static void
 construct_inode_num(const struct fileinfo *props, char *ino_str, const int max)
 {
-	if (prop_fields.inode == 0) {
-		*ino_str = '\0';
-		return;
-	}
-
 	if (props->stat_err == 1) {
 		snprintf(ino_str, INO_STR_LEN, "\x1b[0m%*s%s", max, UNKNOWN_STR, df_c);
 		return;
@@ -474,11 +446,6 @@ construct_inode_num(const struct fileinfo *props, char *ino_str, const int max)
 static void
 construct_links_str(const struct fileinfo *props, char *links_str, const int max)
 {
-	if (prop_fields.links == 0) {
-		*links_str = '\0';
-		return;
-	}
-
 	if (props->stat_err == 1) {
 		snprintf(links_str, LINKS_STR_LEN, "\x1b[0m%*s%s",
 			max, UNKNOWN_STR, df_c);
@@ -492,11 +459,6 @@ construct_links_str(const struct fileinfo *props, char *links_str, const int max
 static void
 construct_blocks_str(const struct fileinfo *props, char *blk_str, const int max)
 {
-	if (prop_fields.blocks == 0) {
-		*blk_str = '\0';
-		return;
-	}
-
 	if (props->stat_err == 1) {
 		snprintf(blk_str, BLK_STR_LEN, "\x1b[0m%*s%s", max, UNKNOWN_STR, df_c);
 		return;
@@ -518,6 +480,8 @@ print_entry_props(const struct fileinfo *props, const struct maxes_t *maxes,
 	char *ctype = dn_c; /* Color for file type indicator */
 
 	set_file_type_and_color(props, &file_type, &ctype);
+	const int file_perm =
+		check_file_access(props->mode, props->uid, props->gid);
 
 	/* Let's compose each properties field individually to be able to
 	 * print only the desired ones. This is specified via the PropFields
@@ -525,30 +489,39 @@ print_entry_props(const struct fileinfo *props, const struct maxes_t *maxes,
 
 	construct_and_print_filename(props, maxes->name);
 
-	static char perm_str[PERM_STR_LEN];
-	construct_file_perms(props->mode, perm_str, file_type, ctype);
+	static char perm_str[PERM_STR_LEN]; *perm_str = '\0';
+	if (prop_fields.perm != 0)
+		construct_file_perms(props->mode, perm_str, file_type, ctype);
 
-	static char time_str[TIME_STR_LEN];
-	construct_timestamp(time_str, props);
+	static char time_str[TIME_STR_LEN]; *time_str = '\0';
+	if (prop_fields.time != 0)
+		construct_timestamp(time_str, props);
 
-	static char size_str[SIZE_STR_LEN];
-	const int file_perm = construct_file_size(props, size_str, maxes->size);
+	static char size_str[SIZE_STR_LEN]; *size_str = '\0';
+	if (prop_fields.size != 0)
+		construct_file_size(props, size_str, maxes->size, file_perm);
 
-	const char *id_color = (file_perm == 1 && conf.colorize == 1) ? dg_c : df_c;
-	static char id_str[ID_STR_LEN];
-	construct_id_field(props, id_str, id_color, maxes);
+	static char id_str[ID_STR_LEN]; *id_str = '\0';
+	if (prop_fields.ids != 0)
+		construct_id_field(props, id_str, maxes, file_perm);
 
-	static char links_str[LINKS_STR_LEN];
-	construct_links_str(props, links_str, maxes->links);
+	static char links_str[LINKS_STR_LEN]; *links_str = '\0';
+	if (prop_fields.links != 0)
+		construct_links_str(props, links_str, maxes->links);
 
-	static char ino_str[INO_STR_LEN];
-	construct_inode_num(props, ino_str, maxes->inode);
+	static char ino_str[INO_STR_LEN]; *ino_str = '\0';
+	if (prop_fields.inode != 0)
+		construct_inode_num(props, ino_str, maxes->inode);
 
-	static char blocks_str[BLK_STR_LEN];
-	construct_blocks_str(props, blocks_str, maxes->blocks);
+	static char blocks_str[BLK_STR_LEN]; *blocks_str = '\0';
+	if (prop_fields.blocks != 0)
+		construct_blocks_str(props, blocks_str, maxes->blocks);
 
-	static char fc_str[FC_STR_LEN];
-	construct_files_counter(props, fc_str, maxes->files_counter);
+	static char fc_str[FC_STR_LEN]; *fc_str = '\0';
+	/* FC_MAX is zero if there are no subdirs in the current dir */
+	if (prop_fields.counter != 0 && conf.files_counter != 0
+	&& maxes->files_counter != 0)
+		construct_files_counter(props, fc_str, maxes->files_counter);
 
 	/* We only need a single character to print the xattributes indicator,
 	 * which would be normally printed like this:
