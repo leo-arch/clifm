@@ -317,15 +317,15 @@ construct_timestamp(char *time_str, const struct fileinfo *props)
 		const int index = conf.relative_time == 1 ? 1 : 0;
 		file_time[index] = UNKNOWN_CHR;
 		cdate = df_c;
-	} else if (t >= 0 && t != (time_t)-1 && localtime_r(&t, &tm)) {
+	} else if (t >= 0 && t != (time_t)-1) {
 		/* PROPS_NOW (global) is set by list_dir(), in listing.c before
 		 * calling print_entry_props(), which calls this function. */
 		const time_t age = props_now - t;
 		/* AGE is negative if file time is in the future. */
 
 		if (conf.relative_time == 1) {
-			calc_relative_time(age < 0 ? age - (age * 2) : age, file_time);
-		} else {
+			calc_relative_time(age < 0 ? -age : age, file_time);
+		} else if (localtime_r(&t, &tm)) {
 			/* If not user defined, let's mimic ls(1) behavior: a file is
 			 * considered recent if it is within the past six months. */
 			const int recent = age >= 0 && age < 14515200LL;
@@ -340,6 +340,8 @@ construct_timestamp(char *time_str, const struct fileinfo *props)
 #pragma GCC diagnostic ignored "-Wformat-nonliteral"
 			strftime(file_time, sizeof(file_time), tfmt, &tm);
 #pragma GCC diagnostic pop
+		} else {
+			xstrsncpy(file_time, invalid_time_str, sizeof(file_time));
 		}
 	} else {
 		/* INVALID_TIME_STR (global) is generated at startup by
