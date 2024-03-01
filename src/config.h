@@ -42,6 +42,7 @@ int  reload_config(void);
 void set_div_line(char *line);
 void set_env(const int reload);
 void set_sel_file(void);
+void set_time_style(char *line, char **str, const int ptime);
 
 __END_DECLS
 

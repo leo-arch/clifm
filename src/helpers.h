@@ -1427,6 +1427,7 @@ struct param_t {
 	int preview;
 	int printsel;
 	int prop_fields_str;
+	int ptime_style;
 	int readonly;
 	int refresh_on_empty_line;
 	int refresh_on_resize;
@@ -1446,6 +1447,7 @@ struct param_t {
 #ifndef _NO_SUGGESTIONS
 	int suggestions;
 #endif /* !_NO_SUGGESTIONS */
+	int time_style;
 	int tips;
 #ifndef _NO_TRASH
 	int trasrm;

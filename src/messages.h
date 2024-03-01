@@ -1398,15 +1398,16 @@ CliFM's built-in opener\
 \n      --print-sel\t\t Keep the list of selected files in sight\
 \n      --prop-fields=FORMAT\t Set a custom format string for the long view (see \
 PropFields in the config file)\
+\n      --ptime-style=STYLE\t How to format timestamps for the p/pp command (see PTimeStyle in the config file)\
 \n      --readonly\t\t Disable internal commands able to modify the file system\
-\n      --rl-vi-mode\t\t Set readline to vi editing mode (defaults to emacs mode)\
-\n      --secure-cmds\t\t Filter commands to prevent command injection\
-\n      --secure-env\t\t Run in a sanitized environment (regular mode)\
-\n      --secure-env-full\t\t Run in a sanitized environment (full mode)\
-\n      --sel-file=FILE\t\t Set FILE as custom selections file\n"
+\n      --rl-vi-mode\t\t Set readline to vi editing mode (defaults to emacs mode)\n"
 
 #define LONG_OPTIONS_B "\
-      --share-selbox\t\t Make the Selection Box common to different profiles\
+      --secure-cmds\t\t Filter commands to prevent command injection\
+\n      --secure-env\t\t Run in a sanitized environment (regular mode)\
+\n      --secure-env-full\t\t Run in a sanitized environment (full mode)\
+\n      --sel-file=FILE\t\t Set FILE as custom selections file\
+\n      --share-selbox\t\t Make the Selection Box common to different profiles\
 \n      --shotgun-file=FILE\t Set FILE as shotgun configuration file\
 \n      --si\t\t\t Print sizes in powers of 1000 instead of 1024\
 \n      --smenutab\t\t Use smenu to display completion matches\
@@ -1414,6 +1415,7 @@ PropFields in the config file)\
 \n      --stat FILE...\t\t Run the 'p' command on FILE(s) and exit\
 \n      --stat-full FILE...\t Run the 'pp' command on FILE(s) and exit\
 \n      --stdtab\t\t\t Force the use of the standard TAB completion mode (readline)\
+\n      --time-style=STYLE\t How to format timestamps in long view (see TimeStyle in the config file)\
 \n      --trash-as-rm\t\t The 'r' command executes 'trash' instead of \
 rm(1) to prevent accidental deletions\
 \n      --virtual-dir-full-paths\t Files in virtual directories are listed as full paths instead of target base names\

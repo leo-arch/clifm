@@ -35,6 +35,7 @@
 
 #include "aux.h"
 #include "checks.h"
+#include "config.h" /* set_time_style */
 #include "file_operations.h"
 #include "init.h"
 #include "mime.h"
@@ -150,6 +151,8 @@
 #define LOPT_READONLY               273
 #define LOPT_LSCOLORS               274
 #define LOPT_PROP_FIELDS            275
+#define LOPT_TIME_STYLE             276
+#define LOPT_PTIME_STYLE            277
 
 /* Link long (--option) and short options (-o) for the getopt_long function. */
 static struct option const longopts[] = {
@@ -246,6 +249,7 @@ static struct option const longopts[] = {
 	{"only-dirs", no_argument, 0, LOPT_ONLY_DIRS},
 	{"open", required_argument, 0, LOPT_OPEN},
 	{"opener", required_argument, 0, LOPT_OPENER},
+	{"ptime-style", required_argument, 0, LOPT_PTIME_STYLE},
 	{"preview", required_argument, 0, LOPT_PREVIEW},
 	{"print-sel", no_argument, 0, LOPT_PRINT_SEL},
 	{"prop-fields", required_argument, 0, LOPT_PROP_FIELDS},
@@ -264,6 +268,7 @@ static struct option const longopts[] = {
 	{"stat", required_argument, 0, LOPT_STAT},
 	{"stat-full", required_argument, 0, LOPT_STAT_FULL},
 	{"stdtab", no_argument, 0, LOPT_STDTAB},
+	{"time-style", required_argument, 0, LOPT_TIME_STYLE},
 	{"virtual-dir", required_argument, 0, LOPT_VIRTUAL_DIR},
 	{"virtual-dir-full-paths", no_argument, 0, LOPT_VIRTUAL_DIR_FULL_PATHS},
 	{"vt100", no_argument, 0, LOPT_VT100},
@@ -1232,6 +1237,21 @@ set_stat(const int optc, const char *optval)
 }
 
 static void
+xset_time_style(char *optval, const int ptime)
+{
+	if (!optval || !*optval || *optval == '-')
+		err_arg_required(ptime == 0 ? "--time-style" : "--ptime-style");
+
+	if (ptime == 1) {
+		xargs.ptime_style = 1;
+		set_time_style(optval, &conf.ptime_str, 1);
+	} else {
+		xargs.time_style = 1;
+		set_time_style(optval, &conf.time_str, 0);
+	}
+}
+
+static void
 xset_prop_fields(const char *optval)
 {
 	/* --prop-fields accepts a single dash (-) as argument. */
@@ -1676,6 +1696,8 @@ parse_cmdline_args(const int argc, char **argv)
 			set_stat(optc, optarg); break;
 		case LOPT_STDTAB:
 			set_stdtab(); break;
+		case LOPT_PTIME_STYLE: xset_time_style(optarg, 1); break;
+		case LOPT_TIME_STYLE: xset_time_style(optarg, 0); break;
 		case LOPT_TRASH_AS_RM:
 			set_trash_as_rm(); break;
 		case LOPT_VIRTUAL_DIR:

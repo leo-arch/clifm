@@ -44,6 +44,12 @@
 #include "navigation.h"
 #include "spawn.h"
 
+/* Predefined time styles */
+#define ISO_TIME           "%Y-%m-%d"
+#define LONG_ISO_TIME      "%Y-%m-%d %H:%M"
+#define FULL_ISO_TIME      "%Y-%m-%d %H:%M:%S %z"
+#define FULL_ISO_NANO_TIME "%Y-%m-%d %H:%M:%S.%N %z"
+
 /* Regenerate the configuration file and create a back up of the old one. */
 static int
 regen_config(void)
@@ -1600,11 +1606,10 @@ create_main_config_file(char *file)
 ;PropFields=\"%s\"\n\
 # Number of spaces between fields in long view (1-2)\n\
 ;PropFieldsGap=%d\n\
-# Format used to print timestamps in long view (see strftime(3))\n\
+# Format used to print timestamps in long view. Available options:\n\
+# default, relative, iso, long-iso, full-iso, +FORMAT (see strftime(3))\n\
 ;TimeStyle=\"\"\n\
-# If you prefer rather relative times\n\
-;TimeStyle=relative\n\
-# Same as TimeStyle, but for the 'p/pp' command\n\
+# Same as TimeStyle, but for the 'p/pp' command (relative time not supported)\n\
 ;PTimeStyle=\"\"\n\
 # Print files apparent size instead of actual device usage\n\
 ;ApparentSize=%s\n\
@@ -2773,6 +2778,74 @@ set_dirhistignore_pattern(char *str)
 	conf.dirhistignore_regex = savestring(pattern, strlen(pattern));
 }
 
+/* Read time format from LINE and store the appropriate value in STR.
+ * PTIME specifies whether we're dealing with PTimeStyle or just TimeStyle
+ * options (the former does not support relative times). */
+void
+set_time_style(char *line, char **str, const int ptime)
+{
+	if (!line || !*line)
+		return;
+
+	char *tmp = get_line_value(line);
+	if (!tmp)
+		return;
+
+	free(*str);
+	*str = (char *)NULL;
+
+	if (*tmp == 'r' && strcmp(tmp + 1, "elative") == 0) {
+		if (ptime == 0) conf.relative_time = 1;
+	} else if (*tmp == 'd' && strcmp(tmp + 1, "efault") == 0) {
+		return;
+	} else if (*tmp == 'i' && strcmp(tmp + 1, "so") == 0) {
+		*str = savestring(ISO_TIME, sizeof(ISO_TIME) - 1);
+	} else if (*tmp == 'f' && strcmp(tmp + 1, "ull-iso") == 0) {
+		*str = savestring(FULL_ISO_TIME, sizeof(FULL_ISO_TIME) - 1);
+	} else if (ptime == 1 && *tmp == 'f' && strcmp(tmp + 1, "ull-iso-nano") == 0) {
+		*str = savestring(FULL_ISO_NANO_TIME, sizeof(FULL_ISO_NANO_TIME) - 1);
+	} else if (*tmp == 'l' && strcmp(tmp + 1, "ong-iso") == 0) {
+		*str = savestring(LONG_ISO_TIME, sizeof(LONG_ISO_TIME) - 1);
+	} else if (*tmp == '+') {
+		if (*(++tmp)) {
+			/* We don't support FORMAT1<newline>FORMAT2, like ls(1) does. */
+			char *n = strchr(tmp, '\n');
+			if (n) *n = '\0';
+			*str = savestring(tmp, strlen(tmp));
+		}
+	} else {
+		char *n = strchr(tmp, '\n');
+		if (n) *n = '\0';
+		*str = savestring(tmp, strlen(tmp));
+	}
+}
+
+static void
+set_time_style_env(void)
+{
+	if (xargs.secure_env == 1 || xargs.secure_env_full == 1)
+		return;
+
+	char *p = getenv("TIME_STYLE");
+	if (!p || !*p)
+		return;
+
+	set_time_style(p, &conf.time_str, 0);
+}
+
+static void
+set_ptime_style_env(void)
+{
+	if (xargs.secure_env == 1 || xargs.secure_env_full == 1)
+		return;
+
+	char *p = getenv("PTIME_STYLE");
+	if (!p || !*p)
+		return;
+
+	set_time_style(p, &conf.ptime_str, 1);
+}
+
 /* Read the main configuration file and set options accordingly */
 static void
 read_config(void)
@@ -3070,12 +3143,9 @@ read_config(void)
 			set_config_int_value(line + 14, &conf.prop_fields_gap, 1, 2);
 		}
 
-		else if (*line == 'P' && strncmp(line, "PTimeStyle=", 11) == 0) {
-			char *tmp = get_line_value(line + 11);
-			if (!tmp)
-				continue;
-			free(conf.ptime_str);
-			conf.ptime_str = savestring(tmp, strlen(tmp));
+		else if (xargs.ptime_style == UNSET && *line == 'P'
+		&& strncmp(line, "PTimeStyle=", 11) == 0) {
+			set_time_style(line + 11, &conf.ptime_str, 1);
 		}
 
 		else if (*line == 'P' && strncmp(line, "PurgeJumpDB=", 12) == 0) {
@@ -3198,14 +3268,9 @@ read_config(void)
 			conf.term = savestring(tmp, strlen(tmp));
 		}
 
-		else if (*line == 'T' && strncmp(line, "TimeStyle=", 10) == 0) {
-			char *tmp = get_line_value(line + 10);
-			if (!tmp)
-				continue;
-			free(conf.time_str);
-			conf.time_str = savestring(tmp, strlen(tmp));
-			if (*tmp == 'r' && strcmp(tmp + 1, "elative") == 0)
-				conf.relative_time = 1;
+		else if (xargs.time_style == UNSET && *line == 'T'
+		&& strncmp(line, "TimeStyle=", 10) == 0) {
+			set_time_style(line + 10, &conf.time_str, 0);
 		}
 
 		else if (xargs.tips == UNSET && *line == 'T'
@@ -3258,6 +3323,11 @@ read_config(void)
 	}
 
 	fclose(config_fp);
+
+	if (!conf.time_str)
+		set_time_style_env();
+	if (!conf.ptime_str)
+		set_ptime_style_env();
 
 	if (xargs.disk_usage_analyzer == 1) {
 		conf.sort = STSIZE;
