@@ -214,10 +214,12 @@ construct_file_size(const struct fileinfo *props, char *size_str,
 		return;
 	}
 
-	if (S_ISCHR(props->mode) || S_ISBLK(props->mode)
-	|| (file_perm == 0 && props->dir == 1 && conf.full_dir_size == 1)) {
-		snprintf(size_str, SIZE_STR_LEN, "%s%*s%s", dn_c, size_max
-			+ (prop_fields.size == PROP_SIZE_HUMAN), "-", df_c);
+	const int no_dir_access =
+		(file_perm == 0 && props->dir == 1 && conf.full_dir_size == 1);
+	if (S_ISCHR(props->mode) || S_ISBLK(props->mode) || no_dir_access == 1) {
+		snprintf(size_str, SIZE_STR_LEN, "%s%*c%s", dn_c, size_max
+			+ (prop_fields.size == PROP_SIZE_HUMAN),
+			no_dir_access == 1 ? UNKNOWN_CHR : '-', df_c);
 		return;
 	}
 
@@ -226,7 +228,7 @@ construct_file_size(const struct fileinfo *props, char *size_str,
 		? props->size : 0;
 
 	/* Let's construct the color for the current file size */
-	const char *csize = props->dir == 1 ? dz_c : df_c;
+	char *csize = props->dir == 1 ? dz_c : df_c;
 	static char sf[MAX_SHADE_LEN];
 	if (conf.colorize == 1) {
 		if (!*dz_c) {

@@ -696,7 +696,7 @@ get_common_ownership(char **args, int *exit_status, int *diff)
 		if (stat(args[i], &b) == -1) {
 			xerror("oc: '%s': %s\n", args[i], strerror(errno));
 			*exit_status = errno;
-			return (char *)NULL;
+			continue;
 		}
 		if (b.st_uid != a.st_uid) {
 			common_uid = 0;
@@ -1639,7 +1639,7 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 
 	if (total_size < 0) {
 		if (total_size == -2) /* No access */
-			printf(_("Total size: \t%s-%s\n"), dn_c, cend);
+			printf(_("Total size: \t%s%c%s\n"), dn_c, UNKNOWN_CHR, cend);
 		else /* get_total_size returned error (-1) */
 			puts(UNKNOWN_STR);
 		return;
