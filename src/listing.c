@@ -871,13 +871,13 @@ compute_maxes(void)
 		}
 
 		if (prop_fields.links == 1) {
-			t = DIGINUM((int)file_info[i].linkn);
+			t = DIGINUM(file_info[i].linkn);
 			if (t > maxes.links)
 				maxes.links = t;
 		}
 
 		if (prop_fields.blocks == 1) {
-			t = DIGINUM((int)file_info[i].blocks);
+			t = DIGINUM_BIG(file_info[i].blocks);
 			if (t > maxes.blocks)
 				maxes.blocks = t;
 		}

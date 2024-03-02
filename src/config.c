@@ -1760,7 +1760,7 @@ create_main_config_file(char *file)
 
 	    "# Sorting method: 0 = none, 1 = name, 2 = size, 3 = atime\n\
 # 4 = btime, 5 = ctime, 6 = mtime, 7 = version, 8 = extension, 9 = inode,\n\
-# 10 = owner-ID, 11 = group-ID\n\
+# 10 = owner-ID, 11 = group-ID, 12 = blocks\n\
 # NOTE: the 'version' method is not available on FreeBSD\n\
 ;Sort=%d\n\
 # By default, CliFM sorts files from less to more (ex: from 'a' to 'z' if\n\

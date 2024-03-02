@@ -111,7 +111,8 @@ const struct sort_t sort_methods[] = {
     {"inode", 9, 0},
     {"owner", 10, 0},
     {"group", 11, 0},
-    {NULL, 12, 0},
+    {"blocks", 12, 0},
+    {NULL, 13, 0},
 };
 
 /* pmsg holds the current program message type */
@@ -759,6 +760,7 @@ const struct cmdslist_t param_str[] = {
 	{"st none", 7},
 	{"st name", 7},
 	{"st size", 7},
+	{"st blocks", 9},
 	{"st atime", 8},
 	{"st btime", 8},
 	{"st ctime", 8},

@@ -2079,6 +2079,7 @@ sort_num_generator(const char *text, int state)
 	    "inode",
 	    "owner",
 	    "group",
+	    "blocks",
 	    NULL
 	};
 

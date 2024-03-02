@@ -256,6 +256,21 @@ sort_by_group(const gid_t a, const gid_t b)
 }
 
 static inline int
+sort_by_blocks(const blkcnt_t a, const blkcnt_t b)
+{
+	int ret = 0;
+
+	if (a > b) {
+		ret = 1;
+	} else {
+		if (a < b)
+			ret = -1;
+	}
+
+	return ret;
+}
+
+static inline int
 sort_dirs(const int a, const int b)
 {
 	if (b != a) {
@@ -295,6 +310,7 @@ entrycmp(const void *a, const void *b)
 	case SINO: ret = sort_by_inode(pa->inode, pb->inode); break;
 	case SOWN: ret = sort_by_owner(pa->uid, pb->uid); break;
 	case SGRP: ret = sort_by_group(pa->gid, pb->gid); break;
+	case SBLK: ret = sort_by_blocks(pa->blocks, pb->blocks); break;
 	default: break;
 	}
 
@@ -367,6 +383,7 @@ num_to_sort_name(const int n)
 	case SINO:   return "inode";
 	case SOWN:   return "owner";
 	case SGRP:   return "group";
+	case SBLK:   return "blocks";
 	default:     return "unknown";
 	}
 }

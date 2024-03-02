@@ -635,7 +635,8 @@ extern time_t curdir_mtime;
 #define SINO       9
 #define SOWN       10
 #define SGRP       11
-#define SORT_TYPES 11
+#define SBLK       12
+#define SORT_TYPES 12
 
 /* Macros for the colors_list function */
 #define NO_ELN        0
