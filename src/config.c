@@ -2802,7 +2802,8 @@ set_time_style(char *line, char **str, const int ptime)
 		*str = savestring(ISO_TIME, sizeof(ISO_TIME) - 1);
 	} else if (*tmp == 'f' && strcmp(tmp + 1, "ull-iso") == 0) {
 		*str = savestring(FULL_ISO_TIME, sizeof(FULL_ISO_TIME) - 1);
-	} else if (ptime == 1 && *tmp == 'f' && strcmp(tmp + 1, "ull-iso-nano") == 0) {
+	} else if (ptime == 1
+	&& *tmp == 'f' && strcmp(tmp + 1, "ull-iso-nano") == 0) {
 		*str = savestring(FULL_ISO_NANO_TIME, sizeof(FULL_ISO_NANO_TIME) - 1);
 	} else if (*tmp == 'l' && strcmp(tmp + 1, "ong-iso") == 0) {
 		*str = savestring(LONG_ISO_TIME, sizeof(LONG_ISO_TIME) - 1);
@@ -2826,7 +2827,9 @@ set_time_style_env(void)
 	if (xargs.secure_env == 1 || xargs.secure_env_full == 1)
 		return;
 
-	char *p = getenv("TIME_STYLE");
+	char *p = getenv("CLIFM_TIME_STYLE");
+	if (!p || !*p)
+		p = getenv("TIME_STYLE");
 	if (!p || !*p)
 		return;
 
