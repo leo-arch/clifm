@@ -245,7 +245,8 @@ For a complete description please consult our [Wiki](https://github.com/leo-arch
 * `Development`
   - [Support for `.hidden` files, including wildcards](https://github.com/leo-arch/clifm/wiki/Advanced#1b-hidden-files).
   - Several improvements to the long view
-    - Dereference symbolic links via `-L,--follow-symlinks-long`.
+    - [Set time style via either `--time-style`, `TimeStyle` (config file), or **TIME_STYLE** (environment variable)](https://github.com/leo-arch/clifm/wiki/Common-Operations#time-styles).
+	- Dereference symbolic links via `-L,--follow-symlinks-long`.
     - Toggle `follow-symlinks-long` via the [`k` command](https://github.com/leo-arch/clifm/wiki/Introduction#k) and the <kbd>Alt-+</kbd> keybinding (edit your keybindings file -via `kb edit`- and add this line to enable this new keybinding: `toggle-follow-links-long:\M-+`).
     - [Disable the group ID field](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode).
     - [File allocated blocks support](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode).
@@ -254,6 +255,7 @@ For a complete description please consult our [Wiki](https://github.com/leo-arch
     - [User/group ID **names** (instead of just numbers)](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode).
     - [Customize displayed fields via `--prop-fields`](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode).
     - [Allow double spacing for fields](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode).
+  - [Set time style used by the `p/pp` command via either `--ptime-style`, `PTimeStyle` (config file), or **PTIME_STYLE** (environment variable)](https://github.com/leo-arch/clifm/wiki/Introduction#p-prop).
   - Since **1)** it was unintuitive to have `-a` and `-l` options to **disable** hidden files and long view respectively (instead of enabling these features, like most files listers do (ex: `ls`, `exa`, `eza`, `lsd`)), and **2)** we were using uppercase options sometimes to enable and sometimes to disable features (which is not consistent), we made the following changes:
     - `-a` enables hidden files and `-A` disables it
     - `-f` enables dirs-first and `-F` disables it
