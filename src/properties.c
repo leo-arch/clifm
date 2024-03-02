@@ -289,7 +289,7 @@ get_file_perms(const mode_t mode)
 {
 	struct perms_t p = {0};
 
-	if (!(mode & (mode_t)~S_IFMT))
+	if (mode == 0) /* stat(2) err */
 		return set_invalid_file_perms();
 
 	p.cur = p.cuw = p.cux = dn_c;
@@ -800,7 +800,7 @@ set_file_owner(char **args)
 
 	for (i = 1; args[i]; i++) {
 		if (stat(args[i], &a) == -1) {
-			xerror("%s: %s\n", args[i], strerror(errno));
+			xerror("stat: '%s': %s\n", args[i], strerror(errno));
 			free(new_own);
 			return errno;
 		}
