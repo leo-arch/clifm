@@ -93,6 +93,7 @@ args=(
 	'--opener=[resource opener to use instead of '\''Lira'\'', CliFM built-in opener]:opener:_command_names'
 	'--preview=[display a preview of FILE and exit]:filename:_files'
 	'--print-sel[always print the list of selected files]'
+	'--ptime-style=[time/date style used by the p/pp command]:pstyle:->pstyles'
 	'--readonly[disable internal commands able to modify the file system]'
 	'--rl-vi-mode[set readline to vi editing mode (defaults to emacs editing mode)]'
 	'--secure-cmds[filter commands to prevent command injection]'
@@ -107,6 +108,7 @@ args=(
 	'--stat=[run the '\''p'\'' command on FILE and exit]:filename:_files'
 	'--stat-full=[run the '\''pp'\'' command on FILE and exit]:filename:_files'
 	'--stdtab[use standard TAB completion]'
+	'--time-style=[time/date style used in long view]:style:->styles'
 	'--trash-as-rm[the '\''r'\'' command executes '\''trash'\'' instead of '\''rm'\'']'
 	'--virtual-dir=[use PATH as CliFM virtual directory]:directory:_directories'
 	'--virtual-dir-full-paths[print full path file names in virtual directories]'
@@ -139,6 +141,14 @@ case "$state" in
 
 	methods)
 		_values -s , 'methods' none name size atime btime mtime version extension inode owner group
+	;;
+
+	styles)
+		_values -s , 'styles' default relative iso long-iso full-iso
+	;;
+
+	pstyles)
+		_values -s , 'pstyles' default iso long-iso full-iso full-iso-nano
 	;;
 
 	workspaces)

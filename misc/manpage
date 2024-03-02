@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Mar 1, 2024" "clifm 1.17.11" "CLIFM Manual"
+.TH "CLIFM" "1" "Mar 2, 2024" "clifm 1.17.11" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -356,7 +356,7 @@ always print the list of selected files. Since this list could be quite extensiv
 set a custom format string for the long view mode. For information on how to construct this format string consult the \fIPropFields\fR option in the configuration file.
 .TP
 \fB\-\-ptime\-style\fR=\fI\,STYLE\/\fR
-time/date style used with the \fIp/pp\fR command and the \fI\-\-stat\fR[\fI\-full\fR] command line options. Available styles: \fBdefault\fR, \fBiso\fR, \fBlong-iso\fR, \fBfull-iso\fR, \fBfull\-iso\-nano\fR, \fB+FORMAT\fR. FORMAT is interpreted like in \fBstrftime\fR(3). Nano-second precision is available via the %N modifier (like in \fBdate\fR(1)).
+time/date style used by the \fIp/pp\fR command and the \fI\-\-stat\fR[\fI\-full\fR] command line switches. Available styles: \fBdefault\fR, \fBiso\fR, \fBlong-iso\fR, \fBfull\-iso\fR, \fBfull\-iso\-nano\fR, \fB+FORMAT\fR. FORMAT is interpreted like in \fBstrftime\fR(3). Nano-second precision is available via the %N modifier (like in \fBdate\fR(1)).
 .TP
 \fB\-\-readonly\fR
 run in read\-only mode (internal commands able to modify the file system are disabled). Disabled commands are: ac, ad, bb, bl/bleach, br/bulk, c, dup, l, le, m, md, n/new, oc, paste, pc, r, rr, t/trash, tag, te, u/undel/untrash, and vv, plus the shell commands cp, rm, mv, ln, mkdir, rmdir, link, and unlink.  
@@ -2865,10 +2865,10 @@ Terminal type for which output is to be prepared
 A quoted list of options to be passed to FZF (if used for TAB completion)
 .TP
 .B TIME_STYLE
-If set from neither \fI\-\-time\-style\fR nor \fITimeStyle\fR (in the configuration file), use this timestamp style for the long view
+If set from neither \fI\-\-time\-style\fR nor \fITimeStyle\fR (in the configuration file), use this time style for the long view mode
 .TP
 .B PTIME_STYLE
-If set from neither \fI\-\-ptime\-style\fR nor \fIPTimeStyle\fR (in the configuration file), use this timestamp style for the \fIp/pp\fR command and the \fI\-\-stat\fR/\fI\-\-stat\-full\fR command line options
+If set from neither \fI\-\-ptime\-style\fR nor \fIPTimeStyle\fR (in the configuration file), use this time style for the \fIp/pp\fR command and the \fI\-\-stat\fR/\fI\-\-stat\-full\fR command line switches
 .TP
 .TP
 Except when running in stealth mode, \fBclifm\fR sets the following environment variables:

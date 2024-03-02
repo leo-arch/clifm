@@ -1398,7 +1398,7 @@ CliFM's built-in opener\
 \n      --print-sel\t\t Keep the list of selected files in sight\
 \n      --prop-fields=FORMAT\t Set a custom format string for the long view (see \
 PropFields in the config file)\
-\n      --ptime-style=STYLE\t How to format timestamps for the p/pp command (see PTimeStyle in the config file)\
+\n      --ptime-style=STYLE\t Time/date style used by the 'p/pp' command (see PTimeStyle in the config file)\
 \n      --readonly\t\t Disable internal commands able to modify the file system\
 \n      --rl-vi-mode\t\t Set readline to vi editing mode (defaults to emacs mode)\n"
 
@@ -1415,7 +1415,7 @@ PropFields in the config file)\
 \n      --stat FILE...\t\t Run the 'p' command on FILE(s) and exit\
 \n      --stat-full FILE...\t Run the 'pp' command on FILE(s) and exit\
 \n      --stdtab\t\t\t Force the use of the standard TAB completion mode (readline)\
-\n      --time-style=STYLE\t How to format timestamps in long view (see TimeStyle in the config file)\
+\n      --time-style=STYLE\t Time/date style used in long view (see TimeStyle in the config file)\
 \n      --trash-as-rm\t\t The 'r' command executes 'trash' instead of \
 rm(1) to prevent accidental deletions\
 \n      --virtual-dir-full-paths\t Files in virtual directories are listed as full paths instead of target base names\

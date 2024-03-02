@@ -130,6 +130,7 @@ _clifm ()
         --opener
         --preview
         --print-sel
+        --ptime-style
         --readonly
         --rl-vi-mode
         --secure-cmds
@@ -144,6 +145,7 @@ _clifm ()
         --stat
         --stat-full
         --stdtab
+        --time-style
         --trash-as-rm
         --virtual-dir
         --virtual-dir-full-paths
@@ -163,6 +165,14 @@ _clifm ()
 
 	elif [[ $prev == "--fuzzy-algo" ]]; then
 		local args=$(echo -e "1\n2")
+		COMPREPLY=( $(compgen -W "$args" -- "$cur") )
+
+	elif [[ $prev == "--time-style" ]]; then
+		local args=$(echo -e "default\nrelative\niso\nlong-iso\nfull-iso")
+		COMPREPLY=( $(compgen -W "$args" -- "$cur") )
+
+	elif [[ $prev == "--ptime-style" ]]; then
+		local args=$(echo -e "default\niso\nlong-iso\nfull-iso\nfull-iso-nano")
 		COMPREPLY=( $(compgen -W "$args" -- "$cur") )
 
     elif [[ $prev == "-z" || $prev == "--sort" ]]; then
