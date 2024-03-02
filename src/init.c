@@ -1720,17 +1720,17 @@ unset_xargs(void)
 	xargs.fzftab = UNSET;
 	xargs.fnftab = UNSET;
 	xargs.smenutab = UNSET;
-#endif // !_NO_FZF //
+#endif /* !_NO_FZF */
 	xargs.hidden = UNSET;
 #ifndef _NO_HIGHLIGHT
 	xargs.highlight = UNSET;
-#endif // !_NO_HIGHLIGHT //
+#endif /* !_NO_HIGHLIGHT */
 	xargs.history = UNSET;
 	xargs.horizontal_list = UNSET;
 #ifndef _NO_ICONS
 	xargs.icons = UNSET;
 	xargs.icons_use_file_color = UNSET;
-#endif // !_NO_ICONS //
+#endif /* !_NO_ICONS */
 	xargs.int_vars = UNSET;
 	xargs.light = UNSET;
 	xargs.list_and_quit = UNSET;
@@ -1767,12 +1767,12 @@ unset_xargs(void)
 	xargs.stealth_mode = UNSET;
 #ifndef _NO_SUGGESTIONS
 	xargs.suggestions = UNSET;
-#endif // !_NO_SUGGESTIONS //
+#endif /* !_NO_SUGGESTIONS */
 	xargs.time_style = UNSET;
 	xargs.tips = UNSET;
 #ifndef _NO_TRASH
 	xargs.trasrm = UNSET;
-#endif // !_NO_TRASH //
+#endif /* !_NO_TRASH */
 	xargs.trim_names = UNSET;
 	xargs.virtual_dir_full_paths = UNSET;
 	xargs.vt100 = UNSET;
