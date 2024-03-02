@@ -2080,6 +2080,7 @@ sort_num_generator(const char *text, int state)
 	    "owner",
 	    "group",
 	    "blocks",
+	    "links",
 	    NULL
 	};
 

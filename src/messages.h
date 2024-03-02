@@ -1002,9 +1002,9 @@ Recognized file types: (d)irectory, regular (f)ile, symbolic (l)ink,\n\
 #define SORT_USAGE "Change files sorting order\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   st [METHOD] [rev]\nMETHOD: 0 = none, \
-1 = name, 2 = size, 3 = atime, 4 = btime, \
-5 = ctime, 6 = mtime, 7 = version, 8 = extension, \
-9 = inode, 10 = owner, 11 = group, 12 = blocks\n\
+1 = name, 2 = size, 3 = atime, 4 = btime, \n5 = ctime, \
+6 = mtime, 7 = version, 8 = extension, 9 = inode,\n\
+10 = owner, 11 = group, 12 = blocks, 13 = links\n\
 Note: Both numbers and names are allowed\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - List files by size\n\
@@ -1299,7 +1299,7 @@ Page Down: Advance one page\nq: Stop pagging\n"
 \n -X       Run in secure-environment mode (paranoid)\
 \n -y       Run in light mode\
 \n -Y       Run in secure-commands mode\
-\n -z NUM   Set a files sorting method (NUM=[1-12])\
+\n -z NUM   Set a files sorting method (NUM=[1-13])\
 \n -Z NUM   List only up to NUM files"
 #else
 #define SHORT_OPTIONS "\

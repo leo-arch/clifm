@@ -112,7 +112,8 @@ const struct sort_t sort_methods[] = {
     {"owner", 10, 0},
     {"group", 11, 0},
     {"blocks", 12, 0},
-    {NULL, 13, 0},
+    {"links", 13, 0},
+    {NULL, 14, 0},
 };
 
 /* pmsg holds the current program message type */
@@ -761,6 +762,7 @@ const struct cmdslist_t param_str[] = {
 	{"st name", 7},
 	{"st size", 7},
 	{"st blocks", 9},
+	{"st links", 8},
 	{"st atime", 8},
 	{"st btime", 8},
 	{"st ctime", 8},
@@ -772,7 +774,9 @@ const struct cmdslist_t param_str[] = {
 	{"st version", 10},
 	{"sort none", 9},
 	{"sort name", 9},
+	{"sort blocks", 11},
 	{"sort size", 9},
+	{"sort links", 10},
 	{"sort atime", 10},
 	{"sort btime", 10},
 	{"sort ctime", 10},

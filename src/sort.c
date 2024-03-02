@@ -153,20 +153,6 @@ namecmp(char *s1, char *s2)
 }
 
 static inline int
-sort_by_size(struct fileinfo *pa, struct fileinfo *pb)
-{
-	const off_t as = pa->size, bs = pb->size;
-
-	if (as > bs)
-		return 1;
-
-	if (as < bs)
-		return (-1);
-
-	return 0;
-}
-
-static inline int
 sort_by_extension(const char *n1, const char *n2, const int n1dir,
 	const int n2dir)
 {
@@ -193,6 +179,20 @@ sort_by_extension(const char *n1, const char *n2, const int n1dir,
 	}
 
 	return ret;
+}
+
+static inline int
+sort_by_size(struct fileinfo *pa, struct fileinfo *pb)
+{
+	const off_t as = pa->size, bs = pb->size;
+
+	if (as > bs)
+		return 1;
+
+	if (as < bs)
+		return (-1);
+
+	return 0;
 }
 
 static inline int
@@ -271,6 +271,21 @@ sort_by_blocks(const blkcnt_t a, const blkcnt_t b)
 }
 
 static inline int
+sort_by_links(const nlink_t a, const nlink_t b)
+{
+	int ret = 0;
+
+	if (a > b) {
+		ret = 1;
+	} else {
+		if (a < b)
+			ret = -1;
+	}
+
+	return ret;
+}
+
+static inline int
 sort_dirs(const int a, const int b)
 {
 	if (b != a) {
@@ -311,6 +326,7 @@ entrycmp(const void *a, const void *b)
 	case SOWN: ret = sort_by_owner(pa->uid, pb->uid); break;
 	case SGRP: ret = sort_by_group(pa->gid, pb->gid); break;
 	case SBLK: ret = sort_by_blocks(pa->blocks, pb->blocks); break;
+	case SLNK: ret = sort_by_links(pa->linkn, pb->linkn); break;
 	default: break;
 	}
 
@@ -364,7 +380,6 @@ alphasort_insensitive(const struct dirent **a, const struct dirent **b)
 		return ret;
 
 	return (-ret);
-//	return (ret - (ret * 2));
 }
 
 static char *
@@ -384,6 +399,7 @@ num_to_sort_name(const int n)
 	case SOWN:   return "owner";
 	case SGRP:   return "group";
 	case SBLK:   return "blocks";
+	case SLNK:   return "links";
 	default:     return "unknown";
 	}
 }
