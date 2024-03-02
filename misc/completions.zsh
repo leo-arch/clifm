@@ -140,7 +140,7 @@ case "$state" in
 	;;
 
 	methods)
-		_values -s , 'methods' none name size atime btime mtime version extension inode owner group
+		_values -s , 'methods' none name size atime btime mtime version extension inode owner group blocks
 	;;
 
 	styles)

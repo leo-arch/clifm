@@ -176,7 +176,7 @@ _clifm ()
 		COMPREPLY=( $(compgen -W "$args" -- "$cur") )
 
     elif [[ $prev == "-z" || $prev == "--sort" ]]; then
-		local args=$(echo -e "none\nname\nsize\natime\nbtime\nctime\nmtime\nversion\nextension\ninode\nowner\ngroup")
+		local args=$(echo -e "none\nname\nsize\natime\nbtime\nctime\nmtime\nversion\nextension\ninode\nowner\ngroup\nblocks")
         COMPREPLY=( $(compgen -W "$args" -- "$cur") )
 
     elif [[ $prev == "--bell" ]]; then
