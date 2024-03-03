@@ -851,17 +851,22 @@ compute_maxes(void)
 		}
 
 		if (prop_fields.ids == PROP_ID_NUM) {
-			const int uid_len = DIGINUM(file_info[i].uid);
-			const int gid_len = DIGINUM(file_info[i].gid);
-			if (gid_len > maxes.id_group)
-				maxes.id_group = gid_len;
-			if (uid_len > maxes.id_user)
-				maxes.id_user = uid_len;
+			const int u = DIGINUM(file_info[i].uid);
+			const int g = DIGINUM(file_info[i].gid);
+			if (g > maxes.id_group)
+				maxes.id_group = g;
+			if (u > maxes.id_user)
+				maxes.id_user = u;
 		} else if (prop_fields.ids == PROP_ID_NAME) {
-			if (file_info[i].gid_i.namlen > (size_t)maxes.id_group)
-				maxes.id_group = (int)file_info[i].gid_i.namlen;
-			if (file_info[i].uid_i.namlen > (size_t)maxes.id_user)
-				maxes.id_user = (int)file_info[i].uid_i.namlen;
+			const int g = file_info[i].gid_i.name
+				? (int)file_info[i].gid_i.namlen : DIGINUM(file_info[i].gid);
+			if (g > maxes.id_group)
+				maxes.id_group = g;
+
+			const int u = file_info[i].uid_i.name
+				? (int)file_info[i].uid_i.namlen : DIGINUM(file_info[i].uid);
+			if (u > maxes.id_user)
+				maxes.id_user = u;
 		}
 
 		if (prop_fields.inode == 1) {
@@ -1929,9 +1934,6 @@ init_fileinfo(const filesn_t n)
 	file_info[n].linkn = 1;
 	file_info[n].ruser = 1;
 	file_info[n].size =  1;
-
-	file_info[n].uid_i.name = UNKNOWN_STR;
-	file_info[n].gid_i.name = UNKNOWN_STR;
 }
 
 static inline void
@@ -1946,11 +1948,6 @@ get_id_names(const filesn_t n)
 			file_info[n].uid_i.name = sys_users[i].name;
 			file_info[n].uid_i.namlen = sys_users[i].namlen;
 		}
-
-		if (!file_info[n].uid_i.name) {
-			file_info[n].uid_i.name = UNKNOWN_STR;
-			file_info[n].uid_i.namlen = UNKNOWN_STR_LEN;
-		}
 	}
 
 	if (sys_groups) {
@@ -1959,11 +1956,6 @@ get_id_names(const filesn_t n)
 				continue;
 			file_info[n].gid_i.name = sys_groups[i].name;
 			file_info[n].gid_i.namlen = sys_groups[i].namlen;
-		}
-
-		if (!file_info[n].gid_i.name) {
-			file_info[n].gid_i.name = UNKNOWN_STR;
-			file_info[n].gid_i.namlen = UNKNOWN_STR_LEN;
 		}
 	}
 }

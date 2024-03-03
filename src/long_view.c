@@ -348,6 +348,11 @@ construct_id_field(const struct fileinfo *props, char *id_str,
 	const char *id_color =
 		(file_perm == 1 && conf.colorize == 1) ? dg_c : df_c;
 
+#define USER_NAME props->uid_i.name ? props->uid_i.name \
+		: (props->stat_err == 1 ? UNKNOWN_STR : xitoa(props->uid))
+#define GROUP_NAME props->gid_i.name ? props->gid_i.name \
+		: (props->stat_err == 1 ? UNKNOWN_STR : xitoa(props->gid))
+
 	if (prop_fields.no_group == 1) {
 		if (prop_fields.ids == PROP_ID_NUM) {
 			if (props->stat_err == 1) {
@@ -359,7 +364,7 @@ construct_id_field(const struct fileinfo *props, char *id_str,
 			}
 		} else { /* PROPS_ID_NAME */
 			snprintf(id_str, ID_STR_LEN, "%s%-*s%s", id_color,
-				maxes->id_user, props->uid_i.name, df_c);
+				maxes->id_user, USER_NAME, df_c);
 		}
 
 		return;
@@ -367,17 +372,20 @@ construct_id_field(const struct fileinfo *props, char *id_str,
 
 	const char *dim = conf.colorize == 0 ? "" : dim_c;
 	if (prop_fields.ids == PROP_ID_NUM) {
-		snprintf(id_str, ID_STR_LEN, "%s%*s %s%*s%s", id_color,
-			maxes->id_user,
-			props->stat_err == 1 ? UNKNOWN_STR : xitoa(props->uid),
-			props->stat_err == 1 ? "" : dim, maxes->id_group,
-			props->stat_err == 1 ? UNKNOWN_STR : xitoa(props->gid),
-			df_c);
+		if (props->stat_err == 1) {
+			snprintf(id_str, ID_STR_LEN, "%s%*c %*c",
+				df_c, maxes->id_user, UNKNOWN_CHR,
+				maxes->id_group, UNKNOWN_CHR);
+		} else {
+			snprintf(id_str, ID_STR_LEN, "%s%*u %s%*u%s",
+				id_color, maxes->id_user, props->uid,
+				dim, maxes->id_group, props->gid, df_c);
+		}
 	} else { /* PROPS_ID_NAME */
-		snprintf(id_str, ID_STR_LEN, "%s%-*s %s%-*s%s", id_color,
-			maxes->id_user, props->uid_i.name,
+		snprintf(id_str, ID_STR_LEN, "%s%-*s %s%-*s%s",
+			id_color, maxes->id_user, USER_NAME,
 			props->stat_err == 1 ? "" : dim,
-			maxes->id_group, props->gid_i.name, df_c);
+			maxes->id_group, GROUP_NAME, df_c);
 	}
 }
 

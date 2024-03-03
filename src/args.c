@@ -652,8 +652,8 @@ set_sort_by_name(const char *name)
 
 	fprintf(stderr, _("%s: --sort: '%s': Invalid value\n"
 		"Valid values: atime, btime, ctime, mtime, extension, group, "
-		"inode, name,\n              none, owner, size, version, blocks.\n"),
-		PROGRAM_NAME, name);
+		"inode, name,\n              none, owner, size, version, "
+		"blocks, links.\n"), PROGRAM_NAME, name);
 	exit(EXIT_FAILURE);
 }
 
