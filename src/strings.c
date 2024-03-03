@@ -1779,6 +1779,12 @@ expand_int_var(char **name)
 static void
 expand_file_type(char ***substr)
 {
+	/* Do not expand file type filter for the 'ft' command. It handles
+	 * filters itself (filter_function() in misc.c). */
+	if (!*substr || ((*substr)[0][0] == 'f'
+	&& (*substr)[0][1] == 't' && !(*substr)[0][2]))
+		return;
+
 	size_t i = 0;
 	struct stat a;
 

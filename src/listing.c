@@ -1872,7 +1872,7 @@ exclude_file_type_light(const unsigned char type)
 }
 
 /* Returns FUNC_SUCCESS if the file with mode MODE and LINKS number
- * of links must be excluded from the files list, or FUNC_FAILURE */
+ * of links must be excluded from the files list, or FUNC_FAILURE. */
 static int
 exclude_file_type(const mode_t mode, const nlink_t links)
 {

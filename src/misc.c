@@ -491,7 +491,7 @@ static int
 unset_filter(void)
 {
 	if (!filter.str) {
-		puts(_("No filter set"));
+		puts(_("ft: No filter set"));
 		return FUNC_SUCCESS;
 	}
 
@@ -504,7 +504,7 @@ unset_filter(void)
 	if (conf.autols == 1)
 		reload_dirlist();
 
-	puts(_("Filter unset"));
+	print_reload_msg(_("Filter unset\n"));
 	return FUNC_SUCCESS;
 }
 
@@ -554,7 +554,7 @@ compile_filter(void)
 	if (conf.autols == 1)
 		reload_dirlist();
 
-	print_reload_msg(_("%s%s: New filter successfully set\n"),
+	print_reload_msg(_("%s%s: New filter set\n"),
 		filter.rev == 1 ? "!" : "", filter.str);
 
 	return FUNC_SUCCESS;
