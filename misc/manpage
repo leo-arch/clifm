@@ -1112,9 +1112,9 @@ show the elements currently contained in the Selection Box.
 show the splash screen.
 .TP
 .B st, sort \fR[\fIMETHOD\fR] [\fIrev\fR]
-with no argument, print the current sorting order. Else, set sorting order to METHOD, where METHOD could be one of: 0 = none, 1 = name, 2 = size, 3 = atime, 4 = btime (ctime, if btime is not available), 5 = ctime, 6 = mtime, 7 = version (name, if ctime is not available), 8 = extension, and 9 = inode, 10 = owner, and 11 = group. Both numbers and names are allowed. Bear in mind that methods 10 and 11 sort by owner and group ID number, not by owner and group names. The default is \fIversion\fR.
+with no argument, print the current sorting order. Else, set sorting order to METHOD, where METHOD could be one of: 0 = none, 1 = name, 2 = size, 3 = atime, 4 = btime, 5 = ctime, 6 = mtime, 7 = version, 8 = extension, 9 = inode, 10 = owner, 11 = group, 12 = blocks, and 13 = links. Both numbers and names are allowed (ex: \fIst 3\fR or \fIst atime\fR). Bear in mind that methods 10 and 11 sort by owner and group ID number, \fBnot\fR by owner and group names. The default is \fIversion\fR.
 .sp
-By default, files are sorted from less to more (ex: from \'a\' to \'z\' if using the "name" method). Use the \fIrev\fR option to invert this order. Ex: \fIst\ rev\fR or \fIst\ 3\ rev\fR. Switch back to the previous ordering running \fIst rev\fR again.
+By default, files are sorted from less to more (ex: from \'a\' to \'z\' if sorting by \fBname\fR). Use the \fIrev\fR subcommand to invert this order. Ex: \fIst\ rev\fR or \fIst\ inode\ rev\fR. Switch back to the previous state running \fIst rev\fR again.
 .TP
 .B stats
 print statistics about files in the current directory (not available in light mode).
