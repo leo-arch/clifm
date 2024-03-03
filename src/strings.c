@@ -2466,7 +2466,7 @@ glob_expand(char **cmd)
 	return 0;
 }
 
-/* Return 0 if CMD should be regex expanded, or 1 otherwise. */
+/* Return 1 if CMD should be regex expanded, or 0 otherwise. */
 static int
 regex_expand(const char *cmd)
 {
