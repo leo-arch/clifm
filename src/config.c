@@ -1758,13 +1758,10 @@ create_main_config_file(char *file)
 # terminal emulator to run CliFM on it.\n\
 ;TerminalCmd='%s'\n\n"
 
-	    "# Sorting method: 0 = none, 1 = name, 2 = size, 3 = atime\n\
-# 4 = btime, 5 = ctime, 6 = mtime, 7 = version, 8 = extension, 9 = inode,\n\
-# 10 = owner-ID, 11 = group-ID, 12 = blocks, 13 = links\n\
-;Sort=%d\n\
-# By default, CliFM sorts files from less to more (ex: from 'a' to 'z' if\n\
-# using the \"name\" method). To invert this ordering, set SortReverse to\n\
-# true (you can also use the --sort-reverse option or the 'st' command)\n\
+	    "# How to sort files: none, name, size, atime, btime, ctime, mtime,\n\
+# version, extension, inode, owner, group, blocks, links\n\
+;Sort=version\n\
+# Sort in reverse order\n\
 ;SortReverse=%s\n\n"
 
 	"# If set to true, settings changed in the current workspace (only via\n\
@@ -1814,7 +1811,6 @@ create_main_config_file(char *file)
 		DEF_COLOR_LNK_AS_TARGET == 1 ? "true" : "false",
 		DEF_SHARE_SELBOX == 1 ? "true" : "false",
 		DEF_TERM_CMD,
-		DEF_SORT,
 		DEF_SORT_REVERSE == 1 ? "true" : "false",
 		DEF_PRIVATE_WS_SETTINGS == 1 ? "true" : "false",
 		DEF_TIPS == 1 ? "true" : "false",
@@ -2848,6 +2844,23 @@ set_ptime_style_env(void)
 	set_time_style(p, &conf.ptime_str, 1);
 }
 
+static void
+set_sort_name(char *line)
+{
+	const char *name = get_line_value(line);
+	if (!name || !*name)
+		return;
+
+	size_t i;
+	for (i = 0; i <= SORT_TYPES; i++) {
+		if (*name == *sort_methods[i].name
+		&& strcmp(name, sort_methods[i].name) == 0) {
+			conf.sort = sort_methods[i].num;
+			return;
+		}
+	}
+}
+
 /* Read the main configuration file and set options accordingly */
 static void
 read_config(void)
@@ -3208,7 +3221,10 @@ read_config(void)
 
 		else if (xargs.sort == UNSET && *line == 'S'
 		&& strncmp(line, "Sort=", 5) == 0) {
-			set_config_int_value(line + 5, &conf.sort, 0, SORT_TYPES);
+			if (!IS_DIGIT(line[5]))
+				set_sort_name(line + 5);
+			else
+				set_config_int_value(line + 5, &conf.sort, 0, SORT_TYPES);
 		}
 
 		else if (xargs.sort_reverse == UNSET && *line == 'S'
