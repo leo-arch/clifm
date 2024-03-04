@@ -87,10 +87,7 @@ struct perms_t {
 	char or;
 	char ow;
 	char ox;
-	char pad1;
-	char pad2;
-	char pad3;
-	int  pad4;
+	char pad[7];
 };
 
 __BEGIN_DECLS
