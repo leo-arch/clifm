@@ -431,7 +431,8 @@ set_prop_fields(const char *line)
 	if (prop_fields.links != 0)
 		prop_fields.len += conf.prop_fields_gap;
 	if (prop_fields.ids != 0) {
-		prop_fields.len += conf.prop_fields_gap;
+		prop_fields.len += conf.prop_fields_gap
+			+ (prop_fields.no_group == 0); /* Space between user and group */
 		if (prop_fields.ids == PROP_ID_NAME) {
 			get_sysusers();
 			get_sysgroups();
