@@ -1991,6 +1991,17 @@ is_write_cmd(const char *cmd)
 }
 
 static int
+toggle_max_filename_len(const char *arg)
+{
+	if (arg && IS_HELP(arg)) {
+		puts(KK_USAGE);
+		return FUNC_SUCCESS;
+	}
+
+	return rl_toggle_max_filename_len(0, 0);
+}
+
+static int
 toggle_follow_links(const char *arg)
 {
 	if (arg && IS_HELP(arg)) {
@@ -2266,6 +2277,9 @@ exec_cmd(char **comm)
 	else if (*comm[0] == 'l' && (comm[0][1] == 'v' || comm[0][1] == 'l')
 	&& !comm[0][2])
 		return (exit_code = long_view_function(comm[1]));
+
+	else if (*comm[0] == 'k' && comm[0][1] == 'k' && !comm[0][2])
+		return (exit_code = toggle_max_filename_len(comm[1]));
 
 	else if (*comm[0] == 'k' && !comm[0][1]) {
 		return (exit_code = toggle_follow_links(comm[1]));

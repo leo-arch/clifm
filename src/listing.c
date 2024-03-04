@@ -135,9 +135,6 @@ struct wtrim_t {
 	int diff; /* */
 };
 
-/* A buffer to store file names to be displayed */
-static char name_buf[(NAME_MAX + 1) * sizeof(wchar_t)];
-
 #if !defined(_NO_ICONS)
 static void
 set_icon_names_hashes(void)

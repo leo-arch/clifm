@@ -156,6 +156,7 @@ check_int_cmd_desc(const char *s, const size_t l)
 
 		else if (*s == 'k') {
 			if (*(s + 1) == 'b') return KB_DESC;
+			if (*(s + 1) == 'k') return KK_DESC;
 		}
 
 		else if (*s == 'l') {

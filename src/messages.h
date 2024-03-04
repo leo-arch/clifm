@@ -585,6 +585,10 @@ For information about the matching algorithm consult the manpage\n\n\
 If enabled, when running in long view information for the file a symbolic\n\
 link points to (instead of for the link itself) is displayed."
 
+#define KK_USAGE "Toggle max-filename-len on/off\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
+  kk"
+
 #define KB_USAGE "Manage key bindings\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   kb, keybinds [list | edit [APP] | reset | readline]\n\n\
@@ -1468,7 +1472,8 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  hh, hidden         Toggle hidden files on/off\n\
  history            Manage the commands history\n\
  icons              Set icons on/off\n\
- k                  Toggle follow links (long view only)\n\
+ k                  Toggle follow-links (long view only)\n\
+ kk                 Toggle max-filename-len\n\
  j                  Jump to a visited directory\n\
  kb, keybinds       Manage keybindings\n\
  le                 Edit symbolic link target\n\
@@ -1781,7 +1786,8 @@ being free, we consider them all equally unethical [...]\""
 #define HIST_DESC    " (manage the commands history)"
 #define ICONS_DESC   " (set icons on/off)"
 #define J_DESC       " (jump to a visited directory)"
-#define K_DESC       " (toggle follow links - long view only)"
+#define K_DESC       " (toggle follow-links - long view only)"
+#define KK_DESC      " (toggle max-filename-len)"
 #define KB_DESC      " (manage keybindings)"
 #define L_DESC       " (create a symbolic link)"
 #define LE_DESC      " (edit a symbolic link)"
