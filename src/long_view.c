@@ -129,7 +129,7 @@ construct_and_print_filename(const struct fileinfo *props,
 	/* If file name length is greater than max, truncate it to max (later a
 	 * tilde (~) will be appended to let the user know the file name was
 	 * truncated). */
-	static char tname[(NAME_MAX + 1) * sizeof(wchar_t)];
+//	static char tname[(NAME_MAX + 1) * sizeof(wchar_t)];
 	int trim = 0;
 
 	/* Handle file names with embedded control characters */

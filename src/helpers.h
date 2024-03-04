@@ -1925,6 +1925,8 @@ extern char **environ;
  * dynamically allocated arrays for them (which, on the other side,
  * would make the whole thing slower and more tedious) */
 
+extern char tname[(NAME_MAX + 1) * 4];
+
 /* Colors */
 extern char
 	/* File types */
