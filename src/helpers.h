@@ -1920,12 +1920,13 @@ extern regex_t regex_hist;    /* Commands history */
 extern regex_t regex_dirhist; /* Directory history */
 extern char **environ;
 
+/* A buffer to store file names to be displayed (wide string) */
+extern char name_buf[(NAME_MAX + 1) * sizeof(wchar_t)];
+
 /* To store all the 39 color variables we use, with 46 bytes each, we need
  * a total of 1,8Kb. It's not much but it could be less if we'd use
  * dynamically allocated arrays for them (which, on the other side,
  * would make the whole thing slower and more tedious) */
-
-extern char tname[(NAME_MAX + 1) * 4];
 
 /* Colors */
 extern char

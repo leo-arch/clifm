@@ -129,7 +129,6 @@ construct_and_print_filename(const struct fileinfo *props,
 	/* If file name length is greater than max, truncate it to max (later a
 	 * tilde (~) will be appended to let the user know the file name was
 	 * truncated). */
-//	static char tname[(NAME_MAX + 1) * sizeof(wchar_t)];
 	int trim = 0;
 
 	/* Handle file names with embedded control characters */
@@ -156,9 +155,9 @@ construct_and_print_filename(const struct fileinfo *props,
 		ext_name = get_ext_info_long(props->name, plen, &trim, &ext_len);
 
 		if (wname)
-			xstrsncpy(tname, wname, sizeof(tname));
+			xstrsncpy(name_buf, wname, sizeof(name_buf));
 		else
-			memcpy(tname, props->name, props->bytes + 1);
+			memcpy(name_buf, props->name, props->bytes + 1);
 
 		int trim_point = (int)plen - rest - 1 - (int)ext_len;
 		if (trim_point <= 0) {
@@ -166,7 +165,7 @@ construct_and_print_filename(const struct fileinfo *props,
 			trim = TRIM_NO_EXT;
 		}
 
-		diff = u8truncstr(tname, (size_t)trim_point);
+		diff = u8truncstr(name_buf, (size_t)trim_point);
 
 		cur_len -= (size_t)rest;
 	}
@@ -177,7 +176,7 @@ construct_and_print_filename(const struct fileinfo *props,
 		pad = 0;
 
 	if (!trim || !conf.unicode)
-		mbstowcs((wchar_t *)tname, wname ? wname : props->name, NAME_MAX + 1);
+		mbstowcs((wchar_t *)name_buf, wname ? wname : props->name, NAME_MAX + 1);
 
 	free(wname);
 
@@ -191,7 +190,7 @@ construct_and_print_filename(const struct fileinfo *props,
 		conf.icons == 1 ? props->icon : "", conf.icons == 1 ? " " : "", df_c,
 
 		conf.colorize == 1 ? props->color : "",
-		(wchar_t *)tname, trim_diff,
+		(wchar_t *)name_buf, trim_diff,
 		conf.light_mode == 1 ? "\x1b[0m" : df_c, pad, "", df_c,
 		trim ? tt_c : "", trim_s,
 		trim == TRIM_EXT ? props->color : "",

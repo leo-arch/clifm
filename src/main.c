@@ -428,9 +428,10 @@ char
 	xf_c[MAX_COLOR + 2], /* Exit code: failure */
 
 	tmp_color[MAX_COLOR + 2], /* A temp buffer to store color codes */
-	dim_c[5] = "\x1b[2m";
+	dim_c[] = "\x1b[2m";
 
-char tname[(NAME_MAX + 1) * 4];
+/* A buffer to store file names to be displayed (wide string) */
+char name_buf[(NAME_MAX + 1) * sizeof(wchar_t)];
 
 /* A list of all internal commands, with short and long formats.
  * We use two more lists of commands: one of commands dealing with file names
@@ -501,6 +502,7 @@ const struct cmdslist_t internal_cmds[] = {
 	{"jl", 2},
 	{"jp", 2},
 	{"k", 1},
+	{"kk", 2},
 //	{"jo", 2},
 	{"kb", 2},
 	{"keybinds", 8},
