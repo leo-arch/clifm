@@ -121,6 +121,7 @@ struct checks_t {
 	int birthtime;
 	int filter_name;
 	int filter_type;
+	int icons_use_file_color;
 	int id_names;
 	int lnk_char;
 	int xattr;
@@ -147,6 +148,15 @@ struct wtrim_t {
 	int diff; /* */
 };
 
+/* A version of the loop-unswitching optimization: move loop-invariant
+ * conditions out of the loop to reduce the amount of conditions in each
+ * loop pass.
+ * In this case, instead of checking multiple loop-invariant conditions
+ * in each pass of the main files listing loop (in list_dir()), we check
+ * only one (i.e. the appropriate member of the checks struct).
+ * The most important here is checks.lnk_char: instead of checking 4
+ * conditions per listed file, we check only one. Thus, if we have 100 files,
+ * this saves 300 condition checks! */
 static void
 init_checks_struct(void)
 {
@@ -155,6 +165,14 @@ init_checks_struct(void)
 		&& prop_fields.time == PROP_TIME_BIRTH));
 	checks.filter_name = (filter.str && filter.type == FILTER_FILE_NAME);
 	checks.filter_type = (filter.str && filter.type == FILTER_FILE_TYPE);
+
+	checks.icons_use_file_color =
+#ifndef _NO_ICONS
+		(xargs.icons_use_file_color == 1 && conf.icons == 1);
+#else
+		0;
+#endif /* !_NO_ICONS */
+
 	checks.id_names = (conf.long_view == 1 && prop_fields.ids == PROP_ID_NAME);
 	checks.lnk_char = (conf.color_lnk_as_target == 1 && follow_symlinks == 1
 		&& conf.icons == 0 && conf.light_mode == 0);
@@ -2047,9 +2065,6 @@ list_dir_light(void)
 		(conf.read_dothidden == 1 && conf.show_hidden == 0)
 		? load_dothidden() : NULL;
 
-	virtual_dir =
-		(stdin_tmp_dir && strcmp(stdin_tmp_dir, workspaces[cur_ws].path) == 0);
-
 	DIR *dir;
 	struct dirent *ent;
 	int reset_pager = 0;
@@ -2089,11 +2104,11 @@ list_dir_light(void)
 			continue;
 
 		/* Check .cfm.in and .cfm.out files for the autocommands function */
-		if (conf.read_autocmd_files == 1 && *ename == '.' && dir_changed == 1)
+		if (checks.autocmd_files == 1 && *ename == '.')
 			check_autocmd_file(ename + 1);
 
 		/* Skip files according to a regex filter */
-		if (filter.str && filter.type == FILTER_FILE_NAME) {
+		if (checks.filter_name == 1) {
 			if (regexec(&regex_exp, ename, 0, NULL, 0) == FUNC_SUCCESS) {
 				if (filter.rev == 1) {
 					excluded_files++;
@@ -2133,7 +2148,7 @@ list_dir_light(void)
 		}
 
 		/* Filter files according to file type */
-		if (filter.str && filter.type == FILTER_FILE_TYPE
+		if (checks.filter_type == 1
 #ifndef _DIRENT_HAVE_D_TYPE
 		&& exclude_file_type_light((unsigned char)get_dt(attr.st_mode))
 		== FUNC_SUCCESS)
@@ -2244,7 +2259,7 @@ list_dir_light(void)
 		}
 
 #ifndef _NO_ICONS
-		if (xargs.icons_use_file_color == 1 && conf.icons == 1)
+		if (checks.icons_use_file_color == 1)
 			file_info[n].icon_color = file_info[n].color;
 #endif /* !_NO_ICONS */
 
@@ -2808,9 +2823,15 @@ list_dir(void)
 		trim.len = 0;
 	}
 
+	get_term_size();
+
+	virtual_dir =
+		(stdin_tmp_dir && strcmp(stdin_tmp_dir, workspaces[cur_ws].path) == 0);
+
 	/* Reset the stats struct */
 	stats = (struct stats_t){0};
-	get_term_size();
+
+	init_checks_struct();
 
 	if (conf.long_view == 1)
 		props_now = time(NULL);
@@ -2821,9 +2842,6 @@ list_dir(void)
 	struct dothidden_t *hidden_list =
 		(conf.read_dothidden == 1 && conf.show_hidden == 0)
 		? load_dothidden() : NULL;
-
-	virtual_dir =
-		(stdin_tmp_dir && strcmp(stdin_tmp_dir, workspaces[cur_ws].path) == 0);
 
 	DIR *dir;
 	struct dirent *ent;
@@ -2867,8 +2885,6 @@ list_dir(void)
 	const int stat_flag =
 		(follow_symlinks == 1 && conf.long_view == 1
 		&& conf.follow_symlinks_long == 1) ? 0 : AT_SYMLINK_NOFOLLOW;
-
-	init_checks_struct();
 
 	while ((ent = readdir(dir))) {
 		const char *ename = ent->d_name;
@@ -2999,7 +3015,7 @@ list_dir(void)
 		}
 
 #ifndef _NO_ICONS
-		if (xargs.icons_use_file_color == 1 && conf.icons == 1)
+		if (checks.icons_use_file_color == 1)
 			file_info[n].icon_color = file_info[n].color;
 #endif /* !_NO_ICONS */
 		if (conf.long_view == 1 && stat_ok == 1)
