@@ -119,11 +119,13 @@ static int dir_out = 0;
 struct checks_t {
 	int autocmd_files;
 	int birthtime;
+	int classify;
 	int filter_name;
 	int filter_type;
 	int icons_use_file_color;
 	int id_names;
 	int lnk_char;
+	int min_name_trim;
 	int xattr;
 };
 
@@ -163,6 +165,7 @@ init_checks_struct(void)
 	checks.autocmd_files = (conf.read_autocmd_files == 1 && dir_changed == 1);
 	checks.birthtime = (conf.sort == SBTIME || (conf.long_view == 1
 		&& prop_fields.time == PROP_TIME_BIRTH));
+	checks.classify = (conf.long_view == 0 && conf.classify == 1);
 	checks.filter_name = (filter.str && filter.type == FILTER_FILE_NAME);
 	checks.filter_type = (filter.str && filter.type == FILTER_FILE_TYPE);
 
@@ -176,6 +179,8 @@ init_checks_struct(void)
 	checks.id_names = (conf.long_view == 1 && prop_fields.ids == PROP_ID_NAME);
 	checks.lnk_char = (conf.color_lnk_as_target == 1 && follow_symlinks == 1
 		&& conf.icons == 0 && conf.light_mode == 0);
+	checks.min_name_trim = (conf.long_view == 1 && conf.max_name_len != UNSET
+		&& conf.min_name_trim > conf.max_name_len);
 	checks.xattr = (conf.long_view == 1 && prop_fields.xattr == 1);
 }
 
@@ -731,15 +736,13 @@ get_longest_filename(const filesn_t n, const size_t pad)
 
 		/* In long view, we won't trim file names below MIN_NAME_TRIM. */
 		const size_t max =
-			(conf.long_view == 1 && conf.max_name_len != UNSET
-			&& conf.min_name_trim > conf.max_name_len)
-			? c_min_name_trim : c_max_name_len;
+			checks.min_name_trim == 1 ? c_min_name_trim : c_max_name_len;
 		if (file_len > max)
 			file_len = max;
 
 		total_len = pad + 1 + file_len;
 
-		if (conf.long_view == 0 && conf.classify == 1) {
+		if (checks.classify == 1) {
 			if (file_info[i].dir)
 				total_len++;
 
@@ -775,10 +778,8 @@ get_longest_filename(const filesn_t n, const size_t pad)
 		}
 	}
 
-#ifndef _NO_ICONS
 	if (conf.long_view == 0 && conf.icons == 1 && conf.columned == 1)
 		longest += 3;
-#endif /* !_NO_ICONS */
 
 	/* longest_fc stores the amount of digits taken by the files counter of
 	 * the longest file name, provided it is a directory.
