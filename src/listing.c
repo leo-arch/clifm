@@ -116,6 +116,18 @@ static size_t longest_fc = 0;
 static int pager_bk = 0;
 static int dir_out = 0;
 
+struct checks_t {
+	int autocmd_files;
+	int birthtime;
+	int filter_name;
+	int filter_type;
+	int id_names;
+	int lnk_char;
+	int xattr;
+};
+
+static struct checks_t checks;
+
 /* Struct to store information about trimmed file names. Used only when
  * Unicode is disabled */
 struct trim_t {
@@ -134,6 +146,20 @@ struct wtrim_t {
 	int type; /* Truncation type: with or without file extension. */
 	int diff; /* */
 };
+
+static void
+init_checks_struct(void)
+{
+	checks.autocmd_files = (conf.read_autocmd_files == 1 && dir_changed == 1);
+	checks.birthtime = (conf.sort == SBTIME || (conf.long_view == 1
+		&& prop_fields.time == PROP_TIME_BIRTH));
+	checks.filter_name = (filter.str && filter.type == FILTER_FILE_NAME);
+	checks.filter_type = (filter.str && filter.type == FILTER_FILE_TYPE);
+	checks.id_names = (conf.long_view == 1 && prop_fields.ids == PROP_ID_NAME);
+	checks.lnk_char = (conf.color_lnk_as_target == 1 && follow_symlinks == 1
+		&& conf.icons == 0 && conf.light_mode == 0);
+	checks.xattr = (conf.long_view == 1 && prop_fields.xattr == 1);
+}
 
 #if !defined(_NO_ICONS)
 static void
@@ -806,15 +832,13 @@ set_long_attribs(const filesn_t n, const struct stat *attr)
 static inline char *
 get_ind_char(const filesn_t index, int *ind_chr)
 {
-	const int print_lnk_char = (file_info[index].symlink == 1
-		&& conf.color_lnk_as_target == 1 && follow_symlinks == 1
-		&& conf.icons == 0 && conf.light_mode == 0);
-
-	*ind_chr = file_info[index].sel == 1 ? SELFILE_CHR
-		: (print_lnk_char == 1 ? LINK_CHR : ' ');
-
-	return file_info[index].sel == 1 ? li_cb
-		: (print_lnk_char == 1 ? lc_c : "");
+	if (file_info[index].symlink == 1 && checks.lnk_char == 1) {
+		*ind_chr = file_info[index].sel == 1 ? SELFILE_CHR : LINK_CHR;
+		return file_info[index].sel == 1 ? li_cb : lc_c;
+	} else {
+		*ind_chr = file_info[index].sel == 1 ? SELFILE_CHR : ' ';
+		return file_info[index].sel == 1 ? li_cb : "";
+	}
 }
 
 /* Return a struct maxes_t with the following information: the largest files
@@ -2461,19 +2485,17 @@ load_file_gral_info(const struct stat *a, const filesn_t n)
 	file_info[n].uid = a->st_uid;
 	file_info[n].gid = a->st_gid;
 
-	if (conf.long_view == 1 && prop_fields.ids == PROP_ID_NAME)
+	if (checks.id_names == 1)
 		get_id_names(n);
 
 #if defined(LINUX_FILE_XATTRS)
-	if (file_info[n].type != DT_LNK
-	&& ((conf.long_view == 1 && prop_fields.xattr == 1) || check_cap == 1)
+	if (file_info[n].type != DT_LNK && (checks.xattr == 1 || check_cap == 1)
 	&& listxattr(file_info[n].name, NULL, 0) > 0)
 		file_info[n].xattr = 1;
 #endif /* LINUX_FILE_XATTRS */
 
 	time_t btime = (time_t)-1;
-	if (conf.sort == SBTIME || (conf.long_view == 1
-	&& prop_fields.time == PROP_TIME_BIRTH)) {
+	if (checks.birthtime == 1) {
 #if defined(ST_BTIME)
 # ifdef LINUX_STATX
 		struct statx attx;
@@ -2846,6 +2868,8 @@ list_dir(void)
 		(follow_symlinks == 1 && conf.long_view == 1
 		&& conf.follow_symlinks_long == 1) ? 0 : AT_SYMLINK_NOFOLLOW;
 
+	init_checks_struct();
+
 	while ((ent = readdir(dir))) {
 		const char *ename = ent->d_name;
 		/* Skip self and parent directories */
@@ -2853,11 +2877,11 @@ list_dir(void)
 			continue;
 
 		/* Check .cfm.in and .cfm.out files for the autocommands function */
-		if (conf.read_autocmd_files == 1 && *ename == '.' && dir_changed == 1)
+		if (checks.autocmd_files == 1 && *ename == '.')
 			check_autocmd_file(ename + 1);
 
 		/* Filter files according to a regex filter */
-		if (filter.str && filter.type == FILTER_FILE_NAME) {
+		if (checks.filter_name == 1) {
 			if (regexec(&regex_exp, ename, 0, NULL, 0) == FUNC_SUCCESS) {
 				if (filter.rev == 1) {
 					excluded_files++;
@@ -2897,7 +2921,7 @@ list_dir(void)
 		}
 
 		/* Filter files according to file type */
-		if (filter.str && filter.type == FILTER_FILE_TYPE && stat_ok == 1
+		if (checks.filter_type == 1 && stat_ok == 1
 		&& exclude_file_type(attr.st_mode, attr.st_nlink) == FUNC_SUCCESS) {
 			/* Decrease counters: the file won't be displayed */
 			if (*ename == '.' && stats.hidden > 0)
