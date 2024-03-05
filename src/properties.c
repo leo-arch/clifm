@@ -1119,12 +1119,9 @@ print_file_name(char *filename, const char *color, const int follow_link,
 
 	if (follow_link == 1) { /* 'pp' command */
 		if (link_target && *link_target) {
-			char *tmp = abbreviate_file_name(link_target);
 			printf(_("\tName: %s%s%s <- %s%s%s\n"), color,
-				tmp ? tmp : link_target, df_c, ln_c,
+				link_target, df_c, ln_c,
 				wname ? wname : filename, df_c);
-			if (tmp != link_target)
-				free(tmp);
 		} else {
 			printf(_("\tName: %s%s%s\n"), color,
 				wname ? wname : filename, df_c);
@@ -1148,13 +1145,9 @@ print_file_name(char *filename, const char *color, const int follow_link,
 	struct stat a;
 	if (tlen != -1 && *target && lstat(target, &a) != -1) {
 		char *link_color = get_link_color(target);
-		char *name = abbreviate_file_name(target);
 
 		printf(_("\tName: %s%s%s -> %s%s%s\n"), ln_c, wname ? wname
-			: filename, df_c, link_color, name ? name : target, df_c);
-
-		if (name != target)
-			free(name);
+			: filename, df_c, link_color, target, df_c);
 
 	} else { /* Broken link */
 		if (tlen != -1 && *target) {
