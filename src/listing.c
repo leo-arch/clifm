@@ -120,6 +120,7 @@ struct checks_t {
 	int autocmd_files;
 	int birthtime;
 	int classify;
+	int files_counter;
 	int filter_name;
 	int filter_type;
 	int icons_use_file_color;
@@ -166,6 +167,11 @@ init_checks_struct(void)
 	checks.birthtime = (conf.sort == SBTIME || (conf.long_view == 1
 		&& prop_fields.time == PROP_TIME_BIRTH));
 	checks.classify = (conf.long_view == 0 && conf.classify == 1);
+
+	checks.files_counter = (conf.files_counter == 1
+		&& ((conf.long_view == 1 && prop_fields.counter == 1)
+		|| (conf.long_view == 0 && conf.classify == 1)));
+
 	checks.filter_name = (filter.str && filter.type == FILTER_FILE_NAME);
 	checks.filter_type = (filter.str && filter.type == FILTER_FILE_TYPE);
 
@@ -2561,7 +2567,7 @@ load_dir_info(const struct stat *a, const filesn_t n)
 	const int daccess = (a &&
 		check_file_access(a->st_mode, a->st_uid, a->st_gid) == 1);
 
-	file_info[n].filesn = (conf.files_counter == 1
+	file_info[n].filesn = (checks.files_counter == 1
 		? (count_dir(file_info[n].name, NO_CPOP) - 2) : 1);
 
 	if (daccess == 0 || file_info[n].filesn < 0) {
