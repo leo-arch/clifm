@@ -398,6 +398,14 @@ static int
 filescounter_function(const char *arg)
 {
 	if (!arg) {
+		conf.files_counter = conf.files_counter == 1 ? 0 : 1;
+		if (conf.autols == 1) reload_dirlist();
+		print_reload_msg(_("Files counter %s\n"),
+			conf.files_counter == 1 ? _("enabled") : _("disabled"));
+		return FUNC_SUCCESS;
+	}
+
+	if (IS_HELP(arg)) {
 		puts(_(FC_USAGE));
 		return FUNC_SUCCESS;
 	}
@@ -556,7 +564,15 @@ auto_open_function(const char *arg)
 static int
 columns_function(const char *arg)
 {
-	if (!arg || IS_HELP(arg)) {
+	if (!arg) {
+		conf.columned = conf.columned == 1 ? 0 : 1;
+		if (conf.autols == 1) reload_dirlist();
+		print_reload_msg(_("Columns %s\n"), conf.columned == 1
+			? _("enabled") : _("disabled"));
+		return FUNC_SUCCESS;
+	}
+
+	if (IS_HELP(arg)) {
 		puts(_(COLUMNS_USAGE));
 		return FUNC_SUCCESS;
 	}

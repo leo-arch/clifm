@@ -34,7 +34,7 @@
 \x1b[1mEXAMPLES\x1b[0m\n\
 - List available actions/plugins\n\
     actions list\n\
-  Note: Since 'list' is the default action, it can be omitted\n\
+  Note: Since 'list' is the default action, it can be omitted.\n\
 - Open/edit the actions configuration file with nano\n\
     actions edit nano\n\
 - Open/edit the actions configuration file with the default application\n\
@@ -60,7 +60,7 @@ use the -h,--help flag. Example: \"- --help\"."
 - Import aliases from ~/.bashrc\n\
     alias import ~/.bashrc\n\
   Note: Only aliases following the POSIX specification (NAME=\"STR\")\n\
-  will be imported"
+  will be imported."
 
 #define ARCHIVE_USAGE "Compress/archive files\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
@@ -210,7 +210,7 @@ operation).\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   colors"
 
-#define COLUMNS_USAGE "Set columned list of files on/off\n\n\
+#define COLUMNS_USAGE "Toggle columned list of files on/off\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   cl, columns [on | off]"
 
@@ -245,15 +245,15 @@ https://github.com/leo-arch/clifm/wiki/Customization#ls_colors-support"
 to the notification daemon instead of\n\
 being printed immediately before the next prompt\n\n\
 To enable this feature use the --desktop-notifications command line flag or\n\
-set DesktopNotifications to true in the configuration file (F10)\n\n\
+set DesktopNotifications to true in the configuration file (F10).\n\n\
 Notifications are sent using the following command:\n\n\
 Linux/BSD: notify-send -u \"TYPE\" \"TITLE\" \"MSG\"\n\
 MacOS:     osascript -e 'display notification \"MSG\" subtitle \"TYPE\" with title \"TITLE\"'\n\
 Haiku:     notify --type \"TYPE\" --title \"TITLE\" \"MSG\"\n\n\
 Note: It is the notification daemon itself who takes care of actually printing\n\
 notifications on your screen. For troubleshoting, consult your \
-daemon's documentation\n\n\
-Tip: You can always check notifications using the 'msg' command"
+daemon's documentation.\n\n\
+Tip: You can always check notifications using the 'msg' command."
 
 #define DH_USAGE "Query the directory history list\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
@@ -265,9 +265,9 @@ Tip: You can always check notifications using the 'msg' command"
     dh query (also 'dh query<TAB>')\n\
 - Change to the entry number (ELN) 12\n\
     dh !12\n\
-  Note: Entry numbers are not displayed when using TAB completion\n\n\
-Note: If the first argument is an absolute path, 'dh' works just as 'cd'\n\
-Tip: Take a look at the 'j' command as well"
+  Note: Entry numbers are not displayed when using TAB completion.\n\n\
+Note: If the first argument is an absolute path, 'dh' works just as 'cd'.\n\
+Tip: Take a look at the 'j' command as well."
 
 #define DIRHIST_USAGE "List or access entries in the directory history list\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
@@ -279,7 +279,7 @@ Tip: Take a look at the 'j' command as well"
     b !12\n\
 - Remove all entries from the directory history list\n\
     b clear\n\n\
-Tip: See also the 'dh' and 'j' commands"
+Tip: See also the 'dh' and 'j' commands."
 
 #define DUP_USAGE "Duplicate files via rsync(1) (cp(1) if rsync is not found)\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
@@ -287,9 +287,9 @@ Tip: See also the 'dh' and 'j' commands"
 \x1b[1mEXAMPLE\x1b[0m\n\
 - Duplicate files whose ELN's are 12 through 20\n\
     d 12-20\n\n\
-You will be asked for a destiny directory\n\
+You will be asked for a destiny directory.\n\
 Duplicated files are created as SRC.copy, and, if SRC.copy exists, as \n\
-SRC.copy-n, where n is an positive integer (starting at 1)\n\n\
+SRC.copy-n, where n is an positive integer (starting at 1).\n\n\
 Parameters passed to rsync: --aczvAXHS --progress\n\n\
 Parameters passed to cp: -a"
 
@@ -323,7 +323,7 @@ Parameters passed to cp: -a"
 \x1b[1mUSAGE\x1b[0m\n\
   export NAME=VALUE..."
 
-#define FC_USAGE "Turn on/off the files counter for directories\n\n\
+#define FC_USAGE "Toggle the files counter for directories on/off\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   fc [on | off | status]"
 
@@ -332,7 +332,7 @@ Parameters passed to cp: -a"
 - Toggle long/detail view mode\n\
     ll (also Alt-l)\n\
   Note: Use PropFields in the configuration file to customize output\n\
-  fields (and TimeStyle for custom timestamp formats)\n\
+  fields (and TimeStyle for custom timestamp formats).\n\
 - Print properties of the file whose ELN is 4\n\
     p4\n\
 - Print file properties, including directory full size\n\
@@ -346,10 +346,10 @@ Note 2: Unlink 'p', 'pp' always follows symlinks to their target file."
 - Enable full directory size (long view)\n\
     fz on (or --full-dir-size)\n\
 - Toggle the disk usage analyzer mode on/off\n\
-    Alt-TAB (or -t, --disk-usage-analyzer)\n\
+    Alt-TAB (or -t,--disk-usage-analyzer)\n\
 - Print files sizes as used blocks instead of used bytes (apparent size)\n\
     Run with --no-apparent-size or set ApparentSize to false in the\n\
-    configuration file\n\
+    configuration file.\n\
 - Use powers of 1000 instead of 1024 for file sizes\n\
     Run with --si"
 
@@ -359,7 +359,7 @@ Note 2: Unlink 'p', 'pp' always follows symlinks to their target file."
 \x1b[1mEXAMPLE\x1b[0m\n\
 - Disable list directories-first\n\
     ff off\n\
-  Note: Toggle directories-first on/off pressing Alt-g"
+  Note: Toggle directories-first on/off pressing Alt-g."
 
 #define FILE_PREVIEWS "Use the 'view' command to preview files in the current \
 directory (depends on fzf).\n\n\
@@ -417,7 +417,7 @@ that there is no need to set this variable."
     ft =l\n\
 - Do not list socket files\n\
     ft !=s\n\
-  Note: See below for the list of available file type characters\n\
+  Note: See below for the list of available file type characters.\n\
 - Unset the current filter\n\
     ft unset\n\n\
 You can also filter files in the current directory using TAB\n\
@@ -444,7 +444,7 @@ Available file type characters:\n\
   x: Executable files (2)\n\n\
 (1) Only via TAB completion\n\
 (2) Not available in light mode\n\n\
-Type '=<TAB>' to get the list of available file type filters\n\n\
+Type '=<TAB>' to get the list of available file type filters.\n\n\
 Other ways of filtering files in the current directory:\n\n\
 * @<TAB>       List all MIME-types found\n\
 * @query<TAB>  MIME-type filter. Ex: @pdf<TAB> to list all PDF files\n\
@@ -513,17 +513,17 @@ history or !<TAB>: List available commands\n\
     history show-time\n\
 - Print the last 4 commands in history\n\
     history -4\n\
-  Note: 'history show-time -4' to add timestamps\n\
+  Note: 'history show-time -4' to add timestamps.\n\
 - Prevent subsequent commands from being written to the history file\n\
     history off (then reenable it via 'history on')\n\
-  Note: Starting a command by a space prevent it from being added to history\n\
+  Note: Starting a command by a space prevent it from being added to history.\n\
 - Edit the commands history list\n\
     history edit\n\
 - Edit the commands history list using vi\n\
     history edit vi\n\
 - Clear the history list\n\
     history clear\n\n\
-You can also access the commands history via the exclamation mark (!)\n\
+You can also access the commands history via the exclamation mark (!).\n\
 - List available commands\n\
     !<TAB>\n\
 - List all history entries matching 'sudo'\n\
@@ -535,7 +535,7 @@ You can also access the commands history via the exclamation mark (!)\n\
 - Execute the 'last - n' command in the history list\n\
     !-n\n\n\
 Tip: Use HistIgnore in the configuration file to exclude command lines\n\
-from the history list"
+from the history list."
 
 #define ICONS_USAGE "Set icons on/off\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
@@ -552,7 +552,7 @@ For information about the matching algorithm consult the manpage\n\n\
     jl str\n\
 - Jump (cd) to the best ranked directory matching \"bui\"\n\
     j bui\n\
-  Note: Hit TAB to get a list of possible matches: 'j bui<TAB>'\n\
+  Note: Hit TAB to get a list of possible matches: 'j bui<TAB>'.\n\
 - If not enough, use multiple query strings\n\
     j ho bui\n\
   Note: Most likey, this will take you to '/home/build'\n\
@@ -669,7 +669,7 @@ If the device is mounted, it will be unmounted; if unmounted, it will \
 be mounted.\n\
 If mounting a device, CliFM will change automatically to the corresponding\n\
 mountpoint.\n\n\
-To get information about a device, enter iELN. For example: i12"
+To get information about a device, enter iELN. For example: 'i12'."
 
 #define MF_USAGE "Limit the amount of files listed on the screen to NUM \
 (valid range: >= 0). Use 'unset' to remove the files limit.\n\n\
@@ -683,7 +683,7 @@ To get information about a device, enter iELN. For example: i12"
 - Open the file 'book.pdf' with the default opening application\n\
     mm open book.pdf\n\
   Note: Since 'open' is the default action, it can be omitted: 'mm book.pdf'.\n\
-  This command is the same as 'open book.pdf' or just 'book.pdf'\n\
+  This command is the same as 'open book.pdf' or just 'book.pdf'.\n\
 - Get MIME information for the file whose ELN is 12\n\
     mm info 12\n\
 - Open/edit the MIME configuration file\n\
@@ -698,8 +698,8 @@ To get information about a device, enter iELN. For example: i12"
     2) Edit the mimelist file\n\
       mm edit (or F6)\n\
     Once in the file, find the appropriate entry and add the desired\n\
-    opening application\n\
-  For more information consult the manpage"
+    opening application.\n\
+  For more information consult the manpage."
 
 #define MSG_USAGE "List available Clifm messages\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
@@ -716,7 +716,7 @@ To get information about a device, enter iELN. For example: i12"
 \x1b[1mEXAMPLES\x1b[0m\n\
 - List available mountpoints\n\
     mp (or Alt-m)\n\
-  Once there, select the mountpoint you want to change to"
+  Once there, select the mountpoint you want to change to."
 
 #define NET_USAGE "Manage network resources\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
@@ -726,7 +726,7 @@ To get information about a device, enter iELN. For example: i12"
     net (or 'net list')\n\
 - Mount the remote resource named 'work'\n\
     net mount work (also 'net m work' or 'net m <TAB>')\n\
-  Note: Since 'mount' is the default action, it can be omitted: 'net work'\n\
+  Note: Since 'mount' is the default action, it can be omitted: 'net work'.\n\
 - Unmount the remote resource named 'work'\n\
     net unmount work (or 'net u work' or 'net u <TAB>')\n\
 - Open/edit the net configuration file\n\
@@ -744,12 +744,12 @@ To get information about a device, enter iELN. For example: i12"
     n file1 file2\n\
 - Create two directories named dir1 and dir2\n\
     n dir1/ dir2/\n\
-  Note: Note the ending slashes\n\
+  Note: Note the ending slashes.\n\
 - Both of the above at once:\n\
     n file1 file2 dir1/ dir2/\n\n\
 Parent directories are created if necessary. For example, if you run\n\
     n dir/subdir/file\n\
-both 'dir' and 'subdir' directories will be created if they do not exist"
+both 'dir' and 'subdir' directories will be created if they do not exist."
 
 #define OC_USAGE "Interactively change files ownership\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
@@ -774,7 +774,7 @@ If only a name/number is entered, it is taken as user.\n\n\
     :video (or \":981\")\n\
 - Change user to peter and primary group to audio\n\
     peter:audio (or \"1000:986\" or \"peter:986\" or \"1000:audio\")\n\n\
-Note: Use the 'pc' command to edit files permissions"
+Note: Use the 'pc' command to edit files permissions."
 
 #define OPEN_USAGE "Open a file\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
@@ -817,8 +817,8 @@ Note: Use the 'pc' command to edit files permissions"
 If set to 'on', run the pager whenever the list of files does no fit on\n\
 the screen. If set to any positive integer greater than 1, run the pager\n\
 whenever the amount of files in the current directory is greater than or\n\
-equal to this value (say, 1000). 1 amounts to 'on' and 0 to 'off'\n\n\
-Note: You can also try the 'pager' plugin running 'gg'"
+equal to this value (say, 1000). 1 amounts to 'on' and 0 to 'off'.\n\n\
+Note: You can also try the 'pager' plugin running 'gg'."
 
 #define PC_USAGE "Interactively edit files permissions\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
@@ -831,9 +831,9 @@ Note: You can also try the 'pager' plugin running 'gg'"
 When editing multiple files with different permissions at once,\n\
 only shared permission bits will be set in the permissions template.\n\
 Bear in mind that the new permissions set will be applied to all files\n\
-passed as arguments\n\n\
-Both symbolic and octal notation for the new permissions set are allowed\n\n\
-Note: Use the 'oc' command to edit files ownership"
+passed as arguments.\n\n\
+Both symbolic and octal notation for the new permissions set are allowed.\n\n\
+Note: Use the 'oc' command to edit files ownership."
 
 #define PIN_USAGE "Pin a file or directory\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
@@ -910,9 +910,8 @@ Unlike 'p', however, 'pp' always follows symlinks to their target file."
 
 #define QUIT_HELP "Exit clifm\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  Q, q, quit, exit\n\n\
-Use 'Q' to exit running the CD on quit function\n\
-To enable this feature consult the manpage"
+  q, quit, exit\n\n\
+To enable the cd-on-quit function consult the manpage."
 
 #define RR_USAGE "Remove files in bulk using a text editor\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
@@ -955,7 +954,7 @@ To perform a recursive search, use the -x modifier (file types not allowed)\n\
 To search for files by content instead of names use the rgfind plugin, bound\n\
 by default to the \"//\" action name. For example:\n\
     // content I\\'m looking for\n\n\
-Note: This plugin depends on fzf(1) and rg(1) (ripgrep)"
+Note: This plugin depends on fzf(1) and rg(1) (ripgrep)."
 
 #define SECURITY_USAGE "CliFM provides three different security mechanisms:\n\n\
 1. Stealth mode (aka incognito/private mode): No file is read nor written\n\
@@ -1009,7 +1008,7 @@ Recognized file types: (d)irectory, regular (f)ile, symbolic (l)ink,\n\
 1 = name, 2 = size, 3 = atime, 4 = btime, \n5 = ctime, \
 6 = mtime, 7 = version, 8 = extension, 9 = inode,\n\
 10 = owner, 11 = group, 12 = blocks, 13 = links\n\
-Note: Both numbers and names are allowed\n\n\
+Note: Both numbers and names are allowed.\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - List files by size\n\
     st size (or 'st <TAB>' to choose from a list)\n\
@@ -1040,8 +1039,8 @@ following shortcuts as well:\n\n\
     tag list file.txt\n\
 - Tag all .PNG files in the current directory as both 'images' and 'png'\n\
     tag add *.png :images :png\n\
-  Note: Tags are created if they do not exist\n\
-  Note 2: Since 'add' is the default action, it can be omitted\n\
+  Note: Tags are created if they do not exist.\n\
+  Note 2: Since 'add' is the default action, it can be omitted.\n\
 - Tag all selected files as 'special'\n\
     tag add sel :special\n\
 - Rename tag 'documents' as 'docs'\n\
@@ -1049,7 +1048,7 @@ following shortcuts as well:\n\n\
 - Merge tag 'png' into 'images'\n\
     tag merge png images\n\
   Note: All files tagged as 'png' will be now tagged as 'images',\n\
-  and the 'png' tag will be removed\n\
+  and the 'png' tag will be removed.\n\
 - Remove the tag 'images' (untag all files tagged as 'images')\n\
     tag del images\n\
 - Untag a few files from the 'work' tag\n\
@@ -1066,7 +1065,7 @@ Operating on tagged files (t:TAG)\n\
     stat t:work t:docs\n\n\
 To operate only on some tagged files use TAB as follows:\n\
     t:TAG<TAB> (multi-selection is allowed)\n\
-Mark the files you need via TAB and then press Enter or Right"
+Mark the files you need via TAB and then press Enter or Right."
 
 #define TE_USAGE "Toggle the executable bit on files\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
@@ -1106,7 +1105,7 @@ Note: For more information try 'u --help'."
 #define UMASK_USAGE "Print/set the file mode creation mask\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   umask [MODE]\n\n\
-Note: MODE is an octal value from 000 to 777\n\n\
+Note: MODE is an octal value from 000 to 777.\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Print the current value\n\
     umask\n\
@@ -1128,7 +1127,7 @@ Note: To permanently set the umask, use the Umask option in the config file."
     u\n\
   or\n\
     'u <TAB>' to choose from a list (multi-selection is allowed)\n\n\
-Note: Use the 'trash' command to trash files. Try 'trash --help'"
+Note: Use the 'trash' command to trash files. Try 'trash --help'."
 
 #define VV_USAGE "Copy files into a directory and bulk rename them at once\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
@@ -1149,7 +1148,7 @@ Note: Use the 'trash' command to trash files. Try 'trash --help'"
     view edit (or F7)\n\
 - Edit the configuration file using vi\n\
     view edit vi\n\n\
-Enter 'help file-previews' for more information"
+Enter 'help file-previews' for more information."
 
 #define WRAPPERS_USAGE "c, m, and r commands are wrappers for \
 cp(1), mv(1), and rm(1) shell\ncommands respectively.\n\n\
@@ -1181,7 +1180,7 @@ Example: cp -abf ...\n\n\
     c file1 dir1/file2\n\
 - Copy all selected files into the current directory\n\
     c sel\n\
-  Note: If destiny directory is omitted, the current directory is assumed\n\
+  Note: If destiny directory is omitted, the current directory is assumed.\n\
 - Copy all selected files into the current directory (non-interactively):\n\
     c -f sel\n\
 - Move all selected files into the directory named testdir\n\
@@ -1191,7 +1190,7 @@ Example: cp -abf ...\n\n\
 - Interactively rename 'file1'\n\
     m file1\n\
   Note: The user is prompted to enter a new name using the old name as\n\
-  template\n\
+  template.\n\
 - Move all selected files into the current directory (non-interactively)\n\
     m -f sel\n\
 - Remove all selected files\n\
@@ -1224,7 +1223,7 @@ Use the 'l' command to create symbolic links, and 'le' to edit them."
 - Unset the workspace number 2\n\
     ws 2 unset\n\n\
 Note: Use the WorkspaceNames option in the configuration file to name\n\
-your workspaces"
+your workspaces."
 
 #define X_USAGE "Launch a new instance of CliFM on a new terminal window\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
@@ -1237,7 +1236,7 @@ your workspaces"
 - Launch a new instance as root\n\
     X\n\n\
 Note: By default xterm(1) is used. Set your preferred terminal\n\
-emulator using the TerminalCmd option in the configuration file"
+emulator using the TerminalCmd option in the configuration file."
 
 /* Misc messages */
 #define PAGER_HELP "?, h: help\nDown arrow, Enter, Space: Advance one line\n\
