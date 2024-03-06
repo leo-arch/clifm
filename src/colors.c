@@ -1590,8 +1590,8 @@ check_ext_color_hash_conflicts(void)
 	size_t i, j;
 
 	for (i = 0; i < ext_colors_n; i++) {
-		for (j = 0; j < ext_colors_n; j++) {
-			if (i != j && ext_colors[i].hash == ext_colors[j].hash) {
+		for (j = i + 1; j < ext_colors_n; j++) {
+			if (ext_colors[i].hash == ext_colors[j].hash) {
 				ext_colors[0].hash = 0;
 				return;
 			}
