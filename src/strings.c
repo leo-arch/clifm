@@ -2746,6 +2746,8 @@ parse_input_str(char *str)
 	const int stdin_dir_ok = (stdin_tmp_dir
 		&& strcmp(workspaces[cur_ws].path, stdin_tmp_dir) == 0);
 
+	const int is_internal_cmd = is_internal(substr[0]);
+
 	/* Let's expand ranges first: the numbers resulting from the expanded range
 	 * will be expanded into the corresponding file names by eln_expand() below. */
 	expand_ranges(&substr);
@@ -2817,7 +2819,8 @@ parse_input_str(char *str)
 		if ((*substr[i] == '.' && (!substr[i][1] || (substr[i][1] == '.'
 		&& (!substr[i][2] || substr[i][2] == '/'))))
 		|| strstr(substr[i], "/..")) {
-			char *tmp = normalize_path(substr[i], strlen(substr[i]));
+			char *tmp = is_internal_cmd == 1
+				? normalize_path(substr[i], strlen(substr[i])) : NULL;
 			if (tmp) {
 				free(substr[i]);
 				substr[i] = tmp;
@@ -2920,7 +2923,7 @@ parse_input_str(char *str)
 	substr[args_n + 1] = (char *)NULL;
 
 	const int is_action = is_action_name(substr[0]);
-	if (is_internal(substr[0]) == 0 && is_action == 0)
+	if (is_internal_cmd == 0 && is_action == 0)
 		return substr;
 
 		/* ####################################################
