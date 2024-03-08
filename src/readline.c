@@ -269,11 +269,11 @@ rl_exclude_input(unsigned char c)
 #endif /* !_NO_SUGGESTIONS */
 		}
 
-		else if (c == '3' && rl_point < rl_end) {
+/*		else if (c == '3' && rl_point < rl_end) {
 			xdelete();
 			_del = DEL_NON_EMPTY_LINE;
 			goto END;
-		}
+		} */
 
 		/* Handle history events. If a suggestion has been printed and
 		 * a history event is triggered (usually via the Up and Down arrow
@@ -556,7 +556,7 @@ my_rl_getc(FILE *stream)
 			}
 
 			/* Syntax highlighting is made from here */
-			int ret = rl_exclude_input(c);
+			const int ret = rl_exclude_input(c);
 			if (ret == RL_INSERT_CHAR) {
 				if (rl_nohist == 1 && !(flags & NO_FIX_RL_POINT))
 					fix_rl_point(c);
@@ -573,7 +573,7 @@ my_rl_getc(FILE *stream)
 			continue;
 		}
 		/* If zero characters are returned, then the file that we are
-		reading from is empty!  Return EOF in that case. */
+		reading from is empty! Return EOF in that case. */
 		if (result == 0)
 			return (EOF);
 
