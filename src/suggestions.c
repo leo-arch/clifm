@@ -2103,9 +2103,7 @@ rl_suggestions(const unsigned char c)
 		 * ######################################*/
 
 	/* Fastback */
-//	if (word && *word == '.' && word[1] == '.' && word[2] == '.'
 	if (word && *word == '.' && word[1] == '.' && (!word[2] || word[2] == '.')
-//	if (word && *word == '.' && (!word[1] || (word[1] == '.' && (!word[2] || word[2] == '.')))
 	&& (printed = check_fastback(word)) != NO_MATCH)
 		goto SUCCESS;
 
@@ -2531,8 +2529,11 @@ rl_suggestions(const unsigned char c)
 	}
 
 	/* 3.f) Cmds in PATH and CliFM internals cmds, but only for the first word. */
-	if (words_num > 1)
+	if (words_num > 1) {
+		if (suggestion_buf)
+			clear_suggestion(CS_FREEBUF);
 		goto NO_SUGGESTION;
+	}
 
 CHECK_FIRST_WORD:
 
