@@ -1697,7 +1697,12 @@ set_default_colors_256(void)
 	if (!*df_c) xstrsncpy(df_c, DEF_DF_C256, sizeof(df_c));
 
 	/* If unset from the config file, use current workspace color */
-	if (!*dl_c && config_ok == 0) xstrsncpy(dl_c, DEF_DL_C256, sizeof(dl_c));
+	if (!*dl_c)
+#ifndef CLIFM_SUCKLESS
+		if (config_ok == 0) xstrsncpy(dl_c, DEF_DL_C256, sizeof(dl_c));
+#else
+		xstrsncpy(dl_c, DEF_DL_C256, sizeof(dl_c));
+#endif /* !CLIFM_SUCKLESS */
 
 	if (!*el_c) xstrsncpy(el_c, DEF_EL_C256, sizeof(el_c));
 	if (!*em_c) xstrsncpy(em_c, DEF_EM_C256, sizeof(em_c));
@@ -1756,8 +1761,7 @@ set_default_colors_256(void)
 	if (!*uf_c) xstrsncpy(uf_c, DEF_UF_C256, sizeof(uf_c));
 
 	/* Properties */
-/*	if (!*dd_c) // Date color unset: let's use shades
-		xstrsncpy(dd_c, DEF_DD_C, sizeof(dd_c)); */
+/*	if (!*dd_c) // Date color unset: let's use shades */
 	if (!*db_c) xstrsncpy(db_c, DEF_DB_C256, sizeof(db_c));
 	if (!*de_c) xstrsncpy(de_c, DEF_DE_C256, sizeof(de_c));
 	if (!*dg_c) xstrsncpy(dg_c, DEF_DG_C256, sizeof(dg_c));
@@ -1769,8 +1773,7 @@ set_default_colors_256(void)
 	if (!*dw_c) xstrsncpy(dw_c, DEF_DW_C256, sizeof(dw_c));
 	if (!*dxd_c) xstrsncpy(dxd_c, DEF_DXD_C256, sizeof(dxd_c));
 	if (!*dxr_c) xstrsncpy(dxr_c, DEF_DXR_C256, sizeof(dxr_c));
-/*	if (!*dz_c) // Size color unset: let's use shades
-		xstrsncpy(dz_c, DEF_DZ_C, sizeof(dz_c)); */
+/*	if (!*dz_c) // Size color unset: let's use shades */
 
 #ifndef _NO_ICONS
 	if (!*dir_ico_c)
@@ -1865,7 +1868,12 @@ set_default_colors(void)
 	if (!*df_c) xstrsncpy(df_c, DEF_DF_C, sizeof(df_c));
 
 	/* If unset from the config file, use current workspace color */
-	if (!*dl_c && config_ok == 0) xstrsncpy(dl_c, DEF_DL_C, sizeof(dl_c));
+	if (!*dl_c)
+#ifndef CLIFM_SUCKLESS
+		if (config_ok == 0) xstrsncpy(dl_c, DEF_DL_C256, sizeof(dl_c));
+#else
+		xstrsncpy(dl_c, DEF_DL_C256, sizeof(dl_c));
+#endif /* !CLIFM_SUCKLESS */
 
 	if (!*el_c) xstrsncpy(el_c, DEF_EL_C, sizeof(el_c));
 	if (!*em_c) xstrsncpy(em_c, DEF_EM_C, sizeof(em_c));
@@ -1924,8 +1932,7 @@ set_default_colors(void)
 	if (!*uf_c) xstrsncpy(uf_c, DEF_UF_C, sizeof(uf_c));
 
 	/* Interface */
-/*	if (!*dd_c) // Date color unset: let's use shades
-		xstrsncpy(dd_c, DEF_DD_C, sizeof(dd_c)); */
+/*	if (!*dd_c) // Date color unset: let's use shades */
 	if (!*db_c) xstrsncpy(db_c, DEF_DB_C, sizeof(db_c));
 	if (!*de_c) xstrsncpy(de_c, DEF_DE_C, sizeof(de_c));
 	if (!*dg_c) xstrsncpy(dg_c, DEF_DG_C, sizeof(dg_c));
@@ -1937,8 +1944,7 @@ set_default_colors(void)
 	if (!*dw_c) xstrsncpy(dw_c, DEF_DW_C, sizeof(dw_c));
 	if (!*dxd_c) xstrsncpy(dxd_c, DEF_DXD_C, sizeof(dxd_c));
 	if (!*dxr_c) xstrsncpy(dxr_c, DEF_DXR_C, sizeof(dxr_c));
-/*	if (!*dz_c) // Size color unset: let's use shades
-		xstrsncpy(dz_c, DEF_DZ_C, sizeof(dz_c)); */
+/*	if (!*dz_c) // Size color unset: let's use shades */
 
 #ifndef _NO_ICONS
 	if (!*dir_ico_c)
