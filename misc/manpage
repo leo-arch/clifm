@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Mar 8, 2024" "clifm 1.18" "CLIFM Manual"
+.TH "CLIFM" "1" "Mar 9, 2024" "clifm 1.18" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -198,6 +198,9 @@ write the last visited directory to \fI$XDG_CONFIG_HOME/clifm/.last\fR to be lat
 \fB\-\-color\-scheme\fR=\fI\,NAME\/\fR
 use the color scheme named \fINAME\fR
 .TP
+\fB\-\-color\-links\-as\-target\fR
+colorize symbolic links using the target file color
+.TP
 \fB\-\-cwd\-in\-title\fR
 print the current working directory in the terminal window title (otherwise, only the program name is printed)
 .TP
@@ -302,7 +305,7 @@ do not check file extensions (mostly used to colorize specific file names) when 
 disable the files counter for directories (speeding up this the listing process: counting files in directories is particularly expensive).
 .TP
 \fB\-\-no\-follow\-symlinks\fR
-do not follow symbolic links when listing files (links to directories will be listed as regular files)
+do not follow symbolic links when listing files (links to directories will be listed as regular files). Overrides both \fI\-L\fR and \fI\-\-color\-links\-as\-target\fR.
 .TP
 \fB\-\-no\-fzfpreview\fR
 disable file previews for TAB completion (fzf mode only)

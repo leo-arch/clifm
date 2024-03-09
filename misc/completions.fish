@@ -44,6 +44,7 @@ complete -c clifm -l case-sens-dirjump -d 'Do not ignore case when consulting th
 complete -c clifm -l case-sens-path-comp -d 'Enable case sensitive path completion'
 complete -c clifm -l cd-on-quit -d 'Enable cd-on-quit (consult the manpage)'
 complete -c clifm -l color-scheme -r -d 'Set a color scheme' -x -a '(ls ~/.config/clifm/colors/*.clifm | awk -F\'/\' \'{print $NF}\' | cut -d\'.\' -f1)'
+complete -c clifm -l color-links-as-target -d 'Colorize symbolic links using the target file color'
 complete -c clifm -l cwd-in-title -d 'Print current directory in window\'s title'
 complete -c clifm -l data-dir -r -d "Set an alternative data directory"
 complete -c clifm -l desktop-notifications -d 'Enable desktop notifications'

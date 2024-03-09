@@ -46,6 +46,7 @@ args=(
 	'--case-sens-path-comp[do not ignore case when completing file names]'
 	'--cd-on-quit[write last visited path to $XDG_CONFIG_HOME/clifm/.last to be accessed later by a shell funtion]'
 	'--color-scheme=[set color scheme]:color:->colorschemes'
+	'--color-links-as-target[colorize symbolic links using the target file color]'
 	'--cwd-in-title[print current directory in the terminal window title]'
 	'--data-dir=[use PATH as data directory]:directory:_directories'
 	'--desktop-notifications[enable desktop notifications]'
