@@ -2460,7 +2460,7 @@ exec_cmd(char **comm)
 #ifndef _NO_PROFILES
 		return (exit_code = profile_function(comm));
 #else
-		{ xerror("%s: prof: %s\n", PROGRAM_NAME, NOT_AVAILABLE);
+		{ xerror("%s: profiles: %s\n", PROGRAM_NAME, NOT_AVAILABLE);
 		return FUNC_FAILURE; }
 #endif /* !_NO_PROFILES */
 

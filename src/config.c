@@ -2365,7 +2365,6 @@ create_bm_file(void)
 	return FUNC_SUCCESS;
 }
 
-#ifndef CLIFM_SUCKLESS
 static char *
 get_line_value(char *line)
 {
@@ -2375,6 +2374,78 @@ get_line_value(char *line)
 	return remove_quotes(line);
 }
 
+/* Read time format from LINE and store the appropriate value in STR.
+ * PTIME specifies whether we're dealing with PTimeStyle or just TimeStyle
+ * options (the former does not support relative times). */
+void
+set_time_style(char *line, char **str, const int ptime)
+{
+	if (!line || !*line)
+		return;
+
+	char *tmp = get_line_value(line);
+	if (!tmp)
+		return;
+
+	free(*str);
+	*str = (char *)NULL;
+
+	if (*tmp == 'r' && strcmp(tmp + 1, "elative") == 0) {
+		if (ptime == 0) conf.relative_time = 1;
+	} else if (*tmp == 'd' && strcmp(tmp + 1, "efault") == 0) {
+		return;
+	} else if (*tmp == 'i' && strcmp(tmp + 1, "so") == 0) {
+		*str = savestring(ISO_TIME, sizeof(ISO_TIME) - 1);
+	} else if (*tmp == 'f' && strcmp(tmp + 1, "ull-iso") == 0) {
+		*str = savestring(FULL_ISO_TIME, sizeof(FULL_ISO_TIME) - 1);
+	} else if (ptime == 1
+	&& *tmp == 'f' && strcmp(tmp + 1, "ull-iso-nano") == 0) {
+		*str = savestring(FULL_ISO_NANO_TIME, sizeof(FULL_ISO_NANO_TIME) - 1);
+	} else if (*tmp == 'l' && strcmp(tmp + 1, "ong-iso") == 0) {
+		*str = savestring(LONG_ISO_TIME, sizeof(LONG_ISO_TIME) - 1);
+	} else if (*tmp == '+') {
+		if (*(++tmp)) {
+			/* We don't support FORMAT1<newline>FORMAT2, like ls(1) does. */
+			char *n = strchr(tmp, '\n');
+			if (n) *n = '\0';
+			*str = savestring(tmp, strlen(tmp));
+		}
+	} else {
+		char *n = strchr(tmp, '\n');
+		if (n) *n = '\0';
+		*str = savestring(tmp, strlen(tmp));
+	}
+}
+
+static void
+set_time_style_env(void)
+{
+	if (xargs.secure_env == 1 || xargs.secure_env_full == 1)
+		return;
+
+	char *p = getenv("CLIFM_TIME_STYLE");
+	if (!p || !*p)
+		p = getenv("TIME_STYLE");
+	if (!p || !*p)
+		return;
+
+	set_time_style(p, &conf.time_str, 0);
+}
+
+static void
+set_ptime_style_env(void)
+{
+	if (xargs.secure_env == 1 || xargs.secure_env_full == 1)
+		return;
+
+	char *p = getenv("PTIME_STYLE");
+	if (!p || !*p)
+		return;
+
+	set_time_style(p, &conf.ptime_str, 1);
+}
+
+#ifndef CLIFM_SUCKLESS
 static int
 set_fzf_preview_value(const char *line, int *var)
 {
@@ -2771,77 +2842,6 @@ set_dirhistignore_pattern(char *str)
 	}
 
 	conf.dirhistignore_regex = savestring(pattern, strlen(pattern));
-}
-
-/* Read time format from LINE and store the appropriate value in STR.
- * PTIME specifies whether we're dealing with PTimeStyle or just TimeStyle
- * options (the former does not support relative times). */
-void
-set_time_style(char *line, char **str, const int ptime)
-{
-	if (!line || !*line)
-		return;
-
-	char *tmp = get_line_value(line);
-	if (!tmp)
-		return;
-
-	free(*str);
-	*str = (char *)NULL;
-
-	if (*tmp == 'r' && strcmp(tmp + 1, "elative") == 0) {
-		if (ptime == 0) conf.relative_time = 1;
-	} else if (*tmp == 'd' && strcmp(tmp + 1, "efault") == 0) {
-		return;
-	} else if (*tmp == 'i' && strcmp(tmp + 1, "so") == 0) {
-		*str = savestring(ISO_TIME, sizeof(ISO_TIME) - 1);
-	} else if (*tmp == 'f' && strcmp(tmp + 1, "ull-iso") == 0) {
-		*str = savestring(FULL_ISO_TIME, sizeof(FULL_ISO_TIME) - 1);
-	} else if (ptime == 1
-	&& *tmp == 'f' && strcmp(tmp + 1, "ull-iso-nano") == 0) {
-		*str = savestring(FULL_ISO_NANO_TIME, sizeof(FULL_ISO_NANO_TIME) - 1);
-	} else if (*tmp == 'l' && strcmp(tmp + 1, "ong-iso") == 0) {
-		*str = savestring(LONG_ISO_TIME, sizeof(LONG_ISO_TIME) - 1);
-	} else if (*tmp == '+') {
-		if (*(++tmp)) {
-			/* We don't support FORMAT1<newline>FORMAT2, like ls(1) does. */
-			char *n = strchr(tmp, '\n');
-			if (n) *n = '\0';
-			*str = savestring(tmp, strlen(tmp));
-		}
-	} else {
-		char *n = strchr(tmp, '\n');
-		if (n) *n = '\0';
-		*str = savestring(tmp, strlen(tmp));
-	}
-}
-
-static void
-set_time_style_env(void)
-{
-	if (xargs.secure_env == 1 || xargs.secure_env_full == 1)
-		return;
-
-	char *p = getenv("CLIFM_TIME_STYLE");
-	if (!p || !*p)
-		p = getenv("TIME_STYLE");
-	if (!p || !*p)
-		return;
-
-	set_time_style(p, &conf.time_str, 0);
-}
-
-static void
-set_ptime_style_env(void)
-{
-	if (xargs.secure_env == 1 || xargs.secure_env_full == 1)
-		return;
-
-	char *p = getenv("PTIME_STYLE");
-	if (!p || !*p)
-		return;
-
-	set_time_style(p, &conf.ptime_str, 1);
 }
 
 static void
@@ -3342,11 +3342,6 @@ read_config(void)
 
 	fclose(config_fp);
 
-	if (!conf.time_str)
-		set_time_style_env();
-	if (!conf.ptime_str)
-		set_ptime_style_env();
-
 	if (xargs.disk_usage_analyzer == 1) {
 		conf.sort = STSIZE;
 		conf.long_view = conf.full_dir_size = 1;
@@ -3567,11 +3562,15 @@ init_config(void)
 
 #ifndef CLIFM_SUCKLESS
 	cschemes_n = get_colorschemes();
-
 	read_config();
 #else
 	xstrsncpy(div_line, DEF_DIV_LINE, sizeof(div_line));
 #endif /* !CLIFM_SUCKLESS */
+
+	if (!conf.time_str)
+		set_time_style_env();
+	if (!conf.ptime_str)
+		set_ptime_style_env();
 
 	if (just_listing == 0)
 		load_prompts();
