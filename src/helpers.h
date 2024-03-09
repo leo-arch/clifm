@@ -1372,6 +1372,7 @@ struct param_t {
 	int case_sens_path_comp;
 	int case_sens_list;
 	int clear_screen;
+	int color_lnk_as_target;
 	int colorize;
 	int columns;
 	int config;

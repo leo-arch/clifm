@@ -1347,6 +1347,7 @@ database (via the 'j' command)\
 \n      --case-sens-path-comp\t Enable case sensitive path completion\
 \n      --cd-on-quit\t\t Enable cd-on-quit functionality (see the manpage)\
 \n      --color-scheme=NAME\t Use color scheme NAME\
+\n      --color-links-as-target\t Use the target file color for symbolic links\
 \n      --cwd-in-title\t\t Print current directory in the terminal window title\
 \n      --data-dir=PATH\t\t Use PATH as data directory\
 \n      --desktop-notifications\t Enable desktop notifications\
@@ -1381,7 +1382,7 @@ and paths\
 \n      --no-file-cap\t\t Do not check file capabilities when listing files\
 \n      --no-file-ext\t\t Do not check file extensions when listing files\
 \n      --no-files-counter\t Disable the files counter for directories\
-\n      --no-follow-symlink\t Do not follow symbolic links when listing files\
+\n      --no-follow-symlink\t Do not follow symbolic links when listing files (overrides -L and --color-links-as-target)\
 \n      --no-fzfpreview\t\t Disable file previews for TAB completion (fzf mode only)\
 \n      --no-highlight\t\t Disable syntax highlighting\
 \n      --no-history\t\t Do not write commands into the history file\

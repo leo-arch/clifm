@@ -189,7 +189,7 @@ init_conf_struct(void)
 	conf.clear_screen = UNSET;
 	conf.cmd_desc_sug = UNSET;
 	conf.colorize = UNSET;
-	conf.color_lnk_as_target = DEF_COLOR_LNK_AS_TARGET;
+	conf.color_lnk_as_target = UNSET;
 	conf.columned = UNSET;
 	conf.cp_cmd = UNSET;
 	conf.desktop_notifications = UNSET;
@@ -1699,6 +1699,7 @@ unset_xargs(void)
 	xargs.classify = UNSET;
 	xargs.clear_screen = UNSET;
 	xargs.color_scheme = UNSET;
+	xargs.color_lnk_as_target = UNSET;
 	xargs.colorize = UNSET;
 	xargs.columns = UNSET;
 	xargs.config = UNSET;
@@ -2686,6 +2687,13 @@ check_options(void)
 	&& regcomp(&regex_hist, DEF_HISTIGNORE, REG_NOSUB | REG_EXTENDED) == 0) {
 		conf.histignore_regex =
 			savestring(DEF_HISTIGNORE, sizeof(DEF_HISTIGNORE) - 1);
+	}
+
+	if (conf.color_lnk_as_target == UNSET) {
+		if (xargs.color_lnk_as_target == UNSET)
+			conf.color_lnk_as_target = DEF_COLOR_LNK_AS_TARGET;
+		else
+			conf.color_lnk_as_target = xargs.color_lnk_as_target;
 	}
 
 	if (conf.trim_names == UNSET) {

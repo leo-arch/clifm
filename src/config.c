@@ -2957,7 +2957,7 @@ read_config(void)
 			set_config_bool_value(line + 12, &conf.clear_screen);
 		}
 
-		else if (*line == 'C'
+		else if (xargs.color_lnk_as_target == UNSET && *line == 'C'
 		&& strncmp(line, "ColorLinksAsTarget=", 19) == 0) {
 			set_config_bool_value(line + 19, &conf.color_lnk_as_target);
 		}
