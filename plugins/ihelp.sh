@@ -108,6 +108,8 @@ hf, hh, hidden@
 history @
 icons @
 j @
+k@
+kk@
 kb, keybinds@
 log @
 ll, lv@
@@ -127,7 +129,7 @@ pc @
 pin @
 pf, profile@
 pg, pager@
-p, pp, prop@
+p, prop@
 prompt@
 q, quit, exit, Q@
 rl, reload@
