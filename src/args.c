@@ -1236,6 +1236,7 @@ set_stat(const int optc, const char *optval)
 	xargs.restore_last_path = conf.restore_last_path = 0;
 }
 
+#ifndef _BE_POSIX
 static void
 xset_time_style(char *optval, const int ptime)
 {
@@ -1270,6 +1271,7 @@ xset_prop_fields(const char *optval)
 	}
 #endif /* !ST_BTIME*/
 }
+#endif /* !_BE_POSIX */
 
 __attribute__ ((noreturn))
 static void
