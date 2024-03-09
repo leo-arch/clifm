@@ -81,7 +81,6 @@
 #define NERD_DART          ""
 #define NERD_DATABASE      ""
 #define NERD_DIFF          ""
-#define NERD_DJVU          ""
 #define NERD_DOCKER        ""
 #define NERD_ELECTRON      "󱀤"
 #define NERD_ELIXIR        ""
@@ -124,6 +123,7 @@
 #define NERD_TS            "󰛦"
 #define NERD_TXT           ""
 #define NERD_VIM           ""
+#define NERD_ZIG           ""
 #define NERD_LOCK          ""
 
 #define NERD_EXCELDOC      "󰈜"

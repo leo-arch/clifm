@@ -45,6 +45,7 @@
 #define EMOJI_ASM EMOJI_CODE
 #define EMOJI_AUDIO "🎵"
 #define EMOJI_BINARY "📓"
+#define EMOJI_BOOK_OPEN "📖"
 #define EMOJI_BRIEFCASE "💼"
 #define EMOJI_C "🇨 "
 #define EMOJI_CLOJURE EMOJI_CODE
@@ -61,7 +62,6 @@
 #define EMOJI_DART EMOJI_CODE
 #define EMOJI_DIFF "📋"
 #define EMOJI_DISK "💿"
-#define EMOJI_DJVU "📎"
 #define EMOJI_DOCKER "🐋"
 #define EMOJI_DOWNLOAD "📥"
 #define EMOJI_ELECTRON "⚛ "
