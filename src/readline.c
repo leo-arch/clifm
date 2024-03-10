@@ -240,7 +240,7 @@ construct_wide_char(unsigned char c)
  * SKIP_CHAR = Do not insert char. Do not suggest.
  * SKIP_CHAR_NO_REDISPLAY = Same as SKIP_CHAR, but do not call rl_redisplay(). */
 static int
-rl_exclude_input(unsigned char c)
+rl_exclude_input(const unsigned char c, const unsigned char prev)
 {
 	/* Delete or backspace keys. */
 	int _del = 0;
@@ -269,11 +269,11 @@ rl_exclude_input(unsigned char c)
 #endif /* !_NO_SUGGESTIONS */
 		}
 
-/*		else if (c == '3' && rl_point < rl_end) {
+		else if (prev == '[' && c == '3' && rl_point < rl_end) {
 			xdelete();
 			_del = DEL_NON_EMPTY_LINE;
 			goto END;
-		} */
+		}
 
 		/* Handle history events. If a suggestion has been printed and
 		 * a history event is triggered (usually via the Up and Down arrow
@@ -548,15 +548,15 @@ my_rl_getc(FILE *stream)
 			&& (!rl_line_buffer || !*rl_line_buffer))
 				rl_quit(0, 0);
 
-			prev = c;
-
 			if (rl_end == 0) {
 				if (conf.highlight == 1)
 					rl_redisplay();
 			}
 
 			/* Syntax highlighting is made from here */
-			const int ret = rl_exclude_input(c);
+			const int ret = rl_exclude_input(c, prev);
+			prev = c;
+
 			if (ret == RL_INSERT_CHAR) {
 				if (rl_nohist == 1 && !(flags & NO_FIX_RL_POINT))
 					fix_rl_point(c);
