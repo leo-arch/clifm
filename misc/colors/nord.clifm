@@ -3,9 +3,7 @@
 # Author: L. Abramovich
 # License: GPL3
 
-define D=0;38;2;216;222;233
-define BD=1
-define DIM=2
+define D=38;2;216;222;233
 
 define R=38;2;191;97;106
 define BR=1;38;2;191;97;106
@@ -37,7 +35,9 @@ define RC=7;38;2;143;188;187
 define UDC=4;02;38;2;143;188;187
 define BDC=1;02;38;2;143;188;187
 
-define DW=2;38;2;216;222;233
+define W=38;2;216;222;233
+define DW=2;38;2;216;222;233  # Dimmed white
+define BDW=1;38;2;216;222;233 # Bold white
 
 define RW=38;2;191;97;106;48;2;216;222;233
 define BW=38;2;129;161;193;48;2;216;222;233
@@ -48,11 +48,21 @@ define KG=38;2;46;52;64;48;2;163;190;140
 define BlGr=38;2;129;161;193;48;2;163;190;140
 define WB=38;2;216;222;233;48;2;129;161;193
 
-FiletypeColors="bd=BY:ca=KR:cd=BD:di=BB:ed=DB:ee=G:ef=DIM:ex=BG:fi=D:ln=BG:mh=RC:nd=BR:nf=DR:no=RW:or=RG:ow=BlGr:pi=M:sg=KY:so=BM:st=WB:su=WR:tw=KG:uf=BW:"
+define ARCHIVE=1;38;2;143;188;187
+define AUDIO=38;2;180;142;173
+define BOOK=1;38;2;191;97;106
+define CODE=38;2;163;190;140
+define DOC=38;2;180;142;173
+define IMAGE=38;2;180;142;173
+define MARKUP=38;2;180;142;173
+define TEMP=38;2;67;76;94
+define VIDEO=38;2;180;142;173
 
-InterfaceColors="bm=BC:db=Y:dd=:de=C:df=D:dg=M:dk=R:dl=B:dn=DW:do=C:dp=M:dr=M:dw=R:dxd=G:dxr=C:dz=:el=BDC:em=BR:fc=DB:hb=C:hc=DR:hd=C:he=C:hn=M:hp=C:hq=Y:hr=R:hs=G:hv=G:lc=G:li=BG:mi=BC:nm=BG:sb=DY:sc=DR:sf=UDC:sh=DM:si=BB:sp=DR:sx=DG:ti=BC:tt=BDC:ts=UM:tx=D:ws1=B:ws2=R:ws3=Y:ws4=G:ws5=C:ws6=C:ws7=C:ws8=C:wc=BC:wm=BY:xs=G:xf=BR:"
+FiletypeColors="bd=BY:ca=KR:cd=BDW:di=BB:ed=DB:ee=G:ef=DW:ex=BG:fi=W:ln=BG:mh=RC:nd=BR:nf=DR:no=RW:or=RG:ow=BlGr:pi=M:sg=KY:so=BM:st=WB:su=WR:tw=KG:uf=BW:"
 
-ExtColors="*.a=R:*.d=G:*.p=G:*.h=G:*.m=G:*.t=G:*.r=G:*.o=B2:*.z=BC:*.c=G:*.gv=G:*.md=M:*.lo=B2:*css=G:*.ts=G:*.pl=G:*.cc=G:*.kt=G:*.so=R:*.ps=M:*.cs=G:*.di=G:*.fs=G:*.hi=B2:*.mn=G:*.7z=BC:*.la=B2:*.js=G:*.pm=G:*.go=G:*.sh=G:*.rm=M:*.rb=G:*.td=G:*.wv=M:*.as=G:*.rs=G:*.cp=G:*.pp=G:*.bz=BC:*.hs=G:*.ex=G:*.ui=M:*.vb=G:*.hh=G:*.ko=R:*.py=G:*.ll=G:*.nb=G:*.bc=B2:*.el=G:*.cr=G:*.ml=G:*.gz=BC:*.jl=G:*.xz=BC:*.mir=G:*.tgz=BC:*.xlr=M:*.m4a=M:*.pyd=B2:*.xml=M:*.pyo=B2:*.ics=M:*.xmp=M:*.bz2=BC:*.pyc=B2:*.blg=B2:*hgrc=G:*.tar=BC:*.htm=M:*.c++=G:*.wma=M:*.cgi=G:*.pid=B2:*.pbm=M:*.idx=B2:*.xls=M:*.iso=BC:*.tbz=BC:*.com=R:*.git=B2:*.cfg=M:*.bak=B2:*.rst=M:*.rpm=BC:*.fon=M:*.mkv=M:*.def=G:*.ind=B2:*.fls=B2:*.tml=M:*.zsh=G:*.sbt=G:*.log=B2:*.ltx=G:*.dpr=G:*.otf=M:*.ods=M:*.exe=R:*.mid=M:*.fsx=G:*.hpp=G:*.wav=M:*.vob=M:*.arj=BC:*.bat=R:*.mli=G:*.yml=M:*.tsx=G:*.pps=M:*.kex=M:*.aux=B2:*.odt=M:*.vcd=BC:*.mov=M:*.rtf=M:*.ico=M:*.nix=M:*.ini=M:*.cxx=G:*.lua=G:*.dot=G:*.ogg=M:*.m4v=M:*.htc=G:*.h++=G:*.fsi=G:*.psd=M:*.rar=BC:*.sxw=M:*.odp=M:*.bag=BC:*.tmp=B2:*.elm=G:*.vim=G:*.ttf=M:*.sxi=M:*.ppt=M:*.erl=G:*.csx=G:*.sty=B2:*.tif=M:*.inc=G:*.cpp=G:*.clj=G:*.pkg=BC:*.jar=BC:*.ppm=M:*.kts=G:*.exs=G:*.flv=M:*.asa=G:*.bcf=B2:*.ipp=G:*.svg=M:*.pas=G:*.awk=G:*.dox=G:*.php=G:*.pod=G:*.gvy=G:*.csv=M:*.mpg=M:*.jpg=M:*.bin=BC:*.img=BC:*.swf=M:*.pdf=BR:*.pgm=M:*.epp=G:*.tex=G:*.toc=B2:*.eps=M:*.mp4=M:*.deb=BC:*.zst=BC:*.bst=M:*.zip=BC:*.fnt=M:*.hxx=G:*.sql=G:*.ps1=G:*.tcl=G:*.mp3=M:*.aif=M:*.inl=G:*.xcf=M:*.pro=G:*.dmg=BC:*.swp=B2:*.bsh=G:*.bib=M:*.bbl=B2:*.avi=M:*.bmp=M:*.dll=R:*.gif=M:*.wmv=M:*.doc=M:*.out=B2:*.txt=M:*.apk=BC:*.ilg=B2:*.png=M:*.yaml=M:*.tiff=M:*.rlib=B2:*.psd1=G:*.html=M:*.diff=G:*.toml=M:*.xlsx=M:*.java=G:*.orig=B2:*.opus=M:*.psm1=G:*.purs=G:*.bash=G:*.hgrc=G:*.docx=M:*.tbz2=BC:*.lisp=G:*.webm=M:*.fish=G:*.mpeg=M:*.pptx=M:*.make=G:*.dart=G:*.h264=M:*.epub=M:*.jpeg=M:*.flac=M:*.conf=M:*.lock=B2:*.json=M:*.less=G:*.toast=BC:*.scala=G:*.ipynb=G:*.cmake=G:*.cabal=G:*.swift=G:*.dyn_o=B2:*.xhtml=M:*.mdown=M:*.cache=B2:*.shtml=M:*.patch=G:*.class=B2:*.gradle=G:*.matlab=G:*.flake8=G:*.ignore=G:*.groovy=G:*.dyn_hi=B2:*.config=M:*.gemspec=G:*.desktop=M:*.rgignore=G:*.cmake.in=G:*.kdevelop=G:*.markdown=M:*.DS_Store=B2:*.fdignore=G:*.gitconfig=G:*.gitignore=G:*.scons_opt=B2:*.localized=B2:*.gitmodules=G:*.synctex.gz=B2:*.travis.yml=G:*.fdb_latexmk=B2:*.applescript=G:*.clang-format=G:*.gitattributes=G:*.sconsign.dblite=B2:*.CFUserTextEncoding=B2"
+InterfaceColors="bm=BC:db=Y:dd=:de=C:df=D:dg=M:dk=R:dl=BDC:dn=DW:do=C:dp=M:dr=M:dw=R:dxd=G:dxr=C:dz=:el=BDC:em=BR:fc=DB:hb=C:hc=DR:hd=C:he=C:hn=M:hp=C:hq=Y:hr=R:hs=G:hv=G:lc=G:li=BG:mi=BC:nm=BG:sb=DY:sc=DR:sf=UDC:sh=DM:si=BB:sp=DR:sx=DG:ti=BC:ts=UM:tt=BDC:tx=D:ws1=B:ws2=R:ws3=Y:ws4=G:ws5=C:ws6=C:ws7=C:ws8=C:wc=BC:wm=BY:xs=G:xf=BR:"
+
+ExtColors="*.7z=ARCHIVE:*.apk=ARCHIVE:*.arj=ARCHIVE:*.bag=ARCHIVE:*.bin=ARCHIVE:*.bz=ARCHIVE:*.bz2=ARCHIVE:*.deb=ARCHIVE:*.dmg=ARCHIVE:*.gz=ARCHIVE:*.iso=ARCHIVE:*.jar=ARCHIVE:*.pkg=ARCHIVE:*.rar=ARCHIVE:*.rpm=ARCHIVE:*.tbz=ARCHIVE:*.tbz2=ARCHIVE:*.tar=ARCHIVE:*.tgz=ARCHIVE:*.toast=ARCHIVE:*.vcd=ARCHIVE:*.xz=ARCHIVE:*.z=ARCHIVE:*.zip=ARCHIVE:*.zst=ARCHIVE:*.aif=AUDIO:*.flac=AUDIO:*.m4a=AUDIO:*.mkv=AUDIO:*.mid=AUDIO:*.mp3=AUDIO:*.ogg=AUDIO:*.opus=AUDIO:*.vob=AUDIO:*.wav=AUDIO:*.wma=AUDIO:*.wmv=AUDIO:*.wv=AUDIO:*.epub=BOOK:*.djvu=BOOK:*.pdf=BOOK:*.ps=BOOK:*.as=CODE:*.asa=CODE:*.awk=CODE:*.bash=CODE:*.c=CODE:*.c++=CODE:*.cabal=CODE:*.cc=CODE:*.cgi=CODE:*.clj=CODE:*.cmake=CODE:*.cp=CODE:*.cpp=CODE:*.cr=CODE:*.cs=CODE:*.csx=CODE:*.cxx=CODE:*.d=CODE:*.dart=CODE:*.def=CODE:*.di=CODE:*.dot=CODE:*.dox=CODE:*.dpr=CODE:*.el=CODE:*.elm=CODE:*.epp=CODE:*.erl=CODE:*.ex=CODE:*.exs=CODE:*.fish=CODE:*.flake8=CODE:*.fs=CODE:*.fsi=CODE:*.fsx=CODE:*.gemspec=CODE:*.go=CODE:*.gradle=CODE:*.groovy=CODE:*.gv=CODE:*.gvy=CODE:*.h=CODE:*.h++=CODE:*.hgrc=CODE:*.hgrc=CODE:*.hh=CODE:*.hpp=CODE:*.hs=CODE:*.htc=CODE:*.hxx=CODE:*.inc=CODE:*.inl=CODE:*.ipp=CODE:*.ipynb=CODE:*.java=CODE:*.jl=CODE:*.js=CODE:*.kt=CODE:*.kts=CODE:*.less=CODE:*.lisp=CODE:*.ll=CODE:*.ltx=CODE:*.lua=CODE:*.m=CODE:*.make=CODE:*.matlab=CODE:*.mir=CODE:*.ml=CODE:*.mli=CODE:*.mn=CODE:*.nb=CODE:*.p=CODE:*.pas=CODE:*.php=CODE:*.pl=CODE:*.pm=CODE:*.pod=CODE:*.pp=CODE:*.pro=CODE:*.ps1=CODE:*.psd1=CODE:*.psm1=CODE:*.purs=CODE:*.py=CODE:*.r=CODE:*.rb=CODE:*.rs=CODE:*.sbt=CODE:*.scala=CODE:*.sh=CODE:*.sql=CODE:*.swift=CODE:*.t=CODE:*.tcl=CODE:*.td=CODE:*.tex=CODE:*.ts=CODE:*.tsx=CODE:*.vb=CODE:*.vim=CODE:*.zsh=CODE:*.doc=DOC:*.docx=DOC:*.fodp=DOC:*.fods=DOC:*.fodt=DOC:*.odp=DOC:*.ods=DOC:*.odt=DOC:*.ppm=DOC:*.pps=DOC:*.ppt=DOC:*.pptx=DOC:*.rtf=DOC:*.sxi=DOC:*.sxw=DOC:*.txt=DOC:*.xls=DOC:*.xlsx=DOC:*.bmp=IMAGE:*.gif=IMAGE:*.ico=IMAGE:*.jpg=IMAGE:*.jpeg=IMAGE:*.pbm=IMAGE:*.pgm=IMAGE:*.png=IMAGE:*.psd=IMAGE:*.svg=IMAGE:*.tif=IMAGE:*.tiff=IMAGE:*.xcf=IMAGE:*.xmp=IMAGE:*.css=MARKUP:*.htm=MARKUP:*.html=MARKUP:*.markdown=MARKUP:*.md=MARKUP:*.mdown=MARKUP:*.shtml=MARKUP:*.xhtml=MARKUP:*.xlr=MARKUP:*.xls=MARKUP:*.xml=MARKUP:*.aux=TEMP:*.bak=TEMP:*.bbl=TEMP:*.bc=TEMP:*.bcf=TEMP:*.blg=TEMP:*.cache=TEMP:*.class=TEMP:*.fls=TEMP:*.git=TEMP:*.hi=TEMP:*.idx=TEMP:*.ilg=TEMP:*.ind=TEMP:*.la=TEMP:*.lo=TEMP:*.localized=TEMP:*.lock=TEMP:*.log=TEMP:*.o=TEMP:*.orig=TEMP:*.out=TEMP:*.pid=TEMP:*.pyc=TEMP:*.pyd=TEMP:*.pyo=TEMP:*.rlib=TEMP:*.sty=TEMP:*.swp=TEMP:*.tmp=TEMP:*.toc=TEMP:*.avi=VIDEO:*.flv=VIDEO:*.h264=VIDEO:*.m4v=VIDEO:*.mp4=VIDEO:*.mpeg=VIDEO:*.mpg=VIDEO:*.mov=VIDEO:*.rm=VIDEO:*.webm=VIDEO:"
 
 DateShades="3,#ff0000-2,#ffffff,#dadada,#bcbcbc,#9e9e9e,#808080"
 SizeShades="3,#bf616a-2,#8fbcbb,#a3be8c,#b48ead,#d08770,#bf616a"
@@ -62,7 +72,7 @@ DirIconColor="Y"
 Prompt="\[\e[0;38;2;216;222;233m\][\S\[\e[0;38;2;216;222;233m\]]\l \A \u:\H \[\e[1;38;2;143;188;187m\]\w\n\[\e[0;38;2;216;222;233m\]<\z\[\e[0;38;2;216;222;233m\]> \[\e[0;38;2;163;190;140m\]\$ \[\e[0m\]"
 Notifications=true
 EnableWarningPrompt=true
-WarningPrompt="\[\e[0m\]\[\e[00;02;38;2;191;97;106m\](!) > "
+WarningPrompt="\[\e[0m\]\[\e[0;2;38;2;191;97;106m\](!) > "
 
 DividingLine="-"
 
