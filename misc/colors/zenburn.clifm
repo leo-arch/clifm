@@ -3,56 +3,68 @@
 # Author: L. Abramovich
 # License: GPL3
 
-define W=38;2;220;220;204
-define BW=01;38;2;220;220;204
-define DW=2;38;2;220;220;204
+define W=#dcdccc     # White
+define BW=#dcdccc-1  # Bold white
+define DW=#dcdccc-2  # Dimmed white
 
-define R=38;2;220;163;163
-define BR=1;38;2;220;163;163
-define DR=2;38;2;220;163;163
-define UBR=4;01;38;2;220;163;163
-define UR=4;38;2;220;163;163
+define R=#dca3a3     # Red
+define BR=#dca3a3-1  # Bold red
+define DR=#dca3a3-2  # Dimmed red
+define UR=#dca3a3-4  # Underlined red
+define UBR=4;1;38;2;220;163;163 # Underlined bold red
 
-define C=38;2;140;208;211
-define BC=1;38;2;140;208;211
-define DC=2;38;2;140;208;211
-define RC=7;38;2;140;208;211
-define UC=4;38;2;140;208;211
+define C=#8cd0d3     # Cyan
+define BC=#8cd0d3-1  # Bold cyan
+define DC=#8cd0d3-2  # Dimmed cyan
+define RC=#8cd0d3-7  # Reverse cyan
+define UC=#8cd0d3-4  # Underlined cyan
 
-define Y=38;2;248;248;147
-define BY=1;38;2;248;248;147
-define DY=2;38;2;248;248;147
+define Y=#f8f893     # Yellow
+define BY=#f8f893-1  # Bold yellow
+define DY=#f8f893-2  # Dimmed yellow
 
-define BG2=1;38;2;40;79;40
-define G=38;2;112;159;127
-define BG=1;38;2;112;159;127
-define DG=2;38;2;112;159;127
+define G=#709f7f     # Green
+define BG=#709f7f-1  # Bold green
+define DG=#709f7f-2  # Dimmed green
+define BG2=#284f28-1 # Bold dark green
 
-define S=38;2;240;207;175 # Salmon
-define BS=1;38;2;240;207;175
-define DS=2;38;2;240;207;175
+define S=#f0cfaf     # Salmon
+define BS=#f0cfaf-1  # Bold salmon
+define DS=#f0cfaf-2  # Dimmed salmon
 
-define M=38;2;159;175;175
-define BM=1;38;2;159;175;175
-define DM=2;38;2;159;175;175
+define M=#9fafaf     # Magenta
+define BM=#9fafaf-1  # Bold magenta
+define DM=#9fafaf-2  # Dimmed magenta
 
-define BV=1;38;5;125
-define V=38;5;125
+define V=#af005f     # Violet
+define BV=#af005f-1  # Bold violet
 
-define KR=38;2;44;48;45;48;2;220;163;163
-define KY=38;2;44;48;45;48;2;248;248;147
-define WGr=38;2;255;255;255;48;2;49;60;54
-define WR=38;2;255;255;255;48;2;220;163;163
-define UWR=4;38;2;255;255;255;48;2;220;163;163
-define WC=38;2;255;255;255;48;2;140;208;211
-define KW=38;2;47;47;47;48;2;255;255;255
-define RK=38;2;241;140;150;48;2;70;70;70
+define KR=38;2;44;48;45;48;2;220;163;163       # Black on red
+define KY=38;2;44;48;45;48;2;248;248;147       # Black on yellow
+define WGr=38;2;255;255;255;48;2;49;60;54      # White on dark green
+define WR=38;2;255;255;255;48;2;220;163;163    # White on red
+define UWR=4;38;2;255;255;255;48;2;220;163;163 # Underlined white on red
+define WC=38;2;255;255;255;48;2;140;208;211    # White on cyan
+define KW=38;2;47;47;47;48;2;255;255;255       # Black on white
+define RK=38;2;241;140;150;48;2;70;70;70       # Red on black
 
-FiletypeColors="di=BS:nd=UBR:ed=S:fi=W:ef=DW:ex=BG:ee=G:ln=BC:or=UC:nf=UR:mh=RC:pi=BM:so=BV:bd=BW:cd=BW:su=KR:sg=KY:ca=WGr:tw=WR:ow=UWR:st=WC:no=KW:uf=RK:"
+define ARCHIVE=#dca3a3-1                    # Bold red
+define DOC=#9fafaf                          # Magenta
+define AUDIO=38;2;255;204;238;48;2;42;42;42 # Magenta on gray
+define IMAGE=38;2;255;204;238;48;2;42;42;42 # Magenta on gray
+define VIDEO=38;2;255;204;238;48;2;42;42;42 # Magenta on gray
+define EBOOK=#af005f-1                      # Bold violet
+define CODE=#09be77                         # Green
+define TOOL=#87ae86                         # Light green
+define CONFIG=#e8bc92                       # Pale blue
+define MARKUP=#e8bc92                       # Pale blue
+define TEMP=#7e7e7e                         # Gray
 
-InterfaceColors="bm=BC:db=Y:dd=:de=C:df=W:dg=R:dk=R:dl=BG2:dn=DW:dr=S:do=C:dp=M:dw=R:dxd=G:dxr=C:dz=:el=BR:em=BR:fc=DS:hb=C:hc=DR:hd=G:he=C:hn=M:hp=C:hq=Y:hr=R:hs=G:hv=G:lc=C:li=BG:mi=BC:nm=BG:si=BB:sb=DY:sc=DR:sf=UDC:sh=DM:sp=DR:sx=DG:ti=BC:ts=UM:tt=BDC:tx=W:wc=BC:wm=BY:ws1=C:ws2=R:ws3=Y:ws4=G:ws5=C:ws6=C:ws7=C:ws8=C:xs=G:xf=BR:"
+FiletypeColors="bd=BW:ca=WGr:cd=BW:di=BS:ed=S:ee=G:ef=DW:ex=BG:fi=W:ln=BC:mh=RC:nd=UBR:nf=UR:no=KW:or=UC:ow=UWR:pi=BM:sg=KY:so=BV:st=WC:su=KR:tw=WR:uf=RK:"
 
-ExtColors="*.tar=BR:*.tgz=BR:*.taz=BR:*.lha=BR:*.lz4=BR:*.lzh=BR:*.lzma=BR:*.tlz=BR:*.txz=BR:*.tzo=BR:*.t7z=BR:*.zip=BR:*.z=BR:*.dz=BR:*.gz=BR:*.lrz=BR:*.lz=BR:*.lzo=BR:*.xz=BR:*.zst=BR:*.tzst=BR:*.bz2=BR:*.bz=BR:*.tbz=BR:*.tbz2=BR:*.tz=BR:*.deb=BR:*.rpm=BR:*.rar=BR:*.cpio=BR:*.7z=BR:*.rz=BR:*.cab=BR:*.pdf=BV:*.doc=M:*.docx=M:*.xls=M:*.xlsx=M:*.ppt=M:*.pptx=M:*.odt=M:*.ods=M:*.odp=M*.jpg=G:*.jpeg=G:*.mjpg=G:*.mjpeg=G:*.gif=G:*.bmp=G:*.xbm=G:*.xpm=G:*.png=G:*.svg=G:*.pcx=G:*.mov=G:*.mpg=G:*.mpeg=G:*.m2v=G:*.mkv=G:*.webm=G:*.webp=G:*.ogm=G:*.mp4=G:*.m4v=G:*.mp4v=G:*.vob=G:*.wmv=G:*.flc=G:*.avi=G:*.flv=G:*.m4a=G:*.mid=G:*.midi=G:*.mp3=G:*.ogg=G:*.wav=G:"
+InterfaceColors="bm=BC:db=Y:dd=:de=C:df=W:dg=R:dk=R:dl=BG2:dn=DW:do=C:dp=M:dr=S:dw=R:dxd=G:dxr=C:dz=:el=BR:em=BR:fc=DS:hb=C:hc=DR:hd=G:he=C:hn=W:hp=C:hq=Y:hr=R:hs=G:hv=G:lc=C:li=BG:mi=BC:nm=BG:sb=DY:sc=DR:sf=UDC:sh=DM:si=BB:sp=DR:sx=DG:ti=BC:ts=UM:tt=BDC:tx=W:wc=BC:wm=BY:ws1=C:ws2=R:ws3=Y:ws4=G:ws5=C:ws6=C:ws7=C:ws8=C:xs=G:xf=BR:"
+
+ExtColors="*.7z=ARCHIVE:*.apk=ARCHIVE:*.arj=ARCHIVE:*.bag=ARCHIVE:*.bin=ARCHIVE:*.bz=ARCHIVE:*.bz2=ARCHIVE:*.deb=ARCHIVE:*.dmg=ARCHIVE:*.gz=ARCHIVE:*.img=ARCHIVE:*.iso=ARCHIVE:*.jar=ARCHIVE:*.pkg=ARCHIVE:*.rar=ARCHIVE:*.rpm=ARCHIVE:*.tar=ARCHIVE:*.tbz=ARCHIVE:*.tbz2=ARCHIVE:*.tgz=ARCHIVE:*.toast=ARCHIVE:*.vcd=ARCHIVE:*.xz=ARCHIVE:*.z=ARCHIVE:*.zip=ARCHIVE:*.zst=ARCHIVE:*.aif=AUDIO:*.flac=AUDIO:*.m4a=AUDIO:*.mid=AUDIO:*.mp3=AUDIO:*.ogg=AUDIO:*.opus=AUDIO:*.wav=AUDIO:*.wma=AUDIO:*.wv=AUDIO:*.djvu=EBOOK:*.epub=EBOOK:*.pdf=EBOOK:*.ps=EBOOK:*.applescript=CODE:*.as=CODE:*.asa=CODE:*.awk=CODE:*.bsh=CODE:*.c=CODE:*.c++=CODE:*.cabal=CODE:*.cc=CODE:*.clj=CODE:*.cp=CODE:*.cpp=CODE:*.cr=CODE:*.cs=CODE:*.csv=CODE:*.csx=CODE:*.cxx=CODE:*.cgi=CODE:*.d=CODE:*.dart=CODE:*.def=CODE:*.di=CODE:*.dot=CODE:*.dox=CODE:*.dpr=CODE:*.el=CODE:*.elm=CODE:*.epp=CODE:*.erl=CODE:*.ex=CODE:*.exs=CODE:*.flake8=CODE:*.fon=CODE:*.fs=CODE:*.fsi=CODE:*.fsx=CODE:*.gemspec=CODE:*.go=CODE:*.gradle=CODE:*.groovy=CODE:*.gv=CODE:*.gvy=CODE:*.h=CODE:*.h++=CODE:*.hgrc=CODE:*.hh=CODE:*.hpp=CODE:*.hs=CODE:*.htc=CODE:*.hxx=CODE:*.ics=CODE:*.inc=CODE:*.inl=CODE:*.ipp=CODE:*.ipynb=CODE:*.java=CODE:*.jl=CODE:*.js=CODE:*.kt=CODE:*.kts=CODE:*.less=CODE:*.lisp=CODE:*.ll=CODE:*.ltx=CODE:*.m=CODE:*.matlab=CODE:*.mir=CODE:*.ml=CODE:*.mli=CODE:*.mn=CODE:*.nb=CODE:*.p=CODE:*.pas=CODE:*.php=CODE:*.pl=CODE:*.pm=CODE:*.pp=CODE:*.pro=CODE:*.psd1=CODE:*.psm1=CODE:*.pod=CODE:*.purs=CODE:*.py=CODE:*.r=CODE:*.rb=CODE:*.rs=CODE:*.rst=CODE:*.sbt=CODE:*.scala=CODE:*.sql=CODE:*.swift=CODE:*.sxi=CODE:*.sxw=CODE:*.t=CODE:*.tcl=CODE:*.td=CODE:*.tex=CODE:*.ts=CODE:*.tsx=CODE:*.vb=CODE:*.xlr=CODE:*.xml=CODE:*.bib=CONFIG:*.bst=CONFIG:*.cfg=CONFIG:*.conf=CONFIG:*.config=CONFIG:*.desktop=CONFIG:*.ini=CONFIG:*.json=CONFIG:*.nix=CONFIG:*.tml=CONFIG:*.toml=CONFIG:*.ui=CONFIG:*.xmp=CONFIG:*.yaml=CONFIG:*.yml=CONFIG:*.doc=DOC:*.docx=DOC:*.fodp=DOC:*.fods=DOC:*.fodt=DOC:*.kex=DOC:*.odp=DOC:*.ods=DOC:*.odt=DOC:*.pps=DOC:*.ppt=DOC:*.pptx=DOC:*.rtf=DOC:*.sxi=DOC:*.sxw=DOC:*.xlr=DOC:*.xls=DOC:*.xlsx=DOC:*.bmp=IMAGE:*.eps=IMAGE:*.fnt=IMAGE:*.fon=IMAGE:*.gif=IMAGE:*.ico=IMAGE:*.jpeg=IMAGE:*.jpg=IMAGE:*.pbm=IMAGE:*.pgm=IMAGE:*.png=IMAGE:*.ppm=IMAGE:*.psd=IMAGE:*.svg=IMAGE:*.tif=IMAGE:*.tiff=IMAGE:*.xcf=IMAGE:*.csv=MARKUP:*.htm=MARKUP:*.html=MARKUP:*.markdown=MARKUP:*.md=MARKUP:*.mdown=MARKUP:*.rst=MARKUP:*.shtml=MARKUP:*.xhtml=MARKUP:*.xml=MARKUP:*.aux=TEMP:*.bak=TEMP:*.bbl=TEMP:*.bc=TEMP:*.bcf=TEMP:*.blg=TEMP:*.cache=TEMP:*.class=TEMP:*.DS_Store=TEMP:*.dyn_hi=TEMP:*.dyn_o=TEMP:*.fdb_latexmk=TEMP:*.fls=TEMP:*.git=TEMP:*.hi=TEMP:*.idx=TEMP:*.ilg=TEMP:*.ind=TEMP:*.la=TEMP:*.lo=TEMP:*.localized=TEMP:*.lock=TEMP:*.log=TEMP:*.o=TEMP:*.out=TEMP:*.orig=TEMP:*.pid=TEMP:*.pyc=TEMP:*.pyd=TEMP:*.pyo=TEMP:*.rlib=TEMP:*.sty=TEMP:*.swp=TEMP:*.tmp=TEMP:*.toc=TEMP:*.clang-format=TOOL:*.cmake=TOOL:*.dox=TOOL:*.fdignore=TOOL:*.flake8=TOOL:*.gemspec=TOOL:*.gitattributes=TOOL:*.gitconfig=TOOL:*.gitignore=TOOL:*.gitmodules=TOOL:*.hgrc=TOOL:*.ignore=TOOL:*.kdevelop=TOOL:*.make=TOOL:*.pro=TOOL:*.rgignore=TOOL:*.avi=VIDEO:*.flv=VIDEO:*.h264=VIDEO:*.m4v=VIDEO:*.mkv=VIDEO:*.mov=VIDEO:*.mp4=VIDEO:*.mpeg=VIDEO:*.mpg=VIDEO:*.ogv=VIDEO:*.rm=VIDEO:*.swf=VIDEO:*.vob=VIDEO:*.webm=VIDEO:*.wmv=VIDEO:"
 
 DateShades="3,#ff0000-2,#ffffff,#dadada,#bcbcbc,#9e9e9e,#808080"
 SizeShades="3,#dca3a3-2,#8cd0d3,#6aae80,#f0cfaf,#709f7f,#dca3a3"
