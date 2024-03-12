@@ -3,60 +3,70 @@
 # Author: L. Abramovich
 # License: GPL3
 
-define BD=1
+define BD=1                     # Bold
 
-define R=38;2;220;50;47
-define BR=1;38;2;220;50;47
-define DR=2;38;2;220;50;47
-define UBR=4;1;38;2;220;50;47
-define UDR=4;2;38;2;220;50;47
+define R=#dc322f                # Red
+define BR=#dc322f-1             # Bold red
+define DR=#dc322f-2             # Dimmed red
+define UBR=4;1;38;2;220;50;47   # Underlined bold red
+define UDR=4;2;38;2;220;50;47   # Underlined dimmed red
 
-define G=38;2;133;153;0
-define BG=1;38;2;133;153;0
-define DG=2;38;2;133;153;0
+define G=#859900                # Green
+define BG=#859900-1             # Bold green
+define DG=#859900-2             # Dimmed green
 
-define Y=38;2;181;137;0
-define BY=1;38;2;181;137;0
-define DY=2;38;2;181;137;0
+define Y=#b58900                # Yellow
+define BY=#b58900-1             # Bold yellow
+define DY=#b58900-2             # Dimmed yellow
 
-define B=38;2;38;139;210
-define BB=1;38;2;38;139;210
-define DB=2;38;2;38;139;210
+define B=#268bd2                # Blue
+define BB=#268bd2-1             # Bold blue
+define DB=#268bd2-2             # Dimmed blue
 
-define M=38;2;211;54;130
-define DM=2;38;2;211;54;130
-define BM=1;38;2;211;54;130
-define UM=4;38;2;211;54;130
+define M=#d33682                # Magenta
+define BM=#d33682-1             # Bold magenta
+define DM=#d33682-2             # Dimmed magenta
+define UM=#d33682-4             # Underlined magenta
 
-define C=38;2;42;161;152
-define BC=1;38;2;42;161;152
-define DC=2;38;2;42;161;152
-define RC=7;38;2;42;161;152
-define UDC=4;2;38;2;42;161;152
-define BDC=1;2;38;2;42;161;152
+define C=#2aa198                # Cyan
+define BC=#2aa198-1             # Bold cyan
+define DC=#2aa198-2             # Dimmed cyan
+define RC=#2aa198-7             # Reverse cyan
+define UDC=4;2;38;2;42;161;152  # Underlined dimmed cyan
+define BDC=1;2;38;2;42;161;152  # Bold dimmed cyan
 
-define W=38;2;238;232;213
-define DW=2;38;2;238;232;213
-define UBW=4;1;38;2;238;232;213
+define W=#eee8d5                # White
+define DW=#eee8d5-2             # Dimmed white
+define UBW=4;1;38;2;238;232;213 # Underlined bold white
 
-define KR=38;2;7;54;66;48;2;220;50;47
-define KY=38;2;7;54;66;48;2;181;137;0
-define KG=38;2;7;54;66;48;2;133;153;0
-define URW=4;38;2;220;50;47;48;2;238;232;213
-define BlGr=38;2;38;139;210;48;2;133;153;0
-define WB=38;2;238;232;213;48;2;38;139;210
-define WR=37;41
+define KR=38;2;7;54;66;48;2;220;50;47 # Black on red
+define KY=38;2;7;54;66;48;2;181;137;0 # Black on yellow
+define KG=38;2;7;54;66;48;2;133;153;0 # Black on green
+define URW=4;38;2;220;50;47;48;2;238;232;213 # Underlined red on white
+define BlGr=38;2;38;139;210;48;2;133;153;0 # Blue on green
+define WB=38;2;238;232;213;48;2;38;139;210 # White on blue
+define WR=37;41                        # White on red
+
+define ARCHIVE=#dc322f-1 # Red
+define AUDIO=#d33682     # Magenta
+define CODE=#eee8d5-1    # Bold light gray
+define DOC=#b58900       # Yellow
+define EBOOK=#dc322f     # White
+define IMAGE=#d33682     # Magenta
+define MARKUP=#eee8d5    # White
+define TEMP=#eee8d5      # Light gray
+define VIDEO=#d33682     # Magenta
 
 FiletypeColors="bd=BY:ca=KR:cd=BD:di=BB:ed=DB:ee=G:ef=DY:ex=BG:fi=W:ln=BC:mh=RC:nd=UBR:nf=UDR:no=URW:or=UDC:ow=BlGr:pi=M:so=BM:su=WR:sg=KY:st=WB:tw=KG:uf=UBW:"
 
-InterfaceColors="bm=BC:db=M:de=C:df=W:dk=R:dl=B:dd=:dg=Y:dn=DW:dr=Y:do=C:dp=M:dw=R:dxd=G:dxr=C:dz=:el=BY:em=BR:fc=DB:hb=C:hc=DR:hd=C:he=C:hn=M:hp=C:hq=Y:hr=R:hs=G:hv=G:lc=G:li=BG:mi=BC:nm=BG:si=BB:sb=DY:sc=DR:sf=UDC:sh=DM:sp=DR:sx=DG:ti=BC:ts=UM:tt=BDC:tx=W:wc=BC:wm=BY:ws1=B:ws2=R:ws3=Y:ws4=G:ws5=C:ws6=C:ws7=C:ws8=C:xs=G:xf=BR:"
+InterfaceColors="bm=BC:db=M:dd=:de=C:df=W:dg=Y:dk=R:dl=B:dn=DW:do=C:dp=M:dr=Y:dw=R:dxd=G:dxr=C:dz=:el=BY:em=BR:fc=DB:hb=C:hc=DR:hd=C:he=C:hn=M:hp=C:hq=Y:hr=R:hs=G:hv=G:lc=G:li=BG:mi=BC:nm=BG:si=BB:sb=DY:sc=DR:sf=UDC:sh=DM:sp=DR:sx=DG:ti=BC:ts=UM:tt=BDC:tx=W:wc=BC:wm=BY:ws1=B:ws2=R:ws3=Y:ws4=G:ws5=C:ws6=C:ws7=C:ws8=C:xf=BR:xs=G:"
 
-ExtColors="*.tar=R:*.tgz=R:*.taz=R:*.lha=R:*.lz4=R:*.lzh=R:*.lzma=R:*.tlz=R:*.txz=R:*.tzo=R:*.t7z=R:*.zip=R:*.z=R:*.dz=R:*.gz=R:*.lrz=R:*.lz=R:*.lzo=R:*.xz=R:*.zst=R:*.tzst=R:*.bz2=R:*.bz=R:*.tbz=R:*.tbz2=R:*.tz=R:*.deb=R:*.rpm=R:*.rar=R:*.cpio=R:*.7z=R:*.rz=R:*.cab=R:*.jpg=M:*.jpeg=M:*.mjpg=M:*.mjpeg=M:*.gif=M:*.bmp=M:*.xbm=M:*.xpm=M:*.png=M:*.svg=M:*.pcx=M:*.mov=M:*.mpg=M:*.mpeg=M:*.m2v=M:*.mkv=M:*.webm=M:*.webp=M:*.ogm=M:*.mp4=M:*.m4v=M:*.mp4v=M:*.vob=M:*.wmv=M:*.flc=M:*.avi=M:*.flv=M:*.m4a=C:*.mid=C:*.midi=C:*.mp3=C:*.ogg=C:*.wav=C:"
+ExtColors="*.7z=ARCHIVE:*.apk=ARCHIVE:*.arj=ARCHIVE:*.bag=ARCHIVE:*.bin=ARCHIVE:*.bz=ARCHIVE:*.bz2=ARCHIVE:*.deb=ARCHIVE:*.dmg=ARCHIVE:*.gz=ARCHIVE:*.img=ARCHIVE:*.iso=ARCHIVE:*.jar=ARCHIVE:*.pkg=ARCHIVE:*.rar=ARCHIVE:*.rpm=ARCHIVE:*.tar=ARCHIVE:*.tbz=ARCHIVE:*.tbz2=ARCHIVE:*.tgz=ARCHIVE:*.toast=ARCHIVE:*.vcd=ARCHIVE:*.xz=ARCHIVE:*.z=ARCHIVE:*.zip=ARCHIVE:*.zst=ARCHIVE:*.aif=AUDIO:*.flac=AUDIO:*.m4a=AUDIO:*.mid=AUDIO:*.mp3=AUDIO:*.ogg=AUDIO:*.opus=AUDIO:*.wav=AUDIO:*.wma=AUDIO:*.wv=AUDIO:*.djvu=EBOOK:*.epub=EBOOK:*.pdf=EBOOK:*.ps=EBOOK:*.applescript=CODE:*.as=CODE:*.asa=CODE:*.awk=CODE:*.bsh=CODE:*.c=CODE:*.c++=CODE:*.cabal=CODE:*.cc=CODE:*.clj=CODE:*.cp=CODE:*.cpp=CODE:*.cr=CODE:*.cs=CODE:*.csv=CODE:*.csx=CODE:*.cxx=CODE:*.cgi=CODE:*.d=CODE:*.dart=CODE:*.def=CODE:*.di=CODE:*.dot=CODE:*.dox=CODE:*.dpr=CODE:*.el=CODE:*.elm=CODE:*.epp=CODE:*.erl=CODE:*.ex=CODE:*.exs=CODE:*.flake8=CODE:*.fon=CODE:*.fs=CODE:*.fsi=CODE:*.fsx=CODE:*.gemspec=CODE:*.go=CODE:*.gradle=CODE:*.groovy=CODE:*.gv=CODE:*.gvy=CODE:*.h=CODE:*.h++=CODE:*.hgrc=CODE:*.hh=CODE:*.hpp=CODE:*.hs=CODE:*.htc=CODE:*.hxx=CODE:*.ics=CODE:*.inc=CODE:*.inl=CODE:*.ipp=CODE:*.ipynb=CODE:*.java=CODE:*.jl=CODE:*.js=CODE:*.kt=CODE:*.kts=CODE:*.less=CODE:*.lisp=CODE:*.ll=CODE:*.ltx=CODE:*.m=CODE:*.matlab=CODE:*.mir=CODE:*.ml=CODE:*.mli=CODE:*.mn=CODE:*.nb=CODE:*.p=CODE:*.pas=CODE:*.php=CODE:*.pl=CODE:*.pm=CODE:*.pp=CODE:*.pro=CODE:*.psd1=CODE:*.psm1=CODE:*.pod=CODE:*.purs=CODE:*.py=CODE:*.r=CODE:*.rb=CODE:*.rs=CODE:*.rst=CODE:*.sbt=CODE:*.scala=CODE:*.sql=CODE:*.swift=CODE:*.sxi=CODE:*.sxw=CODE:*.t=CODE:*.tcl=CODE:*.td=CODE:*.tex=CODE:*.ts=CODE:*.tsx=CODE:*.vb=CODE:*.xlr=CODE:*.xml=CODE:*.bib=CONFIG:*.bst=CONFIG:*.cfg=CONFIG:*.conf=CONFIG:*.config=CONFIG:*.desktop=CONFIG:*.ini=CONFIG:*.json=CONFIG:*.nix=CONFIG:*.tml=CONFIG:*.toml=CONFIG:*.ui=CONFIG:*.xmp=CONFIG:*.yaml=CONFIG:*.yml=CONFIG:*.doc=DOC:*.docx=DOC:*.fodp=DOC:*.fods=DOC:*.fodt=DOC:*.kex=DOC:*.odp=DOC:*.ods=DOC:*.odt=DOC:*.pps=DOC:*.ppt=DOC:*.pptx=DOC:*.rtf=DOC:*.sxi=DOC:*.sxw=DOC:*.xlr=DOC:*.xls=DOC:*.xlsx=DOC:*.bmp=IMAGE:*.eps=IMAGE:*.fnt=IMAGE:*.fon=IMAGE:*.gif=IMAGE:*.ico=IMAGE:*.jpeg=IMAGE:*.jpg=IMAGE:*.pbm=IMAGE:*.pgm=IMAGE:*.png=IMAGE:*.ppm=IMAGE:*.psd=IMAGE:*.svg=IMAGE:*.tif=IMAGE:*.tiff=IMAGE:*.xcf=IMAGE:*.csv=MARKUP:*.htm=MARKUP:*.html=MARKUP:*.markdown=MARKUP:*.md=MARKUP:*.mdown=MARKUP:*.rst=MARKUP:*.shtml=MARKUP:*.xhtml=MARKUP:*.xml=MARKUP:*.aux=TEMP:*.bak=TEMP:*.bbl=TEMP:*.bc=TEMP:*.bcf=TEMP:*.blg=TEMP:*.cache=TEMP:*.class=TEMP:*.DS_Store=TEMP:*.dyn_hi=TEMP:*.dyn_o=TEMP:*.fdb_latexmk=TEMP:*.fls=TEMP:*.git=TEMP:*.hi=TEMP:*.idx=TEMP:*.ilg=TEMP:*.ind=TEMP:*.la=TEMP:*.lo=TEMP:*.localized=TEMP:*.lock=TEMP:*.log=TEMP:*.o=TEMP:*.out=TEMP:*.orig=TEMP:*.pid=TEMP:*.pyc=TEMP:*.pyd=TEMP:*.pyo=TEMP:*.rlib=TEMP:*.sty=TEMP:*.swp=TEMP:*.tmp=TEMP:*.toc=TEMP:*.clang-format=TOOL:*.cmake=TOOL:*.dox=TOOL:*.fdignore=TOOL:*.flake8=TOOL:*.gemspec=TOOL:*.gitattributes=TOOL:*.gitconfig=TOOL:*.gitignore=TOOL:*.gitmodules=TOOL:*.hgrc=TOOL:*.ignore=TOOL:*.kdevelop=TOOL:*.make=TOOL:*.pro=TOOL:*.rgignore=TOOL:*.avi=VIDEO:*.flv=VIDEO:*.h264=VIDEO:*.m4v=VIDEO:*.mkv=VIDEO:*.mov=VIDEO:*.mp4=VIDEO:*.mpeg=VIDEO:*.mpg=VIDEO:*.ogv=VIDEO:*.rm=VIDEO:*.swf=VIDEO:*.vob=VIDEO:*.webm=VIDEO:*.wmv=VIDEO:"
 
 DateShades="3,#ff0000-2,#ffffff,#dadada,#bcbcbc,#9e9e9e,#808080"
 SizeShades="3,#dc322f-2,#2aa1a2,#748409,#b58900,#cb4b16,#dc322f"
 
-DirIconColor=1;38;2;181;137;00
+DirIconColor=1;38;2;181;137;0
 
 Prompt="\[\e[0;38;2;238;232;213m\][\S\[\e[0;38;2;238;232;213m\]]\l \A \u:\H \[\e[38;2;42;161;152m\]\w\[\e[0;38;2;238;232;213m\]\n\[\e[0;38;2;238;232;213m\]<\z\[\e[0;38;2;238;232;213m\]> \[\e[38;2;38;139;210m\]\$ \[\e[0m\]"
 Notifications=true

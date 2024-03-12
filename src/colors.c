@@ -2995,8 +2995,7 @@ color_codes(void)
 		 "to modify the color of the corresponding file type in the "
 		 "color scheme file (in the \"FiletypeColors\" line), "
 		 "using the same ANSI style color format used by dircolors. "
-		 "By default, %s uses only 8/16 colors, but you can use 256 "
-		 "and RGB/true colors as well.\n\n"), PROGRAM_NAME);
+		 "8, 256, and RGB colors are supported.\n\n"));
 
 	if (ext_colors_n > 0) {
 		size_t i;
