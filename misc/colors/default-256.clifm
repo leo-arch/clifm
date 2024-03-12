@@ -64,17 +64,17 @@
 #
 # For the complete list of color names consult the manpage.
 
-define D=0   # Default terminal color
-define DIM=2 # Dimmed
+define D=0           # Default (reset attributes)
+define DIM=2         # Dimmed
 
-define R4=31    # Red (4-bit)
-define BR4=1;31 # Bold red (4-bit)
-define DR4=2;31 # Dimmed red (4-bit)
+define R4=31         # Red (4-bit)
+define BR4=1;31      # Bold red (4-bit)
+define DR4=2;31      # Dimmed red (4-bit)
 
-define G=38;5;76 # Green
-define G4=32     # Green (4-bit)
-define BG4=1;32  # Bold green (4-bit)
-define DG4=2;32  # Dimmed green (4-bit)
+define G=38;5;76     # Green
+define G4=32         # Green (4-bit)
+define BG4=1;32      # Bold green (4-bit)
+define DG4=2;32      # Dimmed green (4-bit)
 
 define Y=38;5;228    # Yellow
 define BY=1;38;5;229 # Bold yellow
@@ -82,58 +82,58 @@ define LY=38;5;185   # Light yellow
 define DY4=2;33      # Dimmed yellow (4-bit)
 define BY4=1;33      # Bold yellow (4-bit)
 
-define B4=34    # Blue (4-bit)
-define BB4=1;34 # Bold blue (4-bit)
-define DB4=2;34 # Dimmed blue (4-bit)
+define B4=34         # Blue (4-bit)
+define BB4=1;34      # Bold blue (4-bit)
+define DB4=2;34      # Dimmed blue (4-bit)
 
-define M=38;5;170  # Magenta
-define BM4=1;35    # Bold magenta (4-bit)
-define DM4=2;35    # Dimmed magenta (4-bit)
-define UM4=4;35    # Underlined magenta (4-bit)
-define UDM4=4;2;35 # Underlined dimmed magenta (4-bit)
+define M=38;5;170    # Magenta
+define BM4=1;35      # Bold magenta (4-bit)
+define DM4=2;35      # Dimmed magenta (4-bit)
+define UM4=4;35      # Underlined magenta (4-bit)
+define UDM4=4;2;35   # Underlined dimmed magenta (4-bit)
 
-define C=38;5;43    # Cyan
-define C4=36        # Cyan (4-bit)
-define BC4=1;36     # Bold cyan (4-bit)
-define DC4=2;36     # Dimmed cyan (4-bit)
-define BDC4=1;2;36  # Bold dimmed cyan (4-bit)
-define RC4=7;36     # Reverse cyan (4-bit)
-define UDC4=4;2;36  # Underlined dimmed cyan (4-bit)
+define C=38;5;43     # Cyan
+define C4=36         # Cyan (4-bit)
+define BC4=1;36      # Bold cyan (4-bit)
+define DC4=2;36      # Dimmed cyan (4-bit)
+define BDC4=1;2;36   # Bold dimmed cyan (4-bit)
+define RC4=7;36      # Reverse cyan (4-bit)
+define UDC4=4;2;36   # Underlined dimmed cyan (4-bit)
 
-define DW=38;5;246  # Dimmed white
-define DWD=38;5;242 # Dimmed white, but darker
-define DW4=2;37     # Dimmed white (4-bit)
-define UDW4=4;2;37  # Underlined dimmed white (4-bit)
+define DW=38;5;246   # Dimmed white
+define DWD=38;5;242  # Dimmed white, but darker
+define DW4=2;37      # Dimmed white (4-bit)
+define UDW4=4;2;37   # Underlined dimmed white (4-bit)
 
 define O=38;5;214    # Orange
 define BO=1;38;5;214 # Bold orange
 
-define P=#af87d7   # Purple
-define AM=38;5;79  # AquaMarine3
-define PG=38;5;77  # PaleGreen3
-define DP=38;5;197 # DeepPink2
-define KK=38;5;228 # Khaki1
+define P=#af87d7     # Purple
+define AM=38;5;79    # AquaMarine3
+define PG=38;5;77    # PaleGreen3
+define DP=38;5;197   # DeepPink2
+define KK=38;5;228   # Khaki1
 
 # Foreground-background combinations
-define URW=4;31;47 # Red foreground, white background (underlined)
-define WR=37;41    # White foreground, red background
+define URW=4;31;47   # Red foreground, white background (underlined)
+define WR=37;41      # White foreground, red background
 # K stands for black (B is used for Blue)
-define KY=30;43   # Black foreground, yellow background
-define KR=30;41   # Black foreground, red background
-define KG=30;42   # Black foreground, green background
-define BlGr=34;42 # Blue foreground, green background
-define WB=37;44   # white foreground, blue background
+define KY=30;43      # Black foreground, yellow background
+define KR=30;41      # Black foreground, red background
+define KG=30;42      # Black foreground, green background
+define BlGr=34;42    # Blue foreground, green background
+define WB=37;44      # white foreground, blue background
 
 # File groups (used for file extensions)
-define DOC=38;5;228    # Yellow
-define VIDEO=1;35      # Bold magenta  (4-bit)
-define IMAGE=35        # Magenta (4-bit)
+define ARCHIVE=1;31    # Bold red (4-bit)
 define AUDIO=38;5;214  # Orange
 define CODE=1;38;5;247 # Bold gray
-define ARCHIVE=1;31    # Bold red (4-bit)
-define BOOK=38;5;223   # Salmon
+define DOC=38;5;228    # Yellow
+define EBOOK=38;5;223  # Salmon
+define IMAGE=35        # Magenta (4-bit)
 define MARKUP=38;5;85  # Aqua
 define TEMP=38;5;247   # Dimmed white
+define VIDEO=1;35      # Bold magenta  (4-bit)
 
 ### To know what are we applying colors to, we use the following codes:
 
@@ -241,7 +241,7 @@ FiletypeColors="bd=BY:ca=KR:cd=BO:di=BB4:ed=DB4:ee=G4:ef=DIM:ex=BG4:fi=D:ln=BC4:
 InterfaceColors="bm=BG4:db=O:dd=:de=AM:df=D:dg=P:dk=DP:dl=DW4:dn=DWD:do=AM:dp=P:dr=KK:dw=DP:dxd=PG:dxr=AM:dz=:el=C4:em=BR4:fc=DW:hb=C4:hc=DW4:hd=C4:he=C4:hn=:hp=C4:hq=LY:hr=R4:hs=G4:hv=G4:hw=R4:lc=C:li=BG4:mi=BC4:nm=BG4:ro=BB4:si=BB4:sb=DY4:sc=DC4:sd=DW4:sf=UDC4:sh=DM4:sp=DR4:sx=DG4:sz=UDM4:ti=BC4:ts=UM4:tt=BDC4:tx=D:wc=BC4:wm=Y:ws1=B4:ws2=R4:ws3=Y:ws4=G4:ws5=C:ws6=O:ws7=M:ws8=DW:xf=BR4:xs=G4:"
 
 # Colors for specific file extensions (case insensitive)
-ExtColors="*.7z=ARCHIVE:*.ace=ARCHIVE:*.alz=ARCHIVE:*.apk=ARCHIVE:*.arc=ARCHIVE:*.arj=ARCHIVE:*.bz=ARCHIVE:*.bz2=ARCHIVE:*.cab=ARCHIVE:*.cpio=ARCHIVE:*.deb=ARCHIVE:*.dwm=ARCHIVE:*.dz=ARCHIVE:*.ear=ARCHIVE:*.esd=ARCHIVE:*.gz=ARCHIVE:*.iso=ARCHIVE:*.img=ARCHIVE:*.jar=ARCHIVE:*.lha=ARCHIVE:*.lrz=ARCHIVE:*.lz=ARCHIVE:*.lz4=ARCHIVE:*.lzh=ARCHIVE:*.lzma=ARCHIVE:*.lzo=ARCHIVE:*.qcow=ARCHIVE:*.qcow2=ARCHIVE:*.rar=ARCHIVE:*.rpm=ARCHIVE:*.rz=ARCHIVE:*.sar=ARCHIVE:*.swm=ARCHIVE:*.t7z=ARCHIVE:*.tar=ARCHIVE:*.taz=ARCHIVE:*.tbz=ARCHIVE:*.tbz2=ARCHIVE:*.tgz=ARCHIVE:*.txz=ARCHIVE:*.tlz=ARCHIVE:*.tz=ARCHIVE:*.tzo=ARCHIVE:*.tzst=ARCHIVE:*.vdi=ARCHIVE:*.vhd=ARCHIVE:*.vhdx=ARCHIVE:*.vmdk=ARCHIVE:*.vsix=ARCHIVE:*.war=ARCHIVE:*.wim=ARCHIVE:*.xz=ARCHIVE:*.z=ARCHIVE:*.zip=ARCHIVE:*.zoo=ARCHIVE:*.zst=ARCHIVE:*.avif=IMAGE:*.bmp=IMAGE:*.gif=IMAGE:*.jpg=IMAGE:*.jpeg=IMAGE:*.jxl=IMAGE:*.mjpeg=IMAGE:*.mjpg=IMAGE:*.mng=IMAGE:*.pbm=IMAGE:*.pcx=IMAGE:*.pgm=IMAGE:*.png=IMAGE:*.ppm=IMAGE:*.svg=IMAGE:*.svgz=IMAGE:*.tga=IMAGE:*.tif=IMAGE:*.tiff=IMAGE:*.xbm=IMAGE:*.xpm=IMAGE:*.3gp=VIDEO:*.asf=VIDEO:*.avi=VIDEO:*.cgm=VIDEO:*.dl=VIDEO:*.emf=VIDEO:*.flc=VIDEO:*.fli=VIDEO:*.flv=VIDEO:*.heics=VIDEO:*.h264=VIDEO:*.gl=VIDEO:*.m2v=VIDEO:*.m2ts=VIDEO:*.m4v=VIDEO:*.mkv=VIDEO:*.mov=VIDEO:*.mp4=VIDEO:*.mp4v=VIDEO:*.mpg=VIDEO:*.mpeg=VIDEO:*.nuv=VIDEO:*.ogm=VIDEO:*.ogv=VIDEO:*.ogx=VIDEO:*.qt=VIDEO:*.rm=VIDEO:*.rmvb=VIDEO:*.vob=VIDEO:*.webm=VIDEO:*.webp=VIDEO:*.wmv=VIDEO:*.xcf=VIDEO:*.xwd=VIDEO:*.yuv=VIDEO:*.aac=AUDIO:*.aif=AUDIO:*.aifc=AUDIO:*.aiff=AUDIO:*.alac=AUDIO:*.ape=AUDIO:*.au=AUDIO:*.flac=AUDIO:*.m4a=AUDIO:*.mid=AUDIO:*.midi=AUDIO:*.mka=AUDIO:*.mp3=AUDIO:*.ogg=AUDIO:*.opus=AUDIO:*.pcm=AUDIO:*.spx=AUDIO:*.wav=AUDIO:*.wma=AUDIO:*.wv=AUDIO:*.azw=BOOK:*.azw3=BOOK:*.cb7=BOOK:*.cba=BOOK:*.cbr=BOOK:*.cbt=BOOK:*.cbz=BOOK:*.djvu=BOOK:*.epub=BOOK:*.fb2=BOOK:*.kf8=BOOK:*.kfx=BOOK:*.mobi=BOOK:*.oxps=BOOK:*.pdb=BOOK:*.pdf=BOOK:*.xps=BOOK:*.doc=DOC:*.docx=DOC:*.fodp=DOC:*.fods=DOC:*.fodt=DOC:*.odg=DOC:*.odp=DOC:*.ods=DOC:*.odt=DOC:*.ppt=DOC:*.pptx=DOC:*.ps=DOC:*.rtf=DOC:*.sxi=DOC:*.sxw=DOC:*.xlr=DOC:*.xls=DOC:*.xlsx=DOC:applescript=CODE:*.as=CODE:*.asa=CODE:*.awk=CODE:*.c=CODE:*.c++=CODE:*.cabal=CODE:*.cc=CODE:*.clj=CODE:*.coffee=CODE:*.cp=CODE:*.cpp=CODE:*.cr=CODE:*.cs=CODE:*.csx=CODE:*.cu=CODE:*.cxx=CODE:*.d=CODE:*.dart=CODE:*.di=CODE:*.dpr=CODE:*.el=CODE:*.elm=CODE:*.erl=CODE:*.ex=CODE:*.exs=CODE:*.f=CODE:*.f90=CODE:*.for=CODE:*.fs=CODE:*.fsi=CODE:*.fsx=CODE:*.go=CODE:*.gd=CODE:*.groovy=CODE:*.gvy=CODE:*.h=CODE:*.h++=CODE:*.hh=CODE:*.hs=CODE:*.hxx=CODE:*.inl=CODE:*.java=CODE:*.jl=CODE:*.js=CODE:*.jsx=CODE:*.kt=CODE:*.kts=CODE:*.lhs=CODE:*.lisp=CODE:*.lua=CODE:*.m=CODE:*.matlab=CODE:*.ml=CODE:*.mli=CODE:*.mn=CODE:*.nb=CODE:*.p=CODE:*.pas=CODE:*.php=CODE:*.pl=CODE:*.pm=CODE:*.pod=CODE:*.pp=CODE:*.purs=CODE:*.py=CODE:*.r=CODE:*.rb=CODE:*.rs=CODE:*.sass=CODE:*.scala=CODE:*.scss=CODE:*.swift=CODE:*.tcl=CODE:*.v=CODE:*.vb=CODE:*.vsh=CODE:*.zig=CODE:*.css=MARKUP:*.htm=MARKUP:*.html=MARKUP:*.ltx=MARKUP:*.md=MARKUP:*.opf=MARKUP:*.rss=MARKUP:*.shtml=MARKUP:*.tex=MARKUP:*.xhtml=MARKUP:*.xml=MARKUP:*.aux=TEMP:*.bak=TEMP:*.bk=TEMP:*.cache=TEMP:*.in=TEMP:*.log=TEMP:*.old=TEMP:*.orig=TEMP:*.out=TEMP:*.part=TEMP:*.pid=TEMP:*.rej=TEMP:*.swp=TEMP:*.temp=TEMP:*.tmp=TEMP:"
+ExtColors="*.7z=ARCHIVE:*.ace=ARCHIVE:*.alz=ARCHIVE:*.apk=ARCHIVE:*.arc=ARCHIVE:*.arj=ARCHIVE:*.bz=ARCHIVE:*.bz2=ARCHIVE:*.cab=ARCHIVE:*.cpio=ARCHIVE:*.deb=ARCHIVE:*.dwm=ARCHIVE:*.dz=ARCHIVE:*.ear=ARCHIVE:*.esd=ARCHIVE:*.gz=ARCHIVE:*.iso=ARCHIVE:*.img=ARCHIVE:*.jar=ARCHIVE:*.lha=ARCHIVE:*.lrz=ARCHIVE:*.lz=ARCHIVE:*.lz4=ARCHIVE:*.lzh=ARCHIVE:*.lzma=ARCHIVE:*.lzo=ARCHIVE:*.qcow=ARCHIVE:*.qcow2=ARCHIVE:*.rar=ARCHIVE:*.rpm=ARCHIVE:*.rz=ARCHIVE:*.sar=ARCHIVE:*.swm=ARCHIVE:*.t7z=ARCHIVE:*.tar=ARCHIVE:*.taz=ARCHIVE:*.tbz=ARCHIVE:*.tbz2=ARCHIVE:*.tgz=ARCHIVE:*.txz=ARCHIVE:*.tlz=ARCHIVE:*.tz=ARCHIVE:*.tzo=ARCHIVE:*.tzst=ARCHIVE:*.vdi=ARCHIVE:*.vhd=ARCHIVE:*.vhdx=ARCHIVE:*.vmdk=ARCHIVE:*.vsix=ARCHIVE:*.war=ARCHIVE:*.wim=ARCHIVE:*.xz=ARCHIVE:*.z=ARCHIVE:*.zip=ARCHIVE:*.zoo=ARCHIVE:*.zst=ARCHIVE:*.avif=IMAGE:*.bmp=IMAGE:*.gif=IMAGE:*.jpg=IMAGE:*.jpeg=IMAGE:*.jxl=IMAGE:*.mjpeg=IMAGE:*.mjpg=IMAGE:*.mng=IMAGE:*.pbm=IMAGE:*.pcx=IMAGE:*.pgm=IMAGE:*.png=IMAGE:*.ppm=IMAGE:*.svg=IMAGE:*.svgz=IMAGE:*.tga=IMAGE:*.tif=IMAGE:*.tiff=IMAGE:*.xbm=IMAGE:*.xpm=IMAGE:*.3gp=VIDEO:*.asf=VIDEO:*.avi=VIDEO:*.cgm=VIDEO:*.dl=VIDEO:*.emf=VIDEO:*.flc=VIDEO:*.fli=VIDEO:*.flv=VIDEO:*.heics=VIDEO:*.h264=VIDEO:*.gl=VIDEO:*.m2v=VIDEO:*.m2ts=VIDEO:*.m4v=VIDEO:*.mkv=VIDEO:*.mov=VIDEO:*.mp4=VIDEO:*.mp4v=VIDEO:*.mpg=VIDEO:*.mpeg=VIDEO:*.nuv=VIDEO:*.ogm=VIDEO:*.ogv=VIDEO:*.ogx=VIDEO:*.qt=VIDEO:*.rm=VIDEO:*.rmvb=VIDEO:*.vob=VIDEO:*.webm=VIDEO:*.webp=VIDEO:*.wmv=VIDEO:*.xcf=VIDEO:*.xwd=VIDEO:*.yuv=VIDEO:*.aac=AUDIO:*.aif=AUDIO:*.aifc=AUDIO:*.aiff=AUDIO:*.alac=AUDIO:*.ape=AUDIO:*.au=AUDIO:*.flac=AUDIO:*.m4a=AUDIO:*.mid=AUDIO:*.midi=AUDIO:*.mka=AUDIO:*.mp3=AUDIO:*.ogg=AUDIO:*.opus=AUDIO:*.pcm=AUDIO:*.spx=AUDIO:*.wav=AUDIO:*.wma=AUDIO:*.wv=AUDIO:*.azw=EBOOK:*.azw3=EBOOK:*.cb7=EBOOK:*.cba=EBOOK:*.cbr=EBOOK:*.cbt=EBOOK:*.cbz=EBOOK:*.djvu=EBOOK:*.epub=EBOOK:*.fb2=EBOOK:*.kf8=EBOOK:*.kfx=EBOOK:*.mobi=EBOOK:*.oxps=EBOOK:*.pdb=EBOOK:*.pdf=EBOOK:*.xps=EBOOK:*.doc=DOC:*.docx=DOC:*.fodp=DOC:*.fods=DOC:*.fodt=DOC:*.odg=DOC:*.odp=DOC:*.ods=DOC:*.odt=DOC:*.ppt=DOC:*.pptx=DOC:*.ps=DOC:*.rtf=DOC:*.sxi=DOC:*.sxw=DOC:*.xlr=DOC:*.xls=DOC:*.xlsx=DOC:applescript=CODE:*.as=CODE:*.asa=CODE:*.awk=CODE:*.c=CODE:*.c++=CODE:*.cabal=CODE:*.cc=CODE:*.clj=CODE:*.coffee=CODE:*.cp=CODE:*.cpp=CODE:*.cr=CODE:*.cs=CODE:*.csx=CODE:*.cu=CODE:*.cxx=CODE:*.d=CODE:*.dart=CODE:*.di=CODE:*.dpr=CODE:*.el=CODE:*.elm=CODE:*.erl=CODE:*.ex=CODE:*.exs=CODE:*.f=CODE:*.f90=CODE:*.for=CODE:*.fs=CODE:*.fsi=CODE:*.fsx=CODE:*.go=CODE:*.gd=CODE:*.groovy=CODE:*.gvy=CODE:*.h=CODE:*.h++=CODE:*.hh=CODE:*.hs=CODE:*.hxx=CODE:*.inl=CODE:*.java=CODE:*.jl=CODE:*.js=CODE:*.jsx=CODE:*.kt=CODE:*.kts=CODE:*.lhs=CODE:*.lisp=CODE:*.lua=CODE:*.m=CODE:*.matlab=CODE:*.ml=CODE:*.mli=CODE:*.mn=CODE:*.nb=CODE:*.p=CODE:*.pas=CODE:*.php=CODE:*.pl=CODE:*.pm=CODE:*.pod=CODE:*.pp=CODE:*.purs=CODE:*.py=CODE:*.r=CODE:*.rb=CODE:*.rs=CODE:*.sass=CODE:*.scala=CODE:*.scss=CODE:*.swift=CODE:*.tcl=CODE:*.v=CODE:*.vb=CODE:*.vsh=CODE:*.zig=CODE:*.css=MARKUP:*.htm=MARKUP:*.html=MARKUP:*.ltx=MARKUP:*.md=MARKUP:*.opf=MARKUP:*.rss=MARKUP:*.shtml=MARKUP:*.tex=MARKUP:*.xhtml=MARKUP:*.xml=MARKUP:*.aux=TEMP:*.bak=TEMP:*.bk=TEMP:*.cache=TEMP:*.in=TEMP:*.log=TEMP:*.old=TEMP:*.orig=TEMP:*.out=TEMP:*.part=TEMP:*.pid=TEMP:*.rej=TEMP:*.swp=TEMP:*.temp=TEMP:*.tmp=TEMP:"
 
 # The series of color shades used to print timestamps
 # The format is: "COLOR-TYPE,ERROR,SHADE1,SHADE2,SHADE3,SHADE4,SHADE5"
