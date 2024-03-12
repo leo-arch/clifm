@@ -735,7 +735,7 @@ expand_app_fields(char ***cmd, size_t *n, char *fpath, int *exec_flags)
 	for (i = 0; a[i]; i++) {
 		/* Expand %f pĺaceholder */
 		if (*a[i] == '%' && *(a[i] + 1) == 'f') {
-			size_t fpath_len = strlen(fpath);
+			const size_t fpath_len = strlen(fpath);
 			a[i] = xnrealloc(a[i], fpath_len + 1, sizeof(char));
 			xstrsncpy(a[i], fpath, fpath_len + 1);
 			f = 1;
@@ -801,7 +801,7 @@ run_mime_app(char **app, char **fpath)
 	}
 
 	const int ret = launch_execv(cmd, (bg_proc && !open_in_foreground)
-			? BACKGROUND : FOREGROUND, exec_flags);
+		? BACKGROUND : FOREGROUND, exec_flags);
 
 	for (i = 0; i < n; i++)
 		free(cmd[i]);
@@ -1644,7 +1644,6 @@ mime_open(char **args)
 			return ret;
 		info = 1;
 		file_index = 2;
-
 	} else {
 		const int ret = get_open_file_path(args, &file_path, &deq_file);
 		if (ret != FUNC_SUCCESS)
