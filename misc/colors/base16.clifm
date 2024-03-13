@@ -3,34 +3,34 @@
 # Author: L. Abramovich
 # License: GPL3
 
-define W=00;38;2;214;213;212
-define BDW=01;38;2;165;162;162
-define DW=38;2;165;162;162
+define W=#d6d5d4
+define BDW=#a5a2a2-1
+define DW=#a5a2a2
 
-define BB=01;38;2;1;160;228
-define DB=00;38;2;1;160;228
+define BB=#01a0e4-1
+define DB=#01a0e4
 define BB4=01;34
 
-define R=00;38;2;219;45;32
-define BR=01;38;2;219;45;32
+define R=#db2d20
+define BR=#db2d20-1
 
-define C=00;38;2;181;228;224
-define BC=01;38;2;181;228;224
-define DC=02;38;2;181;228;224
-define C4=00;36
+define C=#b5e4e0
+define BC=#b5e4e0-1
+define DC=#b5e4e0-2
+define C4=36
 
-define Y=00;38;2;253;237;2
-define BY=01;38;2;253;237;2
-define DY=00;38;2;161;106;48
-define BY4=01;33
+define Y=#fded02
+define BY=#fded02-1
+define DY=#a16a30
+define BY4=1;33
 
-define G=00;38;2;1;162;82
-define BG=01;38;2;1;162;82
-define BG4=01;32
+define G=#01a252
+define BG=#01a282-1
+define BG4=1;32
 
-define M=38;2;161;106;148
+define M=#a16a94
 
-define P=38;2;175;135;215
+define P=#af87d7
 
 define KC4=30;46
 define KR=38;2;9;3;0;48;2;219;45;32
@@ -43,15 +43,23 @@ define WB=38;2;214;213;212;48;2;1;160;228
 define WR=38;2;214;213;212;48;2;219;45;32
 define DfGr=48;2;1;162;82
 
-define ARCHIVE=38;2;219;45;32
-define IMAGE=38;2;161;106;48
-define AUDIO=00;36
+define ARCHIVE=#db2d20-1
+define AUDIO=36
+define CODE=#a5a2a2-1
+define DOC=#fded02
+define EBOOK=#db2d20
+define IMAGE=#a16a94
+define MARKUP=#a1b56c
+define TEMP=#a5a2a2
+define VIDEO=#a16a94-1
 
-FiletypeColors="bd=BY:ca=KR=WG:cd=BDW:di=BB:ed=DB:ee=G:ef=Y:ex=BG:fi=:ln=BC:mh=KC4:nd=BR:nf=R:no=RW:or=C4:ow=BlGr:pi=M:sg=KY:so=DY:su=WR:st=WB:tw=DfGr:uf=RK:"
+FiletypeColors="bd=BY:ca=KR=WG:cd=BDW:di=BB:ed=DB:ee=G:ef=DW:ex=BG:fi=:ln=BC:mh=KC4:nd=BR:nf=R:no=RW:or=C4:ow=BlGr:pi=M:sg=KY:so=DY:su=WR:st=WB:tw=DfGr:uf=RK:"
 
 InterfaceColors="bm=C:db=Y:dc=W:dd=:de=C:df=W:dg=P:dk=R:dl=DB:dn=DW:do=C:dp=M:dr=Y:dw=R:dxd=G:dxr=C:dz=:el=DC:em=R:lc=BC:li=BG4:mi=BC:nm=BG4:si=BB4:ti=BY4:tx=W:wc=C:wm=BY4:ws1=B:ws2=R:ws3=Y:ws4=G:ws5=C:ws6=M:ws7=DW:ws8=W:xf=R:xs=G:"
 
-ExtColors="*.tar=ARCHIVE:*.tgz=ARCHIVE:*.taz=ARCHIVE:*.lha=ARCHIVE:*.lz4=ARCHIVE:*.lzh=ARCHIVE:*.lzma=ARCHIVE:*.tlz=ARCHIVE:*.txz=ARCHIVE:*.tzo=ARCHIVE:*.t7z=ARCHIVE:*.zip=ARCHIVE:*.z=ARCHIVE:*.dz=ARCHIVE:*.gz=ARCHIVE:*.lrz=ARCHIVE:*.lz=ARCHIVE:*.lzo=ARCHIVE:*.xz=ARCHIVE:*.zst=ARCHIVE:*.tzst=ARCHIVE:*.bz2=ARCHIVE:*.bz=ARCHIVE:*.tbz=ARCHIVE:*.tbz2=ARCHIVE:*.tz=ARCHIVE:*.deb=ARCHIVE:*.rpm=ARCHIVE:*.rar=ARCHIVE:*.cpio=ARCHIVE:*.7z=ARCHIVE:*.rz=ARCHIVE:*.cab=ARCHIVE:*.jpg=IMAGE:*.jpeg=IMAGE:*.mjpg=IMAGE:*.mjpeg=IMAGE:*.gif=IMAGE:*.bmp=IMAGE:*.xbm=IMAGE:*.xpm=IMAGE:*.png=IMAGE:*.svg=IMAGE:*.pcx=IMAGE:*.mov=IMAGE:*.mpg=IMAGE:*.mpeg=IMAGE:*.m2v=IMAGE:*.mkv=IMAGE:*.webm=IMAGE:*.webp=IMAGE:*.ogm=IMAGE:*.mp4=IMAGE:*.m4v=IMAGE:*.mp4v=IMAGE:*.vob=IMAGE:*.wmv=IMAGE:*.flc=IMAGE:*.avi=IMAGE:*.flv=IMAGE:*.m4a=AUDIO:*.mid=AUDIO:*.midi=AUDIO:*.mp3=AUDIO:*.ogg=AUDIO:*.wav=AUDIO:"
+ExtColors="*.7z=ARCHIVE:*.apk=ARCHIVE:*.arj=ARCHIVE:*.bag=ARCHIVE:*.bin=ARCHIVE:*.bz=ARCHIVE:*.bz2=ARCHIVE:*.deb=ARCHIVE:*.dmg=ARCHIVE:*.gz=ARCHIVE:*.img=ARCHIVE:*.iso=ARCHIVE:*.jar=ARCHIVE:*.pkg=ARCHIVE:*.rar=ARCHIVE:*.rpm=ARCHIVE:*.tar=ARCHIVE:*.tbz=ARCHIVE:*.tbz2=ARCHIVE:*.tgz=ARCHIVE:*.toast=ARCHIVE:*.vcd=ARCHIVE:*.xz=ARCHIVE:*.z=ARCHIVE:*.zip=ARCHIVE:*.zst=ARCHIVE:*.aif=AUDIO:*.flac=AUDIO:*.m4a=AUDIO:*.mid=AUDIO:*.mp3=AUDIO:*.ogg=AUDIO:*.opus=AUDIO:*.wav=AUDIO:*.wma=AUDIO:*.wv=AUDIO:*.djvu=EBOOK:*.epub=EBOOK:*.pdf=EBOOK:*.ps=EBOOK:*.applescript=CODE:*.as=CODE:*.asa=CODE:*.awk=CODE:*.bsh=CODE:*.c=CODE:*.c++=CODE:*.cabal=CODE:*.cc=CODE:*.clj=CODE:*.cp=CODE:*.cpp=CODE:*.cr=CODE:*.cs=CODE:*.csv=CODE:*.csx=CODE:*.cxx=CODE:*.cgi=CODE:*.d=CODE:*.dart=CODE:*.def=CODE:*.di=CODE:*.dot=CODE:*.dox=CODE:*.dpr=CODE:*.el=CODE:*.elm=CODE:*.epp=CODE:*.erl=CODE:*.ex=CODE:*.exs=CODE:*.flake8=CODE:*.fon=CODE:*.fs=CODE:*.fsi=CODE:*.fsx=CODE:*.gemspec=CODE:*.go=CODE:*.gradle=CODE:*.groovy=CODE:*.gv=CODE:*.gvy=CODE:*.h=CODE:*.h++=CODE:*.hgrc=CODE:*.hh=CODE:*.hpp=CODE:*.hs=CODE:*.htc=CODE:*.hxx=CODE:*.ics=CODE:*.inc=CODE:*.inl=CODE:*.ipp=CODE:*.ipynb=CODE:*.java=CODE:*.jl=CODE:*.js=CODE:*.kt=CODE:*.kts=CODE:*.less=CODE:*.lisp=CODE:*.ll=CODE:*.ltx=CODE:*.m=CODE:*.matlab=CODE:*.mir=CODE:*.ml=CODE:*.mli=CODE:*.mn=CODE:*.nb=CODE:*.p=CODE:*.pas=CODE:*.php=CODE:*.pl=CODE:*.pm=CODE:*.pp=CODE:*.pro=CODE:*.psd1=CODE:*.psm1=CODE:*.pod=CODE:*.purs=CODE:*.py=CODE:*.r=CODE:*.rb=CODE:*.rs=CODE:*.rst=CODE:*.sbt=CODE:*.scala=CODE:*.sql=CODE:*.swift=CODE:*.sxi=CODE:*.sxw=CODE:*.t=CODE:*.tcl=CODE:*.td=CODE:*.tex=CODE:*.ts=CODE:*.tsx=CODE:*.vb=CODE:*.xlr=CODE:*.xml=CODE:*.bib=CONFIG:*.bst=CONFIG:*.cfg=CONFIG:*.conf=CONFIG:*.config=CONFIG:*.desktop=CONFIG:*.ini=CONFIG:*.json=CONFIG:*.nix=CONFIG:*.tml=CONFIG:*.toml=CONFIG:*.ui=CONFIG:*.xmp=CONFIG:*.yaml=CONFIG:*.yml=CONFIG:*.doc=DOC:*.docx=DOC:*.fodp=DOC:*.fods=DOC:*.fodt=DOC:*.kex=DOC:*.odp=DOC:*.ods=DOC:*.odt=DOC:*.pps=DOC:*.ppt=DOC:*.pptx=DOC:*.rtf=DOC:*.sxi=DOC:*.sxw=DOC:*.xlr=DOC:*.xls=DOC:*.xlsx=DOC:*.bmp=IMAGE:*.eps=IMAGE:*.fnt=IMAGE:*.fon=IMAGE:*.gif=IMAGE:*.ico=IMAGE:*.jpeg=IMAGE:*.jpg=IMAGE:*.pbm=IMAGE:*.pgm=IMAGE:*.png=IMAGE:*.ppm=IMAGE:*.psd=IMAGE:*.svg=IMAGE:*.tif=IMAGE:*.tiff=IMAGE:*.xcf=IMAGE:*.csv=MARKUP:*.htm=MARKUP:*.html=MARKUP:*.markdown=MARKUP:*.md=MARKUP:*.mdown=MARKUP:*.rst=MARKUP:*.shtml=MARKUP:*.xhtml=MARKUP:*.xml=MARKUP:*.aux=TEMP:*.bak=TEMP:*.bbl=TEMP:*.bc=TEMP:*.bcf=TEMP:*.blg=TEMP:*.cache=TEMP:*.class=TEMP:*.DS_Store=TEMP:*.dyn_hi=TEMP:*.dyn_o=TEMP:*.fdb_latexmk=TEMP:*.fls=TEMP:*.git=TEMP:*.hi=TEMP:*.idx=TEMP:*.ilg=TEMP:*.ind=TEMP:*.la=TEMP:*.lo=TEMP:*.localized=TEMP:*.lock=TEMP:*.log=TEMP:*.o=TEMP:*.out=TEMP:*.orig=TEMP:*.pid=TEMP:*.pyc=TEMP:*.pyd=TEMP:*.pyo=TEMP:*.rlib=TEMP:*.sty=TEMP:*.swp=TEMP:*.tmp=TEMP:*.toc=TEMP:*.clang-format=TOOL:*.cmake=TOOL:*.dox=TOOL:*.fdignore=TOOL:*.flake8=TOOL:*.gemspec=TOOL:*.gitattributes=TOOL:*.gitconfig=TOOL:*.gitignore=TOOL:*.gitmodules=TOOL:*.hgrc=TOOL:*.ignore=TOOL:*.kdevelop=TOOL:*.make=TOOL:*.pro=TOOL:*.rgignore=TOOL:*.avi=VIDEO:*.flv=VIDEO:*.h264=VIDEO:*.m4v=VIDEO:*.mkv=VIDEO:*.mov=VIDEO:*.mp4=VIDEO:*.mpeg=VIDEO:*.mpg=VIDEO:*.ogv=VIDEO:*.rm=VIDEO:*.swf=VIDEO:*.vob=VIDEO:*.webm=VIDEO:*.wmv=VIDEO:"
+
+#ExtColors="*.tar=ARCHIVE:*.tgz=ARCHIVE:*.taz=ARCHIVE:*.lha=ARCHIVE:*.lz4=ARCHIVE:*.lzh=ARCHIVE:*.lzma=ARCHIVE:*.tlz=ARCHIVE:*.txz=ARCHIVE:*.tzo=ARCHIVE:*.t7z=ARCHIVE:*.zip=ARCHIVE:*.z=ARCHIVE:*.dz=ARCHIVE:*.gz=ARCHIVE:*.lrz=ARCHIVE:*.lz=ARCHIVE:*.lzo=ARCHIVE:*.xz=ARCHIVE:*.zst=ARCHIVE:*.tzst=ARCHIVE:*.bz2=ARCHIVE:*.bz=ARCHIVE:*.tbz=ARCHIVE:*.tbz2=ARCHIVE:*.tz=ARCHIVE:*.deb=ARCHIVE:*.rpm=ARCHIVE:*.rar=ARCHIVE:*.cpio=ARCHIVE:*.7z=ARCHIVE:*.rz=ARCHIVE:*.cab=ARCHIVE:*.jpg=IMAGE:*.jpeg=IMAGE:*.mjpg=IMAGE:*.mjpeg=IMAGE:*.gif=IMAGE:*.bmp=IMAGE:*.xbm=IMAGE:*.xpm=IMAGE:*.png=IMAGE:*.svg=IMAGE:*.pcx=IMAGE:*.mov=IMAGE:*.mpg=IMAGE:*.mpeg=IMAGE:*.m2v=IMAGE:*.mkv=IMAGE:*.webm=IMAGE:*.webp=IMAGE:*.ogm=IMAGE:*.mp4=IMAGE:*.m4v=IMAGE:*.mp4v=IMAGE:*.vob=IMAGE:*.wmv=IMAGE:*.flc=IMAGE:*.avi=IMAGE:*.flv=IMAGE:*.m4a=AUDIO:*.mid=AUDIO:*.midi=AUDIO:*.mp3=AUDIO:*.ogg=AUDIO:*.wav=AUDIO:"
 
 DirIconColor="Y"
 
