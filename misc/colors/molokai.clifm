@@ -3,49 +3,48 @@
 # Author: L. Abramovich
 # License: GPL3
 
-define D=0  # Default
-define BD=1 # Default bold
+define D=0                     # Default (reset attributes)
+define BD=1                    # Bold
 
-define R=38;2;249;38;114       # Red
-define BR=1;38;2;249;38;114
-define DR=2;38;2;249;38;114
-define UR=4;38;2;249;38;114
-define UBR=4;1;38;2;249;38;114
-define RR=7;38;2;249;38;114
+define R=#f92672               # Red
+define BR=#f92672-1            # Bold red
+define DR=#f92672-2            # Dimmed red
+define UR=#f92672-4            # Underlined red
+define RR=#f92672-7            # Reverse red
+define UBR=4;1;38;2;249;38;114 # Underlined bold red
 
-define G=38;2;0;255;135    # Green
-define BG=1;38;2;0;255;135
-define DG=2;38;2;0;255;135
-define G2=38;2;166;226;46
+define G=#00ff87               # Green
+define BG=#00ff87-1
+define DG=#00ff87-2
+define G2=#a6e22e
 
-define Y=38;2;230;219;116    # Yellow
-define BY=1;38;2;230;219;116
-define DY=2;38;2;230;219;116
-define Y2=38;2;226;209;57
+define Y=#e6db74               # Yellow
+define BY=#e6db74-1
+define DY=#e6db74-2
+define Y2=#e2d139
 
-define B=38;2;102;217;239        # Blue
-define BB=1;38;2;102;217;239
-define DB=2;38;2;102;217;239
+define B=#66d9ef               # Blue
+define BB=#66d9ef-1
+define DB=#66d9ef-2
 define UDB=4;2;38;2;102;217;239
 
-define M=35    # Magenta
-define BM=1;35 # Bold Magenta
-define DM=2;35 # Dimmed magenta
-define UM=4;35 # Underlined magenta
+define M=35                    # Magenta (4-bit)
+define BM=1;35                 # Bold Magenta
+define DM=2;35                 # Dimmed magenta
+define UM=4;35                 # Underlined magenta
 
-define C=36 # Cyan
-define BC=1;36 # Bold cyan
-define DC=2;36 # Dimmed cyan
-define RC=7;36 # Reverse cyan
-define UDC=4;02;36 # Underlined dimmed cyan
-define BDC=1;02;36 # Bold dimmed cyan
+define C=36                    # Cyan (4-bit)
+define BC=1;36                 # Bold cyan
+define DC=2;36                 # Dimmed cyan
+define RC=7;36                 # Reverse cyan
+define UDC=4;2;36              # Underlined dimmed cyan
+define BDC=1;2;36              # Bold dimmed cyan
 
-define O=38;2;253;151;31    # Orange
-define BO=1;38;2;253;151;31
-define DO=2;38;2;253;151;31
+define O=#fd971f               # Orange
+define BO=#fd971f-1
+define DO=#fd971f-2
 
-define Gy=38;2;122;112;112 # Gray
-define DW=2;37 # Dimmed white
+define DW=2;37                # Dimmed white (4-bit)
 
 define KR=38;2;0;0;0;48;2;255;74;68
 define RK=38;2;255;74;68;48;2;51;51;51 # Red on black
@@ -62,20 +61,21 @@ define UBlR=4;38;2;102;217;239;48;2;255;74;68
 define RBl=38;2;255;74;68;48;2;102;217;239
 
 define ARCHIVE=38;2;255;74;68;48;2;51;51;51 # Red on black
-define AUDIO=38;2;253;151;31  # Orange
-define CODE=38;2;249;38;114   # Red
-define CONFIG=38;2;166;226;46 # Green2
-define DOC=38;2;230;219;116   # Yellow
-define IMAGE=38;2;253;151;31  # Orange
-define MARKUP=38;2;226;209;57 # Yellow2
-define TEMP=38;2;122;112;112  # Gray
-define VIDEO=38;2;253;151;31  # Orange
+define AUDIO=#fd971f     # Orange
+define CODE=#f92672      # Red
+define CONFIG=#a6e22e    # Green2
+define DOC=#e6db74       # Yellow
+define EBOOK=#e6db74-1   # Bold yellow
+define IMAGE=#fd971f     # Orange
+define MARKUP=#e2d139    # Yellow2
+define TEMP=2;37         # Dimmed white (4-bit)
+define VIDEO=#fd971f-1   # Bold orange
 
 FiletypeColors="bd=BK:ca=KR:cd=BD:di=B:ed=DB:ef=2:ex=BR:fi=0:ln=R:mh=RC:nd=UBR:nf=UR:no=UBlR:or=UKM:ow=BlGr:pi=KB:sg=KY:so=KM:st=KG:su=WR:tw=RBl:uf=UBlR:"
 
 InterfaceColors="bm=BC:db=Y:dd=:de=C:df=D:dg=O:dk=R:dl=DW:dn=DW:do=C:dp=M:dr=Y:dw=R:dxd=G:dxr=C:dz=:el=O:em=BR:fc=DB:hb=C:hc=DR:hd=C:he=C:hn=M:hp=C:hq=Y:hr=R:hs=G:hv=G:lc=R:li=BG:mi=BC:nm=BG:sb=DY:sc=DR:sf=UDC:sh=DM:si=BB:sp=DR:sx=DG:ti=BC:ts=UM:tt=BDC:tx=D:wc=BC:wm=BY:ws1=B:ws2=R:ws3=Y:ws4=G:ws5=C:ws6=C:ws7=C:ws8=C:xf=BR:xs=G:"
 
-ExtColors="*.7z=ARCHIVE:*.apk=ARCHIVE:*.arj=ARCHIVE:*.bag=ARCHIVE:*.bin=ARCHIVE:*.bz=ARCHIVE:*.bz2=ARCHIVE:*.deb=ARCHIVE:*.dmg=ARCHIVE:*.gz=ARCHIVE:*.img=ARCHIVE:*.iso=ARCHIVE:*.jar=ARCHIVE:*.pkg=ARCHIVE:*.rar=ARCHIVE:*.rm=ARCHIVE:*.rpm=ARCHIVE:*.tar=ARCHIVE:*.tbz=ARCHIVE:*.tbz2=ARCHIVE:*.tgz=ARCHIVE:*.toast=ARCHIVE:*.vcd=ARCHIVE:*.xz=ARCHIVE:*.z=ARCHIVE:*.zip=ARCHIVE:*.zst=ARCHIVE:*.aif=AUDIO:*.flac=AUDIO:*.m4v=AUDIO:*.mid=AUDIO:*.mp3=AUDIO:*.ogg=AUDIO:*.opus=AUDIO:*.vob=AUDIO:*.wav=AUDIO:*.wma=AUDIO:*.wv=AUDIO:*.applescript=CODE:*.as=CODE:*.asa=CODE:*.awk=CODE:*.bib=CODE:*.bsh=CODE:*.bst=CODE:*.c=CODE:*.c++=CODE:*.cabal=CODE:*.cc=CODE:*.clj=CODE:*.cp=CODE:*.cpp=CODE:*.cr=CODE:*.cs=CODE:*.csv=CODE:*.csx=CODE:*.cxx=CODE:*.cgi=CODE:*.d=CODE:*.dart=CODE:*.def=CODE:*.di=CODE:*.dot=CODE:*.dox=CODE:*.dpr=CODE:*.el=CODE:*.elm=CODE:*.epp=CODE:*.erl=CODE:*.ex=CODE:*.exs=CODE:*.flake8=CODE:*.fon=CODE:*.fs=CODE:*.fsi=CODE:*.fsx=CODE:*.gemspec=CODE:*.go=CODE:*.gradle=CODE:*.groovy=CODE:*.gv=CODE:*.gvy=CODE:*.h=CODE:*.h++=CODE:*.hgrc=CODE:*.hh=CODE:*.hpp=CODE:*.hs=CODE:*.htc=CODE:*.hxx=CODE:*.ics=CODE:*.inc=CODE:*.inl=CODE:*.ipp=CODE:*.ipynb=CODE:*.java=CODE:*.jl=CODE:*.js=CODE:*.kt=CODE:*.kts=CODE:*.less=CODE:*.lisp=CODE:*.ll=CODE:*.ltx=CODE:*.m=CODE:*.matlab=CODE:*.mir=CODE:*.ml=CODE:*.mli=CODE:*.mn=CODE:*.nb=CODE:*.nix=CODE:*.p=CODE:*.pas=CODE:*.php=CODE:*.pl=CODE:*.pm=CODE:*.pp=CODE:*.pro=CODE:*.psd1=CODE:*.psm1=CODE:*.pod=CODE:*.purs=CODE:*.py=CODE:*.r=CODE:*.rb=CODE:*.rs=CODE:*.rst=CODE:*.sbt=CODE:*.scala=CODE:*.sql=CODE:*.swift=CODE:*.sxi=CODE:*.sxw=CODE:*.t=CODE:*.tcl=CODE:*.td=CODE:*.tex=CODE:*.ts=CODE:*.tsx=CODE:*.vb=CODE:*.xlr=CODE:*.xml=CODE:*.ui=CONFIG:*.pro=CONFIG:*.nix=CONFIG:*.xmp=CONFIG:*.bst=CONFIG:*.dox=CONFIG:*.ini=CONFIG:*.cfg=CONFIG:*.tml=CONFIG:*hgrc=CONFIG:*.bib=CONFIG:*.yml=CONFIG:*.conf=CONFIG:*.toml=CONFIG:*.hgrc=CONFIG:*.json=CONFIG:*.make=CONFIG:*.yaml=CONFIG:*.cmake=CONFIG:*.ignore=CONFIG:*.flake8=CONFIG:*.config=CONFIG:*setup.py=CONFIG:*.gemspec=CONFIG:*.desktop=CONFIG:*.fdignore=CONFIG:*.rgignore=CONFIG:*.cmake.in=CONFIG:*.kdevelop=CONFIG:*.gitignore=CONFIG:*.gitconfig=CONFIG:*.gitmodules=CONFIG:*.clang-format=CONFIG:*.gitattributes=CONFIG:*.doc=DOC:*.docx=DOC:*.fodp=DOC:*.fods=DOC:*.fodt=DOC:*.odp=DOC:*.ods=DOC:*.odt=DOC:*.pps=DOC:*.ppt=DOC:*.pptx=DOC:*.ps=DOC:*.xls=DOC:*.xlsx=DOC:*.rtf=DOC:*.jpeg=IMAGE:*.tiff=IMAGE:*.eps=IMAGE:*.jpg=IMAGE:*.tif=IMAGE:*.bmp=IMAGE:*.gif=IMAGE:*.ico=IMAGE:*.png=IMAGE:*.svg=IMAGE:*.pgm=IMAGE:*.psd=IMAGE:*.pbm=IMAGE:*.ppm=IMAGE:*.xcf=IMAGE:*.css=MARKUP:*.htm=MARKUP:*.html=MARKUP:*.mdown=MARKUP:*.xhtml=MARKUP:*.shtml=MARKUP:*.markdown=MARKUP:*.md=MARKUP:*.aux=TEMP:*.bak=TEMP:*.bbl=TEMP:*.bc=TEMP:*.bcf=TEMP:*.blg=TEMP:*.cache=TEMP:*.class=TEMP:*.dyn_hi=TEMP:*.dyn_o=TEMP:*.fls=TEMP:*.git=TEMP:*.hi=TEMP:*.idx=TEMP:*.ilg=TEMP:*.ind=TEMP:*.la=TEMP:*.lo=TEMP:*.lock=TEMP:*.log=TEMP:*.o=TEMP:*.orig=TEMP:*.out=TEMP:*.pid=TEMP:*.pyc=TEMP:*.pyd=TEMP:*.pyo=TEMP:*.rlib=TEMP:*.scons_opt=TEMP:*.sty=TEMP:*.swp=TEMP:*.tmp=TEMP:*.toc=TEMP:*.avi=VIDEO:*.h264=VIDEO:*.m4a=VIDEO:*.mkv=VIDEO:*.mp4=VIDEO:*.mpeg=VIDEO:*.mpg=VIDEO:*.mov=VIDEO:*.flv=VIDEO:*.rm=VIDEO:*.swf=VIDEO:*.webm=VIDEO:*.wmv=VIDEO:"
+ExtColors="*.7z=ARCHIVE:*.apk=ARCHIVE:*.arj=ARCHIVE:*.bag=ARCHIVE:*.bin=ARCHIVE:*.bz=ARCHIVE:*.bz2=ARCHIVE:*.deb=ARCHIVE:*.dmg=ARCHIVE:*.gz=ARCHIVE:*.img=ARCHIVE:*.iso=ARCHIVE:*.jar=ARCHIVE:*.pkg=ARCHIVE:*.rar=ARCHIVE:*.rm=ARCHIVE:*.rpm=ARCHIVE:*.tar=ARCHIVE:*.tbz=ARCHIVE:*.tbz2=ARCHIVE:*.tgz=ARCHIVE:*.toast=ARCHIVE:*.vcd=ARCHIVE:*.xz=ARCHIVE:*.z=ARCHIVE:*.zip=ARCHIVE:*.zst=ARCHIVE:*.aif=AUDIO:*.flac=AUDIO:*.m4v=AUDIO:*.mid=AUDIO:*.mp3=AUDIO:*.ogg=AUDIO:*.opus=AUDIO:*.vob=AUDIO:*.wav=AUDIO:*.wma=AUDIO:*.wv=AUDIO:*.applescript=CODE:*.as=CODE:*.asa=CODE:*.awk=CODE:*.bib=CODE:*.bsh=CODE:*.bst=CODE:*.c=CODE:*.c++=CODE:*.cabal=CODE:*.cc=CODE:*.clj=CODE:*.cp=CODE:*.cpp=CODE:*.cr=CODE:*.cs=CODE:*.csv=CODE:*.csx=CODE:*.cxx=CODE:*.cgi=CODE:*.d=CODE:*.dart=CODE:*.def=CODE:*.di=CODE:*.dot=CODE:*.dox=CODE:*.dpr=CODE:*.el=CODE:*.elm=CODE:*.epp=CODE:*.erl=CODE:*.ex=CODE:*.exs=CODE:*.flake8=CODE:*.fon=CODE:*.fs=CODE:*.fsi=CODE:*.fsx=CODE:*.gemspec=CODE:*.go=CODE:*.gradle=CODE:*.groovy=CODE:*.gv=CODE:*.gvy=CODE:*.h=CODE:*.h++=CODE:*.hgrc=CODE:*.hh=CODE:*.hpp=CODE:*.hs=CODE:*.htc=CODE:*.hxx=CODE:*.ics=CODE:*.inc=CODE:*.inl=CODE:*.ipp=CODE:*.ipynb=CODE:*.java=CODE:*.jl=CODE:*.js=CODE:*.kt=CODE:*.kts=CODE:*.less=CODE:*.lisp=CODE:*.ll=CODE:*.ltx=CODE:*.m=CODE:*.matlab=CODE:*.mir=CODE:*.ml=CODE:*.mli=CODE:*.mn=CODE:*.nb=CODE:*.nix=CODE:*.p=CODE:*.pas=CODE:*.php=CODE:*.pl=CODE:*.pm=CODE:*.pp=CODE:*.pro=CODE:*.psd1=CODE:*.psm1=CODE:*.pod=CODE:*.purs=CODE:*.py=CODE:*.r=CODE:*.rb=CODE:*.rs=CODE:*.rst=CODE:*.sbt=CODE:*.scala=CODE:*.sql=CODE:*.swift=CODE:*.sxi=CODE:*.sxw=CODE:*.t=CODE:*.tcl=CODE:*.td=CODE:*.tex=CODE:*.ts=CODE:*.tsx=CODE:*.vb=CODE:*.xlr=CODE:*.xml=CODE:*.ui=CONFIG:*.pro=CONFIG:*.nix=CONFIG:*.xmp=CONFIG:*.bst=CONFIG:*.dox=CONFIG:*.ini=CONFIG:*.cfg=CONFIG:*.tml=CONFIG:*hgrc=CONFIG:*.bib=CONFIG:*.yml=CONFIG:*.conf=CONFIG:*.toml=CONFIG:*.hgrc=CONFIG:*.json=CONFIG:*.make=CONFIG:*.yaml=CONFIG:*.cmake=CONFIG:*.ignore=CONFIG:*.flake8=CONFIG:*.config=CONFIG:*setup.py=CONFIG:*.gemspec=CONFIG:*.desktop=CONFIG:*.fdignore=CONFIG:*.rgignore=CONFIG:*.cmake.in=CONFIG:*.kdevelop=CONFIG:*.gitignore=CONFIG:*.gitconfig=CONFIG:*.gitmodules=CONFIG:*.clang-format=CONFIG:*.gitattributes=CONFIG:*.doc=DOC:*.docx=DOC:*.fodp=DOC:*.fods=DOC:*.fodt=DOC:*.odp=DOC:*.ods=DOC:*.odt=DOC:*.pps=DOC:*.ppt=DOC:*.pptx=DOC:*.ps=DOC:*.xls=DOC:*.xlsx=DOC:*.rtf=DOC:*.azw=EBOOK:*.azw3=EBOOK:*.cb7=EBOOK:*.cba=EBOOK:*.cbr=EBOOK:*.cbz=EBOOK:*.djvu=EBOOK:*.epub=EBOOK:*.kf8=EBOOK:*.kfx=EBOOK:*.mobi=EBOOK:*.pdf=EBOOK:*.bmp=IMAGE:*.eps=IMAGE:*.gif=IMAGE:*.ico=IMAGE:*.jpeg=IMAGE:*.jpg=IMAGE:*.pbm=IMAGE:*.pgm=IMAGE:*.png=IMAGE:*.ppm=IMAGE:*.psd=IMAGE:*.svg=IMAGE:*.tif=IMAGE:*.tiff=IMAGE:*.xcf=IMAGE:*.css=MARKUP:*.htm=MARKUP:*.html=MARKUP:*.mdown=MARKUP:*.xhtml=MARKUP:*.shtml=MARKUP:*.markdown=MARKUP:*.md=MARKUP:*.aux=TEMP:*.bak=TEMP:*.bbl=TEMP:*.bc=TEMP:*.bcf=TEMP:*.blg=TEMP:*.cache=TEMP:*.class=TEMP:*.dyn_hi=TEMP:*.dyn_o=TEMP:*.fls=TEMP:*.git=TEMP:*.hi=TEMP:*.idx=TEMP:*.ilg=TEMP:*.ind=TEMP:*.la=TEMP:*.lo=TEMP:*.lock=TEMP:*.log=TEMP:*.o=TEMP:*.orig=TEMP:*.out=TEMP:*.pid=TEMP:*.pyc=TEMP:*.pyd=TEMP:*.pyo=TEMP:*.rlib=TEMP:*.scons_opt=TEMP:*.sty=TEMP:*.swp=TEMP:*.tmp=TEMP:*.toc=TEMP:*.3gp=VIDEO:*.avi=VIDEO:*.flv=VIDEO:*.h264=VIDEO:*.m4a=VIDEO:*.mkv=VIDEO:*.mp4=VIDEO:*.mpeg=VIDEO:*.mpg=VIDEO:*.mov=VIDEO:*.ogv=VIDEO:*.rm=VIDEO:*.swf=VIDEO:*.webm=VIDEO:*.wmv=VIDEO:"
 
 DateShades="3,#ff0000-2,#ffffff,#dadada,#bcbcbc,#9e9e9e,#808080"
 SizeShades="3,#f92672-2,#02da74,#00ff87,#e6db74,#fd971f,#f92672"
