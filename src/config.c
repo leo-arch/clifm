@@ -2234,9 +2234,9 @@ create_mime_file_anew(char *file)
 #X:N:.*\\.ext$=cmd\n\
 \n\
 X:N:.*\\.djvu$=djview;zathura;xreader;evince;atril\n\
-X:N:.*\\.epub$=mupdf;zathura;xreader;ebook-viewer;FBReader\n\
-X:N:.*\\.mobi$=ebook-viewer;FBReader\n\
-X:N:.*\\.(cbr|cbz)$=mcomix;xreader;YACReader;qcomicbook;zathura\n\
+X:N:.*\\.epub$=mupdf;zathura;xreader;ebook-viewer;FBReader;foliate\n\
+X:N:.*\\.mobi$=mupdf;ebook-viewer;FBReader;foliate\n\
+X:N:.*\\.(cbr|cbz)$=mcomix;xreader;YACReader;qcomicbook;zathura;foliate\n\
 X:N:(.*\\.clifm$|clifmrc)=$EDITOR;$VISUAL;kak;micro;nvim;vim;vi;mg;emacs;nano;mili;leafpad;mousepad;featherpad;gedit;kate;pluma\n\
 !X:N:(.*\\.clifm$|clifmrc)=$EDITOR;$VISUAL;kak;micro;nvim;vim;vi;mg;emacs;nano\n\
 \n\n");
