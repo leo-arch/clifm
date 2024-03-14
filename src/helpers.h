@@ -1106,6 +1106,7 @@ struct config_t {
 	int no_eln;
 	int only_dirs;
 	int pager;
+	int pager_once;
 	int purge_jumpdb;
 	int print_selfiles;
 	int private_ws_settings;
@@ -1136,6 +1137,7 @@ struct config_t {
 	int unicode;
 	int warning_prompt;
 	int welcome_message;
+	int pad2;
 };
 
 extern struct config_t conf;

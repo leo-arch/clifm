@@ -2765,14 +2765,19 @@ options_generator(const char *text, int state)
 #define MAX_OPTS 22
 	char *_opts[MAX_OPTS] = {0};
 
-	/* acd, ao, ext, ff, hf, pg (w == 2 -> second word only) */
+	/* acd, ao, ext, ff, hf (w == 2 -> second word only) */
 	if (w == 2 && ( ( *l == 'a' && ((l[1] == 'o' && l[2] == ' ')
 	|| strncmp(l, "acd ", 4) == 0) )
 	|| (*l == 'e' && strncmp(l, "ext ", 4) == 0)
 	|| (*l == 'f' && (l[1] == 'f' || l[1] == 'c') && l[2] == ' ')
-	|| (*l == 'h' && (l[1] == 'f' || l[1] == 'h') && l[2] == ' ')
-	|| (*l == 'p' && l[1] == 'g' && l[2] == ' ') ) ) {
+	|| (*l == 'h' && (l[1] == 'f' || l[1] == 'h') && l[2] == ' ') ) ) {
 		_opts[0] = "on"; _opts[1] = "off"; _opts[2] = "status"; _opts[3] = NULL;
+
+	/* pg, pager */
+	} else if (w == 2 && (*l == 'p' && ((l[1] == 'g' && l[2] == ' ')
+	|| strncmp(l, "pager ", 6) == 0))) {
+		_opts[0] = "on"; _opts[1] = "off"; _opts[2] = "once";
+		_opts[3] = "status"; _opts[4] = NULL;
 
 	/* cl, icons, ll-lv, lm, and fz */
 	} else if (w == 2 && ( (*l == 'c' && l[1] == 'l' && l[2] == ' ')

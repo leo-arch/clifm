@@ -743,6 +743,8 @@ const struct cmdslist_t param_str[] = {
 	{"pager on", 8},
 	{"pg off", 6},
 	{"pager off", 9},
+	{"pg once", 7},
+	{"pager once", 10},
 	{"pg status", 9},
 	{"pager status", 12},
 	{"pf set", 6},

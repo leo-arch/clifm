@@ -232,6 +232,7 @@ init_conf_struct(void)
 	conf.no_eln = UNSET;
 	conf.only_dirs = UNSET;
 	conf.pager = UNSET;
+	conf.pager_once = 0;
 	conf.private_ws_settings = UNSET;
 	conf.prop_fields_gap = UNSET;
 	conf.purge_jumpdb = UNSET;

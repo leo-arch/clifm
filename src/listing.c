@@ -570,8 +570,13 @@ post_listing(DIR *dir, const int reset_pager, const filesn_t excluded_files)
 	if (xargs.list_and_quit == 1)
 		exit(exit_code);
 
-	if (reset_pager == 1 && (conf.pager < 2 || files < (filesn_t)conf.pager))
-		conf.pager = pager_bk;
+	if (conf.pager_once == 0) {
+		if (reset_pager == 1 && (conf.pager < 2 || files < (filesn_t)conf.pager))
+			conf.pager = pager_bk;
+	} else {
+		conf.pager_once = 0;
+		conf.pager = 0;
+	}
 
 	if (max_files != UNSET && files > (filesn_t)max_files)
 		printf("... (%d/%jd)\n", max_files, (intmax_t)files);
