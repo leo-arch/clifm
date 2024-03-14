@@ -3,59 +3,65 @@
 # Author: L. Abramovich
 # License: GPL3
 
-define D=0;38;2;248;248;242
-define BD=0;1;38;2;248;248;242
+define D=#f8f8f2     # Default
+define BD=#f8f8f2-1  # Bold default
 
-define R=38;2;255;85;85
-define BR=1;38;2;255;85;85
-define DR=2;38;2;255;85;85
+define R=#ff5555     # Red
+define BR=#ff5555-1  # Bold red
+define DR=#ff5555-2  # Dimmed red
 
-define G=38;2;80;250;123
-define BG=1;38;2;80;250;123
-define DG=2;38;2;80;250;123
+define G=#50fa7b     # Green
+define BG=#50fa7b-1  # Bold green
+define DG=#50fa7b-2  # Dimmed green
 
-define Y=38;2;241;250;140
-define BY=1;38;2;241;250;140
-define DY=2;38;2;241;250;140
+define Y=#f1fa8c     # Yellow
+define BY=#f1fa8c-1  # Bold yellow
+define DY=#f1fa8c-2  # Dimmed yellow
 
-define B=38;2;98;114;164
-define BB=1;38;2;98;114;164
-define DB=2;38;2;98;114;164
+define M=#ff79c6     # Pink
+define BM=#ff79c6-1  # Bold pink
+define DM=#ff79c6-2  # Dimmed pink
+define UM=#ff79c6-4  # Underlined pink
 
-define M=38;2;255;121;198 #pink
-define BM=1;38;2;255;121;198
-define DM=2;38;2;255;121;198
-define UM=4;38;2;255;121;198
+define M2=#bd93f9    # Purple
+define BM2=#bd93f9-1 # Bold purple
+define DM2=#bd93f9-2 # Dimmed purple
+define UM2=#bd93f9-4 # Underlined purple
 
-define M2=38;2;189;147;249 #purple
-define BM2=1;38;2;189;147;249
-define DM2=2;38;2;189;147;249
-define UM2=4;38;2;189;147;249
+define C=#8be9fd     # Cyan
+define BC=#8be9fd-1  # Bold cyan
+define DC=#8be9fd-2  # Dimmed cyan
+define RC=#8be9fd-7  # Reverse cyan
+define UDC=4;2;38;2;139;233;253  # Underlined dimmed cyan
+define BDC=1;2;38;2;139;233;253  # Bold dimmed cyan
 
-define C=38;2;139;233;253
-define BC=1;38;2;139;233;253
-define DC=2;38;2;139;233;253
-define RC=7;38;2;139;233;253
-define UDC=4;2;38;2;139;233;253
-define BDC=1;2;38;2;139;233;253
-
-define DW=2;38;2;248;248;242
+define DW=#f8f8f2-2  # Dimmed white
 
 # Foreground-background combinations
-define RW=38;2;255;85;85;48;2;248;248;242
-define BW=38;2;98;114;164;48;2;248;248;242
-define WR=38;2;248;248;242;48;2;255;85;85 
-define KY=38;2;40;42;54;48;2;241;250;140
-define KR=38;2;40;42;54;48;2;255;85;85
-define KG=38;2;40;42;54;48;2;80;250;123
-define BlGr=38;2;98;114;164;48;2;80;250;123
-define WB=38;2;248;248;242;48;2;98;114;164
+define RW=38;2;255;85;85;48;2;248;248;242   # Red on white
+define BW=38;2;98;114;164;48;2;248;248;242  # Blue on white
+define WR=38;2;248;248;242;48;2;255;85;85   # White on red
+define KY=38;2;40;42;54;48;2;241;250;140    # Black on yellow
+define KR=38;2;40;42;54;48;2;255;85;85      # Black on red
+define KG=38;2;40;42;54;48;2;80;250;123     # Black on green
+define BlGr=38;2;98;114;164;48;2;80;250;123 # Blue on green
+define WB=38;2;248;248;242;48;2;98;114;164  # White on blue
 
-FiletypeColors="di=BB:nd=BR:ed=DB:fi=D:ef=DY:nf=DR:ln=BC:mh=RC:or=DC:pi=M:so=BM2:bd=BY:cd=BD:su=WR:sg=KY:ca=KR:tw=KG:ow=BlGr:st=WB:ex=BG:ee=G:no=RW:uf=BW:"
+FiletypeColors="bd=BY:ca=KR:cd=BD:di=BM2:ed=M2:ee=G:ef=DY:ex=BG:fi=D:ln=BC:mh=RC:nd=BR:nf=DR:no=RW:or=DC:ow=BlGr:pi=M:sg=KY:so=BM2:st=WB:su=WR:tw=KG:uf=BW:"
 
-InterfaceColors="el=BY:mi=BC:db=M2:de=C:dk=R:dl=B:tx=D:df=D:fc=DB:wc=BC:lc=C:li=BG:si=BB:ti=BC:em=BR:wm=BY:nm=BG:bm=BC:dn=DW:dr=Y:dw=R:dxd=G:dxr=C:dg=Y:dd=:dz=:do=C:dp=M2:sb=DY:sc=DR:sf=UDC:sh=DM2:sp=DR:sx=DG:hb=C:hc=DR:hd=C:he=C:hn=M:hp=C:hq=Y:hr=R:hs=G:hv=G:tt=BDC:ts=UM2:ws1=B:ws2=R:ws3=Y:ws4=G:ws5=C:ws6=C:ws7=C:ws8=C:xs=G:xf=BR:"
+InterfaceColors="bm=BC:db=M2:dd=:de=C:df=D:dg=Y:dk=R:dl=M2:dn=DW:do=C:dp=M2:dr=Y:dw=R:dxd=G:dxr=C:dz=:el=M:em=BR:fc=DW:hb=C:hc=DR:hd=C:he=C:hn=D:hp=C:hq=Y:hr=R:hs=G:hv=G:lc=C:li=BG:mi=BC:nm=BG:sb=DY:sc=DR:sf=UDC:sh=DM2:si=BM2:sp=DR:sx=DG:ti=BC:ts=UM2:tt=BDC:tx=D:wc=BC:wm=BY:ws1=M2:ws2=R:ws3=Y:ws4=G:ws5=C:ws6=C:ws7=C:ws8=C:xf=BR:xs=G:"
 
-ExtColors="*.tar=BR:*.tgz=BR:*.taz=BR:*.lha=BR:*.lz4=BR:*.lzh=BR:*.lzma=BR:*.tlz=BR:*.txz=BR:*.tzo=BR:*.t7z=BR:*.zip=BR:*.z=BR:*.dz=BR:*.gz=BR:*.lrz=BR:*.lz=BR:*.lzo=BR:*.xz=BR:*.zst=BR:*.tzst=BR:*.bz2=BR:*.bz=BR:*.tbz=BR:*.tbz2=BR:*.tz=BR:*.deb=BR:*.rpm=BR:*.rar=BR:*.cpio=BR:*.7z=BR:*.rz=BR:*.cab=BR:*.jpg=BM:*.jpeg=BM:*.mjpg=BM:*.mjpeg=BM:*.gif=BM:*.bmp=BM:*.xbm=BM:*.xpm=BM:*.png=BM:*.svg=BM:*.pcx=BM:*.mov=BM:*.mpg=BM:*.mpeg=BM:*.m2v=BM:*.mkv=BM:*.webm=BM:*.webp=BM:*.ogm=BM:*.mp4=BM:*.m4v=BM:*.mp4v=BM:*.vob=BM:*.wmv=BM:*.flc=BM:*.avi=BM:*.flv=BM:*.m4a=C:*.mid=C:*.midi=C:*.mp3=C:*.ogg=C:*.wav=C:*.pdf=BR:*.doc=M:*.docx=M:*.xls=M:*.xlsx=M:*.ppt=M:*.pptx=M:*.odt=M:*.ods=M:*.odp=M:*.cache=DW:*.tmp=DW:*.temp=DW:*.log=DW:*.bak=DW:*.bk=DW:*.in=DW:*.out=DW:*.part=DW:*.aux=DW:*.c=BD:*.c++=BD:*.cc=BD:*.cpp=BD:*.h=BD:*.h++=BD:*.hh=BD:*.go=BD:*.java=BD:*.js=BD:*.lua=BD:*.rb=BD:*.rs=BD:"
+define ARCHIVE=#ff5555-1 # Bold red
+define AUDIO=#8be9fd     # Cyan
+define CODE=#bd93f9      # Purple
+define DOC=#ffb86c       # Orange
+define EBOOK=#ffb86c-1   # Bold orange
+define IMAGE=#ff79c6     # Bold magenta
+define MARKUP=#f1fa8c    # Yellow
+define TEMP=#f8f8f2-2    # Dimmed white
+define VIDEO=#ff79c6-1   # Bold magenta
+
+ExtColors="*.7z=ARCHIVE:*.apk=ARCHIVE:*.arj=ARCHIVE:*.bag=ARCHIVE:*.bin=ARCHIVE:*.bz=ARCHIVE:*.bz2=ARCHIVE:*.deb=ARCHIVE:*.dmg=ARCHIVE:*.gz=ARCHIVE:*.img=ARCHIVE:*.iso=ARCHIVE:*.jar=ARCHIVE:*.pkg=ARCHIVE:*.qcow=ARCHIVE:*.qcow2=ARCHIVE:*.rar=ARCHIVE:*.rpm=ARCHIVE:*.tbz=ARCHIVE:*.tbz2=ARCHIVE:*.tar=ARCHIVE:*.tgz=ARCHIVE:*.toast=ARCHIVE:*.vcd=ARCHIVE:*.vdi=ARCHIVE:*.vhd=ARCHIVE:*.vhdx=ARCHIVE:*.vmdk=ARCHIVE:*.xz=ARCHIVE:*.z=ARCHIVE:*.zip=ARCHIVE:*.zst=ARCHIVE:*.aif=AUDIO:*.flac=AUDIO:*.m4a=AUDIO:*.mkv=AUDIO:*.mid=AUDIO:*.mp3=AUDIO:*.ogg=AUDIO:*.opus=AUDIO:*.vob=AUDIO:*.wav=AUDIO:*.wma=AUDIO:*.wmv=AUDIO:*.wv=AUDIO:*.azw=EBOOK:*.azw3=EBOOK:*.cb7=EBOOK:*.cba=EBOOK:*.cbr=EBOOK:*.cbz=EBOOK:*.epub=EBOOK:*.djvu=EBOOK:*.kf8=EBOOK:*.kfx=EBOOK:*.mobi=EBOOK:*.pdf=EBOOK:*.ps=EBOOK:*.as=CODE:*.asa=CODE:*.awk=CODE:*.bash=CODE:*.c=CODE:*.c++=CODE:*.cabal=CODE:*.cc=CODE:*.cgi=CODE:*.clj=CODE:*.cmake=CODE:*.cp=CODE:*.cpp=CODE:*.cr=CODE:*.cs=CODE:*.csx=CODE:*.cxx=CODE:*.d=CODE:*.dart=CODE:*.def=CODE:*.di=CODE:*.dot=CODE:*.dox=CODE:*.dpr=CODE:*.el=CODE:*.elm=CODE:*.epp=CODE:*.erl=CODE:*.ex=CODE:*.exs=CODE:*.fish=CODE:*.flake8=CODE:*.fs=CODE:*.fsi=CODE:*.fsx=CODE:*.gemspec=CODE:*.go=CODE:*.gradle=CODE:*.groovy=CODE:*.gv=CODE:*.gvy=CODE:*.h=CODE:*.h++=CODE:*.hgrc=CODE:*.hgrc=CODE:*.hh=CODE:*.hpp=CODE:*.hs=CODE:*.htc=CODE:*.hxx=CODE:*.inc=CODE:*.inl=CODE:*.ipp=CODE:*.ipynb=CODE:*.java=CODE:*.jl=CODE:*.js=CODE:*.kt=CODE:*.kts=CODE:*.less=CODE:*.lisp=CODE:*.ll=CODE:*.ltx=CODE:*.lua=CODE:*.m=CODE:*.make=CODE:*.matlab=CODE:*.mir=CODE:*.ml=CODE:*.mli=CODE:*.mn=CODE:*.nb=CODE:*.p=CODE:*.pas=CODE:*.php=CODE:*.pl=CODE:*.pm=CODE:*.pod=CODE:*.pp=CODE:*.pro=CODE:*.ps1=CODE:*.psd1=CODE:*.psm1=CODE:*.purs=CODE:*.py=CODE:*.r=CODE:*.rb=CODE:*.rs=CODE:*.sbt=CODE:*.scala=CODE:*.sh=CODE:*.sql=CODE:*.swift=CODE:*.t=CODE:*.tcl=CODE:*.td=CODE:*.tex=CODE:*.ts=CODE:*.tsx=CODE:*.vb=CODE:*.vim=CODE:*.zig=CODE:*.zsh=CODE:*.doc=DOC:*.docx=DOC:*.fodp=DOC:*.fods=DOC:*.fodt=DOC:*.odp=DOC:*.ods=DOC:*.odt=DOC:*.ppm=DOC:*.pps=DOC:*.ppt=DOC:*.pptx=DOC:*.rtf=DOC:*.sxi=DOC:*.sxw=DOC:*.txt=DOC:*.xls=DOC:*.xlsx=DOC:*.3gp=IMAGE:*.bmp=IMAGE:*.gif=IMAGE:*.ico=IMAGE:*.jpg=IMAGE:*.jpeg=IMAGE:*.jxl=IMAGE:*.pbm=IMAGE:*.pgm=IMAGE:*.png=IMAGE:*.psd=IMAGE:*.svg=IMAGE:*.tif=IMAGE:*.tiff=IMAGE:*.webp=IMAGE:*.xcf=IMAGE:*.xmp=IMAGE:*.css=MARKUP:*.htm=MARKUP:*.html=MARKUP:*.markdown=MARKUP:*.md=MARKUP:*.mdown=MARKUP:*.shtml=MARKUP:*.xhtml=MARKUP:*.xlr=MARKUP:*.xml=MARKUP:*.aux=TEMP:*.bak=TEMP:*.bbl=TEMP:*.bc=TEMP:*.bcf=TEMP:*.blg=TEMP:*.cache=TEMP:*.class=TEMP:*.fls=TEMP:*.git=TEMP:*.hi=TEMP:*.idx=TEMP:*.ilg=TEMP:*.ind=TEMP:*.la=TEMP:*.lo=TEMP:*.localized=TEMP:*.lock=TEMP:*.log=TEMP:*.o=TEMP:*.orig=TEMP:*.out=TEMP:*.pid=TEMP:*.pyc=TEMP:*.pyd=TEMP:*.pyo=TEMP:*.rlib=TEMP:*.sty=TEMP:*.swp=TEMP:*.tmp=TEMP:*.toc=TEMP:*.avi=VIDEO:*.flv=VIDEO:*.h264=VIDEO:*.m4v=VIDEO:*.mp4=VIDEO:*.mpeg=VIDEO:*.mpg=VIDEO:*.mov=VIDEO:*.ogv=VIDEO:*.rm=VIDEO:*.webm=VIDEO:"
 
 DateShades="3,#ff0000-2,#ffffff,#dadada,#bcbcbc,#9e9e9e,#808080"
 SizeShades="3,#ff5555-2,#50fa7b,#68da85,#f1fa8c,#ffb86c,#ff5555"
