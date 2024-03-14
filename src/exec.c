@@ -439,7 +439,17 @@ filescounter_function(const char *arg)
 static int
 pager_function(const char *arg)
 {
-	if (!arg || IS_HELP(arg)) {
+	if (!arg || (*arg == 'o' && strcmp(arg, "once") == 0)) {
+		conf.pager = 1;
+		conf.pager_once = 1;
+		if (conf.autols == 1)
+			reload_dirlist();
+		else
+			puts(_("Pager enabled (single pass)"));
+		return FUNC_SUCCESS;
+	}
+
+	if (IS_HELP(arg)) {
 		puts(_(PAGER_USAGE));
 		return FUNC_SUCCESS;
 	}
@@ -477,16 +487,6 @@ pager_function(const char *arg)
 			reload_dirlist();
 		else
 			puts(_("Pager enabled"));
-		return FUNC_SUCCESS;
-	}
-
-	if (*arg == 'o' && strcmp(arg, "once") == 0) {
-		conf.pager = 1;
-		conf.pager_once = 1;
-		if (conf.autols == 1)
-			reload_dirlist();
-		else
-			puts(_("Pager enabled (single pass)"));
 		return FUNC_SUCCESS;
 	}
 

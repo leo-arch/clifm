@@ -819,7 +819,8 @@ the screen.\n\n\
 If set to any positive integer greater than 1, run the pager whenever\n\
 the amount of files in the current directory is greater than or equal to\n\
 this value (say, 1000). 1 amounts to 'on' and 0 to 'off'.\n\n\
-Set to 'once' to run the pager only once.\n\n\
+Set to 'once' to run the pager only once. Since this is the default\n\
+value, running 'pg once' is the same as running just 'pg'.\n\n\
 Note: You can also try the 'pager' plugin running 'gg'."
 
 #define PC_USAGE "Interactively edit files permissions\n\n\
