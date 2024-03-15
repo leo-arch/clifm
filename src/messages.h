@@ -1243,7 +1243,7 @@ emulator using the TerminalCmd option in the configuration file."
 
 /* Misc messages */
 #define PAGER_HELP "?, h: help\nDown arrow, Enter, Space: Advance one line\n\
-Page Down: Advance one page\nq: Stop pagging\n"
+Page Down: Advance one page\nq: Stop paging\n"
 #define PAGER_LABEL "\x1b[7;97m--Mas--\x1b[0;49m"
 #define NOT_AVAILABLE "This feature has been disabled at compile time"
 #define STEALTH_DISABLED "Access to configuration files is not allowed in stealth mode"
