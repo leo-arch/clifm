@@ -115,6 +115,7 @@
 static size_t longest_fc = 0;
 static int pager_bk = 0;
 static int dir_out = 0;
+static int pager_quit = 0;
 
 struct checks_t {
 	int autocmd_files;
@@ -578,7 +579,7 @@ post_listing(DIR *dir, const int reset_pager, const filesn_t excluded_files)
 		conf.pager = 0;
 	}
 
-	if (max_files != UNSET && files > (filesn_t)max_files)
+	if (pager_quit == 0 && max_files != UNSET && files > (filesn_t)max_files)
 		printf("... (%d/%jd)\n", max_files, (intmax_t)files);
 
 	print_div_line();
@@ -668,7 +669,11 @@ run_pager(const int columns_n, int *reset_pager, filesn_t *i, size_t *counter)
 	case 112: /* 'p' */
 	case 113: /* 'q' */
 		pager_bk = conf.pager; conf.pager = 0; *reset_pager = 1;
-		break;
+		putchar('\r');
+		ERASE_TO_RIGHT;
+		if (conf.long_view == 0)
+			MOVE_CURSOR_UP(1);
+		return (-3);
 
 	/* If another key is pressed, go back one position.
 	 * Otherwise, some file names won't be listed.*/
@@ -989,6 +994,7 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad,
 		space_left = (int)longest;
 
 	maxes.name = space_left + (conf.icons == 1 ? 3 : 0);
+	pager_quit = 0;
 
 	filesn_t i, k = files;
 	for (i = 0; i < k; i++) {
@@ -1000,6 +1006,11 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad,
 			int ret = 0;
 			if (*counter > (size_t)(term_lines - 2))
 				ret = run_pager(-1, reset_pager, &i, counter);
+			if (ret == -3) {
+				pager_quit = 1;
+				break;
+			}
+
 			if (ret == -1 || ret == -2) {
 				--i;
 				if (ret == -2)
@@ -1022,6 +1033,9 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad,
 		/* Print the remaining part of the entry. */
 		print_entry_props(&file_info[i], &maxes, have_xattr);
 	}
+
+	if (pager_quit == 1)
+		printf("... (%zd/%zd)\n", i, files);
 }
 
 static size_t
@@ -1599,6 +1613,9 @@ list_files_horizontal(size_t *counter, int *reset_pager,
 	filesn_t i;
 	int last_column = 0;
 	int blc = last_column;
+
+	pager_quit = 0;
+
 	for (i = 0; i < nn; i++) {
 		/* If current entry is in the last column, we need to print a new line char */
 		size_t bcur_cols = cur_cols;
@@ -1622,6 +1639,11 @@ list_files_horizontal(size_t *counter, int *reset_pager,
 			filesn_t ret = 0, bi = i;
 			if (blc && *counter > columns_n * ((size_t)term_lines - 2))
 				ret = run_pager((int)columns_n, reset_pager, &i, counter);
+
+			if (ret == -3) {
+				pager_quit = 1;
+				goto END;
+			}
 
 			if (ret == -1) {
 				i = bi ? bi - 1 : bi;
@@ -1652,8 +1674,11 @@ list_files_horizontal(size_t *counter, int *reset_pager,
 			putchar('\n');
 	}
 
+END:
 	if (last_column == 0)
 		putchar('\n');
+	if (pager_quit == 1)
+		printf("... (%zd/%zd)\n", i, files);
 }
 
 /* List files vertically, like ls(1) would
@@ -1700,6 +1725,8 @@ list_files_vertical(size_t *counter, int *reset_pager,
 	filesn_t x = 0; // Index of the file to be actually printed
 	filesn_t xx = 0; // Current line number
 	filesn_t i = 0; // Index of the current entry being analyzed
+
+	pager_quit = 0;
 
 	for ( ; ; i++) {
 		/* Copy current values to restore them if necessary: done to
@@ -1751,6 +1778,11 @@ list_files_vertical(size_t *counter, int *reset_pager,
 			if (blc && *counter > columns_n * ((size_t)term_lines - 2))
 				ret = run_pager((int)columns_n, reset_pager, &x, counter);
 
+			if (ret == -3) {
+				pager_quit = 1;
+				goto END;
+			}
+
 			if (ret == -1) {
 				/* Restore previous values */
 				i = bi ? bi - 1: bi;
@@ -1794,8 +1826,11 @@ list_files_vertical(size_t *counter, int *reset_pager,
 			putchar('\n');
 	}
 
+END:
 	if (last_column == 0)
 		putchar('\n');
+	if (pager_quit == 1)
+		printf("... (%zd/%zd)\n", i, files);
 }
 
 /* Execute commands in either AUTOCMD_DIR_IN_FILE or AUTOCMD_DIR_OUT_FILE files.
