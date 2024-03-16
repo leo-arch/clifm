@@ -116,6 +116,7 @@ static size_t longest_fc = 0;
 static int pager_bk = 0;
 static int dir_out = 0;
 static int pager_quit = 0;
+static int pager_help = 0;
 
 struct checks_t {
 	int autocmd_files;
@@ -650,6 +651,8 @@ run_pager(const int columns_n, int *reset_pager, filesn_t *i, size_t *counter)
 		xgetchar();
 		CLEAR;
 
+		pager_help = conf.long_view == 0;
+
 		if (columns_n == -1) { /* Long view */
 			*i = 0;
 		} else { /* Normal view */
@@ -994,7 +997,7 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad,
 		space_left = (int)longest;
 
 	maxes.name = space_left + (conf.icons == 1 ? 3 : 0);
-	pager_quit = 0;
+	pager_quit = pager_help = 0;
 
 	filesn_t i, k = files;
 	for (i = 0; i < k; i++) {
@@ -1089,9 +1092,22 @@ static char *
 construct_filename(const filesn_t i, struct wtrim_t *wtrim,
 	const int max_namelen)
 {
+	/* When quitting the help screen of the pager, the list of files is
+	 * reprinted from the first entry. Now, when printing the list for the
+	 * first time the LEN field of the file_info struct is set to the displayed
+	 * length, which, if the name is trimmed, is the same as MAX_NAME_LEN
+	 * (causing thus subsequent prints of the list to never trim long file
+	 * names, because the value is already <= MAX_NAME_LEN).
+	 * Because of this, we need to recalculate the length of the current entry
+	 * whenever we're coming from the pager help screen, in order to know
+	 * whether we should trim the name or not. */
+	size_t namelen = pager_help == 1
+		? (file_info[i].utf8 == 1 ? wc_xstrlen(file_info[i].name)
+		: file_info[i].bytes) : file_info[i].len;
+
 	/* file_info[i].len is zero whenever an invalid character was found in
 	 * the file name. Let's recalculate the name length. */
-	if (file_info[i].len == 0) {
+	if (namelen == 0) {
 		wtrim->wname = replace_invalid_chars(file_info[i].name);
 		file_info[i].len = wc_xstrlen(wtrim->wname);
 	}
@@ -1099,7 +1115,7 @@ construct_filename(const filesn_t i, struct wtrim_t *wtrim,
 	char *name = wtrim->wname ? wtrim->wname : file_info[i].name;
 
 	if (files <= 1 || conf.max_name_len == UNSET || conf.long_view != 0
-	|| (int)file_info[i].len <= max_namelen)
+	|| (int)namelen <= max_namelen)
 		return name;
 
 	/* Let's trim the file name (at MAX_NAMELEN, in this example, 11).
@@ -1614,7 +1630,7 @@ list_files_horizontal(size_t *counter, int *reset_pager,
 	int last_column = 0;
 	int blc = last_column;
 
-	pager_quit = 0;
+	pager_quit = pager_help = 0;
 
 	for (i = 0; i < nn; i++) {
 		/* If current entry is in the last column, we need to print a new line char */
@@ -1636,7 +1652,8 @@ list_files_horizontal(size_t *counter, int *reset_pager,
 		&& files >= (filesn_t)conf.pager)) {
 			/* Run the pager only once all columns and rows fitting in
 			 * the screen are filled with the corresponding file names */
-			filesn_t ret = 0, bi = i;
+			int ret = 0;
+			filesn_t bi = i;
 			if (blc && *counter > columns_n * ((size_t)term_lines - 2))
 				ret = run_pager((int)columns_n, reset_pager, &i, counter);
 
@@ -1726,7 +1743,7 @@ list_files_vertical(size_t *counter, int *reset_pager,
 	filesn_t xx = 0; // Current line number
 	filesn_t i = 0; // Index of the current entry being analyzed
 
-	pager_quit = 0;
+	pager_quit = pager_help = 0;
 
 	for ( ; ; i++) {
 		/* Copy current values to restore them if necessary: done to
@@ -1772,7 +1789,8 @@ list_files_vertical(size_t *counter, int *reset_pager,
 
 		if (conf.pager == 1 || (*reset_pager == 0 && conf.pager > 1
 		&& files >= (filesn_t)conf.pager)) {
-			filesn_t ret = 0, bi = i;
+			int ret = 0;
+			filesn_t bi = i;
 			/* Run the pager only once all columns and rows fitting in
 			 * the screen are filled with the corresponding file names */
 			if (blc && *counter > columns_n * ((size_t)term_lines - 2))
