@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Mar 9, 2024" "clifm 1.18" "CLIFM Manual"
+.TH "CLIFM" "1" "Mar 16, 2024" "clifm 1.18" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -1043,12 +1043,22 @@ Use the \fIoc\fR command to edit files ownership.
 .B pf, profile \fR[\fIls\fR, \fIlist\fR] [\fIset\fR, \fIadd\fR, \fIdel PROFILE\fR] [\fIrename PROFILE NEW_NAME\fR]
 with no arguments, prints the name of the currently used profile. Use the \fIls\fR or \fIlist\fR option to list available profiles. To switch, add, delete, or rename a profile, use the \fIset\fR, \fIadd\fR, \fIdel\fR, and \fIrename\fR options respectively.
 .TP
-.B pg, pager \fR[\fIon\fR, \fIoff\fR, \fIstatus\fR, [\fINUM\fR]]
+.B pg, pager \fR[\fIon\fR, \fIoff\fR, \fIonce\fR, \fIstatus\fR, [\fINUM\fR]]
 toggle \fBMas\fR, the built\-in pager, on/off. Useful to list directories with hundreds or thousands of files, the pager will start working, if set to \fIon\fR, whenever the screen is not enough to list all files.
 .sp
 Set it to any positive integer greater than 1 to run the pager whenever the amount of files in the current directory is greater than or equal to this value, say 1000 (0 amounts to \fIoff\fR and 1 to \fIon\fR).
 .sp
-Once in the pager, press the Down arrow key, Space or Enter to move downwards one line, or PageDown to move downwards an entire page. To go upwards, use the shortcuts provided by your terminal emulator, for example, \fIAlt\-PageUp\fR or \fIAlt\-Up\fR. Press \'c\', \'p\', or \'q\' keys to stop the pager, and \'h\' or \'?\' for help.
+Set to \fIonce\fR to run the pager only once. Since this is the default parameter, \fIpg\fR (with no parameter) is equivalent to \fIpg once\fR. \fIAlt\-0\fR is also available.
+.sp
+While paging, the following keys are available:
+.sp
+ \fB?\fR, \fBh\fR: Help
+ \fBDown arrow\fR, \fBEnter\fR, \fBSpace\fR: Advance one line
+ \fBPage down\fR: Advance one page
+ \fBq\fR: Stop paging (without printing remaining files)
+ \fBc\fR: Stop paging (printing remaining files)
+.sp
+Note: For upwards scrolling, use whatever your terminal emulator has to offer (ex: mouse scrolling or some keybinding).
 .TP
 .B pin \fR[\fIFILE/DIR\fR]
 pin a file or a directory to be accessed later via the comma (,) keyword. For example, run \fIpin mydir\fR and then access \fImydir\fR as follows: \fIcd\ \,\fR where the comma is automatically expanded to the pinned file, in this case \fImydir\fR. The comma keyword could be used with any command, either internal or external, e.g, \fIls\ \,\fR.
@@ -1341,6 +1351,8 @@ T}	All .txt files (CWD)
 \fBAlt\-a:\fR Select all files in the current working directory
 .TP
 \fBAlt\-d:\fR Deselect all selected files
+.TP
+\fBAlt\-0:\fR Run MAS, the files pager
 .TP
 \fBAlt\-p:\fR Change to pinned directory
 .TP
@@ -3152,6 +3164,9 @@ T}	Change to pinned directory
 T{
 view (Alt+\-)
 T}	Preview files (current dir) \fB(8)\fR
+T{
+pg (Alt+0)
+T}	Run MAS, the files pager, on the current directory\fR
 .TE
 
 .sp
