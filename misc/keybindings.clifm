@@ -116,6 +116,7 @@ previous-profile:\C-\M-o
 rename-sel:\C-\M-r
 remove-sel:\C-\M-d
 refresh-screen:\C-r
+run-pager:\M-0
 selbox:\M-s
 select-all:\M-a
 show-dirhist:\M-h

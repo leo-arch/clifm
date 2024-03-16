@@ -911,6 +911,7 @@ previous-profile:\\C-\\M-o\n\
 rename-sel:\\C-\\M-r\n\
 remove-sel:\\C-\\M-d\n\
 refresh-screen:\\C-r\n\
+run-pager:\\M-0\n\
 selbox:\\M-s\n\
 select-all:\\M-a\n\
 show-dirhist:\\M-h\n\

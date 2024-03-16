@@ -1563,6 +1563,7 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  M-o           Lock terminal\n\
  M-p           Change to pinned directory\n\
  M-v           Toggle prepend sudo\n\
+ M-0           Run the files pager\n\
  M-[1-4]       Switch to workspace 1-4\n\
  C-M-o         Switch to previous profile\n\
  C-M-p         Switch to next profile\n\

@@ -2151,6 +2151,16 @@ rl_toggle_virtualdir_full_paths(int count, int key)
 	return FUNC_SUCCESS;
 }
 
+static int
+rl_run_pager(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	if (kbind_busy == 1 || conf.pager == 1)
+		return FUNC_SUCCESS;
+
+	return run_kb_cmd("pg");
+}
+
 /* Used to disable keybindings. */
 static int
 do_nothing(int count, int key)
@@ -2241,6 +2251,7 @@ set_keybinds_from_file(void)
 	rl_bind_keyseq(find_key("sort-previous"), rl_sort_previous);
 	rl_bind_keyseq(find_key("sort-next"), rl_sort_next);
 	rl_bind_keyseq(find_key("only-dirs"), rl_toggle_only_dirs);
+	rl_bind_keyseq(find_key("run-pager"), rl_run_pager);
 
 	/* Misc */
 	rl_bind_keyseq(find_key("launch-view"), rl_launch_view);
@@ -2335,6 +2346,7 @@ set_default_keybinds(void)
 	rl_bind_keyseq("\\M-z", rl_sort_previous);
 	rl_bind_keyseq("\\M-x", rl_sort_next);
 	rl_bind_keyseq("\\M-,", rl_toggle_only_dirs);
+	rl_bind_keyseq("\\M-0", rl_run_pager);
 
 	rl_bind_keyseq("\\M--", rl_launch_view);
 	rl_bind_keyseq("\\C-x", rl_new_instance);
@@ -2351,6 +2363,8 @@ set_default_keybinds(void)
 static void
 set_hardcoded_keybinds(void)
 {
+	rl_bind_keyseq("\\M-*", do_nothing);
+
 #ifndef __HAIKU__
 	rl_bind_keyseq("\\C-l", rl_refresh);
 	rl_bind_keyseq("\\C-p", rl_cmdhist);
