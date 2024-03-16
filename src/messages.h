@@ -821,7 +821,15 @@ the amount of files in the current directory is greater than or equal to\n\
 this value (say, 1000). 1 amounts to 'on' and 0 to 'off'.\n\n\
 Set to 'once' to run the pager only once. Since this is the default\n\
 parameter, 'pg' (with no parameter) is equivalent to 'pg once'.\n\n\
-Note: You can also try the 'pager' plugin running 'gg'."
+Note: You can also try the 'pager' plugin running 'gg'.\n\n\
+While paging, the following keys are available:\n\n\
+?, h: Help\n\
+Down arrow, Enter, Space: Advance one line\n\
+Page down: Advance one page\n\
+q: Stop paging (without printing remaining files)\n\
+c: Stop paging (printing remaining files)\n\n\
+Note: For upwards scrolling, use whatever your terminal emulator\n\
+has to offer (ex: mouse scrolling or some keybinding)"
 
 #define PC_USAGE "Interactively edit files permissions\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
@@ -1243,7 +1251,8 @@ emulator using the TerminalCmd option in the configuration file."
 
 /* Misc messages */
 #define PAGER_HELP "?, h: help\nDown arrow, Enter, Space: Advance one line\n\
-Page Down: Advance one page\nq: Stop paging\n"
+Page Down: Advance one page\nq: Stop paging (without printing remaining files)\n\
+c: Stop paging (printing remaining files)\n"
 #define PAGER_LABEL "\x1b[7;97m--Mas--\x1b[0;49m"
 #define NOT_AVAILABLE "This feature has been disabled at compile time"
 #define STEALTH_DISABLED "Access to configuration files is not allowed in stealth mode"

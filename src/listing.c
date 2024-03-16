@@ -630,7 +630,7 @@ run_pager(const int columns_n, int *reset_pager, filesn_t *i, size_t *counter)
 	/* Advance one line at a time */
 	case 66: /* fallthrough */ /* Down arrow */
 	case 10: /* fallthrough */ /* Enter */
-	case 32: /* Space */
+	case ' ':
 		break;
 
 	/* Advance one page at a time */
@@ -639,12 +639,12 @@ run_pager(const int columns_n, int *reset_pager, filesn_t *i, size_t *counter)
 		break;
 
 	/* h: Print pager help */
-	case 63: /* fallthrough */ /* ? */
-	case 104: {
+	case '?': /* fallthrough */
+	case 'h': {
 		CLEAR;
 
 		fputs(_(PAGER_HELP), stdout);
-		int l = (int)term_lines - 5;
+		int l = (int)term_lines - 6;
 		MOVE_CURSOR_DOWN(l);
 		fputs(PAGER_LABEL, stdout);
 
@@ -668,9 +668,13 @@ run_pager(const int columns_n, int *reset_pager, filesn_t *i, size_t *counter)
 	} break;
 
 	/* Stop paging (and set a flag to reenable the pager later) */
-	case 99:  /* 'c' */
-	case 112: /* 'p' */
-	case 113: /* 'q' */
+	case 'c': /* fallthrough */
+	case 'p': /* fallthrough */
+	case 'Q':
+		pager_bk = conf.pager; conf.pager = 0; *reset_pager = 1;
+		break;
+
+	case 'q':
 		pager_bk = conf.pager; conf.pager = 0; *reset_pager = 1;
 		putchar('\r');
 		ERASE_TO_RIGHT;
