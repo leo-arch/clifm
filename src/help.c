@@ -102,11 +102,8 @@ print_tips(const int all)
 		"'ls -ld 1 sel'",
 		"Press TAB to automatically expand an ELN. Ex: 's 2<TAB>' -> 's FILENAME'",
 		"Use ranges (ELN-ELN) to easily move multiple files. Ex: 'm 3-12 dir/'",
-		"Trash files with a simple 't ELN/FILE'",
-		"If too many files are listed, try enabling the pager: 'pg on'",
-		"Once in the pager, go backwards by pressing the keyboard shortcut "
-		"provided by your terminal emulator",
-		"Once in the pager, press 'q' to stop it",
+		"Trash files with a simple 't FILE'",
+		"Too many files? Run the pager: 'pg' or Alt-0",
 		"Switch to long/detail view mode: 'll' or Alt-l",
 		"Search for files using the slash command. Ex: '/*.png'",
 		"The search function allows regular expressions. Ex: '/^c'",
@@ -115,7 +112,7 @@ print_tips(const int all)
 		"Access a remote file system using the 'net' command",
 		"Go back and forth in the directory history with Alt-j and Alt-k "
 		"(also Shift-Left and Shift-Right)",
-		"Run a new instance of CliFM: 'x ELN/DIR'",
+		"Run a new instance of Clifm: 'x DIR'",
 		"Send a command directly to the system shell. Ex: ';ls -l *'",
 		"Run the last executed command: '!!'",
 		"Access the commands history list: '!<TAB>'",
