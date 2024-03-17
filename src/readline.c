@@ -3479,6 +3479,49 @@ complete_glob(char *text, int *exit_status)
 	return matches;
 }
 
+/* Return a pointer to the beginning of the last name in the current
+ * command line. */
+static char *
+get_cmd_name(void)
+{
+	if (!rl_line_buffer || !*rl_line_buffer)
+		return (char *)NULL;
+
+	char *p = rl_line_buffer;
+	char *opt = (char *)NULL;
+	char *name = (char *)NULL;
+
+	/* Truncate the command line before the first option word (starting
+	 * with a dash): "sudo cmd --opt" -> "sudo cmd" */
+	while (*p) {
+		if (*p == ' ' && *(p + 1) == '-') {
+			*p = '\0';
+			opt = p;
+			break;
+		}
+		p++;
+	}
+
+	/* Get a pointer to the beginning of the last name in the truncated
+	 * command line. */
+	p = rl_line_buffer;
+	while (*p) {
+		if (p == rl_line_buffer) {
+			if (*p != ' ')
+				name = p;
+		} else {
+			if (*p == ' ' && *(p + 1) != ' ')
+				name = p + 1;
+		}
+		p++;
+	}
+
+	if (opt)
+		*opt = ' ';
+
+	return name;
+}
+
 static char **
 complete_shell_cmd_opts(char *text, int *exit_status)
 {
@@ -3486,13 +3529,15 @@ complete_shell_cmd_opts(char *text, int *exit_status)
 	char **matches = (char **)NULL;
 
 	char lw[NAME_MAX + 1]; *lw = '\0'; /* Last word before the dash */
-	char *a = strrchr(rl_line_buffer, ' ');
+	char *name = get_cmd_name();
+	if (!name)
+		return (char **)NULL;
 
-	if (a) {
-		*a = '\0';
-		char *b = strrchr(rl_line_buffer, ' ');
-		xstrsncpy(lw, (b && *(b + 1)) ? b + 1 : rl_line_buffer, sizeof(lw));
-		*a = ' ';
+	char *s = strchr(name, ' ');
+	if (s) {
+		*s = '\0';
+		xstrsncpy(lw, name, sizeof(lw));
+		*s = ' ';
 	}
 
 	if (*lw && get_shell_cmd_opts(lw) > 0
