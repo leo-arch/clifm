@@ -3506,9 +3506,8 @@ get_cmd_name(void)
 	 * command line. */
 	p = rl_line_buffer;
 	while (*p) {
-		if (p == rl_line_buffer) {
-			if (*p != ' ')
-				name = p;
+		if (!name && *p != ' ') {
+			name = p;
 		} else {
 			if (*p == ' ' && *(p + 1) != ' ')
 				name = p + 1;
@@ -3528,7 +3527,7 @@ complete_shell_cmd_opts(char *text, int *exit_status)
 	*exit_status = FUNC_FAILURE;
 	char **matches = (char **)NULL;
 
-	char lw[NAME_MAX + 1]; *lw = '\0'; /* Last word before the dash */
+	char cmd[NAME_MAX + 1]; *cmd = '\0';
 	char *name = get_cmd_name();
 	if (!name)
 		return (char **)NULL;
@@ -3536,11 +3535,11 @@ complete_shell_cmd_opts(char *text, int *exit_status)
 	char *s = strchr(name, ' ');
 	if (s) {
 		*s = '\0';
-		xstrsncpy(lw, name, sizeof(lw));
+		xstrsncpy(cmd, name, sizeof(cmd));
 		*s = ' ';
 	}
 
-	if (*lw && get_shell_cmd_opts(lw) > 0
+	if (*cmd && get_shell_cmd_opts(cmd) > 0
 	&& (matches = rl_completion_matches(text, &ext_options_generator)) ) {
 		*exit_status = FUNC_SUCCESS;
 		return matches;
