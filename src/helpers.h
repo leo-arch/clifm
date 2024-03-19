@@ -601,7 +601,7 @@ extern time_t curdir_mtime;
 /* Colors for the prompt: */
 /* \001 and \002 tell readline that color codes between them are
  * non-printing chars. This is specially useful for the prompt, i.e.,
- * when passing color codes to readline */
+ * when passing color codes to readline. */
 #define RL_NC "\001\x1b[0m\002"
 
 #define UNSET  -1
@@ -708,7 +708,7 @@ extern time_t curdir_mtime;
 
 
 #define FZF_INTERNAL_PREVIEWER 1 /* clifm itself */
-/* --preview is set from either from FzfOpts in the color scheme file or from
+/* --preview is set either from FzfOpts in the color scheme file or from
  * FZF_DEFAULT_OPTS environment variable. */
 #define FZF_EXTERNAL_PREVIEWER 2
 
@@ -740,7 +740,7 @@ extern time_t curdir_mtime;
 #define TRIM_NO_EXT 1
 #define TRIM_EXT    2
 
-/* OpenBSD recommends the use of 10 trailing X's. See mkstemp(3) */
+/* OpenBSD recommends the use of 10 trailing X's. See mkstemp(3). */
 #if defined(__OpenBSD__)
 # define TMP_FILENAME ".tempXXXXXXXXXX"
 #else
@@ -751,10 +751,10 @@ extern time_t curdir_mtime;
 # define P_tmpdir "/tmp"
 #endif /* P_tmpdir */
 
-/* Length of random suffix appended to temp files. Used by gen_rand_str() */
+/* Length of random suffix appended to temp files. Used by gen_rand_str(). */
 #define RAND_SUFFIX_LEN 10
 
-/* Macros for the get_sys_shell function */
+/* Macros for the get_sys_shell function. */
 #define SHELL_NONE 0
 #define SHELL_BASH 1
 #define SHELL_DASH 2
@@ -772,9 +772,9 @@ extern time_t curdir_mtime;
 #define SECURE_ENV_FULL   1
 #define SECURE_ENV_IMPORT 0
 
-/* Macros for the sanitization function */
+/* Macros for the sanitization function. */
 /* Commands send to the system shell and taken from an untrusted source,
- * mostly config files, need to be sanitized first */
+ * mostly config files, need to be sanitized first. */
 #define SNT_MIME      0
 #define SNT_PROMPT    1
 #define SNT_PROFILE   2
@@ -786,13 +786,13 @@ extern time_t curdir_mtime;
 #define SNT_NONE      8 /* Trusted command: do not sanitize */
 #define SNT_BLACKLIST 9
 
-/* Macros for the TYPE field of the filter_t struct */
+/* Macros for the TYPE field of the filter_t struct. */
 #define FILTER_NONE      0
 #define FILTER_FILE_NAME 1 /* Regex */
 #define FILTER_FILE_TYPE 2 /* =x */
 #define FILTER_MIME_TYPE 3 /* @query */
 
-/* Macros for properties string fields in long view */
+/* Macros for properties string fields in long view. */
 #define PROP_FIELDS_SIZE 10 /* Ten available fields */
 
 #define PERM_SYMBOLIC 1
@@ -813,7 +813,7 @@ extern time_t curdir_mtime;
 #define PROP_SIZE_BYTES  1
 #define PROP_SIZE_HUMAN  2
 
-/* Macros for fzf_preview_border_type */
+/* Macros for fzf_preview_border_type. */
 #define FZF_BORDER_BOLD    0
 #define FZF_BORDER_BOTTOM  1
 #define FZF_BORDER_DOUBLE  2
@@ -825,7 +825,7 @@ extern time_t curdir_mtime;
 #define FZF_BORDER_TOP     8
 #define FZF_BORDER_VERT    9
 
-/* Flags to skip fuzzy matching based on what we're comparing */
+/* Flags to skip fuzzy matching based on what we're comparing. */
 #define FUZZY_FILES_ASCII 0
 #define FUZZY_FILES_UTF8  1
 #define FUZZY_BM_NAMES    2

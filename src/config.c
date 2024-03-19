@@ -2267,7 +2267,7 @@ X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;v
 \n\
 # Office documents\n\
 ^application/.*(open|office)document\\.spreadsheet.*=sc-im\n\
-X:^application/.*(open|office)document.*=libreoffice;soffice;ooffice\n\
+X:^application/(msword|vnd.ms-excel|vnd.ms-powerpoint|.*(open|office)document.*)=libreoffice;soffice;ooffice\n\
 \n\
 # Archives\n\
 # Note: 'ad' is CliFM's built-in archives utility (based on atool). Remove it if you\n\

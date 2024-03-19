@@ -131,7 +131,7 @@ X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;v
 #-----------------------------
 
 ^application/.*(open|office)document\.spreadsheet.*=sc-im
-X:^application/.*(open|office)document.*=libreoffice;soffice;ooffice
+X:^application/(msword|vnd.ms-excel|vnd.ms-powerpoint|.*(open|office)document.*)=libreoffice;soffice;ooffice
 
 #-----------------------------
 # Archives
