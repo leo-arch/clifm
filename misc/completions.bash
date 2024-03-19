@@ -129,6 +129,7 @@ _clifm ()
         --only-dirs
         --open
         --opener
+        --pager-view
         --preview
         --print-sel
         --ptime-style
@@ -170,6 +171,10 @@ _clifm ()
 
 	elif [[ $prev == "--time-style" ]]; then
 		local args=$(echo -e "default\nrelative\niso\nlong-iso\nfull-iso")
+		COMPREPLY=( $(compgen -W "$args" -- "$cur") )
+
+	elif [[ $prev == "--pager-view" ]]; then
+		local args=$(echo -e "auto\nlong\nshort")
 		COMPREPLY=( $(compgen -W "$args" -- "$cur") )
 
 	elif [[ $prev == "--ptime-style" ]]; then

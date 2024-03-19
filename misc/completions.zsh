@@ -92,6 +92,7 @@ args=(
 	'--only-dirs[list only directories and symbolic links to directories]'
 	'--open=[open FILE and exit]:filename:_files'
 	'--opener=[resource opener to use instead of '\''Lira'\'', CliFM built-in opener]:opener:_command_names'
+	'--pager-view=[how to list files in the pager: auto (default), long, short]:pager_view:->pager_views'
 	'--preview=[display a preview of FILE and exit]:filename:_files'
 	'--print-sel[always print the list of selected files]'
 	'--ptime-style=[time/date style used by the p/pp command]:pstyle:->pstyles'
@@ -128,6 +129,10 @@ case "$state" in
 
 	bells)
 		_values -s , 'bells' 0 1 2 3
+	;;
+
+	pager_views)
+		_values -s , 'pager_views' auto long short
 	;;
 
 	algos)
