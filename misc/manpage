@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Mar 16, 2024" "clifm 1.18" "CLIFM Manual"
+.TH "CLIFM" "1" "Mar 19, 2024" "clifm 1.18" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -348,6 +348,9 @@ run as a standalone resource opener: open \fIFILE\fR and exit, where FILE could 
 .TP
 \fB\-\-opener\fR=\fI\,APPLICATION\/\fR
 use APPLICATION (ex: \fIrifle\fR or \fIxdg\-open\fR) as files opener/launcher (instead of \fILira\fR, \fBclifm\fR's default opener).
+.TP
+\fB\-\-pager\-view\fR=\fI\,MODE\/\fR
+list files in the pager according to MODE. Possible values: \fIauto\fR (use the current listing mode - this is the default), \fIlong\fR (list files in long view), and \fIshort\fR (list files in short view).
 .TP
 \fB\-\-preview\fR=\fI\,FILE\/\fR
 display a preview of \fIFILE\fR (via \fIShotgun\fR) and exit. Use \fI\-\-shotgun\-file\fR to set an alternative confiuguration file via. Consult the \fBSHOTGUN\fR section below for more information.
@@ -1058,7 +1061,13 @@ While paging, the following keys are available:
  \fBq\fR: Stop paging (without printing remaining files)
  \fBc\fR: Stop paging (printing remaining files)
 .sp
-Note: For upwards scrolling, use whatever your terminal emulator has to offer (ex: mouse scrolling or some keybinding).
+Note: To scroll lines up, use whatever your terminal emulator has to offer (ex: mouse scrolling or some keybinding).
+.sp
+By default, the pager lists files using the current listing mode (long or short). Use \fIPagerView\fR in the configuration file (or \fI\-\-pager\-view\fR in the command line) to force the use of a specific mode. Possibles values:
+.sp
+ \fBauto\fR: Use the current listing mode (default)
+ \fBlong\fR: List files in long view
+ \fBshort\fR: List files in short view
 .TP
 .B pin \fR[\fIFILE/DIR\fR]
 pin a file or a directory to be accessed later via the comma (,) keyword. For example, run \fIpin mydir\fR and then access \fImydir\fR as follows: \fIcd\ \,\fR where the comma is automatically expanded to the pinned file, in this case \fImydir\fR. The comma keyword could be used with any command, either internal or external, e.g, \fIls\ \,\fR.
