@@ -71,6 +71,12 @@
 # greater than or equal to this value (say, 1000).
 ;Pager=false
 
+# How to list files in the pager. Possible values:
+# auto: use the current listing mode
+# long: list files in long view
+# short: list files in short view
+;PagerView=auto
+
 # How to list files: 0 = vertically (like ls(1) would), 1 = horizontally.
 ;ListingMode=0
 
