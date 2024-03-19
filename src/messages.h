@@ -829,7 +829,13 @@ Page down: Advance one page\n\
 q: Stop paging (without printing remaining files)\n\
 c: Stop paging (printing remaining files)\n\n\
 Note: For upwards scrolling, use whatever your terminal emulator\n\
-has to offer (ex: mouse scrolling or some keybinding)"
+has to offer (ex: mouse scrolling or some keybinding)\n\n\
+By default, the pager lists files using the current listing mode (long\n\
+or short). Use PagerView in the configuration file (or --pager-view in\n\
+the command line) to force the use of a specific mode. Possibles values:\n\n\
+'auto': Use the current listing mode (default)\n\
+'long': List files in long view\n\
+'short': List files in short view"
 
 #define PC_USAGE "Interactively edit files permissions\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
@@ -1410,16 +1416,17 @@ and paths\
 \n      --open=FILE\t\t Open FILE (via Lira) and exit\
 \n      --opener=APPLICATION\t Resource opener to use instead of Lira, \
 CliFM's built-in opener\
+\n      --pager-view=MODE\t\t How to list files in the pager (auto, long, short)\
 \n      --preview=FILE\t\t Display a preview of FILE (via Shotgun) and exit\
-\n      --print-sel\t\t Keep the list of selected files in sight\
-\n      --prop-fields=FORMAT\t Set a custom format string for the long view (see \
+\n      --print-sel\t\t Keep the list of selected files in sight\n"
+
+#define LONG_OPTIONS_B "\
+      --prop-fields=FORMAT\t Set a custom format string for the long view (see \
 PropFields in the config file)\
 \n      --ptime-style=STYLE\t Time/date style used by the 'p/pp' command (see PTimeStyle in the config file)\
 \n      --readonly\t\t Disable internal commands able to modify the file system\
-\n      --rl-vi-mode\t\t Set readline to vi editing mode (defaults to emacs mode)\n"
-
-#define LONG_OPTIONS_B "\
-      --secure-cmds\t\t Filter commands to prevent command injection\
+\n      --rl-vi-mode\t\t Set readline to vi editing mode (defaults to emacs mode)\
+\n      --secure-cmds\t\t Filter commands to prevent command injection\
 \n      --secure-env\t\t Run in a sanitized environment (regular mode)\
 \n      --secure-env-full\t\t Run in a sanitized environment (full mode)\
 \n      --sel-file=FILE\t\t Set FILE as custom selections file\

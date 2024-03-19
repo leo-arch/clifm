@@ -548,6 +548,11 @@ extern time_t curdir_mtime;
 #define GLOB_CHARS "*?[{"
 #define GLOB_REGEX_CHARS "*?[{|^+$."
 
+/* Possible values for PagerView (conf.pager_view) */
+#define PAGER_AUTO  0
+#define PAGER_LONG  1
+#define PAGER_SHORT 2
+
 /* Used by log_msg() to know wether to tell prompt() to print messages or not */
 #define PRINT_PROMPT   1
 #define NOPRINT_PROMPT 0
@@ -1107,6 +1112,7 @@ struct config_t {
 	int only_dirs;
 	int pager;
 	int pager_once;
+	int pager_view;
 	int purge_jumpdb;
 	int print_selfiles;
 	int private_ws_settings;
@@ -1137,7 +1143,6 @@ struct config_t {
 	int unicode;
 	int warning_prompt;
 	int welcome_message;
-	int pad2;
 };
 
 extern struct config_t conf;
@@ -1428,6 +1433,7 @@ struct param_t {
 	int only_dirs;
 	int open;
 	int pager;
+	int pager_view;
 	int path;
 	int preview;
 	int printsel;

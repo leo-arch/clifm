@@ -117,6 +117,7 @@ static int pager_bk = 0;
 static int dir_out = 0;
 static int pager_quit = 0;
 static int pager_help = 0;
+static int long_view_bk = UNSET;
 
 struct checks_t {
 	int autocmd_files;
@@ -557,9 +558,34 @@ print_cdpath(void)
 	is_cdpath = 0;
 }
 
+/* Restore the origianl value of long-view (taken from LONG_VIEW_BK)
+ * after switching mode for the pager (according to PagerView). */
+static void
+restore_pager_view(void)
+{
+	if (long_view_bk != UNSET) {
+		conf.long_view = long_view_bk;
+		long_view_bk = UNSET;
+	}
+}
+
+/* If running the pager, set long-view according to the value of PagerView in
+ * the config file. the original value of long-view will be restored after
+ * list_dir() by restore_pager_view() according to the value of LONG_VIEW_BK. */
+static void
+set_pager_view(void)
+{
+	if (conf.pager == 1 && conf.pager_view != PAGER_AUTO) {
+		long_view_bk = conf.long_view;
+		conf.long_view = conf.pager_view == PAGER_LONG;
+	}
+}
+
 static int
 post_listing(DIR *dir, const int reset_pager, const filesn_t excluded_files)
 {
+	restore_pager_view();
+
 	if (dir && closedir(dir) == -1)
 		return FUNC_FAILURE;
 
@@ -671,8 +697,13 @@ run_pager(const int columns_n, int *reset_pager, filesn_t *i, size_t *counter)
 	case 'c': /* fallthrough */
 	case 'p': /* fallthrough */
 	case 'Q':
-		pager_bk = conf.pager; conf.pager = 0; *reset_pager = 1;
-		break;
+		if (conf.pager_view == PAGER_AUTO
+		|| (conf.pager_view == PAGER_SHORT && long_view_bk == 0)
+		|| (conf.pager_view == PAGER_LONG && long_view_bk == 1)) {
+			pager_bk = conf.pager; conf.pager = 0; *reset_pager = 1;
+			break;
+		}
+		/* fallthrough */
 
 	case 'q':
 		pager_bk = conf.pager; conf.pager = 0; *reset_pager = 1;
@@ -2877,6 +2908,8 @@ list_dir(void)
 		 * a garbage first line when scrolling up */
 		CLEAR; fflush(stdout);
 	}
+
+	set_pager_view();
 
 	if (xargs.disk_usage_analyzer == 1
 	|| (conf.long_view == 1 && conf.full_dir_size == 1)) {

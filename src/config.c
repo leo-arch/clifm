@@ -1795,7 +1795,9 @@ create_main_config_file(char *file)
 # 1/true: Run the pager whenever the list of files does not fit on the screen\n\
 # >1: Run the pager whenever the amount of files in the current directory is\n\
 # greater than or equal to this value (say, 1000)\n\
-;Pager=%s\n\n"
+;Pager=%s\n\
+# How to list files in the pager: auto (default), short, long\n\
+;PagerView=%s\n\n"
 
 	"# Maximum file name length for listed files. If TrimNames is set to\n\
 # true, names larger than MAXFILENAMELEN will be truncated at MAXFILENAMELEN\n\
@@ -1823,6 +1825,8 @@ create_main_config_file(char *file)
 		DEF_SKIP_NON_ALNUM_PREFIX == 1 ? "true" : "false",
 		DEF_UNICODE == 1 ? "true" : "false",
 		DEF_PAGER == 1 ? "true" : "false",
+		DEF_PAGER_VIEW == PAGER_AUTO ? "auto"
+			: (DEF_PAGER_VIEW == PAGER_LONG ? "long" : "short"),
 		DEF_MAX_NAME_LEN,
 		DEF_TRIM_NAMES == 1 ? "true" : "false"
 		);
@@ -2499,6 +2503,28 @@ set_pager_value(char *line, int *var, const size_t buflen)
 	}
 }
 
+static void
+set_pager_view_value(char *line)
+{
+	if (!line || !*line)
+		return;
+
+	char *p = remove_quotes(line);
+	if (!p)
+		return;
+
+	size_t l = strlen(p);
+	if (p[l - 1] == '\n')
+		p[l - 1] = '\0';
+
+	if (*p == 'a' && strcmp(p, "auto") == 0)
+		conf.pager_view = PAGER_AUTO;
+	else if (*p == 'l' && strcmp(p, "long") == 0)
+		conf.pager_view = PAGER_LONG;
+	else if (*p == 's' && strcmp(p, "short") == 0)
+		conf.pager_view = PAGER_SHORT;
+}
+
 /* Get boolean value from LINE and set VAR accordingly. */
 static void
 set_config_bool_value(char *line, int *var)
@@ -3136,6 +3162,11 @@ read_config(void)
 		else if (xargs.pager == UNSET && *line == 'P'
 		&& strncmp(line, "Pager=", 6) == 0) {
 			set_pager_value(line + 6, &conf.pager, sizeof(line) - 6);
+		}
+
+		else if (xargs.pager_view == UNSET && *line == 'P'
+		&& strncmp(line, "PagerView=", 10) == 0) {
+			set_pager_view_value(line + 10);
 		}
 
 		else if (xargs.printsel == UNSET && *line == 'P'

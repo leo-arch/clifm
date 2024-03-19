@@ -154,6 +154,7 @@
 #define LOPT_TIME_STYLE             276
 #define LOPT_PTIME_STYLE            277
 #define LOPT_COLOR_LNK_AS_TARGET    278
+#define LOPT_PAGER_VIEW             279
 
 /* Link long (--option) and short options (-o) for the getopt_long function. */
 static struct option const longopts[] = {
@@ -251,6 +252,7 @@ static struct option const longopts[] = {
 	{"only-dirs", no_argument, 0, LOPT_ONLY_DIRS},
 	{"open", required_argument, 0, LOPT_OPEN},
 	{"opener", required_argument, 0, LOPT_OPENER},
+	{"pager-view", required_argument, 0, LOPT_PAGER_VIEW},
 	{"ptime-style", required_argument, 0, LOPT_PTIME_STYLE},
 	{"preview", required_argument, 0, LOPT_PREVIEW},
 	{"print-sel", no_argument, 0, LOPT_PRINT_SEL},
@@ -1309,6 +1311,26 @@ set_tab_mode(const char *opt)
 }
 #endif /* _BE_POSIX */
 
+static void
+xset_pager_view(char *arg)
+{
+	if (!arg || !*arg || *arg == '-')
+		err_arg_required("--pager-view");
+
+	if (*arg == 'a' && strcmp(arg, "auto") == 0) {
+		xargs.pager_view = conf.pager_view = PAGER_AUTO;
+	} else if (*arg == 'l' && strcmp(arg, "long") == 0) {
+		xargs.pager_view = conf.pager_view = PAGER_LONG;
+	} else if (*arg == 's' && strcmp(arg, "short") == 0) {
+		xargs.pager_view = conf.pager_view = PAGER_SHORT;
+	} else {
+		fprintf(stderr, _("%s: --pager-view: '%s': Invalid value.\n"
+			"Valid values are 'auto', 'long', and 'short'\n"),
+			PROGRAM_NAME, arg);
+		exit(EXIT_FAILURE);
+	}
+}
+
 /* Evaluate command line arguments, if any, and change initial variables to
  * their corresponding values. */
 #ifdef _BE_POSIX
@@ -1658,6 +1680,7 @@ parse_cmdline_args(const int argc, char **argv)
 
 		case LOPT_OPENER:
 			set_opener(optarg); break;
+		case LOPT_PAGER_VIEW: xset_pager_view(optarg); break;
 		case LOPT_PRINT_SEL:
 			xargs.printsel = conf.print_selfiles = 1; break;
 		case LOPT_PROP_FIELDS: xset_prop_fields(optarg); break;

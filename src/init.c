@@ -233,6 +233,7 @@ init_conf_struct(void)
 	conf.only_dirs = UNSET;
 	conf.pager = UNSET;
 	conf.pager_once = 0;
+	conf.pager_view = UNSET;
 	conf.print_selfiles = UNSET;
 	conf.private_ws_settings = UNSET;
 	conf.prop_fields_gap = UNSET;
@@ -1749,6 +1750,7 @@ unset_xargs(void)
 	xargs.only_dirs = UNSET;
 	xargs.open = UNSET;
 	xargs.pager = UNSET;
+	xargs.pager_view = UNSET;
 	xargs.path = UNSET;
 	xargs.printsel = UNSET;
 	xargs.prop_fields_str = UNSET;
@@ -2689,6 +2691,13 @@ check_options(void)
 	&& regcomp(&regex_hist, DEF_HISTIGNORE, REG_NOSUB | REG_EXTENDED) == 0) {
 		conf.histignore_regex =
 			savestring(DEF_HISTIGNORE, sizeof(DEF_HISTIGNORE) - 1);
+	}
+
+	if (conf.pager_view == UNSET) {
+		if (xargs.pager_view == UNSET)
+			conf.pager_view = DEF_PAGER_VIEW;
+		else
+			conf.pager_view = xargs.pager_view;
 	}
 
 	if (conf.color_lnk_as_target == UNSET) {
