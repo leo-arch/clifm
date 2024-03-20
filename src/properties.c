@@ -1687,6 +1687,76 @@ err_no_file(const char *filename, const char *target, const int errnum)
 	return errnum;
 }
 
+#ifdef CLIFM_DIR_INFO
+struct dir_info_t {
+	unsigned long long dirs;
+	unsigned long long files;
+};
+
+void
+dir_info(const char *dir, int *status, struct dir_info_t *info)
+{
+	if (!dir || !*dir) {
+		*status = ENOENT;
+		return;
+	}
+
+	struct stat a;
+	DIR *p;
+
+	if ((p = opendir(dir)) == NULL) {
+		*status = errno;
+		return;
+	}
+
+	struct dirent *ent;
+
+	while ((ent = readdir(p)) != NULL) {
+		if (SELFORPARENT(ent->d_name))
+			continue;
+
+		char buf[PATH_MAX + 1];
+		snprintf(buf, sizeof(buf), "%s/%s", dir, ent->d_name);
+
+		if (lstat(buf, &a) == -1) {
+			*status = errno;
+			continue;
+		}
+
+		if (S_ISDIR(a.st_mode)) {
+			info->dirs++;
+			dir_info(buf, status, info);
+		} else {
+			info->files++;
+		}
+	}
+
+	closedir(p);
+	return;
+}
+
+static void
+print_dir_items(const char *dir, const int file_perm)
+{
+	if (file_perm == 0) {
+		printf("Items:\t\t%s%c%s\n", dn_c, UNKNOWN_CHR, NC);
+		return;
+	}
+
+	struct dir_info_t info = {0};
+	int status = 0;
+
+	dir_info(dir, &status, &info);
+
+	char read_err[5 + (MAX_COLOR * 2)]; *read_err = '\0';
+	if (status != 0)
+		snprintf(read_err, sizeof(read_err), "%s%c%s", xf_c, DU_ERR_CHAR, NC);
+
+	printf("Items:\t\t%s%s%llu%s subdirs / %s%llu%s files\n",
+		read_err, BOLD, info.dirs, NC, BOLD, info.files, NC);
+}
+#endif /* CLIFM_DIR_INFO */
+
 /* Retrieve information for the file named FILENAME in a stat(1)-like fashion.
  * If FOLLOW_LINK is set to 1, in which case we're running the 'pp' command
  * instead of just 'p', symbolic links are followed and directories size is
@@ -1742,6 +1812,11 @@ do_stat(char *filename, const int follow_link)
 	print_file_details(filename, &attr, file_type, file_perm, xattr);
 	print_timestamps(*link_target ? link_target : filename, &attr);
 	print_file_size(filename, &attr, file_perm, follow_link);
+
+#ifdef CLIFM_DIR_INFO
+	if (S_ISDIR(attr.st_mode) && follow_link == 1)
+		print_dir_items(*link_target ? link_target : filename, file_perm);
+#endif /* CLIFM_DIR_INFO */
 
 	return FUNC_SUCCESS;
 }
