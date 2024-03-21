@@ -1742,21 +1742,39 @@ dir_info(const char *dir, int *status, struct dir_info_t *info)
 static void
 print_dir_items(const char *dir, const int file_perm)
 {
+	fputs("Items:\t\t", stdout);
+
 	if (file_perm == 0) {
-		printf("Items:\t\t%s%c%s\n", dn_c, UNKNOWN_CHR, NC);
+		printf("%s%c%s\n", dn_c, UNKNOWN_CHR, NC);
 		return;
 	}
 
 	struct dir_info_t info = {0};
 	int status = 0;
 
+#define COUNTING_MSG "Counting..."
+	if (term_caps.suggestions == 1) {
+		HIDE_CURSOR;
+		fputs(COUNTING_MSG, stdout);
+		fflush(stdout);
+	} else {
+		fflush(stdout);
+	}
+
 	dir_info(dir, &status, &info);
+
+	if (term_caps.suggestions == 1) {
+		MOVE_CURSOR_LEFT((int)sizeof(COUNTING_MSG) - 1);
+		ERASE_TO_RIGHT;
+		UNHIDE_CURSOR;
+		fflush(stdout);
+	}
 
 	char read_err[5 + (MAX_COLOR * 2)]; *read_err = '\0';
 	if (status != 0)
 		snprintf(read_err, sizeof(read_err), "%s%c%s", xf_c, DU_ERR_CHAR, NC);
 
-	printf("Items:\t\t%s%s%llu%s subdirs / %s%llu%s files\n",
+	printf("%s%s%llu%s subdirs / %s%llu%s files\n",
 		read_err, BOLD, info.dirs, NC, BOLD, info.files, NC);
 }
 #endif /* CLIFM_DIR_INFO */
