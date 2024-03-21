@@ -235,31 +235,29 @@ get_total_size(char *filename, int *status)
 	char _path[PATH_MAX + 1]; *_path = '\0';
 	snprintf(_path, sizeof(_path), "%s/", filename);
 
-	if (term_caps.suggestions == 0) {
-		fputs("Scanning... ", stdout);
-		fflush(stdout);
-#ifdef USE_XDU
-		total_size = dir_size(*_path ? _path : filename, 1, status);
-#else
-		total_size = dir_size(*_path ? _path : filename,
-			(bin_flags & (GNU_DU_BIN_DU | GNU_DU_BIN_GDU)) ? 1 : 0, status);
-#endif /* USE_XDU */
-		fputs("\r           \r", stdout);
-		fputs(_("Total size: \t"), stdout);
-	} else {
-		fputs(_("Total size: \t"), stdout);
+	fputs(_("Total size: \t"), stdout);
+
+#define SCANNING_MSG "Scanning..."
+	if (term_caps.suggestions == 1) {
 		HIDE_CURSOR;
-		fputs("Scanning...", stdout);
+		fputs(dn_c, stdout);
+		fputs(SCANNING_MSG, stdout);
 		fflush(stdout);
+	}
+	fflush(stdout);
+
 #ifdef USE_XDU
-		total_size = dir_size(*_path ? _path : filename, 1, status);
+	total_size = dir_size(*_path ? _path : filename, 1, status);
 #else
-		total_size = dir_size(*_path ? _path : filename,
-			(bin_flags & (GNU_DU_BIN_DU | GNU_DU_BIN_GDU)) ? 1 : 0, status);
+	total_size = dir_size(*_path ? _path : filename,
+		(bin_flags & (GNU_DU_BIN_DU | GNU_DU_BIN_GDU)) ? 1 : 0, status);
 #endif /* USE_XDU */
-		MOVE_CURSOR_LEFT(11);
+
+	if (term_caps.suggestions == 1) {
+		MOVE_CURSOR_LEFT((int)sizeof(SCANNING_MSG) - 1);
 		ERASE_TO_RIGHT;
 		UNHIDE_CURSOR;
+		fputs(df_c, stdout);
 		fflush(stdout);
 	}
 
@@ -1755,11 +1753,10 @@ print_dir_items(const char *dir, const int file_perm)
 #define COUNTING_MSG "Counting..."
 	if (term_caps.suggestions == 1) {
 		HIDE_CURSOR;
+		fputs(dn_c, stdout);
 		fputs(COUNTING_MSG, stdout);
-		fflush(stdout);
-	} else {
-		fflush(stdout);
 	}
+	fflush(stdout);
 
 	dir_info(dir, &status, &info);
 
@@ -1767,6 +1764,7 @@ print_dir_items(const char *dir, const int file_perm)
 		MOVE_CURSOR_LEFT((int)sizeof(COUNTING_MSG) - 1);
 		ERASE_TO_RIGHT;
 		UNHIDE_CURSOR;
+		fputs(df_c, stdout);
 		fflush(stdout);
 	}
 
