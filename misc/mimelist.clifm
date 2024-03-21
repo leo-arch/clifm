@@ -97,6 +97,11 @@ X:N:.*\.djvu$=djview;zathura;xreader;evince;atril
 X:N:.*\.(fb2|epub)$=mupdf;zathura;xreader;ebook-viewer;FBReader;foliate
 X:N:.*\.mobi$=mupdf;ebook-viewer;FBReader;foliate
 X:N:.*\.(cbr|cbz|cb7|cbt|cba)$=mcomix;xreader;YACReader;qcomicbook;zathura;foliate
+X:N:.*\.chm$=xchm
+
+# .abw files are Abiword documents.
+# These are basically XML, but you most likely want to open it with a word processor.
+X:N:.*\.abw$=abiword;libreoffice;soffice;ooffice
 
 ################################
 # 2. MIME types                #
