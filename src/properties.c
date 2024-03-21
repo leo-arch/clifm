@@ -1706,6 +1706,7 @@ dir_info(const char *dir, int *status, struct dir_info_t *info)
 
 	if ((p = opendir(dir)) == NULL) {
 		*status = errno;
+		info->dirs++;
 		return;
 	}
 
@@ -1720,6 +1721,9 @@ dir_info(const char *dir, int *status, struct dir_info_t *info)
 
 		if (lstat(buf, &a) == -1) {
 			*status = errno;
+			/* We cannot know if the file is a directory. Let's take it as
+			 * a plain file. */
+			info->files++;
 			continue;
 		}
 
