@@ -1144,7 +1144,7 @@ construct_filename(const filesn_t i, struct wtrim_t *wtrim,
 	 * the file name. Let's recalculate the name length. */
 	if (namelen == 0) {
 		wtrim->wname = replace_invalid_chars(file_info[i].name);
-		file_info[i].len = wc_xstrlen(wtrim->wname);
+		namelen = file_info[i].len = wc_xstrlen(wtrim->wname);
 	}
 
 	char *name = wtrim->wname ? wtrim->wname : file_info[i].name;
