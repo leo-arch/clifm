@@ -1691,6 +1691,9 @@ struct dir_info_t {
 	unsigned long long files;
 };
 
+/* Recursively count files and directories in the directory DIR and store
+ * values in the INFO struct. If a directory cannot be read, or a file cannot
+ * be stat'ed, STATUS is set to the appropriate errno value. */
 void
 dir_info(const char *dir, int *status, struct dir_info_t *info)
 {
