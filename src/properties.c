@@ -1707,7 +1707,6 @@ dir_info(const char *dir, int *status, struct dir_info_t *info)
 
 	if ((p = opendir(dir)) == NULL) {
 		*status = errno;
-		info->dirs++;
 		return;
 	}
 
