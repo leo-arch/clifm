@@ -1,3 +1,64 @@
+1.18 (Caniche endormi) - March 23, 2024
+
+BUG FIXES
+* Color for temp/backup files not working when it's hex.
+* Negative dir sizes when running with '--list-and-quit --long-view --full-dir-size'.
+* Wrong padding in long view when max-files is set.
+* File names starting with non-alphanumeric characters are listed after alphanumeric names, unlike 'ls' and company.
+* Wrong files listed when TAB completing with "../<TAB>" and the current directory is a symlink.
+* Cannot cd to "../" if the current directory is a symlink.
+* Misleading values in long view when stat(2) fails.
+* Printing garbage when running 'pp' on a broken link.
+* 'ft' command not working with file type filters (ex: 'ft =d').
+* If '--invalid-option --valid-option', clifm complains about '--valid-option'.
+* Cannot run external command on '../dir/file name'.
+* Alt-Right keybinding not working as expected.
+* Long file names not trimmed when going back from the pager help.
+* PrintSelfiles not updated automatically after editing the configuration file.
+* TAB completion for external commands working only for first parameter.
+
+NEW FEATURES/IMPROVEMENTS
+* Allow hiding files listed in a '.hidden' file (includes wildcards support) via 'ReadDotHidden' in the config file.
+* Several improvements to the long view mode:
+  * Use '-L,--follow-symlinks-long' to dereference symbolic links in long view.
+  * New command 'k', to toggle follow-links in long view (keybind 'Alt-+').
+  * Allow ID names (instead of just numbers) via 'I' in PropFields (not available on Termux).
+  * User/group names (instead of ID numbers) is the new default for PropFields.
+  * Birth time support (via 'b' in PropFields).
+  * Hard links number support (via 'l' in PropFields). Color code: 'dk'.
+  * File allocated blocks support (via 'B' in PropFields). Color code: 'db'.
+  * Allow not printing group information (via 'G' in PropFields).
+  * Add missing color code for file inode number: 'de'.
+  * Allow setting fields from the command line via '--prop-fields=FORMAT' (same values as PropFields).
+  * Allow double space between fields via 'PropFieldsGap' in the config file.
+  * Consistent long view colors for nord, base16, and zenburn color schemes.
+  * Improve files counter: '0' for empty dirs, '?' for dirs with no read permission, and '-' for no-dirs.
+* Consistent color for backup/temp files if TEMP isn't defined in the color scheme file.
+* Make 8 color themes use 5 shades instead of just 3 (like 256-color and truecolor themes). 
+* Add '--ls' as short for '--list-and-quit'.
+* Allow '--stat' and '--stat-full' to process multiple files at once (ex: '--stat FILE FILE2 ...').
+* keybinds/suggestions/TAB-comp: exclude sorts not available in light mode.
+* Security: autocmd files won't be read if running on an untrusted environment ('--secure-env' or '--secure-cmds').
+* Set time style via --time-style (long view) and --ptime-style (p/pp command).
+* Support for TIME_STYLE (long view) and PTIME_STYLE (p/pp command).
+* Allow sorting files by 'blocks' and 'links'.
+* Make "Sort" in the config file accept names, and not just numbers.
+* New command 'kk' to toggle max-filename-len.
+* 'p/pp' command: Do not abbreviate symlinks target.
+* Add '--color-links-as-target' command line option.
+* Improve extra color schemes.
+* Allow running the pager only once via 'pg once'.
+* Add keybinding to run the pager (Alt-0).
+* Set the pager listing mode via 'PagerView' in the config file or '--pager-view' in the command line.
+
+BREAKING CHANGES:
+* Since 1) it was unintuitive to have '-a' and '-l' to **disable** hidden files and long view respectively (instead of enabling them, like most files listers do (ex: ls, exa, eza, lsd)), and 2) we were using uppercase options sometimes to enable and sometimes to disable features (which is not consistent), we made the following changes:
+ * -a enables hidden files and -A disables it
+ * -f enables dirs-first and -F disables it
+ * -l enables long-view
+ * -L like ls(1) -L option (long form: --follow-symlinks-long)
+ * -o enables autocd and -O disables it
+
 1.17 (Lechuck) - Feb 9, 2024
 
 BUG FIXES
