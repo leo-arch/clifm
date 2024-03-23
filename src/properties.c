@@ -946,7 +946,7 @@ static int
 print_extended_attributes(char *s, const mode_t mode, const int xattr)
 {
 	if (xattr == 0 || S_ISLNK(mode)) {
-		puts(S_ISLNK(mode) ? _("Unavailable") : _("None"));
+		puts(S_ISLNK(mode) ? _("unavailable") : _("none"));
 		return FUNC_SUCCESS;
 	}
 
@@ -961,7 +961,7 @@ print_extended_attributes(char *s, const mode_t mode, const int xattr)
 	}
 
 	if (buflen == 0) {
-		puts(_("None"));
+		puts(_("none"));
 		return FUNC_SUCCESS;
 	}
 
@@ -1166,7 +1166,7 @@ print_capabilities(const char *filename, const int xattr)
 {
 	cap_t cap = xattr == 1 ? cap_get_file(filename) : NULL;
 	if (!cap) {
-		puts(_("None"));
+		puts(_("none"));
 		return;
 	}
 
@@ -1227,11 +1227,11 @@ print_file_acl(char *file, const mode_t mode, const int xattr)
 {
 #ifndef __linux__
 	UNUSED(file); UNUSED(mode);
-	puts(_("Unavailable"));
+	puts(_("unavailable"));
 	return;
 #else
 	if (S_ISLNK(mode)) {
-		puts(_("Unavailable"));
+		puts(_("unavailable"));
 		return;
 	}
 
@@ -1262,7 +1262,7 @@ print_file_acl(char *file, const mode_t mode, const int xattr)
 
 END:
 	if (found <= 0)
-		puts(found == 0 ? _("None") : _("Invalid ACL"));
+		puts(found == 0 ? _("none") : _("invalid ACL"));
 
 	acl_free(acl);
 #endif /* !__linux__ */
@@ -1345,7 +1345,7 @@ print_file_details(char *filename, const struct stat *attr, const char file_type
 	if (S_ISDIR(attr->st_mode) || S_ISREG(attr->st_mode))
 		print_file_attrs(get_file_attrs(filename));
 	else
-		puts(_("Unavailable"));
+		puts(_("unavailable"));
 
 #elif defined(HAVE_BSD_FFLAGS)
 	fputs(_("Flags: \t\t"), stdout);
@@ -1370,7 +1370,7 @@ print_file_details(char *filename, const struct stat *attr, const char file_type
 	if (S_ISREG(attr->st_mode))
 		print_capabilities(filename, xattr);
 	else
-		puts(_("Unavailable"));
+		puts(_("unavailable"));
 #endif /* LINUX_FILE_CAPS */
 }
 
@@ -1785,6 +1785,30 @@ print_dir_items(const char *dir, const int file_perm)
 }
 #endif /* CLIFM_DIR_INFO */
 
+#ifdef CLIFM_PROP_MIME
+#ifndef _NO_MAGIC
+# include "mime.h"
+#endif
+
+static void
+print_file_mime(const char *name)
+{
+#ifdef _NO_MAGIC
+	UNUSED(name);
+	return;
+#else
+	fputs("MIME type:\t", stdout);
+	char *n = xmagic(name, 1);
+	if (n) {
+		printf("%s\n", n);
+		free(n);
+	} else {
+		printf("%s%c%s\n", dn_c, UNKNOWN_CHR, df_c);
+	}
+#endif /* _NO_MAGIC */
+}
+#endif /* CLIFM_PROP_MIME */
+
 /* Retrieve information for the file named FILENAME in a stat(1)-like fashion.
  * If FOLLOW_LINK is set to 1, in which case we're running the 'pp' command
  * instead of just 'p', symbolic links are followed and directories size is
@@ -1838,6 +1862,9 @@ do_stat(char *filename, const int follow_link)
 	print_file_perms(&attr, file_type, ctype, xattr);
 	print_file_name(filename, color, follow_link, attr.st_mode, link_target);
 	print_file_details(filename, &attr, file_type, file_perm, xattr);
+#ifdef CLIFM_PROP_MIME
+	print_file_mime(*link_target ? link_target : filename);
+#endif
 	print_timestamps(*link_target ? link_target : filename, &attr);
 	print_file_size(filename, &attr, file_perm, follow_link);
 
