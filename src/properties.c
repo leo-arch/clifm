@@ -1689,6 +1689,7 @@ err_no_file(const char *filename, const char *target, const int errnum)
 struct dir_info_t {
 	unsigned long long dirs;
 	unsigned long long files;
+	unsigned long long links;
 };
 
 /* Recursively count files and directories in the directory DIR and store
@@ -1730,6 +1731,8 @@ dir_info(const char *dir, int *status, struct dir_info_t *info)
 		if (S_ISDIR(a.st_mode)) {
 			info->dirs++;
 			dir_info(buf, status, info);
+		} else if (S_ISLNK(a.st_mode)) {
+			info->links++;
 		} else {
 			info->files++;
 		}
@@ -1772,10 +1775,13 @@ print_dir_items(const char *dir, const int file_perm)
 
 	char read_err[5 + (MAX_COLOR * 2)]; *read_err = '\0';
 	if (status != 0)
-		snprintf(read_err, sizeof(read_err), "%s%c%s", xf_c, DU_ERR_CHAR, NC);
+		snprintf(read_err, sizeof(read_err), "%s%c%s", xf_c, DU_ERR_CHAR, df_c);
 
-	printf("%s%s%llu%s subdirs / %s%llu%s files\n",
-		read_err, BOLD, info.dirs, NC, BOLD, info.files, NC);
+	printf(_("%s%s%llu%s (%s%llu%s directories, %s%llu%s files, %s%llu%s links)\n"),
+		read_err, BOLD, info.dirs + info.files + info.links, df_c,
+		BOLD, info.dirs, df_c,
+		BOLD, info.files, df_c,
+		BOLD, info.links, df_c);
 }
 #endif /* CLIFM_DIR_INFO */
 
