@@ -47,7 +47,7 @@
 #include "strings.h"
 
 #if defined(_NO_PROFILES) || defined(_NO_FZF) || defined(_NO_ICONS) \
-|| defined(_NO_TRASH) || defined(_BE_POSIX)
+|| defined(_NO_TRASH) || defined(_BE_POSIX) || defined(_NO_LIRA)
 # include "messages.h"
 #endif /* _NO_PROFILES || _NO_FZF || _NO_ICONS || _NO_TRASH */
 
