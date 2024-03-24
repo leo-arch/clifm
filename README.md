@@ -242,7 +242,7 @@ For a complete description please consult our [Wiki](https://github.com/leo-arch
 <details>
 <summary>Click here to expand</summary>
 
-* `Development`
+* `1.18 (Caniche endormi)`
   - [Support for `.hidden` files, including wildcards](https://github.com/leo-arch/clifm/wiki/Advanced#1b-hidden-files).
   - Several improvements to the long view
     - [Set time style via either `--time-style`, `TimeStyle` (config file), or **TIME_STYLE** (environment variable)](https://github.com/leo-arch/clifm/wiki/Common-Operations#time-styles).
