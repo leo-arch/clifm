@@ -94,6 +94,9 @@
 #include "checks.h" /* check_file_access(), is_number() */
 #include "colors.h" /* get_dir_color(), get_regfile_color() */
 #include "messages.h"
+#ifndef _NO_MAGIC
+# include "mime.h"  /* xmagic() */
+#endif /* !_NO_MAGIC */
 #include "misc.h"
 #include "properties.h"
 #include "readline.h"   /* Required by the 'pc' command */
@@ -124,6 +127,12 @@
 #ifndef minor /* Not defined in Haiku */
 # define minor(x) (x & 0xFF)
 #endif /* minor */
+
+struct dir_info_t {
+	unsigned long long dirs;
+	unsigned long long files;
+	unsigned long long links;
+};
 
 #if defined(LINUX_FILE_ATTRS)
 /* Print file attributes as lsattr(1) would.
@@ -1651,7 +1660,7 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 
 #ifndef USE_XDU
 	if (bin_flags & (GNU_DU_BIN_DU | GNU_DU_BIN_GDU)) {
-#endif // USE_XDU
+#endif /* USE_XDU */
 		char err[sizeof(xf_c) + 6]; *err = '\0';
 		if (du_status != 0)
 			snprintf(err, sizeof(err), "%s%c%s", xf_c, DU_ERR_CHAR, NC);
@@ -1667,7 +1676,7 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 	} else {
 		printf("%s%s%s\n", csize, human_size, cend);
 	}
-#endif // USE_XDU
+#endif /* USE_XDU */
 }
 
 static int
@@ -1684,13 +1693,6 @@ err_no_file(const char *filename, const char *target, const int errnum)
 
 	return errnum;
 }
-
-#ifdef CLIFM_DIR_INFO
-struct dir_info_t {
-	unsigned long long dirs;
-	unsigned long long files;
-	unsigned long long links;
-};
 
 /* Recursively count files and directories in the directory DIR and store
  * values in the INFO struct. If a directory cannot be read, or a file cannot
@@ -1783,12 +1785,6 @@ print_dir_items(const char *dir, const int file_perm)
 		BOLD, info.files, df_c,
 		BOLD, info.links, df_c);
 }
-#endif /* CLIFM_DIR_INFO */
-
-#ifdef CLIFM_PROP_MIME
-#ifndef _NO_MAGIC
-# include "mime.h"
-#endif
 
 static void
 print_file_mime(const char *name)
@@ -1807,7 +1803,6 @@ print_file_mime(const char *name)
 	}
 #endif /* _NO_MAGIC */
 }
-#endif /* CLIFM_PROP_MIME */
 
 /* Retrieve information for the file named FILENAME in a stat(1)-like fashion.
  * If FOLLOW_LINK is set to 1, in which case we're running the 'pp' command
@@ -1862,16 +1857,12 @@ do_stat(char *filename, const int follow_link)
 	print_file_perms(&attr, file_type, ctype, xattr);
 	print_file_name(filename, color, follow_link, attr.st_mode, link_target);
 	print_file_details(filename, &attr, file_type, file_perm, xattr);
-#ifdef CLIFM_PROP_MIME
 	print_file_mime(*link_target ? link_target : filename);
-#endif
 	print_timestamps(*link_target ? link_target : filename, &attr);
 	print_file_size(filename, &attr, file_perm, follow_link);
 
-#ifdef CLIFM_DIR_INFO
 	if (S_ISDIR(attr.st_mode) && follow_link == 1)
 		print_dir_items(*link_target ? link_target : filename, file_perm);
-#endif /* CLIFM_DIR_INFO */
 
 	return FUNC_SUCCESS;
 }
