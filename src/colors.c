@@ -899,6 +899,7 @@ reset_iface_colors(void)
 	*wm_c = '\0';
 	*wp_c = '\0';
 	*xf_c = '\0';
+	*xf_cb = '\0';
 	*xs_c = '\0';
 
 	*ws1_c = '\0';
@@ -1407,8 +1408,10 @@ set_iface_colors(char **colors, const size_t num_colors)
 		else if (*colors[i] == 'x') {
 			if (colors[i][1] == 's' && colors[i][2] == '=')
 				set_color(colors[i] + 3, xs_c, RL_NO_PRINTABLE);
-			else if (colors[i][1] == 'f' && colors[i][2] == '=')
+			else if (colors[i][1] == 'f' && colors[i][2] == '=') {
 				set_color(colors[i] + 3, xf_c, RL_NO_PRINTABLE);
+				set_color(colors[i] + 3, xf_cb, RL_PRINTABLE);
+			}
 		}
 
 		free(colors[i]);
@@ -1731,6 +1734,7 @@ set_default_colors_256(void)
 	if (!*wc_c) xstrsncpy(wc_c, DEF_WC_C256, sizeof(wc_c));
 	if (!*xs_c) xstrsncpy(xs_c, DEF_XS_C256, sizeof(xs_c));
 	if (!*xf_c) xstrsncpy(xf_c, DEF_XF_C256, sizeof(xf_c));
+	if (!*xf_cb) xstrsncpy(xf_cb, DEF_XF_CB256, sizeof(xf_cb));
 
 	/* File types */
 	if (!*bd_c) xstrsncpy(bd_c, DEF_BD_C256, sizeof(bd_c));
@@ -1902,6 +1906,7 @@ set_default_colors(void)
 	if (!*ws8_c) xstrsncpy(ws8_c, DEF_WS8_C, sizeof(ws8_c));
 	if (!*xs_c) xstrsncpy(xs_c, DEF_XS_C, sizeof(xs_c));
 	if (!*xf_c) xstrsncpy(xf_c, DEF_XF_C, sizeof(xf_c));
+	if (!*xf_cb) xstrsncpy(xf_cb, DEF_XF_CB, sizeof(xf_cb));
 
 	/* File types */
 	if (!*bd_c) xstrsncpy(bd_c, DEF_BD_C, sizeof(bd_c));
@@ -2594,6 +2599,7 @@ disable_bold(void)
 	remove_bold_attr(tx_c);
 	remove_bold_attr(xs_c);
 	remove_bold_attr(xf_c);
+	remove_bold_attr(xf_cb);
 
 	remove_bold_attr(wm_c);
 }

@@ -1661,9 +1661,9 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 #ifndef USE_XDU
 	if (bin_flags & (GNU_DU_BIN_DU | GNU_DU_BIN_GDU)) {
 #endif /* USE_XDU */
-		char err[sizeof(xf_c) + 6]; *err = '\0';
+		char err[sizeof(xf_cb) + 6]; *err = '\0';
 		if (du_status != 0)
-			snprintf(err, sizeof(err), "%s%c%s", xf_c, DU_ERR_CHAR, NC);
+			snprintf(err, sizeof(err), "%s%c%s", xf_cb, DU_ERR_CHAR, NC);
 
 		printf("%s%s%s%s ", err, csize, human_size, cend);
 
@@ -1777,7 +1777,7 @@ print_dir_items(const char *dir, const int file_perm)
 
 	char read_err[5 + (MAX_COLOR * 2)]; *read_err = '\0';
 	if (status != 0)
-		snprintf(read_err, sizeof(read_err), "%s%c%s", xf_c, DU_ERR_CHAR, df_c);
+		snprintf(read_err, sizeof(read_err), "%s%c%s", xf_cb, DU_ERR_CHAR, df_c);
 
 	printf(_("%s%s%llu%s (%s%llu%s directories, %s%llu%s files, %s%llu%s links)\n"),
 		read_err, BOLD, info.dirs + info.files + info.links, df_c,

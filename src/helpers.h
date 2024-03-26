@@ -2046,6 +2046,7 @@ extern char
 	wm_c[MAX_COLOR + 2], /* Warning msg */
 	xs_c[MAX_COLOR + 2], /* Exit code: success */
 	xf_c[MAX_COLOR + 2], /* Exit code: failure */
+	xf_cb[MAX_COLOR],    /* Exit code: failure (dir read) */
 
 	tmp_color[MAX_COLOR + 2], /* A temp buffer to store color codes */
 	dim_c[5]; /* Dimming code: not supported by all terminals */

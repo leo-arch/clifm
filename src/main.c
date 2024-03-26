@@ -426,6 +426,7 @@ char
 	tx_c[MAX_COLOR + 2], /* Text color */
 	xs_c[MAX_COLOR + 2], /* Exit code: success */
 	xf_c[MAX_COLOR + 2], /* Exit code: failure */
+	xf_cb[MAX_COLOR],    /* Exit code: failure (dir read) */
 
 	tmp_color[MAX_COLOR + 2], /* A temp buffer to store color codes */
 	dim_c[] = "\x1b[2m";

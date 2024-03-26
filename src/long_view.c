@@ -248,7 +248,7 @@ construct_file_size(const struct fileinfo *props, char *size_str,
 		&& props->du_status != 0);
 	const char *unit_color = conf.colorize == 0
 		? (du_err == 1 ? "\x1b[1m" : "")
-		: (du_err == 1 ? xf_c : dim_c);
+		: (du_err == 1 ? xf_cb : dim_c);
 
 	snprintf(size_str, SIZE_STR_LEN, "%s%*s%s%c\x1b[0m%s",
 		csize, size_max,

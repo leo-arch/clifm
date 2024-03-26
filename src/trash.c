@@ -932,9 +932,9 @@ print_trashdir_size(void)
 	const off_t full_size = dir_size(trash_files_dir, 0, &status) * base;
 	char *human_size = construct_human_size(full_size);
 
-	char err[sizeof(xf_c) + 6]; *err = '\0';
+	char err[sizeof(xf_cb) + 6]; *err = '\0';
 	if (status != 0)
-		snprintf(err, sizeof(err), "%s%c%s", xf_c, DU_ERR_CHAR, NC);
+		snprintf(err, sizeof(err), "%s%c%s", xf_cb, DU_ERR_CHAR, NC);
 
 	char s[MAX_SHADE_LEN]; *s = '\0';
 	if (conf.colorize == 1)
