@@ -1779,11 +1779,11 @@ print_dir_items(const char *dir, const int file_perm)
 	if (status != 0)
 		snprintf(read_err, sizeof(read_err), "%s%c%s", xf_cb, DU_ERR_CHAR, df_c);
 
-	printf(_("%s%s%llu%s (%s%llu%s directories, %s%llu%s files, %s%llu%s links)\n"),
+	printf("%s%s%llu%s (%s%llu%s %s, %s%llu%s %s, %s%llu%s %s)\n",
 		read_err, BOLD, info.dirs + info.files + info.links, df_c,
-		BOLD, info.dirs, df_c,
-		BOLD, info.files, df_c,
-		BOLD, info.links, df_c);
+		BOLD, info.dirs, df_c, info.dirs == 1 ? _("directory") : _("directories"),
+		BOLD, info.files, df_c, info.files == 1 ? _("file") : _("files"),
+		BOLD, info.links, df_c, info.links == 1 ? _("link") : _("links"));
 }
 
 static void
