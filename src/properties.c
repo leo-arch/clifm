@@ -1852,7 +1852,14 @@ do_stat(char *filename, const int follow_link)
 	char *ctype = dn_c; /* Color for file type char. */
 
 	const int file_perm =
+#ifndef __CYGWIN__
 		check_file_access(attr.st_mode, attr.st_uid, attr.st_gid);
+#else
+		/* check_file_access() checks Unix-style permissions, which does
+		 * not make much sense on Windows file systems (particularly, on
+		 * system directories). */
+		1;
+#endif /* !__CYGWIN__ */
 
 	char *color = get_file_type_and_color(*link_target ? link_target : filename,
 		&attr, &file_type, &ctype);
