@@ -1124,14 +1124,21 @@ print_file_name(char *filename, const char *color, const int follow_link,
 	char *wname = wc_xstrlen(filename) == 0
 		? replace_invalid_chars(filename) : (char *)NULL;
 
+	char name[(NAME_MAX * sizeof(wchar_t)) + 3]; *name = '\0';
+	if (strchr(wname ? wname : filename, ' '))
+		snprintf(name, sizeof(name), "'%s'", wname ? wname : filename);
+
+	char *n = *name ? name : (wname ? wname : filename);
+
 	if (follow_link == 1) { /* 'pp' command */
 		if (link_target && *link_target) {
-			printf(_("\tName: %s%s%s <- %s%s%s\n"), color,
-				link_target, df_c, ln_c,
-				wname ? wname : filename, df_c);
+			char t[PATH_MAX * sizeof(wchar_t) + 3]; *t = '\0';
+			if (strchr(link_target, ' '))
+				snprintf(t, sizeof(t), "'%s'", link_target);
+			printf(_("\tName: %s%s%s %s<-%s %s%s%s\n"), color,
+				*t ? t : link_target, df_c, dn_c, df_c, ln_c, n, df_c);
 		} else {
-			printf(_("\tName: %s%s%s\n"), color,
-				wname ? wname : filename, df_c);
+			printf(_("\tName: %s%s%s\n"), color, n, df_c);
 		}
 
 		free(wname);
@@ -1140,7 +1147,7 @@ print_file_name(char *filename, const char *color, const int follow_link,
 
 	/* 'p' command */
 	if (!S_ISLNK(mode)) {
-		printf(_("\tName: %s%s%s\n"), color, wname ? wname : filename, df_c);
+		printf(_("\tName: %s%s%s\n"), color, n, df_c);
 		free(wname);
 		return;
 	}
@@ -1149,20 +1156,23 @@ print_file_name(char *filename, const char *color, const int follow_link,
 	const ssize_t tlen =
 		xreadlink(XAT_FDCWD, filename, target, sizeof(target));
 
+	char t[PATH_MAX * sizeof(wchar_t) + 3]; *t = '\0';
+	if (tlen != -1 && *target && strchr(target, ' '))
+		snprintf(t, sizeof(t), "'%s'", target);
+
 	struct stat a;
 	if (tlen != -1 && *target && lstat(target, &a) != -1) {
 		char *link_color = get_link_color(target);
-
-		printf(_("\tName: %s%s%s -> %s%s%s\n"), ln_c, wname ? wname
-			: filename, df_c, link_color, target, df_c);
+		printf(_("\tName: %s%s%s %s->%s %s%s%s\n"), ln_c, n, df_c,
+			dn_c, df_c, link_color, *t ? t : target, df_c);
 
 	} else { /* Broken link */
 		if (tlen != -1 && *target) {
-			printf(_("\tName: %s%s%s -> %s%s%s (broken link)\n"), or_c,
-				wname ? wname : filename, df_c, uf_c, target, df_c);
+			printf(_("\tName: %s%s%s %s->%s %s%s%s (broken link)\n"), or_c,
+				n, df_c, dn_c, df_c, uf_c, *t ? t : target, df_c);
 		} else {
-			printf(_("\tName: %s%s%s -> ???\n"), or_c, wname ? wname
-				: filename, df_c);
+			printf(_("\tName: %s%s%s %s-> ???%s\n"), or_c, n, df_c,
+				dn_c, df_c);
 		}
 	}
 
