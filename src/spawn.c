@@ -86,6 +86,18 @@ run_in_background(const pid_t pid)
 	return get_exit_code(status, EXEC_BG_PROC);
 }
 
+/* Enable/disable signals for external commands.
+ * Used by launch_execl() and launch_execv(). */
+static void
+set_cmd_signals(void)
+{
+	signal(SIGHUP,  SIG_DFL);
+	signal(SIGINT,  SIG_DFL);
+	signal(SIGQUIT, SIG_DFL);
+	signal(SIGTERM, SIG_DFL);
+	signal(SIGTSTP, SIG_IGN);
+}
+
 /* Implementation of system(3).
  * Unlike system(3), which runs a command using '/bin/sh' as the executing
  * shell, xsystem() uses a custom shell (user.shell) specified via CLIFM_SHELL
@@ -106,10 +118,7 @@ xsystem(const char *cmd)
 	if (pid < 0) {
 		return (-1);
 	} else if (pid == 0) {
-		signal(SIGINT, SIG_DFL);
-		signal(SIGQUIT, SIG_DFL);
-		signal(SIGTSTP, SIG_DFL);
-
+		set_cmd_signals();
 		execl(shell_path, shell_name, "-c", cmd, (char *)NULL);
 		_exit(errno);
 	} else {
@@ -172,10 +181,7 @@ launch_execv(char **cmd, const int bg, const int xflags)
 		if (bg == 0) {
 			/* If the program runs in the foreground, reenable signals only
 			 * for the child, in case they were disabled for the parent. */
-			signal(SIGHUP, SIG_DFL);
-			signal(SIGINT, SIG_DFL);
-			signal(SIGQUIT, SIG_DFL);
-			signal(SIGTERM, SIG_DFL);
+			set_cmd_signals();
 		}
 
 		if (xflags) {
