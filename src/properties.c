@@ -1715,7 +1715,6 @@ dir_info(const char *dir, int *status, struct dir_info_t *info)
 		return;
 	}
 
-	struct stat a;
 	DIR *p;
 
 	if ((p = opendir(dir)) == NULL) {
@@ -1729,6 +1728,19 @@ dir_info(const char *dir, int *status, struct dir_info_t *info)
 		if (SELFORPARENT(ent->d_name))
 			continue;
 
+#if defined(_DIRENT_HAVE_D_TYPE)
+		if (ent->d_type == DT_DIR) {
+			info->dirs++;
+			char buf[PATH_MAX + 1];
+			snprintf(buf, sizeof(buf), "%s/%s", dir, ent->d_name);
+			dir_info(buf, status, info);
+		} else if (ent->d_type == DT_LNK) {
+			info->links++;
+		} else {
+			info->files++;
+		}
+#else
+		struct stat a;
 		char buf[PATH_MAX + 1];
 		snprintf(buf, sizeof(buf), "%s/%s", dir, ent->d_name);
 
@@ -1748,6 +1760,7 @@ dir_info(const char *dir, int *status, struct dir_info_t *info)
 		} else {
 			info->files++;
 		}
+#endif /* _DIRENT_HAVE_D_TYPE */
 	}
 
 	closedir(p);
