@@ -7,7 +7,7 @@
 # Description
 #-----------------------------
 
-# Commented and blank lines are omitted.
+# Commented and blank lines are ignored.
 
 # The below settings cover the most common filetypes.
 # It is recommended to edit this file placing your prefered applications
@@ -22,34 +22,27 @@
 # conditions, loops, etc) are available. In case you need something more
 # complex than a single command (including shell capabilities) write your
 # own script and place the path to the script in place of the command.
-# For example: X:^text/.*:~/scripts/my_cool_script.sh
+# For example:
+#    X:^text/.*:~/scripts/my_cool_script.sh
 
-# Use 'X' to specify a GUI environment and '!X' for non-GUI environments,
-# like the kernel built-in console or a remote SSH session.
+# Use 'X' to specify a GUI environment and '!X' for non-GUI environments:
+# X  = GUI only
+# !X = Non-GUI only (like the kernel console or an SSH session)
+# If the current line applies to both GUI and non-GUI environments, just omit
+# the X. Ex: 'text/plain=vi
 
 # Use 'N' to match file names instead of MIME types.
+# 'N:.*\.txt$=vi' to open all .txt files with vi (either GUI or non-GUI)
+# 'X:N:.*\.txt$=geany' (GUI only)
+# '!X:N:.*\.txt$=vi' (non-GUI only)
 
 # Regular expressions are allowed for both file types and file names.
 
-# Use the %f placeholder to specify the position of the file name to be
+# Use the '%f' placeholder to specify the position of the file name to be
 # opened in the command. Example:
 # 'mpv %f --no-terminal' -> 'mpv FILE --no-terminal' 
 # If %f is not specified, the file name will be added to the end of the
 # command. Ex: 'mpv --no-terminal' -> 'mpv --no-terminal FILE'
-
-# Running the opening application in the background:
-# For GUI applications:
-#    APP %f &
-# For terminal applications:
-#    TERM -e APP %f &
-# Replace 'TERM' and 'APP' by the corresponding values. The -e option
-# might vary depending on the terminal emulator used (TERM)
-
-# Note on graphical applications: If the opening application is already
-# running, the file will be opened, usually in a new tab, and CliFM won't
-# wait for the file to be closed (because the procecss already returned).
-# To avoid this, instruct the application to run a new instance. For example:
-# geany -i, gedit -s, kate -n, pluma --new-window, and so on.
 
 # To silence STDERR and/or STDOUT use !E and !O respectively (they can be
 # used together). Examples:
@@ -57,11 +50,29 @@
 #    mpv %f !E
 # Silence both (STDERR and STDOUT) and run in the background:
 #    mpv %f !EO &
-# For Ranger users, "!EO" is equivalent to "flag f" in rifle.conf
+# For Ranger users, "!EO" is equivalent to "flag f" in rifle.conf.
 
-# In the case of GUI apps, you most likely want this:
-#    cmd %f !EO &
-# However, bear in mind that this will hide error messages.
+# The '%x' flag can be used as a shorthand for "%f !EO &". Example:
+#    mpv %x
+
+# Running the opening application in the background:
+# For GUI applications:
+#    APP %x
+# For terminal applications:
+#    TERM -e APP %x
+# Replace 'TERM' and 'APP' by the corresponding values. The -e option
+# might vary depending on the terminal emulator used (TERM).
+#
+# Bear in mind that this will hide error messages. To print error
+# messages compose the command as follows:
+#    cmd %f !O &
+# This will run 'cmd' in the background silencing STDOUT only.
+
+# Note on graphical applications: If the opening application is already
+# running, the file will be opened, usually in a new tab, and Clifm won't
+# wait for the file to be closed (because the procecss already returned).
+# To avoid this, instruct the application to execute a new instance. For example:
+# geany -i, gedit -s, kate -n, pluma --new-window, and so on.
 
 # Environment variables can be used as well. Example:
 # X:text/plain=$EDITOR %f &;$VISUAL;nano;vi
@@ -93,15 +104,15 @@ X:N:(.*\.clifm$|clifmrc)=$EDITOR;$VISUAL;kak;micro;nvim;vim;vi;mg;emacs;nano;mil
 # Digital books
 #-----------------------------
 
-X:N:.*\.djvu$=djview;zathura;xreader;evince;atril
-X:N:.*\.(fb2|epub)$=mupdf;zathura;xreader;ebook-viewer;FBReader;foliate
-X:N:.*\.mobi$=mupdf;ebook-viewer;FBReader;foliate
-X:N:.*\.(cbr|cbz|cb7|cbt|cba)$=mcomix;xreader;YACReader;qcomicbook;zathura;foliate
-X:N:.*\.chm$=xchm
+X:N:.*\.djvu$=djview %x;zathura %x;xreader %x;evince %x;atril %x
+X:N:.*\.(fb2|epub)$=mupdf %x;zathura %x;xreader %x;ebook-viewer %x;FBReader %x;foliate %x
+X:N:.*\.mobi$=mupdf %x;ebook-viewer %x;FBReader %x;foliate %x
+X:N:.*\.(cbr|cbz|cb7|cbt|cba)$=mcomix %x;xreader %x;YACReader %x;qcomicbook %x;zathura %x;foliate %x
+X:N:.*\.chm$=xchm %x
 
 # .abw files are Abiword documents.
 # These are basically XML, but you most likely want to open it with a word processor.
-X:N:.*\.abw$=abiword;libreoffice;soffice;ooffice
+X:N:.*\.abw$=abiword %x;libreoffice %x;soffice %x;ooffice %x
 
 ################################
 # 2. MIME types                #
@@ -113,22 +124,22 @@ X:N:.*\.abw$=abiword;libreoffice;soffice;ooffice
 # Only for the open-with command (ow) and the --open command line switch
 # In graphical environments directories will be opened in a new window
 
-X:inode/directory=xterm -e clifm %f &;xterm -e vifm %f &;pcmanfm %f &;thunar %f &;xterm -e ncdu %f &
+X:inode/directory=xterm -e clifm %x;xterm -e vifm %x;pcmanfm %x;thunar %x;xterm -e ncdu %x
 !X:inode/directory=vifm;ranger;nnn;ncdu
 
 #-----------------------------
 # Web content
 #-----------------------------
 
-X:^text/html$=$BROWSER;surf;vimprobable;vimprobable2;qutebrowser;dwb;jumanji;luakit;uzbl;uzbl-tabbed;uzbl-browser;uzbl-core;iceweasel;midori;opera;firefox;seamonkey;brave;chromium-browser;chromium;google-chrome;epiphany;konqueror;elinks;links2;links;lynx;w3m
+X:^text/html$=$BROWSER;surf %x;vimprobable %x;vimprobable2 %x;qutebrowser %x;dwb %x;jumanji %x;luakit %x;uzbl %x;uzbl-tabbed %x;uzbl-browser %x;uzbl-core %x;iceweasel %x;midori %x;opera %x;firefox %x;seamonkey %x;brave %x;chromium-browser %x;chromium %x;google-chrome %x;epiphany %x;konqueror %x;elinks;links2;links;lynx;w3m
 !X:^text/html$=$BROWSER;elinks;links2;links;lynx;w3m
 
 #-----------------------------
 # Text
 #-----------------------------
 
-X:^text/rtf$=libreoffice;soffice;ooffice
-X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;vim;vi;mg;emacs;nano;mili;leafpad;mousepad;featherpad;nedit;kate;gedit;pluma;io.elementary.code;liri-text;xed;atom;nota;gobby;kwrite;xedit
+X:^text/rtf$=libreoffice %x;soffice %x;ooffice %x
+X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;vim;vi;mg;emacs;nano;mili;leafpad %x;mousepad %x;featherpad %x;nedit %x;kate %x;gedit %x;pluma %x;io.elementary.code %x;liri-text %x;xed %x;atom %x;nota %x;gobby %x;kwrite %x;xedit %x
 !X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;vim;vi;mg;emacs;nano
 
 #-----------------------------
@@ -136,38 +147,38 @@ X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;v
 #-----------------------------
 
 ^application/.*(open|office)document\.spreadsheet.*=sc-im
-X:^application/(msword|vnd.ms-excel|vnd.ms-powerpoint|.*(open|office)document.*)=libreoffice;soffice;ooffice
+X:^application/(msword|vnd.ms-excel|vnd.ms-powerpoint|.*(open|office)document.*)=libreoffice %x;soffice %x;ooffice %x
 
 #-----------------------------
 # Archives
 #-----------------------------
-# Note: 'ad' is CliFM's built-in archives utility (based on atool). Remove it if you
+# Note: 'ad' is Clifm's built-in archives utility (based on atool(1)). Remove it if you
 # prefer another application.
 
-X:^application/(zip|gzip|zstd|x-7z-compressed|x-xz|x-bzip*|x-tar|x-iso9660-image)=ad;xarchiver %f &;lxqt-archiver %f &;ark %f &
+X:^application/(zip|gzip|zstd|x-7z-compressed|x-xz|x-bzip*|x-tar|x-iso9660-image)=ad;xarchiver %x;lxqt-archiver %x;ark %x
 !X:^application/(zip|gzip|zstd|x-7z-compressed|x-xz|x-bzip*|x-tar|x-iso9660-image)=ad
 
 #-----------------------------
 # PDF
 #-----------------------------
 
-X:.*/pdf$=mupdf;sioyek;llpp;lpdf;zathura;mupdf-x11;apvlv;xpdf;xreader;evince;atril;okular;epdfview;qpdfview
+X:.*/pdf$=mupdf %x;sioyek %x;llpp %x;lpdf %x;zathura %x;mupdf-x11 %x;apvlv %x;xpdf %x;xreader %x;evince %x;atril %x;okular %x;epdfview %x;qpdfview %x
 
 #-----------------------------
 # Images
 #-----------------------------
 
-X:^image/gif$=animate;pqiv;sxiv -a;nsxiv -a;feh
-X:^image/svg=display;inkscape
-X:^image/.*=sxiv;nsxiv;pqiv;gpicview;qview;qimgv;mirage;ristretto;eog;eom;xviewer;viewnior;nomacs;geeqie;gwenview;gthumb;gimp
+X:^image/gif$=animate;pqiv %x;sxiv -a %x;nsxiv -a %x;feh %x
+X:^image/svg=display;inkscape %x
+X:^image/.*=sxiv %x;nsxiv %x;pqiv %x;gpicview %x;qview %x;qimgv %x;mirage %x;ristretto %x;eog %x;eom %x;xviewer %x;viewnior %x;nomacs %x;geeqie %x;gwenview %x;gthumb %x;gimp %x
 !X:^image/.*=fim;img2txt;cacaview;fbi;fbv
 
 #-----------------------------
 # Video and audio
 #-----------------------------
 
-X:^video/.*=ffplay;mplayer;mplayer2;mpv;vlc;gmplayer;smplayer;celluloid;qmplayer2;haruna;totem
-X:^audio/.*=ffplay -nodisp -autoexit -hide_banner;mplayer;mplayer2;mpv;vlc;gmplayer;smplayer;totem
+X:^video/.*=ffplay %x;mplayer %x;mplayer2 %x;mpv %x;vlc %x;gmplayer %x;smplayer %x;celluloid %x;qmplayer2 %x;haruna %x;totem %x
+X:^audio/.*=mpv %x;gmplayer %x;smplayer %x;vlc %x;totem %x;ffplay %x;mplayer;mplayer2
 !X:^audio/.*=ffplay -nodisp -autoexit -hide_banner %f !EO;mplayer %f !EO;mpv --no-terminal
 
 #-----------------------------
@@ -180,7 +191,7 @@ X:^font/.*=fontforge;fontpreview
 # Torrent
 #-----------------------------
 
-X:application/x-bittorrent=rtorrent;transimission-gtk;transmission-qt;deluge-gtk;ktorrent
+X:application/x-bittorrent=rtorrent;transimission-gtk %x;transmission-qt %x;deluge-gtk %x;ktorrent %x
 
 #-----------------------------
 # Fallback

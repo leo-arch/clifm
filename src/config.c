@@ -2192,22 +2192,8 @@ create_mime_file_anew(char *file)
 # Use the %%f placeholder to specify the position of the file name to be\n\
 # opened in the command. Example:\n\
 # 'mpv %%f --terminal=no' -> 'mpv FILE --terminal=no'\n\
-# If %%f is not specified, the file name will be added to the end of the\n\
+# If %%f is not specified, the file name will be appended to the end of the\n\
 # command. Ex: 'mpv --terminal=no' -> 'mpv --terminal=no FILE'\n\
-\n\
-# Running the opening application in the background:\n\
-# For GUI applications:\n\
-#    APP %%f &\n\
-# For terminal applications:\n\
-#    TERM -e APP %%f &\n\
-# Replace 'TERM' and 'APP' by the corresponding values. The -e option\n\
-# might vary depending on the terminal emulator used (TERM)\n\
-\n\
-# Note on graphical applications: If the opening application is already running\n\
-# the file might be opened in a tab, and CliFM won't wait for the file to be\n\
-# closed (because the process already returned). To avoid this, instruct the\n\
-# application to run a new instance: Ex: geany -i, gedit -s, kate -n,\n\
-# pluma --new-window, and so on.\n\
 \n\
 # To silence STDERR and/or STDOUT use !E and !O respectively (they can\n\
 # be used together). Examples:\n\
@@ -2218,6 +2204,23 @@ create_mime_file_anew(char *file)
 # or\n\
 #    mpv %%f !E !O &\n\
 # For Ranger users, \"!EO\" is equivalent to \"flag f\" in rifle.conf\n\
+\n\
+# The '%%x' flag can be used as a shorthand for \"%%f !EO &\". Example:\n\
+#    mpv %%x\n\
+\n\
+# Running the opening application in the background:\n\
+# For GUI applications:\n\
+#    APP %%x\n\
+# For terminal applications:\n\
+#    TERM -e APP %%x\n\
+# Replace 'TERM' and 'APP' by the corresponding values. The -e option\n\
+# might vary depending on the terminal emulator used (TERM).\n\
+\n\
+# Note on graphical applications: If the opening application is already running\n\
+# the file might be opened in a tab, and CliFM won't wait for the file to be\n\
+# closed (because the process already returned). To avoid this, instruct the\n\
+# application to run a new instance: Ex: geany -i, gedit -s, kate -n,\n\
+# pluma --new-window, and so on.\n\
 \n\
 # Environment variables can be used as well. Example:\n\
 # X:text/plain=$EDITOR %%f &;$VISUAL;nano;vi\n\
@@ -2238,10 +2241,10 @@ create_mime_file_anew(char *file)
 # Match files with extension 'ext'\n\
 #X:N:.*\\.ext$=cmd\n\
 \n\
-X:N:.*\\.djvu$=djview;zathura;xreader;evince;atril\n\
-X:N:.*\\.epub$=mupdf;zathura;xreader;ebook-viewer;FBReader;foliate\n\
-X:N:.*\\.mobi$=mupdf;ebook-viewer;FBReader;foliate\n\
-X:N:.*\\.(cbr|cbz)$=mcomix;xreader;YACReader;qcomicbook;zathura;foliate\n\
+X:N:.*\\.djvu$=djview %%x;zathura %%x;xreader %%x;evince %%x;atril %%x\n\
+X:N:.*\\.epub$=mupdf;zathura %%x;xreader %%x;ebook-viewer %%x;FBReader %%x;foliate %%x\n\
+X:N:.*\\.mobi$=mupdf;ebook-viewer %%x;FBReader %%x;foliate %%x\n\
+X:N:.*\\.(cbr|cbz)$=mcomix %%x;xreader %%x;YACReader %%x;qcomicbook %%x;zathura %%x;foliate %%x\n\
 X:N:(.*\\.clifm$|clifmrc)=$EDITOR;$VISUAL;kak;micro;nvim;vim;vi;mg;emacs;nano;mili;leafpad;mousepad;featherpad;gedit;kate;pluma\n\
 !X:N:(.*\\.clifm$|clifmrc)=$EDITOR;$VISUAL;kak;micro;nvim;vim;vi;mg;emacs;nano\n\
 \n\n");
@@ -2253,47 +2256,47 @@ X:N:(.*\\.clifm$|clifmrc)=$EDITOR;$VISUAL;kak;micro;nvim;vim;vi;mg;emacs;nano;mi
 # Directories - only for the open-with (ow) command and the --open command\n\
 # line switch\n\
 # In graphical environments directories will be opened in a new window\n\
-X:inode/directory=xterm -e clifm %%f &;xterm -e vifm %%f &;pcmanfm %%f &;thunar %%f &;xterm -e ncdu %%f &\n\
+X:inode/directory=xterm -e clifm %%x;xterm -e vifm %%x;pcmanfm %%x;thunar %%x;xterm -e ncdu %%x\n\
 !X:inode/directory=vifm;ranger;nnn;ncdu\n\
 \n\
 # Web content\n\
-X:^text/html$=$BROWSER;surf;vimprobable;vimprobable2;qutebrowser;dwb;jumanji;luakit;uzbl;uzbl-tabbed;uzbl-browser;uzbl-core;iceweasel;midori;opera;firefox;seamonkey;brave;chromium-browser;chromium;google-chrome;epiphany;konqueror;elinks;links2;links;lynx;w3m\n\
+X:^text/html$=$BROWSER;surf %%x;vimprobable %%x;vimprobable2 %%x;qutebrowser %%x;dwb %%x;jumanji %%x;luakit %%x;uzbl %%x;uzbl-tabbed %%x;uzbl-browser %%x;uzbl-core %%x;iceweasel %%x;midori %%x;opera %%x;firefox %%x;seamonkey %%x;brave %%x;chromium-browser %%x;chromium %%x;google-chrome %%x;epiphany %%x;konqueror %%x;elinks;links2;links;lynx;w3m\n\
 !X:^text/html$=$BROWSER;elinks;links2;links;lynx;w3m\n\
 \n\
 # Text\n\
-X:^text/rtf$=libreoffice;soffice;ooffice\n\
-X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;vim;vi;mg;emacs;nano;mili;leafpad;mousepad;featherpad;nedit;kate;gedit;pluma;io.elementary.code;liri-text;xed;atom;nota;gobby;kwrite;xedit\n\
+X:^text/rtf$=libreoffice %%x;soffice %%x;ooffice %%x\n\
+X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;vim;vi;mg;emacs;nano;mili;leafpad %%x;mousepad %%x;featherpad %%x;nedit %%x;kate %%x;gedit %%x;pluma %%x;io.elementary.code %%x;liri-text %%x;xed %%x;atom %%x;nota %%x;gobby %%x;kwrite %%x;xedit %%x\n\
 !X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;vim;vi;mg;emacs;nano\n\
 \n\
 # Office documents\n\
 ^application/.*(open|office)document\\.spreadsheet.*=sc-im\n\
-X:^application/(msword|vnd.ms-excel|vnd.ms-powerpoint|.*(open|office)document.*)=libreoffice;soffice;ooffice\n\
+X:^application/(msword|vnd.ms-excel|vnd.ms-powerpoint|.*(open|office)document.*)=libreoffice %%x;soffice %%x;ooffice %%x\n\
 \n\
 # Archives\n\
 # Note: 'ad' is CliFM's built-in archives utility (based on atool). Remove it if you\n\
 # prefer another application.\n\
-X:^application/(zip|gzip|zstd|x-7z-compressed|x-xz|x-bzip*|x-tar|x-iso9660-image)=ad;xarchiver %%f &;lxqt-archiver %%f &;ark %%f &\n\
+X:^application/(zip|gzip|zstd|x-7z-compressed|x-xz|x-bzip*|x-tar|x-iso9660-image)=ad;xarchiver %%x;lxqt-archiver %%x;ark %%x\n\
 !X:^application/(zip|gzip|zstd|x-7z-compressed|x-xz|x-bzip*|x-tar|x-iso9660-image)=ad\n\
 \n\
 # PDF\n\
-X:.*/pdf$=mupdf;sioyek;llpp;lpdf;zathura;mupdf-x11;apvlv;xpdf;xreader;evince;atril;okular;epdfview;qpdfview\n\
+X:.*/pdf$=mupdf %%x;sioyek %%x;llpp %%x;lpdf %%x;zathura %%x;mupdf-x11 %%x;apvlv %%x;xpdf %%x;xreader %%x;evince %%x;atril %%x;okular %%x;epdfview %%x;qpdfview %%x\n\
 \n\
 # Images\n\
-X:^image/gif$=animate;pqiv;sxiv -a;nsxiv -a;feh\n\
-X:^image/svg=display;inkscape\n\
-X:^image/.*=sxiv;nsxiv;pqiv;gpicview;qview;qimgv;mirage;ristretto;eog;eom;xviewer;viewnior;nomacs;geeqie;gwenview;gthumb;gimp\n\
+X:^image/gif$=animate;pqiv %%x;sxiv -a %%x;nsxiv -a %%x;feh %%x\n\
+X:^image/svg=display;inkscape %%x\n\
+X:^image/.*=sxiv %%x;nsxiv %%x;pqiv %%x;gpicview %%x;qview %%x;qimgv %%x;mirage %%x;ristretto %%x;eog %%x;eom %%x;xviewer %%x;viewnior %%x;nomacs %%x;geeqie %%x;gwenview %%x;gthumb %%x;gimp %%x\n\
 !X:^image/.*=fim;img2txt;cacaview;fbi;fbv\n\
 \n\
 # Video and audio\n\
-X:^video/.*=ffplay;mplayer;mplayer2;mpv;vlc;gmplayer;smplayer;celluloid;qmplayer2;haruna;totem\n\
-X:^audio/.*=ffplay -nodisp -autoexit;mplayer;mplayer2;mpv;vlc;gmplayer;smplayer;totem\n\
+X:^video/.*=ffplay %%x;mplayer %%x;mplayer2 %%x;mpv %%x;vlc %%x;gmplayer %%x;smplayer %%x;celluloid %%x;qmplayer2 %%x;haruna %%x;totem %%x\n\
+X:^audio/.*=mpv %%x;gmplayer %%x;smplayer %%x;vlc %%x;totem %%x;ffplay %%x;mplayer;mplayer2\n\
 !X:^audio/.*=ffplay -nodisp -autoexit %%f !EO;mplayer %%f !EO;mpv --no-terminal\n\
 \n\
 # Fonts\n\
 X:^font/.*=fontforge;fontpreview\n\
 \n\
 # Torrent:\n\
-X:application/x-bittorrent=rtorrent;transimission-gtk;transmission-qt;deluge-gtk;ktorrent\n\
+X:application/x-bittorrent=rtorrent;transimission-gtk %%x;transmission-qt %%x;deluge-gtk %%x;ktorrent %%x\n\
 \n\
 # Fallback to an external opener as last resource\n\
 .*=handlr open;mimeopen -n;rifle;mimeo;xdg-open;open;\n");
