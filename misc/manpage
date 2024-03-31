@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Mar 23, 2024" "clifm 1.18" "CLIFM Manual"
+.TH "CLIFM" "1" "Mar 31, 2024" "clifm 1.18.2" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -2098,19 +2098,27 @@ Each line in the MIME list file consists of:
 .TP
 Note that the syntax departs here from the Freedesktop specification in that we do not rely on desktop files (mostly used by desktop environments), but rather on commands and parameters. In general thus, the syntax is this:
 
- [!]X[:N]:REGEX=CMD [ARGS] [%f];CMD [ARGS] [%f]; ...
+ [!]X[:N]:REGEX=CMD [ARGS];CMD [ARGS]; ...
 .TP
-Use the \fB%f\fR placeholder to specify the position of the file name to be opened in the command. For example, \'mpv %f \-\-terminal=no\' will be translated into \'mpv FILE \-\-terminal=no\'. If the placeholder is not specified, the file name will be appended to command string. Thus, this: \'mpv \-\-terminal=no\' amounts to this: \'mpv \-\-terminal=no FILE\'.
+\fBThe %f placeholder\fR
 .TP
-Running the opening application in the background:
+Use the \fB%f\fR placeholder to specify the position of the file name to be opened in the command. For example, \fImpv %f \-\-terminal=no\fR will be translated into \fImpv FILE \-\-terminal=no\fR. If the placeholder is not specified, the file name will be appended to the command string. For example, this: \fImpv \-\-terminal=no\fR amounts to this: \fImpv \-\-terminal=no FILE\fR.
+.TP
+\fBStandard output and standard error\fR
+.TP
+Sometimes you might need to silence either standard error (STDERR), standard output (STDOUT), or both. Use \fB!E\fR and \fB!O\fR to silence them respectively. Both could be used together: \fB!EO\fR.
+.TP
+The \fB%x\fR flag can be used as a shorthand for \fB%f !EO &\fR: the command will be executed in the background, silencing both STDERR and STDOUT. This flag is recommended to open files via graphical applications.
+.TP
+\fBRunning the opening application in the background\fR
 .TP
 For GUI applications:
 
- APP %f &>/dev/null &
+ APP %x
 .TP
 For terminal applications:
 
- TERM \-e APP %f &>/dev/null &
+ TERM \-e APP %x
 .TP
 Replace \'TERM\' and \'APP\' by the corresponding values. The \fI\-e\fR option might vary depending on the terminal emulator used (TERM).
 .TP
@@ -2125,36 +2133,44 @@ Replace \'TERM\' and \'APP\' by the corresponding values. The \fI\-e\fR option m
 .TP
 Match a full file name:
 
- X:N:some_filename:leafpad;mousepad;kate;gedit
+ X:N:some_filename=nano;vim;vi;emacs
 .TP
-\fBNote\fR: the \'N\' character indicates that this rule is intended to match a \fBfile name\fR instead of a MIME type, just as \'X\' means that this rule is aimed at \fBgraphical\fR environments and \'!X\' that it is aimed rather to \fBnon\-graphical\fR environments.
+\fBNote\fR: the \'N\' character indicates that this rule is intended to match a \fBfile name\fR instead of a MIME type, just as \'X\' means that this rule is aimed at \fBgraphical\fR environments and \'!X\' that it is aimed rather at \fBnon\-graphical\fR environments (like the kernel console or an SSH session).
 .TP
-\fBNote 2\fR: If the file name contains a dot, quote it like this: some_filename\.ext (to prevent the REGEX parser from interpreting the dot)
+\fBNote 2\fR: If the file name contains a dot, quote it like this: some_filename\.ext (to prevent the REGEX parser from interpreting the dot).
+.TP
+Open video files with \fBmpv\fR(1) in the foreground and silence STDERR:
+
+ ^video/.*=mpv %f !E
+.TP
+Open video files with \fBgmplayer\fR(1) in the background and silence both STDERR and STDOUT:
+
+ ^video/.*=gmplayer %f !EO & (or 'gmplayer %x')
 .TP
 Match multiple file names (starting with "str"):
 
- X:N:^str.*:leafpad;mousepad;kate;gedit
+ X:N:^str.*=leafpad %x;mousepad %x;kate %x;gedit %x
 .TP
 Match a single extension:
 
- X:N:.*\\.txt$:leafpad;mousepad;kate;gedit
- !X:N:.*\\.^txt$:nano;vim;vi;emacs
+ X:N:.*\\.txt$=leafpad %x;mousepad %x;kate %x;gedit %x
+ !X:N:.*\\.^txt$=nano;vim;vi;emacs
 .TP
 Match multiple extensions:
-.TP
- X:N:.*\\.(sh|c|py|pl)$:geany;leafpad;nano
-.TP
-Match single mimetype:
 
- X:^audio/mp3$=mpv %f \-\-terminal=no;ffplay \-nodisp \-autoexit;mpv;mplayer
+ X:N:.*\\.(sh|c|py|pl)$:geany %x;leafpad %x;nano
+.TP
+Match a single mimetype:
+
+ !X:^audio/mp3$=mpv %f \-\-terminal=no;ffplay \-nodisp \-autoexit;mpv;mplayer
 .TP
 Match mutiple mimetypes:
 
- X:^audio/.*=mplayer;mplayer2;vlc;gmplayer;smplayer;totem
+ X:^audio/.*=mplayer;mplayer2;vlc %x;gmplayer %x;smplayer %x;totem %x
 .TP
 In case of MIME types, you can also write the entire expression without relying on any regular expression. For example:
 
- !X:text/plain=$TERM \-e $EDITOR %f &>/dev/null &
+ !X:text/plain=$TERM \-e $EDITOR %x
 .TP
 For more information take a look at the mimelist file itself (\fIF6\fR or \fImm edit\fR).
 .TP
