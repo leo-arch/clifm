@@ -2282,7 +2282,7 @@ X:^application/(zip|gzip|zstd|x-7z-compressed|x-xz|x-bzip*|x-tar|x-iso9660-image
 X:.*/pdf$=mupdf %%x;sioyek %%x;llpp %%x;lpdf %%x;zathura %%x;mupdf-x11 %%x;apvlv %%x;xpdf %%x;xreader %%x;evince %%x;atril %%x;okular %%x;epdfview %%x;qpdfview %%x\n\
 \n\
 # Images\n\
-X:^image/gif$=animate;pqiv %%x;sxiv -a %%x;nsxiv -a %%x;feh %%x\n\
+X:^image/gif$=animate %%x;pqiv %%x;sxiv -a %%x;nsxiv -a %%x;feh %%x\n\
 X:^image/svg=display;inkscape %%x\n\
 X:^image/.*=sxiv %%x;nsxiv %%x;pqiv %%x;gpicview %%x;qview %%x;qimgv %%x;mirage %%x;ristretto %%x;eog %%x;eom %%x;xviewer %%x;viewnior %%x;nomacs %%x;geeqie %%x;gwenview %%x;gthumb %%x;gimp %%x\n\
 !X:^image/.*=fim;img2txt;cacaview;fbi;fbv\n\
