@@ -733,6 +733,19 @@ expand_app_fields(char ***cmd, size_t *n, char *fpath, int *exec_flags)
 	*exec_flags = E_NOFLAG;
 
 	for (i = 0; a[i]; i++) {
+		/* "%x" is short for "%f !EO &". It must be the last field in the
+		 * command entry (subsequent fields will be ignored). */
+		if (*a[i] == '%' && a[i][1] == 'x') {
+			const size_t fpath_len = strlen(fpath);
+			a[i] = xnrealloc(a[i], fpath_len + 1, sizeof(char));
+			xstrsncpy(a[i], fpath, fpath_len + 1);
+			f = 1;
+			set_exec_flags("EO", exec_flags);
+			bg_proc = 1;
+			i++;
+			break;
+		}
+
 		/* Expand %f pĺaceholder */
 		if (*a[i] == '%' && *(a[i] + 1) == 'f') {
 			const size_t fpath_len = strlen(fpath);
@@ -742,6 +755,7 @@ expand_app_fields(char ***cmd, size_t *n, char *fpath, int *exec_flags)
 			continue;
 		}
 
+		/* Set execution flags */
 		if (*a[i] == '!' && (a[i][1] == 'E' || a[i][1] == 'O')) {
 			set_exec_flags(a[i] + 1, exec_flags);
 			free(a[i]);
@@ -824,6 +838,18 @@ split_and_run(char *app, char *file)
 	int exec_flags = E_NOFLAG;
 
 	for (i = 0; cmd[i]; i++) {
+		/* "%x" is short for "%f !EO &". It must be the last field in the
+		 * command entry (subsequent fields will be ignored). */
+		if (*cmd[i] == '%' && cmd[i][1] == 'x') {
+			const size_t file_len = strlen(file);
+			cmd[i] = xnrealloc(cmd[i], file_len + 1, sizeof(char));
+			xstrsncpy(cmd[i], file, file_len + 1);
+			f = 1;
+			set_exec_flags("EO", &exec_flags);
+			bg_proc = 1;
+			break;
+		}
+
 		if (*cmd[i] == '!' && (cmd[i][1] == 'E' || cmd[i][1] == 'O')) {
 			set_exec_flags(cmd[i] + 1, &exec_flags);
 			free(cmd[i]);
@@ -1231,6 +1257,17 @@ append_params(char **args, char *name, char ***cmd, int *exec_flags)
 {
 	size_t i, n = 1, f = 0;
 	for (i = 1; args[i]; i++) {
+		/* "%x" is short for "%f !EO &". It must be the last field in the
+		 * command entry (subsequent fields will be ignored). */
+		if (*args[i] == '%' && args[i][1] == 'x') {
+			(*cmd)[n] = savestring(name, strlen(name));
+			f = 1;
+			set_exec_flags("EO", exec_flags);
+			bg_proc = 1;
+			n++;
+			break;
+		}
+
 		if (*args[i] == '%' && *(args[i] + 1) == 'f' && !*(args[i] + 2)) {
 			f = 1;
 			(*cmd)[n] = savestring(name, strlen(name));
