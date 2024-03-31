@@ -10,8 +10,8 @@
 # somewhere else.
 #
 # Files dropped remotely are first downloaded via cURL into the CWD and
-# then send to the SelBox, whereas files dropped locally are directly
-# send to the SelBox
+# then sent to the SelBox, whereas files dropped locally are directly
+# sent to the SelBox.
 
 # Dependencies:
 # dragon (https://github.com/mwh/dragon), grep, sed, curl, xargs, tr
