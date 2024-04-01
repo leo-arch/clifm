@@ -3450,6 +3450,21 @@ check_colors(void)
 }
 
 #ifndef _NO_FZF
+static char
+first_non_blank(const char *line)
+{
+	if (!line || !*line)
+		return 0;
+
+	while (*line) {
+		if (*line > ' ')
+			return *line;
+		line++;
+	}
+
+	return 0;
+}
+
 /* Set fzf_border_type (global) to a value describing the value of fzf
  * --border option: 0 (no vertical border), 1 (left or right border),
  * or 2 (left and right border). We need this value to properly calculate
@@ -3457,9 +3472,20 @@ check_colors(void)
 void
 set_fzf_border_type(char *line)
 {
-	char *p = line + (*line == '\'' || *line == '"');
-	if (!p || !*p)
+	if (!line || !*line || (*line != ' ' && *line != '=')) {
+		/* No value for "--border". It defaults to "rounded". */
+		fzf_border_type = 2;
 		return;
+	}
+
+	line++;
+
+	char *p = line + (*line == '\'' || *line == '"');
+	char c = first_non_blank(p);
+	if (!*p || *p == '-' || c == '-' || c == '\0') {
+		fzf_border_type = 2;
+		return;
+	}
 
 	if (strncmp(p, "none", 4) == 0)
 		fzf_border_type = 0; /* No vertical border */
@@ -3494,7 +3520,7 @@ get_fzf_win_height_and_preview(void)
 
 	char *b = (char *)NULL;
 	if (fzf_border_type == UNSET && (b = strstr(p, "--border")))
-		set_fzf_border_type(b + sizeof("--border"));
+		set_fzf_border_type(b + (sizeof("--border") - 1));
 }
 #endif /* !_NO_FZF */
 

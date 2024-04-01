@@ -2209,7 +2209,7 @@ set_fzf_opts(char *line)
 
 	char *b = strstr(conf.fzftab_options, "--border");
 	if (b)
-		set_fzf_border_type(b + sizeof("--border"));
+		set_fzf_border_type(b + (sizeof("--border") - 1));
 }
 
 static void
