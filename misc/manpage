@@ -2082,35 +2082,90 @@ When running for the first time, or whenever the MIME list file cannot be found,
 .TP
 \fBLira\fR will check the file line by line, and if a matching line is found, and if at least one of the specified applications exists, this application will be used to open the corresponding associated file. Else, the next line will be checked. In other words, the precedence order is top to bottom (for lines) and left to right (for applications).
 .TP
-\fBNOTE\fR: In case of directories (whose MIME type is \fIinode/directory\fR), the entry will be used \fBonly\fR for the open\-with command (\fIow\fR).
+\fBNote\fR: In case of directories (whose MIME type is \fIinode/directory\fR), the entry will be used \fBonly\fR for the open\-with command (\fIow\fR).
 .TP
-This MIME list file follows a few simple syntax rules:
+\fB1. Syntax\fR
 .TP
-Each line in the MIME list file consists of:
+In its most basic form, each line in the MIME list file consists of:
 .TP
-\fBa)\fR \'X\' or \'!X\' to specify GUI and non\-GUI environments respectively;
+\fBa)\fR A left value: this is just a regular expression indicating what we are trying to match (it can be a file name, a file extension, or a MIME type).
 .TP
-\fBb)\fR \'N\' to instruct \fILira\fR to match a file name instead of a MIME type;
+\fBb)\fR A right value: a semicolon separated list of commands to be used as the opening application (the first existing program found in this list will be used).
 .TP
-\fBc)\fR A left value, containing either a file name or a MIME type to be matched. Regular expressions are supported;
-.TP
-\fBd)\fR A right value, a list of semicolon separated commands (and optionally the commands parameters) to be associated to the corresponding left value;
-.TP
-Note that the syntax departs here from the Freedesktop specification in that we do not rely on desktop files (mostly used by desktop environments), but rather on commands and parameters. In general thus, the syntax is this:
+For example:
 
- [!]X[:N]:REGEX=CMD [ARGS];CMD [ARGS]; ...
+ ^text/.*=leafpad
 .TP
-\fBThe %f placeholder\fR
+which is to be read as follows: Open text files (in this case we are partially matching a MIME type) using \fBleafpad\fR.
 .TP
-Use the \fB%f\fR placeholder to specify the position of the file name to be opened in the command. For example, \fImpv %f \-\-terminal=no\fR will be translated into \fImpv FILE \-\-terminal=no\fR. If the placeholder is not specified, the file name will be appended to the command string. For example, this: \fImpv \-\-terminal=no\fR amounts to this: \fImpv \-\-terminal=no FILE\fR.
+As explained below, this basic rule can be modified to get much more control on \fBwhat\fR we are matching and \fBhow\fR we execute the opening application.
 .TP
-\fBStandard output and standard error\fR
+The syntax is this:
+
+ [!][X:][N:]REGEX=CMD [ARGS] [%[f,x]] [![E,O]] [&]; ...
 .TP
-Sometimes you might need to silence either standard error (STDERR), standard output (STDOUT), or both. Use \fB!E\fR and \fB!O\fR to silence them respectively. Both could be used together: \fB!EO\fR.
+Note that this syntax departs from the Freedesktop specification in that we do not rely on desktop files (mostly used by desktop environments), but rather on \fBcommands and parameters\fR.
 .TP
-The \fB%x\fR flag can be used as a shorthand for \fB%f !EO &\fR: the command will be executed in the background, silencing both STDERR and STDOUT. This flag is recommended to open files via graphical applications.
+\fB2. The left value (REGEX)\fR
 .TP
-\fBRunning the opening application in the background\fR
+\fB2.1. The X prefix\fR
+.TP
+Without any prefixes, the rule will attempt to match MIME types, disregarding if we are running on a graphical or non-graphical environment. For example,
+
+ ^text/.*=leafpad
+.TP
+instructs \fBlira\fR to open all text files using \fBleafpad\fR, no matter if we are running on a graphical or non-graphical environment.
+.TP
+However, we usually do not want to use \fBleafpad\fR if we are not running on a graphical environment. In this case, we can write a double rule as follows:
+
+ X:^text/.*=leafpad
+ !X:^text/.*=nano
+.TP
+where the first rule (via the \fBX\fR prefix) is intended for use on graphical environments, where we can use \fBleafpad\fR, and the second one (via the \fB!X\fR prefix) for non-graphical environments, where we rather prefer to use \fBnano\fR.
+.TP
+\fB2.2. The N prefix\fR
+.TP
+Sometimes MIME types are not enough to identify a file, or we just want to match a specific file name. In this case, we can use the \fBN\fR prefix to tell \fBLira\fR that we want to match a file name instead of a MIME type. For example:
+
+ X:N:^filename.txt$=leafpad
+.TP
+in which case we want to match exactly the file name \fIfilename.txt\fR (no matter its MIME type).
+.TP
+If we want to match file extensions, instead of entire file names, we can use a regular expression, as follows:
+
+ X:N:.*\.txt$=leafpad
+.TP
+Here, we are not matching a specific file name, but a specific file extension, so that the rule reads as follows: open all files ending with .txt using \fBleafpad\fR.
+.TP
+\fB3. The right value (CMD)\fR
+.TP
+The right value is a semicolon separated list of commands, each of which contains a command, and optionally, command arguments and modifiers. For example:
+
+ X:N:.*\.txt$=leafpad --sync,geany,mousepad,nano
+.TP
+which means: Open .txt files (graphical environments only) using \fIleafpad --sync\fR, or, if not found, \fIgeany\fR, \fImousepad\fR, or \fInano\fR, in this order. The file to be opened will be appended to the command string, say \fIleafpad --sync FILE\fR.
+.TP
+\fB3.1. The %f placeholder\fR
+.TP
+Use the \fB%f\fR placeholder to specify the position of the file to be opened in the command, for example:
+
+ mpv %f --terminal=no
+.TP
+will be translated into: \fImpv FILE --terminal=no\fR
+.TP
+If the placeholder is not specified, the file to be opened will be appended to the command string. Thus, this: \fImpv --terminal=no\fR amounts to this: \fImpv --terminal=no FILE\fR.
+.TP
+\fB3.2. STDERR and STDOUT\fR
+.TP
+Sometimes you might need to silence either standard error (\fBSTDERR\fR), standard output (\fBSTDOUT\fR), or both. Use \fB!E\fR and \fB!O\fR to silence them respectively. Both can be used together: \fB!EO\fR. Example: \fIleafpad %f !EO\fR, or, to silence only \fBSTDOUT\fR: \fIleafpad %f !E\fR.
+.TP
+\fB3.3. Run in the background\fR
+.TP
+The ampersand character (\fB&\fR) can be used, as usual, to run the opening application in the background. Example: \fIleafpad %f &\fR.
+.TP
+\fB3.4. The %x flag\fR
+.TP
+The \fB%x\fR flag can be used as a shorthand for "%f !EO &": the command will be executed in the background and both \fBSTDOUT\fR and \fBSTDERR\fR will be silenced. This flag is recommended to open files via graphical applications. Examples:
 .TP
 For GUI applications:
 
@@ -2118,32 +2173,37 @@ For GUI applications:
 .TP
 For terminal applications:
 
- TERM \-e APP %x
+ TERM -e APP %x
 .TP
-Replace \'TERM\' and \'APP\' by the corresponding values. The \fI\-e\fR option might vary depending on the terminal emulator used (TERM).
+Replace TERM and APP by the appropriate values (say, xterm and vi respectively). The -e option might vary depending on the terminal emulator used.
 .TP
-\fBNOTE\fR: In case of archives, the built\-in \fIad\fR command could be used as opening application.
+\fBNote\fR: In case of archives, the built-in ad command could be used as opening application.
 .TP
-\fBNOTE 2\fR: Environment variables (e.g. \fB$EDITOR\fR, \fB$VISUAL\fR, \fB$BROWSER\fR, and even \fB$PAGER\fR) are also recognized by \fILira\fR. You can even set custom environment variables to be used exclusively by \fBclifm\fR. For example, you can set \fBCLIFM_TERM\fR, \fBCLIFM_EDITOR\fR, and \fBCLIFM_PDF\fR, and then use them to define some associations:
+\fB3.5. Environment variables\fR
+.TP
+Environment variables (e.g. \fB$EDITOR\fR, \fB$VISUAL\fR, \fB$BROWSER\fR, and even \fB$PAGER\fR) are also recognized by \fILira\fR. You can even set custom environment variables to be used exclusively by \fBclifm\fR. For example, you can set \fBCLIFM_TERM\fR, \fBCLIFM_EDITOR\fR, and \fBCLIFM_PDF\fR, and then use them to define some associations:
 
  X:text/plain=$CLIFM_TERM \-e $CLIFM_EDITOR %f &
  X:N:.*\\.pdf$=$CLIFM_PDF %f &
 .TP
-\fBExamples\fR:
+\fB3.6. Using shell scripts\fR
+Bear in mind that commands will be executed directly without shell intervention, so that no shell goodies (like pipes, conditions, loops, etc) are available. In case you need something more complex than a single command (including shell capabilities) write your own script and place the path to the script in place of the command. For example:
+
+ X:^text/.*:~/scripts/my_cool_script.sh
+.TP
+\fB4. Examples\fR:
 .TP
 Match a full file name:
 
  X:N:some_filename=nano;vim;vi;emacs
 .TP
-\fBNote\fR: the \'N\' character indicates that this rule is intended to match a \fBfile name\fR instead of a MIME type, just as \'X\' means that this rule is aimed at \fBgraphical\fR environments and \'!X\' that it is aimed rather at \fBnon\-graphical\fR environments (like the kernel console or an SSH session).
+\fBNote\fR: If the file name contains a dot, quote it like this: some_filename\\.ext (to prevent the REGEX parser from interpreting the dot).
 .TP
-\fBNote 2\fR: If the file name contains a dot, quote it like this: some_filename\.ext (to prevent the REGEX parser from interpreting the dot).
-.TP
-Open video files with \fBmpv\fR(1) in the foreground and silence STDERR:
+Open video files with \fBmpv\fR in the foreground and silence STDERR:
 
  ^video/.*=mpv %f !E
 .TP
-Open video files with \fBgmplayer\fR(1) in the background and silence both STDERR and STDOUT:
+Open video files with \fBgmplayer\fR in the background and silence both STDERR and STDOUT:
 
  ^video/.*=gmplayer %f !EO & (or 'gmplayer %x')
 .TP
@@ -2174,11 +2234,23 @@ In case of MIME types, you can also write the entire expression without relying 
 .TP
 For more information take a look at the mimelist file itself (\fIF6\fR or \fImm edit\fR).
 .TP
-\fBUsing a third\-party opener\fR
+\fB5. Using a third\-party opener\fR
 .TP
-Set the \fIOpener\fR option in the configuration file to the desired opener, e.g. "Opener=xdg\-open".
+This can be done in two ways:
 .TP
-\fBUsing clifm as a standalone resource opener\fR
+\fBa.\fR Set \fIOpener\fR in the configuration file to the name of the desired opener. For example, to use Ranger's \fBrifle\fR(1):
+
+ Opener=rifle
+.TP
+or, if you prefer \fBxdg\-open\fR(1):
+
+ Opener=xdg\-open
+.TP
+\fBb.\fR Tell \fILira\fR to open all files, no matter the MIME type or file name, via the desired opener. For example:
+
+ .*=rifle
+.TP
+\fB6. Using Clifm as a standalone resource opener\fR
 .TP
 Thought \fBclifm\fR is a file manager, it can be used as a simple resource opener via the \fI\-\-open\fR command line option. For example:
 
@@ -2187,11 +2259,6 @@ Thought \fBclifm\fR is a file manager, it can be used as a simple resource opene
  clifm \-\-open https://some_domain
 .TP
 \fBNote\fR: When opening web resources \fBclifm\fR will query the mimelist file using text/html as MIME type. Whatever association it finds for this specific MIME type will be used to open the web resource.
-.TP
-Positional parameters could be used as well, provided the parameter does not point to a directory name, in which case it will be used as \fBclifm\fR starting path. For instance:
-
- clifm /path/to/my_file.jpg
- clifm https://some_domain
 
 .SH 10. SHOTGUN
 \fB1. TAB completion with file previews\fR
