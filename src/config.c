@@ -3450,7 +3450,35 @@ check_colors(void)
 }
 
 #ifndef _NO_FZF
-/* Just check if --height and --preview are set in FZF_DEFAULT_OPTS. */
+/* Set fzf_border_type (global) to a value describing the value of fzf
+ * --border option: 0 (no vertical border), 1 (left or right border),
+ * or 2 (left and right border). We need this value to properly calculate
+ * the width of the fzf preview window. */
+void
+set_fzf_border_type(char *line)
+{
+	char *p = line + (*line == '\'' || *line == '"');
+	if (!p || !*p)
+		return;
+
+	if (strncmp(p, "none", 4) == 0)
+		fzf_border_type = 0; /* No vertical border */
+	else if (strncmp(p, "rounded", 7) == 0
+	|| strncmp(p,  "sharp", 5) == 0
+	|| strncmp(p,  "bold", 4) == 0
+	|| strncmp(p,  "double", 6) == 0
+	|| strncmp(p,  "block", 5) == 0
+	|| strncmp(p,  "thinblock", 9) == 0
+	|| strncmp(p,  "vertical", 8) == 0)
+		fzf_border_type = 2; /* Left and right border */
+	else if (strncmp(p, "left", 4) == 0
+	|| strncmp(p, "right", 5) == 0)
+		fzf_border_type = 1; /* Left or right border */
+	else
+		fzf_border_type = 0; /* No vertical border */
+}
+
+/* Just check if --height, --border, and --preview are set in FZF_DEFAULT_OPTS. */
 static void
 get_fzf_win_height_and_preview(void)
 {
@@ -3463,6 +3491,10 @@ get_fzf_win_height_and_preview(void)
 
 	if (fzf_height_set == 0 && strstr(p, "--height"))
 		fzf_height_set = 1;
+
+	char *b = (char *)NULL;
+	if (fzf_border_type == UNSET && (b = strstr(p, "--border")))
+		set_fzf_border_type(b + sizeof("--border"));
 }
 #endif /* !_NO_FZF */
 

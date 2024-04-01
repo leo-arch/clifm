@@ -1771,6 +1771,7 @@ extern int
 	exit_code,
 	follow_symlinks,
 	fzftab,
+	fzf_border_type,
 	fzf_height_set,
 	fzf_preview_border_type,
 	hist_status,

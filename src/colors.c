@@ -2206,6 +2206,10 @@ set_fzf_opts(char *line)
 
 	if (strstr(conf.fzftab_options, "--height"))
 		fzf_height_set = 1;
+
+	char *b = strstr(conf.fzftab_options, "--border");
+	if (b)
+		set_fzf_border_type(b + sizeof("--border"));
 }
 
 static void

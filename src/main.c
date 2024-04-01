@@ -166,6 +166,7 @@ int
 	exit_code = 0,
 	follow_symlinks = UNSET,
 	fzftab = UNSET,
+	fzf_border_type = UNSET,
 	fzf_height_set = 0,
 	fzf_preview_border_type = 0,
 	hist_status = UNSET,
