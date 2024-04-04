@@ -2157,7 +2157,7 @@ If the placeholder is not specified, the file to be opened will be appended to t
 .TP
 \fB3.2. STDERR and STDOUT\fR
 .TP
-Sometimes you might need to silence either standard error (\fBSTDERR\fR), standard output (\fBSTDOUT\fR), or both. Use \fB!E\fR and \fB!O\fR to silence them respectively. Both can be used together: \fB!EO\fR. Example: \fIleafpad %f !EO\fR, or, to silence only \fBSTDOUT\fR: \fIleafpad %f !E\fR.
+Sometimes we might need to silence either standard error (\fBSTDERR\fR), standard output (\fBSTDOUT\fR), or both. Use \fB!E\fR and \fB!O\fR to silence them respectively. Both can be used together: \fB!EO\fR. Example: \fIleafpad %f !EO\fR, or, to silence only \fBSTDERR\fR: \fIleafpad %f !E\fR.
 .TP
 \fB3.3. Run in the background\fR
 .TP
@@ -2165,7 +2165,7 @@ The ampersand character (\fB&\fR) can be used, as usual, to run the opening appl
 .TP
 \fB3.4. The %x flag\fR
 .TP
-The \fB%x\fR flag can be used as a shorthand for "%f !EO &": the command will be executed in the background and both \fBSTDOUT\fR and \fBSTDERR\fR will be silenced. This flag is recommended to open files via graphical applications. Examples:
+The \fB%x\fR flag is a shorthand for "\fB%f !EO &\fR": the command will be executed in the background and both \fBSTDOUT\fR and \fBSTDERR\fR will be silenced. This flag is recommended to open files via graphical applications. Examples:
 .TP
 For GUI applications:
 
@@ -2177,7 +2177,7 @@ For terminal applications:
 .TP
 Replace TERM and APP by the appropriate values (say, xterm and vi respectively). The -e option might vary depending on the terminal emulator used.
 .TP
-\fBNote\fR: In case of archives, the built-in ad command could be used as opening application.
+\fBNote\fR: In case of archives, the built-in \fIad\fR command can be used as opening application.
 .TP
 \fB3.5. Environment variables\fR
 .TP
