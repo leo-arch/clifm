@@ -1729,7 +1729,9 @@ dir_info(const char *dir, int *status, struct dir_info_t *info)
 			continue;
 
 #if defined(_DIRENT_HAVE_D_TYPE)
-		if (ent->d_type == DT_DIR) {
+		if (ent->d_type == DT_REG) {
+			info->files++;
+		} else if (ent->d_type == DT_DIR) {
 			info->dirs++;
 			char buf[PATH_MAX + 1];
 			snprintf(buf, sizeof(buf), "%s/%s", dir, ent->d_name);
@@ -1752,7 +1754,9 @@ dir_info(const char *dir, int *status, struct dir_info_t *info)
 			continue;
 		}
 
-		if (S_ISDIR(a.st_mode)) {
+		if (S_ISREG(a.st_mode)) {
+			info->files++;
+		} else if (S_ISDIR(a.st_mode)) {
 			info->dirs++;
 			dir_info(buf, status, info);
 		} else if (S_ISLNK(a.st_mode)) {
