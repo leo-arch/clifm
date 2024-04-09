@@ -132,6 +132,9 @@ struct dir_info_t {
 	unsigned long long dirs;
 	unsigned long long files;
 	unsigned long long links;
+	off_t size;
+	int status;
+	int pad0;
 };
 
 #if defined(LINUX_FILE_ATTRS)
@@ -142,7 +145,7 @@ static int
 print_file_attrs(const int aflags)
 {
 	if (aflags == -1) {
-		puts(_("Unavailable"));
+		puts(_("unavailable"));
 		return FUNC_FAILURE;
 	}
 
@@ -236,6 +239,7 @@ get_link_color(const char *name)
 	return color;
 }
 
+/*
 static off_t
 get_total_size(char *filename, int *status)
 {
@@ -260,7 +264,7 @@ get_total_size(char *filename, int *status)
 #else
 	total_size = dir_size(*_path ? _path : filename,
 		(bin_flags & (GNU_DU_BIN_DU | GNU_DU_BIN_GDU)) ? 1 : 0, status);
-#endif /* USE_XDU */
+#endif // USE_XDU
 
 	if (term_caps.suggestions == 1) {
 		MOVE_CURSOR_LEFT((int)sizeof(SCANNING_MSG) - 1);
@@ -271,7 +275,7 @@ get_total_size(char *filename, int *status)
 	}
 
 	return total_size;
-}
+} */
 
 static struct perms_t
 set_invalid_file_perms(void)
@@ -1604,6 +1608,77 @@ print_timestamps(char *filename, const struct stat *attr)
 #endif /* ST_BTIME */
 }
 
+static int
+err_no_file(const char *filename, const char *target, const int errnum)
+{
+	char *errname = xargs.stat > 0 ? PROGRAM_NAME : "prop";
+
+	if (*target) {
+		xerror(_("%s: %s %s->%s %s: Broken symbolic link\n"),
+			errname, filename, mi_c, df_c, target);
+	} else {
+		xerror("%s: '%s': %s\n", errname, filename, strerror(errnum));
+	}
+
+	return errnum;
+}
+
+static void
+print_file_mime(const char *name)
+{
+#ifdef _NO_MAGIC
+	UNUSED(name);
+	return;
+#else
+	fputs("MIME type:\t", stdout);
+	char *n = xmagic(name, 1);
+	if (n) {
+		printf("%s\n", n);
+		free(n);
+	} else {
+		printf("%s%c%s\n", dn_c, UNKNOWN_CHR, df_c);
+	}
+#endif /* _NO_MAGIC */
+}
+
+/*
+static off_t
+get_total_size(char *filename, int *status)
+{
+	off_t total_size = 0;
+
+	char _path[PATH_MAX + 1]; *_path = '\0';
+	snprintf(_path, sizeof(_path), "%s/", filename);
+
+	fputs(_("Total size: \t"), stdout);
+
+#define SCANNING_MSG "Scanning..."
+	if (term_caps.suggestions == 1) {
+		HIDE_CURSOR;
+		fputs(dn_c, stdout);
+		fputs(SCANNING_MSG, stdout);
+		fflush(stdout);
+	}
+	fflush(stdout);
+
+#ifdef USE_XDU
+	total_size = dir_size(*_path ? _path : filename, 1, status);
+#else
+	total_size = dir_size(*_path ? _path : filename,
+		(bin_flags & (GNU_DU_BIN_DU | GNU_DU_BIN_GDU)) ? 1 : 0, status);
+#endif // USE_XDU
+
+	if (term_caps.suggestions == 1) {
+		MOVE_CURSOR_LEFT((int)sizeof(SCANNING_MSG) - 1);
+		ERASE_TO_RIGHT;
+		UNHIDE_CURSOR;
+		fputs(df_c, stdout);
+		fflush(stdout);
+	}
+
+	return total_size;
+}
+
 static void
 print_file_size(char *filename, const struct stat *attr, const int file_perm,
 	const int full_dirsize)
@@ -1640,7 +1715,7 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 		return;
 	}
 
-	if (full_dirsize == 0) /* We're running 'p', not 'pp'. */
+	if (full_dirsize == 0) // We're running 'p', not 'pp'.
 		return;
 
 	int du_status = 0;
@@ -1648,9 +1723,9 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 		? get_total_size(filename, &du_status) : (-2);
 
 	if (total_size < 0) {
-		if (total_size == -2) /* No access */
+		if (total_size == -2) // No access
 			printf(_("Total size: \t%s%c%s\n"), dn_c, UNKNOWN_CHR, cend);
-		else /* get_total_size returned error (-1) */
+		else // get_total_size returned error (-1)
 			puts(UNKNOWN_STR);
 		return;
 	}
@@ -1670,7 +1745,7 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 
 #ifndef USE_XDU
 	if (bin_flags & (GNU_DU_BIN_DU | GNU_DU_BIN_GDU)) {
-#endif /* USE_XDU */
+#endif // USE_XDU
 		char err[sizeof(xf_cb) + 6]; *err = '\0';
 		if (du_status != 0)
 			snprintf(err, sizeof(err), "%s%c%s", xf_cb, DU_ERR_CHAR, NC);
@@ -1686,28 +1761,13 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 	} else {
 		printf("%s%s%s\n", csize, human_size, cend);
 	}
-#endif /* USE_XDU */
-}
-
-static int
-err_no_file(const char *filename, const char *target, const int errnum)
-{
-	char *errname = xargs.stat > 0 ? PROGRAM_NAME : "prop";
-
-	if (*target) {
-		xerror(_("%s: %s %s->%s %s: Broken symbolic link\n"),
-			errname, filename, mi_c, df_c, target);
-	} else {
-		xerror("%s: '%s': %s\n", errname, filename, strerror(errnum));
-	}
-
-	return errnum;
-}
+#endif // USE_XDU
+} */
 
 /* Recursively count files and directories in the directory DIR and store
  * values in the INFO struct. If a directory cannot be read, or a file cannot
  * be stat'ed, STATUS is set to the appropriate errno value. */
-void
+/*void
 dir_info(const char *dir, int *status, struct dir_info_t *info)
 {
 	if (!dir || !*dir) {
@@ -1748,8 +1808,8 @@ dir_info(const char *dir, int *status, struct dir_info_t *info)
 
 		if (lstat(buf, &a) == -1) {
 			*status = errno;
-			/* We cannot know if the file is a directory. Let's take it as
-			 * a plain file. */
+			// We cannot know if the file is a directory. Let's take it as
+			// a plain file.
 			info->files++;
 			continue;
 		}
@@ -1764,13 +1824,14 @@ dir_info(const char *dir, int *status, struct dir_info_t *info)
 		} else {
 			info->files++;
 		}
-#endif /* _DIRENT_HAVE_D_TYPE */
+#endif // _DIRENT_HAVE_D_TYPE
 	}
 
 	closedir(p);
 	return;
-}
+} */
 
+/*
 static void
 print_dir_items(const char *dir, const int file_perm)
 {
@@ -1792,7 +1853,7 @@ print_dir_items(const char *dir, const int file_perm)
 	}
 	fflush(stdout);
 
-	dir_info(dir, &status, &info);
+	dir_info(dir, &status, 1, &info);
 
 	if (term_caps.suggestions == 1) {
 		MOVE_CURSOR_LEFT((int)sizeof(COUNTING_MSG) - 1);
@@ -1806,29 +1867,267 @@ print_dir_items(const char *dir, const int file_perm)
 	if (status != 0)
 		snprintf(read_err, sizeof(read_err), "%s%c%s", xf_cb, DU_ERR_CHAR, df_c);
 
+	char *cend = conf.colorize == 1 ? df_c : "";
+	char *size_color = (char *)NULL;
+	char sf[MAX_SHADE_LEN]; *sf = '\0';
+	if (conf.colorize == 1 && !*dz_c) {
+		get_color_size(info.size, sf, sizeof(sf));
+		size_color = sf;
+	}
+
+	char *size = construct_human_size(info.size);
+	if (size)
+		printf("Total size: \t%s%s%s%s\n", read_err, size_color, size, cend);
+	else
+		puts(UNKNOWN_STR);
+
 	printf("%s%s%llu%s (%s%llu%s %s, %s%llu%s %s, %s%llu%s %s)\n",
 		read_err, BOLD, info.dirs + info.files + info.links, df_c,
 		BOLD, info.dirs, df_c, info.dirs == 1 ? _("directory") : _("directories"),
 		BOLD, info.files, df_c, info.files == 1 ? _("file") : _("files"),
 		BOLD, info.links, df_c, info.links == 1 ? _("link") : _("links"));
+} */
+
+static void
+print_file_size(const struct stat *attr)
+{
+	const off_t size =
+		(FILE_TYPE_NON_ZERO_SIZE(attr->st_mode) || S_TYPEISSHM(attr)
+		|| S_TYPEISTMO(attr)) ? FILE_SIZE_PTR(attr) : 0;
+
+	char *size_unit = construct_human_size(size);
+	char *csize = dz_c;
+	char *cend = conf.colorize == 1 ? df_c : "";
+
+	char sf[MAX_SHADE_LEN];
+	*sf = '\0';
+	if (conf.colorize == 1 && !*dz_c) {
+		get_color_size(size, sf, sizeof(sf));
+		csize = sf;
+	}
+
+	printf(_("Size: \t\t%s%s%s"), csize, size_unit ? size_unit : "?", cend);
+
+	const int bigger_than_bytes = size > (xargs.si == 1 ? 1000 : 1024);
+
+	if (bigger_than_bytes == 1)
+		printf(" / %s%jd B%s", csize, (intmax_t)size, cend);
+
+	printf(" (%s%s%s)\n", conf.apparent_size == 1 ? _("apparent")
+		: _("disk usage"), (xargs.si == 1 && bigger_than_bytes == 1)
+		? ",si" : "", (S_ISREG(attr->st_mode)
+		&& (intmax_t)(attr->st_blocks * S_BLKSIZE) < (intmax_t)attr->st_size)
+		? ",sparse" : "");
+}
+
+struct hlink_t {
+	dev_t dev;
+	ino_t ino;
+};
+
+static struct hlink_t *xdu_hardlinks = {0};
+static size_t xdu_hardlink_n = 0;
+
+static inline int
+check_xdu_hardlinks(const dev_t dev, const ino_t ino)
+{
+	if (!xdu_hardlinks || xdu_hardlink_n == 0)
+		return 0;
+
+	size_t i;
+	for (i = 0; i < xdu_hardlink_n; i++) {
+		if (dev == xdu_hardlinks[i].dev && ino == xdu_hardlinks[i].ino)
+			return 1;
+	}
+
+	return 0;
+}
+
+static inline void
+add_xdu_hardlink(const dev_t dev, const ino_t ino)
+{
+	xdu_hardlinks = xnrealloc(xdu_hardlinks, xdu_hardlink_n + 1,
+		sizeof(struct hlink_t));
+
+	xdu_hardlinks[xdu_hardlink_n].dev = dev;
+	xdu_hardlinks[xdu_hardlink_n].ino = ino;
+	xdu_hardlink_n++;
+}
+
+static inline void
+free_xdu_hardlinks(void)
+{
+	free(xdu_hardlinks);
+	xdu_hardlinks = (struct hlink_t *)NULL;
+	xdu_hardlink_n = 0;
+}
+
+/* The st_size member of a stat struct is meaningful only:
+ * 1. When computing disk usage (not apparent sizes).
+ * 2. If apparent sizes, only for symlinks and regular files.
+ * NOTE: Here we add shared memory object and typed memory object just to
+ * match the check made by du(1). These objects are not implmented on most
+ * systems, but this might change in the future. */
+static inline int
+usable_st_size(struct stat const *s)
+{
+	return (conf.apparent_size != 1 || S_ISLNK(s->st_mode)
+		|| S_ISREG(s->st_mode) || S_TYPEISSHM(s) || S_TYPEISTMO(s));
+}
+
+/* Recursively count files and directories in the directory DIR and store
+ * values in the INFO struct. The total size in bytes is stored in the SIZE
+ * field of the struct. If a directory cannot be read, or a file cannot
+ * be stat'ed, then the STATUS field of the struct is set to the appropriate
+ * errno value. */
+void
+dir_info(const char *dir, const int first_level, struct dir_info_t *info)
+{
+	if (!dir || !*dir) {
+		info->status = ENOENT;
+		return;
+	}
+
+	struct stat a;
+	DIR *p;
+
+	if ((p = opendir(dir)) == NULL) {
+		info->status = errno;
+		return;
+	}
+
+	/* Compute the size of the base directory itself */
+	if (conf.apparent_size != 1 && first_level == 1
+	&& stat(dir, &a) != -1)
+		info->size += (a.st_blocks * S_BLKSIZE);
+
+	struct dirent *ent;
+
+	while ((ent = readdir(p)) != NULL) {
+		if (SELFORPARENT(ent->d_name))
+			continue;
+
+		char buf[PATH_MAX + 1];
+		snprintf(buf, sizeof(buf), "%s/%s", dir, ent->d_name);
+
+		if (lstat(buf, &a) == -1) {
+			info->status = errno;
+			info->files++;
+			continue;
+		}
+
+#ifdef __CYGWIN__
+		/* This is because on Cygwin systems some regular files, maybe due to
+		 * some permissions issue, are otherwise taken as directories. */
+		if (S_ISREG(a.st_mode))
+			goto NOT_DIR;
+#endif /* __CYGWIN__ */
+
+		if (S_ISDIR(a.st_mode)) {
+			/* Even if a subdirectory is unreadable or we can't chdir into
+			 * it, do let its size contribute to the total (provided we're
+			 * not computing apparent sizes). */
+			if (conf.apparent_size != 1)
+				info->size += (a.st_blocks * S_BLKSIZE);
+
+			info->dirs++;
+			dir_info(buf, 0, info);
+
+			continue;
+		}
+
+#ifdef __CYGWIN__
+NOT_DIR:
+#endif /* __CYGWIN__ */
+		if (S_ISLNK(a.st_mode))
+			info->links++;
+		else
+			info->files++;
+
+		if (usable_st_size(&a) == 0)
+			continue;
+
+		if (a.st_nlink > 1) {
+			if (check_xdu_hardlinks(a.st_dev, a.st_ino) == 1)
+				continue;
+			else
+				add_xdu_hardlink(a.st_dev, a.st_ino);
+		}
+
+		info->size += conf.apparent_size == 1 ? a.st_size
+			: (a.st_blocks * S_BLKSIZE);
+	}
+
+	closedir(p);
+
+	if (first_level == 1)
+		free_xdu_hardlinks();
+
+	return;
 }
 
 static void
-print_file_mime(const char *name)
+print_dir_info(const char *dir, const int file_perm)
 {
-#ifdef _NO_MAGIC
-	UNUSED(name);
-	return;
-#else
-	fputs("MIME type:\t", stdout);
-	char *n = xmagic(name, 1);
-	if (n) {
-		printf("%s\n", n);
-		free(n);
-	} else {
-		printf("%s%c%s\n", dn_c, UNKNOWN_CHR, df_c);
+	if (file_perm == 0) {
+		printf(_("Total size: \t%s%c%s\n"), dn_c, UNKNOWN_CHR, NC);
+		printf(_("Items:\t\t%s%c%s\n"), dn_c, UNKNOWN_CHR, NC);
+		return;
 	}
-#endif /* _NO_MAGIC */
+
+	struct dir_info_t info = {0};
+
+	fputs(_("Total size: \t"), stdout);
+
+#define SCANNING_MSG "Scanning..."
+	if (term_caps.suggestions == 1) {
+		HIDE_CURSOR;
+		fputs(dn_c, stdout);
+		fputs(SCANNING_MSG, stdout);
+	}
+	fflush(stdout);
+
+	dir_info(dir, 1, &info);
+
+	if (term_caps.suggestions == 1) {
+		MOVE_CURSOR_LEFT((int)sizeof(SCANNING_MSG) - 1);
+		ERASE_TO_RIGHT;
+		UNHIDE_CURSOR;
+		fputs(df_c, stdout);
+		fflush(stdout);
+	}
+
+	char read_err[5 + (MAX_COLOR * 2)]; *read_err = '\0';
+	if (info.status != 0)
+		snprintf(read_err, sizeof(read_err), "%s%c%s", xf_cb, DU_ERR_CHAR, df_c);
+
+	char *cend = conf.colorize == 1 ? df_c : "";
+	char *size_color = (char *)NULL;
+	char sf[MAX_SHADE_LEN]; *sf = '\0';
+	if (conf.colorize == 1 && !*dz_c) {
+		get_color_size(info.size, sf, sizeof(sf));
+		size_color = sf;
+	}
+
+	char *size = construct_human_size(info.size);
+	if (size) {
+		printf("%s%s%s%s ", read_err, size_color, size, cend);
+
+		const int size_mult_factor = xargs.si == 1 ? 1000 : 1024;
+		if (info.size > size_mult_factor)
+			printf("/ %s%jd B%s ", size_color, (intmax_t)info.size, cend);
+
+		printf("(%s%s)\n", conf.apparent_size == 1 ? _("apparent")
+			: _("disk usage"), xargs.si == 1 ? ",si" : "");
+	} else {
+		puts(UNKNOWN_STR);
+	}
+
+	printf(_("Items:\t\t%s%s%llu%s (%s%llu%s %s, %s%llu%s %s, %s%llu%s %s)\n"),
+		read_err, BOLD, info.dirs + info.files + info.links, df_c,
+		BOLD, info.dirs, df_c, info.dirs == 1 ? _("directory") : _("directories"),
+		BOLD, info.files, df_c, info.files == 1 ? _("file") : _("files"),
+		BOLD, info.links, df_c, info.links == 1 ? _("link") : _("links"));
 }
 
 /* Retrieve information for the file named FILENAME in a stat(1)-like fashion.
@@ -1893,10 +2192,17 @@ do_stat(char *filename, const int follow_link)
 	print_file_details(filename, &attr, file_type, file_perm, xattr);
 	print_file_mime(*link_target ? link_target : filename);
 	print_timestamps(*link_target ? link_target : filename, &attr);
-	print_file_size(filename, &attr, file_perm, follow_link);
 
+/*	print_file_size(filename, &attr, file_perm, follow_link);
 	if (S_ISDIR(attr.st_mode) && follow_link == 1)
-		print_dir_items(*link_target ? link_target : filename, file_perm);
+		print_dir_items(*link_target ? link_target : filename, file_perm); */
+
+	if (S_ISDIR(attr.st_mode)) {
+		if (follow_link == 1)
+			print_dir_info(*link_target ? link_target : filename, file_perm);
+	} else {
+		print_file_size(&attr);
+	}
 
 	return FUNC_SUCCESS;
 }
