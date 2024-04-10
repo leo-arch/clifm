@@ -55,6 +55,7 @@
 #include "readline.h"
 #include "selection.h"
 #include "sort.h"
+#include "xdu.h" /* dir_size() */
 
 /* Save selected elements into a tmp file. Returns 1 on success or 0
  * on error. This function allows the user to work with multiple

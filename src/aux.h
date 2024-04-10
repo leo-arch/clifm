@@ -40,13 +40,6 @@ char *abbreviate_file_name(char *str);
 char *construct_human_size(const off_t size);
 filesn_t count_dir(const char *dir, const int pop);
 
-void dir_info(const char *dir, const int first_level, struct dir_info_t *info);
-#ifdef USE_DU1
-off_t dir_size(char *dir, const int first_level, int *status);
-#else
-off_t dir_size(const char *dir, const int first_level, int *status);
-#endif /* USE_DU1 */
-
 char from_hex(char c);
 char *gen_date_suffix(const struct tm tm);
 void gen_time_str(char *buf, const size_t size, const time_t curtime);

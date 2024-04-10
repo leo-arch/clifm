@@ -93,6 +93,7 @@
 #include "sanitize.h"
 #include "sort.h"
 #include "spawn.h"
+#include "xdu.h"        /* dir_size() */
 
 /* In case we want to try some faster printf implementation */
 /*#if defined(_PALAND_PRINTF)

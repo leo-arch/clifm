@@ -43,6 +43,7 @@ xatoi, url_encode, xnmalloc */
 #include "readline.h"   /* rl_no_hist, rl_get_y_or_n */
 #include "sort.h"       /* skip_files, xalphasort, alphasort_insensitive */
 #include "spawn.h"      /* launch_execv */
+#include "xdu.h"        /* dir_size */
 
 /* Return the amount of currently trashed files. */
 static size_t

@@ -100,6 +100,7 @@
 #include "misc.h"
 #include "properties.h"
 #include "readline.h"   /* Required by the 'pc' command */
+#include "xdu.h" /* dir_info(), dir_size() */
 
 /* A few macros for nano-second precision.
  * Used to print timestamps with the 'p/pp' command. */
