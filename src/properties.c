@@ -1594,7 +1594,7 @@ print_file_mime(const char *name)
 #endif /* _NO_MAGIC */
 }
 
-/*
+#ifdef USE_DU1
 static off_t
 get_total_size(char *filename, int *status)
 {
@@ -1614,12 +1614,7 @@ get_total_size(char *filename, int *status)
 	}
 	fflush(stdout);
 
-#ifndef USE_DU1
 	total_size = dir_size(*_path ? _path : filename, 1, status);
-#else
-	total_size = dir_size(*_path ? _path : filename,
-		(bin_flags & (GNU_DU_BIN_DU | GNU_DU_BIN_GDU)) ? 1 : 0, status);
-#endif // !USE_DU1
 
 	if (term_caps.suggestions == 1) {
 		MOVE_CURSOR_LEFT((int)sizeof(SCANNING_MSG) - 1);
@@ -1696,9 +1691,7 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 		return;
 	}
 
-#ifdef USE_DU1
 	if (bin_flags & (GNU_DU_BIN_DU | GNU_DU_BIN_GDU)) {
-#endif // USE_DU1
 		char err[sizeof(xf_cb) + 6]; *err = '\0';
 		if (du_status != 0)
 			snprintf(err, sizeof(err), "%s%c%s", xf_cb, DU_ERR_CHAR, NC);
@@ -1710,14 +1703,11 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 
 		printf("(%s%s)\n", conf.apparent_size == 1 ? _("apparent")
 			: _("disk usage"), xargs.si == 1 ? ",si" : "");
-#ifdef USE_DU1
 	} else {
 		printf("%s%s%s\n", csize, human_size, cend);
 	}
-#endif // USE_DU1
-} */
+}
 
-/*
 static void
 print_dir_items(const char *dir, const int file_perm)
 {
@@ -1729,7 +1719,6 @@ print_dir_items(const char *dir, const int file_perm)
 	}
 
 	struct dir_info_t info = {0};
-	int status = 0;
 
 #define COUNTING_MSG "Counting..."
 	if (term_caps.suggestions == 1) {
@@ -1753,27 +1742,14 @@ print_dir_items(const char *dir, const int file_perm)
 	if (info.status != 0)
 		snprintf(read_err, sizeof(read_err), "%s%c%s", xf_cb, DU_ERR_CHAR, df_c);
 
-	char *cend = conf.colorize == 1 ? df_c : "";
-	char *size_color = (char *)NULL;
-	char sf[MAX_SHADE_LEN]; *sf = '\0';
-	if (conf.colorize == 1 && !*dz_c) {
-		get_color_size(info.size, sf, sizeof(sf));
-		size_color = sf;
-	}
-
-	char *size = construct_human_size(info.size);
-	if (size)
-		printf("Total size: \t%s%s%s%s\n", read_err, size_color, size, cend);
-	else
-		puts(UNKNOWN_STR);
-
 	printf("%s%s%llu%s (%s%llu%s %s, %s%llu%s %s, %s%llu%s %s)\n",
 		read_err, BOLD, info.dirs + info.files + info.links, df_c,
 		BOLD, info.dirs, df_c, info.dirs == 1 ? _("directory") : _("directories"),
 		BOLD, info.files, df_c, info.files == 1 ? _("file") : _("files"),
 		BOLD, info.links, df_c, info.links == 1 ? _("link") : _("links"));
-} */
+}
 
+#else /* !USE_DU1 */
 static void
 print_file_size(const struct stat *attr)
 {
@@ -1869,6 +1845,7 @@ print_dir_info(const char *dir, const int file_perm)
 		BOLD, info.files, df_c, info.files == 1 ? _("file") : _("files"),
 		BOLD, info.links, df_c, info.links == 1 ? _("link") : _("links"));
 }
+#endif /* USE_DU1 */
 
 /* Retrieve information for the file named FILENAME in a stat(1)-like fashion.
  * If FOLLOW_LINK is set to 1, in which case we're running the 'pp' command
@@ -1933,16 +1910,18 @@ do_stat(char *filename, const int follow_link)
 	print_file_mime(*link_target ? link_target : filename);
 	print_timestamps(*link_target ? link_target : filename, &attr);
 
-/*	print_file_size(filename, &attr, file_perm, follow_link);
+#ifdef USE_DU1
+	print_file_size(filename, &attr, file_perm, follow_link);
 	if (S_ISDIR(attr.st_mode) && follow_link == 1)
-		print_dir_items(*link_target ? link_target : filename, file_perm); */
-
+		print_dir_items(*link_target ? link_target : filename, file_perm);
+#else
 	if (S_ISDIR(attr.st_mode)) {
 		if (follow_link == 1)
 			print_dir_info(*link_target ? link_target : filename, file_perm);
 	} else {
 		print_file_size(&attr);
 	}
+#endif /* USE_DU1 */
 
 	return FUNC_SUCCESS;
 }
