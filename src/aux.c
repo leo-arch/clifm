@@ -1011,7 +1011,6 @@ construct_human_size(const off_t size)
 	return str;
 }
 
-#ifdef USE_XDU
 struct hlink_t {
 	dev_t dev;
 	ino_t ino;
@@ -1067,53 +1066,37 @@ usable_st_size(struct stat const *s)
 		|| S_ISREG(s->st_mode) || S_TYPEISSHM(s) || S_TYPEISTMO(s));
 }
 
-/* Read no more than this many directory entries at a time. Without this
- * limit, processing a directory with 4,000,000 entries requires ~1GiB of
- * memory, and handling 64M entries would require 16GiB of memory. */
-//#define MAX_READDIR_ENTRIES 100000
-
 /* Hand-made implementation of du(1) providing only those features required
  * by clifm.
  *
- * Returns the full size of the directory DIR in bytes, computing apparent
- * sizes, if conf.apparent_size is set to 1, or disk usage otherwise. In case
- * of error, STATUS is set to the appropiate error code (errno): in this case,
- * the return value may be zero, if DIR couldn't be read for some reason, or
- * a positive integer representing the size of the entries that have been
- * actually processed.
- *
+ * Recursively count files and directories in the directory DIR and store
+ * values in the INFO struct. The total size in bytes (apparent size, if
+ * conf.apparent_size is set to 1, or disk usage otherwise) is stored in the
+ * SIZE field of the struct. If a directory cannot be read, or a file cannot
+ * be stat'ed, then the STATUS field of the struct is set to the appropriate
+ * errno value.
  * FIRST_LEVEL must be always 1 when calling this function (this value will
- * be zero whenever the function calls itself recursively).
- *
- * NOTE: Old versions of du (at least up to 8.30) count the size of directories
- * themselves when computing apparent sizes. At least since 9.3, this is not
- * the case anymore (See
- * https://git.savannah.gnu.org/gitweb/?p=coreutils.git;a=commit;h=110bcd28386b1f47a4cd876098acb708fdcbbb25).
- * As stated in 'info du': "Apparent sizes are meaningful only for regular
- * files and symbolic links. Other file types do not contribute to apparent
- * size." We follow here the last behavior. */
-off_t
-dir_size(char *dir, const int first_level, int *status)
+ * be zero whenever the function calls itself recursively). */
+void
+dir_info(const char *dir, const int first_level, struct dir_info_t *info)
 {
 	if (!dir || !*dir) {
-		*status = ENOENT;
-		return 0;
+		info->status = ENOENT;
+		return;
 	}
 
 	struct stat a;
-//	const dev_t base_dev = lstat(dir, &a) != -1 ? a.st_dev : 0;
-	off_t size = 0;
 	DIR *p;
 
 	if ((p = opendir(dir)) == NULL) {
-		*status = errno;
-		return 0;
+		info->status = errno;
+		return;
 	}
 
 	/* Compute the size of the base directory itself */
 	if (conf.apparent_size != 1 && first_level == 1
 	&& stat(dir, &a) != -1)
-		size += (a.st_blocks * S_BLKSIZE);
+		info->size += (a.st_blocks * S_BLKSIZE);
 
 	struct dirent *ent;
 
@@ -1125,30 +1108,38 @@ dir_size(char *dir, const int first_level, int *status)
 		snprintf(buf, sizeof(buf), "%s/%s", dir, ent->d_name);
 
 		if (lstat(buf, &a) == -1) {
-			*status = errno;
+			info->status = errno;
+			info->files++;
 			continue;
 		}
 
-/*		if (base_dev > 0 && base_dev != a.st_dev) {
-			*status = EXDEV; // File is on a different file system.
-			continue;
-		} */
+#ifdef __CYGWIN__
+		/* This is because on Cygwin systems some regular files, maybe due to
+		 * some permissions issue, are otherwise taken as directories. */
+		if (S_ISREG(a.st_mode))
+			goto NOT_DIR;
+#endif /* __CYGWIN__ */
 
 		if (S_ISDIR(a.st_mode)) {
 			/* Even if a subdirectory is unreadable or we can't chdir into
 			 * it, do let its size contribute to the total (provided we're
 			 * not computing apparent sizes). */
 			if (conf.apparent_size != 1)
-				size += (a.st_blocks * S_BLKSIZE);
+				info->size += (a.st_blocks * S_BLKSIZE);
 
-			if (user.uid != 0
-			&& check_file_access(a.st_mode, a.st_uid, a.st_gid) == 0)
-				*status = EACCES;
-			else
-				size += dir_size(buf, 0, status);
+			info->dirs++;
+			dir_info(buf, 0, info);
 
 			continue;
 		}
+
+#ifdef __CYGWIN__
+NOT_DIR:
+#endif /* __CYGWIN__ */
+		if (S_ISLNK(a.st_mode))
+			info->links++;
+		else
+			info->files++;
 
 		if (usable_st_size(&a) == 0)
 			continue;
@@ -1160,7 +1151,7 @@ dir_size(char *dir, const int first_level, int *status)
 				add_xdu_hardlink(a.st_dev, a.st_ino);
 		}
 
-		size += conf.apparent_size == 1 ? a.st_size
+		info->size += conf.apparent_size == 1 ? a.st_size
 			: (a.st_blocks * S_BLKSIZE);
 	}
 
@@ -1169,9 +1160,19 @@ dir_size(char *dir, const int first_level, int *status)
 	if (first_level == 1)
 		free_xdu_hardlinks();
 
-	return size;
+	return;
 }
-#else
+
+#ifndef USE_DU1
+off_t
+dir_size(const char *dir, const int first_level, int *status)
+{
+	struct dir_info_t info = {0};
+	dir_info(dir, first_level, &info);
+	*status = info.status;
+	return (off_t)info.size;
+}
+#else /* USE_DU1 */
 /* Return the full size of the directory DIR using du(1).
  * The size is reported in bytes if SIZE_IN_BYTES is set to 1.
  * Otherwise, human format is used.
@@ -1255,7 +1256,7 @@ END:
 	fclose(fp);
 	return retval;
 }
-#endif /* USE_XDU */
+#endif /* !USE_DU1 */
 
 /* Return the file type of the file pointed to by LINK, or -1 in case of
  * error. Possible return values:

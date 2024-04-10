@@ -3468,7 +3468,7 @@ first_non_blank(const char *line)
 /* Set fzf_border_type (global) to a value describing the value of fzf
  * --border option: 0 (no vertical border), 1 (left or right border),
  * or 2 (left and right border). We need this value to properly calculate
- * the width of the fzf preview window. */
+ * the width of the fzf preview window (get_preview_win_width(), in tabcomp.c). */
 void
 set_fzf_border_type(char *line)
 {

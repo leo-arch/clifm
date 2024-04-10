@@ -112,11 +112,13 @@
 # define _NO_MAGIC
 #endif /* _NO_LIRA && !_NO_MAGIC */
 
-#if (defined(__linux__) || defined(__CYGWIN__) || defined(__HAIKU__)) \
+#if defined(USE_DU1)
+# if (defined(__linux__) || defined(__CYGWIN__) || defined(__HAIKU__)) \
 && !defined(_BE_POSIX)
 /* du(1) can report sizes in bytes, apparent sizes, and take custom block sizes */
-# define HAVE_GNU_DU
-#endif /* (__linux__ || __CYGWIN__ || __HAIKU__) && !_BE_POSIX */
+#  define HAVE_GNU_DU
+# endif /* (__linux__ || __CYGWIN__ || __HAIKU__) && !_BE_POSIX */
+#endif /* USE_DU1 */
 
 #ifndef _NO_GETTEXT
 # include <libintl.h>
@@ -515,9 +517,12 @@ extern time_t curdir_mtime;
 #define FZF_BIN_OK     (1 << 0)
 #define FNF_BIN_OK     (1 << 1)
 #define SMENU_BIN_OK   (1 << 2)
-#define GNU_DU_BIN_DU  (1 << 3)
-/* 'gdu' is the GNU version of 'du' used by BSD systems */
-#define GNU_DU_BIN_GDU (1 << 4)
+#ifdef USE_DU1
+ #define GNU_DU_BIN_DU  (1 << 3)
+ /* 'gdu' is the GNU version of 'du' used by BSD systems */
+ #define GNU_DU_BIN_GDU (1 << 4)
+#endif /* USE_DU1 */
+
 /* In BSD/Solaris systems, GNU utilities are provided as gcp, gmv, grm,
  * gdu, etc.
  * NOTE: Both FreeBSD and DragonFly native utilities provide all the
@@ -1667,6 +1672,15 @@ struct ext_mnt_t {
 
 extern struct ext_mnt_t *ext_mnt;
 #endif /* LINUX_FSINFO */
+
+struct dir_info_t {
+	unsigned long long dirs;
+	unsigned long long files;
+	unsigned long long links;
+	off_t size;
+	int status;
+	int pad0;
+};
 
 enum tab_mode {
 	STD_TAB =   0,

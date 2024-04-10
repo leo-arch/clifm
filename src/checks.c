@@ -297,11 +297,11 @@ check_third_party_cmds_alt(void)
 		free(p); udevilok = 1;
 	}
 
-#if !defined(HAVE_GNU_DU) && !defined(_BE_POSIX)
+#if defined(USE_DU1) && !defined(HAVE_GNU_DU) && !defined(_BE_POSIX)
 	if ( (p = get_cmd_path("gdu")) ) {
 		free(p); bin_flags |= GNU_DU_BIN_GDU;
 	}
-#endif /* !HAVE_GNU_DU && !_BE_POSIX */
+#endif /* USE_DU1 && !HAVE_GNU_DU && !_BE_POSIX */
 
 #if defined(CHECK_COREUTILS)
 	if ( (p = get_cmd_path("grm")) ) {
@@ -316,9 +316,9 @@ check_third_party_cmds_alt(void)
 void
 check_third_party_cmds(void)
 {
-#if defined(HAVE_GNU_DU)
+#if defined(USE_DU1) && defined(HAVE_GNU_DU)
 	bin_flags |= GNU_DU_BIN_DU;
-#endif /* HAVE_GNU_DU */
+#endif /* USE_DU1 && HAVE_GNU_DU */
 
 	if (conf.ext_cmd_ok == 0) {
 		/* We haven't loaded system binaries. Let's run an alternative,
@@ -338,11 +338,11 @@ check_third_party_cmds(void)
 	while (--i >= 0) {
 		if (*bin_commands[i] != 'u' && *bin_commands[i] != 'f'
 		&& *bin_commands[i] != 's'
-#if !defined(HAVE_GNU_DU) && !defined(_BE_POSIX)
+#if defined(USE_DU1) && !defined(HAVE_GNU_DU) && !defined(_BE_POSIX)
 		&& *bin_commands[i] != 'g')
 #else
 		)
-#endif /* !HAVE_GNU_DU && !_BE_POSIX */
+#endif /* USE_DU1 && !HAVE_GNU_DU && !_BE_POSIX */
 			continue;
 
 		if (*bin_commands[i] == 'f' && strcmp(bin_commands[i], "fzf") == 0) {
@@ -369,10 +369,10 @@ check_third_party_cmds(void)
 		if (*bin_commands[i] == 'u' && strcmp(bin_commands[i], "udevil") == 0)
 			udevilok = 1;
 
-#if !defined(HAVE_GNU_DU) && !defined(_BE_POSIX)
+#if defined(USE_DU1) && !defined(HAVE_GNU_DU) && !defined(_BE_POSIX)
 		if (*bin_commands[i] == 'g' && strcmp(bin_commands[i] + 1, "du") == 0)
 			bin_flags |= GNU_DU_BIN_GDU;
-#endif /* !HAVE_GNU_DU && !_BE_POSIX */
+#endif /* USE_DU1 && !HAVE_GNU_DU && !_BE_POSIX */
 
 #if defined(CHECK_COREUTILS)
 		if (*bin_commands[i] == 'g' && strcmp(bin_commands[i] + 1, "rm") == 0) {
@@ -383,11 +383,11 @@ check_third_party_cmds(void)
 
 		if (udevilok == 1 && udisks2ok == 1 && check_coreutils == 0
 		&& (bin_flags & (FZF_BIN_OK & FNF_BIN_OK & SMENU_BIN_OK
-#if !defined(HAVE_GNU_DU) && !defined(_BE_POSIX)
+#if defined(USE_DU1) && !defined(HAVE_GNU_DU) && !defined(_BE_POSIX)
 		& GNU_DU_BIN_GDU)))
 #else
 		)))
-#endif /* !HAVE_GNU_DU && !_BE_POSIX */
+#endif /* USE_DU1 && !HAVE_GNU_DU && !_BE_POSIX */
 			break;
 	}
 
