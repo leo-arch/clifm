@@ -130,6 +130,7 @@ _clifm ()
         --open
         --opener
         --pager-view
+        --physical-size
         --preview
         --print-sel
         --ptime-style

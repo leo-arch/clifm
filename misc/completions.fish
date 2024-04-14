@@ -90,6 +90,7 @@ complete -c clifm -l only-dirs -d 'List only directories and symbolic links to d
 complete -c clifm -l open -r -d 'Open FILE (via Lira) and exit'
 complete -c clifm -l opener -r -d 'Use APP as resource opener'
 complete -c clifm -l pager-view -r -d 'How to list files in the pager' -x -a 'auto long short'
+complete -c clifm -l physical-size -r -d 'Same as --no-apparent-size'
 complete -c clifm -l preview -r -d 'Display a preview of FILE (via shotgun) and exit'
 complete -c clifm -l print-sel -d 'Keep the list of selected files in sight'
 complete -c clifm -l ptime-style -d 'Time/date style used by the p/pp command'

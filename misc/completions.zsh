@@ -93,6 +93,7 @@ args=(
 	'--open=[open FILE and exit]:filename:_files'
 	'--opener=[resource opener to use instead of '\''Lira'\'', CliFM built-in opener]:opener:_command_names'
 	'--pager-view=[how to list files in the pager: auto (default), long, short]:pager_view:->pager_views'
+	'--physical-size[same as --no-apparent-size]'
 	'--preview=[display a preview of FILE and exit]:filename:_files'
 	'--print-sel[always print the list of selected files]'
 	'--ptime-style=[time/date style used by the p/pp command]:pstyle:->pstyles'

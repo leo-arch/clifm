@@ -253,6 +253,7 @@ static struct option const longopts[] = {
 	{"open", required_argument, 0, LOPT_OPEN},
 	{"opener", required_argument, 0, LOPT_OPENER},
 	{"pager-view", required_argument, 0, LOPT_PAGER_VIEW},
+	{"physical-size", no_argument, 0, LOPT_NO_APPARENT_SIZE},
 	{"ptime-style", required_argument, 0, LOPT_PTIME_STYLE},
 	{"preview", required_argument, 0, LOPT_PREVIEW},
 	{"print-sel", no_argument, 0, LOPT_PRINT_SEL},
