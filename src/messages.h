@@ -591,7 +591,7 @@ link points to (instead of for the link itself) is displayed."
 
 #define KB_USAGE "Manage key bindings\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  kb, keybinds [list | edit [APP] | reset | readline]\n\n\
+  kb, keybinds [conflict | list | edit [APP] | reset | readline]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - List your current key bindings\n\
     kb (or 'kb list')\n\
@@ -599,6 +599,8 @@ link points to (instead of for the link itself) is displayed."
     kb edit\n\
 - Open/edit the key bindings file using mousepad\n\
     kb edit mousepad\n\
+- Detect key bindings conflicts\n\
+    kb conflict\n\
 - List the current key bindings for readline\n\
     kb readline\n\
 - Reset your key bindings settings\n\

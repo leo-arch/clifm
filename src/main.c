@@ -700,6 +700,8 @@ const struct cmdslist_t param_str[] = {
 	{"icons off", 9},
 	{"j --purge", 9},
 	{"j --edit", 8},
+	{"kb conflict", 11},
+	{"keybinds conflict", 17},
 	{"kb edit", 7},
 	{"keybinds edit", 13},
 	{"kb list", 7},

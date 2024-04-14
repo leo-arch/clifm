@@ -163,6 +163,34 @@ kbinds_edit(char *app)
 	return FUNC_SUCCESS;
 }
 
+static int
+check_kbinds_conflict(void)
+{
+	if (kbinds_n == 0) {
+		puts(_("kb: No keybindings defined"));
+		return FUNC_SUCCESS;
+	}
+
+	int ret = FUNC_SUCCESS;
+	size_t i, j;
+	for (i = 0; i < kbinds_n; i++) {
+		for (j = i + 1; j < kbinds_n; j++) {
+			if (strcmp(kbinds[i].key, kbinds[j].key) == 0) {
+				fprintf(stderr, _("kb: '%s' conflicts with '%s'\n"),
+					kbinds[i].function, kbinds[j].function);
+				ret = FUNC_FAILURE;
+			}
+		}
+	}
+
+	if (ret == 0)
+		puts(_("kb: No conflict found"));
+	else
+		puts(_("kb: Run 'kb edit' to fix the conflict"));
+
+	return ret;
+}
+
 int
 kbinds_function(char **args)
 {
@@ -185,6 +213,9 @@ kbinds_function(char **args)
 		puts(_(KB_USAGE));
 		return FUNC_SUCCESS;
 	}
+
+	if (*args[1] == 'c' && strcmp(args[1], "conflict") == 0)
+		return check_kbinds_conflict();
 
 	if (*args[1] == 'e' && strcmp(args[1], "edit") == 0)
 		return kbinds_edit(args[2] ? args[2] : NULL);
