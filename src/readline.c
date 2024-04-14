@@ -2882,7 +2882,7 @@ options_generator(const char *text, int state)
 		/* kb, keybinds */
 		if (w == 2 && ( (*l == 'k' && l[1] == 'b' && l[2] == ' ')
 		|| strncmp(l, "keybinds ", 9) == 0) ) {
-			_opts[0] = "conflict"; _opts[1] = "list"; _opts[2] = "edit";
+			_opts[0] = "list"; _opts[1] = "edit"; _opts[2] = "conflict";
 			_opts[3] = "reset"; _opts[4] = "readline"; _opts[5] = NULL;
 		}
 	}

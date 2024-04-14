@@ -591,7 +591,7 @@ link points to (instead of for the link itself) is displayed."
 
 #define KB_USAGE "Manage key bindings\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  kb, keybinds [conflict | list | edit [APP] | reset | readline]\n\n\
+  kb, keybinds [list | edit [APP] | conflict | reset | readline]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - List your current key bindings\n\
     kb (or 'kb list')\n\
