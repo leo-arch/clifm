@@ -352,6 +352,9 @@ use APPLICATION (ex: \fIrifle\fR or \fIxdg\-open\fR) as files opener/launcher (i
 \fB\-\-pager\-view\fR=\fI\,MODE\/\fR
 list files in the pager according to MODE. Possible values: \fIauto\fR (use the current listing mode - this is the default), \fIlong\fR (list files in long view), and \fIshort\fR (list files in short view).
 .TP
+\fB\-\-physical\-size\fR
+same as \fI\-\-no\-apparent\-size\fR
+.TP
 \fB\-\-preview\fR=\fI\,FILE\/\fR
 display a preview of \fIFILE\fR (via \fIShotgun\fR) and exit. Use \fI\-\-shotgun\-file\fR to set an alternative confiuguration file via. Consult the \fBSHOTGUN\fR section below for more information.
 .TP
