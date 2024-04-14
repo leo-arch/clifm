@@ -2161,6 +2161,27 @@ rl_run_pager(int count, int key)
 	return run_kb_cmd("pg");
 }
 
+/* Run "!<TAB>" to display the command history via finder. */
+static int
+rl_cmdhist_tab(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	rl_insert_text("!");
+	rl_point = rl_end;
+
+	if (suggestion_buf)
+		clear_suggestion(CS_FREEBUF);
+
+	tab_complete('!');
+
+	if (rl_end > 0 && rl_line_buffer[rl_end - 1] == '!') {
+		rl_end--;
+		rl_point--;
+	}
+
+	return FUNC_SUCCESS;
+}
+
 /* Used to disable keybindings. */
 static int
 do_nothing(int count, int key)
@@ -2263,6 +2284,7 @@ set_keybinds_from_file(void)
 	rl_bind_keyseq(find_key("prepend-sudo"), rl_prepend_sudo);
 	rl_bind_keyseq(find_key("toggle-disk-usage"), rl_toggle_disk_usage);
 	rl_bind_keyseq(find_key("toggle-max-name-len"), rl_toggle_max_filename_len);
+	rl_bind_keyseq(find_key("cmd-hist"), rl_cmdhist_tab);
 	rl_bind_keyseq(find_key("quit"), rl_quit);
 
 	/* Plugins */

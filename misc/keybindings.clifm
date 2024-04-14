@@ -98,6 +98,7 @@ archive-sel:\C-\M-a
 bookmarks:\M-b
 clear-line:\M-c
 clear-msgs:\M-t
+#cmd-hist:
 create-file:\M-n
 deselect-all:\M-d
 dirs-first:\M-g

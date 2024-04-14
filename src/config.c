@@ -893,6 +893,7 @@ bookmark-sel:\\C-\\M-b\n\
 bookmarks:\\M-b\n\
 clear-line:\\M-c\n\
 clear-msgs:\\M-t\n\
+#cmd-hist:\n\
 create-file:\\M-n\n\
 deselect-all:\\M-d\n\
 export-sel:\\C-\\M-e\n\
