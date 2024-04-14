@@ -545,7 +545,7 @@ print_entry_props(const struct fileinfo *props, const struct maxes_t *maxes,
 	*xattr_str = have_xattr == 1 ? (props->xattr == 1 ? XATTR_CHAR : ' ') : 0;
 
 	/* Print stuff */
-	for (size_t i = 0; prop_fields_str[i] && i < PROP_FIELDS_SIZE; i++) {
+	for (size_t i = 0; i < PROP_FIELDS_SIZE && prop_fields_str[i]; i++) {
 		int print_space = prop_fields_str[i + 1] ? 1 : 0;
 
 		switch (prop_fields_str[i]) {
