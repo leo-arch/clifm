@@ -38,6 +38,16 @@
 # include "mem.h"   /* xnrealloc */
 #endif /* USE_DU1 */
 
+/* According to 'info du', the st_size member of a stat struct is meaningful
+ * only:
+ * 1. When computing disk usage (not apparent sizes).
+ * 2. If apparent sizes, only for symlinks and regular files.
+ * NOTE: Here we add shared memory object and typed memory object just to
+ * match the check made by du(1). These objects are not implmented on most
+ * systems, but this might change in the future. */
+#define USABLE_ST_SIZE(s) (conf.apparent_size != 1 || S_ISLNK((s)->st_mode) \
+		|| S_ISREG((s)->st_mode) || S_TYPEISSHM((s)) || S_TYPEISTMO((s)))
+
 struct hlink_t {
 	dev_t dev;
 	ino_t ino;
@@ -80,30 +90,19 @@ free_xdu_hardlinks(void)
 	xdu_hardlink_n = 0;
 }
 
-/* The st_size member of a stat struct is meaningful only:
- * 1. When computing disk usage (not apparent sizes).
- * 2. If apparent sizes, only for symlinks and regular files.
- * NOTE: Here we add shared memory object and typed memory object just to
- * match the check made by du(1). These objects are not implmented on most
- * systems, but this might change in the future. */
-static inline int
-usable_st_size(struct stat const *s)
-{
-	return (conf.apparent_size != 1 || S_ISLNK(s->st_mode)
-		|| S_ISREG(s->st_mode) || S_TYPEISSHM(s) || S_TYPEISTMO(s));
-}
-
 /* Trimmed down implementation of du(1) providing only those features
  * required by Clifm.
  *
  * Recursively count files and directories in the directory DIR and store
- * values in the INFO struct. The total size in bytes (apparent size, if
- * conf.apparent_size is set to 1, or disk usage otherwise) is stored in the
- * SIZE field of the struct. If a directory cannot be read, or a file cannot
- * be stat'ed, then the STATUS field of the struct is set to the appropriate
- * errno value.
+ * values in the INFO struct.
+ * The total size in bytes (apparent size, if conf.apparent_size is set to 1,
+ * or disk usage otherwise) is stored in the SIZE field of the struct.
+ * The amount of directories, symbolic links, and other file types is stored
+ * in the DIRS, LINKS, and FILES fields respectively.
  * FIRST_LEVEL must be always 1 when calling this function (this value will
- * be zero whenever the function calls itself recursively). */
+ * be zero whenever the function calls itself recursively).
+ * If a directory cannot be read, or a file cannot be stat'ed, then the
+ * STATUS field of the INFO struct is set to the appropriate errno value.*/
 void
 dir_info(const char *dir, const int first_level, struct dir_info_t *info)
 {
@@ -120,34 +119,50 @@ dir_info(const char *dir, const int first_level, struct dir_info_t *info)
 		return;
 	}
 
-	/* Compute the size of the base directory itself */
-	if (conf.apparent_size != 1 && first_level == 1
-	&& stat(dir, &a) != -1)
+#ifdef POSIX_FADV_SEQUENTIAL
+	/* A hint to the kernel to optimize the current dir for reading. */
+	const int fd = dirfd(p);
+	posix_fadvise(fd, 0, 0, POSIX_FADV_SEQUENTIAL);
+#endif /* POSIX_FADV_SEQUENTIAL */
+
+	/* Compute the size of the base directory itself. */
+	if (first_level == 1 && conf.apparent_size != 1 && stat(dir, &a) != -1)
 		info->size += (a.st_blocks * S_BLKSIZE);
 
 	struct dirent *ent;
+	char buf[PATH_MAX + 1];
 
 	while ((ent = readdir(p)) != NULL) {
 		if (SELFORPARENT(ent->d_name))
 			continue;
 
-		char buf[PATH_MAX + 1];
 		snprintf(buf, sizeof(buf), "%s/%s", dir, ent->d_name);
 
 		if (lstat(buf, &a) == -1) {
 			info->status = errno;
+#ifdef _DIRENT_HAVE_D_TYPE
+			/* We cannot extract the file type from st_mode. Let's fallback
+			 * to whatever d_type says. */
+			switch (ent->d_type) {
+			case DT_LNK: info->links++; break;
+			case DT_DIR: info->dirs++; break;
+			default: info->files++; break;
+			}
+#else
 			info->files++;
+#endif /* _DIRENT_HAVE_D_TYPE */
 			continue;
 		}
 
+		if (S_ISLNK(a.st_mode)) {
+			info->links++;
 #ifdef __CYGWIN__
 		/* This is because on Cygwin systems some regular files, maybe due to
 		 * some permissions issue, are otherwise taken as directories. */
-		if (S_ISREG(a.st_mode))
-			goto NOT_DIR;
+		} else if (S_ISREG(a.st_mode)) {
+			info->files++;
 #endif /* __CYGWIN__ */
-
-		if (S_ISDIR(a.st_mode)) {
+		} else if (S_ISDIR(a.st_mode)) {
 			/* Even if a subdirectory is unreadable or we can't chdir into
 			 * it, do let its size contribute to the total (provided we're
 			 * not computing apparent sizes). */
@@ -158,17 +173,11 @@ dir_info(const char *dir, const int first_level, struct dir_info_t *info)
 			dir_info(buf, 0, info);
 
 			continue;
+		} else {
+			info->files++;
 		}
 
-#ifdef __CYGWIN__
-NOT_DIR:
-#endif /* __CYGWIN__ */
-		if (S_ISLNK(a.st_mode))
-			info->links++;
-		else
-			info->files++;
-
-		if (usable_st_size(&a) == 0)
+		if (!USABLE_ST_SIZE(&a))
 			continue;
 
 		if (a.st_nlink > 1) {
