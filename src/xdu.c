@@ -43,7 +43,7 @@
  * 1. When computing disk usage (not apparent sizes).
  * 2. If apparent sizes, only for symlinks and regular files.
  * NOTE: Here we add shared memory object and typed memory object just to
- * match the check made by du(1). These objects are not implmented on most
+ * match the check made by du(1). These objects are not implemented on most
  * systems, but this might change in the future. */
 #define USABLE_ST_SIZE(s) (conf.apparent_size != 1 || S_ISLNK((s)->st_mode) \
 		|| S_ISREG((s)->st_mode) || S_TYPEISSHM((s)) || S_TYPEISTMO((s)))
