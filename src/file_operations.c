@@ -1537,12 +1537,28 @@ cp_mv_file(char **args, const int copy_and_rename, const int force)
 	return FUNC_SUCCESS;
 }
 
+/* Print the file name FNAME, quoted if it contains an space.
+ * A slash is appended if FNAME is a directory (ISDIR >= 1). */
+static void
+print_file_name(char *fname, const int isdir)
+{
+	if (strchr(fname, ' ')) {
+		if (strchr(fname, '\''))
+			printf("\"%s%s\"\n", fname, isdir >= 1 ? "/" : "");
+		else
+			printf("'%s%s'\n", fname, isdir >= 1 ? "/" : "");
+	} else {
+		fputs(fname, stdout);
+		puts(isdir >= 1 ? "/" : "");
+	}
+}
+
 static void
 print_removed_file_info(const struct rm_info info)
 {
 	char *p = abbreviate_file_name(info.name);
-	fputs(p ? p : info.name, stdout);
-	puts(info.dir >= 1 ? "/" : "");
+
+	print_file_name(p ? p : info.name, info.dir);
 
 	/* Name removed, but file is still linked to another name (hardlink) */
 	if (info.dir == 0 && info.links > 1) {
@@ -1596,12 +1612,8 @@ rm_confirm(struct rm_info *info, const size_t start, const int have_dirs)
 		have_dirs == 1 ? _(" (recursively)") : "");
 
 	size_t i;
-	for (i = start; info[i].name; i++) {
-		if (strchr(info[i].name, '\''))
-			printf("\"%s%s\"\n", info[i].name, info[i].dir >= 1 ? "/" : "");
-		else
-			printf("'%s%s'\n", info[i].name, info[i].dir >= 1 ? "/" : "");
-	}
+	for (i = start; info[i].name; i++)
+		print_file_name(info[i].name, info[i].dir);
 
 	return rl_get_y_or_n(_("Continue? [y/n] "));
 }
