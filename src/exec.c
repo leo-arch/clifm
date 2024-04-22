@@ -903,7 +903,7 @@ pin_function(char *arg)
 	if (pinned_dir)
 		printf(_("Pinned file: '%s'\n"), pinned_dir);
 	else
-		puts(_("No pinned file"));
+		puts(_("pin: No pinned file"));
 
 	return FUNC_SUCCESS;
 }
