@@ -1900,8 +1900,7 @@ save_pinned_dir(void)
 	int fd = 0;
 	FILE *fp = open_fwrite(pin_file, &fd);
 	if (!fp) {
-		xerror(_("%s: Error storing pinned directory: %s\n"),
-			PROGRAM_NAME, strerror(errno));
+		xerror(_("pin: Error saving pinned directory: %s\n"), strerror(errno));
 	} else {
 		fprintf(fp, "%s", pinned_dir);
 		fclose(fp);
@@ -1915,50 +1914,58 @@ save_pinned_dir(void)
 int
 pin_directory(char *dir)
 {
-	if (!dir || !*dir) return FUNC_FAILURE;
+	if (!dir || !*dir)
+		return FUNC_FAILURE;
 
-	struct stat attr;
-	if (lstat(dir, &attr) == -1) {
-		xerror("%s: '%s': %s\n", PROGRAM_NAME, dir, strerror(errno));
+	char *d = unescape_str(dir, 0);
+	if (!d)
+		return FUNC_FAILURE;
+
+	struct stat a;
+	if (lstat(d, &a) == -1) {
+		xerror("pin: '%s': %s\n", d, strerror(errno));
+		free(d);
 		return FUNC_FAILURE;
 	}
 
-	if (pinned_dir)
-		{free(pinned_dir); pinned_dir = (char *)NULL;}
+	if (pinned_dir) {
+		free(pinned_dir);
+		pinned_dir = (char *)NULL;
+	}
 
-	const size_t dir_len = strlen(dir);
+	const size_t dir_len = strlen(d);
 
 	/* If absolute path */
 	if (*dir == '/') {
-		pinned_dir = savestring(dir, dir_len);
+		pinned_dir = savestring(d, dir_len);
 	} else { /* If relative path */
 		if (strcmp(workspaces[cur_ws].path, "/") == 0) {
 			pinned_dir = xnmalloc(dir_len + 2, sizeof(char));
-			snprintf(pinned_dir, dir_len + 2, "/%s", dir);
+			snprintf(pinned_dir, dir_len + 2, "/%s", d);
 		} else {
 			const size_t plen = dir_len + strlen(workspaces[cur_ws].path) + 2;
 			pinned_dir = xnmalloc(plen, sizeof(char));
-			snprintf(pinned_dir, plen, "%s/%s", workspaces[cur_ws].path, dir);
+			snprintf(pinned_dir, plen, "%s/%s", workspaces[cur_ws].path, d);
 		}
 	}
 
-	if (xargs.stealth_mode == 1 || save_pinned_dir() == FUNC_SUCCESS)
-		goto END;
-
-	free(pinned_dir);
-	pinned_dir = (char *)NULL;
-	return FUNC_FAILURE;
-
-END:
-	printf(_("%s: Succesfully pinned '%s'\n"), PROGRAM_NAME, dir);
-	return FUNC_SUCCESS;
+	if (xargs.stealth_mode == 1 || save_pinned_dir() == FUNC_SUCCESS) {
+		printf(_("pin: Succesfully pinned '%s'\n"), d);
+		free(d);
+		return FUNC_SUCCESS;
+	} else {
+		free(d);
+		free(pinned_dir);
+		pinned_dir = (char *)NULL;
+		return FUNC_FAILURE;
+	}
 }
 
 int
 unpin_dir(void)
 {
 	if (!pinned_dir) {
-		printf(_("%s: No pinned file\n"), PROGRAM_NAME);
+		puts(_("unpin: No pinned file"));
 		return FUNC_SUCCESS;
 	}
 
@@ -1967,7 +1974,7 @@ unpin_dir(void)
 		char *pin_file = xnmalloc(config_dir_len + 7, sizeof(char));
 		snprintf(pin_file, config_dir_len + 7, "%s/.pin", config_dir);
 		if (unlink(pin_file) == -1) {
-			xerror("%s: '%s': %s\n", PROGRAM_NAME, pin_file, strerror(errno));
+			xerror("pin: '%s': %s\n", pin_file, strerror(errno));
 			cmd_error = 1;
 		}
 
@@ -1976,7 +1983,7 @@ unpin_dir(void)
 			return FUNC_FAILURE;
 	}
 
-	printf(_("Succesfully unpinned %s\n"), pinned_dir);
+	printf(_("unpin: Succesfully unpinned '%s'\n"), pinned_dir);
 
 	free(pinned_dir);
 	pinned_dir = (char *)NULL;

@@ -44,13 +44,10 @@
 #define PERM_STR_LEN  ((MAX_COLOR * 14) + 16) /* construct_file_perms() */
 
 #define TIME_STR_LEN  (MAX_TIME_STR + (MAX_COLOR * 2) + 2) /* construct_timestamp() */
-
 /* construct_human_size() returns a string of at most MAX_HUMAN_SIZE chars (helpers.h) */
 #define SIZE_STR_LEN  (MAX_HUMAN_SIZE + (MAX_COLOR * 3) + 10) /* construct_file_size() */
-
 /* 2 colors + 2 names + (space + NUL byte) + DIM */
 #define ID_STR_LEN    ((MAX_COLOR * 2) + (NAME_MAX * 2) + 2 + 4)
-
 /* Max inode number able to hold: 999 billions! Padding could be as long
  * as max inode lenght - 1 */
 #define INO_STR_LEN   ((MAX_COLOR * 2) + ((12 + 1) * 2) + 4)
@@ -58,7 +55,6 @@
 #define LINKS_STR_LEN ((MAX_COLOR * 2) + 32)
 /* Files counter */
 #define FC_STR_LEN    ((MAX_COLOR * 2) + 32)
-
 /* File allocated blocks */
 #define BLK_STR_LEN   ((MAX_COLOR * 2) + 32)
 
@@ -397,9 +393,9 @@ construct_files_counter(const struct fileinfo *props, char *fc_str,
 			(int)props->filesn, df_c);
 	} else {
 		snprintf(fc_str, FC_STR_LEN, "%s%*c%s", dn_c, max,
-		props->filesn < 0 ? '?' /* Dir with no read permission */
-		: (props->dir == 1 ? '0' : '-'),
-		df_c);
+			props->filesn < 0 ? '?' /* Dir with no read permission */
+			: (props->dir == 1 ? '0' : '-'),
+			df_c);
 	}
 }
 
