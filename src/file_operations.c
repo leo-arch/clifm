@@ -1174,10 +1174,19 @@ symlink_file(char **args)
 	char *target = args[0];
 	char *link_name = args[1];
 	char tmp[PATH_MAX + 1];
+	struct stat a;
 
 	if (!link_name || !*link_name) {
 		char *p = strrchr(target, '/');
 		snprintf(tmp, sizeof(tmp), "%s.link", (p && p[1]) ? p + 1 : target);
+
+		int suffix = 1;
+		while (lstat(tmp, &a) == 0 && suffix < INT_MAX) {
+			snprintf(tmp, sizeof(tmp), "%s.link-%d",
+				(p && p[1]) ? p + 1 : target, suffix);
+			suffix++;
+		}
+
 		link_name = tmp;
 	}
 
@@ -1185,7 +1194,6 @@ symlink_file(char **args)
 	if (len > 1 && link_name[len - 1] == '/')
 		link_name[len - 1] = '\0';
 
-	struct stat a;
 	if (lstat(target, &a) == -1) {
 		printf("link: '%s': %s\n", target, strerror(errno));
 		if (rl_get_y_or_n(_("Create broken symbolic link? [y/n] ")) == 0)
