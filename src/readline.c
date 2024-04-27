@@ -3276,20 +3276,20 @@ complete_bookmark_names(char *text, const size_t words_n, int *exit_status)
 {
 	*exit_status = FUNC_SUCCESS;
 
-	// rl_line_buffer is either "bm " or "bookmarks "
+	/* rl_line_buffer is either "bm " or "bookmarks " */
 	char *q = rl_line_buffer + (rl_line_buffer[1] == 'o' ? 9 : 2);
 
 	if (q && *(q + 1) == 'a' && (*(q + 2) == ' '
 	|| strncmp(q + 1, "add ", 4) == 0)) {
-		if (words_n > 3) // Do not complete anything after "bm add FILE"
+		if (words_n > 3) /* Do not complete anything after "bm add FILE" */
 			rl_attempted_completion_over = 1;
-		else // 'bm add': complete with path completion
+		else /* 'bm add': complete with path completion */
 			*exit_status = FUNC_FAILURE;
 
 		return (char **)NULL;
 	}
 
-	// If not 'bm add' complete with bookmarks
+	/* If not 'bm add' complete with bookmarks */
 #ifndef _NO_SUGGESTIONS
 	if (suggestion.type != FILE_SUG)
 		rl_attempted_completion_over = 1;
