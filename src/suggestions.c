@@ -474,7 +474,8 @@ calculate_suggestion_lines(int *baej, const size_t suggestion_len)
 	|| suggestion.type == JCMD_SUG_NOACD || suggestion.type == BACKDIR_SUG
 	|| suggestion.type == SORT_SUG || suggestion.type == WS_NUM_SUG
 	|| suggestion.type == FUZZY_FILENAME || suggestion.type == DIRHIST_SUG
-	|| suggestion.type == FASTBACK_SUG) {
+	|| suggestion.type == FASTBACK_SUG
+	|| (suggestion.type == COMP_SUG && (flags & BAEJ_SUGGESTION))) {
 		/* 3 = 1 (one char forward) + 2 (" >") */
 		cuc += 3;
 		flags |= BAEJ_SUGGESTION;

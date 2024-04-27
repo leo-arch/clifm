@@ -889,7 +889,7 @@ err_no_link(const char *file)
 	if (tlen != -1)
 		target[tlen] = '\0';
 
-	xerror(_("open: '%s': Broken symbolic link to %s\n"), file,
+	xerror(_("open: '%s': Broken symbolic link to '%s'\n"), file,
 		*target ? target : "???");
 
 	return saved_errno;
@@ -1206,14 +1206,13 @@ symlink_file(char **args)
 			return FUNC_SUCCESS;
 
 		if (unlinkat(XAT_FDCWD, link_name, 0) == -1) {
-			xerror("link: unlink: '%s': %s\n", link_name, strerror(errno));
+			xerror(_("link: Cannot unlink '%s': %s\n"),
+				link_name, strerror(errno));
 			return FUNC_FAILURE;
 		}
 	}
 
-	const int ret = symlinkat(target, XAT_FDCWD, link_name);
-
-	if (ret == -1) {
+	if (symlinkat(target, XAT_FDCWD, link_name) == -1) {
 		xerror(_("link: Cannot create symbolic link '%s': %s\n"),
 			link_name, strerror(errno));
 		return FUNC_FAILURE;
