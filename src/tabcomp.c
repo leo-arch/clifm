@@ -1519,6 +1519,8 @@ get_finder_offset(const char *query, const char *text, char **matches,
 
 	else if (ct == TCMP_DESEL && query) {
 		finder_offset = prompt_offset + (int)(query - lb) - 3;
+		if (!*query && finder_offset > 0)
+			finder_offset--;
 	}
 
 	else if (ct == TCMP_HIST) {
@@ -2153,6 +2155,14 @@ AFTER_USUAL_COMPLETION:
 		should_quote = matches[0] && rl_completer_quote_characters &&
 		rl_filename_completion_desired && rl_filename_quoting_desired;
 
+//////////
+		/* WORKAROUND: If 'ds' and the replacement string needs to be
+		 * quoted, the completion do not work as expected. */
+		if (cur_comp_type == TCMP_DESEL && matches[0]
+		&& rl_strpbrk(matches[0], quote_chars))
+			replacement = NULL;
+//////////
+
 		if (should_quote)
 			should_quote = (should_quote && !quote_char);
 
@@ -2275,7 +2285,7 @@ AFTER_USUAL_COMPLETION:
 					fputs(cur_color, stdout);
 			} else {
 				char *q = (*replacement == '\\' && *(replacement + 1) == '~')
-						? replacement + 1 : replacement;
+					? replacement + 1 : replacement;
 				rl_insert_text(q);
 				rl_redisplay();
 			}
