@@ -2200,8 +2200,10 @@ rl_cmdhist_tab(int count, int key)
 	rl_insert_text("!");
 	rl_point = rl_end;
 
+#ifndef _NO_SUGGESTIONS
 	if (suggestion_buf)
 		clear_suggestion(CS_FREEBUF);
+#endif /* _NO_SUGGESTIONS */
 
 	tab_complete('!');
 
