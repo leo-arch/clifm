@@ -313,7 +313,7 @@ check_dups(FILE *fp)
 
 	size_t n = 0, i = 0;
 	int dups = 0;
-	struct stat a;
+//	struct stat a;
 
 	while (fgets(line, (int)sizeof(line), fp))
 		n++;
@@ -332,6 +332,7 @@ check_dups(FILE *fp)
 		}
 
 		fnames[i] = savestring(line, len);
+//		fnames[i] = normalize_path(line, len);
 		i++;
 	}
 
@@ -339,11 +340,11 @@ check_dups(FILE *fp)
 	fseek(fp, 0L, SEEK_SET);
 
 	for (i = 0; fnames[i]; i++) {
-		if (lstat(fnames[i], &a) == 0) {
+/*		if (lstat(fnames[i], &a) == 0) {
 			dups++;
 			xerror(_("br: '%s' already exists\n"), fnames[i]);
 			continue;
-		}
+		} */
 
 		for (n = i + 1; fnames[n]; n++) {
 			if (strcmp(fnames[i], fnames[n]) == 0) {
