@@ -65,7 +65,9 @@ err_open_tmp_file(const char *file, const int fd)
 	return FUNC_FAILURE;
 }
 
-/* Rename OLDPATH as NEWPATH. */
+/* Rename OLDPATH as NEWPATH.
+ * NEWPATH is checked for existence before renaming, in which case the user
+ * is asked for confirmation. */
 static int
 rename_file(char *oldpath, char *newpath)
 {
@@ -75,17 +77,33 @@ rename_file(char *oldpath, char *newpath)
 	if (len > 1 && newpath[len - 1] == '/')
 		newpath[len - 1] = '\0';
 
-	if (renameat(XAT_FDCWD, oldpath, XAT_FDCWD, newpath) == 0)
+	char *npath = normalize_path(newpath, strlen(newpath));
+
+	struct stat a;
+	if (lstat(npath, &a) == 0) {
+		xerror("br: '%s': %s\n", newpath, strerror(EEXIST));
+		if (rl_get_y_or_n(_("Overwrite this file? [y/n] ")) == 0) {
+			free(npath);
+			return FUNC_FAILURE;
+		}
+	}
+
+	if (renameat(XAT_FDCWD, oldpath, XAT_FDCWD, npath) == 0) {
+		free(npath);
 		return 0;
+	}
 
 	if (errno != EXDEV) {
 		xerror(_("br: Cannot rename '%s' to '%s': %s\n"), oldpath,
 			newpath, strerror(errno));
+		free(npath);
 		return errno;
 	}
 
 	char *cmd[] = {"mv", "--", oldpath, newpath, NULL};
-	return launch_execv(cmd, FOREGROUND, E_NOFLAG);
+	int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
+	free(npath);
+	return ret;
 }
 
 /* Write file names in ARGS into the temporary file TMPFILE, whose file
@@ -313,7 +331,6 @@ check_dups(FILE *fp)
 
 	size_t n = 0, i = 0;
 	int dups = 0;
-//	struct stat a;
 
 	while (fgets(line, (int)sizeof(line), fp))
 		n++;
@@ -332,7 +349,6 @@ check_dups(FILE *fp)
 		}
 
 		fnames[i] = savestring(line, len);
-//		fnames[i] = normalize_path(line, len);
 		i++;
 	}
 
@@ -340,12 +356,6 @@ check_dups(FILE *fp)
 	fseek(fp, 0L, SEEK_SET);
 
 	for (i = 0; fnames[i]; i++) {
-/*		if (lstat(fnames[i], &a) == 0) {
-			dups++;
-			xerror(_("br: '%s' already exists\n"), fnames[i]);
-			continue;
-		} */
-
 		for (n = i + 1; fnames[n]; n++) {
 			if (strcmp(fnames[i], fnames[n]) == 0) {
 				dups++;
@@ -436,10 +446,8 @@ bulk_rename(char **args)
 	}
 
 	/* Check duplicate/existent names. */
-	if (check_dups(fp) != FUNC_SUCCESS) {
-		exit_status = FUNC_FAILURE;
+	if (check_dups(fp) != FUNC_SUCCESS)
 		goto ERROR;
-	}
 
 	/* Print and count files. */
 	size_t modified = count_modified_names(args, fp);
