@@ -189,6 +189,8 @@ count_modified_names(char **args, FILE *fp)
 		i++;
 	}
 
+	fseek(fp, 0L, SEEK_SET);
+
 	if (modified == 0)
 		puts(_("br: Nothing to do"));
 
@@ -209,8 +211,10 @@ open_tmpfile(char *app, char *file)
 	if (application) {
 		char *cmd[] = {application, file, NULL};
 		const int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
+
 		if (ret != FUNC_SUCCESS)
 			unlink(file);
+
 		return ret;
 	}
 
@@ -221,8 +225,10 @@ open_tmpfile(char *app, char *file)
 	if (exit_status != FUNC_SUCCESS) {
 		xerror("br: %s\n", errno != 0
 			? strerror(errno) : _("Error opening temporary file"));
+
 		if (unlink(file) == -1)
 			xerror("br: unlink: '%s': %s\n", file, strerror(errno));
+
 		return exit_status;
 	}
 
@@ -241,6 +247,8 @@ check_line_mismatch(FILE *fp, const size_t total)
 
 		modified++;
 	}
+
+	fseek(fp, 0L, SEEK_SET);
 
 	if (total != modified) {
 		xerror("%s\n", _("br: Line mismatch in temporary file"));
@@ -294,16 +302,74 @@ CONT:
 	return exit_status;
 }
 
+/* Return zero if no name is duplicated in the file pointed to by FP and none
+ * of these file names already exists. Otherwise, the number of
+ * duplicate/existent files is returned. */
+static int
+check_dups(FILE *fp)
+{
+	char line[PATH_MAX + 1];
+	*line = '\0';
+
+	size_t n = 0, i = 0;
+	int dups = 0;
+	struct stat a;
+
+	while (fgets(line, (int)sizeof(line), fp))
+		n++;
+
+	fseek(fp, 0L, SEEK_SET);
+	char **fnames = xnmalloc(n + 1, sizeof(char *));
+
+	while (fgets(line, (int)sizeof(line), fp)) {
+		if (!*line || *line == '\n' || IS_BR_COMMENT(line))
+			continue;
+
+		size_t len = strlen(line);
+		if (line[len - 1] == '\n') {
+			len--;
+			line[len] = '\0';
+		}
+
+		fnames[i] = savestring(line, len);
+		i++;
+	}
+
+	fnames[i] = (char *)NULL;
+	fseek(fp, 0L, SEEK_SET);
+
+	for (i = 0; fnames[i]; i++) {
+		if (lstat(fnames[i], &a) == 0) {
+			dups++;
+			xerror(_("br: '%s' already exists\n"), fnames[i]);
+			continue;
+		}
+
+		for (n = i + 1; fnames[n]; n++) {
+			if (strcmp(fnames[i], fnames[n]) == 0) {
+				dups++;
+				xerror(_("br: '%s' is duplicated\n"), fnames[i]);
+			}
+		}
+	}
+
+	for (i = 0; fnames[i]; i++)
+		free(fnames[i]);
+	free(fnames);
+
+	if (dups > 0 && rl_get_y_or_n(_("Continue? [y/n] ")) == 0)
+		return dups;
+
+	return 0;
+}
+
 /* Rename a bulk of files (ARGS) at once. Takes files to be renamed
  * as arguments, and returns zero on success and one on error. The
- * procedude is quite simple: file names to be renamed are copied into
+ * procedure is quite simple: file names to be renamed are copied into
  * a temporary file, which is opened via the mime function and shown
  * to the user to modify it. Once the file names have been modified and
  * saved, modifications are printed on the screen and the user is
- * asked whether to perform the actual bulk renaming or not.
- *
- * This bulk rename method is the same used by the fff filemanager,
- * ranger, and nnn */
+ * asked whether to perform the actual bulk renaming or not. */
 int
 bulk_rename(char **args)
 {
@@ -319,8 +385,8 @@ bulk_rename(char **args)
 	}
 
 	int exit_status = FUNC_SUCCESS;
-	struct stat attra; /* Original temp file */
-	struct stat attrb; /* Edited temp file */
+	struct stat attra; /* Original temp file. */
+	struct stat attrb; /* Edited temp file. */
 
 	char tmpfile[PATH_MAX + 1];
 	snprintf(tmpfile, sizeof(tmpfile), "%s/%s",
@@ -332,13 +398,13 @@ bulk_rename(char **args)
 		return FUNC_FAILURE;
 	}
 
-	/* Write files to be renamed into a tmp file and store stat info in attra */
+	/* Write files to be renamed into a tmp file and store stat info in attra. */
 	size_t written = 0;
 	int ret = write_files_to_tmp(&args, tmpfile, fd, &attra, &written);
 	if (ret != FUNC_SUCCESS)
 		return ret;
 
-	/* Open the tmp file with the associated text editor */
+	/* Open the tmp file with the associated text editor. */
 	if ((ret = open_tmpfile(args[args_n], tmpfile)) != FUNC_SUCCESS)
 		return ret;
 
@@ -352,12 +418,13 @@ bulk_rename(char **args)
 		xerror("br: '%s': %s\n", tmpfile, strerror(errno));
 		goto ERROR;
 	}
+
 	if (attra.st_mtime == attrb.st_mtime) {
 		puts(_("br: Nothing to do"));
 		goto ERROR;
 	}
 
-	/* Modification time after edition */
+	/* Modification time after edition. */
 	time_t mtime_bk = attrb.st_mtime;
 
 	/* Make sure there are as many lines in the tmp file as files
@@ -367,16 +434,19 @@ bulk_rename(char **args)
 		goto ERROR;
 	}
 
-	/* Rewind to the beginning of the tmp file */
-	fseek(fp, 0L, SEEK_SET);
-	/* Print and count files */
+	/* Check duplicate/existent names. */
+	if (check_dups(fp) != FUNC_SUCCESS) {
+		exit_status = FUNC_FAILURE;
+		goto ERROR;
+	}
+
+	/* Print and count files. */
 	size_t modified = count_modified_names(args, fp);
 	if (modified == 0)
 		goto ERROR;
-	fseek(fp, 0L, SEEK_SET); /* Rewind again */
 
-	/* Ask the user for confirmation */
-	if (rl_get_y_or_n("Continue? [y/n] ") == 0)
+	/* Ask the user for confirmation. */
+	if (rl_get_y_or_n(_("Continue? [y/n] ")) == 0)
 		goto ERROR;
 
 	/* Make sure the tmp file we're about to read is the same we originally
@@ -397,7 +467,7 @@ bulk_rename(char **args)
 	&renamed, modified)) != FUNC_SUCCESS)
 		exit_status = ret;
 
-	/* Clean stuff, report, and exit */
+	/* Clean stuff, report, and exit. */
 	if (unlinkat(fd, tmpfile, 0) == -1) {
 		exit_status = errno;
 		err('w', PRINT_PROMPT, "br: unlink: '%s': %s\n",
@@ -412,6 +482,7 @@ bulk_rename(char **args)
 
 	if (renamed > 0 && is_cwd == 1 && conf.autols == 1)
 		reload_dirlist();
+
 	print_reload_msg(_("%zu file(s) renamed\n"), renamed);
 
 	return exit_status;
