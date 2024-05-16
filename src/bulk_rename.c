@@ -78,6 +78,11 @@ rename_file(char *oldpath, char *newpath)
 		newpath[len - 1] = '\0';
 
 	char *npath = normalize_path(newpath, strlen(newpath));
+	if (!npath || !*npath) {
+		free(npath);
+		xerror(_("br: '%s': Error normalizing path\n"), newpath);
+		return FUNC_FAILURE;
+	}
 
 	struct stat a;
 	if (lstat(npath, &a) == 0) {
@@ -100,7 +105,7 @@ rename_file(char *oldpath, char *newpath)
 		return errno;
 	}
 
-	char *cmd[] = {"mv", "--", oldpath, newpath, NULL};
+	char *cmd[] = {"mv", "--", oldpath, npath, NULL};
 	int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	free(npath);
 	return ret;
@@ -445,7 +450,7 @@ bulk_rename(char **args)
 		goto ERROR;
 	}
 
-	/* Check duplicate/existent names. */
+	/* Check duplicate names. */
 	if (check_dups(fp) != FUNC_SUCCESS)
 		goto ERROR;
 
