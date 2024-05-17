@@ -73,11 +73,13 @@ rename_file(char *oldpath, char *newpath)
 {
 	/* Some renameat(2) implementations (DragonFly) do not like NEWPATH to
 	 * end with a slash (in case of renaming directories). */
-	const size_t len = strlen(newpath);
-	if (len > 1 && newpath[len - 1] == '/')
-		newpath[len - 1] = '\0';
+	size_t nlen = strlen(newpath);
+	if (nlen > 1 && newpath[nlen - 1] == '/') {
+		nlen--;
+		newpath[nlen] = '\0';
+	}
 
-	char *npath = normalize_path(newpath, strlen(newpath));
+	char *npath = normalize_path(newpath, nlen);
 	if (!npath || !*npath) {
 		free(npath);
 		xerror(_("br: '%s': Error normalizing path\n"), newpath);
@@ -106,7 +108,7 @@ rename_file(char *oldpath, char *newpath)
 	}
 
 	char *cmd[] = {"mv", "--", oldpath, npath, NULL};
-	int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
+	const int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	free(npath);
 	return ret;
 }
