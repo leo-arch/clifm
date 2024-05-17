@@ -182,7 +182,7 @@ write_files_to_tmp(char ***args, const char *tmpfile, const int fd,
 }
 
 static size_t
-count_modified_names(char **args, FILE *fp)
+print_and_count_modified_names(char **args, FILE *fp)
 {
 	size_t modified = 0;
 	size_t i = 1;
@@ -307,7 +307,8 @@ rename_bulk_files(char **args, FILE *fp, int *is_cwd, size_t *renamed,
 
 		const int ret = rename_file(args[i], line);
 		if (ret != 0) {
-			exit_status = ret != EEXIST ? ret : 0;
+			if (ret != EEXIST)
+				exit_status = ret;
 			goto CONT;
 		}
 
@@ -456,8 +457,7 @@ bulk_rename(char **args)
 	if (check_dups(fp) != FUNC_SUCCESS)
 		goto ERROR;
 
-	/* Print and count files. */
-	size_t modified = count_modified_names(args, fp);
+	size_t modified = print_and_count_modified_names(args, fp);
 	if (modified == 0)
 		goto ERROR;
 
