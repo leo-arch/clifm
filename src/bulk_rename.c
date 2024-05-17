@@ -91,7 +91,7 @@ rename_file(char *oldpath, char *newpath)
 		xerror("br: '%s': %s\n", newpath, strerror(EEXIST));
 		if (rl_get_y_or_n(_("Overwrite this file? [y/n] ")) == 0) {
 			free(npath);
-			return FUNC_FAILURE;
+			return EEXIST;
 		}
 	}
 
@@ -307,7 +307,7 @@ rename_bulk_files(char **args, FILE *fp, int *is_cwd, size_t *renamed,
 
 		const int ret = rename_file(args[i], line);
 		if (ret != 0) {
-			exit_status = ret;
+			exit_status = ret != EEXIST ? ret : 0;
 			goto CONT;
 		}
 
