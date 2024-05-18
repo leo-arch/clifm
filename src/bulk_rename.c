@@ -146,9 +146,9 @@ write_files_to_tmp(char ***args, const char *tmpfile, const int fd,
 		/* Resolve "./" and "../" */
 		if (*(*args)[i] == '.' && ((*args)[i][1] == '/' || ((*args)[i][1] == '.'
 		&& (*args)[i][2] == '/') ) ) {
-			char *p = realpath((*args)[i], NULL);
+			char *p = normalize_path((*args)[i], strlen((*args)[i]));
 			if (!p) {
-				xerror("br: '%s': %s\n", (*args)[i], strerror(errno));
+				xerror(_("br: '%s': Error normalizing path\n"), (*args)[i]);
 				press_any_key_to_continue(0);
 				continue;
 			}
@@ -328,9 +328,8 @@ CONT:
 	return exit_status;
 }
 
-/* Return zero if no name is duplicated in the file pointed to by FP and none
- * of these file names already exists. Otherwise, the number of
- * duplicate/existent files is returned. */
+/* Return zero if no name is duplicated in the file pointed to by FP.
+ * Otherwise, the number of duplicate files is returned. */
 static int
 check_dups(FILE *fp)
 {
