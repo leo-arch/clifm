@@ -45,12 +45,12 @@
 static char *
 get_date(void)
 {
-	time_t rawtime = time(NULL);
+	const time_t rawtime = time(NULL);
 	struct tm t;
 	if (!localtime_r(&rawtime, &t))
 		return (char *)NULL;
 
-	size_t date_max = MAX_TIME_STR;
+	const size_t date_max = MAX_TIME_STR;
 	char *date = xnmalloc(date_max + 1, sizeof(char));
 	*date = '\0';
 
@@ -85,9 +85,8 @@ static int
 gen_file(char *file)
 {
 	int fd = 0;
-	FILE *fp = (FILE *)NULL;
+	FILE *fp = open_fwrite(file, &fd);
 
-	fp = open_fwrite(file, &fd);
 	if (!fp)
 		return FUNC_FAILURE;
 
@@ -112,14 +111,14 @@ clear_logs(const int flag)
 		return errno;
 	}
 
-	int ret = gen_file(file);
+	const int ret = gen_file(file);
 	if (ret != FUNC_SUCCESS)
 		return FUNC_FAILURE;
 
 	free(last_cmd);
 	last_cmd = savestring(flag == MSG_LOGS
 		? "log msg clear" : "log cmd clear", 13);
-	int bk = conf.log_cmds;
+	const int bk = conf.log_cmds;
 	conf.log_cmds = 1;
 	log_cmd();
 	conf.log_cmds = bk;
@@ -143,7 +142,7 @@ log_cmd(void)
 	/* Construct the log line */
 	char *date = get_date();
 
-	size_t log_len = strlen(date ? date : "unknown")
+	const size_t log_len = strlen(date ? date : "unknown")
 		+ (workspaces[cur_ws].path ? strlen(workspaces[cur_ws].path) : 2)
 		+ strlen(last_cmd) + 6;
 
@@ -296,7 +295,7 @@ log_msg(char *_msg, const int print_prompt, const int logme,
 	if (!_msg)
 		return;
 
-	size_t msg_len = strlen(_msg);
+	const size_t msg_len = strlen(_msg);
 	if (msg_len == 0)
 		return;
 
@@ -391,7 +390,7 @@ reload_history(void)
 	history_truncate_file(hist_file, conf.max_hist);
 
 	/* Update the history array */
-	int ret = get_history();
+	const int ret = get_history();
 
 	return ret;
 }
@@ -619,6 +618,7 @@ get_history(void)
 	history[current_hist_n].date = -1;
 	free(line_buff);
 	fclose(hist_fp);
+
 	return FUNC_SUCCESS;
 }
 
@@ -646,7 +646,7 @@ add_to_cmdhist(char *cmd)
 
 	/* For us */
 	/* Add the new input to the history array */
-	time_t tdate = time(NULL);
+	const time_t tdate = time(NULL);
 	history = xnrealloc(history, (size_t)(current_hist_n + 2),
 		sizeof(struct history_t));
 	history[current_hist_n].cmd = savestring(cmd, cmd_len);

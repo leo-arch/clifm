@@ -1377,7 +1377,8 @@ define_config_file_names(void)
 {
 	const size_t pnl_len = sizeof(PROGRAM_NAME) - 1;
 	size_t tmp_len = 0;
-	int secure_mode = (xargs.secure_env == 1 || xargs.secure_env_full == 1);
+	const int secure_mode =
+		(xargs.secure_env == 1 || xargs.secure_env_full == 1);
 
 	set_main_config_dir(secure_mode); /* config_dir_gral is set here. */
 

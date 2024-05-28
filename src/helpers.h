@@ -1372,7 +1372,7 @@ extern struct opts_t workspace_opts[MAX_WS];
  * line, to avoid overriding them with init_config(). While no command
  * line parameter will be overriden, the user still can modifiy on the
  * fly (editing the config file) any option not specified in the command
- * line */
+ * line. */
 struct param_t {
 	int apparent_size;
 	int auto_open;
@@ -1598,7 +1598,7 @@ struct props_t {
 	int ids; /* User/group IDs: either NUMBER or NAME */
 	int inode; /* File inode number */
 	int len; /* Approx len of the entire properties string taking into account
-			  * the all fields and their length. */
+			  * all fields and their length. */
 	int links; /* File links */
 	int blocks;
 	int no_group; /* Should we display group if IDS is set? */
@@ -1837,7 +1837,6 @@ extern size_t
 	current_hist_n,
 	curhistindex,
 	ext_colors_n,
-//	files, // Amount of files in the current dir. Is size_t enough?
 	jump_n,
 	kbinds_n,
 	longest,
