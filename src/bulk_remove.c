@@ -45,7 +45,8 @@
 # editor (you will be asked for confirmation).\n\
 # Quit the editor without saving to cancel the operation.\n\n"
 
-#define BULK_APP(s) ((*(s) == ':' && (s)[1]) ? (s) + 1 : (s))
+#define IS_RR_COMMENT(s) (*(s) == '#' && (s)[1] == ' ')
+#define BULK_APP(s)      ((*(s) == ':' && (s)[1]) ? (s) + 1 : (s))
 
 static int
 parse_bulk_remove_params(char *s1, char *s2, char **app, char **target)
@@ -265,7 +266,7 @@ get_files_from_tmp_file(const char *tmpfile, const char *target, const filesn_t 
 	char line[PATH_MAX + 1]; *line = '\0';
 
 	while (fgets(line, (int)sizeof(line), fp)) {
-		if (!*line || *line == '#' || *line == '\n')
+		if (!*line || IS_RR_COMMENT(line) || *line == '\n')
 			continue;
 
 		size_t len = strlen(line);
