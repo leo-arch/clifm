@@ -1605,7 +1605,8 @@ check_ext_color_hash_conflicts(void)
 static void
 split_extension_colors(char *extcolors)
 {
-	char *p = extcolors, *buf = (char *)NULL;
+	char *p = extcolors;
+	char *buf = (char *)NULL;
 	size_t len = 0;
 	int eol = 0;
 
@@ -1618,7 +1619,10 @@ split_extension_colors(char *extcolors)
 		case '\n': /* fallthrough */
 		case ':':
 			if (!buf || !*buf) {
-				eol = 1;
+				if (!*p || !*(p + 1))
+					eol = 1;
+				else
+					p++;
 				break;
 			}
 
@@ -2268,7 +2272,28 @@ set_cs_extcolors(char *line, char **extcolors, const ssize_t line_len)
 		l--;
 	}
 
-	*extcolors = savestring(p, (size_t)l);
+	if (!*extcolors) { /* First ExtColors line. */
+		*extcolors = savestring(p, (size_t)l);
+	} else {
+		/* Second ExtColors line or more: append it to the first one. */
+		size_t curlen = strlen(*extcolors);
+		if (curlen > 0 && (*extcolors)[curlen - 1] == ':') {
+			(*extcolors)[curlen - 1] = '\0';
+			curlen--;
+		}
+
+		if (*p == ':' && *(p + 1) && l > 0) {
+			p++;
+			l--;
+		}
+
+		const size_t total_len = curlen + (size_t)l + 1;
+		*extcolors = xnrealloc(*extcolors, total_len + 1, sizeof(char *));
+
+		*(*extcolors + curlen) = ':';
+		memcpy(*extcolors + curlen + 1, p, (size_t)l);
+		(*extcolors)[total_len] = '\0';
+	}
 }
 
 #ifndef _NO_ICONS
@@ -2407,8 +2432,7 @@ read_color_scheme_file(const char *colorscheme, char **filecolors,
 		}
 
 		/* File extension colors */
-		else if (!*extcolors && *line == 'E'
-		&& strncmp(line, "ExtColors=", 10) == 0) {
+		else if (*line == 'E' && strncmp(line, "ExtColors=", 10) == 0) {
 			set_cs_extcolors(line, extcolors, line_len);
 		}
 
