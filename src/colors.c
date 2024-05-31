@@ -1525,11 +1525,15 @@ set_default_size_shades(void)
 static int
 store_extension_line(const char *line)
 {
-	/* Remove the leading "*." from the extension line */
-	if (!line || *line != '*' || *(line + 1) != '.' || !*(line + 2))
+	if (!line || !*line)
 		return FUNC_FAILURE;
 
-	line += 2;
+	/* Remove the leading "*.", if any, from the extension line. */
+	if (*line == '*' && *(line + 1) == '.') {
+		line += 2;
+		if (!*line)
+			return FUNC_FAILURE;
+	}
 
 	char *q = strchr(line, '=');
 	if (!q || !*(q + 1) || q == line)
