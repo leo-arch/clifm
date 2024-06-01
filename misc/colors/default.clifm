@@ -1,5 +1,5 @@
-# Theme file for CliFM
-# Theme name: clifm (16 colors version). Check 'default-256' for a 256 colors version
+# Theme file for Clifm
+# Theme name: clifm (16 colors version). Check 'default-256' for a 256 colors version.
 # Author: L. Abramovich
 # License: GPL3
 
@@ -111,17 +111,6 @@ define KG=30;42     # Black foreground, green background
 define BlGr=34;42   # Blue foreground, green background
 define WB=37;44     # white foreground, blue background
 
-# File groups (used for file extensions)
-define ARCHIVE=1;31 # Bold red
-define AUDIO=36     # Cyan
-define CODE=1;33    # Bold yellow
-define DOC=1        # Bold
-define EBOOK=1      # Bold
-define IMAGE=35     # Magenta
-define MARKUP=1;33  # Same as CODE
-define TEMP=2;37    # Dimmed white
-define VIDEO=1;35   # Bold magenta
-
 ### To know what are we applying colors to, we use the following codes:
 
 ## File types
@@ -217,7 +206,7 @@ define VIDEO=1;35   # Bold magenta
 # xs = Exit code: success
 # xf = Exit code: failure
 
-# NOTE: Whenever a code is unset, the default value is used
+# NOTE: Whenever a code is unset, the default value is used.
 
 # FiletypeColors defines the color used for file names when listing files, 
 # just as InterfaceColors defines colors for CliFM's interface.
@@ -225,10 +214,44 @@ FiletypeColors="bd=BY:ca=KR:cd=BD:di=BB:ed=DB:ee=G:ef=DIM:ex=BG:fi=D:ln=BC:mh=RC
 
 InterfaceColors="bm=BG:db=Y:dd=:de=C:df=D:dg=M:dk=R:dl=DW:dn=DW:do=C:dp=M:dr=Y:dw=R:dxd=G:dxr=C:dz=:el=C:em=BR:fc=DW:hb=C:hc=DW:hd=C:he=C:hn=:hp=C:hq=Y:hr=R:hs=G:hv=G:hw=R:lc=BC:li=BG:mi=BC:nm=BG:ro=:si=BB:sb=DY:sc=DC:sd=DW:sf=UDC:sh=DM:sp=DR:sx=DG:sz=UDM:ti=BC:ts=UM:tt=BDC:tx=D:wc=BC:wm=BY:ws1=B:ws2=R:ws3=Y:ws4=G:ws5=C:ws6=C:ws7=C:ws8=C:xf=BR:xs=G:"
 
-# Colors for specific file extensions (case insensitive)
-ExtColors="*.7z=ARCHIVE:*.ace=ARCHIVE:*.alz=ARCHIVE:*.apk=ARCHIVE:*.arc=ARCHIVE:*.arj=ARCHIVE:*.bz=ARCHIVE:*.bz2=ARCHIVE:*.cab=ARCHIVE:*.cpio=ARCHIVE:*.deb=ARCHIVE:*.dmg=ARCHIVE:*.dwm=ARCHIVE:*.dz=ARCHIVE:*.ear=ARCHIVE:*.esd=ARCHIVE:*.gz=ARCHIVE:*.img=ARCHIVE:*.iso=ARCHIVE:*.jar=ARCHIVE:*.lha=ARCHIVE:*.lrz=ARCHIVE:*.lz=ARCHIVE:*.lz4=ARCHIVE:*.lzh=ARCHIVE:*.lzma=ARCHIVE:*.lzo=ARCHIVE:*.qcow=ARCHIVE:*.qcow2=ARCHIVE:*.rar=ARCHIVE:*.rpm=ARCHIVE:*.rz=ARCHIVE:*.sar=ARCHIVE:*.swm=ARCHIVE:*.t7z=ARCHIVE:*.tar=ARCHIVE:*.taz=ARCHIVE:*.tbz=ARCHIVE:*.tbz2=ARCHIVE:*.tgz=ARCHIVE:*.tlz=ARCHIVE:*.toast=ARCHIVE:*.txz=ARCHIVE:*.tz=ARCHIVE:*.tzo=ARCHIVE:*.tzst=ARCHIVE:*.vcd=ARCHIVE:*.vdi=ARCHIVE:*.vhd=ARCHIVE:*.vhdx=ARCHIVE:*.vmdk=ARCHIVE:*.vsix=ARCHIVE:*.war=ARCHIVE:*.wim=ARCHIVE:*.xz=ARCHIVE:*.z=ARCHIVE:*.zip=ARCHIVE:*.zoo=ARCHIVE:*.zst=ARCHIVE:*.aac=AUDIO:*.aif=AUDIO:*.aifc=AUDIO:*.aiff=AUDIO:*.alac=AUDIO:*.ape=AUDIO:*.au=AUDIO:*.flac=AUDIO:*.m4a=AUDIO:*.mid=AUDIO:*.midi=AUDIO:*.mka=AUDIO:*.mp3=AUDIO:*.ogg=AUDIO:*.opus=AUDIO:*.pcm=AUDIO:*.spx=AUDIO:*.wav=AUDIO:*.wma=AUDIO:*.wv=AUDIO:*.applescript=CODE:*.as=CODE:*.asa=CODE:*.awk=CODE:*.bash=CODE:*.c=CODE:*.c++=CODE:*.cabal=CODE:*.cc=CODE:*.cgi=CODE:*.clj=CODE:*.cp=CODE:*.cpp=CODE:*.cr=CODE:*.cs=CODE:*.csx=CODE:*.cxx=CODE:*.d=CODE:*.dart=CODE:*.def=CODE:*.di=CODE:*.dpr=CODE:*.el=CODE:*.elm=CODE:*.epp=CODE:*.erl=CODE:*.ex=CODE:*.exs=CODE:*.fish=CODE:*.fs=CODE:*.fsi=CODE:*.fsx=CODE:*.gd=CODE:*.go=CODE:*.gradle=CODE:*.groovy=CODE:*.gv=CODE:*.gvy=CODE:*.h=CODE:*.h++=CODE:*.hgrc=CODE:*.hh=CODE:*.hpp=CODE:*.hs=CODE:*.htc=CODE:*.hxx=CODE:*.inc=CODE:*.inl=CODE:*.ipp=CODE:*.ipynb=CODE:*.java=CODE:*.jl=CODE:*.js=CODE:*.jsx=CODE:*.kt=CODE:*.kts=CODE:*.lhs=CODE:*.lisp=CODE:*.ll=CODE:*.lua=CODE:*.m=CODE:*.matlab=CODE:*.mir=CODE:*.ml=CODE:*.mli=CODE:*.mn=CODE:*.nb=CODE:*.p=CODE:*.pas=CODE:*.php=CODE:*.pl=CODE:*.pm=CODE:*.pod=CODE:*.pp=CODE:*.pro=CODE:*.ps1=CODE:*.psd1=CODE:*.psm1=CODE:*.purs=CODE:*.py=CODE:*.r=CODE:*.rb=CODE:*.rs=CODE:*.sbt=CODE:*.scala=CODE:*.sh=CODE:*.swift=CODE:*.t=CODE:*.tcl=CODE:*.td=CODE:*.ts=CODE:*.tsx=CODE:*.vb=CODE:*.vsh=CODE:*.zig=CODE:*.zsh=CODE:*.doc=DOC:*.docx=DOC:*.fodg:*.fodp=DOC:*.fods=DOC:*.fodt=DOC:*.odg=DOC:*.odp=DOC:*.ods=DOC:*.odt=DOC:*.pps=DOC:*.ppt=DOC:*.pptx=DOC:*.rtf=DOC:*.sxi=DOC:*.sxw=DOC:*.txt=DOC:*.xlr=DOC:*.xls=DOC:*.xlsx=DOC:*.azw=EBOOK:*.azw3=EBOOK:*.cb7=EBOOK:*.cba=EBOOK:*.cbr=EBOOK:*.cbt=EBOOK:*.cbz=EBOOK:*.djv=EBOOK:*.djvu=EBOOK:*.epub=EBOOK:*.fb2=EBOOK:*.kf8=EBOOK:*.kfx=EBOOK:*.mobi=EBOOK:*.oxps=EBOOK:*.pdb=EBOOK:*.pdf=EBOOK:*.ps=EBOOK:*.xps=EBOOK:*.ai=IMAGE:*.avif=IMAGE:*.bmp=IMAGE:*.gif=IMAGE:*.ico=IMAGE:*.jpeg=IMAGE:*.jpg=IMAGE:*.jxl=IMAGE:*.mjpeg=IMAGE:*.mjpg=IMAGE:*.mng=IMAGE:*.pbm=IMAGE:*.pcx=IMAGE:*.pgm=IMAGE:*.png=IMAGE:*.ppm=IMAGE:*.psd=IMAGE:*.svg=IMAGE:*.svgz=IMAGE:*.tga=IMAGE:*.tif=IMAGE:*.tiff=IMAGE:*.webp=IMAGE:*.xbm=IMAGE:*.xcf=IMAGE:*.xpm=IMAGE:*.xwd=IMAGE:*.css=MARKUP:*.htm=MARKUP:*.html=MARKUP:*.ltx=MARKUP:*.markdown=MARKUP:*.md=MARKUP:*.mdown=MARKUP:*.opf=MARKUP:*.rss=MARKUP:*.shtml=MARKUP:*.tex=MARKUP:*.xbel=MARKUP:*.xhtml=MARKUP:*.xml=MARKUP:*.aux=TEMP:*.bak=TEMP:*.bbl=TEMP:*.bc=TEMP:*.cache=TEMP:*.class=TEMP:*.git=TEMP:*.hi=TEMP:*.idx=TEMP:*.ilg=TEMP:*.ind=TEMP:*.la=TEMP:*.lo=TEMP:*.localized=TEMP:*.lock=TEMP:*.log=TEMP:*.o=TEMP:*.orig=TEMP:*.out=TEMP:*.pid=TEMP:*.pyc=TEMP:*.pyd=TEMP:*.pyo=TEMP:*.rej=TEMP:*.rlib=TEMP:*.sty=TEMP:*.swp=TEMP:*.tmp=TEMP:*.toc=TEMP:*.3gp=VIDEO:*.asf=VIDEO:*.avi=VIDEO:*.cgm=VIDEO:*.dl=VIDEO:*.emf=VIDEO:*.flc=VIDEO:*.fli=VIDEO:*.flv=VIDEO:*.h264=VIDEO:*.heics=VIDEO:*.gl=VIDEO:*.m2ts=VIDEO:*.m2v=VIDEO:*.m4v=VIDEO:*.mkv=VIDEO:*.mov=VIDEO:*.mp4=VIDEO:*.mp4v=VIDEO:*.mpg=VIDEO:*.mpeg=VIDEO:*.nuv=VIDEO:*.ogm=VIDEO:*.ogv=VIDEO:*.ogx=VIDEO:*.qt=VIDEO:*.rm=VIDEO:*.rmvb=VIDEO:*.vob=VIDEO:*.webm=VIDEO:*.wmv=VIDEO:*.yuv=VIDEO:"
+# Colors for specific file extensions (case insensitive). ExtColors can be used multiple times.
+# ARCHIVES
+define ARCHIVE=1;31 # Bold red
+ExtColors="7z=ARCHIVE:ace=ARCHIVE:alz=ARCHIVE:apk=ARCHIVE:arc=ARCHIVE:arj=ARCHIVE:bz=ARCHIVE:bz2=ARCHIVE:cab=ARCHIVE:cpio=ARCHIVE:deb=ARCHIVE:dmg=ARCHIVE:dwm=ARCHIVE:dz=ARCHIVE:ear=ARCHIVE:esd=ARCHIVE:gz=ARCHIVE:img=ARCHIVE:iso=ARCHIVE:jar=ARCHIVE:lha=ARCHIVE:lrz=ARCHIVE:lz=ARCHIVE:lz4=ARCHIVE:lzh=ARCHIVE:lzma=ARCHIVE:lzo=ARCHIVE:qcow=ARCHIVE:qcow2=ARCHIVE:rar=ARCHIVE:rpm=ARCHIVE:rz=ARCHIVE:sar=ARCHIVE:swm=ARCHIVE:t7z=ARCHIVE:tar=ARCHIVE:taz=ARCHIVE:tbz=ARCHIVE:tbz2=ARCHIVE:tgz=ARCHIVE:tlz=ARCHIVE:toast=ARCHIVE:txz=ARCHIVE:tz=ARCHIVE:tzo=ARCHIVE:tzst=ARCHIVE:vcd=ARCHIVE:vdi=ARCHIVE:vhd=ARCHIVE:vhdx=ARCHIVE:vmdk=ARCHIVE:vsix=ARCHIVE:war=ARCHIVE:wim=ARCHIVE:xz=ARCHIVE:z=ARCHIVE:zip=ARCHIVE:zoo=ARCHIVE:zst=ARCHIVE:aac=AUDIO:"
 
-# The series of color shades used to print timestamps
+# AUDIO FILES
+define AUDIO=36 # Cyan
+ExtColors="ac3=AUDIO:aif=AUDIO:aifc=AUDIO:aiff=AUDIO:alac=AUDIO:anx=AUDIO:ape=AUDIO:au=AUDIO:axa=AUDIO:cue=AUDIO:flac=AUDIO:m2a=AUDIO:m4a=AUDIO:mid=AUDIO:midi=AUDIO:mka=AUDIO:mp3=AUDIO:mpc=AUDIO:mpga=AUDIO:oga=AUDIO:ogg=AUDIO:ogx=AUDIO:opus=AUDIO:pcm=AUDIO:ra=AUDIO:ram=AUDIO:spx=AUDIO:wav=AUDIO:wma=AUDIO:wv=AUDIO:"
+
+# SOURCE FILES
+define CODE=1;33 # Bold yellow
+ExtColors="applescript=CODE:as=CODE:asa=CODE:awk=CODE:bash=CODE:c=CODE:c++=CODE:cabal=CODE:cc=CODE:cgi=CODE:clj=CODE:cp=CODE:cpp=CODE:cr=CODE:cs=CODE:csx=CODE:cxx=CODE:d=CODE:dart=CODE:def=CODE:di=CODE:dpr=CODE:el=CODE:elm=CODE:epp=CODE:erl=CODE:ex=CODE:exs=CODE:fish=CODE:fs=CODE:fsi=CODE:fsx=CODE:gd=CODE:go=CODE:gradle=CODE:groovy=CODE:gv=CODE:gvy=CODE:h=CODE:h++=CODE:hgrc=CODE:hh=CODE:hpp=CODE:hs=CODE:htc=CODE:hxx=CODE:inc=CODE:inl=CODE:ipp=CODE:ipynb=CODE:java=CODE:jl=CODE:js=CODE:jsx=CODE:kt=CODE:kts=CODE:lhs=CODE:lisp=CODE:ll=CODE:lua=CODE:m=CODE:matlab=CODE:mir=CODE:ml=CODE:mli=CODE:mn=CODE:nb=CODE:p=CODE:pas=CODE:php=CODE:pl=CODE:pm=CODE:pod=CODE:pp=CODE:pro=CODE:ps1=CODE:psd1=CODE:psm1=CODE:purs=CODE:py=CODE:r=CODE:rb=CODE:rs=CODE:sbt=CODE:scala=CODE:sh=CODE:swift=CODE:t=CODE:tcl=CODE:td=CODE:ts=CODE:tsx=CODE:vb=CODE:vsh=CODE:zig=CODE:zsh=CODE:"
+
+# DOCUMENTS
+define DOC=1 # Bold
+ExtColors="abw=DOC:doc=DOC:docx=DOC:fodg=DOC:fodp=DOC:fods=DOC:fodt=DOC:odg=DOC:odp=DOC:ods=DOC:odt=DOC:pps=DOC:ppt=DOC:pptx=DOC:rtf=DOC:sxi=DOC:sxw=DOC:txt=DOC:xlr=DOC:xls=DOC:xlsx=DOC:"
+
+# EBOOKS
+define EBOOK=1 # Bold
+ExtColors="azw=EBOOK:azw3=EBOOK:cb7=EBOOK:cba=EBOOK:cbr=EBOOK:cbt=EBOOK:cbz=EBOOK:djv=EBOOK:djvu=EBOOK:epub=EBOOK:fb2=EBOOK:kf8=EBOOK:kfx=EBOOK:mobi=EBOOK:oxps=EBOOK:pdb=EBOOK:pdf=EBOOK:ps=EBOOK:xps=EBOOK:"
+
+# IMAGES
+define IMAGE=35 # Magenta
+ExtColors="ai=IMAGE:avif=IMAGE:bmp=IMAGE:gif=IMAGE:ico=IMAGE:jpeg=IMAGE:jpg=IMAGE:jxl=IMAGE:mjpeg=IMAGE:mjpg=IMAGE:mng=IMAGE:pbm=IMAGE:pcx=IMAGE:pgm=IMAGE:png=IMAGE:ppm=IMAGE:psd=IMAGE:svg=IMAGE:svgz=IMAGE:tga=IMAGE:tif=IMAGE:tiff=IMAGE:webp=IMAGE:xbm=IMAGE:xcf=IMAGE:xpm=IMAGE:xwd=IMAGE:"
+
+# MARKUP FILES
+define MARKUP=1;33 # Same as CODE
+ExtColors="css=MARKUP:htm=MARKUP:html=MARKUP:ltx=MARKUP:markdown=MARKUP:md=MARKUP:mdown=MARKUP:opf=MARKUP:rss=MARKUP:shtml=MARKUP:tex=MARKUP:xbel=MARKUP:xhtml=MARKUP:xml=MARKUP:"
+
+# TEMPORARY FILES
+define TEMP=2;37 # Dimmed white
+ExtColors="aux=TEMP:bak=TEMP:bbl=TEMP:bc=TEMP:cache=TEMP:class=TEMP:git=TEMP:hi=TEMP:idx=TEMP:ilg=TEMP:ind=TEMP:la=TEMP:lo=TEMP:localized=TEMP:lock=TEMP:log=TEMP:o=TEMP:orig=TEMP:out=TEMP:pid=TEMP:pyc=TEMP:pyd=TEMP:pyo=TEMP:rej=TEMP:rlib=TEMP:sty=TEMP:swp=TEMP:tmp=TEMP:toc=TEMP:"
+
+# VIDEO FILES
+define VIDEO=1;35 # Bold magenta
+ExtColors="3gp=VIDEO:asf=VIDEO:avi=VIDEO:cgm=VIDEO:dl=VIDEO:emf=VIDEO:flc=VIDEO:fli=VIDEO:flv=VIDEO:h264=VIDEO:heics=VIDEO:gl=VIDEO:m2ts=VIDEO:m2v=VIDEO:m4v=VIDEO:mkv=VIDEO:mov=VIDEO:mp4=VIDEO:mp4v=VIDEO:mpeg=VIDEO:mpg=VIDEO:nuv=VIDEO:ogm=VIDEO:ogv=VIDEO:qt=VIDEO:rm=VIDEO:rmvb=VIDEO:vob=VIDEO:webm=VIDEO:wmv=VIDEO:yuv=VIDEO:"
+
+# The series of color shades used to print timestamps.
 # The format is: "COLOR-TYPE,ERROR,SHADE1,SHADE2,SHADE3,SHADE4,SHADE5"
 #
 # COLOR-TYPE is one of: 1 (4-bit: 8 colors), 2 (8-bit: 256 colors), 3 (24-bit: truecolor)
@@ -252,7 +275,7 @@ DateShades="1,31-2,36-1,36,36-2,36-2,36-2"
 #DateShades="2,196-2,231,253,250,247,244"
 #DateShades="3,#ff0000-2,#ffffff,#dadada,#bcbcbc,#9e9e9e,#808080"
 
-#NOTE: For DateShades to work, the 'dd' color code (solid color for dates) needs to be unset (default)
+#NOTE: For DateShades to work, the 'dd' color code (solid color for dates) needs to be unset (default).
 
 # Same as DateShades, but for file sizes.
 # The meaning of each size shade is (in order, excluding COLOR-TYPE and ERROR):
@@ -262,18 +285,18 @@ SizeShades="1,31-2,36,32,33,31,35"
 #SizeShades="2,196-2,43,112,227,214,202"
 #SizeShades="3,#ff0000-2,#00d7af,#87d700,#ffff5f,#ffaf00,#ff5f00"
 
-#NOTE: For SizeShades to work, the 'dz' color code (solid color for sizes) needs to be unset (default)
+#NOTE: For SizeShades to work, the 'dz' color code (solid color for sizes) needs to be unset (default).
 
-# If icons are enabled, use this color for directories icon (only for icons-in-terminal and Nerd-fonts)
+# If icons are enabled, use this color for directories icon (only for icons-in-terminal and Nerd-fonts).
 DirIconColor="Y"
 
-# The prompt used by CliFM. Use the 'prompt' command to check for available
-# prompts. Enter 'prompt --help' for more information
+# The prompt used by Clifm. Use the 'prompt' command to check for available
+# prompts. Enter 'prompt --help' for more information.
 # You can use here either prompt codes (see the prompts.clifm file for details)
-# or a prompt name defined in the prompts file
+# or a prompt name defined in the prompts file.
 Prompt="clifm"
 
-# Override prompt values (as defined in the prompts file)
+# Override prompt values (as defined in the prompts file).
 #Prompt=""
 #Notifications=
 #EnableWarningPrompt=
@@ -281,18 +304,18 @@ Prompt="clifm"
 
 # The string used to construct the line dividing the list of files and
 # the prompt (Unicode is supported). Possible values:
-# "0": Print just an empty line
+# "0": Print just an empty line.
 # "C": C is a single char. This char is printed up to the end of the screen
-# "CCC": 3 or more chars. Only these chars (no more) will be printed
+# "CCC": 3 or more chars. Only these chars (no more) will be printed.
 # "": Print a special line drawn with box-drawing characters (not
-#     supported by all terminals/consoles)
-# The color of this line is controlled by the 'dl' code in InterfaceColors
+#     supported by all terminals/consoles).
+# The color of this line is controlled by the 'dl' code in InterfaceColors.
 DividingLine="-"
 
-# If the fzf TAB completion mode is enabled, pass these options to fzf(1):
+# If the fzf TAB completion mode is enabled, pass these options to fzf:
 FzfTabOptions="--color='16,prompt:6,fg+:-1,pointer:4,hl:2,hl+:2,gutter:-1,marker:2,border:7:dim' --marker='*' --bind tab:accept,right:accept,left:abort,alt-p:toggle-preview,change:top,alt-up:preview-page-up,alt-down:preview-page-down --inline-info --layout=reverse-list --preview-window=wrap,border-left"
 
-# Same options, but colorless
+# Same options, but colorless.
 #FzfTabOptions="--color='bw' --marker='*' --bind tab:accept,right:accept,left:abort,alt-p:toggle-preview,change:top,alt-up:preview-page-up,alt-down:preview-page-down --inline-info --layout=reverse-list --preview-window=wrap,border-left"
 
-# For more information consult fzf(1)
+# For more information consult the fzf manpage.
