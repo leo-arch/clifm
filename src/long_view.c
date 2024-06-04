@@ -145,7 +145,7 @@ construct_and_print_filename(const struct fileinfo *props,
 	int diff = 0;
 	char *ext_name = (char *)NULL;
 	if (cur_len > (size_t)max_namelen) {
-		int rest = (int)cur_len - max_namelen;
+		const int rest = (int)cur_len - max_namelen;
 		trim = TRIM_NO_EXT;
 		size_t ext_len = 0;
 		ext_name = get_ext_info_long(props->name, plen, &trim, &ext_len);

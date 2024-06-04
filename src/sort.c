@@ -302,7 +302,8 @@ entrycmp(const void *a, const void *b)
 {
 	struct fileinfo *pa = (struct fileinfo *)a;
 	struct fileinfo *pb = (struct fileinfo *)b;
-	int ret = 0, st = conf.sort;
+	int ret = 0;
+	int st = conf.sort;
 
 	if (conf.list_dirs_first == 1) {
 		ret = sort_dirs(pa->dir, pb->dir);
@@ -335,7 +336,6 @@ entrycmp(const void *a, const void *b)
 	if (!conf.sort_reverse)
 		return ret;
 
-//	return (ret - (ret * 2));
 	return (-ret);
 }
 
@@ -363,7 +363,6 @@ xalphasort(const struct dirent **a, const struct dirent **b)
 
 	/* If sort_reverse, return the opposite value */
 	return (-ret);
-//	return (ret - (ret * 2));
 }
 
 /* This is a modification of the alphasort function that makes it case
