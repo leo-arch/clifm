@@ -2436,7 +2436,8 @@ read_color_scheme_file(const char *colorscheme, char **filecolors,
 		}
 
 		/* File extension colors */
-		else if (*line == 'E' && strncmp(line, "ExtColors=", 10) == 0) {
+		else if (xargs.lscolors == UNSET && *line == 'E'
+		&& strncmp(line, "ExtColors=", 10) == 0) {
 			set_cs_extcolors(line, extcolors, line_len);
 		}
 
