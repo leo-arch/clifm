@@ -1273,8 +1273,8 @@ print_file_details(char *filename, const struct stat *attr, const char file_type
 	case REG_PCHR: fputs(_("Regular file"), stdout); break;
 	case DIR_PCHR: fputs(_("Directory"), stdout); break;
 	case LNK_PCHR: fputs(_("Symbolic link"), stdout); break;
-	case FIFO_PCHR: fputs(_("Fifo"), stdout); break;
-	case SOCK_PCHR: fputs(_("Socket"), stdout); break;
+	case FIFO_PCHR: fputs(_("Fifo    "), stdout); break;
+	case SOCK_PCHR: fputs(_("Socket  "), stdout); break;
 	case BLKDEV_PCHR: fputs(_("Block special file"), stdout); break;
 	case CHARDEV_PCHR: fputs(_("Character special file"), stdout); break;
 #ifndef _BE_POSIX
@@ -1283,8 +1283,8 @@ print_file_details(char *filename, const struct stat *attr, const char file_type
 	case ARCH2_PCHR: fputs(_("Archive state 2"), stdout); break;
 # endif /* S_ARCH1 */
 # ifdef SOLARIS_DOORS
-	case DOOR_PCHR: fputs(_("Door"), stdout); break;
-	case PORT_PCHR: fputs(_("Port"), stdout); break;
+	case DOOR_PCHR: fputs(_("Door    "), stdout); break;
+	case PORT_PCHR: fputs(_("Port    "), stdout); break;
 # endif /* SOLARIS_DOORS */
 # ifdef S_IFWHT
 	case WHT_PCHR: fputs(_("Whiteout"), stdout); break;
