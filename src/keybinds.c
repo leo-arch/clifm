@@ -1718,7 +1718,7 @@ rl_dir_pinned(int count, int key)
 
 /* Switch to workspace N. */
 static int
-rl_swicht_workspace(const int n)
+rl_switch_workspace(const int n)
 {
 	if (rl_line_buffer && *rl_line_buffer)
 		rl_delete_text(0, rl_end);
@@ -1745,28 +1745,28 @@ static int
 rl_ws1(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	return rl_swicht_workspace(1);
+	return rl_switch_workspace(1);
 }
 
 static int
 rl_ws2(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	return rl_swicht_workspace(2);
+	return rl_switch_workspace(2);
 }
 
 static int
 rl_ws3(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	return rl_swicht_workspace(3);
+	return rl_switch_workspace(3);
 }
 
 static int
 rl_ws4(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	return rl_swicht_workspace(4);
+	return rl_switch_workspace(4);
 }
 
 static int
