@@ -1343,7 +1343,7 @@ check_file_safety(const char *name)
 	}
 
 	if (safe == 0)
-		err('w', PRINT_PROMPT, _("%s: File might not be safe\n"), name);
+		err('w', PRINT_PROMPT, _("%s: File may be unsafe\n"), name);
 }
 
 static void
