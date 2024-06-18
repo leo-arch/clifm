@@ -159,7 +159,7 @@ get_largest_shortcut(void)
 		if (!bookmarks[i].shortcut || !*bookmarks[i].shortcut)
 			continue;
 
-		size_t slen = strlen(bookmarks[i].shortcut);
+		const size_t slen = strlen(bookmarks[i].shortcut);
 		if (slen > l)
 			l = slen;
 	}
@@ -303,7 +303,9 @@ open_bookmark(void)
 	if (conf.clear_screen == 1)
 		CLEAR;
 
-	int exit_status = FUNC_SUCCESS, header_printed = 0,	is_dir = 0;
+	int exit_status = FUNC_SUCCESS;
+	int header_printed = 0;
+	int is_dir = 0;
 
 	print_bookmarks();
 
@@ -488,13 +490,12 @@ check_bm_shortcut(const char *shortcut, const int add)
 	return (-1);
 }
 
-/* Bookmark the file FILE as NAME and shortcut SHORTCUT. */
+/* Bookmark the file FILE as NAME and shortcut SHORTCUT.
+ * FILE and NAME are guarranteed to be non-NULL.
+ * FILE is already dequoted. */
 static int
 bookmark_add(char *file, char *name, char *shortcut)
 {
-	/* FILE and NAME are guarranteed to be non-NULL.
-	 * FILE is already dequoted. */
-
 	if (check_bm_path(file) == 1 && rl_get_y_or_n("Continue? [y/n] ") == 0)
 		return FUNC_SUCCESS;
 
@@ -551,7 +552,7 @@ bookmark_add(char *file, char *name, char *shortcut)
 	free(p);
 	free(q);
 
-	reload_bookmarks(); /* Update bookmarks for TAB completion */
+	reload_bookmarks(); /* Update bookmarks for TAB completion. */
 
 	return FUNC_SUCCESS;
 
@@ -593,7 +594,7 @@ add_bookmark(char **cmd)
 	return ret;
 }
 
-/* Go through the list of bookmarks and set the first byte of of the path of
+/* Go through the list of bookmarks and set the first byte of the path of
  * matching bookmarks to NUL to mark it for deletion.
  * Used by del_bookmarks() to remove marked bookmarks. */
 static size_t
@@ -649,7 +650,7 @@ extract_shortcut_and_name(char *line)
 	return bm;
 }
 
-/* Return 0 if the bookmarks line LINE contains a bookmarks marked for deletion,
+/* Return 0 if the bookmarks line LINE contains a bookmark marked for deletion,
  * in which case del_bookmarks() will remove the line from the bookmarks file.
  * Otherwise, 1 is returned. */
 static int
