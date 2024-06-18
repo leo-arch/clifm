@@ -1,3 +1,33 @@
+1.19 (Kozy Krypts) - June 18, 2024
+
+BUGS FIXES
+* Color for error code (xf) printing garbage on some terminals (ConEmu/Mintty).
+* Pressing Ctrl-z while running an external command leaves the shell in an unusable state. Workaround: SIGTSTP (Ctrl-z) disabled for external commands.
+* If the fzf option '--border' is set, long file names in TAB completion are trimmed.
+* Cannot pin file names containing spaces.
+* Wrong cursor position when suggesting file names reaching the end of the screen and the typed text contains backslashes.
+* './symlink' is resolved to target file when bulk renaming.
+* 'rr' attempts to remove files starting with '#'.
+* Extension colors not processed after double colon.
+* Wrong 'Blocks' field padding in 'p/pp' command when file is a socket/fifo.
+
+NEW FEATURES/IMPROVEMENTS:
+* 'pp': Count files in directories.
+* 'p/pp': Display files MIME type.
+* 'p/pp': Enclose file names containing spaces in single quotes.
+* Mimelist file: Add '%x' as short for '%f !EO &'.
+* Mimelist file: Widely use the new '%x' to run GUI opening applications detached.
+* du(1)-free code.
+* Set a custom keybinding for the commands history list (same as '!<TAB>') via "cmd-hist" in the keybindings file.
+* Detect key bindings conflicts via 'kb conflict'.
+* Add '--physical-size' as an alias for '--no-apparent-size'.
+* Check for duplicate/existing files before bulk renaming.
+* Colorize config files (default-256 theme, defined as CONFIG).
+* Add more audio files to default-256 color scheme.
+* Add .djv and .xbel extensions to default color schemes.
+* Allow multiple ExtColors lines in the color scheme file.
+* Allow file extensions without the '*.' prefix in the color scheme file.
+
 1.18 (Caniche endormi) - March 23, 2024
 
 BUG FIXES
