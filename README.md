@@ -20,9 +20,9 @@ href="https://github.com/leo-arch/clifm/issues">Report bug</a></h4>
 <a><img src="https://img.shields.io/github/last-commit/leo-arch/clifm/master?color=blue&style=flat"/></a>
 <!---
 <a href="https://en.wikipedia.org/wiki/Privacy-invasive_software"><img src="https://img.shields.io/badge/privacy-✓-green?style=flat"/></a>
--->
 <a href="https://gitter.im/leo-arch/clifm"><img src="https://img.shields.io/gitter/room/leo-arch/clifm?style=flat"/></a>
-<a href="https://software.opensuse.org//download.html?project=home%3Aarchcrack&package=clifm"><img src="https://img.shields.io/badge/CD-OBS-red?logo=opensuse&logoColor=white"/></a>
+-->
+	<a href="https://software.opensuse.org//download.html?project=home%3Aarchcrack&package=clifm"><img src="https://img.shields.io/badge/CD-OBS-red?logo=opensuse&logoColor=white"/></a>
 </p>
 
 <p align="center">
@@ -386,9 +386,11 @@ Contributions are kindly welcome! Please see our [contribution guidelines](https
 ---
 
 ## Community
+<!---
 Join our [Gitter discussion room](https://gitter.im/leo-arch/clifm) and let us know what you think: ideas, comments, observations and questions are always useful.
+-->
 
-The [Discussions section](https://github.com/leo-arch/clifm/discussions) of this repo is also open to input.
+Visit the [Discussions section](https://github.com/leo-arch/clifm/discussions) of this repo and let us know what you think: ideas, comments, observations and questions are always useful.
 
 ---
 
