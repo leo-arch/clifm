@@ -1116,14 +1116,14 @@ cschemes_function(char **args)
 /* Set color variable VAR (static global) to _COLOR.
  * If not printable, add non-printing char flags (\001 and \002). */
 static void
-set_color(char *_color, char var[], const int flag)
+set_color(char *color, char var[], const int flag)
 {
 #ifndef CLIFM_SUCKLESS
-	char *color_code = (char *)NULL;
-	if (is_color_code(_color) == 0
-	&& (color_code = check_defs(_color)) == NULL)
+	char *def_color = (char *)NULL;
+	if (is_color_code(color) == 0
+	&& (def_color = check_defs(color)) == NULL)
 #else
-	if (is_color_code(_color) == 0)
+	if (is_color_code(color) == 0)
 #endif /* !CLIFM_SUCKLESS */
 	{
 		/* A null color string will be set to the default value by
@@ -1133,9 +1133,9 @@ set_color(char *_color, char var[], const int flag)
 	}
 
 #ifndef CLIFM_SUCKLESS
-	char *p = color_code ? color_code : _color;
+	char *p = def_color ? def_color : color;
 #else
-	char *p = _color;
+	char *p = color;
 #endif /* !CLIFM_SUCKLESS */
 
 	char *s = (char *)NULL;
