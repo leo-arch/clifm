@@ -710,7 +710,8 @@ run_pager(const int columns_n, int *reset_pager, filesn_t *i, size_t *counter)
 		pager_bk = conf.pager; conf.pager = 0; *reset_pager = 1;
 		putchar('\r');
 		ERASE_TO_RIGHT;
-		if (conf.long_view == 0)
+		if (conf.long_view == 0 && conf.columned == 1
+		&& conf.max_name_len != UNSET)
 			MOVE_CURSOR_UP(1);
 		return (-3);
 
