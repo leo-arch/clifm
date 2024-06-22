@@ -1462,7 +1462,7 @@ rl_quit(int count, int key)
 	if (kbind_busy == 1)
 		return FUNC_SUCCESS;
 
-	conf.cd_on_quit = 0;
+//	conf.cd_on_quit = 0;
 	puts("\n");
 
 	/* Reset terminal attributes before exiting. */
