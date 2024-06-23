@@ -203,7 +203,7 @@ Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Di
 <details>
 <summary>Packaging status <a href="https://repology.org/project/clifm/versions"><img src="https://repology.org/badge/tiny-repos/clifm.svg" alt="Packaging status"></a></summary>
 <a href="https://repology.org/project/clifm/versions">
-    <img src="https://repology.org/badge/vertical-allrepos/clifm.svg" alt="Packaging status">
+    <img src="https://repology.org/badge/vertical-allrepos/clifm.svg?columns=3" alt="Packaging status">
 </a>
 </details>
 
