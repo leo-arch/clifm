@@ -594,6 +594,9 @@ post_listing(DIR *dir, const int reset_pager, const filesn_t excluded_files)
  * we have changed the current directory (last command) or not. */
 //	setenv("CLIFM_CHPWD", dir_changed == 1 ? "1" : "0", 1);
 
+	if (dir_changed == 1)
+		first_cmd_in_dir = UNSET;
+
 	dir_changed = 0;
 
 	if (xargs.list_and_quit == 1)
@@ -640,6 +643,12 @@ post_listing(DIR *dir, const int reset_pager, const filesn_t excluded_files)
 	if (excluded_files > 0)
 		print_reload_msg(_("Showing %jd/%jd files\n"),
 			(intmax_t)files, (intmax_t)(files + excluded_files));
+
+	if (conf.print_dir_cmds == 1 && first_cmd_in_dir != UNSET && history) {
+		int i = first_cmd_in_dir - (first_cmd_in_dir > 0 ? 1 : 0);
+		for (; history[i].cmd; i++)
+			printf("%s>%s %s\n", bk_c, df_c, history[i].cmd);
+	}
 
 	return FUNC_SUCCESS;
 }

@@ -234,6 +234,7 @@ init_conf_struct(void)
 	conf.pager = UNSET;
 	conf.pager_once = 0;
 	conf.pager_view = UNSET;
+	conf.print_dir_cmds = UNSET;
 	conf.print_selfiles = UNSET;
 	conf.private_ws_settings = UNSET;
 	conf.prop_fields_gap = UNSET;

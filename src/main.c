@@ -145,6 +145,8 @@ regex_t regex_exp;
 regex_t regex_hist;
 regex_t regex_dirhist;
 
+int first_cmd_in_dir = UNSET;
+
 /* Internal status flags */
 int
 	argc_bk = 0,

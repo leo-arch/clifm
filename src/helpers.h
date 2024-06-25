@@ -869,8 +869,6 @@ extern time_t curdir_mtime;
 # define _(String) String
 #endif /* !_GETTEXT */
 
-//#define strlen(s) xstrlen(s)
-
 /* Log the message and print it to STDERR, but do not store it into the
  * messages array. */
 #define xerror(...) err(ERR_NO_STORE, NOPRINT_PROMPT, __VA_ARGS__)
@@ -1122,6 +1120,7 @@ struct config_t {
 	int pager_once;
 	int pager_view;
 	int purge_jumpdb;
+	int print_dir_cmds;
 	int print_selfiles;
 	int private_ws_settings;
 	int prop_fields_gap;
@@ -1151,6 +1150,7 @@ struct config_t {
 	int unicode;
 	int warning_prompt;
 	int welcome_message;
+	int pad2;
 };
 
 extern struct config_t conf;
@@ -1758,6 +1758,10 @@ enum comp_type {
 };
 
 extern enum comp_type cur_comp_type;
+
+/* Index of the first command executed in the current directory in the history
+ * array. */
+extern int first_cmd_in_dir;
 
 /* Bit flag holders */
 extern int

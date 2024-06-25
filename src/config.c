@@ -3183,6 +3183,10 @@ read_config(void)
 			set_pager_view_value(line + 10);
 		}
 
+		else if (*line == 'P' && strncmp(line, "PrintDirCmds=", 13) == 0) {
+			set_config_bool_value(line + 13, &conf.print_dir_cmds);
+		}
+
 		else if (xargs.printsel == UNSET && *line == 'P'
 		&& strncmp(line, "PrintSelfiles=", 14) == 0) {
 			set_config_bool_value(line + 14, &conf.print_selfiles);
@@ -3813,6 +3817,8 @@ reset_variables(void)
 	init_conf_struct();
 
 	free_workspaces_filters();
+
+	first_cmd_in_dir = UNSET;
 
 	check_cap = UNSET;
 	check_ext = UNSET;
