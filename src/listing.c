@@ -2886,7 +2886,7 @@ list_dir(void)
 	clock_t start = clock();
 #endif /* LIST_SPEED_TEST */
 
-	if (conf.clear_screen == 1)
+	if (conf.clear_screen > 0)
 		{ CLEAR; fflush(stdout); }
 
 	/* Hide the cursor to minimize flickering: it will be unhidden immediately
@@ -2905,7 +2905,7 @@ list_dir(void)
 		dir_out = 0;
 	}
 
-	if (conf.clear_screen == 1) {
+	if (conf.clear_screen > 0) {
 		/* For some reason we need to clear the screen twice to prevent
 		 * a garbage first line when scrolling up */
 		CLEAR; fflush(stdout);

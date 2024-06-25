@@ -2084,6 +2084,8 @@ exec_cmd(char **comm)
 	const int old_exit_code = exit_code;
 	exit_code = FUNC_SUCCESS;
 
+	int is_internal_cmd = 1;
+
 	/* Remove backslash in front of command names: used to bypass alias names */
 	if (*comm[0] == '\\' && *(comm[0] + 1))
 		remove_backslash(&comm[0]);
@@ -2635,10 +2637,13 @@ exec_cmd(char **comm)
 		/* #  EXTERNAL/SHELL COMMANDS # */
 		if ((exit_code = run_shell_cmd(comm)) == FUNC_FAILURE)
 			return FUNC_FAILURE;
+		else
+			is_internal_cmd = 0;
 	}
 
 CHECK_EVENTS:
-	if (conf.autols == 0)
+	if (conf.autols == 0 || (is_internal_cmd == 0
+	&& conf.clear_screen == CLEAR_INTERNAL_CMD_ONLY))
 		return exit_code;
 
 #if defined(LINUX_INOTIFY)

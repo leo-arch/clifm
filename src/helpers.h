@@ -558,6 +558,9 @@ extern time_t curdir_mtime;
 #define PAGER_LONG  1
 #define PAGER_SHORT 2
 
+/* ClearScreen=internal: clear screen only if command is internal */
+#define CLEAR_INTERNAL_CMD_ONLY 2
+
 /* Used by log_msg() to know wether to tell prompt() to print messages or not */
 #define PRINT_PROMPT   1
 #define NOPRINT_PROMPT 0

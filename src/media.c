@@ -585,7 +585,7 @@ media_menu(const int mode)
 		return FUNC_FAILURE;
 	}
 
-	if (conf.clear_screen == 1)
+	if (conf.clear_screen > 0)
 		CLEAR;
 
 #ifdef HAVE_PROC_MOUNTS

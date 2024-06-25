@@ -419,7 +419,7 @@ static char **
 list_and_get_input(struct dirent ***trash_files, const int files_n,
 	const int is_undel)
 {
-	if (conf.clear_screen == 1)
+	if (conf.clear_screen > 0)
 		CLEAR;
 
 	const int ret = print_trashfiles(trash_files, files_n);
@@ -910,7 +910,7 @@ untrash_function(char **args)
 	/* If some trashed file still remains, reload the undel screen */
 	const size_t n = count_trashed_files();
 	if (n > 0) {
-		if (conf.clear_screen == 1) CLEAR;
+		if (conf.clear_screen > 0) CLEAR;
 		untrash_function(args);
 	} else {
 		if (conf.autols == 1) reload_dirlist();
@@ -970,7 +970,7 @@ list_trashed_files(void)
 		return FUNC_SUCCESS;
 	}
 
-	if (conf.clear_screen == 1)
+	if (conf.clear_screen > 0)
 		CLEAR;
 
 	HIDE_CURSOR;

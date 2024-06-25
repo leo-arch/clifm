@@ -2893,6 +2893,15 @@ set_sort_name(char *line)
 	}
 }
 
+static void
+set_clear_screen(char *line)
+{
+	if (*line == 'i' && strncmp(line, "internal", 8) == 0)
+		conf.clear_screen = CLEAR_INTERNAL_CMD_ONLY;
+	else
+		set_config_bool_value(line, &conf.clear_screen);
+}
+
 /* Read the main configuration file and set options accordingly */
 static void
 read_config(void)
@@ -2986,7 +2995,7 @@ read_config(void)
 
 		else if (xargs.clear_screen == UNSET && *line == 'C'
 		&& strncmp(line, "ClearScreen=", 12) == 0) {
-			set_config_bool_value(line + 12, &conf.clear_screen);
+			set_clear_screen(line + 12);
 		}
 
 		else if (xargs.color_lnk_as_target == UNSET && *line == 'C'

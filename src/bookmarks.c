@@ -300,7 +300,7 @@ open_bookmark(void)
 		return FUNC_SUCCESS;
 	}
 
-	if (conf.clear_screen == 1)
+	if (conf.clear_screen > 0)
 		CLEAR;
 
 	int exit_status = FUNC_SUCCESS;

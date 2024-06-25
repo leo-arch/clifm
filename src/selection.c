@@ -832,7 +832,7 @@ list_selected_files(void)
 		return;
 	}
 
-	if (conf.clear_screen == 1)
+	if (conf.clear_screen > 0)
 		CLEAR;
 
 	if (conf.pager == 0)
