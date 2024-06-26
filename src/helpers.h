@@ -1759,10 +1759,6 @@ enum comp_type {
 
 extern enum comp_type cur_comp_type;
 
-/* Index of the first command executed in the current directory in the history
- * array. */
-extern int first_cmd_in_dir;
-
 /* Bit flag holders */
 extern int
 	flags,
@@ -1790,6 +1786,7 @@ extern int
 	dirhist_cur_index,
 	dirhist_total_index,
 	exit_code,
+	first_cmd_in_dir, /* History index of first cmd executed in the current dir */
 	follow_symlinks,
 	fzftab,
 	fzf_border_type,

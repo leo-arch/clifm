@@ -145,8 +145,6 @@ regex_t regex_exp;
 regex_t regex_hist;
 regex_t regex_dirhist;
 
-int first_cmd_in_dir = UNSET;
-
 /* Internal status flags */
 int
 	argc_bk = 0,
@@ -166,6 +164,7 @@ int
 	dirhist_cur_index = 0,
 	dirhist_total_index = 0,
 	exit_code = 0,
+	first_cmd_in_dir = UNSET,
 	follow_symlinks = UNSET,
 	fzftab = UNSET,
 	fzf_border_type = UNSET,
