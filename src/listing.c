@@ -923,7 +923,7 @@ get_ind_char(const filesn_t index, int *ind_chr)
 {
 	if (file_info[index].symlink == 1 && checks.lnk_char == 1) {
 		*ind_chr = file_info[index].sel == 1 ? SELFILE_CHR : LINK_CHR;
-		return file_info[index].sel == 1 ? li_cb : lc_c;
+		return lc_c;
 	} else {
 		*ind_chr = file_info[index].sel == 1 ? SELFILE_CHR : ' ';
 		return file_info[index].sel == 1 ? li_cb : "";
