@@ -367,6 +367,10 @@
 # devices and remote file systems.
 ;PurgeJumpDB=false
 
+# Print the list of commands executed in the current directory (the list is
+# cleared after changing the directory).
+;PrintDirCmds=false
+
 
 #=====================================#
 #        4. LOGS AND HISTORY          #
