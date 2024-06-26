@@ -372,6 +372,10 @@ dump_config(void)
 	print_config_value("Pager", &conf.pager, &n, conf.pager > 1
 		? DUMP_CONFIG_INT : DUMP_CONFIG_BOOL);
 
+	n = DEF_PRINT_DIR_CMDS;
+	print_config_value("PrintDirCmds", &conf.print_dir_cmds, &n,
+		DUMP_CONFIG_BOOL);
+
 	n = DEF_PRINTSEL;
 	print_config_value("PrintSelfiles", &conf.print_selfiles, &n,
 		DUMP_CONFIG_BOOL);
