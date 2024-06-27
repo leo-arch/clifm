@@ -790,7 +790,8 @@ expand_app_fields(char ***cmd, size_t *n, char *fpath, int *exec_flags)
 	return f;
 }
 
-/* Open the file named FILE via the application APP */
+/* Open the file named FILE via the application APP, splitting APP and
+ * expanding fields to the appropriate values. */
 static int
 run_mime_app(char *app, char *file)
 {
@@ -819,6 +820,9 @@ run_mime_app(char *app, char *file)
 	return ret;
 }
 
+/* Open the file named FILE via the application APP.
+ * No field expansion is made on APP, since it must be just an application
+ * name. If expansion is required, use run_mime_app() instead. */
 static int
 run_cmd(char *app, char *file)
 {
