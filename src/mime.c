@@ -752,8 +752,8 @@ expand_app_fields(char ***cmd, size_t *n, char *fpath, int *exec_flags)
 			break;
 		}
 
-		/* Expand %f pĺaceholder */
-		if (*a[i] == '%' && *(a[i] + 1) == 'f') {
+		/* Expand %f placeholder */
+		if (*a[i] == '%' && a[i][1] == 'f') {
 			copy_field(&a[i], fpath);
 			f = 1;
 			continue;
@@ -768,7 +768,7 @@ expand_app_fields(char ***cmd, size_t *n, char *fpath, int *exec_flags)
 		}
 
 		/* Expand environment variable */
-		if (*a[i] == '$' && *(a[i] + 1) >= 'A' && *(a[i] + 1) <= 'Z') {
+		if (*a[i] == '$' && a[i][1] >= 'A' && a[i][1] <= 'Z') {
 			char *p = expand_env(a[i]);
 			if (!p)
 				continue;
