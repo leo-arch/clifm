@@ -723,8 +723,16 @@ set_exec_flags(char *str, int *exec_flags)
 	}
 }
 
-/* Expand %f placeholder, stderr/stdout flags, and environment variables
- * in the opening application line */
+static void
+copy_field(char **dst, const char *src)
+{
+	const size_t src_len = strlen(src);
+	*dst = xnrealloc(*dst, src_len + 1, sizeof(char));
+	xstrsncpy(*dst, src, src_len + 1);
+}
+
+/* Expand %[f|x] placeholder, stderr/stdout flags, and environment variables
+ * in the opening application line. */
 static size_t
 expand_app_fields(char ***cmd, size_t *n, char *fpath, int *exec_flags)
 {
@@ -736,9 +744,7 @@ expand_app_fields(char ***cmd, size_t *n, char *fpath, int *exec_flags)
 		/* "%x" is short for "%f !EO &". It must be the last field in the
 		 * command entry (subsequent fields will be ignored). */
 		if (*a[i] == '%' && a[i][1] == 'x') {
-			const size_t fpath_len = strlen(fpath);
-			a[i] = xnrealloc(a[i], fpath_len + 1, sizeof(char));
-			xstrsncpy(a[i], fpath, fpath_len + 1);
+			copy_field(&a[i], fpath);
 			f = 1;
 			set_exec_flags("EO", exec_flags);
 			bg_proc = 1;
@@ -748,9 +754,7 @@ expand_app_fields(char ***cmd, size_t *n, char *fpath, int *exec_flags)
 
 		/* Expand %f pĺaceholder */
 		if (*a[i] == '%' && *(a[i] + 1) == 'f') {
-			const size_t fpath_len = strlen(fpath);
-			a[i] = xnrealloc(a[i], fpath_len + 1, sizeof(char));
-			xstrsncpy(a[i], fpath, fpath_len + 1);
+			copy_field(&a[i], fpath);
 			f = 1;
 			continue;
 		}
@@ -769,9 +773,7 @@ expand_app_fields(char ***cmd, size_t *n, char *fpath, int *exec_flags)
 			if (!p)
 				continue;
 
-			const size_t p_len = strlen(p);
-			a[i] = xnrealloc(a[i], p_len + 1, sizeof(char *));
-			xstrsncpy(a[i], p, p_len + 1);
+			copy_field(&a[i], p);
 			free(p);
 			continue;
 		}
@@ -841,9 +843,7 @@ split_and_run(char *app, char *file)
 		/* "%x" is short for "%f !EO &". It must be the last field in the
 		 * command entry (subsequent fields will be ignored). */
 		if (*cmd[i] == '%' && cmd[i][1] == 'x') {
-			const size_t file_len = strlen(file);
-			cmd[i] = xnrealloc(cmd[i], file_len + 1, sizeof(char));
-			xstrsncpy(cmd[i], file, file_len + 1);
+			copy_field(&cmd[i], file);
 			f = 1;
 			set_exec_flags("EO", &exec_flags);
 			bg_proc = 1;
@@ -863,12 +863,12 @@ split_and_run(char *app, char *file)
 			cmd[i] = (char *)NULL;
 			continue;
 		}
+
 		if (*cmd[i] == '%' && cmd[i][1] == 'f') {
-			const size_t file_len = strlen(file);
-			cmd[i] = xnrealloc(cmd[i], file_len + 1, sizeof(char));
-			xstrsncpy(cmd[i], file, file_len + 1);
+			copy_field(&cmd[i], file);
 			f = 1;
 		}
+
 		if (*cmd[i] == '$' && cmd[i][1] >= 'A' && cmd[i][1] <= 'Z') {
 			char *env = expand_env(cmd[i]);
 			if (env) {
