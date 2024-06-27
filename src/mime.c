@@ -790,52 +790,16 @@ expand_app_fields(char ***cmd, size_t *n, char *fpath, int *exec_flags)
 	return f;
 }
 
-/* Open the file FPATH via the application APP */
+/* Open the file named FILE via the application APP */
 static int
-run_mime_app(char **app, char **fpath)
+run_mime_app(char *app, char *file)
 {
-	char **cmd = split_str(*app, NO_UPDATE_ARGS);
-	if (!cmd) {
-		free(*app);
-#ifndef __CYGWIN__
-		free(*fpath);
-#endif /* !__CYGWIN__ */
+	char **cmd = split_str(app, NO_UPDATE_ARGS);
+	if (!cmd)
 		return FUNC_FAILURE;
-	}
 
 	int exec_flags = E_NOFLAG;
 	size_t i = 0;
-	const size_t f = expand_app_fields(&cmd, &i, *fpath, &exec_flags);
-
-	/* If no %f placeholder was found, append file name */
-	if (f == 0) {
-		cmd = xnrealloc(cmd, i + 2, sizeof(char *));
-		cmd[i] = savestring(*fpath, strlen(*fpath));
-		cmd[i + 1] = (char *)NULL;
-	}
-
-	const int ret = launch_execv(cmd, (bg_proc && !open_in_foreground)
-		? BACKGROUND : FOREGROUND, exec_flags);
-
-	for (i = 0; cmd[i]; i++)
-		free(cmd[i]);
-	free(cmd);
-
-	free(*app);
-#ifndef __CYGWIN__
-	free(*fpath);
-#endif /* !__CYGWIN */
-
-	return ret;
-}
-
-static int
-split_and_run(char *app, char *file)
-{
-	size_t i;
-	char **cmd = split_str(app, NO_UPDATE_ARGS);
-	int exec_flags = E_NOFLAG;
-
 	const size_t f = expand_app_fields(&cmd, &i, file, &exec_flags);
 
 	/* If no %f placeholder was found, append file name */
@@ -845,8 +809,8 @@ split_and_run(char *app, char *file)
 		cmd[i + 1] = (char *)NULL;
 	}
 
-	const int ret =
-		launch_execv(cmd, bg_proc ? BACKGROUND : FOREGROUND, exec_flags);
+	const int ret = launch_execv(cmd, (bg_proc && !open_in_foreground)
+		? BACKGROUND : FOREGROUND, exec_flags);
 
 	for (i = 0; cmd[i]; i++)
 		free(cmd[i]);
@@ -905,7 +869,7 @@ mime_list_open(char **apps, char *file)
 	int ret = FUNC_FAILURE;
 
 	if (strchr(app, ' '))
-		ret = split_and_run(app, file);
+		ret = run_mime_app(app, file);
 	else /* We have just a command name: no parameter nor placeholder */
 		ret = run_cmd(app, file);
 
@@ -1687,19 +1651,23 @@ mime_open(char **args)
 		return run_archiver(&file_path, &app);
 #endif /* !_NO_ARCHIVING */
 
+	int ret = 0;
 #ifdef __CYGWIN__
-	// Some Windows programs, like Word and Powerpoint (but not Excel!!), do
-	// not like absolute paths when the file name contains spaces. So, let's
-	// pass the file name as it was passed to this function, without
-	// expanding it to an absolute path.
-	// This hack must be removed as soon as the real cause is discovered:
-	// why Word/Powerpoint fails to open absolute paths when the file name
-	// contains spaces?
-	free(file_path);
-	return run_mime_app(&app, &args[file_index]);
+	/* Some Windows programs, like Word and Powerpoint (but not Excel!!), do
+	 * not like absolute paths when the file name contains spaces. So, let's
+	 * pass the file name as it was passed to this function, without
+	 * expanding it to an absolute path.
+	 * This hack must be removed as soon as the real cause is discovered:
+	 * why Word/Powerpoint fails to open absolute paths when the file name
+	 * contains spaces? */
+	ret = run_mime_app(app, args[file_index]);
 #else
-	return run_mime_app(&app, &file_path);
+	ret = run_mime_app(app, file_path);
 #endif /* __CYGWIN__ */
+
+	free(app);
+	free(file_path);
+	return ret;
 }
 #else
 void *_skip_me_lira;
