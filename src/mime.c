@@ -803,23 +803,21 @@ run_mime_app(char **app, char **fpath)
 		return FUNC_FAILURE;
 	}
 
-	int exec_flags = 0;
+	int exec_flags = E_NOFLAG;
 	size_t i = 0;
 	const size_t f = expand_app_fields(&cmd, &i, *fpath, &exec_flags);
-	size_t n = i;
 
 	/* If no %f placeholder was found, append file name */
 	if (f == 0) {
 		cmd = xnrealloc(cmd, i + 2, sizeof(char *));
 		cmd[i] = savestring(*fpath, strlen(*fpath));
 		cmd[i + 1] = (char *)NULL;
-		n++;
 	}
 
 	const int ret = launch_execv(cmd, (bg_proc && !open_in_foreground)
 		? BACKGROUND : FOREGROUND, exec_flags);
 
-	for (i = 0; i < n; i++)
+	for (i = 0; cmd[i]; i++)
 		free(cmd[i]);
 	free(cmd);
 
@@ -834,52 +832,13 @@ run_mime_app(char **app, char **fpath)
 static int
 split_and_run(char *app, char *file)
 {
-	size_t f = 0;
 	size_t i;
 	char **cmd = split_str(app, NO_UPDATE_ARGS);
 	int exec_flags = E_NOFLAG;
 
-	for (i = 0; cmd[i]; i++) {
-		/* "%x" is short for "%f !EO &". It must be the last field in the
-		 * command entry (subsequent fields will be ignored). */
-		if (*cmd[i] == '%' && cmd[i][1] == 'x') {
-			copy_field(&cmd[i], file);
-			f = 1;
-			set_exec_flags("EO", &exec_flags);
-			bg_proc = 1;
-			break;
-		}
+	const size_t f = expand_app_fields(&cmd, &i, file, &exec_flags);
 
-		if (*cmd[i] == '!' && (cmd[i][1] == 'E' || cmd[i][1] == 'O')) {
-			set_exec_flags(cmd[i] + 1, &exec_flags);
-			free(cmd[i]);
-			cmd[i] = (char *)NULL;
-			continue;
-		}
-
-		if (*cmd[i] == '&') {
-			bg_proc = 1;
-			free(cmd[i]);
-			cmd[i] = (char *)NULL;
-			continue;
-		}
-
-		if (*cmd[i] == '%' && cmd[i][1] == 'f') {
-			copy_field(&cmd[i], file);
-			f = 1;
-		}
-
-		if (*cmd[i] == '$' && cmd[i][1] >= 'A' && cmd[i][1] <= 'Z') {
-			char *env = expand_env(cmd[i]);
-			if (env) {
-				free(cmd[i]);
-				cmd[i] = env;
-			}
-		}
-	}
-
-	/* If file to be opened was not specified via %f, append
-	 * it to the cmd array. */
+	/* If no %f placeholder was found, append file name */
 	if (f == 0) {
 		cmd = xnrealloc(cmd, i + 2, sizeof(char *));
 		cmd[i] = savestring(file, strlen(file));
