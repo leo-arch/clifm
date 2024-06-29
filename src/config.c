@@ -3813,16 +3813,8 @@ reset_variables(void)
 	conf.usr_cscheme = (char *)NULL;
 	cur_cscheme = (char *)NULL;
 
-/*	free(user.shell);
-	user.shell = (char *)NULL;
-	free(user.shell_basename);
-	user.shell_basename = (char *)NULL; */
-
 	init_conf_struct();
-
 	free_workspaces_filters();
-
-	first_cmd_in_dir = UNSET;
 
 	check_cap = UNSET;
 	check_ext = UNSET;
@@ -3956,7 +3948,6 @@ reload_config(void)
 	/* Set the current position of the dirhist index to the last entry. */
 	dirhist_cur_index = dirhist_total_index - 1;
 
-	dir_changed = 1;
 	set_env(1);
 	return FUNC_SUCCESS;
 }
