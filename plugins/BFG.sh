@@ -10,7 +10,7 @@
 
 # Previewing dependencies (optional)
 # atool or bsdtar or tar: archives
-# convert (imagemagick), and ueberzug (recommended) or viu or catimg or img2txt: images
+# magick (imagemagick 7.0+), and ueberzug (recommended) or viu or catimg or img2txt: images
 # fontpreview or fontimage (fontforge): fonts
 # libreoffice, catdoc, odt2txt, xls2csv, xls2xcsv, pandoc: office documents
 # pdftoppm or pdftotext or mutool: PDF files
@@ -190,7 +190,7 @@ handle_ext() {
 				fi
 
 				[ -z "$CONVERT_OK" ] && return
-				convert -background none -size "$WIDTH"x"$HEIGHT" "$entry" \
+				magick -background none -size "$WIDTH"x"$HEIGHT" "$entry" \
 					"$PREVIEWDIR/${entryhash}.png"
 				preview_image "${PREVIEWDIR}/${entryhash}.png" && exit 0
 			;;
@@ -341,7 +341,7 @@ handle_mime() {
 					preview_image "$PREVIEWDIR/${entryhash}.jpg" && exit 0
 				fi
 
-				convert -coalesce -resize "$WIDTH"x"$HEIGHT"\> "$entry"[0] \
+				magick "$entry"[0] -resize "$WIDTH"x"$HEIGHT"\> \
 				"$PREVIEWDIR/$entryhash.jpg"
 				preview_image "$PREVIEWDIR/${entryhash}.jpg" && exit 0
 				exit 0
@@ -357,7 +357,7 @@ handle_mime() {
 			filename="$(printf "%s" "$entry" | tr ' ' '_')"
 			if [ ! -d "$PREVIEWDIR/$entryhash" ]; then
 				mkdir -p "$PREVIEWDIR/$entryhash" && \
-				convert -coalesce -resize "$WIDTH"x"$HEIGHT"\> "$entry" \
+				magick "$entry" -coalesce -resize "$WIDTH"x"$HEIGHT"\> \
 				"$PREVIEWDIR/$entryhash/${filename%.*}.jpg"
 			fi
 			while true; do

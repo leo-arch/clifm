@@ -479,6 +479,11 @@ main() {
 	[ -z "$PREVIEWDIR" ] && export PREVIEWDIR="${XDG_CACHE_HOME:-$HOME/.cache}/clifm/previews"
 
 	! [ -d "$PREVIEWDIR" ] && mkdir -p "$PREVIEWDIR"
+	CACHEDIRTAG_HEADER="Signature: 8a477f597d28d172789f06886806bc55
+# This file is a cache directory tag created by (application name).
+# For information about cache directory tags, see:
+#	http://www.brynosaurus.com/cachedir/"
+	! [ -f "$PREVIEWDIR/CACHEDIR.TAG"] && echo "$CACHEDIRTAG_HEADER" > "$PREVIEWDIR/CACHEDIR.TAG"
 
 	if [ "$USE_SCOPE" = 1 ]; then
 		[ -z "$SCOPE_FILE" ] && export SCOPE_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/ranger/scope.sh"

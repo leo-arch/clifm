@@ -76,10 +76,16 @@ default_width=640
 default_height=480
 
 CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/clifm/previews"
+CACHEDIRTAG_FILE="$CACHE_DIR/CACHEDIR.TAG"
+CACHEDIRTAG_HEADER="Signature: 8a477f597d28d172789f06886806bc55
+# This file is a cache directory tag created by Clifm.
+# For information about cache directory tags, see:
+#	http://www.brynosaurus.com/cachedir/"
 
 # Use hashes instead of file names for cached files to generate unique file names
 hash_file() {
 	! [ -d "$CACHE_DIR" ] && mkdir -p "$CACHE_DIR"
+	! [ -f "$CACHEDIRTAG_FILE" ] && echo "$CACHEDIRTAG_HEADER" > "$CACHEDIRTAG_FILE"
 	if type md5sum > /dev/null 2>&1; then
 		PCACHE="$CACHE_DIR/$(md5sum "$1" | cut -d' ' -f1)"
 	elif type md5 > /dev/null 2>&1; then
@@ -139,6 +145,7 @@ display() {
 		# This is a pretty dirty hack: let's create an empty temp file
 		# (CLIFM_KITTY_IMG) to let clifm know that an image is displayed
 		# and should be removed
+
 		touch -- "$CLIFM_KITTY_IMG"
 		kitty icat --silent --loop=0 \
 		--place "$FZF_PREVIEW_COLUMNS"x"$FZF_PREVIEW_LINES"@"$X"x"$Y" \
@@ -154,7 +161,7 @@ main() {
 		"gif")
 			hash_file "$file"
 			! [ -f "${PCACHE}.jpg" ] && \
-				convert -coalesce -resize 640x480\> "$file"[0] "${PCACHE}.jpg"
+				magick "$file"[0] -resize 640x480\> "${PCACHE}.jpg"
 			display "${PCACHE}.jpg"
 		;;
 		"video")
@@ -214,7 +221,7 @@ main() {
 		"svg")
 			hash_file "$file"
 			! [ -f "${PCACHE}.png" ] && \
-				convert -background none -size 1920x1080 "$file" "${PCACHE}.png"
+				magick -background none -size 1920x1080 "$file" "${PCACHE}.png"
 			display "${PCACHE}.png"
 		;;
 #		"comic")
