@@ -1242,8 +1242,8 @@ check_auto_first(char **args)
 static int
 auto_open_file(char **args, char *tmp)
 {
-	char *cmd[] = {"open", tmp, (args_n >= 1) ? args[1]
-		: NULL, (args_n >= 2) ? args[2] : NULL, NULL};
+	char *cmd[] = {"open", tmp, args_n >= 1 ? args[1]
+		: NULL, args_n >= 2 ? args[2] : NULL, NULL};
 	args_n++;
 	const int ret = open_function(cmd);
 	args_n--;

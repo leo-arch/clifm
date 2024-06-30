@@ -906,7 +906,7 @@ open_function(char **cmd)
 		return FUNC_SUCCESS;
 	}
 
-	const char *const errname = "lira";
+	const char *const errname = "open";
 
 	if (*cmd[0] == 'o' && (!cmd[0][1] || strcmp(cmd[0], "open") == 0)) {
 		if (strchr(cmd[1], '\\')) {
