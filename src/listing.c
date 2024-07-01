@@ -585,6 +585,9 @@ set_pager_view(void)
 static void
 print_dir_cmds(void)
 {
+	if (!history || first_cmd_in_dir > (int)current_hist_n)
+		return;
+
 	int i = first_cmd_in_dir - (first_cmd_in_dir > 0 ? 1 : 0);
 	for (; history[i].cmd; i++)
 		printf("%s>%s %s\n", bk_c, df_c, history[i].cmd);
@@ -652,7 +655,7 @@ post_listing(DIR *dir, const int reset_pager, const filesn_t excluded_files)
 		print_reload_msg(_("Showing %jd/%jd files\n"),
 			(intmax_t)files, (intmax_t)(files + excluded_files));
 
-	if (conf.print_dir_cmds == 1 && first_cmd_in_dir != UNSET && history)
+	if (conf.print_dir_cmds == 1 && first_cmd_in_dir != UNSET)
 		print_dir_cmds();
 
 	return FUNC_SUCCESS;

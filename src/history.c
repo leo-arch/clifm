@@ -431,10 +431,6 @@ edit_history(char **args)
 	 * opened. */
 	if (mtime_bfr != attr.st_mtime) {
 		ret = reload_history();
-		/* FIRST_CMD_IN_DIR points somewhere to the directory history, but
-		 * since this history was reload, and maybe reduced, it might point
-		 * now beyond the history array. Unset it to prevent this. */
-		first_cmd_in_dir = UNSET;
 		print_reload_msg(_("File modified. History entries reloaded\n"));
 		return ret;
 	}
@@ -460,7 +456,6 @@ clear_history_func(char **args)
 	fprintf(hist_fp, "%s %s\n", args[0], args[1]);
 	fclose(hist_fp);
 
-	first_cmd_in_dir = UNSET;
 	/* Reset readline history */
 	return reload_history();
 }
