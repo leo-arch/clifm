@@ -796,9 +796,9 @@ run_finder(const size_t height, const int offset, const char *lw,
 	int prev = (conf.fzf_preview > 0 && SHOW_PREVIEWS(cur_comp_type) == 1)
 		? FZF_INTERNAL_PREVIEWER : 0;
 
-	int restore_cwd = cd_trashdir(prev);
+	const int restore_cwd = cd_trashdir(prev);
+	const int prev_hidden = conf.fzf_preview == 2 ? 1 : 0;
 
-	int prev_hidden = conf.fzf_preview == 2 ? 1 : 0;
 	if (conf.fzf_preview == FZF_EXTERNAL_PREVIEWER)
 		prev = FZF_EXTERNAL_PREVIEWER;
 
@@ -842,7 +842,7 @@ run_finder(const size_t height, const int offset, const char *lw,
 
 		if (prev > 0) { /* Either internal of external previewer */
 			set_fzf_env_vars((int)height);
-			size_t s = get_preview_win_width(offset);
+			const size_t s = get_preview_win_width(offset);
 			if (s != (size_t)-1)
 				snprintf(prev_opts, sizeof(prev_opts), "--preview-window=%zu", s);
 		}
@@ -885,10 +885,10 @@ ctrl-d:deselect-all,ctrl-t:toggle-all" : "",
 			finder_in_file, finder_out_file); */
 	}
 
-	int dr = (flags & DELAYED_REFRESH) ? 1 : 0;
+	const int dr = (flags & DELAYED_REFRESH) ? 1 : 0;
 	flags &= ~DELAYED_REFRESH;
 	const mode_t old_mask = umask(0077);
-	int ret = launch_execl(cmd);
+	const int ret = launch_execl(cmd);
 	umask(old_mask);
 
 	if (restore_cwd == 1)
@@ -899,7 +899,9 @@ ctrl-d:deselect-all,ctrl-t:toggle-all" : "",
 
 	if (prev == 1)
 		clear_fzf();
-	if (dr == 1) flags |= DELAYED_REFRESH;
+	if (dr == 1)
+		flags |= DELAYED_REFRESH;
+
 	return ret;
 }
 
