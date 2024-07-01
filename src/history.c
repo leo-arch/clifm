@@ -460,6 +460,7 @@ clear_history_func(char **args)
 	fprintf(hist_fp, "%s %s\n", args[0], args[1]);
 	fclose(hist_fp);
 
+	first_cmd_in_dir = UNSET;
 	/* Reset readline history */
 	return reload_history();
 }
