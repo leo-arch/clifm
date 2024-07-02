@@ -36,7 +36,7 @@
  * wget https://unicode.org/Public/emoji/5.0/emoji-test.txt -qO - | less */
 
 /* Most emojis here are two chars wide. If using one char wide emojis, add
- * a space to get consistent padding. Ex: "X ", or to the left: " X" */
+ * a space to get consistent padding. E.g., "X ", or to the left: " X" */
 
 #ifndef ICONS_EMOJI
 #define ICONS_EMOJI

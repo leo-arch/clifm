@@ -1829,7 +1829,7 @@ list_files_vertical(size_t *counter, int *reset_pager,
 
 		if (x >= nn || !file_info[x].name) {
 			if (last_column == 1)
-				/* Last column is empty. Ex:
+				/* Last column is empty. E.g.:
 				 * 1 file  3 file3  5 file5
 				 * 2 file2 4 file4  HERE
 				 * ... */
@@ -1891,7 +1891,7 @@ list_files_vertical(size_t *counter, int *reset_pager,
 		if (last_column == 0)
 			pad_filename_function(ind_char, x, pad, termcap_move_right);
 		else
-			/* Last column is populated. Ex:
+			/* Last column is populated. E.g.:
 			 * 1 file  3 file3  5 file5HERE
 			 * 2 file2 4 file4  6 file6HERE
 			 * ... */

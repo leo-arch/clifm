@@ -428,7 +428,7 @@ list_and_get_input(struct dirent ***trash_files, const int files_n,
 
 	/* Get input */
 	printf(_("\n%sEnter 'q' to quit\n"
-		"File(s) to be %s (ex: 1 2-6, or *):\n"), df_c,
+		"File(s) to be %s (e.g.: 1 2-6, or *):\n"), df_c,
 		is_undel == 1 ? _("restored") : _("removed"));
 
 	char *line = (char *)NULL;

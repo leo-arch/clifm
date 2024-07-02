@@ -1101,7 +1101,7 @@ get_repack_format(void)
 
 	char *format = (char *)NULL;
 	while (!format) {
-		format = rl_no_hist(_("New format (ex: .tar.xz): "));
+		format = rl_no_hist(_("New format (e.g.: .tar.xz): "));
 		if (!format)
 			continue;
 

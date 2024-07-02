@@ -398,7 +398,7 @@ clean_cmd(const char *str)
 
 	if (q) {
 		err('w', PRINT_PROMPT, _("%s: '%s': Only command base names "
-			"are allowed. Ex: 'nano' instead of '/usr/bin/nano'\n"),
+			"are allowed. E.g.: 'nano' instead of '/usr/bin/nano'\n"),
 			PROGRAM_NAME, str);
 		return FUNC_FAILURE;
 	}

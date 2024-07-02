@@ -22,7 +22,7 @@ Indentation: TABS (I use a width of 4, but you can use 8 if you like)
 
 Naming convention: Linux kernel style
 
-Comments: C style only. Ex:
+Comments: C style only. E.g.:
 
 ```c
 /* This is a single line comment */
@@ -31,7 +31,7 @@ Comments: C style only. Ex:
 * comment */
 ```
 
-Non-function statement blocks: Ex:
+Non-function statement blocks: E.g.:
 ```c
 if (condition) {
 	...
@@ -70,7 +70,7 @@ But,
 char *str = (char *)NULL;
 ```
 
-Prefer ASCII instead of Hex: Ex: `'\0'` instead of `0x00`
+Prefer ASCII instead of Hex: E.g.: `'\0'` instead of `0x00`
 
 Spacing: Write easily readable code. Generally, use blank lines between code blocks (this, however, depends on the code written so far). Just make it readable (the code won't be better for being more tightly written)
 

@@ -311,7 +311,7 @@ get_sysusers(void)
 	n = 0;
 	while ((p = getpwent())) {
 #ifndef __HAIKU__
-		/* Some systems (BSD) may have multiple UIDs 0 (ex: "root" and "toor").
+		/* Some systems (BSD) may have multiple UIDs 0 (e.g.: "root" and "toor").
 		 * This is known as a root alias. Let's always use "root" for UID 0
 		 * (this is what stat(1), ls(1), and most file managers do). */
 		const char *name = p->pw_uid == 0 ? "root" : p->pw_name;

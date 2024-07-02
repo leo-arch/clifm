@@ -755,7 +755,7 @@ init_quoted_words(void)
 /* After expanding multiple fields from an expandable expression, say 'sel',
  * we lost track of quoted words, because the old indices point now to
  * expanded fields.
- * Ex: 'p sel "12"' -> the quoted word index is originally 2, but after the
+ * E.g.: 'p sel "12"' -> the quoted word index is originally 2, but after the
  * expansion of the 'sel' keyword, the index 2 points now to a selected file.
  *
  * This function updates quoted word indices taking into account the starting
@@ -2765,7 +2765,7 @@ parse_input_str(char *str)
 
 		/* should_expand_eln() will check rl_line_buffer looking for the
 		 * command name. Now, if the command name has a fused ELN plus space
-		 * and at least a second parameter (ex: CMD1 2), should_expand_eln()
+		 * and at least a second parameter (E.g.: CMD1 2), should_expand_eln()
 		 * will fail. Let's redirect rl_line_buffer to the buffered command
 		 * name (CMD) so that the check will be properly performed. */
 		char *lb_tmp = rl_line_buffer;
@@ -2990,7 +2990,7 @@ parse_input_str(char *str)
 			 * expansion is made by wordexp(3) */
 			if (is_escaped == 0 && IS_WORD(substr[i][j], substr[i][j + 1])) {
 				/* Unlike glob() and tilde_expand(), wordexp() can expand tilde
-				 * and env vars even in the middle of a string. Ex: $HOME/Downloads */
+				 * and env vars even in the middle of a string. E.g.: $HOME/Downloads */
 				if (word_n < INT_ARRAY_MAX) {
 					word_array[word_n] = (int)i;
 					word_n++;

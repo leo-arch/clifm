@@ -1027,7 +1027,7 @@ extern time_t curdir_mtime;
 #define _CTRL(n)  ((n) & 0x1f)
 // As defined by readline: set to one the eight bit in N
 #define _META(n)  ((n) | 0x80)
-// Ex: 'A' == 01000001
+// E.g.: 'A' == 01000001
 //     ('A' | 0x80) == 11000001 == 193 == Á
  */
 

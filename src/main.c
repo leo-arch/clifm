@@ -1083,8 +1083,8 @@ set_locale(void)
 	setlocale(LC_ALL, "");
 	if (strcmp(nl_langinfo(CODESET), "UTF-8") != 0) {
 		err('w', PRINT_PROMPT, _("%s: Locale is not UTF-8. To avoid "
-			"encoding issues you might want to set an UTF-8 locale. Ex: "
-			"export LANG=es_AR.UTF-8\n"), PROGRAM_NAME);
+			"encoding issues you might want to set an UTF-8 locale. For "
+			"example: export LANG=es_AR.UTF-8\n"), PROGRAM_NAME);
 	}
 }
 

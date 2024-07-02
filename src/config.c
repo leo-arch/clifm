@@ -512,7 +512,7 @@ dump_config(void)
 }
 
 /* Edit the config file, either via the mime function or via the first
- * passed argument (Ex: 'edit nano'). The 'reset' option regenerates
+ * passed argument (e.g.: 'edit nano'). The 'reset' option regenerates
  * the configuration file and creates a back up of the old one */
 int
 edit_function(char **args)
@@ -818,7 +818,7 @@ create_kbinds_file(void)
 # Use the 'kbgen' plugin (compile it first: gcc -o kbgen kbgen.c) to \n\
 # find out the escape code for the key or key sequence you want. Use \n\
 # either octal, hexadecimal codes or symbols.\n\
-# Ex: For Alt-/ (in rxvt terminals) 'kbgen' will print the following \n\
+# E.g.: For Alt-/ (in rxvt terminals) 'kbgen' will print the following \n\
 # lines:\n\
 # Hex  | Oct | Symbol\n\
 # ---- | ---- | ------\n\
@@ -826,7 +826,7 @@ create_kbinds_file(void)
 # \\x2f | \\057 | /\n\
 # In this case, the keybinding, if using symbols, is: \"\\e/:function\"\n\
 # In case you prefer the hex codes it would be: \\x1b\\x2f:function.\n\
-# GNU emacs escape sequences are also allowed (ex: \"\\M-a\", Alt-a\n\
+# GNU emacs escape sequences are also allowed (e.g.: \"\\M-a\", Alt-a\n\
 # in most keyboards, or \"\\C-r\" for Ctrl-r).\n\
 # Some codes, especially those involving keys like Ctrl or the arrow\n\
 # keys, vary depending on the terminal emulator and the system settings.\n\
@@ -945,9 +945,9 @@ quit:\\e[24~\n\
 # Plugins\n\
 # 1) Make sure your plugin is in the plugins directory (or use any of the\n\
 # plugins in there)\n\
-# 2) Link pluginx to your plugin using the 'actions edit' command. Ex:\n\
+# 2) Link pluginx to your plugin using the 'actions edit' command. E.g.:\n\
 # \"plugin1=myplugin.sh\"\n\
-# 3) Set a keybinding here for pluginx. Ex: \"plugin1:\\M-7\"\n\n\
+# 3) Set a keybinding here for pluginx. E.g.: \"plugin1:\\M-7\"\n\n\
 \n\
 # Bound to the xclip plugin\n\
 plugin1:\\C-y\n\n\
@@ -1702,7 +1702,7 @@ create_main_config_file(char *file)
 # f = File names in current directory\n\
 # h = Commands history\n\
 # j = Jump database\n\
-# Use a dash (-) to skip a check. Ex: 'eahfj-c' to skip the bookmarks check\n\
+# Use a dash (-) to skip a check. E.g.: 'eahfj-c' to skip the bookmarks check\n\
 ;SuggestionStrategy=%s\n\n"
 
 	    "# Suggest file names using the corresponding file type color\n\
@@ -1891,7 +1891,7 @@ create_main_config_file(char *file)
 #alias ls='ls --color=auto -A'\n\n"
 
 	    "# PROMPT COMMANDS\n\
-# Write below the commands you want to be executed before the prompt. Ex:\n\
+# Write below the commands you want to be executed before the prompt. E.g.:\n\
 #promptcmd /usr/share/clifm/plugins/git_status.sh\n\
 #promptcmd date | awk '{print $1\", \"$2,$3\", \"$4}'\n\n"
 
@@ -2087,8 +2087,8 @@ create_profile_file(void)
 			"'%s': %s\n", PROGRAM_NAME, profile_file, strerror(errno));
 	} else {
 		fprintf(profile_fp, _("# This is %s's profile file\n#\n"
-			"# Write here the commands you want to be executed at startup\n"
-			"# Ex:\n#echo \"%s, the command line file manager\"; read -r\n#\n"
+			"# Write here the commands you want to be executed at startup.\n"
+			"# E.g.:\n#echo \"%s, the command line file manager\"; read -r\n#\n"
 			"# Uncommented, non-empty lines are executed line by line. If you\n"
 			"# want a multi-line command, just write a script for it:\n"
 			"#sh /path/to/my/script.sh\n"),
@@ -2199,7 +2199,7 @@ create_mime_file_anew(char *file)
 # opened in the command. Example:\n\
 # 'mpv %%f --terminal=no' -> 'mpv FILE --terminal=no'\n\
 # If %%f is not specified, the file name will be appended to the end of the\n\
-# command. Ex: 'mpv --terminal=no' -> 'mpv --terminal=no FILE'\n\
+# command. E.g.: 'mpv --terminal=no' -> 'mpv --terminal=no FILE'\n\
 \n\
 # To silence STDERR and/or STDOUT use !E and !O respectively (they can\n\
 # be used together). Examples:\n\
@@ -2225,7 +2225,7 @@ create_mime_file_anew(char *file)
 # Note on graphical applications: If the opening application is already running\n\
 # the file might be opened in a tab, and CliFM won't wait for the file to be\n\
 # closed (because the process already returned). To avoid this, instruct the\n\
-# application to run a new instance: Ex: geany -i, gedit -s, kate -n,\n\
+# application to run a new instance: e.g.: geany -i, gedit -s, kate -n,\n\
 # pluma --new-window, and so on.\n\
 \n\
 # Environment variables can be used as well. Example:\n\
@@ -3555,7 +3555,7 @@ create_trash_dirs(void)
 	if (xargs.stealth_mode == 1) {
 		err('w', PRINT_PROMPT, _("%s: '%s': %s. Trash function disabled. "
 			"If needed, create the directories manually and restart %s.\n"
-			"Ex: mkdir -p ~/.local/share/Trash/{files,info}\n"),
+			"E.g.: mkdir -p ~/.local/share/Trash/{files,info}\n"),
 			PROGRAM_NAME, trash_dir, strerror(errno), PROGRAM_NAME);
 		trash_ok = 0;
 		return;
@@ -3569,7 +3569,7 @@ create_trash_dirs(void)
 		err('w', PRINT_PROMPT, _("%s: '%s': Cannot create the trash "
 			"directory (or one of its subdirectories: files/ and info/).\n"
 			"Try creating them manually and restart %s.\n"
-			"Ex: mkdir -p ~/.local/share/Trash/{files,info}\n"),
+			"E.g.: mkdir -p ~/.local/share/Trash/{files,info}\n"),
 			PROGRAM_NAME, trash_dir, PROGRAM_NAME);
 		return;
 	}

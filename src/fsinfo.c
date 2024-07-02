@@ -226,7 +226,7 @@ get_fs_type_name(const char *file, int *remote)
 }
 
 /* Return a pointer to the name of the device to which the file FILE belongs
- * (ex: "/dev/sda2" or "//192.168.10.27/share").
+ * (e.g.: "/dev/sda2" or "//192.168.10.27/share").
  *
  * NOTE: It performs the same function as get_dev_name(), but it's 3X slower,
  * so that we use it only when the major device number is zero, in which case

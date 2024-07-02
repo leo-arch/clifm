@@ -108,7 +108,7 @@ If the file is named rather '.cfm.out', the command will be executed when\n\
 leaving, instead of entering, the directory.\n\n\
 Note: Only single-line commands are allowed. If you need more advanced\n\
 stuff, set here the path to a script doing whatever needs to be done.\n\n\
-Note 2: Codes to modify clifm's settings (as described in the first method)\n\
+Note 2: Codes to modify Clifm's settings (as described in the first method)\n\
 are not available here."
 
 #define AUTO_OPEN_USAGE "Turn auto-open on/off\n\n\
@@ -391,7 +391,7 @@ X:font/.*=clifmimg font;\n\
 \n\
 Comment out whatever you want to exclude from the image preview function.\n\
 \n\
-3. Run clifm via the 'clifmrun' script:\n\
+3. Run Clifm via the 'clifmrun' script:\n\
 clifmrun --fzfpreview\n\
 \n\
 Note on Kitty and Wayland:\n\
@@ -447,7 +447,7 @@ Available file type characters:\n\
 Type '=<TAB>' to get the list of available file type filters.\n\n\
 Other ways of filtering files in the current directory:\n\n\
 * @<TAB>       List all MIME-types found\n\
-* @query<TAB>  MIME-type filter. Ex: @pdf<TAB> to list all PDF files\n\
+* @query<TAB>  MIME-type filter. E.g.: @pdf<TAB> to list all PDF files\n\
 * /query       Quick search function: consult the 'search' help topic\n\
 * Alt-.        Toggle hidden files\n\
 * Alt-,        Toggle list-only-dirs\n\
@@ -669,7 +669,7 @@ The list of mounted and unmounted devices will be displayed.\n\
 Choose the device you want using ELN's.\n\
 If the device is mounted, it will be unmounted; if unmounted, it will \
 be mounted.\n\
-If mounting a device, CliFM will change automatically to the corresponding\n\
+If mounting a device, Clifm will change automatically to the corresponding\n\
 mountpoint.\n\n\
 To get information about a device, enter iELN. For example: 'i12'."
 
@@ -831,7 +831,7 @@ Page down: Advance one page\n\
 q: Stop paging (without printing remaining files)\n\
 c: Stop paging (printing remaining files)\n\n\
 Note: For upwards scrolling, use whatever your terminal emulator\n\
-has to offer (ex: mouse scrolling or some keybinding)\n\n\
+has to offer (e.g., mouse scrolling or some keybinding)\n\n\
 By default, the pager lists files using the current listing mode (long\n\
 or short). Use PagerView in the configuration file (or --pager-view in\n\
 the command line) to force the use of a specific mode. Possibles values:\n\n\
@@ -927,7 +927,7 @@ Unlike 'p', however, 'pp' always follows symlinks to their target file."
 - Print the physical working directory (resolve all symlinks)\n\
     pwd -P"
 
-#define QUIT_HELP "Exit clifm\n\n\
+#define QUIT_HELP "Exit Clifm\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   q, quit, exit\n\n\
 To enable the cd-on-quit function consult the manpage."
@@ -975,12 +975,12 @@ by default to the \"//\" action name. For example:\n\
     // content I\\'m looking for\n\n\
 Note: This plugin depends on fzf(1) and rg(1) (ripgrep)."
 
-#define SECURITY_USAGE "CliFM provides three different security mechanisms:\n\n\
+#define SECURITY_USAGE "Clifm provides three different security mechanisms:\n\n\
 1. Stealth mode (aka incognito/private mode): No file is read nor written\n\
 to the file system (unless explicitly required by the user via a command).\n\
 Default values are used.\n\
 Enable this mode via the -S,--stealth-mode command line switch.\n\n\
-2. Secure environment: CliFM runs on a sanitized environment (most\n\
+2. Secure environment: Clifm runs on a sanitized environment (most\n\
 environment variables are cleared and a few of them set to sane defaults).\n\
 Enable this mode via the --secure-env or --secure-env-full command line\n\
 switches.\n\n\
@@ -1178,7 +1178,7 @@ r  -> rm -f ('-rf' for directories) (1)\n\n\
 (1) The user is asked for confirmation if the list of files contains:\n\
 a. At least one directory\n\
 b. Three or more files\n\
-c. At least one non-explicitly-expanded ELN (ex: 'r 12')\n\n\
+c. At least one non-explicitly-expanded ELN (e.g.: 'r 12')\n\n\
 The 'paste' command is equivalent to 'c' and exists only for semantic\n\
 reasons. For example, if you want to copy selected files into the current\n\
 directory, it makes sense to write 'paste sel'.\n\n\
@@ -1244,7 +1244,7 @@ Use the 'l' command to create symbolic links, and 'le' to edit them."
 Note: Use the WorkspaceNames option in the configuration file to name\n\
 your workspaces."
 
-#define X_USAGE "Launch a new instance of CliFM on a new terminal window\n\n\
+#define X_USAGE "Launch a new instance of Clifm on a new terminal window\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   x, X [DIR]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
@@ -1369,7 +1369,7 @@ database (via the 'j' command)\
 \n      --color-scheme=NAME\t Use color scheme NAME\
 \n      --color-links-as-target\t Use the target file color for symbolic links\
 \n      --cwd-in-title\t\t Print current directory in the terminal window title\
-\n      --data-dir=PATH\t\t Use PATH as data directory\
+\n      --data-dir=PATH\t\t Use PATH as data directory (e.g.: /usr/local/share)\
 \n      --desktop-notifications\t Enable desktop notifications\
 \n      --disk-usage\t\t Show disk usage (free/total)\
 \n      --full-dir-size\t\t Print the size of directories and their contents \
@@ -1417,7 +1417,7 @@ and paths\
 \n      --only-dirs\t\t List only directories and symbolic links to directories\
 \n      --open=FILE\t\t Open FILE (via Lira) and exit\
 \n      --opener=APPLICATION\t Resource opener to use instead of Lira, \
-CliFM's built-in opener\
+Clifm's built-in opener\
 \n      --pager-view=MODE\t\t How to list files in the pager (auto, long, short)\
 \n      --physical-size\t\t Same as --no-apparent-size\
 \n      --preview=FILE\t\t Display a preview of FILE (via Shotgun) and exit\
@@ -1437,7 +1437,7 @@ PropFields in the config file)\
 \n      --shotgun-file=FILE\t Set FILE as shotgun configuration file\
 \n      --si\t\t\t Print sizes in powers of 1000 instead of 1024\
 \n      --smenutab\t\t Use smenu to display completion matches\
-\n      --sort-reverse\t\t Sort in reverse order, e.g. z-a instead of a-z\
+\n      --sort-reverse\t\t Sort in reverse order, e.g., z-a instead of a-z\
 \n      --stat FILE...\t\t Run the 'p' command on FILE(s) and exit\
 \n      --stat-full FILE...\t Run the 'pp' command on FILE(s) and exit\
 \n      --stdtab\t\t\t Force the use of the standard TAB completion mode (readline)\
@@ -1519,7 +1519,7 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  pg, pager          Set the files pager on/off\n\
  pin                Pin a directory\n\
  prompt             Switch/edit the prompt\n\
- q, quit, exit      Quit clifm\n\
+ q, quit, exit      Quit Clifm\n\
  Q                  CD on quit\n\
  rf, refresh        Refresh/clear the screen\n\
  rl, reload         Reload the main configuration file\n\
@@ -1539,7 +1539,7 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  ver, version       Print version information\n\
  view               Preview files in the current directory\n\
  ws                 Switch workspaces\n\
- x, X               Launch a new instance of clifm (as root if 'X')\n\n\
+ x, X               Launch a new instance of Clifm (as root if 'X')\n\n\
  Shell-builtins implementations\n\
  export             Export variables to the environment\n\
  pwd                Print the current working directory\n\
@@ -1865,7 +1865,7 @@ being free, we consider them all equally unethical [...]\""
 #define VIEW_DESC    " (preview files in the current directory)"
 #define VV_DESC      " (copy and rename files in bulk at once)"
 #define WS_DESC      " (switch workspaces)"
-#define X_DESC       " (launch a new instance of clifm)"
-#define XU_DESC      " (launch a new instance of clifm as root)"
+#define X_DESC       " (launch a new instance of Clifm)"
+#define XU_DESC      " (launch a new instance of Clifm as root)"
 
 #endif /* MESSAGES_H */

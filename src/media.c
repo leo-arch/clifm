@@ -68,7 +68,7 @@
 /* Information about devices */
 struct mnt_t {
 	char *mnt;   /* Mountpoint */
-	char *dev;   /* Device name (ex: /dev/sda1) */
+	char *dev;   /* Device name (e.g.: /dev/sda1) */
 	char *label; /* Device label */
 };
 
@@ -457,7 +457,7 @@ get_mnt_input(const int mode, int *info)
 	int n = -1;
 	puts(_("Enter 'q' to quit"));
 	if (xargs.mount_cmd != UNSET)
-		puts(_("Enter 'iELN' for device information. Ex: i4"));
+		puts(_("Enter 'iELN' for device information. E.g.: i4"));
 
 	char *input = (char *)NULL;
 	while (!input) {

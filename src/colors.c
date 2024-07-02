@@ -340,7 +340,7 @@ static const struct colors_t color_names[] = {
  *
  * This function is used to print properties strings ('p' command
  * and long view mode). It takes the user defined color of the
- * corresponding file type (e.g. dirs) and removes the bold attribute.
+ * corresponding file type (e.g., dirs) and removes the bold attribute.
  * Also used when running with --no-bold. */
 void
 remove_bold_attr(char *str)
@@ -601,7 +601,7 @@ update_warning_prompt_text_color(void)
 
 #ifndef CLIFM_SUCKLESS
 /* If STR is a valid Xterm-like color name, return the value for this name.
- * If an attribute is appended to the name (ex: NAME-1), return value for this
+ * If an attribute is appended to the name (e.g.: NAME-1), return value for this
  * name plus the corresponding attribute. */
 static char *
 check_names(const char *str)
@@ -2748,7 +2748,7 @@ remove_trash_ext(char **ent)
  * ELN could be:
  * > 0: The ELN of a file in CWD
  * -1:  Error getting ELN
- * 0:   ELN should not be printed. Ex: when listing files not in CWD */
+ * 0:   ELN should not be printed. E.g., when listing files not in CWD */
 void
 colors_list(char *ent, const int eln, const int pad, const int new_line)
 {

@@ -1125,7 +1125,7 @@ static char **
 get_desel_input(size_t *n)
 {
 	printf(_("\n%sEnter 'q' to quit or 'e' to edit the selections file\n"
-		"File(s) to be deselected (ex: 1 2-6, or *):\n"), df_c);
+		"File(s) to be deselected (e.g.: 1 2-6, or *):\n"), df_c);
 
 	char dp[(MAX_COLOR * 2) + 7];
 	snprintf(dp, sizeof(dp), "\001%s\002>\001%s\002 ", mi_c, tx_c);

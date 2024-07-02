@@ -1057,7 +1057,7 @@ my_rl_path_completion(const char *text, int state)
 		&& rl_line_buffer[2] == ' ' && type != DT_DIR)
 			continue;
 
-		/* If the user entered nothing before TAB (ex: "cd [TAB]") */
+		/* If the user entered nothing before TAB (e.g., "cd [TAB]") */
 		if (!filename_len) {
 			/* Exclude "." and ".." as possible completions */
 			if (SELFORPARENT(ent->d_name))
@@ -1150,7 +1150,7 @@ my_rl_path_completion(const char *text, int state)
 			}
 		}
 
-		/* If there is at least one char to complete (ex: "cd .[TAB]") */
+		/* If there is at least one char to complete (e.g., "cd .[TAB]") */
 		else {
 			/* Let's check for possible matches */
 			if (conf.fuzzy_match == 0 || rl_point < rl_end
@@ -4030,7 +4030,7 @@ my_rl_completion(const char *text, const int start, const int end)
 		cur_color = (char *)NULL;
 #endif /* !_NO_HIGHLIGHT */
 
-	/* Do not complete when the cursor is on a word. Ex: dir/_ilename */
+	/* Do not complete when the cursor is on a word. E.g., dir/_ilename */
 	if (rl_point < rl_end && rl_line_buffer[rl_point] != ' ') {
 		rl_attempted_completion_over = 1;
 		return (char **)NULL;
@@ -4236,7 +4236,7 @@ FIRST_WORD_COMP:
 		}
 	}
 
-	/* #### SUDO COMPLETION (ex: "sudo <TAB>") #### */
+	/* #### SUDO COMPLETION (e.g., "sudo <TAB>") #### */
 	if (sudo_len > 0 && words_n == 2 && strncmp(lb, sudo_cmd, sudo_len) == 0
 	&& lb[sudo_len] == ' ') {
 		matches = rl_completion_matches(text, &bin_cmd_generator_ext);
@@ -4548,8 +4548,8 @@ initialize_readline(void)
 	 * tells readline if a space char, which is a word break character
 	 * (see the above rl_completer_word_break_characters variable) is
 	 * quoted or not. If it is, readline then passes the whole string
-	 * to the completer function (ex: "user\ file"), and if not, only
-	 * wathever it found after the space char (ex: "file").
+	 * to the completer function (e.g., "user\ file"), and if not, only
+	 * wathever it found after the space char (e.g., "file").
 	 * Thanks to George Brocklehurst for pointing out this function:
 	 * https://thoughtbot.com/blog/tab-completion-in-gnu-readline. */
 	rl_char_is_quoted_p = quote_detector;
