@@ -789,6 +789,20 @@ cd_trashdir(const int prev)
 #endif /* !_NO_TRASH */
 }
 
+static void
+warn_fzf_error(void)
+{
+	fprintf(stderr, _("%s: Fzf failed. Check the FzfTabOptions "
+		"line by running 'cs edit'\n(some parameter may not "
+		"be supported by the installed fzf version).\n"), PROGRAM_NAME);
+	press_any_key_to_continue(0);
+	if (term_caps.suggestions == 1) {
+		MOVE_CURSOR_UP(3);
+		ERASE_TO_RIGHT_AND_BELOW;
+		MOVE_CURSOR_DOWN(1);
+	}
+}
+
 static int
 run_finder(const size_t height, const int offset, const char *lw,
 	const int multi)
@@ -903,6 +917,8 @@ ctrl-d:deselect-all,ctrl-t:toggle-all" : "",
 		clear_fzf();
 	if (dr == 1)
 		flags |= DELAYED_REFRESH;
+	if (ret == 2 && tabmode == FZF_TAB)
+		warn_fzf_error();
 
 	return ret;
 }
