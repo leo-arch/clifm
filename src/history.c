@@ -665,10 +665,14 @@ record_cmd(char *input)
 	if (!input || !*input)
 		return 0;
 
+	dir_cmds.last_cmd_ignored = 0;
+
 	/* Ignore entries matching HistIgnore */
 	if (conf.histignore_regex && *conf.histignore_regex
-	&& regexec(&regex_hist, input, 0, NULL, 0) == FUNC_SUCCESS)
+	&& regexec(&regex_hist, input, 0, NULL, 0) == FUNC_SUCCESS) {
+		dir_cmds.last_cmd_ignored = 1;
 		return 0;
+	}
 
 	/* Consequtively equal commands in history */
 	if (history && current_hist_n > 0 && history[current_hist_n - 1].cmd

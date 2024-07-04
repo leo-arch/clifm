@@ -128,7 +128,7 @@ profile_set(const char *prof)
 	if (!prof)
 		return FUNC_FAILURE;
 
-	first_cmd_in_dir = UNSET;
+	dir_cmds.first_cmd_in_dir = UNSET;
 
 	/* Check if prof is a valid profile */
 	int found = check_profile(prof);

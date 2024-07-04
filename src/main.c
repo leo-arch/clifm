@@ -97,6 +97,7 @@ struct ext_mnt_t *ext_mnt = (struct ext_mnt_t *)NULL;
 #endif /* LINUX_FSINFO */
 struct groups_t *sys_users = (struct groups_t *)NULL;
 struct groups_t *sys_groups = (struct groups_t *)NULL;
+struct dircmds_t dir_cmds = {UNSET, 0};
 
 const struct sort_t sort_methods[] = {
     {"none", 0, 0},
@@ -164,7 +165,6 @@ int
 	dirhist_cur_index = 0,
 	dirhist_total_index = 0,
 	exit_code = 0,
-	first_cmd_in_dir = UNSET,
 	follow_symlinks = UNSET,
 	fzftab = UNSET,
 	fzf_border_type = UNSET,

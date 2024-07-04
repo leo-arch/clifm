@@ -1676,6 +1676,13 @@ struct ext_mnt_t {
 extern struct ext_mnt_t *ext_mnt;
 #endif /* LINUX_FSINFO */
 
+
+struct dircmds_t {
+	int first_cmd_in_dir; /* History index of first cmd exec'ed in the cur dir */
+	int last_cmd_ignored;
+};
+extern struct dircmds_t dir_cmds;
+
 struct dir_info_t {
 	unsigned long long dirs;
 	unsigned long long files;
@@ -1786,7 +1793,6 @@ extern int
 	dirhist_cur_index,
 	dirhist_total_index,
 	exit_code,
-	first_cmd_in_dir, /* History index of first cmd executed in the current dir */
 	follow_symlinks,
 	fzftab,
 	fzf_border_type,

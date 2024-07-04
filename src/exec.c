@@ -2086,8 +2086,8 @@ exec_cmd(char **comm)
 
 	int is_internal_cmd = 1;
 
-	if (first_cmd_in_dir == UNSET)
-		first_cmd_in_dir = (int)current_hist_n;
+	if (dir_cmds.first_cmd_in_dir == UNSET && dir_cmds.last_cmd_ignored == 0)
+		dir_cmds.first_cmd_in_dir = (int)current_hist_n;
 
 	/* Remove backslash in front of command names: used to bypass alias names */
 	if (*comm[0] == '\\' && *(comm[0] + 1))
