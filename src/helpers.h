@@ -28,8 +28,8 @@
 #define PROGRAM_NAME_UPPERCASE "CliFM"
 #define PROGRAM_NAME "clifm"
 #define PROGRAM_DESC "The command line file manager"
-#define VERSION "1.19.2"
-#define DATE "Jun 26, 2024"
+#define VERSION "1.19.3"
+#define DATE "Jul 4, 2024"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "https://github.com/leo-arch/clifm"
 #define LICENSE "GPL2+"
@@ -1676,10 +1676,10 @@ struct ext_mnt_t {
 extern struct ext_mnt_t *ext_mnt;
 #endif /* LINUX_FSINFO */
 
-
+/* State info for the PrintDirCmds function. */
 struct dircmds_t {
 	int first_cmd_in_dir; /* History index of first cmd exec'ed in the cur dir */
-	int last_cmd_ignored;
+	int last_cmd_ignored; /* Ignored cmd (DirhistIgnore) */
 };
 extern struct dircmds_t dir_cmds;
 
