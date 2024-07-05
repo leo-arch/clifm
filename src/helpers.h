@@ -1679,7 +1679,7 @@ extern struct ext_mnt_t *ext_mnt;
 /* State info for the PrintDirCmds function. */
 struct dircmds_t {
 	int first_cmd_in_dir; /* History index of first cmd exec'ed in the cur dir */
-	int last_cmd_ignored; /* Ignored cmd (DirhistIgnore) */
+	int last_cmd_ignored; /* Ignored cmd (via HistIgnore) */
 };
 extern struct dircmds_t dir_cmds;
 

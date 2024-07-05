@@ -1296,16 +1296,11 @@ mime_open_with(char *filename, char **args)
 	if (!filename || !mime_file)
 		return FUNC_FAILURE;
 
-	err_name = "lira";
+	err_name = "open";
 
-	char *name = normalize_path(filename, strlen(filename));
-	if (!name)
-		return FUNC_FAILURE;
-
-	struct stat a;
-	if (lstat(name, &a) == -1) {
+	char *name = realpath(filename, NULL);
+	if (!name) {
 		xerror("%s: '%s': %s\n", err_name, filename, strerror(errno));
-		free(name);
 		return errno;
 	}
 
