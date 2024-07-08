@@ -1011,8 +1011,10 @@ get_apps_from_file(FILE *fp, char *file_name, const char *mime,
 			if (ret && only_names == 0)
 				*ret = ' ';
 
-			if (!file_path)
+			if (!file_path) {
+				free(appb);
 				continue;
+			}
 
 			/* If the app exists, store it into the APPS array */
 			if (*app != '/') {
