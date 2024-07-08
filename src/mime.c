@@ -935,7 +935,7 @@ get_apps_from_file(FILE *fp, char *file_name, const char *mime,
 
 		while (*tmp) {
 			size_t app_len = 0;
-			/* Split the appplications line into substrings, if any */
+			/* Split the applications line into substrings, if any */
 			while (*tmp != '\0' && *tmp != ';' && *tmp != '\n' && *tmp != '\''
 			&& *tmp != '"') {
 				app[app_len] = *tmp;
@@ -1099,7 +1099,7 @@ mime_open_with_tab(char *filename, const char *prefix, const int only_names)
 #ifndef _NO_MAGIC
 	char *mime = xmagic(name, MIME_TYPE);
 #else
-	err_name = "lira";
+	err_name = "open";
 	char *mime = get_mime(name);
 #endif /* !_NO_MAGIC */
 	if (!mime) {
@@ -1320,12 +1320,16 @@ mime_open_with(char *filename, char **args)
 #else
 	char *mime = get_mime(name);
 #endif /* !_NO_MAGIC */
-	if (!mime)
+	if (!mime) {
+		xerror(_("%s: Error getting MIME type\n"), err_name);
 		goto FAIL;
+	}
 
 	FILE *fp = fopen(mime_file, "r");
-	if (!fp)
+	if (!fp) {
+		xerror("%s: '%s': %s\n", err_name, mime_file, strerror(errno));
 		goto FAIL;
+	}
 
 	char **apps = get_apps_from_file(fp, name, mime, NULL, 0);
 
@@ -1333,6 +1337,9 @@ mime_open_with(char *filename, char **args)
 	free(mime);
 
 	if (!apps) {
+		xerror(_("%s: No opening application found\n"
+			"Tip: Run 'APP FILE', or 'mm edit' to add an opening "
+			"application"), err_name);
 		free(name);
 		return FUNC_FAILURE;
 	}
@@ -1507,7 +1514,7 @@ handle_no_app(const int info, char **fpath, char **mime, const char *arg)
 static int
 print_error_no_mime(char **fpath)
 {
-	xerror(_("%s: Error getting mime-type\n"), err_name);
+	xerror(_("%s: Error getting MIME type\n"), err_name);
 	free(*fpath);
 	return FUNC_FAILURE;
 }
