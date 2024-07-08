@@ -975,7 +975,7 @@ get_apps_from_file(FILE *fp, char *file_name, const char *mime,
 				appb = savestring(app, strlen(app));
 				/* app: the expanded value. */
 				const size_t tlen = strlen(t);
-				app = xnrealloc(app, app_len + tlen + 1, sizeof(char));
+				app = xnrealloc(app, app_len + tlen + 2, sizeof(char));
 				xstrsncpy(app, t, app_len + tlen + 1);
 				free(t);
 			}
