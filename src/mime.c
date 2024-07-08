@@ -1299,12 +1299,18 @@ mime_open_with(char *filename, char **args)
 		return FUNC_FAILURE;
 
 	err_name = "open";
+	char *deq = unescape_str(filename, 0);
+	if (!deq)
+		return FUNC_FAILURE;
 
-	char *name = realpath(filename, NULL);
+	char *name = realpath(deq, NULL);
 	if (!name) {
-		xerror("%s: '%s': %s\n", err_name, filename, strerror(errno));
+		xerror("%s: '%s': %s\n", err_name, deq, strerror(errno));
+		free(deq);
 		return errno;
 	}
+
+	free(deq);
 
 	/* ow FILE APP [ARGS]
 	 * We already have the opening app. Just join the app, option
@@ -1341,7 +1347,7 @@ mime_open_with(char *filename, char **args)
 	if (!apps) {
 		xerror(_("%s: No opening application found\n"
 			"Tip: Run 'APP FILE', or 'mm edit' to add an opening "
-			"application"), err_name);
+			"application\n"), err_name);
 		free(name);
 		return FUNC_FAILURE;
 	}
