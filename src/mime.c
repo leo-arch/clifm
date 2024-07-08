@@ -970,8 +970,7 @@ get_apps_from_file(FILE *fp, char *file_name, const char *mime,
 				if (!t)
 					continue;
 				/* appb: A copy of the original string: let's display
-				 * the env var name itself instead of its expanded
-				 * value. */
+				 * the env var name itself instead of its expanded value. */
 				appb = savestring(app, strlen(app));
 				/* app: the expanded value. */
 				const size_t tlen = strlen(t);
@@ -994,9 +993,10 @@ get_apps_from_file(FILE *fp, char *file_name, const char *mime,
 				}
 			}
 
-			/* Do not allow APP to be plain "clifm", since
-			 * nested executions of clifm are not allowed. */
-			else if (*app == PROGRAM_NAME[0] && strcmp(app, PROGRAM_NAME) == 0) {
+			/* If running in stealth mode, do not allow APP to be plain
+			 * "clifm", since nested executions of clifm are not allowed. */
+			else if (xargs.stealth_mode == 1 && *app == PROGRAM_NAME[0]
+			&& strcmp(app, PROGRAM_NAME) == 0) {
 				;
 			} else if (*app == '/') {
 				if (access(app, X_OK) == 0) {
