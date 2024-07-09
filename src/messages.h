@@ -623,7 +623,10 @@ the current directory.\n\n\
 \x1b[1mEXAMPLE\x1b[0m\n\
 - Create a symbolic link to file.zst named mylink\n\
     l file.zst mylink\n\n\
-Note: Use the 'le' command to edit a symbolic link. Try 'le --help'."
+Note: The link creation mode (by default 'literal', like 'ln -s')\n\
+can be set in the configuration file via the LinkCreationMode option\n\
+(available modes are: absolute, literal, relative).\n\n\
+Tip: Use the 'le' command to edit a symbolic link. Try 'le --help'."
 
 #define LL_USAGE "Toggle long view mode\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
