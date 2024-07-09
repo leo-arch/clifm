@@ -213,6 +213,7 @@ init_conf_struct(void)
 	conf.icons = 0;
 #endif /* !_NO_ICONS */
 	conf.light_mode = UNSET;
+	conf.link_creat_mode = DEF_LINK_CREATION_MODE;
 	conf.list_dirs_first = UNSET;
 	conf.listing_mode = UNSET;
 	conf.log_cmds = UNSET;

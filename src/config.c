@@ -189,6 +189,17 @@ get_quoting_style(const int style)
 	}
 }
 
+static char *
+get_link_creat_mode(const int mode)
+{
+	switch (mode) {
+	case LNK_CREAT_ABS: return "absolute";
+	case LNK_CREAT_REL: return "relative";
+	case LNK_CREAT_REG: return "literal";
+	default: return "literal";
+	}
+}
+
 /* Dump current value of config options (as defined in the config file),
  * highlighting those that differ from default values.
  * Note that values displayed here represent the CURRENT status of the
@@ -314,6 +325,10 @@ dump_config(void)
 
 	n = DEF_LIGHT_MODE;
 	print_config_value("LightMode", &conf.light_mode, &n, DUMP_CONFIG_BOOL);
+
+	s = get_link_creat_mode(DEF_LINK_CREATION_MODE);
+	char *cur_lnk_mode = get_link_creat_mode(conf.link_creat_mode);
+	print_config_value("LinkCreationMode", cur_lnk_mode, s, DUMP_CONFIG_STR);
 
 	n = DEF_LIST_DIRS_FIRST;
 	print_config_value("ListDirsFirst", &conf.list_dirs_first, &n,
@@ -2906,6 +2921,22 @@ set_clear_screen(char *line)
 		set_config_bool_value(line, &conf.clear_screen);
 }
 
+static void
+set_link_creation_mode(const char *val)
+{
+	if (!val || !*val) {
+		conf.link_creat_mode = DEF_LINK_CREATION_MODE;
+		return;
+	}
+
+	if (*val == 'a' && strncmp(val, "absolute", 8) == 0)
+		conf.link_creat_mode = LNK_CREAT_ABS;
+	else if (*val == 'r' && strncmp(val, "relative", 8) == 0)
+		conf.link_creat_mode = LNK_CREAT_REL;
+	else
+		conf.link_creat_mode = DEF_LINK_CREATION_MODE;
+}
+
 /* Read the main configuration file and set options accordingly */
 static void
 read_config(void)
@@ -3092,6 +3123,10 @@ read_config(void)
 		else if (xargs.light == UNSET && *line == 'L'
 		&& strncmp(line, "LightMode=", 10) == 0) {
 			set_config_bool_value(line + 10, &conf.light_mode);
+		}
+
+		else if (*line == 'L' && strncmp(line, "LinkCreationMode=", 17) == 0) {
+			set_link_creation_mode(line + 17);
 		}
 
 		else if (xargs.dirs_first == UNSET && *line == 'L'

@@ -631,6 +631,11 @@ extern time_t curdir_mtime;
 #define MV_ADVMV_FORCE   3 /* advmv -g */
 #define MV_CMD_AVAILABLE 4
 
+/* Macros for LinkCreationMode */
+#define LNK_CREAT_REG 0 /* Like ln -s */
+#define LNK_CREAT_REL 1 /* Like ln -rs */
+#define LNK_CREAT_ABS 2 /* Create absolute target */
+
 /* Macros for listing_mode */
 #define VERTLIST 0 /* ls-like listing mode */
 #define HORLIST  1
@@ -1098,6 +1103,7 @@ struct config_t {
 	int highlight;
 	int icons;
 	int light_mode;
+	int link_creat_mode;
 	int list_dirs_first;
 	int listing_mode;
 	int log_cmds;
@@ -1150,7 +1156,6 @@ struct config_t {
 	int unicode;
 	int warning_prompt;
 	int welcome_message;
-	int pad2;
 };
 
 extern struct config_t conf;

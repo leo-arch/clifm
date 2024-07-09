@@ -860,7 +860,7 @@ mime_list_open(char **apps, char *file)
 		printf("%s%*zu%s %s\n", el_c, pad, i + 1, df_c, apps[i]);
 
 	int n = get_user_input(i);
-	if (n == -1)
+	if (n == -1) /* 'q' or Ctrl-d */
 		return FUNC_SUCCESS;
 
 	char *app = apps[n - 1];

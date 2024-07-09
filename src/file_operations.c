@@ -1140,6 +1140,140 @@ edit_link(char *link)
 	return FUNC_SUCCESS;
 }
 
+/* Return the length of the longest common prefix of canonical PATH1
+ * and PATH2, ensuring only full path components are matched.
+ * Return 0 on no match. */
+static int
+path_common_prefix(char const *path1, char const *path2)
+{
+	int i = 0;
+	int ret = 0;
+
+	/* We already know path1[0] and path2[0] are '/'. Special case '//',
+	 * which is only present in a canonical name on platforms where it
+	 * is distinct. */
+	if ((path1[1] == '/') != (path2[1] == '/'))
+		return 0;
+
+	while (*path1 && *path2) {
+		if (*path1 != *path2)
+			break;
+		if (*path1 == '/')
+			ret = i + 1;
+		path1++;
+		path2++;
+		i++;
+	}
+
+	if ((!*path1 && !*path2) || (!*path1 && *path2 == '/')
+	|| (!*path2 && *path1 == '/'))
+		ret = i;
+
+	return ret;
+}
+
+/* If *PBUF is not NULL then append STR to *PBUF and update *PBUF to point}
+ * to the end of the buffer and adjust *PLEN to reflect the remaining space.
+ * Return 0 on success and 1 on failure (no more buffer space). */
+static int
+append_to_buf(char const *str, char **pbuf, size_t *plen)
+{
+	if (*pbuf) {
+		const size_t slen = strlen(str);
+		if (slen >= *plen)
+			return 1;
+
+		memcpy(*pbuf, str, slen + 1);
+		*pbuf += slen;
+		*plen -= slen;
+	}
+
+	return 0;
+}
+
+/* Generate a link target for TARGET relative to LINK_NAME and copy it into
+ * BUF, whose size is LEN.
+ * Rerturn 0 on success and 1 on failure. */
+static int
+relpath(const char *target, const char *link_name, char *buf, size_t len)
+{
+	int buf_err = 0;
+
+	/* Skip the prefix common to LINK_NAME and TARGET.  */
+	int common_index = path_common_prefix(link_name, target);
+	if (common_index == 0)
+		return 0;
+
+	const char *link_suffix = link_name + common_index;
+	const char *target_suffix = target + common_index;
+
+	/* Skip over extraneous '/'. */
+	if (*link_suffix == '/')
+		link_suffix++;
+	if (*target_suffix == '/')
+		target_suffix++;
+
+	/* Replace remaining components of LINK_NAME with '..', to get
+     to a common directory. Then append the remainder of TARGET.  */
+	if (*link_suffix) {
+		buf_err |= append_to_buf("..", &buf, &len);
+		for (; *link_suffix; ++link_suffix) {
+			if (*link_suffix == '/')
+				buf_err |= append_to_buf("/..", &buf, &len);
+		}
+
+		if (*target_suffix) {
+			buf_err |= append_to_buf("/", &buf, &len);
+			buf_err |= append_to_buf(target_suffix, &buf, &len);
+		}
+	} else {
+		buf_err |= append_to_buf(*target_suffix ? target_suffix : ".",
+			&buf, &len);
+	}
+
+	if (buf_err == 1) {
+		xerror(_("link: Error generating relative path: %s\n"),
+			strerror(ENAMETOOLONG));
+	}
+
+	return buf_err;
+}
+
+static char *
+gen_relative_target(char *link_name, char *target)
+{
+	char *norm_link = normalize_path(link_name, strlen(link_name));
+	if (!norm_link) {
+		xerror(_("link: '%s': Error normalizing path\n"), link_name);
+		return (char *)NULL;
+	}
+
+	char *p = strrchr(norm_link, '/');
+	if (p)
+		*p = '\0';
+
+	char *norm_target = normalize_path(target, strlen(target));
+	if (!norm_target) {
+		free(norm_link);
+		xerror(_("link: '%s': Error normalizing path\n"), target);
+		return (char *)NULL;
+	}
+
+	char *resolved_target = xnmalloc(PATH_MAX + 1, sizeof(char));
+	const int ret = relpath(norm_target, norm_link, resolved_target,
+		PATH_MAX + 1);
+
+	free(norm_link);
+	free(norm_target);
+
+	if (ret != 0) {
+		free(resolved_target);
+		return (char *)NULL;
+	}
+
+	return resolved_target;
+}
+
 /* Create a symbolic link to ARGS[0] named ARGS[1]. If args[1] is not specified,
  * the link is created as target_basename.link.
  * Returns 0 in case of success, or 1 otherwise. */
@@ -1212,11 +1346,29 @@ symlink_file(char **args)
 		}
 	}
 
-	if (symlinkat(target, XAT_FDCWD, link_name) == -1) {
+	char *resolved_target = target;
+
+	switch (conf.link_creat_mode) {
+	case LNK_CREAT_ABS:
+		resolved_target = normalize_path(target, strlen(target)); break;
+	case LNK_CREAT_REL:
+		resolved_target = gen_relative_target(link_name, target); break;
+	default: break;
+	}
+
+	if (!resolved_target)
+		return FUNC_FAILURE;
+
+	if (symlinkat(resolved_target, XAT_FDCWD, link_name) == -1) {
 		xerror(_("link: Cannot create symbolic link '%s': %s\n"),
 			link_name, strerror(errno));
+		if (resolved_target != target)
+			free(resolved_target);
 		return FUNC_FAILURE;
 	}
+
+	if (resolved_target != target)
+		free(resolved_target);
 
 	return FUNC_SUCCESS;
 }
