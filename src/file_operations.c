@@ -22,6 +22,10 @@
  * MA 02110-1301, USA.
 */
 
+/* path_common_prefix(), append_to_buf(), and relpath() were taken from
+ * GNU coreutils (2024), licensed GPL3+, and modified to fit our needs.
+ * Modified code is licensed GPL2+. */
+
 #include "helpers.h"
 
 #include <errno.h>
