@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Jun 26, 2024" "clifm 1.19" "CLIFM Manual"
+.TH "CLIFM" "1" "Jul 9, 2024" "clifm 1.19" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -850,6 +850,8 @@ with no argument (or if the argument is \fIlist\fR), prints the current keyboard
 Create (\fIl\fR) or edit (\fIle\fR) symbolic links.
 .sp
 The syntax for the \fIl\fR command is: \fIl TARGET [LINK_NAME]\fR. Note that if \fILINK_NAME\fR is omitted, the symbolic link is created as \fITARGET_BASENAME.link\fR in the current directory.
+.sp
+By default, the link target is created literally (like \fIln -s\fR would). The link creation mode can be set via the \fILinkCreationMode\fR option in the configuration file. Available modes are: \fIabsolute\fR, \fIliteral\fR, and \fIrelative\fR (like \fIln -rs\fR would).
 .sp
 To edit the target of a symbolic link use the \fIle\fR command followed by the desired link name. The user will be prompted to enter a new link target, using the current one as template.
 .TP
