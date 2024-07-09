@@ -209,9 +209,9 @@ static int
 dump_config(void)
 {
 	puts(_("The following is the list of options (as defined in the configuration "
-		"file) and their current values. Whenever a current value differs "
-		"from the default value, the entry is highlighted and the default "
-		"value is displayed in brackets\n"));
+		"file) and their current values. Whenever a value differs from the "
+		"default, the entry is highlighted and the default value is displayed "
+		"in square brackets.\n"));
 
 	char *start_path = (char *)NULL, *ws_names = (char *)NULL;
 	get_start_path_and_ws_names(&start_path, &ws_names);
