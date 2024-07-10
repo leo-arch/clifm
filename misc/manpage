@@ -172,7 +172,7 @@ set an alternative trash directory
 show version details and exit
 .TP
 \fB\-w\fR, \fB\-\-workspace\fR=\fI\,NUM\/\fR
-start in workspace \fINUM\fR. By default, \fBclifm\fR will recover the last visited directory for each workspace. However, you can override this behaviour using positional parameters to start in workspace \fINUM\fR and in path \fIPATH\fR. Ex: \fIclifm -w4 /etc\fR.
+start in workspace \fINUM\fR. By default, \fBclifm\fR will recover the last visited directory for each workspace. However, you can override this behaviour using positional parameters to start in workspace \fINUM\fR and in path \fIPATH\fR. E.g.: \fIclifm -w4 /etc\fR.
 .TP
 \fB\-x\fR, \fB\-\-no\-ext\-cmds\fR
 disallow the use of external (shell) commands
@@ -238,10 +238,10 @@ enable icons
 instead of a specific color, icons take the color of the corresponding file name (specified either via file type or file extension). Useful when building custom color schemes. This option implies \fB\-\-icons\fR. Only if compiled with support for either icons\-in\-terminal or Nerdfonts. The default build is compiled with emoji\-icons support, in which case this option is ignored (Unicode icons has their own color built\-in)
 .TP
 \fB\-\-int\-vars
-allow the use of internal variables (ex: \fIVAR=/bin; cd $VAR\fR)
+allow the use of internal variables (e.g.: \fIVAR=/bin; cd $VAR\fR)
 .TP
 \fB\-\-list\-and\-quit\fR
-list files and quit. Useful in conjunction with positional parameters. Ex: \'clifm \-\-list\-and\-quit /etc\'
+list files and quit. Useful in conjunction with positional parameters. E.g.: \'clifm \-\-list\-and\-quit /etc\'
 .TP
 \fB\-\-ls\fR
 short for \fI\-\-list\-and\-quit\fR
@@ -347,7 +347,7 @@ list directories only
 run as a standalone resource opener: open \fIFILE\fR and exit, where FILE could be a regular file or a directory, using either standard notation (/dir/file) or the URI file scheme (file:///dir/file]), or a URL (www.domain or https://domain).
 .TP
 \fB\-\-opener\fR=\fI\,APPLICATION\/\fR
-use APPLICATION (ex: \fIrifle\fR or \fIxdg\-open\fR) as files opener/launcher (instead of \fILira\fR, \fBclifm\fR's default opener).
+use APPLICATION (e.g.: \fIrifle\fR or \fIxdg\-open\fR) as files opener/launcher (instead of \fILira\fR, \fBclifm\fR's default opener).
 .TP
 \fB\-\-pager\-view\fR=\fI\,MODE\/\fR
 list files in the pager according to MODE. Possible values: \fIauto\fR (use the current listing mode - this is the default), \fIlong\fR (list files in long view), and \fIshort\fR (list files in short view).
@@ -398,7 +398,7 @@ print file sizes in powers of 1000, as defined by the International System of Un
 use \fIsmenu\fR to display completion matches
 .TP
 \fB\-\-sort\-reverse\fR
-sort files in reverse order (ex: z\-a instead of a\-z)
+sort files in reverse order (e.g.: z\-a instead of a\-z)
 .TP
 \fB\-\-stat\fR \fI\,FILE...\/\fR
 run the \fIp\fR command on FILE(s) and exit. This must be the \fBlast option\fR on the command line. Use \fI\-\-ptime\-style\fR to set a custom date/time format.
@@ -560,7 +560,7 @@ These following simple rules are used to compose clean/safe file names:
 .sp
 Modified file names will be listed on screen asking the user for confirmation, allowing besides to edit (by pressing 'e') the list of modified file names via a text editor.
 .sp
-If the replacement file name already exists, a dash and a number (starting from 1) will be appended. Ex: file\-3.
+If the replacement file name already exists, a dash and a number (starting from 1) will be appended. E.g.: file\-3.
 .TP
 .B bd \fR[\fINAME\fR]
 \fIbd\fR is the \fBbackdir\fR function: it takes you back to the parent directory matching NAME.
@@ -585,7 +585,7 @@ Bookmarks can be manager either from the bookmarks manager screen or from the co
 .sp
 \fB1. The bookmarks manager screen\fR
 .sp
-To access the bookmarks manager screen simply enter \fIbm\fR. Here you can cd into the desired bookmark by entering either its ELN or name (regular files can be bookmarked as well). In this screen you can also add, remove, or edit your bookmarks by simply entering 'e' to edit the bookmarks file (which is simply a list of lines with this format: \fIname:path\fR. Ex: "docs:/home/user/documents"). Make your changes, save, and exit.
+To access the bookmarks manager screen simply enter \fIbm\fR. Here you can cd into the desired bookmark by entering either its ELN or name (regular files can be bookmarked as well). In this screen you can also add, remove, or edit your bookmarks by simply entering 'e' to edit the bookmarks file (which is simply a list of lines with this format: \fIname:path\fR. E.g.: "docs:/home/user/documents"). Make your changes, save, and exit.
 .sp
 \fB2. The command line\fR
 .TS
@@ -645,7 +645,7 @@ This built\-in bulk rename function won\'t deal with deletions, replacements, fi
 \fBc\fR, \fBm\fR, \fBmd\fR, \fBr\fR
 short for the following commands respectively: \fIcp\ \-iRp\fR, \fImv\ \-i\fR, \fImkdir\ \-p\fR, and \fIrm\fR (for files) or \fIrm\ \-r\fR (for directories).
 .sp
-Note that the \fIr\fR command prompts the user for confirmation (printing the list of files to be removed) if the list of files contains: 1. at least one directory, 2. three or more files, 3. at least one non\-explicitly\-expanded ELN (ex: \fIr 12\fR).
+Note that the \fIr\fR command prompts the user for confirmation (printing the list of files to be removed) if the list of files contains: 1. at least one directory, 2. three or more files, 3. at least one non\-explicitly\-expanded ELN (e.g.: \fIr 12\fR).
 .sp
 By default, the \fIc\fR, \fIm\fR, and \fIr\fR commands ask for confirmation before operations. Since this might sometimes be quite intrusive (specially when operating on large amount of files), it is possible to turn interactivity off in two different ways:
 
@@ -673,7 +673,7 @@ Directories check order:
   3. Check \fBCDPATH\fR environment variable and append /DIR to each of the paths specified here. If the result of the concatenation is a valid directory, change into it.
   4. Check directories in the current working directory. If a matching directory is found, change to it.
 .sp
-You can use either ELN\'s or a string to indicate the directory you want. Ex: \fIcd\ 12\fR or \fIcd\ ~/media\fR. If \fIautocd\fR is enabled (default), \fIcd\ 12\fR and \fIcd\ ~/media\fR could be written as \fI12\fR and \fI~/media\fR respectively as well.
+You can use either ELN\'s or a string to indicate the directory you want. E.g.: \fIcd\ 12\fR or \fIcd\ ~/media\fR. If \fIautocd\fR is enabled (default), \fIcd\ 12\fR and \fIcd\ ~/media\fR could be written as \fI12\fR and \fI~/media\fR respectively as well.
 .sp
 Unlike the shell \fBcd\fR(1) command, \fBclifm\fR's built\-in \fIcd\fR function not only changes the current directory, but also lists its content (provided the option \fICdListsAutomatically\fR is enabled, which is the default) according to a comprehensive list of color codes. By default, the output of \fIcd\fR is much like this shell command: \fIcd\ DIR\ &&\ ls\ \-\-color=auto\ \-\-group\-directories\-first\fR.
 .sp
@@ -725,7 +725,7 @@ deselect one or more selected files.
 .sp
 If no parameter is passed, the user is prompted to either mark selected files to be deselected or to edit the selections file (entering \'e\') via a text editor to manually deselect files.
 .sp
-Use \fI*\fR, \fIa\fR or \fIall\fR to deselect all selected entries at once. Ex: \fIds\ *\fR.
+Use \fI*\fR, \fIa\fR or \fIall\fR to deselect all selected entries at once. E.g.: \fIds\ *\fR.
 .sp
 You can also pass the file name(s) (or ELN\'s) to be deselected as a parameter. For example: \fIds\ myfile\ 24\fR.
 .sp
@@ -901,7 +901,7 @@ with no arguments, prints the list of messages in the current session. The \fIcl
 .B n, new \fR[\fIFILE\fR]... [\fIDIR/\fR]...
 create new empty files and/or directories.
 .sp
-If a file name ends with a slash (/), it will be taken as a directory name. Else, it will be created as a regular file. Ex: \fIn\ myfile\ mydir/\fR, to create a file named \fImyfile\fR and a directory named \fImydir\fR. If no file name is provided, the user will be asked to enter one.
+If a file name ends with a slash (/), it will be taken as a directory name. Else, it will be created as a regular file. E.g.: \fIn\ myfile\ mydir/\fR, to create a file named \fImyfile\fR and a directory named \fImydir\fR. If no file name is provided, the user will be asked to enter one.
 .sp
 File name validation is performed over names before creation. In case of an unsafe name, the user is warned and asked for confirmation.
 .sp
@@ -1066,7 +1066,7 @@ While paging, the following keys are available:
  \fBq\fR: Stop paging (without printing remaining files)
  \fBc\fR: Stop paging (printing remaining files)
 .sp
-Note: To scroll lines up, use whatever your terminal emulator has to offer (ex: mouse scrolling or some keybinding).
+Note: To scroll lines up, use whatever your terminal emulator has to offer (e.g.: mouse scrolling or some keybinding).
 .sp
 By default, the pager lists files using the current listing mode (long or short). Use \fIPagerView\fR in the configuration file (or \fI\-\-pager\-view\fR in the command line) to force the use of a specific mode. Possibles values:
 .sp
@@ -1142,9 +1142,9 @@ show the elements currently contained in the Selection Box.
 show the splash screen.
 .TP
 .B st, sort \fR[\fIMETHOD\fR] [\fIrev\fR]
-with no argument, print the current sorting order. Else, sort files by METHOD, where METHOD is one of: 0 = none, 1 = name, 2 = size, 3 = atime, 4 = btime, 5 = ctime, 6 = mtime, 7 = version, 8 = extension, 9 = inode, 10 = owner, 11 = group, 12 = blocks, or 13 = links. Both numbers and names are allowed (ex: \fIst 3\fR or \fIst atime\fR). Bear in mind that methods 10 and 11 sort by owner and group ID number, \fBnot\fR by owner and group names. The default is \fIversion\fR.
+with no argument, print the current sorting order. Else, sort files by METHOD, where METHOD is one of: 0 = none, 1 = name, 2 = size, 3 = atime, 4 = btime, 5 = ctime, 6 = mtime, 7 = version, 8 = extension, 9 = inode, 10 = owner, 11 = group, 12 = blocks, or 13 = links. Both numbers and names are allowed (e.g.: \fIst 3\fR or \fIst atime\fR). Bear in mind that methods 10 and 11 sort by owner and group ID number, \fBnot\fR by owner and group names. The default is \fIversion\fR.
 .sp
-By default, files are sorted from less to more (ex: from \'a\' to \'z\' if sorting by \fBname\fR). Use the \fIrev\fR subcommand to invert this order. Ex: \fIst\ rev\fR or \fIst\ inode\ rev\fR. Switch back to the previous state running \fIst rev\fR again.
+By default, files are sorted from less to more (e.g.: from \'a\' to \'z\' if sorting by \fBname\fR). Use the \fIrev\fR subcommand to invert this order. E.g.: \fIst\ rev\fR or \fIst\ inode\ rev\fR. Switch back to the previous state running \fIst rev\fR again.
 .TP
 .B stats
 print statistics about files in the current directory (not available in light mode).
@@ -1499,7 +1499,7 @@ In this case, supposing you want to use F12 to open the configuration file, the 
  open\-config:\\033\\133\\062\\064\\176 (Oct)
  open\-config:\\e[24~ (Symbol)
 .TP
-GNU emacs escape sequences are also allowed (ex: "\\M\-a", Alt\-a in most keyboards, or "\\C\-r" for Ctrl\-r). Some codes, especially those involving keys like Ctrl or the arrow keys, vary depending on the terminal emulator and the system settings. These keybindings should be set up thus on a per terminal basis. You can also consult the terminfo database via the \fIinfocmp\fR command. See \fBterminfo\fR(5) and \fBinfocmp\fR(1).
+GNU emacs escape sequences are also allowed (e.g.: "\\M\-a", Alt\-a in most keyboards, or "\\C\-r" for Ctrl\-r). Some codes, especially those involving keys like Ctrl or the arrow keys, vary depending on the terminal emulator and the system settings. These keybindings should be set up thus on a per terminal basis. You can also consult the terminfo database via the \fIinfocmp\fR command. See \fBterminfo\fR(5) and \fBinfocmp\fR(1).
 .TP
 .B Readline keybindings
 .TP
@@ -1513,8 +1513,8 @@ System readline keybindings for command line editing, such as \fICtrl\-a\fR, to 
 .TP
 \fBclifm\fR provides four customizable keybindings for custom plugins. The procedure for setting a keybinding for a plugin is the following:
  1) Copy your plugin to the plugins directory (or use any of the plugins already in there)
- 2) Link pluginx (where \'x\' is the plugin number [1\-4]) to your plugin using the \'actions edit\' command. Ex: "plugin1=myplugin.sh"
- 3) Set a keybinding for pluginx using the \'kb edit\' command. Ex: "plugin1:\\M\-7"
+ 2) Link pluginx (where \'x\' is the plugin number [1\-4]) to your plugin using the \'actions edit\' command. E.g.: "plugin1=myplugin.sh"
+ 3) Set a keybinding for pluginx using the \'kb edit\' command. E.g.: "plugin1:\\M\-7"
 
 .SH 7. THEMING
 .TP
@@ -1591,7 +1591,7 @@ The following codes are used for different interface elements (in the \fIInterfa
  sf = ELN's, bookmarks, tag, and file names
  sh = commands history entries
  sx = suggestions for \fBclifm\fR's internal commands and parameters
- sp = suggestions pointer (ex: 56 > filename, where '>' is the suggestion pointer)
+ sp = suggestions pointer (e.g.: 56 > filename, where '>' is the suggestion pointer)
  sz = file names (fuzzy)
 
  \fBSyntax highlighting\fR
@@ -1824,7 +1824,7 @@ Each prompt is built following almost the same escape codes and rules used by th
 .TP
 \fB\\a\fR: A bell character
 .TP
-\fB\\d\fR: The date, in abbreviated form (ex: \'Tue May 26\')
+\fB\\d\fR: The date, in abbreviated form (e.g.: \'Tue May 26\')
 .TP
 \fB\\t\fR: The time, in 24\-hour HH:MM:SS format
 .TP
@@ -1989,13 +1989,13 @@ The suggestions system includes a secondary, warning prompt, used to highlight w
 .TP
 The wrong command name check is omitted if the input string:
 
- Is quoted (ex: "string" or \'string\')
- Is bracketed (ex: (string), [string], or {string})
- It starts with a stream redirection character (ex: <string or >string)
- Is a comment (ex: #string)
+ Is quoted (e.g.: "string" or \'string\')
+ Is bracketed (e.g.: (string), [string], or {string})
+ It starts with a stream redirection character (e.g.: <string or >string)
+ Is a comment (e.g.: #string)
  It starts with one or more spaces
- Is an assignment (ex: foo=var)
- It is escaped (ex: \\string)
+ Is an assignment (e.g.: foo=var)
+ It is escaped (e.g.: \\string)
 .TP
 The warning prompt could be customized by means of the same rules used by the regular prompt. To use a custom warning prompt, modify the \fIWarningPrompt\fR line in the prompts file (via the \fIprompt edit\fR command). It defaults to
 
@@ -2064,7 +2064,7 @@ For information about how to customize \fIfnf\fR consult \fBfnf\fR(1).
 .TP
 Besides the default \fITAB completion\fR for command \fBnames and paths\fR, you can also expand \fBELN's\fR using the TAB key. Example: type 'o 12', press TAB, and it becomes 'o filename ', or, if 12 refers to a directory, 'o dir/'. \fBclifm\fR uses a Bash\-style quoting system, so that this file name: "this is a test@version{1}" is expanded as follows: this\\ is\\ a\\ test\\@version\\{1\\}
 .TP
-ELN's and \fBELN ranges\fR will be also automatically expanded, provided the corresponding ELN's actually exist, that is to say, provided some file name is listed on the screen under those numbers. For example: 'diff 1 118' will only expand '1', but not '118', if there is no ELN 118. In the same way, the range 1\-118 will only be expanded provided there are 118 or more elements listed on the screen. Note that the second field oa a range can be omitted, in which case the ELN of the last listed file is assumed (ex: provided there are 100 listed files, 12\- is equivalent to 12\-100).
+ELN's and \fBELN ranges\fR will be also automatically expanded, provided the corresponding ELN's actually exist, that is to say, provided some file name is listed on the screen under those numbers. For example: 'diff 1 118' will only expand '1', but not '118', if there is no ELN 118. In the same way, the range 1\-118 will only be expanded provided there are 118 or more elements listed on the screen. Note that the second field oa a range can be omitted, in which case the ELN of the last listed file is assumed (e.g.: provided there are 100 listed files, 12\- is equivalent to 12\-100).
 .TP
 Since ranges could be a bit tricky, TAB completion is available to make sure this range actually includes the desired file names.
 .TP
@@ -3133,12 +3133,12 @@ It depends on the terminal emulator you use to correctly display non\-ASCII char
 
 \fBSpaces and file names\fR:
 
-When dealing with file names containing spaces, you can use both single and double quotes (ex: "this file" or 'this file') plus the backslash character (ex: this\\ file).
+When dealing with file names containing spaces, you can use both single and double quotes (e.g.: "this file" or 'this file') plus the backslash character (e.g.: this\\ file).
 .sp
 
 \fBStarting path\fR:
 
-By default, \fBclifm\fR starts in the current working directory. However, you can always specify a different path by passing it as positional parameter. Ex: \fIclifm /home/user/misc\fR. You can also permanently set up the starting path in the \fBclifm\fR configuration file. If the \fIRestoreLastPath\fR option is set to \fItrue\fR, \fBclifm\fR will start instead in the last visited directory (and in the last used workspace), unless the starting path (and optionally the workspace number) is specified using the appropriate command line options.
+By default, \fBclifm\fR starts in the current working directory. However, you can always specify a different path by passing it as positional parameter. E.g.: \fIclifm /home/user/misc\fR. You can also permanently set up the starting path in the \fBclifm\fR configuration file. If the \fIRestoreLastPath\fR option is set to \fItrue\fR, \fBclifm\fR will start instead in the last visited directory (and in the last used workspace), unless the starting path (and optionally the workspace number) is specified using the appropriate command line options.
 .sp
 
 \fBDefault profile\fR:
@@ -3154,7 +3154,7 @@ A description for each option in the configuration file can be found in the conf
 .TP
 .B PROFILE FILE
 The profile file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/profile.clifm\fR.
-In this file you can add those commands you want to be executed at startup. You can also permanently set here some custom variables, ex: 'dir="/path/to/dir"'. This variable may be used as a shortcut to that directory, for instance: \fIcd $dir\fR. Custom variables could also be temporarily defined via the command prompt: Ex: user@hostname ~ $ var="This is a test". Temporary variables will be removed at program exit. Internal variables are disabled by default; enable them via the \fI\-\-int\-vars\fR command line switch.
+In this file you can add those commands you want to be executed at startup. You can also permanently set here some custom variables, e.g.: 'dir="/path/to/dir"'. This variable may be used as a shortcut to that directory, for instance: \fIcd $dir\fR. Custom variables could also be temporarily defined via the command prompt: E.g.: user@hostname ~ $ var="This is a test". Temporary variables will be removed at program exit. Internal variables are disabled by default; enable them via the \fI\-\-int\-vars\fR command line switch.
 .TP
 .B PROMPTS FILE
 This file contains prompts definitions and is located in \fIDATADIR/clifm/prompts.clifm\fR. It will be copied automatically into \fI$XDG_CONFIG_HOME/clifm/prompts.clifm\fR if it doesn't exist. The \fIPrompt\fR line in the color scheme file should point to one of the prompt names defined in this file. See the \fBPROMPT\fR section for more information.
@@ -3375,7 +3375,7 @@ T}	Rename the file whose ELN is 4 \fB(8)\fR
 .sp 0
  \fB(2)\fR Note the ending slash in the directory name
 .sp 0
- \fB(3)\fR Since \fBclifm\fR is integrated to the system shell, you can also use any of the shell commands you usually use to create new files. Ex: \fItouch myfile\fR or \fInano myfile\fR
+ \fB(3)\fR Since \fBclifm\fR is integrated to the system shell, you can also use any of the shell commands you usually use to create new files. E.g.: \fItouch myfile\fR or \fInano myfile\fR
 .sp 0
  \fB(4)\fR Only for non\-standard TAB completion: fzf, fnf, smenu
 .sp 0
