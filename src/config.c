@@ -1588,7 +1588,7 @@ create_main_config_file(char *file)
 
 	fprintf(config_fp,
 		"# How 'l' creates symlinks (absolute, relative, literal)\n\
-;LinkCreateMode=literal\n\n"
+;LinkCreationMode=%s\n\n"
 		"# Enable fuzzy matching for filename/path completions and suggestions\n\
 ;FuzzyMatching=%s\n\n"
 
@@ -1670,6 +1670,9 @@ create_main_config_file(char *file)
 # To enable this feature consult the manpage.\n\
 ;CdOnQuit=%s\n\n",
 
+		DEF_LINK_CREATION_MODE == LNK_CREAT_ABS ? "absolute"
+			: (DEF_LINK_CREATION_MODE == LNK_CREAT_REL ? "relative"
+			: "literal"),
 		DEF_FUZZY_MATCH == 1 ? "true" : "false",
 		DEF_FUZZY_MATCH_ALGO,
 		DEF_FZF_PREVIEW == 1 ? "true" : "false",
