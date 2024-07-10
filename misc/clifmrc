@@ -270,6 +270,7 @@
 # f = File names in current directory
 # h = Commands history
 # j = Jump database
+# Use a single dash (-) to skip all these checks.
 ;SuggestionStrategy=ehfjac
 
 # Suggest file names using the corresponding file type color (set
