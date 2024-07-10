@@ -3,7 +3,7 @@
 		#      The command line file manager      #
 		###########################################
 
-# This is CliFM's main configuration file.
+# This is Clifm's main configuration file.
 
 # Lines starting with either '#' or ';' are commented (ignored).
 # Options starting with a ';' hold the default value, but are commented.
@@ -223,7 +223,7 @@
 
 # Enable/disable icons.
 # By default, emojis (widely available today) are used as icons.
-# Nerd-fonts and icons-in-terminal are supported as well, though clifm
+# Nerd-fonts and icons-in-terminal are supported as well, though Clifm
 # needs to be recompiled in order to enable support. Consult our Wiki
 # (https://github.com/leo-arch/clifm/wiki) for more information.
 ;Icons=false
@@ -341,12 +341,12 @@
 
 # Choose the resource opener to open files with their default associated
 # application (e.g. Ranger's rifle or xdg-open). If not set, 'lira',
-# CliFM's built-in opener, is used instead.
+# Clifm's built-in opener, is used instead.
 ;Opener=
 
-# Only used when opening a directory via a new CliFM instance (with the
+# Only used when opening a directory via a new Clifm instance (with the
 # 'x' command), this option specifies the command to be used to launch a
-# terminal emulator to run CliFM on it.
+# terminal emulator to run Clifm on it.
 ;TerminalCmd="xterm -e"
 
 # Set the file mode creation mask. Defaults to the value inherited from
@@ -437,7 +437,7 @@
 # working directory. If set, it overrides RestoreLastPath.
 ;StartingPath=
 
-# Start CliFM in the last visited directory (and in the last used
+# Start Clifm in the last visited directory (and in the last used
 # workspace). This option is overriden by StartingPath (if set).
 ;RestoreLastPath=true
 
@@ -467,7 +467,7 @@
 # Set a custom welcome message.
 ;WelcomeMessageStr=""
 
-# Print CliFM's logo screen at startup.
+# Print Clifm's logo screen at startup.
 ;SplashScreen=false
 
 
@@ -499,7 +499,7 @@
 #         8. AUTOCOMMANDS             #
 #=====================================#
 
-# Control CliFM's settings on a per directory basis. For more information
+# Control Clifm's settings on a per directory basis. For more information
 # consult the manpage.
 
 # Remote file systems are slow: let's speed this up by enabling the light
