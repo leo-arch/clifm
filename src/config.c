@@ -1531,18 +1531,18 @@ create_main_config_file(char *file)
 \t\t#      The command line file manager      #\n\
 \t\t###########################################\n\n"
 
-	    "# This is the configuration file for CliFM\n\n"
+	    "# This is the configuration file for Clifm\n\n"
 
-		"# Lines starting with '#' or ';' are commented (ignored)\n\
-# Uncomment an option to override the default value\n\n"
+		"# Lines starting with '#' or ';' are commented (ignored).\n\
+# Uncomment an option to override the default value.\n\n"
 
-	    "# Set the color scheme\n\
+	    "# Set the color scheme.\n\
 ;ColorScheme=%s\n\n"
 
-	    "# Inform amount of files contained by a directories when listing files\n\
+	    "# Inform amount of files contained by a directories when listing files.\n\
 ;FilesCounter=%s\n\n"
 
-		"# How to list files: 0 = vertically (like ls(1) would), 1 = horizontally\n\
+		"# How to list files: 0 = vertically (like ls(1) would), 1 = horizontally.\n\
 ;ListingMode=%d\n\n"
 
 		"# List files automatically after changing the current directory.\n\
@@ -1587,12 +1587,12 @@ create_main_config_file(char *file)
 		DEF_RM_FORCE == 1 ? "true" : "false");
 
 	fprintf(config_fp,
-		"# How 'l' creates symlinks (absolute, relative, literal)\n\
+		"# How 'l' creates symlinks (absolute, relative, literal).\n\
 ;LinkCreationMode=%s\n\n"
-		"# Enable fuzzy matching for filename/path completions and suggestions\n\
+		"# Enable fuzzy matching for filename/path completions and suggestions.\n\
 ;FuzzyMatching=%s\n\n"
 
-		"# Fuzzy matching algorithm: 1 (faster, non-Unicode), 2 (slower, Unicode)\n\
+		"# Fuzzy matching algorithm: 1 (faster, non-Unicode), 2 (slower, Unicode).\n\
 ;FuzzyAlgorithm=%d\n\n"
 
 		"# TAB completion mode: 'standard', 'fzf', 'fnf', or 'smenu'. Defaults to\n\
@@ -1610,12 +1610,12 @@ create_main_config_file(char *file)
 
 	    ";WelcomeMessage=%s\n\
 ;WelcomeMessageStr=\"\"\n\n\
-# Print %s's logo screen at startup\n\
+# Print %s's logo screen at startup.\n\
 ;SplashScreen=%s\n\n\
 ;ShowHiddenFiles=%s\n\n\
-# Display extended file metadata next to file names (long listing format)\n\
+# Display extended file metadata next to file names (long listing format).\n\
 ;LongViewMode=%s\n\
-# Properties fields to be printed in long view mode\n\
+# Properties fields to be printed in long view mode.\n\
 # f = files counter for directories\n\
 # B = file allocated blocks\n\
 # d = inode number\n\
@@ -1628,7 +1628,7 @@ create_main_config_file(char *file)
 # x = extended attributes/ACL/capabilities (marked as '@') (requires p|n)\n\
 # A single dash (\'-\') disables all fields\n\
 ;PropFields=\"%s\"\n\
-# Number of spaces between fields in long view (1-2)\n\
+# Number of spaces between fields in long view (1-2).\n\
 ;PropFieldsGap=%d\n\
 # Format used to print timestamps in long view. Available options:\n\
 # default, relative, iso, long-iso, full-iso, +FORMAT (see strftime(3))\n\
@@ -1662,7 +1662,7 @@ create_main_config_file(char *file)
 		"# Automatically purge the jump database from non-existing directories.\n\
 ;PurgeJumpDB=%s\n\n"
 
-	    "# Should CliFM be allowed to run external, shell commands?\n\
+	    "# Should Clifm be allowed to run external, shell commands?\n\
 ;ExternalCommands=%s\n\n"
 
 	    "# Write the last visited directory to ~/.config/clifm/.last to be\n\
@@ -1704,13 +1704,13 @@ create_main_config_file(char *file)
 ;Autocd=%s\n\
 ;AutoOpen=%s\n\n"
 
-		"# Enable autocommand files (.cfm.in and .cfm.out)\n\
+		"# Enable autocommand files (.cfm.in and .cfm.out).\n\
 ;ReadAutocmdFiles=%s\n\n"
 
-		"# Read .hidden files\n\
+		"# Read .hidden files.\n\
 ;ReadDotHidden=%s\n\n"
 
-	    "# If set to true, enable auto-suggestions.\n\
+	    "# Enable auto-suggestions.\n\
 ;AutoSuggestions=%s\n\n"
 
 	    "# The following checks will be performed in the order specified\n\
@@ -1729,16 +1729,16 @@ create_main_config_file(char *file)
 # (set via the color scheme file).\n\
 ;SuggestFiletypeColor=%s\n\n"
 
-		"# Suggest a brief decription for internal commands\n\
+		"# Suggest a brief decription for internal commands.\n\
 ;SuggestCmdDesc=%s\n\n"
 
 ";SyntaxHighlighting=%s\n\n"
 
-	"# How to quote expanded ELN's (regular files only): backslash, single, double\n\
+	"# How to quote expanded ELN's (regular files only): backslash, single, double.\n\
 ;QuotingStyle=%s\n\n"
 
 		"# We have three search strategies: 0 = glob-only, 1 = regex-only,\n\
-# and 2 = glob-regex\n\
+# and 2 = glob-regex.\n\
 ;SearchStrategy=%d\n\n",
 
 		DEF_AUTOCD == 1 ? "true" : "false",
@@ -1770,23 +1770,23 @@ create_main_config_file(char *file)
 # append file type indicator at the end of file names.\n\
 ;Classify=%s\n\n"
 
-		"# Color links as target file name\n\
+		"# Color links as target file name.\n\
 ;ColorLinksAsTarget=%s\n\n"
 
 	    "# Should the Selection Box be shared among different profiles?\n\
 ;ShareSelbox=%s\n\n"
 
 	    "# Choose the resource opener to open files with their default associated\n\
-# application. If not set, Lira, CliFM's built-in opener, is used.\n\
+# application. If not set, Lira, Clifm's built-in opener, is used.\n\
 ;Opener=\n\n"
 
-	    "# Only used when opening a directory via a new CliFM instance (with the 'x'\n\
+	    "# Only used when opening a directory via a new Clifm instance (with the 'x'\n\
 # command), this option specifies the command to be used to launch a\n\
-# terminal emulator to run CliFM on it.\n\
+# terminal emulator to run Clifm on it.\n\
 ;TerminalCmd='%s'\n\n"
 
 	    "# How to sort files: none, name, size, atime, btime, ctime, mtime,\n\
-# version, extension, inode, owner, group, blocks, links\n\
+# version, extension, inode, owner, group, blocks, links.\n\
 ;Sort=version\n\
 # Sort in reverse order\n\
 ;SortReverse=%s\n\n"
@@ -1798,22 +1798,22 @@ create_main_config_file(char *file)
 ;PrivateWorkspaceSettings=%s\n\n"
 
 		"# A comma separated list of workspace names in the form NUM=NAME\n\
-# Example: \"1=MAIN,2=EXTRA,3=GIT,4=WORK\" or \"1=α,2=β,3=γ,4=δ\"\n\
+# Example: \"1=MAIN,2=EXTRA,3=GIT,4=WORK\" or \"1=α,2=β,3=γ,4=δ\".\n\
 ;WorkspaceNames=\"\"\n\n"
 
-	    "# Print a usage tip at startup\n\
+	    "# Print a usage tip at startup.\n\
 ;Tips=%s\n\n\
 ;ListDirsFirst=%s\n\n\
-# Enable case sensitive listing for files in the current directory\n\
+# Enable case sensitive listing for files in the current directory.\n\
 ;CaseSensitiveList=%s\n\n\
 # Enable case sensitive lookup for the directory jumper function (via \n\
-# the 'j' command)\n\
+# the 'j' command).\n\
 ;CaseSensitiveDirJump=%s\n\n\
-# Enable case sensitive completion for file names\n\
+# Enable case sensitive completion for file names.\n\
 ;CaseSensitivePathComp=%s\n\n\
-# Enable case sensitive search\n\
+# Enable case sensitive search.\n\
 ;CaseSensitiveSearch=%s\n\
-# Skip non-alphanumeric characters when sorting files ('version' or 'name')\n\
+# Skip non-alphanumeric characters when sorting files ('version' or 'name').\n\
 ;SkipNonAlnumPrefix=%s\n\n\
 ;Unicode=%s\n\n\
 # Mas, the files list pager. Possible values are:\n\
@@ -1832,7 +1832,7 @@ create_main_config_file(char *file)
 # When running in long mode, this setting is overriden by MinFilenameTrim\n\
 # whenever MAXFILENAMELEN is smaller than MINFILENAMETRIM.\n\
 ;MaxFilenameLen=%d\n\n\
-# Trim file names longer than MAXFILENAMELEN\n\
+# Trim file names longer than MAXFILENAMELEN.\n\
 ;TrimNames=%s\n\n",
 
 		DEF_LIGHT_MODE == 1 ? "true" : "false",
@@ -1869,18 +1869,18 @@ create_main_config_file(char *file)
 
 		"# Print the list of selected files. You can limit the number of printed \n\
 # entries using the MaxPrintSelfiles option (-1 = no limit, 0 = auto (never\n\
-# print more than half terminal height), or any custom value)\n\
+# print more than half terminal height), or any custom value).\n\
 ;PrintSelfiles=%s\n\
 ;MaxPrintSelfiles=%d\n\n"
 
-	    "# If set to true, clear the screen before listing files\n\
+	    "# Clear the screen before listing files.\n\
 ;ClearScreen=%s\n\n"
 
 	    "# If not specified, StartingPath defaults to the current working\n\
-# directory. If set, it overrides RestoreLastPath\n\
+# directory. If set, it overrides RestoreLastPath.\n\
 ;StartingPath=\n\n"
 
-	    "# If set to true, start CliFM in the last visited directory (and in the\n\
+	    "# If set to true, start Clifm in the last visited directory (and in the\n\
 # last used workspace). This option is overriden by StartingPath (if set).\n\
 ;RestoreLastPath=%s\n\n"
 
@@ -1916,8 +1916,8 @@ create_main_config_file(char *file)
 #promptcmd date | awk '{print $1\", \"$2,$3\", \"$4}'\n\n"
 
 		"# AUTOCOMMANDS\n\
-# Control CliFM settings on a per directory basis. For more information\n\
-# consult the manpage\n\
+# Control Clifm settings on a per directory basis. For more information\n\
+# consult the manpage.\n\
 #autocmd /media/remotes/** lm=1,fc=0\n\
 #autocmd @ws3 lv=1\n\
 #autocmd ~/important !printf \"Keep your fingers outta here!\\n\" && read -n1\n\
