@@ -2333,7 +2333,7 @@ rl_suggestions(const unsigned char c)
 	/* Let's find out whether the last entered character is escaped. */
 	int escaped = (wlen > 1 && word[wlen - 2] == '\\') ? 1 : 0;
 
-	for (st = 0; st < SUG_STRATS; st++) {
+	for (st = 0; conf.suggestion_strategy[st]; st++) {
 		switch (conf.suggestion_strategy[st]) {
 
 		case 'a': /* 3.e.1) Aliases */
@@ -2505,7 +2505,6 @@ rl_suggestions(const unsigned char c)
 
 			break;
 
-		case '-': break; /* Ignore check */
 		default: break;
 		}
 	}

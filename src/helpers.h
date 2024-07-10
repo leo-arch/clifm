@@ -712,13 +712,16 @@ extern time_t curdir_mtime;
  * null byte. */
 #define MAX_COLOR 46
 
-/* Macros to control file descriptors in exec functions */
+/* Macros to control file descriptors in exec functions. */
 #define E_NOFLAG   0
 #define E_NOSTDIN  (1 << 1)
 #define E_NOSTDOUT (1 << 2)
 #define E_NOSTDERR (1 << 3)
 #define E_MUTE     (E_NOSTDOUT | E_NOSTDERR)
 
+/* Amount of available suggestion strategies (a,b,c,e,f,h,j).
+ * 'b' is deprecated (kept only for compatibility with old versions) */
+#define SUG_STRATS 7
 
 #define FZF_INTERNAL_PREVIEWER 1 /* clifm itself */
 /* --preview is set either from FzfOpts in the color scheme file or from

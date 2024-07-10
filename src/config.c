@@ -1716,13 +1716,11 @@ create_main_config_file(char *file)
 	    "# The following checks will be performed in the order specified\n\
 # by SuggestionStrategy. Available checks:\n\
 # a = Aliases names\n\
-# b = Bookmarks names (deprecated since v1.9.9)\n\
 # c = Path completion\n\
 # e = ELN's\n\
 # f = File names in current directory\n\
 # h = Commands history\n\
 # j = Jump database\n\
-# Use a dash (-) to skip a check. E.g.: 'eahfj-c' to skip the bookmarks check\n\
 ;SuggestionStrategy=%s\n\n"
 
 	    "# Suggest file names using the corresponding file type color\n\
@@ -2746,30 +2744,15 @@ CONT:
 
 #ifndef _NO_SUGGESTIONS
 static void
-set_sug_strat(const char *line)
+set_sug_strat(char *line)
 {
-	char opt_str[SUG_STRATS + 3] = "";
-	if (sscanf(line, "%9s\n", opt_str) == -1)
-		return;
-
-	char *tmp = remove_quotes(opt_str);
+	char *tmp = remove_quotes(line);
 	if (!tmp)
 		return;
 
-	int fail = 0;
-	size_t s;
-	for (s = 0; tmp[s]; s++) {
-		if (tmp[s] != 'a' && tmp[s] != 'b'
-		&& tmp[s] != 'c' && tmp[s] != 'e'
-		&& tmp[s] != 'f' && tmp[s] != 'h'
-		&& tmp[s] != 'j' && tmp[s] != '-') {
-			fail = 1;
-			break;
-		}
-	}
-
-	if (fail == 1 || s != SUG_STRATS)
-		return;
+	const size_t len = strlen(tmp);
+	if (len > SUG_STRATS)
+		tmp[SUG_STRATS] = '\0';
 
 	free(conf.suggestion_strategy);
 	conf.suggestion_strategy = savestring(tmp, strlen(tmp));

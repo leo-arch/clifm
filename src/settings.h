@@ -533,7 +533,7 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 # define DEF_SUDO_CMD "sudo"
 #endif /* __OpenBSD__ */
 #define DEF_SUG_FILETYPE_COLOR 0
-#define DEF_SUG_STRATEGY "ehfj-ac"
+#define DEF_SUG_STRATEGY "ehfjac"
 #define DEF_SUGGESTIONS 1
 #define DEF_TIME_STYLE_RECENT "%b %e %H:%M" /* Timestamps in long view mode */
 #define DEF_TIME_STYLE_OLDER  "%b %e  %Y"
@@ -571,7 +571,6 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 
 #define DEF_RM_FORCE 0
 
-#define SUG_STRATS 7
 #define MAX_WS 8
 #define MIN_SCREEN_WIDTH 20
 #define MIN_SCREEN_HEIGHT 5
