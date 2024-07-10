@@ -1587,6 +1587,8 @@ create_main_config_file(char *file)
 		DEF_RM_FORCE == 1 ? "true" : "false");
 
 	fprintf(config_fp,
+		"# How 'l' creates symlinks (absolute, relative, literal)\n\
+;LinkCreateMode=literal\n\n"
 		"# Enable fuzzy matching for filename/path completions and suggestions\n\
 ;FuzzyMatching=%s\n\n"
 
