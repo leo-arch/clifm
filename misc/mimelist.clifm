@@ -121,8 +121,8 @@ X:N:.*\.abw$=abiword %x;libreoffice %x;soffice %x;ooffice %x
 #-----------------------------
 # Directories
 #-----------------------------
-# Only for the open-with command (ow) and the --open command line switch
-# In graphical environments directories will be opened in a new window
+# Only for the open-with command (ow) and the --open command line switch.
+# In graphical environments directories will be opened in a new window.
 
 X:inode/directory=xterm -e clifm %x;xterm -e vifm %x;pcmanfm %x;thunar %x;xterm -e ncdu %x
 !X:inode/directory=vifm;ranger;nnn;ncdu
@@ -139,8 +139,8 @@ X:^text/html$=$BROWSER;surf %x;vimprobable %x;vimprobable2 %x;qutebrowser %x;dwb
 #-----------------------------
 
 X:^text/rtf$=libreoffice %x;soffice %x;ooffice %x
-X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;vim;vi;mg;emacs;nano;mili;leafpad %x;mousepad %x;featherpad %x;nedit %x;kate %x;gedit %x;pluma %x;io.elementary.code %x;liri-text %x;xed %x;atom %x;nota %x;gobby %x;kwrite %x;xedit %x
-!X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;vim;vi;mg;emacs;nano
+X:(^text/.*|application/(json|javascript)|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;vim;vi;mg;emacs;nano;mili;leafpad %x;mousepad %x;featherpad %x;nedit %x;kate %x;gedit %x;pluma %x;io.elementary.code %x;liri-text %x;xed %x;atom %x;nota %x;gobby %x;kwrite %x;xedit %x
+!X:(^text/.*|application/(json|javascript)|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;vim;vi;mg;emacs;nano
 
 #-----------------------------
 # Office documents

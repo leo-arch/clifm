@@ -710,7 +710,7 @@ set_shell_level(void)
 }
 
 /* Set a few environment variables, mostly useful to run custom scripts
- * via the actions function */
+ * via the actions function. */
 void
 set_env(const int reaload)
 {
@@ -2286,8 +2286,8 @@ X:^text/html$=$BROWSER;surf %%x;vimprobable %%x;vimprobable2 %%x;qutebrowser %%x
 \n\
 # Text\n\
 X:^text/rtf$=libreoffice %%x;soffice %%x;ooffice %%x\n\
-X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;vim;vi;mg;emacs;nano;mili;leafpad %%x;mousepad %%x;featherpad %%x;nedit %%x;kate %%x;gedit %%x;pluma %%x;io.elementary.code %%x;liri-text %%x;xed %%x;atom %%x;nota %%x;gobby %%x;kwrite %%x;xedit %%x\n\
-!X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;vim;vi;mg;emacs;nano\n\
+X:(^text/.*|application/(json|javascript)|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;vim;vi;mg;emacs;nano;mili;leafpad %%x;mousepad %%x;featherpad %%x;nedit %%x;kate %%x;gedit %%x;pluma %%x;io.elementary.code %%x;liri-text %%x;xed %%x;atom %%x;nota %%x;gobby %%x;kwrite %%x;xedit %%x\n\
+!X:(^text/.*|application/(json|javascript)|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;vim;vi;mg;emacs;nano\n\
 \n\
 # Office documents\n\
 ^application/.*(open|office)document\\.spreadsheet.*=sc-im\n\
