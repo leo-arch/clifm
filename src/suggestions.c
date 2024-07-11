@@ -1219,7 +1219,7 @@ check_cmds(char *str, size_t len, const int print)
 		if (strncmp(cmd, bin_commands[i], len) != 0)
 			continue;
 
-		int ret = print_cmd_suggestion(i, len);
+		const int ret = print_cmd_suggestion(i, len);
 		if (ret == NO_MATCH)
 			continue;
 		return ret;
@@ -1251,7 +1251,8 @@ check_jumpdb(const char *str, const size_t len, const int print)
 		if (len && (conf.case_sens_path_comp
 		? strncmp(str, jump_db[i].path, len)
 		: strncasecmp(str, jump_db[i].path, len)) == 0) {
-			if (jump_db[i].len <= len) return FULL_MATCH;
+			if (jump_db[i].len <= len)
+				return FULL_MATCH;
 
 			suggestion.type = FILE_SUG;
 			suggestion.filetype = DT_DIR;
@@ -2441,7 +2442,12 @@ rl_suggestions(const unsigned char c)
 
 			if (words_num == 1) {
 				word = (first_word && *first_word) ? first_word : last_word;
+				if (*word == '/') /* Absolute path: nothing to do here. */
+					break;
 				wlen = strlen(word);
+			} else {
+				if (*word == '/')
+					break;
 			}
 
 			/* If "./FILE" check only "FILE" */
@@ -2450,9 +2456,6 @@ rl_suggestions(const unsigned char c)
 				wlen -= 2;
 				last_word_offset += 2;
 			}
-
-			if (*word == '/') /* Absolute path: nothing to do here. */
-				break;
 
 			/* If we have a slash, we're not looking for files in the CWD. */
 			char *p = strchr(word, '/');
