@@ -69,6 +69,9 @@ static char *last_word = (char *)NULL;
 static int last_word_offset = 0;
 static int point_is_first_word = 0;
 
+/* A big enough buffer to hold temporary data. */
+static char tmp_buf[PATH_MAX + 2];
+
 /*
 #ifndef _NO_HIGHLIGHT
 // Change the color of the word _LAST_WORD, at offset OFFSET, to COLOR
@@ -365,7 +368,7 @@ recover_from_wrong_cmd(void)
 	 * in which case we should skip this check. */
 	if (rl_line_buffer && (rl_dispatching == 0
 	|| (words_num > 1 && point_is_first_word == 0))) {
-		char *p = (strrchr(rl_line_buffer, ' '));
+		const char *p = (strrchr(rl_line_buffer, ' '));
 		if (p && p != rl_line_buffer && *(p - 1) != '\\' && *(p + 1) != ' ')
 			return FUNC_FAILURE;
 	}
@@ -377,7 +380,7 @@ recover_from_wrong_cmd(void)
 
 #ifndef _NO_HIGHLIGHT
 	if (conf.highlight == 1) {
-		int p = rl_point;
+		const int p = rl_point;
 		rl_point = 0;
 		recolorize_line();
 		rl_point = p;
@@ -593,7 +596,7 @@ print_suggestion(const char *str, size_t offset, char *color)
 	flags &= ~BAEJ_SUGGESTION;
 
 	/* Let's check for baej suggestions, mostly in case of fuzzy matches. */
-	size_t wlen = last_word ? strlen(last_word) : 0;
+	const size_t wlen = last_word ? strlen(last_word) : 0;
 	/* An alias name can be the same as the beginning of the alias definition,
 	 * so that this check must always be true in case of aliases. */
 	if (suggestion.type == ALIAS_SUG || (last_word && cur_comp_type == TCMP_PATH
@@ -607,7 +610,7 @@ print_suggestion(const char *str, size_t offset, char *color)
 	if (conf.highlight == 0)
 		rl_redisplay();
 	curcol = prompt_offset + (rl_line_buffer
-			? (int)wc_xstrlen(rl_line_buffer) : 0);
+		? (int)wc_xstrlen(rl_line_buffer) : 0);
 
 	if (term_cols > 0) {
 		while (curcol > term_cols)
@@ -781,13 +784,13 @@ skip_leading_backslashes(char **str, size_t *len)
 static void
 match_print(char *match, const size_t len, char *color, const int append_slash)
 {
-	char t[PATH_MAX + 2];
-	*t = '\0';
+//	char t[PATH_MAX + 2];
+	*tmp_buf = '\0';
 
 	if (append_slash == 1)
-		snprintf(t, sizeof(t), "%s/", match);
+		snprintf(tmp_buf, sizeof(tmp_buf), "%s/", match);
 
-	char *tmp = escape_str(*t ? t : match);
+	char *tmp = escape_str(*tmp_buf ? tmp_buf : match);
 	if (!tmp || !*tmp) {
 		print_suggestion(match, len, color);
 		return;
@@ -917,17 +920,18 @@ print_directory_suggestion(const filesn_t i, const size_t len, char *color)
 
 	suggestion.filetype = DT_DIR;
 
-	char name[NAME_MAX + 2];
-	snprintf(name, sizeof(name), "%s/", file_info[i].name);
+//	char name[NAME_MAX + 2];
+	*tmp_buf = '\0';
+	snprintf(tmp_buf, sizeof(tmp_buf), "%s/", file_info[i].name);
 
-	char *tmp = escape_str(name);
+	char *tmp = escape_str(tmp_buf);
 	if (tmp) {
 		print_suggestion(tmp, len, color);
 		free(tmp);
 		return;
 	}
 
-	print_suggestion(name, len, color);
+	print_suggestion(tmp_buf, len, color);
 }
 
 static inline void
@@ -949,9 +953,10 @@ print_reg_file_suggestion(char *str, const filesn_t i, size_t len,
 		}
 
 		if (dot_slash) { /* Reinsert './', removed to check file name. */
-			char t[NAME_MAX + 2];
-			snprintf(t, sizeof(t), "./%s", tmp);
-			print_suggestion(t, len + 2, color);
+//			char t[NAME_MAX + 2];
+			*tmp_buf = '\0';
+			snprintf(tmp_buf, sizeof(tmp_buf), "./%s", tmp);
+			print_suggestion(tmp_buf, len + 2, color);
 		} else {
 			print_suggestion(tmp, len, color);
 		}
@@ -961,9 +966,10 @@ print_reg_file_suggestion(char *str, const filesn_t i, size_t len,
 	}
 
 	if (dot_slash) {
-		char t[NAME_MAX + 2];
-		snprintf(t, sizeof(t), "./%s", file_info[i].name);
-		print_suggestion(t, len + 2, color);
+//		char t[NAME_MAX + 2];
+		*tmp_buf = '\0';
+		snprintf(tmp_buf, sizeof(tmp_buf), "./%s", file_info[i].name);
+		print_suggestion(tmp_buf, len + 2, color);
 		return;
 	}
 
@@ -1249,14 +1255,14 @@ check_jumpdb(const char *str, const size_t len, const int print)
 
 			suggestion.type = FILE_SUG;
 			suggestion.filetype = DT_DIR;
-			char tmp[PATH_MAX + 2];
-			*tmp = '\0';
+//			char tmp[PATH_MAX + 2];
+			*tmp_buf = '\0';
 
 			if (jump_db[i].len > 0
 			&& jump_db[i].path[jump_db[i].len - 1] != '/')
-				snprintf(tmp, sizeof(tmp), "%s/", jump_db[i].path);
+				snprintf(tmp_buf, sizeof(tmp_buf), "%s/", jump_db[i].path);
 
-			print_suggestion(*tmp ? tmp : jump_db[i].path, len, color);
+			print_suggestion(*tmp_buf ? tmp_buf : jump_db[i].path, len, color);
 			return PARTIAL_MATCH;
 		}
 	}
@@ -1304,16 +1310,16 @@ check_eln(const char *str, const int print)
 	if (conf.suggest_filetype_color)
 		color = file_info[n].color;
 
-	char tmp[NAME_MAX + 1];
-	*tmp = '\0';
+//	char tmp[NAME_MAX + 1];
+	*tmp_buf = '\0';
 	if (file_info[n].dir) {
-		snprintf(tmp, sizeof(tmp), "%s/", file_info[n].name);
+		snprintf(tmp_buf, sizeof(tmp_buf), "%s/", file_info[n].name);
 		suggestion.filetype = DT_DIR;
 	} else {
 		suggestion.filetype = DT_REG;
 	}
 
-	print_suggestion(!*tmp ? file_info[n].name : tmp, 0, color);
+	print_suggestion(*tmp_buf ? tmp_buf : file_info[n].name, 0, color);
 
 	return PARTIAL_MATCH;
 }
@@ -1431,9 +1437,10 @@ check_users(const char *str, const size_t len)
 		if (len == 0 || (*str == *p->pw_name
 		&& strncmp(str, p->pw_name, len) == 0)) {
 			suggestion.type = USER_SUG;
-			char t[NAME_MAX + 1];
-			snprintf(t, sizeof(t), "~%s", p->pw_name);
-			print_suggestion(t, len + 1, sf_c);
+//			char t[NAME_MAX + 1];
+			*tmp_buf = '\0';
+			snprintf(tmp_buf, sizeof(tmp_buf), "~%s", p->pw_name);
+			print_suggestion(tmp_buf, len + 1, sf_c);
 			endpwent();
 			return PARTIAL_MATCH;
 		}
@@ -1459,9 +1466,10 @@ check_variables(const char *str, const size_t len)
 
 		*ret = '\0';
 		suggestion.type = VAR_SUG;
-		char t[NAME_MAX + 1];
-		snprintf(t, sizeof(t), "$%s", environ[i]);
-		print_suggestion(t, len + 1, sh_c);
+//		char t[NAME_MAX + 1];
+		*tmp_buf = '\0';
+		snprintf(tmp_buf, sizeof(tmp_buf), "$%s", environ[i]);
+		print_suggestion(tmp_buf, len + 1, sh_c);
 		*ret = '=';
 		return PARTIAL_MATCH;
 	}
@@ -1475,9 +1483,10 @@ check_variables(const char *str, const size_t len)
 			continue;
 
 		suggestion.type = CMD_SUG;
-		char t[NAME_MAX + 1];
-		snprintf(t, sizeof(t), "$%s", usr_var[i].name);
-		print_suggestion(t, len + 1, sh_c);
+//		char t[NAME_MAX + 1];
+		*tmp_buf = '\0';
+		snprintf(tmp_buf, sizeof(tmp_buf), "$%s", usr_var[i].name);
+		print_suggestion(tmp_buf, len + 1, sh_c);
 		return PARTIAL_MATCH;
 	}
 
