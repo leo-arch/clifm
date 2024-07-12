@@ -67,7 +67,7 @@ char *url_encode(char *str);
 char *url_decode(char *str);
 filesn_t xatof(const char *s);
 int  xatoi(const char *s);
-char *xitoa(long long n);
+const char *xitoa(long long n);
 char xgetchar(void);
 int  xmkdir(char *dir, const mode_t mode);
 ssize_t xreadlink(const int fd, char *restrict path, char *restrict buf,
