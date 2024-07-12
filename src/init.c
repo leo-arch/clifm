@@ -1949,6 +1949,10 @@ get_sel_files(void)
 size_t
 get_cdpath(void)
 {
+	if (xargs.secure_env == 1 || xargs.secure_env_full == 1
+	|| xargs.secure_cmds == 1)
+		return 0;
+
 	char *p = getenv("CDPATH");
 	if (!p || !*p)
 		return 0;
