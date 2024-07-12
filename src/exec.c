@@ -1197,8 +1197,7 @@ check_auto_first(char **args)
 	|| (args[1] && (*args[1] != '&' || args[1][1])))
 		return (-1);
 
-	if ((*args[0] == 'e' && strcmp(args[0], "edit") == 0)
-	|| (*args[0] == 'c' && strcmp(args[0], "config") == 0))
+	if (is_internal_c(args[0]))
 		return (-1);
 
 	char *deq_str = (char *)NULL;

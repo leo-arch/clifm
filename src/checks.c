@@ -508,8 +508,10 @@ contains_digit(const char *str)
 static int
 find_cmd(const struct cmdslist_t *cmds_list, const size_t list_size, char *cmd)
 {
-	int found = 0, i = (int)list_size;
-	int c = -1, d = contains_digit(cmd);
+	int found = 0;
+	int i = (int)list_size;
+	int c = -1;
+	const int d = contains_digit(cmd);
 
 	if (d != -1) {
 		c = cmd[d];
