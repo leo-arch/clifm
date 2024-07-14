@@ -857,7 +857,7 @@ get_longest_filename(const filesn_t n, const size_t pad)
 	/* longest_fc stores the amount of digits taken by the files counter of
 	 * the longest file name, provided it is a directory.
 	 * We use this to trim file names up to MAX_NAME_LEN + LONGEST_FC, so
-	 * that we can make use of the space used by the files counter.
+	 * that we can make use of the space taken by the files counter.
 	 * Example:
 	 *    longest_dirname/13
 	 *    very_long_file_na~
@@ -1590,7 +1590,8 @@ print_entry_nocolor_light(int *ind_char, const filesn_t i,
 	free(wtrim.wname);
 }
 
-/* Pad the current file name to equate the longest file name length */
+/* Right pad the current file name (adding spaces) to equate the longest
+ * file name length. */
 static void
 pad_filename(const int ind_char, const filesn_t i, const int pad,
 	const int termcap_move_right)
@@ -1621,38 +1622,6 @@ pad_filename(const int ind_char, const filesn_t i, const int pad,
 	}
 }
 
-/* Add spaces needed to equate the longest file name length */
-static void
-pad_filename_light(const int ind_char, const filesn_t i, const int pad,
-	const int termcap_move_right)
-{
-	int cur_len = 0;
-#ifndef _NO_ICONS
-	cur_len = pad + 1 + (conf.icons == 1 ? 3 : 0)
-		+ (int)file_info[i].len + (ind_char ? 1 : 0);
-#else
-	cur_len = pad + 1 + (int)file_info[i].len + (ind_char ? 1 : 0);
-#endif /* !_NO_ICONS */
-
-	if (conf.classify == 1) {
-		if (file_info[i].dir == 1)
-			++cur_len;
-		if (file_info[i].filesn > 0 && conf.files_counter == 1
-		&& file_info[i].ruser == 1)
-			cur_len += DIGINUM((int)file_info[i].filesn);
-	}
-
-	const int diff = (int)longest - cur_len;
-
-	if (termcap_move_right == 0) {
-		int j = diff + 1;
-		while(--j >= 0)
-			putchar(' ');
-	} else {
-		MOVE_CURSOR_RIGHT(diff + 1);
-	}
-}
-
 /* List files horizontally:
  * 1 AAA	2 AAB	3 AAC
  * 4 AAD	5 AAE	6 AAF */
@@ -1670,10 +1639,6 @@ list_files_horizontal(size_t *counter, int *reset_pager,
 	else
 		print_entry_function = conf.light_mode == 1
 			? print_entry_nocolor_light : print_entry_nocolor;
-
-	void (*pad_filename_function)(const int, const filesn_t, const int, const int);
-	pad_filename_function = conf.light_mode == 1
-		? pad_filename_light : pad_filename;
 
 	const int termcap_move_right = (xargs.list_and_quit == 1
 		|| term_caps.suggestions == 0) ? 0 : 1;
@@ -1740,7 +1705,7 @@ list_files_horizontal(size_t *counter, int *reset_pager,
 		print_entry_function(&ind_char, i, pad, max_namelen);
 
 		if (last_column == 0)
-			pad_filename_function(ind_char, i, pad, termcap_move_right);
+			pad_filename(ind_char, i, pad, termcap_move_right);
 		else
 			putchar('\n');
 	}
@@ -1782,10 +1747,6 @@ list_files_vertical(size_t *counter, int *reset_pager,
 	else
 		print_entry_function = conf.light_mode == 1
 			? print_entry_nocolor_light : print_entry_nocolor;
-
-	void (*pad_filename_function)(const int, const filesn_t, const int, const int);
-	pad_filename_function = conf.light_mode == 1
-		? pad_filename_light : pad_filename;
 
 	const int termcap_move_right = (xargs.list_and_quit == 1
 		|| term_caps.suggestions == 0) ? 0 : 1;
@@ -1889,9 +1850,9 @@ list_files_vertical(size_t *counter, int *reset_pager,
 		print_entry_function(&ind_char, x, pad, max_namelen);
 
 		if (last_column == 0)
-			pad_filename_function(ind_char, x, pad, termcap_move_right);
+			pad_filename(ind_char, x, pad, termcap_move_right);
 		else
-			/* Last column is populated. E.g.:
+			/* Last column is populated. Example:
 			 * 1 file  3 file3  5 file5HERE
 			 * 2 file2 4 file4  6 file6HERE
 			 * ... */
