@@ -888,6 +888,12 @@ truncate_file(char *file, const int max, const int check_dups)
 			n++;
 	}
 
+	if (c == EOF && ferror(orig_fp)) {
+		err('w', PRINT_PROMPT, _("%s: '%s': Error reading file\n"),
+			PROGRAM_NAME, file);
+		goto EXIT;
+	}
+
 	if (n <= max)
 		goto EXIT;
 
