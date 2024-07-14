@@ -883,7 +883,7 @@ truncate_file(char *file, const int max, const int check_dups)
 	int n = 0, c;
 
 	/* Count newline chars to get the amount of lines in the file. */
-	while ((c = fgetc(orig_fp)) != EOF && n < INT_MAX) {
+	while ((c = fgetc(orig_fp)) != EOF && n < INT_MAX) { /* Flawfinder: ignore */
 		if (c == '\n')
 			n++;
 	}
