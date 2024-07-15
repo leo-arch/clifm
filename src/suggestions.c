@@ -424,21 +424,6 @@ clear_suggestion(const int sflag)
 	}
 }
 
-/* THIS FUNCTION SHOULD BE REMOVED */
-void
-remove_suggestion_not_end(void)
-{
-/*	if (conf.highlight != 0) {
-		MOVE_CURSOR_RIGHT(rl_end - rl_point);
-		fflush(stdout);
-	}
-
-	ERASE_TO_RIGHT; */
-	clear_suggestion(CS_FREEBUF);
-/*	MOVE_CURSOR_LEFT(rl_end - rl_point);
-	fflush(stdout); */
-}
-
 static inline void
 restore_cursor_position(const size_t slines)
 {

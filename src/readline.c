@@ -260,7 +260,7 @@ rl_exclude_input(const unsigned char c, const unsigned char prev)
 #ifndef _NO_SUGGESTIONS
 			if (rl_point != rl_end && suggestion.printed) {
 				/* This should be the delete key. */
-				remove_suggestion_not_end();
+				clear_suggestion(CS_FREEBUF);
 			} else {
 				if (suggestion.printed)
 					clear_suggestion(CS_FREEBUF);
@@ -375,7 +375,7 @@ END:
 	if (rl_point != rl_end && c != KEY_ESC) {
 		if (rl_point < s) {
 			if (suggestion.printed)
-				remove_suggestion_not_end();
+				clear_suggestion(CS_FREEBUF);
 		}
 		if (wrong_cmd == 1) { /* Wrong cmd and we are on the first word. */
 			char *fs = strchr(rl_line_buffer, ' ');
