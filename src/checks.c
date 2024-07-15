@@ -794,18 +794,11 @@ check_regex(char *str)
 char **
 check_for_alias(char **args)
 {
-	/* Do not expand alias if first word is an ELN */
-	if (aliases_n == 0 || !aliases || !args || flags & FIRST_WORD_IS_ELN)
+	/* Do not expand alias if first word is an ELN or the alias names
+	 * starts with a backslash. */
+	if (aliases_n == 0 || !aliases || !args || flags & FIRST_WORD_IS_ELN
+	|| *args[0] == '\\')
 		return (char **)NULL;
-
-	if (conf.autocd == 1 || conf.auto_open == 1) {
-		/* Do not expand alias is first word is a file name in CWD */
-		struct stat a;
-		if (*args[0] == '\\' || (stat(args[0], &a) == 0 && ((S_ISDIR(a.st_mode)
-		&& conf.autocd == 1) || (!S_ISDIR(a.st_mode)
-		&& conf.auto_open == 1) ) ) )
-			return (char **)NULL;
-	}
 
 	int i = (int)aliases_n;
 

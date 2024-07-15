@@ -2819,8 +2819,8 @@ parse_input_str(char *str)
 		if ((*substr[i] == '.' && (!substr[i][1] || (substr[i][1] == '.'
 		&& (!substr[i][2] || substr[i][2] == '/'))))
 		|| strstr(substr[i], "/..")) {
-			char *tmp = is_internal_cmd == 1
-			&& (*substr[0] != 'l' || substr[0][1]) /* Exclude 'l' command. */
+			char *tmp = (is_internal_cmd == 1
+			&& (*substr[0] != 'l' || substr[0][1])) /* Exclude 'l' command. */
 				? normalize_path(substr[i], strlen(substr[i])) : NULL;
 			if (tmp) {
 				free(substr[i]);
