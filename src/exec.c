@@ -1197,7 +1197,7 @@ check_auto_first(char **args)
 	|| (args[1] && (*args[1] != '&' || args[1][1])))
 		return (-1);
 
-	if (is_internal_c(args[0]))
+	if (!(flags & FIRST_WORD_IS_ELN) && is_internal_c(args[0]))
 		return (-1);
 
 	char *deq_str = (char *)NULL;
