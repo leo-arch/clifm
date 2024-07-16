@@ -1291,13 +1291,17 @@ check_auto_second(char **args)
 
 	if (conf.autocd == 1 && cdpath_n > 0 && !args[1]) {
 		const int ret = cd_function(tmp, CD_NO_PRINT_ERROR);
-		if (ret == FUNC_SUCCESS)
-			{ free(tmp); return FUNC_SUCCESS; }
+		if (ret == FUNC_SUCCESS) {
+			free(tmp);
+			return FUNC_SUCCESS;
+		}
 	}
 
 	struct stat attr;
-	if (stat(tmp, &attr) != 0)
-		{ free(tmp); return (-1); }
+	if (stat(tmp, &attr) != 0) {
+		free(tmp);
+		return (-1);
+	}
 
 	if (conf.autocd == 1 && S_ISDIR(attr.st_mode) && !args[1])
 		return autocd_dir(tmp);

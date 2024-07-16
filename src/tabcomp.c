@@ -113,7 +113,7 @@ enable_raw_mode(const int fd)
 	raw.c_oflag &= (tcflag_t)~(OPOST);
 	/* control modes - set 8 bit chars */
 	raw.c_cflag |= (CS8);
-	/* local modes - choing off, canonical off, no extended functions,
+	/* local modes - echoing off, canonical off, no extended functions,
 	 * no signal chars (^Z,^C) */
 	raw.c_lflag &= (tcflag_t)~(ECHO | ICANON | IEXTEN | ISIG);
     /* control chars - set return condition: min number of bytes and timer. */
@@ -141,7 +141,7 @@ disable_raw_mode(const int fd)
 
 /* Use the "ESC [6n" escape sequence to query the cursor position (both
  * vertical and horizontal) and store both values into C (columns) and L (lines).
- * Returns 0 on success and 1 on error */
+ * Returns 0 on success and 1 on error. */
 static int
 get_cursor_position(int *c, int *l)
 {

@@ -1083,7 +1083,7 @@ print_file_name(char *filename, const char *color, const int follow_link,
 		? replace_invalid_chars(filename) : (char *)NULL;
 
 	char name[(NAME_MAX * sizeof(wchar_t)) + 3]; *name = '\0';
-	if (strchr(wname ? wname : filename, ' '))
+	if (detect_space(wname ? wname : filename) == 1)
 		snprintf(name, sizeof(name), "'%s'", wname ? wname : filename);
 
 	char *n = *name ? name : (wname ? wname : filename);
@@ -1091,7 +1091,7 @@ print_file_name(char *filename, const char *color, const int follow_link,
 	if (follow_link == 1) { /* 'pp' command */
 		if (link_target && *link_target) {
 			char t[PATH_MAX * sizeof(wchar_t) + 3]; *t = '\0';
-			if (strchr(link_target, ' '))
+			if (detect_space(link_target) == 1)
 				snprintf(t, sizeof(t), "'%s'", link_target);
 			printf(_("\tName: %s%s%s %s<-%s %s%s%s\n"), color,
 				*t ? t : link_target, df_c, dn_c, df_c, ln_c, n, df_c);
@@ -1115,7 +1115,7 @@ print_file_name(char *filename, const char *color, const int follow_link,
 		xreadlink(XAT_FDCWD, filename, target, sizeof(target));
 
 	char t[PATH_MAX * sizeof(wchar_t) + 3]; *t = '\0';
-	if (tlen != -1 && *target && strchr(target, ' '))
+	if (tlen != -1 && *target && detect_space(target) == 1)
 		snprintf(t, sizeof(t), "'%s'", target);
 
 	struct stat a;

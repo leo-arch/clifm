@@ -1705,15 +1705,23 @@ cp_mv_file(char **args, const int copy_and_rename, const int force)
 static void
 print_file_name(char *fname, const int isdir)
 {
-	if (strchr(fname, ' ')) {
-		if (strchr(fname, '\''))
-			printf("\"%s%s\"\n", fname, isdir >= 1 ? "/" : "");
+	char *tmp_name = (char *)NULL;
+	if (wc_xstrlen(fname) == 0)
+		tmp_name = replace_invalid_chars(fname);
+
+	char *name = tmp_name ? tmp_name : fname;
+
+	if (detect_space(name) == 1) {
+		if (strchr(name, '\''))
+			printf("\"%s%s\"\n", name, isdir >= 1 ? "/" : "");
 		else
-			printf("'%s%s'\n", fname, isdir >= 1 ? "/" : "");
+			printf("'%s%s'\n", name, isdir >= 1 ? "/" : "");
 	} else {
-		fputs(fname, stdout);
+		fputs(name, stdout);
 		puts(isdir >= 1 ? "/" : "");
 	}
+
+	free(tmp_name);
 }
 
 static void

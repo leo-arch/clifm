@@ -465,6 +465,76 @@ u8truncstr(char *restrict str, const size_t max)
 	return bmax - len;
 }
 
+/* Return 1 is the string S contains at least one whitespace char (ASCII or
+ * Unicode), or 0 otherwise.
+ * The list of available whitespaces is taken from:
+ * https://en.wikipedia.org/wiki/Whitespace_character */
+int
+detect_space(char *s)
+{
+	if (!s || !*s)
+		return 0;
+
+	unsigned char s0, s1, s2;
+
+	while (*s) {
+		s0 = (unsigned char)*s;
+
+		if (s0 == ' ' || s0 == '\t')
+			return 1;
+
+		if ((s1 = (unsigned char)s[1]) == '\0')
+			return 0;
+
+		if (s0 == 0xc2 && (s1 == 0x85 || s1 == 0xa0))
+			return 1; /* Unnamed control char or NO-BREAK SPACE. */
+
+		if ((s2 = (unsigned char)s[2]) == '\0')
+			return 0;
+
+		if (s0 == 0xe1 && s1 == 0x9a && s2 == 0x80)
+			return 1; /* OGHAM SPACE MARK. */
+
+		if (s0 == 0xe1 && s1 == 0xa0 && s2 == 0x8e)
+			return 1; /* MONGOLIAN VOWEL SEPARATOR. */
+
+		if (s0 == 0xe3 && s1 == 0x80 && s2 == 0x80)
+			return 1; /* IDEOGRAPHIC SPACE. */
+
+		if (s0 != 0xe2)
+			goto CONT;
+
+		if (s1 == 0x81 && s2 == 0x9f)
+			return 1; /* MEDIUM MATHEMATICAL SPACE. */
+
+		if (s1 != 0x80)
+			goto CONT;
+
+		switch (s2) {
+		case 0x80: /* fallthrough */ /* EN QUAD. */
+		case 0x81: /* fallthrough */ /* EM QUAD. */
+		case 0x82: /* fallthrough */ /* EN SPACE. */
+		case 0x83: /* fallthrough */ /* EM SPACE. */
+		case 0x84: /* fallthrough */ /* THREE-PER-EM SPACE. */
+		case 0x85: /* fallthrough */ /* FOUR-PER-EM SPACE. */
+		case 0x86: /* fallthrough */ /* SIX-PER-EM SPACE. */
+		case 0x87: /* fallthrough */ /* FIGURE SPACE. */
+		case 0x88: /* fallthrough */ /* PUNCTUATION SPACE. */
+		case 0x89: /* fallthrough */ /* THIN SPACE. */
+		case 0x8a: /* fallthrough */ /* HAIR SPACE. */
+		case 0xa8: /* fallthrough */ /* LINE SEPARATOR. */
+		case 0xa9: /* fallthrough */ /* PARAGRAPH SEPARATOR. */
+		case 0xaf: /* NARROW NO-BREAK SPACE. */
+			return 1;
+		}
+
+CONT:
+		s++;
+	}
+
+	return 0;
+}
+
 /* Replace invalid characters in NAME by INVALID_CHAR ('^').
  * This function is called only if wc_xstrlen() returns zero, in which case
  * we have either a non-printable char or an invalid multi-byte sequence. */
@@ -493,6 +563,21 @@ replace_invalid_chars(const char *name)
 #endif /* CHAR_MIN < 0 */
 			*n = INVALID_CHR;
 			n++; q++;
+			continue;
+		}
+
+		if ((unsigned char)*q == 0xc2 && (unsigned char)*(q + 1) == 0x85) {
+			/* Unnamed control char */
+			*n = INVALID_CHR;
+			n++; q += 2;
+			continue;
+		}
+
+		if ((unsigned char)*q == 0xe2 && (unsigned char)*(q + 1) == 0x80
+		&& ((unsigned char)*(q + 2) == 0xa8 || (unsigned char)*(q + 2) == 0xa9)) {
+			/* Line separator (xa8) / Paragraph separator (xa9) */
+			*n = INVALID_CHR;
+			n++; q += 3;
 			continue;
 		}
 

@@ -31,6 +31,7 @@
 
 __BEGIN_DECLS
 
+int  detect_space(char *s);
 size_t count_chars(const char *s, const char c);
 char *escape_str(const char *str);
 char *gen_rand_str(const size_t len);
