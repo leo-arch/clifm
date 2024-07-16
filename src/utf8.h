@@ -43,9 +43,6 @@
 #pragma warning(disable : 4820)
 #endif
 
-//#include <stddef.h>
-//#include <stdlib.h>
-
 #if defined(_MSC_VER)
 # pragma warning(pop)
 #endif
