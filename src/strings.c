@@ -465,7 +465,7 @@ u8truncstr(char *restrict str, const size_t max)
 	return bmax - len;
 }
 
-/* Return 1 is the string S contains at least one whitespace char (ASCII or
+/* Return 1 if the string S contains at least one whitespace char (ASCII or
  * Unicode), or 0 otherwise.
  * The list of available whitespaces is taken from:
  * https://en.wikipedia.org/wiki/Whitespace_character */
