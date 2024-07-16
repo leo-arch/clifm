@@ -670,10 +670,10 @@ run_pager(const int columns_n, int *reset_pager, filesn_t *i, size_t *counter)
 	fputs(PAGER_LABEL, stdout);
 
 	switch (xgetchar()) {
-
 	/* Advance one line at a time */
 	case 66: /* fallthrough */ /* Down arrow */
 	case 10: /* fallthrough */ /* Enter */
+	case 13: /* fallthrough */ /* Enter */
 	case ' ':
 		break;
 
