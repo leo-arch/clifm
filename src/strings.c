@@ -483,6 +483,9 @@ detect_space(char *s)
 		if (s0 == ' ' || s0 == '\t')
 			return 1;
 
+		if (s0 != 0xc2 && (s0 < 0xe1 || s0 > 0xe3))
+			goto CONT;
+
 		if ((s1 = (unsigned char)s[1]) == '\0')
 			return 0;
 
@@ -492,11 +495,12 @@ detect_space(char *s)
 		if ((s2 = (unsigned char)s[2]) == '\0')
 			return 0;
 
-		if (s0 == 0xe1 && s1 == 0x9a && s2 == 0x80)
-			return 1; /* OGHAM SPACE MARK. */
-
-		if (s0 == 0xe1 && s1 == 0xa0 && s2 == 0x8e)
-			return 1; /* MONGOLIAN VOWEL SEPARATOR. */
+		if (s0 == 0xe1) {
+			if (s1 == 0x9a && s2 == 0x80)
+				return 1; /* OGHAM SPACE MARK. */
+			if (s1 == 0xa0 && s2 == 0x8e)
+				return 1; /* MONGOLIAN VOWEL SEPARATOR. */
+		}
 
 		if (s0 == 0xe3 && s1 == 0x80 && s2 == 0x80)
 			return 1; /* IDEOGRAPHIC SPACE. */
