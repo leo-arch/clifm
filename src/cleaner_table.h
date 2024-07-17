@@ -132,7 +132,7 @@ struct utable_t unitable[] = {
 	{0x007c, 0, "_" },
 	{0x007d, 0, "-" },
 	{0x007e, 0, "_" },
-	{0x00a0, 0, "_" },
+	{0x00a0, 0, "_" }, // no-break space
 	{0x00a1, 0, "_" },
 	{0x00a2, 0, "_cent_" },
 	{0x00a3, 0, "_pound_" },
@@ -161,7 +161,6 @@ struct utable_t unitable[] = {
 	{0x00c1, 0, "A" },
 	{0x00c2, 0, "A" },
 	{0x00c3, 0, "A" },
-//	{0x00c4, 0, "A" },
 	{0x00c4, 0, "Ae" },
 	{0x00c5, 0, "A" },
 	{0x00c6, 0, "AE" },
@@ -180,14 +179,12 @@ struct utable_t unitable[] = {
 	{0x00d3, 0, "O" },
 	{0x00d4, 0, "O" },
 	{0x00d5, 0, "O" },
-//	{0x00d6, 0, "O" },
 	{0x00d6, 0, "Oe" },
 	{0x00d7, 0, "x" },
 	{0x00d8, 0, "O" },
 	{0x00d9, 0, "U" },
 	{0x00da, 0, "U" },
 	{0x00db, 0, "U" },
-//	{0x00dc, 0, "U" },
 	{0x00dc, 0, "Ue" },
 	{0x00dd, 0, "Y" },
 	{0x00de, 0, "TH" },
@@ -196,7 +193,6 @@ struct utable_t unitable[] = {
 	{0x00e1, 0, "a" },
 	{0x00e2, 0, "a" },
 	{0x00e3, 0, "a" },
-//	{0x00e4, 0, "a" },
 	{0x00e4, 0, "ae" },
 	{0x00e5, 0, "a" },
 	{0x00e6, 0, "ae" },
@@ -215,17 +211,16 @@ struct utable_t unitable[] = {
 	{0x00f3, 0, "o" },
 	{0x00f4, 0, "o" },
 	{0x00f5, 0, "o" },
-//	{0x00f6, 0, "o" },
 	{0x00f6, 0, "oe" },
 	{0x00f8, 0, "o" },
 	{0x00f9, 0, "u" },
 	{0x00fa, 0, "u" },
 	{0x00fb, 0, "u" },
-//	{0x00fc, 0, "u" },
 	{0x00fc, 0, "ue" },
 	{0x00fd, 0, "y" },
 	{0x00fe, 0, "th" },
 	{0x00ff, 0, "y" },
+	{0x0085, 0, "_" }, // next line
 	{0x0100, 0, "A" },
 	{0x0101, 0, "a" },
 	{0x0102, 0, "A" },
@@ -560,6 +555,10 @@ struct utable_t unitable[] = {
 	{0x02dc, 0, "~" },
 	{0x03a1, 0, "P" },
 	{0x03c1, 0, "p" },
+	{0x115f, 0, "_" }, // HANGUL CHOSEONG FILLER
+	{0x1160, 0, "_" }, // HANGUL JUNGSEONG FILLER
+	{0x1680, 0, "_" }, // ogham space mark
+	{0x180e, 0, "_" }, // mongolian vowel separator
 	{0x1952, 0, "n" },
 	{0x1959, 0, "u" },
 	{0x1963, 0, "l" },
@@ -589,21 +588,21 @@ struct utable_t unitable[] = {
 	{0x1e9b, 0, "s" },
 	{0x1ef2, 0, "Y" },
 	{0x1ef3, 0, "y" },
-/*	{0x2000, 0, "_" },
-	{0x2001, 0, "_" },
-	{0x2002, 0, "_" },
-	{0x2003, 0, "_" },
-	{0x2004, 0, "_" },
-	{0x2005, 0, "_" },
-	{0x2006, 0, "_" },
-	{0x2007, 0, "_" },
-	{0x2008, 0, "_" },
-	{0x2009, 0, "_" },
-	{0x200a, 0, "_" },
-	{0x200b, 0, "" },
-	{0x200c, 0, "" },
-	{0x200d, 0, "" },
-	{0x200e, 0, "" },
+	{0x2000, 0, "_" }, // en quad
+	{0x2001, 0, "_" }, // em quad
+	{0x2002, 0, "_" }, // en space
+	{0x2003, 0, "_" }, // em space
+	{0x2004, 0, "_" }, // three-per-em space
+	{0x2005, 0, "_" }, // four-per-em space
+	{0x2006, 0, "_" }, // six-per-em space
+	{0x2007, 0, "_" }, // figure space
+	{0x2008, 0, "_" }, // punctuation space
+	{0x2009, 0, "_" }, // thin space
+	{0x200a, 0, "_" }, // hair space
+	{0x200b, 0, "_" }, // zero width space
+	{0x200c, 0, "_" }, // zero width non-joiner
+	{0x200d, 0, "_" }, // zero width joiner
+/*	{0x200e, 0, "" },
 	{0x200f, 0, "" }, */
 	{0x2010, 0, "-" },
 	{0x2011, 0, "-" },
@@ -627,8 +626,10 @@ struct utable_t unitable[] = {
 	{0x2025, 0, ".." },
 	{0x2026, 0, "..." },
 	{0x2027, 0, "." },
-/*	{0x202f, 0, " " },
-	{0x2030, 0, "%" },
+	{0x2028, 0, "_" }, // line separator
+	{0x2029, 0, "_" }, // paragraph separator
+	{0x202f, 0, "_" }, // narrow no-break space
+/*	{0x2030, 0, "%" },
 	{0x2031, 0, "%" },
 	{0x2032, 0, "_" },
 	{0x2033, 0, "__" },
@@ -668,8 +669,8 @@ struct utable_t unitable[] = {
 	{0x205b, 0, "...." },
 	{0x205d, 0, "_" },
 	{0x205e, 0, "_" },
-	{0x205f, 0, "_" },
-	{0x2060, 0, "_" },
+	{0x205f, 0, "_" }, // medium mathematical space
+	{0x2060, 0, "_" }, // word joiner
 	{0x20a0, 0, "ECU" },
 	{0x20a1, 0, "CL" },
 	{0x20a2, 0, "Cr" },
@@ -691,9 +692,14 @@ struct utable_t unitable[] = {
 	{0x20bb, 0, "M" },
 	{0x20bf, 0, "_btc_" },
 	{0x2122, 0, "_tm_" },
+	{0x2422, 0, "_" }, // blank symbol
+	{0x2800, 0, "_" }, // braille pattern blank
+	{0x3000, 0, "_" }, // ideographic space
 	{0x10348, 0, "hu" },
 	{0x1f37a, 0, "_beer_" },
 	{0x02bc, 0, "_"},
+	{0xfeff, 0, "_"}, // zero width non-breaking space
+	{0x3164, 0, "_"}, // hangul filler
 	{0, 0, NULL},
 };
 
