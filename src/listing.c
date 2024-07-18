@@ -262,13 +262,13 @@ is_utf8_name(const char *restrict name, size_t *restrict bytes)
 
 	while (*name) {
 #if !defined(CHAR_MIN) || CHAR_MIN >= 0 /* char is unsigned (PowerPC/ARM) */
-		if (*name >= 0xC0 || *name < ' ')
+		if (*name >= 0xC0 || *name < ' ' || *name == 127)
 #else /* char is signed (X86) */
 		/* If UTF-8 char, the first byte is >= 0xC0, whose decimal
 		 * value is 192, which is bigger than CHAR_MAX if char is signed,
 		 * becoming thus a negative value. In this way, the above two-steps
 		 * check can be written using a single comparison. */
-		if (*name < ' ')
+		if (*name < ' ' || *name == 127)
 #endif /* CHAR_MIN >= 0 */
 			is_utf8 = 1;
 
