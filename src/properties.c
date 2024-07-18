@@ -1585,7 +1585,7 @@ print_file_mime(const char *name)
 	return;
 #else
 	fputs("MIME type:\t", stdout);
-	char *n = xmagic(name, 1);
+	char *n = xmagic(name, MIME_TYPE);
 	if (n) {
 		printf("%s\n", n);
 		free(n);

@@ -539,6 +539,28 @@ CONT:
 	return 0;
 }
 
+/* Check whether the string S begins with a control character.
+ * Return 0 if not, or the number of bytes of the control character. */
+static int
+check_control_char(const unsigned char *s)
+{
+	if (*s < ' ' || *s == 127)
+		return 1; /* C0 control characters and DEL char */
+
+	if (*s == 0xc2 && *(s + 1) >= 0x80 && *(s + 1) <= 0x9f)
+		return 2; /* C1 controls characters */
+
+	if (*s == 0xe2 && *(s + 1) == 0x80
+	&& (*(s + 2) == 0xa8 || *(s + 2) == 0xa9))
+		return 3; /* Line separator (xa8) / Paragraph separator (xa9) */
+
+	if (*s == 0xf3 && *(s + 1) == 0xa9 && *(s + 2) == 0x80
+	&& *(s + 3) == 0x81)
+		return 4; /* Language tag */
+
+	return 0;
+}
+
 /* Replace invalid characters in NAME by INVALID_CHAR ('^').
  * This function is called only if wc_xstrlen() returns zero, in which case
  * we have either a non-printable char or an invalid multi-byte sequence. */
@@ -560,28 +582,10 @@ replace_invalid_chars(const char *name)
 			continue;
 		}
 
-#if defined(CHAR_MIN) && CHAR_MIN < 0
-		if (*q >= '\0' && (*q < ' ' || *q == 127)) { /* Control char or DEL */
-#else
-		if (*q < ' ' || *q == 127) {
-#endif /* CHAR_MIN < 0 */
+		const int ret = check_control_char((unsigned char *)q);
+		if (ret > 0) {
 			*n = INVALID_CHR;
-			n++; q++;
-			continue;
-		}
-
-		if ((unsigned char)*q == 0xc2 && (unsigned char)*(q + 1) == 0x85) {
-			/* Unnamed control char */
-			*n = INVALID_CHR;
-			n++; q += 2;
-			continue;
-		}
-
-		if ((unsigned char)*q == 0xe2 && (unsigned char)*(q + 1) == 0x80
-		&& ((unsigned char)*(q + 2) == 0xa8 || (unsigned char)*(q + 2) == 0xa9)) {
-			/* Line separator (xa8) / Paragraph separator (xa9) */
-			*n = INVALID_CHR;
-			n++; q += 3;
+			n++; q += ret;
 			continue;
 		}
 
