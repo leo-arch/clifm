@@ -78,7 +78,7 @@
 #define unpack_start(chr, size) ((unsigned char) chr & ~UTF_8_ENCODED_ ## size ## _BYTES_MASK)
 #define unpack_cont(chr) ((unsigned char) chr & ~UTF_8_ENCODED_MASK)
 
-struct  bleach_t {
+struct bleach_t {
 	char *original;
 	char *replacement;
 };
@@ -102,9 +102,9 @@ get_utf_8_width(const char c)
 }
 
 /* Replace unsafe characters by safe, portable ones.
- * a-zA-Z0-9._- (Portable Filename Character Set) are kept
- * {[()]} are replaced by a dash (-)
- * Everything else is replaced by an underscore (_) */
+ * a-zA-Z0-9._- (Portable Filename Character Set) are kept.
+ * {[()]} are replaced by a dash (-).
+ * Everything else is replaced by an underscore (_). */
 static int
 translate_unsafe_char(const unsigned char c)
 {
@@ -127,7 +127,7 @@ get_uft8_dec_value(size_t *i, char *str)
 	unsigned char c = (unsigned char)str[*i];
 	int new_value = 0;
 
-	int utf8_width = get_utf_8_width((char)c);
+	const int utf8_width = get_utf_8_width((char)c);
 	switch (utf8_width) {
 		case 1: new_value = (unsigned char)str[0]; break;
 		case 2: new_value = unpack_start(c, 2); break;
@@ -212,7 +212,7 @@ clean_file_name(char *restrict name)
 			continue;
 		}
 
-		if (n <= 126) {
+		if (n <= 127) {
 			int ret = translate_unsafe_char(n);
 			if (ret == -1)
 				continue;
@@ -496,6 +496,7 @@ bleach_files(char **names)
 		return FUNC_SUCCESS;
 	}
 
+	int do_edit = 0, edited_names = 0;
 	struct bleach_t *bfiles = (struct bleach_t *)NULL;
 
 	size_t f = 0, i = 1;
@@ -552,14 +553,15 @@ bleach_files(char **names)
 	char *input = (char *)NULL;
 
 CONFIRM:
-	putchar('\n');
-	int _edit = 0, edited_names = 0;
-
 	while (!input) {
 		input = rl_no_hist(_("Is this OK? [y/n/(e)dit] "));
 
 		if (!input)
 			continue;
+
+		if (strcmp(input, "yes") == 0 || strcmp(input, "no") == 0
+		|| strcmp(input, "edit") == 0)
+			input[1] = '\0';
 
 		if (input[1] || !strchr("yYnNeEq", *input)) {
 			free(input);
@@ -571,7 +573,7 @@ CONFIRM:
 		case 'y': /* fallthrough */
 		case 'Y': rename = 1; break;
 		case 'e':
-			_edit = 1;
+			do_edit = 1;
 			bfiles = edit_replacements(bfiles, &f, &edited_names);
 			if (!bfiles || edited_names == -1)
 				break;
@@ -612,7 +614,7 @@ CONFIRM:
 	/* The user entered 'e' to edit the file, but nothing was modified
 	 * Ask for confirmation in case the user just wanted to see what would
 	 * be done. */
-	if (_edit == 1) {
+	if (do_edit == 1) {
 		printf(_("%zu file name(s) will be bleached\n"), f);
 		if (rl_get_y_or_n(_("Continue? [y/n] ")) != 1) {
 			for (i = 0; i < f; i++) {
