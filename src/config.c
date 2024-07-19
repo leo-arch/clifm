@@ -31,6 +31,10 @@
 #include <time.h>
 #include <unistd.h>
 
+#if defined(MAC_OS_X_RENAMEAT_SYS_STDIO_H)
+# include <sys/stdio.h> /* renameat(2) */
+#endif /* MAC_OS_X_RENAMEAT_SYS_STDIO_H */
+
 #include "autocmds.h"
 #include "aux.h"
 #include "checks.h"

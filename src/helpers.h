@@ -302,6 +302,14 @@ if (S_ISNWK(mode)) return 'n'; // HP/UX: network special file
 # define BSD_KQUEUE
 #endif /* HAVE_KQUEUE && !USE_GENERIC_FS_MONITOR */
 
+/* Before MacOS X 10.10, renameat(2) is declared in sys/stdio.h */
+#if defined(__APPLE__)
+# include <AvailabilityMacros.h>
+# if MAC_OS_X_VERSION_MIN_REQUIRED < 101000
+#  define MAC_OS_X_RENAMEAT_SYS_STDIO_H
+# endif /* MACOS_X < 10.10 */
+#endif /* __APPLE__ */
+
 #include "strings.h"
 #include "settings.h"
 

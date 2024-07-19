@@ -36,6 +36,10 @@
 #include <sys/stat.h>
 #include <errno.h>
 
+#if defined(MAC_OS_X_RENAMEAT_SYS_STDIO_H)
+# include <sys/stdio.h> /* renameat(2) */
+#endif /* MAC_OS_X_RENAMEAT_SYS_STDIO_H */
+
 #include "aux.h" /* press_any_key_to_continue(), abbreviate_file_name(), open_fread() */
 #include "checks.h" /* is_file_in_cwd() */
 #include "file_operations.h" /* open_file() */

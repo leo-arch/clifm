@@ -32,6 +32,10 @@
 #include <unistd.h> /* access, unlinkat */
 /* <time.h>, required by time(2) and localtime_r(2), is included by "aux.h" */
 
+#if defined(MAC_OS_X_RENAMEAT_SYS_STDIO_H)
+# include <sys/stdio.h> /* renameat(2) */
+#endif /* MAC_OS_X_RENAMEAT_SYS_STDIO_H */
+
 #include "aux.h"        /* gen_date_suffix, count_dir, open_fwrite, open_fread,
 xatoi, url_encode, xnmalloc */
 #include "checks.h"     /* is_file_in_cwd, is_number */

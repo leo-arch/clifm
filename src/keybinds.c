@@ -47,6 +47,10 @@ typedef char *rl_cpvfunc_t;
 
 #include <errno.h>
 
+#if defined(MAC_OS_X_RENAMEAT_SYS_STDIO_H)
+# include <sys/stdio.h> /* renameat(2) */
+#endif /* MAC_OS_X_RENAMEAT_SYS_STDIO_H */
+
 #include "aux.h"
 #include "config.h"
 #include "exec.h"

@@ -29,6 +29,10 @@
 #include <string.h>
 #include <unistd.h>
 
+#if defined(MAC_OS_X_RENAMEAT_SYS_STDIO_H)
+# include <sys/stdio.h> /* renameat(2) */
+#endif /* MAC_OS_X_RENAMEAT_SYS_STDIO_H */
+
 #if defined(HAVE_FILE_ATTRS)
 # ifdef __TINYC__
 #  undef SYNC_FILE_RANGE_WRITE_AND_WAIT /* Silence redefinition error */
