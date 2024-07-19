@@ -549,7 +549,7 @@ bleach_files(char **names)
 		return FUNC_SUCCESS;
 	}
 
-	int rename = 0;
+	int rename = 0, quit_func = 0;
 	char *input = (char *)NULL;
 
 CONFIRM:
@@ -572,6 +572,9 @@ CONFIRM:
 		switch (*input) {
 		case 'y': /* fallthrough */
 		case 'Y': rename = 1; break;
+		case 'q': /* fallthrough */
+		case 'n': /* fallthrough */
+		case 'N': quit_func = 1; break;
 		case 'e':
 			do_edit = 1;
 			bfiles = edit_replacements(bfiles, &f, &edited_names);
@@ -602,13 +605,13 @@ CONFIRM:
 		return FUNC_SUCCESS;
 	}
 
-	if (edited_names == -1) { /* ERROR */
+	if (edited_names == -1 || quit_func == 1) { /* ERROR or quit */
 		for (i = 0; i < f; i++) {
 			free(bfiles[i].original);
 			free(bfiles[i].replacement);
 		}
 		free(bfiles);
-		return FUNC_FAILURE;
+		return (quit_func == 1 ? FUNC_SUCCESS : FUNC_FAILURE);
 	}
 
 	/* The user entered 'e' to edit the file, but nothing was modified
