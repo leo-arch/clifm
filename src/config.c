@@ -46,6 +46,7 @@
 #include "messages.h"
 #include "misc.h"
 #include "navigation.h"
+#include "sort.h" /* num_to_sort_name() */
 #include "spawn.h"
 
 /* Predefined time styles */
@@ -452,8 +453,9 @@ dump_config(void)
 	print_config_value("SkipNonAlnumPrefix", &conf.skip_non_alnum_prefix, &n,
 		DUMP_CONFIG_BOOL);
 
-	n = DEF_SORT;
-	print_config_value("Sort", &conf.sort, &n, DUMP_CONFIG_INT);
+	s = num_to_sort_name(DEF_SORT);
+	char *cur_sort_mode = num_to_sort_name(conf.sort);
+	print_config_value("Sort", cur_sort_mode, s, DUMP_CONFIG_STR);
 
 	n = DEF_SORT_REVERSE;
 	print_config_value("SortReverse", &conf.sort_reverse, &n, DUMP_CONFIG_BOOL);

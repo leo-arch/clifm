@@ -33,6 +33,7 @@ __BEGIN_DECLS
 int  alphasort_insensitive(const struct dirent **a, const struct dirent **b);
 int  compare_strings(char **s1, char **s2);
 int  entrycmp(const void *a, const void *b);
+char *num_to_sort_name(const int n);
 void print_sort_method(void);
 int  skip_nonexec(const struct dirent *ent);
 int  skip_files(const struct dirent *ent);

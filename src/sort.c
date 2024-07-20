@@ -381,7 +381,7 @@ alphasort_insensitive(const struct dirent **a, const struct dirent **b)
 	return (-ret);
 }
 
-static char *
+char *
 num_to_sort_name(const int n)
 {
 	switch (n) {
