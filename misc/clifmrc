@@ -149,7 +149,7 @@
 ;LightMode=false
 
 # Clear the screen before listing files.
-# Possible values: 'true', 'false', 'internal' (restrict this behaviour to
+# Possible values: 'true', 'false', 'internal' (restrict this behavior to
 # internal commands only: shell commands won't clear the screen).
 # Note: if set to 'internal', the current list of files won't be refreshed
 # even if an external command creates, removes, or renames a file in the

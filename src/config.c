@@ -2490,16 +2490,15 @@ set_fzf_preview_value(const char *line, int *var)
 	*var = 0;
 #endif /* _NO_LIRA */
 
-	char *p = strchr(line, '=');
-	if (!p || !*(++p))
+	if (!line || !*line)
 		return (-1);
 
-	if (*p == 't' && strncmp(p, "true", 4) == 0) {
+	if (*line == 't' && strncmp(line, "true\n", 5) == 0) {
 		*var = 1;
-	} else if (*p == 'h' && strncmp(p, "hidden", 6) == 0) {
+	} else if (*line == 'h' && strncmp(line, "hidden\n", 7) == 0) {
 		*var = 2;
 	} else {
-		if (*p == 'f' && strncmp(p, "false", 5) == 0)
+		if (*line == 'f' && strncmp(line, "false\n", 6) == 0)
 			*var = 0;
 	}
 
@@ -2526,10 +2525,10 @@ set_pager_value(char *line, int *var, const size_t buflen)
 		return;
 	}
 
-	if (*p == 't' && strncmp(p, "true", 4) == 0) {
+	if (*p == 't' && strncmp(p, "true\n", 5) == 0) {
 		*var = 1;
 	} else {
-		if (*p == 'f' && strncmp(p, "false", 5) == 0)
+		if (*p == 'f' && strncmp(p, "false\n", 6) == 0)
 			*var = 0;
 	}
 }
@@ -2543,10 +2542,6 @@ set_pager_view_value(char *line)
 	char *p = remove_quotes(line);
 	if (!p)
 		return;
-
-	size_t l = strlen(p);
-	if (p[l - 1] == '\n')
-		p[l - 1] = '\0';
 
 	if (*p == 'a' && strcmp(p, "auto") == 0)
 		conf.pager_view = PAGER_AUTO;
@@ -2564,10 +2559,10 @@ set_config_bool_value(char *line, int *var)
 	if (!p || !*p || *p < 'f')
 		return;
 
-	if (*p == 't' && strncmp(p, "true", 4) == 0) {
+	if (*p == 't' && strncmp(p, "true\n", 5) == 0) {
 		*var = 1;
 	} else {
-		if (*p == 'f' && strncmp(p, "false", 5) == 0)
+		if (*p == 'f' && strncmp(p, "false\n", 6) == 0)
 			*var = 0;
 	}
 }
@@ -2597,14 +2592,8 @@ set_colorscheme(char *line)
 	if (!p)
 		return;
 
-	size_t l = strlen(p);
-	if (p[l - 1] == '\n') {
-		p[l - 1] = '\0';
-		l--;
-	}
-
 	free(conf.usr_cscheme);
-	conf.usr_cscheme = savestring(p, l);
+	conf.usr_cscheme = savestring(p, strlen(p));
 }
 
 void
@@ -2624,7 +2613,7 @@ set_div_line(char *line)
 	xstrsncpy(div_line, tmp, sizeof(div_line));
 }
 
-static inline int
+static int
 set_files_filter(const char *line)
 {
 	char *p = strchr(line, '=');
@@ -2636,7 +2625,7 @@ set_files_filter(const char *line)
 		return (-1);
 
 	size_t l = strlen(q);
-	if (q[l - 1] == '\n') {
+	if (l > 0 && q[l - 1] == '\n') {
 		q[l - 1] = '\0';
 		l--;
 	}
@@ -2656,14 +2645,15 @@ set_files_filter(const char *line)
 	return FUNC_SUCCESS;
 }
 
-static inline void
-set_listing_mode(const char *line)
+static void
+set_listing_mode(char *line)
 {
-	char *p = strchr(line, '=');
-	if (!p || !*p || !*(++p))
-		goto END;
+	if (!line || !*line)
+		return;
 
-	const int n = atoi(p);
+	line[1] = '\0';
+
+	const int n = atoi(line);
 	if (n == INT_MIN)
 		goto END;
 
@@ -2765,23 +2755,22 @@ set_sug_strat(char *line)
 
 #ifndef _NO_FZF
 static void
-set_tabcomp_mode(const char *line)
+set_tabcomp_mode(char *line)
 {
-	char opt_str[11] = "";
-	if (sscanf(line, "%10s\n", opt_str) == -1)
+	if (!line || !*line)
 		return;
 
-	char *tmp = remove_quotes(opt_str);
+	char *tmp = remove_quotes(line);
 	if (!tmp)
 		return;
 
-	if (strncmp(tmp, "standard", 8) == 0) {
+	if (strcmp(tmp, "standard") == 0) {
 		fzftab = 0; tabmode = STD_TAB;
-	} else if (strncmp(tmp, "fzf", 3) == 0) {
+	} else if (strcmp(tmp, "fzf") == 0) {
 		fzftab = 1; tabmode = FZF_TAB;
-	} else if (strncmp(tmp, "fnf", 3) == 0) {
+	} else if (strcmp(tmp, "fnf") == 0) {
 		fzftab = 1; tabmode = FNF_TAB;
-	} else if (strncmp(tmp, "smenu", 5) == 0) {
+	} else if (strcmp(tmp, "smenu") == 0) {
 		fzftab = 1; tabmode = SMENU_TAB;
 	}
 }
@@ -2907,7 +2896,7 @@ set_sort_name(char *line)
 static void
 set_clear_screen(char *line)
 {
-	if (*line == 'i' && strncmp(line, "internal", 8) == 0)
+	if (*line == 'i' && strncmp(line, "internal\n", 9) == 0)
 		conf.clear_screen = CLEAR_INTERNAL_CMD_ONLY;
 	else
 		set_config_bool_value(line, &conf.clear_screen);
@@ -2921,9 +2910,9 @@ set_link_creation_mode(const char *val)
 		return;
 	}
 
-	if (*val == 'a' && strncmp(val, "absolute", 8) == 0)
+	if (*val == 'a' && strncmp(val, "absolute\n", 9) == 0)
 		conf.link_creat_mode = LNK_CREAT_ABS;
-	else if (*val == 'r' && strncmp(val, "relative", 8) == 0)
+	else if (*val == 'r' && strncmp(val, "relative\n", 9) == 0)
 		conf.link_creat_mode = LNK_CREAT_REL;
 	else
 		conf.link_creat_mode = DEF_LINK_CREATION_MODE;
@@ -3097,7 +3086,7 @@ read_config(void)
 
 		else if (xargs.fzf_preview == UNSET && *line == 'F'
 		&& strncmp(line, "FzfPreview=", 11) == 0) {
-			if (set_fzf_preview_value(line, &conf.fzf_preview) == -1)
+			if (set_fzf_preview_value(line + 11, &conf.fzf_preview) == -1)
 				continue;
 		}
 
@@ -3128,7 +3117,7 @@ read_config(void)
 
 		else if (xargs.horizontal_list == UNSET && *line == 'L'
 		&& strncmp(line, "ListingMode=", 12) == 0) {
-			set_listing_mode(line);
+			set_listing_mode(line + 12);
 		}
 
 		else if (xargs.longview == UNSET && *line == 'L'

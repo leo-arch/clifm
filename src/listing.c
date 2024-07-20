@@ -2121,7 +2121,6 @@ construct_human_sizes(void)
 				(s == 0.00f || s - (float)x == 0.00f) ? 0 : 2,
 				(double)s);
 
-		/* + 1 to take the size prefix (B, K, M, etc) into account */
 		file_info[i].human_size.len = ret > 0 ? (size_t)ret : 0;
 		/* Let's follow du(1) in using 'k' (lowercase) instead of 'K'
 		 * (uppercase) when using powers of 1000 (--si). */
