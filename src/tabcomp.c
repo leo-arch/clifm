@@ -2635,7 +2635,7 @@ CALC_OFFSET:
 		for (i = 1; i <= (size_t)count; i++) {
 			if (i >= term_lines) {
 				/* A little pager */
-				fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
+				fputs("\x1b[7m--Mas--\x1b[0m", stdout);
 				int c = 0;
 				while ((c = xgetchar()) == KEY_ESC);
 				if (c == 'q') {
