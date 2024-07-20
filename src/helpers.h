@@ -734,7 +734,7 @@ extern time_t curdir_mtime;
 #define FZF_INTERNAL_PREVIEWER 1 /* clifm itself */
 /* --preview is set either from FzfOpts in the color scheme file or from
  * FZF_DEFAULT_OPTS environment variable. */
-#define FZF_EXTERNAL_PREVIEWER 2
+#define FZF_EXTERNAL_PREVIEWER 3
 
 /* Macros for the backdir (bd) function */
 #define BD_TAB    1
