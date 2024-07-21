@@ -740,6 +740,47 @@ trim_final_slashes(void)
 	}
 }
 
+static void
+print_user_message(void)
+{
+	char *s = conf.welcome_message_str;
+
+	if (!strchr(s, '\\')) {
+		printf("%s%s%s\n", wc_c, s, df_c);
+		return;
+	}
+
+	int c = 0;
+	char *tmp = (char *)NULL;
+
+	printf("%s", wc_c);
+
+	while (*s) {
+		if (*s == '\\' && *(s + 1)) {
+			s++;
+			if (*s >= '0' && *s <= '7' && (tmp = gen_octal(&s, &c))) {
+				printf("%s", tmp);
+				free(tmp);
+			} else if (*s == 'e' && (tmp = gen_escape_char(&s, &c))) {
+				printf("%s", tmp);
+				free(tmp);
+			} else if (*s == 'n') {
+				putchar('\n');
+				s++;
+			} else {
+				putchar(*s);
+				s++;
+			}
+		} else {
+			putchar(*s);
+			s++;
+		}
+	}
+
+	putchar('\n');
+	printf("%s", df_c);
+}
+
 static inline void
 print_welcome_msg(void)
 {
@@ -748,8 +789,8 @@ print_welcome_msg(void)
 	if (message_shown == 1 || conf.welcome_message == 0)
 		return;
 
-	if (conf.welcome_message_str)
-		printf("%s%s%s\n", wc_c, conf.welcome_message_str, df_c);
+	if (conf.welcome_message_str != NULL)
+		print_user_message();
 	else
 		printf("%s%s\n%s", wc_c, DEF_WELCOME_MESSAGE_STR, df_c);
 
