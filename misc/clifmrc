@@ -463,6 +463,8 @@
 ;WelcomeMessage=true
 
 # Set a custom welcome message.
+# Colors are available via escape codes. E.g.: "\e[34mWelcome!\e[0m".
+# An ending new line character will be appended automatically.
 ;WelcomeMessageStr=""
 
 # Print Clifm's logo screen at startup.
