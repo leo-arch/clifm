@@ -148,6 +148,9 @@
  * let's try to be POSIX-1.2001 compliant. This is still experimental:
  * a crash was reported due to x_scandir(), the scandir(3) replacement. */
 # include "compat.h"
+# define xrealpath old_realpath
+#else
+# define xrealpath realpath
 #endif /* CLIFM_LEGACY */
 
 #ifdef __sun

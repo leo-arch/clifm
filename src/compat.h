@@ -67,6 +67,7 @@ int old_chown(int fd, const char *path, uid_t owner, gid_t group, int flag);
 int old_mkdir(int dirfd, const char *pathname, mode_t mode);
 ssize_t old_readlink(int dirfd, const char *restrict pathname,
 	char *restrict buf, size_t bufsiz);
+char *old_realpath(const char *restrict path, char *restrict resolved_path);
 int old_rename(int olddirfd, const char *oldpath, int newdirfd,
 	const char *newpath);
 int old_stat(int fd, const char *restrict path, struct stat *sb, int flag);

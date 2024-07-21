@@ -545,7 +545,7 @@ construct_sel_path(char *sel_path)
 	char tmpdir[PATH_MAX + 1];
 	xstrsncpy(tmpdir, sel_path, sizeof(tmpdir));
 
-	if (*sel_path == '.' && realpath(sel_path, tmpdir) == NULL) {
+	if (*sel_path == '.' && xrealpath(sel_path, tmpdir) == NULL) {
 		xerror("sel: '%s': %s\n", sel_path, strerror(errno));
 		return (char *)NULL;
 	}

@@ -697,7 +697,7 @@ get_comp_color(const char *filename, const struct stat *attr, int *free_color)
 
 	case S_IFLNK: {
 		if (conf.light_mode == 1) return ln_c;
-		char *linkname = realpath(filename, (char *)NULL);
+		char *linkname = xrealpath(filename, NULL);
 		if (linkname) {
 			free(linkname);
 			return ln_c;

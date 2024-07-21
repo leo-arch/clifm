@@ -112,7 +112,7 @@ get_extraction_path(void)
 	}
 
 	if (*ext_path == '.') {
-		char *p = realpath(ext_path, NULL);
+		char *p = xrealpath(ext_path, NULL);
 		if (p) {
 			free(ext_path);
 			return p;

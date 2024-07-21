@@ -1066,12 +1066,12 @@ construct_filename(char *filename)
 		}
 
 		free(name);
-		name = realpath(deq_file, NULL);
+		name = xrealpath(deq_file, NULL);
 		free(deq_file);
 	}
 
 	if (!name) {
-		name = realpath(filename, NULL);
+		name = xrealpath(filename, NULL);
 		if (!name)
 			return (char *)NULL;
 	}
@@ -1300,7 +1300,7 @@ mime_open_with(char *filename, char **args)
 	if (!deq)
 		return FUNC_FAILURE;
 
-	char *name = realpath(deq, NULL);
+	char *name = xrealpath(deq, NULL);
 	if (!name) {
 		xerror("%s: '%s': %s\n", err_name, deq, strerror(errno));
 		free(deq);
@@ -1421,11 +1421,11 @@ mime_info(char *arg, char **fpath, char **deq)
 
 	if (strchr(arg, '\\')) {
 		*deq = unescape_str(arg, 0);
-		*fpath = realpath(*deq, NULL);
+		*fpath = xrealpath(*deq, NULL);
 		free(*deq);
 		*deq = (char *)NULL;
 	} else {
-		*fpath = realpath(arg, NULL);
+		*fpath = xrealpath(arg, NULL);
 	}
 
 	if (!*fpath) {
@@ -1459,13 +1459,13 @@ get_open_file_path(char **args, char **fpath, char **deq)
 	/* Only dequote the file name if coming from the mime command */
 	if (*args[0] == 'm' && strchr(f, '\\')) {
 		*deq = unescape_str(f, 0);
-		*fpath = realpath(*deq, NULL);
+		*fpath = xrealpath(*deq, NULL);
 		free(*deq);
 		*deq = (char *)NULL;
 	}
 
 	if (!*fpath) {
-		*fpath = realpath(f, NULL);
+		*fpath = xrealpath(f, NULL);
 		if (!*fpath) {
 			xerror("%s: '%s': %s\n", err_name, f, strerror(errno));
 			return errno;

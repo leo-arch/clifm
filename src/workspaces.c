@@ -79,7 +79,7 @@ get_workspace_path_color(const uint8_t num)
 	if (S_ISLNK(a.st_mode)) {
 		char p[PATH_MAX + 1];
 		*p = '\0';
-		char *ret = realpath(workspaces[num].path, p);
+		char *ret = xrealpath(workspaces[num].path, p);
 		return (ret && *p) ? ln_c : or_c;
 	}
 

@@ -409,7 +409,7 @@ get_directory_color(const char *filename, const struct stat *a)
 		return nd_c;
 
 	if (S_ISLNK(a->st_mode)) {
-		char *linkname = realpath(filename, (char *)NULL);
+		char *linkname = xrealpath(filename, NULL);
 		if (linkname) {
 			free(linkname);
 			return ln_c;

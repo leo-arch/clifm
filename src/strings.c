@@ -1372,7 +1372,7 @@ expand_tag(char ***args, const int tag_index)
 
 		char rpath[PATH_MAX + 1];
 		*rpath = '\0';
-		char *ret = realpath(filename, rpath);
+		char *ret = xrealpath(filename, rpath);
 		if (!ret || !*rpath) {
 			/* This tagged file points to a non-existent file. Just copy
 			 * the tag path. */
@@ -1698,7 +1698,7 @@ eln_expand(char ***substr, const size_t i)
 	char *abs_path = (char *)NULL;
 	if (file_info[j].name && *file_info[j].name == '-'
 	&& !is_internal_c((*substr)[0]))
-		abs_path = realpath(file_info[j].name, NULL);
+		abs_path = xrealpath(file_info[j].name, NULL);
 
 	char *esc_str = (char *)NULL;
 	if (conf.quoting_style == QUOTING_STYLE_BACKSLASH

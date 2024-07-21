@@ -956,7 +956,7 @@ get_tagged_file_target(char *filename)
 	snprintf(dir, sizeof(dir), "%s/%s/%s", tags_dir, cur_tag, p ? p : filename);
 	free(p);
 
-	char *rpath = realpath(dir, NULL);
+	char *rpath = xrealpath(dir, NULL);
 	char *s = rpath ? rpath : filename;
 	int free_tmp = 0;
 	char *q = home_tilde(s, &free_tmp);

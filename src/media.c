@@ -190,7 +190,7 @@ get_dev_label(void)
 		const char *name = labels[i]->d_name;
 		char lpath[PATH_MAX + 1];
 		snprintf(lpath, sizeof(lpath), "%s/%s", DISK_LABELS_PATH, name);
-		char *rpath = realpath(lpath, NULL);
+		char *rpath = xrealpath(lpath, NULL);
 		if (!rpath) {
 			free(labels[i]);
 			continue;

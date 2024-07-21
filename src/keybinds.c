@@ -2124,7 +2124,7 @@ rl_toggle_virtualdir_full_paths(int count, int key)
 
 	filesn_t i = files;
 	while (--i >= 0) {
-		char *rp = realpath(file_info[i].name, NULL);
+		char *rp = xrealpath(file_info[i].name, NULL);
 		if (!rp) continue;
 
 		char *p = (char *)NULL;

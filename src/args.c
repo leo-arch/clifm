@@ -489,7 +489,7 @@ resolve_relative_path(const char *s)
 	if (!s || !*s)
 		return (char *)NULL;
 
-	char *p = realpath(s, NULL);
+	char *p = xrealpath(s, NULL);
 	if (!p)
 		return (char *)NULL;
 

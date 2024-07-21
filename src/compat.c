@@ -118,6 +118,23 @@ x_strnlen(const char *s, size_t max)
 	return n;
 }
 
+/* ----------------- realpath ------------------------ */
+
+/* According to POSIX-1.2001, realpath(3) does not support RESOLVED_PATH
+ * to be NULL. So, if it is NULL, lets allocate memory ourselves. */
+char *
+old_realpath(const char *restrict path, char *restrict resolved_path)
+{
+	if (resolved_path != NULL)
+		return realpath(path, resolved_path);
+
+	char *ptr = malloc(PATH_MAX + 1);
+	if (!ptr)
+		return (char *)NULL;
+
+	return realpath(path, ptr);
+}
+
 /* ------------------------- scandir ------------------------ */
 
 /* Taken from glibc 2.34, licensed GPL2.1+.

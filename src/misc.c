@@ -2009,7 +2009,7 @@ version_function(void)
 	const char *legacy = "-LEGACY";
 #else
 	const char *legacy = "";
-#endif
+#endif /* CLIFM_LEGACY */
 
 	printf(_("%s %s%s%s (%s)\n%s\nLicense %s\nWritten by %s\n"), PROGRAM_NAME,
 		VERSION, posix, legacy, DATE, CONTACT, LICENSE, AUTHOR);

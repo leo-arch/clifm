@@ -454,7 +454,7 @@ get_sys_shell(void)
 
 	char tmp[PATH_MAX + 1];
 	*tmp = '\0';
-	char *ret = realpath(user.shell, tmp);
+	char *ret = xrealpath(user.shell, tmp);
 	if (!ret || !*tmp)
 		return SHELL_POSIX;
 
@@ -790,7 +790,7 @@ get_user_data_env(void)
 	char *t = sec_env == 0 ? xgetenv("HOME", 0) : (char *)NULL;
 
 	if (t) {
-		char *p = realpath(t, NULL);
+		char *p = xrealpath(t, NULL);
 		char *h = p ? p : t;
 		tmp_user.home = savestring(h, strlen(h));
 		free(p);
@@ -899,7 +899,7 @@ get_user_data(void)
 	/* Sometimes (FreeBSD for example) the home directory, as returned by the
 	 * passwd struct, is a symlink, in which case we want to resolve it.
 	 * See https://lists.freebsd.org/pipermail/freebsd-arm/2016-July/014404.html */
-	char *r = realpath(homedir, NULL);
+	char *r = xrealpath(homedir, NULL);
 	if (r) {
 		tmp_user.home_len = strlen(r);
 		tmp_user.home = savestring(r, tmp_user.home_len);
@@ -2269,7 +2269,7 @@ skip_this_path(char *name)
 	if (!S_ISLNK(a.st_mode))
 		return 0;
 
-	char *rpath = realpath(name, NULL);
+	char *rpath = xrealpath(name, NULL);
 	if (!rpath)
 		return 1;
 

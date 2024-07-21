@@ -107,7 +107,7 @@ print_tagged_file(char *name, const char *tag)
 	*tmp = '\0';
 
 	snprintf(dir, sizeof(dir), "%s/%s/%s", tags_dir, tag, name);
-	char *ret = realpath(dir, tmp);
+	char *ret = xrealpath(dir, tmp);
 	if (!ret)
 		return;
 

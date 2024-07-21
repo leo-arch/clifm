@@ -2824,7 +2824,7 @@ colors_list(char *ent, const int eln, const int pad, const int new_line)
 			if (conf.colorize == 0) {
 				color = ln_c;
 			} else {
-				char *linkname = realpath(ent, NULL);
+				char *linkname = xrealpath(ent, NULL);
 				color = linkname ? ln_c : or_c;
 				free(linkname);
 			}
