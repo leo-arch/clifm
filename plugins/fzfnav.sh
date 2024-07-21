@@ -483,7 +483,7 @@ main() {
 # This file is a cache directory tag created by Clifm.
 # For information about cache directory tags, see:
 #	http://www.brynosaurus.com/cachedir/"
-	! [ -f "$PREVIEWDIR/CACHEDIR.TAG"] && echo "$CACHEDIRTAG_HEADER" > "$PREVIEWDIR/CACHEDIR.TAG"
+	! [ -f "$PREVIEWDIR/CACHEDIR.TAG" ] && echo "$CACHEDIRTAG_HEADER" > "$PREVIEWDIR/CACHEDIR.TAG"
 
 	if [ "$USE_SCOPE" = 1 ]; then
 		[ -z "$SCOPE_FILE" ] && export SCOPE_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/ranger/scope.sh"
