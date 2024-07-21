@@ -743,9 +743,9 @@ trim_final_slashes(void)
 static inline void
 print_welcome_msg(void)
 {
-	static int wm = UNSET;
+	static int message_shown = 0;
 
-	if (wm == 0 || conf.welcome_message == 0)
+	if (message_shown == 1 || conf.welcome_message == 0)
 		return;
 
 	if (conf.welcome_message_str)
@@ -755,7 +755,7 @@ print_welcome_msg(void)
 
 	printf("%s\n", _(HELP_MESSAGE));
 
-	wm = 0;
+	message_shown = 1;
 }
 
 static inline void
