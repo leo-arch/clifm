@@ -2004,8 +2004,15 @@ version_function(void)
 #else
 	const char *posix = "-POSIX";
 #endif /* _BE_POSIX */
-	printf(_("%s %s%s (%s)\n%s\nLicense %s\nWritten by %s\n"), PROGRAM_NAME,
-		VERSION, posix, DATE, CONTACT, LICENSE, AUTHOR);
+
+#ifdef CLIFM_LEGACY
+	const char *legacy = "-LEGACY";
+#else
+	const char *legacy = "";
+#endif
+
+	printf(_("%s %s%s%s (%s)\n%s\nLicense %s\nWritten by %s\n"), PROGRAM_NAME,
+		VERSION, posix, legacy, DATE, CONTACT, LICENSE, AUTHOR);
 }
 
 void
