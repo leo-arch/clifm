@@ -106,16 +106,12 @@ old_chown(int fd, const char *path, uid_t owner, gid_t group, int flag)
 
 /* strnlen(3) is not specified in POSIX-1.2001 */
 size_t
-x_strnlen(const char *s, size_t max)
+x_strnlen(const char *s, size_t len)
 {
-	size_t n = 0;
+	size_t i;
 
-	while (*s && n < max) {
-		s++;
-		n++;
-	}
-
-	return n;
+	for (i = 0; i < len && s[i]; i++);
+	return i;
 }
 
 /* ----------------- realpath ------------------------ */
