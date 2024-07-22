@@ -140,7 +140,6 @@ xf=1;31:xs=0;32:"
 
 /* Symlink char indicator (for ColorLinksAsTarget only) */
 #define DEF_LC_C  "\x1b[1;36m"
-//#define DEF_LC_C_256  "\x1b[0;38;5;43m"
 
 #define DEF_TS_C  "\x1b[4;35m" /* Matching prefix for TAB completed possible entries */
 #define DEF_TT_C  "\x1b[1;2;36m" /* Tilde for trimmed file names */

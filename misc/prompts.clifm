@@ -8,9 +8,6 @@
 # to highlight invalid/non-existent command names) is built using command
 # substitution ($(cmd)), string literals and/or one or more of the
 # following escape sequences:
-
-# The prompt line is build using command substitution ($(cmd)), string
-# literals and/or the following escape sequences:
 #
 # \e: Escape character
 # \u: The username
@@ -95,8 +92,8 @@
 # the prompt name you want (e.g. Prompt="classic"), and comment out the
 # remaining prompt lines.
 #
-# NOTE: Since the below prompts have been designed for CliFM's default
-# color scheme, you might need to edit the one you choose manually to
+# NOTE: Since the below prompts have been designed for Clifm's default
+# color scheme, you may want to edit the one you choose manually to
 # make it fit your current color scheme.
 
 [clifm]
@@ -112,7 +109,7 @@ EnableWarningPrompt=true
 WarningPrompt="\[\e[0m\](!) > "
 
 [clifm-box-drawing]
-# The box drawing set isn't supported by all terminals
+# Note: The box drawing set used here is not supported by all terminal emulators
 Notifications=false
 RegularPrompt="\[\e[0m\]\[\e[0;36m\]\[\e(0\]lq\[\e(B\]\[\e[0;31m\]\#\[\e[0m\]\I\[\e[32m\]\*\[\e[36m\]\%\[\e[31m\]\(\[\e[33m\]\)\[\e[32m\]\=\[\e[0m\][\S\[\e[0m\]]\l \A \u:\H \[\e[0;36m\]\w\n\[\e[0;36m\]\[\e(0\]mq\[\e(B\]\[\e[0m\]<\z\[\e[0m\]> \[\e[0;34m\]\$ \[\e[0m\]"
 EnableWarningPrompt=true
