@@ -146,7 +146,8 @@
 #ifdef CLIFM_LEGACY
 /* Replace functions not available before POSIX-1.2008. More precisely,
  * let's try to be POSIX-1.2001 compliant. This is still experimental:
- * a crash was reported due to x_scandir(), the scandir(3) replacement. */
+ * a crash was reported due to x_scandir(), the scandir(3) replacement
+ * (see https://github.com/leo-arch/clifm/discussions/254). */
 # include "compat.h"
 # define xrealpath old_realpath
 #else

@@ -1276,6 +1276,26 @@ xset_prop_fields(const char *optval)
 	}
 #endif /* !ST_BTIME*/
 }
+
+static void
+xset_pager_view(char *arg)
+{
+	if (!arg || !*arg || *arg == '-')
+		err_arg_required("--pager-view");
+
+	if (*arg == 'a' && strcmp(arg, "auto") == 0) {
+		xargs.pager_view = conf.pager_view = PAGER_AUTO;
+	} else if (*arg == 'l' && strcmp(arg, "long") == 0) {
+		xargs.pager_view = conf.pager_view = PAGER_LONG;
+	} else if (*arg == 's' && strcmp(arg, "short") == 0) {
+		xargs.pager_view = conf.pager_view = PAGER_SHORT;
+	} else {
+		fprintf(stderr, _("%s: --pager-view: '%s': Invalid value.\n"
+			"Valid values are 'auto', 'long', and 'short'\n"),
+			PROGRAM_NAME, arg);
+		exit(EXIT_FAILURE);
+	}
+}
 #endif /* !_BE_POSIX */
 
 __attribute__ ((noreturn))
@@ -1311,26 +1331,6 @@ set_tab_mode(const char *opt)
 	}
 }
 #endif /* _BE_POSIX */
-
-static void
-xset_pager_view(char *arg)
-{
-	if (!arg || !*arg || *arg == '-')
-		err_arg_required("--pager-view");
-
-	if (*arg == 'a' && strcmp(arg, "auto") == 0) {
-		xargs.pager_view = conf.pager_view = PAGER_AUTO;
-	} else if (*arg == 'l' && strcmp(arg, "long") == 0) {
-		xargs.pager_view = conf.pager_view = PAGER_LONG;
-	} else if (*arg == 's' && strcmp(arg, "short") == 0) {
-		xargs.pager_view = conf.pager_view = PAGER_SHORT;
-	} else {
-		fprintf(stderr, _("%s: --pager-view: '%s': Invalid value.\n"
-			"Valid values are 'auto', 'long', and 'short'\n"),
-			PROGRAM_NAME, arg);
-		exit(EXIT_FAILURE);
-	}
-}
 
 /* Evaluate command line arguments, if any, and change initial variables to
  * their corresponding values. */
