@@ -3881,6 +3881,7 @@ complete_prompt_names(char *text, const size_t words_n)
 	if (words_n > 3)
 		return (char **)NULL;
 
+	rl_attempted_completion_over = 1;
 	char *p = unescape_str((char *)text, 0);
 	char **matches = rl_completion_matches(p ? p : text, &prompts_generator);
 	free(p);
