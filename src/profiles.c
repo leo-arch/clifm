@@ -184,13 +184,6 @@ profile_set(const char *prof)
 	}
 	usrvar_n = 0;
 
-	i = (int)kbinds_n;
-	while (--i >= 0) {
-		free(kbinds[i].function);
-		free(kbinds[i].key);
-	}
-	kbinds_n = 0;
-
 	i = (int)actions_n;
 	while (--i >= 0) {
 		free(usr_actions[i].name);
