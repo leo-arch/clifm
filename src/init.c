@@ -741,6 +741,32 @@ check_etc_shells(const char *file, char *shells_file, int *tmp_errno)
 	return ret;
 }
 
+/* Make sure clifm is not used for $SHELL. This will brake programs using
+ * SHELL to run shell commands. For example, "fzf --preview". */
+static void
+validate_shell(void)
+{
+	char *p = xgetenv("SHELL", 0);
+	if (!p)
+		return;
+
+#ifdef _PATH_BSHELL
+	char *def_shell = _PATH_BSHELL;
+#else
+	char *def_shell = "/bin/sh";
+#endif /* _PATH_BSHELL */
+
+	char *q = strrchr(p, '/');
+	if ((!q && strcmp(p, PROGRAM_NAME) == 0)
+	|| (q && q[1] && strcmp(q + 1, PROGRAM_NAME) == 0)) {
+		err('w', PRINT_PROMPT, _("%s: '%s' is not a shell. "
+			"Setting SHELL to '%s'.\n"), PROGRAM_NAME, p,
+			def_shell);
+		unsetenv("SHELL");
+		setenv("SHELL", def_shell, 1);
+	}
+}
+
 static void
 validate_custom_shell(char **file)
 {
@@ -757,7 +783,7 @@ validate_custom_shell(char **file)
 	char *def_shell = _PATH_BSHELL;
 #else
 	char *def_shell = "/bin/sh";
-#endif
+#endif /* _PATH_BSHELL */
 
 	if (*file && check_etc_shells(*file, shells_file,
 	&tmp_errno) == FUNC_SUCCESS)
@@ -825,6 +851,8 @@ get_user_data_env(void)
 	if (p && t == p) /* CLIFM_SHELL */
 		validate_custom_shell(&tmp_user.shell);
 
+	validate_shell();
+
 	return tmp_user;
 }
 
@@ -881,6 +909,8 @@ get_user_data(void)
 	tmp_user.shell_basename = (char *)NULL;
 	if (is_custom_shell == 1)
 		validate_custom_shell(&tmp_user.shell);
+
+	validate_shell();
 
 	if (homedir == pw->pw_dir && (!homedir
 	|| stat(homedir, &a) == -1 || !S_ISDIR(a.st_mode))) {
