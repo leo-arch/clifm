@@ -836,13 +836,13 @@ get_rgb(char *hex, int *attr, int *r, int *g, int *b)
 	tmp[0] = *(hex + 4); tmp[1] = *(hex + 5);
 	*b = hex2int(tmp);
 
-	*attr = 0;
-	if (*(hex + 6) == '-' && *(hex + 7) && *(hex + 7) >= '1'
+	*attr = -1; /* Attribute unset */
+	if (*(hex + 6) == '-' && *(hex + 7) && *(hex + 7) >= '0'
 	&& *(hex + 7) <= '9' && !*(hex + 8))
 		*attr = *(hex + 7) - '0';
 
 	if (xargs.no_bold == 1 && *attr == 1)
-		*attr = 0;
+		*attr = -1;
 
 	return 0;
 }
@@ -870,11 +870,14 @@ get_rgb(char *hex, int *attr, int *r, int *g, int *b)
 char *
 hex2rgb(char *hex)
 {
-	int attr = 0, r = 0, g = 0, b = 0;
+	int attr = -1, r = 0, g = 0, b = 0;
 	if (get_rgb(hex, &attr, &r, &g, &b) == -1)
 		return (char *)NULL;
 
-	snprintf(tmp_color, sizeof(tmp_color), "%d;38;2;%d;%d;%d", attr, r, g, b);
+	if (attr == -1) /* No attribute */
+		snprintf(tmp_color, sizeof(tmp_color), "38;2;%d;%d;%d", r, g, b);
+	else
+		snprintf(tmp_color, sizeof(tmp_color), "%d;38;2;%d;%d;%d", attr, r, g, b);
 	return tmp_color;
 }
 

@@ -1158,7 +1158,7 @@ color256_to_ansi(char *s)
 	if (!s || !*s || !s[1])
 		return (char *)NULL;
 
-	int attr = 0;
+	int attr = -1;
 
 	char *q = strchr(s + 1, '-');
 	if (q) {
@@ -1171,7 +1171,11 @@ color256_to_ansi(char *s)
 	const int n = atoi(s + 1);
 
 	if (n >= 0 && n <= 255) {
-		snprintf(tmp_color, sizeof(tmp_color), "%d;38;5;%d", attr, n);
+		if (attr == -1) /* No attribute */
+			snprintf(tmp_color, sizeof(tmp_color), "38;5;%d", n);
+		else
+			snprintf(tmp_color, sizeof(tmp_color), "%d;38;5;%d", attr, n);
+
 		ret = tmp_color;
 	}
 
