@@ -28,17 +28,24 @@
 #define RL_PRINTABLE    1
 #define RL_NO_PRINTABLE 0 /* Add non-printing flags (\001 and \002)*/
 
-/* Tell split_color_line weather we're dealing with interface or file
- * type colors */
+/* Tell split_color_line wether we're dealing with interface or file
+ * type colors. */
 #define SPLIT_INTERFACE_COLORS 0
 #define SPLIT_FILETYPE_COLORS  1
 
-/* Max amount of custom color variables in the color scheme file */
+/* Max amount of custom color variables in the color scheme file. */
 #define MAX_DEFS 128
 
-/* Macros for the set_shades function */
+/* Macros for the set_shades function. */
 #define DATE_SHADES 0
 #define SIZE_SHADES 1
+
+/* Special colors (#RRGGBB and @NUM) need to be expanded into codes the
+ * terminal emulator can understand. For example, "#FF0000" will be expanded
+ * to "\x1b[38;2;255;0;0m", and "@160" to "\x1b[38;5;160m". */
+#define RGB_COLOR_PREFIX '#'
+#define COLOR256_PREFIX  '@'
+#define IS_COLOR_PREFIX(c) ((c) == RGB_COLOR_PREFIX || (c) == COLOR256_PREFIX)
 
 __BEGIN_DECLS
 

@@ -498,6 +498,9 @@ get_file_color(const char *filename, const struct stat *attr)
 static int
 is_hex_color(const char *str)
 {
+	if (!str || !*str)
+		return 0;
+
 	size_t c = 0;
 
 	while (*str) {
@@ -519,9 +522,38 @@ is_hex_color(const char *str)
 	return 1;
 }
 
+/* Validate a 256 color code string with this format: [0-999]-[0-9]. */
+static int
+is_256_color(const char *str)
+{
+	if (!str || !*str)
+		return 0;
+
+	const char *s = str;
+
+	size_t c = 0;
+	while (s[c]) {
+		if (c == 0 && (s[c] < '0' || s[c] > '9'))
+			return 0;
+		if (c == 1 && ((s[c] < '0' || s[c] > '9') && s[c] != '-'))
+			return 0;
+		if (c == 2 && ((s[c] < '0' || s[c] > '9') && s[c] != '-'))
+			return 0;
+		if (c == 3 && ((s[c] < '0' || s[c] > '9') && s[c] != '-'))
+			return 0;
+		if (c == 4 && (s[c] < '0' || s[c] > '9'))
+			return 0;
+		if (c == 5)
+			return 0;
+		c++;
+	}
+
+	return 1;
+}
+
 /* Check if STR has the format of a color code string (a number or a
  * semicolon list (max 12 fields) of numbers of at most 3 digits each).
- * Hex color codes (#RRGGBB) are also validated.
+ * Hex color codes (#RRGGBB) and 256 colors short (+NUM) are also validated.
  * Returns 1 if true and 0 if false. */
 static int
 is_color_code(const char *str)
@@ -529,8 +561,11 @@ is_color_code(const char *str)
 	if (!str || !*str)
 		return 0;
 
-	if (*str == '#')
+	if (*str == RGB_COLOR_PREFIX)
 		return is_hex_color(str + 1);
+
+	if (*str == COLOR256_PREFIX)
+		return is_256_color(str + 1);
 
 	size_t digits = 0, semicolon = 0;
 
@@ -794,7 +829,8 @@ strip_color_line(const char *str, const char mode)
 			if ((*str >= '0' && *str <= '9') || (*str >= 'a' && *str <= 'z')
 			|| (*str >= 'A' && *str <= 'Z')
 			|| *str == '=' || *str == ';' || *str == ':'
-			|| *str == '#' || *str == '-' || *str == '_')
+			|| *str == RGB_COLOR_PREFIX || *str == COLOR256_PREFIX
+			|| *str == '-' || *str == '_')
 				{buf[len] = *str; len++;}
 			str++;
 		}
@@ -805,7 +841,8 @@ strip_color_line(const char *str, const char mode)
 			if ((*str >= '0' && *str <= '9') || (*str >= 'a' && *str <= 'z')
 			|| (*str >= 'A' && *str <= 'Z') || *str == '*' || *str == '.'
 			|| *str == '=' || *str == ';' || *str == ':'
-			|| *str == '#' || *str == '-' || *str == '_')
+			|| *str == RGB_COLOR_PREFIX || *str == COLOR256_PREFIX
+			|| *str == '-' || *str == '_')
 				{buf[len] = *str; len++;}
 			str++;
 		}
@@ -1113,6 +1150,52 @@ cschemes_function(char **args)
 #endif /* CLIFM_SUCKLESS */
 }
 
+/* Convert a @NUM color string to the proper ANSI code representation.
+ * Return a pointer to the converted string on success or NULL on error. */
+static char *
+color256_to_ansi(char *s)
+{
+	if (!s || !*s || !s[1])
+		return (char *)NULL;
+
+	int attr = 0;
+
+	char *q = strchr(s + 1, '-');
+	if (q) {
+		*q = '\0';
+		if (q[1] >= '0' && q[1] <= '9' && !q[2])
+			attr = q[1] - '0';
+	}
+
+	char *ret = (char *)NULL;
+	const int n = atoi(s + 1);
+
+	if (n >= 0 && n <= 255) {
+		snprintf(tmp_color, sizeof(tmp_color), "%d;38;5;%d", attr, n);
+		ret = tmp_color;
+	}
+
+	if (q)
+		*q = '-';
+
+	return ret;
+}
+
+static char *
+decode_color_prefix(char *s)
+{
+	if (!s || !*s)
+		return (char *)NULL;
+
+	if (*s == RGB_COLOR_PREFIX)
+		return hex2rgb(s);
+	if (*s == COLOR256_PREFIX)
+		return color256_to_ansi(s);
+
+	return (char *)NULL;
+}
+
+
 /* Set color variable VAR (static global) to _COLOR.
  * If not printable, add non-printing char flags (\001 and \002). */
 static void
@@ -1139,11 +1222,9 @@ set_color(char *color, char var[], const int flag)
 #endif /* !CLIFM_SUCKLESS */
 
 	char *s = (char *)NULL;
-	if (*p == '#') {
-		if (!(s = hex2rgb(p))) {
-			*var = '\0';
-			return;
-		}
+	if (IS_COLOR_PREFIX(*p) && !(s = decode_color_prefix(p))) {
+		*var = '\0';
+		return;
 	}
 
 	if (flag == RL_NO_PRINTABLE)
@@ -1550,7 +1631,8 @@ store_extension_line(const char *line)
 		return FUNC_FAILURE;
 
 	char *tmp = (def && *def) ? def : q + 1;
-	char *code = *tmp == '#' ? hex2rgb(tmp) : tmp;
+	char *code = IS_COLOR_PREFIX(*tmp) ? decode_color_prefix(tmp) : tmp;
+
 	if (!code || !*code)
 		return FUNC_FAILURE;
 
@@ -2092,7 +2174,8 @@ store_definition(char *str)
 	/* If we find a definition for TEMP, let's use this color for backup files
 	 * (bk_c color code). */
 	if (!*bk_c && *name == 'T' && strcmp(name + 1, "EMP") == 0) {
-		char *v = *value == '#' ? hex2rgb(value) : value;
+		char *v = IS_COLOR_PREFIX(*value) ? decode_color_prefix(value) : value;
+
 		snprintf(bk_c, sizeof(bk_c), "\x1b[0;%sm", v);
 	}
 
