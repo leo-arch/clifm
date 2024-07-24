@@ -19,7 +19,7 @@
 # 38;2;255;0;0  24-bit (RGB)
 # #ff0000       24-bit (HEX)
 #
-# A single attribute can be used for hex colors, and 256 colors (in the form +NUM),
+# A single attribute can be used for hex colors, and 256 colors (in the form @NUM),
 # using a dash and an attribute number (#RRGGBB-[1-9] or @NUM-[1-9]), where 1-9 is:
 #
 # 1: Bold or increased intensity
