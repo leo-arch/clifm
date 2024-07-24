@@ -1181,6 +1181,8 @@ color256_to_ansi(char *s)
 	return ret;
 }
 
+/* Decode the prefixed color string S to the proper ANSI representation
+ * Returns a pointer to the decoded string on success, or NULL or error. */
 static char *
 decode_color_prefix(char *s)
 {
@@ -1209,7 +1211,7 @@ set_color(char *color, char var[], const int flag)
 	if (is_color_code(color) == 0)
 #endif /* !CLIFM_SUCKLESS */
 	{
-		/* A null color string will be set to the default value by
+		/* A NULL color string will be set to the default value by
 		 * set_default_colors function. */
 		*var = '\0';
 		return;
