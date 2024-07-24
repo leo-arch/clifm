@@ -168,6 +168,7 @@
 define D=0           # Default (reset attributes)
 define DIM=2         # Dimmed
 
+define R=@160        # Red
 define R4=@1         # Red (4-bit)
 define BR4=@1-1      # Bold red (4-bit)
 define DR4=@1-2      # Dimmed red (4-bit)
@@ -228,7 +229,7 @@ define WB=37;44      # White on blue
 # just as InterfaceColors defines colors for Clifm's interface.
 FiletypeColors="bd=BY:ca=KR:cd=BO:di=BB4:ed=DB4:ee=G4:ef=DIM:ex=BG4:fi=D:ln=BC4:mh=RC4:nd=BR4:nf=DR4:no=URW:or=UDC4:ow=BlGr:pi=M4:sg=KY:so=BM4:st=WB:su=WR:tw=KG:uf=UDW4:"
 
-InterfaceColors="bm=BG4:db=O:dd=:de=AM:df=D:dg=P:dk=DP:dl=DW4:dn=DWD:do=AM:dp=P:dr=KK:dw=DP:dxd=PG:dxr=AM:dz=:el=C4:em=BR4:fc=DW:hb=C4:hc=DW4:hd=C4:he=C4:hn=:hp=C4:hq=LY:hr=R4:hs=G4:hv=G4:hw=R4:lc=C:li=BG4:mi=BC4:nm=BG4:ro=BB4:si=BB4:sb=DY4:sc=DC4:sd=DW4:sf=UDC4:sh=DM4:sp=DR4:sx=DG4:sz=UDM4:ti=BC4:ts=UM4:tt=BDC4:tx=D:wc=BC4:wm=Y:ws1=B4:ws2=R4:ws3=Y:ws4=G4:ws5=C:ws6=O:ws7=M4:ws8=DW:xf=BR4:xs=G4:"
+InterfaceColors="bm=BG4:db=O:dd=:de=AM:df=D:dg=P:dk=DP:dl=DW4:dn=DWD:do=AM:dp=P:dr=KK:dw=DP:dxd=PG:dxr=AM:dz=:el=C4:em=BR4:fc=DW:hb=C4:hc=DW4:hd=C4:he=C4:hn=:hp=C4:hq=LY:hr=R4:hs=G4:hv=G4:hw=R4:lc=C:li=BG4:mi=BC4:nm=BG4:ro=BB4:si=BB4:sb=DY4:sc=DC4:sd=DW4:sf=UDC4:sh=DWD:sp=DR4:sx=DG4:sz=UDM4:ti=BC4:ts=UM4:tt=BDC4:tx=D:wc=BC4:wm=Y:ws1=B4:ws2=R:ws3=Y:ws4=G4:ws5=C:ws6=O:ws7=M4:ws8=DW:xf=BR4:xs=G4:"
 
 ### Colors for specific file extensions (case insensitive). ExtColors can be used multiple times.
 # ARCHIVES

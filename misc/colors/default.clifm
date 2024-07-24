@@ -216,7 +216,7 @@ define WB=37;44     # white foreground, blue background
 # just as InterfaceColors defines colors for CliFM's interface.
 FiletypeColors="bd=BY:ca=KR:cd=BD:di=BB:ed=DB:ee=G:ef=DIM:ex=BG:fi=D:ln=BC:mh=RC:nd=BR:nf=DR:no=URW:or=UDC:ow=BlGr:pi=M:sg=KY:so=BM:st=WB:su=WR:tw=KG:uf=UDW:"
 
-InterfaceColors="bm=BG:db=Y:dd=:de=C:df=D:dg=M:dk=R:dl=DW:dn=DW:do=C:dp=M:dr=Y:dw=R:dxd=G:dxr=C:dz=:el=C:em=BR:fc=DW:hb=C:hc=DW:hd=C:he=C:hn=:hp=C:hq=Y:hr=R:hs=G:hv=G:hw=R:lc=BC:li=BG:mi=BC:nm=BG:ro=:si=BB:sb=DY:sc=DC:sd=DW:sf=UDC:sh=DM:sp=DR:sx=DG:sz=UDM:ti=BC:ts=UM:tt=BDC:tx=D:wc=BC:wm=BY:ws1=B:ws2=R:ws3=Y:ws4=G:ws5=C:ws6=C:ws7=C:ws8=C:xf=BR:xs=G:"
+InterfaceColors="bm=BG:db=Y:dd=:de=C:df=D:dg=M:dk=R:dl=DW:dn=DW:do=C:dp=M:dr=Y:dw=R:dxd=G:dxr=C:dz=:el=C:em=BR:fc=DW:hb=C:hc=DW:hd=C:he=C:hn=:hp=C:hq=Y:hr=R:hs=G:hv=G:hw=R:lc=BC:li=BG:mi=BC:nm=BG:ro=:si=BB:sb=DY:sc=DC:sd=DW:sf=UDC:sh=DW:sp=DR:sx=DG:sz=UDM:ti=BC:ts=UM:tt=BDC:tx=D:wc=BC:wm=BY:ws1=B:ws2=R:ws3=Y:ws4=G:ws5=C:ws6=C:ws7=C:ws8=C:xf=BR:xs=G:"
 
 # Colors for specific file extensions (case insensitive). ExtColors can be used multiple times.
 # ARCHIVES
