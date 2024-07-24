@@ -3052,6 +3052,48 @@ END:
 }
 #endif /* CLIFM_SUCKLESS */
 
+static int
+get_largest_ext_name(void)
+{
+	size_t i;
+	size_t l = 0;
+
+	for (i = 0; i < ext_colors_n; i++)
+		if (ext_colors[i].len > l)
+			l = ext_colors[i].len;
+
+	return (int)l;
+}
+
+static void
+print_ext_colors(void)
+{
+	if (ext_colors_n == 0)
+		return;
+
+	printf(_("%sExtension colors%s\n\n"), BOLD, df_c);
+	const int l = get_largest_ext_name() + 2; /* +2 == ".*"*/
+	int cols = term_cols / (l + 2); /* +2 == 2 ending spaces */
+	if (cols <= 0)
+		cols = 1;
+
+	int n = 1;
+	size_t i;
+
+	for (i = 0; i < ext_colors_n; i++) {
+		printf("\x1b[%sm*.%s%s%*s", ext_colors[i].value,
+			ext_colors[i].name, NC, l - (int)ext_colors[i].len, "");
+		if (n == cols) {
+			n = 1;
+			putchar('\n');
+		} else {
+			n++;
+		}
+	}
+
+	fputs("\n\n", stdout);
+}
+
 static void
 print_color_blocks(void)
 {
@@ -3101,7 +3143,7 @@ color_codes(void)
 	printf(_(" %sfile name%s: pi: Pipe or FIFO special file\n"), pi_c, df_c);
 #ifdef SOLARIS_DOORS
 	printf(_(" %sfile name%s: oo: Door/Port file\n"), oo_c, df_c);
-#endif /* SOLARIS_DOORS */
+#endif // SOLARIS_DOORS
 	printf(_(" %sfile name%s: su: SUID file\n"), su_c, df_c);
 	printf(_(" %sfile name%s: sg: SGID file\n"), sg_c, df_c);
 	printf(_(" %sfile name%s: ca: File with capabilities\n"), ca_c, df_c);
@@ -3121,19 +3163,8 @@ color_codes(void)
 		 "self (.) and parent (..) directories."));
 	printf(_("\nThe second field in this list is the code that is to be used "
 		 "to modify the color of the corresponding file type in the "
-		 "color scheme file (in the \"FiletypeColors\" line), "
-		 "using the same ANSI style color format used by dircolors. "
-		 "8, 256, and RGB colors are supported.\n\n"));
+		 "color scheme file (in the \"FiletypeColors\" line).\n\n"));
 
-	if (ext_colors_n > 0) {
-		size_t i;
-		printf(_("%sExtension colors%s\n\n"), BOLD, df_c);
-		for (i = 0; i < ext_colors_n; i++) {
-			printf(" \x1b[%sm*.%s%s\n", ext_colors[i].value,
-				ext_colors[i].name, NC);
-		}
-		putchar('\n');
-	}
-
+	print_ext_colors();
 	print_color_blocks();
 }
