@@ -60,7 +60,7 @@ gen_time(const int c)
 	struct tm tm;
 
 	if (!localtime_r(&rawtime, &tm)) {
-		temp = savestring("?", 1);
+		temp = savestring(UNKNOWN_STR, sizeof(UNKNOWN_STR) - 1);
 	} else if (c == 't') {
 		char time[9] = "";
 		strftime(time, sizeof(time), "%H:%M:%S", &tm);
@@ -256,7 +256,7 @@ gen_user_name(void)
 	char *temp = (char *)NULL;
 
 	if (!user.name)
-		temp = savestring("?", 1);
+		temp = savestring(UNKNOWN_STR, sizeof(UNKNOWN_STR) - 1);
 	else
 		temp = savestring(user.name, strlen(user.name));
 
@@ -282,7 +282,7 @@ static inline char *
 gen_user_flag(void)
 {
 	char *temp = xnmalloc(2, sizeof(char));
-	*temp = user.uid == 0 ? '#' : '$';
+	*temp = user.uid == 0 ? ROOT_USR_CHAR : NON_ROOT_USR_CHAR;
 	temp[1] = '\0';
 
 	return temp;
@@ -294,7 +294,7 @@ gen_mode(void)
 	char *temp = xnmalloc(2, sizeof(char));
 
 	if (conf.light_mode == 1) {
-		*temp = 'L';
+		*temp = LIGHT_MODE_CHAR;
 		temp[1] = '\0';
 	} else {
 		*temp = '\0';

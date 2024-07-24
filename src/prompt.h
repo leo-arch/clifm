@@ -41,6 +41,10 @@
 #define STEALTH_IND "S\001\x1b[0m\002"
 #define STEALTH_IND_SIZE (MAX_COLOR + 7 + 1)
 
+#define ROOT_USR_CHAR     '#'
+#define NON_ROOT_USR_CHAR '$'
+#define LIGHT_MODE_CHAR   'L'
+
 #define EMERGENCY_PROMPT_MSG "Error decoding prompt line. Using an \
 emergency prompt"
 #define EMERGENCY_PROMPT "\001\x1b[0m\002> "

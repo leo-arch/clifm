@@ -372,7 +372,6 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define UNKNOWN_CHR     '?'
 /* Same as UNKNOWN_CHR, but as a string */
 #define UNKNOWN_STR     "?"
-#define UNKNOWN_STR_LEN 1
 
 /* Characters used to classify files when running colorless (and classify
  * is enabled) */
