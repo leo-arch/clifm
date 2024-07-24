@@ -3052,7 +3052,7 @@ END:
 }
 #endif /* CLIFM_SUCKLESS */
 
-static int
+static size_t
 get_largest_ext_name(void)
 {
 	size_t i;
@@ -3062,17 +3062,15 @@ get_largest_ext_name(void)
 		if (ext_colors[i].len > l)
 			l = ext_colors[i].len;
 
-	return (int)l;
+	return l;
 }
 
 static void
 print_ext_colors(void)
 {
-	if (ext_colors_n == 0)
-		return;
+	printf(_("%sFile extension colors%s\n\n"), BOLD, df_c);
 
-	printf(_("%sExtension colors%s\n\n"), BOLD, df_c);
-	const int l = get_largest_ext_name() + 2; /* +2 == ".*"*/
+	const int l = (int)get_largest_ext_name() + 2; /* +2 == ".*"*/
 	int cols = term_cols / (l + 2); /* +2 == 2 ending spaces */
 	if (cols <= 0)
 		cols = 1;
@@ -3081,8 +3079,9 @@ print_ext_colors(void)
 	size_t i;
 
 	for (i = 0; i < ext_colors_n; i++) {
+		const int pad = l - (int)ext_colors[i].len;
 		printf("\x1b[%sm*.%s%s%*s", ext_colors[i].value,
-			ext_colors[i].name, NC, l - (int)ext_colors[i].len, "");
+			ext_colors[i].name, NC, pad, "");
 		if (n == cols) {
 			n = 1;
 			putchar('\n');
@@ -3165,6 +3164,8 @@ color_codes(void)
 		 "to modify the color of the corresponding file type in the "
 		 "color scheme file (in the \"FiletypeColors\" line).\n\n"));
 
-	print_ext_colors();
+	if (ext_colors_n > 0)
+		print_ext_colors();
+
 	print_color_blocks();
 }
