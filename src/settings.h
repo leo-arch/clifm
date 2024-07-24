@@ -417,6 +417,11 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
  * invalid UTF-8 char) in file names. */
 #define INVALID_CHR '^'
 
+/* A few identifiers used in the prompt */
+#define ROOT_USR_CHAR     '#'
+#define NON_ROOT_USR_CHAR '$'
+#define LIGHT_MODE_CHAR   'L'
+
 /* String used for the messages pointer (e.g.: "-> 2 file(s) removed")
  * Note: The color used for this string is 'mi' (in the color scheme file). */
 #define MSG_PTR_STR "->"
@@ -578,8 +583,8 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define DEF_PROMPT_NO_COLOR_NAME "clifm-no-color"
 #define DEF_PROMPT_NOTIF 1
 #define DEFAULT_PROMPT "\\[\\e[0m\\]\\I[\\S\\[\\e[0m\\]]\\l \
-\\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0m\\]<\\z\\[\\e[0m\\]\
->\\[\\e[00;34m\\] \\$\\[\\e[0m\\] "
+\\A \\u:\\H \\[\\e[0;36m\\]\\w\\n\\[\\e[0m\\]<\\z\\[\\e[0m\\]\
+>\\[\\e[0;34m\\] \\$\\[\\e[0m\\] "
 #define DEFAULT_PROMPT_NO_COLOR "\\I[\\S]\\l \\A \\u:\\H \\w\\n<\\z> \\$ "
 
 #define DEF_WARNING_PROMPT 1
@@ -587,7 +592,7 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #if defined(RL_READLINE_VERSION) && RL_READLINE_VERSION < 0x0700
 # define DEF_WPROMPT_STR DEF_WPROMPT_STR_NO_COLOR
 #else
-# define DEF_WPROMPT_STR "\\[\\e[00;02;31m\\](!) > "
+# define DEF_WPROMPT_STR "\\[\\e[0;1;31m\\](!)\\[\\e[0;2m\\] > "
 #endif /* READLINE < 7.0 */
 
 /* These options, except --preview-window=border-left (fzf 0.27), work with at
