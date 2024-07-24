@@ -70,7 +70,7 @@ DirIconColor="Y"
 Prompt="\[\e[0;38;2;248;248;242m\][\S\[\e[0;38;2;248;248;242m\]]\l \A \u:\H \[\e[0;38;2;139;233;253m\]\w\n\[\e[0;38;2;248;248;242m\]<\z\[\e[0;38;2;248;248;242m\]> \[\e[0;38;2;98;114;164m\]\$ \[\e[0m\]"
 Notifications=true
 EnableWarningPrompt=true
-WarningPrompt="\[\e[0m\]\[\e[0;2;38;2;255;85;85m\](!) > "
+WarningPrompt="\[\e[0;1;38;2;255;85;85m\](!)\[\e[0;2m\] > "
 
 DividingLine="-"
 
