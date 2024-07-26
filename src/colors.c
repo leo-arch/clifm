@@ -3123,44 +3123,40 @@ color_codes(void)
 	if (ext_colors_n > 0)
 		printf(_("%sFile type colors%s\n\n"), BOLD, df_c);
 
-	printf(_(" %sfile name%s: di: Directory*\n"), di_c, df_c);
-	printf(_(" %sfile name%s: ed: EMPTY directory\n"), ed_c, df_c);
-	printf(_(" %sfile name%s: nd: Directory with no read/exec permission\n"),
+	printf(_(" %sfile name%s (di) Directory\n"), di_c, df_c);
+	printf(_(" %sfile name%s (ed) Empty directory\n"), ed_c, df_c);
+	printf(_(" %sfile name%s (nd) Directory with no read/exec permission\n"),
 	    nd_c, df_c);
-	printf(_(" %sfile name%s: fi: Regular file\n"), fi_c, df_c);
-	printf(_(" %sfile name%s: ef: Empty (zero-lenght) file\n"), ef_c, df_c);
-	printf(_(" %sfile name%s: nf: File with no read permission\n"),
+	printf(_(" %sfile name%s (fi) Regular file\n"), fi_c, df_c);
+	printf(_(" %sfile name%s (ef) Empty file\n"), ef_c, df_c);
+	printf(_(" %sfile name%s (nf) File with no read permission\n"),
 	    nf_c, df_c);
-	printf(_(" %sfile name%s: ex: Executable file\n"), ex_c, df_c);
-	printf(_(" %sfile name%s: ee: Empty executable file\n"), ee_c, df_c);
-	printf(_(" %sfile name%s: ln: Symbolic link*\n"), ln_c, df_c);
-	printf(_(" %sfile name%s: or: Broken symbolic link\n"), or_c, df_c);
-	printf(_(" %sfile name%s: mh: Multi-hardlink\n"), mh_c, df_c);
-	printf(_(" %sfile name%s: bd: Block special file\n"), bd_c, df_c);
-	printf(_(" %sfile name%s: cd: Character special file\n"), cd_c, df_c);
-	printf(_(" %sfile name%s: so: Socket file\n"), so_c, df_c);
-	printf(_(" %sfile name%s: pi: Pipe or FIFO special file\n"), pi_c, df_c);
+	printf(_(" %sfile name%s (ex) Executable file\n"), ex_c, df_c);
+	printf(_(" %sfile name%s (ee) Empty executable file\n"), ee_c, df_c);
+	printf(_(" %sfile name%s (ln) Symbolic link\n"), ln_c, df_c);
+	printf(_(" %sfile name%s (or) Broken symbolic link\n"), or_c, df_c);
+	printf(_(" %sfile name%s (mh) Multi-hardlink\n"), mh_c, df_c);
+	printf(_(" %sfile name%s (bd) Block device\n"), bd_c, df_c);
+	printf(_(" %sfile name%s (cd) Character device\n"), cd_c, df_c);
+	printf(_(" %sfile name%s (so) Socket file\n"), so_c, df_c);
+	printf(_(" %sfile name%s (pi) Pipe or FIFO special file\n"), pi_c, df_c);
 #ifdef SOLARIS_DOORS
-	printf(_(" %sfile name%s: oo: Door/Port file\n"), oo_c, df_c);
+	printf(_(" %sfile name%s (oo) Door/Port file\n"), oo_c, df_c);
 #endif // SOLARIS_DOORS
-	printf(_(" %sfile name%s: su: SUID file\n"), su_c, df_c);
-	printf(_(" %sfile name%s: sg: SGID file\n"), sg_c, df_c);
-	printf(_(" %sfile name%s: ca: File with capabilities\n"), ca_c, df_c);
-	printf(_(" %sfile name%s: st: Sticky and NOT other-writable "
-		 "directory*\n"), st_c, df_c);
-	printf(_(" %sfile name%s: tw: Sticky and other-writable directory*\n"),
+	printf(_(" %sfile name%s (su) SUID file\n"), su_c, df_c);
+	printf(_(" %sfile name%s (sg) SGID file\n"), sg_c, df_c);
+	printf(_(" %sfile name%s (ca) File with capabilities\n"), ca_c, df_c);
+	printf(_(" %sfile name%s (st) Sticky and NOT other-writable "
+		 "directory\n"), st_c, df_c);
+	printf(_(" %sfile name%s (tw) Sticky and other-writable directory\n"),
 		tw_c, df_c);
-	printf(_(" %sfile name%s: ow: Other-writable and NOT sticky directory*\n"),
+	printf(_(" %sfile name%s (ow) Other-writable and NOT sticky directory\n"),
 	    ow_c, df_c);
-	printf(_(" %sfile name%s: no: Unknown file type\n"), no_c, df_c);
-	printf(_(" %sfile name%s: uf: Unaccessible (non-stat'able) file\n"),
+	printf(_(" %sfile name%s (no) Unknown file type\n"), no_c, df_c);
+	printf(_(" %sfile name%s (uf) Unaccessible (non-stat'able) file\n"),
 		uf_c, df_c);
 
-	puts(_("\n*The slash followed by a number (/xx) after directories "
-		 "or symbolic links to directories indicates the amount of "
-		 "files contained by the corresponding directory, excluding "
-		 "self (.) and parent (..) directories."));
-	printf(_("\nThe second field in this list is the code that is to be used "
+	printf(_("\nThe second field in this list is the code required "
 		 "to modify the color of the corresponding file type in the "
 		 "color scheme file (in the \"FiletypeColors\" line).\n\n"));
 

@@ -128,9 +128,9 @@
 #include <limits.h>
 #include <regex.h>
 #include <stdlib.h>
-#include <sys/stat.h> /* S_BLKSIZE */
+#include <sys/stat.h>  /* S_BLKSIZE */
 #include <sys/types.h> /* ssize_t */
-#include <fcntl.h> /* AT_* constants (like AT_FDCWD) */
+#include <fcntl.h>     /* AT_* constants (like AT_FDCWD) */
 /* Included here to test _DIRENT_HAVE_D_TYPE and DT macros. */
 #include <dirent.h>
 
