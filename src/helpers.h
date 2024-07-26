@@ -129,6 +129,7 @@
 #include <regex.h>
 #include <stdlib.h>
 #include <sys/stat.h> /* S_BLKSIZE */
+#include <sys/types.h> /* ssize_t */
 #include <fcntl.h> /* AT_* constants (like AT_FDCWD) */
 /* Included here to test _DIRENT_HAVE_D_TYPE and DT macros. */
 #include <dirent.h>
@@ -249,7 +250,6 @@ if (S_ISNWK(mode)) return 'n'; // HP/UX: network special file
 #if defined(__linux__)
 # include <linux/version.h>
 # include <linux/limits.h>
-# include <sys/types.h>
 # if !defined(__GLIBC__) || (__GLIBC__ > 2 \
 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 9)) \
 && LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,27)
@@ -257,7 +257,6 @@ if (S_ISNWK(mode)) return 'n'; // HP/UX: network special file
 # endif /* GLIBC >= 2.9 && linux >= 2.6.27 */
 #elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) \
 || defined(__DragonFly__) || defined(__APPLE__)
-# include <sys/types.h>
 # include <sys/time.h>
 # include <sys/param.h>
 # include <sys/syslimits.h>
@@ -275,7 +274,6 @@ if (S_ISNWK(mode)) return 'n'; // HP/UX: network special file
 #  define HAVE_KQUEUE
 # endif /* FreeBSD >= 4.1 */
 #elif defined(__sun) || defined(__CYGWIN__)
-# include <sys/types.h>
 # include <sys/time.h>
 #elif defined(__HAIKU__)
 # include <stdint.h> /* uint8_t */
@@ -307,7 +305,7 @@ if (S_ISNWK(mode)) return 'n'; // HP/UX: network special file
 #endif /* HAVE_KQUEUE && !USE_GENERIC_FS_MONITOR */
 
 /* Before MacOS X 10.10, renameat(2) is declared in sys/stdio.h */
-#if defined(__APPLE__)
+#if defined(__APPLE__) && !defined(CLIFM_LEGACY)
 # include <AvailabilityMacros.h>
 # if MAC_OS_X_VERSION_MIN_REQUIRED < 101000
 #  define MAC_OS_X_RENAMEAT_SYS_STDIO_H
