@@ -500,7 +500,7 @@ gen_notification(const int flag)
 		break;
 	case NOTIF_SEL:
 		if (sel_n > 0)
-			snprintf(p, len, "*%zu", sel_n);
+			snprintf(p, len, "%c%zu", SELFILE_CHR, sel_n);
 		break;
 	case NOTIF_TRASH:
 		if (trash_n > 0)
@@ -930,7 +930,8 @@ construct_prompt(const char *decoded_prompt)
 			snprintf(trash_ind, N_IND, "%sT%zu%s",
 				ti_c, (size_t)trash_n, RL_NC);
 		if (sel_n > 0)
-			snprintf(sel_ind, N_IND, "%s*%zu%s", li_c, sel_n, RL_NC);
+			snprintf(sel_ind, N_IND, "%s%c%zu%s", li_c, SELFILE_CHR,
+				sel_n, RL_NC);
 	}
 
 	const size_t prompt_len = set_prompt_length(strlen(decoded_prompt));

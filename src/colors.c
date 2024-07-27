@@ -3161,18 +3161,22 @@ print_prop_colors(void)
 		dxd_c, df_c, dxd_c, df_c);
 	printf(_("%sColor%s (dxr) Execute bit - file (%sx%s)\n"),
 		dxr_c, df_c, dxr_c, df_c);
-	printf(_("%sColor%s (dp)  SUID/SGID bit (%ss%s)\n"), dp_c,
+	printf(_("%sColor%s (dp)  SUID/SGID bit (e.g. %ss%s)\n"), dp_c,
 		df_c, dp_c, df_c);
-	printf(_("%sColor%s (dg)  User/group ID (e.g. %sJane wheel%s)\n"),
+	printf(_("%sColor%s (dg)  User/group ID (e.g. %sjane wheel%s)\n"),
 		dg_c, df_c, dg_c, df_c);
-	if (*dz_c)
-		printf(_("%sColor%s (dz)  Size\n"), dz_c, df_c);
-	else
+	if (*dz_c) {
+		printf(_("%sColor%s (dz)  Size (e.g. %s12.69k%s)\n"),
+			dz_c, df_c, dz_c, df_c);
+	} else {
 		printf(_("      (dz)  Size (unset: using shades)\n"));
-	if (*dd_c)
-		printf(_("%sColor%s (dd)  Date\n"), dd_c, df_c);
-	else
+	}
+	if (*dd_c) {
+		printf(_("%sColor%s (dd)  Date (e.g. %sJul 9 16:39%s)\n"),
+			dd_c, df_c, dd_c, df_c);
+	} else {
 		printf(_("      (dd)  Date (unset: using shades)\n"));
+	}
 	printf(_("%sColor%s (db)  Used blocks (e.g. %s1576%s)\n"),
 		db_c, df_c, db_c, df_c);
 	printf(_("%sColor%s (dk)  Links number (e.g. %s92%s)\n"),
@@ -3199,13 +3203,13 @@ print_interface_colors(void)
 		dl_c, df_c, dl_c, df_c);
 	printf(_("%sColor%s (lc) Symbolic link indicator (e.g. %s36%s"
 		"%s%c%ssymlink)\n"), lc_c, df_c, el_c, df_c, lc_c, LINK_CHR, df_c);
-	printf(_("%sColor%s (mi) Miscellaneous indicator (\"%s%s%s\")\n"), mi_c,
+	printf(_("%sColor%s (mi) Miscellaneous indicator (%s%s%s)\n"), mi_c,
 		df_c, mi_c, MSG_PTR_STR, df_c);
 	printf(_("%sColor%s (bm) Bookmark names in the bookmarks screen\n"),
 		bm_c, df_c);
 	printf(_("%sColor%s (ts) Matching completion prefix (e.g. "
 		"%sfile%sname)\n"), ts_c, df_c, ts_c, df_c);
-	printf(_("%sColor%s (tt) Trimmed file names mark (filenam%s%c%s.ext)\n"),
+	printf(_("%sColor%s (tt) Trimmed file names mark (filenam%s%c%s.odt)\n"),
 		tt_c, df_c, tt_c, TRIMFILE_CHR, df_c);
 	printf(_("%sColor%s (df) Default color\n"), df_c, df_c);
 }
@@ -3271,9 +3275,9 @@ print_suggestion_colors(void)
 	printf("%sColor%s (sb) Shell builtin names (e.g. ex%sport%s)\n",
 		sb_c, df_c, sb_c, df_c);
 	printf("%sColor%s (sd) Internal commands description (e.g. "
-		"c %s(copy files)%s)\n", sd_c, df_c, sd_c, df_c);
-	printf("%sColor%s (sp) Pointer (e.g. 48 %s%c%s %sfilename%s)\n",
-		sp_c, df_c, sp_c, BAEJ_SUG_POINTER, df_c, sf_c, df_c);
+		"br %s(batch rename files)%s)\n", sd_c, df_c, sd_c, df_c);
+	printf("%sColor%s (sp) Pointer (e.g. %s48%s %s%c%s %sfilename%s)\n",
+		sp_c, df_c, hn_c, df_c, sp_c, BAEJ_SUG_POINTER, df_c, sf_c, df_c);
 #else
 	return;
 #endif /* !_NO_SUGGESTIONS */
@@ -3285,13 +3289,13 @@ print_highlight_colors(void)
 #ifndef _NO_HIGHLIGHT
 	printf(_("\n%sSyntax highlighting%s\n\n"), BOLD, df_c);
 
-	printf(_("%sColor%s (hb) Brackets: \"%s(){}[]%s\"\n"),
+	printf(_("%sColor%s (hb) Brackets: %s(){}[]%s\n"),
 		hb_c, df_c, hb_c, df_c);
 	printf(_("%sColor%s (hc) Commented out text (e.g. some text "
 		"%s#comment%s)\n"), hc_c, df_c, hc_c, df_c);
 	printf(_("%sColor%s (hd) Slash (e.g. dir%s/%sfile)\n"),
 		hd_c, df_c, hd_c, df_c);
-	printf(_("%sColor%s (he) Expansion characters: \"%s@*%s\"\n"),
+	printf(_("%sColor%s (he) Expansion characters: %s~*%s\n"),
 		he_c, df_c, he_c, df_c);
 	printf(_("%sColor%s (hn) Number (e.g. pp %s12%s)\n"),
 		hn_c, df_c, hn_c, df_c);
@@ -3299,13 +3303,13 @@ print_highlight_colors(void)
 		hp_c, df_c, hp_c, df_c);
 	printf(_("%sColor%s (hq) Quoted text (e.g. %s\"some text\"%s)\n"),
 		hq_c, df_c, hq_c, df_c);
-	printf(_("%sColor%s (hr) Redirection character: '%s>%s'\n"),
+	printf(_("%sColor%s (hr) Redirection characters: %s><%s\n"),
 		hr_c, df_c, hr_c, df_c);
-	printf(_("%sColor%s (hs) Process separator characters: \"%s|;&%s\" \n"),
+	printf(_("%sColor%s (hs) Process separator characters: %s|;&%s \n"),
 		hs_c, df_c, hs_c, df_c);
-	printf(_("%sColor%s (hv) Variable name (e.g. %s$VAR%s)\n"),
+	printf(_("%sColor%s (hv) Variable name (e.g. %s$FOO%s)\n"),
 		hv_c, df_c, hv_c, df_c);
-	printf(_("%sColor%s (hw) Backslash (e.g. r this%s\\%s file%s\\%s "
+	printf(_("%sColor%s (hw) Backslash (e.g. sel this%s\\%s file%s\\%s "
 		"name)\n"), hw_c, df_c, hw_c, df_c, hw_c, df_c);
 #else
 	return;
@@ -3330,7 +3334,7 @@ color_codes(void)
 	print_highlight_colors();
 	print_suggestion_colors();
 
-	puts(_("\nThe bracketed field above is the code required to modify the "
+	puts(_("\nThe bracketed field is the code required to modify the "
 		 "color of the corresponding element in the color scheme file.\n\n"));
 
 	print_color_blocks();
