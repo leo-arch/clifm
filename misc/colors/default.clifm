@@ -1,39 +1,39 @@
 # Theme file for Clifm
-# Theme name: clifm (16 colors version). Check 'default-256' for a 256 colors version.
+# Theme name: clifm (16 colors). Check 'default-256' for a 256 colors version.
 # Author: L. Abramovich
 # License: GPL3
 
 ### How do we define colors?
 #
-# FiletypeColors, InterfaceColors, and ExtColors use the same format used
-# by the LS_COLORS environment variable. Thus, "di=1;34" means that (non-empty)
-# directories will be printed in bold blue.
+# The FiletypeColors, InterfaceColors, and ExtColors options take SGR sequences
+# (excluding the initial escape character and the ending 'm') as color values,
+# just like the LS_COLORS environment variable. However, shortcuts for 8-bit
+# (256-colors) and 24-bit (true color) colors are available. For example:
 #
-# Color codes are just traditional ANSI escape sequences less the escape char
-# and the final 'm'.
-# 4-bit (16 colors), 8-bit (256 colors), and 24-bit (RGB/HEX) colors are supported.
-# Example:
 # 31            4-bit
 # 38;5;160      8-bit
 # @160          8-bit  (short)
-# 38;2;255;0;0  24-bit (RGB)
-# #ff0000       24-bit (HEX)
+# 38;2;255;0;0  24-bit
+# #ff0000       24-bit (short, HEX)
 #
-# A single attribute can be used for hex colors, and 256 colors (in the form @NUM),
+# A single attribute can be added to hex colors, and 256 colors (in the form @NUM),
 # using a dash and an attribute number (#RRGGBB-[1-9] or @NUM-[1-9]), where 1-9 is:
 #
 # 1: Bold or increased intensity
 # 2: Faint, decreased intensity or dim
-# 3: Italic (Not widely supported)
+# 3: Italic (not widely supported)
 # 4: Underline
 # 5: Slow blink
 # 6: Rapid blink
 # 7: Reverse video or invert
-# 8: Conceal or hide (Not widely supported)
+# 8: Conceal or hide (not widely supported)
 # 9: Crossed-out or strike
 #
-# For example, for bold red the hex code is #ff0000-1, while the 256 colors code
-# is @160-1
+# For example, for bold red the hex code is #ff0000-1, while the 256-colors code
+# is @160-1.
+#
+# Note: For more information about SGR sequences consult
+# https://en.wikipedia.org/wiki/ANSI_escape_code
 
 ### Use some variables to hold your color codes
 #
@@ -46,13 +46,14 @@
 #
 # For example;
 #
-# define M=@6-1
-# el=M
+# define BOLD_CYAN=@6-1
+# el=BOLD_CYAN
 #
-# Here we define 'M' as "@6-1", and then we use this color for ELN's,
+# Here we define 'BOLD_CYAN' as "@6-1", and then we use this color for ELN's,
 # whose code is 'el' (see below).
 
-### Xterm-like color names are also supported. Example:
+### Xterm-like color names are also supported. For example, let's use DarkSeaGreen1
+# for ELN's:
 #
 # el=DarkSeaGreen1
 #
@@ -61,162 +62,150 @@
 # define Green=DarkSeaGreen1
 # el=Green
 #
-# Just as with hex colors, a single attribute can be appended to color names.
+# Just as with hex colors, a single attribute can be added to color names.
 # For example, 'DarkSeaGreen1-1' to get the bold version of this color.
 #
 # For the complete list of color names consult the manpage.
 
-### To know what are we applying colors to, we use the following codes:
-#
-## File types
-# bd = Block device
-# ca = File with capabilities
-# cd = Char device
-# ed = Empty directory
-# ee = Empty executable file
-# ex = Executable file
-# ef = Empty regular file
-# fi = Regular file
-# di = Directory
-# ln = Symbolic link
-# mh = Multi-hardlink file
-# nd = Directory with no read permission
-# ne = Empty directory with no read permission
-# nf = Regular file with no read permission
-# no = Unknown
-# oo = Door (Solaris only)
-# or = Broken symlink
-# ow = Other-writable
-# pi = FIFO/pipe
-# sg = SGID file
-# so = Socket
-# st = Sticky (not other-writable)
-# su = SUID file
-# tw = Sticky and other-writable
-# uf = Non-'stat'able file
-#
-## Interface
-# bm = Bookmarked directory
-# fc = Files counter
-# df = Default color
-# dl = Dividing line
-# el = ELN color
-# lc = Symlink indicator (for ColorLinksAsTarget only)
-# mi = Misc indicators
-# ts = TAB completion suffix
-# tt = Tilde for trimmed files
-# wc = Welcome message
-#
-## Auto-suggestions
-# sb = Shell builtins
-# sc = External commands and aliases
-# sd = Internal commands description
-# sf = File names
-# sh = History
-# sx = Internal commands and parameters
-# sp = BAEJ suggestions pointer
-# sz = File names (fuzzy)
-#
-## Syntax highlighting
-# hb = Brackets () [] {}
-# hc = Comments
-# hd = Paths (slashes)
-# he = Expansion operators: * ~
-# hn = Numbers
-# hp = Parameters: -
-# hq = Quoted strings
-# hr = Redirection >
-# hs = Process separators | & ; */
-# hv = Variables $ */
-# hw = Backslash (aka whack)
-#
-## File properties
-# db =  File allocated blocks
-# dd =  Date (1)
-# de =  File inode number (long view only)
-# dg =  UID, GID
-# dk =  Number of links (long view only)
-# dn =  Dash (none)
-# do =  Permissions in octal notation
-# dp =  Special files (SUID, SGID, etc)
-# dr =  Read
-# dw =  Write
-# dxd = Execute (dirs)
-# dxr = Execute (reg files)
-# dz =  Size (1)
-#
-# (1) If unset, gradient colors will be used (default). See
-# DateShades and SizeShades below for more information.
-#
-## Workspaces
-# wsN = Workspace number N
-#
-## Prompt notifications
-# em = Errors
-# li = Selected files indicator
-# nm = Notices
-# ti = Trash indicator
-# tx = Command line text
-# ro = Read-only mode indicator
-# si = Stealth mode indicator
-# wm = Warnings
-# xs = Exit code: success
-# xf = Exit code: failure
-#
-# NOTE: Whenever a code is unset, the default value is used.
+## Edit the value of the below defintions to change colors. For example, to change
+# the color of directories to bold red: 'define FTYPE_DIR=@1-1'.
 
-define D=0          # Default (reset attributes)
-define BD=1         # Bold
-define DIM=2        # Dimmed
+#=====================================#
+#            FILE TYPES               #
+#=====================================#
 
-define R=31         # Red
-define BR=1;31      # Bold red
-define DR=2;31      # Dimmed red
+define FTYPE_DIR=1;34             # Directory
+define FTYPE_EMPTY_DIR=2;34       # Empty directory
+define FTYPE_DIR_NO_PERM=1;31     # Directory with no read permission
+define FTYPE_REG=0                # Regular file
+define FTYPE_EMPTY_REG=2          # Empty regular file
+define FTYPE_REG_NO_PERM=2;31     # Regular file with no read permission
+define FTYPE_EXEC=1;32            # Executable file
+define FTYPE_EMPTY_EXEC=32        # Empty executable file
+define FTYPE_LINK=1;36            # Symbolic link
+define FTYPE_BROKEN_LINK=4;2;36   # Broken symbolic link
+define FTYPE_MULTI_HLINK=7;36     # Multi-hardlink file
+define FTYPE_BLK_DEV=1;33         # Block device
+define FTYPE_CHR_DEV=1            # Char device
+define FTYPE_FIFO=35              # FIFO/pipe
+define FTYPE_SOCK=1;35            # Socket
+define FTYPE_CAP=30;41            # File with capabilities
+define FTYPE_DOOR=35              # Door (Solaris only)
+define FTYPE_SUID=37;41           # SUID file
+define FTYPE_SGID=30;43           # SGID file
+define FTYPE_OW=34;42             # Other-writable
+define FTYPE_STICKY_NOT_OW=37;44  # Sticky (not other-writable)
+define FTYPE_STICKY_OW=30;42      # Sticky and other-writable
+define FTYPE_UNKNOWN=4;31;47      # Unknown file type
+define FTYPE_NON_STAT=4;2;37      # Non-stat'able file
 
-define G=32         # Green
-define BG=1;32      # Bold green
-define DG=2;32      # Dimmed green
+#=====================================#
+#       PROPERTIES / LONG VIEW        #
+#=====================================#
 
-define Y=33         # Yellow
-define BY=1;33      # Bold yellow
-define DY=2;33      # Dimmed yellow
+define PROP_READ=33         # Read bit
+define PROP_WRITE=31        # Write bit
+define PROP_EXEC_DIR=36     # Execute bit (directories)
+define PROP_EXEC_FILE=32    # Execute bit (files)
+define PROP_SPECIAL=35      # SUID/SGID bit
+define PROP_ID=35           # User/group IDs
+define PROP_SIZE=           # Size (1)
+define PROP_DATE=           # Date (1)
+define PROP_BLKS=33         # Used blocks
+define PROP_INODE=36        # Inode number
+define PROP_LINKS=31        # Number of file links
+define PROP_OCTAL_PERM=36   # Permissions in octal
+define PROP_DASH=2;37       # Dot separator and dash (unset bit)
 
-define B=34         # Blue
-define BB=1;34      # Bold blue
-define DB=2;34      # Dimmed blue
+# (1) If unset (default), color shades are used instead.
+# See DateShades and SizeShades below.
 
-define M=35         # Magenta
-define BM=1;35      # Bold Magenta
-define DM=2;35      # Dimmed magenta
-define UM=4;35      # Underlined magenta
-define UDM=2;4;35   # Underlined dimmed magenta
+#=====================================#
+#            INTERFACE                #
+#=====================================#
 
-define C=36         # Cyan
-define BC=1;36      # Bold cyan
-define DC=2;36      # Dimmed cyan
-define RC=7;36      # Reverse cyan
-define UDC=4;2;36   # Underlined dimmed cyan
-define BDC=1;2;36   # Bold dimmed cyan
+define IFACE_ELN=36               # ELN's (e.g. "12 myfile")
+define IFACE_FILES_COUNTER=2;37   # Files counter (e.g. "dir/12")
+define IFACE_DIV_LINE=2;37        # Dividing line
+define IFACE_LINK_IND=1;36        # Symbolic link indicator ('@')
+define IFACE_MISC_IND=1;36        # Miscellaneous indicator ("->")
+define IFACE_BM_NAME=1;32         # Bookmark names in the bookmarks screen
+define IFACE_TABCOMP_PREFIX=4;35  # Matching prefix (TAB completion)
+define IFACE_WELCOME_MSG=1;36     # Welcome message
+define IFACE_TRIM_CHAR=1;2;36     # Character used to mark trimmed file names ('~')
+define IFACE_DEF_COLOR=0          # Default color
 
-define DW=2;37      # Dimmed white
-define UDW=4;2;37   # Underlined dimmed white
+#=====================================#
+#               PROMPT                #
+#=====================================#
 
-# Foreground-background combinations
-define URW=4;31;47  # Red foreground, white background
-define WR=37;41     # White foreground, red background
-# K stands for black (B is used for Blue)
-define KY=30;43     # Black foreground, yellow background
-define KR=30;41     # Black foreground, red background
-define KG=30;42     # Black foreground, green background
-# BG is already used for bold green
-define BlGr=34;42   # Blue foreground, green background
-define WB=37;44     # white foreground, blue background
+define PROMPT_TEXT=0             # Command line text color
+define PROMPT_SEL=1;32           # Selected files indicator
+define PROMPT_TRASH=1;36         # Trashed files indicator
+define PROMPT_NOTICE=1;32        # Notice message indicator
+define PROMPT_WARNING=1;33       # Warning message indicator
+define PROMPT_ERR=1;31           # Error message indicator
+define PROMPT_READ_ONLY=1;34     # Read-only indicator
+define PROMPT_STEALTH=1;34       # Stealth mode indicator
+define PROMPT_EXIT_SUCCESS=32    # Success exit code
+define PROMPT_EXIT_FAILURE=1;31  # Error exit code
 
-# FiletypeColors defines the color used for file names when listing files, 
-# just as InterfaceColors defines colors for CliFM's interface.
-FiletypeColors="bd=BY:ca=KR:cd=BD:di=BB:ed=DB:ee=G:ef=DIM:ex=BG:fi=D:ln=BC:mh=RC:nd=BR:nf=DR:no=URW:or=UDC:ow=BlGr:pi=M:sg=KY:so=BM:st=WB:su=WR:tw=KG:uf=UDW:"
+#=====================================#
+#        WORKSPACE NUMBER/NAME        #
+#=====================================#
 
-InterfaceColors="bm=BG:db=Y:dd=:de=C:df=D:dg=M:dk=R:dl=DW:dn=DW:do=C:dp=M:dr=Y:dw=R:dxd=G:dxr=C:dz=:el=C:em=BR:fc=DW:hb=C:hc=DW:hd=C:he=C:hn=:hp=C:hq=Y:hr=R:hs=G:hv=G:hw=R:lc=BC:li=BG:mi=BC:nm=BG:ro=:si=BB:sb=DY:sc=DC:sd=DW:sf=UDC:sh=DW:sp=DR:sx=DG:sz=UDM:ti=BC:ts=UM:tt=BDC:tx=D:wc=BC:wm=BY:ws1=B:ws2=R:ws3=Y:ws4=G:ws5=C:ws6=C:ws7=C:ws8=C:xf=BR:xs=G:"
+define WORKSPACE_1=34
+define WORKSPACE_2=31
+define WORKSPACE_3=33
+define WORKSPACE_4=32
+define WORKSPACE_5=36
+define WORKSPACE_6=36
+define WORKSPACE_7=36
+define WORKSPACE_8=36
+
+#=====================================#
+#           SUGGESTIONS               #
+#=====================================#
+
+define SUG_HIST=2;37               # History
+define SUG_FILE_NAME=4;2;36        # File names
+define SUG_FILE_NAME_FUZZY=4;2;35  # File names (fuzzy)
+define SUG_INT_CMD=2;32            # Internal command names and parameters
+define SUG_EXT_CMD=2;36            # External command names
+define SUG_BUILTIN=2;33            # Shell builtin names
+define SUG_INT_CMD_DESC=2;37       # Internal commands description (e.g. "c (copy files)")
+define SUG_BAEJ_POINTER=2;31       # BAEJ pointer (e.g. "12 > myfile")
+
+#=====================================#
+#       SYNTAX HIGHLIGHTING           #
+#=====================================#
+
+define HL_BRACKET=36    # Brackets: () [] {}
+define HL_COMMENT=2;37  # Commented out text (starting with '#')
+define HL_SLASH=36      # Slash
+define HL_EXPANSION=36  # Expansion characters: * ~
+define HL_NUMBER=       # Number
+define HL_PARAM=36      # Command parameters (e.g. "echo '-e'")
+define HL_QUOTE=33      # Quoted text (single and double quotes)
+define HL_REDIRECT=31   # Redirection characters: > <
+define HL_PROC_SEP=32   # Process separators: | & ;
+define HL_VAR=32        # Variable names: $FOO
+define HL_WHACK=31      # Backslash (aka whack)
+
+# NOTE: Exception made of PROP_SIZE and PROP_DATE, whenever a value is unset,
+# the default value is used. To force it to use no color, set its value to zero.
+# Example:
+# define VAR=0
+
+### Colors used for file names when listing files
+FiletypeColors="bd=FTYPE_BLK_DEV:ca=FTYPE_CAP:cd=FTYPE_CHR_DEV:di=FTYPE_DIR:ed=FTYPE_EMPTY_DIR:ee=FTYPE_EMPTY_EXEC:ef=FTYPE_EMPTY_REG:ex=FTYPE_EXEC:fi=FTYPE_REG:ln=FTYPE_LINK:mh=FTYPE_MULTI_HLINK:nd=FTYPE_DIR_NO_PERM:nf=FTYPE_REG_NO_PERM:no=FTYPE_UNKNOWN:oo=FTYPE_DOOR:or=FTYPE_BROKEN_LINK:ow=FTYPE_OW:pi=FTYPE_FIFO:sg=FTYPE_SGID:so=FTYPE_SOCK:st=FTYPE_STICKY_NOT_OW:su=FTYPE_SUID:tw=FTYPE_STICKY_OW:uf=FTYPE_NON_STAT:"
+
+### Colors for Clifm's interface elements
+InterfaceColors="bm=IFACE_BM_NAME:db=PROP_BLKS:dd=PROP_DATE:de=PROP_INODE:df=IFACE_DEF_COLOR:dg=PROP_ID:dk=PROP_LINKS:dl=IFACE_DIV_LINE:dn=PROP_DASH:do=PROP_OCTAL_PERM:dp=PROP_SPECIAL:dr=PROP_READ:dw=PROP_WRITE:dxd=PROP_EXEC_DIR:dxr=PROP_EXEC_FILE:dz=PROP_SIZE:el=IFACE_ELN:em=PROMPT_ERR:fc=IFACE_FILES_COUNTER:hb=HL_BRACKET:hc=HL_COMMENT:hd=HL_SLASH:he=HL_EXPANSION:hn=HL_NUMBER:hp=HL_PARAM:hq=HL_QUOTE:hr=HL_REDIRECT:hs=HL_PROC_SEP:hv=HL_VAR:hw=HL_WHACK:lc=IFACE_LINK_IND:li=PROMPT_SEL:mi=IFACE_MISC_IND:nm=PROMPT_NOTICE:ro=PROMPT_READ_ONLY:si=PROMPT_STEALTH:sb=SUG_BUILTIN:sc=SUG_EXT_CMD:sd=SUG_INT_CMD_DESC:sf=SUG_FILE_NAME:sh=SUG_HIST:sp=SUG_BAEJ_POINTER:sx=SUG_INT_CMD:sz=SUG_FILE_NAME_FUZZY:ti=PROMPT_TRASH:ts=IFACE_TABCOMP_PREFIX:tt=IFACE_TRIM_CHAR:tx=PROMPT_TEXT:wc=IFACE_WELCOME_MSG:wm=PROMPT_WARNING:ws1=WORKSPACE_1:ws2=WORKSPACE_2:ws3=WORKSPACE_3:ws4=WORKSPACE_4:ws5=WORKSPACE_5:ws6=WORKSPACE_6:ws7=WORKSPACE_7:ws8=WORKSPACE_8:xf=PROMPT_EXIT_FAILURE:xs=PROMPT_EXIT_SUCCESS:"
+
+#=====================================#
+#           FILE EXTENSIONS           #
+#=====================================#
 
 # Colors for specific file extensions (case insensitive). ExtColors can be used multiple times.
 # ARCHIVES
@@ -255,7 +244,11 @@ ExtColors="aux=TEMP:bak=TEMP:bbl=TEMP:bc=TEMP:cache=TEMP:class=TEMP:git=TEMP:hi=
 define VIDEO=1;35 # Bold magenta
 ExtColors="3gp=VIDEO:asf=VIDEO:avi=VIDEO:cgm=VIDEO:dl=VIDEO:emf=VIDEO:flc=VIDEO:fli=VIDEO:flv=VIDEO:h264=VIDEO:heics=VIDEO:gl=VIDEO:m2ts=VIDEO:m2v=VIDEO:m4v=VIDEO:mkv=VIDEO:mov=VIDEO:mp4=VIDEO:mp4v=VIDEO:mpeg=VIDEO:mpg=VIDEO:nuv=VIDEO:ogm=VIDEO:ogv=VIDEO:qt=VIDEO:rm=VIDEO:rmvb=VIDEO:vob=VIDEO:webm=VIDEO:wmv=VIDEO:yuv=VIDEO:"
 
-# The series of color shades used to print timestamps.
+#=====================================#
+#           COLOR SHADES              #
+#=====================================#
+
+### TIMESTAMPS ###
 # The format is: "COLOR-TYPE,ERROR,SHADE1,SHADE2,SHADE3,SHADE4,SHADE5"
 #
 # COLOR-TYPE is one of: 1 (4-bit: 8 colors), 2 (8-bit: 256 colors), 3 (24-bit: truecolor)
@@ -281,7 +274,7 @@ DateShades="1,31-2,36-1,36,36-2,36-2,36-2"
 
 #NOTE: For DateShades to work, the 'dd' color code (solid color for dates) needs to be unset (default).
 
-# Same as DateShades, but for file sizes.
+### FILE SIZES ###
 # The meaning of each size shade is (in order, excluding COLOR-TYPE and ERROR):
 # byte, Kb, Mb, Gb, bigger
 
@@ -293,6 +286,10 @@ SizeShades="1,31-2,36,32,33,31,35"
 
 # If icons are enabled, use this color for directories icon (only for icons-in-terminal and Nerd-fonts).
 DirIconColor="Y"
+
+#=====================================#
+#           PROMPT STYLE              #
+#=====================================#
 
 # The prompt used by Clifm. Use the 'prompt' command to check for available
 # prompts. Enter 'prompt --help' for more information.
@@ -315,6 +312,10 @@ Prompt="clifm"
 #     supported by all terminals/consoles).
 # The color of this line is controlled by the 'dl' code in InterfaceColors.
 DividingLine="-"
+
+#=====================================#
+#               FZF                   #
+#=====================================#
 
 # If the fzf TAB completion mode is enabled, pass these options to fzf:
 FzfTabOptions="--color='16,prompt:6,fg+:-1,pointer:4,hl:2,hl+:2,gutter:-1,marker:2,border:7:dim' --marker='*' --bind tab:accept,right:accept,left:abort,alt-p:toggle-preview,change:top,alt-up:preview-page-up,alt-down:preview-page-down --inline-info --layout=reverse-list --preview-window=wrap,border-left"
