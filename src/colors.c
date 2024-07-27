@@ -553,7 +553,7 @@ is_256_color(const char *str)
 
 /* Check if STR has the format of a color code string (a number or a
  * semicolon list (max 12 fields) of numbers of at most 3 digits each).
- * Hex color codes (#RRGGBB) and 256 colors short (+NUM) are also validated.
+ * Hex color codes (#RRGGBB) and 256 colors short (@NUM) are also validated.
  * Returns 1 if true and 0 if false. */
 static int
 is_color_code(const char *str)
@@ -3150,6 +3150,55 @@ print_file_type_colors(void)
 		uf_c, df_c);
 }
 
+#include "properties.h" /* get_color_age(), get_color_size() */
+static void
+print_size_shades(void)
+{
+	fputs(_("      (dz)  Size (unset: using shades)\n              "), stdout);
+
+	char tstr[MAX_SHADE_LEN]; *tstr = '\0';
+
+	get_color_size((off_t)1, tstr, sizeof(tstr));
+	printf("%sbytes%s ", tstr, df_c);
+
+	get_color_size((off_t)1024, tstr, sizeof(tstr));
+	printf("%sKb%s ", tstr, df_c);
+
+	get_color_size((off_t)1024 * 1024, tstr, sizeof(tstr));
+	printf("%sMb%s ", tstr, df_c);
+
+	get_color_size((off_t)1024 * 1024 * 1024, tstr, sizeof(tstr));
+	printf("%sGb%s ", tstr, df_c);
+
+	get_color_size((off_t)1024 * 1024 * 1024 * 1024, tstr, sizeof(tstr));
+	printf("%sBigger%s\n", tstr, df_c);
+}
+
+static void
+print_date_shades(void)
+{
+	fputs(_("      (dd)  Date (unset: using shades)\n              "), stdout);
+
+	const time_t t = time(NULL);
+	props_now = t;
+	char tstr[MAX_SHADE_LEN]; *tstr = '\0';
+
+	get_color_age(t - (60*60LL), tstr, sizeof(tstr));
+	printf("%shour%s ", tstr, df_c);
+
+	get_color_age(t - (24*60*60LL), tstr, sizeof(tstr));
+	printf("%sday%s ", tstr, df_c);
+
+	get_color_age(t - (7*24*60*60LL), tstr, sizeof(tstr));
+	printf("%sweek%s ", tstr, df_c);
+
+	get_color_age(t - (4*7*24*60*60LL), tstr, sizeof(tstr));
+	printf("%smonth%s ", tstr, df_c);
+
+	get_color_age(t - (5*7*24*60*60LL), tstr, sizeof(tstr));
+	printf("%solder%s\n", tstr, df_c);
+}
+
 static void
 print_prop_colors(void)
 {
@@ -3169,13 +3218,13 @@ print_prop_colors(void)
 		printf(_("%sColor%s (dz)  Size (e.g. %s12.69k%s)\n"),
 			dz_c, df_c, dz_c, df_c);
 	} else {
-		printf(_("      (dz)  Size (unset: using shades)\n"));
+		print_size_shades();
 	}
 	if (*dd_c) {
 		printf(_("%sColor%s (dd)  Date (e.g. %sJul 9 16:39%s)\n"),
 			dd_c, df_c, dd_c, df_c);
 	} else {
-		printf(_("      (dd)  Date (unset: using shades)\n"));
+		print_date_shades();
 	}
 	printf(_("%sColor%s (db)  Used blocks (e.g. %s1576%s)\n"),
 		db_c, df_c, db_c, df_c);
