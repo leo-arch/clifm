@@ -6,8 +6,8 @@
 ### How do we define colors?
 #
 # The FiletypeColors, InterfaceColors, and ExtColors options take SGR sequences
-# (less the initial escape character and the ending 'm') as color values, just
-# like the LS_COLORS environment variable. However, shortcuts for 8-bit
+# (excluding the initial escape character and the ending 'm') as color values,
+# just like the LS_COLORS environment variable. However, shortcuts for 8-bit
 # (256-colors) and 24-bit (true color) colors are available. For example:
 #
 # 31            4-bit
@@ -192,7 +192,10 @@ define HL_PROC_SEP=@2   # Process separators: | & ;
 define HL_VAR=@2        # Variable names: $FOO
 define HL_WHACK=@1      # Backslash (aka whack)
 
-# NOTE: Whenever a value is unset, the default value is used.
+# NOTE: Exception made of PROP_SIZE and PROP_DATE, whenever a value is unset,
+# the default value is used. To force it to use no color, set its value to zero.
+# Example:
+# define VAR=0
 
 ### Colors used for file names when listing files
 FiletypeColors="bd=FTYPE_BLK_DEV:ca=FTYPE_CAP:cd=FTYPE_CHR_DEV:di=FTYPE_DIR:ed=FTYPE_EMPTY_DIR:ee=FTYPE_EMPTY_EXEC:ef=FTYPE_EMPTY_REG:ex=FTYPE_EXEC:fi=FTYPE_REG:ln=FTYPE_LINK:mh=FTYPE_MULTI_HLINK:nd=FTYPE_DIR_NO_PERM:nf=FTYPE_REG_NO_PERM:no=FTYPE_UNKNOWN:oo=FTYPE_DOOR:or=FTYPE_BROKEN_LINK:ow=FTYPE_OW:pi=FTYPE_FIFO:sg=FTYPE_SGID:so=FTYPE_SOCK:st=FTYPE_STICKY_NOT_OW:su=FTYPE_SUID:tw=FTYPE_STICKY_OW:uf=FTYPE_NON_STAT:"
@@ -200,8 +203,11 @@ FiletypeColors="bd=FTYPE_BLK_DEV:ca=FTYPE_CAP:cd=FTYPE_CHR_DEV:di=FTYPE_DIR:ed=F
 ### Colors for Clifm's interface elements
 InterfaceColors="bm=IFACE_BM_NAME:db=PROP_BLKS:dd=PROP_DATE:de=PROP_INODE:df=IFACE_DEF_COLOR:dg=PROP_ID:dk=PROP_LINKS:dl=IFACE_DIV_LINE:dn=PROP_DASH:do=PROP_OCTAL_PERM:dp=PROP_SPECIAL:dr=PROP_READ:dw=PROP_WRITE:dxd=PROP_EXEC_DIR:dxr=PROP_EXEC_FILE:dz=PROP_SIZE:el=IFACE_ELN:em=PROMPT_ERR:fc=IFACE_FILES_COUNTER:hb=HL_BRACKET:hc=HL_COMMENT:hd=HL_SLASH:he=HL_EXPANSION:hn=HL_NUMBER:hp=HL_PARAM:hq=HL_QUOTE:hr=HL_REDIRECT:hs=HL_PROC_SEP:hv=HL_VAR:hw=HL_WHACK:lc=IFACE_LINK_IND:li=PROMPT_SEL:mi=IFACE_MISC_IND:nm=PROMPT_NOTICE:ro=PROMPT_READ_ONLY:si=PROMPT_STEALTH:sb=SUG_BUILTIN:sc=SUG_EXT_CMD:sd=SUG_INT_CMD_DESC:sf=SUG_FILE_NAME:sh=SUG_HIST:sp=SUG_BAEJ_POINTER:sx=SUG_INT_CMD:sz=SUG_FILE_NAME_FUZZY:ti=PROMPT_TRASH:ts=IFACE_TABCOMP_PREFIX:tt=IFACE_TRIM_CHAR:tx=PROMPT_TEXT:wc=IFACE_WELCOME_MSG:wm=PROMPT_WARNING:ws1=WORKSPACE_1:ws2=WORKSPACE_2:ws3=WORKSPACE_3:ws4=WORKSPACE_4:ws5=WORKSPACE_5:ws6=WORKSPACE_6:ws7=WORKSPACE_7:ws8=WORKSPACE_8:xf=PROMPT_EXIT_FAILURE:xs=PROMPT_EXIT_SUCCESS:"
 
-### Colors for specific file extensions (case insensitive).
-# ExtColors can be used multiple times.
+#=====================================#
+#           FILE EXTENSIONS           #
+#=====================================#
+
+# NOTE: ExtColors can be used multiple times.
 
 # ARCHIVES
 define ARCHIVE=@1-1
@@ -247,7 +253,11 @@ ExtColors="3gp=VIDEO:asf=VIDEO:avi=VIDEO:cgm=VIDEO:dl=VIDEO:emf=VIDEO:flc=VIDEO:
 define DB=@211
 ExtColors="cdx=DB:dat=DB:db=DB:dbf=DB:dbi=DB:dbx=DB:fox=DB:mdb=DB:mdn=DB:mdx=DB:msql=DB:mssql=DB:pgsql=DB:sql=DB:ssql=DB:"
 
-### The series of color shades used to print timestamps.
+#=====================================#
+#           COLOR SHADES              #
+#=====================================#
+
+### TIMESTAMPS ###
 # The format is: "COLOR-TYPE,ERROR,SHADE1,SHADE2,SHADE3,SHADE4,SHADE5"
 #
 # COLOR-TYPE is one of: 1 (4-bit: 8 colors), 2 (8-bit: 256 colors), 3 (24-bit: truecolor)
@@ -271,7 +281,7 @@ ExtColors="cdx=DB:dat=DB:db=DB:dbf=DB:dbi=DB:dbx=DB:fox=DB:mdb=DB:mdn=DB:mdx=DB:
 DateShades="2,197-2,231,253,250,247,244"
 #DateShades="3,#ff005f-2,#ffffff,#dadada,#bcbcbc,#9e9e9e,#808080"
 
-### Same as DateShades, but for file sizes.
+### FILE SIZES ###
 # The meaning of each size shade is (in order, excluding COLOR-TYPE and ERROR):
 # byte, Kb, Mb, Gb, bigger
 
@@ -282,7 +292,11 @@ SizeShades="3,#ff005f-2,#5fd7af,#5fd75f,#ffff87,#ffaf5f,#ff5f5f"
 ### If icons are enabled, use this color for directories icon (only for icons-in-terminal and Nerd-fonts)
 DirIconColor="Y"
 
-### The prompt used by CliFM. Use the 'prompt' command to check for available
+#=====================================#
+#           PROMPT STYLE              #
+#=====================================#
+
+### The prompt used by Clifm. Use the 'prompt' command to check for available
 # prompts. Enter 'prompt --help' for more information.
 # You can use here either prompt codes (see the prompts.clifm file for details)
 # or a prompt name defined in the prompts file.
@@ -302,6 +316,10 @@ Prompt="clifm"
 #     supported by all terminals/consoles)
 # The color of this line is controlled by the 'dl' code in InterfaceColors
 DividingLine="-"
+
+#=====================================#
+#               FZF                   #
+#=====================================#
 
 ### If the fzf TAB completion mode is enabled, pass these options to fzf:
 FzfTabOptions="--color='16,prompt:6,fg+:-1,pointer:4,hl:2,hl+:2,gutter:-1,marker:2,border:7:dim' --marker='*' --bind tab:accept,right:accept,left:abort,alt-p:toggle-preview,change:top,alt-up:preview-page-up,alt-down:preview-page-down --inline-info --layout=reverse-list --preview-window=wrap,border-left"
