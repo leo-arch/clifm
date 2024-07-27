@@ -3068,7 +3068,7 @@ get_largest_ext_name(void)
 static void
 print_ext_colors(void)
 {
-	printf(_("%sFile extension colors%s\n\n"), BOLD, df_c);
+	printf(_("\n%sFile extensions%s\n\n"), BOLD, df_c);
 
 	const int l = (int)get_largest_ext_name() + 2; /* +2 == ".*"*/
 	int cols = term_cols / (l + 2); /* +2 == 2 ending spaces */
@@ -3090,7 +3090,7 @@ print_ext_colors(void)
 		}
 	}
 
-	fputs("\n\n", stdout);
+	fputs("\n", stdout);
 }
 
 static void
@@ -3111,6 +3111,207 @@ print_color_blocks(void)
 	SET_LINE_WRAP;
 }
 
+static void
+print_file_type_colors(void)
+{
+	printf(_("%sFile types%s\n\n"), BOLD, df_c);
+
+	printf(_("%sColor%s (di) Directory\n"), di_c, df_c);
+	printf(_("%sColor%s (ed) Empty directory\n"), ed_c, df_c);
+	printf(_("%sColor%s (nd) Directory with no read/exec permission\n"),
+	    nd_c, df_c);
+	printf(_("%sColor%s (fi) Regular file\n"), fi_c, df_c);
+	printf(_("%sColor%s (ef) Empty file\n"), ef_c, df_c);
+	printf(_("%sColor%s (nf) File with no read permission\n"),
+	    nf_c, df_c);
+	printf(_("%sColor%s (ex) Executable file\n"), ex_c, df_c);
+	printf(_("%sColor%s (ee) Empty executable file\n"), ee_c, df_c);
+	printf(_("%sColor%s (ln) Symbolic link\n"), ln_c, df_c);
+	printf(_("%sColor%s (or) Broken symbolic link\n"), or_c, df_c);
+	printf(_("%sColor%s (mh) Multi-hardlink\n"), mh_c, df_c);
+	printf(_("%sColor%s (bd) Block device\n"), bd_c, df_c);
+	printf(_("%sColor%s (cd) Character device\n"), cd_c, df_c);
+	printf(_("%sColor%s (so) Socket file\n"), so_c, df_c);
+	printf(_("%sColor%s (pi) Pipe or FIFO special file\n"), pi_c, df_c);
+#ifdef SOLARIS_DOORS
+	printf(_("%sColor%s (oo) Door/Port file\n"), oo_c, df_c);
+#endif // SOLARIS_DOORS
+	printf(_("%sColor%s (su) SUID file\n"), su_c, df_c);
+	printf(_("%sColor%s (sg) SGID file\n"), sg_c, df_c);
+	printf(_("%sColor%s (ca) File with capabilities\n"), ca_c, df_c);
+	printf(_("%sColor%s (st) Sticky and NOT other-writable "
+		 "directory\n"), st_c, df_c);
+	printf(_("%sColor%s (tw) Sticky and other-writable directory\n"),
+		tw_c, df_c);
+	printf(_("%sColor%s (ow) Other-writable and NOT sticky directory\n"),
+	    ow_c, df_c);
+	printf(_("%sColor%s (no) Unknown file type\n"), no_c, df_c);
+	printf(_("%sColor%s (uf) Unaccessible (non-stat'able) file\n"),
+		uf_c, df_c);
+}
+
+static void
+print_prop_colors(void)
+{
+	printf(_("\n%sProperties / Long view%s\n\n"), BOLD, df_c);
+
+	printf(_("%sColor%s (dr)  Read bit (%sr%s)\n"), dr_c, df_c, dr_c, df_c);
+	printf(_("%sColor%s (dw)  Write bit (%sw%s)\n"), dw_c, df_c, dw_c, df_c);
+	printf(_("%sColor%s (dxd) Execute bit - directory (%sx%s)\n"),
+		dxd_c, df_c, dxd_c, df_c);
+	printf(_("%sColor%s (dxr) Execute bit - file (%sx%s)\n"),
+		dxr_c, df_c, dxr_c, df_c);
+	printf(_("%sColor%s (dp)  SUID/SGID bit (%ss%s)\n"), dp_c,
+		df_c, dp_c, df_c);
+	printf(_("%sColor%s (dg)  User/group ID (e.g. %sJane wheel%s)\n"),
+		dg_c, df_c, dg_c, df_c);
+	if (*dz_c)
+		printf(_("%sColor%s (dz)  Size\n"), dz_c, df_c);
+	else
+		printf(_("      (dz)  Size (unset: using shades)\n"));
+	if (*dd_c)
+		printf(_("%sColor%s (dd)  Date\n"), dd_c, df_c);
+	else
+		printf(_("      (dd)  Date (unset: using shades)\n"));
+	printf(_("%sColor%s (db)  Used blocks (e.g. %s1576%s)\n"),
+		db_c, df_c, db_c, df_c);
+	printf(_("%sColor%s (dk)  Links number (e.g. %s92%s)\n"),
+		dk_c, df_c, dk_c, df_c);
+	printf(_("%sColor%s (de)  Inode number (e.g. %s802721%s)\n"),
+		de_c, df_c, de_c, df_c);
+	printf(_("%sColor%s (do)  Permissions in octal (e.g. %s0640%s)\n"),
+		do_c, df_c, do_c, df_c);
+	printf(_("%sColor%s (dn)  Dot/dash (e.g. %sr%sw%s-.%sr%s--.--%s)\n"),
+		dn_c, df_c, dr_c, dw_c, dn_c, dr_c, dn_c, df_c);
+
+}
+
+static void
+print_interface_colors(void)
+{
+	printf(_("\n%sInterface%s\n\n"), BOLD, df_c);
+
+	printf(_("%sColor%s (el) ELN's (e.g. %s12%s filename)\n"),
+		el_c, df_c, el_c, df_c);
+	printf(_("%sColor%s (fc) Files counter (e.g. dir%s/24%s)\n"),
+		fc_c, df_c, fc_c, df_c);
+	printf(_("%sColor%s (dl) Dividing line (e.g. %s------>%s)\n"),
+		dl_c, df_c, dl_c, df_c);
+	printf(_("%sColor%s (lc) Symbolic link indicator (e.g. %s36%s"
+		"%s%c%ssymlink)\n"), lc_c, df_c, el_c, df_c, lc_c, LINK_CHR, df_c);
+	printf(_("%sColor%s (mi) Miscellaneous indicator (\"%s%s%s\")\n"), mi_c,
+		df_c, mi_c, MSG_PTR_STR, df_c);
+	printf(_("%sColor%s (bm) Bookmark names in the bookmarks screen\n"),
+		bm_c, df_c);
+	printf(_("%sColor%s (ts) Matching completion prefix (e.g. "
+		"%sfile%sname)\n"), ts_c, df_c, ts_c, df_c);
+	printf(_("%sColor%s (tt) Trimmed file names mark (filenam%s%c%s.ext)\n"),
+		tt_c, df_c, tt_c, TRIMFILE_CHR, df_c);
+	printf(_("%sColor%s (df) Default color\n"), df_c, df_c);
+}
+
+static void
+print_workspace_colors(void)
+{
+	printf(_("\n%sWorkspaces%s\n\n"), BOLD, df_c);
+
+	printf(_("%sColor%s (ws1) Workspace [%s1%s]\n"), ws1_c, df_c, ws1_c, df_c);
+	printf(_("%sColor%s (ws2) Workspace [%s2%s]\n"), ws2_c, df_c, ws2_c, df_c);
+	printf(_("%sColor%s (ws3) Workspace [%s3%s]\n"), ws3_c, df_c, ws3_c, df_c);
+	printf(_("%sColor%s (ws4) Workspace [%s4%s]\n"), ws4_c, df_c, ws4_c, df_c);
+	printf(_("%sColor%s (ws5) Workspace [%s5%s]\n"), ws5_c, df_c, ws5_c, df_c);
+	printf(_("%sColor%s (ws6) Workspace [%s6%s]\n"), ws6_c, df_c, ws6_c, df_c);
+	printf(_("%sColor%s (ws7) Workspace [%s7%s]\n"), ws7_c, df_c, ws7_c, df_c);
+	printf(_("%sColor%s (ws8) Workspace [%s8%s]\n"), ws8_c, df_c, ws8_c, df_c);
+
+}
+
+static void
+print_prompt_colors(void)
+{
+	printf(_("\n%sPrompt%s\n\n"), BOLD, df_c);
+
+	printf(_("%sColor%s (tx) Command line text\n"), tx_c, df_c);
+	printf(_("%sColor%s (li) Selected files indicator (%s%c%s)\n"),
+		li_c, df_c, li_c, SELFILE_CHR, df_c);
+	printf(_("%sColor%s (ti) Trashed files indicator (%sT%s)\n"), ti_c,
+		df_c, ti_c, df_c);
+	printf(_("%sColor%s (xs) Success exit code (<%s0%s>)\n"),
+		xs_c, df_c, xs_c, df_c);
+	printf(_("%sColor%s (xf) Error exit code (e.g. <%s1%s>)\n"),
+		xf_c, df_c, xf_c, df_c);
+	printf(_("%sColor%s (nm) Notice message indicator (%sN%s)\n"),
+		nm_c, df_c, nm_c, df_c);
+	printf(_("%sColor%s (wm) Warning message indicator (%sW%s)\n"),
+		wm_c, df_c, wm_c, df_c);
+	printf(_("%sColor%s (em) Error message indicator (%sE%s)\n"),
+		em_c, df_c, em_c, df_c);
+	printf(_("%sColor%s (ro) Read-only mode indicator (%sRO%s)\n"),
+		ro_c, df_c, ro_c, df_c);
+	printf(_("%sColor%s (si) Stealth mode indicator (%sS%s)\n"),
+		si_c, df_c, si_c, df_c);
+}
+
+static void
+print_suggestion_colors(void)
+{
+#ifndef _NO_SUGGESTIONS
+	printf("\n%sSuggestions%s\n\n", BOLD, df_c);
+	printf("%sColor%s (sh) History (e.g. sud%so vim clifmrc%s)\n",
+		sh_c, df_c, sh_c, df_c);
+	printf("%sColor%s (sf) File names (e.g. thi%ss_filename%s)\n",
+		sf_c, df_c, sf_c, df_c);
+	printf("%sColor%s (sz) File names (fuzzy) (e.g. dwn %s%c%s "
+		"%sDownloads%s)\n", sz_c, df_c, sp_c, BAEJ_SUG_POINTER, df_c,
+		sz_c, df_c);
+	printf("%sColor%s (sx) Internal command names and parameters "
+		"(e.g. boo%skmarks%s)\n", sx_c, df_c, sx_c, df_c);
+	printf("%sColor%s (sc) External command names (e.g. lib%sreoffice%s)\n",
+		sc_c, df_c, sc_c, df_c);
+	printf("%sColor%s (sb) Shell builtin names (e.g. ex%sport%s)\n",
+		sb_c, df_c, sb_c, df_c);
+	printf("%sColor%s (sd) Internal commands description (e.g. "
+		"c %s(copy files)%s)\n", sd_c, df_c, sd_c, df_c);
+	printf("%sColor%s (sp) Pointer (e.g. 48 %s%c%s %sfilename%s)\n",
+		sp_c, df_c, sp_c, BAEJ_SUG_POINTER, df_c, sf_c, df_c);
+#else
+	return;
+#endif /* !_NO_SUGGESTIONS */
+}
+
+static void
+print_highlight_colors(void)
+{
+#ifndef _NO_HIGHLIGHT
+	printf(_("\n%sSyntax highlighting%s\n\n"), BOLD, df_c);
+
+	printf(_("%sColor%s (hb) Brackets: \"%s(){}[]%s\"\n"),
+		hb_c, df_c, hb_c, df_c);
+	printf(_("%sColor%s (hc) Commented out text (e.g. some text "
+		"%s#comment%s)\n"), hc_c, df_c, hc_c, df_c);
+	printf(_("%sColor%s (hd) Slash (e.g. dir%s/%sfile)\n"),
+		hd_c, df_c, hd_c, df_c);
+	printf(_("%sColor%s (he) Expansion characters: \"%s@*%s\"\n"),
+		he_c, df_c, he_c, df_c);
+	printf(_("%sColor%s (hn) Number (e.g. pp %s12%s)\n"),
+		hn_c, df_c, hn_c, df_c);
+	printf(_("%sColor%s (hp) Command parameter (e.g. cmd %s--param%s)\n"),
+		hp_c, df_c, hp_c, df_c);
+	printf(_("%sColor%s (hq) Quoted text (e.g. %s\"some text\"%s)\n"),
+		hq_c, df_c, hq_c, df_c);
+	printf(_("%sColor%s (hr) Redirection character: '%s>%s'\n"),
+		hr_c, df_c, hr_c, df_c);
+	printf(_("%sColor%s (hs) Process separator characters: \"%s|;&%s\" \n"),
+		hs_c, df_c, hs_c, df_c);
+	printf(_("%sColor%s (hv) Variable name (e.g. %s$VAR%s)\n"),
+		hv_c, df_c, hv_c, df_c);
+	printf(_("%sColor%s (hw) Backslash (e.g. r this%s\\%s file%s\\%s "
+		"name)\n"), hw_c, df_c, hw_c, df_c, hw_c, df_c);
+#else
+	return;
+#endif /* !_NO_HIGHLIGHT */
+}
+
 /* List color codes for file types used by the program. */
 void
 color_codes(void)
@@ -3120,48 +3321,17 @@ color_codes(void)
 		return;
 	}
 
-	if (ext_colors_n > 0)
-		printf(_("%sFile type colors%s\n\n"), BOLD, df_c);
+	print_file_type_colors();
+	print_ext_colors();
+	print_prop_colors();
+	print_interface_colors();
+	print_workspace_colors();
+	print_prompt_colors();
+	print_highlight_colors();
+	print_suggestion_colors();
 
-	printf(_(" %sfile name%s (di) Directory\n"), di_c, df_c);
-	printf(_(" %sfile name%s (ed) Empty directory\n"), ed_c, df_c);
-	printf(_(" %sfile name%s (nd) Directory with no read/exec permission\n"),
-	    nd_c, df_c);
-	printf(_(" %sfile name%s (fi) Regular file\n"), fi_c, df_c);
-	printf(_(" %sfile name%s (ef) Empty file\n"), ef_c, df_c);
-	printf(_(" %sfile name%s (nf) File with no read permission\n"),
-	    nf_c, df_c);
-	printf(_(" %sfile name%s (ex) Executable file\n"), ex_c, df_c);
-	printf(_(" %sfile name%s (ee) Empty executable file\n"), ee_c, df_c);
-	printf(_(" %sfile name%s (ln) Symbolic link\n"), ln_c, df_c);
-	printf(_(" %sfile name%s (or) Broken symbolic link\n"), or_c, df_c);
-	printf(_(" %sfile name%s (mh) Multi-hardlink\n"), mh_c, df_c);
-	printf(_(" %sfile name%s (bd) Block device\n"), bd_c, df_c);
-	printf(_(" %sfile name%s (cd) Character device\n"), cd_c, df_c);
-	printf(_(" %sfile name%s (so) Socket file\n"), so_c, df_c);
-	printf(_(" %sfile name%s (pi) Pipe or FIFO special file\n"), pi_c, df_c);
-#ifdef SOLARIS_DOORS
-	printf(_(" %sfile name%s (oo) Door/Port file\n"), oo_c, df_c);
-#endif // SOLARIS_DOORS
-	printf(_(" %sfile name%s (su) SUID file\n"), su_c, df_c);
-	printf(_(" %sfile name%s (sg) SGID file\n"), sg_c, df_c);
-	printf(_(" %sfile name%s (ca) File with capabilities\n"), ca_c, df_c);
-	printf(_(" %sfile name%s (st) Sticky and NOT other-writable "
-		 "directory\n"), st_c, df_c);
-	printf(_(" %sfile name%s (tw) Sticky and other-writable directory\n"),
-		tw_c, df_c);
-	printf(_(" %sfile name%s (ow) Other-writable and NOT sticky directory\n"),
-	    ow_c, df_c);
-	printf(_(" %sfile name%s (no) Unknown file type\n"), no_c, df_c);
-	printf(_(" %sfile name%s (uf) Unaccessible (non-stat'able) file\n"),
-		uf_c, df_c);
-
-	printf(_("\nThe second field in this list is the code required "
-		 "to modify the color of the corresponding file type in the "
-		 "color scheme file (in the \"FiletypeColors\" line).\n\n"));
-
-	if (ext_colors_n > 0)
-		print_ext_colors();
+	puts(_("\nThe bracketed field above is the code required to modify the "
+		 "color of the corresponding element in the color scheme file.\n\n"));
 
 	print_color_blocks();
 }

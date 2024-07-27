@@ -995,7 +995,8 @@ extern time_t curdir_mtime;
 #define ERASE_TO_LEFT            fputs("\x1b[1K", stdout) /* EL1 */
 #define ERASE_TO_RIGHT_AND_BELOW fputs("\x1b[J", stdout)  /* ED0 */
 
-#define	SUGGEST_BAEJ(offset, color) printf("\x1b[%dC%s>\x1b[0m ", (offset), (color))
+#define	SUGGEST_BAEJ(offset, color) printf("\x1b[%dC%s%c\x1b[0m ", \
+	(offset), (color), BAEJ_SUG_POINTER)
 /* ######## */
 
 /* Sequences used by the pad_filename function (listing.c):
