@@ -50,6 +50,7 @@
 #include "listing.h"
 #include "messages.h"
 #include "misc.h"
+#include "properties.h" /* get_color_age(), get_color_size() */
 #include "sanitize.h"
 #include "spawn.h"
 
@@ -3150,7 +3151,6 @@ print_file_type_colors(void)
 		uf_c, df_c);
 }
 
-#include "properties.h" /* get_color_age(), get_color_size() */
 static void
 print_size_shades(void)
 {
@@ -3258,8 +3258,8 @@ print_interface_colors(void)
 		bm_c, df_c);
 	printf(_("%sColor%s (ts) Matching completion prefix (e.g. "
 		"%sfile%sname)\n"), ts_c, df_c, ts_c, df_c);
-	printf(_("%sColor%s (tt) Trimmed file names mark (filenam%s%c%s.odt)\n"),
-		tt_c, df_c, tt_c, TRIMFILE_CHR, df_c);
+	printf(_("%sColor%s (tt) Trimmed file names mark (e.g. "
+		"filenam%s%c%s.odt)\n"), tt_c, df_c, tt_c, TRIMFILE_CHR, df_c);
 	printf(_("%sColor%s (df) Default color\n"), df_c, df_c);
 }
 

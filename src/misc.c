@@ -2011,8 +2011,14 @@ version_function(void)
 	const char *legacy = "";
 #endif /* CLIFM_LEGACY */
 
-	printf(_("%s %s%s%s (%s)\n%s\nLicense %s\nWritten by %s\n"), PROGRAM_NAME,
-		VERSION, posix, legacy, DATE, CONTACT, LICENSE, AUTHOR);
+#ifdef CLIFM_SUCKLESS
+	const char *suckless = "-SUCKLESS";
+#else
+	const char *suckless = "";
+#endif /* CLIFM_SUCKLESS */
+
+	printf(_("%s %s%s%s%s (%s)\n%s\nLicense %s\nWritten by %s\n"), PROGRAM_NAME,
+		VERSION, posix, legacy, suckless, DATE, CONTACT, LICENSE, AUTHOR);
 }
 
 void
