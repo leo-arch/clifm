@@ -2004,8 +2004,8 @@ version_function(void)
 	char *suckless = "";
 	char *paranoid = "";
 
-#ifndef _BE_POSIX
-	posix = "";
+#ifdef _BE_POSIX
+	posix = "-POSIX";
 #endif /* _BE_POSIX */
 
 #ifdef CLIFM_LEGACY
