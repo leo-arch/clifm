@@ -318,7 +318,7 @@ if (S_ISNWK(mode)) return 'n'; // HP/UX: network special file
                       + __GNUC_MINOR__ * 100 \
                       + __GNUC_PATCHLEVEL__)
 # if GCC_VERSION >= 40600
-#  define GCC_ALLOWS_PAGMA_IN_FUNC
+#  define GCC_ALLOWS_PRAGMA_IN_FUNC
 # endif /* GCC > 4.6 */
 #endif /* __GNUC__ */
 
