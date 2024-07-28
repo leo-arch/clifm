@@ -312,7 +312,8 @@ if (S_ISNWK(mode)) return 'n'; // HP/UX: network special file
 # endif /* MACOS_X < 10.10 */
 #endif /* __APPLE__ */
 
-/* GCC < 4.6 does not allow pragmas inside functions */
+/* GCC < 4.6 does not allow pragmas inside functions.
+ * See https://gcc.gnu.org/gcc-4.6/changes.html */
 #if defined(__GNUC__)
 # define GCC_VERSION (__GNUC__ * 10000       \
                       + __GNUC_MINOR__ * 100 \

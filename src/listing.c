@@ -255,7 +255,7 @@ swap_ent(const size_t id1, const size_t id2)
  * wc_xstrlen(). This gives us a little performance improvement: 3% faster
  * over 100,000 files. */
 static uint8_t
-is_utf8_name(const char *restrict name, size_t *restrict bytes)
+is_utf8_name(const char *name, size_t *bytes)
 {
 	uint8_t is_utf8 = 0;
 	const char *start = name;
@@ -1078,7 +1078,7 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad,
 		}
 
 		int ind_chr = 0;
-		char *ind_chr_color = get_ind_char(i, &ind_chr);
+		const char *ind_chr_color = get_ind_char(i, &ind_chr);
 
 		if (conf.no_eln == 0) {
 			printf("%s%*jd%s%s%c%s", el_c, pad, (intmax_t)i + 1, df_c,
