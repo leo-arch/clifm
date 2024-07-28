@@ -1999,25 +1999,23 @@ free_software(void)
 void
 version_function(void)
 {
+	char *posix = "";
+	char *legacy = "";
+	char *suckless = "";
+	char *paranoid = "";
+
 #ifndef _BE_POSIX
-	const char *posix = "";
-#else
-	const char *posix = "-POSIX";
+	posix = "";
 #endif /* _BE_POSIX */
 
 #ifdef CLIFM_LEGACY
-	const char *legacy = "-LEGACY";
-#else
-	const char *legacy = "";
+	legacy = "-LEGACY";
 #endif /* CLIFM_LEGACY */
 
 #ifdef CLIFM_SUCKLESS
-	const char *suckless = "-SUCKLESS";
-#else
-	const char *suckless = "";
+	suckless = "-SUCKLESS";
 #endif /* CLIFM_SUCKLESS */
 
-	char *paranoid = "";
 #ifdef SECURITY_PARANOID
 # if SECURITY_PARANOID > 0
 	paranoid = "-PARANOID";
