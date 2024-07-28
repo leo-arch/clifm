@@ -312,6 +312,16 @@ if (S_ISNWK(mode)) return 'n'; // HP/UX: network special file
 # endif /* MACOS_X < 10.10 */
 #endif /* __APPLE__ */
 
+/* GCC < 4.6 does not allow pragmas inside functions */
+#if defined(__GNUC__)
+# define GCC_VERSION (__GNUC__ * 10000       \
+                      + __GNUC_MINOR__ * 100 \
+                      + __GNUC_PATCHLEVEL__)
+# if GCC_VERSION >= 40600
+#  define GCC_ALLOWS_PAGMA_IN_FUNC
+# endif /* GCC > 4.6 */
+#endif /* __GNUC__ */
+
 #include "strings.h"
 #include "settings.h"
 
