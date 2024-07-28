@@ -2017,8 +2017,16 @@ version_function(void)
 	const char *suckless = "";
 #endif /* CLIFM_SUCKLESS */
 
-	printf(_("%s %s%s%s%s (%s)\n%s\nLicense %s\nWritten by %s\n"), PROGRAM_NAME,
-		VERSION, posix, legacy, suckless, DATE, CONTACT, LICENSE, AUTHOR);
+	char *paranoid = "";
+#ifdef SECURITY_PARANOID
+# if SECURITY_PARANOID > 0
+	paranoid = "-PARANOID";
+# endif
+#endif /* SECURITY_PARANOID */
+
+	printf(_("%s %s%s%s%s%s (%s)\n%s\nLicense %s\nWritten by %s\n"),
+		PROGRAM_NAME, VERSION, posix, legacy, suckless, paranoid,
+		DATE, CONTACT, LICENSE, AUTHOR);
 }
 
 void
