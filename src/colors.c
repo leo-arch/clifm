@@ -3171,7 +3171,7 @@ print_size_shades(void)
 	printf("%sGb%s ", tstr, df_c);
 
 	get_color_size((off_t)1024 * 1024 * 1024 * 1024, tstr, sizeof(tstr));
-	printf("%sBigger%s\n", tstr, df_c);
+	printf("%sbigger%s\n", tstr, df_c);
 }
 
 static void
@@ -3284,7 +3284,9 @@ print_prompt_colors(void)
 {
 	printf(_("\n%sPrompt%s\n\n"), BOLD, df_c);
 
-	printf(_("%sColor%s (tx) Command line text\n"), tx_c, df_c);
+	printf(_("%sColor%s (tx) Command line text (e.g. \x1b[1;34m$\x1b[0m "
+		"%sls%s %s-l%s %sfilename.zst%s)\n"), tx_c, df_c, tx_c, df_c,
+		hp_c, df_c, tx_c, df_c);
 	printf(_("%sColor%s (li) Selected files indicator (%s%c%s)\n"),
 		li_c, df_c, li_c, SELFILE_CHR, df_c);
 	printf(_("%sColor%s (ti) Trashed files indicator (%sT%s)\n"), ti_c,
