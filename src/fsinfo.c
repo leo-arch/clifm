@@ -149,8 +149,8 @@ get_fs_type_name(const char *file, int *remote)
 	case T_HUGETLBFS_MAGIC: return "hugetlbfs";
 	case T_IBRIX_MAGIC: *remote = 1; return "ibrix";
 	case T_INOTIFYFS_MAGIC: return "inotifyfs";
-	case T_ISOFS_MAGIC: return "isofs";
-	case T_ISOFS_R_WIN_MAGIC: return "isofs";
+	case T_ISOFS_MAGIC: /* fallthrough */
+	case T_ISOFS_R_WIN_MAGIC: /* fallthrough */
 	case T_ISOFS_WIN_MAGIC: return "isofs";
 	case T_JFFS_MAGIC: return "jffs";
 	case T_JFFS2_MAGIC: return "jffs2";

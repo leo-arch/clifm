@@ -196,7 +196,7 @@ get_longest_tag(void)
 
 	for (i = 0; i < tags_n; i++) {
 		const size_t l = strlen(tags[i]);
-		if (l > (size_t)_longest)
+		if (l > _longest)
 			_longest = l;
 	}
 

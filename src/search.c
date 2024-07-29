@@ -824,7 +824,7 @@ print_regex_entry(struct search_t list, const int namepad, const int elnpad,
 
 static size_t
 print_regex_matches(const mode_t file_type, struct dirent **reg_dirlist,
-	int *regex_index)
+	const int *regex_index)
 {
 	/* colors_list() makes use of TAB_OFFSET. We don't need it here. */
 	const size_t tab_offset_bk = tab_offset;

@@ -57,8 +57,6 @@ free_bookmarks(void)
 	free(bookmarks);
 	bookmarks = (struct bookmarks_t *)NULL;
 	bm_n = 0;
-
-	return;
 }
 
 void

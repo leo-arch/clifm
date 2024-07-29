@@ -63,6 +63,21 @@ press_any_key_to_continue(const int init_newline)
 	errno = saved_errno;
 }
 
+/* Return the value of the environment variable S, allocated via malloc if
+ * ALLOC is 1, or just a pointer to the value if 0. */
+char *
+xgetenv(const char *s, const int alloc)
+{
+	if (!s || !*s)
+		return (char *)NULL;
+
+	char *p = getenv(s);
+	if (p && *p)
+		return (alloc == 1 ? strdup(p) : p);
+
+	return (char *)NULL;
+}
+
 /* Print the regex error ERRCODE (returned by either regcomp(3) or regexec(3)),
  * whose compiled regular expression is REGEXP and original pattern PATTERN,
  * in the next prompt if PROMPT_ERR == 1, or immediately otherwise. */

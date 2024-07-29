@@ -195,8 +195,6 @@ dir_info(const char *dir, const int first_level, struct dir_info_t *info)
 
 	if (first_level == 1)
 		free_xdu_hardlinks();
-
-	return;
 }
 
 #ifndef USE_DU1
@@ -206,7 +204,7 @@ dir_size(const char *dir, const int first_level, int *status)
 	struct dir_info_t info = {0};
 	dir_info(dir, first_level, &info);
 	*status = info.status;
-	return (off_t)info.size;
+	return info.size;
 }
 #else /* USE_DU1 */
 /* Return the full size of the directory DIR using du(1).

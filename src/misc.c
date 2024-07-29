@@ -426,8 +426,6 @@ read_inotify(void)
 		/* Reset the inotify watch list */
 		reset_inotify();
 	}
-
-	return;
 }
 #elif defined(BSD_KQUEUE)
 /* Insert the following lines in the for loop to debug kqueue:
@@ -1424,7 +1422,7 @@ free_stuff(void)
 	}
 
 	if (dirhist_total_index) {
-		i = (int)dirhist_total_index;
+		i = dirhist_total_index;
 		while (--i >= 0)
 			free(old_pwd[i]);
 		free(old_pwd);
@@ -1759,7 +1757,7 @@ handle_stdin(void)
 	 * == (65535 * PATH_MAX)
 	 * == 262MiB of data ((65535 * PATH_MAX) / 1024) */
 
-	size_t chunk = 512 * 1024,
+	size_t chunk = (size_t)512 * 1024,
 		   chunks_n = 1,
 		   total_len = 0,
 		   max_chunks = 512;

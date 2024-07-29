@@ -3183,19 +3183,19 @@ print_date_shades(void)
 	props_now = t;
 	char tstr[MAX_SHADE_LEN]; *tstr = '\0';
 
-	get_color_age(t - (60*60LL), tstr, sizeof(tstr));
+	get_color_age(t - (60LL*60), tstr, sizeof(tstr));
 	printf("%shour%s ", tstr, df_c);
 
-	get_color_age(t - (24*60*60LL), tstr, sizeof(tstr));
+	get_color_age(t - (24LL*60*60), tstr, sizeof(tstr));
 	printf("%sday%s ", tstr, df_c);
 
-	get_color_age(t - (7*24*60*60LL), tstr, sizeof(tstr));
+	get_color_age(t - (7LL*24*60*60), tstr, sizeof(tstr));
 	printf("%sweek%s ", tstr, df_c);
 
-	get_color_age(t - (4*7*24*60*60LL), tstr, sizeof(tstr));
+	get_color_age(t - (4LL*7*24*60*60), tstr, sizeof(tstr));
 	printf("%smonth%s ", tstr, df_c);
 
-	get_color_age(t - (5*7*24*60*60LL), tstr, sizeof(tstr));
+	get_color_age(t - (5LL*7*24*60*60), tstr, sizeof(tstr));
 	printf("%solder%s\n", tstr, df_c);
 }
 

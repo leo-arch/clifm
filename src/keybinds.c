@@ -1554,7 +1554,7 @@ rl_profile_next(int count, int key)
 	next_prof = cur_prof + 1;
 	total_profs--;
 
-	if (next_prof > (int)total_profs || !profile_names[next_prof]
+	if (next_prof > total_profs || !profile_names[next_prof]
 	|| total_profs <= 1)
 		next_prof = 0;
 

@@ -931,7 +931,7 @@ dirjump(char **args, const int mode)
 		 * matching process, that is, excluding non-matches,
 		 * using subsequent parameters. */
 		else {
-			j = (int)match;
+			j = match;
 			while (--j >= 0) {
 				if (!entry[j].match || !*entry[j].match) {
 					entry[j].match = (char *)NULL;

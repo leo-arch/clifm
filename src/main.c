@@ -457,8 +457,6 @@ const struct cmdslist_t internal_cmds[] = {
 	{"bb", 2},
 	{"bleach", 6},
 	{"bd", 2},
-	{"bh", 2}, // REMOVE AS SOON AS REPLACED BY DH
-	{"fh", 2}, // REMOVE AS SOON AS REPLACED BY DH
 	{"dh", 2},
 	{"bl", 2},
 	{"bm", 2},
@@ -479,7 +477,6 @@ const struct cmdslist_t internal_cmds[] = {
 	{"dup", 3},
 	{"ds", 2},
 	{"desel", 5},
-	{"edit", 4}, /* Deprecated */
 	{"config", 6},
 	{"exp", 3},
 	{"export", 6},
@@ -632,11 +629,6 @@ const struct cmdslist_t param_str[] = {
 	{"cs edit", 7},
 	{"desel all", 9},
 	{"ds all", 6},
-///////// Deprecated
-	{"edit", 4},
-	{"edit reset", 10},
-	{"edit dump", 9},
-/////////
 	{"config", 6},
 	{"config edit", 11},
 	{"config dump", 11},

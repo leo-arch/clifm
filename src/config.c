@@ -141,7 +141,7 @@ get_tab_comp_mode_str(void)
 	case FNF_TAB: xstrsncpy(s, "fnf", 4); break;
 	case SMENU_TAB: xstrsncpy(s, "smenu", 6); break;
 	case STD_TAB: xstrsncpy(s, "standard", 9); break;
-// 	default: free(s); s = (char *)NULL; break;
+/* 	default: free(s); s = (char *)NULL; break; */
 /* The default case is not needed: all cases for TABMODE are covered */
 	}
 
@@ -200,7 +200,7 @@ get_link_creat_mode(const int mode)
 	switch (mode) {
 	case LNK_CREAT_ABS: return "absolute";
 	case LNK_CREAT_REL: return "relative";
-	case LNK_CREAT_REG: return "literal";
+	case LNK_CREAT_REG: /* fallthrough */
 	default: return "literal";
 	}
 }
@@ -543,11 +543,6 @@ edit_function(char **args)
 		return FUNC_SUCCESS;
 	}
 
-	if (*args[0] == 'e') {
-		err('n', PRINT_PROMPT, "%s: The 'edit' command is deprecated. "
-			"Use 'config' instead\n", PROGRAM_NAME);
-	}
-
 	if (args[1] && IS_HELP(args[1])) {
 		printf("%s\n", EDIT_USAGE);
 		return FUNC_SUCCESS;
@@ -718,7 +713,7 @@ set_shell_level(void)
 /* Set a few environment variables, mostly useful to run custom scripts
  * via the actions function. */
 void
-set_env(const int reaload)
+set_env(const int reload)
 {
 	if (xargs.stealth_mode == 1)
 		return;
@@ -737,7 +732,7 @@ set_env(const int reaload)
 
 	setenv_plugins_helper();
 
-	if (reaload == 0)
+	if (reload == 0)
 		set_shell_level();
 }
 
@@ -769,8 +764,6 @@ set_sel_file(void)
 		snprintf(sel_file, len, "%s/.config/%s/selbox.clifm", user.home,
 			PROGRAM_NAME);
 	}
-
-	return;
 }
 
 /* Copy the file SRC_FILENAME from the data directory (DATA_DIR) to the
@@ -1489,8 +1482,6 @@ define_config_file_names(void)
 	tmp_len = config_dir_len + 12;
 	remotes_file = xnmalloc(tmp_len, sizeof(char));
 	snprintf(remotes_file, tmp_len, "%s/nets.clifm", config_dir);
-
-	return;
 }
 
 /* Import readline.clifm from data directory. */
@@ -2033,7 +2024,6 @@ create_def_color_scheme(void)
 		DEF_FZFTAB_OPTIONS);
 
 	fclose(fp);
-	return;
 }
 
 static int
@@ -2693,8 +2683,6 @@ free_workspaces_names(void)
 			workspaces[i].name = (char *)NULL;
 		}
 	}
-
-	return;
 }
 
 /* Get workspaces names from the WorkspacesNames line in the configuration
@@ -2732,10 +2720,7 @@ set_workspace_names(char *line)
 
 CONT:
 		t = p + 1;
-		continue;
 	}
-
-	return;
 }
 
 #ifndef _NO_SUGGESTIONS
@@ -3431,8 +3416,6 @@ read_config(void)
 			regfree(&regex_exp);
 		}
 	}
-
-	return;
 }
 #endif /* CLIFM_SUCKLESS */
 

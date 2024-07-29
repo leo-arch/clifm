@@ -417,7 +417,7 @@ wc_xstrlen(const char *restrict str)
 	 * command line: a history entry involving several paths might easily be
 	 * longer than PATH_MAX. */
 	static wchar_t wbuf[ARG_MAX];
-	const size_t len = mbstowcs(wbuf, str, ARG_MAX);
+	const size_t len = mbstowcs(wbuf, str, (size_t)ARG_MAX);
 	if (len == (size_t)-1) /* Invalid multi-byte sequence found */
 		return 0;
 
@@ -924,7 +924,7 @@ split_str(char *str, const int update_args)
 
 	size_t buf_len = 0, words = 0, str_len = 0;
 	char *buf = xnmalloc(1, sizeof(char));
-	int close = 0;
+	char close = 0;
 	char **substr = (char **)NULL;
 
 	int keep_quotes = cmd_keeps_quotes(str);

@@ -128,7 +128,7 @@ get_bd_matches(const char *str, int *n, const int mode)
 		}
 		*q = '\0';
 
-		matches = xnrealloc(matches, (size_t)(*n + 2), sizeof(char *));
+		matches = xnrealloc(matches, (size_t)*n + 2, sizeof(char *));
 		if (mode == BD_TAB) {
 			/* Print only the path base name */
 			char *ss = strrchr(workspaces[cur_ws].path, '/');

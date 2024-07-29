@@ -1209,8 +1209,9 @@ set_no_suggestions(void)
 {
 #ifndef _NO_SUGGESTIONS
 	xargs.suggestions = conf.suggestions = 0;
-#endif /* !_NO_SUGGESTIONS */
+#else
 	return;
+#endif /* !_NO_SUGGESTIONS */
 }
 
 static void

@@ -541,7 +541,7 @@ my_rl_getc(FILE *stream)
 
 	while (1) {
 		result = (int)read(fileno(stream), &c, sizeof(unsigned char)); /* flawfinder: ignore */
-		if (result > 0 && result == sizeof(unsigned char)) {
+		if (result == sizeof(unsigned char)) {
 			/* Ctrl-d (empty command line only). Let's check the previous
 			 * char wasn't ESC to prevent Ctrl-Alt-d to be taken as Ctrl-d */
 			if (c == 4 && prev != KEY_ESC && rl_nohist == 0
@@ -617,7 +617,7 @@ my_rl_getc(FILE *stream)
 }
 
 /* Alternative taking input function used by alt_rl_prompt(), our readline
- * alternative interface */
+ * alternative interface. */
 static int
 alt_rl_getc(FILE *stream)
 {
@@ -626,7 +626,7 @@ alt_rl_getc(FILE *stream)
 
 	while (1) {
 		result = (int)read(fileno(stream), &c, sizeof(unsigned char)); /* flawfinder: ignore */
-		if (result > 0 && result == sizeof(unsigned char)) {
+		if (result == sizeof(unsigned char)) {
 
 			if (c == 4 || c == 24) { /* 4 == Ctrl-d && 24 == Ctrl-x */
 				MOVE_CURSOR_UP(1);
@@ -3456,8 +3456,7 @@ complete_glob(char *text, int *exit_status)
 	char *p = (*rl_line_buffer == '/' && rl_end > 1
 		&& !strchr(rl_line_buffer + 1, ' ')
 		&& !strchr(rl_line_buffer + 1, '/'))
-			? (char *)(text + 1)
-			: (char *)text;
+			? (text + 1) : text;
 
 	if ((matches = rl_glob(p)) == NULL)
 		return (char **)NULL;
@@ -3716,7 +3715,7 @@ complete_backdir(char *text, const size_t words_n)
 		return (char **)NULL;
 
 	int n = 0;
-	char *p = unescape_str((char *)text, 0);
+	char *p = unescape_str(text, 0);
 	char **matches = get_bd_matches(p ? p : text, &n, BD_TAB);
 	free(p);
 
@@ -3814,7 +3813,7 @@ complete_profiles(char *text, const size_t words_n)
 	if (suggestion.type != FILE_SUG)
 		rl_attempted_completion_over = 1;
 # endif /* _NO_SUGGESTIONS */
-	char *p = unescape_str((char *)text, 0);
+	char *p = unescape_str(text, 0);
 	char **matches = rl_completion_matches(p ? p : text, &profiles_generator);
 	free(p);
 
@@ -3883,7 +3882,7 @@ complete_prompt_names(char *text, const size_t words_n)
 	if (words_n > 3)
 		return (char **)NULL;
 
-	char *p = unescape_str((char *)text, 0);
+	char *p = unescape_str(text, 0);
 	char **matches = rl_completion_matches(p ? p : text, &prompts_generator);
 	free(p);
 

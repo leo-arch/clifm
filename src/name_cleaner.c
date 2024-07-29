@@ -78,9 +78,9 @@
 # Edit replacement file names as you wish, save, and close the editor.\n\
 # You will be asked for confirmation at exit.\n\n"
 
-#define check_width(chr, size) if ((chr & UTF_8_ENCODED_ ## size ## _BYTES_MASK) == UTF_8_ENCODED_ ## size ## _BYTES) { return size; }
-#define unpack_start(chr, size) ((unsigned char) chr & ~UTF_8_ENCODED_ ## size ## _BYTES_MASK)
-#define unpack_cont(chr) ((unsigned char) chr & ~UTF_8_ENCODED_MASK)
+#define check_width(chr, size) if (((chr) & UTF_8_ENCODED_ ## size ## _BYTES_MASK) == UTF_8_ENCODED_ ## size ## _BYTES) { return size; }
+#define unpack_start(chr, size) ((unsigned char)(chr) & ~UTF_8_ENCODED_ ## size ## _BYTES_MASK)
+#define unpack_cont(chr) ((unsigned char)(chr) & ~UTF_8_ENCODED_MASK)
 
 struct bleach_t {
 	char *original;
@@ -126,7 +126,7 @@ translate_unsafe_char(const unsigned char c)
 }
 
 static int
-get_uft8_dec_value(size_t *i, char *str)
+get_uft8_dec_value(size_t *i, const char *str)
 {
 	unsigned char c = (unsigned char)str[*i];
 	int new_value = 0;

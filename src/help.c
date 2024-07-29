@@ -439,7 +439,7 @@ print_trash_topic(void)
 static int
 run_help_topic(const char *topic)
 {
-	if (*topic == '-' && IS_HELP(topic)) {
+	if (IS_HELP(topic)) {
 		puts(HELP_USAGE);
 		return FUNC_SUCCESS;
 	}

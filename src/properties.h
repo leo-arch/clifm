@@ -56,15 +56,6 @@
 /* Max size for a file size color (used by get_color_size()) */
 #define MAX_SHADE_LEN 26 /* "\x1b[0;x;38;2;xxx;xxx;xxxm\0" */
 
-/* Macros to calculate relative timestamps (used by get_color_age()) */
-#define RT_SECOND 1
-#define RT_MINUTE (60  * RT_SECOND)
-#define RT_HOUR   (60  * RT_MINUTE)
-#define RT_DAY    (24  * RT_HOUR)
-#define RT_WEEK   (7   * RT_DAY)
-#define RT_MONTH  (30  * RT_DAY)
-#define RT_YEAR   (365 * RT_DAY)
-
 /* Struct used by get_file_perms() */
 struct perms_t {
 	/* Field colors */

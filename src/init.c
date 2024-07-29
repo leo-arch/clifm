@@ -690,21 +690,6 @@ get_user_groups(const char *name, const gid_t gid, int *ngroups)
 	return g;
 }
 
-/* Return the value of the environment variable S, allocated via malloc if
- * ALLOC is 1, or just a pointer to the value if 0 */
-char *
-xgetenv(const char *s, const int alloc)
-{
-	if (!s || !*s)
-		return (char *)NULL;
-
-	char *p = getenv(s);
-	if (p && *p)
-		return alloc == 1 ? strdup(p) : p;
-
-	return (char *)NULL;
-}
-
 /* The user specified a custom shell via the CLIFM_SHELL environment variable.
  * Since this will be used to run shell commands, it's better to make sure
  * we have a valid shell, that is, one of the shells specified in
@@ -906,12 +891,6 @@ get_user_data(void)
 		homedir = pw->pw_dir;
 	}
 
-	tmp_user.shell_basename = (char *)NULL;
-	if (is_custom_shell == 1)
-		validate_custom_shell(&tmp_user.shell);
-
-	validate_shell();
-
 	if (homedir == pw->pw_dir && (!homedir
 	|| stat(homedir, &a) == -1 || !S_ISDIR(a.st_mode))) {
 		xerror(_("%s: '%s': Invalid home directory in the password "
@@ -938,6 +917,12 @@ get_user_data(void)
 		tmp_user.home_len = strlen(homedir);
 		tmp_user.home = savestring(homedir, tmp_user.home_len);
 	}
+
+	tmp_user.shell_basename = (char *)NULL;
+	if (is_custom_shell == 1)
+		validate_custom_shell(&tmp_user.shell);
+
+	validate_shell();
 
 	return tmp_user;
 }

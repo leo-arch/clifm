@@ -860,15 +860,15 @@ get_color_age(const time_t t, char *str, const size_t len)
 	 * for 8 color shades type. This check should be removed in the future. */
 	if (date_shades_old_style == 1) {
 		if      (age <         0LL) n = 0;
-		else if (age <=    60*60LL) n = 1; /* One hour or less */
-		else if (age <= 24*60*60LL) n = 2; /* One day or less */
+		else if (age <=    60LL*60) n = 1; /* One hour or less */
+		else if (age <= 24LL*60*60) n = 2; /* One day or less */
 		else                        n = 3; /* Older */
 	} else {
 		if      (age <             0LL) n = 0;
-		else if (age <=        60*60LL) n = 1; /* One hour or less */
-		else if (age <=     24*60*60LL) n = 2; /* One day or less */
-		else if (age <=   7*24*60*60LL) n = 3; /* One weak or less */
-		else if (age <= 4*7*24*60*60LL) n = 4; /* One month or less */
+		else if (age <=        60LL*60) n = 1; /* One hour or less */
+		else if (age <=     24LL*60*60) n = 2; /* One day or less */
+		else if (age <=   7LL*24*60*60) n = 3; /* One weak or less */
+		else if (age <= 4LL*7*24*60*60) n = 4; /* One month or less */
 		else                            n = 5; /* Older */
 	}
 
@@ -1161,7 +1161,7 @@ print_capabilities(const char *filename, const int xattr)
 
 #if defined(HAVE_ACL) && defined(__linux__)
 static void
-list_acl(const acl_t acl, int *found, const acl_type_t type)
+list_acl(acl_t acl, int *found, const acl_type_t type)
 {
 	acl_entry_t entry;
 	int entryid;

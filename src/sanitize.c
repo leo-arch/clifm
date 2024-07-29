@@ -223,26 +223,26 @@ xsecure_env(const int mode)
 	drop_privs();
 	umask(0077);
 
-	char *display = (char *)NULL,
-		 *wayland_display = (char *)NULL,
-		 *_term = (char *)NULL,
-		 *tz = (char *)NULL,
-		 *lang = (char *)NULL,
-		 *fzfopts = (char *)NULL,
-		 *clifm_level = (char *)NULL;
+	char *display = (char *)NULL;
+	char *wayland_display = (char *)NULL;
+	char *_term = (char *)NULL;
+	char *tz = (char *)NULL;
+	char *lang = (char *)NULL;
+	char *fzfopts = (char *)NULL;
+	char *clifm_level = (char *)NULL;
 
-	clifm_level = getenv("CLIFMLVL");
+	clifm_level = xgetenv("CLIFMLVL", 1);
 
 	if (mode != SECURE_ENV_FULL) {
 		/* Let's keep these values from the current environment */
-		display = getenv("DISPLAY");
+		display = xgetenv("DISPLAY", 1);
 		if (!display)
-			wayland_display = getenv("WAYLAND_DISPLAY");
-		_term = getenv("TERM");
-		tz = getenv("TZ");
-		lang = getenv("LANG");
+			wayland_display = xgetenv("WAYLAND_DISPLAY", 1);
+		_term = xgetenv("TERM", 1);
+		tz = xgetenv("TZ", 1);
+		lang = xgetenv("LANG", 1);
 		if (fzftab)
-			fzfopts = getenv("FZF_DEFAULT_OPTS");
+			fzfopts = xgetenv("FZF_DEFAULT_OPTS", 1);
 	} else {
 		if (clifm_level)
 			nesting_level = 2; /* This is a nested instance */
@@ -253,7 +253,7 @@ xsecure_env(const int mode)
 	xsetenv("IFS", " \t\n");
 
 	if (mode == SECURE_ENV_FULL)
-		return FUNC_SUCCESS;
+		goto END;
 
 	if (user.name)
 		xsetenv("USER", user.name);
@@ -287,6 +287,15 @@ xsecure_env(const int mode)
 
 	if (fzfopts)
 		xsetenv("FZF_DEFAULT_OPTS", fzfopts);
+
+END:
+	free(display);
+	free(wayland_display);
+	free(clifm_level);
+	free(_term);
+	free(tz);
+	free(lang);
+	free(fzfopts);
 
 	return FUNC_SUCCESS;
 }
@@ -435,7 +444,7 @@ sanitize_cmd(const char *str, const int type)
 		exit_status = sanitize_gral(str);
 		break;
 	case SNT_BLACKLIST: return sanitize_blacklist(str);
-	case SNT_NONE: return FUNC_SUCCESS;
+	case SNT_NONE: /* fallthrough */
 	default: return FUNC_SUCCESS;
 	}
 

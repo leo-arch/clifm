@@ -184,7 +184,7 @@ static inline char *
 gen_exit_status(void)
 {
 	const size_t code_len = (size_t)DIGINUM(exit_code);
-	const size_t len = code_len + 3 + (MAX_COLOR * 2);
+	const size_t len = code_len + 3 + ((size_t)MAX_COLOR * 2);
 
 	char *temp = xnmalloc(len, sizeof(char));
 	snprintf(temp, len, "%s%d\001%s\002",
@@ -385,16 +385,18 @@ substitute_cmd(char **line, char **res, size_t *len)
 	tmp_str[tmp + 2] = '\0';
 	*line += tmp + 1;
 
-	const char *old_value = getenv("IFS");
+	char *old_value = xgetenv("IFS", 1);
 	setenv("IFS", "", 1);
 
 	wordexp_t wordbuf;
 	if (wordexp(tmp_str, &wordbuf, 0) != FUNC_SUCCESS) {
 		free(tmp_str);
 		reset_ifs(old_value);
+		free(old_value);
 		return;
 	}
 	reset_ifs(old_value);
+	free(old_value);
 	free(tmp_str);
 
 	if (wordbuf.we_wordc) {
@@ -411,7 +413,6 @@ substitute_cmd(char **line, char **res, size_t *len)
 	}
 
 	wordfree(&wordbuf);
-	return;
 }
 #endif /* !__HAIKU__ && !__OpenBSD__ && !__ANDROID__ */
 
@@ -928,7 +929,7 @@ construct_prompt(const char *decoded_prompt)
 			snprintf(notice_ind, N_IND, "%sN%zu%s", nm_c, msgs.notice, RL_NC);
 		if (trash_n > 0)
 			snprintf(trash_ind, N_IND, "%sT%zu%s",
-				ti_c, (size_t)trash_n, RL_NC);
+				ti_c, trash_n, RL_NC);
 		if (sel_n > 0)
 			snprintf(sel_ind, N_IND, "%s%c%zu%s", li_c, SELFILE_CHR,
 				sel_n, RL_NC);

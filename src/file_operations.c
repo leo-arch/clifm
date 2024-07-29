@@ -1059,8 +1059,6 @@ print_current_target(char *target)
 	} else {
 		puts(_("??? (broken link)"));
 	}
-
-	return;
 }
 
 /* Relink the symbolic link LINK to a new target. */

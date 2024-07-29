@@ -159,7 +159,7 @@ reload_binaries(void)
 		free(paths);
 	}
 
-	path_n = (size_t)get_path_env(1);
+	path_n = get_path_env(1);
 	get_path_programs();
 }
 #endif /* !__CYGWIN__ */
@@ -311,7 +311,7 @@ quit_func(char **args, const int exit_status)
 	if (!args || !args[0])
 		return;
 
-	if (args[1] && *args[1] == '-' && IS_HELP(args[1])) {
+	if (args[1] && IS_HELP(args[1])) {
 		puts(QUIT_HELP);
 		return;
 	}
@@ -653,7 +653,7 @@ msgs_function(const char *arg)
 		}
 
 		size_t i;
-		for (i = 0; i < (size_t)msgs_n; i++)
+		for (i = 0; i < msgs_n; i++)
 			free(messages[i]);
 
 		if (conf.autols == 1)
@@ -666,7 +666,7 @@ msgs_function(const char *arg)
 
 	if (msgs_n > 0) {
 		size_t i;
-		for (i = 0; i < (size_t)msgs_n; i++)
+		for (i = 0; i < msgs_n; i++)
 			printf("%s", messages[i]);
 	} else {
 		printf(_("%s: No messages\n"), PROGRAM_NAME);
@@ -2174,8 +2174,7 @@ exec_cmd(char **comm)
 	else if (*comm[0] == 'f' && (!comm[0][1] || strcmp(comm[0], "forth") == 0))
 		return (exit_code = forth_function(comm));
 
-	else if ((*comm[0] == 'b' || *comm[0] == 'f' || *comm[0] == 'd')
-	&& comm[0][1] == 'h' && !comm[0][2])
+	else if (*comm[0] == 'd' && comm[0][1] == 'h' && !comm[0][2])
 		return (exit_code = dirhist_function(comm[1]));
 
 	/*    ############### BULK REMOVE ##################     */
@@ -2543,10 +2542,8 @@ exec_cmd(char **comm)
 	else if (*comm[0] == 'a' && strcmp(comm[0], "alias") == 0)
 		return (exit_code = alias_function(comm));
 
-	/* #### EDIT, CONFIG #### */
-	/* The 'edit' command is deprecated */
-	else if ((*comm[0] == 'e' && strcmp(comm[0], "edit") == 0)
-	|| (*comm[0] == 'c' && strcmp(comm[0], "config") == 0))
+	/* #### CONFIG #### */
+	else if (*comm[0] == 'c' && strcmp(comm[0], "config") == 0)
 		return (exit_code = edit_function(comm));
 
 	/* #### HISTORY #### */

@@ -205,17 +205,17 @@ send_desktop_notification(char *msg)
 #if defined(__HAIKU__)
 	case ERROR: snprintf(type, sizeof(type), "error"); break;
 	case WARNING: snprintf(type, sizeof(type), "important"); break;
-	case NOTICE: snprintf(type, sizeof(type), "information"); break;
+	case NOTICE: /* fallthrough */
 	default: snprintf(type, sizeof(type), "information"); break;
 #elif defined(__APPLE__)
 	case ERROR: snprintf(type, sizeof(type), "Error"); break;
 	case WARNING: snprintf(type, sizeof(type), "Warning"); break;
-	case NOTICE: snprintf(type, sizeof(type), "Notice"); break;
+	case NOTICE: /* fallthrough */
 	default: snprintf(type, sizeof(type), "Notice"); break;
 #else
 	case ERROR: snprintf(type, sizeof(type), "critical"); break;
 	case WARNING: snprintf(type, sizeof(type), "normal"); break;
-	case NOTICE: snprintf(type, sizeof(type), "low"); break;
+	case NOTICE: /* fallthrough */
 	default: snprintf(type, sizeof(type), "low"); break;
 #endif /* __HAIKU__ */
 	}
@@ -352,7 +352,7 @@ add_to_dirhist(const char *dir_path)
 		&& strcmp(dir_path, old_pwd[dirhist_total_index - 1]) == 0)
 			return;
 
-		old_pwd = xnrealloc(old_pwd, (size_t)(dirhist_total_index + 2),
+		old_pwd = xnrealloc(old_pwd, (size_t)dirhist_total_index + 2,
 			sizeof(char *));
 
 		dirhist_cur_index = dirhist_total_index;
@@ -366,7 +366,7 @@ add_to_dirhist(const char *dir_path)
 
 	/* If not at the end of dirhist, add previous AND new entry */
 	else {
-		old_pwd = xnrealloc(old_pwd, (size_t)(dirhist_total_index + 3),
+		old_pwd = xnrealloc(old_pwd, (size_t)dirhist_total_index + 3,
 			sizeof(char *));
 
 		old_pwd[dirhist_total_index] = savestring(

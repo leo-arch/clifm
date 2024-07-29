@@ -60,10 +60,9 @@ char *x_strcasestr(char *a, char *b);
 #endif /* _BE_POSIX */
 
 char * xstrcasechr(char *s, char c);
-//size_t xstrlen(const char *restrict s);
 size_t xstrsncpy(char *restrict dst, const char *restrict src, size_t n);
-char * xstrncat(char *restrict dst, const size_t dst_end,
-	const char *restrict src, const size_t dst_len);
+char * xstrncat(char *restrict dst, const size_t dst_len,
+	const char *restrict src, const size_t dst_size);
 int  xstrverscmp(const char *s1, const char *s2);
 
 __END_DECLS

@@ -63,7 +63,7 @@ change_word_color(const char *_last_word, const int offset, const char *color)
  * This function is used to colorize input, history entries, and accepted
  * suggestions */
 char *
-rl_highlight(char *str, const size_t pos, const int flag)
+rl_highlight(const char *str, const size_t pos, const int flag)
 {
 	char *cl = (char *)NULL;
 	/* PREV is 0 when there is no previous char (STR[POS] is the first one) */
@@ -210,9 +210,7 @@ rl_highlight(char *str, const size_t pos, const int flag)
 	}
 
 	if (cur_color == hq_c) {
-		if (quote[Q_SINGLE] == 1)
-			cl = (char *)NULL;
-		else if (quote[Q_DOUBLE] == 1)
+		if (quote[Q_SINGLE] == 1 || quote[Q_DOUBLE] == 1)
 			cl = (char *)NULL;
 	}
 

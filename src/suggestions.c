@@ -252,8 +252,6 @@ check_int_cmd_desc(const char *s, const size_t l)
 			return B_DESC;
 		if (*s == 'b' && strcmp(s + 1, "ulk") == 0)
 			return BR_DESC;
-		if (*s == 'e' && strcmp(s + 1, "dit") == 0)
-			return EDIT_DESC;
 		if (*s == 'm' && strcmp(s + 1, "ime") == 0)
 			return MM_DESC;
 		if (*s == 'o' && strcmp(s + 1, "pen") == 0)
@@ -520,7 +518,7 @@ check_conditions(const size_t offset, const size_t wlen, int *baej,
 	 * it equals ARG_MAX, in which case we most probably have a truncated
 	 * suggestion (mbstowcs will convert only up to ARG_MAX chars), exit. */
 	const size_t suggestion_len = wlen - offset;
-	if (suggestion_len == 0 || suggestion_len == ARG_MAX
+	if (suggestion_len == 0 || suggestion_len == (size_t)ARG_MAX
 	|| (int)suggestion_len > (term_cols * term_lines) - curcol)
 		return FUNC_FAILURE;
 
@@ -647,7 +645,7 @@ get_reg_file_color(const char *filename, const struct stat *attr,
 	if (attr->st_mode & S_ISGID) return sg_c;
 
 #ifdef LINUX_FILE_CAPS
-	const cap_t cap = cap_get_file(filename);
+	cap_t cap = cap_get_file(filename);
 	if (cap) {
 		cap_free(cap);
 		return ca_c;
@@ -1962,7 +1960,7 @@ check_dirhist(char *word, const size_t len)
 		} else {
 			int s = fuzzy_match(word, old_pwd[i], len, fuzzy_str_type);
 			if (s > best_fz_score) {
-				fuzzy_index = (int)i;
+				fuzzy_index = i;
 				if (s == TARGET_BEGINNING_BONUS)
 					break;
 				best_fz_score = s;
@@ -2178,18 +2176,6 @@ rl_suggestions(const unsigned char c)
 				if ((printed = check_backdir()) != NO_MATCH)
 					goto SUCCESS;
 		}
-
-		/* REMOVE AS SOON AS BH IS REPLACED BY DH!! */
-		else if (words_num == 2 && old_pwd && dirhist_total_index > 0 && wlen > 0
-		&& lb[1] == 'h' && lb[2] == ' ' && !strchr(word, '/')) {
-			if (lb[1] == 'h' && lb[2] == ' ' && (lb[3] == '-'
-			|| strncmp(lb + 3, "--help", strlen(lb + 3)) == 0))
-				break;
-			if ((printed = check_dirhist(word, wlen)) != NO_MATCH)
-				goto SUCCESS;
-			else
-				goto FAIL;
-		}
 		break;
 
 	case 'c': /* Color schemes */
@@ -2200,11 +2186,7 @@ rl_suggestions(const unsigned char c)
 		}
 		break;
 
-	case 'f': /* fallthrough */ /* REMOVE AS SOON AS FH CMD IS REMOVED! */
 	case 'd': /* Dirhist command (dh) */
-		if (lb[1] == 'h' && lb[2] == ' ' && (lb[3] == '-'
-		|| strncmp(lb + 3, "--help", strlen(lb + 3)) == 0))
-			break;
 		if (words_num == 2 && old_pwd && dirhist_total_index > 0 && wlen > 0
 		&& lb[1] == 'h' && lb[2] == ' ' && !strchr(word, '/')) {
 			if ((printed = check_dirhist(word, wlen)) != NO_MATCH)
@@ -2215,10 +2197,6 @@ rl_suggestions(const unsigned char c)
 		break;
 
 	case 'j': /* j command */
-		if (lb[1] == ' ' && lb[2] == '-' && (lb[3] == 'h'
-		|| strncmp(lb + 2, "--help", strlen(lb + 2)) == 0))
-			break;
-
 		if (lb[1] == ' '  || ((lb[1] == 'c'	|| lb[1] == 'p') && lb[2] == ' ')) {
 			if ((printed = check_jcmd(full_line)) != NO_MATCH) {
 				zero_offset = 1;

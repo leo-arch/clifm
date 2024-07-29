@@ -710,7 +710,7 @@ get_user_input(const size_t max)
 }
 
 static void
-set_exec_flags(char *str, int *exec_flags)
+set_exec_flags(const char *str, int *exec_flags)
 {
 	if (*str == 'E') {
 		*exec_flags |= E_NOSTDERR;
