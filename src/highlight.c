@@ -295,7 +295,7 @@ recolorize_line(void)
 			}
 			continue;
 		}
-		t[0] = (char)ss[i];
+		t[0] = ss[i];
 		t[1] = '\0';
 		rl_insert_text(t);
 		rl_redisplay();

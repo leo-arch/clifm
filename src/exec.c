@@ -2361,8 +2361,7 @@ exec_cmd(char **comm)
 
 	/*     ############### SEARCH ##################     */
 	else if ( (*comm[0] == '/' && is_path(comm[0]) == 0)
-	|| (*comm[0] == '/' && !comm[0][1] && comm[1] && *comm[1] == '-'
-	&& IS_HELP(comm[1])) )
+	|| (*comm[0] == '/' && !comm[0][1] && comm[1] && IS_HELP(comm[1])) )
 		return (exit_code = search_function(comm));
 
 	/*    ############### BATCH LINK ##################     */

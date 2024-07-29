@@ -383,7 +383,7 @@ xstrverscmp(const char *s1, const char *s2)
 		state += (c1 == '0') + (IS_DIGIT(c1) != 0);
 	}
 
-	state = result_type[state * 3 + (((c2 == '0') + (IS_DIGIT(c2) != 0)))];
+	state = (int)result_type[state * 3 + (((c2 == '0') + (IS_DIGIT(c2) != 0)))];
 
 	switch (state) {
 	case VCMP: return diff;
@@ -955,7 +955,7 @@ split_str(char *str, const int update_args)
 				} else {
 					/* If '`' advance one char. Otherwise the while
 					 * below will stop at first char, which is not
-					 * what we want */
+					 * what we want. */
 					close = *str;
 					str++;
 					buf = xnrealloc(buf, buf_len + 1, sizeof(char *));
@@ -964,7 +964,7 @@ split_str(char *str, const int update_args)
 				}
 			}
 
-			/* Copy everything until null byte or closing char */
+			/* Copy everything until null byte or closing char. */
 			while (*str && *str != close) {
 				buf = xnrealloc(buf, buf_len + 1, sizeof(char *));
 				buf[buf_len] = *str;
@@ -973,7 +973,7 @@ split_str(char *str, const int update_args)
 			}
 
 			/* If the while loop stopped with a null byte, there was
-			 * no ending close (either ')' or '`')*/
+			 * no ending close (either ')' or '`'). */
 			if (!*str) {
 				xerror(_("%s: Missing '%c'\n"), PROGRAM_NAME, close);
 				free(buf);
@@ -989,7 +989,7 @@ split_str(char *str, const int update_args)
 
 			/* Copy the closing char and add an space: this function
 			 * takes space as word breaking char, so that everything
-			 * in the buffer will be copied as one single word */
+			 * in the buffer will be copied as one single word. */
 			buf = xnrealloc(buf, buf_len + 2, sizeof(char *));
 			buf[buf_len] = *str;
 			buf_len++;
@@ -1059,19 +1059,19 @@ split_str(char *str, const int update_args)
 
 			break;
 
-		/* TAB, new line char, and space are taken as word breaking characters */
+		/* TAB, new line char, and space are taken as word breaking characters. */
 		case '\t': /* fallthrough */
 		case '\n': /* fallthrough */
 		case ' ':
-			/* If escaped, just copy it into the buffer */
+			/* If escaped, just copy it into the buffer. */
 			if (str_len && *(str - 1) == '\\') {
 				buf = xnrealloc(buf, buf_len + 1, sizeof(char *));
 				buf[buf_len] = *str;
 				buf_len++;
 			} else {
-				/* If not escaped, break the string */
+				/* If not escaped, break the string. */
 				/* Add a terminating null byte to the buffer, and, if not empty,
-				 * dump the buffer into the substrings array */
+				 * dump the buffer into the substrings array. */
 				buf[buf_len] = '\0';
 
 				if (buf_len > 0) {
@@ -1080,7 +1080,7 @@ split_str(char *str, const int update_args)
 					words++;
 				}
 
-				/* Clear the buffer to get a new string */
+				/* Clear the buffer to get a new string. */
 				memset(buf, '\0', buf_len);
 				buf_len = 0;
 			}
@@ -1103,7 +1103,7 @@ split_str(char *str, const int update_args)
 
 	/* The while loop stops when the null byte is reached, so that the last
 	 * substring is not printed, but still stored in the buffer. Therefore,
-	 * we need to add it, if not empty, to our substrings array */
+	 * we need to add it, if not empty, to our substrings array. */
 	buf[buf_len] = '\0';
 
 	if (buf_len > 0) {
@@ -1120,7 +1120,7 @@ split_str(char *str, const int update_args)
 	buf = (char *)NULL;
 
 	if (words > 0) {
-		/* Add a final null string to the array */
+		/* Add a final null string to the array. */
 		substr = xnrealloc(substr, words + 1, sizeof(char *));
 		substr[words] = (char *)NULL;
 
@@ -1129,7 +1129,7 @@ split_str(char *str, const int update_args)
 		return substr;
 	} else {
 		if (update_args == 1)
-			args_n = 0; /* Just in case, but I think it's not needed */
+			args_n = 0; /* Just in case, but I think it's not required. */
 		return (char **)NULL;
 	}
 }

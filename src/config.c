@@ -2790,7 +2790,7 @@ static void
 set_quoting_style(char *str)
 {
 	conf.quoting_style = DEF_QUOTING_STYLE;
-	if (!str || !str)
+	if (!str || !*str)
 		return;
 
 	char *val = get_line_value(str);

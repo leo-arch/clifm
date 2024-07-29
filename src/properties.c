@@ -1424,8 +1424,6 @@ gen_user_time_str(char *buf, size_t buf_size, struct tm *t, const size_t nsec)
 #ifdef GCC_ALLOWS_PRAGMA_IN_FUNC
 # pragma GCC diagnostic pop
 #endif /* GCC_ALLOWS_PRAGMA_IN_FUNC */
-
-	return;
 }
 
 /* Write into BUF, whose size is SIZE, the timestamp TIM, with nanoseconds NSEC,

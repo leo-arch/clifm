@@ -551,11 +551,11 @@ decode_prompt(char *line)
 	size_t result_len = 0;
 	int c;
 
-	while ((c = *line++)) {
+	while ((c = (int)*line++)) {
 		/* We have an escape char */
 		if (c == '\\') {
 			/* Now move on to the next char */
-			c = *line;
+			c = (int)*line;
 			switch (c) {
 			/* Files statistics */
 			case 'B': temp = gen_stats_str(STATS_BLK); goto ADD_STRING;

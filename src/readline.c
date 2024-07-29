@@ -2147,8 +2147,8 @@ nets_generator(const char *text, int state)
 	}
 
 	while ((name = remotes[i++].name) != NULL) {
-		if (conf.case_sens_path_comp ? strncmp(name, text, len)
-		: strncasecmp(name, text, len) == 0) {
+		if ((conf.case_sens_path_comp ? strncmp(name, text, len)
+		: strncasecmp(name, text, len)) == 0) {
 			if (is_unmount == 1) { /* List only mounted resources */
 				if (i > 0 && remotes[i - 1].mounted == 1)
 					return strdup(name);
@@ -2411,7 +2411,8 @@ rl_mime_files(const char *text)
 }
 #endif /* !_NO_MAGIC */
 
-/* Return the list of matches for the glob expression TEXT or NULL if no matches */
+/* Return the list of matches for the glob expression TEXT or NULL if
+ * there are no matches. */
 static char **
 rl_glob(char *text)
 {
@@ -2456,7 +2457,7 @@ rl_glob(char *text)
 	if (p && *(++p)) {
 		q = strrchr(p, '/');
 		if (q && *(++q)) {
-			c = *q;
+			c = (int)*q;
 			*q = '\0';
 		}
 	}
@@ -3294,7 +3295,7 @@ complete_bookmark_names(char *text, const size_t words_n, int *exit_status)
 	if (suggestion.type != FILE_SUG)
 		rl_attempted_completion_over = 1;
 #endif /* !_NO_SUGGESTIONS */
-	char *p = unescape_str((char *)text, 0);
+	char *p = unescape_str(text, 0);
 	char **matches = rl_completion_matches(p ? p : text, &bookmarks_generator);
 	free(p);
 

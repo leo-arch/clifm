@@ -23,6 +23,7 @@ Checks: >
     -readability-isolate-declaration,
     -readability-suspicious-call-argument,
     -readability-avoid-nested-conditional-operator,
+    -readability-else-after-return,
     -bugprone-assignment-in-if-condition,
     -bugprone-easily-swappable-parameters,
     -bugprone-narrowing-conversions,

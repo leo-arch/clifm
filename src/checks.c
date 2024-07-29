@@ -514,7 +514,7 @@ find_cmd(const struct cmdslist_t *cmds_list, const size_t list_size, char *cmd)
 {
 	int found = 0;
 	int i = (int)list_size;
-	int c = -1;
+	char c = 0;
 	const int d = contains_digit(cmd);
 
 	if (d != -1) {
@@ -532,7 +532,7 @@ find_cmd(const struct cmdslist_t *cmds_list, const size_t list_size, char *cmd)
 	}
 
 	if (d != -1)
-		cmd[d] = (char)c;
+		cmd[d] = c;
 
 	return found;
 }
