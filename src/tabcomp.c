@@ -2016,7 +2016,7 @@ tab_complete(const int what_to_do)
 		 * completion, so use the word break characters to find the
 		 * substring on which to complete. */
 			while (--rl_point) {
-				scan = rl_line_buffer[rl_point];
+				scan = (int)rl_line_buffer[rl_point];
 
 				if (strchr(rl_completer_word_break_characters, scan) == 0
 				|| (scan == ' '	&& rl_point
@@ -2030,7 +2030,7 @@ tab_complete(const int what_to_do)
 		}
 
 		/* If we are at an unquoted word break, then advance past it. */
-		scan = rl_line_buffer[rl_point];
+		scan = (int)rl_line_buffer[rl_point];
 		if (strchr(rl_completer_word_break_characters, scan)) {
 		/* If the character that caused the word break was a quoting
 		 * character, then remember it as the delimiter. */
@@ -2109,7 +2109,7 @@ AFTER_USUAL_COMPLETION:
 		for (i = 0; matches[i + 1]; i++) {
 			if (strcmp(matches[i], matches[i + 1]) == 0) {
 				free(matches[i]);
-				matches[i] = (char *)&dead_slot;
+				matches[i] = &dead_slot;
 			} else {
 				newlen++;
 			}
@@ -2119,14 +2119,14 @@ AFTER_USUAL_COMPLETION:
 		 * Copy all the non-dead entries into a new array. */
 		temp_array = xnmalloc(3 + newlen, sizeof (char *));
 		for (i = j = 1; matches[i]; i++) {
-			if (matches[i] != (char *)&dead_slot) {
+			if (matches[i] != &dead_slot) {
 				temp_array[j] = matches[i];
 				j++;
 			}
 		}
 		temp_array[j] = (char *)NULL;
 
-		if (matches[0] != (char *)&dead_slot)
+		if (matches[0] != &dead_slot)
 			free(matches[0]);
 		free(matches);
 
@@ -2272,7 +2272,7 @@ AFTER_USUAL_COMPLETION:
 						}
 						continue;
 					}
-					t[0] = (char)replacement[k];
+					t[0] = replacement[k];
 					t[1] = '\0';
 					rl_insert_text(t);
 
@@ -2523,7 +2523,7 @@ DISPLAY_MATCHES:
 				goto CALC_OFFSET;
 
 			char *dd = (char *)NULL;
-			// MATCHES[0] SHOULD BE DIR!!
+			/* MATCHES[0] SHOULD BE DIR!! */
 			if (strstr(matches[0], "/..")) {
 				dd = normalize_path(matches[0], strlen(matches[0]));
 				if (dd) {
@@ -2568,12 +2568,12 @@ CALC_OFFSET:
 			goto RESET_PATH;
 		}
 #else
-		if (1) {} /* This just silences a warning */
+		if (1) {} /* This just silences a warning. */
 #endif /* !_NO_FZF */
 
-		/* Standard TAB completion */
+		/* Standard TAB completion. */
 		char *ptr = matches[0];
-		/* Skip leading backslashes */
+		/* Skip leading backslashes. */
 		while (*ptr) {
 			if (*ptr != '\\')
 				break;
@@ -2636,7 +2636,7 @@ CALC_OFFSET:
 			if (i >= term_lines) {
 				/* A little pager */
 				fputs("\x1b[7m--Mas--\x1b[0m", stdout);
-				int c = 0;
+				char c = 0;
 				while ((c = xgetchar()) == KEY_ESC);
 				if (c == 'q') {
 					/* Delete the --Mas-- label */
@@ -2715,7 +2715,7 @@ RESTART:
 					continue;
 				}
 
-				t[0] = (char)ss[k];
+				t[0] = ss[k];
 				t[1] = '\0';
 				rl_insert_text(t);
 				rl_redisplay();
