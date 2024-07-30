@@ -3257,14 +3257,16 @@ print_interface_colors(void)
 		"filenam%s%c%s.odt)\n"), tt_c, df_c, tt_c, TRIMFILE_CHR, df_c);
 	printf(_("%sColor%s (dl) Dividing line (e.g. %s------>%s)\n"),
 		dl_c, df_c, dl_c, df_c);
-	printf(_("%sColor%s (mi) Miscellaneous indicator (%s%s%s)\n"), mi_c,
-		df_c, mi_c, MSG_PTR_STR, df_c);
+	printf(_("%sColor%s (mi) Miscellaneous indicator (%s%s%s) (%s2%s)\n"),
+		mi_c, df_c, mi_c, MSG_PTR_STR, df_c, BOLD, df_c);
 	printf(_("%sColor%s (ts) Matching completion prefix (e.g. "
 		"%sfile%sname)\n"), ts_c, df_c, ts_c, df_c);
 	printf(_("%sColor%s (df) Default color\n"), df_c, df_c);
 
 	printf(_("\n(%s1%s) Used only when ColorLinksAsTarget is "
 		"enabled\n"), BOLD, df_c);
+	printf(_("(%s2%s) Also used for miscellaneous names (like bookmarks "
+		"and color schemes) in TAB completion\n"), BOLD, df_c);
 }
 
 static void
