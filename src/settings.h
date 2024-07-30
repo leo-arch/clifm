@@ -43,7 +43,7 @@ ee=32:ef=2:ex=1;32:fi=0:ln=1;36:mh=30;46:nd=4;1;31:nf=2;4;31:\
 no=31;47:or=2;4;36:ow=34;42:pi=35:so=1;35:su=37;41:sg=30;43:st=37;44:\
 tw=30;42:uf=2;4;37:"
 
-#define DEF_IFACE_COLORS "bm=1;36:db=:dd=:de=:df=0:dg=:dk=:dl=2;37:\
+#define DEF_IFACE_COLORS "db=:dd=:de=:df=0:dg=:dk=:dl=2;37:\
 dn=0;2;37:do=:dp=:dr=:dw=:dxd=:dxr=:dz=:\
 el=0;36:em=1;31:fc=0;2;37:hb=0;36:hc=2;31:lc=:\
 hd=0;36:he=0;36:hn=0:hp=0;36:hq=0;33:hr=0;31:hs=0;32:hv=0;32:\
@@ -121,7 +121,6 @@ xf=1;31:xs=0;32:"
 #define DEF_UF_C  "\x1b[2;4;37m" /* Un'stat'able file */
 
 /* Interface */
-#define DEF_BM_C  "\x1b[1;36m"   /* Bookmarked dirs in bookmarks screen */
 #define DEF_DF_C  "\x1b[0m"      /* Reset attributes: default terminal color */
 #define DEF_DL_C  "\x1b[2;37m"   /* Dividing line */
 #define DEF_EL_C  "\x1b[0;36m"   /* ELN's */
@@ -213,7 +212,7 @@ ed=2;34:ee=32:ef=2:ex=1;32:fi=0:ln=1;36:mh=7;36:nd=1;31:nf=2;31:no=4;31;47:\
 or=4;2;36:ow=34;42:pi=35:sg=30;43:so=1;35:st=37;44:su=37;41:tw=30;42:\
 uf=4;2;37:"
 
-#define DEF_IFACE_COLORS_256 "bm=1;32:db=:dd=:de=:df=0:dg=38;5;140:\
+#define DEF_IFACE_COLORS_256 "db=:dd=:de=:df=0:dg=38;5;140:\
 dk=:dl=2;37:dn=:do=:dp=:dr=:dw=:dxd=:dxr=:dz=:el=36:em=1;31:fc=38;5;246:hb=36:\
 hc=2;37:hd=36:he=36:hn=:hp=36:hq=LY:hr=31:hs=32:hv=32:lc=38;5;43:li=1;32:\
 mi=1;36:nm=1;32:ro=:si=1;34:sb=2;33:sc=2;36:sd=2;37:sf=4;2;36:sh=2;37:sp=2;31:\
@@ -285,7 +284,6 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define DEF_UF_C256  "\x1b[2;4;37m" /* Un'stat'able file */
 
 /* Interface */
-#define DEF_BM_C256  "\x1b[1;32m"   /* Bookmarked dirs in bookmarks screen */
 #define DEF_DF_C256  "\x1b[0m"      /* Reset attributes: default terminal color */
 #define DEF_DL_C256  "\x1b[2;37m"   /* Dividing line */
 #define DEF_EL_C256  "\x1b[0;36m"   /* ELN's */

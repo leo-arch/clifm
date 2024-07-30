@@ -419,7 +419,7 @@ fzftab_color(char *filename, const struct stat *attr)
 }
 
 static char *
-get_entry_color(char *entry, const char *norm_prefix)
+get_comp_entry_color(char *entry, const char *norm_prefix)
 {
 	if (conf.colorize == 0)
 		return (char *)NULL;
@@ -1201,7 +1201,7 @@ store_completions(char **matches)
 
 		} else if (ct != TCMP_HIST && ct != TCMP_FILE_TYPES_OPTS
 		&& ct != TCMP_MIME_LIST && ct != TCMP_CMD_DESC) {
-			char *cl = get_entry_color(entry, norm_prefix);
+			char *cl = get_comp_entry_color(entry, norm_prefix);
 			*tmp_color = '\0';
 
 			/* If color does not start with escape, then we have a color

@@ -917,7 +917,6 @@ reset_iface_colors(void)
 	*sx_c = '\0';
 	*sz_c = '\0';
 
-	*bm_c = '\0';
 	*df_c = '\0';
 	*dl_c = '\0';
 	*el_c = '\0';
@@ -1336,10 +1335,7 @@ set_iface_colors(char **colors, const size_t num_colors)
 {
 	int i = (int)num_colors;
 	while (--i >= 0) {
-		if (*colors[i] == 'b' && colors[i][1] == 'm' && colors[i][2] == '=')
-			set_color(colors[i] + 3, bm_c, RL_PRINTABLE);
-
-		else if (*colors[i] == 'd') {
+		if (*colors[i] == 'd') {
 			if (colors[i][1] == 'b' && colors[i][2] == '=')
 				set_color(colors[i] + 3, db_c, RL_PRINTABLE);
 			else if (colors[i][1] == 'd' && colors[i][2] == '=')
@@ -1793,7 +1789,6 @@ set_default_colors_256(void)
 	if (!*sz_c) xstrsncpy(sz_c, DEF_SZ_C256, sizeof(sz_c));
 
 	/* Interface */
-	if (!*bm_c) xstrsncpy(bm_c, DEF_BM_C256, sizeof(bm_c));
 	if (!*df_c) xstrsncpy(df_c, DEF_DF_C256, sizeof(df_c));
 
 	/* If unset from the config file, use current workspace color */
@@ -1965,7 +1960,6 @@ set_default_colors(void)
 	if (!*sz_c) xstrsncpy(sz_c, DEF_SZ_C, sizeof(sz_c));
 
 	/* Interface */
-	if (!*bm_c) xstrsncpy(bm_c, DEF_BM_C, sizeof(bm_c));
 	if (!*df_c) xstrsncpy(df_c, DEF_DF_C, sizeof(df_c));
 
 	/* If unset from the config file, use current workspace color */
@@ -2647,7 +2641,6 @@ disable_bold(void)
 	remove_bold_attr(uf_c);
 
 	/* Interface */
-	remove_bold_attr(bm_c);
 	remove_bold_attr(df_c);
 	remove_bold_attr(dl_c);
 	remove_bold_attr(el_c);
@@ -2832,6 +2825,55 @@ remove_trash_ext(char **ent)
 	return d;
 }
 
+char *
+get_entry_color(char *ent, const struct stat *s)
+{
+	char *color = fi_c;
+
+	switch (s->st_mode & S_IFMT) {
+	case S_IFREG: {
+		size_t ext = 0;
+		char *d = remove_trash_ext(&ent);
+		color = get_regfile_color(ent, s, &ext);
+		if (d)
+			*d = '.';
+		}
+		break;
+
+	case S_IFDIR:
+		if (conf.colorize == 0)
+			color = di_c;
+		else if (check_file_access(s->st_mode, s->st_uid, s->st_gid) == 0)
+			color = nd_c;
+		else
+			color = get_dir_color(ent, s->st_mode, s->st_nlink, -1);
+		break;
+
+	case S_IFLNK: {
+		if (conf.colorize == 0) {
+			color = ln_c;
+		} else {
+			char *linkname = xrealpath(ent, NULL);
+			color = linkname ? ln_c : or_c;
+			free(linkname);
+		}
+		}
+		break;
+
+	case S_IFIFO: color = pi_c; break;
+	case S_IFBLK: color = bd_c; break;
+	case S_IFCHR: color = cd_c; break;
+#ifdef SOLARIS_DOORS
+	case S_IFPORT: /* fallthrough */
+	case S_IFDOOR: color = oo_c; break;
+#endif /* SOLARIS_DOORS */
+	case S_IFSOCK: color = so_c; break;
+	default: color = no_c; break;
+	}
+
+	return color;
+}
+
 /* Print the entry ENT using color codes and ELN as ELN, right padding PAD
  * chars and terminate ENT with or without a new line char (NEW_LINE
  * 1 or 0 respectively).
@@ -2886,52 +2928,7 @@ colors_list(char *ent, const int eln, const int pad, const int new_line)
 	if (wlen == 0) /* Invalid chars found. */
 		wname = replace_invalid_chars(ent);
 
-	char *color = (char *)NULL;
-
-	if (ret == -1) {
-		color = uf_c;
-	} else {
-		switch (attr.st_mode & S_IFMT) {
-		case S_IFREG: {
-			size_t ext = 0;
-			char *d = remove_trash_ext(&ent);
-			color = get_regfile_color(ent, &attr, &ext);
-			if (d)
-				*d = '.';
-			}
-			break;
-
-		case S_IFDIR:
-			if (conf.colorize == 0)
-				color = di_c;
-			else if (check_file_access(attr.st_mode, attr.st_uid, attr.st_gid) == 0)
-				color = nd_c;
-			else
-				color = get_dir_color(ent, attr.st_mode, attr.st_nlink, -1);
-			break;
-
-		case S_IFLNK: {
-			if (conf.colorize == 0) {
-				color = ln_c;
-			} else {
-				char *linkname = xrealpath(ent, NULL);
-				color = linkname ? ln_c : or_c;
-				free(linkname);
-			}
-			}
-			break;
-
-		case S_IFIFO: color = pi_c; break;
-		case S_IFBLK: color = bd_c; break;
-		case S_IFCHR: color = cd_c; break;
-#ifdef SOLARIS_DOORS
-		case S_IFPORT: /* fallthrough */
-		case S_IFDOOR: color = oo_c; break;
-#endif /* SOLARIS_DOORS */
-		case S_IFSOCK: color = so_c; break;
-		default: color = no_c; break;
-		}
-	}
+	char *color = ret == -1 ? uf_c : get_entry_color(ent, &attr);
 
 	char *name = wname ? wname : ent;
 	char *tmp = (flags & IN_SELBOX_SCREEN) ? abbreviate_file_name(name) : name;
@@ -3262,8 +3259,6 @@ print_interface_colors(void)
 		dl_c, df_c, dl_c, df_c);
 	printf(_("%sColor%s (mi) Miscellaneous indicator (%s%s%s)\n"), mi_c,
 		df_c, mi_c, MSG_PTR_STR, df_c);
-	printf(_("%sColor%s (bm) Bookmark names in the bookmarks screen\n"),
-		bm_c, df_c);
 	printf(_("%sColor%s (ts) Matching completion prefix (e.g. "
 		"%sfile%sname)\n"), ts_c, df_c, ts_c, df_c);
 	printf(_("%sColor%s (df) Default color\n"), df_c, df_c);

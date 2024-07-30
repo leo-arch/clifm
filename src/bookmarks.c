@@ -33,6 +33,7 @@
 #include "aux.h" /* xatoi(), normalize_path(), open_fread(), open_fwrite() */
 #include "bookmarks.h" /* bookmarks_function() */
 #include "checks.h" /* is_number() */
+#include "colors.h" /* get_entry_color() */
 #include "file_operations.h" /* open_function() */
 #include "init.h" /* load_bookmarks() */
 #include "messages.h" /* STEALTH_DISABLED */
@@ -177,48 +178,34 @@ print_bookmarks(void)
 	const size_t ls = get_largest_shortcut();
 	size_t i;
 
-	/* Print bookmarks, taking into account shortcut, name, and path */
+	/* Print bookmarks, taking into account shortcut, name, and path. */
 	for (i = 0; i < bm_n; i++) {
 		if (!bookmarks[i].path || !*bookmarks[i].path)
 			continue;
 
-		int is_dir = 0, sc_ok = 0, name_ok = 0, non_existent = 0;
-
-		if (bookmarks[i].shortcut) sc_ok = 1;
-		if (bookmarks[i].name) name_ok = 1;
-
-		if (stat(bookmarks[i].path, &attr) == -1) {
-			non_existent = 1;
-		} else {
-			switch ((attr.st_mode & S_IFMT)) {
-			case S_IFDIR: is_dir = 1; break;
-			case S_IFREG: break;
-			default: non_existent = 1; break;
-			}
-		}
+		const int sc_ok = bookmarks[i].shortcut ? 1 : 0;
 
 		int sc_pad = (int)ls;
 		if (sc_ok == 0 && ls > 0)
-			sc_pad += 2; /* No shortcut. Let's count '[' and ']' */
+			sc_pad += 2; // No shortcut. Let's count '[' and ']'
 		if (sc_ok == 1)
 			sc_pad -= (int)strlen(bookmarks[i].shortcut);
 		if (sc_pad < 0)
 			sc_pad = 0;
 
-		printf("%s%s%-*zu%s%c%s%c%s%c%s%-*s %s%s%s\n",
-			NC, el_c, eln_pad, i + 1, df_c, /* ELN */
-			ls > 0 ? ' ' : 0,
+		char *color = stat(bookmarks[i].path, &attr) == -1
+			? uf_c : get_entry_color(bookmarks[i].path, &attr);
 
-		    BOLD, sc_ok == 1 ? '[' : 0, /* Shortcut */
-		    sc_ok == 1 ? bookmarks[i].shortcut : "",
-		    sc_ok == 1 ? ']' : 0, df_c, sc_pad, "",
+		printf("%s%s%-*zu%s%s%s%s%s%s%s%-*s %s%s%s\n",
+			NC, el_c, eln_pad, i + 1, df_c, // ELN
+			ls > 0 ? " " : "",
 
-		    non_existent == 1 ? (conf.colorize == 1 /* Name */
-		    ? uf_c : "\x1b[0m\x1b[4m")
-		    : (is_dir == 0 ? fi_c : (name_ok == 1 ? bm_c : di_c)),
-		    name_ok == 1 ? bookmarks[i].name
-		    : bookmarks[i].path, conf.colorize == 1 /* Path */
-		    ? df_c : "\x1b[0m");
+			BOLD, sc_ok == 1 ? "[" : "", // Shortcut
+			sc_ok == 1 ? bookmarks[i].shortcut : "",
+			sc_ok == 1 ? "]" : "", df_c, sc_pad, "",
+
+			color, bookmarks[i].name ? bookmarks[i].name
+			: bookmarks[i].path, df_c);
 	}
 
 	UNHIDE_CURSOR;

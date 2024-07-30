@@ -2023,7 +2023,6 @@ extern char
 	uf_c[MAX_COLOR], /* Non-'stat'able file */
 
 	/* Interface */
-	bm_c[MAX_COLOR], /* Bookmarked directory */
 	df_c[MAX_COLOR], /* Default color */
 	dl_c[MAX_COLOR], /* Dividing line */
 	el_c[MAX_COLOR], /* ELN color */
