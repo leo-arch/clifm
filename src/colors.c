@@ -3171,7 +3171,7 @@ print_size_shades(void)
 	printf("%sGb%s ", tstr, df_c);
 
 	get_color_size((off_t)1024 * 1024 * 1024 * 1024, tstr, sizeof(tstr));
-	printf("%sbigger%s\n", tstr, df_c);
+	printf(_("%sbigger%s\n"), tstr, df_c);
 }
 
 static void
@@ -3183,20 +3183,23 @@ print_date_shades(void)
 	props_now = t;
 	char tstr[MAX_SHADE_LEN]; *tstr = '\0';
 
+/*	get_color_age(t + 1, tstr, sizeof(tstr)); // Future time
+	printf(_("%serror%s "), tstr, df_c); */
+
 	get_color_age(t - (60LL*60), tstr, sizeof(tstr));
-	printf("%shour%s ", tstr, df_c);
+	printf(_("%shour%s "), tstr, df_c);
 
 	get_color_age(t - (24LL*60*60), tstr, sizeof(tstr));
-	printf("%sday%s ", tstr, df_c);
+	printf(_("%sday%s "), tstr, df_c);
 
 	get_color_age(t - (7LL*24*60*60), tstr, sizeof(tstr));
-	printf("%sweek%s ", tstr, df_c);
+	printf(_("%sweek%s "), tstr, df_c);
 
 	get_color_age(t - (4LL*7*24*60*60), tstr, sizeof(tstr));
-	printf("%smonth%s ", tstr, df_c);
+	printf(_("%smonth%s "), tstr, df_c);
 
-	get_color_age(t - (5LL*7*24*60*60), tstr, sizeof(tstr));
-	printf("%solder%s\n", tstr, df_c);
+	get_color_age(t - (4LL*7*24*60*60+1), tstr, sizeof(tstr));
+	printf(_("%solder%s\n"), tstr, df_c);
 }
 
 static void
