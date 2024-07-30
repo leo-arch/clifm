@@ -3235,7 +3235,7 @@ print_prop_colors(void)
 		dk_c, df_c, dk_c, df_c);
 	printf(_("%sColor%s (de)  Inode number (e.g. %s802721%s)\n"),
 		de_c, df_c, de_c, df_c);
-	printf(_("%sColor%s (do)  Permissions in octal (e.g. %s0640%s)\n"),
+	printf(_("%sColor%s (do)  Octal permissions (e.g. %s0640%s)\n"),
 		do_c, df_c, do_c, df_c);
 	printf(_("%sColor%s (dn)  Dot/dash (e.g. %sr%sw%s-.%sr%s--.--%s)\n"),
 		dn_c, df_c, dr_c, dw_c, dn_c, dr_c, dn_c, df_c);
@@ -3251,19 +3251,25 @@ print_interface_colors(void)
 		el_c, df_c, el_c, df_c);
 	printf(_("%sColor%s (fc) Files counter (e.g. dir%s/24%s)\n"),
 		fc_c, df_c, fc_c, df_c);
+	printf(_("%sColor%s (lc) Symbolic link indicator (e.g. %s36%s"
+		"%s%c%ssymlink) (%s1%s)\n"), lc_c, df_c, el_c, df_c, lc_c,
+		LINK_CHR, df_c, BOLD, df_c);
+	printf(_("%sColor%s (li) Selected file indicator (e.g. %s12%s"
+		"%s%c%sfilename)\n"), li_c, df_c, el_c, df_c, li_c, SELFILE_CHR, df_c);
+	printf(_("%sColor%s (tt) Trimmed file names mark (e.g. "
+		"filenam%s%c%s.odt)\n"), tt_c, df_c, tt_c, TRIMFILE_CHR, df_c);
 	printf(_("%sColor%s (dl) Dividing line (e.g. %s------>%s)\n"),
 		dl_c, df_c, dl_c, df_c);
-	printf(_("%sColor%s (lc) Symbolic link indicator (e.g. %s36%s"
-		"%s%c%ssymlink)\n"), lc_c, df_c, el_c, df_c, lc_c, LINK_CHR, df_c);
 	printf(_("%sColor%s (mi) Miscellaneous indicator (%s%s%s)\n"), mi_c,
 		df_c, mi_c, MSG_PTR_STR, df_c);
 	printf(_("%sColor%s (bm) Bookmark names in the bookmarks screen\n"),
 		bm_c, df_c);
 	printf(_("%sColor%s (ts) Matching completion prefix (e.g. "
 		"%sfile%sname)\n"), ts_c, df_c, ts_c, df_c);
-	printf(_("%sColor%s (tt) Trimmed file names mark (e.g. "
-		"filenam%s%c%s.odt)\n"), tt_c, df_c, tt_c, TRIMFILE_CHR, df_c);
 	printf(_("%sColor%s (df) Default color\n"), df_c, df_c);
+
+	printf(_("\n(%s1%s) Used only when ColorLinksAsTarget is "
+		"enabled\n"), BOLD, df_c);
 }
 
 static void
@@ -3287,7 +3293,7 @@ print_prompt_colors(void)
 {
 	printf(_("\n%sPrompt%s\n\n"), BOLD, df_c);
 
-	printf(_("%sColor%s (tx) Command line text (e.g. \x1b[1;34m$\x1b[0m "
+	printf(_("%sColor%s (tx) Input text (e.g. \x1b[1;34m$\x1b[0m "
 		"%sls%s %s-l%s %sfilename.zst%s)\n"), tx_c, df_c, tx_c, df_c,
 		hp_c, df_c, tx_c, df_c);
 	printf(_("%sColor%s (li) Selected files indicator (%s%c%s)\n"),
