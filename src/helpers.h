@@ -25,7 +25,7 @@
 #ifndef HELPERS_H
 #define HELPERS_H
 
-#define PROGRAM_NAME_UPPERCASE "CliFM"
+#define PROGRAM_NAME_UPPERCASE "Clifm"
 #define PROGRAM_NAME "clifm"
 #define PROGRAM_DESC "The command line file manager"
 #define VERSION "1.19.8"

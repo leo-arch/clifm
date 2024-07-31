@@ -1,5 +1,5 @@
               ######################
-              # CliFM actions file #
+              # Clifm actions file #
               ######################
 
 # Empty and commented lines are omitted.
@@ -10,7 +10,7 @@
 # either in DATADIR/clifm/plugins (usually /usr/share/clifm/plugins) or
 # in $XDG_CONFIG_HOME/clifm/plugins (usually ~/.config/clifm/plugins).
 
-# Actions can be executed directly from the CliFM command line, as if
+# Actions can be executed directly from the Clifm command line, as if
 # they were any other command: the associated file will be executed
 # instead.
 

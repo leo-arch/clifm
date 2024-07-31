@@ -1,5 +1,5 @@
                 ##############################
-                # Keybindings file for CliFM #
+                # Keybindings file for Clifm #
                 ##############################
 
 # Empty and commented lines are omitted.
@@ -11,7 +11,7 @@
 
 # If you need some more control, hex, octal, and decimal notation is
 # supported as well (this is needed for example for function keys). For
-# the sake of simplicity, CliFM provides a plugin to easily get the
+# the sake of simplicity, Clifm provides a plugin to easily get the
 # adequate codes.
 
 # Use the 'kbgen' plugin (compile it first: 'gcc -o kbgen kbgen.c') to

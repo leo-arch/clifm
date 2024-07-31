@@ -1009,7 +1009,7 @@ create_preview_file(void)
 
 	fprintf(fp, "                  ######################################\n\
                   #   Configuration file for Shotgun   #\n\
-                  #       CliFM's file previewer       #\n\
+                  #       Clifm's file previewer       #\n\
                   ######################################\n\
 \n\
 # Commented and blank lines are omitted\n\
@@ -1975,9 +1975,9 @@ create_def_color_scheme(void)
 
 	fprintf(fp, "# Default color scheme for %s\n\n\
 # FiletypeColors defines the color used for file types when listing files,\n\
-# just as InterfaceColors defines colors for CliFM's interface and ExtColors\n\
+# just as InterfaceColors defines colors for Clifm's interface and ExtColors\n\
 # for file extensions. They all make use of the same format used by the\n\
-# LS_COLORS environment variable. Thus, \"di=01;34\" means that (non-empty)\n\
+# LS_COLORS environment variable. Thus, \"di=1;34\" means that (non-empty)\n\
 # directories will be listed in bold blue.\n\
 # Color codes are traditional ANSI escape sequences less the escape char and\n\
 # the final 'm'. 8 bit, 256 colors, RGB, and hex (#rrggbb) colors are supported.\n\
@@ -2182,7 +2182,7 @@ create_mime_file_anew(char *file)
 
 	fprintf(fp, "                  ###################################\n\
                   #   Configuration file for Lira   #\n\
-                  #     CliFM's resource opener     #\n\
+                  #     Clifm's resource opener     #\n\
                   ###################################\n\
 \n\
 # Commented and blank lines are omitted.\n\
@@ -2237,7 +2237,7 @@ create_mime_file_anew(char *file)
 # might vary depending on the terminal emulator used (TERM).\n\
 \n\
 # Note on graphical applications: If the opening application is already running\n\
-# the file might be opened in a tab, and CliFM won't wait for the file to be\n\
+# the file might be opened in a tab, and Clifm won't wait for the file to be\n\
 # closed (because the process already returned). To avoid this, instruct the\n\
 # application to run a new instance: e.g.: geany -i, gedit -s, kate -n,\n\
 # pluma --new-window, and so on.\n\
@@ -2293,7 +2293,7 @@ X:(^text/.*|application/(json|javascript)|inode/x-empty)=$EDITOR;$VISUAL;kak;mic
 X:^application/(msword|vnd.ms-excel|vnd.ms-powerpoint|.*(open|office)document.*)=libreoffice %%x;soffice %%x;ooffice %%x\n\
 \n\
 # Archives\n\
-# Note: 'ad' is CliFM's built-in archives utility (based on atool). Remove it if you\n\
+# Note: 'ad' is Clifm's built-in archives utility (based on atool). Remove it if you\n\
 # prefer another application.\n\
 X:^application/(zip|gzip|zstd|x-7z-compressed|x-xz|x-bzip*|x-tar|x-iso9660-image)=ad;xarchiver %%x;lxqt-archiver %%x;ark %%x\n\
 !X:^application/(zip|gzip|zstd|x-7z-compressed|x-xz|x-bzip*|x-tar|x-iso9660-image)=ad\n\

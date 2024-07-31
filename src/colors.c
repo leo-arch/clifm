@@ -2795,7 +2795,7 @@ remove_trash_ext(char **ent)
 char *
 get_entry_color(char *ent, const struct stat *s)
 {
-	char *color = fi_c;
+	char *color = (char *)NULL;
 
 	switch (s->st_mode & S_IFMT) {
 	case S_IFREG: {

@@ -1,5 +1,5 @@
               #######################################
-              # Readline keybindings file for CliFM #
+              # Readline keybindings file for Clifm #
               #######################################
 
 # For the complete list of Readline options see:
@@ -45,7 +45,7 @@ $if mode=emacs
 "\x1b\x4f\x64": backward-word
 "\x1b\x4f\x63": forward-word
 
-# A few keybinds to avoid conflicts with CliFM specific keybinds
+# A few keybinds to avoid conflicts with Clifm specific keybinds
 "\x1b\xd":
 "\C-d":
 "\e\e":
