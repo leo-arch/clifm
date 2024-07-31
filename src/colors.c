@@ -1202,7 +1202,7 @@ decode_color_prefix(char *s)
 }
 
 
-/* Set color variable VAR (static global) to _COLOR.
+/* Set color variable VAR (static global) to COLOR.
  * If not printable, add non-printing char flags (\001 and \002). */
 static void
 set_color(char *color, char var[], const int flag)
@@ -1236,7 +1236,7 @@ set_color(char *color, char var[], const int flag)
 	if (flag == RL_NO_PRINTABLE)
 		snprintf(var, MAX_COLOR + 2, "\001\x1b[%sm\002", s ? s : p); /* NOLINT */
 	else
-		snprintf(var, MAX_COLOR - 1, "\x1b[00;%sm", s ? s : p); /* NOLINT */
+		snprintf(var, MAX_COLOR - 1, "\x1b[0;%sm", s ? s : p); /* NOLINT */
 }
 
 static void
@@ -1253,24 +1253,24 @@ set_filetype_colors(char **colors, const size_t words)
 			set_color(colors[i] + 3, bd_c, RL_PRINTABLE);
 
 		else if (*colors[i] == 'c') {
-			if (colors[i][1] == 'a')
-				set_color(colors[i] + 3, ca_c, RL_PRINTABLE);
-			else if (colors[i][1] == 'd')
-				set_color(colors[i] + 3, cd_c, RL_PRINTABLE);
+			switch (colors[i][1]) {
+			case 'a': set_color(colors[i] + 3, ca_c, RL_PRINTABLE); break;
+			case 'd': set_color(colors[i] + 3, cd_c, RL_PRINTABLE); break;
+			default: break;
+			}
 		}
 
 		else if (*colors[i] == 'd' && colors[i][1] == 'i')
 			set_color(colors[i] + 3, di_c, RL_PRINTABLE);
 
 		else if (*colors[i] == 'e') {
-			if (colors[i][1] == 'd')
-				set_color(colors[i] + 3, ed_c, RL_PRINTABLE);
-			else if (colors[i][1] == 'e')
-				set_color(colors[i] + 3, ee_c, RL_PRINTABLE);
-			else if (colors[i][1] == 'f')
-				set_color(colors[i] + 3, ef_c, RL_PRINTABLE);
-			else if (colors[i][1] == 'x')
-				set_color(colors[i] + 3, ex_c, RL_PRINTABLE);
+			switch (colors[i][1]) {
+			case 'd': set_color(colors[i] + 3, ed_c, RL_PRINTABLE); break;
+			case 'e': set_color(colors[i] + 3, ee_c, RL_PRINTABLE); break;
+			case 'f': set_color(colors[i] + 3, ef_c, RL_PRINTABLE); break;
+			case 'x': set_color(colors[i] + 3, ex_c, RL_PRINTABLE); break;
+			default: break;
+			}
 		}
 
 		else if (*colors[i] == 'f' && colors[i][1] == 'i')
@@ -1283,37 +1283,36 @@ set_filetype_colors(char **colors, const size_t words)
 			set_color(colors[i] + 3, mh_c, RL_PRINTABLE);
 
 		else if (*colors[i] == 'n') {
-			if (colors[i][1] == 'd')
-				set_color(colors[i] + 3, nd_c, RL_PRINTABLE);
-			else if (colors[i][1] == 'f')
-				set_color(colors[i] + 3, nf_c, RL_PRINTABLE);
-			else if (colors[i][1] == 'o')
-				set_color(colors[i] + 3, no_c, RL_PRINTABLE);
+			switch (colors[i][1]) {
+			case 'd': set_color(colors[i] + 3, nd_c, RL_PRINTABLE); break;
+			case 'f': set_color(colors[i] + 3, nf_c, RL_PRINTABLE); break;
+			case 'o': set_color(colors[i] + 3, no_c, RL_PRINTABLE); break;
+			default: break;
+			}
 		}
 
 		else if (*colors[i] == 'o') {
-			if (colors[i][1] == 'r')
-				set_color(colors[i] + 3, or_c, RL_PRINTABLE);
-			else if (colors[i][1] == 'w')
-				set_color(colors[i] + 3, ow_c, RL_PRINTABLE);
+			switch (colors[i][1]) {
+			case 'r': set_color(colors[i] + 3, or_c, RL_PRINTABLE); break;
+			case 'w': set_color(colors[i] + 3, ow_c, RL_PRINTABLE); break;
 #ifdef SOLARIS_DOORS
-			else if (colors[i][1] == 'o') /* oo = Door */
-				set_color(colors[i] + 3, oo_c, RL_PRINTABLE);
+			case 'o': set_color(colors[i] + 3, oo_c, RL_PRINTABLE); break;
 #endif /* SOLARIS_DOORS */
+			default: break;
+			}
 		}
 
 		else if (*colors[i] == 'p' && colors[i][1] == 'i')
 			set_color(colors[i] + 3, pi_c, RL_PRINTABLE);
 
 		else if (*colors[i] == 's') {
-			if (colors[i][1] == 'g')
-				set_color(colors[i] + 3, sg_c, RL_PRINTABLE);
-			else if (colors[i][1] == 'o')
-				set_color(colors[i] + 3, so_c, RL_PRINTABLE);
-			else if (colors[i][1] == 't')
-				set_color(colors[i] + 3, st_c, RL_PRINTABLE);
-			else if (colors[i][1] == 'u')
-				set_color(colors[i] + 3, su_c, RL_PRINTABLE);
+			switch (colors[i][1]) {
+			case 'g': set_color(colors[i] + 3, sg_c, RL_PRINTABLE); break;
+			case 'o': set_color(colors[i] + 3, so_c, RL_PRINTABLE); break;
+			case 't': set_color(colors[i] + 3, st_c, RL_PRINTABLE); break;
+			case 'u': set_color(colors[i] + 3, su_c, RL_PRINTABLE); break;
+			default: break;
+			}
 		}
 
 		else if (*colors[i] == 't' && colors[i][1] == 'w')
@@ -1336,44 +1335,34 @@ set_iface_colors(char **colors, const size_t num_colors)
 	int i = (int)num_colors;
 	while (--i >= 0) {
 		if (*colors[i] == 'd') {
-			if (colors[i][1] == 'b' && colors[i][2] == '=')
-				set_color(colors[i] + 3, db_c, RL_PRINTABLE);
-			else if (colors[i][1] == 'd' && colors[i][2] == '=')
-				set_color(colors[i] + 3, dd_c, RL_PRINTABLE);
-			else if (colors[i][1] == 'e' && colors[i][2] == '=')
-				set_color(colors[i] + 3, de_c, RL_PRINTABLE);
-			else if (colors[i][1] == 'f' && colors[i][2] == '=')
-				set_color(colors[i] + 3, df_c, RL_PRINTABLE);
-			else if (colors[i][1] == 'g' && colors[i][2] == '=')
-				set_color(colors[i] + 3, dg_c, RL_PRINTABLE);
-			else if (colors[i][1] == 'k' && colors[i][2] == '=')
-				set_color(colors[i] + 3, dk_c, RL_PRINTABLE);
-			else if (colors[i][1] == 'l' && colors[i][2] == '=')
-				set_color(colors[i] + 3, dl_c, RL_PRINTABLE);
-			else if (colors[i][1] == 'n' && colors[i][2] == '=')
-				set_color(colors[i] + 3, dn_c, RL_PRINTABLE);
-			else if (colors[i][1] == 'o' && colors[i][2] == '=')
-				set_color(colors[i] + 3, do_c, RL_PRINTABLE);
-			else if (colors[i][1] == 'p' && colors[i][2] == '=')
-				set_color(colors[i] + 3, dp_c, RL_PRINTABLE);
-			else if (colors[i][1] == 'r' && colors[i][2] == '=')
-				set_color(colors[i] + 3, dr_c, RL_PRINTABLE);
-			else if (colors[i][1] == 'w' && colors[i][2] == '=')
-				set_color(colors[i] + 3, dw_c, RL_PRINTABLE);
-			else if (colors[i][1] == 'x' && colors[i][2] == 'd'
-			&& colors[i][3] == '=')
-				set_color(colors[i] + 4, dxd_c, RL_PRINTABLE);
-			else if (colors[i][1] == 'x' && colors[i][2] == 'r'
-			&& colors[i][3] == '=')
-				set_color(colors[i] + 4, dxr_c, RL_PRINTABLE);
-			else if (colors[i][1] == 'z' && colors[i][2] == '=')
-				set_color(colors[i] + 3, dz_c, RL_PRINTABLE);
+			if (colors[i][1] == 'x' && colors[i][2] && colors[i][3] == '=') {
+				if (colors[i][2] == 'd')
+					set_color(colors[i] + 4, dxd_c, RL_PRINTABLE);
+				else if (colors[i][2] == 'r')
+					set_color(colors[i] + 4, dxr_c, RL_PRINTABLE);
+			} else if (colors[i][1] && colors[i][2] == '=') {
+				switch (colors[i][1]) {
+				case 'b': set_color(colors[i] + 3, db_c, RL_PRINTABLE); break;
+				case 'd': set_color(colors[i] + 3, dd_c, RL_PRINTABLE); break;
+				case 'e': set_color(colors[i] + 3, de_c, RL_PRINTABLE); break;
+				case 'f': set_color(colors[i] + 3, df_c, RL_PRINTABLE); break;
+				case 'g': set_color(colors[i] + 3, dg_c, RL_PRINTABLE); break;
+				case 'k': set_color(colors[i] + 3, dk_c, RL_PRINTABLE); break;
+				case 'l': set_color(colors[i] + 3, dl_c, RL_PRINTABLE); break;
+				case 'n': set_color(colors[i] + 3, dn_c, RL_PRINTABLE); break;
+				case 'o': set_color(colors[i] + 3, do_c, RL_PRINTABLE); break;
+				case 'p': set_color(colors[i] + 3, dp_c, RL_PRINTABLE); break;
+				case 'r': set_color(colors[i] + 3, dr_c, RL_PRINTABLE); break;
+				case 'w': set_color(colors[i] + 3, dw_c, RL_PRINTABLE); break;
+				default: break;
+				}
+			}
 		}
 
-		else if (*colors[i] == 'e') {
-			if (colors[i][1] == 'l' && colors[i][2] == '=')
+		else if (*colors[i] == 'e' && colors[i][1] && colors[i][2] == '=') {
+			if (colors[i][1] == 'l')
 				set_color(colors[i] + 3, el_c, RL_PRINTABLE);
-			else if (colors[i][1] == 'm' && colors[i][2] == '=')
+			else if (colors[i][1] == 'm')
 				set_color(colors[i] + 3, em_c, RL_NO_PRINTABLE);
 		}
 
@@ -1381,36 +1370,28 @@ set_iface_colors(char **colors, const size_t num_colors)
 		&& colors[i][2] == '=')
 			set_color(colors[i] + 3, fc_c, RL_PRINTABLE);
 
-		else if (*colors[i] == 'h') {
-			if (colors[i][1] == 'b' && colors[i][2] == '=')
-				set_color(colors[i] + 3, hb_c, RL_PRINTABLE);
-			else if (colors[i][1] == 'c' && colors[i][2] == '=')
-				set_color(colors[i] + 3, hc_c, RL_PRINTABLE);
-			else if (colors[i][1] == 'd' && colors[i][2] == '=')
-				set_color(colors[i] + 3, hd_c, RL_PRINTABLE);
-			else if (colors[i][1] == 'e' && colors[i][2] == '=')
-				set_color(colors[i] + 3, he_c, RL_PRINTABLE);
-			else if (colors[i][1] == 'n' && colors[i][2] == '=')
-				set_color(colors[i] + 3, hn_c, RL_PRINTABLE);
-			else if (colors[i][1] == 'p' && colors[i][2] == '=')
-				set_color(colors[i] + 3, hp_c, RL_PRINTABLE);
-			else if (colors[i][1] == 'q' && colors[i][2] == '=')
-				set_color(colors[i] + 3, hq_c, RL_PRINTABLE);
-			else if (colors[i][1] == 'r' && colors[i][2] == '=')
-				set_color(colors[i] + 3, hr_c, RL_PRINTABLE);
-			else if (colors[i][1] == 's' && colors[i][2] == '=')
-				set_color(colors[i] + 3, hs_c, RL_PRINTABLE);
-			else if (colors[i][1] == 'v' && colors[i][2] == '=')
-				set_color(colors[i] + 3, hv_c, RL_PRINTABLE);
-			else if (colors[i][1] == 'w' && colors[i][2] == '=')
-				set_color(colors[i] + 3, hw_c, RL_PRINTABLE);
+		else if (*colors[i] == 'h' && colors[i][1] && colors[i][2] == '=') {
+			switch (colors[i][1]) {
+			case 'b': set_color(colors[i] + 3, hb_c, RL_PRINTABLE); break;
+			case 'c': set_color(colors[i] + 3, hc_c, RL_PRINTABLE); break;
+			case 'd': set_color(colors[i] + 3, hd_c, RL_PRINTABLE); break;
+			case 'e': set_color(colors[i] + 3, he_c, RL_PRINTABLE); break;
+			case 'n': set_color(colors[i] + 3, hn_c, RL_PRINTABLE); break;
+			case 'p': set_color(colors[i] + 3, hp_c, RL_PRINTABLE); break;
+			case 'q': set_color(colors[i] + 3, hq_c, RL_PRINTABLE); break;
+			case 'r': set_color(colors[i] + 3, hr_c, RL_PRINTABLE); break;
+			case 's': set_color(colors[i] + 3, hs_c, RL_PRINTABLE); break;
+			case 'v': set_color(colors[i] + 3, hv_c, RL_PRINTABLE); break;
+			case 'w': set_color(colors[i] + 3, hw_c, RL_PRINTABLE); break;
+			default: break;
+			}
 		}
 
-		else if (*colors[i] == 'l') {
-			if (colors[i][1] == 'i' && colors[i][2] == '=') {
+		else if (*colors[i] == 'l' && colors[i][1] && colors[i][2] == '=') {
+			if (colors[i][1] == 'i') {
 				set_color(colors[i] + 3, li_c, RL_NO_PRINTABLE);
 				set_color(colors[i] + 3, li_cb, RL_PRINTABLE);
-			} else if (colors[i][1] == 'c' && colors[i][2] == '=') {
+			} else if (colors[i][1] == 'c') {
 				set_color(colors[i] + 3, lc_c, RL_PRINTABLE);
 			}
 		}
@@ -1423,41 +1404,33 @@ set_iface_colors(char **colors, const size_t num_colors)
 		&& colors[i][2] == '=')
 			set_color(colors[i] + 3, nm_c, RL_NO_PRINTABLE);
 
-		else if (*colors[i] == 'r') {
-			if (colors[i][1] == 'o' && colors[i][2] == '=')
-				set_color(colors[i] + 3, ro_c, RL_NO_PRINTABLE);
+		else if (*colors[i] == 'r' && colors[i][1] == 'o'
+		&& colors[i][2] == '=')
+			set_color(colors[i] + 3, ro_c, RL_NO_PRINTABLE);
+
+		else if (*colors[i] == 's' && colors[i][1] && colors[i][2] == '=') {
+			switch (colors[i][1]) {
+			case 'b': set_color(colors[i] + 3, sb_c, RL_PRINTABLE); break;
+			case 'c': set_color(colors[i] + 3, sc_c, RL_PRINTABLE); break;
+			case 'd': set_color(colors[i] + 3, sd_c, RL_PRINTABLE); break;
+			case 'h': set_color(colors[i] + 3, sh_c, RL_PRINTABLE); break;
+			case 'i': set_color(colors[i] + 3, si_c, RL_NO_PRINTABLE); break;
+			case 'f': set_color(colors[i] + 3, sf_c, RL_PRINTABLE); break;
+			case 'p': set_color(colors[i] + 3, sp_c, RL_PRINTABLE); break;
+			case 'x': set_color(colors[i] + 3, sx_c, RL_PRINTABLE); break;
+			case 'z': set_color(colors[i] + 3, sz_c, RL_PRINTABLE); break;
+			default: break;
+			}
 		}
 
-		else if (*colors[i] == 's') {
-			if (colors[i][1] == 'b' && colors[i][2] == '=')
-				set_color(colors[i] + 3, sb_c, RL_PRINTABLE);
-			else if (colors[i][1] == 'c' && colors[i][2] == '=')
-				set_color(colors[i] + 3, sc_c, RL_PRINTABLE);
-			else if (colors[i][1] == 'd' && colors[i][2] == '=')
-				set_color(colors[i] + 3, sd_c, RL_PRINTABLE);
-			else if (colors[i][1] == 'h' && colors[i][2] == '=')
-				set_color(colors[i] + 3, sh_c, RL_PRINTABLE);
-			else if (colors[i][1] == 'i' && colors[i][2] == '=')
-				set_color(colors[i] + 3, si_c, RL_NO_PRINTABLE);
-			else if (colors[i][1] == 'f' && colors[i][2] == '=')
-				set_color(colors[i] + 3, sf_c, RL_PRINTABLE);
-			else if (colors[i][1] == 'p' && colors[i][2] == '=')
-				set_color(colors[i] + 3, sp_c, RL_PRINTABLE);
-			else if (colors[i][1] == 'x' && colors[i][2] == '=')
-				set_color(colors[i] + 3, sx_c, RL_PRINTABLE);
-			else if (colors[i][1] == 'z' && colors[i][2] == '=')
-				set_color(colors[i] + 3, sz_c, RL_PRINTABLE);
-		}
-
-		else if (*colors[i] == 't') {
-			if (colors[i][1] == 'i' && colors[i][2] == '=')
-				set_color(colors[i] + 3, ti_c, RL_NO_PRINTABLE);
-			else if (colors[i][1] == 's' && colors[i][2] == '=')
-				set_color(colors[i] + 3, ts_c, RL_PRINTABLE);
-			else if (colors[i][1] == 't' && colors[i][2] == '=')
-				set_color(colors[i] + 3, tt_c, RL_PRINTABLE);
-			else if (colors[i][1] == 'x' && colors[i][2] == '=')
-				set_color(colors[i] + 3, tx_c, RL_PRINTABLE);
+		else if (*colors[i] == 't' && colors[i][1] && colors[i][2] == '=') {
+			switch (colors[i][1]) {
+			case 'i': set_color(colors[i] + 3, ti_c, RL_NO_PRINTABLE); break;
+			case 's': set_color(colors[i] + 3, ts_c, RL_PRINTABLE); break;
+			case 't': set_color(colors[i] + 3, tt_c, RL_PRINTABLE); break;
+			case 'x': set_color(colors[i] + 3, tx_c, RL_PRINTABLE); break;
+			default: break;
+			}
 		}
 
 		else if (*colors[i] == 'w') {
@@ -1467,32 +1440,26 @@ set_iface_colors(char **colors, const size_t num_colors)
 				set_color(colors[i] + 3, wm_c, RL_NO_PRINTABLE);
 			else if (colors[i][1] == 'p' && colors[i][2] == '=')
 				set_color(colors[i] + 3, wp_c, RL_PRINTABLE);
-
 			else if (colors[i][1] == 's' && colors[i][2]
 			&& colors[i][3] == '=') {
-				if (colors[i][2] == '1')
-					set_color(colors[i] + 4, ws1_c, RL_NO_PRINTABLE);
-				else if (colors[i][2] == '2')
-					set_color(colors[i] + 4, ws2_c, RL_NO_PRINTABLE);
-				else if (colors[i][2] == '3')
-					set_color(colors[i] + 4, ws3_c, RL_NO_PRINTABLE);
-				else if (colors[i][2] == '4')
-					set_color(colors[i] + 4, ws4_c, RL_NO_PRINTABLE);
-				else if (colors[i][2] == '5')
-					set_color(colors[i] + 4, ws5_c, RL_NO_PRINTABLE);
-				else if (colors[i][2] == '6')
-					set_color(colors[i] + 4, ws6_c, RL_NO_PRINTABLE);
-				else if (colors[i][2] == '7')
-					set_color(colors[i] + 4, ws7_c, RL_NO_PRINTABLE);
-				else if (colors[i][2] == '8')
-					set_color(colors[i] + 4, ws8_c, RL_NO_PRINTABLE);
+				switch (colors[i][2]) {
+				case '1': set_color(colors[i] + 4, ws1_c, RL_NO_PRINTABLE); break;
+				case '2': set_color(colors[i] + 4, ws2_c, RL_NO_PRINTABLE); break;
+				case '3': set_color(colors[i] + 4, ws3_c, RL_NO_PRINTABLE); break;
+				case '4': set_color(colors[i] + 4, ws4_c, RL_NO_PRINTABLE); break;
+				case '5': set_color(colors[i] + 4, ws5_c, RL_NO_PRINTABLE); break;
+				case '6': set_color(colors[i] + 4, ws6_c, RL_NO_PRINTABLE); break;
+				case '7': set_color(colors[i] + 4, ws7_c, RL_NO_PRINTABLE); break;
+				case '8': set_color(colors[i] + 4, ws8_c, RL_NO_PRINTABLE); break;
+				default: break;
+				}
 			}
 		}
 
-		else if (*colors[i] == 'x') {
-			if (colors[i][1] == 's' && colors[i][2] == '=')
+		else if (*colors[i] == 'x' && colors[i][1] && colors[i][2] == '=') {
+			if (colors[i][1] == 's')
 				set_color(colors[i] + 3, xs_c, RL_NO_PRINTABLE);
-			else if (colors[i][1] == 'f' && colors[i][2] == '=') {
+			else if (colors[i][1] == 'f') {
 				set_color(colors[i] + 3, xf_c, RL_NO_PRINTABLE);
 				set_color(colors[i] + 3, xf_cb, RL_PRINTABLE);
 			}
@@ -3088,7 +3055,7 @@ print_ext_colors(void)
 		}
 	}
 
-	fputs("\n", stdout);
+	printf("%s\n", df_c);
 }
 
 static void
@@ -3290,7 +3257,7 @@ print_prompt_colors(void)
 {
 	printf(_("\n%sPrompt%s\n\n"), BOLD, df_c);
 
-	printf(_("%sColor%s (tx) Input text (e.g. \x1b[1;34m$\x1b[0m "
+	printf(_("%sColor%s (tx) Input text (e.g. \x1b[1m$\x1b[0m "
 		"%sls%s %s-l%s %sfilename.zst%s)\n"), tx_c, df_c, tx_c, df_c,
 		hp_c, df_c, tx_c, df_c);
 	printf(_("%sColor%s (li) Selected files indicator (%s%c%s)\n"),
