@@ -323,6 +323,13 @@ nx_getdelim_append(char **lineptr, size_t *bufsize, size_t count, char ch)
 	return (-1);
 }
 
+#ifdef __HAIKU__
+/* Haiku complains about -ENOMEM overflowing int. */
+# define XENOMEM 1
+#else
+# define XENOMEM ENOMEM
+#endif /* __HAIKU__ */
+
 /* Read data into a dynamically resizable buffer until EOF or until a
  * delimiter character is found. The returned data will be null terminated
  * (unless there's an error allocating memory that prevents it).
@@ -353,7 +360,7 @@ nx_getdelim(char **lineptr, size_t *n, int delim, FILE *stream)
 
 		/* Check for error adding to the buffer (ie., out of memory) */
 		if (result < 0) {
-			err = -ENOMEM;
+			err = -XENOMEM;
 			break;
 		}
 
@@ -383,7 +390,7 @@ nx_getdelim(char **lineptr, size_t *n, int delim, FILE *stream)
 
 	if (feof(stream) && (count == 0)) {
 		if (nx_getdelim_append(&line, &size, count, 0) < 0) {
-			return -ENOMEM;
+			return -XENOMEM;
 		}
 	}
 
