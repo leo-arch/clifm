@@ -154,7 +154,7 @@ define PROMPT_EXIT_FAILURE=@1-1  # Error exit code
 #=====================================#
 
 define WORKSPACE_1=@4
-define WORKSPACE_2=@160
+define WORKSPACE_2=@1
 define WORKSPACE_3=@228
 define WORKSPACE_4=@2
 define WORKSPACE_5=@43
