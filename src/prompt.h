@@ -33,8 +33,14 @@
 #define CTLESC '\001'
 #define CTLNUL '\177'
 
-#define ROOT_IND "\001\x1b[1;31m\002R\001\x1b[0m\002"
-#define ROOT_IND_NO_COLOR "R"
+#ifdef __HAIKU__
+/* No need for a root indicator on Haiku: it always runs as root. */
+# define ROOT_IND ""
+# define ROOT_IND_NO_COLOR ""
+#else
+# define ROOT_IND "\001\x1b[1;31m\002R\001\x1b[0m\002"
+# define ROOT_IND_NO_COLOR "R"
+#endif
 #define ROOT_IND_SIZE 17
 #define RDONLY_IND "RO\001\x1b[0m\002"
 #define RDONLY_IND_SIZE (MAX_COLOR + 8 + 1)
