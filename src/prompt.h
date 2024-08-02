@@ -40,7 +40,7 @@
 #else
 # define ROOT_IND "\001\x1b[1;31m\002R\001\x1b[0m\002"
 # define ROOT_IND_NO_COLOR "R"
-#endif
+#endif /* __HAIKU__ */
 #define ROOT_IND_SIZE 17
 #define RDONLY_IND "RO\001\x1b[0m\002"
 #define RDONLY_IND_SIZE (MAX_COLOR + 8 + 1)
