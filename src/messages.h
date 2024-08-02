@@ -1740,39 +1740,6 @@ Q               cd on quit (consult the manpage)"
      ;kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkc \n\
         :c::::::::::::::::::::::::::::::::::."
 
-#define FREE_SOFTWARE "Excerpt from 'What is Free Software?', by Richard Stallman. \
-Source: https://www.gnu.org/philosophy/free-sw.html\n \
-\n\"'Free software' means software that respects users' freedom and \
-community. Roughly, it means that the users have the freedom to run, \
-copy, distribute, study, change and improve the software. Thus, 'free \
-software' is a matter of liberty, not price. To understand the concept, \
-you should think of 'free' as in 'free speech', not as in 'free beer'. \
-We sometimes call it 'libre software', borrowing the French or Spanish \
-word for 'free' as in freedom, to show we do not mean the software is \
-gratis.\n\
-\nWe campaign for these freedoms because everyone deserves them. With \
-these freedoms, the users (both individually and collectively) control \
-the program and what it does for them. When users don't control the \
-program, we call it a 'nonfree' or proprietary program. The nonfree \
-program controls the users, and the developer controls the program; \
-this makes the program an instrument of unjust power. \n\
-\nA program is free software if the program's users have the four \
-essential freedoms:\n\n\
-- The freedom to run the program as you wish, for any purpose \
-(freedom 0).\n\
-- The freedom to study how the program works, and change it so it does \
-your computing as you wish (freedom 1). Access to the source code is a \
-precondition for this.\n\
-- The freedom to redistribute copies so you can help your neighbor \
-(freedom 2).\n\
-- The freedom to distribute copies of your modified versions to others \
-(freedom 3). By doing this you can give the whole community a chance to \
-benefit from your changes. Access to the source code is a precondition \
-for this. \n\
-\nA program is free software if it gives users adequately all of these \
-freedoms. Otherwise, it is nonfree. While we can distinguish various \
-nonfree distribution schemes in terms of how far they fall short of \
-being free, we consider them all equally unethical [...]\""
 
 /* Brief commands description */
 #define AC_DESC      " (archive/compress files)"
@@ -1804,7 +1771,6 @@ being free, we consider them all equally unethical [...]\""
 #define F_DESC       " (go forth in the directory history list)"
 #define FC_DESC      " (set the files counter on/off)"
 #define FF_DESC      " (toggle list-directories-first on/off)"
-#define FS_DESC      " (what is free software?)"
 #define FT_DESC      " (set a files filter)"
 #define FZ_DESC      " (print directories full size - long view only)"
 #define HF_DESC      " (toggle show-hidden-files on/off)"

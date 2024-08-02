@@ -148,7 +148,6 @@ check_int_cmd_desc(const char *s, const size_t l)
 		else if (*s == 'f') {
 			if (*(s + 1) == 'c') return FC_DESC;
 			if (*(s + 1) == 'f') return FF_DESC;
-			if (*(s + 1) == 's') return FS_DESC;
 			if (*(s + 1) == 't') return FT_DESC;
 			if (*(s + 1) == 'z') return FZ_DESC;
 		}

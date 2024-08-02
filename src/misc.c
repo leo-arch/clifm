@@ -1989,12 +1989,6 @@ unpin_dir(void)
 }
 
 void
-free_software(void)
-{
-	puts(_(FREE_SOFTWARE));
-}
-
-void
 version_function(void)
 {
 	char *posix = "";

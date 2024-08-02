@@ -2606,10 +2606,6 @@ exec_cmd(char **comm)
 		version_function();	return FUNC_SUCCESS;
 	}
 
-	else if (*comm[0] == 'f' && comm[0][1] == 's' && !comm[0][2]) {
-		free_software(); return FUNC_SUCCESS;
-	}
-
 	else if (*comm[0] == 'b' && strcmp(comm[0], "bonus") == 0) {
 		bonus_function(); return FUNC_SUCCESS;
 	}
