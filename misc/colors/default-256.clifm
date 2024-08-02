@@ -126,7 +126,7 @@ define PROP_DASH=@242       # Dot separator and dash (unset bit)
 
 define IFACE_ELN=@6               # ELN's (e.g. "12 myfile")
 define IFACE_FILES_COUNTER=@7-2   # Files counter (e.g. "dir/12")
-define IFACE_DIV_LINE=@7-2        # Dividing line
+define IFACE_DIV_LINE=@243        # Dividing line
 define IFACE_LINK_IND=@43         # Symbolic link indicator ('@')
 define IFACE_MISC_IND=@6-1        # Miscellaneous indicator ("->")
 define IFACE_TABCOMP_PREFIX=@5-4  # Matching prefix (TAB completion)
@@ -166,13 +166,13 @@ define WORKSPACE_8=@246-2
 #           SUGGESTIONS               #
 #=====================================#
 
-define SUG_HIST=@7-2               # History
+define SUG_HIST=@243               # History
 define SUG_FILE_NAME=4;2;36        # File names
 define SUG_FILE_NAME_FUZZY=4;2;35  # File names (fuzzy)
 define SUG_INT_CMD=@2-2            # Internal command names and parameters
 define SUG_EXT_CMD=@6-2            # External command names
 define SUG_BUILTIN=@3-2            # Shell builtin names
-define SUG_INT_CMD_DESC=@7-2       # Internal commands description (e.g. "c (copy files)")
+define SUG_INT_CMD_DESC=@243       # Internal commands description (e.g. "c (copy files)")
 define SUG_BAEJ_POINTER=@1-2       # BAEJ pointer (e.g. "12 > myfile")
 
 #=====================================#
