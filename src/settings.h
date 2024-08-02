@@ -44,14 +44,14 @@ no=31;47:or=2;4;36:ow=34;42:pi=35:so=1;35:su=37;41:sg=30;43:st=37;44:\
 tw=30;42:uf=2;4;37:"
 
 #define DEF_IFACE_COLORS "db=:dd=:de=:df=0:dg=:dk=:dl=2;37:\
-dn=0;2;37:do=:dp=:dr=:dw=:dxd=:dxr=:dz=:\
-el=0;36:em=1;31:fc=0;2;37:hb=0;36:hc=2;31:lc=:\
-hd=0;36:he=0;36:hn=0:hp=0;36:hq=0;33:hr=0;31:hs=0;32:hv=0;32:\
-li=1;32:mi=1;36:nm=1;32:ro=:sb=0;2;33:sc=2;36:sd=0;2;37:\
-sf=4;2;36:sh=2;37:si=1;34:sp=02;31:sx=02;32:sz=0;2;4;35:\
+dn=2;37:do=:dp=:dr=:dw=:dxd=:dxr=:dz=:\
+el=36:em=1;31:fc=2;37:hb=36:hc=2;31:lc=:\
+hd=36:he=0;36:hn=0:hp=36:hq=33:hr=31:hs=32:hv=32:\
+li=1;32:mi=1;36:nm=1;32:ro=:sb=2;33:sc=2;36:sd=2;37:\
+sf=4;2;36:sh=2;37:si=1;34:sp=2;31:sx=2;32:sz=4;2;36:\
 ti=1;36:ts=4;35:tt=2;1;36:tx=0:\
 wc=1;36:wm=1;33:ws1=34:ws2=31:ws3=33:ws4=32:ws5=36:ws6=36:ws7=36:ws8=36:\
-xf=1;31:xs=0;32:"
+xf=1;31:xs=32:"
 
 /* If ExtColors is not defined in the color scheme file (or if this file isn't
  * found), DEF_EXT_COLORS is used instead. */
@@ -165,7 +165,7 @@ xf=1;31:xs=0;32:"
 #define DEF_SF_C  "\x1b[2;4;36m" /* ELN's, bookmark, file, and directory names */
 #define DEF_SP_C  "\x1b[2;31m"   /* Suggestions pointer (12 > filename) */
 #define DEF_SX_C  "\x1b[2;32m"   /* Internal commands and parameters */
-#define DEF_SZ_C  "\x1b[2;4;35m" /* File names (fuzzy) */
+#define DEF_SZ_C  "\x1b[2;4;36m" /* File names (fuzzy) */
 
 /* Highlight */
 #define DEF_HB_C  "\x1b[0;36m" /* Parenthesis, Brackets ( {[()]} ) */
@@ -216,7 +216,7 @@ uf=4;2;37:"
 do=:dp=:dr=:dw=:dxd=:dxr=:dz=:el=36:em=1;31:fc=38;5;246:hb=36:hc=2;37:\
 hd=36:he=36:hn=:hp=36:hq=LY:hr=31:hs=32:hv=32:lc=38;5;43:li=1;32:mi=1;36:\
 nm=1;32:ro=:si=1;34:sb=2;33:sc=2;36:sd=38;5;243:sf=4;2;36:sh=38;5;243:sp=2;31:\
-sx=2;32:sz=4;2;35:ti=1;36:ts=4;35:tt=1;2;36:tx=0:wc=1;36:wm=38;5;228:ws1=34:\
+sx=2;32:sz=4;2;36:ti=1;36:ts=4;35:tt=1;2;36:tx=0:wc=1;36:wm=38;5;228:ws1=34:\
 ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 
 #define DEF_EXT_COLORS_256 "*.tar=1;31:*.tgz=1;31:*.arc=1;31:*.arj=1;31:\
@@ -328,7 +328,7 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define DEF_SF_C256  "\x1b[2;4;36m" /* ELN's, bookmark, file, and directory names */
 #define DEF_SP_C256  "\x1b[2;31m"   /* Suggestions pointer (12 > filename) */
 #define DEF_SX_C256  "\x1b[2;32m"   /* Internal commands and parameters */
-#define DEF_SZ_C256  "\x1b[2;4;35m" /* File names (fuzzy) */
+#define DEF_SZ_C256  "\x1b[2;4;36m" /* File names (fuzzy) */
 
 /* Highlight */
 #define DEF_HB_C256  "\x1b[0;36m" /* Parenthesis, Brackets ( {[()]} ) */

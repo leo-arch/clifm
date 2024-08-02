@@ -168,7 +168,7 @@ define WORKSPACE_8=@246-2
 
 define SUG_HIST=@243               # History
 define SUG_FILE_NAME=4;2;36        # File names
-define SUG_FILE_NAME_FUZZY=4;2;35  # File names (fuzzy)
+define SUG_FILE_NAME_FUZZY=4;2;36  # File names (fuzzy)
 define SUG_INT_CMD=@2-2            # Internal command names and parameters
 define SUG_EXT_CMD=@6-2            # External command names
 define SUG_BUILTIN=@3-2            # Shell builtin names
