@@ -3071,7 +3071,7 @@ print_color_blocks(void)
 	printf("\x1b[%dC\x1b[0m\x1b[0;100m   \x1b[0m\x1b[0;101m   "
 		"\x1b[0m\x1b[0;102m   \x1b[0m\x1b[0;103m   \x1b[0m\x1b[0;104m   "
 		"\x1b[0m\x1b[0;105m   \x1b[0m\x1b[0;106m   \x1b[0m\x1b[0;107m   "
-		"\x1b[0m\n", pad);
+		"\x1b[0m\n\n", pad);
 
 	SET_LINE_WRAP;
 }
@@ -3147,9 +3147,6 @@ print_date_shades(void)
 	props_now = t;
 	char tstr[MAX_SHADE_LEN]; *tstr = '\0';
 
-/*	get_color_age(t + 1, tstr, sizeof(tstr)); // Future time
-	printf(_("%serror%s "), tstr, df_c); */
-
 	get_color_age(t - (60LL*60), tstr, sizeof(tstr));
 	printf(_("%shour%s "), tstr, df_c);
 
@@ -3219,7 +3216,7 @@ print_interface_colors(void)
 		"%s%c%ssymlink) (%s1%s)\n"), lc_c, df_c, el_c, df_c, lc_c,
 		LINK_CHR, df_c, BOLD, df_c);
 	printf(_("%sColor%s (li) Selected file indicator (e.g. %s12%s"
-		"%s%c%sfilename)\n"), li_c, df_c, el_c, df_c, li_c, SELFILE_CHR, df_c);
+		"%s%c%sfilename)\n"), li_cb, df_c, el_c, df_c, li_cb, SELFILE_CHR, df_c);
 	printf(_("%sColor%s (tt) Trimmed file names mark (e.g. "
 		"filenam%s%c%s.odt)\n"), tt_c, df_c, tt_c, TRIMFILE_CHR, df_c);
 	printf(_("%sColor%s (dl) Dividing line (e.g. %s------>%s)\n"),
@@ -3236,20 +3233,46 @@ print_interface_colors(void)
 		"and color schemes) in TAB completion\n"), BOLD, df_c);
 }
 
+/* Return a pointer to a statically allocated buffer storing the color code
+ * S with starting \001 and ending \002 removed. */
+static char *
+remove_ctrl_chars(char *s)
+{
+	if (*s != 001)
+		return s;
+
+	s++;
+
+	xstrsncpy(tmp_color, s, sizeof(tmp_color));
+
+	const size_t l = strlen(tmp_color);
+	if (l > 0 && tmp_color[l - 1] == 002)
+		tmp_color[l - 1] = '\0';
+
+	return tmp_color;
+}
+
 static void
 print_workspace_colors(void)
 {
 	printf(_("\n%sWorkspaces%s\n\n"), BOLD, df_c);
 
-	printf(_("%sColor%s (ws1) Workspace [%s1%s]\n"), ws1_c, df_c, ws1_c, df_c);
-	printf(_("%sColor%s (ws2) Workspace [%s2%s]\n"), ws2_c, df_c, ws2_c, df_c);
-	printf(_("%sColor%s (ws3) Workspace [%s3%s]\n"), ws3_c, df_c, ws3_c, df_c);
-	printf(_("%sColor%s (ws4) Workspace [%s4%s]\n"), ws4_c, df_c, ws4_c, df_c);
-	printf(_("%sColor%s (ws5) Workspace [%s5%s]\n"), ws5_c, df_c, ws5_c, df_c);
-	printf(_("%sColor%s (ws6) Workspace [%s6%s]\n"), ws6_c, df_c, ws6_c, df_c);
-	printf(_("%sColor%s (ws7) Workspace [%s7%s]\n"), ws7_c, df_c, ws7_c, df_c);
-	printf(_("%sColor%s (ws8) Workspace [%s8%s]\n"), ws8_c, df_c, ws8_c, df_c);
-
+	char *p = remove_ctrl_chars(ws1_c);
+	printf(_("%sColor%s (ws1) Workspace [%s1%s]\n"), p, df_c, p, df_c);
+	p = remove_ctrl_chars(ws2_c);
+	printf(_("%sColor%s (ws2) Workspace [%s2%s]\n"), p, df_c, p, df_c);
+	p = remove_ctrl_chars(ws3_c);
+	printf(_("%sColor%s (ws3) Workspace [%s3%s]\n"), p, df_c, p, df_c);
+	p = remove_ctrl_chars(ws4_c);
+	printf(_("%sColor%s (ws4) Workspace [%s4%s]\n"), p, df_c, p, df_c);
+	p = remove_ctrl_chars(ws5_c);
+	printf(_("%sColor%s (ws5) Workspace [%s5%s]\n"), p, df_c, p, df_c);
+	p = remove_ctrl_chars(ws6_c);
+	printf(_("%sColor%s (ws6) Workspace [%s6%s]\n"), p, df_c, p, df_c);
+	p = remove_ctrl_chars(ws7_c);
+	printf(_("%sColor%s (ws7) Workspace [%s7%s]\n"), p, df_c, p, df_c);
+	p = remove_ctrl_chars(ws8_c);
+	printf(_("%sColor%s (ws8) Workspace [%s8%s]\n"), p, df_c, p, df_c);
 }
 
 static void
@@ -3261,23 +3284,31 @@ print_prompt_colors(void)
 		"%sls%s %s-l%s %sfilename.zst%s)\n"), tx_c, df_c, tx_c, df_c,
 		hp_c, df_c, tx_c, df_c);
 	printf(_("%sColor%s (li) Selected files indicator (%s%c%s)\n"),
-		li_c, df_c, li_c, SELFILE_CHR, df_c);
-	printf(_("%sColor%s (ti) Trashed files indicator (%sT%s)\n"), ti_c,
-		df_c, ti_c, df_c);
+		li_cb, df_c, li_cb, SELFILE_CHR, df_c);
+	char *p = remove_ctrl_chars(ti_c);
+	printf(_("%sColor%s (ti) Trashed files indicator (%sT%s)\n"), p,
+		df_c, p, df_c);
+	p = remove_ctrl_chars(xs_c);
 	printf(_("%sColor%s (xs) Success exit code (<%s0%s>)\n"),
-		xs_c, df_c, xs_c, df_c);
+		p, df_c, p, df_c);
+	p = remove_ctrl_chars(xf_c);
 	printf(_("%sColor%s (xf) Error exit code (e.g. <%s1%s>)\n"),
-		xf_c, df_c, xf_c, df_c);
+		p, df_c, p, df_c);
+	p = remove_ctrl_chars(nm_c);
 	printf(_("%sColor%s (nm) Notice message indicator (%sN%s)\n"),
-		nm_c, df_c, nm_c, df_c);
+		p, df_c, p, df_c);
+	p = remove_ctrl_chars(wm_c);
 	printf(_("%sColor%s (wm) Warning message indicator (%sW%s)\n"),
-		wm_c, df_c, wm_c, df_c);
+		p, df_c, p, df_c);
+	p = remove_ctrl_chars(em_c);
 	printf(_("%sColor%s (em) Error message indicator (%sE%s)\n"),
-		em_c, df_c, em_c, df_c);
+		p, df_c, p, df_c);
+	p = remove_ctrl_chars(ro_c);
 	printf(_("%sColor%s (ro) Read-only mode indicator (%sRO%s)\n"),
-		ro_c, df_c, ro_c, df_c);
+		p, df_c, p, df_c);
+	p = remove_ctrl_chars(si_c);
 	printf(_("%sColor%s (si) Stealth mode indicator (%sS%s)\n"),
-		si_c, df_c, si_c, df_c);
+		p, df_c, p, df_c);
 }
 
 static void
