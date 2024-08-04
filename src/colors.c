@@ -1109,6 +1109,18 @@ set_colorscheme(char *arg)
 }
 #endif /* !CLIFM_SUCKLESS */
 
+static char *
+get_color_scheme_name(void)
+{
+	if (cur_cscheme && *cur_cscheme)
+		return cur_cscheme;
+
+	if (term_caps.color >= 256)
+		return _("built-in (256 colors)");
+
+	return _("built-in (8 colors)");
+}
+
 int
 cschemes_function(char **args)
 {
@@ -1146,8 +1158,8 @@ cschemes_function(char **args)
 	}
 
 	if (*args[1] == 'n' && (!args[1][1] || strcmp(args[1], "name") == 0)) {
-		printf(_("cs: Current color scheme is '%s'\n"),
-			cur_cscheme ? cur_cscheme : "?");
+		printf(_("cs: The current color scheme is '%s'\n"),
+			get_color_scheme_name());
 		return FUNC_SUCCESS;
 	}
 
@@ -3379,14 +3391,7 @@ print_highlight_colors(void)
 static void
 print_color_scheme_name(void)
 {
-	printf(_("%sColor scheme: "), BOLD);
-
-	if (cur_cscheme && *cur_cscheme) {
-		printf("%s%s\n\n", cur_cscheme, df_c);
-	} else {
-		printf(_("Built-in (%d colors)%s\n\n"),
-			term_caps.color >= 256 ? 256 : 8, df_c);
-	}
+	printf(_("%sColor scheme: %s%s\n\n"), BOLD, get_color_scheme_name(), df_c);
 }
 
 /* List color codes for file types used by the program. */
