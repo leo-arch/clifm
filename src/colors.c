@@ -3371,6 +3371,19 @@ print_highlight_colors(void)
 #endif /* !_NO_HIGHLIGHT */
 }
 
+static void
+print_color_scheme_name(void)
+{
+	printf(_("%sColor scheme: "), BOLD);
+
+	if (cur_cscheme && *cur_cscheme) {
+		printf("%s%s\n\n", cur_cscheme, df_c);
+	} else {
+		printf(_("Built-in (%d colors)%s\n\n"),
+			term_caps.color >= 256 ? 256 : 8, df_c);
+	}
+}
+
 /* List color codes for file types used by the program. */
 void
 color_codes(void)
@@ -3380,6 +3393,7 @@ color_codes(void)
 		return;
 	}
 
+	print_color_scheme_name();
 	print_file_type_colors();
 	print_ext_colors();
 	print_prop_colors();
