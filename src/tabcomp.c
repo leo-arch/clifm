@@ -1842,7 +1842,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	set_finder_paths();
 
 	/* Store possible completions in FINDER_IN_FILE to pass them to the finder. */
-	size_t num_matches = store_completions(matches);
+	const size_t num_matches = store_completions(matches);
 	if (num_matches == (size_t)-1)
 		return FUNC_FAILURE;
 
@@ -1859,7 +1859,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	size_t height = 0;
 
 	if (fzf_height_set == 0 || tabmode == FNF_TAB) {
-		size_t max_height = set_fzf_max_win_height();
+		const size_t max_height = set_fzf_max_win_height();
 		height = (num_matches + 1 > max_height) ? max_height : num_matches;
 	}
 
@@ -1881,7 +1881,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	char *deq = q ? (strchr(q, '\\') ? unescape_str(q, 0) : q) : (char *)NULL;
 
 	/* Run the finder application and store the ouput into FINDER_OUT_FILE. */
-	int ret = run_finder(height, finder_offset, deq, multi);
+	const int ret = run_finder(height, finder_offset, deq, multi);
 
 	if (deq && deq != q)
 		free(deq);

@@ -92,10 +92,10 @@ define FTYPE_SOCK=1;35            # Socket
 define FTYPE_CAP=30;41            # File with capabilities
 define FTYPE_DOOR=35              # Door (Solaris only)
 define FTYPE_SUID=37;41           # SUID file
-define FTYPE_SGID=30;43           # SGID file
-define FTYPE_OW=34;42             # Other-writable
+define FTYPE_SGID=37;43           # SGID file
+define FTYPE_OW=34;40             # Other-writable
 define FTYPE_STICKY_NOT_OW=37;44  # Sticky (not other-writable)
-define FTYPE_STICKY_OW=30;42      # Sticky and other-writable
+define FTYPE_STICKY_OW=37;42      # Sticky and other-writable
 define FTYPE_UNKNOWN=4;31;47      # Unknown file type
 define FTYPE_NON_STAT=4;2;37      # Non-stat'able file
 
