@@ -1,4 +1,4 @@
-# Theme file for Clifm
+# Theme file for CliFM
 # Theme name: nord (based on https://github.com/arcticicestudio/nord-xresources)
 # Author: L. Abramovich
 # License: GPL3
@@ -29,6 +29,7 @@ define M=#b48ead                 # Magenta
 define BM=#b48ead-1              # Bold magenta
 define DM=#b48ead-2              # Dimmed magenta
 define UM=#b48ead-4              # Underlined magenta
+define RM=#b48ead-7              # Underlined magenta
 
 define C=#8fbcbb                 # Cyan
 define BC=#8fbcbb-1              # Bold cyan
@@ -37,18 +38,22 @@ define RC=#8fbcbb-7              # Reverse cyan
 define UDC=4;02;38;2;143;188;187 # Underlined dimmed cyan
 define BDC=1;02;38;2;143;188;187 # Bold dimmed cyan
 
+define O=38;2;208;135;112        # Orange
+define BO=1;38;2;208;135;112     # Bold orange
+
 define W=#d8dee9                 # White
 define DW=#d8dee9-2              # Dimmed white
 define BDW=1;38;2;216;222;233    # Bold dimmed white
+define UDW=4;2;38;2;216;222;233  # Underlined dimmed white
 
 define RW=38;2;191;97;106;48;2;216;222;233     # Red on white
 define BW=38;2;129;161;193;48;2;216;222;233    # Blue on white
 define WR=38;2;216;222;233;191;97;106          # White on red
 define KY=38;2;46;52;64;48;2;235;203;139       # Black on yellow
 define KR=38;2;46;52;64;48;2;191;97;106        # Black on red
-define KG=38;2;46;52;64;48;2;163;190;140       # Black on green
-define BlGr=38;2;129;161;193;48;2;163;190;140  # Blue on gray
 define WB=38;2;216;222;233;48;2;129;161;193    # White on blue
+define WG=1;38;2;216;222;233;48;2;163;190;140    # White on green
+define BlGr=38;2;129;161;193;48;2;67;76;94   # Blue on gray
 
 define ARCHIVE=#8fbcbb-1 # Bold cyan
 define AUDIO=#d08770-1   # Bold orange
@@ -60,7 +65,7 @@ define MARKUP=1;38;2;208;135;112;48;2;67;76;94 # Orange on gray
 define TEMP=#d8dee9-2    # Dimmed white
 define VIDEO=#b48ead-1   # Bold magenta
 
-FiletypeColors="bd=BY:ca=KR:cd=BDW:di=BB:ed=DB:ee=G:ef=DW:ex=BG:fi=W:ln=BG:mh=RC:nd=BR:nf=DR:no=RW:or=RG:ow=BlGr:pi=M:sg=KY:so=BM:st=WB:su=WR:tw=KG:uf=BW:"
+FiletypeColors="bd=BY:ca=KR:cd=BDW:di=BB:ed=DB:ee=O:ef=DW:ex=BO:fi=W:ln=BG:mh=RC:nd=BR:nf=DR:no=RW:or=RG:ow=BlGr:pi=RM:sg=KY:so=RM:st=WB:su=WR:tw=WG:uf=UDW:"
 
 InterfaceColors="db=Y:dd=:de=C:df=D:dg=M:dk=R:dl=BDC:dn=DW:do=C:dp=M:dr=M:dw=R:dxd=G:dxr=C:dz=:el=BDC:em=BR:fc=DB:hb=C:hc=DR:hd=C:he=C:hn=D:hp=C:hq=Y:hr=R:hs=G:hv=G:hw=R:lc=G:li=BG:mi=BC:nm=BG:sb=DY:sc=DR:sf=UDC:sh=DW:si=BB:sp=DR:sx=DG:ti=BC:ts=UM:tt=BDC:tx=D:ws1=B:ws2=R:ws3=Y:ws4=G:ws5=C:ws6=C:ws7=C:ws8=C:wc=BC:wm=BY:xs=G:xf=BR:"
 
