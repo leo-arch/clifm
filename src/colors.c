@@ -1028,7 +1028,7 @@ edit_colorscheme(char *app)
 	struct stat attr;
 	char file[PATH_MAX + 1];
 
-	snprintf(file, sizeof(file), "%s/%s.clifm", colors_dir, cur_cscheme); /* NOLINT */
+	snprintf(file, sizeof(file), "%s/%s.clifm", colors_dir, cur_cscheme);
 	if (stat(file, &attr) == -1
 	&& import_color_scheme(cur_cscheme) != FUNC_SUCCESS) {
 		xerror(_("cs: '%s': No such color scheme\n"), cur_cscheme);
@@ -1267,9 +1267,9 @@ set_color(char *color, char var[], const int flag)
 	}
 
 	if (flag == RL_NO_PRINTABLE)
-		snprintf(var, MAX_COLOR + 2, "\001\x1b[%sm\002", s ? s : p); /* NOLINT */
+		snprintf(var, MAX_COLOR + 2, "\001\x1b[%sm\002", s ? s : p);
 	else
-		snprintf(var, MAX_COLOR - 1, "\x1b[0;%sm", s ? s : p); /* NOLINT */
+		snprintf(var, MAX_COLOR - 1, "\x1b[0;%sm", s ? s : p);
 }
 
 static void
@@ -2417,7 +2417,7 @@ read_color_scheme_file(const char *colorscheme, char **filecolors,
 	*colorscheme_file = '\0';
 	if (config_ok == 1 && colors_dir) {
 		snprintf(colorscheme_file, sizeof(colorscheme_file), "%s/%s.clifm",
-			colors_dir, colorscheme ? colorscheme : "default"); /* NOLINT */
+			colors_dir, colorscheme ? colorscheme : "default");
 	}
 
 	/* If not in local dir, check system data dir as well */
@@ -2888,9 +2888,9 @@ colors_list(char *ent, const int eln, const int pad, const int new_line)
 	*index = '\0';
 
 	if (eln > 0)
-		snprintf(index, sizeof(index), "%d ", eln); /* NOLINT */
+		snprintf(index, sizeof(index), "%d ", eln);
 	else if (eln == -1)
-		snprintf(index, sizeof(index), "? "); /* NOLINT */
+		snprintf(index, sizeof(index), "? ");
 	else
 		index[0] = '\0';
 
@@ -3010,7 +3010,7 @@ get_colorschemes(void)
 
 	char sys_colors_dir[PATH_MAX + 1];
 	snprintf(sys_colors_dir, sizeof(sys_colors_dir), "%s/%s/colors",
-		data_dir, PROGRAM_NAME); /* NOLINT */
+		data_dir, PROGRAM_NAME);
 
 	if (stat(sys_colors_dir, &attr) == -1)
 		goto END;

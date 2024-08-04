@@ -219,7 +219,7 @@ dir_size(char *dir, const int size_in_bytes, int *status)
 
 	char file[PATH_MAX + 1];
 	snprintf(file, sizeof(file), "%s/%s", xargs.stealth_mode == 1
-		? P_tmpdir : tmp_dir, TMP_FILENAME); /* NOLINT */
+		? P_tmpdir : tmp_dir, TMP_FILENAME);
 
 	int fd = mkstemp(file);
 	if (fd == -1)

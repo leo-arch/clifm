@@ -981,7 +981,7 @@ get_cmd_path(const char *cmd)
 		&& *paths[i].path == '.' && !paths[i].path[1])
 			continue;
 
-		snprintf(cmd_path, PATH_MAX + 1, "%s/%s", paths[i].path, cmd); /* NOLINT */
+		snprintf(cmd_path, PATH_MAX + 1, "%s/%s", paths[i].path, cmd);
 		if (access(cmd_path, X_OK) == 0)
 			return cmd_path;
 	}

@@ -142,7 +142,7 @@ run_action(char *action, char **args)
 		return FUNC_FAILURE;
 
 	char fifo_path[PATH_MAX + 1];
-	snprintf(fifo_path, sizeof(fifo_path), "%s/.pipe.%s", tmp_dir, rand_ext); /* NOLINT */
+	snprintf(fifo_path, sizeof(fifo_path), "%s/.pipe.%s", tmp_dir, rand_ext);
 	free(rand_ext);
 
 	errno = 0;

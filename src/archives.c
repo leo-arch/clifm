@@ -184,7 +184,7 @@ extract_iso(char *file)
 	/* 7z x -oDIR FILE (use FILE as DIR) */
 	const size_t flen = strlen(file);
 	char *o_option = xnmalloc(flen + 7, sizeof(char));
-	snprintf(o_option, flen + 7, "-o%s.dir", file); /* NOLINT */
+	snprintf(o_option, flen + 7, "-o%s.dir", file);
 
 	/* Construct and execute cmd */
 	char *cmd[] = {"7z", "x", o_option, file, NULL};
@@ -207,7 +207,7 @@ extract_iso_to_dir(char *file)
 
 	const size_t len = strlen(ext_path);
 	char *o_option = xnmalloc(len + 3, sizeof(char));
-	snprintf(o_option, len + 3, "-o%s", ext_path); /* NOLINT */
+	snprintf(o_option, len + 3, "-o%s", ext_path);
 	free(ext_path);
 
 	/* Construct and execute cmd */
@@ -262,7 +262,7 @@ create_mountpoint(char *file)
 	} else {
 		const size_t len = config_dir_len + strlen(tfile) + 9;
 		mountpoint = xnmalloc(len, sizeof(char));
-		snprintf(mountpoint, len, "%s/mounts/%s", config_dir, tfile); /* NOLINT */
+		snprintf(mountpoint, len, "%s/mounts/%s", config_dir, tfile);
 	}
 
 	char *dir_cmd[] = {"mkdir", "-pm700", mountpoint, NULL};
@@ -375,11 +375,11 @@ create_iso_from_block_dev(char *in_file, char *out_file)
 {
 	size_t len = strlen(in_file) + 4;
 	char *if_option = xnmalloc(len, sizeof(char));
-	snprintf(if_option, len, "if=%s", in_file); /* NOLINT */
+	snprintf(if_option, len, "if=%s", in_file);
 
 	len = strlen(out_file) + 4;
 	char *of_option = xnmalloc(len, sizeof(char));
-	snprintf(of_option, len, "of=%s", out_file); /* NOLINT */
+	snprintf(of_option, len, "of=%s", out_file);
 
 	char *sudo = get_sudo_path();
 	if (!sudo) {
@@ -666,7 +666,7 @@ add_default_extension(char *name)
 
 	char *t = savestring(name, name_len);
 	name = xnrealloc(name, name_len + 8, sizeof(char));
-	snprintf(name, name_len + 8, "%s.tar.gz", t); /* NOLINT */
+	snprintf(name, name_len + 8, "%s.tar.gz", t);
 	free(t);
 
 	return name;
@@ -850,7 +850,7 @@ compress_others(char **args, char *name)
 	tcmd[1] = savestring("-a", 2);
 	const size_t len = strlen(name) + (!ext_ok ? 7 : 0) + 1;
 	tcmd[2] = xnmalloc(len, sizeof(char *));
-	snprintf(tcmd[2], len, "%s%s", name, !ext_ok ? ".tar.gz" : ""); /* NOLINT */
+	snprintf(tcmd[2], len, "%s%s", name, !ext_ok ? ".tar.gz" : "");
 	n += 3;
 
 	for (i = 1; args[i]; i++) {
@@ -1168,7 +1168,7 @@ list_mounted_files(char *mountpoint)
 	}
 
 	free(workspaces[cur_ws].path);
-	workspaces[cur_ws].path = savestring(mountpoint, strlen(mountpoint)); /* NOLINT */
+	workspaces[cur_ws].path = savestring(mountpoint, strlen(mountpoint));
 	add_to_jumpdb(workspaces[cur_ws].path);
 
 	int exit_status = FUNC_SUCCESS;
