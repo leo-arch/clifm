@@ -100,7 +100,9 @@ int
 umask_function(char *arg)
 {
 	if (!arg) {
-		const mode_t old_umask = umask(0);
+		const mode_t old_umask = umask(0); /* flawfinder: ignore */
+		/* umask is set to zero, and then changed back, only to get the
+		 * current value. */
 		printf("%04o\n", old_umask);
 		umask(old_umask);
 		return FUNC_SUCCESS;
