@@ -1,4 +1,4 @@
-# Theme file for Clifm
+# Theme file for CliFM
 # Theme name: gruvbox (based on https://github.com/morhetz/gruvbox)
 # Author: L. Abramovich
 # License: GPL3
@@ -39,6 +39,7 @@ define M=#b16286               # Magenta
 define BM=#b16286-1            # Bold magenta
 define DM=#b16286-2            # Dimmed magenta
 define UM=#b16286-4            # Underlined magenta
+define RM=#b16286-7            # Reversemagenta
 
 define C=#83a598               # Cyan
 define BC=#83a598-1            # Bold cyan
@@ -57,6 +58,9 @@ define BGy=#a89984-1           # Bold gray
 define DGy=#a89984-2           # Dimmed gray
 
 define DW=#ebdbb2-2            # Dimmed white
+define UW=#ebdbb2-4            # Dimmed white
+define UDW=4;2;38;2;235;219;178 # Underlined dimmed white
+
 
 define KO=38;2;40;40;40;48;2;214;93;14        # Black on orange
 define WK=38;2;235;219;178;48;2;40;40;40      # White on black
@@ -79,7 +83,7 @@ define MARKUP=#d79921    # Yellow
 define TEMP=#ebdbb2-2    # Dimmed white
 define VIDEO=#b8bb26-1   # Bold green
 
-FiletypeColors="bd=BY:ca=KR:cd=IO:di=BA:ed=A:ee=GK:ef=DW:ex=BGK:fi=D:ln=BC:mh=RC:nd=BR:nf=R:no=WK:or=C:ow=BG:pi=M:sg=KO:so=BM:st=WB:su=WR:tw=IWB:uf=WR:"
+FiletypeColors="bd=BY:ca=KR:cd=IO:di=BA:ed=A:ee=GK:ef=DW:ex=BGK:fi=D:ln=BC:mh=RC:nd=BR:nf=R:no=WK:or=C:ow=BG:pi=RM:sg=KO:so=RM:st=WB:su=WR:tw=IWB:uf=UDW:"
 
 InterfaceColors="db=O:dd=:de=C:df=D:dg=Y:dk=R:dl=B:dn=DW:do=C:dp=M:dr=Y:dw=R:dxd=G:dxr=C:dz=:el=BR2:em=BR:fc=DGy:hb=C:hc=DR:hd=C:he=C:hn=D:hp=C:hq=Y:hr=R:hs=G:hv=G:lc=BC:li=BG:mi=BC:nm=BG:sb=DY:sc=DR:sd=DW:sf=UDC:sh=DW:si=BB:sp=DR:sx=DG:ti=BC:ts=UM:tt=BDC:tx=D:wc=BC:wm=BY:ws1=B:ws2=R:ws3=Y:ws4=G:ws5=C:ws6=C:ws7=C:ws8=C:xf=BR:xs=G:"
 
