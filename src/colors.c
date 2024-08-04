@@ -1124,7 +1124,7 @@ get_color_scheme_name(void)
 static int
 print_colors_tip(const int stealth)
 {
-	xerror(_("%s: %s\nTIP: To edit the "
+	xerror(_("%s: %s.\nTIP: To edit the "
 		"color scheme use the following environment "
 		"variables: CLIFM_FILE_COLORS, CLIFM_IFACE_COLORS, "
 		"and CLIFM_EXT_COLORS.\nExample:\n\n"
@@ -1141,8 +1141,8 @@ cschemes_function(char **args)
 #ifdef CLIFM_SUCKLESS
 	UNUSED(args);
 	print_colors_tip(0);
-	printf("\nYou can also edit 'settings.h' in the source code and "
-		"recompile.\n");
+	fputs("\nYou can also edit 'settings.h' in the source code and "
+		"recompile.\n", stderr);
 	return FUNC_FAILURE;
 #else
 	if (!args)
