@@ -1,4 +1,4 @@
-# Theme file for Clifm
+# Theme file for CliFM
 # Theme name: molokai (based on vivid(1))
 # Author: L. Abramovich
 # License: GPL3
@@ -70,7 +70,7 @@ define MARKUP=#e2d139    # Yellow2
 define TEMP=2;37         # Dimmed white (4-bit)
 define VIDEO=#fd971f-1   # Bold orange
 
-FiletypeColors="bd=BK:ca=KR:cd=BD:di=B:ed=DB:ef=2:ex=BR:fi=0:ln=R:mh=RC:nd=UBR:nf=UR:no=UBlR:or=UKM:ow=BlGr:pi=KB:sg=KY:so=KM:st=KG:su=WR:tw=RBl:uf=UBlR:"
+FiletypeColors="bd=BD:ca=KR:cd=BD:di=B:ed=DB:ef=2:ex=BR:fi=0:ln=R:mh=RC:nd=UBR:nf=UR:no=UBlR:or=UKM:ow=BK:pi=KB:sg=KY:so=KM:st=KG:su=WR:tw=RBl:uf=UBlR:"
 
 InterfaceColors="db=Y:dd=:de=C:df=D:dg=O:dk=R:dl=DW:dn=DW:do=C:dp=M:dr=Y:dw=R:dxd=G:dxr=C:dz=:el=O:em=BR:fc=DB:hb=C:hc=DR:hd=C:he=C:hn=D:hp=C:hq=Y:hr=R:hs=G:hv=G:lc=R:li=BG:mi=BC:nm=BG:sb=DY:sc=DR:sf=UDC:sh=DW:si=BB:sp=DR:sx=DG:ti=BC:ts=UM:tt=BDC:tx=D:wc=BC:wm=BY:ws1=B:ws2=R:ws3=Y:ws4=G:ws5=C:ws6=C:ws7=C:ws8=C:xf=BR:xs=G:"
 
