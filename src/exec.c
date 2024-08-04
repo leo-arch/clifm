@@ -2596,7 +2596,7 @@ exec_cmd(char **comm)
 	}
 
 	/* These functions just print stuff, so that the value of exit_code
-	 * is always zero, that is to say, success */
+	 * is always zero, that is to say, success. */
 	else if (*comm[0] == 'c' && strcmp(comm[0], "colors") == 0) {
 		colors_function(comm[1]); return FUNC_SUCCESS;
 	}

@@ -222,6 +222,8 @@ operation).\n\n\
     cs name (or 'cs n')\n\
 - List available color schemes\n\
     cs (or 'cs <TAB>')\n\
+- Preview the current color scheme\n\
+    cs preview (or 'cs p')\n\
 - Edit the current color scheme\n\
     cs edit\n\
 - Edit the current color scheme using vi\n\

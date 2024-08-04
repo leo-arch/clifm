@@ -1140,6 +1140,11 @@ cschemes_function(char **args)
 	if (*args[1] == 'e' && (!args[1][1] || strcmp(args[1], "edit") == 0))
 		return edit_colorscheme(args[2]);
 
+	if (*args[1] == 'p' && (!args[1][1] || strcmp(args[1], "preview") == 0)) {
+		color_codes();
+		return FUNC_SUCCESS;
+	}
+
 	if (*args[1] == 'n' && (!args[1][1] || strcmp(args[1], "name") == 0)) {
 		printf(_("cs: Current color scheme is '%s'\n"),
 			cur_cscheme ? cur_cscheme : "?");
