@@ -124,7 +124,7 @@ print_tips(const int all)
 		"Create aliases to easily run your preferred commands (F10)",
 		"Open and edit the configuration file: 'config' or F10",
 		"Get a brief description for each Clifm command: 'cmd<TAB>'",
-		"Print the currently used color codes: 'colors'",
+		"Preview the current color scheme: 'cs preview'",
 		"Toggle hidden files on/off: 'hh' or Alt-.",
 		"Toggle follow-links (long view only) on/off: 'k' or Alt-+",
 		"Go to the root directory: Alt-r",
