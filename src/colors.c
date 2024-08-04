@@ -1887,25 +1887,25 @@ set_extra_colors(void)
 		xstrsncpy(nd_c, di_c, sizeof(nd_c)); /* No perm dir */
 	} else {
 		xstrsncpy(ed_c, term_caps.color >= 256
-			? DEF_DI_C256 : DEF_DI_C, sizeof(ed_c));
+			? DEF_DI_C256 : DEF_DI_C, sizeof(ed_c)); /* NOLINT */
 		xstrsncpy(nd_c, term_caps.color >= 256
-			? DEF_DI_C256 : DEF_DI_C, sizeof(nd_c));
+			? DEF_DI_C256 : DEF_DI_C, sizeof(nd_c)); /* NOLINT */
 	}
 
 	if (*ex_c)
 		xstrsncpy(ee_c, ex_c, sizeof(ee_c)); /* Empty executable */
 	else
 		xstrsncpy(ee_c, term_caps.color >= 256
-			? DEF_EX_C256 : DEF_EX_C, sizeof(ee_c));
+			? DEF_EX_C256 : DEF_EX_C, sizeof(ee_c)); /* NOLINT */
 
 	if (*fi_c) {
 		xstrsncpy(ef_c, fi_c, sizeof(ef_c)); /* Empty file */
 		xstrsncpy(nf_c, fi_c, sizeof(nf_c)); /* No perm file */
 	} else {
 		xstrsncpy(ef_c, term_caps.color >= 256
-			? DEF_FI_C256 : DEF_FI_C, sizeof(ef_c));
+			? DEF_FI_C256 : DEF_FI_C, sizeof(ef_c)); /* NOLINT */
 		xstrsncpy(nf_c, term_caps.color >= 256
-			? DEF_FI_C256 : DEF_FI_C, sizeof(nf_c));
+			? DEF_FI_C256 : DEF_FI_C, sizeof(nf_c)); /* NOLINT */
 	}
 }
 
@@ -2217,11 +2217,11 @@ set_cs_prompt_noti(const char *line)
 		return;
 
 	if (*line == 't' && strncmp(line, "true", 4) == 0)
-		prompt_notif = 1;
+		prompt_notif = 1; /* NOLINT */
 	else if (*line == 'f' && strncmp(line, "false", 5) == 0)
-		prompt_notif = 0;
+		prompt_notif = 0; /* NOLINT */
 	else
-		prompt_notif = DEF_PROMPT_NOTIF;
+		prompt_notif = DEF_PROMPT_NOTIF; /* NOLINT */
 }
 
 static void
@@ -2231,11 +2231,11 @@ set_cs_enable_warning_prompt(const char *line)
 		return;
 
 	if (*line == 't' && strncmp(line, "true", 4) == 0)
-		conf.warning_prompt = 1;
+		conf.warning_prompt = 1; /* NOLINT */
 	else if (*line == 'f' && strncmp(line, "false", 5) == 0)
-		conf.warning_prompt = 0;
+		conf.warning_prompt = 0; /* NOLINT */
 	else
-		conf.warning_prompt = DEF_WARNING_PROMPT;
+		conf.warning_prompt = DEF_WARNING_PROMPT; /* NOLINT */
 }
 
 static void

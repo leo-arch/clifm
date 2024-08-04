@@ -1649,11 +1649,11 @@ load_prompts(void)
 
 		if (*line == 'N' && strncmp(line, "Notifications=", 14) == 0) {
 			if (*ret == 't' && strcmp(ret, "true") == 0)
-				prompts[n].notifications = 1;
+				prompts[n].notifications = 1; /* NOLINT */
 			else if (*ret == 'f' && strcmp(ret, "false") == 0)
-				prompts[n].notifications = 0;
+				prompts[n].notifications = 0; /* NOLINT */
 			else
-				prompts[n].notifications = DEF_PROMPT_NOTIF;
+				prompts[n].notifications = DEF_PROMPT_NOTIF; /* NOLINT */
 			continue;
 		}
 
@@ -1670,11 +1670,11 @@ load_prompts(void)
 
 		if (strncmp(line, "EnableWarningPrompt=", 20) == 0) {
 			if (*ret == 't' && strcmp(ret, "true") == 0)
-				prompts[n].warning_prompt_enabled = 1;
+				prompts[n].warning_prompt_enabled = 1; /* NOLINT */
 			else if (*ret == 'f' && strcmp(ret, "false") == 0)
-				prompts[n].warning_prompt_enabled = 0;
+				prompts[n].warning_prompt_enabled = 0; /* NOLINT */
 			else
-				prompts[n].warning_prompt_enabled = DEF_WARNING_PROMPT;
+				prompts[n].warning_prompt_enabled = DEF_WARNING_PROMPT; /* NOLINT */
 			continue;
 		}
 

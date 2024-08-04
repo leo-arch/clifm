@@ -3508,7 +3508,7 @@ set_fzf_border_type(char *line)
 	}
 
 	if (strncmp(p, "none", 4) == 0)
-		fzf_border_type = 0; /* No vertical border */
+		fzf_border_type = 0;  /* NOLINT *//* No vertical border */
 	else if (strncmp(p, "rounded", 7) == 0
 	|| strncmp(p,  "sharp", 5) == 0
 	|| strncmp(p,  "bold", 4) == 0
@@ -3521,7 +3521,7 @@ set_fzf_border_type(char *line)
 	|| strncmp(p, "right", 5) == 0)
 		fzf_border_type = 1; /* Left or right border */
 	else
-		fzf_border_type = 0; /* No vertical border */
+		fzf_border_type = 0; /* NOLINT *//* No vertical border */
 }
 
 /* Just check if --height, --border, and --preview are set in FZF_DEFAULT_OPTS. */
