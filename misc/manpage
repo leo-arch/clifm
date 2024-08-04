@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Jul 31, 2024" "clifm 1.19.9" "CLIFM Manual"
+.TH "CLIFM" "1" "Aug 4, 2024" "clifm 1.19.9" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -686,7 +686,7 @@ toggle columns on/off.
 show this list of commands. A more convenient way of getting information about \fBclifm\fR commands is via the interactive help plugin (depends on \fIfzf\fR), by default bound to the "ihelp" action name.
 .TP
 .B colors
-print the list of currently used color codes
+preview the current color scheme
 .TP
 .B config \fR[\fIedit\fR [\fIAPP\fR]] [\fIreset\fR, \fIdump\fR]
 Manage the main configuration file.
@@ -699,8 +699,10 @@ The \fIdump\fR subcommand prints the list of settings (as defined in the main co
 .sp
 \fBNOTE\fR: The \fIedit\fR command (though deprecated) can be used as well instead of \fIconfig\fR.
 .TP
-.B cs, colorschemes \fR[\fIedit\fR [\fIAPP\fR]] [\fIn\fR, \fIname\fR] [\fINAME\fR]
-with no arguments, list available color schemes (\fIcs name\fR (or \fIcs n\fR) to print the current color scheme name).
+.B cs, colorschemes \fR[\fIedit\fR [\fIAPP\fR]] [\fIn\fR, \fIname\fR] [\fIp\fR, \fIpreview\fR] [\fINAME\fR]
+with no arguments, list available color schemes (\fIcs name\fR (or \fIcs n\fR) to print the current color scheme name). 
+.sp
+To get a preview of the current color scheme use the \fIpreview\fR subcommand: \fIcs preview\fR.
 .sp
 Use the \fIedit\fR subcommand to open/edit the configuration file of the current color scheme (open with APP if specified or via the default associated application).
 .sp
