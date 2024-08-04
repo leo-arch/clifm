@@ -40,7 +40,7 @@
  * /usr/local/share/clifm/colors/). */
 #define DEF_FILE_COLORS "bd=1;33:ca=30;41:cd=1:di=1;34:ed=2;34:\
 ee=32:ef=2:ex=1;32:fi=0:ln=1;36:mh=30;46:nd=4;1;31:nf=2;4;31:\
-no=31;47:or=2;4;36:ow=34;40:pi=45;37:so=45;37:su=37;41:sg=30;43:st=37;44:\
+no=31;47:or=2;4;36:ow=34;40:pi=4;45;37:so=45;37:su=37;41:sg=30;43:st=37;44:\
 tw=37;42:uf=2;4;37:"
 
 #define DEF_IFACE_COLORS "db=:dd=:de=:df=0:dg=:dk=:dl=2;37:\
@@ -112,7 +112,7 @@ xf=1;31:xs=32:"
 #endif /* __sun */
 #define DEF_OR_C  "\x1b[2;4;36m" /* Orphaned/broken symlink */
 #define DEF_OW_C  "\x1b[34;40m"  /* Other-writable */
-#define DEF_PI_C  "\x1b[45;37m"  /* FIFO/pipe */
+#define DEF_PI_C  "\x1b[4;45;37m"  /* FIFO/pipe */
 #define DEF_SG_C  "\x1b[30;43m"  /* SGID file */
 #define DEF_SO_C  "\x1b[45;37m"  /* Socket */
 #define DEF_ST_C  "\x1b[37;44m"  /* Sticky bit set */
@@ -209,7 +209,7 @@ xf=1;31:xs=32:"
 
 #define DEF_FILE_COLORS_256 "bd=1;38;5;229:ca=30;41:cd=1;38;5;214:di=1;34:\
 ed=2;34:ee=32:ef=2:ex=1;32:fi=0:ln=1;36:mh=7;36:nd=1;31:nf=2;31:no=4;31;47:\
-or=4;2;36:ow=48;5;235;38;5;33:pi=45;37:sg=30;43:so=45;37:st=37;44:su=37;41:\
+or=4;2;36:ow=48;5;235;38;5;33:pi=4;45;37:sg=30;43:so=45;37:st=37;44:su=37;41:\
 tw=37;42:uf=4;2;37:"
 
 #define DEF_IFACE_COLORS_256 "db=:dd=:de=:df=0:dg=35:dk=:dl=38;5;243:dn=:\
@@ -275,7 +275,7 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #endif /* __sun */
 #define DEF_OR_C256  "\x1b[2;4;36m" /* Orphaned/broken symlink */
 #define DEF_OW_C256  "\x1b[48;5;235;38;5;33m"  /* Other-writable */
-#define DEF_PI_C256  "\x1b[45;37m"  /* FIFO/pipe */
+#define DEF_PI_C256  "\x1b[4;45;37m"  /* FIFO/pipe */
 #define DEF_SG_C256  "\x1b[30;43m"  /* SGID file */
 #define DEF_SO_C256  "\x1b[45;37m"  /* Socket */
 #define DEF_ST_C256  "\x1b[37;44m"  /* Sticky bit set */
