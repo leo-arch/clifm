@@ -218,7 +218,7 @@ operation).\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   cs, colorschemes [COLORSCHEME | edit [APP] | n, name]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
-- Print current color scheme\n\
+- Print the name of the current color scheme\n\
     cs name (or 'cs n')\n\
 - List available color schemes\n\
     cs (or 'cs <TAB>')\n\

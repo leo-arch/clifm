@@ -1121,47 +1121,62 @@ get_color_scheme_name(void)
 	return _("built-in (8 colors)");
 }
 
+static int
+print_colors_tip(const int stealth)
+{
+	xerror(_("%s: %s\nTIP: To edit the "
+		"color scheme use the following environment "
+		"variables: CLIFM_FILE_COLORS, CLIFM_IFACE_COLORS, "
+		"and CLIFM_EXT_COLORS.\nExample:\n\n"
+		"CLIFM_FILE_COLORS=\"di=31:ln=33:\" CLIFM_IFACE_COLORS=\"el=35:fc=34:\" "
+		"CLIFM_EXT_COLORS=\"*.c=1;33:*.odt=4;35:\" clifm\n"),
+		PROGRAM_NAME, stealth == 1 ? STEALTH_DISABLED : NOT_AVAILABLE);
+	return FUNC_FAILURE;
+}
+
 int
 cschemes_function(char **args)
 {
 #ifdef CLIFM_SUCKLESS
 	UNUSED(args);
-	printf("%s: colors: %s. Edit 'settings.h' in the source code "
-		"and recompile.\n", PROGRAM_NAME, NOT_AVAILABLE);
+	print_colors_tip(0);
+	printf("\nYou can also edit 'settings.h' in the source code and "
+		"recompile.\n");
 	return FUNC_FAILURE;
 #else
-	if (xargs.stealth_mode == 1) {
-		xerror(_("%s: colors: %s\nTIP: To change the "
-			"current color scheme use the following environment "
-			"variables: CLIFM_FILE_COLORS, CLIFM_IFACE_COLORS, "
-			"and CLIFM_EXT_COLORS\n"), PROGRAM_NAME, STEALTH_DISABLED);
+	if (!args)
 		return FUNC_FAILURE;
+
+	if (args[1] && *args[1] == 'p' && (!args[1][1]
+	|| strcmp(args[1], "preview") == 0)) {
+		color_codes();
+		return FUNC_SUCCESS;
 	}
+
+	if (args[1] && *args[1] == 'n' && (!args[1][1]
+	|| strcmp(args[1], "name") == 0)) {
+		printf(_("Current color scheme: '%s'\n"),
+			get_color_scheme_name());
+		return FUNC_SUCCESS;
+	}
+
+	if (args[1] && IS_HELP(args[1])) {
+		puts(_(CS_USAGE));
+		return FUNC_SUCCESS;
+	}
+
+	if (xargs.stealth_mode == 1)
+		return print_colors_tip(1);
 
 	if (conf.colorize == 0) {
 		printf(_("%s: Colors are disabled\n"), PROGRAM_NAME);
 		return FUNC_FAILURE;
 	}
 
-	if (!args) return FUNC_FAILURE;
-
 	if (!args[1]) return list_colorschemes();
-
-	if (IS_HELP(args[1])) { puts(_(CS_USAGE)); return FUNC_SUCCESS;	}
 
 	if (*args[1] == 'e' && (!args[1][1] || strcmp(args[1], "edit") == 0))
 		return edit_colorscheme(args[2]);
-
-	if (*args[1] == 'p' && (!args[1][1] || strcmp(args[1], "preview") == 0)) {
-		color_codes();
-		return FUNC_SUCCESS;
-	}
-
-	if (*args[1] == 'n' && (!args[1][1] || strcmp(args[1], "name") == 0)) {
-		printf(_("cs: The current color scheme is '%s'\n"),
-			get_color_scheme_name());
-		return FUNC_SUCCESS;
-	}
 
 	return set_colorscheme(args[1]);
 #endif /* CLIFM_SUCKLESS */
