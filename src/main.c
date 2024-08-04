@@ -1189,7 +1189,7 @@ main(int argc, char *argv[])
 	}
 
 	/* Make sure all initialization is made with restrictive permissions. */
-	const mode_t old_mask = umask(0077);
+	const mode_t old_mask = umask(0077); /* flawfinder: ignore */
 
 	check_term(); /* Let's check terminal capabilities. */
 

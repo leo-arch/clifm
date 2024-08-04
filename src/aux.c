@@ -636,7 +636,7 @@ gen_date_suffix(const struct tm tm)
 int
 xmkdir(char *dir, const mode_t mode)
 {
-	mode_t old_mask = umask(0077);
+	mode_t old_mask = umask(0077); /* flawfinder: ignore */
 	int ret = mkdirat(XAT_FDCWD, dir, mode);
 	umask(old_mask);
 

@@ -903,7 +903,7 @@ ctrl-d:deselect-all,ctrl-t:toggle-all" : "",
 
 	const int dr = (flags & DELAYED_REFRESH) ? 1 : 0;
 	flags &= ~DELAYED_REFRESH;
-	const mode_t old_mask = umask(0077);
+	const mode_t old_mask = umask(0077); /* flawfinder: ignore */
 	const int ret = launch_execl(cmd);
 	umask(old_mask);
 

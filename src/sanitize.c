@@ -221,7 +221,7 @@ xsecure_env(const int mode)
 	sanitize_file_descriptors();
 	disable_coredumps();
 	drop_privs();
-	umask(0077);
+	umask(0077); /* flawfinder: ignore */
 
 	char *display = (char *)NULL;
 	char *wayland_display = (char *)NULL;

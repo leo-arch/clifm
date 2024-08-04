@@ -786,7 +786,7 @@ import_from_data_dir(const char *src_filename, char *dest)
 	if (stat(sys_file, &attr) == -1)
 		return FUNC_FAILURE;
 
-	const mode_t old_umask = umask(0177);
+	const mode_t old_umask = umask(0177); /* flawfinder: ignore */
 	char *cmd[] = {"cp", "--", sys_file, dest, NULL};
 	int ret = launch_execv(cmd, FOREGROUND, E_NOSTDERR);
 	umask(old_umask);
