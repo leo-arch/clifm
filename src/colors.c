@@ -1129,7 +1129,8 @@ print_colors_tip(const int stealth)
 		"variables: CLIFM_FILE_COLORS, CLIFM_IFACE_COLORS, "
 		"and CLIFM_EXT_COLORS.\nExample:\n\n"
 		"CLIFM_FILE_COLORS=\"di=31:ln=33:\" CLIFM_IFACE_COLORS=\"el=35:fc=34:\" "
-		"CLIFM_EXT_COLORS=\"*.c=1;33:*.odt=4;35:\" clifm\n"),
+		"CLIFM_EXT_COLORS=\"*.c=1;33:*.odt=4;35:\" clifm\n\n"
+		"Consult the manpage for more information.\n"),
 		PROGRAM_NAME, stealth == 1 ? STEALTH_DISABLED : NOT_AVAILABLE);
 	return FUNC_FAILURE;
 }
