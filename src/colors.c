@@ -3051,7 +3051,7 @@ END:
 #endif /* CLIFM_SUCKLESS */
 
 static size_t
-get_largest_ext_name(void)
+get_longest_ext_name(void)
 {
 	size_t i;
 	size_t l = 0;
@@ -3068,7 +3068,7 @@ print_ext_colors(void)
 {
 	printf(_("\n%sFile extensions%s\n\n"), BOLD, df_c);
 
-	const int l = (int)get_largest_ext_name() + 2; /* +2 == ".*"*/
+	const int l = (int)get_longest_ext_name() + 2; /* +2 == ".*" */
 	int cols = term_cols / (l + 2); /* +2 == 2 ending spaces */
 	if (cols <= 0)
 		cols = 1;

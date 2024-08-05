@@ -339,17 +339,17 @@ edit_actions(char *app)
 }
 
 static size_t
-get_largest_action_name(void)
+get_longest_action_name(void)
 {
 	int i = (int)actions_n;
-	size_t largest = 0;
+	size_t l = 0;
 	while (--i >= 0) {
 		size_t len = strlen(usr_actions[i].name);
-		if (len > largest)
-			largest = len;
+		if (len > l)
+			l = len;
 	}
 
-	return largest;
+	return l;
 }
 
 int
@@ -360,10 +360,10 @@ actions_function(char **args)
 			/* Just list available actions */
 			puts(_("To run a plugin just enter its action name\n"
 				"Example: enter '//' to run the rgfind plugin"));
-			size_t i, largest = get_largest_action_name();
+			size_t i, longest_name_len = get_longest_action_name();
 			for (i = 0; i < actions_n; i++) {
-				printf("%-*s %s->%s %s\n", (int)largest, usr_actions[i].name,
-				    mi_c, df_c, usr_actions[i].value);
+				printf("%-*s %s->%s %s\n", (int)longest_name_len,
+					usr_actions[i].name, mi_c, df_c, usr_actions[i].value);
 			}
 			return FUNC_SUCCESS;
 		}

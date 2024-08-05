@@ -112,14 +112,13 @@
 
 #define ENTRY_N 64
 
-/* Amount of digits of the files counter of the longest directory */
-static size_t longest_fc = 0;
-static size_t longest_name = 0;
-static int pager_bk = 0;
-static int dir_out = 0;
-static int pager_quit = 0;
-static int pager_help = 0;
-static int long_view_bk = UNSET;
+/* Information about the longest file name in the curent list of files. */
+struct longest_t {
+	size_t fc_len;   /* Length of the files counter (if a directory). */
+	size_t name_len; /* Length of the longest name. */
+};
+
+static struct longest_t longest;
 
 struct checks_t {
 	int autocmd_files;
@@ -136,6 +135,12 @@ struct checks_t {
 };
 
 static struct checks_t checks;
+
+static int pager_bk = 0;
+static int dir_out = 0;
+static int pager_quit = 0;
+static int pager_help = 0;
+static int long_view_bk = UNSET;
 
 /* Struct to store information about trimmed file names. Used only when
  * Unicode is disabled */
@@ -844,20 +849,20 @@ get_longest_filename(const filesn_t n, const size_t pad)
 			}
 		}
 
-		if (total_len > longest_name) {
+		if (total_len > longest.name_len) {
 			longest_index = i;
 			if (conf.listing_mode == VERTLIST || max_files == UNSET
 			|| i < c_max_files)
-				longest_name = total_len;
+				longest.name_len = total_len;
 		}
 	}
 
 	if (conf.long_view == 0 && conf.icons == 1 && conf.columned == 1)
-		longest_name += 3;
+		longest.name_len += 3;
 
-	/* longest_fc stores the amount of digits taken by the files counter of
+	/* LONGEST.FC_LEN stores the amount of digits taken by the files counter of
 	 * the longest file name, provided it is a directory.
-	 * We use this to trim file names up to MAX_NAME_LEN + LONGEST_FC, so
+	 * We use this to trim file names up to MAX_NAME_LEN + LONGEST.FC_LEN, so
 	 * that we can make use of the space taken by the files counter.
 	 * Example:
 	 *    longest_dirname/13
@@ -867,7 +872,7 @@ get_longest_filename(const filesn_t n, const size_t pad)
 	 *    very_long_file_~
 	 * */
 
-	longest_fc = 0;
+	longest.fc_len = 0;
 	if (conf.max_name_len != UNSET && longest_index != -1
 	&& file_info[longest_index].dir == 1
 	&& file_info[longest_index].filesn > 0 && conf.files_counter == 1) {
@@ -876,39 +881,39 @@ get_longest_filename(const filesn_t n, const size_t pad)
 		 * between the trimmed file name and the next column is too
 		 * tight (only one). By not adding it we get an extra space
 		 * to relax a bit the space between columns. */
-/*		longest_fc = DIGINUM(file_info[longest_index].filesn) + 1; */
-		longest_fc = DIGINUM(file_info[longest_index].filesn);
-		const size_t t = pad + c_max_name_len + 1 + longest_fc;
-		if (t > longest_name)
-			longest_fc -= t - longest_name;
-		if ((int)longest_fc < 0)
-			longest_fc = 0;
+/*		longest.fc_len = DIGINUM(file_info[longest_index].filesn) + 1; */
+		longest.fc_len = DIGINUM(file_info[longest_index].filesn);
+		const size_t t = pad + c_max_name_len + 1 + longest.fc_len;
+		if (t > longest.name_len)
+			longest.fc_len -= t - longest.name_len;
+		if ((int)longest.fc_len < 0)
+			longest.fc_len = 0;
 	}
 }
 
 /* Set a few extra properties needed for long view mode */
 static void
-set_long_attribs(const filesn_t n, const struct stat *attr)
+set_long_attribs(const filesn_t n, const struct stat *a)
 {
 	if (conf.light_mode == 1) {
 		switch (prop_fields.time) {
-		case PROP_TIME_ACCESS: file_info[n].ltime = attr->st_atime; break;
-		case PROP_TIME_CHANGE: file_info[n].ltime = attr->st_ctime; break;
-		case PROP_TIME_MOD: file_info[n].ltime = attr->st_mtime; break;
+		case PROP_TIME_ACCESS: file_info[n].ltime = a->st_atime; break;
+		case PROP_TIME_CHANGE: file_info[n].ltime = a->st_ctime; break;
+		case PROP_TIME_MOD: file_info[n].ltime = a->st_mtime; break; /* NOLINT */
 		case PROP_TIME_BIRTH:
 #ifdef ST_BTIME_LIGHT
-			file_info[n].ltime = attr->ST_BTIME.tv_sec; break;
+			file_info[n].ltime = a->ST_BTIME.tv_sec; break;
 #else
-			file_info[n].ltime = attr->st_mtime; break;
+			file_info[n].ltime = a->st_mtime; break;
 #endif /* ST_BTIME_LIGHT */
-		default: file_info[n].ltime = attr->st_mtime; break;
+		default: file_info[n].ltime = a->st_mtime; break; /* NOLINT */
 		}
 
-		file_info[n].blocks = attr->st_blocks;
-		file_info[n].linkn = attr->st_nlink;
-		file_info[n].mode = attr->st_mode;
-		file_info[n].uid = attr->st_uid;
-		file_info[n].gid = attr->st_gid;
+		file_info[n].blocks = a->st_blocks;
+		file_info[n].linkn = a->st_nlink;
+		file_info[n].mode = a->st_mode;
+		file_info[n].uid = a->st_uid;
+		file_info[n].gid = a->st_gid;
 	}
 
 	if (conf.full_dir_size == 1 && file_info[n].dir == 1
@@ -916,7 +921,7 @@ set_long_attribs(const filesn_t n, const struct stat *attr)
 		file_info[n].size = dir_size(file_info[n].name, 1,
 			&file_info[n].du_status);
 	} else {
-		file_info[n].size = FILE_SIZE_PTR(attr);
+		file_info[n].size = FILE_SIZE_PTR(a);
 	}
 }
 
@@ -934,7 +939,7 @@ get_ind_char(const filesn_t index, int *ind_chr)
 	}
 }
 
-/* Return a struct maxes_t with the following information: the largest files
+/* Return a struct maxes_t with the following information: the longest files
  * counter, user ID, group ID, file size, inode, and file links in the
  * current list of files.
  * This information is required to build the properties line for each entry
@@ -1045,11 +1050,11 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad,
 	if (space_left < conf.min_name_trim)
 		space_left = conf.min_name_trim;
 
-	if (conf.min_name_trim != UNSET && longest_name > (size_t)space_left)
-		longest_name = (size_t)space_left;
+	if (conf.min_name_trim != UNSET && longest.name_len > (size_t)space_left)
+		longest.name_len = (size_t)space_left;
 
-	if (longest_name < (size_t)space_left)
-		space_left = (int)longest_name;
+	if (longest.name_len < (size_t)space_left)
+		space_left = (int)longest.name_len;
 
 	maxes.name = space_left + (conf.icons == 1 ? 3 : 0);
 	pager_quit = pager_help = 0;
@@ -1099,11 +1104,11 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad,
 static size_t
 get_columns(void)
 {
-	/* LONGEST_NAME is size_t: it will never be less than zero. */
-	size_t n = (size_t)term_cols / (longest_name + 1);
+	/* LONGEST.NAME_LEN is size_t: it will never be less than zero. */
+	size_t n = (size_t)term_cols / (longest.name_len + 1);
 	/* +1 for the space between file names. */
 
-	/* If LONGEST_NAME is bigger than terminal columns, N will zero.
+	/* If LONGEST.NAME_LEN is bigger than terminal columns, N will zero.
 	 * To avoid this: */
 	if (n < 1)
 		n = 1;
@@ -1613,7 +1618,7 @@ pad_filename(const int ind_char, const filesn_t i, const int pad,
 			cur_len += DIGINUM((int)file_info[i].filesn);
 	}
 
-	const int diff = (int)longest_name - cur_len;
+	const int diff = (int)longest.name_len - cur_len;
 	if (termcap_move_right == 0) {
 		int j = diff + 1;
 		while (--j >= 0)
@@ -1644,7 +1649,7 @@ list_files_horizontal(size_t *counter, int *reset_pager,
 	const int termcap_move_right = (xargs.list_and_quit == 1
 		|| term_caps.suggestions == 0) ? 0 : 1;
 
-	const int int_longest_fc = (int)longest_fc;
+	const int int_longest_fc_len = (int)longest.fc_len;
 	size_t cur_cols = 0;
 	filesn_t i;
 	int last_column = 0;
@@ -1697,7 +1702,7 @@ list_files_horizontal(size_t *counter, int *reset_pager,
 			 * #    PRINT THE CURRENT ENTRY    #
 			 * ################################# */
 
-		const int fc = file_info[i].dir != 1 ? int_longest_fc : 0;
+		const int fc = file_info[i].dir != 1 ? int_longest_fc_len : 0;
 		/* Displayed file name will be trimmed to MAX_NAME_LEN. */
 		const int max_namelen = conf.max_name_len + fc;
 
@@ -1752,7 +1757,7 @@ list_files_vertical(size_t *counter, int *reset_pager,
 	const int termcap_move_right = (xargs.list_and_quit == 1
 		|| term_caps.suggestions == 0) ? 0 : 1;
 
-	const int int_longest_fc = (int)longest_fc;
+	const int int_longest_fc_len = (int)longest.fc_len;
 	size_t cur_cols = 0;
 	size_t cc = columns_n; // Current column number
 	filesn_t x = 0; // Index of the file to be actually printed
@@ -1842,7 +1847,7 @@ list_files_vertical(size_t *counter, int *reset_pager,
 			 * #    PRINT THE CURRENT ENTRY    #
 			 * ################################# */
 
-		const int fc = file_info[x].dir != 1 ? int_longest_fc : 0;
+		const int fc = file_info[x].dir != 1 ? int_longest_fc_len : 0;
 		/* Displayed file name will be trimmed to MAX_NAMELEN. */
 		const int max_namelen = conf.max_name_len + fc;
 
@@ -1935,11 +1940,14 @@ check_autocmd_file(const char *s)
 	}
 }
 
+/* If the file at offset I is largest than SIZE, store information about this
+ * file in NAME and COLOR, and update SIZE to the size of the new largest file.
+ * Also, TOTAL is increased with the size of the file under analysis. */
 static void
-get_largest(const filesn_t i, off_t *size, char **name,
+get_largest_file_info(const filesn_t i, off_t *size, char **name,
 	char **color, off_t *total)
 {
-	/* Only directories and regular files should be counted */
+	/* Only directories and regular files should be counted. */
 	if (file_info[i].type != DT_DIR && file_info[i].type != DT_REG
 	&& (file_info[i].type != DT_LNK || conf.apparent_size != 1))
 		return;
@@ -2152,8 +2160,9 @@ list_dir_light(void)
 	int close_dir = 1;
 	int have_xattr = 0;
 
-	/* A few variables for the disk usage analyzer mode */
-	off_t largest_size = 0, total_size = 0;
+	/* Let's store information about the largest file in the list for the
+	 * disk usage analyzer mode. */
+	off_t largest_name_size = 0, total_size = 0;
 	char *largest_name = (char *)NULL, *largest_color = (char *)NULL;
 
 	if ((dir = opendir(workspaces[cur_ws].path)) == NULL) {
@@ -2171,7 +2180,7 @@ list_dir_light(void)
 	set_events_checker();
 
 	errno = 0;
-	longest_name = 0;
+	longest.name_len = 0;
 	filesn_t n = 0, count = 0;
 	size_t total_dents = 0;
 
@@ -2358,7 +2367,7 @@ list_dir_light(void)
 		}
 
 		if (xargs.disk_usage_analyzer == 1) {
-			get_largest(n, &largest_size, &largest_name,
+			get_largest_file_info(n, &largest_name_size, &largest_name,
 				&largest_color, &total_size);
 		}
 
@@ -2438,7 +2447,7 @@ END:
 
 	if (xargs.disk_usage_analyzer == 1 && conf.long_view == 1
 	&& conf.full_dir_size == 1) {
-		print_analysis_stats(total_size, largest_size,
+		print_analysis_stats(total_size, largest_name_size,
 			largest_color, largest_name);
 	}
 
@@ -2933,8 +2942,9 @@ list_dir(void)
 	int close_dir = 1;
 	int have_xattr = 0;
 
-	/* A few variables for the disk usage analyzer mode */
-	off_t largest_size = 0, total_size = 0;
+	/* Let's store information about the largest file in the list for the
+	 * disk usage analyzer mode. */
+	off_t largest_name_size = 0, total_size = 0;
 	char *largest_name = (char *)NULL, *largest_color = (char *)NULL;
 
 	if ((dir = opendir(workspaces[cur_ws].path)) == NULL) {
@@ -2958,7 +2968,7 @@ list_dir(void)
 		 * ########################################## */
 
 	errno = 0;
-	longest_name = 0;
+	longest.name_len = 0;
 	filesn_t n = 0, count = 0;
 	size_t total_dents = 0;
 
@@ -3104,7 +3114,7 @@ list_dir(void)
 			set_long_attribs(n, &attr);
 
 		if (xargs.disk_usage_analyzer == 1)
-			get_largest(n, &largest_size, &largest_name,
+			get_largest_file_info(n, &largest_name_size, &largest_name,
 				&largest_color, &total_size);
 
 		n++;
@@ -3198,7 +3208,7 @@ END:
 
 	if (xargs.disk_usage_analyzer == 1 && conf.long_view == 1
 	&& conf.full_dir_size == 1) {
-		print_analysis_stats(total_size, largest_size,
+		print_analysis_stats(total_size, largest_name_size,
 			largest_color, largest_name);
 	}
 

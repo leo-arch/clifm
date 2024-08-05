@@ -420,7 +420,7 @@ get_directory_color(const char *filename, const struct stat *a)
 	return get_dir_color(filename, a->st_mode, a->st_nlink, -1);
 }
 
-/* Compare ranks A and B (used to sort jump entries by rank)*/
+/* Compare ranks A and B (used to sort jump entries by rank). */
 int
 rank_cmp(const void *a, const void *b)
 {
@@ -512,7 +512,7 @@ print_jump_table(const int reduce, const time_t now)
 		tmp_jump[i].first_visit = (time_t)days_since_first;
 		tmp_jump[i].last_visit = (time_t)hours_since_last;
 
-		/* Get largest item for each field to correctly calculate pad */
+		/* Get longest item for each field to correctly calculate padding. */
 		int n = DIGINUM(rank);
 		if (n > max_rank)
 			max_rank = n;
@@ -527,7 +527,7 @@ print_jump_table(const int reduce, const time_t now)
 			max_last = n;
 	}
 
-	/* Sort entries by rank (from less to more) */
+	/* Sort entries by rank (from less to more). */
 	qsort(tmp_jump, jump_n, sizeof(*tmp_jump), rank_cmp);
 
 	for (i = 0; i < jump_n; i++) {
@@ -660,37 +660,6 @@ purge_jump_database(char *arg)
 
 	return purge_low_ranked_entries(n);
 }
-
-/*
-static inline int
-handle_jump_order(char *arg, const int mode)
-{
-	if (!arg) {
-		if (mode == NO_SUG_JUMP)
-			fprintf(stderr, "%s\n", _(JUMP_USAGE));
-		return FUNC_FAILURE;
-	}
-
-	if (!is_number(arg)) {
-		if (mode == NO_SUG_JUMP)
-			return cd_function(arg, CD_PRINT_ERROR);
-
-		return FUNC_FAILURE;
-	}
-
-	int int_order = atoi(arg);
-	if (int_order <= 0 || int_order > (int)jump_n
-	|| !jump_db || !jump_db[int_order - 1].path) {
-		if (mode == NO_SUG_JUMP)
-			xerror(_("jump: %s: No such order number\n"), arg);
-		return FUNC_FAILURE;
-	}
-
-	if (mode == NO_SUG_JUMP)
-		return cd_function(jump_db[int_order - 1].path, CD_PRINT_ERROR);
-
-	return save_jump_suggestion(jump_db[int_order - 1].path);
-} */
 
 static inline int
 check_jump_params(char **args, const time_t now, const int reduce)
@@ -839,7 +808,6 @@ dirjump(char **args, const int mode)
 	switch (args[0][1]) {
 	case 'c': jump_opt = JCHILD; break;
 	case 'p': jump_opt = JPARENT; break;
-//	case 'o': return handle_jump_order(args[1], mode);
 	case 'l': jump_opt = JLIST; break;
 	case '\0': jump_opt = NONE; break;
 	default:

@@ -146,7 +146,7 @@ edit_bookmarks(char *cmd, const int flag)
 }
 
 static size_t
-get_largest_shortcut(void)
+get_longest_shortcut(void)
 {
 	if (bm_n == 0 || !bookmarks)
 		return 0;
@@ -175,7 +175,7 @@ print_bookmarks(void)
 
 	struct stat attr;
 	const int eln_pad = DIGINUM(bm_n);
-	const size_t ls = get_largest_shortcut();
+	const size_t ls = get_longest_shortcut();
 	size_t i;
 
 	/* Print bookmarks, taking into account shortcut, name, and path. */

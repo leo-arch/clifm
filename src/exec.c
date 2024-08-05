@@ -735,17 +735,17 @@ lightmode_function(const char *arg)
 }
 
 static size_t
-get_largest_alias_name(void)
+get_longest_alias_name(void)
 {
 	int i = (int)aliases_n;
-	size_t largest = 0;
+	size_t l = 0;
 	while (--i >= 0) {
 		const size_t len = strlen(aliases[i].name);
-		if (len > largest)
-			largest = len;
+		if (len > l)
+			l = len;
 	}
 
-	return largest;
+	return l;
 }
 
 static int
@@ -757,10 +757,10 @@ list_aliases(void)
 	}
 
 	size_t i;
-	const size_t largest = get_largest_alias_name();
+	const size_t longest_name_len = get_longest_alias_name();
 
 	for (i = 0; i < aliases_n; i++) {
-		printf("%-*s %s->%s %s\n", (int)largest,
+		printf("%-*s %s->%s %s\n", (int)longest_name_len,
 			aliases[i].name, mi_c, df_c, aliases[i].cmd);
 	}
 

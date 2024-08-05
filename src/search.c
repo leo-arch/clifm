@@ -438,13 +438,13 @@ get_glob_longest(struct search_t *matches, int *longest_eln,
 	if (conf.icons == 1)
 		*longest_match += 3;
 
-	int largest = 0;
+	int longest_name = 0;
 	for (i = 0; matches[i].name; i++) {
-		if (matches[i].eln > largest)
-			largest = matches[i].eln;
+		if (matches[i].eln > longest_name)
+			longest_name = matches[i].eln;
 	}
 
-	*eln_pad = DIGINUM(largest);
+	*eln_pad = DIGINUM(longest_name);
 	*longest_match += (size_t)(*eln_pad - DIGINUM(*longest_eln));
 }
 
@@ -760,41 +760,42 @@ load_entry_info(struct dirent **reg_dirlist, const int index)
 	return list;
 }
 
+/* Return the length of the longest entry in the files list LIST. */
 static size_t
-get_regex_largest(struct search_t *list, const int total, int *elnpad)
+get_regex_longest(struct search_t *list, const int total, int *elnpad)
 {
 	int i = total;
-	size_t largest_file = 0;
-	int largest_file_eln = -1;
-	int largest_eln = -1;
+	size_t longest_file_len = 0;
+	int longest_file_eln = -1;
+	int longest_eln = -1;
 
 	while (--i >= 0) {
-		if (list[i].len > largest_file) {
-			largest_file = list[i].len;
-			largest_file_eln = list[i].eln;
+		if (list[i].len > longest_file_len) {
+			longest_file_len = list[i].len;
+			longest_file_eln = list[i].eln;
 		}
-		if (list[i].eln != -1 && list[i].eln > largest_eln)
-			largest_eln = list[i].eln;
+		if (list[i].eln != -1 && list[i].eln > longest_eln)
+			longest_eln = list[i].eln;
 	}
 
-	*elnpad = DIGINUM(largest_eln);
-	largest_file += (size_t)(*elnpad - DIGINUM(largest_file_eln));
+	*elnpad = DIGINUM(longest_eln);
+	longest_file_len += (size_t)(*elnpad - DIGINUM(longest_file_eln));
 
-	return largest_file;
+	return longest_file_len;
 }
 
 static size_t
-calc_columns(const size_t largest_file, const size_t matches)
+calc_columns(const size_t longest_file_len, const size_t matches)
 {
 	struct winsize w;
 	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 	unsigned short termcols = w.ws_col > 0 ? w.ws_col : 80;
 
 	size_t columns;
-	if (largest_file == 0 || largest_file > termcols)
+	if (longest_file_len == 0 || longest_file_len > termcols)
 		columns = 1;
 	else
-		columns = (size_t)termcols / (largest_file + 1);
+		columns = (size_t)termcols / (longest_file_len + 1);
 
 	if (columns > matches)
 		columns = matches;
@@ -807,7 +808,7 @@ print_regex_entry(struct search_t list, const int namepad, const int elnpad,
 	const int newline)
 {
 	if (list.eln != -1) {
-		// Print ELN, file indicator, and icon.
+		/* Print ELN, file indicator, and icon. */
 		int index = list.eln - 1;
 		char ind_chr = file_info[index].sel == 1 ? SELFILE_CHR : ' ';
 		char *ind_chr_color = file_info[index].sel == 1 ? li_cb : "";
@@ -856,8 +857,8 @@ print_regex_matches(const mode_t file_type, struct dirent **reg_dirlist,
 	}
 
 	int eln_pad = -1;
-	const size_t largest_file = get_regex_largest(list, (int)matches, &eln_pad);
-	const size_t columns = calc_columns(largest_file, matches);
+	const size_t longest_len = get_regex_longest(list, (int)matches, &eln_pad);
+	const size_t columns = calc_columns(longest_len, matches);
 
 	size_t last_col = 0, cur_col = 0;
 
@@ -875,7 +876,7 @@ print_regex_matches(const mode_t file_type, struct dirent **reg_dirlist,
 
 		/* Calculate how much right pad we need for the current entry */
 		int name_pad = (last_col == 1 || count == matches) ? NO_PAD :
-			(int)(largest_file - list[i].len - (list[i].eln == -1 ? 0
+			(int)(longest_len - list[i].len - (list[i].eln == -1 ? 0
 			: (size_t)(eln_pad - DIGINUM(list[i].eln))) + 1);
 
 		if (name_pad < 0)

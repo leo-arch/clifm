@@ -374,7 +374,7 @@ construct_files_counter(const struct fileinfo *props, char *fc_str,
 			(int)props->filesn, df_c);
 	} else {
 		snprintf(fc_str, FC_STR_LEN, "%s%*c%s", dn_c, max,
-			props->filesn < 0 ? '?' /* Dir with no read permission */
+			props->filesn < 0 ? UNKNOWN_CHR /* Dir with no read permission */
 			: (props->dir == 1 ? '0' : '-'),
 			df_c);
 	}
