@@ -192,15 +192,15 @@ list_files_in_tag(char *name)
 static size_t
 get_longest_tag(void)
 {
-	size_t i, _longest = 0;
+	size_t i, longest_tag = 0;
 
 	for (i = 0; i < tags_n; i++) {
 		const size_t l = strlen(tags[i]);
-		if (l > _longest)
-			_longest = l;
+		if (l > longest_tag)
+			longest_tag = l;
 	}
 
-	return _longest;
+	return longest_tag;
 }
 
 /* List all tags applied to the file whose device ID is DEV and inode number

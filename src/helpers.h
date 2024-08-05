@@ -1879,7 +1879,6 @@ extern size_t
 	ext_colors_n,
 	jump_n,
 	kbinds_n,
-	longest,
 	msgs_n,
 	P_tmpdir_len,
 	path_n,

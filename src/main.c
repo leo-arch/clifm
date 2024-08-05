@@ -224,7 +224,6 @@ size_t
 	ext_colors_n = 0,
 	jump_n = 0,
 	kbinds_n = 0,
-	longest = 0,
 	msgs_n = 0,
 	P_tmpdir_len = 0,
 	path_n = 0,

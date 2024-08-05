@@ -114,6 +114,7 @@
 
 /* Amount of digits of the files counter of the longest directory */
 static size_t longest_fc = 0;
+static size_t longest_name = 0;
 static int pager_bk = 0;
 static int dir_out = 0;
 static int pager_quit = 0;
@@ -843,16 +844,16 @@ get_longest_filename(const filesn_t n, const size_t pad)
 			}
 		}
 
-		if (total_len > longest) {
+		if (total_len > longest_name) {
 			longest_index = i;
 			if (conf.listing_mode == VERTLIST || max_files == UNSET
 			|| i < c_max_files)
-				longest = total_len;
+				longest_name = total_len;
 		}
 	}
 
 	if (conf.long_view == 0 && conf.icons == 1 && conf.columned == 1)
-		longest += 3;
+		longest_name += 3;
 
 	/* longest_fc stores the amount of digits taken by the files counter of
 	 * the longest file name, provided it is a directory.
@@ -878,8 +879,8 @@ get_longest_filename(const filesn_t n, const size_t pad)
 /*		longest_fc = DIGINUM(file_info[longest_index].filesn) + 1; */
 		longest_fc = DIGINUM(file_info[longest_index].filesn);
 		const size_t t = pad + c_max_name_len + 1 + longest_fc;
-		if (t > longest)
-			longest_fc -= t - longest;
+		if (t > longest_name)
+			longest_fc -= t - longest_name;
 		if ((int)longest_fc < 0)
 			longest_fc = 0;
 	}
@@ -1044,11 +1045,11 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad,
 	if (space_left < conf.min_name_trim)
 		space_left = conf.min_name_trim;
 
-	if (conf.min_name_trim != UNSET && longest > (size_t)space_left)
-		longest = (size_t)space_left;
+	if (conf.min_name_trim != UNSET && longest_name > (size_t)space_left)
+		longest_name = (size_t)space_left;
 
-	if (longest < (size_t)space_left)
-		space_left = (int)longest;
+	if (longest_name < (size_t)space_left)
+		space_left = (int)longest_name;
 
 	maxes.name = space_left + (conf.icons == 1 ? 3 : 0);
 	pager_quit = pager_help = 0;
@@ -1098,11 +1099,11 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad,
 static size_t
 get_columns(void)
 {
-	/* LONGEST is size_t: it will never be less than zero. */
-	size_t n = (size_t)term_cols / (longest + 1);
+	/* LONGEST_NAME is size_t: it will never be less than zero. */
+	size_t n = (size_t)term_cols / (longest_name + 1);
 	/* +1 for the space between file names. */
 
-	/* If longest is bigger than terminal columns, N will zero.
+	/* If LONGEST_NAME is bigger than terminal columns, N will zero.
 	 * To avoid this: */
 	if (n < 1)
 		n = 1;
@@ -1612,7 +1613,7 @@ pad_filename(const int ind_char, const filesn_t i, const int pad,
 			cur_len += DIGINUM((int)file_info[i].filesn);
 	}
 
-	const int diff = (int)longest - cur_len;
+	const int diff = (int)longest_name - cur_len;
 	if (termcap_move_right == 0) {
 		int j = diff + 1;
 		while (--j >= 0)
@@ -2170,7 +2171,7 @@ list_dir_light(void)
 	set_events_checker();
 
 	errno = 0;
-	longest = 0;
+	longest_name = 0;
 	filesn_t n = 0, count = 0;
 	size_t total_dents = 0;
 
@@ -2680,8 +2681,8 @@ load_link_info(const int fd, const filesn_t n)
 		return;
 	}
 
-	struct stat attrl;
-	if (fstatat(fd, file_info[n].name, &attrl, 0) == -1) {
+	struct stat a;
+	if (fstatat(fd, file_info[n].name, &a, 0) == -1) {
 		file_info[n].color = or_c;
 		file_info[n].xattr = 0;
 		stats.broken_link++;
@@ -2695,7 +2696,7 @@ load_link_info(const int fd, const filesn_t n)
 	 * this function. */
 	static char tmp[PATH_MAX + 1]; *tmp = '\0';
 	const ssize_t ret =
-		(conf.color_lnk_as_target == 1 && !S_ISDIR(attrl.st_mode))
+		(conf.color_lnk_as_target == 1 && !S_ISDIR(a.st_mode))
 		? readlinkat(XAT_FDCWD, file_info[n].name, tmp, sizeof(tmp) - 1)
 		: 0;
 	if (ret > 0)
@@ -2703,7 +2704,7 @@ load_link_info(const int fd, const filesn_t n)
 
 	const char *lname = *tmp ? tmp : file_info[n].name;
 
-	if (S_ISDIR(attrl.st_mode)) {
+	if (S_ISDIR(a.st_mode)) {
 		file_info[n].dir = 1;
 		file_info[n].filesn = conf.files_counter == 1
 			? (count_dir(file_info[n].name, NO_CPOP) - 2) : 1;
@@ -2715,13 +2716,13 @@ load_link_info(const int fd, const filesn_t n)
 		/* DFILES is negative only if count_dir() failed, which in
 		 * this case only means EACCESS error. */
 		file_info[n].color = conf.color_lnk_as_target == 1
-			? ((dfiles < 0 || check_file_access(attrl.st_mode,
-			attrl.st_uid, attrl.st_gid) == 0) ? nd_c
-			: get_dir_color(lname, attrl.st_mode, attrl.st_nlink,
+			? ((dfiles < 0 || check_file_access(a.st_mode,
+			a.st_uid, a.st_gid) == 0) ? nd_c
+			: get_dir_color(lname, a.st_mode, a.st_nlink,
 			dfiles)) : ln_c;
 	} else {
 		if (conf.color_lnk_as_target == 1)
-			get_link_target_color(lname, &attrl, n);
+			get_link_target_color(lname, &a, n);
 		else
 			file_info[n].color = ln_c;
 	}
@@ -2957,7 +2958,7 @@ list_dir(void)
 		 * ########################################## */
 
 	errno = 0;
-	longest = 0;
+	longest_name = 0;
 	filesn_t n = 0, count = 0;
 	size_t total_dents = 0;
 
