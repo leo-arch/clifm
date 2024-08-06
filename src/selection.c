@@ -616,11 +616,14 @@ get_sel_file_size(const size_t i, int *status)
 	if (lstat(sel_elements[i].name, &attr) == -1)
 		return (off_t)-1;
 
-	const int base = xargs.si == 1 ? 1000 : 1024;
 	if (S_ISDIR(attr.st_mode)) {
 		fputs(_("Calculating file size... "), stdout); fflush(stdout);
+#ifdef USE_DU1
 		sel_elements[i].size = (off_t)(dir_size(sel_elements[i].name,
-			0, status) * base);
+			0, status) * (xargs.si == 1 ? 1000 : 1024));
+#else
+		sel_elements[i].size = (off_t)dir_size(sel_elements[i].name, 0, status);
+#endif /* USE_DU1 */
 		putchar('\r'); ERASE_TO_RIGHT; fflush(stdout);
 	} else {
 		sel_elements[i].size = (off_t)FILE_SIZE(attr);
