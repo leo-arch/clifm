@@ -1887,8 +1887,10 @@ restore_shell(void)
 		TCSANOW, (const struct termios *)&orig_term_attrs);
 }
 
+/* Store device and inode number of each selected file to identify them
+ * later and mark them as selected in the files list. */
 static int
-load_sel_devino(void)
+set_sel_devino(void)
 {
 	free(sel_devino);
 	sel_devino = xnmalloc(sel_n + 1, sizeof(struct devino_t));
@@ -1911,13 +1913,13 @@ load_sel_devino(void)
 int
 get_sel_files(void)
 {
-	if (selfile_ok == 0 || config_ok == 0 || !sel_file) {
-		if (sel_n > 0) /* We might be in stealth mode. */
-			return load_sel_devino();
-		return FUNC_FAILURE;
-	}
+	if (xargs.stealth_mode == 1 && sel_n > 0)
+		return set_sel_devino();
 
-	size_t selnbk = sel_n;
+	if (selfile_ok == 0 || config_ok == 0 || !sel_file)
+		return FUNC_FAILURE;
+
+	const size_t selnbk = sel_n;
 	/* First, clear the sel array, in case it was already used. */
 	if (sel_n > 0) {
 		int i = (int)sel_n;
@@ -1962,20 +1964,19 @@ get_sel_files(void)
 			sel_n + 2, sizeof(struct sel_t));
 		sel_elements[sel_n].name = savestring(line, len);
 		sel_elements[sel_n].size = (off_t)UNSET;
-		/* Store device and inode number to identify later selected files
-		 * and mark them in the files list. */
-		sel_devino = xnrealloc(sel_devino, sel_n + 1, sizeof(struct devino_t));
-		sel_devino[sel_n].ino = a.st_ino;
-		sel_devino[sel_n].dev = a.st_dev;
 		sel_n++;
 		sel_elements[sel_n].name = (char *)NULL;
 		sel_elements[sel_n].size = (off_t)UNSET;
 	}
 
 	fclose(fp);
+
+	if (sel_n > 0)
+		set_sel_devino();
+
 	/* If previous and current amount of sel files don't match (mostly
 	 * because some selected files were removed), recreate the selections
-	 * file to reflect current state. */
+	 * file to reflect the current state. */
 	if (selnbk != sel_n)
 		save_sel();
 
