@@ -66,7 +66,7 @@ int
 save_sel(void)
 {
 	if (selfile_ok == 0 || config_ok == 0 || !sel_file)
-		return FUNC_FAILURE;
+		return (xargs.stealth_mode == 1 ? FUNC_SUCCESS : FUNC_FAILURE);
 
 	if (sel_n == 0) {
 		if (unlink(sel_file) == -1) {
@@ -617,7 +617,9 @@ get_sel_file_size(const size_t i, int *status)
 		return (off_t)-1;
 
 	if (S_ISDIR(attr.st_mode)) {
+		fputs(dn_c, stdout);
 		fputs(_("Calculating file size... "), stdout); fflush(stdout);
+		fputs(df_c, stdout);
 #ifdef USE_DU1
 		sel_elements[i].size = (off_t)(dir_size(sel_elements[i].name,
 			0, status) * (xargs.si == 1 ? 1000 : 1024));

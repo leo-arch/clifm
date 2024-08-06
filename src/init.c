@@ -1887,12 +1887,35 @@ restore_shell(void)
 		TCSANOW, (const struct termios *)&orig_term_attrs);
 }
 
+static int
+load_sel_devino(void)
+{
+	free(sel_devino);
+	sel_devino = xnmalloc(sel_n + 1, sizeof(struct devino_t));
+
+	size_t i;
+	struct stat a;
+	for (i = 0; i < sel_n; i++) {
+		const char *name = sel_elements[i].name;
+		if (fstatat(XAT_FDCWD, name, &a, AT_SYMLINK_NOFOLLOW) == -1)
+			continue;
+
+		sel_devino[i].ino = a.st_ino;
+		sel_devino[i].dev = a.st_dev;
+	}
+
+	return FUNC_SUCCESS;
+}
+
 /* Get current entries in the Selection Box, if any. */
 int
 get_sel_files(void)
 {
-	if (selfile_ok == 0 || config_ok == 0 || !sel_file)
+	if (selfile_ok == 0 || config_ok == 0 || !sel_file) {
+		if (sel_n > 0) /* We might be in stealth mode. */
+			return load_sel_devino();
 		return FUNC_FAILURE;
+	}
 
 	size_t selnbk = sel_n;
 	/* First, clear the sel array, in case it was already used. */
