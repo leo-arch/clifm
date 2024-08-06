@@ -1960,8 +1960,7 @@ get_sel_files(void)
 		if (fstatat(XAT_FDCWD, line, &a, AT_SYMLINK_NOFOLLOW) == -1)
 			continue;
 
-		sel_elements = xnrealloc(sel_elements,
-			sel_n + 2, sizeof(struct sel_t));
+		sel_elements = xnrealloc(sel_elements, sel_n + 2, sizeof(struct sel_t));
 		sel_elements[sel_n].name = savestring(line, len);
 		sel_elements[sel_n].size = (off_t)UNSET;
 		sel_n++;

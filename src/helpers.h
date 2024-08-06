@@ -89,6 +89,7 @@
 
 #ifdef __TINYC__
 # define __STDC_NO_VLA__ 1
+//# include <sys/cdefs.h>
 #endif /* __TINYC__ */
 
 #define _FILE_OFFSET_BITS 64 /* Support large files */

@@ -384,11 +384,8 @@ fzftab_color(char *filename, const struct stat *attr)
 			return nf_c;
 
 		char *cl = get_file_color(filename, attr);
-
-		if (cl && (check_ext == 0 || cl == nf_c || cl == ca_c
-		|| (attr->st_mode & 00100) || (attr->st_mode & 00010)
-		|| (attr->st_mode & 00001)))
-			return cl;
+		if (check_ext == 0 || cl != fi_c)
+			return (cl ? cl : fi_c);
 
 		/* If trashed file, remove the trash extension, so we can get the
 		 * color according to the actual file extension. */

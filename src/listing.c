@@ -2782,10 +2782,7 @@ load_regfile_info(const struct stat *a, const filesn_t n)
 	else if (a && IS_EXEC(a)) {
 		file_info[n].exec = 1;
 		stats.exec++;
-		if (file_info[n].size == 0)
-			file_info[n].color = ee_c;
-		else
-			file_info[n].color = ex_c;
+		file_info[n].color = file_info[n].size == 0 ? ee_c : ex_c;
 	} else if (file_info[n].linkn > 1) { /* Multi-hardlink */
 		file_info[n].color = mh_c;
 		stats.multi_link++;
@@ -2800,14 +2797,11 @@ load_regfile_info(const struct stat *a, const filesn_t n)
 		file_info[n].icon = ICON_EXEC;
 #endif /* !_NO_ICONS */
 
-	/* Unaccessible files, files with capabilities, multi-hardlink
-	 * and executable files take precedence over temp and file
-	 * extension colors. */
-	const int no_override_color = (file_info[n].color == nf_c
-	|| file_info[n].color == ca_c || file_info[n].color == mh_c
-	|| file_info[n].exec == 1);
+	/* Try temp and extension color only provided the file is a non-empty
+	 * regular file. */
+	const int override_color = (file_info[n].color == fi_c);
 
-	if (no_override_color == 0
+	if (override_color == 1
 	&& IS_TEMP_FILE(file_info[n].name, file_info[n].bytes)) {
 		file_info[n].color = bk_c;
 		return;
@@ -2824,7 +2818,7 @@ load_regfile_info(const struct stat *a, const filesn_t n)
 #endif /* !_NO_ICONS */
 
 	/* Check file extension */
-	char *ext = (no_override_color == 0 && check_ext == 1)
+	char *ext = (override_color == 1 && check_ext == 1)
 		? strrchr(file_info[n].name, '.') : (char *)NULL;
 
 	if (!ext || ext == file_info[n].name || !*(ext + 1))
