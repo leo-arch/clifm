@@ -35,19 +35,6 @@
 #include "messages.h" /* SORT_USAGE */
 
 int
-skip_nonexec(const struct dirent *ent)
-{
-#ifdef _DIRENT_HAVE_D_TYPE
-	if (ent->d_type == DT_REG && access(ent->d_name, X_OK) == -1)
-#else
-	if (access(ent->d_name, X_OK) == -1)
-#endif /* _DIRENT_HAVE_D_TYPE */
-		return 0;
-
-	return 1;
-}
-
-int
 skip_files(const struct dirent *ent)
 {
 	/* In case a directory isn't reacheable, like a failed

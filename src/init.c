@@ -2337,10 +2337,6 @@ get_path_programs(void)
 	struct dirent ***commands_bin = (struct dirent ***)NULL;
 
 	if (conf.ext_cmd_ok == 1) {
-		/* NOTE: xchdir() is only required by skip_nonexec() */
-		char tmp[PATH_MAX + 1] = "";
-		char *cwd = get_cwd(tmp, sizeof(tmp), 0);
-
 		commands_bin = xnmalloc(path_n, sizeof(struct dirent));
 		cmd_n = xnmalloc(path_n, sizeof(int));
 
@@ -2350,16 +2346,11 @@ get_path_programs(void)
 			commands_bin[i] = (struct dirent **)NULL;
 
 			if (!paths[i].path || !*paths[i].path
-			|| skip_this_path(paths[i].path) == 1
-			|| xchdir(paths[i].path, NO_TITLE) == -1)
+			|| skip_this_path(paths[i].path) == 1)
 				continue;
 
-			cmd_n[i] = scandir(paths[i].path, &commands_bin[i],
-#ifdef __CYGWIN__
-					NULL, xalphasort);
-#else
-					conf.light_mode == 1 ? NULL : skip_nonexec, xalphasort);
-#endif /* __CYGWIN__ */
+			cmd_n[i] = scandir(paths[i].path, &commands_bin[i], NULL, xalphasort);
+
 			/* If paths[i] directory is empty, 2 is returned. If it does not
 			 * exist, scandir returns -1.
 			 * Fedora, for example, adds HOME/bin and HOME/.local/bin to
@@ -2367,8 +2358,6 @@ get_path_programs(void)
 			if (cmd_n[i] > 2)
 				total_cmd += cmd_n[i] - 2;
 		}
-
-		xchdir(cwd, NO_TITLE);
 	}
 
 	/* Add internal commands */
