@@ -403,7 +403,7 @@ fzftab_color(char *filename, const struct stat *attr)
 
 		if (te) *te = '.';
 
-		return ext_cl ? ext_cl : (cl ? cl : df_c);
+		return ext_cl ? ext_cl : (cl ? cl : fi_c);
 		}
 
 	case S_IFSOCK: return so_c;

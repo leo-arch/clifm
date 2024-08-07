@@ -1311,8 +1311,12 @@ set_filetype_colors(char **colors, const size_t words)
 		else if (*colors[i] == 'l' && colors[i][1] == 'n')
 			set_color(colors[i] + 3, ln_c, RL_PRINTABLE);
 
-		else if (*colors[i] == 'm' && colors[i][1] == 'h')
-			set_color(colors[i] + 3, mh_c, RL_PRINTABLE);
+		else if (*colors[i] == 'm') {
+			if (colors[i][1] == 'h')
+				set_color(colors[i] + 3, mh_c, RL_PRINTABLE);
+			else if (colors[i][1] == 'i')
+				set_color(colors[i] + 3, uf_c, RL_PRINTABLE);
+		}
 
 		else if (*colors[i] == 'n') {
 			switch (colors[i][1]) {
@@ -1638,7 +1642,7 @@ store_extension_line(const char *line)
 	if (!code || !*code)
 		return FUNC_FAILURE;
 
-	ext_colors = xnrealloc(ext_colors, ext_colors_n + 1, sizeof(struct ext_t));
+	ext_colors = xnrealloc(ext_colors, ext_colors_n + 2, sizeof(struct ext_t));
 
 	const size_t len = (size_t)(q - line);
 	ext_colors[ext_colors_n].len = len;
@@ -1694,7 +1698,8 @@ static void
 split_extension_colors(char *extcolors)
 {
 	char *p = extcolors;
-	char *buf = (char *)NULL;
+	char buf[MAX_COLOR + 3 + NAME_MAX]; /* "*.NAME=COLOR" */
+	*buf = '\0';
 	size_t len = 0;
 	int eol = 0;
 
@@ -1706,7 +1711,7 @@ split_extension_colors(char *extcolors)
 		case '\0': /* fallthrough */
 		case '\n': /* fallthrough */
 		case ':':
-			if (!buf || !*buf) {
+			if (!*buf) {
 				if (!*p || !*(p + 1))
 					eol = 1;
 				else
@@ -1726,7 +1731,11 @@ split_extension_colors(char *extcolors)
 			break;
 
 		default:
-			buf = xnrealloc(buf, len + 2, sizeof(char));
+			if (len >= sizeof(buf)) {
+				p++;
+				break;
+			}
+
 			buf[len] = *p;
 			len++;
 			p++;
@@ -1736,11 +1745,7 @@ split_extension_colors(char *extcolors)
 
 	p = (char *)NULL;
 
-	free(buf);
-
 	if (ext_colors) {
-		ext_colors = xnrealloc(ext_colors,
-			ext_colors_n + 1, sizeof(struct ext_t));
 		ext_colors[ext_colors_n].name = (char *)NULL;
 		ext_colors[ext_colors_n].value = (char *)NULL;
 		ext_colors[ext_colors_n].len = 0;
@@ -2554,9 +2559,13 @@ read_color_scheme_file(const char *colorscheme, char **filecolors,
 static void
 split_color_line(char *line, const int type)
 {
-	/* Split the colors line into substrings (one per color) */
-	char *p = line, *buf = (char *)NULL, **colors = (char **)NULL;
-	size_t len = 0, words = 0;
+	char *p = line;
+	char **colors = (char **)NULL;
+	/* MAX_COLOR is not enough when parsing LS_COLORS lines, where we
+	 * usually find extension colors ("*.ext=color"). */
+	char buf[MAX_COLOR + 3 + NAME_MAX]; *buf = '\0';
+	size_t len = 0;
+	size_t words = 0;
 	int eol = 0;
 
 	while (eol == 0) {
@@ -2565,15 +2574,22 @@ split_color_line(char *line, const int type)
 		case '\0': /* fallthrough */
 		case '\n': /* fallthrough */
 		case ':':
-			if (!buf)
+			if (!*buf) {
+				if (!*p || !*(p + 1))
+					eol = 1;
+				else
+					p++;
 				break;
+			}
+
 			buf[len] = '\0';
-			colors = xnrealloc(colors, words + 1, sizeof(char *));
+
+			colors = xnrealloc(colors, words + 2, sizeof(char *));
 			colors[words] = savestring(buf, len);
 			words++;
 			*buf = '\0';
 
-			if (!*p)
+			if (*p == '\0')
 				eol = 1;
 
 			len = 0;
@@ -2581,7 +2597,11 @@ split_color_line(char *line, const int type)
 			break;
 
 		default:
-			buf = xnrealloc(buf, len + 2, sizeof(char));
+			if (len >= sizeof(buf)) {
+				p++;
+				break;
+			}
+
 			buf[len] = *p;
 			len++;
 			p++;
@@ -2591,16 +2611,13 @@ split_color_line(char *line, const int type)
 
 	p = (char *)NULL;
 
-	free(buf);
-
 	if (!colors)
 		return;
 
-	colors = xnrealloc(colors, words + 1, sizeof(char *));
 	colors[words] = (char *)NULL;
 
-	/* Set the color variables
-	 * The colors array is free'd by any of these functions */
+	/* Set the color variables.
+	 * The colors array is free'd by both of these functions. */
 	if (type == SPLIT_FILETYPE_COLORS)
 		set_filetype_colors(colors, words);
 	else
