@@ -425,8 +425,7 @@ gen_emergency_prompt(void)
 		xerror("%s: %s\n", PROGRAM_NAME, EMERGENCY_PROMPT_MSG);
 	}
 
-	char *_prompt = savestring(EMERGENCY_PROMPT, sizeof(EMERGENCY_PROMPT) - 1);
-	return _prompt;
+	return savestring(EMERGENCY_PROMPT, sizeof(EMERGENCY_PROMPT) - 1);
 }
 
 static inline char *
@@ -477,7 +476,7 @@ gen_stats_str(const int flag)
 static inline char *
 gen_notification(const int flag)
 {
-	const size_t len = MAX_INT_STR;
+	const size_t len = MAX_INT_STR + 1;
 
 	char *p = xnmalloc(len, sizeof(char));
 	*p = '\0';
@@ -754,16 +753,16 @@ print_user_message(void)
 	int c = 0;
 	char *tmp = (char *)NULL;
 
-	printf("%s", wc_c);
+	fputs(wc_c, stdout);
 
 	while (*s) {
 		if (*s == '\\' && *(s + 1)) {
 			s++;
 			if (*s >= '0' && *s <= '7' && (tmp = gen_octal(&s, &c))) {
-				printf("%s", tmp);
+				fputs(tmp, stdout);
 				free(tmp);
 			} else if (*s == 'e' && (tmp = gen_escape_char(&s, &c))) {
-				printf("%s", tmp);
+				fputs(tmp, stdout);
 				free(tmp);
 			} else if (*s == 'n') {
 				putchar('\n');
@@ -779,7 +778,7 @@ print_user_message(void)
 	}
 
 	putchar('\n');
-	printf("%s", df_c);
+	fputs(df_c, stdout);
 }
 
 static inline void
