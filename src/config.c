@@ -689,7 +689,7 @@ set_shell_level(void)
 	else
 		shlvl_n = 1;
 
-	char tmp[32];
+	char tmp[MAX_INT_STR];
 	snprintf(tmp, sizeof(tmp), "%d", shlvl_n);
 	setenv("SHLVL", tmp, 1);
 

@@ -727,7 +727,7 @@ set_fzf_env_vars(const int height)
 	default: break;
 	}
 
-	char p[32];
+	char p[MAX_INT_STR];
 	snprintf(p, sizeof(p), "%d", y > 0 ? y - 1 : 0);
 	setenv("CLIFM_FZF_LINE", p, 1);
 	snprintf(p, sizeof(p), "%d", x > 0 ? x : 0);
@@ -821,7 +821,7 @@ run_finder(const size_t height, const int offset, const char *lw,
 
 	/* If height was not set in FZF_DEFAULT_OPTS nor in the config
 	 * file, let's define it ourselves. */
-	char height_str[10 + 32];
+	char height_str[10 + MAX_INT_STR];
 	*height_str = '\0';
 	if (fzf_height_set == 0)
 		snprintf(height_str, sizeof(height_str), "--height=%zu", height);
@@ -847,7 +847,7 @@ run_finder(const size_t height, const int offset, const char *lw,
 
 	} else { /* FZF */
 		/* All fixed parameters are compatible with at least fzf 0.16.11 (Aug 1, 2017) */
-		char prev_opts[18 + 32];
+		char prev_opts[18 + MAX_INT_STR];
 		*prev_opts = '\0';
 		const char prev_str[] = "--preview \"clifm --preview {}\"";
 

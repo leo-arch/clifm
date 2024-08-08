@@ -651,8 +651,9 @@ CONFIRM:
 			while (lstat(r, &a) == 0) {
 				char tmp[PATH_MAX + 1];
 				xstrsncpy(tmp, r, sizeof(tmp));
-				r = xnrealloc(r, PATH_MAX + 32, sizeof(char));
-				snprintf(r, PATH_MAX + 31, "%s-%zu", tmp, rep_suffix);
+				const size_t len = PATH_MAX + MAX_INT_STR + 2;
+				r = xnrealloc(r, len, sizeof(char));
+				snprintf(r, len, "%s-%zu", tmp, rep_suffix);
 				rep_suffix++;
 			}
 

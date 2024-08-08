@@ -2900,7 +2900,7 @@ get_entry_color(char *ent, const struct stat *s)
 void
 colors_list(char *ent, const int eln, const int pad, const int new_line)
 {
-	char index[32];
+	char index[MAX_INT_STR + 1];
 	*index = '\0';
 
 	if (eln > 0)

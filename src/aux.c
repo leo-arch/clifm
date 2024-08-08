@@ -1078,7 +1078,7 @@ xitoa(long long n)
 	if (n >= 0 && n <= 100)
 		return nums[n];
 
-	static char buf[32] = {0};
+	static char buf[MAX_INT_STR] = {0};
 	long long i = 30;
 
 	while (n > 0 && i > 0) {

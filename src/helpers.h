@@ -935,6 +935,15 @@ extern time_t curdir_mtime;
 #define TOUPPER(c) (((c) >= 'a' && (c) <= 'z') ? ((c) - 'a' + 'A') : (c))
 #define TOLOWER(c) (((c) >= 'A' && (c) <= 'Z') ? ((c) - 'A' + 'a') : (c))
 
+/* A yottabyte takes 26 digits, 28 if we count the negative sign and the NULL
+ * terminator, so that 32 bytes is more than enough. */
+#define MAX_INT_STR 32
+/* Bytes required to transform an integer of type TYPE into a string,
+ * including the ending NULL char and the negative sign. */
+/* CHAR_BIT is defined in limits.h */
+/*#define INT_STR_SIZE(type) (((CHAR_BIT * sizeof(type) - 1) * 10 / 33) + 3) */
+/* INT_STR_SIZE() is much more accurate than MAX_INT_STR, but not fully tested. */
+
 /* UINT_MAX is 4294967295 == 10 digits */
 #define DIGINUM(n) (((n) < 10) ? 1 \
 		: ((n) < 100)        ? 2   \

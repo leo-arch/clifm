@@ -463,8 +463,8 @@ gen_stats_str(const int flag)
 
 	char *p = (char *)NULL;
 	if (val != 0) {
-		p = xnmalloc(32, sizeof(char));
-		snprintf(p, 32, "%zu", val);
+		p = xnmalloc(MAX_INT_STR, sizeof(char));
+		snprintf(p, MAX_INT_STR, "%zu", val);
 	} else {
 		p = xnmalloc(2, sizeof(char));
 		*p = '-';
@@ -477,7 +477,7 @@ gen_stats_str(const int flag)
 static inline char *
 gen_notification(const int flag)
 {
-	const size_t len = 32;
+	const size_t len = MAX_INT_STR;
 
 	char *p = xnmalloc(len, sizeof(char));
 	*p = '\0';
@@ -519,8 +519,8 @@ gen_nesting_level(const int mode)
 	char *p = (char *)NULL;
 
 	if (mode == 'i') {
-		p = xnmalloc(32, sizeof(char));
-		snprintf(p, 32, "%d", nesting_level);
+		p = xnmalloc(MAX_INT_STR, sizeof(char));
+		snprintf(p, MAX_INT_STR, "%d", nesting_level);
 		return p;
 	}
 
@@ -531,7 +531,7 @@ gen_nesting_level(const int mode)
 		return p;
 	}
 
-	const size_t len = (MAX_COLOR * 2) + 32;
+	const size_t len = (MAX_COLOR * 2) + MAX_INT_STR;
 	p = xnmalloc(len, sizeof(char));
 	snprintf(p, len, "(%d)", nesting_level);
 
@@ -867,7 +867,7 @@ setenv_prompt(void)
 	/* Set environment variables with CliFM state information
 	 * (sel files, trash, stealth mode, messages) to be handled by
 	 * the prompt itself. */
-	char t[32];
+	char t[MAX_INT_STR];
 	snprintf(t, sizeof(t), "%d", (int)sel_n);
 	setenv("CLIFM_STAT_SEL", t, 1);
 #ifndef _NO_TRASH

@@ -2048,10 +2048,10 @@ print_analysis_stats(const off_t total, const off_t largest,
 		const char *p_largest = construct_human_size(largest);
 		l = savestring(p_largest, strlen(p_largest));
 	} else {
-		t = xnmalloc(32, sizeof(char));
-		l = xnmalloc(32, sizeof(char));
-		snprintf(t, 32, "%ju", (uintmax_t)total);
-		snprintf(l, 32, "%ju", (uintmax_t)largest);
+		t = xnmalloc(MAX_INT_STR, sizeof(char));
+		l = xnmalloc(MAX_INT_STR, sizeof(char));
+		snprintf(t, MAX_INT_STR, "%ju", (uintmax_t)total);
+		snprintf(l, MAX_INT_STR, "%ju", (uintmax_t)largest);
 	}
 
 	char *tsize = BOLD_GREEN, *lsize = BOLD_GREEN;

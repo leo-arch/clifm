@@ -1779,7 +1779,7 @@ run_plugin(const int num)
 	if (rl_line_buffer && *rl_line_buffer)
 		setenv("CLIFM_LINE", rl_line_buffer, 1);
 
-	char cmd[32 + 7];
+	char cmd[MAX_INT_STR + 7];
 	snprintf(cmd, sizeof(cmd), "plugin%d", num);
 	int ret = run_kb_cmd(cmd);
 

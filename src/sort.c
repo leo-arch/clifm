@@ -446,8 +446,8 @@ set_sort_by_name(char **arg)
 				return FUNC_FAILURE;
 			}
 
-			*arg = xnrealloc(*arg, 32, sizeof(char));
-			snprintf(*arg, 32, "%d", sort_methods[i].num);
+			*arg = xnrealloc(*arg, MAX_INT_STR, sizeof(char));
+			snprintf(*arg, MAX_INT_STR, "%d", sort_methods[i].num);
 			return FUNC_SUCCESS;
 		}
 	}
@@ -461,7 +461,7 @@ sort_function(char **arg)
 {
 	/* No argument: Just print current sorting order */
 	if (!arg[1]) {
-		fputs(_("Sorting order: "), stdout);
+		fputs(_("Sorted by "), stdout);
 		print_sort_method();
 		return FUNC_SUCCESS;
 	}
