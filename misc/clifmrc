@@ -135,7 +135,7 @@ TimeFollowsSort=true
 # Append an 'a', 'b', 'c', or 'm' to the timestamp (long view only) to indicate
 # the kind of timestamp, i.e, access, birth, status change, or modification
 # time respectively.
-MarkTimestamp=true
+TimestampMark=true
 
 # Same as TimeStyle, but for the 'p/pp' command.
 # Available styles: default, iso, long-iso, full-iso, full-iso-nano, +FORMAT

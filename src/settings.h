@@ -481,7 +481,6 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define DEF_LOG_MSGS 0
 #define DEF_LOG_CMDS 0
 #define DEF_LONG_VIEW 0
-#define DEF_MARK_TIMESTAMP 0
 #define DEF_MAX_DIRHIST 100
 #define DEF_MAX_FILES UNSET
 #define DEF_MAX_NAME_LEN 20
@@ -542,6 +541,7 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define DEF_TIME_STYLE_RECENT "%b %e %H:%M" /* Timestamps in long view mode */
 #define DEF_TIME_STYLE_OLDER  "%b %e  %Y"
 #define DEF_TIME_STYLE_LONG   "%a %b %d %T %Y %z" /* Used by history and trash */
+#define DEF_TIMESTAMP_MARK 0
 #define DEF_TIPS 1
 #define DEF_TOGGLE_WORKSPACES 1
 #define DEF_TRASRM 0

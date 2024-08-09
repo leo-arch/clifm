@@ -1146,7 +1146,6 @@ struct config_t {
 	int log_cmds;
 	int log_msgs;
 	int long_view;
-	int mark_timestamp;
 	int max_dirhist;
 	int max_hist;
 	int max_jump_total_rank;
@@ -1185,6 +1184,7 @@ struct config_t {
 	int suggest_filetype_color;
 	int suggestions;
 	int time_follows_sort;
+	int timestamp_mark;
 	int tips;
 	int trim_names;
 #ifndef _NO_TRASH
