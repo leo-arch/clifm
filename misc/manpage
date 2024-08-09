@@ -1629,6 +1629,7 @@ The following codes are used for different interface elements (in the \fIInterfa
  do  = octal value for file properties
  dp  = SUID, SGID, sticky bit
  dr  = read permission bit
+ dt  = timestamp identification mark
  dw  = write permission bit
  dxd = executable permission bit (directories)
  dxr = executable permission bit (regular files)
