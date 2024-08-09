@@ -3193,12 +3193,10 @@ print_size_shades(void)
 }
 
 static void
-print_date_shades(void)
+print_date_shades(const time_t t)
 {
 	fputs(_("      (dd)  Date (unset: using shades)\n              "), stdout);
 
-	const time_t t = time(NULL);
-	props_now = t;
 	char tstr[MAX_SHADE_LEN]; *tstr = '\0';
 
 	get_color_age(t - (60LL*60), tstr, sizeof(tstr));
@@ -3218,6 +3216,25 @@ print_date_shades(void)
 }
 
 static void
+print_date_colors(void)
+{
+	const time_t t = time(NULL);
+	props_now = t;
+
+	if (*dd_c) {
+		printf(_("%sColor%s (dd)  Date (e.g. %sJul 9 08:12%s)\n"),
+			dd_c, df_c, dd_c, df_c);
+	} else {
+		print_date_shades(t);
+	}
+
+	char tstr[MAX_SHADE_LEN]; *tstr = '\0';
+	get_color_age(t - (24LL*60*60), tstr, sizeof(tstr));
+	printf(_("%s%sColor%s (dt)  Timestamp mark (e.g. %sMay 25 22:08%sm%s)\n"),
+		tstr, *dt_c ? dt_c : dim_c, df_c, tstr, *dt_c ? dt_c : dim_c, df_c);
+}
+
+static void
 print_prop_colors(void)
 {
 	printf(_("\n%sProperties / Long view%s\n\n"), BOLD, df_c);
@@ -3232,18 +3249,16 @@ print_prop_colors(void)
 		df_c, dp_c, df_c);
 	printf(_("%sColor%s (dg)  User/group ID (e.g. %sjane wheel%s)\n"),
 		dg_c, df_c, dg_c, df_c);
+
 	if (*dz_c) {
 		printf(_("%sColor%s (dz)  Size (e.g. %s12.69k%s)\n"),
 			dz_c, df_c, dz_c, df_c);
 	} else {
 		print_size_shades();
 	}
-	if (*dd_c) {
-		printf(_("%sColor%s (dd)  Date (e.g. %sJul 9 16:39%s)\n"),
-			dd_c, df_c, dd_c, df_c);
-	} else {
-		print_date_shades();
-	}
+
+	print_date_colors();
+
 	printf(_("%sColor%s (db)  Used blocks (e.g. %s1576%s)\n"),
 		db_c, df_c, db_c, df_c);
 	printf(_("%sColor%s (dk)  Links number (e.g. %s92%s)\n"),
