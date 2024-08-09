@@ -254,6 +254,28 @@ construct_file_perms(const mode_t mode, char *perm_str, const char file_type,
 	}
 }
 
+static char *
+get_time_char(void)
+{
+	if (conf.time_follows_sort == 1) {
+		switch (conf.sort) {
+		case SATIME: return "a";
+		case SCTIME: return "c";
+		case SBTIME: return "b";
+		case SMTIME: return "m";
+		default: break;
+		}
+	}
+
+	switch (prop_fields.time) {
+	case PROP_TIME_ACCESS: return "a";
+	case PROP_TIME_CHANGE: return "c";
+	case PROP_TIME_BIRTH: return "b";
+	case PROP_TIME_MOD: /* fallthrough */
+	default: return "m";
+	}
+}
+
 static void
 construct_timestamp(char *time_str, const struct fileinfo *props)
 {
@@ -313,8 +335,9 @@ construct_timestamp(char *time_str, const struct fileinfo *props)
 		xstrsncpy(file_time, invalid_time_str, sizeof(file_time));
 	}
 
-	snprintf(time_str, TIME_STR_LEN, "%s%s%s", cdate, *file_time
-		? file_time : UNKNOWN_STR, df_c);
+	snprintf(time_str, TIME_STR_LEN, "%s%s%s%s%s", cdate, *file_time
+		? file_time : UNKNOWN_STR, dim_c, conf.mark_timestamp == 1
+		? get_time_char() : "", df_c);
 }
 
 static void

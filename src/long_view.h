@@ -34,7 +34,7 @@
 /* 14 colors + 15 single chars + NUL byte */
 #define PERM_STR_LEN  ((MAX_COLOR * 14) + 16) /* construct_file_perms() */
 
-#define TIME_STR_LEN  (MAX_TIME_STR + (MAX_COLOR * 2) + 2) /* construct_timestamp() */
+#define TIME_STR_LEN  (MAX_TIME_STR + (MAX_COLOR * 4) + 2 + 1) /* construct_timestamp() */
 /* construct_human_size() returns a string of at most MAX_HUMAN_SIZE chars (helpers.h) */
 #define SIZE_STR_LEN  (MAX_HUMAN_SIZE + (MAX_COLOR * 3) + 10) /* construct_file_size() */
 /* 2 colors + 2 names + (space + NUL byte) + DIM */

@@ -219,6 +219,7 @@ init_conf_struct(void)
 	conf.log_cmds = UNSET;
 	conf.log_msgs = UNSET;
 	conf.long_view = UNSET;
+	conf.mark_timestamp = DEF_MARK_TIMESTAMP;
 	conf.max_dirhist = UNSET;
 	conf.max_hist = UNSET;
 	conf.max_log = UNSET;
@@ -256,6 +257,7 @@ init_conf_struct(void)
 	conf.splash_screen = UNSET;
 	conf.suggest_filetype_color = UNSET;
 	conf.suggestions = UNSET;
+	conf.time_follows_sort = DEF_TIME_FOLLOWS_SORT;
 	conf.tips = UNSET;
 	conf.trim_names = UNSET;
 #ifndef _NO_TRASH
@@ -2656,7 +2658,7 @@ check_time_str(void)
 
 	if (conf.relative_time == 1) {
 	/* +1 = extra space to avoid hitting the screen right edge in long view. */
-		prop_fields.len += (7 + 1);
+		prop_fields.len += (7 + 1) + (conf.mark_timestamp == 1 ? 1 : 0);
 		xstrsncpy(invalid_time_str, " -     ", sizeof(invalid_time_str));
 		return;
 	}
@@ -2681,7 +2683,7 @@ check_time_str(void)
 
 	/* Append the time string length to the properties total length, so that
 	 * we can better calculate how much space left we have to print file names. */
-	prop_fields.len += (int)(l + 1);
+	prop_fields.len += (int)(l + 1) + (conf.mark_timestamp == 1 ? 1 : 0);
 }
 #pragma GCC diagnostic pop
 

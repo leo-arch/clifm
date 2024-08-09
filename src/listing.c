@@ -131,6 +131,7 @@ struct checks_t {
 	int id_names;
 	int lnk_char;
 	int min_name_trim;
+	int time_follows_sort;
 	int xattr;
 };
 
@@ -198,6 +199,8 @@ init_checks_struct(void)
 	checks.min_name_trim = (conf.long_view == 1 && conf.max_name_len != UNSET
 		&& conf.min_name_trim > conf.max_name_len);
 	checks.xattr = (conf.long_view == 1 && prop_fields.xattr == 1);
+	checks.time_follows_sort = (conf.time_follows_sort == 1
+		&& conf.sort >= SATIME && conf.sort <= SMTIME);
 }
 
 #if !defined(_NO_ICONS)
@@ -2616,12 +2619,22 @@ load_file_gral_info(const struct stat *a, const filesn_t n)
 	}
 
 	if (conf.long_view == 1) {
-		switch (prop_fields.time) {
-		case PROP_TIME_ACCESS: file_info[n].ltime = a->st_atime; break;
-		case PROP_TIME_CHANGE: file_info[n].ltime = a->st_ctime; break;
-		case PROP_TIME_MOD: file_info[n].ltime = a->st_mtime; break;
-		case PROP_TIME_BIRTH: file_info[n].ltime = btime; break;
-		default: file_info[n].ltime = a->st_mtime; break;
+		if (checks.time_follows_sort == 1) {
+			switch (conf.sort) {
+			case SATIME: file_info[n].ltime = a->st_atime; break;
+			case SBTIME: file_info[n].ltime = btime; break;
+			case SCTIME: file_info[n].ltime = a->st_ctime; break;
+			case SMTIME: file_info[n].ltime = a->st_mtime; break;
+			default: file_info[n].ltime = a->st_mtime; break;
+			}
+		} else {
+			switch (prop_fields.time) {
+			case PROP_TIME_ACCESS: file_info[n].ltime = a->st_atime; break;
+			case PROP_TIME_CHANGE: file_info[n].ltime = a->st_ctime; break;
+			case PROP_TIME_MOD: file_info[n].ltime = a->st_mtime; break;
+			case PROP_TIME_BIRTH: file_info[n].ltime = btime; break;
+			default: file_info[n].ltime = a->st_mtime; break;
+			}
 		}
 	}
 

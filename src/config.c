@@ -1625,6 +1625,10 @@ create_main_config_file(char *file)
 # x = extended attributes/ACL/capabilities (marked as '@') (requires p|n)\n\
 # A single dash (\'-\') disables all fields\n\
 ;PropFields=\"%s\"\n\
+# Append a mark to timestamps in long view to identify the kind of timestamp.\n\
+;MarkTimestamp=%d\n\
+# Make time field in long view follow sort if sorting by time.\n\
+;TimeFollowsSort=%d\n\
 # Number of spaces between fields in long view (1-2).\n\
 ;PropFieldsGap=%d\n\
 # Format used to print timestamps in long view. Available options:\n\
@@ -1680,6 +1684,8 @@ create_main_config_file(char *file)
 		DEF_SHOW_HIDDEN == 1 ? "true" : "false",
 		DEF_LONG_VIEW == 1 ? "true" : "false",
 		DEF_PROP_FIELDS,
+		DEF_MARK_TIMESTAMP,
+		DEF_TIME_FOLLOWS_SORT,
 		DEF_PROP_FIELDS_GAP,
 		DEF_APPARENT_SIZE == 1 ? "true" : "false",
 		DEF_FULL_DIR_SIZE == 1 ? "true" : "false",
@@ -3126,6 +3132,10 @@ read_config(void)
 			set_config_bool_value(line + 8, &conf.log_cmds);
 		}
 
+		else if (*line == 'M' && strncmp(line, "MarkTimestamp=", 14) == 0) {
+			set_config_bool_value(line + 14, &conf.mark_timestamp);
+		}
+
 		else if (xargs.max_dirhist == UNSET && *line == 'M'
 		&& strncmp(line, "MaxDirhist=", 11) == 0) {
 			set_config_int_value(line + 11, &conf.max_dirhist, 0, INT_MAX);
@@ -3341,6 +3351,10 @@ read_config(void)
 
 			free(conf.term);
 			conf.term = savestring(tmp, strlen(tmp));
+		}
+
+		else if (*line == 'T' && strncmp(line, "TimeFollowsSort=", 16) == 0) {
+			set_config_bool_value(line + 16, &conf.time_follows_sort);
 		}
 
 		else if (xargs.time_style == UNSET && *line == 'T'
