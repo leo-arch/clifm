@@ -87,7 +87,7 @@ define FTYPE_BROKEN_LINK=4;2;36   # Broken symbolic link
 define FTYPE_MULTI_HLINK=7;36     # Multi-hardlink file
 define FTYPE_BLK_DEV=1;33         # Block device
 define FTYPE_CHR_DEV=1            # Char device
-define FTYPE_FIFO=4;45;37         # FIFO/pipe
+define FTYPE_FIFO=45;37           # FIFO/pipe
 define FTYPE_SOCK=45;37           # Socket
 define FTYPE_CAP=30;41            # File with capabilities
 define FTYPE_DOOR=35              # Door (Solaris only)
@@ -116,9 +116,11 @@ define PROP_INODE=36        # Inode number
 define PROP_LINKS=31        # Number of file links
 define PROP_OCTAL_PERM=36   # Permissions in octal
 define PROP_DASH=2;37       # Dot separator and dash (unset bit)
+define PROP_TIME_MARK=      # Timestamp identification character (2)
 
 # (1) If unset (default), color shades are used instead.
 # See DateShades and SizeShades below.
+# (2) If unset, the current timestamp color is dimmed.
 
 #=====================================#
 #            INTERFACE                #
@@ -200,7 +202,7 @@ define HL_WHACK=31      # Backslash (aka whack)
 FiletypeColors="bd=FTYPE_BLK_DEV:ca=FTYPE_CAP:cd=FTYPE_CHR_DEV:di=FTYPE_DIR:ed=FTYPE_EMPTY_DIR:ee=FTYPE_EMPTY_EXEC:ef=FTYPE_EMPTY_REG:ex=FTYPE_EXEC:fi=FTYPE_REG:ln=FTYPE_LINK:mh=FTYPE_MULTI_HLINK:nd=FTYPE_DIR_NO_PERM:nf=FTYPE_REG_NO_PERM:no=FTYPE_UNKNOWN:oo=FTYPE_DOOR:or=FTYPE_BROKEN_LINK:ow=FTYPE_OW:pi=FTYPE_FIFO:sg=FTYPE_SGID:so=FTYPE_SOCK:st=FTYPE_STICKY_NOT_OW:su=FTYPE_SUID:tw=FTYPE_STICKY_OW:uf=FTYPE_NON_STAT:"
 
 ### Colors for Clifm's interface elements
-InterfaceColors="db=PROP_BLKS:dd=PROP_DATE:de=PROP_INODE:df=IFACE_DEF_COLOR:dg=PROP_ID:dk=PROP_LINKS:dl=IFACE_DIV_LINE:dn=PROP_DASH:do=PROP_OCTAL_PERM:dp=PROP_SPECIAL:dr=PROP_READ:dw=PROP_WRITE:dxd=PROP_EXEC_DIR:dxr=PROP_EXEC_FILE:dz=PROP_SIZE:el=IFACE_ELN:em=PROMPT_ERR:fc=IFACE_FILES_COUNTER:hb=HL_BRACKET:hc=HL_COMMENT:hd=HL_SLASH:he=HL_EXPANSION:hn=HL_NUMBER:hp=HL_PARAM:hq=HL_QUOTE:hr=HL_REDIRECT:hs=HL_PROC_SEP:hv=HL_VAR:hw=HL_WHACK:lc=IFACE_LINK_IND:li=PROMPT_SEL:mi=IFACE_MISC_IND:nm=PROMPT_NOTICE:ro=PROMPT_READ_ONLY:si=PROMPT_STEALTH:sb=SUG_BUILTIN:sc=SUG_EXT_CMD:sd=SUG_INT_CMD_DESC:sf=SUG_FILE_NAME:sh=SUG_HIST:sp=SUG_BAEJ_POINTER:sx=SUG_INT_CMD:sz=SUG_FILE_NAME_FUZZY:ti=PROMPT_TRASH:ts=IFACE_TABCOMP_PREFIX:tt=IFACE_TRIM_CHAR:tx=PROMPT_TEXT:wc=IFACE_WELCOME_MSG:wm=PROMPT_WARNING:ws1=WORKSPACE_1:ws2=WORKSPACE_2:ws3=WORKSPACE_3:ws4=WORKSPACE_4:ws5=WORKSPACE_5:ws6=WORKSPACE_6:ws7=WORKSPACE_7:ws8=WORKSPACE_8:xf=PROMPT_EXIT_FAILURE:xs=PROMPT_EXIT_SUCCESS:"
+InterfaceColors="db=PROP_BLKS:dd=PROP_DATE:de=PROP_INODE:df=IFACE_DEF_COLOR:dg=PROP_ID:dk=PROP_LINKS:dl=IFACE_DIV_LINE:dn=PROP_DASH:do=PROP_OCTAL_PERM:dp=PROP_SPECIAL:dr=PROP_READ:dt=PROP_TIME_MARK:dw=PROP_WRITE:dxd=PROP_EXEC_DIR:dxr=PROP_EXEC_FILE:dz=PROP_SIZE:el=IFACE_ELN:em=PROMPT_ERR:fc=IFACE_FILES_COUNTER:hb=HL_BRACKET:hc=HL_COMMENT:hd=HL_SLASH:he=HL_EXPANSION:hn=HL_NUMBER:hp=HL_PARAM:hq=HL_QUOTE:hr=HL_REDIRECT:hs=HL_PROC_SEP:hv=HL_VAR:hw=HL_WHACK:lc=IFACE_LINK_IND:li=PROMPT_SEL:mi=IFACE_MISC_IND:nm=PROMPT_NOTICE:ro=PROMPT_READ_ONLY:si=PROMPT_STEALTH:sb=SUG_BUILTIN:sc=SUG_EXT_CMD:sd=SUG_INT_CMD_DESC:sf=SUG_FILE_NAME:sh=SUG_HIST:sp=SUG_BAEJ_POINTER:sx=SUG_INT_CMD:sz=SUG_FILE_NAME_FUZZY:ti=PROMPT_TRASH:ts=IFACE_TABCOMP_PREFIX:tt=IFACE_TRIM_CHAR:tx=PROMPT_TEXT:wc=IFACE_WELCOME_MSG:wm=PROMPT_WARNING:ws1=WORKSPACE_1:ws2=WORKSPACE_2:ws3=WORKSPACE_3:ws4=WORKSPACE_4:ws5=WORKSPACE_5:ws6=WORKSPACE_6:ws7=WORKSPACE_7:ws8=WORKSPACE_8:xf=PROMPT_EXIT_FAILURE:xs=PROMPT_EXIT_SUCCESS:"
 
 #=====================================#
 #           FILE EXTENSIONS           #
@@ -267,7 +269,7 @@ ExtColors="3gp=VIDEO:asf=VIDEO:avi=VIDEO:cgm=VIDEO:dl=VIDEO:emf=VIDEO:flc=VIDEO:
 #    "226-2"      -> "dimmed yellow"     (8-bit colors notation)
 #    "#ffaff00-4" -> "underlined orange" (24-bit colors notation)
 
-DateShades="1,31-2,36-1,36,36-2,36-2,36-2"
+DateShades="1,31-2,37,37-2,36-1,36,36-2"
 #DateShades="2,196-2,231,253,250,247,244"
 #DateShades="3,#ff0000-2,#ffffff,#dadada,#bcbcbc,#9e9e9e,#808080"
 

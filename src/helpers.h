@@ -2084,6 +2084,7 @@ extern char
 	do_c[MAX_COLOR],  /* Octal perms */
 	dp_c[MAX_COLOR],  /* Special files (SUID, SGID, etc) */
 	dr_c[MAX_COLOR],  /* Read */
+	dt_c[MAX_COLOR],  /* Timestamp mark */
 	dw_c[MAX_COLOR],  /* Write */
 	dxd_c[MAX_COLOR], /* Execute (dirs) */
 	dxr_c[MAX_COLOR], /* Execute (reg files) */

@@ -956,6 +956,7 @@ reset_iface_colors(void)
 	*do_c = '\0';
 	*dp_c = '\0';
 	*dr_c = '\0';
+	*dt_c = '\0';
 	*dw_c = '\0';
 	*dxd_c = '\0';
 	*dxr_c = '\0';
@@ -1389,6 +1390,7 @@ set_iface_colors(char **colors, const size_t num_colors)
 				case 'o': set_color(colors[i] + 3, do_c, RL_PRINTABLE); break;
 				case 'p': set_color(colors[i] + 3, dp_c, RL_PRINTABLE); break;
 				case 'r': set_color(colors[i] + 3, dr_c, RL_PRINTABLE); break;
+				case 't': set_color(colors[i] + 3, dt_c, RL_PRINTABLE); break;
 				case 'w': set_color(colors[i] + 3, dw_c, RL_PRINTABLE); break;
 				default: break;
 				}
@@ -1870,6 +1872,7 @@ set_default_colors_256(void)
 	if (!*do_c) xstrsncpy(do_c, DEF_DO_C256, sizeof(do_c));
 	if (!*dp_c) xstrsncpy(dp_c, DEF_DP_C256, sizeof(dp_c));
 	if (!*dr_c) xstrsncpy(dr_c, DEF_DR_C256, sizeof(dr_c));
+/*	if (!*dt_c) // Unset: dim the current color */
 	if (!*dw_c) xstrsncpy(dw_c, DEF_DW_C256, sizeof(dw_c));
 	if (!*dxd_c) xstrsncpy(dxd_c, DEF_DXD_C256, sizeof(dxd_c));
 	if (!*dxr_c) xstrsncpy(dxr_c, DEF_DXR_C256, sizeof(dxr_c));
@@ -2041,6 +2044,7 @@ set_default_colors(void)
 	if (!*do_c) xstrsncpy(do_c, DEF_DO_C, sizeof(do_c));
 	if (!*dp_c) xstrsncpy(dp_c, DEF_DP_C, sizeof(dp_c));
 	if (!*dr_c) xstrsncpy(dr_c, DEF_DR_C, sizeof(dr_c));
+/*	if (!*dt_c) // Unset: dim the current color */
 	if (!*dw_c) xstrsncpy(dw_c, DEF_DW_C, sizeof(dw_c));
 	if (!*dxd_c) xstrsncpy(dxd_c, DEF_DXD_C, sizeof(dxd_c));
 	if (!*dxr_c) xstrsncpy(dxr_c, DEF_DXR_C, sizeof(dxr_c));
@@ -2705,6 +2709,7 @@ disable_bold(void)
 	remove_bold_attr(do_c);
 	remove_bold_attr(dp_c);
 	remove_bold_attr(dr_c);
+	remove_bold_attr(dt_c);
 	remove_bold_attr(dw_c);
 	remove_bold_attr(dxd_c);
 	remove_bold_attr(dxr_c);

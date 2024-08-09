@@ -336,8 +336,8 @@ construct_timestamp(char *time_str, const struct fileinfo *props)
 	}
 
 	snprintf(time_str, TIME_STR_LEN, "%s%s%s%s%s", cdate, *file_time
-		? file_time : UNKNOWN_STR, dim_c, conf.mark_timestamp == 1
-		? get_time_char() : "", df_c);
+		? file_time : UNKNOWN_STR, *dt_c ? dt_c : dim_c,
+		conf.mark_timestamp == 1 ? get_time_char() : "", df_c);
 }
 
 static void
