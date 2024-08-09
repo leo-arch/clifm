@@ -1626,9 +1626,9 @@ create_main_config_file(char *file)
 # A single dash (\'-\') disables all fields\n\
 ;PropFields=\"%s\"\n\
 # Append a mark to timestamps in long view to identify the kind of timestamp.\n\
-;TimestampMark=%d\n\
+;TimestampMark=%s\n\
 # Make time field in long view follow sort if sorting by time.\n\
-;TimeFollowsSort=%d\n\
+;TimeFollowsSort=%s\n\
 # Number of spaces between fields in long view (1-2).\n\
 ;PropFieldsGap=%d\n\
 # Format used to print timestamps in long view. Available options:\n\
@@ -1684,8 +1684,8 @@ create_main_config_file(char *file)
 		DEF_SHOW_HIDDEN == 1 ? "true" : "false",
 		DEF_LONG_VIEW == 1 ? "true" : "false",
 		DEF_PROP_FIELDS,
-		DEF_TIMESTAMP_MARK,
-		DEF_TIME_FOLLOWS_SORT,
+		DEF_TIMESTAMP_MARK == 1 ? "true" : "false",
+		DEF_TIME_FOLLOWS_SORT == 1 ? "true" : "false",
 		DEF_PROP_FIELDS_GAP,
 		DEF_APPARENT_SIZE == 1 ? "true" : "false",
 		DEF_FULL_DIR_SIZE == 1 ? "true" : "false",
