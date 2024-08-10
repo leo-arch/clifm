@@ -2078,13 +2078,14 @@ extern char
 	db_c[MAX_COLOR],  /* File allocated blocks */
 	dd_c[MAX_COLOR],  /* Date (fixed color: no shading) */
 	de_c[MAX_COLOR],  /* Inode number */
-	dg_c[MAX_COLOR],  /* UID, GID */
+	dg_c[MAX_COLOR],  /* Group ID */
 	dk_c[MAX_COLOR],  /* Number of links */
 	dn_c[MAX_COLOR],  /* dash (none) */
 	do_c[MAX_COLOR],  /* Octal perms */
 	dp_c[MAX_COLOR],  /* Special files (SUID, SGID, etc) */
 	dr_c[MAX_COLOR],  /* Read */
 	dt_c[MAX_COLOR],  /* Timestamp mark */
+	du_c[MAX_COLOR],  /* User ID */
 	dw_c[MAX_COLOR],  /* Write */
 	dxd_c[MAX_COLOR], /* Execute (dirs) */
 	dxr_c[MAX_COLOR], /* Execute (reg files) */

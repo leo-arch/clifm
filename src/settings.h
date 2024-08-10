@@ -43,8 +43,8 @@ ee=32:ef=2:ex=1;32:fi=0:ln=1;36:mh=30;46:nd=4;1;31:nf=2;4;31:\
 no=31;47:or=2;4;36:ow=34;40:pi=4;45;37:so=45;37:su=37;41:sg=30;43:st=37;44:\
 tw=37;42:uf=2;4;37:"
 
-#define DEF_IFACE_COLORS "db=:dd=:de=:df=0:dg=:dk=:dl=2;37:\
-dn=2;37:do=:dp=:dr=:dt=:dw=:dxd=:dxr=:dz=:\
+#define DEF_IFACE_COLORS "db=:dd=:de=:df=0:dg=2;35:dk=:dl=2;37:\
+dn=2;37:do=:dp=:dr=:dt=:du=35:dw=:dxd=:dxr=:dz=:\
 el=36:em=1;31:fc=2;37:hb=36:hc=2;31:lc=:\
 hd=36:he=0;36:hn=0:hp=36:hq=33:hr=31:hs=32:hv=32:\
 li=1;32:mi=1;36:nm=1;32:ro=:sb=2;33:sc=2;36:sd=2;37:\
@@ -110,15 +110,15 @@ xf=1;31:xs=32:"
 #ifdef __sun
 #define DEF_OO_C  "\x1b[0;35m"    /* Solaris door/port (ls default is 1;35) */
 #endif /* __sun */
-#define DEF_OR_C  "\x1b[2;4;36m" /* Orphaned/broken symlink */
-#define DEF_OW_C  "\x1b[34;40m"  /* Other-writable */
-#define DEF_PI_C  "\x1b[4;45;37m"  /* FIFO/pipe */
-#define DEF_SG_C  "\x1b[30;43m"  /* SGID file */
-#define DEF_SO_C  "\x1b[45;37m"  /* Socket */
-#define DEF_ST_C  "\x1b[37;44m"  /* Sticky bit set */
-#define DEF_SU_C  "\x1b[37;41m"  /* SUID file */
-#define DEF_TW_C  "\x1b[37;42m"  /* Sticky and other-writable */
-#define DEF_UF_C  "\x1b[2;4;37m" /* Un'stat'able file */
+#define DEF_OR_C  "\x1b[2;4;36m"  /* Orphaned/broken symlink */
+#define DEF_OW_C  "\x1b[34;40m"   /* Other-writable */
+#define DEF_PI_C  "\x1b[4;45;37m" /* FIFO/pipe */
+#define DEF_SG_C  "\x1b[30;43m"   /* SGID file */
+#define DEF_SO_C  "\x1b[45;37m"   /* Socket */
+#define DEF_ST_C  "\x1b[37;44m"   /* Sticky bit set */
+#define DEF_SU_C  "\x1b[37;41m"   /* SUID file */
+#define DEF_TW_C  "\x1b[37;42m"   /* Sticky and other-writable */
+#define DEF_UF_C  "\x1b[2;4;37m"  /* Un'stat'able file */
 
 /* Interface */
 #define DEF_DF_C  "\x1b[0m"      /* Reset attributes: default terminal color */
@@ -181,18 +181,19 @@ xf=1;31:xs=32:"
 #define DEF_HW_C  "\x1b[1;31m" /* Backslash (aka whack) */
 
 /* Colors for the properties and long/detail view functions */
-#define DEF_DB_C  "\x1b[0;33m" /* File allocated blocks */
-#define DEF_DD_C  "\x1b[0;36m" /* Modification date */
-#define DEF_DE_C  "\x1b[0;36m" /* Inode number (long view only) */
-#define DEF_DG_C  "\x1b[0;35m" /* UID, GID */
-#define DEF_DK_C  "\x1b[0;31m" /* Number of links (long view only) */
+#define DEF_DB_C  "\x1b[0;33m"   /* File allocated blocks */
+#define DEF_DD_C  "\x1b[0;36m"   /* Modification date */
+#define DEF_DE_C  "\x1b[0;36m"   /* Inode number (long view only) */
+#define DEF_DG_C  "\x1b[0;2;35m" /* Group ID */
+#define DEF_DK_C  "\x1b[0;31m"   /* Number of links (long view only) */
 #define DEF_DN_C  "\x1b[0;2;37m" /* Dash (no attribute) */
-#define DEF_DO_C  "\x1b[0;36m" /* Perms in octal */
-#define DEF_DP_C  "\x1b[0;35m" /* SUID, SGID, Sticky */
-#define DEF_DR_C  "\x1b[0;33m" /* Read perm */
-#define DEF_DW_C  "\x1b[0;31m" /* Write perm */
-#define DEF_DXD_C "\x1b[0;32m" /* Execute perm (dirs) */
-#define DEF_DXR_C "\x1b[0;36m" /* Execute perm (reg files) */
+#define DEF_DO_C  "\x1b[0;36m"   /* Perms in octal */
+#define DEF_DP_C  "\x1b[0;35m"   /* SUID, SGID, Sticky */
+#define DEF_DR_C  "\x1b[0;33m"   /* Read perm */
+#define DEF_DU_C  "\x1b[0;35m"   /* User ID */
+#define DEF_DW_C  "\x1b[0;31m"   /* Write perm */
+#define DEF_DXD_C "\x1b[0;32m"   /* Execute perm (dirs) */
+#define DEF_DXR_C "\x1b[0;36m"   /* Execute perm (reg files) */
 
 /* Default color shades for date field in file properties */
 #define DEF_DATE_SHADES_8   "1,31-2,37-1,37,37-2,36,36-2"
@@ -211,8 +212,8 @@ ed=2;34:ee=32:ef=2:ex=1;32:fi=0:ln=1;36:mh=7;36:nd=1;31:nf=2;31:no=4;31;47:\
 or=4;2;36:ow=48;5;235;38;5;33:pi=4;45;37:sg=30;43:so=45;37:st=37;44:su=37;41:\
 tw=37;42:uf=4;2;37:"
 
-#define DEF_IFACE_COLORS_256 "db=:dd=:de=:df=0:dg=35:dk=:dl=38;5;243:dn=:\
-do=:dp=:dr=:dt=:dw=:dxd=:dxr=:dz=:el=36:em=1;31:fc=38;5;246:hb=36:hc=2;37:\
+#define DEF_IFACE_COLORS_256 "db=:dd=:de=:df=0:dg=2;35:dk=:dl=38;5;243:dn=:\
+do=:dp=:dr=:dt=:du=35:dw=:dxd=:dxr=:dz=:el=36:em=1;31:fc=38;5;246:hb=36:hc=2;37:\
 hd=36:he=36:hn=:hp=36:hq=LY:hr=31:hs=32:hv=32:lc=38;5;43:li=1;32:mi=1;36:\
 nm=1;32:ro=:si=1;34:sb=2;33:sc=2;36:sd=38;5;243:sf=4;2;36:sh=38;5;243:sp=2;31:\
 sx=2;32:sz=4;2;36:ti=1;36:ts=4;35:tt=1;2;36:tx=0:wc=1;36:wm=38;5;228:ws1=34:\
@@ -346,12 +347,13 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define DEF_DB_C256  "\x1b[0;38;5;214m" /* File allocated blocks */
 #define DEF_DD_C256  "\x1b[0;36m"       /* Modification date */
 #define DEF_DE_C256  "\x1b[0;38;5;79m"  /* Inode number (long view only) */
-#define DEF_DG_C256  "\x1b[0;35m"       /* UID, GID */
+#define DEF_DG_C256  "\x1b[0;2;35m"     /* Group ID */
 #define DEF_DK_C256  "\x1b[0;38;5;197m" /* Number of links (long view only) */
 #define DEF_DN_C256  "\x1b[0;2;37m"     /* Dash (no attribute) */
 #define DEF_DO_C256  "\x1b[0;38;5;79m"  /* Perms in octal */
 #define DEF_DP_C256  "\x1b[0;38;5;140m" /* SUID, SGID, Sticky */
 #define DEF_DR_C256  "\x1b[0;38;5;228m" /* Read perm */
+#define DEF_DU_C256  "\x1b[0;35m"       /* User ID */
 #define DEF_DW_C256  "\x1b[0;38;5;197m" /* Write perm */
 #define DEF_DXD_C256 "\x1b[0;38;5;77m"  /* Execute perm (dirs) */
 #define DEF_DXR_C256 "\x1b[0;38;5;79m"  /* Execute perm (reg files) */

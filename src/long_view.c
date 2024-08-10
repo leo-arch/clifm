@@ -336,7 +336,7 @@ construct_timestamp(char *time_str, const struct fileinfo *props)
 	}
 
 	snprintf(time_str, TIME_STR_LEN, "%s%s%s%s%s", cdate, *file_time
-		? file_time : UNKNOWN_STR, *dt_c ? dt_c : dim_c,
+		? file_time : UNKNOWN_STR, dt_c,
 		conf.timestamp_mark == 1 ? get_time_char() : "", df_c);
 }
 
@@ -344,8 +344,8 @@ static void
 construct_id_field(const struct fileinfo *props, char *id_str,
 	const struct maxes_t *maxes, const int file_perm)
 {
-	const char *id_color =
-		(file_perm == 1 && conf.colorize == 1) ? dg_c : df_c;
+	const char *uid_color =
+		(file_perm == 1 && conf.colorize == 1) ? du_c : df_c;
 
 #define USER_NAME props->uid_i.name ? props->uid_i.name \
 		: (props->stat_err == 1 ? UNKNOWN_STR : xitoa(props->uid))
@@ -355,21 +355,24 @@ construct_id_field(const struct fileinfo *props, char *id_str,
 	if (prop_fields.no_group == 1) {
 		if (prop_fields.ids == PROP_ID_NUM) {
 			if (props->stat_err == 1) {
-				snprintf(id_str, ID_STR_LEN, "%s%*s%s", id_color,
+				snprintf(id_str, ID_STR_LEN, "%s%*s%s", uid_color,
 					maxes->id_user, UNKNOWN_STR, df_c);
 			} else {
-				snprintf(id_str, ID_STR_LEN, "%s%*u%s", id_color,
+				snprintf(id_str, ID_STR_LEN, "%s%*u%s", uid_color,
 					maxes->id_user, props->uid, df_c);
 			}
 		} else { /* PROPS_ID_NAME */
-			snprintf(id_str, ID_STR_LEN, "%s%-*s%s", id_color,
+			snprintf(id_str, ID_STR_LEN, "%s%-*s%s", uid_color,
 				maxes->id_user, USER_NAME, df_c);
 		}
 
 		return;
 	}
 
-	const char *dim = conf.colorize == 0 ? "" : dim_c;
+//	const char *dim = conf.colorize == 0 ? "" : dim_c;
+	const char *gid_color = conf.colorize == 0 ? "" :
+		(file_perm == 1 ? dg_c : dim_c);
+
 	if (prop_fields.ids == PROP_ID_NUM) {
 		if (props->stat_err == 1) {
 			snprintf(id_str, ID_STR_LEN, "%s%*c %*c",
@@ -377,13 +380,13 @@ construct_id_field(const struct fileinfo *props, char *id_str,
 				maxes->id_group, UNKNOWN_CHR);
 		} else {
 			snprintf(id_str, ID_STR_LEN, "%s%*u %s%*u%s",
-				id_color, maxes->id_user, props->uid,
-				dim, maxes->id_group, props->gid, df_c);
+				uid_color, maxes->id_user, props->uid,
+				gid_color, maxes->id_group, props->gid, df_c);
 		}
 	} else { /* PROPS_ID_NAME */
 		snprintf(id_str, ID_STR_LEN, "%s%-*s %s%-*s%s",
-			id_color, maxes->id_user, USER_NAME,
-			props->stat_err == 1 ? "" : dim,
+			uid_color, maxes->id_user, USER_NAME,
+			props->stat_err == 1 ? "" : gid_color,
 			maxes->id_group, GROUP_NAME, df_c);
 	}
 }

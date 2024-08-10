@@ -957,6 +957,7 @@ reset_iface_colors(void)
 	*dp_c = '\0';
 	*dr_c = '\0';
 	*dt_c = '\0';
+	*du_c = '\0';
 	*dw_c = '\0';
 	*dxd_c = '\0';
 	*dxr_c = '\0';
@@ -1391,6 +1392,7 @@ set_iface_colors(char **colors, const size_t num_colors)
 				case 'p': set_color(colors[i] + 3, dp_c, RL_PRINTABLE); break;
 				case 'r': set_color(colors[i] + 3, dr_c, RL_PRINTABLE); break;
 				case 't': set_color(colors[i] + 3, dt_c, RL_PRINTABLE); break;
+				case 'u': set_color(colors[i] + 3, du_c, RL_PRINTABLE); break;
 				case 'w': set_color(colors[i] + 3, dw_c, RL_PRINTABLE); break;
 				default: break;
 				}
@@ -1866,13 +1868,21 @@ set_default_colors_256(void)
 /*	if (!*dd_c) // Date color unset: let's use shades */
 	if (!*db_c) xstrsncpy(db_c, DEF_DB_C256, sizeof(db_c));
 	if (!*de_c) xstrsncpy(de_c, DEF_DE_C256, sizeof(de_c));
-	if (!*dg_c) xstrsncpy(dg_c, DEF_DG_C256, sizeof(dg_c));
+	if (!*dg_c) xstrsncpy(dg_c, *du_c ? DEF_DG_C256 : DEF_DU_C256, sizeof(dg_c));
 	if (!*dk_c) xstrsncpy(dk_c, DEF_DK_C256, sizeof(dk_c));
 	if (!*dn_c) xstrsncpy(dn_c, DEF_DN_C256, sizeof(dn_c));
 	if (!*do_c) xstrsncpy(do_c, DEF_DO_C256, sizeof(do_c));
 	if (!*dp_c) xstrsncpy(dp_c, DEF_DP_C256, sizeof(dp_c));
 	if (!*dr_c) xstrsncpy(dr_c, DEF_DR_C256, sizeof(dr_c));
-/*	if (!*dt_c) // Unset: dim the current color */
+	if (!*dt_c) // Unset: dim the current color */
+		xstrsncpy(dt_c, dim_c, sizeof(dt_c));
+	if (!*du_c) {
+		/* Before the introduction of the du color code, user IDs were
+		 * printed using the dg color code, and group IDs using the same
+		 * color but dimmed. If du isn't set, let's keep this old behavior. */
+		xstrsncpy(du_c, dg_c, sizeof(du_c));
+		xstrsncpy(dg_c, dim_c, sizeof(dg_c));
+	}
 	if (!*dw_c) xstrsncpy(dw_c, DEF_DW_C256, sizeof(dw_c));
 	if (!*dxd_c) xstrsncpy(dxd_c, DEF_DXD_C256, sizeof(dxd_c));
 	if (!*dxr_c) xstrsncpy(dxr_c, DEF_DXR_C256, sizeof(dxr_c));
@@ -2038,13 +2048,21 @@ set_default_colors(void)
 /*	if (!*dd_c) // Date color unset: let's use shades */
 	if (!*db_c) xstrsncpy(db_c, DEF_DB_C, sizeof(db_c));
 	if (!*de_c) xstrsncpy(de_c, DEF_DE_C, sizeof(de_c));
-	if (!*dg_c) xstrsncpy(dg_c, DEF_DG_C, sizeof(dg_c));
+	if (!*dg_c) xstrsncpy(dg_c, *du_c ? DEF_DG_C : DEF_DU_C, sizeof(dg_c));
 	if (!*dk_c) xstrsncpy(dk_c, DEF_DK_C, sizeof(dk_c));
 	if (!*dn_c) xstrsncpy(dn_c, DEF_DN_C, sizeof(dn_c));
 	if (!*do_c) xstrsncpy(do_c, DEF_DO_C, sizeof(do_c));
 	if (!*dp_c) xstrsncpy(dp_c, DEF_DP_C, sizeof(dp_c));
 	if (!*dr_c) xstrsncpy(dr_c, DEF_DR_C, sizeof(dr_c));
-/*	if (!*dt_c) // Unset: dim the current color */
+	if (!*dt_c) // Unset: dim the current color */
+		xstrsncpy(dt_c, dim_c, sizeof(dt_c));
+	if (!*du_c) {
+		/* Before the introduction of the du color code, user IDs were
+		 * printed using the dg color code, and group IDs using the same
+		 * color but dimmed. If du isn't set, let's keep this old behavior. */
+		xstrsncpy(du_c, dg_c, sizeof(du_c));
+		xstrsncpy(dg_c, dim_c, sizeof(dg_c));
+	}
 	if (!*dw_c) xstrsncpy(dw_c, DEF_DW_C, sizeof(dw_c));
 	if (!*dxd_c) xstrsncpy(dxd_c, DEF_DXD_C, sizeof(dxd_c));
 	if (!*dxr_c) xstrsncpy(dxr_c, DEF_DXR_C, sizeof(dxr_c));
@@ -2710,6 +2728,7 @@ disable_bold(void)
 	remove_bold_attr(dp_c);
 	remove_bold_attr(dr_c);
 	remove_bold_attr(dt_c);
+	remove_bold_attr(du_c);
 	remove_bold_attr(dw_c);
 	remove_bold_attr(dxd_c);
 	remove_bold_attr(dxr_c);
@@ -3231,7 +3250,7 @@ print_date_colors(void)
 	char tstr[MAX_SHADE_LEN]; *tstr = '\0';
 	get_color_age(t - (24LL*60*60), tstr, sizeof(tstr));
 	printf(_("%s%sColor%s (dt)  Timestamp mark (e.g. %sMay 25 22:08%sm%s)\n"),
-		tstr, *dt_c ? dt_c : dim_c, df_c, tstr, *dt_c ? dt_c : dim_c, df_c);
+		tstr, dt_c, df_c, tstr, dt_c, df_c);
 }
 
 static void
@@ -3247,8 +3266,10 @@ print_prop_colors(void)
 		dxr_c, df_c, dxr_c, df_c);
 	printf(_("%sColor%s (dp)  SUID/SGID bit (e.g. %ss%s)\n"), dp_c,
 		df_c, dp_c, df_c);
-	printf(_("%sColor%s (dg)  User/group ID (e.g. %sjane wheel%s)\n"),
-		dg_c, df_c, dg_c, df_c);
+	printf(_("%sColor%s (du)  User ID (e.g. %sjane %swheel%s)\n"),
+		du_c, df_c, du_c, dg_c, df_c);
+	printf(_("%s%sColor%s (dg)  Group ID (e.g. %sjane %swheel%s)\n"),
+		du_c, dg_c, df_c, du_c, dg_c, df_c);
 
 	if (*dz_c) {
 		printf(_("%sColor%s (dz)  Size (e.g. %s12.69k%s)\n"),

@@ -1262,8 +1262,10 @@ print_file_details(char *filename, const struct stat *attr, const char file_type
 	struct passwd *owner = getpwuid(attr->st_uid);
 	struct group *group = getgrgid(attr->st_gid);
 
-	const char *id_color =
+	const char *gid_color =
 		conf.colorize == 0 ? "" : (file_perm == 1 ? dg_c : BOLD);
+	const char *uid_color =
+		conf.colorize == 0 ? "" : (file_perm == 1 ? du_c : BOLD);
 	const char *cend = conf.colorize == 1 ? df_c : "";
 
 	if (conf.colorize == 1)
@@ -1304,9 +1306,9 @@ print_file_details(char *filename, const struct stat *attr, const char file_type
 		(uintmax_t)minor(attr->st_dev), cend);
 	printf(_("\tInode: %s%ju%s"), BOLD, (uintmax_t)attr->st_ino, cend);
 
-	printf(_("  Uid: %s%u (%s)%s"), id_color, attr->st_uid, !owner
+	printf(_("  Uid: %s%u (%s)%s"), uid_color, attr->st_uid, !owner
 		? _("UNKNOWN") : owner->pw_name, cend);
-	printf(_("  Gid: %s%u (%s)%s"), id_color, attr->st_gid, !group
+	printf(_("  Gid: %s%u (%s)%s"), gid_color, attr->st_gid, !group
 		? _("UNKNOWN") : group->gr_name, cend);
 
 	if (S_ISCHR(attr->st_mode) || S_ISBLK(attr->st_mode)) {
