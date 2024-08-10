@@ -442,9 +442,9 @@ int
 u8truncstr(char *restrict str, const size_t max)
 {
 	int len = 0;
-	static wchar_t buf[NAME_MAX + 1];
+	static wchar_t buf[NAME_BUF_SIZE];
 	*buf = L'\0';
-	if (mbstowcs(buf, str, NAME_MAX + 1) == (size_t)-1)
+	if (mbstowcs(buf, str, NAME_BUF_SIZE) == (size_t)-1)
 		return 0;
 
 	int i, bmax = (int)max;
@@ -460,7 +460,7 @@ u8truncstr(char *restrict str, const size_t max)
 		len += l;
 	}
 
-	wcsncpy((wchar_t *)str, buf, (size_t)bmax * sizeof(wchar_t)); /* flawfinder: ignore */
+	wcsncpy((wchar_t *)str, buf, NAME_BUF_SIZE); /* flawfinder: ignore */
 
 	return bmax - len;
 }

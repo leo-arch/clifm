@@ -3138,7 +3138,7 @@ read_config(void)
 		}
 
 		else if (*line == 'M' && strncmp(line, "MaxFilenameLen=", 15) == 0) {
-			set_config_int_value(line + 15, &conf.max_name_len, 1, INT_MAX);
+			set_config_int_value(line + 15, &conf.max_name_len, 1, NAME_BUF_SIZE);
 		}
 
 		else if (*line == 'M' && strncmp(line, "MaxHistory=", 11) == 0) {

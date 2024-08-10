@@ -1212,7 +1212,7 @@ construct_filename(const filesn_t i, struct wtrim_t *wtrim,
 		/* If not UTF-8, let's avoid u8truncstr(). It's a bit faster this way. */
 		const char c = name[trim_len];
 		name[trim_len] = '\0';
-		mbstowcs((wchar_t *)name_buf, name, NAME_MAX + 1);
+		mbstowcs((wchar_t *)name_buf, name, NAME_BUF_SIZE);
 		name[trim_len] = c;
 	}
 

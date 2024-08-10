@@ -434,7 +434,7 @@ char
 	dim_c[] = "\x1b[2m";
 
 /* A buffer to store file names to be displayed (wide string) */
-char name_buf[NAME_BUF_SIZE];
+char name_buf[NAME_BUF_SIZE * sizeof(wchar_t)];
 
 /* A list of all internal commands, with short and long formats.
  * We use two more lists of commands: one of commands dealing with file names
