@@ -1623,19 +1623,22 @@ The following codes are used for different interface elements (in the \fIInterfa
  db  = file allocated blocks
  dd  = last access/change/modification time \fB(1)\fR
  de  = file inode number (long view only)
- dg  = file ID (UID, GID) whenever the current user owns the file or is in the file\'s group
+ dg  = group ID (provided the user has access to the file)
  dk  = number of links (long view only)
  dn  = dash (unset property)
  do  = octal value for file properties
  dp  = SUID, SGID, sticky bit
  dr  = read permission bit
- dt  = timestamp identification mark
+ dt  = timestamp identification mark \fB(2)\fR
+ du  = user ID (provided the user has access to the file)
  dw  = write permission bit
  dxd = executable permission bit (directories)
  dxr = executable permission bit (regular files)
  dz  = size \fB(1)\fR
 .sp
- \fB(1)\fR If unset, gradient colors are used (based on file size and file age). This is the default.
+ \fB(1)\fR If unset (default), gradient colors are used (based on file size and file age).
+.sp 0
+ \fB(2)\fR If unset (default), a dimmed version of the current timestamp color is used.
 .sp
  \fBNOTE\fR: For a better graphical representation of file properties, 256 colors are used if possible (otherwise, \fBclifm\fR falls back to 16 colors).
 .sp
