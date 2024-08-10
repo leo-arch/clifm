@@ -861,7 +861,7 @@ get_longest_filename(const filesn_t n, const size_t pad)
 	}
 
 	if (conf.long_view == 0 && conf.icons == 1 && conf.columned == 1)
-		longest.name_len += 3;
+		longest.name_len += ICON_LEN;
 
 	/* LONGEST.FC_LEN stores the amount of digits taken by the files counter of
 	 * the longest file name, provided it is a directory.
@@ -1048,7 +1048,7 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad,
 	int space_left = (int)term_cols - (prop_fields.len + have_xattr
 		+ maxes.files_counter + maxes.size + maxes.links + maxes.inode
 		+ maxes.id_user + (prop_fields.no_group == 0 ? maxes.id_group : 0)
-		+ maxes.blocks + (conf.icons == 1 ? 3 : 0));
+		+ maxes.blocks + (conf.icons == 1 ? ICON_LEN : 0));
 
 	if (space_left < conf.min_name_trim)
 		space_left = conf.min_name_trim;
@@ -1059,7 +1059,7 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad,
 	if (longest.name_len < (size_t)space_left)
 		space_left = (int)longest.name_len;
 
-	maxes.name = space_left + (conf.icons == 1 ? 3 : 0);
+	maxes.name = space_left + (conf.icons == 1 ? ICON_LEN : 0);
 	pager_quit = pager_help = 0;
 
 	filesn_t i, k = files;
@@ -1608,7 +1608,7 @@ pad_filename(const int ind_char, const filesn_t i, const int pad,
 	int cur_len = 0;
 
 #ifndef _NO_ICONS
-	cur_len = pad + 1 + (conf.icons == 1 ? 3 : 0) + (int)file_info[i].len
+	cur_len = pad + 1 + (conf.icons == 1 ? ICON_LEN : 0) + (int)file_info[i].len
 		+ (ind_char ? 1 : 0);
 #else
 	cur_len = pad + 1 + (int)file_info[i].len + (ind_char ? 1 : 0);

@@ -116,7 +116,7 @@ construct_and_print_filename(const struct fileinfo *props,
 		? (filesn_t)max_files : files;
 
 	size_t cur_len = (size_t)DIGINUM(n) + 1 + plen
-		+ (conf.icons == 1 ? 3 : 0);
+		+ (conf.icons == 1 ? ICON_LEN : 0);
 
 	int diff = 0;
 	char *name = wname ? wname : props->name;

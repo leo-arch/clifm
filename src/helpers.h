@@ -890,6 +890,9 @@ extern time_t curdir_mtime;
 #define SIMPLE_STAT 1
 #define FULL_STAT   2
 
+/* Length to be added to a filename length if icons are enabled. */
+#define ICON_LEN 3
+
 /* Function macros */
 #define atoi xatoi /* xatoi is just a secure atoi */
 
