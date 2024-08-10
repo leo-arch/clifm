@@ -115,22 +115,18 @@ construct_and_print_filename(const struct fileinfo *props,
 	const filesn_t n = (max_files > UNSET && files > (filesn_t)max_files)
 		? (filesn_t)max_files : files;
 
-	size_t cur_len = (size_t)DIGINUM(n) + 1 + plen;
-	if (conf.icons == 1)
-		cur_len += 3;
+	size_t cur_len = (size_t)DIGINUM(n) + 1 + plen
+		+ (conf.icons == 1 ? 3 : 0);
 
 	int diff = 0;
+	char *name = wname ? wname : props->name;
 	char *ext_name = (char *)NULL;
+
 	if (cur_len > (size_t)max_namelen) {
 		const int rest = (int)cur_len - max_namelen;
 		trim = TRIM_NO_EXT;
 		size_t ext_len = 0;
 		ext_name = get_ext_info_long(props->name, plen, &trim, &ext_len);
-
-		if (wname)
-			xstrsncpy(name_buf, wname, sizeof(name_buf));
-		else
-			memcpy(name_buf, props->name, props->bytes + 1);
 
 		int trim_point = (int)plen - rest - 1 - (int)ext_len;
 		if (trim_point <= 0) {
@@ -138,22 +134,33 @@ construct_and_print_filename(const struct fileinfo *props,
 			trim = TRIM_NO_EXT;
 		}
 
-		diff = u8truncstr(name_buf, (size_t)trim_point);
+		if (props->utf8 == 1) {
+			if (wname)
+				xstrsncpy(name_buf, name, sizeof(name_buf));
+			else /* memcpy is faster: use it whenever possible. */
+				memcpy(name_buf, name, props->bytes + 1);
+
+			diff = u8truncstr(name_buf, (size_t)trim_point);
+		} else { /* Let's avoid u8truncstr() to get some extra speed. */
+			const char c = name[trim_point];
+			name[trim_point] = '\0';
+			mbstowcs((wchar_t *)name_buf, name, NAME_BUF_SIZE);
+			name[trim_point] = c;
+		}
 
 		cur_len -= (size_t)rest;
+	} else {
+		mbstowcs((wchar_t *)name_buf, name, NAME_BUF_SIZE);
 	}
+
+	free(wname);
 
 	/* Calculate pad for each file name */
 	int pad = max_namelen - (int)cur_len;
 	if (pad < 0)
 		pad = 0;
 
-	if (!trim || !conf.unicode)
-		mbstowcs((wchar_t *)name_buf, wname ? wname : props->name, NAME_MAX + 1);
-
-	free(wname);
-
-	char *trim_diff = diff > 0 ? gen_diff_str(diff) : "";
+	const char *trim_diff = diff > 0 ? gen_diff_str(diff) : "";
 
 	static char trim_s[2] = {0};
 	*trim_s = trim > 0 ? TRIMFILE_CHR : 0;
