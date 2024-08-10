@@ -1997,7 +1997,9 @@ extern regex_t regex_dirhist; /* Directory history */
 extern char **environ;
 
 /* A buffer to store file names to be displayed (wide string) */
-extern char name_buf[(NAME_MAX + 1) * sizeof(wchar_t)];
+#define NAME_BUF_SIZE (NAME_MAX * 2 * sizeof(wchar_t))
+//#define NAME_BUF_SIZE ((NAME_MAX + 1) * sizeof(wchar_t))
+extern char name_buf[NAME_BUF_SIZE];
 
 /* To store all the 39 color variables we use, with 46 bytes each, we need
  * a total of 1,8Kb. It's not much but it could be less if we'd use
