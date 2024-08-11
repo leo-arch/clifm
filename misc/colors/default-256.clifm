@@ -74,30 +74,30 @@
 #            FILE TYPES               #
 #=====================================#
 
-define FTYPE_DIR=@4-1             # Directory
-define FTYPE_EMPTY_DIR=@4-2       # Empty directory
-define FTYPE_DIR_NO_PERM=@1-1     # Directory with no read permission
-define FTYPE_REG=0                # Regular file
-define FTYPE_EMPTY_REG=2          # Empty regular file
-define FTYPE_REG_NO_PERM=@1-2     # Regular file with no read permission
-define FTYPE_EXEC=@2-1            # Executable file
-define FTYPE_EMPTY_EXEC=@2        # Empty executable file
-define FTYPE_LINK=@6-1            # Symbolic link
-define FTYPE_BROKEN_LINK=4;2;36   # Broken symbolic link
-define FTYPE_MULTI_HLINK=@6-7     # Multi-hardlink file
-define FTYPE_BLK_DEV=@229-1       # Block device
-define FTYPE_CHR_DEV=@214-1       # Char device
-define FTYPE_FIFO=4;45;37         # FIFO/pipe
-define FTYPE_SOCK=45;37           # Socket
-define FTYPE_CAP=30;41            # File with capabilities
-define FTYPE_DOOR=@5              # Door (Solaris only)
-define FTYPE_SUID=37;41           # SUID file
-define FTYPE_SGID=30;43           # SGID file
-define FTYPE_OW=48;5;235;38;5;33  # Other-writable
-define FTYPE_STICKY_NOT_OW=37;44  # Sticky (not other-writable)
-define FTYPE_STICKY_OW=37;42      # Sticky and other-writable
-define FTYPE_UNKNOWN=4;31;47      # Unknown file type
-define FTYPE_NON_STAT=4;2;37      # Non-stat'able file
+define FTYPE_DIR=@4-1               # Directory
+define FTYPE_EMPTY_DIR=@4-2         # Empty directory
+define FTYPE_DIR_NO_PERM=@1-1       # Directory with no read permission
+define FTYPE_REG=0                  # Regular file
+define FTYPE_EMPTY_REG=2            # Empty regular file
+define FTYPE_REG_NO_PERM=@1-2       # Regular file with no read permission
+define FTYPE_EXEC=@2-1              # Executable file
+define FTYPE_EMPTY_EXEC=@2          # Empty executable file
+define FTYPE_LINK=@6-1              # Symbolic link
+define FTYPE_BROKEN_LINK=4;2;36     # Broken symbolic link
+define FTYPE_MULTI_HLINK=@6-7       # Multi-hardlink file
+define FTYPE_BLK_DEV=@229-1         # Block device
+define FTYPE_CHR_DEV=@214-1         # Char device
+define FTYPE_FIFO=38;5;5;48;5;238   # FIFO/pipe
+define FTYPE_SOCK=1;38;5;5;48;5;238 # Socket
+define FTYPE_CAP=30;41              # File with capabilities
+define FTYPE_DOOR=@5                # Door (Solaris only)
+define FTYPE_SUID=37;41             # SUID file
+define FTYPE_SGID=30;43             # SGID file
+define FTYPE_OW=48;5;235;38;5;33    # Other-writable
+define FTYPE_STICKY_NOT_OW=37;44    # Sticky (not other-writable)
+define FTYPE_STICKY_OW=37;42        # Sticky and other-writable
+define FTYPE_UNKNOWN=4;31;47        # Unknown file type
+define FTYPE_NON_STAT=4;2;37        # Non-stat'able file
 
 #=====================================#
 #       PROPERTIES / LONG VIEW        #
@@ -121,7 +121,7 @@ define PROP_TIME_MARK=      # Timestamp identification character (2)
 
 # (1) If unset (default), color shades are used instead.
 # See DateShades and SizeShades below.
-# (2) If unset, the current timestamp color is dimmed.
+# (2) If unset (default), a dimmed version of the current timestamp color is used.
 
 #=====================================#
 #            INTERFACE                #
