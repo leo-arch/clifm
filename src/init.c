@@ -263,7 +263,6 @@ init_conf_struct(void)
 #ifndef _NO_TRASH
 	conf.tr_as_rm = UNSET;
 #endif /* !_NO_TRASH */
-	conf.unicode = DEF_UNICODE;
 	conf.warning_prompt = UNSET;
 	conf.welcome_message = UNSET;
 
@@ -3143,9 +3142,6 @@ check_options(void)
 		else
 			conf.autols = xargs.autols;
 	}
-
-	if (conf.unicode == UNSET)
-		conf.unicode = DEF_UNICODE;
 
 	if (conf.max_path == UNSET) {
 		if (xargs.max_path == UNSET)

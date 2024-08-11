@@ -548,7 +548,6 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define DEF_TOGGLE_WORKSPACES 1
 #define DEF_TRASRM 0
 #define DEF_TRIM_NAMES 1
-#define DEF_UNICODE 1
 #define DEF_WELCOME_MESSAGE 1
 
 /* This expands to "CliFM > The command line file manager" */

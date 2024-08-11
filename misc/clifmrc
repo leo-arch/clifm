@@ -436,10 +436,6 @@ TimestampMark=true
 # be listed before 'afile', otherwise, after 'gfile'.
 ;SkipNonAlnumPrefix=true
 
-# Whether to be Unicode aware or not. If using a 100% ASCII setup
-# (e.g. English), you can turn this off.
-;Unicode=true
-
 # Set a custom starting path. If not specified, it defaults to the current
 # working directory. If set, it overrides RestoreLastPath.
 ;StartingPath=

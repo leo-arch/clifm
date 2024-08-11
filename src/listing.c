@@ -143,19 +143,7 @@ static int pager_quit = 0;
 static int pager_help = 0;
 static int long_view_bk = UNSET;
 
-/* Struct to store information about trimmed file names. Used only when
- * Unicode is disabled */
-struct trim_t {
-	int state;
-	int a; /* trimmed char */
-	int b; /* char next to trimmed char */
-	int pad;
-	size_t len; /* Lenght of file name before trimming */
-};
-
-static struct trim_t trim;
-
-/* Struct to store information about file names to be trimmed (Unicode) */
+/* Struct to store information about file names to be trimmed. */
 struct wtrim_t {
 	char *wname; /* Address to store file name with replaced control chars */
 	int type; /* Truncation type: with or without file extension. */
@@ -2914,11 +2902,6 @@ list_dir(void)
 		fflush(stdout);
 		if (xargs.list_and_quit != 1)
 			HIDE_CURSOR;
-	}
-
-	if (conf.unicode == 0) {
-		trim.state = trim.a = trim.b = 0;
-		trim.len = 0;
 	}
 
 	get_term_size();

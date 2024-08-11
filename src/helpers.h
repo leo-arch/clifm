@@ -1195,9 +1195,9 @@ struct config_t {
 #else
 	int pad1; /* Keep the struct alignment */
 #endif /* !_NO_TRASH */
-	int unicode;
 	int warning_prompt;
 	int welcome_message;
+	int pad2;
 };
 
 extern struct config_t conf;

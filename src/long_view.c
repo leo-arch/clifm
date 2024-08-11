@@ -36,17 +36,16 @@
 #include "properties.h" /* get_color_age, get_color_size, get_file_perms */
 
 static char *
-get_ext_info_long(const char *name, const size_t name_len, int *trim,
-	size_t *ext_len)
+get_ext_info_long(const struct fileinfo *props, const size_t name_len,
+	int *trim, size_t *ext_len)
 {
 	char *ext_name = (char *)NULL;
-
-	char *e = strrchr(name, '.');
-	if (e && e != name && *(e + 1)) {
+	char *e = strrchr(props->name, '.');
+	if (e && e != props->name && *(e + 1)) {
 		ext_name = e;
 		*trim = TRIM_EXT;
-		if (conf.unicode == 0)
-			*ext_len = name_len - (size_t)(ext_name - name);
+		if (props->utf8 == 0)
+			*ext_len = name_len - (size_t)(ext_name - props->name);
 		else
 			*ext_len = wc_xstrlen(ext_name);
 	}
@@ -126,7 +125,7 @@ construct_and_print_filename(const struct fileinfo *props,
 		const int rest = (int)cur_len - max_namelen;
 		trim = TRIM_NO_EXT;
 		size_t ext_len = 0;
-		ext_name = get_ext_info_long(props->name, plen, &trim, &ext_len);
+		ext_name = get_ext_info_long(props, plen, &trim, &ext_len);
 
 		int trim_point = (int)plen - rest - 1 - (int)ext_len;
 		if (trim_point <= 0) {

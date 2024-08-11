@@ -514,9 +514,6 @@ dump_config(void)
 	n = DEF_TRIM_NAMES;
 	print_config_value("TrimNames", &conf.trim_names, &n, DUMP_CONFIG_BOOL);
 
-	n = DEF_UNICODE;
-	print_config_value("Unicode", &conf.unicode, &n, DUMP_CONFIG_BOOL);
-
 	n = DEF_WELCOME_MESSAGE;
 	print_config_value("WelcomeMessage", &conf.welcome_message, &n,
 		DUMP_CONFIG_BOOL);
@@ -1816,7 +1813,6 @@ create_main_config_file(char *file)
 ;CaseSensitiveSearch=%s\n\
 # Skip non-alphanumeric characters when sorting files ('version' or 'name').\n\
 ;SkipNonAlnumPrefix=%s\n\n\
-;Unicode=%s\n\n\
 # Mas, the files list pager. Possible values are:\n\
 # 0/false: Disable the pager\n\
 # 1/true: Run the pager whenever the list of files does not fit on the screen\n\
@@ -1850,7 +1846,6 @@ create_main_config_file(char *file)
 		DEF_CASE_SENS_PATH_COMP == 1 ? "true" : "false",
 		DEF_CASE_SENS_SEARCH == 1 ? "true" : "false",
 		DEF_SKIP_NON_ALNUM_PREFIX == 1 ? "true" : "false",
-		DEF_UNICODE == 1 ? "true" : "false",
 		DEF_PAGER == 1 ? "true" : "false",
 		DEF_PAGER_VIEW == PAGER_AUTO ? "auto"
 			: (DEF_PAGER_VIEW == PAGER_LONG ? "long" : "short"),
@@ -3377,10 +3372,6 @@ read_config(void)
 		else if (xargs.trim_names == UNSET && *line == 'T'
 		&& strncmp(line, "TrimNames=", 10) == 0) {
 			set_config_bool_value(line + 10, &conf.trim_names);
-		}
-
-		else if (*line == 'U' && strncmp(line, "Unicode=", 8) == 0) {
-			set_config_bool_value(line + 8, &conf.unicode);
 		}
 
 		else if (xargs.secure_env != 1 && xargs.secure_env_full != 1
