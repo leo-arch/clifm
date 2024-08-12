@@ -41,7 +41,7 @@ get_ext_info_long(const struct fileinfo *props, const size_t name_len,
 {
 	char *ext_name = (char *)NULL;
 	char *e = strrchr(props->name, '.');
-	if (e && e != props->name && *(e + 1)) {
+	if (e && e != props->name && e[1]) {
 		ext_name = e;
 		*trim = TRIM_EXT;
 		if (props->utf8 == 0)
@@ -265,20 +265,20 @@ get_time_char(void)
 {
 	if (conf.time_follows_sort == 1) {
 		switch (conf.sort) {
-		case SATIME: return "a";
-		case SCTIME: return "c";
-		case SBTIME: return "b";
-		case SMTIME: return "m";
+		case SATIME: return conf.relative_time == 1 ? "A" : "a";
+		case SCTIME: return conf.relative_time == 1 ? "C" : "c";
+		case SBTIME: return conf.relative_time == 1 ? "B" : "b";
+		case SMTIME: return conf.relative_time == 1 ? "M" : "m";
 		default: break;
 		}
 	}
 
 	switch (prop_fields.time) {
-	case PROP_TIME_ACCESS: return "a";
-	case PROP_TIME_CHANGE: return "c";
-	case PROP_TIME_BIRTH: return "b";
+	case PROP_TIME_ACCESS: return conf.relative_time == 1 ? "A" : "a";
+	case PROP_TIME_BIRTH: return conf.relative_time == 1 ? "B" : "b";
+	case PROP_TIME_CHANGE: return conf.relative_time == 1 ? "C" : "c";
 	case PROP_TIME_MOD: /* fallthrough */
-	default: return "m";
+	default: return conf.relative_time == 1 ? "M" : "m";
 	}
 }
 
