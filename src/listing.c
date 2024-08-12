@@ -143,7 +143,7 @@ static int pager_quit = 0;
 static int pager_help = 0;
 static int long_view_bk = UNSET;
 
-/* Struct to store information about file names to be trimmed. */
+/* Struct to store information about trimmed file names. */
 struct wtrim_t {
 	char *wname; /* Address to store file name with replaced control chars */
 	int type; /* Truncation type: with or without file extension. */
@@ -669,8 +669,8 @@ run_pager(const int columns_n, int *reset_pager, filesn_t *i, size_t *counter)
 	switch (xgetchar()) {
 	/* Advance one line at a time */
 	case 66: /* fallthrough */ /* Down arrow */
-	case 10: /* fallthrough */ /* Enter */
-	case 13: /* fallthrough */ /* Enter */
+	case 10: /* fallthrough */ /* Enter (LF) */
+	case 13: /* fallthrough */ /* Enter (CR) */
 	case ' ':
 		break;
 
@@ -1111,29 +1111,45 @@ get_columns(void)
 	return n;
 }
 
-static void
-get_ext_info(const filesn_t i, int *trim_type, size_t *ext_len)
+static size_t
+get_ext_info(const filesn_t i, int *trim_type)
 {
 	if (!file_info[i].ext_name) {
 		char *dot = strrchr(file_info[i].name, '.');
 		if (!dot || dot == file_info[i].name || !dot[1])
-			return;
+			return 0;
 
 		file_info[i].ext_name = dot;
 	}
 
 	*trim_type = TRIM_EXT;
 
+	size_t ext_len = 0;
 	size_t bytes = 0;
-	if (is_utf8_name(file_info[i].ext_name, &bytes) == 0)
-		*ext_len = bytes;
-	else
-		*ext_len = wc_xstrlen(file_info[i].ext_name);
+	const char *e = file_info[i].ext_name;
 
-	if ((int)*ext_len >= conf.max_name_len - 1 || (int)*ext_len <= 0) {
-		*ext_len = 0;
+	if (file_info[i].utf8 == 0) {
+		/* Extension names are usually short. Let's call strlen(2) only
+		 * when it is longer than 6 (including the initial dot). */
+		ext_len = !e[1] ? 1
+			: !e[2] ? 2
+			: !e[3] ? 3
+			: !e[4] ? 4
+			: !e[5] ? 5
+			: !e[6] ? 6
+			: strlen(e);
+	} else if (is_utf8_name(e, &bytes) == 0) {
+		ext_len = bytes;
+	} else {
+		ext_len = wc_xstrlen(e);
+	}
+
+	if ((int)ext_len >= conf.max_name_len - 1 || (int)ext_len <= 0) {
+		ext_len = 0;
 		*trim_type = TRIM_NO_EXT;
 	}
+
+	return ext_len;
 }
 
 /* Construct the file name to be displayed.
@@ -1184,8 +1200,7 @@ construct_filename(const filesn_t i, struct wtrim_t *wtrim,
 	 * in file_info[i].name (this might impact on some later operation!) */
 
 	wtrim->type = TRIM_NO_EXT;
-	size_t ext_len = 0;
-	get_ext_info(i, &wtrim->type, &ext_len);
+	size_t ext_len = get_ext_info(i, &wtrim->type);
 
 	const int trim_len = max_namelen - 1 - (int)ext_len;
 
