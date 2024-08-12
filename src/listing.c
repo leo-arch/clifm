@@ -131,6 +131,7 @@ struct checks_t {
 	int id_names;
 	int lnk_char;
 	int min_name_trim;
+	int scanning;
 	int time_follows_sort;
 	int xattr;
 };
@@ -186,9 +187,11 @@ init_checks_struct(void)
 		&& conf.icons == 0 && conf.light_mode == 0);
 	checks.min_name_trim = (conf.long_view == 1 && conf.max_name_len != UNSET
 		&& conf.min_name_trim > conf.max_name_len);
-	checks.xattr = (conf.long_view == 1 && prop_fields.xattr == 1);
+	checks.scanning = (xargs.disk_usage_analyzer == 1
+		|| (conf.long_view == 1 && conf.full_dir_size == 1));
 	checks.time_follows_sort = (conf.time_follows_sort == 1
 		&& conf.sort >= SATIME && conf.sort <= SMTIME);
+	checks.xattr = (conf.long_view == 1 && prop_fields.xattr == 1);
 }
 
 #if !defined(_NO_ICONS)
@@ -2144,6 +2147,31 @@ construct_human_sizes(void)
 	}
 }
 
+#define LIST_SCANNING_MSG "Scanning... "
+static void
+print_scanning_message(void)
+{
+	UNHIDE_CURSOR;
+	fputs(LIST_SCANNING_MSG, stdout);
+	fflush(stdout);
+	if (xargs.list_and_quit != 1)
+		HIDE_CURSOR;
+}
+
+static void
+print_scanned_file(const char *name)
+{
+	printf("\r\x1b[%zuC\x1b[0K%s/", sizeof(LIST_SCANNING_MSG) - 1, name);
+	fflush(stdout);
+}
+
+static void
+erase_scanning_message(void)
+{
+	fputs("\r\x1b[0K", stdout);
+	fflush(stdout);
+}
+
 /* List files in the current working directory (global variable 'path').
  * Unlike list_dir(), however, this function uses no color and runs
  * neither stat() nor count_dir(), which makes it quite faster. Return
@@ -2291,6 +2319,9 @@ list_dir_light(void)
 		file_info[n].symlink = (file_info[n].type == DT_LNK);
 		file_info[n].inode = ent->d_ino;
 
+		if (checks.scanning == 1 && file_info[n].dir == 1)
+			print_scanned_file(file_info[n].name);
+
 		switch (file_info[n].type) {
 		case DT_DIR:
 #ifndef _NO_ICONS
@@ -2393,11 +2424,8 @@ list_dir_light(void)
 	if (hidden_list)
 		free_dothidden(&hidden_list);
 
-	if (xargs.disk_usage_analyzer == 1
-	|| (conf.long_view == 1 && conf.full_dir_size == 1)) {
-		fputs("\r            \r", stdout); /* Erase the "Scanning ..." message */
-		fflush(stdout);
-	}
+	if (checks.scanning == 1)
+		erase_scanning_message();
 
 	if (n == 0) {
 		printf("%s. ..%s\n", di_c, df_c);
@@ -2909,16 +2937,6 @@ list_dir(void)
 	}
 
 	set_pager_view();
-
-	if (xargs.disk_usage_analyzer == 1
-	|| (conf.long_view == 1 && conf.full_dir_size == 1)) {
-		UNHIDE_CURSOR;
-		fputs(_("Scanning... "), stdout);
-		fflush(stdout);
-		if (xargs.list_and_quit != 1)
-			HIDE_CURSOR;
-	}
-
 	get_term_size();
 
 	virtual_dir =
@@ -2926,8 +2944,10 @@ list_dir(void)
 
 	/* Reset the stats struct */
 	stats = (struct stats_t){0};
-
 	init_checks_struct();
+
+	if (checks.scanning == 1)
+		print_scanning_message();
 
 	if (conf.long_view == 1)
 		props_now = time(NULL);
@@ -3111,6 +3131,9 @@ list_dir(void)
 		default: file_info[n].color = df_c; break;
 		}
 
+		if (checks.scanning == 1 && file_info[n].dir == 1)
+			print_scanned_file(file_info[n].name);
+
 #ifndef _NO_ICONS
 		if (checks.icons_use_file_color == 1)
 			file_info[n].icon_color = file_info[n].color;
@@ -3118,9 +3141,10 @@ list_dir(void)
 		if (conf.long_view == 1 && stat_ok == 1)
 			set_long_attribs(n, &attr);
 
-		if (xargs.disk_usage_analyzer == 1)
+		if (xargs.disk_usage_analyzer == 1) {
 			get_largest_file_info(n, &largest_name_size, &largest_name,
 				&largest_color, &total_size);
+		}
 
 		n++;
 		if (n > FILESN_MAX - 1) {
@@ -3147,11 +3171,8 @@ list_dir(void)
 	file_info[n].name = (char *)NULL;
 	files = n;
 
-	if (xargs.disk_usage_analyzer == 1 || (conf.long_view == 1
-	&& conf.full_dir_size == 1)) {
-		fputs("\r            \r", stdout); /* Erase the "Scanning ..." message */
-		fflush(stdout);
-	}
+	if (checks.scanning == 1)
+		erase_scanning_message();
 
 	if (n == 0) {
 		printf("%s. ..%s\n", di_c, df_c);
