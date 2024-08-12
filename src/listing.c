@@ -2161,7 +2161,8 @@ print_scanning_message(void)
 static void
 print_scanned_file(const char *name)
 {
-	printf("\r\x1b[%zuC\x1b[0K%s/", sizeof(LIST_SCANNING_MSG) - 1, name);
+	printf("\r\x1b[%zuC\x1b[0K%s%s%s/", sizeof(LIST_SCANNING_MSG) - 1,
+		di_c, name, df_c);
 	fflush(stdout);
 }
 
