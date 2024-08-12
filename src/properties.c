@@ -2047,13 +2047,17 @@ print_analysis_stats(const off_t total, const off_t largest,
 	if (prop_fields.size == PROP_SIZE_HUMAN) {
 		const char *p_total = construct_human_size(total);
 		t = savestring(p_total, strlen(p_total));
-		const char *p_largest = construct_human_size(largest);
-		l = savestring(p_largest, strlen(p_largest));
+		if (conf.sort != STSIZE) {
+			const char *p_largest = construct_human_size(largest);
+			l = savestring(p_largest, strlen(p_largest));
+		}
 	} else {
 		t = xnmalloc(MAX_INT_STR, sizeof(char));
-		l = xnmalloc(MAX_INT_STR, sizeof(char));
 		snprintf(t, MAX_INT_STR, "%ju", (uintmax_t)total);
-		snprintf(l, MAX_INT_STR, "%ju", (uintmax_t)largest);
+		if (conf.sort != STSIZE) {
+			l = xnmalloc(MAX_INT_STR, sizeof(char));
+			snprintf(l, MAX_INT_STR, "%ju", (uintmax_t)largest);
+		}
 	}
 
 	char *tsize = BOLD_GREEN, *lsize = BOLD_GREEN;
@@ -2062,20 +2066,25 @@ print_analysis_stats(const off_t total, const off_t largest,
 	if (term_caps.color > 0 && !*dz_c) {
 		get_color_size(total, ts, sizeof(ts));
 		tsize = ts;
-		get_color_size(largest, ls, sizeof(ls));
-		lsize = ls;
+		if (conf.sort != STSIZE) {
+			get_color_size(largest, ls, sizeof(ls));
+			lsize = ls;
+		}
 	}
 
-	printf(_("Total size:   %s%s%s\n"
-		"Largest file: %s%s%s %c%s%s%s%c\n"),
+	printf(_("Total size: %s%s%s%s\n"), conf.sort != STSIZE ? "  " : "",
 		conf.colorize == 1 ? tsize : "" , t ? t : UNKNOWN_STR,
-		conf.colorize == 1 ? tx_c : "",
-		conf.colorize == 1 ? lsize : "" , l ? l : UNKNOWN_STR,
-		conf.colorize == 1 ? tx_c : "",
-		name ? '[' : 0,
-		(conf.colorize == 1 && color) ? color : "",
-		name ? name : "", tx_c,
-		name ? ']' : 0);
+		conf.colorize == 1 ? tx_c : "");
+
+	if (conf.sort != STSIZE) {
+		printf(_("Largest file: %s%s%s %c%s%s%s%c\n"),
+			conf.colorize == 1 ? lsize : "" , l ? l : UNKNOWN_STR,
+			conf.colorize == 1 ? tx_c : "",
+			name ? '[' : 0,
+			(conf.colorize == 1 && color) ? color : "",
+			name ? name : "", tx_c,
+			name ? ']' : 0);
+	}
 
 	free(t);
 	free(l);
