@@ -130,13 +130,13 @@
 
 # If sorting files by time, use the same time files are sorted by for the time
 # field in long view (disregarding the value set in PropFields).
-TimeFollowsSort=true
+;TimeFollowsSort=true
 
 # Append an 'a', 'b', 'c', or 'm' to the timestamp (long view only) to indicate
 # the kind of timestamp, i.e, access, birth, status change, or modification
 # time respectively. In case of relative times, uppercase characters are used
 # instead for better visibility.
-TimestampMark=false
+;TimestampMark=false
 
 # Same as TimeStyle, but for the 'p/pp' command.
 # Available styles: default, iso, long-iso, full-iso, full-iso-nano, +FORMAT
