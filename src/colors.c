@@ -3267,9 +3267,9 @@ print_prop_colors(void)
 		dxr_c, df_c, dxr_c, df_c);
 	printf(_("%sColor%s (dp)  SUID/SGID bit (e.g. %ss%s)\n"), dp_c,
 		df_c, dp_c, df_c);
-	printf(_("%sColor%s (du)  User ID (e.g. %sjane %swheel%s)\n"),
-		du_c, df_c, du_c, dg_c, df_c);
-	printf(_("%s%sColor%s (dg)  Group ID (e.g. %sjane %swheel%s)\n"),
+	printf(_("%sColor%s (du)  User ID (e.g. %sjane%s)\n"),
+		du_c, df_c, du_c, df_c);
+	printf(_("%s%sColor%s (dg)  Group ID (e.g. %s%swheel%s)\n"),
 		du_c, dg_c, df_c, du_c, dg_c, df_c);
 
 	if (*dz_c) {
