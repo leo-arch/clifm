@@ -134,7 +134,8 @@ TimeFollowsSort=true
 
 # Append an 'a', 'b', 'c', or 'm' to the timestamp (long view only) to indicate
 # the kind of timestamp, i.e, access, birth, status change, or modification
-# time respectively.
+# time respectively. In case of relative times, uppercase characters are used
+# instead for better visibility.
 TimestampMark=true
 
 # Same as TimeStyle, but for the 'p/pp' command.
