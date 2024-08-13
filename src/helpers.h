@@ -621,14 +621,9 @@ extern time_t curdir_mtime;
 #define NOEXEC_MSG   "Permission denied"
 
 /* A few fixed colors */
-#define BOLD_RED   (conf.colorize == 1 ? "\x1b[1;31m" : "")
-#define BOLD_GREEN (conf.colorize == 1 ? "\x1b[1;32m" : "")
-#define REG_CYAN   (conf.colorize == 1 ? "\x1b[0;36m" : "")
-#define BOLD       ((xargs.no_bold != 1 && conf.colorize == 1) ? "\x1b[1m" : "")
+#define BOLD ((xargs.no_bold != 1 && conf.colorize == 1) ? "\x1b[1m" : "")
 /* NC: Reset color attributes to terminal defaults */
-#define NC         (conf.colorize == 1 ? "\x1b[0m" : "")
-
-/* Colors for the prompt: */
+#define NC   (conf.colorize == 1 ? "\x1b[0m" : "")
 /* \001 and \002 tell readline that color codes between them are
  * non-printing chars. This is specially useful for the prompt, i.e.,
  * when passing color codes to readline. */

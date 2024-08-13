@@ -2022,9 +2022,10 @@ version_function(void)
 void
 splash(void)
 {
+	const char *reg_cyan = conf.colorize == 1 ? "\x1b[0;36m" : "";
 	printf("\n%s%s\n\n%s%s\t\t       %s%s\n           %s\n",
-		conf.colorize ? REG_CYAN : "", ASCII_LOGO_BIG, df_c,
-		BOLD, df_c, PROGRAM_NAME_UPPERCASE, _(PROGRAM_DESC));
+		reg_cyan, ASCII_LOGO_BIG, df_c, BOLD, df_c,
+		PROGRAM_NAME_UPPERCASE, PROGRAM_DESC);
 
 	HIDE_CURSOR;
 	if (conf.splash_screen) {

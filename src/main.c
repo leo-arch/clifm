@@ -938,8 +938,9 @@ static inline void
 set_root_indicator(void)
 {
 	if (user.uid == 0) {
+		const char *bold_red = conf.colorize == 1 ? "\x1b[1;31m" : "";
 		err(ERR_NO_LOG, PRINT_PROMPT, _("%s->%s Running as root%s\n"),
-			conf.colorize == 1 ? mi_c : "", conf.colorize == 1 ? BOLD_RED : "",
+			conf.colorize == 1 ? mi_c : "", bold_red,
 			conf.colorize == 1 ? df_c : "");
 	}
 }
