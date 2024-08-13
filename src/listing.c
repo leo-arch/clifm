@@ -1961,7 +1961,7 @@ get_largest_file_info(const filesn_t i, off_t *size, char **name,
 	&& (file_info[i].type != DT_LNK || conf.apparent_size != 1))
 		return;
 
-	if (conf.sort != STSIZE && file_info[i].size > *size) {
+	if (file_info[i].size > *size) {
 		*size = file_info[i].size;
 		*name = file_info[i].name;
 		*color = file_info[i].color;

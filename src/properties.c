@@ -1831,7 +1831,7 @@ print_dir_info(const char *dir, const int file_perm)
 		snprintf(read_err, sizeof(read_err), "%s%c%s", xf_cb, DU_ERR_CHAR, df_c);
 
 	char *cend = conf.colorize == 1 ? df_c : "";
-	char *size_color = (char *)NULL;
+	char *size_color = dz_c;
 	char sf[MAX_SHADE_LEN]; *sf = '\0';
 	if (conf.colorize == 1 && !*dz_c) {
 		get_color_size(info.size, sf, sizeof(sf));
