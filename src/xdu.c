@@ -163,6 +163,11 @@ dir_info(const char *dir, const int first_level, struct dir_info_t *info)
 			info->files++;
 #endif /* __CYGWIN__ */
 		} else if (S_ISDIR(a.st_mode)) {
+/*			In case we want to print the currently scanned directory:
+ * 			Note: 12 is the size of "Scanning... "
+			printf("\r\x1b[%zuC\x1b[0K%s%.*s%s", (size_t)12,
+				di_c, term_cols - 12 - 2, buf, df_c); */
+
 			/* Even if a subdirectory is unreadable or we can't chdir into
 			 * it, do let its size contribute to the total (provided we're
 			 * not computing apparent sizes). */

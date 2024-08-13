@@ -72,7 +72,6 @@ typedef char *rl_cpvfunc_t;
  * as a C string: 4 bytes plus a trailing nul byte. */
 #define UTF8_MAX_LEN 5
 
-#define RL_EMACS_MODE 1
 #define RL_VI_MODE    0
 
 #define SUGGEST_ONLY             0

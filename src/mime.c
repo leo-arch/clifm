@@ -36,14 +36,14 @@
 # include <magic.h>
 #endif /* !_NO_MAGIC */
 
-#if defined(_NO_MAGIC) && !defined(_BE_POSIX)
-# include <paths.h>
+#if defined(_NO_MAGIC)
+# if !defined(_BE_POSIX)
+#  include <paths.h>
+# endif /* !_BE_POSIX */
 # ifndef _PATH_DEVNULL
 #  define _PATH_DEVNULL "/dev/null"
 # endif /* _PATH_DEVNULL */
-#else
-# define _PATH_DEVNULL "/dev/null"
-#endif /* _NO_MAGIC && !_BE_POSIX */
+#endif /* _NO_MAGIC */
 
 #ifndef _NO_ARCHIVING
 #include "archives.h"
