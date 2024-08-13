@@ -206,7 +206,7 @@ construct_file_size(const struct fileinfo *props, char *size_str,
 		? props->size : 0;
 
 	/* Let's construct the color for the current file size */
-	char *csize = props->dir == 1 ? dz_c : df_c;
+	char *csize = dz_c;
 	static char sf[MAX_SHADE_LEN];
 	if (conf.colorize == 1) {
 		if (!*dz_c) {
