@@ -2060,10 +2060,10 @@ print_analysis_stats(const off_t total, const off_t largest,
 		}
 	}
 
-	char *tsize = BOLD_GREEN, *lsize = BOLD_GREEN;
+	char *tsize = dz_c, *lsize = dz_c;
 
 	char ts[MAX_SHADE_LEN], ls[MAX_SHADE_LEN];
-	if (term_caps.color > 0 && !*dz_c) {
+	if (!*dz_c) {
 		get_color_size(total, ts, sizeof(ts));
 		tsize = ts;
 		if (conf.sort != STSIZE) {
@@ -2077,13 +2077,13 @@ print_analysis_stats(const off_t total, const off_t largest,
 		conf.colorize == 1 ? tx_c : "");
 
 	if (conf.sort != STSIZE) {
-		printf(_("Largest file: %s%s%s %c%s%s%s%c\n"),
+		printf(_("Largest file: %s%s%s %s%s%s%s%s\n"),
 			conf.colorize == 1 ? lsize : "" , l ? l : UNKNOWN_STR,
 			conf.colorize == 1 ? tx_c : "",
-			name ? '[' : 0,
+			name ? "[" : "",
 			(conf.colorize == 1 && color) ? color : "",
 			name ? name : "", tx_c,
-			name ? ']' : 0);
+			name ? "]" : "");
 	}
 
 	free(t);
