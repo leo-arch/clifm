@@ -1394,6 +1394,7 @@ set_iface_colors(char **colors, const size_t num_colors)
 				case 't': set_color(colors[i] + 3, dt_c, RL_PRINTABLE); break;
 				case 'u': set_color(colors[i] + 3, du_c, RL_PRINTABLE); break;
 				case 'w': set_color(colors[i] + 3, dw_c, RL_PRINTABLE); break;
+				case 'z': set_color(colors[i] + 3, dz_c, RL_PRINTABLE); break;
 				default: break;
 				}
 			}
