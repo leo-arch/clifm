@@ -789,7 +789,7 @@ import_from_data_dir(const char *src_filename, char *dest)
 	umask(old_umask);
 
 #ifdef __MSYS__
-	/* chmod() does not work on MSYS2. See
+	/* chmod(2) does not work on MSYS2. See
 	 * https://github.com/msys2/MSYS2-packages/issues/2612 */
 	return ret;
 #else

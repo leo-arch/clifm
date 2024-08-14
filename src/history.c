@@ -171,8 +171,11 @@ log_cmd(void)
 
 /* Write _MSG into the log file: [date] _MSG */
 static void
-write_msg_into_logfile(const char *_msg)
+write_msg_into_logfile(const char *msg_str)
 {
+	if (!msg_str || !*msg_str || !msgs_log_file || !*msgs_log_file)
+		return;
+
 	FILE *fp = open_fappend(msgs_log_file);
 	if (!fp) {
 		/* Do not log this error: We might enter into an infinite loop
@@ -185,7 +188,7 @@ write_msg_into_logfile(const char *_msg)
 	}
 
 	char *date = get_date();
-	fprintf(fp, "[%s] %s", date ? date : "unknown", _msg);
+	fprintf(fp, "[%s] %s", date ? date : "unknown", msg_str);
 	fclose(fp);
 	free(date);
 }
@@ -289,37 +292,37 @@ send_desktop_notification(char *msg)
  * file as follows: "m:[date] msg", where 'date' is YYYY-MM-DDTHH:MM:SS.
  * */
 void
-log_msg(char *_msg, const int print_prompt, const int logme,
+log_msg(char *msg_str, const int print_prompt, const int logme,
 	const int add_to_msgs_list)
 {
-	if (!_msg)
+	if (!msg_str)
 		return;
 
-	const size_t msg_len = strlen(_msg);
+	const size_t msg_len = strlen(msg_str);
 	if (msg_len == 0)
 		return;
 
 	if (add_to_msgs_list == 1) {
 		msgs_n++;
 		messages = xnrealloc(messages, (size_t)(msgs_n + 1), sizeof(char *));
-		messages[msgs_n - 1] = savestring(_msg, msg_len);
+		messages[msgs_n - 1] = savestring(msg_str, msg_len);
 		messages[msgs_n] = (char *)NULL;
 	}
 
 	if (print_prompt == 1) {
 		if (conf.desktop_notifications == 1 && logme != 0)
-			send_desktop_notification(_msg);
+			send_desktop_notification(msg_str);
 		else
 			print_msg = 1;
 	} else {
-		fputs(_msg, stderr);
+		fputs(msg_str, stderr);
 	}
 
 	if (xargs.stealth_mode == 1 || config_ok == 0 || !msgs_log_file
 	|| !*msgs_log_file || logme != 1 || conf.log_msgs == 0)
 		return;
 
-	write_msg_into_logfile(_msg);
+	write_msg_into_logfile(msg_str);
 }
 
 static void
