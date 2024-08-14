@@ -788,18 +788,16 @@ import_from_data_dir(const char *src_filename, char *dest)
 	int ret = launch_execv(cmd, FOREGROUND, E_NOSTDERR);
 	umask(old_umask);
 
-#ifdef __MSYS__
-	/* chmod(2) does not work on MSYS2. See
-	 * https://github.com/msys2/MSYS2-packages/issues/2612 */
-	return ret;
-#else
 	if (ret == FUNC_SUCCESS) {
+#ifndef __MSYS__
+		/* chmod(2) does not work on MSYS2. See
+		 * https://github.com/msys2/MSYS2-packages/issues/2612 */
 		xchmod(dest, "0600", 1);
+#endif /* __MSYS__ */
 		return FUNC_SUCCESS;
 	}
 
 	return FUNC_FAILURE;
-#endif /* __MSYS__ */
 }
 
 /* Create the keybindings file. */
