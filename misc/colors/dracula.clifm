@@ -23,6 +23,9 @@ define BM=#ff79c6-1  # Bold pink
 define DM=#ff79c6-2  # Dimmed pink
 define UM=#ff79c6-4  # Underlined pink
 
+define MK=38;2;255;121;198;48;2;68;68;68
+define BMK=1;38;2;255;121;198;48;2;68;68;68
+
 define M2=#bd93f9    # Purple
 define BM2=#bd93f9-1 # Bold purple
 define DM2=#bd93f9-2 # Dimmed purple
@@ -57,7 +60,7 @@ define MARKUP=#f1fa8c    # Yellow
 define TEMP=#f8f8f2-2    # Dimmed white
 define VIDEO=#ff79c6-1   # Bold magenta
 
-FiletypeColors="bd=BY:ca=KR:cd=BD:di=BM2:ed=M2:ee=G:ef=DY:ex=BG:fi=D:ln=BC:mh=RC:nd=BR:nf=DR:no=RW:or=DC:ow=BlGr:pi=M:sg=KY:so=BM2:st=WB:su=WR:tw=KG:uf=BW:"
+FiletypeColors="bd=BY:ca=KR:cd=BD:di=BM2:ed=M2:ee=G:ef=DY:ex=BG:fi=D:ln=BC:mh=RC:nd=BR:nf=DR:no=RW:or=DC:ow=BlGr:pi=MK:sg=KY:so=BMK:st=WB:su=WR:tw=KG:uf=BW:"
 
 InterfaceColors="db=M2:dd=:de=C:df=W:dg=Y:dk=R:dl=M2:dn=DW:do=C:dp=M2:dr=Y:dw=R:dxd=G:dxr=C:dz=:el=M:em=BR:fc=DW:hb=C:hc=DR:hd=C:he=C:hn=W:hp=C:hq=Y:hr=R:hs=G:hv=G:lc=C:li=BG:mi=BC:nm=BG:sb=DY:sc=DR:sf=UDC:sh=DM2:si=BM2:sp=DR:sx=DG:ti=BC:ts=UM2:tt=BDC:tx=W:wc=BC:wm=BY:ws1=M2:ws2=R:ws3=Y:ws4=G:ws5=C:ws6=C:ws7=C:ws8=C:xf=BR:xs=G:"
 
