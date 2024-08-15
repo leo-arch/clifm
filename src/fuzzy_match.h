@@ -36,7 +36,7 @@
 #define IS_ALPHA_CASE(c) ( ((c) >= 'a' && (c) <= 'z') || ((c) >= 'A' && (c) <= 'Z') )
 #define IS_CAMEL_CASE(c, p) ( (c) >= 'A' && (c) <= 'Z' && (p) >= 'a' && (p) <= 'z' )
 
-#define TARGET_BEGINNING_BONUS  NAME_MAX * 10
+#define TARGET_BEGINNING_BONUS  (NAME_MAX * 10)
 #define FIRST_CHAR_BONUS        10
 #define INCLUDED_BONUS          8
 #define WORD_BEGINNING_BONUS    5

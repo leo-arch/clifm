@@ -84,7 +84,7 @@ emergency prompt"
 #define NOTIF_ROOT    5
 
 /* Size of the indicator for msgs, trash, and sel */
-#define N_IND MAX_COLOR + 1 + sizeof(size_t) + 6 + 1 + 13
+#define N_IND (MAX_COLOR + 1 + sizeof(size_t) + 6 + 1 + 13)
 /* Color + 1 letter + plus unsigned integer + RL_NC size + nul char */
 
 __BEGIN_DECLS
