@@ -851,7 +851,7 @@ set_alt_config_dir(char *dir)
 		}
 	} else {
 		alt_config_dir = savestring(dir, strlen(dir));
-		err(ERR_NO_LOG, PRINT_PROMPT, _("%s: '%s': Using alternative "
+		err(ERR_NO_LOG, PRINT_PROMPT, _("%s: '%s': Using an alternative "
 			"configuration directory\n"), PROGRAM_NAME, alt_config_dir);
 	}
 
@@ -864,7 +864,8 @@ set_custom_selfile(char *file)
 	if (!file || !*file || *file == '-')
 		err_arg_required("--sel-file"); /* noreturn */
 
-	if ( (sel_file = normalize_path(file, strlen(file))) ) {
+	sel_file = normalize_path(file, strlen(file));
+	if (sel_file) {
 		xargs.sel_file = 1;
 		return;
 	}

@@ -371,9 +371,9 @@ if (S_ISNWK(mode)) return 'n'; // HP/UX: network special file
 
 #ifndef ARG_MAX
 # ifdef __linux__
-#  define ARG_MAX 128 * 1024
+#  define ARG_MAX (128 * 1024)
 # else
-#  define ARG_MAX 512 * 1024
+#  define ARG_MAX (512 * 1024)
 # endif /* __linux__ */
 #endif /* !ARG_MAX */
 
@@ -591,8 +591,8 @@ extern time_t curdir_mtime;
 #define FALLBACK_PROMPT_OFFSET 6
 
 /* A few macros for the err function */
-#define ERR_NO_LOG   -1 /* err prints but doesn't log */
-#define ERR_NO_STORE -2 /* err prints and logs, but doesn't store the msg into the messages array */
+#define ERR_NO_LOG   (-1) /* err prints but doesn't log */
+#define ERR_NO_STORE (-2) /* err prints and logs, but doesn't store the msg into the messages array */
 
 /* Macros for xchdir (for setting term title or not) */
 #define SET_TITLE 1
@@ -629,9 +629,9 @@ extern time_t curdir_mtime;
  * when passing color codes to readline. */
 #define RL_NC "\001\x1b[0m\002"
 
-#define UNSET  -1
+#define UNSET  (-1)
 /* Some options take -1 as a valid value. So, let's use -2 to mark it unset */
-#define UNSET2 -2
+#define UNSET2 (-2)
 
 /* Macros for the cp and mv cmds */
 #define CP_CP            0 /* cp -iRp */
@@ -865,7 +865,7 @@ extern time_t curdir_mtime;
 #define FUZZY_HISTORY     3
 #define FUZZY_ALGO_MAX    2 /* We have two fuzzy algorithms */
 
-#define JUMP_ENTRY_PURGED        -1
+#define JUMP_ENTRY_PURGED        (-1)
 #define JUMP_ENTRY_PERMANENT     2
 #define JUMP_ENTRY_PERMANENT_CHR '+'
 

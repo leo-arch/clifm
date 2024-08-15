@@ -860,7 +860,8 @@ truncate_file(char *file, const int max, const int check_dups)
 	int orig_fd = 0;
 	if (stat(file, &attr) == -1) {
 		/* File doesn't exist: create it and exit. */
-		if (!(orig_fp = open_fwrite(file, &orig_fd))) {
+		orig_fp = open_fwrite(file, &orig_fd);
+		if (!orig_fp) {
 			err('w', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME, file,
 				strerror(errno));
 		} else {
