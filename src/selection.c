@@ -624,7 +624,7 @@ get_sel_file_size(const size_t i, int *status)
 		sel_elements[i].size = (off_t)(dir_size(sel_elements[i].name,
 			0, status) * (xargs.si == 1 ? 1000 : 1024));
 #else
-		sel_elements[i].size = (off_t)dir_size(sel_elements[i].name, 0, status);
+		sel_elements[i].size = dir_size(sel_elements[i].name, 0, status);
 #endif /* USE_DU1 */
 		putchar('\r'); ERASE_TO_RIGHT; fflush(stdout);
 	} else {
