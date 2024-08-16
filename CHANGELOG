@@ -1,6 +1,57 @@
+1.20 (Madam Xima) - Aug 16, 2024
+
+BUG FIXES
+* The pager counter ovewrites the last entry (when columns is off or file names aren't trimmed).
+* 'ow' does not work on symlinks.
+* 'ow' does not work on file names containing spaces.
+* Cannot run internal command or alias in a directory containing a file named like the command/alias.
+* File names containing unnamed control char, line separator, or paragraph separator characters are not properly displayed.
+* Reading CDPATH even if running with '--secure-env'.
+* Enter key not working in the pager when invoked via keybinding (Alt-0).
+* File name with embedded DEL or C1 control chars breaks columns.
+* 'Bleach' cannot handle names with embedded DEL chars.
+* renameat(2) not found when compiling on MacOS < 10.10.
+* "hidden" option for 'FzfPreview' not working.
+* 'kb' informs "no keybindings defined" after switching profiles.
+* Broken prompt color when using hex colors for workspaces.
+* Scrollback buffer not removed when clearing the screen on Kitty (mostly because kitty does not report having this capability. See https://github.com/kovidgoyal/kitty/issues/268.
+* Wrong reported total size in the selection box.
+* No selected files indicator in stealth mode.
+* Error exit code (1) when deselecting all files in stealth mode.
+* Empty file color is overriden by the file extension color.
+* Ignoring 'mi' code when reading LS_COLORS.
+* Buffer overflow when trimming down file names in long-view and MaxNameLen is unset.
+* "Total size" field in 'pp' informs NULL color when the 'dz' color code is set.
+* The size fields at the bottom of the disk-usaga-analyzer screen ignore the size color ('dz') if it is set. 
+
+NEW FEATURES/IMPROVEMENTS
+* Prevent external commands from refreshing the current list of files by setting 'ClearScreen' to 'internal' in the config file.
+* Keep in sight commands executed in the current directory via 'PrintDirCmds' in the config file.
+* When 'ColorLnkAsTarget' is enabled, color the selected file indicator using the same color used by the link indicator if the selected file is a symlink.
+* Conform to the CACHEDIR.TAG specification when creating cache files (image previews).
+* Choose how 'l' creates symbolic links (absolute, relative, literal) via 'LinkCreationMode' in the config file.
+* Allow colorizing the custom welcome message ('WelcomeMessageStr') via escape codes.
+* Alt-[5-9] keybindings are now disabled by default (in 'readline.clifm').
+* Disallow the use of clifm for $SHELL (it will brake programs using '$SHELL' to spawn other programs - e.g. 'fzf --preview').
+* Specify 8-bit (256 colors) colors using the '@NUM[-ATTR]' notation in color scheme files.
+* Improved and more useful 'colors' screen.
+* More intuitive and easily customizable default color scheme files.
+* Removed deprecated commands: 'bh', 'fh', and 'edit'.
+* Removed 'fs' command (what is free software?).
+* Removed the 'bm' color code (bookmark names in the bookmarks screen are now printed using the target file color).
+* Add 'preview' subcommand to the 'cs' command (same as 'colors', but more consistent).
+* Add Loupe (Gnome new image viewer) as opening application (mimelist file).
+* If sorting files by time, use the same time files are sorted by for the time field in long view (via 'TimeFollowsSort').
+* Append an identifying character to timestamps (long view) (via 'TimestampMark'). Color code 'dt'.
+* The 'dg' color code is now used for group IDs, while the new one, 'du', is used for user IDs. If 'du' isn't set, we fallback to the old behavior: 'dg' is used for user IDs, and group IDs are printed using a dimmed version of 'dg'. 
+* Remove the Unicode option from the configuration file. It has no effect anymore.
+* When scanning directories (full-dir-size and long-view, or disk-usage-analyzer), print currently scanned subdirs.
+* Disk usage analyzer: largest file not printed if sorting by size (redundant).
+* Use the 'dz' color code (for file sizes) for both dirs and regular files (if the code is set).
+
 1.19 (Kozy Krypts) - June 18, 2024
 
-BUGS FIXES
+BUG FIXES
 * Color for error code (xf) printing garbage on some terminals (ConEmu/Mintty).
 * Pressing Ctrl-z while running an external command leaves the shell in an unusable state. Workaround: SIGTSTP (Ctrl-z) disabled for external commands.
 * If the fzf option '--border' is set, long file names in TAB completion are trimmed.
