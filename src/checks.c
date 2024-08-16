@@ -932,8 +932,9 @@ truncate_file(char *file, const int max, const int check_dups)
 			continue;
 
 		/* Delete old entries, i.e., copy only new ones. */
-		if (i++ >= n - (max - 1))
-			fprintf(tmp_fp, "%s", line);
+		if (i >= n - (max - 1))
+			fputs(line, tmp_fp);
+		i++;
 
 		if (check_dups == 1) {
 			free(prev_line);

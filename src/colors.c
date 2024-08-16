@@ -1983,9 +1983,9 @@ set_default_colors(void)
 	/* If unset from the config file, use current workspace color */
 	if (!*dl_c)
 #ifndef CLIFM_SUCKLESS
-		if (config_ok == 0) xstrsncpy(dl_c, DEF_DL_C256, sizeof(dl_c));
+		if (config_ok == 0) xstrsncpy(dl_c, DEF_DL_C, sizeof(dl_c));
 #else
-		xstrsncpy(dl_c, DEF_DL_C256, sizeof(dl_c));
+		xstrsncpy(dl_c, DEF_DL_C, sizeof(dl_c));
 #endif /* !CLIFM_SUCKLESS */
 
 	if (!*el_c) xstrsncpy(el_c, DEF_EL_C, sizeof(el_c));
