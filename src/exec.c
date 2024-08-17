@@ -2603,7 +2603,7 @@ exec_cmd(char **comm)
 
 	else if (*comm[0] == 'v' && (strcmp(comm[0], "ver") == 0
 	|| strcmp(comm[0], "version") == 0)) {
-		version_function();	return FUNC_SUCCESS;
+		version_function(1); return FUNC_SUCCESS;
 	}
 
 	else if (*comm[0] == 'b' && strcmp(comm[0], "bonus") == 0) {

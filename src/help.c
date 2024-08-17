@@ -564,16 +564,10 @@ __attribute__ ((noreturn))
 void
 help_function(void)
 {
-#ifdef _BE_POSIX
-	const char *posix = "-POSIX";
-#else
-	const char *posix = "";
-#endif /* _BE_POSIX */
-
 	fputs(NC, stdout);
 	printf("%s\n", ASCII_LOGO);
-	printf(_("%s %s%s (%s), by %s\n"), PROGRAM_NAME, VERSION,
-		posix, DATE, AUTHOR);
+	printf(_("%s %s (%s), by %s\n"), PROGRAM_NAME, VERSION,
+		DATE, AUTHOR);
 #ifdef _BE_POSIX
 	printf("\nUSAGE: %s %s\n%s\n", PROGRAM_NAME, GRAL_USAGE,
 		_(OPTIONS_LIST));

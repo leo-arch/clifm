@@ -1989,7 +1989,7 @@ unpin_dir(void)
 }
 
 void
-version_function(void)
+version_function(const int full)
 {
 	char *posix = "";
 	char *legacy = "";
@@ -2014,9 +2014,14 @@ version_function(void)
 # endif
 #endif /* SECURITY_PARANOID */
 
-	printf(_("%s %s%s%s%s%s (%s)\n%s\nLicense %s\nWritten by %s\n"),
-		PROGRAM_NAME, VERSION, posix, legacy, suckless, paranoid,
-		DATE, CONTACT, LICENSE, AUTHOR);
+	if (full == 1) { /* Running from within clifm (as 'ver')*/
+		printf(_("%s %s%s%s%s%s (%s)\n%s\nLicense %s\nWritten by %s\n"),
+			PROGRAM_NAME, VERSION, posix, legacy, suckless, paranoid,
+			DATE, CONTACT, LICENSE, AUTHOR);
+	} else { /* Running as --version (or -v) */
+		printf("%s%s%s%s%s\n", VERSION, posix, legacy, suckless, paranoid);
+		exit(EXIT_SUCCESS);
+	}
 }
 
 void

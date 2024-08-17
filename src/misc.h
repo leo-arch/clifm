@@ -58,7 +58,7 @@ void set_filter_type(const char c);
 void set_term_title(char *str);
 void splash(void);
 int  unpin_dir(void);
-void version_function(void);
+void version_function(const int full);
 
 #ifdef LINUX_INOTIFY
 void read_inotify(void);

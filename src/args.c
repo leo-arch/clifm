@@ -417,7 +417,7 @@ try_standard_data_dirs(void)
 	struct stat a;
 
 	for (i = 0; data_dirs[i]; i++) {
-		char tmp[PATH_MAX + 5 + 10];
+		char tmp[PATH_MAX + 5 + ((sizeof(PROGRAM_NAME) - 1) * 2)];
 		snprintf(tmp, sizeof(tmp), "%s/%s/%src", data_dirs[i],
 			PROGRAM_NAME, PROGRAM_NAME);
 
@@ -1221,7 +1221,7 @@ set_trash_as_rm(void)
 #ifndef _NO_TRASH
 	xargs.trasrm = conf.tr_as_rm = 1;
 #else
-	fprintf(stderr, "%s: trash: %s\n", PROGRAM_NAME, _(NOT_AVAILABLE));
+	fprintf(stderr, "%s: trash: %s\n", PROGRAM_NAME, NOT_AVAILABLE);
 	exit(EXIT_FAILURE);
 #endif /* !_NO_TRASH */
 }
@@ -1300,19 +1300,6 @@ xset_pager_view(char *arg)
 }
 #endif /* !_BE_POSIX */
 
-__attribute__ ((noreturn))
-static void
-print_version(void)
-{
-#ifdef _BE_POSIX
-	char *posix = "-POSIX";
-#else
-	char *posix = "";
-#endif /* _BE_POSIX */
-	printf("%s%s\n", VERSION, posix);
-	exit(EXIT_SUCCESS);
-}
-
 #ifdef _BE_POSIX
 static void
 set_tab_mode(const char *opt)
@@ -1375,7 +1362,7 @@ parse_cmdline_args(const int argc, char **argv)
 #ifndef _NO_ICONS
 			xargs.icons = conf.icons = 1; break;
 #else
-			fprintf(stderr, "%s: icons: %s\n", PROGRAM_NAME, _(NOT_AVAILABLE));
+			fprintf(stderr, "%s: icons: %s\n", PROGRAM_NAME, NOT_AVAILABLE);
 			exit(EXIT_FAILURE);
 #endif /* !_NO_ICONS */
 		case 'I': set_alt_trash_dir(optarg); break;
@@ -1392,7 +1379,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case 'o': set_opener(optarg); break;
 		case 'O':
 #ifdef _NO_LIRA
-			fprintf(stderr, "%s: open: %s\n", PROGRAM_NAME, _(NOT_AVAILABLE));
+			fprintf(stderr, "%s: open: %s\n", PROGRAM_NAME, NOT_AVAILABLE);
 			exit(EXIT_FAILURE);
 #else
 			open_prev_file = optarg;
@@ -1402,7 +1389,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case 'p': set_alt_profile(optarg); break;
 		case 'P':
 #ifdef _NO_LIRA
-			fprintf(stderr, "%s: preview: %s\n", PROGRAM_NAME, _(NOT_AVAILABLE));
+			fprintf(stderr, "%s: preview: %s\n", PROGRAM_NAME, NOT_AVAILABLE);
 			exit(EXIT_FAILURE);
 #else
 			open_prev_file = optarg;
@@ -1418,7 +1405,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case 't': set_color_scheme(optarg, "-t"); break;
 		case 'T': xargs.trim_names = conf.trim_names = 0; break;
 		case 'u': xargs.disk_usage_analyzer = 1; break;
-		case 'v': print_version(); /* noreturn */
+		case 'v': version_function(0); break; /* noreturn */
 		case 'V': set_virtual_dir(optarg, "-V"); break;
 		case 'w': set_workspace(optarg); break;
 		case 'W': xargs.printsel = conf.print_selfiles = 1; break;
@@ -1536,7 +1523,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case 'S': xargs.stealth_mode = 1; break;
 		case 't': xargs.disk_usage_analyzer = 1; break;
 		case 'T': set_alt_trash_dir(optarg); break;
-		case 'v': print_version(); /* noreturn */
+		case 'v': version_function(0); break; /* noreturn */
 		case 'w': set_workspace(optarg); break;
 		case 'x': conf.ext_cmd_ok = xargs.ext = 0; break;
 		case 'y': conf.light_mode = xargs.light = 1; break;
@@ -1712,7 +1699,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case LOPT_SHOTGUN_FILE:
 #ifdef _NO_LIRA
 			fprintf(stderr, "%s: --shotgun-file: %s\n",
-				PROGRAM_NAME, _(NOT_AVAILABLE));
+				PROGRAM_NAME, NOT_AVAILABLE);
 			exit(EXIT_FAILURE);
 #else
 			set_shotgun_file(optarg); break;
