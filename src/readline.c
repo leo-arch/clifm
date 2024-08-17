@@ -244,7 +244,7 @@ static int
 rl_exclude_input(const unsigned char c, const unsigned char prev)
 {
 	/* Delete or backspace keys. */
-	int _del = 0;
+	int del_key = 0;
 
 	/* Disable suggestions while in vi mode. */
 	if (rl_editing_mode == RL_VI_MODE) {
@@ -272,7 +272,7 @@ rl_exclude_input(const unsigned char c, const unsigned char prev)
 
 		else if (prev == '[' && c == '3' && rl_point < rl_end) {
 			xdelete();
-			_del = DEL_NON_EMPTY_LINE;
+			del_key = DEL_NON_EMPTY_LINE;
 			goto END;
 		}
 
@@ -294,7 +294,7 @@ rl_exclude_input(const unsigned char c, const unsigned char prev)
 
 	if (c == 4 && rl_point < rl_end) { /* 4 == EOT (Ctrl-D) */
 		xdelete();
-		_del = DEL_NON_EMPTY_LINE;
+		del_key = DEL_NON_EMPTY_LINE;
 		goto END;
 	}
 
@@ -323,7 +323,8 @@ rl_exclude_input(const unsigned char c, const unsigned char prev)
 	switch (c) {
 		case KEY_DELETE: /* fallthrough */
 		case KEY_BACKSPACE:
-			_del = (rl_point == 0 && rl_end == 0) ? DEL_EMPTY_LINE : DEL_NON_EMPTY_LINE;
+			del_key = (rl_point == 0 && rl_end == 0)
+				? DEL_EMPTY_LINE : DEL_NON_EMPTY_LINE;
 			xbackspace();
 			if (rl_end == 0 && cur_color != tx_c) {
 				cur_color = tx_c;
@@ -393,7 +394,7 @@ END:
 
 #ifndef _NO_HIGHLIGHT
 	if (conf.highlight == 0) {
-		if (_del > 0) {
+		if (del_key > 0) {
 # ifndef _NO_SUGGESTIONS
 			/* Since we have removed a char, let's check if there is
 			 * a suggestion available using the modified input line. */
@@ -406,7 +407,7 @@ END:
 			if (rl_point == 0 && rl_end == 0) {
 				if (wrong_cmd == 1)
 					recover_from_wrong_cmd();
-				if (_del == DEL_EMPTY_LINE)
+				if (del_key == DEL_EMPTY_LINE)
 					leftmost_bell();
 			}
 # endif /* !_NO_SUGGESTIONS */
@@ -422,7 +423,7 @@ END:
 		recolorize_line();
 #endif /* !_NO_HIGHLIGHT */
 
-	if (_del > 0) {
+	if (del_key > 0) {
 #ifndef _NO_SUGGESTIONS
 		if (wrong_cmd == 1 && s == -1 && rl_end > 0) {
 			rl_suggestions((unsigned char)rl_line_buffer[rl_end - 1]);
@@ -432,7 +433,7 @@ END:
 		if (rl_point == 0 && rl_end == 0) {
 			if (wrong_cmd == 1)
 				recover_from_wrong_cmd();
-			if (_del == DEL_EMPTY_LINE)
+			if (del_key == DEL_EMPTY_LINE)
 				leftmost_bell();
 		}
 #endif /* !_NO_SUGGESTIONS */
