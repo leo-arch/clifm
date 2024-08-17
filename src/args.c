@@ -971,25 +971,25 @@ set_alt_config_file(char *file)
 static char *
 resolve_path(char *file)
 {
-	char *_path = (char *)NULL;
+	char *s_path = (char *)NULL;
 
 	if (*file == '.') {
-		_path = normalize_path(file, strlen(file));
-		if (!_path) {
+		s_path = normalize_path(file, strlen(file));
+		if (!s_path) {
 			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, file, strerror(errno));
 			exit(errno);
 		}
 
 	} else if (*file == '~') {
-		_path = tilde_expand(file);
-		if (!_path) {
+		s_path = tilde_expand(file);
+		if (!s_path) {
 			fprintf(stderr, _("%s: '%s': Error expanding tilde\n"),
 				PROGRAM_NAME, file);
 			exit(EXIT_FAILURE);
 		}
 
 	} else if (*file == '/') {
-		_path = savestring(file, strlen(file));
+		s_path = savestring(file, strlen(file));
 
 	} else {
 		char tmp[PATH_MAX + 1] = "";
@@ -1001,61 +1001,61 @@ resolve_path(char *file)
 		}
 
 		const size_t len = strlen(cwd) + strlen(file) + 2;
-		_path = xnmalloc(len, sizeof(char));
-		snprintf(_path, len, "%s/%s", cwd, file);
+		s_path = xnmalloc(len, sizeof(char));
+		snprintf(s_path, len, "%s/%s", cwd, file);
 	}
 
-	return _path;
+	return s_path;
 }
 
 static char *
 resolve_starting_path(char *file)
 {
-	char *_path = (char *)NULL;
+	char *s_path = (char *)NULL;
 
 	if (IS_FILE_URI(file)) {
-		_path = savestring(file + 7, strlen(file + 7));
+		s_path = savestring(file + 7, strlen(file + 7));
 	} else if (is_url(file) == FUNC_SUCCESS) {
 		open_reg_exit(file, 1, 0); /* noreturn */
 	} else {
-		_path = resolve_path(file);
+		s_path = resolve_path(file);
 	}
 
 	struct stat a;
-	if (stat(_path, &a) == -1) {
+	if (stat(s_path, &a) == -1) {
 		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, file, strerror(errno));
-		free(_path);
+		free(s_path);
 		exit(errno);
 	}
 
 	if (!S_ISDIR(a.st_mode)) {
 		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, file, strerror(ENOTDIR));
-		free(_path);
+		free(s_path);
 		exit(ENOTDIR);
 	}
 
 	xargs.path = 1;
-	return _path;
+	return s_path;
 }
 
 static void
-set_starting_path(char *_path)
+set_starting_path(char *s_path)
 {
-	if (xchdir(_path, SET_TITLE) == 0) {
+	if (xchdir(s_path, SET_TITLE) == 0) {
 		if (cur_ws == UNSET)
 			cur_ws = DEF_CUR_WS;
 
 		free(workspaces[cur_ws].path);
-		workspaces[cur_ws].path = savestring(_path, strlen(_path));
+		workspaces[cur_ws].path = savestring(s_path, strlen(s_path));
 
 	} else { /* Error changing directory */
 		if (xargs.list_and_quit == 1) {
-			xerror("%s: '%s': %s\n", PROGRAM_NAME, _path, strerror(errno));
+			xerror("%s: '%s': %s\n", PROGRAM_NAME, s_path, strerror(errno));
 			exit(EXIT_FAILURE);
 		}
 
 		err('w', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
-			_path, strerror(errno));
+			s_path, strerror(errno));
 	}
 }
 
