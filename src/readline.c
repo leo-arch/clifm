@@ -76,7 +76,9 @@ typedef char *rl_cpvfunc_t;
 
 #define SUGGEST_ONLY             0
 #define RL_INSERT_CHAR           1
-#define SKIP_CHAR                2
+#ifndef _NO_SUGGESTIONS
+# define SKIP_CHAR               2
+#endif /* !_NO_SUGGESTIONS */
 #define SKIP_CHAR_NO_REDISPLAY   3
 
 #define MAX_EXT_OPTS NAME_MAX
@@ -364,10 +366,13 @@ rl_exclude_input(const unsigned char c, const unsigned char prev)
 	rl_insert_text(t);
 
 	int s = 0;
+	char *p = (char *)NULL;
 
 END:
 #ifndef _NO_SUGGESTIONS
-	s = strcntchrlst(rl_line_buffer, ' ');
+	p = strrchr(rl_line_buffer, ' ');
+	s = p ? (int)(p - rl_line_buffer) : -1;
+
 	/* Do not take into account final spaces. */
 	if (s >= 0 && !rl_line_buffer[s + 1])
 		s = -1;
@@ -383,7 +388,7 @@ END:
 		}
 	}
 #else
-	UNUSED(s);
+	UNUSED(s); UNUSED(p);
 #endif /* !_NO_SUGGESTIONS */
 
 #ifndef _NO_HIGHLIGHT

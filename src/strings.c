@@ -633,27 +633,6 @@ strcntchr(const char *str, const char c)
 	return (-1);
 }
 
-/* Returns the index of the last appearance of C in STR, if any, and
- * -1 if C was not found or STR is NULL. */
-int
-strcntchrlst(const char *str, const char c)
-{
-	if (!str)
-		return (-1);
-
-	int i = 0;
-
-	int p = -1;
-	while (*str) {
-		if (*str == c)
-			p = i;
-		i++;
-		str++;
-	}
-
-	return p;
-}
-
 /* Get substring in STR before the last appearance of C. Returns
  * substring  if C is found and NULL if not (or if C was the first
  * char in STR). */
