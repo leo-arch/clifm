@@ -94,11 +94,11 @@ static int tagged_files_n = 0;
  * The question will be repeated until 'y' or 'n' is entered.
  * Returns 1 if 'y' or 0 if 'n'. */
 int
-rl_get_y_or_n(const char *_msg)
+rl_get_y_or_n(const char *msg_str)
 {
 	char *answer = (char *)NULL;
 	while (!answer) {
-		answer = rl_no_hist(_msg);
+		answer = rl_no_hist(msg_str);
 		if (!answer)
 			continue;
 
@@ -258,15 +258,10 @@ rl_exclude_input(const unsigned char c, const unsigned char prev)
 	/* Skip escape sequences, mostly arrow keys. */
 	if (rl_readline_state & RL_STATE_MOREINPUT) {
 		if (c == '~') {
+			/* This should be the delete key. */
 #ifndef _NO_SUGGESTIONS
-			if (rl_point != rl_end && suggestion.printed) {
-				/* This should be the delete key. */
+			if (suggestion.printed)
 				clear_suggestion(CS_FREEBUF);
-			} else {
-				if (suggestion.printed)
-					clear_suggestion(CS_FREEBUF);
-			}
-			return RL_INSERT_CHAR;
 #endif /* !_NO_SUGGESTIONS */
 		}
 
@@ -319,7 +314,7 @@ rl_exclude_input(const unsigned char c, const unsigned char prev)
 	if (c != KEY_ESC)
 		cmdhist_flag = 0;
 
-	/* Skip ESC, backspace, Enter, and TAB keys. */
+	/* Skip ESC, del/backspace, Enter, and TAB keys. */
 	switch (c) {
 		case KEY_DELETE: /* fallthrough */
 		case KEY_BACKSPACE:
@@ -350,10 +345,8 @@ rl_exclude_input(const unsigned char c, const unsigned char prev)
 				if (suggestion.nlines >= 2 || suggestion.type == ELN_SUG
 				|| suggestion.type == BOOKMARK_SUG
 				|| suggestion.type == ALIAS_SUG
-				|| suggestion.type == JCMD_SUG) {
+				|| suggestion.type == JCMD_SUG)
 					clear_suggestion(CS_FREEBUF);
-					return RL_INSERT_CHAR;
-				}
 			}
 #endif /* !_NO_SUGGESTIONS */
 			return RL_INSERT_CHAR;
@@ -741,9 +734,9 @@ alt_rl_prompt(const char *_prompt, const char *line)
 }
 
 char *
-secondary_prompt(const char *_prompt, const char *line)
+secondary_prompt(const char *prompt_str, const char *line)
 {
-	alt_rl_prompt(_prompt, line);
+	alt_rl_prompt(prompt_str, line);
 
 	if (!rl_callback_handler_input)
 		return (char *)NULL;
@@ -777,10 +770,10 @@ is_quote_char(const char c)
 }
 
 char *
-rl_no_hist(const char *prompt)
+rl_no_hist(const char *prompt_str)
 {
 	rl_nohist = rl_notab = 1;
-	char *input = secondary_prompt(prompt, NULL);
+	char *input = secondary_prompt(prompt_str, NULL);
 	rl_nohist = rl_notab = 0;
 
 	if (!input) /* Ctrl-d */
@@ -827,7 +820,7 @@ quote_detector(char *line, int index)
  * Modified version of:
  * https://utcc.utoronto.ca/~cks/space/blog/programming/ReadlineQuotingExample*/
 static char *
-my_rl_quote(char *text, int mt, char *qp)
+my_rl_quote(char *text, int mt, char *qp) /* NOLINT */
 {
 	/* NOTE: mt and qp arguments are not used here, but are required by
 	 * rl_filename_quoting_function */
