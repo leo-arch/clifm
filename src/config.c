@@ -1888,6 +1888,9 @@ create_main_config_file(char *file)
 # prevent accidental deletions.\n\
 ;TrashAsRm=%s\n\n"
 
+	    "# If set to true, do not ask for confirmation before trashing files.\n\
+;TrashForce=%s\n\n"
+
 	    "# Set readline editing mode: 0 for vi and 1 for emacs (default).\n\
 ;RlEditMode=%d\n\n",
 
@@ -1902,6 +1905,7 @@ create_main_config_file(char *file)
 		DEF_CLEAR_SCREEN == 1 ? "true" : "false",
 		DEF_RESTORE_LAST_PATH == 1 ? "true" : "false",
 		DEF_TRASRM == 1 ? "true" : "false",
+		DEF_TRASH_FORCE == 1 ? "true" : "false",
 		DEF_RL_EDIT_MODE
 		);
 
@@ -3370,6 +3374,10 @@ read_config(void)
 		else if (xargs.trasrm == UNSET && *line == 'T'
 		&& strncmp(line, "TrashAsRm=", 10) == 0) {
 			set_config_bool_value(line + 10, &conf.tr_as_rm);
+		}
+
+		else if (*line == 'T' && strncmp(line, "TrashForce=", 11) == 0) {
+			set_config_bool_value(line + 11, &conf.trash_force);
 		}
 #endif /* !_NO_TRASH */
 

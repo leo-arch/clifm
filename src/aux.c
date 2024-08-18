@@ -63,6 +63,30 @@ press_any_key_to_continue(const int init_newline)
 	errno = saved_errno;
 }
 
+/* Print the file name FNAME, quoted if it contains an space.
+ * A slash is appended if FNAME is a directory (ISDIR >= 1). */
+void
+print_file_name(char *fname, const int isdir)
+{
+	char *tmp_name = (char *)NULL;
+	if (wc_xstrlen(fname) == 0)
+		tmp_name = replace_invalid_chars(fname);
+
+	char *name = tmp_name ? tmp_name : fname;
+
+	if (detect_space(name) == 1) {
+		if (strchr(name, '\''))
+			printf("\"%s%s\"\n", name, isdir >= 1 ? "/" : "");
+		else
+			printf("'%s%s'\n", name, isdir >= 1 ? "/" : "");
+	} else {
+		fputs(name, stdout);
+		puts(isdir >= 1 ? "/" : "");
+	}
+
+	free(tmp_name);
+}
+
 /* Return the value of the environment variable S, allocated via malloc if
  * ALLOC is 1, or just a pointer to the value if 0. */
 char *

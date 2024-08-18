@@ -1187,12 +1187,13 @@ struct config_t {
 	int trim_names;
 #ifndef _NO_TRASH
 	int tr_as_rm;
+	int trash_force;
 #else
 	int pad1; /* Keep the struct alignment */
+	int pad2;
 #endif /* !_NO_TRASH */
 	int warning_prompt;
 	int welcome_message;
-	int pad2;
 };
 
 extern struct config_t conf;

@@ -37,7 +37,7 @@
 #endif /* MAC_OS_X_RENAMEAT_SYS_STDIO_H */
 
 #include "aux.h"        /* gen_date_suffix, count_dir, open_fwrite, open_fread,
-xatoi, url_encode, xnmalloc */
+xatoi, url_encode, xnmalloc, print_file_name */
 #include "checks.h"     /* is_file_in_cwd, is_number */
 #include "colors.h"     /* colors_list */
 #include "listing.h"    /* reload_dirlist */
@@ -1073,7 +1073,7 @@ list_ok_trashed_files(char **args, const int *trashed, const size_t trashed_n)
 
 		char *name = (*tmp == '.' && tmp[1] == '/') ? tmp + 2 : tmp;
 
-		puts(name);
+		print_file_name(name, 0);
 
 		if (tmp && tmp != p)
 			free(tmp);
@@ -1082,19 +1082,60 @@ list_ok_trashed_files(char **args, const int *trashed, const size_t trashed_n)
 	}
 }
 
+/* Print file names in ARGS and ask for confirmation.
+ * Return the number of files to be trashed if the answer is afirmative,
+ * or zero otherwise. */
+static size_t
+ask_for_confirmation(char **args)
+{
+	struct stat a;
+	size_t i = 0;
+
+	fputs(_("File(s) to be trashed:\n"), stdout);
+
+	for (i = 1; args[i]; i++) {
+		char *name = unescape_str(args[i], 0);
+		if (!name)
+			name = savestring(args[i], strlen(args[i]));
+
+		const size_t l = strlen(name);
+		if (l > 1 && name[l - 1] == '/')
+			name[l - 1] = '\0';
+
+		print_file_name(name, lstat(name, &a) != -1 && S_ISDIR(a.st_mode));
+		free(name);
+	}
+
+	if (rl_get_y_or_n("Continue? [y/n] ") == 0)
+		return 0;
+
+	return i;
+}
+
 /* Trash files passed as arguments to the trash command */
 static int
 trash_files_args(char **args)
 {
+	if (!args || !args[0] || !args[1])
+		return FUNC_FAILURE;
+
+	int exit_status = FUNC_SUCCESS, cwd = 0;
+	size_t i, trashed_files = 0, n = 0;
+
+	if (conf.trash_force == 1) {
+		for (i = 1; args[i]; i++);
+	} else {
+		i = ask_for_confirmation(args);
+		if (i == 0)
+			return FUNC_SUCCESS;
+	}
+
 	time_t rawtime = time(NULL);
 	struct tm t;
 	char *suffix = localtime_r(&rawtime, &t) ? gen_date_suffix(t) : (char *)NULL;
 	if (!suffix)
 		return FUNC_FAILURE;
 
-	int exit_status = FUNC_SUCCESS, cwd = 0;
-	size_t i, trashed_files = 0, n = 0;
-	for (i = 1; args[i]; i++);
 	int *successfully_trashed = xnmalloc(i + 1, sizeof(int));
 
 	for (i = 1; args[i]; i++) {

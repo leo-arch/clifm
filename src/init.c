@@ -262,6 +262,7 @@ init_conf_struct(void)
 	conf.trim_names = UNSET;
 #ifndef _NO_TRASH
 	conf.tr_as_rm = UNSET;
+	conf.trash_force = DEF_TRASH_FORCE;
 #endif /* !_NO_TRASH */
 	conf.warning_prompt = UNSET;
 	conf.welcome_message = UNSET;

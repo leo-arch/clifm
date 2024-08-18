@@ -1076,7 +1076,7 @@ print_file_perms(const struct stat *attr, const char file_type_char,
 }
 
 static void
-print_file_name(char *filename, const char *color, const int follow_link,
+print_filename(char *filename, const char *color, const int follow_link,
 	const mode_t mode, char *link_target)
 {
 	char *wname = wc_xstrlen(filename) == 0
@@ -1918,7 +1918,7 @@ do_stat(char *filename, const int follow_link)
 #endif /* LINUX_FILE_XATTRS */
 
 	print_file_perms(&attr, file_type, ctype, xattr);
-	print_file_name(filename, color, follow_link, attr.st_mode, link_target);
+	print_filename(filename, color, follow_link, attr.st_mode, link_target);
 	print_file_details(filename, &attr, file_type, file_perm, xattr);
 	print_file_mime(*link_target ? link_target : filename);
 	print_timestamps(*link_target ? link_target : filename, &attr);
