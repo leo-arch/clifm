@@ -500,6 +500,14 @@ dump_config(void)
 	s = DEF_TERM_CMD;
 	print_config_value("TerminalCmd", conf.term, s, DUMP_CONFIG_STR);
 
+	n = DEF_TIME_FOLLOWS_SORT;
+	print_config_value("TimeFollowsSort", &conf.time_follows_sort,
+		&n, DUMP_CONFIG_BOOL);
+
+	n = DEF_TIMESTAMP_MARK;
+	print_config_value("TimestampMark", &conf.timestamp_mark,
+		&n, DUMP_CONFIG_BOOL);
+
 	s = "";
 	print_config_value("TimeStyle", conf.time_str, s, DUMP_CONFIG_STR);
 
@@ -509,6 +517,9 @@ dump_config(void)
 #ifndef _NO_TRASH
 	n = DEF_TRASRM;
 	print_config_value("TrashAsRm", &conf.tr_as_rm, &n, DUMP_CONFIG_BOOL);
+
+	n = DEF_TRASH_FORCE;
+	print_config_value("TrashForce", &conf.trash_force, &n, DUMP_CONFIG_BOOL);
 #endif /* !_NO_TRASH */
 
 	n = DEF_TRIM_NAMES;
