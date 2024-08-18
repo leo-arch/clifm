@@ -194,6 +194,7 @@ gen_trashinfo_file(char *file, const char *suffix, const struct tm *tm)
 		if (fd != -1) close(fd);
 		xerror("trash: '%s': %s\n", info_file, strerror(saved_errno));
 		free(info_file);
+		free(url_str);
 		return saved_errno;
 	}
 
