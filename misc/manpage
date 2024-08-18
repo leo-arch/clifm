@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Aug 16, 2024" "clifm 1.20" "CLIFM Manual"
+.TH "CLIFM" "1" "Aug 18, 2024" "clifm 1.20.1" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -1152,9 +1152,11 @@ By default, files are sorted from less to more (e.g.: from \'a\' to \'z\' if sor
 print statistics about files in the current directory (not available in light mode).
 .TP
 .B t, trash \fR[\fIELN/FILE\fR]... [\fIls\fR, \fIlist\fR] [\fIclear\fR, \fIempty\fR] [\fIdel\fR [\fIFILE\fR]...]]
-with no argument (or by passing the \fIls\fR option), it prints the list of currently trashed files. The \fIclear\fR or \fIempty\fR parameter removes all files from the trash can, while the \fIdel\fR parameter lists trashed files allowing the user to remove one or more of them. If using \fIdel\fR, TAB completion to list/select currently trashed files is available.
+with no argument (or by passing the \fIls\fR option), it prints the list of currently trashed files. The \fIclear\fR or \fIempty\fR parameter removes all files from the trash can, while the \fIdel\fR parameter lists trashed files allowing the user to permanently remove one or more trashed files. If using \fIdel\fR, TAB completion to list/select currently trashed files is available.
 .sp
-The trash directory is \fI$XDG_DATA_HOME/Trash\fR, usually \fI~/.local/share/Trash\fR. Since this trash system follows the Freedesktop specification, it is able to handle files trashed by different Trash implementations.
+The trash directory is \fI$XDG_DATA_HOME/Trash\fR, falling back to \fI$HOME/.local/share/Trash\fR. To set an alternative trash directory use the \fI\-T,\-\-trash\-dir\fR command line option.
+.sp
+Since this trash system follows the Freedesktop specification, it is able to handle files trashed by different Trash implementations.
 .sp
 To restore trashed files (to their original location) see the \fIundel\fR command below.
 .TP
