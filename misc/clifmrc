@@ -323,7 +323,11 @@
 # Make the 'r' command trash files instead of removing them.
 ;TrashAsRm=false
 
-# If set to true, the 'r' command will never prompt before removals.
+# If set to true, do not ask for confirmation before trashing files.
+;TrashForce=true
+
+# If set to true, do not ask for confirmation before removing files
+# with the 'r' command.
 # Note: use the '-f' parameter to turn this option on for a single
 # command. Example: 'r -f FILE'.
 ;rmForce=false
