@@ -3618,9 +3618,17 @@ set_trash_dirs(void)
 			return;
 		}
 
-		len = user.home_len + 20;
-		trash_dir = xnmalloc(len, sizeof(char));
-		snprintf(trash_dir, len, "%s/.local/share/Trash", user.home);
+		char *p = (char *)NULL;
+		if (xargs.secure_env != 1 && xargs.secure_env_full != 1
+		&& (p = getenv("XDG_DATA_HOME")) && *p) {
+			len = strlen(p) + 7;
+			trash_dir = xnmalloc(len, sizeof(char));
+			snprintf(trash_dir, len, "%s/Trash", p);
+		} else {
+			len = user.home_len + 20;
+			trash_dir = xnmalloc(len, sizeof(char));
+			snprintf(trash_dir, len, "%s/.local/share/Trash", user.home);
+		}
 	}
 
 	const size_t trash_len = strlen(trash_dir);
