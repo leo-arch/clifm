@@ -279,6 +279,18 @@ is_utf8_name(const char *name, size_t *bytes)
 	return is_utf8;
 }
 
+/* Return the amount of ASCII/UTF-8 characters in the string S. */
+static size_t
+count_utf8_chars(const char *s)
+{
+	size_t count = 0;
+
+	for (; *s; s++)
+		count += ((*s & 0xc0) != 0x80);
+
+	return count;
+}
+
 /* Set the color of the dividing line: DL, is the color code is set,
  * or the color of the current workspace if not */
 static void
@@ -289,25 +301,27 @@ set_div_line_color(void)
 		return;
 	}
 
-	/* If div line color isn't set, use the current workspace color */
+	const char *def_color = term_caps.color >= 256 ? DEF_DL_C256 : DEF_DL_C;
+
+	/* If div line color isn't set, use the current workspace color. */
 	switch (cur_ws) {
-	case 0: fputs(*ws1_c ? ws1_c : DEF_DL_C, stdout); break;
-	case 1: fputs(*ws2_c ? ws2_c : DEF_DL_C, stdout); break;
-	case 2: fputs(*ws3_c ? ws3_c : DEF_DL_C, stdout); break;
-	case 3: fputs(*ws4_c ? ws4_c : DEF_DL_C, stdout); break;
-	case 4: fputs(*ws5_c ? ws5_c : DEF_DL_C, stdout); break;
-	case 5: fputs(*ws6_c ? ws6_c : DEF_DL_C, stdout); break;
-	case 6: fputs(*ws7_c ? ws7_c : DEF_DL_C, stdout); break;
-	case 7: fputs(*ws8_c ? ws8_c : DEF_DL_C, stdout); break;
-	default: fputs(DEF_DL_C, stdout); break;
+	case 0: fputs(*ws1_c ? ws1_c : def_color, stdout); break;
+	case 1: fputs(*ws2_c ? ws2_c : def_color, stdout); break;
+	case 2: fputs(*ws3_c ? ws3_c : def_color, stdout); break;
+	case 3: fputs(*ws4_c ? ws4_c : def_color, stdout); break;
+	case 4: fputs(*ws5_c ? ws5_c : def_color, stdout); break;
+	case 5: fputs(*ws6_c ? ws6_c : def_color, stdout); break;
+	case 6: fputs(*ws7_c ? ws7_c : def_color, stdout); break;
+	case 7: fputs(*ws8_c ? ws8_c : def_color, stdout); break;
+	default: fputs(def_color, stdout); break;
 	}
 }
 
-/* Print the line divinding files and prompt using DIV_LINE. If
- * DIV_LINE takes more than two columns to be printed (ASCII chars
- * take only one, but unicode chars could take two), print exactly the
- * content of DIV_LINE. Otherwise, repeat DIV_LINE to fulfill
- * all terminal columns. If DIV_LINE is '0', print no line at all */
+/* Print the line dividing files and prompt using DIV_LINE. If
+ * DIV_LINE contains more than one character, print exactly the
+ * content of DIV_LINE. If it contains exactly one character, print
+ * DIV_LINE up to the right screen edge. If it is "0", print an empty
+ * line. And, if unset, draw a line using box-drawing characters. */
 static void
 print_div_line(void)
 {
@@ -319,29 +333,27 @@ print_div_line(void)
 	if (conf.colorize == 1)
 		set_div_line_color();
 
-	if (!*div_line) { /* Let's draw the line with box drawing chars */
+	if (!*div_line) {
 		fputs("\x1b(0m", stdout);
-		int k;
-		for (k = 0; k < (int)term_cols - 2; k++)
+		int i;
+		for (i = 0; i < (int)term_cols - 2; i++)
 			putchar('q');
 		fputs("\x1b(0j\x1b(B", stdout);
 		putchar('\n');
 	} else if (*div_line == '0' && !div_line[1]) {
-		/* No line */
 		putchar('\n');
 	} else {
-		/* Custom line */
-		const size_t len = wc_xstrlen(div_line);
-		if (len <= 1) {
+		const size_t c = count_utf8_chars(div_line);
+		if (c <= 1) {
 			/* Extend DIV_LINE to the end of the screen - 1.
 			 * We substract 1 to prevent an extra empty line after the
-			 * dividing line in some terminals (e.g. cons25). */
-			int i = len > 0 ? (int)(term_cols / len) : 0;
+			 * dividing line on some terminals (e.g. cons25). */
+			const size_t len = !div_line[1] ? 1 : wc_xstrlen(div_line);
+			int i = c > 0 ? (int)(term_cols / len) : 0;
 			for (; i > 1; i--)
 				fputs(div_line, stdout);
 			putchar('\n');
 		} else {
-			/* Print DIV_LINE exactly */
 			puts(div_line);
 		}
 	}
