@@ -332,7 +332,7 @@ print_div_line(void)
 	} else {
 		/* Custom line */
 		const size_t len = wc_xstrlen(div_line);
-		if (len <= 2) {
+		if (len <= 1) {
 			/* Extend DIV_LINE to the end of the screen - 1.
 			 * We substract 1 to prevent an extra empty line after the
 			 * dividing line in some terminals (e.g. cons25). */
