@@ -1841,7 +1841,7 @@ remove_files(char **args)
 		 * stat(2) will take it as the symlink it is and rm(1) will remove
 		 * the symlink (not the target) without complains. */
 		const size_t len = strlen(args[i]);
-		if (len > 0 && args[i][len - 1] == '/')
+		if (len > 1 && args[i][len - 1] == '/')
 			args[i][len - 1] = '\0';
 
 		/* Check if at least one file is in the current directory. If not,

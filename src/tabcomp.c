@@ -71,15 +71,15 @@ typedef char *rl_cpvfunc_t;
 # include "suggestions.h"
 #endif /* !_NO_SUGGESTIONS */
 
-#define CPR     "\x1b[6n" /* Cursor position report */
-#define CPR_LEN (sizeof(CPR) - 1)
+#ifndef _NO_FZF
+# define CPR     "\x1b[6n" /* Cursor position report */
+# define CPR_LEN (sizeof(CPR) - 1)
 
-#define SHOW_PREVIEWS(c) ((c) == TCMP_PATH || (c) == TCMP_SEL \
+# define SHOW_PREVIEWS(c) ((c) == TCMP_PATH || (c) == TCMP_SEL \
 || (c) == TCMP_RANGES || (c) == TCMP_DESEL || (c) == TCMP_JUMP \
 || (c) == TCMP_TAGS_F || (c) == TCMP_GLOB || (c) == TCMP_FILE_TYPES_FILES \
 || (c) == TCMP_BM_PATHS || (c) == TCMP_UNTRASH || (c) == TCMP_TRASHDEL)
 
-#ifndef _NO_FZF
 static char finder_in_file[PATH_MAX + 1];
 static char finder_out_file[PATH_MAX + 1];
 
