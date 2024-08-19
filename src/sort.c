@@ -140,38 +140,48 @@ namecmp(char *s1, char *s2)
 }
 
 static inline int
-sort_by_extension(const char *n1, const char *n2, const int n1dir,
-	const int n2dir)
+sort_by_extension(struct fileinfo *pa, struct fileinfo *pb)
 {
-	int ret = 0;
-	char *aext = (char *)NULL, *bext = (char *)NULL, *val;
+	char *e1 = (char *)NULL;
+	char *e2 = (char *)NULL;
 
-	/* If the entry is a directory, we don't take it as having an extension,
-	 * even if it has a dot in its name. */
-	val = n1dir == 0 ? strrchr(n1, '.') : (char *)NULL;
-	if (val && val != n1)
-		aext = val + 1;
-
-	val = n2dir == 0 ? strrchr(n2, '.') : (char *)NULL;
-	if (val && val != n2)
-		bext = val + 1;
-
-	if (aext || bext) {
-		if (!aext)
-			ret = -1;
-		else if (!bext)
-			ret = 1;
-		else
-			ret = strcasecmp(aext, bext);
+	if (pa->dir == 0) {
+		if (pa->ext_name) {
+			e1 = pa->ext_name + (pa->ext_name[1] != '\0');
+		} else {
+			char *p = strrchr(pa->name, '.');
+			if (p && p[1])
+				e1 = p + 1;
+		}
 	}
 
-	return ret;
+	if (pb->dir == 0) {
+		if (pb->ext_name) {
+			e2 = pb->ext_name + (pb->ext_name[1] != '\0');
+		} else {
+			char *p = strrchr(pb->name, '.');
+			if (p && p[1])
+				e2 = p + 1;
+		}
+	}
+
+	if (e1 || e2) {
+		if (!e1)
+			return (-1);
+		if (!e2)
+			return 1;
+
+		return strcasecmp(e1, e2);
+	}
+
+	return 0;
 }
 
 static inline int
 sort_by_size(struct fileinfo *pa, struct fileinfo *pb)
 {
-	const off_t as = pa->size, bs = pb->size;
+	const off_t as = pa->size;
+	const off_t bs = pb->size;
 
 	if (as > bs)
 		return 1;
@@ -273,6 +283,28 @@ sort_by_links(const nlink_t a, const nlink_t b)
 }
 
 static inline int
+sort_by_type(struct fileinfo *pa, struct fileinfo *pb)
+{
+	const mode_t m1 = pa->type;
+	const mode_t m2 = pb->type;
+
+	const int e1 = (pa->type == DT_REG && pa->exec == 1);
+	const int e2 = (pb->type == DT_REG && pb->exec == 1);
+
+	if (e1 > e2)
+		return 1;
+	if (e2 > e1)
+		return (-1);
+
+	if (m1 > m2)
+		return 1;
+	if (m2 > m1)
+		return (-1);
+
+	return 0;
+}
+
+static inline int
 sort_dirs(const int a, const int b)
 {
 	if (b != a) {
@@ -308,13 +340,17 @@ entrycmp(const void *a, const void *b)
 	case SCTIME: /* fallthrough */
 	case SMTIME: ret = sort_by_time(pa->time, pb->time); break;
 	case SVER: ret = xstrverscmp(pa->name, pb->name); break;
-	case SEXT:
-		ret = sort_by_extension(pa->name, pb->name, pa->dir, pb->dir); break;
+	case SEXT: ret = sort_by_extension(pa, pb); break;
 	case SINO: ret = sort_by_inode(pa->inode, pb->inode); break;
 	case SOWN: ret = sort_by_owner(pa->uid, pb->uid); break;
 	case SGRP: ret = sort_by_group(pa->gid, pb->gid); break;
 	case SBLK: ret = sort_by_blocks(pa->blocks, pb->blocks); break;
 	case SLNK: ret = sort_by_links(pa->linkn, pb->linkn); break;
+	case STYPE:
+		ret = sort_by_type(pa, pb);
+		if (ret == 0)
+			ret = sort_by_extension(pa, pb);
+		break;
 	default: break;
 	}
 
@@ -386,6 +422,7 @@ num_to_sort_name(const int n)
 	case SGRP:   return "group";
 	case SBLK:   return "blocks";
 	case SLNK:   return "links";
+	case STYPE:  return "type";
 	default:     return "unknown";
 	}
 }

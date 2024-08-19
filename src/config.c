@@ -1799,7 +1799,7 @@ create_main_config_file(char *file)
 ;TerminalCmd='%s'\n\n"
 
 	    "# How to sort files: none, name, size, atime, btime, ctime, mtime,\n\
-# version, extension, inode, owner, group, blocks, links.\n\
+# version, extension, inode, owner, group, blocks, links, type.\n\
 ;Sort=version\n\
 # Sort in reverse order\n\
 ;SortReverse=%s\n\n"

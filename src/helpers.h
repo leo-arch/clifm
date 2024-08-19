@@ -672,7 +672,8 @@ extern time_t curdir_mtime;
 #define SGRP       11
 #define SBLK       12
 #define SLNK       13
-#define SORT_TYPES 13
+#define STYPE      14
+#define SORT_TYPES 14
 
 /* Macros for the colors_list function */
 #define NO_ELN        0
@@ -927,7 +928,7 @@ extern time_t curdir_mtime;
 
 /* Do we have the sort method S in light mode? */
 #define ST_IN_LIGHT_MODE(s) ((s) == SNAME || (s) == SVER || (s) == SINO \
-		|| (s) == SEXT || (s) == SNONE)
+		|| (s) == SEXT || (s) == SNONE || (s) == STYPE)
 
 #define UNUSED(x) (void)(x) /* Just silence the compiler's warning */
 #define TOUPPER(c) (((c) >= 'a' && (c) <= 'z') ? ((c) - 'a' + 'A') : (c))

@@ -114,7 +114,8 @@ const struct sort_t sort_methods[] = {
     {"group", 11, 0},
     {"blocks", 12, 0},
     {"links", 13, 0},
-    {NULL, 14, 0},
+    {"type", 14, 0},
+    {NULL, 15, 0},
 };
 
 /* pmsg holds the current program message type */
@@ -776,6 +777,7 @@ const struct cmdslist_t param_str[] = {
 	{"st extension", 12},
 	{"st inode", 8},
 	{"st version", 10},
+	{"st type", 7},
 	{"sort none", 9},
 	{"sort name", 9},
 	{"sort blocks", 11},
@@ -790,6 +792,7 @@ const struct cmdslist_t param_str[] = {
 	{"sort extension", 14},
 	{"sort inode", 10},
 	{"sort version", 12},
+	{"sort type", 9},
 	{"st rev", 6},
 	{"sort rev", 8},
 	{"t list", 6},
