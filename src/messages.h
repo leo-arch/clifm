@@ -1027,15 +1027,13 @@ Recognized file types: (d)irectory, regular (f)ile, symbolic (l)ink,\n\
 
 #define SORT_USAGE "Change files sorting order\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  st [METHOD] [rev]\nMETHOD: 0 = none, \
-1 = name, 2 = size, 3 = atime, 4 = btime, \n5 = ctime, \
-6 = mtime, 7 = version, 8 = extension, 9 = inode,\n\
-10 = owner, 11 = group, 12 = blocks, 13 = links\n\
-Note: Both numbers and names are allowed.\n\n\
+  st [METHOD] [rev]\n\n\
+Available methods: none, name, size, atime, btime, ctime, mtime\n\
+version, extension, inode, owner, group, blocks, links, type.\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - List files by size\n\
     st size (or 'st <TAB>' to choose from a list)\n\
-- Revert the current sorting order (i.e. z-a instead of a-z)\n\
+- Revert the current sorting order (e.g. z-a instead of a-z)\n\
     st rev"
 
 #define TAG_USAGE "(Un)tag files and/or directories\n\n\
