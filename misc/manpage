@@ -181,7 +181,7 @@ disallow the use of external (shell) commands
 enable the light mode to speed up \fBclifm\fR. See the \fBNOTE ON SPEED\fR section below.
 .TP
 \fB\-z\fR, \fB\-\-sort\fR=\fI\,METHOD\/\fR
-sort files by \fIMETHOD\fR, where \fIMETHOD\fR is one of: 0 = none, 1 = name, 2 = size, 3 = atime, 4 = btime, 5 = ctime, 6 = mtime, 7 = version, 8 =  extension, 9 = inode, 10 = owner, 11 = group, 12 = blocks, or 13 = links. Both numbers and strings are allowed. E.g: \fI\-\-sort=9\fR or \fI\-\-sort=inode\fR.
+sort files by \fIMETHOD\fR, where \fIMETHOD\fR is one of: 0 = none, 1 = name, 2 = size, 3 = atime, 4 = btime, 5 = ctime, 6 = mtime, 7 = version, 8 =  extension, 9 = inode, 10 = owner, 11 = group, 12 = blocks, 13 = links, or 14 = type. Both numbers and strings are allowed. E.g: \fI\-\-sort=9\fR or \fI\-\-sort=inode\fR.
 .TP
 \fB\-\-bell\fR=\fI\,TYPE\/\fR
 set the terminal bell type, where TYPE is: 0 = none, 1 = audible, 2 = visible (requires readline >= 8.1), and 3 = flash. Defaults to \fB1\fR (\fBvisible\fR), and, if not available, \fB0\fR (\fBnone\fR). Only numbers are allowed.
