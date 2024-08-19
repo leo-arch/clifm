@@ -317,11 +317,13 @@ set_div_line_color(void)
 	}
 }
 
-/* Print the line dividing files and prompt using DIV_LINE. If
- * DIV_LINE contains more than one character, print exactly the
- * content of DIV_LINE. If it contains exactly one character, print
- * DIV_LINE up to the right screen edge. If it is "0", print an empty
- * line. And, if unset, draw a line using box-drawing characters. */
+/* Print the line dividing files and prompt using DIV_LINE.
+ * If DIV_LINE is unset, draw a line using box-drawing characters.
+ * If it contains exactly one character, print DIV_LINE up to the
+ * right screen edge.
+ * If it contains more than one character, print exactly the
+ * content of DIV_LINE.
+ * If it is "0", print an empty line. */
 static void
 print_div_line(void)
 {
@@ -344,7 +346,9 @@ print_div_line(void)
 		putchar('\n');
 	} else {
 		const size_t c = count_utf8_chars(div_line);
-		if (c <= 1) {
+		if (c > 1) {
+			puts(div_line);
+		} else {
 			/* Extend DIV_LINE to the end of the screen - 1.
 			 * We substract 1 to prevent an extra empty line after the
 			 * dividing line on some terminals (e.g. cons25). */
@@ -353,8 +357,6 @@ print_div_line(void)
 			for (; i > 1; i--)
 				fputs(div_line, stdout);
 			putchar('\n');
-		} else {
-			puts(div_line);
 		}
 	}
 
