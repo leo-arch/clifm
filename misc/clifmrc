@@ -81,8 +81,8 @@
 ;ListingMode=0
 
 # How to sort listed files.
-# Available options: none, name, version, extension, blocks, size, links,
-# atime, btime, ctime, mtime, inode, owner, and group.
+# Available options: none, name, version, extension, type, blocks, size,
+# links, atime, btime, ctime, mtime, inode, owner, and group.
 ;Sort=version
 
 # By default, files are sorted from less to more (ex: from 'a' to 'z' if
