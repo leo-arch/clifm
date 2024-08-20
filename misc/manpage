@@ -1144,7 +1144,7 @@ show the elements currently contained in the Selection Box.
 show the splash screen.
 .TP
 .B st, sort \fR[\fIMETHOD\fR] [\fIrev\fR]
-with no argument, print the current sorting order. Else, sort files by METHOD, where METHOD is one of: none, name, size, atime, btime, ctime, mtime, version, extension, inode, owner, group, blocks, links, or type (e.g.: \fIst atime\fR). Methods 10 and 11 sort by owner and group ID names if using ID names in long view (see the PropFields option in the configuration file). Else, ID numbers are used. The default order is \fIversion\fR.
+with no argument, print the current sorting order. Else, sort files by METHOD, where METHOD is one of: 0=none, 1=name, 2=size, 3=atime, 4=btime, 5=ctime, 6=mtime, 7=version, 8=extension, 9=inode, 10=owner, 11=group, 12=blocks, 13=links, or 14=type (e.g.: \fIst atime\fR or \fIst 3\fR). Methods 10 and 11 sort by owner and group ID names if using ID names in long view (see the \fIPropFields\fR option in the configuration file). Else, ID numbers are used. The default order is \fIversion\fR.
 .sp
 By default, files are sorted from less to more (e.g.: from \'a\' to \'z\' if sorting by \fBname\fR). Use the \fIrev\fR subcommand to invert this order. E.g.: \fIst\ rev\fR or \fIst\ inode\ rev\fR. Switch back to the previous state running \fIst rev\fR again.
 .TP

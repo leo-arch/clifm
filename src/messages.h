@@ -1025,14 +1025,32 @@ Recognized file types: (d)irectory, regular (f)ile, symbolic (l)ink,\n\
 - Deselect files selectively\n\
     ds <TAB> (multi-selection is allowed)"
 
+#define SNONE      0
+#define SNAME      1
+#define STSIZE     2
+#define SATIME     3
+#define SBTIME     4
+#define SCTIME     5
+#define SMTIME     6
+#define SVER       7
+#define SEXT       8
+#define SINO       9
+#define SOWN       10
+#define SGRP       11
+#define SBLK       12
+#define SLNK       13
+#define STYPE      14
+
 #define SORT_USAGE "Change files sorting order\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   st [METHOD] [rev]\n\n\
-Available methods: none, name, size, atime, btime, ctime, mtime\n\
-version, extension, inode, owner, group, blocks, links, type.\n\n\
+Available methods: 0=none, 1=name, 2=size, 3=atime, 4=btime,\n\
+5=ctime, 6=mtime, 7=version, 8=extension, 9=inode, 10=owner,\n\
+11=group, 12=blocks, 13=links, and 14=type.\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - List files by size\n\
     st size (or 'st <TAB>' to choose from a list)\n\
+    Sort numbers can be used as well (e.g. 'st 2')\n\
 - Revert the current sorting order (e.g. z-a instead of a-z)\n\
     st rev"
 
