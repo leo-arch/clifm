@@ -182,7 +182,8 @@ init_checks_struct(void)
 		0;
 #endif /* !_NO_ICONS */
 
-	checks.id_names = (conf.long_view == 1 && prop_fields.ids == PROP_ID_NAME);
+	checks.id_names = (prop_fields.ids == PROP_ID_NAME
+		&& (conf.long_view == 1 || conf.sort == SOWN || conf.sort == SGRP));
 	checks.lnk_char = (conf.color_lnk_as_target == 1 && follow_symlinks == 1
 		&& conf.icons == 0 && conf.light_mode == 0);
 	checks.min_name_trim = (conf.long_view == 1 && conf.max_name_len != UNSET

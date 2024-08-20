@@ -223,8 +223,13 @@ sort_by_inode(const ino_t a, const ino_t b)
 }
 
 static inline int
-sort_by_owner(const uid_t a, const uid_t b)
+sort_by_owner(struct fileinfo *pa, struct fileinfo *pb)
 {
+	if (pa->uid_i.name && pb->uid_i.name)
+		return namecmp(pa->uid_i.name, pb->uid_i.name);
+
+	const uid_t a = pa->uid;
+	const uid_t b = pb->uid;
 	int ret = 0;
 
 	if (a > b) {
@@ -238,8 +243,13 @@ sort_by_owner(const uid_t a, const uid_t b)
 }
 
 static inline int
-sort_by_group(const gid_t a, const gid_t b)
+sort_by_group(struct fileinfo *pa, struct fileinfo *pb)
 {
+	if (pa->gid_i.name && pb->gid_i.name)
+		return namecmp(pa->gid_i.name, pb->gid_i.name);
+
+	const gid_t a = pa->gid;
+	const gid_t b = pb->gid;
 	int ret = 0;
 
 	if (a > b) {
@@ -342,8 +352,8 @@ entrycmp(const void *a, const void *b)
 	case SVER: ret = xstrverscmp(pa->name, pb->name); break;
 	case SEXT: ret = sort_by_extension(pa, pb); break;
 	case SINO: ret = sort_by_inode(pa->inode, pb->inode); break;
-	case SOWN: ret = sort_by_owner(pa->uid, pb->uid); break;
-	case SGRP: ret = sort_by_group(pa->gid, pb->gid); break;
+	case SOWN: ret = sort_by_owner(pa, pb); break;
+	case SGRP: ret = sort_by_group(pa, pb); break;
 	case SBLK: ret = sort_by_blocks(pa->blocks, pb->blocks); break;
 	case SLNK: ret = sort_by_links(pa->linkn, pb->linkn); break;
 	case STYPE:
@@ -356,6 +366,7 @@ entrycmp(const void *a, const void *b)
 
 	if (!ret)
 		ret = namecmp(pa->name, pb->name);
+
 	if (!conf.sort_reverse)
 		return ret;
 
