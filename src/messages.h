@@ -206,7 +206,7 @@ operation).\n\n\
   or, if autocd is enabled (default)\n\
     /var"
 
-#define COLORS_USAGE "Print the list of currently used color codes\n\n\
+#define COLORS_USAGE "Preview the current color scheme\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   colors"
 
@@ -1024,22 +1024,6 @@ Recognized file types: (d)irectory, regular (f)ile, symbolic (l)ink,\n\
     ds * (or Alt-d)\n\
 - Deselect files selectively\n\
     ds <TAB> (multi-selection is allowed)"
-
-#define SNONE      0
-#define SNAME      1
-#define STSIZE     2
-#define SATIME     3
-#define SBTIME     4
-#define SCTIME     5
-#define SMTIME     6
-#define SVER       7
-#define SEXT       8
-#define SINO       9
-#define SOWN       10
-#define SGRP       11
-#define SBLK       12
-#define SLNK       13
-#define STYPE      14
 
 #define SORT_USAGE "Change files sorting order\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
