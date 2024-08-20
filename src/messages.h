@@ -1117,7 +1117,7 @@ Mark the files you need via TAB and then press Enter or Right."
 - Set the executable bit on all selected files\n\
    te sel"
 
-#define TRASH_USAGE "Move one or multiple files to the trash can\n\n\
+#define TRASH_USAGE "Move files to the trash can\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   t, trash [FILE... | del | empty | list]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\

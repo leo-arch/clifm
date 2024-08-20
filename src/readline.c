@@ -1480,7 +1480,7 @@ int_cmds_generator(const char *text, int state)
 		"tag     (tag files)",
 		"te      (toggle the executable bit on files)",
 		"tips    (print tips)",
-		"t       (trash files)",
+		"t       (move files to the trash can)",
 		"u       (restore trashed files using a menu)",
 		"unpin   (unpin the pinned directory)",
 		"ver     (print version information)",
