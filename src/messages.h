@@ -1117,7 +1117,7 @@ Mark the files you need via TAB and then press Enter or Right."
 - Set the executable bit on all selected files\n\
    te sel"
 
-#define TRASH_USAGE "Send one or multiple files to the trash can\n\n\
+#define TRASH_USAGE "Move one or multiple files to the trash can\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   t, trash [FILE... | del | empty | list]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
@@ -1236,12 +1236,12 @@ Example: cp -abf ...\n\n\
     r sel\n\
 - Remove all selected files (non-interactively)\n\
     r -f sel\n\
-  Note: Use the 't' command to send files to the trash can. Try 't --help'.\n\n\
+  Note: Use the 't' command to move files to the trash can. Try 't --help'.\n\n\
 To create files and directories you can use the 'md' and 'n' commands.\n\
 Try 'md --help' and 'n --help' for more details.\n\n\
 Use the 'vv' command to copy files into a directory and bulk rename them\n\
 at once. Try 'vv --help'.\n\n\
-Use the 'cr' plugin to send a file to a remote location:\n\
+Use the 'cr' plugin to copy a file to a remote location:\n\
     cr FILE (run 'cr --edit' before to set up your remotes)\n\n\
 Use the 'l' command to create symbolic links, and 'le' to edit them."
 
@@ -1549,7 +1549,7 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  splash             Print the splash screen\n\
  st, sort           Change files sorting order\n\
  stats              Print files statistics\n\
- t, trash           Send files to the trash can\n\
+ t, trash           Move files to the trash can\n\
  tag                Tag files\n\
  te                 Toggle the executable bit on files\n\
  tips               Print tips\n\
@@ -1698,7 +1698,7 @@ le mylink            Edit the symbolic link 'mylink'\n\
 oc myfile            Edit file ownership of the file 'myfile'\n\
 pc myfile            Edit file properties of the file 'myfile'\n\
 te *.sh              Toggle the executable bit on all .sh files\n\
-t 12-18              Send the files whose ELN's are 12-18 to the trash can\n\
+t 12-18              Move the files whose ELN's are 12-18 to the trash can\n\
 t del | t del <TAB>  Permanently remove trashed files using a menu\n\
 t empty              Empty the trash can\n\
 u | u <TAB>          Undelete trashed files using a menu\n\

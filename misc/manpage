@@ -1100,12 +1100,12 @@ Reload all settings, except those passed as command line arguments, from the con
 .B rr \fR[\fIDIR\fR] [\fIEDITOR\fR]
 Remove files and/or directories in bulk using a text editor.
 .sp
-\fIrr\fR sends all files in \fIDIR\fR (or in the current directory if \fIDIR\fR is omitted) to a temporary file and opens it using \fIEDITOR\fR (or the default associated application for \fItext/plain\fR MIME type, if \fIEDITOR\fR is omitted).
+\fIrr\fR writes all file names in \fIDIR\fR (or in the current directory if \fIDIR\fR is omitted) to a temporary file and opens it using \fIEDITOR\fR (or the default associated application for \fItext/plain\fR MIME type, if \fIEDITOR\fR is omitted).
 .sp
 Once in the editor, remove the lines corresponding to the files you want to delete. Save changes and close the editor. Removed files will be listed and the user asked for confirmation.
 .TP
 .B s, sel \fIELN/FILE\fR... [[\fI!\fR]\fIPATTERN\fR] [\fI\-filetype\fR] [\fI:PATH\fR]
-send one or multiple files (either regular files or directories) to the Selection Box. \fIsel\fR accepts individual elements, range of elements, say 1\-6, file names and paths, just as wildcards (globbing) and regular expressions. Example: \fIs 1 4\-10 ^r file* filename /path/to/filename\fR.
+mark one or multiple files (either regular files or directories) as selected (send to the Selection Box). \fIsel\fR accepts individual elements, range of elements, say 1\-6, file names and paths, just as wildcards (globbing) and regular expressions. Example: \fIs 1 4\-10 ^r file* filename /path/to/filename\fR.
 .sp
 If not in light mode, once a file is selected, and if the file is in the current working directory, the corresponding file name will be marked with an asterisk (colored according to the value of \fIli\fR in the color scheme file (by default bold green)), at the left of the file name (and at the right of its ELN).
 .sp
@@ -1152,7 +1152,9 @@ By default, files are sorted from less to more (e.g.: from \'a\' to \'z\' if sor
 print statistics about files in the current directory (not available in light mode).
 .TP
 .B t, trash \fR[\fIELN/FILE\fR]... [\fIls\fR, \fIlist\fR] [\fIclear\fR, \fIempty\fR] [\fIdel\fR [\fIFILE\fR]...]]
-with no argument (or by passing the \fIls\fR option), it prints the list of currently trashed files. The \fIclear\fR or \fIempty\fR parameter removes all files from the trash can, while the \fIdel\fR parameter lists trashed files allowing the user to permanently remove one or more trashed files. If using \fIdel\fR, TAB completion to list/select currently trashed files is available.
+move specified files to the trash can (e.g. \fIt file1 file2\fR).
+.sp
+With no argument (or by passing the \fIls\fR option), it prints the list of currently trashed files. The \fIclear\fR (or \fIempty\fR) sucommand removes all files from the trash can, while the \fIdel\fR subcommand lists trashed files allowing the user to permanently remove one or more trashed files. If using \fIdel\fR, TAB completion to list/select currently trashed files is available.
 .sp
 The trash directory is \fI$XDG_DATA_HOME/Trash\fR, falling back to \fI$HOME/.local/share/Trash\fR. To set an alternative trash directory use the \fI\-T,\-\-trash\-dir\fR command line option.
 .sp
