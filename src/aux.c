@@ -594,7 +594,7 @@ normalize_path(char *src, const size_t src_len)
 void
 rl_ring_bell(void)
 {
-	switch (bell) {
+	switch (conf.bell_style) {
 	case BELL_AUDIBLE:
 		RING_BELL; fflush(stderr); return;
 

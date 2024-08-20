@@ -180,6 +180,7 @@ init_conf_struct(void)
 	conf.auto_open = UNSET;
 	conf.autocd = UNSET;
 	conf.autols = UNSET;
+	conf.bell_style = DEF_BELL_STYLE;
 	conf.case_sens_dirjump = UNSET;
 	conf.case_sens_path_comp = UNSET;
 	conf.case_sens_search = UNSET;
@@ -2809,11 +2810,6 @@ check_options(void)
 
 	if (print_removed_files == UNSET)
 		print_removed_files = DEF_PRINT_REMOVED_FILES;
-
-	if (xargs.bell_style == UNSET)
-		bell = DEF_BELL_STYLE;
-	else
-		bell = xargs.bell_style;
 
 	if (xargs.refresh_on_resize == UNSET)
 		xargs.refresh_on_resize = DEF_REFRESH_ON_RESIZE;

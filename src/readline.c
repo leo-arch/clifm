@@ -156,7 +156,7 @@ xbackspace(void)
 static void
 leftmost_bell(void)
 {
-	if (bell == BELL_VISIBLE) {
+	if (conf.bell_style == BELL_VISIBLE) {
 		rl_extend_line_buffer(2);
 		*rl_line_buffer = ' ';
 		*(rl_line_buffer + 1) = '\0';
@@ -165,7 +165,7 @@ leftmost_bell(void)
 
 	rl_ring_bell();
 
-	if (bell == BELL_VISIBLE) {
+	if (conf.bell_style == BELL_VISIBLE) {
 		rl_delete_text(0, rl_end);
 		rl_end = rl_point = 0;
 	}

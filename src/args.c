@@ -813,7 +813,7 @@ set_bell_style(const char *opt)
 		exit(EXIT_FAILURE);
 	}
 
-	xargs.bell_style = a;
+	xargs.bell_style = conf.bell_style = a;
 }
 
 static void

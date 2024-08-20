@@ -1114,6 +1114,7 @@ struct config_t {
 	int auto_open;
 	int autocd;
 	int autols;
+	int bell_style;
 	int case_sens_dirjump;
 	int case_sens_path_comp;
 	int case_sens_search;
@@ -1197,6 +1198,7 @@ struct config_t {
 #endif /* !_NO_TRASH */
 	int warning_prompt;
 	int welcome_message;
+	int pad3;
 };
 
 extern struct config_t conf;
@@ -1826,7 +1828,6 @@ extern int
 extern int
 	argc_bk, /* A copy of argc taken from main() */
 	autocmd_set,
-	bell,
 	bg_proc,
 	cmdhist_flag,
 	config_ok,
