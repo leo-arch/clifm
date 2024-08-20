@@ -656,7 +656,8 @@ get_reg_file_color(const char *filename, const struct stat *attr,
 	if (FILE_SIZE_PTR(attr) == 0) return ef_c;
 	if (attr->st_nlink > 1)	return mh_c;
 
-	const char *ext = check_ext == 1 ? strrchr(filename, '.') : (char *)NULL;
+	const char *ext =
+		conf.check_ext == 1 ? strrchr(filename, '.') : (char *)NULL;
 	if (!ext || ext == filename)
 		return fi_c;
 

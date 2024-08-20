@@ -154,8 +154,6 @@ int
 	autojump = UNSET,
 	bell = UNSET,
 	bg_proc = 0,
-	check_cap = UNSET,
-	check_ext = UNSET,
 	cmdhist_flag = 0,
 	config_ok = 1,
 	control_d_exits = 0,

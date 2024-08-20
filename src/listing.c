@@ -2643,7 +2643,8 @@ load_file_gral_info(const struct stat *a, const filesn_t n)
 		get_id_names(n);
 
 #if defined(LINUX_FILE_XATTRS)
-	if (file_info[n].type != DT_LNK && (checks.xattr == 1 || check_cap == 1)
+	if (file_info[n].type != DT_LNK
+	&& (checks.xattr == 1 || conf.check_cap == 1)
 	&& listxattr(file_info[n].name, NULL, 0) > 0)
 		file_info[n].xattr = 1;
 #endif /* LINUX_FILE_XATTRS */
@@ -2878,7 +2879,7 @@ load_regfile_info(const struct stat *a, const filesn_t n)
 #endif /* !_NO_ICONS */
 
 	/* Check file extension */
-	char *ext = (override_color == 1 && check_ext == 1)
+	char *ext = (override_color == 1 && conf.check_ext == 1)
 		? strrchr(file_info[n].name, '.') : (char *)NULL;
 
 	if (!ext || ext == file_info[n].name || !*(ext + 1))

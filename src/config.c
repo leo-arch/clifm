@@ -3853,8 +3853,6 @@ reset_variables(void)
 	init_conf_struct();
 	free_workspaces_filters();
 
-	check_cap = UNSET;
-	check_ext = UNSET;
 	follow_symlinks = UNSET;
 #ifndef _NO_FZF
 	fzftab = UNSET;

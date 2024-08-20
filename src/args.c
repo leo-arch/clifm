@@ -1616,9 +1616,9 @@ parse_cmdline_args(const int argc, char **argv)
 		case LOPT_NO_DIR_JUMPER:
 			xargs.no_dirjump = 1; break;
 		case LOPT_NO_FILE_CAP:
-			xargs.check_cap = check_cap = 0; break;
+			xargs.check_cap = conf.check_cap = 0; break;
 		case LOPT_NO_FILE_EXT:
-			xargs.check_ext = check_ext = 0; break;
+			xargs.check_ext = conf.check_ext = 0; break;
 		case LOPT_NO_FILES_COUNTER:
 			xargs.files_counter = conf.files_counter = 0; break;
 		case LOPT_NO_FOLLOW_SYMLINKS:

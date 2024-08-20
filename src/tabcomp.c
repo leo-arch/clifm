@@ -384,7 +384,7 @@ fzftab_color(char *filename, const struct stat *attr)
 			return nf_c;
 
 		char *cl = get_file_color(filename, attr);
-		if (check_ext == 0 || cl != fi_c)
+		if (conf.check_ext == 0 || cl != fi_c)
 			return (cl ? cl : fi_c);
 
 		/* If trashed file, remove the trash extension, so we can get the

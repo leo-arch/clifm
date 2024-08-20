@@ -184,6 +184,8 @@ init_conf_struct(void)
 	conf.case_sens_path_comp = UNSET;
 	conf.case_sens_search = UNSET;
 	conf.case_sens_list = UNSET;
+	conf.check_cap = DEF_CHECK_CAP;
+	conf.check_ext = DEF_CHECK_EXT;
 	conf.cd_on_quit = UNSET;
 	conf.classify = UNSET;
 	conf.clear_screen = UNSET;
@@ -2849,12 +2851,6 @@ check_options(void)
 
 	if (conf.cp_cmd == UNSET)
 		conf.cp_cmd = DEF_CP_CMD;
-
-	if (check_cap == UNSET)
-		check_cap = DEF_CHECK_CAP;
-
-	if (check_ext == UNSET)
-		check_ext = DEF_CHECK_EXT;
 
 	if (follow_symlinks == UNSET)
 		follow_symlinks = DEF_FOLLOW_SYMLINKS;

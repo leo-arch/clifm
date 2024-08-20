@@ -411,7 +411,7 @@ get_regfile_color(const char *filename, const struct stat *attr, size_t *is_ext)
 		return nf_c;
 
 	char *color = get_file_color(filename, attr);
-	if (check_ext == 0 || color != fi_c)
+	if (conf.check_ext == 0 || color != fi_c)
 		return color ? color : fi_c;
 
 	char *ext = strrchr(filename, '.');
@@ -475,7 +475,7 @@ get_file_color(const char *filename, const struct stat *attr)
 		color = sg_c;
 	}
 #ifdef LINUX_FILE_CAPS
-	else if (check_cap == 1 && (cap = cap_get_file(filename))) {
+	else if (conf.check_cap == 1 && (cap = cap_get_file(filename))) {
 		color = ca_c;
 		cap_free(cap);
 	}

@@ -1119,6 +1119,8 @@ struct config_t {
 	int case_sens_search;
 	int case_sens_list; /* files list */
 	int cd_on_quit;
+	int check_cap;
+	int check_ext;
 	int classify;
 	int clear_screen;
 	int cmd_desc_sug;
@@ -1826,8 +1828,6 @@ extern int
 	autocmd_set,
 	bell,
 	bg_proc,
-	check_cap,
-	check_ext,
 	cmdhist_flag,
 	config_ok,
 	cur_ws,
