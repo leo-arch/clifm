@@ -3853,13 +3853,10 @@ reset_variables(void)
 	init_conf_struct();
 	free_workspaces_filters();
 
-	follow_symlinks = UNSET;
 #ifndef _NO_FZF
 	fzftab = UNSET;
 #endif /* !_NO_FZF */
 	hist_status = UNSET;
-	int_vars = UNSET;
-	max_files = UNSET;
 	print_removed_files = UNSET;
 	prompt_offset = UNSET;
 	prompt_notif = UNSET;

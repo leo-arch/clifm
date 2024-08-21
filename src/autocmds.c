@@ -40,7 +40,7 @@ reset_opts(void)
 	opts.color_scheme = cur_cscheme;
 	opts.files_counter = conf.files_counter;
 	opts.light_mode = conf.light_mode;
-	opts.max_files = max_files;
+	opts.max_files = conf.max_files;
 	opts.long_view = conf.long_view;
 	opts.show_hidden = conf.show_hidden;
 	opts.max_name_len = conf.max_name_len;
@@ -150,7 +150,7 @@ RUN_AUTOCMD:
 			opts.light_mode = conf.light_mode;
 			opts.files_counter = conf.files_counter;
 			opts.long_view = conf.long_view;
-			opts.max_files = max_files;
+			opts.max_files = conf.max_files;
 			opts.show_hidden = conf.show_hidden;
 			opts.sort = conf.sort;
 			opts.sort_reverse = conf.sort_reverse;
@@ -184,7 +184,7 @@ RUN_AUTOCMD:
 		if (autocmds[i].max_name_len != -1)
 			conf.max_name_len = autocmds[i].max_name_len;
 		if (autocmds[i].max_files != -2)
-			max_files = autocmds[i].max_files;
+			conf.max_files = autocmds[i].max_files;
 		if (autocmds[i].color_scheme)
 			set_colors(autocmds[i].color_scheme, 0);
 		if (autocmds[i].cmd) {
@@ -206,7 +206,7 @@ revert_autocmd_opts(void)
 	conf.light_mode = opts.light_mode;
 	conf.files_counter = opts.files_counter;
 	conf.long_view = opts.long_view;
-	max_files = opts.max_files;
+	conf.max_files = opts.max_files;
 	conf.show_hidden = opts.show_hidden;
 	conf.max_name_len = opts.max_name_len;
 	conf.pager = opts.pager;
@@ -282,7 +282,7 @@ init_autocmd_opts(void)
 	autocmds[autocmds_n].files_counter = conf.files_counter;
 	autocmds[autocmds_n].light_mode = conf.light_mode;
 	autocmds[autocmds_n].long_view = conf.long_view;
-	autocmds[autocmds_n].max_files = max_files;
+	autocmds[autocmds_n].max_files = conf.max_files;
 	autocmds[autocmds_n].max_name_len = conf.max_name_len;
 	autocmds[autocmds_n].only_dirs = conf.only_dirs;
 	autocmds[autocmds_n].pager = conf.pager;

@@ -143,7 +143,7 @@ init_workspaces_opts(void)
 		workspace_opts[i].light_mode = conf.light_mode;
 		workspace_opts[i].list_dirs_first = conf.list_dirs_first;
 		workspace_opts[i].long_view = conf.long_view;
-		workspace_opts[i].max_files = max_files;
+		workspace_opts[i].max_files = conf.max_files;
 		workspace_opts[i].max_name_len = conf.max_name_len;
 		workspace_opts[i].only_dirs = conf.only_dirs;
 		workspace_opts[i].pager = conf.pager;
@@ -200,6 +200,7 @@ init_conf_struct(void)
 	conf.disk_usage = UNSET;
 	conf.ext_cmd_ok = UNSET;
 	conf.files_counter = UNSET;
+	conf.follow_symlinks = DEF_FOLLOW_SYMLINKS;
 	conf.follow_symlinks_long = DEF_FOLLOW_SYMLINKS_LONG;
 	conf.full_dir_size = UNSET;
 	conf.fuzzy_match = UNSET;
@@ -215,6 +216,7 @@ init_conf_struct(void)
 #else
 	conf.icons = 0;
 #endif /* !_NO_ICONS */
+	conf.int_vars = DEF_INT_VARS;
 	conf.light_mode = UNSET;
 	conf.link_creat_mode = DEF_LINK_CREATION_MODE;
 	conf.list_dirs_first = UNSET;
@@ -223,6 +225,7 @@ init_conf_struct(void)
 	conf.log_msgs = UNSET;
 	conf.long_view = UNSET;
 	conf.max_dirhist = UNSET;
+	conf.max_files = DEF_MAX_FILES;
 	conf.max_hist = UNSET;
 	conf.max_log = UNSET;
 	conf.max_jump_total_rank = UNSET;
@@ -2848,9 +2851,6 @@ check_options(void)
 	if (conf.cp_cmd == UNSET)
 		conf.cp_cmd = DEF_CP_CMD;
 
-	if (follow_symlinks == UNSET)
-		follow_symlinks = DEF_FOLLOW_SYMLINKS;
-
 	if (conf.mv_cmd == UNSET)
 		conf.mv_cmd = DEF_MV_CMD;
 
@@ -3001,13 +3001,6 @@ check_options(void)
 	if (conf.suggest_filetype_color == UNSET)
 		conf.suggest_filetype_color = DEF_SUG_FILETYPE_COLOR;
 #endif /* _NO_SUGGESTIONS */
-
-	if (int_vars == UNSET) {
-		if (xargs.int_vars == UNSET)
-			int_vars = DEF_INT_VARS;
-		else
-			int_vars = xargs.int_vars;
-	}
 
 	if (conf.print_selfiles == UNSET) {
 		if (xargs.printsel == UNSET)

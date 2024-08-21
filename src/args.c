@@ -1424,7 +1424,7 @@ parse_cmdline_args(const int argc, char **argv)
 			break;
 		case 'z': set_sort(optarg); break;
 		case 'Z':
-			set_max_value(optarg, &xargs.max_files, &max_files);
+			set_max_value(optarg, &xargs.max_files, &conf.max_files);
 			break;
 
 		/* Handle error */
@@ -1581,7 +1581,7 @@ parse_cmdline_args(const int argc, char **argv)
 #endif /* !_NO_ICONS */
 
 		case LOPT_INT_VARS:
-			xargs.int_vars = int_vars = 1; break;
+			xargs.int_vars = conf.int_vars = 1; break;
 		case LOPT_LIST_AND_QUIT:
 			xargs.list_and_quit = 1;
 			xargs.no_dirjump = 1;
@@ -1592,7 +1592,7 @@ parse_cmdline_args(const int argc, char **argv)
 			set_max_value(optarg, &xargs.max_dirhist, &conf.max_dirhist);
 			break;
 		case LOPT_MAX_FILES:
-			set_max_value(optarg, &xargs.max_files, &max_files);
+			set_max_value(optarg, &xargs.max_files, &conf.max_files);
 			break;
 		case LOPT_MAX_PATH:
 			set_max_value(optarg, &xargs.max_path, &conf.max_path);
@@ -1622,7 +1622,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case LOPT_NO_FILES_COUNTER:
 			xargs.files_counter = conf.files_counter = 0; break;
 		case LOPT_NO_FOLLOW_SYMLINKS:
-			xargs.follow_symlinks = follow_symlinks = 0; break;
+			xargs.follow_symlinks = conf.follow_symlinks = 0; break;
 		case LOPT_NO_FZFPREVIEW:
 			xargs.fzf_preview = conf.fzf_preview = 0; break;
 		case LOPT_NO_HIGHLIGHT:

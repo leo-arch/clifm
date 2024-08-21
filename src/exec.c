@@ -328,26 +328,26 @@ static int
 set_max_files(char **args)
 {
 	if (!args[1]) { /* Inform about the current value */
-		if (max_files == -1)
+		if (conf.max_files == UNSET)
 			puts(_("Max files: unset"));
 		else
-			printf(_("Max files: %d\n"), max_files);
+			printf(_("Max files: %d\n"), conf.max_files);
 		return FUNC_SUCCESS;
 	}
 
 	if (IS_HELP(args[1])) { puts(_(MF_USAGE)); return FUNC_SUCCESS;	}
 
 	if (*args[1] == 'u' && strcmp(args[1], "unset") == 0) {
-		max_files = -1;
+		conf.max_files = UNSET;
 		if (conf.autols == 1) reload_dirlist();
 		print_reload_msg(_("Max files unset\n"));
 		return FUNC_SUCCESS;
 	}
 
 	if (*args[1] == '0' && !args[1][1]) {
-		max_files = 0;
+		conf.max_files = 0;
 		if (conf.autols == 1) reload_dirlist();
-		print_reload_msg(_("Max files set to %d\n"), max_files);
+		print_reload_msg(_("Max files set to %d\n"), conf.max_files);
 		return FUNC_SUCCESS;
 	}
 
@@ -357,9 +357,9 @@ set_max_files(char **args)
 		return (exit_code = FUNC_FAILURE);
 	}
 
-	max_files = (int)inum;
+	conf.max_files = (int)inum;
 	if (conf.autols == 1) reload_dirlist();
-	print_reload_msg(_("Max files set to %d\n"), max_files);
+	print_reload_msg(_("Max files set to %d\n"), conf.max_files);
 
 	return FUNC_SUCCESS;
 }
@@ -2769,7 +2769,7 @@ exec_profile(void)
 		if (line[line_len - 1] == '\n')
 			line[line_len - 1] = '\0';
 
-		if (int_vars == 1 && strchr(line, '=') && !IS_DIGIT(*line))
+		if (conf.int_vars == 1 && strchr(line, '=') && !IS_DIGIT(*line))
 			create_usr_var(line);
 		else
 			run_profile_line(line);

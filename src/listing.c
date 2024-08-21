@@ -184,7 +184,7 @@ init_checks_struct(void)
 
 	checks.id_names = (prop_fields.ids == PROP_ID_NAME
 		&& (conf.long_view == 1 || conf.sort == SOWN || conf.sort == SGRP));
-	checks.lnk_char = (conf.color_lnk_as_target == 1 && follow_symlinks == 1
+	checks.lnk_char = (conf.color_lnk_as_target == 1 && conf.follow_symlinks == 1
 		&& conf.icons == 0 && conf.light_mode == 0);
 	checks.min_name_trim = (conf.long_view == 1 && conf.max_name_len != UNSET
 		&& conf.min_name_trim > conf.max_name_len);
@@ -636,8 +636,9 @@ post_listing(DIR *dir, const int reset_pager, const filesn_t excluded_files)
 		conf.pager = 0;
 	}
 
-	if (pager_quit == 0 && max_files != UNSET && files > (filesn_t)max_files)
-		printf("... (%d/%jd)\n", max_files, (intmax_t)files);
+	if (pager_quit == 0 && conf.max_files != UNSET
+	&& files > (filesn_t)conf.max_files)
+		printf("... (%d/%jd)\n", conf.max_files, (intmax_t)files);
 
 	print_div_line();
 
@@ -802,8 +803,8 @@ set_events_checker(void)
 static void
 get_longest_filename(const filesn_t n, const size_t pad)
 {
-	const filesn_t c_max_files = (filesn_t)max_files;
-	filesn_t i = (max_files != UNSET && c_max_files < n) ? c_max_files : n;
+	const filesn_t c_max_files = (filesn_t)conf.max_files;
+	filesn_t i = (conf.max_files != UNSET && c_max_files < n) ? c_max_files : n;
 	filesn_t longest_index = -1;
 
 	/* Cast only once here instead of hundreds of times in the while loop. */
@@ -860,7 +861,7 @@ get_longest_filename(const filesn_t n, const size_t pad)
 
 		if (total_len > longest.name_len) {
 			longest_index = i;
-			if (conf.listing_mode == VERTLIST || max_files == UNSET
+			if (conf.listing_mode == VERTLIST || conf.max_files == UNSET
 			|| i < c_max_files)
 				longest.name_len = total_len;
 		}
@@ -958,7 +959,7 @@ compute_maxes(void)
 {
 	struct maxes_t maxes = {0};
 	filesn_t i = xargs.max_files > 0 ? (filesn_t)xargs.max_files
-		: (max_files > 0 ? max_files : files);
+		: (conf.max_files > 0 ? conf.max_files : files);
 
 	while (--i >= 0) {
 		int t = 0;
@@ -1070,7 +1071,7 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad,
 
 	filesn_t i, k = files;
 	for (i = 0; i < k; i++) {
-		if (max_files != UNSET && i == max_files)
+		if (conf.max_files != UNSET && i == conf.max_files)
 			break;
 
 		if (conf.pager == 1 || (*reset_pager == 0 && conf.pager > 1
@@ -1659,8 +1660,8 @@ static void
 list_files_horizontal(size_t *counter, int *reset_pager,
 	const int pad, const size_t columns_n)
 {
-	const filesn_t nn = (max_files != UNSET && (filesn_t)max_files < files)
-		? (filesn_t)max_files : files;
+	const filesn_t nn = (conf.max_files != UNSET
+		&& (filesn_t)conf.max_files < files) ? (filesn_t)conf.max_files : files;
 
 	void (*print_entry_function)(int *, const filesn_t, const int, const int);
 	if (conf.colorize == 1)
@@ -1755,8 +1756,8 @@ list_files_vertical(size_t *counter, int *reset_pager,
 	const int pad, const size_t columns_n)
 {
 	/* Total amount of files to be listed. */
-	const filesn_t nn = (max_files != UNSET && (filesn_t)max_files < files)
-		? (filesn_t)max_files : files;
+	const filesn_t nn = (conf.max_files != UNSET
+		&& (filesn_t)conf.max_files < files) ? (filesn_t)conf.max_files : files;
 
 	/* How many lines (rows) do we need to print NN files? */
 	/* Division/modulo is slow, true. But the compiler will make a much
@@ -2449,8 +2450,8 @@ list_dir_light(void)
 		goto END;
 	}
 
-	const int pad = (max_files != UNSET && files > (filesn_t)max_files)
-		? DIGINUM(max_files) : DIGINUM(files);
+	const int pad = (conf.max_files != UNSET && files > (filesn_t)conf.max_files)
+		? DIGINUM(conf.max_files) : DIGINUM(files);
 
 	if (conf.sort != SNONE)
 		ENTSORT(file_info, (size_t)n, entrycmp);
@@ -2746,7 +2747,7 @@ load_link_info(const int fd, const filesn_t n)
 	file_info[n].icon = ICON_LINK;
 #endif // !_NO_ICONS
 
-	if (follow_symlinks == 0) {
+	if (conf.follow_symlinks == 0) {
 		file_info[n].color = ln_c;
 		return;
 	}
@@ -3017,7 +3018,7 @@ list_dir(void)
 	file_info = xnmalloc(ENTRY_N + 2, sizeof(struct fileinfo));
 
 	const int stat_flag =
-		(follow_symlinks == 1 && conf.long_view == 1
+		(conf.follow_symlinks == 1 && conf.long_view == 1
 		&& conf.follow_symlinks_long == 1) ? 0 : AT_SYMLINK_NOFOLLOW;
 
 	while ((ent = readdir(dir))) {
@@ -3083,7 +3084,7 @@ list_dir(void)
 		}
 
 		if (conf.only_dirs == 1 && stat_ok == 1 && !S_ISDIR(attr.st_mode)
-		&& (follow_symlinks == 0 || !S_ISLNK(attr.st_mode)
+		&& (conf.follow_symlinks == 0 || !S_ISLNK(attr.st_mode)
 		|| get_link_ref(ename) != S_IFDIR)) {
 			excluded_files++;
 			continue;
@@ -3197,8 +3198,8 @@ list_dir(void)
 		goto END;
 	}
 
-	const int pad = (max_files != UNSET && files > (filesn_t)max_files)
-		? DIGINUM(max_files) : DIGINUM(files);
+	const int pad = (conf.max_files != UNSET && files > (filesn_t)conf.max_files)
+		? DIGINUM(conf.max_files) : DIGINUM(files);
 
 		/* #############################################
 		 * #    SORT FILES ACCORDING TO SORT METHOD    #

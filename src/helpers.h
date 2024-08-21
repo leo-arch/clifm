@@ -1134,6 +1134,7 @@ struct config_t {
 	int disk_usage;
 	int ext_cmd_ok;
 	int files_counter;
+	int follow_symlinks;
 	int follow_symlinks_long;
 	int full_dir_size;
 	int fuzzy_match;
@@ -1141,6 +1142,7 @@ struct config_t {
 	int fzf_preview;
 	int highlight;
 	int icons;
+	int int_vars;
 	int light_mode;
 	int link_creat_mode;
 	int list_dirs_first;
@@ -1151,6 +1153,7 @@ struct config_t {
 	int max_dirhist;
 	int max_hist;
 	int max_jump_total_rank;
+	int max_files;
 	int max_log;
 	int max_name_len;
 	int max_name_len_bk;
@@ -1198,7 +1201,7 @@ struct config_t {
 #endif /* !_NO_TRASH */
 	int warning_prompt;
 	int welcome_message;
-	int pad3;
+//	int pad3;
 };
 
 extern struct config_t conf;
@@ -1839,20 +1842,17 @@ extern int
 	dirhist_cur_index,
 	dirhist_total_index,
 	exit_code,
-	follow_symlinks,
 	fzftab,
 	fzf_border_type,
 	fzf_height_set,
 	fzf_preview_border_type,
 	hist_status,
 	home_ok,
-	int_vars,
 	internal_cmd,
 	is_sel,
 	is_cdpath,
 	jump_total_rank,
 	kbind_busy,
-	max_files,
 	mime_match,
 	nesting_level, /* Is this a nested instance? */
 	no_log,

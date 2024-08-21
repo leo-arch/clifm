@@ -111,8 +111,8 @@ construct_and_print_filename(const struct fileinfo *props,
 		plen = wc_xstrlen(wname);
 	}
 
-	const filesn_t n = (max_files > UNSET && files > (filesn_t)max_files)
-		? (filesn_t)max_files : files;
+	const filesn_t n = (conf.max_files > UNSET
+		&& files > (filesn_t)conf.max_files) ? (filesn_t)conf.max_files : files;
 
 	size_t cur_len = (size_t)DIGINUM(n) + 1 + plen
 		+ (conf.icons == 1 ? ICON_LEN : 0);
@@ -417,7 +417,7 @@ set_file_type_and_color(const struct fileinfo *props, char *type, char **color)
 {
 	struct stat a;
 	if (props->stat_err == 1 && conf.follow_symlinks_long == 1
-	&& conf.long_view == 1 && follow_symlinks == 1
+	&& conf.long_view == 1 && conf.follow_symlinks == 1
 	&& lstat(props->name, &a) == 0 && S_ISLNK(a.st_mode)) {
 		*type = LNK_PCHR;
 		*color = conf.colorize == 1 ? ln_c : df_c;
