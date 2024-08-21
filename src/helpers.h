@@ -1826,6 +1826,7 @@ extern int
 
 /* Internal state flags */
 extern int
+	alt_prompt, /* We're running a secondary prompt for the rename function */
 	argc_bk, /* A copy of argc taken from main() */
 	autocmd_set,
 	bg_proc,
@@ -1875,8 +1876,7 @@ extern int
 	trash_ok,
 #endif /* !_NO_TRASH */
 	virtual_dir,
-	wrong_cmd,
-	xrename; /* We're running a secondary prompt for the rename function */
+	wrong_cmd;
 
 extern unsigned short term_cols, term_lines;
 

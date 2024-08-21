@@ -435,7 +435,7 @@ get_new_perms(const char *str, const int diff)
 {
 	const int poffset_bk = prompt_offset;
 	prompt_offset = 3;
-	xrename = 2; /* Disable TAB completion for this prompt */
+	alt_prompt = 2; /* Disable TAB completion for this prompt */
 	rl_nohist = 1;
 
 	if (diff == 1) {
@@ -449,7 +449,7 @@ get_new_perms(const char *str, const int diff)
 
 	char *new_perms = secondary_prompt(m, str);
 
-	xrename = rl_nohist = 0;
+	alt_prompt = rl_nohist = 0;
 	prompt_offset = poffset_bk;
 
 	if (diff == 0 && new_perms && *str == *new_perms
@@ -613,7 +613,7 @@ get_new_ownership(const char *str, const int diff)
 {
 	const int poffset_bk = prompt_offset;
 	prompt_offset = 3;
-	xrename = 3; /* Allow completion only for user and group names */
+	alt_prompt = 3; /* Allow completion only for user and group names */
 	rl_nohist = 1;
 
 	if (diff == 1) {
@@ -627,7 +627,7 @@ get_new_ownership(const char *str, const int diff)
 
 	char *new_own = secondary_prompt(m, str);
 
-	xrename = rl_nohist = 0;
+	alt_prompt = rl_nohist = 0;
 	prompt_offset = poffset_bk;
 
 	if (diff == 0 && new_own && *str == *new_own && strcmp(str, new_own) == 0) {

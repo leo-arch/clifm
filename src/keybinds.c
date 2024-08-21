@@ -1207,7 +1207,7 @@ static int
 rl_clear_line(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	if (kbind_busy == 1 && xrename == 0)
+	if (kbind_busy == 1 && alt_prompt == 0)
 		return FUNC_SUCCESS;
 
 	words_num = 0;

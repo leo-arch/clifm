@@ -1499,7 +1499,7 @@ run_cp_mv_cmd(char **cmd, const int skip_force)
 		return FUNC_FAILURE;
 
 	char *new_name = (char *)NULL;
-	if (xrename == 1) {
+	if (alt_prompt == 1) {
 		if (!cmd[1])
 			return EINVAL;
 
@@ -1517,7 +1517,7 @@ run_cp_mv_cmd(char **cmd, const int skip_force)
 			}
 			if (i == -1) {
 				xerror(_("%s: %s: No such ELN\n"), PROGRAM_NAME, cmd[1]);
-				xrename = 0;
+				alt_prompt = 0;
 				return ENOENT;
 			}
 		} else {
@@ -1526,7 +1526,7 @@ run_cp_mv_cmd(char **cmd, const int skip_force)
 			const int ret = lstat(p ? p : cmd[1], &a);
 			free(p);
 			if (ret == -1) {
-				xrename = 0;
+				alt_prompt = 0;
 				xerror("m: %s: %s\n", cmd[1], strerror(errno));
 				return errno;
 			}

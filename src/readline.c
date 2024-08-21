@@ -866,7 +866,7 @@ my_rl_quote(char *text, int mt, char *qp) /* NOLINT */
 char *
 my_rl_path_completion(const char *text, int state)
 {
-	if (!text || !*text || xrename == 2)
+	if (!text || !*text || alt_prompt == 2)
 		return (char *)NULL;
 	/* state is zero before completion, and 1 ... n after getting
 	 * possible completions. Example:
@@ -3968,11 +3968,11 @@ complete_eln(char *text, int *exit_status, const size_t words_n)
 
 	/* First word */
 	if (words_n == 1) {
-		if (xrename >= 2 || (file_info[n - 1].dir == 1 && conf.autocd == 0)
+		if (alt_prompt >= 2 || (file_info[n - 1].dir == 1 && conf.autocd == 0)
 		|| (file_info[n - 1].dir == 0 && conf.auto_open == 0))
 			return (char **)NULL;
 	} else { /* Second word or more */
-		if (xrename == 1 || xrename == 3 || should_expand_eln(text) == 0)
+		if (alt_prompt == 1 || alt_prompt == 3 || should_expand_eln(text) == 0)
 			return (char **)NULL;
 	}
 
@@ -4048,8 +4048,8 @@ my_rl_completion(const char *text, const int start, const int end)
 			return matches;
 	}
 
-	/* xrename is set (non-zero) whenever we are using an alternative prompt. */
-	if (xrename != 0)
+	/* alt_prompt is set (non-zero) whenever we are using an alternative prompt. */
+	if (alt_prompt != 0)
 		goto FIRST_WORD_COMP;
 
 	/* #### FILE TYPE EXPANSION #### */
@@ -4150,7 +4150,7 @@ my_rl_completion(const char *text, const int start, const int end)
 	}
 
 	/* ##### HISTORY COMPLETION ("!") ##### */
-	if (xrename == 0 && *text == '!') {
+	if (alt_prompt == 0 && *text == '!') {
 		char *p = unescape_str((char *)text, 0);
 		matches = rl_completion_matches(p ? p : text, &hist_generator);
 		free(p);
@@ -4169,11 +4169,11 @@ FIRST_WORD_COMP:
 
 		/* #### OWNERSHIP EXPANSION ####
 		 * Used only by the 'oc' command to edit files ownership. */
-		if (xrename == 3)
+		if (alt_prompt == 3)
 			return complete_ownership(text);
 
 		/* #### INTERNAL COMMANDS EXPANSION #### */
-		if (xrename == 0 && ((*text == 'c' && text[1] == 'm'
+		if (alt_prompt == 0 && ((*text == 'c' && text[1] == 'm'
 		&& text[2] == 'd' && !text[3]) || strcmp(text, "commands") == 0)) {
 			if ((matches = rl_completion_matches(text, &int_cmds_generator))) {
 				cur_comp_type = TCMP_CMD_DESC;
@@ -4182,7 +4182,7 @@ FIRST_WORD_COMP:
 		}
 
 		/* SEARCH PATTERNS COMPLETION */
-		if (xrename == 0 && *text == '/' && text[1] == '*') {
+		if (alt_prompt == 0 && *text == '/' && text[1] == '*') {
 			char *p = unescape_str((char *)text, 0);
 			matches = rl_completion_matches(p ? p : text, &hist_generator);
 			free(p);
@@ -4192,7 +4192,7 @@ FIRST_WORD_COMP:
 			}
 		}
 
-		if ((conf.autocd == 1 || conf.auto_open == 1) && xrename < 2
+		if ((conf.autocd == 1 || conf.auto_open == 1) && alt_prompt < 2
 		&& (!text || *text != '/')) {
 			/* Compĺete with files in CWD */
 			matches = rl_completion_matches(text, &filenames_gen_text);
@@ -4204,7 +4204,7 @@ FIRST_WORD_COMP:
 
 		/* If neither autocd nor auto-open, try to complete with command names,
 		 * except when TEXT is "/" */
-		if (xrename == 0 && (conf.autocd == 0 || *text != '/' || text[1])) {
+		if (alt_prompt == 0 && (conf.autocd == 0 || *text != '/' || text[1])) {
 			if ((matches = rl_completion_matches(text, &bin_cmd_generator))) {
 				cur_comp_type = TCMP_CMD;
 				return matches;
@@ -4218,7 +4218,7 @@ FIRST_WORD_COMP:
 				 * # 3. SECOND WORD OR MORE #
 				 * ########################## */
 
-	if (xrename == 1 || xrename == 3)
+	if (alt_prompt == 1 || alt_prompt == 3)
 		return (char **)NULL;
 
 	rl_sort_completion_matches = 0;

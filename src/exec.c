@@ -2256,7 +2256,7 @@ exec_cmd(char **comm)
 				return FUNC_SUCCESS;
 			}
 			if (!sel_is_last && comm[1] && !comm[2])
-				xrename = 1;
+				alt_prompt = 1;
 
 			use_force = is_force_param(comm[1]);
 			set_mv_cmd(&comm[0], use_force);

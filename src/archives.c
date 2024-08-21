@@ -65,11 +65,11 @@ ask_user_for_path(void)
 
 	const int poffset_bk = prompt_offset;
 	prompt_offset = (int)strlen(m) + 1;
-	xrename = rl_nohist = 1;
+	alt_prompt = rl_nohist = 1;
 
 	char *ext_path = secondary_prompt(m, NULL);
 
-	xrename = rl_nohist = 0;
+	alt_prompt = rl_nohist = 0;
 	prompt_offset = poffset_bk;
 
 	if (!ext_path)
