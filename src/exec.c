@@ -260,7 +260,7 @@ check_shell_cmd_conditions(char **args)
 	/* No command name ends with a slash */
 	const size_t len = (args && args[0]) ? strlen(args[0]) : 0;
 	if (len > 0 && args[0][len - 1] == '/') {
-		xerror("%s: %s: %s\n", conf.autocd == 1 ? "cd" : "open",
+		xerror("%s: '%s': %s\n", conf.autocd == 1 ? "cd" : "open",
 			args[0], strerror(ENOENT));
 		return conf.autocd == 1 ? FUNC_FAILURE : E_NOTFOUND;
 	}

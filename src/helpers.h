@@ -1834,7 +1834,7 @@ extern int
 	cur_ws,
 	curcol,
 	dequoted,
-	dir_changed, /* flag to know is dir was changed: used by autocmds */
+	dir_changed, /* flag to know if dir was changed: used by autocmds */
 	dirhist_cur_index,
 	dirhist_total_index,
 	exit_code,

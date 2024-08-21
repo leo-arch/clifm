@@ -151,7 +151,6 @@ regex_t regex_dirhist;
 int
 	argc_bk = 0,
 	autocmd_set = 0,
-	autojump = UNSET,
 	bg_proc = 0,
 	cmdhist_flag = 0,
 	config_ok = 1,
