@@ -129,23 +129,18 @@ print_config_value(const char *option, void *cur_value, void *def_value,
 	}
 }
 
-/* Return a mallo'ced pointer to a string representing the value for
- * TabCompletionMode in the config file. */
+/* Return a string representing the value for TabCompletionMode in
+ * the config file. */
 static char *
 get_tab_comp_mode_str(void)
 {
-	char *s = xnmalloc(9, sizeof(char));
-
 	switch (tabmode) {
-	case FZF_TAB: xstrsncpy(s, "fzf", 4); break;
-	case FNF_TAB: xstrsncpy(s, "fnf", 4); break;
-	case SMENU_TAB: xstrsncpy(s, "smenu", 6); break;
-	case STD_TAB: xstrsncpy(s, "standard", 9); break;
-/* 	default: free(s); s = (char *)NULL; break; */
-/* The default case is not needed: all cases for TABMODE are covered */
+	case FZF_TAB: return "fzf";
+	case FNF_TAB: return "fnf";
+	case SMENU_TAB: return "smenu";
+	case STD_TAB: return "standard";
+	/* The default case is not needed: all cases for TABMODE are covered */
 	}
-
-	return s;
 }
 
 static void
@@ -495,7 +490,6 @@ dump_config(void)
 		"standard",
 #endif /* !_NO_FZF */
 		DUMP_CONFIG_STR);
-	free(ss);
 
 	s = DEF_TERM_CMD;
 	print_config_value("TerminalCmd", conf.term, s, DUMP_CONFIG_STR);
