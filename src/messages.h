@@ -1478,7 +1478,7 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  bm, bookmarks      Manage bookmarks\n\
  br, bulk           Rename files in bulk\n\
  c, l, m, md, r     Copy, link, move, makedir, and remove\n\
- colors             List current file type colors\n\
+ colors             Preview the current color scheme\n\
  cd                 Change directory\n\
  cl, columns        Set columns on/off\n\
  cmd, commands      Jump to the COMMANDS section in the manpage\n\
@@ -1492,14 +1492,13 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  f, forth           Go forth in the directory history list\n\
  fc                 Set the files counter on/off\n\
  ff, dirs-first     Toggle list-directories-first on/off\n\
- fs                 What is free software?\n\
  ft, filter         Set a files filter\n\
  fz                 Print directories full size (long view mode only)\n\
  hh, hidden         Toggle hidden files on/off\n\
  history            Manage the commands history\n\
  icons              Set icons on/off\n\
- k                  Toggle follow-links (long view only)\n\
- kk                 Toggle max-filename-len\n\
+ k                  Toggle follow-links on/off (long view only)\n\
+ kk                 Toggle max-filename-len on/off\n\
  j                  Jump to a visited directory\n\
  kb, keybinds       Manage keybindings\n\
  le                 Edit symbolic link target\n\
