@@ -241,7 +241,7 @@ init_conf_struct(void)
 	conf.pager = UNSET;
 	conf.pager_once = 0;
 	conf.pager_view = UNSET;
-	conf.print_dir_cmds = UNSET;
+	conf.print_dir_cmds = DEF_PRINT_DIR_CMDS;
 	conf.print_selfiles = UNSET;
 	conf.private_ws_settings = DEF_PRIVATE_WS_SETTINGS;
 	conf.prop_fields_gap = DEF_PROP_FIELDS_GAP;
