@@ -630,8 +630,6 @@ extern time_t curdir_mtime;
 #define RL_NC "\001\x1b[0m\002"
 
 #define UNSET  (-1)
-/* Some options take -1 as a valid value. So, let's use -2 to mark it unset */
-#define UNSET2 (-2)
 
 /* Macros for the cp and mv cmds */
 #define CP_CP            0 /* cp -iRp */
@@ -1720,7 +1718,7 @@ extern struct ext_t *ext_colors;
 #define EXT4_FSTYPE 0x004
 struct ext_mnt_t {
 	char *mnt_point;
-	int  type; /* One of EXTNFSTYPE macros */
+	int  type; /* One of EXTN_FSTYPE macros */
 	int  pad0;
 };
 

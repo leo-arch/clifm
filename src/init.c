@@ -183,18 +183,18 @@ init_conf_struct(void)
 	conf.bell_style = DEF_BELL_STYLE;
 	conf.case_sens_dirjump = UNSET;
 	conf.case_sens_path_comp = UNSET;
-	conf.case_sens_search = UNSET;
+	conf.case_sens_search = DEF_CASE_SENS_SEARCH;
 	conf.case_sens_list = UNSET;
 	conf.check_cap = DEF_CHECK_CAP;
 	conf.check_ext = DEF_CHECK_EXT;
 	conf.cd_on_quit = UNSET;
 	conf.classify = UNSET;
 	conf.clear_screen = UNSET;
-	conf.cmd_desc_sug = UNSET;
+	conf.cmd_desc_sug = DEF_CMD_DESC_SUG;
 	conf.colorize = UNSET;
 	conf.color_lnk_as_target = UNSET;
-	conf.columned = UNSET;
-	conf.cp_cmd = UNSET;
+	conf.columned = DEF_COLUMNS;
+	conf.cp_cmd = DEF_CP_CMD;
 	conf.desktop_notifications = UNSET;
 	conf.dirhist_map = UNSET;
 	conf.disk_usage = UNSET;
@@ -221,21 +221,21 @@ init_conf_struct(void)
 	conf.link_creat_mode = DEF_LINK_CREATION_MODE;
 	conf.list_dirs_first = UNSET;
 	conf.listing_mode = UNSET;
-	conf.log_cmds = UNSET;
-	conf.log_msgs = UNSET;
+	conf.log_cmds = DEF_LOG_CMDS;
+	conf.log_msgs = DEF_LOG_MSGS;
 	conf.long_view = UNSET;
 	conf.max_dirhist = UNSET;
 	conf.max_files = DEF_MAX_FILES;
-	conf.max_hist = UNSET;
-	conf.max_log = UNSET;
-	conf.max_jump_total_rank = UNSET;
+	conf.max_hist = DEF_MAX_HIST;
+	conf.max_log = DEF_MAX_LOG;
+	conf.max_jump_total_rank = DEF_MAX_JUMP_TOTAL_RANK;
 	conf.max_name_len = DEF_MAX_NAME_LEN;
 	conf.max_name_len_bk = 0;
 	conf.max_path = UNSET;
-	conf.max_printselfiles = UNSET2; /* -1 is a valid value */
-	conf.min_jump_rank = UNSET2; /* UNSET (-1) is a valid value for MinJumpRank */
-	conf.min_name_trim = UNSET;
-	conf.mv_cmd = UNSET;
+	conf.max_printselfiles = DEF_MAX_PRINTSEL;
+	conf.min_jump_rank = DEF_MIN_JUMP_RANK;
+	conf.min_name_trim = DEF_MIN_NAME_TRIM;
+	conf.mv_cmd = DEF_MV_CMD;
 	conf.no_eln = UNSET;
 	conf.only_dirs = UNSET;
 	conf.pager = UNSET;
@@ -243,24 +243,24 @@ init_conf_struct(void)
 	conf.pager_view = UNSET;
 	conf.print_dir_cmds = UNSET;
 	conf.print_selfiles = UNSET;
-	conf.private_ws_settings = UNSET;
-	conf.prop_fields_gap = UNSET;
-	conf.purge_jumpdb = UNSET;
+	conf.private_ws_settings = DEF_PRIVATE_WS_SETTINGS;
+	conf.prop_fields_gap = DEF_PROP_FIELDS_GAP;
+	conf.purge_jumpdb = DEF_PURGE_JUMPDB;
 	conf.quoting_style = DEF_QUOTING_STYLE;
 	conf.read_autocmd_files = DEF_READ_AUTOCMD_FILES;
 	conf.read_dothidden = DEF_READ_DOTHIDDEN;
 	conf.readonly = DEF_READONLY;
-	conf.relative_time = UNSET;
+	conf.relative_time = DEF_RELATIVE_TIME;
 	conf.restore_last_path = UNSET;
-	conf.rm_force = UNSET;
-	conf.search_strategy = UNSET;
+	conf.rm_force = DEF_RM_FORCE;
+	conf.search_strategy = DEF_SEARCH_STRATEGY;
 	conf.share_selbox = UNSET;
 	conf.show_hidden = UNSET;
 	conf.skip_non_alnum_prefix = DEF_SKIP_NON_ALNUM_PREFIX;
 	conf.sort = UNSET;
 	conf.sort_reverse = 0;
 	conf.splash_screen = UNSET;
-	conf.suggest_filetype_color = UNSET;
+	conf.suggest_filetype_color = DEF_SUG_FILETYPE_COLOR;
 	conf.suggestions = UNSET;
 	conf.time_follows_sort = DEF_TIME_FOLLOWS_SORT;
 	conf.timestamp_mark = DEF_TIMESTAMP_MARK;
@@ -2755,21 +2755,9 @@ check_options(void)
 			conf.trim_names = xargs.trim_names;
 	}
 
-	if (conf.columned == UNSET)
-		conf.columned = DEF_COLUMNS;
-
 	conf.max_name_len_bk = conf.max_name_len;
 	if (conf.trim_names == 0)
 		conf.max_name_len = UNSET;
-
-	if (conf.relative_time == UNSET)
-		conf.relative_time = DEF_RELATIVE_TIME;
-
-	if (conf.cmd_desc_sug == UNSET)
-		conf.cmd_desc_sug = DEF_CMD_DESC_SUG;
-
-	if (conf.purge_jumpdb == UNSET)
-		conf.purge_jumpdb = DEF_PURGE_JUMPDB;
 
 	if (conf.fuzzy_match == UNSET) {
 		conf.fuzzy_match = xargs.fuzzy_match == UNSET
@@ -2781,12 +2769,6 @@ check_options(void)
 			? DEF_FUZZY_MATCH_ALGO : xargs.fuzzy_match_algo;
 	}
 
-	if (conf.private_ws_settings == UNSET)
-		conf.private_ws_settings = DEF_PRIVATE_WS_SETTINGS;
-
-	if (conf.rm_force == UNSET)
-		conf.rm_force = DEF_RM_FORCE;
-
 	if (conf.desktop_notifications == UNSET) {
 		if (xargs.desktop_notifications == UNSET)
 			conf.desktop_notifications = DEF_DESKTOP_NOTIFICATIONS;
@@ -2794,16 +2776,10 @@ check_options(void)
 			conf.desktop_notifications = xargs.desktop_notifications;
 	}
 
-	if (conf.prop_fields_gap == UNSET)
-		conf.prop_fields_gap = DEF_PROP_FIELDS_GAP;
-
 	if (!*prop_fields_str)
 		xstrsncpy(prop_fields_str, DEF_PROP_FIELDS, sizeof(prop_fields_str));
 	set_prop_fields(prop_fields_str);
 	check_time_str();
-
-	if (conf.search_strategy == UNSET)
-		conf.search_strategy = DEF_SEARCH_STRATEGY;
 
 	if (xargs.eln_use_workspace_color == UNSET)
 		xargs.eln_use_workspace_color = DEF_ELN_USE_WORKSPACE_COLOR;
@@ -2847,21 +2823,6 @@ check_options(void)
 
 	if (xargs.secure_env_full == UNSET)
 		xargs.secure_env_full = DEF_SECURE_ENV_FULL;
-
-	if (conf.cp_cmd == UNSET)
-		conf.cp_cmd = DEF_CP_CMD;
-
-	if (conf.mv_cmd == UNSET)
-		conf.mv_cmd = DEF_MV_CMD;
-
-	if (conf.min_name_trim == UNSET)
-		conf.min_name_trim = DEF_MIN_NAME_TRIM;
-
-	if (conf.min_jump_rank == UNSET2)
-		conf.min_jump_rank = DEF_MIN_JUMP_RANK;
-
-	if (conf.max_jump_total_rank == UNSET)
-		conf.max_jump_total_rank = DEF_MAX_JUMP_TOTAL_RANK;
 
 	if (conf.no_eln == UNSET) {
 		if (xargs.no_eln == UNSET)
@@ -2936,7 +2897,8 @@ check_options(void)
 		if (conf.colorize == 1 || !getenv("FZF_DEFAULT_OPTS")) {
 			if (conf.colorize == 1) {
 				conf.fzftab_options =
-					savestring(DEF_FZFTAB_OPTIONS, sizeof(DEF_FZFTAB_OPTIONS) - 1);
+					savestring(DEF_FZFTAB_OPTIONS,
+					sizeof(DEF_FZFTAB_OPTIONS) - 1);
 			} else {
 				conf.fzftab_options =
 					savestring(DEF_FZFTAB_OPTIONS_NO_COLOR,
@@ -2997,9 +2959,6 @@ check_options(void)
 
 	if (!conf.suggestion_strategy)
 		conf.suggestion_strategy = savestring(DEF_SUG_STRATEGY, SUG_STRATS);
-
-	if (conf.suggest_filetype_color == UNSET)
-		conf.suggest_filetype_color = DEF_SUG_FILETYPE_COLOR;
 #endif /* _NO_SUGGESTIONS */
 
 	if (conf.print_selfiles == UNSET) {
@@ -3009,18 +2968,12 @@ check_options(void)
 			conf.print_selfiles = xargs.print_selfiles;
 	}
 
-	if (conf.max_printselfiles == UNSET2) /* -1 (UNSET) is a valid value */
-		conf.max_printselfiles = DEF_MAX_PRINTSEL;
-
 	if (conf.case_sens_list == UNSET) {
 		if (xargs.case_sens_list == UNSET)
 			conf.case_sens_list = DEF_CASE_SENS_LIST;
 		else
 			conf.case_sens_list = xargs.case_sens_list;
 	}
-
-	if (conf.case_sens_search == UNSET)
-		conf.case_sens_search = DEF_CASE_SENS_SEARCH;
 
 	if (conf.case_sens_dirjump == UNSET) {
 		if (xargs.case_sens_dirjump == UNSET)
@@ -3136,12 +3089,6 @@ check_options(void)
 			conf.max_path = xargs.max_path;
 	}
 
-	if (conf.log_msgs == UNSET)
-		conf.log_msgs = DEF_LOG_MSGS;
-
-	if (conf.log_cmds == UNSET)
-		conf.log_cmds = DEF_LOG_CMDS;
-
 	if (conf.light_mode == UNSET) {
 		if (xargs.light_mode == UNSET)
 			conf.light_mode = DEF_LIGHT_MODE;
@@ -3225,33 +3172,6 @@ check_options(void)
 		else
 			conf.restore_last_path = xargs.restore_last_path;
 	}
-
-	if (conf.max_hist == UNSET)
-		conf.max_hist = DEF_MAX_HIST;
-
-	if (conf.max_log == UNSET)
-		conf.max_log = DEF_MAX_LOG;
-
-	/* This block was needed when Shell was an option in the config file.
-	 * Let's keep it in case we readd this option. For the time being, the
-	 * shell used to run external commands is set via environment variables,
-	 * either CLIFM_SHELL, or SHELL. */
-/*	if (!user.shell) {
-		struct user_t tmp_user = get_user_data();
-		user.shell = tmp_user.shell;
-
-		// We don't need these values of the user struct: free them
-		free(tmp_user.name);
-		free(tmp_user.home);
-		free(tmp_user.groups);
-
-		if (!user.shell)
-			user.shell = savestring(FALLBACK_SHELL, sizeof(FALLBACK_SHELL) - 1);
-
-		free(user.shell_basename);
-		user.shell_basename = (char *)NULL;
-		shell = get_sys_shell();
-	} */
 
 	if (!conf.term)
 		conf.term = savestring(DEF_TERM_CMD, sizeof(DEF_TERM_CMD) - 1);
