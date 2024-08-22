@@ -3041,7 +3041,7 @@ read_config(void)
 			set_config_bool_value(line + 21, &conf.desktop_notifications);
 		}
 
-		else if (xargs.dirmap == UNSET && *line == 'D'
+		else if (xargs.dirhist_map == UNSET && *line == 'D'
 		&& strncmp(line, "DirhistMap=", 11) == 0) {
 			set_config_bool_value(line + 11, &conf.dirhist_map);
 		}
@@ -3059,7 +3059,7 @@ read_config(void)
 			set_div_line(line + 13);
 		}
 
-		else if (xargs.ext == UNSET && *line == 'E'
+		else if (xargs.ext_cmd_ok == UNSET && *line == 'E'
 		&& strncmp(line, "ExternalCommands=", 17) == 0) {
 			set_config_bool_value(line + 17, &conf.ext_cmd_ok);
 		}
@@ -3108,7 +3108,7 @@ read_config(void)
 		}
 #endif /* !_NO_ICONS */
 
-		else if (xargs.light == UNSET && *line == 'L'
+		else if (xargs.light_mode == UNSET && *line == 'L'
 		&& strncmp(line, "LightMode=", 10) == 0) {
 			set_config_bool_value(line + 10, &conf.light_mode);
 		}
@@ -3117,7 +3117,7 @@ read_config(void)
 			set_link_creation_mode(line + 17);
 		}
 
-		else if (xargs.dirs_first == UNSET && *line == 'L'
+		else if (xargs.list_dirs_first == UNSET && *line == 'L'
 		&& strncmp(line, "ListDirsFirst=", 14) == 0) {
 			set_config_bool_value(line + 14, &conf.list_dirs_first);
 		}
@@ -3127,7 +3127,7 @@ read_config(void)
 			set_listing_mode(line + 12);
 		}
 
-		else if (xargs.longview == UNSET && *line == 'L'
+		else if (xargs.long_view == UNSET && *line == 'L'
 		&& strncmp(line, "LongViewMode=", 13) == 0) {
 			set_config_bool_value(line + 13, &conf.long_view);
 		}
@@ -3214,7 +3214,7 @@ read_config(void)
 			set_config_bool_value(line + 13, &conf.print_dir_cmds);
 		}
 
-		else if (xargs.printsel == UNSET && *line == 'P'
+		else if (xargs.print_selfiles == UNSET && *line == 'P'
 		&& strncmp(line, "PrintSelfiles=", 14) == 0) {
 			set_config_bool_value(line + 14, &conf.print_selfiles);
 		}
@@ -3286,7 +3286,7 @@ read_config(void)
 			set_config_bool_value(line + 12, &conf.share_selbox);
 		}
 
-		else if (xargs.hidden == UNSET && *line == 'S'
+		else if (xargs.show_hidden == UNSET && *line == 'S'
 		&& strncmp(line, "ShowHiddenFiles=", 16) == 0) {
 			set_config_bool_value(line + 16, &conf.show_hidden);
 		}
@@ -3309,7 +3309,7 @@ read_config(void)
 			set_config_bool_value(line + 12, &conf.sort_reverse);
 		}
 
-		else if (xargs.splash == UNSET && *line == 'S'
+		else if (xargs.splash_screen == UNSET && *line == 'S'
 		&& strncmp(line, "SplashScreen=", 13) == 0) {
 			set_config_bool_value(line + 13, &conf.splash_screen);
 		}

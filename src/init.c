@@ -1729,16 +1729,15 @@ unset_xargs(void)
 	xargs.color_scheme = UNSET;
 	xargs.color_lnk_as_target = UNSET;
 	xargs.colorize = UNSET;
-	xargs.columns = UNSET;
+	xargs.columned = UNSET;
 	xargs.config = UNSET;
 	xargs.cwd_in_title = UNSET;
 	xargs.desktop_notifications = UNSET;
-	xargs.dirmap = UNSET;
+	xargs.dirhist_map = UNSET;
 	xargs.disk_usage = UNSET;
 	xargs.disk_usage_analyzer = UNSET;
 	xargs.eln_use_workspace_color = UNSET;
-	xargs.ext = UNSET;
-	xargs.dirs_first = UNSET;
+	xargs.ext_cmd_ok = UNSET;
 	xargs.files_counter = UNSET;
 	xargs.follow_symlinks = UNSET;
 	xargs.follow_symlinks_long = UNSET;
@@ -1751,7 +1750,6 @@ unset_xargs(void)
 	xargs.fnftab = UNSET;
 	xargs.smenutab = UNSET;
 #endif /* !_NO_FZF */
-	xargs.hidden = UNSET;
 #ifndef _NO_HIGHLIGHT
 	xargs.highlight = UNSET;
 #endif /* !_NO_HIGHLIGHT */
@@ -1762,22 +1760,23 @@ unset_xargs(void)
 	xargs.icons_use_file_color = UNSET;
 #endif /* !_NO_ICONS */
 	xargs.int_vars = UNSET;
-	xargs.light = UNSET;
+	xargs.light_mode = UNSET;
 	xargs.list_and_quit = UNSET;
-	xargs.longview = UNSET;
+	xargs.list_dirs_first = UNSET;
+	xargs.long_view = UNSET;
 	xargs.lscolors = UNSET;
 	xargs.max_dirhist = UNSET;
 	xargs.max_path = UNSET;
 	xargs.mount_cmd = UNSET;
 	xargs.no_bold = UNSET;
 	xargs.no_dirjump = UNSET;
-	xargs.noeln = UNSET;
+	xargs.no_eln = UNSET;
 	xargs.only_dirs = UNSET;
 	xargs.open = UNSET;
 	xargs.pager = UNSET;
 	xargs.pager_view = UNSET;
 	xargs.path = UNSET;
-	xargs.printsel = UNSET;
+	xargs.print_selfiles = UNSET;
 	xargs.prop_fields_str = UNSET;
 	xargs.ptime_style = UNSET;
 	xargs.readonly = UNSET;
@@ -1790,10 +1789,11 @@ unset_xargs(void)
 	xargs.secure_cmds = UNSET;
 	xargs.sel_file = UNSET;
 	xargs.share_selbox = UNSET;
+	xargs.show_hidden = UNSET;
 	xargs.si = UNSET;
 	xargs.sort = UNSET;
 	xargs.sort_reverse = UNSET;
-	xargs.splash = UNSET;
+	xargs.splash_screen = UNSET;
 	xargs.stat = 0;
 	xargs.stealth_mode = UNSET;
 #ifndef _NO_SUGGESTIONS
@@ -2864,10 +2864,10 @@ check_options(void)
 		conf.max_jump_total_rank = DEF_MAX_JUMP_TOTAL_RANK;
 
 	if (conf.no_eln == UNSET) {
-		if (xargs.noeln == UNSET)
+		if (xargs.no_eln == UNSET)
 			conf.no_eln = DEF_NOELN;
 		else
-			conf.no_eln = xargs.noeln;
+			conf.no_eln = xargs.no_eln;
 	}
 
 	if (prompt_notif == UNSET)
@@ -3003,10 +3003,10 @@ check_options(void)
 #endif /* _NO_SUGGESTIONS */
 
 	if (conf.print_selfiles == UNSET) {
-		if (xargs.printsel == UNSET)
+		if (xargs.print_selfiles == UNSET)
 			conf.print_selfiles = DEF_PRINTSEL;
 		else
-			conf.print_selfiles = xargs.printsel;
+			conf.print_selfiles = xargs.print_selfiles;
 	}
 
 	if (conf.max_printselfiles == UNSET2) /* -1 (UNSET) is a valid value */
@@ -3053,10 +3053,10 @@ check_options(void)
 	}
 
 	if (conf.splash_screen == UNSET) {
-		if (xargs.splash == UNSET)
+		if (xargs.splash_screen == UNSET)
 			conf.splash_screen = DEF_SPLASH_SCREEN;
 		else
-			conf.splash_screen = xargs.splash;
+			conf.splash_screen = xargs.splash_screen;
 	}
 
 	if (conf.welcome_message == UNSET) {
@@ -3067,10 +3067,10 @@ check_options(void)
 	}
 
 	if (conf.show_hidden == UNSET) {
-		if (xargs.hidden == UNSET)
+		if (xargs.show_hidden == UNSET)
 			conf.show_hidden = DEF_SHOW_HIDDEN;
 		else
-			conf.show_hidden = xargs.hidden;
+			conf.show_hidden = xargs.show_hidden;
 	}
 
 	if (conf.files_counter == UNSET) {
@@ -3081,17 +3081,17 @@ check_options(void)
 	}
 
 	if (conf.long_view == UNSET) {
-		if (xargs.longview == UNSET)
+		if (xargs.long_view == UNSET)
 			conf.long_view = DEF_LONG_VIEW;
 		else
-			conf.long_view = xargs.longview;
+			conf.long_view = xargs.long_view;
 	}
 
 	if (conf.ext_cmd_ok == UNSET) {
-		if (xargs.ext == UNSET)
+		if (xargs.ext_cmd_ok == UNSET)
 			conf.ext_cmd_ok = DEF_EXT_CMD_OK;
 		else
-			conf.ext_cmd_ok = xargs.ext;
+			conf.ext_cmd_ok = xargs.ext_cmd_ok;
 	}
 
 	if (conf.pager == UNSET) {
@@ -3116,10 +3116,10 @@ check_options(void)
 	}
 
 	if (conf.list_dirs_first == UNSET) {
-		if (xargs.dirs_first == UNSET)
+		if (xargs.list_dirs_first == UNSET)
 			conf.list_dirs_first = DEF_LIST_DIRS_FIRST;
 		else
-			conf.list_dirs_first = xargs.dirs_first;
+			conf.list_dirs_first = xargs.list_dirs_first;
 	}
 
 	if (conf.autols == UNSET) {
@@ -3143,10 +3143,10 @@ check_options(void)
 		conf.log_cmds = DEF_LOG_CMDS;
 
 	if (conf.light_mode == UNSET) {
-		if (xargs.light == UNSET)
+		if (xargs.light_mode == UNSET)
 			conf.light_mode = DEF_LIGHT_MODE;
 		else
-			conf.light_mode = xargs.light;
+			conf.light_mode = xargs.light_mode;
 	}
 
 	if (conf.classify == UNSET) {
@@ -3206,10 +3206,10 @@ check_options(void)
 	}
 
 	if (conf.dirhist_map == UNSET) {
-		if (xargs.dirmap == UNSET)
+		if (xargs.dirhist_map == UNSET)
 			conf.dirhist_map = DEF_DIRHIST_MAP;
 		else
-			conf.dirhist_map = xargs.dirmap;
+			conf.dirhist_map = xargs.dirhist_map;
 	}
 
 	if (conf.disk_usage == UNSET) {

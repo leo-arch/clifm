@@ -1440,11 +1440,11 @@ struct param_t {
 	int clear_screen;
 	int color_lnk_as_target;
 	int colorize;
-	int columns;
+	int columned;
 	int config;
 	int cwd_in_title;
 	int desktop_notifications;
-	int dirmap;
+	int dirhist_map;
 	int disk_usage;
 	int cd_on_quit;
 	int check_cap;
@@ -1453,8 +1453,7 @@ struct param_t {
 	int color_scheme;
 	int disk_usage_analyzer;
 	int eln_use_workspace_color;
-	int ext;
-	int dirs_first;
+	int ext_cmd_ok;
 	int files_counter;
 	int follow_symlinks;
 	int follow_symlinks_long;
@@ -1467,7 +1466,6 @@ struct param_t {
 	int fnftab;
 	int smenutab;
 #endif /* !_NO_FZF */
-	int hidden;
 #ifndef _NO_HIGHLIGHT
 	int highlight;
 #endif /* !_NO_HIGHLIGHT */
@@ -1479,8 +1477,9 @@ struct param_t {
 	int icons_use_file_color;
 	int int_vars;
 	int list_and_quit;
-	int light;
-	int longview;
+	int light_mode;
+	int list_dirs_first;
+	int long_view;
 	int lscolors;
 	int max_dirhist;
 	int max_files;
@@ -1488,14 +1487,14 @@ struct param_t {
 	int mount_cmd;
 	int no_bold;
 	int no_dirjump;
-	int noeln;
+	int no_eln;
 	int only_dirs;
 	int open;
 	int pager;
 	int pager_view;
 	int path;
 	int preview;
-	int printsel;
+	int print_selfiles;
 	int prop_fields_str;
 	int ptime_style;
 	int readonly;
@@ -1508,10 +1507,11 @@ struct param_t {
 	int secure_env_full;
 	int sel_file;
 	int share_selbox;
+	int show_hidden;
 	int si; /* Sizes in powers of 1000 instead of 1024 */
 	int sort;
 	int sort_reverse;
-	int splash;
+	int splash_screen;
 	int stat;
 	int stealth_mode;
 #ifndef _NO_SUGGESTIONS

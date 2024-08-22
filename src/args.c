@@ -1338,8 +1338,8 @@ parse_cmdline_args(const int argc, char **argv)
 
 	while ((optc = getopt(argc, argv, OPTSTRING)) != EOF) {
 		switch (optc) {
-		case 'a': conf.show_hidden = xargs.hidden = 1; break;
-		case 'A': conf.show_hidden = xargs.hidden = 0; break;
+		case 'a': xargs.show_hidden = conf.show_hidden = 1; break;
+		case 'A': xargs.show_hidden = conf.show_hidden = 0; break;
 		case 'b': xargs.bm_file = 1; set_alt_bm_file(optarg); break;
 		case 'B': set_tab_mode(optarg); break;
 		case 'c': xargs.config = 1; set_alt_config_file(optarg); break;
@@ -1369,7 +1369,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case 'j': set_stat(optc, optarg); break;
 		case 'J': set_stat(optc, optarg); break;
 		case 'k': set_alt_kbinds_file(optarg); break;
-		case 'l': conf.long_view = xargs.longview = 1; break;
+		case 'l': xargs.long_view = conf.long_view = 1; break;
 		case 'L':
 			xargs.follow_symlinks_long = conf.follow_symlinks_long = 1; break;
 		case 'm': xargs.fuzzy_match = conf.fuzzy_match = 1; break;
@@ -1408,7 +1408,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case 'v': version_function(0); break; /* noreturn */
 		case 'V': set_virtual_dir(optarg, "-V"); break;
 		case 'w': set_workspace(optarg); break;
-		case 'W': xargs.printsel = conf.print_selfiles = 1; break;
+		case 'W': xargs.print_selfiles = conf.print_selfiles = 1; break;
 		case 'x':
 			xargs.secure_env = 1;
 			xsecure_env(SECURE_ENV_IMPORT);
@@ -1417,7 +1417,7 @@ parse_cmdline_args(const int argc, char **argv)
 			xargs.secure_env_full = 1;
 			xsecure_env(SECURE_ENV_FULL);
 			break;
-		case 'y': conf.light_mode = xargs.light = 1; break;
+		case 'y': conf.light_mode = xargs.light_mode = 1; break;
 		case 'Y':
 			xargs.secure_cmds = xargs.secure_env = 1;
 			xsecure_env(SECURE_ENV_IMPORT);
@@ -1484,8 +1484,8 @@ parse_cmdline_args(const int argc, char **argv)
 
 		switch (optc) {
 		/* Short options */
-		case 'a': conf.show_hidden = xargs.hidden = 1; break;
-		case 'A': conf.show_hidden = xargs.hidden = 0; break;
+		case 'a': xargs.show_hidden = conf.show_hidden = 1; break;
+		case 'A': xargs.show_hidden = conf.show_hidden = 0; break;
 		case 'b': xargs.bm_file = 1; set_alt_bm_file(optarg); break;
 		case 'c': xargs.config = 1; set_alt_config_file(optarg); break;
 
@@ -1499,34 +1499,34 @@ parse_cmdline_args(const int argc, char **argv)
 #endif /* RUN_CMD */
 
 		case 'D': set_alt_config_dir(optarg); break;
-		case 'e': xargs.noeln = conf.no_eln = 1; break;
+		case 'e': xargs.no_eln = conf.no_eln = 1; break;
 		case 'E': xargs.eln_use_workspace_color = 1; break;
-		case 'f': conf.list_dirs_first = xargs.dirs_first = 1; break;
-		case 'F': conf.list_dirs_first = xargs.dirs_first = 0; break;
-		case 'g': conf.pager = xargs.pager = 1; break;
-		case 'G': conf.pager = xargs.pager = 0; break;
+		case 'f': xargs.list_dirs_first = conf.list_dirs_first = 1; break;
+		case 'F': xargs.list_dirs_first = conf.list_dirs_first = 0; break;
+		case 'g': xargs.pager = conf.pager = 1; break;
+		case 'G': xargs.pager = conf.pager = 0; break;
 		case 'h': help_function(); break; /* noreturn */
 		case 'H': xargs.horizontal_list = 1; conf.listing_mode = HORLIST; break;
-		case 'i': conf.case_sens_list = xargs.case_sens_list = 0; break;
-		case 'I': conf.case_sens_list = xargs.case_sens_list = 1; break;
+		case 'i': xargs.case_sens_list = conf.case_sens_list = 0; break;
+		case 'I': xargs.case_sens_list = conf.case_sens_list = 1; break;
 		case 'k': set_alt_kbinds_file(optarg); break;
-		case 'l': conf.long_view = xargs.longview = 1; break;
+		case 'l': xargs.long_view = conf.long_view = 1; break;
 		case 'L':
 			xargs.follow_symlinks_long = conf.follow_symlinks_long = 1; break;
-		case 'm': conf.dirhist_map = xargs.dirmap = 1; break;
-		case 'o': conf.autols = xargs.autols = 1; break;
-		case 'O': conf.autols = xargs.autols = 0; break;
+		case 'm': xargs.dirhist_map = conf.dirhist_map = 1; break;
+		case 'o': xargs.autols = conf.autols = 1; break;
+		case 'O': xargs.autols = conf.autols = 0; break;
 		case 'p': path_value = optarg; xargs.path = 1; break;
 		case 'P': set_alt_profile(optarg); break;
 		case 'r': xargs.refresh_on_empty_line = 0; break;
-		case 's': conf.splash_screen = xargs.splash = 1; break;
+		case 's': xargs.splash_screen = conf.splash_screen = 1; break;
 		case 'S': xargs.stealth_mode = 1; break;
 		case 't': xargs.disk_usage_analyzer = 1; break;
 		case 'T': set_alt_trash_dir(optarg); break;
 		case 'v': version_function(0); break; /* noreturn */
 		case 'w': set_workspace(optarg); break;
-		case 'x': conf.ext_cmd_ok = xargs.ext = 0; break;
-		case 'y': conf.light_mode = xargs.light = 1; break;
+		case 'x': xargs.ext_cmd_ok = conf.ext_cmd_ok = 0; break;
+		case 'y': xargs.light_mode = conf.light_mode = 1; break;
 		case 'z': set_sort(optarg); break;
 
 		/* Only-long options */
@@ -1612,7 +1612,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case LOPT_NO_COLORS:
 			set_no_colors(); break;
 		case LOPT_NO_COLUMNS:
-			xargs.columns = conf.columned = 0; break;
+			xargs.columned = conf.columned = 0; break;
 		case LOPT_NO_DIR_JUMPER:
 			xargs.no_dirjump = 1; break;
 		case LOPT_NO_FILE_CAP:
@@ -1672,7 +1672,7 @@ parse_cmdline_args(const int argc, char **argv)
 			set_opener(optarg); break;
 		case LOPT_PAGER_VIEW: xset_pager_view(optarg); break;
 		case LOPT_PRINT_SEL:
-			xargs.printsel = conf.print_selfiles = 1; break;
+			xargs.print_selfiles = conf.print_selfiles = 1; break;
 		case LOPT_PROP_FIELDS: xset_prop_fields(optarg); break;
 		case LOPT_READONLY: xargs.readonly = conf.readonly = 1; break;
 		case LOPT_RL_VI_MODE:
