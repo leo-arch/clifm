@@ -230,12 +230,9 @@ set_fzf_preview_border_type(void)
 static void
 kitty_clear(void)
 {
-//	printf("\033_Ga=d,t=d\033\\");
-//	fflush(stdout);
-//	char *cmd[] = { "printf", "\033_Ga=d\033\\", NULL };
 	char *cmd[] = {"kitty", "icat", "--clear", "--transfer-mode=stream",
 		"--stdin=no", NULL};
-	launch_execv(cmd, 0, 0);
+	launch_execv(cmd, FOREGROUND, E_NOFLAG);
 }
 
 /* Remove any image printed by ueberzug.
