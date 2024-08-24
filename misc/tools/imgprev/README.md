@@ -111,11 +111,11 @@ clifmrun
 If you have a [sixel capable terminal](https://github.com/saitoha/libsixel#terminal-requirements) and `fzf` version 0.44 or later you can easily take advantage of this capability as follows:
 
 1. See points 1 and 2 in the [Usage section](#usage). Note that, since `ueberzug` isn't required, there's no need to copy the `clifmrun` script.
-2. Edit the `clifmimg.sh` script and uncomment the `chafa` line (used to generate the sixel images):
+2. Edit the `clifmimg` script and uncomment the `chafa` line (used to generate sixel images):
 ```sh
 chafa -f sixel -s "${C}x$((L - 1))" "$1"; exit 0
 ```
-3. Run **clifm** as always (again, `clifmrun` is not required).
+3. Run **clifm** as usual (again, `clifmrun` is not required).
 
 ### Kitty and Wayland
 
