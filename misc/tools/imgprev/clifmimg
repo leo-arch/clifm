@@ -147,9 +147,8 @@ display() {
 		# and should be removed
 
 		touch -- "$CLIFM_KITTY_IMG"
-		kitty icat --silent --loop=0 \
-		--place "$FZF_PREVIEW_COLUMNS"x"$FZF_PREVIEW_LINES"@"$X"x"$Y" \
-		--transfer-mode=stream --align=left -- "$1"
+		kitty icat --loop=0 --place "$FZF_PREVIEW_COLUMNS"x"$FZF_PREVIEW_LINES"@"$X"x"$Y" \
+		--clear --transfer-mode=stream --stdin=no --align=left -- "$1"
 	else
 		printf '{"action": "add", "identifier": "clifm-preview", "x": "%s", "y": "%s", "width": "%s", "height": "%s", "scaler" : "contain", "path": "%s"}\n' "$X" "$Y" "$COLUMNS" "$LINES" "$1" > "$CLIFM_FIFO_UEBERZUG"
 	fi
