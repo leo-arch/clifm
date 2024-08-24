@@ -233,8 +233,8 @@ kitty_clear(void)
 //	printf("\033_Ga=d,t=d\033\\");
 //	fflush(stdout);
 //	char *cmd[] = { "printf", "\033_Ga=d\033\\", NULL };
-	char *cmd[] = {"kitty", "icat", "--clear", "--silent",
-		"--transfer-mode=stream", NULL};
+	char *cmd[] = {"kitty", "icat", "--clear", "--transfer-mode=stream",
+		"--stdin=no", NULL};
 	launch_execv(cmd, 0, 0);
 }
 

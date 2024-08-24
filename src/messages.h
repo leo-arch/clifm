@@ -1171,6 +1171,7 @@ Note: Use the 'trash' command to trash files. Try 'trash --help'."
     view edit (or F7)\n\
 - Edit the configuration file using vi\n\
     view edit vi\n\n\
+Select files using the TAB key.\n\
 Enter 'help file-previews' for more information."
 
 #define WRAPPERS_USAGE "c, m, and r commands are wrappers for \
