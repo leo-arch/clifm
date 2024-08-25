@@ -36,7 +36,7 @@ Launch an instance of `ueberzug` and set the appropriate values (as environment 
 
 Parameters passed to `clifmrun` will be passed to **clifm** itself.
 
-The kitty image protocol is also supported. See the [Usage section](#usage) below.
+Sixel graphics and the kitty image protocol are also supported. See the [Usage section](#usage) below.
 
 ### clifmimg
 
@@ -68,39 +68,42 @@ The first parameter (thumbnailing method) could be any of the following:
 
 ## Usage
 
-1. Copy both scripts (`clifmrun` and `clifmimg`) to somewhere in you **PATH** (say `/usr/local/bin`). You can find them in `DATADIR/clifm/plugins` (usually `/usr/local/share/clifm/plugins`).
-
-2. Run `view edit` (<kbd>F7</kbd> is also available) to edit [shotgun's](https://github.com/leo-arch/clifm/wiki/Advanced#shotgun) configuration file (`$HOME/.config/clifm/profiles/PROFILE/preview.clifm`), and add the following lines at the top of the file (to make sure they won't be overriden by previous directives):
+1. Run `view edit` (<kbd>F7</kbd> is also available) to edit [shotgun's](https://github.com/leo-arch/clifm/wiki/Advanced#shotgun) configuration file (`$HOME/.config/clifm/profiles/PROFILE/preview.clifm`), and add the following lines at the top of the file (to make sure they won't be overriden by previous directives):
 
 ```sh
 ...
 # Uncomment and edit this line to use Ranger's scope script: 
 #.*=/home/USER/.config/ranger/scope.sh %f 120 80 /tmp/clifm/ True;
 
-X:^application/.*(officedocument|msword|ms-excel|opendocument).*=clifmimg doc;
-X:^text/rtf$=clifmimg doc;
-X:^application/epub\+zip$=clifmimg epub;
-X:^application/pdf$=clifmimg pdf;
-X:^image/vnd.djvu=clifmimg djvu;
-X:^image/svg\+xml$=clifmimg svg;
-X:^image/gif$=clifmimg gif;
-X:^image/.*=clifmimg image;
-X:^video/.*=clifmimg video;
-X:^audio/.*=clifmimg audio;
-X:^application/postscript$=clifmimg postscript;
-X:N:.*\.otf$=clifmimg font;
-X:font/.*=clifmimg font;
+# If the clifmimg script cannot be found under '~/.config/clifm/', you can copy it from the data
+# directory, usually '/usr/local/share/clifm/plugins/'.
+
+^application/.*(officedocument|msword|ms-excel|opendocument).*=~/.config/clifm/clifmimg doc;
+^text/rtf$=~/.config/clifm/clifmimg doc;
+^application/epub\+zip$=~/.config/clifm/clifmimg epub;
+^application/pdf$=~/.config/clifm/clifmimg pdf;
+^image/vnd.djvu=~/.config/clifm/clifmimg djvu;
+^image/svg\+xml$=~/.config/clifm/clifmimg svg;
+^image/gif$=~/.config/clifm/clifmimg gif;
+^image/.*=~/.config/clifm/clifmimg image;
+^video/.*=~/.config/clifm/clifmimg video;
+^audio/.*=~/.config/clifm/clifmimg audio;
+^application/postscript$=~/.config/clifm/clifmimg postscript;
+N:.*\.otf$=~/.config/clifm/clifmimg font;
+font/.*=~/.config/clifm/clifmimg font;
 
 # Directories
 ...
 
 ```
 
-This instructs **clifm** to use `clifmimg` to generate previews (and display them via `ueberzug`) for the specified file names or file types (both for TAB completion (in [fzf mode](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion)) and via the [`view` command](https://github.com/leo-arch/clifm/wiki/Introduction#view)).
+This instructs **clifm** to use `clifmimg` to generate previews for the specified file names or file types (both for TAB completion (in [fzf mode](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion)) and via the [`view` command](https://github.com/leo-arch/clifm/wiki/Introduction#view)).
 
 In case you don't want image preview for some of these files types, just comment out the corresponding line or change its value to your preferred previewing application.
 
-3. Run **clifm** via the `clifmrun` script
+2. Edit the `display()` function in the `clifmimg` script and choose your preferred previewing method. It default to `ueberzug`.
+
+3. Run **clifm** via the `clifmrun` script (you can find it under `DATADIR/clifm/plugins/`, usually, `/usr/local/share/clifm/plugins/`). In case you're running with fzf (version 0.44 or later) and the sixel method, running `clifmrun` is not necessary.
 
 ```sh
 clifmrun
@@ -108,14 +111,13 @@ clifmrun
 
 ### Sixel graphics and Fzf
 
-If you have a [sixel capable terminal](https://github.com/saitoha/libsixel#terminal-requirements) and `fzf` version 0.44 or later you can easily take advantage of this capability as follows:
+If you have a [sixel capable terminal](https://github.com/saitoha/libsixel#terminal-requirements) and `fzf` (version 0.44 or later) you can easily take advantage of this capability as follows:
 
-1. See points 1 and 2 in the [Usage section](#usage). Note that, since `ueberzug` isn't required, there's no need to copy the `clifmrun` script.
-2. Edit the `clifmimg` script and uncomment the `chafa` line (used to generate sixel images):
+1. Edit the `clifmimg` script and uncomment the `chafa` line (used to generate sixel images):
 ```sh
 chafa -f sixel -s "${C}x$((L - 1))" "$1"; exit 0
 ```
-3. Run **clifm** as usual (again, `clifmrun` is not required).
+2. Run **clifm** as usual (`clifmrun` is **not** required).
 
 ### Kitty and Wayland
 
