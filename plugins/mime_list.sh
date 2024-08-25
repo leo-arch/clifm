@@ -41,7 +41,7 @@ fi
 # shellcheck disable=SC2154
 find . -maxdepth 1 -mindepth 1 | \
 file -F'@' -N -n --mime-type -if- | \
-grep "@\ .*${mime}" | cut -d"@" -f1 | cut -d"/" -f2-10 | sort | \
+grep "@ .*${mime}" | cut -d"@" -f1 | cut -d"/" -f2-10 | sort | \
 fzf --reverse --height="$fzf_height" --exit-0 --header "Choose a file" \
 --info=inline --color="$(get_fzf_colors)"
 
