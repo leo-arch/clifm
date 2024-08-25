@@ -138,8 +138,8 @@ get_tab_comp_mode_str(void)
 	case FZF_TAB: return "fzf";
 	case FNF_TAB: return "fnf";
 	case SMENU_TAB: return "smenu";
-	case STD_TAB: return "standard";
-	/* The default case is not needed: all cases for TABMODE are covered */
+	case STD_TAB: /* fallthrough */
+	default: return "standard";
 	}
 }
 
