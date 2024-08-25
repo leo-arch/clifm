@@ -28,8 +28,8 @@ fi
 
 cur="$(clifm -v)"
 
-if [ "v$cur" != "$upstream" ]; then
-	printf "You are up to date: %s is the latest release\n" "$cur"
+if [ "v$cur" = "$upstream" ]; then
+	printf "Clifm is up to date: %s is the latest release\n" "$cur"
 else
 	printf "%s: New release available (current version is %s)\n" "$upstream" "$cur"
 
