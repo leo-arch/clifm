@@ -114,7 +114,7 @@ remove_file_from_trash(const char *name)
 	char *file2 = xnmalloc(len, sizeof(char));
 	snprintf(file2, len, "%s/%s", trash_info_dir, info_file);
 
-	char *cmd[] = {"rm", "-r", "--", file1, file2, NULL};
+	char *cmd[] = {"rm", "-rf", "--", file1, file2, NULL};
 	int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 
 	free(file1);
