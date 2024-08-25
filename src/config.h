@@ -31,12 +31,12 @@
 
 __BEGIN_DECLS
 
+int  config_edit(char **args);
 int  create_bm_file(void);
 int  create_kbinds_file(void);
 int  create_main_config_file(char *file);
 int  create_mime_file(char *file, const int new_prof);
 void create_tmp_files(void);
-int  edit_function(char **args);
 void init_config(void);
 int  reload_config(void);
 void set_div_line(char *line);

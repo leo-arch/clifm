@@ -538,7 +538,7 @@ dump_config(void)
  * passed argument (e.g.: 'edit nano'). The 'reset' option regenerates
  * the configuration file and creates a back up of the old one */
 int
-edit_function(char **args)
+config_edit(char **args)
 {
 	if (xargs.stealth_mode == 1) {
 		printf("%s: %s\n", PROGRAM_NAME, STEALTH_DISABLED);
@@ -769,13 +769,13 @@ set_sel_file(void)
 }
 
 /* Copy the file SRC_FILENAME from the data directory (DATA_DIR) to the
- * directory DEST.
+ * directory DEST, and make DEST executable if EXEC is set to 1.
  * The original file will be copied into DEST with AT MOST
  * 600 permissions (via umask(3)), making sure the user has read/write
  * permissions (via xchmod()), just in case the original file has no such
  * permissions. */
 static int
-import_from_data_dir(const char *src_filename, char *dest)
+import_from_data_dir(const char *src_filename, char *dest, const int exec)
 {
 	if (!data_dir || !src_filename || !dest
 	|| !*data_dir || !*src_filename || !*dest)
@@ -788,7 +788,7 @@ import_from_data_dir(const char *src_filename, char *dest)
 	if (stat(sys_file, &attr) == -1)
 		return FUNC_FAILURE;
 
-	const mode_t old_umask = umask(0177); /* flawfinder: ignore */
+	const mode_t old_umask = umask(exec == 1 ? 0077 : 0177); /* flawfinder: ignore */
 	char *cmd[] = {"cp", "--", sys_file, dest, NULL};
 	int ret = launch_execv(cmd, FOREGROUND, E_NOSTDERR);
 	umask(old_umask);
@@ -797,7 +797,7 @@ import_from_data_dir(const char *src_filename, char *dest)
 #ifndef __MSYS__
 		/* chmod(2) does not work on MSYS2. See
 		 * https://github.com/msys2/MSYS2-packages/issues/2612 */
-		xchmod(dest, "0600", 1);
+		xchmod(dest, exec == 1 ? "0700" : "0600", 1);
 #endif /* __MSYS__ */
 		return FUNC_SUCCESS;
 	}
@@ -818,7 +818,7 @@ create_kbinds_file(void)
 		return FUNC_SUCCESS;
 
 	/* If not, try to import it from DATADIR */
-	if (import_from_data_dir("keybindings.clifm", kbinds_file) == FUNC_SUCCESS)
+	if (import_from_data_dir("keybindings.clifm", kbinds_file, 0) == FUNC_SUCCESS)
 		return FUNC_SUCCESS;
 
 	/* Else, create it */
@@ -992,7 +992,7 @@ create_preview_file(void)
 
 #if !defined(__FreeBSD__) && !defined(__OpenBSD__) && !defined(__NetBSD__) \
 && !defined(__DragonFly__) && !defined(__APPLE__)
-	if (import_from_data_dir("preview.clifm", file) == FUNC_SUCCESS)
+	if (import_from_data_dir("preview.clifm", file, 0) == FUNC_SUCCESS)
 		return FUNC_SUCCESS;
 #endif /* !BSD */
 
@@ -1085,7 +1085,7 @@ create_actions_file(char *file)
 		return FUNC_SUCCESS;
 
 	/* If not, try to import it from DATADIR */
-	if (import_from_data_dir("actions.clifm", file) == FUNC_SUCCESS)
+	if (import_from_data_dir("actions.clifm", file, 0) == FUNC_SUCCESS)
 		return FUNC_SUCCESS;
 
 	/* Else, create it */
@@ -1490,20 +1490,19 @@ define_config_file_names(void)
 	snprintf(remotes_file, tmp_len, "%s/nets.clifm", config_dir);
 }
 
-/* Import readline.clifm from data directory. */
 static int
-import_rl_file(void)
+import_data_file(const char *src, const char *dst, const int exec)
 {
-	if (!data_dir || !config_dir_gral)
+	if (!data_dir || !config_dir_gral || !src || !dst)
 		return FUNC_FAILURE;
 
-	char dest[PATH_MAX + 1];
-	snprintf(dest, sizeof(dest), "%s/readline.clifm", config_dir_gral);
-	struct stat attr;
-	if (lstat(dest, &attr) == 0)
+	char dest_file[PATH_MAX + 1];
+	snprintf(dest_file, sizeof(dest_file), "%s/%s", config_dir_gral, dst);
+	struct stat a;
+	if (lstat(dest_file, &a) == 0)
 		return FUNC_SUCCESS;
 
-	return import_from_data_dir("readline.clifm", dest);
+	return import_from_data_dir(src, dest_file, exec);
 }
 
 /* Create the main configuration file and store in FILE. */
@@ -1513,7 +1512,7 @@ create_main_config_file(char *file)
 	/* First, try to import it from DATADIR */
 	char src_filename[NAME_MAX];
 	snprintf(src_filename, sizeof(src_filename), "%src", PROGRAM_NAME);
-	if (import_from_data_dir(src_filename, file) == FUNC_SUCCESS)
+	if (import_from_data_dir(src_filename, file, 0) == FUNC_SUCCESS)
 		return FUNC_SUCCESS;
 
 	/* If not found, create it */
@@ -2053,7 +2052,7 @@ create_remotes_file(void)
 		return FUNC_SUCCESS;
 
 	/* Let's try to copy the file from DATADIR */
-	if (import_from_data_dir("nets.clifm", remotes_file) == FUNC_SUCCESS)
+	if (import_from_data_dir("nets.clifm", remotes_file, 0) == FUNC_SUCCESS)
 		return FUNC_SUCCESS;
 
 	/* If not in DATADIR, let's create a minimal file here */
@@ -2175,7 +2174,8 @@ create_config_files(const int just_listing)
 			"directory '%s': The actions function is disabled\n"),
 			PROGRAM_NAME, plugins_dir);
 
-	import_rl_file();
+	import_data_file("readline.clifm", "readline.clifm", 0);
+	import_data_file("plugins/clifmimg", "clifmimg", 1);
 	create_actions_file(actions_file);
 	create_mime_file(mime_file, 0);
 	create_preview_file();
@@ -2365,7 +2365,7 @@ create_mime_file(char *file, const int new_prof)
 	if (stat(file, &attr) == FUNC_SUCCESS)
 		return FUNC_SUCCESS;
 
-	int ret = import_from_data_dir("mimelist.clifm", file);
+	int ret = import_from_data_dir("mimelist.clifm", file, 0);
 	if (ret != FUNC_SUCCESS)
 		ret = create_mime_file_anew(file);
 

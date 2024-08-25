@@ -2543,7 +2543,7 @@ exec_cmd(char **comm)
 
 	/* #### CONFIG #### */
 	else if (*comm[0] == 'c' && strcmp(comm[0], "config") == 0)
-		return (exit_code = edit_function(comm));
+		return (exit_code = config_edit(comm));
 
 	/* #### HISTORY #### */
 	else if (*comm[0] == 'h' && strcmp(comm[0], "history") == 0)
