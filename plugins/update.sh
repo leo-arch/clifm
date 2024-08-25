@@ -1,8 +1,9 @@
 #!/bin/sh
 
-# Check clifm's upstream version
-# Dependencies: awk, grep
-
+# Description: Check clifm's upstream version
+#
+# Dependencies: awk, curl, grep
+#
 # Written by L. Abramovich
 # License GPL3
 
@@ -27,10 +28,30 @@ fi
 
 cur="$(clifm -v)"
 
-if [ "v$cur" = "$upstream" ]; then
+if [ "v$cur" != "$upstream" ]; then
 	printf "You are up to date: %s is the latest release\n" "$cur"
 else
 	printf "%s: New release available (current version is %s)\n" "$upstream" "$cur"
+
+	OS="$(uname -s)"
+	if [ "$OS" != "Linux" ] && [ "$OS" != "FreeBSD" ] && [ "$OS" != "NetBSD" ] \
+	&& [ "$OS" != "OpenBSD" ] && [ "$OS" != "DragonFly" ] && [ "$OS" != "Darwin" ]; then
+		printf "\nTo manually build the latest release consult the documentation at\n\
+https://github.com/leo-arch/clifm/wiki/Introduction#installation\n"
+		exit 0
+	fi
+
+	sudo_cmd="sudo"
+	[ "$OS" = "OpenBSD" ] && sudo_cmd="doas"
+
+	printf "\nIf not provided by your package manager, you can build the latest\n\
+release as follows:\n\n\
+1) Clone the latest release:\n\
+ git clone https://github.com/leo-arch/clifm --depth=1\n\
+2) cd into the clifm directory:\n\
+ cd clifm\n\
+3) Build and install:\n\
+ %s make install\n" "$sudo_cmd"
 fi
 
 exit 0
