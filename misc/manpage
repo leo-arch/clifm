@@ -1517,9 +1517,9 @@ System readline keybindings for command line editing, such as \fICtrl\-a\fR, to 
 .TP
 .B Keybindings for plugins
 .TP
-\fBclifm\fR provides four customizable keybindings for custom plugins. The procedure for setting a keybinding for a plugin is the following:
+\fBclifm\fR provides sixteen customizable keybindings for custom plugins. The procedure for setting a keybinding for a plugin is the following:
  1) Copy your plugin to the plugins directory (or use any of the plugins already in there)
- 2) Link pluginx (where \'x\' is the plugin number [1\-4]) to your plugin using the \'actions edit\' command. E.g.: "plugin1=myplugin.sh"
+ 2) Link pluginx (where \'x\' is the plugin number [1\-16]) to your plugin using the \'actions edit\' command. E.g.: "plugin1=myplugin.sh"
  3) Set a keybinding for pluginx using the \'kb edit\' command. E.g.: "plugin1:\\M\-7"
 
 .SH 7. THEMING
