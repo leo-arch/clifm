@@ -781,16 +781,16 @@ import_from_data_dir(const char *src_filename, char *dest, const int exec)
 	|| !*data_dir || !*src_filename || !*dest)
 		return FUNC_FAILURE;
 
-	struct stat attr;
+	struct stat a;
 	char sys_file[PATH_MAX + 1];
-	snprintf(sys_file, sizeof(sys_file), "%s/%s/%s", data_dir, PROGRAM_NAME,
-		src_filename);
-	if (stat(sys_file, &attr) == -1)
+	snprintf(sys_file, sizeof(sys_file), "%s/%s/%s", data_dir,
+		PROGRAM_NAME, src_filename);
+	if (stat(sys_file, &a) == -1)
 		return FUNC_FAILURE;
 
 	const mode_t old_umask = umask(exec == 1 ? 0077 : 0177); /* flawfinder: ignore */
 	char *cmd[] = {"cp", "--", sys_file, dest, NULL};
-	int ret = launch_execv(cmd, FOREGROUND, E_NOSTDERR);
+	const int ret = launch_execv(cmd, FOREGROUND, E_NOSTDERR);
 	umask(old_umask);
 
 	if (ret == FUNC_SUCCESS) {

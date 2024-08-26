@@ -1781,7 +1781,7 @@ run_plugin(const int num)
 
 	char cmd[MAX_INT_STR + 7];
 	snprintf(cmd, sizeof(cmd), "plugin%d", num);
-	int ret = run_kb_cmd(cmd);
+	const int ret = run_kb_cmd(cmd);
 
 	unsetenv("CLIFM_LINE");
 
@@ -1815,6 +1815,201 @@ rl_plugin4(int count, int key)
 	UNUSED(count); UNUSED(key);
 	return run_plugin(4);
 }
+
+static int
+rl_plugin5(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	return run_plugin(5);
+}
+
+static int
+rl_plugin6(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	return run_plugin(6);
+}
+
+static int
+rl_plugin7(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	return run_plugin(7);
+}
+
+static int
+rl_plugin8(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	return run_plugin(8);
+}
+
+static int
+rl_plugin9(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	return run_plugin(9);
+}
+
+static int
+rl_plugin10(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	return run_plugin(10);
+}
+
+static int
+rl_plugin11(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	return run_plugin(11);
+}
+
+static int
+rl_plugin12(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	return run_plugin(12);
+}
+
+static int
+rl_plugin13(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	return run_plugin(13);
+}
+
+static int
+rl_plugin14(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	return run_plugin(14);
+}
+
+static int
+rl_plugin15(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	return run_plugin(15);
+}
+
+static int
+rl_plugin16(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	return run_plugin(16);
+}
+
+/*
+static int
+rl_plugin17(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	return run_plugin(17);
+}
+
+static int
+rl_plugin18(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	return run_plugin(18);
+}
+
+static int
+rl_plugin19(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	return run_plugin(19);
+}
+
+static int
+rl_plugin20(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	return run_plugin(20);
+}
+
+static int
+rl_plugin21(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	return run_plugin(21);
+}
+
+static int
+rl_plugin22(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	return run_plugin(22);
+}
+
+static int
+rl_plugin23(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	return run_plugin(23);
+}
+
+static int
+rl_plugin24(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	return run_plugin(24);
+}
+
+static int
+rl_plugin25(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	return run_plugin(25);
+}
+
+static int
+rl_plugin26(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	return run_plugin(26);
+}
+
+static int
+rl_plugin27(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	return run_plugin(27);
+}
+
+static int
+rl_plugin28(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	return run_plugin(28);
+}
+
+static int
+rl_plugin29(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	return run_plugin(29);
+}
+static int
+rl_plugin30(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	return run_plugin(30);
+}
+
+static int
+rl_plugin31(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	return run_plugin(31);
+}
+static int
+rl_plugin32(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	return run_plugin(32);
+} */
 
 static int
 rl_launch_view(int count, int key)
@@ -2300,6 +2495,35 @@ set_keybinds_from_file(void)
 	rl_bind_keyseq(find_key("plugin2"), rl_plugin2);
 	rl_bind_keyseq(find_key("plugin3"), rl_plugin3);
 	rl_bind_keyseq(find_key("plugin4"), rl_plugin4);
+	rl_bind_keyseq(find_key("plugin5"), rl_plugin5);
+	rl_bind_keyseq(find_key("plugin6"), rl_plugin6);
+	rl_bind_keyseq(find_key("plugin7"), rl_plugin7);
+	rl_bind_keyseq(find_key("plugin8"), rl_plugin8);
+	rl_bind_keyseq(find_key("plugin9"), rl_plugin9);
+	rl_bind_keyseq(find_key("plugin10"), rl_plugin10);
+	rl_bind_keyseq(find_key("plugin11"), rl_plugin11);
+	rl_bind_keyseq(find_key("plugin12"), rl_plugin12);
+	rl_bind_keyseq(find_key("plugin13"), rl_plugin13);
+	rl_bind_keyseq(find_key("plugin14"), rl_plugin14);
+	rl_bind_keyseq(find_key("plugin15"), rl_plugin15);
+	rl_bind_keyseq(find_key("plugin16"), rl_plugin16);
+/*	rl_bind_keyseq(find_key("plugin17"), rl_plugin17);
+	rl_bind_keyseq(find_key("plugin18"), rl_plugin18);
+	rl_bind_keyseq(find_key("plugin19"), rl_plugin19);
+	rl_bind_keyseq(find_key("plugin20"), rl_plugin20);
+	rl_bind_keyseq(find_key("plugin21"), rl_plugin21);
+	rl_bind_keyseq(find_key("plugin22"), rl_plugin22);
+	rl_bind_keyseq(find_key("plugin23"), rl_plugin23);
+	rl_bind_keyseq(find_key("plugin24"), rl_plugin24);
+	rl_bind_keyseq(find_key("plugin25"), rl_plugin25);
+	rl_bind_keyseq(find_key("plugin26"), rl_plugin26);
+	rl_bind_keyseq(find_key("plugin27"), rl_plugin27);
+	rl_bind_keyseq(find_key("plugin28"), rl_plugin28);
+	rl_bind_keyseq(find_key("plugin29"), rl_plugin29);
+	rl_bind_keyseq(find_key("plugin30"), rl_plugin30);
+	rl_bind_keyseq(find_key("plugin31"), rl_plugin31);
+	rl_bind_keyseq(find_key("plugin32"), rl_plugin32); */
+
 }
 
 static void
