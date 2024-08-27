@@ -1565,11 +1565,23 @@ get_term_size(void)
 	if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) == -1) {
 		term_cols = 80;
 		term_lines = 24;
-		return;
+	} else {
+		term_cols =  w.ws_col > 0 ? w.ws_col : 80;
+		term_lines = w.ws_row > 0 ? w.ws_row : 24;
 	}
 
-	term_cols =  w.ws_col > 0 ? w.ws_col : 80;
-	term_lines = w.ws_row > 0 ? w.ws_row : 24;
+	if (xargs.secure_env_full == 1)
+		return;
+
+	char *env = getenv("CLIFM_COLUMNS");
+	int value = env ? atoi(env) : -1;
+	if (value > 0 && value <= USHRT_MAX)
+		term_cols = (unsigned short)value;
+
+	env = getenv("CLIFM_LINES");
+	value = env ? atoi(env) : -1;
+	if (value > 0 && value <= USHRT_MAX)
+		term_lines = (unsigned short)value;
 }
 
 #ifndef _BE_POSIX
