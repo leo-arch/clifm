@@ -1,7 +1,7 @@
 #!/bin/sh
 
-# Description: Print the current list of files through a pager less(1)
-# Dependencies: less
+# Description: Print the current list of files through a pager (less)
+# Dependencies: less, tput
 # Author: L. Abramovich
 # License: GPL3
 
@@ -14,6 +14,11 @@ fi
 
 if ! type less >/dev/null 2>&1; then
 	printf "clifm: less: command not found\n" >&2
+	exit 127
+fi
+
+if ! type tput >/dev/null 2>&1; then
+	printf "clifm: tput: command not found\n" >&2
 	exit 127
 fi
 
