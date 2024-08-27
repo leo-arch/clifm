@@ -3012,6 +3012,12 @@ Same as \fBTIME_STYLE\fR, but specific to \fBclifm\fR (takes precedence over \fB
 .B PTIME_STYLE
 If set from neither \fI\-\-ptime\-style\fR nor \fIPTimeStyle\fR (in the configuration file), use this time style for the \fIp/pp\fR command and the \fI\-\-stat\fR/\fI\-\-stat\-full\fR command line switches
 .TP
+.B CLIFM_COLUMNS
+The number of terminal columns
+.TP
+.B CLIFM_LINES
+The number of terminal lines
+.TP
 .TP
 Except when running in stealth mode, \fBclifm\fR sets the following environment variables:
 .TP
