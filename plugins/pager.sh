@@ -17,24 +17,24 @@ if ! type column >/dev/null 2>&1; then
 	exit 127
 fi
 
-_pager="${PAGER:-less}"
+pager_cmd="${PAGER:-less}"
 
-if ! type "$_pager" >/dev/null 2>&1; then
-	printf "clifm: %s: command not found\n" "$_pager" >&2
+if ! type "$pager_cmd" >/dev/null 2>&1; then
+	printf "clifm: %s: command not found\n" "$pager_cmd" >&2
 	exit 127
 fi
 
-if [ "$_pager" = "less" ]; then
-	_pager_opts="-ncs -Pclifm --tilde"
+if [ "$pager_cmd" = "less" ]; then
+	pager_opts="-rncs -Pclifm --tilde"
 fi
 
-# This produces a columned but uncolored list of files
+if [ "$CLIFM_LONG_VIEW" = "1" ]; then
+	clifm_opts="--ls -l --no-clear-screen"
+else
+	clifm_opts="--ls --no-clear-screen"
+fi
+
 # shellcheck disable=SC2086
-clifm --no-color --no-columns --list-and-quit --no-clear-screen "$PWD" | column | "$_pager" $_pager_opts
-
-# To get a colored but uncolumned list of files, uncomment this line and comment out the one above
-#clifm --list-and-quit --no-columns --no-clear-screen "$PWD" | most
-
-# Ideally, we want a columned AND colored list, I know, but this isn't working right now
+CLIFM_COLUMNS="$(tput cols)" CLIFM_LINES="$(tput lines)" clifm $clifm_opts "$PWD" | "$pager_cmd" $pager_opts
 
 exit 0
