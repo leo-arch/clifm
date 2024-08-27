@@ -29,6 +29,6 @@ else
 fi
 
 # shellcheck disable=SC2086
-CLIFM_COLUMNS="$(tput cols)" CLIFM_LINES="$(tput lines)" clifm $clifm_opts "$PWD" | less -rncs -Pclifm --tilde
+CLIFM_COLUMNS="$(tput cols)" CLIFM_LINES="$(tput lines)" clifm $clifm_opts "$PWD" | less -rncs -P"clifm\:" --tilde
 
 exit 0

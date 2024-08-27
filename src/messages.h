@@ -841,7 +841,8 @@ or short). Use PagerView in the configuration file (or --pager-view in\n\
 the command line) to force the use of a specific mode. Possibles values:\n\n\
 'auto': Use the current listing mode (default)\n\
 'long': List files in long view\n\
-'short': List files in short view"
+'short': List files in short view\n\n\
+Note: You can also try the 'gg' plugin (just enter 'gg')."
 
 #define PC_USAGE "Interactively edit files permissions\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
