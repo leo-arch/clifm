@@ -151,6 +151,11 @@ run_action(char *action, char **args)
 		return errno;
 	}
 
+	/* For the time being, this is required only by the pager.sh plugin.
+	 * We should think of a better way to let plugins know about clifm's
+	 * current state. */
+	setenv("CLIFM_LONG_VIEW", conf.long_view == 1 ? "1" : "0", 1);
+
 	setenv("CLIFM_BUS", fifo_path, 1);
 	if (xargs.cwd_in_title == 1)
 		set_term_title(action);
@@ -263,6 +268,7 @@ END:
 		set_term_title(workspaces[cur_ws].path);
 
 	unsetenv("CLIFM_BUS");
+	unsetenv("CLIFM_LONG_VIEW");
 	return exit_status;
 }
 
