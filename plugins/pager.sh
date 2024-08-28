@@ -22,11 +22,8 @@ if ! type tput >/dev/null 2>&1; then
 	exit 127
 fi
 
-if [ "$CLIFM_LONG_VIEW" = "1" ]; then
-	clifm_opts="--ls -l --no-clear-screen"
-else
-	clifm_opts="--ls --no-clear-screen"
-fi
+clifm_opts="--ls --no-clear-screen"
+[ "$CLIFM_LONG_VIEW" = "1" ] && clifm_opts="${clifm_opts} -l"
 
 # shellcheck disable=SC2086
 CLIFM_COLUMNS="$(tput cols)" CLIFM_LINES="$(tput lines)" clifm $clifm_opts "$PWD" | less -rncs -P"LESS (clifm)\:" --tilde
