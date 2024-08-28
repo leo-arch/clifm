@@ -753,12 +753,12 @@ static size_t
 get_preview_win_width(const int offset)
 {
 	size_t w = 0;
-	size_t l = longest_prev_entry + 8 + (fzf_border_type <= 0 ? 0
+	const size_t l = longest_prev_entry + 8 + (fzf_border_type <= 0 ? 0
 		/* fzf_border_type == 1 (right or left): this takes 2 extra columns.
 		 * fzf_border_type == 2 (rounded, sharp, bold, block, thinblock,
 		 * double, or vertical): this takes 4 extra columns. */
 		: (fzf_border_type == 1 ? 2 : 4));
-	int total_win_width = term_cols - offset;
+	const int total_win_width = term_cols - offset;
 
 	if (l < (size_t)total_win_width)
 		w = (size_t)total_win_width - l;

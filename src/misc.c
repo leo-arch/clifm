@@ -1548,8 +1548,8 @@ free_stuff(void)
 	if (conf.colorize == 1 && xargs.list_and_quit != 1)
 		RESTORE_COLOR;
 
-	int ret = 0;
-	if ((ret = restore_shell()) < 0) {
+	const int ret = restore_shell();
+	if (ret < 0) {
 		fprintf(stderr, "%s: tcsetattr: %s\n", PROGRAM_NAME, strerror(ret));
 		exit(ret);
 	}
@@ -1596,7 +1596,7 @@ sigwinch_handler(int sig)
 	get_term_size();
 	flags |= DELAYED_REFRESH;
 }
-#endif /* _BE_POSIX */
+#endif /* !_BE_POSIX */
 
 void
 set_signals_to_ignore(void)
@@ -1606,7 +1606,7 @@ set_signals_to_ignore(void)
 	signal(SIGTSTP, SIG_IGN); /* C-z */
 #ifndef _BE_POSIX
 	signal(SIGWINCH, sigwinch_handler);
-#endif /* _BE_POSIX */
+#endif /* !_BE_POSIX */
 }
 
 static int
