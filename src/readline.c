@@ -89,6 +89,7 @@ static char ext_opts[MAX_EXT_OPTS][MAX_EXT_OPTS_LEN];
 static struct dirent **tagged_files = (struct dirent **)NULL;
 static int tagged_files_n = 0;
 #endif /* !_NO_TAGS */
+static int cb_running = 0;
 
 /* Get user input (y/n, uppercase is allowed) using _MSG as message.
  * The question will be repeated until 'y' or 'n' is entered.
@@ -515,12 +516,12 @@ fix_rl_point(const unsigned char c)
 	if (!RL_ISSTATE(RL_STATE_MOREINPUT) || c != 'C')
 		return;
 
-	char point = rl_line_buffer[rl_point];
+	const char point = rl_line_buffer[rl_point];
 	/* Continue only if leading or continuation multi-byte */
 	if ((point & 0xc0) != 0xc0 && (point & 0xc0) != 0x80)
 		return;
 
-	int mlen = mblen(rl_line_buffer + rl_point, MB_CUR_MAX);
+	const int mlen = mblen(rl_line_buffer + rl_point, MB_CUR_MAX);
 	rl_point += mlen > 0 ? mlen - 1 : 0;
 }
 
@@ -589,7 +590,7 @@ my_rl_getc(FILE *stream)
 			}
 			continue;
 		}
-#endif /* EWOULDBLOCK */
+#endif /* EWOULDBLOCK && O_NDELAY */
 
 #if defined(_POSIX_VERSION) && defined(EAGAIN) && defined(O_NONBLOCK)
 		if (errno == EAGAIN) {
@@ -652,7 +653,7 @@ alt_rl_getc(FILE *stream)
 			}
 			continue;
 		}
-#endif /* EWOULDBLOCK */
+#endif /* EWOULDBLOCK && O_NDELAY */
 
 #if defined(_POSIX_VERSION) && defined(EAGAIN) && defined(O_NONBLOCK)
 		if (errno == EAGAIN) {
@@ -676,8 +677,6 @@ alt_rl_getc(FILE *stream)
 		 Otherwise, some error ocurred, also signifying EOF. */
 	}
 }
-
-static int cb_running = 0;
 
 /* Callback function called for each line when accept-line executed, EOF
  * seen, or EOF character read. This sets a flag and returns; it could
@@ -706,7 +705,7 @@ cb_linehandler(char *line)
 }
 
 static int
-alt_rl_prompt(const char *_prompt, const char *line)
+alt_rl_prompt(const char *prompt_str, const char *line)
 {
 	cb_running = 1;
 	kbind_busy = 1;
@@ -715,7 +714,7 @@ alt_rl_prompt(const char *_prompt, const char *line)
 	conf.highlight = 0;
 
 	/* Install the line handler */
-	rl_callback_handler_install(_prompt, cb_linehandler);
+	rl_callback_handler_install(prompt_str, cb_linehandler);
 
 	/* Set the initial line content, if any */
 	if (line) {
@@ -862,18 +861,18 @@ my_rl_quote(char *text, int mt, char *qp) /* NOLINT */
 }
 
 /* This is the filename_completion_function() function of an old Bash
- * release (1.14.7) modified to fit CliFM needs */
+ * release (1.14.7) modified to fit Clifm's needs */
+/* state is zero before completion, and 1 ... n after getting
+ * possible completions. Example:
+ * cd Do[TAB] -> state 0
+ * cuments/ -> state 1
+ * wnloads/ -> state 2
+ * */
 char *
 my_rl_path_completion(const char *text, int state)
 {
 	if (!text || !*text || alt_prompt == 2)
 		return (char *)NULL;
-	/* state is zero before completion, and 1 ... n after getting
-	 * possible completions. Example:
-	 * cd Do[TAB] -> state 0
-	 * cuments/ -> state 1
-	 * wnloads/ -> state 2
-	 * */
 
 	/* Dequote string to be completed (text), if necessary */
 	static char *tmp_text = (char *)NULL;
@@ -885,9 +884,6 @@ my_rl_path_completion(const char *text, int state)
 		if (!tmp_text)
 			return (char *)NULL;
 	}
-
-/*	int rl_complete_with_tilde_expansion = 0; */
-	/* ~/Doc -> /home/user/Doc */
 
 	static DIR *directory;
 	static char *filename = (char *)NULL;
@@ -919,24 +915,15 @@ my_rl_path_completion(const char *text, int state)
 		else
 			filename = savestring("", 1);
 
-//		if (!*text)
-//			text = ".";
-
 		if (text_len) {
 			dirname = savestring(p, text_len);
 		} else {
 			dirname = xnmalloc(2, sizeof(char));
 			*dirname = '\0';
 			dirname[1] = '\0';
-//			dirname = savestring("", 1);
 		}
 
 		exec = (*dirname == '.' && dirname[1] == '/');
-/*		if (dirname[0] == '.' && dirname[1] == '/')
-			exec = 1; // Only executable files and directories are allowed
-		else
-			exec = 0; */
-
 		/* Get everything after last slash */
 		temp = strrchr(dirname, '/');
 
@@ -1254,11 +1241,6 @@ my_rl_path_completion(const char *text, int state)
 					match = 1;
 			}
 
-/*			else if (exec) {
-				if (type == DT_REG && access(ent->d_name, X_OK) == 0)
-					match = 1;
-			} */
-
 			else if (exec_path) {
 				if (type == DT_REG || type == DT_DIR) {
 					snprintf(tmp, sizeof(tmp), "%s%s", dir_tmp, ent->d_name);
@@ -1307,27 +1289,9 @@ my_rl_path_completion(const char *text, int state)
 		char *temp = (char *)NULL;
 
 		if (dirname && (dirname[0] != '.' || dirname[1])) {
-/*			if (rl_complete_with_tilde_expansion && *users_dirname == '~') {
-				size_t dirlen = strlen(dirname);
-				size_t len = dirlen + strlen(ent->d_name) + 1;
-				temp = (char *)xnmalloc(len + 1, sizeof(char));
-				xstrsncpy(temp, dirname, len + 1);
-				// Canonicalization cuts off any final slash present.
-				// We need to add it back.
-
-				if (dirname[dirlen - 1] != '/') {
-					temp[dirlen] = '/';
-					temp[dirlen + 1] = '\0';
-				}
-			} else { */
 			size_t temp_len = strlen(users_dirname) + strlen(ent->d_name) + 1;
 			temp = xnmalloc(temp_len, sizeof(char));
 			snprintf(temp, temp_len, "%s%s", users_dirname, ent->d_name);
-//			strcpy(temp, users_dirname);
-			/* If fast_back == 1 and filename is empty, we have the
-			 * root dir: do not append anything else */
-//			if (fast_back == 0 || (filename && *filename))
-//			strcat(temp, ent->d_name);
 		} else {
 			temp = savestring(ent->d_name, strlen(ent->d_name));
 		}
