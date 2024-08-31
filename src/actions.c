@@ -42,6 +42,7 @@
 #include "messages.h"
 #include "misc.h"
 #include "sanitize.h"
+#include "sort.h" /* num_to_sort_name() */
 #include "spawn.h"
 
 /* Get the executable's path of the action ACTION
@@ -93,6 +94,38 @@ get_plugin_path(char *action, int *status)
 	*status = ENOENT;
 	xerror("actions: '%s': %s\n", action, strerror(ENOENT));
 	return (char *)NULL;
+}
+
+static void
+export_status_values(void)
+{
+	if (cur_cscheme && *cur_cscheme)
+		setenv("CLIFM_COLOR_SCHEME", cur_cscheme, 1);
+	setenv("CLIFM_CUR_WS", xitoa(cur_ws + 1), 1);
+	setenv("CLIFM_FILES_COUNTER", conf.files_counter == 1 ? "1" : "0", 1);
+	setenv("CLIFM_FOLLOW_LINKS", conf.follow_symlinks == 1 ? "1" : "0", 1);
+	setenv("CLIFM_LONG_VIEW", conf.long_view == 1 ? "1" : "0", 1);
+	setenv("CLIFM_ONLY_DIRS", conf.only_dirs == 1 ? "1" : "0", 1);
+	setenv("CLIFM_SEL_FILES", xitoa((long long)sel_n), 1);
+	setenv("CLIFM_SHOW_HIDDEN", conf.show_hidden == 1 ? "1" : "0", 1);
+	setenv("CLIFM_SORT_STYLE", num_to_sort_name(conf.sort), 1);
+	setenv("CLIFM_TRASH_FILES", xitoa((long long)trash_n), 1);
+	setenv("CLIFM_TRIM_NAMES", conf.trim_names == 1 ? "1" : "0", 1);
+}
+
+static void
+unset_export_values(void) {
+	unsetenv("CLIFM_COLOR_SCHEME");
+	unsetenv("CLIFM_CUR_WS");
+	unsetenv("CLIFM_FILES_COUNTER");
+	unsetenv("CLIFM_FOLLOW_LINKS");
+	unsetenv("CLIFM_LONG_VIEW");
+	unsetenv("CLIFM_ONLY_DIRS");
+	unsetenv("CLIFM_SEL_FILES");
+	unsetenv("CLIFM_SHOW_HIDDEN");
+	unsetenv("CLIFM_SORT_STYLE");
+	unsetenv("CLIFM_TRASH_FILES");
+	unsetenv("CLIFM_TRIM_NAMES");
 }
 
 int
@@ -151,12 +184,9 @@ run_action(char *action, char **args)
 		return errno;
 	}
 
-	/* For the time being, this is required only by the pager.sh plugin.
-	 * We should think of a better way to let plugins know about clifm's
-	 * current state. */
-	setenv("CLIFM_LONG_VIEW", conf.long_view == 1 ? "1" : "0", 1);
-
+	export_status_values();
 	setenv("CLIFM_BUS", fifo_path, 1);
+
 	if (xargs.cwd_in_title == 1)
 		set_term_title(action);
 
@@ -268,7 +298,7 @@ END:
 		set_term_title(workspaces[cur_ws].path);
 
 	unsetenv("CLIFM_BUS");
-	unsetenv("CLIFM_LONG_VIEW");
+	unset_export_values();
 	return exit_status;
 }
 

@@ -855,7 +855,7 @@ get_rgb(char *hex, int *attr, int *r, int *g, int *b)
 		return (-1);
 
 	if (*hex == '#') {
-		if (!*(hex + 1))
+		if (!hex[1])
 			return (-1);
 		hex++;
 	}
@@ -863,19 +863,19 @@ get_rgb(char *hex, int *attr, int *r, int *g, int *b)
 	char tmp[3];
 	tmp[2] = '\0';
 
-	tmp[0] = *hex; tmp[1] = *(hex + 1);
+	tmp[0] = hex[0]; tmp[1] = hex[1];
 	*r = hex2int(tmp);
 
-	tmp[0] = *(hex + 2); tmp[1] = *(hex + 3);
+	tmp[0] = hex[2]; tmp[1] = hex[3];
 	*g = hex2int(tmp);
 
-	tmp[0] = *(hex + 4); tmp[1] = *(hex + 5);
+	tmp[0] = hex[4]; tmp[1] = hex[5];
 	*b = hex2int(tmp);
 
-	*attr = -1; /* Attribute unset */
-	if (*(hex + 6) == '-' && *(hex + 7) && *(hex + 7) >= '0'
-	&& *(hex + 7) <= '9' && !*(hex + 8))
-		*attr = *(hex + 7) - '0';
+	*attr = -1; // Attribute unset
+	if (hex[6] == '-' && hex[7] && hex[7] >= '0'
+	&& hex[7] <= '9' && !hex[8])
+		*attr = hex[7] - '0';
 
 	if (xargs.no_bold == 1 && *attr == 1)
 		*attr = -1;
