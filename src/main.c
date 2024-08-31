@@ -278,6 +278,7 @@ char
 	*msgs_log_file = (char *)NULL,
 	*pinned_dir = (char *)NULL,
 	*plugins_dir = (char *)NULL,
+	*plugins_helper_file = (char *)NULL,
 	*profile_file = (char *)NULL,
 	*prompts_file = (char *)NULL,
 	*quote_chars = (char *)NULL,

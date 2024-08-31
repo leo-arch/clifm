@@ -1957,6 +1957,7 @@ extern char
 	*msgs_log_file,
 	*pinned_dir,
 	*plugins_dir,
+	*plugins_helper_file,
 	*profile_file,
 	*prompts_file,
 	*quote_chars,

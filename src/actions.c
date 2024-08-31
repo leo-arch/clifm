@@ -114,6 +114,11 @@ export_status_values(void)
 	if (conf.max_files >= 0)
 		setenv("CLIFM_MAX_FILES", xitoa(conf.max_files), 1);
 	setenv("CLIFM_ONLY_DIRS", conf.only_dirs == 1 ? "1" : "0", 1);
+	if (plugins_helper_file && *plugins_helper_file)
+		setenv("CLIFM_PLUGINS_HELPER", plugins_helper_file, 1);
+	setenv("CLIFM_PROFILE", alt_profile ? alt_profile : "default", 1);
+	if (sel_file && *sel_file)
+		setenv("CLIFM_SELFILE", sel_file, 1);
 	if (sel_n > 0)
 		setenv("CLIFM_SEL_FILES", xitoa((long long)sel_n), 1);
 	setenv("CLIFM_SHOW_HIDDEN", conf.show_hidden == 1 ? "1" : "0", 1);
@@ -137,7 +142,10 @@ unset_export_values(void) {
 	unsetenv("CLIFM_LONG_VIEW");
 	unsetenv("CLIFM_MAX_FILES");
 	unsetenv("CLIFM_ONLY_DIRS");
+	unsetenv("CLIFM_PLUGINS_HELPER");
+	unsetenv("CLIFM_PROFILE");
 	unsetenv("CLIFM_SEL_FILES");
+	unsetenv("CLIFM_SELFILE");
 	unsetenv("CLIFM_SHOW_HIDDEN");
 	unsetenv("CLIFM_SORT_REVERSE");
 	unsetenv("CLIFM_SORT_STYLE");

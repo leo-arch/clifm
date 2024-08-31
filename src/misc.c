@@ -1502,6 +1502,7 @@ free_stuff(void)
 	free(cmds_log_file);
 	free(mime_file);
 	free(plugins_dir);
+	free(plugins_helper_file);
 	free(profile_file);
 	free(remotes_file);
 

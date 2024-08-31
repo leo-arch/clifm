@@ -615,36 +615,40 @@ config_edit(char **args)
 	return ret;
 }
 
-/* Find the plugins-helper file and set CLIFM_PLUGINS_HELPER accordingly.
- * This envionment variable will be used by plugins. Returns zero on
- * success or one on error.
- * Try first the plugins directory.
- * If not there, try the data dir.
- * Else, try some standard locations. */
+/* Find the plugins-helper file and store its path into the PLUGINS_HELPER_FILE
+ * global variable. It will used to set CLIFM_PLUGINS_HELPER environment
+ * variable when running a plugin.
+ * Returns zero on success or one on error.
+ * 1. Try first the plugins directory.
+ * 2. If not there, try the data dir.
+ * 3. Else, try some standard locations. */
 static int
-setenv_plugins_helper(void)
+set_plugins_helper_file(void)
 {
 	if (getenv("CLIFM_PLUGINS_HELPER"))
 		return FUNC_SUCCESS;
 
 	struct stat attr;
 	if (plugins_dir && *plugins_dir) {
-		char _path[PATH_MAX + 1];
-		snprintf(_path, sizeof(_path), "%s/plugins-helper", plugins_dir);
+		char helper_path[PATH_MAX + 1];
+		snprintf(helper_path, sizeof(helper_path),
+			"%s/plugins-helper", plugins_dir);
 
-		if (stat(_path, &attr) != -1
-		&& setenv("CLIFM_PLUGINS_HELPER", _path, 1) == 0)
+		if (stat(helper_path, &attr) != -1) {
+			plugins_helper_file = savestring(helper_path, strlen(helper_path));
 			return FUNC_SUCCESS;
+		}
 	}
 
 	if (data_dir && *data_dir) {
-		char _path[PATH_MAX + 1];
-		snprintf(_path, sizeof(_path), "%s/%s/plugins/plugins-helper",
-			data_dir, PROGRAM_NAME);
+		char helper_path[PATH_MAX + 1];
+		snprintf(helper_path, sizeof(helper_path),
+			"%s/%s/plugins/plugins-helper", data_dir, PROGRAM_NAME);
 
-		if (stat(_path, &attr) != -1
-		&& setenv("CLIFM_PLUGINS_HELPER", _path, 1) == 0)
+		if (stat(helper_path, &attr) != -1) {
+			plugins_helper_file = savestring(helper_path, strlen(helper_path));
 			return FUNC_SUCCESS;
+		}
 	}
 
 	char home_local[PATH_MAX + 1];
@@ -654,7 +658,7 @@ setenv_plugins_helper(void)
 			"%s/.local/share/clifm/plugins/plugins-helper", user.home);
 	}
 
-	const char *const _paths[] = {
+	const char *const std_paths[] = {
 		home_local,
 #if defined(__HAIKU__)
 		"/boot/system/non-packaged/data/clifm/plugins/plugins-helper",
@@ -671,10 +675,11 @@ setenv_plugins_helper(void)
 		NULL};
 
 	size_t i;
-	for (i = 0; _paths[i]; i++) {
-		if (stat(_paths[i], &attr) != -1
-		&& setenv("CLIFM_PLUGINS_HELPER", _paths[i], 1) == 0)
+	for (i = 0; std_paths[i]; i++) {
+		if (stat(std_paths[i], &attr) != -1) {
+			plugins_helper_file = savestring(std_paths[i], strlen(std_paths[i]));
 			return FUNC_SUCCESS;
+		}
 	}
 
 	return FUNC_FAILURE;
@@ -712,8 +717,7 @@ set_shell_level(void)
 	setenv("CLIFMLVL", tmp, 1);
 }
 
-/* Set a few environment variables, mostly useful to run custom scripts
- * via the actions function. */
+/* Set a few environment variables. */
 void
 set_env(const int reload)
 {
@@ -721,7 +725,6 @@ set_env(const int reload)
 		return;
 
 	setenv("CLIFM", config_dir ? config_dir : "1", 1);
-	setenv("CLIFM_PROFILE", alt_profile ? alt_profile : "default", 1);
 
 	char t[NAME_MAX];
 	snprintf(t, sizeof(t), "%d", (int)own_pid);
@@ -729,10 +732,7 @@ set_env(const int reload)
 	snprintf(t, sizeof(t), "%s", VERSION);
 	setenv("CLIFM_VERSION", t, 1);
 
-	if (sel_file)
-		setenv("CLIFM_SELFILE", sel_file, 1);
-
-	setenv_plugins_helper();
+	set_plugins_helper_file();
 
 	if (reload == 0)
 		set_shell_level();
