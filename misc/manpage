@@ -500,9 +500,11 @@ Use the \fIedit\fR subcommand to add, remove or modify custom actions (using APP
 .sp
 The aim of this function is to allow the user to easily add custom commands and functions to \fBclifm\fR. In other words, the actions function is a plugins capability.
 .sp
-The general procedure is quite simple: a) edit the actions file (via \fIactions edit\fR) and bind a custom action name to an executable file (written in any language you want, be it a shell or Python script, a C program or whatever you like). Example: "myaction=myscript.sh". b) Now, drop the corresponding script (in our example, \fImyscript.sh\fR) into the plugins directory (see the \fBFILES\fR section below). 3) Once this is done, you can call the script using the custom action name defined before as if it were any other command: run \fImyaction\fR, and \fImyscript.sh\fR will be executed.
+The general procedure is quite simple: a) edit the actions file (via \fIactions edit\fR) and bind a custom action name to an executable file (written in any language you want, be it a shell or Python script, a C program or whatever you like). Example: "myaction=myscript.sh". b) Now, drop the corresponding script (in our example, \fImyscript.sh\fR) into the plugins directory, usually, \fI~/.config/clifm/plugins\fR (see the \fBFILES\fR section below). 3) Once this is done, you can call the script using the custom action name defined before as if it were any other command: run \fImyaction\fR, and \fImyscript.sh\fR will be executed.
 .sp
 All arguments passed to the action command are passed to the script or program as well (which is executed via the system shell).
+.sp
+To assist the user when writing plugins, \fBclifm\fR's state information is exported via environment variables when running plugins. For example, \fBCLIFM_LONG_VIEW\fR is set to 1 if currently running in long view. See the \fBENVIRONMENT\fR section for the complete list of exported values.
 .sp
 The plugins bundled with \fBclifm\fR (take a look at the plugins directory) could be used as a starting point to create new plugins.
 .TP
@@ -3084,6 +3086,59 @@ Exit code of the last executed command
 .TP
 .B CLIFM_STAT_STEALTH
 1 if running in stealth mode, 0 otherwise
+.TP
+When running a plugin, the following environment variables are set:
+.TP
+.B CLIFM_COLOR_SCHEME
+Set to the name of the current color scheme
+.TP
+.B CLIFM_CUR_WS
+Set to the current workspace number
+.TP
+.B CLIFM_DIRS_FIRST
+Set to 1 if list-dirs-first is enabled. Otherwise it is set to 0
+.TP
+.B CLIFM_FILES_COUNTER
+Set to 1 if files-counter is enabled. Otherwise it is set to 0
+.TP
+.B CLIFM_FILES_FILTER
+Set to the files filter string. Unset if no files filter is set
+.TP
+.B CLIFM_FILTER_REVERSE
+Set to 1 if filter-reverse is set or to 0 otherwise (unset if no files filter is set)
+.TP
+.B CLIFM_FOLLOW_LINKS
+Set to 1 if follow-symlinks is enabled. Otherwise it is set to 0
+.TP
+.B CLIFM_LIGHT_MODE
+Set to 1 if light-mode is enabled. Otherwise it is set to 0
+.TP
+.B CLIFM_LONG_VIEW
+Set to 1 if long-view is enabled. Otherwise it is set to 0
+.TP
+.B CLIFM_MAX_FILES
+Set to MAX_FILES if max-files is set. Unset otherwise.
+.TP
+.B CLIFM_ONLY_DIRS
+Set to 1 if only-dirs is enabled. Otherwise it is set to 0
+.TP
+.B CLIFM_SEL_FILES
+Set to the number of currently selected files (unset if there are no selected files)
+.TP
+.B CLIFM_SHOW_HIDDEN
+Set to 1 if show-hidden is enabled. Otherwise it is set to 0
+.TP
+.B CLIFM_SORT_REVERSE
+Set to 1 if sort-reverse is enabled. Otherwise it is set to 0
+.TP
+.B CLIFM_SORT_STYLE
+Set to the current sorting method
+.TP
+.B CLIFM_TRASH_FILES
+Set to the number of currently trashed files (unset if there are no trashed files)
+.TP
+.B CLIFM_TRIM_NAMES
+Set to 1 if trim-names is enabled. Otherwise it is set to 0
 
 .SH 20. SECURITY
 Since \fBclifm\fR executes OS commands, it needs to provide a way to securely run these commands, specially when it comes to untrusted environments. Two features are provided to achieve this aim: \fBsecure environment\fR and \fBsecure commands\fR.

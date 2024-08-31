@@ -102,14 +102,25 @@ export_status_values(void)
 	if (cur_cscheme && *cur_cscheme)
 		setenv("CLIFM_COLOR_SCHEME", cur_cscheme, 1);
 	setenv("CLIFM_CUR_WS", xitoa(cur_ws + 1), 1);
+	setenv("CLIFM_DIRS_FIRST", conf.list_dirs_first == 1 ? "1" : "0", 1);
 	setenv("CLIFM_FILES_COUNTER", conf.files_counter == 1 ? "1" : "0", 1);
+	if (filter.str && *filter.str) {
+		setenv("CLIFM_FILES_FILTER", filter.str, 1);
+		setenv("CLIFM_FILTER_REVERSE", filter.rev == 1 ? "1" : "0", 1);
+	}
 	setenv("CLIFM_FOLLOW_LINKS", conf.follow_symlinks == 1 ? "1" : "0", 1);
+	setenv("CLIFM_LIGHT_MODE", conf.light_mode == 1 ? "1" : "0", 1);
 	setenv("CLIFM_LONG_VIEW", conf.long_view == 1 ? "1" : "0", 1);
+	if (conf.max_files >= 0)
+		setenv("CLIFM_MAX_FILES", xitoa(conf.max_files), 1);
 	setenv("CLIFM_ONLY_DIRS", conf.only_dirs == 1 ? "1" : "0", 1);
-	setenv("CLIFM_SEL_FILES", xitoa((long long)sel_n), 1);
+	if (sel_n > 0)
+		setenv("CLIFM_SEL_FILES", xitoa((long long)sel_n), 1);
 	setenv("CLIFM_SHOW_HIDDEN", conf.show_hidden == 1 ? "1" : "0", 1);
+	setenv("CLIFM_SORT_REVERSE", conf.sort_reverse == 1 ? "1" : "0", 1);
 	setenv("CLIFM_SORT_STYLE", num_to_sort_name(conf.sort), 1);
-	setenv("CLIFM_TRASH_FILES", xitoa((long long)trash_n), 1);
+	if (trash_n > 0)
+		setenv("CLIFM_TRASH_FILES", xitoa((long long)trash_n), 1);
 	setenv("CLIFM_TRIM_NAMES", conf.trim_names == 1 ? "1" : "0", 1);
 }
 
@@ -117,12 +128,18 @@ static void
 unset_export_values(void) {
 	unsetenv("CLIFM_COLOR_SCHEME");
 	unsetenv("CLIFM_CUR_WS");
+	unsetenv("CLIFM_DIRS_FIRST");
 	unsetenv("CLIFM_FILES_COUNTER");
+	unsetenv("CLIFM_FILES_FILTER");
+	unsetenv("CLIFM_FILTER_REVERSE");
 	unsetenv("CLIFM_FOLLOW_LINKS");
+	unsetenv("CLIFM_LIGHT_MODE");
 	unsetenv("CLIFM_LONG_VIEW");
+	unsetenv("CLIFM_MAX_FILES");
 	unsetenv("CLIFM_ONLY_DIRS");
 	unsetenv("CLIFM_SEL_FILES");
 	unsetenv("CLIFM_SHOW_HIDDEN");
+	unsetenv("CLIFM_SORT_REVERSE");
 	unsetenv("CLIFM_SORT_STYLE");
 	unsetenv("CLIFM_TRASH_FILES");
 	unsetenv("CLIFM_TRIM_NAMES");
