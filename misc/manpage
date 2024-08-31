@@ -2955,7 +2955,13 @@ The following variables are read at initialization time:
 If set to any value, \fBclifm\fR will run colorless
 .TP
 .B CLIFM_NO_COLOR
-Same as \fBNO_COLOR\fR (or \fBCLICOLOR=0\fR), but specific to \fBclifm\fR
+Same as \fBNO_COLOR\fR, but specific to \fBclifm\fR
+.TP
+.B CLICOLOR_FORCE
+Force the use of colors, even if the terminal informs not supporting colors
+.TP
+.B CLIFM_FORCE_COLOR
+Same as \fBCLICOLOR_FORCE\fR, but specific to \fBclifm\fR
 .TP
 .B COLORTERM
 If set to either \fItruecolor\fR or \fI24bit\fR, \fBclifm\fR assumes the terminal emulator to be capable of displaying true colors (and thereby also 256 colors), despite what the \fBterminfo\fR(5) database informs.
@@ -2974,9 +2980,6 @@ A comma separated list of colors used to print timetamps based on age
 .TP
 .B CLIFM_SIZE_SHADES
 Same as \fBCLIFM_DATE_SHADES\fR, but for file sizes
-.TP
-.B CLIFM_FORCE_COLOR
-Force the use of colors, even if the terminal informs that it does not support colors
 .TP
 .B CLIFM_HISTFILE
 A custom commands history file
