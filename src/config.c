@@ -3446,14 +3446,11 @@ check_colors(void)
 {
 	char *nc = getenv("NO_COLOR");
 	char *cnc = getenv("CLIFM_NO_COLOR");
+
+	char *ccf = getenv("CLICOLOR_FORCE"); /* See https://bixense.com/clicolors */
 	char *cfc = getenv("CLIFM_FORCE_COLOR");
 
-	/* See https://bixense.com/clicolors */
-	char *cc = getenv("CLICOLOR");
-	char *ccf = getenv("CLICOLOR_FORCE");
-
-	if (term_caps.color == 0 || (nc && *nc) || (cnc && *cnc)
-	|| (cc && *cc == '0' && !*(cc + 1))) {
+	if (term_caps.color == 0 || nc || cnc) {
 		conf.colorize = 0;
 	} else {
 		if (conf.colorize == UNSET) {
@@ -3464,8 +3461,7 @@ check_colors(void)
 		}
 	}
 
-	if (xargs.colorize == UNSET
-	&& ((cfc && *cfc) || (ccf && *ccf && *ccf != '0'))) {
+	if (xargs.colorize == UNSET && !nc && !cnc && (ccf || cfc)) {
 		if (term_caps.color == 0)
 			/* The user is forcing the use of colors even when the terminal
 			 * reports no color capability. Let's assume a highly compatible
