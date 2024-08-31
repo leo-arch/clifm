@@ -101,6 +101,8 @@ export_status_values(void)
 {
 	if (cur_cscheme && *cur_cscheme)
 		setenv("CLIFM_COLOR_SCHEME", cur_cscheme, 1);
+	if (conf.colorize != 1)
+		setenv("CLIFM_COLORLESS", "1", 1);
 	setenv("CLIFM_CUR_WS", xitoa(cur_ws + 1), 1);
 	setenv("CLIFM_DIRS_FIRST", conf.list_dirs_first == 1 ? "1" : "0", 1);
 	setenv("CLIFM_FILES_COUNTER", conf.files_counter == 1 ? "1" : "0", 1);
@@ -132,6 +134,7 @@ export_status_values(void)
 static void
 unset_export_values(void) {
 	unsetenv("CLIFM_COLOR_SCHEME");
+	unsetenv("CLIFM_COLORLESS");
 	unsetenv("CLIFM_CUR_WS");
 	unsetenv("CLIFM_DIRS_FIRST");
 	unsetenv("CLIFM_FILES_COUNTER");

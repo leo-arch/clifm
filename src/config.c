@@ -3475,16 +3475,12 @@ check_colors(void)
 	}
 
 	if (conf.colorize == 1) {
-		unsetenv("CLIFM_COLORLESS");
 		set_colors(conf.usr_cscheme ? conf.usr_cscheme
 			: (term_caps.color >= 256
 			? DEF_COLOR_SCHEME_256 : DEF_COLOR_SCHEME), 1);
 		cur_color = tx_c;
 		return;
 	}
-
-	if (xargs.stealth_mode != 1)
-		setenv("CLIFM_COLORLESS", "1", 1);
 
 	reset_filetype_colors();
 	reset_iface_colors();
