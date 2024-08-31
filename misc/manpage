@@ -3032,25 +3032,11 @@ Set to the PID number of \fBclifm\fR's running instance
 .B CLIFM_VERSION
 Set to the version number of \fBclifm\fR's running instance
 .TP
-.B CLIFM_PLUGINS_HELPER
-Set to the full path to the plugins\-helper script used by many plugins.
-.TP
-.B CLIFM_PROFILE
-This variable is set to the current profile of \fBclifm\fR (if using two or more instances of \fBclifm\fR under different profiles, the last one will be used). Specially useful to develop \fBclifm\fR plugins on a per profile basis.
-.TP
-.B CLIFM_SELFILE
-The path to the current selection file.
-.TP
 .B CLIFM_COLORLESS
 Set to 1 if running colorless (via the \fBNO_COLOR\fR or \fBCLIFM_NO_COLOR\fR environment variables, or the \fI\-\-no\-color\fR command line option).
 .TP
-.B CLIFM_BUS
-This variable contains the path to a pipe by means of which plugins can talk to \fBclifm\fR. See the \fBPLUGINS\fR section for more information..TP
 .B CLIFM_VIRTUAL_DIR
 This variable is set to the path to the currently used virtual directory only if (and while) the virtual directory function is exectued. See the \fBVIRTUAL DIRECTORIES\fR section above.
-.TP
-.B CLIFM_LINE
-When running a plugin via a keybinding, this variable holds the content of the current line buffer. For a usage example see the \fIxclip.sh\fR plugin.
 .TP
 .B SHLVL
 Incremented by one each time a new shell is started.
@@ -3089,6 +3075,9 @@ Exit code of the last executed command
 .TP
 When running a plugin, the following environment variables are set:
 .TP
+.B CLIFM_BUS
+The path to a pipe by means of which plugins can talk to \fBclifm\fR. See the \fBPLUGINS\fR section for more information.
+.TP
 .B CLIFM_COLOR_SCHEME
 Set to the name of the current color scheme
 .TP
@@ -3113,6 +3102,9 @@ Set to 1 if follow-symlinks is enabled. Otherwise it is set to 0
 .B CLIFM_LIGHT_MODE
 Set to 1 if light-mode is enabled. Otherwise it is set to 0
 .TP
+.B CLIFM_LINE
+When running a plugin via a keybinding, this variable holds the content of the current line buffer. For a usage example see the \fIxclip.sh\fR plugin.
+.TP
 .B CLIFM_LONG_VIEW
 Set to 1 if long-view is enabled. Otherwise it is set to 0
 .TP
@@ -3122,8 +3114,17 @@ Set to MAX_FILES if max-files is set. Unset otherwise.
 .B CLIFM_ONLY_DIRS
 Set to 1 if only-dirs is enabled. Otherwise it is set to 0
 .TP
+.B CLIFM_PLUGINS_HELPER
+Set to the full path to the plugins\-helper script used by many plugins.
+.TP
+.B CLIFM_PROFILE
+Set to the name of the current profile.
+.TP
 .B CLIFM_SEL_FILES
 Set to the number of currently selected files (unset if there are no selected files)
+.TP
+.B CLIFM_SELFILE
+Set to the path to the current selection file
 .TP
 .B CLIFM_SHOW_HIDDEN
 Set to 1 if show-hidden is enabled. Otherwise it is set to 0
