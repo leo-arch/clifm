@@ -31,7 +31,7 @@ fi
 [ "$(git rev-parse --is-inside-work-tree 2>/dev/null)" != "true" ] && exit 1
 
 if [ -n "$CLIFM_COLORLESS" ]; then
-	git status -sb 2>/dev/null | cat
+	git -c color.status=false status -sb 2>/dev/null
 else
 	git status -sb 2>/dev/null
 fi
