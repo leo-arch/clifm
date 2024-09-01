@@ -162,6 +162,12 @@ run_action(char *action, char **args)
 	if (!action || !*action)
 		return FUNC_FAILURE;
 
+	if (xargs.secure_cmds == 1) {
+		fprintf(stderr, _("%s: Plugins are not allowed in "
+			"secure-cmds mode\n"), PROGRAM_NAME);
+		return FUNC_FAILURE;
+	}
+
 		/* #####################################
 		 * #    1) CREATE CMD TO BE EXECUTED   #
 		 * ##################################### */

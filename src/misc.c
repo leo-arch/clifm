@@ -1571,7 +1571,7 @@ get_term_size(void)
 		term_lines = w.ws_row > 0 ? w.ws_row : 24;
 	}
 
-	if (xargs.secure_env_full == 1)
+	if (xargs.secure_env == 1 || xargs.secure_env_full == 1)
 		return;
 
 	char *env = getenv("CLIFM_COLUMNS");
