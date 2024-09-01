@@ -3788,6 +3788,9 @@ reset_variables(void)
 	free(kbinds_file);
 	mime_file = plugins_dir = actions_file = kbinds_file = (char *)NULL;
 
+	free(plugins_helper_file);
+	plugins_helper_file = (char *)NULL;
+
 	free(colors_dir);
 	free(tmp_dir);
 	free(sel_file);
