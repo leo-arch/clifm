@@ -41,6 +41,7 @@
 
 #include "aux.h"
 #include "misc.h"
+#include "sanitize.h" /* sanitize_cmd() */
 #include "term_info.h"
 
 #define TRUE_COLOR 16777216
@@ -813,6 +814,10 @@ check_for_alias(char **args)
 
 		if (*aliases[i].name != *args[0]
 		|| strcmp(args[0], aliases[i].name) != 0)
+			continue;
+
+		if (xargs.secure_cmds == 1
+		&& sanitize_cmd(aliases[i].cmd, SNT_GRAL) == FUNC_FAILURE)
 			continue;
 
 		args_n = 0; /* Reset args_n to be used by parse_input_str() */
