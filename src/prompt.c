@@ -863,27 +863,18 @@ setenv_prompt(void)
 	if (prompt_notif == 1)
 		return;
 
-	/* Set environment variables with CliFM state information
-	 * (sel files, trash, stealth mode, messages) to be handled by
-	 * the prompt itself. */
-	char t[MAX_INT_STR];
-	snprintf(t, sizeof(t), "%d", (int)sel_n);
-	setenv("CLIFM_STAT_SEL", t, 1);
+	/* Set environment variables with clifm state information
+	 * (sel files, trash, stealth mode, messages, workspace, and last exit
+	 * code) to be handled by the prompt itself. */
+	setenv("CLIFM_STAT_SEL", xitoa((long long)sel_n), 1);
 #ifndef _NO_TRASH
-	snprintf(t, sizeof(t), "%d", trash_n > 0 ? (int)trash_n : 0);
-	setenv("CLIFM_STAT_TRASH", t, 1);
+	setenv("CLIFM_STAT_TRASH", xitoa((long long)trash_n), 1);
 #endif /* !_NO_TRASH */
-	snprintf(t, sizeof(t), "%d", (int)msgs.error);
-	setenv("CLIFM_STAT_ERROR_MSGS", t, 1);
-	snprintf(t, sizeof(t), "%d", (int)msgs.warning);
-	setenv("CLIFM_STAT_WARNING_MSGS", t, 1);
-	snprintf(t, sizeof(t), "%d", (int)msgs.notice);
-	setenv("CLIFM_STAT_NOTICE_MSGS", t, 1);
-
-	snprintf(t, sizeof(t), "%d", cur_ws + 1);
-	setenv("CLIFM_STAT_WS", t, 1);
-	snprintf(t, sizeof(t), "%d", exit_code);
-	setenv("CLIFM_STAT_EXIT", t, 1);
+	setenv("CLIFM_STAT_ERROR_MSGS", xitoa((long long)msgs.error), 1);
+	setenv("CLIFM_STAT_WARNING_MSGS", xitoa((long long)msgs.warning), 1);
+	setenv("CLIFM_STAT_NOTICE_MSGS", xitoa((long long)msgs.notice), 1);
+	setenv("CLIFM_STAT_WS", xitoa((long long)cur_ws + 1), 1);
+	setenv("CLIFM_STAT_EXIT", xitoa((long long)exit_code), 1);
 	setenv("CLIFM_STAT_ROOT", user.uid == 0 ? "1" : "0", 1);
 	setenv("CLIFM_STAT_STEALTH", (xargs.stealth_mode == 1) ? "1" : "0", 1);
 }
