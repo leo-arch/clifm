@@ -3450,17 +3450,6 @@ check_colors(void)
 	char *ccf = getenv("CLICOLOR_FORCE"); /* See https://bixense.com/clicolors */
 	char *cfc = getenv("CLIFM_FORCE_COLOR");
 
-	if (term_caps.color == 0 || nc || cnc) {
-		conf.colorize = 0;
-	} else {
-		if (conf.colorize == UNSET) {
-			if (xargs.colorize == UNSET)
-				conf.colorize = DEF_COLORS;
-			else
-				conf.colorize = xargs.colorize;
-		}
-	}
-
 	if (xargs.colorize == UNSET && !nc && !cnc && (ccf || cfc)) {
 		if (term_caps.color == 0)
 			/* The user is forcing the use of colors even when the terminal
@@ -3468,6 +3457,10 @@ check_colors(void)
 			 * value. */
 			term_caps.color = 8;
 		conf.colorize = 1;
+	} else if (xargs.colorize == 0 || term_caps.color == 0 || nc || cnc) {
+		conf.colorize = 0;
+	} else {
+		conf.colorize = xargs.colorize == 1 ? 1 : DEF_COLORS;
 	}
 
 	if (conf.colorize == 1) {
