@@ -272,16 +272,16 @@ by default, \fBclifm\fR changes directories by just specifying the corresponding
 .TP
 \fB\-\-no\-classify\fR
 by default, \fBclifm\fR appends a file type indicator character to file names when running with no colors (see the \fB\-\-no\-color\fR option below) and a directory indicator (plus a files counter) when running with colors. Classification characters are: 
- /n: directories (n = files counter)
- @:  symbolic links
- !:  broken symbolic links
- |:  fifo/pipes
- =:  sockets
- *:  executable files
- +:  block devices
- -:  character devices
+ /n: directory (n = files counter)
+ @:  symbolic link
+ !:  broken symbolic link
+ |:  fifo/pipe
+ =:  socket
+ *:  executable file
+ +:  block device
+ -:  character device
  ?:  unknown file type
-Use this option to disable file type classification.
+Use this option to disable file type classification. Note that this option disables the files counter too.
 .TP
 \fB\-\-no\-clear\-screen\fR
 do not clear the screen before listing files
