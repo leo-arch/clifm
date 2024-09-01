@@ -725,12 +725,8 @@ set_env(const int reload)
 		return;
 
 	setenv("CLIFM", config_dir ? config_dir : "1", 1);
-
-	char t[NAME_MAX];
-	snprintf(t, sizeof(t), "%d", (int)own_pid);
-	setenv("CLIFM_PID", t, 1);
-	snprintf(t, sizeof(t), "%s", VERSION);
-	setenv("CLIFM_VERSION", t, 1);
+	setenv("CLIFM_PID", xitoa((long long)own_pid), 1);
+	setenv("CLIFM_VERSION", VERSION, 1);
 
 	set_plugins_helper_file();
 
