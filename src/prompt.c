@@ -37,6 +37,7 @@
 #include <errno.h>
 
 #include "aux.h"
+#include "checks.h" /* is_number() */
 #include "colors.h" /* update_warning_prompt_text_color() */
 #include "file_operations.h"
 #include "history.h"
@@ -537,6 +538,109 @@ gen_nesting_level(const int mode)
 	return p;
 }
 
+static char *
+get_color_attribute(const char *line)
+{
+	if (!line || !*line || line[1] != ':')
+		return (char *)NULL;
+
+	switch (line[0]) {
+	case 'b': return "1;"; /* Bold */
+	case 'd': return "2;"; /* Dim */
+	case 'i': return "3;"; /* Italic */
+	case 'n': return "0;"; /* Normal/reset */
+	case 'r': return "7;"; /* Reverse */
+	case 'u': return "4;"; /* Underline */
+	default: return (char *)NULL;
+	}
+}
+
+/* Convert a color notation ("%{color}") into an actual color escape
+ * sequence. Return this latter on success or NULL on error (invalid
+ * color notation). */
+char *
+gen_color(char **line)
+{
+	if (!*line || !*(*line))
+		return (char *)NULL;
+
+	/* At this point LINE is "{color}" */
+	char *l = (*line) + 1; /* L is now "color}" */
+
+	int bg = (l[0] == 'k' && l[1] == ':' && l[2]);
+	char *attr = bg == 0 ? get_color_attribute(l) : (char *)NULL;
+	if (bg == 1 || attr)
+		l += 2; /* Remove background/attribute prefix ("x:") */
+
+	char *p = strchr(l, '}');
+	if (!p)
+		return (char *)NULL;
+
+	*p = '\0'; /* Remove trailing '}': now we have "color" */
+
+#define C_START RL_PROMPT_START_IGNORE
+#define C_END   RL_PROMPT_END_IGNORE
+#define C_ESC   0x1b
+#define C_LEN   24 /* 24 == max color length (rgb) */
+
+#define GEN_COLOR(s1, s2) (snprintf(temp, C_LEN, "%c%c[%s%sm%c", C_START, \
+	C_ESC, attr ? attr : "", bg == 1 ? (s1) : (s2), C_END));
+#define GEN_ATTR(c) (snprintf(temp, C_LEN, "%c%c[%cm%c", C_START, C_ESC, \
+	(c), C_END))
+
+	char *temp = xnmalloc(C_LEN, sizeof(char));
+	int n = -1;
+
+	if (l[0] == 'b' && strcmp(l, "black") == 0) {
+		GEN_COLOR("40", "30");
+	} else if (l[0] == 'r' && strcmp(l, "red") == 0) {
+		GEN_COLOR("41", "31");
+	} else if (l[0] == 'g' && strcmp(l, "green") == 0) {
+		GEN_COLOR("42", "32");
+	} else if (l[0] == 'y' && strcmp(l, "yellow") == 0) {
+		GEN_COLOR("43", "33");
+	} else if (l[0] == 'b' && strcmp(l, "blue") == 0) {
+		GEN_COLOR("44", "34");
+	} else if (l[0] == 'm' && strcmp(l, "magenta") == 0) {
+		GEN_COLOR("45", "35");
+	} else if (l[0] == 'c' && strcmp(l, "cyan") == 0) {
+		GEN_COLOR("46", "36");
+	} else if (l[0] == 'w' && strcmp(l, "white") == 0) {
+		GEN_COLOR("47", "37");
+	} else if (l[0] == 'r' && strcmp(l, "reset") == 0) {
+		GEN_ATTR('0');
+	} else if (l[0] == 'b' && strcmp(l, "bold") == 0) {
+		GEN_ATTR('1');
+	} else if (l[0] == 'd' && strcmp(l, "dim") == 0) {
+		GEN_ATTR('2');
+	} else if (l[0] == 'i' && strcmp(l, "italic") == 0) {
+		GEN_ATTR('3');
+	} else if (l[0] == 'u' && strcmp(l, "underline") == 0) {
+		GEN_ATTR('4');
+	} else if (l[0] == 'r' && strcmp(l, "reverse") == 0) {
+		GEN_ATTR('7');
+	} else if (IS_DIGIT(l[0]) && is_number(l)
+	&& (n = atoi(l)) >= 0 && n <= 255) {
+		snprintf(temp, C_LEN, "%c%c[%s%s;5;%dm%c",
+			C_START, C_ESC, attr ? attr : "",
+			bg == 1 ? "48" : "38", n, C_END);
+	} else if (l[0] == '#') {
+		int a, r, g, b;
+		get_rgb(l, &a, &r, &g, &b);
+		snprintf(temp, C_LEN, "%c%c[%s%s;2;%d;%d;%dm%c",
+			C_START, C_ESC, attr ? attr : "",
+			bg == 1 ? "48" : "38", r, g, b, C_END);
+	} else {
+		*p = '}'; /* Restore the trailing '}' */
+		free(temp);
+		return (char *)NULL;
+	}
+
+	*p = '}'; /* Restore the trailing '}' */
+	*line = p; /* Set LINE to the end of the color notation */
+	return temp;
+}
+
 /* Decode the prompt string (encoded_prompt global variable) taken from
  * the configuration file. */
 char *
@@ -551,8 +655,15 @@ decode_prompt(char *line)
 	int c;
 
 	while ((c = (int)*line++)) {
+		/* Color notation: "%{color}" */
+		if (c == '%' && *line == '{' && line[1]) {
+			temp = gen_color(&line);
+			if (temp)
+				add_string(&temp, c, &line, &result, &result_len);
+		}
+
 		/* We have an escape char */
-		if (c == '\\') {
+		else if (c == '\\') {
 			/* Now move on to the next char */
 			c = (int)*line;
 			switch (c) {
@@ -670,7 +781,7 @@ ADD_STRING:
 			}
 		}
 
-		/* If not escape code, check for command substitution, and if not,
+		/* If not an escape code, check for command substitution, and if not,
 		 * just add whatever char is there. */
 		else {
 			/* Remove non-escaped quotes */
@@ -758,7 +869,7 @@ print_user_message(void)
 	while (*s) {
 		if (*s == '\\' && *(s + 1)) {
 			s++;
-			if (*s >= '0' && *s <= '7' && (tmp = gen_octal(&s, &c))) {
+			if (*s >= '0' && *s <= '7' && (tmp = gen_octal(&s, &c))) { /* NOLINT */
 				fputs(tmp, stdout);
 				free(tmp);
 			} else if (*s == 'e' && (tmp = gen_escape_char(&s, &c))) {

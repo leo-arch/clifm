@@ -93,6 +93,7 @@ __BEGIN_DECLS
 char *prompt(const int prompt_flag);
 char *decode_prompt(char *line);
 int  prompt_function(char **args);
+char *gen_color(char **line);
 
 __END_DECLS
 

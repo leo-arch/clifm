@@ -872,7 +872,7 @@ get_rgb(char *hex, int *attr, int *r, int *g, int *b)
 	tmp[0] = hex[4]; tmp[1] = hex[5];
 	*b = hex2int(tmp);
 
-	*attr = -1; // Attribute unset
+	*attr = -1; /* Attribute unset */
 	if (hex[6] == '-' && hex[7] && hex[7] >= '0'
 	&& hex[7] <= '9' && !hex[8])
 		*attr = hex[7] - '0';

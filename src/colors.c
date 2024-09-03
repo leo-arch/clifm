@@ -50,6 +50,7 @@
 #include "listing.h"
 #include "messages.h"
 #include "misc.h"
+#include "prompt.h" /* gen_color() */
 #include "properties.h" /* get_color_age(), get_color_size() */
 #include "sanitize.h"
 #include "spawn.h"
@@ -595,6 +596,48 @@ is_color_code(const char *str)
 	return 1;
 }
 
+static void
+check_rl_version_and_warn(void)
+{
+	if (rl_readline_version >= 0x0700)
+		return;
+
+	err('w', PRINT_PROMPT, _("%s: Escape sequence detected in the "
+		"warning prompt string: this might cause a few glichtes in the "
+		"prompt due to some bugs in the current readline library (%s). "
+		"Please consider removing these escape sequences (via either "
+		"'prompt edit' or 'cs edit') or upgrading to a newer version "
+		"of the library (>= 7.0 is recommended).\n"),
+		PROGRAM_NAME, rl_library_version);
+}
+
+/* Same as update_warning_prompt_text_color() but for the new color syntax
+ * (%{color}) */
+static void
+update_warning_prompt_text_color_new_syntax(void)
+{
+	char *start = strrchr(conf.wprompt_str, '%');
+	if (!start || start[1] != '{')
+		return;
+
+	start++;
+	char *color = gen_color(&start);
+	if (!color || !*color) {
+		free(color);
+		return;
+	}
+
+	/* Remove trailing \002 and leading \001 */
+	size_t len = strlen(color);
+	color[len - 1] = '\0';
+	len--;
+
+	memcpy(wp_c, color + 1, len);
+	free(color);
+
+	check_rl_version_and_warn();
+}
+
 /* Update the wp_c color code to match the last color used in the warning
  * prompt string.
  * NOTE: If we don't do this, the text entered in the warning prompt (wp_c)
@@ -608,8 +651,11 @@ update_warning_prompt_text_color(void)
 	/* Let's look for the last "\e[" */
 	char *start = strrchr(conf.wprompt_str, '[');
 	if (!start || start - conf.wprompt_str < 2 || *(start - 1) != 'e'
-	|| *(start - 2) != '\\' || !IS_DIGIT(*(start + 1)))
+	|| *(start - 2) != '\\' || !IS_DIGIT(*(start + 1))) {
+		/* Let's check the new color notation (%{color}) as well */
+		update_warning_prompt_text_color_new_syntax();
 		return;
+	}
 
 	start++;
 	char *end = strchr(start, 'm');
@@ -620,15 +666,7 @@ update_warning_prompt_text_color(void)
 	if (is_color_code(start)) {
 		snprintf(wp_c, sizeof(wp_c), "\x1b[%sm", start);
 
-		if (rl_readline_version < 0x0700) {
-			err('w', PRINT_PROMPT, _("%s: Escape sequence detected in the "
-				"warning prompt string: this might cause a few glichtes in the "
-				"prompt due to some bugs in the current readline library (%s). "
-				"Please consider removing these escape sequences (via either "
-				"'prompt edit' or 'cs edit') or upgrading to a newer version "
-				"of the library (>= 7.0 is recommended).\n"),
-				PROGRAM_NAME, rl_library_version);
-		}
+		check_rl_version_and_warn();
 	}
 
 	*end = 'm';
