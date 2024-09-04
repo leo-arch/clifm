@@ -495,7 +495,7 @@ get_file_color(const char *filename, const struct stat *attr)
 	return color;
 }
 
-/* Validate a hex color code string with this format: RRGGBB-[1-9]. */
+/* Validate a hex color code string with this format: RRGGBB-[1-9] or RGB-[1-9]. */
 static int
 is_hex_color(const char *str)
 {
@@ -506,10 +506,10 @@ is_hex_color(const char *str)
 
 	while (*str) {
 		c++;
-		if (c == 7 && *str == '-') {
-			if (!*(str + 1))
+		if ((c == 7 || c == 4) && *str == '-') {
+			if (!str[1])
 				return 0;
-			return (*(str + 1) >= '0' && *(str + 1) <= '9');
+			return (str[1] >= '0' && str[1] <= '9');
 		}
 		if ( !( (*str >= '0' && *str <= '9') || (*str >= 'a' && *str <= 'f')
 		|| (*str >= 'A' && *str <= 'F') ) )
@@ -517,7 +517,7 @@ is_hex_color(const char *str)
 		str++;
 	}
 
-	if (c != 6)
+	if (c != 6 && c != 3)
 		return 0;
 
 	return 1;

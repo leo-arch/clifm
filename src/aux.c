@@ -860,22 +860,42 @@ get_rgb(char *hex, int *attr, int *r, int *g, int *b)
 		hex++;
 	}
 
+	char *h = hex;
+
+	/* Convert 3-digits HEX to 6-digits */
+	static char buf[9];
+	if (h[0] && h[1] && h[2] && (!h[3] || h[3] == '-') ) {
+		buf[0] = buf[1] = h[0];
+		buf[2] = buf[3] = h[1];
+		buf[4] = buf[5] = h[2];
+
+		if (!h[3] || !h[4]) {
+			buf[6] = '\0';
+		} else {
+			buf[6] = '-';
+			buf[7] = h[4];
+			buf[8] = '\0';
+		}
+
+		h = buf;
+	}
+
 	char tmp[3];
 	tmp[2] = '\0';
 
-	tmp[0] = hex[0]; tmp[1] = hex[1];
+	tmp[0] = h[0]; tmp[1] = h[1];
 	*r = hex2int(tmp);
 
-	tmp[0] = hex[2]; tmp[1] = hex[3];
+	tmp[0] = h[2]; tmp[1] = h[3];
 	*g = hex2int(tmp);
 
-	tmp[0] = hex[4]; tmp[1] = hex[5];
+	tmp[0] = h[4]; tmp[1] = h[5];
 	*b = hex2int(tmp);
 
 	*attr = -1; /* Attribute unset */
-	if (hex[6] == '-' && hex[7] && hex[7] >= '0'
-	&& hex[7] <= '9' && !hex[8])
-		*attr = hex[7] - '0';
+	if (h[6] == '-' && h[7] && h[7] >= '0'
+	&& h[7] <= '9' && !h[8])
+		*attr = h[7] - '0';
 
 	if (xargs.no_bold == 1 && *attr == 1)
 		*attr = -1;
