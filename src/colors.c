@@ -633,6 +633,7 @@ update_warning_prompt_text_color_new_syntax(void)
 	len--;
 
 	memcpy(wp_c, color + 1, len);
+	wp_c[len] = '\0';
 	free(color);
 
 	check_rl_version_and_warn();
