@@ -555,6 +555,24 @@ get_color_attribute(const char *line)
 	}
 }
 
+/* Return 1 if the string S is valid hex color, or 0 otherwise. */
+static int
+is_valid_hex(const char *s)
+{
+	if (!s || !*s)
+		return 0;
+
+	size_t i;
+	for (i = 0; s[i]; i++) {
+		if ( !( (s[i] >= '0' && s[i] <= '9')
+		|| (s[i] >= 'a' && s[i] <= 'f')
+		|| (s[i] >= 'A' && s[i] <= 'F') ) )
+			return 0;
+	}
+
+	return (i == 3 || i == 6);
+}
+
 /* Convert a color notation ("%{color}") into an actual color escape
  * sequence. Return this latter on success or NULL on error (invalid
  * color notation). */
@@ -624,9 +642,10 @@ gen_color(char **line)
 		snprintf(temp, C_LEN, "%c%c[%s%s;5;%dm%c",
 			C_START, C_ESC, attr ? attr : "",
 			bg == 1 ? "48" : "38", n, C_END);
-	} else if (l[0] == '#') {
-		int a, r, g, b;
-		get_rgb(l, &a, &r, &g, &b);
+	} else if (l[0] == '#' && is_valid_hex(l + 1)) {
+		/* Fallback values in case get_rgb() returns prematurely (error) */
+		int a = -1, r = 100, g = 100, b = 100;
+		get_rgb(l + 1, &a, &r, &g, &b);
 		snprintf(temp, C_LEN, "%c%c[%s%s;2;%d;%d;%dm%c",
 			C_START, C_ESC, attr ? attr : "",
 			bg == 1 ? "48" : "38", r, g, b, C_END);
