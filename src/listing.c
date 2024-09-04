@@ -2673,7 +2673,7 @@ load_file_gral_info(const struct stat *a, const filesn_t n)
 			case SATIME: file_info[n].ltime = a->st_atime; break;
 			case SBTIME: file_info[n].ltime = btime; break;
 			case SCTIME: file_info[n].ltime = a->st_ctime; break;
-			case SMTIME: file_info[n].ltime = a->st_mtime; break;
+			case SMTIME: /* fallthrough */
 			default: file_info[n].ltime = a->st_mtime; break;
 			}
 		} else {

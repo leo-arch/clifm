@@ -603,8 +603,8 @@ gen_color(char **line)
 
 #define GEN_COLOR(s1, s2) (snprintf(temp, C_LEN, "%c%c[%s%sm%c", C_START, \
 	C_ESC, attr ? attr : "", bg == 1 ? (s1) : (s2), C_END));
-#define GEN_ATTR(c) (snprintf(temp, C_LEN, "%c%c[%cm%c", C_START, C_ESC, \
-	(c), C_END))
+#define GEN_ATTR(c) (snprintf(temp, C_LEN, "%c%c[%s%cm%c", C_START, C_ESC, \
+	attr ? attr : "", (c), C_END))
 
 	char *temp = xnmalloc(C_LEN, sizeof(char));
 	int n = -1;
