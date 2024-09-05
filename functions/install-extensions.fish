@@ -1,5 +1,5 @@
 #!/usr/bin/env fish
-# Install CliFM extension functions
+# Install Clifm extension functions
 
 # Description
 # Execute this script to install the provided fish functions to the functions directory.
