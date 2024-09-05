@@ -12,7 +12,7 @@
 #
 # Dependencies: mktemp, cat, rm
 
-[ -z "$CLIFM_TERM"] && CLIFM_TERM="xterm"
+[ -z "$CLIFM_TERM" ] && CLIFM_TERM="xterm"
 
 SEL_FILE="$1"
 [ -z "$SEL_FILE" ] && SEL_FILE=$(mktemp "${TMPDIR:-/tmp}/clifm_sel.XXXXXX")
