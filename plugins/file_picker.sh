@@ -8,6 +8,8 @@
 # either stdout, if no file is specified as first parameter, or to the
 # specified file otherwise.
 #
+# Usage example: ls -ld $(file_picker.sh)
+#
 # Dependencies: mktemp, cat, rm
 
 [ -z "$CLIFM_TERM"] && CLIFM_TERM="xterm"
@@ -15,7 +17,7 @@
 SEL_FILE="$1"
 [ -z "$SEL_FILE" ] && SEL_FILE=$(mktemp "${TMPDIR:-/tmp}/clifm_sel.XXXXXX")
 
-$CLIFM_TERM -e "$HOME"/build/git_repos/clifm/src/clifm --sel-file="$SEL_FILE"
+$CLIFM_TERM -e clifm --sel-file="$SEL_FILE"
 
 ! [ -f "$SEL_FILE" ] && exit 0
 
