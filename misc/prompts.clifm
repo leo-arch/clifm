@@ -171,30 +171,30 @@ WarningPrompt="%{reset}%{b:green}╰─%{reset}<\z%{reset}> %{b:red}λ%{n:dim} "
 # The following prompts require a patched Nerdfont
 [firestarter]
 Notifications=false
-RegularPrompt="%{reset}%{b:124}╭─%{124}%{b:7}%{k:124}\#%{7}\I%{7}\(%{3}\)%{2}\=%{6}\%%{2}\*%{7}%{k:124}[\S%{7}%{k:124}] %{reset}%{k:124}\A %{n:124}%{k:3}%{n:0}%{k:3} \u:\H %{n:3}%{k:124}%{n:7}%{k:124} \w %{n:124}%{reset}\n%{b:124}╰─▶%{reset} "
+RegularPrompt="%{reset}%{b:124}╭─%{124}%{7}%{k:124}\#%{7}\I\(%{3}\)%{2}\=%{6}\%%{2}\*%{7}%{k:124}[\S%{7}] %{reset}%{k:124}\A %{n:124}%{k:3}%{0} \u:\H %{3}%{k:124}%{7}%{k:124} \w %{n:124}%{reset}\n%{b:124}╰─▶%{reset} "
 EnableWarningPrompt=true
 WarningPrompt="%{reset}%{b:124}╰─%{n:124}▶ "
 
 [cold-winter]
 Notifications=false
-RegularPrompt="%{reset}%{b:1}%{k:237}\#%{n:7}%{k:237}\I%{1}%{k:237}\(%{3}\)%{2}\=%{6}\%%{2}\*%{n:7}%{k:237}[\S%{n:7}%{k:237}] \A %{n:237}%{k:6} %{0}%{k:6}\u:\H %{n:6}%{k:237} %{n:7}%{k:237}\w %{n:237} \n %{b:cyan}%{reset} "
+RegularPrompt="%{reset}%{b:1}%{k:237}\#%{n:7}%{k:237}\I%{1}\(%{3}\)%{2}\=%{6}\%%{2}\*%{n:7}%{k:237}[\S%{n:7}%{k:237}] \A %{n:237}%{k:6} %{0}\u:\H %{n:6}%{k:237} %{n:7}%{k:237}\w %{n:237} \n %{b:cyan}%{reset} "
 EnableWarningPrompt=true
 WarningPrompt=" %{reset}%{b:1}!%{n:dim} "
 
 [spot]
 Notifications=false
-RegularPrompt="%{n:7}%{k:53} \I%{160}\#%{160}\(%{178}\)%{41}\=%{6}\%%{41}\*%{n:7}%{k:53}[\S%{7}] %{53}%{k:178} %{n:0}%{k:178}\A \u:\H \w %{n:178}%{reset}\n%{n:254}%{k:53} \$ %{n:53} %{reset} "
+RegularPrompt="%{n:7}%{k:53} \I%{160}\#%{160}\(%{178}\)%{41}\=%{6}\%%{41}\*%{7}[\S%{7}] %{53}%{k:178} %{0}\A \u:\H \w %{n:178}\n%{254}%{k:53} \$ %{n:53} %{reset} "
 EnableWarningPrompt=true
 WarningPrompt="%{n:7}%{k:124} \x %{n:124} %{n:dim} "
 
 [artic-particles]
 Notifications=false
-RegularPrompt="%{n:7}%{k:18} \I%{b:160}\#%{160}\(%{3}\)%{2}\=%{6}\%%{2}\*%{n:7}%{k:18}[\S%{n:7}%{k:18}] %{n:7}%{k:18}\A %{n:18}%{k:7}  \u:\H %{n:7}%{k:18} \w %{n:18} \n%{n:7}%{k:18} \$ %{n:18} "
+RegularPrompt="%{n:7}%{k:18} \I%{b:160}\#%{160}\(%{3}\)%{2}\=%{6}\%%{2}\*%{n:7}%{k:18}[\S%{n:7}%{k:18}] \A %{n:18}%{k:7}  \u:\H %{n:7}%{k:18} \w %{n:18} \n%{n:7}%{k:18} \$ %{n:18} "
 EnableWarningPrompt=true
 WarningPrompt="%{reset}%{b:1}%{k:7} \$ %{n:7} %{n:dim}"
 
 [green-beret]
 Notifications=false
-RegularPrompt="%{reset}╭─%{n:239}%{15}%{k:239}\I%{160}\#%{160}\(%{3}\)%{76}\=%{6}\%%{76}\*%{15}[\S%{15}]  \A \u %{n:239}%{k:70}%{n:0}%{k:70} \w %{n:70}%{reset}\n╰─%{70}▶%{reset} "
+RegularPrompt="%{reset}╭─%{239}%{15}%{k:239}\I%{160}\#%{160}\(%{3}\)%{76}\=%{6}\%%{76}\*%{15}[\S%{15}]  \A \u %{n:239}%{k:70}%{0} \w %{n:70}%{reset}\n╰─%{70}▶%{reset} "
 EnableWarningPrompt=true
 WarningPrompt="%{reset}╰─%{160}▶%{n:dim} "
