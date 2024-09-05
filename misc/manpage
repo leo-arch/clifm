@@ -2399,7 +2399,7 @@ You can set \fISuggestFiletypeColor\fR to \fItrue\fR in the configuration file t
 \fIsf\fR. For example, if a suggestion is printed for a file that is a symbolic link, \fIln\fR or \fIor\fR (if a broken link) will be used instead of \fIsf\fR.
 
 .SH 12. SHELL FUNCTIONS
-\fBClifm\fR includes a few shell functions to perform specific actions (cd\-on\-quit, file\-picker, and subshell\-notice). Take a look at the corresponding files, in \fI/usr/share/clifm/functions\fR, and follow the instructions. Needles to say, you can write your own functions.
+\fBClifm\fR includes a few shell functions to perform specific actions (cd\-on\-quit, and subshell\-notice). Take a look at the corresponding files, in \fI/usr/share/clifm/functions\fR, and follow the instructions. Needles to say, you can write your own functions.
 
 .SH 13. PLUGINS
 Plugins are just scripts or programs (written in any language) intended to add, extend or improve \fBclifm\fR\'s functionalities. They are linked to actions names defined in a dedicated configuration file (\fIXDG_CONFIG_HOME/clifm/profiles/PROFILE/actions.clifm\fR).
@@ -2535,8 +2535,11 @@ T{
 wall
 T}	Set image as wallpaper	\fB(7)\fR
 T{
+\fIunset\fR
+T}	Pick/select files via \fBclifm\fR	\fB(8)\fR
+T{
 Ctrl-y
-T}	Copy the line buffer to the clipboard	\fB(8)\fR
+T}	Copy the line buffer to the clipboard	\fB(9)\fR
 .TE
 
 .sp
@@ -2558,7 +2561,9 @@ Whereas this plugin provides basic Git integration, it could be easily modified 
 .sp
 \fB(7)\fR feh, xloadimage, hsetroot, or nitrogen (for X); swww or swaybg (for Wayland)
 .sp
-\fB(8)\fR Dependencies: cb, wl\-copy, xclip, xsel, pbcopy, termux\-clipboard\-set, clipboard, or clip. Consult the plugin file itself (\fIxclip.sh\fR) for more information
+\fB(8)\fR \fIfile_picker.sh\fR (by default unset)
+.sp
+\fB(9)\fR Dependencies: cb, wl\-copy, xclip, xsel, pbcopy, termux\-clipboard\-set, clipboard, or clip. Consult the plugin file itself (\fIxclip.sh\fR) for more information
 
 .B Dependencies of the previewer plugin (fzfnav.sh)
 
