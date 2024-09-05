@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Aug 31, 2024" "clifm 1.20.4" "CLIFM Manual"
+.TH "CLIFM" "1" "Sep 5, 2024" "clifm 1.20.5" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -2561,7 +2561,7 @@ Whereas this plugin provides basic Git integration, it could be easily modified 
 .sp
 \fB(7)\fR feh, xloadimage, hsetroot, or nitrogen (for X); swww or swaybg (for Wayland)
 .sp
-\fB(8)\fR \fIfile_picker.sh\fR (by default unset)
+\fB(8)\fR \fIfile_picker.sh\fR (by default unset). Usage example: \fIls -ld $(file_picker.sh)\fR
 .sp
 \fB(9)\fR Dependencies: cb, wl\-copy, xclip, xsel, pbcopy, termux\-clipboard\-set, clipboard, or clip. Consult the plugin file itself (\fIxclip.sh\fR) for more information
 
