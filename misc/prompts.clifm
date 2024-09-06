@@ -92,7 +92,7 @@
 #
 # 2) Using the %{COLOR} syntax, where COLOR is:
 #  a) A color/attribute name: black, red, green, yellow, blue, magenta,
-#   cyan, white, reset, bold, dim, italic, underline, reverse.
+#   cyan, white, reset, bold, dim, italic, underline, reverse, strike.
 #   E.g. "%{reset}%{bold}%{red}"
 #
 #  b) A number in the range 0-255 (256-colors). E.g. "%{196}"
@@ -112,6 +112,7 @@
 #    k: bacKground
 #    n: Normal/reset
 #    r: Reverse
+#    s: Strike
 #    u: Underline
 #
 #  For example, "%{d:red}" (dimmed red) or "%{u:#ff0000}" (underlined red).
@@ -120,6 +121,12 @@
 #
 #  To specify a background color (instead of foreground), use the "k:" prefix.
 #  E.g., "%{u:red}%{k:blue}" will print underlined red on a blue background.
+#
+#  Excluding the 'n' and 'k' prefixes, writing a prefix in uppercase turns off
+#  the corresponding attribute (unlike 'n', which turns off all attributes).
+#  E.g.: "%{b:red}%{k:blue}text%{B:red}text" will print "text" twice, first in
+#  bold red on a blue background, and then in red (no bold) keeping the blue
+#  background.
 
 # To permanetly set any of the below prompts edit your color scheme file
 # (via the 'cs edit' command), set Prompt to the appropriate prompt name
