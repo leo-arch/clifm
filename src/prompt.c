@@ -646,8 +646,10 @@ gen_color(char **line)
 		GEN_ATTR('7');
 	} else if (l[0] == 's' && strcmp(l, "strike") == 0) {
 		GEN_ATTR('9');
-	} else if (IS_DIGIT(l[0]) && is_number(l)
-	&& (n = atoi(l)) >= 0 && n <= 255) {
+	} else if (IS_DIGIT(l[0]) && (!l[1] || (is_number(l + 1)
+	&& (n = atoi(l)) <= 255))) {
+		if (!l[1])
+			n = l[0] - '0';
 		snprintf(temp, C_LEN, "%c%c[%s%s;5;%dm%c",
 			C_START, C_ESC, attr ? attr : "",
 			bg == 1 ? "48" : "38", n, C_END);
