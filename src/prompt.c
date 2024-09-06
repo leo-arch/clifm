@@ -551,8 +551,8 @@ get_color_attribute(const char *line)
 	case 'n': return "0;"; /* Normal/reset */
 	case 'r': return "7;"; /* Reverse */
 	case 's': return "9;"; /* Strikethrough */
-	case 'u': return "4;"; /* Disable underline */
-	case 'B': /* falthrough */
+	case 'u': return "4;"; /* Underline */
+	case 'B': /* fallthrough */
 	case 'D': return "22;"; /* Disable bold/dim: normal intensity */
 	case 'I': return "23;"; /* Disable italic */
 	case 'R': return "27;"; /* Disable reverse */
