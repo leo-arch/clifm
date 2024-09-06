@@ -550,7 +550,14 @@ get_color_attribute(const char *line)
 	case 'i': return "3;"; /* Italic */
 	case 'n': return "0;"; /* Normal/reset */
 	case 'r': return "7;"; /* Reverse */
-	case 'u': return "4;"; /* Underline */
+	case 's': return "9;"; /* Strikethrough */
+	case 'u': return "4;"; /* Disable underline */
+	case 'B': /* falthrough */
+	case 'D': return "22;"; /* Disable bold/dim: normal intensity */
+	case 'I': return "23;"; /* Disable italic */
+	case 'R': return "27;"; /* Disable reverse */
+	case 'S': return "29;"; /* Disable strikethrough */
+	case 'U': return "24;"; /* Disable underline */
 	default: return (char *)NULL;
 	}
 }
@@ -599,7 +606,7 @@ gen_color(char **line)
 #define C_START RL_PROMPT_START_IGNORE
 #define C_END   RL_PROMPT_END_IGNORE
 #define C_ESC   0x1b
-#define C_LEN   24 /* 24 == max color length (rgb) */
+#define C_LEN   25 /* 25 == max color length (rgb) */
 
 #define GEN_COLOR(s1, s2) (snprintf(temp, C_LEN, "%c%c[%s%sm%c", C_START, \
 	C_ESC, attr ? attr : "", bg == 1 ? (s1) : (s2), C_END));
@@ -637,6 +644,8 @@ gen_color(char **line)
 		GEN_ATTR('4');
 	} else if (l[0] == 'r' && strcmp(l, "reverse") == 0) {
 		GEN_ATTR('7');
+	} else if (l[0] == 's' && strcmp(l, "strike") == 0) {
+		GEN_ATTR('9');
 	} else if (IS_DIGIT(l[0]) && is_number(l)
 	&& (n = atoi(l)) >= 0 && n <= 255) {
 		snprintf(temp, C_LEN, "%c%c[%s%s;5;%dm%c",
