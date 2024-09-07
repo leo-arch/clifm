@@ -580,9 +580,13 @@ mime_import(char *file)
 				if (*line == '#' || *line == '\n')
 					continue;
 
-				const int index = strcntchr(line, '.');
-				if (index != -1)
-					line[index] = '\0';
+				char *a = strchr(line, '=');
+				if (!a || !a[1])
+					continue;
+
+				char *ret = strchr(a + 1, '.');
+				if (ret)
+					*ret = '\0';
 
 				fprintf(mime_fp, "%s\n", line);
 				mime_defs++;
