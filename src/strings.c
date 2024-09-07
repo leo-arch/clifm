@@ -3157,13 +3157,14 @@ savestring(const char *restrict str, size_t size)
 	if (!str)
 		return (char *)NULL;
 
-	char *ptr = (char *)NULL;
-	ptr = malloc((size + 1) * sizeof(char));
-
+	char *ptr = malloc((size + 1) * sizeof(char));
 	if (!ptr)
 		return (char *)NULL;
 
-	xstrsncpy(ptr, str, size + 1);
+	const char *ret = memccpy(ptr, str, '\0', size + 1);
+	if (!ret)
+		ptr[size] = '\0';
+
 	return ptr;
 }
 
