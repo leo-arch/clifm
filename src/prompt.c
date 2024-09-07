@@ -106,18 +106,19 @@ get_dir_basename(const char *_path)
 }
 
 static inline char *
-reduce_path(const char *_path)
+reduce_path(const char *s)
 {
 	char *temp = (char *)NULL;
+	const size_t slen = strlen(s);
 
-	if (strlen(_path) > (size_t)conf.max_path) {
-		char *ret = strrchr(_path, '/');
-		if (!ret)
-			temp = savestring(_path, strlen(_path));
+	if (slen > (size_t)conf.max_path) {
+		char *ret = strrchr(s, '/');
+		if (!ret || !ret[1])
+			temp = savestring(s, slen);
 		else
-			temp = savestring(ret + 1, strlen(ret + 1));
+			temp = savestring(ret + 1, (size_t)(s + slen - ret - 1));
 	} else {
-		temp = savestring(_path, strlen(_path));
+		temp = savestring(s, slen);
 	}
 
 	return temp;
@@ -541,7 +542,7 @@ gen_nesting_level(const int mode)
 static char *
 get_color_attribute(const char *line)
 {
-	if (!line || !*line || line[1] != ':')
+	if (!line || !line[0] || line[1] != ':')
 		return (char *)NULL;
 
 	switch (line[0]) {
@@ -616,34 +617,36 @@ gen_color(char **line)
 	char *temp = xnmalloc(C_LEN, sizeof(char));
 	int n = -1;
 
-	if (l[0] == 'b' && strcmp(l, "black") == 0) {
+	/* 'bold' and 'blue' are used more often than 'black': check them first. */
+	if (l[0] == 'b' && strcmp(l, "bold") == 0) {
+		GEN_ATTR('1');
+	} else if (l[0] == 'b' && strcmp(l, "blue") == 0) {
+		GEN_COLOR("44", "34");
+	} else if (l[0] == 'b' && strcmp(l, "black") == 0) {
 		GEN_COLOR("40", "30");
+	/* 'reset' is used more often than 'red' and 'reverse': check it first. */
+	} else if (l[0] == 'r' && strcmp(l, "reset") == 0) {
+		GEN_ATTR('0');
 	} else if (l[0] == 'r' && strcmp(l, "red") == 0) {
 		GEN_COLOR("41", "31");
+	} else if (l[0] == 'r' && strcmp(l, "reverse") == 0) {
+		GEN_ATTR('7');
 	} else if (l[0] == 'g' && strcmp(l, "green") == 0) {
 		GEN_COLOR("42", "32");
 	} else if (l[0] == 'y' && strcmp(l, "yellow") == 0) {
 		GEN_COLOR("43", "33");
-	} else if (l[0] == 'b' && strcmp(l, "blue") == 0) {
-		GEN_COLOR("44", "34");
 	} else if (l[0] == 'm' && strcmp(l, "magenta") == 0) {
 		GEN_COLOR("45", "35");
 	} else if (l[0] == 'c' && strcmp(l, "cyan") == 0) {
 		GEN_COLOR("46", "36");
 	} else if (l[0] == 'w' && strcmp(l, "white") == 0) {
 		GEN_COLOR("47", "37");
-	} else if (l[0] == 'r' && strcmp(l, "reset") == 0) {
-		GEN_ATTR('0');
-	} else if (l[0] == 'b' && strcmp(l, "bold") == 0) {
-		GEN_ATTR('1');
 	} else if (l[0] == 'd' && strcmp(l, "dim") == 0) {
 		GEN_ATTR('2');
 	} else if (l[0] == 'i' && strcmp(l, "italic") == 0) {
 		GEN_ATTR('3');
 	} else if (l[0] == 'u' && strcmp(l, "underline") == 0) {
 		GEN_ATTR('4');
-	} else if (l[0] == 'r' && strcmp(l, "reverse") == 0) {
-		GEN_ATTR('7');
 	} else if (l[0] == 's' && strcmp(l, "strike") == 0) {
 		GEN_ATTR('9');
 	} else if (IS_DIGIT(l[0]) && (!l[1] || (is_number(l + 1)

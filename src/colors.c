@@ -1613,11 +1613,11 @@ set_shades(char *line, const int type)
 
 		if (p) {
 			*p = '\0';
-			if (*(p + 1) && *(p + 1) >= '0' && *(p + 1) <= '9' && !*(p + 2))
-				color_attr = (uint8_t)(*(p + 1) - '0');
+			if (p[1] && p[1] >= '0' && p[1] <= '9' && !p[2])
+				color_attr = (uint8_t)(p[1] - '0');
 		}
 
-		int n = atoi(str);
+		const int n = atoi(str);
 		if (n < 0 || n > 255)
 			goto NEXT;
 
