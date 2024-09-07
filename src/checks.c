@@ -926,13 +926,13 @@ truncate_file(char *file, const int max, const int check_dups)
 	int i = 1;
 	size_t line_size = 0;
 	char *line = (char *)NULL;
-
+	ssize_t line_len = 0;
 	char *prev_line = (char *)NULL;
-	size_t prev_line_size = 0;
+	ssize_t prev_line_len = 0;
 
-	while (getline(&line, &line_size, orig_fp) > 0) {
+	while ((line_len = getline(&line, &line_size, orig_fp)) > 0) {
 		/* Skip consecutive equal entries. */
-		if (check_dups == 1 && prev_line && line_size == prev_line_size
+		if (check_dups == 1 && prev_line && line_len == prev_line_len
 		&& strcmp(line, prev_line) == 0)
 			continue;
 
@@ -943,8 +943,8 @@ truncate_file(char *file, const int max, const int check_dups)
 
 		if (check_dups == 1) {
 			free(prev_line);
-			prev_line = savestring(line, line_size);
-			prev_line_size = line_size;
+			prev_line = savestring(line, (size_t)line_len);
+			prev_line_len = line_len;
 		}
 	}
 
