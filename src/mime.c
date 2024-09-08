@@ -581,7 +581,7 @@ mime_import(char *file)
 					continue;
 
 				char *a = strchr(line, '=');
-				if (!a || !a[1])
+				if (!a || !a[1] || a == line)
 					continue;
 
 				char *ret = strchr(a + 1, '.');

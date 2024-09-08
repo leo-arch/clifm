@@ -88,37 +88,32 @@ gen_time(const int c)
 }
 
 static inline char *
-get_dir_basename(const char *_path)
+get_dir_basename(const char *str)
 {
-	char *temp = (char *)NULL;
-	char *ret = (char *)NULL;
-
 	/* If not root dir (/), get last path component */
-	if (!(*_path == '/' && !*(_path + 1)))
-		ret = strrchr(_path, '/');
+	const char *ret = (*str == '/' && !str[1])
+		? (char *)NULL : strrchr(str, '/');
 
-	if (!ret)
-		temp = savestring(_path, strlen(_path));
-	else
-		temp = savestring(ret + 1, strlen(ret + 1));
+	if (!ret || !ret[1])
+		return savestring(str, strlen(str));
 
-	return temp;
+	return savestring(ret + 1, strlen(ret + 1));
 }
 
 static inline char *
-reduce_path(const char *s)
+reduce_path(const char *str)
 {
 	char *temp = (char *)NULL;
-	const size_t slen = strlen(s);
+	const size_t slen = strlen(str);
 
 	if (slen > (size_t)conf.max_path) {
-		char *ret = strrchr(s, '/');
+		char *ret = strrchr(str, '/');
 		if (!ret || !ret[1])
-			temp = savestring(s, slen);
+			temp = savestring(str, slen);
 		else
-			temp = savestring(ret + 1, (size_t)(s + slen - ret - 1));
+			temp = savestring(ret + 1, (size_t)(str + slen - ret - 1));
 	} else {
-		temp = savestring(s, slen);
+		temp = savestring(str, slen);
 	}
 
 	return temp;
@@ -127,7 +122,8 @@ reduce_path(const char *s)
 static inline char *
 gen_pwd(const int c)
 {
-	char *temp = (char *)NULL, *tmp_path = (char *)NULL;
+	char *temp = (char *)NULL;
+	char *tmp_path = (char *)NULL;
 	int free_tmp_path = 0;
 
 	if (user.home
