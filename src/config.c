@@ -363,8 +363,8 @@ dump_config(void)
 	n = DEF_MAX_LOG;
 	print_config_value("MaxLog", &conf.max_log, &n, DUMP_CONFIG_INT);
 
-	n = DEF_MAX_PATH;
-	print_config_value("MaxPath", &conf.max_path, &n, DUMP_CONFIG_INT);
+	n = DEF_PROMPT_P_MAX_PATH;
+	print_config_value("MaxPath", &conf.prompt_p_max_path, &n, DUMP_CONFIG_INT);
 
 	n = DEF_MAX_PRINTSEL;
 	print_config_value("MaxPrintSelfiles", &conf.max_printselfiles, &n,
@@ -1601,11 +1601,6 @@ create_main_config_file(char *file)
 # 'true', 'false', 'hidden' (enabled, but hidden; toggle it with Alt-p)\n\
 ;FzfPreview=%s\n\n"
 
-	    "# MaxPath is only used for the /p option of the prompt: the current working\n\
-# directory will be abbreviated to its basename (everything after last slash)\n\
-# whenever the current path is longer than MaxPath.\n\
-;MaxPath=%d\n\n"
-
 	    ";WelcomeMessage=%s\n\
 ;WelcomeMessageStr=\"\"\n\n\
 # Print %s's logo screen at startup.\n\
@@ -1678,7 +1673,6 @@ create_main_config_file(char *file)
 		DEF_FUZZY_MATCH == 1 ? "true" : "false",
 		DEF_FUZZY_MATCH_ALGO,
 		DEF_FZF_PREVIEW == 1 ? "true" : "false",
-		DEF_MAX_PATH,
 		DEF_WELCOME_MESSAGE == 1 ? "true" : "false",
 		PROGRAM_NAME,
 		DEF_SPLASH_SCREEN == 1 ? "true" : "false",
@@ -3158,9 +3152,12 @@ read_config(void)
 			set_config_int_value(line + 7, &conf.max_log, 1, INT_MAX);
 		}
 
-		else if (xargs.max_path == UNSET && *line == 'M'
+		else if (xargs.prompt_p_max_path == UNSET && *line == 'M'
 		&& strncmp(line, "MaxPath=", 8) == 0) {
-			set_config_int_value(line + 8, &conf.max_path, 1, INT_MAX);
+			err('n', PRINT_PROMPT, "%s: MaxPath: This option is "
+				"deprecated. Use the CLIFM_PROMPT_P_MAX_PATH environment "
+				"variable instead.\n", PROGRAM_NAME);
+			set_config_int_value(line + 8, &conf.prompt_p_max_path, 1, INT_MAX);
 		}
 
 		else if (*line == 'M' && strncmp(line, "MaxPrintSelfiles=", 17) == 0) {

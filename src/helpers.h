@@ -1155,7 +1155,6 @@ struct config_t {
 	int max_log;
 	int max_name_len;
 	int max_name_len_bk;
-	int max_path;
 	int max_printselfiles;
 	int min_jump_rank;
 	int min_name_trim;
@@ -1169,6 +1168,9 @@ struct config_t {
 	int print_dir_cmds;
 	int print_selfiles;
 	int private_ws_settings;
+	int prompt_f_dir_len;
+	int prompt_f_full_len_dirs;
+	int prompt_p_max_path;
 	int prop_fields_gap;
 	int quoting_style;
 	int read_autocmd_files;
@@ -1481,7 +1483,6 @@ struct param_t {
 	int lscolors;
 	int max_dirhist;
 	int max_files;
-	int max_path;
 	int mount_cmd;
 	int no_bold;
 	int no_dirjump;
@@ -1493,6 +1494,7 @@ struct param_t {
 	int path;
 	int preview;
 	int print_selfiles;
+	int prompt_p_max_path;
 	int prop_fields_str;
 	int ptime_style;
 	int readonly;

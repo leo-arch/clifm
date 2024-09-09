@@ -66,6 +66,7 @@ void set_fzf_preview_border_type(void);
 int  should_expand_eln(const char *text);
 char *url_encode(char *str);
 char *url_decode(char *str);
+int  utf8_bytes(unsigned char c);
 filesn_t xatof(const char *s);
 int  xatoi(const char *s);
 const char *xitoa(long long n);

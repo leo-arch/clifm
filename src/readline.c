@@ -173,22 +173,6 @@ leftmost_bell(void)
 }
 #endif /* !_NO_SUGGESTIONS */
 
-/* Return the number of bytes in a UTF-8 sequence by inspecting only the
- * leading byte (C).
- * Taken from
- * https://stackoverflow.com/questions/22790900/get-length-of-multibyte-utf-8-sequence */
-static int
-utf8_bytes(unsigned char c)
-{
-    c >>= 4;
-    c &= 7;
-
-    if (c == 4)
-		return 2;
-
-	return c - 3;
-}
-
 /* Construct a wide-char byte by byte
  * This function is called multiple times until we get a full wide-char.
  * Each byte (C), in each subsequent call, is appended to a string (WC_STR),

@@ -231,7 +231,6 @@ init_conf_struct(void)
 	conf.max_jump_total_rank = DEF_MAX_JUMP_TOTAL_RANK;
 	conf.max_name_len = DEF_MAX_NAME_LEN;
 	conf.max_name_len_bk = 0;
-	conf.max_path = UNSET;
 	conf.max_printselfiles = DEF_MAX_PRINTSEL;
 	conf.min_jump_rank = DEF_MIN_JUMP_RANK;
 	conf.min_name_trim = DEF_MIN_NAME_TRIM;
@@ -244,6 +243,9 @@ init_conf_struct(void)
 	conf.print_dir_cmds = DEF_PRINT_DIR_CMDS;
 	conf.print_selfiles = UNSET;
 	conf.private_ws_settings = DEF_PRIVATE_WS_SETTINGS;
+	conf.prompt_f_dir_len = DEF_PROMPT_F_DIR_LEN;
+	conf.prompt_f_full_len_dirs = DEF_PROMPT_F_FULL_LEN_DIRS;
+	conf.prompt_p_max_path = UNSET;
 	conf.prop_fields_gap = DEF_PROP_FIELDS_GAP;
 	conf.purge_jumpdb = DEF_PURGE_JUMPDB;
 	conf.quoting_style = DEF_QUOTING_STYLE;
@@ -1091,7 +1093,7 @@ load_jumpdb(void)
 
 		if (*line == '@') {
 			if (is_number(line + 1)) {
-				int a = atoi(line + 1);
+				const int a = atoi(line + 1);
 				jump_total_rank = a == INT_MIN ? 0 : a;
 			}
 			continue;
@@ -1766,7 +1768,6 @@ unset_xargs(void)
 	xargs.long_view = UNSET;
 	xargs.lscolors = UNSET;
 	xargs.max_dirhist = UNSET;
-	xargs.max_path = UNSET;
 	xargs.mount_cmd = UNSET;
 	xargs.no_bold = UNSET;
 	xargs.no_dirjump = UNSET;
@@ -1777,6 +1778,7 @@ unset_xargs(void)
 	xargs.pager_view = UNSET;
 	xargs.path = UNSET;
 	xargs.print_selfiles = UNSET;
+	xargs.prompt_p_max_path = UNSET;
 	xargs.prop_fields_str = UNSET;
 	xargs.ptime_style = UNSET;
 	xargs.readonly = UNSET;
@@ -2522,13 +2524,17 @@ get_aliases(void)
 			char *s = strchr(line, ' ');
 			if (!s || !*(++s))
 				continue;
+
 			char *p = strchr(s, '=');
 			if (!p || !*(p + 1))
 				continue;
+
 			*p = '\0';
 			p++;
 
-			if (alias_exists(s) == 1) continue;
+			if (alias_exists(s) == 1)
+				continue;
+
 			write_alias(s, p);
 		}
 	}
@@ -2719,11 +2725,33 @@ set_sudo_cmd(void)
 	sudo_cmd = DEF_SUDO_CMD;
 }
 
+static void
+set_prompt_options(void)
+{
+	int n = 0;
+
+	char *val = getenv("CLIFM_PROMPT_F_DIR_LEN");
+	if (val && is_number(val) && (n = atoi(val)) > 0 && n < INT_MAX)
+		conf.prompt_f_dir_len = n;
+
+	val = getenv("CLIFM_PROMPT_F_FULL_LEN_DIRS");
+	if (val && is_number(val) && (n = atoi(val)) > 0 && n < INT_MAX)
+		conf.prompt_f_full_len_dirs = n;
+
+	if (conf.prompt_p_max_path != UNSET)
+		return;
+
+	val = getenv("CLIFM_PROMPT_P_MAX_PATH");
+	if (val && is_number(val) && (n = atoi(val)) > 0 && n < INT_MAX)
+		conf.prompt_p_max_path = n;
+}
+
 /* If some option was not set, set it to the default value. */
 void
 check_options(void)
 {
 	set_sudo_cmd();
+	set_prompt_options();
 
 	if (xargs.secure_env == 1 || xargs.secure_env_full == 1)
 		conf.read_autocmd_files = 0;
@@ -3082,11 +3110,16 @@ check_options(void)
 			conf.autols = xargs.autols;
 	}
 
-	if (conf.max_path == UNSET) {
-		if (xargs.max_path == UNSET)
-			conf.max_path = DEF_MAX_PATH;
+	if (xargs.prompt_p_max_path != UNSET)
+		err('n', PRINT_PROMPT, "%s: --max-path: This option is "
+			"deprecated. Use the CLIFM_PROMPT_P_MAX_PATH environment "
+			"variable instead.\n", PROGRAM_NAME);
+
+	if (conf.prompt_p_max_path == UNSET) {
+		if (xargs.prompt_p_max_path == UNSET)
+			conf.prompt_p_max_path = DEF_PROMPT_P_MAX_PATH;
 		else
-			conf.max_path = xargs.max_path;
+			conf.prompt_p_max_path = xargs.prompt_p_max_path;
 	}
 
 	if (conf.light_mode == UNSET) {

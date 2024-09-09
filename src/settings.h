@@ -489,7 +489,6 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define DEF_MAX_HIST 1000
 #define DEF_MAX_JUMP_TOTAL_RANK 100000
 #define DEF_MAX_LOG 1000
-#define DEF_MAX_PATH 40
 #define DEF_MAX_PRINTSEL 0
 #define DEF_MIN_JUMP_RANK 10
 #define DEF_MIN_NAME_TRIM 20
@@ -504,6 +503,9 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define DEF_PRINTSEL 0
 #define DEF_PRINT_REMOVED_FILES 1
 #define DEF_PRIVATE_WS_SETTINGS 0
+#define DEF_PROMPT_F_DIR_LEN 1
+#define DEF_PROMPT_F_FULL_LEN_DIRS 1
+#define DEF_PROMPT_P_MAX_PATH 40
 /* "xfpIsm" =
  * xattrs/caps/ACLs, files counter, perms, owner/grp names, size (human), mtime */
 #define DEF_PROP_FIELDS "xfpIsm"

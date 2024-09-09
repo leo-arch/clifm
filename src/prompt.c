@@ -106,7 +106,7 @@ reduce_path(const char *str)
 	char *temp = (char *)NULL;
 	const size_t slen = strlen(str);
 
-	if (slen > (size_t)conf.max_path) {
+	if (slen > (size_t)conf.prompt_p_max_path) {
 		char *ret = strrchr(str, '/');
 		if (!ret || !ret[1])
 			temp = savestring(str, slen);
@@ -117,6 +117,100 @@ reduce_path(const char *str)
 	}
 
 	return temp;
+}
+
+static size_t
+copy_char(char *buf, char *s)
+{
+	const int bytes = ((*s & 0xc0) == 0xc0 || (*s & 0xc0) == 0x80)
+		? utf8_bytes((unsigned char)*s) : 1;
+
+	if (bytes == 1) {
+		*buf = *s;
+		return 1;
+	}
+
+	int c = 0;
+	while (c < bytes) {
+		buf[c] = *s;
+		c++;
+		s++;
+	}
+
+	return (size_t)c;
+}
+
+static inline char *
+reduce_path_fish(char *str)
+{
+	if ((*str == '~' || *str == '/') && !str[1])
+		return savestring(*str == '~' ? "~" : "/", 1);
+
+	if (conf.prompt_f_dir_len == 0)
+		return savestring(str, strlen(str));
+
+	char *s = str;
+	size_t total_comps = (*s == '~');
+
+	while (*s) {
+		if (*s == '/')
+			total_comps++;
+		s++;
+	}
+
+	if (conf.prompt_f_full_len_dirs > 1
+	&& total_comps > (size_t)conf.prompt_f_full_len_dirs - 1)
+		total_comps -= (size_t)conf.prompt_f_full_len_dirs - 1;
+
+	size_t slen = (size_t)(s - str);
+	s = str;
+
+	char *buf = xnmalloc(slen + 1, sizeof(char));
+	size_t i = 0;
+	size_t cur_comps = 0;
+
+	if (*s == '~') {
+		buf[i++] = *s;
+		cur_comps++;
+	}
+
+	while (*s) {
+		if (*s != '/') {
+			s++;
+			continue;
+		}
+
+		buf[i++] = '/';
+		cur_comps++;
+		s++;
+
+		if (cur_comps >= total_comps) {
+			xstrsncpy(buf + i, s, slen - i + 1);
+			break;
+		}
+
+		if (*s == '.') {
+			buf[i++] = *s;
+			s++;
+		}
+
+		if (conf.prompt_f_dir_len == 1) {
+			const size_t bytes = copy_char(buf + i, s);
+			i += bytes;
+			s += bytes;
+			continue;
+		}
+
+		size_t q = 0;
+		while (*s && *s != '/' && q < (size_t)conf.prompt_f_dir_len) {
+			const size_t bytes = copy_char(buf + i, s);
+			i += bytes;
+			s += bytes;
+			q++;
+		}
+	}
+
+	return buf;
 }
 
 static inline char *
@@ -137,6 +231,8 @@ gen_pwd(const int c)
 		temp = get_dir_basename(tmp_path);
 	else if (c == 'p')
 		temp = reduce_path(tmp_path);
+	else if (c == 'f')
+		temp = reduce_path_fish(tmp_path);
 	else /* If c == 'w' */
 		temp = savestring(tmp_path, strlen(tmp_path));
 
@@ -780,6 +876,7 @@ decode_prompt(char *line)
 				temp = gen_mode(); goto ADD_STRING;
 
 			case 'p': /* fallthrough */ /* Abbreviated if longer than PathMax */
+			case 'f': /* fallthrough */ /* Abbreviated, fish-like */
 			case 'w': /* fallthrough */ /* Full PWD */
 			case 'W': /* Short PWD */
 				if (!workspaces[cur_ws].path) {	line++;	break; }

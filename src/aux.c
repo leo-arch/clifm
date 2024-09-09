@@ -49,6 +49,22 @@
 #endif /* !_NO_HIGHLIGHT */
 #include "spawn.h"
 
+/* Return the number of bytes in a UTF-8 sequence by inspecting only the
+ * leading byte (C).
+ * Taken from
+ * https://stackoverflow.com/questions/22790900/get-length-of-multibyte-utf-8-sequence */
+int
+utf8_bytes(unsigned char c)
+{
+    c >>= 4;
+    c &= 7;
+
+    if (c == 4)
+		return 2;
+
+	return c - 3;
+}
+
 void
 press_any_key_to_continue(const int init_newline)
 {

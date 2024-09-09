@@ -1595,7 +1595,8 @@ parse_cmdline_args(const int argc, char **argv)
 			set_max_value(optarg, &xargs.max_files, &conf.max_files);
 			break;
 		case LOPT_MAX_PATH:
-			set_max_value(optarg, &xargs.max_path, &conf.max_path);
+			set_max_value(optarg, &xargs.prompt_p_max_path,
+				&conf.prompt_p_max_path);
 			break;
 		case LOPT_MNT_UDISKS2:
 			xargs.mount_cmd = MNT_UDISKS2; break;
