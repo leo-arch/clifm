@@ -449,12 +449,6 @@
 # workspace). This option is overriden by StartingPath (if set).
 ;RestoreLastPath=true
 
-# This option is only used by the /p option in the prompt string (see the
-# prompts.clifm file): the current working directory will be abbreviated
-# to its basename (everything after the last slash) whenever the current
-# path is longer than MaxPath.
-;MaxPath=40
-
 # Set readline editing mode: 0 for vi and 1 for emacs (default).
 ;RlEditMode=1
 

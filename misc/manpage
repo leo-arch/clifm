@@ -255,9 +255,6 @@ maximum number of visited directories to remember
 \fB\-\-max\-files\fR=\fI\,NUM\/\fR
 list only up to \fINUM\fR files. Use \-1 or \'unset\' to remove the files limit (default). See the \fImf\fR command for a more detailed description.
 .TP
-\fB\-\-max\-path\fR=\fI\,NUM\/\fR
-set the maximum number of characters after which the current directory in the prompt line will be abbreviated to the directory base name (whenever the \fI\\z\fR code is used in the prompt)
-.TP
 \fB\-\-mnt\-udisks2\fR
 use \fIudisks2\fR instead of \fIudevil\fR (default), for the \fImedia\fR command
 .TP
@@ -1842,7 +1839,7 @@ Each prompt is built following almost the same escape codes and rules used by th
 .TP
 \fB\\H\fR: The full hostname
 .TP
-\fB\\h\fR: The hostname, up to the first \'.'\
+\fB\\h\fR: The hostname, up to the first \'.\'
 .TP
 \fB\\n\fR: A newline character
 .TP
@@ -1860,11 +1857,13 @@ Each prompt is built following almost the same escape codes and rules used by th
 .TP
 \fB\\A\fR: The time, in 24\-hour HH:MM format
 .TP
-\fB\\w\fR: The full current working directory, with $HOME abbreviated with a tilde
+\fB\\w\fR: The full current working directory, with the $HOME abbreviated with a tilde (~)
 .TP
-\fB\\W\fR: The basename of $PWD, with $HOME abbreviated with a tilde
+\fB\\W\fR: The basename of current working directory, with $HOME abbreviated with a tilde
 .TP
-\fB\\p\fR: A mix of the two above, it abbreviates the current working directory only if longer than PathMax (a value defined in the configuration file).
+\fB\\p\fR: A mix of the two above, it abbreviates the current working directory only if longer than 40 characters. To change this value set the \fBCLIFM_P_MAX_PATH\fR to a value greater than zero.
+.TP
+\fB\\f\fR: Replace $HOME with a tilde and abbreviate every path component but the last to a single character. To change the number of characters per path component, set the \fBCLIFM_PROMPT_F_DIR_LEN\fR environment variable to a value greater than zero (defaults to 1). To keep some path components unshortened, set the \fBCLIFM_PROMPT_F_FULL_LEN_DIRS\fR to a value greater than zero (defaults to 1).
 .TP
 \fB\\z\fR: Exit code of the last executed command (colored according to the \fIxs\fR (success) and \fIxf\fR (failure) codes in \fIInterfaceColors\fR in the color scheme file)
 .TP
