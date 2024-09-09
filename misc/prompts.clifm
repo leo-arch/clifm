@@ -29,11 +29,10 @@
 # \A: The time, in 24-hour HH:MM format
 # \w: The full current working directory, with the home directory abbreviated
 #     with a tilde (~).
-# \W: The basename of the current working directory, with $HOME abbreviated
-#     with a tilde.
+# \W: The basename of the current directory, with $HOME abbreviated with a tilde.
 # \p: Abbreviate the current working directory only if longer than 40 characters.
 #     To change this value set the CLIFM_P_MAX_PATH to a value greater than zero.
-# \f: Abbreviate every path component but the last to a default of one character.
+# \f: Abbreviate every path component but the last to a single character.
 #     To change the number of characters per path component, set the
 #     CLIFM_PROMPT_F_DIR_LEN environment variable to a value greater than zero
 #     (defaults to 1). To keep some path components unshortened, set the
@@ -165,6 +164,12 @@ Notifications=true
 RegularPrompt="%{reset}\I[%{b:green}\u%{n:cyan}@%{b:green}\H%{reset}] %{b:blue}\w%{reset} \$ "
 EnableWarningPrompt=true
 WarningPrompt="%{dim}\I[%{b:green}\u%{n:cyan}%{dim}@%{b:green}\H%{n:dim}] %{b:blue}\w %{b:red}!%{n:dim} "
+
+[pez]
+Notifications=true
+RegularPrompt="%{reset}\I[\S%{reset}]\l %{blue}\f%{reset} <\z%{reset}>\n%{b:green}>%{reset} "
+EnableWarningPrompt=true
+WarningPrompt="%{reset}%{b:red}>%{n:dim} "
 
 [security-scanner]
 # Print file statistics about the current directory (-:-:-:-) in this order:
