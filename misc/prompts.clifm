@@ -167,9 +167,9 @@ WarningPrompt="%{dim}\I[%{b:green}\u%{n:cyan}%{dim}@%{b:green}\H%{n:dim}] %{b:bl
 
 [pez]
 Notifications=true
-RegularPrompt="%{reset}\I[\S%{reset}]\l %{blue}\f%{reset} <\z%{reset}>\n%{b:green}>%{reset} "
+RegularPrompt="%{reset}\I[\S%{reset}]\l %{blue}\f%{reset} <\z%{reset}>\n%{b:red}>%{yellow}>%{green}>%{reset} "
 EnableWarningPrompt=true
-WarningPrompt="%{reset}%{b:red}>%{n:dim} "
+WarningPrompt="%{reset}%{b:red}>>>%{n:dim} "
 
 [security-scanner]
 # Print file statistics about the current directory (-:-:-:-) in this order:
