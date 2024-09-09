@@ -1492,16 +1492,7 @@ edit_prompts_file(char *app)
 
 	const time_t old_time = a.st_mtime;
 
-	int ret = FUNC_FAILURE;
-	if (app && *app) {
-		char *cmd[] = {app, prompts_file, NULL};
-		ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
-	} else {
-		open_in_foreground = 1;
-		ret = open_file(prompts_file);
-		open_in_foreground = 0;
-	}
-
+	int ret = open_config_file(app, prompts_file);
 	if (ret != FUNC_SUCCESS)
 		return ret;
 

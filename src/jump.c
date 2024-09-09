@@ -352,16 +352,7 @@ edit_jumpdb(char *app)
 
 	const time_t mtime_bfr = attr.st_mtime;
 
-	int ret = FUNC_FAILURE;
-	if (app && *app) {
-		char *cmd[] = {app, jump_file, NULL};
-		ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
-	} else {
-		open_in_foreground = 1;
-		ret = open_file(jump_file);
-		open_in_foreground = 0;
-	}
-
+	const int ret = open_config_file(app, jump_file);
 	if (ret != FUNC_SUCCESS)
 		return ret;
 

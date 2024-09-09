@@ -409,18 +409,7 @@ edit_history(char **args)
 
 	const time_t mtime_bfr = attr.st_mtime;
 
-	int ret = FUNC_SUCCESS;
-
-	/* If we have an opening application (2nd argument) */
-	if (args[2]) {
-		char *cmd[] = {args[2], hist_file, NULL};
-		ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
-	} else {
-		open_in_foreground = 1;
-		ret = open_file(hist_file);
-		open_in_foreground = 0;
-	}
-
+	int ret = open_config_file(args[2], hist_file);
 	if (ret != FUNC_SUCCESS)
 		return ret;
 

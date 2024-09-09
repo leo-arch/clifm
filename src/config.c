@@ -580,19 +580,8 @@ config_edit(char **args)
 	}
 
 	const time_t prev_mtime = attr.st_mtime;
-	int ret = FUNC_SUCCESS;
 
-	/* If there is an argument... */
-	if (opening_app) {
-		char *cmd[] = {opening_app, config_file, NULL};
-		ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
-	} else {
-		/* If no application was passed as 2nd argument */
-		open_in_foreground = 1;
-		ret = open_file(config_file);
-		open_in_foreground = 0;
-	}
-
+	const int ret = open_config_file(opening_app, config_file);
 	if (ret != FUNC_SUCCESS)
 		return ret;
 

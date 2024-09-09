@@ -55,6 +55,7 @@ mode_t get_dt(const mode_t mode);
 int  get_link_ref(const char *link);
 char *hex2rgb(char *hex);
 char *normalize_path(char *src, const size_t src_len);
+int  open_config_file(char *app, char *file);
 FILE *open_fread(const char *name, int *fd);
 FILE *open_fwrite(const char *name, int *fd);
 FILE *open_fappend(const char *name);

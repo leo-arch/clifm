@@ -111,17 +111,8 @@ edit_bookmarks(char *cmd, const int flag)
 	}
 
 	const time_t prev = a.st_mtime;
-	int ret = FUNC_SUCCESS;
 
-	if (!cmd) {
-		open_in_foreground = 1;
-		ret = open_file(bm_file);
-		open_in_foreground = 0;
-	} else {
-		char *tmp_cmd[] = {cmd, bm_file, NULL};
-		ret = launch_execv(tmp_cmd, FOREGROUND, E_NOFLAG);
-	}
-
+	const int ret = open_config_file(cmd, bm_file);
 	if (ret != FUNC_SUCCESS) {
 		if (!cmd)
 			xerror("%s\n", _("bookmarks: Cannot open the bookmarks file"));

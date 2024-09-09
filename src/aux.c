@@ -44,10 +44,32 @@
 #include "aux.h"
 #include "misc.h"
 #include "checks.h"
+#include "file_operations.h" /* open_file() */
 #ifndef _NO_HIGHLIGHT
 # include "highlight.h"
 #endif /* !_NO_HIGHLIGHT */
-#include "spawn.h"
+#include "spawn.h" /* launch_execv() */
+
+/* Open the file FILE with APP (if not NULL, or with the default associated
+ * application otherwise). Returns the exit code returned by the opening
+ * application. */
+int
+open_config_file(char *app, char *file)
+{
+	if (!file || !*file)
+		return FUNC_FAILURE;
+
+	if (app && *app) {
+		char *cmd[] = {app, file, NULL};
+		return launch_execv(cmd, FOREGROUND, E_NOFLAG);
+	}
+
+	open_in_foreground = 1;
+	const int ret = open_file(file);
+	open_in_foreground = 0;
+
+	return ret;
+}
 
 /* Return the number of bytes in a UTF-8 sequence by inspecting only the
  * leading byte (C).
