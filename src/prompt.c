@@ -53,6 +53,10 @@
 # include "suggestions.h"
 #endif /* !_NO_SUGGESTIONS */
 
+#if defined(__HAIKU__) || defined(__OpenBSD__) || defined(__ANDROID__)
+# define NO_WORDEXP
+#endif /* __HAIKU__ || __OpenBSD__ || __ANDROID__ */
+
 static inline char *
 gen_time(const int c)
 {
@@ -456,7 +460,7 @@ add_string(char **tmp, const int c, char **line, char **res, size_t *len)
 	free(*tmp);
 }
 
-#if !defined(__HAIKU__) && !defined(__OpenBSD__) && !defined(__ANDROID__)
+#ifndef NO_WORDEXP
 static inline void
 reset_ifs(const char *value)
 {
@@ -469,46 +473,52 @@ reset_ifs(const char *value)
 static inline void
 substitute_cmd(char **line, char **res, size_t *len)
 {
-	const int tmp = strcntchr(*line, ')');
-	if (tmp == -1) return; /* No ending bracket */
+	char *p = strchr(*line, ')');
+	if (!p)
+		return; /* No ending bracket */
 
-	const size_t tmp_len = strlen(*line) + 2;
-	char *tmp_str = xnmalloc(tmp_len, sizeof(char));
-	snprintf(tmp_str, tmp_len, "$%s", *line);
+	/* Extract the command to be executed */
+	const char c = p[1];
+	p[1] = '\0';
+	const size_t cmd_len = strlen(*line) + 2;
+	char *cmd = xnmalloc(cmd_len, sizeof(char));
+	snprintf(cmd, cmd_len, "$%s", *line); /* Reinsert leading '$' */
+	p[1] = c;
 
-	tmp_str[tmp + 2] = '\0';
-	*line += tmp + 1;
+	/* Set LINE after the ending bracket to continue processing */
+	*line = p + 1;
 
 	char *old_value = xgetenv("IFS", 1);
 	setenv("IFS", "", 1);
 
 	wordexp_t wordbuf;
-	if (wordexp(tmp_str, &wordbuf, 0) != FUNC_SUCCESS) {
-		free(tmp_str);
-		reset_ifs(old_value);
-		free(old_value);
-		return;
-	}
+	const int ret = wordexp(cmd, &wordbuf, 0);
+
 	reset_ifs(old_value);
 	free(old_value);
-	free(tmp_str);
+	free(cmd);
 
-	if (wordbuf.we_wordc) {
-		for (size_t j = 0; j < wordbuf.we_wordc; j++) {
-			*len += strlen(wordbuf.we_wordv[j]);
-			if (!*res) {
-				*res = xnmalloc(*len + 2, sizeof(char));
-				*(*res) = '\0';
-			} else {
-				*res = xnrealloc(*res, *len + 2, sizeof(char));
-			}
-			xstrncat(*res, strlen(*res), wordbuf.we_wordv[j], *len + 2);
+	if (ret != 0)
+		return;
+
+	if (wordbuf.we_wordc == 0)
+		goto END;
+
+	for (size_t j = 0; j < wordbuf.we_wordc; j++) {
+		*len += strlen(wordbuf.we_wordv[j]);
+		if (!*res) {
+			*res = xnmalloc(*len + 2, sizeof(char));
+			*(*res) = '\0';
+		} else {
+			*res = xnrealloc(*res, *len + 2, sizeof(char));
 		}
+		xstrncat(*res, strlen(*res), wordbuf.we_wordv[j], *len + 2);
 	}
 
+END:
 	wordfree(&wordbuf);
 }
-#endif /* !__HAIKU__ && !__OpenBSD__ && !__ANDROID__ */
+#endif /* !NO_WORDEXP */
 
 static inline char *
 gen_emergency_prompt(void)
@@ -914,13 +924,13 @@ ADD_STRING:
 			if (c == '\'' || c == '"')
 				continue;
 
-#if !defined(__HAIKU__) && !defined(__OpenBSD__) && !defined(__ANDROID__)
+#ifndef NO_WORDEXP
 			/* Command substitution */
 			if (c == '$' && *line == '(') {
 				substitute_cmd(&line, &result, &result_len);
 				continue;
 			}
-#endif /* !__HAIKU__ && !__OpenBSD__ && !__ANDROID__ */
+#endif /* !NO_WORDEXP */
 
 			const size_t new_len = result_len + 2
 				+ (wrong_cmd ? (MAX_COLOR + 6) : 0);
