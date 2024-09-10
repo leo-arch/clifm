@@ -1351,16 +1351,26 @@ lira_function(char **args)
 }
 
 static inline int
-check_comments(const char *name)
+check_comments(char *name)
 {
-	if (*name != '#')
+	const int maybe_comment =
+		((*name == '\\' && name[1] == '#') || *name == '#');
+
+	if (maybe_comment == 0)
 		return FUNC_FAILURE;
+
+	char *p = (*name == '\\' || strchr(name + 1, '\\'))
+		? unescape_str(name, 0) : (char *)NULL;
+	char * n = p ? p : name;
 
 	/* Skip lines starting with '#' if there is no such file name
 	 * in the current directory. This implies that no command starting
 	 * with '#' will be executed */
 	struct stat a;
-	if (lstat(name, &a) == -1)
+	const int ret = lstat(n, &a);
+	free(p);
+
+	if (ret == -1)
 		return FUNC_SUCCESS;
 
 	if (conf.autocd == 1 && S_ISDIR(a.st_mode))
