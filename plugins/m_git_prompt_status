@@ -4,9 +4,15 @@
 # License: GPL3
 # Written by L. Abramovich
 
-branch="$(git branch --show-current 2>/dev/null)"
+tmp="$(git -c color.status=false status -sb 2>/dev/null | sed -n 1p | cut -d'/' -f2)"
 
-[ -z "$branch" ] && exit 1
+[ -z "$tmp" ] && exit 1
+
+branch="$(echo "$tmp" | cut -d' ' -f1)"
+
+case "$tmp" in
+	*"["*) ahead_behind="$(echo "$tmp" | cut -d' ' -f2-3 | tr -d '[]')" ;;
+esac
 
 status=""
 
@@ -23,7 +29,17 @@ for i in $(git status --porcelain | cut -c1-3 | uniq); do
 done
 
 # FIXME: The POSIX version of echo does not support flags
-echo -ne "(\e[35m$branch\e[0m"
+if [ -n "$ahead_behind" ]; then
+	if [ "$(echo "$ahead_behind" | cut -b1)" = "a" ]; then
+		color="\e[0;32m"
+	else
+		color="\e[0;31m"
+	fi
+	echo -ne "(\e[35m$branch\e[0m\e[2;37m|$color$ahead_behind\e[0m"
+else
+	echo -ne "(\e[35m$branch\e[0m"
+fi
+
 if [ -n "$status" ]; then
 	echo -e "\e[2;37m|\e[0m${status}\e[0m)"
 else
