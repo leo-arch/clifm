@@ -1,18 +1,21 @@
 #!/bin/sh
 
 # Git prompt module for Clifm
-# Dependencies: git, sed, cut, tr, uniq
+# Dependencies: git, sed, cut, tr, uniq, tail
 # License: GPL3
 # Written by L. Abramovich
 
-temp="$(git -c color.status=false status -sb 2>/dev/null | sed -n 1p)"
+output="$(git -c color.status=false status -sb 2>/dev/null)"
 
-case "$temp" in
-	*"/"*) tmp="$(echo "$temp" | cut -d'/' -f2)" ;;
-	*) tmp="$(echo "$temp" | cut -d' ' -f2-10)" ;;
+[ -z "$output" ] && exit 1
+
+header="$(echo "$output" | sed -n 1p)"
+files="$(echo "$output" | tail -n+2 | cut -c1-3 | uniq)"
+
+case "$header" in
+	*"/"*) tmp="$(echo "$header" | cut -d'/' -f2)" ;;
+	*) tmp="$(echo "$header" | cut -d' ' -f2-10)" ;;
 esac
-
-[ -z "$tmp" ] && exit 1
 
 branch="$(echo "$tmp" | cut -d' ' -f1)"
 
@@ -22,7 +25,7 @@ esac
 
 status=""
 
-for i in $(git status --porcelain | cut -c1-3 | uniq); do
+for i in $files; do
 	case "$i" in
 		".") status="${status}\e[36m+" ;;
 		"D"*) status="${status}\e[31mD" ;;
