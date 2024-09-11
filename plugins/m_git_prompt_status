@@ -1,0 +1,33 @@
+#!/bin/sh
+
+# Git prompt module for Clifm
+# License: GPL3
+# Written by L. Abramovich
+
+branch="$(git branch --show-current 2>/dev/null)"
+
+[ -z "$branch" ] && exit 1
+
+status=""
+
+for i in $(git status --porcelain | cut -c1-3 | uniq); do
+	case "$i" in
+		".") status="${status}\e[36m+" ;;
+		"D"*) status="${status}\e[31mD" ;;
+		"M"*) status="${status}\e[32mM" ;;
+		"R"*) status="${status}\e[35mR" ;;
+		"U"*) status="${status}\e[33mU" ;;
+		"A"*) status="${status}\e[32mA" ;;
+		"??"*) status="${status}\e[31m?" ;;
+    esac
+done
+
+# FIXME: The POSIX version of echo does not support flags
+echo -ne "(\e[35m$branch\e[0m"
+if [ -n "$status" ]; then
+	echo -e "\e[2;37m|\e[0m${status}\e[0m)"
+else
+	echo -e ")\n"
+fi
+
+exit 0

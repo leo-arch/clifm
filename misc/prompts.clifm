@@ -6,8 +6,11 @@
 
 # The regular prompt (just as the warning one, a secondary prompt used
 # to highlight invalid/non-existent command names) is built using command
-# substitution ($(cmd)), string literals and/or one or more of the
-# following escape sequences:
+# substitution ($(cmd)), prompt modules (${module}), string literals, and
+# escape sequences.
+#
+# 1. ESCAPE SEQUENCES
+# -------------------
 #
 # \e: Escape character
 # \u: The username
@@ -91,7 +94,10 @@
 # character, or by inserting its hex code:
 # echo -ne "paste_your_char" | hexdump -C
 
-# COLORIZATION is made using either of the two following methods:
+# 2. COLORS
+# ---------
+#
+# Colorization is made using either of the two following methods:
 # 1) Bash-style full escape sequences (e.g. "\[\e[1;31m\]", for bold red)
 #
 # 2) Using the %{COLOR} syntax, where COLOR is:
@@ -140,6 +146,26 @@
 # scheme, you may want to edit the one you choose manually to make it fit
 # your current color scheme.
 
+# 3. PROMPT MODULES AND COMMAND SUBSTITUTION
+# ------------------------------------------
+# 
+# Since escape codes are limited and internal to Clifm, prompt modules and command
+# substitution are designed to provide external information to the prompt.
+#
+# While command substitution work much like in regular shells, invoking shell
+# commands (e.g. $(uname -s)), prompt modules are programs/scripts located in the
+# plugins directory (etiher local or system wide).
+
+# To run a prompt module write "${NAME}". For example, to run the git prompt module:
+# "${m_git_prompt_status}". Clifm will look for this module in the local plugins directory
+# (~/.config/clifm/plugins), and, if not found, in the data directory (usually,
+# /usr/local/share/clifm/plugins). Take a look at the "git" prompt for a concrete
+# usage example.
+#
+# Note that you can also run a prompt module using command substitution, in which case
+# you need to indicate the path to the module. For example:
+# $(/usr/local/share/clifm/plugins/m_git_prompt_status)
+
 [clifm]
 Notifications=true
 RegularPrompt="%{reset}\I[\S%{reset}]\l \A \u:\H %{cyan}\w%{reset}\n<\z%{reset}> %{blue}\$%{reset} "
@@ -164,6 +190,12 @@ Notifications=true
 RegularPrompt="%{reset}\I[%{b:green}\u%{n:cyan}@%{b:green}\H%{reset}] %{b:blue}\w%{reset} \$ "
 EnableWarningPrompt=true
 WarningPrompt="%{dim}\I[%{b:green}\u%{n:cyan}%{dim}@%{b:green}\H%{n:dim}] %{b:blue}\w %{b:red}!%{n:dim} "
+
+[git]
+Notifications=true
+RegularPrompt="%{reset}[\S%{reset}] %{green}\f%{reset} ${m_git_prompt_status}\n<\z%{reset}> %{cyan}\$%{reset} "
+EnableWarningPrompt=true
+WarningPrompt="%{reset}%{b:red}(!)%{n:dim} > "
 
 [pez]
 Notifications=true
