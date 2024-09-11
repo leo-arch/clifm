@@ -812,7 +812,7 @@ check_mod_paths_cache(const char *name)
 static void
 cache_pmod_path(const char *mod_path)
 {
-	if (!mod_path || !*mod_path)
+	if (!mod_path || !*mod_path || p_mod_paths_n == MAX_PMOD_PATHS)
 		return;
 
 	xstrsncpy(p_mod_paths[p_mod_paths_n].path, mod_path, strlen(mod_path) + 1);
