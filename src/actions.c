@@ -82,7 +82,8 @@ get_plugin_path(char *action, int *status)
 
 	/* Not in local dir. Let's check the system data dir as well */
 	if (data_dir && dir_path == 0) {
-		cmd_len = action_len + strlen(data_dir)	+ strlen(PROGRAM_NAME) + 11;
+		cmd_len = action_len + strlen(data_dir)
+			+ (sizeof(PROGRAM_NAME) - 1) + 11;
 		cmd = xnrealloc(cmd, cmd_len, sizeof(char));
 		snprintf(cmd, cmd_len, "%s/%s/plugins/%s", data_dir,
 			PROGRAM_NAME, action);

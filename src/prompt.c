@@ -776,6 +776,54 @@ gen_color(char **line)
 	return temp;
 }
 
+static char *
+get_prompt_module_path(const char *name)
+{
+	struct stat a;
+	static char m_path[PATH_MAX];
+
+	if (plugins_dir && *plugins_dir) {
+		snprintf(m_path, sizeof(m_path), "%s/%s", plugins_dir, name);
+		if (stat(m_path, &a) != -1)
+			return &m_path[0];
+	}
+
+	if (data_dir && *data_dir) {
+		snprintf(m_path, sizeof(m_path), "%s/%s/plugins/%s",
+			data_dir, PROGRAM_NAME, name);
+		if (stat(m_path, &a) != -1)
+			return &m_path[0];
+	}
+
+	return (char *)NULL;
+}
+
+static void
+run_prompt_module(char **line, char **res, size_t *len)
+{
+	char *p = strchr(*line, '}');
+	if (!p)
+		return;
+
+	*p = '\0';
+
+	const char *p_path = get_prompt_module_path(*line + 1);
+	if (!p_path)
+		goto END;
+
+	const size_t cmd_len = strlen(p_path) + 3;
+	char *cmd = xnmalloc(cmd_len, sizeof(char));
+	snprintf(cmd, cmd_len, "(%s)", p_path);
+
+	char *orig_ptr = cmd;
+	substitute_cmd(&cmd, res, len);
+	free(orig_ptr);
+
+END:
+	*p = '}';
+	*line = p + 1;
+}
+
 /* Decode the prompt string (encoded_prompt global variable) taken from
  * the configuration file. */
 char *
@@ -931,6 +979,11 @@ ADD_STRING:
 				continue;
 			}
 #endif /* !NO_WORDEXP */
+
+			if (c == '$' && *line == '{') {
+				run_prompt_module(&line, &result, &result_len);
+				continue;
+			}
 
 			const size_t new_len = result_len + 2
 				+ (wrong_cmd ? (MAX_COLOR + 6) : 0);
