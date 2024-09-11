@@ -780,7 +780,7 @@ static char *
 get_prompt_module_path(const char *name)
 {
 	struct stat a;
-	static char m_path[PATH_MAX];
+	static char m_path[PATH_MAX + 1];
 
 	if (plugins_dir && *plugins_dir) {
 		snprintf(m_path, sizeof(m_path), "%s/%s", plugins_dir, name);
@@ -811,13 +811,13 @@ run_prompt_module(char **line, char **res, size_t *len)
 	if (!p_path)
 		goto END;
 
-	const size_t cmd_len = strlen(p_path) + 3;
-	char *cmd = xnmalloc(cmd_len, sizeof(char));
-	snprintf(cmd, cmd_len, "(%s)", p_path);
+	/* get_prompt_module_path() returns a pointer to a string of at most
+	 * PATH_MAX + 1. */
+	char cmd[PATH_MAX + 4];
+	snprintf(cmd, sizeof(cmd), "(%s)", p_path);
 
-	char *orig_ptr = cmd;
-	substitute_cmd(&cmd, res, len);
-	free(orig_ptr);
+	char *ptr = &cmd[0];
+	substitute_cmd(&ptr, res, len);
 
 END:
 	*p = '}';
