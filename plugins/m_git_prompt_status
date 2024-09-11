@@ -4,7 +4,13 @@
 # License: GPL3
 # Written by L. Abramovich
 
-tmp="$(git -c color.status=false status -sb 2>/dev/null | sed -n 1p | cut -d'/' -f2)"
+#tmp="$(git -c color.status=false status -sb 2>/dev/null | sed -n 1p | cut -d'/' -f2)"
+temp="$(git -c color.status=false status -sb 2>/dev/null | sed -n 1p)"
+
+case "$temp" in
+	*"/"*) tmp="$(echo "$temp" | cut -d'/' -f2)" ;;
+	*) tmp="$(echo "$temp" | cut -d' ' -f2-10)" ;;
+esac
 
 [ -z "$tmp" ] && exit 1
 
