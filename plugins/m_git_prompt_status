@@ -5,12 +5,12 @@
 # License: GPL3
 # Written by L. Abramovich
 
-output="$(git -c color.status=false status -sb 2>/dev/null)"
+cmd_output="$(git -c color.status=false status -sb 2>/dev/null)"
 
-[ -z "$output" ] && exit 1
+[ -z "$cmd_output" ] && exit 1
 
-header="$(echo "$output" | sed -n 1p)"
-files="$(echo "$output" | tail -n+2 | cut -c1-3 | uniq)"
+header="$(echo "$cmd_output" | sed -n 1p)"
+files="$(echo "$cmd_output" | tail -n+2 | cut -c1-3 | uniq)"
 
 case "$header" in
 	*"/"*) tmp="$(echo "$header" | cut -d'/' -f2)" ;;
@@ -21,6 +21,7 @@ branch="$(echo "$tmp" | cut -d' ' -f1)"
 
 case "$tmp" in
 	*"["*) ahead_behind="$(echo "$tmp" | cut -d' ' -f2-3 | tr -d '[]')" ;;
+	*) ahead_behind="" ;;
 esac
 
 status=""
@@ -41,22 +42,19 @@ branch_color="\e[0;35m"
 sep_color="\e[2;37m"
 end_color="\e[0m"
 
-# FIXME: The POSIX version of echo does not support flags
+output="$branch_color$branch$sep_color|"
+
 if [ -n "$ahead_behind" ]; then
-	if [ "$(echo "$ahead_behind" | cut -b1)" = "a" ]; then
-		ab_color="\e[0;32m"
-	else
-		ab_color="\e[0;31m"
-	fi
-	echo -ne "($branch_color$branch$sep_color|$ab_color$ahead_behind$end_color"
+	ab_color="\e[0;32m"
+	[ "$(echo "$ahead_behind" | cut -b1)" != "a" ] && ab_color="\e[0;31m"
+	output="$output$ab_color$ahead_behind$end_color"
 else
-	echo -ne "($branch_color$branch$sep_color|\e[0;32m=$end_color"
+	output="$output\e[0;32m=$end_color"
 fi
 
-if [ -n "$status" ]; then
-	echo -e "$sep_color|$end_color$status$end_color)"
-else
-	echo -e ")\n"
-fi
+[ -n "$status" ] && output="$output$sep_color|$end_color$status$end_color"
+
+# FIXME: The POSIX version of echo does not support flags
+echo -e "($output)"
 
 exit 0
