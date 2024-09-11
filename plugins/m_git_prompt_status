@@ -28,20 +28,24 @@ for i in $(git status --porcelain | cut -c1-3 | uniq); do
     esac
 done
 
+branch_color="\e[0;35m"
+sep_color="\e[2;37m"
+end_color="\e[0m"
+
 # FIXME: The POSIX version of echo does not support flags
 if [ -n "$ahead_behind" ]; then
 	if [ "$(echo "$ahead_behind" | cut -b1)" = "a" ]; then
-		color="\e[0;32m"
+		ab_color="\e[0;32m"
 	else
-		color="\e[0;31m"
+		ab_color="\e[0;31m"
 	fi
-	echo -ne "(\e[35m$branch\e[0m\e[2;37m|$color$ahead_behind\e[0m"
+	echo -ne "($branch_color$branch$sep_color|$ab_color$ahead_behind$end_color"
 else
-	echo -ne "(\e[35m$branch\e[0m"
+	echo -ne "($branch_color$branch$sep_color|\e[0;32m=$end_color"
 fi
 
 if [ -n "$status" ]; then
-	echo -e "\e[2;37m|\e[0m${status}\e[0m)"
+	echo -e "$sep_color|$end_color$status$end_color)"
 else
 	echo -e ")\n"
 fi
