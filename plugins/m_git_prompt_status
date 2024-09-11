@@ -1,10 +1,10 @@
 #!/bin/sh
 
 # Git prompt module for Clifm
+# Dependencies: git, sed, cut, tr, uniq
 # License: GPL3
 # Written by L. Abramovich
 
-#tmp="$(git -c color.status=false status -sb 2>/dev/null | sed -n 1p | cut -d'/' -f2)"
 temp="$(git -c color.status=false status -sb 2>/dev/null | sed -n 1p)"
 
 case "$temp" in
