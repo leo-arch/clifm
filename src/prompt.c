@@ -57,6 +57,16 @@
 # define NO_WORDEXP
 #endif /* __HAIKU__ || __OpenBSD__ || __ANDROID__ */
 
+#define MAX_PMOD_PATHS 8
+static size_t p_mod_paths_n = 0;
+
+struct p_mod_paths_t {
+	char path[PATH_MAX];
+	char *name;
+};
+
+static struct p_mod_paths_t p_mod_paths[MAX_PMOD_PATHS];
+
 static inline char *
 gen_time(const int c)
 {
@@ -777,22 +787,68 @@ gen_color(char **line)
 }
 
 static char *
+check_mod_paths_cache(const char *name)
+{
+	size_t i = 0;
+
+	static int first = 0;
+	if (first == 0) { /* Initialize the cache */
+		first = 1;
+		for (i = 0; i < MAX_PMOD_PATHS; i++) {
+			p_mod_paths[i].path[0] = '\0';
+			p_mod_paths[i].name = (char *)NULL;
+		}
+	}
+
+	for (i = 0; i < MAX_PMOD_PATHS && p_mod_paths[i].name; i++) {
+		if (*name == *p_mod_paths[i].name
+		&& strcmp(name + 1, p_mod_paths[i].name + 1) == 0)
+			return &p_mod_paths[i].path[0];
+	}
+
+	return (char *)NULL;
+}
+
+static void
+cache_pmod_path(const char *mod_path)
+{
+	if (!mod_path || !*mod_path)
+		return;
+
+	xstrsncpy(p_mod_paths[p_mod_paths_n].path, mod_path, strlen(mod_path) + 1);
+
+	char *p = strrchr(p_mod_paths[p_mod_paths_n].path, '/');
+	if (p && p[1])
+		p_mod_paths[p_mod_paths_n].name = p + 1;
+
+	p_mod_paths_n++;
+}
+
+static char *
 get_prompt_module_path(const char *name)
 {
+	char *cached_path = check_mod_paths_cache(name);
+	if (cached_path)
+		return cached_path;
+
 	struct stat a;
-	static char m_path[PATH_MAX + 1];
+	static char m_path[PATH_MAX];
 
 	if (plugins_dir && *plugins_dir) {
 		snprintf(m_path, sizeof(m_path), "%s/%s", plugins_dir, name);
-		if (stat(m_path, &a) != -1)
+		if (stat(m_path, &a) != -1) {
+			cache_pmod_path(m_path);
 			return &m_path[0];
+		}
 	}
 
 	if (data_dir && *data_dir) {
 		snprintf(m_path, sizeof(m_path), "%s/%s/plugins/%s",
 			data_dir, PROGRAM_NAME, name);
-		if (stat(m_path, &a) != -1)
+		if (stat(m_path, &a) != -1) {
+			cache_pmod_path(m_path);
 			return &m_path[0];
+		}
 	}
 
 	return (char *)NULL;
@@ -808,18 +864,14 @@ run_prompt_module(char **line, char **res, size_t *len)
 	*p = '\0';
 
 	const char *p_path = get_prompt_module_path(*line + 1);
-	if (!p_path)
-		goto END;
+	if (p_path) {
+		char cmd[PATH_MAX + 3];
+		snprintf(cmd, sizeof(cmd), "(%s)", p_path);
 
-	/* get_prompt_module_path() returns a pointer to a string of at most
-	 * PATH_MAX + 1. */
-	char cmd[PATH_MAX + 4];
-	snprintf(cmd, sizeof(cmd), "(%s)", p_path);
+		char *ptr = &cmd[0];
+		substitute_cmd(&ptr, res, len);
+	}
 
-	char *ptr = &cmd[0];
-	substitute_cmd(&ptr, res, len);
-
-END:
 	*p = '}';
 	*line = p + 1;
 }
