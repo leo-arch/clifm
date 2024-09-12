@@ -28,8 +28,6 @@ if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "-h" ]; }; then
 	exit 0
 fi
 
-[ "$(git rev-parse --is-inside-work-tree 2>/dev/null)" != "true" ] && exit 1
-
 if [ -n "$CLIFM_COLORLESS" ]; then
 	git -c color.status=false status -sb 2>/dev/null
 else
