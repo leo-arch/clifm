@@ -259,7 +259,7 @@ gen_pwd(const int c)
 static inline char *
 gen_workspace(void)
 {
-		/* An int (or workspace name) + workspaces color + NUL byte */
+	/* An int (or workspace name) + workspaces color + NUL byte */
 	char s[NAME_MAX + sizeof(ws1_c) + 1];
 	char *cl = (char *)NULL;
 
@@ -791,9 +791,9 @@ check_mod_paths_cache(const char *name)
 {
 	size_t i = 0;
 
-	static int first = 0;
-	if (first == 0) { /* Initialize the cache */
-		first = 1;
+	static int init = 0;
+	if (init == 0) { /* Initialize the cache */
+		init = 1;
 		for (i = 0; i < MAX_PMOD_PATHS; i++) {
 			p_mod_paths[i].path[0] = '\0';
 			p_mod_paths[i].name = (char *)NULL;

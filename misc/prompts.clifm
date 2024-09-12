@@ -154,7 +154,7 @@
 #
 # While command substitution work much like in regular shells, invoking shell
 # commands (e.g. $(uname -s)), prompt modules are programs/scripts located in the
-# plugins directory (etiher local or system wide).
+# plugins directory (either local or system wide).
 
 # To run a prompt module write "${NAME}". For example, to run the git prompt module:
 # "${m_git_prompt_status}". Clifm will look for this module in the local plugins directory
