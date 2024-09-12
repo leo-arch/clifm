@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Sep 5, 2024" "clifm 1.20.5" "CLIFM Manual"
+.TH "CLIFM" "1" "Sep 12, 2024" "clifm 1.20.7" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -1541,7 +1541,7 @@ Each color scheme may include any (or all) of the below options:
 .TP
  \fIDirIconColor\fR = Color for the directory icon (when icons are enabled). See the \fBCOLORS\fR section below. Only when using icons\-in\-terminal or Nerfonts. If using rather emoji\-icons (default build), this option is ignored.
 .TP
- \fIPrompt\fR = Define CliFM\'s prompt. See the \fBTHE PROMPT\fR section below.
+ \fIPrompt\fR = Define Clifm\'s prompt. See the \fBTHE PROMPT\fR section below.
 .TP
  \fIDividingLine\fR = The line dividing the current list of files and the prompt. See the \fBTHE DIVIDING LINE\fR below.
 .TP
@@ -1669,7 +1669,9 @@ Colors are defined basically as SGR sequences (excluding the initial escape char
  38;5;160      8-bit
  @160          8-bit  (short)
  38;2;255;0;0  24-bit
- #ff0000       24-bit (short, HEX)
+ #ff0000       24-bit (short, HEX) \fB(1)\fR
+.TP
+\fB(1)\fR Both three and six digits hexadecimal colors (lower or uppercase) are supported. For example, \fB#f00\fR amounts to \fB#ff0000\fR.
 .TP
 A \fIsingle\fR attribute can be added to hex colors and 256 colors (in the form @NUM) using a dash and an attribute number (#RRGGBB-[1-9] or @NUM-[1-9]), where 1-9 is:
 .sp
@@ -1821,127 +1823,11 @@ For a full no\-color experience recall to edit your prompt removing all color co
 .TP
 \fBclifm\fR's prompt (regular and warning ones) is taken from the \fIPrompt\fR line in the color scheme file using a prompt name as defined in the prompts file, for example, \fIPrompt="security\-scanner"\fR.
 .TP
-Prompts can be customized via the \fIprompt edit\fR command.
-.TP
-Each prompt is built following almost the same escape codes and rules used by the Bash prompt, except that it does not accept shell functions (like conditionals and loops). Command substitution (in the form $(cmd)), string literals, and escape codes can be used to build the prompt line and its colors. This is a list of supported escape codes:
-.TP
-\fB\\e\fR: Escape character
-.TP
-\fB\\s\fR: The name of the shell (everything after the last slash) currently used by \fBclifm\fR
-.TP
-\fB\\S\fR: Current workspace number (or name, if named), colored according to \fIwsN\fR code in the \fIInterfaceColors\fR section in the color scheme file
-.TP
-\fB\\l\fR: Print an \'L\' if in light mode
-.TP
-\fB\\P\fR: The current profile name
-.TP
-\fB\\u\fR: The username
-.TP
-\fB\\H\fR: The full hostname
-.TP
-\fB\\h\fR: The hostname, up to the first \'.\'
-.TP
-\fB\\n\fR: A newline character
-.TP
-\fB\\r\fR: A carriage return
-.TP
-\fB\\a\fR: A bell character
-.TP
-\fB\\d\fR: The date, in abbreviated form (e.g.: \'Tue May 26\')
-.TP
-\fB\\t\fR: The time, in 24\-hour HH:MM:SS format
-.TP
-\fB\\T\fR: The time, in 12\-hour HH:MM:SS format
-.TP
-\fB\\@\fR: The time, in 12\-hour am/pm format
-.TP
-\fB\\A\fR: The time, in 24\-hour HH:MM format
-.TP
-\fB\\w\fR: The full current working directory, with the $HOME abbreviated with a tilde (~)
-.TP
-\fB\\W\fR: The basename of current working directory, with $HOME abbreviated with a tilde
-.TP
-\fB\\p\fR: A mix of the two above, it abbreviates the current working directory only if longer than 40 characters. To change this value set the \fBCLIFM_P_MAX_PATH\fR to a value greater than zero.
-.TP
-\fB\\f\fR: Replace $HOME with a tilde and abbreviate every path component but the last to a single character. To change the number of characters per path component, set the \fBCLIFM_PROMPT_F_DIR_LEN\fR environment variable to a value greater than zero (defaults to 1). To keep some path components unshortened, set the \fBCLIFM_PROMPT_F_FULL_LEN_DIRS\fR to a value greater than zero (defaults to 1).
-.TP
-\fB\\z\fR: Exit code of the last executed command (colored according to the \fIxs\fR (success) and \fIxf\fR (failure) codes in \fIInterfaceColors\fR in the color scheme file)
-.TP
-\fB\\i\fR: The value of \fBCLIFMLVL\fR (number of nested instances of \fBclifm\fR)
-.TP
-\fB\\I\fR: Same as \fB\\I\fR, but formatted as "(n)" (nothing is printed if \fBCLIFMLVL\fR is 1)
-.TP
-\fB\\$\fR \'#\', if the effective user ID is 0, and \'$\' otherwise
-.TP
-\fB\\nnn\fR: The character whose ASCII code is the octal value nnn
-.TP
-\fB\\\\\fR: A literal backslash
-.TP
-\fB\\[\fR: Begin a sequence of non\-printing characters. This is mostly used to add color to the prompt line
-.TP
-\fB\\]\fR: End a sequence of non\-printing characters
-.TP
-The following files statistics escape codes are also recognized (not available in light mode):
-.TP
-\fB\\D\fR: Amount of sub\-directories in the current directory
-.TP
-\fB\\R\fR: Amount of regular files in the current directory
-.TP
-\fB\\X\fR: Amount of executable files in the current directory
-.TP
-\fB\\.\fR: Amount of hidden files in the current directory
-.TP
-\fB\\U\fR: Amount of SUID files in the current directory
-.TP
-\fB\\G\fR: Amount of SGID files in the current directory
-.TP
-\fB\\F\fR: Amount of FIFO/pipe files in the current directory
-.TP
-\fB\\K\fR: Amount of socket files in the current directory
-.TP
-\fB\\B\fR: Amount of block device files in the current directory
-.TP
-\fB\\C\fR: Amount of character device files in the current directory
-.TP
-\fB\\x\fR: Amount of files with capabilities in the current directory
-.TP
-\fB\\L\fR: Amount of symbolic links in the current directory
-.TP
-\fB\\o\fR: Amount of broken symbolic links in the current directory
-.TP
-\fB\\M\fR: Amount of multi\-link files in the current directory
-.TP
-\fB\\E\fR: Amount of files with extended attributes in the current directory
-.TP
-\fB\\O\fR: Amount of other\-writable files in the current directory
-.TP
-\fB\\>\fR: Amount of door files in the current directory (Solaris only)
-.TP
-\fB\\"\fR: Amount of files with the sticky bit set in the current directory
-.TP
-\fB\\?\fR: Amount of files of unknown file type in the current directory
-.TP
-\fB\\!\fR: Amount of unstatable files in the current directory
-.TP
-Escape codes for prompt notifications (mostly used for custom prompts which need to handle notifications themselves, in which case \fINotifications\fR should be set to \fIfalse\fR in the color scheme file to prevent automatic insertion of notifications at the left of the prompt):
-.TP
-\fB\\*\fR: \'*\' + amount of selected files
-.TP
-\fB\\%\fR: \'T\' + amount of trashed files
-.TP
-\fB\\#\fR: \'R\' if root user
-.TP
-\fB\\)\fR: \'W\' + amount of warning messages
-.TP
-\fB\\(\fR: \'E\' + amount of error messages
-.TP
-\fB\\=\fR: \'N\' + amount of notice messages
-.TP
-\fBNote\fR: Except for '\\#', nothing is printed if the number is zero.
+Each prompt is built following almost the same escape codes and rules used by the Bash prompt, except that it does not accept shell functions (like conditionals and loops). Command substitution (in the form \fB$(cmd)\fR), prompt modules (in the form \fB%{module}\fR), color codes (in the form \fB%{color}\fR), string literals, and escape sequences can be used to build the prompt. Consult the prompts file (via the \fIprompt edit\fR command) for detailed information about prompt building.
 .TP
 By default, for example, \fBclifm\fR's prompt line is this:
 
-\fB"\\[\\e[0m\\][\\S\\[\\e[0m\\]]\\l \\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0m\\]<\\z\\[\\e[0m\\]>\\[\\e[0;34m\\] \\$\\[\\e[0m\\] "\fR
+\fB"%{reset}\\I[\\S%{reset}]\\l \\A \\u:\\H %{cyan}\\w%{reset}\\n<\\z%{reset}> %{blue}\\$%{reset} "\fR
 
 .TP
 which once decoded should look something like this:
@@ -1951,7 +1837,7 @@ which once decoded should look something like this:
 .TP
 with the workspace number printed in blue, the path in cyan, the last exit status in green, and the dollar sign in blue.
 .TP
-A more "classic" prompt could be built as follows:
+A more "classic" prompt cab be generated as follows:
 
  \fB"\\u@\\U \\w> "\fR
 .TP
@@ -1959,52 +1845,9 @@ or, using now command substitution:
 
  \fB"$(whoami)@$(hostname) $(pwd)> "\fR
 .TP
-
-\fBAdvanced prompt customization\fR
-.TP
-Besides commands substitution, which allows you to include in the prompt any information you like via shell scripts or simple shell commands, the use of Unicode characters allows you to build colorful and modern prompts.
-.TP
-Inserting Unicode characters in the prompt can be made in two ways:
-.TP
-\fBa)\fR Pasting the character itself using a text editor
-.TP
-\fBb)\fR Entering the octal code corresponding to the character. Use \fBhexdump\fR(1) as follows to get the appropriate hex code:
-
- echo \-ne "[paste the char here]" | hexdump \-c
-.TP
-The first line of the output will be something along these lines:
-
- 00000000  256 234 356               |...|
-.TP
-In this case, the octal code is: "256 234 356". So, to insert this Unicode character in the prompt, add it as follows:
-
- Prompt="... \\256\\234\\356 ..."
-.TP
-\fBNote\fR: Make sure you have installed a font able to display Unicode characters.
-.TP
-A few advanced prompt examples can be found in the prompts file.
-.TP
-\fBA simple use case for the files statistics escape codes\fR
-.TP
-We all want to keep our systems safe. One of the many ways to get a bit of safety is by checking that there is not file in our file system that could somehow endanger our machines. SUID, SGID, executable, and other\-writable files are to be count among these dangers. This is why it could be useful to build a little files scanner for our prompt using the above mentioned files statistics escape codes. This is the code for our scanner:
-
- \fB\\[\\e[0m\\]\\[\\e[1;31m\\]\\U\\[\\e[0m\\]:\\[\\e[1;33m\\]\\G\\[\\e[0m\\]:
- \\[\\e[1;32m\\]\\O\\[\\e[0m\\]:\\[\\e[1;34m\\]\\X\\[\\e[0m\\]"\fR
-.TP
-By adding this code to our prompt line, we get something like this:
-
- \fB24:2:\-:2389\fR
-.TP
-This tells us that in the current directory we have 24 SUID files (printed in bold red), 2 SGID files (bold yellow), no other\-writable file, and 2389 executable files.
-.TP
-\fBNOTE\fR: A predefined prompt with this files scanner integrated can be found in the \fIprompts.clifm\fR file.
-.TP
-\fBNOTE 2\fR: Most of the information these escape codes rely on depends on \fBstat\fR(3). Now, since \fBstat\fR(3) is not used when running in light mode (for performance reasons), this information won\'t be available in light mode either.
-
-.TP
 \fBPrompt notifications\fR
 .TP
-A bold red \'R\' at the left of the prompt reminds the user that the program is running as root. A bold green asterisk indicates that there are elements in the Selection Box. In the same way, a yellow 'T' means that there are currently files in the trash can, just as a bold blue 'S' means that the program is running in stealth mode. Finally, \fBclifm\fR makes use of three kind of messages: errors (a red \'E\' at the left of the prompt), warnings (a yellow \'W\'), and simple notices (a green \'N\').
+A bold red \'R\' at the left of the prompt reminds the user that the program is running as root. A bold green asterisk indicates that there are elements in the Selection Box. In the same way, a cyan 'T' means that there are currently files in the trash can, just as a bold blue 'S' means that the program is running in stealth mode. Finally, \fBclifm\fR makes use of three kind of messages: errors (a red \'E\' at the left of the prompt), warnings (a yellow \'W\'), and simple notices (a green \'N\').
 .TP
 If \fINotifications\fR is set to "false" in the prompts file, the above notifications won\'t be printed by the prompt, but is still available to the user as escape codes (see above) and environment variables (see the \fBENVIRONMENT\fR section below) to build custom prompts.
 .TP
@@ -2024,7 +1867,8 @@ The wrong command name check is omitted if the input string:
 .TP
 The warning prompt could be customized by means of the same rules used by the regular prompt. To use a custom warning prompt, modify the \fIWarningPrompt\fR line in the prompts file (via the \fIprompt edit\fR command). It defaults to
 
- \fB"\\[\\e[0;2;31m\\](!) > "\fR
+\fB"%{reset}%{b:red}(!)%{n:dim} > "\fR
+
 .TP
 the last line of the regular prompt will become "\fB(!) > \fR", printed in a dimmed red color, including the input string.
 .TP
