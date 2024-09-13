@@ -1821,11 +1821,13 @@ For a full no\-color experience recall to edit your prompt removing all color co
 .TP
 .B 2. THE PROMPT
 .TP
-\fBclifm\fR's prompt (regular and warning ones) is taken from the \fIPrompt\fR line in the color scheme file using a prompt name as defined in the prompts file, for example, \fIPrompt="security\-scanner"\fR.
+\fBClifm\fR's prompt is taken from the \fIPrompt\fR line in the color scheme file using a prompt name as defined in the prompts file, for example, \fIPrompt="security\-scanner"\fR.
 .TP
-Each prompt is built following almost the same escape codes and rules used by the Bash prompt, except that it does not accept shell functions (like conditionals and loops). Command substitution (in the form \fB$(cmd)\fR), prompt modules (in the form \fB%{module}\fR), color codes (in the form \fB%{color}\fR), string literals, and escape sequences can be used to build the prompt. Consult the prompts file (via the \fIprompt edit\fR command) for detailed information about prompt building.
+Each prompt is built following almost the same escape codes and rules used by the Bash prompt, except that it does not accept shell functions (like conditionals and loops). Command substitution (in the form \fB$(cmd)\fR), prompt modules (in the form \fB%{module}\fR), color codes (in the form \fB%{color}\fR), string literals, and escape sequences can be used to build the prompt.
 .TP
-By default, for example, \fBclifm\fR's prompt line is this:
+Consult the prompts file (via the \fIprompt edit\fR command) for detailed information and examples on how to build a prompt.
+.TP
+By default, for intstance, \fBclifm\fR's prompt line is this:
 
 \fB"%{reset}\\I[\\S%{reset}]\\l \\A \\u:\\H %{cyan}\\w%{reset}\\n<\\z%{reset}> %{blue}\\$%{reset} "\fR
 
@@ -1835,9 +1837,9 @@ which once decoded should look something like this:
  \fB[1] 13:45 user:hostname /my/path
  <0> $\fR
 .TP
-with the workspace number printed in blue, the path in cyan, the last exit status in green, and the dollar sign in blue.
+with the workspace number printed in blue, the path in cyan, the last exit status in green (or red in case of error), and the dollar sign in blue.
 .TP
-A more "classic" prompt cab be generated as follows:
+A more "classic" prompt can be generated as follows:
 
  \fB"\\u@\\U \\w> "\fR
 .TP
@@ -1849,11 +1851,11 @@ or, using now command substitution:
 .TP
 A bold red \'R\' at the left of the prompt reminds the user that the program is running as root. A bold green asterisk indicates that there are elements in the Selection Box. In the same way, a cyan 'T' means that there are currently files in the trash can, just as a bold blue 'S' means that the program is running in stealth mode. Finally, \fBclifm\fR makes use of three kind of messages: errors (a red \'E\' at the left of the prompt), warnings (a yellow \'W\'), and simple notices (a green \'N\').
 .TP
-If \fINotifications\fR is set to "false" in the prompts file, the above notifications won\'t be printed by the prompt, but is still available to the user as escape codes (see above) and environment variables (see the \fBENVIRONMENT\fR section below) to build custom prompts.
+If \fINotifications\fR is set to "false" in the prompts file, the above notifications won\'t be printed by the prompt, but are still available to the user as escape codes (see above) and environment variables (see the \fBENVIRONMENT\fR section below) to build custom prompts.
 .TP
 \fBThe Warning Prompt\fR
 .TP
-The suggestions system includes a secondary, warning prompt, used to highlight wrong/invalid/non\-existent command names. Once an invalid command is entered, the regular prompt will be switched to the warning prompt and the whole input line will turn dimmed red (though it can be customized to your liking).
+The suggestions system includes a secondary, warning prompt, used to highlight wrong/invalid/non\-existent command names. Once an invalid command is entered, the regular prompt will be switched to the warning prompt.
 .TP
 The wrong command name check is omitted if the input string:
 
@@ -1865,12 +1867,12 @@ The wrong command name check is omitted if the input string:
  Is an assignment (e.g.: foo=var)
  It is escaped (e.g.: \\string)
 .TP
-The warning prompt could be customized by means of the same rules used by the regular prompt. To use a custom warning prompt, modify the \fIWarningPrompt\fR line in the prompts file (via the \fIprompt edit\fR command). It defaults to
+The warning prompt can be customized by means of the same rules used by the regular prompt. To use a custom warning prompt, modify the \fIWarningPrompt\fR line in the prompts file (via the \fIprompt edit\fR command). It defaults to
 
 \fB"%{reset}%{b:red}(!)%{n:dim} > "\fR
 
 .TP
-the last line of the regular prompt will become "\fB(!) > \fR", printed in a dimmed red color, including the input string.
+the last line of the regular prompt will become "\fB(!) > \fR", with "(!)" printed in bold red.
 .TP
 To disable this feature use the \fI\-\-no\-warning\-prompt\fR command line switch or set the \fIEnableWarningPrompt\fR option to \fBfalse\fR in the prompts file.
 .TP
