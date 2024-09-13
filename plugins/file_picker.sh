@@ -15,7 +15,7 @@
 if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
 	printf "\x1b[1mUSAGE\x1b[0m:\n  %s [FILE]\n\n" "$name" >&2
-	printf "Select files via Clifm, writing selected files to STDOUT, or to FILE if specified\n" >&2
+	printf "Select files via Clifm. At exit, selected files are written to STDOUT, or to FILE if specified\n" >&2
 	exit 0
 fi
 
