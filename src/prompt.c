@@ -348,27 +348,19 @@ gen_octal(char **line, int *c)
 static inline char *
 gen_profile(void)
 {
-	char *temp = (char *)NULL;
-
 	if (!alt_profile)
-		temp = savestring("default", 7);
-	else
-		temp = savestring(alt_profile, strlen(alt_profile));
+		return savestring("default", 7);
 
-	return temp;
+	return savestring(alt_profile, strlen(alt_profile));
 }
 
 static inline char *
 gen_user_name(void)
 {
-	char *temp = (char *)NULL;
-
 	if (!user.name)
-		temp = savestring(UNKNOWN_STR, sizeof(UNKNOWN_STR) - 1);
-	else
-		temp = savestring(user.name, strlen(user.name));
+		return savestring(UNKNOWN_STR, sizeof(UNKNOWN_STR) - 1);
 
-	return temp;
+	return savestring(user.name, strlen(user.name));
 }
 
 static inline char *
