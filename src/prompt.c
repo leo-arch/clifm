@@ -874,20 +874,13 @@ gen_last_cmd_time(char **line)
 	if (last_cmd_time < (double)conf.prompt_b_min)
 		goto END;
 
-	if (conf.prompt_b_precision == 0) {
-		char *temp = xnmalloc(MAX_INT_STR, sizeof(char));
-		snprintf(temp, MAX_INT_STR, "%d",
-			(int)last_cmd_time < 0 ? INT_MAX : (int)last_cmd_time);
-		return temp;
-	}
-
-	const int precision = conf.prompt_b_precision + 1;
+	const int precision = conf.prompt_b_precision;
 	const int len = snprintf(NULL, 0, "%.*f", precision, last_cmd_time);
 	if (len < 0)
 		goto END;
 
-	char *temp = xnmalloc((size_t)len, sizeof(char));
-	snprintf(temp, (size_t)len, "%.*f", precision, last_cmd_time);
+	char *temp = xnmalloc((size_t)len + 1, sizeof(char));
+	snprintf(temp, (size_t)len + 1, "%.*f", precision, last_cmd_time);
 
 	return temp;
 
