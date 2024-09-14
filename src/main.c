@@ -875,15 +875,29 @@ run_and_exit(void)
 }
 #endif /* RUN_CMD */
 
+/* Run the command CMD and, if the '\b' prompt code is used, store execution
+ * time in last_cmd_time (global). */
 static void
 exec_cmd_tm(char **cmd)
 {
-    struct timespec begin, end;
-    clock_gettime(CLOCK_REALTIME, &begin);
+	struct timespec begin, end;
+	int reta = -1;
+	int retb = -1;
+
+	if (conf.prompt_b_is_set == 1)
+		reta = clock_gettime(CLOCK_REALTIME, &begin);
 
 	exec_cmd(cmd);
 
-    clock_gettime(CLOCK_REALTIME, &end);
+	if (conf.prompt_b_is_set == 0)
+		return;
+
+	retb = clock_gettime(CLOCK_REALTIME, &end);
+
+	if (reta == -1 || retb == -1) {
+		last_cmd_time = 0.0;
+		return;
+	}
 
 	last_cmd_time =
 		(double)(end.tv_nsec - begin.tv_nsec) / 1000000000.0 +

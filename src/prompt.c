@@ -879,17 +879,22 @@ run_prompt_module(char **line, char **res, size_t *len)
 static char *
 gen_last_cmd_time(char **line)
 {
-	if (last_cmd_time < (double)conf.prompt_b_min) {
-		(*line)++;
-		return (char *)NULL;
-	}
+	if (last_cmd_time < (double)conf.prompt_b_min)
+		goto END;
 
 	const int precision = conf.prompt_b_precision + 1;
 	const int len = snprintf(NULL, 0, "%.*f", precision, last_cmd_time);
+	if (len < 0)
+		goto END;
+
 	char *temp = xnmalloc((size_t)len, sizeof(char));
 	snprintf(temp, (size_t)len, "%.*f", precision, last_cmd_time);
 
 	return temp;
+
+END:
+	(*line)++;
+	return (char *)NULL;
 }
 
 /* Decode the prompt string (encoded_prompt global variable) taken from
@@ -1550,6 +1555,7 @@ switch_prompt(const size_t n)
 	}
 
 	prompt_notif = prompts[n].notifications;
+	set_prompt_options();
 
 	if (xargs.warning_prompt == 0)
 		return FUNC_SUCCESS;
@@ -1603,6 +1609,57 @@ set_default_prompt(void)
 	*cur_prompt_name = '\0';
 	prompt_notif = DEF_PROMPT_NOTIF;
 	return FUNC_SUCCESS;
+}
+
+/* Read environment variables controling options for the '\b', '\f', and
+ * '\p' prompt codes and set the appropriate values. */
+void
+set_prompt_options(void)
+{
+	char *val = (char *)NULL;
+	int n = 0;
+	int b_is_set = 0;
+	int f_is_set = 0;
+	int p_is_set = 0;
+
+	const char *rp = conf.encoded_prompt; /* Regular prompt */
+	const char *wp = conf.wprompt_str;    /* Warning prompt */
+
+#define CHECK_PROMPT_OPT(s) ((rp && *rp && strstr(rp, (s)) != NULL) \
+	|| (wp && *wp && strstr(wp, (s)) != NULL))
+
+	if (conf.encoded_prompt && *conf.encoded_prompt) {
+		b_is_set = CHECK_PROMPT_OPT("\\b");
+		f_is_set = CHECK_PROMPT_OPT("\\f");
+		p_is_set = CHECK_PROMPT_OPT("\\p");
+	}
+	conf.prompt_b_is_set = b_is_set;
+
+	if (f_is_set == 1) {
+		val = getenv("CLIFM_PROMPT_F_DIR_LEN");
+		if (val && is_number(val) && (n = atoi(val)) > 0 && n < INT_MAX)
+			conf.prompt_f_dir_len = n;
+
+		val = getenv("CLIFM_PROMPT_F_FULL_LEN_DIRS");
+		if (val && is_number(val) && (n = atoi(val)) > 0 && n < INT_MAX)
+			conf.prompt_f_full_len_dirs = n;
+	}
+
+	if (b_is_set == 1) {
+		val = getenv("CLIFM_PROMPT_B_PRECISION");
+		if (val && IS_DIGIT(*val) && *val > '0' && !val[1])
+			conf.prompt_b_precision = *val - '0';
+
+		val = getenv("CLIFM_PROMPT_B_MIN");
+		if (val && is_number(val) && (n = atoi(val)) < INT_MAX)
+			conf.prompt_b_min = n;
+	}
+
+	if (conf.prompt_p_max_path == UNSET && p_is_set == 1) {
+		val = getenv("CLIFM_PROMPT_P_MAX_PATH");
+		if (val && is_number(val) && (n = atoi(val)) > 0 && n < INT_MAX)
+			conf.prompt_p_max_path = n;
+	}
 }
 
 static int

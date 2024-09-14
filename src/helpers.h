@@ -1168,6 +1168,7 @@ struct config_t {
 	int print_dir_cmds;
 	int print_selfiles;
 	int private_ws_settings;
+	int prompt_b_is_set;
 	int prompt_b_min;
 	int prompt_b_precision;
 	int prompt_f_dir_len;
@@ -1203,6 +1204,7 @@ struct config_t {
 #endif /* !_NO_TRASH */
 	int warning_prompt;
 	int welcome_message;
+	int pad3;
 };
 
 extern struct config_t conf;
