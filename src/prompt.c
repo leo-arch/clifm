@@ -874,6 +874,13 @@ gen_last_cmd_time(char **line)
 	if (last_cmd_time < (double)conf.prompt_b_min)
 		goto END;
 
+	if (conf.prompt_b_precision == 0) {
+		char *temp = xnmalloc(MAX_INT_STR, sizeof(char));
+		snprintf(temp, MAX_INT_STR, "%d",
+			(int)last_cmd_time < 0 ? INT_MAX : (int)last_cmd_time);
+		return temp;
+	}
+
 	const int precision = conf.prompt_b_precision + 1;
 	const int len = snprintf(NULL, 0, "%.*f", precision, last_cmd_time);
 	if (len < 0)
@@ -1635,7 +1642,7 @@ set_prompt_options(void)
 
 	if (b_is_set == 1) {
 		val = getenv("CLIFM_PROMPT_B_PRECISION");
-		if (val && IS_DIGIT(*val) && *val > '0' && !val[1])
+		if (val && IS_DIGIT(*val) && !val[1])
 			conf.prompt_b_precision = *val - '0';
 
 		val = getenv("CLIFM_PROMPT_B_MIN");
