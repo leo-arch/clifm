@@ -42,6 +42,10 @@
 #     CLIFM_PROMPT_F_FULL_LEN_DIRS to a value greater than zero (defaults to 1).
 # \z: Exit code of the last executed command (printed in green in case of
 #     success and in bold red in case of error)
+# \b: Execution time of the last command in seconds. Use $CLIFM_PROMPT_B_MIN to
+#     print times only if bigger than the specified value (defaults to 0), and
+#     $CLIFM_PROMPT_B_PRECISION to print only the specified value of decimal
+#     places (defaults to 2).
 # \i: The value of CLIFMLVL (number of clifm nested instances)
 # \I: Same as \i, but formatted as '(n)' (nothing is printed if CLIFMLVL is 1)
 # \$: #, if the effective user ID is 0 (root), and $ otherwise
