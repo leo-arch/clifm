@@ -1618,9 +1618,6 @@ set_prompt_options(void)
 {
 	char *val = (char *)NULL;
 	int n = 0;
-	int b_is_set = 0;
-	int f_is_set = 0;
-	int p_is_set = 0;
 
 	const char *rp = conf.encoded_prompt; /* Regular prompt */
 	const char *wp = conf.wprompt_str;    /* Warning prompt */
@@ -1628,11 +1625,10 @@ set_prompt_options(void)
 #define CHECK_PROMPT_OPT(s) ((rp && *rp && strstr(rp, (s)) != NULL) \
 	|| (wp && *wp && strstr(wp, (s)) != NULL))
 
-	if (conf.encoded_prompt && *conf.encoded_prompt) {
-		b_is_set = CHECK_PROMPT_OPT("\\b");
-		f_is_set = CHECK_PROMPT_OPT("\\f");
-		p_is_set = CHECK_PROMPT_OPT("\\p");
-	}
+	const int b_is_set = CHECK_PROMPT_OPT("\\b");
+	const int f_is_set = CHECK_PROMPT_OPT("\\f");
+	const int p_is_set = CHECK_PROMPT_OPT("\\p");
+
 	conf.prompt_b_is_set = b_is_set;
 
 	if (f_is_set == 1) {
