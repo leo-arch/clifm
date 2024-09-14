@@ -35,6 +35,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <termios.h>
+#include <time.h> /* clock_gettime() */
 #include <unistd.h>
 
 #include "args.h"
@@ -125,6 +126,7 @@ enum tab_mode tabmode = STD_TAB;
 
 struct param_t xargs = {0};
 unsigned short term_cols;
+double last_cmd_time = 0;
 
 /* Bit flag holders */
 int
@@ -873,6 +875,21 @@ run_and_exit(void)
 }
 #endif /* RUN_CMD */
 
+static void
+exec_cmd_tm(char **cmd)
+{
+    struct timespec begin, end;
+    clock_gettime(CLOCK_REALTIME, &begin);
+
+	exec_cmd(cmd);
+
+    clock_gettime(CLOCK_REALTIME, &end);
+
+	last_cmd_time =
+		(double)(end.tv_nsec - begin.tv_nsec) / 1000000000.0 +
+		(double)(end.tv_sec  - begin.tv_sec);
+}
+
 /* This is the main structure of any basic shell (a REPL)
 	 1 - Grab user input
 	 2 - Parse user input
@@ -910,7 +927,7 @@ run_main_loop(void)
 		if (alias_cmd) {
 			/* If an alias is found, check_for_alias() frees CMD and returns
 			 * ALIAS_CMD in its place to be executed by exec_cmd() */
-			exec_cmd(alias_cmd);
+			exec_cmd_tm(alias_cmd);
 
 			for (i = 0; alias_cmd[i]; i++)
 				free(alias_cmd[i]);
@@ -919,7 +936,7 @@ run_main_loop(void)
 		}
 
 		if (!(flags & FAILED_ALIAS))
-			exec_cmd(cmd);
+			exec_cmd_tm(cmd);
 		flags &= ~FAILED_ALIAS;
 
 		i = (int)args_n + 1;

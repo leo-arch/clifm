@@ -876,6 +876,22 @@ run_prompt_module(char **line, char **res, size_t *len)
 	*line = p + 1;
 }
 
+static char *
+gen_last_cmd_time(char **line)
+{
+	if (last_cmd_time < (double)conf.prompt_b_min) {
+		(*line)++;
+		return (char *)NULL;
+	}
+
+	const int precision = conf.prompt_b_precision + 1;
+	const int len = snprintf(NULL, 0, "%.*f", precision, last_cmd_time);
+	char *temp = xnmalloc((size_t)len, sizeof(char));
+	snprintf(temp, (size_t)len, "%.*f", precision, last_cmd_time);
+
+	return temp;
+}
+
 /* Decode the prompt string (encoded_prompt global variable) taken from
  * the configuration file. */
 char *
@@ -951,8 +967,11 @@ decode_prompt(char *line)
 				temp = gen_octal(&line, &c); goto ADD_STRING;
 
 			case 'c': /* Program name */
-				temp = savestring(PROGRAM_NAME, strlen(PROGRAM_NAME));
+				temp = savestring(PROGRAM_NAME, sizeof(PROGRAM_NAME) - 1);
 				goto ADD_STRING;
+
+			case 'b':
+				temp = gen_last_cmd_time(&line); goto ADD_STRING;
 
 			case 'P': /* Current profile name */
 				temp = gen_profile(); goto ADD_STRING;

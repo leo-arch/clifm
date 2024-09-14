@@ -243,6 +243,8 @@ init_conf_struct(void)
 	conf.print_dir_cmds = DEF_PRINT_DIR_CMDS;
 	conf.print_selfiles = UNSET;
 	conf.private_ws_settings = DEF_PRIVATE_WS_SETTINGS;
+	conf.prompt_b_min = DEF_PROMPT_B_MIN;
+	conf.prompt_b_precision = DEF_PROMPT_B_PRECISION;
 	conf.prompt_f_dir_len = DEF_PROMPT_F_DIR_LEN;
 	conf.prompt_f_full_len_dirs = DEF_PROMPT_F_FULL_LEN_DIRS;
 	conf.prompt_p_max_path = UNSET;
@@ -2725,6 +2727,8 @@ set_sudo_cmd(void)
 	sudo_cmd = DEF_SUDO_CMD;
 }
 
+/* Read environment variables controling options for the '\b', '\f', and
+ * '\p' prompt codes, setting the appropriate values. */
 static void
 set_prompt_options(void)
 {
@@ -2737,6 +2741,14 @@ set_prompt_options(void)
 	val = getenv("CLIFM_PROMPT_F_FULL_LEN_DIRS");
 	if (val && is_number(val) && (n = atoi(val)) > 0 && n < INT_MAX)
 		conf.prompt_f_full_len_dirs = n;
+
+	val = getenv("CLIFM_PROMPT_B_PRECISION");
+	if (val && IS_DIGIT(*val) && !val[1])
+		conf.prompt_b_precision = *val - '0';
+
+	val = getenv("CLIFM_PROMPT_B_MIN");
+	if (val && is_number(val) && (n = atoi(val)) < INT_MAX)
+		conf.prompt_b_min = n;
 
 	if (conf.prompt_p_max_path != UNSET)
 		return;
