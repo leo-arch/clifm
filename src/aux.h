@@ -64,7 +64,7 @@ void print_file_name(char *fname, const int isdir);
 int  read_octal(char *str);
 void rl_ring_bell(void);
 void set_fzf_preview_border_type(void);
-int  should_expand_eln(const char *text);
+int  should_expand_eln(const char *text, char *cmd_name);
 char *url_encode(char *str);
 char *url_decode(char *str);
 int  utf8_bytes(unsigned char c);

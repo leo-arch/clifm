@@ -337,10 +337,11 @@ find_digit(char *str)
 /* Check whether a given command needs ELN's to be expanded/completed/suggested.
  * Returns 1 if yes or 0 if not. */
 int
-should_expand_eln(const char *text)
+should_expand_eln(const char *text, char *cmd_name)
 {
-	char *l = rl_line_buffer;
-	             /* Do not expand numbers starting with zero */
+	char *l = cmd_name ? cmd_name : rl_line_buffer;
+
+	/* Do not expand numbers starting with zero */
 	if (!l || !*l || *text == '0' || !is_number(text))
 		return 0;
 
@@ -369,6 +370,7 @@ should_expand_eln(const char *text)
 		return 1;
 
 	*p = '\0';
+
 	flags |= STATE_COMPLETING;
 	if (is_internal_c(l) && !is_internal_f(l)) {
 		*p = t;

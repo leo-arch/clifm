@@ -139,7 +139,7 @@ check_paths_timestamps(void)
  * installed, renamed, or removed from some of the paths in PATH
  * while in CliFM, this latter needs to be restarted in order
  * to be able to recognize the new program for TAB completion */
-static inline void
+static void
 reload_binaries(void)
 {
 	if (check_paths_timestamps() == FUNC_SUCCESS)
@@ -1089,7 +1089,7 @@ sort_func(char **args)
 	return sort_function(args);
 }
 
-static inline int
+static int
 check_pinned_file(char **args)
 {
 	int i = (int)args_n + 1;
@@ -1103,7 +1103,7 @@ check_pinned_file(char **args)
 	return FUNC_SUCCESS;
 }
 
-static inline int
+static int
 check_actions(char **args)
 {
 	if (actions_n == 0)
@@ -1152,7 +1152,7 @@ launch_shell(const char *arg)
 	return (-1);
 }
 
-static inline void
+static void
 expand_and_deescape(char **arg, char **deq_str)
 {
 	if (*(*arg) == '~') {
@@ -1351,7 +1351,7 @@ lira_function(char **args)
 #endif /* !_NO_LIRA */
 }
 
-static inline int
+static int
 check_comments(char *name)
 {
 	const int maybe_comment =
@@ -2697,19 +2697,19 @@ exec_cmd_tm(char **cmd)
 	return ret;
 }
 
-static inline void
+static void
 run_chained_cmd(char **cmd, size_t *err_code)
 {
 	size_t i;
 	char **alias_cmd = check_for_alias(cmd);
 	if (alias_cmd) {
-		if (exec_cmd(alias_cmd) != 0)
+		if (exec_cmd_tm(alias_cmd) != 0)
 			*err_code = 1;
 		for (i = 0; alias_cmd[i]; i++)
 			free(alias_cmd[i]);
 		free(alias_cmd);
 	} else {
-		if ((flags & FAILED_ALIAS) || exec_cmd(cmd) != 0)
+		if ((flags & FAILED_ALIAS) || exec_cmd_tm(cmd) != 0)
 			*err_code = 1;
 		flags &= ~FAILED_ALIAS;
 		for (i = 0; i <= args_n; i++)
@@ -2748,23 +2748,25 @@ exec_chained_cmds(char *cmd)
 			continue;
 		}
 
-		if (cmd[i] == '&') cond_exec = 1;
+		if (cmd[i] == '&')
+			cond_exec = 1;
 
 		char **tmp_cmd = parse_input_str((*str == ' ') ? str + 1 : str);
 		free(str);
 
-		if (!tmp_cmd) continue;
+		if (!tmp_cmd)
+			continue;
 
 		run_chained_cmd(tmp_cmd, &error_code);
 
 		/* Do not continue if the execution was condtional and
 		 * the previous command failed. */
-		if (cond_exec && error_code)
+		if (cond_exec == 1 && error_code == 1)
 			break;
 	}
 }
 
-static inline void
+static void
 run_profile_line(char *cmd)
 {
 	if (xargs.secure_cmds == 1

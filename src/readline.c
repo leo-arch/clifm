@@ -3920,7 +3920,8 @@ complete_eln(char *text, int *exit_status, const size_t words_n)
 		|| (file_info[n - 1].dir == 0 && conf.auto_open == 0))
 			return (char **)NULL;
 	} else { /* Second word or more */
-		if (alt_prompt == 1 || alt_prompt == 3 || should_expand_eln(text) == 0)
+		if (alt_prompt == 1 || alt_prompt == 3
+		|| should_expand_eln(text, NULL) == 0)
 			return (char **)NULL;
 	}
 

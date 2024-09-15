@@ -2843,7 +2843,7 @@ parse_input_str(char *str)
 		char *lb_tmp = rl_line_buffer;
 		if (rl_dispatching == 0 && fusedcmd_ok == 1)
 			rl_line_buffer = substr[0];
-		if (should_expand_eln(substr[i]) == 1)
+		if (should_expand_eln(substr[i], substr[0]) == 1)
 			eln_expand(&substr, i);
 		rl_line_buffer = lb_tmp;
 
