@@ -3320,9 +3320,12 @@ complete_ranges(char *text, int *exit_status)
 
 #ifndef _NO_LIRA
 static char **
-complete_open_with(char *text)
+complete_open_with(char *text, char *start)
 {
-	char *p = rl_line_buffer + 3;
+	if (!start || !*start)
+		return (char **)NULL;
+
+	char *p = start + 3;
 	char *s = strrchr(p, ' ');
 	if (s)
 		*s = '\0';
@@ -4242,7 +4245,7 @@ FIRST_WORD_COMP:
 	/* #### OPEN WITH #### */
 	if (rl_end > 4 && s && *s == 'o' && s[1] == 'w' && s[2] == ' '
 	&& s[3] && s[3] != ' ' && words_n >= 3)
-		return complete_open_with((char *)text);
+		return complete_open_with((char *)text, s);
 #endif /* _NO_LIRA */
 
 	/* #### PROMPT (only for 'prompt set') #### */
