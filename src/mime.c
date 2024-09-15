@@ -144,7 +144,7 @@ skip_line_prefix(char *line)
 static int
 skip_line(char *line, char **pattern, char **cmds)
 {
-	if (*line == '#' || *line == '[' || *line == '\n')
+	if (SKIP_LINE(*line) || *line == '[')
 		return 1;
 
 	*pattern = skip_line_prefix(line);
@@ -340,6 +340,7 @@ get_app(const char *mime, const char *filename)
 
 		if (skip_line(line, &pattern, &cmds) == 1)
 			continue;
+
 		/* PATTERN points now to the beginning of the null terminated pattern,
 		 * while CMDS points to the beginning of the list of opening cmds. */
 
