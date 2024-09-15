@@ -33,6 +33,7 @@ __BEGIN_DECLS
 
 int  detect_space(char *s);
 size_t count_chars(const char *s, const char c);
+size_t count_words(size_t *start_word, size_t *full_word);
 char *escape_str(const char *str);
 char *gen_rand_str(const size_t len);
 char *get_last_chr(char *str, const char c, const int len);

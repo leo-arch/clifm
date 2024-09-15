@@ -1499,43 +1499,6 @@ is_last_word(void)
 	return lw;
 }
 
-/* Return the number of words found in the current readline buffer. */
-static size_t
-count_words(size_t *start_word, size_t *full_word)
-{
-	size_t words = 0, w = 0, first_non_space = 0;
-	char q = 0;
-	char *b = rl_line_buffer;
-	for (; b[w]; w++) {
-		/* Keep track of open quotes. */
-		if (b[w] == '\'' || b[w] == '"')
-			q = q == b[w] ? 0 : b[w];
-
-		if (!first_non_space && b[w] != ' ') {
-			words = 1;
-			*start_word = w;
-			first_non_space = 1;
-			continue;
-		}
-		if (w > 0 && b[w] == ' ' && b[w - 1] != '\\') {
-			if (!*full_word && b[w - 1] != '|'
-			&& b[w - 1] != ';' && b[w - 1] != '&')
-				*full_word = w; /* Index of the end of the first full word (cmd). */
-			if (b[w + 1] && b[w + 1] != ' ') {
-				words++;
-			}
-		}
-		/* If a process separator char is found, reset variables so that we
-		 * can start counting again for the new command. */
-		if (!q && cur_color != hq_c && w > 0 && b[w - 1] != '\\'
-		&& ((b[w] == '&' && b[w - 1] == '&') || b[w] == '|' || b[w] == ';')) {
-			words = first_non_space = *full_word = 0;
-		}
-	}
-
-	return words;
-}
-
 static void
 turn_it_wrong(void)
 {
@@ -2059,7 +2022,7 @@ rl_suggestions(const unsigned char c)
 	}
 
 	/* '~' or '~/' */
-	if (word && *word == '~' && (!word[1] || (word[1] == '/' && !word[2]))) {
+	if (*word == '~' && (!word[1] || (word[1] == '/' && !word[2]))) {
 		if (wrong_cmd)
 			recover_from_wrong_cmd();
 
@@ -2078,7 +2041,7 @@ rl_suggestions(const unsigned char c)
 		 * ######################################*/
 
 	/* Fastback */
-	if (word && *word == '.' && word[1] == '.' && (!word[2] || word[2] == '.')
+	if (*word == '.' && word[1] == '.' && (!word[2] || word[2] == '.')
 	&& (printed = check_fastback(word)) != NO_MATCH)
 		goto SUCCESS;
 

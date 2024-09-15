@@ -2669,26 +2669,27 @@ ext_options_generator(const char *text, int state)
 }
 
 static size_t
-rl_count_words(void)
+rl_count_words(char **w, char **start)
 {
-	if (!rl_line_buffer)
-		return 0;
+	size_t start_word = 0, full_word = 0;
+	size_t n = count_words(&start_word, &full_word);
 
-	char *p = rl_line_buffer;
-	while (*p == ' ')
-		++p;
-	if (!*p)
-		return 0;
+	static char first_word[NAME_MAX];
+	*first_word = '\0';
+	*w = (char *)NULL;
 
-	size_t c = 1;
-	while (*p) {
-		if (*p == ' ' && p > rl_line_buffer
-		&& *(p - 1) != '\\' && *(p + 1) != ' ')
-			c++;
-		p++;
+	if (full_word != 0) {
+		rl_line_buffer[full_word] = '\0';
+		char *q = rl_line_buffer + start_word;
+		xstrsncpy(first_word, q, sizeof(first_word));
+		rl_line_buffer[full_word] = ' ';
+		*w = first_word;
+		if (rl_line_buffer && rl_end > 0 && rl_line_buffer[rl_end - 1] == ' ')
+			n++;
 	}
 
-	return c;
+	*start = rl_line_buffer ? rl_line_buffer + start_word : (char *)NULL;
+	return n;
 }
 
 /* THIS IS AWFUL! WRITE A BETTER IMPLEMENTATION */
@@ -2696,149 +2697,156 @@ rl_count_words(void)
 static char *
 options_generator(const char *text, int state)
 {
-	char *l = rl_line_buffer;
-	if (!l || !*l)
+	if (!rl_line_buffer || !*rl_line_buffer)
 		return (char *)NULL;
 
-	static size_t len = 0, w = 0;
+	static size_t len = 0;
+	static size_t w = 0;
 	static int i;
 	char *name;
+	static char *cmd_name = (char *)NULL;
+	static char *word_start = (char *)NULL;
 
 	if (state == 0) {
 		i = 0;
 		len = strlen(text);
-		w = rl_count_words();
+		w = rl_count_words(&cmd_name, &word_start);
 	}
 
+	if (!cmd_name)
+		return (char *)NULL;
+
+	char *c = cmd_name;
+	char *s = word_start;
+
 #define MAX_OPTS 22
-	char *_opts[MAX_OPTS] = {0};
+	char *c_opts[MAX_OPTS] = {0};
 
 	/* acd, ao, ext, ff, hf (w == 2 -> second word only) */
-	if (w == 2 && ( ( *l == 'a' && ((l[1] == 'o' && l[2] == ' ')
-	|| strncmp(l, "acd ", 4) == 0) )
-	|| (*l == 'e' && strncmp(l, "ext ", 4) == 0)
-	|| (*l == 'f' && (l[1] == 'f' || l[1] == 'c') && l[2] == ' ')
-	|| (*l == 'h' && (l[1] == 'f' || l[1] == 'h') && l[2] == ' ') ) ) {
-		_opts[0] = "on"; _opts[1] = "off"; _opts[2] = "status"; _opts[3] = NULL;
+	if (w == 2 && ( ( *c == 'a' && ((c[1] == 'o' && !c[2])
+	|| strcmp(c, "acd") == 0) )
+	|| (*c == 'e' && strcmp(c, "ext") == 0)
+	|| (*c == 'f' && (c[1] == 'f' || c[1] == 'c') && !c[2])
+	|| (*c == 'h' && (c[1] == 'f' || c[1] == 'h') && !c[2]) ) ) {
+		c_opts[0] = "on"; c_opts[1] = "off"; c_opts[2] = "status"; c_opts[3] = NULL;
 
 	/* pg, pager */
-	} else if (w == 2 && (*l == 'p' && ((l[1] == 'g' && l[2] == ' ')
-	|| strncmp(l, "pager ", 6) == 0))) {
-		_opts[0] = "on"; _opts[1] = "off"; _opts[2] = "once";
-		_opts[3] = "status"; _opts[4] = NULL;
+	} else if (w == 2 && (*c == 'p' && ((c[1] == 'g' && !c[2])
+	|| strcmp(c, "pager") == 0))) {
+		c_opts[0] = "on"; c_opts[1] = "off"; c_opts[2] = "once";
+		c_opts[3] = "status"; c_opts[4] = NULL;
 
 	/* cl, icons, ll-lv, lm, and fz */
-	} else if (w == 2 && ( (*l == 'c' && l[1] == 'l' && l[2] == ' ')
-	|| (*l == 'i' && strncmp(l, "icons ", 6) == 0)
-	|| (*l == 'l' && (l[1] == 'v' || l[1] == 'l' || l[1] == 'm')
-	&& l[2] == ' ')
-	|| (*l == 'f' && l[1] == 'z' && l[2] == ' ') ) ) {
-		_opts[0] = "on"; _opts[1] = "off"; _opts[2] = NULL;
+	} else if (w == 2 && ( (*c == 'c' && c[1] == 'l' && !c[2])
+	|| (*c == 'i' && strcmp(c, "icons") == 0)
+	|| (*c == 'l' && (c[1] == 'v' || c[1] == 'l' || c[1] == 'm') && !c[2])
+	|| (*c == 'f' && c[1] == 'z' && !c[2]) ) ) {
+		c_opts[0] = "on"; c_opts[1] = "off"; c_opts[2] = NULL;
 
 	/* config */
-	} else if (w == 2 && *l == 'c' && strncmp(l, "config ", 7) == 0) {
-		_opts[0] = "edit"; _opts[1] = "dump"; _opts[2] = "reset";
-		_opts[3] = NULL;
+	} else if (w == 2 && *c == 'c' && strcmp(c, "config") == 0) {
+		c_opts[0] = "edit"; c_opts[1] = "dump"; c_opts[2] = "reset";
+		c_opts[3] = NULL;
 
 	/* actions */
-	} else if (w == 2 && *l == 'a' && strncmp(l, "actions ", 8) == 0) {
-		_opts[0] = "list"; _opts[1] = "edit"; _opts[2] = NULL;
+	} else if (w == 2 && *c == 'a' && strcmp(c, "actions") == 0) {
+		c_opts[0] = "list"; c_opts[1] = "edit"; c_opts[2] = NULL;
 
 	/* log */
-	} else if (w == 3 && *l == 'l' && (strncmp(l, "log msg ", 8) == 0
-	|| strncmp(l, "log cmd ", 8) == 0) ) {
-		_opts[0] = "list"; _opts[1] = "on"; _opts[2] = "off";
-		_opts[3] = "status"; _opts[4] = "clear"; _opts[5] = NULL;
-	} else if (w == 2 && *l == 'l' && strncmp(l, "log ", 4) == 0) {
-		_opts[0] = "cmd"; _opts[1] = "msg"; _opts[2] = NULL;
+	} else if (w == 3 && s && *s == 'l' && (strncmp(s, "log msg ", 8) == 0
+	|| strncmp(s, "log cmd ", 8) == 0) ) {
+		c_opts[0] = "list"; c_opts[1] = "on"; c_opts[2] = "off";
+		c_opts[3] = "status"; c_opts[4] = "clear"; c_opts[5] = NULL;
+	} else if (w == 2 && *c == 'l' && strcmp(c, "log") == 0) {
+		c_opts[0] = "cmd"; c_opts[1] = "msg"; c_opts[2] = NULL;
 
 	/* mime */
-	} else if (w == 2 && *l == 'm' && ((l[1] == 'm' && l[2] == ' ')
-	|| strncmp(l, "mime ", 5) == 0)) {
-		_opts[0] = "open"; _opts[1] = "info"; _opts[2] = "edit";
-		_opts[3] = "import"; _opts[4] = NULL;
+	} else if (w == 2 && *c == 'm' && ((c[1] == 'm' && !c[2])
+	|| strcmp(c, "mime") == 0)) {
+		c_opts[0] = "open"; c_opts[1] = "info"; c_opts[2] = "edit";
+		c_opts[3] = "import"; c_opts[4] = NULL;
 
 #ifndef _NO_PROFILES
 	/* profile */
-	} else if (w == 2 && ( (*l == 'p' && l[1] == 'f' && l[2] == ' ')
-	|| strncmp(l, "profile ", 8) == 0 ) ) {
-		_opts[0] = "set"; _opts[1] = "list"; _opts[2] = "add";
-		_opts[3] = "del"; _opts[4] = "rename"; _opts[5] = NULL;
+	} else if (w == 2 && ( (*c == 'p' && c[1] == 'f' && !c[2])
+	|| strcmp(c, "profile") == 0 ) ) {
+		c_opts[0] = "set"; c_opts[1] = "list"; c_opts[2] = "add";
+		c_opts[3] = "del"; c_opts[4] = "rename"; c_opts[5] = NULL;
 #endif /* _NO_PROFILES */
 
 	/* prompt */
-	} else if (w == 2 && *l == 'p' && strncmp(l, "prompt ", 7) == 0) {
-		_opts[0] = "set"; _opts[1] = "list"; _opts[2] = "unset";
-		_opts[3] = "edit"; _opts[4] = "reload"; _opts[5] = NULL;
-#ifndef _NO_TAGS
+	} else if (w == 2 && *c == 'p' && strcmp(c, "prompt") == 0) {
+		c_opts[0] = "set"; c_opts[1] = "list"; c_opts[2] = "unset";
+		c_opts[3] = "edit"; c_opts[4] = "reload"; c_opts[5] = NULL;
 
 	/* pwd */
-	} else if (w == 2 && *l == 'p' && l[1] == 'w' && l[2] == 'd' && l[3] == ' ') {
-		_opts[0] = "-L"; _opts[1] = "-P"; _opts[2] = NULL;
+	} else if (w == 2 && *c == 'p' && c[1] == 'w' && c[2] == 'd' && !c[3]) {
+		c_opts[0] = "-L"; c_opts[1] = "-P"; c_opts[2] = NULL;
 
+#ifndef _NO_TAGS
 	/* tag */
-	} else if (w == 2 && *l == 't' && l[1] == 'a' && l[2] == 'g' && l[3] == ' ') {
-		_opts[0] = "add"; _opts[1] = "del"; _opts[2] = "list";
-		_opts[3] = "list-full"; _opts[4] = "merge"; _opts[5] = "new";
-		_opts[6] = "rename"; _opts[7] = "untag"; _opts[8] = NULL;
+	} else if (w == 2 && *c == 't' && c[1] == 'a' && c[2] == 'g' && !c[3]) {
+		c_opts[0] = "add"; c_opts[1] = "del"; c_opts[2] = "list";
+		c_opts[3] = "list-full"; c_opts[4] = "merge"; c_opts[5] = "new";
+		c_opts[6] = "rename"; c_opts[7] = "untag"; c_opts[8] = NULL;
 #endif /* !_NO_TAGS */
 
 	/* net */
-	} else if (w == 2 && *l == 'n' && l[1] == 'e'
-	&& l[2] == 't' && l[3] == ' ') {
-		_opts[0] = "mount"; _opts[1] = "unmount"; _opts[2] = "list";
-		_opts[3] = "edit"; _opts[4] = NULL;
+	} else if (w == 2 && *c == 'n' && c[1] == 'e'
+	&& c[2] == 't' && !c[3]) {
+		c_opts[0] = "mount"; c_opts[1] = "unmount"; c_opts[2] = "list";
+		c_opts[3] = "edit"; c_opts[4] = NULL;
 
 	/* history */
-	} else if (w == 2 && *l == 'h' && strncmp(l, "history ", 8) == 0) {
-		_opts[0] = "edit"; _opts[1] = "clear"; _opts[2] = "on";
-		_opts[3] = "off"; _opts[4] = "status"; _opts[5] = "show-time";
-		_opts[6] = NULL;
+	} else if (w == 2 && *c == 'h' && strcmp(c, "history") == 0) {
+		c_opts[0] = "edit"; c_opts[1] = "clear"; c_opts[2] = "on";
+		c_opts[3] = "off"; c_opts[4] = "status"; c_opts[5] = "show-time";
+		c_opts[6] = NULL;
 
 	/* help topics */
-	} else if (w == 2 && *l == 'h' && l[1] == 'e'
-	&& strncmp(l, "help ", 5) == 0) {
-		_opts[0] = "archives";
-		_opts[1] = "autocommands";
-		_opts[2] = "basics";
-		_opts[3] = "bookmarks";
-		_opts[4] = "commands";
-		_opts[5] = "desktop-notifications";
-		_opts[6] = "dir-jumper";
-		_opts[7] = "file-details";
-		_opts[8] = "file-filters";
-		_opts[9] = "file-previews";
-		_opts[10] = "file-tags";
-		_opts[11] = "navigation";
-		_opts[12] = "plugins";
-		_opts[13] = "profiles";
-		_opts[14] = "remotes";
-		_opts[15] = "resource-opener";
-		_opts[16] = "search";
-		_opts[17] = "security";
-		_opts[18] = "selection";
-		_opts[19] = "theming";
-		_opts[20] = "trash";
-		_opts[21] = NULL;
+	} else if (w == 2 && *c == 'h' && c[1] == 'e'
+	&& strcmp(c, "help") == 0) {
+		c_opts[0] = "archives";
+		c_opts[1] = "autocommands";
+		c_opts[2] = "basics";
+		c_opts[3] = "bookmarks";
+		c_opts[4] = "commands";
+		c_opts[5] = "desktop-notifications";
+		c_opts[6] = "dir-jumper";
+		c_opts[7] = "file-details";
+		c_opts[8] = "file-filters";
+		c_opts[9] = "file-previews";
+		c_opts[10] = "file-tags";
+		c_opts[11] = "navigation";
+		c_opts[12] = "plugins";
+		c_opts[13] = "profiles";
+		c_opts[14] = "remotes";
+		c_opts[15] = "resource-opener";
+		c_opts[16] = "search";
+		c_opts[17] = "security";
+		c_opts[18] = "selection";
+		c_opts[19] = "theming";
+		c_opts[20] = "trash";
+		c_opts[21] = NULL;
 
 	/* b, f */
-	} else if (w == 2 && ( (*l == 'b' && l[1] == ' ')
-	|| (*l == 'f' && l[1] == ' ') ) ) {
-		_opts[0] = "hist"; _opts[1] = "clear"; _opts[2] = NULL;
+	} else if (w == 2 && ( (*c == 'b' && !c[1])
+	|| (*c == 'f' && !c[1]) ) ) {
+		c_opts[0] = "hist"; c_opts[1] = "clear"; c_opts[2] = NULL;
 
 	} else {
 		/* kb, keybinds */
-		if (w == 2 && ( (*l == 'k' && l[1] == 'b' && l[2] == ' ')
-		|| strncmp(l, "keybinds ", 9) == 0) ) {
-			_opts[0] = "list"; _opts[1] = "edit"; _opts[2] = "conflict";
-			_opts[3] = "reset"; _opts[4] = "readline"; _opts[5] = NULL;
+		if (w == 2 && ( (*c == 'k' && c[1] == 'b' && !c[2])
+		|| strcmp(c, "keybinds") == 0) ) {
+			c_opts[0] = "list"; c_opts[1] = "edit"; c_opts[2] = "conflict";
+			c_opts[3] = "reset"; c_opts[4] = "readline"; c_opts[5] = NULL;
 		}
 	}
 
-	if (!_opts[0])
+	if (!c_opts[0])
 		return (char *)NULL;
 
-	while ((name = _opts[i++]) != NULL) {
+	while ((name = c_opts[i++]) != NULL) {
 		if (strncmp(name, text, len) == 0)
 			return strdup(name);
 	}
@@ -2920,9 +2928,9 @@ users_generator(const char *text, int state)
 
 #ifndef _NO_TAGS
 static int
-tag_complete(const char *text)
+tag_complete(const char *text, char *start)
 {
-	char *l = rl_line_buffer;
+	char *l = start;
 	int comp = 0;
 	if (*(l + 1) && *(l + 2) == ' ') {
 		switch (*(l + 1)) {
@@ -3497,12 +3505,12 @@ complete_shell_cmd_opts(char *text, int *exit_status)
 
 #ifndef _NO_TAGS
 static char **
-complete_tag_names(char *text, int *exit_status)
+complete_tag_names(char *text, int *exit_status, char *start)
 {
 	*exit_status = FUNC_FAILURE;
 	char **matches = (char **)NULL;
 
-	int comp = tag_complete(text);
+	int comp = tag_complete(text, start);
 	if (comp != 1 && comp != 2)
 		return (char **)NULL;
 
@@ -3694,9 +3702,9 @@ complete_workspaces(char *text)
 }
 
 static int
-int_cmd_no_filename(void)
+int_cmd_no_filename(char *start)
 {
-	char *lb = rl_line_buffer;
+	char *lb = start;
 	char *p = strchr(lb, ' ');
 	if (!p)
 		return 0;
@@ -3905,7 +3913,7 @@ complete_sel_keyword(const char *text, int *exit_status, const size_t words_n)
 }
 
 static char **
-complete_eln(char *text, int *exit_status, const size_t words_n)
+complete_eln(char *text, int *exit_status, const size_t words_n, char *cmd_name)
 {
 	*exit_status = FUNC_FAILURE;
 	char **matches = (char **)NULL;
@@ -3921,7 +3929,7 @@ complete_eln(char *text, int *exit_status, const size_t words_n)
 			return (char **)NULL;
 	} else { /* Second word or more */
 		if (alt_prompt == 1 || alt_prompt == 3
-		|| should_expand_eln(text, NULL) == 0)
+		|| should_expand_eln(text, cmd_name) == 0)
 			return (char **)NULL;
 	}
 
@@ -3958,8 +3966,10 @@ my_rl_completion(const char *text, const int start, const int end)
 
 	int exit_status = FUNC_SUCCESS;
 	char **matches = (char **)NULL;
-	char *lb = rl_line_buffer;
-	size_t words_n = rl_count_words();
+	char *cmd_name = (char *)NULL;
+	char *cmd_start = (char *)NULL;
+	size_t words_n = rl_count_words(&cmd_name, &cmd_start);
+	char *s = cmd_start;
 
 	static size_t sudo_len = 0;
 	if (sudo_len == 0)
@@ -3992,7 +4002,7 @@ my_rl_completion(const char *text, const int start, const int end)
 
 	/* ##### ELN EXPANSION ##### */
 	if (escaped == 0 && *text >= '1' && *text <= '9') {
-		matches = complete_eln((char *)text, &exit_status, words_n);
+		matches = complete_eln((char *)text, &exit_status, words_n, cmd_name);
 		if (exit_status == FUNC_SUCCESS)
 			return matches;
 	}
@@ -4187,8 +4197,8 @@ FIRST_WORD_COMP:
 	}
 
 	/* #### SUDO COMPLETION (e.g., "sudo <TAB>") #### */
-	if (sudo_len > 0 && words_n == 2 && strncmp(lb, sudo_cmd, sudo_len) == 0
-	&& lb[sudo_len] == ' ') {
+	if (sudo_len > 0 && words_n == 2 && s && strncmp(s, sudo_cmd, sudo_len) == 0
+	&& s[sudo_len] == ' ') {
 		matches = rl_completion_matches(text, &bin_cmd_generator_ext);
 		if (matches) {
 			cur_comp_type = TCMP_CMD;
@@ -4199,25 +4209,25 @@ FIRST_WORD_COMP:
 #ifndef _NO_TAGS
 	/* #### TAG NAMES COMPLETION #### */
 	/* 't? TAG' and 't? :tag' */
-	if (tags_n > 0 && *lb == 't' && rl_end > 2) {
-		matches = complete_tag_names((char *)text, &exit_status);
+	if (tags_n > 0 && s && *s == 't' && rl_end > 2) {
+		matches = complete_tag_names((char *)text, &exit_status, s);
 		if (exit_status == FUNC_SUCCESS)
 			return matches;
 	}
 #endif /* !_NO_TAGS */
 
 	/* #### DIRECTORY HISTORY COMPLETION #### */
-	if (((*lb == 'b' || *lb == 'f' || *lb == 'd') && lb[1] == 'h'
-	&& lb[2] == ' ') && !strchr(text, '/') )
+	if (s && (((*s == 'b' || *s == 'f' || *s == 'd') && s[1] == 'h'
+	&& s[2] == ' ') && !strchr(text, '/') ) )
 		return complete_dirhist((char *)text, words_n);
 
 	/* #### BACKDIR COMPLETION #### */
-	if (*text != '/' && *lb == 'b' && lb[1] == 'd' && lb[2] == ' ')
+	if (*text != '/' && s && *s == 'b' && s[1] == 'd' && s[2] == ' ')
 		return complete_backdir((char *)text, words_n);
 
 #ifndef _NO_LIRA
 	/* #### OPENING APPS FOR INTERNAL CMDS TAKING 'EDIT' AS SUBCOMMAND */
-	if (is_edit(lb, words_n) == 1 && config_file) {
+	if (s && is_edit(s, words_n) == 1 && config_file) {
 		/* mime_open_with_tab needs a file name to match against the
 		 * mimelist file and get the list of opening applications.
 		 * Now, since here we are listing apps to open config files,
@@ -4230,27 +4240,27 @@ FIRST_WORD_COMP:
 	}
 
 	/* #### OPEN WITH #### */
-	if (rl_end > 4 && *lb == 'o' && lb[1] == 'w' && lb[2] == ' '
-	&& lb[3] && lb[3] != ' ' && words_n >= 3)
+	if (rl_end > 4 && s && *s == 'o' && s[1] == 'w' && s[2] == ' '
+	&& s[3] && s[3] != ' ' && words_n >= 3)
 		return complete_open_with((char *)text);
 #endif /* _NO_LIRA */
 
 	/* #### PROMPT (only for 'prompt set') #### */
-	if (*lb == 'p' && lb[1] == 'r' && strncmp(lb, "prompt set " , 11) == 0)
+	if (s && *s == 'p' && s[1] == 'r' && strncmp(s, "prompt set " , 11) == 0)
 		return complete_prompt_names((char *)text, words_n);
 
 #ifndef _NO_TRASH
 	/* ### UNTRASH ### */
-	if (*lb == 'u' && (lb[1] == ' ' || (lb[1] == 'n'
-	&& (strncmp(lb, "untrash ", 8) == 0
-	|| strncmp(lb, "undel ", 6) == 0))))
+	if (s && *s == 'u' && (s[1] == ' ' || (s[1] == 'n'
+	&& (strncmp(s, "untrash ", 8) == 0
+	|| strncmp(s, "undel ", 6) == 0))))
 		return complete_trashed_files(text, TCMP_UNTRASH);
 
 	/* ### TRASH DEL ### */
-	if (*lb == 't' && (lb[1] == ' ' || lb[1] == 'r')
-	&& (strncmp(lb, "t del ", 6) == 0
-	|| strncmp(lb, "tr del ", 7) == 0
-	|| strncmp(lb, "trash del ", 10) == 0))
+	if (s && *s == 't' && (s[1] == ' ' || s[1] == 'r')
+	&& (strncmp(s, "t del ", 6) == 0
+	|| strncmp(s, "tr del ", 7) == 0
+	|| strncmp(s, "trash del ", 10) == 0))
 		return complete_trashed_files(text, TCMP_TRASHDEL);
 #endif /* !_NO_TRASH */
 
@@ -4274,8 +4284,8 @@ FIRST_WORD_COMP:
 			return matches; */
 
 		/* Sort number */
-		if (*lb == 's' && (strncmp(lb, "st ", 3) == 0
-		|| strncmp(lb, "sort ", 5) == 0)
+		if (s && *s == 's' && (strncmp(s, "st ", 3) == 0
+		|| strncmp(s, "sort ", 5) == 0)
 		&& is_number(text) && n >= 0 && n <= SORT_TYPES) {
 			rl_attempted_completion_over = 1;
 			return complete_sort_num(text, words_n);
@@ -4283,61 +4293,61 @@ FIRST_WORD_COMP:
 	}
 
 	/* ### DESELECT COMPLETION ### */
-	if (sel_n && *lb == 'd' && (strncmp(lb, "ds ", 3) == 0
-	|| strncmp(lb, "desel ", 6) == 0))
+	if (sel_n && s && *s == 'd' && (strncmp(s, "ds ", 3) == 0
+	|| strncmp(s, "desel ", 6) == 0))
 		return complete_desel(text);
 
 	/* ### DIRJUMP COMPLETION ### */
 	/* j, jc, jp commands */
-	if (*lb == 'j' && (lb[1] == ' '	|| ((lb[1] == 'c' || lb[1] == 'p')
-	&& lb[2] == ' ') || strncmp(lb, "jump ", 5) == 0))
+	if (s && *s == 'j' && (s[1] == ' ' || ((s[1] == 'c' || s[1] == 'p')
+	&& s[2] == ' ') || strncmp(s, "jump ", 5) == 0))
 		return complete_jump(text);
 
 	/* ### BOOKMARKS COMPLETION ### */
-	if (*lb == 'b' && (lb[1] == 'm' || lb[1] == 'o')
-	&& (strncmp(lb, "bm ", 3) == 0 || strncmp(lb, "bookmarks ", 10) == 0)) {
+	if (s && *s == 'b' && (s[1] == 'm' || s[1] == 'o')
+	&& (strncmp(s, "bm ", 3) == 0 || strncmp(s, "bookmarks ", 10) == 0)) {
 		matches = complete_bookmark_names((char *)text, words_n, &exit_status);
 		if (exit_status == FUNC_SUCCESS)
 			return matches;
 	}
 
 	/* ### ALIASES COMPLETION ### */
-	if (aliases_n > 0 && *lb == 'a' && strncmp(lb, "alias ", 6) == 0
-	&& strncmp(lb + 6, "import ", 7) != 0)
+	if (aliases_n > 0 && s && *s == 'a' && strncmp(s, "alias ", 6) == 0
+	&& strncmp(s + 6, "import ", 7) != 0)
 		return complete_alias_names(text, words_n);
 
 	/* ### COLOR SCHEMES COMPLETION ### */
-	if (conf.colorize == 1 && *lb == 'c' && ((lb[1] == 's' && lb[2] == ' ')
-	|| strncmp(lb, "colorschemes ", 13) == 0))
+	if (conf.colorize == 1 && s && *s == 'c' && ((s[1] == 's' && s[2] == ' ')
+	|| strncmp(s, "colorschemes ", 13) == 0))
 		return complete_colorschemes((char *)text, words_n);
 
 #ifndef _NO_PROFILES
 	/* ### PROFILES COMPLETION ### */
-	if (*lb == 'p' && (strncmp(lb, "pf ", 3) == 0
-	|| strncmp(lb, "profile ", 8) == 0))
+	if (s && *s == 'p' && (strncmp(s, "pf ", 3) == 0
+	|| strncmp(s, "profile ", 8) == 0))
 		return complete_profiles((char *)text, words_n);
 #endif /* !_NO_PROFILES */
 
 	/* ### SORT COMMAND COMPLETION ### */
-	if (*lb == 's' && (strncmp(lb, "st ", 3) == 0
-	|| strncmp(lb, "sort ", 5) == 0))
+	if (s && *s == 's' && (strncmp(s, "st ", 3) == 0
+	|| strncmp(s, "sort ", 5) == 0))
 		return complete_sort_names(text, words_n);
 
 	/* ### WORKSPACES COMPLETION ### */
-	if (*lb == 'w' && strncmp(lb, "ws ", 3) == 0 && words_n == 2)
+	if (s && *s == 'w' && strncmp(s, "ws ", 3) == 0 && words_n == 2)
 		return complete_workspaces((char *)text);
 
 	/* ### COMPLETIONS FOR THE 'UNSET' COMMAND ### */
-	if (*lb == 'u' && strncmp(lb, "unset ", 6) == 0)
+	if (s && *s == 'u' && strncmp(s, "unset ", 6) == 0)
 		return rl_completion_matches(text, &env_vars_generator);
 
 	/* ### NET COMMAND COMPLETION ### */
-	if (*lb == 'n' && strncmp(lb, "net ", 4) == 0)
+	if (s && *s == 'n' && strncmp(s, "net ", 4) == 0)
 		return complete_net((char *)text);
 
 	/* If we have an internal command not dealing with file names,
 	 * do not perform any further completion. */
-	if (int_cmd_no_filename() == 1)
+	if (s && int_cmd_no_filename(s) == 1)
 		return (char **)NULL;
 
 	/* Let's try to complete arguments for shell commands. */
