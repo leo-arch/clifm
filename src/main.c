@@ -888,19 +888,18 @@ exec_cmd_tm(char **cmd)
 
 	exec_cmd(cmd);
 
-	if (conf.prompt_b_is_set == 0)
-		return;
+	if (conf.prompt_b_is_set == 1) {
+		const int retb = clock_gettime(CLOCK_REALTIME, &end);
 
-	const int retb = clock_gettime(CLOCK_REALTIME, &end);
+		if (reta == -1 || retb == -1) {
+			last_cmd_time = 0.0;
+			return;
+		}
 
-	if (reta == -1 || retb == -1) {
-		last_cmd_time = 0.0;
-		return;
+		last_cmd_time =
+			(double)(end.tv_nsec - begin.tv_nsec) / 1000000000.0 +
+			(double)(end.tv_sec  - begin.tv_sec);
 	}
-
-	last_cmd_time =
-		(double)(end.tv_nsec - begin.tv_nsec) / 1000000000.0 +
-		(double)(end.tv_sec  - begin.tv_sec);
 }
 
 /* This is the main structure of any basic shell (a REPL)
