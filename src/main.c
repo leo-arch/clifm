@@ -176,7 +176,6 @@ int
 	is_cdpath = 0,
 	jump_total_rank = 0,
 	kbind_busy = 0,
-	mime_match = 0,
 	nesting_level = 0,
 	no_log = 0,
 	open_in_foreground = 0,

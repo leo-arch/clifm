@@ -1856,7 +1856,6 @@ extern int
 	is_cdpath,
 	jump_total_rank,
 	kbind_busy,
-	mime_match,
 	nesting_level, /* Is this a nested instance? */
 	no_log,
 	open_in_foreground, /* Overrides mimelist file value: used by mime_open */

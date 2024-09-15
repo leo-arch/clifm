@@ -3830,7 +3830,6 @@ reset_variables(void)
 	internal_cmd = 0;
 	is_sel = 0;
 	kbind_busy = 0;
-	mime_match = 0;
 	no_log = 0;
 	print_msg = 0;
 	recur_perm_error_flag = 0;

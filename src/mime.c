@@ -60,6 +60,7 @@
 #include "spawn.h"
 
 static char *err_name = (char *)NULL;
+static int mime_match = 0;
 
 /* Expand all environment variables in the string S.
  * Returns the expanded string or NULL on error. */
