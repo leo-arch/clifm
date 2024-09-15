@@ -27,8 +27,9 @@
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>   /* access */
-#include <sys/wait.h> /* waitpid */
+#include <unistd.h>   /* access() */
+#include <sys/wait.h> /* waitpid() */
+#include <time.h>     /* clock_gettime() */
 
 #ifdef __OpenBSD__
 typedef char *rl_cpvfunc_t;
@@ -2081,7 +2082,7 @@ toggle_follow_links(const char *arg)
  * This will be the value returned by this function. Used by the \z
  * escape code in the prompt to print the exit status of the last
  * executed command */
-int
+static int
 exec_cmd(char **comm)
 {
 	if (zombies > 0)
@@ -2665,6 +2666,35 @@ CHECK_EVENTS:
 #endif /* LINUX_INOTIFY */
 
 	return exit_code;
+}
+
+/* Run the command CMD and, if the '\b' prompt code is used, store execution
+ * time in last_cmd_time (global). */
+int
+exec_cmd_tm(char **cmd)
+{
+	struct timespec begin, end;
+	int reta = -1;
+
+	if (conf.prompt_b_is_set == 1)
+		reta = clock_gettime(CLOCK_REALTIME, &begin);
+
+	const int ret = exec_cmd(cmd);
+
+	if (conf.prompt_b_is_set == 1) {
+		const int retb = clock_gettime(CLOCK_REALTIME, &end);
+
+		if (reta == -1 || retb == -1) {
+			last_cmd_time = 0.0;
+			return ret;
+		}
+
+		last_cmd_time =
+			(double)(end.tv_nsec - begin.tv_nsec) / 1000000000.0 +
+			(double)(end.tv_sec  - begin.tv_sec);
+	}
+
+	return ret;
 }
 
 static inline void

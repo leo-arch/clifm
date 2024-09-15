@@ -27,7 +27,7 @@
 
 __BEGIN_DECLS
 
-int  exec_cmd(char **comm);
+int  exec_cmd_tm(char **cmd);
 void exec_chained_cmds(char *cmd);
 void exec_profile(void);
 

@@ -319,7 +319,7 @@ rl_update_prompt_old(void)
 }
 #endif /* __HAIKU__ || !_NO_PROFILES */
 
-/* Runs any command recognized by CliFM via a keybind. Example:
+/* Runs any command recognized by Clifm via a keybind. Example:
  * keybind_exec_cmd("sel *") */
 int
 keybind_exec_cmd(char *str)
@@ -337,7 +337,7 @@ keybind_exec_cmd(char *str)
 	putchar('\n');
 
 	if (cmd) {
-		exit_status = exec_cmd(cmd);
+		exit_status = exec_cmd_tm(cmd);
 
 		/* While in the bookmarks or mountpoints screen, the kbind_busy
 		 * flag will be set to 1 and no keybinding will work. Once the

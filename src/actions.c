@@ -309,13 +309,13 @@ run_action(char *action, char **args)
 		if (_cmd) {
 			char **alias_cmd = check_for_alias(_cmd);
 			if (alias_cmd) {
-				exit_status = exec_cmd(alias_cmd);
+				exit_status = exec_cmd_tm(alias_cmd);
 				for (i = 0; alias_cmd[i]; i++)
 					free(alias_cmd[i]);
 				free(alias_cmd);
 			} else {
 				if (!(flags & FAILED_ALIAS))
-					exit_status = exec_cmd(_cmd);
+					exit_status = exec_cmd_tm(_cmd);
 				flags &= ~FAILED_ALIAS;
 				for (i = 0; i <= args_n; i++)
 					free(_cmd[i]);
