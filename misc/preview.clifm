@@ -8,6 +8,7 @@
 #--------------------------------
 
 # Commented and blank lines are omitted.
+# Lines starting with either '#' or ';' are comments.
 
 # It is recommended to edit this file setting your preferred applications
 # first: the previewing process will be smoother and faster this way.
@@ -16,10 +17,10 @@
 # For syntax details consult the mimelist.clifm file (via 'mm edit' or F6).
 
 # Uncomment this line to use pistol (or any other previewing application):
-#.*=pistol
+;.*=pistol
 
 # Uncomment and edit this line to use Ranger's scope script:
-#.*=~/.config/ranger/scope.sh %f 120 80 /tmp/clifm/ True
+;.*=~/.config/ranger/scope.sh %f 120 80 /tmp/clifm/ True
 
 # Image previews
 # 1) Uncomment the below lines to enable image previews for the specified file types.
@@ -32,19 +33,19 @@
 # the Kitty protocol, and ueberzug are supported). If the clifmimg script is not found under
 # ~/.config/clifm/, you can copy it from DATADIR/clifm/plugins/.
 #
-#^application/.*(officedocument|msword|ms-excel|opendocument).*=~/.config/clifm/clifmimg doc;
-#^text/rtf$=~/.config/clifm/clifmimg doc;
-#^application/epub\+zip$=~/.config/clifm/clifmimg epub;
-#^application/pdf$=~/.config/clifm/clifmimg pdf;
-#^image/vnd.djvu=~/.config/clifm/clifmimg djvu;
-#^image/svg\+xml$=~/.config/clifm/clifmimg svg;
-#^image/gif$=~/.config/clifm/clifmimg gif;
-#^image/.*=~/.config/clifm/clifmimg image;
-#^video/.*=~/.config/clifm/clifmimg video;
-#^audio/.*=~/.config/clifm/clifmimg audio;
-#^application/postscript$=~/.config/clifm/clifmimg postscript;
-#N:.*\.otf$=~/.config/clifm/clifmimg font;
-#font/.*=~/.config/clifm/clifmimg font;
+;^application/.*(officedocument|msword|ms-excel|opendocument).*=~/.config/clifm/clifmimg doc;
+;^text/rtf$=~/.config/clifm/clifmimg doc;
+;^application/epub\+zip$=~/.config/clifm/clifmimg epub;
+;^application/pdf$=~/.config/clifm/clifmimg pdf;
+;^image/vnd.djvu=~/.config/clifm/clifmimg djvu;
+;^image/svg\+xml$=~/.config/clifm/clifmimg svg;
+;^image/gif$=~/.config/clifm/clifmimg gif;
+;^image/.*=~/.config/clifm/clifmimg image;
+;^video/.*=~/.config/clifm/clifmimg video;
+;^audio/.*=~/.config/clifm/clifmimg audio;
+;^application/postscript$=~/.config/clifm/clifmimg postscript;
+;N:.*\.otf$=~/.config/clifm/clifmimg font;
+;font/.*=~/.config/clifm/clifmimg font;
 
 #--------------------------------
 # Directories
