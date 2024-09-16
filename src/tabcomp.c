@@ -1287,8 +1287,13 @@ get_query_str(char *lw)
 		break;
 
 	case TCMP_JUMP:
-		tmp = lb ? strchr(lb, ' ') : (char *)NULL;
-		query = (tmp && *tmp && tmp[1]) ? tmp + 1 : (char *)NULL;
+		if (lb && *lb == 'j' && lb[1] == ' ') {
+			query = lb[2] ? lb + 2 : (char *)NULL;
+		} else {
+			tmp = lb ? strstr(lb, "j ") : (char *)NULL;
+			query = (tmp && *tmp && tmp[1] && tmp[2])
+				? tmp + 2 : (char *)NULL;
+		}
 		break;
 
 	default: query = lw; break;
@@ -1552,7 +1557,7 @@ get_finder_offset(const char *query, const char *text, char **matches,
 
 	else if (ct == TCMP_JUMP) {
 		if (query) {
-			if (lb && *lb && lb[1] == ' ') {
+			if (lb && *lb == 'j' && lb[1] == ' ') {
 				/* The command is "j" */
 				finder_offset = prompt_offset - 1;
 			} else {
@@ -1661,15 +1666,15 @@ do_some_cleanup(char **buf, char **matches, const char *query,
 	size_t *prefix_len)
 {
 	enum comp_type ct = cur_comp_type;
+	char *lb = rl_line_buffer;
 
 	/* TCMP_HIST might be either search or command history */
 	int cmd_hist = (ct == TCMP_HIST && rl_line_buffer
-		&& (*rl_line_buffer != '/' || rl_line_buffer[1] != '*'));
+		&& (*lb != '/' || lb[1] != '*'));
 
 	if (rl_point < rl_end && ct != TCMP_PATH && ct != TCMP_CMD) {
-		char *s = rl_line_buffer
-			? get_last_chr(rl_line_buffer, ' ', rl_point) : (char *)NULL;
-		int start = s ? (int)(s - rl_line_buffer + 1) : 0;
+		char *s = lb ? get_last_chr(lb, ' ', rl_point) : (char *)NULL;
+		int start = s ? (int)(s - lb + 1) : 0;
 		rl_delete_text(start, rl_point);
 		rl_point = start;
 	}
@@ -1683,20 +1688,34 @@ do_some_cleanup(char **buf, char **matches, const char *query,
 		*buf = tmp;
 	}
 
-	else if ((ct == TCMP_HIST && cmd_hist == 0) || ct == TCMP_JUMP) {
+	else if (ct == TCMP_HIST && cmd_hist == 0) {
 		rl_delete_text(0, rl_end);
 		rl_point = rl_end = 0;
+	}
+
+	else if (ct == TCMP_JUMP) {
+		if (*lb == 'j' && lb[1] == ' ') {
+			rl_delete_text(0, rl_end);
+			rl_point = rl_end = 0;
+		} else {
+			char *tmp = strstr(lb, "j ");
+			if (tmp && tmp[1] && tmp[2]) {
+				rl_point = (int)(tmp - lb + 2);
+				rl_delete_text(rl_point, rl_end);
+				rl_end = rl_point;
+			}
+		}
 	}
 
 	else if (cmd_hist == 1 || ct == TCMP_RANGES || ct == TCMP_SEL
 	|| ct == TCMP_TAGS_F || ct == TCMP_GLOB
 	|| ct == TCMP_BM_PATHS || ct == TCMP_BM_PREFIX
 	|| ct == TCMP_TAGS_T || ct == TCMP_DIRHIST) {
-		char *s = rl_line_buffer ? get_last_chr(rl_line_buffer,
+		char *s = lb ? get_last_chr(lb,
 			(ct == TCMP_GLOB && words_num == 1)
 			? '/' : ' ', rl_end) : (char *)NULL;
 		if (s) {
-			rl_point = (int)(s - rl_line_buffer + 1);
+			rl_point = (int)(s - lb + 1);
 			rl_delete_text(rl_point, rl_end);
 			rl_end = rl_point;
 		} else if (cmd_hist == 1 || ct == TCMP_BM_PATHS || ct == TCMP_TAGS_F
@@ -1708,9 +1727,8 @@ do_some_cleanup(char **buf, char **matches, const char *query,
 	}
 
 	else if (ct == TCMP_FILE_TYPES_FILES || ct == TCMP_CMD_DESC) {
-		char *s = rl_line_buffer
-			? get_last_chr(rl_line_buffer, ' ', rl_end) : (char *)NULL;
-		rl_point = !s ? 0 : (int)(s - rl_line_buffer + 1);
+		char *s = lb ? get_last_chr(lb, ' ', rl_end) : (char *)NULL;
+		rl_point = !s ? 0 : (int)(s - lb + 1);
 		rl_delete_text(rl_point, rl_end);
 		rl_end = rl_point;
 		ERASE_TO_RIGHT;

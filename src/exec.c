@@ -2163,7 +2163,6 @@ exec_cmd(char **comm)
 
 	/*   ################ DIRECTORY JUMPER ##################     */
 	else if (*comm[0] == 'j' && (!comm[0][1] || ((comm[0][1] == 'c'
-//	|| comm[0][1] == 'p' || comm[0][1] == 'e' || comm[0][1] == 'o'
 	|| comm[0][1] == 'p' || comm[0][1] == 'e'
 	|| comm[0][1] == 'l') && !comm[0][2])))
 		return (exit_code = dirjump(comm, NO_SUG_JUMP));

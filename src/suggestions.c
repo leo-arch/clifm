@@ -1864,7 +1864,7 @@ check_bookmark_names(char *word, const size_t len)
 }
 
 static int
-check_backdir(void)
+check_backdir(char *start)
 {
 	if (!workspaces || !workspaces[cur_ws].path)
 		return NO_MATCH;
@@ -1878,7 +1878,7 @@ check_backdir(void)
 	if (q)
 		*q = '\0';
 
-	char *lb = rl_line_buffer + 3;
+	char *lb = start + 3;
 	char *ds = strchr(lb, '\\') ? unescape_str(lb, 0) : lb;
 
 	/* Find the query string in the list of parent directories. */
@@ -1994,6 +1994,9 @@ rl_suggestions(const unsigned char c)
 		first_word = savestring(q, strlen(q));
 		rl_line_buffer[full_word] = ' ';
 	}
+
+	/* A pointer to the beginning of the last word (command name) */
+	char *s = rl_line_buffer + start_word;
 
 	char *word = (words_num == 1 && c != ' ' && first_word)
 		? first_word : last_word;
@@ -2111,17 +2114,17 @@ rl_suggestions(const unsigned char c)
 	/* 3.d) Let's suggest non-fixed parameters for internal commands
 	 * Only if second word or more (first word is the command name). */
 
-	switch (words_num > 1 ? *lb : '\0') {
+	switch (words_num > 1 ? *s : '\0') {
 	case 'b': /* Bookmark names */
-		if (bm_n > 0 && lb[1] == 'm' && lb[2] == ' ') {
-			if (!(*(lb + 3) == 'a' && *(lb + 4) == ' ')
-			&& strncmp(lb + 3, "add", 3) != 0) {
+		if (bm_n > 0 && s[1] == 'm' && s[2] == ' ') {
+			if (!(*(s + 3) == 'a' && *(s + 4) == ' ')
+			&& strncmp(s + 3, "add", 3) != 0) {
 				if ((printed = check_bookmark_names(word, wlen)) != NO_MATCH) {
 					goto SUCCESS;
 				} else {
 					if (suggestion.printed)
 						clear_suggestion(CS_FREEBUF);
-					if (*(lb + 3) != '-') /* Might be --help, let it continue. */
+					if (*(s + 3) != '-') /* Might be --help, let it continue. */
 						goto FAIL;
 				}
 			} else if (words_num > 5) {
@@ -2131,19 +2134,19 @@ rl_suggestions(const unsigned char c)
 		}
 
 		/* Backdir function (bd) */
-		else if (lb[1] == 'd' && lb[2] == ' ' && lb[3]) {
-				if (*(lb + 3) == '/' && !*(lb + 4)) {
+		else if (s[1] == 'd' && s[2] == ' ' && s[3]) {
+				if (*(s + 3) == '/' && !*(s + 4)) {
 					/* The query string is a single slash: do nothing. */
 					goto FAIL;
 				}
-				if ((printed = check_backdir()) != NO_MATCH)
+				if ((printed = check_backdir(s)) != NO_MATCH)
 					goto SUCCESS;
 		}
 		break;
 
 	case 'c': /* Color schemes */
-		if (conf.colorize == 1 && color_schemes && lb[1] == 's'
-		&& lb[2] == ' ') {
+		if (conf.colorize == 1 && color_schemes && s[1] == 's'
+		&& s[2] == ' ') {
 			if ((printed = check_color_schemes(word, wlen)) != NO_MATCH)
 				goto SUCCESS;
 		}
@@ -2151,7 +2154,7 @@ rl_suggestions(const unsigned char c)
 
 	case 'd': /* Dirhist command (dh) */
 		if (words_num == 2 && old_pwd && dirhist_total_index > 0 && wlen > 0
-		&& lb[1] == 'h' && lb[2] == ' ' && !strchr(word, '/')) {
+		&& s[1] == 'h' && s[2] == ' ' && !strchr(word, '/')) {
 			if ((printed = check_dirhist(word, wlen)) != NO_MATCH)
 				goto SUCCESS;
 			else
@@ -2160,8 +2163,9 @@ rl_suggestions(const unsigned char c)
 		break;
 
 	case 'j': /* j command */
-		if (lb[1] == ' '  || ((lb[1] == 'c'	|| lb[1] == 'p') && lb[2] == ' ')) {
-			if ((printed = check_jcmd(full_line)) != NO_MATCH) {
+		if (s[1] == ' ' || ((s[1] == 'c' || s[1] == 'p') && s[2] == ' ')) {
+//			if ((printed = check_jcmd(full_line)) != NO_MATCH) {
+			if ((printed = check_jcmd(s)) != NO_MATCH) {
 				zero_offset = 1;
 				goto SUCCESS;
 			} else {
@@ -2171,7 +2175,7 @@ rl_suggestions(const unsigned char c)
 		break;
 
 	case 'n': /* 'net' command: remotes */
-		if (remotes && lb[1] == 'e' && lb[2] == 't' && lb[3] == ' ') {
+		if (remotes && s[1] == 'e' && s[2] == 't' && s[3] == ' ') {
 			if ((printed = check_remotes(word, wlen)) != NO_MATCH)
 				goto SUCCESS;
 		}
@@ -2179,9 +2183,9 @@ rl_suggestions(const unsigned char c)
 
 	case 'p': /* Profiles */
 #ifndef _NO_PROFILES
-		if (profile_names && words_num == 3 && lb[1] == 'f' && lb[2] == ' '
-		&& (strncmp(lb + 3, "set ", 4) == 0 || strncmp(lb + 3, "del ", 4) == 0
-		|| strncmp(lb + 3, "rename ", 7) == 0)) {
+		if (profile_names && words_num == 3 && s[1] == 'f' && s[2] == ' '
+		&& (strncmp(s + 3, "set ", 4) == 0 || strncmp(s + 3, "del ", 4) == 0
+		|| strncmp(s + 3, "rename ", 7) == 0)) {
 			if ((printed = check_profiles(word, wlen)) != NO_MATCH)
 				goto SUCCESS;
 			else
@@ -2189,7 +2193,7 @@ rl_suggestions(const unsigned char c)
 		}
 #endif /* !_NO_PROFILES */
 
-		if (lb[1] == 'r' && strncmp(lb, "prompt set ", 11) == 0) {
+		if (s[1] == 'r' && strncmp(s, "prompt set ", 11) == 0) {
 			printed = check_prompts(word, wlen);
 			if (prompts_n > 0 && printed != NO_MATCH)
 				goto SUCCESS;
@@ -2197,7 +2201,7 @@ rl_suggestions(const unsigned char c)
 		break;
 
 	case 's': /* Sort */
-		if (((lb[1] == 't' && lb[2] == ' ') || strncmp(lb, "sort ", 5) == 0)
+		if (((s[1] == 't' && s[2] == ' ') || strncmp(s, "sort ", 5) == 0)
 		&& is_number(word)) {
 			if (words_num > 2)
 				goto FAIL;
@@ -2209,12 +2213,12 @@ rl_suggestions(const unsigned char c)
 
 #ifndef _NO_TAGS
 	case 't': /* Tag command */
-		if ((lb[1] == 'a' || lb[1] == 'u') && lb[2] == ' ') {
+		if ((s[1] == 'a' || s[1] == 'u') && s[2] == ' ') {
 			if (*word == ':' && *(word + 1)
 			&& (printed = check_tags(word + 1, wlen - 1, TAGC_SUG)) != NO_MATCH)
 				goto SUCCESS;
-		} else if ((lb[1] == 'l' || lb[1] == 'm' || lb[1] == 'n'
-		|| lb[1] == 'r' || lb[1] == 'y') && lb[2] == ' ') {
+		} else if ((s[1] == 'l' || s[1] == 'm' || s[1] == 'n'
+		|| s[1] == 'r' || s[1] == 'y') && s[2] == ' ') {
 			printed = check_tags(word, wlen, TAGS_SUG);
 			if (*word && printed != NO_MATCH)
 				goto SUCCESS;
@@ -2223,7 +2227,7 @@ rl_suggestions(const unsigned char c)
 #endif /* _NO_TAGS */
 
 	case 'w': /* Workspaces */
-		if (lb[1] == 's' && lb[2] == ' ') {
+		if (s[1] == 's' && s[2] == ' ') {
 			if (words_num > 2)
 				goto FAIL;
 			if ((printed = check_workspaces(word, wlen)) != NO_MATCH)

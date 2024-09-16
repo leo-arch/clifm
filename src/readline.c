@@ -3322,9 +3322,6 @@ complete_ranges(char *text, int *exit_status)
 static char **
 complete_open_with(char *text, char *start)
 {
-	if (!start || !*start)
-		return (char **)NULL;
-
 	char *p = start + 3;
 	char *s = strrchr(p, ' ');
 	if (s)

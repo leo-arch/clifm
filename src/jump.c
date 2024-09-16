@@ -652,7 +652,7 @@ purge_jump_database(char *arg)
 	return purge_low_ranked_entries(n);
 }
 
-static inline int
+static int
 check_jump_params(char **args, const time_t now, const int reduce)
 {
 	if (args[0][1] == 'e')
@@ -675,7 +675,7 @@ check_jump_params(char **args, const time_t now, const int reduce)
 	return (-1);
 }
 
-static inline int
+static int
 mark_target_segment(char *str)
 {
 	const size_t len = strlen(str);
@@ -698,7 +698,7 @@ mark_target_segment(char *str)
  * SEGMENT is a flag: LAST_SEGMENT or FIRST_SEGMENT. In both cases the
  * resulting string will be checked to match for the first or last segment
  * of the full match (MATCH). If not NULL is returned. */
-static inline char *
+static char *
 get_needle(const char *needle, const char *match, const char *query,
 	const int segment)
 {
@@ -728,7 +728,7 @@ get_needle(const char *needle, const char *match, const char *query,
 	return ret;
 }
 
-static inline int
+static int
 rank_tmp_entry(const struct jump_entry_t *entry, const time_t now,
 	const int reduce, const char *query)
 {
