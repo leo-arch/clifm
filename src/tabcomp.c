@@ -1246,7 +1246,6 @@ get_query_str(char *lw)
 	case TCMP_RANGES:           /* fallthrough */
 	case TCMP_SEL:              /* fallthrough */
 	case TCMP_BM_PATHS:         /* fallthrough */
-	case TCMP_TAGS_F:           /* fallthrough */
 	case TCMP_GLOB:             /* fallthrough */
 	case TCMP_CMD_DESC:         /* fallthrough */
 	case TCMP_FILE_TYPES_OPTS:  /* fallthrough */

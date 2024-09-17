@@ -3532,9 +3532,9 @@ complete_tag_names(char *text, int *exit_status, char *start)
 
 	/* comp == 2
 	 * Let's match tagged files for the untag function. */
-	char *_tag = get_cur_tag();
-	matches = check_tagged_files(_tag);
-	free(_tag);
+	char *c_tag = get_cur_tag();
+	matches = check_tagged_files(c_tag);
+	free(c_tag);
 
 	if (!matches)
 		return (char **)NULL;
