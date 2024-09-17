@@ -55,9 +55,8 @@
 
 #if defined(__HAIKU__) || defined(__OpenBSD__) || defined(__ANDROID__)
 # define NO_WORDEXP
-#endif /* __HAIKU__ || __OpenBSD__ || __ANDROID__ */
-
-#define MAX_PMOD_PATHS 8
+#else
+# define MAX_PMOD_PATHS 8
 static size_t p_mod_paths_n = 0;
 
 struct p_mod_paths_t {
@@ -66,6 +65,7 @@ struct p_mod_paths_t {
 };
 
 static struct p_mod_paths_t p_mod_paths[MAX_PMOD_PATHS];
+#endif /* __HAIKU__ || __OpenBSD__ || __ANDROID__ */
 
 static inline char *
 gen_time(const int c)
@@ -778,6 +778,7 @@ gen_color(char **line)
 	return temp;
 }
 
+#ifndef NO_WORDEXP
 static char *
 check_mod_paths_cache(const char *name)
 {
@@ -867,6 +868,7 @@ run_prompt_module(char **line, char **res, size_t *len)
 	*p = '}';
 	*line = p + 1;
 }
+#endif /* !NO_WORDEXP */
 
 static char *
 gen_last_cmd_time(char **line)
@@ -1046,12 +1048,12 @@ ADD_STRING:
 				substitute_cmd(&line, &result, &result_len);
 				continue;
 			}
-#endif /* !NO_WORDEXP */
 
 			if (c == '$' && *line == '{') {
 				run_prompt_module(&line, &result, &result_len);
 				continue;
 			}
+#endif /* !NO_WORDEXP */
 
 			const size_t new_len = result_len + 2
 				+ (wrong_cmd ? (MAX_COLOR + 6) : 0);
