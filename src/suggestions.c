@@ -1641,7 +1641,7 @@ get_last_word(const char *last_space)
 }
 
 static int
-check_workspaces(char *word, size_t wlen)
+check_workspaces(char *word, size_t wlen, const int type)
 {
 	if (!word || !*word || !workspaces)
 		return NO_MATCH;
@@ -1673,7 +1673,8 @@ check_workspaces(char *word, size_t wlen)
 
 		if (TOUPPER(*w) == TOUPPER(*workspaces[i].name)
 		&& strncasecmp(w, workspaces[i].name, l) == 0) {
-			suggestion.type = WS_NAME_SUG;
+//			suggestion.type = WS_NAME_SUG;
+			suggestion.type = type;
 			char *p = escape_str(workspaces[i].name);
 			print_suggestion(p ? p : workspaces[i].name, wlen, sf_c);
 			free(p);
@@ -2230,7 +2231,7 @@ rl_suggestions(const unsigned char c)
 		if (s[1] == 's' && s[2] == ' ') {
 			if (words_num > 2)
 				goto FAIL;
-			if ((printed = check_workspaces(word, wlen)) != NO_MATCH)
+			if ((printed = check_workspaces(word, wlen, WS_NAME_SUG)) != NO_MATCH)
 				goto SUCCESS;
 		}
 	break;
@@ -2253,6 +2254,12 @@ rl_suggestions(const unsigned char c)
 	/* 3.d.3) Bookmark names (b:) */
 	if (*word == 'b' && *(word + 1) == ':' && *(word + 2)) {
 		if ((printed = check_bookmark_names(word, wlen)) != NO_MATCH)
+			goto SUCCESS;
+	}
+
+	/* Workspaces (w:) */
+	if (*word == 'w' && word[1] == ':' && word[2]) {
+		if ((printed = check_workspaces(word + 2, wlen - 2, WS_PREFIX_SUG)) != NO_MATCH)
 			goto SUCCESS;
 	}
 
@@ -2462,8 +2469,10 @@ CHECK_FIRST_WORD:
 
 	word = first_word ? first_word : last_word;
 
-	/* Skip 'b:' (bookmarks), 's:' (sel files) and 't:' (tags) constructs. */
-	if ((*word == 'b' || *word == 's' || *word == 't') && *(word + 1) == ':')
+	/* Skip 'b:' (bookmarks), 's:' (sel files) 't:' (tags) and 'w:'
+	 * (workspaces) constructs. */
+	if ((*word == 'b' || *word == 's' || *word == 't' || *word == 'w')
+	&& *(word + 1) == ':')
 		goto NO_SUGGESTION;
 
 	if (!word || !*word

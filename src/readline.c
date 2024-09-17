@@ -2151,7 +2151,7 @@ workspaces_generator(const char *text, int state)
 	while (i < MAX_WS) {
 		if (!workspaces[i].name) {
 			if (len == 0) {
-				char t[12];
+				char t[MAX_INT_STR + 3];
 				snprintf(t, sizeof(t), "%d", i + 1);
 				i++;
 				return strdup(t);
@@ -3687,13 +3687,14 @@ complete_workspaces(char *text)
 {
 	rl_sort_completion_matches = 0;
 	rl_attempted_completion_over = 1;
-	char *p = unescape_str(text, 0);
+	char *t = (*text == 'w' && text[1] == ':') ? text + 2 : text;
+	char *p = unescape_str(t, 0);
 
-	char **matches = rl_completion_matches(p ? p : text, &workspaces_generator);
+	char **matches = rl_completion_matches(p ? p : t, &workspaces_generator);
 	free(p);
 
 	if (matches) {
-		cur_comp_type = TCMP_WORKSPACES;
+		cur_comp_type = t != text ? TCMP_WS_PREFIX : TCMP_WORKSPACES;
 		return matches;
 	}
 
@@ -4099,6 +4100,9 @@ my_rl_completion(const char *text, const int start, const int end)
 		if (exit_status == FUNC_SUCCESS)
 			return matches;
 	}
+
+	if (*text == 'w' && text[1] == ':')
+		return complete_workspaces((char *)text);
 
 	/* ##### SEL KEYWORD (both "sel" and "s:") ##### */
 	if (sel_n > 0 && *text == 's' && (text[1] == ':'

@@ -1143,7 +1143,8 @@ store_completions(char **matches)
 
 	if (ct == TCMP_TAGS_S || ct == TCMP_TAGS_U || ct == TCMP_SORT
 	|| ct == TCMP_BOOKMARK || ct == TCMP_CSCHEME || ct == TCMP_NET
-	|| ct == TCMP_PROF || ct == TCMP_PROMPTS || ct == TCMP_BM_PREFIX)
+	|| ct == TCMP_PROF || ct == TCMP_PROMPTS || ct == TCMP_BM_PREFIX
+	|| ct == TCMP_WS_PREFIX)
 		no_file_comp = 1; /* We're not completing file names. */
 
 	char *norm_prefix = (char *)NULL;
@@ -1254,6 +1255,7 @@ get_query_str(char *lw)
 		break;
 
 	case TCMP_TAGS_T: /* fallthrough */
+	case TCMP_WS_PREFIX: /* fallthrough */
 	case TCMP_BM_PREFIX:
 		query = (lw && *lw && lw[1] && lb[2]) ? lw + 2 : (char *)NULL;
 		break;
@@ -1638,7 +1640,7 @@ get_finder_offset(const char *query, const char *text, char **matches,
 	&& ct != TCMP_CMD_DESC && ct != TCMP_FILE_TYPES_OPTS
 	&& ct != TCMP_FILE_TYPES_FILES && ct != TCMP_MIME_LIST
 	&& ct != TCMP_TAGS_F && ct != TCMP_TAGS_T && ct != TCMP_TAGS_C
-	&& ct != TCMP_DIRHIST)
+	&& ct != TCMP_DIRHIST && ct != TCMP_WS_PREFIX)
 		finder_offset++; /* Last char is space */
 
 	while (finder_offset > term_cols)
@@ -2235,6 +2237,7 @@ AFTER_USUAL_COMPLETION:
 		&& cur_comp_type != TCMP_CMD_DESC
 		&& cur_comp_type != TCMP_OWNERSHIP
 		&& cur_comp_type != TCMP_DIRHIST
+		&& (cur_comp_type != TCMP_WS_PREFIX || !matches[1])
 
 		&& (cur_comp_type != TCMP_BM_PATHS || !matches[1])
 
@@ -2261,10 +2264,13 @@ AFTER_USUAL_COMPLETION:
 			/* Let's keep the backslash, used to bypass alias names. */
 			if (c == TCMP_CMD && text && *text == '\\' && *(text + 1))
 				start++;
+			if (c == TCMP_WS_PREFIX)
+				start += 2;
 
 			rl_begin_undo_group();
 			rl_delete_text(start, rl_point);
 			rl_point = start;
+
 #ifndef _NO_HIGHLIGHT
 			if (conf.highlight && !wrong_cmd) {
 				size_t k, l = 0;

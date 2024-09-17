@@ -801,6 +801,7 @@ rl_accept_suggestion(int count, int key)
 	case TAGT_SUG: /* fallthrough */
 	case TAGC_SUG: /* fallthrough */
 	case TAGS_SUG: /* fallthrough */
+	case WS_PREFIX_SUG: /* fallthrough */
 	case BM_PREFIX_SUG: {
 		char prefix[3];
 		if (suggestion.type == TAGC_SUG) {
@@ -809,10 +810,13 @@ rl_accept_suggestion(int count, int key)
 			prefix[0] = 't'; prefix[1] = ':'; prefix[2] = '\0';
 		} else if (suggestion.type == BM_PREFIX_SUG) {
 			prefix[0] = 'b'; prefix[1] = ':'; prefix[2] = '\0';
+		} else if (suggestion.type == WS_PREFIX_SUG) {
+			prefix[0] = 'w'; prefix[1] = ':'; prefix[2] = '\0';
 		}
 
 		rl_insert_text(prefix);
-		char *p = suggestion.type != BM_PREFIX_SUG
+		char *p = (suggestion.type != BM_PREFIX_SUG
+			&& suggestion.type != WS_PREFIX_SUG)
 			? escape_str(suggestion_buf) : (char *)NULL;
 
 		my_insert_text(p ? p : suggestion_buf, NULL, 0);

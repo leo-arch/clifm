@@ -721,6 +721,7 @@ extern time_t curdir_mtime;
 #define PROFILE_SUG    30
 #define BM_PREFIX_SUG  31 /* Bookmark name (b:NAME) */
 #define DIRHIST_SUG    32
+#define WS_PREFIX_SUG  33 /* Workspace name (w:NAME) */
 
 /* 46 == \x1b[00;38;02;000;000;000;00;48;02;000;000;000m\0 (24bit, RGB
  * true color format including foreground and background colors, the SGR
@@ -1815,6 +1816,7 @@ enum comp_type {
 	TCMP_OWNERSHIP =  34,
 	TCMP_DIRHIST =    35,
 	TCMP_MIME_LIST =  36,
+	TCMP_WS_PREFIX =  37, /* 'w:' keyword expansion */
 	TCMP_MIME_FILES = TCMP_FILE_TYPES_FILES /* Same behavior */
 };
 

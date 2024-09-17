@@ -1837,6 +1837,50 @@ expand_sel_keyword(char ***substr)
 		(*substr)[0][1] = '\0';
 }
 
+static int
+expand_workspace(char **name)
+{
+	char *ws_name = *name + 2;
+
+	if (is_number(ws_name)) {
+		const int n = MAX_WS > 9 ? atoi(ws_name) : *ws_name - '0';
+		if (n <= 0 || n > MAX_WS || !workspaces[n - 1].path)
+			return FUNC_FAILURE;
+
+		char *q = escape_str(workspaces[n - 1].path);
+		char *tmp = q ? q : workspaces[n - 1].path;
+		const size_t tmp_len = strlen(tmp);
+		*name = xnrealloc(*name, tmp_len + 1, sizeof(char));
+		xstrsncpy(*name, tmp, tmp_len + 1);
+		free(q);
+
+		return FUNC_SUCCESS;
+	}
+
+	char *deq_str = unescape_str(ws_name, 0);
+	char *tmp_name = deq_str ? deq_str : ws_name;
+	size_t i = 0;
+	for (i = 0; i < MAX_WS; i++) {
+		if (!workspaces[i].path || !workspaces[i].name
+		|| *tmp_name != *workspaces[i].name
+		|| strcmp(tmp_name, workspaces[i].name) != 0)
+			continue;
+
+		char *q = escape_str(workspaces[i].path);
+		char *tmp = q ? q : workspaces[i].path;
+		const size_t tmp_len = strlen(tmp);
+		*name = xnrealloc(*name, tmp_len + 1, sizeof(char));
+		xstrsncpy(*name, tmp, tmp_len + 1);
+		free(q);
+		free(deq_str);
+
+		return FUNC_SUCCESS;
+	}
+
+	free(deq_str);
+	return FUNC_FAILURE;
+}
+
 /* Expand the bookmark NAME into the corresponding bookmark path.
  * Returns FUNC_SUCCESS if the expansion took place or FUNC_FAILURE otherwise */
 static int
@@ -2967,6 +3011,15 @@ parse_input_str(char *str)
 		/* Expand bookmark name (b:NAME) into the corresponding path */
 		if (*substr[i] == 'b' && substr[i][1] == ':' && substr[i][2]) {
 			if (expand_bm_name(&substr[i]) == FUNC_SUCCESS)
+				continue;
+		}
+
+			/* ######################################
+			 * #     2.8) WORKSPACE EXPANSION       #
+			 * ###################################### */
+
+		if (*substr[i] == 'w' && substr[i][1] == ':' && substr[i][2]) {
+			if (expand_workspace(&substr[i]) == FUNC_SUCCESS)
 				continue;
 		}
 
