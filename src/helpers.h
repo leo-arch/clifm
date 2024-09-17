@@ -722,6 +722,7 @@ extern time_t curdir_mtime;
 #define BM_PREFIX_SUG  31 /* Bookmark name (b:NAME) */
 #define DIRHIST_SUG    32
 #define WS_PREFIX_SUG  33 /* Workspace name (w:NAME) */
+#define WS_NUM_PREFIX_SUG 34
 
 /* 46 == \x1b[00;38;02;000;000;000;00;48;02;000;000;000m\0 (24bit, RGB
  * true color format including foreground and background colors, the SGR

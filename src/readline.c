@@ -2149,6 +2149,11 @@ workspaces_generator(const char *text, int state)
 		return (char *)NULL;
 
 	while (i < MAX_WS) {
+		if (cur_comp_type == TCMP_WS_PREFIX && !workspaces[i].path) {
+			i++; /* If 'w:', skip unset workspaces */
+			continue;
+		}
+
 		if (!workspaces[i].name) {
 			if (len == 0) {
 				char t[MAX_INT_STR + 3];
@@ -3690,13 +3695,16 @@ complete_workspaces(char *text)
 	char *t = (*text == 'w' && text[1] == ':') ? text + 2 : text;
 	char *p = unescape_str(t, 0);
 
+	const enum comp_type ct = cur_comp_type;
+	cur_comp_type = t != text ? TCMP_WS_PREFIX : TCMP_WORKSPACES;
+
 	char **matches = rl_completion_matches(p ? p : t, &workspaces_generator);
 	free(p);
 
-	if (matches) {
-		cur_comp_type = t != text ? TCMP_WS_PREFIX : TCMP_WORKSPACES;
+	if (matches)
 		return matches;
-	}
+
+	cur_comp_type = ct;
 
 	rl_sort_completion_matches = 1;
 	return (char **)NULL;

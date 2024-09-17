@@ -445,7 +445,7 @@ calculate_suggestion_lines(int *baej, const size_t suggestion_len)
 	|| suggestion.type == JCMD_SUG_NOACD || suggestion.type == BACKDIR_SUG
 	|| suggestion.type == SORT_SUG || suggestion.type == WS_NUM_SUG
 	|| suggestion.type == FUZZY_FILENAME || suggestion.type == DIRHIST_SUG
-	|| suggestion.type == FASTBACK_SUG
+	|| suggestion.type == FASTBACK_SUG || suggestion.type == WS_NUM_PREFIX_SUG
 	|| (suggestion.type == COMP_SUG && (flags & BAEJ_SUGGESTION))) {
 		/* 3 = 1 (one char forward) + 2 (" >") */
 		cuc += 3;
@@ -1649,7 +1649,8 @@ check_workspaces(char *word, size_t wlen, const int type)
 	if (*word >= '1' && *word <= MAX_WS + '0' && !*(word + 1)) {
 		const int a = atoi(word);
 		if (a > 0 && workspaces[a - 1].name) {
-			suggestion.type = WS_NUM_SUG;
+			suggestion.type = type == WS_PREFIX_SUG
+				? WS_NUM_PREFIX_SUG : WS_NUM_SUG;
 			print_suggestion(workspaces[a - 1].name, 0, sf_c);
 			return PARTIAL_MATCH;
 		}
@@ -1673,7 +1674,6 @@ check_workspaces(char *word, size_t wlen, const int type)
 
 		if (TOUPPER(*w) == TOUPPER(*workspaces[i].name)
 		&& strncasecmp(w, workspaces[i].name, l) == 0) {
-//			suggestion.type = WS_NAME_SUG;
 			suggestion.type = type;
 			char *p = escape_str(workspaces[i].name);
 			print_suggestion(p ? p : workspaces[i].name, wlen, sf_c);

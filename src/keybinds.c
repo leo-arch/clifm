@@ -802,15 +802,17 @@ rl_accept_suggestion(int count, int key)
 	case TAGC_SUG: /* fallthrough */
 	case TAGS_SUG: /* fallthrough */
 	case WS_PREFIX_SUG: /* fallthrough */
+	case WS_NUM_PREFIX_SUG:
 	case BM_PREFIX_SUG: {
-		char prefix[3];
+		char prefix[3]; prefix[0] = '\0';
 		if (suggestion.type == TAGC_SUG) {
 			prefix[0] = ':'; prefix[1] = '\0';
 		} else if (suggestion.type == TAGT_SUG) {
 			prefix[0] = 't'; prefix[1] = ':'; prefix[2] = '\0';
 		} else if (suggestion.type == BM_PREFIX_SUG) {
 			prefix[0] = 'b'; prefix[1] = ':'; prefix[2] = '\0';
-		} else if (suggestion.type == WS_PREFIX_SUG) {
+		} else if (suggestion.type == WS_PREFIX_SUG
+		|| suggestion.type == WS_NUM_PREFIX_SUG) {
 			prefix[0] = 'w'; prefix[1] = ':'; prefix[2] = '\0';
 		}
 

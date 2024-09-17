@@ -1144,7 +1144,7 @@ store_completions(char **matches)
 	if (ct == TCMP_TAGS_S || ct == TCMP_TAGS_U || ct == TCMP_SORT
 	|| ct == TCMP_BOOKMARK || ct == TCMP_CSCHEME || ct == TCMP_NET
 	|| ct == TCMP_PROF || ct == TCMP_PROMPTS || ct == TCMP_BM_PREFIX
-	|| ct == TCMP_WS_PREFIX)
+	|| ct == TCMP_WS_PREFIX || ct == TCMP_WORKSPACES)
 		no_file_comp = 1; /* We're not completing file names. */
 
 	char *norm_prefix = (char *)NULL;
