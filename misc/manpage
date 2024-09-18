@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Sep 12, 2024" "clifm 1.20.7" "CLIFM Manual"
+.TH "CLIFM" "1" "Sep 17, 2024" "clifm 1.20.9" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -1210,6 +1210,8 @@ Though by default workspaces are unnamed, you can name them wathever you like us
 Use autocommands to persistenly set options per workspace, for example, to always list files in the third workspace in long view. See the \fBAUTOCOMMANDS\fR section below for more information.
 .sp
 Make local settings private to the current workspace by setting the \fIPrivateWorkspaceSettings\fR option to \fItrue\fR in the configuration file: settings changed via either the command line or keyboard shortcuts (say Alt\-l, to toggle the long view) will apply only to the current workspace and will be remembered even when switching workspaces.
+.sp
+To directly operate on a workspace (namely, the path it points to) you can use the \fIw:\fR construct followed by a workspace number or name. For example, to copy all .png files in the current directory to the third workspace, enter \fIc *.png w:3\fR. Press TAB immediately after \fIw:\fR to get the list of available workspaces. 
 .TP
 .B x, X \fR[\fIDIR\fR]
 open DIR, or the current working directory if DIR is not specified, in a new instance of \fBclifm\fR (as root if \fIX\fR, as the current unprivileged user if \fIx\fR) using the value of \fITerminalCmd\fR (from the configuration file) as terminal emulator. If this value is not set, \fIxterm\fR will be used as fallback terminal emulator. This function is only available for graphical environments.
