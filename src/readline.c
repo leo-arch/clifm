@@ -4109,7 +4109,8 @@ my_rl_completion(const char *text, const int start, const int end)
 			return matches;
 	}
 
-	if (*text == 'w' && text[1] == ':')
+	if ((words_n > 1 || conf.autocd == 1)
+	&& *text == 'w' && text[1] == ':')
 		return complete_workspaces((char *)text);
 
 	/* ##### SEL KEYWORD (both "sel" and "s:") ##### */
