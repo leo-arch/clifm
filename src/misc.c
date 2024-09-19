@@ -180,7 +180,8 @@ set_eln_color(void)
 	}
 
 	if (!cl || !*cl) {
-		xstrsncpy(el_c, DEF_EL_C, sizeof(el_c));
+		xstrsncpy(el_c, term_caps.color >= 256
+			? DEF_EL_C256 : DEF_EL_C, sizeof(el_c));
 		return;
 	}
 
