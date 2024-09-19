@@ -165,17 +165,38 @@ END:
 void
 set_eln_color(void)
 {
+	char *cl = (char *)NULL;
+
 	switch (cur_ws) {
-	case 0: xstrsncpy(el_c, *ws1_c ? ws1_c : DEF_EL_C, sizeof(el_c)); break;
-	case 1: xstrsncpy(el_c, *ws2_c ? ws2_c : DEF_EL_C, sizeof(el_c)); break;
-	case 2: xstrsncpy(el_c, *ws3_c ? ws3_c : DEF_EL_C, sizeof(el_c)); break;
-	case 3: xstrsncpy(el_c, *ws4_c ? ws4_c : DEF_EL_C, sizeof(el_c)); break;
-	case 4: xstrsncpy(el_c, *ws5_c ? ws5_c : DEF_EL_C, sizeof(el_c)); break;
-	case 5: xstrsncpy(el_c, *ws6_c ? ws6_c : DEF_EL_C, sizeof(el_c)); break;
-	case 6: xstrsncpy(el_c, *ws7_c ? ws7_c : DEF_EL_C, sizeof(el_c)); break;
-	case 7: xstrsncpy(el_c, *ws8_c ? ws8_c : DEF_EL_C, sizeof(el_c)); break;
-	default: xstrsncpy(el_c, DEF_EL_C, sizeof(el_c)); break;
+	case 0: cl = ws1_c; break;
+	case 1: cl = ws2_c; break;
+	case 2: cl = ws3_c; break;
+	case 3: cl = ws4_c; break;
+	case 4: cl = ws5_c; break;
+	case 5: cl = ws6_c; break;
+	case 6: cl = ws7_c; break;
+	case 7: cl = ws8_c; break;
+	default: break;
 	}
+
+	if (!cl || !*cl) {
+		xstrsncpy(el_c, DEF_EL_C, sizeof(el_c));
+		return;
+	}
+
+	/* Remove leading and trainling control characters (\001 and \002)*/
+	size_t cl_len = 0;
+	if (*cl == 001) {
+		cl++;
+		cl_len = strlen(cl);
+		if (cl_len > 0 && cl[cl_len - 1] == 002)
+			cl[cl_len - 1] = '\0';
+	}
+
+	xstrsncpy(el_c, cl, sizeof(el_c));
+
+	if (cl_len > 0)
+		cl[cl_len - 1] = 002;
 }
 
 /* Custom POSIX implementation of GNU asprintf() modified to log program
