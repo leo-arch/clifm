@@ -46,6 +46,6 @@ fzf_borders()
 
 # A few fixed values to construct the FZF interface
 fzf_height="${CLIFM_FZF_HEIGHT:-80}%"
-fzf_prompt="CliFM > "
+fzf_prompt="Clifm > "
 colorize=1
 [ -n "$CLIFM_COLORLESS" ] && colorize=0

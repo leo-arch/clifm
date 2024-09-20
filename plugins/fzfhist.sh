@@ -1,7 +1,7 @@
 #!/bin/sh
 
-# Command history plugin via FZF for CliFM
-# Dependencies: fzf
+# Commands history plugin for Clifm
+# Dependencies: fzf, tac, sed
 
 # Written by L. Abramovich
 # License GPL3
@@ -18,7 +18,7 @@ if ! type fzf > /dev/null 2>&1; then
 	exit 127
 fi
 
-FILE="${XDG_CONFIG_HOME:=$HOME/.config}/clifm/profiles/$CLIFM_PROFILE/history.clifm"
+HIST_FILE="${XDG_CONFIG_HOME:=$HOME/.config}/clifm/profiles/$CLIFM_PROFILE/history.clifm"
 
 # Source our plugins helper
 if [ -z "$CLIFM_PLUGINS_HELPER" ] || ! [ -f "$CLIFM_PLUGINS_HELPER" ]; then
@@ -29,11 +29,10 @@ fi
 . "$CLIFM_PLUGINS_HELPER"
 
 # shellcheck disable=SC2154
-fzf --prompt="$fzf_prompt" \
+sed '/^#/d' "$HIST_FILE" | tac | fzf --prompt="$fzf_prompt" \
 --reverse --height 15 --info=inline \
 --bind "tab:accept" --header "Run a command from history" \
---color="$(get_fzf_colors)" \
- < "$FILE" > "$CLIFM_BUS"
+--color="$(get_fzf_colors)" > "$CLIFM_BUS"
 printf "\n"
 
 exit 0
