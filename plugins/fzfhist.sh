@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Commands history plugin for Clifm
-# Dependencies: fzf, tac, sed
+# Dependencies: fzf, tac, sed, awk
 
 # Written by L. Abramovich
 # License GPL3
@@ -29,7 +29,7 @@ fi
 . "$CLIFM_PLUGINS_HELPER"
 
 # shellcheck disable=SC2154
-sed '/^#/d' "$HIST_FILE" | tac | fzf --prompt="$fzf_prompt" \
+sed '/^#/d' "$HIST_FILE" | tac | awk '!x[$0]++' | fzf --prompt="$fzf_prompt" \
 --reverse --height 15 --info=inline \
 --bind "tab:accept" --header "Run a command from history" \
 --color="$(get_fzf_colors)" > "$CLIFM_BUS"
