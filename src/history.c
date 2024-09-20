@@ -462,7 +462,8 @@ print_history_list(const int timestamp)
 			char tdate[MAX_TIME_STR];
 			gen_time_str(tdate, sizeof(tdate), history[i].date);
 			printf(" %s%-*zu%s %s%s%s %s\n", el_c, n, i + 1, df_c,
-				"\x1b[0;2m", tdate, "\x1b[0m", history[i].cmd);
+				conf.colorize == 1 ? "\x1b[0;2m" : "",
+				tdate, "\x1b[0m", history[i].cmd);
 		} else {
 			printf(" %s%-*zu%s %s\n", el_c, n, i + 1, df_c, history[i].cmd);
 		}
