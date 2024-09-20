@@ -8,7 +8,7 @@
 
 if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "-h" ]; }; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
-	printf "Navigate and execute CliFM commands history via FZF\n"
+	printf "Navigate/execute the Clifm commands history via FZF\n"
 	printf "\n\x1b[1mUSAGE\x1b[0m\n  %s\n" "$name"
 	exit 0
 fi
