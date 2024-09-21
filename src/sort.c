@@ -34,6 +34,9 @@
 #include "listing.h"
 #include "messages.h" /* SORT_USAGE */
 
+#define F_SORT(a, b)      ((a) == (b) ? 0 : ((a) > (b) ? 1 : -1))
+#define F_SORT_DIRS(a, b) ((a) == (b) ? 0 : ((a) < (b) ? 1 : -1))
+
 int
 skip_files(const struct dirent *ent)
 {
@@ -178,68 +181,12 @@ sort_by_extension(struct fileinfo *pa, struct fileinfo *pb)
 }
 
 static inline int
-sort_by_size(struct fileinfo *pa, struct fileinfo *pb)
-{
-	const off_t as = pa->size;
-	const off_t bs = pb->size;
-
-	if (as > bs)
-		return 1;
-
-	if (as < bs)
-		return (-1);
-
-	return 0;
-}
-
-static inline int
-sort_by_time(const time_t a, const time_t b)
-{
-	int ret = 0;
-
-	if (a > b) {
-		ret = 1;
-	} else {
-		if (a < b)
-			ret = -1;
-	}
-
-	return ret;
-}
-
-static inline int
-sort_by_inode(const ino_t a, const ino_t b)
-{
-	int ret = 0;
-
-	if (a > b) {
-		ret = 1;
-	} else {
-		if (a < b)
-			ret = -1;
-	}
-
-	return ret;
-}
-
-static inline int
 sort_by_owner(struct fileinfo *pa, struct fileinfo *pb)
 {
 	if (pa->uid_i.name && pb->uid_i.name)
 		return namecmp(pa->uid_i.name, pb->uid_i.name);
 
-	const uid_t a = pa->uid;
-	const uid_t b = pb->uid;
-	int ret = 0;
-
-	if (a > b) {
-		ret = 1;
-	} else {
-		if (a < b)
-			ret = -1;
-	}
-
-	return ret;
+	return F_SORT(pa->uid, pb->uid);
 }
 
 static inline int
@@ -248,48 +195,7 @@ sort_by_group(struct fileinfo *pa, struct fileinfo *pb)
 	if (pa->gid_i.name && pb->gid_i.name)
 		return namecmp(pa->gid_i.name, pb->gid_i.name);
 
-	const gid_t a = pa->gid;
-	const gid_t b = pb->gid;
-	int ret = 0;
-
-	if (a > b) {
-		ret = 1;
-	} else {
-		if (a < b)
-			ret = -1;
-	}
-
-	return ret;
-}
-
-static inline int
-sort_by_blocks(const blkcnt_t a, const blkcnt_t b)
-{
-	int ret = 0;
-
-	if (a > b) {
-		ret = 1;
-	} else {
-		if (a < b)
-			ret = -1;
-	}
-
-	return ret;
-}
-
-static inline int
-sort_by_links(const nlink_t a, const nlink_t b)
-{
-	int ret = 0;
-
-	if (a > b) {
-		ret = 1;
-	} else {
-		if (a < b)
-			ret = -1;
-	}
-
-	return ret;
+	return F_SORT(pa->gid, pb->gid);
 }
 
 static inline int
@@ -311,19 +217,7 @@ sort_by_type(struct fileinfo *pa, struct fileinfo *pb)
 	if (m2 > m1)
 		return (-1);
 
-	return 0;
-}
-
-static inline int
-sort_dirs(const int a, const int b)
-{
-	if (b != a) {
-		if (b)
-			return 1;
-		return (-1);
-	}
-
-	return 0;
+	return sort_by_extension(pa, pb);
 }
 
 int
@@ -335,7 +229,7 @@ entrycmp(const void *a, const void *b)
 	int st = conf.sort;
 
 	if (conf.list_dirs_first == 1) {
-		ret = sort_dirs(pa->dir, pb->dir);
+		ret = F_SORT_DIRS(pa->dir, pb->dir);
 		if (ret != 0)
 			return ret;
 	}
@@ -344,23 +238,20 @@ entrycmp(const void *a, const void *b)
 		st = SNAME;
 
 	switch (st) {
-	case STSIZE: ret = sort_by_size(pa, pb); break;
+	case STSIZE: ret = F_SORT(pa->size, pb->size); break;
 	case SATIME: /* fallthrough */
 	case SBTIME: /* fallthrough */
 	case SCTIME: /* fallthrough */
-	case SMTIME: ret = sort_by_time(pa->time, pb->time); break;
+	case SMTIME: ret = F_SORT(pa->time, pb->time); break;
+
 	case SVER: ret = xstrverscmp(pa->name, pb->name); break;
 	case SEXT: ret = sort_by_extension(pa, pb); break;
-	case SINO: ret = sort_by_inode(pa->inode, pb->inode); break;
+	case SINO: ret = F_SORT(pa->inode, pb->inode); break;
 	case SOWN: ret = sort_by_owner(pa, pb); break;
 	case SGRP: ret = sort_by_group(pa, pb); break;
-	case SBLK: ret = sort_by_blocks(pa->blocks, pb->blocks); break;
-	case SLNK: ret = sort_by_links(pa->linkn, pb->linkn); break;
-	case STYPE:
-		ret = sort_by_type(pa, pb);
-		if (ret == 0)
-			ret = sort_by_extension(pa, pb);
-		break;
+	case SBLK: ret = F_SORT(pa->blocks, pb->blocks); break;
+	case SLNK: ret = F_SORT(pa->linkn, pb->linkn); break;
+	case STYPE: ret = sort_by_type(pa, pb); break;
 	default: break;
 	}
 
