@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-03-10 11:23-0300\n"
+"POT-Creation-Date: 2024-09-22 15:04-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,76 +17,92 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: properties.c:1324
+#: properties.c:1301
 #, c-format
 msgid "\tBlocks: %s%jd%s"
 msgstr ""
 
-#: properties.c:1330
+#: properties.c:1307
 #, c-format
 msgid "\tInode: %s%ju%s"
 msgstr ""
 
-#: properties.c:1126 properties.c:1136
+#: properties.c:1099 properties.c:1108
 #, c-format
 msgid "\tName: %s%s%s\n"
 msgstr ""
 
-#: properties.c:1149
+#: properties.c:1132
 #, c-format
-msgid "\tName: %s%s%s -> %s%s%s\n"
+msgid "\tName: %s%s%s %s-> ???%s\n"
 msgstr ""
 
-#: properties.c:1154
+#: properties.c:1124
 #, c-format
-msgid "\tName: %s%s%s -> %s%s%s (broken link)\n"
+msgid "\tName: %s%s%s %s->%s %s%s%s\n"
 msgstr ""
 
-#: properties.c:1157
+#: properties.c:1129
 #, c-format
-msgid "\tName: %s%s%s -> ???\n"
+msgid "\tName: %s%s%s %s->%s %s%s%s (broken link)\n"
 msgstr ""
 
-#: properties.c:1122
+#: properties.c:1096
 #, c-format
-msgid "\tName: %s%s%s <- %s%s%s\n"
+msgid "\tName: %s%s%s %s<-%s %s%s%s\n"
 msgstr ""
 
-#: jump.c:465
+#: jump.c:456
 #, c-format
 msgid ""
 "\n"
 " %sOrder\tVisits\tFirst\tLast\tRank\tDirectory%s\n"
 msgstr ""
 
-#: keybinds.c:1680
+#: keybinds.c:1712
 #, c-format
 msgid ""
 "\n"
 "%s: No pinned file\n"
 msgstr ""
 
-#: keybinds.c:1330
+#: keybinds.c:1362
 #, c-format
 msgid ""
 "\n"
 "%s: sel: %s\n"
 msgstr ""
 
-#: trash.c:429
+#: trash.c:435
 #, c-format
 msgid ""
 "\n"
 "%sEnter 'q' to quit\n"
-"File(s) to be %s (ex: 1 2-6, or *):\n"
+"File(s) to be %s (e.g.: 1 2-6, or *):\n"
 msgstr ""
 
-#: selection.c:1126
+#: selection.c:1132
 #, c-format
 msgid ""
 "\n"
 "%sEnter 'q' to quit or 'e' to edit the selections file\n"
-"File(s) to be deselected (ex: 1 2-6, or *):\n"
+"File(s) to be deselected (e.g.: 1 2-6, or *):\n"
+msgstr ""
+
+#: colors.c:3010
+#, c-format
+msgid ""
+"\n"
+"%sFile extensions%s\n"
+"\n"
+msgstr ""
+
+#: colors.c:3200
+#, c-format
+msgid ""
+"\n"
+"%sInterface%s\n"
+"\n"
 msgstr ""
 
 #: archives.c:827
@@ -98,14 +114,38 @@ msgid ""
 "compressed files using the original file names.\n"
 msgstr ""
 
-#: trash.c:928
+#: colors.c:3272
+#, c-format
+msgid ""
+"\n"
+"%sPrompt%s\n"
+"\n"
+msgstr ""
+
+#: colors.c:3160
+#, c-format
+msgid ""
+"\n"
+"%sProperties / Long view%s\n"
+"\n"
+msgstr ""
+
+#: colors.c:3336
+#, c-format
+msgid ""
+"\n"
+"%sSyntax highlighting%s\n"
+"\n"
+msgstr ""
+
+#: trash.c:934
 #, c-format
 msgid ""
 "\n"
 "%sTotal size: "
 msgstr ""
 
-#: selection.c:916
+#: selection.c:922
 #, c-format
 msgid ""
 "\n"
@@ -120,27 +160,30 @@ msgid ""
 "\n"
 msgstr ""
 
-#: colors.c:2990
-msgid ""
-"\n"
-"*The slash followed by a number (/xx) after directories or symbolic links to "
-"directories indicates the amount of files contained by the corresponding "
-"directory, excluding self (.) and parent (..) directories."
-msgstr ""
-
-#: colors.c:2994
+#: colors.c:3249
 #, c-format
 msgid ""
 "\n"
-"The second field in this list is the code that is to be used to modify the "
-"color of the corresponding file type in the color scheme file (in the "
-"\"FiletypeColors\" line), using the same ANSI style color format used by "
-"dircolors. By default, %s uses only 8/16 colors, but you can use 256 and RGB/"
-"true colors as well.\n"
+"%sWorkspaces%s\n"
 "\n"
 msgstr ""
 
-#: jump.c:567
+#: colors.c:3221
+#, c-format
+msgid ""
+"\n"
+"(%s1%s) Used only when ColorLinksAsTarget is enabled\n"
+msgstr ""
+
+#: colors.c:3390
+msgid ""
+"\n"
+"The bracketed field is the code required to modify the color of the "
+"corresponding element in the color scheme file.\n"
+"\n"
+msgstr ""
+
+#: jump.c:558
 #, c-format
 msgid ""
 "\n"
@@ -148,175 +191,67 @@ msgid ""
 "Total visits: %d\n"
 msgstr ""
 
-#: jump.c:638
+#: jump.c:629
 #, c-format
 msgid ""
 "\n"
 "jump: Purged %d %s\n"
 msgstr ""
 
-#: jump.c:598
+#: jump.c:589
 #, c-format
 msgid ""
 "\n"
 "jump: Purged %d invalid %s\n"
 msgstr ""
 
-#: properties.c:1325
+#: colors.c:3118
+msgid ""
+"      (dd)  Date (unset: using shades)\n"
+"              "
+msgstr ""
+
+#: colors.c:3095
+msgid ""
+"      (dz)  Size (unset: using shades)\n"
+"              "
+msgstr ""
+
+#: properties.c:1302
 #, c-format
 msgid "  Block size: %s%d%s"
 msgstr ""
 
-#: properties.c:1338
+#: properties.c:1315
 #, c-format
 msgid "  Device type: %s%ju,%ju%s\n"
 msgstr ""
 
-#: properties.c:1334
+#: properties.c:1311
 #, c-format
 msgid "  Gid: %s%u (%s)%s"
 msgstr ""
 
-#: properties.c:1326
+#: properties.c:1303
 #, c-format
 msgid "  IO Block: %s%jd%s\n"
 msgstr ""
 
-#: properties.c:1332
+#: properties.c:1309
 #, c-format
 msgid "  Uid: %s%u (%s)%s"
 msgstr ""
 
-#: colors.c:2970
-#, c-format
-msgid " %sfile name%s: bd: Block special file\n"
-msgstr ""
-
-#: colors.c:2979
-#, c-format
-msgid " %sfile name%s: ca: File with capabilities\n"
-msgstr ""
-
-#: colors.c:2971
-#, c-format
-msgid " %sfile name%s: cd: Character special file\n"
-msgstr ""
-
-#: colors.c:2957
-#, c-format
-msgid " %sfile name%s: di: Directory*\n"
-msgstr ""
-
-#: colors.c:2958
-#, c-format
-msgid " %sfile name%s: ed: EMPTY directory\n"
-msgstr ""
-
-#: colors.c:2966
-#, c-format
-msgid " %sfile name%s: ee: Empty executable file\n"
-msgstr ""
-
-#: colors.c:2962
-#, c-format
-msgid " %sfile name%s: ef: Empty (zero-lenght) file\n"
-msgstr ""
-
-#: colors.c:2965
-#, c-format
-msgid " %sfile name%s: ex: Executable file\n"
-msgstr ""
-
-#: colors.c:2961
-#, c-format
-msgid " %sfile name%s: fi: Regular file\n"
-msgstr ""
-
-#: colors.c:2967
-#, c-format
-msgid " %sfile name%s: ln: Symbolic link*\n"
-msgstr ""
-
-#: colors.c:2969
-#, c-format
-msgid " %sfile name%s: mh: Multi-hardlink\n"
-msgstr ""
-
-#: colors.c:2959
-#, c-format
-msgid " %sfile name%s: nd: Directory with no read/exec permission\n"
-msgstr ""
-
-#: colors.c:2963
-#, c-format
-msgid " %sfile name%s: nf: File with no read permission\n"
-msgstr ""
-
-#: colors.c:2986
-#, c-format
-msgid " %sfile name%s: no: Unknown file type\n"
-msgstr ""
-
-#: colors.c:2975
-#, c-format
-msgid " %sfile name%s: oo: Door/Port file\n"
-msgstr ""
-
-#: colors.c:2968
-#, c-format
-msgid " %sfile name%s: or: Broken symbolic link\n"
-msgstr ""
-
-#: colors.c:2984
-#, c-format
-msgid " %sfile name%s: ow: Other-writable and NOT sticky directory*\n"
-msgstr ""
-
-#: colors.c:2973
-#, c-format
-msgid " %sfile name%s: pi: Pipe or FIFO special file\n"
-msgstr ""
-
-#: colors.c:2978
-#, c-format
-msgid " %sfile name%s: sg: SGID file\n"
-msgstr ""
-
-#: colors.c:2972
-#, c-format
-msgid " %sfile name%s: so: Socket file\n"
-msgstr ""
-
-#: colors.c:2980
-#, c-format
-msgid " %sfile name%s: st: Sticky and NOT other-writable directory*\n"
-msgstr ""
-
-#: colors.c:2977
-#, c-format
-msgid " %sfile name%s: su: SUID file\n"
-msgstr ""
-
-#: colors.c:2982
-#, c-format
-msgid " %sfile name%s: tw: Sticky and other-writable directory*\n"
-msgstr ""
-
-#: colors.c:2987
-#, c-format
-msgid " %sfile name%s: uf: Unaccessible (non-stat'able) file\n"
-msgstr ""
-
-#: sort.c:416
+#: sort.c:340
 #, c-format
 msgid " (not available in light mode: using %sname%s)\n"
 msgstr ""
 
-#: colors.c:966
+#: colors.c:1052
 msgid " (on LS_COLORS)"
 msgstr ""
 
-#: file_operations.c:1596
+#: file_operations.c:1759
 msgid " (recursively)"
 msgstr ""
 
@@ -355,13 +290,13 @@ msgstr ""
 msgid " Unmount command: %s\n"
 msgstr ""
 
-#: config.c:2078
+#: config.c:2095
 #, c-format
 msgid ""
 "# This is %s's profile file\n"
 "#\n"
-"# Write here the commands you want to be executed at startup\n"
-"# Ex:\n"
+"# Write here the commands you want to be executed at startup.\n"
+"# E.g.:\n"
 "#echo \"%s, the command line file manager\"; read -r\n"
 "#\n"
 "# Uncommented, non-empty lines are executed line by line. If you\n"
@@ -369,7 +304,7 @@ msgid ""
 "#sh /path/to/my/script.sh\n"
 msgstr ""
 
-#: mime.c:1434
+#: mime.c:1411
 #, c-format
 msgid ""
 "%d MIME association(s) imported from the system.\n"
@@ -377,33 +312,33 @@ msgid ""
 "Add these new associations to your mimelist file running 'mm edit'.\n"
 msgstr ""
 
-#: name_cleaner.c:669
+#: name_cleaner.c:679
 #, c-format
 msgid "%d file name(s) bleached\n"
 msgstr ""
 
-#: selection.c:1068
+#: selection.c:1074
 #, c-format
 msgid "%d file(s) deselected\n"
 msgstr ""
 
-#: selection.c:662
+#: selection.c:668
 #, c-format
 msgid "%d file(s) selected\n"
 msgstr ""
 
-#: misc.c:2000
+#: help.c:569
+#, c-format
+msgid "%s %s (%s), by %s\n"
+msgstr ""
+
+#: misc.c:2053
 #, c-format
 msgid ""
-"%s %s%s (%s)\n"
+"%s %s%s%s%s%s (%s)\n"
 "%s\n"
 "License %s\n"
 "Written by %s\n"
-msgstr ""
-
-#: help.c:578
-#, c-format
-msgid "%s %s%s (%s), by %s\n"
 msgstr ""
 
 #: tags.c:115
@@ -411,14 +346,14 @@ msgstr ""
 msgid "%s (error resolving link target)\n"
 msgstr ""
 
-#: jump.c:452
+#: jump.c:443
 #, c-format
 msgid ""
 "%s A plus sign next rank values means that the corresponding directory is "
 "marked as permanent (it won't be removed).\n"
 msgstr ""
 
-#: jump.c:447
+#: jump.c:438
 #, c-format
 msgid ""
 "%s An asterisk next rank values means that the corresponding directory will "
@@ -427,28 +362,28 @@ msgid ""
 "workspace.\n"
 msgstr ""
 
-#: jump.c:461
+#: jump.c:452
 #, c-format
 msgid ""
 "%s Entries ranked below MinJumpRank (currently %d) will be removed at "
 "program exit.\n"
 msgstr ""
 
-#: jump.c:445
+#: jump.c:436
 #, c-format
 msgid ""
 "%s First time access is displayed in days, while last time access is "
 "displayed in hours.\n"
 msgstr ""
 
-#: jump.c:457
+#: jump.c:448
 #, c-format
 msgid ""
 "%s MinJumpRank is set to %d: entries will not be removed from the database "
 "(no matter their rank).\n"
 msgstr ""
 
-#: bookmarks.c:76
+#: bookmarks.c:75
 #, c-format
 msgid ""
 "%s%s\n"
@@ -456,7 +391,7 @@ msgid ""
 "Choose a bookmark (by ELN, shortcut, or name):\n"
 msgstr ""
 
-#: file_operations.c:1054
+#: file_operations.c:1060
 #, c-format
 msgid "%s%s%s (broken link)\n"
 msgstr ""
@@ -466,7 +401,7 @@ msgstr ""
 msgid "%s%s%s is tagged as:\n"
 msgstr ""
 
-#: trash.c:946
+#: trash.c:952
 #, c-format
 msgid "%s%s%s%s\n"
 msgstr ""
@@ -476,9 +411,19 @@ msgstr ""
 msgid "%s%s%s: Succesfully mounted on %s\n"
 msgstr ""
 
-#: misc.c:557
+#: misc.c:577
 #, c-format
 msgid "%s%s: New filter set\n"
+msgstr ""
+
+#: colors.c:3172
+#, c-format
+msgid "%s%sColor%s (dg)  Group ID (e.g. %s%swheel%s)\n"
+msgstr ""
+
+#: colors.c:3153
+#, c-format
+msgid "%s%sColor%s (dt)  Timestamp mark (e.g. %sMay 25 22:08%sm%s)\n"
 msgstr ""
 
 #: archives.c:1030
@@ -486,39 +431,39 @@ msgstr ""
 msgid "%s%sFile%s: %s\n"
 msgstr ""
 
-#: selection.c:840
+#: selection.c:846
 #, c-format
 msgid "%s%sSelection Box%s\n"
 msgstr ""
 
-#: trash.c:392
+#: trash.c:398
 #, c-format
 msgid ""
 "%s%sTrashed files%s\n"
 "\n"
 msgstr ""
 
-#: properties.c:824
+#: properties.c:789
 #, c-format
 msgid "%s->%s %s: Primary group set to %d (%s%s%s)\n"
 msgstr ""
 
-#: properties.c:818
+#: properties.c:783
 #, c-format
 msgid "%s->%s %s: User set to %d (%s%s%s)\n"
 msgstr ""
 
-#: main.c:941
+#: main.c:937
 #, c-format
 msgid "%s->%s Running as root%s\n"
 msgstr ""
 
-#: listing.c:411
+#: listing.c:430
 #, c-format
 msgid "%s/%s (%d%% free) %s %s\n"
 msgstr ""
 
-#: name_cleaner.c:665
+#: name_cleaner.c:675
 #, c-format
 msgid "%s: %d file names(s) bleached\n"
 msgstr ""
@@ -528,7 +473,7 @@ msgstr ""
 msgid "%s: %d: Invalid ELN\n"
 msgstr ""
 
-#: properties.c:1681
+#: properties.c:1583
 #, c-format
 msgid "%s: %s %s->%s %s: Broken symbolic link\n"
 msgstr ""
@@ -538,108 +483,127 @@ msgstr ""
 msgid "%s: %s failed to allocate %zux%zu bytes\n"
 msgstr ""
 
-#: init.c:2671
+#: colors.c:1166
+#, c-format
+msgid ""
+"%s: %s.\n"
+"TIP: To edit the color scheme use the following environment variables: "
+"CLIFM_FILE_COLORS, CLIFM_IFACE_COLORS, and CLIFM_EXT_COLORS.\n"
+"Example:\n"
+"\n"
+"CLIFM_FILE_COLORS=\"di=31:ln=33:\" CLIFM_IFACE_COLORS=\"el=35:fc=34:\" "
+"CLIFM_EXT_COLORS=\"*.c=1;33:*.odt=4;35:\" clifm\n"
+"\n"
+"Consult the manpage for more information.\n"
+msgstr ""
+
+#: init.c:2726
 #, c-format
 msgid ""
 "%s: %s: %s\n"
 "Invalid authentication program (falling back to '%s')\n"
 msgstr ""
 
-#: config.c:2130
+#: config.c:2147
 #, c-format
 msgid "%s: %s: Cannot create tags directory. Tag function disabled\n"
 msgstr ""
 
-#: exec.c:2000
+#: exec.c:2027
 #, c-format
 msgid "%s: %s: Command not allowed in read-only mode\n"
 msgstr ""
 
-#: exec.c:356
+#: exec.c:357
 #, c-format
 msgid "%s: %s: Invalid number\n"
 msgstr ""
 
-#: file_operations.c:1356
+#: file_operations.c:1519
 #, c-format
 msgid "%s: %s: No such ELN\n"
 msgstr ""
 
-#: config.c:1228
+#: config.c:1239
 #, c-format
 msgid ""
 "%s: %s: Using a temporary directory for the Selection Box. Selected files "
 "won't be persistent across reboots\n"
 msgstr ""
 
-#: strings.c:1806
+#: strings.c:1960
 #, c-format
 msgid ""
 "%s: '%c': Invalid file type filter. Run 'help file-filters' for more "
 "information\n"
 msgstr ""
 
-#: file_operations.c:990
+#: file_operations.c:996
 #, c-format
 msgid ""
 "%s: '%s' (%s): Cannot open file\n"
 "Try 'APP FILE' or 'open FILE APP'\n"
 msgstr ""
 
-#: args.c:845
+#: init.c:761
+#, c-format
+msgid "%s: '%s' is not a shell. Setting SHELL to '%s'.\n"
+msgstr ""
+
+#: args.c:848
 #, c-format
 msgid ""
 "%s: '%s': %s\n"
 "Falling back to the default configuration directory\n"
 msgstr ""
 
-#: config.c:1184
+#: config.c:1195
 #, c-format
 msgid ""
 "%s: '%s': %s.\n"
 "Cannot create temporary directory. Falling back to '%s'.\n"
 msgstr ""
 
-#: init.c:768
+#: init.c:798
 #, c-format
 msgid ""
 "%s: '%s': %s.\n"
 "Cannot validate shell. Falling back to '%s'.\n"
 msgstr ""
 
-#: config.c:3444
+#: config.c:3546
 #, c-format
 msgid ""
 "%s: '%s': %s. Trash function disabled. If needed, create the directories "
 "manually and restart %s.\n"
-"Ex: mkdir -p ~/.local/share/Trash/{files,info}\n"
+"E.g.: mkdir -p ~/.local/share/Trash/{files,info}\n"
 msgstr ""
 
-#: config.c:2871
+#: config.c:2908
 #, c-format
 msgid "%s: '%s': %s. Using default values.\n"
 msgstr ""
 
-#: args.c:1104
+#: args.c:1108
 #, c-format
 msgid "%s: '%s': Absolute path is required as argument\n"
 msgstr ""
 
-#: config.c:3457
+#: config.c:3559
 #, c-format
 msgid ""
 "%s: '%s': Cannot create the trash directory (or one of its subdirectories: "
 "files/ and info/).\n"
 "Try creating them manually and restart %s.\n"
-"Ex: mkdir -p ~/.local/share/Trash/{files,info}\n"
+"E.g.: mkdir -p ~/.local/share/Trash/{files,info}\n"
 msgstr ""
 
-#: misc.c:802
+#: misc.c:822
 #, c-format
 msgid "%s: '%s': Cannot escape file name\n"
 msgstr ""
 
-#: config.c:2102
+#: config.c:2119
 #, c-format
 msgid ""
 "%s: '%s': Directory not writable. Bookmarks, commands logs, and commands "
@@ -647,54 +611,59 @@ msgid ""
 "default options.\n"
 msgstr ""
 
-#: args.c:883 args.c:982 aux.c:458
+#: args.c:887 args.c:986 aux.c:534
 #, c-format
 msgid "%s: '%s': Error expanding tilde\n"
 msgstr ""
 
-#: strings.c:2000 strings.c:2074
+#: strings.c:2154 strings.c:2228
 #, c-format
 msgid "%s: '%s': Error quoting file name\n"
 msgstr ""
 
-#: history.c:334
+#: checks.c:895
+#, c-format
+msgid "%s: '%s': Error reading file\n"
+msgstr ""
+
+#: history.c:336
 #, c-format
 msgid "%s: '%s': Error saving directory entry: %s\n"
 msgstr ""
 
-#: args.c:869
+#: args.c:873
 #, c-format
 msgid "%s: '%s': Error setting custom selections file\n"
 msgstr ""
 
-#: file_operations.c:616 file_operations.c:915 file_operations.c:1695
+#: file_operations.c:622 file_operations.c:921 file_operations.c:1854
 #, c-format
 msgid "%s: '%s': Error unescaping file name\n"
 msgstr ""
 
-#: aux.c:441
+#: aux.c:517
 #, c-format
 msgid "%s: '%s': Error unescaping string\n"
 msgstr ""
 
-#: file_operations.c:1622
+#: file_operations.c:1781
 #, c-format
 msgid "%s: '%s': File changed on disk!\n"
 msgstr ""
 
-#: init.c:866
+#: init.c:898
 #, c-format
 msgid ""
 "%s: '%s': Home directory not found\n"
 "Falling back to '%s'\n"
 msgstr ""
 
-#: exec.c:1473 exec.c:1499
+#: exec.c:1500 exec.c:1526
 #, c-format
 msgid "%s: '%s': Invalid argument. Try 'fz -h'\n"
 msgstr ""
 
-#: args.c:806
+#: args.c:809
 #, c-format
 msgid ""
 "%s: '%s': Invalid bell style. Valid values are 0:none, 1:audible, 2:visible "
@@ -702,68 +671,68 @@ msgid ""
 "possible, 'none'.\n"
 msgstr ""
 
-#: args.c:792
+#: args.c:795
 #, c-format
 msgid "%s: '%s': Invalid fuzzy algorithm. Valid values are either 1 or 2.\n"
 msgstr ""
 
-#: init.c:882
+#: init.c:910
 #, c-format
 msgid ""
 "%s: '%s': Invalid home directory in the password database.\n"
 "Something is really wrong! Exiting.\n"
 msgstr ""
 
-#: args.c:1090
+#: args.c:1094
 #, c-format
 msgid "%s: '%s': Invalid profile name\n"
 msgstr ""
 
-#: config.c:3355
+#: config.c:3416
 #, c-format
 msgid "%s: '%s': Invalid regular expression\n"
 msgstr ""
 
-#: init.c:764
+#: init.c:794
 #, c-format
 msgid ""
 "%s: '%s': Invalid shell. Falling back to '%s'.\n"
 "Check '%s' for a list of valid shells.\n"
 msgstr ""
 
-#: args.c:1137
+#: args.c:1141
 #, c-format
 msgid "%s: '%s': Invalid workspace. Valid values are 1-8.\n"
 msgstr ""
 
-#: mime.c:1533 mime.c:1537
+#: mime.c:1510 mime.c:1514
 #, c-format
 msgid "%s: '%s': No associated application found\n"
 msgstr ""
 
-#: exec.c:778
+#: exec.c:792
 #, c-format
 msgid "%s: '%s': No such alias\n"
 msgstr ""
 
-#: selection.c:988
+#: selection.c:994
 #, c-format
 msgid "%s: '%s': No such selected file\n"
 msgstr ""
 
-#: misc.c:643
+#: misc.c:663
 #, c-format
 msgid "%s: '%s': Not a directory\n"
 msgstr ""
 
-#: sanitize.c:400
+#: sanitize.c:409
 #, c-format
 msgid ""
-"%s: '%s': Only command base names are allowed. Ex: 'nano' instead of '/usr/"
+"%s: '%s': Only command base names are allowed. E.g.: 'nano' instead of '/usr/"
 "bin/nano'\n"
 msgstr ""
 
-#: args.c:290
+#: args.c:293
 #, c-format
 msgid ""
 "%s: '%s': Option requires an argument\n"
@@ -775,54 +744,54 @@ msgstr ""
 msgid "%s: '%s': Remote mounted on %s\n"
 msgstr ""
 
-#: exec.c:1134
+#: exec.c:1148
 #, c-format
 msgid "%s: '%s': Syntax error\n"
 msgstr ""
 
-#: checks.c:185
+#: checks.c:190
 #, c-format
 msgid ""
 "%s: '%s': Terminal type not supported. Limited functionality is expected.\n"
 msgstr ""
 
-#: args.c:301
+#: args.c:304
 #, c-format
 msgid ""
 "%s: '%s': Unrecognized option\n"
 "Try '%s --help' for more information.\n"
 msgstr ""
 
-#: file_operations.c:814
+#: file_operations.c:820
 #, c-format
 msgid "%s: '%s': Unsafe file name\n"
 msgstr ""
 
-#: args.c:851
+#: args.c:854
 #, c-format
-msgid "%s: '%s': Using alternative configuration directory\n"
+msgid "%s: '%s': Using an alternative configuration directory\n"
 msgstr ""
 
-#: args.c:1306
+#: args.c:1318
 #, c-format
 msgid "%s: '%s': Valid values are 0-3\n"
 msgstr ""
 
-#: args.c:353
+#: args.c:356
 #, c-format
 msgid ""
 "%s: '%zu': Invalid workspace.\n"
 "Falling back to workspace %zu\n"
 msgstr ""
 
-#: properties.c:1826
+#: properties.c:2018
 #, c-format
 msgid ""
 "%s: '--stat': Option requires an argument\n"
 "Try '%s --help' for more information.\n"
 msgstr ""
 
-#: args.c:756
+#: args.c:759
 #, c-format
 msgid ""
 "%s: --fzytab: We have migrated to 'fnf'.\n"
@@ -830,42 +799,49 @@ msgid ""
 "instead\n"
 msgstr ""
 
-#: args.c:1270
+#: args.c:1295
+#, c-format
+msgid ""
+"%s: --pager-view: '%s': Invalid value.\n"
+"Valid values are 'auto', 'long', and 'short'\n"
+msgstr ""
+
+#: args.c:1275
 #, c-format
 msgid "%s: --prop-fields: 'b': Birth time is not available on this platform\n"
 msgstr ""
 
-#: args.c:655
+#: args.c:658
 #, c-format
 msgid ""
 "%s: --sort: '%s': Invalid value\n"
 "Valid values: atime, btime, ctime, mtime, extension, group, inode, name,\n"
-"              none, owner, size, version, blocks, links.\n"
+"              none, owner, size, version, blocks, links, type.\n"
 msgstr ""
 
-#: args.c:673
+#: args.c:676
 #, c-format
 msgid "%s: --sort: '%s': Valid values are 0-%d\n"
 msgstr ""
 
-#: readline.c:4418
+#: readline.c:4440
 #, c-format
 msgid ""
 "%s: An input file must be provided via the CLIFM_TEST_INPUT_FILE environment "
 "variable\n"
 msgstr ""
 
-#: bookmarks.c:779
+#: bookmarks.c:756
 #, c-format
 msgid "%s: Bookmarks function disabled\n"
 msgstr ""
 
-#: config.c:538
+#: config.c:560
 #, c-format
 msgid "%s: Cannot access the configuration file\n"
 msgstr ""
 
-#: init.c:530
+#: init.c:549
 #, c-format
 msgid ""
 "%s: Cannot access the home directory. Bookmarks, commands logs, and commands "
@@ -873,14 +849,14 @@ msgid ""
 "database won't be persistent. Using default options\n"
 msgstr ""
 
-#: config.c:2120
+#: config.c:2137
 #, c-format
 msgid ""
 "%s: Cannot create colors directory '%s': Falling back to the default color "
 "scheme\n"
 msgstr ""
 
-#: config.c:2058
+#: config.c:2075
 #, c-format
 msgid ""
 "%s: Cannot create configuration directory '%s': Bookmarks, commands logs, "
@@ -888,35 +864,35 @@ msgid ""
 "Falling back to default options.\n"
 msgstr ""
 
-#: args.c:836
+#: args.c:839
 #, c-format
 msgid ""
 "%s: Cannot create directory '%s' (error %d)\n"
 "Falling back to the default configuration directory\n"
 msgstr ""
 
-#: config.c:2135
+#: config.c:2152
 #, c-format
 msgid ""
 "%s: Cannot create plugins directory '%s': The actions function is disabled\n"
 msgstr ""
 
-#: args.c:607
+#: args.c:610
 #, c-format
 msgid "%s: Cannot retrieve the home directory\n"
 msgstr ""
 
-#: colors.c:1092
+#: colors.c:1212
 #, c-format
 msgid "%s: Colors are disabled\n"
 msgstr ""
 
-#: colors.c:2950
+#: colors.c:3376
 #, c-format
 msgid "%s: Currently running without colors\n"
 msgstr ""
 
-#: misc.c:617
+#: misc.c:637
 #, c-format
 msgid ""
 "%s: Default terminal not set. Use the configuration file (F10) to set it\n"
@@ -927,12 +903,12 @@ msgstr ""
 msgid "%s: Directory history cleared\n"
 msgstr ""
 
-#: jump.c:819
+#: jump.c:779
 #, c-format
 msgid "%s: Directory jumper function disabled\n"
 msgstr ""
 
-#: misc.c:1846
+#: misc.c:1879
 #, c-format
 msgid "%s: Empty file names buffer. Nothing to do\n"
 msgstr ""
@@ -947,29 +923,29 @@ msgstr ""
 msgid "%s: Error dropping user privileges. Aborting.\n"
 msgstr ""
 
-#: args.c:1074
+#: args.c:1078
 #, c-format
 msgid "%s: Error expanding tilde. Using default opener.\n"
 msgstr ""
 
-#: aux.c:481
+#: mime.c:1335 mime.c:1528
+#, c-format
+msgid "%s: Error getting MIME type\n"
+msgstr ""
+
+#: aux.c:557
 #, c-format
 msgid "%s: Error getting current directory\n"
 msgstr ""
 
-#: mime.c:515
+#: mime.c:517
 #, c-format
 msgid "%s: Error getting home directory\n"
 msgstr ""
 
-#: main.c:1050
+#: main.c:1046
 #, c-format
 msgid "%s: Error getting hostname\n"
-msgstr ""
-
-#: mime.c:1551
-#, c-format
-msgid "%s: Error getting mime-type\n"
 msgstr ""
 
 #: navigation.c:75
@@ -977,7 +953,7 @@ msgstr ""
 msgid "%s: Error getting the current working directory\n"
 msgstr ""
 
-#: misc.c:1016
+#: misc.c:1036
 #, c-format
 msgid "%s: Error getting variable value\n"
 msgstr ""
@@ -987,17 +963,12 @@ msgstr ""
 msgid "%s: Error retrieving mountpoint\n"
 msgstr ""
 
-#: misc.c:1205
+#: misc.c:1225
 #, c-format
 msgid "%s: Error saving last visited directory: %s\n"
 msgstr ""
 
-#: misc.c:1903
-#, c-format
-msgid "%s: Error storing pinned directory: %s\n"
-msgstr ""
-
-#: colors.c:589
+#: colors.c:606
 #, c-format
 msgid ""
 "%s: Escape sequence detected in the warning prompt string: this might cause "
@@ -1007,112 +978,119 @@ msgid ""
 "(>= 7.0 is recommended).\n"
 msgstr ""
 
-#: exec.c:276
+#: exec.c:277
 #, c-format
 msgid "%s: External commands are not allowed. Run 'ext on' to enable them.\n"
 msgstr ""
 
-#: args.c:374 main.c:1012
+#: args.c:377 main.c:1008
 #, c-format
 msgid "%s: Fatal error! Failure retrieving current working directory\n"
 msgstr ""
 
-#: config.c:1344
+#: config.c:1355
 #, c-format
-msgid "%s: File might not be safe\n"
+msgid "%s: File may be unsafe\n"
 msgstr ""
 
-#: misc.c:623
+#: misc.c:643
 #, c-format
 msgid "%s: Function only available for graphical environments\n"
 msgstr ""
 
-#: colors.c:2181
+#: tabcomp.c:792
+#, c-format
+msgid ""
+"%s: Fzf failed. Check the FzfTabOptions line by running 'cs edit'\n"
+"(some parameter may not be supported by the installed fzf version).\n"
+msgstr ""
+
+#: colors.c:2205
 #, c-format
 msgid ""
 "%s: FzfTabOptions contains unsafe characters (<>|;&$`). Falling back to "
 "default values.\n"
 msgstr ""
 
-#: history.c:534
+#: history.c:528
 #, c-format
 msgid "%s: History function disabled\n"
 msgstr ""
 
-#: init.c:889
+#: init.c:917
 #, c-format
 msgid ""
 "%s: Home directory not found.\n"
 "Something is really wrong! Exiting.\n"
 msgstr ""
 
-#: listing.c:2294 listing.c:3037
+#: listing.c:2430 listing.c:3169
 #, c-format
 msgid "%s: Integer overflow detected (showing only %jd files)\n"
 msgstr ""
 
-#: main.c:1144
+#: main.c:1140
 #, c-format
 msgid ""
 "%s: Invalid sort value: only none, name, extension, version, and inode are "
 "allowed in light mode\n"
 msgstr ""
 
-#: config.c:1328
+#: config.c:1339
 #, c-format
 msgid "%s: Is a symbolic link\n"
 msgstr ""
 
-#: config.c:1333
+#: config.c:1344
 #, c-format
 msgid "%s: Is not a regular file\n"
 msgstr ""
 
-#: misc.c:1751
+#: misc.c:1784
 #, c-format
 msgid "%s: Light mode is not supported in virtual directories\n"
 msgstr ""
 
-#: main.c:1078
+#: main.c:1074
 #, c-format
 msgid ""
 "%s: Locale is not UTF-8. To avoid encoding issues you might want to set an "
-"UTF-8 locale. Ex: export LANG=es_AR.UTF-8\n"
+"UTF-8 locale. For example: export LANG=es_AR.UTF-8\n"
 msgstr ""
 
-#: exec.c:1827
+#: exec.c:1854
 #, c-format
 msgid "%s: Log function disabled\n"
 msgstr ""
 
-#: strings.c:885
+#: strings.c:995
 #, c-format
 msgid "%s: Missing '%c'\n"
 msgstr ""
 
-#: strings.c:942
+#: strings.c:1052
 #, c-format
 msgid "%s: Missing closing quote: '%c'\n"
 msgstr ""
 
-#: exec.c:2617
+#: exec.c:2640
 #, c-format
 msgid "%s: Nested instances are not allowed in stealth mode\n"
 msgstr ""
 
-#: exec.c:742 exec.c:764
+#: exec.c:756 exec.c:778
 #, c-format
 msgid "%s: No aliases found\n"
 msgstr ""
 
-#: args.c:578
+#: args.c:581
 #, c-format
 msgid ""
 "%s: No data directory found. Data files, such as plugins and color schemes, "
-"might not be available.\n"
+"may not be available.\n"
 msgstr ""
 
-#: exec.c:638 exec.c:659
+#: exec.c:652 exec.c:673
 #, c-format
 msgid "%s: No messages\n"
 msgstr ""
@@ -1122,7 +1100,14 @@ msgstr ""
 msgid "%s: No mount application found. Install either udevil or udisks2\n"
 msgstr ""
 
-#: exec.c:1084 misc.c:1961
+#: mime.c:1351
+#, c-format
+msgid ""
+"%s: No opening application found\n"
+"Tip: Run 'APP FILE', or 'mm edit' to add an opening application\n"
+msgstr ""
+
+#: exec.c:1098
 #, c-format
 msgid "%s: No pinned file\n"
 msgstr ""
@@ -1132,7 +1117,7 @@ msgstr ""
 msgid "%s: No remotes defined. Run 'net edit' to add one.\n"
 msgstr ""
 
-#: bookmarks.c:254
+#: bookmarks.c:230
 #, c-format
 msgid "%s: No such ELN\n"
 msgstr ""
@@ -1142,22 +1127,22 @@ msgstr ""
 msgid "%s: No tags found, Use 'tag new' to create new tags\n"
 msgstr ""
 
-#: name_cleaner.c:547 name_cleaner.c:599
+#: name_cleaner.c:552 name_cleaner.c:608
 #, c-format
 msgid "%s: Nothing to do\n"
 msgstr ""
 
-#: mime.c:601
+#: mime.c:607
 #, c-format
 msgid "%s: Nothing was imported. No MIME association found\n"
 msgstr ""
 
-#: mime.c:509
+#: mime.c:511
 #, c-format
 msgid "%s: Nothing was imported. No graphical environment found\n"
 msgstr ""
 
-#: history.c:267
+#: history.c:269
 #, c-format
 msgid ""
 "%s: Notification daemon error: %s\n"
@@ -1165,30 +1150,35 @@ msgid ""
 "or %s to silence this warning (original message printed below)\n"
 msgstr ""
 
-#: args.c:1420
+#: args.c:1432
 #, c-format
 msgid ""
 "%s: Option '-%c' requires an argument.\n"
 "Try '%s -h' for more information.\n"
 msgstr ""
 
-#: prompt.c:1279
+#: actions.c:167
+#, c-format
+msgid "%s: Plugins are not allowed in secure-cmds mode\n"
+msgstr ""
+
+#: prompt.c:1721
 #, c-format
 msgid "%s: Prompts successfully reloaded\n"
 msgstr ""
 
-#: main.c:1138
+#: main.c:1134
 #, c-format
 msgid "%s: PropFields: 'b': Birth time is not allowed in light mode\n"
 msgstr ""
 
-#: args.c:688
+#: args.c:691
 #, c-format
 msgid ""
 "%s: Running in stealth mode. Access to configuration files is not allowed\n"
 msgstr ""
 
-#: config.c:3540
+#: config.c:3650
 #, c-format
 msgid ""
 "%s: Running in stealth mode: persistent selection, bookmarks, jump database "
@@ -1196,17 +1186,12 @@ msgid ""
 "disabled.\n"
 msgstr ""
 
-#: misc.c:1953
-#, c-format
-msgid "%s: Succesfully pinned '%s'\n"
-msgstr ""
-
 #: tags.c:397
 #, c-format
 msgid "%s: Successfully created tag\n"
 msgstr ""
 
-#: exec.c:1106
+#: exec.c:1120
 #, c-format
 msgid ""
 "%s: The 'dh' plugin is deprecated. Use the built-in 'dh' command instead "
@@ -1214,7 +1199,7 @@ msgid ""
 "more information about the new command.\n"
 msgstr ""
 
-#: checks.c:198
+#: checks.c:203
 #, c-format
 msgid ""
 "%s: The TERM environment variable is unset.\n"
@@ -1226,7 +1211,7 @@ msgstr ""
 msgid "%s: There are no available %s\n"
 msgstr ""
 
-#: config.c:1338
+#: config.c:1349
 #, c-format
 msgid "%s: There is another name hard linked to this file\n"
 msgstr ""
@@ -1236,12 +1221,12 @@ msgstr ""
 msgid "%s: This feature is not available on Haiku\n"
 msgstr ""
 
-#: exec.c:103
+#: exec.c:104
 #, c-format
 msgid "%s: To gracefully quit enter 'q'\n"
 msgstr ""
 
-#: trash.c:836 trash.c:1174
+#: trash.c:842 trash.c:1221
 #, c-format
 msgid "%s: Trash function disabled\n"
 msgstr ""
@@ -1251,148 +1236,512 @@ msgstr ""
 msgid "%s: Unmounted %s\n"
 msgstr ""
 
-#: args.c:1425
+#: args.c:1437
 #, c-format
 msgid ""
 "%s: Unrecognized option: '-%c'\n"
 "Try '%s -h' for more information.\n"
 msgstr ""
 
-#: bulk_rename.c:311
+#: bulk_rename.c:399
 #, c-format
 msgid "%s: br: Feature not allowed in virtual directories\n"
 msgstr ""
 
-#: misc.c:1229
+#: misc.c:1249
 #, c-format
 msgid "%s: cd-on-quit: Cannot create symbolic link '%s': %s\n"
 msgstr ""
 
-#: exec.c:1250
+#: exec.c:1263
 #, c-format
 msgid "%s: cd: '%s': Is a directory\n"
 msgstr ""
 
-#: config.c:2765
+#: config.c:2777
 #, c-format
 msgid ""
 "%s: chdir: '%s': %s. Using the current working directory as starting path\n"
 msgstr ""
 
-#: colors.c:1084
-#, c-format
-msgid ""
-"%s: colors: %s\n"
-"TIP: To change the current color scheme use the following environment "
-"variables: CLIFM_FILE_COLORS, CLIFM_IFACE_COLORS, and CLIFM_EXT_COLORS\n"
-msgstr ""
-
-#: colors.c:1975
+#: colors.c:1997
 #, c-format
 msgid "%s: colors: %s: No such color scheme. Falling back to default\n"
 msgstr ""
 
-#: colors.c:2317
+#: colors.c:2366
 #, c-format
 msgid "%s: colors: '%s': No such color scheme. Falling back to default\n"
 msgstr ""
 
-#: checks.c:239
+#: checks.c:244
 #, c-format
 msgid ""
 "%s: fnf: Command not found. Falling back to the default value (fzf, if "
 "found, or standard)\n"
 msgstr ""
 
-#: checks.c:232
+#: checks.c:237
 #, c-format
 msgid "%s: fzf: Command not found. Falling back to standard TAB completion\n"
 msgstr ""
 
-#: history.c:529
+#: history.c:523
 #, c-format
 msgid "%s: history: %s\n"
 msgstr ""
 
-#: exec.c:601
+#: exec.c:615
 #, c-format
 msgid "%s: icons: %s\n"
 msgstr ""
 
-#: keybinds.c:174
-#, c-format
-msgid "%s: kb: No keybindings defined\n"
-msgstr ""
-
-#: remotes.c:384
+#: remotes.c:375
 #, c-format
 msgid "%s: net: %s: Mounting remote...\n"
 msgstr ""
 
-#: remotes.c:429
+#: remotes.c:420
 #, c-format
 msgid "%s: net: %s: Unmount command failed with error code %d\n"
 msgstr ""
 
-#: remotes.c:426
+#: remotes.c:417
 #, c-format
 msgid "%s: net: %s: Unmounting remote...\n"
 msgstr ""
 
-#: bulk_remove.c:405
+#: bulk_remove.c:406
 #, c-format
 msgid "%s: rr: Feature not allowed in virtual directories\n"
 msgstr ""
 
-#: checks.c:244
+#: checks.c:249
 #, c-format
 msgid ""
 "%s: smenu: Command not found. Falling back to the default value (fzf, if "
 "found, or standard)\n"
 msgstr ""
 
-#: exec.c:1433
+#: exec.c:1460
 #, c-format
 msgid "%s: trash: %s\n"
 msgstr ""
 
-#: checks.c:209
+#: checks.c:214
 #, c-format
 msgid "%s: udisks2: Command not found. Falling back to udevil\n"
 msgstr ""
 
-#: bookmarks.c:175
+#: bookmarks.c:165
 #, c-format
 msgid ""
 "%sBookmarks Manager%s\n"
 "\n"
 msgstr ""
 
-#: properties.c:658
+#: colors.c:3368
+#, c-format
+msgid ""
+"%sColor scheme: %s%s\n"
+"\n"
+msgstr ""
+
+#: colors.c:3071
+#, c-format
+msgid "%sColor%s (bd) Block device\n"
+msgstr ""
+
+#: colors.c:3080
+#, c-format
+msgid "%sColor%s (ca) File with capabilities\n"
+msgstr ""
+
+#: colors.c:3072
+#, c-format
+msgid "%sColor%s (cd) Character device\n"
+msgstr ""
+
+#: colors.c:3184
+#, c-format
+msgid "%sColor%s (db)  Used blocks (e.g. %s1576%s)\n"
+msgstr ""
+
+#: colors.c:3145
+#, c-format
+msgid "%sColor%s (dd)  Date (e.g. %sJul 9 08:12%s)\n"
+msgstr ""
+
+#: colors.c:3188
+#, c-format
+msgid "%sColor%s (de)  Inode number (e.g. %s802721%s)\n"
+msgstr ""
+
+#: colors.c:3219
+#, c-format
+msgid "%sColor%s (df) Default color\n"
+msgstr ""
+
+#: colors.c:3058
+#, c-format
+msgid "%sColor%s (di) Directory\n"
+msgstr ""
+
+#: colors.c:3186
+#, c-format
+msgid "%sColor%s (dk)  Links number (e.g. %s92%s)\n"
+msgstr ""
+
+#: colors.c:3213
+#, c-format
+msgid "%sColor%s (dl) Dividing line (e.g. %s------>%s)\n"
+msgstr ""
+
+#: colors.c:3192
+#, c-format
+msgid "%sColor%s (dn)  Dot/dash (e.g. %sr%sw%s-.%sr%s--.--%s)\n"
+msgstr ""
+
+#: colors.c:3190
+#, c-format
+msgid "%sColor%s (do)  Octal permissions (e.g. %s0640%s)\n"
+msgstr ""
+
+#: colors.c:3168
+#, c-format
+msgid "%sColor%s (dp)  SUID/SGID bit (e.g. %ss%s)\n"
+msgstr ""
+
+#: colors.c:3162
+#, c-format
+msgid "%sColor%s (dr)  Read bit (%sr%s)\n"
+msgstr ""
+
+#: colors.c:3170
+#, c-format
+msgid "%sColor%s (du)  User ID (e.g. %sjane%s)\n"
+msgstr ""
+
+#: colors.c:3163
+#, c-format
+msgid "%sColor%s (dw)  Write bit (%sw%s)\n"
+msgstr ""
+
+#: colors.c:3164
+#, c-format
+msgid "%sColor%s (dxd) Execute bit - directory (%sx%s)\n"
+msgstr ""
+
+#: colors.c:3166
+#, c-format
+msgid "%sColor%s (dxr) Execute bit - file (%sx%s)\n"
+msgstr ""
+
+#: colors.c:3176
+#, c-format
+msgid "%sColor%s (dz)  Size (e.g. %s12.69k%s)\n"
+msgstr ""
+
+#: colors.c:3059
+#, c-format
+msgid "%sColor%s (ed) Empty directory\n"
+msgstr ""
+
+#: colors.c:3067
+#, c-format
+msgid "%sColor%s (ee) Empty executable file\n"
+msgstr ""
+
+#: colors.c:3063
+#, c-format
+msgid "%sColor%s (ef) Empty file\n"
+msgstr ""
+
+#: colors.c:3202
+#, c-format
+msgid "%sColor%s (el) ELN's (e.g. %s12%s filename)\n"
+msgstr ""
+
+#: colors.c:3295
+#, c-format
+msgid "%sColor%s (em) Error message indicator (%sE%s)\n"
+msgstr ""
+
+#: colors.c:3066
+#, c-format
+msgid "%sColor%s (ex) Executable file\n"
+msgstr ""
+
+#: colors.c:3204
+#, c-format
+msgid "%sColor%s (fc) Files counter (e.g. dir%s/24%s)\n"
+msgstr ""
+
+#: colors.c:3062
+#, c-format
+msgid "%sColor%s (fi) Regular file\n"
+msgstr ""
+
+#: colors.c:3338
+#, c-format
+msgid "%sColor%s (hb) Brackets: %s(){}[]%s\n"
+msgstr ""
+
+#: colors.c:3340
+#, c-format
+msgid "%sColor%s (hc) Commented out text (e.g. some text %s#comment%s)\n"
+msgstr ""
+
+#: colors.c:3342
+#, c-format
+msgid "%sColor%s (hd) Slash (e.g. dir%s/%sfile)\n"
+msgstr ""
+
+#: colors.c:3344
+#, c-format
+msgid "%sColor%s (he) Expansion characters: %s~*%s\n"
+msgstr ""
+
+#: colors.c:3346
+#, c-format
+msgid "%sColor%s (hn) Number (e.g. pp %s12%s)\n"
+msgstr ""
+
+#: colors.c:3348
+#, c-format
+msgid "%sColor%s (hp) Command parameter (e.g. cmd %s--param%s)\n"
+msgstr ""
+
+#: colors.c:3350
+#, c-format
+msgid "%sColor%s (hq) Quoted text (e.g. %s\"some text\"%s)\n"
+msgstr ""
+
+#: colors.c:3352
+#, c-format
+msgid "%sColor%s (hr) Redirection characters: %s><%s\n"
+msgstr ""
+
+#: colors.c:3354
+#, c-format
+msgid "%sColor%s (hs) Process separator characters: %s|;&%s \n"
+msgstr ""
+
+#: colors.c:3356
+#, c-format
+msgid "%sColor%s (hv) Variable name (e.g. %s$FOO%s)\n"
+msgstr ""
+
+#: colors.c:3358
+#, c-format
+msgid "%sColor%s (hw) Backslash (e.g. sel this%s\\%s file%s\\%s name)\n"
+msgstr ""
+
+#: colors.c:3206
+#, c-format
+msgid ""
+"%sColor%s (lc) Symbolic link indicator (e.g. %s36%s%s%c%ssymlink) (%s1%s)\n"
+msgstr ""
+
+#: colors.c:3209
+#, c-format
+msgid "%sColor%s (li) Selected file indicator (e.g. %s12%s%s%c%sfilename)\n"
+msgstr ""
+
+#: colors.c:3277
+#, c-format
+msgid "%sColor%s (li) Selected files indicator (%s%c%s)\n"
+msgstr ""
+
+#: colors.c:3068
+#, c-format
+msgid "%sColor%s (ln) Symbolic link\n"
+msgstr ""
+
+#: colors.c:3070
+#, c-format
+msgid "%sColor%s (mh) Multi-hardlink\n"
+msgstr ""
+
+#: colors.c:3215
+#, c-format
+msgid "%sColor%s (mi) Miscellaneous indicator (%s%s%s) (%s2%s)\n"
+msgstr ""
+
+#: colors.c:3060
+#, c-format
+msgid "%sColor%s (nd) Directory with no read/exec permission\n"
+msgstr ""
+
+#: colors.c:3064
+#, c-format
+msgid "%sColor%s (nf) File with no read permission\n"
+msgstr ""
+
+#: colors.c:3289
+#, c-format
+msgid "%sColor%s (nm) Notice message indicator (%sN%s)\n"
+msgstr ""
+
+#: colors.c:3087
+#, c-format
+msgid "%sColor%s (no) Unknown file type\n"
+msgstr ""
+
+#: colors.c:3076
+#, c-format
+msgid "%sColor%s (oo) Door/Port file\n"
+msgstr ""
+
+#: colors.c:3069
+#, c-format
+msgid "%sColor%s (or) Broken symbolic link\n"
+msgstr ""
+
+#: colors.c:3085
+#, c-format
+msgid "%sColor%s (ow) Other-writable and NOT sticky directory\n"
+msgstr ""
+
+#: colors.c:3074
+#, c-format
+msgid "%sColor%s (pi) Pipe or FIFO special file\n"
+msgstr ""
+
+#: colors.c:3298
+#, c-format
+msgid "%sColor%s (ro) Read-only mode indicator (%sRO%s)\n"
+msgstr ""
+
+#: colors.c:3079
+#, c-format
+msgid "%sColor%s (sg) SGID file\n"
+msgstr ""
+
+#: colors.c:3301
+#, c-format
+msgid "%sColor%s (si) Stealth mode indicator (%sS%s)\n"
+msgstr ""
+
+#: colors.c:3073
+#, c-format
+msgid "%sColor%s (so) Socket file\n"
+msgstr ""
+
+#: colors.c:3081
+#, c-format
+msgid "%sColor%s (st) Sticky and NOT other-writable directory\n"
+msgstr ""
+
+#: colors.c:3078
+#, c-format
+msgid "%sColor%s (su) SUID file\n"
+msgstr ""
+
+#: colors.c:3280
+#, c-format
+msgid "%sColor%s (ti) Trashed files indicator (%sT%s)\n"
+msgstr ""
+
+#: colors.c:3217
+#, c-format
+msgid "%sColor%s (ts) Matching completion prefix (e.g. %sfile%sname)\n"
+msgstr ""
+
+#: colors.c:3211
+#, c-format
+msgid "%sColor%s (tt) Trimmed file names mark (e.g. filenam%s%c%s.odt)\n"
+msgstr ""
+
+#: colors.c:3083
+#, c-format
+msgid "%sColor%s (tw) Sticky and other-writable directory\n"
+msgstr ""
+
+#: colors.c:3274
+#, c-format
+msgid ""
+"%sColor%s (tx) Input text (e.g. [1m$[0m %sls%s %s-l%s %sfilename.zst%s)\n"
+msgstr ""
+
+#: colors.c:3088
+#, c-format
+msgid "%sColor%s (uf) Unaccessible (non-stat'able) file\n"
+msgstr ""
+
+#: colors.c:3292
+#, c-format
+msgid "%sColor%s (wm) Warning message indicator (%sW%s)\n"
+msgstr ""
+
+#: colors.c:3252
+#, c-format
+msgid "%sColor%s (ws1) Workspace [%s1%s]\n"
+msgstr ""
+
+#: colors.c:3254
+#, c-format
+msgid "%sColor%s (ws2) Workspace [%s2%s]\n"
+msgstr ""
+
+#: colors.c:3256
+#, c-format
+msgid "%sColor%s (ws3) Workspace [%s3%s]\n"
+msgstr ""
+
+#: colors.c:3258
+#, c-format
+msgid "%sColor%s (ws4) Workspace [%s4%s]\n"
+msgstr ""
+
+#: colors.c:3260
+#, c-format
+msgid "%sColor%s (ws5) Workspace [%s5%s]\n"
+msgstr ""
+
+#: colors.c:3262
+#, c-format
+msgid "%sColor%s (ws6) Workspace [%s6%s]\n"
+msgstr ""
+
+#: colors.c:3264
+#, c-format
+msgid "%sColor%s (ws7) Workspace [%s7%s]\n"
+msgstr ""
+
+#: colors.c:3266
+#, c-format
+msgid "%sColor%s (ws8) Workspace [%s8%s]\n"
+msgstr ""
+
+#: colors.c:3286
+#, c-format
+msgid "%sColor%s (xf) Error exit code (e.g. <%s1%s>)\n"
+msgstr ""
+
+#: colors.c:3283
+#, c-format
+msgid "%sColor%s (xs) Success exit code (<%s0%s>)\n"
+msgstr ""
+
+#: properties.c:623
 #, c-format
 msgid ""
 "%sEdit file ownership (Ctrl-d to quit)\n"
 "Both ID numbers and names are supported\n"
 msgstr ""
 
-#: properties.c:480
+#: properties.c:445
 #, c-format
 msgid ""
 "%sEdit file permissions (Ctrl-d to quit)\n"
 "Both symbolic and numeric notation are supported\n"
 msgstr ""
 
-#: colors.c:3003
+#: colors.c:3056
 #, c-format
 msgid ""
-"%sExtension colors%s\n"
-"\n"
-msgstr ""
-
-#: colors.c:2955
-#, c-format
-msgid ""
-"%sFile type colors%s\n"
+"%sFile types%s\n"
 "\n"
 msgstr ""
 
@@ -1401,14 +1750,14 @@ msgstr ""
 msgid "%sFile%s: %s\n"
 msgstr ""
 
-#: properties.c:655
+#: properties.c:620
 #, c-format
 msgid ""
 "%sFiles with different owners\n"
 "Only common owners are set in the template\n"
 msgstr ""
 
-#: properties.c:477
+#: properties.c:442
 #, c-format
 msgid ""
 "%sFiles with different sets of permissions\n"
@@ -1422,7 +1771,7 @@ msgid ""
 "\n"
 msgstr ""
 
-#: config.c:2306
+#: config.c:2327
 #, c-format
 msgid ""
 "%sNOTE%s: %s created a new MIME list file (%s). It is recommended to edit "
@@ -1436,7 +1785,7 @@ msgstr ""
 msgid "%sNOTE%s: Using Zstandard\n"
 msgstr ""
 
-#: aux.c:57
+#: aux.c:95
 #, c-format
 msgid "%sPress any key to continue... "
 msgstr ""
@@ -1460,116 +1809,146 @@ msgstr ""
 msgid "%s[e]%sxtract %s[t]%sest %s[i]%snfo %s[q]%suit\n"
 msgstr ""
 
-#: name_cleaner.c:616
+#: colors.c:3112
+#, c-format
+msgid "%sbigger%s\n"
+msgstr ""
+
+#: colors.c:3126
+#, c-format
+msgid "%sday%s "
+msgstr ""
+
+#: colors.c:3123
+#, c-format
+msgid "%shour%s "
+msgstr ""
+
+#: colors.c:3132
+#, c-format
+msgid "%smonth%s "
+msgstr ""
+
+#: colors.c:3135
+#, c-format
+msgid "%solder%s\n"
+msgstr ""
+
+#: colors.c:3129
+#, c-format
+msgid "%sweek%s "
+msgstr ""
+
+#: name_cleaner.c:625
 #, c-format
 msgid "%zu file name(s) will be bleached\n"
 msgstr ""
 
-#: file_operations.c:489
+#: file_operations.c:495
 #, c-format
 msgid "%zu file(s) created\n"
 msgstr ""
 
-#: selection.c:1240 selection.c:1261
+#: selection.c:1246 selection.c:1267
 #, c-format
 msgid "%zu file(s) deselected\n"
 msgstr ""
 
-#: file_operations.c:1587
+#: file_operations.c:1750
 #, c-format
 msgid "%zu file(s) removed\n"
 msgstr ""
 
-#: trash.c:89
+#: trash.c:94
 #, c-format
 msgid "%zu file(s) removed from the trash can\n"
 msgstr ""
 
-#: bulk_rename.c:415
+#: bulk_rename.c:505
 #, c-format
 msgid "%zu file(s) renamed\n"
 msgstr ""
 
-#: trash.c:790 trash.c:822
+#: trash.c:796 trash.c:828
 #, c-format
 msgid "%zu file(s) restored\n"
 msgstr ""
 
-#: exec.c:1731 selection.c:953
+#: exec.c:1758 selection.c:959
 #, c-format
 msgid "%zu file(s) selected\n"
 msgstr ""
 
-#: trash.c:1159
+#: trash.c:1206
 #, c-format
 msgid "%zu file(s) trashed\n"
 msgstr ""
 
-#: selection.c:1243
+#: selection.c:1249
 #, c-format
 msgid "%zu selected file(s)\n"
 msgstr ""
 
-#: file_operations.c:1900
+#: file_operations.c:2059
 #, c-format
 msgid "%zu symbolic link(s) created\n"
 msgstr ""
 
-#: exec.c:1732 selection.c:663 selection.c:1069 selection.c:1241
+#: exec.c:1759 selection.c:669 selection.c:1075 selection.c:1247
 #, c-format
 msgid "%zu total selected file(s)\n"
 msgstr ""
 
-#: trash.c:90 trash.c:791 trash.c:823 trash.c:1160
+#: trash.c:95 trash.c:797 trash.c:829 trash.c:1207
 #, c-format
 msgid "%zu total trashed file(s)\n"
 msgstr ""
 
-#: trash.c:916
+#: trash.c:922
 #, c-format
 msgid "%zu trashed file(s)\n"
 msgstr ""
 
-#: file_operations.c:1135
+#: file_operations.c:1139
 #, c-format
 msgid "'%s' relinked to "
 msgstr ""
 
-#: bookmarks.c:721
+#: bookmarks.c:698
 #, c-format
 msgid ""
 "'%s': %s\n"
 "bookmarks: Error creating temporary file\n"
 msgstr ""
 
-#: bookmarks.c:712
+#: bookmarks.c:689
 #, c-format
 msgid ""
 "'%s': %s\n"
 "bookmarks: Error reading the bookmarks file\n"
 msgstr ""
 
-#: misc.c:919
+#: misc.c:939
 #, c-format
 msgid "'%s': Alias already exists\n"
 msgstr ""
 
-#: misc.c:880
+#: misc.c:900
 #, c-format
 msgid "'%s': Alias conflicts with internal command\n"
 msgstr ""
 
-#: bookmarks.c:272 bookmarks.c:371
+#: bookmarks.c:248 bookmarks.c:349
 #, c-format
 msgid "'%s': Invalid bookmark\n"
 msgstr ""
 
-#: search.c:946
+#: search.c:947
 #, c-format
 msgid "'%s': Invalid regular expression\n"
 msgstr ""
 
-#: bookmarks.c:277 bookmarks.c:380 bookmarks.c:617
+#: bookmarks.c:253 bookmarks.c:358 bookmarks.c:594
 #, c-format
 msgid "'%s': No such bookmark\n"
 msgstr ""
@@ -1579,129 +1958,136 @@ msgstr ""
 msgid "'%s': Successfully removed tag\n"
 msgstr ""
 
-#: properties.c:1102
+#: properties.c:1067
 #, c-format
 msgid ""
 "(%s%04o%s)%s%c%s/%s%c%s%c%s%c%s.%s%c%s%c%s%c%s.%s%c%s%c%s%c%s%s Links: "
 "%s%zu%s "
 msgstr ""
 
-#: selection.c:1262
+#: colors.c:3223
+#, c-format
+msgid ""
+"(%s2%s) Also used for miscellaneous names (like bookmarks and color schemes) "
+"in TAB completion\n"
+msgstr ""
+
+#: selection.c:1268
 msgid "0 total selected file(s)\n"
 msgstr ""
 
-#: properties.c:1016
+#: properties.c:981
 msgid "<no value>"
 msgstr ""
 
-#: file_operations.c:1056
+#: file_operations.c:1062
 msgid "??? (broken link)"
 msgstr ""
 
-#: properties.c:1366
+#: properties.c:1343
 msgid "ACL-extended:\t"
 msgstr ""
 
-#: properties.c:1537
+#: properties.c:1524
 #, c-format
 msgid "Access: \t%s%s%s\n"
 msgstr ""
 
-#: properties.c:1307
+#: properties.c:1284
 msgid "Archive state 1"
 msgstr ""
 
-#: exec.c:1398
+#: exec.c:1425
 #, c-format
 msgid "Archive state 1:       %zu\n"
 msgstr ""
 
-#: properties.c:1308
+#: properties.c:1285
 msgid "Archive state 2"
 msgstr ""
 
-#: exec.c:1399
+#: exec.c:1426
 #, c-format
 msgid "Archive state 2:       %zu\n"
 msgstr ""
 
-#: mime.c:1570
+#: mime.c:1547
 #, c-format
 msgid "Associated application: %s [%s]\n"
 msgstr ""
 
-#: mime.c:1520
+#: mime.c:1497
 msgid "Associated application: None\n"
 msgstr ""
 
-#: mime.c:1567
+#: mime.c:1544
 #, c-format
 msgid "Associated application: ad [built-in] [%s]\n"
 msgstr ""
 
-#: properties.c:1346
+#: properties.c:1323
 msgid "Attributes: \t"
 msgstr ""
 
-#: exec.c:551
+#: exec.c:565
 msgid "Auto-open disabled"
 msgstr ""
 
-#: exec.c:548
+#: exec.c:562
 msgid "Auto-open enabled"
 msgstr ""
 
-#: exec.c:553
+#: exec.c:567
 #, c-format
 msgid "Auto-open is %s\n"
 msgstr ""
 
-#: exec.c:524
+#: exec.c:538
 msgid "Autocd disabled"
 msgstr ""
 
-#: exec.c:521
+#: exec.c:535
 msgid "Autocd enabled"
 msgstr ""
 
-#: exec.c:526
+#: exec.c:540
 #, c-format
 msgid "Autocd is %s\n"
 msgstr ""
 
-#: properties.c:1584
+#: properties.c:1571
 #, c-format
 msgid "Birth: \t\t%s%s%s\n"
 msgstr ""
 
-#: properties.c:1586
+#: properties.c:1573
 #, c-format
 msgid "Birth: \t\t%s-%s\n"
 msgstr ""
 
-#: properties.c:1303
+#: properties.c:1280
 msgid "Block special file"
 msgstr ""
 
-#: selection.c:620
+#: selection.c:621
 msgid "Calculating file size... "
 msgstr ""
 
-#: config.c:78
+#: config.c:83
 #, c-format
 msgid "Cannot rename file '%s': %s\n"
 msgstr ""
 
-#: properties.c:1371
+#: properties.c:1348
 msgid "Capabilities:\t"
 msgstr ""
 
-#: properties.c:1539
+#: properties.c:1526
 #, c-format
 msgid "Change: \t%s%s%s\n"
 msgstr ""
 
-#: properties.c:1304
+#: properties.c:1281
 msgid "Character special file"
 msgstr ""
 
@@ -1717,42 +2103,42 @@ msgstr ""
 msgid "Choose a mountpoint: "
 msgstr ""
 
-#: mime.c:680
+#: mime.c:686
 msgid "Choose an application ('q' to quit): "
 msgstr ""
 
-#: history.c:445
+#: history.c:436
 msgid "Clear history? [y/n] "
 msgstr ""
 
-#: listing.c:598
+#: listing.c:662
 #, c-format
 msgid "Color scheme %s->%s %s\n"
 msgstr ""
 
-#: exec.c:570
+#: exec.c:584
 #, c-format
 msgid "Columns %s\n"
 msgstr ""
 
-#: exec.c:587
+#: exec.c:601
 msgid "Columns disabled\n"
 msgstr ""
 
-#: exec.c:583
+#: exec.c:597
 msgid "Columns enabled\n"
 msgstr ""
 
-#: config.c:61
+#: config.c:66
 msgid "Configuration file not found"
 msgstr ""
 
-#: file_operations.c:735 file_operations.c:816 file_operations.c:1606
-#: name_cleaner.c:617
+#: bulk_rename.c:382 bulk_rename.c:468 file_operations.c:741
+#: file_operations.c:822 file_operations.c:1765 name_cleaner.c:626
 msgid "Continue? [y/n] "
 msgstr ""
 
-#: file_operations.c:1191
+#: file_operations.c:1337
 msgid "Create broken symbolic link? [y/n] "
 msgstr ""
 
@@ -1761,88 +2147,93 @@ msgstr ""
 msgid "Created new tag %s%s%s\n"
 msgstr ""
 
-#: misc.c:573
+#: colors.c:1198
+#, c-format
+msgid "Current color scheme: '%s'\n"
+msgstr ""
+
+#: misc.c:593
 #, c-format
 msgid "Current filter: %c%s\n"
 msgstr ""
 
-#: file_operations.c:1048
+#: file_operations.c:1054
 msgid "Current target -> "
 msgstr ""
 
-#: properties.c:1328
+#: properties.c:1305
 #, c-format
 msgid "Device: %s%ju,%ju%s"
 msgstr ""
 
-#: keybinds.c:1008
+#: keybinds.c:1040
 #, c-format
 msgid "Directories first %s\n"
 msgstr ""
 
-#: exec.c:391
+#: exec.c:392
 msgid "Directories first disabled\n"
 msgstr ""
 
-#: exec.c:387
+#: exec.c:388
 msgid "Directories first enabled\n"
 msgstr ""
 
-#: exec.c:382
+#: exec.c:383
 #, c-format
 msgid "Directories first is %s\n"
 msgstr ""
 
-#: properties.c:1299
+#: properties.c:1276
 msgid "Directory"
 msgstr ""
 
-#: keybinds.c:2040
+#: keybinds.c:2127
 #, c-format
 msgid "Disk usage analyzer %s\n"
 msgstr ""
 
-#: properties.c:1311
-msgid "Door"
+#: properties.c:1288
+msgid "Door    "
 msgstr ""
 
-#: exec.c:1394
+#: exec.c:1421
 #, c-format
 msgid "Doors:                 %zu\n"
 msgstr ""
 
-#: file_operations.c:1022
+#: file_operations.c:1028
 msgid "Edit target (Ctrl-d to quit)"
 msgstr ""
 
 #: media.c:460
-msgid "Enter 'iELN' for device information. Ex: i4"
+msgid "Enter 'iELN' for device information. E.g.: i4"
 msgstr ""
 
 #: archives.c:1100 media.c:458
 msgid "Enter 'q' to quit"
 msgstr ""
 
-#: file_operations.c:252
+#: file_operations.c:258
 msgid ""
 "Enter destiny directory (Ctrl-d to quit)\n"
 "Tip: \".\" for current directory"
 msgstr ""
 
-#: file_operations.c:723
+#: file_operations.c:729
 msgid ""
 "Enter new file name (Ctrl-d to quit)\n"
 "Tip: End name with a slash to create a directory"
 msgstr ""
 
-#: file_operations.c:1284
+#: file_operations.c:1447
 #, c-format
 msgid ""
 "Enter new name (Ctrl-d to quit)\n"
 "%s>%s "
 msgstr ""
 
-#: bulk_rename.c:223 mime.c:391
+#: bulk_rename.c:256 mime.c:393
 msgid "Error opening temporary file"
 msgstr ""
 
@@ -1850,40 +2241,40 @@ msgstr ""
 msgid "Error querying file type"
 msgstr ""
 
-#: exec.c:499
+#: exec.c:513
 msgid "External commands allowed"
 msgstr ""
 
-#: exec.c:495
+#: exec.c:509
 #, c-format
 msgid "External commands are %s\n"
 msgstr ""
 
-#: exec.c:502
+#: exec.c:516
 msgid "External commands disallowed"
 msgstr ""
 
-#: properties.c:1301
-msgid "Fifo"
+#: properties.c:1278
+msgid "Fifo    "
 msgstr ""
 
-#: actions.c:337
+#: actions.c:398
 msgid "File modified. Actions reloaded\n"
 msgstr ""
 
-#: bookmarks.c:142
+#: bookmarks.c:132
 msgid "File modified. Bookmarks reloaded\n"
 msgstr ""
 
-#: history.c:435
+#: history.c:426
 msgid "File modified. History entries reloaded\n"
 msgstr ""
 
-#: prompt.c:1250
+#: prompt.c:1692
 msgid "File modified. Prompts reloaded\n"
 msgstr ""
 
-#: remotes.c:314
+#: remotes.c:305
 msgid "File modified. Remotes reloaded\n"
 msgstr ""
 
@@ -1891,34 +2282,38 @@ msgstr ""
 msgid "File name ('q' to quit): "
 msgstr ""
 
-#: bookmarks.c:544
+#: bookmarks.c:521
 msgid "File succesfully bookmarked"
 msgstr ""
 
-#: file_operations.c:1595
+#: file_operations.c:1758
 #, c-format
 msgid "File(s) to be removed%s:\n"
 msgstr ""
 
-#: file_operations.c:118
+#: trash.c:1095
+msgid "File(s) to be trashed:\n"
+msgstr ""
+
+#: file_operations.c:124
 #, c-format
 msgid "File-creation mask set to '%04o'\n"
 msgstr ""
 
-#: exec.c:403
+#: exec.c:404
 #, c-format
 msgid "Files counter %s\n"
 msgstr ""
 
-#: exec.c:423
+#: exec.c:424
 msgid "Files counter disabled\n"
 msgstr ""
 
-#: exec.c:416
+#: exec.c:417
 msgid "Files counter enabled\n"
 msgstr ""
 
-#: exec.c:947
+#: exec.c:961
 #, c-format
 msgid "Files exported to '%s'\n"
 msgstr ""
@@ -1933,101 +2328,112 @@ msgstr ""
 msgid "Files tagged as %s%s%s:\n"
 msgstr ""
 
-#: misc.c:507
+#: misc.c:527
 msgid "Filter unset\n"
 msgstr ""
 
-#: properties.c:1353
+#: properties.c:1330
 msgid "Flags: \t\t"
 msgstr ""
 
-#: exec.c:2043 keybinds.c:982
+#: exec.c:2070 keybinds.c:1014
 #, c-format
 msgid "Follow links %s\n"
 msgstr ""
 
-#: help.c:289
+#: help.c:286
 msgid ""
 "For more information consult the manpage and/or the Wiki:\n"
 "https://github.com/leo-arch/clifm/wiki"
 msgstr ""
 
-#: exec.c:1494
+#: exec.c:1521
 msgid "Full directory size disabled\n"
 msgstr ""
 
-#: exec.c:1483
+#: exec.c:1510
 msgid "Full directory size enabled\n"
 msgstr ""
 
-#: exec.c:1490
+#: exec.c:1517
 msgid "Full directory size is already disabled"
 msgstr ""
 
-#: exec.c:1479
+#: exec.c:1506
 msgid "Full directory size is already enabled"
 msgstr ""
 
-#: search.c:1039
+#: search.c:1040
 msgid "Glob: No matches found. Trying regex...\n"
 msgstr ""
 
-#: exec.c:827 keybinds.c:1070
+#: exec.c:841 keybinds.c:1102
 msgid "Hiding dotfiles\n"
 msgstr ""
 
-#: history.c:506
+#: history.c:500
 #, c-format
 msgid "History is %s\n"
 msgstr ""
 
-#: exec.c:617
+#: exec.c:631
 msgid "Icons disabled\n"
 msgstr ""
 
-#: exec.c:612
+#: exec.c:626
 msgid "Icons enabled\n"
-msgstr ""
-
-#: properties.c:1267
-msgid "Invalid ACL"
 msgstr ""
 
 #: archives.c:703
 msgid "Invalid file name"
 msgstr ""
 
-#: name_cleaner.c:559
+#: name_cleaner.c:561
 msgid "Is this OK? [y/n/(e)dit] "
 msgstr ""
 
-#: keybinds.c:1034
+#: properties.c:1803
+#, c-format
+msgid "Items:\t\t%s%c%s\n"
+msgstr ""
+
+#: properties.c:1855
+#, c-format
+msgid "Items:\t\t%s%s%llu%s (%s%llu%s %s, %s%llu%s %s, %s%llu%s %s)\n"
+msgstr ""
+
+#: properties.c:2080
+#, c-format
+msgid "Largest file: %s%s%s %s%s%s%s%s\n"
+msgstr ""
+
+#: keybinds.c:1066
 #, c-format
 msgid "Light mode %s\n"
 msgstr ""
 
-#: exec.c:711
+#: exec.c:725
 msgid "Light mode already off"
 msgstr ""
 
-#: exec.c:703
+#: exec.c:717
 msgid "Light mode already on"
 msgstr ""
 
-#: exec.c:716
+#: exec.c:730
 msgid "Light mode disabled\n"
 msgstr ""
 
-#: exec.c:708
+#: exec.c:722
 msgid "Light mode enabled\n"
 msgstr ""
 
-#: exec.c:1791 keybinds.c:954
+#: exec.c:1818 keybinds.c:986
 #, c-format
 msgid "Long view %s\n"
 msgstr ""
 
-#: mime.c:1560
+#: mime.c:1537
 #, c-format
 msgid "MIME type: %s\n"
 msgstr ""
@@ -2037,47 +2443,47 @@ msgstr ""
 msgid "Matches found: %d%s\n"
 msgstr ""
 
-#: search.c:888
+#: search.c:889
 #, c-format
 msgid "Matches found: %zu\n"
 msgstr ""
 
-#: exec.c:350 exec.c:362
+#: exec.c:351 exec.c:363
 #, c-format
 msgid "Max files set to %d\n"
 msgstr ""
 
-#: exec.c:343
+#: exec.c:344
 msgid "Max files unset\n"
 msgstr ""
 
-#: exec.c:334
+#: exec.c:335
 #, c-format
 msgid "Max files: %d\n"
 msgstr ""
 
-#: exec.c:332
+#: exec.c:333
 msgid "Max files: unset"
 msgstr ""
 
-#: keybinds.c:416
+#: keybinds.c:442
 #, c-format
 msgid "Max name length set to %d\n"
 msgstr ""
 
-#: keybinds.c:414
+#: keybinds.c:440
 msgid "Max name length unset\n"
 msgstr ""
 
-#: exec.c:648
+#: exec.c:662
 msgid "Messages cleared\n"
 msgstr ""
 
-#: selection.c:820
+#: selection.c:826
 msgid "Missing parameter. Try 's --help'\n"
 msgstr ""
 
-#: properties.c:1538
+#: properties.c:1525
 #, c-format
 msgid "Modify: \t%s%s%s\n"
 msgstr ""
@@ -2090,7 +2496,7 @@ msgstr ""
 msgid "Mountpoints"
 msgstr ""
 
-#: mime.c:1559
+#: mime.c:1536
 #, c-format
 msgid "Name: %s\n"
 msgstr ""
@@ -2100,16 +2506,16 @@ msgstr ""
 msgid "Name: %s%s%s\n"
 msgstr ""
 
-#: config.c:89
+#: config.c:94
 #, c-format
 msgid "New configuration file written to '%s'\n"
 msgstr ""
 
 #: archives.c:1104
-msgid "New format (ex: .tar.xz): "
+msgid "New format (e.g.: .tar.xz): "
 msgstr ""
 
-#: properties.c:834
+#: properties.c:799
 #, c-format
 msgid "New ownership set for %zu file(s)\n"
 msgstr ""
@@ -2122,30 +2528,25 @@ msgstr ""
 msgid "No matches found\n"
 msgstr ""
 
-#: exec.c:893
-msgid "No pinned file"
-msgstr ""
-
-#: mime.c:1463
+#: mime.c:1440
 msgid "No such ELN"
 msgstr ""
 
-#: mime.c:1559 properties.c:951 properties.c:966 properties.c:1171
-#: properties.c:1267
+#: mime.c:1536
 msgid "None"
 msgstr ""
 
-#: config.c:83
+#: config.c:88
 #, c-format
 msgid "Old configuration file written to '%s'\n"
 msgstr ""
 
-#: keybinds.c:1838
+#: keybinds.c:1925
 #, c-format
 msgid "Only directories %s\n"
 msgstr ""
 
-#: exec.c:684
+#: exec.c:698
 #, c-format
 msgid "Opener set to '%s'\n"
 msgstr ""
@@ -2154,124 +2555,115 @@ msgstr ""
 msgid "Operation: "
 msgstr ""
 
-#: file_operations.c:1197
+#: bulk_rename.c:96 file_operations.c:1343
 msgid "Overwrite this file? [y/n] "
 msgstr ""
 
-#: exec.c:476
+#: exec.c:481
 msgid "Pager disabled"
 msgstr ""
 
-#: exec.c:470
+#: exec.c:490
 msgid "Pager enabled"
 msgstr ""
 
-#: exec.c:464
+#: exec.c:449
+msgid "Pager enabled (single pass)"
+msgstr ""
+
+#: exec.c:475
 #, c-format
 msgid "Pager set to %d\n"
 msgstr ""
 
-#: exec.c:891
+#: exec.c:905
 #, c-format
 msgid "Pinned file: '%s'\n"
 msgstr ""
 
-#: properties.c:1312
-msgid "Port"
+#: properties.c:1289
+msgid "Port    "
 msgstr ""
 
-#: exec.c:1395
+#: exec.c:1422
 #, c-format
 msgid "Ports:                 %zu\n"
 msgstr ""
 
-#: strings.c:1863
+#: strings.c:2017
 msgid "Querying MIME types... "
 msgstr ""
 
-#: properties.c:1298
+#: properties.c:1275
 msgid "Regular file"
 msgstr ""
 
-#: file_operations.c:1120
+#: file_operations.c:1124
 msgid "Relink as broken symbolic link? [y/n] "
 msgstr ""
 
-#: trash.c:72
+#: trash.c:77
 #, c-format
 msgid "Remove %zu file(s)? [y/n] "
 msgstr ""
 
-#: file_operations.c:1629
+#: file_operations.c:1788
 msgid "Remove files anyway? [y/n] "
 msgstr ""
 
-#: bookmarks.c:755
+#: bookmarks.c:732
 #, c-format
 msgid "Removed %zu bookmark(s)\n"
 msgstr ""
 
-#: help.c:311
+#: help.c:308
 msgid ""
 "Run '?' and consult the BASIC FILE OPERATIONS section\n"
 "Try also 'c --help' for more information about basic file management commands"
 msgstr ""
 
-#: help.c:376
+#: help.c:373
 msgid "Run '?' and consult the NAVIGATION section"
 msgstr ""
 
-#: misc.c:734
+#: misc.c:754
 msgid "Run command? [y/n] "
 msgstr ""
 
-#: exec.c:1363
+#: exec.c:1390
 msgid "Running in light mode: Some files statistics are not available\n"
 msgstr ""
 
-#: listing.c:2822
-msgid "Scanning... "
-msgstr ""
-
-#: exec.c:822
+#: exec.c:836
 #, c-format
 msgid "Show-hidden-files is %s\n"
 msgstr ""
 
-#: listing.c:607
+#: listing.c:671
 #, c-format
 msgid "Showing %jd/%jd files\n"
 msgstr ""
 
-#: exec.c:831 keybinds.c:1068
+#: exec.c:845 keybinds.c:1100
 msgid "Showing dotfiles\n"
 msgstr ""
 
-#: properties.c:1610
+#: properties.c:1663 properties.c:1784
 #, c-format
 msgid "Size: \t\t%s%s%s"
 msgstr ""
 
-#: properties.c:1302
-msgid "Socket"
+#: properties.c:1279
+msgid "Socket  "
 msgstr ""
 
-#: listing.c:593
+#: listing.c:657 sort.c:402
 msgid "Sorted by "
 msgstr ""
 
-#: sort.c:478
-msgid "Sorting order: "
-msgstr ""
-
-#: profiles.c:351
+#: profiles.c:350
 #, c-format
 msgid "Succesfully created profile %s%s%s\n"
-msgstr ""
-
-#: misc.c:1979
-#, c-format
-msgid "Succesfully unpinned %s\n"
 msgstr ""
 
 #: tags.c:744
@@ -2279,7 +2671,7 @@ msgstr ""
 msgid "Successfully merged %s%s%s into %s%s%s\n"
 msgstr ""
 
-#: profiles.c:397
+#: profiles.c:396
 #, c-format
 msgid "Successfully removed profile %s%s%s\n"
 msgstr ""
@@ -2294,73 +2686,72 @@ msgstr ""
 msgid "Successfully untagged %zu file(s)\n"
 msgstr ""
 
-#: keybinds.c:2148
+#: keybinds.c:2235
 #, c-format
 msgid "Switched to %s names\n"
 msgstr ""
 
-#: profiles.c:269
+#: profiles.c:268
 #, c-format
 msgid "Switched to profile %s%s%s\n"
 msgstr ""
 
-#: properties.c:1300
+#: properties.c:1277
 msgid "Symbolic link"
 msgstr ""
 
-#: help.c:431
+#: help.c:428
 msgid "Take a look at the 'colorschemes', 'prompt', and 'config' commands"
 msgstr ""
 
-#: exec.c:431
+#: exec.c:432
 msgid "The files counter is disabled"
 msgstr ""
 
-#: exec.c:429
+#: exec.c:430
 msgid "The files counter is enabled"
 msgstr ""
 
-#: config.c:200
+#: config.c:211
 msgid ""
 "The following is the list of options (as defined in the configuration file) "
-"and their current values. Whenever a current value differs from the default "
-"value, the entry is highlighted and the default value is displayed in "
-"brackets\n"
+"and their current values. Whenever a value differs from the default, the "
+"entry is highlighted and the default value is displayed in square brackets.\n"
 msgstr ""
 
-#: exec.c:449
+#: exec.c:460
 msgid "The pager is disabled"
 msgstr ""
 
-#: exec.c:450
+#: exec.c:461
 msgid "The pager is enabled"
 msgstr ""
 
-#: exec.c:451
+#: exec.c:462
 #, c-format
 msgid "The pager is set to %d\n"
 msgstr ""
 
-#: actions.c:361
+#: actions.c:422
 msgid ""
 "To run a plugin just enter its action name\n"
 "Example: enter '//' to run the rgfind plugin"
 msgstr ""
 
-#: exec.c:872
+#: exec.c:886
 #, c-format
 msgid "Toggled executable bit on %zu %s\n"
 msgstr ""
 
-#: properties.c:348 properties.c:427
+#: properties.c:313 properties.c:392
 msgid "Too few"
 msgstr ""
 
-#: properties.c:348 properties.c:427
+#: properties.c:313 properties.c:392
 msgid "Too many"
 msgstr ""
 
-#: exec.c:1365
+#: exec.c:1392
 #, c-format
 msgid ""
 "Total files:                 %jd\n"
@@ -2385,38 +2776,31 @@ msgid ""
 "Unstatable files:            %zu\n"
 msgstr ""
 
-#: properties.c:248 properties.c:250
+#: properties.c:1619 properties.c:1809
 msgid "Total size: \t"
 msgstr ""
 
-#: properties.c:1635
+#: properties.c:1688 properties.c:1802
 #, c-format
 msgid "Total size: \t%s%c%s\n"
 msgstr ""
 
-#: properties.c:1877
+#: properties.c:2075
 #, c-format
-msgid ""
-"Total size:   %s%s%s\n"
-"Largest file: %s%s%s %c%s%s%s%c\n"
+msgid "Total size: %s%s%s%s\n"
 msgstr ""
 
-#: trash.c:87
+#: trash.c:92
 #, c-format
 msgid "Trash can emptied: %zu file(s) removed\n"
 msgstr ""
 
-#: mime.c:641
+#: mime.c:647
 msgid "Try 'mm edit APPLICATION'\n"
 msgstr ""
 
-#: properties.c:1333 properties.c:1335
+#: properties.c:1310 properties.c:1312
 msgid "UNKNOWN"
-msgstr ""
-
-#: properties.c:136 properties.c:951 properties.c:1232 properties.c:1236
-#: properties.c:1350 properties.c:1375
-msgid "Unavailable"
 msgstr ""
 
 #: archives.c:679
@@ -2425,20 +2809,20 @@ msgid ""
 "Example: myarchive.xz"
 msgstr ""
 
-#: listing.c:604
+#: listing.c:668
 msgid "Virtual directory\n"
 msgstr ""
 
-#: properties.c:1315
+#: properties.c:1292
 msgid "Whiteout"
 msgstr ""
 
-#: exec.c:1402
+#: exec.c:1429
 #, c-format
 msgid "Whiteout:              %zu\n"
 msgstr ""
 
-#: properties.c:1361
+#: properties.c:1338
 msgid "Xattributes:\t"
 msgstr ""
 
@@ -2446,48 +2830,48 @@ msgstr ""
 msgid "Yes"
 msgstr ""
 
-#: actions.c:273
+#: actions.c:344
 msgid "actions: Access to configuration files is not allowed in stealth mode"
 msgstr ""
 
-#: actions.c:375
+#: actions.c:436
 msgid ""
 "actions: No actions defined. Use the 'actions edit' command to add new "
 "actions\n"
 msgstr ""
 
-#: actions.c:372
+#: actions.c:433
 msgid "actions: Plugins are not allowed in stealth mode\n"
 msgstr ""
 
-#: actions.c:69
+#: actions.c:70
 msgid "actions: Plugins directory not defined"
 msgstr ""
 
-#: misc.c:945
+#: misc.c:965
 #, c-format
 msgid "alias: %zu alias(es) imported\n"
 msgstr ""
 
-#: misc.c:839
+#: misc.c:859
 #, c-format
 msgid "alias: '%s': Error normalizing file name\n"
 msgstr ""
 
-#: misc.c:931
+#: misc.c:951
 #, c-format
 msgid "alias: No alias found in '%s'\n"
 msgstr ""
 
-#: misc.c:939
+#: misc.c:959
 msgid "alias: No alias imported\n"
 msgstr ""
 
-#: exec.c:496
+#: exec.c:510
 msgid "allowed"
 msgstr ""
 
-#: properties.c:1617 properties.c:1666
+#: properties.c:1670 properties.c:1717 properties.c:1791 properties.c:1849
 msgid "apparent"
 msgstr ""
 
@@ -2527,86 +2911,104 @@ msgstr ""
 msgid "bd: '/': No parent directory"
 msgstr ""
 
-#: file_operations.c:1852
+#: file_operations.c:2011
 #, c-format
 msgid "bl: '%s': Error unescaping name\n"
 msgstr ""
 
-#: file_operations.c:1885
+#: file_operations.c:2044
 #, c-format
 msgid "bl: Cannot create symbolic link '%s': %s\n"
 msgstr ""
 
-#: name_cleaner.c:505
+#: name_cleaner.c:510
 #, c-format
 msgid "bleach: '%s': Error unescaping file name\n"
 msgstr ""
 
-#: bookmarks.c:405
+#: bookmarks.c:383
 #, c-format
 msgid "bookmarks: '%s': Already bookmarked as '%s'\n"
 msgstr ""
 
-#: bookmarks.c:431
+#: bookmarks.c:409
 #, c-format
 msgid "bookmarks: '%s': Colons and square brackets are not allowed\n"
 msgstr ""
 
-#: bookmarks.c:581
+#: bookmarks.c:558
 #, c-format
 msgid "bookmarks: '%s': Error unescaping file name\n"
 msgstr ""
 
-#: bookmarks.c:460
+#: bookmarks.c:438
 #, c-format
 msgid "bookmarks: '%s': Name already in use\n"
 msgstr ""
 
-#: bookmarks.c:426
+#: bookmarks.c:404
 #, c-format
 msgid "bookmarks: '%s': Reserved bookmark keyword\n"
 msgstr ""
 
-#: bookmarks.c:484
+#: bookmarks.c:462
 #, c-format
 msgid "bookmarks: '%s': Shortcut already in use\n"
 msgstr ""
 
-#: bookmarks.c:575
+#: bookmarks.c:552
 msgid "bookmarks: Cannot add any more bookmarks"
 msgstr ""
 
-#: bookmarks.c:128
+#: bookmarks.c:118
 msgid "bookmarks: Cannot open the bookmarks file"
 msgstr ""
 
-#: bookmarks.c:757
+#: bookmarks.c:734
 #, c-format
 msgid ""
 "bookmarks: Error updating bookmarks\n"
 "Cannot rename temporary file '%s': %s\n"
 msgstr ""
 
-#: bulk_rename.c:112
+#: bulk_rename.c:373
+#, c-format
+msgid "br: '%s' is duplicated\n"
+msgstr ""
+
+#: bulk_rename.c:89 bulk_rename.c:155
+#, c-format
+msgid "br: '%s': Error normalizing path\n"
+msgstr ""
+
+#: bulk_rename.c:141
 #, c-format
 msgid "br: '%s': Error unescaping file name\n"
 msgstr ""
 
-#: bulk_rename.c:82
+#: bulk_rename.c:108
 #, c-format
 msgid "br: Cannot rename '%s' to '%s': %s\n"
 msgstr ""
 
-#: bulk_rename.c:246
+#: bulk_rename.c:283
 msgid "br: Line mismatch in temporary file"
 msgstr ""
 
-#: bulk_rename.c:193 bulk_rename.c:356
+#: bulk_rename.c:224 bulk_rename.c:445
 msgid "br: Nothing to do"
 msgstr ""
 
-#: bulk_rename.c:389
+#: bulk_rename.c:478
 msgid "br: Temporary file changed on disk! Aborting."
+msgstr ""
+
+#: colors.c:1158
+msgid "built-in (256 colors)"
+msgstr ""
+
+#: colors.c:1160
+msgid "built-in (8 colors)"
 msgstr ""
 
 #: navigation.c:477
@@ -2622,35 +3024,30 @@ msgstr ""
 msgid "cd: Path is NULL or empty"
 msgstr ""
 
-#: colors.c:996 colors.c:1066
+#: colors.c:1082 colors.c:1143
 #, c-format
 msgid "cs: '%s': No such color scheme\n"
 msgstr ""
 
-#: colors.c:1106
-#, c-format
-msgid "cs: Current color scheme is '%s'\n"
-msgstr ""
-
-#: colors.c:986
+#: colors.c:1072
 msgid "cs: Current color scheme is unknown"
 msgstr ""
 
-#: colors.c:958 colors.c:981
+#: colors.c:1044 colors.c:1067
 msgid "cs: No color scheme found"
 msgstr ""
 
-#: selection.c:1198
+#: selection.c:1204
 #, c-format
 msgid "desel: %s: Invalid ELN\n"
 msgstr ""
 
-#: selection.c:1187
+#: selection.c:1193
 #, c-format
 msgid "desel: '%s': Invalid entry\n"
 msgstr ""
 
-#: selection.c:1279
+#: selection.c:1285
 msgid "desel: No selected files"
 msgstr ""
 
@@ -2658,56 +3055,64 @@ msgstr ""
 msgid "devices"
 msgstr ""
 
-#: exec.c:1755
+#: exec.c:1782
 #, c-format
 msgid "dh: '%d': No such entry number\n"
 msgstr ""
 
-#: exec.c:1761
+#: exec.c:1788
 msgid "dh: Invalid history entry"
 msgstr ""
 
-#: exec.c:383 exec.c:404 exec.c:527 exec.c:554 exec.c:571 exec.c:823
-#: exec.c:1792 exec.c:1842 exec.c:1872 exec.c:2044 keybinds.c:955
-#: keybinds.c:983 keybinds.c:1009 keybinds.c:1035 keybinds.c:1839
-#: keybinds.c:2041
+#: properties.c:1760 properties.c:1857
+msgid "directories"
+msgstr ""
+
+#: properties.c:1760 properties.c:1857
+msgid "directory"
+msgstr ""
+
+#: exec.c:384 exec.c:405 exec.c:541 exec.c:568 exec.c:585 exec.c:837
+#: exec.c:1819 exec.c:1869 exec.c:1899 exec.c:2071 keybinds.c:987
+#: keybinds.c:1015 keybinds.c:1041 keybinds.c:1067 keybinds.c:1926
+#: keybinds.c:2128
 msgid "disabled"
 msgstr ""
 
-#: properties.c:1618 properties.c:1667
+#: properties.c:1671 properties.c:1718 properties.c:1792 properties.c:1850
 msgid "disk usage"
 msgstr ""
 
-#: file_operations.c:335
+#: file_operations.c:341
 #, c-format
 msgid "dup: '%s': Error unescaping file name\n"
 msgstr ""
 
-#: exec.c:383 exec.c:404 exec.c:527 exec.c:554 exec.c:571 exec.c:823
-#: exec.c:1792 exec.c:1842 exec.c:1872 exec.c:2044 keybinds.c:955
-#: keybinds.c:983 keybinds.c:1009 keybinds.c:1035 keybinds.c:1839
-#: keybinds.c:2041
+#: exec.c:384 exec.c:405 exec.c:541 exec.c:568 exec.c:585 exec.c:837
+#: exec.c:1819 exec.c:1869 exec.c:1899 exec.c:2071 keybinds.c:987
+#: keybinds.c:1015 keybinds.c:1041 keybinds.c:1067 keybinds.c:1926
+#: keybinds.c:2128
 msgid "enabled"
 msgstr ""
 
-#: jump.c:599 jump.c:639
+#: jump.c:590 jump.c:630
 msgid "entries"
 msgstr ""
 
-#: jump.c:599 jump.c:639
+#: jump.c:590 jump.c:630
 msgid "entry"
 msgstr ""
 
-#: exec.c:197
+#: exec.c:198
 #, c-format
 msgid "export: %s: Empty assignement\n"
 msgstr ""
 
-#: exec.c:173
+#: exec.c:174
 msgid "export: A parameter, in the form VAR=VALUE, is required"
 msgstr ""
 
-#: exec.c:190
+#: exec.c:191
 msgid "export: Error unescaping argument"
 msgstr ""
 
@@ -2715,31 +3120,31 @@ msgstr ""
 msgid "false"
 msgstr ""
 
-#: exec.c:873
+#: exec.c:887 properties.c:1761 properties.c:1858
 msgid "file"
 msgstr ""
 
-#: exec.c:873
+#: exec.c:887 properties.c:1761 properties.c:1858
 msgid "files"
 msgstr ""
 
-#: history.c:273
+#: history.c:275
 msgid "fix the error (consult your daemon's documentation)"
 msgstr ""
 
-#: misc.c:600
+#: misc.c:620
 msgid "ft: Error removing quotes: Filter unset"
 msgstr ""
 
-#: misc.c:546
+#: misc.c:566
 msgid "ft: Invalid file type filter"
 msgstr ""
 
-#: misc.c:550
+#: misc.c:570
 msgid "ft: Invalid filter"
 msgstr ""
 
-#: misc.c:494
+#: misc.c:514
 msgid "ft: No filter set"
 msgstr ""
 
@@ -2752,109 +3157,157 @@ msgstr ""
 msgid "history: Invalid history entry"
 msgstr ""
 
-#: history.c:272
+#: history.c:274
 msgid "install a notification daemon"
+msgstr ""
+
+#: properties.c:1242
+msgid "invalid ACL"
 msgstr ""
 
 #: jump.c:338
 msgid "je: Configuration directory not found\n"
 msgstr ""
 
-#: jump.c:846
+#: jump.c:805
 #, c-format
 msgid "jump: '%c': Invalid option\n"
 msgstr ""
 
-#: jump.c:657
+#: jump.c:648
 #, c-format
 msgid "jump: '%s': Invalid value\n"
 msgstr ""
 
-#: jump.c:636
+#: jump.c:627
 #, c-format
 msgid "jump: No entry ranked below %d\n"
 msgstr ""
 
-#: jump.c:596
+#: jump.c:587
 msgid "jump: No invalid entries"
 msgstr ""
 
-#: jump.c:985
+#: jump.c:944
 msgid "jump: No matches found"
 msgstr ""
 
-#: exec.c:2034
+#: exec.c:2061
 msgid "k: Feature not available in light mode"
 msgstr ""
 
-#: exec.c:2029
+#: exec.c:2056
 msgid "k: Not in long view"
 msgstr ""
 
-#: keybinds.c:101 keybinds.c:132
+#: keybinds.c:174
+#, c-format
+msgid "kb: '%s' conflicts with '%s'\n"
+msgstr ""
+
+#: keybinds.c:182
+msgid "kb: No conflict found"
+msgstr ""
+
+#: keybinds.c:165
+msgid "kb: No keybindings defined"
+msgstr ""
+
+#: keybinds.c:197
+msgid "kb: No keybindings defined\n"
+msgstr ""
+
+#: keybinds.c:105 keybinds.c:136
 msgid "kb: No keybindings file found\n"
 msgstr ""
 
-#: keybinds.c:117 keybinds.c:161
+#: keybinds.c:121 keybinds.c:156
 #, c-format
 msgid "kb: Restart %s for changes to take effect\n"
 msgstr ""
 
-#: file_operations.c:1075
+#: keybinds.c:184
+msgid "kb: Run 'kb edit' to fix the conflict"
+msgstr ""
+
+#: file_operations.c:1079
 #, c-format
 msgid "le: '%s': Error unescaping file name\n"
 msgstr ""
 
-#: file_operations.c:1095
+#: file_operations.c:1099
 #, c-format
 msgid "le: '%s': Not a symbolic link\n"
 msgstr ""
 
-#: file_operations.c:1130
+#: file_operations.c:1134
 #, c-format
 msgid "le: Cannot relink symbolic link '%s': %s\n"
 msgstr ""
 
-#: file_operations.c:1110
+#: file_operations.c:1114
 msgid "le: Nothing to do"
 msgstr ""
 
-#: file_operations.c:1209
+#: properties.c:1762 properties.c:1859
+msgid "link"
+msgstr ""
+
+#: file_operations.c:1251 file_operations.c:1262
+#, c-format
+msgid "link: '%s': Error normalizing path\n"
+msgstr ""
+
+#: file_operations.c:1367
 #, c-format
 msgid "link: Cannot create symbolic link '%s': %s\n"
 msgstr ""
 
-#: exec.c:1841
+#: file_operations.c:1347
+#, c-format
+msgid "link: Cannot unlink '%s': %s\n"
+msgstr ""
+
+#: file_operations.c:1239
+#, c-format
+msgid "link: Error generating relative path: %s\n"
+msgstr ""
+
+#: properties.c:1762 properties.c:1859
+msgid "links"
+msgstr ""
+
+#: exec.c:1868
 #, c-format
 msgid "log: Command logs are %s\n"
 msgstr ""
 
-#: exec.c:1854
+#: exec.c:1881
 msgid "log: Command logs disabled"
 msgstr ""
 
-#: exec.c:1848
+#: exec.c:1875
 msgid "log: Command logs enabled"
 msgstr ""
 
-#: exec.c:1871
+#: exec.c:1898
 #, c-format
 msgid "log: Message logs are %s\n"
 msgstr ""
 
-#: exec.c:1891
+#: exec.c:1918
 msgid "log: Message logs cleared"
 msgstr ""
 
-#: exec.c:1884
+#: exec.c:1911
 msgid "log: Message logs disabled"
 msgstr ""
 
-#: exec.c:1878
+#: exec.c:1905
 msgid "log: Message logs enabled"
 msgstr ""
 
-#: keybinds.c:2149
+#: keybinds.c:2236
 msgid "long"
 msgstr ""
 
@@ -2862,7 +3315,7 @@ msgstr ""
 msgid "media"
 msgstr ""
 
-#: exec.c:2483
+#: exec.c:2512
 msgid "media: Function not available\n"
 msgstr ""
 
@@ -2882,7 +3335,7 @@ msgstr ""
 msgid "mountpoints"
 msgstr ""
 
-#: exec.c:2473
+#: exec.c:2502
 msgid "mountpoints: Function not available\n"
 msgstr ""
 
@@ -2890,11 +3343,11 @@ msgstr ""
 msgid "mp: There are no available mountpoints\n"
 msgstr ""
 
-#: file_operations.c:1552
+#: file_operations.c:1715
 msgid "name was"
 msgstr ""
 
-#: file_operations.c:1552
+#: file_operations.c:1715
 msgid "names were"
 msgstr ""
 
@@ -2903,7 +3356,7 @@ msgstr ""
 msgid "net: '%s': Error getting parent directory\n"
 msgstr ""
 
-#: remotes.c:387
+#: remotes.c:378
 #, c-format
 msgid "net: '%s': Mount command failed with error code %d\n"
 msgstr ""
@@ -2942,190 +3395,208 @@ msgstr ""
 msgid "net: Remotes file is undefined\n"
 msgstr ""
 
-#: file_operations.c:734
+#: file_operations.c:740
 #, c-format
 msgid "new: '%s': Unsafe file name\n"
 msgstr ""
 
-#: exec.c:496
+#: properties.c:916 properties.c:931 properties.c:1146 properties.c:1242
+msgid "none"
+msgstr ""
+
+#: exec.c:510
 msgid "not allowed"
 msgstr ""
 
-#: properties.c:791
+#: properties.c:756
 #, c-format
 msgid "oc: '%s': Invalid group\n"
 msgstr ""
 
-#: properties.c:778
+#: properties.c:743
 #, c-format
 msgid "oc: '%s': Invalid user\n"
 msgstr ""
 
-#: properties.c:832
+#: properties.c:797
 msgid "oc: Nothing to do"
 msgstr ""
 
-#: properties.c:669
+#: properties.c:634
 msgid "oc: Nothing to do\n"
 msgstr ""
 
-#: file_operations.c:892
+#: file_operations.c:898
 #, c-format
-msgid "open: '%s': Broken symbolic link to %s\n"
+msgid "open: '%s': Broken symbolic link to '%s'\n"
 msgstr ""
 
-#: properties.c:1763
+#: properties.c:1956
 #, c-format
 msgid "p: '%s': Cannot unescape file name\n"
 msgstr ""
 
-#: properties.c:426
+#: properties.c:391
 #, c-format
 msgid "pc: %s characters: 9 are expected\n"
 msgstr ""
 
-#: properties.c:347
+#: properties.c:312
 #, c-format
 msgid "pc: %s digits. Either 3 or 4 are expected\n"
 msgstr ""
 
-#: properties.c:355
+#: properties.c:320
 #, c-format
 msgid ""
 "pc: '%c': Invalid digit. Values in the range 0-7 are expected for each "
 "field\n"
 msgstr ""
 
-#: properties.c:637
+#: properties.c:602
 #, c-format
 msgid "pc: Applied new permissions to %zu file(s)\n"
 msgstr ""
 
-#: properties.c:629
+#: properties.c:594
 #, c-format
 msgid "pc: Changing permissions of '%s': %s\n"
 msgstr ""
 
-#: properties.c:376
+#: properties.c:341
 #, c-format
 msgid "pc: Invalid character in field %zu: %s-r%s are expected\n"
 msgstr ""
 
-#: properties.c:386
+#: properties.c:351
 #, c-format
 msgid "pc: Invalid character in field %zu: %s-w%s are expected\n"
 msgstr ""
 
-#: properties.c:395
+#: properties.c:360
 #, c-format
 msgid "pc: Invalid character in field %zu: %s-xsS%s are expected\n"
 msgstr ""
 
-#: properties.c:403
+#: properties.c:368
 #, c-format
 msgid "pc: Invalid character in field %zu: %s-xtT%s are expected\n"
 msgstr ""
 
-#: properties.c:492
+#: properties.c:457
 msgid "pc: Nothing to do\n"
 msgstr ""
 
-#: profiles.c:143
+#: profiles.c:149
 #, c-format
 msgid "pf: '%s' is the current profile\n"
 msgstr ""
 
-#: profiles.c:287
+#: profiles.c:286
 #, c-format
 msgid "pf: '%s': Cannot create profile: Home directory not found\n"
 msgstr ""
 
-#: profiles.c:393
+#: profiles.c:392
 #, c-format
 msgid "pf: '%s': Error removing profile\n"
 msgstr ""
 
-#: profiles.c:448 profiles.c:493
+#: profiles.c:447 profiles.c:492
 #, c-format
 msgid "pf: '%s': Invalid profile name\n"
 msgstr ""
 
-#: profiles.c:515
+#: profiles.c:514
 #, c-format
 msgid "pf: '%s': Is the current profile\n"
 msgstr ""
 
-#: profiles.c:380 profiles.c:510
+#: profiles.c:379 profiles.c:509
 #, c-format
 msgid "pf: '%s': No such profile\n"
 msgstr ""
 
-#: profiles.c:134
+#: profiles.c:140
 #, c-format
 msgid ""
 "pf: '%s': No such profile\n"
 "To add a new profile enter 'pf add PROFILE'\n"
 msgstr ""
 
-#: profiles.c:282
+#: profiles.c:281
 #, c-format
 msgid "pf: '%s': Profile already exists\n"
 msgstr ""
 
-#: profiles.c:555
+#: profiles.c:554
 #, c-format
 msgid "pf: '%s': Profile successfully renamed to %s%s%s\n"
 msgstr ""
 
-#: profiles.c:359
+#: profiles.c:358
 msgid "pf: 's': Error creating profile\n"
 msgstr ""
 
-#: profiles.c:545
+#: profiles.c:544
 #, c-format
 msgid "pf: Cannot rename profile '%s': %s\n"
 msgstr ""
 
-#: profiles.c:488
+#: profiles.c:487
 msgid "pf: Configuration directory is not set\n"
 msgstr ""
 
-#: profiles.c:214
+#: profiles.c:213
 msgid "pf: Error opening the history file\n"
 msgstr ""
 
-#: profiles.c:498
+#: profiles.c:497
 msgid "pf: Nothing to do. Source and destination names are the same."
 msgstr ""
 
-#: profiles.c:301
+#: profiles.c:300
 #, c-format
 msgid "pf: mkdir: '%s': Error creating configuration directory\n"
 msgstr ""
 
-#: exec.c:460
+#: exec.c:471
 msgid "pg: xatoi: Error converting to integer"
 msgstr ""
 
-#: prompt.c:1174
+#: misc.c:1936
+#, c-format
+msgid "pin: Error saving pinned directory: %s\n"
+msgstr ""
+
+#: exec.c:907
+msgid "pin: No pinned file"
+msgstr ""
+
+#: misc.c:1986
+#, c-format
+msgid "pin: Succesfully pinned '%s'\n"
+msgstr ""
+
+#: prompt.c:1578
 #, c-format
 msgid "prompt: %s: Error unescaping string\n"
 msgstr ""
 
-#: prompt.c:1187
+#: prompt.c:1591
 #, c-format
 msgid "prompt: %s: No such prompt\n"
 msgstr ""
 
-#: prompt.c:1167
+#: prompt.c:1571
 msgid "prompt: No extra prompts defined. Using the default prompt"
 msgstr ""
 
-#: prompt.c:1116
+#: prompt.c:1519
 msgid "prompt: No extra prompts found. Using the default prompt"
 msgstr ""
 
-#: prompt.c:1213
+#: prompt.c:1664
 msgid "prompt: Prompts file not found"
 msgstr ""
 
@@ -3136,36 +3607,36 @@ msgid ""
 "Usage: pwd [-LP]\n"
 msgstr ""
 
-#: file_operations.c:1550
+#: file_operations.c:1713
 #, c-format
 msgid ""
 "r: '%s': File may still exist (%jd more %s linked to this file before this "
 "operation)\n"
 msgstr ""
 
-#: trash.c:431
+#: trash.c:437
 msgid "removed"
 msgstr ""
 
-#: trash.c:431
+#: trash.c:437
 msgid "restored"
 msgstr ""
 
-#: bulk_remove.c:235
+#: bulk_remove.c:236
 #, c-format
 msgid "rr: '%s': Cannot open file\n"
 msgstr ""
 
-#: bulk_remove.c:216
+#: bulk_remove.c:217
 #, c-format
 msgid "rr: '%s': Directory empty\n"
 msgstr ""
 
-#: bulk_remove.c:389
+#: bulk_remove.c:390
 msgid "rr: Nothing to do"
 msgstr ""
 
-#: bulk_remove.c:444
+#: bulk_remove.c:445
 msgid "rr: Temporary file changed on disk! Aborting."
 msgstr ""
 
@@ -3179,61 +3650,61 @@ msgstr ""
 msgid "search: '%c': Unrecognized file type\n"
 msgstr ""
 
-#: search.c:684 search.c:854 search.c:1012
+#: search.c:684 search.c:855 search.c:1013
 msgid "search: No matches found\n"
 msgstr ""
 
-#: selection.c:464
+#: selection.c:465
 #, c-format
 msgid "sel: %s: Invalid regular expression\n"
 msgstr ""
 
-#: selection.c:496
+#: selection.c:497
 #, c-format
 msgid ""
 "sel: '%c': Unrecognized file type.\n"
 "Try 'sel --help' for more information.\n"
 msgstr ""
 
-#: selection.c:148
+#: selection.c:149
 #, c-format
 msgid "sel: '%s': Already selected\n"
 msgstr ""
 
-#: selection.c:938
+#: selection.c:944
 msgid "sel: Cannot open the selections file"
 msgstr ""
 
-#: selection.c:102
+#: selection.c:103
 msgid "sel: Cannot select any more files"
 msgstr ""
 
-#: selection.c:121
+#: selection.c:122
 #, c-format
 msgid "sel: Cannot select file '%s': %s\n"
 msgstr ""
 
-#: selection.c:555
+#: selection.c:556
 msgid "sel: Error expanding path"
 msgstr ""
 
-#: selection.c:637
+#: selection.c:643
 msgid "sel: Error writing files into the selections file\n"
 msgstr ""
 
-#: selection.c:649 selection.c:655
+#: selection.c:655 selection.c:661
 msgid "sel: No matches found\n"
 msgstr ""
 
-#: selection.c:830
+#: selection.c:836
 msgid "sel: No selected files"
 msgstr ""
 
-#: keybinds.c:2149
+#: keybinds.c:2236
 msgid "short"
 msgstr ""
 
-#: mime.c:1514
+#: mime.c:1491
 #, c-format
 msgid ""
 "shotgun: '%s': No associated application found\n"
@@ -3241,22 +3712,22 @@ msgid ""
 "%s\n"
 msgstr ""
 
-#: sort.c:498
+#: sort.c:422
 #, c-format
 msgid "st: %d (%s): Not available in light mode\n"
 msgstr ""
 
-#: sort.c:469
+#: sort.c:393
 #, c-format
 msgid "st: %s: No such sorting order\n"
 msgstr ""
 
-#: sort.c:458
+#: sort.c:382
 #, c-format
 msgid "st: '%s': Not available in light mode\n"
 msgstr ""
 
-#: sort.c:505
+#: sort.c:429
 msgid "st: Birth time is not available on this platform"
 msgstr ""
 
@@ -3313,64 +3784,64 @@ msgstr ""
 msgid "tag: Source and destiny are the same tag"
 msgstr ""
 
-#: file_operations.c:239
+#: file_operations.c:245
 #, c-format
 msgid "te: Changing permissions of '%s': %s\n"
 msgstr ""
 
-#: trash.c:564
+#: trash.c:570
 #, c-format
 msgid "trash: %s: Invalid ELN\n"
 msgstr ""
 
-#: trash.c:586
+#: trash.c:592
 #, c-format
 msgid "trash: '%s': Cannot remove file from the trash can\n"
 msgstr ""
 
-#: trash.c:1063
+#: trash.c:1069
 #, c-format
 msgid "trash: '%s': Error abbreviating file name\n"
 msgstr ""
 
-#: trash.c:177
+#: trash.c:182
 #, c-format
 msgid "trash: '%s': Error encoding path\n"
 msgstr ""
 
-#: trash.c:231
+#: trash.c:237
 #, c-format
 msgid "trash: '%s': Error getting file base name\n"
 msgstr ""
 
-#: trash.c:1056 trash.c:1104
+#: trash.c:1062 trash.c:1151
 #, c-format
 msgid "trash: '%s': Error unescaping file name\n"
 msgstr ""
 
-#: trash.c:1010
+#: trash.c:1016
 #, c-format
 msgid "trash: Cannot trash '%s'\n"
 msgstr ""
 
-#: trash.c:282 trash.c:331 trash.c:1034
+#: trash.c:288 trash.c:337 trash.c:1040
 #, c-format
 msgid "trash: Cannot trash '%s': %s\n"
 msgstr ""
 
-#: trash.c:1097
+#: trash.c:1144
 msgid "trash: Cannot trash any more files"
 msgstr ""
 
-#: trash.c:127 trash.c:161 trash.c:504 trash.c:515 trash.c:968
+#: trash.c:132 trash.c:166 trash.c:510 trash.c:521 trash.c:974
 msgid "trash: No trashed files"
 msgstr ""
 
-#: trash.c:954
+#: trash.c:960
 msgid "trash: The trash directory is undefined\n"
 msgstr ""
 
-#: trash.c:1016
+#: trash.c:1022
 msgid "trash: Use 'trash del' to remove trashed files\n"
 msgstr ""
 
@@ -3378,50 +3849,64 @@ msgstr ""
 msgid "true"
 msgstr ""
 
-#: file_operations.c:122
+#: file_operations.c:128
 #, c-format
 msgid "umask: %s: Out of range (valid values are 000-777)\n"
 msgstr ""
 
-#: trash.c:887
+#: properties.c:140 properties.c:916 properties.c:1207 properties.c:1211
+#: properties.c:1327 properties.c:1352
+msgid "unavailable"
+msgstr ""
+
+#: trash.c:893
 #, c-format
 msgid "undel: %s: Invalid ELN\n"
 msgstr ""
 
-#: trash.c:759
+#: trash.c:765
 #, c-format
 msgid "undel: '%s': %s\n"
 msgstr ""
 
-#: trash.c:702
+#: trash.c:708
 #, c-format
 msgid "undel: '%s': Destination file exists\n"
 msgstr ""
 
-#: trash.c:648
+#: trash.c:654
 #, c-format
 msgid "undel: '%s': Error decoding original path\n"
 msgstr ""
 
-#: trash.c:676
+#: trash.c:682
 #, c-format
 msgid "undel: '%s': No directory specified\n"
 msgstr ""
 
-#: trash.c:670
+#: trash.c:676
 msgid "undel: File name is NULL or empty\n"
 msgstr ""
 
-#: trash.c:610
+#: trash.c:616
 #, c-format
 msgid "undel: Info file for '%s' not found. Try restoring the file manually.\n"
 msgstr ""
 
-#: bookmarks.c:407
+#: bookmarks.c:385
 msgid "unnamed"
 msgstr ""
 
-#: file_operations.c:1273
+#: misc.c:2001
+msgid "unpin: No pinned file"
+msgstr ""
+
+#: misc.c:2019
+#, c-format
+msgid "unpin: Succesfully unpinned '%s'\n"
+msgstr ""
+
+#: file_operations.c:1436
 msgid "vv: Destiny directory is the current directory"
 msgstr ""
 
@@ -3481,10 +3966,10 @@ msgstr ""
 msgid "ws: This is already the last workspace\n"
 msgstr ""
 
-#: file_operations.c:202
+#: file_operations.c:208
 msgid "xchmod: Empty buffer for file name\n"
 msgstr ""
 
-#: file_operations.c:208
+#: file_operations.c:214
 msgid "xchmod: Empty buffer for mode\n"
 msgstr ""
