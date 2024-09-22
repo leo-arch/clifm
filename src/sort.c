@@ -243,7 +243,6 @@ entrycmp(const void *a, const void *b)
 	case SBTIME: /* fallthrough */
 	case SCTIME: /* fallthrough */
 	case SMTIME: ret = F_SORT(pa->time, pb->time); break;
-
 	case SVER: ret = xstrverscmp(pa->name, pb->name); break;
 	case SEXT: ret = sort_by_extension(pa, pb); break;
 	case SINO: ret = F_SORT(pa->inode, pb->inode); break;
