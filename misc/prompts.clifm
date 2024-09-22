@@ -207,6 +207,12 @@ RegularPrompt="%{reset}\I[\S%{reset}]\l %{blue}\f%{reset} <\z%{reset}>\n%{b:red}
 EnableWarningPrompt=true
 WarningPrompt="%{reset}%{b:red}>>>%{n:dim} "
 
+[timer]
+Notifications=true
+RegularPrompt="%{reset}[\S%{reset}] %{cyan}\w%{reset} <\z%{reset}:%{blue}\b%{reset}s>\n%{green}\$%{reset} "
+EnableWarningPrompt=true
+WarningPrompt="%{reset}%{red}\$%{n:dim} "
+
 [security-scanner]
 # Print file statistics about the current directory (-:-:-:-) in this order:
 # SUID, SGID, other-writable, and executable files
