@@ -236,6 +236,7 @@ remotes_unmount(char *name)
 		return FUNC_FAILURE;
 
 	/* Get out of mountpoint before unmounting */
+	int reload_files = 0;
 	size_t mlen = strlen(remotes[i].mountpoint);
 	if (strncmp(remotes[i].mountpoint, workspaces[cur_ws].path, mlen) == 0) {
 		if (mlen > 0 && remotes[i].mountpoint[mlen - 1] == '/') {
@@ -264,11 +265,14 @@ remotes_unmount(char *name)
 		*p = '/';
 
 		if (conf.autols == 1)
-			reload_dirlist();
+			reload_files = 1;
 	}
 
 	if (launch_execl(remotes[i].unmount_cmd) != FUNC_SUCCESS)
 		return FUNC_FAILURE;
+
+	if (reload_files == 1)
+		reload_dirlist();
 
 	remotes[i].mounted = 0;
 	return FUNC_SUCCESS;

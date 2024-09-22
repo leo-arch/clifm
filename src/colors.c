@@ -1180,8 +1180,8 @@ cschemes_function(char **args)
 #ifdef CLIFM_SUCKLESS
 	UNUSED(args);
 	print_colors_tip(0);
-	fputs("\nYou can also edit 'settings.h' in the source code and "
-		"recompile.\n", stderr);
+	fputs(_("\nYou can also edit 'settings.h' in the source code and "
+		"recompile.\n"), stderr);
 	return FUNC_FAILURE;
 #else
 	if (!args)
