@@ -1682,11 +1682,11 @@ edit_prompts_file(char *app)
 		return errno;
 	}
 
-	if (conf.autols == 1)
-		reload_dirlist();
-
 	if (old_time == a.st_mtime)
 		return FUNC_SUCCESS;
+
+	if (conf.autols == 1)
+		reload_dirlist();
 
 	ret = load_prompts();
 	print_reload_msg(_("File modified. Prompts reloaded\n"));
