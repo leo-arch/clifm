@@ -314,7 +314,7 @@ rl_exclude_input(const unsigned char c, const unsigned char prev)
 
 		case KEY_ENTER:
 #ifndef _NO_SUGGESTIONS
-			if (suggestion.printed && suggestion_buf)
+			if (suggestion_buf != NULL)
 				clear_suggestion(CS_FREEBUF);
 #endif /* !_NO_SUGGESTIONS */
 			cur_color = tx_c;
