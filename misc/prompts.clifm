@@ -106,8 +106,8 @@
 #
 # 2) Using the %{COLOR} syntax, where COLOR is:
 #  a) A color/attribute name: black, red, green, yellow, blue, magenta,
-#   cyan, white, bold, dim, italic, underline, reverse, strike.
-#   E.g. "%{reset}%{bold}%{red}"
+#   cyan, white, or bold, dim, italic, underline, reverse, strike.
+#   E.g. "%{bold}%{red}"
 #
 #   Removing a specific attribute can be done using any of the following
 #   keywords:
