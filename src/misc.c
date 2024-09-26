@@ -1129,6 +1129,9 @@ expand_prompt_name(char *name)
 			free(conf.rprompt_str);
 			conf.rprompt_str = savestring(prompts[i].right,
 				strlen(prompts[i].right));
+			if (prompts[i].regular)
+				conf.prompt_is_multiline =
+					strstr(prompts[i].regular, "\\n") ? 1 : 0;
 		}
 
 		prompt_notif = prompts[i].notifications;

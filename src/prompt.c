@@ -1569,7 +1569,8 @@ prompt(const int prompt_flag)
 		? decoded_prompt : EMERGENCY_PROMPT);
 	free(decoded_prompt);
 
-	if (conf.rprompt_str && *conf.rprompt_str && term_caps.suggestions == 1)
+	if (conf.rprompt_str && *conf.rprompt_str
+	&& conf.prompt_is_multiline == 1 && term_caps.suggestions == 1)
 		print_right_prompt();
 
 	if (prompt_flag == PROMPT_UPDATE || prompt_flag == PROMPT_UPDATE_RUN_CMDS) {
@@ -1642,8 +1643,10 @@ switch_prompt(const size_t n)
 	if (prompts[n].warning)
 		conf.wprompt_str = savestring(prompts[n].warning, strlen(prompts[n].warning));
 
-	if (prompts[n].right)
+	if (prompts[n].right) {
 		conf.rprompt_str = savestring(prompts[n].right, strlen(prompts[n].right));
+		conf.prompt_is_multiline = prompts[n].multiline;
+	}
 
 	prompt_notif = prompts[n].notifications;
 	set_prompt_options();

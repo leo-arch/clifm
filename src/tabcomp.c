@@ -72,8 +72,8 @@ typedef char *rl_cpvfunc_t;
 #endif /* !_NO_SUGGESTIONS */
 
 #ifndef _NO_FZF
-# define CPR     "\x1b[6n" /* Cursor position report */
-# define CPR_LEN (sizeof(CPR) - 1)
+# define CPR_CODE "\x1b[6n" /* Cursor position report */
+# define CPR_LEN  (sizeof(CPR_CODE) - 1)
 
 # define SHOW_PREVIEWS(c) ((c) == TCMP_PATH || (c) == TCMP_SEL \
 || (c) == TCMP_RANGES || (c) == TCMP_DESEL || (c) == TCMP_JUMP \
@@ -151,7 +151,7 @@ get_cursor_position(int *c, int *l)
 	if (enable_raw_mode(STDIN_FILENO) == -1) return FUNC_FAILURE;
 
 	/* 1. Ask the terminal about cursor position */
-	if (write(STDOUT_FILENO, CPR, CPR_LEN) != CPR_LEN)
+	if (write(STDOUT_FILENO, CPR_CODE, CPR_LEN) != CPR_LEN)
 		{ disable_raw_mode(STDIN_FILENO); return FUNC_FAILURE; }
 
 	/* 2. Read the response: "ESC [ rows ; cols R" */

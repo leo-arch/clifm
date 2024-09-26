@@ -250,6 +250,7 @@ init_conf_struct(void)
 	conf.prompt_f_dir_len = DEF_PROMPT_F_DIR_LEN;
 	conf.prompt_f_full_len_dirs = DEF_PROMPT_F_FULL_LEN_DIRS;
 	conf.prompt_p_max_path = UNSET;
+	conf.prompt_is_multiline = 0;
 	conf.prop_fields_gap = DEF_PROP_FIELDS_GAP;
 	conf.purge_jumpdb = DEF_PURGE_JUMPDB;
 	conf.quoting_style = DEF_QUOTING_STYLE;
@@ -1565,6 +1566,7 @@ unset_prompt_values(const size_t n)
 	prompts[n].warning = (char *)NULL;
 	prompts[n].notifications = DEF_PROMPT_NOTIF;
 	prompts[n].warning_prompt_enabled = DEF_WARNING_PROMPT;
+	prompts[n].multiline = 0;
 }
 
 static char *
@@ -1704,6 +1706,9 @@ load_prompts(void)
 			prompts[n].right = xnrealloc(prompts[n].right,
 				ret_len + 1, sizeof(char));
 			xstrsncpy(prompts[n].right, ret, ret_len + 1);
+			if (prompts[n].regular)
+				prompts[n].multiline =
+					strstr(prompts[n].regular, "\\n") ? 1 : 0;
 		}
 	}
 

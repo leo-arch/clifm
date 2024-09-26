@@ -1177,6 +1177,7 @@ struct config_t {
 	int prompt_f_dir_len;
 	int prompt_f_full_len_dirs;
 	int prompt_p_max_path;
+	int prompt_is_multiline;
 	int prop_fields_gap;
 	int quoting_style;
 	int read_autocmd_files;
@@ -1207,7 +1208,6 @@ struct config_t {
 #endif /* !_NO_TRASH */
 	int warning_prompt;
 	int welcome_message;
-	int pad3;
 };
 
 extern struct config_t conf;
@@ -1628,6 +1628,8 @@ struct prompts_t {
 	char *right;
 	int notifications;
 	int warning_prompt_enabled;
+	int multiline; /* Regular prompt is multiline */
+	int pad0;
 };
 
 extern struct prompts_t *prompts;

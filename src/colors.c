@@ -2191,6 +2191,8 @@ set_cs_right_prompt_str(char *line)
 
 	free(conf.rprompt_str);
 	conf.rprompt_str = savestring(p, strlen(p));
+	if (conf.encoded_prompt)
+		conf.prompt_is_multiline = strstr(conf.encoded_prompt, "\\n") ? 1 : 0;
 }
 
 #ifndef _NO_FZF
