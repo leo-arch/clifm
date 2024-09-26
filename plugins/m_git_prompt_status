@@ -38,18 +38,18 @@ for i in $files; do
     esac
 done
 
-branch_color="\e[0;35m"
+branch_color="\e[22;35m"
 sep_color="\e[2;37m"
-end_color="\e[0m"
+end_color="\e[22;39m"
 
 output="$branch_color$branch$sep_color|"
 
 if [ -n "$ahead_behind" ]; then
-	ab_color="\e[0;32m"
-	[ "$(echo "$ahead_behind" | cut -b1)" != "a" ] && ab_color="\e[0;31m"
+	ab_color="\e[22;32m"
+	[ "$(echo "$ahead_behind" | cut -b1)" != "a" ] && ab_color="\e[22;31m"
 	output="$output$ab_color$ahead_behind$end_color"
 else
-	output="$output\e[0;32m=$end_color"
+	output="$output\e[22;32m=$end_color"
 fi
 
 [ -n "$status" ] && output="$output$sep_color|$end_color$status$end_color"
