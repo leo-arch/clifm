@@ -105,9 +105,15 @@
 # 1) Bash-style full escape sequences (e.g. "\[\e[1;31m\]", for bold red)
 #
 # 2) Using the %{COLOR} syntax, where COLOR is:
-#  a) A color/attribute name: black, red, green, yellow, blue, magenta,
-#   cyan, white, or bold, dim, italic, underline, reverse, strike.
-#   E.g. "%{bold}%{red}"
+#  a) A color/attribute name:
+#   Color names: black, red, green, yellow, blue, magenta, cyan, white.
+#    To get the full-brightness variant of any of the above colors use the
+#    'br' prefix. E.g. "brblue" or "brblack".
+#    Note that "brblack" has higher brightness than "black" (close to gray).
+#
+#   Attribute names: bold, dim, italic, underline, reverse, strike.
+#
+#   Example: "%{bold}%{brred}"
 #
 #   Removing a specific attribute can be done using any of the following
 #   keywords:

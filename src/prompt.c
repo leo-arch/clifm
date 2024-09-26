@@ -699,10 +699,15 @@ gen_color(char **line)
 	/* At this point LINE is "{color}" */
 	char *l = (*line) + 1; /* L is now "color}" */
 
-	int bg = (l[0] == 'k' && l[1] == ':' && l[2]);
+	const int bg = (l[0] == 'k' && l[1] == ':' && l[2]);
 	char *attr = bg == 0 ? get_color_attribute(l) : (char *)NULL;
 	if (bg == 1 || attr)
 		l += 2; /* Remove background/attribute prefix ("x:") */
+
+	/* Is color bright? */
+	const int br = (l[0] == 'b' && l[1] == 'r' && l[2]);
+	if (br == 1)
+		l += 2;
 
 	char *p = strchr(l, '}');
 	if (!p)
@@ -727,26 +732,26 @@ gen_color(char **line)
 	if (l[0] == 'b' && strcmp(l, "bold") == 0) {
 		GEN_ATTR("1");
 	} else if (l[0] == 'b' && strcmp(l, "blue") == 0) {
-		GEN_COLOR("44", "34");
+		GEN_COLOR(br ? "104" : "44", br ? "94" : "34");
 	} else if (l[0] == 'b' && strcmp(l, "black") == 0) {
-		GEN_COLOR("40", "30");
+		GEN_COLOR(br ? "100" : "40", br ? "90" : "30");
 	/* 'reset' is used more often than 'red' and 'reverse': check it first. */
 	} else if (l[0] == 'r' && strcmp(l, "reset") == 0) {
 		GEN_ATTR("0");
 	} else if (l[0] == 'r' && strcmp(l, "red") == 0) {
-		GEN_COLOR("41", "31");
+		GEN_COLOR(br ? "101" : "41", br ? "91" : "31");
 	} else if (l[0] == 'r' && strcmp(l, "reverse") == 0) {
 		GEN_ATTR("7");
 	} else if (l[0] == 'g' && strcmp(l, "green") == 0) {
-		GEN_COLOR("42", "32");
+		GEN_COLOR(br ? "102" : "42", br ? "92" : "32");
 	} else if (l[0] == 'y' && strcmp(l, "yellow") == 0) {
-		GEN_COLOR("43", "33");
+		GEN_COLOR(br ? "103" : "43", br ? "93" : "33");
 	} else if (l[0] == 'm' && strcmp(l, "magenta") == 0) {
-		GEN_COLOR("45", "35");
+		GEN_COLOR(br ? "105" : "45", br ? "95" : "35");
 	} else if (l[0] == 'c' && strcmp(l, "cyan") == 0) {
-		GEN_COLOR("46", "36");
+		GEN_COLOR(br ? "106" : "46", br ? "96" : "36");
 	} else if (l[0] == 'w' && strcmp(l, "white") == 0) {
-		GEN_COLOR("47", "37");
+		GEN_COLOR(br ? "107" : "47", br ? "97" : "37");
 	} else if (l[0] == 'd' && strcmp(l, "dim") == 0) {
 		GEN_ATTR("2");
 	} else if (l[0] == 'i' && strcmp(l, "italic") == 0) {
