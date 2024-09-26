@@ -663,6 +663,8 @@ get_color_attribute(const char *line)
 	case 'R': return "27;"; /* Disable reverse */
 	case 'S': return "29;"; /* Disable strikethrough */
 	case 'U': return "24;"; /* Disable underline */
+	case 'K': return "49;"; /* Disable background (terminal default) */
+	case 'N': return "39;"; /* Disable foreground (terminal default) */
 	default: return (char *)NULL;
 	}
 }
@@ -715,26 +717,26 @@ gen_color(char **line)
 
 #define GEN_COLOR(s1, s2) (snprintf(temp, C_LEN, "%c%c[%s%sm%c", C_START, \
 	C_ESC, attr ? attr : "", bg == 1 ? (s1) : (s2), C_END));
-#define GEN_ATTR(c) (snprintf(temp, C_LEN, "%c%c[%s%cm%c", C_START, C_ESC, \
-	attr ? attr : "", (c), C_END))
+#define GEN_ATTR(s) (snprintf(temp, C_LEN, "%c%c[%s%sm%c", C_START, C_ESC, \
+	attr ? attr : "", (s), C_END))
 
 	char *temp = xnmalloc(C_LEN, sizeof(char));
 	int n = -1;
 
 	/* 'bold' and 'blue' are used more often than 'black': check them first. */
 	if (l[0] == 'b' && strcmp(l, "bold") == 0) {
-		GEN_ATTR('1');
+		GEN_ATTR("1");
 	} else if (l[0] == 'b' && strcmp(l, "blue") == 0) {
 		GEN_COLOR("44", "34");
 	} else if (l[0] == 'b' && strcmp(l, "black") == 0) {
 		GEN_COLOR("40", "30");
 	/* 'reset' is used more often than 'red' and 'reverse': check it first. */
 	} else if (l[0] == 'r' && strcmp(l, "reset") == 0) {
-		GEN_ATTR('0');
+		GEN_ATTR("0");
 	} else if (l[0] == 'r' && strcmp(l, "red") == 0) {
 		GEN_COLOR("41", "31");
 	} else if (l[0] == 'r' && strcmp(l, "reverse") == 0) {
-		GEN_ATTR('7');
+		GEN_ATTR("7");
 	} else if (l[0] == 'g' && strcmp(l, "green") == 0) {
 		GEN_COLOR("42", "32");
 	} else if (l[0] == 'y' && strcmp(l, "yellow") == 0) {
@@ -746,13 +748,27 @@ gen_color(char **line)
 	} else if (l[0] == 'w' && strcmp(l, "white") == 0) {
 		GEN_COLOR("47", "37");
 	} else if (l[0] == 'd' && strcmp(l, "dim") == 0) {
-		GEN_ATTR('2');
+		GEN_ATTR("2");
 	} else if (l[0] == 'i' && strcmp(l, "italic") == 0) {
-		GEN_ATTR('3');
+		GEN_ATTR("3");
 	} else if (l[0] == 'u' && strcmp(l, "underline") == 0) {
-		GEN_ATTR('4');
+		GEN_ATTR("4");
 	} else if (l[0] == 's' && strcmp(l, "strike") == 0) {
-		GEN_ATTR('9');
+		GEN_ATTR("9");
+	} else if (l[0] == 'f' && strcmp(l, "freset") == 0) {
+		GEN_ATTR("39");
+	} else if (l[0] == 'k' && strcmp(l, "kreset") == 0) {
+		GEN_ATTR("49");
+	} else if ((l[0] == 'b' || l[0] == 'd') && strcmp(l + 1, "reset") == 0) {
+		GEN_ATTR("22");
+	} else if (l[0] == 'i' && strcmp(l, "ireset") == 0) {
+		GEN_ATTR("23");
+	} else if (l[0] == 'u' && strcmp(l, "ureset") == 0) {
+		GEN_ATTR("24");
+	} else if (l[0] == 'r' && strcmp(l, "rreset") == 0) {
+		GEN_ATTR("27");
+	} else if (l[0] == 's' && strcmp(l, "sreset") == 0) {
+		GEN_ATTR("29");
 	} else if (IS_DIGIT(l[0]) && (!l[1] || (is_number(l + 1)
 	&& (n = atoi(l)) <= 255))) {
 		if (!l[1])
@@ -1378,17 +1394,94 @@ log_and_record(char *input)
 	if (record_cmd(input) == 1)
 		add_to_cmdhist(input);
 }
-/*
-void
+
+#include <wchar.h>
+static int
+get_rprompt_len_utf8(char *rprompt)
+{
+	if (!rprompt || !*rprompt)
+		return 0;
+
+	char *nl = strchr(rprompt, '\n');
+	if (nl)
+		*nl = '\0';
+
+	static wchar_t buf[NAME_MAX];
+	*buf = L'\0';
+	if (mbstowcs(buf, rprompt, NAME_MAX) == (size_t)-1)
+		return 0;
+
+	size_t i = 0;
+	int len = 0;
+
+	while (buf[i]) {
+		if (buf[i] == '\x1b' && buf[i + 1] == '[') {
+			wchar_t *tmp = wcschr(buf + i + 1, L'm');
+			if (tmp)
+				i += (size_t)(tmp - (buf + i) + 1);
+		} else if (buf[i] == 001) {
+			wchar_t *tmp = wcschr(buf + i, L'\002');
+			if (tmp)
+				i += (size_t)(tmp - (buf + i) + 1);
+		} else {
+			len += wcwidth(buf[i]);
+			i++;
+		}
+	}
+
+	return len;
+}
+
+static int
+get_rprompt_len(char *rprompt)
+{
+	char *p = rprompt;
+	while (*p) {
+		if ((*p & 0xc0) == 0xc0 || (*p & 0xc0) == 0x80)
+			return get_rprompt_len_utf8(rprompt);
+		p++;
+	}
+
+	p = rprompt;
+	int len = 0;
+
+	while (*p) {
+		if (*p == '\n') {
+			*p = '\0';
+			break;
+		} else if (*p == '\x1b' && p[1] == '[') {
+			char *tmp = strchr(p, 'm');
+			if (tmp)
+				p = tmp + 1;
+		} else if (*p == 001) {
+			char *tmp = strchr(p, '\002');
+			if (tmp)
+				p = tmp + 1;
+		} else {
+			len++;
+			p++;
+		}
+	}
+
+	return len;
+}
+
+static void
 print_right_prompt(void)
 {
-//	get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
-	get_cursor_position(0, 1);
-	char *p = decode_prompt(right_prompt);
-	printf("%*s", term_cols, p);
-	printf("\x1b[%d;%dH", curline, curcol);
-	free(p);
-} */
+	char *rprompt = decode_prompt(conf.rprompt_str);
+	const int len = rprompt ? get_rprompt_len(rprompt) : 0;
+	if (len <= 0 || len >= term_cols) {
+		free(rprompt);
+		return;
+	}
+
+	MOVE_CURSOR_RIGHT(term_cols);
+	MOVE_CURSOR_LEFT(len);
+	fputs(rprompt, stdout);
+	MOVE_CURSOR_LEFT(term_cols);
+	free(rprompt);
+}
 
 /* Some commands take '!' as parameter modifier: quick search, 'filter',
  * and 'sel', in which case history expansion must not be performed.
@@ -1476,6 +1569,9 @@ prompt(const int prompt_flag)
 		? decoded_prompt : EMERGENCY_PROMPT);
 	free(decoded_prompt);
 
+	if (conf.rprompt_str && *conf.rprompt_str && term_caps.suggestions == 1)
+		print_right_prompt();
+
 	if (prompt_flag == PROMPT_UPDATE || prompt_flag == PROMPT_UPDATE_RUN_CMDS) {
 		rl_set_prompt(the_prompt);
 		free(the_prompt);
@@ -1487,9 +1583,6 @@ prompt(const int prompt_flag)
 	 * and the current cursor column. This length might vary if the
 	 * prompt contains dynamic values. */
 	prompt_offset = UNSET;
-
-/*	if (right_prompt && *right_prompt)
-		print_right_prompt(); */
 
 	UNHIDE_CURSOR;
 
@@ -1538,15 +1631,19 @@ list_prompts(void)
 static int
 switch_prompt(const size_t n)
 {
-	if (prompts[n].regular) {
-		free(conf.encoded_prompt);
-		conf.encoded_prompt = savestring(prompts[n].regular, strlen(prompts[n].regular));
-	}
+	free(conf.encoded_prompt);
+	free(conf.wprompt_str);
+	free(conf.rprompt_str);
+	conf.encoded_prompt = conf.wprompt_str = conf.rprompt_str = (char *)NULL;
 
-	if (prompts[n].warning) {
-		free(conf.wprompt_str);
+	if (prompts[n].regular)
+		conf.encoded_prompt = savestring(prompts[n].regular, strlen(prompts[n].regular));
+
+	if (prompts[n].warning)
 		conf.wprompt_str = savestring(prompts[n].warning, strlen(prompts[n].warning));
-	}
+
+	if (prompts[n].right)
+		conf.rprompt_str = savestring(prompts[n].right, strlen(prompts[n].right));
 
 	prompt_notif = prompts[n].notifications;
 	set_prompt_options();
@@ -1613,11 +1710,13 @@ set_prompt_options(void)
 	char *val = (char *)NULL;
 	int n = 0;
 
-	const char *rp = conf.encoded_prompt; /* Regular prompt */
+	const char *np = conf.encoded_prompt; /* Normal/Regular prompt */
 	const char *wp = conf.wprompt_str;    /* Warning prompt */
+	const char *rp = conf.rprompt_str;    /* Right prompt */
 
-#define CHECK_PROMPT_OPT(s) ((rp && *rp && strstr(rp, (s)) != NULL) \
-	|| (wp && *wp && strstr(wp, (s)) != NULL))
+#define CHECK_PROMPT_OPT(s) ((np && *np && strstr(np, (s)) != NULL) \
+	|| (wp && *wp && strstr(wp, (s)) != NULL)                       \
+	|| (rp && *rp && strstr(rp, (s)) != NULL))
 
 	const int b_is_set = CHECK_PROMPT_OPT("\\b");
 	const int f_is_set = CHECK_PROMPT_OPT("\\f");

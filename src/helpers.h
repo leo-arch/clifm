@@ -1100,6 +1100,7 @@ struct config_t {
 	char *term;
 	char *time_str;
 	char *ptime_str;
+	char *rprompt_str;
 	char *welcome_message_str;
 	char *wprompt_str;
 #ifndef _NO_SUGGESTIONS
@@ -1624,6 +1625,7 @@ struct prompts_t {
 	char *name;
 	char *regular;
 	char *warning;
+	char *right;
 	int notifications;
 	int warning_prompt_enabled;
 };

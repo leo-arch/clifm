@@ -2179,6 +2179,20 @@ set_cs_warning_prompt_str(char *line)
 	conf.wprompt_str = savestring(p, strlen(p));
 }
 
+static void
+set_cs_right_prompt_str(char *line)
+{
+	if (IS_CTRL_CHR(*line))
+		return;
+
+	char *p = remove_quotes(line);
+	if (!p)
+		return;
+
+	free(conf.rprompt_str);
+	conf.rprompt_str = savestring(p, strlen(p));
+}
+
 #ifndef _NO_FZF
 static void
 set_fzf_opts(char *line)
@@ -2404,17 +2418,6 @@ read_color_scheme_file(const char *colorscheme, char **filecolors,
 			set_cs_prompt_noti(line + 14);
 		}
 
-/*		else if (*line == 'R' && strncmp(line, "RightPrompt=", 12) == 0) {
-			char *p = line + 12;
-			if (*p < ' ')
-				continue;
-			char *q = remove_quotes(p);
-			if (!q)
-				continue;
-			free(right_prompt);
-			right_prompt = savestring(q, strlen(q));
-		} */
-
 		else if (xargs.warning_prompt == UNSET && *line == 'E'
 		&& strncmp(line, "EnableWarningPrompt=", 20) == 0) {
 			set_cs_enable_warning_prompt(line + 20);
@@ -2422,6 +2425,10 @@ read_color_scheme_file(const char *colorscheme, char **filecolors,
 
 		else if (*line == 'W' && strncmp(line, "WarningPrompt=", 14) == 0) {
 			set_cs_warning_prompt_str(line + 14);
+		}
+
+		else if (*line == 'R' && strncmp(line, "RightPrompt=", 12) == 0) {
+			set_cs_right_prompt_str(line + 12);
 		}
 
 #ifndef _NO_FZF

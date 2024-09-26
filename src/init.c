@@ -289,6 +289,7 @@ init_conf_struct(void)
 	conf.term = (char *)NULL;
 	conf.time_str = (char *)NULL;
 	conf.ptime_str = (char *)NULL;
+	conf.rprompt_str = (char *)NULL;
 	conf.usr_cscheme = (char *)NULL;
 	conf.wprompt_str = (char *)NULL;
 	conf.welcome_message_str = (char *)NULL;
@@ -1560,6 +1561,7 @@ unset_prompt_values(const size_t n)
 {
 	prompts[n].name = (char *)NULL;
 	prompts[n].regular = (char *)NULL;
+	prompts[n].right = (char *)NULL;
 	prompts[n].warning = (char *)NULL;
 	prompts[n].notifications = DEF_PROMPT_NOTIF;
 	prompts[n].warning_prompt_enabled = DEF_WARNING_PROMPT;
@@ -1697,13 +1699,19 @@ load_prompts(void)
 				ret_len + 1, sizeof(char));
 			xstrsncpy(prompts[n].warning, ret, ret_len + 1);
 		}
+
+		if (strncmp(line, "RightPrompt=", 12) == 0) {
+			prompts[n].right = xnrealloc(prompts[n].right,
+				ret_len + 1, sizeof(char));
+			xstrsncpy(prompts[n].right, ret, ret_len + 1);
+		}
 	}
 
 	free(line);
 	fclose(fp);
 
 	if (prompts[n].name) {
-		++n;
+		n++;
 		prompts[n].name = (char *)NULL;
 	}
 

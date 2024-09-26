@@ -3015,7 +3015,7 @@ parse_input_str(char *str)
 		}
 
 			/* ######################################
-			 * #     2.8) WORKSPACE EXPANSION       #
+			 * #     2.9) WORKSPACE EXPANSION       #
 			 * ###################################### */
 
 		if (*substr[i] == 'w' && substr[i][1] == ':' && substr[i][2]) {
@@ -3024,7 +3024,7 @@ parse_input_str(char *str)
 		}
 
 			/* ###################################
-			 * #   2.9) USER DEFINED VARIABLES   #
+			 * #   2.10) USER DEFINED VARIABLES   #
 			 * ###################################*/
 
 		if (conf.int_vars == 1 && usrvar_n > 0) {
@@ -3034,7 +3034,7 @@ parse_input_str(char *str)
 		}
 
 			/* ###################################
-			 * #  2.10) SYMLINKS IN VIRTUAL DIR  #
+			 * #  2.11) SYMLINKS IN VIRTUAL DIR  #
 			 * ################################### */
 
 		/* We are in STDIN_TMP_DIR: Expand symlinks to target */
@@ -3049,13 +3049,13 @@ parse_input_str(char *str)
 	/* The following expansions expand into MULTIPLE fields */
 
 				/* ###########################
-				 * #   2.11) SEL EXPANSION   #
+				 * #   2.12) SEL EXPANSION   #
 				 * ########################### */
 
 	expand_sel_keyword(&substr);
 
 				/* #################################
-				 * #     2.12) TAGS EXPANSION      #
+				 * #     2.13) TAGS EXPANSION      #
 				 * ################################# */
 
 #ifndef _NO_TAGS
@@ -3063,20 +3063,20 @@ parse_input_str(char *str)
 #endif /* _NO_TAGS */
 
 				/* ################################
-				 * #    2.13) FILE TYPE (=CHAR)   #
+				 * #    2.14) FILE TYPE (=CHAR)   #
 				 * ################################ */
 
 	expand_file_type(&substr);
 
 				/* ##################################
-				 * #   2.14) MIME TYPE (@PATTERN)   #
+				 * #   2.15) MIME TYPE (@PATTERN)   #
 				 * ################################## */
 #ifndef _NO_MAGIC
 	expand_mime_type(&substr);
 #endif /* !_NO_MAGIC */
 
 				/* ###############################
-				 * #    2.15) BOOKMARKS (b:)     #
+				 * #    2.16) BOOKMARKS (b:)     #
 				 * ############################### */
 
 	expand_bookmarks(&substr);

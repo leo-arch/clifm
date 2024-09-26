@@ -1125,6 +1125,12 @@ expand_prompt_name(char *name)
 				strlen(prompts[i].warning));
 		}
 
+		if (prompts[i].right) {
+			free(conf.rprompt_str);
+			conf.rprompt_str = savestring(prompts[i].right,
+				strlen(prompts[i].right));
+		}
+
 		prompt_notif = prompts[i].notifications;
 
 		if (xargs.warning_prompt != 0)
@@ -1146,6 +1152,7 @@ free_prompts(void)
 		free(prompts[i].name);
 		free(prompts[i].regular);
 		free(prompts[i].warning);
+		free(prompts[i].right);
 	}
 	free(prompts);
 	prompts = (struct prompts_t *)NULL;
@@ -1361,6 +1368,7 @@ free_stuff(void)
 /*	free(right_prompt); */
 	free_dirlist();
 	free(conf.opener);
+	free(conf.rprompt_str);
 	free(conf.wprompt_str);
 	free(conf.fzftab_options);
 	free(conf.welcome_message_str);
