@@ -107,29 +107,24 @@
 # 2) Using the %{COLOR} syntax, where COLOR is:
 #  a) A color/attribute name:
 #   Color names: black, red, green, yellow, blue, magenta, cyan, white.
+#
 #    To get the full-brightness variant of any of the above colors use the
-#    'br' prefix. E.g. "brblue" or "brblack".
+#    'br' prefix followed by the color name. E.g. "brblue" or "brblack".
 #    Note that "brblack" has higher brightness than "black" (close to gray).
 #
 #   Attribute names: bold, dim, italic, underline, reverse, strike.
 #
-#   Example: "%{bold}%{brred}"
+#    To disable a specific attribute use the 'no' prefix followed by the
+#    attribute name. E.g. "nounderline" or "nobold".
 #
-#   Removing a specific attribute can be done using any of the following
-#   keywords:
-#    freset: set Foreground color to terminal default
-#    kreset: set bacKground color to terminal default
-#    ureset: remove Underline attribute
-#    ireset: remove Italic attribute
-#    breset: remove Bold attribute
-#    dreset: remove Dim attribute
-#    sreset: remove Strikethrough attribute
-#    rreset: remove Reverse attribute
-#    reset:  reset ALL attributes to terminal default values
+#    To disable all previous attributes use the "reset" keyword.
 #
-#    Example: "%{bold}%{underline}%{red}test%{ureset}test%{reset}"
-#    prints "test" twice, first in a bold underlined red, and then
-#    in bold red (no underline).
+#   Example: "%{bold}%{underline}%{brred}text%{nounderline}text%{reset}"
+#   prints "text" twice, first in a bold underlined bright red, and then
+#   in a bold bright red (no underline).
+#
+#   Use the special "freset" and "breset" keywords to set the foreground
+#   and background color respectively to the default terminal value.
 #
 #  b) A number in the range 0-255 (256-colors). E.g. "%{196}"
 #
@@ -160,7 +155,8 @@
 #
 #  Writing a prefix in UPPERCASE turns off the corresponding attribute
 #  (unlike 'n', which turns off ALL attributes).
-#  E.g.: "%{b:red}%{k:blue}text%{B:red}text" will print "text" twice, first in
+#
+#  E.g.: "%{b:red}%{k:blue}text%{B:red}text" prints "text" twice, first in
 #  bold red on a blue background, and then in red (no bold) keeping the blue
 #  background. Note that 'N' sets the terminal default foreground color,
 #  while 'K' sets the terminal default background color.

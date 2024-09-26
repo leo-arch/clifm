@@ -709,6 +709,11 @@ gen_color(char **line)
 	if (br == 1)
 		l += 2;
 
+	/* Disable attribute? */
+	const int no_attr = (l[0] == 'n' && l[1] == 'o' && l[2]);
+	if (no_attr == 1)
+		l += 2;
+
 	char *p = strchr(l, '}');
 	if (!p)
 		return (char *)NULL;
@@ -730,7 +735,7 @@ gen_color(char **line)
 
 	/* 'bold' and 'blue' are used more often than 'black': check them first. */
 	if (l[0] == 'b' && strcmp(l, "bold") == 0) {
-		GEN_ATTR("1");
+		GEN_ATTR(no_attr ? "22" : "1");
 	} else if (l[0] == 'b' && strcmp(l, "blue") == 0) {
 		GEN_COLOR(br ? "104" : "44", br ? "94" : "34");
 	} else if (l[0] == 'b' && strcmp(l, "black") == 0) {
@@ -741,7 +746,7 @@ gen_color(char **line)
 	} else if (l[0] == 'r' && strcmp(l, "red") == 0) {
 		GEN_COLOR(br ? "101" : "41", br ? "91" : "31");
 	} else if (l[0] == 'r' && strcmp(l, "reverse") == 0) {
-		GEN_ATTR("7");
+		GEN_ATTR(no_attr ? "27" : "7");
 	} else if (l[0] == 'g' && strcmp(l, "green") == 0) {
 		GEN_COLOR(br ? "102" : "42", br ? "92" : "32");
 	} else if (l[0] == 'y' && strcmp(l, "yellow") == 0) {
@@ -753,27 +758,17 @@ gen_color(char **line)
 	} else if (l[0] == 'w' && strcmp(l, "white") == 0) {
 		GEN_COLOR(br ? "107" : "47", br ? "97" : "37");
 	} else if (l[0] == 'd' && strcmp(l, "dim") == 0) {
-		GEN_ATTR("2");
+		GEN_ATTR(no_attr ? "22" : "2");
 	} else if (l[0] == 'i' && strcmp(l, "italic") == 0) {
-		GEN_ATTR("3");
+		GEN_ATTR(no_attr ? "23" : "3");
 	} else if (l[0] == 'u' && strcmp(l, "underline") == 0) {
-		GEN_ATTR("4");
+		GEN_ATTR(no_attr ? "24" : "4");
 	} else if (l[0] == 's' && strcmp(l, "strike") == 0) {
-		GEN_ATTR("9");
+		GEN_ATTR(no_attr ? "29" : "9");
 	} else if (l[0] == 'f' && strcmp(l, "freset") == 0) {
 		GEN_ATTR("39");
-	} else if (l[0] == 'k' && strcmp(l, "kreset") == 0) {
+	} else if (l[0] == 'b' && strcmp(l, "breset") == 0) {
 		GEN_ATTR("49");
-	} else if ((l[0] == 'b' || l[0] == 'd') && strcmp(l + 1, "reset") == 0) {
-		GEN_ATTR("22");
-	} else if (l[0] == 'i' && strcmp(l, "ireset") == 0) {
-		GEN_ATTR("23");
-	} else if (l[0] == 'u' && strcmp(l, "ureset") == 0) {
-		GEN_ATTR("24");
-	} else if (l[0] == 'r' && strcmp(l, "rreset") == 0) {
-		GEN_ATTR("27");
-	} else if (l[0] == 's' && strcmp(l, "sreset") == 0) {
-		GEN_ATTR("29");
 	} else if (IS_DIGIT(l[0]) && (!l[1] || (is_number(l + 1)
 	&& (n = atoi(l)) <= 255))) {
 		if (!l[1])
