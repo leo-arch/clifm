@@ -106,8 +106,24 @@
 #
 # 2) Using the %{COLOR} syntax, where COLOR is:
 #  a) A color/attribute name: black, red, green, yellow, blue, magenta,
-#   cyan, white, reset, bold, dim, italic, underline, reverse, strike.
+#   cyan, white, bold, dim, italic, underline, reverse, strike.
 #   E.g. "%{reset}%{bold}%{red}"
+#
+#   Removing a specific attribute can be done using any of the following
+#   keywords:
+#    freset: set Foreground color to terminal default
+#    kreset: set bacKground color to terminal default
+#    ureset: remove Underline attribute
+#    ireset: remove Italic attribute
+#    breset: remove Bold attribute
+#    dreset: remove Dim attribute
+#    sreset: remove Strikethrough attribute
+#    rreset: remove Reverse attribute
+#    reset:  reset ALL attributes to terminal default values
+#
+#    Example: "%{bold}%{underline}%{red}test%{ureset}test%{reset}"
+#    prints "test" twice, first in a bold underlined red, and then
+#    in bold red (no underline).
 #
 #  b) A number in the range 0-255 (256-colors). E.g. "%{196}"
 #
@@ -136,11 +152,12 @@
 #  To specify a background color (instead of foreground), use the "k:" prefix.
 #  E.g., "%{u:red}%{k:blue}" will print underlined red on a blue background.
 #
-#  Excluding the 'n' and 'k' prefixes, writing a prefix in uppercase turns off
-#  the corresponding attribute (unlike 'n', which turns off all attributes).
+#  Writing a prefix in UPPERCASE turns off the corresponding attribute
+#  (unlike 'n', which turns off ALL attributes).
 #  E.g.: "%{b:red}%{k:blue}text%{B:red}text" will print "text" twice, first in
 #  bold red on a blue background, and then in red (no bold) keeping the blue
-#  background.
+#  background. Note that 'N' sets the terminal default foreground color,
+#  while 'K' sets the terminal default background color.
 
 # To permanetly set any of the below prompts edit your color scheme file
 # (via the 'cs edit' command), set Prompt to the appropriate prompt name
