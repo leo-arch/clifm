@@ -710,8 +710,8 @@ gen_color(char **line)
 		l += 2;
 
 	/* Disable attribute? */
-	const int no_attr = (l[0] == 'n' && l[1] == 'o' && l[2]);
-	if (no_attr == 1)
+	const int attr_off = (l[0] == 'n' && l[1] == 'o' && l[2]);
+	if (attr_off == 1)
 		l += 2;
 
 	char *p = strchr(l, '}');
@@ -735,7 +735,7 @@ gen_color(char **line)
 
 	/* 'bold' and 'blue' are used more often than 'black': check them first. */
 	if (l[0] == 'b' && strcmp(l, "bold") == 0) {
-		GEN_ATTR(no_attr ? "22" : "1");
+		GEN_ATTR(attr_off ? "22" : "1");
 	} else if (l[0] == 'b' && strcmp(l, "blue") == 0) {
 		GEN_COLOR(br ? "104" : "44", br ? "94" : "34");
 	} else if (l[0] == 'b' && strcmp(l, "black") == 0) {
@@ -746,7 +746,7 @@ gen_color(char **line)
 	} else if (l[0] == 'r' && strcmp(l, "red") == 0) {
 		GEN_COLOR(br ? "101" : "41", br ? "91" : "31");
 	} else if (l[0] == 'r' && strcmp(l, "reverse") == 0) {
-		GEN_ATTR(no_attr ? "27" : "7");
+		GEN_ATTR(attr_off ? "27" : "7");
 	} else if (l[0] == 'g' && strcmp(l, "green") == 0) {
 		GEN_COLOR(br ? "102" : "42", br ? "92" : "32");
 	} else if (l[0] == 'y' && strcmp(l, "yellow") == 0) {
@@ -758,13 +758,13 @@ gen_color(char **line)
 	} else if (l[0] == 'w' && strcmp(l, "white") == 0) {
 		GEN_COLOR(br ? "107" : "47", br ? "97" : "37");
 	} else if (l[0] == 'd' && strcmp(l, "dim") == 0) {
-		GEN_ATTR(no_attr ? "22" : "2");
+		GEN_ATTR(attr_off ? "22" : "2");
 	} else if (l[0] == 'i' && strcmp(l, "italic") == 0) {
-		GEN_ATTR(no_attr ? "23" : "3");
+		GEN_ATTR(attr_off ? "23" : "3");
 	} else if (l[0] == 'u' && strcmp(l, "underline") == 0) {
-		GEN_ATTR(no_attr ? "24" : "4");
+		GEN_ATTR(attr_off ? "24" : "4");
 	} else if (l[0] == 's' && strcmp(l, "strike") == 0) {
-		GEN_ATTR(no_attr ? "29" : "9");
+		GEN_ATTR(attr_off ? "29" : "9");
 	} else if (l[0] == 'f' && l[1] == 'g' && strcmp(l + 2, "reset") == 0) {
 		GEN_ATTR("39");
 	} else if (l[0] == 'b' && l[1] == 'g' && strcmp(l + 2, "reset") == 0) {
