@@ -62,7 +62,7 @@ print_tips(const int all)
 		"Manage default associated applications with the 'mime' command",
 		"Customize previewing applications: 'view edit' or F7",
 		"List mountpoints: 'mp' or Alt-m",
-		"Compress and decompress files using the 'ac' and 'ad' "
+		"Compress and decompress files using the 'ac' and 'ad' " /* NOLINT */
 		"commands respectively. E.g.: 'ac sel' or 'ad file.zip'",
 		"Disallow the use of shell commands with the -x option: 'clifm -x'",
 		"Don't like ELN's? Disable them using the -e command line switch",

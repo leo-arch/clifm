@@ -3442,7 +3442,7 @@ check_colors(void)
 	} else if (xargs.colorize == 0 || term_caps.color == 0 || nc || cnc) {
 		conf.colorize = 0;
 	} else {
-		conf.colorize = xargs.colorize == 1 ? 1 : DEF_COLORS;
+		conf.colorize = xargs.colorize == 1 ? 1 : DEF_COLORS; /* NOLINT */
 	}
 
 	if (conf.colorize == 1) {

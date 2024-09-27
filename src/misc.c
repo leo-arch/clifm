@@ -2118,7 +2118,7 @@ bonus_function(void)
 		"Keep it simple, stupid",
 		"If ain't broken, brake it",
 		"\"I only know that I know nothing\" (Socrates)",
-		"(Learned) Ignorance is the true outcome of wisdom (Nicholas "
+		"(Learned) Ignorance is the true outcome of wisdom (Nicholas " /* NOLINT */
 		"of Cusa)",
 		"True intelligence is about questions, not answers",
 		"Humanity is just an arrow released towards God",
