@@ -102,7 +102,7 @@
 # ---------
 #
 # Colorization is made using either of the two following methods:
-# 1) Bash-style full escape sequences (e.g. "\[\e[1;31m\]", for bold red)
+# 1) Bash-style ANSI escape codes (e.g. "\[\e[1;31m\]", for bold red)
 #
 # 2) Using the %{COLOR} syntax, where COLOR is:
 #  a) A color/attribute name:
@@ -123,8 +123,11 @@
 #   prints "text" twice, first in a bold underlined bright red, and then
 #   in a bold bright red (no underline).
 #
-#   Use the special "freset" and "breset" keywords to set the foreground
-#   and background color respectively to the default terminal value.
+#   Use the special "fgreset" and "bgreset" keywords to set the foreground
+#   and background color respectively to the default terminal value. For
+#   example, "%{k:red}%{blue}test%{bgreset}" prints "test" in blue on a
+#   red background, and then resets the background color (keeping the
+#   foreground color).
 #
 #  b) A number in the range 0-255 (256-colors). E.g. "%{196}"
 #

@@ -765,9 +765,9 @@ gen_color(char **line)
 		GEN_ATTR(no_attr ? "24" : "4");
 	} else if (l[0] == 's' && strcmp(l, "strike") == 0) {
 		GEN_ATTR(no_attr ? "29" : "9");
-	} else if (l[0] == 'f' && strcmp(l, "freset") == 0) {
+	} else if (l[0] == 'f' && l[1] == 'g' && strcmp(l + 2, "reset") == 0) {
 		GEN_ATTR("39");
-	} else if (l[0] == 'b' && strcmp(l, "breset") == 0) {
+	} else if (l[0] == 'b' && l[1] == 'g' && strcmp(l + 2, "reset") == 0) {
 		GEN_ATTR("49");
 	} else if (IS_DIGIT(l[0]) && (!l[1] || (is_number(l + 1)
 	&& (n = atoi(l)) <= 255))) {
