@@ -35,6 +35,7 @@
 #include <readline/readline.h>
 #include <readline/history.h> /* history_expand() */
 #include <errno.h>
+#include <wchar.h> /* mbstowcs, wcschr, wcwidth */
 
 #include "aux.h"
 #include "checks.h" /* is_number() */
@@ -1395,7 +1396,7 @@ log_and_record(char *input)
 		add_to_cmdhist(input);
 }
 
-#include <wchar.h>
+/* UTF-8 version of get_prompt_len(). */
 static int
 get_rprompt_len_utf8(char *rprompt)
 {
@@ -1432,6 +1433,7 @@ get_rprompt_len_utf8(char *rprompt)
 	return len;
 }
 
+/* Return the printable length of the string RPROMPT. Zero is returned on error. */
 static int
 get_rprompt_len(char *rprompt)
 {

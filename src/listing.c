@@ -267,8 +267,8 @@ is_utf8_name(const char *name, size_t *bytes)
 #else /* char is signed (X86) */
 		/* If UTF-8 char, the first byte is >= 0xC0, whose decimal
 		 * value is 192, which is bigger than CHAR_MAX if char is signed,
-		 * becoming thus a negative value. In this way, the above two-steps
-		 * check can be written using a single comparison. */
+		 * becoming thus a negative value. In this way, the above three-steps
+		 * check can be written using only two checks. */
 		if (*name < ' ' || *name == 127)
 #endif /* CHAR_MIN >= 0 */
 			is_utf8 = 1;
