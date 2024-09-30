@@ -323,8 +323,8 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 /* Suggestions */
 #define DEF_SB_C256  "\x1b[2;33m"   /* Shell built-ins */
 #define DEF_SC_C256  "\x1b[2;36m"   /* Aliases and binaries in PATH */
-#define DEF_SD_C256  "\x1b[38;5;243m"   /* Internal commands description */
-#define DEF_SH_C256  "\x1b[38;5;243m"   /* Commands history */
+#define DEF_SD_C256  "\x1b[38;5;240m"   /* Internal commands description */
+#define DEF_SH_C256  "\x1b[38;5;240m"   /* Commands history */
 #define DEF_SF_C256  "\x1b[2;4;36m" /* ELN's, bookmark, file, and directory names */
 #define DEF_SP_C256  "\x1b[2;31m"   /* Suggestions pointer (12 > filename) */
 #define DEF_SX_C256  "\x1b[2;32m"   /* Internal commands and parameters */

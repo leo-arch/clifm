@@ -169,13 +169,13 @@ define WORKSPACE_8=@246-2
 #           SUGGESTIONS               #
 #=====================================#
 
-define SUG_HIST=@243               # History
+define SUG_HIST=@240               # History
 define SUG_FILE_NAME=4;2;36        # File names
 define SUG_FILE_NAME_FUZZY=4;2;36  # File names (fuzzy)
 define SUG_INT_CMD=@2-2            # Internal command names and parameters
 define SUG_EXT_CMD=@6-2            # External command names
 define SUG_BUILTIN=@3-2            # Shell builtin names
-define SUG_INT_CMD_DESC=@243       # Internal commands description (e.g. "c (copy files)")
+define SUG_INT_CMD_DESC=@240       # Internal commands description (e.g. "c (copy files)")
 define SUG_POINTER=@1-2            # Suggestions pointer (e.g. "12 > myfile")
 
 #=====================================#
@@ -304,10 +304,11 @@ DirIconColor="Y"
 # or a prompt name defined in the prompts file.
 Prompt="clifm"
 # Override prompt values (as defined in the prompts file).
-#Prompt=""
-#Notifications=
-#EnableWarningPrompt=
-#WarningPrompt=""
+#Prompt="%{reset}%{b:blue}>%{reset} "
+#Notifications=true
+#RightPrompt="testing\nline"
+#EnableWarningPrompt=true
+#WarningPrompt="%{reset}%{d:red}>%{reset}%{dim} "
 
 ### The string used to construct the line dividing the list of files and
 # the prompt (Unicode is supported). Possible values:
