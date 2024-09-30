@@ -302,6 +302,7 @@ Prompt="clifm"
 # Override prompt values (as defined in the prompts file).
 #Prompt=""
 #Notifications=
+#RightPrompt=""
 #EnableWarningPrompt=
 #WarningPrompt=""
 

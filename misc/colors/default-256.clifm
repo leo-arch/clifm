@@ -304,11 +304,11 @@ DirIconColor="Y"
 # or a prompt name defined in the prompts file.
 Prompt="clifm"
 # Override prompt values (as defined in the prompts file).
-#Prompt="%{reset}%{b:blue}>%{reset} "
-#Notifications=true
-#RightPrompt="testing\nline"
-#EnableWarningPrompt=true
-#WarningPrompt="%{reset}%{d:red}>%{reset}%{dim} "
+#Prompt=""
+#Notifications=
+#RightPrompt=""
+#EnableWarningPrompt=
+#WarningPrompt=""
 
 ### The string used to construct the line dividing the list of files and
 # the prompt (Unicode is supported). Possible values:
