@@ -1,3 +1,48 @@
+1.21 (Lemonhead) - Sep 30, 2024
+
+BUG FIXES
+* 'TimeFollowsSort' and 'TimestampMark' are missing in 'config dump'.
+* $XDG_DATA_HOME ignored when setting the trash directory.
+* Memory leak when trashing files and the trash info file cannot be opened.
+* When 'PrintDirCmds' is unset, it is marked as modified by 'config dump'.
+* Image previews not working on Kitty terminal.
+* Double confirmation prompt when removing write-protected files from the trash can.
+* The 'mime_list.sh' plugin is broken.
+* The 'mime import' command fails to import lines with a MIME type containing dots.
+* Cannot auto-open/autocd files starting with '#' and containing characters that need to be escaped (e.g. "#%${}", etc).
+* Completions/suggestions not working in chained commands.
+* Query string ignored when untagging files (TAB completion).
+* The -E option prints garbage next to ELN's on some terminals.
+* The fzfhist.sh plugin (bound to the 'h' action name) lists timestamps along with history commands.
+* Out of date files list after unmounting remote.
+* Suggestion not removed after pressing Enter.
+
+NEW FEATURES/IMPROVEMENTS
+* Ask for confirmation when trashing files (enable by setting 'TrashForce' to false in the config file).
+* Allow sorting files by file type (including executable files and file extensions): 'st type'.
+* Sort user and group by names, not numbers, if using ID names in long-view (see the 'PropFields' option in the configuration file).
+* Increase the number of bindable plugins from 4 to 16.
+* Read CLIFM_COLUMNS and CLIFM_LINES from the environment.
+* Fix columns/colors issue in the pager.sh plugin ('gg').
+* Export status values (as environment variables) when running plugins. Consult the ENVIRONMENT section of the manpge for more information.
+* The following environment variables are now set only when running a plugin: CLIFM_PLUGINS_HELPER, CLIFM_SELFILE, CLIFM_PROFILE, and CLIFM_COLORLESS.
+* Plugins are disabled in 'secure-cmds' mode (it just makes sense).
+* Sanitize aliases when running in 'secure-cmds' mode.
+* New alternative color notation for the prompt: '%{color}'. See the new prompts file for details.
+* Add support for right prompts. See the new prompts file for details.
+* Allow the use of 3-digit HEX colors (e.g. #ef0 amounts to #eeff00).
+* New plugin: 'file_picker.sh' (removed old file_picker shell functions).
+* Implement fish-like abbreviation of the current directory in the prompt via the '\f' prompt code.
+* Implement prompt modules (via ${module}).
+* Use the '\b' prompt code to print the execution time of the last command.
+* New prompt ('pez'), implementing the new fish-like path abbreviation.
+* New prompt ('git'), implementing the new prompt modules feature.
+* New prompt ('timer'), implementing the new '\b' prompt code (last command execution time).
+* New prompt ('info'), implementing a right prompt.
+* '--max-path' and 'MaxPath' are deprecated in favor of the CLIFM_PROMPT_P_MAX_PATH environment variable.
+* Workspace expansion via the 'w:' construct. Example: 'c 2 w:3' to copy the file whose ELN is 2 to the third workspace.
+* Make 'history show-time' list timestamps and commands on the same line.
+
 1.20 (Madam Xima) - Aug 16, 2024
 
 BUG FIXES
