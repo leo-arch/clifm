@@ -128,7 +128,7 @@ define PROP_TIME_MARK=      # Timestamp identification character (2)
 #=====================================#
 
 define IFACE_ELN=@6               # ELN's (e.g. "12 myfile")
-define IFACE_FILES_COUNTER=@7-2   # Files counter (e.g. "dir/12")
+define IFACE_FILES_COUNTER=@247   # Files counter (e.g. "dir/12")
 define IFACE_DIV_LINE=@243        # Dividing line
 define IFACE_LINK_IND=@43         # Symbolic link indicator ('@')
 define IFACE_MISC_IND=@6-1        # Miscellaneous indicator ("->")
