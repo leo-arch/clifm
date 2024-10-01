@@ -186,8 +186,7 @@ X:^audio/.*=mpv %x;gmplayer %x;smplayer %x;vlc %x;totem %x;ffplay %x;mplayer;mpl
 # Fonts
 #-----------------------------
 
-X:N:.*\.otf$=fontforge;fontpreview
-X:^font/.*=fontforge;fontpreview
+X:^font/.*|^application/(font.*|.*opentype)=fontforge;fontpreview
 
 #-----------------------------
 # Torrent
