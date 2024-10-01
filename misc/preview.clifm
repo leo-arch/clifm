@@ -58,7 +58,7 @@ inode/directory=exa -a --tree --level=1 --;eza -a --tree --level=1 --;lsd -A --t
 #--------------------------------
 
 ^text/rtf=catdoc --;
-N:.*\.json$=jq --color-output . ;python -m json.tool --;
+N:.*\.json$=jq --color-output . --;python -m json.tool --;
 N:.*\.md$=glow -s dark --;mdcat --;
 ^text/html$=w3m -dump;lynx -dump --;elinks -dump;pandoc -s -t markdown --;
 ^text/.*=highlight -f --out-format=xterm256 --force --;bat --style=plain --color=always --;cat --;
@@ -101,6 +101,12 @@ application/(zip|gzip|x-7z-compressed|x-xz|x-bzip*|x-tar)=atool --list --;bsdtar
 #--------------------------------
 
 application/x-bittorrent=transmission-show --;
+
+#--------------------------------
+# Email
+#--------------------------------
+
+message/rfc822=mu -q view --;cat --;
 
 #--------------------------------
 # Fallback
