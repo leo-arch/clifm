@@ -179,7 +179,7 @@ set_file_type_and_search_path(char **args, mode_t *file_type,
 	case 'c': *file_type = invert == 1 ? DT_CHR : S_IFCHR; break;
 	case 'd': *file_type = invert == 1 ? DT_DIR : S_IFDIR; break;
 #ifdef SOLARIS_DOORS
-	case 'D': *file_type = invert == 1 ? DT_DOOR : S_IFDOOR; break;
+	case 'O': *file_type = invert == 1 ? DT_DOOR : S_IFDOOR; break;
 	case 'P': *file_type = invert == 1 ? DT_PORT : S_IFPORT; break;
 #endif /* SOLARIS_DOORS */
 	case 'f': *file_type = invert == 1 ? DT_REG : S_IFREG; break;
