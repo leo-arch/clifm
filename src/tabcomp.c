@@ -1252,7 +1252,8 @@ get_query_str(char *lw)
 	case TCMP_CMD_DESC:         /* fallthrough */
 	case TCMP_FILE_TYPES_OPTS:  /* fallthrough */
 	case TCMP_FILE_TYPES_FILES: /* fallthrough */
-	case TCMP_MIME_LIST:
+	case TCMP_MIME_LIST:        /* fallthrough */
+	case TCMP_TAGS_F:
 		break;
 
 	case TCMP_TAGS_T: /* fallthrough */
