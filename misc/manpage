@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Sep 30, 2024" "clifm 1.21" "CLIFM Manual"
+.TH "CLIFM" "1" "Oct 1, 2024" "clifm 1.21.1" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -1273,14 +1273,17 @@ Available file type characters:
  \fBc\fR: Character devices
  \fBC\fR: Files with capabilities (1)(2)
  \fBd\fR: Directories
+ \fBD\fR: Empty directories
  \fBf\fR: Regular files
+ \fBF\fR: Empty regular files
  \fBg\fR: SGID files (2)
  \fBh\fR: Multi\-hardlink files (directories excluded)
  \fBl\fR: Symbolic links
+ \fBL\fR: Broken symbolic links
  \fBo\fR: Other\-writable files (2)
  \fBp\fR: FIFO/pipes (2)
  \fBs\fR: Sockets (2)
- \fBD\fR: Doors (Solaris only)
+ \fBO\fR: Doors (Solaris only)
  \fBP\fR: Event ports (Solaris only)
  \fBt\fR: Files with the sticky bit set (2)
  \fBu\fR: SUID files (2)
