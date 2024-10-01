@@ -2306,6 +2306,7 @@ X:^audio/.*=mpv %%x;gmplayer %%x;smplayer %%x;vlc %%x;totem %%x;ffplay %%x;mplay
 !X:^audio/.*=ffplay -nodisp -autoexit %%f !EO;mplayer %%f !EO;mpv --no-terminal\n\
 \n\
 # Fonts\n\
+X:N:.*\\.otf$=fontforge;fontpreview\n\
 X:^font/.*=fontforge;fontpreview\n\
 \n\
 # Torrent:\n\

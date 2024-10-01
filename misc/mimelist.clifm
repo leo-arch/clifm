@@ -8,6 +8,7 @@
 #-----------------------------
 
 # Commented and blank lines are ignored.
+# Lines starting with either '#' or ';' are comments.
 
 # The below settings cover the most common filetypes.
 # It is recommended to edit this file placing your prefered applications
@@ -185,6 +186,7 @@ X:^audio/.*=mpv %x;gmplayer %x;smplayer %x;vlc %x;totem %x;ffplay %x;mplayer;mpl
 # Fonts
 #-----------------------------
 
+X:N:.*\.otf$=fontforge;fontpreview
 X:^font/.*=fontforge;fontpreview
 
 #-----------------------------
