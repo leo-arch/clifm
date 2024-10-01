@@ -959,7 +959,7 @@ get_tagged_file_target(char *filename)
 	char *s = rpath ? rpath : filename;
 	int free_tmp = 0;
 	char *q = home_tilde(s, &free_tmp);
-	if (q && free_tmp == 1)
+	if (q && free_tmp == 1 && s == rpath)
 		free(s);
 
 	return q ? q : s;

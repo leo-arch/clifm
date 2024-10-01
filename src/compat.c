@@ -128,7 +128,11 @@ old_realpath(const char *restrict path, char *restrict resolved_path)
 	if (!ptr)
 		return (char *)NULL;
 
-	return realpath(path, ptr);
+	char *ret = realpath(path, ptr);
+	if (!ret)
+		free(ptr);
+
+	return ret;
 }
 
 /* ------------------------- scandir ------------------------ */
