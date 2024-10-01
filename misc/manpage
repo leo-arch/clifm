@@ -459,7 +459,7 @@ To search for files in any directory other than the current directory, specify t
 .sp
 \fB3. File type filter\fR
 .sp
-The result of the search could be further filtered by specifying a filter type: \-b, \-c, \-d, \-f, \-l, \-p, \-s, \-D, and \-P (block device, character device, directory, regular file, symbolic link, FIFO/pipe, socket, door (Solaris), and port (Solaris) respectively. For example, \fI/[.\-].*d$\ \-d Documents/\fR will list all directories containing a dot or a dash and ending with \'d\' in the directory named \fIDocuments\fR.
+The result of the search could be further filtered by specifying a filter type: \-b, \-c, \-d, \-f, \-l, \-p, \-s, \-O, and \-P (block device, character device, directory, regular file, symbolic link, FIFO/pipe, socket, door (Solaris), and port (Solaris) respectively. For example, \fI/[.\-].*d$\ \-d Documents/\fR will list all directories containing a dot or a dash and ending with \'d\' in the directory named \fIDocuments\fR.
 .sp
 \fB4. Negate a pattern\fR
 .sp
