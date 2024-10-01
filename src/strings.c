@@ -82,14 +82,15 @@ typedef char *rl_cpvfunc_t;
 
 #ifdef SOLARIS_DOORS
 # define IS_FILE_TYPE_FILTER(x) ((x) == 'b' || (x) == 'c' || (x) == 'C' \
-|| (x) == 'd' || (x) == 'f' || (x) == 'g' || (x) == 'h' || (x) == 'l' \
-|| (x) == 'o' || (x) == 'p' || (x) == 's' || (x) == 't' || (x) == 'u' \
-|| (x) == 'x' || (x) == 'D' || (x) == 'P')
+|| (x) == 'd' || (x) == 'D' || (x) == 'f' || (x) == 'F' || (x) == 'g' \
+|| (x) == 'h' || (x) == 'l' || (x) == 'L' || (x) == 'o' || (x) == 'p' \
+|| (x) == 's' || (x) == 't' || (x) == 'u' || (x) == 'x' || (x) == 'O' \
+|| (x) == 'P')
 #else
 # define IS_FILE_TYPE_FILTER(x) ((x) == 'b' || (x) == 'c' || (x) == 'C' \
-|| (x) == 'd' || (x) == 'f' || (x) == 'g' || (x) == 'h' || (x) == 'l' \
-|| (x) == 'o' || (x) == 'p' || (x) == 's' || (x) == 't' || (x) == 'u' \
-|| (x) == 'x')
+|| (x) == 'd' || (x) == 'D' || (x) == 'f' || (x) == 'F' || (x) == 'g' \
+|| (x) == 'h' || (x) == 'l' || (x) == 'L' || (x) == 'o' || (x) == 'p' \
+|| (x) == 's' || (x) == 't' || (x) == 'u' || (x) == 'x')
 #endif /* SOLARIS_DOORS */
 
 #define IS_GLOB(x, y) (((x) == '*' || (x) == '?' || (x) == '{' ) && (y) != ' ')
@@ -1553,8 +1554,12 @@ expand_file_type_filter(const char t)
 			if (file_info[i].dir == 1)
 				f[n++] = strdup(name);
 			break;
-#ifdef SOLARIS_DOORS
 		case 'D':
+			if (file_info[i].color == ed_c)
+				f[n++] = strdup(name);
+			break;
+#ifdef SOLARIS_DOORS
+		case 'O':
 			if (file_info[i].type == DT_DOOR)
 				f[n++] = strdup(name);
 			break;
@@ -1567,6 +1572,10 @@ expand_file_type_filter(const char t)
 			if (file_info[i].type == DT_REG)
 				f[n++] = strdup(name);
 			break;
+		case 'F':
+			if (file_info[i].color == ef_c)
+				f[n++] = strdup(name);
+			break;
 		case 'h':
 			if (file_info[i].dir == 0 && file_info[i].linkn > 1)
 				f[n++] = strdup(name);
@@ -1575,7 +1584,10 @@ expand_file_type_filter(const char t)
 			if (file_info[i].type == DT_LNK)
 				f[n++] = strdup(name);
 			break;
-
+		case 'L':
+			if (file_info[i].color == or_c)
+				f[n++] = strdup(name);
+			break;
 		case 'o':
 			if (file_info[i].color == tw_c || file_info[i].color == ow_c)
 				f[n++] = strdup(name);

@@ -1579,7 +1579,9 @@ extern struct sel_t *sel_elements;
 /* File statistics for the current directory. Used by the 'stats' command */
 struct stats_t {
 	size_t dir;
+	size_t empty_dir;
 	size_t reg;
+	size_t empty_reg;
 	size_t exec;
 	size_t hidden;
 	size_t suid;

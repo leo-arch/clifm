@@ -2728,6 +2728,8 @@ load_dir_info(const struct stat *a, const filesn_t n)
 			: df_c;
 	}
 
+	stats.empty_dir += (file_info[n].filesn == 0);
+
 	/* Let's gather some file statistics based on the file type color */
 	if (file_info[n].color == tw_c) {
 		stats.other_writable++;
@@ -2850,6 +2852,7 @@ load_regfile_info(const struct stat *a, const filesn_t n)
 		stats.multi_link++;
 	} else if (file_info[n].size == 0) {
 		file_info[n].color = ef_c;
+		stats.empty_reg++;
 	} else { /* Regular file */
 		file_info[n].color = fi_c;
 	}

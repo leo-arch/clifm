@@ -2988,13 +2988,16 @@ check_file_type_opts(const char c)
 	case 'b': return stats.block_dev > 0 ? 1 : 0;
 	case 'c': return stats.char_dev > 0 ? 1 : 0;
 	case 'd': return stats.dir > 0 ? 1 : 0;
+	case 'D': return stats.empty_dir > 0 ? 1 : 0;
 #ifdef SOLARIS_DOORS
-	case 'D': return stats.door > 0 ? 1 : 0;
+	case 'O': return stats.door > 0 ? 1 : 0;
 	case 'P': return stats.port > 0 ? 1 : 0;
 #endif /* SOLARIS_DOORS */
 	case 'f': return stats.reg > 0 ? 1 : 0;
+	case 'F': return stats.empty_reg > 0 ? 1 : 0;
 	case 'h': return stats.multi_link > 0 ? 1 : 0;
 	case 'l': return stats.link > 0 ? 1 : 0;
+	case 'L': return stats.broken_link > 0 ? 1 : 0;
 	case 'p': return stats.fifo > 0 ? 1 : 0;
 	case 's': return stats.socket > 0 ? 1 : 0;
 	case 'x': return stats.exec > 0 ? 1 : 0;
@@ -3020,13 +3023,16 @@ file_types_opts_generator(const char *text, int state)
 		"b (Block device)",
 		"c (Character device)",
 		"d (Directory)",
+		"D (Empty directory)",
 #ifdef SOLARIS_DOORS
-		"D (Door)",
+		"O (Door)",
 		"P (Port)",
 #endif /* SOLARIS_DOORS */
 		"f (Regular file)",
+		"F (Empty regular file)",
 		"h (Multi-hardlink file)",
 		"l (Symbolic link)",
+		"L (Broken symbolic link)",
 		"p (FIFO-pipe)",
 		"s (Socket)",
 		"x (Executable)",
@@ -3075,8 +3081,12 @@ file_types_generator(const char *text, int state)
 			if (file_info[i].dir == 1)
 				ret = strdup(name);
 			break;
-#ifdef SOLARIS_DOORS
 		case 'D':
+			if (file_info[i].color == ed_c)
+				ret = strdup(name);
+			break;
+#ifdef SOLARIS_DOORS
+		case 'O':
 			if (file_info[i].type == DT_DOOR)
 				ret = strdup(name);
 			break;
@@ -3089,6 +3099,10 @@ file_types_generator(const char *text, int state)
 			if (file_info[i].type == DT_REG)
 				ret = strdup(name);
 			break;
+		case 'F':
+			if (file_info[i].color == ef_c)
+				ret = strdup(name);
+			break;
 		case 'h':
 			if (file_info[i].dir == 0 && file_info[i].linkn > 1)
 				ret = strdup(name);
@@ -3097,7 +3111,10 @@ file_types_generator(const char *text, int state)
 			if (file_info[i].type == DT_LNK)
 				ret = strdup(name);
 			break;
-
+		case 'L':
+			if (file_info[i].color == or_c)
+				ret = strdup(name);
+			break;
 		case 'o':
 			if (file_info[i].color == tw_c || file_info[i].color == ow_c)
 				ret = strdup(name);

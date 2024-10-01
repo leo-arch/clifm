@@ -373,6 +373,8 @@ fzftab_color(char *filename, const struct stat *attr)
 	if (conf.colorize == 0)
 		return df_c;
 
+	struct stat a;
+
 	switch (attr->st_mode & S_IFMT) {
 	case S_IFDIR:
 		if (check_file_access(attr->st_mode, attr->st_uid, attr->st_gid) == 0)
@@ -410,7 +412,7 @@ fzftab_color(char *filename, const struct stat *attr)
 	case S_IFIFO: return pi_c;
 	case S_IFBLK: return bd_c;
 	case S_IFCHR: return cd_c;
-	case S_IFLNK: return ln_c;
+	case S_IFLNK: return stat(filename, &a) == -1 ? or_c : ln_c;
 	default: return uf_c;
 	}
 }

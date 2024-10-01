@@ -1389,9 +1389,20 @@ print_stats(void)
 	if (conf.light_mode == 1)
 		puts(_("Running in light mode: Some files statistics are not available\n"));
 
+	char dir_empty[MAX_INT_STR + 10]; *dir_empty = '\0';
+	char reg_empty[MAX_INT_STR + 10]; *reg_empty = '\0';
+	char lnk_broken[MAX_INT_STR + 10]; *lnk_broken = '\0';
+	if (stats.empty_dir > 0)
+		snprintf(dir_empty, sizeof(dir_empty), " (%zu empty)", stats.empty_dir);
+	if (stats.empty_reg > 0)
+		snprintf(reg_empty, sizeof(reg_empty), " (%zu empty)", stats.empty_reg);
+	if (stats.broken_link > 0)
+		snprintf(lnk_broken, sizeof(lnk_broken),
+			" (%zu broken)", stats.broken_link);
+
 	printf(_("Total files:                 %jd\n\
-Directories:                 %zu\n\
-Regular files:               %zu\n\
+Directories:                 %zu%s\n\
+Regular files:               %zu%s\n\
 Executable files:            %zu\n\
 Hidden files:                %zu\n\
 SUID files:                  %zu\n\
@@ -1401,8 +1412,7 @@ FIFO/pipes:                  %zu\n\
 Sockets:                     %zu\n\
 Block devices:               %zu\n\
 Character devices:           %zu\n\
-Symbolic links:              %zu\n\
-Broken symbolic links:       %zu\n\
+Symbolic links:              %zu%s\n\
 Multi-link files:            %zu\n\
 Files w/extended attributes: %zu\n\
 Other-writable files:        %zu\n\
@@ -1410,11 +1420,11 @@ Sticky files:                %zu\n\
 Unknown file types:          %zu\n\
 Unstatable files:            %zu\n\
 "),
-	(intmax_t)files, stats.dir, stats.reg, stats.exec, stats.hidden, stats.suid,
-	stats.sgid, stats.caps, stats.fifo, stats.socket, stats.block_dev,
-	stats.char_dev, stats.link, stats.broken_link, stats.multi_link,
-	stats.extended, stats.other_writable, stats.sticky, stats.unknown,
-	stats.unstat);
+	(intmax_t)files, stats.dir, dir_empty, stats.reg, reg_empty,
+	stats.exec, stats.hidden, stats.suid, stats.sgid, stats.caps, stats.fifo,
+	stats.socket, stats.block_dev, stats.char_dev, stats.link,
+	lnk_broken, stats.multi_link, stats.extended, stats.other_writable,
+	stats.sticky, stats.unknown, stats.unstat);
 
 #ifndef _BE_POSIX
 # ifdef SOLARIS_DOORS
