@@ -89,8 +89,7 @@ The first parameter (thumbnailing method) could be any of the following:
 ^video/.*=~/.config/clifm/clifmimg video;
 ^audio/.*=~/.config/clifm/clifmimg audio;
 ^application/postscript$=~/.config/clifm/clifmimg postscript;
-N:.*\.otf$=~/.config/clifm/clifmimg font;
-font/.*=~/.config/clifm/clifmimg font;
+^font/.*|^application/(font.*|.*opentype)=~/.config/clifm/clifmimg font;
 
 # Directories
 ...
