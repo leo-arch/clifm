@@ -27,19 +27,18 @@
 # 2) Edit shotgun's config file (F7) and add the following lines at the top
 # of the file (to make sure they won't be overriden by previous lines):
 #
-#X:^application/.*(officedocument|msword|ms-excel|opendocument).*=clifmimg doc;
-#X:^text/rtf$=clifmimg doc;
-#X:N:.*\.epub$=clifmimg epub;
-#X:.*/pdf$=clifmimg pdf
-#X:^image/vnd.djvu=clifmimg djvu
-#X:^image/svg\+xml$=clifmimg svg;
-#X:^image/gif$=clifmimg gif;
-#X:^image/.*=clifmimg image;
-#X:^video/.*=clifmimg video;
-#X:^audio/.*=clifmimg audio;
-#X:^application/postscript$=clifmimg postscript;
-#X:N:.*\.otf$=clifmimg font;
-#X:font/.*=clifmimg font;
+#X:^application/.*(officedocument|msword|ms-excel|opendocument).*=~/.config/clifm/clifmimg doc;
+#X:^text/rtf$=~/.config/clifm/clifmimg doc;
+#X:N:.*\.epub$=~/.config/clifm/clifmimg epub;
+#X:.*/pdf$=~/.config/clifm/clifmimg pdf
+#X:^image/vnd.djvu=~/.config/clifm/clifmimg djvu
+#X:^image/svg\+xml$=~/.config/clifm/clifmimg svg;
+#X:^image/gif$=~/.config/clifm/clifmimg gif;
+#X:^image/.*=~/.config/clifm/clifmimg image;
+#X:^video/.*=~/.config/clifm/clifmimg video;
+#X:^audio/.*=~/.config/clifm/clifmimg audio;
+#X:^application/postscript$=~/.config/clifm/clifmimg postscript;
+#X:^font/.*|^application/(font.*|.*opentype)=~/.config/clifm/clifmimg font;
 #
 # This instructs clifm to use this script to generate previews for the
 # specified files.
