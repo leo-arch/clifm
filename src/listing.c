@@ -2012,7 +2012,7 @@ exclude_file_type_light(const unsigned char type)
 	case 'b': if (type == DT_BLK)  match = 1; break;
 	case 'p': if (type == DT_FIFO) match = 1; break;
 #ifdef SOLARIS_DOORS
-	case 'D': if (type == DT_DOOR) match = 1; break;
+	case 'O': if (type == DT_DOOR) match = 1; break;
 	case 'P': if (type == DT_PORT) match = 1; break;
 #endif /* SOLARIS_DOORS */
 	default: return FUNC_FAILURE;
@@ -2027,25 +2027,30 @@ exclude_file_type_light(const unsigned char type)
 /* Returns FUNC_SUCCESS if the file with mode MODE and LINKS number
  * of links must be excluded from the files list, or FUNC_FAILURE. */
 static int
-exclude_file_type(const mode_t mode, const nlink_t links)
+exclude_file_type(const char *name, const mode_t mode,
+	const nlink_t links, const off_t size)
 {
 /* ADD: C = Files with capabilities */
 
 	if (!*(filter.str + 1))
 		return FUNC_FAILURE;
 
+	struct stat a;
 	int match = 0;
 
 	switch (*(filter.str + 1)) {
 	case 'b': if (S_ISBLK(mode))  match = 1; break;
 	case 'd': if (S_ISDIR(mode))  match = 1; break;
+	case 'D': if (S_ISDIR(mode) && count_dir(name, CPOP) <= 2) match = 1; break;
 #ifdef SOLARIS_DOORS
-	case 'D': if (S_ISDOOR(mode)) match = 1; break;
+	case 'O': if (S_ISDOOR(mode)) match = 1; break;
 	case 'P': if (S_ISPORT(mode)) match = 1; break;
 #endif /* SOLARIS_DOORS */
 	case 'c': if (S_ISCHR(mode))  match = 1; break;
 	case 'f': if (S_ISREG(mode))  match = 1; break;
+	case 'F': if (S_ISREG(mode) && size == 0) match = 1; break;
 	case 'l': if (S_ISLNK(mode))  match = 1; break;
+	case 'L': if (S_ISLNK(mode) && stat(name, &a) == -1)  match = 1; break;
 	case 'p': if (S_ISFIFO(mode)) match = 1; break;
 	case 's': if (S_ISSOCK(mode)) match = 1; break;
 
@@ -3076,7 +3081,8 @@ list_dir(void)
 
 		/* Filter files according to file type */
 		if (checks.filter_type == 1 && stat_ok == 1
-		&& exclude_file_type(attr.st_mode, attr.st_nlink) == FUNC_SUCCESS) {
+		&& exclude_file_type(ename, attr.st_mode, attr.st_nlink,
+		attr.st_size) == FUNC_SUCCESS) {
 			/* Decrease counters: the file won't be displayed */
 			if (*ename == '.' && stats.hidden > 0)
 				stats.hidden--;

@@ -537,14 +537,18 @@ validate_file_type_filter(void)
 
 	const char c = *(filter.str + 1);
 	if (c == 'b' || c == 'c' || c == 'd' || c == 'f'
+#ifdef SOLARIS_DOORS
+	|| c == 'l' || c == 'p' || c == 's' || c == 'O' || c == 'P')
+#else
 	|| c == 'l' || c == 'p' || c == 's')
+#endif /* SOLARIS_DOORS */
 		return FUNC_SUCCESS;
 
 	if (conf.light_mode == 1)
 		return FUNC_FAILURE;
 
 	if (c == 'g' || c == 'h' || c == 'o' || c == 't'
-	|| c == 'u' || c == 'x')
+	|| c == 'u' || c == 'x' || c == 'D' || c == 'F' || c == 'L')
 		return FUNC_SUCCESS;
 
 	return FUNC_FAILURE;
