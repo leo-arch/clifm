@@ -60,7 +60,11 @@ use the -h,--help flag. Example: \"- --help\"."
 - Import aliases from ~/.bashrc\n\
     alias import ~/.bashrc\n\
   Note: Only aliases following the POSIX specification (NAME=\"STR\")\n\
-  will be imported."
+  will be imported.\n\
+- Add a new alias\n\
+    Run 'config', go to the aliases section, and write:\n\
+      alias myalias=\"mycommand\"\n\
+    Save and quit the editor."
 
 #define ARCHIVE_USAGE "Compress/archive files\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
