@@ -432,14 +432,18 @@ Available file type characters:\n\
   b: Block devices\n\
   c: Character devices\n\
   d: Directories\n\
-  D: Doors (Solaris only)\n\
+  D: Empty directories (2)\n\
   f: Regular files\n\
-  h: Multi-hardlink files\n\
+  F: Empty regular files (2)\n\
+  h: Multi-hardlink files (2)\n\
   l: Symbolic links\n\
+  L: Broken symbolic links (2)\n\
   p: FIFO/pipes\n\
   s: Sockets\n\
   C: Files with capabilities (1)(2)\n\
   o: Other-writable files (2)\n\
+  O: Doors (Solaris only)\n\
+  P: Port (Solaris only)\n\
   t: Files with the sticky bit set (2)\n\
   u: SUID files (2)\n\
   g: SGID files (2)\n\
