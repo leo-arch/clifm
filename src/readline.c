@@ -587,16 +587,18 @@ alt_rl_getc(FILE *stream)
 {
 	int result;
 	unsigned char c;
+	static unsigned char prev = 0;
 
 	while (1) {
 		result = (int)read(fileno(stream), &c, sizeof(unsigned char)); /* flawfinder: ignore */
 		if (result == sizeof(unsigned char)) {
 
-			if (c == CTRL('D') || c == CTRL('X')) { /* 4 == Ctrl-d && 24 == Ctrl-x */
+			if ((c == CTRL('D') || c == CTRL('X')) && prev != KEY_ESC) {
 				MOVE_CURSOR_UP(1);
 				return (EOF);
 			}
 
+			prev = c;
 			fix_rl_point(c);
 			return c;
 		}
