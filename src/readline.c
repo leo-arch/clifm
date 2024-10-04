@@ -230,6 +230,8 @@ rl_exclude_input(const unsigned char c, const unsigned char prev)
 {
 	/* Delete or backspace keys. */
 	int del_key = 0;
+	int space = 0;
+	char *ptr = (char *)NULL;
 
 	/* Disable suggestions while in vi mode. */
 	if (rl_editing_mode == RL_VI_MODE) {
@@ -260,8 +262,9 @@ rl_exclude_input(const unsigned char c, const unsigned char prev)
 		 * a history event is triggered (usually via the Up and Down arrow
 		 * keys), the suggestion buffer won't be freed. Let's do it here. */
 #ifndef _NO_SUGGESTIONS
-		else if ((c == 'A' || c == 'B') && suggestion_buf)
+		else if ((c == 'A' || c == 'B') && suggestion_buf) {
 			clear_suggestion(CS_FREEBUF);
+		}
 #endif /* !_NO_SUGGESTIONS */
 
 		else {
@@ -272,13 +275,13 @@ rl_exclude_input(const unsigned char c, const unsigned char prev)
 		return RL_INSERT_CHAR;
 	}
 
-	if (c == 4 && rl_point < rl_end) { /* 4 == EOT (Ctrl-D) */
+	if (c == CTRL('D') && rl_point < rl_end) {
 		xdelete();
 		del_key = DEL_NON_EMPTY_LINE;
 		goto END;
 	}
 
-	if (c == KEY_KILL) { /* 21 == Ctrl-U (kill line) */
+	if (c == CTRL('U')) { /* Kill line */
 #ifndef _NO_SUGGESTIONS
 		if (wrong_cmd == 1)
 			recover_from_wrong_cmd();
@@ -344,84 +347,62 @@ rl_exclude_input(const unsigned char c, const unsigned char prev)
 	t[1] = '\0';
 	rl_insert_text(t);
 
-	int s = 0;
-	char *p = (char *)NULL;
-
 END:
 #ifndef _NO_SUGGESTIONS
-	p = strrchr(rl_line_buffer, ' ');
-	s = p ? (int)(p - rl_line_buffer) : -1;
+	ptr = strrchr(rl_line_buffer, ' ');
+	space = ptr ? (int)(ptr - rl_line_buffer) : -1;
 
-	/* Do not take into account final spaces. */
-	if (s >= 0 && !rl_line_buffer[s + 1])
-		s = -1;
+	/* Do not take into account ending spaces. */
+	if (space >= 0 && !rl_line_buffer[space + 1])
+		space = -1;
+
 	if (rl_point != rl_end && c != KEY_ESC) {
-		if (rl_point < s) {
+		if (rl_point < space) {
 			if (suggestion.printed)
 				clear_suggestion(CS_FREEBUF);
 		}
+
 		if (wrong_cmd == 1) { /* Wrong cmd and we are on the first word. */
 			char *fs = strchr(rl_line_buffer, ' ');
 			if (fs && rl_line_buffer + rl_point <= fs)
-				s = -1;
+				space = -1;
 		}
 	}
 #else
-	UNUSED(s); UNUSED(p);
+	UNUSED(space); UNUSED(ptr);
 #endif /* !_NO_SUGGESTIONS */
 
 #ifndef _NO_HIGHLIGHT
-	if (conf.highlight == 0) {
-		if (del_key > 0) {
-# ifndef _NO_SUGGESTIONS
-			/* Since we have removed a char, let's check if there is
-			 * a suggestion available using the modified input line. */
-			if (wrong_cmd == 1 && s == -1 && rl_end > 0) {
-				/* If a suggestion is found, the normal prompt will be
-				 * restored and wrong_cmd will be set to zero. */
-				rl_suggestions((unsigned char)rl_line_buffer[rl_end - 1]);
-				return SKIP_CHAR;
-			}
-			if (rl_point == 0 && rl_end == 0) {
-				if (wrong_cmd == 1)
-					recover_from_wrong_cmd();
-				if (del_key == DEL_EMPTY_LINE)
-					leftmost_bell();
-			}
-# endif /* !_NO_SUGGESTIONS */
-
-# ifdef NO_BACKWARD_SUGGEST
-			return SKIP_CHAR;
-# endif /* NO_BACKWARD_SUGGEST */
-		}
-		return SUGGEST_ONLY;
-	}
-
-	if (wrong_cmd == 0)
+	if (wrong_cmd == 0 && conf.highlight == 1)
 		recolorize_line();
 #endif /* !_NO_HIGHLIGHT */
 
-	if (del_key > 0) {
-#ifndef _NO_SUGGESTIONS
-		if (wrong_cmd == 1 && s == -1 && rl_end > 0) {
-			rl_suggestions((unsigned char)rl_line_buffer[rl_end - 1]);
-			return SKIP_CHAR;
-		}
+	if (del_key <= 0)
+		return SUGGEST_ONLY;
 
-		if (rl_point == 0 && rl_end == 0) {
-			if (wrong_cmd == 1)
-				recover_from_wrong_cmd();
-			if (del_key == DEL_EMPTY_LINE)
-				leftmost_bell();
-		}
+#ifndef _NO_SUGGESTIONS
+	/* Since we have removed a char, let's check if there is
+	 * a suggestion available using the modified input line. */
+	if (wrong_cmd == 1 && space == -1 && rl_end > 0) {
+		/* If a suggestion is found, the normal prompt will be
+		 * restored and wrong_cmd will be set to zero. */
+		rl_suggestions((unsigned char)rl_line_buffer[rl_end - 1]);
+		return SKIP_CHAR;
+	}
+
+	if (rl_point == 0 && rl_end == 0) {
+		if (wrong_cmd == 1)
+			recover_from_wrong_cmd();
+		if (del_key == DEL_EMPTY_LINE)
+			leftmost_bell();
+	}
 #endif /* !_NO_SUGGESTIONS */
 
 #ifdef NO_BACKWARD_SUGGEST
-		return SKIP_CHAR;
-#endif /* NO_BACKWARD_SUGGEST */
-	}
-
+	return SKIP_CHAR;
+#else
 	return SUGGEST_ONLY;
+#endif /* NO_BACKWARD_SUGGEST */
 }
 
 /* Unicode aware implementation of readline's rl_expand_prompt()
@@ -525,9 +506,9 @@ my_rl_getc(FILE *stream)
 	while (1) {
 		result = (int)read(fileno(stream), &c, sizeof(unsigned char)); /* flawfinder: ignore */
 		if (result == sizeof(unsigned char)) {
-			/* Ctrl-d (empty command line only). Let's check the previous
+			/* Ctrl-d (empty command line only). Let's check that the previous
 			 * char wasn't ESC to prevent Ctrl-Alt-d to be taken as Ctrl-d */
-			if (c == 4 && prev != KEY_ESC && rl_nohist == 0
+			if (c == CTRL('D') && prev != KEY_ESC && rl_nohist == 0
 			&& (!rl_line_buffer || !*rl_line_buffer))
 				rl_quit(0, 0);
 
@@ -611,7 +592,7 @@ alt_rl_getc(FILE *stream)
 		result = (int)read(fileno(stream), &c, sizeof(unsigned char)); /* flawfinder: ignore */
 		if (result == sizeof(unsigned char)) {
 
-			if (c == 4 || c == 24) { /* 4 == Ctrl-d && 24 == Ctrl-x */
+			if (c == CTRL('D') || c == CTRL('X')) { /* 4 == Ctrl-d && 24 == Ctrl-x */
 				MOVE_CURSOR_UP(1);
 				return (EOF);
 			}
