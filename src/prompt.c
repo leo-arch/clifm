@@ -137,8 +137,7 @@ reduce_path(const char *str)
 static size_t
 copy_char(char *buf, char *s)
 {
-	const int bytes = ((*s & 0xc0) == 0xc0 || (*s & 0xc0) == 0x80)
-		? utf8_bytes((unsigned char)*s) : 1;
+	const int bytes = IS_UTF8_CHAR(*s) ? utf8_bytes((unsigned char)*s) : 1;
 
 	if (bytes == 1) {
 		*buf = *s;
@@ -1439,7 +1438,7 @@ get_rprompt_len(char *rprompt)
 {
 	char *p = rprompt;
 	while (*p) {
-		if ((*p & 0xc0) == 0xc0 || (*p & 0xc0) == 0x80)
+		if (IS_UTF8_CHAR(*p))
 			return get_rprompt_len_utf8(rprompt);
 		p++;
 	}

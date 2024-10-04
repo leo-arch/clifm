@@ -337,7 +337,7 @@ xstrncat(char *restrict dst, const size_t dst_len, const char *restrict src,
 int
 xstrverscmp(const char *s1, const char *s2)
 {
-	if ((*s1 & 0xc0) == 0xc0 || (*s2 & 0xc0) == 0xc0)
+	if (IS_UTF8_LEAD_BYTE(*s1) || IS_UTF8_LEAD_BYTE(*s2))
 		return strcoll(s1, s2);
 
 	const unsigned char *p1 = (const unsigned char *)s1;

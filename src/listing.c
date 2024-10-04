@@ -287,7 +287,7 @@ count_utf8_chars(const char *s)
 	size_t count = 0;
 
 	for (; *s; s++)
-		count += ((*s & 0xc0) != 0x80);
+		count += !IS_UTF8_CONT_BYTE(*s);
 
 	return count;
 }

@@ -934,6 +934,10 @@ extern time_t curdir_mtime;
 #define TOUPPER(c) (((c) >= 'a' && (c) <= 'z') ? ((c) - 'a' + 'A') : (c))
 #define TOLOWER(c) (((c) >= 'A' && (c) <= 'Z') ? ((c) - 'A' + 'a') : (c))
 
+#define IS_UTF8_LEAD_BYTE(c) (((c) & 0xc0) == 0xc0)
+#define IS_UTF8_CONT_BYTE(c) (((c) & 0xc0) == 0x80)
+#define IS_UTF8_CHAR(c)      (IS_UTF8_LEAD_BYTE((c)) || IS_UTF8_CONT_BYTE((c)))
+
 /* A yottabyte takes 26 digits, 28 if we count the negative sign and the NULL
  * terminator, so that 32 bytes is more than enough to represent any given
  * integer as a string. */

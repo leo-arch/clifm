@@ -173,14 +173,14 @@ leftmost_bell(void)
 }
 #endif /* !_NO_SUGGESTIONS */
 
-/* Construct a wide-char byte by byte
+/* Construct a wide-char (UTF8) byte by byte.
  * This function is called multiple times until we get a full wide-char.
  * Each byte (C), in each subsequent call, is appended to a string (WC_STR),
  * until we have a complete multi-byte char (WC_BYTES were copied into WC_STR),
  * in which case we insert the character into the readline buffer (my_rl_getc
  * will then trigger the suggestions system using the updated input buffer) */
 static int
-construct_wide_char(unsigned char c)
+construct_utf8_char(unsigned char c)
 {
 	static char wc_str[UTF8_MAX_LEN] = "";
 	static size_t wc_len = 0;
@@ -295,9 +295,8 @@ rl_exclude_input(const unsigned char c, const unsigned char prev)
 	&& c != KEY_ENTER && c != KEY_ESC)
 		return RL_INSERT_CHAR;
 
-	/* Multi-byte (UTF8) char. */
-	if ((c & 0xc0) == 0xc0 || (c & 0xc0) == 0x80)
-		return construct_wide_char(c);
+	if (IS_UTF8_CHAR(c))
+		return construct_utf8_char(c);
 
 	if (c != KEY_ESC)
 		cmdhist_flag = 0;
@@ -483,7 +482,7 @@ fix_rl_point(const unsigned char c)
 
 	const char point = rl_line_buffer[rl_point];
 	/* Continue only if leading or continuation multi-byte */
-	if ((point & 0xc0) != 0xc0 && (point & 0xc0) != 0x80)
+	if (!IS_UTF8_CHAR(point))
 		return;
 
 	const int mlen = mblen(rl_line_buffer + rl_point, MB_CUR_MAX);
