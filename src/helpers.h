@@ -685,7 +685,6 @@ extern time_t curdir_mtime;
 #define KEY_BACKSPACE 8
 #define KEY_DELETE    127
 #define KEY_ENTER     13
-#define KEY_KILL      21 /* Ctrl-u */
 
 /* Macros to specify suggestions type */
 #define NO_SUG         0
