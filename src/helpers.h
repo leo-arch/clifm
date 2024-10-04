@@ -892,9 +892,9 @@ extern time_t curdir_mtime;
 #define atoi xatoi /* xatoi is just a secure atoi */
 
 #ifndef _NO_GETTEXT
-# define _(String) gettext(String)
+# define _(str) gettext(str)
 #else
-# define _(String) String
+# define _(str) str
 #endif /* !_GETTEXT */
 
 /* Log the message and print it to STDERR, but do not store it into the
@@ -930,12 +930,6 @@ extern time_t curdir_mtime;
 		|| (s) == SEXT || (s) == SNONE || (s) == STYPE)
 
 #define UNUSED(x) (void)(x) /* Just silence the compiler's warning */
-#define TOUPPER(c) (((c) >= 'a' && (c) <= 'z') ? ((c) - 'a' + 'A') : (c))
-#define TOLOWER(c) (((c) >= 'A' && (c) <= 'Z') ? ((c) - 'A' + 'a') : (c))
-
-#define IS_UTF8_LEAD_BYTE(c) (((c) & 0xc0) == 0xc0)
-#define IS_UTF8_CONT_BYTE(c) (((c) & 0xc0) == 0x80)
-#define IS_UTF8_CHAR(c)      (IS_UTF8_LEAD_BYTE((c)) || IS_UTF8_CONT_BYTE((c)))
 
 /* A yottabyte takes 26 digits, 28 if we count the negative sign and the NULL
  * terminator, so that 32 bytes is more than enough to represent any given
@@ -985,6 +979,13 @@ extern time_t curdir_mtime;
 #define IS_ALPHA(c)    ((unsigned int)(c) >= 'a' && (unsigned int)(c) <= 'z')
 #define IS_ALPHA_UP(c) ((unsigned int)(c) >= 'A' && (unsigned int)(c) <= 'Z')
 #define IS_ALNUM(c)    (IS_ALPHA((c)) || IS_ALPHA_UP((c)) || IS_DIGIT((c)))
+
+#define TOUPPER(c) (IS_ALPHA((c)) ? ((c) - 'a' + 'A') : (c))
+#define TOLOWER(c) (IS_ALPHA_UP((c)) ? ((c) - 'A' + 'a') : (c))
+
+#define IS_UTF8_LEAD_BYTE(c) (((c) & 0xc0) == 0xc0)
+#define IS_UTF8_CONT_BYTE(c) (((c) & 0xc0) == 0x80)
+#define IS_UTF8_CHAR(c)      (IS_UTF8_LEAD_BYTE((c)) || IS_UTF8_CONT_BYTE((c)))
 
 #define IS_COMMENT(c)  ((unsigned int)(c) == '#' || (unsigned int)(c) == ';')
 #define IS_CTRL_CHR(c) ((unsigned int)(c) < ' ')
