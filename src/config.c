@@ -3242,7 +3242,8 @@ read_config(void)
 			set_config_bool_value(line + 16, &conf.restore_last_path);
 		}
 
-		else if (*line == 'R' && strncmp(line, "RlEditMode=", 11) == 0) {
+		else if (xargs.rl_vi_mode == UNSET && *line == 'R'
+		&& strncmp(line, "RlEditMode=", 11) == 0) {
 			if (*(line + 11) == '0')
 				rl_vi_editing_mode(1, 0);
 			else
