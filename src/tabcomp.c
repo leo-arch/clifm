@@ -52,8 +52,6 @@ typedef char *rl_cpvfunc_t;
 
 #include <errno.h>
 
-#include <termios.h> /* Get cursor position functions */
-
 #include "aux.h"
 #include "checks.h"
 #include "colors.h"
@@ -72,9 +70,6 @@ typedef char *rl_cpvfunc_t;
 #endif /* !_NO_SUGGESTIONS */
 
 #ifndef _NO_FZF
-# define CPR_CODE "\x1b[6n" /* Cursor position report */
-# define CPR_LEN  (sizeof(CPR_CODE) - 1)
-
 # define SHOW_PREVIEWS(c) ((c) == TCMP_PATH || (c) == TCMP_SEL \
 || (c) == TCMP_RANGES || (c) == TCMP_DESEL || (c) == TCMP_JUMP \
 || (c) == TCMP_TAGS_F || (c) == TCMP_GLOB || (c) == TCMP_FILE_TYPES_FILES \
@@ -86,103 +81,11 @@ static char finder_out_file[PATH_MAX + 1];
 /* We need to know the longest entry (if previewing files) to correctly
  * calculate the width of the preview window. */
 static size_t longest_prev_entry;
+#endif /* _NO_FZF */
 
 /* The following three functions are used to get current cursor position
  * (both vertical and horizontal), needed by TAB completion in fzf mode
  * with previews enabled */
-
-static struct termios orig_termios;
-
-/* Set the terminal into raw mode. Return 0 on success and -1 on error */
-static int
-enable_raw_mode(const int fd)
-{
-	struct termios raw;
-
-	if (!isatty(STDIN_FILENO))
-		goto FAIL;
-
-	if (tcgetattr(fd, &orig_termios) == -1)
-		goto FAIL;
-
-	raw = orig_termios;  /* modify the original mode */
-	/* input modes: no break, no CR to NL, no parity check, no strip char,
-	 * no start/stop output control. */
-	raw.c_iflag &= (tcflag_t)~(BRKINT | ICRNL | INPCK | ISTRIP | IXON);
-	/* output modes - disable post processing */
-	raw.c_oflag &= (tcflag_t)~(OPOST);
-	/* control modes - set 8 bit chars */
-	raw.c_cflag |= (CS8);
-	/* local modes - echoing off, canonical off, no extended functions,
-	 * no signal chars (^Z,^C) */
-	raw.c_lflag &= (tcflag_t)~(ECHO | ICANON | IEXTEN | ISIG);
-    /* control chars - set return condition: min number of bytes and timer. */
-    /* We want read to return every single byte, without timeout. */
-	raw.c_cc[VMIN] = 1; raw.c_cc[VTIME] = 0; /* 1 byte, no timer */
-
-	/* Put terminal in raw mode after flushing */
-	if (tcsetattr(fd, TCSAFLUSH, &raw) < 0)
-		goto FAIL;
-
-	return 0;
-
-FAIL:
-	errno = ENOTTY;
-	return (-1);
-}
-
-static int
-disable_raw_mode(const int fd)
-{
-	if (tcsetattr(fd, TCSAFLUSH, &orig_termios) == -1)
-		return FUNC_FAILURE;
-	return FUNC_SUCCESS;
-}
-
-/* Use the "ESC [6n" escape sequence to query the cursor position (both
- * vertical and horizontal) and store both values into C (columns) and L (lines).
- * Returns 0 on success and 1 on error. */
-static int
-get_cursor_position(int *c, int *l)
-{
-	char buf[32];
-	unsigned int i = 0;
-
-	if (enable_raw_mode(STDIN_FILENO) == -1) return FUNC_FAILURE;
-
-	/* 1. Ask the terminal about cursor position */
-	if (write(STDOUT_FILENO, CPR_CODE, CPR_LEN) != CPR_LEN)
-		{ disable_raw_mode(STDIN_FILENO); return FUNC_FAILURE; }
-
-	/* 2. Read the response: "ESC [ rows ; cols R" */
-	int read_err = 0;
-	while (i < sizeof(buf) - 1) {
-		if (read(STDIN_FILENO, buf + i, 1) != 1) /* flawfinder: ignore */
-			{ read_err = 1; break; }
-		if (buf[i] == 'R')
-			break;
-		i++;
-	}
-	buf[i] = '\0';
-
-	if (disable_raw_mode(STDIN_FILENO) == -1 || read_err == 1)
-		return FUNC_FAILURE;
-
-	/* 3. Parse the response */
-	if (*buf != KEY_ESC || *(buf + 1) != '[' || !*(buf + 2))
-		return FUNC_FAILURE;
-
-	char *p = strchr(buf + 2, ';');
-	if (!p || !*(p + 1)) return FUNC_FAILURE;
-
-	*p = '\0';
-	*l = atoi(buf + 2); *c = atoi(p + 1);
-	if (*l == INT_MIN || *c == INT_MIN)
-		return FUNC_FAILURE;
-
-	return FUNC_SUCCESS;
-}
-#endif /* !_NO_FZF */
 
 /* Return the character which best describes FILENAME.
 `@' for symbolic links

@@ -326,6 +326,7 @@ if (S_ISNWK(mode)) return 'n'; // HP/UX: network special file
 
 #include "strings.h"
 #include "settings.h"
+#include "term.h"
 
 /* General exit codes for functions */
 #define FUNC_SUCCESS 0 /* True/success */
@@ -1001,47 +1002,6 @@ extern time_t curdir_mtime;
 
 #define IS_HELP(s) (*(s) == '-' && (((s)[1] == 'h' && !(s)[2]) \
 				|| strcmp((s), "--help") == 0))
-
-/* TERMINAL ESCAPE CODES */
-#define CLEAR \
-	if (term_caps.home == 1 && term_caps.clear == 1) { \
-		if (term_caps.del_scrollback == 1)             \
-			fputs("\x1b[H\x1b[2J\x1b[3J", stdout);     \
-		else                                           \
-			fputs("\x1b[H\x1b[J", stdout);             \
-	}
-
-#define MOVE_CURSOR_DOWN(n)      printf("\x1b[%dB", (n))  /* CUD */
-
-/* ######## Escape sequences used by the suggestions system */
-#define MOVE_CURSOR_UP(n)        printf("\x1b[%dA", (n))  /* CUU */
-#define MOVE_CURSOR_RIGHT(n)     printf("\x1b[%dC", (n))  /* CUF */
-#define MOVE_CURSOR_LEFT(n)      printf("\x1b[%dD", (n))  /* CUB */
-#define ERASE_TO_RIGHT           fputs("\x1b[0K", stdout) /* EL0 */
-#define ERASE_TO_LEFT            fputs("\x1b[1K", stdout) /* EL1 */
-#define ERASE_TO_RIGHT_AND_BELOW fputs("\x1b[J", stdout)  /* ED0 */
-
-#define	SUGGEST_BAEJ(offset, color) printf("\x1b[%dC%s%c\x1b[0m ", \
-	(offset), (color), BAEJ_SUG_POINTER)
-/* ######## */
-
-/* Sequences used by the pad_filename function (listing.c):
- * MOVE_CURSOR_RIGHT() */
-
-/* Sequences used by the pager (listing.c):
- * MOVE_CURSOR_DOWN(n)
- * ERASE_TO_RIGHT */
-
-#define META_SENDS_ESC  fputs("\x1b[?1036h", stdout)
-#define HIDE_CURSOR     fputs(term_caps.hide_cursor == 1 ? "\x1b[?25l" : "", stdout) /* DECTCEM */
-#define UNHIDE_CURSOR   fputs(term_caps.hide_cursor == 1 ? "\x1b[?25h" : "", stdout)
-
-#define RESTORE_COLOR   fputs("\x1b[0;39;49m", stdout)
-#define SET_RVIDEO      fputs("\x1b[?5h", stderr) /* DECSCNM: Enable reverse video */
-#define UNSET_RVIDEO    fputs("\x1b[?5l", stderr)
-#define SET_LINE_WRAP   fputs("\x1b[?7h", stderr) /* DECAWM */
-#define UNSET_LINE_WRAP fputs("\x1b[?7l", stderr)
-#define RING_BELL       fputs("\007", stderr)
 
 /* Get the maximum value for a given data type.
  * Taken from coreutils (https://github.com/coreutils/gnulib/blob/master/lib/intprops.h) */

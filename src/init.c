@@ -30,7 +30,6 @@
 #include <signal.h>
 #include <stdio.h>
 #include <string.h>
-#include <termios.h>
 #include <time.h>
 #include <unistd.h>
 #include <readline/tilde.h> /* tilde_expand() */
@@ -78,9 +77,6 @@
 #  define NGROUPS_MAX 1024
 # endif /* __linux__ */
 #endif /* !NGROUPS_MAX */
-
-static struct termios orig_term_attrs;
-static int reset_term = 0;
 
 #ifdef LINUX_FSINFO
 void
@@ -624,18 +620,6 @@ check_env_filter(void)
 	filter.env = 1;
 	set_filter_type(*p);
 	filter.str = savestring(p, strlen(p));
-}
-
-static pid_t
-get_own_pid(void)
-{
-	pid_t pid;
-
-	pid = getpid();
-
-	if (pid < 0)
-		return 0;
-	return pid;
 }
 
 /* Return 1 is secure-env is enabled. Otherwise, return 0.
@@ -1828,90 +1812,6 @@ unset_xargs(void)
 	xargs.vt100 = UNSET;
 	xargs.welcome_message = UNSET;
 	xargs.warning_prompt = UNSET;
-}
-
-static int
-check_nest_level(void)
-{
-	/* If running on a fully sanitized environment, no variable is imported
-	 * at all, but CLIFMLVL is nevertheless consulted (by xsecure_env()) to
-	 * know whether we are running a nested instance, in which case
-	 * NESTING_LEVEL is set to 2. */
-	if (xargs.secure_env_full == 1 && nesting_level == 2)
-		return 2;
-
-	char *level = getenv("CLIFMLVL");
-	if (!level)
-		goto FALLBACK;
-
-	int a = atoi(level);
-	if (a < 1 || a > MAX_SHELL_LEVEL)
-		goto FALLBACK;
-
-	return a + 1;
-
-FALLBACK:
-	return (getenv("CLIFM") ? 2 : 1);
-}
-
-/* Keep track of attributes of the shell. Make sure the shell is running
- * interactively as the foreground job before proceeding.
- * Based on https://www.gnu.org/software/libc/manual/html_node/Initializing-the-Shell.html#Initializing-the-Shell
- * */
-void
-init_shell(void)
-{
-	if (isatty(STDIN_FILENO) == 0) { /* Shell is not interactive */
-		errno = 0;
-		exit_code = handle_stdin();
-		return;
-	}
-
-	reset_term = 1;
-
-	if ((nesting_level = check_nest_level()) > 1) {
-		set_signals_to_ignore();
-		own_pid = get_own_pid();
-		tcgetattr(STDIN_FILENO, &orig_term_attrs);
-		return;
-	}
-
-	own_pid = get_own_pid();
-	pid_t shell_pgid = 0;
-
-	/* Loop until we are in the foreground */
-	while (tcgetpgrp(STDIN_FILENO) != (shell_pgid = getpgrp()))
-		kill(- shell_pgid, SIGTTIN);
-
-	/* Ignore interactive and job-control signals */
-	set_signals_to_ignore();
-	signal(SIGTTIN, SIG_IGN);
-	signal(SIGTTOU, SIG_IGN);
-
-	/* Put ourselves in our own process group */
-	shell_pgid = getpid();
-	setpgid(shell_pgid, shell_pgid);
-/*	if (setpgid(shell_pgid, shell_pgid) < 0) {
-		// This fails with EPERM when running as 'term -e clifm'
-		err(0, NOPRINT_PROMPT, "%s: setpgid: %s\n", PROGRAM_NAME, strerror(errno));
-		exit(errno);
-	} */
-
-	/* Grab control of the terminal */
-	tcsetpgrp(STDIN_FILENO, shell_pgid);
-
-	/* Save default terminal attributes for shell */
-	tcgetattr(STDIN_FILENO, &orig_term_attrs);
-}
-
-int
-restore_shell(void)
-{
-	if (reset_term == 0)
-		return 0;
-
-	return tcsetattr(STDIN_FILENO,
-		TCSANOW, (const struct termios *)&orig_term_attrs);
 }
 
 /* Store device and inode number of each selected file to identify them
