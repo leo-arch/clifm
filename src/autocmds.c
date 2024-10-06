@@ -24,7 +24,6 @@
 
 #include "helpers.h"
 
-#include <stdio.h>
 #include <string.h>
 #include <readline/tilde.h>
 

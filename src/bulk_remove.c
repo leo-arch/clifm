@@ -25,8 +25,6 @@
 #include "helpers.h"
 
 #include <dirent.h> /* scandir() */
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h> /* strnlen() */
 #include <sys/stat.h> /* (l)stat() */
 #include <fcntl.h> /* unlinkat() */

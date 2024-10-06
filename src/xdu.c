@@ -25,7 +25,6 @@
 #include "helpers.h"
 
 #include <errno.h>
-#include <stdio.h>   /* snprintf */
 #ifdef USE_DU1
 # include <string.h> /* strchr */
 # include <unistd.h> /* close, dup, dup2, unlink, unlinkat */

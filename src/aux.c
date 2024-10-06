@@ -34,7 +34,6 @@
 # include <attr.h> /* getattrat, nvlist_lookup_uint64_array, nvlist_free */
 #endif /* __sun && ST_BTIME */
 #include <errno.h>
-#include <stdio.h>
 #include <string.h>
 #include <termios.h>
 #include <unistd.h>

@@ -25,7 +25,6 @@
 #include "helpers.h"
 
 #if defined(LINUX_FSINFO)
-# include <stdio.h> /* fclose(3), fgets(3) */
 # include <string.h> /* strnlen(3), strncmp(3) */
 # include <mntent.h> /* xxxmntent(), used by get_remote_fs_name() */
 # include <sys/statfs.h> /* statfs(2) */

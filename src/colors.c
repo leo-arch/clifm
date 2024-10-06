@@ -24,7 +24,6 @@
 
 #include "helpers.h"
 
-#include <stdio.h>
 #ifdef __linux__
 # include <sys/capability.h>
 #endif /* __linux__ */

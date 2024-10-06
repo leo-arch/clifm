@@ -128,6 +128,7 @@
 #include <glob.h>
 #include <limits.h>
 #include <regex.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>  /* S_BLKSIZE */
 #include <sys/types.h> /* ssize_t */

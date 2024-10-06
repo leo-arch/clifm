@@ -26,7 +26,6 @@
 
 #include <errno.h> /* ENOMEM */
 #include <stdlib.h> /* malloc(), calloc(), realloc() */
-#include <stdio.h> /* fprintf() */
 
 #if defined(__has_builtin) && !defined(NO_BUILTIN_MUL_OVERFLOW)
 # if __has_builtin(__builtin_mul_overflow)

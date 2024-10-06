@@ -25,7 +25,6 @@
 #include "helpers.h"
 
 #include <errno.h>
-#include <stdio.h>
 #include <string.h> /* strerror */
 #include <unistd.h> /* access */
 

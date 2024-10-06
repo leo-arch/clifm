@@ -24,7 +24,6 @@
 
 #include "helpers.h"
 
-#include <stdio.h>  /* printf(3), putchar(3), fputs(3) */
 #include <string.h> /* memcpy(3), strrchr(3) */
 #include <time.h>   /* strftime(3) */
 

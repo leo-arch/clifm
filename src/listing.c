@@ -24,7 +24,6 @@
 
 #include "helpers.h"
 
-#include <stdio.h>
 #include <sys/statvfs.h>
 #include <unistd.h> /* open(2), readlinkat(2) */
 #include <errno.h>

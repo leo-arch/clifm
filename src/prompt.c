@@ -27,7 +27,6 @@
 
 #include "helpers.h"
 
-#include <stdio.h>
 #include <string.h>
 #if !defined(__HAIKU__) && !defined(__OpenBSD__) && !defined(__ANDROID__)
 # include <wordexp.h>

@@ -24,7 +24,6 @@
 
 #include "helpers.h"
 
-#include <stdio.h>
 #ifdef __OpenBSD__
 typedef char *rl_cpvfunc_t;
 #include <ereadline/readline/readline.h>

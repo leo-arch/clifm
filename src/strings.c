@@ -35,7 +35,6 @@
 #if defined(__HAIKU__)
 # include <stdint.h>
 #endif /* __HAIKU__ */
-#include <stdio.h>
 #include <string.h>
 #ifndef HAVE_ARC4RANDOM
 # include <time.h> /* time(2) */

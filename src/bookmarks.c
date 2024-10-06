@@ -25,7 +25,6 @@
 #include "helpers.h"
 
 #include <errno.h>
-#include <stdio.h>
 #include <readline/readline.h> /* tilde_expand() */
 #include <string.h>
 #include <unistd.h>

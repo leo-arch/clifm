@@ -40,7 +40,6 @@
 
 #include "helpers.h"
 
-#include <stdio.h>
 #include <unistd.h>
 
 #ifdef __OpenBSD__

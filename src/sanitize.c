@@ -28,7 +28,6 @@
 #ifndef _BE_POSIX
 # include <paths.h> /* _PATH_STDPATH */
 #endif /* _BE_POSIX */
-#include <stdio.h>
 #include <errno.h>
 #include <sys/resource.h> /* getrlimit(3), setrlimit(3) */
 #include <unistd.h> /* close(2), sysconf(3) */

@@ -30,7 +30,6 @@
 
 #include "helpers.h"
 
-#include <stdio.h>  /* fgets, fopen, fclose, fseek */
 #include <string.h> /* strcmp, strlen */
 
 #include "aux.h"       /* xnmalloc, open_fread */

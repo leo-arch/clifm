@@ -27,7 +27,6 @@
 #include "helpers.h"
 
 #include <errno.h>
-#include <stdio.h>
 #include <string.h>
 #include <unistd.h> /* access, unlinkat */
 /* <time.h>, required by time(2) and localtime_r(2), is included by "aux.h" */

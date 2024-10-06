@@ -27,7 +27,6 @@
 #include "helpers.h"
 
 #include <errno.h>
-#include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 #include <readline/tilde.h>

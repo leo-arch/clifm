@@ -32,7 +32,6 @@
 #include <errno.h>
 #include <signal.h>
 #include <stdarg.h>
-#include <stdio.h>
 #include <string.h>
 #include <sys/ioctl.h>
 #include <termios.h> /* tcsetattr */
