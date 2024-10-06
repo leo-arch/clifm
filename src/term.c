@@ -24,6 +24,7 @@
 
 #include "helpers.h"
 
+#include <stdio.h> /* required by MacOS for FILE */
 #include <signal.h> /* signal */
 #include <stdlib.h> /* getenv */
 #include <string.h> /* strchr */
