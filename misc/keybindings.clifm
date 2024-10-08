@@ -1,71 +1,47 @@
-                ##############################
-                # Keybindings file for Clifm #
-                ##############################
+                ##################################
+                #   Keybindings file for Clifm   #
+                ##################################
 
-# Empty and commented lines are omitted.
+# Empty and commented lines are ignored.
 
-# Emacs style key escapes are the simplest way of setting your
-# keybindings. For example, use "action:\C-t" to bind the action name
-# 'action' to Ctrl-t
-# Note: Available action names are defined below
-
-# If you need some more control, hex, octal, and decimal notation is
-# supported as well (this is needed for example for function keys). For
-# the sake of simplicity, Clifm provides a plugin to easily get the
-# adequate codes.
-
-# Use the 'kbgen' plugin (compile it first: 'gcc -o kbgen kbgen.c') to
-# find out the escape code for the key or key sequence you want. Use
-# either octal, hexadecimal codes or symbols.
+# Below is the list of available functions and their default key bindings.
+# To edit a keybinding use the 'kb bind' command. For example, to bind
+# the previous-dir function run 'kb bind previous-dir', enter a new
+# key binding and confirm.
 #
-# Example: For Alt-/ (in rxvt terminals) 'kbgen' will print the following
-# lines:
-#
-# Hex  | Oct | Symbol
-# ---- | ---- | ------
-# \x1b | \033 | ESC (\e)
-# \x2f | \057 | /
-#
-# In this case, the keybinding, if using symbols, is: "\e/:function"
-# In case you prefer the hex codes it would be: \x1b\x2f:function.
-# GNU emacs escape sequences are also allowed (ex: "\M-a", Alt-a
-# in most keyboards, or "\C-r" for Ctrl-r).
-
-# Some codes, especially those involving keys like Ctrl or the arrow
-# keys, vary depending on the terminal emulator and the system settings.
-# These keybindings should be set up thus on a per terminal basis.
-# You can also consult the terminfo database via the infocmp command.
-# See terminfo(5) and infocmp(1).
+# In case you wan to edit this file manually, use Emacs style key sequences.
+# For example, use "action:\C-t" to bind the action name 'action' to Ctrl-t,
+# or "action:\et" to bind it to Alt-t.
 
 # Alt-j
-previous-dir:\M-j
+previous-dir:\ej
 # Shift-left (rxvt)
 previous-dir2:\e[d
 # Shift-left (xterm)
-previous-dir3:\e[2D
+previous-dir3:\e[1;2D
 # Shift-left (others)
-previous-dir4:\e[1;2D
+previous-dir4:\e[2D
 
 # Alt-k
-next-dir:\M-k
+next-dir:\ek
 # Shift-right (rxvt)
 next-dir2:\e[c
 # Shift-right (xterm)
-next-dir3:\e[2C
+next-dir3:\e[1;2C
 # Shift-right (others)
-next-dir4:\e[1;2C
+next-dir4:\e[2C
 
 # Alt-u
-parent-dir:\M-u
+parent-dir:\eu
 # Shift-up (rxvt)
 parent-dir2:\e[a
 # Shift-up (xterm)
-parent-dir3:\e[2A
+parent-dir3:\e[1;2A
 # Shift-up (others)
-parent-dir4:\e[1;2A
+parent-dir4:\e[2A
 
 # Alt-e
-home-dir:\M-e
+home-dir:\ee
 # Home key (rxvt)
 #home-dir2:\e[7~
 # Home key (xterm)
@@ -74,85 +50,89 @@ home-dir:\M-e
 #home-dir4:\e[1~
 
 # Alt-r
-root-dir:\M-r
+root-dir:\er
 # Alt-/ (rxvt)
 root-dir2:\e/
 #root-dir3:
 
-pinned-dir:\M-p
-workspace1:\M-1
-workspace2:\M-2
-workspace3:\M-3
-workspace4:\M-4
+pinned-dir:\ep
+workspace1:\e1
+workspace2:\e2
+workspace3:\e3
+workspace4:\e4
 
 # Help
 # F1-3
+show-manpage:\eOP
+show-manpage2:\e[11~
 show-cmds:\eOQ
 show-cmds2:\e[12~
 show-kbinds:\eOR
 show-kbinds2:\e[13~
-show-manpage:\eOP
-show-manpage2:\e[11~
 
-archive-sel:\C-\M-a
-bookmarks:\M-b
-clear-line:\M-c
-clear-msgs:\M-t
+archive-sel:\e\C-a
+bookmark-sel:\e\C-b
+bookmarks:\eb
+clear-line:\ec
+clear-msgs:\et
 #cmd-hist:
-create-file:\M-n
-deselect-all:\M-d
-dirs-first:\M-g
-export-sel:\C-\M-e
-launch-view:\M--
-lock:\M-o
-mountpoints:\M-m
-move-sel:\C-\M-n
+create-file:\en
+deselect-all:\ed
+dirs-first:\eg
+export-sel:\e\C-e
+launch-view:\e-
+lock:\eo
+mountpoints:\em
+move-sel:\e\C-n
 new-instance:\C-x
-next-profile:\C-\M-p
-only-dirs:\M-,
-open-sel:\C-\M-g
-paste-sel:\C-\M-v
-prepend-sudo:\M-v
-previous-profile:\C-\M-o
-rename-sel:\C-\M-r
-remove-sel:\C-\M-d
+next-profile:\e\C-p
+only-dirs:\e,
+open-sel:\e\C-g
+paste-sel:\e\C-v
+prepend-sudo:\ev
+previous-profile:\e\C-o
+rename-sel:\e\C-r
+remove-sel:\e\C-d
 refresh-screen:\C-r
-run-pager:\M-0
-selbox:\M-s
-select-all:\M-a
-show-dirhist:\M-h
-sort-previous:\M-z
-sort-next:\M-x
-toggle-hidden:\M-i
-toggle-hidden2:\M-.
-toggle-light:\M-y
-toggle-long:\M-l
-toggle-follow-links-long:\M-+
-toggle-max-name-len:\C-\M-l
-toggle-disk-usage:\C-\M-i
-toggle-virtualdir-full-paths:\M-w
-trash-sel:\C-\M-t
-untrash-all:\C-\M-u
+run-pager:\e0
+selbox:\es
+select-all:\ea
+show-dirhist:\eh
+sort-previous:\ez
+sort-next:\ex
+toggle-hidden:\ei
+toggle-hidden2:\e.
+toggle-light:\ey
+toggle-long:\el
+toggle-follow-links-long:\e+
+toggle-max-name-len:\e\C-l
+toggle-disk-usage:\e\C-i
+toggle-virtualdir-full-paths:\ew
+trash-sel:\e\C-t
+untrash-all:\e\C-u
 
 # F6-12
-edit-color-scheme:\e[19~
-open-bookmarks:\e[23~
-open-config:\e[21~
-#open-jump-db:\e[18~
-open-keybinds:\e[20~
 open-mime:\e[17~
 open-preview:\e[18~
+#open-jump-db:\e[18~
+edit-color-scheme:\e[19~
+open-keybinds:\e[20~
+open-config:\e[21~
+open-bookmarks:\e[23~
 quit:\e[24~
 
 # Plugins
 # 1) Make sure your plugin is in the plugins directory (or use any of the
 # plugins in there)
-# 2) Link pluginx to your plugin using the 'actions edit' command. Ex:
+# 2) Link pluginx to your plugin using the 'actions edit' command. E.g.:
 # "plugin1=myplugin.sh"
-# 3) Set a keybinding here for pluginx. Ex: "plugin1:\M-7"
+# 3) Set a keybinding here for pluginx. E.g.: "plugin1:\M-7"
 
 # Bound to the xclip plugin
 plugin1:\C-y
+
+# Bound to sort_mtime plugin
+plugin2:\C-r
 
 #plugin2:
 #plugin3:
