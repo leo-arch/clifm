@@ -1750,6 +1750,25 @@ check_profiles(char *word, const size_t len)
 #endif /* !_NO_PROFILES */
 
 static int
+check_kb_func_names(char *word, const size_t len)
+{
+	if (!word || !*word || len == 0 || kbinds_n == 0 || !kbinds)
+		return NO_MATCH;
+
+	size_t i;
+	for (i = 0; i < kbinds_n; i++) {
+		if (!kbinds[i].function || *word != *kbinds[i].function
+		|| strncmp(word, kbinds[i].function, len) != 0)
+			continue;
+		suggestion.type = NET_SUG; /* Same behavior */
+		print_suggestion(kbinds[i].function, len, sx_c);
+		return PARTIAL_MATCH;
+	}
+
+	return NO_MATCH;
+}
+
+static int
 check_remotes(char *word, const size_t len)
 {
 	if (!word || !*word || !remotes)
@@ -2171,6 +2190,13 @@ rl_suggestions(const unsigned char c)
 			} else {
 				goto FAIL;
 			}
+		}
+		break;
+
+	case 'k': /* 'kb bind' command */
+		if (s[1] == 'b' && s[2] == ' ' && s[3] && strncmp(s + 3, "bind ", 5) == 0) {
+			if ((printed = check_kb_func_names(word, wlen)) != NO_MATCH)
+				goto SUCCESS;
 		}
 		break;
 

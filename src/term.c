@@ -32,7 +32,7 @@
 #include <errno.h>
 
 #include "aux.h" /* xatoi */
-#include "misc.h" /* set_signals_to_ignore */
+#include "misc.h" /* set_signals_to_ignore, handle_stdin */
 
 static struct termios bk_term_attrs;
 static struct termios orig_term_attrs;
@@ -188,7 +188,7 @@ get_cursor_position(int *c, int *l)
 
 	/* 1. Ask the terminal about cursor position */
 	const size_t cpr_len = sizeof(CPR_CODE) - 1;
-	if (write(STDOUT_FILENO, CPR_CODE, cpr_len) != cpr_len) {
+	if (write(STDOUT_FILENO, CPR_CODE, cpr_len) != (ssize_t)cpr_len) {
 		disable_raw_mode(STDIN_FILENO);
 		return FUNC_FAILURE;
 	}
@@ -196,12 +196,16 @@ get_cursor_position(int *c, int *l)
 	/* 2. Read the response: "ESC [ rows ; cols R" */
 	int read_err = 0;
 	while (i < sizeof(buf) - 1) {
-		if (read(STDIN_FILENO, buf + i, 1) != 1) /* flawfinder: ignore */
-			{ read_err = 1; break; }
+		if (read(STDIN_FILENO, buf + i, 1) != 1) { /* flawfinder: ignore */
+			read_err = 1;
+			break;
+		}
+
 		if (buf[i] == 'R')
 			break;
 		i++;
 	}
+
 	buf[i] = '\0';
 
 	if (disable_raw_mode(STDIN_FILENO) == -1 || read_err == 1)
@@ -212,7 +216,8 @@ get_cursor_position(int *c, int *l)
 		return FUNC_FAILURE;
 
 	char *p = strchr(buf + 2, ';');
-	if (!p || !*(p + 1)) return FUNC_FAILURE;
+	if (!p || !*(p + 1))
+		return FUNC_FAILURE;
 
 	*p = '\0';
 	*l = atoi(buf + 2); *c = atoi(p + 1);

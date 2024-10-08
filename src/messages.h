@@ -601,10 +601,14 @@ link points to (instead of for the link itself) is displayed."
 
 #define KB_USAGE "Manage key bindings\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  kb, keybinds [list | edit [APP] | conflict | reset | readline]\n\n\
+  kb, keybinds [list | bind FUNC | edit [APP] | conflict | reset | readline]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - List your current key bindings\n\
     kb (or 'kb list')\n\
+- List available function names\n\
+    kb bind <TAB>\n\
+- Bind toggle-hidden to a key\n\
+    kb bind toggle-hidden\n\
 - Open/edit the key bindings file\n\
     kb edit\n\
 - Open/edit the key bindings file using mousepad\n\

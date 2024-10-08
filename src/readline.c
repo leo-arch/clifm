@@ -2046,6 +2046,26 @@ aliases_generator(const char *text, int state)
 }
 
 static char *
+kb_func_names_gen(const char *text, int state)
+{
+	static int i;
+	static size_t len;
+	char *name;
+
+	if (!state) {
+		i = 0;
+		len = strlen(text);
+	}
+
+	while ((name = kb_cmds[i++].name) != NULL) {
+		if (strncmp(name, text, len) == 0)
+			return strdup(name);
+	}
+
+	return (char *)NULL;
+}
+
+static char *
 nets_generator(const char *text, int state)
 {
 	if (!remotes)
@@ -2824,8 +2844,9 @@ options_generator(const char *text, int state)
 		/* kb, keybinds */
 		if (w == 2 && ( (*c == 'k' && c[1] == 'b' && !c[2])
 		|| strcmp(c, "keybinds") == 0) ) {
-			c_opts[0] = "list"; c_opts[1] = "edit"; c_opts[2] = "conflict";
-			c_opts[3] = "reset"; c_opts[4] = "readline"; c_opts[5] = NULL;
+			c_opts[0] = "list"; c_opts[1] = "bind"; c_opts[2] = "edit";
+			c_opts[3] = "conflict"; c_opts[4] = "reset";
+			c_opts[5] = "readline"; c_opts[6] = NULL;
 		}
 	}
 
@@ -3872,6 +3893,20 @@ complete_sort_num(const char *text, const size_t words_n)
 }
 
 static char **
+complete_kb_func_names(const char *text, const size_t words_n)
+{
+	if (words_n != 3)
+		return (char **)NULL;
+
+	char **matches = rl_completion_matches(text, &kb_func_names_gen);
+	if (!matches)
+		return (char **)NULL;
+
+	cur_comp_type = TCMP_NET; /* Same behavior */
+	return matches;
+}
+
+static char **
 complete_alias_names(const char *text, const size_t words_n)
 {
 	if (words_n > 2)
@@ -4326,6 +4361,10 @@ FIRST_WORD_COMP:
 	if (aliases_n > 0 && s && *s == 'a' && strncmp(s, "alias ", 6) == 0
 	&& strncmp(s + 6, "import ", 7) != 0)
 		return complete_alias_names(text, words_n);
+
+	/* ### KEYBIND FUNCS COMPLETION ### */
+	if (s && *s == 'k' && strncmp(s, "kb bind ", 8) == 0)
+		return complete_kb_func_names(text, words_n);
 
 	/* ### COLOR SCHEMES COMPLETION ### */
 	if (conf.colorize == 1 && s && *s == 'c' && ((s[1] == 's' && s[2] == ' ')

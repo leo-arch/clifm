@@ -657,7 +657,7 @@ CONFIRM:
 			}
 
 			if (renameat(XAT_FDCWD, o, XAT_FDCWD, r) == -1) {
-				xerror("bleach: Cannot rename '%s' to '%s': %s\n",
+				xerror(_("bleach: Cannot rename '%s' to '%s': %s\n"),
 					o, r, strerror(errno));
 				total_rename--;
 				exit_status = FUNC_FAILURE;

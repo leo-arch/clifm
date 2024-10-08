@@ -79,8 +79,8 @@ regen_config(void)
 		snprintf(bk, sizeof(bk), "%s-%s", config_file, date);
 
 		if (renameat(XAT_FDCWD, config_file, XAT_FDCWD, bk) == -1) {
-			xerror(_("Cannot rename file '%s': %s\n"),
-				config_file, strerror(errno));
+			xerror(_("Cannot rename '%s' to '%s': %s\n"),
+				config_file, bk, strerror(errno));
 			return errno;
 		}
 

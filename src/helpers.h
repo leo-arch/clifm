@@ -1647,6 +1647,7 @@ struct cmdslist_t {
 
 extern const struct cmdslist_t param_str[];
 extern const struct cmdslist_t internal_cmds[];
+extern const struct cmdslist_t kb_cmds[];
 
 extern size_t internal_cmds_n;
 

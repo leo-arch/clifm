@@ -24,8 +24,6 @@
 
 #include "helpers.h"
 
-#include <stdio.h>
-
 #ifdef __OpenBSD__
 typedef char *rl_cpvfunc_t;
 # include <ereadline/readline/readline.h>
@@ -38,7 +36,6 @@ typedef char *rl_cpvfunc_t;
 # undef CTRL
 #endif /* __TINYC */
 
-#include <termios.h>
 #include <unistd.h>
 
 #ifdef __NetBSD__
@@ -178,10 +175,337 @@ check_kbinds_conflict(void)
 		}
 	}
 
-	if (ret == 0)
+	if (ret == FUNC_SUCCESS)
 		puts(_("kb: No conflict found"));
 	else
-		puts(_("kb: Run 'kb edit' to fix the conflict"));
+		puts(_("Run 'kb edit' to fix the conflict"));
+
+	return ret;
+}
+
+/* Retrieve the key sequence associated to FUNCTION */
+static char *
+find_key(const char *function)
+{
+	if (kbinds_n == 0)
+		return (char *)NULL;
+
+	int n = (int)kbinds_n;
+	while (--n >= 0) {
+		if (*function != *kbinds[n].function)
+			continue;
+		if (strcmp(function, kbinds[n].function) == 0)
+			return kbinds[n].key;
+	}
+
+	return (char *)NULL;
+}
+
+/* Read a key sequence from STDIN a return its value. */
+static char *
+get_new_keybind(void)
+{
+	const size_t buf_size = NAME_MAX;
+	char *buf = xnmalloc(buf_size + 1, sizeof(char));
+	size_t len = 0;
+	int ret = 0;
+	int result;
+	int ch = 0;
+
+	buf[0] = '\0';
+
+	putchar(':');
+	fflush(stdout);
+
+	if (enable_raw_mode(STDIN_FILENO) == -1) {
+		UNHIDE_CURSOR;
+		free(buf);
+		return (char *)NULL;
+	}
+
+	while (1) {
+		result = (int)read(STDIN_FILENO, &ch, sizeof(unsigned char)); /* flawfinder: ignore */
+		if (result == 0 || len >= buf_size)
+			break;
+
+		if (result != sizeof(unsigned char))
+			continue;
+
+		const unsigned char c = (unsigned char)ch;
+
+		if (c == KEY_ENTER)
+			break;
+
+		if (c == CTRL('D')) {
+			buf[0] = '\0';
+			break;
+		}
+
+		if (c == CTRL('C')) {
+			putchar('\r');
+			ERASE_TO_RIGHT;
+			putchar(':');
+			fflush(stdout);
+			buf[0] = '\0';
+			len = 0;
+			continue;
+		}
+
+		if (c == KEY_ESC) {
+			ret = snprintf(buf + len, sizeof(buf), "\\e");
+		} else if (isprint(c) && c != ' ') {
+			ret = snprintf(buf + len, sizeof(buf), "%c", c);
+		} else {
+			if (c <= 31) {
+				ret = snprintf(buf + len, sizeof(buf),
+					"\\C-%c", c + '@' - 'A' + 'a');
+			} else {
+				ret = snprintf(buf + len, sizeof(buf), "\\x%x", c);
+			}
+		}
+
+		if (ret < 0)
+			continue;
+
+		if (*buf) {
+			fputs(buf + len, stdout);
+			fflush(stdout);
+		}
+
+		len += (size_t)ret;
+	}
+
+	disable_raw_mode(STDIN_FILENO);
+	putchar('\n');
+
+	if (!*buf) {
+		free(buf);
+		return (char *)NULL;
+	}
+
+	return buf;
+}
+
+/* Append the key sequence KB associated to the function name FUNC_NAME
+ * to the keybingins file. */
+static int
+append_kb_to_file(const char *func_name, const char *kb)
+{
+	FILE *fp = open_fappend(kbinds_file);
+	if (!fp) {
+		xerror(_("kb: Cannot open '%s': %s\n"), kbinds_file, strerror(errno));
+		return FUNC_FAILURE;
+	}
+
+	fprintf(fp, "\n%s:%s\n", func_name, kb);
+	fclose(fp);
+
+	return FUNC_SUCCESS;
+}
+
+/* Edit the keybindings file and update the key sequence bound to FUNC_NAME
+ * with the key sequence KB. */
+static int
+rebind_kb(const char *func_name, const char *kb)
+{
+	int orig_fd = 0;
+	FILE *orig_fp = open_fread(kbinds_file, &orig_fd);
+	if (!orig_fp) {
+		xerror(_("kb: Cannot open '%s': %s\n"), kbinds_file, strerror(errno));
+		return FUNC_FAILURE;
+	}
+
+	const size_t len = strlen(config_dir_gral) + (sizeof(TMP_FILENAME) - 1) + 2;
+	char *tmp_name = xnmalloc(len, sizeof(char));
+	snprintf(tmp_name, len, "%s/%s", config_dir_gral, TMP_FILENAME);
+
+	int tmp_fd = mkstemp(tmp_name);
+	if (tmp_fd == -1) {
+		xerror(_("kb: Error creating temporary file: %s\n"), strerror(errno));
+		goto ERROR;
+	}
+
+	FILE *tmp_fp = fdopen(tmp_fd, "w");
+	if (!tmp_fp) {
+		xerror(_("kb: Cannot open temporary file: %s\n"), strerror(errno));
+		unlinkat(tmp_fd, tmp_name, 0);
+		close(tmp_fd);
+		goto ERROR;
+	}
+
+	int found = 0;
+	const size_t func_len = strlen(func_name);
+	char line[NAME_MAX];
+	while (fgets(line, sizeof(line), orig_fp) != NULL) {
+		if (found == 0 && strncmp(line, func_name, func_len) == 0
+		&& line[func_len] == ':') {
+			fprintf(tmp_fp, "%s:%s\n", func_name, kb);
+			found = 1;
+		} else {
+			fputs(line, tmp_fp);
+		}
+	}
+
+	if (found == 1) {
+		if (renameat(tmp_fd, tmp_name, orig_fd, kbinds_file) == -1)
+			xerror("kb: Cannot rename '%s' to '%s': %s\n",
+				tmp_name, kbinds_file, strerror(errno));
+	} else {
+		unlinkat(tmp_fd, tmp_name, 0);
+	}
+
+	fclose(orig_fp);
+	fclose(tmp_fp);
+
+	free(tmp_name);
+
+	if (found == 0)
+		return append_kb_to_file(func_name, kb);
+
+	return FUNC_SUCCESS;
+
+ERROR:
+	free(tmp_name);
+	fclose(orig_fp);
+	return FUNC_FAILURE;
+}
+
+/* Check the key sequence KB against the list of clifm's key sequences.
+ * Return FUNC_FAILURE in case of conflict, or FUNC_SUCCESS. */
+static int
+check_func_name(const char *func_name)
+{
+	size_t len = strlen(func_name);
+	size_t i;
+	for (i = 0; kb_cmds[i].name; i++) {
+		if (len == kb_cmds[i].len && *kb_cmds[i].name == *func_name
+		&& strcmp(kb_cmds[i].name, func_name) == 0)
+			return FUNC_SUCCESS;
+	}
+
+	return FUNC_FAILURE;
+}
+
+/* Check the key sequence KB against the list of readline's key sequences.
+ * Return FUNC_FAILURE in case of conflict, or FUNC_SUCCESS. */
+static int
+check_rl_kbinds(const char *kb)
+{
+	size_t i;
+	char *name = (char *)NULL;
+	char **names = (char **)rl_funmap_names();
+	int conflict = 0;
+
+	for (i = 0; (name = names[i]); i++) {
+		rl_command_func_t *function = rl_named_function(name);
+		char **keys = rl_invoking_keyseqs(function);
+		if (!keys)
+			continue;
+
+		size_t j;
+		for (j = 0; keys[j]; j++) {
+			if (conflict == 0 && strcmp(kb, keys[j]) == 0) {
+				fprintf(stderr, _("kb: Key already in use by '%s' "
+					"(readline)\nEdit '~/.config/clifm/readline.clifm' "
+					"to fix the conflict.\nYou can either unset the "
+					"key sequence:\n  \"%s\":\nor set the function to a "
+					"different key sequence:\n  \"\\e\\C-p\": %s\n"),
+					name, kb, name);
+				conflict = 1;
+			}
+			free(keys[j]);
+		}
+		free(keys);
+	}
+
+	free(names);
+
+	return conflict == 1 ? FUNC_FAILURE : FUNC_SUCCESS;
+}
+
+/* Check the key sequence KB against both clifm and readline key sequences.
+ * Return FUNC_FAILURE in case of conflict, or FUNC_SUCCESS. */
+static int
+validate_new_kb(const char *kb)
+{
+	size_t i;
+	for (i = 0; i < kbinds_n; i++) {
+		if (kbinds[i].key && strcmp(kb, kbinds[i].key) == 0) {
+			fprintf(stderr, _("kb: Key already in use by '%s'\n"),
+				kbinds[i].function);
+			return FUNC_FAILURE;
+		}
+	}
+
+	if (check_rl_kbinds(kb) == FUNC_FAILURE)
+		return FUNC_FAILURE;
+
+	if (!strchr(kb, '\\')) {
+		fprintf(stderr, _("kb: Invalid key binding\n"));
+		return FUNC_FAILURE;
+	}
+
+	return FUNC_SUCCESS;
+}
+
+/* Bind the function FUNC_NAME to a new key sequence. */
+static int
+bind_kb_func(const char *func_name)
+{
+	if (xargs.stealth_mode == 1) {
+		printf("%s: kb: %s\n", PROGRAM_NAME, STEALTH_DISABLED);
+		return FUNC_SUCCESS;
+	}
+
+	if (!kbinds_file || !*kbinds_file) {
+		xerror(_("kb: No keybindings file found\n"));
+		return FUNC_FAILURE;
+	}
+
+	if (!func_name || !*func_name) {
+		puts(KB_USAGE);
+		return FUNC_SUCCESS;
+	}
+
+	if (check_func_name(func_name) == FUNC_FAILURE) {
+		xerror(_("kb: '%s': Invalid function name\nType 'kb bind <TAB>' "
+			"to list available function names\n"), func_name);
+		return FUNC_FAILURE;
+	}
+
+	struct stat a;
+	if (stat(kbinds_file, &a) == -1 && create_kbinds_file() == FUNC_FAILURE)
+		return FUNC_FAILURE;
+
+	const char *cur_key = find_key(func_name);
+	printf(_("Enter a key binding for '%s' (current: %s)\n"),
+		func_name, cur_key ? cur_key : "unset");
+	puts(_("(Enter:accept, Ctrl-d:abort, Ctrl-c:clear-line)"));
+	puts(_("To unset the function enter '-'"));
+
+	char *kb = get_new_keybind();
+	if (kb == NULL)
+		return FUNC_SUCCESS;
+
+	if (validate_new_kb(kb) == FUNC_FAILURE) {
+		free(kb);
+		return FUNC_FAILURE;
+	}
+
+//	printf(_("Current key: %s\n"), cur_key ? cur_key : "unset");
+	printf(_("New key: %s\n"), kb);
+	if (rl_get_y_or_n(_("Bind to this new key? [y/n] ")) == 0) {
+		free(kb);
+		return FUNC_SUCCESS;
+	}
+
+	const int ret = rebind_kb(func_name, kb);
+	free(kb);
+
+	if (ret == FUNC_SUCCESS) {
+		err('n', PRINT_PROMPT, _("kb: Restart %s for changes to "
+			"take effect\n"), PROGRAM_NAME);
+	}
 
 	return ret;
 }
@@ -209,6 +533,9 @@ kbinds_function(char **args)
 		return FUNC_SUCCESS;
 	}
 
+	if (*args[1] == 'b' && strcmp(args[1], "bind") == 0)
+		return bind_kb_func(args[2]);
+
 	if (*args[1] == 'c' && strcmp(args[1], "conflict") == 0)
 		return check_kbinds_conflict();
 
@@ -226,6 +553,64 @@ kbinds_function(char **args)
 	fprintf(stderr, "%s\n", _(KB_USAGE));
 	return FUNC_FAILURE;
 }
+
+/*
+static void
+copy_key(char *buf, const size_t buf_size, char *ptr, size_t *len)
+{
+	if (strcasecmp(ptr, "control") == 0 || strcasecmp(ptr, "ctrl") == 0) {
+		xstrsncpy(buf + *len, "\\C", buf_size); *len += 2;
+	} else if (strcasecmp(ptr, "alt") == 0 || strcasecmp(ptr, "meta") == 0) {
+		xstrsncpy(buf + *len, "\\M", buf_size); *len += 2;
+	} else if (strcasecmp(ptr, "del") == 0 || strcasecmp(ptr, "rubout") == 0) {
+		xstrsncpy(buf + *len, "\\d", buf_size); *len += 2;
+	} else if (strcasecmp(ptr, "esc") == 0 || strcasecmp(ptr, "escape") == 0) {
+		xstrsncpy(buf + *len, "\\e", buf_size); *len += 2;
+	} else if (strcasecmp(ptr, "spc") == 0 || strcasecmp(ptr, "space") == 0) {
+		xstrsncpy(buf + *len, "\\ ", buf_size); *len += 2;
+	} else if (strcasecmp(ptr, "ret") == 0 || strcasecmp(ptr, "return") == 0) {
+		xstrsncpy(buf + *len, "\\r", buf_size); *len += 2;
+	} else if (strcasecmp(ptr, "lfd") == 0 || strcasecmp(ptr, "newline") == 0) {
+		xstrsncpy(buf + *len, "\\n", buf_size); *len += 2;
+	} else if (strcasecmp(ptr, "tab") == 0) {
+		xstrsncpy(buf + *len, "\\t", buf_size); *len += 2;
+	} else {
+		xstrsncpy(buf + *len, ptr, buf_size); *len += strlen(ptr);
+	}
+}
+
+static char *
+save_key(char *key)
+{
+	if (!key || !*key)
+		return (char *)NULL;
+
+	if (*key == '\\')
+		return savestring(key, strlen(key));
+
+	char buf[NAME_MAX]; *buf = '\0';
+	char *ptr = key;
+	char *dash = (char *)NULL;
+	size_t len = 0;
+
+	while (len < sizeof(buf) && *ptr && (dash = strchr(ptr, '-')) && dash[1]) {
+		*dash = '\0';
+
+		copy_key(buf, sizeof(buf), ptr, &len);
+
+		ptr = dash + 1;
+		buf[len] = '-';
+		len++;
+		*dash = '-';
+	}
+
+	if (*ptr)
+		copy_key(buf, sizeof(buf), ptr, &len);
+	else
+		buf[len - (len > 0)] = '\0';
+
+	return savestring(buf, strlen(buf));
+} */
 
 /* Store keybinds from the keybinds file into a struct */
 int
@@ -272,6 +657,7 @@ load_keybinds(void)
 		/* Now copy left and right value of each keybind into the
 		 * keybinds struct */
 		kbinds = xnrealloc(kbinds, kbinds_n + 1, sizeof(struct kbinds_t));
+/*		kbinds[kbinds_n].key = save_key(tmp + 1); */
 		kbinds[kbinds_n].key = savestring(tmp + 1, strlen(tmp + 1));
 
 		*tmp = '\0';
@@ -388,24 +774,6 @@ run_kb_cmd(char *cmd)
 		prompt_offset = UNSET;
 
 	return FUNC_SUCCESS;
-}
-
-/* Retrieve the key sequence associated to FUNCTION */
-static char *
-find_key(char *function)
-{
-	if (!kbinds_n)
-		return (char *)NULL;
-
-	int n = (int)kbinds_n;
-	while (--n >= 0) {
-		if (*function != *kbinds[n].function)
-			continue;
-		if (strcmp(function, kbinds[n].function) == 0)
-			return kbinds[n].key;
-	}
-
-	return (char *)NULL;
 }
 
 int
