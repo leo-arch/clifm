@@ -161,10 +161,13 @@ kbinds_edit(char *app)
 static int
 check_rl_kbinds_all(void)
 {
-	size_t i;
+	size_t i, j, k, conflict_key = 0;
 	char *name = (char *)NULL;
 	char **names = (char **)rl_funmap_names();
 	int conflict = 0;
+
+	if (!names)
+		return FUNC_SUCCESS;
 
 	for (i = 0; (name = names[i]); i++) {
 		rl_command_func_t *function = rl_named_function(name);
@@ -172,14 +175,14 @@ check_rl_kbinds_all(void)
 		if (!keys)
 			continue;
 
-		size_t j;
 		for (j = 0; keys[j]; j++) {
-			size_t k;
 			for (k = 0; k < kbinds_n; k++) {
-				if (strcmp(kbinds[k].key, keys[j]) == 0) {
+				if (kbinds[k].key && strcmp(kbinds[k].key, keys[j]) == 0) {
 					fprintf(stderr, _("kb: '%s' conflicts with '%s' "
-						"(readline)\n"), kbinds[k].function, name);
+						"(readline)\n"), kbinds[k].function
+						? kbinds[k].function : "unnamed", name);
 					conflict++;
+					conflict_key = k;
 				}
 			}
 			free(keys[j]);
@@ -191,9 +194,15 @@ check_rl_kbinds_all(void)
 
 	int ret = conflict > 0 ? FUNC_FAILURE : FUNC_SUCCESS;
 
-	if (ret == FUNC_FAILURE)
+	if (ret == FUNC_FAILURE) {
 		fprintf(stderr, _("Edit '~/.config/clifm/readline.clifm' "
-			"to fix the conflicts.\n"));
+			"to fix the conflict.\n"));
+		fprintf(stderr, _("You can either unset the conflicting key "
+			"sequence:\n  \"%s\":\n"
+			"or set the conflicting function to a different key sequence:\n"
+			"  \"\\e\\C-p\": %s\n"), kbinds[conflict_key].key,
+			kbinds[conflict_key].function);
+	}
 
 	return ret;
 }
@@ -207,6 +216,9 @@ check_rl_kbinds(const char *kb)
 	char *name = (char *)NULL;
 	char **names = (char **)rl_funmap_names();
 	int conflict = 0;
+
+	if (!names)
+		return FUNC_SUCCESS;
 
 	for (i = 0; (name = names[i]); i++) {
 		rl_command_func_t *function = rl_named_function(name);
@@ -239,7 +251,7 @@ static int
 check_kbinds_conflict(void)
 {
 	if (kbinds_n == 0) {
-		puts(_("kb: No keybindings defined"));
+		puts(_("kb: No key bindings defined"));
 		return FUNC_SUCCESS;
 	}
 
