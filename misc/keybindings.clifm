@@ -131,9 +131,6 @@ quit:\e[24~
 # Bound to the xclip plugin
 plugin1:\C-y
 
-# Bound to sort_mtime plugin
-plugin2:\C-r
-
 #plugin2:
 #plugin3:
 #plugin4:
