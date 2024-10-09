@@ -282,6 +282,7 @@ get_new_keybind(void)
 	int ret = 0;
 	int result;
 	int ch = 0;
+	int prev = 0;
 
 	buf[0] = '\0';
 
@@ -303,22 +304,24 @@ get_new_keybind(void)
 
 		const unsigned char c = (unsigned char)ch;
 
-		if (c == KEY_ENTER)
-			break;
+		if (prev != KEY_ESC) {
+			if (c == KEY_ENTER)
+				break;
 
-		if (c == CTRL('D')) {
-			buf[0] = '\0';
-			break;
-		}
+			if (c == CTRL('D')) {
+				buf[0] = '\0';
+				break;
+			}
 
-		if (c == CTRL('C')) {
-			putchar('\r');
-			ERASE_TO_RIGHT;
-			putchar(':');
-			fflush(stdout);
-			buf[0] = '\0';
-			len = 0;
-			continue;
+			if (c == CTRL('C')) {
+				putchar('\r');
+				ERASE_TO_RIGHT;
+				putchar(':');
+				fflush(stdout);
+				buf[0] = '\0';
+				len = 0;
+				continue;
+			}
 		}
 
 		if (c == KEY_ESC) {
@@ -334,6 +337,7 @@ get_new_keybind(void)
 			}
 		}
 
+		prev = ch;
 		if (ret < 0)
 			continue;
 
