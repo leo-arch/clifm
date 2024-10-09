@@ -155,13 +155,45 @@ kbinds_edit(char *app)
 	return FUNC_SUCCESS;
 }
 
-/* Check all readline key bindings against all of clifm keybindings.
+/* FUNC_NAME is not NULL when invokd by 'kb conflict' (in which case we're
+ * check a readline key sequence). Otherwise, if invoked by 'kb bind',
+ * FUNC_NAME isn't set.
+ * We display different messages depending on the invoking command.
+ * Return the index of the last conflicting clifm key sequence (stored in the
+ * kbinds struct). */
+static int
+check_clifm_kb(const char *kb, const char *func_name)
+{
+	int ret = FUNC_SUCCESS;
+	size_t i;
+	for (i = 0; i < kbinds_n; i++) {
+		if (!kbinds[i].key || strcmp(kb, kbinds[i].key) != 0)
+			continue;
+
+		if (func_name != NULL) {
+			fprintf(stderr, _("kb: '%s' conflicts with '%s' (readline)\n"),
+				kbinds[i].function ? kbinds[i].function : "unnamed",
+				func_name);
+		} else {
+			fprintf(stderr, _("kb: Key already in use by '%s'\n"),
+				kbinds[i].function ? kbinds[i].function : "unnamed");
+		}
+		ret = FUNC_FAILURE;
+	}
+
+	return ret;
+}
+
+/* Check all readline key sequences against the key seqeunce KB, if not NULL
+ * (this is the case when validating a key entered via 'kb bind').
+ * Otherwise the check is made against all clifm key sequences (i.e., when
+ * the invoking command is 'kb conflict').
  * Return FUNC_FAILURE if at least one conflict is found. Otherwise,
  * return FUNC_SUCCESS. */
 static int
-check_rl_kbinds_all(void)
+check_rl_kbinds(const char *kb)
 {
-	size_t i, j, k, conflict_key = 0;
+	size_t i, j;
 	char *name = (char *)NULL;
 	char **names = (char **)rl_funmap_names();
 	int conflict = 0;
@@ -176,13 +208,14 @@ check_rl_kbinds_all(void)
 			continue;
 
 		for (j = 0; keys[j]; j++) {
-			for (k = 0; k < kbinds_n; k++) {
-				if (kbinds[k].key && strcmp(kbinds[k].key, keys[j]) == 0) {
-					fprintf(stderr, _("kb: '%s' conflicts with '%s' "
-						"(readline)\n"), kbinds[k].function
-						? kbinds[k].function : "unnamed", name);
+			if (kb == NULL) {
+				if (check_clifm_kb(keys[j], name) == FUNC_FAILURE)
 					conflict++;
-					conflict_key = k;
+			} else {
+				if (strcmp(kb, keys[j]) == 0) {
+					fprintf(stderr, _("kb: Key already in use by '%s' "
+						"(readline)\n"), name);
+					conflict++;
 				}
 			}
 			free(keys[j]);
@@ -192,59 +225,7 @@ check_rl_kbinds_all(void)
 
 	free(names);
 
-	int ret = conflict > 0 ? FUNC_FAILURE : FUNC_SUCCESS;
-
-	if (ret == FUNC_FAILURE) {
-		fprintf(stderr, _("Edit '~/.config/clifm/readline.clifm' "
-			"to fix the conflict.\n"));
-		fprintf(stderr, _("You can either unset the conflicting key "
-			"sequence:\n  \"%s\":\n"
-			"or set the conflicting function to a different key sequence:\n"
-			"  \"\\e\\C-p\": %s\n"), kbinds[conflict_key].key,
-			kbinds[conflict_key].function);
-	}
-
-	return ret;
-}
-
-/* Check the key sequence KB against the list of readline's key sequences.
- * Return FUNC_FAILURE in case of conflict, or FUNC_SUCCESS. */
-static int
-check_rl_kbinds(const char *kb)
-{
-	size_t i;
-	char *name = (char *)NULL;
-	char **names = (char **)rl_funmap_names();
-	int conflict = 0;
-
-	if (!names)
-		return FUNC_SUCCESS;
-
-	for (i = 0; (name = names[i]); i++) {
-		rl_command_func_t *function = rl_named_function(name);
-		char **keys = rl_invoking_keyseqs(function);
-		if (!keys)
-			continue;
-
-		size_t j;
-		for (j = 0; keys[j]; j++) {
-			if (conflict == 0 && strcmp(kb, keys[j]) == 0) {
-				fprintf(stderr, _("kb: Key already in use by '%s' "
-					"(readline)\nEdit '~/.config/clifm/readline.clifm' "
-					"to fix the conflict.\nYou can either unset the "
-					"key sequence:\n  \"%s\":\nor set the function to a "
-					"different key sequence:\n  \"\\e\\C-p\": %s\n"),
-					name, kb, name);
-				conflict = 1;
-			}
-			free(keys[j]);
-		}
-		free(keys);
-	}
-
-	free(names);
-
-	return conflict == 1 ? FUNC_FAILURE : FUNC_SUCCESS;
+	return conflict > 0 ? FUNC_FAILURE : FUNC_SUCCESS;
 }
 
 static int
@@ -267,13 +248,8 @@ check_kbinds_conflict(void)
 		}
 	}
 
-	if (ret == FUNC_FAILURE)
-		puts(_("Run 'kb edit' to fix the conflict"));
-	else {
-		ret = check_rl_kbinds_all();
-		if (ret == FUNC_SUCCESS)
-			puts(_("kb: No conflicts found"));
-	}
+	if (check_rl_kbinds(NULL) == FUNC_FAILURE)
+		ret = FUNC_FAILURE;
 
 	return ret;
 }
@@ -443,7 +419,7 @@ rebind_kb(const char *func_name, const char *kb)
 
 	if (found == 1) {
 		if (renameat(tmp_fd, tmp_name, orig_fd, kbinds_file) == -1)
-			xerror("kb: Cannot rename '%s' to '%s': %s\n",
+			xerror(_("kb: Cannot rename '%s' to '%s': %s\n"),
 				tmp_name, kbinds_file, strerror(errno));
 	} else {
 		unlinkat(tmp_fd, tmp_name, 0);
@@ -486,24 +462,17 @@ check_func_name(const char *func_name)
 static int
 validate_new_kb(const char *kb)
 {
-	size_t i;
-	for (i = 0; i < kbinds_n; i++) {
-		if (kbinds[i].key && strcmp(kb, kbinds[i].key) == 0) {
-			fprintf(stderr, _("kb: Key already in use by '%s'\n"),
-				kbinds[i].function);
-			return FUNC_FAILURE;
-		}
-	}
-
-	if (check_rl_kbinds(kb) == FUNC_FAILURE)
-		return FUNC_FAILURE;
-
 	if (!strchr(kb, '\\')) {
 		fprintf(stderr, _("kb: Invalid key binding\n"));
 		return FUNC_FAILURE;
 	}
 
-	return FUNC_SUCCESS;
+	int ret = check_clifm_kb(kb, NULL);
+
+	if (check_rl_kbinds(kb) == FUNC_FAILURE)
+		ret = FUNC_FAILURE;
+
+	return ret;
 }
 
 /* Bind the function FUNC_NAME to a new key sequence. */
@@ -536,7 +505,7 @@ bind_kb_func(const char *func_name)
 		return FUNC_FAILURE;
 
 	const char *cur_key = find_key(func_name);
-	printf(_("Enter a key binding for '%s' (current: %s)\n"),
+	printf(_("Enter a key binding for '%s' (current: \"%s\")\n"),
 		func_name, cur_key ? cur_key : "unset");
 	puts(_("(Enter:accept, Ctrl-d:abort, Ctrl-c:clear-line)"));
 	puts(_("To unset the function enter '-'"));
@@ -550,7 +519,6 @@ bind_kb_func(const char *func_name)
 		return FUNC_FAILURE;
 	}
 
-//	printf(_("Current key: %s\n"), cur_key ? cur_key : "unset");
 	printf(_("New key: %s\n"), kb);
 	if (rl_get_y_or_n(_("Bind to this new key? [y/n] ")) == 0) {
 		free(kb);
