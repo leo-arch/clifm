@@ -272,12 +272,12 @@ find_key(const char *function)
 	return (char *)NULL;
 }
 
-/* Read a key sequence from STDIN a return its value. */
+/* Read a key sequence from STDIN and return its value (memory to hold this
+ * value is allocated via malloc(2)). */
 static char *
 get_new_keybind(void)
 {
-	const size_t buf_size = NAME_MAX;
-	char *buf = xnmalloc(buf_size + 1, sizeof(char));
+	char buf[NAME_MAX];
 	size_t len = 0;
 	int ret = 0;
 	int result;
@@ -290,13 +290,12 @@ get_new_keybind(void)
 
 	if (enable_raw_mode(STDIN_FILENO) == -1) {
 		UNHIDE_CURSOR;
-		free(buf);
 		return (char *)NULL;
 	}
 
 	while (1) {
 		result = (int)read(STDIN_FILENO, &ch, sizeof(unsigned char)); /* flawfinder: ignore */
-		if (result == 0 || len >= buf_size)
+		if (result == 0 || len >= sizeof(buf))
 			break;
 
 		if (result != sizeof(unsigned char))
@@ -349,12 +348,10 @@ get_new_keybind(void)
 	disable_raw_mode(STDIN_FILENO);
 	putchar('\n');
 
-	if (!*buf) {
-		free(buf);
+	if (!*buf)
 		return (char *)NULL;
-	}
 
-	return buf;
+	return savestring(buf, strlen(buf));
 }
 
 /* Append the key sequence KB associated to the function name FUNC_NAME
