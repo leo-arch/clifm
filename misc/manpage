@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Oct 1, 2024" "clifm 1.21.1" "CLIFM Manual"
+.TH "CLIFM" "1" "Oct 9, 2024" "clifm 1.21.3" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -40,19 +40,21 @@ clifm \- The Command Line File Manager
 .sp
 \fB16.\fR Virtual directories
 .sp
-\fB17.\fR Note on speed
+\fB17.\fR Key bindings
 .sp
-\fB18.\fR Kangaroo frecency algorithm
+\fB18.\fR Note on speed
 .sp
-\fB19.\fR Environment
+\fB19.\fR Kangaroo frecency algorithm
 .sp
-\fB20.\fR Security
+\fB20.\fR Environment
 .sp
-\fB21.\fR Miscellaneous notes
+\fB21.\fR Security
 .sp
-\fB22.\fR Files
+\fB22.\fR Miscellaneous notes
 .sp
-\fB23.\fR Examples
+\fB23.\fR Files
+.sp
+\fB24.\fR Examples
 
 .SH 1. GETTING HELP
 There are several ways of getting help in \fBclifm\fR. Once in the program, enter \fI?\fR or \fIhelp\fR for some basic usage examples, or press \fBF1\fR to access this manpage, \fBF2\fR to go to the \fBCOMMANDS\fR section of this very manpage, or \fBF3\fR to jump to the \fBKEYBOARD SHORTCUTS\fR section.
@@ -844,8 +846,20 @@ if running in long view, toggle follow-links (\fIAlt\-+\fR is also available). S
 .B kk
 toggle max-filename-len on/off (\fICtrl\-Alt\-l\fR is also available)
 .TP
-.B kb, keybinds \fR[\fIlist\fR] [\fIedit\fR [\fIAPP\fR]] [\fIconflict\fR] [\fIreset\fR] [\fIreadline\fR]
-with no argument (or if the argument is \fIlist\fR), prints the current keyboard codes and their associated functions. To edit the keybindings file, use the \fIedit\fR option (the file will be opened with APP, if specified, or with the default associated application otherwise). If you somehow messed up your keybindings, you can check your keybindings for conflicts with the \fIconflict\fR option, or use the \fIreset\fR option to create a fresh keybindings file with the default values. To list readline keybindings, use the \fIreadline\fR option. Bear in mind that these keybindings are not provided by \fBclifm\fR, but by readline itself, and as such depend on the system settings (they can be customized however via the \fI~/.inputrc\fR file).
+.B kb, keybinds \fR[\fIlist\fR] \fR[\fIbind FUNCTION\fR]  [\fIedit\fR [\fIAPP\fR]] [\fIconflict\fR] [\fIreset\fR] [\fIreadline\fR]
+with no argument (or if the argument is \fIlist\fR), prints the current key bindings and their associated functions.
+.sp
+To change a key binding use the \fIbind\fR subcommand.
+.sp
+Type \fIkb bind <TAB>\fR to get the list of bindable functions.
+.sp
+Enter \fIkb bind FUNCTION\fR to set a new key binding for FUNCTION. For example, to bind the function \fIprevious-dir\fR to a new key, enter \fIkb bind previous-dir\fR. You'll see a little prompt: press the key combination you want to associate to the specified function and the press \fBEnter\fR (while in this prompt, press \fBCtrl-d\fR to abort or \fBCtrl-c\fR to clear the current line).
+.sp
+To manually edit your key bindings use the \fIedit\fR option (the keybindings file will be opened with APP, if specified, or with the default associated application otherwise).
+.sp
+If you somehow messed up your keybindings, you can check for key bindings conflicts with the \fIconflict\fR option, or use the \fIreset\fR option to create a fresh keybindings file with the default values.
+.sp
+To list readline keybindings (defined in \fI~/.config/clifm/readline.clifm\fR), use the \fIreadline\fR option. The syntax is the same as the one used by readline's \fI.inputrc\fR file (consult \fIhttp://tiswww.case.edu/php/chet/readline/readline.html#SEC9\fR for more information.)
 .TP
 .B l, le
 Create (\fIl\fR) or edit (\fIle\fR) symbolic links.
@@ -2393,7 +2407,7 @@ T}	Copy the line buffer to the clipboard	\fB(9)\fR
 .TE
 
 .sp
-\fB(1)\fR xclip or xsel (Xorg), wl\-copy/wl\-paste (Wayland), clipboard (Haiku), clip (Cygwin), pbcopy/pbget (MacOS), termux\-clipboard\-get/termux\-clipboard\-set (Termux), cb (cross\-platform: https://github.com/Slackadays/Clipboard)
+\fB(1)\fR xclip or xsel (Xorg), wl\-copy/wl\-paste (Wayland), clipboard (Haiku), clip (Cygwin), pbcopy/pbget (MacOS), termux\-clipboard\-get/termux\-clipboard\-set (Termux), cb (cross\-platform: \fIhttps://github.com/Slackadays/Clipboard\fR)
 .sp
 \fB(2)\fR \fIcolors.sh\fR (by default unset)
 .sp
@@ -2736,7 +2750,10 @@ If navigating the file system, you can quickly go back to the virtual directory 
 .sp
 \fBalias vtd=\'cd $CLIFM_VIRTUAL_DIR\'\fR
 
-.SH 17. NOTE ON SPEED
+.SH 17. KEY BINDINGS
+For the list of default key bindings consult the \fBEXAMPLES\fR section below. To manage your key bindings see the \fIkb\fR command description above.
+
+.SH 18. NOTE ON SPEED
 \fBclifm\fR is by itself quite fast by default, but if speed is still an issue, it is possible to get some extra performance.
 .sp
 The two most time consuming features are:
@@ -2759,7 +2776,7 @@ Despite the above, however, it is important to bear in mind that listing speed d
 .sp
 If using Xterm, a nice speed boost is provided by the fast scroll option: set \fIfastScroll\fR to true in your \fI~/.Xresources\fR file. See \fBxterm\fR(1).
 
-.SH 18. KANGAROO FRECENCY ALGORITHM
+.SH 19. KANGAROO FRECENCY ALGORITHM
 The directory jumper function is designed to learn the navigation habits of the user. The information is stored in a database (see the \fBFILES\fR section below) used to get the best match for a given string provided by the user. In this sense, Kangaroo is like a quick, smart, and evolved cd function.
 .sp
 The information stored in the database, always per directory, is:
@@ -2803,7 +2820,7 @@ NOTE: Directories visited in the last 24 hours, just as pinned, bookmarked direc
 .sp
 The idea of 'frecency' was, as far as I know, first devised and designed by Mozilla. See \fIhttps://wiki.mozilla.org/User:Mconnor/Past/PlacesFrecency\fR. However, it is also implemented, though using different algorithms, by different projects like \fBautojump\fR, \fBz.lua\fR, and \fBzoxide\fR.
 
-.SH 19. ENVIRONMENT
+.SH 20. ENVIRONMENT
 The following variables are read at initialization time:
 .TP
 .B NO_COLOR
@@ -2999,7 +3016,7 @@ Set to the number of currently trashed files (unset if there are no trashed file
 .B CLIFM_TRIM_NAMES
 Set to 1 if trim-names is enabled. Otherwise it is set to 0
 
-.SH 20. SECURITY
+.SH 21. SECURITY
 Since \fBclifm\fR executes OS commands, it needs to provide a way to securely run these commands, specially when it comes to untrusted environments. Two features are provided to achieve this aim: \fBsecure environment\fR and \fBsecure commands\fR.
 .TP
 Both features are aimed at protecting the program and the system as such from malicious input, either coming from environment variables or from indirect input, that is to say, input coming not from the command line (in which is assumed that it is the user herself who is executing the given command), but from files: this is the case of default associated applications (the \fImime\fR command), autocommands, aliases, plugins, (un)mount commands (via the \fInet\fR command), just as profile and prompt commands.
@@ -3047,7 +3064,7 @@ Commands containing \fIat least one\fR unsafe character will be rejected. Of cou
 .TP
 \fBd)\fR A secure environment is set (\fI\-\-secure\-env\fR is implied; to run on a fully sanitized environment run as follows: \fI\-\-secure\-cmds \-\-secure\-env\-full\fR.
 
-.SH 21. MISCELLANEOUS NOTES
+.SH 22. MISCELLANEOUS NOTES
 .sp
 \fBSequential and conditional execution of commands\fR:
 
@@ -3091,7 +3108,7 @@ By default, \fBclifm\fR starts in the current working directory. However, you ca
 
 \fBclifm\fR's default profile is \fIdefault\fR. To create alternative profiles use the \fI\-P\fR command line option or the \fIpf add\fR command (see above).
 
-.SH 22. FILES
+.SH 23. FILES
 .TP
 .B CONFIGURATION FILE
 The main configuration file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/clifmrc\fR. It will be copied from \fIDATADIR/clifm\fR (usually \fI/usr/local/share/clifm\fR), and if not found, it will be created anew with default values. Here you can permanently set up \fBclifm\fR options, define aliases, prompt commands, and autocommands. You can access the configuration file either via the \fIconfig\fR command or pressing F10.
@@ -3142,7 +3159,7 @@ The directory jumper database is stored in \fI$XDG_CONFIG_HOME/clifm/profiles/PR
 .TP
 \fBNOTE\fR: If \fI$XDG_CONFIG_HOME\fR is not set, \fI$HOME/.config/\fR is used instead.
 
-.SH 23. EXAMPLES
+.SH 24. EXAMPLES
 \fBNOTE\fR: Always try TAB. TAB completion is available for many things
 
 \fBNOTE 2\fR: Suggestions for possible completions are printed next to the text typed so far. To accept the given suggestion press \fIRight\fR (or \fIAlt\-f\fR to accept only the first/next suggested word). Otherwise, the suggestion is just ignored
