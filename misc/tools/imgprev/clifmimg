@@ -171,7 +171,8 @@ main() {
 		"epub")
 			hash_file "$file"
 			! [ -f "${PCACHE}.jpg" ] && \
-				epub-thumbnailer "$file" "${PCACHE}.jpg" 1024 >/dev/null 2>&1
+				gnome-epub-thumbnailer -s 1024 "$file" "${PCACHE}.jpg" >/dev/null 2>&1
+#				epub-thumbnailer "$file" "${PCACHE}.jpg" 1024 >/dev/null 2>&1
 			display "${PCACHE}.jpg"
 			;;
 		"pdf")
