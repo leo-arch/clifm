@@ -857,7 +857,7 @@ To manually edit your key bindings use the \fIedit\fR option (the keybindings fi
 .sp
 If you somehow messed up your keybindings, you can check for key bindings conflicts with the \fIconflict\fR option, or use the \fIreset\fR option to create a fresh keybindings file with the default values.
 .sp
-To list readline keybindings (defined in \fI~/.config/clifm/readline.clifm\fR), use the \fIreadline\fR option. The syntax is the same as the one used by readline's \fI.inputrc\fR file (consult \fIhttp://tiswww.case.edu/php/chet/readline/readline.html#SEC9\fR for more information.)
+To list readline key bindings (defined in \fI~/.config/clifm/readline.clifm\fR), use the \fIreadline\fR option. The syntax is the same as the one used by readline's \fI.inputrc\fR file (consult \fIhttp://tiswww.case.edu/php/chet/readline/readline.html#SEC9\fR for more information.)
 .TP
 .B l, le
 Create (\fIl\fR) or edit (\fIle\fR) symbolic links.
@@ -1309,164 +1309,126 @@ Available file type characters:
 .sp
 By means of the above features, you can easily group and operate on groups of files. For example, this command:
 .sp
- vt :b @image =x sel t:work *.txt
+ vt b: @image =x sel t:work *.txt
 .sp
 opens a virtual directory (see the \fBVIRTUAL DIRECTORIES\fR section below) automatically expanding the above expressions as follows:
 
 .TS
-allbox;
+allbox tab(;);
 lb lb
 l l.
-Expression	Description
-T{
-:b
-T}	All your bookmarks (paths)
-T{
-@image
-T}	All image files (CWD)
-T{
-=x
-T}	All executable files (CWD)
-T{
-sel
-T}	All selected files
-T{
-t:work
-T}	All files tagged as \fIwork\fR
-T{
-*.txt
-T}	All .txt files (CWD)
+Expression ; Description
+b: ; All your bookmarks (paths)
+@image ; All image files (CWD)
+=x ; All executable files (CWD)
+sel ; All selected files
+t:work ; All files tagged as \fIwork\fR
+*.txt ; All .txt files (CWD)
 .TE
 
 .SH 6. KEYBOARD SHORTCUTS
-.TP
-The following are the default key bindings. To customize them, use the \fIkb bind\fR command. For more information consult the description of the \fIkb\fR command above.
-.TP
-\fBCtrl\-Alt\-j:\fR Switch to vi editing mode
-.TP
-\fBCtrl\-Alt\-e:\fR Switch back to emacs editing mode (default)
-.TP
-\fBRight\fR, \fBCtrl\-f:\fR Accept the entire current suggestion
-.TP
-\fBAlt\-Right\fR, \fBAlt\-f:\fR Accept only the first word of the current suggestion (up to first slash or space)
-.TP
-\fBAlt\-c:\fR Clear the current command line buffer
-.TP
-\fBAlt\-q:\fR Delete last word (up to last slash or space)
-.TP
-\fBAlt\-i, Alt\-.:\fR Toggle hidden files on/off
-.TP
-\fBAlt\-l:\fR Toggle long view mode on/off
-.TP
-\fBAlt\-+:\fR Toggle follow links (long view only)
-.TP
-\fBAlt\-g:\fR Toggle list\-directories\-first on/off
-.TP
-\fBAlt\-,:\fR Toggle list only directories on/off
-.TP
-\fBCtrl\-Alt\-l:\fR Toggle max file name length on/off
-.TP
-\fBCtrl\-Alt\-i:\fR, \fBAlt\-TAB:\fR Toggle disk usage analyzer on/off
-.TP
-\fBAlt\-w:\fR Toggle full path file names in virtual directories
-.TP
-\fBCtrl\-l:\fR Refresh the screen (reprint the list of files in the current directory)
-.TP
-\fBAlt\-t:\fR Clear program messages
-.TP
-\fBAlt\-m:\fR List mountpoints
-.TP
-\fBAlt\-b:\fR Launch the Bookmarks Manager
-.TP
-\fBAlt\-h:\fR Show directory history
-.TP
-\fBAlt\-n:\fR Create new file or directory
-.TP
-\fBAlt\-s:\fR Open the Selection Box
-.TP
-\fBAlt\-\-:\fR Launch the files previewer (\fIview\fR command)
-.TP
-\fBAlt\-a:\fR Select all files in the current working directory
-.TP
-\fBAlt\-d:\fR Deselect all selected files
-.TP
-\fBAlt\-0:\fR Run MAS, the files pager
-.TP
-\fBAlt\-p:\fR Change to pinned directory
-.TP
-\fBAlt\-1:\fR Switch to workspace 1
-.TP
-\fBAlt\-2:\fR Switch to workspace 2
-.TP
-\fBAlt\-3:\fR Switch to workspace 3
-.TP
-\fBAlt\-4:\fR Switch to workspace 4
-.TP
-\fBAlt\-r:\fR Change to root directory
-.TP
-\fBAlt\-e, Home:\fR Change to home directory
-.TP
-\fBAlt\-u, Shift\-Up:\fR Change to parent directory
-.TP
-\fBAlt\-j, Shift\-Left:\fR Change to previous visited directory
-.TP
-\fBAlt\-k, Shift\-Right:\fR Change to next visited directory
-.TP
-\fBCtrl\-Alt\-o:\fR Switch to previous profile
-.TP
-\fBCtrl\-Alt\-p:\fR Switch to next profile
-.TP
-\fBCtrl\-Alt\-a:\fR Archive selected files
-.TP
-\fBCtrl\-Alt\-e:\fR Export selected files
-.TP
-\fBCtrl\-Alt\-r:\fR Rename selected files
-.TP
-\fBCtrl\-Alt\-d:\fR Remove selected files
-.TP
-\fBCtrl\-Alt\-t:\fR Trash selected files
-.TP
-\fBCtrl\-Alt\-u:\fR Restore trashed files
-.TP
-\fBCtrl\-Alt\-g:\fR Open/change-to last selected file/directory
-.TP
-\fBCtrl\-Alt\-n:\fR Move selected files into the current directory
-.TP
-\fBCtrl\-Alt\-v:\fR Copy selected files into the current directory
-.TP
-\fBAlt\-y:\fR Toggle light mode on/off
-.TP
-\fBAlt\-z:\fR Switch to previous sorting method
-.TP
-\fBAlt\-x:\fR Switch to next sorting method
-.TP
-\fBCtrl\-x:\fR Launch a new instance of \fBclifm\fR
-.TP
-\fBCtrl\-y:\fR Copy the contents of the line buffer to the clipboard \fB(1)\fR
-.TP
-\fBF1:\fR Go to the manpage
-.TP
-\fBF2:\fR List commands
-.TP
-\fBF3:\fR List keybindings
-.TP
-\fBF6:\fR Open the MIME list file
-.TP
-\fBF7:\fR Open the shotgun configuration file
-.TP
-\fBF8:\fR Open the current color scheme file
-.TP
-\fBF9:\fR Open the keybindings file
-.TP
-\fBF10:\fR Open the main configuration file
-.TP
-\fBF11:\fR Open the bookmarks file
-.TP
-\fBF12:\fR Quit
+.sp
+The following is the list of default keyboard shortcuts:
+
+.TS
+allbox tab(:);
+lb lb
+lb l.
+Key : Description
+Ctrl\-Alt\-j : Switch to vi editing mode
+Ctrl\-Alt\-e : Switch back to emacs editing mode (default)
+Right, Ctrl\-f : Accept the entire current suggestion
+Alt\-Right, Alt\-f : Accept the first suggested word (up to first slash or space)
+Alt\-c : Clear the current command line buffer
+Alt\-q : Delete last word (up to last slash or space)
+Alt\-i, Alt\-. : Toggle hidden files on/off
+Alt\-l : Toggle long view mode on/off
+Alt\-+ : Toggle follow links (long view only)
+Alt\-g : Toggle list\-directories\-first on/off
+Alt\-, : Toggle list only directories on/off
+Ctrl\-Alt\-l : Toggle max file name length on/off
+Ctrl\-Alt\-i, Alt\-TAB : Toggle disk usage analyzer on/off
+Alt\-w : Toggle full path file names in virtual directories
+Ctrl\-l : Refresh the screen (reprint the list of files in the current directory)
+Alt\-t : Clear program messages
+Alt\-m : List mountpoints
+Alt\-b : Launch the Bookmarks Manager
+Alt\-h : Show directory history
+Alt\-n : Create new file or directory
+Alt\-s : Open the Selection Box
+Alt\-\- : Launch the files previewer (\fIview\fR command)
+Alt\-a : Select all files in the current working directory
+Alt\-d : Deselect all selected files
+Alt\-0 : Run MAS, the files pager
+Alt\-p : Change to pinned directory
+Alt\-1 : Switch to workspace 1
+Alt\-2 : Switch to workspace 2
+Alt\-3 : Switch to workspace 3
+Alt\-4 : Switch to workspace 4
+.TE
+
+.TS
+allbox tab(:);
+lb lb
+lb l.
+Key : Description
+Alt\-r : Change to root directory
+Alt\-e, Home : Change to home directory
+Alt\-u, Shift\-Up : Change to parent directory
+Alt\-j, Shift\-Left : Change to previous visited directory
+Alt\-k, Shift\-Right : Change to next visited directory
+Ctrl\-Alt\-o : Switch to previous profile
+Ctrl\-Alt\-p : Switch to next profile
+Ctrl\-Alt\-a : Archive selected files
+Ctrl\-Alt\-e : Export selected files
+Ctrl\-Alt\-r : Rename selected files
+Ctrl\-Alt\-d : Remove selected files
+Ctrl\-Alt\-t : Trash selected files
+Ctrl\-Alt\-u : Restore trashed files
+Ctrl\-Alt\-g : Open/change-to last selected file/directory
+Ctrl\-Alt\-n : Move selected files into the current directory
+Ctrl\-Alt\-v : Copy selected files into the current directory
+Alt\-y : Toggle light mode on/off
+Alt\-z : Switch to previous sorting method
+Alt\-x : Switch to next sorting method
+Ctrl\-x : Launch a new instance of \fBclifm\fR
+Ctrl\-y : Copy the contents of the line buffer to the clipboard \fB(1)\fR
+F1 : Go to the manpage
+F2 : List commands
+F3 : List keybindings
+F6 : Open the MIME list file
+F7 : Open the shotgun configuration file
+F8 : Open the current color scheme file
+F9 : Open the keybindings file
+F10 : Open the main configuration file
+F11 : Open the bookmarks file
+F12 : Quit
+.TE
+
 .TP
 \fB(1)\fR This shortcut is bound to the \fIxclip\fR plugin. See the \fBPLUGINS\fR section below for more information.
 .TP
-\fBNOTE\fR: Some of these keybindings might not work on your console/terminal emulator, depending on your system. Some useful tips on this regard:
+\fBCustomizing keybindings\fR
+.TP
+The above are the default keyboard shortcuts. However, they can be customized using the \fIkb bind\fR command (for more information consult the description for the \fIkb\fR command above).
+.TP
+The key bindings configuration file can also be manually edited using the \fIkb edit\fR command (for more details take a look at the description provided by this file itself).
+.TP
+.B Readline key bindings
+.TP
+Readline key bindings for command line editing, such as \fICtrl\-a\fR, to move the cursor to the beginning of the line, or \fICtrl\-e\fR, to move it to the end, should work out of the box. Of course, you can modify these key bindings by editing the \fI~/.config/clifm/readline.clifm\fR file, following the same rules used by readline itself for the \fI~/.inputrc\fR file. For more information consult the readline documentation (\fBreadline\fR(3)).
+.TP
+.B Keybindings for plugins
+.TP
+\fBclifm\fR provides sixteen customizable keybindings for custom plugins. The procedure for setting a keybinding for a plugin is the following:
+ 1) Copy your plugin to the plugins directory (or use any of the plugins already in there)
+ 2) Link pluginx (where \'x\' is the plugin number [1\-16]) to your plugin using the \'actions edit\' command. E.g.: "plugin1=myplugin.sh"
+ 3) Set a keybinding for pluginx using the \'kb edit\' command. E.g.: "plugin1:\\M\-7"
+.TP
+.B Troubleshooting
+.TP
+Some of these key bindings might not work on your console/terminal emulator, depending on your system. Some useful tips on this regard:
+.TP
 Haiku terminal: Most of these keybindings won\'t work on the Haiku terminal, since Alt plays here the role Ctrl usually plays in most other systems (see the Haiku documentation). To fix this, set your custom keybindings.
 .TP
 Kernel built-in console: Key sequences involving the Shift key (S\-up, S\-left, and S\-right in our case) will just not work. Use the alternative key sequences instead: M\-u, M\-j, and M\-k respectively
@@ -1493,52 +1455,6 @@ Terminology/Yakuake: Shift+left and Shift+right are already bound to other funct
 Of course, the above two procedures should be similar in case of keybinding issues in other terminal emulators.
 .TP
 In case some of these keybindings are already used by your Window Manager, you only need to unbind the key or rebind the corresponding function to another key. Since each Window Manager uses its own mechanisms to set/unset keybindings, you should consult the appropriate manual.
-.TP
-\fBCustomizing keybindings\fR
-.TP
-The above are the default keyboard shortcuts. However, they can be freely modified using the \'kb edit\' command (or pressing F9), or editing the keybindings file (see the \fBFILES\fR section below) to your liking.
-.TP
-Since \fBclifm\fR does not depend on the curses library, keybindings are set up via ANSI escape codes, for example, "\e[17~" for the F6 key. The two main difficulties with ANSI escape codes are: 1) They are not intuitive at all, and 2) They vary depending on the terminal emulator used. This is why we provide a plugin (kbgen) to more easily configure your keybindings.
-.TP
-The plugin can be found in the plugins directory as a C source file. The first step, therefore, is to compile this source file to produce a binary file. Compile as follows:
-.TP
- gcc \-o kbgen kbgen.c
-.TP
-\fBNote\fR: Depending on your system, you might need to link against the curses library adding either \fB\-lcurses\fR or \fB\-lncurses\fR to the above line. 
-.TP
-Now, run the plugin by entering \'./kbgen\'. Use either octal, hexadecimal codes or symbols. Example: For F12 'kbgen' will print the following lines:
-.sp
- Hex  | Oct  | Symbol
- \-\-\-\- | \-\-\-\- | \-\-\-\-\-\-
- \\x1b | \\033 | ESC (\\e)
- \\x5b | \\133 | [
- \\x32 | \\062 | 2
- \\x34 | \\064 | 4
- \\x7e | \\176 | ~
-.TP
-In this case, supposing you want to use F12 to open the configuration file, the keybinding would be any of the following:
-.sp
- open\-config:\\x1b\\x5b\\x32\\x34\\x7e (Hex)
- open\-config:\\033\\133\\062\\064\\176 (Oct)
- open\-config:\\e[24~ (Symbol)
-.TP
-GNU emacs escape sequences are also allowed (e.g.: "\\M\-a", Alt\-a in most keyboards, or "\\C\-r" for Ctrl\-r). Some codes, especially those involving keys like Ctrl or the arrow keys, vary depending on the terminal emulator and the system settings. These keybindings should be set up thus on a per terminal basis. You can also consult the terminfo database via the \fIinfocmp\fR command. See \fBterminfo\fR(5) and \fBinfocmp\fR(1).
-.TP
-.B Readline keybindings
-.TP
-System readline keybindings for command line editing, such as \fICtrl\-a\fR, to move the cursor to the beginning of the line, or \fICtrl\-e\fR, to move it to the end, should work out of the box. Of course, you can modify readline keybindings using the \fI$HOME/.inputrc\fR file, either globally or for some specific terminal or application. In this latter case, it is possible to set keybindings specifically for \fBclifm\fR using the \fIapplication\fR construct, that is, telling readline that the following keybindings apply only to \fBclifm\fR. For example, to bind the function "kill\-whole\-line" to \fICtrl\-b\fR, add the following lines to your \fI.inputrc\fR file:
-.sp
- $if clifm
- "\\C\-b": kill\-whole\-line
- $endif
-.TP
-.B Keybindings for plugins
-.TP
-\fBclifm\fR provides sixteen customizable keybindings for custom plugins. The procedure for setting a keybinding for a plugin is the following:
- 1) Copy your plugin to the plugins directory (or use any of the plugins already in there)
- 2) Link pluginx (where \'x\' is the plugin number [1\-16]) to your plugin using the \'actions edit\' command. E.g.: "plugin1=myplugin.sh"
- 3) Set a keybinding for pluginx using the \'kb edit\' command. E.g.: "plugin1:\\M\-7"
-
 .SH 7. THEMING
 .TP
 All customization settings (theming) are made from a single configuration file (the color scheme file), installed by default in \fIXDG_DATA_DIRS/clifm/colors\fR (usuallly \fI/usr/local/share/clifm/colors\fR or \fI/usr/share/clifm/colors\fR), though color scheme files found in \fIXDG_CONFIG_HOME/clifm/colors\fR (usually \fIHOME/.config/clifm/colors\fR) take precedence.
