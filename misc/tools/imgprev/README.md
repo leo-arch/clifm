@@ -78,7 +78,7 @@ The first parameter (thumbnailing method) could be any of the following:
 # If the clifmimg script cannot be found under '~/.config/clifm/', you can copy it from the data
 # directory, usually '/usr/local/share/clifm/plugins/'.
 
-^application/.*(officedocument|msword|ms-excel|opendocument).*=~/.config/clifm/clifmimg doc;
+^application/.*(officedocument|msword|ms-excel|ms-powerpoint|opendocument).*=~/.config/clifm/clifmimg doc;
 ^text/rtf$=~/.config/clifm/clifmimg doc;
 ^application/epub\+zip$=~/.config/clifm/clifmimg epub;
 ^application/pdf$=~/.config/clifm/clifmimg pdf;
