@@ -26,19 +26,19 @@
 # 2) Edit shotgun's config file (F7 or "view edit") and add the following lines at
 # the top of the file (to make sure they won't be overriden by previous directives):
 #
-#X:^application/.*(officedocument|msword|ms-excel|ms-powerpoint|opendocument).*=~/.config/clifm/clifmimg doc;
-#X:^text/rtf$=~/.config/clifm/clifmimg doc;
-#X:^application/epub\+zip$=~/.config/clifm/clifmimg epub;
-#X:^application/x-mobipocket-ebook$=~/.config/clifm/clifmimg mobi;
-#X:.*/pdf$=~/.config/clifm/clifmimg pdf
-#X:^image/vnd.djvu=~/.config/clifm/clifmimg djvu
-#X:^image/svg\+xml$=~/.config/clifm/clifmimg svg;
-#X:^image/gif$=~/.config/clifm/clifmimg gif;
-#X:^image/.*=~/.config/clifm/clifmimg image;
-#X:^video/.*=~/.config/clifm/clifmimg video;
-#X:^audio/.*=~/.config/clifm/clifmimg audio;
-#X:^application/postscript$=~/.config/clifm/clifmimg postscript;
-#X:^font/.*|^application/(font.*|.*opentype)=~/.config/clifm/clifmimg font;
+#^application/.*(officedocument|msword|ms-excel|ms-powerpoint|opendocument).*=~/.config/clifm/clifmimg doc;
+#^text/rtf$=~/.config/clifm/clifmimg doc;
+#^application/epub\+zip$=~/.config/clifm/clifmimg epub;
+#^application/x-mobipocket-ebook$=~/.config/clifm/clifmimg mobi;
+#.*/pdf$=~/.config/clifm/clifmimg pdf
+#^image/vnd.djvu=~/.config/clifm/clifmimg djvu
+#^image/svg\+xml$=~/.config/clifm/clifmimg svg;
+#^image/gif$=~/.config/clifm/clifmimg gif;
+#^image/.*=~/.config/clifm/clifmimg image;
+#^video/.*=~/.config/clifm/clifmimg video;
+#^audio/.*=~/.config/clifm/clifmimg audio;
+#^application/postscript$=~/.config/clifm/clifmimg postscript;
+#^font/.*|^application/(font.*|.*opentype)=~/.config/clifm/clifmimg font;
 #
 # This instructs clifm to use this script to generate previews for the
 # specified files.
@@ -228,6 +228,11 @@ gen_svg_preview() {
 	print_err_msg "magick" "$?"
 }
 
+gen_img_convert_preview() {
+	magick -- "$1" "$2" >/dev/null 2>&1 && return 0
+	print_err_msg "magick" "$?"
+}
+
 #gen_comic_preview() {
 #	comicthumb "$file" "$PCACHE" 1024 >/dev/null 2>&1 && return 0
 #	print_err_msg "comicthumb" "$?"
@@ -235,7 +240,18 @@ gen_svg_preview() {
 
 main() {
 	case "$type" in
-		"image") display "$file"
+		"image")
+			case "$file" in
+			*.bmp|*.BMP|*.ico|*.ICO)
+				hash_file "$file"
+				if [ -f "${PCACHE}.jpg" ] || gen_img_convert_preview "$file" "${PCACHE}.jpg" >/dev/null 2>&1; then
+					display "${PCACHE}.jpg"
+				fi
+			;;
+			*)
+				display "$file"
+			;;
+			esac
 		;;
 		"gif")
 			hash_file "$file"
