@@ -5,31 +5,31 @@
 # Authors: cirala, L. Abramovich
 
 # Description
-# Convert (if necessary) and preview images via an already running
-# instance of ueberzug (executed by the 'clifmrun' script) or the kitty
-# image protocol. Thumbnails are cached (in $CACHE_DIR) using file hashes
-# as names.
+# Convert (if necessary) and generate previews (as thumbnails) for images.
+# Thumbnails are cached (in $CACHE_DIR) using file hashes as names.
 #
-# The first parameter tells what kind of file is to be converted/displayed
+# The first parameter tells what file type is to be converted/displayed
+# (supported types: image, gif, video, epub, mobi, pdf, svg, doc, djvu, audio, font, postscript)
 # The second one is the file name to be converted/displayed.
 
 ######################
 # Usage
 ######################
-# This script is intended to be used by shotgun, clifm's built-in previewer,
+#
+# This script is intended to be used by shotgun, Clifm's built-in previewer,
 # to generate and display image previews for several file types.
 # Follow these steps to enable it:
 #
-# 1) Copy both this script and 'clifmrun' somewhere in you $PATH (say
-# /usr/local/bin) (otherwise, just replace 'clifmimg' in point 2 below
-# by 'path/to/clifmimg').
+# 1) (Ueberzug/kitty only) Copy 'clifmrun' somewhere in you $PATH (say
+# /usr/local/bin)
 #
-# 2) Edit shotgun's config file (F7) and add the following lines at the top
-# of the file (to make sure they won't be overriden by previous lines):
+# 2) Edit shotgun's config file (F7 or "view edit") and add the following lines at
+# the top of the file (to make sure they won't be overriden by previous directives):
 #
-#X:^application/.*(officedocument|msword|ms-excel|opendocument).*=~/.config/clifm/clifmimg doc;
+#X:^application/.*(officedocument|msword|ms-excel|ms-powerpoint|opendocument).*=~/.config/clifm/clifmimg doc;
 #X:^text/rtf$=~/.config/clifm/clifmimg doc;
-#X:N:.*\.epub$=~/.config/clifm/clifmimg epub;
+#X:^application/epub\+zip$=~/.config/clifm/clifmimg epub;
+#X:^application/x-mobipocket-ebook$=~/.config/clifm/clifmimg mobi;
 #X:.*/pdf$=~/.config/clifm/clifmimg pdf
 #X:^image/vnd.djvu=~/.config/clifm/clifmimg djvu
 #X:^image/svg\+xml$=~/.config/clifm/clifmimg svg;
@@ -46,33 +46,36 @@
 # comment out the corresponding line or change its value to your preferred
 # previewing application.
 #
-# 4) Run clifm via the 'clifmrun' script (which takes care of running an
-# instance of ueberzug and set the appropriate values so that it can be used
-# by clifm via shotgun, which calls this script to generate previews).
+# 4) (Ueberzug/kitty only): Run clifm via the 'clifmrun' script (which
+# takes care of running an instance of ueberzug/kitty and set the appropriate
+# values so that it can be used by Clifm via shotgun, which calls this script
+# to generate previews).
 
-# Dependencies:
-# ueberzug (of course, this one is used to display images)
-# md5sum or md5 (generate file hashes)
+######################
+# Dependencies
+######################
+#
+# ueberzug/kitty terminal (optional)
+# md5sum/md5 (generate file hashes)
 #
 # The following applications are used to generate thumbnails:
+#
 # ffmpegthumbnailer (Video files)
-# epub-thumbnailer (ePub files)
+# gnome-epub-thumbnailer/epub-thumbnailer (ePub files)
+# gnome-mobi-thumbnailer (Mobi files)
 # pdftoppm (PDF files - provided by the poppler package)
 # ddjvu (DjVu files - provided by the djvulibre package)
 # ffmpeg (Audio files)
 # fontpreview (Font files)
 # libreoffice (Office files: odt, docx, xlsx, etc)
 # gs (Postscript files - provided by the ghostscript package)
-# convert (GIF, SVG files, and sixel images - provided by the imagemagick package)
+# magick (GIF, SVG files, and sixel images - provided by the imagemagick package)
 #
 # Note: The exact package names provinding these programs vary depending
 # on your OS/distribution, but ususally they have the same name as the program
 
 type="$1"
 file="$2"
-
-default_width=640
-default_height=480
 
 CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/clifm/previews"
 CACHEDIRTAG_FILE="$CACHE_DIR/CACHEDIR.TAG"
@@ -91,7 +94,7 @@ hash_file() {
 		PCACHE="$CACHE_DIR/$(md5 -q "$1")"
 	else
 		printf "clifm: No hashing application found.\nEither md5sum or md5 \
-are required.\n" >&2
+is required.\n" >&2
 		exit 1
 	fi
 }
@@ -117,8 +120,8 @@ display() {
 ## Uncomment any of the following previewing methods (instead of kitty or ueberzug).
 # If using any of these methods, there is no need to run via clifmrun; just run clifm as always.
 #
-# New: since 0.44, fzf added sixel support (experimental).
-#	chafa -f sixel -s "${C}x$((L - 1))" "$1"; exit 0
+# New: since 0.44, fzf added sixel support.
+	chafa -f sixel -s "${C}x$((L - 1))" "$1"; exit 0
 
 #	chafa -f symbols -s "${C}x${L}" "$1"; exit 0
 #	pixterm -s 2 -tc "${C}" -tr "${L}" "$1"; exit 0
@@ -153,80 +156,158 @@ display() {
 	fi
 }
 
+print_err_msg() {
+	case "$2" in
+		127) echo "${1}: Command not found";;
+		*) echo "${1}: Error generating preview (code: $2)";;
+	esac
+	return 1
+}
+
+gen_epub_preview() {
+	gnome-epub-thumbnailer -s 1024 "$1" "$2" >/dev/null 2>&1 && return 0
+	print_err_msg "gnome-epub-thumbnailer" "$?"
+	epub-thumbnailer "$1" "$2" 1024 >/dev/null 2>&1 && return 0
+	print_err_msg "epub-thumbnailer" "$?"
+}
+
+gen_mobi_preview() {
+	gnome-mobi-thumbnailer -s 1024 "$1" "$2" >/dev/null 2>&1 && return 0
+	print_err_msg "gnome-mobi-thumbnailer" "$?"
+}
+
+gen_pdf_preview() {
+	pdftoppm -jpeg -f 1 -singlefile -scale-to 1920 "$1" "$2" >/dev/null 2>&1 && return 0
+	print_err_msg "pdftoppm" "$?"
+}
+
+gen_gif_preview() {
+	magick "$1"[0] -resize 640x480\> "$2" >/dev/null 2>&1 && return 0
+	print_err_msg "magick" "$?"
+}
+
+gen_video_preview() {
+	ffmpegthumbnailer -i "$1" -o "$2" -s 0 -q 5 >/dev/null 2>&1 && return 0
+	print_err_msg "ffmpegthumbnailer" "$?"
+}
+
+gen_doc_preview() {
+	format="png"
+	if libreoffice --headless --convert-to "$format" "$1" \
+	--outdir "$CACHE_DIR" >/dev/null 2>&1; then
+		f="${1##*/}"
+		mv "$CACHE_DIR/${f%.*}.$format" "${2}.$format" && return 0
+	fi
+
+	print_err_msg "libreoffice" "$?"
+}
+
+gen_djvu_preview() {
+	ddjvu -format=tiff -quality=90 -page=1 "$1" "$2" >/dev/null 2>&1 && return 0
+	print_err_msg "ddjvu" "$?"
+}
+
+gen_audio_preview() {
+	ffmpeg -hide_banner -i "$1" "$2" -y >/dev/null 2>&1 && return 0
+	print_err_msg "ffmpeg" "$?"
+}
+
+gen_font_preview() {
+	fontpreview -i "$1" -o "$2" >/dev/null 2>&1 && return 0
+	print_err_msg "fontpreview" "$?"
+}
+
+gen_postscript_preview() {
+	gs -sDEVICE=jpeg -dJPEGQ=100 -dNOPAUSE -dBATCH -dSAFER -r300 \
+		-sOutputFile="$2" "$1" >/dev/null 2>&1 && return 0
+	print_err_msg "gs (ghostscript)" "$?"
+}
+
+gen_svg_preview() {
+	magick -background none -size 1920x1080 "$1" "$2" >/dev/null 2>&1 && return 0
+	print_err_msg "magick" "$?"
+}
+
+#gen_comic_preview() {
+#	comicthumb "$file" "$PCACHE" 1024 >/dev/null 2>&1 && return 0
+#	print_err_msg "comicthumb" "$?"
+#}
+
 main() {
 	case "$type" in
-		"image") display "$file" ;;
+		"image") display "$file"
+		;;
 		"gif")
 			hash_file "$file"
-			! [ -f "${PCACHE}.jpg" ] && \
-				magick "$file"[0] -resize 640x480\> "${PCACHE}.jpg"
-			display "${PCACHE}.jpg"
+			if [ -f "${PCACHE}.jpg" ] || gen_gif_preview "$file" "${PCACHE}.jpg"; then
+				display "${PCACHE}.jpg"
+			fi
 		;;
 		"video")
 			hash_file "$file"
-			! [ -f "${PCACHE}.jpg" ] && \
-				ffmpegthumbnailer -i "$file" -o "${PCACHE}.jpg" -s 0 -q 5
-			display "${PCACHE}.jpg"
-			;;
+			if [ -f "${PCACHE}.jpg" ] || gen_video_preview "$file" "${PCACHE}.jpg"; then
+				display "${PCACHE}.jpg"
+			fi
+		;;
 		"epub")
 			hash_file "$file"
-			! [ -f "${PCACHE}.jpg" ] && \
-				gnome-epub-thumbnailer -s 1024 "$file" "${PCACHE}.jpg" >/dev/null 2>&1
-#				epub-thumbnailer "$file" "${PCACHE}.jpg" 1024 >/dev/null 2>&1
-			display "${PCACHE}.jpg"
-			;;
+			if [ -f "${PCACHE}.jpg" ] || gen_epub_preview "$file" "${PCACHE}.jpg"; then
+				display "${PCACHE}.jpg"
+			fi
+		;;
+		"mobi")
+			hash_file "$file"
+			if [ -f "${PCACHE}.jpg" ] || gen_mobi_preview "$file" "${PCACHE}.jpg"; then
+				display "${PCACHE}.jpg"
+			fi
+		;;
 		"pdf")
 			hash_file "$file"
-			! [ -f "${PCACHE}.jpg" ] && \
-				pdftoppm -jpeg -f 1 -singlefile -scale-to 1920 "$file" "$PCACHE"
-			display "${PCACHE}.jpg"
-			;;
+			if [ -f "${PCACHE}.jpg" ] || gen_pdf_preview "$file" "$PCACHE"; then
+				display "${PCACHE}.jpg"
+			fi
+		;;
 		"djvu")
 			hash_file "$file"
-			! [ -f "${PCACHE}.jpg" ] && \
-				ddjvu -format=tiff -quality=90 -page=1 "$file" "$PCACHE.jpg"
-			display "${PCACHE}.jpg"
-			;;
+			if [ -f "${PCACHE}.jpg" ] || gen_djvu_preview "$file" "${PCACHE}.jpg"; then
+				display "${PCACHE}.jpg"
+			fi
+		;;
 		"audio")
 			hash_file "$file"
-			! [ -f "${PCACHE}.jpg" ] && \
-				ffmpeg -hide_banner -i "$file" "${PCACHE}.jpg" -y >/dev/null 2>&1
-			display "${PCACHE}.jpg"
-			;;
+			if [ -f "${PCACHE}.jpg" ] || gen_audio_preview "$file" "${PCACHE}.jpg"; then
+				display "${PCACHE}.jpg"
+			fi
+		;;
 		"font")
 			hash_file "$file"
-			! [ -f "${PCACHE}.jpg" ] && \
-				fontpreview -i "$file" -o "${PCACHE}.jpg"
-			display "${PCACHE}.jpg"
-			;;
+			if [ -f "${PCACHE}.jpg" ] || gen_font_preview "$file" "${PCACHE}.jpg"; then
+				display "${PCACHE}.jpg"
+			fi
+		;;
 		"doc")
 			hash_file "$file"
-			format="png"
-			if ! [ -f "${PCACHE}.$format" ]; then
-				libreoffice --headless --convert-to "$format" "$file" \
-				--outdir "$CACHE_DIR" > /dev/null 2>&1 || exit 1
-				f="${file##*/}"
-				mv "$CACHE_DIR/${f%.*}.$format" "${PCACHE}.$format"
+			if [ -f "${PCACHE}.png" ] || gen_doc_preview "$file" "$PCACHE"; then
+				display "${PCACHE}.png"
 			fi
-			display "${PCACHE}.$format"
 		;;
 		"postscript")
 			hash_file "$file"
-			! [ -f "${PCACHE}.jpg" ] && \
-				gs -sDEVICE=jpeg -dJPEGQ=100 -dNOPAUSE -dBATCH -dSAFER -r300 \
-				-sOutputFile="${PCACHE}.jpg" "$file" > /dev/null 2>&1
-			display "${PCACHE}.jpg"
+			if [ -f "${PCACHE}.jpg" ] || gen_postscript_preview "$file" "${PCACHE}.jpg"; then
+				display "${PCACHE}.jpg"
+			fi
 		;;
 		"svg")
 			hash_file "$file"
-			! [ -f "${PCACHE}.png" ] && \
-				magick -background none -size 1920x1080 "$file" "${PCACHE}.png"
-			display "${PCACHE}.png"
+			if [ -f "${PCACHE}.png" ] || gen_svg_preview "$file" "${PCACHE}.png"; then
+				display "${PCACHE}.png"
+			fi
 		;;
 #		"comic")
 #			hash_file "$file"
-#			! [ -f "${PCACHE}.png" ] && comicthumb "$file" "$PCACHE" 1024
-#			display "${PCACHE}.png"
+#			if [ -f "${PCACHE}.png" ] || gen_comic_preview "$file" "$PCACHE"; then
+#				display "${PCACHE}.png"
+#			fi
 #		;;
         *)
     esac
