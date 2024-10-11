@@ -121,7 +121,7 @@ display() {
 # If using any of these methods, there is no need to run via clifmrun; just run clifm as always.
 #
 # New: since 0.44, fzf added sixel support.
-	chafa -f sixel -s "${C}x$((L - 1))" "$1"; exit 0
+#	chafa -f sixel -s "${C}x$((L - 1))" "$1"; exit 0
 
 #	chafa -f symbols -s "${C}x${L}" "$1"; exit 0
 #	pixterm -s 2 -tc "${C}" -tr "${L}" "$1"; exit 0
