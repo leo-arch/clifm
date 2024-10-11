@@ -58,6 +58,7 @@ The first parameter (thumbnailing method) could be any of the following:
 * video
 * gif
 * epub
+* mobi
 * pdf
 * djvu
 * audio
@@ -81,6 +82,7 @@ The first parameter (thumbnailing method) could be any of the following:
 ^application/.*(officedocument|msword|ms-excel|ms-powerpoint|opendocument).*=~/.config/clifm/clifmimg doc;
 ^text/rtf$=~/.config/clifm/clifmimg doc;
 ^application/epub\+zip$=~/.config/clifm/clifmimg epub;
+^application/x-mobipocket-ebook$=~/.config/clifm/clifmimg mobi;
 ^application/pdf$=~/.config/clifm/clifmimg pdf;
 ^image/vnd.djvu=~/.config/clifm/clifmimg djvu;
 ^image/svg\+xml$=~/.config/clifm/clifmimg svg;
