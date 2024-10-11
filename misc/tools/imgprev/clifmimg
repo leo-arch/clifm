@@ -244,7 +244,7 @@ main() {
 			case "$file" in
 			*.bmp|*.BMP|*.ico|*.ICO|*.pcx|*.PCX|*.tga|*.TGA)
 				hash_file "$file"
-				if [ -f "${PCACHE}.jpg" ] || gen_img_convert_preview "$file" "${PCACHE}.jpg" >/dev/null 2>&1; then
+				if [ -f "${PCACHE}.jpg" ] || gen_img_convert_preview "$file" "${PCACHE}.jpg"; then
 					display "${PCACHE}.jpg"
 				fi
 			;;
