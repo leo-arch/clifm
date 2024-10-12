@@ -248,6 +248,8 @@ set_fzf_preview_border_type(void)
 	case 'b':
 		if (p[8] == 'o' && p[9] == 't')
 			fzf_preview_border_type = FZF_BORDER_BOTTOM;
+		else if (p[8] == 'l')
+			fzf_preview_border_type = FZF_BORDER_BLOCK;
 		else
 			fzf_preview_border_type = FZF_BORDER_BOLD;
 		break;
@@ -257,10 +259,15 @@ set_fzf_preview_border_type(void)
 	case 'n': fzf_preview_border_type = FZF_BORDER_NONE; break;
 	case 'r':
 		fzf_preview_border_type = p[8] == 'o'
-			? FZF_BORDER_ROUNDED : FZF_BORDER_NONE;
+			? FZF_BORDER_ROUNDED : FZF_BORDER_RIGHT;
 		break;
 	case 's': fzf_preview_border_type = FZF_BORDER_SHARP; break;
-	case 't': fzf_preview_border_type = FZF_BORDER_TOP; break;
+	case 't':
+		if (p[8] == 'o')
+			fzf_preview_border_type = FZF_BORDER_TOP;
+		else
+			fzf_preview_border_type = FZF_BORDER_THINBLOCK;
+		break;
 	case 'v': fzf_preview_border_type = FZF_BORDER_VERT; break;
 	default: break;
 	}

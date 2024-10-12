@@ -849,16 +849,19 @@ extern time_t curdir_mtime;
 #define PROP_SIZE_HUMAN  2
 
 /* Macros for fzf_preview_border_type. */
-#define FZF_BORDER_BOLD    0
-#define FZF_BORDER_BOTTOM  1
-#define FZF_BORDER_DOUBLE  2
-#define FZF_BORDER_HORIZ   3
-#define FZF_BORDER_LEFT    4
-#define FZF_BORDER_NONE    5
-#define FZF_BORDER_ROUNDED 6
-#define FZF_BORDER_SHARP   7
-#define FZF_BORDER_TOP     8
-#define FZF_BORDER_VERT    9
+#define FZF_BORDER_BOLD      0
+#define FZF_BORDER_BOTTOM    1
+#define FZF_BORDER_DOUBLE    2
+#define FZF_BORDER_HORIZ     3
+#define FZF_BORDER_LEFT      4
+#define FZF_BORDER_NONE      5
+#define FZF_BORDER_ROUNDED   6
+#define FZF_BORDER_SHARP     7
+#define FZF_BORDER_TOP       8
+#define FZF_BORDER_VERT      9
+#define FZF_BORDER_BLOCK     10
+#define FZF_BORDER_THINBLOCK 11
+#define FZF_BORDER_RIGHT     12
 
 /* Flags to skip fuzzy matching based on what we're comparing. */
 #define FUZZY_FILES_ASCII 0
