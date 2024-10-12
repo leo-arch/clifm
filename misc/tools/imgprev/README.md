@@ -6,7 +6,6 @@
 
 ## Table of contents
 
-* [Description](#description)
 * [Usage](#usage)
 * [General procedure](#general-procedure)
 * [Dependencies](#dependencies)
@@ -22,54 +21,9 @@
 
 ---
 
-## Description
-
-Based on [vifmimg](https://github.com/cirala/vifmimg), these scripts ([clifmimg](https://github.com/leo-arch/clifm/blob/master/misc/tools/imgprev/clifmimg) and [clifmrun](https://github.com/leo-arch/clifm/blob/master/misc/tools/imgprev/clifmrun)) are intended to provide image preview capabilities to **clifm** using either [ueberzug](https://github.com/ueber-devel/ueberzug) (default)<sup>1</sup> or the [kitty image protocol](https://sw.kovidgoyal.net/kitty/graphics-protocol/) (currently experimental and slower). Bear in mind that `ueberzug` only works on X11.
-
-For the Sixel method, consult the [Sixel section](#sixel-graphics-and-fzf) below.
-
-<sup>1</sup> Since the original `ueberzug` is not maintained anymore, we strongly recommend using this fork instead: https://github.com/ueber-devel/ueberzug.
-
-### clifmrun
-
-Launch an instance of `ueberzug` and set the appropriate values (as environment variables) so that it can be used by [shotgun](https://github.com/leo-arch/clifm/wiki/Advanced#shotgun) (clifm's built-in previewer) to display images via `clifmimg` (see below).
-
-Parameters passed to `clifmrun` will be passed to **clifm** itself.
-
-Sixel graphics and the kitty image protocol are also supported. See the [Usage section](#usage) below.
-
-### clifmimg
-
-Convert (if necessary) and preview images (thumbnails) via an already running instance of `ueberzug`, launched by `clifmrun` (see above).
-
-Thumbnails are cached (in the directory pointed to by the `CACHE_DIR` variable, by default `${XDG_CACHE_HOME:-$HOME/.cache}/clifm/previews`, usually (`$HOME/.cache/clifm/previews`)) using file hashes as names.
-
-It takes two parameters: the first one tells what kind of file is to be converted/displayed. The second one is the file name to be converted/displayed. For example:
-
-```sh
-clifmimg doc /path/to/file.docx
-```
-
-generates a thumbnail of `file.docx` using the method named `doc`.
-
-The first parameter (thumbnailing method) could be any of the following:
-
-* image
-* video
-* gif
-* epub
-* mobi
-* pdf
-* djvu
-* audio
-* font
-* doc
-* postscript
-* svg
-
 ## Usage
 
-1. Run `view edit` (<kbd>F7</kbd> is also available) to edit [shotgun's](https://github.com/leo-arch/clifm/wiki/Advanced#shotgun) configuration file (`$HOME/.config/clifm/profiles/PROFILE/preview.clifm`), and add the following lines at the top of the file (to make sure they won't be overriden by previous directives):
+1. Run `view edit` (<kbd>F7</kbd> is also available) to edit [shotgun's](https://github.com/leo-arch/clifm/wiki/Advanced#shotgun) configuration file (`$HOME/.config/clifm/profiles/PROFILE/preview.clifm`), and uncomment the following lines from the top of the file:
 
 ```sh
 ...
@@ -98,64 +52,62 @@ The first parameter (thumbnailing method) could be any of the following:
 
 ```
 
-This instructs **clifm** to use `clifmimg` to generate previews for the specified file names or file types (both for TAB completion (in [fzf mode](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion)) and via the [`view` command](https://github.com/leo-arch/clifm/wiki/Introduction#view)).
+This instructs **clifm** to use the [clifmimg script](https://github.com/leo-arch/clifm/blob/master/misc/tools/imgprev/clifmimg) to generate previews for the specified file names or file types (both for TAB completion (in [fzf mode](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion)) and via the [`view` command](https://github.com/leo-arch/clifm/wiki/Introduction#view)).
 
 In case you don't want image preview for some of these files types, just comment out the corresponding line or change its value to your preferred previewing application.
 
-2. Edit the `display()` function in the `clifmimg` script and choose your preferred previewing method. It default to `ueberzug`.
+2. If using either the `ueberzug` or the `kitty` [methods](#previewing-methods), run **clifm** via the [clifmrun script](https://github.com/leo-arch/clifm/blob/master/misc/tools/imgprev/clifmrun) (you can find it under `~/.config/clifm/` or `DATADIR/clifm/plugins/` (usually, `/usr/local/share/clifm/plugins/` or `/usr/share/clifm/plugins`). Otherwise, run **clifm** as usual.
 
-3. Run **clifm** via the `clifmrun` script (you can find it under `DATADIR/clifm/plugins/`, usually, `/usr/local/share/clifm/plugins/`). In case you're running with fzf (version 0.44 or later) and the sixel method, running `clifmrun` is not necessary.
+### Previewing methods
 
-```sh
-clifmrun
-```
+Available previewing methods are: `sixel`, `ueberzug`, `kitty`, and `ascii`.
 
-### Sixel graphics and Fzf
+The previwing method is controlled by the `method` variable in the `clifmimg` script. By default, this variable is unset, meaning that **clifm** will try to guess the available method. To manually choose a method, set the `method` variable to any of the available methods.
 
-If you have a [sixel capable terminal](https://github.com/saitoha/libsixel#terminal-requirements) and `fzf` (version 0.44 or later) you can easily take advantage of this capability as follows:
+If using either `ueberzug`<sup>1</sup> or `kitty` methods, you must run **clifm** via the `clifmrun` script.
 
-1. Edit the `clifmimg` script and uncomment the `chafa` line (used to generate sixel images):
-```sh
-chafa -f sixel -s "${C}x$((L - 1))" "$1"; exit 0
-```
-2. Run **clifm** as usual (`clifmrun` is **not** required).
+If using rather the `ascii` method, several applications to generate ASCII previews are available: `chafa`, `pixterm`, `img2text`, `viu`, `catimg`, `tiv`, and `timg`. Use the `ascii_method` variable in the `clifmimg` script to set you preferred application. It defaults to `chafa`.
+
+In the case of the `sixel` method, **chafa**(1) is used to generate sixel images.
+
+<sup>1</sup> Since the original `ueberzug` is not maintained anymore, we recommend using this fork instead: https://github.com/ueber-devel/ueberzug.
 
 ### Kitty and Wayland
 
 If running on the kitty terminal you can force the use of the kitty image protocol (instead of `ueberzug`) as follows:
 
 ```sh
-CLIFM_KITTY_NO_UEBERZUG=1 clifmrun --fzfpreview
+CLIFM_KITTY_NO_UEBERZUG=1 clifmrun
 ```
 Note that on Wayland the kitty image protocol will be used by default, so that there is no need to set this variable.
-
-### ASCII/Unicode images
-
-If you prefer a character art method (instead of `ueberzug` or `kitty`), just uncomment the corresponding line in the `display` function in the `clifmimg` file. For example, to use [**chafa**(1)](https://github.com/hpjansson/chafa/):
-
-```sh
-
-display() {
-
-    [ -z ] && exit 1
-
-    chafa -f symbols -s "$((FZF_PREVIEW_COLUMNS - 2))x$((FZF_PREVIEW_LINES))" "$1"; exit 0
-#  pixterm -s 2 -tc "$((FZF_PREVIEW_COLUMNS - 2))" -tr "$FZF_PREVIEW_LINES" "$1"; exit 0
-#  img2txt -H"$FZF_PREVIEW_LINES" -W"$((FZF_PREVIEW_COLUMNS - 2))" "$1"; exit 0
-...
-```
-
-**Note**: In this case, there is no need to run `clifmrun`.
 
 ## General procedure
 
 The steps involved in generating image previews are:
 
-1. `clifmrun` creates an instance of `ueberzug` and then launches **clifm**.
-2. Every time TAB completion is invoked for files (if running in fzf mode), or the [view command](https://github.com/leo-arch/clifm/wiki/Introduction#view) is executed, `fzf` is launched.
+1. The `clifmrun` script prepares the environment to generate image previews (via either `ueberzug` or `kitty`) and then launches **clifm**.<sup>1</sup>
+2. Every time TAB completion is invoked for files (if running in [fzf mode](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion)), or the [view command](https://github.com/leo-arch/clifm/wiki/Introduction#view) is executed, `fzf` is launched.
 3. `fzf` calls shotgun (via `clifm --preview`) to generate a preview of the currently hovered file.
 4. Shotgun executes `clifmimg`, which takes care of genereting a thumbnail of the corresponding file.
-5. Once the thumbnail is generated, `clifmimg` sends the image to `ueberzug`, which takes care of placing it on the fzf preview window.
+5. Once the thumbnail is generated, `clifmimg` takes care of disaplying the thumbnail via any of the available [previewing methods](#previewing-methods).
+
+<sup>1</sup> Parameters passed to `clifmrun` will be passed to **clifm** itself.
+
+### The clifmimg script
+
+This script converts (if necessary) and generates image previews (as thumbnails) for files.
+
+For performance reasons, thumbnails are cached (in the directory pointed to by the `CACHE_DIR` variable, by default `${XDG_CACHE_HOME:-$HOME/.cache}/clifm/previews`, usually (`~/.cache/clifm/previews`)) using file hashes as names.
+
+It takes two parameters: the first one tells the type of file is to be previewed. The second one is the file name to be previewed. For example:
+
+```sh
+clifmimg doc /path/to/file.docx
+```
+
+generates a thumbnail of `file.docx` using the method named `doc`.
+
+The first parameter (thumbnailing method) can be any of the following: `image`, `video`, `audio`, `gif`,  `svg`, `epub`, `mobi`, `pdf`, `djvu`, `doc`, `postscript`, and `font`.
 
 ## Dependencies
 
@@ -165,14 +117,15 @@ The following applications are used to generate thumbnails:
 | --- | --- | --- |
 | `ueberzug` | Image files | Images are displayed directly. No thumbnail generation is required |
 | `ffmpegthumbnailer` | Video files | |
-| `epub-thumbnailer` | ePub files | |
+| `gnome-epub-thumbnailer`/`epub-thumbnailer` | ePub files | |
+| `gnome-mobi-thumbnailer` | Mobi files | |
 | `pdftoppm` | PDF files | Provided by the `poppler` package |
 | `ddjvu` | DjVu files | Provided by the `djvulibre` package |
 | `ffmpeg` | Audio files | |
 | `fontpreview` | Font files |
 | `libreoffice` | Office files (odt, docx, xlsx, etc) | |
 | `gs` | Postscript files | Provided by the `ghostscript` package |
-| `convert` | SVG files | Provided by the `imagemagick` package |
+| `magick` | SVG files | Provided by the `imagemagick` package |
 
 **Note**: The exact package names provinding the above programs vary depending on your OS/distribution, but ususally they have the same name as the corresponding program.
 
@@ -185,4 +138,4 @@ X=$((CLIFM_TERM_COLUMNS - FZF_PREVIEW_COLUMNS - 1)) # 1 extra column: the scroll
 Y=$((CLIFM_FZF_LINE + 2)) # 2 extra lines: menu bar and main toolbar
 ```
 
-If the issue persists, bear in mind that _clifm_ uses the `CPR` (cursor position report) [escape code](https://www.xfree86.org/current/ctlseqs.html) to get the current position of the cursor on the screen (which then is passed to the `clifmimg` script to generate the preview). If your terminal does not support `CPR` (most do), you are out of look: just try another terminal.
+If the issue persists, bear in mind that **clifm** uses the `CPR` (cursor position report) [escape code](https://www.xfree86.org/current/ctlseqs.html) to get the current position of the cursor on the screen (which then is passed to the `clifmimg` script to generate the preview). If your terminal does not support `CPR` (most do), you are out of look: just try another terminal.
