@@ -2133,6 +2133,7 @@ create_config_files(const int just_listing)
 
 	import_data_file("readline.clifm", "readline.clifm", 0);
 	import_data_file("plugins/clifmimg", "clifmimg", 1);
+	import_data_file("plugins/clifmrun", "clifmrun", 1);
 	create_actions_file(actions_file);
 	create_mime_file(mime_file, 0);
 	create_preview_file();

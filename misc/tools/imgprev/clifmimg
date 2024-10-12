@@ -4,55 +4,36 @@
 # All changes are licensed under GPL-3.0
 # Authors: cirala, L. Abramovich
 
-# Description
-# Convert (if necessary) and generate previews (as thumbnails) for images.
+######################
+# DESCRIPTION
+######################
+#
+# Convert (if necessary) and generate previews (as thumbnails) for files.
 # Thumbnails are cached (in $CACHE_DIR) using file hashes as names.
 #
-# The first parameter tells what file type is to be converted/displayed
-# (supported types: image, gif, video, epub, mobi, pdf, svg, doc, djvu, audio, font, postscript)
-# The second one is the file name to be converted/displayed.
+# The first parameter is the file type to be previewed (supported types:
+# image, gif, video, epub, mobi, pdf, svg, doc, djvu, audio, font, postscript)
+# The second parameter is the file name to be previewed.
 
 ######################
-# Usage
+# USAGE
 ######################
 #
 # This script is intended to be used by shotgun, Clifm's built-in previewer,
 # to generate and display image previews for several file types.
 # Follow these steps to enable it:
 #
-# 1) (Ueberzug/kitty only) Copy 'clifmrun' somewhere in you $PATH (say
-# /usr/local/bin)
+# 1) Edit shotgun's config file (via F7 or "view edit") and uncomment the "clifmimg"
+# lines at the top of the file (this instructs Clifm to use this this script to generate
+# previews for the specified file types.
 #
-# 2) Edit shotgun's config file (F7 or "view edit") and add the following lines at
-# the top of the file (to make sure they won't be overriden by previous directives):
+# 2) If using the kitty or ueberzug methods run clifm via the 'clifmrun' script. Otherwise,
+# run clifm as usual.
 #
-#^application/.*(officedocument|msword|ms-excel|ms-powerpoint|opendocument).*=~/.config/clifm/clifmimg doc;
-#^text/rtf$=~/.config/clifm/clifmimg doc;
-#^application/epub\+zip$=~/.config/clifm/clifmimg epub;
-#^application/x-mobipocket-ebook$=~/.config/clifm/clifmimg mobi;
-#.*/pdf$=~/.config/clifm/clifmimg pdf
-#^image/vnd.djvu=~/.config/clifm/clifmimg djvu
-#^image/svg\+xml$=~/.config/clifm/clifmimg svg;
-#^image/gif$=~/.config/clifm/clifmimg gif;
-#^image/.*=~/.config/clifm/clifmimg image;
-#^video/.*=~/.config/clifm/clifmimg video;
-#^audio/.*=~/.config/clifm/clifmimg audio;
-#^application/postscript$=~/.config/clifm/clifmimg postscript;
-#^font/.*|^application/(font.*|.*opentype)=~/.config/clifm/clifmimg font;
-#
-# This instructs clifm to use this script to generate previews for the
-# specified files.
-# In case you don't want image preview for some of these files types, just
-# comment out the corresponding line or change its value to your preferred
-# previewing application.
-#
-# 4) (Ueberzug/kitty only): Run clifm via the 'clifmrun' script (which
-# takes care of running an instance of ueberzug/kitty and set the appropriate
-# values so that it can be used by Clifm via shotgun, which calls this script
-# to generate previews).
+# Note: clifmrun can be found under ~/.config/clifm/ (or /usr/share/clifm/plugins/)
 
 ######################
-# Dependencies
+# DEPENDENCIES
 ######################
 #
 # ueberzug/kitty terminal (optional)
@@ -74,6 +55,27 @@
 # Note: The exact package names provinding these programs vary depending
 # on your OS/distribution, but ususally they have the same name as the program
 
+############################
+# IMAGE PREVIEW METHOD
+############################
+#
+# Set the preview image method.
+# Available methods: sixel, ueberzug, kitty, ascii
+#
+# NOTE: To use either ueberzug or the kitty methods, please run Clifm
+# via the clifmrun script.
+#
+# If unset, we'll make our best guess.
+method=""
+
+# Set the application used to generate ASCII image previews.
+# Available applications: chafa, pixterm, img2text, viu, catimg, tiv, timg
+ascii_method="chafa"
+
+# To generate sixel images we use chafa(1).
+
+########################
+
 type="$1"
 file="$2"
 
@@ -83,6 +85,13 @@ CACHEDIRTAG_HEADER="Signature: 8a477f597d28d172789f06886806bc55
 # This file is a cache directory tag created by Clifm.
 # For information about cache directory tags, see:
 #	http://www.brynosaurus.com/cachedir/"
+
+get_preview_method() {
+	if [ -z "$method" ]; then
+		method="$CLIFM_IMG_SUPPORT"
+		[ -z "$method" ] && method="ascii"
+	fi
+}
 
 # Use hashes instead of file names for cached files to generate unique file names
 hash_file() {
@@ -117,43 +126,53 @@ display() {
 		CLIFM_TERM_COLUMNS=$COLUMNS
 	fi
 
-## Uncomment any of the following previewing methods (instead of kitty or ueberzug).
-# If using any of these methods, there is no need to run via clifmrun; just run clifm as always.
-#
-# New: since 0.44, fzf added sixel support.
-#	chafa -f sixel -s "${C}x$((L - 1))" "$1"; exit 0
-
-#	chafa -f symbols -s "${C}x${L}" "$1"; exit 0
-#	pixterm -s 2 -tc "${C}" -tr "${L}" "$1"; exit 0
-#	img2txt -H"${L}" -W"${C}" "$1"; exit 0
-#	viu -b -h"${L}" -w"${C}" "$1"; exit 0
-#	catimg -H"${L}" "$1"; exit 0
-#	tiv -h "${L}" -w "${C}" "$1"; exit 0
-#	timg -g "${C}x${L}" "$1"; exit 0
-#	explosion -w "${C}" -h "${L}" "$1"; exit 0
-##
-
-	# CLIFM_TERM_COLUMNS: Number of columns of the current terminal
-	# window (value exported by clifm)
-	# FZF_PREVIEW_COLUMNS: Number of columns of the fzf preview
-	# window (value exported by fzf itself)
-	# CLIFM_FZF_LINE: Terminal line of the fzf window (exported by clifm)
 	X=$((CLIFM_TERM_COLUMNS - FZF_PREVIEW_COLUMNS))
 	Y=$CLIFM_FZF_LINE
 
-	if [ -n "$CLIFM_KITTY_IMG" ]; then
-		# CLIFM_KITTY_IMG is the path to a temp file created by clifmrun
-		# if running on a kitty terminal
-		# This is a pretty dirty hack: let's create an empty temp file
-		# (CLIFM_KITTY_IMG) to let clifm know that an image is displayed
-		# and should be removed
+	case "$method" in
+		sixel)
+			chafa -f sixel -s "${C}x$((L - 1))" "$1"
+#			img2sixel -w auto -h "$(((L - 1) * 16))" "$1"
+#			timg -ps -g "${C}x$((L - 1))" "$1"
+		;;
 
-		touch -- "$CLIFM_KITTY_IMG"
-		kitty icat --loop=0 --place "$FZF_PREVIEW_COLUMNS"x"$FZF_PREVIEW_LINES"@"$X"x"$Y" \
-		--clear --transfer-mode=stream --stdin=no --align=left -- "$1"
-	else
-		printf '{"action": "add", "identifier": "clifm-preview", "x": "%s", "y": "%s", "width": "%s", "height": "%s", "scaler" : "contain", "path": "%s"}\n' "$X" "$Y" "$COLUMNS" "$LINES" "$1" > "$CLIFM_FIFO_UEBERZUG"
-	fi
+		kitty)
+			# CLIFM_KITTY_IMG is the path to a temp file created by the clifmrun
+			# script if running on a kitty terminal.
+			# This is a pretty dirty hack: let's create an empty temp file
+			# (CLIFM_KITTY_IMG) to let Clifm know that an image is displayed
+			# and should be removed.
+			if [ -z "$CLIFM_KITTY_IMG" ]; then
+				echo "To enable kitty previews run clifm via clifmrun"
+				exit 0
+			fi
+
+			touch -- "$CLIFM_KITTY_IMG"
+			kitty icat --loop=0 --place "$FZF_PREVIEW_COLUMNS"x"$FZF_PREVIEW_LINES"@"$X"x"$Y" \
+			--clear --transfer-mode=stream --stdin=no --align=left -- "$1"
+		;;
+
+		ueberzug)
+			if [ -z "$CLIFM_FIFO_UEBERZUG" ]; then
+				echo "To enable ueberzug previews run clifm via clifmrun"
+				exit 0
+			fi
+
+			printf '{"action": "add", "identifier": "clifm-preview", "x": "%s", "y": "%s", "width": "%s", "height": "%s", "scaler" : "contain", "path": "%s"}\n' "$((X - 1))" "$Y" "$COLUMNS" "$LINES" "$1" > "$CLIFM_FIFO_UEBERZUG"
+		;;
+
+		ascii)
+			case "$ascii_method" in
+				chafa) chafa -f symbols -s "${C}x${L}" "$1" ;;
+				pixterm) pixterm -s 2 -tc "${C}" -tr "${L}" "$1" ;;
+				img2text) img2txt -H"${L}" -W"${C}" "$1" ;;
+				viu) viu -b -h"${L}" -w"${C}" "$1" ;;
+				catimg) catimg -H"${L}" "$1" ;;
+				tiv) tiv -h "${L}" -w "${C}" "$1" ;;
+				timg) timg -g "${C}x${L}" "$1" ;;
+			esac
+		;;
+	esac
 }
 
 print_err_msg() {
@@ -239,6 +258,8 @@ gen_img_convert_preview() {
 #}
 
 main() {
+	get_preview_method
+
 	case "$type" in
 		"image")
 			case "$file" in

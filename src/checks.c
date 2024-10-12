@@ -157,7 +157,7 @@ set_term_caps(const int i)
 	term_caps.pager = (TERM_INFO[i].cub == 0 || TERM_INFO[i].el == 0) ? 0 : 1;
 }
 
-/* Check whether current terminal (_TERM) supports colors and requesting
+/* Check whether current terminal (ENV_TERM) supports colors and requesting
  * cursor position (needed to print suggestions). If not, disable the
  * feature accordingly. */
 static void
@@ -193,6 +193,32 @@ check_term_support(const char *env_term)
 	set_term_caps(index);
 }
 
+/* Try to detect what kind of image capability the running terminal supports
+ * (sixel, ueberzug, kitty protocol, and ascii).
+ * Write the result into the CLIFM_IMG_SUPPORT environment variable.
+ * This variable will be read by clifmimg to generate images using the
+ * specified method. */
+static void
+check_img_support(void)
+{
+	if (xargs.stealth_mode == 1)
+		/* If CLIFM_IMG_SUPPORT is unset, the clifmimg script falls back to
+		 * the ascii method. */
+		return;
+
+	if (check_sixel_support() == 1) {
+		setenv("CLIFM_IMG_SUPPORT", "sixel", 1);
+	/* CLIFM_FIFO_UEBERZUG is set by the clifmrun script */
+	} else if (getenv("CLIFM_FIFO_UEBERZUG")) {
+		setenv("CLIFM_IMG_SUPPORT", "ueberzug", 1);
+	/* CLIFM_KITTY_IMG is set by the clifmrun script */
+	} else if (getenv("CLIFM_KITTY_IMG")) {
+		setenv("CLIFM_IMG_SUPPORT", "kitty", 1);
+	} else {
+		setenv("CLIFM_IMG_SUPPORT", "ascii", 1);
+	}
+}
+
 void
 check_term(void)
 {
@@ -204,6 +230,7 @@ check_term(void)
 	}
 
 	check_term_support(t);
+	check_img_support();
 }
 
 static void

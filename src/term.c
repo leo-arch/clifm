@@ -174,6 +174,54 @@ disable_raw_mode(const int fd)
 		? FUNC_FAILURE : FUNC_SUCCESS;
 }
 
+/* Return 1 if the running terminal is sixel capable, 0 if not, or -1 on error. */
+int
+check_sixel_support(void)
+{
+	char buf[64];
+	unsigned int i = 0;
+
+	if (enable_raw_mode(STDIN_FILENO) == -1)
+		return (-1);
+
+	/* 1. Ask the terminal for device attributes (primary DA) */
+	const ssize_t qlen = 3;
+	if (write(STDOUT_FILENO, "\x1b[c", qlen) != qlen) {
+		disable_raw_mode(STDIN_FILENO);
+		return (-1);
+	}
+
+	/* 2. Read the response: "n;n;n;...c" */
+	int read_err = 0;
+	while (i < sizeof(buf) - 1) {
+		if (read(STDIN_FILENO, buf + i, 1) != 1) { /* flawfinder: ignore */
+			read_err = 1;
+			break;
+		}
+
+		if (buf[i] == 'c')
+			break;
+		i++;
+	}
+
+	buf[i] = '\0';
+
+	if (disable_raw_mode(STDIN_FILENO) == -1 || read_err == 1)
+		return (-1);
+
+	/* 3. Parse the response. We're looking for sixel support (4).
+	 * See https://vt100.net/docs/vt510-rm/DA1.html */
+	i = 0;
+	while (buf[i]) {
+		if ((i == 0 || buf[i - 1] == ';') && buf[i] == '4'
+		&& (!buf[i + 1] || buf[i + 1] == ';'))
+			return 1;
+		i++;
+	}
+
+	return 0;
+}
+
 /* Use the "ESC [6n" escape sequence to query the cursor position (both
  * vertical and horizontal) and store both values into C (columns) and L (lines).
  * Returns 0 on success and 1 on error. */
