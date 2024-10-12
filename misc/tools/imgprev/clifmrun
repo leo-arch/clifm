@@ -4,31 +4,38 @@
 # All changes are licensed under GPL-3.0
 # Authors: cirala, L. Abramovich
 
+###################
 # DESCRIPTION
+###################
 #
-# Launch an instance of ueberzug(1) and set the appropriate values so that
-# it can be used by clifm to display images via the 'clifmimg' script.
-# Consult the 'clifmimg' file itself for instructions on how to set up clifm's
-# shotgun to preview images via 'clifmimg'.
+# Prepare the environment to generate image previews via either ueberzug or
+# the kitty protocol, and then launch Clifm.
+
+# The values set here are used by Clifm to display images via the 'clifmimg' script.
+# Consult the 'clifmimg' file itself for instructions on how to set up Clifm to
+# preview images via 'clifmimg'.
 #
 # Previews for TAB completion (in FZF mode) are enabled by default. In any case,
-# check the FzfPreview option in clifm's main configuration file.
+# check the FzfPreview option in Clifm's main configuration file.
 
+###################
 # DEPENDENCIES
+###################
 #
 # ueberzug
+# kitty terminal
 #
 # NOTE: Ueberzug needs to run on a graphical environment. Wayland is not supported.
 #
 # NOTE 2: Since the original ueberzug is unmaintained, we recommend using this fork
 # instead: https://github.com/ueber-devel/ueberzug
 #
-# If running on the kitty terminal you can set CLIFM_KITTY_NO_UEBERZUG to 1 to use
-# the kitty image protocol itself (currently slower than ueberzug). Run as follows:
+# If running on the kitty terminal you can set CLIFM_KITTY_UEBERZUG to 1 to force the
+# use of ueberzug instead of the kitty protocol. Run as follows:
 #
-# CLIFM_KITTY_NO_UERBERZUG=1 clifmrun --fzfpreview
+# CLIFM_KITTY_UERBERZUG=1 clifmrun
 #
-# If running on Wayland, the kitty image protocol is used by default
+# If running on Wayland, this variable is ignored.
 #
 
 ueberzug_cleanup() {
@@ -70,7 +77,7 @@ if ! type clifm > /dev/null 2>&1; then
 	printf "clifm: Command not found\n"
 	exit 127
 
-elif [ "$TERM" = "xterm-kitty" ] && { [ -n "$CLIFM_KITTY_NO_UEBERZUG" ] \
+elif [ "$TERM" = "xterm-kitty" ] && { [ -z "$CLIFM_KITTY_UEBERZUG" ] \
 || [ -n "$WAYLAND_DISPLAY" ]; }; then
 	export CLIFM_KITTY_IMG="${TMPDIR:-/tmp}/clifm_kitty_img"
 	clifm "$@"
