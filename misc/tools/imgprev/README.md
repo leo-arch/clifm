@@ -62,11 +62,11 @@ In case you don't want image preview for some of these files types, just comment
 
 Available previewing methods are: `sixel`, `ueberzug`, `kitty`, and `ascii`.
 
-The previwing method is controlled by the `method` variable in the `clifmimg` script. By default, this variable is unset, meaning that **clifm** will try to guess the available method. To manually choose a method, set the `method` variable to any of the available methods.
+The previewing method is controlled by the `method` variable in the `clifmimg` script. By default, this variable is unset, meaning that **clifm** will try to guess the available method. To manually choose a method, set the `method` variable to any of the available methods.
 
 If using either `ueberzug`<sup>1</sup> or `kitty` methods, you must run **clifm** via the `clifmrun` script.
 
-If using rather the `ascii` method, several applications to generate ASCII previews are available: `chafa`, `pixterm`, `img2text`, `viu`, `catimg`, `tiv`, and `timg`. Use the `ascii_method` variable in the `clifmimg` script to set you preferred application. It defaults to `chafa`.
+If using rather the `ascii` method, several applications to generate ASCII previews are available: `chafa`, `pixterm`, `img2text`, `viu`, `catimg`, `tiv`, and `timg`. Use the `ascii_method` variable in the `clifmimg` script to set your preferred application. It defaults to `chafa`.
 
 In the case of the `sixel` method, **chafa**(1) is used to generate sixel images.
 
