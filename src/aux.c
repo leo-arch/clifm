@@ -237,16 +237,16 @@ set_fzf_preview_border_type(void)
 
 	char *p = (conf.fzftab_options && *conf.fzftab_options)
 		? strstr(conf.fzftab_options, "border-") : (char *)NULL;
-	if (!p || !*(p + 7)) {
+	if (!p || !p[7]) {
 		char *q = getenv("FZF_DEFAULT_OPTS");
 		p = q ? strstr(q, "border-") : (char *)NULL;
-		if (!p || !*(p + 7))
+		if (!p || !p[7])
 			return;
 	}
 
-	switch (*(p + 7)) {
+	switch (p[7]) {
 	case 'b':
-		if (*(p + 8) == 'o' && *(p + 9) == 't')
+		if (p[8] == 'o' && p[9] == 't')
 			fzf_preview_border_type = FZF_BORDER_BOTTOM;
 		else
 			fzf_preview_border_type = FZF_BORDER_BOLD;
@@ -255,7 +255,10 @@ set_fzf_preview_border_type(void)
 	case 'h': fzf_preview_border_type = FZF_BORDER_HORIZ; break;
 	case 'l': fzf_preview_border_type = FZF_BORDER_LEFT; break;
 	case 'n': fzf_preview_border_type = FZF_BORDER_NONE; break;
-	case 'r': fzf_preview_border_type = FZF_BORDER_ROUNDED; break;
+	case 'r':
+		fzf_preview_border_type = p[8] == 'o'
+			? FZF_BORDER_ROUNDED : FZF_BORDER_NONE;
+		break;
 	case 's': fzf_preview_border_type = FZF_BORDER_SHARP; break;
 	case 't': fzf_preview_border_type = FZF_BORDER_TOP; break;
 	case 'v': fzf_preview_border_type = FZF_BORDER_VERT; break;
