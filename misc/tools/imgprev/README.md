@@ -74,12 +74,12 @@ In the case of the `sixel` method, **chafa**(1) is used to generate sixel images
 
 ### Kitty and Wayland
 
-If running on the kitty terminal you can force the use of the kitty image protocol (instead of `ueberzug`) as follows:
+If running on the kitty terminal you can force the use of `ueberzug` instead of the kitty image protocol as follows:
 
 ```sh
-CLIFM_KITTY_NO_UEBERZUG=1 clifmrun
+CLIFM_KITTY_UEBERZUG=1 clifmrun
 ```
-Note that on Wayland the kitty image protocol will be used by default, so that there is no need to set this variable.
+Note that on Wayland `ueberzug` is not supported, so that this variable is ignored.
 
 ## General procedure
 
