@@ -59,7 +59,7 @@ Note: In case you don't want image previews for some of these files types, just 
 
 The previewing method is controlled by the `method` variable in the [`clifmimg` script](https://github.com/leo-arch/clifm/edit/master/misc/tools/imgprev/README.md#the-clifmimg-script).
 
-By default, this variable is unset, meaning that **clifm** will try to guess the available method. To manually choose a method, set the `method` variable to any of the available methods:
+By default, this variable is unset, meaning that **clifm** will try to [guess the previewing method](#automatic-method-detection). To manually choose a method, set the `method` variable to any of the available methods:
 
 | Method | Description | Observation |
 | -- | -- | --- |
@@ -69,6 +69,19 @@ By default, this variable is unset, meaning that **clifm** will try to guess the
 | `ascii` | Preview images using ASCII characters | Several applications to generate ASCII previews are available: `chafa`, `pixterm`, `img2text`, `viu`, `catimg`, `tiv`, and `timg`. Use the `ascii_method` variable in the [`clifmimg` script](https://github.com/leo-arch/clifm/edit/master/misc/tools/imgprev/README.md#the-clifmimg-script) to set your preferred application. It defaults to `chafa`. |
 
 <sup>1</sup> Since the original `ueberzug` is not maintained anymore, we recommend using this fork instead: https://github.com/ueber-devel/ueberzug.
+
+### Automatic method detection
+
+At startup, **clifm** tries to guess the previwing method supported by the running terminal and writes the corresponding value into the **CLIFM_IMG_SUPPORT** environment variable, which is then read by the [clifmimg script](#the-clifmimg-script) to generate previews via the specified method. The procedure is as follows:
+
+1. If **CLIFM_FIFO_UEBERZUG** is set (this vartiable is set by the [clifmrun script](https://github.com/leo-arch/clifm/blob/master/misc/tools/imgprev/clifmrun)), **CLIFM_IMG_SUPPORT** is set to `ueberzug`.
+2. If **KITTY_WINDOW_ID** is set, **CLIFM_IMG_SUPPORT** is set to `kitty`.
+3. If sixel support is detected<sup>1</sup>, **CLIFM_IMG_SUPPORT** is set to `sixel`.
+4. Otherwise, **CLIFM_IMG_SUPPORT** is set to `ascii`.
+
+Note that if **CLIFM_IMG_SUPPORT** is unset, the `clifmimg` script falls back to the `ascii` method.
+
+<sup>1</sup> Note for devs: see the `check_sixel_support()` function in the `term.c` file.
 
 ## General procedure
 
