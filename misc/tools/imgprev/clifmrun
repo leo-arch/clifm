@@ -70,11 +70,16 @@ init_ueberzug() {
 }
 
 if ! type clifm > /dev/null 2>&1; then
-	printf "clifm: Command not found\n"
+	printf "clifm: Command not found\n" >&2
 	exit 127
 
-elif [ -z "$DISPLAY" ] || [ -n "$WAYLAND_DISPLAY" ] || ! type ueberzug >/dev/null 2>&1; then
-	clifm "$@"
+elif ! type ueberzug >/dev/null 2>&1; then
+	printf "ueberzug: Command not found\n" >&2
+	exit 127
+
+elif [ -z "$DISPLAY" ] || [ -n "$WAYLAND_DISPLAY" ]; then
+	printf "clifm: Not running on X\n" >&2
+	exit 1
 
 else
 	trap ueberzug_cleanup EXIT
