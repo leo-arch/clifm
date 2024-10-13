@@ -42,10 +42,14 @@ silence_stderr() {
 	major="$(echo "$str" | cut -d'.' -f1)"
 	minor="$(echo "$str" | cut -d'.' -f2)"
 
-	if [ "$major" -ge 18 ] && [ "$minor" -ge 2 ]; then
-		echo 0
+	if [ "$major" -lt 18 ]; then
+		true
+	elif [ "$major" -gt 18 ]; then
+		false
+	elif [ "$minor" -ge 2 ]; then
+		false
 	else
-		echo 1
+		true
 	fi
 }
 
@@ -58,10 +62,10 @@ init_ueberzug() {
 
 	mkfifo "$CLIFM_FIFO_UEBERZUG"
 
-	if [ "$(silence_stderr)" = "0" ]; then
-		tail -f "$CLIFM_FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
-	else
+	if silence_stderr; then
 		tail -f "$CLIFM_FIFO_UEBERZUG" | ueberzug layer --silent --parser json > /dev/null 2>&1 &
+	else
+		tail -f "$CLIFM_FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
 	fi
 }
 
