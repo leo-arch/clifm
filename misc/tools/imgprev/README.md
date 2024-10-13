@@ -23,13 +23,10 @@
 
 ## Usage
 
-1. Run `view edit` (<kbd>F7</kbd> is also available) to edit [shotgun's](https://github.com/leo-arch/clifm/wiki/Advanced#shotgun) configuration file (`$HOME/.config/clifm/profiles/PROFILE/preview.clifm`), and uncomment the following lines from the top of the file:
+1. Run `view edit` (or press <kbd>F7</kbd>) to edit [shotgun's](https://github.com/leo-arch/clifm/wiki/Advanced#shotgun) configuration file, and uncomment the following lines from the top of the file:
 
 ```sh
 ...
-# Uncomment and edit this line to use Ranger's scope script: 
-#.*=/home/USER/.config/ranger/scope.sh %f 120 80 /tmp/clifm/ True;
-
 # If the clifmimg script cannot be found under '~/.config/clifm/', you can copy it from the data
 # directory, usually '/usr/local/share/clifm/plugins/'.
 
@@ -52,19 +49,19 @@
 
 ```
 
-This instructs **clifm** to use the [clifmimg script](https://github.com/leo-arch/clifm/blob/master/misc/tools/imgprev/clifmimg) to generate previews for the specified file names or file types (both for TAB completion (in [fzf mode](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion)) and via the [`view` command](https://github.com/leo-arch/clifm/wiki/Introduction#view)).
+This instructs **clifm** to use the [clifmimg script](#the-clifmimg-script) to generate previews for the specified file types (both for TAB completion (in [fzf mode](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion)) and via the [`view` command](https://github.com/leo-arch/clifm/wiki/Introduction#view)).
 
-In case you don't want image preview for some of these files types, just comment out the corresponding line or change its value to your preferred previewing application.
+Note: In case you don't want image previews for some of these files types, just comment out the corresponding line or change its value to your preferred previewing application.
 
-2. If using either the `ueberzug` or the `kitty` [methods](#previewing-methods), run **clifm** via the [clifmrun script](https://github.com/leo-arch/clifm/blob/master/misc/tools/imgprev/clifmrun) (you can find it under `~/.config/clifm/` or `DATADIR/clifm/plugins/` (usually, `/usr/local/share/clifm/plugins/` or `/usr/share/clifm/plugins`). Otherwise, run **clifm** as usual.
+2. Run **clifm** as usual (note that if using the [`ueberzug` method](#previewing-methods), you must run **clifm** via the [clifmrun script](https://github.com/leo-arch/clifm/blob/master/misc/tools/imgprev/clifmrun) (you can find it under `~/.config/clifm/` or `DATADIR/clifm/plugins/` (usually `/usr/local/share/clifm/plugins/` or `/usr/share/clifm/plugins`).
 
 ### Previewing methods
 
 Available previewing methods are: `sixel`, `ueberzug`, `kitty`, and `ascii`.
 
-The previewing method is controlled by the `method` variable in the `clifmimg` script. By default, this variable is unset, meaning that **clifm** will try to guess the available method. To manually choose a method, set the `method` variable to any of the available methods.
+The previewing method is controlled by the `method` variable in the `clifmimg` script. By default, this variable is unset, meaning that **clifm** will try to guess the available method. To manually choose a method, set the `method` variable to any of the available values.
 
-If using either `ueberzug`<sup>1</sup> or `kitty` methods, you must run **clifm** via the `clifmrun` script.
+If using the `ueberzug`<sup>1</sup> method, you must run **clifm** via the `clifmrun` script.
 
 If using rather the `ascii` method, several applications to generate ASCII previews are available: `chafa`, `pixterm`, `img2text`, `viu`, `catimg`, `tiv`, and `timg`. Use the `ascii_method` variable in the `clifmimg` script to set your preferred application. It defaults to `chafa`.
 
@@ -72,20 +69,11 @@ In the case of the `sixel` method, **chafa**(1) is used to generate sixel images
 
 <sup>1</sup> Since the original `ueberzug` is not maintained anymore, we recommend using this fork instead: https://github.com/ueber-devel/ueberzug.
 
-### Kitty and Wayland
-
-If running on the kitty terminal you can force the use of `ueberzug` instead of the kitty image protocol as follows:
-
-```sh
-CLIFM_KITTY_UEBERZUG=1 clifmrun
-```
-Note that on Wayland `ueberzug` is not supported, so that this variable is ignored.
-
 ## General procedure
 
 The steps involved in generating image previews are:
 
-1. The `clifmrun` script prepares the environment to generate image previews (via either `ueberzug` or `kitty`) and then launches **clifm**.<sup>1</sup>
+1. The `clifmrun` script prepares the environment to generate image previews via `ueberzug` and then launches **clifm**.<sup>1</sup> (if not using the [`ueberzug` method](#previewing-methods), ommit this step).
 2. Every time TAB completion is invoked for files (if running in [fzf mode](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion)), or the [view command](https://github.com/leo-arch/clifm/wiki/Introduction#view) is executed, `fzf` is launched.
 3. `fzf` calls shotgun (via `clifm --preview`) to generate a preview of the currently hovered file.
 4. Shotgun executes `clifmimg`, which takes care of genereting a thumbnail of the corresponding file.
@@ -95,9 +83,9 @@ The steps involved in generating image previews are:
 
 ### The clifmimg script
 
-This script converts (if necessary) and generates image previews (as thumbnails) for files.
+[This script](https://github.com/leo-arch/clifm/blob/master/misc/tools/imgprev/clifmimg) converts (if necessary) and generates image previews (as thumbnails) for files.
 
-For performance reasons, thumbnails are cached (in the directory pointed to by the `CACHE_DIR` variable, by default `${XDG_CACHE_HOME:-$HOME/.cache}/clifm/previews`, usually (`~/.cache/clifm/previews`)) using file hashes as names.
+For performance reasons, thumbnails are cached (in the directory pointed to by the `CACHE_DIR` variable<sup>1</sup>) using file hashes as names ().
 
 It takes two parameters: the first one tells the type of file is to be previewed. The second one is the file name to be previewed. For example:
 
@@ -108,6 +96,8 @@ clifmimg doc /path/to/file.docx
 generates a thumbnail of `file.docx` using the method named `doc`.
 
 The first parameter (thumbnailing method) can be any of the following: `image`, `video`, `audio`, `gif`,  `svg`, `epub`, `mobi`, `pdf`, `djvu`, `doc`, `postscript`, and `font`.
+
+<sup>1</sup> By default this directory is `${XDG_CACHE_HOME:-$HOME/.cache}/clifm/previews` (which usually expands to `~/.cache/clifm/previews`).
 
 ## Dependencies
 
