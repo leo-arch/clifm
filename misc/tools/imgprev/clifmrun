@@ -12,11 +12,12 @@
 # Clifm.
 
 # The values set here are used by Clifm to display images via the 'clifmimg' script.
-# Consult the 'clifmimg' file itself for instructions on how to set up Clifm to
-# preview images via 'clifmimg'.
+# Consult this script itself ('~/.config/clifm/clifmimg') for instructions on how to
+# set up Clifm to generate image previews.
 #
 # Previews for TAB completion (in FZF mode) are enabled by default. In any case,
-# check the FzfPreview option in Clifm's main configuration file.
+# check the FzfPreview option in Clifm's main configuration file (run 'config' or
+# press F10).
 
 ###################
 # DEPENDENCIES
