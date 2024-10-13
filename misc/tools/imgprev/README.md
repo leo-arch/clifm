@@ -57,15 +57,16 @@ Note: In case you don't want image previews for some of these files types, just 
 
 ### Previewing methods
 
-Available previewing methods are: `sixel`, `ueberzug`, `kitty`, and `ascii`.
+The previewing method is controlled by the `method` variable in the [`clifmimg` script](https://github.com/leo-arch/clifm/edit/master/misc/tools/imgprev/README.md#the-clifmimg-script).
 
-The previewing method is controlled by the `method` variable in the `clifmimg` script. By default, this variable is unset, meaning that **clifm** will try to guess the available method. To manually choose a method, set the `method` variable to any of the available values.
+By default, this variable is unset, meaning that **clifm** will try to guess the available method. To manually choose a method, set the `method` variable to any of the available methods:
 
-If using the `ueberzug`<sup>1</sup> method, you must run **clifm** via the `clifmrun` script.
-
-If using rather the `ascii` method, several applications to generate ASCII previews are available: `chafa`, `pixterm`, `img2text`, `viu`, `catimg`, `tiv`, and `timg`. Use the `ascii_method` variable in the `clifmimg` script to set your preferred application. It defaults to `chafa`.
-
-In the case of the `sixel` method, **chafa**(1) is used to generate sixel images.
+| Method | Description | Observation |
+| -- | -- | --- |
+| `sixel` | Preview images in full color using the sixel protocol | [**chafa**(1)](https://github.com/hpjansson/chafa) is used to generate sixel images. Note that not all terminal emulators support this protocol. Visit https://www.arewesixelyet.com/ for more information. |
+| `ueberzug`<sup>1</sup> | Preview images  in full color using [ueberzug](https://github.com/ueber-devel/ueberzug) | Run **clifm** via the `clifmrun` script (see point 2 in the Usage section).  |
+| `kitty` | Preview images  in full color using the [kitty image protocol](https://sw.kovidgoyal.net/kitty/graphics-protocol/) | The Kitty terminal is required. |
+| `ascii` | Preview images using ASCII characters | Several applications to generate ASCII previews are available: `chafa`, `pixterm`, `img2text`, `viu`, `catimg`, `tiv`, and `timg`. Use the `ascii_method` variable in the [`clifmimg` script](https://github.com/leo-arch/clifm/edit/master/misc/tools/imgprev/README.md#the-clifmimg-script) to set your preferred application. It defaults to `chafa`. |
 
 <sup>1</sup> Since the original `ueberzug` is not maintained anymore, we recommend using this fork instead: https://github.com/ueber-devel/ueberzug.
 
@@ -73,7 +74,7 @@ In the case of the `sixel` method, **chafa**(1) is used to generate sixel images
 
 The steps involved in generating image previews are:
 
-1. The `clifmrun` script prepares the environment to generate image previews via `ueberzug` and then launches **clifm**.<sup>1</sup> (if not using the [`ueberzug` method](#previewing-methods), ommit this step).
+1. The `clifmrun` script prepares the environment to generate image previews via `ueberzug` and then launches **clifm**.<sup>1</sup> (if not using the [`ueberzug` method](#previewing-methods), this step is ommited).
 2. Every time TAB completion is invoked for files (if running in [fzf mode](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion)), or the [view command](https://github.com/leo-arch/clifm/wiki/Introduction#view) is executed, `fzf` is launched.
 3. `fzf` calls shotgun (via `clifm --preview`) to generate a preview of the currently hovered file.
 4. Shotgun executes `clifmimg`, which takes care of genereting a thumbnail of the corresponding file.
