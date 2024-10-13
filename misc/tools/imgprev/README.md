@@ -85,7 +85,7 @@ The steps involved in generating image previews are:
 
 [This script](https://github.com/leo-arch/clifm/blob/master/misc/tools/imgprev/clifmimg) converts (if necessary) and generates image previews (as thumbnails) for files.
 
-For performance reasons, thumbnails are cached (in the directory pointed to by the `CACHE_DIR` variable<sup>1</sup>) using file hashes as names ().
+For performance reasons, thumbnails are cached (in the directory pointed to by the `CACHE_DIR` variable<sup>1</sup>) using file hashes as names (this allows us to securly identify files independently of their actual name).
 
 It takes two parameters: the first one tells the type of file is to be previewed. The second one is the file name to be previewed. For example:
 
