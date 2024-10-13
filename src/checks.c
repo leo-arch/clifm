@@ -206,17 +206,19 @@ check_img_support(void)
 		 * the ascii method. */
 		return;
 
-	if (check_sixel_support() == 1) {
-		setenv("CLIFM_IMG_SUPPORT", "sixel", 1);
-	/* CLIFM_FIFO_UEBERZUG is set by the clifmrun script */
-	} else if (getenv("CLIFM_FIFO_UEBERZUG")) {
+	if (getenv("CLIFM_IMG_SUPPORT"))
+		/* If running Clifm via the fzf previewer, this variable is already
+		 * set. Don't check. */
+		return;
+
+	if (getenv("CLIFM_FIFO_UEBERZUG")) /* Variable set by the clifmrun script */
 		setenv("CLIFM_IMG_SUPPORT", "ueberzug", 1);
-	/* CLIFM_KITTY_IMG is set by the clifmrun script */
-	} else if (getenv("CLIFM_KITTY_IMG")) {
+	else if (getenv("KITTY_WINDOW_ID"))
 		setenv("CLIFM_IMG_SUPPORT", "kitty", 1);
-	} else {
+	else if (check_sixel_support() == 1)
+		setenv("CLIFM_IMG_SUPPORT", "sixel", 1);
+	else
 		setenv("CLIFM_IMG_SUPPORT", "ascii", 1);
-	}
 }
 
 void

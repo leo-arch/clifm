@@ -273,15 +273,6 @@ set_fzf_preview_border_type(void)
 	}
 }
 
-/* Remove images printed on the kitty terminal */
-static void
-kitty_clear(void)
-{
-	char *cmd[] = {"kitty", "icat", "--clear", "--transfer-mode=stream",
-		"--stdin=no", NULL};
-	launch_execv(cmd, FOREGROUND, E_NOFLAG);
-}
-
 /* Remove any image printed by ueberzug.
  * This function assumes:
  * 1) That ueberzug was launched using the json parser (default).
@@ -304,27 +295,18 @@ ueberzug_clear(char *file)
 void
 clear_term_img(void)
 {
-	char *p = getenv("CLIFM_FIFO_UEBERZUG");
-	if (p) {
-		ueberzug_clear(p);
-		return;
+	static char fu[PATH_MAX] = "";
+	char *p = (char *)NULL;
+
+	if (!*fu) {
+		p = getenv("CLIFM_FIFO_UEBERZUG");
+		if (!p || !*p)
+			return;
+
+		xstrsncpy(fu, p, sizeof(fu));
 	}
 
-	if (!(flags & KITTY_TERM))
-		return;
-
-	/* This works, but it's too slow. Replace by ACP escape codes (both for
-	 * displaying and removing the image). Take a look at how ranger does it. */
-
-	/* CLIFM_KITTY_IMG is set by the clifmrun plugin to a temp file name,
-	 * which is then created (empty) by the clifmimg plugin every time an
-	 * image is displayed via the kitty protocol. */
-	p = getenv("CLIFM_KITTY_IMG");
-	struct stat a;
-	if (p && stat(p, &a) != -1) {
-		kitty_clear();
-		unlinkat(XAT_FDCWD, p, 0);
-	}
+	ueberzug_clear(fu);
 }
 
 /* Return a pointer to the first digit found in STR or NULL if none is found. */

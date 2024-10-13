@@ -27,8 +27,8 @@
 # lines at the top of the file (this instructs Clifm to use this this script to generate
 # previews for the specified file types.
 #
-# 2) If using the kitty or ueberzug methods run clifm via the 'clifmrun' script. Otherwise,
-# run clifm as usual.
+# 2) If using the ueberzug method (see IMAGE PREVIEW METHOD below) run clifm via the
+# 'clifmrun' script. Otherwise, run clifm as usual.
 #
 # Note: clifmrun can be found under ~/.config/clifm/ (or /usr/share/clifm/plugins/)
 
@@ -62,8 +62,7 @@
 # Set the preview image method.
 # Available methods: sixel, ueberzug, kitty, ascii
 #
-# NOTE: To use either ueberzug or the kitty methods, please run Clifm
-# via the clifmrun script.
+# NOTE: To use the ueberzug method, run Clifm via the clifmrun script.
 #
 # If unset, we'll make our best guess.
 method=""
@@ -137,19 +136,8 @@ display() {
 		;;
 
 		kitty)
-			# CLIFM_KITTY_IMG is the path to a temp file created by the clifmrun
-			# script if running on a kitty terminal.
-			# This is a pretty dirty hack: let's create an empty temp file
-			# (CLIFM_KITTY_IMG) to let Clifm know that an image is displayed
-			# and should be removed.
-			if [ -z "$CLIFM_KITTY_IMG" ]; then
-				echo "To enable kitty previews run clifm via clifmrun"
-				exit 0
-			fi
-
-			touch -- "$CLIFM_KITTY_IMG"
 			kitty icat --loop=0 --place "$FZF_PREVIEW_COLUMNS"x"$((FZF_PREVIEW_LINES - 1))"@"$X"x"$Y" \
-			--clear --transfer-mode=stream --stdin=no --align=left -- "$1"
+			--clear --transfer-mode=memory --unicode-placeholder --stdin=no --align=left -- "$1"
 		;;
 
 		ueberzug)

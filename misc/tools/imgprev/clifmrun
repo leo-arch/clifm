@@ -8,8 +8,8 @@
 # DESCRIPTION
 ###################
 #
-# Prepare the environment to generate image previews via either ueberzug or
-# the kitty protocol, and then launch Clifm.
+# Prepare the environment to generate image previews via ueberzug and then launch
+# Clifm.
 
 # The values set here are used by Clifm to display images via the 'clifmimg' script.
 # Consult the 'clifmimg' file itself for instructions on how to set up Clifm to
@@ -22,20 +22,12 @@
 # DEPENDENCIES
 ###################
 #
-# ueberzug
-# kitty terminal
+# Ueberzug
 #
 # NOTE: Ueberzug needs to run on a graphical environment. Wayland is not supported.
 #
 # NOTE 2: Since the original ueberzug is unmaintained, we recommend using this fork
 # instead: https://github.com/ueber-devel/ueberzug
-#
-# If running on the kitty terminal you can set CLIFM_KITTY_UEBERZUG to 1 to force the
-# use of ueberzug instead of the kitty protocol. Run as follows:
-#
-# CLIFM_KITTY_UERBERZUG=1 clifmrun
-#
-# If running on Wayland, this variable is ignored.
 #
 
 ueberzug_cleanup() {
@@ -77,19 +69,14 @@ if ! type clifm > /dev/null 2>&1; then
 	printf "clifm: Command not found\n"
 	exit 127
 
-elif [ "$TERM" = "xterm-kitty" ] && { [ -z "$CLIFM_KITTY_UEBERZUG" ] \
-|| [ -n "$WAYLAND_DISPLAY" ]; }; then
-	export CLIFM_KITTY_IMG="${TMPDIR:-/tmp}/clifm_kitty_img"
-	clifm "$@"
-
-elif ! type ueberzug > /dev/null 2>&1 || [ -z "$DISPLAY" ] || [ -n "$WAYLAND_DISPLAY" ]; then
-	clifm "$@"
+elif [ -z "$DISPLAY" ] || [ -n "$WAYLAND_DISPLAY" ] || ! type ueberzug >/dev/null 2>&1; then
+#	clifm "$@"
+	~/build/git_repos/clifm/src/clifm "$@"
 
 else
 	trap ueberzug_cleanup EXIT
 	init_ueberzug
-
-	clifm "$@"
-
+#	clifm "$@"
+	~/build/git_repos/clifm/src/clifm "$@"
 	printf '{"action": "remove", "identifier": "clifm-preview"}\n' > "$CLIFM_FIFO_UEBERZUG"
 fi
