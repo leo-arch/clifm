@@ -70,13 +70,11 @@ if ! type clifm > /dev/null 2>&1; then
 	exit 127
 
 elif [ -z "$DISPLAY" ] || [ -n "$WAYLAND_DISPLAY" ] || ! type ueberzug >/dev/null 2>&1; then
-#	clifm "$@"
-	~/build/git_repos/clifm/src/clifm "$@"
+	clifm "$@"
 
 else
 	trap ueberzug_cleanup EXIT
 	init_ueberzug
-#	clifm "$@"
-	~/build/git_repos/clifm/src/clifm "$@"
+	clifm "$@"
 	printf '{"action": "remove", "identifier": "clifm-preview"}\n' > "$CLIFM_FIFO_UEBERZUG"
 fi
