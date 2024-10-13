@@ -53,7 +53,11 @@ This instructs **clifm** to use the [clifmimg script](#the-clifmimg-script) to g
 
 Note: In case you don't want image previews for some of these files types, just comment out the corresponding line or change its value to your preferred previewing application.
 
-2. Run **clifm** as usual (note that if using the [`ueberzug` method](#previewing-methods), you must run **clifm** via the [clifmrun script](https://github.com/leo-arch/clifm/blob/master/misc/tools/imgprev/clifmrun) (you can find it under `~/.config/clifm/` or `DATADIR/clifm/plugins/` (usually `/usr/local/share/clifm/plugins/` or `/usr/share/clifm/plugins`).
+2. Run **clifm** as usual.
+
+> [!NOTE]
+> If using the [`ueberzug` method](#previewing-methods), you must run **clifm** via the [clifmrun script](https://github.com/leo-arch/clifm/blob/master/misc/tools/imgprev/clifmrun).
+> You can find this script under `~/.config/clifm/` or `DATADIR/clifm/plugins/` (usually `/usr/local/share/clifm/plugins/` or `/usr/share/clifm/plugins/`).
 
 ### Previewing methods
 
@@ -64,15 +68,19 @@ By default, this variable is unset, meaning that **clifm** will try to [guess th
 | Method | Description | Observation |
 | -- | -- | --- |
 | `sixel` | Preview images in full color using the sixel protocol | [**chafa**(1)](https://github.com/hpjansson/chafa) is used to generate sixel images. Note that not all terminal emulators support this protocol. Visit https://www.arewesixelyet.com/ for more information. |
-| `ueberzug`<sup>1</sup> | Preview images  in full color using [ueberzug](https://github.com/ueber-devel/ueberzug) | Run **clifm** via the `clifmrun` script (see point 2 in the Usage section).  |
+| `ueberzug` | Preview images  in full color using [ueberzug](https://github.com/ueber-devel/ueberzug) | Run **clifm** via the `clifmrun` script (see point 2 in the Usage section).  |
 | `kitty` | Preview images  in full color using the [kitty image protocol](https://sw.kovidgoyal.net/kitty/graphics-protocol/) | The Kitty terminal is required. |
 | `ascii` | Preview images using ASCII characters | Several applications to generate ASCII previews are available: `chafa`, `pixterm`, `img2text`, `viu`, `catimg`, `tiv`, and `timg`. Use the `ascii_method` variable in the [`clifmimg` script](https://github.com/leo-arch/clifm/edit/master/misc/tools/imgprev/README.md#the-clifmimg-script) to set your preferred application. It defaults to `chafa`. |
 
-<sup>1</sup> Since the original `ueberzug` is not maintained anymore, we recommend using this fork instead: https://github.com/ueber-devel/ueberzug.
+> [!NOTE]
+> Since the original `ueberzug` is not maintained anymore, we recommend using this fork instead: https://github.com/ueber-devel/ueberzug.
+
+> [!NOTE]
+> The sixel method works only partially for KDE Konsole: images cannot be cleaned up automatically. We recommned using the `ueberzug` method instead.
 
 ### Automatic method detection
 
-At startup, **clifm** tries to guess the previwing method supported by the running terminal and writes the corresponding value into the **CLIFM_IMG_SUPPORT** environment variable, which is then read by the [clifmimg script](#the-clifmimg-script) to generate previews via the specified method. The procedure is as follows:
+At startup, **clifm** tries to guess the previewing method supported by the running terminal and writes the corresponding value into the **CLIFM_IMG_SUPPORT** environment variable, which is then read by the [clifmimg script](#the-clifmimg-script) to generate previews via the specified method. The procedure is as follows:
 
 1. If **CLIFM_FIFO_UEBERZUG** is set (this vartiable is set by the [clifmrun script](https://github.com/leo-arch/clifm/blob/master/misc/tools/imgprev/clifmrun)), **CLIFM_IMG_SUPPORT** is set to `ueberzug`.
 2. If **KITTY_WINDOW_ID** is set, **CLIFM_IMG_SUPPORT** is set to `kitty`.
@@ -87,7 +95,7 @@ Note that if **CLIFM_IMG_SUPPORT** is unset, the `clifmimg` script falls back to
 
 The steps involved in generating image previews are:
 
-1. The `clifmrun` script prepares the environment to generate image previews via `ueberzug` and then launches **clifm**.<sup>1</sup> (if not using the [`ueberzug` method](#previewing-methods), this step is ommited).
+1. The `clifmrun` script prepares the environment to generate image previews via `ueberzug` and then launches **clifm**.<sup>1</sup> (If not using the [`ueberzug` method](#previewing-methods), this step is ommited).
 2. Every time TAB completion is invoked for files (if running in [fzf mode](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion)), or the [view command](https://github.com/leo-arch/clifm/wiki/Introduction#view) is executed, `fzf` is launched.
 3. `fzf` calls shotgun (via `clifm --preview`) to generate a preview of the currently hovered file.
 4. Shotgun executes `clifmimg`, which takes care of genereting a thumbnail of the corresponding file.
@@ -101,7 +109,7 @@ The steps involved in generating image previews are:
 
 For performance reasons, thumbnails are cached (in the directory pointed to by the `CACHE_DIR` variable<sup>1</sup>) using file hashes as names (this allows us to securly identify files independently of their actual name).
 
-It takes two parameters: the first one tells the type of file is to be previewed. The second one is the file name to be previewed. For example:
+The script takes two parameters: the first one tells the type of file is to be previewed, and the the second one is the file name to be previewed. For example:
 
 ```sh
 clifmimg doc /path/to/file.docx
@@ -131,7 +139,8 @@ The following applications are used to generate thumbnails:
 | `gs` | Postscript files | Provided by the `ghostscript` package |
 | `magick` | SVG files | Provided by the `imagemagick` package |
 
-**Note**: The exact package names provinding the above programs vary depending on your OS/distribution, but ususally they have the same name as the corresponding program.
+> [!NOTE]
+> The exact package names provinding the above programs vary depending on your OS/distribution, but they usually have the same name as the corresponding program.
 
 ## Troubleshooting
 
