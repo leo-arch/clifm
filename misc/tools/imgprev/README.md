@@ -61,7 +61,7 @@ Note: In case you don't want image previews for some of these files types, just 
 
 ### Previewing methods
 
-The previewing method is controlled by the `method` variable in the [`clifmimg` script](https://github.com/leo-arch/clifm/edit/master/misc/tools/imgprev/README.md#the-clifmimg-script).
+The previewing method is controlled by the `method` variable in the [`clifmimg` script](#the-clifmimg-script).
 
 By default, this variable is unset, meaning that **clifm** will try to [guess the previewing method](#automatic-method-detection). To manually choose a method, set the `method` variable to any of the available methods:
 
@@ -70,7 +70,7 @@ By default, this variable is unset, meaning that **clifm** will try to [guess th
 | `sixel` | Preview images in full color using the sixel protocol | [**chafa**(1)](https://github.com/hpjansson/chafa) is used to generate sixel images. Note that not all terminal emulators support this protocol. Visit https://www.arewesixelyet.com/ for more information. |
 | `ueberzug` | Preview images  in full color using [ueberzug](https://github.com/ueber-devel/ueberzug) | Run **clifm** via the `clifmrun` script (see point 2 in the Usage section).  |
 | `kitty` | Preview images  in full color using the [kitty image protocol](https://sw.kovidgoyal.net/kitty/graphics-protocol/) | The Kitty terminal is required. |
-| `ansi` | Preview images using ANSI art (text mode) | Several applications to generate ANSI previews are available: `chafa`, `pixterm`, `img2text`, `viu`, `catimg`, `tiv`, and `timg`. Use the `ansi_method` variable in the [`clifmimg` script](https://github.com/leo-arch/clifm/edit/master/misc/tools/imgprev/README.md#the-clifmimg-script) to set your preferred application. It defaults to `chafa`. |
+| `ansi` | Preview images using ANSI art (text mode) | Several applications to generate ANSI previews are available: `chafa`, `pixterm`, `img2text`, `viu`, `catimg`, `tiv`, and `timg`. Use the `ansi_method` variable in the [`clifmimg` script](#the-clifmimg-script) to set your preferred application. It defaults to `chafa`. |
 
 > [!NOTE]
 > Since the original `ueberzug` is not maintained anymore, we recommend using this fork instead: https://github.com/ueber-devel/ueberzug.
@@ -144,7 +144,7 @@ The following applications are used to generate thumbnails:
 
 ## Troubleshooting
 
-Image previews are misplaced: This is mostly the case when your terminal emulator is using a menu bar and/or a scrollbar. `Konsole`, for example, displays by default a menu bar and a main toolbar on the top of the window, plus a scrollbar on the right, which is the cause of the image misplacement. To fix this, tweak the `X` and `Y` variables in the `display` function of the [`clifmimg` script](https://github.com/leo-arch/clifm/tree/master/misc/tools/imgprev#clifmimg) as follows:
+Image previews are misplaced: This is mostly the case when your terminal emulator is using a menu bar and/or a scrollbar. `Konsole`, for example, displays by default a menu bar and a main toolbar on the top of the window, plus a scrollbar on the right, which is the cause of the image misplacement. To fix this, tweak the `X` and `Y` variables in the `display` function of the [`clifmimg` script](https://github.com/leo-arch/clifm/blob/master/misc/tools/imgprev/clifmimg) as follows:
 
 ```sh
 X=$((CLIFM_TERM_COLUMNS - FZF_PREVIEW_COLUMNS - 1)) # 1 extra column: the scroll bar
