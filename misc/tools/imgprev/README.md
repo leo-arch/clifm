@@ -76,7 +76,7 @@ By default, this variable is unset, meaning that **clifm** will try to [guess th
 > Since the original `ueberzug` is not maintained anymore, we recommend using this fork instead: https://github.com/ueber-devel/ueberzug.
 
 > [!NOTE]
-> The sixel method works only partially for KDE Konsole: images cannot be cleaned up automatically. We recommned using the `ueberzug` method instead.
+> The sixel method works only partially for KDE Konsole: images cannot be cleaned up automatically (see [this bug report](https://bugs.kde.org/show_bug.cgi?id=456354)). [A fix](https://invent.kde.org/utilities/konsole/-/commit/cc4539f6bfd8e5b6beac23ecd13897c666e88eaa) was commited on October 11, 2024, so that the issue might be fixed in the next release. Meanwhile, we recommned using the `ueberzug` method instead.
 
 ### Automatic method detection
 
