@@ -194,10 +194,10 @@ check_term_support(const char *env_term)
 }
 
 /* Try to detect what kind of image capability the running terminal supports
- * (sixel, ueberzug, kitty protocol, and ascii).
+ * (sixel, ueberzug, kitty protocol, and ansi).
  * Write the result into the CLIFM_IMG_SUPPORT environment variable.
- * This variable will be read by clifmimg to generate images using the
- * specified method. */
+ * This variable will be read by the clifmimg script to generate images using
+ * the specified method. */
 static void
 check_img_support(void)
 {
