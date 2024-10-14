@@ -288,8 +288,8 @@ DateShades="2,197-2,231,253,250,247,244"
 # byte, Kb, Mb, Gb, bigger
 
 #SizeShades="1,31-2,32,33,31,31,31"
-#SizeShades="2,197-2,79,77,228,215,203"
-SizeShades="3,#ff005f-2,#5fd7af,#5fd75f,#ffff87,#ffaf5f,#ff5f5f"
+SizeShades="2,197-2,79,77,228,215,203"
+#SizeShades="3,#ff005f-2,#5fd7af,#5fd75f,#ffff87,#ffaf5f,#ff5f5f"
 
 ### If icons are enabled, use this color for directories icon (only for icons-in-terminal and Nerd-fonts)
 DirIconColor="Y"
