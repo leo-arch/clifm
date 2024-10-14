@@ -203,7 +203,7 @@ check_img_support(void)
 {
 	if (xargs.stealth_mode == 1)
 		/* If CLIFM_IMG_SUPPORT is unset, the clifmimg script falls back to
-		 * the ascii method. */
+		 * the ansi method. */
 		return;
 
 	if (getenv("CLIFM_IMG_SUPPORT"))
@@ -218,7 +218,7 @@ check_img_support(void)
 	else if (check_sixel_support() == 1)
 		setenv("CLIFM_IMG_SUPPORT", "sixel", 1);
 	else
-		setenv("CLIFM_IMG_SUPPORT", "ascii", 1);
+		setenv("CLIFM_IMG_SUPPORT", "ansi", 1);
 }
 
 void
