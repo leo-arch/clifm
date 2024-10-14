@@ -2725,7 +2725,7 @@ options_generator(const char *text, int state)
 	char *c = cmd_name;
 	char *s = word_start;
 
-#define MAX_OPTS 22
+#define MAX_OPTS 23
 	char *c_opts[MAX_OPTS] = {0};
 
 	/* acd, ao, ext, ff, hf (w == 2 -> second word only) */
@@ -2822,18 +2822,19 @@ options_generator(const char *text, int state)
 		c_opts[7] = "file-details";
 		c_opts[8] = "file-filters";
 		c_opts[9] = "file-previews";
-		c_opts[10] = "file-tags";
-		c_opts[11] = "navigation";
-		c_opts[12] = "plugins";
-		c_opts[13] = "profiles";
-		c_opts[14] = "remotes";
-		c_opts[15] = "resource-opener";
-		c_opts[16] = "search";
-		c_opts[17] = "security";
-		c_opts[18] = "selection";
-		c_opts[19] = "theming";
-		c_opts[20] = "trash";
-		c_opts[21] = NULL;
+		c_opts[10] = "image-previews";
+		c_opts[11] = "file-tags";
+		c_opts[12] = "navigation";
+		c_opts[13] = "plugins";
+		c_opts[14] = "profiles";
+		c_opts[15] = "remotes";
+		c_opts[16] = "resource-opener";
+		c_opts[17] = "search";
+		c_opts[18] = "security";
+		c_opts[19] = "selection";
+		c_opts[20] = "theming";
+		c_opts[21] = "trash";
+		c_opts[22] = NULL;
 
 	/* b, f */
 	} else if (w == 2 && ( (*c == 'b' && !c[1])

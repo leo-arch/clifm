@@ -2297,25 +2297,13 @@ X:application/x-bittorrent=rtorrent;transimission-gtk %%x;transmission-qt %%x;de
 	return FUNC_SUCCESS;
 }
 
-static void
-print_mime_file_msg(char *file)
-{
-	int free_mem = 0;
-	char *f = home_tilde(file, &free_mem);
-
-	err('n', PRINT_PROMPT, _("%sNOTE%s: %s created a new MIME list file (%s). "
-		"It is recommended to edit this file (entering 'mm edit' or "
-		"pressing F6) to add the programs you use and remove those "
-		"you don't. This will make the process of opening files "
-		"faster and smoother.\n"), BOLD, NC, PROGRAM_NAME, f ? f : file);
-
-	if (f != file)
-		free(f);
-}
-
 int
 create_mime_file(char *file, const int new_prof)
 {
+	/* This variable was used to print a notice message when running for the
+	 * first time. Too much information: removed. */
+	UNUSED(new_prof);
+
 	if (!file || !*file)
 		return FUNC_FAILURE;
 
@@ -2326,9 +2314,6 @@ create_mime_file(char *file, const int new_prof)
 	int ret = import_from_data_dir("mimelist.clifm", file, 0);
 	if (ret != FUNC_SUCCESS)
 		ret = create_mime_file_anew(file);
-
-	if (new_prof == 0 && ret == FUNC_SUCCESS)
-		print_mime_file_msg(file);
 
 	return ret;
 }

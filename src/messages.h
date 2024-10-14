@@ -369,45 +369,18 @@ Note 2: Unlink 'p', 'pp' always follows symlinks to their target file."
 
 #define FILE_PREVIEWS "Use the 'view' command to preview files in the current \
 directory (depends on fzf).\n\n\
-To add file previews to TAB completion (fzf mode only), use the --fzfpreview\n\
-command line option, or set FzfPreview to true in the configuration file\n\
-('config' or F10).\n\n\
-Enabling image previews (either ueberzug (X11 only) or the Kitty terminal\n\
-are required)\n\
+\x1b[1mENABLING IMAGE PREVIEWS\x1b[0m\n\
 \n\
-1. Copy 'clifmrun' and 'clifmimg' scripts to somewhere in you $PATH \n\
-(say /usr/local/bin). You can find them in DATADIR/clifm/plugins (usually\n\
-/usr/local/share/clifm/plugins).\n\n\
-2. Edit shotgun's configuration file ('view edit' or F7) and add the\n\
-following lines at the top of the file (to make sure they won't be\n\
-overriden by previous directives):\n\
+Edit shotgun's configuration file ('view edit' or F7) and uncomment the\n\
+'clifmimg' lines from the top of the file.\n\
 \n\
-X:^application/.*(officedocument|msword|ms-excel|opendocument).*=clifmimg doc;\n\
-X:^text/rtf$=clifmimg doc;\n\
-X:^application/epub\\+zip$=clifmimg epub;\n\
-X:^appliaction/pdf$=clifmimg pdf;\n\
-X:^image/vnd.djvu=clifmimg djvu;\n\
-X:^image/svg\\+xml$=clifmimg svg;\n\
-X:^image/.*=clifmimg image;\n\
-X:^video/.*=clifmimg video;\n\
-X:^audio/.*=clifmimg audio;\n\
-X:^application/postscript$=clifmimg postscript;\n\
-X:N:.*\\.otf$=clifmimg font;\n\
-X:font/.*=clifmimg font;\n\
+This instructs Clifm to use the 'clifmimg' script (~/.config/clifm/clifmimg)\n\
+to generate image previews (for TAB completion -in fzf-mode- and the 'view'\n\
+command).\n\
 \n\
-Comment out whatever you want to exclude from the image preview function.\n\
-\n\
-3. Run Clifm via the 'clifmrun' script:\n\
-clifmrun --fzfpreview\n\
-\n\
-Note on Kitty and Wayland:\n\
-If running on the kitty terminal you can force the use of the kitty image\n\
-protocol (instead of ueberzug) as follows:\n\
-\n\
-CLIFM_KITTY_NO_UEBERZUG=1 clifmrun --fzfpreview\n\
-\n\
-Note that on Wayland the kitty image protocol will be used by default, so\n\
-that there is no need to set this variable."
+By default, Clifm will try to guess the best previewing method. However, you\n\
+can edit the 'clifmimg' script and set the 'method' variable to any of the\n\
+available previewing methods: sixel, ueberzug, kitty, ascii."
 
 #define FILTER_USAGE "Set a filter for the files list\n\n\
 \x1b[1mUSAGE\x1b[0m\n\

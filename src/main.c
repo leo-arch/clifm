@@ -656,6 +656,7 @@ const struct cmdslist_t param_str[] = {
 	{"help file-details", 17},
 	{"help file-filters", 17},
 	{"help file-previews", 18},
+	{"help image-previews", 19},
 	{"help file-tags", 14},
 	{"help navigation", 15},
 	{"help plugins", 12},

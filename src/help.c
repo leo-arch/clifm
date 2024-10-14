@@ -460,7 +460,8 @@ run_help_topic(const char *topic)
 		return print_file_attributes_topic();
 	if (*topic == 'f' && strcmp(topic, "file-filters") == 0)
 		return print_file_filters_topic();
-	if (*topic == 'f' && strcmp(topic, "file-previews") == 0)
+	if ((*topic == 'f' && strcmp(topic, "file-previews") == 0)
+	|| (*topic == 'i' && strcmp(topic, "image-previews") == 0))
 		return print_file_previews_topic();
 	if (*topic == 'f' && strcmp(topic, "file-tags") == 0)
 		return print_file_tags_topic();
