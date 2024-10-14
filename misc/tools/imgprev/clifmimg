@@ -60,16 +60,16 @@
 ############################
 #
 # Set the preview image method.
-# Available methods: sixel, ueberzug, kitty, ascii
+# Available methods: sixel, ueberzug, kitty, ansi (text mode)
 #
 # NOTE: To use the ueberzug method, run Clifm via the clifmrun script.
 #
 # If unset, we'll make our best guess.
 method=""
 
-# Set the application used to generate ASCII image previews.
+# Set the application used to generate ANSI image previews.
 # Available applications: chafa, pixterm, img2text, viu, catimg, tiv, timg
-ascii_method="chafa"
+ansi_method="chafa"
 
 # To generate sixel images we use chafa(1).
 
@@ -88,7 +88,7 @@ CACHEDIRTAG_HEADER="Signature: 8a477f597d28d172789f06886806bc55
 get_preview_method() {
 	if [ -z "$method" ]; then
 		method="$CLIFM_IMG_SUPPORT"
-		[ -z "$method" ] && method="ascii"
+		[ -z "$method" ] && method="ansi"
 	fi
 }
 
@@ -149,8 +149,8 @@ display() {
 			printf '{"action": "add", "identifier": "clifm-preview", "x": "%s", "y": "%s", "width": "%s", "height": "%s", "scaler" : "contain", "path": "%s"}\n' "$((X - 1))" "$Y" "$COLUMNS" "$((LINES - 1))" "$1" > "$CLIFM_FIFO_UEBERZUG"
 		;;
 
-		ascii)
-			case "$ascii_method" in
+		ansi)
+			case "$ansi_method" in
 				chafa) chafa -f symbols -s "${C}x${L}" "$1" ;;
 				pixterm) pixterm -s 2 -tc "${C}" -tr "${L}" "$1" ;;
 				img2text) img2txt -H"${L}" -W"${C}" "$1" ;;
