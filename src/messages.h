@@ -380,7 +380,10 @@ command).\n\
 \n\
 By default, Clifm will try to guess the best previewing method. However, you\n\
 can edit the 'clifmimg' script and set the 'method' variable to any of the\n\
-available previewing methods: sixel, ueberzug, kitty, ansi (text mode)."
+available previewing methods: sixel, ueberzug, kitty, ansi (text mode).\n\
+\n\
+If using the 'ueberzug' method, you must start Clifm via the 'clifmrun' script\n\
+(~/.config/clifm/clifmrun)"
 
 #define FILTER_USAGE "Set a filter for the files list\n\n\
 \x1b[1mUSAGE\x1b[0m\n\

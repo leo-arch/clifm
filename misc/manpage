@@ -1855,7 +1855,7 @@ To use FZF global values (defined in \fBFZF_DEFAULT_OPTS\fR), set \fIFzfTabOptio
 .TP
 File previews are available in FZF mode via \fIshotgun\fR. See the \fBSHOTGUN\fR section above.
 .TP
-Image previews (X11 only) are available via the \fIclifmimg\fR plugin. Consult the Wiki for more information: \fIhttps://github.com/leo\-arch/clifm/wiki/Specifics#tab\-completion\-with\-file\-previews\fR
+Image previews are available via the \fIclifmimg\fR plugin. Consult the Wiki for more information: \fIhttps://github.com/leo\-arch/clifm/wiki/Specifics#tab\-completion\-with\-file\-previews\fR
 .TP
 If using the \fIsmenu\fR mode, the interface can be customized using the \fBCLIFM_SMENU_OPTIONS\fR environment variable. For example:
 .sp

@@ -214,6 +214,8 @@ check_img_support(void)
 	if (getenv("CLIFM_FIFO_UEBERZUG")) /* Variable set by the clifmrun script */
 		setenv("CLIFM_IMG_SUPPORT", "ueberzug", 1);
 	else if (getenv("KITTY_WINDOW_ID"))
+		/* KITTY_WINDOW_ID is guaranteed to be defined if running on the
+		 * kitty terminal. See https://github.com/kovidgoyal/kitty/issues/957 */
 		setenv("CLIFM_IMG_SUPPORT", "kitty", 1);
 	else if (check_sixel_support() == 1)
 		setenv("CLIFM_IMG_SUPPORT", "sixel", 1);
