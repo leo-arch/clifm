@@ -153,6 +153,7 @@
 #define LOPT_PTIME_STYLE            277
 #define LOPT_COLOR_LNK_AS_TARGET    278
 #define LOPT_PAGER_VIEW             279
+#define LOPT_NO_UNICODE             280
 
 /* Link long (--option) and short options (-o) for the getopt_long function. */
 static struct option const longopts[] = {
@@ -245,6 +246,7 @@ static struct option const longopts[] = {
 	{"no-suggestions", no_argument, 0, LOPT_NO_SUGGESTIONS},
 	{"no-tips", no_argument, 0, LOPT_NO_TIPS},
 	{"no-trim-names", no_argument, 0, LOPT_NO_TRIM_NAMES},
+	{"no-unicode", no_argument, 0, LOPT_NO_UNICODE},
 	{"no-warning-prompt", no_argument, 0, LOPT_NO_WARNING_PROMPT},
 	{"no-welcome-message", no_argument, 0, LOPT_NO_WELCOME_MESSAGE},
 	{"only-dirs", no_argument, 0, LOPT_ONLY_DIRS},
@@ -1644,6 +1646,8 @@ parse_cmdline_args(const int argc, char **argv)
 			xargs.tips = conf.tips = 0; break;
 		case LOPT_NO_TRIM_NAMES:
 			xargs.trim_names = conf.trim_names = 0; break;
+		case LOPT_NO_UNICODE:
+			xargs.no_unicode = 1; term_caps.unicode = 0; break;
 		case LOPT_NO_WARNING_PROMPT:
 			xargs.warning_prompt = conf.warning_prompt = 0; break;
 		case LOPT_NO_WELCOME_MESSAGE:

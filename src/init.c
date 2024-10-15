@@ -1772,6 +1772,7 @@ unset_xargs(void)
 	xargs.no_bold = UNSET;
 	xargs.no_dirjump = UNSET;
 	xargs.no_eln = UNSET;
+	xargs.no_unicode = UNSET;
 	xargs.only_dirs = UNSET;
 	xargs.open = UNSET;
 	xargs.pager = UNSET;

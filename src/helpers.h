@@ -1460,6 +1460,7 @@ struct param_t {
 	int no_bold;
 	int no_dirjump;
 	int no_eln;
+	int no_unicode;
 	int only_dirs;
 	int open;
 	int pager;

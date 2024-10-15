@@ -124,6 +124,7 @@ _clifm ()
         --no-suggestions
         --no-tips
         --no-trim-names
+        --no-unicode
 		--no-warning-prompt
         --no-welcome-message
         --only-dirs

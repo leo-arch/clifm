@@ -1404,6 +1404,7 @@ and paths\
 \n      --no-suggestions\t\t Disable auto-suggestions\
 \n      --no-tips\t\t\t Disable startup tips\
 \n      --no-trim-names\t\t Do not trim file names\
+\n      --no-unicode\t\t Do not use Unicode characters\
 \n      --no-warning-prompt\t Disable the warning prompt\
 \n      --no-welcome-message\t Disable the welcome message\
 \n      --only-dirs\t\t List only directories and symbolic links to directories\

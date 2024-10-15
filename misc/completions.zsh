@@ -87,6 +87,7 @@ args=(
 	'--no-suggestions[disable auto-suggestions]'
 	'--no-tips[disable startup tips]'
 	'--no-trim-names[do not trim file names]'
+	'--no-unicode[do not use Unicode characters]'
 	'--no-warning-prompt[disable the warning prompt, used to highlight invalid command names]'
 	'--no-welcome-message[disable the welcome message]'
 	'--only-dirs[list only directories and symbolic links to directories]'

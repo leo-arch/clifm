@@ -84,6 +84,7 @@ complete -c clifm -l no-restore-last-path -d 'Do not record the last visited dir
 complete -c clifm -l no-suggestions -d 'Disable auto-suggestions'
 complete -c clifm -l no-tips -d 'Disable startup tips'
 complete -c clifm -l no-trim-names -d 'Do not trim file names'
+complete -c clifm -l no-unicode -d 'Do not use Unicode characters'
 complete -c clifm -l no-warning-prompt -d 'Disable the warning prompt'
 complete -c clifm -l no-welcome-message -d 'Disable the welcome message'
 complete -c clifm -l only-dirs -d 'List only directories and symbolic links to directories'
