@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Oct 9, 2024" "clifm 1.21.3" "CLIFM Manual"
+.TH "CLIFM" "1" "Oct 15, 2024" "clifm 1.21.6" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -330,6 +330,9 @@ disable startup tips
 .TP
 \fB\-\-no\-trim\-names\fR
 do not trim file names (see \fIMaxFilenameLen\fR in the configuration file)
+.TP
+\fB\-\-no\-unicode\fR
+do not use Unicode characters
 .TP
 \fB\-\-no\-warning\-prompt\fR
 disable the warning prompt (used to highlight invalid command names)
