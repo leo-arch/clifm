@@ -185,8 +185,7 @@ check_sixel_support(void)
 		return (-1);
 
 	/* 1. Ask the terminal for device attributes (primary DA) */
-	const ssize_t qlen = 3;
-	if (write(STDOUT_FILENO, "\x1b[c", qlen) != qlen) {
+	if (write(STDOUT_FILENO, "\x1b[c", 3) != 3) {
 		disable_raw_mode(STDIN_FILENO);
 		return (-1);
 	}
@@ -218,6 +217,51 @@ check_sixel_support(void)
 			return 1;
 		i++;
 	}
+
+	return 0;
+}
+
+/* Return 1 if the running terminal supports Unicode, 0 if not, or -1 on error.
+ * Based on https://unix.stackexchange.com/questions/184345/detect-how-much-of-unicode-my-terminal-supports-even-through-screen*/
+int
+check_unicode_support(void)
+{
+	char buf[64];
+	unsigned int i = 0;
+
+	if (enable_raw_mode(STDIN_FILENO) == -1)
+		return (-1);
+
+	/* 1. Ask the terminal to print a 3-byte Unicode character that takes
+	 * 2 terminal columns, then request the cursor position, and finally
+	 * clear the line. */
+	if (write(STDOUT_FILENO, "\xe2\x88\xb4\x1b[6n\x1b[1K\r", 12) != 12) {
+		disable_raw_mode(STDIN_FILENO);
+		return (-1);
+	}
+
+	/* 2. Read the response: "...;nR" */
+	int read_err = 0;
+	while (i < sizeof(buf) - 1) {
+		if (read(STDIN_FILENO, buf + i, 1) != 1) { /* flawfinder: ignore */
+			read_err = 1;
+			break;
+		}
+
+		if (buf[i] == 'R')
+			break;
+		i++;
+	}
+
+	buf[i] = '\0';
+
+	if (disable_raw_mode(STDIN_FILENO) == -1 || read_err == 1)
+		return (-1);
+
+	/* 3. Parse the response. If we get 2, we have Unicode support. */
+	char *p = strchr(buf, ';');
+	if (p && p[1] == '2')
+		return 1;
 
 	return 0;
 }

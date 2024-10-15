@@ -126,6 +126,7 @@ static void
 set_term_caps(const int i)
 {
 	const int true_color = check_truecolor();
+	term_caps.unicode = 0;
 
 	if (i == -1) { /* TERM not found in our terminfo database */
 		term_caps.color = true_color == 1 ? TRUE_COLOR : 0;
@@ -137,6 +138,7 @@ set_term_caps(const int i)
 		term_caps.home = 0;
 		term_caps.clear = 0;
 		term_caps.del_scrollback = 0;
+		term_caps.req_dev_attrs = 0;
 		return;
 	}
 
@@ -145,6 +147,7 @@ set_term_caps(const int i)
 	term_caps.clear = TERM_INFO[i].ed;
 	term_caps.del_scrollback = TERM_INFO[i].del_scrollback;
 	term_caps.req_cur_pos = TERM_INFO[i].req_cur_pos;
+	term_caps.req_dev_attrs = TERM_INFO[i].req_dev_attrs;
 
 	term_caps.color = true_color == 1 ? TRUE_COLOR
 		: (TERM_INFO[i].color > 0 ? TERM_INFO[i].color : 0);
@@ -170,11 +173,7 @@ check_term_support(const char *env_term)
 
 	size_t i;
 	const size_t len = strlen(env_term);
-	/* Color and cursor position request support. */
 	int index = -1;
-
-	if (*env_term == 'x' && strcmp(env_term, "xterm-kitty") == 0)
-		flags |= KITTY_TERM;
 
 	for (i = 0; TERM_INFO[i].name; i++) {
 		if (*env_term != *TERM_INFO[i].name || len != TERM_INFO[i].len
@@ -217,7 +216,7 @@ check_img_support(void)
 		/* KITTY_WINDOW_ID is guaranteed to be defined if running on the
 		 * kitty terminal. See https://github.com/kovidgoyal/kitty/issues/957 */
 		setenv("CLIFM_IMG_SUPPORT", "kitty", 1);
-	else if (check_sixel_support() == 1)
+	else if (term_caps.req_dev_attrs == 1 && check_sixel_support() == 1)
 		setenv("CLIFM_IMG_SUPPORT", "sixel", 1);
 	else
 		setenv("CLIFM_IMG_SUPPORT", "ansi", 1);
@@ -234,7 +233,21 @@ check_term(void)
 	}
 
 	check_term_support(t);
+
+	/* These terminals do not responde to the escape codes sent by
+	 * the below checks, no matter what terminfo says. */
+	if (*t == 'E' && strcmp(t + 1, "term") == 0)
+		return;
+
+#ifdef __FreeBSD__
+	if (!(flags & GUI))
+		return;
+#endif /* __FreeBSD__ */
+
 	check_img_support();
+
+	if (term_caps.req_cur_pos == 1 && check_unicode_support() == 1)
+		term_caps.unicode = 1;
 }
 
 static void

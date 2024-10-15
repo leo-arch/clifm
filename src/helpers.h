@@ -533,9 +533,8 @@ extern time_t curdir_mtime;
 #define IN_SELBOX_SCREEN    (1 << 9)
 #define MULTI_SEL           (1 << 10)
 #define PREVIEWER           (1 << 11)
-#define KITTY_TERM          (1 << 12)
-#define NO_FIX_RL_POINT     (1 << 13)
-#define FAILED_ALIAS        (1 << 14)
+#define NO_FIX_RL_POINT     (1 << 12)
+#define FAILED_ALIAS        (1 << 13)
 
 /* Flags for third party binaries */
 #define FZF_BIN_OK     (1 << 0)
@@ -1622,6 +1621,8 @@ struct termcaps_t {
 	int clear; /* ED (erase display) */
 	int del_scrollback; /* E3 */
 	int req_cur_pos; /* CPR (cursor position request) */
+	int req_dev_attrs; /* Primary DA (device attributes request) */
+	int unicode;
 };
 extern struct termcaps_t term_caps;
 
