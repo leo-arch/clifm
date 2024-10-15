@@ -3321,7 +3321,7 @@ print_suggestion_colors(void)
 	printf("%sColor%s (sf) File names (e.g. thi%ss_filename%s)\n",
 		sf_c, df_c, sf_c, df_c);
 	printf("%sColor%s (sz) File names (fuzzy) (e.g. dwn %s%c%s "
-		"%sDownloads%s)\n", sz_c, df_c, sp_c, BAEJ_SUG_POINTER, df_c,
+		"%sDownloads%s)\n", sz_c, df_c, sp_c, SUG_POINTER, df_c,
 		sz_c, df_c);
 	printf("%sColor%s (sx) Internal command names and parameters "
 		"(e.g. boo%skmarks%s)\n", sx_c, df_c, sx_c, df_c);
@@ -3332,7 +3332,7 @@ print_suggestion_colors(void)
 	printf("%sColor%s (sd) Internal commands description (e.g. "
 		"br %s(batch rename files)%s)\n", sd_c, df_c, sd_c, df_c);
 	printf("%sColor%s (sp) Pointer (e.g. %s48%s %s%c%s %sfilename%s)\n",
-		sp_c, df_c, hn_c, df_c, sp_c, BAEJ_SUG_POINTER, df_c, sf_c, df_c);
+		sp_c, df_c, hn_c, df_c, sp_c, SUG_POINTER, df_c, sf_c, df_c);
 #else
 	return;
 #endif /* !_NO_SUGGESTIONS */
