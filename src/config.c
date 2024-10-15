@@ -99,13 +99,15 @@ static void
 print_config_value(const char *option, void *cur_value, void *def_value,
 		const int type)
 {
+	const char *ptr = term_caps.unicode == 1 ? MISC_PTR_U : MISC_PTR;
+
 	if (type == DUMP_CONFIG_STR) {
 		char *cv = (char *)cur_value;
 		char *dv = (char *)def_value;
 		if (!cv || (dv && strcmp(cv, dv) == 0))
 			printf("  %s: \"%s\"\n", option, dv);
 		else
-			printf("%s>%s %s%s: \"%s\" [\"%s\"]%s\n", mi_c, df_c,
+			printf("%s%s%s %s%s: \"%s\" [\"%s\"]%s\n", mi_c, ptr, df_c,
 				BOLD, option, cv, dv, df_c);
 	}
 
@@ -114,7 +116,7 @@ print_config_value(const char *option, void *cur_value, void *def_value,
 		if (cv == dv)
 			printf("  %s: %s\n", option, cv == 1 ? "true" : "false");
 		else
-			printf("%s>%s %s%s: %s [%s]%s\n", mi_c, df_c, BOLD, option,
+			printf("%s%s%s %s%s: %s [%s]%s\n", mi_c, ptr, df_c, BOLD, option,
 				cv == 1 ? "true" : "false", dv == 1 ? "true" : "false", df_c);
 	}
 
@@ -123,7 +125,7 @@ print_config_value(const char *option, void *cur_value, void *def_value,
 		if (cv == dv)
 			printf("  %s: %d\n", option, cv);
 		else
-			printf("%s>%s %s%s: %d [%d]%s\n", mi_c, df_c, BOLD, option,
+			printf("%s%s%s %s%s: %d [%d]%s\n", mi_c, ptr, df_c, BOLD, option,
 				cv, dv, df_c);
 	}
 }

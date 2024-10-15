@@ -401,7 +401,13 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define PORT_PCHR    'P' /* Event port (Solaris) */
 #define UNK_PCHR     UNKNOWN_CHR
 
-#define SELFILE_CHR  '*'
+#define SELFILE_CHR   'S' /* Prompt indicator */
+#define SELFILE_STR   "*" /* Selected file mark for files list (ASCII) */
+#define SELFILE_STR_U "┃" /* Unicode alternative */
+
+#define LINK_STR   "@" /* Symbolic link mark for listed files (ASCII) */
+#define LINK_STR_U "@" /* Unicode alternative */
+
 #define TRIMFILE_CHR '~'
 
 /* Character used to mark files with extended attributes (long view) */
@@ -422,7 +428,16 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 
 /* String used for the messages pointer (e.g.: "-> 2 file(s) removed")
  * Note: The color used for this string is 'mi' (in the color scheme file). */
-#define MSG_PTR_STR "->"
+#define MSG_PTR_STR   "->"
+#define MSG_PTR_STR_U "→"  /* Unicode alternative */
+
+/* Used in multiple places, e.g., when listing prompts, color schemes, profiles,
+ * and workspaces ('config dump' as well). */
+#define MISC_PTR   ">"
+#define MISC_PTR_U "┃"
+
+#define DIR_CMD_PTR   ">"
+#define DIR_CMD_PTR_U ">"
 
 /* Character used to print non-matching suggestions, e.g. "12 > filename". */
 #define BAEJ_SUG_POINTER '>'
@@ -457,6 +472,7 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define DEF_DIRHIST_MAP 0
 #define DEF_DISK_USAGE 0
 #define DEF_DIV_LINE "-"
+#define DEF_DIV_LINE_U "─" /* Unicode alternative */
 #define DEF_ELN_USE_WORKSPACE_COLOR 0
 /* Available styles: QUOTING_STYLE_BACKSLASH, QUOTING_STYLE_SINGLE_QUOTES,
  * and QUOTING_STYLE_DOUBLE_QUOTES */

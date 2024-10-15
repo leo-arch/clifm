@@ -293,7 +293,8 @@ print_reload_msg(const char *msg, ...)
 		return FUNC_FAILURE;
 
 	if (conf.autols == 1)
-		printf("%s%s%s ", mi_c, MSG_PTR_STR, df_c);
+		printf("%s%s%s ", mi_c, term_caps.unicode == 1
+			? MSG_PTR_STR_U : MSG_PTR_STR, df_c);
 
 	char *buf = xnmalloc((size_t)size + 1, sizeof(char));
 

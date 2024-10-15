@@ -206,11 +206,6 @@ check_term_support(const char *env_term)
 static void
 check_img_support(void)
 {
-	if (xargs.stealth_mode == 1)
-		/* If CLIFM_IMG_SUPPORT is unset, the clifmimg script falls back to
-		 * the ansi method. */
-		return;
-
 	if (getenv("CLIFM_IMG_SUPPORT"))
 		/* If running Clifm via the fzf previewer, this variable is already
 		 * set. Don't check. */

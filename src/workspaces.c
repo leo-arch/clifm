@@ -90,12 +90,13 @@ list_workspaces(void)
 {
 	uint8_t i;
 	int pad = (int)get_longest_workspace_name();
+	const char *ptr = term_caps.unicode == 1 ? MISC_PTR_U : MISC_PTR;
 
 	for (i = 0; i < MAX_WS; i++) {
 		char *path_color = get_workspace_path_color(i);
 
 		if (i == cur_ws)
-			printf("%s>%s ", mi_c, df_c);
+			printf("%s%s%s ", mi_c, ptr, df_c);
 		else
 			fputs("  ", stdout);
 

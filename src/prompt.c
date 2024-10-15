@@ -1621,7 +1621,8 @@ list_prompts(void)
 
 		if (*cur_prompt_name == *prompts[i].name
 		&& strcmp(cur_prompt_name, prompts[i].name) == 0)
-			printf("%s>%s %s\n", mi_c, df_c, prompts[i].name);
+			printf("%s%s%s %s\n", mi_c, term_caps.unicode == 1
+				? MISC_PTR_U : MISC_PTR, df_c, prompts[i].name);
 		else
 			printf("  %s\n", prompts[i].name);
 	}
