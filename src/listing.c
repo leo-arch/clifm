@@ -349,13 +349,15 @@ print_div_line(void)
 		if (c > 1) {
 			puts(div_line);
 		} else {
+			const char *dl = (*div_line == '-' && !div_line[1]
+				&& term_caps.unicode == 1) ? "─" : div_line;
 			/* Extend DIV_LINE to the end of the screen - 1.
 			 * We substract 1 to prevent an extra empty line after the
 			 * dividing line on some terminals (e.g. cons25). */
-			const size_t len = !div_line[1] ? 1 : wc_xstrlen(div_line);
+			const size_t len = !dl[1] ? 1 : wc_xstrlen(dl);
 			int i = c > 0 ? (int)(term_cols / len) : 0;
 			for (; i > 1; i--)
-				fputs(div_line, stdout);
+				fputs(dl, stdout);
 			putchar('\n');
 		}
 	}
