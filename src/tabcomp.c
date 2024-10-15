@@ -753,7 +753,7 @@ run_finder(const size_t height, const int offset, const char *lw,
 			finder_in_file, finder_out_file);
 
 	} else { /* FZF */
-		/* All fixed parameters are compatible with at least fzf 0.16.11 (Aug 1, 2017) */
+		/* All fixed parameters are compatible with at least fzf 0.18.0 (Mar 31, 2019) */
 		char prev_opts[18 + MAX_INT_STR];
 		*prev_opts = '\0';
 		const char prev_str[] = "--preview \"clifm --preview {}\"";
@@ -765,12 +765,13 @@ run_finder(const size_t height, const int offset, const char *lw,
 				snprintf(prev_opts, sizeof(prev_opts), "--preview-window=%zu", s);
 		}
 
-		snprintf(cmd, sizeof(cmd), "fzf %s "
+		snprintf(cmd, sizeof(cmd), "fzf %s %s "
 			"%s --margin=0,0,0,%d "
 			"%s --read0 --ansi "
 			"--query='%s' %s %s %s %s %s "
 			"< %s > %s",
 			conf.fzftab_options,
+			term_caps.unicode == 0 ? "--no-unicode" : "",
 			*height_str ? height_str : "", offset,
 			conf.case_sens_path_comp == 1 ? "+i" : "-i",
 			lw ? lw : "", conf.colorize == 0 ? "--color=bw" : "",

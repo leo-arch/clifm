@@ -138,6 +138,7 @@ set_term_caps(const int i)
 		term_caps.home = 0;
 		term_caps.clear = 0;
 		term_caps.del_scrollback = 0;
+		term_caps.req_cur_pos = 0;
 		term_caps.req_dev_attrs = 0;
 		return;
 	}
@@ -190,6 +191,11 @@ check_term_support(const char *env_term)
 	}
 
 	set_term_caps(index);
+
+	/* Eterm does not report device attributes (DA), no matter what
+	 * terminfo says. */
+	if (*env_term == 'E' && strcmp(env_term + 1, "term") == 0)
+		term_caps.req_dev_attrs = 0;
 }
 
 /* Try to detect what kind of image capability the running terminal supports
@@ -233,11 +239,6 @@ check_term(void)
 	}
 
 	check_term_support(t);
-
-	/* These terminals do not responde to the escape codes sent by
-	 * the below checks, no matter what terminfo says. */
-	if (*t == 'E' && strcmp(t + 1, "term") == 0)
-		return;
 
 #ifdef __FreeBSD__
 	if (!(flags & GUI))
