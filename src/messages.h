@@ -164,7 +164,7 @@ Note: Links are always created in the current directory."
 
 #define BOOKMARKS_USAGE "Manage bookmarks\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  bm, bookmarks [a, add FILENAME NAME | d, del [NAME] | e, edit [APP] | NAME]\n\n\
+  bm, bookmarks [a, add FILENAME NAME | d, del NAME | e, edit [APP] | NAME]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - List bookmarks\n\
     bm (also Alt-b, 'bm <TAB>' or 'b:<TAB>')\n\
