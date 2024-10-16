@@ -186,13 +186,13 @@ print_bookmarks(void)
 		char *color = stat(bookmarks[i].path, &attr) == -1
 			? uf_c : get_entry_color(bookmarks[i].path, &attr);
 
-		printf("%s%s%-*zu%s%s%s%s%s%s%s%-*s %s%s%s\n",
+		printf("%s%s%*zu%s%s%s%s%s%s%s%-*s %s%s%s\n",
 			NC, el_c, eln_pad, i + 1, df_c, // ELN
 			ls > 0 ? " " : "",
 
-			BOLD, sc_ok == 1 ? "[" : "", // Shortcut
-			sc_ok == 1 ? bookmarks[i].shortcut : "",
-			sc_ok == 1 ? "]" : "", df_c, sc_pad, "",
+			sc_ok == 1 ? "[" : "", sc_ok == 1 ? mi_c : bk_c, // Shortcut
+			sc_ok == 1 ? bookmarks[i].shortcut : "-", df_c,
+			sc_ok == 1 ? "]" : "", sc_pad, "",
 
 			color, bookmarks[i].name ? bookmarks[i].name
 			: bookmarks[i].path, df_c);
