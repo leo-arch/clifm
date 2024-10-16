@@ -30,6 +30,8 @@
 	if (term_caps.home == 1 && term_caps.clear == 1) { \
 		if (term_caps.del_scrollback == 1)             \
 			fputs("\x1b[H\x1b[2J\x1b[3J", stdout);     \
+		else if (term_caps.del_scrollback == 2)        \
+			fputs("\033c", stdout);                    \
 		else                                           \
 			fputs("\x1b[H\x1b[J", stdout);             \
 	}
