@@ -582,7 +582,7 @@ The query string could match any part of a directory name: \fIbd er\fR, for inst
 .B bl \fIFILE\fR...
 Create symbolic links (in the current directory) for each specified file. For example, to create symbolic links in the directory \fIdir\fR for all PNG files in the current directory, issue these commands: \fIs *.png\fR, \fIcd dir\fR, and then \fIbl sel\fR.
 .TP
-.B bm, bookmarks \fR[\fIa\fR, \fIadd\fR \fIFILENAME\fR \fINAME\fR [\fISHORTCUT\fR]] [\fId\fR, \fIdel\fR [\fINAME\fR]] [\fIe, edit\fR [\fIAPP\fR]] [\fINAME\fR, \fISHORTCUT\fR]
+.B bm, bookmarks \fR[\fIa\fR, \fIadd\fR \fIFILENAME\fR \fINAME\fR [\fISHORTCUT\fR]] [\fId\fR, \fIdel\fR \fINAME\fR] [\fIe, edit\fR [\fIAPP\fR]] [\fINAME\fR, \fISHORTCUT\fR]
 Bookmarks can be manager either from the bookmarks manager screen or from the command line.
 .sp
 \fB1. The bookmarks manager screen\fR
