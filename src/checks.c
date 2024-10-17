@@ -235,6 +235,10 @@ check_term(void)
 
 	check_term_support(t);
 
+	/* Skip below checks if STDOUT is not interactive. */
+	if (isatty(STDOUT_FILENO) == 0)
+		return;
+
 #ifdef __FreeBSD__
 	if (!(flags & GUI))
 		return;
