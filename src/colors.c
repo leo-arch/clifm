@@ -3216,7 +3216,8 @@ print_interface_colors(void)
 		"%s%c%ssymlink) (%s1%s)\n"), lc_c, df_c, el_c, df_c, lc_c,
 		LINK_CHR, df_c, BOLD, df_c);
 	printf(_("%sColor%s (li) Selected file indicator (e.g. %s12%s"
-		"%s%c%sfilename)\n"), li_cb, df_c, el_c, df_c, li_cb, SELFILE_CHR, df_c);
+		"%s%s%sfilename)\n"), li_cb, df_c, el_c, df_c, li_cb,
+		term_caps.unicode == 1 ? SELFILE_STR_U : SELFILE_STR, df_c);
 	printf(_("%sColor%s (tt) Trimmed file names mark (e.g. "
 		"filenam%s%c%s.odt)\n"), tt_c, df_c, tt_c, TRIMFILE_CHR, df_c);
 	printf(_("%sColor%s (dl) Dividing line (e.g. %s------>%s)\n"),
