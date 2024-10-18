@@ -191,7 +191,7 @@ print_bookmarks(void)
 			ls > 0 ? " " : "",
 
 			sc_ok == 1 ? "[" : "", sc_ok == 1 ? mi_c : bk_c, // Shortcut
-			sc_ok == 1 ? bookmarks[i].shortcut : "-", df_c,
+			sc_ok == 1 ? bookmarks[i].shortcut : "", df_c,
 			sc_ok == 1 ? "]" : "", sc_pad, "",
 
 			color, bookmarks[i].name ? bookmarks[i].name
