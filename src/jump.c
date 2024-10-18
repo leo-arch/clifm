@@ -576,7 +576,8 @@ purge_invalid_entries(void)
 			continue;
 
 		if (stat(jump_db[i].path, &a) == -1) {
-			printf("%s->%s %s%s%s\n", mi_c, df_c, uf_c, jump_db[i].path, df_c);
+			printf("%s%s%s %s%s%s\n", mi_c, SET_MSG_PTR, df_c, uf_c,
+				jump_db[i].path, df_c);
 			jump_db[i].rank = JUMP_ENTRY_PURGED;
 			c++;
 		}
@@ -616,7 +617,8 @@ purge_low_ranked_entries(const int limit)
 				continue;
 			}
 			jump_db[i].keep = 0;
-			printf("%s->%s %s (%d)\n", mi_c, df_c, jump_db[i].path, rank);
+			printf("%s%s%s %s (%d)\n", mi_c, SET_MSG_PTR, df_c,
+				jump_db[i].path, rank);
 			jump_db[i].rank = JUMP_ENTRY_PURGED;
 			c++;
 		}

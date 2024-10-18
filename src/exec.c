@@ -760,8 +760,8 @@ list_aliases(void)
 	const size_t longest_name_len = get_longest_alias_name();
 
 	for (i = 0; i < aliases_n; i++) {
-		printf("%-*s %s->%s %s\n", (int)longest_name_len,
-			aliases[i].name, mi_c, df_c, aliases[i].cmd);
+		printf("%-*s %s%s%s %s\n", (int)longest_name_len,
+			aliases[i].name, mi_c, SET_MSG_PTR, df_c, aliases[i].cmd);
 	}
 
 	return FUNC_SUCCESS;

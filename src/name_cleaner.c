@@ -446,8 +446,8 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 		} else if (strncmp(line, "replacement: ", 13) == 0
 		&& bfiles[i].original) {
 			bfiles[i].replacement = savestring(p, strlen(p));
-			printf("%s %s->%s %s\n", bfiles[i].original, mi_c, df_c,
-				bfiles[i].replacement);
+			printf("%s %s%s%s %s\n", bfiles[i].original, mi_c, SET_MSG_PTR,
+				df_c, bfiles[i].replacement);
 			i++;
 		} else {
 			continue;
@@ -541,8 +541,8 @@ bleach_files(char **names)
 		} else {
 			bfiles[f].replacement = savestring(p, strlen(p));
 		}
-		printf("%s %s->%s %s\n",
-			bfiles[f].original, mi_c, df_c, bfiles[f].replacement);
+		printf("%s %s%s%s %s\n",
+			bfiles[f].original, mi_c, SET_MSG_PTR, df_c, bfiles[f].replacement);
 		f++;
 		free(p);
 	}

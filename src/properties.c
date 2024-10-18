@@ -779,14 +779,16 @@ set_file_owner(char **args)
 		}
 
 		if (*new_own && owner->pw_uid != a.st_uid) {
-			printf(_("%s->%s %s: User set to %d (%s%s%s)\n"),
-				mi_c, NC, args[i], owner->pw_uid, BOLD, owner->pw_name, NC);
+			printf(_("%s%s%s %s: User set to %d (%s%s%s)\n"),
+				mi_c, SET_MSG_PTR, NC, args[i], owner->pw_uid,
+				BOLD, owner->pw_name, NC);
 			new_o++;
 		}
 
 		if (new_group && group->gr_gid != a.st_gid) {
-			printf(_("%s->%s %s: Primary group set to %d (%s%s%s)\n"),
-				mi_c, NC, args[i], group->gr_gid, BOLD, group->gr_name, NC);
+			printf(_("%s%s%s %s: Primary group set to %d (%s%s%s)\n"),
+				mi_c, SET_MSG_PTR, NC, args[i], group->gr_gid, BOLD,
+				group->gr_name, NC);
 			new_g++;
 		}
 	}
@@ -1092,8 +1094,10 @@ print_filename(char *filename, const char *color, const int follow_link,
 			char t[PATH_MAX * sizeof(wchar_t) + 3]; *t = '\0';
 			if (detect_space(link_target) == 1)
 				snprintf(t, sizeof(t), "'%s'", link_target);
-			printf(_("\tName: %s%s%s %s<-%s %s%s%s\n"), color,
-				*t ? t : link_target, df_c, dn_c, df_c, ln_c, n, df_c);
+			printf(_("\tName: %s%s%s %s%s%s %s%s%s\n"), color,
+				*t ? t : link_target, df_c, dn_c,
+				term_caps.unicode == 1 ? MSG_PTR_STR_LEFT_U : MSG_PTR_STR_LEFT,
+				df_c, ln_c, n, df_c);
 		} else {
 			printf(_("\tName: %s%s%s\n"), color, n, df_c);
 		}
@@ -1120,16 +1124,16 @@ print_filename(char *filename, const char *color, const int follow_link,
 	struct stat a;
 	if (tlen != -1 && *target && lstat(target, &a) != -1) {
 		char *link_color = get_link_color(target);
-		printf(_("\tName: %s%s%s %s->%s %s%s%s\n"), ln_c, n, df_c,
-			dn_c, df_c, link_color, *t ? t : target, df_c);
+		printf(_("\tName: %s%s%s %s%s%s %s%s%s\n"), ln_c, n, df_c,
+			dn_c, SET_MSG_PTR, df_c, link_color, *t ? t : target, df_c);
 
 	} else { /* Broken link */
 		if (tlen != -1 && *target) {
-			printf(_("\tName: %s%s%s %s->%s %s%s%s (broken link)\n"), or_c,
-				n, df_c, dn_c, df_c, uf_c, *t ? t : target, df_c);
+			printf(_("\tName: %s%s%s %s%s%s %s%s%s (broken link)\n"), or_c,
+				n, df_c, dn_c, SET_MSG_PTR, df_c, uf_c, *t ? t : target, df_c);
 		} else {
-			printf(_("\tName: %s%s%s %s-> ???%s\n"), or_c, n, df_c,
-				dn_c, df_c);
+			printf(_("\tName: %s%s%s %s%s ???%s\n"), or_c, n, df_c,
+				dn_c, SET_MSG_PTR, df_c);
 		}
 	}
 
@@ -1579,8 +1583,8 @@ err_no_file(const char *filename, const char *target, const int errnum)
 	char *errname = xargs.stat > 0 ? PROGRAM_NAME : "prop";
 
 	if (*target) {
-		xerror(_("%s: %s %s->%s %s: Broken symbolic link\n"),
-			errname, filename, mi_c, df_c, target);
+		xerror(_("%s: %s %s%s%s %s: Broken symbolic link\n"),
+			errname, filename, mi_c, SET_MSG_PTR, df_c, target);
 	} else {
 		xerror("%s: '%s': %s\n", errname, filename, strerror(errnum));
 	}

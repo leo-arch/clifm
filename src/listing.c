@@ -661,7 +661,8 @@ post_listing(DIR *dir, const int reset_pager, const filesn_t excluded_files)
 	}
 
 	if (switch_cscheme == 1)
-		printf(_("Color scheme %s->%s %s\n"), mi_c, df_c, cur_cscheme);
+		printf(_("Color scheme %s%s%s %s\n"), mi_c,	SET_MSG_PTR,
+			df_c, cur_cscheme);
 
 	if (conf.print_selfiles == 1 && sel_n > 0)
 		print_sel_files(term_lines);

@@ -422,8 +422,9 @@ actions_function(char **args)
 				"Example: enter '//' to run the rgfind plugin"));
 			size_t i, longest_name_len = get_longest_action_name();
 			for (i = 0; i < actions_n; i++) {
-				printf("%-*s %s->%s %s\n", (int)longest_name_len,
-					usr_actions[i].name, mi_c, df_c, usr_actions[i].value);
+				printf("%-*s %s%s%s %s\n", (int)longest_name_len,
+					usr_actions[i].name, mi_c, SET_MSG_PTR,
+					df_c, usr_actions[i].value);
 			}
 			return FUNC_SUCCESS;
 		}

@@ -519,9 +519,10 @@ bookmark_add(char *file, char *name, char *shortcut)
 
 	puts(_("File succesfully bookmarked"));
 	if (s)
-		printf("[%s]%s %s->%s %s\n", s, n, mi_c, tx_c, np ? np : file);
+		printf("[%s]%s %s%s%s %s\n", s, n, mi_c, SET_MSG_PTR,
+			tx_c, np ? np : file);
 	else
-		printf("%s %s->%s %s\n", n, mi_c, tx_c, np ? np : file);
+		printf("%s %s%s%s %s\n", n, mi_c, SET_MSG_PTR, tx_c, np ? np : file);
 
 	free(np);
 	free(p);

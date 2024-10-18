@@ -630,6 +630,8 @@ extern time_t curdir_mtime;
  * when passing color codes to readline. */
 #define RL_NC "\001\x1b[0m\002"
 
+#define SET_MSG_PTR (term_caps.unicode == 1 ? MSG_PTR_STR_U : MSG_PTR_STR)
+
 #define UNSET  (-1)
 
 /* Macros for the cp and mv cmds */

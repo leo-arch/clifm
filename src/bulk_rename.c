@@ -203,7 +203,8 @@ print_and_count_modified_names(char **args, FILE *fp)
 			char *a = abbreviate_file_name(args[i]);
 			char *b = abbreviate_file_name(line);
 
-			printf("%s %s->%s %s\n", a ? a : args[i], mi_c, df_c, b ? b : line);
+			printf("%s %s%s%s %s\n", a ? a : args[i], mi_c, SET_MSG_PTR,
+				df_c, b ? b : line);
 
 			if (a && a != args[i])
 				free(a);

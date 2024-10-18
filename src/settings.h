@@ -431,6 +431,9 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define MSG_PTR_STR   "->"
 #define MSG_PTR_STR_U "→"  /* Unicode alternative */
 
+#define MSG_PTR_STR_LEFT   "<-"
+#define MSG_PTR_STR_LEFT_U "←"
+
 /* Used in multiple places, e.g., when listing prompts, color schemes, profiles,
  * and workspaces ('config dump' as well). */
 #define MISC_PTR   ">"
