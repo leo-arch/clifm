@@ -136,7 +136,7 @@ display() {
 		;;
 
 		kitty)
-			kitty icat --loop=0 --place "$FZF_PREVIEW_COLUMNS"x"$((FZF_PREVIEW_LINES - 1))"@"$X"x"$Y" \
+			kitty icat --loop=0 --place "${FZF_PREVIEW_COLUMNS}x$((FZF_PREVIEW_LINES - 1))@${X}x${Y}" \
 			--clear --transfer-mode=memory --unicode-placeholder --stdin=no --align=left -- "$1"
 		;;
 
@@ -165,37 +165,37 @@ display() {
 
 print_err_msg() {
 	case "$2" in
-		127) echo "${1}: Command not found";;
-		*) echo "${1}: Error generating preview (code: $2)";;
+		127) echo "${1}: Command not found (required to generate previews for '${3}' files)" ;;
+		*) echo "${1}: Error generating preview (code: ${2})" ;;
 	esac
 	return 1
 }
 
 gen_epub_preview() {
 	gnome-epub-thumbnailer -s 1024 "$1" "$2" >/dev/null 2>&1 && return 0
-	print_err_msg "gnome-epub-thumbnailer" "$?"
+	print_err_msg "gnome-epub-thumbnailer" "$?" "epub"
 	epub-thumbnailer "$1" "$2" 1024 >/dev/null 2>&1 && return 0
-	print_err_msg "epub-thumbnailer" "$?"
+	print_err_msg "epub-thumbnailer" "$?" "epub"
 }
 
 gen_mobi_preview() {
 	gnome-mobi-thumbnailer -s 1024 "$1" "$2" >/dev/null 2>&1 && return 0
-	print_err_msg "gnome-mobi-thumbnailer" "$?"
+	print_err_msg "gnome-mobi-thumbnailer" "$?" "mobi"
 }
 
 gen_pdf_preview() {
 	pdftoppm -jpeg -f 1 -singlefile -scale-to 1920 "$1" "$2" >/dev/null 2>&1 && return 0
-	print_err_msg "pdftoppm" "$?"
+	print_err_msg "pdftoppm" "$?" "pdf"
 }
 
 gen_gif_preview() {
 	magick "$1"[0] -resize 640x480\> "$2" >/dev/null 2>&1 && return 0
-	print_err_msg "magick" "$?"
+	print_err_msg "magick" "$?" "gif"
 }
 
 gen_video_preview() {
 	ffmpegthumbnailer -i "$1" -o "$2" -s 0 -q 5 >/dev/null 2>&1 && return 0
-	print_err_msg "ffmpegthumbnailer" "$?"
+	print_err_msg "ffmpegthumbnailer" "$?" "video"
 }
 
 gen_doc_preview() {
@@ -204,46 +204,46 @@ gen_doc_preview() {
 	--outdir "$CACHE_DIR" >/dev/null 2>&1; then
 		f="${1##*/}"
 		mv "$CACHE_DIR/${f%.*}.$format" "${2}.$format" && return 0
-		print_err_msg "mv (libreoffice)" "$?"
+		print_err_msg "mv (libreoffice)" "$?" "doc"
 	else
-		print_err_msg "libreoffice" "$?"
+		print_err_msg "libreoffice" "$?" "doc"
 	fi
 }
 
 gen_djvu_preview() {
 	ddjvu -format=tiff -quality=90 -page=1 "$1" "$2" >/dev/null 2>&1 && return 0
-	print_err_msg "ddjvu" "$?"
+	print_err_msg "ddjvu" "$?" "djvu"
 }
 
 gen_audio_preview() {
 	ffmpeg -hide_banner -i "$1" "$2" -y >/dev/null 2>&1 && return 0
-	print_err_msg "ffmpeg" "$?"
+	print_err_msg "ffmpeg" "$?" "audio"
 }
 
 gen_font_preview() {
 	fontpreview -i "$1" -o "$2" >/dev/null 2>&1 && return 0
-	print_err_msg "fontpreview" "$?"
+	print_err_msg "fontpreview" "$?" "font"
 }
 
 gen_postscript_preview() {
 	gs -sDEVICE=jpeg -dJPEGQ=100 -dNOPAUSE -dBATCH -dSAFER -r300 \
 		-sOutputFile="$2" "$1" >/dev/null 2>&1 && return 0
-	print_err_msg "gs (ghostscript)" "$?"
+	print_err_msg "gs (ghostscript)" "$?" "postscript"
 }
 
 gen_svg_preview() {
 	magick -background none -size 1920x1080 "$1" "$2" >/dev/null 2>&1 && return 0
-	print_err_msg "magick" "$?"
+	print_err_msg "magick" "$?" "svg"
 }
 
 gen_img_convert_preview() {
 	magick -- "$1" "$2" >/dev/null 2>&1 && return 0
-	print_err_msg "magick" "$?"
+	print_err_msg "magick" "$?" "image"
 }
 
 #gen_comic_preview() {
 #	comicthumb "$file" "$PCACHE" 1024 >/dev/null 2>&1 && return 0
-#	print_err_msg "comicthumb" "$?"
+#	print_err_msg "comicthumb" "$?" "comic"
 #}
 
 main() {
