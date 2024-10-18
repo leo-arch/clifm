@@ -33,10 +33,153 @@
 
 #include "aux.h" /* xatoi */
 #include "misc.h" /* set_signals_to_ignore, handle_stdin */
+#include "term_info.h"
+
+#define TRUE_COLOR 16777216
 
 static struct termios bk_term_attrs;
 static struct termios orig_term_attrs;
 static int reset_term = 0;
+
+/* See https://github.com/termstandard/colors#truecolor-detection */
+static int
+check_truecolor(void)
+{
+	char *c = getenv("COLORTERM");
+
+	if (c && ((*c == 't' && strcmp(c + 1, "ruecolor") == 0)
+	|| (*c == '2' && strcmp(c + 1, "4bit") == 0) ) )
+		return 1;
+
+	return 0;
+}
+
+static void
+set_term_caps(const int i)
+{
+	const int true_color = check_truecolor();
+	term_caps.unicode = 0;
+
+	if (i == -1) { /* TERM not found in our terminfo database */
+		term_caps.color = true_color == 1 ? TRUE_COLOR : 0;
+		if (term_caps.color <= 8)
+			memset(dim_c, '\0', sizeof(dim_c));
+		term_caps.suggestions = 0;
+		term_caps.pager = 0;
+		term_caps.hide_cursor = 0;
+		term_caps.home = 0;
+		term_caps.clear = 0;
+		term_caps.del_scrollback = 0;
+		term_caps.req_cur_pos = 0;
+		term_caps.req_dev_attrs = 0;
+		return;
+	}
+
+	term_caps.home = TERM_INFO[i].home;
+	term_caps.hide_cursor = TERM_INFO[i].hide_cursor;
+	term_caps.clear = TERM_INFO[i].ed;
+	term_caps.del_scrollback = TERM_INFO[i].del_scrollback;
+	term_caps.req_cur_pos = TERM_INFO[i].req_cur_pos;
+	term_caps.req_dev_attrs = TERM_INFO[i].req_dev_attrs;
+
+	term_caps.color = true_color == 1 ? TRUE_COLOR
+		: (TERM_INFO[i].color > 0 ? TERM_INFO[i].color : 0);
+	if (term_caps.color <= 8)
+		memset(dim_c, '\0', sizeof(dim_c));
+
+	term_caps.suggestions = (TERM_INFO[i].cub == 1 && TERM_INFO[i].ed == 1
+		&& TERM_INFO[i].el == 1) ? 1 : 0;
+
+	term_caps.pager = (TERM_INFO[i].cub == 0 || TERM_INFO[i].el == 0) ? 0 : 1;
+}
+
+/* Check whether current terminal (ENV_TERM) supports colors and requesting
+ * cursor position (needed to print suggestions). If not, disable the
+ * feature accordingly. */
+static void
+check_term_support(const char *env_term)
+{
+	if (!env_term || !*env_term) {
+		set_term_caps(-1);
+		return;
+	}
+
+	size_t i;
+	const size_t len = strlen(env_term);
+	int index = -1;
+
+	for (i = 0; TERM_INFO[i].name; i++) {
+		if (*env_term != *TERM_INFO[i].name || len != TERM_INFO[i].len
+		|| strcmp(env_term, TERM_INFO[i].name) != 0)
+			continue;
+
+		index = (int)i;
+		break;
+	}
+
+	if (index == -1) {
+		err('w', PRINT_PROMPT, _("%s: '%s': Terminal type not supported. "
+			"Limited functionality is expected.\n"), PROGRAM_NAME, env_term);
+	}
+
+	set_term_caps(index);
+
+	/* Eterm does not report device attributes (DA), no matter what
+	 * terminfo says. */
+	if (*env_term == 'E' && strcmp(env_term + 1, "term") == 0)
+		term_caps.req_dev_attrs = 0;
+}
+
+/* Try to detect what kind of image capability the running terminal supports
+ * (sixel, ueberzug, kitty protocol, and ansi).
+ * Write the result into the CLIFM_IMG_SUPPORT environment variable.
+ * This variable will be read by the clifmimg script to generate images using
+ * the specified method. */
+static void
+check_img_support(void)
+{
+	if (getenv("CLIFM_FIFO_UEBERZUG")) /* Variable set by the clifmrun script */
+		setenv("CLIFM_IMG_SUPPORT", "ueberzug", 1);
+	else if (getenv("KITTY_WINDOW_ID"))
+		/* KITTY_WINDOW_ID is guaranteed to be defined if running on the
+		 * kitty terminal. See https://github.com/kovidgoyal/kitty/issues/957 */
+		setenv("CLIFM_IMG_SUPPORT", "kitty", 1);
+	else if (term_caps.req_dev_attrs == 1 && check_sixel_support() == 1)
+		setenv("CLIFM_IMG_SUPPORT", "sixel", 1);
+	else
+		setenv("CLIFM_IMG_SUPPORT", "ansi", 1);
+}
+
+void
+check_term(void)
+{
+	char *t = getenv("TERM");
+	if (!t || !*t) {
+		t = "xterm";
+		err('w', PRINT_PROMPT, _("%s: The TERM environment variable is unset.\n"
+			"Running in xterm compatibility mode\n"), PROGRAM_NAME);
+	}
+
+	check_term_support(t);
+
+	/* Skip below checks if STDOUT is not interactive (this includes running
+	 * Clifm from 'fzf --preview', i.e. TAB completion), or if not required
+	 * (--ls, --stat, --stat-full, and --open). */
+	if (xargs.list_and_quit == 1 || xargs.stat > 0 || xargs.open == 1
+	|| isatty(STDOUT_FILENO) == 0)
+		return;
+
+#ifdef __FreeBSD__
+	if (!(flags & GUI))
+		return;
+#endif /* __FreeBSD__ */
+
+	check_img_support();
+
+	if (xargs.no_unicode != 1 && term_caps.req_cur_pos == 1
+	&& check_unicode_support() == 1)
+		term_caps.unicode = 1;
+}
 
 static pid_t
 get_own_pid(void)
