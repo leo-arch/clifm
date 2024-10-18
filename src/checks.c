@@ -236,7 +236,8 @@ check_term(void)
 	check_term_support(t);
 
 	/* Skip below checks if STDOUT is not interactive. */
-	if (isatty(STDOUT_FILENO) == 0)
+	if (xargs.list_and_quit == 1 || xargs.stat > 0 || xargs.open == 1
+	|| isatty(STDOUT_FILENO) == 0)
 		return;
 
 #ifdef __FreeBSD__
@@ -246,7 +247,8 @@ check_term(void)
 
 	check_img_support();
 
-	if (term_caps.req_cur_pos == 1 && check_unicode_support() == 1)
+	if (xargs.no_unicode != 1 && term_caps.req_cur_pos == 1
+	&& check_unicode_support() == 1)
 		term_caps.unicode = 1;
 }
 

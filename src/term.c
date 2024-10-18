@@ -233,9 +233,9 @@ check_unicode_support(void)
 		return (-1);
 
 	/* 1. Ask the terminal to print a 3-byte Unicode character that takes
-	 * 2 terminal columns, then request the cursor position, and finally
+	 * 1 terminal column, then request the cursor position, and finally
 	 * clear the line. */
-	if (write(STDOUT_FILENO, "\xe2\x88\xb4\x1b[6n\x1b[1K\r", 12) != 12) {
+	if (write(STDOUT_FILENO, "\r\xe2\x88\xb4\x1b[6n\x1b[1K\r", 13) != 13) {
 		disable_raw_mode(STDIN_FILENO);
 		return (-1);
 	}
@@ -260,7 +260,7 @@ check_unicode_support(void)
 
 	/* 3. Parse the response. If we get 2, we have Unicode support. */
 	char *p = strchr(buf, ';');
-	if (p && p[1] == '2')
+	if (p && p[1] == '2' && !p[2])
 		return 1;
 
 	return 0;

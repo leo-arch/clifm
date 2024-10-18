@@ -629,6 +629,8 @@ open_reg_exit(char *filename, const int url, const int preview)
 	if (path_n == 0)
 		path_n = get_path_env(0);
 
+	check_term();
+
 #ifndef _NO_LIRA
 	if (url == 1 && mime_open_url(filename) == FUNC_SUCCESS)
 		exit(EXIT_SUCCESS);
@@ -1647,7 +1649,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case LOPT_NO_TRIM_NAMES:
 			xargs.trim_names = conf.trim_names = 0; break;
 		case LOPT_NO_UNICODE:
-			xargs.no_unicode = 1; term_caps.unicode = 0; break;
+			xargs.no_unicode = 1; break;
 		case LOPT_NO_WARNING_PROMPT:
 			xargs.warning_prompt = conf.warning_prompt = 0; break;
 		case LOPT_NO_WELCOME_MESSAGE:

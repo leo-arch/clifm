@@ -1269,8 +1269,6 @@ main(int argc, char *argv[])
 	/* Make sure all initialization is made with restrictive permissions. */
 	const mode_t old_mask = umask(0077); /* flawfinder: ignore */
 
-	check_term(); /* Let's check terminal capabilities. */
-
 	/* # 1. INITIALIZE EVERYTHING WE NEED # */
 
 	init_conf_struct();
@@ -1312,6 +1310,8 @@ main(int argc, char *argv[])
 #ifdef SECURITY_PARANOID
 	set_security_paranoid_mode();
 #endif /* SECURITY_PARANOID */
+
+	check_term(); /* Let's check terminal capabilities. */
 
 	/* Get paths from PATH environment variable. These paths will be
 	 * used later by get_path_programs (for the autocomplete function)
