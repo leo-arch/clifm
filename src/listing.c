@@ -471,18 +471,18 @@ print_sel_files(const unsigned short t_rows)
 static void
 print_dirhist_map(void)
 {
-	size_t i;
-	for (i = 0; i < (size_t)dirhist_total_index; i++) {
-		if (i != (size_t)dirhist_cur_index)
-			continue;
+	const int pad = DIGINUM(1 + (dirhist_cur_index + 1 < dirhist_total_index
+		? dirhist_cur_index + 1 : dirhist_cur_index));
 
+	int i;
+	for (i = dirhist_cur_index; i < dirhist_total_index; i++) {
 		if (i > 0 && old_pwd[i - 1])
-			printf("%zu %s\n", i, old_pwd[i - 1]);
+			printf("%s%*d%s %s\n", el_c, pad, i, df_c, old_pwd[i - 1]);
 
-		printf("%zu %s%s%s\n", i + 1, mi_c, old_pwd[i], df_c);
+		printf("%s%*d%s %s%s%s\n", el_c, pad, i + 1, df_c, mi_c, old_pwd[i], df_c);
 
-		if (i + 1 < (size_t)dirhist_total_index && old_pwd[i + 1])
-			printf("%zu %s\n", i + 2, old_pwd[i + 1]);
+		if (i + 1 < dirhist_total_index && old_pwd[i + 1])
+			printf("%s%*d%s %s\n", el_c, pad, i + 2, df_c, old_pwd[i + 1]);
 
 		break;
 	}
@@ -649,11 +649,14 @@ post_listing(DIR *dir, const int reset_pager, const filesn_t excluded_files)
 		print_div_line();
 	}
 
-	if (conf.disk_usage == 1)
-		print_disk_usage();
+	if (conf.print_selfiles == 1 && sel_n > 0)
+		print_sel_files(term_lines);
 
 	if (is_cdpath == 1)
 		print_cdpath();
+
+	if (conf.disk_usage == 1)
+		print_disk_usage();
 
 	if (sort_switch == 1) {
 		print_reload_msg(_("Sorted by "));
@@ -663,9 +666,6 @@ post_listing(DIR *dir, const int reset_pager, const filesn_t excluded_files)
 	if (switch_cscheme == 1)
 		printf(_("Color scheme %s%s%s %s\n"), mi_c,	SET_MSG_PTR,
 			df_c, cur_cscheme);
-
-	if (conf.print_selfiles == 1 && sel_n > 0)
-		print_sel_files(term_lines);
 
 	if (virtual_dir == 1)
 		print_reload_msg(_("Virtual directory\n"));
