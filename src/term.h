@@ -73,8 +73,6 @@
 __BEGIN_DECLS
 
 void check_term(void);
-int  check_sixel_support(void);
-int  check_unicode_support(void);
 int  disable_raw_mode(const int fd);
 int  enable_raw_mode(const int fd);
 int  get_cursor_position(int *c, int *l);
