@@ -204,9 +204,10 @@ gen_doc_preview() {
 	--outdir "$CACHE_DIR" >/dev/null 2>&1; then
 		f="${1##*/}"
 		mv "$CACHE_DIR/${f%.*}.$format" "${2}.$format" && return 0
+		print_err_msg "mv (libreoffice)" "$?"
+	else
+		print_err_msg "libreoffice" "$?"
 	fi
-
-	print_err_msg "libreoffice" "$?"
 }
 
 gen_djvu_preview() {
