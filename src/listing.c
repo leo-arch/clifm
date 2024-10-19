@@ -835,13 +835,12 @@ get_longest_filename(const filesn_t n, const size_t pad)
 		total_len = pad + 1 + file_len;
 
 		if (checks.classify == 1) {
-			if (file_info[i].dir)
-				total_len++;
-
 			if (file_info[i].filesn > 0 && conf.files_counter == 1)
 				total_len += DIGINUM(file_info[i].filesn);
 
-			if (file_info[i].dir == 0 && conf.colorize == 0) {
+			if (file_info[i].dir == 1) {
+				total_len++;
+			} else if (conf.colorize == 0) {
 				switch (file_info[i].type) {
 				case DT_REG:
 					if (file_info[i].exec == 1)
@@ -2711,6 +2710,8 @@ load_file_gral_info(const struct stat *a, const filesn_t n)
 static inline void
 load_dir_info(const struct stat *a, const filesn_t n)
 {
+	file_info[n].dir = 1;
+
 #ifndef _NO_ICONS
 	if (conf.icons == 1) {
 		get_dir_icon(n);
@@ -2757,6 +2758,8 @@ load_dir_info(const struct stat *a, const filesn_t n)
 static inline void
 load_link_info(const int fd, const filesn_t n)
 {
+	file_info[n].symlink = 1;
+
 #ifndef _NO_ICONS
 	file_info[n].icon = ICON_LINK;
 #endif // !_NO_ICONS
@@ -2944,8 +2947,10 @@ list_dir(void)
 	clock_t start = clock();
 #endif /* LIST_SPEED_TEST */
 
-	if (conf.clear_screen > 0)
-		{ CLEAR; fflush(stdout); }
+	if (conf.clear_screen > 0) {
+		CLEAR;
+		fflush(stdout);
+	}
 
 	/* Hide the cursor to minimize flickering: it will be unhidden immediately
 	 * before printing the next prompt (prompt.c) */
@@ -2966,7 +2971,8 @@ list_dir(void)
 	if (conf.clear_screen > 0) {
 		/* For some reason we need to clear the screen twice to prevent
 		 * a garbage first line when scrolling up */
-		CLEAR; fflush(stdout);
+		CLEAR;
+		fflush(stdout);
 	}
 
 	set_pager_view();
@@ -3142,9 +3148,6 @@ list_dir(void)
 			file_info[n].type = DT_UNKNOWN;
 			stats.unknown++;
 		}
-
-		file_info[n].dir = (file_info[n].type == DT_DIR);
-		file_info[n].symlink = (file_info[n].type == DT_LNK);
 
 		switch (file_info[n].type) {
 		case DT_DIR: load_dir_info(stat_ok == 1 ? &attr : NULL, n); break;
