@@ -216,9 +216,6 @@ define ARCHIVE=@1-1
 ExtColors="7z=ARCHIVE:ace=ARCHIVE:alz=ARCHIVE:apk=ARCHIVE:arc=ARCHIVE:arj=ARCHIVE:bz=ARCHIVE:bz2=ARCHIVE:cab=ARCHIVE:cpio=ARCHIVE:deb=ARCHIVE:dmg=ARCHIVE:dwm=ARCHIVE:dz=ARCHIVE:ear=ARCHIVE:esd=ARCHIVE:gz=ARCHIVE:img=ARCHIVE:iso=ARCHIVE:jar=ARCHIVE:lha=ARCHIVE:lrz=ARCHIVE:lz=ARCHIVE:lz4=ARCHIVE:lzh=ARCHIVE:lzma=ARCHIVE:lzo=ARCHIVE:qcow=ARCHIVE:qcow2=ARCHIVE:rar=ARCHIVE:rpm=ARCHIVE:rz=ARCHIVE:sar=ARCHIVE:swm=ARCHIVE:t7z=ARCHIVE:tar=ARCHIVE:taz=ARCHIVE:tbz=ARCHIVE:tbz2=ARCHIVE:tgz=ARCHIVE:tlz=ARCHIVE:toast=ARCHIVE:txz=ARCHIVE:tz=ARCHIVE:tzo=ARCHIVE:tzst=ARCHIVE:vcd=ARCHIVE:vdi=ARCHIVE:vhd=ARCHIVE:vhdx=ARCHIVE:vmdk=ARCHIVE:vsix=ARCHIVE:war=ARCHIVE:wim=ARCHIVE:xz=ARCHIVE:z=ARCHIVE:zip=ARCHIVE:zoo=ARCHIVE:zst=ARCHIVE:"
 
 # AUDIO FILES
-#define AUDIO=@214
-#ExtColors="aac=AUDIO:ac3=AUDIO:aif=AUDIO:aifc=AUDIO:aiff=AUDIO:alac=AUDIO:anx=AUDIO:ape=AUDIO:au=AUDIO:axa=AUDIO:cue=AUDIO:flac=AUDIO:m2a=AUDIO:m4a=AUDIO:mid=AUDIO:midi=AUDIO:mka=AUDIO:mp3=AUDIO:mpc=AUDIO:mpga=AUDIO:oga=AUDIO:ogg=AUDIO:ogx=AUDIO:opus=AUDIO:pcm=AUDIO:ra=AUDIO:ram=AUDIO:spx=AUDIO:wav=AUDIO:wma=AUDIO:wv=AUDIO:"
-
 define AUDIO=@214
 ExtColors="aac=AUDIO:ac3=AUDIO:anx=AUDIO:au=AUDIO:axa=AUDIO:cue=AUDIO:m2a=AUDIO:m4a=AUDIO:mid=AUDIO:midi=AUDIO:mka=AUDIO:mp3=AUDIO:mpc=AUDIO:mpga=AUDIO:oga=AUDIO:ogg=AUDIO:ogx=AUDIO:opus=AUDIO:ra=AUDIO:ram=AUDIO:spx=AUDIO:wma=AUDIO:"
 
@@ -236,7 +233,7 @@ ExtColors="cfg=CONFIG:clifm=CONFIG:conf=CONFIG:desktop=CONFIG:hjson=CONFIG:ini=C
 
 # DOCUMENTS
 define DOC=@228
-ExtColors="abw=DOC:doc=DOC:docx=DOC:fodg=DOC:fodp=DOC:fods=DOC:fodt=DOC:odg=DOC:odp=DOC:ods=DOC:odt=DOC:pps=DOC:ppt=DOC:pptx=DOC:rtf=DOC:sxi=DOC:sxw=DOC:txt=DOC:xlr=DOC:xls=DOC:xlsx=DOC:"
+ExtColors="abw=DOC:doc=DOC:docx=DOC:fodp=DOC:fods=DOC:fodt=DOC:odp=DOC:ods=DOC:odt=DOC:pps=DOC:ppt=DOC:pptx=DOC:rtf=DOC:sxi=DOC:sxw=DOC:txt=DOC:xlr=DOC:xls=DOC:xlsx=DOC:"
 
 # EBOOKS
 define EBOOK=@223
