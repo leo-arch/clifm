@@ -1048,7 +1048,7 @@ compute_maxes(void)
 }
 
 static void
-print_long_mode(size_t *counter, int *reset_pager, const int pad,
+print_long_mode(size_t *counter, int *reset_pager, const int eln_len,
 	int have_xattr)
 {
 	struct maxes_t maxes = compute_maxes();
@@ -1102,7 +1102,7 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad,
 		const char *ind_chr_color = get_ind_char(i, &ind_chr);
 
 		if (conf.no_eln == 0) {
-			printf("%s%*jd%s%s%s%s", el_c, pad, (intmax_t)i + 1, df_c,
+			printf("%s%*jd%s%s%s%s", el_c, eln_len, (intmax_t)i + 1, df_c,
 				ind_chr_color, ind_chr, df_c);
 		} else {
 			printf("%s%s%s", ind_chr_color, ind_chr, df_c);
@@ -1630,20 +1630,14 @@ print_entry_nocolor_light(int *ind_char, const filesn_t i,
 /* Right pad the current file name (adding spaces) to equate the longest
  * file name length. */
 static void
-pad_filename(const int ind_char, const filesn_t i, const int pad,
+pad_filename(const int ind_char, const filesn_t i, const int eln_len,
 	const int termcap_move_right)
 {
-	int cur_len = 0;
-
-#ifndef _NO_ICONS
-	cur_len = pad + 1 + (conf.icons == 1 ? ICON_LEN : 0) + (int)file_info[i].len
-		+ (ind_char ? 1 : 0);
-#else
-	cur_len = pad + 1 + (int)file_info[i].len + (ind_char ? 1 : 0);
-#endif /* !_NO_ICONS */
+	int cur_len =  eln_len + 1 + (conf.icons == 1 ? ICON_LEN : 0)
+		+ (int)file_info[i].len + (ind_char ? 1 : 0);
 
 	if (file_info[i].dir == 1 && conf.classify == 1) {
-		++cur_len;
+		cur_len++;
 		if (file_info[i].filesn > 0 && conf.files_counter == 1
 		&& file_info[i].ruser == 1)
 			cur_len += DIGINUM((int)file_info[i].filesn);
@@ -1664,7 +1658,7 @@ pad_filename(const int ind_char, const filesn_t i, const int pad,
  * 4 AAD	5 AAE	6 AAF */
 static void
 list_files_horizontal(size_t *counter, int *reset_pager,
-	const int pad, const size_t columns_n)
+	const int eln_len, const size_t columns_n)
 {
 	const filesn_t nn = (conf.max_files != UNSET
 		&& (filesn_t)conf.max_files < files) ? (filesn_t)conf.max_files : files;
@@ -1739,10 +1733,10 @@ list_files_horizontal(size_t *counter, int *reset_pager,
 
 		file_info[i].eln_n = conf.no_eln == 1 ? -1 : DIGINUM(i + 1);
 
-		print_entry_function(&ind_char, i, pad, max_namelen);
+		print_entry_function(&ind_char, i, eln_len, max_namelen);
 
 		if (last_column == 0)
-			pad_filename(ind_char, i, pad, termcap_move_right);
+			pad_filename(ind_char, i, eln_len, termcap_move_right);
 		else
 			putchar('\n');
 	}
@@ -1759,7 +1753,7 @@ END:
  * 2 AAB	4 AAD	6 AAF */
 static void
 list_files_vertical(size_t *counter, int *reset_pager,
-	const int pad, const size_t columns_n)
+	const int eln_len, const size_t columns_n)
 {
 	/* Total amount of files to be listed. */
 	const filesn_t nn = (conf.max_files != UNSET
@@ -1884,10 +1878,10 @@ list_files_vertical(size_t *counter, int *reset_pager,
 
 		file_info[x].eln_n = conf.no_eln == 1 ? -1 : DIGINUM(x + 1);
 
-		print_entry_function(&ind_char, x, pad, max_namelen);
+		print_entry_function(&ind_char, x, eln_len, max_namelen);
 
 		if (last_column == 0)
-			pad_filename(ind_char, x, pad, termcap_move_right);
+			pad_filename(ind_char, x, eln_len, termcap_move_right);
 		else
 			/* Last column is populated. Example:
 			 * 1 file  3 file3  5 file5HERE
@@ -2461,7 +2455,7 @@ list_dir_light(void)
 		goto END;
 	}
 
-	const int pad = conf.no_eln == 1 ? 0
+	const int eln_len = conf.no_eln == 1 ? 0
 		: ((conf.max_files != UNSET && files > (filesn_t)conf.max_files)
 		? DIGINUM(conf.max_files) : DIGINUM(files));
 
@@ -2473,7 +2467,7 @@ list_dir_light(void)
 
 	/* Get the longest file name */
 	if (conf.columned == 1 || conf.long_view == 1)
-		get_longest_filename(n, (size_t)pad);
+		get_longest_filename(n, (size_t)eln_len);
 
 				/* ########################
 				 * #    LONG VIEW MODE    #
@@ -2482,7 +2476,7 @@ list_dir_light(void)
 	if (conf.long_view == 1) {
 		if (prop_fields.size == PROP_SIZE_HUMAN)
 			construct_human_sizes();
-		print_long_mode(&counter, &reset_pager, pad, have_xattr);
+		print_long_mode(&counter, &reset_pager, eln_len, have_xattr);
 		goto END;
 	}
 
@@ -2494,9 +2488,9 @@ list_dir_light(void)
 	columns_n = conf.columned == 0 ? 1 : get_columns();
 
 	if (conf.listing_mode == VERTLIST) /* ls(1)-like listing */
-		list_files_vertical(&counter, &reset_pager, pad, columns_n);
+		list_files_vertical(&counter, &reset_pager, eln_len, columns_n);
 	else
-		list_files_horizontal(&counter, &reset_pager, pad, columns_n);
+		list_files_horizontal(&counter, &reset_pager, eln_len, columns_n);
 
 END:
 	exit_code =
@@ -3218,7 +3212,7 @@ list_dir(void)
 		goto END;
 	}
 
-	const int pad = conf.no_eln == 1 ? 0
+	const int eln_len = conf.no_eln == 1 ? 0
 		: ((conf.max_files != UNSET && files > (filesn_t)conf.max_files)
 		? DIGINUM(conf.max_files) : DIGINUM(files));
 
@@ -3238,7 +3232,7 @@ list_dir(void)
 
 	/* Get the longest file name */
 	if (conf.columned == 1 || conf.long_view == 1)
-		get_longest_filename(n, (size_t)pad);
+		get_longest_filename(n, (size_t)eln_len);
 
 				/* ########################
 				 * #    LONG VIEW MODE    #
@@ -3247,7 +3241,7 @@ list_dir(void)
 	if (conf.long_view == 1) {
 		if (prop_fields.size == PROP_SIZE_HUMAN)
 			construct_human_sizes();
-		print_long_mode(&counter, &reset_pager, pad, have_xattr);
+		print_long_mode(&counter, &reset_pager, eln_len, have_xattr);
 		goto END;
 	}
 
@@ -3259,9 +3253,9 @@ list_dir(void)
 	columns_n = conf.columned == 0 ? 1 : get_columns();
 
 	if (conf.listing_mode == VERTLIST) /* ls(1) like listing */
-		list_files_vertical(&counter, &reset_pager, pad, columns_n);
+		list_files_vertical(&counter, &reset_pager, eln_len, columns_n);
 	else
-		list_files_horizontal(&counter, &reset_pager, pad, columns_n);
+		list_files_horizontal(&counter, &reset_pager, eln_len, columns_n);
 
 				/* #########################
 				 * #   POST LISTING STUFF  #
