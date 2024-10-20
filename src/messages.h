@@ -220,7 +220,7 @@ operation).\n\n\
 
 #define CS_USAGE "Switch color schemes\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  cs, colorschemes [COLORSCHEME | edit [APP] | n, name]\n\n\
+  cs, colorschemes [COLORSCHEME | edit [APP] | preview | check-ext | name]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Print the name of the current color scheme\n\
     cs name (or 'cs n')\n\
