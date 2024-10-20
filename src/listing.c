@@ -575,7 +575,7 @@ print_cdpath(void)
 	is_cdpath = 0;
 }
 
-/* Restore the origianl value of long-view (taken from LONG_VIEW_BK)
+/* Restore the original value of long-view (taken from LONG_VIEW_BK)
  * after switching mode for the pager (according to PagerView). */
 static void
 restore_pager_view(void)
@@ -810,9 +810,8 @@ get_longest_filename(const filesn_t n, const size_t pad)
 	filesn_t i = (conf.max_files != UNSET && c_max_files < n) ? c_max_files : n;
 	filesn_t longest_index = -1;
 
-	/* Cast only once here instead of hundreds of times in the while loop. */
-	const size_t c_max_name_len = (size_t)conf.max_name_len;
-	const size_t c_min_name_trim = (size_t)conf.min_name_trim;
+	const size_t max = checks.min_name_trim == 1
+		? (size_t)conf.min_name_trim : (size_t)conf.max_name_len;
 
 	while (--i >= 0) {
 		size_t total_len = 0;
@@ -826,9 +825,6 @@ get_longest_filename(const filesn_t n, const size_t pad)
 			free(wname);
 		}
 
-		/* In long view, we won't trim file names below MIN_NAME_TRIM. */
-		const size_t max =
-			checks.min_name_trim == 1 ? c_min_name_trim : c_max_name_len;
 		if (file_len > max)
 			file_len = max;
 
@@ -884,6 +880,9 @@ get_longest_filename(const filesn_t n, const size_t pad)
 	 *    very_long_file_~
 	 * */
 
+//	const int tight = 0;
+//	longest.name_len += (tight == 0);
+
 	longest.fc_len = 0;
 	if (conf.max_name_len != UNSET && longest_index != -1
 	&& file_info[longest_index].dir == 1
@@ -895,7 +894,8 @@ get_longest_filename(const filesn_t n, const size_t pad)
 		 * to relax a bit the space between columns. */
 /*		longest.fc_len = DIGINUM(file_info[longest_index].filesn) + 1; */
 		longest.fc_len = DIGINUM(file_info[longest_index].filesn);
-		const size_t t = pad + c_max_name_len + 1 + longest.fc_len;
+//		longest.fc_len = DIGINUM(file_info[longest_index].filesn) + 1;
+		const size_t t = pad + (size_t)conf.max_name_len + 1 + longest.fc_len;
 		if (t > longest.name_len)
 			longest.fc_len -= t - longest.name_len;
 		if ((int)longest.fc_len < 0)
@@ -2056,7 +2056,7 @@ exclude_file_type(const char *name, const mode_t mode,
 	case 'f': if (S_ISREG(mode))  match = 1; break;
 	case 'F': if (S_ISREG(mode) && size == 0) match = 1; break;
 	case 'l': if (S_ISLNK(mode))  match = 1; break;
-	case 'L': if (S_ISLNK(mode) && stat(name, &a) == -1)  match = 1; break;
+	case 'L': if (S_ISLNK(mode) && stat(name, &a) == -1) match = 1; break;
 	case 'p': if (S_ISFIFO(mode)) match = 1; break;
 	case 's': if (S_ISSOCK(mode)) match = 1; break;
 
@@ -2461,8 +2461,9 @@ list_dir_light(void)
 		goto END;
 	}
 
-	const int pad = (conf.max_files != UNSET && files > (filesn_t)conf.max_files)
-		? DIGINUM(conf.max_files) : DIGINUM(files);
+	const int pad = conf.no_eln == 1 ? 0
+		: ((conf.max_files != UNSET && files > (filesn_t)conf.max_files)
+		? DIGINUM(conf.max_files) : DIGINUM(files));
 
 	if (conf.sort != SNONE)
 		ENTSORT(file_info, (size_t)n, entrycmp);
@@ -2600,7 +2601,7 @@ static inline void
 check_extra_file_types(mode_t *mode, const struct stat *a)
 {
 	/* If all the below macros are originally undefined, they all expand to
-	 * zero, in which case S is never used. Let's avoid a compiler warning. */
+	 * zero, in which case A is never used. Let's avoid a compiler warning. */
 	UNUSED(a);
 
 	if (S_TYPEISMQ(a))
@@ -3217,8 +3218,9 @@ list_dir(void)
 		goto END;
 	}
 
-	const int pad = (conf.max_files != UNSET && files > (filesn_t)conf.max_files)
-		? DIGINUM(conf.max_files) : DIGINUM(files);
+	const int pad = conf.no_eln == 1 ? 0
+		: ((conf.max_files != UNSET && files > (filesn_t)conf.max_files)
+		? DIGINUM(conf.max_files) : DIGINUM(files));
 
 		/* #############################################
 		 * #    SORT FILES ACCORDING TO SORT METHOD    #
