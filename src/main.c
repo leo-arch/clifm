@@ -616,6 +616,8 @@ const struct cmdslist_t param_str[] = {
 	{"bookmarks edit", 14},
 	{"c -f", 4},
 	{"c --force", 9},
+	{"cs check-ext", 12},
+	{"colorschemes check-ext", 22},
 	{"colorschemes edit", 17},
 	{"cs edit", 7},
 	{"colorschemes preview", 20},

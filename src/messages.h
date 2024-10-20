@@ -228,6 +228,8 @@ operation).\n\n\
     cs (or 'cs <TAB>')\n\
 - Preview the current color scheme\n\
     cs preview (or 'cs p')\n\
+- Check for file extension conflicts\n\
+    cs check-ext\n\
 - Edit the current color scheme\n\
     cs edit\n\
 - Edit the current color scheme using vi\n\

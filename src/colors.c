@@ -1174,6 +1174,45 @@ print_colors_tip(const int stealth)
 	return FUNC_FAILURE;
 }
 
+/* Make sure hashes for file name extensions do not conflict.
+ * If they do, the hash field at index zero (of the ext_colors struct) is set
+ * to 0 to indicate that we have hash conflicts (in which case regular string
+ * comparison must be used instead). */
+static int
+check_ext_color_hash_conflicts(const int list)
+{
+	size_t i, j, conflicts = 0;
+
+	for (i = 0; i < ext_colors_n; i++) {
+		for (j = i + 1; j < ext_colors_n; j++) {
+			if (ext_colors[i].hash == ext_colors[j].hash) {
+				if (list == 1) {
+					printf(_("'%s' conflicts with '%s'\n"),
+						ext_colors[i].name, ext_colors[j].name);
+					conflicts++;
+				} else {
+					ext_colors[0].hash = 0;
+					err('w', PRINT_PROMPT, _("%s: File extension conflicts "
+						"found. Run 'cs check-ext' to find out\n"),
+						PROGRAM_NAME);
+					return FUNC_FAILURE;
+				}
+			}
+		}
+	}
+
+	if (list == 0)
+		return FUNC_SUCCESS;
+
+	if (conflicts > 0) {
+		puts(_("Run 'cs edit' to fix these conflicts"));
+		return FUNC_FAILURE;
+	}
+
+	puts(_("cs: No conflict found"));
+	return FUNC_SUCCESS;
+}
+
 int
 cschemes_function(char **args)
 {
@@ -1200,6 +1239,9 @@ cschemes_function(char **args)
 		return FUNC_SUCCESS;
 	}
 
+	if (args[1] && *args[1] == 'c' && strcmp(args[1], "check-ext") == 0)
+		return check_ext_color_hash_conflicts(1);
+
 	if (args[1] && IS_HELP(args[1])) {
 		puts(_(CS_USAGE));
 		return FUNC_SUCCESS;
@@ -1213,7 +1255,8 @@ cschemes_function(char **args)
 		return FUNC_FAILURE;
 	}
 
-	if (!args[1]) return list_colorschemes();
+	if (!args[1])
+		return list_colorschemes();
 
 	if (*args[1] == 'e' && (!args[1][1] || strcmp(args[1], "edit") == 0))
 		return edit_colorscheme(args[2]);
@@ -1718,25 +1761,6 @@ free_extension_colors(void)
 	ext_colors_n = 0;
 }
 
-/* Make sure hashes for file name extensions do not conflict.
- * If they do, the hash field at index zero (of the ext_colors struct) is set
- * to 0 to indicate that we have hash conflicts (in which case regular string
- * comparison must be used instead). */
-static void
-check_ext_color_hash_conflicts(void)
-{
-	size_t i, j;
-
-	for (i = 0; i < ext_colors_n; i++) {
-		for (j = i + 1; j < ext_colors_n; j++) {
-			if (ext_colors[i].hash == ext_colors[j].hash) {
-				ext_colors[0].hash = 0;
-				return;
-			}
-		}
-	}
-}
-
 static void
 split_extension_colors(char *extcolors)
 {
@@ -1795,7 +1819,7 @@ split_extension_colors(char *extcolors)
 		ext_colors[ext_colors_n].value_len = 0;
 
 		ext_colors[ext_colors_n].hash = 0;
-		check_ext_color_hash_conflicts();
+		check_ext_color_hash_conflicts(0);
 	}
 }
 
@@ -3225,13 +3249,15 @@ print_interface_colors(void)
 	printf(_("%sColor%s (mi) Miscellaneous indicator (%s%s%s) (%s2%s)\n"),
 		mi_c, df_c, mi_c, MSG_PTR_STR, df_c, BOLD, df_c);
 	printf(_("%sColor%s (ts) Matching completion prefix (e.g. "
-		"%sfile%sname)\n"), ts_c, df_c, ts_c, df_c);
+		"%sfile%sname) (%s3%s)\n"), ts_c, df_c, ts_c, df_c, BOLD, df_c);
 	printf(_("%sColor%s (df) Default color\n"), df_c, df_c);
 
 	printf(_("\n(%s1%s) Used only when ColorLinksAsTarget is "
 		"enabled\n"), BOLD, df_c);
 	printf(_("(%s2%s) Also used for miscellaneous names (like bookmarks "
 		"and color schemes) in TAB completion\n"), BOLD, df_c);
+	printf(_("(%s3%s) Used only for the standard TAB completion "
+		"mode\n"), BOLD, df_c);
 }
 
 /* Return a pointer to a statically allocated buffer storing the color code
