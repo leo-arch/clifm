@@ -85,8 +85,8 @@ define FTYPE_EMPTY_EXEC=@2          # Empty executable file
 define FTYPE_LINK=@6-1              # Symbolic link
 define FTYPE_BROKEN_LINK=4;2;36     # Broken symbolic link
 define FTYPE_MULTI_HLINK=@6-7       # Multi-hardlink file
-define FTYPE_BLK_DEV=@229-1         # Block device
-define FTYPE_CHR_DEV=@214-1         # Char device
+define FTYPE_BLK_DEV=@5-1           # Block device
+define FTYPE_CHR_DEV=@5             # Char device
 define FTYPE_FIFO=38;5;5;48;5;238   # FIFO/pipe
 define FTYPE_SOCK=1;38;5;5;48;5;238 # Socket
 define FTYPE_CAP=30;41              # File with capabilities
@@ -216,8 +216,15 @@ define ARCHIVE=@1-1
 ExtColors="7z=ARCHIVE:ace=ARCHIVE:alz=ARCHIVE:apk=ARCHIVE:arc=ARCHIVE:arj=ARCHIVE:bz=ARCHIVE:bz2=ARCHIVE:cab=ARCHIVE:cpio=ARCHIVE:deb=ARCHIVE:dmg=ARCHIVE:dwm=ARCHIVE:dz=ARCHIVE:ear=ARCHIVE:esd=ARCHIVE:gz=ARCHIVE:img=ARCHIVE:iso=ARCHIVE:jar=ARCHIVE:lha=ARCHIVE:lrz=ARCHIVE:lz=ARCHIVE:lz4=ARCHIVE:lzh=ARCHIVE:lzma=ARCHIVE:lzo=ARCHIVE:qcow=ARCHIVE:qcow2=ARCHIVE:rar=ARCHIVE:rpm=ARCHIVE:rz=ARCHIVE:sar=ARCHIVE:swm=ARCHIVE:t7z=ARCHIVE:tar=ARCHIVE:taz=ARCHIVE:tbz=ARCHIVE:tbz2=ARCHIVE:tgz=ARCHIVE:tlz=ARCHIVE:toast=ARCHIVE:txz=ARCHIVE:tz=ARCHIVE:tzo=ARCHIVE:tzst=ARCHIVE:vcd=ARCHIVE:vdi=ARCHIVE:vhd=ARCHIVE:vhdx=ARCHIVE:vmdk=ARCHIVE:vsix=ARCHIVE:war=ARCHIVE:wim=ARCHIVE:xz=ARCHIVE:z=ARCHIVE:zip=ARCHIVE:zoo=ARCHIVE:zst=ARCHIVE:"
 
 # AUDIO FILES
+#define AUDIO=@214
+#ExtColors="aac=AUDIO:ac3=AUDIO:aif=AUDIO:aifc=AUDIO:aiff=AUDIO:alac=AUDIO:anx=AUDIO:ape=AUDIO:au=AUDIO:axa=AUDIO:cue=AUDIO:flac=AUDIO:m2a=AUDIO:m4a=AUDIO:mid=AUDIO:midi=AUDIO:mka=AUDIO:mp3=AUDIO:mpc=AUDIO:mpga=AUDIO:oga=AUDIO:ogg=AUDIO:ogx=AUDIO:opus=AUDIO:pcm=AUDIO:ra=AUDIO:ram=AUDIO:spx=AUDIO:wav=AUDIO:wma=AUDIO:wv=AUDIO:"
+
 define AUDIO=@214
-ExtColors="aac=AUDIO:ac3=AUDIO:aif=AUDIO:aifc=AUDIO:aiff=AUDIO:alac=AUDIO:anx=AUDIO:ape=AUDIO:au=AUDIO:axa=AUDIO:cue=AUDIO:flac=AUDIO:m2a=AUDIO:m4a=AUDIO:mid=AUDIO:midi=AUDIO:mka=AUDIO:mp3=AUDIO:mpc=AUDIO:mpga=AUDIO:oga=AUDIO:ogg=AUDIO:ogx=AUDIO:opus=AUDIO:pcm=AUDIO:ra=AUDIO:ram=AUDIO:spx=AUDIO:wav=AUDIO:wma=AUDIO:wv=AUDIO:"
+ExtColors="aac=AUDIO:ac3=AUDIO:anx=AUDIO:au=AUDIO:axa=AUDIO:cue=AUDIO:m2a=AUDIO:m4a=AUDIO:mid=AUDIO:midi=AUDIO:mka=AUDIO:mp3=AUDIO:mpc=AUDIO:mpga=AUDIO:oga=AUDIO:ogg=AUDIO:ogx=AUDIO:opus=AUDIO:ra=AUDIO:ram=AUDIO:spx=AUDIO:wma=AUDIO:"
+
+# LOSSLESS AUDIO
+define LAUDIO=@214-1
+ExtColors="aif=LAUDIO:aifc=LAUDIO:aiff=LAUDIO:alac=LAUDIO:ape=LAUDIO:flac=LAUDIO:pcm=LAUDIO:wav=LAUDIO:wm=LAUDIO:"
 
 # SOURCE FILES
 define CODE=@247-1
@@ -236,8 +243,12 @@ define EBOOK=@223
 ExtColors="azw=EBOOK:azw3=EBOOK:cb7=EBOOK:cba=EBOOK:cbr=EBOOK:cbt=EBOOK:cbz=EBOOK:djv=EBOOK:djvu=EBOOK:epub=EBOOK:fb2=EBOOK:kf8=EBOOK:kfx=EBOOK:mobi=EBOOK:oxps=EBOOK:pdb=EBOOK:pdf=EBOOK:ps=EBOOK:xps=EBOOK:"
 
 # IMAGES
-define IMAGE=@5
-ExtColors="ai=IMAGE:avif=IMAGE:bmp=IMAGE:gif=IMAGE:ico=IMAGE:jpeg=IMAGE:jpg=IMAGE:jxl=IMAGE:mjpeg=IMAGE:mjpg=IMAGE:mng=IMAGE:pbm=IMAGE:pcx=IMAGE:pgm=IMAGE:png=IMAGE:ppm=IMAGE:psd=IMAGE:svg=IMAGE:svgz=IMAGE:tga=IMAGE:tif=IMAGE:tiff=IMAGE:webp=IMAGE:xbm=IMAGE:xcf=IMAGE:xpm=IMAGE:xwd=IMAGE:"
+define IMAGE=@141
+ExtColors="ai=IMAGE:arw=IMAGE:avif=IMAGE:bmp=IMAGE:cr2=IMAGE:dvi=IMAGE:eps=IMAGE:fodg=IMAGE:heic=IMAGE:heif=IMAGE:gif=IMAGE:ico=IMAGE:j2c=IMAGE:j2k=IMAGE:jfi=IMAGE:jfif=IMAGE:jp2=IMAGE:jpe=IMAGE:jpeg=IMAGE:jpf=IMAGE:jpg=IMAGE:jpx=IMAGE:jxl=IMAGE:nef=IMAGE:mjpeg=IMAGE:mjpg=IMAGE:mng=IMAGE:odg=IMAGE:orf=IMAGE:pbm=IMAGE:pcx=IMAGE:pgm=IMAGE:png=IMAGE:pnm=IMAGE:ppm=IMAGE:psd=IMAGE:pxm=IMAGE:qoi=IMAGE:raw=IMAGE:svg=IMAGE:svgz=IMAGE:tga=IMAGE:tif=IMAGE:tiff=IMAGE:webp=IMAGE:xbm=IMAGE:xcf=IMAGE:xpm=IMAGE:xwd=IMAGE:"
+
+# VIDEO FILES
+define VIDEO=@141-1
+ExtColors="3gp=VIDEO:asf=VIDEO:avi=VIDEO:cgm=VIDEO:dl=VIDEO:emf=VIDEO:flc=VIDEO:fli=VIDEO:flv=VIDEO:h264=VIDEO:heics=VIDEO:gl=VIDEO:m2ts=VIDEO:m2v=VIDEO:m4v=VIDEO:mkv=VIDEO:mov=VIDEO:mp4=VIDEO:mp4v=VIDEO:mpeg=VIDEO:mpg=VIDEO:nuv=VIDEO:ogm=VIDEO:ogv=VIDEO:qt=VIDEO:rm=VIDEO:rmvb=VIDEO:vob=VIDEO:webm=VIDEO:wmv=VIDEO:yuv=VIDEO:"
 
 # MARKUP FILES
 define MARKUP=@85
@@ -246,10 +257,6 @@ ExtColors="css=MARKUP:htm=MARKUP:html=MARKUP:ltx=MARKUP:markdown=MARKUP:md=MARKU
 # TEMPORARY FILES
 define TEMP=@247
 ExtColors="aux=TEMP:bak=TEMP:bbl=TEMP:bc=TEMP:cache=TEMP:class=TEMP:git=TEMP:hi=TEMP:idx=TEMP:ilg=TEMP:ind=TEMP:la=TEMP:lo=TEMP:localized=TEMP:lock=TEMP:log=TEMP:o=TEMP:orig=TEMP:out=TEMP:pid=TEMP:pyc=TEMP:pyd=TEMP:pyo=TEMP:rej=TEMP:rlib=TEMP:sty=TEMP:swp=TEMP:tmp=TEMP:toc=TEMP:"
-
-# VIDEO FILES
-define VIDEO=@5-1
-ExtColors="3gp=VIDEO:asf=VIDEO:avi=VIDEO:cgm=VIDEO:dl=VIDEO:emf=VIDEO:flc=VIDEO:fli=VIDEO:flv=VIDEO:h264=VIDEO:heics=VIDEO:gl=VIDEO:m2ts=VIDEO:m2v=VIDEO:m4v=VIDEO:mkv=VIDEO:mov=VIDEO:mp4=VIDEO:mp4v=VIDEO:mpeg=VIDEO:mpg=VIDEO:nuv=VIDEO:ogm=VIDEO:ogv=VIDEO:qt=VIDEO:rm=VIDEO:rmvb=VIDEO:vob=VIDEO:webm=VIDEO:wmv=VIDEO:yuv=VIDEO:"
 
 # DATABASES
 define DB=@211
