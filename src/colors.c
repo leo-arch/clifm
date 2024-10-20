@@ -1175,18 +1175,20 @@ print_colors_tip(const int stealth)
 }
 
 /* Make sure hashes for file name extensions do not conflict.
- * If they do, the hash field at index zero (of the ext_colors struct) is set
- * to 0 to indicate that we have hash conflicts (in which case regular string
- * comparison must be used instead). */
+ * CS_CHECK is 0 when this function is called at startup: if a hash conflict
+ * is found, the hash field at index zero (of the ext_colors struct) is set
+ * to 0 to indicate that we must use regular string comparison (slower).
+ * CS_CHECK is 1 when the function is invoked by the 'cs check-ext' command.
+ * It returns FUNC_FAILURE in case of conflicts, or FUNC_SUCCESS otherwise. */
 static int
-check_ext_color_hash_conflicts(const int list)
+check_ext_color_hash_conflicts(const int cs_check)
 {
 	size_t i, j, conflicts = 0;
 
 	for (i = 0; i < ext_colors_n; i++) {
 		for (j = i + 1; j < ext_colors_n; j++) {
 			if (ext_colors[i].hash == ext_colors[j].hash) {
-				if (list == 1) {
+				if (cs_check == 1) {
 					printf(_("'%s' conflicts with '%s'\n"),
 						ext_colors[i].name, ext_colors[j].name);
 					conflicts++;
@@ -1201,7 +1203,7 @@ check_ext_color_hash_conflicts(const int list)
 		}
 	}
 
-	if (list == 0)
+	if (cs_check == 0)
 		return FUNC_SUCCESS;
 
 	if (conflicts > 0) {
