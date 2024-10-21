@@ -264,7 +264,7 @@ profile_set(const char *prof)
 	if (conf.autols == 1)
 		reload_dirlist();
 
-	print_reload_msg(_("Switched to profile %s%s%s\n"), BOLD, prof, NC);
+	print_reload_msg(NULL, NULL, _("Switched to profile %s%s%s\n"), BOLD, prof, NC);
 	return FUNC_SUCCESS;
 }
 

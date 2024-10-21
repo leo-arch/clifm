@@ -128,7 +128,7 @@ edit_bookmarks(char *cmd, const int flag)
 
 		if (flag == NO_BM_SCREEN) {
 			reload_dirlist();
-			print_reload_msg(_("File modified. Bookmarks reloaded\n"));
+			print_reload_msg(NULL, NULL, _("File modified. Bookmarks reloaded\n"));
 		}
 	}
 
@@ -729,7 +729,8 @@ del_bookmarks(char **args)
 
 	if (removed > 0) {
 		if (rename(tmp_file, bm_file) == 0) {
-			print_reload_msg(_("Removed %zu bookmark(s)\n"), removed);
+			print_reload_msg(SET_SUCCESS_PTR, xs_c,
+				_("Removed %zu bookmark(s)\n"), removed);
 		} else {
 			xerror(_("bookmarks: Error updating bookmarks\nCannot rename "
 				"temporary file '%s': %s\n"), tmp_file, strerror(errno));

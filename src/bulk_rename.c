@@ -501,7 +501,7 @@ bulk_rename(char **args)
 	if (renamed > 0 && is_cwd == 1 && conf.autols == 1)
 		reload_dirlist();
 
-	print_reload_msg(_("%zu file(s) renamed\n"), renamed);
+	print_reload_msg(SET_SUCCESS_PTR, xs_c, _("%zu file(s) renamed\n"), renamed);
 
 	return exit_status;
 

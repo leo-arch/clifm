@@ -1792,7 +1792,7 @@ edit_prompts_file(char *app)
 		reload_dirlist();
 
 	ret = load_prompts();
-	print_reload_msg(_("File modified. Prompts reloaded\n"));
+	print_reload_msg(NULL, NULL, _("File modified. Prompts reloaded\n"));
 
 	if (*cur_prompt_name)
 		set_prompt(cur_prompt_name);

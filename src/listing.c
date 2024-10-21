@@ -428,7 +428,7 @@ print_disk_usage(void)
 	devname = DEV_NO_NAME;
 #endif /* _BE_POSIX */
 
-	print_reload_msg(_("%s/%s (%d%% free) %s %s\n"),
+	print_reload_msg(NULL, NULL, _("%s/%s (%d%% free) %s %s\n"),
 		free_space ? free_space : "?", size ? size : "?", free_percentage,
 		fstype, devname);
 
@@ -570,7 +570,7 @@ print_cdpath(void)
 {
 	if (workspaces && workspaces[cur_ws].path
 	&& *workspaces[cur_ws].path)
-		print_reload_msg("cdpath: %s\n", workspaces[cur_ws].path);
+		print_reload_msg(NULL, NULL, "cdpath: %s\n", workspaces[cur_ws].path);
 
 	is_cdpath = 0;
 }
@@ -659,7 +659,7 @@ post_listing(DIR *dir, const int reset_pager, const filesn_t excluded_files)
 		print_disk_usage();
 
 	if (sort_switch == 1) {
-		print_reload_msg(_("Sorted by "));
+		print_reload_msg(NULL, NULL, _("Sorted by "));
 		print_sort_method();
 	}
 
@@ -668,10 +668,10 @@ post_listing(DIR *dir, const int reset_pager, const filesn_t excluded_files)
 			df_c, cur_cscheme);
 
 	if (virtual_dir == 1)
-		print_reload_msg(_("Virtual directory\n"));
+		print_reload_msg(NULL, NULL, _("Virtual directory\n"));
 
 	if (excluded_files > 0)
-		print_reload_msg(_("Showing %jd/%jd files\n"),
+		print_reload_msg(NULL, NULL, _("Showing %jd/%jd files\n"),
 			(intmax_t)files, (intmax_t)(files + excluded_files));
 
 	if (conf.print_dir_cmds == 1 && dir_cmds.first_cmd_in_dir != UNSET)
@@ -2498,7 +2498,7 @@ END:
 
 #ifndef ST_BTIME_LIGHT
 	if (conf.long_view == 1 && prop_fields.time == PROP_TIME_BIRTH)
-		print_reload_msg("Long view: Birth time not available in light "
+		print_reload_msg(NULL, NULL, "Long view: Birth time not available in light "
 			"mode. Using %smodification time%s.\n", BOLD, NC);
 #endif /* !ST_BTIME_LIGHT */
 

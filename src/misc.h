@@ -49,7 +49,7 @@ int  handle_stdin(void);
 int  is_blank_name(const char *s);
 int  list_mountpoints(void);
 int  new_instance(char *, int);
-int  print_reload_msg(const char *msg, ...);
+int  print_reload_msg(const char *ptr, const char *color, const char *msg, ...);
 int  pin_directory(char *dir);
 void save_last_path(char *last_path_tmp);
 void set_eln_color(void);

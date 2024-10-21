@@ -599,7 +599,7 @@ config_edit(char **args)
 
 		if (conf.autols == 1)
 			reload_dirlist();
-		print_reload_msg(_(CONFIG_FILE_UPDATED));
+		print_reload_msg(NULL, NULL, _(CONFIG_FILE_UPDATED));
 	}
 
 	return ret;

@@ -277,11 +277,13 @@ ERROR:
 
 /* Print format string MSG, as "> MSG" (colored), if autols is on, or just
  * as "MSG" if off.
+ * Use PTR as pointer, or ">" if PTR is NULL.
+ * Use COLOR as pointer color, or mi_c if COLOR is NULL.
  * This function is used to inform the user about changes that require a
  * a files list reload (either upon files or interface modifications). */
-__attribute__((__format__(__printf__, 1, 0)))
+__attribute__((__format__(__printf__, 3, 4)))
 int
-print_reload_msg(const char *msg, ...)
+print_reload_msg(const char *ptr, const char *color, const char *msg, ...)
 {
 	va_list arglist;
 
@@ -293,8 +295,8 @@ print_reload_msg(const char *msg, ...)
 		return FUNC_FAILURE;
 
 	if (conf.autols == 1)
-		printf("%s%s%s ", mi_c, term_caps.unicode == 1
-			? MSG_PTR_STR_U : MSG_PTR_STR, df_c);
+		printf("%s%s%s ", color ? color : mi_c,
+			ptr ? ptr : SET_MSG_PTR, df_c);
 
 	char *buf = xnmalloc((size_t)size + 1, sizeof(char));
 
@@ -524,7 +526,7 @@ unset_filter(void)
 	if (conf.autols == 1)
 		reload_dirlist();
 
-	print_reload_msg(_("Filter unset\n"));
+	print_reload_msg(NULL, NULL, _("Filter unset\n"));
 	return FUNC_SUCCESS;
 }
 
@@ -578,7 +580,7 @@ compile_filter(void)
 	if (conf.autols == 1)
 		reload_dirlist();
 
-	print_reload_msg(_("%s%s: New filter set\n"),
+	print_reload_msg(NULL, NULL, _("%s%s: New filter set\n"),
 		filter.rev == 1 ? "!" : "", filter.str);
 
 	return FUNC_SUCCESS;

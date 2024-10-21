@@ -552,7 +552,7 @@ print_glob_matches(struct search_t *matches, const char *search_path)
 
 	tab_offset = tab_offset_bk;
 
-	print_reload_msg(_("Matches found: %d%s\n"), found,
+	print_reload_msg(SET_SUCCESS_PTR, xs_c, _("Matches found: %d%s\n"), found,
 		conf.search_strategy != GLOB_ONLY ? " (glob)" : "");
 
 	return found;
@@ -885,7 +885,7 @@ print_regex_matches(const mode_t file_type, struct dirent **reg_dirlist,
 		print_regex_entry(list[i], name_pad, eln_pad, newline);
 	}
 
-	print_reload_msg(_("Matches found: %zu\n"), count);
+	print_reload_msg(SET_SUCCESS_PTR, xs_c, _("Matches found: %zu\n"), count);
 
 END:
 	free(list);

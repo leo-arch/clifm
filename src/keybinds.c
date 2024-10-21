@@ -832,9 +832,9 @@ rl_toggle_max_filename_len(int count, int key)
 	}
 
 	if (conf.max_name_len == UNSET)
-		print_reload_msg(_("Max name length unset\n"));
+		print_reload_msg(NULL, NULL, _("Max name length unset\n"));
 	else
-		print_reload_msg(_("Max name length set to %d\n"), conf.max_name_len);
+		print_reload_msg(NULL, NULL, _("Max name length set to %d\n"), conf.max_name_len);
 
 	xrl_reset_line_state();
 	return FUNC_SUCCESS;
@@ -1378,7 +1378,7 @@ rl_toggle_long_view(int count, int key)
 		reload_dirlist();
 	}
 
-	print_reload_msg(_("Long view %s\n"),
+	print_reload_msg(NULL, NULL, _("Long view %s\n"),
 		conf.long_view == 1 ? _("enabled") : _("disabled"));
 	xrl_reset_line_state();
 	return FUNC_SUCCESS;
@@ -1406,7 +1406,7 @@ rl_toggle_follow_link_long(int count, int key)
 		reload_dirlist();
 	}
 
-	print_reload_msg(_("Follow links %s\n"),
+	print_reload_msg(NULL, NULL, _("Follow links %s\n"),
 		conf.follow_symlinks_long == 1 ? _("enabled") : _("disabled"));
 	xrl_reset_line_state();
 	return FUNC_SUCCESS;
@@ -1432,7 +1432,7 @@ rl_toggle_dirs_first(int count, int key)
 		reload_dirlist();
 	}
 
-	print_reload_msg(_("Directories first %s\n"),
+	print_reload_msg(NULL, NULL, _("Directories first %s\n"),
 		conf.list_dirs_first ? _("enabled") : _("disabled"));
 	xrl_reset_line_state();
 	return FUNC_SUCCESS;
@@ -1458,7 +1458,7 @@ rl_toggle_light_mode(int count, int key)
 		reload_dirlist();
 	}
 
-	print_reload_msg(_("Light mode %s\n"),
+	print_reload_msg(NULL, NULL, _("Light mode %s\n"),
 		conf.light_mode == 1 ? _("enabled") : _("disabled"));
 	xrl_reset_line_state();
 
@@ -1492,9 +1492,9 @@ rl_toggle_hidden_files(int count, int key)
 	}
 
 	if (conf.show_hidden == 1)
-		print_reload_msg(_("Showing dotfiles\n"));
+		print_reload_msg(NULL, NULL, _("Showing dotfiles\n"));
 	else
-		print_reload_msg(_("Hiding dotfiles\n"));
+		print_reload_msg(NULL, NULL, _("Hiding dotfiles\n"));
 
 	xrl_reset_line_state();
 	return FUNC_SUCCESS;
@@ -2317,7 +2317,7 @@ rl_toggle_only_dirs(int count, int key)
 		reload_dirlist();
 	}
 
-	print_reload_msg(_("Only directories %s\n"), conf.only_dirs
+	print_reload_msg(NULL, NULL, _("Only directories %s\n"), conf.only_dirs
 		? _("enabled") : _("disabled"));
 	xrl_reset_line_state();
 	return exit_status;
@@ -2519,7 +2519,7 @@ rl_toggle_disk_usage(int count, int key)
 		reload_dirlist();
 	}
 
-	print_reload_msg(_("Disk usage analyzer %s\n"),
+	print_reload_msg(NULL, NULL, _("Disk usage analyzer %s\n"),
 		xargs.disk_usage_analyzer == 1 ? _("enabled") : _("disabled"));
 	xrl_reset_line_state();
 	return exit_status;
@@ -2627,7 +2627,7 @@ rl_toggle_virtualdir_full_paths(int count, int key)
 		putchar('\n');
 
 	reload_dirlist();
-	print_reload_msg(_("Switched to %s names\n"),
+	print_reload_msg(NULL, NULL, _("Switched to %s names\n"),
 		xargs.virtual_dir_full_paths == 1 ? _("long") : _("short"));
 	xrl_reset_line_state();
 	return FUNC_SUCCESS;

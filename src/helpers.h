@@ -631,6 +631,8 @@ extern time_t curdir_mtime;
 #define RL_NC "\001\x1b[0m\002"
 
 #define SET_MSG_PTR (term_caps.unicode == 1 ? MSG_PTR_STR_U : MSG_PTR_STR)
+#define SET_SUCCESS_PTR (term_caps.unicode == 1 ? SUCCESS_PTR_STR_U : SUCCESS_PTR_STR)
+#define SET_ERROR_PTR (term_caps.unicode == 1 ? ERROR_PTR_STR_U : ERROR_PTR_STR)
 
 #define UNSET  (-1)
 

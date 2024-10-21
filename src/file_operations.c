@@ -491,7 +491,8 @@ list_created_files(char **nfiles, const filesn_t nfiles_n)
 			free(f);
 	}
 
-	print_reload_msg(_("%zu file(s) created\n"), (size_t)nfiles_n);
+	print_reload_msg(SET_SUCCESS_PTR, xs_c, _("%zu file(s) created\n"),
+		(size_t)nfiles_n);
 }
 
 static int
@@ -1746,7 +1747,7 @@ list_removed_files(struct rm_info *info, const size_t start,
 		print_removed_file_info(info[i]);
 	}
 
-	print_reload_msg(_("%zu file(s) removed\n"), c);
+	print_reload_msg(SET_SUCCESS_PTR, xs_c, _("%zu file(s) removed\n"), c);
 }
 
 /* Print files to be removed and ask the user for confirmation.
@@ -2055,7 +2056,8 @@ batch_link(char **args)
 			press_any_key_to_continue(0);
 		reload_dirlist();
 	}
-	print_reload_msg(_("%zu symbolic link(s) created\n"), symlinked);
+	print_reload_msg(SET_SUCCESS_PTR, xs_c,
+		_("%zu symbolic link(s) created\n"), symlinked);
 
 	return exit_status;
 }

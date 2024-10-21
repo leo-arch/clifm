@@ -675,7 +675,8 @@ CONFIRM:
 	} else {
 		if (conf.autols == 1)
 			reload_dirlist();
-		print_reload_msg(_("%d file name(s) bleached\n"), total_rename);
+		print_reload_msg(SET_SUCCESS_PTR, xs_c,
+			_("%d file name(s) bleached\n"), total_rename);
 	}
 
 	return exit_status;

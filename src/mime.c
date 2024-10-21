@@ -657,7 +657,7 @@ mime_edit(char **args)
 
 	if (stat(mime_file, &a) != -1 && a.st_mtime != prev) {
 		reload_dirlist();
-		print_reload_msg(_(CONFIG_FILE_UPDATED));
+		print_reload_msg(NULL, NULL, _(CONFIG_FILE_UPDATED));
 	}
 
 	return exit_status;

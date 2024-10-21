@@ -664,8 +664,9 @@ print_sel_results(const int new_sel, const char *sel_path,
 	if (conf.autols == 1 && error == 0)
 		reload_dirlist();
 
-	print_reload_msg(_("%d file(s) selected\n"), new_sel);
-	print_reload_msg(_("%zu total selected file(s)\n"), sel_n);
+	print_reload_msg(SET_SUCCESS_PTR, xs_c,
+		_("%d file(s) selected\n"), new_sel);
+	print_reload_msg(NULL, NULL, _("%zu total selected file(s)\n"), sel_n);
 
 	return FUNC_SUCCESS;
 }
@@ -955,7 +956,7 @@ edit_selfile(void)
 	if (conf.autols == 1)
 		reload_dirlist();
 
-	print_reload_msg(_("%zu file(s) selected\n"), sel_n);
+	print_reload_msg(SET_SUCCESS_PTR, xs_c, _("%zu file(s) selected\n"), sel_n);
 	return ret;
 
 ERROR:
@@ -1070,8 +1071,8 @@ desel_entries(char **desel_elements, const size_t desel_n, const int desel_scree
 	if (desel_screen == 1) {
 		free(desel_path);
 	} else if (err == 1) {
-		print_reload_msg(_("%d file(s) deselected\n"), dn);
-		print_reload_msg(_("%zu total selected file(s)\n"), sel_n);
+		print_reload_msg(SET_SUCCESS_PTR, xs_c, _("%d file(s) deselected\n"), dn);
+		print_reload_msg(NULL, NULL, _("%zu total selected file(s)\n"), sel_n);
 	}
 	free(desel_elements);
 
@@ -1242,10 +1243,11 @@ end_deselect(const int err, char ***args)
 		reload_dirlist();
 
 	if (argsbk > 0) {
-		print_reload_msg(_("%zu file(s) deselected\n"), desel_files);
-		print_reload_msg(_("%zu total selected file(s)\n"), sel_n);
+		print_reload_msg(SET_SUCCESS_PTR, xs_c,
+			_("%zu file(s) deselected\n"), desel_files);
+		print_reload_msg(NULL, NULL, _("%zu total selected file(s)\n"), sel_n);
 	} else {
-		print_reload_msg(_("%zu selected file(s)\n"), sel_n);
+		print_reload_msg(NULL, NULL, _("%zu selected file(s)\n"), sel_n);
 	}
 
 	return exit_status;
@@ -1263,8 +1265,9 @@ handle_desel_args(char **args)
 			reload_dirlist();
 
 		if (ret == FUNC_SUCCESS) {
-			print_reload_msg(_("%zu file(s) deselected\n"), n);
-			print_reload_msg(_("0 total selected file(s)\n"));
+			print_reload_msg(SET_SUCCESS_PTR, xs_c,
+				_("%zu file(s) deselected\n"), n);
+			print_reload_msg(NULL, NULL, _("0 total selected file(s)\n"));
 		}
 		return ret;
 
