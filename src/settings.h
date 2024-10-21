@@ -434,7 +434,7 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define MSG_PTR_STR_LEFT   "<-"
 #define MSG_PTR_STR_LEFT_U "←"
 
-#define SUCCESS_PTR_STR_U "✓"
+#define SUCCESS_PTR_STR_U "✔"
 #define SUCCESS_PTR_STR   "->"
 #define ERROR_PTR_STR_U   "✗"
 #define ERROR_PTR_STR     "->"
