@@ -3239,8 +3239,8 @@ print_interface_colors(void)
 	printf(_("%sColor%s (fc) Files counter (e.g. dir%s/24%s)\n"),
 		fc_c, df_c, fc_c, df_c);
 	printf(_("%sColor%s (lc) Symbolic link indicator (e.g. %s36%s"
-		"%s%c%ssymlink) (%s1%s)\n"), lc_c, df_c, el_c, df_c, lc_c,
-		LINK_CHR, df_c, BOLD, df_c);
+		"%s%s%ssymlink) (%s1%s)\n"), lc_c, df_c, el_c, df_c, lc_c,
+		term_caps.unicode == 1 ? LINK_STR_U : LINK_STR, df_c, BOLD, df_c);
 	printf(_("%sColor%s (li) Selected file indicator (e.g. %s12%s"
 		"%s%s%sfilename)\n"), li_cb, df_c, el_c, df_c, li_cb,
 		term_caps.unicode == 1 ? SELFILE_STR_U : SELFILE_STR, df_c);

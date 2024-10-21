@@ -405,7 +405,8 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define SELFILE_STR   "*" /* Selected file mark for files list (ASCII) */
 #define SELFILE_STR_U "┃" /* Unicode alternative */
 
-#define LINK_STR   "@" /* Symbolic link mark for listed files (ASCII) */
+/* Symbolic link mark for listed files (if ColorLinksAsTarget is enabled). */
+#define LINK_STR   "@" /* ASCII */
 #define LINK_STR_U "@" /* Unicode alternative */
 
 #define TRIMFILE_CHR '~'
@@ -431,7 +432,7 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define MSG_PTR_STR   "->"
 #define MSG_PTR_STR_U "→"  /* Unicode alternative */
 
-/* Used only by the 'pp' command in a symbolic link */
+/* Used only by the 'pp' command on a symbolic link */
 #define MSG_PTR_STR_LEFT   "<-"
 #define MSG_PTR_STR_LEFT_U "←"
 
@@ -451,7 +452,7 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 
 /* If PrintDirCmds is enabled */
 #define DIR_CMD_PTR   ">"
-#define DIR_CMD_PTR_U ">"
+#define DIR_CMD_PTR_U "≻"
 
 /* Character used to print non-matching suggestions, e.g. "12 > filename". */
 #define SUG_POINTER '>'
