@@ -733,42 +733,6 @@ is_quote_char(const char c)
 	return 0;
 }
 
-/*
-char *
-rl_no_hist(const char *prompt_str)
-{
-	rl_nohist = rl_notab = 1;
-	char *input = secondary_prompt(prompt_str, NULL);
-	rl_nohist = rl_notab = 0;
-
-	if (!input) // Ctrl-d
-		return savestring("q", 1);
-
-	if (!*input) {
-		free(input);
-		return (char *)NULL;
-	}
-
-	// Do we have some non-blank char?
-	int blank = 1;
-	char *p = input;
-
-	while (*p) {
-		if (*p != ' ' && *p != '\n' && *p != '\t') {
-			blank = 0;
-			break;
-		}
-		p++;
-	}
-
-	if (blank == 1) {
-		free(input);
-		return (char *)NULL;
-	}
-
-	return input;
-} */
-
 char *
 rl_no_hist(const char *prompt_str, const int tabcomp)
 {
