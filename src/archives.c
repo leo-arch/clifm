@@ -127,7 +127,7 @@ get_operation(const int mode)
 	char sel_op = 0;
 	char *op = (char *)NULL;
 	while (!op) {
-		op = rl_no_hist(_("Operation: "));
+		op = rl_no_hist(_("Operation: "), 0);
 		if (!op)
 			continue;
 		if (!*op || op[1] != '\0') {
@@ -680,7 +680,7 @@ get_archive_filename(void)
 	char *name = (char *)NULL;
 	while (!name) {
 		flags |= NO_FIX_RL_POINT;
-		name = rl_no_hist(_("File name ('q' to quit): "));
+		name = rl_no_hist(_("File name ('q' to quit): "), 0);
 		flags &= ~NO_FIX_RL_POINT;
 
 		if (!name || !*name) {
@@ -769,7 +769,7 @@ zstandard(char *in_file, char *out_file, const char mode, const char op)
 
 	char *operation = (char *)NULL;
 	while (!operation) {
-		operation = rl_no_hist(_("Operation: "));
+		operation = rl_no_hist(_("Operation: "), 0);
 		if (!operation)
 			continue;
 		if (!*operation || operation[1] != '\0') {
@@ -965,7 +965,7 @@ get_zstandard_operation(void)
 	char *operation = (char *)NULL;
 
 	while (!operation) {
-		operation = rl_no_hist(_("Operation: "));
+		operation = rl_no_hist(_("Operation: "), 0);
 		if (!operation)
 			continue;
 		if (!*operation || operation[1] != '\0') {
@@ -1100,7 +1100,7 @@ get_repack_format(void)
 
 	char *format = (char *)NULL;
 	while (!format) {
-		format = rl_no_hist(_("New format (e.g.: .tar.xz): "));
+		format = rl_no_hist(_("New format (e.g.: .tar.xz): "), 0);
 		if (!format)
 			continue;
 

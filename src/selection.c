@@ -1136,7 +1136,7 @@ get_desel_input(size_t *n)
 	snprintf(dp, sizeof(dp), "\001%s\002>\001%s\002 ", mi_c, tx_c);
 	char *line = NULL;
 	while (!line)
-		line = rl_no_hist(dp);
+		line = rl_no_hist(dp, 0);
 
 	/* get_substr() will try to expand ranges, in which case a range with
 	 * no second field is expanded from the value of the first field to the

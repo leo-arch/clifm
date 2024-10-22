@@ -979,10 +979,10 @@ bookmarks_func(char **args)
 	 * by another function. */
 	kbind_busy = 1;
 	/* Disable TAB completion while in Bookmarks */
-	rl_attempted_completion_function = NULL;
+//	rl_attempted_completion_function = NULL;
 	const int exit_status = bookmarks_function(args);
 	/* Reenable TAB completion */
-	rl_attempted_completion_function = my_rl_completion;
+//	rl_attempted_completion_function = my_rl_completion;
 	/* Reenable keyboard shortcuts */
 	kbind_busy = 0;
 

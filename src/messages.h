@@ -879,7 +879,7 @@ Note: Use the 'oc' command to edit files ownership."
 
 #define PROMPT_USAGE "Change current prompt\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  prompt [set NAME | list | unset | edit [APP] | reload]\n\
+  prompt [set NAME | list | unset | edit [APP] | reload]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - List available prompts\n\
     prompt list (or 'prompt set <TAB>' to choose from a list)\n\

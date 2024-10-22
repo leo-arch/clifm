@@ -682,7 +682,7 @@ get_user_input(const size_t max)
 	char *input = (char *)NULL;
 
 	while (!input) {
-		input = rl_no_hist(_("Choose an application ('q' to quit): "));
+		input = rl_no_hist(_("Choose an application ('q' to quit): "), 0);
 		if (!input || !*input) {
 			free(input);
 			input = (char *)NULL;

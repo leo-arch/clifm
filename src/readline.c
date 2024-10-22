@@ -98,7 +98,7 @@ rl_get_y_or_n(const char *msg_str)
 {
 	char *answer = (char *)NULL;
 	while (!answer) {
-		answer = rl_no_hist(msg_str);
+		answer = rl_no_hist(msg_str, 0);
 		if (!answer)
 			continue;
 
@@ -733,10 +733,47 @@ is_quote_char(const char c)
 	return 0;
 }
 
+/*
 char *
 rl_no_hist(const char *prompt_str)
 {
 	rl_nohist = rl_notab = 1;
+	char *input = secondary_prompt(prompt_str, NULL);
+	rl_nohist = rl_notab = 0;
+
+	if (!input) // Ctrl-d
+		return savestring("q", 1);
+
+	if (!*input) {
+		free(input);
+		return (char *)NULL;
+	}
+
+	// Do we have some non-blank char?
+	int blank = 1;
+	char *p = input;
+
+	while (*p) {
+		if (*p != ' ' && *p != '\n' && *p != '\t') {
+			blank = 0;
+			break;
+		}
+		p++;
+	}
+
+	if (blank == 1) {
+		free(input);
+		return (char *)NULL;
+	}
+
+	return input;
+} */
+
+char *
+rl_no_hist(const char *prompt_str, const int tabcomp)
+{
+	rl_notab = (tabcomp == 0);
+	rl_nohist = 1;
 	char *input = secondary_prompt(prompt_str, NULL);
 	rl_nohist = rl_notab = 0;
 
@@ -4175,8 +4212,17 @@ FIRST_WORD_COMP:
 
 		/* #### OWNERSHIP EXPANSION ####
 		 * Used only by the 'oc' command to edit files ownership. */
+
 		if (alt_prompt == 3)
 			return complete_ownership(text);
+
+		if (alt_prompt == 4) {
+			rl_attempted_completion_over = 1;
+			if ((matches = rl_completion_matches(text, &bookmarks_generator))) {
+				cur_comp_type = TCMP_NET;
+				return matches;
+			}
+		}
 
 		/* #### INTERNAL COMMANDS EXPANSION #### */
 		if (alt_prompt == 0 && ((*text == 'c' && text[1] == 'm'

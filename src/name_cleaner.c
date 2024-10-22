@@ -557,7 +557,7 @@ bleach_files(char **names)
 
 CONFIRM:
 	while (!input) {
-		input = rl_no_hist(_("Is this OK? [y/n/(e)dit] "));
+		input = rl_no_hist(_("Is this OK? [y/n/(e)dit] "), 0);
 
 		if (!input)
 			continue;

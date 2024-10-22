@@ -32,7 +32,8 @@ int  is_quote_char(const char c);
 char **my_rl_completion(const char *text, int start, int end);
 char *my_rl_path_completion(const char *text, int state);
 int  rl_get_y_or_n(const char *msg_str);
-char *rl_no_hist(const char *prompt_str);
+//char *rl_no_hist(const char *prompt_str);
+char *rl_no_hist(const char *prompt_str, const int tabcomp);
 char *secondary_prompt(const char *prompt_str, const char *line);
 
 __END_DECLS

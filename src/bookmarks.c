@@ -75,10 +75,17 @@ bm_prompt(const int print_header)
 			"Choose a bookmark (by ELN, shortcut, or name):\n"),
 			NC, df_c, 'e', 'q');
 
+	const int prompt_offset_bk = prompt_offset;
+	prompt_offset = 0;
+	alt_prompt = 4;
+
 	char bm_str[(MAX_COLOR * 2) + 7];
 	snprintf(bm_str, sizeof(bm_str), "\001%s\002>\001%s\002 ", mi_c, tx_c);
 	while (!bm)
-		bm = rl_no_hist(bm_str);
+		bm = rl_no_hist(bm_str, 1);
+
+	alt_prompt = 0;
+	prompt_offset = prompt_offset_bk;
 
 	char **cmd = (char **)NULL;
 	/* "e/edit" is the only command that needs to split the input string:
@@ -135,25 +142,32 @@ edit_bookmarks(char *cmd, const int flag)
 	return FUNC_SUCCESS;
 }
 
-static size_t
-get_longest_shortcut(void)
+/* Update LS and LN with the longest shortcut and name entries in the bookmarks
+ * database respectively. */
+static void
+get_longest_entries(size_t *ls, size_t *ln)
 {
-	if (bm_n == 0 || !bookmarks)
-		return 0;
+	*ls = 0;
+	*ln = 0;
 
-	size_t l = 0;
+	if (bm_n == 0 || !bookmarks)
+		return;
+
 	int i = (int)bm_n;
 
 	while (--i >= 0) {
-		if (!bookmarks[i].shortcut || !*bookmarks[i].shortcut)
-			continue;
+		if (bookmarks[i].shortcut && *bookmarks[i].shortcut) {
+			const size_t slen = strlen(bookmarks[i].shortcut);
+			if (slen > *ls)
+				*ls = slen;
+		}
 
-		const size_t slen = strlen(bookmarks[i].shortcut);
-		if (slen > l)
-			l = slen;
+		if (bookmarks[i].name && *bookmarks[i].name) {
+			const size_t nlen = strlen(bookmarks[i].name);
+			if (nlen > *ln)
+				*ln = nlen;
+		}
 	}
-
-	return l;
 }
 
 /* Print the list of available bookmarks. */
@@ -165,8 +179,10 @@ print_bookmarks(void)
 
 	struct stat attr;
 	const int eln_pad = DIGINUM(bm_n);
-	const size_t ls = get_longest_shortcut();
+	size_t ls = 0, ln = 0;
 	size_t i;
+
+	get_longest_entries(&ls, &ln);
 
 	/* Print bookmarks, taking into account shortcut, name, and path. */
 	for (i = 0; i < bm_n; i++) {
@@ -186,7 +202,7 @@ print_bookmarks(void)
 		char *color = stat(bookmarks[i].path, &attr) == -1
 			? uf_c : get_entry_color(bookmarks[i].path, &attr);
 
-		printf("%s%s%*zu%s%s%s%s%s%s%s%-*s %s%s%s\n",
+		printf("%s%s%*zu%s%s%s%s%s%s%s%-*s %s%-*s%s  %s%s%s\n",
 			NC, el_c, eln_pad, i + 1, df_c, // ELN
 			ls > 0 ? " " : "",
 
@@ -194,8 +210,8 @@ print_bookmarks(void)
 			sc_ok == 1 ? bookmarks[i].shortcut : "", df_c,
 			sc_ok == 1 ? "]" : "", sc_pad, "",
 
-			color, bookmarks[i].name ? bookmarks[i].name
-			: bookmarks[i].path, df_c);
+			mi_c, (int)ln, bookmarks[i].name ? bookmarks[i].name : "",
+			df_c, color, bookmarks[i].path, df_c);
 	}
 
 	UNHIDE_CURSOR;

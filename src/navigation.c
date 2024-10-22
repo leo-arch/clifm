@@ -186,7 +186,7 @@ grab_bd_input(const int n)
 	putchar('\n');
 
 	while (!input) {
-		input = rl_no_hist(_("Choose a directory ('q' to quit): "));
+		input = rl_no_hist(_("Choose a directory ('q' to quit): "), 0);
 		if (!input || !*input) {
 			free(input);
 			input = (char *)NULL;

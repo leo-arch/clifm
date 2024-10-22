@@ -442,7 +442,7 @@ list_and_get_input(struct dirent ***trash_files, const int files_n,
 	snprintf(tprompt, sizeof(tprompt), "\001%s\002>\001%s\002 ", mi_c, tx_c);
 
 	while (!line)
-		line = rl_no_hist(tprompt);
+		line = rl_no_hist(tprompt, 0);
 
 	const filesn_t tfiles = files;
 	files = (filesn_t)trash_n;
