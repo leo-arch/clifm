@@ -4234,7 +4234,7 @@ FIRST_WORD_COMP:
 				 * # 3. SECOND WORD OR MORE #
 				 * ########################## */
 
-	if (alt_prompt == 1 || alt_prompt == 3)
+	if (alt_prompt == 1 || alt_prompt == 3 || alt_prompt == 4)
 		return (char **)NULL;
 
 	rl_sort_completion_matches = 0;
