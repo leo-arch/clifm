@@ -846,6 +846,10 @@ static int
 rl_prepend_sudo(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
+
+	if (kbind_busy == 1)
+		return FUNC_SUCCESS;
+
 #ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf) {
 		clear_suggestion(CS_FREEBUF);
@@ -1855,10 +1859,6 @@ int
 rl_quit(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	if (kbind_busy == 1)
-		return FUNC_SUCCESS;
-
-//	conf.cd_on_quit = 0;
 	puts("\n");
 
 	/* Reset terminal attributes before exiting. */
@@ -2103,6 +2103,10 @@ static int
 rl_dir_pinned(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
+
+	if (kbind_busy == 1)
+		return FUNC_SUCCESS;
+
 	if (!pinned_dir) {
 		printf(_("\n%s: No pinned file\n"), PROGRAM_NAME);
 		rl_reset_line_state();
