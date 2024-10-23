@@ -2116,6 +2116,9 @@ rl_dir_pinned(int count, int key)
 static int
 rl_switch_workspace(const int n)
 {
+	if (kbind_busy == 1)
+		return FUNC_SUCCESS;
+
 	if (rl_line_buffer && *rl_line_buffer)
 		rl_delete_text(0, rl_end);
 
@@ -2168,6 +2171,9 @@ rl_ws4(int count, int key)
 static int
 run_plugin(const int num)
 {
+	if (kbind_busy == 1)
+		return FUNC_SUCCESS;
+
 	if (rl_line_buffer && *rl_line_buffer)
 		setenv("CLIFM_LINE", rl_line_buffer, 1);
 
@@ -2489,6 +2495,9 @@ static int
 rl_toggle_disk_usage(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
+
+	if (kbind_busy == 1)
+		return FUNC_SUCCESS;
 
 	/* Default values */
 	static int dsort = DEF_SORT, dlong = DEF_LONG_VIEW,
