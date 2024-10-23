@@ -115,7 +115,8 @@ is_blank_name(const char *s)
 char *
 get_newname(const char *msg, char *old_name, int *quoted)
 {
-	alt_prompt = rl_nohist = 1;
+	rl_nohist = 1;
+	alt_prompt = FILES_PROMPT;
 	int poffset_bk = prompt_offset;
 	prompt_offset = 3;
 
@@ -262,6 +263,11 @@ err(const int msg_type, const int prompt_flag, const char *format, ...)
 	if (msg_type == ERR_NO_STORE) {
 		add_to_msgs_list = 0;
 		logme = 1;
+/*		if (prompt_flag == NOPRINT_PROMPT && term_caps.unicode == 1) {
+			// Invoked as xerror()
+			printf("%s%s%s ", xf_c, ERROR_PTR_STR_U, df_c);
+			fflush(stdout);
+		} */
 	}
 
 	log_msg(buf, prompt_flag, logme, add_to_msgs_list);

@@ -77,7 +77,7 @@ bm_prompt(const int print_header)
 
 	const int prompt_offset_bk = prompt_offset;
 	prompt_offset = 0;
-	alt_prompt = 4;
+	alt_prompt = BOOKMARKS_PROMPT;
 
 	char bm_str[(MAX_COLOR * 2) + 7];
 	snprintf(bm_str, sizeof(bm_str), "\001%s\002>\001%s\002 ", mi_c, tx_c);

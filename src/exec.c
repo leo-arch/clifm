@@ -978,11 +978,7 @@ bookmarks_func(char **args)
 	 * still be waiting for input while the screen have been taken
 	 * by another function. */
 	kbind_busy = 1;
-	/* Disable TAB completion while in Bookmarks */
-//	rl_attempted_completion_function = NULL;
 	const int exit_status = bookmarks_function(args);
-	/* Reenable TAB completion */
-//	rl_attempted_completion_function = my_rl_completion;
 	/* Reenable keyboard shortcuts */
 	kbind_busy = 0;
 
@@ -2276,7 +2272,7 @@ exec_cmd(char **comm)
 				return FUNC_SUCCESS;
 			}
 			if (!sel_is_last && comm[1] && !comm[2])
-				alt_prompt = 1;
+				alt_prompt = FILES_PROMPT;
 
 			use_force = is_force_param(comm[1]);
 			set_mv_cmd(&comm[0], use_force);

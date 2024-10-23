@@ -898,6 +898,12 @@ extern time_t curdir_mtime;
 /* Length to be added to a filename length if icons are enabled. */
 #define ICON_LEN 3
 
+/* Macros for alternative prompts (alt_prompt) */
+#define FILES_PROMPT       1 /* Allow files names completion */
+#define PERMISSIONS_PROMPT 2 /* pc command */
+#define OWNERSHIP_PROMPT   3 /* oc command */
+#define BOOKMARKS_PROMPT   4 /* bookmarks screen */
+
 /* Function macros */
 #define atoi xatoi /* xatoi is just a secure atoi */
 
@@ -1818,7 +1824,7 @@ extern int
 
 /* Internal state flags */
 extern int
-	alt_prompt, /* We're running a secondary prompt for the rename function */
+	alt_prompt, /* We're running a secondary prompt */
 	argc_bk, /* A copy of argc taken from main() */
 	autocmd_set,
 	bg_proc,

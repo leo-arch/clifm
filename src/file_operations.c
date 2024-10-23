@@ -1499,7 +1499,7 @@ run_cp_mv_cmd(char **cmd, const int skip_force)
 		return FUNC_FAILURE;
 
 	char *new_name = (char *)NULL;
-	if (alt_prompt == 1) {
+	if (alt_prompt == FILES_PROMPT) { /* 'm' command (interactive rename) */
 		if (!cmd[1])
 			return EINVAL;
 

@@ -434,7 +434,7 @@ get_new_perms(const char *str, const int diff)
 {
 	const int poffset_bk = prompt_offset;
 	prompt_offset = 3;
-	alt_prompt = 2; /* Disable TAB completion for this prompt */
+	alt_prompt = PERMISSIONS_PROMPT;
 	rl_nohist = 1;
 
 	if (diff == 1) {
@@ -612,7 +612,7 @@ get_new_ownership(const char *str, const int diff)
 {
 	const int poffset_bk = prompt_offset;
 	prompt_offset = 3;
-	alt_prompt = 3; /* Allow completion only for user and group names */
+	alt_prompt = OWNERSHIP_PROMPT;
 	rl_nohist = 1;
 
 	if (diff == 1) {

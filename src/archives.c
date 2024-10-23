@@ -64,7 +64,8 @@ ask_user_for_path(void)
 
 	const int poffset_bk = prompt_offset;
 	prompt_offset = (int)strlen(m) + 1;
-	alt_prompt = rl_nohist = 1;
+	rl_nohist = 1;
+	alt_prompt = FILES_PROMPT;
 
 	char *ext_path = secondary_prompt(m, NULL);
 

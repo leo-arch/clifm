@@ -3968,11 +3968,12 @@ complete_eln(char *text, int *exit_status, const size_t words_n, char *cmd_name)
 
 	/* First word */
 	if (words_n == 1) {
-		if (alt_prompt >= 2 || (file_info[n - 1].dir == 1 && conf.autocd == 0)
+		if ((alt_prompt != 0 && alt_prompt != FILES_PROMPT)
+		|| (file_info[n - 1].dir == 1 && conf.autocd == 0)
 		|| (file_info[n - 1].dir == 0 && conf.auto_open == 0))
 			return (char **)NULL;
 	} else { /* Second word or more */
-		if (alt_prompt == 1 || alt_prompt == 3
+		if (alt_prompt == FILES_PROMPT || alt_prompt == OWNERSHIP_PROMPT
 		|| should_expand_eln(text, cmd_name) == 0)
 			return (char **)NULL;
 	}
@@ -4177,10 +4178,10 @@ FIRST_WORD_COMP:
 		/* #### OWNERSHIP EXPANSION ####
 		 * Used only by the 'oc' command to edit files ownership. */
 
-		if (alt_prompt == 3)
+		if (alt_prompt == OWNERSHIP_PROMPT)
 			return complete_ownership(text);
 
-		if (alt_prompt == 4) {
+		if (alt_prompt == BOOKMARKS_PROMPT) {
 			rl_attempted_completion_over = 1;
 			if ((matches = rl_completion_matches(text, &bookmarks_generator))) {
 				cur_comp_type = TCMP_NET;
@@ -4208,8 +4209,8 @@ FIRST_WORD_COMP:
 			}
 		}
 
-		if ((conf.autocd == 1 || conf.auto_open == 1) && alt_prompt < 2
-		&& (!text || *text != '/')) {
+		if ((conf.autocd == 1 || conf.auto_open == 1) && (alt_prompt == 0
+		|| alt_prompt == FILES_PROMPT) && (!text || *text != '/')) {
 			/* Compĺete with files in CWD */
 			matches = rl_completion_matches(text, &filenames_gen_text);
 			if (matches) {
@@ -4234,7 +4235,7 @@ FIRST_WORD_COMP:
 				 * # 3. SECOND WORD OR MORE #
 				 * ########################## */
 
-	if (alt_prompt == 1 || alt_prompt == 3 || alt_prompt == 4)
+	if (alt_prompt != 0) /* Disable for alternative prompts */
 		return (char **)NULL;
 
 	rl_sort_completion_matches = 0;
