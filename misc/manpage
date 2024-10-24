@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Oct 15, 2024" "clifm 1.21.6" "CLIFM Manual"
+.TH "CLIFM" "1" "Oct 24, 2024" "clifm 1.21.9" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -414,6 +414,9 @@ time/date style used in long view. Available styles: \fBdefault\fR, \fBrelative\
 .TP
 \fB\-\-trash\-as\-rm\fR
 the \fIr\fR command executes the built-in \'trash\' (see the \fIt\fR command) instead of \fBrm\fR(1) to prevent accidental deletions
+.TP
+\fB\-\-unicode\fR
+Unicode decorations are used provided Unicode support is detected for the running terminal. Use this option to force Unicode decorations.
 .TP
 \fB\-\-virtual\-dir\fR=\fI\,PATH\/\fR
 use PATH as CliFM\'s virtual directory
