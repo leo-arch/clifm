@@ -151,6 +151,7 @@ _clifm ()
         --stdtab
         --time-style
         --trash-as-rm
+        --unicode
         --virtual-dir
         --virtual-dir-full-paths
         --vt100

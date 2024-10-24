@@ -114,6 +114,7 @@ args=(
 	'--stdtab[use standard TAB completion]'
 	'--time-style=[time/date style used in long view]:style:->styles'
 	'--trash-as-rm[the '\''r'\'' command executes '\''trash'\'' instead of '\''rm'\'']'
+	'--unicode[force the use of Unicode decorations]'
 	'--virtual-dir=[use PATH as CliFM virtual directory]:directory:_directories'
 	'--virtual-dir-full-paths[print full path file names in virtual directories]'
 	'--vt100[run in VT100 compatibility mode]'
