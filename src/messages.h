@@ -1441,6 +1441,8 @@ PropFields in the config file)\
 \n      --time-style=STYLE\t Time/date style used in long view (see TimeStyle in the config file)\
 \n      --trash-as-rm\t\t The 'r' command executes 'trash' instead of \
 rm(1) to prevent accidental deletions\
+\n      --unicode\t\t\t Unicode decorations are used if Unicode support is detected. \
+Use this option to force Unicode decorations.\
 \n      --virtual-dir-full-paths\t Files in virtual directories are listed as full paths instead of target base names\
 \n      --virtual-dir=PATH\t Absolute path to a directory to be used as virtual directory\
 \n      --vt100\t\t\t Run in vt100 compatibility mode\n"

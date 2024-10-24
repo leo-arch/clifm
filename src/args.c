@@ -154,6 +154,7 @@
 #define LOPT_COLOR_LNK_AS_TARGET    278
 #define LOPT_PAGER_VIEW             279
 #define LOPT_NO_UNICODE             280
+#define LOPT_UNICODE                281
 
 /* Link long (--option) and short options (-o) for the getopt_long function. */
 static struct option const longopts[] = {
@@ -274,6 +275,7 @@ static struct option const longopts[] = {
 	{"stat-full", required_argument, 0, LOPT_STAT_FULL},
 	{"stdtab", no_argument, 0, LOPT_STDTAB},
 	{"time-style", required_argument, 0, LOPT_TIME_STYLE},
+	{"unicode", no_argument, 0, LOPT_UNICODE},
 	{"virtual-dir", required_argument, 0, LOPT_VIRTUAL_DIR},
 	{"virtual-dir-full-paths", no_argument, 0, LOPT_VIRTUAL_DIR_FULL_PATHS},
 	{"vt100", no_argument, 0, LOPT_VT100},
@@ -1725,6 +1727,8 @@ parse_cmdline_args(const int argc, char **argv)
 		case LOPT_TIME_STYLE: xset_time_style(optarg, 0); break;
 		case LOPT_TRASH_AS_RM:
 			set_trash_as_rm(); break;
+		case LOPT_UNICODE:
+			xargs.unicode = 1; break;
 		case LOPT_VIRTUAL_DIR:
 			set_virtual_dir(optarg, "--virtual-dir"); break;
 		case LOPT_VIRTUAL_DIR_FULL_PATHS:
