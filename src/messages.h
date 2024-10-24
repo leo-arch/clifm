@@ -1145,10 +1145,8 @@ Note: Use the 'trash' command to trash files. Try 'trash --help'."
 
 #define VV_USAGE "Copy files into a directory and bulk rename them at once\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  vv FILE... [DIR]\n\n\
+  vv FILE... DIR\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
-- Copy selected files into the current directory and rename them\n\
-    vv sel\n\
 - Copy selected files into 'mydir' and rename them\n\
     vv sel mydir\n\
 - Copy all PDF files into the directory whose ELN is 4 and rename them\n\
@@ -1313,6 +1311,7 @@ c: Stop paging (printing remaining files)\n"
 \n -t NAME  Use the color scheme NAME\
 \n -T       Do not trim file names\
 \n -u       Run in disk usage analyzer mode\
+\n -U       Disable Unicode decorations\
 \n -v       Print version information and exit\
 \n -V DIR   Set a custom virtual directory\
 \n -w NUM   Start in workspace NUM (1-8)\
@@ -1409,7 +1408,7 @@ and paths\
 \n      --no-suggestions\t\t Disable auto-suggestions\
 \n      --no-tips\t\t\t Disable startup tips\
 \n      --no-trim-names\t\t Do not trim file names\
-\n      --no-unicode\t\t Do not use Unicode characters\
+\n      --no-unicode\t\t Disable Unicode decorations\
 \n      --no-warning-prompt\t Disable the warning prompt\
 \n      --no-welcome-message\t Disable the welcome message\
 \n      --only-dirs\t\t List only directories and symbolic links to directories\

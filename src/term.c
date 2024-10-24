@@ -350,14 +350,7 @@ set_term_caps(const int i)
 		term_caps.color = true_color == 1 ? TRUE_COLOR : 0;
 		if (term_caps.color <= 8)
 			memset(dim_c, '\0', sizeof(dim_c));
-		term_caps.suggestions = 0;
-		term_caps.pager = 0;
-		term_caps.hide_cursor = 0;
-		term_caps.home = 0;
-		term_caps.clear = 0;
-		term_caps.del_scrollback = 0;
-		term_caps.req_cur_pos = 0;
-		term_caps.req_dev_attrs = 0;
+		/* All fields of the term_caps struct are already set to zero */
 		return;
 	}
 
@@ -462,7 +455,8 @@ check_term(void)
 
 	check_img_support();
 
-	if (xargs.no_unicode != 1 && term_caps.req_cur_pos == 1
-	&& check_unicode_support() == 1)
+	/* At this point, term_caps.unicode is zero */
+	if (xargs.unicode == 1 || (xargs.unicode == UNSET
+	&& term_caps.req_cur_pos == 1 && check_unicode_support() == 1))
 		term_caps.unicode = 1;
 }

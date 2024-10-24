@@ -1472,7 +1472,6 @@ struct param_t {
 	int no_bold;
 	int no_dirjump;
 	int no_eln;
-	int no_unicode;
 	int only_dirs;
 	int open;
 	int pager;
@@ -1509,6 +1508,7 @@ struct param_t {
 	int trasrm;
 #endif /* !_NO_TRASH */
 	int trim_names;
+	int unicode;
 	int virtual_dir_full_paths;
 	int vt100;
 	int welcome_message;

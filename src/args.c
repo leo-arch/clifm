@@ -61,7 +61,7 @@
 #endif /* CLIFM_DATADIR */
 
 #ifdef _BE_POSIX
-# define OPTSTRING ":aAb:B:c:CdDeEfFgGhHiI:j:J:k:lLmMnNo:O:p:P:qQrRsSt:TuvV:w:WxXyYz:Z"
+# define OPTSTRING ":aAb:B:c:CdDeEfFgGhHiI:j:J:k:lLmMnNo:O:p:P:qQrRsSt:TuUvV:w:WxXyYz:Z"
 #else
 # ifdef RUN_CMD
 #  define OPTSTRING "+:aAb:c:C:D:eEfFgGhHiIk:lLmoOp:P:rsStT:vw:xyz:"
@@ -1407,6 +1407,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case 't': set_color_scheme(optarg, "-t"); break;
 		case 'T': xargs.trim_names = conf.trim_names = 0; break;
 		case 'u': xargs.disk_usage_analyzer = 1; break;
+		case 'U': xargs.unicode = 0; break;
 		case 'v': version_function(0); break; /* noreturn */
 		case 'V': set_virtual_dir(optarg, "-V"); break;
 		case 'w': set_workspace(optarg); break;
@@ -1649,7 +1650,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case LOPT_NO_TRIM_NAMES:
 			xargs.trim_names = conf.trim_names = 0; break;
 		case LOPT_NO_UNICODE:
-			xargs.no_unicode = 1; break;
+			xargs.unicode = 0; break;
 		case LOPT_NO_WARNING_PROMPT:
 			xargs.warning_prompt = conf.warning_prompt = 0; break;
 		case LOPT_NO_WELCOME_MESSAGE:
