@@ -1428,6 +1428,19 @@ vv_rename_files(char **args, const size_t copied)
 }
 
 static int
+vv_create_new_dir(const char *dir)
+{
+	fprintf(stderr, _("vv: '%s': directory does not exist.\n"), dir);
+	if (rl_get_y_or_n(_("Create it? [y/n] ")) == 0)
+		return (-1);
+
+	char tmp[PATH_MAX + 1];
+	snprintf(tmp, sizeof(tmp), "%s/", dir);
+
+	return create_file(tmp, 1);
+}
+
+static int
 validate_vv_dest_dir(const char *file)
 {
 	if (args_n == 0) {
@@ -1438,10 +1451,7 @@ validate_vv_dest_dir(const char *file)
 	struct stat a;
 	if (stat(file, &a) == -1) {
 		if (errno == ENOENT) {
-			fprintf(stderr, _("'%s': directory does not exist.\n"), file);
-			if (rl_get_y_or_n(_("Create it? [y/n] ")) == 0)
-				return (-1);
-			return xmkdir(file, 0700);
+			return vv_create_new_dir(file);
 		} else {
 			xerror("vv: '%s': %s\n", file, strerror(errno));
 			return FUNC_FAILURE;
