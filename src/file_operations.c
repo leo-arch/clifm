@@ -1378,7 +1378,7 @@ symlink_file(char **args)
 }
 
 static int
-vv_rename_files(char **args)
+vv_rename_files(char **args, const size_t copied)
 {
 	char **tmp = xnmalloc(args_n + 2, sizeof(char *));
 	tmp[0] = savestring("br", 2);
@@ -1388,9 +1388,10 @@ vv_rename_files(char **args)
 	if (l > 0 && args[args_n][l - 1] == '/')
 		args[args_n][l - 1] = '\0';
 
-	char *dest = args[args_n];
+	char *dest = sel_is_last == 1 ? "." : args[args_n];
+	const size_t n = args_n + (sel_is_last == 1);
 
-	for (i = 1; i < args_n && args[i]; i++) {
+	for (i = 1; i < n && args[i]; i++) {
 		l = strlen(args[i]);
 		if (l > 0 && args[i][l - 1] == '/')
 			args[i][l - 1] = '\0';
@@ -1404,7 +1405,20 @@ vv_rename_files(char **args)
 	}
 
 	tmp[c] = (char *)NULL;
-	const int ret = bulk_rename(tmp);
+
+	size_t renamed = 0;
+	const int ret = bulk_rename(tmp, &renamed, 0);
+
+	if (conf.autols == 1)
+		reload_dirlist();
+
+	print_reload_msg(SET_SUCCESS_PTR, xs_c, "%zu file(s) copied\n", copied);
+	if (renamed > 0) {
+		print_reload_msg(SET_SUCCESS_PTR, xs_c,
+			"%zu file(s) renamed\n", renamed);
+	} else {
+		print_reload_msg(NULL, NULL, "%zu file(s) renamed\n", renamed);
+	}
 
 	for (i = 0; tmp[i]; i++)
 		free(tmp[i]);
@@ -1418,22 +1432,24 @@ validate_vv_dest_dir(const char *file)
 {
 	if (args_n == 0) {
 		fprintf(stderr, "%s\n", VV_USAGE);
-		return FUNC_FAILURE;
+		return (-1);
 	}
 
 	struct stat a;
 	if (stat(file, &a) == -1) {
-		xerror("vv: '%s': %s\n", file, strerror(errno));
-		return FUNC_FAILURE;
+		if (errno == ENOENT) {
+			fprintf(stderr, _("'%s': directory does not exist.\n"), file);
+			if (rl_get_y_or_n(_("Create it? [y/n] ")) == 0)
+				return (-1);
+			return xmkdir(file, 0700);
+		} else {
+			xerror("vv: '%s': %s\n", file, strerror(errno));
+			return FUNC_FAILURE;
+		}
 	}
 
-	if (!S_ISDIR(a.st_mode)) {
+	if (!S_ISDIR(a.st_mode) && sel_is_last == 0) {
 		xerror("vv: '%s': %s\n", file, strerror(ENOTDIR));
-		return FUNC_FAILURE;
-	}
-
-	if (strcmp(workspaces[cur_ws].path, file) == 0) {
-		xerror("%s\n", _("vv: Destiny directory is the current directory"));
 		return FUNC_FAILURE;
 	}
 
@@ -1628,10 +1644,12 @@ run_cp_mv_cmd(char **cmd, const int skip_force)
 int
 cp_mv_file(char **args, const int copy_and_rename, const int force)
 {
+	int ret = 0;
+
 	/* vv command */
 	if (copy_and_rename == 1
-	&& validate_vv_dest_dir(args[args_n]) == FUNC_FAILURE)
-		return FUNC_FAILURE;
+	&& (ret = validate_vv_dest_dir(args[args_n])) != FUNC_SUCCESS)
+		return ret == -1 ? FUNC_SUCCESS : FUNC_FAILURE;
 
 	if (*args[0] == 'm' && args[1]) {
 		const size_t len = strlen(args[1]);
@@ -1679,7 +1697,7 @@ cp_mv_file(char **args, const int copy_and_rename, const int force)
 
 	tcmd[n] = (char *)NULL;
 
-	const int ret = launch_execv(tcmd, FOREGROUND, E_NOFLAG);
+	ret = launch_execv(tcmd, FOREGROUND, E_NOFLAG);
 
 	for (i = 0; tcmd[i]; i++)
 		free(tcmd[i]);
@@ -1689,7 +1707,7 @@ cp_mv_file(char **args, const int copy_and_rename, const int force)
 		return ret;
 
 	if (copy_and_rename == 1) /* vv command */
-		return vv_rename_files(args);
+		return vv_rename_files(args, args_n - (sel_is_last == 0));
 
 	/* If 'mv sel' and command is successful deselect everything,
 	 * since sel files are not there anymore. */

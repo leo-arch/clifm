@@ -27,7 +27,7 @@
 
 __BEGIN_DECLS
 
-int bulk_rename(char **args);
+int bulk_rename(char **args, size_t *renamed, const size_t reload_list);
 
 __END_DECLS
 

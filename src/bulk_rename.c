@@ -48,7 +48,7 @@
 #include "readline.h" /* rl_get_y_or_n() */
 #include "spawn.h" /* launch_execv() */
 
-#define BULK_RENAME_TMP_FILE_HEADER "# CliFM - Rename files in bulk\n\
+#define BULK_RENAME_TMP_FILE_HEADER "# Clifm - Rename files in bulk\n\
 # Edit file names, save, and quit the editor (you will be\n\
 # asked for confirmation).\n\
 # Quit the editor without saving to cancel the operation.\n\n"
@@ -384,16 +384,24 @@ check_dups(FILE *fp)
 	return 0;
 }
 
-/* Rename a bulk of files (ARGS) at once. Takes files to be renamed
- * as arguments, and returns zero on success and one on error. The
- * procedure is quite simple: file names to be renamed are copied into
- * a temporary file, which is opened via the mime function and shown
- * to the user to modify it. Once the file names have been modified and
- * saved, modifications are printed on the screen and the user is
- * asked whether to perform the actual bulk renaming or not. */
+/* Rename a bulk of files (ARGS) at once.
+ * Takes files to be renamed as arguments, and returns zero on success or one
+ * on error.
+ *
+ * RENAMED is updated to the number of renamed files.
+ * If reload_list is set to 1, the list of files is reload and a summary
+ * message is displayed.
+ *
+ * The procedure is simple: file names to be renamed are copied into a
+ * temporary file, which is opened via the mime function and shown to
+ * the user to modify it. Once the file names have been modified and saved,
+ * modifications are printed on the screen and the user is asked wehther to
+ * perform the actual bulk renaming or not. */
 int
-bulk_rename(char **args)
+bulk_rename(char **args, size_t *renamed, const size_t reload_list)
 {
+	*renamed = 0;
+
 	if (virtual_dir == 1) {
 		xerror(_("%s: br: Feature not allowed in virtual "
 			"directories\n"), PROGRAM_NAME);
@@ -479,10 +487,9 @@ bulk_rename(char **args)
 	}
 
 	int is_cwd = 0;
-	size_t renamed = 0;
 
 	if ((ret = rename_bulk_files(args, fp, &is_cwd,
-	&renamed, modified)) != FUNC_SUCCESS)
+	renamed, modified)) != FUNC_SUCCESS)
 		exit_status = ret;
 
 	/* Clean stuff, report, and exit. */
@@ -498,10 +505,14 @@ bulk_rename(char **args)
 		/* Just in case a selected file in the current dir was renamed. */
 		get_sel_files();
 
-	if (renamed > 0 && is_cwd == 1 && conf.autols == 1)
+	if (reload_list == 0)
+		return exit_status;
+
+	if (*renamed > 0 && is_cwd == 1 && conf.autols == 1)
 		reload_dirlist();
 
-	print_reload_msg(SET_SUCCESS_PTR, xs_c, _("%zu file(s) renamed\n"), renamed);
+	print_reload_msg(SET_SUCCESS_PTR, xs_c,
+		_("%zu file(s) renamed\n"), *renamed);
 
 	return exit_status;
 

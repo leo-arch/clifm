@@ -2386,8 +2386,10 @@ exec_cmd(char **comm)
 
 	/*    ############### BULK RENAME ##################     */
 	else if (*comm[0] == 'b' && ((comm[0][1] == 'r' && !comm[0][2])
-	|| strcmp(comm[0], "bulk") == 0))
-		exit_code = bulk_rename(comm);
+	|| strcmp(comm[0], "bulk") == 0)) {
+		size_t renamed = 0;
+		exit_code = bulk_rename(comm, &renamed, 1);
+	}
 
 	/*      ################ SORT ##################     */
 	else if (*comm[0] == 's' && ((comm[0][1] == 't' && !comm[0][2])

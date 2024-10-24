@@ -1145,12 +1145,15 @@ Note: Use the 'trash' command to trash files. Try 'trash --help'."
 
 #define VV_USAGE "Copy files into a directory and bulk rename them at once\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  vv FILE... DIR\n\n\
+  vv FILE... [DIR]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
+- Copy selected files into the current directory and rename them\n\
+    vv sel\n\
 - Copy selected files into 'mydir' and rename them\n\
     vv sel mydir\n\
 - Copy all PDF files into the directory whose ELN is 4 and rename them\n\
-    vv *.pdf 4"
+    vv *.pdf 4\n\n\
+Note: If DIR does not exist, it will be created"
 
 #define VIEW_USAGE "Preview files in the current directory (requires fzf)\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
