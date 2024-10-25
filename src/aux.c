@@ -470,11 +470,15 @@ get_cwd(char *buf, const size_t buflen, const int check_workspace)
 	return tmp;
 }
 
-/* OpenBSD implementation of memrchr(), licensed MIT.
- * Modified code is licensed GPL2+. */
-static const void *
+void *
 xmemrchr(const void *s, const int c, size_t n)
 {
+#if defined(__GLIBC__) || defined(__FreeBSD__) || defined(__OpenBSD__) \
+|| defined(__NetBSD__)
+	return memrchr(s, c, n);
+#else
+	/* OpenBSD implementation of memrchr(), licensed MIT.
+	 * Modified code is licensed GPL2+. */
 	const unsigned char *cp;
 
 	if (n != 0) {
@@ -486,6 +490,7 @@ xmemrchr(const void *s, const int c, size_t n)
 	}
 
 	return (NULL);
+#endif /* __GLIBC__ || BSD */
 }
 
 /* Canonicalize/normalize the path SRC without resolving symlinks.

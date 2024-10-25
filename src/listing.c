@@ -1139,7 +1139,7 @@ static size_t
 get_ext_info(const filesn_t i, int *trim_type)
 {
 	if (!file_info[i].ext_name) {
-		char *dot = strrchr(file_info[i].name, '.');
+		char *dot = xmemrchr(file_info[i].name, '.', file_info[i].bytes);
 		if (!dot || dot == file_info[i].name || !dot[1])
 			return 0;
 
@@ -2894,7 +2894,7 @@ load_regfile_info(const struct stat *a, const filesn_t n)
 
 	/* Check file extension */
 	char *ext = (override_color == 1 && conf.check_ext == 1)
-		? strrchr(file_info[n].name, '.') : (char *)NULL;
+		? xmemrchr(file_info[n].name, '.', file_info[n].bytes) : (char *)NULL;
 
 	if (!ext || ext == file_info[n].name || !*(ext + 1))
 		return;
