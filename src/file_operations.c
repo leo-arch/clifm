@@ -1039,6 +1039,12 @@ get_new_link_target(char *cur_target)
 			return (char *)NULL;
 	}
 
+	char *tmp = (char *)NULL;
+	if (*new_target == '~' && (tmp = tilde_expand(new_target))) {
+		free(new_target);
+		new_target = tmp;
+	}
+
 	size_t l = strlen(new_target);
 	if (l > 0 && new_target[l - 1] == ' ') {
 		l--;
