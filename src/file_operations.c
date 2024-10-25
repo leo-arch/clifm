@@ -1057,7 +1057,7 @@ get_new_link_target(char *cur_target)
 static void
 print_current_target(char *target)
 {
-	fputs(_("Current target -> "), stdout);
+	printf(_("Current target %s%s%s "), dn_c, SET_MSG_PTR, df_c);
 
 	struct stat a;
 	if (lstat(target, &a) != -1) {
