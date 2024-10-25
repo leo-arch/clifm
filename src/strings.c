@@ -1278,7 +1278,6 @@ check_shell_functions(const char *str)
 		"if ", "if(",
 		"[ ", "[[ ", "test ",
 		"case ", "case(",
-		"echo ", "printf ",
 		"declare ",
 		"(( ",
 		"set ",
