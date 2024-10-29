@@ -983,6 +983,7 @@ reset_iface_colors(void)
 	*xf_c = '\0';
 	*xf_cb = '\0';
 	*xs_c = '\0';
+	*xs_cb = '\0';
 
 	*ws1_c = '\0';
 	*ws2_c = '\0';
@@ -1581,8 +1582,10 @@ set_iface_colors(char **colors, const size_t num_colors)
 		}
 
 		else if (*colors[i] == 'x' && colors[i][1] && colors[i][2] == '=') {
-			if (colors[i][1] == 's')
+			if (colors[i][1] == 's') {
 				set_color(colors[i] + 3, xs_c, RL_NO_PRINTABLE);
+				set_color(colors[i] + 3, xs_cb, RL_PRINTABLE);
+			}
 			else if (colors[i][1] == 'f') {
 				set_color(colors[i] + 3, xf_c, RL_NO_PRINTABLE);
 				set_color(colors[i] + 3, xf_cb, RL_PRINTABLE);
@@ -1938,6 +1941,8 @@ set_default_colors(void)
 	if (!*ws7_c) xstrsncpy(ws7_c, CVAR(WS7), sizeof(ws7_c));
 	if (!*ws8_c) xstrsncpy(ws8_c, CVAR(WS8), sizeof(ws8_c));
 	if (!*xs_c) xstrsncpy(xs_c, CVAR(XS), sizeof(xs_c));
+	if (!*xf_cb) xstrsncpy(xf_cb, term_caps.color >= 256
+		? DEF_XS_CB256 : DEF_XS_CB, sizeof(xs_cb)); /* NOLINT */
 	if (!*xf_c) xstrsncpy(xf_c, CVAR(XF), sizeof(xf_c));
 	if (!*xf_cb) xstrsncpy(xf_cb, term_caps.color >= 256
 		? DEF_XF_CB256 : DEF_XF_CB, sizeof(xf_cb)); /* NOLINT */
@@ -2690,6 +2695,7 @@ disable_bold(void)
 	remove_bold_attr(ti_c);
 	remove_bold_attr(tx_c);
 	remove_bold_attr(xs_c);
+	remove_bold_attr(xs_cb);
 	remove_bold_attr(xf_c);
 	remove_bold_attr(xf_cb);
 
@@ -3317,10 +3323,10 @@ print_prompt_colors(void)
 	char *p = remove_ctrl_chars(ti_c);
 	printf(_("%sColor%s (ti) Trashed files indicator (%sT%s)\n"), p,
 		df_c, p, df_c);
-	p = remove_ctrl_chars(xs_c);
+	p = remove_ctrl_chars(xs_cb);
 	printf(_("%sColor%s (xs) Success exit code (<%s0%s>)\n"),
 		p, df_c, p, df_c);
-	p = remove_ctrl_chars(xf_c);
+	p = remove_ctrl_chars(xf_cb);
 	printf(_("%sColor%s (xf) Error exit code (e.g. <%s1%s>)\n"),
 		p, df_c, p, df_c);
 	p = remove_ctrl_chars(nm_c);

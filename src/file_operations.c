@@ -491,7 +491,7 @@ list_created_files(char **nfiles, const filesn_t nfiles_n)
 			free(f);
 	}
 
-	print_reload_msg(SET_SUCCESS_PTR, xs_c, _("%zu file(s) created\n"),
+	print_reload_msg(SET_SUCCESS_PTR, xs_cb, _("%zu file(s) created\n"),
 		(size_t)nfiles_n);
 }
 
@@ -1418,9 +1418,9 @@ vv_rename_files(char **args, const size_t copied)
 	if (conf.autols == 1)
 		reload_dirlist();
 
-	print_reload_msg(SET_SUCCESS_PTR, xs_c, "%zu file(s) copied\n", copied);
+	print_reload_msg(SET_SUCCESS_PTR, xs_cb, "%zu file(s) copied\n", copied);
 	if (renamed > 0) {
-		print_reload_msg(SET_SUCCESS_PTR, xs_c,
+		print_reload_msg(SET_SUCCESS_PTR, xs_cb,
 			"%zu file(s) renamed\n", renamed);
 	} else {
 		print_reload_msg(NULL, NULL, "%zu file(s) renamed\n", renamed);
@@ -1781,7 +1781,7 @@ list_removed_files(struct rm_info *info, const size_t start,
 		print_removed_file_info(info[i]);
 	}
 
-	print_reload_msg(SET_SUCCESS_PTR, xs_c, _("%zu file(s) removed\n"), c);
+	print_reload_msg(SET_SUCCESS_PTR, xs_cb, _("%zu file(s) removed\n"), c);
 }
 
 /* Print files to be removed and ask the user for confirmation.
@@ -2090,7 +2090,7 @@ batch_link(char **args)
 			press_any_key_to_continue(0);
 		reload_dirlist();
 	}
-	print_reload_msg(SET_SUCCESS_PTR, xs_c,
+	print_reload_msg(SET_SUCCESS_PTR, xs_cb,
 		_("%zu symbolic link(s) created\n"), symlinked);
 
 	return exit_status;

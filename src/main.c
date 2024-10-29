@@ -419,6 +419,7 @@ char
 	ti_c[MAX_COLOR + 2], /* Trash indicator color */
 	tx_c[MAX_COLOR + 2], /* Text color */
 	xs_c[MAX_COLOR + 2], /* Exit code: success */
+	xs_cb[MAX_COLOR],    /* Exit code: success (Unicode success indicator) */
 	xf_c[MAX_COLOR + 2], /* Exit code: failure */
 	xf_cb[MAX_COLOR],    /* Exit code: failure (dir read) */
 

@@ -882,7 +882,7 @@ toggle_exec_func(char **args)
 		if (conf.autols == 1 && exit_status == FUNC_SUCCESS)
 			reload_dirlist();
 
-		print_reload_msg(SET_SUCCESS_PTR, xs_c,
+		print_reload_msg(SET_SUCCESS_PTR, xs_cb,
 			_("Toggled executable bit on %zu %s\n"),
 			n, n > 1 ? _("files") : _("file"));
 	}

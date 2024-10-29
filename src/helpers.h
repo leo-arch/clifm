@@ -896,7 +896,7 @@ extern time_t curdir_mtime;
 #define FULL_STAT   2
 
 /* Length to be added to a filename length if icons are enabled. */
-#define ICON_LEN 3
+#define ICON_LEN (2 + 1) /* Icon width + space */
 
 /* Macros for alternative prompts (alt_prompt) */
 #define FILES_PROMPT       1 /* Allow files names completion */
@@ -2111,6 +2111,7 @@ extern char
 	si_c[MAX_COLOR + 2], /* Stealth indicator */
 	wm_c[MAX_COLOR + 2], /* Warning msg */
 	xs_c[MAX_COLOR + 2], /* Exit code: success */
+	xs_cb[MAX_COLOR],    /* Exit code: success (Unicode success indicator) */
 	xf_c[MAX_COLOR + 2], /* Exit code: failure */
 	xf_cb[MAX_COLOR],    /* Exit code: failure (dir read) */
 

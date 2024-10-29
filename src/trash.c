@@ -88,10 +88,10 @@ print_removal_result(const size_t n)
 	const size_t cur = (n <= trash_n ? (trash_n - n) : 0);
 
 	if (cur == 0) {
-		print_reload_msg(SET_SUCCESS_PTR, xs_c,
+		print_reload_msg(SET_SUCCESS_PTR, xs_cb,
 			_("Trash can emptied: %zu file(s) removed\n"), n);
 	} else {
-		print_reload_msg(SET_SUCCESS_PTR, xs_c,
+		print_reload_msg(SET_SUCCESS_PTR, xs_cb,
 			_("%zu file(s) removed from the trash can\n"), n);
 		print_reload_msg(NULL, NULL, _("%zu total trashed file(s)\n"), cur);
 	}
@@ -794,7 +794,7 @@ untrash_all(struct dirent ***tfiles, const int tfiles_n, const int free_files)
 		if (conf.autols == 1) reload_dirlist();
 
 		const size_t n = count_trashed_files();
-		print_reload_msg(SET_SUCCESS_PTR, xs_c,
+		print_reload_msg(SET_SUCCESS_PTR, xs_cb,
 			_("%zu file(s) restored\n"), untrashed);
 		print_reload_msg(NULL, NULL, _("%zu total trashed file(s)\n"), n);
 	}
@@ -827,7 +827,7 @@ untrash_files(char **args)
 		if (conf.autols == 1) reload_dirlist();
 
 		const size_t n = count_trashed_files();
-		print_reload_msg(SET_SUCCESS_PTR, xs_c,
+		print_reload_msg(SET_SUCCESS_PTR, xs_cb,
 			_("%zu file(s) restored\n"), untrashed);
 		print_reload_msg(NULL, NULL, _("%zu total trashed file(s)\n"), n);
 	}
@@ -1207,7 +1207,7 @@ trash_files_args(char **args)
 
 PRINT_TRASHED:
 	list_ok_trashed_files(args, successfully_trashed, n);
-	print_reload_msg(SET_SUCCESS_PTR, xs_c,
+	print_reload_msg(SET_SUCCESS_PTR, xs_cb,
 		_("%zu file(s) trashed\n"), trashed_files);
 	print_reload_msg(NULL, NULL, _("%zu total trashed file(s)\n"),
 		trash_n + trashed_files);

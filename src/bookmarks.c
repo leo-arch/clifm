@@ -745,7 +745,7 @@ del_bookmarks(char **args)
 
 	if (removed > 0) {
 		if (rename(tmp_file, bm_file) == 0) {
-			print_reload_msg(SET_SUCCESS_PTR, xs_c,
+			print_reload_msg(SET_SUCCESS_PTR, xs_cb,
 				_("Removed %zu bookmark(s)\n"), removed);
 		} else {
 			xerror(_("bookmarks: Error updating bookmarks\nCannot rename "
