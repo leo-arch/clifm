@@ -336,8 +336,8 @@ should_expand_eln(const char *text, char *cmd_name)
 	if (!l || !*l || *text == '0' || !is_number(text))
 		return 0;
 
-	/* Exclude 'ws' and 'st/sort' commands. */
-	if ((*l == 'w' && l[1] == 's' && !l[2])
+	/* Exclude 'ws', 'mf', and 'st/sort' commands. */
+	if ((*l == 'w' && l[1] == 's' && !l[2]) || (*l == 'm' && l[1] == 'f' && !l[2])
 	|| (*l == 's' && ((l[1] == 't' && !l[2]) || strcmp(l + 1, "ort") == 0)))
 		return 0;
 
