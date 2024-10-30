@@ -586,9 +586,6 @@ compile_filter(void)
 	if (conf.autols == 1)
 		reload_dirlist();
 
-	print_reload_msg(NULL, NULL, _("%s%s: New filter set\n"),
-		filter.rev == 1 ? "!" : "", filter.str);
-
 	return FUNC_SUCCESS;
 
 ERR:

@@ -678,6 +678,10 @@ post_listing(DIR *dir, const int reset_pager, const filesn_t excluded_files)
 		print_reload_msg(NULL, NULL, _("Showing %jd/%jd files\n"),
 			(intmax_t)files, (intmax_t)(files + excluded_files));
 
+	if (filter.str && *filter.str)
+		print_reload_msg(NULL, NULL, _("Active filter: %s%s%s%s\n"),
+			BOLD, filter.rev == 1 ? "!" : "", filter.str, df_c);
+
 	if (conf.print_dir_cmds == 1 && dir_cmds.first_cmd_in_dir != UNSET)
 		print_dir_cmds();
 
