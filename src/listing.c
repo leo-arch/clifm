@@ -111,6 +111,10 @@
 
 #define ENTRY_N 64
 
+#ifdef TIGHT_COLUMNS
+# define COLUMNS_GAP 2
+#endif
+
 /* Information about the longest file name in the curent list of files. */
 struct longest_t {
 	size_t fc_len;   /* Length of the files counter (if a directory). */
@@ -803,8 +807,27 @@ set_events_checker(void)
 #endif /* LINUX_INOTIFY */
 }
 
+static int
+has_file_type_char(const filesn_t i)
+{
+	switch (file_info[i].type) {
+	case DT_REG:  return (file_info[i].exec == 1);
+	case DT_BLK:  /* fallthrough */
+	case DT_CHR:  /* fallthrough */
+#ifdef SOLARIS_DOORS
+	case DT_DOOR: /* fallthrough */
+	case DT_PORT: /* fallthrough */
+#endif /* SOLARIS_DOORS */
+	case DT_LNK:  /* fallthrough */
+	case DT_SOCK: /* fallthrough */
+	case DT_FIFO: /* fallthrough */
+	case DT_UNKNOWN: return 1;
+	default: return 0;
+	}
+}
+
 static void
-get_longest_filename(const filesn_t n, const size_t pad)
+get_longest_filename(const filesn_t n, const size_t eln_len)
 {
 	const filesn_t c_max_files = (filesn_t)conf.max_files;
 	filesn_t i = (conf.max_files != UNSET && c_max_files < n) ? c_max_files : n;
@@ -828,33 +851,15 @@ get_longest_filename(const filesn_t n, const size_t pad)
 		if (file_len > max)
 			file_len = max;
 
-		total_len = pad + 1 + file_len;
+		total_len = eln_len + 1 + file_len;
 
 		if (checks.classify == 1) {
 			if (file_info[i].filesn > 0 && conf.files_counter == 1)
 				total_len += DIGINUM(file_info[i].filesn);
 
-			if (file_info[i].dir == 1) {
+			if (file_info[i].dir == 1 || (conf.colorize == 0
+			&& has_file_type_char(i)))
 				total_len++;
-			} else if (conf.colorize == 0) {
-				switch (file_info[i].type) {
-				case DT_REG:
-					if (file_info[i].exec == 1)
-						total_len++;
-					break;
-				case DT_BLK:  /* fallthrough */
-				case DT_CHR:  /* fallthrough */
-#ifdef SOLARIS_DOORS
-				case DT_DOOR: /* fallthrough */
-				case DT_PORT: /* fallthrough */
-#endif /* SOLARIS_DOORS */
-				case DT_LNK:  /* fallthrough */
-				case DT_SOCK: /* fallthrough */
-				case DT_FIFO: /* fallthrough */
-				case DT_UNKNOWN: total_len++; break;
-				default: break;
-				}
-			}
 		}
 
 		if (total_len > longest.name_len) {
@@ -880,22 +885,13 @@ get_longest_filename(const filesn_t n, const size_t pad)
 	 *    very_long_file_~
 	 * */
 
-//	const int tight = 0;
-//	longest.name_len += (tight == 0);
-
 	longest.fc_len = 0;
 	if (conf.max_name_len != UNSET && longest_index != -1
 	&& file_info[longest_index].dir == 1
 	&& file_info[longest_index].filesn > 0 && conf.files_counter == 1) {
-		/* We add 1 here to count the slash between the dir name
-		 * and the files counter too. However, in doing this the space
-		 * between the trimmed file name and the next column is too
-		 * tight (only one). By not adding it we get an extra space
-		 * to relax a bit the space between columns. */
-/*		longest.fc_len = DIGINUM(file_info[longest_index].filesn) + 1; */
-		longest.fc_len = DIGINUM(file_info[longest_index].filesn);
-//		longest.fc_len = DIGINUM(file_info[longest_index].filesn) + 1;
-		const size_t t = pad + (size_t)conf.max_name_len + 1 + longest.fc_len;
+		longest.fc_len = DIGINUM(file_info[longest_index].filesn) + 1;
+		const size_t t = eln_len + (size_t)conf.max_name_len
+			+ 1 + longest.fc_len;
 		if (t > longest.name_len)
 			longest.fc_len -= t - longest.name_len;
 		if ((int)longest.fc_len < 0)
@@ -1116,11 +1112,18 @@ print_long_mode(size_t *counter, int *reset_pager, const int eln_len,
 		printf("... (%zd/%zd)\n", i, files);
 }
 
+/* Return the minimal amount of columns we can use for the current list
+ * of files. If possible, this number will be increased later by the
+ * get_longest_per_col() function. */
 static size_t
 get_columns(void)
 {
 	/* LONGEST.NAME_LEN is size_t: it will never be less than zero. */
+#ifdef TIGHT_COLUMNS
+	size_t n = (size_t)term_cols / (longest.name_len + COLUMNS_GAP);
+#else
 	size_t n = (size_t)term_cols / (longest.name_len + 1);
+#endif
 	/* +1 for the space between file names. */
 
 	/* If LONGEST.NAME_LEN is bigger than terminal columns, N will zero.
@@ -1627,6 +1630,158 @@ print_entry_nocolor_light(int *ind_char, const filesn_t i,
 	free(wtrim.wname);
 }
 
+#ifdef TIGHT_COLUMNS
+static int
+calc_item_length(const int eln_len, const int icon_len, const filesn_t i)
+{
+	size_t file_len = file_info[i].len;
+	if (file_len == 0) {
+		/* Invalid chars found. Reconstruct and recalculate length. */
+		char *wname = replace_invalid_chars(file_info[i].name);
+		file_len = wname ? wc_xstrlen(wname) : 0;
+		free(wname);
+	}
+
+	const size_t max_namelen = (size_t)conf.max_name_len
+		+ (file_info[i].dir != 1 ? longest.fc_len : 0);
+
+	const size_t name_len = (max_namelen > 0 && file_len > max_namelen)
+		? max_namelen : file_len;
+
+	int item_len = eln_len + 1 + (int)name_len + icon_len;
+
+	if (conf.classify != 1)
+		return item_len;
+
+	if (file_info[i].dir == 1) {
+		item_len++;
+		if (file_info[i].filesn > 0 && conf.files_counter == 1
+		&& file_info[i].ruser == 1)
+			item_len += DIGINUM((int)file_info[i].filesn);
+	} else if (conf.colorize == 0 && has_file_type_char(i) == 1) {
+		item_len++;
+	}
+
+	return item_len;
+}
+
+static size_t *
+get_longest_per_col(size_t *columns_n, filesn_t *rows, const filesn_t files_n)
+{
+	size_t used_cols = 0;
+	size_t longest_index = 0;
+
+	/* Make enough room to hold columns information. We'll never get more
+	 * columns for the current files list than the amount of terminal columns. */
+	size_t *longest_per_col = xnmalloc((size_t)term_cols + 1, sizeof(size_t));
+
+	/* Hold info about the previous columns state */
+	size_t *prev_longest_per_col = (size_t *)NULL;
+	filesn_t prev_rows = *rows;
+
+	const int longest_eln = conf.no_eln != 1 ? DIGINUM(files_n + 1) : 1;
+	const int icon_len = (conf.icons == 1 ? ICON_LEN : 0);
+
+#define LONGEST_PLUS_GAP (longest_per_col[longest_index] + COLUMNS_GAP)
+
+	while (1) {
+		/* Calculate the number of rows that will be in each column except
+		 * possibly for a short column on the right. */
+		*rows = files_n / (filesn_t)*columns_n
+			+ (files_n % (filesn_t)*columns_n != 0);
+
+		/* Get longest filename per column */
+		filesn_t i;
+		filesn_t counter = 1;
+		size_t longest_name_len = 0;
+
+		for (i = 0; i < files_n; i++) {
+			size_t len = 0;
+			if (file_info[i].total_entry_len > 0) {
+				len = file_info[i].total_entry_len;
+			} else {
+				len = file_info[i].total_entry_len =
+					(size_t)calc_item_length(longest_eln, icon_len, i);
+			}
+
+			if (len > longest_name_len)
+				longest_name_len = len;
+
+			if (counter == *rows) {
+				counter = 1;
+				longest_per_col[longest_index] = longest_name_len;
+				used_cols += LONGEST_PLUS_GAP;
+				longest_index++;
+				longest_name_len = 0;
+			} else {
+				counter++;
+			}
+		}
+
+		/* Count last column as well: If the number of files in the last
+		 * column is less than the amount of rows (in which case
+		 * LONGEST_NAME_LEN is bigger than zero), the longest name in this
+		 * column isn't taken into account: let's do it here. */
+		if (longest_name_len > 0) {
+			longest_per_col[longest_index] = longest_name_len;
+			used_cols += LONGEST_PLUS_GAP;
+		} else {
+			longest_index--;
+		}
+
+		const int rest = (int)term_cols - (int)used_cols;
+
+		if ((*rows == 1 && (filesn_t)*columns_n + 1 >= files_n)
+		|| rest < (int)LONGEST_PLUS_GAP) {
+			if (rest < 0 && *columns_n > 1) {
+				if (!prev_longest_per_col)
+					return longest_per_col;
+
+				(*columns_n)--;
+				*rows = prev_rows;
+				free(longest_per_col);
+				return prev_longest_per_col;
+			} else {
+				break;
+			}
+		}
+
+		/* Keep a copy of the current state, in case the next iteration
+		 * returns too many columns, in which case the current state is
+		 * what we want. */
+		prev_rows = *rows;
+		free(prev_longest_per_col);
+		prev_longest_per_col = xnmalloc(*columns_n + 1, sizeof(size_t));
+		memcpy(prev_longest_per_col, longest_per_col,
+			(*columns_n + 1) * sizeof(size_t));
+
+		/* There is space left for one more column: increase columns_n. */
+		(*columns_n)++;
+		longest_index = 0;
+		used_cols = 0;
+	}
+
+	free(prev_longest_per_col);
+	return longest_per_col;
+}
+
+static void
+pad_filename_new(const filesn_t i, const int termcap_move_right,
+	const size_t longest_in_col)
+{
+	const int diff = ((int)longest_in_col + COLUMNS_GAP)
+		- ((int)file_info[i].total_entry_len + (conf.no_eln == 1));
+
+	if (termcap_move_right == 0) {
+		int j = diff;
+		while (--j >= 0)
+			putchar(' ');
+	} else {
+		MOVE_CURSOR_RIGHT(diff);
+	}
+}
+#endif /* TIGHT_COLUMNS */
+
 /* Right pad the current file name (adding spaces) to equate the longest
  * file name length. */
 static void
@@ -1658,10 +1813,13 @@ pad_filename(const int ind_char, const filesn_t i, const int eln_len,
  * 4 AAD	5 AAE	6 AAF */
 static void
 list_files_horizontal(size_t *counter, int *reset_pager,
-	const int eln_len, const size_t columns_n)
+	const int eln_len, size_t columns_n)
 {
 	const filesn_t nn = (conf.max_files != UNSET
 		&& (filesn_t)conf.max_files < files) ? (filesn_t)conf.max_files : files;
+
+/*	size_t *longest_per_col = get_longest_per_col(&columns_n, nn);
+	size_t cur_col = 0; */
 
 	void (*print_entry_function)(int *, const filesn_t, const int, const int);
 	if (conf.colorize == 1)
@@ -1735,13 +1893,18 @@ list_files_horizontal(size_t *counter, int *reset_pager,
 
 		print_entry_function(&ind_char, i, eln_len, max_namelen);
 
-		if (last_column == 0)
+		if (last_column == 0) {
+/*			pad_filename_new(i, termcap_move_right, longest_per_col[cur_col]);
+			cur_col++; */
 			pad_filename(ind_char, i, eln_len, termcap_move_right);
-		else
+		} else {
 			putchar('\n');
+//			cur_col = 0;
+		}
 	}
 
 END:
+//	free(longest_per_col);
 	if (last_column == 0)
 		putchar('\n');
 	if (pager_quit == 1)
@@ -1753,12 +1916,17 @@ END:
  * 2 AAB	4 AAD	6 AAF */
 static void
 list_files_vertical(size_t *counter, int *reset_pager,
-	const int eln_len, const size_t columns_n)
+	const int eln_len, size_t columns_n)
 {
 	/* Total amount of files to be listed. */
 	const filesn_t nn = (conf.max_files != UNSET
 		&& (filesn_t)conf.max_files < files) ? (filesn_t)conf.max_files : files;
 
+#ifdef TIGHT_COLUMNS
+	filesn_t rows = 0;
+	size_t *longest_per_col = get_longest_per_col(&columns_n, &rows, nn);
+	size_t cur_col = 0;
+#else
 	/* How many lines (rows) do we need to print NN files? */
 	/* Division/modulo is slow, true. But the compiler will make a much
 	 * better job than us at optimizing this code. */
@@ -1766,6 +1934,7 @@ list_files_vertical(size_t *counter, int *reset_pager,
 	filesn_t rows = nn / (filesn_t)columns_n;
 	if (nn % (filesn_t)columns_n > 0)
 		++rows;
+#endif
 
 	int last_column = 0;
 	/* The previous value of LAST_COLUMN. We need this value to run the pager. */
@@ -1783,7 +1952,6 @@ list_files_vertical(size_t *counter, int *reset_pager,
 		|| term_caps.suggestions == 0) ? 0 : 1;
 
 	const int int_longest_fc_len = (int)longest.fc_len;
-	size_t cur_cols = 0;
 	size_t cc = columns_n; // Current column number
 	filesn_t x = 0; // Index of the file to be actually printed
 	filesn_t xx = 0; // Current line number
@@ -1798,34 +1966,35 @@ list_files_vertical(size_t *counter, int *reset_pager,
 		size_t bcc = cc; // Copy of CC
 		if (cc == columns_n) {
 			x = xx;
-			++xx;
-			cc = 0;
+			xx++;
+			cc = 1;
 		} else {
 			x += rows;
+			cc++;
 		}
-		++cc;
 
 		if (xx > rows)
 			break;
 
-		size_t bcur_cols = cur_cols;
 		/* If current entry is in the last column, print a new line char */
-		if (++cur_cols == columns_n) {
-			cur_cols = 0;
+		if (cc == columns_n)
 			last_column = 1;
-		} else {
+		else
 			last_column = 0;
-		}
 
 		int ind_char = (conf.classify != 0);
 
 		if (x >= nn || !file_info[x].name) {
-			if (last_column == 1)
+			if (last_column == 1) {
 				/* Last column is empty. E.g.:
 				 * 1 file  3 file3  5 file5
 				 * 2 file2 4 file4  HERE
 				 * ... */
 				putchar('\n');
+#ifdef TIGHT_COLUMNS
+				cur_col = 0;
+#endif
+			}
 			continue;
 		}
 
@@ -1853,17 +2022,16 @@ list_files_vertical(size_t *counter, int *reset_pager,
 				x = bx;
 				xx = bxx;
 				cc = bcc;
-				cur_cols = bcur_cols;
 				continue;
 			} else {
 				if (ret == -2) {
 					i = x = xx = last_column = blc = 0;
-					*counter = cur_cols = 0;
+					*counter = 0;
 					cc = columns_n;
 					continue;
 				}
 			}
-			++(*counter);
+			(*counter)++;
 		}
 
 		blc = last_column;
@@ -1880,17 +2048,29 @@ list_files_vertical(size_t *counter, int *reset_pager,
 
 		print_entry_function(&ind_char, x, eln_len, max_namelen);
 
-		if (last_column == 0)
+		if (last_column == 0) {
+#ifdef TIGHT_COLUMNS
+			pad_filename_new(x, termcap_move_right,	longest_per_col[cur_col]);
+			cur_col++;
+#else
 			pad_filename(ind_char, x, eln_len, termcap_move_right);
-		else
+#endif
+		} else {
 			/* Last column is populated. Example:
 			 * 1 file  3 file3  5 file5HERE
 			 * 2 file2 4 file4  6 file6HERE
 			 * ... */
 			putchar('\n');
+#ifdef TIGHT_COLUMNS
+			cur_col = 0;
+#endif
+		}
 	}
 
 END:
+#ifdef TIGHT_COLUMNS
+	free(longest_per_col);
+#endif
 	if (last_column == 0)
 		putchar('\n');
 	if (pager_quit == 1)

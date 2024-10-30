@@ -3323,10 +3323,10 @@ print_prompt_colors(void)
 	char *p = remove_ctrl_chars(ti_c);
 	printf(_("%sColor%s (ti) Trashed files indicator (%sT%s)\n"), p,
 		df_c, p, df_c);
-	p = remove_ctrl_chars(xs_cb);
+	p = remove_ctrl_chars(xs_c);
 	printf(_("%sColor%s (xs) Success exit code (<%s0%s>)\n"),
 		p, df_c, p, df_c);
-	p = remove_ctrl_chars(xf_cb);
+	p = remove_ctrl_chars(xf_c);
 	printf(_("%sColor%s (xf) Error exit code (e.g. <%s1%s>)\n"),
 		p, df_c, p, df_c);
 	p = remove_ctrl_chars(nm_c);

@@ -1316,6 +1316,9 @@ struct fileinfo {
 	blkcnt_t blocks;
 	size_t len;    /* File name len (columns needed to display file name) */
 	size_t bytes;  /* Bytes consumed by file name */
+#ifdef TIGHT_COLUMNS
+	size_t total_entry_len;
+#endif
 	time_t ltime;  /* For long view mode */
 	time_t time;
 	ino_t inode;
