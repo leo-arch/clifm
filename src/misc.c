@@ -1378,7 +1378,6 @@ free_stuff(void)
 	free(bin_name);
 	free_bookmarks();
 	free(conf.encoded_prompt);
-/*	free(right_prompt); */
 	free_dirlist();
 	free(conf.opener);
 	free(conf.rprompt_str);

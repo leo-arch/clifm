@@ -95,13 +95,34 @@ atool(1)          Extraction/decompression, listing, and repacking of archives"
 There are two ways to set autocommands:\n\
   1) Via the 'autocmd' keyword in the configuration file\n\
   2) Via specifically named files in the corresponding directory\n\n\
-Example using the first method:\n\
+1) Example using the first method:\n\n\
 Edit the configuration file ('config' or F10) and add the following line:\n\n\
   autocmd /media/remotes/** fc=0,lm=1\n\n\
-This instructs clifm to always disable the files counter and to run in\n\
+This instructs Clifm to always disable the files counter and to run in\n\
 light mode whenever you enter the '/media/remotes' directory (or any\n\
 subdirectory).\n\n\
-Example using the second method:\n\
+Note: To match only '/media/remotes' write \"/media/remotes\" instead,\n\
+and to match all subdirectories (excluding the parent directory itself),\n\
+write \"/media/remotes/*\".\n\n\
+The following codes are used to control Clifm's settings:\n\n\
+  Code | Description     | Example\n\
+  cs     Color scheme      cs=nord\n\
+  fc     Files counter     fc=0\n\
+  ft     Files filter      ft=.*\\.pdf$\n\
+  hf     Hidden files      hf=0\n\
+  lm     Light mode        lm=1\n\
+  lv     Long view         lv=1\n\
+  mf     Max files         mf=100\n\
+  mn     Max name length   mn=30\n\
+  od     Only directories  od=1\n\
+  pg     Pager             pg=0\n\
+  st     Sort method       st=5\n\
+  sr     Sort reverse      sr=1\n\n\
+To run a shell command or a script use the '!CMD' expression. For example:\n\n\
+  autcomd ~/important !printf \"Get outta here!\" && read -n1\n\
+  autcomd ~/Documents !~/my_script.sh\n\
+\n\
+2) Example using the second method:\n\n\
 a. Set 'ReadAutocmdFiles' to 'true' in the configuration file.\n\
 b. Create a '.cfm.in' file in the '~/Important' directory with the following\n\
 content:\n\n\
@@ -110,7 +131,7 @@ This little reminder will be printed every time you enter the 'Important'\n\
 directory.\n\n\
 If the file is named rather '.cfm.out', the command will be executed when\n\
 leaving, instead of entering, the directory.\n\n\
-Note: Only single-line commands are allowed. If you need more advanced\n\
+Note 1: Only single-line commands are allowed. If you need more elaborated\n\
 stuff, set here the path to a script doing whatever needs to be done.\n\n\
 Note 2: Codes to modify Clifm's settings (as described in the first method)\n\
 are not available here."
