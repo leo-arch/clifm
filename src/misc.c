@@ -1066,6 +1066,7 @@ free_autocmds(void)
 	while (--i >= 0) {
 		free(autocmds[i].pattern);
 		free(autocmds[i].cmd);
+		free(autocmds[i].filter.str);
 		autocmds[i].color_scheme = (char *)NULL;
 	}
 	free(autocmds);

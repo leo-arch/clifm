@@ -47,6 +47,54 @@ reset_opts(void)
 	opts.pager = conf.pager;
 	opts.sort = conf.sort;
 	opts.sort_reverse = conf.sort_reverse;
+	opts.filter = (struct filter_t){0};
+}
+
+static int
+set_autocmd_regex_filter(const char *pattern)
+{
+	regfree(&regex_exp);
+	const int ret = regcomp(&regex_exp, pattern, REG_NOSUB | REG_EXTENDED);
+	if (ret != FUNC_SUCCESS) {
+		regfree(&regex_exp);
+		return FUNC_FAILURE;
+	}
+
+	return FUNC_SUCCESS;
+}
+
+static void
+copy_current_files_filter(void)
+{
+	free(opts.filter.str);
+	opts.filter.str = (char *)NULL;
+
+	if (!filter.str)
+		return;
+
+	opts.filter.str = savestring(filter.str, strlen(filter.str));
+	opts.filter.rev = filter.rev;
+	opts.filter.type = filter.type;
+	opts.filter.env = filter.env;
+}
+
+static void
+install_autocmd_files_filter(const size_t i)
+{
+	free(filter.str);
+	if (strcmp(autocmds[i].filter.str, "unset") == 0) {
+		filter.str = (char *)NULL;
+		if (filter.type == FILTER_FILE_NAME)
+			regfree(&regex_exp);
+	} else {
+		filter.str = savestring(autocmds[i].filter.str,
+			strlen(autocmds[i].filter.str));
+		filter.type = autocmds[i].filter.type;
+		filter.rev = autocmds[i].filter.rev;
+		filter.env = autocmds[i].filter.env;
+		if (filter.type == FILTER_FILE_NAME)
+			set_autocmd_regex_filter(filter.str);
+	}
 }
 
 /* Run autocommands for the current directory */
@@ -156,10 +204,14 @@ RUN_AUTOCMD:
 			opts.max_name_len = conf.max_name_len;
 			opts.pager = conf.pager;
 			opts.only_dirs = conf.only_dirs;
+
 			if (autocmds[i].color_scheme && cur_cscheme)
 				opts.color_scheme = cur_cscheme;
 			else
 				opts.color_scheme = (char *)NULL;
+
+			copy_current_files_filter();
+
 			autocmd_set = 1;
 		}
 
@@ -191,11 +243,62 @@ RUN_AUTOCMD:
 			|| sanitize_cmd(autocmds[i].cmd, SNT_AUTOCMD) == FUNC_SUCCESS)
 				launch_execl(autocmds[i].cmd);
 		}
+		if (autocmds[i].filter.str)
+			install_autocmd_files_filter(i);
 
 		break;
 	}
 
 	return found;
+}
+
+static int
+set_autocmd_filter_type(const char c)
+{
+	if (c == '=')
+		return FILTER_FILE_TYPE;
+
+	if (c == '@')
+		return FILTER_MIME_TYPE; /* UNIMPLEMENTED */
+
+	return FILTER_FILE_NAME;
+}
+
+static void
+revert_files_filter(void)
+{
+	filter.type = opts.filter.type;
+	filter.rev = opts.filter.rev;
+	filter.env = opts.filter.env;
+
+	free(filter.str);
+	filter.str = savestring(opts.filter.str, strlen(opts.filter.str));
+	free(opts.filter.str);
+	opts.filter.str = (char *)NULL;
+
+	if (filter.type == FILTER_FILE_NAME)
+		set_autocmd_regex_filter(filter.str);
+}
+
+static void
+remove_files_filter(void)
+{
+	free(filter.str);
+	filter = (struct filter_t){0};
+
+	if (filter.type == FILTER_FILE_NAME)
+		regfree(&regex_exp);
+}
+
+static void
+set_autocmd_files_filter(const char *pattern, const size_t index)
+{
+	autocmds[autocmds_n].filter.rev = (*pattern == '!');
+	const char *p = pattern + (*pattern == '!');
+	free(autocmds[autocmds_n].filter.str);
+	autocmds[index].filter.str = savestring(p, strlen(p));
+	autocmds[index].filter.type = set_autocmd_filter_type(*p);
+	autocmds[index].filter.env = 0;
 }
 
 /* Revert back to options previous to autocommand */
@@ -212,8 +315,17 @@ revert_autocmd_opts(void)
 	conf.sort = opts.sort;
 	conf.only_dirs = opts.only_dirs;
 	conf.sort_reverse = opts.sort_reverse;
+
 	if (opts.color_scheme && opts.color_scheme != cur_cscheme)
 		set_colors(opts.color_scheme, 0);
+
+	if (opts.filter.str) {
+		revert_files_filter();
+	} else {
+		if (filter.str) /* This is an autocmd filter. Remove it. */
+			remove_files_filter();
+	}
+
 	autocmd_set = 0;
 }
 
@@ -244,6 +356,8 @@ set_autocmd_opt(char *opt)
 				break;
 			}
 		}
+	} else if (*opt == 'f' && opt[1] == 't') {
+		set_autocmd_files_filter(p, autocmds_n);
 	} else {
 		int a = atoi(p);
 		if (a == INT_MIN)
@@ -288,6 +402,7 @@ init_autocmd_opts(void)
 	autocmds[autocmds_n].show_hidden = conf.show_hidden;
 	autocmds[autocmds_n].sort = conf.sort;
 	autocmds[autocmds_n].sort_reverse = conf.sort_reverse;
+	autocmds[autocmds_n].filter = (struct filter_t){0};
 }
 
 /* Take an autocmd line (from the config file) and store parameters

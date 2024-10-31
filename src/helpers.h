@@ -1373,6 +1373,7 @@ struct devino_t {
 extern struct devino_t *sel_devino;
 
 struct autocmds_t {
+	struct filter_t filter;
 	char *pattern;
 	char *color_scheme;
 	char *cmd;
