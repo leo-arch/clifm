@@ -1380,6 +1380,7 @@ struct autocmds_t {
 	int long_view;
 	int light_mode;
 	int files_counter;
+	int full_dir_size;
 	int max_files;
 	int max_name_len;
 	int show_hidden;
@@ -1387,6 +1388,7 @@ struct autocmds_t {
 	int sort_reverse;
 	int pager;
 	int only_dirs;
+	int temp;
 };
 
 extern struct autocmds_t *autocmds;
@@ -1395,6 +1397,7 @@ struct opts_t {
 	struct filter_t filter;
 	char *color_scheme;
 	int files_counter;
+	int full_dir_size;
 	int light_mode;
 	int list_dirs_first;
 	int long_view;
@@ -1405,7 +1408,6 @@ struct opts_t {
 	int show_hidden;
 	int sort;
 	int sort_reverse;
-	int pad0;
 };
 
 extern struct opts_t opts;

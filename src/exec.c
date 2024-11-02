@@ -2079,6 +2079,7 @@ toggle_follow_links(const char *arg)
 	return FUNC_SUCCESS;
 }
 
+#include "autocmds.h"
 /* Take the command entered by the user, already splitted into substrings
  * by parse_input_str(), and call the corresponding function. Return zero
  * in case of success and one in case of error
@@ -2436,6 +2437,9 @@ exec_cmd(char **comm)
 	else if (*comm[0] == 'f' && ((comm[0][1] == 't' && !comm[0][2])
 	|| strcmp(comm[0], "filter") == 0))
 		return (exit_code = filter_function(comm[1]));
+
+	else if (*comm[0] == 'a' && strcmp(comm[0], "auto") == 0)
+		return (exit_code = add_autocmd(comm + 1));
 
 	else if (*comm[0] == 'f' && comm[0][1] == 'z' && !comm[0][2])
 		return (exit_code = toggle_full_dir_size(comm[1]));

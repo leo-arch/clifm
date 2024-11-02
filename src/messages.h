@@ -91,6 +91,20 @@ atool(1)          Extraction/decompression, listing, and repacking of archives"
 \x1b[1mUSAGE\x1b[0m\n\
   acd, autocd [on | off | status]"
 
+#define AUTO_USAGE "Set a temporary autocommand for the current directory\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
+  auto [unset | AUTOCMD]\n\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- List files in the current directory in long view\n\
+    auto lv=1\n\
+- List only .pdf files, set the color scheme to nord, and sort files by size\n\
+    auto ft=.*\\.pdf$,cs=nord,st=size\n\
+- Unset all temporary autocommands set for the current directory\n\
+    auto unset\n\n\
+For the list of available autocommand codes enter 'help autocommands'\n\n\
+Note: Unlike autocommands defined in the configuration files, autocommands\n\
+set via the 'auto' command are lost at program exit."
+
 #define AUTOCMDS_USAGE "Tweak settings or run custom commands on a per directory basis\n\n\
 There are two ways to set autocommands:\n\
   1) Via the 'autocmd' keyword in the configuration file\n\
@@ -109,6 +123,7 @@ The following codes are used to control Clifm's settings:\n\n\
   cs     Color scheme      cs=nord\n\
   fc     Files counter     fc=0\n\
   ft     Files filter      ft=.*\\.pdf$\n\
+  fz     Full dir size     fz=1\n\
   hf     Hidden files      hf=0\n\
   lm     Light mode        lm=1\n\
   lv     Long view         lv=1\n\
@@ -116,7 +131,7 @@ The following codes are used to control Clifm's settings:\n\n\
   mn     Max name length   mn=30\n\
   od     Only directories  od=1\n\
   pg     Pager             pg=0\n\
-  st     Sort method       st=5\n\
+  st     Sort method       st=size\n\
   sr     Sort reverse      sr=1\n\n\
 To run a shell command or a script use the '!CMD' expression. For example:\n\n\
   autcomd ~/important !printf \"Get outta here!\" && read -n1\n\
@@ -134,7 +149,9 @@ leaving, instead of entering, the directory.\n\n\
 Note 1: Only single-line commands are allowed. If you need more elaborated\n\
 stuff, set here the path to a script doing whatever needs to be done.\n\n\
 Note 2: Codes to modify Clifm's settings (as described in the first method)\n\
-are not available here."
+are not available here.\n\n\
+Note 3: To set a temporary autocommand for the current directory use the\n\
+'auto' command. Run 'auto --help' for details."
 
 #define AUTO_OPEN_USAGE "Turn auto-open on/off\n\n\
 \x1b[1mUSAGE\x1b[0m\n\

@@ -440,6 +440,7 @@ const struct cmdslist_t internal_cmds[] = {
 	{"ac", 2},
 	{"ad", 2},
 	{"acd", 3},
+	{"auto", 4},
 	{"autocd", 6},
 	{"actions", 7},
 	{"alias", 5},
@@ -495,7 +496,6 @@ const struct cmdslist_t internal_cmds[] = {
 	{"jp", 2},
 	{"k", 1},
 	{"kk", 2},
-//	{"jo", 2},
 	{"kb", 2},
 	{"keybinds", 8},
 	{"l", 1},
@@ -591,6 +591,7 @@ size_t internal_cmds_n = 0;
 const struct cmdslist_t param_str[] = {
 	{"actions edit", 12},
 	{"actions list", 12},
+	{"auto unset", 10},
 	{"autocd on", 9},
 	{"acd on", 6},
 	{"autocd off", 10},
