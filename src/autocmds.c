@@ -28,6 +28,7 @@
 #include <readline/tilde.h>
 
 #include "aux.h"
+#include "checks.h"   /* is_number */
 #include "colors.h"
 #include "listing.h"  /* reload_dirlist */
 #include "messages.h" /* AUTO_USAGE macro */
@@ -383,7 +384,7 @@ set_autocmd_opt(char *opt, const size_t n)
 	} else if (*opt == 'f' && opt[1] == 't') {
 		set_autocmd_files_filter(p, n);
 	} else {
-		int a = atoi(p);
+		int a = is_number(p) ? atoi(p) : -1;
 		if (a == INT_MIN)
 			a = 0;
 		if (*opt == 'f' && opt[1] == 'c')
@@ -552,8 +553,8 @@ add_autocmd(char **args)
 		}
 	}
 
-	/* No autocommand for this target (current directory). Let's create a new
-	 * entry for this autocommand. */
+	/* No autocommand found for this target (current directory). Let's
+	 * create a new entry for this autocommand. */
 
 	const size_t cwd_len = workspaces[cur_ws].path
 		? strlen(workspaces[cur_ws].path) : 0;

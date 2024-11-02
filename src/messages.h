@@ -97,12 +97,12 @@ atool(1)          Extraction/decompression, listing, and repacking of archives"
 \x1b[1mEXAMPLES\x1b[0m\n\
 - List files in the current directory in long view\n\
     auto lv=1\n\
-- List only .pdf files, set the color scheme to nord, and sort files by size\n\
+- List only PDF files, set the color scheme to nord, and sort files by size\n\
     auto ft=.*\\.pdf$,cs=nord,st=size\n\
 - Unset all temporary autocommands set for the current directory\n\
     auto unset\n\n\
 For the list of available autocommand codes enter 'help autocommands'\n\n\
-Note: Unlike autocommands defined in the configuration files, autocommands\n\
+Note: Unlike autocommands defined in the configuration file, autocommands\n\
 set via the 'auto' command are lost at program exit."
 
 #define AUTOCMDS_USAGE "Tweak settings or run custom commands on a per directory basis\n\n\
