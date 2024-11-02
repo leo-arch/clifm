@@ -301,6 +301,12 @@ remove_files_filter(void)
 static void
 set_autocmd_files_filter(const char *pattern, const size_t n)
 {
+	if (*pattern == 'u' && strcmp(pattern, "unset") == 0) {
+		free(autocmds[n].filter.str);
+		autocmds[n].filter = (struct filter_t){0};
+		return;
+	}
+
 	autocmds[n].filter.rev = (*pattern == '!');
 	const char *p = pattern + (*pattern == '!');
 	free(autocmds[n].filter.str);
@@ -354,6 +360,29 @@ set_autocmd_sort_by_name(const char *name)
 	return DEF_SORT;
 }
 
+static void
+set_autocmd_color_scheme(const char *name, const size_t n)
+{
+	if (!name || !*name || cschemes_n == 0)
+		return;
+
+	if (*name == 'u' && strcmp(name, "unset") == 0) {
+		autocmds[n].color_scheme = (char *)NULL;
+		return;
+	}
+
+	int i = (int)cschemes_n;
+	while (--i >= 0) {
+		if (*color_schemes[i] == *name
+		&& strcmp(color_schemes[i], name) == 0) {
+			autocmds[n].color_scheme = color_schemes[i];
+			return;
+		}
+	}
+
+	autocmds[n].color_scheme = (char *)NULL;
+}
+
 /* Store each autocommand option in the corresponding field of the
  * autocmds struct. */
 static void
@@ -374,13 +403,7 @@ set_autocmd_opt(char *opt, const size_t n)
 
 	*(p - 1) = '\0';
 	if (*opt == 'c' && opt[1] == 's') {
-		int i = (int)cschemes_n;
-		while (--i >= 0) {
-			if (*color_schemes[i] == *p && strcmp(color_schemes[i], p) == 0) {
-				autocmds[n].color_scheme = color_schemes[i];
-				break;
-			}
-		}
+		set_autocmd_color_scheme(p, n);
 	} else if (*opt == 'f' && opt[1] == 't') {
 		set_autocmd_files_filter(p, n);
 	} else {
