@@ -1675,6 +1675,11 @@ get_longest_per_col(size_t *columns_n, filesn_t *rows, const filesn_t files_n)
 	size_t used_cols = 0;
 	size_t longest_index = 0;
 
+	if (*columns_n == 0)
+		*columns_n = 1;
+	if (*rows <= 0)
+		*rows = 1;
+
 	/* Make enough room to hold columns information. We'll never get more
 	 * columns for the current files list than the amount of terminal columns. */
 	size_t *longest_per_col = xnmalloc((size_t)term_cols + 1, sizeof(size_t));
@@ -1730,7 +1735,10 @@ get_longest_per_col(size_t *columns_n, filesn_t *rows, const filesn_t files_n)
 			longest_per_col[longest_index] = longest_name_len;
 			used_cols += LONGEST_PLUS_GAP;
 		} else {
-			longest_index--;
+			if (longest_index > 0)
+				longest_index--;
+			else
+				break;
 		}
 
 		const int rest = (int)term_cols - (int)used_cols;
