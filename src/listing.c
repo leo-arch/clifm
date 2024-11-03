@@ -626,11 +626,6 @@ post_listing(DIR *dir, const int reset_pager, const filesn_t excluded_files)
  * we have changed the current directory (last command) or not. */
 //	setenv("CLIFM_CHPWD", dir_changed == 1 ? "1" : "0", 1);
 
-	if (dir_changed == 1)
-		dir_cmds.first_cmd_in_dir = UNSET;
-
-	dir_changed = 0;
-
 	if (xargs.list_and_quit == 1)
 		exit(exit_code);
 
@@ -681,6 +676,13 @@ post_listing(DIR *dir, const int reset_pager, const filesn_t excluded_files)
 	if (filter.str && *filter.str)
 		print_reload_msg(NULL, NULL, _("Active filter: %s%s%s%s\n"),
 			BOLD, filter.rev == 1 ? "!" : "", filter.str, df_c);
+
+	if (dir_changed == 1) {
+		if (autocmd_set == 1)
+			print_reload_msg(NULL, NULL, _("Autocmd\n"));
+		dir_cmds.first_cmd_in_dir = UNSET;
+		dir_changed = 0;
+	}
 
 	if (conf.print_dir_cmds == 1 && dir_cmds.first_cmd_in_dir != UNSET)
 		print_dir_cmds();
