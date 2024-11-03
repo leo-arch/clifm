@@ -569,7 +569,8 @@ add_autocmd(char **args)
 
 	size_t i;
 	for (i = 0; i < autocmds_n; i++) {
-		if (strcmp(workspaces[cur_ws].path, autocmds[i].pattern) == 0) {
+		if (autocmds[i].temp == 1
+		&& strcmp(workspaces[cur_ws].path, autocmds[i].pattern) == 0) {
 			/* Add option to an existing autocmd */
 			modify_autocmd(args[0], i);
 			return autocmd_dirlist_reload();
