@@ -529,7 +529,7 @@ parse_autocmd_line(char *cmd, const size_t buflen)
 }
 
 static int
-unset_autocmd(void)
+unset_tmp_autocmds(void)
 {
 	size_t found = 0;
 	size_t i;
@@ -574,7 +574,7 @@ add_autocmd(char **args)
 	}
 
 	if (*args[0] == 'u' && strcmp(args[0], "unset") == 0) {
-		return (unset_autocmd() == FUNC_FAILURE ? FUNC_FAILURE
+		return (unset_tmp_autocmds() == FUNC_FAILURE ? FUNC_FAILURE
 			: autocmd_dirlist_reload());
 	}
 

@@ -1059,16 +1059,53 @@ create_usr_var(const char *str)
 	return FUNC_SUCCESS;
 }
 
+/* Resize the autocmds array leaving only temporary autocommands. */
+static void
+keep_temp_autocmds(void)
+{
+	size_t i;
+	size_t c = 0;
+
+	for (i = 0; i < autocmds_n; i++) {
+		/* Temporary entries are guaranteed to be sequential. See add_autocmd()
+		 * in autocmds.c */
+		if (autocmds[i].temp == 1) {
+			c++;
+			continue;
+		}
+
+		free(autocmds[i].pattern);
+		free(autocmds[i].cmd);
+		free(autocmds[i].filter.str);
+		autocmds[i] = (struct autocmds_t){0};
+	}
+
+	autocmds_n = c;
+	autocmds = xnrealloc(autocmds, autocmds_n, sizeof(struct autocmds_t));
+}
+
 void
-free_autocmds(void)
+free_autocmds(const int keep_temp)
 {
 	int i = (int)autocmds_n;
+
+	if (keep_temp == 1) {
+		while (--i >= 0) {
+			if (autocmds[i].temp == 1) {
+				keep_temp_autocmds();
+				return;
+			}
+		}
+	}
+
+	i = (int)autocmds_n;
 	while (--i >= 0) {
 		free(autocmds[i].pattern);
 		free(autocmds[i].cmd);
 		free(autocmds[i].filter.str);
 		autocmds[i].color_scheme = (char *)NULL;
 	}
+
 	free(autocmds);
 	autocmds = (struct autocmds_t *)NULL;
 	autocmds_n = 0;
@@ -1366,7 +1403,7 @@ free_stuff(void)
 
 	free_prompts();
 	free(prompts_file);
-	free_autocmds();
+	free_autocmds(0);
 	free_tags();
 	free_remotes(1);
 

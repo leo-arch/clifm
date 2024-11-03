@@ -36,7 +36,7 @@ int  confirm_sudo_cmd(char **cmd);
 int  create_usr_var(const char *str);
 int  expand_prompt_name(char *name);
 int  filter_function(char *arg);
-void free_autocmds(void);
+void free_autocmds(const int keep_temp);
 void free_prompts(void);
 void free_stuff(void);
 int  free_remotes(const int exit);

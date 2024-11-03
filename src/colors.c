@@ -2708,9 +2708,9 @@ disable_bold(void)
 int
 set_colors(const char *colorscheme, const int check_env)
 {
-	char *filecolors = (char *)NULL,
-		 *extcolors = (char *)NULL,
-	     *ifacecolors = (char *)NULL;
+	char *filecolors = (char *)NULL;
+	char *extcolors = (char *)NULL;
+	char *ifacecolors = (char *)NULL;
 
 	date_shades.type = SHADE_TYPE_UNSET;
 	size_shades.type = SHADE_TYPE_UNSET;
@@ -2958,6 +2958,9 @@ is_duplicate_colorscheme_name(const char *name, const size_t total)
 size_t
 get_colorschemes(void)
 {
+	if (color_schemes && cschemes_n > 0)
+		return cschemes_n;
+
 	struct stat attr;
 	int schemes_total = 0;
 	struct dirent *ent;
@@ -3027,7 +3030,8 @@ get_colorschemes(void)
 	color_schemes[i] = (char *)NULL;
 
 END:
-	qsort(color_schemes, i, sizeof(char *), (QSFUNC *)compare_strings);
+	if (color_schemes)
+		qsort(color_schemes, i, sizeof(char *), (QSFUNC *)compare_strings);
 	return i;
 }
 #endif /* CLIFM_SUCKLESS */

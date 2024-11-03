@@ -3759,27 +3759,15 @@ reset_variables(void)
 	free(conf.welcome_message_str);
 	conf.welcome_message_str = (char *)NULL;
 
-	free_autocmds();
+	free_autocmds(1);
 	free_tags();
 	free_remotes(0);
 	free_regex_filters();
 
 	free(conf.opener);
 	free(conf.encoded_prompt);
-/*	free(right_prompt); */
 	free(conf.term);
-//	conf.opener = conf.encoded_prompt = right_prompt = conf.term = (char *)NULL;
 	conf.opener = conf.encoded_prompt = conf.term = (char *)NULL;
-
-	int i = (int)cschemes_n;
-	while (--i >= 0)
-		free(color_schemes[i]);
-	free(color_schemes);
-	color_schemes = (char **)NULL;
-	cschemes_n = 0;
-	free(conf.usr_cscheme);
-	conf.usr_cscheme = (char *)NULL;
-	cur_cscheme = (char *)NULL;
 
 	init_conf_struct();
 	free_workspaces_filters();
@@ -3911,5 +3899,8 @@ reload_config(void)
 	dirhist_cur_index = dirhist_total_index - 1;
 
 	set_env(1);
+
+	dir_changed = (autocmds_n > 0);
+
 	return FUNC_SUCCESS;
 }
