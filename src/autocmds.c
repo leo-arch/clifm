@@ -29,12 +29,12 @@
 
 #include "aux.h"
 #include "checks.h"   /* is_number */
-#include "colors.h"
+#include "colors.h"   /* set_colors */
 #include "listing.h"  /* reload_dirlist */
 #include "messages.h" /* AUTO_USAGE macro */
 #include "misc.h"     /* xerror (err) */
-#include "sanitize.h"
-#include "spawn.h"
+#include "sanitize.h" /* sanitize_cmd */
+#include "spawn.h"    /* launch_execl */
 
 /* The opts struct contains option values previous to any autocommand call */
 void
@@ -100,6 +100,65 @@ install_autocmd_files_filter(const size_t i)
 		if (filter.type == FILTER_FILE_NAME)
 			set_autocmd_regex_filter(filter.str);
 	}
+}
+
+static void
+save_current_options(const size_t i)
+{
+	opts.light_mode = conf.light_mode;
+	opts.files_counter = conf.files_counter;
+	opts.full_dir_size = conf.full_dir_size;
+	opts.long_view = conf.long_view;
+	opts.max_files = conf.max_files;
+	opts.show_hidden = conf.show_hidden;
+	opts.sort = conf.sort;
+	opts.sort_reverse = conf.sort_reverse;
+	opts.max_name_len = conf.max_name_len;
+	opts.pager = conf.pager;
+	opts.only_dirs = conf.only_dirs;
+
+	if (autocmds[i].color_scheme && cur_cscheme)
+		opts.color_scheme = cur_cscheme;
+	else
+		opts.color_scheme = (char *)NULL;
+
+	copy_current_files_filter();
+}
+
+static void
+set_autocmd_options(const size_t i)
+{
+	if (autocmds[i].light_mode != -1)
+		conf.light_mode = autocmds[i].light_mode;
+	if (autocmds[i].files_counter != -1)
+		conf.files_counter = autocmds[i].files_counter;
+	if (autocmds[i].full_dir_size != -1)
+		conf.full_dir_size = autocmds[i].full_dir_size;
+	if (autocmds[i].long_view != -1)
+		conf.long_view = autocmds[i].long_view;
+	if (autocmds[i].show_hidden != -1)
+		conf.show_hidden = autocmds[i].show_hidden;
+	if (autocmds[i].only_dirs != -1)
+		conf.only_dirs = autocmds[i].only_dirs;
+	if (autocmds[i].pager != -1)
+		conf.pager = autocmds[i].pager;
+	if (autocmds[i].sort != -1)
+		conf.sort = autocmds[i].sort;
+	if (autocmds[i].sort_reverse != -1)
+		conf.sort_reverse = autocmds[i].sort_reverse;
+	if (autocmds[i].max_name_len != -1)
+		conf.max_name_len = autocmds[i].max_name_len;
+	if (autocmds[i].max_files != -2)
+		conf.max_files = autocmds[i].max_files;
+	if (autocmds[i].color_scheme)
+		set_colors(autocmds[i].color_scheme, 0);
+	if (autocmds[i].cmd) {
+		if (xargs.secure_cmds == 0
+		|| sanitize_cmd(autocmds[i].cmd, SNT_AUTOCMD) == FUNC_SUCCESS)
+			launch_execl(autocmds[i].cmd);
+	}
+	if (autocmds[i].filter.str)
+		install_autocmd_files_filter(i);
 }
 
 /* Run autocommands for the current directory */
@@ -199,60 +258,12 @@ RUN_AUTOCMD:
 		if (autocmd_set == 0) {
 			/* Backup current options, only if there was no autocmd for
 			 * this directory */
-			opts.light_mode = conf.light_mode;
-			opts.files_counter = conf.files_counter;
-			opts.full_dir_size = conf.full_dir_size;
-			opts.long_view = conf.long_view;
-			opts.max_files = conf.max_files;
-			opts.show_hidden = conf.show_hidden;
-			opts.sort = conf.sort;
-			opts.sort_reverse = conf.sort_reverse;
-			opts.max_name_len = conf.max_name_len;
-			opts.pager = conf.pager;
-			opts.only_dirs = conf.only_dirs;
-
-			if (autocmds[i].color_scheme && cur_cscheme)
-				opts.color_scheme = cur_cscheme;
-			else
-				opts.color_scheme = (char *)NULL;
-
-			copy_current_files_filter();
-
+			save_current_options(i);
 			autocmd_set = 1;
 		}
 
 		/* Set options for current directory */
-		if (autocmds[i].light_mode != -1)
-			conf.light_mode = autocmds[i].light_mode;
-		if (autocmds[i].files_counter != -1)
-			conf.files_counter = autocmds[i].files_counter;
-		if (autocmds[i].full_dir_size != -1)
-			conf.full_dir_size = autocmds[i].full_dir_size;
-		if (autocmds[i].long_view != -1)
-			conf.long_view = autocmds[i].long_view;
-		if (autocmds[i].show_hidden != -1)
-			conf.show_hidden = autocmds[i].show_hidden;
-		if (autocmds[i].only_dirs != -1)
-			conf.only_dirs = autocmds[i].only_dirs;
-		if (autocmds[i].pager != -1)
-			conf.pager = autocmds[i].pager;
-		if (autocmds[i].sort != -1)
-			conf.sort = autocmds[i].sort;
-		if (autocmds[i].sort_reverse != -1)
-			conf.sort_reverse = autocmds[i].sort_reverse;
-		if (autocmds[i].max_name_len != -1)
-			conf.max_name_len = autocmds[i].max_name_len;
-		if (autocmds[i].max_files != -2)
-			conf.max_files = autocmds[i].max_files;
-		if (autocmds[i].color_scheme)
-			set_colors(autocmds[i].color_scheme, 0);
-		if (autocmds[i].cmd) {
-			if (xargs.secure_cmds == 0
-			|| sanitize_cmd(autocmds[i].cmd, SNT_AUTOCMD) == FUNC_SUCCESS)
-				launch_execl(autocmds[i].cmd);
-		}
-		if (autocmds[i].filter.str)
-			install_autocmd_files_filter(i);
+		set_autocmd_options(i);
 
 		break;
 	}
@@ -383,10 +394,10 @@ set_autocmd_color_scheme(const char *name, const size_t n)
 	autocmds[n].color_scheme = (char *)NULL;
 }
 
-/* Store each autocommand option in the corresponding field of the
- * autocmds struct. */
+/* Store each autocommand option (OPT) in the corresponding field of
+ * the given autocmds (N). */
 static void
-set_autocmd_opt(char *opt, const size_t n)
+fill_autocmd_opt(char *opt, const size_t n)
 {
 	if (!opt || !*opt)
 		return;
@@ -479,7 +490,7 @@ modify_autocmd(char *arg, const size_t n)
 			continue;
 		}
 
-		set_autocmd_opt(val, n);
+		fill_autocmd_opt(val, n);
 
 		if (!*arg)
 			break;
@@ -488,8 +499,7 @@ modify_autocmd(char *arg, const size_t n)
 	return FUNC_SUCCESS;
 }
 
-/* Take an autocmd line (from the config file) and store parameters
- * in a struct. */
+/* Take an autocmd line and store parameters in a struct. */
 void
 parse_autocmd_line(char *cmd, const size_t buflen)
 {
@@ -549,6 +559,7 @@ autocmd_dirlist_reload(void)
 	return FUNC_SUCCESS;
 }
 
+/* 'auto' command: add a temporary autocommand for the current directory. */
 int
 add_autocmd(char **args)
 {
