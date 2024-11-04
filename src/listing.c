@@ -678,8 +678,8 @@ post_listing(DIR *dir, const int reset_pager, const filesn_t excluded_files)
 			BOLD, filter.rev == 1 ? "!" : "", filter.str, df_c);
 
 	if (dir_changed == 1) {
-		if (autocmd_set == 1)
-			print_reload_msg(NULL, NULL, _("Autocmd\n"));
+/*		if (autocmd_set == 1)
+			print_reload_msg(NULL, NULL, _("Autocmd\n")); */
 		dir_cmds.first_cmd_in_dir = UNSET;
 		dir_changed = 0;
 	}
