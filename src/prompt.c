@@ -1347,6 +1347,8 @@ print_prompt_messages(void)
 		fputs(messages[i].text, stderr);
 		messages[i].read = 1;
 	}
+
+	print_msg = 0;
 }
 
 static inline void
