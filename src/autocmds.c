@@ -309,13 +309,13 @@ remove_files_filter(void)
 		regfree(&regex_exp);
 }
 
-static void
+static int
 set_autocmd_files_filter(const char *pattern, const size_t n)
 {
 	if (*pattern == 'u' && strcmp(pattern, "unset") == 0) {
 		free(autocmds[n].filter.str);
 		autocmds[n].filter = (struct filter_t){0};
-		return;
+		return FUNC_SUCCESS;
 	}
 
 	autocmds[n].filter.rev = (*pattern == '!');
@@ -324,6 +324,8 @@ set_autocmd_files_filter(const char *pattern, const size_t n)
 	autocmds[n].filter.str = savestring(p, strlen(p));
 	autocmds[n].filter.type = set_autocmd_filter_type(*p);
 	autocmds[n].filter.env = 0;
+
+	return FUNC_SUCCESS;
 }
 
 /* Revert back to options previous to autocommand */
@@ -356,30 +358,14 @@ revert_autocmd_opts(void)
 }
 
 static int
-set_autocmd_sort_by_name(const char *name)
-{
-	size_t i;
-	for (i = 0; i <= SORT_TYPES; i++) {
-		if (*name != *sort_methods[i].name
-		|| strcmp(name, sort_methods[i].name) != 0)
-			continue;
-
-		return (conf.light_mode == 1 && !ST_IN_LIGHT_MODE(sort_methods[i].num))
-			? DEF_SORT : sort_methods[i].num;
-	}
-
-	return DEF_SORT;
-}
-
-static void
 set_autocmd_color_scheme(const char *name, const size_t n)
 {
 	if (!name || !*name || cschemes_n == 0)
-		return;
+		return FUNC_FAILURE;
 
 	if (*name == 'u' && strcmp(name, "unset") == 0) {
 		autocmds[n].color_scheme = (char *)NULL;
-		return;
+		return FUNC_SUCCESS;
 	}
 
 	int i = (int)cschemes_n;
@@ -387,66 +373,149 @@ set_autocmd_color_scheme(const char *name, const size_t n)
 		if (*color_schemes[i] == *name
 		&& strcmp(color_schemes[i], name) == 0) {
 			autocmds[n].color_scheme = color_schemes[i];
-			return;
+			return FUNC_SUCCESS;
 		}
 	}
 
+	err('e', PRINT_PROMPT, _("autocmd: '%s': Invalid value for 'cs'\n"), name);
 	autocmds[n].color_scheme = (char *)NULL;
+	return FUNC_FAILURE;
 }
 
-/* Store each autocommand option (OPT) in the corresponding field of
- * the given autocmds (N). */
-static void
+static int
+set_autocmd_sort_by_name(const char *name, const size_t n)
+{
+	if (*name == 'u' && strcmp(name, "unset") == 0) {
+		autocmds[n].sort = UNSET;
+		return FUNC_SUCCESS;
+	}
+
+	size_t i;
+	for (i = 0; i <= SORT_TYPES; i++) {
+		if (*name != *sort_methods[i].name
+		|| strcmp(name, sort_methods[i].name) != 0)
+			continue;
+
+		autocmds[n].sort = (conf.light_mode == 1
+			&& !ST_IN_LIGHT_MODE(sort_methods[i].num))
+			? conf.sort : sort_methods[i].num;
+		return FUNC_SUCCESS;
+	}
+
+	return FUNC_FAILURE;
+}
+
+static int
+set_autocmd_sort(const char *val, const size_t n)
+{
+	if (!val || !*val)
+		return FUNC_FAILURE;
+
+	if (!is_number(val)) {
+		if (set_autocmd_sort_by_name(val, n) == FUNC_SUCCESS)
+			return FUNC_SUCCESS;
+		goto ERROR;
+	}
+
+	const int a = atoi(val);
+	if (a >= 0 && a <= SORT_TYPES) {
+		autocmds[n].sort = a;
+		return FUNC_SUCCESS;
+	}
+
+ERROR:
+	err('e', PRINT_PROMPT, _("autocmd: '%s': Invalid value for 'st'\n"), val);
+	return FUNC_FAILURE;
+}
+
+/* Store each autocommand option in OPT in the corresponding field of
+ * the autocommand at index N. */
+static int
 fill_autocmd_opt(char *opt, const size_t n)
 {
 	if (!opt || !*opt)
-		return;
+		return FUNC_FAILURE;
 
 	if (*opt == '!' && *(++opt)) {
 		free(autocmds[n].cmd);
 		autocmds[n].cmd = savestring(opt, strlen(opt));
-		return;
+		return FUNC_SUCCESS;
 	}
 
 	char *p = strchr(opt, '=');
-	if (!p || !*(++p))
-		return;
+	if (!p || !*(++p)) {
+		err('e', PRINT_PROMPT, _("autocmd: '%s': Invalid option format "
+			" (it must be 'OPTION=VALUE').\n"), opt);
+		return FUNC_FAILURE;
+	}
 
 	*(p - 1) = '\0';
-	if (*opt == 'c' && opt[1] == 's') {
-		set_autocmd_color_scheme(p, n);
-	} else if (*opt == 'f' && opt[1] == 't') {
-		set_autocmd_files_filter(p, n);
+
+	/* All option names take exactly two characters. */
+	if (!*opt || !opt[1] || opt[2])
+		goto ERR_NAME;
+
+	/* 'cs', 'ft', and 'st' take strings as values. */
+	if (*opt == 'c' && opt[1] == 's')
+		return set_autocmd_color_scheme(p, n);
+
+	if (*opt == 'f' && opt[1] == 't')
+		return set_autocmd_files_filter(p, n);
+
+	if (*opt == 's' && opt[1] == 't')
+		return set_autocmd_sort(p, n);
+
+	/* The below options taken only numbers (or 'unset') as values. */
+	int a = 0;
+	if (!is_number(p)) {
+		if (*p != 'u' || strcmp(p, "unset") != 0)
+			goto ERR_VAL;
+		a = UNSET;
 	} else {
-		int a = is_number(p) ? atoi(p) : -1;
-		if (a == INT_MIN)
-			a = 0;
-		if (*opt == 'f' && opt[1] == 'c')
-			autocmds[n].files_counter = a;
-		if (*opt == 'f' && opt[1] == 'z')
-			autocmds[n].full_dir_size = a;
-		else if (*opt == 'h' && (opt[1] == 'f' || opt[1] == 'h'))
-			autocmds[n].show_hidden = a;
-		else if (*opt == 'l' && opt[1] == 'm')
-			autocmds[n].light_mode = a;
-		else if (*opt == 'l' && (opt[1] == 'v' || opt[1] == 'l'))
-			autocmds[n].long_view = a;
-		else if (*opt == 'm' && opt[1] == 'f')
-			autocmds[n].max_files = a;
-		else if (*opt == 'm' && opt[1] == 'n')
-			autocmds[n].max_name_len = a;
-		else if (*opt == 'o' && opt[1] == 'd')
-			autocmds[n].only_dirs = a;
-		else if (*opt == 'p' && opt[1] == 'g')
-			autocmds[n].pager = a;
-		else if (*opt == 's' && opt[1] == 't')
-			autocmds[n].sort =
-				IS_DIGIT(*p) ? a : set_autocmd_sort_by_name(p);
-		else {
-			if (*opt == 's' && opt[1] == 'r')
-				autocmds[n].sort_reverse = a;
-		}
+		a = atoi(p);
 	}
+
+	if (*opt == 'm' && opt[1] == 'f') {
+		autocmds[n].max_files = a;
+		return FUNC_SUCCESS;
+	}
+
+	if (*opt == 'm' && opt[1] == 'n') {
+		autocmds[n].max_name_len = a;
+		return FUNC_SUCCESS;
+	}
+
+	if (a < 0 || a > 1)
+		goto ERR_VAL;
+
+	if (*opt == 'f' && opt[1] == 'c')
+		autocmds[n].files_counter = a;
+	else if (*opt == 'f' && opt[1] == 'z')
+		autocmds[n].full_dir_size = a;
+	else if (*opt == 'h' && (opt[1] == 'f' || opt[1] == 'h'))
+		autocmds[n].show_hidden = a;
+	else if (*opt == 'l' && opt[1] == 'm')
+		autocmds[n].light_mode = a;
+	else if (*opt == 'l' && (opt[1] == 'v' || opt[1] == 'l'))
+		autocmds[n].long_view = a;
+	else if (*opt == 'o' && opt[1] == 'd')
+		autocmds[n].only_dirs = a;
+	else if (*opt == 'p' && opt[1] == 'g')
+		autocmds[n].pager = a;
+	else if (*opt == 's' && opt[1] == 'r')
+		autocmds[n].sort_reverse = a;
+	else
+		goto ERR_NAME;
+
+	return FUNC_SUCCESS;
+
+ERR_NAME:
+	err('e', PRINT_PROMPT, _("autocmd: '%s': Invalid option name\n"), opt);
+	return FUNC_FAILURE;
+
+ERR_VAL:
+	err('e', PRINT_PROMPT, _("autocmd: '%s': Invalid value for '%s'\n"), p, opt);
+	return FUNC_FAILURE;
 }
 
 static void
@@ -475,44 +544,46 @@ static int
 modify_autocmd(char *arg, const size_t n)
 {
 	char *p = arg;
+	int exit_status = FUNC_FAILURE;
 
 	while (1) {
 		char *val = (char *)NULL;
 		if (*arg == ',') {
-			*(arg) = '\0';
+			*arg = '\0';
 			arg++;
 			val = p;
 			p = arg;
 		} else if (!*arg) {
 			val = p;
 		} else {
-			++arg;
+			arg++;
 			continue;
 		}
 
-		fill_autocmd_opt(val, n);
+		if (fill_autocmd_opt(val, n) == FUNC_SUCCESS)
+			exit_status = FUNC_SUCCESS;
 
 		if (!*arg)
 			break;
 	}
 
-	return FUNC_SUCCESS;
+	return exit_status;
 }
 
 /* Take an autocmd line and store parameters in a struct. */
-void
+int
 parse_autocmd_line(char *cmd, const size_t buflen)
 {
 	if (!cmd || !*cmd)
-		return;
+		return FUNC_FAILURE;
 
 	const size_t clen = strnlen(cmd, buflen);
 	if (clen > 0 && cmd[clen - 1] == '\n')
 		cmd[clen - 1] = '\0';
 
 	char *p = strchr(cmd, ' ');
-	if (!p || !*(p + 1))
-		return;
+	if (!p || !p[1])
+		return FUNC_FAILURE;
 
 	*p = '\0';
 
@@ -523,9 +594,15 @@ parse_autocmd_line(char *cmd, const size_t buflen)
 
 	p++;
 
-	modify_autocmd(p, autocmds_n);
+	if (modify_autocmd(p, autocmds_n) == FUNC_FAILURE) {
+		/* No valid option found for this autocmd: remove it. */
+		free(autocmds[autocmds_n].pattern);
+		autocmds = xnrealloc(autocmds, autocmds_n, sizeof(struct autocmds_t));
+		return FUNC_FAILURE;
+	}
 
 	autocmds_n++;
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -583,8 +660,8 @@ add_autocmd(char **args)
 		if (autocmds[i].temp == 1
 		&& strcmp(workspaces[cur_ws].path, autocmds[i].pattern) == 0) {
 			/* Add option to an existing autocmd */
-			modify_autocmd(args[0], i);
-			return autocmd_dirlist_reload();
+			return modify_autocmd(args[0], i) == FUNC_SUCCESS
+				? autocmd_dirlist_reload() : FUNC_FAILURE;
 		}
 	}
 
@@ -601,9 +678,12 @@ add_autocmd(char **args)
 	char *str = xnmalloc(len, sizeof(char));
 	snprintf(str, len, "%s %s", workspaces[cur_ws].path, args[0]);
 
-	parse_autocmd_line(str, len);
+	const int ret = parse_autocmd_line(str, len);
 
 	free(str);
+
+	if (ret == FUNC_FAILURE)
+		return FUNC_FAILURE;
 
 	if (autocmds_n > 1) {
 		/* Move the entry added by parse_autocmd_line() to the first place
