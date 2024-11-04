@@ -1045,7 +1045,7 @@ list_colorschemes(void)
 		return FUNC_SUCCESS;
 	}
 
-	const char *ptr = term_caps.unicode == 1 ? MISC_PTR_U : MISC_PTR;
+	const char *ptr = SET_MISC_PTR;
 	size_t i;
 	for (i = 0; color_schemes[i]; i++) {
 		if (cur_cscheme == color_schemes[i])

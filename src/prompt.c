@@ -1614,6 +1614,7 @@ list_prompts(void)
 		return FUNC_SUCCESS;
 	}
 
+	const char *ptr = SET_MISC_PTR;
 	size_t i;
 	for (i = 0; i < prompts_n; i++) {
 		if (!prompts[i].name)
@@ -1621,8 +1622,7 @@ list_prompts(void)
 
 		if (*cur_prompt_name == *prompts[i].name
 		&& strcmp(cur_prompt_name, prompts[i].name) == 0)
-			printf("%s%s%s %s\n", mi_c, term_caps.unicode == 1
-				? MISC_PTR_U : MISC_PTR, df_c, prompts[i].name);
+			printf("%s%s%s %s\n", mi_c, ptr, df_c, prompts[i].name);
 		else
 			printf("  %s\n", prompts[i].name);
 	}

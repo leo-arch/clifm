@@ -407,7 +407,7 @@ print_profiles(void)
 	size_t i;
 	char *cur_prof = alt_profile ? alt_profile : "default";
 
-	const char *ptr = term_caps.unicode == 1 ? MISC_PTR_U : MISC_PTR;
+	const char *ptr = SET_MISC_PTR;
 	for (i = 0; profile_names[i]; i++) {
 		if (*cur_prof == *profile_names[i]
 		&& strcmp(cur_prof, profile_names[i]) == 0)

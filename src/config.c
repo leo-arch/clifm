@@ -99,7 +99,7 @@ static void
 print_config_value(const char *option, void *cur_value, void *def_value,
 		const int type)
 {
-	const char *ptr = term_caps.unicode == 1 ? MISC_PTR_U : MISC_PTR;
+	const char *ptr = SET_MISC_PTR;
 
 	if (type == DUMP_CONFIG_STR) {
 		char *cv = (char *)cur_value;

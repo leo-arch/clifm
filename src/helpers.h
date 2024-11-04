@@ -632,6 +632,7 @@ extern time_t curdir_mtime;
 
 #define SET_MSG_PTR (term_caps.unicode == 1 ? MSG_PTR_STR_U : MSG_PTR_STR)
 #define SET_SUCCESS_PTR (term_caps.unicode == 1 ? SUCCESS_PTR_STR_U : SUCCESS_PTR_STR)
+#define SET_MISC_PTR (term_caps.unicode == 1 ? MISC_PTR_U : MISC_PTR)
 /* Unused
 #define SET_ERROR_PTR (term_caps.unicode == 1 ? ERROR_PTR_STR_U : ERROR_PTR_STR)
 */

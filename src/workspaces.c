@@ -90,7 +90,7 @@ list_workspaces(void)
 {
 	uint8_t i;
 	int pad = (int)get_longest_workspace_name();
-	const char *ptr = term_caps.unicode == 1 ? MISC_PTR_U : MISC_PTR;
+	const char *ptr = SET_MISC_PTR;
 
 	for (i = 0; i < MAX_WS; i++) {
 		char *path_color = get_workspace_path_color(i);
