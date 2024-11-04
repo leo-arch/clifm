@@ -303,9 +303,12 @@ log_msg(char *msg_str, const int print_prompt, const int logme,
 
 	if (add_to_msgs_list == 1) {
 		msgs_n++;
-		messages = xnrealloc(messages, (size_t)(msgs_n + 1), sizeof(char *));
-		messages[msgs_n - 1] = savestring(msg_str, msg_len);
-		messages[msgs_n] = (char *)NULL;
+		messages = xnrealloc(messages, (size_t)(msgs_n + 1),
+			sizeof(struct pmsgs_t));
+		messages[msgs_n - 1].text = savestring(msg_str, msg_len);
+		messages[msgs_n - 1].read = 0;
+		messages[msgs_n].text = (char *)NULL;
+		messages[msgs_n].read = 0;
 	}
 
 	if (print_prompt == 1) {

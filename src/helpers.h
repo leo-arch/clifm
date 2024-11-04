@@ -1735,6 +1735,13 @@ struct dircmds_t {
 };
 extern struct dircmds_t dir_cmds;
 
+struct pmsgs_t {
+	char *text;
+	int read;
+	int pad0;
+};
+extern struct pmsgs_t *messages;
+
 struct dir_info_t {
 	unsigned long long dirs;
 	unsigned long long files;
@@ -1967,7 +1974,6 @@ extern char
 	*quote_chars,
 	*rl_callback_handler_input,
 	*remotes_file,
-/*	*right_prompt, */
 	*sel_file,
 	*smenutab_options_env,
 	*stdin_tmp_dir,
@@ -1989,7 +1995,6 @@ extern char
 	**bin_commands,
 	**cdpaths,
 	**color_schemes,
-	**messages,
 	**old_pwd,
 	**profile_names,
 	**prompt_cmds,

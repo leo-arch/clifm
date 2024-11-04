@@ -97,6 +97,7 @@ struct ext_mnt_t *ext_mnt = (struct ext_mnt_t *)NULL;
 struct groups_t *sys_users = (struct groups_t *)NULL;
 struct groups_t *sys_groups = (struct groups_t *)NULL;
 struct dircmds_t dir_cmds = {UNSET, 0};
+struct pmsgs_t *messages = (struct pmsgs_t *)NULL;
 
 const struct sort_t sort_methods[] = {
     {"none", 0, 0},
@@ -283,7 +284,6 @@ char
 	*quote_chars = (char *)NULL,
 	*rl_callback_handler_input = (char *)NULL,
 	*remotes_file = (char *)NULL,
-/*	*right_prompt = (char *)NULL, */
 	*sel_file = (char *)NULL,
 	*smenutab_options_env = (char *)NULL,
 	*stdin_tmp_dir = (char *)NULL,
@@ -305,7 +305,6 @@ char
 	**bin_commands = (char **)NULL,
 	**cdpaths = (char **)NULL,
 	**color_schemes = (char **)NULL,
-	**messages = (char **)NULL,
 	**old_pwd = (char **)NULL,
 	**profile_names = (char **)NULL,
 	**prompt_cmds = (char **)NULL,

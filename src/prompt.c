@@ -1336,6 +1336,19 @@ construct_prompt(const char *decoded_prompt)
 	return the_prompt;
 }
 
+static void
+print_prompt_messages(void)
+{
+	size_t i;
+	for (i = 0; i < msgs_n; i++) {
+		if (messages[i].read == 1)
+			continue;
+
+		fputs(messages[i].text, stderr);
+		messages[i].read = 1;
+	}
+}
+
 static inline void
 initialize_prompt_data(const int prompt_flag)
 {
@@ -1374,11 +1387,8 @@ initialize_prompt_data(const int prompt_flag)
 	}
 #endif /* !_NO_SUGGESTIONS */
 
-	/* Print error messages */
-	if (print_msg == 1 && msgs_n > 0) {
-		fputs(messages[msgs_n - 1], stderr);
-		print_msg = 0; /* Print messages only once */
-	}
+	if (print_msg == 1 && msgs_n > 0)
+		print_prompt_messages();
 }
 
 static inline void

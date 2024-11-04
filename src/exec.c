@@ -654,7 +654,7 @@ msgs_function(const char *arg)
 
 		size_t i;
 		for (i = 0; i < msgs_n; i++)
-			free(messages[i]);
+			free(messages[i].text);
 
 		if (conf.autols == 1)
 			reload_dirlist();
@@ -667,7 +667,7 @@ msgs_function(const char *arg)
 	if (msgs_n > 0) {
 		size_t i;
 		for (i = 0; i < msgs_n; i++)
-			printf("%s", messages[i]);
+			printf("%s", messages[i].text);
 	} else {
 		printf(_("%s: No messages\n"), PROGRAM_NAME);
 	}

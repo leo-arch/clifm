@@ -244,8 +244,8 @@ err(const int msg_type, const int prompt_flag, const char *format, ...)
 		{free(buf); goto ERROR;}
 
 	/* If the new message is the same as the last message, skip it. */
-	if (msgs_n > 0 && msg_type != 'f' && *messages[msgs_n - 1] == *buf
-	&& strcmp(messages[msgs_n - 1], buf) == 0)
+	if (msgs_n > 0 && msg_type != 'f' && *messages[msgs_n - 1].text == *buf
+	&& strcmp(messages[msgs_n - 1].text, buf) == 0)
 		{free(buf); goto ERROR;}
 
 	if (msg_type >= 'e') {
@@ -1540,10 +1540,10 @@ free_stuff(void)
 		free(prompt_cmds[i]);
 	free(prompt_cmds);
 
-	if (msgs_n) {
+	if (msgs_n > 0) {
 		i = (int)msgs_n;
 		while (--i >= 0)
-			free(messages[i]);
+			free(messages[i].text);
 		free(messages);
 	}
 
