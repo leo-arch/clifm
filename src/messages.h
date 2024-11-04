@@ -133,9 +133,9 @@ The following codes are used to control Clifm's settings:\n\n\
   fc     Files counter     fc=0\n\
   ft     Files filter      ft=.*\\.pdf$\n\
   fz     Full dir size     fz=1\n\
-  hf     Hidden files      hf=0\n\
+  hf,hh  Hidden files      hf=0\n\
   lm     Light mode        lm=1\n\
-  lv     Long view         lv=1\n\
+  lv,ll  Long view         lv=1\n\
   mf     Max files         mf=100\n\
   mn     Max name length   mn=30\n\
   od     Only directories  od=1\n\

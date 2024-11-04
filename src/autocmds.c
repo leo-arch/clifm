@@ -425,11 +425,11 @@ fill_autocmd_opt(char *opt, const size_t n)
 			autocmds[n].files_counter = a;
 		if (*opt == 'f' && opt[1] == 'z')
 			autocmds[n].full_dir_size = a;
-		else if (*opt == 'h' && opt[1] == 'f')
+		else if (*opt == 'h' && (opt[1] == 'f' || opt[1] == 'h'))
 			autocmds[n].show_hidden = a;
 		else if (*opt == 'l' && opt[1] == 'm')
 			autocmds[n].light_mode = a;
-		else if (*opt == 'l' && opt[1] == 'v')
+		else if (*opt == 'l' && (opt[1] == 'v' || opt[1] == 'l'))
 			autocmds[n].long_view = a;
 		else if (*opt == 'm' && opt[1] == 'f')
 			autocmds[n].max_files = a;
