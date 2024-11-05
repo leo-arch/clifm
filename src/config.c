@@ -2864,6 +2864,24 @@ set_link_creation_mode(const char *val)
 		conf.link_creat_mode = DEF_LINK_CREATION_MODE;
 }
 
+static void
+set_autocmd_msg_value(const char *val)
+{
+	if (!val || !*val)
+		return;
+
+	if (*val == 'f' && strncmp(val, "false\n", 6) == 0)
+		conf.autocmd_msg = AUTOCMD_MSG_NONE;
+	else if (*val == 'm' && strncmp(val, "mini\n", 5) == 0)
+		conf.autocmd_msg = AUTOCMD_MSG_MINI;
+	else if (*val == 's' && strncmp(val, "short\n", 6) == 0)
+		conf.autocmd_msg = AUTOCMD_MSG_SHORT;
+	else if (*val == 'l' && strncmp(val, "long\n", 5) == 0)
+		conf.autocmd_msg = AUTOCMD_MSG_LONG;
+	else
+		conf.autocmd_msg = DEF_AUTOCMD_MSG;
+}
+
 /* Read the main configuration file and set options accordingly */
 static void
 read_config(void)
@@ -3046,6 +3064,10 @@ read_config(void)
 			set_config_bool_value(line + 6, &conf.icons);
 		}
 #endif /* !_NO_ICONS */
+
+		else if (*line == 'I' && strncmp(line, "InformAutocmd=", 14) == 0) {
+			set_autocmd_msg_value(line + 14);
+		}
 
 		else if (xargs.light_mode == UNSET && *line == 'L'
 		&& strncmp(line, "LightMode=", 10) == 0) {

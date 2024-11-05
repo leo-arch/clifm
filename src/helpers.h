@@ -905,6 +905,11 @@ extern time_t curdir_mtime;
 #define OWNERSHIP_PROMPT   3 /* oc command */
 #define BOOKMARKS_PROMPT   4 /* bookmarks screen */
 
+#define AUTOCMD_MSG_NONE  0
+#define AUTOCMD_MSG_MINI  1
+#define AUTOCMD_MSG_SHORT 2
+#define AUTOCMD_MSG_LONG  3
+
 /* Function macros */
 #define atoi xatoi /* xatoi is just a secure atoi */
 
@@ -1094,6 +1099,7 @@ struct config_t {
 	int apparent_size;
 	int auto_open;
 	int autocd;
+	int autocmd_msg;
 	int autols;
 	int bell_style;
 	int case_sens_dirjump;
@@ -1188,6 +1194,7 @@ struct config_t {
 #endif /* !_NO_TRASH */
 	int warning_prompt;
 	int welcome_message;
+	int pad3;
 };
 
 extern struct config_t conf;

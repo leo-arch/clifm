@@ -27,9 +27,10 @@
 __BEGIN_DECLS
 
 int  add_autocmd(char **args);
-void parse_autocmd_line(char *cmd, const size_t buflen);
-void reset_opts(void);
 int  check_autocmds(void);
+void parse_autocmd_line(char *cmd, const size_t buflen);
+void print_autocmd_msg(const int n);
+void reset_opts(void);
 void revert_autocmd_opts(void);
 
 __END_DECLS

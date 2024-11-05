@@ -463,6 +463,9 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 /* Default options */
 #define DEF_APPARENT_SIZE 1
 #define DEF_AUTOCD 1
+/* InformAutocmd values:
+ * AUTOCMD_MSG_NONE, AUTOCMD_MSG_MINI, AUTOCMD_MSG_SHORT, AUTOCMD_MSG_LONG */
+#define DEF_AUTOCMD_MSG AUTOCMD_MSG_LONG
 #define DEF_AUTO_OPEN 1
 #define DEF_AUTOLS 1
 #define DEF_CASE_SENS_LIST 0

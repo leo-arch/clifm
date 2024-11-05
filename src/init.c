@@ -175,6 +175,7 @@ init_conf_struct(void)
 	conf.apparent_size = UNSET;
 	conf.auto_open = UNSET;
 	conf.autocd = UNSET;
+	conf.autocmd_msg = DEF_AUTOCMD_MSG;
 	conf.autols = UNSET;
 	conf.bell_style = DEF_BELL_STYLE;
 	conf.case_sens_dirjump = UNSET;

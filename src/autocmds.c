@@ -34,6 +34,7 @@
 #include "messages.h" /* AUTO_USAGE macro */
 #include "misc.h"     /* xerror (err) */
 #include "sanitize.h" /* sanitize_cmd */
+#include "sort.h"     /* num_to_sort_name */
 #include "spawn.h"    /* launch_execl */
 
 /* The opts struct contains option values previous to any autocommand call */
@@ -161,6 +162,79 @@ set_autocmd_options(const size_t i)
 		install_autocmd_files_filter(i);
 }
 
+static int
+gen_opt_entry(char *buf, const char *name, const char *val, size_t *pos)
+{
+	const int long_msg = (conf.autocmd_msg == AUTOCMD_MSG_LONG);
+
+	const int ret = snprintf(buf, PATH_MAX, "%s%s%s%s", *pos > 0 ? ", " : "",
+		name, (long_msg == 1 && val) ? "=" : "",
+		(long_msg == 1 && val) ? val : "");
+
+	(*pos)++;
+	return (ret > 0 ? ret : 0);
+}
+
+void
+print_autocmd_msg(const int n)
+{
+	if (conf.autocmd_msg == AUTOCMD_MSG_MINI) {
+		print_reload_msg(NULL, NULL, "Autocmd\n");
+		return;
+	}
+
+	char buf[PATH_MAX];
+	int len = 0; /* Number of bytes currently consumed by buf. */
+	size_t c = 0; /* Number of procesed options for the current autocommand. */
+	struct autocmds_t *a = autocmds;
+
+	if (a[n].color_scheme && a[n].color_scheme != opts.color_scheme)
+		len += gen_opt_entry(buf + len, "cs", a[n].color_scheme, &c);
+
+	if (a[n].files_counter != -1 && a[n].files_counter != opts.files_counter)
+		len += gen_opt_entry(buf + len, "fc", xitoa(a[n].files_counter), &c);
+
+	if (a[n].filter.str && a[n].filter.str != opts.filter.str)
+		len += gen_opt_entry(buf + len, "ft", NULL, &c);
+
+	if (a[n].full_dir_size != -1 && a[n].full_dir_size != opts.full_dir_size)
+		len += gen_opt_entry(buf + len, "fz", xitoa(a[n].full_dir_size), &c);
+
+	if (a[n].show_hidden != -1 && a[n].show_hidden != opts.show_hidden)
+		len += gen_opt_entry(buf + len, "hf", xitoa(a[n].show_hidden), &c);
+
+	if (a[n].light_mode != -1 && a[n].light_mode != opts.light_mode)
+		len += gen_opt_entry(buf + len, "lm", xitoa(a[n].light_mode), &c);
+
+	if (a[n].long_view != -1 && a[n].long_view != opts.long_view)
+		len += gen_opt_entry(buf + len, "lv", xitoa(a[n].long_view), &c);
+
+	if (a[n].max_files != -1 && a[n].max_files != opts.max_files)
+		len += gen_opt_entry(buf + len, "mf", xitoa(a[n].max_files), &c);
+
+	if (a[n].max_name_len != -1 && a[n].max_name_len != opts.max_name_len)
+		len += gen_opt_entry(buf + len, "mn", xitoa(a[n].max_name_len), &c);
+
+	if (a[n].only_dirs != -1 && a[n].only_dirs != opts.only_dirs)
+		len += gen_opt_entry(buf + len, "od", xitoa(a[n].only_dirs), &c);
+
+	if (a[n].pager != -1 && a[n].pager != opts.pager)
+		len += gen_opt_entry(buf + len, "pg", xitoa(a[n].pager), &c);
+
+	if (a[n].sort != -1 && a[n].sort != opts.sort)
+		len += gen_opt_entry(buf + len, "st", num_to_sort_name(a[n].sort), &c);
+
+	if (a[n].sort_reverse != -1 && a[n].sort_reverse != opts.sort_reverse)
+		len += gen_opt_entry(buf + len, "sr", xitoa(a[n].sort_reverse), &c);
+
+	if (len <= 0) /* No autocommand option set. Do not print any message */
+		return;
+
+	print_reload_msg(NULL, NULL, "Autocmd [");
+	fputs(buf, stdout);
+	fputs("]\n", stdout);
+}
+
 /* Run autocommands for the current directory */
 int
 check_autocmds(void)
@@ -268,7 +342,7 @@ RUN_AUTOCMD:
 		break;
 	}
 
-	return found;
+	return (autocmds_n == i ? (-1) : (int)i);
 }
 
 static int
@@ -377,7 +451,7 @@ set_autocmd_color_scheme(const char *name, const size_t n)
 		}
 	}
 
-	err('e', PRINT_PROMPT, _("autocmd: '%s': Invalid value for 'cs'\n"), name);
+	err(ERR_NO_LOG, PRINT_PROMPT, _("autocmd: '%s': Invalid value for 'cs'\n"), name);
 	autocmds[n].color_scheme = (char *)NULL;
 	return FUNC_FAILURE;
 }
@@ -424,7 +498,7 @@ set_autocmd_sort(const char *val, const size_t n)
 	}
 
 ERROR:
-	err('e', PRINT_PROMPT, _("autocmd: '%s': Invalid value for 'st'\n"), val);
+	err(ERR_NO_LOG, PRINT_PROMPT, _("autocmd: '%s': Invalid value for 'st'\n"), val);
 	return FUNC_FAILURE;
 }
 
@@ -444,7 +518,7 @@ fill_autocmd_opt(char *opt, const size_t n)
 
 	char *p = strchr(opt, '=');
 	if (!p || !*(++p)) {
-		err('e', PRINT_PROMPT, _("autocmd: '%s': Invalid option format "
+		err(ERR_NO_LOG, PRINT_PROMPT, _("autocmd: '%s': Invalid option format "
 			" (it must be 'OPTION=VALUE').\n"), opt);
 		return FUNC_FAILURE;
 	}
@@ -485,7 +559,7 @@ fill_autocmd_opt(char *opt, const size_t n)
 		return FUNC_SUCCESS;
 	}
 
-	if (a < 0 || a > 1)
+	if (a < -1 || a > 1)
 		goto ERR_VAL;
 
 	if (*opt == 'f' && opt[1] == 'c')
@@ -510,11 +584,11 @@ fill_autocmd_opt(char *opt, const size_t n)
 	return FUNC_SUCCESS;
 
 ERR_NAME:
-	err('e', PRINT_PROMPT, _("autocmd: '%s': Invalid option name\n"), opt);
+	err(ERR_NO_LOG, PRINT_PROMPT, _("autocmd: '%s': Invalid option name\n"), opt);
 	return FUNC_FAILURE;
 
 ERR_VAL:
-	err('e', PRINT_PROMPT, _("autocmd: '%s': Invalid value for '%s'\n"), p, opt);
+	err(ERR_NO_LOG, PRINT_PROMPT, _("autocmd: '%s': Invalid value for '%s'\n"), p, opt);
 	return FUNC_FAILURE;
 }
 
