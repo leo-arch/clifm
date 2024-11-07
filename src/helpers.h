@@ -1397,6 +1397,8 @@ struct autocmds_t {
 	int pager;
 	int only_dirs;
 	int temp;
+	int match;
+	int pad0;
 };
 
 extern struct autocmds_t *autocmds;

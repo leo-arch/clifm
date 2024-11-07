@@ -616,7 +616,7 @@ print_dir_cmds(void)
 
 static int
 post_listing(DIR *dir, const int reset_pager, const filesn_t excluded_files,
-	const int autocmd_index)
+	const int autocmd_ret)
 {
 	restore_pager_view();
 
@@ -678,8 +678,8 @@ post_listing(DIR *dir, const int reset_pager, const filesn_t excluded_files,
 		print_reload_msg(NULL, NULL, _("Active filter: %s%s%s%s\n"),
 			BOLD, filter.rev == 1 ? "!" : "", filter.str, df_c);
 
-	if (autocmd_index != -1 && conf.autocmd_msg != AUTOCMD_MSG_NONE)
-		print_autocmd_msg(autocmd_index);
+	if (autocmd_ret == 1 && conf.autocmd_msg != AUTOCMD_MSG_NONE)
+		print_autocmd_msg();
 
 	if (dir_changed == 1) {
 		dir_cmds.first_cmd_in_dir = UNSET;
@@ -2395,7 +2395,7 @@ erase_scanning_message(void)
  * neither stat() nor count_dir(), which makes it quite faster. Return
  * zero on success and one on error */
 static int
-list_dir_light(const int autocmd_index)
+list_dir_light(const int autocmd_ret)
 {
 #ifdef LIST_SPEED_TEST
 	clock_t start = clock();
@@ -2691,7 +2691,7 @@ list_dir_light(const int autocmd_index)
 END:
 	exit_code =
 		post_listing(close_dir == 1 ? dir : NULL, reset_pager,
-			excluded_files, autocmd_index);
+			excluded_files, autocmd_ret);
 
 #ifndef ST_BTIME_LIGHT
 	if (conf.long_view == 1 && prop_fields.time == PROP_TIME_BIRTH)
@@ -3149,11 +3149,11 @@ list_dir(void)
 	if (xargs.list_and_quit != 1)
 		HIDE_CURSOR;
 
-	int autocmd_index = -1;
+	int autocmd_ret = 0;
 	if (autocmds_n > 0 && dir_changed == 1) {
 		if (autocmd_set == 1)
 			revert_autocmd_opts();
-		autocmd_index = check_autocmds();
+		autocmd_ret = check_autocmds();
 	}
 
 	if (dir_changed == 1 && dir_out == 1) {
@@ -3185,7 +3185,7 @@ list_dir(void)
 		props_now = time(NULL);
 
 	if (conf.light_mode == 1)
-		return list_dir_light(autocmd_index);
+		return list_dir_light(autocmd_ret);
 
 	struct dothidden_t *hidden_list =
 		(conf.read_dothidden == 1 && conf.show_hidden == 0)
@@ -3462,7 +3462,7 @@ list_dir(void)
 END:
 	exit_code =
 		post_listing(close_dir == 1 ? dir : NULL, reset_pager,
-			excluded_files, autocmd_index);
+			excluded_files, autocmd_ret);
 
 	if (xargs.disk_usage_analyzer == 1 && conf.long_view == 1
 	&& conf.full_dir_size == 1) {
