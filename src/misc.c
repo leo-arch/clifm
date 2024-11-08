@@ -1059,19 +1059,21 @@ create_usr_var(const char *str)
 	return FUNC_SUCCESS;
 }
 
-/* Resize the autocmds array leaving only temporary autocommands. */
+/*
+// Resize the autocmds array leaving only temporary autocommands.
 static void
 keep_temp_autocmds(void)
 {
 	size_t i;
 	size_t c = 0;
+	struct autocmds_t *a = (struct autocmds_t *)NULL;
 
 	for (i = 0; i < autocmds_n; i++) {
-		/* Temporary entries are guaranteed to be sequential. See add_autocmd()
-		 * in autocmds.c */
 		if (autocmds[i].temp == 1) {
+			a = xnrealloc(a, c + 2, sizeof(struct autocmds_t));
+			memmove(a + c, autocmds + i, sizeof(struct autocmds_t));
 			c++;
-			continue;
+			a[c] = (struct autocmds_t){0};
 		}
 
 		free(autocmds[i].pattern);
@@ -1081,13 +1083,16 @@ keep_temp_autocmds(void)
 	}
 
 	autocmds_n = c;
-	autocmds = xnrealloc(autocmds, autocmds_n, sizeof(struct autocmds_t));
-}
+	free(autocmds);
+	autocmds = a;
+//	autocmds = xnrealloc(autocmds, autocmds_n, sizeof(struct autocmds_t));
+} */
 
 void
 free_autocmds(const int keep_temp)
 {
-	int i = (int)autocmds_n;
+	UNUSED(keep_temp);
+/*	int i = (int)autocmds_n;
 
 	if (keep_temp == 1) {
 		while (--i >= 0) {
@@ -1096,9 +1101,9 @@ free_autocmds(const int keep_temp)
 				return;
 			}
 		}
-	}
+	} */
 
-	i = (int)autocmds_n;
+	int i = (int)autocmds_n;
 	while (--i >= 0) {
 		free(autocmds[i].pattern);
 		free(autocmds[i].cmd);
