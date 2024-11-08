@@ -37,6 +37,8 @@
 #include "sort.h"     /* num_to_sort_name */
 #include "spawn.h"    /* launch_execl */
 
+#define MF_UNSET (-2)
+
 /* The opts struct contains option values previous to any autocommand call */
 void
 reset_opts(void)
@@ -125,27 +127,27 @@ save_current_options(void)
 static void
 set_autocmd_options(const size_t i)
 {
-	if (autocmds[i].light_mode != -1)
+	if (autocmds[i].light_mode != UNSET)
 		conf.light_mode = autocmds[i].light_mode;
-	if (autocmds[i].files_counter != -1)
+	if (autocmds[i].files_counter != UNSET)
 		conf.files_counter = autocmds[i].files_counter;
-	if (autocmds[i].full_dir_size != -1)
+	if (autocmds[i].full_dir_size != UNSET)
 		conf.full_dir_size = autocmds[i].full_dir_size;
-	if (autocmds[i].long_view != -1)
+	if (autocmds[i].long_view != UNSET)
 		conf.long_view = autocmds[i].long_view;
-	if (autocmds[i].show_hidden != -1)
+	if (autocmds[i].show_hidden != UNSET)
 		conf.show_hidden = autocmds[i].show_hidden;
-	if (autocmds[i].only_dirs != -1)
+	if (autocmds[i].only_dirs != UNSET)
 		conf.only_dirs = autocmds[i].only_dirs;
-	if (autocmds[i].pager != -1)
+	if (autocmds[i].pager != UNSET)
 		conf.pager = autocmds[i].pager;
-	if (autocmds[i].sort != -1)
+	if (autocmds[i].sort != UNSET)
 		conf.sort = autocmds[i].sort;
-	if (autocmds[i].sort_reverse != -1)
+	if (autocmds[i].sort_reverse != UNSET)
 		conf.sort_reverse = autocmds[i].sort_reverse;
-	if (autocmds[i].max_name_len != -1)
+	if (autocmds[i].max_name_len != UNSET)
 		conf.max_name_len = autocmds[i].max_name_len;
-	if (autocmds[i].max_files != -2)
+	if (autocmds[i].max_files != MF_UNSET)
 		conf.max_files = autocmds[i].max_files;
 	if (autocmds[i].cmd) {
 		if (xargs.secure_cmds == 0
@@ -171,11 +173,69 @@ gen_opt_entry(char *buf, const char *name, const char *val, size_t *pos)
 	return (ret > 0 ? ret : 0);
 }
 
+static struct autocmds_t
+gen_common_options(void)
+{
+	struct autocmds_t a;
+	size_t i;
+
+	a.cmd = (char *)NULL;
+	a.color_scheme = (char *)NULL;
+	a.files_counter = UNSET;
+	a.full_dir_size = UNSET;
+	a.light_mode = UNSET;
+	a.long_view = UNSET;
+	a.max_files = MF_UNSET;
+	a.max_name_len = UNSET;
+	a.only_dirs = UNSET;
+	a.pager = UNSET;
+	a.show_hidden = UNSET;
+	a.sort = UNSET;
+	a.sort_reverse = UNSET;
+	a.filter = (struct filter_t){0};
+	a.temp = 0;
+
+	for (i = 0; i < autocmds_n; i++) {
+		if (autocmds[i].match == 0)
+			continue;
+
+		if (autocmds[i].color_scheme && autocmds[i].color_scheme != opts.color_scheme)
+			a.color_scheme = autocmds[i].color_scheme;
+		if (autocmds[i].filter.str && autocmds[i].filter.str != opts.filter.str) {
+			a.filter.str = autocmds[i].filter.str;
+			a.filter.rev = autocmds[i].filter.rev;
+			a.filter.type = autocmds[i].filter.type;
+		}
+		if (autocmds[i].files_counter != UNSET && autocmds[i].files_counter != opts.files_counter)
+			a.files_counter = autocmds[i].files_counter;
+		if (autocmds[i].full_dir_size != UNSET && autocmds[i].full_dir_size != opts.full_dir_size)
+			a.full_dir_size = autocmds[i].full_dir_size;
+		if (autocmds[i].light_mode != UNSET && autocmds[i].light_mode != opts.light_mode)
+			a.light_mode = autocmds[i].light_mode;
+		if (autocmds[i].long_view != UNSET && autocmds[i].long_view != opts.long_view)
+			a.long_view = autocmds[i].long_view;
+		if (autocmds[i].max_files != MF_UNSET && autocmds[i].max_files != opts.max_files)
+			a.max_files = autocmds[i].max_files;
+		if (autocmds[i].max_name_len != UNSET && autocmds[i].max_name_len != opts.max_name_len)
+			a.max_name_len = autocmds[i].max_name_len;
+		if (autocmds[i].only_dirs != UNSET && autocmds[i].only_dirs != opts.only_dirs)
+			a.only_dirs = autocmds[i].only_dirs;
+		if (autocmds[i].pager != UNSET && autocmds[i].pager != opts.pager)
+			a.pager = autocmds[i].pager;
+		if (autocmds[i].show_hidden != UNSET && autocmds[i].show_hidden != opts.show_hidden)
+			a.show_hidden = autocmds[i].show_hidden;
+		if (autocmds[i].sort != UNSET && autocmds[i].sort != opts.sort)
+			a.sort = autocmds[i].sort;
+		if (autocmds[i].sort_reverse != UNSET && autocmds[i].sort_reverse != opts.sort_reverse)
+			a.sort_reverse = autocmds[i].sort_reverse;
+	}
+
+	return a;
+}
+
 void
 print_autocmd_msg(void)
 {
-	return;
-
 	if (conf.autocmd_msg == AUTOCMD_MSG_MINI) {
 		print_reload_msg(NULL, NULL, "Autocmd\n");
 		return;
@@ -184,52 +244,46 @@ print_autocmd_msg(void)
 	char buf[PATH_MAX];
 	int len = 0; /* Number of bytes currently consumed by buf. */
 	size_t c = 0; /* Number of procesed options for the current autocommand. */
-	struct autocmds_t *a = autocmds;
+	struct autocmds_t a = gen_common_options();
 
-	size_t n;
-	for (n = 0; n < autocmds_n; n++) {
-		if (autocmds[n].match == 0)
-			continue;
+	if (a.color_scheme && a.color_scheme != opts.color_scheme)
+		len += gen_opt_entry(buf + len, "cs", a.color_scheme, &c);
 
-		if (a[n].color_scheme && a[n].color_scheme != opts.color_scheme)
-			len += gen_opt_entry(buf + len, "cs", a[n].color_scheme, &c);
+	if (a.files_counter != UNSET && a.files_counter != opts.files_counter)
+		len += gen_opt_entry(buf + len, "fc", xitoa(a.files_counter), &c);
 
-		if (a[n].files_counter != -1 && a[n].files_counter != opts.files_counter)
-			len += gen_opt_entry(buf + len, "fc", xitoa(a[n].files_counter), &c);
+	if (a.filter.str && a.filter.str != opts.filter.str)
+		len += gen_opt_entry(buf + len, "ft", NULL, &c);
 
-		if (a[n].filter.str && a[n].filter.str != opts.filter.str)
-			len += gen_opt_entry(buf + len, "ft", NULL, &c);
+	if (a.full_dir_size != UNSET && a.full_dir_size != opts.full_dir_size)
+		len += gen_opt_entry(buf + len, "fz", xitoa(a.full_dir_size), &c);
 
-		if (a[n].full_dir_size != -1 && a[n].full_dir_size != opts.full_dir_size)
-			len += gen_opt_entry(buf + len, "fz", xitoa(a[n].full_dir_size), &c);
+	if (a.show_hidden != UNSET && a.show_hidden != opts.show_hidden)
+		len += gen_opt_entry(buf + len, "hf", xitoa(a.show_hidden), &c);
 
-		if (a[n].show_hidden != -1 && a[n].show_hidden != opts.show_hidden)
-			len += gen_opt_entry(buf + len, "hf", xitoa(a[n].show_hidden), &c);
+	if (a.light_mode != UNSET && a.light_mode != opts.light_mode)
+		len += gen_opt_entry(buf + len, "lm", xitoa(a.light_mode), &c);
 
-		if (a[n].light_mode != -1 && a[n].light_mode != opts.light_mode)
-			len += gen_opt_entry(buf + len, "lm", xitoa(a[n].light_mode), &c);
+	if (a.long_view != UNSET && a.long_view != opts.long_view)
+		len += gen_opt_entry(buf + len, "lv", xitoa(a.long_view), &c);
 
-		if (a[n].long_view != -1 && a[n].long_view != opts.long_view)
-			len += gen_opt_entry(buf + len, "lv", xitoa(a[n].long_view), &c);
+	if (a.max_files != UNSET && a.max_files != opts.max_files)
+		len += gen_opt_entry(buf + len, "mf", xitoa(a.max_files), &c);
 
-		if (a[n].max_files != -1 && a[n].max_files != opts.max_files)
-			len += gen_opt_entry(buf + len, "mf", xitoa(a[n].max_files), &c);
+	if (a.max_name_len != UNSET && a.max_name_len != opts.max_name_len)
+		len += gen_opt_entry(buf + len, "mn", xitoa(a.max_name_len), &c);
 
-		if (a[n].max_name_len != -1 && a[n].max_name_len != opts.max_name_len)
-			len += gen_opt_entry(buf + len, "mn", xitoa(a[n].max_name_len), &c);
+	if (a.only_dirs != UNSET && a.only_dirs != opts.only_dirs)
+		len += gen_opt_entry(buf + len, "od", xitoa(a.only_dirs), &c);
 
-		if (a[n].only_dirs != -1 && a[n].only_dirs != opts.only_dirs)
-			len += gen_opt_entry(buf + len, "od", xitoa(a[n].only_dirs), &c);
+	if (a.pager != UNSET && a.pager != opts.pager)
+		len += gen_opt_entry(buf + len, "pg", xitoa(a.pager), &c);
 
-		if (a[n].pager != -1 && a[n].pager != opts.pager)
-			len += gen_opt_entry(buf + len, "pg", xitoa(a[n].pager), &c);
+	if (a.sort != UNSET && a.sort != opts.sort)
+		len += gen_opt_entry(buf + len, "st", num_to_sort_name(a.sort), &c);
 
-		if (a[n].sort != -1 && a[n].sort != opts.sort)
-			len += gen_opt_entry(buf + len, "st", num_to_sort_name(a[n].sort), &c);
-
-		if (a[n].sort_reverse != -1 && a[n].sort_reverse != opts.sort_reverse)
-			len += gen_opt_entry(buf + len, "sr", xitoa(a[n].sort_reverse), &c);
-	}
+	if (a.sort_reverse != UNSET && a.sort_reverse != opts.sort_reverse)
+		len += gen_opt_entry(buf + len, "sr", xitoa(a.sort_reverse), &c);
 
 	if (len <= 0) /* No autocommand option set. Do not print any message */
 		return;
@@ -245,8 +299,8 @@ run_autocmds(const size_t *matches, const size_t matches_n)
 	save_current_options();
 	autocmd_set = 1;
 
-	int cs_last_index = -1;
-	int ft_last_index = -1;
+	int cs_last_index = UNSET;
+	int ft_last_index = UNSET;
 	size_t i;
 
 	for (i = 0; i < matches_n; i++) {
@@ -258,9 +312,9 @@ run_autocmds(const size_t *matches, const size_t matches_n)
 		set_autocmd_options(matches[i]);
 	}
 
-	if (cs_last_index != -1)
+	if (cs_last_index != UNSET)
 		set_colors(autocmds[cs_last_index].color_scheme, 0);
-	if (ft_last_index != -1)
+	if (ft_last_index != UNSET)
 		install_autocmd_files_filter((size_t)ft_last_index);
 
 	return 1;
@@ -626,7 +680,7 @@ init_autocmd_opts(const size_t n)
 	autocmds[n].full_dir_size = UNSET;
 	autocmds[n].light_mode = UNSET;
 	autocmds[n].long_view = UNSET;
-	autocmds[n].max_files = UNSET;
+	autocmds[n].max_files = MF_UNSET;
 	autocmds[n].max_name_len = UNSET;
 	autocmds[n].only_dirs = UNSET;
 	autocmds[n].pager = UNSET;
