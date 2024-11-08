@@ -177,6 +177,7 @@ static struct autocmds_t
 gen_common_options(void)
 {
 	struct autocmds_t a;
+	struct autocmds_t *b = autocmds;
 	size_t i;
 
 	a.cmd = (char *)NULL;
@@ -196,38 +197,42 @@ gen_common_options(void)
 	a.temp = 0;
 
 	for (i = 0; i < autocmds_n; i++) {
-		if (autocmds[i].match == 0)
+		if (b[i].match == 0)
 			continue;
 
-		if (autocmds[i].color_scheme && autocmds[i].color_scheme != opts.color_scheme)
-			a.color_scheme = autocmds[i].color_scheme;
-		if (autocmds[i].filter.str && autocmds[i].filter.str != opts.filter.str) {
-			a.filter.str = autocmds[i].filter.str;
-			a.filter.rev = autocmds[i].filter.rev;
-			a.filter.type = autocmds[i].filter.type;
+		if (b[i].color_scheme && b[i].color_scheme != opts.color_scheme)
+			a.color_scheme = b[i].color_scheme;
+		if (b[i].filter.str && b[i].filter.str != opts.filter.str) {
+			a.filter.str = b[i].filter.str;
+			a.filter.rev = b[i].filter.rev;
+			a.filter.type = b[i].filter.type;
 		}
-		if (autocmds[i].files_counter != UNSET && autocmds[i].files_counter != opts.files_counter)
-			a.files_counter = autocmds[i].files_counter;
-		if (autocmds[i].full_dir_size != UNSET && autocmds[i].full_dir_size != opts.full_dir_size)
-			a.full_dir_size = autocmds[i].full_dir_size;
-		if (autocmds[i].light_mode != UNSET && autocmds[i].light_mode != opts.light_mode)
-			a.light_mode = autocmds[i].light_mode;
-		if (autocmds[i].long_view != UNSET && autocmds[i].long_view != opts.long_view)
-			a.long_view = autocmds[i].long_view;
-		if (autocmds[i].max_files != MF_UNSET && autocmds[i].max_files != opts.max_files)
-			a.max_files = autocmds[i].max_files;
-		if (autocmds[i].max_name_len != UNSET && autocmds[i].max_name_len != opts.max_name_len)
-			a.max_name_len = autocmds[i].max_name_len;
-		if (autocmds[i].only_dirs != UNSET && autocmds[i].only_dirs != opts.only_dirs)
-			a.only_dirs = autocmds[i].only_dirs;
-		if (autocmds[i].pager != UNSET && autocmds[i].pager != opts.pager)
-			a.pager = autocmds[i].pager;
-		if (autocmds[i].show_hidden != UNSET && autocmds[i].show_hidden != opts.show_hidden)
+		if (b[i].files_counter != UNSET
+		&& b[i].files_counter != opts.files_counter)
+			a.files_counter = b[i].files_counter;
+		if (b[i].full_dir_size != UNSET
+		&& b[i].full_dir_size != opts.full_dir_size)
+			a.full_dir_size = b[i].full_dir_size;
+		if (b[i].light_mode != UNSET && b[i].light_mode != opts.light_mode)
+			a.light_mode = b[i].light_mode;
+		if (b[i].long_view != UNSET && b[i].long_view != opts.long_view)
+			a.long_view = b[i].long_view;
+		if (b[i].max_files != MF_UNSET && b[i].max_files != opts.max_files)
+			a.max_files = b[i].max_files;
+		if (b[i].max_name_len != UNSET
+		&& b[i].max_name_len != opts.max_name_len)
+			a.max_name_len = b[i].max_name_len;
+		if (b[i].only_dirs != UNSET && b[i].only_dirs != opts.only_dirs)
+			a.only_dirs = b[i].only_dirs;
+		if (b[i].pager != UNSET && b[i].pager != opts.pager)
+			a.pager = b[i].pager;
+		if (b[i].show_hidden != UNSET && b[i].show_hidden != opts.show_hidden)
 			a.show_hidden = autocmds[i].show_hidden;
-		if (autocmds[i].sort != UNSET && autocmds[i].sort != opts.sort)
-			a.sort = autocmds[i].sort;
-		if (autocmds[i].sort_reverse != UNSET && autocmds[i].sort_reverse != opts.sort_reverse)
-			a.sort_reverse = autocmds[i].sort_reverse;
+		if (b[i].sort != UNSET && b[i].sort != opts.sort)
+			a.sort = b[i].sort;
+		if (b[i].sort_reverse != UNSET
+		&& b[i].sort_reverse != opts.sort_reverse)
+			a.sort_reverse = b[i].sort_reverse;
 	}
 
 	return a;
