@@ -267,7 +267,7 @@ print_autocmd_msg(void)
 	if (a.long_view != UNSET && a.long_view != opts.long_view)
 		len += gen_opt_entry(buf + len, "lv", xitoa(a.long_view), &c);
 
-	if (a.max_files != UNSET && a.max_files != opts.max_files)
+	if (a.max_files != MF_UNSET && a.max_files != opts.max_files)
 		len += gen_opt_entry(buf + len, "mf", xitoa(a.max_files), &c);
 
 	if (a.max_name_len != UNSET && a.max_name_len != opts.max_name_len)
@@ -347,19 +347,24 @@ check_autocmds(void)
 		if (!autocmds[i].pattern || !*autocmds[i].pattern)
 			continue;
 
+		if (autocmds[i].temp == 1
+		&& strcmp(autocmds[i].pattern, workspaces[cur_ws].path) == 0)
+			goto STORE_MATCH;
+
 		int rev = 0;
 		char *p = autocmds[i].pattern;
 		if (*p == '!') {
-			++p;
+			p++;
 			rev = 1;
 		}
 
 		/* Check workspaces (@wsN)*/
 		if (*autocmds[i].pattern == '@' && autocmds[i].pattern[1] == 'w'
-		&& autocmds[i].pattern[2] == 's' && autocmds[i].pattern[3]
-		/* char '1' - 48 (or '0') == int 1 */
-		&& autocmds[i].pattern[3] - 48 == cur_ws + 1)
-			goto STORE_MATCH;
+		&& autocmds[i].pattern[2] == 's' && autocmds[i].pattern[3]) {
+			if (autocmds[i].pattern[3] - '0' == cur_ws + 1)
+				goto STORE_MATCH;
+			continue;
+		}
 
 		/* Double asterisk: match everything starting with PATTERN
 		 * (less double asterisk itself and ending slash). */
@@ -390,6 +395,8 @@ check_autocmds(void)
 				workspaces[cur_ws].path, plen - n) == 0)
 					goto STORE_MATCH;
 			}
+
+			continue;
 		}
 
 		/* Glob expression or plain text for PATTERN */
@@ -404,6 +411,7 @@ check_autocmds(void)
 
 		int found = 0;
 		size_t j;
+
 		for (j = 0; j < g.gl_pathc; j++) {
 			if (*workspaces[cur_ws].path == *g.gl_pathv[j]
 			&& strcmp(workspaces[cur_ws].path, g.gl_pathv[j]) == 0) {
@@ -411,6 +419,7 @@ check_autocmds(void)
 				break;
 			}
 		}
+
 		globfree(&g);
 
 		if ((rev == 0 && found == 0) || (rev == 1 && found == 1))
