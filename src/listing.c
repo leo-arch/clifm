@@ -967,8 +967,12 @@ static struct maxes_t
 compute_maxes(void)
 {
 	struct maxes_t maxes = {0};
+
 	filesn_t i = xargs.max_files > 0 ? (filesn_t)xargs.max_files
 		: (conf.max_files > 0 ? conf.max_files : files);
+
+	if (i > files)
+		i = files;
 
 	while (--i >= 0) {
 		int t = 0;
