@@ -24,6 +24,7 @@
 
 #include "helpers.h"
 
+#include <fnmatch.h>  /* fnmatch */
 #include <string.h>
 #include <readline/tilde.h>
 
@@ -352,9 +353,20 @@ check_autocmds(void)
 		if (!autocmds[i].pattern || !*autocmds[i].pattern)
 			continue;
 
-		if (autocmds[i].temp == 1
-		&& strcmp(autocmds[i].pattern, workspaces[cur_ws].path) == 0)
-			goto STORE_MATCH;
+		/* 1. Temporary autocommands (set via the 'auto' command). */
+		if (autocmds[i].temp == 1) {
+			if (strcmp(autocmds[i].pattern, workspaces[cur_ws].path) == 0)
+				goto STORE_MATCH;
+			continue;
+		}
+
+		/* 2. Workspaces (@wsN). */
+		if (*autocmds[i].pattern == '@' && autocmds[i].pattern[1] == 'w'
+		&& autocmds[i].pattern[2] == 's' && autocmds[i].pattern[3]) {
+			if (autocmds[i].pattern[3] - '0' == cur_ws + 1)
+				goto STORE_MATCH;
+			continue;
+		}
 
 		int rev = 0;
 		char *p = autocmds[i].pattern;
@@ -363,15 +375,7 @@ check_autocmds(void)
 			rev = 1;
 		}
 
-		/* Check workspaces (@wsN)*/
-		if (*autocmds[i].pattern == '@' && autocmds[i].pattern[1] == 'w'
-		&& autocmds[i].pattern[2] == 's' && autocmds[i].pattern[3]) {
-			if (autocmds[i].pattern[3] - '0' == cur_ws + 1)
-				goto STORE_MATCH;
-			continue;
-		}
-
-		/* Double asterisk: match everything starting with PATTERN
+		/* 3. Double asterisk: match everything starting with PATTERN
 		 * (less double asterisk itself and ending slash). */
 		size_t plen = strlen(p), n = 0;
 		if (!rev && plen >= 3 && p[plen - 1] == '*' && p[plen - 2] == '*') {
@@ -404,28 +408,16 @@ check_autocmds(void)
 			continue;
 		}
 
-		/* Glob expression or plain text for PATTERN */
-		glob_t g;
-		const int ret = glob(p, GLOB_NOSORT | GLOB_NOCHECK | GLOB_TILDE
-			| GLOB_BRACE, NULL, &g);
+		/* 4. Glob expression or plain text for PATTERN */
 
-		if (ret != 0) {
-			globfree(&g);
+		char *pattern = p;
+		if (*p == '~' && !(pattern = tilde_expand(p)))
 			continue;
-		}
 
-		int found = 0;
-		size_t j;
+		const int found = (fnmatch(pattern, workspaces[cur_ws].path, 0) == 0);
 
-		for (j = 0; j < g.gl_pathc; j++) {
-			if (*workspaces[cur_ws].path == *g.gl_pathv[j]
-			&& strcmp(workspaces[cur_ws].path, g.gl_pathv[j]) == 0) {
-				found = 1;
-				break;
-			}
-		}
-
-		globfree(&g);
+		if (pattern != p)
+			free(pattern);
 
 		if ((rev == 0 && found == 0) || (rev == 1 && found == 1))
 			continue;
