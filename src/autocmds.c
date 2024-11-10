@@ -38,7 +38,9 @@
 #include "sort.h"     /* num_to_sort_name */
 #include "spawn.h"    /* launch_execl */
 
-#define MF_UNSET (-2)
+/* Some options (mf and mn) take UNSET (-1) as a valid value. Let's use
+ * this macro to mark them as unset (no value). */
+#define AC_UNSET (-2)
 
 /* The opts struct contains option values previous to any autocommand call */
 void
@@ -146,9 +148,9 @@ set_autocmd_options(const size_t i)
 		conf.sort = autocmds[i].sort;
 	if (autocmds[i].sort_reverse != UNSET)
 		conf.sort_reverse = autocmds[i].sort_reverse;
-	if (autocmds[i].max_name_len != UNSET)
+	if (autocmds[i].max_name_len != AC_UNSET)
 		conf.max_name_len = autocmds[i].max_name_len;
-	if (autocmds[i].max_files != MF_UNSET)
+	if (autocmds[i].max_files != AC_UNSET)
 		conf.max_files = autocmds[i].max_files;
 	if (autocmds[i].cmd) {
 		if (xargs.secure_cmds == 0
@@ -187,8 +189,8 @@ gen_common_options(void)
 	a.full_dir_size = UNSET;
 	a.light_mode = UNSET;
 	a.long_view = UNSET;
-	a.max_files = MF_UNSET;
-	a.max_name_len = UNSET;
+	a.max_files = AC_UNSET;
+	a.max_name_len = AC_UNSET;
 	a.only_dirs = UNSET;
 	a.pager = UNSET;
 	a.show_hidden = UNSET;
@@ -201,38 +203,34 @@ gen_common_options(void)
 		if (b[i].match == 0)
 			continue;
 
-		if (b[i].color_scheme && b[i].color_scheme != opts.color_scheme)
+		if (b[i].color_scheme)
 			a.color_scheme = b[i].color_scheme;
-		if (b[i].filter.str && b[i].filter.str != opts.filter.str) {
+		if (b[i].filter.str) {
 			a.filter.str = b[i].filter.str;
 			a.filter.rev = b[i].filter.rev;
 			a.filter.type = b[i].filter.type;
 		}
-		if (b[i].files_counter != UNSET
-		&& b[i].files_counter != opts.files_counter)
+		if (b[i].files_counter != UNSET)
 			a.files_counter = b[i].files_counter;
-		if (b[i].full_dir_size != UNSET
-		&& b[i].full_dir_size != opts.full_dir_size)
+		if (b[i].full_dir_size != UNSET)
 			a.full_dir_size = b[i].full_dir_size;
-		if (b[i].light_mode != UNSET && b[i].light_mode != opts.light_mode)
+		if (b[i].light_mode != UNSET)
 			a.light_mode = b[i].light_mode;
-		if (b[i].long_view != UNSET && b[i].long_view != opts.long_view)
+		if (b[i].long_view != UNSET)
 			a.long_view = b[i].long_view;
-		if (b[i].max_files != MF_UNSET && b[i].max_files != opts.max_files)
+		if (b[i].max_files != AC_UNSET)
 			a.max_files = b[i].max_files;
-		if (b[i].max_name_len != UNSET
-		&& b[i].max_name_len != opts.max_name_len)
+		if (b[i].max_name_len != AC_UNSET)
 			a.max_name_len = b[i].max_name_len;
-		if (b[i].only_dirs != UNSET && b[i].only_dirs != opts.only_dirs)
+		if (b[i].only_dirs != UNSET)
 			a.only_dirs = b[i].only_dirs;
-		if (b[i].pager != UNSET && b[i].pager != opts.pager)
+		if (b[i].pager != UNSET)
 			a.pager = b[i].pager;
-		if (b[i].show_hidden != UNSET && b[i].show_hidden != opts.show_hidden)
+		if (b[i].show_hidden != UNSET)
 			a.show_hidden = autocmds[i].show_hidden;
-		if (b[i].sort != UNSET && b[i].sort != opts.sort)
+		if (b[i].sort != UNSET)
 			a.sort = b[i].sort;
-		if (b[i].sort_reverse != UNSET
-		&& b[i].sort_reverse != opts.sort_reverse)
+		if (b[i].sort_reverse != UNSET)
 			a.sort_reverse = b[i].sort_reverse;
 	}
 
@@ -273,10 +271,10 @@ print_autocmd_msg(void)
 	if (a.long_view != UNSET && a.long_view != opts.long_view)
 		len += gen_opt_entry(buf + len, "lv", xitoa(a.long_view), &c);
 
-	if (a.max_files != MF_UNSET && a.max_files != opts.max_files)
+	if (a.max_files != AC_UNSET && a.max_files != opts.max_files)
 		len += gen_opt_entry(buf + len, "mf", xitoa(a.max_files), &c);
 
-	if (a.max_name_len != UNSET && a.max_name_len != opts.max_name_len)
+	if (a.max_name_len != AC_UNSET && a.max_name_len != opts.max_name_len)
 		len += gen_opt_entry(buf + len, "mn", xitoa(a.max_name_len), &c);
 
 	if (a.only_dirs != UNSET && a.only_dirs != opts.only_dirs)
@@ -602,13 +600,14 @@ fill_autocmd_opt(char *opt, const size_t n)
 	}
 
 	char *p = strchr(opt, '=');
-	if (!p || !*(++p)) {
+	if (!p) {
 		err(ERR_NO_LOG, PRINT_PROMPT, _("autocmd: '%s': Invalid option format "
 			" (it must be 'OPTION=VALUE').\n"), opt);
 		return FUNC_FAILURE;
 	}
 
-	*(p - 1) = '\0';
+	*p = '\0';
+	p++;
 
 	/* All option names take exactly two characters. */
 	if (!*opt || !opt[1] || opt[2])
@@ -616,17 +615,19 @@ fill_autocmd_opt(char *opt, const size_t n)
 
 	/* 'cs', 'ft', and 'st' take strings as values. */
 	if (*opt == 'c' && opt[1] == 's')
-		return set_autocmd_color_scheme(p, n);
+		return set_autocmd_color_scheme(*p ? p : "unset", n);
 
 	if (*opt == 'f' && opt[1] == 't')
-		return set_autocmd_files_filter(p, n);
+		return set_autocmd_files_filter(*p ? p : "unset", n);
 
 	if (*opt == 's' && opt[1] == 't')
-		return set_autocmd_sort(p, n);
+		return set_autocmd_sort(*p ? p : "unset", n);
 
 	/* The below options taken only numbers (or 'unset') as values. */
 	int a = 0;
-	if (!is_number(p)) {
+	if (!*p) { /* 'OPTION=' amounts to 'OPTION=unset'. */
+		a = UNSET;
+	} else if (!is_number(p)) {
 		if (*p != 'u' || strcmp(p, "unset") != 0)
 			goto ERR_VAL;
 		a = UNSET;
@@ -635,16 +636,16 @@ fill_autocmd_opt(char *opt, const size_t n)
 	}
 
 	if (*opt == 'm' && opt[1] == 'f') {
-		autocmds[n].max_files = a;
+		autocmds[n].max_files = !*p ? AC_UNSET : a;
 		return FUNC_SUCCESS;
 	}
 
 	if (*opt == 'm' && opt[1] == 'n') {
-		autocmds[n].max_name_len = a;
+		autocmds[n].max_name_len = !*p ? AC_UNSET : a;
 		return FUNC_SUCCESS;
 	}
 
-	if (a < -1 || a > 1)
+	if (a != UNSET && a != 1 && a != 0)
 		goto ERR_VAL;
 
 	if (*opt == 'f' && opt[1] == 'c')
@@ -686,8 +687,8 @@ init_autocmd_opts(const size_t n)
 	autocmds[n].full_dir_size = UNSET;
 	autocmds[n].light_mode = UNSET;
 	autocmds[n].long_view = UNSET;
-	autocmds[n].max_files = MF_UNSET;
-	autocmds[n].max_name_len = UNSET;
+	autocmds[n].max_files = AC_UNSET;
+	autocmds[n].max_name_len = AC_UNSET;
 	autocmds[n].only_dirs = UNSET;
 	autocmds[n].pager = UNSET;
 	autocmds[n].show_hidden = UNSET;
