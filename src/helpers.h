@@ -1386,20 +1386,20 @@ struct autocmds_t {
 	char *pattern;
 	char *color_scheme;
 	char *cmd;
-	int long_view;
-	int light_mode;
 	int files_counter;
 	int full_dir_size;
+	int long_view;
+	int light_mode;
+	int match;
 	int max_files;
 	int max_name_len;
+	int only_dirs;
+	int pager;
+	int pattern_rev;
 	int show_hidden;
 	int sort;
 	int sort_reverse;
-	int pager;
-	int only_dirs;
 	int temp;
-	int match;
-	int pad0;
 };
 
 extern struct autocmds_t *autocmds;

@@ -390,76 +390,44 @@ check_autocmds(void)
 		if (!autocmds[i].pattern || !*autocmds[i].pattern)
 			continue;
 
+		char *p = autocmds[i].pattern;
+		const int rev = autocmds[i].pattern_rev;
+		int found = 0;
+
 		/* 1. Temporary autocommands (set via the 'auto' command). */
 		if (autocmds[i].temp == 1) {
-			if (strcmp(autocmds[i].pattern, workspaces[cur_ws].path) == 0)
-				goto STORE_MATCH;
-			continue;
+			found = (strcmp(p, workspaces[cur_ws].path) == 0);
+			goto CHECK_MATCH;
 		}
 
 		/* 2. Workspaces (@wsN). */
-		if (*autocmds[i].pattern == '@' && autocmds[i].pattern[1] == 'w'
-		&& autocmds[i].pattern[2] == 's' && autocmds[i].pattern[3]) {
-			if (autocmds[i].pattern[3] - '0' == cur_ws + 1)
-				goto STORE_MATCH;
-			continue;
-		}
-
-		int rev = 0;
-		char *p = autocmds[i].pattern;
-		if (*p == '!') {
-			p++;
-			rev = 1;
+		if (*p == '@' && p[1] == 'w' && p[2] == 's' && p[3]) {
+			found = (p[3] - '0' == cur_ws + 1);
+			goto CHECK_MATCH;
 		}
 
 		/* 3. Double asterisk: match everything starting with PATTERN
 		 * (less double asterisk itself and ending slash). */
-		size_t plen = strlen(p), n = 0;
-		if (!rev && plen >= 3 && p[plen - 1] == '*' && p[plen - 2] == '*') {
-			n = 2;
+		const size_t plen = strlen(p);
+		if (plen >= 3 && p[plen - 1] == '*' && p[plen - 2] == '*') {
+			size_t n = 2;
 			if (p[plen - 3] == '/')
 				n++;
 
-			if (*p == '~') {
-				p[plen - n] = '\0';
-				char *path = tilde_expand(p);
-				if (!path)
-					continue;
+			if (plen - n == 0 || strncmp(p,
+			workspaces[cur_ws].path, plen - n) == 0)
+				found = 1;
 
-				p[plen - n] = (n == 2 ? '*' : '/');
-				const size_t tlen = strlen(path);
-				const int ret = strncmp(path, workspaces[cur_ws].path, tlen);
-				free(path);
-
-				if (ret == 0)
-					goto STORE_MATCH;
-
-			} else { /* We have an absolute path */
-				/* If (plen - n) == 0 we have "/\**", that is, match everything:
-				 * no need to perform any check. */
-				if (plen - n == 0 || strncmp(autocmds[i].pattern,
-				workspaces[cur_ws].path, plen - n) == 0)
-					goto STORE_MATCH;
-			}
-
-			continue;
+			goto CHECK_MATCH;
 		}
 
 		/* 4. Glob expression or plain text for PATTERN */
+		found = (fnmatch(p, workspaces[cur_ws].path, 0) == 0);
 
-		char *pattern = p;
-		if (*p == '~' && !(pattern = tilde_expand(p)))
-			continue;
-
-		const int found = (fnmatch(pattern, workspaces[cur_ws].path, 0) == 0);
-
-		if (pattern != p)
-			free(pattern);
-
+CHECK_MATCH:
 		if ((rev == 0 && found == 0) || (rev == 1 && found == 1))
 			continue;
 
-STORE_MATCH:
 		matches[matches_n] = i;
 		matches_n++;
 	}
@@ -736,6 +704,7 @@ init_autocmd_opts(const size_t n)
 	autocmds[n].filter = (struct filter_t){0};
 	autocmds[n].temp = 0;
 	autocmds[n].match = 0;
+	autocmds[n].pattern_rev = 0;
 }
 
 /* Modify the options of the autocommand whose index number is N
@@ -770,6 +739,29 @@ modify_autocmd(char *arg, const size_t n)
 	return exit_status;
 }
 
+static void
+save_autocmd_pattern(const char *p, const size_t buf_len, const size_t n)
+{
+	if (*p == '!') {
+		p++;
+		autocmds[n].pattern_rev = 1;
+	}
+
+	if (*p == '~' && user.home && *user.home) {
+		if (!p[1] || (p[1] == '/' && !p[2])) {
+			autocmds[n].pattern = savestring(user.home, user.home_len);
+		} else if (p[1] == '/') {
+			const size_t len = user.home_len + (strnlen(p, buf_len) - 2) + 2;
+			autocmds[n].pattern = xnmalloc(len, sizeof(char));
+			snprintf(autocmds[n].pattern, len, "%s/%s", user.home, p + 2);
+		} else {
+			autocmds[n].pattern = savestring(p, strnlen(p, buf_len));
+		}
+	} else {
+		autocmds[n].pattern = savestring(p, strnlen(p, buf_len));
+	}
+}
+
 /* Take an autocmd line and store parameters in a struct. */
 int
 parse_autocmd_line(char *cmd, const size_t buflen)
@@ -788,9 +780,8 @@ parse_autocmd_line(char *cmd, const size_t buflen)
 	*p = '\0';
 
 	autocmds = xnrealloc(autocmds, autocmds_n + 1, sizeof(struct autocmds_t));
-	autocmds[autocmds_n].pattern = savestring(cmd, strnlen(cmd, buflen));
-
 	init_autocmd_opts(autocmds_n);
+	save_autocmd_pattern(cmd, buflen, autocmds_n);
 
 	p++;
 
