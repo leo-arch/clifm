@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Oct 24, 2024" "clifm 1.21.9" "CLIFM Manual"
+.TH "CLIFM" "1" "Nov 10, 2024" "clifm 1.21.12" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -527,6 +527,37 @@ To create multiple aliases for files at once, this is the recommended procedure:
 NOTE: Make sure alias names do not conflict with other commands, either internal or external. To bypass the conflicts check, performed automatically by the \'alias import\' command, you can edit the aliases file manually (F10).
 
 4) Finally, import this file with the \fIalias\fR function: \fIalias\ import\ tmp_file\fR. Now, you can access any of these files by entering just a few characters: a1, b1, and c1.
+.TP
+.B auto [\fIlist\fR | \fIunset\fR | \fIOPTION=VALUE\fR...]
+Set a temporary autocommand for the current directory.
+.sp
+Unlike \fBpermanent\fR autocommands, defined in the configuration file via the \fIautocmd\fR keyword (see the \fBAUTOCOMMANDS\fR section below), options set via the \fIauto\fR command are \fBtemporary\fR, i.e., valid only for the current directory and the current session.
+.sp
+Options set via this command take precedence over both permament autocommands and regular options (set either via the command line or the configuration file).
+.sp
+\fBExamples\fR
+.sp
+List available autocommands
+  \fBauto list\fR
+.sp
+List files in the current directory in long view
+  \fBauto lv=1\fR
+.sp
+List only PDF files, set the color scheme to nord, and sort files by size
+  \fBauto ft=.*\.pdf$,cs=nord,st=size\fR
+.sp
+The same list of options can be specified sequentially (i.e., previous options are preserved)
+  \fBauto ft=.*\.pdf$
+  auto cs=nord
+  auto st=size\fR
+.sp
+Unset the files filter and the color scheme, and change sort to blocks
+  \fBauto ft=,cs=,st=blocks\fR
+.sp
+Unset all temporary autocommands previously set for the current directory
+  \fBauto unset\fR
+.sp
+For the list of available option codes consult the \fBAUTOCOMMANDS\fR section or enter \fIhelp autocommands\fR.
 .TP
 .B ao, auto\-open \fR[\fIon\fR, \fIoff\fR, \fIstatus\fR]
 toggle the auto\-open function on/off. If set to on, \fIFILE\fR amounts to \fIopen\ FILE\fR.
@@ -1557,6 +1588,7 @@ The following codes are used for different interface elements (in the \fIInterfa
  \fBPrompt elements\fR
  li = selected files
  ti = trash indicator
+ ac = autocommand indicator
  em = error message indicator
  wm = warning message indicator
  nm = notice message indicator
@@ -2386,20 +2418,22 @@ Take a look at the Wiki for more information: \fIhttps://github.com/clifm/wiki/A
 .SH 14. AUTOCOMMANDS
 Heavily inspired by \fBVifm\fR, the \fIautocommands\fR function allows the user a fine\-grained control over \fBclifm\fR settings. It is mostly devised as a way to improve performance for remote file systems (usually slower than local ones) by allowing you to turn off some features (like the files counter) that might greatly affect performance under some circumstances (like remote connections). However, the \fIautocommands\fR function is not restricted to this specific use case: use it for whatever purpose you find useful.
 .sp
+\fBNote\fR: We describe here \fBpermanent\fR autocommands, which need to be defined in the configuration file. \fBTemporary\fR autocommands (set via the command line and valid only for the current directory and the current session) are also available via the \fIauto\fR command. See above.
+.sp
 Add a line preceded by the \fIautocmd\fR keyword to the config file. The general syntax is:
  \fIautocmd TARGET cmd,cmd,cmd\fR
 .sp
 \fBTARGET\fR specifies the object to which subsequent commands will apply. It can match either \fBdirectory names (paths)\fR or \fBworkspaces\fR.
 .sp
-1. To match directory names use a glob pattern. If no glob metacharacter is provided, the string will be compared as is to the current working directory. To invert the meaning of a pattern, prepend an exclamation mark. To match all directories under a specific directory (including this directory itself) use the double asterisk (**). A few examples:
+1. To match directory names use a glob pattern (as specified by \fBglob\fR(7)). If no glob metacharacter is provided, the string will be compared as is to the current working directory. To invert the meaning of a pattern, prepend an exclamation mark. To match all directories under a specific directory (including this directory itself) use the double asterisk (**). A few examples:
 .sp
  \fB~/Downloads\fR      Match exactly the Downloads directory (and \fIonly\fR this directory) in your home directory
- \fB~/Downloads/*\fR    Match all subdirectories in ~/Downloads (\fIexcluding\fR the Downloads directory itself)
- \fB/~/Downloads/**\fR  \fIRecursively\fR match all subdirectories in ~/Downloads (\fIincluding\fR the Downloads directory itself)
- \fB~/Downloads/*.d\fR  Match all subdirectories in ~/Downloads ending with ".d" (\fRexcluding\fR the Downloads directory itself)
+ \fB~/Downloads/*\fR    Recursively match all subdirectories in ~/Downloads (\fBexcluding\fR the Downloads directory itself)
+ \fB/~/Downloads/**\fR  Recursively match all subdirectories in ~/Downloads (\fBincluding\fR the Downloads directory itself)
+ \fB~/Downloads/*.d\fR  Match all subdirectories in ~/Downloads ending with ".d" (\fBexcluding\fR the Downloads directory itself)
  \fB!~/Downloads\fR     Match everything except the \fI~/Downloads\fR directory
 .sp
-2. \fBTARGET\fR is also able to match workspaces using the ampersand character (@) followed by the ws keyword and then the workspace number. For example, to match the third workspace: \fI@ws3\fR, and to match the first workspace: \fI@ws1\fR.
+2. You can match workspaces using the ampersand character (\fI@\fR) followed by the \fIws\fR keyword and then the workspace number. For example, to match the third workspace: \fI@ws3\fR, or, to match the first workspace, \fI@ws1\fR. To match instead all workspaces except the second one: \fI!@ws2\fR.
 .sp
 \fBTARGET\fR is followed by a comma separated list of commands:
 .sp
@@ -2411,17 +2445,22 @@ The following codes are used to control \fBclifm\fR's files list:
  \fBcs\fR     Color scheme          cs=zenburn
  \fBfc\fR     Files counter         fc=0
  \fBft\fR     Files filter          ft=.*\\.pdf$
- \fBhf\fR     Hidden files          hf=0
+ \fBfz\fR     Full dir size         fz=1
+ \fBhf,hh\fR  Hidden files          hf=0
  \fBlm\fR     Light mode            lm=1
- \fBlv\fR     Long/detail view      lv=0
- \fBmf\fR     Max files             mf=100
- \fBmn\fR     Max file name length  mn=20
+ \fBlv,ll\fR  Long/detail view      lv=0
+ \fBmf\fR     Max files             mf=100 \fB(1)\fR
+ \fBmn\fR     Max file name length  mn=20 \fB(1)\fR
  \fBod\fR     Only directories      od=1
  \fBpg\fR     Pager                 pg=0
  \fBst\fR     Sort method           st=5
  \fBsr\fR     Reverse sort          sr=1
 .sp
-A few example lines:
+To remove a value, set the option to an empty value. For example, to remove the files filter and the color scheme: \fIft=,cs=\fR.
+.sp
+\fB(1)\fR This option supports the \fIunset\fR keyword to remove the corresponding limit. E.g.: \fImf=unset,mn=unset\fR.
+.sp
+\fBExamples\fR
 .sp
  \fB1.\fR Run in light mode and disable the files counter for the \fIremotes\fR directory:\fB(1)\fR
     autocmd /media/remotes/** lm=1,fc=0
@@ -2435,7 +2474,7 @@ A few example lines:
  \fB4.\fR Lots of media files (with large file names). Trim file names to 20 chars max and  run the files previewer:\fB(2)\fR
     autocmd ~/Downloads mn=20,!~/.config/clifm/plugins/fzfnav.sh
 
- \fB5.\fR I want the second workspace, no matter what the current directory is, to list files in long/detail view:
+ \fB5.\fR I want the second workspace, no matter what the current directory is, to list files in long view:
     autocmd @ws2 lv=1
 
  \fB6.\fR Mmm, just because I can. Be creative!
@@ -2444,15 +2483,18 @@ A few example lines:
 .sp
 \fB(1)\fR This is the recommended configuration for remote file systems
 .sp 0
-\fB(2)\fR As seen here, plugins could be used as well: in this case, we want to run \fIfzfnav\fR (to make use of the files preview capability) whenever we enter into the \fIDownloads\fR directory, usually containing videos, music, and images.
+\fB(2)\fR As seen here, plugins can be used as well: in this case, we want to run \fIfzfnav\fR (to make use of the files preview capability) whenever we enter into the \fIDownloads\fR directory, usually containing videos, music, and images.
 \fBNOTE\fR: If you decide to use a plugin, bear in mind that it won\'t be able to communicate with \fBclifm\fR, because the \fIautocommand\fR function always executes commands as external applications using the system shell.
 .sp
-Bear in mind that \fIautocmd\fR directives are evaluated from top to bottom, so that only the first matching target will be executed. This can be used to exclude some target from a subsequent directive. For instance, if you want all subdirectories in \fI~/Downloads\fR, except \fImydir\fR, to be listed in light mode, write the following directives:
+Bear in mind that \fIautocmd\fR directives are evaluated from top to bottom, so that subsequent matching entries will overwrite options set by previous entries.
 .sp
-    autocmd ~/Downloads/mydir/** lm=0
-    autocmd ~/Downloads/** lm=1
+\fBAutocommand notifications\fR
 .sp
-Since the first directive is evaluated before the second one, this latter will apply to everything under \fIDownloads\fR, exception made of \fImydir\fR (and subdirectories).
+By default, a gray 'A' is printed to the left of the prompt whenever an autocommand is active for the current directory.
+.sp
+The behavior of this indicator can be customized via the \fIInformAutocmd\fR option in the configuration file.
+.sp
+The color code used to colorize this indicator is \fIac\fR (see the \fBCOLORS\fR section above).
 .sp
 \fBAutocommand files: \fI.cfm.in\fB and \fI.cfm.out\fR
 .sp
