@@ -250,43 +250,45 @@ print_autocmd_msg(void)
 	size_t c = 0; /* Number of procesed options for the current autocommand. */
 	struct autocmds_t a = gen_common_options();
 
-	if (a.color_scheme && a.color_scheme != opts.color_scheme)
+	if (a.color_scheme)
 		len += gen_opt_entry(buf + len, "cs", a.color_scheme, &c);
 
-	if (a.files_counter != UNSET && a.files_counter != opts.files_counter)
+	if (a.files_counter != UNSET)
 		len += gen_opt_entry(buf + len, "fc", xitoa(a.files_counter), &c);
 
-	if (a.filter.str && a.filter.str != opts.filter.str)
+	if (a.filter.str)
 		len += gen_opt_entry(buf + len, "ft", NULL, &c);
 
-	if (a.full_dir_size != UNSET && a.full_dir_size != opts.full_dir_size)
+	if (a.full_dir_size != UNSET)
 		len += gen_opt_entry(buf + len, "fz", xitoa(a.full_dir_size), &c);
 
-	if (a.show_hidden != UNSET && a.show_hidden != opts.show_hidden)
+	if (a.show_hidden != UNSET)
 		len += gen_opt_entry(buf + len, "hf", xitoa(a.show_hidden), &c);
 
-	if (a.light_mode != UNSET && a.light_mode != opts.light_mode)
+	if (a.light_mode != UNSET)
 		len += gen_opt_entry(buf + len, "lm", xitoa(a.light_mode), &c);
 
-	if (a.long_view != UNSET && a.long_view != opts.long_view)
+	if (a.long_view != UNSET)
 		len += gen_opt_entry(buf + len, "lv", xitoa(a.long_view), &c);
 
-	if (a.max_files != AC_UNSET && a.max_files != opts.max_files)
-		len += gen_opt_entry(buf + len, "mf", xitoa(a.max_files), &c);
+	if (a.max_files != AC_UNSET)
+		len += gen_opt_entry(buf + len, "mf",
+			a.max_files == UNSET ? "unset" : xitoa(a.max_files), &c);
 
-	if (a.max_name_len != AC_UNSET && a.max_name_len != opts.max_name_len)
-		len += gen_opt_entry(buf + len, "mn", xitoa(a.max_name_len), &c);
+	if (a.max_name_len != AC_UNSET)
+		len += gen_opt_entry(buf + len, "mn",
+			a.max_name_len == UNSET ? "unset" : xitoa(a.max_name_len), &c);
 
-	if (a.only_dirs != UNSET && a.only_dirs != opts.only_dirs)
+	if (a.only_dirs != UNSET)
 		len += gen_opt_entry(buf + len, "od", xitoa(a.only_dirs), &c);
 
-	if (a.pager != UNSET && a.pager != opts.pager)
+	if (a.pager != UNSET)
 		len += gen_opt_entry(buf + len, "pg", xitoa(a.pager), &c);
 
-	if (a.sort != UNSET && a.sort != opts.sort)
+	if (a.sort != UNSET)
 		len += gen_opt_entry(buf + len, "st", num_to_sort_name(a.sort), &c);
 
-	if (a.sort_reverse != UNSET && a.sort_reverse != opts.sort_reverse)
+	if (a.sort_reverse != UNSET)
 		len += gen_opt_entry(buf + len, "sr", xitoa(a.sort_reverse), &c);
 
 	if (len <= 0) /* No autocommand option set. Do not print any message */
