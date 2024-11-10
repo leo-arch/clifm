@@ -246,6 +246,8 @@ check_int_cmd_desc(const char *s, const size_t l)
 	}
 
 	else if (l == 4) {
+		if (*s == 'a' && strcmp(s + 1, "uto") == 0)
+			return AUTO_DESC;
 		if (*s == 'b' && strcmp(s + 1, "ack") == 0)
 			return B_DESC;
 		if (*s == 'b' && strcmp(s + 1, "ulk") == 0)

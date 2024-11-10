@@ -148,6 +148,9 @@ To run a shell command or a script use the '!CMD' expression. For example:\n\n\
   autcomd ~/important !printf \"Get outta here!\" && read -n1\n\
   autcomd ~/Documents !~/my_script.sh\n\
 \n\
+Autocommand notifications are controlled by the InformAutocmd option in the\n\
+configuration file.\n\
+\n\
 2) Example using the second method:\n\n\
 a. Set 'ReadAutocmdFiles' to 'true' in the configuration file.\n\
 b. Create a '.cfm.in' file in the '~/Important' directory with the following\n\
@@ -1793,6 +1796,7 @@ Q               cd on quit (consult the manpage)"
 #define AD_DESC      " (dearchive/decompress files)"
 #define ALIAS_DESC   " (list aliases)"
 #define AO_DESC      " (set auto-open on/off)"
+#define AUTO_DESC    " (set a temporary autocommand)"
 #define B_DESC       " (go back in the directory history list)"
 #define BD_DESC      " (change to a parent directory)"
 #define BL_DESC      " (create symbolic links in bulk)"

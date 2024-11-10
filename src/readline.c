@@ -1344,6 +1344,7 @@ int_cmds_generator(const char *text, int state)
 		"ad      (dearchive/decompress files)",
 		"alias   (list aliases)",
 		"ao      (set auto-open on/off)",
+		"auto    (set a temporary autocommand)",
 		"b       (go back in the directory history list)",
 		"bd      (change to a parent directory)",
 		"bl      (create symbolic links in bulk)",
