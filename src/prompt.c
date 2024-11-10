@@ -578,15 +578,33 @@ gen_stats_str(const int flag)
 	return p;
 }
 
+static size_t
+count_autocmd_matches(void)
+{
+	if (autocmds_n == 0)
+		return 0;
+
+	size_t c = 0;
+	ssize_t i = (ssize_t)autocmds_n;
+	while (--i >= 0)
+		c += (autocmds[i].match == 1);
+
+	return c;
+}
+
 static inline char *
 gen_notification(const int flag)
 {
-	const size_t len = MAX_INT_STR + 1;
+	const size_t len = MAX_INT_STR + 2;
 
 	char *p = xnmalloc(len, sizeof(char));
 	*p = '\0';
 
 	switch (flag) {
+	case NOTIF_AUTOCMD:
+		if (count_autocmd_matches() > 0)
+			{ *p = 'A'; p[1] = '\0'; }
+		break;
 	case NOTIF_ERROR:
 		if (msgs.error > 0)
 			snprintf(p, len, "E%zu", msgs.error);
@@ -964,6 +982,8 @@ decode_prompt(char *line)
 			case '(': temp = gen_notification(NOTIF_ERROR); goto ADD_STRING;
 			case '=': temp = gen_notification(NOTIF_NOTICE); goto ADD_STRING;
 
+			case 'y': temp = gen_notification(NOTIF_AUTOCMD); goto ADD_STRING;
+
 			case 'z': /* Exit status of last executed command */
 				temp = gen_exit_status(); goto ADD_STRING;
 
@@ -1286,20 +1306,6 @@ set_prompt_length(const size_t decoded_prompt_len, const size_t ac_matches)
 	}
 
 	return len;
-}
-
-static size_t
-count_autocmd_matches(void)
-{
-	if (autocmds_n == 0)
-		return 0;
-
-	size_t c = 0;
-	size_t i;
-	for (i = 0; i < autocmds_n; i++)
-		c += (autocmds[i].match == 1);
-
-	return c;
 }
 
 static inline char *

@@ -82,6 +82,7 @@ emergency prompt"
 #define NOTIF_ERROR   3
 #define NOTIF_NOTICE  4
 #define NOTIF_ROOT    5
+#define NOTIF_AUTOCMD 6
 
 /* Size of the indicator for msgs, trash, and sel. */
 #define N_IND (MAX_COLOR + 1 + 21 + (sizeof(RL_NC) - 1) + 1)
