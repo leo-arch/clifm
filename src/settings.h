@@ -43,7 +43,7 @@ ee=32:ef=2:ex=1;32:fi=0:ln=1;36:mh=30;46:nd=4;1;31:nf=2;4;31:\
 no=31;47:or=2;4;36:ow=34;40:pi=4;45;37:so=45;37:su=37;41:sg=30;43:st=37;44:\
 tw=37;42:uf=2;4;37:"
 
-#define DEF_IFACE_COLORS "db=:dd=:de=:df=0:dg=2;35:dk=:dl=2;37:\
+#define DEF_IFACE_COLORS "ac=:db=:dd=:de=:df=0:dg=2;35:dk=:dl=2;37:\
 dn=2;37:do=:dp=:dr=:dt=:du=35:dw=:dxd=:dxr=:dz=:\
 el=36:em=1;31:fc=2;37:hb=36:hc=2;31:lc=:\
 hd=36:he=0;36:hn=0:hp=36:hq=33:hr=31:hs=32:hv=32:\
@@ -121,6 +121,7 @@ xf=1;31:xs=32:"
 #define DEF_UF_C  "\x1b[2;4;37m"  /* Un'stat'able file */
 
 /* Interface */
+#define DEF_AC_C  "\001\x1b[2;37m\002"   /* Autocmd indicator */
 #define DEF_DF_C  "\x1b[0m"      /* Reset attributes: default terminal color */
 #define DEF_DL_C  "\x1b[2;37m"   /* Dividing line */
 #define DEF_EL_C  "\x1b[0;36m"   /* ELN's */
@@ -213,7 +214,7 @@ ed=2;34:ee=32:ef=2:ex=1;32:fi=0:ln=1;36:mh=7;36:nd=1;31:nf=2;31:no=4;31;47:\
 or=4;2;36:ow=48;5;235;38;5;33:pi=38;5;5;48;5;238:sg=30;43:so=1;38;5;5;48;5;238:\
 st=37;44:su=37;41:tw=37;42:uf=4;2;37:"
 
-#define DEF_IFACE_COLORS_256 "db=:dd=:de=:df=0:dg=2;35:dk=:dl=38;5;243:dn=:\
+#define DEF_IFACE_COLORS_256 "ac=:db=:dd=:de=:df=0:dg=2;35:dk=:dl=38;5;243:dn=:\
 do=:dp=:dr=:dt=:du=35:dw=:dxd=:dxr=:dz=:el=36:em=1;31:fc=38;5;246:hb=36:hc=2;37:\
 hd=36:he=36:hn=:hp=36:hq=LY:hr=31:hs=32:hv=32:lc=38;5;43:li=1;32:mi=1;36:\
 nm=1;32:ro=:si=1;34:sb=2;33:sc=2;36:sd=38;5;243:sf=4;2;36:sh=38;5;243:sp=2;31:\
@@ -285,6 +286,7 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define DEF_UF_C256  "\x1b[2;4;37m" /* Un'stat'able file */
 
 /* Interface */
+#define DEF_AC_C256  "\001\x1b[38;5;247m\002" /* Autocmd indicator */
 #define DEF_DF_C256  "\x1b[0m"      /* Reset attributes: default terminal color */
 #define DEF_DL_C256  "\x1b[38;5;243m"   /* Dividing line */
 #define DEF_EL_C256  "\x1b[0;36m"   /* ELN's */
@@ -465,7 +467,7 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define DEF_AUTOCD 1
 /* InformAutocmd values:
  * AUTOCMD_MSG_NONE, AUTOCMD_MSG_MINI, AUTOCMD_MSG_SHORT, AUTOCMD_MSG_LONG */
-#define DEF_AUTOCMD_MSG AUTOCMD_MSG_LONG
+#define DEF_AUTOCMD_MSG AUTOCMD_MSG_PROMPT
 #define DEF_AUTO_OPEN 1
 #define DEF_AUTOLS 1
 #define DEF_CASE_SENS_LIST 0

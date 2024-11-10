@@ -1456,7 +1456,10 @@ set_iface_colors(char **colors, const size_t num_colors)
 {
 	int i = (int)num_colors;
 	while (--i >= 0) {
-		if (*colors[i] == 'd') {
+		if (*colors[i] == 'a' && colors[i][1] == 'c' && colors[i][2] == '=')
+			set_color(colors[i] + 3, ac_c, RL_NO_PRINTABLE);
+
+		else if (*colors[i] == 'd') {
 			if (colors[i][1] == 'x' && colors[i][2] && colors[i][3] == '=') {
 				if (colors[i][2] == 'd')
 					set_color(colors[i] + 4, dxd_c, RL_PRINTABLE);
@@ -1977,6 +1980,7 @@ set_default_colors(void)
 
 	/* Interface */
 /*	if (!*dd_c) // Date color unset: let's use shades */
+	if (!*ac_c) xstrsncpy(ac_c, CVAR(AC), sizeof(ac_c));
 	if (!*db_c) xstrsncpy(db_c, CVAR(DB), sizeof(db_c));
 	if (!*de_c) xstrsncpy(de_c, CVAR(DE), sizeof(de_c));
 	if (!*dg_c) xstrsncpy(dg_c, *du_c ? CVAR(DG) : CVAR(DU), sizeof(dg_c));
@@ -2620,6 +2624,7 @@ disable_bold(void)
 	remove_bold_attr(uf_c);
 
 	/* Interface */
+	remove_bold_attr(ac_c);
 	remove_bold_attr(df_c);
 	remove_bold_attr(dl_c);
 	remove_bold_attr(el_c);
@@ -3239,6 +3244,25 @@ print_prop_colors(void)
 
 }
 
+/* Return a pointer to a statically allocated buffer storing the color code
+ * S with starting \001 and ending \002 removed. */
+static char *
+remove_ctrl_chars(char *s)
+{
+	if (*s != 001)
+		return s;
+
+	s++;
+
+	xstrsncpy(tmp_color, s, sizeof(tmp_color));
+
+	const size_t l = strlen(tmp_color);
+	if (l > 0 && tmp_color[l - 1] == 002)
+		tmp_color[l - 1] = '\0';
+
+	return tmp_color;
+}
+
 static void
 print_interface_colors(void)
 {
@@ -3272,25 +3296,6 @@ print_interface_colors(void)
 		"mode\n"), BOLD, df_c);
 }
 
-/* Return a pointer to a statically allocated buffer storing the color code
- * S with starting \001 and ending \002 removed. */
-static char *
-remove_ctrl_chars(char *s)
-{
-	if (*s != 001)
-		return s;
-
-	s++;
-
-	xstrsncpy(tmp_color, s, sizeof(tmp_color));
-
-	const size_t l = strlen(tmp_color);
-	if (l > 0 && tmp_color[l - 1] == 002)
-		tmp_color[l - 1] = '\0';
-
-	return tmp_color;
-}
-
 static void
 print_workspace_colors(void)
 {
@@ -3322,9 +3327,12 @@ print_prompt_colors(void)
 	printf(_("%sColor%s (tx) Input text (e.g. \x1b[1m$\x1b[0m "
 		"%sls%s %s-l%s %sfilename.zst%s)\n"), tx_c, df_c, tx_c, df_c,
 		hp_c, df_c, tx_c, df_c);
+	char *p = remove_ctrl_chars(ac_c);
+	printf(_("%sColor%s (ac) Autocommand indicator (%sA%s)\n"),
+		p, df_c, p, df_c);
 	printf(_("%sColor%s (li) Selected files indicator (%s%c%s)\n"),
 		li_cb, df_c, li_cb, SELFILE_CHR, df_c);
-	char *p = remove_ctrl_chars(ti_c);
+	p = remove_ctrl_chars(ti_c);
 	printf(_("%sColor%s (ti) Trashed files indicator (%sT%s)\n"), p,
 		df_c, p, df_c);
 	p = remove_ctrl_chars(xs_c);

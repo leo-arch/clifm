@@ -1265,20 +1265,21 @@ setenv_prompt(void)
 }
 
 static inline size_t
-set_prompt_length(const size_t decoded_prompt_len)
+set_prompt_length(const size_t decoded_prompt_len, const size_t ac_matches)
 {
 	size_t len = 0;
 
 	if (prompt_notif == 1) {
 		len = (size_t)(decoded_prompt_len
+		+ (ac_matches > 0 ? N_IND : 0)
 		+ (xargs.stealth_mode == 1 ? STEALTH_IND_SIZE : 0)
 		+ (user.uid == 0 ? ROOT_IND_SIZE : 0)
 		+ (conf.readonly == 1 ? RDONLY_IND_SIZE : 0)
-		+ ((sel_n > 0) ? N_IND : 0)
-		+ ((trash_n > 0) ? N_IND : 0)
-		+ ((msgs.error > 0) ? N_IND : 0)
-		+ ((msgs.warning > 0) ? N_IND : 0)
-		+ ((msgs.notice > 0) ? N_IND : 0)
+		+ (sel_n > 0 ? N_IND : 0)
+		+ (trash_n > 0 ? N_IND : 0)
+		+ (msgs.error > 0 ? N_IND : 0)
+		+ (msgs.warning > 0 ? N_IND : 0)
+		+ (msgs.notice > 0 ? N_IND : 0)
 		+ 6 + sizeof(tx_c) + 1 + 2);
 	} else {
 		len = (size_t)(decoded_prompt_len + 6 + sizeof(tx_c) + 1);
@@ -1287,15 +1288,36 @@ set_prompt_length(const size_t decoded_prompt_len)
 	return len;
 }
 
+static size_t
+count_autocmd_matches(void)
+{
+	if (autocmds_n == 0)
+		return 0;
+
+	size_t c = 0;
+	size_t i;
+	for (i = 0; i < autocmds_n; i++)
+		c += (autocmds[i].match == 1);
+
+	return c;
+}
+
 static inline char *
 construct_prompt(const char *decoded_prompt)
 {
 	/* Construct indicators: MSGS (ERR, WARN, and NOTICE), SEL, and TRASH */
 	char err_ind[N_IND], warn_ind[N_IND],
-		notice_ind[N_IND], trash_ind[N_IND], sel_ind[N_IND];
+		notice_ind[N_IND], trash_ind[N_IND], sel_ind[N_IND],
+		acmd_ind[N_IND];
 	*err_ind = *warn_ind = *notice_ind = *trash_ind = *sel_ind = '\0';
+	*acmd_ind = '\0';
+
+	size_t ac_matches = 0;
 
 	if (prompt_notif == 1) {
+		if (conf.autocmd_msg == AUTOCMD_MSG_PROMPT
+		&& (ac_matches = count_autocmd_matches()) > 0)
+			snprintf(acmd_ind, N_IND, "%sA%s", ac_c, RL_NC);
 		if (msgs.error > 0)
 			snprintf(err_ind, N_IND, "%sE%zu%s", em_c, msgs.error, RL_NC);
 		if (msgs.warning > 0)
@@ -1310,12 +1332,14 @@ construct_prompt(const char *decoded_prompt)
 				sel_n, RL_NC);
 	}
 
-	const size_t prompt_len = set_prompt_length(strlen(decoded_prompt));
+	const size_t prompt_len =
+		set_prompt_length(strlen(decoded_prompt), ac_matches);
 	char *the_prompt = xnmalloc(prompt_len, sizeof(char));
 
 	if (prompt_notif == 1) {
 		snprintf(the_prompt, prompt_len,
-			"%s%s%s%s%s%s%s%s%s%s%s%s\001%s\002",
+			"%s%s%s%s%s%s%s%s%s%s%s%s%s\001%s\002",
+			ac_matches > 0 ? acmd_ind : "",
 			(user.uid == 0) ? (conf.colorize == 1
 				? ROOT_IND : ROOT_IND_NO_COLOR) : "",
 			(conf.readonly == 1) ? ro_c : "",

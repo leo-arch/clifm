@@ -2880,6 +2880,8 @@ set_autocmd_msg_value(const char *val)
 		conf.autocmd_msg = AUTOCMD_MSG_LONG;
 	else if (*val == 'f' && strncmp(val, "full\n", 5) == 0)
 		conf.autocmd_msg = AUTOCMD_MSG_FULL;
+	else if (*val == 'p' && strncmp(val, "prompt\n", 7) == 0)
+		conf.autocmd_msg = AUTOCMD_MSG_PROMPT;
 	else
 		conf.autocmd_msg = DEF_AUTOCMD_MSG;
 }

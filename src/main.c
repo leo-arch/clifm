@@ -342,6 +342,7 @@ char
 	uf_c[MAX_COLOR], /* Non-'stat'able file */
 
 	/* Interface */
+	ac_c[MAX_COLOR], /* Autocmd indicator */
 	df_c[MAX_COLOR], /* Default color */
 	dl_c[MAX_COLOR], /* Dividing line index */
 	el_c[MAX_COLOR], /* ELN */

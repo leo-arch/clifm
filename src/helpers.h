@@ -905,11 +905,12 @@ extern time_t curdir_mtime;
 #define OWNERSHIP_PROMPT   3 /* oc command */
 #define BOOKMARKS_PROMPT   4 /* bookmarks screen */
 
-#define AUTOCMD_MSG_NONE  0
-#define AUTOCMD_MSG_MINI  1
-#define AUTOCMD_MSG_SHORT 2
-#define AUTOCMD_MSG_LONG  3
-#define AUTOCMD_MSG_FULL  4
+#define AUTOCMD_MSG_NONE   0
+#define AUTOCMD_MSG_MINI   1
+#define AUTOCMD_MSG_SHORT  2
+#define AUTOCMD_MSG_LONG   3
+#define AUTOCMD_MSG_FULL   4
+#define AUTOCMD_MSG_PROMPT 5
 
 /* Function macros */
 #define atoi xatoi /* xatoi is just a secure atoi */
@@ -2056,6 +2057,7 @@ extern char
 	uf_c[MAX_COLOR], /* Non-'stat'able file */
 
 	/* Interface */
+	ac_c[MAX_COLOR], /* Autocmd indicator */
 	df_c[MAX_COLOR], /* Default color */
 	dl_c[MAX_COLOR], /* Dividing line */
 	el_c[MAX_COLOR], /* ELN color */

@@ -228,11 +228,9 @@ gen_common_options(void)
 }
 
 static int
-gen_opt_entry(char *buf, const char *name, const char *val, size_t *pos)
+gen_opt_entry(char *buf, const char *name, const char *val, size_t *pos,
+	const int long_msg)
 {
-	const int long_msg = (conf.autocmd_msg == AUTOCMD_MSG_LONG
-		|| conf.autocmd_msg == AUTOCMD_MSG_FULL);
-
 	const int ret = snprintf(buf, AC_BUF_SIZE, "%s%s%s%s", *pos > 0 ? ", " : "",
 		name, (long_msg == 1 && val) ? "=" : "",
 		(long_msg == 1 && val) ? val : "");
@@ -247,48 +245,52 @@ gen_autocmd_options_list(char *buf, struct autocmds_t a, const int print_filter)
 {
 	int len = 0; /* Number of bytes currently consumed by buf. */
 	size_t c = 0; /* Number of procesed options for the current autocommand. */
+	/* PRINT_FILTER is 1 if coming from the 'auto list' command. */
+	/* Should we print the message in long mode? */
+	const int lm =
+		(conf.autocmd_msg != AUTOCMD_MSG_SHORT || print_filter == 1);
 
 	if (a.color_scheme != NULL)
-		len += gen_opt_entry(buf + len, "cs", a.color_scheme, &c);
+		len += gen_opt_entry(buf + len, "cs", a.color_scheme, &c, lm);
 
 	if (a.files_counter != UNSET)
-		len += gen_opt_entry(buf + len, "fc", xitoa(a.files_counter), &c);
+		len += gen_opt_entry(buf + len, "fc", xitoa(a.files_counter), &c, lm);
 
 	if (a.filter.str != NULL)
 		len += gen_opt_entry(buf + len, "ft",
-			print_filter == 1 ? a.filter.str : NULL, &c);
+			print_filter == 1 ? a.filter.str : NULL, &c, lm);
 
 	if (a.full_dir_size != UNSET)
-		len += gen_opt_entry(buf + len, "fz", xitoa(a.full_dir_size), &c);
+		len += gen_opt_entry(buf + len, "fz", xitoa(a.full_dir_size), &c, lm);
 
 	if (a.show_hidden != UNSET)
-		len += gen_opt_entry(buf + len, "hf", xitoa(a.show_hidden), &c);
+		len += gen_opt_entry(buf + len, "hf", xitoa(a.show_hidden), &c, lm);
 
 	if (a.light_mode != UNSET)
-		len += gen_opt_entry(buf + len, "lm", xitoa(a.light_mode), &c);
+		len += gen_opt_entry(buf + len, "lm", xitoa(a.light_mode), &c, lm);
 
 	if (a.long_view != UNSET)
-		len += gen_opt_entry(buf + len, "lv", xitoa(a.long_view), &c);
+		len += gen_opt_entry(buf + len, "lv", xitoa(a.long_view), &c, lm);
 
 	if (a.max_files != AC_UNSET)
 		len += gen_opt_entry(buf + len, "mf",
-			a.max_files == UNSET ? "unset" : xitoa(a.max_files), &c);
+			a.max_files == UNSET ? "unset" : xitoa(a.max_files), &c, lm);
 
 	if (a.max_name_len != AC_UNSET)
 		len += gen_opt_entry(buf + len, "mn",
-			a.max_name_len == UNSET ? "unset" : xitoa(a.max_name_len), &c);
+			a.max_name_len == UNSET ? "unset" : xitoa(a.max_name_len), &c, lm);
 
 	if (a.only_dirs != UNSET)
-		len += gen_opt_entry(buf + len, "od", xitoa(a.only_dirs), &c);
+		len += gen_opt_entry(buf + len, "od", xitoa(a.only_dirs), &c, lm);
 
 	if (a.pager != UNSET)
-		len += gen_opt_entry(buf + len, "pg", xitoa(a.pager), &c);
+		len += gen_opt_entry(buf + len, "pg", xitoa(a.pager), &c, lm);
 
 	if (a.sort != UNSET)
-		len += gen_opt_entry(buf + len, "st", num_to_sort_name(a.sort), &c);
+		len += gen_opt_entry(buf + len, "st", num_to_sort_name(a.sort), &c, lm);
 
 	if (a.sort_reverse != UNSET)
-		len += gen_opt_entry(buf + len, "sr", xitoa(a.sort_reverse), &c);
+		len += gen_opt_entry(buf + len, "sr", xitoa(a.sort_reverse), &c, lm);
 
 	return len;
 }

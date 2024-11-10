@@ -678,7 +678,8 @@ post_listing(DIR *dir, const int reset_pager, const filesn_t excluded_files,
 		print_reload_msg(NULL, NULL, _("Active filter: %s%s%s%s\n"),
 			BOLD, filter.rev == 1 ? "!" : "", filter.str, df_c);
 
-	if (autocmd_ret == 1 && conf.autocmd_msg != AUTOCMD_MSG_NONE)
+	if (autocmd_ret == 1 && conf.autocmd_msg != AUTOCMD_MSG_NONE
+	&& conf.autocmd_msg != AUTOCMD_MSG_PROMPT)
 		print_autocmd_msg();
 
 	if (dir_changed == 1) {
