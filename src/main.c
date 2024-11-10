@@ -591,6 +591,7 @@ const struct cmdslist_t param_str[] = {
 	{"actions edit", 12},
 	{"actions list", 12},
 	{"auto unset", 10},
+	{"auto list", 9},
 	{"autocd on", 9},
 	{"acd on", 6},
 	{"autocd off", 10},

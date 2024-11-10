@@ -93,13 +93,15 @@ atool(1)          Extraction/decompression, listing, and repacking of archives"
 
 #define AUTO_USAGE "Set a temporary autocommand for the current directory\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  auto [unset | OPTION=VALUE,...]\n\n\
+  auto [list | unset | OPTION=VALUE,...]\n\n\
 Unlike permenent autocommands (defined in the configuration file),\n\
 options set via the 'auto' command are valid only for the current\n\
 directory and the current session (i.e., they are lost at program exit).\n\n\
 These options take precedence over both permament autocommands and regular\n\
 options (set via either the command line or the configuration file).\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
+- Print the list of available autocommands\n\
+    auto list\n\
 - List files in the current directory in long view\n\
     auto lv=1\n\
 - List only PDF files, set the color scheme to nord, and sort files by size\n\
@@ -109,7 +111,7 @@ options (set via either the command line or the configuration file).\n\n\
     auto cs=nord\n\
     auto st=size\n\
 - Unset the files filter and the color scheme, and change sort to blocks\n\
-    auto ft=unset,cs=unset,st=blocks\n\
+    auto ft=,cs=,st=blocks\n\
 - Unset all temporary options previously set for the current directory\n\
     auto unset\n\n\
 For the list of available option codes enter 'help autocommands'."

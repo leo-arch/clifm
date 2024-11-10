@@ -243,7 +243,7 @@ gen_opt_entry(char *buf, const char *name, const char *val, size_t *pos)
 
 /* Write into BUF the list of autocmd options set in the struct A. */
 static int
-gen_autocmd_options_list(char *buf, struct autocmds_t a)
+gen_autocmd_options_list(char *buf, struct autocmds_t a, const int print_filter)
 {
 	int len = 0; /* Number of bytes currently consumed by buf. */
 	size_t c = 0; /* Number of procesed options for the current autocommand. */
@@ -255,7 +255,8 @@ gen_autocmd_options_list(char *buf, struct autocmds_t a)
 		len += gen_opt_entry(buf + len, "fc", xitoa(a.files_counter), &c);
 
 	if (a.filter.str != NULL)
-		len += gen_opt_entry(buf + len, "ft", NULL, &c);
+		len += gen_opt_entry(buf + len, "ft",
+			print_filter == 1 ? a.filter.str : NULL, &c);
 
 	if (a.full_dir_size != UNSET)
 		len += gen_opt_entry(buf + len, "fz", xitoa(a.full_dir_size), &c);
@@ -301,7 +302,7 @@ print_autocmd_options_list_full(void)
 			continue;
 
 		char buf[AC_BUF_SIZE];
-		const int len = gen_autocmd_options_list(buf, autocmds[i]);
+		const int len = gen_autocmd_options_list(buf, autocmds[i], 0);
 		if (len <= 0)
 			continue;
 
@@ -326,7 +327,7 @@ print_autocmd_msg(void)
 
 	char buf[AC_BUF_SIZE];
 	struct autocmds_t a = gen_common_options();
-	const int len = gen_autocmd_options_list(buf, a);
+	const int len = gen_autocmd_options_list(buf, a, 0);
 
 	if (len <= 0) /* No autocommand option set. Do not print any message */
 		return;
@@ -827,6 +828,53 @@ autocmd_dirlist_reload(void)
 	return FUNC_SUCCESS;
 }
 
+static size_t
+get_longest_pattern(void)
+{
+	size_t i;
+	size_t len = 0;
+
+	for (i = 0; i < autocmds_n; i++) {
+		if (!autocmds[i].pattern || !*autocmds[i].pattern)
+			continue;
+
+		const size_t l = strlen(autocmds[i].pattern)
+			+ (size_t)autocmds[i].pattern_rev;
+		if (l > len)
+			len = l;
+	}
+
+	return len;
+}
+
+static int
+print_autocmds_list(void)
+{
+	if (autocmds_n == 0) {
+		fputs("auto: No autocommand defined\n", stdout);
+		return FUNC_SUCCESS;
+	}
+
+	char buf[AC_BUF_SIZE];
+	size_t i;
+	const int longest_pattern = (int)get_longest_pattern();
+
+	for (i = 0; i < autocmds_n; i++) {
+		if (!autocmds[i].pattern || !*autocmds[i].pattern
+		|| gen_autocmd_options_list(buf, autocmds[i], 1) <= 0)
+			continue;
+
+		printf("%s%s%s%s%-*s %s%s%s %s%s\n",
+			xs_cb, autocmds[i].match == 1 ? SET_MISC_PTR : " ", df_c,
+			autocmds[i].pattern_rev == 1 ? "!" : "",
+			longest_pattern, autocmds[i].pattern,
+			mi_c, SET_MSG_PTR, df_c,
+			buf, autocmds[i].temp == 1 ? " [temp]" : "");
+	}
+
+	return FUNC_SUCCESS;
+}
+
 /* 'auto' command: add a temporary autocommand for the current directory. */
 int
 add_autocmd(char **args)
@@ -835,6 +883,9 @@ add_autocmd(char **args)
 		puts(AUTO_USAGE);
 		return FUNC_SUCCESS;
 	}
+
+	if (*args[0] == 'l' && strcmp(args[0], "list") == 0)
+		return print_autocmds_list();
 
 	if (!workspaces || !workspaces[cur_ws].path || !*workspaces[cur_ws].path) {
 		xerror(_("auto: The current directory is undefined\n"));
