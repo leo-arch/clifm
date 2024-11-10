@@ -909,6 +909,7 @@ extern time_t curdir_mtime;
 #define AUTOCMD_MSG_MINI  1
 #define AUTOCMD_MSG_SHORT 2
 #define AUTOCMD_MSG_LONG  3
+#define AUTOCMD_MSG_FULL  4
 
 /* Function macros */
 #define atoi xatoi /* xatoi is just a secure atoi */

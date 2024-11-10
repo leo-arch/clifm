@@ -42,6 +42,9 @@
  * this macro to mark them as unset (no value). */
 #define AC_UNSET (-2)
 
+/* Size of the buffer used to store the list of autocommand options */
+#define AC_BUF_SIZE PATH_MAX
+
 /* The opts struct contains option values previous to any autocommand call */
 void
 reset_opts(void)
@@ -163,19 +166,6 @@ set_autocmd_options(const size_t i)
 	 * the current directory. */
 }
 
-static int
-gen_opt_entry(char *buf, const char *name, const char *val, size_t *pos)
-{
-	const int long_msg = (conf.autocmd_msg == AUTOCMD_MSG_LONG);
-
-	const int ret = snprintf(buf, PATH_MAX, "%s%s%s%s", *pos > 0 ? ", " : "",
-		name, (long_msg == 1 && val) ? "=" : "",
-		(long_msg == 1 && val) ? val : "");
-
-	(*pos)++;
-	return (ret > 0 ? ret : 0);
-}
-
 static struct autocmds_t
 gen_common_options(void)
 {
@@ -237,26 +227,34 @@ gen_common_options(void)
 	return a;
 }
 
-void
-print_autocmd_msg(void)
+static int
+gen_opt_entry(char *buf, const char *name, const char *val, size_t *pos)
 {
-	if (conf.autocmd_msg == AUTOCMD_MSG_MINI) {
-		print_reload_msg(NULL, NULL, "Autocmd\n");
-		return;
-	}
+	const int long_msg = (conf.autocmd_msg == AUTOCMD_MSG_LONG
+		|| conf.autocmd_msg == AUTOCMD_MSG_FULL);
 
-	char buf[PATH_MAX];
+	const int ret = snprintf(buf, AC_BUF_SIZE, "%s%s%s%s", *pos > 0 ? ", " : "",
+		name, (long_msg == 1 && val) ? "=" : "",
+		(long_msg == 1 && val) ? val : "");
+
+	(*pos)++;
+	return (ret > 0 ? ret : 0);
+}
+
+/* Write into BUF the list of autocmd options set in the struct A. */
+static int
+gen_autocmd_options_list(char *buf, struct autocmds_t a)
+{
 	int len = 0; /* Number of bytes currently consumed by buf. */
 	size_t c = 0; /* Number of procesed options for the current autocommand. */
-	struct autocmds_t a = gen_common_options();
 
-	if (a.color_scheme)
+	if (a.color_scheme != NULL)
 		len += gen_opt_entry(buf + len, "cs", a.color_scheme, &c);
 
 	if (a.files_counter != UNSET)
 		len += gen_opt_entry(buf + len, "fc", xitoa(a.files_counter), &c);
 
-	if (a.filter.str)
+	if (a.filter.str != NULL)
 		len += gen_opt_entry(buf + len, "ft", NULL, &c);
 
 	if (a.full_dir_size != UNSET)
@@ -290,6 +288,45 @@ print_autocmd_msg(void)
 
 	if (a.sort_reverse != UNSET)
 		len += gen_opt_entry(buf + len, "sr", xitoa(a.sort_reverse), &c);
+
+	return len;
+}
+
+static void
+print_autocmd_options_list_full(void)
+{
+	size_t i;
+	for (i = 0; i < autocmds_n; i++) {
+		if (autocmds[i].match == 0)
+			continue;
+
+		char buf[AC_BUF_SIZE];
+		const int len = gen_autocmd_options_list(buf, autocmds[i]);
+		if (len <= 0)
+			continue;
+
+		print_reload_msg(NULL, NULL, "Autocmd [");
+		fputs(buf, stdout);
+		printf("]%s\n", autocmds[i].temp == 1 ? "T" : "");
+	}
+}
+
+void
+print_autocmd_msg(void)
+{
+	if (conf.autocmd_msg == AUTOCMD_MSG_MINI) {
+		print_reload_msg(NULL, NULL, "Autocmd\n");
+		return;
+	}
+
+	if (conf.autocmd_msg == AUTOCMD_MSG_FULL) {
+		print_autocmd_options_list_full();
+		return;
+	}
+
+	char buf[AC_BUF_SIZE];
+	struct autocmds_t a = gen_common_options();
+	const int len = gen_autocmd_options_list(buf, a);
 
 	if (len <= 0) /* No autocommand option set. Do not print any message */
 		return;
