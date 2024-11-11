@@ -82,6 +82,7 @@ acd, autocd@
 actions @
 alias @
 ao, auto-open@
+auto @
 b, back@
 bb, bleach@
 bd @
