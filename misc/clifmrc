@@ -317,7 +317,7 @@
 
 # Inform about autocommand options set for the current directory
 # Available values:
-# false: Do not print any message.
+# none: Do not print any message.
 # mini: Minimal message (no options details).
 # short: Add the list of autocommand options (without values).
 # long: Like 'short', but displays the value of each option (multiple

@@ -209,7 +209,7 @@ get_ia_value_str(const int val)
 	case AUTOCMD_MSG_SHORT: return "short";
 	case AUTOCMD_MSG_LONG: return "long";
 	case AUTOCMD_MSG_PROMPT: return "prompt";
-	case AUTOCMD_MSG_NONE: return "false";
+	case AUTOCMD_MSG_NONE: return "none";
 	default: return "prompt";
 	}
 }
@@ -2887,7 +2887,7 @@ set_autocmd_msg_value(const char *val)
 	if (!val || !*val)
 		return;
 
-	if (*val == 'f' && strncmp(val, "false\n", 6) == 0)
+	if (*val == 'n' && strncmp(val, "none\n", 5) == 0)
 		conf.autocmd_msg = AUTOCMD_MSG_NONE;
 	else if (*val == 'm' && strncmp(val, "mini\n", 5) == 0)
 		conf.autocmd_msg = AUTOCMD_MSG_MINI;
