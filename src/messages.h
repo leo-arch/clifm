@@ -94,11 +94,11 @@ atool(1)          Extraction/decompression, listing, and repacking of archives"
 #define AUTO_USAGE "Set a temporary autocommand for the current directory\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   auto [list | unset | OPTION=VALUE,...]\n\n\
-Unlike permenent autocommands (defined in the configuration file),\n\
-options set via the 'auto' command are valid only for the current\n\
-directory and the current session (i.e., they are lost at program exit).\n\n\
-These options take precedence over both permament autocommands and regular\n\
-options (set via either the command line or the configuration file).\n\n\
+Unlike permanent autocommands (defined in the configuration file),\n\
+options set via the 'auto' command are temporary, i.e. valid only for the\n\
+current directory and the current session.\n\n\
+Options set via this command take precedence over both permament autocommands\n\
+and regular options (set via either the command line or the configuration file).\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Print the list of available autocommands\n\
     auto list\n\
