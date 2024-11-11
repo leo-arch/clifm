@@ -45,6 +45,7 @@ typedef char *rl_cpvfunc_t;
 #ifndef _NO_ARCHIVING
 # include "archives.h"
 #endif /* !_NO_ARCHIVING */
+#include "autocmds.h" /* add_autocmd() */
 #include "aux.h"
 #include "bookmarks.h"
 #include "checks.h"
@@ -332,7 +333,7 @@ set_max_files(char **args)
 			puts(_("Max files: unset"));
 		else
 			printf(_("Max files: %d\n"), conf.max_files);
-		return FUNC_SUCCESS;
+		goto SUCCESS;
 	}
 
 	if (IS_HELP(args[1])) { puts(_(MF_USAGE)); return FUNC_SUCCESS;	}
@@ -341,14 +342,14 @@ set_max_files(char **args)
 		conf.max_files = UNSET;
 		if (conf.autols == 1) reload_dirlist();
 		print_reload_msg(NULL, NULL, _("Max files unset\n"));
-		return FUNC_SUCCESS;
+		goto SUCCESS;
 	}
 
 	if (*args[1] == '0' && !args[1][1]) {
 		conf.max_files = 0;
 		if (conf.autols == 1) reload_dirlist();
 		print_reload_msg(NULL, NULL, _("Max files set to %d\n"), conf.max_files);
-		return FUNC_SUCCESS;
+		goto SUCCESS;
 	}
 
 	const long inum = strtol(args[1], NULL, 10);
@@ -361,6 +362,8 @@ set_max_files(char **args)
 	if (conf.autols == 1) reload_dirlist();
 	print_reload_msg(NULL, NULL, _("Max files set to %d\n"), conf.max_files);
 
+SUCCESS:
+	update_autocmd_opts(AC_MAX_FILES);
 	return FUNC_SUCCESS;
 }
 
@@ -399,6 +402,7 @@ filescounter_function(const char *arg)
 {
 	if (!arg) {
 		conf.files_counter = conf.files_counter == 1 ? 0 : 1;
+		update_autocmd_opts(AC_FILES_COUNTER);
 		if (conf.autols == 1) reload_dirlist();
 		print_reload_msg(NULL, NULL, _("Files counter %s\n"),
 			conf.files_counter == 1 ? _("enabled") : _("disabled"));
@@ -412,6 +416,7 @@ filescounter_function(const char *arg)
 
 	if (*arg == 'o' && strcmp(arg, "on") == 0) {
 		conf.files_counter = 1;
+		update_autocmd_opts(AC_FILES_COUNTER);
 		if (conf.autols == 1) reload_dirlist();
 		print_reload_msg(NULL, NULL, _("Files counter enabled\n"));
 		return FUNC_SUCCESS;
@@ -419,6 +424,7 @@ filescounter_function(const char *arg)
 
 	if (*arg == 'o' && strcmp(arg, "off") == 0) {
 		conf.files_counter = 0;
+		update_autocmd_opts(AC_FILES_COUNTER);
 		if (conf.autols == 1) reload_dirlist();
 		print_reload_msg(NULL, NULL, _("Files counter disabled\n"));
 		return FUNC_SUCCESS;
@@ -472,13 +478,13 @@ pager_function(const char *arg)
 		}
 		conf.pager = n;
 		printf(_("Pager set to %d\n"), n);
-		return FUNC_SUCCESS;
+		goto SUCCESS;
 	}
 
 	if (*arg == 'o' && strcmp(arg, "off") == 0) {
 		conf.pager = 0;
 		puts(_("Pager disabled"));
-		return FUNC_SUCCESS;
+		goto SUCCESS;
 	}
 
 	if (*arg == 'o' && strcmp(arg, "on") == 0) {
@@ -487,11 +493,15 @@ pager_function(const char *arg)
 			reload_dirlist();
 		else
 			puts(_("Pager enabled"));
-		return FUNC_SUCCESS;
+		goto SUCCESS;
 	}
 
 	fprintf(stderr, "%s\n", _(PAGER_USAGE));
 	return FUNC_FAILURE;
+
+SUCCESS:
+	update_autocmd_opts(AC_PAGER);
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -717,6 +727,7 @@ lightmode_function(const char *arg)
 			return FUNC_SUCCESS;
 		}
 		conf.light_mode = 1;
+		update_autocmd_opts(AC_LIGHT_MODE);
 		if (conf.autols == 1) reload_dirlist();
 		print_reload_msg(NULL, NULL, _("Light mode enabled\n"));
 	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
@@ -725,6 +736,7 @@ lightmode_function(const char *arg)
 			return FUNC_SUCCESS;
 		}
 		conf.light_mode = 0;
+		update_autocmd_opts(AC_LIGHT_MODE);
 		if (conf.autols == 1) reload_dirlist();
 		print_reload_msg(NULL, NULL, _("Light mode disabled\n"));
 	} else {
@@ -843,6 +855,8 @@ hidden_files_function(const char *arg)
 		if (conf.autols == 1) reload_dirlist();
 		print_reload_msg(NULL, NULL, _("Showing dotfiles\n"));
 	}
+
+	update_autocmd_opts(AC_SHOW_HIDDEN);
 
 	return FUNC_SUCCESS;
 }
@@ -1512,6 +1526,7 @@ toggle_full_dir_size(const char *arg)
 			puts(_("Full directory size is already enabled"));
 		} else {
 			conf.full_dir_size = 1;
+			update_autocmd_opts(AC_FULL_DIR_SIZE);
 			if (conf.autols == 1) reload_dirlist();
 			print_reload_msg(NULL, NULL, _("Full directory size enabled\n"));
 		}
@@ -1523,6 +1538,7 @@ toggle_full_dir_size(const char *arg)
 			puts(_("Full directory size is already disabled"));
 		} else {
 			conf.full_dir_size = 0;
+			update_autocmd_opts(AC_FULL_DIR_SIZE);
 			if (conf.autols == 1) reload_dirlist();
 			print_reload_msg(NULL, NULL, _("Full directory size disabled\n"));
 		}
@@ -1818,6 +1834,8 @@ long_view_function(const char *arg)
 	}
 
 	conf.long_view = arg[1] == 'n' ? 1 : 0;
+	update_autocmd_opts(AC_LONG_VIEW);
+
 	if (conf.autols == 1)
 		reload_dirlist();
 
@@ -2073,13 +2091,12 @@ toggle_follow_links(const char *arg)
 	if (conf.autols == 1)
 		reload_dirlist();
 
-	print_reload_msg(NULL, NULL, _("Follow links %s\n"), conf.follow_symlinks_long == 1
-		? _("enabled") : _("disabled"));
+	print_reload_msg(NULL, NULL, _("Follow links %s\n"),
+		conf.follow_symlinks_long == 1 ? _("enabled") : _("disabled"));
 
 	return FUNC_SUCCESS;
 }
 
-#include "autocmds.h"
 /* Take the command entered by the user, already splitted into substrings
  * by parse_input_str(), and call the corresponding function. Return zero
  * in case of success and one in case of error

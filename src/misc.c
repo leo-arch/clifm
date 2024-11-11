@@ -59,6 +59,7 @@ typedef char *rl_cpvfunc_t;
 #endif /* LINUX_INOTIFY */
 
 #include "aux.h"
+#include "autocmds.h" /* update_autocmd_opts() */
 #include "bookmarks.h"
 #include "checks.h"
 #include "file_operations.h"
@@ -609,8 +610,11 @@ filter_function(char *arg)
 		return FUNC_SUCCESS;
 	}
 
-	if (*arg == 'u' && strcmp(arg, "unset") == 0)
-		return unset_filter();
+	if (*arg == 'u' && strcmp(arg, "unset") == 0) {
+		const int ret = unset_filter();
+		update_autocmd_opts(AC_FILTER);
+		return ret;
+	}
 
 	free(filter.str);
 	regfree(&regex_exp);
@@ -633,6 +637,7 @@ filter_function(char *arg)
 
 	set_filter_type(*p);
 	filter.str = savestring(p, strlen(p));
+	update_autocmd_opts(AC_FILTER);
 
 	return compile_filter();
 }

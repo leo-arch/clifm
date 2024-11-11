@@ -28,8 +28,9 @@
 #include <unistd.h>
 #include <strings.h> /* str(n)casecmp() */
 
+#include "autocmds.h" /* update_autocmd_opts() */
+#include "aux.h"      /* xatoi */
 #include "checks.h"
-#include "aux.h" /* xatoi */
 #include "listing.h"
 #include "messages.h" /* SORT_USAGE */
 
@@ -435,6 +436,8 @@ sort_function(char **arg)
 
 		if (arg[2] && *arg[2] == 'r' && strcmp(arg[2], "rev") == 0)
 			toggle_sort_reverse();
+
+		update_autocmd_opts(AC_SORT);
 
 		return re_sort_files_list();
 	}

@@ -49,6 +49,7 @@ typedef char *rl_cpvfunc_t;
 #endif /* MAC_OS_X_RENAMEAT_SYS_STDIO_H */
 
 #include "aux.h"
+#include "autocmds.h" /* update_autocmd_opts() */
 #include "config.h"
 #include "exec.h"
 #include "file_operations.h"
@@ -825,6 +826,8 @@ rl_toggle_max_filename_len(int count, int key)
 		conf.max_name_len = UNSET;
 	}
 
+	update_autocmd_opts(AC_MAX_NAME_LEN);
+
 	if (conf.autols == 1) {
 		if (conf.clear_screen == 0)
 			putchar('\n');
@@ -1374,6 +1377,8 @@ rl_toggle_long_view(int count, int key)
 
 	conf.long_view = conf.long_view == 1 ? 0 : 1;
 
+	update_autocmd_opts(AC_LONG_VIEW);
+
 	if (conf.autols == 1) {
 		if (conf.clear_screen == 0)
 		/* Without this putchar(), the first entries of the directories
@@ -1455,6 +1460,7 @@ rl_toggle_light_mode(int count, int key)
 #endif /* !_NO_SUGGESTIONS */
 
 	conf.light_mode = conf.light_mode == 1 ? 0 : 1;
+	update_autocmd_opts(AC_LIGHT_MODE);
 
 	if (conf.autols == 1) {
 		if (conf.clear_screen == 0)
@@ -1488,6 +1494,8 @@ rl_toggle_hidden_files(int count, int key)
 #endif /* !_NO_SUGGESTIONS */
 
 	conf.show_hidden = conf.show_hidden == 1 ? 0 : 1;
+
+	update_autocmd_opts(AC_SHOW_HIDDEN);
 
 	if (conf.autols == 1) {
 		if (conf.clear_screen == 0)
@@ -1670,6 +1678,8 @@ rl_sort_next(int count, int key)
 		sort_switch = 0;
 	}
 
+	update_autocmd_opts(AC_SORT);
+
 	xrl_reset_line_state();
 	return FUNC_SUCCESS;
 }
@@ -1706,6 +1716,8 @@ rl_sort_previous(int count, int key)
 		reload_dirlist();
 		sort_switch = 0;
 	}
+
+	update_autocmd_opts(AC_SORT);
 
 	xrl_reset_line_state();
 	return FUNC_SUCCESS;
@@ -2319,6 +2331,7 @@ rl_toggle_only_dirs(int count, int key)
 		return FUNC_SUCCESS;
 
 	conf.only_dirs = conf.only_dirs ? 0 : 1;
+	update_autocmd_opts(AC_ONLY_DIRS);
 
 	int exit_status = exit_code;
 	if (conf.autols == 1) {

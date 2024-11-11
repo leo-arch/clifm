@@ -64,6 +64,39 @@ reset_opts(void)
 	opts.filter = (struct filter_t){0};
 }
 
+void
+update_autocmd_opts(const int opt)
+{
+	switch (opt) {
+	case AC_COLOR_SCHEME: opts.color_scheme = cur_cscheme; break;
+	case AC_FILES_COUNTER: opts.files_counter = conf.files_counter; break;
+	case AC_FULL_DIR_SIZE: opts.full_dir_size = conf.full_dir_size; break;
+	case AC_LIGHT_MODE: opts.light_mode = conf.light_mode; break;
+	case AC_LONG_VIEW: opts.long_view = conf.long_view; break;
+	case AC_SHOW_HIDDEN: opts.show_hidden = conf.show_hidden; break;
+	case AC_MAX_FILES: opts.max_files = conf.max_files; break;
+	case AC_MAX_NAME_LEN: opts.max_name_len = conf.max_name_len; break;
+	case AC_ONLY_DIRS: opts.only_dirs = conf.only_dirs; break;
+	case AC_SORT:
+		opts.sort = conf.sort;
+		opts.sort_reverse = conf.sort_reverse;
+		break;
+	case AC_PAGER: opts.pager = conf.pager; break;
+	case AC_FILTER:
+		free(opts.filter.str);
+		if (!filter.str) {
+			opts.filter = (struct filter_t){0};
+		} else {
+			opts.filter.str = savestring(filter.str, strlen(filter.str));
+			opts.filter.type = filter.type;
+			opts.filter.rev = filter.rev;
+			opts.filter.env = filter.env;
+		}
+		break;
+	default: break;
+	}
+}
+
 static int
 set_autocmd_regex_filter(const char *pattern)
 {

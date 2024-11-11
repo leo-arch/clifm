@@ -643,6 +643,21 @@ extern time_t curdir_mtime;
 
 #define UNSET  (-1)
 
+/* Macros for the update_autocmd_opts() function */
+#define AC_COLOR_SCHEME  0
+#define AC_FILES_COUNTER 1
+#define AC_FILTER        2
+#define AC_FULL_DIR_SIZE 3
+#define AC_LIGHT_MODE    4
+#define AC_LONG_VIEW     5
+#define AC_MAX_FILES     6
+#define AC_MAX_NAME_LEN  7
+#define AC_ONLY_DIRS     8
+#define AC_PAGER         9
+#define AC_SHOW_HIDDEN   10
+#define AC_SORT          11
+
+
 /* Macros for the cp and mv cmds */
 #define CP_CP            0 /* cp -iRp */
 #define CP_CP_FORCE      1 /* cp -Rp */

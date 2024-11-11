@@ -42,6 +42,7 @@
 #endif /* __OpenBSD__ */
 
 #include "aux.h"
+#include "autocmds.h" /* update_autocmd_opts() */
 #include "checks.h"
 #include "colors.h"
 #include "config.h" /* set_div_line() */
@@ -1264,7 +1265,9 @@ cschemes_function(char **args)
 	if (*args[1] == 'e' && (!args[1][1] || strcmp(args[1], "edit") == 0))
 		return edit_colorscheme(args[2]);
 
-	return set_colorscheme(args[1]);
+	const int ret = set_colorscheme(args[1]);
+	update_autocmd_opts(AC_COLOR_SCHEME);
+	return ret;
 #endif /* CLIFM_SUCKLESS */
 }
 
