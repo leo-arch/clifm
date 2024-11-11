@@ -315,6 +315,22 @@
 # directory. For more information consult the manpage.
 ;ReadAutocmdFiles=false
 
+# Inform about autocommand options set for the current directory
+# Available values:
+# false: Do not print any message.
+# mini: Minimal message (no options details).
+# short: Add the list of autocommand options (without values).
+# long: Like 'short', but displays the value of each option (multiple
+#  matching autocommands are squashed into a single line). 
+# full: Like 'long', but multiple autocommands are printed on separate
+#  lines. Also, a 'T' is appended to mark temporary autcommands (i.e.,
+#  set via the 'auto' command).
+# prompt: Print a little notification ('A') in the prompt.
+#  The color used for this notification is 'ac' (see the color scheme file).
+#  If PromptNotif is set to false for the current prompt, nothing is printed
+#  (you can use the '\y' prompt code in the prompts file to set it manually).
+;InformAutocmd=prompt
+
 # Run in read-only mode (internal commands able to modify the file
 # system are disabled). Consult the manpage for the list of affected
 # commands.
