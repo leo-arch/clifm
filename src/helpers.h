@@ -146,6 +146,10 @@
 # undef _DIRENT_HAVE_D_TYPE
 #endif /* _BE_POSIX && _DIRENT_HAVE_D_TYPE */
 
+#if !defined(TIGHT_COLUMNS) && !defined(NO_TIGHT_COLUMNS)
+# define TIGHT_COLUMNS
+#endif
+
 #ifdef CLIFM_LEGACY
 /* Replace functions not available before POSIX-1.2008. More precisely,
  * let's try to be POSIX-1.2001 compliant. This is still experimental:
