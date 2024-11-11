@@ -201,6 +201,19 @@ get_link_creat_mode(const int mode)
 	}
 }
 
+static char *
+get_ia_value_str(const int val)
+{
+	switch (val) {
+	case AUTOCMD_MSG_FULL: return "full";
+	case AUTOCMD_MSG_SHORT: return "short";
+	case AUTOCMD_MSG_LONG: return "long";
+	case AUTOCMD_MSG_PROMPT: return "prompt";
+	case AUTOCMD_MSG_NONE: return "false";
+	default: return "prompt";
+	}
+}
+
 /* Dump current value of config options (as defined in the config file),
  * highlighting those that differ from default values.
  * Note that values displayed here represent the CURRENT status of the
@@ -323,6 +336,10 @@ dump_config(void)
 	n = DEF_ICONS;
 	print_config_value("Icons", &conf.icons, &n, DUMP_CONFIG_BOOL);
 #endif /* !_NO_ICONS */
+
+	s = get_ia_value_str(DEF_AUTOCMD_MSG);
+	char *ia_value = get_ia_value_str(conf.autocmd_msg);
+	print_config_value("InformAutocmd", ia_value, s, DUMP_CONFIG_STR);
 
 	n = DEF_LIGHT_MODE;
 	print_config_value("LightMode", &conf.light_mode, &n, DUMP_CONFIG_BOOL);
