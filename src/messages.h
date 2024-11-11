@@ -106,7 +106,7 @@ and regular options (set via either the command line or the configuration file).
     auto lv=1\n\
 - List only PDF files, set the color scheme to nord, and sort files by size\n\
     auto ft=.*\\.pdf$,cs=nord,st=size\n\
-- Same as above, but sequentially (previous values are kept)\n\
+- Same as above, but sequentially (previous values are preserved)\n\
     auto ft=.*\\.pdf$\n\
     auto cs=nord\n\
     auto st=size\n\
