@@ -53,8 +53,10 @@
 #    mpv %f !EO &
 # For Ranger users, "!EO" is equivalent to "flag f" in rifle.conf.
 
-# The '%x' flag can be used as a shorthand for "%f !EO &". Example:
+# The '%x' flag can be used as a shorthand for "%f !EO &". For example:
 #    mpv %x
+# When using this flag the opening application is executed in a new
+# session, i.e., detached from the running terminal (via setsid(3)).
 
 # Running the opening application in the background:
 # For GUI applications:
