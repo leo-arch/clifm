@@ -824,7 +824,14 @@ parse_autocmd_line(char *cmd, const size_t buflen)
 	if (modify_autocmd(p, autocmds_n) == FUNC_FAILURE) {
 		/* No valid option found for this autocmd: remove it. */
 		free(autocmds[autocmds_n].pattern);
-		autocmds = xnrealloc(autocmds, autocmds_n, sizeof(struct autocmds_t));
+		if (autocmds_n > 0) {
+			autocmds =
+				xnrealloc(autocmds, autocmds_n, sizeof(struct autocmds_t));
+		} else {
+			free(autocmds);
+			autocmds = (struct autocmds_t *)NULL;
+		}
+
 		return FUNC_FAILURE;
 	}
 
