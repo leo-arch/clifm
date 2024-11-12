@@ -327,9 +327,9 @@
 #   set via the 'auto' command).
 # 'prompt': Print a little notification (a gray 'A') in the prompt.
 #   The color code used for this notification is 'ac' (see the color scheme file).
-#   If PromptNotif is set to false for the current prompt, nothing is printed
-#   (you can use the '\y' prompt code in the prompts file to manually set
-#   this notification).
+#   If Notifications is set to false for the current prompt (see the prompts file),
+#   nothing is printed (you can use the '\y' prompt code in the prompts file to
+#   manually set this notification).
 ;InformAutocmd=prompt
 
 # Run in read-only mode (internal commands able to modify the file
