@@ -752,6 +752,7 @@ expand_app_fields(char ***cmd, size_t *n, char *fpath, int *exec_flags)
 			copy_field(&a[i], fpath);
 			f = 1;
 			set_exec_flags("EO", exec_flags);
+			*exec_flags |= E_SETSID;
 			bg_proc = 1;
 			i++;
 			break;

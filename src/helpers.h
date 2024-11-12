@@ -762,6 +762,7 @@ extern time_t curdir_mtime;
 #define E_NOSTDOUT (1 << 2)
 #define E_NOSTDERR (1 << 3)
 #define E_MUTE     (E_NOSTDOUT | E_NOSTDERR)
+#define E_SETSID   (1 << 4)
 
 /* Amount of available suggestion strategies (a,b,c,e,f,h,j).
  * 'b' is deprecated (kept only for compatibility with old versions) */
