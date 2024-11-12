@@ -28,8 +28,8 @@
 #define PROGRAM_NAME_UPPERCASE "Clifm"
 #define PROGRAM_NAME "clifm"
 #define PROGRAM_DESC "The command line file manager"
-#define VERSION "1.21.12"
-#define DATE "Nov 10, 2024"
+#define VERSION "1.21.13"
+#define DATE "Nov 12, 2024"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "https://github.com/leo-arch/clifm"
 #define LICENSE "GPL2+"
@@ -761,8 +761,8 @@ extern time_t curdir_mtime;
 #define E_NOSTDIN  (1 << 1)
 #define E_NOSTDOUT (1 << 2)
 #define E_NOSTDERR (1 << 3)
-#define E_MUTE     (E_NOSTDOUT | E_NOSTDERR)
 #define E_SETSID   (1 << 4)
+#define E_MUTE     (E_NOSTDOUT | E_NOSTDERR)
 
 /* Amount of available suggestion strategies (a,b,c,e,f,h,j).
  * 'b' is deprecated (kept only for compatibility with old versions) */
