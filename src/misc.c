@@ -245,9 +245,9 @@ err(const int msg_type, const int prompt_flag, const char *format, ...)
 		{free(buf); goto ERROR;}
 
 	/* If the new message is the same as the last message, skip it. */
-	if (msgs_n > 0 && msg_type != 'f' && *messages[msgs_n - 1].text == *buf
+/*	if (msgs_n > 0 && msg_type != 'f' && *messages[msgs_n - 1].text == *buf
 	&& strcmp(messages[msgs_n - 1].text, buf) == 0)
-		{free(buf); goto ERROR;}
+		{free(buf); goto ERROR;} */
 
 	if (msg_type >= 'e') {
 		switch (msg_type) {
