@@ -148,7 +148,7 @@
 
 #if !defined(TIGHT_COLUMNS) && !defined(NO_TIGHT_COLUMNS)
 # define TIGHT_COLUMNS
-#endif
+#endif /* !TIGHT_COLUMNS && !NO_TIGHT_COLUMNS */
 
 #ifdef CLIFM_LEGACY
 /* Replace functions not available before POSIX-1.2008. More precisely,

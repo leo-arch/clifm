@@ -1683,13 +1683,17 @@ create_main_config_file(char *file)
 	fprintf(config_fp,
 	    "# If set to true, a command name that is the name of a directory or a\n\
 # file is executed as if it were the argument to the the 'cd' or the \n\
-# 'open' commands respectivelly: 'cd DIR' works the same as just 'DIR'\n\
+# 'open' commands respectively: 'cd DIR' works the same as just 'DIR'\n\
 # and 'open FILE' works the same as just 'FILE'.\n\
 ;Autocd=%s\n\
 ;AutoOpen=%s\n\n"
 
 		"# Enable autocommand files (.cfm.in and .cfm.out).\n\
 ;ReadAutocmdFiles=%s\n\n"
+
+		"# How to display autocommand notifications (none, mini, short, long,\n\
+# full, prompt)\n\
+;InformAutocmd=prompt\n\n"
 
 		"# Read .hidden files.\n\
 ;ReadDotHidden=%s\n\n"

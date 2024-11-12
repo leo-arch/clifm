@@ -426,7 +426,7 @@ check_autocmds(void)
 		if (!autocmds[i].pattern || !*autocmds[i].pattern)
 			continue;
 
-		char *p = autocmds[i].pattern;
+		const char *p = autocmds[i].pattern;
 		const int rev = autocmds[i].pattern_rev;
 		int found = 0;
 

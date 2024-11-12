@@ -321,15 +321,15 @@
 # 'mini': Minimal message (no options details).
 # 'short': Add the list of autocommand options (without values).
 # 'long': Like 'short', but displays the value of each option (multiple
-#  matching autocommands are merged into a single line). 
+#   matching autocommands are merged into a single line).
 # 'full': Like 'long', but multiple autocommands are printed on separate
-#  lines. Also, a 'T' is appended to mark temporary autocommands (i.e.,
-#  set via the 'auto' command).
+#   lines. Also, a 'T' is appended to mark temporary autocommands (i.e.,
+#   set via the 'auto' command).
 # 'prompt': Print a little notification (a gray 'A') in the prompt.
-#  The color used for this notification is 'ac' (see the color scheme file).
-#  If PromptNotif is set to false for the current prompt, nothing is printed
-#  (you can use the '\y' prompt code in the prompts file to manually set
-#  this notification).
+#   The color code used for this notification is 'ac' (see the color scheme file).
+#   If PromptNotif is set to false for the current prompt, nothing is printed
+#   (you can use the '\y' prompt code in the prompts file to manually set
+#   this notification).
 ;InformAutocmd=prompt
 
 # Run in read-only mode (internal commands able to modify the file
