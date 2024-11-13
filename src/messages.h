@@ -29,9 +29,9 @@
 # define GRAL_USAGE "[OPTIONS] [DIR]"
 
 #define ACTIONS_USAGE "List or edit actions/plugins\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   actions [list | edit [APP]]\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - List available actions/plugins\n\
     actions list\n\
   Note: Since 'list' is the default action, it can be omitted.\n\
@@ -48,9 +48,9 @@ Some plugins accept parameters. To get information about a specific plugin\n\
 use the -h,--help flag. Example: \"- --help\"."
 
 #define ALIAS_USAGE "List, print, or import aliases\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   alias [import FILE | list | NAME]\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - List available aliases\n\
     alias\n\
   or\n\
@@ -67,9 +67,9 @@ use the -h,--help flag. Example: \"- --help\"."
     Save and quit the editor."
 
 #define ARCHIVE_USAGE "Compress/archive files\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   ac, ad ELN/FILE...\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - Compress/archive all selected files\n\
     ac sel\n\
 - Compress/archive a range of files\n\
@@ -80,7 +80,7 @@ use the -h,--help flag. Example: \"- --help\"."
     ad file.tar.gz\n\
   or just open the file (the appropriate menu will be displayed)\n\
     o file.tar.gz (or just 'file.tar.gz')\n\n\
-\x1b[1mDEPENDENCIES\x1b[0m\n\
+\x1b[1mDEPENDENCIES\x1b[22m\n\
 zstd(1)           Everything related to Zstandard\n\
 mkisofs(1)        Create ISO 9660 files\n\
 7z(1) / mount(1)  Operate on ISO 9660 files\n\
@@ -88,18 +88,18 @@ archivemount(1)   Mount archives\n\
 atool(1)          Extraction/decompression, listing, and repacking of archives"
 
 #define AUTOCD_USAGE "Turn autocd on/off\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   acd, autocd [on | off | status]"
 
 #define AUTO_USAGE "Set a temporary autocommand for the current directory\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
-  auto [list | unset | OPTION=VALUE,...]\n\n\
+\x1b[1mUSAGE\x1b[22m\n\
+  auto [list | none | unset | OPTION=VALUE,...]\n\n\
 Unlike permanent autocommands (defined in the configuration file),\n\
 options set via the 'auto' command are temporary, i.e. valid only for the\n\
 current directory and the current session.\n\n\
 Options set via this command take precedence over both permament autocommands\n\
 and regular options (set via either the command line or the configuration file).\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - Print the list of available autocommands\n\
     auto list\n\
 - List files in the current directory in long view\n\
@@ -113,7 +113,9 @@ and regular options (set via either the command line or the configuration file).
 - Unset the files filter and the color scheme, and change sort to blocks\n\
     auto ft=,cs=,st=blocks\n\
 - Unset all temporary options previously set for the current directory\n\
-    auto unset\n\n\
+    auto unset\n\
+- Reload the current directory ignoring all autocommands\n\
+    auto none\n\n\
 For the list of available option codes enter 'help autocommands'."
 
 #define AUTOCMDS_USAGE "Tweak settings or run custom commands on a per directory basis\n\n\
@@ -168,14 +170,14 @@ Note 3: To set a temporary autocommand for the current directory use the\n\
 'auto' command. Run 'auto --help' for details."
 
 #define AUTO_OPEN_USAGE "Turn auto-open on/off\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   ao, auto-open [on | off | status]"
 
 #define BACK_USAGE "Change to the previous directory in the directory \
 history list\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   b, back [h, hist | clear | !ELN]\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - Just change to the previously visited directory\n\
     b (also Alt-j or Shift-Left)\n\
 - Print the directory history list\n\
@@ -187,17 +189,17 @@ history list\n\n\
 
 #define BD_USAGE "Quickly change to a parent directory matching NAME. If \
 NAME is not specified, print the list of all parent directories\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   bd [NAME]\n\n\
-\x1b[1mEXAMPLE\x1b[0m\n\
+\x1b[1mEXAMPLE\x1b[22m\n\
 - Supposing you are in ~/Documents/misc/some/deep/dir, change to\n\
 ~/Documents/misc\n\
     bd mi (or 'bd <TAB>' to choose from a list)"
 
 #define BL_USAGE "Create multiple symbolic links at once\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   bl FILE...\n\n\
-\x1b[1mEXAMPLE\x1b[0m\n\
+\x1b[1mEXAMPLE\x1b[22m\n\
 - Symlink files 'file1', 'file2', 'file3', and 'file4' at once\n\
     bl file* (or 'bl <TAB>' to choose from a list - multi-selection is\n\
   allowed)\n\
@@ -208,16 +210,16 @@ NAME is not specified, print the list of all parent directories\n\n\
 Note: Links are always created in the current directory."
 
 #define BLEACH_USAGE "Clean up file names from non-ASCII characters\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   bb, bleach ELN/FILE...\n\n\
-\x1b[1mEXAMPLE\x1b[0m\n\
+\x1b[1mEXAMPLE\x1b[22m\n\
 - Bleach file names in your Downloads directory\n\
     bb ~/Downloads/*"
 
 #define BOOKMARKS_USAGE "Manage bookmarks\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   bm, bookmarks [a, add FILENAME NAME | d, del NAME | e, edit [APP] | NAME]\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - List bookmarks\n\
     bm (also Alt-b, 'bm <TAB>' or 'b:<TAB>')\n\
 - Bookmark the directory /media/mount as 'mnt'\n\
@@ -237,13 +239,13 @@ Note: Links are always created in the current directory."
     s b:"
 
 #define BULK_RENAME_USAGE "Bulk rename files\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   br, bulk ELN/FILE... [:EDITOR]\n\n\
 The list of files to be renamed is opened via EDITOR (default associated\n\
 application for text files if omitted). Edit the file names you want to \n\
 rename, save, and quit the editor (quit without saving to cancel the \n\
 operation).\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - Bulk rename all files ending with .pdf in the current directory\n\
     br *.pdf\n\
   or\n\
@@ -254,26 +256,26 @@ operation).\n\n\
     br sel :vi"
 
 #define CD_USAGE "Change the current working directory\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   cd [ELN/DIR]\n\n\
-\x1b[1mEXAMPLE\x1b[0m\n\
+\x1b[1mEXAMPLE\x1b[22m\n\
 - Change to /var\n\
     cd /var\n\
   or, if autocd is enabled (default)\n\
     /var"
 
 #define COLORS_USAGE "Preview the current color scheme\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   colors"
 
 #define COLUMNS_USAGE "Toggle columned list of files on/off\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   cl, columns [on | off]"
 
 #define CS_USAGE "Switch color schemes\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   cs, colorschemes [COLORSCHEME | edit [APP] | preview | check-ext | name]\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - Print the name of the current color scheme\n\
     cs name (or 'cs n')\n\
 - List available color schemes\n\
@@ -293,9 +295,9 @@ Run with --lscolors. Consult the Wiki for details:\n\
 https://github.com/leo-arch/clifm/wiki/Customization#ls_colors-support"
 
 #define DESEL_USAGE "Deselect one or more selected files\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   ds, desel [*, a, all]\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - Deselect all selected files\n\
     ds * (or Alt-d)\n\
 - Deselect files from a menu\n\
@@ -316,9 +318,9 @@ daemon's documentation.\n\n\
 Tip: You can always check notifications using the 'msg' command."
 
 #define DH_USAGE "Query the directory history list\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   dh [STRING] [PATH] [!ELN]\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - Print the directory history list\n\
     dh (also 'dh <TAB>')\n\
 - Print directory history entries matching \"query\"\n\
@@ -330,9 +332,9 @@ Note: If the first argument is an absolute path, 'dh' works just as 'cd'.\n\
 Tip: Take a look at the 'j' command as well."
 
 #define DIRHIST_USAGE "List or access entries in the directory history list\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   b/f [hist | clear | !ELN]\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - Print the directory history list\n\
     b hist\n\
 - Change to the directory whose ELN is 12 in the directory history list\n\
@@ -342,9 +344,9 @@ Tip: Take a look at the 'j' command as well."
 Tip: See also the 'dh' and 'j' commands."
 
 #define DUP_USAGE "Duplicate files via rsync(1) (cp(1) if rsync is not found)\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   d, dup ELN/FILE...\n\n\
-\x1b[1mEXAMPLE\x1b[0m\n\
+\x1b[1mEXAMPLE\x1b[22m\n\
 - Duplicate files whose ELN's are 12 through 20\n\
     d 12-20\n\n\
 You will be asked for a destiny directory.\n\
@@ -354,9 +356,9 @@ Parameters passed to rsync: --aczvAXHS --progress\n\n\
 Parameters passed to cp: -a"
 
 #define EDIT_USAGE "Edit the main configuration file\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   config [reset | dump | APPLICATION]\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - Open/edit the configuration file\n\
     config (or F10)\n\
 - Open/edit the configuration file using nano\n\
@@ -367,28 +369,28 @@ Parameters passed to cp: -a"
     config reset"
 
 #define EXT_USAGE "Turn on/off the use of external commands\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   ext [on, off, status]"
 
 #define EXPORT_FILES_USAGE "Export files to a temporary file\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   exp [ELN/FILE...]\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - Export all selected files\n\
     exp sel\n\
 - Export all PDF files in the current directory\n\
     exp *.pdf"
 
 #define EXPORT_VAR_USAGE "Add one or more variables to the environment\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   export NAME=VALUE..."
 
 #define FC_USAGE "Toggle the files counter for directories on/off\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   fc [on | off | status]"
 
 #define FILE_DETAILS "List file details\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - Toggle long/detail view mode\n\
     ll (also Alt-l)\n\
   Note: Use PropFields in the configuration file to customize output\n\
@@ -402,7 +404,7 @@ error ocurred while reading a subdirectory, so sizes may not be accurate\n\n\
 Note 2: Unlink 'p', 'pp' always follows symlinks to their target file."
 
 #define FILE_SIZE_USAGE "File sizes/disk usage\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - Enable full directory size (long view)\n\
     fz on (or --full-dir-size)\n\
 - Toggle the disk usage analyzer mode on/off\n\
@@ -414,16 +416,16 @@ Note 2: Unlink 'p', 'pp' always follows symlinks to their target file."
     Run with --si"
 
 #define FF_USAGE "Set list-directories-first on/off\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   ff, dirs-first [on | off | status]\n\
-\x1b[1mEXAMPLE\x1b[0m\n\
+\x1b[1mEXAMPLE\x1b[22m\n\
 - Disable list directories-first\n\
     ff off\n\
   Note: Toggle directories-first on/off pressing Alt-g."
 
 #define FILE_PREVIEWS "Use the 'view' command to preview files in the current \
 directory (depends on fzf).\n\n\
-\x1b[1mENABLING IMAGE PREVIEWS\x1b[0m\n\
+\x1b[1mENABLING IMAGE PREVIEWS\x1b[22m\n\
 \n\
 Edit shotgun's configuration file ('view edit' or F7) and uncomment the\n\
 'clifmimg' lines from the top of the file.\n\
@@ -440,9 +442,9 @@ If using the 'ueberzug' method, you must start Clifm via the 'clifmrun' script\n
 (~/.config/clifm/clifmrun)"
 
 #define FILTER_USAGE "Set a filter for the files list\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   ft, filter [unset | [!]REGEX,=FILE-TYPE-CHAR]\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - Print the current filter, if any\n\
     ft\n\
 - Do not list hidden files\n\
@@ -500,9 +502,9 @@ files in the current directory:\n\n\
     s =x =l @image"
 
 #define FORTH_USAGE "Change to the next directory in the directory history list\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   f, forth [h, hist | clear | !ELN]\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - Just change to the next visited directory\n\
     f (also Alt-k or Shift-Right)\n\
 - Print the directory history list\n\
@@ -513,13 +515,13 @@ files in the current directory:\n\n\
     b (also Alt-j or Shift-Left)"
 
 #define FZ_USAGE "Toggle full directory size on/off (only for long view mode)\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   fz [on, off]"
 
 #define HELP_USAGE "Get help\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   help [TOPIC]\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - Print the help screen\n\
     help\n\
 - Get help about the 'bookmarks' topic\n\
@@ -528,25 +530,25 @@ files in the current directory:\n\n\
     help <TAB>"
 
 #define HF_USAGE "Set hidden files on/off\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   hf, hh, hidden [on | off | status]\n\n\
-\x1b[1mEXAMPLE\x1b[0m\n\
+\x1b[1mEXAMPLE\x1b[22m\n\
 - Show hidden files\n\
     hh on\n\
 - Toggle hidden files\n\
     hh (or Alt-.)"
 
 #define HISTEXEC_USAGE "Access commands history entries\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
 history or !<TAB>: List available commands\n\
 !!: Execute the last command\n\
 !n: Execute the command number 'n' in the history list\n\
 !-n: Execute the last - n command in the history list"
 
 #define HISTORY_USAGE "List or access commands history entries\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   history [edit [APP] | clear | -N | on | off | status | show-time [-N]]\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - Print the complete list of commands in history\n\
     history\n\
 - Print the complete list of commands in history (with timestamps)\n\
@@ -578,14 +580,14 @@ Tip: Use HistIgnore in the configuration file to exclude command lines\n\
 from the history list."
 
 #define ICONS_USAGE "Set icons on/off\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   icons [on, off]"
 
 #define JUMP_USAGE "Change to a directory in the jump database (visited directories)\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   j [--purge [NUM] | --edit [APP]], jc, jp, jl [STRING]..., je\n\n\
 For information about the matching algorithm consult the manpage\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - Print the list of entries in the jump database\n\
     j (or jl)\n\
 - List all entries matching \"str\"\n\
@@ -620,19 +622,19 @@ For information about the matching algorithm consult the manpage\n\n\
   is in the directory history, it won't be removed from the database."
 
 #define K_USAGE "Toggle follow-links in long view mode\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   k\n\n\
 If enabled, when running in long view information for the file a symbolic\n\
 link points to (instead of for the link itself) is displayed."
 
 #define KK_USAGE "Toggle max-filename-len on/off\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   kk"
 
 #define KB_USAGE "Manage key bindings\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   kb, keybinds [list | bind FUNC | edit [APP] | conflict | reset | readline]\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - List your current key bindings\n\
     kb (or 'kb list')\n\
 - List available function names\n\
@@ -651,20 +653,20 @@ link points to (instead of for the link itself) is displayed."
     kb reset"
 
 #define LE_USAGE "Edit a symbolic link\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   le SYMLINK\n\n\
 The user is prompted to enter a new link target using the current\n\
 target as template.\n\n\
-\x1b[1mEXAMPLE\x1b[0m\n\
+\x1b[1mEXAMPLE\x1b[22m\n\
 - Edit the symbolic link named file.link\n\
     le file.link"
 
 #define LINK_USAGE "Create a symbolic link\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   l TARGET [LINK_NAME]\n\n\
 If LINK_NAME is omitted, it is created as TARGET_BASENAME.link in\n\
 the current directory.\n\n\
-\x1b[1mEXAMPLE\x1b[0m\n\
+\x1b[1mEXAMPLE\x1b[22m\n\
 - Create a symbolic link to file.zst named mylink\n\
     l file.zst mylink\n\n\
 Note: The link creation mode (by default 'literal', like 'ln -s')\n\
@@ -673,22 +675,22 @@ can be set in the configuration file via the LinkCreationMode option\n\
 Tip: Use the 'le' command to edit a symbolic link. Try 'le --help'."
 
 #define LL_USAGE "Toggle long view mode\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   ll, lv [on | off]\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - Change to long view\n\
     ll on\n\
 - Toggle long view\n\
     ll (or Alt-l)"
 
 #define LM_USAGE "Set light mode on/off\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   lm [on, off]"
 
 #define LOG_USAGE "Manage Clifm logs\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   log [cmd | msg] [list | on | off | status | clear]\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - Print message logs\n\
     log msg list (or just 'log msg')\n\
 - Enable command logs\n\
@@ -700,9 +702,9 @@ Tip: Use the 'le' command to edit a symbolic link. Try 'le --help'."
 
 #define MD_USAGE "Create one or more directories\n\
 (parent directories are created if they do not exist)\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   md DIR...\n\n\
-\x1b[1mEXAMPLE\x1b[0m\n\
+\x1b[1mEXAMPLE\x1b[22m\n\
   md dir1 dir2 dir3/subdir\n\n\
 Note: Use the 'n' command to create both files and directories.\n\
 Try 'n --help' for more details."
@@ -710,7 +712,7 @@ Try 'n --help' for more details."
 #define MEDIA_USAGE "List available media devices, allowing you to mount or \
 unmount them\n\
 Note: Either udevil(1) or udisks2(1) is required\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   media\n\n\
 The list of mounted and unmounted devices will be displayed.\n\
 Choose the device you want using ELN's.\n\
@@ -722,13 +724,13 @@ To get information about a device, enter iELN. For example: 'i12'."
 
 #define MF_USAGE "Limit the amount of files listed on the screen to NUM \
 (valid range: >= 0). Use 'unset' to remove the files limit.\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   mf [NUM | unset]"
 
 #define MIME_USAGE "Set default opening applications based on MIME types or file names\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   mm, mime [open FILE | info FILE | edit [APP] | import]\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - Open the file 'book.pdf' with the default opening application\n\
     mm open book.pdf\n\
   Note: Since 'open' is the default action, it can be omitted: 'mm book.pdf'.\n\
@@ -751,26 +753,26 @@ To get information about a device, enter iELN. For example: 'i12'."
   For more information consult the manpage."
 
 #define MSG_USAGE "List available Clifm messages\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   msg, messages [clear]\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - List available messages\n\
     msg\n\
 - Clear the current list of messages\n\
     msg clear (or Alt-t)"
 
 #define MOUNTPOINTS_USAGE "List and change to a mountpoint\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   mp, mountpoints\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - List available mountpoints\n\
     mp (or Alt-m)\n\
   Once there, select the mountpoint you want to change to."
 
 #define NET_USAGE "Manage network resources\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   net [NAME] [list | edit [APP] | m, mount NAME | u, unmount NAME]\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - List available remote resources (like SSHFS or samba)\n\
     net (or 'net list')\n\
 - Mount the remote resource named 'work'\n\
@@ -786,9 +788,9 @@ To get information about a device, enter iELN. For example: 'i12'."
     cr FILE (run 'cr --edit' before to set up your remotes)"
 
 #define NEW_USAGE "Create new files and/or directories\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   n, new [FILE...] [DIR/...]\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - Create two files named file1 and file2\n\
     n file1 file2\n\
 - Create two directories named dir1 and dir2\n\
@@ -801,14 +803,14 @@ Parent directories are created if necessary. For example, if you run\n\
 both 'dir' and 'subdir' directories will be created if they do not exist."
 
 #define OC_USAGE "Interactively change files ownership\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   oc FILE...\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - Change ownership of selected files\n\
     oc sel\n\
 - Change ownership of all .iso files\n\
     oc *.iso\n\n\
-\x1b[1mNOTES\x1b[0m\n\
+\x1b[1mNOTES\x1b[22m\n\
 A template is presented to the user to be edited.\n\n\
 Only user and primary group common to all files passed as\n\
 parameters are set in the ownership template.\n\n\
@@ -816,7 +818,7 @@ Ownership (both user and primary group, if specified) is\n\
 changed for all files passed as parameters.\n\n\
 Both names and ID numbers are allowed (TAB completion is available).\n\n\
 If only a name/number is entered, it is taken as user.\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - Change user to root\n\
     root (or \"0\")\n\
 - Change primary group to video\n\
@@ -826,9 +828,9 @@ If only a name/number is entered, it is taken as user.\n\n\
 Note: Use the 'pc' command to edit files permissions."
 
 #define OPEN_USAGE "Open a file\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   o, open ELN/FILE [APPLICATION]\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - Open the file whose ELN is 12 with the default associated application\n\
   (see the 'mime' command)\n\
     o 12\n\
@@ -839,18 +841,18 @@ Note: Use the 'pc' command to edit files permissions."
     12 vi"
 
 #define OPENER_USAGE "Set the resource opener\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   opener APPLICATION\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - Set the resources opener to xdg-open (instead of the default, Lira)\n\
     opener xdg-open\n\
 - Set the resources opener back to the default (Lira)\n\
     opener default"
 
 #define OW_USAGE "Open a file with a specific application\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   ow FILE [APP]\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - Choose opening application for the file 'test.c' from a menu\n\
     ow test.c\n\
   or\n\
@@ -861,7 +863,7 @@ Note: Use the 'pc' command to edit files permissions."
     ow test.c geany"
 
 #define PAGER_USAGE "Set the files list pager on/off\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   pg, pager [on | off | once | status | NUM]\n\n\
 If set to 'on', run the pager whenever the list of files does no fit on\n\
 the screen.\n\n\
@@ -887,9 +889,9 @@ the command line) to force the use of a specific mode. Possibles values:\n\n\
 Note: You can also try the 'gg' plugin (just enter 'gg')."
 
 #define PC_USAGE "Interactively edit files permissions\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   pc FILE...\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - Change permissions of file named file.txt\n\
     pc file.txt\n\
 - Change permissions of all selected files at once\n\
@@ -902,9 +904,9 @@ Both symbolic and octal notation for the new permissions set are allowed.\n\n\
 Note: Use the 'oc' command to edit files ownership."
 
 #define PIN_USAGE "Pin a file or directory\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   pin FILE/DIR\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - Pin the directory ~/my_important_dir\n\
     pin ~/my_important_dir\n\
 - Change to the pinned directory\n\
@@ -913,9 +915,9 @@ Note: Use the 'oc' command to edit files ownership."
     unpin"
 
 #define PROFILES_USAGE "Manage profiles\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   pf, profile [list | set, add, del PROFILE | rename PROFILE NEW_NAME]\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - Print the current profile name\n\
     pf\n\
 - List available profiles\n\
@@ -930,9 +932,9 @@ Note: Use the 'oc' command to edit files ownership."
     pf rename myprofile cool_name"
 
 #define PROMPT_USAGE "Change current prompt\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   prompt [set NAME | list | unset | edit [APP] | reload]\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - List available prompts\n\
     prompt list (or 'prompt set <TAB>' to choose from a list)\n\
 - Change prompt to the prompt named MYPROMPT\n\
@@ -951,9 +953,9 @@ color scheme file ('cs edit'), and set the Prompt field to\n\
 whatever prompt you like."
 
 #define PROP_USAGE "Print files properties\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   p, pp, prop [ELN/FILE...]\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - Print the properties of the file whose ELN is 12\n\
     p 12 (or 'p <TAB>' to choose from a list)\n\
 - Print the properties of all selected files\n\
@@ -966,27 +968,27 @@ Otherwise, information about the link itself is displayed.\n\
 Unlike 'p', however, 'pp' always follows symlinks to their target file."
 
 #define PWD_DESC "Print the name of the current working directory\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   pwd [-L | -P]\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - Print the logical working directory (do not resolve symlinks)\n\
     pwd (or 'pwd -L')\n\
 - Print the physical working directory (resolve all symlinks)\n\
     pwd -P"
 
 #define QUIT_HELP "Exit Clifm\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   q, quit, exit\n\n\
 To enable the cd-on-quit function consult the manpage."
 
 #define RR_USAGE "Remove files in bulk using a text editor\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   rr [DIR] [:EDITOR]\n\n\
 The list of files in DIR (current directory if omitted) is opened via\n\
 EDITOR (default associated application for text files if omitted). Remove\n\
 the lines corresponding to the files you want to delete, save, and quit\n\
 the editor (quit without saving to cancel the operation).\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - Bulk remove files/dirs in the current directory using the default editor\n\
     rr\n\
 - Bulk remove files/dirs in the current directory using nano\n\
@@ -995,9 +997,9 @@ the editor (quit without saving to cancel the operation).\n\n\
     rr mydir :vi"
 
 #define SEARCH_USAGE "Search for files using either glob or regular expressions\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   /PATTERN [-filetype] [-x] [DIR]\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - List all PDF files in the current working directory\n\
     /*.pdf (or, as a regular expression, '/.*\\.pdf$')\n\
 - List all files starting with 'A' in the directory whose ELN is 7\n\
@@ -1039,11 +1041,11 @@ behavior and command injection. Enable this mode using the --secure-cmds\n\
 command line switch."
 
 #define SEL_USAGE "Select one or multiple files\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   s, sel ELN/FILE... [[!]PATTERN] [-FILETYPE] [:PATH]\n\n\
 Recognized file types: (d)irectory, regular (f)ile, symbolic (l)ink,\n\
 (s)ocket, fifo/(p)ipe, (b)lock device, (c)haracter device\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - Select the file whose ELN is 12\n\
     s 12 (or 's <TAB>' to choose from a list - multi-selection is allowed)\n\
 - Select all files ending with .odt:\n\
@@ -1069,12 +1071,12 @@ Recognized file types: (d)irectory, regular (f)ile, symbolic (l)ink,\n\
     ds <TAB> (multi-selection is allowed)"
 
 #define SORT_USAGE "Change files sorting order\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   st [METHOD] [rev]\n\n\
 Available methods: 0=none, 1=name, 2=size, 3=atime, 4=btime,\n\
 5=ctime, 6=mtime, 7=version, 8=extension, 9=inode, 10=owner,\n\
 11=group, 12=blocks, 13=links, and 14=type.\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - List files by size\n\
     st size (or 'st <TAB>' to choose from a list)\n\
     Sort numbers can be used as well (e.g. 'st 2')\n\
@@ -1082,7 +1084,7 @@ Available methods: 0=none, 1=name, 2=size, 3=atime, 4=btime,\n\
     st rev"
 
 #define TAG_USAGE "(Un)tag files and/or directories\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   tag [add | del | list | list-full | merge | new | rename | untag]\n\
       [FILE...] [[:]TAG]\n\n\
 Instead of the long format described above, you can use any of the\n\
@@ -1094,7 +1096,7 @@ following shortcuts as well:\n\n\
   tn: Create new tag(s)      (same as 'tag new')\n\
   tu: Untag file(s)          (same as 'tag untag')\n\
   ty: Merge two tags         (same as 'tag merge')\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - List available tags\n\
     tag list (or 't:<TAB>')\n\
 - List available tags and each tagged file\n\
@@ -1134,20 +1136,20 @@ To operate only on some tagged files use TAB as follows:\n\
 Mark the files you need via TAB and then press Enter or Right."
 
 #define TE_USAGE "Toggle the executable bit on files\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
     te ELN/FILE...\n\
   or\n\
     'te <TAB>' to choose from a list (multi-selection is allowed)\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - Set the executable bit on all shell scripts in the current directory\n\
     te *.sh\n\
 - Set the executable bit on all selected files\n\
    te sel"
 
 #define TRASH_USAGE "Move files to the trash can\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   t, trash [FILE... | del | empty | list]\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - Trash the file whose ELN is 12\n\
     t 12\n\
   or\n\
@@ -1169,10 +1171,10 @@ Mark the files you need via TAB and then press Enter or Right."
 Note: For more information try 'u --help'."
 
 #define UMASK_USAGE "Print/set the file mode creation mask\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   umask [MODE]\n\n\
 Note: MODE is an octal value from 000 to 777.\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - Print the current value\n\
     umask\n\
 - Set mask to 077\n\
@@ -1180,13 +1182,13 @@ Note: MODE is an octal value from 000 to 777.\n\n\
 Note: To permanently set the umask, use the Umask option in the config file."
 
 #define UNSET_USAGE "Delete variables from the environment\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   unset NAME..."
 
 #define UNTRASH_USAGE "Restore files from the trash can\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   u, undel, untrash [FILE... | *, a, all]\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - Restore all trashed files (to their original location)\n\
     u *\n\
 - Restore trashed files selectively using a menu\n\
@@ -1196,9 +1198,9 @@ Note: To permanently set the umask, use the Umask option in the config file."
 Note: Use the 'trash' command to trash files. Try 'trash --help'."
 
 #define VV_USAGE "Copy files into a directory and bulk rename them at once\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   vv FILE... DIR\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - Copy selected files into 'mydir' and rename them\n\
     vv sel mydir\n\
 - Copy all PDF files into the directory whose ELN is 4 and rename them\n\
@@ -1206,9 +1208,9 @@ Note: Use the 'trash' command to trash files. Try 'trash --help'."
 Note: If DIR does not exist, it will be created"
 
 #define VIEW_USAGE "Preview files in the current directory (requires fzf)\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   view [edit [APP]]\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - Just run the previewer\n\
     view (or Alt+-)\n\
 - Edit the configuration file\n\
@@ -1220,7 +1222,7 @@ Enter 'help file-previews' for more information."
 
 #define WRAPPERS_USAGE "c, m, and r commands are wrappers for \
 cp(1), mv(1), and rm(1) shell\ncommands respectively.\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
 c  -> cp -iRp\n\
 m  -> mv -i\n\
 r  -> rm -f ('-rf' for directories) (1)\n\n\
@@ -1241,7 +1243,7 @@ prevent 'r' from prompting before removals. Set rmForce to true in the\n\
 configuration file to make this option permanent.\n\n\
 To use different parameters, run the corresponding utility, as usual.\n\
 Example: cp -abf ...\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - Create a copy of file1 named file2\n\
     c file1 file2\n\
 - Create a copy of file1 in the directory dir1 named file2\n\
@@ -1275,9 +1277,9 @@ Use the 'cr' plugin to copy a file to a remote location:\n\
 Use the 'l' command to create symbolic links, and 'le' to edit them."
 
 #define WS_USAGE "Switch workspaces\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   ws [NUM/NAME [unset] | + | -]\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - List available workspaces\n\
     ws (or 'ws <TAB>')\n\
 - Switch to the first workspace\n\
@@ -1294,9 +1296,9 @@ Note: Use the WorkspaceNames option in the configuration file to name\n\
 your workspaces."
 
 #define X_USAGE "Launch a new instance of Clifm on a new terminal window\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
+\x1b[1mUSAGE\x1b[22m\n\
   x, X [DIR]\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[22m\n\
 - Launch a new instance in the current directory\n\
     x\n\
 - Open the directory mydir in a new instance\n\
