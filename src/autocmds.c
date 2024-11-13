@@ -917,6 +917,15 @@ print_autocmds_list(void)
 	return FUNC_SUCCESS;
 }
 
+static int
+reload_dir_ignoring_autocmds(void)
+{
+	revert_autocmd_opts();
+	dir_changed = 0;
+	reload_dirlist();
+	return FUNC_SUCCESS;
+}
+
 /* 'auto' command: add a temporary autocommand for the current directory. */
 int
 add_autocmd(char **args)
@@ -925,6 +934,9 @@ add_autocmd(char **args)
 		puts(AUTO_USAGE);
 		return FUNC_SUCCESS;
 	}
+
+	if (*args[0] == 'n' && strcmp(args[0], "none") == 0)
+		return reload_dir_ignoring_autocmds();
 
 	if (*args[0] == 'l' && strcmp(args[0], "list") == 0)
 		return print_autocmds_list();
