@@ -114,7 +114,7 @@ and regular options (set via either the command line or the configuration file).
     auto ft=,cs=,st=blocks\n\
 - Unset all temporary options previously set for the current directory\n\
     auto unset\n\
-- Reload the current directory ignoring all autocommands\n\
+- Reload the current directory ignoring all autocommands (includes permanent autocommands)\n\
     auto none\n\n\
 For the list of available option codes enter 'help autocommands'."
 
