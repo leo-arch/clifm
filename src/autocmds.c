@@ -920,7 +920,13 @@ print_autocmds_list(void)
 static int
 reload_dir_ignoring_autocmds(void)
 {
+	if (autocmds_n == 0) {
+		fputs("auto: No autocommand defined\n", stdout);
+		return FUNC_SUCCESS;
+	}
+
 	revert_autocmd_opts();
+	unset_autocmd_matches();
 	dir_changed = 0;
 	reload_dirlist();
 	return FUNC_SUCCESS;
