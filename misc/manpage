@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Nov 10, 2024" "clifm 1.21.12" "CLIFM Manual"
+.TH "CLIFM" "1" "Nov 13, 2024" "clifm 1.21.13" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -528,7 +528,7 @@ NOTE: Make sure alias names do not conflict with other commands, either internal
 
 4) Finally, import this file with the \fIalias\fR function: \fIalias\ import\ tmp_file\fR. Now, you can access any of these files by entering just a few characters: a1, b1, and c1.
 .TP
-.B auto [\fIlist\fR | \fIunset\fR | \fIOPTION=VALUE\fR...]
+.B auto [\fIlist\fR | \fInone\fR | \fIunset\fR | \fIOPTION=VALUE\fR...]
 Set a temporary autocommand for the current directory.
 .sp
 Unlike \fBpermanent\fR autocommands, defined in the configuration file via the \fIautocmd\fR keyword (see the \fBAUTOCOMMANDS\fR section below), options set via the \fIauto\fR command are \fBtemporary\fR, i.e., valid only for the current directory and the current session.
@@ -556,6 +556,9 @@ Unset the files filter and the color scheme, and change sort to blocks
 .sp
 Unset all temporary autocommands previously set for the current directory
   \fBauto unset\fR
+.sp
+Reload the current directory ignoring all autocommands (including permanent autocommands)
+  \fBauto none\fR
 .sp
 For the list of available option codes consult the \fBAUTOCOMMANDS\fR section or enter \fIhelp autocommands\fR.
 .TP
