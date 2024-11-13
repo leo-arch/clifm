@@ -198,7 +198,7 @@ launch_execv(char **cmd, const int bg, const int xflags)
 				dup2(fd, STDOUT_FILENO);
 			if (xflags & E_NOSTDERR)
 				dup2(fd, STDERR_FILENO);
-			if ((xflags & E_SETSID) && setsid() == -1) {
+			if ((xflags & E_SETSID) && setsid() == (pid_t)-1) {
 				xerror("%s: setsid: %s\n", PROGRAM_NAME, strerror(errno));
 				close(fd);
 				_exit(errno);
