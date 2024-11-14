@@ -1176,6 +1176,15 @@ print_colors_tip(const int stealth)
 	return FUNC_FAILURE;
 }
 
+static void
+print_ext_conflict(const char *a, const char *b)
+{
+	if (*a == *b && strcmp(a, b) == 0)
+		printf(_("'%s' is duplicated\n"), a);
+	else
+		printf(_("'%s' conflicts with '%s'\n"), a, b);
+}
+
 /* Make sure hashes for file name extensions do not conflict.
  * CS_CHECK is 0 when this function is called at startup: if a hash conflict
  * is found, the hash field at index zero (of the ext_colors struct) is set
@@ -1191,8 +1200,7 @@ check_ext_color_hash_conflicts(const int cs_check)
 		for (j = i + 1; j < ext_colors_n; j++) {
 			if (ext_colors[i].hash == ext_colors[j].hash) {
 				if (cs_check == 1) {
-					printf(_("'%s' conflicts with '%s'\n"),
-						ext_colors[i].name, ext_colors[j].name);
+					print_ext_conflict(ext_colors[i].name, ext_colors[j].name);
 					conflicts++;
 				} else {
 					ext_colors[0].hash = 0;
