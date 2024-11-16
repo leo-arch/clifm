@@ -676,8 +676,11 @@ msgs_function(const char *arg)
 
 	if (msgs_n > 0) {
 		size_t i;
-		for (i = 0; i < msgs_n; i++)
+		for (i = 0; i < msgs_n; i++) {
+			if (i > 0 && strcmp(messages[i].text, messages[i - 1].text) == 0)
+				continue;
 			printf("%s", messages[i].text);
+		}
 	} else {
 		printf(_("%s: No messages\n"), PROGRAM_NAME);
 	}

@@ -657,7 +657,6 @@ extern time_t curdir_mtime;
 #define AC_SHOW_HIDDEN   10
 #define AC_SORT          11
 
-
 /* Macros for the cp and mv cmds */
 #define CP_CP            0 /* cp -iRp */
 #define CP_CP_FORCE      1 /* cp -Rp */

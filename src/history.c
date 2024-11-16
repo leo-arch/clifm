@@ -57,7 +57,8 @@ get_date(void)
 	return date;
 }
 
-/* Print available logs, for messages, if MSG is 1, or for commands otherwise. */
+/* Print available logs, for messages, if FLAG is MSG_LOGS, or for
+ * commands otherwise. */
 int
 print_logs(const int flag)
 {
