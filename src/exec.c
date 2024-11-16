@@ -649,6 +649,40 @@ icons_function(const char *arg)
 }
 
 static int
+clear_msgs(void)
+{
+	if (msgs_n == 0) {
+		printf(_("%s: No messages\n"), PROGRAM_NAME);
+		return FUNC_SUCCESS;
+	}
+
+	size_t i;
+	for (i = 0; i < msgs_n; i++)
+		free(messages[i].text);
+
+	if (conf.autols == 1)
+		reload_dirlist();
+	print_reload_msg(NULL, NULL, _("Messages cleared\n"));
+	msgs_n = msgs.error = msgs.warning = msgs.notice = 0;
+	pmsg = NOMSG;
+
+	return FUNC_SUCCESS;
+}
+
+static int
+print_msgs(void)
+{
+	size_t i;
+	for (i = 0; i < msgs_n; i++) {
+		if (i > 0 && strcmp(messages[i].text, messages[i - 1].text) == 0)
+			continue;
+		printf("%s", messages[i].text);
+	}
+
+	return FUNC_SUCCESS;
+}
+
+static int
 msgs_function(const char *arg)
 {
 	if (arg && IS_HELP(arg)) {
@@ -656,34 +690,13 @@ msgs_function(const char *arg)
 		return FUNC_SUCCESS;
 	}
 
-	if (arg && strcmp(arg, "clear") == 0) {
-		if (msgs_n == 0) {
-			printf(_("%s: No messages\n"), PROGRAM_NAME);
-			return FUNC_SUCCESS;
-		}
+	if (arg && strcmp(arg, "clear") == 0)
+		return clear_msgs();
 
-		size_t i;
-		for (i = 0; i < msgs_n; i++)
-			free(messages[i].text);
+	if (msgs_n > 0)
+		return print_msgs();
 
-		if (conf.autols == 1)
-			reload_dirlist();
-		print_reload_msg(NULL, NULL, _("Messages cleared\n"));
-		msgs_n = msgs.error = msgs.warning = msgs.notice = 0;
-		pmsg = NOMSG;
-		return FUNC_SUCCESS;
-	}
-
-	if (msgs_n > 0) {
-		size_t i;
-		for (i = 0; i < msgs_n; i++) {
-			if (i > 0 && strcmp(messages[i].text, messages[i - 1].text) == 0)
-				continue;
-			printf("%s", messages[i].text);
-		}
-	} else {
-		printf(_("%s: No messages\n"), PROGRAM_NAME);
-	}
+	printf(_("%s: No messages\n"), PROGRAM_NAME);
 
 	return FUNC_SUCCESS;
 }
