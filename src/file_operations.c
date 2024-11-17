@@ -1521,9 +1521,9 @@ cwd_has_sel_files(void)
 }
 
 static void
-print_cp_mv_end_msg(const char *operation, const size_t n)
+print_cp_mv_summary_msg(const char *operation, const size_t n, const int cwd)
 {
-	if (conf.autols == 1)
+	if (conf.autols == 1 && cwd == 1)
 		reload_dirlist();
 
 	print_reload_msg(SET_SUCCESS_PTR, xs_cb, "%zu file(s) %s\n",
@@ -1609,6 +1609,7 @@ run_cp_mv_cmd(char **cmd, const int skip_force, const size_t files_num)
 		n++;
 	}
 
+	int cwd = 0;
 	size_t i;
 	for (i = 1; cmd[i]; i++) {
 		/* The -f,--force parameter is internal. Skip it.
@@ -1620,6 +1621,8 @@ run_cp_mv_cmd(char **cmd, const int skip_force, const size_t files_num)
 			continue;
 		tcmd[n] = savestring(p, strlen(p));
 		free(p);
+		if (cwd == 0)
+			cwd = is_file_in_cwd(tcmd[n]);
 		n++;
 	}
 
@@ -1659,7 +1662,7 @@ run_cp_mv_cmd(char **cmd, const int skip_force, const size_t files_num)
 		/* Just in case a selected file in the current dir was renamed. */
 		get_sel_files();
 
-	print_cp_mv_end_msg(operation, files_num);
+	print_cp_mv_summary_msg(operation, files_num, cwd);
 
 	return FUNC_SUCCESS;
 }
@@ -1710,18 +1713,22 @@ cp_mv_file(char **args, const int copy_and_rename, const int force)
 		n++;
 	}
 
+	int cwd = 0;
 	size_t i = force == 1 ? 2 : 1;
 	for (; args[i]; i++) {
 		p = unescape_str(args[i], 0);
 		if (!p)
 			continue;
 		tcmd[n] = savestring(p, strlen(p));
+		if (cwd == 0)
+			cwd = is_file_in_cwd(tcmd[n]);
 		free(p);
 		n++;
 	}
 
 	if (sel_is_last == 1) {
 		tcmd[n] = savestring(".", 1);
+		cwd = 1;
 		n++;
 	}
 
@@ -1747,7 +1754,7 @@ cp_mv_file(char **args, const int copy_and_rename, const int force)
 	&& (!args[0][2] || args[0][2] == ' '))
 		deselect_all();
 
-	print_cp_mv_end_msg(operation, files_num);
+	print_cp_mv_summary_msg(operation, files_num, cwd);
 
 	return FUNC_SUCCESS;
 }
