@@ -1520,12 +1520,32 @@ cwd_has_sel_files(void)
 	return 0;
 }
 
+static void
+print_cp_mv_end_msg(const char *operation, const size_t n)
+{
+	if (conf.autols == 1)
+		reload_dirlist();
+
+	print_reload_msg(SET_SUCCESS_PTR, xs_cb, "%zu file(s) %s\n",
+		n, operation);
+}
+
+static char *
+get_operation(const char c, const char *last_filename, const size_t n)
+{
+	struct stat a;
+	const int mv_is_ren = (c == 'm' && n == 1 && last_filename
+		&& stat(last_filename, &a) == -1);
+
+	return (mv_is_ren == 1 ? "renamed" : (c == 'm' ? "moved" : "copied"));
+}
+
 /* Run CMD (either cp(1) or mv(1)) via execv().
  * skip_force is true (1) when the -f,--force parameter has been provided to
  * either 'c' or 'm' commands: it intructs cp/mv to run non-interactivelly
  * (no -i). */
 static int
-run_cp_mv_cmd(char **cmd, const int skip_force)
+run_cp_mv_cmd(char **cmd, const int skip_force, const size_t files_num)
 {
 	if (!cmd)
 		return FUNC_FAILURE;
@@ -1621,6 +1641,8 @@ run_cp_mv_cmd(char **cmd, const int skip_force)
 		}
 	}
 
+	const char *operation = get_operation(*cmd[0], tcmd[n - 1], files_num);
+
 	tcmd[n] = (char *)NULL;
 	const int ret = launch_execv(tcmd, FOREGROUND, E_NOFLAG);
 
@@ -1633,24 +1655,11 @@ run_cp_mv_cmd(char **cmd, const int skip_force)
 
 	/* Error messages are printed by launch_execv() itself. */
 
-	/* If 'rm sel' and command is successful, deselect everything. */
-	if (is_sel && *cmd[0] == 'r' && cmd[0][1] == 'm' && (!cmd[0][2]
-	|| cmd[0][2] == ' ')) {
-		int j = (int)sel_n;
-		while (--j >= 0)
-			free(sel_elements[j].name);
-		sel_n = 0;
-		save_sel();
-	}
-
 	if (sel_n > 0 && *cmd[0] == 'm' && cwd_has_sel_files())
 		/* Just in case a selected file in the current dir was renamed. */
 		get_sel_files();
 
-#ifdef GENERIC_FS_MONITOR
-	if (*cmd[0] == 'm')
-		reload_dirlist();
-#endif /* GENERIC_FS_MONITOR */
+	print_cp_mv_end_msg(operation, files_num);
 
 	return FUNC_SUCCESS;
 }
@@ -1673,8 +1682,13 @@ cp_mv_file(char **args, const int copy_and_rename, const int force)
 			args[1][len - 1] = '\0';
 	}
 
+	/* Number of files to operate on. */
+	/* In case of 'm FILE' (interactive rename), args_n is 1, and 1 is
+	 * the number we want. */
+	const size_t files_num = args_n - (args_n > 1 && sel_is_last == 0);
+
 	if (is_sel == 0 && copy_and_rename == 0)
-		return run_cp_mv_cmd(args, force);
+		return run_cp_mv_cmd(args, force, files_num);
 
 	size_t n = 0;
 	char **tcmd = xnmalloc(3 + args_n + 2, sizeof(char *));
@@ -1713,6 +1727,8 @@ cp_mv_file(char **args, const int copy_and_rename, const int force)
 
 	tcmd[n] = (char *)NULL;
 
+	const char *operation = get_operation(*args[0], tcmd[n - 1], files_num);
+
 	ret = launch_execv(tcmd, FOREGROUND, E_NOFLAG);
 
 	for (i = 0; tcmd[i]; i++)
@@ -1723,13 +1739,15 @@ cp_mv_file(char **args, const int copy_and_rename, const int force)
 		return ret;
 
 	if (copy_and_rename == 1) /* vv command */
-		return vv_rename_files(args, args_n - (sel_is_last == 0));
+		return vv_rename_files(args, files_num);
 
 	/* If 'mv sel' and command is successful deselect everything,
 	 * since sel files are not there anymore. */
 	if (*args[0] == 'm' && args[0][1] == 'v'
 	&& (!args[0][2] || args[0][2] == ' '))
 		deselect_all();
+
+	print_cp_mv_end_msg(operation, files_num);
 
 	return FUNC_SUCCESS;
 }
