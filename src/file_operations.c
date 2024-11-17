@@ -627,7 +627,11 @@ validate_filename(char **name, const int is_md)
 	free(*name);
 	*name = deq;
 
+	/* Skip initial slash and "~/" */
 	char *tmp = *deq != '/' ? deq : deq + 1;
+	if (*tmp == '~' && tmp[1] == '/' && tmp[2])
+		tmp += 2;
+
 	char *p = tmp, *q = tmp;
 	struct stat a;
 	int ret = 1;
