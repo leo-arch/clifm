@@ -423,16 +423,26 @@ Note 2: Unlink 'p', 'pp' always follows symlinks to their target file."
     ff off\n\
   Note: Toggle directories-first on/off pressing Alt-g."
 
-#define FILE_PREVIEWS "Use the 'view' command to preview files in the current \
-directory (depends on fzf).\n\n\
-\x1b[1mENABLING IMAGE PREVIEWS\x1b[22m\n\
+#define FILE_PREVIEWS "\
+File previews are enabled by default if running in fzf mode.\n\n\
+To disable this feature run with '--no-fzfpreview' or set 'FzfPreview' to\n\
+false in the configuration file.\n\n\
+Clifm runs in fzf mode if the fzf binary is found somewhere in your $PATH\n\
+('--fzftab' and 'TabCompletionMode' in the configuration file are also\n\
+available).\n\n\
+File previews are generated using a configuration file, which you can edit to\n\
+your liking running 'view edit' (or pressing F7).\n\n\
+Use the 'view' command to preview files in the current directory in full screen.\n\n\
+To know how to enable image previews run 'help image-previews'."
+
+#define IMAGE_PREVIEWS "\x1b[1mENABLING IMAGE PREVIEWS\x1b[22m\n\
 \n\
 Edit shotgun's configuration file ('view edit' or F7) and uncomment the\n\
 'clifmimg' lines from the top of the file.\n\
 \n\
 This instructs Clifm to use the 'clifmimg' script (~/.config/clifm/clifmimg)\n\
-to generate image previews (for TAB completion -in fzf-mode- and the 'view'\n\
-command).\n\
+to generate image previews (for both TAB completion -in fzf mode- and the\n\
+'view' command).\n\
 \n\
 By default, Clifm will try to guess the best previewing method. However, you\n\
 can edit the 'clifmimg' script and set the 'method' variable to any of the\n\

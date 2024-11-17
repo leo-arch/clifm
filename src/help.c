@@ -357,9 +357,9 @@ print_file_filters_topic(void)
 }
 
 static int
-print_file_previews_topic(void)
+print_file_previews_topic(const int image_prevs)
 {
-	puts(FILE_PREVIEWS);
+	puts(image_prevs == 1 ? IMAGE_PREVIEWS : FILE_PREVIEWS);
 	putchar('\n');
 	print_more_info();
 	return FUNC_SUCCESS;
@@ -460,9 +460,10 @@ run_help_topic(const char *topic)
 		return print_file_attributes_topic();
 	if (*topic == 'f' && strcmp(topic, "file-filters") == 0)
 		return print_file_filters_topic();
-	if ((*topic == 'f' && strcmp(topic, "file-previews") == 0)
-	|| (*topic == 'i' && strcmp(topic, "image-previews") == 0))
-		return print_file_previews_topic();
+	if (*topic == 'f' && strcmp(topic, "file-previews") == 0)
+		return print_file_previews_topic(0);
+	if (*topic == 'i' && strcmp(topic, "image-previews") == 0)
+		return print_file_previews_topic(1);
 	if (*topic == 'f' && strcmp(topic, "file-tags") == 0)
 		return print_file_tags_topic();
 	if (*topic == 'n' && strcmp(topic, "navigation") == 0)
