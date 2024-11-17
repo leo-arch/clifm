@@ -866,7 +866,8 @@ static int
 autocmd_dirlist_reload(void)
 {
 	dir_changed = 1;
-	reload_dirlist();
+	if (conf.autols == 1)
+		reload_dirlist();
 	return FUNC_SUCCESS;
 }
 

@@ -1525,23 +1525,15 @@ cwd_has_sel_files(void)
 }
 
 static void
-print_cp_mv_summary_msg(const char *operation, const size_t n, const int cwd)
+print_cp_mv_summary_msg(const char c, const size_t n, const int cwd)
 {
 	if (conf.autols == 1 && cwd == 1)
 		reload_dirlist();
 
-	print_reload_msg(SET_SUCCESS_PTR, xs_cb, "%zu file(s) %s\n",
-		n, operation);
-}
-
-static char *
-get_operation(const char c, const char *last_filename, const size_t n)
-{
-	struct stat a;
-	const int mv_is_ren = (c == 'm' && n == 1 && last_filename
-		&& stat(last_filename, &a) == -1);
-
-	return (mv_is_ren == 1 ? "renamed" : (c == 'm' ? "moved" : "copied"));
+	if (c == 'm')
+		print_reload_msg(SET_SUCCESS_PTR, xs_cb, _("%zu file(s) moved\n"), n);
+	else
+		print_reload_msg(SET_SUCCESS_PTR, xs_cb, _("%zu file(s) copied\n"), n);
 }
 
 /* Run CMD (either cp(1) or mv(1)) via execv().
@@ -1644,11 +1636,11 @@ run_cp_mv_cmd(char **cmd, const int skip_force, const size_t files_num)
 			tcmd[n] = savestring(q, strlen(q));
 			free(new_name);
 			free(p);
+			if (cwd == 0)
+				cwd = is_file_in_cwd(tcmd[n]);
 			n++;
 		}
 	}
-
-	const char *operation = get_operation(*cmd[0], tcmd[n - 1], files_num);
 
 	tcmd[n] = (char *)NULL;
 	const int ret = launch_execv(tcmd, FOREGROUND, E_NOFLAG);
@@ -1666,7 +1658,7 @@ run_cp_mv_cmd(char **cmd, const int skip_force, const size_t files_num)
 		/* Just in case a selected file in the current dir was renamed. */
 		get_sel_files();
 
-	print_cp_mv_summary_msg(operation, files_num, cwd);
+	print_cp_mv_summary_msg(*cmd[0], files_num, cwd);
 
 	return FUNC_SUCCESS;
 }
@@ -1738,8 +1730,6 @@ cp_mv_file(char **args, const int copy_and_rename, const int force)
 
 	tcmd[n] = (char *)NULL;
 
-	const char *operation = get_operation(*args[0], tcmd[n - 1], files_num);
-
 	ret = launch_execv(tcmd, FOREGROUND, E_NOFLAG);
 
 	for (i = 0; tcmd[i]; i++)
@@ -1758,7 +1748,7 @@ cp_mv_file(char **args, const int copy_and_rename, const int force)
 	&& (!args[0][2] || args[0][2] == ' '))
 		deselect_all();
 
-	print_cp_mv_summary_msg(operation, files_num, cwd);
+	print_cp_mv_summary_msg(*args[0], files_num, cwd);
 
 	return FUNC_SUCCESS;
 }
