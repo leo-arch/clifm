@@ -1793,11 +1793,13 @@ list_removed_files(struct rm_info *info, const size_t start,
 	if (conf.autols == 1 && cwd == 1)
 		reload_dirlist();
 
-	for (i = start; info[i].name; i++) {
-		if (!info[i].name || !*info[i].name || info[i].exists == 1)
-			continue;
+	if (print_removed_files == 1) {
+		for (i = start; info[i].name; i++) {
+			if (!info[i].name || !*info[i].name || info[i].exists == 1)
+				continue;
 
-		print_removed_file_info(info[i]);
+			print_removed_file_info(info[i]);
+		}
 	}
 
 	print_reload_msg(SET_SUCCESS_PTR, xs_cb, _("%zu file(s) removed\n"), c);
@@ -1960,8 +1962,7 @@ remove_files(char **args)
 	if (is_sel && exit_status == FUNC_SUCCESS)
 		deselect_all();
 
-	if (print_removed_files == 1)
-		list_removed_files(info, 3, cwd);
+	list_removed_files(info, 3, cwd);
 
 END:
 	for (i = 3; rm_cmd[i]; i++)
