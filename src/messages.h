@@ -1731,14 +1731,14 @@ n mydir/             Create a new directory named 'mydir'\n\
 c sel                Copy selected files into the current directory (1)\n\
 r sel                Remove all selected files (1)\n\
 br sel               Bulk rename selected files (1)\n\
-c 34 file_copy       Copy the file whose ELN is 34 as 'file_copy' in the CWD\n\
+c 34 file_copy       Copy the file whose ELN is 34 as 'file_copy'\n\
 cr myfile            Copy 'myfile' to a remote location\n\
 m 45 3               Move the file whose ELN is 45 to the dir whose ELN is 3\n\
 m myfile.txt         Interactively rename 'myfile.txt'\n\
 l myfile mylink      Create a symbolic link named 'mylink' pointing to 'myfile'\n\
 le mylink            Edit the symbolic link 'mylink'\n\
-oc myfile            Edit file ownership of the file 'myfile'\n\
-pc myfile            Edit file properties of the file 'myfile'\n\
+oc myfile            Edit ownership of the file 'myfile'\n\
+pc myfile            Edit permissions of the file 'myfile'\n\
 te *.sh              Toggle the executable bit on all .sh files\n\
 t 12-18              Move the files whose ELN's are 12-18 to the trash can\n\
 t del | t del <TAB>  Permanently remove trashed files using a menu\n\
@@ -1757,6 +1757,9 @@ ih              Run the interactive help plugin (requires fzf)\n\
 ll | Alt-l      Toggle detail/long view mode\n\
 hh | Alt-.      Toggle hidden files\n\
 rf | Ctrl-l     Clear the screen (also Enter on empty line)\n\
+pg | Alt-0      Run the pager (builtin)\n\
+gg              Run the pager (plugin)\n\
+auto            Add an autocommand to the current directory\n\
 config | F10    View/edit the configuration file\n\
 mm edit | F6    Change default associated applications\n\
 kb edit | F9    Edit keybindings\n\
@@ -1773,8 +1776,7 @@ media           (Un)mount storage devices\n\
 net work        Mount the network resource named 'work'\n\
 actions         List available actions/plugins\n\
 icons on        Enable icons\n\
-q | F12         I'm tired, quit\n\
-Q               cd on quit (consult the manpage)"
+q | F12         I'm tired, quit"
 
 #define ASCII_LOGO_BIG "\
      .okkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkd. \n\
