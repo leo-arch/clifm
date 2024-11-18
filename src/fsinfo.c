@@ -261,6 +261,7 @@ get_dev_name_mntent(const char *file)
 	return (!*name ? DEV_NO_NAME : name);
 }
 
+#ifndef __CYGWIN__
 /* Return a pointer to the name of the block device whose ID is DEV. */
 char *
 get_dev_name(const dev_t dev)
@@ -297,6 +298,7 @@ get_dev_name(const dev_t dev)
 
 	return (!*name ? DEV_NO_NAME : name);
 }
+#endif /* !__CYGWIN__ */
 
 #elif defined(HAVE_STATFS)
 /* Update DEVNAME and DEVTYPE to make it point to the device name and device

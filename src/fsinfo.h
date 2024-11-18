@@ -29,7 +29,9 @@ __BEGIN_DECLS
 
 #if defined(LINUX_FSINFO)
 char *get_fs_type_name(const char *file, int *remote);
+#ifndef __CYGWIN__
 char *get_dev_name(const dev_t dev);
+#endif /* !__CYGWIN__ */
 char *get_dev_name_mntent(const char *file);
 #elif defined(HAVE_STATFS)
 void get_dev_info(const char *file, char **devname, char **devtype);
