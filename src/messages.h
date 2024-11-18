@@ -1530,6 +1530,7 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  actions            Manage actions/plugins\n\
  alias              Manage aliases\n\
  ao, auto-open      Set auto-open on/off\n\
+ auto               Set an autocommand for the current directory\n\
  b, back            Go back in the directory history list\n\
  bb, bleach         Clean up non-ASCII file names\n\
  bd                 Go back to a parent directory\n\

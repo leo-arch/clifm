@@ -25,7 +25,7 @@
 #ifndef LINUXFS_H
 #define LINUXFS_H
 
-/* These macros are taken from linux/magic.h, stat(2), and coreutils stat.c
+/* These macros are taken from linux/magic.h, statfs(2), and coreutils stat.c
  * (see https://github.com/coreutils/coreutils/blob/master/src/stat.c). */
 
 #define T_AAFS_MAGIC           0x5a3c69f0
