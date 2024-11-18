@@ -109,6 +109,7 @@
 #define T_NFSD_MAGIC           0x6e667364 /* remote */
 #define T_NILFS_MAGIC          0x3434
 #define T_NSFS_MAGIC           0x6e736673
+#define T_NTFS_CG_MAGIC        0x3e706ff /* Cygwin */
 #define T_NTFS_MAGIC           0x5346544e
 #define T_OCFS2_MAGIC          0x7461636f /* remote */
 #define T_OPENPROM_MAGIC       0x9fa1
@@ -148,6 +149,7 @@
 #define T_USBDEVICE_MAGIC      0x9fa2
 #define T_V9FS_MAGIC           0x01021997
 #define T_VBOXSF_MAGIC         0x786f4256 /* remote */
+#define T_VFAT_MAGIC           0x20206    /* Cygwin */
 #define T_VMHGFS_MAGIC         0xbacbacbc /* remote */
 #define T_VXFS_MAGIC           0xa501fcf5 /* remote */
 #define T_VZFS_MAGIC           0x565a4653

@@ -118,7 +118,7 @@ get_fs_type_name(const char *file, int *remote)
 	case T_CRAMFS_MAGIC_WEND: return "cramfs-wend";
 	case T_DAXFS_MAGIC: return "daxfs";
 	case T_DEBUGFS_MAGIC: return "debugfs";
-	case T_DEVFS_MAGIC: return "devfs"; // Linux 2.6.17 and earlier
+	case T_DEVFS_MAGIC: return "devfs"; /* Linux 2.6.17 and earlier */
 	case T_DEVMEM_MAGIC: return "devmem";
 	case T_DEVPTS_MAGIC: return "devpts";
 	case T_DMA_BUF_MAGIC: return "dma-buf-fs";
@@ -170,6 +170,7 @@ get_fs_type_name(const char *file, int *remote)
 	case T_NFSD_MAGIC: *remote = 1; return "nfsd";
 	case T_NILFS_MAGIC: return "nilfs";
 	case T_NSFS_MAGIC: return "nsfs";
+	case T_NTFS_CG_MAGIC: /* fallthrough */ /* Cygwin */
 	case T_NTFS_MAGIC: return "ntfs";
 	case T_OCFS2_MAGIC: *remote = 1; return "ocfs2";
 	case T_OPENPROM_MAGIC: return "openprom";
@@ -209,6 +210,7 @@ get_fs_type_name(const char *file, int *remote)
 	case T_USBDEVICE_MAGIC: return "usbdevfs";
 	case T_V9FS_MAGIC: return "v9fs";
 	case T_VBOXSF_MAGIC: *remote = 1; return "vboxsf";
+	case T_VFAT_MAGIC: return "vfat"; /* Cygwin */
 	case T_VMHGFS_MAGIC: *remote = 1; return "vmhgfs";
 	case T_VXFS_MAGIC: *remote = 1; return "vxfs";
 	case T_VZFS_MAGIC: return "vzfs";

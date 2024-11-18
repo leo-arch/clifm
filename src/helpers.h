@@ -491,7 +491,7 @@ extern time_t curdir_mtime;
 # define HAVE_PLEDGE
 #endif
 
-#if !defined(_BE_POSIX) && defined(__linux__)
+#if !defined(_BE_POSIX) && (defined(__linux__) || defined(__CYGWIN__))
 # define LINUX_FSINFO
 #endif
 
