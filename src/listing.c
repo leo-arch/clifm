@@ -359,7 +359,7 @@ print_div_line(void)
 			 * We substract 1 to prevent an extra empty line after the
 			 * dividing line on some terminals (e.g. cons25). */
 			const size_t len = !dl[1] ? 1 : wc_xstrlen(dl);
-			int i = c > 0 ? (int)(term_cols / len) : 0;
+			int i = c > 0 ? (int)(term_cols / (len > 0 ? len : 1)) : 0;
 			for (; i > 1; i--)
 				fputs(dl, stdout);
 			putchar('\n');
