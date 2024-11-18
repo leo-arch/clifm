@@ -114,6 +114,7 @@
 #define T_OPENPROM_MAGIC       0x9fa1
 #define T_OVERLAYFS_MAGIC      0x794c7630 /* remote */
 #define T_PANFS_MAGIC          0xaad7aaea /* remote */
+#define T_PID_FS_MAGIC         0x50494446
 #define T_PIPEFS_MAGIC         0x50495045 /* remote */
 #define T_PPC_CMM_FS_MAGIC     0xc7571590
 #define T_PRL_FS_MAGIC         0x7c7c6673 /* remote */

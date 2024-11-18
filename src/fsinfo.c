@@ -175,6 +175,7 @@ get_fs_type_name(const char *file, int *remote)
 	case T_OPENPROM_MAGIC: return "openprom";
 	case T_OVERLAYFS_MAGIC: *remote = 1; return "overlayfs";
 	case T_PANFS_MAGIC: *remote = 1; return "panfs";
+	case T_PID_FS_MAGIC: return "pidfs";
 	case T_PIPEFS_MAGIC: *remote = 1; return "pipefs";
 	case T_PPC_CMM_FS_MAGIC: return "ppc-cmm-fs";
 	case T_PRL_FS_MAGIC: *remote = 1; return "prl_fs";
