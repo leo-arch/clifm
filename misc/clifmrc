@@ -341,7 +341,7 @@
 ;TrashAsRm=false
 
 # If set to true, do not ask for confirmation before trashing files.
-;TrashForce=true
+;TrashForce=false
 
 # If set to true, do not ask for confirmation before removing files
 # with the 'r' command.
