@@ -41,9 +41,9 @@
 # include <sys/xattr.h>
 #endif /* LINUX_FILE_XATTRS */
 
-#if defined(LINUX_FSINFO) || defined(HAVE_STATFS)
+#if defined(LINUX_FSINFO) || defined(HAVE_STATFS) || defined(__sun)
 # include "fsinfo.h"
-#endif /* LINUX_FSINFO || HAVE_STATFS */
+#endif /* LINUX_FSINFO || HAVE_STATFS || __sun */
 
 #if defined(LIST_SPEED_TEST)
 # include <time.h>
@@ -426,7 +426,7 @@ print_disk_usage(void)
 	devname = a.f_mntfromname;
 #elif defined(__sun)
 	fstype = a.f_basetype;
-	devname = DEV_NO_NAME;
+	devname = get_dev_mountpoint(workspaces[cur_ws].path);
 #elif defined(LINUX_FSINFO)
 	int remote = 0;
 	fstype = get_fs_type_name(workspaces[cur_ws].path, &remote);

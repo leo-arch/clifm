@@ -33,6 +33,9 @@
 # include "linuxfs.h" /* FS_MAGIC macros for file system types */
 #elif defined(HAVE_STATFS)
 # include <sys/mount.h> /* statfs(2) */
+#elif defined(__sun)
+# include <sys/mnttab.h> /* getmntent() */
+# include <string.h> /* strstr() */
 #endif /* __linux__ */
 
 #if defined(LINUX_FSINFO)
@@ -258,7 +261,7 @@ get_dev_name_mntent(const char *file)
 
 	endmntent(fp);
 
-	return (!*name ? DEV_NO_NAME : name);
+	return (*name ? name : DEV_NO_NAME);
 }
 
 #ifndef __CYGWIN__
@@ -296,7 +299,7 @@ get_dev_name(const dev_t dev)
 
 	fclose(fp);
 
-	return (!*name ? DEV_NO_NAME : name);
+	return (*name ? name : DEV_NO_NAME);
 }
 #endif /* !__CYGWIN__ */
 
@@ -315,6 +318,35 @@ get_dev_info(const char *file, char **devname, char **devtype)
 
 	*devname = a.f_mntfromname;
 	*devtype = a.f_fstypename;
+}
+
+#elif defined(__sun)
+char *
+get_dev_mountpoint(const char *file)
+{
+	FILE *fp = fopen(MNTTAB, "r");
+	if (!fp)
+		return DEV_NO_NAME;
+
+	size_t mnt_longest = 0;
+	static char name[PATH_MAX + 1]; *name = '\0';
+	struct mnttab ent;
+
+	while (getmntent(fp, &ent) == 0) {
+		char *ptr = strstr(file, ent.mnt_mountp);
+		if (!ptr || ptr != file)
+			continue;
+
+		const size_t l = strlen(ent.mnt_mountp);
+		if (l > mnt_longest) {
+			mnt_longest = l;
+			xstrsncpy(name, ent.mnt_mountp, sizeof(name));
+		}
+	}
+
+	fclose(fp);
+
+	return (*name ? name : DEV_NO_NAME);
 }
 
 #else
