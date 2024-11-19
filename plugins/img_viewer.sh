@@ -2,7 +2,7 @@
 
 # Description: Image thumbnails plugin for CliFM
 # Dependencies (any of the following):
-#     sxiv feh pqiv gthumb ristretto gwenview lsix img2sixel
+#     nsxiv sxiv feh pqiv gthumb ristretto gwenview lsix img2sixel
 #       (or just your preferred image viewer)
 #     xargs
 #     tr
@@ -36,7 +36,9 @@ fi
 
 names="$(echo "$args" | sed 's/\\ /\t/g;s/ /\n/g;s/\t/ /g;s/\\//g')"
 
-if type sxiv > /dev/null 2>&1; then
+if type nsxiv > /dev/null 2>&1; then
+	(echo "$names" | tr \\n \\0 | xargs -0 nsxiv -aqt) && exit 0 || found=1
+elif type sxiv > /dev/null 2>&1; then
 	(echo "$names" | tr \\n \\0 | xargs -0 sxiv -aqt) && exit 0 || found=1
 elif type feh > /dev/null 2>&1; then
 	(echo "$names" | tr \\n \\0 | xargs -0 feh -tZ) && exit 0 || found=1
