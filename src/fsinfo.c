@@ -51,7 +51,7 @@ get_ext_fs_type(const char *file)
 {
 	char *type = "ext2/3/4";
 
-	if (!ext_mnt || !file)
+	if (!ext_mnt || !file || !*file)
 		return type;
 
 	size_t mnt_longest = 0;
@@ -88,7 +88,7 @@ char *
 get_fs_type_name(const char *file, int *remote)
 {
 	struct statfs a;
-	if (statfs(file, &a) == -1)
+	if (!file || !*file || statfs(file, &a) == -1)
 		return "?";
 
 	switch (a.f_type) {
@@ -239,6 +239,9 @@ get_fs_type_name(const char *file, int *remote)
 char *
 get_dev_name_mntent(const char *file)
 {
+	if (!file || !*file)
+		return DEV_NO_NAME;
+
 	FILE *fp = setmntent("/proc/self/mounts", "r");
 	if (!fp)
 		return DEV_NO_NAME;
@@ -324,6 +327,9 @@ get_dev_info(const char *file, char **devname, char **devtype)
 char *
 get_dev_mountpoint(const char *file)
 {
+	if (!file || !*file)
+		return DEV_NO_NAME;
+
 	FILE *fp = fopen(MNTTAB, "r");
 	if (!fp)
 		return DEV_NO_NAME;
