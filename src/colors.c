@@ -963,6 +963,7 @@ reset_iface_colors(void)
 	*sx_c = '\0';
 	*sz_c = '\0';
 
+	*ac_c = '\0';
 	*df_c = '\0';
 	*dl_c = '\0';
 	*el_c = '\0';
@@ -1221,7 +1222,7 @@ check_ext_color_hash_conflicts(const int cs_check)
 		return FUNC_FAILURE;
 	}
 
-	puts(_("cs: No conflict found"));
+	puts(_("cs: No conflicts found"));
 	return FUNC_SUCCESS;
 }
 
