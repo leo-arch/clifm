@@ -233,7 +233,7 @@ ExtColors="azw=EBOOK:azw3=EBOOK:cb7=EBOOK:cba=EBOOK:cbr=EBOOK:cbt=EBOOK:cbz=EBOO
 
 # IMAGES
 define IMAGE=35 # Magenta
-ExtColors="ai=IMAGE:avif=IMAGE:bmp=IMAGE:gif=IMAGE:ico=IMAGE:jpeg=IMAGE:jpg=IMAGE:jxl=IMAGE:mjpeg=IMAGE:mjpg=IMAGE:mng=IMAGE:pbm=IMAGE:pcx=IMAGE:pgm=IMAGE:png=IMAGE:ppm=IMAGE:psd=IMAGE:svg=IMAGE:svgz=IMAGE:tga=IMAGE:tif=IMAGE:tiff=IMAGE:webp=IMAGE:xbm=IMAGE:xcf=IMAGE:xpm=IMAGE:xwd=IMAGE:"
+ExtColors="ai=IMAGE:avif=IMAGE:bmp=IMAGE:ff=IMAGE:gif=IMAGE:heif=IMAGE:ico=IMAGE:jpeg=IMAGE:jpg=IMAGE:jxl=IMAGE:mjpeg=IMAGE:mjpg=IMAGE:mng=IMAGE:pam=IMAGE:pbm=IMAGE:pcx=IMAGE:pgm=IMAGE:png=IMAGE:ppm=IMAGE:psd=IMAGE:qoi=IMAGE:svg=IMAGE:svgz=IMAGE:tga=IMAGE:tif=IMAGE:tiff=IMAGE:webp=IMAGE:xbm=IMAGE:xcf=IMAGE:xpm=IMAGE:xwd=IMAGE:"
 
 # MARKUP FILES
 define MARKUP=1;33 # Same as CODE
