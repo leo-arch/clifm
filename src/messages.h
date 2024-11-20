@@ -1409,7 +1409,7 @@ c: Stop paging (printing remaining files)\n"
 \n  -m, --dirhist-map\t\t Enable the directory history map\
 \n  -o, --autols\t\t\t List files automatically (default)\
 \n  -O, --no-autols\t\t Do not list files automatically\
-\n  -P, --profile=PROFILE\t\t Use (or create) PROFILE as profile\
+\n  -P, --profile=NAME\t\t Use (or create) NAME as profile\
 \n  -r, --no-refresh-on-empty-line Do not refresh the list of files when pressing Enter \
 on an empty line\
 \n  -s, --splash\t\t\t Enable the splash screen\
@@ -1417,7 +1417,7 @@ on an empty line\
 \n  -t, --disk-usage-analyzer\t Run in disk usage analyzer mode\
 \n  -T, --trash-dir=DIR\t\t Set an alternative trash directory\
 \n  -v, --version\t\t\t Show version details and exit\
-\n  -w, --workspace=NUM\t\t Start in workspace NUM\
+\n  -w, --workspace=NUM\t\t Start in the workspace NUM\
 \n  -x, --no-ext-cmds\t\t Disallow the use of external commands\
 \n  -y, --light-mode\t\t Run in light mode\
 \n  -z, --sort=METHOD\t\t Sort files by METHOD (see the manpage)"
@@ -1428,19 +1428,18 @@ on an empty line\
 database (via the 'j' command)\
 \n      --case-sens-path-comp\t Enable case sensitive path completion\
 \n      --cd-on-quit\t\t Enable cd-on-quit functionality (see the manpage)\
-\n      --color-scheme=NAME\t Use color scheme NAME\
-\n      --color-links-as-target\t Use the target file color for symbolic links\
-\n      --cwd-in-title\t\t Print current directory in the terminal window title\
+\n      --color-scheme=NAME\t Use the color scheme NAME\
+\n      --color-links-as-target\t Colorize symbolic links according to the target file\
+\n      --cwd-in-title\t\t Print the current directory in the terminal window title\
 \n      --data-dir=PATH\t\t Use PATH as data directory (e.g.: /usr/local/share)\
 \n      --desktop-notifications\t Enable desktop notifications\
-\n      --disk-usage\t\t Show disk usage (free/total)\
-\n      --full-dir-size\t\t Print the size of directories and their contents \
-(long view only)\
-\n      --fuzzy-algo\t\t Set fuzzy algorithm for fuzzy matching to '1' or '2'\
+\n      --disk-usage\t\t Show disk usage (free/total FS MOUNTPOINT)\
+\n      --full-dir-size\t\t Recursively calculate directories size (long view only)\
+\n      --fuzzy-algo=NUM\t\t Set fuzzy algorithm for fuzzy matching (1 or 2)\
 \n      --fuzzy-matching\t\t Enable fuzzy TAB completion/suggestions for file names \
 and paths\
 \n      --fzfpreview-hidden\t Enable file previews for TAB completion (fzf mode only) with the preview window hidden (toggle with Alt-p)\
-\n      --fzftab\t\t\t Use fzf to display completion matches (default if fzf binary is found)\
+\n      --fzftab\t\t\t Use fzf to display completion matches (default if the fzf binary is found in PATH)\
 \n      --fnftab\t\t\t Use fnf to display completion matches\
 \n      --icons\t\t\t Enable icons\
 \n      --icons-use-file-color\t Icon colors follow file colors\
@@ -1477,8 +1476,8 @@ and paths\
 \n      --no-welcome-message\t Disable the welcome message\
 \n      --only-dirs\t\t List only directories and symbolic links to directories\
 \n      --open=FILE\t\t Open FILE (via Lira) and exit\
-\n      --opener=APPLICATION\t Resource opener to use instead of Lira, \
-Clifm's built-in opener\
+\n      --opener=APPLICATION\t Use APPLICATION as resource opener (instead of Lira, \
+our built-in opener)\
 \n      --pager-view=MODE\t\t How to list files in the pager (auto, long, short)\
 \n      --physical-size\t\t Same as --no-apparent-size\
 \n      --preview=FILE\t\t Display a preview of FILE (via Shotgun) and exit\
@@ -1495,7 +1494,7 @@ PropFields in the config file)\
 \n      --secure-env-full\t\t Run in a sanitized environment (full mode)\
 \n      --sel-file=FILE\t\t Set FILE as custom selections file\
 \n      --share-selbox\t\t Make the Selection Box common to different profiles\
-\n      --shotgun-file=FILE\t Set FILE as shotgun configuration file\
+\n      --shotgun-file=FILE\t Set FILE as shotgun's configuration file\
 \n      --si\t\t\t Print sizes in powers of 1000 instead of 1024\
 \n      --smenutab\t\t Use smenu to display completion matches\
 \n      --sort-reverse\t\t Sort in reverse order, e.g., z-a instead of a-z\
@@ -1503,7 +1502,7 @@ PropFields in the config file)\
 \n      --stat-full FILE...\t Run the 'pp' command on FILE(s) and exit\
 \n      --stdtab\t\t\t Force the use of the standard TAB completion mode (readline)\
 \n      --time-style=STYLE\t Time/date style used in long view (see TimeStyle in the config file)\
-\n      --trash-as-rm\t\t The 'r' command executes 'trash' instead of \
+\n      --trash-as-rm\t\t The 'r' command runs 'trash' instead of \
 rm(1) to prevent accidental deletions\
 \n      --unicode\t\t\t Unicode decorations are used if Unicode support is detected. \
 Use this option to force Unicode decorations.\
