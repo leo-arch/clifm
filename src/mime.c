@@ -190,9 +190,9 @@ test_pattern(const char *pattern, const char *filename, const char *mime)
 }
 
 /* Return 1 if APP is a valid and existent application (2 if it's located in
- * the home directory), or zero otherwise. */
+ * the home directory), or 0 otherwise. */
 static int
-check_app_existence(char **app, char **arg)
+check_app_existence(char **app, const char *params, const size_t params_len)
 {
 	if (*(*app) == 'a' && *(*app + 1) == 'd' && !*(*app + 2))
 		/* No need to check: 'ad' is an internal command. */
@@ -202,7 +202,7 @@ check_app_existence(char **app, char **arg)
 	if (*(*app) == '~' && *(*app + 1) == '/' && *(*app + 2)) {
 		size_t len = user.home_len + strlen(*app);
 		const size_t cmd_len = len > 0 ? len - 1 : 0;
-		len += *arg ? strlen(*arg) + 1 : 0;
+		len += params ? params_len + 1 : 0;
 
 		char *tmp_cmd = xnmalloc(len, sizeof(char));
 		snprintf(tmp_cmd, len, "%s/%s", user.home, *app + 2);
@@ -212,23 +212,18 @@ check_app_existence(char **app, char **arg)
 			return 0;
 		}
 
-		if (*arg) /* Append arguments */
-			snprintf(tmp_cmd + cmd_len, len, " %s", *arg);
+		if (params) { /* Append command paramters */
+			tmp_cmd[cmd_len] = ' ';
+			memcpy(tmp_cmd + cmd_len + 1, params, params_len + 1);
+		}
 
-		*app = xnrealloc(*app, len + 2, sizeof(char));
-		xstrsncpy(*app, tmp_cmd, len + 2);
-		free(tmp_cmd);
+		free(*app);
+		*app = tmp_cmd;
 		return 2;
 	}
 
 	/* Either a command name or an absolute path */
-	char *cmd_path = get_cmd_path(*app);
-	if (cmd_path) {
-		free(cmd_path);
-		return 1;
-	}
-
-	return 0;
+	return is_cmd_in_path(*app);
 }
 
 /* Return a copy the first cmd found in LINE (NULL terminated) or NULL.
@@ -296,7 +291,7 @@ retrieve_app(char *line)
 		if (*app == '~' && param_len > 0)
 			params = savestring(ret + 1, param_len);
 
-		int exists = check_app_existence(&app, &params);
+		const int exists = check_app_existence(&app, params, param_len);
 		free(params);
 
 		if (exists != 2 && ret) /* App not in HOME */

@@ -49,6 +49,7 @@ size_t hashme(const char *str, const int case_sensitive);
 struct timespec get_birthtime(const char *filename);
 #endif /* __sun && ST_BTIME */
 char *get_cmd_path(const char *cmd);
+int  is_cmd_in_path(const char *cmd);
 int  get_rgb(char *hex, int *attr, int *r, int *g, int *b);
 void clear_term_img(void);
 mode_t get_dt(const mode_t mode);

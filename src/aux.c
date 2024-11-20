@@ -290,12 +290,11 @@ ueberzug_clear(char *file)
 	fclose(fp);
 }
 
-/* Let's clear images printed on the terminal screen, either via
- * ueberzug(1) or the kitty image protocol. */
+/* Let's clear images printed on the terminal screen via ueberzug(1). */
 void
 clear_term_img(void)
 {
-	static char fu[PATH_MAX] = "";
+	static char fu[PATH_MAX + 1] = "";
 	char *p = (char *)NULL;
 
 	if (!*fu) {
@@ -1066,6 +1065,47 @@ get_cmd_path(const char *cmd)
 	errno = ENOENT;
 	free(cmd_path);
 	return (char *)NULL;
+}
+
+/* Same thing as get_cmd_path(), but returns 1 in case of success or 0
+ * otherwise instead of the absolute path to CMD. Unlike get_cmd_path(),
+ * it does not allocate memory in the heap, so that it's faster. */
+int
+is_cmd_in_path(const char *cmd)
+{
+	errno = 0;
+	if (!cmd || !*cmd) {
+		errno = EINVAL;
+		return 0;
+	}
+
+	if (*cmd == '~') {
+		char *p = tilde_expand(cmd);
+		return (p && access(p, X_OK) == 0);
+	}
+
+	if (*cmd == '/')
+		return (access(cmd, X_OK) == 0);
+
+	char cmd_path[PATH_MAX + 1];
+
+	size_t i;
+	for (i = 0; i < path_n; i++) { /* Check each path in PATH */
+		if (!paths[i].path || !*paths[i].path)
+			continue;
+
+		/* Skip '.' (CWD) if running with secure environment */
+		if ((xargs.secure_env == 1 || xargs.secure_env_full == 1)
+		&& *paths[i].path == '.' && !paths[i].path[1])
+			continue;
+
+		snprintf(cmd_path, sizeof(cmd_path), "%s/%s", paths[i].path, cmd);
+		if (access(cmd_path, X_OK) == 0)
+			return 1;
+	}
+
+	errno = ENOENT;
+	return 0;
 }
 
 /* Convert SIZE to human readable form (at most 2 decimal places).
