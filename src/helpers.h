@@ -530,8 +530,8 @@ extern time_t curdir_mtime;
 #define FIRST_WORD_IS_ELN   (1 << 4)
 #define IN_BOOKMARKS_SCREEN (1 << 5)
 #define STATE_COMPLETING    (1 << 6)
-/* Instead of a completion for the current word, a BAEJ suggestion points to
- * a possible completion as follows: WORD > COMPLETION */
+/* Instead of a completion for the current query, a BAEJ suggestion points to
+ * a possible completion as follows: QUERY > COMPLETION */
 #define BAEJ_SUGGESTION     (1 << 7)
 #define STATE_SUGGESTING    (1 << 8)
 #define IN_SELBOX_SCREEN    (1 << 9)
@@ -539,6 +539,7 @@ extern time_t curdir_mtime;
 #define PREVIEWER           (1 << 11)
 #define NO_FIX_RL_POINT     (1 << 12)
 #define FAILED_ALIAS        (1 << 13)
+#define ALT_PREVIEW_FILE    (1 << 14)
 
 /* Flags for third party binaries */
 #define FZF_BIN_OK     (1 << 0)

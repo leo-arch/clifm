@@ -33,11 +33,6 @@
  * tab_complete
  * All changes are licensed under GPL-2.0-or-later. */
 
-/* enable_raw_mode, disable_raw_mode, and get_cursor_position functions are
- * taken from https://github.com/antirez/linenoise/blob/master/linenoise.c, licensed
- * under BSD-2-Clause.
- * All changes are licenced under GPL-2.0-or-later. */
-
 #include "helpers.h"
 
 #include <unistd.h>
@@ -597,6 +592,28 @@ get_last_word(char *str, const int original_query)
 	return w;
 }
 
+/* We have an alternative preview file (set either via --shotgun-file,
+ * --config-dir, or --profile).
+ * Let's write the file name into an environment variable
+ * (CLIFM_ALT_PREVIEW_FILE), so that the clifm instance invoked by fzf
+ * can handle it. */
+static void
+setenv_fzf_alt_preview_file(void)
+{
+	static char buf[PATH_MAX + 1] = "";
+
+	if (!*buf) {
+		if (alt_preview_file && *alt_preview_file)
+			snprintf(buf, sizeof(buf), "%s", alt_preview_file);
+		else if (config_dir && *config_dir)
+			snprintf(buf, sizeof(buf), "%s/preview.clifm", config_dir);
+		else
+			return;
+	}
+
+	setenv("CLIFM_ALT_PREVIEW_FILE", buf, 1);
+}
+
 static void
 set_fzf_env_vars(const int height)
 {
@@ -641,6 +658,9 @@ set_fzf_env_vars(const int height)
 	setenv("CLIFM_TERM_COLUMNS", p, 1);
 	snprintf(p, sizeof(p), "%d", term_lines);
 	setenv("CLIFM_TERM_LINES", p, 1);
+
+	if (flags & ALT_PREVIEW_FILE)
+		setenv_fzf_alt_preview_file();
 }
 
 static void
@@ -650,6 +670,8 @@ clear_fzf(void)
 	unsetenv("CLIFM_FZF_LINE");
 	unsetenv("CLIFM_TERM_COLUMNS");
 	unsetenv("CLIFM_TERM_LINES");
+	if (flags & ALT_PREVIEW_FILE)
+		unsetenv("CLIFM_ALT_PREVIEW_FILE");
 }
 
 /* Calculate the available space for the fzf preview window based on
@@ -818,7 +840,7 @@ ctrl-d:deselect-all,ctrl-t:toggle-all" : "",
 	/* Restore the user's shell to its original value. */
 	user.shell = shell_bk;
 
-	if (prev == 1)
+	if (prev == FZF_INTERNAL_PREVIEWER)
 		clear_fzf();
 	if (dr == 1)
 		flags |= DELAYED_REFRESH;

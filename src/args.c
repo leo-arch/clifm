@@ -615,7 +615,12 @@ open_reg_exit(char *filename, const int url, const int preview)
 
 	tmp_dir = savestring(P_tmpdir, P_tmpdir_len);
 
-	if (alt_preview_file && preview == 1) {
+	const char *env_preview_file = (preview == 1 && !alt_preview_file)
+		? getenv("CLIFM_ALT_PREVIEW_FILE") : NULL;
+
+	if (env_preview_file && *env_preview_file) {
+		mime_file = savestring(env_preview_file, strlen(env_preview_file));
+	} else if (alt_preview_file && preview == 1) {
 		mime_file = savestring(alt_preview_file, strlen(alt_preview_file));
 	} else {
 		const size_t mime_file_len = strlen(homedir)
@@ -855,6 +860,7 @@ set_alt_config_dir(char *dir)
 		}
 	} else {
 		alt_config_dir = savestring(dir, strlen(dir));
+		flags |= ALT_PREVIEW_FILE;
 		err(ERR_NO_LOG, PRINT_PROMPT, _("%s: '%s': Using an alternative "
 			"configuration directory\n"), PROGRAM_NAME, alt_config_dir);
 	}
@@ -913,6 +919,7 @@ set_shotgun_file(char *opt)
 		err_arg_required("--shotgun-file"); /* noreturn */
 
 	alt_preview_file = stat_file(opt);
+	flags |= ALT_PREVIEW_FILE;
 }
 #endif /* !_NO_LIRA */
 #endif /* !_BE_POSIX */
@@ -1092,6 +1099,7 @@ set_alt_profile(const char *name)
 
 	if (validate_profile_name(name) == FUNC_SUCCESS) {
 		alt_profile = savestring(name, strlen(name));
+		flags |= ALT_PREVIEW_FILE;
 		return;
 	}
 
@@ -1752,7 +1760,8 @@ parse_cmdline_args(const int argc, char **argv)
 #endif /* !_NO_LIRA */
 
 	char *spath = (char *)NULL;
-	if (xargs.stat == 0 && argv[optind]) { /* Starting path passed as positional parameter */
+	if (xargs.stat == 0 && argv[optind]) {
+		/* Starting path passed as positional parameter */
 		spath = resolve_starting_path(argv[optind]);
 	} else {
 		if (path_value) /* Starting path passed via -p */
@@ -1764,7 +1773,7 @@ parse_cmdline_args(const int argc, char **argv)
 		free(spath);
 	} else {
 		if (xargs.list_and_quit == 1) {
-			/* Starting path not specified in the command line, let's use
+			/* Starting path not specified in the command line. Let's use
 			 * the current directory. */
 			conf.restore_last_path = 0;
 			set_start_path();
