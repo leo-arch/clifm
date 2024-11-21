@@ -247,31 +247,31 @@ print_tips(const int all)
 }
 
 /* Retrieve pager path, first from PAGER, then try less(1), and finally
- * more(1). If none is found returns NULL. */
+ * more(1). If none is found return NULL. */
 static char *
 get_pager(void)
 {
-	char *_pager = (char *)NULL;
+	char *pager_cmd = (char *)NULL;
 	char *p = getenv("PAGER");
 	if (p) {
 		char *s = strchr(p, ' ');
 		if (s) *s = '\0';
-		_pager = savestring(p, strlen(p));
-		return _pager;
+		pager_cmd = savestring(p, strlen(p));
+		return pager_cmd;
 	}
 
 	p = get_cmd_path("less");
 	if (p) {
-		_pager = savestring(p, strlen(p));
+		pager_cmd = savestring(p, strlen(p));
 		free(p);
-		return _pager;
+		return pager_cmd;
 	}
 
 	p = get_cmd_path("more");
 	if (p) {
-		_pager = savestring(p, strlen(p));
+		pager_cmd = savestring(p, strlen(p));
 		free(p);
-		return _pager;
+		return pager_cmd;
 	}
 
 	return (char *)NULL;

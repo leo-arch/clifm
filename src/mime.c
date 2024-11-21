@@ -1569,14 +1569,12 @@ run_archiver(char **fpath, char **app)
 static int
 check_file_cmd(void)
 {
-	char *p = get_cmd_path("file");
-	if (!p) {
+	if (is_cmd_in_path("file") == 0) {
 		xerror("%s: Cannot retrieve MIME type: 'file' command "
 			"not found\n", err_name);
 		return FUNC_FAILURE;
 	}
 
-	free(p);
 	return FUNC_SUCCESS;
 }
 #endif /* _NO_MAGIC */

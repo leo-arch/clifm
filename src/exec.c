@@ -1755,12 +1755,10 @@ preview_function(char **args)
 	enum tab_mode tabmode_bk = tabmode;
 
 	if (tabmode != FZF_TAB) {
-		char *p = get_cmd_path("fzf");
-		if (!p) {
+		if (is_cmd_in_path("fzf") == 0) {
 			err(0, NOPRINT_PROMPT, "%s: fzf: %s\n", PROGRAM_NAME, NOTFOUND_MSG);
 			return E_NOTFOUND; /* 127, as required by exit(1) */
 		}
-		free(p);
 	}
 
 	conf.fzf_preview = 1;

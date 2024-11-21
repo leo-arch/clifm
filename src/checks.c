@@ -173,44 +173,36 @@ static void
 check_third_party_cmds_alt(void)
 {
 	int udisks2ok = 0, udevilok = 0;
-	char *p = (char *)NULL;
 
-	if ( (p = get_cmd_path("fzf")) ) {
-		free(p);
+	if (is_cmd_in_path("fzf") == 1) {
 		bin_flags |= FZF_BIN_OK;
 		if (fzftab == UNSET) fzftab = 1;
 	}
 
-	if ( (p = get_cmd_path("fnf")) ) {
-		free(p);
+	if (is_cmd_in_path("fnf") == 1) {
 		bin_flags |= FNF_BIN_OK;
 		if (fzftab == UNSET) fzftab = 1;
 	}
 
-	if ( (p = get_cmd_path("smenu")) ) {
-		free(p);
+	if (is_cmd_in_path("smenu") == 1) {
 		bin_flags |= SMENU_BIN_OK;
 		if (fzftab == UNSET) fzftab = 1;
 	}
 
-	if ( (p = get_cmd_path("udisksctl")) ) {
-		free(p); udisks2ok = 1;
-	}
+	if (is_cmd_in_path("udiskctl") == 1)
+		udisks2ok = 1;
 
-	if ( (p = get_cmd_path("udevil")) ) {
-		free(p); udevilok = 1;
-	}
+	if (is_cmd_in_path("udevil") == 1)
+		udevilok = 1;
 
 #if defined(USE_DU1) && !defined(HAVE_GNU_DU) && !defined(_BE_POSIX)
-	if ( (p = get_cmd_path("gdu")) ) {
-		free(p); bin_flags |= GNU_DU_BIN_GDU;
-	}
+	if (is_cmd_in_path("gdu") == 1)
+		bin_flags |= GNU_DU_BIN_GDU;
 #endif /* USE_DU1 && !HAVE_GNU_DU && !_BE_POSIX */
 
 #if defined(CHECK_COREUTILS)
-	if ( (p = get_cmd_path("grm")) ) {
-		free(p); bin_flags |= BSD_HAVE_COREUTILS;
-	}
+	if (is_cmd_in_path("grm") == 1)
+		bin_flags |= BSD_HAVE_COREUTILS;
 #endif /* CHECK_COREUTILS */
 
 	set_mount_cmd(udisks2ok, udevilok);

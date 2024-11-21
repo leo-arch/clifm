@@ -324,7 +324,7 @@ dup_file(char **cmd)
 		dlen--;
 	}
 
-	char *rsync_path = get_cmd_path("rsync");
+	const int rsync_ok = is_cmd_in_path("rsync");
 	int exit_status = FUNC_SUCCESS;
 
 	size_t i;
@@ -381,7 +381,7 @@ dup_file(char **cmd)
 			source[source_len - 1] = '/';
 
 		/* 2. Run command. */
-		if (rsync_path) {
+		if (rsync_ok == 1) {
 			char *dup_cmd[] = {"rsync", "-aczvAXHS", "--progress", "--",
 				source, dest, NULL};
 			if (launch_execv(dup_cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
@@ -406,7 +406,6 @@ dup_file(char **cmd)
 	}
 
 	free(dest_dir);
-	free(rsync_path);
 	return exit_status;
 }
 

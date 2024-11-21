@@ -3855,27 +3855,14 @@ reset_variables(void)
 static void
 update_finder_binaries_status(void)
 {
-	char *p = (char *)NULL;
-	if (!(bin_flags & FZF_BIN_OK)) {
-		if ((p = get_cmd_path("fzf"))) {
-			free(p);
-			bin_flags |= FZF_BIN_OK;
-		}
-	}
+	if (!(bin_flags & FZF_BIN_OK) && is_cmd_in_path("fzf") == 1)
+		bin_flags |= FZF_BIN_OK;
 
-	if (!(bin_flags & FNF_BIN_OK)) {
-		if ((p = get_cmd_path("fnf"))) {
-			free(p);
-			bin_flags |= FNF_BIN_OK;
-		}
-	}
+	if (!(bin_flags & FNF_BIN_OK) && is_cmd_in_path("fnf") == 1)
+		bin_flags |= FNF_BIN_OK;
 
-	if (!(bin_flags & SMENU_BIN_OK)) {
-		if ((p = get_cmd_path("smenu"))) {
-			free(p);
-			bin_flags |= SMENU_BIN_OK;
-		}
-	}
+	if (!(bin_flags & SMENU_BIN_OK) && is_cmd_in_path("smenu") == 1)
+		bin_flags |= SMENU_BIN_OK;
 }
 #endif /* !_NO_FZF */
 

@@ -82,10 +82,8 @@ define_find_name(void)
 	/* Let's run this only once. */
 	if (check == 1) {
 		check = 0;
-		char *p = get_cmd_path("gfind");
-		if (p)
+		if (is_cmd_in_path("gfind") == 1)
 			have_gfind = 1;
-		free(p);
 	}
 
 	return (have_gfind == 1 ? "gfind" : "find");
