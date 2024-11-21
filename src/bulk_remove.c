@@ -31,7 +31,7 @@
 #include <unistd.h> /* unlinkat() */
 #include <errno.h>
 
-#include "aux.h" /* xnmalloc, open_fwrite(), get_cmd_path(), count_dir() */
+#include "aux.h" /* xnmalloc, open_fwrite(), is_cmd_in_path(), count_dir() */
 #include "checks.h" /* is_internal() */
 #include "file_operations.h" // open_file() */
 #include "messages.h" /* RR_USAGE */
@@ -58,8 +58,8 @@ parse_bulk_remove_params(char *s1, char *s2, char **app, char **target)
 	int ret = 0;
 	struct stat a;
 	if ((ret = stat(s1, &a)) == -1 || !S_ISDIR(a.st_mode)) {
-		char *p = get_cmd_path(BULK_APP(s1));
-		if (!p) { /* S1 is neither a directory nor a valid application */
+		if (is_cmd_in_path(BULK_APP(s1)) == 0) {
+			/* S1 is neither a directory nor a valid application */
 			int ec = (ret == -1 && *s1 == ':') ? E_NOTFOUND : ENOTDIR;
 			if (ec == ENOTDIR)
 				xerror("rr: '%s': %s\n", s1, strerror(ec));
@@ -67,10 +67,10 @@ parse_bulk_remove_params(char *s1, char *s2, char **app, char **target)
 				xerror("rr: '%s': %s\n", BULK_APP(s1), NOTFOUND_MSG);
 			return ec;
 		}
+
 		/* S1 is an application name. TARGET defaults to CWD */
 		*target = workspaces[cur_ws].path;
 		*app = BULK_APP(s1);
-		free(p);
 		return FUNC_SUCCESS;
 	}
 
@@ -83,10 +83,9 @@ parse_bulk_remove_params(char *s1, char *s2, char **app, char **target)
 	if (!s2 || !*s2) /* No S2. APP defaults to default associated app */
 		return FUNC_SUCCESS;
 
-	char *p = get_cmd_path(BULK_APP(s2));
-	if (p) { /* S2 is a valid application name */
+	if (is_cmd_in_path(BULK_APP(s2)) == 1) {
+		/* S2 is a valid application name */
 		*app = BULK_APP(s2);
-		free(p);
 		return FUNC_SUCCESS;
 	}
 
@@ -330,7 +329,7 @@ get_remove_files(const char *target, char **tmp_files,
 
 	for (i = 0; i < (size_t)n; i++) {
 		if (remove_this_file((*a)[i]->d_name, tmp_files) == 1) {
-			char p[PATH_MAX + 1];
+			char p[PATH_MAX + NAME_MAX + 3];
 			if (*target == '/') {
 				snprintf(p, sizeof(p), "%s/%s", target, (*a)[i]->d_name);
 			} else {
@@ -416,7 +415,18 @@ bulk_remove(char *s1, char *s2)
 	int fd = 0, ret = 0, i = 0;
 	filesn_t n = 0;
 
-	if ((ret = parse_bulk_remove_params(s1, s2, &app, &target)) != FUNC_SUCCESS)
+	char dpath[PATH_MAX + 1]; *dpath = '\0';
+	if (s1 && *s1 && *s1 != ':' && strchr(s1, '\\')) {
+		char *tmp = unescape_str(s1, 0);
+		if (tmp) {
+			xstrsncpy(dpath, tmp, sizeof(dpath));
+			free(tmp);
+		}
+	}
+
+	ret = parse_bulk_remove_params(*dpath ? dpath : s1, s2, &app, &target);
+
+	if (ret != FUNC_SUCCESS)
 		return ret;
 
 	struct stat attr;
