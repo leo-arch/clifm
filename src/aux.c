@@ -1035,7 +1035,7 @@ get_cmd_path(const char *cmd)
 	if (*cmd == '~') {
 		char *p = tilde_expand(cmd);
 		if (p && access(p, X_OK) == 0)
-			cmd_path = savestring(p, strlen(p));
+			cmd_path = p;
 		return cmd_path;
 	}
 
@@ -1081,7 +1081,9 @@ is_cmd_in_path(const char *cmd)
 
 	if (*cmd == '~') {
 		char *p = tilde_expand(cmd);
-		return (p && access(p, X_OK) == 0);
+		const int ret = (p && access(p, X_OK) == 0);
+		free(p);
+		return ret;
 	}
 
 	if (*cmd == '/')
