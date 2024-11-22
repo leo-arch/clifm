@@ -347,7 +347,7 @@ check_file_access(const mode_t mode, const uid_t uid, const gid_t gid)
 }
 
 /* Return 1 if the command CMD exists (is found in PATH) and is executable
- * by the current user. Otherwise, return 0.
+ * (and readable) by the current user. Otherwise, return 0.
  * This code is based on the file_status() function used by which(1). */
 int
 is_exec_cmd(const char *cmd)

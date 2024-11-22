@@ -166,7 +166,7 @@ get_fs_type_name(const char *file, int *remote)
 	case T_MINIX2_MAGIC2: return "minix v2 (30 char.)";
 	case T_MINIX3_MAGIC: return "minix3";
 	case T_MQUEUE_MAGIC: return "mqueue";
-	case T_MSDOS_MAGIC: return "msdos";
+	case T_MSDOS_MAGIC: return "vfat";
 	case T_MTD_INODE_FS_MAGIC: return "inodefs";
 	case T_NCP_MAGIC: *remote = 1; return "novell";
 	case T_NFS_MAGIC: *remote = 1; return "nfs";
