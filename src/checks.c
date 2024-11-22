@@ -346,6 +346,41 @@ check_file_access(const mode_t mode, const uid_t uid, const gid_t gid)
 	return 0;
 }
 
+/* Return 1 if the command CMD exists (is found in PATH) and is executable
+ * by the current user. Otherwise, return 0.
+ * This code is based on the file_status() function used by which(1). */
+int
+is_exec_cmd(const char *cmd)
+{
+	if (!cmd || !*cmd)
+		return 0;
+
+	struct stat a;
+	if (stat(cmd, &a) == -1 || !S_ISREG(a.st_mode))
+		return 0;
+
+	/* The file is read/exec by others (world). This is the most common case
+	 * for files in PATH. */
+	if ((a.st_mode & S_IXOTH) && (a.st_mode & S_IROTH))
+		return 1;
+
+	/* We're root: we only need the exec bit to be set for any of user,
+	 * group, or others. */
+	if (user.uid == (uid_t)0 && (a.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)))
+		return 1;
+
+	/* We're the owner of the file. */
+	if (user.uid == a.st_uid && (a.st_mode & S_IXUSR) && (a.st_mode & S_IRUSR))
+		return 1;
+
+	/* We're are in the file's group. */
+	if (check_user_groups(a.st_gid) == 1 && (a.st_mode & S_IXGRP)
+	&& (a.st_mode & S_IRGRP))
+		return 1;
+
+	return 0;
+}
+
 char *
 get_sudo_path(void)
 {

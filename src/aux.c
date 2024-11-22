@@ -42,7 +42,7 @@
 
 #include "aux.h"
 #include "misc.h"
-#include "checks.h"
+#include "checks.h" /* is_exec_cmd() */
 #include "file_operations.h" /* open_file() */
 #ifndef _NO_HIGHLIGHT
 # include "highlight.h"
@@ -1034,13 +1034,15 @@ get_cmd_path(const char *cmd)
 
 	if (*cmd == '~') {
 		char *p = tilde_expand(cmd);
-		if (p && access(p, X_OK) == 0)
+//		if (p && access(p, X_OK) == 0)
+		if (p && is_exec_cmd(p) == 1)
 			cmd_path = p;
 		return cmd_path;
 	}
 
 	if (*cmd == '/') {
-		if (access(cmd, X_OK) == 0)
+//		if (access(cmd, X_OK) == 0)
+		if (is_exec_cmd(cmd) == 1)
 			cmd_path = savestring(cmd, strlen(cmd));
 		return cmd_path;
 	}
@@ -1058,7 +1060,8 @@ get_cmd_path(const char *cmd)
 			continue;
 
 		snprintf(cmd_path, PATH_MAX + 1, "%s/%s", paths[i].path, cmd);
-		if (access(cmd_path, X_OK) == 0)
+//		if (access(cmd_path, X_OK) == 0)
+		if (is_exec_cmd(cmd_path) == 1)
 			return cmd_path;
 	}
 
@@ -1081,13 +1084,15 @@ is_cmd_in_path(const char *cmd)
 
 	if (*cmd == '~') {
 		char *p = tilde_expand(cmd);
-		const int ret = (p && access(p, X_OK) == 0);
+//		const int ret = (p && access(p, X_OK) == 0);
+		const int ret = (p && is_exec_cmd(p) == 1);
 		free(p);
 		return ret;
 	}
 
 	if (*cmd == '/')
-		return (access(cmd, X_OK) == 0);
+//		return (access(cmd, X_OK) == 0);
+		return is_exec_cmd(cmd);
 
 	char cmd_path[PATH_MAX + 1];
 
@@ -1102,7 +1107,8 @@ is_cmd_in_path(const char *cmd)
 			continue;
 
 		snprintf(cmd_path, sizeof(cmd_path), "%s/%s", paths[i].path, cmd);
-		if (access(cmd_path, X_OK) == 0)
+		if (is_exec_cmd(cmd_path) == 1)
+//		if (access(cmd_path, X_OK) == 0)
 			return 1;
 	}
 
