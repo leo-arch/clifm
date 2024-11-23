@@ -1,3 +1,57 @@
+1.22 (Banana picker) - Nov 23, 2024
+
+BUG FIXES
+* Wrong query string when TAB completing tagged files and '--fuzzy-match' is enabled.
+* When pressing Ctrl-Alt-[d,x] on a secondary prompt the cursor moves up one line.
+* '--rl-vi-mode' not working if 'RlEditMode' is set in the config file.
+* No image preview for powerpoint files.
+* Wrong ueberzug image offset when fzf preview window border is set to 'border-[right,thinblock]'.
+* When clearing the screen, the scrollback buffer is not cleared on rxvt-based terminals.
+* Not using all available columns when running with '--no-eln'.
+* TAB completing file names in the 'pc' prompt after the first word.
+* Some keybindings (Alt-TAB, Alt-v, Alt-p) are operative in secondary prompts, when they shouldn't.
+* Garbage in the command line when trying to switch workspaces via a keybinding in a secondary prompt.
+* F12 (quit) not working on secondary prompts.
+* 'echo ELN' does not expand to file name (while 'stat ELN' does).
+* 'mf' command expands numbers to ELN's.
+* When multiple system messages are generated, only the last one is displayed in the prompt.
+* Negation ('!') does not work for workspaces and double asterisk expressions in autocmds.
+* Help messages ignore the command line text color.
+* The 'n/new' command issues a warning when attempting to create a file in the home directory using the tilde ('~/FILE').
+* File previews (TAB completion or the 'view' command) ignore alternative preview file (set via either '--shotgun-file', '--config-dir', or '--profile').
+* 'rr' does not work with directory names containing spaces (e.g. 'rr this\ dir').
+* The 'open/preview' function matches directories as valid opening applications.
+
+NEW FUEATURES/IMPROVEMENTS
+* Extra file type filters for the '=' keyword: 'D' for empty directories, 'F' for empty regular files, and 'L' for broken links. On Solaris, the 'D' file type char (previously used for door files) was replaced by 'O'.
+* Use the 'kb bind' command to customize your key bindings instead of manually editing the keybindings file (via 'kb edit').
+* 'kb conflict' now checks for readline key bindings as well.
+* Proper error messages when appliaction does not exist/fails while previewing images (clifmimg).
+* Add image previewing method for mobi files (clifmimg).
+* Add support for legacy image formats: bmp, ico, pcx, and tga (clifmimg).
+* Automatic detection of image preview method. Update your clifmimg script (~/.config/clifm/clifmimg) (just remove it and restart) to make use of this new feature. By default, Clifm and the 'clifmimg' script will try to guess the best previewing method (sixel, ueberzug, kitty, or ansi). Edit the 'method' variable in the 'clifmimg' script to manually set a previewing method.
+* A more modern interface: If Unicode support is detected, Clifm will draw decorations using Unicode characters (use '--no-unicode' to disable Unicode decorations, and '--unicode' to force it).
+* The selected files indicator in the prompt was replaced by 'S' (previously '*').
+* Right pad and colorize ELN's in dirhist map.
+* The color scheme is checked at startup for file extension conflicts. If found, the user is warned.
+* Use 'cs check-ext' command to manually check for file extension conflicts.
+* Display bookmarked paths in the bookmarks screen.
+* Add names completion to the bookmarks prompt in the bookmarks screen ('bm' command).
+* Several improvements to the 'vv' command.
+* Allow using tilde (~) for the home dir when editing a symbolic link ('le' command).
+* Active files filter ('ft' command) is always displayed.
+* Add files filter ('ft') and full-dir-size ('fz') to autocommands.
+* Allow using names for 'st' in autocommands.
+* Use the 'auto' command to set a temporary autocommand for the current directory. Run 'auto --help' for more info.
+* New config file option: 'InformAutocmd' to control how matching autocommands are displayed in the prompt. Available values: 'none', 'short', 'long', 'full', and 'prompt' (default).
+* Better columns arrangement when listing files (vertical list only).
+* Lira: make opening applications invoked with the '%x' flag run in a new session (detached from the terminal) (via setsid(3)).
+* Lira: Check for 'Calligra' and 'Gnumeric' when opening office documents.
+* Add 'N file(s) copied/moved' message to 'c' and 'm' commands.
+* Set 'TrashForce' to false by default.
+* Do not print the list of removed/trashed files after files removal/trash.
+* Enable file system type and mountpoint (via '--disk-usage') on Cygwin/MSYS2/Solaris.
+
 1.21 (Lemonhead) - Sep 30, 2024
 
 BUG FIXES
