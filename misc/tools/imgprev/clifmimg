@@ -50,7 +50,7 @@
 # fontpreview (Font files)
 # libreoffice (Office files: odt, docx, xlsx, etc)
 # gs (Postscript files - provided by the ghostscript package)
-# magick (GIF, SVG files, and sixel images - provided by the imagemagick package)
+# magick (GIF, SVG files, and legacy image formats (bmp, pcx, etc.) - provided by the imagemagick package)
 #
 # Note: The exact package names provinding these programs vary depending
 # on your OS/distribution, but ususally they have the same name as the program
@@ -107,6 +107,20 @@ is required.\n" >&2
 	fi
 }
 
+print_err_msg() {
+	case "$2" in
+		127)
+			if [ "$3" = "sixel" ]; then
+				echo "${1}: Command not found (required to display sixel images)"
+			else
+				echo "${1}: Command not found (required to generate previews for '${3}' files)"
+			fi
+			;;
+		*) echo "${1}: Error generating preview (code: ${2})" ;;
+	esac
+	return 1
+}
+
 display() {
 	[ -z "$1" ] && exit 1
 
@@ -130,7 +144,8 @@ display() {
 
 	case "$method" in
 		sixel)
-			chafa -f sixel -s "${C}x$((L - 1))" "$1"
+			chafa -f sixel -s "${C}x$((L - 1))" "$1" 2>/dev/null && return 0
+			print_err_msg "chafa" "$?" "sixel"
 #			img2sixel -w auto -h "$(((L - 1) * 16))" "$1"
 #			timg -ps -g "${C}x$((L - 1))" "$1"
 		;;
@@ -161,14 +176,6 @@ display() {
 			esac
 		;;
 	esac
-}
-
-print_err_msg() {
-	case "$2" in
-		127) echo "${1}: Command not found (required to generate previews for '${3}' files)" ;;
-		*) echo "${1}: Error generating preview (code: ${2})" ;;
-	esac
-	return 1
 }
 
 gen_epub_preview() {
