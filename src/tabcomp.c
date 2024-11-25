@@ -1023,13 +1023,6 @@ get_finder_output(const int multi, char *base)
 	return buf;
 }
 
-static inline void
-write_comp_to_file(const char *entry, const char *color, FILE *fp)
-{
-	const char end_char = tabmode == SMENU_TAB ? '\n' : '\0';
-	fprintf(fp, "%s%s%s%c", color, entry, NC, end_char);
-}
-
 /* Return a normalized (absolute) path for the query string PREFIX.
  * E.g., "./b<TAB>" -> /parent/dir
  * The partially typed basename, here 'b', is excluded, since it will be added
@@ -1063,14 +1056,13 @@ store_completions(char **matches)
 		return (size_t)-1;
 	}
 
-	int no_file_comp = 0;
 	const enum comp_type ct = cur_comp_type;
 
-	if (ct == TCMP_TAGS_S || ct == TCMP_TAGS_U || ct == TCMP_SORT
-	|| ct == TCMP_BOOKMARK || ct == TCMP_CSCHEME || ct == TCMP_NET
-	|| ct == TCMP_PROF || ct == TCMP_PROMPTS || ct == TCMP_BM_PREFIX
-	|| ct == TCMP_WS_PREFIX || ct == TCMP_WORKSPACES)
-		no_file_comp = 1; /* We're not completing file names. */
+	const int no_file_comp = (ct == TCMP_TAGS_S || ct == TCMP_TAGS_U
+		|| ct == TCMP_SORT || ct == TCMP_BOOKMARK || ct == TCMP_CSCHEME
+		|| ct == TCMP_NET || ct == TCMP_PROF || ct == TCMP_PROMPTS
+		|| ct == TCMP_BM_PREFIX || ct == TCMP_WS_PREFIX
+		|| ct == TCMP_WORKSPACES); /* We're not completing file names. */
 
 	char *norm_prefix = (char *)NULL;
 	/* "./_", "../_", and "_/.._" */
@@ -1082,9 +1074,8 @@ store_completions(char **matches)
 	size_t i;
 	/* 'view' cmd with only one match: matches[0]. */
 	const size_t start = ((flags & PREVIEWER) && !matches[1]) ? 0 : 1;
-	char *_path = (char *)NULL;
-
-	int prev = (conf.fzf_preview > 0 && SHOW_PREVIEWS(ct) == 1) ? 1 : 0;
+	const int prev = (conf.fzf_preview > 0 && SHOW_PREVIEWS(ct) == 1);
+	const char end_char = tabmode == SMENU_TAB ? '\n' : '\0';
 	longest_prev_entry = 0;
 
 #ifndef _NO_TRASH
@@ -1102,9 +1093,9 @@ store_completions(char **matches)
 
 		if (prev == 1) {
 			const int get_base_name = ((ct == TCMP_PATH || ct == TCMP_GLOB)
-				&& !(flags & PREVIEWER)) ? 1 : 0;
+				&& !(flags & PREVIEWER));
 			char *p = get_base_name == 1 ? strrchr(entry, '/') : (char *)NULL;
-			const size_t len = strlen(p && *(p + 1) ? p + 1 : entry);
+			const size_t len = strlen((p && p[1]) ? p + 1 : entry);
 			if (len > longest_prev_entry)
 				longest_prev_entry = len;
 		}
@@ -1113,11 +1104,11 @@ store_completions(char **matches)
 			color = di_c;
 		} else if (ct == TCMP_TAGS_T || ct == TCMP_BM_PREFIX) {
 			color = mi_c;
-			if (*(entry + 2))
+			if (entry[2])
 				entry += 2;
 		} else if (ct == TCMP_TAGS_C) {
 			color = mi_c;
-			if (*(entry + 1))
+			if (entry[1])
 				entry += 1;
 		} else if (no_file_comp == 1) {
 			color = mi_c;
@@ -1138,13 +1129,13 @@ store_completions(char **matches)
 			if (ct != TCMP_SEL && ct != TCMP_DESEL && ct != TCMP_BM_PATHS
 			&& ct != TCMP_DIRHIST && ct != TCMP_OPENWITH
 			&& ct != TCMP_JUMP && ct != TCMP_TAGS_F) {
-				_path = strrchr(entry, '/');
-				entry = (_path && *(++_path)) ? _path : entry;
+				char *ptr = strrchr(entry, '/');
+				entry = (ptr && *(++ptr)) ? ptr : entry;
 			}
 		}
 
 		if (*entry)
-			write_comp_to_file(entry, color, fp);
+			fprintf(fp, "%s%s%s%c", color, entry, NC, end_char);
 	}
 
 #ifndef _NO_TRASH
