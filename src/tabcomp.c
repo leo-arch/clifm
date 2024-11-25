@@ -926,7 +926,7 @@ get_glob_file_target(char *str, const char *initial_path)
 }
 
 /* Recover finder (fzf/fnf/smenu) output from FINDER_OUT_FILE file.
- * Return this output (reformated if needed) or NULL in case of error.
+ * Return this output (reformatted if needed) or NULL in case of error.
  * FINDER_OUT_FILE is removed immediately after use.  */
 static char *
 get_finder_output(const int multi, char *base)
@@ -937,8 +937,9 @@ get_finder_output(const int multi, char *base)
 		return print_no_finder_file();
 	}
 
-	char *buf = xnmalloc(1, sizeof(char)), *line = (char *)NULL;
+	char *buf = xnmalloc(1, sizeof(char));
 	*buf = '\0';
+	char *line = (char *)NULL;
 	size_t bsize = 0, line_size = 0;
 	ssize_t line_len = 0;
 	char *initial_path = (cur_comp_type == TCMP_GLOB) ? base : (char *)NULL;
@@ -1023,7 +1024,7 @@ get_finder_output(const int multi, char *base)
 static void
 write_comp_to_file(char *entry, const char *color, FILE *fp)
 {
-	char end_char = tabmode == SMENU_TAB ? '\n' : '\0';
+	const char end_char = tabmode == SMENU_TAB ? '\n' : '\0';
 
 	if (wc_xstrlen(entry) == 0) {
 		char *wname = replace_invalid_chars(entry);

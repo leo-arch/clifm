@@ -391,11 +391,10 @@ nx_getdelim(char **lineptr, size_t *n, int delim, FILE *stream)
 	if (ferror(stream))
 		return 0;
 
-	if (feof(stream) && (count == 0)) {
-		if (nx_getdelim_append(&line, &size, count, 0) < 0) {
+/*	if (feof(stream) && (count == 0)) {
+		if (nx_getdelim_append(&line, &size, count, 0) < 0)
 			return -XENOMEM;
-		}
-	}
+	} */
 
 	/* Compilers, at least GCC and Clang, emit a warning here about a
 	 * possible memory leak. That's true, but according to getline(3),
