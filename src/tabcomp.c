@@ -1023,18 +1023,10 @@ get_finder_output(const int multi, char *base)
 	return buf;
 }
 
-static void
+static inline void
 write_comp_to_file(const char *entry, const char *color, FILE *fp)
 {
 	const char end_char = tabmode == SMENU_TAB ? '\n' : '\0';
-
-	if (wc_xstrlen(entry) == 0) {
-		char *wname = replace_invalid_chars(entry);
-		fprintf(fp, "%s%s%s%c", color, wname ? wname : entry, NC, end_char);
-		free(wname);
-		return;
-	}
-
 	fprintf(fp, "%s%s%s%c", color, entry, NC, end_char);
 }
 
