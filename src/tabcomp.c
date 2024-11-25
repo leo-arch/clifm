@@ -142,7 +142,7 @@ static int
 get_y_or_n(void)
 {
 	for (;;) {
-		int c = fgetc(stdin); /* Flawfinder: ignore */
+		const int c = fgetc(stdin); /* Flawfinder: ignore */
 		if (c == 'y' || c == 'Y' || c == ' ')
 			return (1);
 		if (c == 'n' || c == 'N' || c == RUBOUT || c == EOF) {
@@ -159,7 +159,7 @@ static int
 print_filename(char *to_print, char *full_pathname)
 {
 	char *s;
-	enum comp_type t = cur_comp_type;
+	const enum comp_type t = cur_comp_type;
 
 	if (conf.colorize == 1 && (t == TCMP_PATH || t == TCMP_SEL
 	|| t == TCMP_DESEL || t == TCMP_RANGES || t == TCMP_TAGS_F
@@ -184,15 +184,15 @@ print_filename(char *to_print, char *full_pathname)
 		int extension_char = 0;
 		if (to_print != full_pathname) {
 			/* Terminate the directory name */
-			char c = to_print[-1];
+			const char c = to_print[-1];
 			to_print[-1] = '\0';
 
 			s = tilde_expand(full_pathname);
 			if (rl_directory_completion_hook)
 				(*rl_directory_completion_hook)(&s);
 
-			size_t slen = strlen(s);
-			size_t tlen = strlen(to_print);
+			const size_t slen = strlen(s);
+			const size_t tlen = strlen(to_print);
 			char *new_full_pathname = xnmalloc(slen + tlen + 2, sizeof(char));
 			snprintf(new_full_pathname, slen + tlen + 2, "%s/%s", s, to_print);
 
@@ -327,7 +327,7 @@ get_comp_entry_color(char *entry, const char *norm_prefix)
 	struct stat attr;
 
 	/* Normalize URI file scheme */
-	size_t len = strlen(entry);
+	const size_t len = strlen(entry);
 	if (len > FILE_URI_PREFIX_LEN && IS_FILE_URI(entry))
 		entry += FILE_URI_PREFIX_LEN;
 
@@ -341,7 +341,7 @@ get_comp_entry_color(char *entry, const char *norm_prefix)
 		return uf_c;
 	}
 
-	enum comp_type t = cur_comp_type;
+	const enum comp_type t = cur_comp_type;
 	/* Absolute path (/FILE) or file in CWD (./FILE) */
 	if ( (*entry == '/' || (*entry == '.' && entry[1] == '/') )
 	&& (t == TCMP_PATH || t == TCMP_SEL || t == TCMP_DESEL
@@ -443,7 +443,7 @@ static void
 append_ending_char(const enum comp_type ct)
 {
 	/* We only want the portion of the line before the cursor position. */
-	char cur_char = rl_line_buffer[rl_point];
+	const char cur_char = rl_line_buffer[rl_point];
 	rl_line_buffer[rl_point] = '\0';
 
 	char *lastword = get_last_input_word();
@@ -464,7 +464,7 @@ append_ending_char(const enum comp_type ct)
 
 	char *tmp = *deq_str ? deq_str : lastword;
 
-	size_t len = tmp == deq_str ? deq_str_len : strlen(tmp);
+	const size_t len = tmp == deq_str ? deq_str_len : strlen(tmp);
 	size_t is_file_uri = 0;
 
 	if (*tmp == 'f' && tmp[1] == 'i' && len > FILE_URI_PREFIX_LEN
@@ -507,14 +507,14 @@ write_completion(char *buf, const size_t offset, const int multi)
 		 * need to consider other completion types as well. */
 		ERASE_TO_RIGHT;
 
-	enum comp_type t = cur_comp_type;
+	const enum comp_type t = cur_comp_type;
 	/* Remove ending new line char */
 	char *n = strchr(buf, '\n');
 	if (n)
 		*n = '\0';
 
 	if (t == TCMP_GLOB) {
-		size_t blen = strlen(buf);
+		const size_t blen = strlen(buf);
 		if (blen > 0 && buf[blen - 1] == '/')
 			buf[blen - 1] = '\0';
 		if (rl_line_buffer && *rl_line_buffer == '/' && rl_end > 0
@@ -918,7 +918,7 @@ get_glob_file_target(char *str, const char *initial_path)
 	if (*str == '/' || !initial_path)
 		return str;
 
-	size_t len = strlen(initial_path) + strlen(str) + 1;
+	const size_t len = strlen(initial_path) + strlen(str) + 1;
 	char *p = xnmalloc(len, sizeof(char));
 	snprintf(p, len, "%s%s", initial_path, str);
 
@@ -939,10 +939,12 @@ get_finder_output(const int multi, char *base)
 
 	char *buf = xnmalloc(1, sizeof(char));
 	*buf = '\0';
+	const char *initial_path =
+		(cur_comp_type == TCMP_GLOB) ? base : (char *)NULL;
+
 	char *line = (char *)NULL;
 	size_t bsize = 0, line_size = 0;
 	ssize_t line_len = 0;
-	char *initial_path = (cur_comp_type == TCMP_GLOB) ? base : (char *)NULL;
 
 	while ((line_len = getline(&line, &line_size, fp)) > 0) {
 		if (line[line_len - 1] == '\n') {
@@ -976,11 +978,11 @@ get_finder_output(const int multi, char *base)
 			} else if (cur_comp_type == TCMP_TAGS_F && tags_dir && cur_tag) {
 				s = get_tagged_file_target(line);
 			} else if (cur_comp_type == TCMP_BM_PREFIX) {
-				size_t len = strlen(line) + 3;
+				const size_t len = strlen(line) + 3;
 				s = xnmalloc(len, sizeof(char));
 				snprintf(s, len, "b:%s", line);
 			} else if (cur_comp_type == TCMP_TAGS_T) {
-				size_t len = strlen(line) + 3;
+				const size_t len = strlen(line) + 3;
 				s = xnmalloc(len, sizeof(char));
 				snprintf(s, len, "t:%s", line);
 			}
@@ -996,13 +998,13 @@ get_finder_output(const int multi, char *base)
 		if (*r == '\\' && *(r + 1) == '~')
 			r++;
 
-		size_t qlen = (r != line) ? strlen(r) : (size_t)line_len;
+		const size_t qlen = (r != line) ? strlen(r) : (size_t)line_len;
 		bsize += qlen + 3;
 		buf = xnrealloc(buf, bsize, sizeof(char));
 		xstrncat(buf, strlen(buf), r, bsize);
 
 		if (multi == 1) {
-			size_t l = strlen(buf);
+			const size_t l = strlen(buf);
 			buf[l] = ' ';
 			buf[l + 1] = '\0';
 			free(q);
@@ -1022,7 +1024,7 @@ get_finder_output(const int multi, char *base)
 }
 
 static void
-write_comp_to_file(char *entry, const char *color, FILE *fp)
+write_comp_to_file(const char *entry, const char *color, FILE *fp)
 {
 	const char end_char = tabmode == SMENU_TAB ? '\n' : '\0';
 
@@ -1070,7 +1072,7 @@ store_completions(char **matches)
 	}
 
 	int no_file_comp = 0;
-	enum comp_type ct = cur_comp_type;
+	const enum comp_type ct = cur_comp_type;
 
 	if (ct == TCMP_TAGS_S || ct == TCMP_TAGS_U || ct == TCMP_SORT
 	|| ct == TCMP_BOOKMARK || ct == TCMP_CSCHEME || ct == TCMP_NET
@@ -1087,7 +1089,7 @@ store_completions(char **matches)
 
 	size_t i;
 	/* 'view' cmd with only one match: matches[0]. */
-	size_t start = ((flags & PREVIEWER) && !matches[1]) ? 0 : 1;
+	const size_t start = ((flags & PREVIEWER) && !matches[1]) ? 0 : 1;
 	char *_path = (char *)NULL;
 
 	int prev = (conf.fzf_preview > 0 && SHOW_PREVIEWS(ct) == 1) ? 1 : 0;
@@ -1107,10 +1109,10 @@ store_completions(char **matches)
 		char *color = df_c, *entry = matches[i];
 
 		if (prev == 1) {
-			int get_base_name = ((ct == TCMP_PATH || ct == TCMP_GLOB)
+			const int get_base_name = ((ct == TCMP_PATH || ct == TCMP_GLOB)
 				&& !(flags & PREVIEWER)) ? 1 : 0;
 			char *p = get_base_name == 1 ? strrchr(entry, '/') : (char *)NULL;
-			size_t len = strlen(p && *(p + 1) ? p + 1 : entry);
+			const size_t len = strlen(p && *(p + 1) ? p + 1 : entry);
 			if (len > longest_prev_entry)
 				longest_prev_entry = len;
 		}
@@ -1256,7 +1258,7 @@ count_quote_chars(const char *str, const size_t len)
 static size_t
 calculate_prefix_len(const char *str, const char *query, const char *lw)
 {
-	enum comp_type ct = cur_comp_type;
+	const enum comp_type ct = cur_comp_type;
 
 	if (ct == TCMP_FILE_TYPES_OPTS || ct == TCMP_SEL || ct == TCMP_RANGES
 	|| ct == TCMP_TAGS_T || ct == TCMP_BM_PREFIX || ct == TCMP_HIST
@@ -1286,7 +1288,7 @@ calculate_prefix_len(const char *str, const char *query, const char *lw)
 
 	char *q = strrchr(str, '/');
 	if (q) {
-		size_t qlen = strlen(q);
+		const size_t qlen = strlen(q);
 		if (ct == TCMP_PATH) {
 			/* Add backslashes to the length of the match: every quoted char
 			 * will be escaped later by write_completion(), so that backslashes
@@ -1314,7 +1316,7 @@ calculate_prefix_len(const char *str, const char *query, const char *lw)
 static int
 is_multi_sel(void)
 {
-	enum comp_type t = cur_comp_type;
+	const enum comp_type t = cur_comp_type;
 
 	if (t == TCMP_SEL || t == TCMP_DESEL || t == TCMP_RANGES
 	|| t == TCMP_TRASHDEL || t == TCMP_UNTRASH || t == TCMP_TAGS_F
@@ -1409,30 +1411,30 @@ static int
 get_finder_offset(const char *query, const char *text, char **matches,
 	const char *lw, size_t *height, int *total_line_len)
 {
-	enum comp_type ct = cur_comp_type;
+	const enum comp_type ct = cur_comp_type;
 	char *lb = rl_line_buffer;
 	int finder_offset = 0;
 
 	 /* We don't want to place the finder's window too much to the right,
 	 * making its contents unreadable: let's make sure we have at least
 	 * 20 chars (40 if previews are enabled) for the finder's window. */
-	int fspace = (tabmode == FZF_TAB && conf.fzf_preview == 1
+	const int fspace = (tabmode == FZF_TAB && conf.fzf_preview == 1
 		&& SHOW_PREVIEWS(ct) == 1) ? 40 : 20;
 
 	/* If showing previews, let's reserve at least a quarter of the
 	 * terminal height. */
-	int min_prev_height = term_lines / 4;
+	const int min_prev_height = term_lines / 4;
 	if (fspace == 40 && (int)*height < min_prev_height
 	&& min_prev_height > 0) /* fspace == 40: We're previewing files. */
 		*height = (size_t)min_prev_height;
 
-	int max_finder_offset = term_cols > fspace ? term_cols - fspace : 0;
+	const int max_finder_offset = term_cols > fspace ? term_cols - fspace : 0;
 
 	int diff = 0;
 	if (rl_end > rl_point)
 		diff = (int)wc_xstrlen(lb + rl_point);
 
-	int cur_line_len = lb ? (int)wc_xstrlen(lb) - diff : 0;
+	const int cur_line_len = lb ? (int)wc_xstrlen(lb) - diff : 0;
 	*total_line_len = cur_line_len + prompt_offset;
 
 	int last_line_len = cur_line_len;
@@ -1457,7 +1459,7 @@ get_finder_offset(const char *query, const char *text, char **matches,
 	if (!lw) {
 		finder_offset++;
 	} else {
-		size_t lw_len = wc_xstrlen(lw);
+		const size_t lw_len = wc_xstrlen(lw);
 		if (lw_len > 1) {
 			finder_offset -= (int)(lw_len - 1);
 			if (finder_offset < 0)
@@ -1598,7 +1600,7 @@ static void
 do_some_cleanup(char **buf, char **matches, const char *query,
 	size_t *prefix_len)
 {
-	enum comp_type ct = cur_comp_type;
+	const enum comp_type ct = cur_comp_type;
 	char *lb = rl_line_buffer;
 
 	/* TCMP_HIST might be either search or command history */
@@ -1606,15 +1608,15 @@ do_some_cleanup(char **buf, char **matches, const char *query,
 		&& (*lb != '/' || lb[1] != '*'));
 
 	if (rl_point < rl_end && ct != TCMP_PATH && ct != TCMP_CMD) {
-		char *s = lb ? get_last_chr(lb, ' ', rl_point) : (char *)NULL;
-		int start = s ? (int)(s - lb + 1) : 0;
+		const char *s = lb ? get_last_chr(lb, ' ', rl_point) : (char *)NULL;
+		const int start = s ? (int)(s - lb + 1) : 0;
 		rl_delete_text(start, rl_point);
 		rl_point = start;
 	}
 
 	else if (ct == TCMP_OPENWITH && strchr(*buf, ' ')) {
 		/* We have multiple words ("CMD ARG..."): quote the string. */
-		size_t len = strlen(*buf) + 3;
+		const size_t len = strlen(*buf) + 3;
 		char *tmp = xnmalloc(len, sizeof(char));
 		snprintf(tmp, len, "\"%s\"", *buf);
 		free(*buf);
@@ -1669,7 +1671,7 @@ do_some_cleanup(char **buf, char **matches, const char *query,
 	}
 
 	else if (ct == TCMP_USERS) {
-		size_t l = strlen(*buf);
+		const size_t l = strlen(*buf);
 		char *p = savestring(*buf, l);
 		*buf = xnrealloc(*buf, (l + 2), sizeof(char));
 		snprintf(*buf, l + 2, "~%s", p);
@@ -1692,12 +1694,14 @@ static int
 do_completion(char *buf, const size_t prefix_len, const int multi)
 {
 	/* Some further buffer clean up: remove new line char and ending spaces. */
-	size_t blen = strlen(buf);
+	const size_t blen = strlen(buf);
 	int j = (int)blen;
+
 	if (j > 0 && buf[j - 1] == '\n') {
 		j--;
 		buf[j] = '\0';
 	}
+
 	while (--j >= 0 && buf[j] == ' ')
 		buf[j] = '\0';
 
