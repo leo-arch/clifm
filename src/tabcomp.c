@@ -1028,7 +1028,7 @@ write_comp_to_file(char *entry, const char *color, FILE *fp)
 
 	if (wc_xstrlen(entry) == 0) {
 		char *wname = replace_invalid_chars(entry);
-		fprintf(fp, "%s%c", wname ? wname : entry, end_char);
+		fprintf(fp, "%s%s%s%c", color, wname ? wname : entry, NC, end_char);
 		free(wname);
 		return;
 	}
