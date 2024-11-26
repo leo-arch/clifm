@@ -60,7 +60,7 @@ inode/directory=exa -a --tree --level=1 --;eza -a --tree --level=1 --;lsd -A --t
 N:.*\.json$=jq --color-output . --;python -m json.tool --;
 N:.*\.md$=glow -s dark --;mdcat --;
 ^text/html$=w3m -dump;lynx -dump --;elinks -dump;pandoc -s -t markdown --;
-^text/.*=highlight -f --out-format=xterm256 --force --;bat --style=plain --color=always --;cat --;
+^text/.*|^application/javascript$=highlight -f --out-format=xterm256 --force --;bat --style=plain --color=always --;cat --;
 
 #--------------------------------
 # Office documents

@@ -1024,7 +1024,7 @@ inode/directory=exa -a --tree --level=1 --;lsd -A --tree --depth=1 --color=alway
 ^text/rtf=catdoc --;\n\
 N:.*\\.json$=jq --color-output . ;python -m json.tool --;\n\
 N:.*\\.md$=glow -s dark --;mdcat --;\n\
-^text/.*=highlight -f --out-format=xterm256 --force --;bat --style=plain --color=always --;cat --;\n\
+^text/.*|^application/javascript$=highlight -f --out-format=xterm256 --force --;bat --style=plain --color=always --;cat --;\n\
 \n\
 # Office documents\n\
 N:.*\\.xlsx$=xlsx2csv --;file -b --;\n\
