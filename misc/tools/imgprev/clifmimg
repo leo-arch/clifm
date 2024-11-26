@@ -68,7 +68,7 @@
 method=""
 
 # Set the application used to generate ANSI image previews.
-# Available applications: chafa, pixterm, img2text, viu, catimg, tiv, timg
+# Available applications: chafa, pixterm, img2txt, viu, catimg, tiv, timg
 ansi_method="chafa"
 
 # To generate sixel images we use chafa(1).
@@ -144,10 +144,11 @@ display() {
 
 	case "$method" in
 		sixel)
-			chafa -f sixel -s "${C}x$((L - 1))" "$1" 2>/dev/null && return 0
+			chafa -f sixel -s "${C}x$((L - 1))" -- "$1" 2>/dev/null && return 0
 			print_err_msg "chafa" "$?" "sixel"
-#			img2sixel -w auto -h "$(((L - 1) * 16))" "$1"
-#			timg -ps -g "${C}x$((L - 1))" "$1"
+#			img2sixel -w auto -h "$(((L - 1) * 16))" -- "$1"
+#			timg -ps -g "${C}x$((L - 1))" -- "$1"
+#			magick "$1" -dither FloydSteinberg -size ${C}x$((L - 1)) sixel:- 2>/dev/null && return 0
 		;;
 
 		kitty)
@@ -166,13 +167,13 @@ display() {
 
 		ansi)
 			case "$ansi_method" in
-				chafa) chafa -f symbols -s "${C}x${L}" "$1" ;;
-				pixterm) pixterm -s 2 -tc "${C}" -tr "${L}" "$1" ;;
-				img2text) img2txt -H"${L}" -W"${C}" "$1" ;;
-				viu) viu -b -h"${L}" -w"${C}" "$1" ;;
-				catimg) catimg -H"${L}" "$1" ;;
+				chafa) chafa -f symbols -s "${C}x${L}" -- "$1" ;;
+				pixterm) pixterm -s 2 -tc "${C}" -tr "${L}" -- "$1" ;;
+				img2txt) img2txt -H"${L}" -W"${C}" -- "$1" ;;
+				viu) viu -b -h"${L}" -w"${C}" -- "$1" ;;
+				catimg) catimg -H"${L}" -- "$1" ;;
 				tiv) tiv -h "${L}" -w "${C}" "$1" ;;
-				timg) timg -g "${C}x${L}" "$1" ;;
+				timg) timg -g "${C}x${L}" -- "$1" ;;
 			esac
 		;;
 	esac
