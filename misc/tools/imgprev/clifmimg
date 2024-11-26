@@ -260,9 +260,15 @@ main() {
 	case "$type" in
 		"image")
 			case "$file" in
-			*.bmp|*.BMP|*.ico|*.ICO|*.pcx|*.PCX|*.tga|*.TGA)
+			*.bmp|*.BMP|*.ico|*.ICO|*.pcx|*.PCX|*.tga|*.TGA|*.exr|*.hdr|*.heic|*.pbm|*.pgm|*.pnm|*.ppm|*.xpm)
 				hash_file "$file"
 				if [ -f "${PCACHE}.jpg" ] || gen_img_convert_preview "$file" "${PCACHE}.jpg"; then
+					display "${PCACHE}.jpg"
+				fi
+			;;
+			*.fit)
+				hash_file "$file"
+				if [ -f "${PCACHE}.jpg" ] || gen_gif_preview "$file" "${PCACHE}.jpg"; then
 					display "${PCACHE}.jpg"
 				fi
 			;;
