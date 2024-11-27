@@ -114,8 +114,12 @@ X:N:.*\.(cbr|cbz|cb7|cbt|cba)$=mcomix %x;xreader %x;YACReader %x;qcomicbook %x;z
 X:N:.*\.chm$=xchm %x
 
 # .abw files are Abiword documents. These are basically XML, but you most
-# likely want to open it with a word processor.
+# likely want to open them with a word processor.
 X:N:.*\.abw$=abiword %x;libreoffice %x;soffice %x;ooffice %x
+
+# .kra files are Krita image files. These are actually zip files, but you
+# most likely want to open them with Krita.
+X:N:.*\.kra$=krita %x;
 
 ################################
 # 2. MIME types                #
