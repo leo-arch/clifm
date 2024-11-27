@@ -1000,7 +1000,7 @@ create_preview_file(void)
                   #       Clifm's file previewer       #\n\
                   ######################################\n\
 \n\
-# Commented and blank lines are omitted\n\
+# Commented and blank lines are ignored\n\
 \n\
 # It is recommended to edit this file setting your preferred applications\n\
 # first: the previewing process will be smoother and faster this way\n\
@@ -1012,34 +1012,34 @@ create_preview_file(void)
 #.*=pistol\n\
 \n\
 # Uncomment and edit this line to use Ranger's scope script:\n\
-#.*=/home/USER/.config/ranger/scope.sh %%f 120 80 /tmp/clifm/ True\n\
+#.*=~/.config/ranger/scope.sh %%f 120 80 /tmp/clifm/ True\n\
 \n\
 # Directories\n\
-inode/directory=exa -a --tree --level=1 --;lsd -A --tree --depth=1 --color=always;tree -a -L 1;%s\n\
+inode/directory=exa -a --tree --level=1;lsd -A --tree --depth=1 --color=always;tree -a -L 1;%s\n\
 \n\
 # Web content\n\
-^text/html$=w3m -dump;lynx -dump --;elinks -dump;pandoc -s -t markdown --;\n\
+^text/html$=w3m -dump;lynx -dump;elinks -dump;pandoc -s -t markdown;\n\
 \n\
 # Text\n\
-^text/rtf=catdoc --;\n\
-N:.*\\.json$=jq --color-output . ;python -m json.tool --;\n\
-N:.*\\.md$=glow -s dark --;mdcat --;\n\
-^text/.*|^application/javascript$=highlight -f --out-format=xterm256 --force --;bat --style=plain --color=always --;cat --;\n\
+^text/rtf=catdoc;\n\
+N:.*\\.json$=jq --color-output . ;python -m json.tool;\n\
+N:.*\\.md$=glow -s dark;mdcat;\n\
+^text/.*|^application/javascript$=highlight -f --out-format=xterm256 --force;bat --style=plain --color=always;cat;\n\
 \n\
 # Office documents\n\
-N:.*\\.xlsx$=xlsx2csv --;file -b --;\n\
-N:.*\\.(odt|ods|odp|sxw)$=odt2txt;pandoc -s -t markdown --;\n\
-^application/(.*wordprocessingml.document|.*epub+zip|x-fictionbook+xml)=pandoc -s -t markdown --;\n\
-^application/msword=catdoc --;file -b --;\n\
-^application/ms-excel=xls2csv --;file -b --;\n\
+N:.*\\.xlsx$=xlsx2csv;file -b;\n\
+N:.*\\.(odt|ods|odp|sxw)$=odt2txt;pandoc -s -t markdown;\n\
+^application/(.*wordprocessingml.document|.*epub+zip|x-fictionbook+xml)=pandoc -s -t markdown;\n\
+^application/msword=catdoc;file -b;\n\
+^application/ms-excel=xls2csv;file -b;\n\
 \n\
 # Archives\n\
-N:.*\\.rar=unrar lt -p- --;\n\
-application/zstd=file -b --;true\n\
-application/(zip|gzip|x-7z-compressed|x-xz|x-bzip*|x-tar)=atool --list --;bsdtar --list --file;\n\
+N:.*\\.rar=unrar lt -p-;\n\
+application/zstd=file -b;true\n\
+application/(zip|gzip|x-7z-compressed|x-xz|x-bzip*|x-tar)=atool --list;bsdtar --list --file;\n\
 \n\
 # PDF\n\
-^application/pdf$=pdftotext -l 10 -nopgbrk -q -- %%f -;mutool draw -F txt -i --;exiftool;\n\
+^application/pdf$=pdftotext -l 10 -nopgbrk -q -- %%f -;mutool draw -F txt -i;exiftool;\n\
 \n\
 # Image, video, and audio\n\
 ^image/vnd.djvu=djvutxt;exiftool;\n\
@@ -1048,10 +1048,10 @@ application/(zip|gzip|x-7z-compressed|x-xz|x-bzip*|x-tar)=atool --list --;bsdtar
 ^audio/.*=mediainfo;exiftool;\n\
 \n\
 # Torrent:\n\
-application/x-bittorrent=transmission-show --;\n\
+application/x-bittorrent=transmission-show;\n\
 \n\
 # Fallback\n\
-.*=file -b --;true;\n",
+.*=file -b;true;\n",
 	lscmd);
 
 	fclose(fp);
