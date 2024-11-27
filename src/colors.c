@@ -770,10 +770,9 @@ END:
 static char *
 check_ext_hash(const size_t hash, size_t *val_len)
 {
-	size_t i;
-	for (i = 0; i < ext_colors_n; i++) {
-		if (!ext_colors[i].name || !ext_colors[i].value
-		|| hash != ext_colors[i].hash)
+	ssize_t i = (ssize_t)ext_colors_n;
+	while (--i >= 0) {
+		if (hash != ext_colors[i].hash || !ext_colors[i].value)
 			continue;
 
 		if (val_len)
@@ -1180,6 +1179,9 @@ print_colors_tip(const int stealth)
 static void
 print_ext_conflict(const char *a, const char *b)
 {
+	if (!a || !b)
+		return;
+
 	if (*a == *b && strcmp(a, b) == 0)
 		printf(_("'%s' is duplicated\n"), a);
 	else
