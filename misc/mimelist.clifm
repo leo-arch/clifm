@@ -181,7 +181,7 @@ X:.*/pdf$=mupdf %x;sioyek %x;llpp %x;lpdf %x;zathura %x;mupdf-x11 %x;apvlv %x;xp
 X:^image/gif$=animate %x;pqiv %x;sxiv -a %x;nsxiv -a %x;feh %x
 X:^image/svg$=display %x;inkscape %x
 X:^image/x-xcf$=gimp %x
-X:^image/.*=viewnior %x;imv %x;pqiv %x;sxiv %x;nsxiv %x;gpicview %x;qview %x;qimgv %x;mirage %x;ristretto %x;loupe %x;eog %x;eom %x;xviewer %x;nomacs %x;geeqie %x;gwenview %x;gthumb %x;gimp %x;krita %x
+X:^image/.*=viewnior %x;mcomix %x;imv %x;pqiv %x;sxiv %x;nsxiv %x;gpicview %x;qview %x;qimgv %x;mirage %x;ristretto %x;loupe %x;eog %x;eom %x;xviewer %x;nomacs %x;geeqie %x;gwenview %x;gthumb %x;gimp %x;krita %x
 !X:^image/.*=fim;img2txt;cacaview;fbi;fbv
 
 #-----------------------------
