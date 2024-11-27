@@ -2299,6 +2299,7 @@ X:.*/pdf$=mupdf %%x;sioyek %%x;llpp %%x;lpdf %%x;zathura %%x;mupdf-x11 %%x;apvlv
 # Images\n\
 X:^image/gif$=animate %%x;pqiv %%x;sxiv -a %%x;nsxiv -a %%x;feh %%x\n\
 X:^image/svg$=display;inkscape %%x\n\
+X:^image/x-xcf$=gimp %%x\n\
 X:^image/.*=display %%x;pqiv %%x;sxiv %%x;nsxiv %%x;gpicview %%x;qview %%x;qimgv %%x;mirage %%x;ristretto %%x;loupe %%x;eog %%x;eom %%x;xviewer %%x;viewnior %%x;nomacs %%x;geeqie %%x;gwenview %%x;gthumb %%x;gimp %%x;krita %%x\n\
 !X:^image/.*=fim;img2txt;cacaview;fbi;fbv\n\
 \n\
