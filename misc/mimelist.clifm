@@ -110,7 +110,7 @@ X:N:(.*\.clifm$|clifmrc)=$EDITOR;$VISUAL;kak;micro;nvim;vim;vi;mg;emacs;nano;mil
 X:N:.*\.djvu$=djview %x;zathura %x;xreader %x;evince %x;atril %x
 X:N:.*\.(fb2|epub)$=mupdf %x;zathura %x;xreader %x;ebook-viewer %x;FBReader %x;foliate %x
 X:N:.*\.mobi$=mupdf %x;ebook-viewer %x;FBReader %x;foliate %x
-X:N:.*\.(cbr|cbz|cb7|cbt|cba)$=mcomix %x;xreader %x;YACReader %x;qcomicbook %x;zathura %x;foliate %x
+X:N:.*\.(cbr|cbz|cb7|cbt|cba)$=mcomix %x;xreader %x;YACReader %x;qcomicbook %x;zathura %x;foliate %x;atril %x
 X:N:.*\.chm$=xchm %x
 
 # .abw files are Abiword documents. These are basically XML, but you most
@@ -176,7 +176,7 @@ X:.*/pdf$=mupdf %x;sioyek %x;llpp %x;lpdf %x;zathura %x;mupdf-x11 %x;apvlv %x;xp
 
 X:^image/gif$=animate %x;pqiv %x;sxiv -a %x;nsxiv -a %x;feh %x
 X:^image/svg$=display %x;inkscape %x
-X:^image/.*=display %x;pqiv %x;sxiv %x;nsxiv %x;gpicview %x;qview %x;qimgv %x;mirage %x;ristretto %x;loupe %x;eog %x;eom %x;xviewer %x;viewnior %x;nomacs %x;geeqie %x;gwenview %x;gthumb %x;gimp %x
+X:^image/.*=display %x;pqiv %x;sxiv %x;nsxiv %x;gpicview %x;qview %x;qimgv %x;mirage %x;ristretto %x;loupe %x;eog %x;eom %x;xviewer %x;viewnior %x;nomacs %x;geeqie %x;gwenview %x;gthumb %x;krita %x;gimp %x
 !X:^image/.*=fim;img2txt;cacaview;fbi;fbv
 
 #-----------------------------
@@ -191,7 +191,7 @@ X:^audio/.*=gmplayer %x;smplayer %x;vlc %x;totem %x;ffplay %x;audacity %x;mpv --
 # Fonts
 #-----------------------------
 
-X:^font/.*|^application/(font.*|.*opentype)=fontforge;fontpreview
+X:^font/.*|^application/(font.*|.*opentype)=fontforge %x;fontpreview
 
 #-----------------------------
 # Torrent
