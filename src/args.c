@@ -1071,17 +1071,17 @@ set_starting_path(char *s_path)
 }
 
 static void
-set_opener(const char *str)
+set_opener(const char *str, const char *opt)
 {
-	if (!str || !*str)
-		return;
+	if (!str || !*str || *str == '-')
+		err_arg_required(opt);
 
 	if (*str != '~') {
-		conf.opener = savestring(optarg, strlen(optarg));
+		conf.opener = savestring(str, strlen(str));
 		return;
 	}
 
-	char *ep = tilde_expand(optarg);
+	char *ep = tilde_expand(str);
 	if (ep) {
 		conf.opener = savestring(ep, strlen(ep));
 		free(ep);
@@ -1388,7 +1388,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case 'M': set_no_colors(); break;
 		case 'n': xargs.history = 0; break;
 		case 'N': xargs.no_bold = 1; break;
-		case 'o': set_opener(optarg); break;
+		case 'o': set_opener(optarg, "-o"); break;
 		case 'O':
 #ifdef _NO_LIRA
 			fprintf(stderr, "%s: open: %s\n", PROGRAM_NAME, NOT_AVAILABLE);
@@ -1685,7 +1685,7 @@ parse_cmdline_args(const int argc, char **argv)
 #endif /* _NO_LIRA */
 
 		case LOPT_OPENER:
-			set_opener(optarg); break;
+			set_opener(optarg, "--opener"); break;
 		case LOPT_PAGER_VIEW: xset_pager_view(optarg); break;
 		case LOPT_PRINT_SEL:
 			xargs.print_selfiles = conf.print_selfiles = 1; break;
