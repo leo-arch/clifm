@@ -29,6 +29,7 @@
 # Use 'X' to specify a GUI environment and '!X' for non-GUI environments:
 # X  = GUI only
 # !X = Non-GUI only (like the kernel console or an SSH session)
+#
 # If the current line applies to both GUI and non-GUI environments, just omit
 # the X. E.g.: 'text/plain=vi'
 
@@ -40,10 +41,12 @@
 # Regular expressions are allowed for both MIME types and file names.
 
 # Use the '%f' placeholder to specify the position of the file name to be
-# opened in the command. Example:
+# opened in the command. For example:
 #    'mpv %f --no-terminal' -> 'mpv FILE --no-terminal' 
+#
 # If %f is not specified, the file name will be added to the end of the
-# command. E.g.: 'mpv --no-terminal' -> 'mpv --no-terminal FILE'
+# command. For example:
+#    'mpv --no-terminal' -> 'mpv --no-terminal FILE'
 
 # To silence STDERR and/or STDOUT use !E and !O respectively (they can be
 # used together). Examples:
@@ -54,6 +57,7 @@
 
 # The '%x' flag can be used as a shorthand for "%f !EO &". For example:
 #    mpv %x
+#
 # When using this flag the opening application is executed in a new
 # session, i.e., detached from the running terminal (via setsid(3)).
 #
@@ -68,7 +72,7 @@
 # might vary depending on the terminal emulator used (TERM).
 #
 # Bear in mind that this will hide error messages. To print error
-# messages compose the command as follows:
+# messages write the command as follows:
 #    cmd %f !O &
 # This will run 'cmd' in the background silencing STDOUT only.
 
