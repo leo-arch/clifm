@@ -30,20 +30,20 @@
 # X  = GUI only
 # !X = Non-GUI only (like the kernel console or an SSH session)
 # If the current line applies to both GUI and non-GUI environments, just omit
-# the X. Ex: 'text/plain=vi
+# the X. E.g.: 'text/plain=vi'
 
 # Use 'N' to match file names instead of MIME types.
 # 'N:.*\.txt$=vi' to open all .txt files with vi (both GUI and non-GUI)
 # 'X:N:.*\.txt$=geany' (GUI only)
 # '!X:N:.*\.txt$=vi' (non-GUI only)
 
-# Regular expressions are allowed for both file types and file names.
+# Regular expressions are allowed for both MIME types and file names.
 
 # Use the '%f' placeholder to specify the position of the file name to be
 # opened in the command. Example:
-# 'mpv %f --no-terminal' -> 'mpv FILE --no-terminal' 
+#    'mpv %f --no-terminal' -> 'mpv FILE --no-terminal' 
 # If %f is not specified, the file name will be added to the end of the
-# command. Ex: 'mpv --no-terminal' -> 'mpv --no-terminal FILE'
+# command. E.g.: 'mpv --no-terminal' -> 'mpv --no-terminal FILE'
 
 # To silence STDERR and/or STDOUT use !E and !O respectively (they can be
 # used together). Examples:
@@ -51,12 +51,13 @@
 #    mpv %f !E
 # Silence both (STDERR and STDOUT) and run in the background:
 #    mpv %f !EO &
-# For Ranger users, "!EO" is equivalent to "flag f" in rifle.conf.
 
 # The '%x' flag can be used as a shorthand for "%f !EO &". For example:
 #    mpv %x
 # When using this flag the opening application is executed in a new
 # session, i.e., detached from the running terminal (via setsid(3)).
+#
+# For Ranger users, the '%x' flag is equivalent to "flag f" in rifle.conf.
 
 # Running the opening application in the background:
 # For GUI applications:
