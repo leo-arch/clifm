@@ -2300,7 +2300,7 @@ X:.*/pdf$=mupdf %%x;sioyek %%x;llpp %%x;lpdf %%x;zathura %%x;mupdf-x11 %%x;apvlv
 X:^image/gif$=animate %%x;pqiv %%x;sxiv -a %%x;nsxiv -a %%x;feh %%x\n\
 X:^image/svg$=display;inkscape %%x\n\
 X:^image/x-xcf$=gimp %%x\n\
-X:^image/.*=imv %%x;nsxiv %%x;sxiv %%x;pqiv %%x;qview %%x;qimgv %%x;viewnior %%x;mirage %%x;ristretto %%x;xviewer %%x;nomacs %%x;geeqie %%x;gpicview %%x;gthumb %%x;gwenview %%x;shotwell %%x;loupe %%x;eog %%x;eom %%x;mcomix %%x;feh %%x;display %%x;gimp %%x;krita %%x\n\
+X:^image/.*=imv %%x;nsxiv %%x;sxiv %%x;pqiv %%x;qview %%x;qimgv %%x;viewnior %%x;oculante %%x;mirage %%x;ristretto %%x;xviewer %%x;nomacs %%x;geeqie %%x;gpicview %%x;gthumb %%x;gwenview %%x;shotwell %%x;loupe %%x;eog %%x;eom %%x;mcomix %%x;feh %%x;display %%x;gimp %%x;krita %%x\n\
 !X:^image/.*=fim;img2txt;cacaview;fbi;fbv\n\
 \n\
 # Video and audio\n\
