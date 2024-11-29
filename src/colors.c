@@ -766,7 +766,8 @@ END:
 #endif /* !CLIFM_SUCKLESS */
 
 /* Look for the hash HASH in the hash table for file name extensions.
- * Return a pointer to the corresponding color if found, or NULL. */
+ * Return a pointer to the corresponding color if found, or NULL.
+ * If VAL_LEN isn't NULL, it is updated with the length of the returned value. */
 static char *
 check_ext_hash(const size_t hash, size_t *val_len)
 {
