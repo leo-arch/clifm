@@ -827,7 +827,7 @@ launch_new_instance_cmd(char ***cmd, char **self, char **sudo_prog,
 /* Open DIR in a new instance of the program (using TERM, set in the config
  * file, as terminal emulator). */
 int
-new_instance(char *dir, const int sudo)
+new_instance(char *dir, int sudo)
 {
 	int ret = check_new_instance_init_conditions();
 	if (ret != FUNC_SUCCESS)
@@ -835,6 +835,10 @@ new_instance(char *dir, const int sudo)
 
 	if (!dir)
 		return EINVAL;
+
+	/* Do not run with sudo if already root */
+	if (user.uid == 0)
+		sudo = 0;
 
 	char *sudo_prog = (char *)NULL;
 #ifndef __HAIKU__
