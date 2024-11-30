@@ -2157,18 +2157,21 @@ run_dir_cmd(const int mode)
 		launch_execl(buf);
 }
 
-/* Check if the file named S is either cfm.in or cfm.out.
- * We already know it starts with a dot. */
+/* Check if the file extension S is either "in" or "out".
+ * We already know it starts with ".cfm.". */
 static void
 check_autocmd_file(const char *s)
 {
-	if (s[0] == 'c' && s[1] == 'f' && s[2] == 'm' && s[3] == '.') {
-		if (s[4] == 'o' && s[5] == 'u' && s[6] == 't' && !s[7]) {
+	switch (*s) {
+	case 'i':
+		if (s[1] == 'n' && !s[2])
+			run_dir_cmd(AUTOCMD_DIR_IN);
+		break;
+	case 'o':
+		if (s[1] == 'u' && s[2] == 't' && !s[3])
 			dir_out = 1;
-		} else {
-			if (s[4] == 'i' && s[5] == 'n' && !s[6])
-				run_dir_cmd(AUTOCMD_DIR_IN);
-		}
+		break;
+	default: break;
 	}
 }
 
@@ -2456,8 +2459,9 @@ list_dir_light(const int autocmd_ret)
 			continue;
 
 		/* Check .cfm.in and .cfm.out files for the autocommands function */
-		if (checks.autocmd_files == 1 && *ename == '.')
-			check_autocmd_file(ename + 1);
+		if (checks.autocmd_files == 1 && *ename == '.' && ename[1] == 'c'
+		&& ename[2] == 'f' && ename[3] == 'm' && ename[4] == '.' && ename[5])
+			check_autocmd_file(ename + 5);
 
 		/* Skip files according to a regex filter */
 		if (checks.filter_name == 1) {
@@ -3253,8 +3257,9 @@ list_dir(void)
 			continue;
 
 		/* Check .cfm.in and .cfm.out files for the autocommands function */
-		if (checks.autocmd_files == 1 && *ename == '.')
-			check_autocmd_file(ename + 1);
+		if (checks.autocmd_files == 1 && *ename == '.' && ename[1] == 'c'
+		&& ename[2] == 'f' && ename[3] == 'm' && ename[4] == '.' && ename[5])
+			check_autocmd_file(ename + 5);
 
 		/* Filter files according to a regex filter */
 		if (checks.filter_name == 1) {
