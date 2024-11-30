@@ -644,26 +644,41 @@ filter_function(char *arg)
 
 /* Check whether the conditions to run the new_instance function are
  * fulfilled */
-static inline int
+static int
 check_new_instance_init_conditions(void)
 {
-	if (!conf.term) {
-		xerror(_("%s: Default terminal not set. Use the "
-			"configuration file (F10) to set it\n"), PROGRAM_NAME);
-		return FUNC_FAILURE;
-	}
-
 	if (!(flags & GUI)) {
 		xerror(_("%s: Function only available for graphical "
 			"environments\n"), PROGRAM_NAME);
 		return FUNC_FAILURE;
 	}
 
+	if (!conf.term || !*conf.term) {
+		xerror(_("%s: Default terminal not set. Use the "
+			"configuration file (F10) to set it.\n"), PROGRAM_NAME);
+		return FUNC_FAILURE;
+	}
+
+	/* Check command existence. */
+	char *s = strchr(conf.term, ' ');
+	if (s)
+		*s = '\0';
+
+	if (is_cmd_in_path(conf.term) == 0) {
+		xerror("%s: %s: %s\n", PROGRAM_NAME, conf.term, NOTFOUND_MSG);
+		if (s)
+			*s = ' ';
+		return E_NOTFOUND;
+	}
+
+	if (s)
+		*s = ' ';
+
 	return FUNC_SUCCESS;
 }
 
 /* Just check that DIR exists and is a directory */
-static inline int
+static int
 check_dir(char **dir)
 {
 	int ret = FUNC_SUCCESS;
@@ -682,7 +697,7 @@ check_dir(char **dir)
 }
 
 /* Construct absolute path for DIR */
-static inline char *
+static char *
 get_path_dir(char **dir)
 {
 	char *path_dir = (char *)NULL;
@@ -779,8 +794,6 @@ launch_new_instance_cmd(char ***cmd, char **self, char **sudo_prog,
 	sudo = 0;
 #endif /* __HAIKU__ */
 
-//	setenv("CLIFM_OWN_CHILD", "1", 1);
-
 	if (*cmd) {
 		ret = (sudo == 0 || confirm_sudo_cmd(*cmd) == 1)
 			? launch_execv(*cmd, BACKGROUND, E_SETSID)
@@ -805,8 +818,6 @@ launch_new_instance_cmd(char ***cmd, char **self, char **sudo_prog,
 	free(*self);
 	free(*dir);
 
-//	unsetenv("CLIFM_OWN_CHILD");
-
 	return ret;
 }
 
@@ -818,41 +829,42 @@ launch_new_instance_cmd(char ***cmd, char **self, char **sudo_prog,
 int
 new_instance(char *dir, const int sudo)
 {
-	if (check_new_instance_init_conditions() == FUNC_FAILURE)
-		return FUNC_FAILURE;
+	int ret = check_new_instance_init_conditions();
+	if (ret != FUNC_SUCCESS)
+		return ret;
 
 	if (!dir)
 		return EINVAL;
 
-	char *_sudo = (char *)NULL;
+	char *sudo_prog = (char *)NULL;
 #ifndef __HAIKU__
-	if (sudo == 1 && !(_sudo = get_sudo_path()))
+	if (sudo == 1 && !(sudo_prog = get_sudo_path()))
 		return errno;
 #endif /* !__HAIKU__ */
 
 	char *deq_dir = unescape_str(dir, 0);
 	if (!deq_dir) {
-		free(_sudo);
+		free(sudo_prog);
 		xerror(_("%s: '%s': Cannot escape file name\n"), PROGRAM_NAME, dir);
 		return FUNC_FAILURE;
 	}
 
 	char *self = get_cmd_path(PROGRAM_NAME);
 	if (!self) {
-		free(_sudo); free(deq_dir);
+		free(sudo_prog); free(deq_dir);
 		xerror("%s: %s: %s\n", PROGRAM_NAME, PROGRAM_NAME, strerror(errno));
 		return errno;
 	}
 
-	const int ret = check_dir(&deq_dir);
+	ret = check_dir(&deq_dir);
 	if (ret != FUNC_SUCCESS) {
-		free(deq_dir); free(self); free(_sudo);
+		free(deq_dir); free(self); free(sudo_prog);
 		return ret;
 	}
 
 	char *path_dir = get_path_dir(&deq_dir);
-	char **cmd = get_cmd(path_dir, _sudo, self, sudo);
-	return launch_new_instance_cmd(&cmd, &self, &_sudo, &path_dir, sudo);
+	char **cmd = get_cmd(path_dir, sudo_prog, self, sudo);
+	return launch_new_instance_cmd(&cmd, &self, &sudo_prog, &path_dir, sudo);
 }
 
 /* Import (copy to main config file) aliases from the file named FILE.

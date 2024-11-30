@@ -2908,6 +2908,57 @@ set_autocmd_msg_value(const char *val)
 		conf.autocmd_msg = DEF_AUTOCMD_MSG;
 }
 
+static char *
+get_term_env(const char *cmd)
+{
+	if (!cmd || !*cmd)
+		return (char *)NULL;
+
+	char *s = strchr(cmd, ' ');
+	if (s)
+		*s = '\0';
+
+	char *env = getenv(cmd);
+
+	if (s)
+		*s = ' ';
+
+	char *buf = (char *)NULL;
+	if (env && *env) {
+		const size_t len = strlen(env) + (s ? strlen(s) : 0) + 1;
+		buf = xnmalloc(len, sizeof(char));
+		snprintf(buf, len, "%s%s", env, s ? s : "");
+	}
+
+	return buf;
+}
+
+static void
+set_term_cmd(char *cmd)
+{
+	if (!cmd || !*cmd)
+		return;
+
+	char *tmp = remove_quotes(cmd);
+	if (!tmp)
+		return;
+
+	char *val = tmp;
+	char *buf = (char *)NULL;
+
+	if (*tmp == '$' && tmp[1] && xargs.secure_env != 1
+	&& xargs.secure_env_full != 1) {
+		buf = get_term_env(tmp + 1);
+		if (buf)
+			val = buf;
+	}
+
+	free(conf.term);
+	conf.term = savestring(val, strlen(val));
+
+	free(buf);
+}
+
 /* Read the main configuration file and set options accordingly */
 static void
 read_config(void)
@@ -3342,16 +3393,7 @@ read_config(void)
 #endif /* !_NO_FZF */
 
 		else if (*line == 'T' && strncmp(line, "TerminalCmd=", 12) == 0) {
-			char *opt = line + 12;
-			if (!*opt)
-				continue;
-
-			char *tmp = remove_quotes(opt);
-			if (!tmp)
-				continue;
-
-			free(conf.term);
-			conf.term = savestring(tmp, strlen(tmp));
+			set_term_cmd(line + 12);
 		}
 
 		else if (*line == 'T' && strncmp(line, "TimeFollowsSort=", 16) == 0) {
