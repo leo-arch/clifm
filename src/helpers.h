@@ -525,21 +525,19 @@ extern time_t curdir_mtime;
 
 /* Used by the refresh on resize feature */
 #define DELAYED_REFRESH     (1 << 2)
-#define PATH_PROGRAMS_ALREADY_LOADED (1 << 3)
-
-#define FIRST_WORD_IS_ELN   (1 << 4)
-#define IN_BOOKMARKS_SCREEN (1 << 5)
-#define STATE_COMPLETING    (1 << 6)
+#define FIRST_WORD_IS_ELN   (1 << 3)
+#define IN_BOOKMARKS_SCREEN (1 << 4)
+#define STATE_COMPLETING    (1 << 5)
 /* Instead of a completion for the current query, a BAEJ suggestion points to
  * a possible completion as follows: QUERY > COMPLETION */
-#define BAEJ_SUGGESTION     (1 << 7)
-#define STATE_SUGGESTING    (1 << 8)
-#define IN_SELBOX_SCREEN    (1 << 9)
-#define MULTI_SEL           (1 << 10)
-#define PREVIEWER           (1 << 11)
-#define NO_FIX_RL_POINT     (1 << 12)
-#define FAILED_ALIAS        (1 << 13)
-#define ALT_PREVIEW_FILE    (1 << 14)
+#define BAEJ_SUGGESTION     (1 << 6)
+#define STATE_SUGGESTING    (1 << 7)
+#define IN_SELBOX_SCREEN    (1 << 8)
+#define MULTI_SEL           (1 << 9)
+#define PREVIEWER           (1 << 10)
+#define NO_FIX_RL_POINT     (1 << 11)
+#define FAILED_ALIAS        (1 << 12)
+#define ALT_PREVIEW_FILE    (1 << 13)
 
 /* Flags for third party binaries */
 #define FZF_BIN_OK     (1 << 0)

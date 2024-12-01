@@ -1322,8 +1322,7 @@ main(int argc, char *argv[])
 	/* Get paths from PATH environment variable. These paths will be
 	 * used later by get_path_programs (for the autocomplete function)
 	 * and get_cmd_path(). */
-	if (!(flags & PATH_PROGRAMS_ALREADY_LOADED))
-		path_n = get_path_env(1);
+	path_n = get_path_env(1);
 	cdpath_n = get_cdpath();
 
 	check_env_filter();
@@ -1349,8 +1348,7 @@ main(int argc, char *argv[])
 
 	/* Get the list of available programs in PATH to be used by the
 	 * custom TAB-completion function (tab_complete(), in tabcomp.c). */
-	if (!(flags & PATH_PROGRAMS_ALREADY_LOADED))
-		get_path_programs();
+	get_path_programs();
 
 	/* Check third-party programs availability: finders (fzf, fnf, smenu),
 	 * udevil, and udisks2. */

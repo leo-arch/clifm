@@ -3263,7 +3263,7 @@ list_dir(void)
 
 		/* Filter files according to a regex filter */
 		if (checks.filter_name == 1) {
-			if (regexec(&regex_exp, ename, 0, NULL, 0) == FUNC_SUCCESS) {
+			if (regexec(&regex_exp, ename, 0, NULL, 0) == 0) {
 				if (filter.rev == 1) {
 					excluded_files++;
 					continue;
