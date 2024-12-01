@@ -1391,7 +1391,7 @@ c: Stop paging (printing remaining files)\n"
 \n  -a, --show-hidden\t\t Show hidden files\
 \n  -A, --no-hidden\t\t Do not show hidden files\
 \n  -b, --bookmarks-file=FILE\t Set an alternative bookmarks file\
-\n  -c, --config-file=FILE\t Set an alternative configuration file\
+\n  -c, --config-file=FILE\t Set an alternative configuration file ($CLIFMRC is also available)\
 \n  -D, --config-dir=DIR\t\t Set an alternative configuration directory\
 \n  -e, --no-eln\t\t\t Do not print ELN's (entry list number)\
 \n  -E, --eln-use-workspace-color\t ELN's use the current workspace color\
