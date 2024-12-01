@@ -1272,9 +1272,10 @@ create_tmp_files(void)
 }
 
 /* Set the main configuration directory. Three sources are examined:
- * 1. Alternative config dir, from the command line.
- * 2. XDG_CONFIG_HOME.
- * 3. user.home: $HOME if not secure-env or pw_dir from the passwd database. */
+ * 1. Alternative config dir, as set via -D,--config-dir.
+ * 2. XDG_CONFIG_HOME/clifm (if not secure-env).
+ * 3. user.home/.config/clifm: $HOME if not secure-env or pw_dir from the
+ * passwd database. */
 static void
 set_main_config_dir(const int secure_mode)
 {
@@ -1283,16 +1284,12 @@ set_main_config_dir(const int secure_mode)
 		return;
 	}
 
-	char *xdg_config_home = secure_mode == 0
-		? getenv("XDG_CONFIG_HOME") : (char *)NULL;
+	char *env = secure_mode == 0 ? getenv("XDG_CONFIG_HOME") : (char *)NULL;
 
-	if (xdg_config_home) {
-		const size_t len = strlen(xdg_config_home);
-		const size_t tmp_len = len + (sizeof(PROGRAM_NAME) - 1) + 2;
-
-		config_dir_gral = xnmalloc(tmp_len, sizeof(char));
-		snprintf(config_dir_gral, tmp_len, "%s/%s", xdg_config_home,
-			PROGRAM_NAME);
+	if (env && *env) {
+		const size_t len = strlen(env) + (sizeof(PROGRAM_NAME) - 1) + 2;
+		config_dir_gral = xnmalloc(len, sizeof(char));
+		snprintf(config_dir_gral, len, "%s/%s", env, PROGRAM_NAME);
 		return;
 	}
 
@@ -1300,6 +1297,52 @@ set_main_config_dir(const int secure_mode)
 	config_dir_gral = xnmalloc(tmp_len, sizeof(char));
 	snprintf(config_dir_gral, tmp_len, "%s/.config/%s", user.home,
 		PROGRAM_NAME);
+}
+
+/* Set the profile directory. Two sources are examined:
+ * 1. CONFIG_DIR/profiles/PROF (if PROF is set via -P,--profile)
+ * 2. CONFIG_DIR/profiles/default
+ * CONFIG_DIR is set by set_main_config_dir() */
+static void
+set_profile_dir(const size_t config_gral_len)
+{
+	/* alt_profile will not be NULL whenever the -P option is used
+	 * to run clifm under an alternative profile. */
+	if (alt_profile && *alt_profile) {
+		const size_t len = config_gral_len + strlen(alt_profile) + 11;
+		config_dir = xnmalloc(len, sizeof(char));
+		snprintf(config_dir, len, "%s/profiles/%s",
+			config_dir_gral, alt_profile);
+	} else {
+		const size_t len = config_gral_len + 18;
+		config_dir = xnmalloc(len, sizeof(char));
+		snprintf(config_dir, len, "%s/profiles/default", config_dir_gral);
+	}
+
+	config_dir_len = strlen(config_dir);
+}
+
+/* Set the main configuration file. Three sources are examined:
+ * 1. Alternative config file, from the command line (-c,--config-file).
+ * 2. CLIFMRC (if not secure env).
+ * 3. PROFILE_DIR/clifmrc: PROFILE_DIR is set by set_profile_dir() */
+static void
+set_main_config_file(const int secure_mode)
+{
+	if (alt_config_file && *alt_config_file) {
+		config_file = savestring(alt_config_file, strlen(alt_config_file));
+		return;
+	}
+
+	char *env = secure_mode == 0 ? getenv("CLIFMRC") : (char *)NULL;
+	if (env && *env) {
+		config_file = savestring(env, strlen(env));
+		return;
+	}
+
+	const size_t len = config_dir_len + (sizeof(PROGRAM_NAME) - 1) + 4;
+	config_file = xnmalloc(len, sizeof(char));
+	snprintf(config_file, len, "%s/%src", config_dir, PROGRAM_NAME);
 }
 
 /* Set the history file, as defined in CLIFM_HISTFILE environment variable
@@ -1381,29 +1424,14 @@ check_config_files_integrity(void)
 static void
 define_config_file_names(void)
 {
-	const size_t pnl_len = sizeof(PROGRAM_NAME) - 1;
 	size_t tmp_len = 0;
 	const int secure_mode =
 		(xargs.secure_env == 1 || xargs.secure_env_full == 1);
 
 	set_main_config_dir(secure_mode); /* config_dir_gral is set here. */
-
 	const size_t config_gral_len = strlen(config_dir_gral);
-
-	/* alt_profile will not be NULL whenever the -P option is used
-	 * to run clifm under an alternative profile. */
-	if (alt_profile) {
-		tmp_len = config_gral_len + strlen(alt_profile) + 11;
-		config_dir = xnmalloc(tmp_len, sizeof(char));
-		snprintf(config_dir, tmp_len, "%s/profiles/%s",
-			config_dir_gral, alt_profile);
-	} else {
-		tmp_len = config_gral_len + 18;
-		config_dir = xnmalloc(tmp_len, sizeof(char));
-		snprintf(config_dir, tmp_len, "%s/profiles/default", config_dir_gral);
-	}
-
-	config_dir_len = strlen(config_dir);
+	set_profile_dir(config_gral_len); /* config_dir is set here */
+	set_main_config_file(secure_mode);
 
 	tmp_len = config_dir_len + 6;
 	tags_dir = xnmalloc(tmp_len, sizeof(char));
@@ -1446,14 +1474,6 @@ define_config_file_names(void)
 	snprintf(cmds_log_file, tmp_len, "%s/cmdlogs.clifm", config_dir);
 
 	set_hist_file(secure_mode, tmp_len);
-
-	if (!alt_config_file) {
-		tmp_len = config_dir_len + pnl_len + 4;
-		config_file = xnmalloc(tmp_len, sizeof(char));
-		snprintf(config_file, tmp_len, "%s/%src", config_dir, PROGRAM_NAME);
-	} else {
-		config_file = savestring(alt_config_file, strlen(alt_config_file));
-	}
 
 	tmp_len = config_dir_len + 15;
 	profile_file = xnmalloc(tmp_len, sizeof(char));
