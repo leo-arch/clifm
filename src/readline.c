@@ -4466,8 +4466,10 @@ set_rl_init_file(void)
 		if (!fp) {
 			err('w', PRINT_PROMPT, "%s: fopen: %s: %s\n", PROGRAM_NAME,
 				rl_file, strerror(errno));
+			free(rl_file);
 			return;
 		}
+
 		fprintf(fp, "# This is readline's configuration file for %s\n",
 			PROGRAM_NAME_UPPERCASE);
 		fclose(fp);
