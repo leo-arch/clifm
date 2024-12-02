@@ -2827,18 +2827,21 @@ Define a file filter. If set, this variable overrides the \fIFilter\fR option in
 Name of the authenticator program. Used by the \fIX\fR command (to launch a new instance of **clifm** as root), the \fIAlt\-v\fR keybinding (to prepend the authenticator program name to the current command line), and for some operations on archives (ISO files). Defaults to \fIsudo\fR (or \fIdoas\fR if compiled on OpenBSD). Example: \fICLIFM_SUDO_CMD=doas clifm\fI.
 .TP
 .B SHELL
+.sp 0
 An absolute path to the shell to be used by \fBclifm\fR to run external commands. Only values found in \fI/etc/shells\fR are allowed.
 .TP
 .B CLIFM_SHELL
 Same as \fBSHELL\fR, but specific to \fBclifm\fR (takes precedence over \fBSHELL\fR).
 .TP
 .B TMPDIR
+.sp 0
 Path to a directory where temporary files will be created
 .TP
 .B CLIFM_TMPDIR
 Same as \fBTMPDIR\fR, but specific to \fBclifm\fR (takes precendece over \fBTMPDIR\fR)
 .TP
 .B TERM
+.sp 0
 Terminal type for which output is to be prepared
 .TP
 .B FZF_DEFAULT_OPTS
@@ -2860,21 +2863,26 @@ The number of terminal columns
 The number of terminal lines
 .TP
 .TP
-Except when running in stealth mode, \fBclifm\fR sets the following environment variables:
+Except when running in \fBstealth mode\fR, \fBclifm\fR sets the following environment variables:
 .TP
 .B CLIFM
-This variable is set to the path to the configuration directory. By inspecting this variable other programs can find out if they were spawned by \fBclifm\fR. It can also be used to quickly jump into the configuration directory: \fIcd $CLIFM\fR or just \fI$CLIFM\fR
+.sp 0
+Path to the configuration directory. By inspecting this variable other programs can find out if they were spawned by \fBclifm\fR. It can also be used to quickly jump into the configuration directory: \fIcd $CLIFM\fR or just \fI$CLIFM\fR
+.TP
+.B CLIFMRC
+Path to the main configuration file (by default \fI~/.config/clifm/profiles/default/clifmrc\fR)
 .TP
 .B CLIFM_PID
-Set to the PID number of \fBclifm\fR's running instance
+PID number of \fBclifm\fR's running instance
 .TP
 .B CLIFM_VERSION
-Set to the version number of \fBclifm\fR's running instance
+Version number of \fBclifm\fR's running instance
 .TP
 .B CLIFM_VIRTUAL_DIR
-This variable is set to the path to the currently used virtual directory only if (and while) the virtual directory function is exectued. See the \fBVIRTUAL DIRECTORIES\fR section above.
+Path to the currently used virtual directory only if (and while) the virtual directory function is exectued. See the \fBVIRTUAL DIRECTORIES\fR section above.
 .TP
 .B SHLVL
+.sp 0
 Incremented by one each time a new shell is started.
 .TP
 .B CLIFMLVL
