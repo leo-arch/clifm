@@ -731,7 +731,9 @@ set_env(const int reload)
 	if (xargs.stealth_mode == 1)
 		return;
 
-	setenv("CLIFM", config_dir ? config_dir : "1", 1);
+	setenv("CLIFM", (config_dir && *config_dir) ? config_dir : "1", 1);
+	if (config_file && *config_file)
+		setenv("CLIFMRC", config_file, 1);
 	setenv("CLIFM_PID", xitoa((long long)own_pid), 1);
 	setenv("CLIFM_VERSION", VERSION, 1);
 
@@ -1330,7 +1332,7 @@ set_main_config_file(const int secure_mode)
 {
 	if (alt_config_file && *alt_config_file) {
 		config_file = savestring(alt_config_file, strlen(alt_config_file));
-		goto SET_ENV;
+		return;
 	}
 
 	char *env = secure_mode == 0 ? getenv("CLIFMRC") : (char *)NULL;
@@ -1342,10 +1344,6 @@ set_main_config_file(const int secure_mode)
 	const size_t len = config_dir_len + (sizeof(PROGRAM_NAME) - 1) + 4;
 	config_file = xnmalloc(len, sizeof(char));
 	snprintf(config_file, len, "%s/%src", config_dir, PROGRAM_NAME);
-
-SET_ENV:
-	if (xargs.stealth_mode != 1)
-		setenv("CLIFMRC", config_file, 1);
 }
 
 /* Set the history file, as defined in CLIFM_HISTFILE environment variable
