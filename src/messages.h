@@ -993,7 +993,7 @@ To enable the cd-on-quit function consult the manpage."
 
 #define RELOAD_USAGE "Reload the main configuration file and update settings accordingly\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
-  reload"
+  rl, reload"
 
 #define RR_USAGE "Remove files in bulk using a text editor\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
