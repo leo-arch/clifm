@@ -902,7 +902,7 @@ alias_import(char *file)
 		return errno;
 	}
 
-	/* Open CliFM's config file as well. */
+	/* Open clifm's config file as well. */
 	FILE *config_fp = open_fappend(config_file);
 	if (!config_fp) {
 		xerror("alias: '%s': %s\n", config_file, strerror(errno));

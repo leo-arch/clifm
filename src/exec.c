@@ -1058,8 +1058,13 @@ new_instance_function(char **args)
 }
 
 static int
-reload_function(void)
+reload_function(const char *arg)
 {
+	if (arg && IS_HELP(arg)) {
+		puts(RELOAD_USAGE);
+		return FUNC_SUCCESS;
+	}
+
 	const int exit_status = reload_config();
 	conf.welcome_message = 0;
 
@@ -2507,7 +2512,7 @@ exec_cmd(char **comm)
 
 	else if (*comm[0] == 'r' && ((comm[0][1] == 'l' && !comm[0][2])
 	|| strcmp(comm[0], "reload") == 0))
-		return (exit_code = reload_function());
+		return (exit_code = reload_function(comm[1]));
 
 	/* #### NEW INSTANCE #### */
 	else if ((*comm[0] == 'x' || *comm[0] == 'X') && !comm[0][1])
