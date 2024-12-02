@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Nov 23, 2024" "clifm 1.22" "CLIFM Manual"
+.TH "CLIFM" "1" "Dec 2, 2024" "clifm 1.22.2" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -97,7 +97,7 @@ ignore entries starting with .
 set an alternative bookmarks file
 .TP
 \fB\-c\fR, \fB\-\-config\-file\fR=\fI\,FILE\/\fR
-set an alternative configuration file
+set an alternative configuration file (\fB$CLIFMRC\fR can be used as well)
 .TP
 \fB\-D\fR, \fB\-\-config\-dir\fR=\fI\,DIR\/\fR
 set an alternative configuration directory (if configuration files do not exist already, they will be created in \fIDIR\fR).
@@ -2784,6 +2784,9 @@ The idea of 'frecency' was, as far as I know, first devised and designed by Mozi
 .SH 19. ENVIRONMENT
 The following variables are read at initialization time:
 .TP
+.B CLIFMRC
+Path to the main configuration file (this value is overriden by \fI\-c\fR,\fI\-\-config\-file\fR).
+.TP
 .B NO_COLOR
 If set to any value, \fBclifm\fR will run colorless
 .TP
@@ -2821,7 +2824,7 @@ A custom commands history file
 Define a file filter. If set, this variable overrides the \fIFilter\fR option in the configuration file
 .TP
 .B CLIFM_SUDO_CMD
-Name of the authenticator program. Used by the \fIX\fR command (to launch a new instance of CliFM as root), the \fIAlt\-v\fR keybinding (to prepend the authenticator program name to the current command line), and for some operations on archives (ISO files). Defaults to \fIsudo\fR (or \fIdoas\fR if compiled on OpenBSD). Example: \fICLIFM_SUDO_CMD=doas clifm\fI.
+Name of the authenticator program. Used by the \fIX\fR command (to launch a new instance of **clifm** as root), the \fIAlt\-v\fR keybinding (to prepend the authenticator program name to the current command line), and for some operations on archives (ISO files). Defaults to \fIsudo\fR (or \fIdoas\fR if compiled on OpenBSD). Example: \fICLIFM_SUDO_CMD=doas clifm\fI.
 .TP
 .B SHELL
 An absolute path to the shell to be used by \fBclifm\fR to run external commands. Only values found in \fI/etc/shells\fR are allowed.
@@ -3072,7 +3075,17 @@ By default, \fBclifm\fR starts in the current working directory. However, you ca
 .SH 22. FILES
 .TP
 .B CONFIGURATION FILE
-The main configuration file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/clifmrc\fR. It will be copied from \fIDATADIR/clifm\fR (usually \fI/usr/local/share/clifm\fR), and if not found, it will be created anew with default values. Here you can permanently set up \fBclifm\fR options, define aliases, prompt commands, and autocommands. You can access the configuration file either via the \fIconfig\fR command or pressing F10.
+The main configuration file is looked up in these places (and in this order):
+.sp
+ \fB1.\fR \fI\-c\fR,\fI\-\-config\-file\fR
+ \fB2.\fR \fB$CLIFMRC\fR
+ \fB3.\fR \fB$XDG_CONFIG_HOME\fR/clifm/profiles/PROFILE/clifmrc
+.sp
+If \fB$XDG_CONFIG_HOME\fR is not set, '\fB$HOME\fR/.config' is used instead. If running with secure-environment (via either \fI\-\-secure\-cmds\fR \fI\-\-secure\-env\fR or \fI\-\-secure\-env\-full\fR) no environment variable is read, so that the home directory is taken from the passwd database (via \fBgetpwuid\fR(3)).
+.sp
+PROFILE is by default \fIdefault\fR (unless set via \fI\-P\fR,\fI\-\-profile\fR).
+.sp
+You can access the configuration file either via the \fIconfig\fR command or pressing F10.
 .sp
 A description for each option in the configuration file can be found in the configuration file itself.
 .TP
