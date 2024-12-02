@@ -3077,11 +3077,11 @@ By default, \fBclifm\fR starts in the current working directory. However, you ca
 .B CONFIGURATION FILE
 The main configuration file is looked up in these places (and in this order):
 .sp
- \fB1.\fR \fI\-c\fR,\fI\-\-config\-file\fR
- \fB2.\fR \fB$CLIFMRC\fR
- \fB3.\fR \fB$XDG_CONFIG_HOME\fR/clifm/profiles/PROFILE/clifmrc
+ \fB1.\fR \fI\-c\fR,\fI\-\-config\-file\fR switch
+ \fB2.\fR \fB$CLIFMRC\fR variable
+ \fB3.\fR \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/clifmrc\fR directory
 .sp
-If \fB$XDG_CONFIG_HOME\fR is not set, '\fB$HOME\fR/.config' is used instead. If running with secure-environment (via either \fI\-\-secure\-cmds\fR \fI\-\-secure\-env\fR or \fI\-\-secure\-env\-full\fR) no environment variable is read, so that the home directory is taken from the passwd database (via \fBgetpwuid\fR(3)).
+If \fB$XDG_CONFIG_HOME\fR is not set, \fI$HOME/.config\fR is used instead. If running with secure-environment (via either \fI\-\-secure\-cmds\fR, \fI\-\-secure\-env\fR, or \fI\-\-secure\-env\-full\fR) no environment variable is read, so that the home directory is taken instead from the password database (via \fBgetpwuid\fR(3)).
 .sp
 PROFILE is by default \fIdefault\fR (unless set via \fI\-P\fR,\fI\-\-profile\fR).
 .sp
