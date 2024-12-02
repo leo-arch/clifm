@@ -1279,7 +1279,7 @@ create_tmp_files(void)
 static void
 set_main_config_dir(const int secure_mode)
 {
-	if (alt_config_dir) {
+	if (alt_config_dir && *alt_config_dir) {
 		config_dir_gral = savestring(alt_config_dir, strlen(alt_config_dir));
 		return;
 	}
@@ -1293,10 +1293,9 @@ set_main_config_dir(const int secure_mode)
 		return;
 	}
 
-	const size_t tmp_len = user.home_len + (sizeof(PROGRAM_NAME) - 1) + 10;
-	config_dir_gral = xnmalloc(tmp_len, sizeof(char));
-	snprintf(config_dir_gral, tmp_len, "%s/.config/%s", user.home,
-		PROGRAM_NAME);
+	const size_t len = user.home_len + (sizeof(PROGRAM_NAME) - 1) + 10;
+	config_dir_gral = xnmalloc(len, sizeof(char));
+	snprintf(config_dir_gral, len, "%s/.config/%s", user.home, PROGRAM_NAME);
 }
 
 /* Set the profile directory. Two sources are examined:
@@ -1331,7 +1330,7 @@ set_main_config_file(const int secure_mode)
 {
 	if (alt_config_file && *alt_config_file) {
 		config_file = savestring(alt_config_file, strlen(alt_config_file));
-		return;
+		goto SET_ENV;
 	}
 
 	char *env = secure_mode == 0 ? getenv("CLIFMRC") : (char *)NULL;
@@ -1343,6 +1342,10 @@ set_main_config_file(const int secure_mode)
 	const size_t len = config_dir_len + (sizeof(PROGRAM_NAME) - 1) + 4;
 	config_file = xnmalloc(len, sizeof(char));
 	snprintf(config_file, len, "%s/%src", config_dir, PROGRAM_NAME);
+
+SET_ENV:
+	if (xargs.stealth_mode != 1)
+		setenv("CLIFMRC", config_file, 1);
 }
 
 /* Set the history file, as defined in CLIFM_HISTFILE environment variable
