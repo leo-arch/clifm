@@ -357,7 +357,7 @@ Parameters passed to cp: -a"
 
 #define EDIT_USAGE "Edit the main configuration file\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
-  config [reset | dump | APPLICATION]\n\n\
+  config [reload | reset | dump | APPLICATION]\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
 - Open/edit the configuration file\n\
     config (or F10)\n\
@@ -365,6 +365,8 @@ Parameters passed to cp: -a"
     config nano\n\
 - Print current values, highlighting those deviating from default values\n\
     config dump\n\
+- Reload the main configuration file and update settings accordingly\n\
+    config reload\n\
 - Create a fresh configuration file (making a backup of the old one)\n\
     config reset"
 
