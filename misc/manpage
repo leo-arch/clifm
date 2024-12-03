@@ -727,10 +727,12 @@ show this list of commands. A more convenient way of getting information about \
 .B colors
 preview the current color scheme
 .TP
-.B config \fR[\fIedit\fR [\fIAPP\fR]] [\fIreset\fR, \fIdump\fR]
+.B config \fR[\fIedit\fR [\fIAPP\fR]] [\fIreset\fR, \fIreload\fR, \fIdump\fR]
 Manage the main configuration file.
 .sp
 To edit the configuration file use the \fIedit\fR subcommand. If an application is specified (\fIconfig edit APP\fR), \fIAPP\fR will be used to open the file (otherwise, the default associated program will be used). Edit settings to your liking if necessary, save, and quit the editor. Changes are automatically applied. Note that, since \fIedit\fR is the default action, it can be omitted. Enter just \fIconfig\fR to open the configuration file, or \fIconfig APP\fR to open it using \fIAPP\fR.
+.sp
+Use the \fIreload\fR subcommand to reload the main configuration file and update settings accordingly.
 .sp
 Use the \fIreset\fR subcommand to generate a fresh configuration file and create a backup copy of the old one (named \fIclifmrc.YYYYMMDD@HH:MM:SS\fR).
 .sp
