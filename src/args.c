@@ -943,6 +943,12 @@ set_alt_file(char *src, char **dest, const char *err_name)
 		src = tmp;
 	}
 
+	struct stat a;
+	if (stat(src, &a) == -1) {
+		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, src, strerror(errno));
+		exit(errno);
+	}
+
 	*dest = savestring(src, strlen(src));
 	free(tmp);
 }
