@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Dec 2, 2024" "clifm 1.22.2" "CLIFM Manual"
+.TH "CLIFM" "1" "Dec 3, 2024" "clifm 1.22.3" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -255,6 +255,9 @@ maximum number of visited directories to remember
 \fB\-\-max\-files\fR=\fI\,NUM\/\fR
 list only up to \fINUM\fR files. Use \-1 or \'unset\' to remove the files limit (default). See the \fImf\fR command for a more detailed description.
 .TP
+\fB\-\-mimelist\-file\fR=\fI\,FILE\/\fR
+set \fIFILE\fR as Lira\'s configuration file. See the \fBRESOURCE OPENER\fR section below for more information
+.TP
 \fB\-\-mnt\-udisks2\fR
 use \fIudisks2\fR instead of \fIudevil\fR (default), for the \fImedia\fR command
 .TP
@@ -389,7 +392,7 @@ set \fIFILE\fR as selections file
 make the Selection Box common (that is, accessible) to different profiles. By default, each profile has a private Selection Box.
 .TP
 \fB\-\-shotgun\-file\fR=\fI\,FILE\/\fR
-set \fIFILE\fR as shotgun\'s configuration file. Only effective when running as a standalone files previewer via the \fI\-\-preview\fR switch. See the \fBSHOTGUN\fR section below for more information
+set \fIFILE\fR as shotgun\'s configuration file. See the \fBSHOTGUN\fR section below for more information
 .TP
 \fB\-\-si\fR
 print file sizes in powers of 1000, as defined by the International System of Units (SI), instead of 1024
