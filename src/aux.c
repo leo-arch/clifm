@@ -1215,6 +1215,9 @@ xitoa(long long n)
 filesn_t
 xatof(const char *s)
 {
+	if (!s[1] && *s > '0' && *s <= '9')
+		return (filesn_t)(*s - '0');
+
 	errno = 0;
 	const long long ret = strtoll(s, NULL, 10);
 
@@ -1241,6 +1244,9 @@ xatof(const char *s)
 int
 xatoi(const char *s)
 {
+	if (!s[1] && *s >= '0' && *s <= '9')
+		return (*s - '0');
+
 	errno = 0;
 	const long ret = strtol(s, NULL, 10);
 
