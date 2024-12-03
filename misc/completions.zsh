@@ -65,6 +65,7 @@ args=(
 	'--max-dirhist=[maximum number of visited directories to remember]:int:'
 	'--max-files=[list only up to NUM files]:int:'
 	'--max-path=[set the maximun number of characters of the prompt path]:int:'
+	'--mimelist-file=[set Lira configuration file to FILE]:filename:_files'
 	'--mnt-udisks2[use udisks2 instead of udevil for the media command]'
 	'--no-apparent-size[print file sizes as used blocks instead of used bytes]'
 	'--no-bold[disable bold colors]'
