@@ -1379,6 +1379,7 @@ free_stuff(void)
 	free(alt_config_file);
 	free(alt_bm_file);
 	free(alt_kbinds_file);
+	free(alt_mimelist_file);
 	free(alt_preview_file);
 	free(alt_profile);
 

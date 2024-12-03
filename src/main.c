@@ -255,6 +255,7 @@ char
 	*alt_trash_dir = (char *)NULL,
 	*alt_config_file = (char *)NULL,
 	*alt_kbinds_file = (char *)NULL,
+	*alt_mimelist_file = (char *)NULL,
 	*alt_preview_file = (char *)NULL,
 	*alt_profile = (char *)NULL,
 	*bin_name = (char *)NULL,

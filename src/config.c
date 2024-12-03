@@ -1487,6 +1487,14 @@ define_config_file_names(void)
 		bm_file = savestring(alt_bm_file, strlen(alt_bm_file));
 	}
 
+	if (!alt_mimelist_file) {
+		tmp_len = config_dir_len + 16;
+		mime_file = xnmalloc(tmp_len, sizeof(char));
+		snprintf(mime_file, tmp_len, "%s/mimelist.clifm", config_dir);
+	} else {
+		mime_file = savestring(alt_mimelist_file, strlen(alt_mimelist_file));
+	}
+
 	tmp_len = config_dir_len + 15;
 	msgs_log_file = xnmalloc(tmp_len, sizeof(char));
 	snprintf(msgs_log_file, tmp_len, "%s/msglogs.clifm", config_dir);
@@ -1499,10 +1507,6 @@ define_config_file_names(void)
 	tmp_len = config_dir_len + 15;
 	profile_file = xnmalloc(tmp_len, sizeof(char));
 	snprintf(profile_file, tmp_len, "%s/profile.clifm", config_dir);
-
-	tmp_len = config_dir_len + 16;
-	mime_file = xnmalloc(tmp_len, sizeof(char));
-	snprintf(mime_file, tmp_len, "%s/mimelist.clifm", config_dir);
 
 	tmp_len = config_dir_len + 15;
 	actions_file = xnmalloc(tmp_len, sizeof(char));

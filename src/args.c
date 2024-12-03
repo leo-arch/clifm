@@ -155,6 +155,7 @@
 #define LOPT_PAGER_VIEW             279
 #define LOPT_NO_UNICODE             280
 #define LOPT_UNICODE                281
+#define LOPT_ALT_MIMEFILE           282
 
 /* Link long (--option) and short options (-o) for the getopt_long function. */
 static struct option const longopts[] = {
@@ -225,6 +226,7 @@ static struct option const longopts[] = {
 	{"max-dirhist", required_argument, 0, LOPT_MAX_DIRHIST},
 	{"max-files", required_argument, 0, LOPT_MAX_FILES},
 	{"max-path", required_argument, 0, LOPT_MAX_PATH},
+	{"mimelist-file", required_argument, 0, LOPT_ALT_MIMEFILE},
 	{"mnt-udisks2", no_argument, 0, LOPT_MNT_UDISKS2},
 	{"no-apparent-size", no_argument, 0, LOPT_NO_APPARENT_SIZE},
 	{"no-bold", no_argument, 0, LOPT_NO_BOLD},
@@ -735,23 +737,6 @@ RUN:
 }
 #endif /* !_NO_LIRA */
 
-static void
-set_alt_bm_file(char *file)
-{
-	if (!file || !*file || *file == '-')
-		err_arg_required("-b"); /* noreturn */
-
-	char *p = (char *)NULL;
-
-	if (*file == '~') {
-		p = tilde_expand(file);
-		file = p;
-	}
-
-	alt_bm_file = savestring(file, strlen(file));
-	free(p);
-}
-
 #ifndef _BE_POSIX
 static void
 set_vt100(void)
@@ -946,37 +931,20 @@ set_alt_trash_dir(char *file)
 }
 
 static void
-set_alt_kbinds_file(char *file)
+set_alt_file(char *src, char **dest, const char *err_name)
 {
-	if (!file || !*file || *file == '-')
-		err_arg_required("-k"); /* noreturn */
+	if (!src || !*src || *src == '-')
+		err_arg_required(err_name); /* noreturn */
 
-	char *kbinds_exp = (char *)NULL;
+	char *tmp = (char *)NULL;
 
-	if (*file == '~') {
-		kbinds_exp = tilde_expand(file);
-		file = kbinds_exp;
+	if (*src == '~') {
+		tmp = tilde_expand(src);
+		src = tmp;
 	}
 
-	alt_kbinds_file = savestring(file, strlen(file));
-	free(kbinds_exp);
-}
-
-static void
-set_alt_config_file(char *file)
-{
-	if (!file || !*file || *file == '-')
-		err_arg_required("-c"); /* noreturn */
-
-	char *config_exp = (char *)NULL;
-
-	if (*file == '~') {
-		config_exp = tilde_expand(file);
-		file = config_exp;
-	}
-
-	alt_config_file = savestring(file, strlen(file));
-	free(config_exp);
+	*dest = savestring(src, strlen(src));
+	free(tmp);
 }
 
 static char *
@@ -1352,9 +1320,15 @@ parse_cmdline_args(const int argc, char **argv)
 		switch (optc) {
 		case 'a': xargs.show_hidden = conf.show_hidden = 1; break;
 		case 'A': xargs.show_hidden = conf.show_hidden = 0; break;
-		case 'b': xargs.bm_file = 1; set_alt_bm_file(optarg); break;
+		case 'b':
+			xargs.bm_file = 1;
+			set_alt_file(optarg, &alt_bm_file, "-b");
+			break;
 		case 'B': set_tab_mode(optarg); break;
-		case 'c': xargs.config = 1; set_alt_config_file(optarg); break;
+		case 'c':
+			xargs.config = 1;
+			set_alt_file(optarg, &alt_config_file, "-c");
+			break;
 		case 'C': xargs.clear_screen = conf.clear_screen = 0; break;
 		case 'd': xargs.disk_usage = conf.disk_usage = 1; break;
 		case 'D': xargs.only_dirs = conf.only_dirs = 1; break;
@@ -1380,7 +1354,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case 'I': set_alt_trash_dir(optarg); break;
 		case 'j': set_stat(optc, optarg); break;
 		case 'J': set_stat(optc, optarg); break;
-		case 'k': set_alt_kbinds_file(optarg); break;
+		case 'k': set_alt_file(optarg, &alt_kbinds_file, "-k"); break;
 		case 'l': xargs.long_view = conf.long_view = 1; break;
 		case 'L':
 			xargs.follow_symlinks_long = conf.follow_symlinks_long = 1; break;
@@ -1499,8 +1473,14 @@ parse_cmdline_args(const int argc, char **argv)
 		/* Short options */
 		case 'a': xargs.show_hidden = conf.show_hidden = 1; break;
 		case 'A': xargs.show_hidden = conf.show_hidden = 0; break;
-		case 'b': xargs.bm_file = 1; set_alt_bm_file(optarg); break;
-		case 'c': xargs.config = 1; set_alt_config_file(optarg); break;
+		case 'b':
+			xargs.bm_file = 1;
+			set_alt_file(optarg, &alt_bm_file, "-b");
+			break;
+		case 'c':
+			xargs.config = 1;
+			set_alt_file(optarg, &alt_config_file, "-c");
+			break;
 
 #ifdef RUN_CMD
 		case 'C':
@@ -1522,7 +1502,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case 'H': xargs.horizontal_list = 1; conf.listing_mode = HORLIST; break;
 		case 'i': xargs.case_sens_list = conf.case_sens_list = 0; break;
 		case 'I': xargs.case_sens_list = conf.case_sens_list = 1; break;
-		case 'k': set_alt_kbinds_file(optarg); break;
+		case 'k': set_alt_file(optarg, &alt_kbinds_file, "-k"); break;
 		case 'l': xargs.long_view = conf.long_view = 1; break;
 		case 'L':
 			xargs.follow_symlinks_long = conf.follow_symlinks_long = 1; break;
@@ -1611,6 +1591,8 @@ parse_cmdline_args(const int argc, char **argv)
 			set_max_value(optarg, &xargs.prompt_p_max_path,
 				&conf.prompt_p_max_path);
 			break;
+		case LOPT_ALT_MIMEFILE:
+			set_alt_file(optarg, &alt_mimelist_file, "--mimelist-file"); break;
 		case LOPT_MNT_UDISKS2:
 			xargs.mount_cmd = MNT_UDISKS2; break;
 		case LOPT_NO_APPARENT_SIZE:

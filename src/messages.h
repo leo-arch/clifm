@@ -1455,6 +1455,7 @@ and paths\
 \n      --lscolors\t\t Read file colors from LS_COLORS\
 \n      --max-dirhist=NUM\t\t Maximum number of visited directories to recall\
 \n      --max-files=NUM\t\t List only up to NUM files\
+\n      --mimelist-file=FILE\t Set FILE as Lira's configuration file\
 \n      --mnt-udisks2\t\t Use udisks2(1) instead of udevil(1) for the 'media' command\
 \n      --no-apparent-size\t Inform file sizes as used blocks instead of used bytes (apparent size)\
 \n      --no-bold\t\t\t Disable bold colors (applies to all color schemes)\
