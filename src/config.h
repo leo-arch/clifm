@@ -39,6 +39,7 @@ int  create_mime_file(char *file, const int new_prof);
 void create_tmp_files(void);
 void init_config(void);
 int  reload_config(void);
+int  config_reload(const char *arg);
 void set_div_line(char *line);
 void set_env(const int reload);
 #ifndef _NO_FZF

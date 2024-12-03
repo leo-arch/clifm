@@ -2753,8 +2753,8 @@ options_generator(const char *text, int state)
 
 	/* config */
 	} else if (w == 2 && *c == 'c' && strcmp(c, "config") == 0) {
-		c_opts[0] = "edit"; c_opts[1] = "dump"; c_opts[2] = "reset";
-		c_opts[3] = NULL;
+		c_opts[0] = "edit"; c_opts[1] = "dump"; c_opts[2] = "reload";
+		c_opts[3] = "reset"; c_opts[4] = NULL;
 
 	/* actions */
 	} else if (w == 2 && *c == 'a' && strcmp(c, "actions") == 0) {

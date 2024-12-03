@@ -631,6 +631,7 @@ const struct cmdslist_t param_str[] = {
 	{"config", 6},
 	{"config edit", 11},
 	{"config dump", 11},
+	{"config reload", 13},
 	{"config reset", 12},
 	{"ext on", 6},
 	{"ext off", 7},

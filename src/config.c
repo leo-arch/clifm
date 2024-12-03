@@ -554,7 +554,7 @@ dump_config(void)
 
 /* Edit the config file, either via the mime function or via the first
  * passed argument (e.g.: 'edit nano'). The 'reset' option regenerates
- * the configuration file and creates a back up of the old one */
+ * the configuration file and creates a back up of the old one. */
 int
 config_edit(char **args)
 {
@@ -571,6 +571,9 @@ config_edit(char **args)
 	if (args[1] && *args[1] == 'd' && strcmp(args[1], "dump") == 0)
 		return dump_config();
 
+	if (args[1] && *args[1] == 'r' && strcmp(args[1], "reload") == 0)
+		return config_reload(args[2]);
+
 	if (args[1] && *args[1] == 'r' && strcmp(args[1], "reset") == 0)
 		return regen_config();
 
@@ -579,9 +582,8 @@ config_edit(char **args)
 		return FUNC_FAILURE;
 	}
 
-	char *opening_app = args[1];
-	if (args[1] && strcmp(args[1], "edit") == 0)
-		opening_app = args[2];
+	char *opening_app =
+		(args[1] && strcmp(args[1], "edit") == 0) ? args[2] : args[1];
 
 	/* Get modification time of the config file before opening it */
 	struct stat attr;
@@ -620,6 +622,24 @@ config_edit(char **args)
 	}
 
 	return ret;
+}
+
+int
+config_reload(const char *arg)
+{
+	if (arg && IS_HELP(arg)) {
+		puts(RELOAD_USAGE);
+		return FUNC_SUCCESS;
+	}
+
+	const int exit_status = reload_config();
+	conf.welcome_message = 0;
+
+	if (conf.autols == 1)
+		reload_dirlist();
+
+	print_reload_msg(NULL, NULL, "Configuration file reloaded\n");
+	return exit_status;
 }
 
 /* Find the plugins-helper file and store its path into the PLUGINS_HELPER_FILE

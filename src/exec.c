@@ -1057,24 +1057,6 @@ new_instance_function(char **args)
 	return exit_status;
 }
 
-static int
-reload_function(const char *arg)
-{
-	if (arg && IS_HELP(arg)) {
-		puts(RELOAD_USAGE);
-		return FUNC_SUCCESS;
-	}
-
-	const int exit_status = reload_config();
-	conf.welcome_message = 0;
-
-	if (conf.autols == 1)
-		reload_dirlist();
-
-	print_reload_msg(NULL, NULL, "Configuration file reloaded\n");
-	return exit_status;
-}
-
 #ifndef NO_MEDIA_FUNC
 /* MODE could be either MEDIA_LIST (mp command) or MEDIA_MOUNT (media command) */
 static int
@@ -2512,7 +2494,7 @@ exec_cmd(char **comm)
 
 	else if (*comm[0] == 'r' && ((comm[0][1] == 'l' && !comm[0][2])
 	|| strcmp(comm[0], "reload") == 0))
-		return (exit_code = reload_function(comm[1]));
+		return (exit_code = config_reload(comm[1]));
 
 	/* #### NEW INSTANCE #### */
 	else if ((*comm[0] == 'x' || *comm[0] == 'X') && !comm[0][1])
