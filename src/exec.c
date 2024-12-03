@@ -1740,6 +1740,7 @@ preview_function(char **args)
 
 	const int fzf_preview_bk = conf.fzf_preview;
 	enum tab_mode tabmode_bk = tabmode;
+	const int fzftab_bk = fzftab;
 
 	if (tabmode != FZF_TAB) {
 		if (is_cmd_in_path("fzf") == 0) {
@@ -1750,6 +1751,7 @@ preview_function(char **args)
 
 	conf.fzf_preview = 1;
 	tabmode = FZF_TAB;
+	fzftab = 1;
 
 	rl_delete_text(0, rl_end);
 	rl_point = rl_end = 0;
@@ -1761,6 +1763,7 @@ preview_function(char **args)
 
 	tabmode = tabmode_bk;
 	conf.fzf_preview = fzf_preview_bk;
+	fzftab = fzftab_bk;
 
 	if (sel_n > seln_bk) {
 		save_sel();
