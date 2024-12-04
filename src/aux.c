@@ -353,25 +353,18 @@ should_expand_eln(const char *text, char *cmd_name)
 
 	char *p = strchr(l, ' ');
 	char t = ' ';
-	if (!p && (p = find_digit(l)) )
+	if (!p && (p = find_digit(l)))
 		t = *p;
 
-	if (!p)
-		return 1;
-
-	*p = '\0';
-
+	if (p) /* Either space of fused ELN. */
+		*p = '\0';
 	flags |= STATE_COMPLETING;
-	if (is_internal_c(l) && !is_internal_f(l)) {
-		*p = t;
-		flags &= ~STATE_COMPLETING;
-		return 0;
-	}
-
+	const int ret = (is_internal_c(l) && !is_internal_f(l)) ? 0 : 1;
 	flags &= ~STATE_COMPLETING;
-	*p = t;
+	if (p)
+		*p = t;
 
-	return 1;
+	return ret;
 }
 
 #if !defined(_POSIX_C_SOURCE) || _POSIX_C_SOURCE >= 199309L
