@@ -926,7 +926,7 @@ alias_import(char *file)
 		if (!alias_name)
 			continue;
 
-		if (is_internal_c(alias_name)) {
+		if (is_internal_cmd(alias_name, ALL_CMDS, 1, 1)) {
 			xerror(_("'%s': Alias conflicts with internal "
 				"command\n"), alias_name);
 			free(alias_name);

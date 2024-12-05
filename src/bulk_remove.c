@@ -32,7 +32,6 @@
 #include <errno.h>
 
 #include "aux.h" /* xnmalloc, open_fwrite(), is_cmd_in_path(), count_dir() */
-#include "checks.h" /* is_internal() */
 #include "file_operations.h" // open_file() */
 #include "messages.h" /* RR_USAGE */
 #include "misc.h" /* xerror() */

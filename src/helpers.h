@@ -1693,14 +1693,30 @@ struct props_t {
 };
 extern struct props_t prop_fields;
 
+#define ALL_CMDS        (1 << 0) // Check all commands (ignore parameters)
+#define NO_PARAM        (1 << 1) // Command takes no parameter
+#define PARAM_STR       (1 << 2) // Command takes a string (not file name)
+#define PARAM_FNAME     (1 << 3) // Command takes file names
+#define PARAM_NUM       (1 << 4) // Command takes numbers
+#define NO_FNAME_NUM    (NO_PARAM | PARAM_STR) // Neither file name nor number
+#define PARAM_FNAME_NUM (PARAM_FNAME | PARAM_NUM) // Either file name or number
+
 struct cmdslist_t {
+	char *name;
+	size_t len;
+	int flag;
+	int pad;
+};
+
+extern const struct cmdslist_t internal_cmds[];
+
+struct nameslist_t {
 	char *name;
 	size_t len;
 };
 
-extern const struct cmdslist_t param_str[];
-extern const struct cmdslist_t internal_cmds[];
-extern const struct cmdslist_t kb_cmds[];
+extern const struct nameslist_t param_str[];
+extern const struct nameslist_t kb_cmds[];
 
 extern size_t internal_cmds_n;
 

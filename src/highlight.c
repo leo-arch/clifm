@@ -104,7 +104,7 @@ rl_highlight(const char *str, const size_t pos, const int flag)
 		} else {
 			char cc = c;
 			*(str + pos) = '\0';
-			int ret = is_internal_f(str);
+			int ret = is_internal_cmd(str, PARAM_FNAME_NUM, 0, 0);
 			*(str + pos) = cc;
 			if (ret) {
 				cl = hn_c;

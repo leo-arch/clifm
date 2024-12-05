@@ -1945,7 +1945,7 @@ bin_cmd_generator_ext(const char *text, int state)
 	}
 
 	while ((name = bin_commands[i++]) != NULL) {
-		if (is_internal_c(name) == 1)
+		if (is_internal_cmd(name, ALL_CMDS, 1, 1) == 1)
 			continue;
 		if (!text || !*text
 		|| (*text == *name && strncmp(name, text, len) == 0))
@@ -3742,7 +3742,7 @@ int_cmd_no_filename(char *start)
 
 	*p = '\0';
 	flags |= STATE_COMPLETING;
-	if (is_internal_c(lb) && !is_internal_f(lb)) {
+	if (is_internal_cmd(lb, NO_FNAME_NUM, 1, 1)) {
 		rl_attempted_completion_over = 1;
 		*p = ' ';
 		flags &= ~STATE_COMPLETING;

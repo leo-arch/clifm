@@ -1211,7 +1211,7 @@ check_auto_first(char **args)
 	|| (args[1] && (*args[1] != '&' || args[1][1])))
 		return (-1);
 
-	if (!(flags & FIRST_WORD_IS_ELN) && is_internal_c(args[0]))
+	if (!(flags & FIRST_WORD_IS_ELN) && is_internal_cmd(args[0], ALL_CMDS, 1, 1))
 		return (-1);
 
 	char *deq_str = (char *)NULL;
@@ -1981,7 +1981,7 @@ check_fs_changes(void)
 static int
 is_write_cmd(const char *cmd)
 {
-	static struct cmdslist_t const wcmds[] = {
+	static struct nameslist_t const wcmds[] = {
 		/* Internal commands */
 		{"ac", 2},
 		{"ad", 2},
@@ -2126,7 +2126,7 @@ exec_cmd(char **comm)
 	const int old_exit_code = exit_code;
 	exit_code = FUNC_SUCCESS;
 
-	int is_internal_cmd = 1;
+	int is_internal_command = 1;
 
 	if (dir_cmds.first_cmd_in_dir == UNSET && dir_cmds.last_cmd_ignored == 0)
 		dir_cmds.first_cmd_in_dir = (int)current_hist_n;
@@ -2679,11 +2679,11 @@ exec_cmd(char **comm)
 		if ((exit_code = run_shell_cmd(comm)) == FUNC_FAILURE)
 			return FUNC_FAILURE;
 		else
-			is_internal_cmd = 0;
+			is_internal_command = 0;
 	}
 
 CHECK_EVENTS:
-	if (conf.autols == 0 || (is_internal_cmd == 0
+	if (conf.autols == 0 || (is_internal_command == 0
 	&& conf.clear_screen == CLEAR_INTERNAL_CMD_ONLY))
 		return exit_code;
 

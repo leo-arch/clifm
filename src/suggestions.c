@@ -855,7 +855,7 @@ check_completions(char *str, size_t len, const int print)
 		return NO_MATCH;
 
 	if (conf.fuzzy_match != 0 && words_num == 1 && *str != '/'
-	&& is_internal_c(str))
+	&& is_internal_cmd(str, ALL_CMDS, 1, 1))
 		return NO_MATCH;
 
 	int printed = NO_MATCH;
@@ -1127,7 +1127,7 @@ check_builtins(const char *str, const size_t len, const int print)
 static inline int
 print_cmd_suggestion(const size_t i, const size_t len)
 {
-	if (is_internal_c(bin_commands[i])) {
+	if (is_internal_cmd(bin_commands[i], ALL_CMDS, 1, 1)) {
 		if (strlen(bin_commands[i]) > len) {
 			suggestion.type = CMD_SUG;
 			print_suggestion(bin_commands[i], len, sx_c);
@@ -1165,7 +1165,7 @@ print_internal_cmd_suggestion(char *str, const size_t len, const int print)
 		return check_builtins(str, len, print);
 
 	*p = '\0';
-	if (!is_internal_c(str))
+	if (!is_internal_cmd(str, ALL_CMDS, 1, 1))
 		return NO_MATCH;
 
 	return FULL_MATCH;
@@ -1398,7 +1398,7 @@ check_help(char *full_line, const char *_last_word)
 		return NO_MATCH;
 
 	*ret = '\0';
-	int retval = is_internal_c(full_line);
+	int retval = is_internal_cmd(full_line, ALL_CMDS, 1, 1);
 	*ret = ' ';
 
 	if (!retval)
@@ -2329,7 +2329,7 @@ rl_suggestions(const unsigned char c)
 			/* Skip internal commands not dealing with file names. */
 			if (first_word) {
 				flags |= STATE_COMPLETING;
-				if (is_internal_c(first_word) && !is_internal_f(first_word)) {
+				if (is_internal_cmd(first_word, NO_FNAME_NUM, 1, 1)) {
 					flags &= ~STATE_COMPLETING;
 					goto NO_SUGGESTION;
 				}
@@ -2429,7 +2429,7 @@ rl_suggestions(const unsigned char c)
 			/* Skip internal commands not dealing with file names. */
 			if (first_word) {
 				flags |= STATE_COMPLETING;
-				if (is_internal_c(first_word) && !is_internal_f(first_word)) {
+				if (is_internal_cmd(first_word, NO_FNAME_NUM, 1, 1)) {
 					flags &= ~STATE_COMPLETING;
 					goto NO_SUGGESTION;
 				}

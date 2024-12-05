@@ -359,7 +359,7 @@ should_expand_eln(const char *text, char *cmd_name)
 	if (p) /* Either space of fused ELN. */
 		*p = '\0';
 	flags |= STATE_COMPLETING;
-	const int ret = (is_internal_c(l) && !is_internal_f(l)) ? 0 : 1;
+	const int ret = (is_internal_cmd(l, NO_FNAME_NUM, 1, 1)) ? 0 : 1;
 	flags &= ~STATE_COMPLETING;
 	if (p)
 		*p = t;

@@ -43,9 +43,8 @@ int  is_bin_cmd(char *str);
 int  is_exec_cmd(const char *cmd);
 int  is_file_in_cwd(char *name);
 int  is_force_param(const char *s);
-int  is_internal(const char *restrict cmd);
-int  is_internal_c(const char *restrict cmd);
-int  is_internal_f(const char *restrict cmd);
+int  is_internal_cmd(char *cmd, const int flag, const int check_hist,
+	const int check_search);
 int  is_number(const char *restrict str);
 int  is_url(const char *url);
 void truncate_file(char *file, const int max, const int check_dups);

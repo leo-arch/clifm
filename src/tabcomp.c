@@ -387,7 +387,7 @@ get_comp_entry_color(char *entry, const char *norm_prefix)
 		return uf_c;
 	}
 
-	if (t == TCMP_CMD && is_internal_c(entry))
+	if (t == TCMP_CMD && is_internal_cmd(entry, ALL_CMDS, 1, 1))
 		return hv_c;
 
 	return df_c;

@@ -912,7 +912,7 @@ cmd_keeps_quotes(char *str)
 	char *p = strchr(str, ' ');
 	if (p) {
 		*p = '\0';
-		const int ret = is_internal_c(str);
+		const int ret = is_internal_cmd(str, ALL_CMDS, 1, 1);
 		*p = ' ';
 		/* Let's keep quotes for external commands */
 		if (ret == 0)
@@ -1223,7 +1223,7 @@ split_fused_param(char *str)
 		&& check_fused_param(p)) {
 			char t = *p;
 			*p = '\0';
-			if (is_internal_f(pp)) {
+			if (is_internal_cmd(pp, PARAM_FNAME_NUM, 0, 0)) {
 				*b = ' ';
 				b++;
 			}
@@ -1324,7 +1324,7 @@ is_fused_param(char *str)
 	char c = *q;
 	*q = '\0';
 
-	const int ret = is_internal_f(str);
+	const int ret = is_internal_cmd(str, PARAM_FNAME_NUM, 0, 0);
 	*q = c;
 
 	if (ret == 0)
@@ -1724,12 +1724,12 @@ eln_expand(char ***substr, const size_t i)
 	 * taking the file name as a command option. */
 	char *abs_path = (char *)NULL;
 	if (file_info[j].name && *file_info[j].name == '-'
-	&& !is_internal_c((*substr)[0]))
+	&& !is_internal_cmd((*substr)[0], ALL_CMDS, 1, 1))
 		abs_path = xrealpath(file_info[j].name, NULL);
 
 	char *esc_str = (char *)NULL;
 	if (conf.quoting_style == QUOTING_STYLE_BACKSLASH
-	|| is_internal_c((*substr)[0]) || is_number((*substr)[0]))
+	|| is_internal_cmd((*substr)[0], ALL_CMDS, 1, 1) || is_number((*substr)[0]))
 		esc_str = escape_str(abs_path ? abs_path : file_info[j].name);
 	else
 		esc_str = quote_str(abs_path ? abs_path : file_info[j].name);
@@ -2730,7 +2730,7 @@ check_chained_cmds(char *str)
 		buf[len] = '\0';
 
 		if (strcmp(buf, "&&") != 0) {
-			if (is_internal_c(buf)) {
+			if (is_internal_cmd(buf, ALL_CMDS, 1, 1)) {
 				internal_ok = 1;
 				break;
 			}
@@ -2910,7 +2910,7 @@ parse_input_str(char *str)
 	const int stdin_dir_ok = (stdin_tmp_dir
 		&& strcmp(workspaces[cur_ws].path, stdin_tmp_dir) == 0);
 
-	const int is_internal_cmd = is_internal(substr[0]);
+	const int is_int_cmd = is_internal_cmd(substr[0], PARAM_FNAME, 0, 1);
 
 	/* Let's expand ranges first: the numbers resulting from the expanded range
 	 * will be expanded into the corresponding file names by eln_expand() below. */
@@ -2983,7 +2983,7 @@ parse_input_str(char *str)
 		if ((*substr[i] == '.' && (!substr[i][1] || (substr[i][1] == '.'
 		&& (!substr[i][2] || substr[i][2] == '/'))))
 		|| strstr(substr[i], "/..")) {
-			char *tmp = (is_internal_cmd == 1
+			char *tmp = (is_int_cmd == 1
 			&& (*substr[0] != 'l' || substr[0][1])) /* Exclude 'l' command. */
 				? normalize_path(substr[i], strlen(substr[i])) : NULL;
 			if (tmp) {
@@ -3097,7 +3097,7 @@ parse_input_str(char *str)
 	substr[args_n + 1] = (char *)NULL;
 
 	const int is_action = is_action_name(substr[0]);
-	if (is_internal_cmd == 0 && is_action == 0)
+	if (is_int_cmd == 0 && is_action == 0)
 		return substr;
 
 		/* ####################################################

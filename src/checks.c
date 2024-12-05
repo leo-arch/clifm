@@ -414,8 +414,8 @@ is_number(const char *restrict str)
 }
 
 /* Check if command STR contains a digit and this digit is not the first
- * char of STR. Used by find_cmd() (called by is_internal_c()) to check
- * for fused parameters in internal commands.
+ * char of STR. Used by is_internal_cmd() to check for fused parameters in
+ * internal commands.
  * Returns the index of the digit in STR or -1 if no digit is found. */
 static int
 contains_digit(const char *str)
@@ -435,35 +435,6 @@ contains_digit(const char *str)
 	return (-1);
 }
 
-/* Return 1 if CMD is found in CMDS_LIST or zero otherwise. */
-static int
-find_cmd(const struct cmdslist_t *cmds_list, const size_t list_size, char *cmd)
-{
-	int found = 0;
-	int i = (int)list_size;
-	char c = 0;
-	const int d = contains_digit(cmd);
-
-	if (d != -1) {
-		c = cmd[d];
-		cmd[d] = '\0';
-	}
-
-	const size_t cmd_len = strlen(cmd);
-	while (--i >= 0) {
-		if (*cmd == *cmds_list[i].name && cmd_len == cmds_list[i].len
-		&& strcmp(cmd, cmds_list[i].name) == 0) {
-			found = 1;
-			break;
-		}
-	}
-
-	if (d != -1)
-		cmd[d] = c;
-
-	return found;
-}
-
 /* Check whether S is an action name.
  * Returns 1 if true or 0 otherwise. */
 int
@@ -481,179 +452,52 @@ is_action_name(const char *s)
 	return 0;
 }
 
-/* Return 1 if CMD is an internal command, or zero otherwise. */
+/* Return 1 if CMD is an internal command matching the flags in FLAG.
+ * Otherwise, return 0. */
 int
-is_internal_c(char *restrict cmd)
+is_internal_cmd(char *cmd, const int flag, const int check_hist,
+	const int check_search)
 {
-	if (find_cmd(internal_cmds, internal_cmds_n, cmd))
-		return 1;
+	if (!cmd || !*cmd)
+		return 0;
 
-	/* Check for the search and history functions as well */
-	if ((*cmd == '/' && access(cmd, F_OK) != 0) || (*cmd == '!'
-	&& (IS_DIGIT(cmd[1]) || (cmd[1] == '-' && IS_DIGIT(cmd[2]))
-	|| cmd[1] == '!')))
-		return 1;
-
-	return 0;
-}
-
-/* Check cmd against a list of internal commands. Used by parse_input_str()
- * to know whether it should perform additional expansions, like glob, regex,
- * tilde, and so on. Only internal commands dealing with ELN/filenames
- * should be checked here. */
-int
-is_internal(char *restrict cmd)
-{
-	static struct cmdslist_t const int_cmds[] = {
-		{"ac", 2},
-		{"ad", 2},
-		{"bb", 2},
-		{"bleach", 6},
-		{"bm", 2},
-		{"bookmarks", 9},
-		{"bl", 2},
-		{"br", 2},
-		{"bulk", 4},
-		{"c", 1},
-		{"cd", 2},
-		{"d", 1},
-		{"dup", 3},
-		{"exp", 3},
-		{"export", 6},
-		{"jc", 2},
-		{"jp", 2},
-		{"l", 1},
-		{"le", 2},
-		{"m", 1},
-		{"mm", 2},
-		{"mime", 4},
-		{"n", 1},
-		{"new", 3},
-		{"o", 1},
-		{"oc", 2},
-		{"open", 4},
-		{"paste", 5},
-		{"p", 1},
-		{"pc", 2},
-		{"pp", 2},
-		{"pr", 2},
-		{"prop", 4},
-		{"pin", 3},
-		{"r", 1},
-		{"s", 1},
-		{"sel", 3},
-		{"t", 1},
-		{"tr", 2},
-		{"trash", 5},
-		{"tag", 3},
-		{"ta", 2},
-		{"te", 2},
-		{"v", 1},
-		{"vv", 2},
-		{NULL, 0}
-	};
-
-	static size_t i = 0;
-	if (i == 0)
-		i = (sizeof(int_cmds) / sizeof(struct cmdslist_t)) - 1;
-
-	if (find_cmd(int_cmds, i, cmd))
-		return 1;
-
-	/* Check for the search function as well */
-	if (*cmd == '/' && access(cmd, F_OK) != 0)
-		return 1;
-
-	return 0;
-}
-
-/* Check CMD against a list of internal commands taking ELN's or numbers
- * as parameters. Used by split_fusedcmd(). */
-int
-is_internal_f(const char *restrict cmd)
-{
-	/* If we are completing/suggesting, do not take 'ws', 'mf', and 'st/sort'
-	 * commands into account: they do not take ELN/filenames as parameters,
-	 * but just numbers, in which case no ELN-filename completion should
-	 * be made. */
-	if (flags & STATE_COMPLETING
+	/* Old is_internal_f() function */
+	if ((flags & STATE_COMPLETING) && (flag & PARAM_FNAME_NUM)
 	&& (*cmd == 'w' || (*cmd == 'm' && *(cmd + 1) == 'f')
 	|| (*cmd == 's' && (*(cmd + 1) == 't' || *(cmd + 1) == 'o')) ) )
 		return 0;
 
-	static struct cmdslist_t const int_cmds[] = {
-		{"ac", 2},
-		{"ad", 2},
-		{"alias", 5}, /* 'alias import' takes file names */
-		{"bb", 2},
-		{"dh", 2},
-		{"bl", 2},
-		{"bleach", 6},
-		{"bm", 2},
-		{"bookmarks", 9},
-		{"br", 2},
-		{"bulk", 4},
-		{"c", 1},
-		{"cd", 2},
-		{"d", 1},
-		{"dup", 3},
-		{"ds", 2},
-		{"desel", 5},
-		{"exp", 3},
-		{"l", 1},
-		{"ln", 2},
-		{"le", 2},
-		{"m", 1},
-		{"mime", 4},
-		{"mm", 2},
-		{"md", 2},
-		{"mf", 2},
-		{"n", 1},
-		{"new", 3},
-		{"o", 1},
-		{"oc", 2},
-		{"open", 4},
-		{"ow", 2},
-		{"p", 1},
-		{"pc", 2},
-		{"pp", 2},
-		{"pr", 2},
-		{"prop", 4},
-		{"paste", 5},
-		{"pin", 3},
-		{"r", 1},
-		{"rr", 2},
-		{"s", 1},
-		{"sel", 3},
-		{"st", 2},
-		{"sort", 4},
-		{"t", 1},
-		{"tr", 2},
-		{"trash", 5},
-		{"tag", 3},
-		{"ta", 2},
-		{"te", 2},
-		{"tl", 2},
-		{"v", 1},
-		{"vv", 2},
-		{"ws", 2},
-		{"x", 1},
-		{"X", 1},
-		{NULL, 0}
-	};
+	char c = 0;
+	const int d = contains_digit(cmd);
 
-	static int n = 0;
-	if (n == 0)
-		n = (int)(sizeof(int_cmds) / sizeof(struct cmdslist_t)) - 1;
-	const size_t cmd_len = strlen(cmd);
+	if (d != -1) {
+		c = cmd[d];
+		cmd[d] = '\0';
+	}
 
-	int i = n;
+	const size_t clen = strlen(cmd);
+	ssize_t i = (ssize_t)internal_cmds_n;
+	int found = 0;
+
 	while (--i >= 0) {
-		if (*cmd == *int_cmds[i].name && cmd_len == int_cmds[i].len
-		&& strcmp(cmd, int_cmds[i].name) == 0) {
-			return 1;
+		if (((flag & ALL_CMDS) || (internal_cmds[i].flag & flag))
+		&& clen == internal_cmds[i].len && *cmd == *internal_cmds[i].name
+		&& strcmp(cmd + 1, internal_cmds[i].name + 1) == 0) {
+			found = 1;
+			break;
 		}
 	}
+
+	if (d != -1)
+		cmd[d] = c;
+
+	if (found == 1)
+		return 1;
+
+	if ((check_search == 1 && (*cmd == '/' && access(cmd, F_OK) != 0))
+	|| (check_hist == 1 && (*cmd == '!' && (IS_DIGIT(cmd[1])
+	|| (cmd[1] == '-' && IS_DIGIT(cmd[2])) || cmd[1] == '!'))))
+		return 1;
 
 	return 0;
 }
