@@ -1687,6 +1687,14 @@ calc_item_length(const int eln_len, const int icon_len, const filesn_t i)
 static size_t *
 get_longest_per_col(size_t *columns_n, filesn_t *rows, const filesn_t files_n)
 {
+	if (conf.columned == 0) {
+		*columns_n = 1;
+		*rows = files;
+		size_t *longest_per_col = xnmalloc(2, sizeof(size_t));
+		longest_per_col[0] = term_cols;
+		return longest_per_col;
+	}
+
 	size_t used_cols = 0;
 	size_t longest_index = 0;
 
