@@ -303,9 +303,9 @@ END:
 static int
 sanitize_mime(const char *cmd)
 {
-	/* Only %f is allowed */
+	/* Only %[fx] is allowed */
 	char *p = strchr(cmd, '%');
-	if (p && *(p + 1) != 'f')
+	if (p && p[1] != 'f' && p[1] != 'x')
 		return FUNC_FAILURE;
 
 	/* Disallow double ampersand */

@@ -2611,8 +2611,8 @@ glob_expand(char **cmd)
 	if (!cmd || !cmd[0] || !*cmd[0])
 		return 0;
 
-	/* In case of 'desel', allow glob expansion onyl if the first parameter
-	 * is not "*", in which the deselect function itself takes care of
+	/* In case of 'desel', allow glob expansion only if the first parameter
+	 * is not "*", in which case the deselect function itself takes care of
 	 * deselecting all files. */
 	if (sel_n > 0 && cmd[1] && *cmd[1]
 	&& (strcmp(cmd[0], "ds") == 0 || strcmp(cmd[0], "desel") == 0)) {
