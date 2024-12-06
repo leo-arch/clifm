@@ -64,6 +64,7 @@ check_glob_char(const char *str, const int gflag)
 {
 	if (!str || !*str)
 		return 0;
+
 	return strpbrk(str, (gflag == GLOB_ONLY)
 		? GLOB_CHARS : GLOB_REGEX_CHARS) ? 1 : 0;
 }

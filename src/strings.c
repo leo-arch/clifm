@@ -2611,13 +2611,21 @@ glob_expand(char **cmd)
 	if (!cmd || !cmd[0] || !*cmd[0])
 		return 0;
 
-	/* Do not expand if command is deselect, sel or untrash, just to
-	 * allow the use of "*" for desel and untrash ("ds *" and "u *"),
-	 * and to let the sel function handle glob patterns itself. */
+	/* In case of 'desel', allow glob expansion onyl if the first parameter
+	 * is not "*", in which the deselect function itself takes care of
+	 * deselecting all files. */
+	if (sel_n > 0 && cmd[1] && *cmd[1]
+	&& (strcmp(cmd[0], "ds") == 0 || strcmp(cmd[0], "desel") == 0)) {
+		if (*cmd[1] == '*' && !cmd[1][1])
+			return 0;
+		return (check_glob_char(cmd[1], GLOB_REGEX));
+	}
+
+	/* Do not expand if command is sel or untrash, just to allow the use
+	 * of "*" for desel and untrash ("ds *" and "u *"), and to let the
+	 * sel function handle glob patterns itself. */
 
 	if (strcmp(cmd[0], "s") != 0 && strcmp(cmd[0], "sel") != 0
-
-	&& strcmp(cmd[0], "ds") != 0 && strcmp(cmd[0], "desel") != 0
 
 	&& strcmp(cmd[0], "u") != 0 && strcmp(cmd[0], "undel") != 0
 	&& strcmp(cmd[0], "untrash") != 0

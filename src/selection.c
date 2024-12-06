@@ -1106,22 +1106,23 @@ static int
 deselect_from_args(char **args)
 {
 	char **ds = xnmalloc(args_n + 1, sizeof(char *));
-	size_t j, k = 0;
+	size_t i, j = 0;
 
-	for (j = 1; j <= args_n; j++) {
-		char *pp = normalize_path(args[j], strlen(args[j]));
-		if (!pp)
+	for (i = 1; i <= args_n; i++) {
+		char *ptr = normalize_path(args[i], strlen(args[i]));
+		if (!ptr)
 			continue;
-		ds[k] = savestring(pp, strlen(pp));
-		k++;
-		free(pp);
+
+		ds[j] = savestring(ptr, strlen(ptr));
+		j++;
+
+		free(ptr);
 	}
-	ds[k] = (char *)NULL;
 
-	if (desel_entries(ds, args_n, 0) == FUNC_FAILURE)
-		return FUNC_FAILURE;
+	ds[j] = (char *)NULL;
 
-	return FUNC_SUCCESS;
+	return (desel_entries(ds, j, 0) == FUNC_FAILURE
+		? FUNC_FAILURE : FUNC_SUCCESS);
 }
 
 /* Desel screen: take user input and return an array of input substrings,
