@@ -248,7 +248,8 @@ get_bm_path(char *arg)
 		return bookmarks[num - 1].path;
 	}
 
-	char *name = remove_quotes(arg);
+	char *p = remove_quotes(arg);
+	char *name = p ? p : arg;
 
 	/* If string, check shortcuts and names */
 	size_t i;
