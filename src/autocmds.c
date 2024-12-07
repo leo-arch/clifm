@@ -274,7 +274,7 @@ gen_opt_entry(char *buf, const char *name, const char *val, size_t *pos,
 
 /* Write into BUF the list of autocmd options set in the struct A. */
 static int
-gen_autocmd_options_list(char *buf, struct autocmds_t a, const int print_filter)
+gen_autocmd_options_list(char *buf, struct autocmds_t *a, const int print_filter)
 {
 	int len = 0; /* Number of bytes currently consumed by buf. */
 	size_t c = 0; /* Number of procesed options for the current autocommand. */
@@ -283,47 +283,47 @@ gen_autocmd_options_list(char *buf, struct autocmds_t a, const int print_filter)
 	const int lm =
 		(conf.autocmd_msg != AUTOCMD_MSG_SHORT || print_filter == 1);
 
-	if (a.color_scheme != NULL)
-		len += gen_opt_entry(buf + len, "cs", a.color_scheme, &c, lm);
+	if (a->color_scheme != NULL)
+		len += gen_opt_entry(buf + len, "cs", a->color_scheme, &c, lm);
 
-	if (a.files_counter != UNSET)
-		len += gen_opt_entry(buf + len, "fc", xitoa(a.files_counter), &c, lm);
+	if (a->files_counter != UNSET)
+		len += gen_opt_entry(buf + len, "fc", xitoa(a->files_counter), &c, lm);
 
-	if (a.filter.str != NULL)
+	if (a->filter.str != NULL)
 		len += gen_opt_entry(buf + len, "ft",
-			print_filter == 1 ? a.filter.str : NULL, &c, lm);
+			print_filter == 1 ? a->filter.str : NULL, &c, lm);
 
-	if (a.full_dir_size != UNSET)
-		len += gen_opt_entry(buf + len, "fz", xitoa(a.full_dir_size), &c, lm);
+	if (a->full_dir_size != UNSET)
+		len += gen_opt_entry(buf + len, "fz", xitoa(a->full_dir_size), &c, lm);
 
-	if (a.show_hidden != UNSET)
-		len += gen_opt_entry(buf + len, "hf", xitoa(a.show_hidden), &c, lm);
+	if (a->show_hidden != UNSET)
+		len += gen_opt_entry(buf + len, "hf", xitoa(a->show_hidden), &c, lm);
 
-	if (a.light_mode != UNSET)
-		len += gen_opt_entry(buf + len, "lm", xitoa(a.light_mode), &c, lm);
+	if (a->light_mode != UNSET)
+		len += gen_opt_entry(buf + len, "lm", xitoa(a->light_mode), &c, lm);
 
-	if (a.long_view != UNSET)
-		len += gen_opt_entry(buf + len, "lv", xitoa(a.long_view), &c, lm);
+	if (a->long_view != UNSET)
+		len += gen_opt_entry(buf + len, "lv", xitoa(a->long_view), &c, lm);
 
-	if (a.max_files != AC_UNSET)
+	if (a->max_files != AC_UNSET)
 		len += gen_opt_entry(buf + len, "mf",
-			a.max_files == UNSET ? "unset" : xitoa(a.max_files), &c, lm);
+			a->max_files == UNSET ? "unset" : xitoa(a->max_files), &c, lm);
 
-	if (a.max_name_len != AC_UNSET)
+	if (a->max_name_len != AC_UNSET)
 		len += gen_opt_entry(buf + len, "mn",
-			a.max_name_len == UNSET ? "unset" : xitoa(a.max_name_len), &c, lm);
+			a->max_name_len == UNSET ? "unset" : xitoa(a->max_name_len), &c, lm);
 
-	if (a.only_dirs != UNSET)
-		len += gen_opt_entry(buf + len, "od", xitoa(a.only_dirs), &c, lm);
+	if (a->only_dirs != UNSET)
+		len += gen_opt_entry(buf + len, "od", xitoa(a->only_dirs), &c, lm);
 
-	if (a.pager != UNSET)
-		len += gen_opt_entry(buf + len, "pg", xitoa(a.pager), &c, lm);
+	if (a->pager != UNSET)
+		len += gen_opt_entry(buf + len, "pg", xitoa(a->pager), &c, lm);
 
-	if (a.sort != UNSET)
-		len += gen_opt_entry(buf + len, "st", num_to_sort_name(a.sort), &c, lm);
+	if (a->sort != UNSET)
+		len += gen_opt_entry(buf + len, "st", num_to_sort_name(a->sort), &c, lm);
 
-	if (a.sort_reverse != UNSET)
-		len += gen_opt_entry(buf + len, "sr", xitoa(a.sort_reverse), &c, lm);
+	if (a->sort_reverse != UNSET)
+		len += gen_opt_entry(buf + len, "sr", xitoa(a->sort_reverse), &c, lm);
 
 	return len;
 }
@@ -337,7 +337,7 @@ print_autocmd_options_list_full(void)
 			continue;
 
 		char buf[AC_BUF_SIZE];
-		const int len = gen_autocmd_options_list(buf, autocmds[i], 0);
+		const int len = gen_autocmd_options_list(buf, &autocmds[i], 0);
 		if (len <= 0)
 			continue;
 
@@ -362,7 +362,7 @@ print_autocmd_msg(void)
 
 	char buf[AC_BUF_SIZE];
 	struct autocmds_t a = gen_common_options();
-	const int len = gen_autocmd_options_list(buf, a, 0);
+	const int len = gen_autocmd_options_list(buf, &a, 0);
 
 	if (len <= 0) /* No autocommand option set. Do not print any message */
 		return;
@@ -904,7 +904,7 @@ print_autocmds_list(void)
 
 	for (i = 0; i < autocmds_n; i++) {
 		if (!autocmds[i].pattern || !*autocmds[i].pattern
-		|| gen_autocmd_options_list(buf, autocmds[i], 1) <= 0)
+		|| gen_autocmd_options_list(buf, &autocmds[i], 1) <= 0)
 			continue;
 
 		printf("%s%s%s%s%-*s %s%s%s %s%s\n",
