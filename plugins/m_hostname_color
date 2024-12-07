@@ -1,0 +1,19 @@
+#!/bin/sh
+
+# Hostname color prompt module for Clifm
+# Author: L. Abramovich
+# License: GPL2+
+
+# Description:
+# Dinamically colorize the hostname string in the prompt depending
+# on whether we are running on a SSH remote session or not.
+
+# Usage:
+# Edit your prompt (via 'prompt edit') and modify the hostname code
+# as follows:
+#
+# RegularPrompt="... \u:${m_hostname_color}\H%{reset} ..."
+#
+# The hostname will be printed in yellow whenever we're on a SSH session.
+
+[ -n "$SSH_TTY" ] && printf "\e[0;33m"

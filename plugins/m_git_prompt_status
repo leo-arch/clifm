@@ -2,8 +2,13 @@
 
 # Git prompt module for Clifm
 # Dependencies: git, sed, cut, tr, uniq, tail
-# License: GPL3
-# Written by L. Abramovich
+# Author: L. Abramovich
+# License: GPL2+
+
+# Usage:
+# Edit your prompt (via 'prompt edit') and add this code:
+#
+# RegularPrompt="... ${m_git_prompt_status} ..."
 
 cmd_output="$(git -c color.status=false status -sb 2>/dev/null)"
 
