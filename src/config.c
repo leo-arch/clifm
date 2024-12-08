@@ -3185,6 +3185,10 @@ read_config(void)
 		&& strncmp(line, "Icons=", 6) == 0) {
 			set_config_bool_value(line + 6, &conf.icons);
 		}
+
+		else if (*line == 'I' && strncmp(line, "IconPad=", 8) == 0) {
+			set_config_int_value(line + 8, &conf.icon_pad, 0, 2);
+		}
 #endif /* !_NO_ICONS */
 
 		else if (*line == 'I' && strncmp(line, "InformAutocmd=", 14) == 0) {

@@ -433,7 +433,7 @@ get_glob_longest(struct search_t *matches, int *longest_eln,
 	}
 
 	if (conf.icons == 1)
-		*longest_match += ICON_LEN;
+		*longest_match += (size_t)ICON_LEN;
 
 	int longest_name = 0;
 	for (i = 0; matches[i].name; i++) {
@@ -751,7 +751,7 @@ load_entry_info(struct dirent **reg_dirlist, const int index)
 	list.name = name;
 	list.eln = reg_dirlist ? -1 : index + 1;
 	list.len = wc_xstrlen(name);
-	list.len += (!reg_dirlist && conf.icons == 1) ? ICON_LEN : 0;
+	list.len += (!reg_dirlist && conf.icons == 1) ? (size_t)ICON_LEN : 0;
 	list.len += reg_dirlist ? 0 : (size_t)(DIGINUM(list.eln) + 1);
 
 	return list;

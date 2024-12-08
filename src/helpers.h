@@ -915,7 +915,7 @@ extern time_t curdir_mtime;
 #define FULL_STAT   2
 
 /* Length to be added to a filename length if icons are enabled. */
-#define ICON_LEN (2 + 1) /* Icon width + space */
+#define ICON_LEN (2 + conf.icon_pad) /* Fixed icon width + pad */
 
 /* Macros for alternative prompts (alt_prompt) */
 #define FILES_PROMPT       1 /* Allow files names completion */
@@ -1149,6 +1149,7 @@ struct config_t {
 	int fzf_preview;
 	int highlight;
 	int icons;
+	int icon_pad;
 	int int_vars;
 	int light_mode;
 	int link_creat_mode;
@@ -1214,7 +1215,6 @@ struct config_t {
 #endif /* !_NO_TRASH */
 	int warning_prompt;
 	int welcome_message;
-	int pad3;
 };
 
 extern struct config_t conf;
