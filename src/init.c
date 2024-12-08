@@ -213,7 +213,7 @@ init_conf_struct(void)
 #else
 	conf.icons = 0;
 #endif /* !_NO_ICONS */
-	conf.icon_pad = DEF_ICON_PAD;
+	conf.icons_gap = DEF_ICONS_GAP;
 	conf.int_vars = DEF_INT_VARS;
 	conf.light_mode = UNSET;
 	conf.link_creat_mode = DEF_LINK_CREATION_MODE;

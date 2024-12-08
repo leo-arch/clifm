@@ -596,7 +596,7 @@ from the history list."
   icons [on, off]\n\n\
 Note: Depending on how the terminal renders icons, the apparent space\n\
 between icons and file names may not be the most appropiate. This space\n\
-can be adjusted using the IconPad option in the configuration file\n\
+can be adjusted using the IconsGap option in the configuration file\n\
 (valid values: 0, 1, 2)."
 
 #define JUMP_USAGE "Change to a directory in the jump database (visited directories)\n\n\

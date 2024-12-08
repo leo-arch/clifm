@@ -336,8 +336,8 @@ dump_config(void)
 	n = DEF_ICONS;
 	print_config_value("Icons", &conf.icons, &n, DUMP_CONFIG_BOOL);
 
-	n = DEF_ICON_PAD;
-	print_config_value("IconPad", &conf.icon_pad, &n, DUMP_CONFIG_INT);
+	n = DEF_ICONS_GAP;
+	print_config_value("IconsGap", &conf.icons_gap, &n, DUMP_CONFIG_INT);
 #endif /* !_NO_ICONS */
 
 	s = get_ia_value_str(DEF_AUTOCMD_MSG);
@@ -1932,7 +1932,7 @@ create_main_config_file(char *file)
 		DEF_MAX_LOG,
 		DEF_HISTIGNORE,
 		DEF_ICONS == 1 ? "true" : "false",
-		DEF_ICON_PAD,
+		DEF_ICONS_GAP,
 		DEF_DISK_USAGE == 1 ? "true" : "false",
 		DEF_PRINTSEL == 1 ? "true" : "false",
 		DEF_MAX_PRINTSEL,
@@ -3191,8 +3191,8 @@ read_config(void)
 			set_config_bool_value(line + 6, &conf.icons);
 		}
 
-		else if (*line == 'I' && strncmp(line, "IconPad=", 8) == 0) {
-			set_config_int_value(line + 8, &conf.icon_pad, 0, 2);
+		else if (*line == 'I' && strncmp(line, "IconsGap=", 9) == 0) {
+			set_config_int_value(line + 9, &conf.icons_gap, 0, 2);
 		}
 #endif /* !_NO_ICONS */
 
