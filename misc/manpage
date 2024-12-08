@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Dec 3, 2024" "clifm 1.22.3" "CLIFM Manual"
+.TH "CLIFM" "1" "Dec 8, 2024" "clifm 1.22.5" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -832,7 +832,7 @@ You can use the exclamation mark (!) to perform some history commands:
 .B icons \fR[\fIon\fR, \fIoff\fR]
 toggle icons on/off
 .sp
-\fBNote\fR: Depending on how the terminal renders icons, the apparent space between icons and file names may not be the most appropiate. This space can be adjusted using the \fIIconPad\fR option in the configuration file (valid values: 0, 1, 2).
+\fBNote\fR: Depending on how the terminal renders icons, the apparent space between icons and file names may not be the most appropiate. This space can be adjusted using the \fIIconsGap\fR option in the configuration file (valid values: 0, 1, 2).
 .TP
 .B j [\fI\-\-purge\fR [\fINUM\fR]] [\fI\-\-edit\fR], jc, jl, jp \fR[\fISTR\fR]..., \fBje\fR
 \fIj\fR is the fastest way of using \fBKangaroo\fR, a \fBdirectory jumper\fR function used to quickly navigate through the jump database (i.e. a database of visited directories).
