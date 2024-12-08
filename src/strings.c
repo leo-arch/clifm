@@ -1223,7 +1223,9 @@ split_fused_param(char *str)
 		&& check_fused_param(p)) {
 			char t = *p;
 			*p = '\0';
-			if (is_internal_cmd(pp, PARAM_FNAME_NUM, 0, 0)) {
+			const size_t plen = strlen(pp);
+			if (plen > 0 && pp[plen - 1] != '-'
+			&& is_internal_cmd(pp, PARAM_FNAME_NUM, 0, 0)) {
 				*b = ' ';
 				b++;
 			}
