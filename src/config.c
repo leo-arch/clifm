@@ -335,6 +335,9 @@ dump_config(void)
 #ifndef _NO_ICONS
 	n = DEF_ICONS;
 	print_config_value("Icons", &conf.icons, &n, DUMP_CONFIG_BOOL);
+
+	n = DEF_ICON_PAD;
+	print_config_value("IconPad", &conf.icon_pad, &n, DUMP_CONFIG_INT);
 #endif /* !_NO_ICONS */
 
 	s = get_ia_value_str(DEF_AUTOCMD_MSG);
