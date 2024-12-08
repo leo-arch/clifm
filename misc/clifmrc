@@ -238,6 +238,9 @@
 # (https://github.com/leo-arch/clifm/wiki) for more information.
 ;Icons=false
 
+# Number of spaces between icons and file names (valid values: 0, 1, 2).
+;IconPad=1
+
 
 #=====================================#
 #         2. COMMAND LINE             #

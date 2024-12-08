@@ -1893,6 +1893,7 @@ create_main_config_file(char *file)
 ;HistIgnore=%s\n\
 ;DirhistIgnore=\"\"\n\
 ;Icons=%s\n\
+;IconPad=%d\n\
 ;Umask=077\n\
 ;DiskUsage=%s\n\n"
 
@@ -1928,6 +1929,7 @@ create_main_config_file(char *file)
 		DEF_MAX_LOG,
 		DEF_HISTIGNORE,
 		DEF_ICONS == 1 ? "true" : "false",
+		DEF_ICON_PAD,
 		DEF_DISK_USAGE == 1 ? "true" : "false",
 		DEF_PRINTSEL == 1 ? "true" : "false",
 		DEF_MAX_PRINTSEL,
