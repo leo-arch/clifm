@@ -2993,7 +2993,8 @@ load_link_info(const int fd, const filesn_t n)
 
 #ifndef _NO_ICONS
 	file_info[n].icon = ICON_LINK;
-#endif // !_NO_ICONS
+	file_info[n].icon_color = conf.color_lnk_as_target == 1 ? ln_c : WHITE;
+#endif /* !_NO_ICONS */
 
 	if (conf.follow_symlinks == 0) {
 		file_info[n].color = ln_c;
