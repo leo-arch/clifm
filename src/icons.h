@@ -439,13 +439,20 @@ char
 # define B_BLACK EMPTY_STR
 #endif /* _NERD || _ICONS_IN_TERMINAL */
 
-/* Default icons and colors for directories, regular files, and symlinks */
-#define DEF_DIR_ICON ICON_DIR
+/* Default icons and colors */
+#define DEF_DIR_ICON ICON_DIR /* Directory */
 #define DEF_DIR_ICON_COLOR YELLOW
-#define DEF_FILE_ICON ICON_REG
+
+#define DEF_FILE_ICON ICON_REG /* Regular file */
 #define DEF_FILE_ICON_COLOR WHITE
+
+#define DEF_LINK_ICON ICON_LINK /* Symbolic link */
 #define DEF_LINK_ICON_COLOR CYAN
+
+#define DEF_EXEC_ICON ICON_EXEC /* Executable file */
 #define DEF_EXEC_ICON_COLOR WHITE
+
+#define DEF_NOPERM_ICON ICON_LOCK /* File without access permissions */
 #define DEF_NOPERM_ICON_COLOR YELLOW
 
 /* Per file extension icons */

@@ -529,7 +529,8 @@ get_dir_icon(const filesn_t n)
 {
 	/* Default values for directories */
 	file_info[n].icon = DEF_DIR_ICON;
-	file_info[n].icon_color = DEF_DIR_ICON_COLOR;
+	/* DIR_ICO_C is set from the color scheme file */
+	file_info[n].icon_color = *dir_ico_c ? dir_ico_c : DEF_DIR_ICON_COLOR;
 
 	if (!file_info[n].name)
 		return;
@@ -2944,12 +2945,8 @@ load_dir_info(const struct stat *a, const filesn_t n)
 	file_info[n].dir = 1;
 
 #ifndef _NO_ICONS
-	if (conf.icons == 1) {
+	if (conf.icons == 1)
 		get_dir_icon(n);
-
-		if (*dir_ico_c)	/* If set from the color scheme file */
-			file_info[n].icon_color = dir_ico_c;
-	}
 #endif /* !_NO_ICONS */
 
 	const int daccess = (a &&
@@ -2992,7 +2989,7 @@ load_link_info(const int fd, const filesn_t n)
 	file_info[n].symlink = 1;
 
 #ifndef _NO_ICONS
-	file_info[n].icon = ICON_LINK;
+	file_info[n].icon = DEF_LINK_ICON;
 	file_info[n].icon_color = conf.color_lnk_as_target == 1 ?
 		DEF_LINK_ICON_COLOR : DEF_FILE_ICON_COLOR;
 #endif /* !_NO_ICONS */
@@ -3060,7 +3057,7 @@ load_regfile_info(const struct stat *a, const filesn_t n)
 	if (user.uid != 0 && a
 	&& check_file_access(a->st_mode, a->st_uid, a->st_gid) == 0) {
 #ifndef _NO_ICONS
-		file_info[n].icon = ICON_LOCK;
+		file_info[n].icon = DEF_NOPERM_ICON;
 		file_info[n].icon_color = DEF_NOPERM_ICON_COLOR;
 #endif /* !_NO_ICONS */
 		file_info[n].color = nf_c;
@@ -3107,7 +3104,7 @@ load_regfile_info(const struct stat *a, const filesn_t n)
 
 #ifndef _NO_ICONS
 	if (file_info[n].exec == 1) {
-		file_info[n].icon = ICON_EXEC;
+		file_info[n].icon = DEF_EXEC_ICON;
 		file_info[n].icon_color = DEF_EXEC_ICON_COLOR;
 	}
 #endif /* !_NO_ICONS */
