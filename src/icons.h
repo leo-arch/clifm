@@ -104,6 +104,7 @@ char
     ICON_MAKEFILE[] = NERD_MAKEFILE,
     ICON_MANPAGE[] = NERD_MANUAL,
     ICON_MARKDOWN[] = NERD_MARKDOWN,
+    ICON_MATLAB[] = NERD_MATLAB,
     ICON_MYSQL[] = NERD_MYSQL,
     ICON_ASM[] = NERD_ASM,
     ICON_OCAML[] = NERD_OCAML,
@@ -220,6 +221,7 @@ char
     ICON_LUA[] = FILE_LUA,
     ICON_MANPAGE[] = FILE_MANPAGE,
     ICON_MAKEFILE[] = FILE_MAPBOX,
+    ICON_MATLAB[] = FILE_MATLAB,
     ICON_MARKDOWN[] = OCT_MARKDOWN,
     ICON_MYSQL[] = MFIZZ_MYSQL,
     ICON_ASM[] = FILE_NASM,
@@ -338,6 +340,7 @@ char
     ICON_MAKEFILE[] = EMOJI_MAKE,
     ICON_MANPAGE[] = EMOJI_MANUAL,
     ICON_MARKDOWN[] = EMOJI_MARKDOWN,
+    ICON_MATLAB[] = EMOJI_MATLAB,
     ICON_MYSQL[] = EMOJI_DATABASE,
     ICON_ASM[] = EMOJI_ASM,
     ICON_OCAML[] = EMOJI_OCAML,
@@ -436,11 +439,14 @@ char
 # define B_BLACK EMPTY_STR
 #endif /* _NERD || _ICONS_IN_TERMINAL */
 
-/* Default icons and colors for directories and files */
+/* Default icons and colors for directories, regular files, and symlinks */
 #define DEF_DIR_ICON ICON_DIR
 #define DEF_DIR_ICON_COLOR YELLOW
 #define DEF_FILE_ICON ICON_REG
 #define DEF_FILE_ICON_COLOR WHITE
+#define DEF_LINK_ICON_COLOR CYAN
+#define DEF_EXEC_ICON_COLOR WHITE
+#define DEF_NOPERM_ICON_COLOR YELLOW
 
 /* Per file extension icons */
 struct icons_t const icon_ext[] = {
@@ -578,9 +584,11 @@ struct icons_t const icon_ext[] = {
     {"lzh", ICON_ARCHIVE, YELLOW},
     {"lzma", ICON_ARCHIVE, YELLOW},
 
+    {"m", ICON_MATLAB, YELLOW},
     {"m4a", ICON_AUDIO, YELLOW},
     {"m4v", ICON_VID, BLUE},
     {"markdown", ICON_MARKDOWN, WHITE},
+    {"mat", ICON_MATLAB, YELLOW},
     {"md", ICON_MARKDOWN, WHITE},
     {"mk", ICON_MAKEFILE, WHITE},
     {"mkv", ICON_VID, BLUE},

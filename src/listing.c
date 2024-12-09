@@ -2993,7 +2993,8 @@ load_link_info(const int fd, const filesn_t n)
 
 #ifndef _NO_ICONS
 	file_info[n].icon = ICON_LINK;
-	file_info[n].icon_color = conf.color_lnk_as_target == 1 ? ln_c : WHITE;
+	file_info[n].icon_color = conf.color_lnk_as_target == 1 ?
+		DEF_LINK_ICON_COLOR : DEF_FILE_ICON_COLOR;
 #endif /* !_NO_ICONS */
 
 	if (conf.follow_symlinks == 0) {
@@ -3060,7 +3061,7 @@ load_regfile_info(const struct stat *a, const filesn_t n)
 	&& check_file_access(a->st_mode, a->st_uid, a->st_gid) == 0) {
 #ifndef _NO_ICONS
 		file_info[n].icon = ICON_LOCK;
-		file_info[n].icon_color = YELLOW;
+		file_info[n].icon_color = DEF_NOPERM_ICON_COLOR;
 #endif /* !_NO_ICONS */
 		file_info[n].color = nf_c;
 	} else if (a && (a->st_mode & S_ISUID)) {
@@ -3105,8 +3106,10 @@ load_regfile_info(const struct stat *a, const filesn_t n)
 	}
 
 #ifndef _NO_ICONS
-	if (file_info[n].exec == 1)
+	if (file_info[n].exec == 1) {
 		file_info[n].icon = ICON_EXEC;
+		file_info[n].icon_color = DEF_EXEC_ICON_COLOR;
+	}
 #endif /* !_NO_ICONS */
 
 	/* Try temp and extension color only provided the file is a non-empty

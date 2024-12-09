@@ -95,6 +95,7 @@
 #define EMOJI_MAKE "🛠 "
 #define EMOJI_MANUAL "❔"
 #define EMOJI_MARKDOWN "⬇ "
+#define EMOJI_MATLAB EMOJI_CODE
 #define EMOJI_MOVIE "🎬"
 #define EMOJI_MUSIC "🎧"
 #define EMOJI_NOTE "📝"

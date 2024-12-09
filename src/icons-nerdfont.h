@@ -99,6 +99,7 @@
 #define NERD_LINUX         ""
 #define NERD_LUA           ""
 #define NERD_MARKDOWN      ""
+#define NERD_MATLAB        ""
 #define NERD_MYSQL         ""
 #define NERD_NIX           ""
 #define NERD_OCAML         ""
