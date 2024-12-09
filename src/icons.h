@@ -408,17 +408,11 @@ char
 # define WHITE "\x1b[0;37m"
 # define B_WHITE "\x1b[1;37m"
 # define YELLOW "\x1b[0;33m"
-# define B_YELLOW "\x1b[1;33m"
 # define GREEN "\x1b[0;32m"
 # define B_GREEN "\x1b[1;32m"
 # define CYAN "\x1b[0;36m"
-# define B_CYAN "\x1b[1;36m"
 # define MAGENTA "\x1b[0;35m"
-# define B_MAGENTA "\x1b[1;35m"
 # define RED "\x1b[0;31m"
-# define B_RED "\x1b[1;31m"
-# define BLACK "\x1b[0;30m"
-# define B_BLACK "\x1b[1;30m"
 #else
 # define EMPTY_STR ""
 # define BLUE EMPTY_STR
@@ -426,25 +420,16 @@ char
 # define WHITE EMPTY_STR
 # define B_WHITE EMPTY_STR
 # define YELLOW EMPTY_STR
-# define B_YELLOW EMPTY_STR
 # define GREEN EMPTY_STR
 # define B_GREEN EMPTY_STR
 # define CYAN EMPTY_STR
-# define B_CYAN EMPTY_STR
 # define MAGENTA EMPTY_STR
-# define B_MAGENTA EMPTY_STR
 # define RED EMPTY_STR
-# define B_RED EMPTY_STR
-# define BLACK EMPTY_STR
-# define B_BLACK EMPTY_STR
 #endif /* _NERD || _ICONS_IN_TERMINAL */
 
 /* Default icons and colors */
 #define DEF_DIR_ICON ICON_DIR /* Directory */
 #define DEF_DIR_ICON_COLOR YELLOW
-
-#define DEF_FILE_ICON ICON_REG /* Regular file */
-#define DEF_FILE_ICON_COLOR WHITE
 
 #define DEF_LINK_ICON ICON_LINK /* Symbolic link */
 #define DEF_LINK_ICON_COLOR CYAN
@@ -452,8 +437,11 @@ char
 #define DEF_EXEC_ICON ICON_EXEC /* Executable file */
 #define DEF_EXEC_ICON_COLOR WHITE
 
-#define DEF_NOPERM_ICON ICON_LOCK /* File without access permissions */
+#define DEF_NOPERM_ICON ICON_LOCK /* File without access permission */
 #define DEF_NOPERM_ICON_COLOR YELLOW
+
+#define DEF_FILE_ICON ICON_REG /* None of the above */
+#define DEF_FILE_ICON_COLOR WHITE
 
 /* Per file extension icons */
 struct icons_t const icon_ext[] = {
