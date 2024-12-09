@@ -51,7 +51,7 @@
 #define EMOJI_CLOJURE EMOJI_CODE
 #define EMOJI_CODE "📑"
 #define EMOJI_CHANGELOG "🔺"
-#define EMOJI_CHESS EMOJI_FILE
+#define EMOJI_CHESS "♟️ "
 #define EMOJI_CONF "🔧"
 #define EMOJI_COFFEE EMOJI_JAVA
 #define EMOJI_CPP EMOJI_C
@@ -69,7 +69,7 @@
 #define EMOJI_ELM EMOJI_CODE
 #define EMOJI_ENCRYPTED "🔒"
 #define EMOJI_ERLANG EMOJI_CODE
-#define EMOJI_EXEC "⚙ "
+#define EMOJI_EXEC "⚙️ "
 #define EMOJI_FILE "📄"
 #define EMOJI_FOLDER "📂"
 #define EMOJI_FONT "🔤"
@@ -86,7 +86,7 @@
 #define EMOJI_JSON EMOJI_CONF
 #define EMOJI_KEY "🔑"
 #define EMOJI_KOTLIN "🇰 "
-#define EMOJI_LICENSE "⚖ "
+#define EMOJI_LICENSE "⚖️ "
 #define EMOJI_LINK "🔗"
 #define EMOJI_LINUX "🐧"
 #define EMOJI_LIST "✅"
@@ -103,6 +103,7 @@
 #define EMOJI_PDF "🔖"
 #define EMOJI_PERL "🐪"
 #define EMOJI_PHOTO "📸"
+#define EMOJI_PHOTOSHOP "🖌️ "
 #define EMOJI_PICTURE "📷"
 #define EMOJI_PLAYLIST EMOJI_MUSIC
 #define EMOJI_POSTSCRIPT EMOJI_PDF
