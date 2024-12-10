@@ -1604,8 +1604,7 @@ create_main_config_file(char *file)
 # Only 0 and 2 will prompt before overwrite\n\
 ;mvCmd=%d\n\n"
 
-		"# If set to true, the 'r' command will never prompt before removals\n\
-# rm(1) is invoked with the -f flag.\n\
+		"# If set to true, the 'r' command will never prompt before removals.\n\
 ;rmForce=%s\n\n",
 
 		DEF_COLOR_SCHEME,
