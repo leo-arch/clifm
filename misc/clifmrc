@@ -347,9 +347,9 @@
 ;TrashForce=false
 
 # If set to true, do not ask for confirmation before removing files
-# with the 'r' command.
-# Note: use the '-f' parameter to turn this option on for a single
-# command. Example: 'r -f FILE'.
+# ('r' command only).
+# Note: If set to false, you can still use the '-f' parameter to turn
+# confirmation off for a single command. E.g.: 'r -f FILE'.
 ;rmForce=false
 
 # Set the default copy command. Available options are:
