@@ -396,47 +396,29 @@ set_start_path(void)
 	return FUNC_SUCCESS;
 }
 
-static int
-try_standard_data_dirs(void)
-{
-	char home_local[PATH_MAX + 1];
-	*home_local = '\0';
-	if (user.home && *user.home)
-		snprintf(home_local, sizeof(home_local), "%s/.local/share", user.home);
-
-	char *const data_dirs[] = {
-		home_local,
-		"/usr/local/share",
-		"/usr/share",
-		"/opt/local/share",
-		"/opt/share",
-		"/opt/clifm/share",
-#if defined(__HAIKU__)
-		"/boot/system/non-packaged/data",
-		"/boot/system/data",
-#endif /* __HAIKU__ */
-		NULL };
-
-	size_t i;
-	struct stat a;
-
-	for (i = 0; data_dirs[i]; i++) {
-		char tmp[PATH_MAX + 5 + ((sizeof(PROGRAM_NAME) - 1) * 2)];
-		snprintf(tmp, sizeof(tmp), "%s/%s/%src", data_dirs[i],
-			PROGRAM_NAME, PROGRAM_NAME);
-
-		if (stat(tmp, &a) == -1 || !S_ISREG(a.st_mode))
-			continue;
-
-		data_dir = savestring(data_dirs[i], strlen(data_dirs[i]));
-		return FUNC_SUCCESS;
-	}
-
-	return FUNC_FAILURE;
-}
-
+/* Check whether DIR contains the 'clifm/clifmrc' file, in which case we
+ * assume this is clifm's data directory.
+ * Return a malloc'ed copy of DIR in case of success, or NULL on error. */
 static char *
 try_datadir(const char *dir)
+{
+	if (!dir || !*dir)
+		return (char *)NULL;
+
+	struct stat a;
+	char p[PATH_MAX + 1];
+
+	/* Try DIR/clifm/clifmrc */
+	snprintf(p, sizeof(p), "%s/%s/%src", dir, PROGRAM_NAME, PROGRAM_NAME);
+	if (stat(p, &a) != -1 && S_ISREG(a.st_mode) && a.st_size > 0)
+		return savestring(dir, strlen(dir));
+
+	return (char *)NULL;
+}
+
+/* Same as try_datadir(), but performs a few extra checks. */
+static char *
+try_datadir_from_param(const char *dir)
 {
 	if (!dir || !*dir)
 		return (char *)NULL;
@@ -452,7 +434,7 @@ try_datadir(const char *dir)
 
 	/* Try DIR/share/clifm/clifmrc */
 	snprintf(p, sizeof(p), "%s/share/%s/%src", dir, PROGRAM_NAME, PROGRAM_NAME);
-	if (stat(p, &a) != -1 && S_ISREG(a.st_mode)) {
+	if (stat(p, &a) != -1 && S_ISREG(a.st_mode) && a.st_size > 0) {
 		const size_t len = strlen(dir) + 7;
 		char *q = xnmalloc(len, sizeof(char));
 		snprintf(q, len, "%s/share", dir);
@@ -461,10 +443,86 @@ try_datadir(const char *dir)
 
 	/* Try DIR/clifm/clifmrc */
 	snprintf(p, sizeof(p), "%s/%s/%src", dir, PROGRAM_NAME, PROGRAM_NAME);
-	if (stat(p, &a) != -1 && S_ISREG(a.st_mode))
+	if (stat(p, &a) != -1 && S_ISREG(a.st_mode) && a.st_size > 0)
 		return savestring(dir, strlen(dir));
 
 	return (char *)NULL;
+}
+
+/* Let's inspect paths in XDG_DATA_DIRS looking for clifm's data directory.
+ * In case of success, the path is stored in data_dir (global) and FUNC_SUCCESS
+ * is returned. Otherwise, FUNC_FAILURE is returned and data_dir is set to NULL. */
+static int
+try_xdg_data_dirs(void)
+{
+	char *env = getenv("XDG_DATA_DIRS");
+	if (!env || !*env)
+		return FUNC_FAILURE;
+
+	char *str = strtok(env, ":");
+	if (!str || !*str)
+		return FUNC_FAILURE;
+
+	if ((data_dir = try_datadir(str)) != NULL)
+		return FUNC_SUCCESS;
+
+	while ((str = strtok(NULL, ":")) != NULL) {
+		if ((data_dir = try_datadir(str)) != NULL)
+			return FUNC_SUCCESS;
+	}
+
+	return FUNC_FAILURE;
+}
+
+/* Let's find out where the data directory is located trying these
+ * directories (and in this order):
+ * $XDG_DATA_HOME
+ * $XDG_DATA_DIRS
+ * /usr/local/share
+ * /usr/share
+ * /opt/local/share
+ * /opt/share
+ * /opt/clifm/share */
+static int
+try_standard_data_dirs(void)
+{
+	char home_local[PATH_MAX + 1];
+	*home_local = '\0';
+	const int sec_env = (xargs.secure_env == 1 || xargs.secure_env_full == 1);
+
+	char *env = sec_env != 1 ? getenv("XDG_DATA_HOME") : (char *)NULL;
+	if (env && *env)
+		xstrsncpy(home_local, env, sizeof(home_local));
+	else if (user.home && *user.home)
+		snprintf(home_local, sizeof(home_local), "%s/.local/share", user.home);
+
+	if ((data_dir = try_datadir(home_local)) != NULL)
+		return FUNC_SUCCESS;
+
+	if (sec_env != 1 && try_xdg_data_dirs() == FUNC_SUCCESS)
+		return FUNC_SUCCESS;
+
+	/* Neither XDG_DATA_HOM nor XDG_DATA_DIRS. Let's try a few standard paths */
+	char *const data_dirs[] = {
+		"/usr/local/share",
+		"/usr/share",
+		"/opt/local/share",
+		"/opt/share",
+		"/opt/clifm/share",
+#if defined(__HAIKU__)
+		"/boot/system/non-packaged/data",
+		"/boot/system/data",
+#endif /* __HAIKU__ */
+		NULL };
+
+	size_t i;
+
+	for (i = 0; data_dirs[i]; i++) {
+		if ((data_dir = try_datadir(data_dirs[i])) != NULL)
+			return FUNC_SUCCESS;
+	}
+
+	return FUNC_FAILURE;
 }
 
 static char *
@@ -484,7 +542,7 @@ resolve_absolute_path(const char *s)
 	if (p)
 		*p = '/';
 
-	return try_datadir(t ? t : s);
+	return try_datadir_from_param(t ? t : s);
 }
 
 static char *
@@ -501,7 +559,7 @@ resolve_relative_path(const char *s)
 	if (q && q != p)
 		*q = '\0';
 
-	char *r = try_datadir(p);
+	char *r = try_datadir_from_param(p);
 	free(p);
 	return r;
 }
@@ -520,12 +578,14 @@ resolve_basename(const char *s)
 	if (q && q != p)
 		*q = '\0';
 
-	char *r = try_datadir(p);
+	char *r = try_datadir_from_param(p);
 	free(p);
 
 	return r;
 }
 
+/* Let's try to get the data directory from the path pointed to by ARG
+ * (either --data-dir=PATH or argv[0]). */
 static int
 get_data_dir_from_path(char *arg)
 {
@@ -556,11 +616,12 @@ END:
 
 /* Get the system data directory (usually /usr/local/share),
  * Try first CLIFM_DATADIR, defined in the Makefile, then a few standard
- * paths, and finally try to guess based on whatever argv[0] provides. */
+ * paths (like XDG_DATA_DIRS), and finally try to guess based on whatever
+ * argv[0] provides. */
 void
 get_data_dir(void)
 {
-	if (data_dir) /* DATA_DIR was defined via --data-dir */
+	if (data_dir != NULL) /* DATA_DIR was set via --data-dir */
 		return;
 
 #ifdef CLIFM_DATADIR
@@ -583,7 +644,8 @@ get_data_dir(void)
 		return;
 
 	err('w', PRINT_PROMPT, _("%s: No data directory found. Data files, "
-		"such as plugins and color schemes, may not be available.\n"),
+		"such as plugins and color schemes, may not be available.\n"
+		"Set a custom data directory via the '--data-dir' option.\n"),
 		PROGRAM_NAME);
 }
 
