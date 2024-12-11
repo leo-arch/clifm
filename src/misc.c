@@ -780,7 +780,7 @@ confirm_sudo_cmd(char **cmd)
 	if (i > 0)
 		putchar('\n');
 
-	return rl_get_y_or_n(_("Run command? [y/n] "));
+	return rl_get_y_or_n(_("Run command? [y/n] "), 0);
 }
 
 /* Launch a new instance using CMD. If CMD is NULL, try "CONF.TERM clifm".

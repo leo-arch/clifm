@@ -741,7 +741,7 @@ ask_and_create_file(void)
 
 	if (validate_filename(&filename, 0) == 0) {
 		xerror(_("new: '%s': Unsafe file name\n"), filename);
-		if (rl_get_y_or_n(_("Continue? [y/n] ")) == 0) {
+		if (rl_get_y_or_n(_("Continue? [y/n] "), 0) == 0) {
 			free(filename);
 			return FUNC_SUCCESS;
 		}
@@ -822,7 +822,7 @@ create_files(char **args, const int is_md)
 		if (validate_filename(&args[i], is_md) == 0) {
 			xerror(_("%s: '%s': Unsafe file name\n"),
 				is_md ? "md" : "new", args[i]);
-			if (rl_get_y_or_n(_("Continue? [y/n] ")) == 0)
+			if (rl_get_y_or_n(_("Continue? [y/n] "), 0) == 0)
 				continue;
 		}
 
@@ -1130,7 +1130,7 @@ edit_link(char *link)
 	/* Check new_path existence and warn the user if it does not exist. */
 	if (lstat(new_path, &attr) == -1) {
 		xerror("'%s': %s\n", new_path, strerror(errno));
-		if (rl_get_y_or_n(_("Relink as broken symbolic link? [y/n] ")) == 0) {
+		if (rl_get_y_or_n(_("Relink as broken symbolic link? [y/n] "), 0) == 0) {
 			free(new_path);
 			return FUNC_SUCCESS;
 		}
@@ -1343,13 +1343,13 @@ symlink_file(char **args)
 
 	if (lstat(target, &a) == -1) {
 		printf("link: '%s': %s\n", target, strerror(errno));
-		if (rl_get_y_or_n(_("Create broken symbolic link? [y/n] ")) == 0)
+		if (rl_get_y_or_n(_("Create broken symbolic link? [y/n] "), 0) == 0)
 			return FUNC_SUCCESS;
 	}
 
 	if (lstat(link_name, &a) != -1 && S_ISLNK(a.st_mode)) {
 		printf("link: '%s': %s\n", link_name, strerror(EEXIST));
-		if (rl_get_y_or_n(_("Overwrite this file? [y/n] ")) == 0)
+		if (rl_get_y_or_n(_("Overwrite this file? [y/n] "), 0) == 0)
 			return FUNC_SUCCESS;
 
 		if (unlinkat(XAT_FDCWD, link_name, 0) == -1) {
@@ -1440,7 +1440,7 @@ static int
 vv_create_new_dir(const char *dir)
 {
 	fprintf(stderr, _("vv: '%s': directory does not exist.\n"), dir);
-	if (rl_get_y_or_n(_("Create it? [y/n] ")) == 0)
+	if (rl_get_y_or_n(_("Create it? [y/n] "), 0) == 0)
 		return (-1);
 
 	char tmp[PATH_MAX + 1];
@@ -1816,7 +1816,7 @@ rm_confirm(struct rm_info *info, const size_t start, const int have_dirs)
 	for (i = start; info[i].name; i++)
 		print_file_name(info[i].name, info[i].dir);
 
-	return rl_get_y_or_n(_("Continue? [y/n] "));
+	return rl_get_y_or_n(_("Continue? [y/n] "), 0);
 }
 
 static int
@@ -1839,7 +1839,7 @@ check_rm_files(struct rm_info *info, const size_t start, const char *errname)
 	}
 
 	if (ret == FUNC_FAILURE) {
-		return (rl_get_y_or_n(_("Remove files anyway? [y/n] ")) == 0
+		return (rl_get_y_or_n(_("Remove files anyway? [y/n] "), 0) == 0
 			? FUNC_FAILURE : FUNC_SUCCESS);
 	}
 

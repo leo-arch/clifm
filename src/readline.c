@@ -89,13 +89,17 @@ static struct dirent **tagged_files = (struct dirent **)NULL;
 static int tagged_files_n = 0;
 #endif /* !_NO_TAGS */
 static int cb_running = 0;
+static char rl_default_answer = 0;
 
 /* Get user input (y/n, uppercase is allowed) using _MSG as message.
- * The question will be repeated until 'y' or 'n' is entered.
+ * If DEFAULT_ANSWER isn't zero, it will be used in case the user just
+ * presses Enter on an empty line.
  * Returns 1 if 'y' or 0 if 'n'. */
 int
-rl_get_y_or_n(const char *msg_str)
+rl_get_y_or_n(const char *msg_str, char default_answer)
 {
+	rl_default_answer = default_answer != 0 ? default_answer : 0;
+
 	char *answer = (char *)NULL;
 	while (!answer) {
 		answer = rl_no_hist(msg_str, 0);
@@ -663,6 +667,16 @@ cb_linehandler(char *line)
 			rl_callback_handler_input = savestring(line, strlen(line));
 			rl_callback_handler_remove();
 			cb_running = 0;
+		} else {
+			/* Enter on empty line. If we have a default answer (set via
+			 * rl_get_y_or_no()), let's return this answer. */
+			if (rl_default_answer != 0) {
+				rl_callback_handler_input = xnmalloc(2, sizeof(char));
+				*rl_callback_handler_input = rl_default_answer;
+				rl_callback_handler_input[1] = '\0';
+				rl_callback_handler_remove();
+				cb_running = 0;
+			}
 		}
 
 		free(line);

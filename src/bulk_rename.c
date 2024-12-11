@@ -91,7 +91,7 @@ rename_file(char *oldpath, char *newpath)
 	struct stat a;
 	if (lstat(npath, &a) == 0) {
 		xerror("br: '%s': %s\n", newpath, strerror(EEXIST));
-		if (rl_get_y_or_n(_("Overwrite this file? [y/n] ")) == 0) {
+		if (rl_get_y_or_n(_("Overwrite this file? [y/n] "), 0) == 0) {
 			free(npath);
 			return EEXIST;
 		}
@@ -378,7 +378,7 @@ check_dups(FILE *fp)
 		free(fnames[i]);
 	free(fnames);
 
-	if (dups > 0 && rl_get_y_or_n(_("Continue? [y/n] ")) == 0)
+	if (dups > 0 && rl_get_y_or_n(_("Continue? [y/n] "), 0) == 0)
 		return dups;
 
 	return 0;
@@ -472,7 +472,7 @@ bulk_rename(char **args, size_t *renamed, const size_t reload_list)
 		goto ERROR;
 
 	/* Ask the user for confirmation. */
-	if (rl_get_y_or_n(_("Continue? [y/n] ")) == 0)
+	if (rl_get_y_or_n(_("Continue? [y/n] "), 0) == 0)
 		goto ERROR;
 
 	/* Make sure the tmp file we're about to read is the same we originally

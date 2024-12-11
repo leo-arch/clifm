@@ -622,7 +622,7 @@ CONFIRM:
 	 * be done. */
 	if (do_edit == 1) {
 		printf(_("%zu file name(s) will be bleached\n"), f);
-		if (rl_get_y_or_n(_("Continue? [y/n] ")) != 1) {
+		if (rl_get_y_or_n(_("Continue? [y/n] "), 0) != 1) {
 			for (i = 0; i < f; i++) {
 				free(bfiles[i].original);
 				free(bfiles[i].replacement);

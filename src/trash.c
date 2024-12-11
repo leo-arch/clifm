@@ -75,7 +75,7 @@ confirm_removal(const size_t n)
 	char msg[256]; /* Big enough, in case of translations. */
 	snprintf(msg, sizeof(msg), _("Remove %zu file(s)? [y/n] "), n);
 
-	return rl_get_y_or_n(msg);
+	return rl_get_y_or_n(msg, 0);
 }
 
 /* We have removed N files from the trash can. Print the results. */
@@ -1111,7 +1111,7 @@ ask_for_confirmation(char **args)
 		free(name);
 	}
 
-	if (rl_get_y_or_n("Continue? [y/n] ") == 0)
+	if (rl_get_y_or_n(_("Continue? [y/n] "), 0) == 0)
 		return 0;
 
 	return i;
