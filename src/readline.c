@@ -96,9 +96,9 @@ static char rl_default_answer = 0;
  * presses Enter on an empty line.
  * Returns 1 if 'y' or 0 if 'n'. */
 int
-rl_get_y_or_n(const char *msg_str, char default_answer)
+rl_get_y_or_n(const char *msg_str, char def_answer)
 {
-	rl_default_answer = default_answer != 0 ? default_answer : 0;
+	rl_default_answer = def_answer != 0 ? def_answer : 0;
 
 	char *answer = (char *)NULL;
 	while (!answer) {
@@ -669,7 +669,7 @@ cb_linehandler(char *line)
 			cb_running = 0;
 		} else {
 			/* Enter on empty line. If we have a default answer (set via
-			 * rl_get_y_or_no()), let's return this answer. */
+			 * rl_get_y_or_n()), let's return this answer. */
 			if (rl_default_answer != 0) {
 				rl_callback_handler_input = xnmalloc(2, sizeof(char));
 				*rl_callback_handler_input = rl_default_answer;

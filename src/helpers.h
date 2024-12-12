@@ -1096,6 +1096,12 @@ extern time_t curdir_mtime;
 typedef ssize_t filesn_t;
 extern filesn_t files;
 
+struct default_answer_t {
+	char remove;
+	char trash;
+	char pad[6];
+};
+
 /* User settings (mostly from the config file) */
 struct config_t {
 	char *opener;
@@ -1116,6 +1122,7 @@ struct config_t {
 	char *usr_cscheme;
 	char *fzftab_options;
 
+	struct default_answer_t default_answer;
 	int apparent_size;
 	int auto_open;
 	int autocd;

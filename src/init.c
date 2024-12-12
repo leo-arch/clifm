@@ -192,6 +192,8 @@ init_conf_struct(void)
 	conf.color_lnk_as_target = UNSET;
 	conf.columned = DEF_COLUMNS;
 	conf.cp_cmd = DEF_CP_CMD;
+	conf.default_answer.remove = DEF_ANSWER_REMOVE;
+	conf.default_answer.trash = DEF_ANSWER_TRASH;
 	conf.desktop_notifications = UNSET;
 	conf.dirhist_map = UNSET;
 	conf.disk_usage = UNSET;

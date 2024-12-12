@@ -1111,7 +1111,10 @@ ask_for_confirmation(char **args)
 		free(name);
 	}
 
-	if (rl_get_y_or_n(_("Continue? [y/n] "), 0) == 0)
+	char msg[NAME_MAX];
+	snprintf(msg, sizeof(msg), "Continue? %s ",
+		gen_default_answer(conf.default_answer.trash));
+	if (rl_get_y_or_n(msg, conf.default_answer.trash) == 0)
 		return 0;
 
 	return i;

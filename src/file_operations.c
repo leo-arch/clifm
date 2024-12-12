@@ -36,7 +36,7 @@
 # undef CHAR_MAX /* Silence redefinition error */
 #endif /* __TINYC__ */
 
-#include "aux.h"
+#include "aux.h" /* gen_default_answer() */
 #include "checks.h"
 #include "colors.h"
 #include "file_operations.h"
@@ -1816,7 +1816,10 @@ rm_confirm(struct rm_info *info, const size_t start, const int have_dirs)
 	for (i = start; info[i].name; i++)
 		print_file_name(info[i].name, info[i].dir);
 
-	return rl_get_y_or_n(_("Continue? [y/n] "), 0);
+	char msg[NAME_MAX];
+	snprintf(msg, sizeof(msg), _("Continue? %s "),
+		gen_default_answer(conf.default_answer.remove));
+	return rl_get_y_or_n(msg, conf.default_answer.remove);
 }
 
 static int

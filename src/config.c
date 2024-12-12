@@ -3008,6 +3008,44 @@ set_term_cmd(char *cmd)
 	free(buf);
 }
 
+static void
+set_default_answer(const char *str)
+{
+	if (!str || !*str || str[1] != ':'
+	|| (str[2] != 'y' && str[2] != 'n'))
+		return;
+
+	switch (*str) {
+	case 'r': conf.default_answer.remove = str[2]; break;
+	case 't': conf.default_answer.trash = str[2]; break;
+	default: break;
+	}
+}
+
+static void
+set_default_answers(char *val)
+{
+	if (!val || !*val)
+		return;
+
+	char *v = remove_quotes(val);
+	if (!v || !*v)
+		return;
+
+	char *str = strtok(v, ",");
+	if (!str || !*str)
+		return;
+
+	set_default_answer(str);
+
+	while ((str = strtok(NULL, ",")) != NULL)
+		set_default_answer(str);
+
+//	printf("r:%c(%d),t:%c(%d)\n",
+//		conf.default_answer.remove, conf.default_answer.remove,
+//		conf.default_answer.trash, conf.default_answer.trash);
+}
+
 /* Read the main configuration file and set options accordingly */
 static void
 read_config(void)
@@ -3117,6 +3155,10 @@ read_config(void)
 		else if (*line == 'c' && strncmp(line, "cpCmd=", 6) == 0) {
 			set_config_int_value(line + 6, &conf.cp_cmd,
 				0, CP_CMD_AVAILABLE - 1);
+		}
+
+		else if (*line == 'D' && strncmp(line, "DefaultAnswer=", 14) == 0) {
+			set_default_answers(line + 14);
 		}
 
 		else if (xargs.desktop_notifications == UNSET && *line == 'D'
@@ -3741,8 +3783,8 @@ undef_config_file_names(void)
 	free(remotes_file); remotes_file = (char *)NULL;
 }
 
-/* Set up CliFM directories and config files. Load the user's
- * configuration from clifmrc. */
+/* Set up Clifm directories and config files. Load the user's
+ * configuration from the 'clifmrc' file. */
 void
 init_config(void)
 {
