@@ -91,18 +91,36 @@ static int tagged_files_n = 0;
 static int cb_running = 0;
 static char rl_default_answer = 0;
 
-/* Get user input (y/n, uppercase is allowed) using _MSG as message.
+static const char *
+gen_y_n_str(const char def_answer)
+{
+	switch (def_answer) {
+	case '0': return "[y/n]";
+	case 'y': return "[Y/n]";
+	case 'n': return "[y/N]";
+	default:  return "[y/n]";
+	}
+}
+
+/* Get user input (y/n, uppercase is allowed) using MSG_STR as prompt message.
  * If DEFAULT_ANSWER isn't zero, it will be used in case the user just
  * presses Enter on an empty line.
  * Returns 1 if 'y' or 0 if 'n'. */
 int
-rl_get_y_or_n(const char *msg_str, char def_answer)
+rl_get_y_or_n(const char *msg_str, char default_answer)
 {
-	rl_default_answer = def_answer != 0 ? def_answer : 0;
+	rl_default_answer = default_answer != 0 ? default_answer : 0;
+
+	const char *yes_no_str = gen_y_n_str(default_answer);
+	const size_t msg_len = strlen(msg_str) + strlen(yes_no_str) + 3;
+	char *msg = xnmalloc(msg_len, sizeof(char));
+	snprintf(msg, msg_len, "%s %s ", msg_str, yes_no_str);
+
+	int ret = 0;
 
 	char *answer = (char *)NULL;
 	while (!answer) {
-		answer = rl_no_hist(msg_str, 0);
+		answer = rl_no_hist(msg, 0);
 		if (!answer)
 			continue;
 
@@ -116,20 +134,21 @@ rl_get_y_or_n(const char *msg_str, char def_answer)
 		case 'y': /* fallthrough */
 		case 'Y':
 			if (!answer[1] || strcmp(answer + 1, "es") == 0)
-				{ free(answer); return 1; }
+				{ free(answer); ret = 1; break; }
 			else
 				{ free(answer); answer = (char *)NULL; continue; }
 		case 'n': /* fallthrough */
 		case 'N':
 			if (!answer[1] || (answer[1] == 'o' && !answer[2]))
-				{ free(answer); return 0; }
+				{ free(answer); ret = 0; break; }
 			else
 				{ free(answer); answer = (char *)NULL; continue; }
 		default: free(answer); answer = (char *)NULL; continue;
 		}
 	}
 
-	return 0; /* Never reached */
+	free(msg);
+	return ret;
 }
 
 /* Delete key implementation */

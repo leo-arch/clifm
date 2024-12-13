@@ -100,17 +100,6 @@ press_any_key_to_continue(const int init_newline)
 	errno = saved_errno;
 }
 
-const char *
-gen_default_answer(const char def_answer)
-{
-	switch (def_answer) {
-	case '0': return "[y/n]";
-	case 'y': return "[Y/n]";
-	case 'n': return "[y/N]";
-	default:  return "[y/n]";
-	}
-}
-
 /* Print the file name FNAME, quoted if it contains an space.
  * A slash is appended if FNAME is a directory (ISDIR >= 1). */
 void

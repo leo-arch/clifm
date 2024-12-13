@@ -488,7 +488,7 @@ check_bm_shortcut(const char *shortcut, const int add)
 static int
 bookmark_add(char *file, char *name, char *shortcut)
 {
-	if (check_bm_path(file) == 1 && rl_get_y_or_n(_("Continue? [y/n] "), 0) == 0)
+	if (check_bm_path(file) == 1 && rl_get_y_or_n(_("Continue?"), 0) == 0)
 		return FUNC_SUCCESS;
 
 	int exit_status = FUNC_FAILURE;

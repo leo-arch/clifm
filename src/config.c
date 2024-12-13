@@ -3040,10 +3040,6 @@ set_default_answers(char *val)
 
 	while ((str = strtok(NULL, ",")) != NULL)
 		set_default_answer(str);
-
-//	printf("r:%c(%d),t:%c(%d)\n",
-//		conf.default_answer.remove, conf.default_answer.remove,
-//		conf.default_answer.trash, conf.default_answer.trash);
 }
 
 /* Read the main configuration file and set options accordingly */

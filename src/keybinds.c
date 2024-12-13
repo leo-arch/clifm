@@ -522,7 +522,7 @@ bind_kb_func(const char *func_name)
 	}
 
 	printf(_("New key: %s\n"), kb);
-	if (rl_get_y_or_n(_("Bind to this new key? [y/n] "), 0) == 0) {
+	if (rl_get_y_or_n(_("Bind to this new key?"), 0) == 0) {
 		free(kb);
 		return FUNC_SUCCESS;
 	}
