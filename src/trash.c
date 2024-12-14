@@ -73,7 +73,7 @@ confirm_removal(const size_t n)
 		return 1; /* Yes */
 
 	char msg[256]; /* Big enough, in case of translations. */
-	snprintf(msg, sizeof(msg), _("Remove %zu file(s)? [y/n] "), n);
+	snprintf(msg, sizeof(msg), _("Remove %zu file(s)?"), n);
 
 	return rl_get_y_or_n(msg, 0);
 }
