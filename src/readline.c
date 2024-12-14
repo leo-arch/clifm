@@ -109,7 +109,7 @@ gen_y_n_str(const char def_answer)
 int
 rl_get_y_or_n(const char *msg_str, char default_answer)
 {
-	rl_default_answer = default_answer != 0 ? default_answer : 0;
+	rl_default_answer = default_answer;
 
 	const char *yes_no_str = gen_y_n_str(default_answer);
 	const size_t msg_len = strlen(msg_str) + strlen(yes_no_str) + 3;
@@ -708,7 +708,7 @@ alt_rl_prompt(const char *prompt_str, const char *line)
 	cb_running = 1;
 	kbind_busy = 1;
 	rl_getc_function = alt_rl_getc;
-	int highlight_bk = conf.highlight;
+	const int highlight_bk = conf.highlight;
 	conf.highlight = 0;
 
 	/* Install the line handler */
