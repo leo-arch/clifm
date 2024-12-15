@@ -1822,7 +1822,7 @@ static int
 unset_function(char **var)
 {
 	if (!var || !var[0]) {
-		printf("unset: A variable name is required\n");
+		puts(_("unset: A variable name is required"));
 		return FUNC_SUCCESS;
 	}
 
@@ -1881,7 +1881,7 @@ run_log_cmd(char **args)
 		if (*args[1] == 'c' && strcmp(args[1], "clear") == 0) {
 			int ret = clear_logs(CMD_LOGS);
 			if (ret == FUNC_SUCCESS)
-				printf("log: Command logs cleared\n");
+				puts(_("log: Command logs cleared"));
 			return ret;
 		}
 	}
@@ -2071,13 +2071,13 @@ toggle_follow_links(const char *arg)
 
 /* Take the command entered by the user, already splitted into substrings
  * by parse_input_str(), and call the corresponding function. Return zero
- * in case of success and one in case of error
+ * in case of success and one in case of error.
 
- * Exit flag. exit_code is zero (sucess) by default. In case of error
+ * Exit status: EXIT_CODE is zero (success) by default. In case of error
  * in any of the functions below, it will be set to one (failure).
  * This will be the value returned by this function. Used by the \z
  * escape code in the prompt to print the exit status of the last
- * executed command */
+ * executed command. */
 static int
 exec_cmd(char **comm)
 {

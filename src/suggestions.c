@@ -68,7 +68,7 @@ static char *last_word = (char *)NULL;
 static int last_word_offset = 0;
 static int point_is_first_word = 0;
 
-/* A big enough buffer to hold temporary data. */
+/* A buffer big enough to hold temporary data. */
 static char tmp_buf[PATH_MAX + 2];
 
 /*
@@ -768,7 +768,6 @@ skip_leading_backslashes(char **str, size_t *len)
 static void
 match_print(char *match, const size_t len, char *color, const int append_slash)
 {
-//	char t[PATH_MAX + 2];
 	*tmp_buf = '\0';
 
 	if (append_slash == 1)
@@ -904,7 +903,6 @@ print_directory_suggestion(const filesn_t i, const size_t len, char *color)
 
 	suggestion.filetype = DT_DIR;
 
-//	char name[NAME_MAX + 2];
 	*tmp_buf = '\0';
 	snprintf(tmp_buf, sizeof(tmp_buf), "%s/", file_info[i].name);
 
@@ -937,7 +935,6 @@ print_reg_file_suggestion(char *str, const filesn_t i, size_t len,
 		}
 
 		if (dot_slash) { /* Reinsert './', removed to check file name. */
-//			char t[NAME_MAX + 2];
 			*tmp_buf = '\0';
 			snprintf(tmp_buf, sizeof(tmp_buf), "./%s", tmp);
 			print_suggestion(tmp_buf, len + 2, color);
@@ -950,7 +947,6 @@ print_reg_file_suggestion(char *str, const filesn_t i, size_t len,
 	}
 
 	if (dot_slash) {
-//		char t[NAME_MAX + 2];
 		*tmp_buf = '\0';
 		snprintf(tmp_buf, sizeof(tmp_buf), "./%s", file_info[i].name);
 		print_suggestion(tmp_buf, len + 2, color);
@@ -1240,7 +1236,6 @@ check_jumpdb(const char *str, const size_t len, const int print)
 
 			suggestion.type = FILE_SUG;
 			suggestion.filetype = DT_DIR;
-//			char tmp[PATH_MAX + 2];
 			*tmp_buf = '\0';
 
 			if (jump_db[i].len > 0
@@ -1295,7 +1290,6 @@ check_eln(const char *str, const int print)
 	if (conf.suggest_filetype_color)
 		color = file_info[n].color;
 
-//	char tmp[NAME_MAX + 1];
 	*tmp_buf = '\0';
 	if (file_info[n].dir) {
 		snprintf(tmp_buf, sizeof(tmp_buf), "%s/", file_info[n].name);
@@ -1422,7 +1416,6 @@ check_users(const char *str, const size_t len)
 		if (len == 0 || (*str == *p->pw_name
 		&& strncmp(str, p->pw_name, len) == 0)) {
 			suggestion.type = USER_SUG;
-//			char t[NAME_MAX + 1];
 			*tmp_buf = '\0';
 			snprintf(tmp_buf, sizeof(tmp_buf), "~%s", p->pw_name);
 			print_suggestion(tmp_buf, len + 1, sf_c);
@@ -1451,7 +1444,6 @@ check_variables(const char *str, const size_t len)
 
 		*ret = '\0';
 		suggestion.type = VAR_SUG;
-//		char t[NAME_MAX + 1];
 		*tmp_buf = '\0';
 		snprintf(tmp_buf, sizeof(tmp_buf), "$%s", environ[i]);
 		print_suggestion(tmp_buf, len + 1, sh_c);
@@ -1468,7 +1460,6 @@ check_variables(const char *str, const size_t len)
 			continue;
 
 		suggestion.type = CMD_SUG;
-//		char t[NAME_MAX + 1];
 		*tmp_buf = '\0';
 		snprintf(tmp_buf, sizeof(tmp_buf), "$%s", usr_var[i].name);
 		print_suggestion(tmp_buf, len + 1, sh_c);
