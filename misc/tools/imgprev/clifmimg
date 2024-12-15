@@ -167,7 +167,7 @@ display() {
 
 		ansi)
 			case "$ansi_method" in
-				chafa) chafa -f symbols -s "${C}x${L}" "$1" ;;
+				chafa) chafa --symbols=all -s "${C}x${L}" -- "$1" ;;
 				pixterm) pixterm -s 2 -tc "${C}" -tr "${L}" "$1" ;;
 				img2txt) img2txt -H"${L}" -W"${C}" "$1" ;;
 				viu) viu -b -h"${L}" -w"${C}" "$1" ;;
