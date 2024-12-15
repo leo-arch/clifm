@@ -1839,8 +1839,9 @@ check_rm_files(struct rm_info *info, const size_t start, const char *errname)
 	}
 
 	if (ret == FUNC_FAILURE) {
-		return (rl_get_y_or_n(_("Remove files anyway?"), 0) == 0
-			? FUNC_FAILURE : FUNC_SUCCESS);
+		return (rl_get_y_or_n(_("Remove files anyway?"),
+			conf.default_answer.remove) == 0
+				? FUNC_FAILURE : FUNC_SUCCESS);
 	}
 
 	return ret;
