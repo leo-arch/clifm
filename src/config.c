@@ -1607,6 +1607,9 @@ create_main_config_file(char *file)
 		"# If set to true, the 'r' command will never prompt before removals.\n\
 ;rmForce=%s\n\n",
 
+		"# Default answers for specific confirmation prompts:\n\
+;DefaultAnswer=\"\"\n\n"
+
 		DEF_COLOR_SCHEME,
 		DEF_FILES_COUNTER == 1 ? "true" : "false",
 		DEF_LISTING_MODE,

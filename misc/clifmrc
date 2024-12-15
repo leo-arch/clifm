@@ -365,6 +365,19 @@
 # Only 0 and 2 will prompt before overwrite.
 ;mvCmd=0
 
+# A command separated line of fields defining defaults answers for
+# confirmation prompts. Each field has two values separated by a colon (':').
+# The left value indicates the command (for the time being only the following
+# left values are supported):
+#  'r': remove ('r' command)
+#  't': trash
+# The right value holds the default answer for the corresponding command:
+#  'y' or 'n'.
+# If unset, no default answer will be used.
+# For example, to set 'n' as the default answer for the 'r' command, and
+# 'y' for trash: "r:n,t:y".
+;DefaultAnswer=""
+
 # How should the 'l' command create symbolic links. Possible values:
 # absolute = Make the target an absolute path
 # relative = Make the target relative to the link location (like 'ln -rs')
