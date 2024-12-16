@@ -23,7 +23,7 @@
 */
 
 /* The following functions are taken from Bash (1.14.7), licensed GPL-1.0-or-later,
- * and modified if needed:
+ * and modified as required:
  * stat_char
  * get_y_or_n
  * print_filename
@@ -31,7 +31,7 @@
  * rl_strpbrk
  * compare_strings
  * tab_complete
- * All changes are licensed under GPL-2.0-or-later. */
+ * All changes are licensed GPL-2.0-or-later. */
 
 #include "helpers.h"
 
@@ -2112,7 +2112,7 @@ AFTER_USUAL_COMPLETION:
 
 //////////
 		/* WORKAROUND: If 'ds' and the replacement string needs to be
-		 * quoted, the completion do not work as expected. */
+		 * quoted, the completion does not work as expected. */
 		if (cur_comp_type == TCMP_DESEL && matches[0]
 		&& rl_strpbrk(matches[0], quote_chars))
 			replacement = NULL;
@@ -2221,7 +2221,8 @@ AFTER_USUAL_COMPLETION:
 					 * last printed color.
 					 * Drawback: there will be no color after the cursor
 					 * position (no color however is better than a wrong color). */
-					if (!replacement[k + 1] && rl_point < rl_end && cur_color != tx_c) {
+					if (!replacement[k + 1] && rl_point < rl_end
+					&& cur_color != tx_c) {
 						int _end = rl_end;
 						rl_end = rl_point;
 						rl_redisplay();
@@ -2232,7 +2233,8 @@ AFTER_USUAL_COMPLETION:
 
 					rl_redisplay();
 
-					if (cur_color == hv_c || cur_color == hq_c || cur_color == hp_c) {
+					if (cur_color == hv_c || cur_color == hq_c
+					|| cur_color == hp_c) {
 						fputs(cur_color, stdout);
 						fflush(stdout);
 					}

@@ -640,7 +640,7 @@ save_key(char *key)
 	return savestring(buf, strlen(buf));
 } */
 
-/* Store keybinds from the keybinds file into a struct */
+/* Store keybinds from the keybinds file into a struct. */
 int
 load_keybinds(void)
 {
@@ -700,7 +700,8 @@ load_keybinds(void)
 }
 
 /* This call to prompt() just updates the prompt in case it was modified by
- * a keybinding, for example, chdir, files selection, trash, and so on. */
+ * a keybinding, for example, chdir, files selection, trash, and so on.
+ * The screen is not refreshed in any way. */
 static void
 rl_update_prompt(void)
 {
@@ -709,10 +710,8 @@ rl_update_prompt(void)
 		rl_point = rl_end = 0;
 	}
 
-	/* Set this flag to prevent prompt() from refreshing the screen. */
-	rl_pending_input = 1;
-	/* In UPDATE mode, prompt() always returns NULL. */
-	prompt(exec_prompt_cmds ? PROMPT_UPDATE_RUN_CMDS : PROMPT_UPDATE);
+	prompt(exec_prompt_cmds ? PROMPT_UPDATE_RUN_CMDS : PROMPT_UPDATE,
+		PROMPT_NO_SCREEN_REFRESH);
 	exec_prompt_cmds = 0;
 	UNHIDE_CURSOR;
 }
@@ -725,11 +724,8 @@ static void
 rl_update_prompt_old(void)
 {
 	HIDE_CURSOR;
-	int b = xargs.refresh_on_empty_line;
-	xargs.refresh_on_empty_line = 0;
-	char *input = prompt(PROMPT_SHOW);
+	char *input = prompt(PROMPT_SHOW, PROMPT_NO_SCREEN_REFRESH);
 	free(input);
-	xargs.refresh_on_empty_line = b;
 }
 #endif /* __HAIKU__ || !_NO_PROFILES */
 

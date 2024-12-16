@@ -25,10 +25,14 @@
 #ifndef PROMPT_H
 #define PROMPT_H
 
-/* Mode macros for the prompt function */
-#define PROMPT_UPDATE 0
-#define PROMPT_SHOW   1
+/* Mode macros for the prompt() function */
+/* First parameter */
+#define PROMPT_UPDATE          0
+#define PROMPT_SHOW            1
 #define PROMPT_UPDATE_RUN_CMDS 2
+/* Second parameter */
+#define PROMPT_NO_SCREEN_REFRESH 0
+#define PROMPT_SCREEN_REFRESH    1
 
 #define CTLESC '\001'
 #define CTLNUL '\177'
@@ -91,7 +95,7 @@ emergency prompt"
 
 __BEGIN_DECLS
 
-char *prompt(const int prompt_flag);
+char *prompt(const int prompt_flag, const int screen_refresh);
 char *decode_prompt(char *line);
 int  prompt_function(char **args);
 char *gen_color(char **line);

@@ -1583,24 +1583,24 @@ expand_history(char **input)
 }
 
 static char *
-handle_empty_line(void)
+handle_empty_line(const int screen_refresh)
 {
 	if (conf.autols == 1 && ((flags & DELAYED_REFRESH)
-	|| xargs.refresh_on_empty_line == 1) && rl_pending_input == 0) {
+	|| xargs.refresh_on_empty_line == 1)
+	&& screen_refresh == PROMPT_SCREEN_REFRESH) {
 		flags &= ~DELAYED_REFRESH;
 		refresh_screen();
 	} else {
 		flags &= ~DELAYED_REFRESH;
 	}
 
-	rl_pending_input = 0;
 	return (char *)NULL;
 }
 
 /* Print the prompt and return the string entered by the user, to be
  * parsed later by parse_input_str() */
 char *
-prompt(const int prompt_flag)
+prompt(const int prompt_flag, const int screen_refresh)
 {
 	initialize_prompt_data(prompt_flag);
 
@@ -1635,7 +1635,7 @@ prompt(const int prompt_flag)
 
 	if (!input || !*input || rl_end == 0) {
 		free(input);
-		return handle_empty_line();
+		return handle_empty_line(screen_refresh);
 	}
 
 	flags &= ~DELAYED_REFRESH;
