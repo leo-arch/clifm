@@ -406,7 +406,7 @@ try_datadir(const char *dir)
 		return (char *)NULL;
 
 	struct stat a;
-	char p[PATH_MAX + 1];
+	char p[PATH_MAX + 5 + ((sizeof(PROGRAM_NAME) - 1) * 2)];
 
 	/* Try DIR/clifm/clifmrc */
 	snprintf(p, sizeof(p), "%s/%s/%src", dir, PROGRAM_NAME, PROGRAM_NAME);
