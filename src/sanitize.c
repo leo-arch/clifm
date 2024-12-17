@@ -251,15 +251,15 @@ xsecure_env(const int mode)
 	set_path_env();
 	xsetenv("IFS", " \t\n");
 
-	if (mode == SECURE_ENV_FULL)
-		goto END;
-
 	if (user.name)
 		xsetenv("USER", user.name);
 	if (user.home)
 		xsetenv("HOME", user.home);
 	if (user.shell)
 		xsetenv("SHELL", user.shell);
+
+	if (mode == SECURE_ENV_FULL)
+		goto END;
 
 	if (display && sanitize_cmd(display, SNT_DISPLAY) == FUNC_SUCCESS) {
 		xsetenv("DISPLAY", display);
