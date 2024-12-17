@@ -3682,8 +3682,11 @@ set_fzf_height(char *line)
 	if (!line || !*line || !*(++line) || *line == '~')
 		return 0;
 
-	get_term_size();
 	int val = 0;
+	int percent = 0;
+	size_t len = 0;
+
+	get_term_size();
 
 	char *s = strchr(line, ' ');
 	if (s)
@@ -3697,23 +3700,30 @@ set_fzf_height(char *line)
 		}
 	}
 
-	if (is_number(line)) {
-		val = atoi(line);
-		goto END;
+	len = strlen(line);
+	if (len > 1 && line[len - 1] == '%') {
+		line[len - 1] = '\0';
+		percent = 1;
 	}
 
-	const size_t len = strlen(line);
-	if (len > 1 && line[len - 1] == '%') {
+	if (!is_number(line))
+		goto END;
+
+	if (percent == 0) {
+		val = atoi(line);
+		goto END;
+	} else {
 		line[len - 1] = '\0';
 		const int n = atoi(line);
 		if (n > 0 && n <= 100)
 			val = n * term_lines / 100;
-		line[len - 1] = '%';
 	}
 
 END:
 	if (s)
 		*s = ' ';
+	if (percent == 1)
+		line[len - 1] = '%';
 
 	return val;
 }
