@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Dec 8, 2024" "clifm 1.22.5" "CLIFM Manual"
+.TH "CLIFM" "1" "Dec 17, 2024" "clifm 1.22.6" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -3019,7 +3019,7 @@ The following variables are set in an environment agnostic way (that is, securel
 .TP
 As a plus, \fB1)\fR core dumps are disabled, \fB2)\fR the umask value is set to \fI0077\fR at startup and the creation mode (when using the \fInew\fR command) is forced to \fI0700\fR for directories and \fI0600\fR for files, \fB3)\fR non\-standard file descriptors (>2) are closed, \fB4)\fR SUID/SGID privileges, if any, are dropped, and \fB5)\fR autocommand files aren't read at all (even if \fIReadAutocmdFiles\fR is set to true).
 .TP
-\fBb)\fR \fIFull\fR: this mode is just like the regular mode, except that \fInothing\fR is imported from the environment at all and only \fBPATH\fR and \fBIFS\fR are set (as described above). Everything else remains unset, and is the user's responsibility to set environment variables (via the export function), as needed. In this case, you might want to set, at least, \fBTERM\fR, and, if running in a graphical environment, \fBDISPLAY\fR.
+\fBb)\fR \fIFull\fR: this mode is just like the regular mode, except that \fInothing\fR is imported from the environment at all and only \fBPATH\fR, \fBHOME\fR, \fBUSER\fR, \fBSHELL\fR, and \fBIFS\fR are set (as described above). Everything else remains unset, and is the user's responsibility to set environment variables (via the export function), as needed. In this case, you might want to set, at least, \fBTERM\fR, and, if running in a graphical environment, \fBDISPLAY\fR.
 .TP
 Be aware that enabling secure\-environment might break some functions, depending on the system configuration.
 .TP
