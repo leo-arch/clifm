@@ -2281,18 +2281,17 @@ set_fzf_opts(char *line)
 		}
 	}
 
-	fzf_height_set = 0;
-
 	if (!conf.fzftab_options)
 		return;
 
 	if (strstr(conf.fzftab_options, "--preview "))
 		conf.fzf_preview = FZF_EXTERNAL_PREVIEWER;
 
-	if (strstr(conf.fzftab_options, "--height"))
-		fzf_height_set = 1;
+	char *b = strstr(conf.fzftab_options, "--height");
+	if (b)
+		fzf_height_set = set_fzf_height(b + (sizeof("--height") - 1));
 
-	char *b = strstr(conf.fzftab_options, "--border");
+	b = strstr(conf.fzftab_options, "--border");
 	if (b)
 		set_fzf_border_type(b + (sizeof("--border") - 1));
 }

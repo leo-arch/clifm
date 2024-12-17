@@ -44,6 +44,7 @@ void set_div_line(char *line);
 void set_env(const int reload);
 #ifndef _NO_FZF
 void set_fzf_border_type(char *line);
+int  set_fzf_height(char *line);
 #endif /* !_NO_FZF */
 void set_sel_file(void);
 void set_time_style(char *line, char **str, const int ptime);

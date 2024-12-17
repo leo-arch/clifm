@@ -3045,6 +3045,16 @@ set_default_answers(char *val)
 		set_default_answer(str);
 }
 
+static void
+set_rl_edit_mode(const char *val)
+{
+	if (val && ((*val == '0' && val[1] == '\n')
+	|| (*val == 'v' && val[1] == 'i' && val[2] == '\n')) )
+		rl_vi_editing_mode(1, 0);
+	else
+		rl_emacs_editing_mode(1, 0);
+}
+
 /* Read the main configuration file and set options accordingly */
 static void
 read_config(void)
@@ -3407,10 +3417,7 @@ read_config(void)
 
 		else if (xargs.rl_vi_mode == UNSET && *line == 'R'
 		&& strncmp(line, "RlEditMode=", 11) == 0) {
-			if (*(line + 11) == '0')
-				rl_vi_editing_mode(1, 0);
-			else
-				rl_emacs_editing_mode(1, 0);
+			set_rl_edit_mode(line + 11);
 		}
 
 		else if (*line == 'r' && strncmp(line, "rmForce=", 8) == 0) {
@@ -3668,22 +3675,65 @@ set_fzf_border_type(char *line)
 		fzf_border_type = 0; /* NOLINT *//* No vertical border */
 }
 
+int
+set_fzf_height(char *line)
+{
+	/* For the time being, "~NUM" is not supported for "--height" */
+	if (!line || !*line || !*(++line) || *line == '~')
+		return 0;
+
+	get_term_size();
+	int val = 0;
+
+	char *s = strchr(line, ' ');
+	if (s)
+		*s = '\0';
+
+	if (*line == '-') {
+		const int n = atoi(line + 1);
+		if (n > 0 && n < term_lines) {
+			val = term_lines - n;
+			goto END;
+		}
+	}
+
+	if (is_number(line)) {
+		val = atoi(line);
+		goto END;
+	}
+
+	const size_t len = strlen(line);
+	if (len > 1 && line[len - 1] == '%') {
+		line[len - 1] = '\0';
+		const int n = atoi(line);
+		if (n > 0 && n <= 100)
+			val = n * term_lines / 100;
+		line[len - 1] = '%';
+	}
+
+END:
+	if (s)
+		*s = ' ';
+
+	return val;
+}
+
 /* Just check if --height, --border, and --preview are set in FZF_DEFAULT_OPTS. */
 static void
 get_fzf_win_height_and_preview(void)
 {
-	char *p = getenv("FZF_DEFAULT_OPTS");
+	char *p = xargs.secure_env_full == 1 ? NULL : getenv("FZF_DEFAULT_OPTS");
 	if (!p || !*p)
 		return;
 
 	if (conf.fzf_preview == UNSET && strstr(p, "--preview "))
 		conf.fzf_preview = FZF_EXTERNAL_PREVIEWER;
 
-	if (fzf_height_set == 0 && strstr(p, "--height"))
-		fzf_height_set = 1;
-
 	char *b = (char *)NULL;
-	if (fzf_border_type == UNSET && (b = strstr(p, "--border")))
+	if ((b = strstr(p, "--height")) != NULL)
+		fzf_height_set = set_fzf_height(b + (sizeof("--height") - 1));
+
+	if (fzf_border_type == UNSET && (b = strstr(p, "--border")) != NULL)
 		set_fzf_border_type(b + (sizeof("--border") - 1));
 }
 #endif /* !_NO_FZF */
