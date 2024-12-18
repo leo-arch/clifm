@@ -166,7 +166,7 @@ int
 
 	fzftab = UNSET,
 	fzf_border_type = UNSET,
-	fzf_height_set = 0,
+	fzf_height_value = 0,
 	fzf_preview_border_type = 0,
 
 	hist_status = UNSET,

@@ -2289,11 +2289,11 @@ set_fzf_opts(char *line)
 
 	char *b = strstr(conf.fzftab_options, "--height");
 	if (b)
-		fzf_height_set = set_fzf_height(b + (sizeof("--height") - 1));
+		fzf_height_value = get_fzf_height(b + (sizeof("--height") - 1));
 
 	b = strstr(conf.fzftab_options, "--border");
 	if (b)
-		set_fzf_border_type(b + (sizeof("--border") - 1));
+		fzf_border_type = get_fzf_border_type(b + (sizeof("--border") - 1));
 }
 
 static void

@@ -3640,45 +3640,43 @@ first_non_blank(const char *line)
  * --border option: 0 (no vertical border), 1 (left or right border),
  * or 2 (left and right border). We need this value to properly calculate
  * the width of the fzf preview window (get_preview_win_width(), in tabcomp.c). */
-void
-set_fzf_border_type(char *line)
+int
+get_fzf_border_type(char *line)
 {
-	if (!line || !*line || (*line != ' ' && *line != '=')) {
+	if (!line || !*line || (*line != ' ' && *line != '='))
 		/* No value for "--border". It defaults to "rounded". */
-		fzf_border_type = 2;
-		return;
-	}
+		return 2;
 
 	line++;
 
 	char *p = line + (*line == '\'' || *line == '"');
 	char c = first_non_blank(p);
-	if (!*p || *p == '-' || c == '-' || c == '\0') {
-		fzf_border_type = 2;
-		return;
-	}
+	if (!*p || *p == '-' || c == '-' || c == '\0')
+		return 2;
 
 	if (strncmp(p, "none", 4) == 0)
-		fzf_border_type = 0;  /* NOLINT *//* No vertical border */
-	else if (strncmp(p, "rounded", 7) == 0
+		return 0;  /* NOLINT *//* No vertical border */
+
+	if (strncmp(p, "rounded", 7) == 0
 	|| strncmp(p,  "sharp", 5) == 0
 	|| strncmp(p,  "bold", 4) == 0
 	|| strncmp(p,  "double", 6) == 0
 	|| strncmp(p,  "block", 5) == 0
 	|| strncmp(p,  "thinblock", 9) == 0
 	|| strncmp(p,  "vertical", 8) == 0)
-		fzf_border_type = 2; /* Left and right border */
-	else if (strncmp(p, "left", 4) == 0
+		return 2; /* Left and right border */
+
+	if (strncmp(p, "left", 4) == 0
 	|| strncmp(p, "right", 5) == 0)
-		fzf_border_type = 1; /* Left or right border */
-	else
-		fzf_border_type = 0; /* NOLINT *//* No vertical border */
+		return 1; /* Left or right border */
+
+	return 0;
 }
 
 int
-set_fzf_height(char *line)
+get_fzf_height(char *line)
 {
-	/* For the time being, "~NUM" is not supported for "--height" */
+	/* For the time being, the '~' prefix is not supported for "--height" */
 	if (!line || !*line || !*(++line) || *line == '~')
 		return 0;
 
@@ -3694,10 +3692,9 @@ set_fzf_height(char *line)
 
 	if (*line == '-') {
 		const int n = atoi(line + 1);
-		if (n > 0 && n < term_lines) {
+		if (n >= 0 && n < term_lines)
 			val = term_lines - n;
-			goto END;
-		}
+		goto END;
 	}
 
 	len = strlen(line);
@@ -3741,10 +3738,10 @@ get_fzf_win_height_and_preview(void)
 
 	char *b = (char *)NULL;
 	if ((b = strstr(p, "--height")) != NULL)
-		fzf_height_set = set_fzf_height(b + (sizeof("--height") - 1));
+		fzf_height_value = get_fzf_height(b + (sizeof("--height") - 1));
 
 	if (fzf_border_type == UNSET && (b = strstr(p, "--border")) != NULL)
-		set_fzf_border_type(b + (sizeof("--border") - 1));
+		fzf_border_type = get_fzf_border_type(b + (sizeof("--border") - 1));
 }
 #endif /* !_NO_FZF */
 

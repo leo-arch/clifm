@@ -1404,7 +1404,8 @@ get_finder_offset(const char *query, const char *text, char **matches,
 	 * terminal height. */
 	const int min_prev_height = term_lines / 4;
 	if (fspace == 40 && (int)*height < min_prev_height
-	&& min_prev_height > 0 && fzf_height_set == 0) /* fspace == 40: We're previewing files. */
+	&& min_prev_height > 0 && fzf_height_value == 0)
+		/* fspace == 40: We're previewing files. */
 		*height = (size_t)min_prev_height;
 
 	const int max_finder_offset = term_cols > fspace ? term_cols - fspace : 0;
@@ -1789,10 +1790,10 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	 * specifies how many entries will be displayed at once. */
 	size_t height = 0;
 
-	if (fzf_height_set > 0) {
+	if (fzf_height_value > 0) {
 		/* Height was set either in FZF_DEFAULT_OPTS or in the color scheme
 		 * file. Let's respect this value. */
-		height = (size_t)fzf_height_set;
+		height = (size_t)fzf_height_value;
 	} else {
 		const size_t max_height = set_fzf_max_win_height();
 		height = (num_matches + 1 > max_height) ? max_height : num_matches;

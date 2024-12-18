@@ -1905,7 +1905,7 @@ extern int
 	exit_code,
 	fzftab,
 	fzf_border_type,
-	fzf_height_set,
+	fzf_height_value,
 	fzf_preview_border_type,
 	hist_status,
 	home_ok,
