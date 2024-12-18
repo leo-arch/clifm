@@ -538,6 +538,7 @@ extern time_t curdir_mtime;
 #define NO_FIX_RL_POINT     (1 << 11)
 #define FAILED_ALIAS        (1 << 12)
 #define ALT_PREVIEW_FILE    (1 << 13)
+#define UEBERZUG_IMG_PREV   (1 << 14)
 
 /* Flags for third party binaries */
 #define FZF_BIN_OK     (1 << 0)
@@ -1904,6 +1905,7 @@ extern int
 	dirhist_total_index,
 	exit_code,
 	fzftab,
+	fzf_ext_border,
 	fzf_border_type,
 	fzf_height_value,
 	fzf_preview_border_type,

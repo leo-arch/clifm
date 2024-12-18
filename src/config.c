@@ -3636,6 +3636,45 @@ first_non_blank(const char *line)
 	return 0;
 }
 
+/* Return a macro describing the border type set for the '--border' option
+ * in a fzf command (either FZF_DEFAULT_OPTS or FzfTabOptions). */
+static int
+get_fzf_border(char *line)
+{
+	if (!line || !*line || (*line != ' ' && *line != '='))
+		/* No value for "--border". It defaults to "rounded". */
+		return FZF_BORDER_ROUNDED;
+
+	line++;
+
+	char *p = line + (*line == '\'' || *line == '"');
+	char c = first_non_blank(p);
+	if (!*p || *p == '-' || c == '-' || c == '\0')
+		return FZF_BORDER_ROUNDED;
+
+	if (*p == 'b') {
+		if (strncmp(p, "block", 5) == 0) return FZF_BORDER_BLOCK;
+		if (strncmp(p, "bold", 4) == 0) return FZF_BORDER_BOLD;
+		if (strncmp(p, "bottom", 6) == 0) return FZF_BORDER_BOTTOM;
+	}
+	if (*p == 'd' && strncmp(p, "double", 6) == 0) return FZF_BORDER_DOUBLE;
+	if (*p == 'l' && strncmp(p, "left", 4) == 0) return FZF_BORDER_LEFT;
+	if (*p == 'n' && strncmp(p, "none", 4) == 0) return FZF_BORDER_NONE;
+	if (*p == 'r') {
+		if (strncmp(p, "right", 5) == 0) return FZF_BORDER_RIGHT;
+		if (strncmp(p, "rounded", 7) == 0) return FZF_BORDER_ROUNDED;
+	}
+	if (*p == 's' && strncmp(p, "sharp", 5) == 0) return FZF_BORDER_SHARP;
+	if (*p == 't') {
+		if (strncmp(p, "top", 3) == 0) return FZF_BORDER_TOP;
+		if (strncmp(p, "thinblock", 9) == 0) return FZF_BORDER_THINBLOCK;
+	}
+	if (*p == 'v' && strncmp(p, "vertical", 8) == 0) return FZF_BORDER_VERT;
+
+/*	return FZF_BORDER_ROUNDED; */
+	return FZF_BORDER_NONE; /* == 0 */
+}
+
 /* Set fzf_border_type (global) to a value describing the value of fzf
  * --border option: 0 (no vertical border), 1 (left or right border),
  * or 2 (left and right border). We need this value to properly calculate
@@ -3643,34 +3682,20 @@ first_non_blank(const char *line)
 int
 get_fzf_border_type(char *line)
 {
-	if (!line || !*line || (*line != ' ' && *line != '='))
-		/* No value for "--border". It defaults to "rounded". */
-		return 2;
+	fzf_ext_border = get_fzf_border(line);
 
-	line++;
-
-	char *p = line + (*line == '\'' || *line == '"');
-	char c = first_non_blank(p);
-	if (!*p || *p == '-' || c == '-' || c == '\0')
-		return 2;
-
-	if (strncmp(p, "none", 4) == 0)
-		return 0;  /* NOLINT *//* No vertical border */
-
-	if (strncmp(p, "rounded", 7) == 0
-	|| strncmp(p,  "sharp", 5) == 0
-	|| strncmp(p,  "bold", 4) == 0
-	|| strncmp(p,  "double", 6) == 0
-	|| strncmp(p,  "block", 5) == 0
-	|| strncmp(p,  "thinblock", 9) == 0
-	|| strncmp(p,  "vertical", 8) == 0)
-		return 2; /* Left and right border */
-
-	if (strncmp(p, "left", 4) == 0
-	|| strncmp(p, "right", 5) == 0)
-		return 1; /* Left or right border */
-
-	return 0;
+	switch (fzf_ext_border) {
+	case FZF_BORDER_ROUNDED: /* fallthrough */
+	case FZF_BORDER_SHARP:   /* fallthrough */
+	case FZF_BORDER_BOLD:    /* fallthrough */
+	case FZF_BORDER_DOUBLE:  /* fallthrough */
+	case FZF_BORDER_BLOCK:   /* fallthrough */
+	case FZF_BORDER_THINBLOCK:
+	case FZF_BORDER_VERT: return 2;
+	case FZF_BORDER_LEFT:    /* fallthrough */
+	case FZF_BORDER_RIGHT: return 1;
+	default: return 0;
+	}
 }
 
 int

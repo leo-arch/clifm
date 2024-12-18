@@ -591,29 +591,30 @@ check_for_alias(char **args)
 
 		args_n = 0; /* Reset args_n to be used by parse_input_str() */
 
-		char **alias_comm = parse_input_str(aliases[i].cmd);
-		if (!alias_comm) {
+		char **alias_cmd = parse_input_str(aliases[i].cmd);
+		if (!alias_cmd) {
 			flags |= FAILED_ALIAS; /* Prevent exec_cmd() from being executed */
 			return (char **)NULL;
 		}
 
 		size_t j;
-		/* Add input parameters, if any, to alias_comm */
+		/* Add input parameters, if any, to alias_comm. Expansions were
+		 * already performed before calling this function. */
 		if (args[1]) {
 			for (j = 1; args[j]; j++) {
-				alias_comm = xnrealloc(alias_comm,
+				alias_cmd = xnrealloc(alias_cmd,
 				    ++args_n + 2, sizeof(char *));
-				alias_comm[args_n] = savestring(args[j], strlen(args[j]));
+				alias_cmd[args_n] = savestring(args[j], strlen(args[j]));
 			}
 		}
 
-		alias_comm[args_n + 1] = (char *)NULL;
+		alias_cmd[args_n + 1] = (char *)NULL;
 
 		/* Free original command */
 		for (j = 0; args[j]; j++)
 			free(args[j]);
 		free(args);
-		return alias_comm;
+		return alias_cmd;
 	}
 
 	return (char **)NULL;

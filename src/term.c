@@ -417,16 +417,18 @@ check_term_support(const char *env_term)
 static void
 check_img_support(void)
 {
-	if (getenv("CLIFM_FIFO_UEBERZUG")) /* Variable set by the clifmrun script */
+	if (getenv("CLIFM_FIFO_UEBERZUG")) { /* Variable set by the clifmrun script */
 		setenv("CLIFM_IMG_SUPPORT", "ueberzug", 1);
-	else if (getenv("KITTY_WINDOW_ID"))
+		flags |= UEBERZUG_IMG_PREV;
+	} else if (getenv("KITTY_WINDOW_ID")) {
 		/* KITTY_WINDOW_ID is guaranteed to be defined if running on the
 		 * kitty terminal. See https://github.com/kovidgoyal/kitty/issues/957 */
 		setenv("CLIFM_IMG_SUPPORT", "kitty", 1);
-	else if (term_caps.req_dev_attrs == 1 && check_sixel_support() == 1)
+	} else if (term_caps.req_dev_attrs == 1 && check_sixel_support() == 1) {
 		setenv("CLIFM_IMG_SUPPORT", "sixel", 1);
-	else
+	} else {
 		setenv("CLIFM_IMG_SUPPORT", "ansi", 1);
+	}
 }
 
 void

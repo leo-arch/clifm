@@ -615,6 +615,27 @@ setenv_fzf_alt_preview_file(void)
 }
 
 static void
+fix_x_y_values(int *x, int *y)
+{
+	switch (fzf_ext_border) {
+	case FZF_BORDER_ROUNDED:   /* fallthrough */
+	case FZF_BORDER_SHARP:     /* fallthrough */
+	case FZF_BORDER_BOLD:      /* fallthrough */
+	case FZF_BORDER_DOUBLE:    /* fallthrough */
+	case FZF_BORDER_BLOCK:     /* fallthrough */
+	case FZF_BORDER_THINBLOCK: /* fallthrough */
+	case FZF_BORDER_HORIZ:     /* fallthrough */
+	case FZF_BORDER_TOP: (*x)--; (*y)++; break;
+	case FZF_BORDER_RIGHT: /* fallthrough */
+	case FZF_BORDER_VERT: (*x)--; break;
+/*	case FZF_BORDER_BOTTOM: // No coordinates correction required
+	case FZF_BORDER_NONE:
+	case FZF_BORDER_LEFT: */
+	default: break;
+	}
+}
+
+static void
 set_fzf_env_vars(const int height)
 {
 	int col = 0;
@@ -650,6 +671,9 @@ set_fzf_env_vars(const int height)
 	case FZF_BORDER_VERT: x -= 2; break;
 	default: break;
 	}
+
+	if (flags & UEBERZUG_IMG_PREV)
+		fix_x_y_values(&x, &y);
 
 	char p[MAX_INT_STR];
 	snprintf(p, sizeof(p), "%d", y > 0 ? y - 1 : 0);

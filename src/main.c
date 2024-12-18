@@ -165,6 +165,7 @@ int
 	exit_code = 0,
 
 	fzftab = UNSET,
+	fzf_ext_border = 0,
 	fzf_border_type = UNSET,
 	fzf_height_value = 0,
 	fzf_preview_border_type = 0,
