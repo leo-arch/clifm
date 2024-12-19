@@ -91,7 +91,8 @@ rename_file(char *oldpath, char *newpath)
 	struct stat a;
 	if (lstat(npath, &a) == 0) {
 		xerror("br: '%s': %s\n", newpath, strerror(EEXIST));
-		if (rl_get_y_or_n(_("Overwrite this file?"), 0) == 0) {
+		if (rl_get_y_or_n(_("Overwrite this file?"),
+		conf.default_answer.remove) == 0) {
 			free(npath);
 			return EEXIST;
 		}

@@ -1349,8 +1349,10 @@ symlink_file(char **args)
 
 	if (lstat(link_name, &a) != -1 && S_ISLNK(a.st_mode)) {
 		printf("link: '%s': %s\n", link_name, strerror(EEXIST));
-		if (rl_get_y_or_n(_("Overwrite this file?"), 0) == 0)
+		if (rl_get_y_or_n(_("Overwrite this file?"),
+		conf.default_answer.remove) == 0) {
 			return FUNC_SUCCESS;
+		}
 
 		if (unlinkat(XAT_FDCWD, link_name, 0) == -1) {
 			xerror(_("link: Cannot unlink '%s': %s\n"),
