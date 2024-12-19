@@ -1100,7 +1100,8 @@ extern filesn_t files;
 struct default_answer_t {
 	char remove;
 	char trash;
-	char pad[6];
+	char bulk_rename;
+	char pad[5];
 };
 
 /* User settings (mostly from the config file) */

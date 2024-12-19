@@ -194,6 +194,7 @@ init_conf_struct(void)
 	conf.cp_cmd = DEF_CP_CMD;
 	conf.default_answer.remove = DEF_ANSWER_REMOVE;
 	conf.default_answer.trash = DEF_ANSWER_TRASH;
+	conf.default_answer.bulk_rename = DEF_ANSWER_BULK_RENAME;
 	conf.desktop_notifications = UNSET;
 	conf.dirhist_map = UNSET;
 	conf.disk_usage = UNSET;

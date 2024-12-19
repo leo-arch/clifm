@@ -472,7 +472,7 @@ bulk_rename(char **args, size_t *renamed, const size_t reload_list)
 		goto ERROR;
 
 	/* Ask the user for confirmation. */
-	if (rl_get_y_or_n(_("Continue?"), 0) == 0)
+	if (rl_get_y_or_n(_("Continue?"), conf.default_answer.bulk_rename) == 0)
 		goto ERROR;
 
 	/* Make sure the tmp file we're about to read is the same we originally
