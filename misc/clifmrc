@@ -370,7 +370,8 @@
 # The left value indicates the command (for the time being only the following
 # left values are supported):
 #  'r': remove ('r' command)
-#  't': trash
+#  't': trash ('t' command)
+#  'R': bulk rename ('br' command)
 # The right value holds the default answer for the corresponding command:
 #  'y' or 'n'.
 # If unset, no default answer will be used.
