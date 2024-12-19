@@ -436,7 +436,7 @@ edit_history(char **args)
 static int
 clear_history_func(char **args)
 {
-	if (rl_get_y_or_n(_("Clear history?"), 0) == 0)
+	if (rl_get_y_or_n(_("Clear history?"), conf.default_answer.remove) == 0)
 		return FUNC_SUCCESS;
 
 	/* Let's overwrite whatever was there. */
