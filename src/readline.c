@@ -102,6 +102,18 @@ gen_y_n_str(const char def_answer)
 	}
 }
 
+static char
+set_default_answer(const char default_answer)
+{
+	if (conf.default_answer.default_all != 0)
+		return conf.default_answer.default_all;
+
+	if (default_answer == 0)
+		return conf.default_answer.default_;
+
+	return default_answer;
+}
+
 /* Get user input (y/n, uppercase is allowed) using MSG_STR as prompt message.
  * If DEFAULT_ANSWER isn't zero, it will be used in case the user just
  * presses Enter on an empty line.
@@ -109,9 +121,9 @@ gen_y_n_str(const char def_answer)
 int
 rl_get_y_or_n(const char *msg_str, char default_answer)
 {
-	rl_default_answer = default_answer;
+	rl_default_answer = set_default_answer(default_answer);
 
-	const char *yes_no_str = gen_y_n_str(default_answer);
+	const char *yes_no_str = gen_y_n_str(rl_default_answer);
 	const size_t msg_len = strlen(msg_str) + strlen(yes_no_str) + 3;
 	char *msg = xnmalloc(msg_len, sizeof(char));
 	snprintf(msg, msg_len, "%s %s ", msg_str, yes_no_str);

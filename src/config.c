@@ -3019,9 +3019,11 @@ set_default_answer(const char *str)
 		return;
 
 	switch (*str) {
+	case 'd': conf.default_answer.default_ = str[2]; break;
+	case 'D': conf.default_answer.default_all = str[2]; break;
 	case 'r': conf.default_answer.remove = str[2]; break;
-	case 't': conf.default_answer.trash = str[2]; break;
 	case 'R': conf.default_answer.bulk_rename = str[2]; break;
+	case 't': conf.default_answer.trash = str[2]; break;
 	default: break;
 	}
 }

@@ -464,9 +464,11 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 
 /* Default options */
 /* Default answers for confirmation prompts: 0 (none), 'y', or 'n' */
-#define DEF_ANSWER_REMOVE      0
-#define DEF_ANSWER_TRASH       0
-#define DEF_ANSWER_BULK_RENAME 0
+#define DEF_ANSWER_REMOVE       0
+#define DEF_ANSWER_TRASH        0
+#define DEF_ANSWER_BULK_RENAME  0
+#define DEF_ANSWER_DEFAULT      0
+#define DEF_ANSWER_DEFAULT_FULL 0
 
 #define DEF_APPARENT_SIZE 1
 #define DEF_AUTOCD 1
