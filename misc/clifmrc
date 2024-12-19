@@ -365,7 +365,7 @@
 # Only 0 and 2 will prompt before overwrite.
 ;mvCmd=0
 
-# A command separated line of fields defining defaults answers for
+# A command separated line of fields defining default answers for
 # confirmation prompts. Each field has two values separated by a colon (':').
 # The left value indicates the command (for the time being only the following
 # left values are supported):
