@@ -372,11 +372,13 @@
 #  'r': remove ('r' command)
 #  't': trash ('t' command)
 #  'R': bulk rename ('br' command)
+#  'd': All confirmation prompts (excluding the above ones, if defined)
+#  'D': All confirmation prompts (including the above ones)
 # The right value holds the default answer for the corresponding command:
 #  'y' or 'n'.
-# If unset, no default answer will be used.
-# For example, to set 'n' as the default answer for the 'r' command, and
-# 'y' for trash: "r:n,t:y".
+# If unset (or set to any other value), no default answer will be used.
+# For example, to set 'n' as the default answer for the 'r' command and
+# trash, and 'y' for everything else: "r:n,t:n,d:y".
 ;DefaultAnswer=""
 
 # How should the 'l' command create symbolic links. Possible values:
