@@ -1350,7 +1350,7 @@ symlink_file(char **args)
 	if (lstat(link_name, &a) != -1 && S_ISLNK(a.st_mode)) {
 		printf("link: '%s': %s\n", link_name, strerror(EEXIST));
 		if (rl_get_y_or_n(_("Overwrite this file?"),
-		conf.default_answer.remove) == 0) {
+		conf.default_answer.overwrite) == 0) {
 			return FUNC_SUCCESS;
 		}
 
@@ -1694,7 +1694,7 @@ check_overwrite(char **args, const int force, size_t *skipped)
 		if (p && lstat(p, &a) != -1) {
 			snprintf(msg, sizeof(msg), "%s: '%s': Overwrite this file?",
 				cmd_name, p);
-			if (rl_get_y_or_n(msg, conf.default_answer.remove) == 0) {
+			if (rl_get_y_or_n(msg, conf.default_answer.overwrite) == 0) {
 				free(p);
 				return 0;
 			}
@@ -1730,7 +1730,7 @@ check_overwrite(char **args, const int force, size_t *skipped)
 
 		snprintf(msg, sizeof(msg), "%s: '%s': Overwrite this file?",
 			cmd_name, buf);
-		if (rl_get_y_or_n(msg, conf.default_answer.remove) == 0) {
+		if (rl_get_y_or_n(msg, conf.default_answer.overwrite) == 0) {
 			/* Nullify this entry. It will be skipped later. */
 			*args[i] = '\0';
 			(*skipped)++;

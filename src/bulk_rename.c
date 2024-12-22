@@ -92,7 +92,7 @@ rename_file(char *oldpath, char *newpath)
 	if (lstat(npath, &a) == 0) {
 		xerror("br: '%s': %s\n", newpath, strerror(EEXIST));
 		if (rl_get_y_or_n(_("Overwrite this file?"),
-		conf.default_answer.remove) == 0) {
+		conf.default_answer.overwrite) == 0) {
 			free(npath);
 			return EEXIST;
 		}
@@ -380,7 +380,7 @@ check_dups(FILE *fp)
 	free(fnames);
 
 	if (dups > 0 && rl_get_y_or_n(_("Continue?"),
-	conf.default_answer.remove) == 0) {
+	conf.default_answer.overwrite) == 0) {
 		return dups;
 	}
 

@@ -374,6 +374,7 @@
 # confirmation prompts. Each field has two values separated by a colon (':').
 # The left value indicates the command (for the time being only the following
 # left values are supported):
+#  'o': overwrite files (mostly 'c' and 'm' commands)
 #  'r': remove ('r' command)
 #  't': trash ('t' command)
 #  'R': bulk rename ('br' command)
@@ -383,7 +384,7 @@
 #  'y' or 'n'.
 # If unset (or set to any other value), no default answer will be used.
 # For example, to set 'n' as the default answer for the 'r' command and
-# trash, and 'y' for everything else: "r:n,t:n,d:y".
+# 'overwrite files', and 'y' for everything else: "r:n,o:n,d:y".
 ;DefaultAnswer=""
 
 # How should the 'l' command create symbolic links. Possible values:

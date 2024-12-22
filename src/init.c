@@ -195,6 +195,7 @@ init_conf_struct(void)
 	conf.default_answer.remove = DEF_ANSWER_REMOVE;
 	conf.default_answer.trash = DEF_ANSWER_TRASH;
 	conf.default_answer.bulk_rename = DEF_ANSWER_BULK_RENAME;
+	conf.default_answer.overwrite = DEF_ANSWER_OVERWRITE;
 	conf.default_answer.default_ = DEF_ANSWER_DEFAULT;
 	conf.default_answer.default_all = DEF_ANSWER_DEFAULT_ALL;
 	conf.desktop_notifications = UNSET;

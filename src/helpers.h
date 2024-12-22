@@ -1101,9 +1101,10 @@ struct default_answer_t {
 	char remove;
 	char trash;
 	char bulk_rename;
+	char overwrite;
 	char default_;
 	char default_all;
-	char pad[3];
+	char pad[2];
 };
 
 /* User settings (mostly from the config file) */
