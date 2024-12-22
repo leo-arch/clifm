@@ -359,7 +359,7 @@
 # 3: 'advcp -gRp' (force)
 # 4: 'wcp'
 # 5: 'rsync -avP'
-# Note: 2-5 include a progress bar.
+# Note: Options 2-5 include a progress bar.
 ;cpCmd=0
 
 # Set the default move command. Available options are:
@@ -367,7 +367,7 @@
 # 1: 'mv' (force: do not prompt before overwrite)
 # 2: 'advmv -g'
 # 3: 'advmv -g' (force)
-# 2 and 3 include a progress bar.
+# Note: Options 2 and 3 include a progress bar.
 ;mvCmd=0
 
 # A command separated line of fields defining default answers for
@@ -384,8 +384,8 @@
 #  'y' or 'n'.
 # If unset (or set to any other value), no default answer will be used.
 # For example, to set 'n' as the default answer for the 'r' command and
-# 'overwrite files', and 'y' for everything else: "r:n,o:n,d:y".
-;DefaultAnswer=""
+# 'y' for everything else: "r:n,d:y".
+;DefaultAnswer="o:n,r:n,t:y,R:n,d:y"
 
 # How should the 'l' command create symbolic links. Possible values:
 # absolute = Make the target an absolute path

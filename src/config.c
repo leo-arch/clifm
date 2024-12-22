@@ -214,6 +214,38 @@ get_ia_value_str(const int val)
 	}
 }
 
+static char *
+gen_default_answer_value_str(const int cfg)
+{
+	char val_d = cfg ? conf.default_answer.default_ : DEF_ANSWER_DEFAULT;
+	char val_D = cfg ? conf.default_answer.default_all : DEF_ANSWER_DEFAULT_ALL;
+	char val_o = cfg ? conf.default_answer.overwrite : DEF_ANSWER_OVERWRITE;
+	char val_r = cfg ? conf.default_answer.remove : DEF_ANSWER_REMOVE;
+	char val_R = cfg ? conf.default_answer.bulk_rename : DEF_ANSWER_BULK_RENAME;
+	char val_t = cfg ? conf.default_answer.trash : DEF_ANSWER_TRASH;
+
+#define DA_BUFSIZE 32
+	static char bufa[DA_BUFSIZE];
+	static char bufb[DA_BUFSIZE];
+	memset(cfg ? bufa : bufb, '\0', DA_BUFSIZE);
+
+	char *p = cfg ? bufa : bufb;
+	int l = 0;
+
+	l += snprintf(p + l, DA_BUFSIZE - (size_t)l, "d:%c,", val_d ? val_d : '0');
+	l += snprintf(p + l, DA_BUFSIZE - (size_t)l, "D:%c,", val_D ? val_D : '0');
+	l += snprintf(p + l, DA_BUFSIZE - (size_t)l, "o:%c,", val_o ? val_o : '0');
+	l += snprintf(p + l, DA_BUFSIZE - (size_t)l, "r:%c,", val_r ? val_r : '0');
+	l += snprintf(p + l, DA_BUFSIZE - (size_t)l, "R:%c,", val_R ? val_R : '0');
+	l += snprintf(p + l, DA_BUFSIZE - (size_t)l, "t:%c,", val_t ? val_t : '0');
+#undef DA_BUFSIZE
+
+	if (l > 0 && p[l - 1] == ',')
+		p[l - 1] = '\0';
+
+	return p;
+}
+
 /* Dump current value of config options (as defined in the config file),
  * highlighting those that differ from default values.
  * Note that values displayed here represent the CURRENT status of the
@@ -286,6 +318,10 @@ dump_config(void)
 
 	n = DEF_CP_CMD;
 	print_config_value("cpCmd", &conf.cp_cmd, &n, DUMP_CONFIG_INT);
+
+	s = gen_default_answer_value_str(0);
+	char *cur_da_value = gen_default_answer_value_str(1);
+	print_config_value("DefaultAnswer", cur_da_value, s, DUMP_CONFIG_STR);
 
 	n = DEF_DESKTOP_NOTIFICATIONS;
 	print_config_value("DesktopNotifications", &conf.desktop_notifications,
