@@ -1592,16 +1592,14 @@ create_main_config_file(char *file)
 ;Filter=""\n\n"
 
 	    "# Set the default copy command. Available options are:\n\
-# 0 = 'cp -iRp', 1 = 'cp -Rp', 2 = 'advcp -giRp', 3 = 'advcp -gRp',\n\
-# 4 = 'wcp', and 5 = 'rsync -avP'\n\
-# 2-5 include a progress bar\n\
-# Only 0 and 2 will prompt before overwrite\n\
+# 0: 'cp -Rp', 1: 'cp -Rp' (force), 2: 'advcp -gRp', 3: 'advcp -gRp' (force),\n\
+# 4: 'wcp', and 5: 'rsync -avP'\n\
+# Note: 2-5 include a progress bar\n\
 ;cpCmd=%d\n\n"
 
 	    "# Set the default move command. Available options are:\n\
-# 0 = 'mv -i', 1 = 'mv', 2 = 'advmv -gi', and 3 = 'advmv -g'\n\
-# 2 and 3 include a progress bar\n\
-# Only 0 and 2 will prompt before overwrite\n\
+# 0: 'mv', 1: 'mv' (force), 2: 'advmv -g', and 3: 'advmv -g' (force)\n\
+# Note: 2 and 3 include a progress bar\n\
 ;mvCmd=%d\n\n"
 
 		"# If set to true, the 'r' command will never prompt before removals.\n\
