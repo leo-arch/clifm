@@ -1553,10 +1553,10 @@ toggle_full_dir_size(const char *arg)
 }
 
 static void
-set_cp_cmd(char **cmd, const int cp_force)
+set_cp_cmd(char **cmd, int *cp_force)
 {
 	const int bk_cp_cmd = conf.cp_cmd;
-	if (cp_force == 1) {
+	if (*cp_force == 1) {
 		if (conf.cp_cmd == CP_ADVCP)
 			conf.cp_cmd = CP_ADVCP_FORCE;
 		else if (conf.cp_cmd == CP_CP)
@@ -1567,10 +1567,10 @@ set_cp_cmd(char **cmd, const int cp_force)
 
 	switch (conf.cp_cmd) {
 	case CP_ADVCP: n = DEFAULT_ADVCP_CMD; break;
-	case CP_ADVCP_FORCE: n = DEFAULT_ADVCP_CMD_FORCE; break;
+	case CP_ADVCP_FORCE: n = DEFAULT_ADVCP_CMD_FORCE; *cp_force = 1; break;
 	case CP_WCP: n = DEFAULT_WCP_CMD; break;
 	case CP_RSYNC: n = DEFAULT_RSYNC_CMD; break;
-	case CP_CP_FORCE: n = DEFAULT_CP_CMD_FORCE; break;
+	case CP_CP_FORCE: n = DEFAULT_CP_CMD_FORCE; *cp_force = 1; break;
 	case CP_CP: /* fallthrough */
 	default: n = DEFAULT_CP_CMD; break;
 	}
@@ -1583,10 +1583,10 @@ set_cp_cmd(char **cmd, const int cp_force)
 }
 
 static void
-set_mv_cmd(char **cmd, const int mv_force)
+set_mv_cmd(char **cmd, int *mv_force)
 {
 	int bk_mv_cmd = conf.mv_cmd;
-	if (mv_force == 1) {
+	if (*mv_force == 1) {
 		if (conf.mv_cmd == MV_ADVMV)
 			conf.mv_cmd = MV_ADVMV_FORCE;
 		else if (conf.mv_cmd == MV_MV)
@@ -1597,8 +1597,8 @@ set_mv_cmd(char **cmd, const int mv_force)
 
 	switch (conf.mv_cmd) {
 	case MV_ADVMV: n = DEFAULT_ADVMV_CMD; break;
-	case MV_ADVMV_FORCE: n = DEFAULT_ADVMV_CMD_FORCE; break;
-	case MV_MV_FORCE: n = DEFAULT_MV_CMD_FORCE; break;
+	case MV_ADVMV_FORCE: n = DEFAULT_ADVMV_CMD_FORCE; *mv_force = 1; break;
+	case MV_MV_FORCE: n = DEFAULT_MV_CMD_FORCE; *mv_force = 1; break;
 	case MV_MV: /* fallthrough */
 	default: n = DEFAULT_MV_CMD; break;
 	}
@@ -2254,7 +2254,7 @@ exec_cmd(char **comm)
 				copy_and_rename = 1;
 
 			use_force = is_force_param(comm[1]);
-			set_cp_cmd(&comm[0], use_force);
+			set_cp_cmd(&comm[0], &use_force);
 
 		} else if (*comm[0] == 'm' && !comm[0][1]) {
 			if (comm[1] && IS_HELP(comm[1])) {
@@ -2265,7 +2265,7 @@ exec_cmd(char **comm)
 				alt_prompt = FILES_PROMPT;
 
 			use_force = is_force_param(comm[1]);
-			set_mv_cmd(&comm[0], use_force);
+			set_mv_cmd(&comm[0], &use_force);
 		}
 
 		kbind_busy = 1;

@@ -379,8 +379,10 @@ check_dups(FILE *fp)
 		free(fnames[i]);
 	free(fnames);
 
-	if (dups > 0 && rl_get_y_or_n(_("Continue?"), 0) == 0)
+	if (dups > 0 && rl_get_y_or_n(_("Continue?"),
+	conf.default_answer.remove) == 0) {
 		return dups;
+	}
 
 	return 0;
 }

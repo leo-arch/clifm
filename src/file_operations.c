@@ -1403,6 +1403,9 @@ vv_rename_files(char **args, const size_t copied)
 	const size_t n = args_n + (sel_is_last == 1);
 
 	for (i = 1; i < n && args[i]; i++) {
+		if (!*args[i])
+			continue;
+
 		l = strlen(args[i]);
 		if (l > 0 && args[i][l - 1] == '/')
 			args[i][l - 1] = '\0';
@@ -1525,13 +1528,16 @@ cwd_has_sel_files(void)
 	return 0;
 }
 
+#define IS_MVCMD(s) (*(s) == 'm' || (*(s) == 'a' \
+	&& strncmp((s), "advmv", 5) == 0))
+
 static void
-print_cp_mv_summary_msg(const char c, const size_t n, const int cwd)
+print_cp_mv_summary_msg(const char *c, const size_t n, const int cwd)
 {
 	if (conf.autols == 1 && cwd == 1)
 		reload_dirlist();
 
-	if (c == 'm')
+	if (IS_MVCMD(c))
 		print_reload_msg(SET_SUCCESS_PTR, xs_cb, _("%zu file(s) moved\n"), n);
 	else
 		print_reload_msg(SET_SUCCESS_PTR, xs_cb, _("%zu file(s) copied\n"), n);
@@ -1611,7 +1617,8 @@ run_cp_mv_cmd(char **cmd, const int skip_force, const size_t files_num)
 	for (i = 1; cmd[i]; i++) {
 		/* The -f,--force parameter is internal. Skip it.
 		 * It instructs cp/mv to run non-interactively (no -i param). */
-		if (skip_force == 1 && i == 1 && is_force_param(cmd[i]) == 1)
+		if (!*cmd[i] || (skip_force == 1 && i == 1
+		&& is_force_param(cmd[i]) == 1))
 			continue;
 		p = unescape_str(cmd[i], 0);
 		if (!p)
@@ -1623,8 +1630,8 @@ run_cp_mv_cmd(char **cmd, const int skip_force, const size_t files_num)
 		n++;
 	}
 
-	if (cmd[1] && !cmd[2] && *cmd[0] == 'c' && *(cmd[0] + 1) == 'p'
-	&& *(cmd[0] + 2) == ' ') {
+	if (cmd[1] && !cmd[2] && *cmd[0] == 'c' && cmd[0][1] == 'p'
+	&& cmd[0][2] == ' ') {
 		tcmd[n][0] = '.';
 		tcmd[n][1] = '\0';
 		n++;
@@ -1655,13 +1662,104 @@ run_cp_mv_cmd(char **cmd, const int skip_force, const size_t files_num)
 
 	/* Error messages are printed by launch_execv() itself. */
 
-	if (sel_n > 0 && *cmd[0] == 'm' && cwd_has_sel_files())
+	if (sel_n > 0 && IS_MVCMD(cmd[0]) && cwd_has_sel_files())
 		/* Just in case a selected file in the current dir was renamed. */
 		get_sel_files();
 
-	print_cp_mv_summary_msg(*cmd[0], files_num, cwd);
+	print_cp_mv_summary_msg(cmd[0], files_num, cwd);
 
 	return FUNC_SUCCESS;
+}
+
+static int
+check_overwrite(char **args, const int force, size_t *skipped)
+{
+	const int append_curdir = (sel_is_last == 1 && sel_n > 0);
+	const size_t files_num = args_n + (append_curdir == 1);
+
+	if (!args || files_num <= 1 || force == 1)
+		return 1;
+
+	const char *cmd_name = IS_MVCMD(args[0]) ? "m" : "c";
+	const char *dest = append_curdir == 1 ? "." : args[args_n];
+
+	struct stat a;
+	if (!dest || stat(dest, &a) == -1)
+		return 1;
+
+	char msg[PATH_MAX + 28];
+
+	if (!S_ISDIR(a.st_mode)) {
+		char *p = unescape_str(args[2], 0);
+		if (p && lstat(p, &a) != -1) {
+			snprintf(msg, sizeof(msg), "%s: '%s': Overwrite this file?",
+				cmd_name, p);
+			if (rl_get_y_or_n(msg, conf.default_answer.remove) == 0) {
+				free(p);
+				return 0;
+			}
+		}
+		free(p);
+
+		return 1;
+	}
+
+	char buf[PATH_MAX + 1];
+	size_t i;
+	const size_t dest_len = strlen(dest);
+	const int ends_with_slash =
+		(dest_len > 1 && dest[dest_len - 1] == '/');
+
+	for (i = 1; i < files_num; i++) {
+		char *p = unescape_str(args[i], 0);
+		if (!p)
+			continue;
+
+		const char *s = strrchr(p, '/');
+		const char *basename = (s && s[1]) ? s + 1 : p;
+
+		if (ends_with_slash == 0)
+			snprintf(buf, sizeof(buf), "%s/%s", dest, basename);
+		else
+			snprintf(buf, sizeof(buf), "%s%s", dest, basename);
+
+		free(p);
+
+		if (lstat(buf, &a) == -1)
+			continue;
+
+		snprintf(msg, sizeof(msg), "%s: '%s': Overwrite this file?",
+			cmd_name, buf);
+		if (rl_get_y_or_n(msg, conf.default_answer.remove) == 0) {
+			/* Nullify this entry. It will be skipped later. */
+			*args[i] = '\0';
+			(*skipped)++;
+		}
+	}
+
+	/* If skipped == files_num - 1, there are no source files left, only
+	 * the destiny file. There's nothing to do. */
+	return (*skipped < files_num - 1);
+}
+
+/* Remove trainling slashes from source files in ARGS. */
+static void
+remove_dirslash_from_source(char **args)
+{
+	if (args_n <= 1)
+		return;
+
+	size_t i;
+	for (i = 1; i < args_n; i++) {
+		if (!args[i])
+			break;
+		if (!*args[i])
+			continue;
+
+		const size_t len = strlen(args[i]);
+		if (len > 1 && args[i][len - 1] == '/')
+			args[i][len - 1] = '\0';
+	}
 }
 
 /* Launch the command associated to 'c' (also 'v' and 'vv') or 'm'
@@ -1670,22 +1768,32 @@ int
 cp_mv_file(char **args, const int copy_and_rename, const int force)
 {
 	int ret = 0;
+	size_t skipped = 0;
+
+	if (check_overwrite(args, force, &skipped) == 0)
+		return FUNC_SUCCESS;
 
 	/* vv command */
 	if (copy_and_rename == 1
 	&& (ret = validate_vv_dest_dir(args[args_n])) != FUNC_SUCCESS)
 		return ret == -1 ? FUNC_SUCCESS : FUNC_FAILURE;
 
-	if (*args[0] == 'm' && args[1]) {
+	if (IS_MVCMD(args[0]) && args[1]) {
 		const size_t len = strlen(args[1]);
 		if (len > 0 && args[1][len - 1] == '/')
 			args[1][len - 1] = '\0';
 	}
 
+	/* rsync won't copy directories with a trailing slash. Remove it. */
+	if (*args[0] == 'r' && args[1])
+		remove_dirslash_from_source(args);
+
 	/* Number of files to operate on. */
 	/* In case of 'm FILE' (interactive rename), args_n is 1, and 1 is
 	 * the number we want. */
-	const size_t files_num = args_n - (args_n > 1 && sel_is_last == 0);
+	const size_t force_param = (args[1] && is_force_param(args[1]));
+	const size_t files_num =
+		args_n - (args_n > 1 && sel_is_last == 0) - skipped - force_param;
 
 	if (is_sel == 0 && copy_and_rename == 0)
 		return run_cp_mv_cmd(args, force, files_num);
@@ -1705,16 +1813,15 @@ cp_mv_file(char **args, const int copy_and_rename, const int force)
 	}
 
 	/* wcp(1) does not support end of options (--) */
-	if (strcmp(tcmd[0], "wcp") != 0) {
+	if (*tcmd[0] == 'w' && strcmp(tcmd[0], "wcp") != 0) {
 		tcmd[n] = savestring("--" , 2);
 		n++;
 	}
 
 	int cwd = 0;
-	size_t i = force == 1 ? 2 : 1;
+	size_t i = force_param == 1 ? 2 : 1;
 	for (; args[i]; i++) {
-		p = unescape_str(args[i], 0);
-		if (!p)
+		if (!*args[i] || !(p = unescape_str(args[i], 0)))
 			continue;
 		tcmd[n] = savestring(p, strlen(p));
 		if (cwd == 0)
@@ -1743,13 +1850,12 @@ cp_mv_file(char **args, const int copy_and_rename, const int force)
 	if (copy_and_rename == 1) /* vv command */
 		return vv_rename_files(args, files_num);
 
-	/* If 'mv sel' and command is successful deselect everything,
-	 * since sel files are not there anymore. */
-	if (*args[0] == 'm' && args[0][1] == 'v'
-	&& (!args[0][2] || args[0][2] == ' '))
+	/* If 'mv sel' and command is successful deselect everything:
+	 * selected files are not there anymore. */
+	if (is_sel == 1 && sel_n > 0 && IS_MVCMD(args[0]))
 		deselect_all();
 
-	print_cp_mv_summary_msg(*args[0], files_num, cwd);
+	print_cp_mv_summary_msg(args[0], files_num, cwd);
 
 	return FUNC_SUCCESS;
 }

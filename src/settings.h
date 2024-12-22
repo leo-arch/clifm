@@ -610,16 +610,20 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 
 /* cp and mv commands
  * All options used for cp(1) and mv(1) are POSIX. No need to check. */
-#define DEFAULT_CP_CMD "cp -iRp"
+//#define DEFAULT_CP_CMD "cp -iRp"
+#define DEFAULT_CP_CMD "cp -Rp"
 #define DEFAULT_CP_CMD_FORCE "cp -Rp"
-#define DEFAULT_ADVCP_CMD "advcp -giRp"
+//#define DEFAULT_ADVCP_CMD "advcp -giRp"
+#define DEFAULT_ADVCP_CMD "advcp -gRp"
 #define DEFAULT_ADVCP_CMD_FORCE "advcp -gRp"
 #define DEFAULT_WCP_CMD "wcp"
 #define DEFAULT_RSYNC_CMD "rsync -avP"
 
-#define DEFAULT_MV_CMD "mv -i"
+//#define DEFAULT_MV_CMD "mv -i"
+#define DEFAULT_MV_CMD "mv"
 #define DEFAULT_MV_CMD_FORCE "mv"
-#define DEFAULT_ADVMV_CMD "advmv -gi"
+//#define DEFAULT_ADVMV_CMD "advmv -gi"
+#define DEFAULT_ADVMV_CMD "advmv -g"
 #define DEFAULT_ADVMV_CMD_FORCE "advmv -g"
 
 #define DEF_RM_FORCE 0
