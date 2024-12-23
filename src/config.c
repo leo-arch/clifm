@@ -3045,10 +3045,21 @@ set_term_cmd(char *cmd)
 }
 
 static void
+set_default_answers_to_default(void)
+{
+	conf.default_answer.remove = DEF_ANSWER_REMOVE;
+	conf.default_answer.trash = DEF_ANSWER_TRASH;
+	conf.default_answer.bulk_rename = DEF_ANSWER_BULK_RENAME;
+	conf.default_answer.overwrite = DEF_ANSWER_OVERWRITE;
+	conf.default_answer.default_ = DEF_ANSWER_DEFAULT;
+	conf.default_answer.default_all = DEF_ANSWER_DEFAULT_ALL;
+}
+
+static void
 set_default_answer(const char *str)
 {
 	if (!str || !*str || str[1] != ':'
-	|| (str[2] != 'y' && str[2] != 'n'))
+	|| (str[2] != 'y' && str[2] != 'n' && str[2] != 'u'))
 		return;
 
 	switch (*str) {
@@ -3090,17 +3101,6 @@ set_rl_edit_mode(const char *val)
 		rl_vi_editing_mode(1, 0);
 	else
 		rl_emacs_editing_mode(1, 0);
-}
-
-static void
-set_default_answers_to_default(void)
-{
-	conf.default_answer.remove = DEF_ANSWER_REMOVE;
-	conf.default_answer.trash = DEF_ANSWER_TRASH;
-	conf.default_answer.bulk_rename = DEF_ANSWER_BULK_RENAME;
-	conf.default_answer.overwrite = DEF_ANSWER_OVERWRITE;
-	conf.default_answer.default_ = DEF_ANSWER_DEFAULT;
-	conf.default_answer.default_all = DEF_ANSWER_DEFAULT_ALL;
 }
 
 /* Read the main configuration file and set options accordingly */

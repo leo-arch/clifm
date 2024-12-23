@@ -95,9 +95,9 @@ static const char *
 gen_y_n_str(const char def_answer)
 {
 	switch (def_answer) {
-	case '0': return "[y/n]";
 	case 'y': return "[Y/n]";
 	case 'n': return "[y/N]";
+	case 'u': /* fallthrough */
 	default:  return "[y/n]";
 	}
 }
