@@ -382,7 +382,7 @@
 #  'D': All confirmation prompts (including the above ones, no matter their value)
 #
 # The right value holds the default answer for the corresponding prompt:
-#  'y', 'n', or 'u' (unset - the value of 'd' is ignored for this prompt).
+#  'y', 'n', or 'u' (unset - no default answer, wait for explicit input).
 #
 # If a value, left or right, is unset (or set to any other value), no default
 # answer will be used ('y' or 'n' will be explicitly required, unless 'd' or 'D'
