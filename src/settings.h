@@ -464,10 +464,10 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 
 /* Default options */
 /* Default answers for confirmation prompts: 0 (none), 'y', or 'n' */
-#define DEF_ANSWER_REMOVE      'n' /* 'r' command */
-#define DEF_ANSWER_TRASH       'y' /* 't' command */
 #define DEF_ANSWER_BULK_RENAME 'n' /* 'br' command */
 #define DEF_ANSWER_OVERWRITE   'n' /* 'c' and 'm' commands mostly */
+#define DEF_ANSWER_REMOVE      'n' /* 'r' command */
+#define DEF_ANSWER_TRASH       'y' /* 't' command */
 #define DEF_ANSWER_DEFAULT     'y' /* Remaining prompts */
 #define DEF_ANSWER_DEFAULT_ALL 0   /* All prompts (overrides the above ones) */
 

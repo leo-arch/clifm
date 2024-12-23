@@ -227,17 +227,16 @@ gen_default_answer_value_str(const int cfg)
 #define DA_BUFSIZE 32
 	static char bufa[DA_BUFSIZE];
 	static char bufb[DA_BUFSIZE];
-	memset(cfg ? bufa : bufb, '\0', DA_BUFSIZE);
-
 	char *p = cfg ? bufa : bufb;
 	int l = 0;
+	memset(p, '\0', DA_BUFSIZE);
 
-	l += snprintf(p + l, DA_BUFSIZE - (size_t)l, "d:%c,", val_d ? val_d : '0');
-	l += snprintf(p + l, DA_BUFSIZE - (size_t)l, "D:%c,", val_D ? val_D : '0');
-	l += snprintf(p + l, DA_BUFSIZE - (size_t)l, "o:%c,", val_o ? val_o : '0');
-	l += snprintf(p + l, DA_BUFSIZE - (size_t)l, "r:%c,", val_r ? val_r : '0');
-	l += snprintf(p + l, DA_BUFSIZE - (size_t)l, "R:%c,", val_R ? val_R : '0');
-	l += snprintf(p + l, DA_BUFSIZE - (size_t)l, "t:%c,", val_t ? val_t : '0');
+	l += snprintf(p + l, DA_BUFSIZE - (size_t)l, "d:%c,", val_d ? val_d : '-');
+	l += snprintf(p + l, DA_BUFSIZE - (size_t)l, "D:%c,", val_D ? val_D : '-');
+	l += snprintf(p + l, DA_BUFSIZE - (size_t)l, "o:%c,", val_o ? val_o : '-');
+	l += snprintf(p + l, DA_BUFSIZE - (size_t)l, "r:%c,", val_r ? val_r : '-');
+	l += snprintf(p + l, DA_BUFSIZE - (size_t)l, "R:%c,", val_R ? val_R : '-');
+	l += snprintf(p + l, DA_BUFSIZE - (size_t)l, "t:%c,", val_t ? val_t : '-');
 #undef DA_BUFSIZE
 
 	if (l > 0 && p[l - 1] == ',')
