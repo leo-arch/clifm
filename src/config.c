@@ -3092,6 +3092,17 @@ set_rl_edit_mode(const char *val)
 		rl_emacs_editing_mode(1, 0);
 }
 
+static void
+set_default_answers_to_default(void)
+{
+	conf.default_answer.remove = DEF_ANSWER_REMOVE;
+	conf.default_answer.trash = DEF_ANSWER_TRASH;
+	conf.default_answer.bulk_rename = DEF_ANSWER_BULK_RENAME;
+	conf.default_answer.overwrite = DEF_ANSWER_OVERWRITE;
+	conf.default_answer.default_ = DEF_ANSWER_DEFAULT;
+	conf.default_answer.default_all = DEF_ANSWER_DEFAULT_ALL;
+}
+
 /* Read the main configuration file and set options accordingly */
 static void
 read_config(void)
@@ -3109,6 +3120,7 @@ read_config(void)
 	if (xargs.rl_vi_mode == 1)
 		rl_vi_editing_mode(1, 0);
 
+	int default_answers_set = 0;
 	int ret = -1;
 	conf.max_name_len = DEF_MAX_NAME_LEN;
 	*div_line = *DEF_DIV_LINE;
@@ -3204,6 +3216,7 @@ read_config(void)
 		}
 
 		else if (*line == 'D' && strncmp(line, "DefaultAnswer=", 14) == 0) {
+			default_answers_set = 1;
 			set_default_answers(line + 14);
 		}
 
@@ -3601,6 +3614,9 @@ read_config(void)
 	}
 
 	fclose(config_fp);
+
+	if (default_answers_set == 0)
+		set_default_answers_to_default();
 
 	if (xargs.disk_usage_analyzer == 1) {
 		conf.sort = STSIZE;
