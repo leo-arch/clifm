@@ -372,17 +372,22 @@
 
 # A command separated line of fields defining default answers for
 # confirmation prompts. Each field has two values separated by a colon (':').
-# The left value indicates the command (for the time being only the following
-# left values are supported):
+#
+# The left value specifies a confirmation prompt:
 #  'o': overwrite files (mostly 'c' and 'm' commands)
 #  'r': remove ('r' command)
 #  't': trash ('t' command)
 #  'R': bulk rename ('br' command)
 #  'd': All confirmation prompts (excluding, if defined, the above ones)
 #  'D': All confirmation prompts (including the above ones, no matter their value)
-# The right value holds the default answer for the corresponding command:
+#
+# The right value holds the default answer for the corresponding prompt:
 #  'y' or 'n'.
-# If unset (or set to any other value), no default answer will be used.
+#
+# If a value, left or right, is unset (or set to any other value), no default
+# answer will be used ('y' or 'n' will be explicitly required, unless 'd' or 'D'
+# are set to any valid value).
+#
 # For example, to set 'n' as the default answer for the 'r' command and
 # 'y' for everything else: "r:n,d:y".
 ;DefaultAnswer="o:n,r:n,t:y,R:n,d:y"
