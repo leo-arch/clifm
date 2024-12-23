@@ -854,7 +854,7 @@ import_from_data_dir(const char *src_filename, char *dest, const int exec)
 	const mode_t old_umask = umask(exec == 1 ? 0077 : 0177); /* flawfinder: ignore */
 	char *cmd[] = {"cp", "--", sys_file, dest, NULL};
 	const int ret = launch_execv(cmd, FOREGROUND, E_NOSTDERR);
-	umask(old_umask);
+	umask(old_umask); /* flawfinder: ignore */
 
 	if (ret == FUNC_SUCCESS) {
 #ifndef __MSYS__
@@ -3591,7 +3591,7 @@ read_config(void)
 			ret = sscanf(line + 6, "%o\n", &opt_num);
 			if (ret == -1 || opt_num > MAX_UMASK)
 				continue;
-			umask((mode_t)opt_num);
+			umask((mode_t)opt_num); /* flawfinder: ignore */
 		}
 
 		else if (xargs.welcome_message == UNSET && *line == 'W'

@@ -361,7 +361,7 @@ read_inotify(void)
 	char inotify_buf[EVENT_BUF_LEN];
 
 	memset((void *)inotify_buf, '\0', sizeof(inotify_buf));
-	i = (int)read(inotify_fd, inotify_buf, sizeof(inotify_buf));
+	i = (int)read(inotify_fd, inotify_buf, sizeof(inotify_buf)); /* flawfinder: ignore */
 
 	if (i <= 0) {
 # ifdef INOTIFY_DEBUG
@@ -1887,7 +1887,7 @@ handle_stdin(void)
 	char *buf = xnmalloc(chunk, sizeof(char));
 
 	while (chunks_n < max_chunks) {
-		input_len = read(STDIN_FILENO, buf + total_len, chunk);
+		input_len = read(STDIN_FILENO, buf + total_len, chunk); /* flawfinder: ignore */
 
 		/* Error */
 		if (input_len < 0) {

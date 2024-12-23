@@ -1420,7 +1420,7 @@ main(int argc, char *argv[])
 	init_workspaces_opts();
 
 	/* Restore user umask */
-	umask(old_mask);
+	umask(old_mask); /* flawfinder: ignore */
 
 	/* # 2. MAIN PROGRAM LOOP # */
 	run_main_loop();

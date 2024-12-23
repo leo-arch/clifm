@@ -687,7 +687,7 @@ xmkdir(const char *dir, const mode_t mode)
 {
 	mode_t old_mask = umask(0077); /* flawfinder: ignore */
 	int ret = mkdirat(XAT_FDCWD, dir, mode);
-	umask(old_mask);
+	umask(old_mask); /* flawfinder: ignore */
 
 	if (ret == -1)
 		return FUNC_FAILURE;

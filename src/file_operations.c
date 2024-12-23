@@ -103,7 +103,7 @@ umask_function(char *arg)
 		/* umask is set to zero, and then changed back, only to get the
 		 * current value. */
 		printf("%04o\n", old_umask);
-		umask(old_umask);
+		umask(old_umask); /* flawfinder: ignore */
 		return FUNC_SUCCESS;
 	}
 
@@ -119,7 +119,7 @@ umask_function(char *arg)
 	if (new_umask < 0 || new_umask > MAX_UMASK)
 		goto ERROR;
 
-	umask((mode_t)new_umask);
+	umask((mode_t)new_umask); /* flawfinder: ignore */
 	printf(_("File-creation mask set to '%04o'\n"), new_umask);
 	return FUNC_SUCCESS;
 

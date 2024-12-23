@@ -852,7 +852,7 @@ ctrl-d:deselect-all,ctrl-t:toggle-all" : "",
 	flags &= ~DELAYED_REFRESH;
 	const mode_t old_mask = umask(0077); /* flawfinder: ignore */
 	const int ret = launch_execl(cmd);
-	umask(old_mask);
+	umask(old_mask); /* flawfinder: ignore */
 
 	if (restore_cwd == 1)
 		xchdir(workspaces[cur_ws].path, NO_TITLE);

@@ -1033,7 +1033,7 @@ import_color_scheme(const char *name)
 	char *cmd[] = {"cp", "--", dfile, colors_dir, NULL};
 	const mode_t old_mask = umask(0077); /* flawfinder: ignore */
 	const int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
-	umask(old_mask);
+	umask(old_mask); /* flawfinder: ignore */
 
 	return ret == FUNC_SUCCESS ? ret : FUNC_FAILURE;
 }
