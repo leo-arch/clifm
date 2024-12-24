@@ -354,7 +354,7 @@ nx_getdelim(char **lineptr, size_t *n, int delim, FILE *stream)
 	size = *n;
 
 	for (;;) {
-		int ch = fgetc(stream);
+		int ch = fgetc(stream); /* flawfinder: ignore */
 
 		if (ch == EOF)
 			break;

@@ -38,7 +38,7 @@
 #include "utf8.h"
 
 /* Three functions added to the utf8.h library */
-/* Returns the amount of bytes needed to advance to the character next to S */
+/* Return the amount of bytes needed to advance to the character next to S */
 static int
 utf8nextcodepoint(const char *s)
 {
@@ -65,15 +65,18 @@ utf8casechr(char *s, char *c)
 		return (char *)NULL;
 
 	utf8_int32_t cps = 0, cpc = 0, cp = 0;
+	char *ret = (char *)NULL;
+
 	utf8codepoint(c, &cpc);
 	cp = utf8uprcodepoint(cpc);
 
 	while (*s) {
-		utf8codepoint(s, &cps);
+		ret = utf8codepoint(s, &cps);
 		if (utf8uprcodepoint(cps) != cp) {
-			s += utf8nextcodepoint(s);
+			s = ret;
 			continue;
 		}
+
 		return s;
 	}
 
@@ -89,7 +92,7 @@ contains_utf8(const char *s)
 		return 0;
 
 	while (*s) {
-		if (utf8nextcodepoint(s) > 1)
+		if (IS_UTF8_LEAD_BYTE(*s))
 			return 1;
 		s++;
 	}
@@ -103,7 +106,7 @@ contains_utf8(const char *s)
 static int
 fuzzy_match_v1(char *s1, char *s2, const size_t s1_len)
 {
-	int cs = conf.case_sens_path_comp;
+	const int cs = conf.case_sens_path_comp;
 	int included = 0;
 	char *p = (char *)NULL;
 
@@ -119,11 +122,8 @@ fuzzy_match_v1(char *s1, char *s2, const size_t s1_len)
 
 	int word_beginning = 0;
 	int consecutive_chars = 0;
-	int first_char = 0;
-	if (cs == 1)
-		first_char = *s1 == *s2 ? 1 : 0;
-	else
-		first_char = TOUPPER(*s1) == TOUPPER(*s2) ? 1 : 0;
+	const int first_char = cs == 1 ? (*s1 == *s2)
+		: (TOUPPER(*s1) == TOUPPER(*s2));
 
 	size_t l = 0;
 	char *hs = s2;
@@ -181,14 +181,14 @@ fuzzy_match(char *s1, char *s2, const size_t s1_len, const int type)
 		return 0;
 
 	if (type == FUZZY_FILES_ASCII || type == FUZZY_FILES_UTF8) {
-		if ((*s1 == '.' && *(s1 + 1) == '.') || *s1 == '-')
+		if ((*s1 == '.' && s1[1] == '.') || *s1 == '-')
 			return 0;
 	}
 
 	if (type == FUZZY_FILES_ASCII || conf.fuzzy_match_algo == 1)
 		return fuzzy_match_v1(s1, s2, s1_len);
 
-	int cs = conf.case_sens_path_comp;
+	const int cs = conf.case_sens_path_comp;
 	int included = 0;
 	char *p = (char *)NULL;
 
@@ -202,14 +202,13 @@ fuzzy_match(char *s1, char *s2, const size_t s1_len, const int type)
 		included = 1;
 	}
 
-	int word_beginning = 0;
-	int consecutive_chars = 0;
-	int first_char = 0;
-
 	utf8_int32_t cp1 = 0, cp2 = 0;
 	utf8codepoint(s1, &cp1);
 	utf8codepoint(s2, &cp2);
-	first_char = (cs == 1) ? (cp1 == cp2)
+
+	int word_beginning = 0;
+	int consecutive_chars = 0;
+	const int first_char = (cs == 1) ? (cp1 == cp2)
 		: (utf8uprcodepoint(cp1) == utf8uprcodepoint(cp2));
 
 	size_t l = 0;
@@ -236,12 +235,15 @@ fuzzy_match(char *s1, char *s2, const size_t s1_len, const int type)
 		: (utf8uprcodepoint(cp1) == utf8uprcodepoint(cp2)) ) )
 			consecutive_chars++;
 
-		char *bc = l > 0 ? utf8rcodepoint(m, &cp1) : (char *)NULL;
+		const char *bc = l > 0 ? utf8rcodepoint(m, &cp1) : (char *)NULL;
 		if (bc) {
-			utf8codepoint(bc, &cp2);
-			if (IS_WORD_SEPARATOR(*bc) || (utf8isupper(cp2) != 1
-			&& utf8isupper(cp1) == 1) )
+			if (IS_WORD_SEPARATOR(*bc)) {
 				word_beginning++;
+			} else {
+				utf8codepoint(bc, &cp2);
+				if (utf8isupper(cp2) != 1 && utf8isupper(cp1) == 1)
+					word_beginning++;
+			}
 		}
 
 		hs = m + b;

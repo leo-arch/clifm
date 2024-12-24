@@ -1945,7 +1945,7 @@ dirhist_generator(const char *text, int state)
 	if (!state) {
 		i = 0;
 		len = strlen(text);
-		fuzzy_str_type = (conf.fuzzy_match == 1	&& contains_utf8(text) == 1)
+		fuzzy_str_type = (conf.fuzzy_match == 1 && contains_utf8(text) == 1)
 			? FUZZY_FILES_UTF8 : FUZZY_FILES_ASCII;
 	}
 
