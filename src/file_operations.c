@@ -409,6 +409,40 @@ dup_file(char **cmd)
 	return exit_status;
 }
 
+/* Attempt to create the file pointed to ABS_PATH, whose basename is BASENAME,
+ * from a template file.
+ * The name of template file is generated using the file extension found in
+ * BASENAME. E.g. if BASENAME is 'file.c', the template file to check will be
+ * '~/.config/clifm/templates/c'.
+ * If the template file is found, we copy this file using the name provided
+ * by ABS_PATH as the destiny file.
+ * Return 1 in case of success or 0 otherwise. */
+static int
+create_from_template(char *abs_path, char *basename)
+{
+	if (!config_dir_gral || !*config_dir_gral || !abs_path || !*abs_path
+	|| !basename || !*basename)
+		return 0;
+
+	char *ext = strrchr(basename, '.');
+	if (!ext || ext == basename || !++ext)
+		return 0;
+
+	char template_file[PATH_MAX + 1];
+	snprintf(template_file, sizeof(template_file),
+		"%s/templates/%s", config_dir_gral, ext);
+
+	struct stat a;
+	if (lstat(template_file, &a) == -1 || !S_ISREG(a.st_mode)
+	|| check_file_access(a.st_mode, a.st_uid, a.st_gid) == 0)
+		return 0;
+
+	char *cmd[] = {"cp", template_file, abs_path, NULL};
+	const int ret = launch_execv(cmd, FOREGROUND, 0);
+
+	return (ret == 0);
+}
+
 /* Create the file named NAME, as a directory, if ending wit a slash, or as
  * a regular file otherwise.
  * Parent directories are created if they do not exist.
@@ -448,7 +482,9 @@ CONT:
 		n = ret + 1;
 	}
 
-	if (*n && status != FUNC_FAILURE) { /* Regular file */
+
+	if (*n && status != FUNC_FAILURE /* Regular file */
+	&& create_from_template(name, n) == 0) {
 		/* Regular file creation mode (666, or 600 in secure-mode). open(2)
 		 * will modify this according to the current umask value. */
 		if (xargs.secure_env == 1 || xargs.secure_env_full == 1)
