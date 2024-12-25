@@ -374,7 +374,7 @@
 # confirmation prompts. Each field has two values separated by a colon (':').
 #
 # The left value specifies a confirmation prompt:
-#  'o': overwrite files (mostly 'c', 'm', and 'n' commands)
+#  'o': overwrite files (mostly 'c' and 'm' commands)
 #  'r': remove ('r' command)
 #  't': trash ('t' command)
 #  'R': bulk rename ('br' command)
