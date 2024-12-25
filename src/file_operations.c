@@ -708,21 +708,19 @@ format_new_filename(char **name)
 }
 
 static int
-err_file_exists(char *name, const int multi, const int is_md)
+ask_overwrite(char *file, const char *cmd_name)
 {
-	char *n = abbreviate_file_name(name);
-	char *p = n ? n : name;
+	char *n = abbreviate_file_name(file);
+	char *p = n ? n : file;
 
-	xerror("%s: '%s': %s\n", is_md ? "md" : "new",
-		(*p == '.' && p[1] == '/' && p[2]) ? p + 2 : p, strerror(EEXIST));
+	char msg[PATH_MAX + 3 + 27];
+	snprintf(msg, sizeof(msg), _("%s: '%s': Overwrite this file?"),
+		cmd_name, (*p == '.' && p[1] == '/' && p[2]) ? p + 2 : p);
 
-	if (n && n != name)
+	if (n && n != file)
 		free(n);
 
-	if (multi == 1)
-		press_any_key_to_continue(0);
-
-	return FUNC_FAILURE;
+	return rl_get_y_or_n(msg, conf.default_answer.overwrite);
 }
 
 /* Ask the user for a new file name and create the file. */
@@ -753,10 +751,8 @@ ask_and_create_file(void)
 		goto ERROR;
 
 	struct stat a;
-	if (lstat(filename, &a) == 0) {
-		exit_status = err_file_exists(filename, 0, 0);
+	if (lstat(filename, &a) == 0 && ask_overwrite(filename, "new") == 0)
 		goto ERROR;
-	}
 
 	exit_status = create_file(filename, 0);
 	if (exit_status == FUNC_SUCCESS) {
@@ -777,7 +773,7 @@ check_file_existence(char *file)
 {
 	int s = 0;
 	const size_t l = strlen(file);
-	if (l > 0 && file[l - 1] == '/') {
+	if (l > 1 && file[l - 1] == '/') {
 		file[l - 1] = '\0';
 		s = 1;
 	}
@@ -832,11 +828,10 @@ create_files(char **args, const int is_md)
 			continue;
 		}
 
-		/* Skip existent files. */
-		if (check_file_existence(args[i]) == 0) {
-			exit_status = err_file_exists(args[i], 0, is_md);
+		/* Warn about existent files. */
+		if (check_file_existence(args[i]) == 0
+		&& ask_overwrite(args[i], is_md == 1 ? "md" : "new") == 0)
 			continue;
-		}
 
 		const int ret = create_file(args[i], is_md);
 		if (ret == FUNC_SUCCESS) {
