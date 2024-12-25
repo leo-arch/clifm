@@ -2125,6 +2125,9 @@ expand_glob(char ***substr, const int *glob_array, const size_t glob_n)
 	for (g = 0; g < (size_t)glob_n; g++) {
 		glob_t globbuf;
 
+		if (is_quoted_word((size_t)glob_array[g] + old_pathc))
+			continue;
+
 		if (glob((*substr)[glob_array[g] + (int)old_pathc],
 			GLOB_BRACE | GLOB_TILDE, NULL, &globbuf) != FUNC_SUCCESS) {
 			globfree(&globbuf);
@@ -2461,8 +2464,11 @@ expand_regex(char ***substr)
 			break;
 
 		/* Ignore the first string of the search function: it will be
-		 * expanded by the search function itself. */
-		if (*(*substr)[0] == '/') {
+		 * expanded by the search function itself.
+		 * Also, ignore quoted words and existent file names. */
+		struct stat a;
+		if (*(*substr)[0] == '/' || is_quoted_word((size_t)i)
+		|| lstat((*substr)[i], &a) != -1) {
 			tmp[n] = (*substr)[i];
 			n++;
 			continue;
@@ -3152,9 +3158,14 @@ parse_input_str(char *str)
 		if (substr[0][0] == '/' && i == 0)
 			continue;
 
+		/* Ignore existent file names as well. */
+		struct stat a;
+		if (lstat(substr[i], &a) != -1)
+			continue;
+
 #ifdef HAVE_WORDEXP
 		/* Let's make wordexp(3) ignore escaped words. */
-		int is_escaped = strchr(substr[i], '\\') ? 1 : 0;
+		const int is_escaped = strchr(substr[i], '\\') ? 1 : 0;
 #endif /* HAVE_WORDEXP */
 
 		size_t j = 0;
