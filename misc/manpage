@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Dec 17, 2024" "clifm 1.22.6" "CLIFM Manual"
+.TH "CLIFM" "1" "Dec 26, 2024" "clifm 1.22.9" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -956,11 +956,20 @@ list available mountpoints and change the current working directory to the selec
 with no arguments, prints the list of messages in the current session. The \fIclear\fR option tells \fBclifm\fR to empty the messages list.
 .TP
 .B n, new \fR[\fIFILE\fR]... [\fIDIR/\fR]...
-create new empty files and/or directories.
+create new regular files and/or directories.
 .sp
-If a file name ends with a slash (/), it will be taken as a directory name. Else, it will be created as a regular file. E.g.: \fIn\ myfile\ mydir/\fR, to create a file named \fImyfile\fR and a directory named \fImydir\fR. If no file name is provided, the user will be asked to enter one.
+If a file name ends with a slash (/), it will be taken as a directory name. Else, it will be created as a regular file. E.g.: \fIn\ myfile\ mydir/\fR, to create a file named \fImyfile\fR and a directory named \fImydir\fR. If no file name is provided, the user will be prompted to enter one.
 .sp
-File name validation is performed over names before creation. In case of an unsafe name, the user is warned and asked for confirmation.
+New regular files will be created from a \fBtemplate file\fR if:
+.sp
+ 1. The file to be created has a file name extension (e.g., \fIfile.html\fR).
+ 2. A file named like this extension, here \fIhtml\fR, exists in the templates directory \fB(1)\fR.
+.sp
+If both conditions are met, running \fIn file.html\fR will create a new file named \fIfile.html\fR which is a copy of the \fIhtml\fR file in the templates directory (\fI~/.config/clifm/templates/html\fR).
+.sp
+\fB(1)\fR The templates directory is by default \fI~/.config/clifm/templates/\fR (unless the \fI\-\-config\-dir=DIR\fR command line flag was set when running the current instance of \fBclifm\fR, in which case \fIDIR/templates/\fR is used instead.
+.sp
+\fBFile name validation\fR is performed over names before creation. In case of an unsafe name, the user is warned and asked for confirmation.
 .sp
 A name (namely, any component of a path) is considered unsafe if:
   1. Starts with a dash (\-): command option flags collision
