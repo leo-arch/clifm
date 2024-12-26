@@ -398,7 +398,7 @@ set_start_path(void)
 
 /* Check whether DIR contains the 'clifm/clifmrc' file, in which case we
  * assume this is clifm's data directory.
- * Return a malloc'ed copy of DIR in case of success, or NULL on error. */
+ * Returns a malloc'ed copy of DIR in case of success, or NULL on error. */
 static char *
 try_datadir(const char *dir)
 {
@@ -502,7 +502,7 @@ try_standard_data_dirs(void)
 	if (sec_env != 1 && try_xdg_data_dirs() == FUNC_SUCCESS)
 		return FUNC_SUCCESS;
 
-	/* Neither XDG_DATA_HOM nor XDG_DATA_DIRS. Let's try a few standard paths */
+	/* Neither XDG_DATA_HOME nor XDG_DATA_DIRS. Let's try a few standard paths */
 	char *const data_dirs[] = {
 		"/usr/local/share",
 		"/usr/share",
