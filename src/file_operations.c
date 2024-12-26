@@ -437,6 +437,8 @@ create_from_template(char *abs_path, char *basename)
 		return 0;
 
 	char *cmd[] = {"cp", template_file, abs_path, NULL};
+	/* Let's copy the template file. STDERR and STDOUT are silenced: in case
+	 * of error, we'll try to create a plain empty regular file via open(2). */
 	const int ret = launch_execv(cmd, FOREGROUND, E_MUTE);
 
 	return (ret == 0);

@@ -816,7 +816,17 @@ To get information about a device, enter iELN. For example: 'i12'."
     n file1 file2 dir1/ dir2/\n\n\
 Parent directories are created if necessary. For example, if you run\n\
     n dir/subdir/file\n\
-both 'dir' and 'subdir' directories will be created if they do not exist."
+both 'dir' and 'subdir' directories will be created if they do not exist.\n\n\
+\x1b[1mFILE TEMPLATES\x1b[22m\n\
+New regular files will be created from a template file if:\n\n\
+  1. The file to be created has a file name extension (e.g., 'file.html').\n\
+  2. A file named like this extension, here 'html', exists in the\n\
+     templates directory, usually '~/.config/clifm/templates/' (unless\n\
+     the '--config-dir=DIR' command line flag was set when running Clifm,\n\
+     in which case 'DIR/templates/' is used instead).\n\n\
+If both conditions are met, running 'n file.html' will create a new file\n\
+named 'file.html' which is a copy of the 'html' file in the templates\n\
+directory ('~/.config/clifm/templates/html')."
 
 #define OC_USAGE "Interactively change files ownership\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
