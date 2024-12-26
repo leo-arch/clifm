@@ -826,7 +826,12 @@ New regular files will be created from a template file if:\n\n\
      in which case 'DIR/templates/' is used instead).\n\n\
 If both conditions are met, running 'n file.html' will create a new file\n\
 named 'file.html' which is a copy of the 'html' file in the templates\n\
-directory ('~/.config/clifm/templates/html')."
+directory ('~/.config/clifm/templates/html').\n\n\
+Note that template names are not limited to actual file extensions: you\n\
+can name your templates whatever you like (with any content you want)\n\
+provided new files are created using the template name as extension. E.g.:\n\
+'n file.my_super_cool_template'. In this way, you can use as many\n\
+templates as you wish."
 
 #define OC_USAGE "Interactively change files ownership\n\n\
 \x1b[1mUSAGE\x1b[22m\n\

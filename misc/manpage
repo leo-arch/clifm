@@ -969,6 +969,8 @@ If both conditions are met, running \fIn file.html\fR will create a new file nam
 .sp
 \fB(1)\fR The templates directory is by default \fI~/.config/clifm/templates/\fR (unless the \fI\-\-config\-dir=DIR\fR command line flag was set when running the current instance of \fBclifm\fR, in which case \fIDIR/templates/\fR is used instead.
 .sp
+Note that template names are not limited to actual file extensions: you can name your templates whatever you like (with any content you want) provided new files are created using the template name as extension. E.g.: \fIn file.my_super_cool_template\fR. In this way, you can use as many templates as you wish.
+.sp
 \fBFile name validation\fR is performed over names before creation. In case of an unsafe name, the user is warned and asked for confirmation.
 .sp
 A name (namely, any component of a path) is considered unsafe if:
