@@ -1389,6 +1389,7 @@ main(int argc, char *argv[])
 
 	shell = get_sys_shell();
 	create_kbinds_file();
+	load_file_templates();
 	load_bookmarks();
 	load_keybinds();
 	load_tags();

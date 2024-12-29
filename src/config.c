@@ -3863,7 +3863,7 @@ create_trash_dirs(void)
 	if (ret != FUNC_SUCCESS) {
 		trash_ok = 0;
 		err('w', PRINT_PROMPT, _("%s: '%s': Cannot create the trash "
-			"directory (or one of its subdirectories: files/ and info/).\n"
+			"directory (or one of its subdirectories: 'files' and 'info').\n"
 			"Try creating them manually and restart %s.\n"
 			"E.g.: mkdir -p ~/.local/share/Trash/{files,info}\n"),
 			PROGRAM_NAME, trash_dir, PROGRAM_NAME);
@@ -3988,10 +3988,8 @@ init_config(void)
 	if (!conf.ptime_str)
 		set_ptime_style_env();
 
-	if (just_listing == 0) {
+	if (just_listing == 0)
 		load_prompts();
-		load_file_templates();
-	}
 
 	check_colors();
 
