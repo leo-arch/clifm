@@ -2113,6 +2113,26 @@ kb_func_names_gen(const char *text, int state)
 }
 
 static char *
+file_templates_generator(const char *text, int state)
+{
+	static int i;
+	static size_t len;
+	char *name;
+
+	if (!state) {
+		i = 0;
+		len = strlen(text);
+	}
+
+	while ((name = file_templates[i++]) != NULL) {
+		if (strncmp(name, text, len) == 0)
+			return strdup(name);
+	}
+
+	return (char *)NULL;
+}
+
+static char *
 nets_generator(const char *text, int state)
 {
 	if (!remotes)
@@ -3875,6 +3895,21 @@ complete_colorschemes(char *text, const size_t words_n)
 }
 
 static char **
+complete_file_templates(char *text)
+{
+	char *p = unescape_str(text, 0);
+	char **matches =
+		rl_completion_matches(p ? p : text, &file_templates_generator);
+	free(p);
+
+	if (!matches)
+		return (char **)NULL;
+
+	cur_comp_type = TCMP_FILE_TEMPLATES;
+	return matches;
+}
+
+static char **
 complete_desel(const char *text)
 {
 	rl_attempted_completion_over = 1;
@@ -4413,6 +4448,14 @@ FIRST_WORD_COMP:
 		matches = complete_bookmark_names((char *)text, words_n, &exit_status);
 		if (exit_status == FUNC_SUCCESS)
 			return matches;
+	}
+
+	/* ### FILE TEMPLATES COMPLETION ('n/new' command) ### */
+	if (file_templates && s && *s == 'n' && (s[1] == ' ' || (s[1] == 'e'
+	&& s[2] == 'w' && s[3] == ' '))) {
+		char *p = strrchr(text, '@');
+		if (p)
+			return complete_file_templates(p + 1);
 	}
 
 	/* ### ALIASES COMPLETION ### */

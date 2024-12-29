@@ -52,6 +52,7 @@ void init_workspaces_opts(void);
 int  load_actions(void);
 int  load_bookmarks(void);
 int  load_dirhist(void);
+void load_file_templates(void);
 void load_jumpdb(void);
 int  load_pinned_dir(void);
 int  load_prompts(void);

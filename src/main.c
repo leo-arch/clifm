@@ -307,6 +307,7 @@ char
 	**bin_commands = (char **)NULL,
 	**cdpaths = (char **)NULL,
 	**color_schemes = (char **)NULL,
+	**file_templates = (char **)NULL,
 	**old_pwd = (char **)NULL,
 	**profile_names = (char **)NULL,
 	**prompt_cmds = (char **)NULL,

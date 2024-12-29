@@ -1878,7 +1878,8 @@ enum comp_type {
 	TCMP_DIRHIST =    35,
 	TCMP_MIME_LIST =  36,
 	TCMP_WS_PREFIX =  37, /* 'w:' keyword expansion */
-	TCMP_MIME_FILES = TCMP_FILE_TYPES_FILES /* Same behavior */
+	TCMP_MIME_FILES = TCMP_FILE_TYPES_FILES, /* Same behavior */
+	TCMP_FILE_TEMPLATES = 38
 };
 
 extern enum comp_type cur_comp_type;
@@ -2054,6 +2055,7 @@ extern char
 	**bin_commands,
 	**cdpaths,
 	**color_schemes,
+	**file_templates,
 	**old_pwd,
 	**profile_names,
 	**prompt_cmds,

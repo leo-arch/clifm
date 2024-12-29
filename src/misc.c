@@ -1367,6 +1367,20 @@ handle_last_path(void)
 	free(last_path_tmp);
 }
 
+static void
+free_file_templates(void)
+{
+	if (!file_templates)
+		return;
+
+	filesn_t i;
+	for (i = 0; file_templates[i]; i++)
+		free(file_templates[i]);
+
+	free(file_templates);
+	file_templates = (char **)NULL;
+}
+
 /* This function is called by atexit() to clear whatever is there at exit
  * time and avoid thus memory leaks */
 void
@@ -1433,6 +1447,7 @@ free_stuff(void)
 	free_autocmds(0);
 	free_tags();
 	free_remotes(1);
+	free_file_templates();
 
 	if (xargs.stealth_mode != 1)
 		save_jumpdb();

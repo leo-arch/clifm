@@ -409,36 +409,110 @@ dup_file(char **cmd)
 	return exit_status;
 }
 
-/* Attempt to create the file pointed to by ABS_PATH, whose basename is
- * BASENAME, from a template file.
- * The name of template file is generated using the file extension found in
- * BASENAME. E.g. if BASENAME is 'file.c', the template file to check will be
- * '~/.config/clifm/templates/c'.
- * If the template file exists, we copy this file using the name provided
- * by ABS_PATH as the destiny file.
- * Return 1 in case of success or 0 otherwise. */
+static int
+err_file_exists(char *name, const int multi, const int is_md)
+{
+	char *n = abbreviate_file_name(name);
+	char *p = n ? n : name;
+
+	xerror("%s: '%s': %s\n", is_md ? "md" : "new",
+		(*p == '.' && p[1] == '/' && p[2]) ? p + 2 : p, strerror(EEXIST));
+
+	if (n && n != name)
+		free(n);
+
+	if (multi == 1)
+		press_any_key_to_continue(0);
+
+	return FUNC_FAILURE;
+}
+
+static char *
+extract_template_name_from_filename(char *basename, int *t_auto)
+{
+	/* Explicit template name: file@template */
+	char *tname = strrchr(basename, '@');
+	if (tname && tname != basename && tname[1]) {
+		*t_auto = 0;
+		return tname + 1;
+	}
+
+	/* Automatic template (taken from file extension). */
+	*t_auto = 1;
+	tname = strrchr(basename, '.');
+	if (tname && tname != basename && tname[1])
+		return tname + 1;
+
+	return (char *)NULL;
+}
+
+/* Return 1 if the template NAME is found in the templates list,
+ * or 0 otherwise. */
+static int
+find_template(const char *name)
+{
+	if (!file_templates)
+		return 0;
+
+	filesn_t i;
+	for (i = 0; file_templates[i]; i++) {
+		if (*name == *file_templates[i]
+		&& strcmp(name, file_templates[i]) == 0)
+			return 1;
+	}
+
+	return 0;
+}
+
+/* Create the file show absolute path is ABS_PATH, and whose basename is
+ * BASENAME, from the corresponing template.
+ * Returns 1 in case of success, 0 in there's no template for this file
+ * (or cp(1) fails), or -1 in case of error. */
 static int
 create_from_template(char *abs_path, char *basename)
 {
-	if (!config_dir_gral || !*config_dir_gral || !abs_path || !*abs_path
-	|| !basename || !*basename)
+	if (!file_templates || !config_dir_gral || !*config_dir_gral
+	|| !abs_path || !*abs_path || !basename || !*basename)
 		return 0;
 
-	char *ext = strrchr(basename, '.');
-	if (!ext || ext == basename || !++ext)
+	int t_auto = 1;
+	const char *t_name =
+		extract_template_name_from_filename(basename, &t_auto);
+	if (!t_name)
 		return 0;
+
+	if (find_template(t_name) == 0) {
+/*		if (t_auto == 0) {
+			xerror(_("new: '%s': No such template\n"), t_name);
+			return (-1);
+		} */
+		return 0;
+	}
+
+	if (t_auto == 0) {
+		/* src_file@template: Remove template name from source file name. */
+		char *p = strrchr(abs_path, '@');
+		if (p)
+			*p = '\0';
+	}
 
 	char template_file[PATH_MAX + 1];
 	snprintf(template_file, sizeof(template_file),
-		"%s/templates/%s", config_dir_gral, ext);
+		"%s/templates/%s", config_dir_gral, t_name);
 
 	struct stat a;
 	if (lstat(template_file, &a) == -1 || !S_ISREG(a.st_mode))
 		return 0;
 
+	if (lstat(abs_path, &a) != -1) {
+		err_file_exists(abs_path, 0, 0);
+		return (-1);
+	}
+
 	char *cmd[] = {"cp", template_file, abs_path, NULL};
 	/* Let's copy the template file. STDERR and STDOUT are silenced: in case
-	 * of error, we'll try to create a plain empty regular file via open(2). */
+	 * of error, we'll try to create a plain empty regular file via open(2)
+	 * and print the error message in case of failure. */
 	const int ret = launch_execv(cmd, FOREGROUND, E_MUTE);
 
 	return (ret == 0);
@@ -483,8 +557,15 @@ CONT:
 		n = ret + 1;
 	}
 
-	if (*n && status != FUNC_FAILURE /* Regular file */
-	&& create_from_template(name, n) == 0) {
+	if (*n && status != FUNC_FAILURE) { /* Regular file */
+		const int retval = create_from_template(name, n);
+		if (retval != 0) {
+			if (retval == -1)
+				// file@template: No such template, or destiny file exists
+				status = FUNC_FAILURE;
+			goto END;
+		}
+
 		/* Regular file creation mode (666, or 600 in secure-mode). open(2)
 		 * will modify this according to the current umask value. */
 		if (xargs.secure_env == 1 || xargs.secure_env_full == 1)
@@ -501,6 +582,7 @@ CONT:
 		}
 	}
 
+END:
 	return status;
 }
 
@@ -741,24 +823,6 @@ format_new_filename(char **name)
 	free(npath);
 
 	return FUNC_SUCCESS;
-}
-
-static int
-err_file_exists(char *name, const int multi, const int is_md)
-{
-	char *n = abbreviate_file_name(name);
-	char *p = n ? n : name;
-
-	xerror("%s: '%s': %s\n", is_md ? "md" : "new",
-		(*p == '.' && p[1] == '/' && p[2]) ? p + 2 : p, strerror(EEXIST));
-
-	if (n && n != name)
-		free(n);
-
-	if (multi == 1)
-		press_any_key_to_continue(0);
-
-	return FUNC_FAILURE;
 }
 
 /* Ask the user for a new file name and create the file. */

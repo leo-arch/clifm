@@ -3988,8 +3988,11 @@ init_config(void)
 	if (!conf.ptime_str)
 		set_ptime_style_env();
 
-	if (just_listing == 0)
+	if (just_listing == 0) {
 		load_prompts();
+		load_file_templates();
+	}
+
 	check_colors();
 
 	if (xargs.secure_env == 1 || xargs.secure_env_full == 1)

@@ -165,7 +165,7 @@ print_filename(char *to_print, char *full_pathname)
 	|| t == TCMP_DESEL || t == TCMP_RANGES || t == TCMP_TAGS_F
 	|| t == TCMP_FILE_TYPES_FILES || t == TCMP_MIME_LIST
 	|| t == TCMP_BM_PATHS || t == TCMP_GLOB || t == TCMP_UNTRASH
-	|| t == TCMP_TRASHDEL)) {
+	|| t == TCMP_TRASHDEL || t == TCMP_FILE_TEMPLATES)) {
 		colors_list(to_print, NO_ELN, NO_PAD, NO_NEWLINE);
 	} else {
 		for (s = to_print + tab_offset; *s; s++)
@@ -1082,7 +1082,8 @@ store_completions(char **matches)
 		|| ct == TCMP_SORT || ct == TCMP_BOOKMARK || ct == TCMP_CSCHEME
 		|| ct == TCMP_NET || ct == TCMP_PROF || ct == TCMP_PROMPTS
 		|| ct == TCMP_BM_PREFIX || ct == TCMP_WS_PREFIX
-		|| ct == TCMP_WORKSPACES); /* We're not completing file names. */
+		|| ct == TCMP_WORKSPACES || ct == TCMP_FILE_TEMPLATES);
+			/* We're not completing file names. */
 
 	char *norm_prefix = (char *)NULL;
 	/* "./_", "../_", and "_/.._" */
@@ -1187,6 +1188,7 @@ get_query_str(char *lw)
 	case TCMP_FILE_TYPES_OPTS:  /* fallthrough */
 	case TCMP_FILE_TYPES_FILES: /* fallthrough */
 	case TCMP_MIME_LIST:        /* fallthrough */
+	case TCMP_FILE_TEMPLATES:   /* fallthrough */
 	case TCMP_TAGS_F:
 		break;
 
@@ -1577,7 +1579,8 @@ get_finder_offset(const char *query, const char *text, char **matches,
 	&& ct != TCMP_CMD_DESC && ct != TCMP_FILE_TYPES_OPTS
 	&& ct != TCMP_FILE_TYPES_FILES && ct != TCMP_MIME_LIST
 	&& ct != TCMP_TAGS_F && ct != TCMP_TAGS_T && ct != TCMP_TAGS_C
-	&& ct != TCMP_DIRHIST && ct != TCMP_WS_PREFIX)
+	&& ct != TCMP_DIRHIST && ct != TCMP_WS_PREFIX
+	&& ct != TCMP_FILE_TEMPLATES)
 		finder_offset++; /* Last char is space */
 
 	while (finder_offset > term_cols)
@@ -2172,6 +2175,7 @@ AFTER_USUAL_COMPLETION:
 		if (replacement && (cur_comp_type != TCMP_HIST || !matches[1])
 		&& cur_comp_type != TCMP_FILE_TYPES_OPTS
 		&& cur_comp_type != TCMP_MIME_LIST
+		&& cur_comp_type != TCMP_FILE_TEMPLATES
 		&& (cur_comp_type != TCMP_FILE_TYPES_FILES || !matches[1])
 		&& (cur_comp_type != TCMP_GLOB || !matches[1])
 		&& cur_comp_type != TCMP_JUMP && cur_comp_type != TCMP_RANGES
@@ -2573,6 +2577,7 @@ CALC_OFFSET:
 		|| cur_comp_type == TCMP_FILE_TYPES_OPTS
 		|| cur_comp_type == TCMP_BM_PATHS || cur_comp_type == TCMP_MIME_LIST
 		|| cur_comp_type == TCMP_CMD_DESC || cur_comp_type == TCMP_SEL
+		|| cur_comp_type == TCMP_FILE_TEMPLATES
 		|| cur_comp_type == TCMP_DIRHIST
 		|| (tabmode == STD_TAB && (cur_comp_type == TCMP_JUMP
 		|| cur_comp_type == TCMP_TAGS_F) ) )

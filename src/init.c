@@ -1593,6 +1593,60 @@ ERROR:
 	return (char *)NULL;
 }
 
+void
+load_file_templates(void)
+{
+	if (!config_dir_gral || !*config_dir_gral)
+		return;
+
+	filesn_t n = 0;
+	struct stat a;
+	char templates_dir[PATH_MAX + 1];
+	snprintf(templates_dir, sizeof(templates_dir),
+		"%s/templates", config_dir_gral);
+
+	if (lstat(templates_dir, &a) == -1 || !S_ISDIR(a.st_mode)
+	|| (n = count_dir(templates_dir, NO_CPOP)) <= 2)
+		return;
+
+	DIR *dir;
+	struct dirent *ent;
+
+	if ((dir = opendir(templates_dir)) == NULL)
+		return;
+
+	file_templates = xnmalloc((size_t)n - 1, sizeof(char *));
+	n = 0;
+
+	while ((ent = readdir(dir))) {
+		const char *ename = ent->d_name;
+		if (SELFORPARENT(ename) || *ename == '.')
+			continue;
+
+#ifndef _DIRENT_HAVE_D_TYPE
+		char buf[PATH_MAX + NAME_MAX + 2];
+		snprintf(buf, sizeof(buf), "%s/%s", templates_dir, ename);
+		if (stat(buf, &a) == -1 || !S_ISREG(a.st_mode))
+#else
+		if (ent->d_type != DT_REG)
+#endif // !_DIRENT_HAVE_D_TYPE
+			continue;
+
+		file_templates[n] = savestring(ename, strlen(ename));
+		n++;
+	}
+
+	closedir(dir);
+
+	if (n == 0) {
+		free(file_templates);
+		file_templates = (char **)NULL;
+		return;
+	}
+
+	file_templates[n] = (char *)NULL;
+}
+
 /* Load prompts from PROMPTS_FILE. */
 int
 load_prompts(void)
