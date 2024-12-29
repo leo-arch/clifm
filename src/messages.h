@@ -835,8 +835,8 @@ provided new files are created using the template name as extension. E.g.:\n\
 \x1b[1m2. Explicit templates\x1b[22m\n\n\
 If a file name is followed by '@TEMPLATE', where TEMPLATE is any regular\n\
 file found in the templates directory(1), the file will be created as a\n\
-copy of the corresponding file template. E.g., 'n file.sh@my_script.sh'.\n\n\
-TAB completion is available for explicit templates: 'n file@<TAB>'\n\n\
+copy of the corresponding file template. E.g.: 'n file.sh@my_script.sh'.\n\n\
+TAB completion is available for explicit templates: 'n file@<TAB>'.\n\n\
 (1) The templates directory is by default '~/.config/clifm/templates'\n\
 (unless the '--config-dir=DIR' command line flag was set when running\n\
 Clifm, in which case 'DIR/templates' is used instead)."
