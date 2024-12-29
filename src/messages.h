@@ -805,7 +805,7 @@ To get information about a device, enter iELN. For example: 'i12'."
 
 #define NEW_USAGE "Create new files and/or directories\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
-  n, new [FILE...] [DIR/...]\n\n\
+  n, new [FILE[@TEMPLATE]...] [DIR/...]\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
 - Create two files named file1 and file2\n\
     n file1 file2\n\
@@ -813,25 +813,33 @@ To get information about a device, enter iELN. For example: 'i12'."
     n dir1/ dir2/\n\
   Note: Note the ending slashes.\n\
 - Both of the above at once:\n\
-    n file1 file2 dir1/ dir2/\n\n\
+    n file1 file2 dir1/ dir2/\n\
+- Create a file from a file template (see below for more information)\n\
+    n file1@my_template\n\n\
 Parent directories are created if necessary. For example, if you run\n\
     n dir/subdir/file\n\
 both 'dir' and 'subdir' directories will be created if they do not exist.\n\n\
-\x1b[1mFILE TEMPLATES\x1b[22m\n\
+\x1b[1mFILE TEMPLATES\x1b[22m\n\n\
+\x1b[1m1. Automatic templates\x1b[22m\n\n\
 New regular files will be created from a template file if:\n\n\
-  1. The file to be created has a file name extension (e.g., 'file.html').\n\
-  2. A file named like this extension, here 'html', exists in the\n\
-     templates directory, usually '~/.config/clifm/templates/' (unless\n\
-     the '--config-dir=DIR' command line flag was set when running Clifm,\n\
-     in which case 'DIR/templates/' is used instead).\n\n\
+  a. The file to be created has a file name extension (e.g., 'file.html').\n\
+  b. A file named like this extension, here 'html', exists in the\n\
+     templates directory(1).\n\n\
 If both conditions are met, running 'n file.html' will create a new file\n\
 named 'file.html' which is a copy of the 'html' file in the templates\n\
-directory ('~/.config/clifm/templates/html').\n\n\
+directory.\n\n\
 Note that template names are not limited to actual file extensions: you\n\
 can name your templates whatever you like (with any content you want)\n\
 provided new files are created using the template name as extension. E.g.:\n\
-'n file.my_super_cool_template'. In this way, you can use as many\n\
-templates as you wish."
+'n file.my_super_cool_template'.\n\n\
+\x1b[1m2. Explicit templates\x1b[22m\n\n\
+If a file name is followed by '@TEMPLATE', where TEMPLATE is any regular\n\
+file found in the templates directory(1), the file will be created as a\n\
+copy of the corresponding file template. E.g., 'n file.sh@my_script.sh'.\n\n\
+TAB completion is available for explicit templates: 'n file@<TAB>'\n\n\
+(1) The templates directory is by default '~/.config/clifm/templates'\n\
+(unless the '--config-dir=DIR' command line flag was set when running\n\
+Clifm, in which case 'DIR/templates' is used instead)."
 
 #define OC_USAGE "Interactively change files ownership\n\n\
 \x1b[1mUSAGE\x1b[22m\n\

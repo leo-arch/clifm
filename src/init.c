@@ -1629,7 +1629,7 @@ load_file_templates(void)
 		if (stat(buf, &a) == -1 || !S_ISREG(a.st_mode))
 #else
 		if (ent->d_type != DT_REG)
-#endif // !_DIRENT_HAVE_D_TYPE
+#endif /* !_DIRENT_HAVE_D_TYPE */
 			continue;
 
 		file_templates[n] = savestring(ename, strlen(ename));
