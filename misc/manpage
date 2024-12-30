@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Dec 26, 2024" "clifm 1.22.9" "CLIFM Manual"
+.TH "CLIFM" "1" "Dec 30, 2024" "clifm 1.22.10" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -977,7 +977,7 @@ If a file name is followed by the expression \fI@TEMPLATE\fR, where TEMPLATE is 
 .sp
 TAB completion is available for explicit templates: \fIn file@<TAB>\fR
 .sp
-\fB(1)\fR The templates directory is by default \fI~/.config/clifm/templates\fR (unless the \fI\-\-config\-dir=DIR\fR command line flag was set when running the current instance of \fBclifm\fR, in which case \fIDIR/templates\fR is used instead).
+\fB(1)\fR The templates directory is \fB$CLIFM_TEMPLATES_DIR\fR, \fB$XDG_TEMPLATES_DIR\fR, or \fI~/Templates\fR, in this precendence order.
 .sp
 \fBFile name validation\fR is performed over names before creation. In case of an unsafe name, the user is warned and asked for confirmation.
 .sp
@@ -2842,6 +2842,9 @@ A comma separated list of colors used to print timetamps based on age
 .TP
 .B CLIFM_SIZE_SHADES
 Same as \fBCLIFM_DATE_SHADES\fR, but for file sizes
+.TP
+.B CLIFM_TEMPLATES_DIR
+A custom file templates directory
 .TP
 .B CLIFM_HISTFILE
 A custom commands history file
