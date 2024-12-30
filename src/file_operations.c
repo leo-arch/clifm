@@ -471,7 +471,7 @@ find_template(const char *name)
 static int
 create_from_template(char *abs_path, char *basename)
 {
-	if (!file_templates || !config_dir_gral || !*config_dir_gral
+	if (!file_templates || !templates_dir || !*templates_dir
 	|| !abs_path || !*abs_path || !basename || !*basename)
 		return 0;
 
@@ -498,7 +498,7 @@ create_from_template(char *abs_path, char *basename)
 
 	char template_file[PATH_MAX + 1];
 	snprintf(template_file, sizeof(template_file),
-		"%s/templates/%s", config_dir_gral, t_name);
+		"%s/%s", templates_dir, t_name);
 
 	struct stat a;
 	if (lstat(template_file, &a) == -1 || !S_ISREG(a.st_mode))

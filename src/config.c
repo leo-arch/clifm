@@ -2190,20 +2190,6 @@ create_profile_file(void)
 }
 
 static void
-create_templates_dir(void)
-{
-	if (!config_dir_gral || !*config_dir_gral)
-		return;
-
-	struct stat a;
-	char dir[PATH_MAX + 1];
-	snprintf(dir, sizeof(dir), "%s/templates", config_dir_gral);
-
-	if (lstat(dir, &a) == -1)
-		xmkdir(dir, S_IRWXU);
-}
-
-static void
 create_config_files(const int just_listing)
 {
 	struct stat attr;
@@ -2231,8 +2217,6 @@ create_config_files(const int just_listing)
 
 	if (stat(profile_file, &attr) == -1)
 		create_profile_file();
-
-	create_templates_dir();
 
 	if (stat(colors_dir, &attr) == -1
 	&& xmkdir(colors_dir, S_IRWXU) == FUNC_FAILURE)

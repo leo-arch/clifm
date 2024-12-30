@@ -1633,6 +1633,7 @@ free_stuff(void)
 #endif /* !_NO_SUGGESTIONS */
 
 	free(sel_file);
+	free(templates_dir);
 	free(tmp_rootdir);
 	free(tmp_dir);
 	free(user.name);

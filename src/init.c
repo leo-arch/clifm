@@ -1593,18 +1593,41 @@ ERROR:
 	return (char *)NULL;
 }
 
+static char *
+set_templates_dir(void)
+{
+	char *buf = (char *)NULL;
+	const int se = (xargs.secure_env == 1 || xargs.secure_env_full == 1);
+
+	char *p = se == 0 ? getenv("CLIFM_TEMPLATES_DIR") : (char *)NULL;
+	if (p && *p) {
+		buf = savestring(p, strlen(p));
+	} else if (se == 0 && (p = getenv("XDG_TEMPLATES_DIR")) && *p) {
+		buf = savestring(p, strlen(p));
+	} else if (user.home != NULL) {
+		const size_t len = strlen(user.home) + 11;
+		buf = xnmalloc(len, sizeof(char));
+		snprintf(buf, len, "%s/Templates", user.home);
+	}
+
+	if (buf && *buf == '~') {
+		p = tilde_expand(buf);
+		free(buf);
+		return p;
+	}
+
+	return buf;
+}
+
 void
 load_file_templates(void)
 {
-	if (!config_dir_gral || !*config_dir_gral)
+	templates_dir = set_templates_dir();
+	if (!templates_dir || !*templates_dir)
 		return;
 
 	filesn_t n = 0;
 	struct stat a;
-	char templates_dir[PATH_MAX + 1];
-	snprintf(templates_dir, sizeof(templates_dir),
-		"%s/templates", config_dir_gral);
-
 	if (lstat(templates_dir, &a) == -1 || !S_ISDIR(a.st_mode)
 	|| (n = count_dir(templates_dir, NO_CPOP)) <= 2)
 		return;

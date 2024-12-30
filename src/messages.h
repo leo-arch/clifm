@@ -824,7 +824,7 @@ both 'dir' and 'subdir' directories will be created if they do not exist.\n\n\
 New regular files will be created from a template file if:\n\n\
   a. The file to be created has a file name extension (e.g., 'file.html').\n\
   b. A file named like this extension, here 'html', exists in the\n\
-     templates directory(1).\n\n\
+     templates directory (1).\n\n\
 If both conditions are met, running 'n file.html' will create a new file\n\
 named 'file.html' which is a copy of the 'html' file in the templates\n\
 directory.\n\n\
@@ -834,12 +834,11 @@ provided new files are created using the template name as extension. E.g.:\n\
 'n file.my_super_cool_template'.\n\n\
 \x1b[1m2. Explicit templates\x1b[22m\n\n\
 If a file name is followed by '@TEMPLATE', where TEMPLATE is any regular\n\
-file found in the templates directory(1), the file will be created as a\n\
+file found in the templates directory (1), the file will be created as a\n\
 copy of the corresponding file template. E.g.: 'n file.sh@my_script.sh'.\n\n\
 TAB completion is available for explicit templates: 'n file@<TAB>'.\n\n\
-(1) The templates directory is by default '~/.config/clifm/templates'\n\
-(unless the '--config-dir=DIR' command line flag was set when running\n\
-Clifm, in which case 'DIR/templates' is used instead)."
+(1) The templates directory is $CLIFM_TEMPLATES_DIR, $XDG_TEMPLATES_DIR,\n\
+or ~/Templates, in this precedence order."
 
 #define OC_USAGE "Interactively change files ownership\n\n\
 \x1b[1mUSAGE\x1b[22m\n\

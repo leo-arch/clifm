@@ -2042,6 +2042,7 @@ extern char
 	*suggestion_buf,
 #endif /* !_NO_SUGGESTIONS */
 	*tags_dir,
+	*templates_dir,
 	*tmp_rootdir,
 	*tmp_dir,
 #ifndef _NO_TRASH
