@@ -240,6 +240,7 @@ For a complete description please consult our [Wiki](https://github.com/leo-arch
 ---
 
 ## :newspaper: What's new?
+<!---
 <details>
 <summary>Click here to expand</summary>
 
@@ -364,8 +365,9 @@ For a complete description please consult our [Wiki](https://github.com/leo-arch
   - In order to make _Lira_ more powerful (it can now match entire file names instead of just file extensions) it was necessary to introduce [a little syntax modification](https://github.com/leo-arch/clifm/wiki/Specifics#syntax) in its configuration file.
 
 </details>
+-->
 
-For more details consult the [changelog file](https://github.com/leo-arch/clifm/blob/master/CHANGELOG).
+Consult the [changelog file](https://github.com/leo-arch/clifm/blob/master/CHANGELOG).
 
 ---
 
