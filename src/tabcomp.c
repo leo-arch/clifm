@@ -1587,8 +1587,7 @@ get_finder_offset(const char *query, const char *text, char **matches,
 	&& ct != TCMP_CMD_DESC && ct != TCMP_FILE_TYPES_OPTS
 	&& ct != TCMP_FILE_TYPES_FILES && ct != TCMP_MIME_LIST
 	&& ct != TCMP_TAGS_F && ct != TCMP_TAGS_T && ct != TCMP_TAGS_C
-	&& ct != TCMP_DIRHIST && ct != TCMP_WS_PREFIX
-	&& ct != TCMP_FILE_TEMPLATES)
+	&& ct != TCMP_DIRHIST && ct != TCMP_WS_PREFIX)
 		finder_offset++; /* Last char is space */
 
 	while (finder_offset > term_cols)
