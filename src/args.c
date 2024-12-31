@@ -805,6 +805,7 @@ set_vt100(void)
 {
 	xargs.vt100 = 1;
 	xargs.clear_screen = conf.clear_screen = 0;
+	xargs.unicode = 0;
 	fzftab = 0; tabmode = STD_TAB;
 }
 
