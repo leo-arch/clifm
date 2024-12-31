@@ -387,6 +387,13 @@ get_comp_entry_color(char *entry, const char *norm_prefix)
 		return uf_c;
 	}
 
+	if (t == TCMP_FILE_TEMPLATES && templates_dir) {
+		char tmp[PATH_MAX + 1];
+		snprintf(tmp, sizeof(tmp), "%s/%s", templates_dir, entry);
+		if (lstat(tmp, &attr) != -1)
+			return fzftab_color(tmp, &attr);
+	}
+
 	if (t == TCMP_CMD && is_internal_cmd(entry, ALL_CMDS, 1, 1))
 		return hv_c;
 
@@ -1082,7 +1089,7 @@ store_completions(char **matches)
 		|| ct == TCMP_SORT || ct == TCMP_BOOKMARK || ct == TCMP_CSCHEME
 		|| ct == TCMP_NET || ct == TCMP_PROF || ct == TCMP_PROMPTS
 		|| ct == TCMP_BM_PREFIX || ct == TCMP_WS_PREFIX
-		|| ct == TCMP_WORKSPACES || ct == TCMP_FILE_TEMPLATES);
+		|| ct == TCMP_WORKSPACES);
 			/* We're not completing file names. */
 
 	char *norm_prefix = (char *)NULL;
