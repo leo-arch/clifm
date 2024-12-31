@@ -482,10 +482,10 @@ create_from_template(char *abs_path, char *basename)
 		return 0;
 
 	if (find_template(t_name) == 0) {
-/*		if (t_auto == 0) {
+		if (t_auto == 0) {
 			xerror(_("new: '%s': No such template\n"), t_name);
 			return (-1);
-		} */
+		}
 		return 0;
 	}
 
