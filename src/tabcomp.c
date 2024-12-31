@@ -1195,7 +1195,6 @@ get_query_str(char *lw)
 	case TCMP_FILE_TYPES_OPTS:  /* fallthrough */
 	case TCMP_FILE_TYPES_FILES: /* fallthrough */
 	case TCMP_MIME_LIST:        /* fallthrough */
-	case TCMP_FILE_TEMPLATES:   /* fallthrough */
 	case TCMP_TAGS_F:
 		break;
 
@@ -1203,6 +1202,13 @@ get_query_str(char *lw)
 	case TCMP_WS_PREFIX: /* fallthrough */
 	case TCMP_BM_PREFIX:
 		query = (lw && *lw && lw[1] && lb[2]) ? lw + 2 : (char *)NULL;
+		break;
+
+	case TCMP_FILE_TEMPLATES: /* fallthrough */
+	case TCMP_DESEL:
+		tmp = lb ? strrchr(lb, cur_comp_type == TCMP_DESEL ? ' ' : '@')
+			: (char *)NULL;
+		query = (!tmp || !*(tmp++)) ? (char *)NULL : tmp;
 		break;
 
 	case TCMP_TAGS_C:
@@ -1217,11 +1223,6 @@ get_query_str(char *lw)
 	case TCMP_OWNERSHIP:
 		tmp = lb ? strchr(lb, ':') : (char *)NULL;
 		query = !tmp ? lb : ((*tmp && tmp[1]) ? tmp + 1 : (char *)NULL);
-		break;
-
-	case TCMP_DESEL:
-		tmp = lb ? strrchr(lb, ' ') : (char *)NULL;
-		query = (!tmp || !*(tmp++)) ? (char *)NULL : tmp;
 		break;
 
 	case TCMP_HIST:
@@ -1287,7 +1288,7 @@ calculate_prefix_len(const char *str, const char *query, const char *lw)
 			return 0;
 	}
 
-	if (ct == TCMP_DESEL)
+	if (ct == TCMP_DESEL || ct == TCMP_FILE_TEMPLATES)
 		return strlen(query ? query : (lw ? lw : ""));
 
 	if (ct == TCMP_OWNERSHIP) {
@@ -1487,7 +1488,7 @@ get_finder_offset(const char *query, const char *text, char **matches,
 			finder_offset = lb ? (int)(query - lb) : 0;
 	}
 
-	else if (ct == TCMP_DESEL && query) {
+	else if ((ct == TCMP_DESEL || ct == TCMP_FILE_TEMPLATES) && query) {
 		finder_offset = prompt_offset + (int)(query - lb) - 3;
 		if (!*query && finder_offset > 0)
 			finder_offset--;
@@ -2143,7 +2144,7 @@ AFTER_USUAL_COMPLETION:
 		 * set of matches don't require a quoted substring. */
 		char *replacement = matches[0];
 		should_quote = matches[0] && rl_completer_quote_characters &&
-		rl_filename_completion_desired && rl_filename_quoting_desired;
+			rl_filename_completion_desired && rl_filename_quoting_desired;
 
 //////////
 		/* WORKAROUND: If 'ds' and the replacement string needs to be
@@ -2157,9 +2158,7 @@ AFTER_USUAL_COMPLETION:
 			should_quote = (should_quote && !quote_char);
 
 		if (should_quote) {
-			int do_replace;
-
-			do_replace = NO_MATCH;
+			int do_replace = NO_MATCH;
 
 			/* If there is a single match, see if we need to quote it.
 			This also checks whether the common prefix of several
@@ -2182,11 +2181,10 @@ AFTER_USUAL_COMPLETION:
 		if (replacement && (cur_comp_type != TCMP_HIST || !matches[1])
 		&& cur_comp_type != TCMP_FILE_TYPES_OPTS
 		&& cur_comp_type != TCMP_MIME_LIST
-		&& cur_comp_type != TCMP_FILE_TEMPLATES
+		&& (cur_comp_type != TCMP_FILE_TEMPLATES || !matches[1])
 		&& (cur_comp_type != TCMP_FILE_TYPES_FILES || !matches[1])
 		&& (cur_comp_type != TCMP_GLOB || !matches[1])
 		&& cur_comp_type != TCMP_JUMP && cur_comp_type != TCMP_RANGES
-//		&& (cur_comp_type != TCMP_SEL || fzftab != 1 || sel_n == 1)
 		&& cur_comp_type != TCMP_SEL
 		&& cur_comp_type != TCMP_CMD_DESC
 		&& cur_comp_type != TCMP_OWNERSHIP
@@ -2199,7 +2197,7 @@ AFTER_USUAL_COMPLETION:
 
 			enum comp_type c = cur_comp_type;
 			if ((c == TCMP_DESEL || c == TCMP_NET
-			|| c == TCMP_BM_PATHS || c == TCMP_PROF
+			|| c == TCMP_BM_PATHS || c == TCMP_PROF || c == TCMP_FILE_TEMPLATES
 			|| c == TCMP_TAGS_C || c == TCMP_TAGS_S || c == TCMP_TAGS_T
 			|| c == TCMP_TAGS_U || c == TCMP_BOOKMARK || c == TCMP_GLOB
 			|| c == TCMP_PROMPTS || c == TCMP_CSCHEME || c == TCMP_WORKSPACES
@@ -2218,8 +2216,13 @@ AFTER_USUAL_COMPLETION:
 			/* Let's keep the backslash, used to bypass alias names. */
 			if (c == TCMP_CMD && text && *text == '\\' && *(text + 1))
 				start++;
-			if (c == TCMP_WS_PREFIX)
+			else if (c == TCMP_WS_PREFIX)
 				start += 2;
+			else if (c == TCMP_FILE_TEMPLATES) {
+				char *p = strrchr(text, '@');
+				if (p && p[1])
+					start = rl_point - (int)strlen(p + 1);
+			}
 
 			rl_begin_undo_group();
 			rl_delete_text(start, rl_point);
