@@ -97,7 +97,8 @@ hash_file() {
 	! [ -d "$CACHE_DIR" ] && mkdir -p "$CACHE_DIR"
 	! [ -f "$CACHEDIRTAG_FILE" ] && echo "$CACHEDIRTAG_HEADER" > "$CACHEDIRTAG_FILE"
 	if type md5sum > /dev/null 2>&1; then
-		PCACHE="$CACHE_DIR/$(md5sum "$1" | cut -d' ' -f1)"
+		tmp="$(md5sum "$1")"
+		PCACHE="$CACHE_DIR/${tmp%% *}"
 	elif type md5 > /dev/null 2>&1; then
 		PCACHE="$CACHE_DIR/$(md5 -q "$1")"
 	else
@@ -179,31 +180,19 @@ display() {
 	esac
 }
 
-gen_epub_preview() {
-	gnome-epub-thumbnailer -s 1024 "$1" "$2" >/dev/null 2>&1 && return 0
-	print_err_msg "gnome-epub-thumbnailer" "$?" "epub"
-	epub-thumbnailer "$1" "$2" 1024 >/dev/null 2>&1 && return 0
-	print_err_msg "epub-thumbnailer" "$?" "epub"
+gen_audio_preview() {
+	ffmpeg -hide_banner -i "$1" "$2" -y >/dev/null 2>&1 && return 0
+	print_err_msg "ffmpeg" "$?" "audio"
 }
 
-gen_mobi_preview() {
-	gnome-mobi-thumbnailer -s 1024 "$1" "$2" >/dev/null 2>&1 && return 0
-	print_err_msg "gnome-mobi-thumbnailer" "$?" "mobi"
-}
+#gen_comic_preview() {
+#	comicthumb "$file" "$PCACHE" 1024 >/dev/null 2>&1 && return 0
+#	print_err_msg "comicthumb" "$?" "comic"
+#}
 
-gen_pdf_preview() {
-	pdftoppm -jpeg -f 1 -singlefile -scale-to 1920 "$1" "$2" >/dev/null 2>&1 && return 0
-	print_err_msg "pdftoppm" "$?" "pdf"
-}
-
-gen_gif_preview() {
-	magick "$1"[0] -resize 640x480\> "$2" >/dev/null 2>&1 && return 0
-	print_err_msg "magick" "$?" "gif"
-}
-
-gen_video_preview() {
-	ffmpegthumbnailer -i "$1" -o "$2" -s 0 -q 5 >/dev/null 2>&1 && return 0
-	print_err_msg "ffmpegthumbnailer" "$?" "video"
+gen_djvu_preview() {
+	ddjvu -format=tiff -quality=90 -page=1 "$1" "$2" >/dev/null 2>&1 && return 0
+	print_err_msg "ddjvu" "$?" "djvu"
 }
 
 gen_doc_preview() {
@@ -218,19 +207,36 @@ gen_doc_preview() {
 	fi
 }
 
-gen_djvu_preview() {
-	ddjvu -format=tiff -quality=90 -page=1 "$1" "$2" >/dev/null 2>&1 && return 0
-	print_err_msg "ddjvu" "$?" "djvu"
-}
-
-gen_audio_preview() {
-	ffmpeg -hide_banner -i "$1" "$2" -y >/dev/null 2>&1 && return 0
-	print_err_msg "ffmpeg" "$?" "audio"
+gen_epub_preview() {
+	gnome-epub-thumbnailer -s 1024 "$1" "$2" >/dev/null 2>&1 && return 0
+	print_err_msg "gnome-epub-thumbnailer" "$?" "epub"
+	epub-thumbnailer "$1" "$2" 1024 >/dev/null 2>&1 && return 0
+	print_err_msg "epub-thumbnailer" "$?" "epub"
 }
 
 gen_font_preview() {
 	fontpreview -i "$1" -o "$2" >/dev/null 2>&1 && return 0
 	print_err_msg "fontpreview" "$?" "font"
+}
+
+gen_gif_preview() {
+	magick "$1"[0] -resize 640x480\> "$2" >/dev/null 2>&1 && return 0
+	print_err_msg "magick" "$?" "gif"
+}
+
+gen_img_convert_preview() {
+	magick -- "$1" "$2" >/dev/null 2>&1 && return 0
+	print_err_msg "magick" "$?" "image"
+}
+
+gen_mobi_preview() {
+	gnome-mobi-thumbnailer -s 1024 "$1" "$2" >/dev/null 2>&1 && return 0
+	print_err_msg "gnome-mobi-thumbnailer" "$?" "mobi"
+}
+
+gen_pdf_preview() {
+	pdftoppm -jpeg -f 1 -singlefile -scale-to 1920 "$1" "$2" >/dev/null 2>&1 && return 0
+	print_err_msg "pdftoppm" "$?" "pdf"
 }
 
 gen_postscript_preview() {
@@ -244,15 +250,10 @@ gen_svg_preview() {
 	print_err_msg "magick" "$?" "svg"
 }
 
-gen_img_convert_preview() {
-	magick -- "$1" "$2" >/dev/null 2>&1 && return 0
-	print_err_msg "magick" "$?" "image"
+gen_video_preview() {
+	ffmpegthumbnailer -i "$1" -o "$2" -s 0 -q 5 >/dev/null 2>&1 && return 0
+	print_err_msg "ffmpegthumbnailer" "$?" "video"
 }
-
-#gen_comic_preview() {
-#	comicthumb "$file" "$PCACHE" 1024 >/dev/null 2>&1 && return 0
-#	print_err_msg "comicthumb" "$?" "comic"
-#}
 
 main() {
 	get_preview_method
