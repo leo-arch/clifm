@@ -1,8 +1,8 @@
 #!/bin/sh
 
-# Video thumbnails plugin for CliFM
+# Video thumbnails plugin for Clifm
 # Written by L. Abramovich
-# License: GPL3
+# License: GPL2+
 # Dependencies: sed, tr, head, ffmpegthumbnailer, and sxiv, lsix, or feh
 
 is_vid()

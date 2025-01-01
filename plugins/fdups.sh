@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Plugin to find/remove duplicate files for CliFM
+# Plugin to find/remove duplicate files for Clifm
 #
 # Usage: fdups.sh [DIR]
 #

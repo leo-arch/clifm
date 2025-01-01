@@ -1,6 +1,6 @@
-# Some common functions for CliFM plugins
+# Some common functions for Clifm plugins
 # Author: L. Abramovich
-# License: GPL3
+# License: GPL2+
 
 cmd_exists()
 {

@@ -1,10 +1,10 @@
 #!/bin/sh
 
-# Files decryption plugin for CliFM
+# Files decryption plugin for Clifm
 # Decrypt a file passed as parameter using gpg(1)
 
 # Author: L. Abramovich
-# License: GPL3
+# License: GPL2+
 
 # Dependencies: gpg, tar, sed, grep
 

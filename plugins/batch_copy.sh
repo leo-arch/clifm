@@ -1,8 +1,8 @@
 #!/bin/sh
 
-# CliFM plugin to copy file(s) into multiple destinations
+# Clifm plugin to copy file(s) into multiple destinations
 # Written by L. Abramovich
-# License: GPL3
+# License: GPL2+
 
 # Description: Copy files passed as arguments to files specified via
 # a text editor

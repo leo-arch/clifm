@@ -1,8 +1,8 @@
 #!/bin/sh
 
-# Terminal colors test script for CliFM
+# Terminal colors test script for Clifm
 # Written by L. Abramovich
-# License GPL3
+# License GPL2+
 
 name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
 

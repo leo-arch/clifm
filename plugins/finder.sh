@@ -1,8 +1,8 @@
 #!/bin/sh
 
-# CliFM plugin to find/open/cd files using FZF/Rofi
+# Clifm plugin to find/open/cd files using FZF/Rofi
 # Written by L. Abramovich
-# License GPL3
+# License GPL2+
 
 # Dependencies: fzf or rofi, and sed
 

@@ -4,7 +4,7 @@
 # Dependencies: fzf, and one of these: scp, ffsend, croc
 
 # Author: L. Abramovich
-# License: GPL3
+# License: GPL2+
 
 if [ -z "$1" ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"

@@ -3,7 +3,7 @@
 # Description: Copy the contents of the line buffer to the clipboard
 # Dependencies:
 #  Any of the following: cb, wl-copy, xclip, xsel, pbcopy, termux-clipboard-set, clipboard, or clip
-# License: GPL3
+# License: GPL2+
 # Author: L. Abramovich
 
 # Bound by default to Ctrl-y

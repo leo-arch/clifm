@@ -4,7 +4,7 @@
 # Dependencies: fzf, tac, sed, awk
 
 # Written by L. Abramovich
-# License GPL3
+# License GPL2+
 
 if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "-h" ]; }; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"

@@ -1,12 +1,12 @@
 #!/bin/sh
 
-# FZF deselection plugin for CliFM
+# FZF deselection plugin for Clifm
 # Description: Deselect currently selected files using FZF
 
 # Dependencies: fzf
 
 # Written by L. Abramovich
-# License: GPL3
+# License: GPL2+
 
 if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "-h" ]; }; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"

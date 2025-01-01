@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Directory change plugin for CliFM
+# Directory change plugin for Clifm
 
 # Find and change directory using find and fzf
 # Author: Docbroke

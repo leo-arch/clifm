@@ -1,10 +1,10 @@
 #!/bin/sh
 
-# Plugin to search for files by content for CliFM
+# Plugin to search for files by content for Clifm
 # Dependencies: rg (Ripgrep), fzf, and sed
 
 # Written by L. Abramovich
-# License: GPL3
+# License: GPL2+
 
 MAX_DEPTH=1
 

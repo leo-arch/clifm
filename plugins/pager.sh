@@ -3,7 +3,7 @@
 # Description: Print the current list of files through a pager (less)
 # Dependencies: less, tput
 # Author: L. Abramovich
-# License: GPL3
+# License: GPL2+
 
 if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"

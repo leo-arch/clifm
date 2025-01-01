@@ -1,8 +1,8 @@
 #!/bin/sh
 
-# Interactive help plugin for CliFM
+# Interactive help plugin for Clifm
 # Written by L. Abramovich
-# License: GPL3
+# License: GPL2+
 
 # Dependencies: man, sed, less, and fzf or rofi
 

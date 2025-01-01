@@ -2,7 +2,7 @@
 
 # Files picker plugin for Clifm
 # Written by L. Abramovich
-# License: GPL3
+# License: GPL2+
 #
 # Description: Select files via Clifm and, at exit, write selected files to
 # either stdout, if no file is specified as first parameter, or to the

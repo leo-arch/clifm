@@ -1,10 +1,10 @@
 #!/bin/sh
 
-# Files selection plugin for CliFM
+# Files selection plugin for Clifm
 # Dependencies: fzf, find
 
 # Author: L. Abramovich
-# License: GPL3
+# License: GPL2+
 
 if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"

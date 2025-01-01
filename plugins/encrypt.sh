@@ -1,10 +1,10 @@
 #!/bin/sh
 
-# Files encryption plugin for CliFM
+# Files encryption plugin for Clifm
 # Encrypt files passed as parameters using gpg(1)
 
 # Authors: KlzXS, L. Abramovich
-# License: GPL3
+# License: GPL2+
 
 # Dependencies: gpg, tar, sed, fzf, awk, xargs
 

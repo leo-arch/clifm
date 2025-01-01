@@ -1,10 +1,10 @@
 #!/bin/sh
 
-# A PDF text viewer plugin for CLiFM
+# A PDF text viewer plugin for Clifm
 # Dependencies: pdftotext
 
 # Written by L. Abramovich
-# License: GPL3
+# License: GPL2+
 
 if [ -z "$1" ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"

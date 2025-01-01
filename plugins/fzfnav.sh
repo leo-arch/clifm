@@ -1,8 +1,8 @@
 #!/bin/sh
 
-# FZF navigation/previewing/selection plugin for CliFM
+# FZF navigation/previewing/selection plugin for Clifm
 # Written by L. Abramovich
-# License: GPL3
+# License: GPL2+
 
 # Description: Navigate the filesystem (including files preview and
 # selection) with FZF.

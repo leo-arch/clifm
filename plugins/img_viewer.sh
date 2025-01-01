@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Description: Image thumbnails plugin for CliFM
+# Description: Image thumbnails plugin for Clifm
 # Dependencies (any of the following):
 #     nsxiv sxiv feh pqiv gthumb ristretto gwenview lsix img2sixel
 #       (or just your preferred image viewer)
@@ -8,7 +8,7 @@
 #     tr
 #
 # Author: L. Abramovich
-# License: GPL3
+# License: GPL2+
 
 # Specify here your preferred image viewer and command line options for it
 VIEWER=""

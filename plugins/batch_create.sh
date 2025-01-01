@@ -1,8 +1,8 @@
 #!/bin/sh
 
-# CliFM plugin to create multiple files and/or dirs at once
+# Clifm plugin to create multiple files and/or dirs at once
 # Written by L. Abramovich
-# License: GPL3
+# License: GPL2+
 
 # Dependencies: xargs, text editor
 

@@ -1,10 +1,10 @@
 #!/bin/sh
 
-# CliFM plugin to navigate the jump database via fzf/Rofi
+# Clifm plugin to navigate the jump database via fzf/Rofi
 # Dependencies: fzf or rofi, and grep
 
 # Written by L. Abramovich
-# Lincese GPL3
+# Lincese GPL2+
 
 if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "-h" ]; }; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"

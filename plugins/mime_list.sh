@@ -4,7 +4,7 @@
 # Dependencies: fzf, file, grep
 
 # Written by L. Abramovich
-# License GPL3
+# License GPL2+
 
 # Dependencies: find, file, fzf
 

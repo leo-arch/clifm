@@ -1,8 +1,8 @@
 #!/bin/sh
 
-# Drag and drop plugin for CliFM
+# Drag and drop plugin for Clifm
 # Written by L. Abramovich
-# License: GPL3
+# License: GPL2+
 
 # Description:
 # With no arguments, it opens a window to drop files; otherwise, files

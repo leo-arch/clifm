@@ -1,8 +1,8 @@
 #!/bin/sh
 
-# Disk usage analyzer plugin for CliFM
+# Disk usage analyzer plugin for Clifm
 # Written by L. Abramovich
-# License: GPL3
+# License: GPL2+
 # Description: Navigate the filesystem with FZF and display directories size.
 # Dependencies: du, fzf, grep
 

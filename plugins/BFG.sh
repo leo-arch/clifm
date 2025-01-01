@@ -1,12 +1,12 @@
 #!/bin/sh
 
-# BFG: This is CliFM's file previewer script. It is called by the fzfnav.sh
+# BFG: This is Clifm's file previewer script. It is called by the fzfnav.sh
 # plugin for each hovered file. Variables for available applications are
 # exported by fzfnav to prevent this script from checking the same
 # applications once and again
 
 # Written by L. Abramovich
-# License: GPL3
+# License: GPL2+
 
 # Previewing dependencies (optional)
 # atool or bsdtar or tar: archives

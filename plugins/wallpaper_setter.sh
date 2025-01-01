@@ -1,13 +1,13 @@
 #!/bin/sh
 
-# Wallpaper setter plugin for CliFM
+# Wallpaper setter plugin for Clifm
 # Dependencies:
 #  file, sed, and
 #    feh, xsetbg (xloadimage), hsetroot, or nitrogen (for X)
 #    swww (https://github.com/Horus645/swww) or swaybg (for Wayland)
 
 # Written by L. Abramovich
-# License: GPL3
+# License: GPL2+
 
 if [ -z "$1" ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
