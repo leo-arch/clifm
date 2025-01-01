@@ -1,17 +1,17 @@
 /* misc.h */
 
 /*
- * This file is part of CliFM
+ * This file is part of Clifm
  *
- * Copyright (C) 2016-2024, L. Abramovich <leo.clifm@outlook.com>
+ * Copyright (C) 2016-2025, L. Abramovich <leo.clifm@outlook.com>
  * All rights reserved.
 
- * CliFM is free software; you can redistribute it and/or modify
+ * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * CliFM is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.

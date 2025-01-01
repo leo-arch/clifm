@@ -4,11 +4,11 @@
  */
 
 			/*  ########################################
-			 *  #               CliFM                  #
+			 *  #               Clifm                  #
 			 *  # 	  The command line file manager    #
 			 *  ######################################## */
 
-/* Copyright (C) 2016-2024, L. Abramovich <leo.clifm@outlook.com>
+/* Copyright (C) 2016-2025, L. Abramovich <leo.clifm@outlook.com>
  * All rights reserved.
 
  * This program is free software; you can redistribute it and/or modify
