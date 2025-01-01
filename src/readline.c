@@ -2125,7 +2125,8 @@ file_templates_generator(const char *text, int state)
 	}
 
 	while ((name = file_templates[i++]) != NULL) {
-		if (strncmp(name, text, len) == 0)
+		if (conf.case_sens_path_comp ? strncmp(name, text, len) == 0
+		: strncasecmp(name, text, len) == 0)
 			return strdup(name);
 	}
 

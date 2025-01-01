@@ -1281,6 +1281,10 @@ calculate_prefix_len(const char *str, const char *query, const char *lw)
 		/* None of these completions produces a partial match (prefix) */
 		return 0;
 
+	if (ct == TCMP_FILE_TEMPLATES)
+		/* Insert the entire match (to honor case insensitive query) */
+		return 0;
+
 	size_t prefix_len = 0, len = strlen(str);
 
 	if (len == 0 || str[len - 1] == '/') {
@@ -1288,7 +1292,7 @@ calculate_prefix_len(const char *str, const char *query, const char *lw)
 			return 0;
 	}
 
-	if (ct == TCMP_DESEL || ct == TCMP_FILE_TEMPLATES)
+	if (ct == TCMP_DESEL)
 		return strlen(query ? query : (lw ? lw : ""));
 
 	if (ct == TCMP_OWNERSHIP) {
@@ -1675,8 +1679,10 @@ do_some_cleanup(char **buf, char **matches, const char *query,
 		}
 	}
 
-	else if (ct == TCMP_FILE_TYPES_FILES || ct == TCMP_CMD_DESC) {
-		char *s = lb ? get_last_chr(lb, ' ', rl_end) : (char *)NULL;
+	else if (ct == TCMP_FILE_TYPES_FILES || ct == TCMP_CMD_DESC
+	|| ct == TCMP_FILE_TEMPLATES) {
+		char *s = lb ? get_last_chr(lb,
+			ct == TCMP_FILE_TEMPLATES ? '@' : ' ', rl_end) : (char *)NULL;
 		rl_point = !s ? 0 : (int)(s - lb + 1);
 		rl_delete_text(rl_point, rl_end);
 		rl_end = rl_point;
