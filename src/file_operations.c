@@ -509,7 +509,7 @@ create_from_template(char *abs_path, char *basename)
 		return (-1);
 	}
 
-	char *cmd[] = {"cp", template_file, abs_path, NULL};
+	char *cmd[] = {"cp", "--", template_file, abs_path, NULL};
 	/* Let's copy the template file. STDERR and STDOUT are silenced: in case
 	 * of error, we'll try to create a plain empty regular file via open(2)
 	 * and print the error message in case of failure. */
