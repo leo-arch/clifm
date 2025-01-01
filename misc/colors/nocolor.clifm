@@ -1,7 +1,7 @@
 # Theme file for Clifm
 # Theme name: nocolor
 # Author: L. Abramovich
-# License: GPL3
+# License: GPL2+
 
 FiletypeColors="di=0;1:nd=0;2:ed=0:fi=0:ef=0:nf=0;2:ln=0;1;4:mh=0:or=0;2;4:pi=0:so=0:bd=0:cd=0:su=0:sg=0:ca=0:tw=0:ow=0:st=0:ex=0:ee=0:no=0:uf=0:"
 

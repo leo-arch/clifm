@@ -1,7 +1,7 @@
 # Theme file for Clifm
 # Theme name: nord (based on https://github.com/arcticicestudio/nord-xresources)
 # Author: L. Abramovich
-# License: GPL3
+# License: GPL2+
 
 define D=#d8dee9                 # Default
 

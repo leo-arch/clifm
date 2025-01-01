@@ -1,7 +1,7 @@
 # Theme file for Clifm
 # Theme name: one-dark (based on https://github.com/r3tex/one-dark)
 # Author: L. Abramovich
-# License: GPL3
+# License: GPL2+
 
 define D=#abb2bf               # Default
 define BD=#abb2bf-1            # Bold default

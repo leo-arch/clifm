@@ -1,7 +1,7 @@
 # Color scheme file for Clifm
 # Theme name: base16
 # Author: L. Abramovich
-# License: GPL3
+# License: GPL2+
 
 define W=#d6d5d4
 define BDW=#a5a2a2-1

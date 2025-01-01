@@ -1,7 +1,7 @@
 # Theme file for Clifm
 # Theme name: solarized (based on https://github.com/altercation/solarized)
 # Author: L. Abramovich
-# License: GPL3
+# License: GPL2+
 
 define BD=1                     # Bold
 

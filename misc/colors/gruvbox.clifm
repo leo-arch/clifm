@@ -1,7 +1,7 @@
 # Theme file for Clifm
 # Theme name: gruvbox (based on https://github.com/morhetz/gruvbox)
 # Author: L. Abramovich
-# License: GPL3
+# License: GPL2+
 
 define D=#ebdbb2               # Default
 define BD=1                    # Bold

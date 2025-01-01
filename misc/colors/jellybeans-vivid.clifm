@@ -1,7 +1,7 @@
 # Theme file for Clifm
 # Theme name: jellybeans-vivid (based on vivid(1))
 # Author: L. Abramovich
-# License: GPL3
+# License: GPL2+
 
 define D=0           # Default (reset attributes)
 define DIM=2         # Dimmed

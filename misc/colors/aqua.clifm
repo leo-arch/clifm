@@ -1,7 +1,7 @@
 # Theme file for Clifm
 # Theme name: aqua
 # Author: L. Abramovich
-# License: GPL3
+# License: GPL2+
 
 define D=37         # Default
 define BD=1;2;37    # Bold dimmed default

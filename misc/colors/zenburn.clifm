@@ -1,7 +1,7 @@
 # Theme file for Clifm
 # Theme name: zenburn (based on https://github.com/jnurmine/Zenburn)
 # Author: L. Abramovich
-# License: GPL3
+# License: GPL2+
 
 define W=#dcdccc     # White
 define BW=#dcdccc-1  # Bold white
