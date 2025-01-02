@@ -577,7 +577,8 @@ set_autocmd_color_scheme(const char *name, const size_t n)
 		}
 	}
 
-	err(ERR_NO_LOG, PRINT_PROMPT, _("autocmd: '%s': Invalid value for 'cs'\n"), name);
+	err(ERR_NO_LOG, PRINT_PROMPT, _("autocmd: '%s': Invalid value for 'cs'\n"),
+		name);
 	autocmds[n].color_scheme = (char *)NULL;
 	return FUNC_FAILURE;
 }
@@ -624,7 +625,8 @@ set_autocmd_sort(const char *val, const size_t n)
 	}
 
 ERROR:
-	err(ERR_NO_LOG, PRINT_PROMPT, _("autocmd: '%s': Invalid value for 'st'\n"), val);
+	err(ERR_NO_LOG, PRINT_PROMPT, _("autocmd: '%s': Invalid value for 'st'\n"),
+		val);
 	return FUNC_FAILURE;
 }
 
@@ -713,11 +715,13 @@ fill_autocmd_opt(char *opt, const size_t n)
 	return FUNC_SUCCESS;
 
 ERR_NAME:
-	err(ERR_NO_LOG, PRINT_PROMPT, _("autocmd: '%s': Invalid option name\n"), opt);
+	err(ERR_NO_LOG, PRINT_PROMPT, _("autocmd: '%s': Invalid option name\n"),
+		opt);
 	return FUNC_FAILURE;
 
 ERR_VAL:
-	err(ERR_NO_LOG, PRINT_PROMPT, _("autocmd: '%s': Invalid value for '%s'\n"), p, opt);
+	err(ERR_NO_LOG, PRINT_PROMPT, _("autocmd: '%s': Invalid value for '%s'\n"),
+		p, opt);
 	return FUNC_FAILURE;
 }
 

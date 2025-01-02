@@ -1767,11 +1767,13 @@ print_dir_items(const char *dir, const int file_perm)
 
 #else /* !USE_DU1 */
 static void
-print_file_size(const struct stat *attr)
+print_size(const struct stat *attr, const int apparent)
 {
 	const off_t size =
 		(FILE_TYPE_NON_ZERO_SIZE(attr->st_mode) || S_TYPEISSHM(attr)
-		|| S_TYPEISTMO(attr)) ? FILE_SIZE_PTR(attr) : 0;
+		|| S_TYPEISTMO(attr))
+			? (apparent == 1 ? attr->st_size : attr->st_blocks * S_BLKSIZE)
+			: 0;
 
 	char *size_unit = construct_human_size(size);
 	char *csize = dz_c;
@@ -1784,18 +1786,53 @@ print_file_size(const struct stat *attr)
 		csize = sf;
 	}
 
-	printf(_("Size: \t\t%s%s%s"), csize, size_unit ? size_unit : "?", cend);
+	printf("%s%s%s", csize, size_unit ? size_unit : "?", cend);
 
 	const int bigger_than_bytes = size > (xargs.si == 1 ? 1000 : 1024);
 
 	if (bigger_than_bytes == 1)
 		printf(" / %s%jd B%s", csize, (intmax_t)size, cend);
 
-	printf(" (%s%s%s)\n", conf.apparent_size == 1 ? _("apparent")
-		: _("disk usage"), (xargs.si == 1 && bigger_than_bytes == 1)
+	printf(" (%s%s%s)\n", apparent == 1 ? _("apparent")
+		: _("on disk"), (xargs.si == 1 && bigger_than_bytes == 1)
 		? ",si" : "", (S_ISREG(attr->st_mode)
 		&& (intmax_t)(attr->st_blocks * S_BLKSIZE) < (intmax_t)attr->st_size)
 		? ",sparse" : "");
+}
+
+static void
+print_file_size(const struct stat *attr)
+{
+	fputs(_("Size:\t\t"), stdout);
+	print_size(attr, 1); /* Apparent size */
+	fputs("\t\t", stdout);
+	print_size(attr, 0); /* Physical size */
+}
+
+static void
+print_dir_size(const off_t dir_size, const int apparent, const char *read_err)
+{
+	char *cend = conf.colorize == 1 ? df_c : "";
+	char *size_color = dz_c;
+	char sf[MAX_SHADE_LEN]; *sf = '\0';
+	if (conf.colorize == 1 && !*dz_c) {
+		get_color_size(dir_size, sf, sizeof(sf));
+		size_color = sf;
+	}
+
+	char *size = construct_human_size(dir_size);
+	if (size) {
+		printf("%s%s%s%s ", read_err, size_color, size, cend);
+
+		const int size_mult_factor = xargs.si == 1 ? 1000 : 1024;
+		if (dir_size > size_mult_factor)
+			printf("/ %s%jd B%s ", size_color, (intmax_t)dir_size, cend);
+
+		printf("(%s%s)\n", apparent == 1 ? _("apparent")
+			: _("on disk"), xargs.si == 1 ? ",si" : "");
+	} else {
+		puts(UNKNOWN_STR);
+	}
 }
 
 static void
@@ -1809,7 +1846,7 @@ print_dir_info(const char *dir, const int file_perm)
 
 	struct dir_info_t info = {0};
 
-	fputs(_("Total size: \t"), stdout);
+	fputs(_("Total size:\t"), stdout);
 
 #define SCANNING_MSG "Scanning..."
 	if (term_caps.suggestions == 1) {
@@ -1828,32 +1865,15 @@ print_dir_info(const char *dir, const int file_perm)
 		fputs(df_c, stdout);
 		fflush(stdout);
 	}
+#undef SCANNING_MSG
 
 	char read_err[5 + (MAX_COLOR * 2)]; *read_err = '\0';
 	if (info.status != 0)
 		snprintf(read_err, sizeof(read_err), "%s%c%s", xf_cb, DU_ERR_CHAR, df_c);
 
-	char *cend = conf.colorize == 1 ? df_c : "";
-	char *size_color = dz_c;
-	char sf[MAX_SHADE_LEN]; *sf = '\0';
-	if (conf.colorize == 1 && !*dz_c) {
-		get_color_size(info.size, sf, sizeof(sf));
-		size_color = sf;
-	}
-
-	char *size = construct_human_size(info.size);
-	if (size) {
-		printf("%s%s%s%s ", read_err, size_color, size, cend);
-
-		const int size_mult_factor = xargs.si == 1 ? 1000 : 1024;
-		if (info.size > size_mult_factor)
-			printf("/ %s%jd B%s ", size_color, (intmax_t)info.size, cend);
-
-		printf("(%s%s)\n", conf.apparent_size == 1 ? _("apparent")
-			: _("disk usage"), xargs.si == 1 ? ",si" : "");
-	} else {
-		puts(UNKNOWN_STR);
-	}
+	print_dir_size(info.size, 1, read_err); /* Apparent */
+	fputs("\t\t", stdout);
+	print_dir_size(info.blocks * S_BLKSIZE, 0, read_err); /* Physical */
 
 	printf(_("Items:\t\t%s%s%llu%s (%s%llu%s %s, %s%llu%s %s, %s%llu%s %s)\n"),
 		read_err, BOLD, info.dirs + info.files + info.links, df_c,

@@ -94,14 +94,19 @@ free_xdu_hardlinks(void)
  *
  * Recursively count files and directories in the directory DIR and store
  * values in the INFO struct.
- * The total size in bytes (apparent size, if conf.apparent_size is set to 1,
- * or disk usage otherwise) is stored in the SIZE field of the struct.
+ *
+ * The total size in bytes is stored in the SIZE field of the struct, and
+ * the total amount of used blocks in the BLOCKS field.
+ * Translate this info into apparent and physical sizes of DIR:
+ *   apparent size = info->size
+ *   physical size = info->blocks * S_BLKSIZE
+ *
  * The amount of directories, symbolic links, and other file types is stored
  * in the DIRS, LINKS, and FILES fields respectively.
  * FIRST_LEVEL must be always 1 when calling this function (this value will
  * be zero whenever the function calls itself recursively).
  * If a directory cannot be read, or a file cannot be stat'ed, then the
- * STATUS field of the INFO struct is set to the appropriate errno value.*/
+ * STATUS field of the INFO struct is set to the appropriate errno value. */
 void
 dir_info(const char *dir, const int first_level, struct dir_info_t *info)
 {
@@ -124,9 +129,9 @@ dir_info(const char *dir, const int first_level, struct dir_info_t *info)
 	posix_fadvise(fd, 0, 0, POSIX_FADV_SEQUENTIAL);
 #endif /* POSIX_FADV_SEQUENTIAL */
 
-	/* Compute the size of the base directory itself. */
-	if (first_level == 1 && conf.apparent_size != 1 && stat(dir, &a) != -1)
-		info->size += (a.st_blocks * S_BLKSIZE);
+	/* Compute the PHYSICAL size of the base directory itself. */
+	if (first_level == 1 && stat(dir, &a) != -1)
+		info->blocks += a.st_blocks;
 
 	struct dirent *ent;
 	char buf[PATH_MAX + 1];
@@ -162,16 +167,10 @@ dir_info(const char *dir, const int first_level, struct dir_info_t *info)
 			info->files++;
 #endif /* __CYGWIN__ */
 		} else if (S_ISDIR(a.st_mode)) {
-/*			In case we want to print the currently scanned directory:
- * 			Note: 12 is the size of "Scanning... "
-			printf("\r\x1b[%zuC\x1b[0K%s%.*s%s", (size_t)12,
-				di_c, term_cols - 12 - 2, buf, df_c); */
-
 			/* Even if a subdirectory is unreadable or we can't chdir into
-			 * it, do let its size contribute to the total (provided we're
-			 * not computing apparent sizes). */
-			if (conf.apparent_size != 1)
-				info->size += (a.st_blocks * S_BLKSIZE);
+			 * it, do let its PHYSICAL size contribute to the total
+			 * (provided we're not computing apparent sizes). */
+			info->blocks += a.st_blocks;
 
 			info->dirs++;
 			dir_info(buf, 0, info);
@@ -191,8 +190,8 @@ dir_info(const char *dir, const int first_level, struct dir_info_t *info)
 				add_xdu_hardlink(a.st_dev, a.st_ino);
 		}
 
-		info->size += conf.apparent_size == 1 ? a.st_size
-			: (a.st_blocks * S_BLKSIZE);
+		info->size += a.st_size;
+		info->blocks += a.st_blocks;
 	}
 
 	closedir(p);
@@ -208,7 +207,7 @@ dir_size(const char *dir, const int first_level, int *status)
 	struct dir_info_t info = {0};
 	dir_info(dir, first_level, &info);
 	*status = info.status;
-	return info.size;
+	return (conf.apparent_size == 1 ? info.size : (info.blocks * S_BLKSIZE));
 }
 #else /* USE_DU1 */
 /* Return the full size of the directory DIR using du(1).

@@ -1804,6 +1804,7 @@ struct dir_info_t {
 	unsigned long long files;
 	unsigned long long links;
 	off_t size;
+	blkcnt_t blocks;
 	int status;
 	int pad0;
 };
