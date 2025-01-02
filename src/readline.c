@@ -2285,7 +2285,7 @@ prompts_generator(const char *text, int state)
 	}
 
 	while (i < (int)prompts_n && (name = prompts[i++].name) != NULL) {
-		if ((conf.case_sens_list ? strncmp(name, text, len)
+		if ((conf.case_sens_list == 1 ? strncmp(name, text, len)
 		: strncasecmp(name, text, len)) == 0)
 			return strdup(name);
 	}

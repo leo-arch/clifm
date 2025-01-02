@@ -1643,7 +1643,7 @@ load_file_templates(void)
 
 	while ((ent = readdir(dir))) {
 		const char *ename = ent->d_name;
-		if (SELFORPARENT(ename) || *ename == '.')
+		if (SELFORPARENT(ename))
 			continue;
 
 #ifndef _DIRENT_HAVE_D_TYPE
