@@ -2061,24 +2061,27 @@ static char *
 bsd_to_ansi_color(char color, const int bg)
 {
 	char c = color;
-	int bold = 0;
+	int up = 0;
 
 	if (IS_ALPHA_UP(color)) {
-		bold = 1;
+		up = 1;
 		c = TOLOWER(color);
 	}
 
+	/* An uppercase letter for background sets the underline attribute.
+	 * We follow here the FreeBSD implementation of ls(1). */
+
 	switch (c) {
-	case 'a': return (bg ? (bold ? "1;40" : "40") : (bold ? "1;30" : "30"));
-	case 'b': return (bg ? (bold ? "1;41" : "41") : (bold ? "1;31" : "31"));
-	case 'c': return (bg ? (bold ? "1;42" : "42") : (bold ? "1;32" : "32"));
-	case 'd': return (bg ? (bold ? "1;43" : "43") : (bold ? "1;33" : "33"));
-	case 'e': return (bg ? (bold ? "1;44" : "44") : (bold ? "1;34" : "34"));
-	case 'f': return (bg ? (bold ? "1;45" : "45") : (bold ? "1;35" : "35"));
-	case 'g': return (bg ? (bold ? "1;46" : "46") : (bold ? "1;36" : "36"));
-	case 'h': return (bg ? (bold ? "1;47" : "47") : (bold ? "1;37" : "37"));
-	case 'x': return (bg ? "49" : "39");
-	default: return "";
+	case 'a': return (bg ? (up ? "4;40" : "40") : (up ? "1;30" : "30"));
+	case 'b': return (bg ? (up ? "4;41" : "41") : (up ? "1;31" : "31"));
+	case 'c': return (bg ? (up ? "4;42" : "42") : (up ? "1;32" : "32"));
+	case 'd': return (bg ? (up ? "4;43" : "43") : (up ? "1;33" : "33"));
+	case 'e': return (bg ? (up ? "4;44" : "44") : (up ? "1;34" : "34"));
+	case 'f': return (bg ? (up ? "4;45" : "45") : (up ? "1;35" : "35"));
+	case 'g': return (bg ? (up ? "4;46" : "46") : (up ? "1;36" : "36"));
+	case 'h': return (bg ? (up ? "4;47" : "47") : (up ? "1;37" : "37"));
+	case 'x': return (bg ? (up ? "4;49" : "49") : "39");
+	default:  return (bg ? "49" : "39"); /* Never reached */
 	}
 }
 
@@ -2097,13 +2100,13 @@ set_filetype(const int c)
 	case 8:  return "sg";
 	case 9:  return "tw";
 	case 10: return "ow";
-	default: return "";
+	default: return "fi"; /* Never reached */
 	}
 }
 
 /* If the LSCOLORS environment variable is set, convert its value to a valid
  * GNU LS_COLORS format.
- * Returns a pointer to the transformed string or NULL in case of error.
+ * Returns a pointer to the transformed string, or NULL in case of error.
  * For information about the format used by LSCOLORS consult
  * 'https://www.unix.com/man-page/FreeBSD/1/ls'. */
 static char *
