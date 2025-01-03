@@ -2148,10 +2148,14 @@ set_lscolors_bsd(void)
 		const char *ft = set_filetype(f);
 		f++;
 
-		len += snprintf(buf + len, sizeof(buf) - (size_t)len,
+		const int n = snprintf(buf + len, sizeof(buf) - (size_t)len,
 			"%s=%s;%s:", ft, bsd_to_ansi_color(env[c], 0),
 			bsd_to_ansi_color(env[c + 1], 1));
 
+		if (n < 0 || n >= (int)sizeof(buf) - len)
+			break;
+
+		len += n;
 		c += 2;
 	}
 

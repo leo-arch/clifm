@@ -618,7 +618,7 @@ print_dir_cmds(void)
 	const char *ptr = term_caps.unicode ? DIR_CMD_PTR_U : DIR_CMD_PTR;
 	int i = dir_cmds.first_cmd_in_dir - (dir_cmds.first_cmd_in_dir > 0 ? 1 : 0);
 	for (; history[i].cmd; i++)
-		printf("%s%s%s %s\n", bk_c, ptr, df_c, history[i].cmd);
+		printf("%s%s%s %s\n", dn_c, ptr, df_c, history[i].cmd);
 }
 
 static int
