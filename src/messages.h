@@ -1478,7 +1478,7 @@ and paths\
 \n      --int-vars\t\t Enable internal variables\
 \n      --list-and-quit\t\t List files and quit\
 \n      --ls\t\t\t Short for --list-and-quit\
-\n      --lscolors\t\t Read file colors from LS_COLORS\
+\n      --lscolors\t\t Read file colors from LS_COLORS or LSCOLORS (BSD style)\
 \n      --max-dirhist=NUM\t\t Maximum number of visited directories to recall\
 \n      --max-files=NUM\t\t List only up to NUM files\
 \n      --mimelist-file=FILE\t Set FILE as Lira's configuration file\

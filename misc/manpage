@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Dec 30, 2024" "clifm 1.22.10" "CLIFM Manual"
+.TH "CLIFM" "1" "Jan 3, 2025" "clifm 1.22.11" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -247,7 +247,7 @@ list files and quit. Useful in conjunction with positional parameters. E.g.: \'c
 short for \fI\-\-list\-and\-quit\fR
 .TP
 \fB\-\-lscolors\fR
-read file colors from the \fBLS_COLORS\fR environment variable (GNU ls only). Bear in mind that clifm-specific colors (like empty directory or inaccessible file) will be disabled. Note also that colors for specific file names, as defined in \fBLS_COLORS\fR, are not supported. Consult \fBdircolors\fR(1) for more information.
+read file colors from the \fBLS_COLORS\fR environment variable (BSD \fBLSCOLORS\fR is also supported). Bear in mind that clifm-specific colors (like empty directory or inaccessible file) will be disabled. Note also that colors for specific file names, as defined in \fBLS_COLORS\fR, are not supported. Consult \fBdircolors\fR(1) for more information about \fBLS_COLORS\fR, or the \fBls\fR(1) BSD manpage in the case of \fBLSCOLORS\fR.
 .TP
 \fB\-\-max\-dirhist\fR
 maximum number of visited directories to remember
