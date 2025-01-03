@@ -2023,6 +2023,7 @@ set_default_colors(void)
 		xstrsncpy(dir_ico_c, CVAR(DIR_ICO), sizeof(dir_ico_c));
 #endif /* !_NO_ICONS */
 }
+#undef CVAR
 
 /* Set a pointer to the current color scheme */
 static int
@@ -2056,15 +2057,121 @@ get_cur_colorscheme(const char *colorscheme)
 	return FUNC_SUCCESS;
 }
 
-/* Inspect LS_COLORS variable and assing pointers to ENV_FILECOLORS and
- * ENV_EXTCOLORS accordingly. */
+static char *
+bsd_to_ansi_color(char color, const int bg)
+{
+	char c = color;
+	int bold = 0;
+
+	if (IS_ALPHA_UP(color)) {
+		bold = 1;
+		c = TOLOWER(color);
+	}
+
+	switch (c) {
+	case 'a': return (bg ? (bold ? "1;40" : "40") : (bold ? "1;30" : "30"));
+	case 'b': return (bg ? (bold ? "1;41" : "41") : (bold ? "1;31" : "31"));
+	case 'c': return (bg ? (bold ? "1;42" : "42") : (bold ? "1;32" : "32"));
+	case 'd': return (bg ? (bold ? "1;43" : "43") : (bold ? "1;33" : "33"));
+	case 'e': return (bg ? (bold ? "1;44" : "44") : (bold ? "1;34" : "34"));
+	case 'f': return (bg ? (bold ? "1;45" : "45") : (bold ? "1;35" : "35"));
+	case 'g': return (bg ? (bold ? "1;46" : "46") : (bold ? "1;36" : "36"));
+	case 'h': return (bg ? (bold ? "1;47" : "47") : (bold ? "1;37" : "37"));
+	case 'x': return (bg ? "" : "0");
+	default: return "";
+	}
+}
+
+static char *
+set_filetype(const int c)
+{
+	switch (c) {
+	case 0:  return "di";
+	case 1:  return "ln";
+	case 2:  return "so";
+	case 3:  return "pi";
+	case 4:  return "ex";
+	case 5:  return "bd";
+	case 6:  return "cd";
+	case 7:  return "su";
+	case 8:  return "sg";
+	case 9:  return "tw";
+	case 10: return "ow";
+	default: return "";
+	}
+}
+
+/* If the LSCOLORS environment variable is set, convert its value to a valid
+ * GNU LS_COLORS format.
+ * Returns a pointer to the transformed string or NULL in case of error.
+ * For information about the format used by LSCOLORS consult
+ * 'https://www.unix.com/man-page/FreeBSD/1/ls'. */
+static char *
+set_lscolors_bsd(void)
+{
+	char *env = getenv("LSCOLORS");
+	if (!env)
+		return (char *)NULL;
+
+	/* 144 bytes are required to hold the largest possible value for LSCOLORS:
+	 * 11 file types, 13 chars max each, plus the terminating NUL char.
+	 * However, more often than not these kind hard limits fail: let's use
+	 * something a bit bigger. */
+	static char buf[256];
+
+	size_t c = 0;
+	int f = 0;
+	int len = 0;
+
+#define IS_BSD_COLOR(c) (((c) >= 'a' && (c) <= 'h') \
+	|| ((c) >= 'A' && (c) <= 'H' ) || (c) == 'x')
+
+	while (env[c] && f < 11) {
+		if (!IS_BSD_COLOR(env[c])) {
+			c++;
+			continue;
+		}
+
+		if (!env[c + 1])
+			break;
+
+		if (!IS_BSD_COLOR(env[c + 1])) {
+			c += 2;
+			continue;
+		}
+
+		/* At this point, we have a valid "fg" pair. */
+
+		const char bg = env[c + 1] != 'x';
+		const char *ft = set_filetype(f);
+		f++;
+
+		len += snprintf(buf + len, sizeof(buf) - (size_t)len,
+			"%s=%s%s%s:", ft, bsd_to_ansi_color(env[c], 0),
+			bg == 1 ? ";" : "",
+			bg == 1 ? bsd_to_ansi_color(env[c + 1], 1) : "");
+
+		c += 2;
+	}
+
+#undef IS_BSD_COLOR
+
+	buf[len] = '\0';
+	return *buf ? buf : (char *)NULL;
+}
+
+/* Inspect LS_COLORS/LSCOLORS variable and assign pointers to ENV_FILECOLORS
+ * and ENV_EXTCOLORS accordingly. */
 static void
 set_lscolors(char **env_filecolors, char **env_extcolors)
 {
 	static char *ls_colors = (char *)NULL;
 	ls_colors = getenv("LS_COLORS");
-	if (!ls_colors || !*ls_colors)
-		return;
+	if (!ls_colors || !*ls_colors) {
+		ls_colors = set_lscolors_bsd();
+		if (!ls_colors || !*ls_colors)
+			return;
+	}
 
 	char *ext_ptr = strchr(ls_colors, '*');
 	if (ext_ptr) {
