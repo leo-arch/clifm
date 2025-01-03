@@ -2077,7 +2077,7 @@ bsd_to_ansi_color(char color, const int bg)
 	case 'f': return (bg ? (bold ? "1;45" : "45") : (bold ? "1;35" : "35"));
 	case 'g': return (bg ? (bold ? "1;46" : "46") : (bold ? "1;36" : "36"));
 	case 'h': return (bg ? (bold ? "1;47" : "47") : (bold ? "1;37" : "37"));
-	case 'x': return (bg ? "" : "0");
+	case 'x': return (bg ? "49" : "39");
 	default: return "";
 	}
 }
@@ -2124,7 +2124,7 @@ set_lscolors_bsd(void)
 	int len = 0;
 
 #define IS_BSD_COLOR(c) (((c) >= 'a' && (c) <= 'h') \
-	|| ((c) >= 'A' && (c) <= 'H' ) || (c) == 'x')
+	|| ((c) >= 'A' && (c) <= 'H' ) || (c) == 'x' || (c) == 'X')
 
 	while (env[c] && f < 11) {
 		if (!IS_BSD_COLOR(env[c])) {
@@ -2142,14 +2142,12 @@ set_lscolors_bsd(void)
 
 		/* At this point, we have a valid "fg" pair. */
 
-		const char bg = env[c + 1] != 'x';
 		const char *ft = set_filetype(f);
 		f++;
 
 		len += snprintf(buf + len, sizeof(buf) - (size_t)len,
-			"%s=%s%s%s:", ft, bsd_to_ansi_color(env[c], 0),
-			bg == 1 ? ";" : "",
-			bg == 1 ? bsd_to_ansi_color(env[c + 1], 1) : "");
+			"%s=%s;%s:", ft, bsd_to_ansi_color(env[c], 0),
+			bsd_to_ansi_color(env[c + 1], 1));
 
 		c += 2;
 	}
