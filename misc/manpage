@@ -2339,9 +2339,6 @@ T{
 ++
 T}	Jump to a directory in the jump database	fzf or rofi
 T{
-kbgen
-T}	Get escape codes for keybindings	\fB(5)\fR
-T{
 kd
 T}	Decrypt a GnuPG encrypted file	gpg, tar, sed, grep
 T{
@@ -2367,7 +2364,7 @@ T{
 T}	Search files by content	fzf, ripgrep
 T{
 \fIunset\fR
-T}	Update plugins	\fB(6)\fR
+T}	Update plugins	\fB(5)\fR
 T{
 vid
 T}	Preview video files thumbnails	ffmpegthumbnailer
@@ -2376,13 +2373,13 @@ vt
 T}	Virtual directory for sets of files	sed
 T{
 wall
-T}	Set image as wallpaper	\fB(7)\fR
+T}	Set image as wallpaper	\fB(6)\fR
 T{
 \fIunset\fR
-T}	Pick/select files via \fBclifm\fR	\fB(8)\fR
+T}	Pick/select files via \fBclifm\fR	\fB(7)\fR
 T{
 Ctrl-y
-T}	Copy the line buffer to the clipboard	\fB(9)\fR
+T}	Copy the line buffer to the clipboard	\fB(8)\fR
 .TE
 
 .sp
@@ -2398,15 +2395,13 @@ T}	Copy the line buffer to the clipboard	\fB(9)\fR
 .sp
 Whereas this plugin provides basic Git integration, it could be easily modified (it is just a few lines long) to include whatever git function you might need.
 .sp
-\fB(5)\fR It needs to be compiled first: \fIgcc \-o kbgen kbgen.c \-lcurses\fR
+\fB(5)\fR \fIupdate.sh\fR (by default unset)
 .sp
-\fB(6)\fR \fIupdate.sh\fR (by default unset)
+\fB(6)\fR feh, xloadimage, hsetroot, or nitrogen (for X); swww or swaybg (for Wayland)
 .sp
-\fB(7)\fR feh, xloadimage, hsetroot, or nitrogen (for X); swww or swaybg (for Wayland)
+\fB(7)\fR \fIfile_picker.sh\fR (by default unset). Usage example: \fIls -ld $(file_picker.sh)\fR
 .sp
-\fB(8)\fR \fIfile_picker.sh\fR (by default unset). Usage example: \fIls -ld $(file_picker.sh)\fR
-.sp
-\fB(9)\fR Dependencies: cb, wl\-copy, xclip, xsel, pbcopy, termux\-clipboard\-set, clipboard, or clip. Consult the plugin file itself (\fIxclip.sh\fR) for more information
+\fB(8)\fR Dependencies: cb, wl\-copy, xclip, xsel, pbcopy, termux\-clipboard\-set, clipboard, or clip. Consult the plugin file itself (\fIxclip.sh\fR) for more information
 
 .B Dependencies of the previewer plugin (fzfnav.sh)
 
