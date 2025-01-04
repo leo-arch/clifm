@@ -64,7 +64,6 @@ install: $(BIN)
 	$(INSTALL) -m 0755 misc/tools/imgprev/clifmimg $(DESTDIR)$(PROG_DATADIR)/plugins
 	$(INSTALL) -m 0755 misc/tools/*.py $(DESTDIR)$(PROG_DATADIR)/tools
 	chmod 644 $(DESTDIR)$(PROG_DATADIR)/plugins/BFG.cfg
-	chmod 644 $(DESTDIR)$(PROG_DATADIR)/plugins/kbgen.c
 	chmod 644 $(DESTDIR)$(PROG_DATADIR)/plugins/plugins-helper
 	$(INSTALL) -m 0644 misc/colors/*.clifm $(DESTDIR)$(PROG_DATADIR)/colors
 	$(INSTALL) -m 0644 functions/* $(DESTDIR)$(PROG_DATADIR)/functions
