@@ -1306,13 +1306,7 @@ url_encode(char *str)
 	char *pstr = str, *pbuf = buf;
 
 	for (; *pstr; pstr++) {
-#if defined(__CYGWIN__)
-		/* GCC on CYGWIN complains about subscript having type 'char' */
-		if (isalnum((unsigned char)*pstr) || *pstr == '-' || *pstr == '_'
-		|| *pstr == '.'
-#else
-		if (isalnum(*pstr) || *pstr == '-' || *pstr == '_' || *pstr == '.'
-#endif /* __CYGWIN__ */
+		if (isalnum((int)*pstr) || *pstr == '-' || *pstr == '_' || *pstr == '.'
 		|| *pstr == '~' || *pstr == '/') {
 			/* Do not encode any of the above chars */
 			*pbuf = *pstr;
