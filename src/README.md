@@ -101,7 +101,7 @@ if (*str == *str2 && strcmp(str + 1, str2 + 1) == 0)
 
 **c)** Pass structs by address (`function(&my_struct)`) intead of by value (`function(my_struct)`): passing an address to a function is faster than duplicating the value of each struct member and then pass it to the function. Also, try not to pass more than 4 parameters to functions.
 
-**d)** Use `static` and `const` as much as possible. For example, if a variable won't be modified after the initial assignment, make it constant, i.e. reead-only (`const int var = 12`). Likewise, if a function won't be invoked outside the current compilation unit (source file and its corresponding header file), declare it as `static`: `static int my_func()`. In the same line, limit the scope of your variables as much as possible. For example, do not write:
+**d)** Use `static` and `const` as much as possible. For example, if a variable won't be modified after the initial assignment, make it constant, i.e. read-only (`const int var = 12`). Likewise, if a function won't be invoked outside the current compilation unit (source file and its corresponding header file), declare it as `static`: `static int my_func()`. In the same line, limit the scope of your variables as much as possible. For example, do not write:
 
 ```c
 int n = 0;
