@@ -69,7 +69,7 @@ jobs:
       run: |
         sudo apt-get install make gcc libcap-dev libreadline-dev libacl1-dev libmagic-dev
 
-    - name: Compile CliFM
+    - name: Compile Clifm
       run: |
         make
     
