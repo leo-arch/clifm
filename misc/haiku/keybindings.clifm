@@ -1,23 +1,17 @@
-# Keybindings file for CliFM
+                ##################################
+                #   Keybindings file for Clifm   #
+                ##################################
 
-# Use the 'kbgen' plugin (compile it first: gcc -o kbgen kbgen.c) to 
-# find out the escape code for the key or key sequence you want. Use 
-# either octal, hexadecimal codes or symbols.
-# Ex: For Alt-/ (in rxvt terminals) 'kbgen' will print the following 
-# lines:
-# Hex  | Oct | Symbol
-# ---- | ---- | ------
-# \x1b | \033 | ESC (\e)
-# \x2f | \057 | /
-# In this case, the keybinding, if using symbols, is: "\e/:function"
-# In case you prefer the hex codes it would be: \x1b\x2f:function.
-# GNU emacs escape sequences are also allowed (ex: "\M-a", Alt-a
-# in most keyboards, or "\C-r" for Ctrl-r).
-# Some codes, especially those involving keys like Ctrl or the arrow
-# keys, vary depending on the terminal emulator and the system settings.
-# These keybindings should be set up thus on a per terminal basis.
-# You can also consult the terminfo database via the infocmp command.
-# See terminfo(5) and infocmp(1).
+# Empty and commented lines are ignored.
+
+# Below is the list of available functions and their default key bindings.
+# To edit a keybinding use the 'kb bind' command. For example, to bind
+# the previous-dir function run 'kb bind previous-dir', enter a new
+# key binding and confirm.
+#
+# In case you wan to edit this file manually, use Emacs style key sequences.
+# For example, use "action:\C-t" to bind the action name 'action' to Ctrl-t,
+# or "action:\et" to bind it to Alt-t.
 
 # Ctrl-j
 previous-dir:\C-j
