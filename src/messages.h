@@ -1251,15 +1251,18 @@ Note: If DIR does not exist, it will be created"
 
 #define VIEW_USAGE "Preview files in the current directory (requires fzf)\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
-  view [edit [APP]]\n\n\
+  view [edit [APP] | purge]\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
 - Just run the previewer\n\
     view (or Alt+-)\n\
+  Note: Select files using the TAB key.\n\
 - Edit the configuration file\n\
     view edit (or F7)\n\
 - Edit the configuration file using vi\n\
-    view edit vi\n\n\
-Select files using the TAB key.\n\
+    view edit vi\n\
+- Purge the thumbnails directory(1) of dangling thumbnails\n\
+    view purge\n\n\
+(1) $XDG_CACHE_HOME/clifm/thumbnails\n\n\
 Enter 'help file-previews' for more information."
 
 #define WRAPPERS_USAGE "c, m, and r commands are wrappers for \
