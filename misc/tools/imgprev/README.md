@@ -107,9 +107,9 @@ The steps involved in generating image previews are:
 
 [This script](https://github.com/leo-arch/clifm/blob/master/misc/tools/imgprev/clifmimg) converts (if necessary) and generates image previews (as thumbnails) for files.
 
-For performance reasons, thumbnails are cached (in the directory pointed to by the `CACHE_DIR` variable<sup>1</sup>) using file hashes as names (this allows us to securly identify files independently of their actual name).
+For performance reasons, thumbnails are cached (in the directory pointed to by the `CACHE_DIR` variable<sup>1</sup>) using MD5 hashes as names (this allows us to securly identify files independently of their actual name).
 
-The script takes two parameters: the first one tells the type of file is to be previewed, and the the second one is the file name to be previewed. For example:
+The script takes two parameters: the first one tells the type of file to be previewed, and the the second one is the file name to be previewed. For example:
 
 ```sh
 clifmimg doc /path/to/file.docx
@@ -119,7 +119,9 @@ generates a thumbnail of `file.docx` using the method named `doc`.
 
 The first parameter (thumbnailing method) can be any of the following: `image`, `video`, `audio`, `gif`,  `svg`, `epub`, `mobi`, `pdf`, `djvu`, `doc`, `postscript`, and `font`.
 
-<sup>1</sup> By default this directory is `${XDG_CACHE_HOME:-$HOME/.cache}/clifm/previews` (which usually expands to `~/.cache/clifm/previews`).
+Every time a thumbnail is generated, `clifmimg` adds a new entry to the thumbnails database (`thumbnails.info` in the thumbnails directory<sup>1</sup>). Each entry has this form: **THUMB@PATH**, where THUMB is the name of the thumbnail (an MD5 hash of the original file name followed by a file extension, either `png` or `jpg`), and PATH the absolute path to the original file. This database is read by the [`view purge`](https://github.com/leo-arch/clifm/wiki/Introduction#view) command (available since 1.22.12) to keep the thumbnails directory in a clean state.
+
+<sup>1</sup> By default this directory is `$XDG_CACHE_HOME/clifm/thumbnails` (which usually expands to `~/.cache/clifm/thumbnails`). Note that previous versions of this scripts used `$XDG_CACHE_HOME/clifm/previews` instead.
 
 ## Dependencies
 
