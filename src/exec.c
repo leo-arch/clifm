@@ -1687,6 +1687,169 @@ preview_edit(char *app)
 	return ret;
 }
 
+static size_t
+remove_empty_thumbnails(void)
+{
+	DIR *dir;
+	struct dirent *ent;
+
+	if ((dir = opendir(thumbnails_dir)) == NULL)
+		return 0;
+
+	struct stat a;
+	char buf[PATH_MAX + 1];
+	size_t removed = 0;
+
+	while ((ent = readdir(dir)) != NULL) {
+		if (SELFORPARENT(ent->d_name))
+			continue;
+
+		snprintf(buf, sizeof(buf), "%s/%s", thumbnails_dir, ent->d_name);
+		if (lstat(buf, &a) == -1 || !S_ISREG(a.st_mode))
+			continue;
+
+		if (a.st_size == 0 && unlink(buf) != -1)
+			removed++;
+	}
+
+	closedir(dir);
+
+	return removed;
+}
+
+/* Remove dangling thumbnails from the thumbnails directory by checking the
+ * $XDG_CACHE_HOME/clifm/thumbnails/thumbnails.info file.
+ *
+ * The info file is created by the 'clifmimg' script: every time a new
+ * thumbnail is generated, a new entry is added to this file.
+ * Each entry has this form: THUMB@ORIG
+ * THUMB is the name of the thumbnail file (i.e. an MD5 hash of the original
+ * file followed by a file extension, either jpg or png).
+ * ORIG is the absolute path to the original file name.
+ *
+ * If THUMB does not exist, the entry is removed from the info file.
+ * If both THUMB and ORIG exist, the entry is preserved.
+ * Finally, if ORIG does not exist, the current entry is removed and THUMB
+ * gets deleted. */
+static int
+purge_thumbnails_cache(void)
+{
+	if (!thumbnails_dir || !*thumbnails_dir)
+		return FUNC_FAILURE;
+
+	struct stat a;
+	if (stat(thumbnails_dir, &a) == -1 || !S_ISDIR(a.st_mode)) {
+		xerror(_("view: The thumbnails directory does not exist, is not a "
+			"directory, or there are no thumbnails\n"));
+		return FUNC_FAILURE;
+	}
+
+	size_t rem_files = remove_empty_thumbnails();
+
+	char thumb_file[PATH_MAX + 1];
+	snprintf(thumb_file, sizeof(thumb_file), "%s/%s",
+		thumbnails_dir, THUMBNAILS_INFO_FILE);
+
+	if (lstat(thumb_file, &a) == -1) {
+		xerror(_("view: Cannot access '%s': %s\n"), thumb_file, strerror(errno));
+		return FUNC_FAILURE;
+	}
+
+	if (!S_ISREG(a.st_mode)) {
+		xerror(_("view: '%s': Not a regular file\n"), thumb_file);
+		return FUNC_FAILURE;
+	}
+
+	char tmp_file[PATH_MAX + 1];
+	snprintf(tmp_file, sizeof(tmp_file), "%s/%s", thumbnails_dir, TMP_FILENAME);
+	int tmp_fd = mkstemp(tmp_file);
+	if (tmp_fd == -1) {
+		xerror(_("view: Cannot create temporary file '%s': %s\n"),
+			tmp_file, strerror(errno));
+		return FUNC_FAILURE;
+	}
+
+	FILE *tmp_fp = fdopen(tmp_fd, "w");
+	if (!tmp_fp) {
+		xerror(_("view: Cannot open temporary file '%s': %s\n"),
+			tmp_file, strerror(errno));
+		unlink(tmp_file);
+		return FUNC_FAILURE;
+	}
+
+	int fd = 0;
+	FILE *fp = open_fread(thumb_file, &fd);
+	if (!fp) {
+		xerror(_("view: Cannot open '%s': %s\n"), thumb_file, strerror(errno));
+		fclose(tmp_fp);
+		unlink(tmp_file);
+		return FUNC_FAILURE;
+	}
+
+	off_t size_sum = 0;
+	int errors = 0;
+	char tfile[PATH_MAX + 40]; /* Bigger than line is enough. This just avoids
+	a compiler warning. */
+
+	/* MD5 hash (32 bytes) + '.' + extension (usually 3 bytes) + '@'
+	 * + absolute path + new line char + NUL char */
+	char line[PATH_MAX + 39];
+	while (fgets(line, (int)sizeof(line), fp) != NULL) {
+		char *p = strchr(line, '@');
+		if (!p || p[1] != '/') /* Malformed entry: remove it. */
+			continue;
+
+		*p = '\0';
+		p++;
+		const size_t len = strlen(p);
+		if (len > 1 && p[len - 1] == '\n')
+			p[len - 1] = '\0';
+
+		snprintf(tfile, sizeof(tfile), "%s/%s", thumbnails_dir, line);
+		struct stat b;
+		if (lstat(tfile, &b) == -1)
+			/* Thumbnail file does not exist: remove this entry */
+			continue;
+
+		if (lstat(p, &a) != -1) {
+			/* Both the thumbnail file and the original file exist. */
+			fprintf(tmp_fp, "%s@%s\n", line, p);
+			continue;
+		}
+
+		/* The thumbnail file exist, but the original file does not:
+		 * remove this entry and the corresponding thumbnail file. */
+
+		printf(_("view: '%s': Removing dangling thumbnail... "), line);
+		if (unlink(tfile) == -1) {
+			printf("%s\n", strerror(errno));
+			errors++;
+		} else {
+			puts(_("OK"));
+			rem_files++;
+			size_sum += conf.apparent_size == 1
+				? b.st_size : b.st_blocks * S_BLKSIZE;
+		}
+	}
+
+	fclose(fp);
+	fclose(tmp_fp);
+
+	rename(tmp_file, thumb_file);
+	unlink(tmp_file);
+
+	if (rem_files > 0) {
+		const char *human = construct_human_size(size_sum);
+		print_reload_msg(SET_SUCCESS_PTR, xs_cb, _("Removed %zu "
+			"thumbnail(s): %s\n"), rem_files, human ? human : UNKNOWN_STR);
+	} else {
+		if (errors == 0)
+			puts(_("view: No dangling thumbnails"));
+	}
+
+	return errors == 0 ? FUNC_SUCCESS : FUNC_FAILURE;
+}
+
 static int
 preview_function(char **args)
 {
@@ -1702,6 +1865,8 @@ preview_function(char **args)
 		}
 		if (*args[0] == 'e' && strcmp(args[0], "edit") == 0)
 			return preview_edit(args[1]);
+		if (*args[0] == 'p' && strcmp(args[0], "purge") == 0)
+			return purge_thumbnails_cache();
 	}
 
 	const size_t seln_bk = sel_n;

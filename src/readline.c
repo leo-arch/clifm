@@ -2865,6 +2865,9 @@ options_generator(const char *text, int state)
 		c_opts[6] = "rename"; c_opts[7] = "untag"; c_opts[8] = NULL;
 #endif /* !_NO_TAGS */
 
+	} else if (w == 2 && strcmp(c, "view") == 0) {
+		c_opts[0] = "edit"; c_opts[1] = "purge"; c_opts[3] = NULL;
+
 	/* net */
 	} else if (w == 2 && *c == 'n' && c[1] == 'e'
 	&& c[2] == 't' && !c[3]) {

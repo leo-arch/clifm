@@ -296,6 +296,7 @@ char
 	*sys_shell = (char *)NULL,
 	*tags_dir = (char *)NULL,
 	*templates_dir = (char *)NULL,
+	*thumbnails_dir = (char *)NULL,
 	*tmp_rootdir = (char *)NULL,
 	*tmp_dir = (char *)NULL,
 #ifndef _NO_TRASH
@@ -819,6 +820,7 @@ const struct nameslist_t param_str[] = {
 	{"undel all", 9},
 	{"untrash all", 11},
 	{"view edit", 9},
+	{"view purge", 10},
 	{NULL, 0}
 };
 

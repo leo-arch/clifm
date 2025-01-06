@@ -1481,6 +1481,27 @@ check_config_files_integrity(void)
 }
 
 static void
+set_thumbnails_dir(void)
+{
+	const int se = (xargs.secure_env == 1 || xargs.secure_env_full == 1);
+
+	const char *p = se == 0 ? getenv("XDG_CACHE_HOME") : (char *)NULL;
+	if ((!p || !*p) && (!user.home || !*user.home))
+		return;
+
+	if (p && *p) {
+		const size_t len = strlen(p) + sizeof(PROGRAM_NAME) + 30;
+		thumbnails_dir = xnmalloc(len, sizeof(char));
+		snprintf(thumbnails_dir, len, "%s/%s/thumbnails", p, PROGRAM_NAME);
+	} else {
+		const size_t len = user.home_len + sizeof(PROGRAM_NAME) + 26;
+		thumbnails_dir = xnmalloc(len, sizeof(char));
+		snprintf(thumbnails_dir, len, "%s/.cache/%s/thumbnails",
+			user.home, PROGRAM_NAME);
+	}
+}
+
+static void
 define_config_file_names(void)
 {
 	size_t tmp_len = 0;
@@ -1541,6 +1562,7 @@ define_config_file_names(void)
 	snprintf(cmds_log_file, tmp_len, "%s/cmdlogs.clifm", config_dir);
 
 	set_hist_file(secure_mode, tmp_len);
+	set_thumbnails_dir();
 
 	tmp_len = config_dir_len + 15;
 	profile_file = xnmalloc(tmp_len, sizeof(char));

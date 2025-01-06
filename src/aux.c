@@ -1122,7 +1122,7 @@ construct_human_size(const off_t size)
 
 	while (s >= base) {
 		s = s * mult_factor; /* == (s = s / base), but faster */
-		++n;
+		n++;
 	}
 
 	const int x = (int)s;

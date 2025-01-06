@@ -1634,6 +1634,7 @@ free_stuff(void)
 
 	free(sel_file);
 	free(templates_dir);
+	free(thumbnails_dir);
 	free(tmp_rootdir);
 	free(tmp_dir);
 	free(user.name);

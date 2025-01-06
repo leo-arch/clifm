@@ -690,6 +690,11 @@ set_fzf_env_vars(const int height)
 	snprintf(p, sizeof(p), "%d", term_lines);
 	setenv("CLIFM_TERM_LINES", p, 1);
 
+	if (thumbnails_dir && *thumbnails_dir) {
+		setenv("CLIFM_THUMBNAILS_DIR", thumbnails_dir, 1);
+		setenv("CLIFM_THUMBINFO_FILE", THUMBNAILS_INFO_FILE, 1);
+	}
+
 	if (flags & ALT_PREVIEW_FILE)
 		setenv_fzf_alt_preview_file();
 }
@@ -701,6 +706,8 @@ clear_fzf(void)
 	unsetenv("CLIFM_FZF_LINE");
 	unsetenv("CLIFM_TERM_COLUMNS");
 	unsetenv("CLIFM_TERM_LINES");
+	unsetenv("CLIFM_THUMBNAILS_DIR");
+	unsetenv("CLIFM_THUMBINFO_FILE");
 	if (flags & ALT_PREVIEW_FILE)
 		unsetenv("CLIFM_ALT_PREVIEW_FILE");
 }
