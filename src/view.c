@@ -225,7 +225,8 @@ purge_thumbnails_cache(void)
 	if (rem_files > 0) {
 		const char *human = construct_human_size(size_sum);
 		print_reload_msg(SET_SUCCESS_PTR, xs_cb, _("Removed %zu "
-			"thumbnail(s): %s\n"), rem_files, human ? human : UNKNOWN_STR);
+			"thumbnail(s): %s freed\n"),
+			rem_files, human ? human : UNKNOWN_STR);
 	} else {
 		if (errors == 0)
 			puts(_("view: No dangling thumbnails"));
