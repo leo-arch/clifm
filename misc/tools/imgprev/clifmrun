@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Based on https://github.com/cirala/vifmimg, licensed under GPL-3.0
-# All changes are licensed under GPL-3.0
+# All changes are licensed under GPL-2.0+
 # Authors: cirala, L. Abramovich
 
 ###################

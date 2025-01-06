@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Based on https://github.com/cirala/vifmimg, licensed under GPL-3.0
-# All changes are licensed under GPL-3.0
+# All changes are licensed under GPL-2.0+
 # Authors: cirala, L. Abramovich
 
 ######################
@@ -14,6 +14,11 @@
 # The first parameter is the file type to be previewed (supported types:
 # image, gif, video, epub, mobi, pdf, svg, doc, djvu, audio, font, postscript)
 # The second parameter is the file name to be previewed.
+#
+# Each time a thumbnail is generated, a line is added to $THUMBINFO_FILE with
+# this format: THUMB@PATH, where THUMB is the name of the thumbnail (an MD5 hash
+# of the original file followed by a file extension, either jpg or png), and
+# PATH is the absolute path to the original file.
 
 ######################
 # USAGE
@@ -53,7 +58,7 @@
 # magick (GIF, SVG files, and legacy image formats (bmp, pcx, etc.) - provided by the imagemagick package)
 #
 # Note: The exact package names provinding these programs vary depending
-# on your OS/distribution, but ususally they have the same name as the program
+# on your OS/distribution, but ususally they have the same name as the program.
 
 ############################
 # IMAGE PREVIEW METHOD
@@ -78,12 +83,17 @@ ansi_method="chafa"
 type="$1"
 file="$2"
 
-CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/clifm/previews"
+CACHE_DIR="$CLIFM_THUMBNAILS_DIR"
+[ -z "$CACHE_DIR" ] && CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/clifm/thumbnails"
+
 CACHEDIRTAG_FILE="$CACHE_DIR/CACHEDIR.TAG"
 CACHEDIRTAG_HEADER="Signature: 8a477f597d28d172789f06886806bc55
 # This file is a cache directory tag created by Clifm.
 # For information about cache directory tags, see:
 #	http://www.brynosaurus.com/cachedir/"
+
+THUMBINFO_FILE="$CACHE_DIR/${CLIFM_THUMBINFO_FILE:-thumbnails.info}"
+
 
 get_preview_method() {
 	if [ -z "$method" ]; then
@@ -120,6 +130,11 @@ print_err_msg() {
 		*) echo "${1}: Error generating preview (code: ${2})" ;;
 	esac
 	return 1
+}
+
+add_to_info_file() {
+	echo "${2##*/}@$1" >> "$THUMBINFO_FILE"
+	return 0
 }
 
 display() {
@@ -181,17 +196,20 @@ display() {
 }
 
 gen_audio_preview() {
-	ffmpeg -hide_banner -i "$1" "$2" -y >/dev/null 2>&1 && return 0
+	ffmpeg -hide_banner -i "$1" "$2" -y >/dev/null 2>&1 && \
+		add_to_info_file "$1" "$2" && return 0
 	print_err_msg "ffmpeg" "$?" "audio"
 }
 
 #gen_comic_preview() {
-#	comicthumb "$file" "$PCACHE" 1024 >/dev/null 2>&1 && return 0
+#	comicthumb "$1" "$2" 1024 >/dev/null 2>&1 && \
+#		add_to_info_file "1" "${2}.$3" && return 0
 #	print_err_msg "comicthumb" "$?" "comic"
 #}
 
 gen_djvu_preview() {
-	ddjvu -format=tiff -quality=90 -page=1 "$1" "$2" >/dev/null 2>&1 && return 0
+	ddjvu -format=tiff -quality=90 -page=1 "$1" "$2" >/dev/null 2>&1 && \
+		add_to_info_file "$1" "$2" && return 0
 	print_err_msg "ddjvu" "$?" "djvu"
 }
 
@@ -200,7 +218,8 @@ gen_doc_preview() {
 	if libreoffice --headless --convert-to "$format" "$1" \
 	--outdir "$CACHE_DIR" >/dev/null 2>&1; then
 		f="${1##*/}"
-		mv "$CACHE_DIR/${f%.*}.$format" "${2}.$format" && return 0
+		mv "$CACHE_DIR/${f%.*}.$format" "${2}.$format" && \
+			add_to_info_file "$1" "${2}.$format" && return 0
 		print_err_msg "mv (libreoffice)" "$?" "doc"
 	else
 		print_err_msg "libreoffice" "$?" "doc"
@@ -208,50 +227,60 @@ gen_doc_preview() {
 }
 
 gen_epub_preview() {
-	gnome-epub-thumbnailer -s 1024 "$1" "$2" >/dev/null 2>&1 && return 0
+	gnome-epub-thumbnailer -s 1024 "$1" "$2" >/dev/null 2>&1 && \
+		add_to_info_file "$1" "$2" && return 0
 	print_err_msg "gnome-epub-thumbnailer" "$?" "epub"
-	epub-thumbnailer "$1" "$2" 1024 >/dev/null 2>&1 && return 0
-	print_err_msg "epub-thumbnailer" "$?" "epub"
+#	epub-thumbnailer "$1" "$2" 1024 >/dev/null 2>&1 && \
+#		add_to_info_file "$1" "$2" && return 0
+#	print_err_msg "epub-thumbnailer" "$?" "epub"
 }
 
 gen_font_preview() {
-	fontpreview -i "$1" -o "$2" >/dev/null 2>&1 && return 0
+	fontpreview -i "$1" -o "$2" >/dev/null 2>&1 && \
+		add_to_info_file "$1" "$2" && return 0
 	print_err_msg "fontpreview" "$?" "font"
 }
 
 gen_gif_preview() {
-	magick "$1"[0] -resize 640x480\> "$2" >/dev/null 2>&1 && return 0
+	magick "$1"[0] -resize 640x480\> "$2" >/dev/null 2>&1 && \
+		add_to_info_file "$1" "$2" && return 0
 	print_err_msg "magick" "$?" "gif"
 }
 
 gen_img_convert_preview() {
-	magick -- "$1" "$2" >/dev/null 2>&1 && return 0
+	magick "$1"[0] "$2" >/dev/null 2>&1 && \
+		add_to_info_file "$1" "$2" && return 0
 	print_err_msg "magick" "$?" "image"
 }
 
 gen_mobi_preview() {
-	gnome-mobi-thumbnailer -s 1024 "$1" "$2" >/dev/null 2>&1 && return 0
+	gnome-mobi-thumbnailer -s 1024 "$1" "$2" >/dev/null 2>&1 && \
+		add_to_info_file "$1" "$2" && return 0
 	print_err_msg "gnome-mobi-thumbnailer" "$?" "mobi"
 }
 
 gen_pdf_preview() {
-	pdftoppm -jpeg -f 1 -singlefile -scale-to 1920 "$1" "$2" >/dev/null 2>&1 && return 0
+	pdftoppm -jpeg -f 1 -singlefile -scale-to 1920 "$1" "$2" >/dev/null 2>&1 && \
+		add_to_info_file "$1" "${2}.jpg" && return 0
 	print_err_msg "pdftoppm" "$?" "pdf"
 }
 
 gen_postscript_preview() {
 	gs -sDEVICE=jpeg -dJPEGQ=100 -dNOPAUSE -dBATCH -dSAFER -r300 \
-		-sOutputFile="$2" "$1" >/dev/null 2>&1 && return 0
+		-sOutputFile="$2" "$1" >/dev/null 2>&1 && \
+			add_to_info_file "$1" "$2" && return 0
 	print_err_msg "gs (ghostscript)" "$?" "postscript"
 }
 
 gen_svg_preview() {
-	magick -background none -size 1920x1080 "$1" "$2" >/dev/null 2>&1 && return 0
+	magick -background none -size 1920x1080 "$1" "$2" >/dev/null 2>&1 && \
+		add_to_info_file "$1" "$2" && return 0
 	print_err_msg "magick" "$?" "svg"
 }
 
 gen_video_preview() {
-	ffmpegthumbnailer -i "$1" -o "$2" -s 0 -q 5 >/dev/null 2>&1 && return 0
+	ffmpegthumbnailer -i "$1" -o "$2" -s 0 -q 5 >/dev/null 2>&1 && \
+		add_to_info_file "$1" "$2" && return 0
 	print_err_msg "ffmpegthumbnailer" "$?" "video"
 }
 
@@ -346,7 +375,7 @@ main() {
 		;;
 #		"comic")
 #			hash_file "$file"
-#			if [ -f "${PCACHE}.png" ] || gen_comic_preview "$file" "$PCACHE"; then
+#			if [ -f "${PCACHE}.png" ] || gen_comic_preview "$file" "$PCACHE" "png"; then
 #				display "${PCACHE}.png"
 #			fi
 #		;;
