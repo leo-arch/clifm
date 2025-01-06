@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Jan 3, 2025" "clifm 1.22.11" "CLIFM Manual"
+.TH "CLIFM" "1" "Jan 6, 2025" "clifm 1.22.12" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -1257,12 +1257,14 @@ copy FILE(s) into DIR and bulk rename them at once.
 .B ver, version
 show \fBclifm\fR version details.
 .TP
-.B view \fR[\fIedit\fR [\fIAPP\fR]]
+.B view \fR[\fIedit\fR [\fIAPP\fR] | \fIpurge\fR]
 preview files in the current directory (full screen). Requires \fBfzf\fR(1). \fIAlt+\-\fR is also available.
 .sp
-To edit the previewer configuration file, enter \fIview edit\fR, or \fIview edit vi\fR to open it with a specific application, in this case, \fBvi\fR(1).
-.sp
 By pressing Enter or Right, the currently highlighted file will be selected and \fIview\fR closed. To select multiple files, mark them with the TAB key and then press Enter or Right to confirm. To quit \fIview\fR press Escape or the Left arrow key.
+.sp
+Run \fIview purge\fR to purge the thumbnails directory (\fI$XDG_CACHE_HOME/clifm/thumbnails\fR) of dangling thumbnails.
+.sp
+To edit the previewer configuration file enter \fIview edit\fR, or \fIview edit vi\fR to open it with a specific application, in this case, \fBvi\fR(1).
 .sp
 For \fBimage previews\fR consult the Wiki (\fIhttps://github.com/leo\-arch/clifm/tree/master/misc/tools/imgprev\fR) or enter \fIhelp image\-previews\fR.
 .sp
