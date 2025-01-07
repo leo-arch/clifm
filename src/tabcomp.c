@@ -1391,15 +1391,13 @@ is_multi_sel(void)
 static int
 clean_rl_buffer(const char *text)
 {
-	if (!text || !*text)
-		return FUNC_FAILURE;
-
 	if (rl_point != rl_end)
 		return FUNC_SUCCESS;
 
 	/* If the previous char is not space, then a common prefix was appended:
 	 * remove it. */
-	if ((rl_end > 0 && rl_line_buffer && rl_line_buffer[rl_end - 1] != ' ')
+	if (rl_end == 0
+	|| (rl_end > 0 && rl_line_buffer && rl_line_buffer[rl_end - 1] != ' ')
 	|| (rl_end >= 2 && rl_line_buffer && rl_line_buffer[rl_end - 2] == '\\')) {
 		/* Find the last non-escaped space. */
 		int i = rl_end, sp = -1;
