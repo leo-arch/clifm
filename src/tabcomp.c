@@ -1391,13 +1391,15 @@ is_multi_sel(void)
 static int
 clean_rl_buffer(const char *text)
 {
+	if (!text || !*text)
+		return FUNC_FAILURE;
+
 	if (rl_point != rl_end)
 		return FUNC_SUCCESS;
 
 	/* If the previous char is not space, then a common prefix was appended:
 	 * remove it. */
-	if (rl_end == 0
-	|| (rl_end > 0 && rl_line_buffer && rl_line_buffer[rl_end - 1] != ' ')
+	if ((rl_end > 0 && rl_line_buffer && rl_line_buffer[rl_end - 1] != ' ')
 	|| (rl_end >= 2 && rl_line_buffer && rl_line_buffer[rl_end - 2] == '\\')) {
 		/* Find the last non-escaped space. */
 		int i = rl_end, sp = -1;
@@ -2059,7 +2061,7 @@ AFTER_USUAL_COMPLETION:
 	/* Common prefix for multiple matches is appended to the input query.
 	 * Let's rise a flag to know if we should reinsert the original query
 	 * in case the user cancels the completion (pressing ESC). */
-	int common_prefix_added =
+	const int common_prefix_added =
 		(fzftab == 1 && matches[1] && strcmp(matches[0], text) != 0);
 #endif /* _NO_FZF */
 
