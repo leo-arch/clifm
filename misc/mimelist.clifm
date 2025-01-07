@@ -44,8 +44,12 @@
 # opened in the command. For example:
 #    'mpv %f --no-terminal' -> 'mpv FILE --no-terminal' 
 #
-# If %f is not specified, the file name will be added to the end of the
-# command. For example:
+# The %u expression is expanded to the file URI for the original file.
+# For example, if the file name is '/home/user/this is a test',
+# 'cmd %u' is expanded to 'cmd file:///home/user/this%20is%20a%20test'.
+#
+# If neither %f nor %u are specified, the file name will be appended to the
+# end of the command. For example:
 #    'mpv --no-terminal' -> 'mpv --no-terminal FILE'
 
 # To silence STDERR and/or STDOUT use !E and !O respectively (they can be

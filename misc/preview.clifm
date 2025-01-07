@@ -33,18 +33,18 @@
 # If this script is not found under ~/.config/clifm/, you can copy it from
 # the data directory (usually /usr/share/clifm/plugins/).
 #
-;^application/.*(officedocument|msword|ms-excel|ms-powerpoint|opendocument).*=~/.config/clifm/clifmimg doc;
-;^text/rtf$=~/.config/clifm/clifmimg doc;
-;^application/epub\+zip$=~/.config/clifm/clifmimg epub;
-;^application/pdf$=~/.config/clifm/clifmimg pdf;
-;^image/vnd.djvu=~/.config/clifm/clifmimg djvu;
-;^image/svg\+xml$=~/.config/clifm/clifmimg svg;
-;^image/gif$=~/.config/clifm/clifmimg gif;
-;^image/.*=~/.config/clifm/clifmimg image;
-;^video/.*=~/.config/clifm/clifmimg video;
-;^audio/.*=~/.config/clifm/clifmimg audio;
-;^application/postscript$=~/.config/clifm/clifmimg postscript;
-;^font/.*|^application/(font.*|.*opentype)=~/.config/clifm/clifmimg font;
+;^application/.*(officedocument|msword|ms-excel|ms-powerpoint|opendocument).*=~/.config/clifm/clifmimg doc %f %u;
+;^text/rtf$=~/.config/clifm/clifmimg doc %f %u;
+;^application/epub\+zip$=~/.config/clifm/clifmimg epub %f %u;
+;^application/pdf$=~/.config/clifm/clifmimg pdf %f %u;
+;^image/vnd.djvu=~/.config/clifm/clifmimg djvu %f %u;
+;^image/svg\+xml$=~/.config/clifm/clifmimg svg %f %u;
+;^image/gif$=~/.config/clifm/clifmimg gif %f %u;
+;^image/.*=~/.config/clifm/clifmimg image %f %u;
+;^video/.*=~/.config/clifm/clifmimg video %f %u;
+;^audio/.*=~/.config/clifm/clifmimg audio %f %u;
+;^application/postscript$=~/.config/clifm/clifmimg postscript %f %u;
+;^font/.*|^application/(font.*|.*opentype)=~/.config/clifm/clifmimg font %f %u;
 
 #--------------------------------
 # Directories
