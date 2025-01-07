@@ -760,6 +760,18 @@ expand_app_fields(char ***cmd, size_t *n, char *fpath, int *exec_flags)
 			continue;
 		}
 
+		/* Expand %u to the file URI for the original file name */
+		if (*a[i] == '%' && a[i][1] == 'u') {
+			char *p = url_encode(fpath, 1);
+			if (!p)
+				continue;
+
+			copy_field(&a[i], p);
+			free(p);
+			f = 1;
+			continue;
+		}
+
 		/* Set execution flags */
 		if (*a[i] == '!' && (a[i][1] == 'E' || a[i][1] == 'O')) {
 			set_exec_flags(a[i] + 1, exec_flags);

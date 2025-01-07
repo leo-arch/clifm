@@ -2314,8 +2314,11 @@ create_mime_file_anew(char *file)
 # Use the %%f placeholder to specify the position of the file name to be\n\
 # opened in the command. Example:\n\
 # 'mpv %%f --terminal=no' -> 'mpv FILE --terminal=no'\n\
-# If %%f is not specified, the file name will be appended to the end of the\n\
-# command. E.g.: 'mpv --terminal=no' -> 'mpv --terminal=no FILE'\n\
+#\n\
+# The %%u placeholder is expanded to the file URI for the original file.\n\
+#\n\
+# If neither %%f nor %%u are specified, the file name will be appended to the\n\
+# end of the command. E.g.: 'mpv --terminal=no' -> 'mpv --terminal=no FILE'\n\
 \n\
 # To silence STDERR and/or STDOUT use !E and !O respectively (they can\n\
 # be used together). Examples:\n\

@@ -178,7 +178,7 @@ static int
 gen_trashinfo_file(char *file, const char *suffix, const struct tm *tm)
 {
 	/* Encode path to URL format (RF 2396) */
-	char *url_str = url_encode(file);
+	char *url_str = url_encode(file, 0);
 	if (!url_str) {
 		xerror(_("trash: '%s': Error encoding path\n"), file);
 		return FUNC_FAILURE;
