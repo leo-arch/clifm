@@ -106,15 +106,15 @@ remove_empty_thumbnails(void)
  *
  * The info file is created by the 'clifmimg' script: every time a new
  * thumbnail is generated, a new entry is added to this file.
- * Each entry has this form: THUMB@ORIG
- * THUMB is the name of the thumbnail file (i.e. an MD5 hash of the original
- * file followed by a file extension, either jpg or png).
- * ORIG is the absolute path to the original file name.
+ * Each entry has this form: THUMB_FILE@FILE_URI
+ * THUMB_FILE is the name of the thumbnail file (i.e. an MD5 hash of
+ * FILE_URI followed by a file extension, either jpg or png).
+ * FILE_URI is the file URI for the absolute path to the original file name.
  *
- * If THUMB does not exist, the entry is removed from the info file.
- * If both THUMB and ORIG exist, the entry is preserved.
- * Finally, if ORIG does not exist, the current entry is removed and THUMB
- * gets deleted. */
+ * If THUMB_FILE does not exist, the entry is removed from the info file.
+ * If both THUMB_FILE and FILE_URI exist, the entry is preserved.
+ * Finally, if FILE_URI does not exist, the current entry is removed and
+ * THUMB_FILE gets deleted. */
 static int
 purge_thumbnails_cache(void)
 {
@@ -172,19 +172,22 @@ purge_thumbnails_cache(void)
 
 	off_t size_sum = 0;
 	int errors = 0;
-	char tfile[PATH_MAX + 40]; /* Bigger than line is enough. This just avoids
+	char tfile[PATH_MAX + 1]; /* Bigger than line is enough. This just avoids
 	a compiler warning. */
 
-	/* MD5 hash (32 bytes) + '.' + extension (usually 3 bytes) + '@'
-	 * + absolute path + new line char + NUL char */
-	char line[PATH_MAX + 39];
-	while (fgets(line, (int)sizeof(line), fp) != NULL) {
+	char *line = (char *)NULL;
+	size_t line_size = 0;
+	ssize_t line_len = 0;
+
+	while ((line_len = getline(&line, &line_size, fp)) > 0) {
 		char *p = strchr(line, '@');
-		if (!p || p[1] != '/') /* Malformed entry: remove it. */
+		if (!p || strncmp(p + 1, "file:///", 8) != 0)
+			/* Malformed entry: remove it. */
 			continue;
 
 		*p = '\0';
-		p++;
+		p += 8;
+
 		const size_t len = strlen(p);
 		if (len > 1 && p[len - 1] == '\n')
 			p[len - 1] = '\0';
@@ -195,9 +198,18 @@ purge_thumbnails_cache(void)
 			/* Thumbnail file does not exist: remove this entry */
 			continue;
 
-		if (lstat(p, &a) != -1) {
+		char *abs_path = p;
+		if (strchr(p, '%'))
+			abs_path = url_decode(p);
+
+		const int retval = lstat(abs_path, &a);
+
+		if (abs_path != p)
+			free(abs_path);
+
+		if (retval != -1) {
 			/* Both the thumbnail file and the original file exist. */
-			fprintf(tmp_fp, "%s@%s\n", line, p);
+			fprintf(tmp_fp, "%s@file://%s\n", line, p);
 			continue;
 		}
 
@@ -218,6 +230,7 @@ purge_thumbnails_cache(void)
 
 	fclose(fp);
 	fclose(tmp_fp);
+	free(line);
 
 	rename(tmp_file, thumb_file);
 	unlink(tmp_file);

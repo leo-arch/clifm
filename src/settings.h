@@ -667,10 +667,9 @@ alt-down:preview-page-down --inline-info --layout=reverse-list \
 #define DEF_SMENU_OPTIONS "-a t:2,b b:4 c:r ct:2,r sf:6,r st:5,r mt:5,b"
 
 /* Name of the file to store thumbnails original paths.
- * Each line in this file has this format: THUMB_FILE@ORIGINAL_FILE,
- * where THUMB_FILE is the name of the thumbnail file (md5 hash of the
- * absolute path to the original file name), and ORIGNAL_FILE is the
- * absolute path to the original file name.
+ * Each line in this file has this format: THUMB_FILE@FILE_URI,
+ * where THUMB_FILE is the name of the thumbnail file (MD5 hash of FILE_URI),
+ * and FILE_URI is the file URI for the absolute path to the original file name.
  * This file is located in $XDG_CACHE_HOME/clifm/thumbnails */
 #define THUMBNAILS_INFO_FILE "thumbnails.info"
 
