@@ -67,11 +67,10 @@
 # Note: The exact package names providing these programs vary depending
 # on your OS/distribution, but ususally they have the same name as the program.
 
-############################
-# DEFAULT OPTIONS
-############################
+#-----------------------------
+# 1. DEFAULT OPTIONS
+#-----------------------------
 
-#
 # Set the preview image method.
 # Available methods: sixel, ueberzug, kitty, ansi (text mode)
 #
@@ -84,12 +83,26 @@ method=""
 # Available applications: chafa, pixterm, img2txt, viu, catimg, tiv, timg
 ansi_method="chafa"
 
-# To generate sixel images we use chafa(1).
+# NOTE: To generate sixel images we use chafa(1).
 
 type="$1"
 file="$2"
 file_URI="${3:-$file}"
 
+# The maximum size for a thumbnail is, according to the Freedesktop specification
+# (https://specifications.freedesktop.org/thumbnail-spec/latest/creation.html),
+# 1024x1024. However, since we display thumbnails in a preview window, sometimes
+# using half of the screen, we need a bigger resolution.
+DEFAULT_SIZE="1920x1080"
+
+# According to the Freedesktop specification, thumbnails should be in PNG format.
+# However, some of the convertions below, mostly for PDF files, generate truncated
+# images when converting to PNG (while quickly scrolling through the preview window).
+# This is why, for the time being, we stick to JPG.
+THUMB_FORMAT="jpg"
+
+# Because of the above observations, we cannot use any of the thumbnails directories
+# specificied by the Freedesktop specification, but a custom one.
 CACHE_DIR="$CLIFM_THUMBNAILS_DIR"
 [ -z "$CACHE_DIR" ] && CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/clifm/thumbnails"
 
@@ -99,14 +112,13 @@ CACHEDIRTAG_HEADER="Signature: 8a477f597d28d172789f06886806bc55
 # For information about cache directory tags, see:
 #	http://www.brynosaurus.com/cachedir/"
 
+# This file contains information about generated thumbnails: for the time being,
+# only the path to the original file (as a file URI).
 THUMBINFO_FILE="$CACHE_DIR/${CLIFM_THUMBINFO_FILE:-thumbnails.info}"
 
-DEFAULT_SIZE="1920x1080"
-THUMB_FORMAT="jpg"
-
-############################
-# SOME AUXILIARY FUNCTIONS
-############################
+#-----------------------------
+# 2. SOME AUXILIARY FUNCTIONS
+#-----------------------------
 
 get_preview_method() {
 	if [ -z "$method" ]; then
@@ -153,9 +165,9 @@ add_to_info_file() {
 	return 0
 }
 
-############################
-# DISPLAY IMAGES
-############################
+#-----------------------------
+# 3. DISPLAY IMAGES
+#-----------------------------
 
 display() {
 	[ -z "$1" ] && exit 1
@@ -215,9 +227,9 @@ display() {
 	esac
 }
 
-############################
-# THUMBNAILS GENERATION
-############################
+#-----------------------------
+# 4. THUMBNAILS GENERATION
+#-----------------------------
 
 gen_audio_preview() {
 	ffmpeg -hide_banner -i "$1" "$2" -y >/dev/null 2>&1 && \
@@ -308,9 +320,9 @@ gen_video_preview() {
 	print_err_msg "ffmpegthumbnailer" "$?" "video"
 }
 
-############################
-# MAIN
-############################
+#-----------------------------
+# 4. MAIN
+#-----------------------------
 
 main() {
 	get_preview_method
