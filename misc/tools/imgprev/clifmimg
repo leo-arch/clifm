@@ -1,7 +1,10 @@
 #!/bin/sh
 
-# Based on https://github.com/cirala/vifmimg, licensed under GPL-3.0
-# All changes are licensed under GPL-2.0+
+# clifmimg
+# Version: 1.2
+
+# Based on https://github.com/cirala/vifmimg, licensed GPL-3.0
+# All changes are licensed GPL-2.0+
 # Authors: cirala, L. Abramovich
 
 ######################
@@ -9,16 +12,20 @@
 ######################
 #
 # Convert (if necessary) and generate previews (as thumbnails) for files.
-# Thumbnails are cached (in $CACHE_DIR) using file hashes as names.
+# Thumbnails are cached (in $CACHE_DIR) using file name hashes as names.
 #
 # The first parameter is the file type to be previewed (supported types:
 # image, gif, video, epub, mobi, pdf, svg, doc, djvu, audio, font, postscript)
+#
 # The second parameter is the file name to be previewed.
+#
+# The third parameter (optional) is the file URI for the file to be previewed.
+# If unset, the second parameter (the unenconded file name) is used instead.
 #
 # Each time a thumbnail is generated, a line is added to $THUMBINFO_FILE with
 # this format: THUMB@PATH, where THUMB is the name of the thumbnail (an MD5 hash
-# of the original file followed by a file extension, either jpg or png), and
-# PATH is the absolute path to the original file.
+# of PATH followed by a file extension, either jpg or png), and PATH is the
+# absolute canonical URI for the original file.
 
 ######################
 # USAGE
@@ -42,7 +49,7 @@
 ######################
 #
 # ueberzug/kitty terminal (optional)
-# md5sum/md5 (generate file hashes)
+# md5sum/md5 (generate file name hashes)
 #
 # The following applications are used to generate thumbnails:
 #
@@ -57,12 +64,13 @@
 # gs (Postscript files - provided by the ghostscript package)
 # magick (GIF, SVG files, and legacy image formats (bmp, pcx, etc.) - provided by the imagemagick package)
 #
-# Note: The exact package names provinding these programs vary depending
+# Note: The exact package names providing these programs vary depending
 # on your OS/distribution, but ususally they have the same name as the program.
 
 ############################
-# IMAGE PREVIEW METHOD
+# DEFAULT OPTIONS
 ############################
+
 #
 # Set the preview image method.
 # Available methods: sixel, ueberzug, kitty, ansi (text mode)
@@ -78,10 +86,9 @@ ansi_method="chafa"
 
 # To generate sixel images we use chafa(1).
 
-########################
-
 type="$1"
 file="$2"
+file_URI="${3:-$file}"
 
 CACHE_DIR="$CLIFM_THUMBNAILS_DIR"
 [ -z "$CACHE_DIR" ] && CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/clifm/thumbnails"
@@ -94,6 +101,12 @@ CACHEDIRTAG_HEADER="Signature: 8a477f597d28d172789f06886806bc55
 
 THUMBINFO_FILE="$CACHE_DIR/${CLIFM_THUMBINFO_FILE:-thumbnails.info}"
 
+DEFAULT_SIZE="1920x1080"
+THUMB_FORMAT="jpg"
+
+############################
+# SOME AUXILIARY FUNCTIONS
+############################
 
 get_preview_method() {
 	if [ -z "$method" ]; then
@@ -102,15 +115,14 @@ get_preview_method() {
 	fi
 }
 
-# Use hashes instead of file names for cached files to generate unique file names
 hash_file() {
 	! [ -d "$CACHE_DIR" ] && mkdir -p "$CACHE_DIR"
 	! [ -f "$CACHEDIRTAG_FILE" ] && echo "$CACHEDIRTAG_HEADER" > "$CACHEDIRTAG_FILE"
 	if type md5sum > /dev/null 2>&1; then
-		tmp="$(md5sum "$1")"
+		tmp="$(printf "%s" "$1" | md5sum)"
 		PCACHE="$CACHE_DIR/${tmp%% *}"
 	elif type md5 > /dev/null 2>&1; then
-		PCACHE="$CACHE_DIR/$(md5 -q "$1")"
+		PCACHE="$CACHE_DIR/$(md5 -q -s "$1")"
 	else
 		printf "clifm: No hashing application found.\nEither md5sum or md5 \
 is required.\n" >&2
@@ -127,15 +139,23 @@ print_err_msg() {
 				echo "${1}: Command not found (required to generate previews for '${3}' files)"
 			fi
 			;;
-		*) echo "${1}: Error generating preview (code: ${2})" ;;
+		*)
+			echo "${1}: Error generating preview (code: ${2})"
+			# The thumbnail exists, but cannot be displayed. Possibly truncated. Regenerate it.
+			[ -f "${PCACHE}.$THUMB_FORMAT" ] && rm -f -- "${PCACHE}.$THUMB_FORMAT" > /dev/null 2>&1
+		;;
 	esac
 	return 1
 }
 
 add_to_info_file() {
-	echo "${2##*/}@$1" >> "$THUMBINFO_FILE"
+	echo "${1##*/}@$file_URI" >> "$THUMBINFO_FILE"
 	return 0
 }
+
+############################
+# DISPLAY IMAGES
+############################
 
 display() {
 	[ -z "$1" ] && exit 1
@@ -195,31 +215,35 @@ display() {
 	esac
 }
 
+############################
+# THUMBNAILS GENERATION
+############################
+
 gen_audio_preview() {
 	ffmpeg -hide_banner -i "$1" "$2" -y >/dev/null 2>&1 && \
-		add_to_info_file "$1" "$2" && return 0
+		add_to_info_file "$2" && return 0
 	print_err_msg "ffmpeg" "$?" "audio"
 }
 
 #gen_comic_preview() {
-#	comicthumb "$1" "$2" 1024 >/dev/null 2>&1 && \
-#		add_to_info_file "1" "${2}.$3" && return 0
+#	comicthumb "$1" "$2" "${DEFAULT_SIZE%%x*}" >/dev/null 2>&1 && \
+#		add_to_info_file "${2}.$3" && return 0
 #	print_err_msg "comicthumb" "$?" "comic"
 #}
 
 gen_djvu_preview() {
 	ddjvu -format=tiff -quality=90 -page=1 "$1" "$2" >/dev/null 2>&1 && \
-		add_to_info_file "$1" "$2" && return 0
+		add_to_info_file "$2" && return 0
 	print_err_msg "ddjvu" "$?" "djvu"
 }
 
 gen_doc_preview() {
-	format="png"
+	format="$THUMB_FORMAT"
 	if libreoffice --headless --convert-to "$format" "$1" \
 	--outdir "$CACHE_DIR" >/dev/null 2>&1; then
 		f="${1##*/}"
 		mv "$CACHE_DIR/${f%.*}.$format" "${2}.$format" && \
-			add_to_info_file "$1" "${2}.$format" && return 0
+			add_to_info_file "${2}.$format" && return 0
 		print_err_msg "mv (libreoffice)" "$?" "doc"
 	else
 		print_err_msg "libreoffice" "$?" "doc"
@@ -227,62 +251,66 @@ gen_doc_preview() {
 }
 
 gen_epub_preview() {
-	gnome-epub-thumbnailer -s 1024 "$1" "$2" >/dev/null 2>&1 && \
-		add_to_info_file "$1" "$2" && return 0
+	gnome-epub-thumbnailer -s "${DEFAULT_SIZE%%x*}" "$1" "$2" >/dev/null 2>&1 && \
+		add_to_info_file "$2" && return 0
 	print_err_msg "gnome-epub-thumbnailer" "$?" "epub"
 #	epub-thumbnailer "$1" "$2" 1024 >/dev/null 2>&1 && \
-#		add_to_info_file "$1" "$2" && return 0
+#		add_to_info_file "$2" && return 0
 #	print_err_msg "epub-thumbnailer" "$?" "epub"
 }
 
 gen_font_preview() {
 	fontpreview -i "$1" -o "$2" >/dev/null 2>&1 && \
-		add_to_info_file "$1" "$2" && return 0
+		add_to_info_file "$2" && return 0
 	print_err_msg "fontpreview" "$?" "font"
 }
 
 gen_gif_preview() {
-	magick "$1"[0] -resize 640x480\> "$2" >/dev/null 2>&1 && \
-		add_to_info_file "$1" "$2" && return 0
+	magick "$1"[0] -resize "$DEFAULT_SIZE"\> "$2" >/dev/null 2>&1 && \
+		add_to_info_file "$2" && return 0
 	print_err_msg "magick" "$?" "gif"
 }
 
 gen_img_convert_preview() {
-	magick "$1"[0] "$2" >/dev/null 2>&1 && \
-		add_to_info_file "$1" "$2" && return 0
+	magick "$1"[0] -resize "$DEFAULT_SIZE"\> "$2" >/dev/null 2>&1 && \
+		add_to_info_file "$2" && return 0
 	print_err_msg "magick" "$?" "image"
 }
 
 gen_mobi_preview() {
-	gnome-mobi-thumbnailer -s 1024 "$1" "$2" >/dev/null 2>&1 && \
-		add_to_info_file "$1" "$2" && return 0
+	gnome-mobi-thumbnailer -s "${DEFAULT_SIZE%%x*}" "$1" "$2" >/dev/null 2>&1 && \
+		add_to_info_file "$2" && return 0
 	print_err_msg "gnome-mobi-thumbnailer" "$?" "mobi"
 }
 
 gen_pdf_preview() {
-	pdftoppm -jpeg -f 1 -singlefile -scale-to 1920 "$1" "$2" >/dev/null 2>&1 && \
-		add_to_info_file "$1" "${2}.jpg" && return 0
+	pdftoppm -jpeg -f 1 -singlefile -scale-to "${DEFAULT_SIZE%%x*}" "$1" "$2" >/dev/null 2>&1 && \
+		add_to_info_file "${2}.jpg" && return 0
 	print_err_msg "pdftoppm" "$?" "pdf"
 }
 
 gen_postscript_preview() {
 	gs -sDEVICE=jpeg -dJPEGQ=100 -dNOPAUSE -dBATCH -dSAFER -r300 \
 		-sOutputFile="$2" "$1" >/dev/null 2>&1 && \
-			add_to_info_file "$1" "$2" && return 0
+			add_to_info_file "$2" && return 0
 	print_err_msg "gs (ghostscript)" "$?" "postscript"
 }
 
 gen_svg_preview() {
-	magick -background none -size 1920x1080 "$1" "$2" >/dev/null 2>&1 && \
-		add_to_info_file "$1" "$2" && return 0
+	magick -background none -size "$DEFAULT_SIZE" "$1" "$2" >/dev/null 2>&1 && \
+		add_to_info_file "$2" && return 0
 	print_err_msg "magick" "$?" "svg"
 }
 
 gen_video_preview() {
-	ffmpegthumbnailer -i "$1" -o "$2" -s 0 -q 5 >/dev/null 2>&1 && \
-		add_to_info_file "$1" "$2" && return 0
+	ffmpegthumbnailer -i "$1" -o "$2" -s "${DEFAULT_SIZE%%x*}" -q 5 >/dev/null 2>&1 && \
+		add_to_info_file "$2" && return 0
 	print_err_msg "ffmpegthumbnailer" "$?" "video"
 }
+
+############################
+# MAIN
+############################
 
 main() {
 	get_preview_method
@@ -291,15 +319,15 @@ main() {
 		"image")
 			case "$file" in
 			*.bmp|*.BMP|*.ico|*.ICO|*.pcx|*.PCX|*.tga|*.TGA|*.exr|*.hdr|*.heic|*.pbm|*.pgm|*.pnm|*.ppm|*.xpm)
-				hash_file "$file"
-				if [ -f "${PCACHE}.jpg" ] || gen_img_convert_preview "$file" "${PCACHE}.jpg"; then
-					display "${PCACHE}.jpg"
+				hash_file "$file_URI"
+				if [ -f "${PCACHE}.$THUMB_FORMAT" ] || gen_img_convert_preview "$file" "${PCACHE}.$THUMB_FORMAT"; then
+					display "${PCACHE}.$THUMB_FORMAT"
 				fi
 			;;
 			*.fit)
-				hash_file "$file"
-				if [ -f "${PCACHE}.jpg" ] || gen_gif_preview "$file" "${PCACHE}.jpg"; then
-					display "${PCACHE}.jpg"
+				hash_file "$file_URI"
+				if [ -f "${PCACHE}.$THUMB_FORMAT" ] || gen_gif_preview "$file" "${PCACHE}.$THUMB_FORMAT"; then
+					display "${PCACHE}.$THUMB_FORMAT"
 				fi
 			;;
 			*)
@@ -308,75 +336,75 @@ main() {
 			esac
 		;;
 		"gif")
-			hash_file "$file"
-			if [ -f "${PCACHE}.jpg" ] || gen_gif_preview "$file" "${PCACHE}.jpg"; then
-				display "${PCACHE}.jpg"
+			hash_file "$file_URI"
+			if [ -f "${PCACHE}.$THUMB_FORMAT" ] || gen_gif_preview "$file" "${PCACHE}.$THUMB_FORMAT"; then
+				display "${PCACHE}.$THUMB_FORMAT"
 			fi
 		;;
 		"video")
-			hash_file "$file"
-			if [ -f "${PCACHE}.jpg" ] || gen_video_preview "$file" "${PCACHE}.jpg"; then
-				display "${PCACHE}.jpg"
+			hash_file "$file_URI"
+			if [ -f "${PCACHE}.$THUMB_FORMAT" ] || gen_video_preview "$file" "${PCACHE}.$THUMB_FORMAT"; then
+				display "${PCACHE}.$THUMB_FORMAT"
 			fi
 		;;
 		"epub")
-			hash_file "$file"
-			if [ -f "${PCACHE}.jpg" ] || gen_epub_preview "$file" "${PCACHE}.jpg"; then
-				display "${PCACHE}.jpg"
+			hash_file "$file_URI"
+			if [ -f "${PCACHE}.$THUMB_FORMAT" ] || gen_epub_preview "$file" "${PCACHE}.$THUMB_FORMAT"; then
+				display "${PCACHE}.$THUMB_FORMAT"
 			fi
 		;;
 		"mobi")
-			hash_file "$file"
-			if [ -f "${PCACHE}.jpg" ] || gen_mobi_preview "$file" "${PCACHE}.jpg"; then
-				display "${PCACHE}.jpg"
+			hash_file "$file_URI"
+			if [ -f "${PCACHE}.$THUMB_FORMAT" ] || gen_mobi_preview "$file" "${PCACHE}.$THUMB_FORMAT"; then
+				display "${PCACHE}.$THUMB_FORMAT"
 			fi
 		;;
 		"pdf")
-			hash_file "$file"
-			if [ -f "${PCACHE}.jpg" ] || gen_pdf_preview "$file" "$PCACHE"; then
-				display "${PCACHE}.jpg"
+			hash_file "$file_URI"
+			if [ -f "${PCACHE}.$THUMB_FORMAT" ] || gen_pdf_preview "$file" "$PCACHE"; then
+				display "${PCACHE}.$THUMB_FORMAT"
 			fi
 		;;
 		"djvu")
-			hash_file "$file"
-			if [ -f "${PCACHE}.jpg" ] || gen_djvu_preview "$file" "${PCACHE}.jpg"; then
-				display "${PCACHE}.jpg"
+			hash_file "$file_URI"
+			if [ -f "${PCACHE}.$THUMB_FORMAT" ] || gen_djvu_preview "$file" "${PCACHE}.$THUMB_FORMAT"; then
+				display "${PCACHE}.$THUMB_FORMAT"
 			fi
 		;;
 		"audio")
-			hash_file "$file"
-			if [ -f "${PCACHE}.jpg" ] || gen_audio_preview "$file" "${PCACHE}.jpg"; then
-				display "${PCACHE}.jpg"
+			hash_file "$file_URI"
+			if [ -f "${PCACHE}.$THUMB_FORMAT" ] || gen_audio_preview "$file" "${PCACHE}.$THUMB_FORMAT"; then
+				display "${PCACHE}.$THUMB_FORMAT"
 			fi
 		;;
 		"font")
-			hash_file "$file"
-			if [ -f "${PCACHE}.jpg" ] || gen_font_preview "$file" "${PCACHE}.jpg"; then
-				display "${PCACHE}.jpg"
+			hash_file "$file_URI"
+			if [ -f "${PCACHE}.$THUMB_FORMAT" ] || gen_font_preview "$file" "${PCACHE}.$THUMB_FORMAT"; then
+				display "${PCACHE}.$THUMB_FORMAT"
 			fi
 		;;
 		"doc")
-			hash_file "$file"
-			if [ -f "${PCACHE}.png" ] || gen_doc_preview "$file" "$PCACHE"; then
-				display "${PCACHE}.png"
+			hash_file "$file_URI"
+			if [ -f "${PCACHE}.$THUMB_FORMAT" ] || gen_doc_preview "$file" "$PCACHE"; then
+				display "${PCACHE}.$THUMB_FORMAT"
 			fi
 		;;
 		"postscript")
-			hash_file "$file"
-			if [ -f "${PCACHE}.jpg" ] || gen_postscript_preview "$file" "${PCACHE}.jpg"; then
-				display "${PCACHE}.jpg"
+			hash_file "$file_URI"
+			if [ -f "${PCACHE}.$THUMB_FORMAT" ] || gen_postscript_preview "$file" "${PCACHE}.$THUMB_FORMAT"; then
+				display "${PCACHE}.$THUMB_FORMAT"
 			fi
 		;;
 		"svg")
-			hash_file "$file"
-			if [ -f "${PCACHE}.png" ] || gen_svg_preview "$file" "${PCACHE}.png"; then
-				display "${PCACHE}.png"
+			hash_file "$file_URI"
+			if [ -f "${PCACHE}.$THUMB_FORMAT" ] || gen_svg_preview "$file" "${PCACHE}.$THUMB_FORMAT"; then
+				display "${PCACHE}.$THUMB_FORMAT"
 			fi
 		;;
 #		"comic")
-#			hash_file "$file"
-#			if [ -f "${PCACHE}.png" ] || gen_comic_preview "$file" "$PCACHE" "png"; then
-#				display "${PCACHE}.png"
+#			hash_file "$file_URI"
+#			if [ -f "${PCACHE}.$THUMB_FORMAT" ] || gen_comic_preview "$file" "$PCACHE" "$THUMB_FORMAT"; then
+#				display "${PCACHE}.$THUMB_FORMAT"
 #			fi
 #		;;
         *)
