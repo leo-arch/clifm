@@ -766,17 +766,27 @@ open_preview_file(char *file, const int mode)
 		exit(EXIT_FAILURE);
 	}
 
+	static char buf[PATH_MAX + 1];
 	char *fpath = file;
 	int url = 1;
 	const int preview = mode == PREVIEW_FILE ? 1 : 0;
 
 	struct stat attr;
 	if (IS_FILE_URI(fpath)) {
-		fpath = file + 7;
+		if (strchr(file + 7, '%')) {
+			char *ptr = url_decode(file + 7);
+			xstrsncpy(buf, ptr ? ptr : file, sizeof(buf));
+			free(ptr);
+			fpath = buf;
+		} else {
+			fpath = file + 7;
+		}
+
 		if (stat(fpath, &attr) == -1) {
 			xerror("%s: '%s': %s\n", PROGRAM_NAME, file, strerror(errno));
 			exit(errno);
 		}
+
 		url = 0;
 		goto RUN;
 	}
