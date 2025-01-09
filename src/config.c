@@ -1088,7 +1088,7 @@ create_preview_file(void)
 ;^audio/.*=~/.config/clifm/clifmimg audio %%f %%u;\n\
 ;^application/postscript$=~/.config/clifm/clifmimg postscript %%f %%u;\n\
 ;^font/.*|^application/(font.*|.*opentype)=~/.config/clifm/clifmimg font %%f %%u;\n\
-;N:.*\.(cbz|cbr|cbt)$=~/.config/clifm/clifmimg comic %%f %%u;\n\
+;N:.*\\.(cbz|cbr|cbt)$=~/.config/clifm/clifmimg comic %%f %%u;\n\
 \n\
 # Directories\n\
 inode/directory=exa -a --tree --level=1;lsd -A --tree --depth=1 --color=always;tree -a -L 1;%s\n\
