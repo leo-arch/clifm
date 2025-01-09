@@ -43,6 +43,7 @@
 ^audio/.*=~/.config/clifm/clifmimg audio %f %u;
 ^application/postscript$=~/.config/clifm/clifmimg postscript %f %u;
 ^font/.*|^application/(font.*|.*opentype)=~/.config/clifm/clifmimg font %f %u;
+N:.*\.(cbz|cbr|cbt)$=~/.config/clifm/clifmimg comic %f %u;
 
 # Directories
 ...
