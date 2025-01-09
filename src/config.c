@@ -1074,6 +1074,21 @@ create_preview_file(void)
 # Uncomment and edit this line to use Ranger's scope script:\n\
 #.*=~/.config/ranger/scope.sh %%f 120 80 /tmp/clifm/ True\n\
 \n\
+# Uncomment to enable image previews for the corresponding file types:\n\
+^application/.*(officedocument|msword|ms-excel|ms-powerpoint|opendocument).*=~/.config/clifm/clifmimg doc %%f %%u;\n\
+^text/rtf$=~/.config/clifm/clifmimg doc %%f %%u;\n\
+^application/epub\\+zip$=~/.config/clifm/clifmimg epub %%f %%u;\n\
+^application/x-mobipocket-ebook$=~/.config/clifm/clifmimg mobi %%f %%u;\n\
+^application/pdf$=~/.config/clifm/clifmimg pdf %%f %%u;\n\
+^image/vnd.djvu=~/.config/clifm/clifmimg djvu %%f %%u;\n\
+^image/svg\\+xml$=~/.config/clifm/clifmimg svg %%f %%u;\n\
+^image/gif$=~/.config/clifm/clifmimg gif %%f %%u;\n\
+^image/.*=~/.config/clifm/clifmimg image %%f %%u;\n\
+^video/.*=~/.config/clifm/clifmimg video %%f %%u;\n\
+^audio/.*=~/.config/clifm/clifmimg audio %%f %%u;\n\
+^application/postscript$=~/.config/clifm/clifmimg postscript %%f %%u;\n\
+^font/.*|^application/(font.*|.*opentype)=~/.config/clifm/clifmimg font %%f %%u;\n\
+\n\
 # Directories\n\
 inode/directory=exa -a --tree --level=1;lsd -A --tree --depth=1 --color=always;tree -a -L 1;%s\n\
 \n\
