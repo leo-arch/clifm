@@ -121,7 +121,7 @@ generates a thumbnail of `file.docx` using the method named `doc`.
 
 The first parameter (thumbnailing method) can be any of the following: `image`, `video`, `audio`, `gif`,  `svg`, `epub`, `mobi`, `pdf`, `djvu`, `doc`, `postscript`, and `font`.
 
-Every time a thumbnail is generated, `clifmimg` adds a new entry to the thumbnails database (`thumbnails.info` in the thumbnails directory<sup>1</sup>). Each entry has this form: **THUMB@PATH**, where **THUMB** is the name of the thumbnail file (an MD5 hash of **PATH** followed by a file extension, either `png` or `jpg`), and **PATH** the file URI for the absolute path to the original file. This database is read by the [`view purge`](https://github.com/leo-arch/clifm/wiki/Introduction#view) command (available since 1.22.12) to keep the thumbnails directory in a clean state.<sup>3</sup>
+Every time a thumbnail is generated, `clifmimg` adds a new entry to the thumbnails database (`.thumbs.info` in the thumbnails directory<sup>1</sup>). Each entry has this form: **THUMB@PATH**, where **THUMB** is the name of the thumbnail file (an MD5 hash of **PATH** followed by a file extension, either `png` or `jpg`), and **PATH** the file URI for the absolute path to the original file. This database is read by the [`view purge`](https://github.com/leo-arch/clifm/wiki/Introduction#view) command (available since 1.22.12) to keep the thumbnails directory in a clean state.<sup>3</sup>
 
 <sup>1</sup> By default this directory is `$XDG_CACHE_HOME/clifm/thumbnails` (which usually expands to `~/.cache/clifm/thumbnails`). Note that previous versions of this scripts used `$XDG_CACHE_HOME/clifm/previews` instead.
 

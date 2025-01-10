@@ -114,7 +114,7 @@ CACHEDIRTAG_HEADER="Signature: 8a477f597d28d172789f06886806bc55
 
 # This file contains information about generated thumbnails: for the time being,
 # only the path to the original file (as a file URI).
-THUMBINFO_FILE="$CACHE_DIR/${CLIFM_THUMBINFO_FILE:-thumbnails.info}"
+THUMBINFO_FILE="$CACHE_DIR/${CLIFM_THUMBINFO_FILE:-.thumbs.info}"
 
 #-----------------------------
 # 2. SOME AUXILIARY FUNCTIONS

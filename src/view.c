@@ -102,7 +102,7 @@ remove_empty_thumbnails(void)
 }
 
 /* Remove dangling thumbnails from the thumbnails directory by checking the
- * $XDG_CACHE_HOME/clifm/thumbnails/thumbnails.info file.
+ * $XDG_CACHE_HOME/clifm/thumbnails/.thumbs.info file.
  *
  * The info file is created by the 'clifmimg' script: every time a new
  * thumbnail is generated, a new entry is added to this file.

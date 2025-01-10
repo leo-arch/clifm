@@ -671,7 +671,7 @@ alt-down:preview-page-down --inline-info --layout=reverse-list \
  * where THUMB_FILE is the name of the thumbnail file (MD5 hash of FILE_URI),
  * and FILE_URI is the file URI for the absolute path to the original file name.
  * This file is located in $XDG_CACHE_HOME/clifm/thumbnails */
-#define THUMBNAILS_INFO_FILE "thumbnails.info"
+#define THUMBNAILS_INFO_FILE ".thumbs.info"
 
 /* Should we add __APPLE__ here too? */
 #if defined(__HAIKU__)
