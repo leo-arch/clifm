@@ -1022,6 +1022,8 @@ plugin1:\\C-y\n\n\
 	return FUNC_SUCCESS;
 }
 
+/* Create the preview.clifm file. If possible, it is imported from the
+ * data directory. */
 static int
 create_preview_file(void)
 {

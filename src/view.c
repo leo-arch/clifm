@@ -37,6 +37,10 @@ typedef char *rl_cpvfunc_t;
 # include <readline/readline.h>
 #endif /* __OpenBSD__ */
 
+#if defined(MAC_OS_X_RENAMEAT_SYS_STDIO_H)
+# include <sys/stdio.h> /* renameat(2) */
+#endif /* MAC_OS_X_RENAMEAT_SYS_STDIO_H */
+
 #include "aux.h" // open_f functions, is_cmd_in_path, construct_human_size
 #include "file_operations.h" // open_file
 #include "init.h" // get_sel_files
@@ -92,7 +96,7 @@ remove_empty_thumbnails(void)
 		if (lstat(buf, &a) == -1 || !S_ISREG(a.st_mode))
 			continue;
 
-		if (a.st_size == 0 && unlink(buf) != -1)
+		if (a.st_size == 0 && unlinkat(XAT_FDCWD, buf, 0) != -1)
 			removed++;
 	}
 
@@ -157,7 +161,7 @@ purge_thumbnails_cache(void)
 	if (!tmp_fp) {
 		xerror(_("view: Cannot open temporary file '%s': %s\n"),
 			tmp_file, strerror(errno));
-		unlink(tmp_file);
+		unlinkat(tmp_fd, tmp_file, 0);
 		return FUNC_FAILURE;
 	}
 
@@ -165,8 +169,8 @@ purge_thumbnails_cache(void)
 	FILE *fp = open_fread(thumb_file, &fd);
 	if (!fp) {
 		xerror(_("view: Cannot open '%s': %s\n"), thumb_file, strerror(errno));
+		unlinkat(tmp_fd, tmp_file, 0);
 		fclose(tmp_fp);
-		unlink(tmp_file);
 		return FUNC_FAILURE;
 	}
 
@@ -216,7 +220,7 @@ purge_thumbnails_cache(void)
 		 * remove this entry and the corresponding thumbnail file. */
 
 		printf(_("view: '%s': Removing dangling thumbnail... "), line);
-		if (unlink(tfile) == -1) {
+		if (unlinkat(XAT_FDCWD, tfile, 0) == -1) {
 			printf("%s\n", strerror(errno));
 			errors++;
 		} else {
@@ -227,12 +231,11 @@ purge_thumbnails_cache(void)
 		}
 	}
 
+	renameat(tmp_fd, tmp_file, fd, thumb_file);
+
 	fclose(fp);
 	fclose(tmp_fp);
 	free(line);
-
-	rename(tmp_file, thumb_file);
-	unlink(tmp_file);
 
 	if (rem_files > 0) {
 		const char *human = construct_human_size(size_sum);
