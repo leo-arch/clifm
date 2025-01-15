@@ -2987,9 +2987,10 @@ parse_input_str(char *str)
 
 		size_t slen = strlen(substr[i]);
 		if (slen > FILE_URI_PREFIX_LEN && IS_FILE_URI(substr[i])) {
-			char tmp[PATH_MAX + 1];
-			xstrsncpy(tmp, substr[i], sizeof(tmp));
-			xstrsncpy(substr[i], tmp + FILE_URI_PREFIX_LEN, slen + 1);
+			char *ptr = url_decode(substr[i] + FILE_URI_PREFIX_LEN);
+			if (ptr && *ptr)
+				xstrsncpy(substr[i], ptr, slen + 1);
+			free(ptr);
 		}
 
 			/* ###############################
