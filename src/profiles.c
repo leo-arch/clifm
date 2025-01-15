@@ -525,7 +525,7 @@ rename_profile(char **args)
 		return errno;
 	}
 
-	int fd = dirfd(dir);
+	const int fd = dirfd(dir);
 	if (fd == -1) {
 		xerror("pf: '%s': %s\n", src_pf_name, strerror(errno));
 		closedir(dir);

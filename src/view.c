@@ -105,6 +105,81 @@ remove_empty_thumbnails(void)
 	return removed;
 }
 
+static off_t
+remove_dangling_thumb(const char *basename, const char *abs_path,
+	const struct stat *attr)
+{
+	off_t size_sum = 0;
+
+	printf(_("view: '%s': Removing dangling thumbnail... "), basename);
+	if (unlinkat(XAT_FDCWD, abs_path, 0) == -1) {
+		printf("%s\n", strerror(errno));
+		return (off_t)-1;
+	} else {
+		puts("OK");
+		size_sum += conf.apparent_size == 1
+			? attr->st_size : attr->st_blocks * S_BLKSIZE;
+	}
+
+	return size_sum;
+}
+
+static size_t
+remove_thumbs_not_in_db(char **thumbs, off_t *size_sum, int *errors)
+{
+	char **t = thumbs;
+	size_t rem = 0;
+
+	if (!t)
+		return rem;
+
+	DIR *dir = opendir(thumbnails_dir);
+	if (!dir)
+		return rem;
+
+	char tmp[PATH_MAX + 1];
+	struct dirent *ent;
+	size_t i = 0;
+
+	while ((ent = readdir(dir)) != NULL) {
+		if (SELFORPARENT(ent->d_name)
+		|| strcmp(ent->d_name, "CACHEDIR.TAG") == 0
+		|| strcmp(ent->d_name, ".thumbs.info") == 0)
+			continue;
+
+		int found = 0;
+		for (i = 0; t[i]; i++) {
+			if (*ent->d_name == *t[i] && strcmp(ent->d_name, t[i]) == 0) {
+				found = 1;
+				break;
+			}
+		}
+
+		if (found == 1)
+			continue;
+
+		snprintf(tmp, sizeof(tmp), "%s/%s", thumbnails_dir, ent->d_name);
+
+		struct stat a;
+		if (lstat(tmp, &a) == -1) {
+			xerror("view: '%s': %s\n", ent->d_name, strerror(errno));
+			continue;
+		}
+
+		const off_t ret = remove_dangling_thumb(ent->d_name, tmp, &a);
+		if (ret != (off_t)-1) {
+			rem++;
+			(*size_sum) += ret;
+		} else {
+			(*errors)++;
+		}
+	}
+
+	closedir(dir);
+
+	return rem;
+}
+
 /* Remove dangling thumbnails from the thumbnails directory by checking the
  * $XDG_CACHE_HOME/clifm/thumbnails/.thumbs.info file.
  *
@@ -117,8 +192,10 @@ remove_empty_thumbnails(void)
  *
  * If THUMB_FILE does not exist, the entry is removed from the info file.
  * If both THUMB_FILE and FILE_URI exist, the entry is preserved.
- * Finally, if FILE_URI does not exist, the current entry is removed and
- * THUMB_FILE gets deleted. */
+ * If FILE_URI does not exist, the current entry is removed and
+ * THUMB_FILE gets deleted.
+ * Finally, unregistered thumbnail files (not found in the database),
+ * get deteled as well. */
 static int
 purge_thumbnails_cache(void)
 {
@@ -179,6 +256,19 @@ purge_thumbnails_cache(void)
 	char tfile[PATH_MAX + 1]; /* Bigger than line is enough. This just avoids
 	a compiler warning. */
 
+	/* Let's keep a record of all thumbnail files in the database.
+	 * We use this list to found unregistered thumbnails (not in
+	 * the database). */
+	char buf[NAME_MAX + 1];
+	size_t thumbs_in_db_c = 0;
+	while (fgets(buf, 2, fp) != NULL)
+		thumbs_in_db_c++;
+
+	fseek(fp, 0L, SEEK_SET);
+
+	char **thumbs_in_db = xnmalloc(thumbs_in_db_c + 1, sizeof(char *));
+	thumbs_in_db_c = 0;
+
 	char *line = (char *)NULL;
 	size_t line_size = 0;
 
@@ -212,22 +302,20 @@ purge_thumbnails_cache(void)
 
 		if (retval != -1) {
 			/* Both the thumbnail file and the original file exist. */
+			thumbs_in_db[thumbs_in_db_c] = savestring(line, strlen(line));
+			thumbs_in_db_c++;
 			fprintf(tmp_fp, "%s@file://%s\n", line, p);
 			continue;
 		}
 
 		/* The thumbnail file exist, but the original file does not:
 		 * remove this entry and the corresponding thumbnail file. */
-
-		printf(_("view: '%s': Removing dangling thumbnail... "), line);
-		if (unlinkat(XAT_FDCWD, tfile, 0) == -1) {
-			printf("%s\n", strerror(errno));
-			errors++;
-		} else {
-			puts(_("OK"));
+		const off_t ret = remove_dangling_thumb(line, tfile, &b);
+		if (ret != (off_t)-1) {
 			rem_files++;
-			size_sum += conf.apparent_size == 1
-				? b.st_size : b.st_blocks * S_BLKSIZE;
+			size_sum += ret;
+		} else {
+			errors++;
 		}
 	}
 
@@ -236,6 +324,13 @@ purge_thumbnails_cache(void)
 	fclose(fp);
 	fclose(tmp_fp);
 	free(line);
+
+	thumbs_in_db[thumbs_in_db_c] = (char *)NULL;
+	rem_files += remove_thumbs_not_in_db(thumbs_in_db, &size_sum, &errors);
+	size_t i;
+	for (i = 0; thumbs_in_db[i]; i++)
+		free(thumbs_in_db[i]);
+	free(thumbs_in_db);
 
 	if (rem_files > 0) {
 		const char *human = construct_human_size(size_sum);
