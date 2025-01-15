@@ -526,6 +526,11 @@ rename_profile(char **args)
 	}
 
 	int fd = dirfd(dir);
+	if (fd == -1) {
+		xerror("pf: '%s': %s\n", src_pf_name, strerror(errno));
+		closedir(dir);
+		return errno;
+	}
 
 	p = unescape_str(args[1], 0);
 	if (p) {

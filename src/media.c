@@ -325,6 +325,11 @@ mount_dev(const int n)
 		return FUNC_FAILURE;
 
 	int stdout_bk = dup(STDOUT_FILENO); /* Save original stdout */
+	if (stdout_bk == -1) {
+		unlinkat(fd, file, 0);
+		return FUNC_FAILURE;
+	}
+
 	dup2(fd, STDOUT_FILENO); /* Redirect stdout to the desired file */
 	close(fd);
 

@@ -2465,6 +2465,13 @@ list_dir_light(const int autocmd_ret)
 
 #ifdef POSIX_FADV_SEQUENTIAL
 	const int fd = dirfd(dir);
+	if (fd == -1) {
+		xerror(_("%s: Error getting file descriptor for the current "
+			"directory: %s\n"), PROGRAM_NAME, workspaces[cur_ws].path,
+			strerror(errno));
+		goto END;
+	}
+
 	posix_fadvise(fd, 0, 0, POSIX_FADV_SEQUENTIAL);
 #endif /* POSIX_FADV_SEQUENTIAL */
 
@@ -3254,6 +3261,12 @@ list_dir(void)
 	set_events_checker();
 
 	const int fd = dirfd(dir);
+	if (fd == -1) {
+		xerror(_("%s: Error getting file descriptor for the current "
+			"directory: %s\n"), PROGRAM_NAME, workspaces[cur_ws].path,
+			strerror(errno));
+		goto END;
+	}
 
 #ifdef POSIX_FADV_SEQUENTIAL
 	/* A hint to the kernel to optimize current dir for reading */
