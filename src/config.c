@@ -3182,7 +3182,7 @@ set_preview_max_size(char *val)
 	if (n < 0 || n > INT_MAX)
 		return;
 
-	/* Transform the given value into KiB. */
+	/* Transform the given value to KiB. */
 	switch (unit) {
 	case 'B': conf.preview_max_size = n <= 1024 ? 1 : (int)n / 1024; break;
 	case 'K': conf.preview_max_size = (int)n; break;
@@ -3198,7 +3198,7 @@ set_preview_max_size(char *val)
 	if (conf.preview_max_size < 0) {
 		err('w', PRINT_PROMPT, _("PreviewMaxSize: Value too large "
 			"(max %dGiB).\n"), INT_MAX / 1048576);
-		conf.preview_max_size = DEF_PREVIEW_MAX_SIZE;
+		conf.preview_max_size = INT_MAX; /* Max supported size (in KiB). */
 	}
 }
 
