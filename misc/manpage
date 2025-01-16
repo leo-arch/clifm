@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Jan 6, 2025" "clifm 1.22.12" "CLIFM Manual"
+.TH "CLIFM" "1" "Jan 16, 2025" "clifm 1.23" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -2839,6 +2839,9 @@ A comma separated list of colors used to print timetamps based on age
 .TP
 .B CLIFM_SIZE_SHADES
 Same as \fBCLIFM_DATE_SHADES\fR, but for file sizes
+.TP
+.B CLIFM_PREVIEW_MAX_SIZE
+If running with \fI\-\-preview\fR, or \fIPreviewMaxSize\fR is not set in the configuration file, no preview is generated for files larger that this value. The value must be specified in KiB: for example, 2048 is read as 2 MiB.
 .TP
 .B CLIFM_TEMPLATES_DIR
 A custom file templates directory
