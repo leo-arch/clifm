@@ -713,7 +713,8 @@ clear_fzf(void)
 	unsetenv("CLIFM_TERM_LINES");
 	unsetenv("CLIFM_THUMBNAILS_DIR");
 	unsetenv("CLIFM_THUMBINFO_FILE");
-	unsetenv("CLIFM_PREVIEW_MAX_SIZE");
+	if (conf.preview_max_size != UNSET)
+		unsetenv("CLIFM_PREVIEW_MAX_SIZE");
 	if (flags & ALT_PREVIEW_FILE)
 		unsetenv("CLIFM_ALT_PREVIEW_FILE");
 }
