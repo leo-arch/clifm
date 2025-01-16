@@ -444,7 +444,7 @@ dump_config(void)
 		? DUMP_CONFIG_INT : DUMP_CONFIG_BOOL);
 
 	n = DEF_PREVIEW_MAX_SIZE;
-	print_config_value("PreviewMaxSize", &conf.preview_max_size, &n,
+	print_config_value("PreviewMaxSize (in KiB)", &conf.preview_max_size, &n,
 		DUMP_CONFIG_INT);
 
 	n = DEF_PRINT_DIR_CMDS;
@@ -3184,7 +3184,7 @@ set_preview_max_size(char *val)
 
 	/* Transform the given value into KiB. */
 	switch (unit) {
-	case 'B': conf.preview_max_size = (int)n / 1024; break;
+	case 'B': conf.preview_max_size = n <= 1024 ? 1 : (int)n / 1024; break;
 	case 'K': conf.preview_max_size = (int)n; break;
 	case 'M': conf.preview_max_size = (int)n * 1024; break;
 	case 'G': conf.preview_max_size = (int)n * 1048576; break;

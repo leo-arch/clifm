@@ -274,7 +274,7 @@
 
 # Do not preview files larger than PreviewMaxSize.
 # Supported size units: K, M, G, T (e.g. 100M).
-# Maximum supported size: 2047G.
+# Supported size range: 1K-2047G.
 # Set to -1 (or empty) to disable this feature (no limit).
 ;PreviewMaxSize=
 
