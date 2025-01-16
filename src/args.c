@@ -665,7 +665,8 @@ get_home_sec_env(void)
 	return (pw->pw_dir);
 }
 
-/* Return 1 if the size of the file FILENAME is <= MAX_SIZE, or 0 otherwise. */
+/* Return 1 if the size of the file FILENAME is <= MAX_SIZE (in KiB),
+ * or 0 otherwise. */
 static int
 preview_this_file(const char *filename, const char *max_size)
 {
@@ -675,7 +676,8 @@ preview_this_file(const char *filename, const char *max_size)
 
 	if (s > 0 && s <= INT_MAX) {
 		struct stat a;
-		if (stat(filename, &a) != -1 && (a.st_size / 1024) > (off_t)s)
+		/* n >> 10 == n / 1024, i.e. n (which is in bytes) in KiB. */
+		if (stat(filename, &a) != -1 && (a.st_size >> 10) > (off_t)s)
 			return 0;
 	}
 
