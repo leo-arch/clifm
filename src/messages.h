@@ -435,6 +435,9 @@ available).\n\n\
 File previews are generated using a configuration file, which you can edit to\n\
 your liking running 'view edit' (or pressing F7).\n\n\
 Use the 'view' command to preview files in the current directory in full screen.\n\n\
+Prevent big files from generating a preview using the PreviewMaxSize option in\n\
+the configuration file. For example: 'PreviewMaxSize=100M' (supported size\n\
+units: K, M, G, T). By default, there is no limit.\n\n\
 To know how to enable image previews run 'help image-previews'."
 
 #define IMAGE_PREVIEWS "\x1b[1mENABLING IMAGE PREVIEWS\x1b[22m\n\
