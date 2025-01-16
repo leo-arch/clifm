@@ -443,6 +443,10 @@ dump_config(void)
 	print_config_value("Pager", &conf.pager, &n, conf.pager > 1
 		? DUMP_CONFIG_INT : DUMP_CONFIG_BOOL);
 
+	n = DEF_PREVIEW_MAX_SIZE;
+	print_config_value("PreviewMaxSize", &conf.preview_max_size, &n,
+		DUMP_CONFIG_INT);
+
 	n = DEF_PRINT_DIR_CMDS;
 	print_config_value("PrintDirCmds", &conf.print_dir_cmds, &n,
 		DUMP_CONFIG_BOOL);
@@ -1501,6 +1505,9 @@ check_config_files_integrity(void)
 static void
 set_thumbnails_dir(void)
 {
+	if (thumbnails_dir)
+		return;
+
 	const int se = (xargs.secure_env == 1 || xargs.secure_env_full == 1);
 
 	const char *p = se == 0 ? getenv("XDG_CACHE_HOME") : (char *)NULL;
@@ -1710,6 +1717,9 @@ create_main_config_file(char *file)
 # 'true', 'false', 'hidden' (enabled, but hidden; toggle it with Alt-p)\n\
 ;FzfPreview=%s\n\n"
 
+		"# Do not preview files larger than this value (-1 for unlimited).\n\
+;PreviewMaxSize=%d\n\n"
+
 	    ";WelcomeMessage=%s\n\
 ;WelcomeMessageStr=\"\"\n\n\
 # Print %s's logo screen at startup.\n\
@@ -1782,6 +1792,7 @@ create_main_config_file(char *file)
 		DEF_FUZZY_MATCH == 1 ? "true" : "false",
 		DEF_FUZZY_MATCH_ALGO,
 		DEF_FZF_PREVIEW == 1 ? "true" : "false",
+		DEF_PREVIEW_MAX_SIZE,
 		DEF_WELCOME_MESSAGE == 1 ? "true" : "false",
 		PROGRAM_NAME,
 		DEF_SPLASH_SCREEN == 1 ? "true" : "false",
@@ -3146,6 +3157,51 @@ set_rl_edit_mode(const char *val)
 		rl_emacs_editing_mode(1, 0);
 }
 
+static void
+set_preview_max_size(char *val)
+{
+	char *tmp;
+	if (!val || !*val || !(tmp = remove_quotes(val)))
+		return;
+
+	const size_t l = strlen(tmp);
+	if (l > 1 && tmp[l - 1] == '\n')
+		tmp[l - 1] = '\0';
+
+	char *u = tmp;
+	while (*u && IS_DIGIT(*u))
+		u++;
+
+	char unit = 'B'; /* If no unit is specified, we fallback to bytes. */
+	if (*u && u != tmp) {
+		unit = TOUPPER(*u);
+		*u = '\0';
+	}
+
+	const long n = strtol(tmp, NULL, 10);
+	if (n < 0 || n > INT_MAX)
+		return;
+
+	/* Transform the given value into KiB. */
+	switch (unit) {
+	case 'B': conf.preview_max_size = (int)n / 1024; break;
+	case 'K': conf.preview_max_size = (int)n; break;
+	case 'M': conf.preview_max_size = (int)n * 1024; break;
+	case 'G': conf.preview_max_size = (int)n * 1048576; break;
+	case 'T': conf.preview_max_size = (int)n * 1073741824; break;
+	default:
+		err('w', PRINT_PROMPT, _("PreviewMaxSize: '%c': Invalid unit.\n"),
+			unit);
+		return;
+	}
+
+	if (conf.preview_max_size < 0) {
+		err('w', PRINT_PROMPT, _("PreviewMaxSize: Value too large "
+			"(max %dGiB).\n"), INT_MAX / 1048576);
+		conf.preview_max_size = DEF_PREVIEW_MAX_SIZE;
+	}
+}
+
 /* Read the main configuration file and set options accordingly */
 static void
 read_config(void)
@@ -3450,6 +3506,10 @@ read_config(void)
 		else if (xargs.pager_view == UNSET && *line == 'P'
 		&& strncmp(line, "PagerView=", 10) == 0) {
 			set_pager_view_value(line + 10);
+		}
+
+		else if (*line == 'P' && strncmp(line, "PreviewMaxSize=", 15) == 0) {
+			set_preview_max_size(line + 15);
 		}
 
 		else if (*line == 'P' && strncmp(line, "PrintDirCmds=", 13) == 0) {

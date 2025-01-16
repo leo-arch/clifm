@@ -272,6 +272,12 @@
 # 'true', 'false', 'hidden' (enabled, but hidden; toggle with Alt-p).
 ;FzfPreview=true
 
+# Do not preview files larger than PreviewMaxSize.
+# Supported size units: K, M, G, T (e.g. 100M).
+# Maximum supported size: 2047G.
+# Set to -1 (or empty) to disable this feature (no limit).
+;PreviewMaxSize=
+
 # Enable auto-suggestions
 ;AutoSuggestions=true
 

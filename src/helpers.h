@@ -1187,6 +1187,7 @@ struct config_t {
 	int pager_once;
 	int pager_view;
 	int purge_jumpdb;
+	int preview_max_size;
 	int print_dir_cmds;
 	int print_selfiles;
 	int private_ws_settings;
@@ -1227,6 +1228,7 @@ struct config_t {
 #endif /* !_NO_TRASH */
 	int warning_prompt;
 	int welcome_message;
+	int pad3;
 };
 
 extern struct config_t conf;

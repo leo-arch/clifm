@@ -695,6 +695,11 @@ set_fzf_env_vars(const int height)
 		setenv("CLIFM_THUMBINFO_FILE", THUMBNAILS_INFO_FILE, 1);
 	}
 
+	if (conf.preview_max_size != UNSET) {
+		snprintf(p, sizeof(p), "%d", conf.preview_max_size);
+		setenv("CLIFM_PREVIEW_MAX_SIZE", p, 1);
+	}
+
 	if (flags & ALT_PREVIEW_FILE)
 		setenv_fzf_alt_preview_file();
 }
@@ -708,6 +713,7 @@ clear_fzf(void)
 	unsetenv("CLIFM_TERM_LINES");
 	unsetenv("CLIFM_THUMBNAILS_DIR");
 	unsetenv("CLIFM_THUMBINFO_FILE");
+	unsetenv("CLIFM_PREVIEW_MAX_SIZE");
 	if (flags & ALT_PREVIEW_FILE)
 		unsetenv("CLIFM_ALT_PREVIEW_FILE");
 }

@@ -244,6 +244,7 @@ init_conf_struct(void)
 	conf.pager = UNSET;
 	conf.pager_once = 0;
 	conf.pager_view = UNSET;
+	conf.preview_max_size = DEF_PREVIEW_MAX_SIZE;
 	conf.print_dir_cmds = DEF_PRINT_DIR_CMDS;
 	conf.print_selfiles = UNSET;
 	conf.private_ws_settings = DEF_PRIVATE_WS_SETTINGS;

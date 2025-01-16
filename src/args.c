@@ -665,11 +665,37 @@ get_home_sec_env(void)
 	return (pw->pw_dir);
 }
 
-/* Opener function: open FILENAME and exit */
+/* Return 1 if the size of the file FILENAME is <= MAX_SIZE, or 0 otherwise. */
+static int
+preview_this_file(const char *filename, const char *max_size)
+{
+	const long s = strtol(max_size, NULL, 10);
+	if (s == 0)
+		return 0;
+
+	if (s > 0 && s <= INT_MAX) {
+		struct stat a;
+		if (stat(filename, &a) != -1 && (a.st_size / 1024) > (off_t)s)
+			return 0;
+	}
+
+	return 1;
+}
+
+/* Opener/previewer function: open/preview FILENAME and exit. */
 __attribute__ ((noreturn))
 static void
 open_reg_exit(char *filename, const int url, const int preview)
 {
+	char *max_size =
+		(preview == 1 && url == 0 && xargs.secure_env != 1
+		&& xargs.secure_env_full != 1)
+			? getenv("CLIFM_PREVIEW_MAX_SIZE") : NULL;
+
+	if (max_size && *max_size && is_number(max_size)
+	&& preview_this_file(filename, max_size) == 0)
+		exit(EXIT_SUCCESS);
+
 	char *homedir = (xargs.secure_env == 1 || xargs.secure_env_full == 1)
 		? get_home_sec_env() : getenv("HOME");
 	if (!homedir) {
@@ -805,7 +831,7 @@ RUN:
 	if (preview == 1)
 		clear_term_img();
 
-	open_reg_exit(fpath, url, preview);
+	open_reg_exit(fpath, url, preview); /* noreturn */
 }
 #endif /* !_NO_LIRA */
 
