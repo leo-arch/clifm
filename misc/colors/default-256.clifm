@@ -250,7 +250,7 @@ ExtColors="3gp=VIDEO:asf=VIDEO:avi=VIDEO:cgm=VIDEO:dl=VIDEO:emf=VIDEO:flc=VIDEO:
 
 # MARKUP FILES
 define MARKUP=@85
-ExtColors="css=MARKUP:htm=MARKUP:html=MARKUP:ltx=MARKUP:markdown=MARKUP:md=MARKUP:mdown=MARKUP:opf=MARKUP:rss=MARKUP:shtml=MARKUP:tex=MARKUP:xbel=MARKUP:xhtml=MARKUP:xml=MARKUP:"
+ExtColors="css=MARKUP:htm=MARKUP:html=MARKUP:ltx=MARKUP:markdown=MARKUP:md=MARKUP:mdown=MARKUP:opf=MARKUP:rss=MARKUP:sass=MARKUP:scss=MARKUP:shtml=MARKUP:tex=MARKUP:xbel=MARKUP:xhtml=MARKUP:xml=MARKUP:"
 
 # TEMPORARY FILES
 define TEMP=@247

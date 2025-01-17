@@ -237,7 +237,7 @@ ExtColors="ai=IMAGE:avif=IMAGE:bmp=IMAGE:exr=IMAGE:ff=IMAGE:gif=IMAGE:hdr=IMAGE:
 
 # MARKUP FILES
 define MARKUP=1;33 # Same as CODE
-ExtColors="css=MARKUP:htm=MARKUP:html=MARKUP:ltx=MARKUP:markdown=MARKUP:md=MARKUP:mdown=MARKUP:opf=MARKUP:rss=MARKUP:shtml=MARKUP:tex=MARKUP:xbel=MARKUP:xhtml=MARKUP:xml=MARKUP:"
+ExtColors="css=MARKUP:htm=MARKUP:html=MARKUP:ltx=MARKUP:markdown=MARKUP:md=MARKUP:mdown=MARKUP:opf=MARKUP:rss=MARKUP:sass=MARKUP:scss=MARKUP:shtml=MARKUP:tex=MARKUP:xbel=MARKUP:xhtml=MARKUP:xml=MARKUP:"
 
 # TEMPORARY FILES
 define TEMP=2;37 # Dimmed white
