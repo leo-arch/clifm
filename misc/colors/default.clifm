@@ -225,7 +225,7 @@ ExtColors="applescript=CODE:as=CODE:asa=CODE:awk=CODE:bash=CODE:c=CODE:c++=CODE:
 
 # DOCUMENTS
 define DOC=1 # Bold
-ExtColors="abw=DOC:doc=DOC:docx=DOC:fodg=DOC:fodp=DOC:fods=DOC:fodt=DOC:odg=DOC:odp=DOC:ods=DOC:odt=DOC:pps=DOC:ppt=DOC:pptx=DOC:rtf=DOC:sxi=DOC:sxw=DOC:txt=DOC:xlr=DOC:xls=DOC:xlsx=DOC:"
+ExtColors="abw=DOC:csv=DOC:doc=DOC:docx=DOC:fodg=DOC:fodp=DOC:fods=DOC:fodt=DOC:odg=DOC:odp=DOC:ods=DOC:odt=DOC:pps=DOC:ppt=DOC:pptx=DOC:rtf=DOC:sxi=DOC:sxw=DOC:txt=DOC:xlr=DOC:xls=DOC:xlsx=DOC:"
 
 # EBOOKS
 define EBOOK=1 # Bold
