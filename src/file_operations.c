@@ -693,7 +693,7 @@ is_valid_filename(char *name)
 			return 0;
 		}
 		/* Contains shell meta-characters */
-		if (strchr("*?:[]\"<>|(){}&'!\\;$", *s)) {
+		if (strchr("*?[]<>|(){}&=`^!\\;$", *s)) {
 			printf("%s: %s\n", name, unsafe_name_msgs[UNSAFE_META]);
 			return 0;
 		}
