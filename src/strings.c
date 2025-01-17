@@ -1016,6 +1016,13 @@ split_str(char *str, const int update_args)
 
 		case '\'': /* fallthrough */
 		case '"': {
+			if (str_len > 0 && *(str - 1) == '\\') {
+				buf = xnrealloc(buf, buf_len + 1, sizeof(char *));
+				buf[buf_len] = *str;
+				buf_len++;
+				break;
+			}
+
 			const int is_quoted = (keep_quotes == 1
 				|| (str_len > 0 && *(str - 1) == '\\'));
 			/* If the quote is escaped, keep it. */
