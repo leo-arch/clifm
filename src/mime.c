@@ -369,13 +369,10 @@ xmagic(const char *file, const int query_mime)
 	magic_load(cookie, NULL);
 
 	const char *mime = magic_file(cookie, file);
-	if (!mime) {
-		magic_close(cookie);
-		return (char *)NULL;
-	}
 
-	char *str = savestring(mime, strlen(mime));
+	char *str = mime ? savestring(mime, strlen(mime)) : (char *)NULL;
 	magic_close(cookie);
+
 	return str;
 }
 
