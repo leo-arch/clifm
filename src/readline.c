@@ -57,6 +57,7 @@ typedef char *rl_cpvfunc_t;
 #include "mime.h"
 #include "navigation.h"
 #include "readline.h"
+#include "sort.h" /* compare_strings() */
 #include "spawn.h"
 #ifndef _NO_SUGGESTIONS
 # include "suggestions.h"
@@ -71,7 +72,7 @@ typedef char *rl_cpvfunc_t;
  * as a C string: 4 bytes plus a trailing nul byte. */
 #define UTF8_MAX_LEN 5
 
-#define RL_VI_MODE    0
+#define RL_VI_MODE 0
 
 #define SUGGEST_ONLY             0
 #define RL_INSERT_CHAR           1
@@ -2377,6 +2378,10 @@ rl_mime_list(void)
 		{ free(t[0]); free(t); return (char **)NULL; }
 
 	t = xnrealloc(t, n + 1, sizeof(char *));
+
+	if (rl_sort_completion_matches == 1)
+		qsort(t, n, sizeof(*t), (QSFUNC *)compare_strings);
+
 	return t;
 }
 
