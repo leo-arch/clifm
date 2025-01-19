@@ -92,7 +92,7 @@ file_URI="${3:-$file}"
 # The maximum size for a thumbnail is, according to the Freedesktop specification
 # (https://specifications.freedesktop.org/thumbnail-spec/latest/creation.html),
 # 1024x1024. However, since we display thumbnails in a preview window, sometimes
-# using half of the screen, we need a bigger resolution.
+# using half of the screen, we need a higher resolution.
 DEFAULT_SIZE="1920x1080"
 
 # According to the Freedesktop specification, thumbnails should be in PNG format.
