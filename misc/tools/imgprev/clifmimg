@@ -192,7 +192,7 @@ display() {
 
 	case "$method" in
 		sixel)
-			chafa -f sixel -s "${C}x$((L - 1))" "$1" 2>/dev/null && return 0
+			chafa -f sixel --view-size "${C}x${L}" "$1" 2>/dev/null && return 0
 			print_err_msg "chafa" "$?" "sixel"
 #			img2sixel -w auto -h "$(((L - 1) * 16))" "$1"
 #			timg -ps -g "${C}x$((L - 1))" "$1"
