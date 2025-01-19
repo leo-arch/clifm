@@ -283,12 +283,6 @@ gen_gif_preview() {
 	print_err_msg "magick" "$?" "gif"
 }
 
-gen_img_convert_preview() {
-	magick "$1"[0] -resize "$DEFAULT_SIZE"\> "$2" >/dev/null 2>&1 && \
-		add_to_info_file "$2" && return 0
-	print_err_msg "magick" "$?" "image"
-}
-
 gen_mobi_preview() {
 	gnome-mobi-thumbnailer -s "${DEFAULT_SIZE%%x*}" "$1" "$2" >/dev/null 2>&1 && \
 		add_to_info_file "$2" && return 0
@@ -329,23 +323,7 @@ main() {
 
 	case "$type" in
 		"image")
-			case "$file" in
-			*.bmp|*.BMP|*.ico|*.ICO|*.pcx|*.PCX|*.tga|*.TGA|*.exr|*.hdr|*.heic|*.pbm|*.pgm|*.pnm|*.ppm|*.xpm)
-				hash_file "$file_URI"
-				if [ -f "${PCACHE}.$THUMB_FORMAT" ] || gen_img_convert_preview "$file" "${PCACHE}.$THUMB_FORMAT"; then
-					display "${PCACHE}.$THUMB_FORMAT"
-				fi
-			;;
-			*.fit)
-				hash_file "$file_URI"
-				if [ -f "${PCACHE}.$THUMB_FORMAT" ] || gen_gif_preview "$file" "${PCACHE}.$THUMB_FORMAT"; then
-					display "${PCACHE}.$THUMB_FORMAT"
-				fi
-			;;
-			*)
-				display "$file"
-			;;
-			esac
+			display "$file"
 		;;
 		"gif")
 			hash_file "$file_URI"
