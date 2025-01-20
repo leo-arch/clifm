@@ -234,7 +234,11 @@ display() {
 gen_audio_preview() {
 	ffmpeg -hide_banner -i "$1" "$2" -y >/dev/null 2>&1 && \
 		add_to_info_file "$2" && return 0
-	print_err_msg "ffmpeg" "$?" "audio"
+	audio_err="$?"
+	if [ "$audio_err" -eq 234 ]; then
+		file -b "$1"; return 1 # No image found. Just print file info.
+	fi
+	print_err_msg "ffmpeg" "$audio_err" "audio"
 }
 
 gen_comic_preview() {
