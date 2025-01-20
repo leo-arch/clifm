@@ -1561,10 +1561,10 @@ print_mime_info(char **app, char **fpath, char **mime)
 	mime_file = buf;
 
 	char *preview_app = get_app(*mime, *fpath);
-	if (preview_app && *preview_app) {
-		printf(_("Previewing application: %s [%s]\n"), preview_app,
-			mime_match ? "MIME" : "FILENAME");
-	}
+	printf(_("Previewing application: %s %s\n"),
+		(preview_app && *preview_app) ? preview_app : "None",
+		(preview_app && *preview_app)
+		? (mime_match ? "[MIME]" : "[FILENAME]") : "");
 
 	mime_file = mime_file_ptr;
 	free(preview_app);
