@@ -1545,13 +1545,31 @@ static int
 print_mime_info(char **app, char **fpath, char **mime)
 {
 	if (*(*app) == 'a' && (*app)[1] == 'd' && !(*app)[2]) {
-		printf(_("Associated application: ad [built-in] [%s]\n"),
+		printf(_("Opening application:    ad [built-in] [%s]\n"),
 			mime_match ? "MIME" : "FILENAME");
 	} else {
-		printf(_("Associated application: %s [%s]\n"), *app,
+		printf(_("Opening application:    %s [%s]\n"), *app,
 			mime_match ? "MIME" : "FILENAME");
 	}
 
+	if (!config_dir || !*config_dir)
+		goto END;
+
+	char buf[PATH_MAX];
+	snprintf(buf, sizeof(buf), "%s/preview.clifm", config_dir);
+	char *mime_file_ptr = mime_file;
+	mime_file = buf;
+
+	char *preview_app = get_app(*mime, *fpath);
+	if (preview_app && *preview_app) {
+		printf(_("Previewing application: %s [%s]\n"), preview_app,
+			mime_match ? "MIME" : "FILENAME");
+	}
+
+	mime_file = mime_file_ptr;
+	free(preview_app);
+
+END:
 	free(*fpath);
 	free(*mime);
 	free(*app);
