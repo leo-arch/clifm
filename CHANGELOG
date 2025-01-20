@@ -1,3 +1,50 @@
+1.23 (Pirahna poodle) - Jan 20, 2025
+
+BUG FIXES
+* TAB completion: file names with embedded control chars are not properly colorized.
+* TAB completion: no preview for file names with embedded control chars.
+* Image previews: 'img2txt' method not working for ANSI images ('clifmimg').
+* 'view' command not working when running with '--stdtab'.
+* 'cl,columns' command stopped working.
+* 'sel *.pdf' works, but 'desel *.pdf' doesn't.
+* Opening applications using the '%x' flag (mimelist file) not working with '--secure-cmds'.
+* 'MaxFilenameLen=-1' (in the config file) is ignored.
+* Garbage on the command line running a keybinding in vi-mode. 
+* Wrong image placement (ueberzug method) when '--height' is set from either $FZF_DEFAULT_OPTS or 'FzfTabOptions'.
+* Config: 'cmCmd=5' (rsync) does not copy directories themselves (but its content).
+* Cannot operate on file names containing REGEX characters (e.g. the command 's c++' REGEX expands 'c++').
+* --preview/--open fail when given a file URI with percent-escaped characters (e.g. 'file:///home/user/this%20file.txt').
+* Cannot open file with single quote in name (e.g. "John's file.txt").
+
+NEW FEATURES/IMPROVEMENTS
+* Add file preview for javascript files.
+* Image previews: add support for exr, fit, hdr, heic, pbm, pgm, pnm, ppm, and xpm image formats.
+* Properly fail when '--opener' is given no parameter.
+* 'x' command: expand environment variable in TerminalCmd (first word only).
+* 'x' command: run terminal detached (via setsid(3)). 
+* 'X' command: do not run with 'sudo' if already root.
+* Set the main configuration file path via $CLIFMRC.
+* Add '--help' to the 'reload' command.
+* 'config reload' can be used now instead of 'reload'.
+* Add '--mimelist-file' command line option to set an alternative mimelist file.
+* Check for file existence when setting alternative configuration files.
+* New prompt module (m_hostname_color): dinamically colorize the hostname depending on whether we're on a SSH session or not.
+* Adjust the number of spaces between icons and file names using the 'IconsGap' option in the configuration file. Valid values: 0, 1 (default), or 2.
+* Explicitly check $XDG_DATA_HOME and $XDG_DATA_DIRS when setting clifm's data directory.
+* Add builtin confirmation prompt to 'c' and 'm' commands.
+* Set a default answer for confirmation prompts via 'DefaultAnswer' in the config file (default value: "o:n,r:n,t:y,R:n,d:y"). This means: "no" for overwrite (includes 'c' and 'm' commands), remove, and bulk rename, "yes" for everything else (including trash).
+* Create files from templates using the 'n' command. Run 'n --help' for more information.
+* 'p/pp' command: print both apparent and physical sizes.
+* Make '--lscolors' able to understand $LSCOLORS (FreeBSD style).
+* Purge the thumbnails directory of dangling thumbnails using the 'view purge' command. Remember to update your 'clifmimg' script to start populating the thumbnails database: 'cp /usr/share/clifm/plugins/clifmimg ~/.config/clifm/'. Note that the thumbnails directory has been changed from '$XDG_CACHE_HOME/clifm/previews' to '$XDG_CACHE_HOME/clifm/thumbnails'. You can remove the old directory: from now on thumbnails will be stored in the new directory.
+* Both the mimelist and the preview configuration files now support the '%u' placeholder, which is expanded to the file URI for the original file name.
+* 'clifmimg': Generate thumbnail names as MD5 hashes of the file URI for the original file name (as recommended by the FreeDesktop specification - https://specifications.freedesktop.org/thumbnail-spec/latest/thumbsave.html), instead of hashing the file itself. This brings a nice performance improvement, specially when it comes to large files. This works along with the '%u' placeholder mentioned above. Update your 'clifmimg' script.
+* Prevent big files from generating a preview via 'PreviewMaxSize' in the config file. Supported size units: K, M, G, T; supported size range: 1K-2047G. E.g.: "PreviewMaxSize=100M".
+* Colorize .csv files as documents (default color scheme).
+* Colorize .sass and .scss files as markup files (default color scheme).
+* Sort completion matches for mimetype filter (@<TAB>).
+* Add previewing app info to 'mm info' command.
+
 1.22 (Banana picker) - Nov 23, 2024
 
 BUG FIXES
@@ -22,7 +69,7 @@ BUG FIXES
 * 'rr' does not work with directory names containing spaces (e.g. 'rr this\ dir').
 * The 'open/preview' function matches directories as valid opening applications.
 
-NEW FUEATURES/IMPROVEMENTS
+NEW FEATURES/IMPROVEMENTS
 * Extra file type filters for the '=' keyword: 'D' for empty directories, 'F' for empty regular files, and 'L' for broken links. On Solaris, the 'D' file type char (previously used for door files) was replaced by 'O'.
 * Use the 'kb bind' command to customize your key bindings instead of manually editing the keybindings file (via 'kb edit').
 * 'kb conflict' now checks for readline key bindings as well.
