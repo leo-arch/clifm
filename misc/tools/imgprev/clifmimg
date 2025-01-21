@@ -300,7 +300,7 @@ gen_pdf_preview() {
 }
 
 gen_postscript_preview() {
-	gs -sDEVICE=jpeg -dJPEGQ=100 -dNOPAUSE -dBATCH -dSAFER -r300 \
+	gs -sDEVICE=jpeggray -dNOPAUSE -dBATCH -dSAFER -q -r300 -dFirstPage=1 -dLastPage=1 \
 		-sOutputFile="$2" "$1" >/dev/null 2>&1 && \
 			add_to_info_file "$2" && return 0
 	print_err_msg "gs (ghostscript)" "$?" "postscript"
