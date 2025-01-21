@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # clifmimg
-# Version: 1.2
+# Version: 1.3
 
 # Based on https://github.com/cirala/vifmimg, licensed GPL-3.0
 # All changes are licensed GPL-2.0+
@@ -270,7 +270,7 @@ gen_epub_preview() {
 	gnome-epub-thumbnailer -s "${DEFAULT_SIZE%%x*}" "$1" "$2" >/dev/null 2>&1 && \
 		add_to_info_file "$2" && return 0
 	print_err_msg "gnome-epub-thumbnailer" "$?" "epub"
-#	epub-thumbnailer "$1" "$2" 1024 >/dev/null 2>&1 && \
+#	epub-thumbnailer "$1" "$2" "${DEFAULT_SIZE%%x*}" >/dev/null 2>&1 && \
 #		add_to_info_file "$2" && return 0
 #	print_err_msg "epub-thumbnailer" "$?" "epub"
 }
