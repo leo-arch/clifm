@@ -660,21 +660,18 @@ set_fzf_env_vars(const int height)
 	int y = line;
 
 	switch (fzf_preview_border_type) {
-	case FZF_BORDER_BOTTOM: /* fallthrough */
-	case FZF_BORDER_NONE:   /* fallthrough */
-	case FZF_BORDER_LEFT:   /* fallthrough */
+	case FZF_BORDER_BOTTOM:    /* fallthrough */
+	case FZF_BORDER_NONE:      /* fallthrough */
+	case FZF_BORDER_LEFT:      /* fallthrough */
 	case FZF_BORDER_RIGHT: break;
-
-	case FZF_BORDER_TOP:  /* fallthrough */
+	case FZF_BORDER_TOP:       /* fallthrough */
 	case FZF_BORDER_HORIZ: y += (flags & PREVIEWER) ? 2 : 1; break;
-
 	case FZF_BORDER_BLOCK:     /* fallthrough */
 	case FZF_BORDER_BOLD:      /* fallthrough */
 	case FZF_BORDER_DOUBLE:    /* fallthrough */
 	case FZF_BORDER_ROUNDED:   /* fallthrough */
 	case FZF_BORDER_THINBLOCK: /* fallthrough */
 	case FZF_BORDER_SHARP: y += (flags & PREVIEWER) ? 2 : 1; x -= 2; break;
-
 	case FZF_BORDER_VERT: x -= 2; break;
 	default: break;
 	}
@@ -2070,6 +2067,7 @@ AFTER_USUAL_COMPLETION:
 	 * in case the user cancels the completion (pressing ESC). */
 	const int common_prefix_added =
 		(fzftab == 1 && matches[1] && strcmp(matches[0], text) != 0);
+//		(fzftab == 1 && matches[1] && strlen(matches[0]) > strlen(text));
 #endif /* _NO_FZF */
 
 	size_t i;
