@@ -1088,7 +1088,7 @@ create_preview_file(void)
 ;^application/pdf$=~/.config/clifm/clifmimg pdf %%f %%u;\n\
 ;^image/vnd.djvu=~/.config/clifm/clifmimg djvu %%f %%u;\n\
 ;^image/svg\\+xml$=~/.config/clifm/clifmimg svg %%f %%u;\n\
-;^image/(bmp|fits|gif|heic|.*icon|vnd.(zbrush.pcx|radiance)|x-(exr|miff|mng|sgi|tga|xpixmap|portable-.*map))$=~/.config/clifm/clifmimg gif %%f %%u;\n\
+;^image/(bmp|fits|gif|heic|.*icon|jp2|vnd.(zbrush.pcx|radiance)|wmf|x-(dpx|exr|miff|mng|pict|sgi|tga|xpixmap|portable-.*map))$=~/.config/clifm/clifmimg gif %%f %%u;\n\
 ;^image/.*=~/.config/clifm/clifmimg image %%f %%u;\n\
 ;^video/.*=~/.config/clifm/clifmimg video %%f %%u;\n\
 ;^audio/.*=~/.config/clifm/clifmimg audio %%f %%u;\n\
