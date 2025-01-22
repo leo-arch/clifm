@@ -225,7 +225,7 @@ ExtColors="applescript=CODE:as=CODE:asa=CODE:awk=CODE:bash=CODE:c=CODE:c++=CODE:
 
 # DOCUMENTS
 define DOC=1 # Bold
-ExtColors="abw=DOC:csv=DOC:doc=DOC:docx=DOC:fodg=DOC:fodp=DOC:fods=DOC:fodt=DOC:odg=DOC:odp=DOC:ods=DOC:odt=DOC:pps=DOC:ppt=DOC:pptx=DOC:rtf=DOC:sxi=DOC:sxw=DOC:txt=DOC:xlr=DOC:xls=DOC:xlsx=DOC:"
+ExtColors="abw=DOC:csv=DOC:doc=DOC:docx=DOC:fodp=DOC:fods=DOC:fodt=DOC:odp=DOC:ods=DOC:odt=DOC:pps=DOC:ppt=DOC:pptx=DOC:rtf=DOC:sxi=DOC:sxw=DOC:txt=DOC:xlr=DOC:xls=DOC:xlsx=DOC:"
 
 # EBOOKS
 define EBOOK=1 # Bold
@@ -233,7 +233,7 @@ ExtColors="azw=EBOOK:azw3=EBOOK:cb7=EBOOK:cba=EBOOK:cbr=EBOOK:cbt=EBOOK:cbz=EBOO
 
 # IMAGES
 define IMAGE=35 # Magenta
-ExtColors="ai=IMAGE:avif=IMAGE:bmp=IMAGE:eps=IMAGE:exr=IMAGE:ff=IMAGE:fit=IMAGE:gbr=IMAGE:gif=IMAGE:hdr=IMAGE:heic=IMAGE:heif=IMAGE:ico=IMAGE:jfif=IMAGE:jp2=IMAGE:jpeg=IMAGE:jpg=IMAGE:jxl=IMAGE:miff=IMAGE:mjpeg=IMAGE:mjpg=IMAGE:mng=IMAGE:pam=IMAGE:pbm=IMAGE:pcx=IMAGE:pgm=IMAGE:png=IMAGE:pnm=IMAGE:ppm=IMAGE:psd=IMAGE:qoi=IMAGE:sgi=IMAGE:svg=IMAGE:svgz=IMAGE:tga=IMAGE:tif=IMAGE:tiff=IMAGE:webp=IMAGE:wmf=IMAGE:xbm=IMAGE:xcf=IMAGE:xpm=IMAGE:xwd=IMAGE:"
+ExtColors="avif=IMAGE:bmp=IMAGE:dng=IMAGE:dpx=IMAGE:dvi=IMAGE:eps=IMAGE:exr=IMAGE:ff=IMAGE:fit=IMAGE:fodg=IMAGE:hdr=IMAGE:heic=IMAGE:heif=IMAGE:gbr=IMAGE:gif=IMAGE:ico=IMAGE:j2c=IMAGE:j2k=IMAGE:jfi=IMAGE:jfif=IMAGE:jif=IMAGE:jp2=IMAGE:jpe=IMAGE:jpeg=IMAGE:jpf=IMAGE:jpg=IMAGE:jpx=IMAGE:jxl=IMAGE:kra=IMAGE:miff=IMAGE:mng=IMAGE:odg=IMAGE:orf=IMAGE:pam=IMAGE:pbm=IMAGE:pcx=IMAGE:pgm=IMAGE:pict=IMAGE:png=IMAGE:pnm=IMAGE:ppm=IMAGE:psd=IMAGE:pxm=IMAGE:qoi=IMAGE:rgb=IMAGE:rgba=IMAGE:raw=IMAGE:sgi=IMAGE:svg=IMAGE:svgz=IMAGE:tga=IMAGE:tif=IMAGE:tiff=IMAGE:webp=IMAGE:wmf=IMAGE:xbm=IMAGE:xcf=IMAGE:xpm=IMAGE:xwd=IMAGE:"
 
 # MARKUP FILES
 define MARKUP=1;33 # Same as CODE
