@@ -60,6 +60,7 @@
 
 static char *err_name = (char *)NULL;
 static int mime_match = 0;
+static char *g_mime_type = (char *)NULL;
 
 /* Expand all environment variables in the string S.
  * Returns the expanded string or NULL on error. */
@@ -750,10 +751,16 @@ expand_app_fields(char ***cmd, size_t *n, char *fpath, int *exec_flags)
 			break;
 		}
 
-		/* Expand %f placeholder */
+		/* Expand %f placeholder to the file's absolute path */
 		if (*a[i] == '%' && a[i][1] == 'f') {
 			copy_field(&a[i], fpath);
 			f = 1;
+			continue;
+		}
+
+		/* Expand %m placeholder to the file's MIME type */
+		if (*a[i] == '%' && a[i][1] == 'm' && g_mime_type) {
+			copy_field(&a[i], g_mime_type);
 			continue;
 		}
 
@@ -1349,17 +1356,20 @@ mime_open_with(char *filename, char **args)
 	char **apps = get_apps_from_file(fp, name, mime, NULL, 0);
 
 	fclose(fp);
-	free(mime);
 
 	if (!apps) {
 		xerror(_("%s: No opening application found\n"
 			"Tip: Run 'APP FILE', or 'mm edit' to add an opening "
 			"application\n"), err_name);
 		free(name);
+		free(mime);
 		return FUNC_FAILURE;
 	}
 
+	g_mime_type = mime;
 	const int ret = mime_list_open(apps, name);
+	free(mime);
+	g_mime_type = (char *)NULL;
 
 	size_t i;
 	for (i = 0; apps[i]; i++)
@@ -1579,13 +1589,14 @@ END:
 
 #ifndef _NO_ARCHIVING
 static int
-run_archiver(char **fpath, char **app)
+run_archiver(char **fpath, char **app, char **mime_type)
 {
 	char *cmd[] = {"ad", *fpath, NULL};
 	const int exit_status = archiver(cmd, 'd');
 
 	free(*fpath);
 	free(*app);
+	free(*mime_type);
 
 	return exit_status;
 }
@@ -1680,14 +1691,13 @@ mime_open(char **args)
 	if (info == 1)
 		return print_mime_info(&app, &file_path, &mime);
 
-	free(mime);
-
 	/* Construct and execute the command */
 #ifndef _NO_ARCHIVING
 	if (*app == 'a' && app[1] == 'd' && !app[2])
-		return run_archiver(&file_path, &app);
+		return run_archiver(&file_path, &app, &mime);
 #endif /* !_NO_ARCHIVING */
 
+	g_mime_type = mime;
 	int ret = 0;
 #ifdef __CYGWIN__
 	/* Some Windows programs, like Word and Powerpoint (but not Excel!!), do
@@ -1702,6 +1712,8 @@ mime_open(char **args)
 	ret = run_mime_app(app, file_path);
 #endif /* __CYGWIN__ */
 
+	free(mime);
+	g_mime_type = (char *)NULL;
 	free(app);
 	free(file_path);
 	return ret;
