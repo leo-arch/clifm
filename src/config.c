@@ -2348,6 +2348,8 @@ create_mime_file_anew(char *file)
 #\n\
 # If neither %%f nor %%u are specified, the file name will be appended to the\n\
 # end of the command. E.g.: 'mpv --terminal=no' -> 'mpv --terminal=no FILE'\n\
+#\n\
+# The %%m placeholder is expanded to the file's MIME type.\n\
 \n\
 # To silence STDERR and/or STDOUT use !E and !O respectively (they can\n\
 # be used together). Examples:\n\
