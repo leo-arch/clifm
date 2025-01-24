@@ -2812,14 +2812,6 @@ check_options(void)
 			hist_status = xargs.history;
 	}
 
-/*	if (!conf.wprompt_str) {
-		if (conf.colorize == 1)
-			conf.wprompt_str = savestring(DEF_WPROMPT_STR, sizeof(DEF_WPROMPT_STR) - 1);
-		else
-			conf.wprompt_str = savestring(DEF_WPROMPT_STR_NO_COLOR,
-				sizeof(DEF_WPROMPT_STR_NO_COLOR) - 1);
-	} */
-
 	/* Do no override command line options */
 	if (xargs.cwd_in_title == UNSET)
 		xargs.cwd_in_title = DEF_CWD_IN_TITLE;

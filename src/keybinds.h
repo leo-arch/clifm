@@ -31,7 +31,6 @@
 
 __BEGIN_DECLS
 
-/*void add_func_to_rl(void); */
 int  keybind_exec_cmd(char *str);
 int  kbinds_function(char **args);
 int  load_keybinds(void);

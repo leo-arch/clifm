@@ -908,9 +908,6 @@ int inotify_fd = UNSET, inotify_wd = UNSET;
 int watch = UNSET;
 unsigned int INOTIFY_MASK =
 	IN_CREATE | IN_DELETE | IN_DELETE_SELF | IN_MOVE | IN_MOVE_SELF
-/*#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 18, 0)
-	| IN_DONT_FOLLOW | IN_EXCL_UNLINK | IN_ONLYDIR | IN_MASK_CREATE;
-#else */
 # if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 15)
 	| IN_DONT_FOLLOW | IN_ONLYDIR
 # endif /* LINUX >= 2.6.15 */
@@ -1104,18 +1101,6 @@ check_working_directory(void)
 	}
 }
 
-/* Check whether we have a working shell */
-/*
-static inline void
-check_working_shell(void)
-{
-	if (access(user.shell, X_OK) == -1) {
-		err('w', PRINT_PROMPT, _("%s: %s: System shell not found. "
-			"Please edit the configuration file to specify a working "
-			"shell.\n"), PROGRAM_NAME, user.shell);
-	}
-} */
-
 #ifndef _NO_TRASH
 static inline void
 init_trash(void)
@@ -1243,16 +1228,6 @@ list_files_and_quit(void)
 	list_files();
 	exit(EXIT_SUCCESS); /* Never reached. */
 }
-
-/*
-static void
-init_file_flags(void)
-{
-	flags |= CONFIG_OK;
-	flags |= HOME_OK;
-	flags |= SELFILE_OK;
-	flags |= TRASH_OK;
-} */
 
 				/**
 				 * #############################

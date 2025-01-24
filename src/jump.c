@@ -482,8 +482,6 @@ print_jump_table(const int reduce, const time_t now)
 
 		int days_since_first = 0, hours_since_last = 0;
 		int rank = rank_entry((int)i, now, &days_since_first, &hours_since_last);
-//		int keep = jump_db[i].keep;
-//		jump_db[i].keep = 0;
 
 		if (reduce) {
 			int tmp_rank = rank;
@@ -495,7 +493,6 @@ print_jump_table(const int reduce, const time_t now)
 
 		tmp_jump[i].path = jump_db[i].path;
 		tmp_jump[i].keep = jump_db[i].keep;
-//		tmp_jump[i].keep = keep;
 		tmp_jump[i].rank = rank;
 		tmp_jump[i].len = jump_db[i].len;
 		tmp_jump[i].visits = jump_db[i].visits;

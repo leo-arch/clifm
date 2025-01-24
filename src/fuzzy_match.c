@@ -51,7 +51,7 @@ utf8nextcodepoint(const char *s)
 	} else if (0xc0 == (0xe0 & *s)) {
 		/* 2-byte utf8 code point (began with 0b110xxxxx) */
 		return 2;
-	} else { /* if (0x00 == (0x80 & *s)) { */
+	} else { /* (0x00 == (0x80 & *s)) { */
 		/* 1-byte ascii (began with 0b0xxxxxxx) */
 		return 1;
 	}

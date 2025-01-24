@@ -1008,7 +1008,6 @@ my_insert_text(char *text, char *s, const char _s)
 					q[l] = '\0';
 					l = 0;
 					rl_insert_text(q);
-//					rl_redisplay();
 				}
 				continue;
 			}
@@ -1029,7 +1028,6 @@ my_insert_text(char *text, char *s, const char _s)
 			 * As a workaround, let's reprint the suggestion */
 			size_t slen = strlen(suggestion_buf);
 			*s = _s ? _s : ' ';
-//			print_suggestion(suggestion_buf, slen + 1, suggestion.color);
 			print_suggestion(suggestion_buf, slen, suggestion.color);
 			*s = '\0';
 		}
@@ -2923,7 +2921,6 @@ set_hardcoded_keybinds(void)
 	rl_bind_keyseq("\x1bOC", rl_accept_suggestion);
 
 	/* Bind Alt-Right and Alt-f to accept the first suggested word */
-/*	rl_bind_key(('f' | 0200), rl_accept_first_word); */ // Alt-f
 	rl_bind_keyseq("\x1b\x66", rl_accept_first_word);
 	rl_bind_keyseq("\x1b[3C", rl_accept_first_word);
 	rl_bind_keyseq("\x1b\x1b[C", rl_accept_first_word);
