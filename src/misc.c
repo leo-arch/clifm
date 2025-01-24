@@ -1479,8 +1479,7 @@ free_stuff(void)
 		free(jump_db);
 	}
 
-	if (pinned_dir)
-		free(pinned_dir);
+	free(pinned_dir);
 
 //	ADD FILTER TYPE CHECK!
 	if (filter.str) {
@@ -1601,10 +1600,8 @@ free_stuff(void)
 	if (workspaces && workspaces[0].path) {
 		i = MAX_WS;
 		while (--i >= 0) {
-			if (workspaces[i].path)
-				free(workspaces[i].path);
-			if (workspaces[i].name)
-				free(workspaces[i].name);
+			free(workspaces[i].path);
+			free(workspaces[i].name);
 		}
 		free(workspaces);
 	}

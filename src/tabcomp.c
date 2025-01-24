@@ -2143,8 +2143,7 @@ AFTER_USUAL_COMPLETION:
 		&& our_func == rl_completion_entry_function) {
 			(void)(*rl_ignore_some_completions_function)(matches);
 			if (matches == 0 || matches[0] == 0) {
-				if (matches)
-					free(matches);
+				free(matches);
 				free(text);
 				rl_ding();
 				return 0;

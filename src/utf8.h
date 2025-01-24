@@ -163,7 +163,7 @@ utf8chr(const utf8_int8_t *src, utf8_int32_t chr)
 		c[0] = (utf8_int8_t)(0xe0 | (utf8_int8_t)(chr >> 12));
 		c[1] = (utf8_int8_t)(0x80 | (utf8_int8_t)((chr >> 6) & 0x3f));
 		c[2] = (utf8_int8_t)(0x80 | (utf8_int8_t)(chr & 0x3f));
-	} else { /* if (0 == ((int)0xffe00000 & chr)) { */
+	} else { /* ((int)0xffe00000 & chr) == 0 { */
 		/* 4-byte/21-bit utf8 code point
 		* (0b11110xxx 0b10xxxxxx 0b10xxxxxx 0b10xxxxxx) */
 		c[0] = (utf8_int8_t)(0xf0 | (utf8_int8_t)(chr >> 18));

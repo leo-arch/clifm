@@ -912,12 +912,9 @@ my_rl_path_completion(const char *text, int state)
 	if (!state) {
 		char *temp;
 
-		if (dirname)
-			free(dirname);
-		if (filename)
-			free(filename);
-		if (users_dirname)
-			free(users_dirname);
+		free(dirname);
+		free(filename);
+		free(users_dirname);
 
 		/* tmp_text is true whenever text was dequoted */
 		char *p = tmp_text ? tmp_text : (char *)text;
