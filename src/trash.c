@@ -1080,7 +1080,7 @@ list_ok_trashed_files(char **args, const int *trashed, const size_t trashed_n)
 
 		print_file_name(name, 0);
 
-		if (tmp && tmp != p)
+		if (tmp != p)
 			free(tmp);
 		if (p && p != args[trashed[i]])
 			free(p);

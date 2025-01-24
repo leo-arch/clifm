@@ -1175,7 +1175,7 @@ check_cmds(char *str, size_t len, const int print)
 		return NO_MATCH;
 
 	char *cmd = str;
-	if (cmd && *cmd == '\\' && *(cmd + 1)) {
+	if (*cmd == '\\' && *(cmd + 1)) {
 		cmd++;
 		len--;
 	}
