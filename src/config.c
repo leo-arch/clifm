@@ -1081,15 +1081,16 @@ create_preview_file(void)
 #.*=~/.config/ranger/scope.sh %%f 120 80 /tmp/clifm/ True\n\
 \n\
 # Uncomment to enable image previews for the corresponding file types:\n\
-;^application/.*(officedocument|msword|ms-excel|ms-powerpoint|opendocument).*=~/.config/clifm/clifmimg doc %%f %%u;\n\
-;^text/rtf$=~/.config/clifm/clifmimg doc %%f %%u;\n\
+;^text/rtf$|^application/.*(officedocument|msword|ms-excel|ms-powerpoint|opendocument).*=~/.config/clifm/clifmimg doc %%f %%u;\n\
 ;^application/epub\\+zip$=~/.config/clifm/clifmimg epub %%f %%u;\n\
 ;^application/x-mobipocket-ebook$=~/.config/clifm/clifmimg mobi %%f %%u;\n\
 ;^application/pdf$=~/.config/clifm/clifmimg pdf %%f %%u;\n\
+;^image/vnd.djvu$=~/.config/clifm/clifmimg djvu %%f %%u;\n\
+;^image/svg\\+xml$=~/.config/clifm/clifmimg svg %%f %%u;\n\n\
 # Display images directly via the 'image' method\n\
 ;^image/(jpeg|png|tiff|webp|x-xwindow-dump)$=~/.config/clifm/clifmimg image %%f %%u;\n\
 # Convert and display via the 'gif' method\n\
-;^image/.*=~/.config/clifm/clifmimg gif %%f %%u;\n\
+;^image/.*=~/.config/clifm/clifmimg gif %%f %%u;\n\n\
 ;^video/.*=~/.config/clifm/clifmimg video %%f %%u;\n\
 ;^audio/.*=~/.config/clifm/clifmimg audio %%f %%u;\n\
 ;^application/postscript$=~/.config/clifm/clifmimg postscript %%f %%u;\n\
