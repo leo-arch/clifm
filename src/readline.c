@@ -4300,7 +4300,7 @@ FIRST_WORD_COMP:
 		}
 
 		if ((conf.autocd == 1 || conf.auto_open == 1) && (alt_prompt == 0
-		|| alt_prompt == FILES_PROMPT) && (!text || *text != '/')) {
+		|| alt_prompt == FILES_PROMPT) && *text != '/') {
 			/* Compĺete with files in CWD */
 			matches = rl_completion_matches(text, &filenames_gen_text);
 			if (matches) {

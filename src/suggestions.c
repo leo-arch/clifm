@@ -2023,7 +2023,7 @@ rl_suggestions(const unsigned char c)
 	}
 
 	/* If not on the first word and not at the end of the last word, do nothing. */
-	int lw = is_last_word();
+	const int lw = is_last_word();
 	if (!lw) {
 		if (suggestion.printed == 1 && suggestion.nlines > 1)
 			clear_suggestion(CS_FREEBUF);
@@ -2088,7 +2088,7 @@ rl_suggestions(const unsigned char c)
 		/* An alias name could be the same as the beginning of the alias
 		 * defintion, so that this test must always be skipped in case
 		 * of aliases. */
-		} else if (suggestion.type != ALIAS_SUG && c != ' ' && word
+		} else if (suggestion.type != ALIAS_SUG && c != ' '
 		&& (conf.case_sens_path_comp ? (*word == *suggestion_buf
 		&& strncmp(word, suggestion_buf, wlen) == 0)
 		: (TOUPPER(*word) == TOUPPER(*suggestion_buf)
@@ -2493,7 +2493,7 @@ CHECK_FIRST_WORD:
 	&& *(word + 1) == ':')
 		goto NO_SUGGESTION;
 
-	if (!word || !*word
+	if (!*word
 
 	|| (c == ' ' && (*word == '\''
 	|| *word == '"' || *word == '$' || *word == '#'))

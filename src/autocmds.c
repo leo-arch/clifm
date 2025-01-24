@@ -975,8 +975,7 @@ add_autocmd(char **args)
 	/* No autocommand found for this target (current directory). Let's
 	 * create a new entry for this autocommand. */
 
-	const size_t cwd_len = workspaces[cur_ws].path
-		? strlen(workspaces[cur_ws].path) : 0;
+	const size_t cwd_len = strlen(workspaces[cur_ws].path);
 	if (cwd_len == 0)
 		return FUNC_FAILURE;
 
