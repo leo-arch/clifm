@@ -30,11 +30,12 @@
 # If the clifmimg script cannot be found under '~/.config/clifm/', you can copy it from the data
 # directory, usually '/usr/local/share/clifm/plugins/' or '/usr/share/clifm/plugins'.
 
-^application/.*(officedocument|msword|ms-excel|ms-powerpoint|opendocument).*=~/.config/clifm/clifmimg doc %f %u;
-^text/rtf$=~/.config/clifm/clifmimg doc %f %u;
+^text/rtf$|^application/.*(officedocument|msword|ms-excel|ms-powerpoint|opendocument).*=~/.config/clifm/clifmimg doc %f %u;
 ^application/epub\+zip$=~/.config/clifm/clifmimg epub %f %u;
 ^application/x-mobipocket-ebook$=~/.config/clifm/clifmimg mobi %f %u;
 ^application/pdf$=~/.config/clifm/clifmimg pdf %f %u;
+^image/vnd.djvu$=~/.config/clifm/clifmimg djvu %f %u;
+^image/svg\+xml$=~/.config/clifm/clifmimg svg %f %u;
 ^image/(jpeg|png|tiff|webp|x-xwindow-dump)$=~/.config/clifm/clifmimg image %f %u;
 ^image/.*=~/.config/clifm/clifmimg gif %f %u;
 ^video/.*=~/.config/clifm/clifmimg video %f %u;
@@ -115,11 +116,17 @@ clifmimg doc %f %u
 # which expands to something like this: "clifmimg doc /path/to/file.docx file:///path/to/file.docx"
 ```
 
-generates a thumbnail of `file.docx` using the method named `doc`.
+generates a thumbnail of `file.docx` using the `doc` method.
 
-The first parameter (thumbnailing method) can be any of the following: `image`, `video`, `audio`, `gif`,  `svg`, `epub`, `mobi`, `pdf`, `djvu`, `doc`, `postscript`, and `font`.
+The first parameter (thumbnailing method) can be any of the following:
 
-Every time a thumbnail is generated, `clifmimg` adds a new entry to the thumbnails database (`.thumbs.info` in the thumbnails directory<sup>1</sup>). Each entry has this form: **THUMB@PATH**, where **THUMB** is the name of the thumbnail file (an MD5 hash of **PATH** followed by a file extension, either `png` or `jpg`), and **PATH** the file URI for the absolute path to the original file. This database is read by the [`view purge`](https://github.com/leo-arch/clifm/wiki/Introduction#view) command (available since 1.22.12) to keep the thumbnails directory in a clean state.<sup>3</sup>
+| Method | Description | Thumbnail generation |
+| --- | --- |  --- |
+| `image` | Display image directly, without previous convertion | No |
+| `gif`, `svg` | Convert image and display | Yes |
+| `audio`, `djvu`, `doc`, `epub`, `font`, `mobi`, `pdf`, `postscript`, and `video` | Convert file to image and display | Yes |
+
+Every time a thumbnail is generated `clifmimg` adds a new entry to the thumbnails database (`.thumbs.info` in the thumbnails directory<sup>1</sup>). Each entry has this form: **THUMB@PATH**, where **THUMB** is the name of the thumbnail file (an MD5 hash of **PATH** followed by a file extension, either `png` or `jpg`), and **PATH** the file URI for the absolute path to the original file. This database is read by the [`view purge`](https://github.com/leo-arch/clifm/wiki/Introduction#view) command (available since 1.22.12) to keep the thumbnails directory in a clean state.<sup>3</sup>
 
 <sup>1</sup> By default this directory is `$XDG_CACHE_HOME/clifm/thumbnails` (which usually expands to `~/.cache/clifm/thumbnails`). Note that previous versions of this scripts used `$XDG_CACHE_HOME/clifm/previews` instead.
 
@@ -133,20 +140,20 @@ The following applications are used to generate thumbnails:
 
 | Application | File type | Observation |
 | --- | --- | --- |
-| `ueberzug` | Image files | Images are displayed directly. No thumbnail generation is required |
-| `ffmpegthumbnailer` | Video files | |
-| `gnome-epub-thumbnailer`/`epub-thumbnailer` | ePub files | |
-| `gnome-mobi-thumbnailer` | Mobi files | |
-| `pdftoppm` | PDF files | Provided by the `poppler` package |
-| `ddjvu` | DjVu files | Provided by the `djvulibre` package |
-| `ffmpeg` | Audio files | |
-| `fontpreview` | Font files |
-| `libreoffice` | Office files (odt, docx, xlsx, etc) | |
-| `gs` | Postscript files | Provided by the `ghostscript` package |
-| `magick` | SVG files | Provided by the `imagemagick` package |
+| `ffmpegthumbnailer` | Video | |
+| `gnome-epub-thumbnailer` | ePub | |
+| `gnome-mobi-thumbnailer` | Mobi | |
+| `pdftoppm` | PDF | Provided by the `poppler` package |
+| `ddjvu` | DjVu | Provided by the `djvulibre` package |
+| `ffmpeg` | Audio | |
+| `fontpreview` | Font | https://github.com/sdushantha/fontpreview |
+| `libreoffice` | Office documents | |
+| `librsvg` | SVG image | Required by **magick**(1) to convert SVG files | |
+| `gs` | Postscript | Provided by the `ghostscript` package |
+| `magick` | Several image formats | Provided by the `imagemagick` package |
 
 > [!NOTE]
-> The exact package names provinding the above programs vary depending on your OS/distribution, but they usually have the same name as the corresponding program.
+> The exact package names providing the above programs may vary depending on your OS/distribution, but they usually have the same name as the corresponding program.
 
 ## Troubleshooting
 
