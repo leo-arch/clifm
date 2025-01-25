@@ -77,7 +77,7 @@ print_tips(const int all)
 		"--secure-cmds command line switches",
 		"Run in disk usage analyzer mode using the -t command line switch",
 		"Fuzzy suggestions are supported. E.g.: 'dwn > Downloads'. Enable them via --fuzzy-matching, or FuzzyMatching in the configuration file",
-		"Miss LS_COLORS? Run with --lscolors (GNU ls only)",
+		"Miss LS_COLORS? Run with --lscolors",
 #else
 		"Create a new profile: 'pf add PROFILE' or 'clifm -p PROFILE'",
 		"Run in incognito/private mode via the -s flag",
