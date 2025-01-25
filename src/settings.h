@@ -454,8 +454,7 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 
 /* If PrintDirCmds is enabled */
 #define DIR_CMD_PTR   ">"
-//#define DIR_CMD_PTR_U "≻"
-#define DIR_CMD_PTR_U ">"
+#define DIR_CMD_PTR_U DIR_CMD_PTR
 
 /* Character used to print non-matching suggestions, e.g. "12 > filename". */
 #define SUG_POINTER '>'

@@ -144,7 +144,7 @@ remove_thumbs_not_in_db(char **thumbs, off_t *size_sum, int *errors)
 	while ((ent = readdir(dir)) != NULL) {
 		if (SELFORPARENT(ent->d_name)
 		|| strcmp(ent->d_name, "CACHEDIR.TAG") == 0
-		|| strcmp(ent->d_name, ".thumbs.info") == 0)
+		|| strcmp(ent->d_name, THUMBNAILS_INFO_FILE) == 0)
 			continue;
 
 		int found = 0;
