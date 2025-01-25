@@ -67,7 +67,7 @@ By default, this variable is unset, meaning that **clifm** will try to [guess th
 
 | Method | Description | Observation | Recommended terminal emulator |
 | -- | -- | --- | --- |
-| `sixel` | Preview images in full color using the sixel protocol | [**chafa**(1)](https://github.com/hpjansson/chafa) is used to generate sixel images. Note that not all terminal emulators support this protocol. Visit https://www.arewesixelyet.com/ for more information. | XTerm, Wezterm, Mlterm, Foot |
+| `sixel` | Preview images in full color using the sixel protocol | [**chafa**(1)](https://github.com/hpjansson/chafa) is used to generate sixel images. Note that not all terminal emulators support this protocol. Visit https://www.arewesixelyet.com/ for more information. | XTerm, Wezterm, Mlterm, Contour, Foot |
 | `ueberzug` | Preview images  in full color using [ueberzug](https://github.com/ueber-devel/ueberzug) | Run **clifm** via the `clifmrun` script (see point 2 in the Usage section).  | Any (X11 only) |
 | `kitty` | Preview images  in full color using the [kitty image protocol](https://sw.kovidgoyal.net/kitty/graphics-protocol/) | The Kitty terminal is required. | Kitty |
 | `ansi` | Preview images using ANSI art (text mode) | Several applications to generate ANSI previews are available: `chafa`, `pixterm`, `img2text`, `viu`, `catimg`, `tiv`, and `timg`. Use the `ansi_method` variable in the [`clifmimg` script](#the-clifmimg-script) to set your preferred application. It defaults to `chafa`. | Any |
