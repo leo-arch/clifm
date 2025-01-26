@@ -80,6 +80,23 @@ type="$1"
 file="$2"
 file_URI="${3:-$file}"
 
+# FOR FUTURE REFERENCE
+# $type can be used for multiple MIME types. For example:
+#
+# ^image/.*$=~/.config/clifm/clifmimg gif %f %u;
+#
+# Here we use the same converting function ('gif') for all subtypes of the type "image".
+# But we might need (not currently the case though) a different treatement depending
+# on the subtype (say "bmp", "heif", or whatever). Here's where having the corresponding
+# MIME type can come in handy.
+#
+# NOTE: Make sure to pass the MIME type to this script by adding '%m' to the
+# corresponding line in the 'preview.clifm' config file. For example:
+#
+# ^image/.*$=~/.config/clifm/clifmimg gif %f %u %m;
+#
+#mime_type="${4:-unknown}"
+
 #-----------------------------
 # 2. DEFAULT OPTIONS
 #-----------------------------
