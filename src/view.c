@@ -287,9 +287,12 @@ purge_thumbnails_cache(void)
 
 		snprintf(tfile, sizeof(tfile), "%s/%s", thumbnails_dir, line);
 		struct stat b;
-		if (lstat(tfile, &b) == -1)
+		if (lstat(tfile, &b) == -1) {
 			/* Thumbnail file does not exist: remove this entry */
+			printf(_("view: '%s' does not exist. Entry removed.\n"), line);
+			rem_files++;
 			continue;
+		}
 
 		char *abs_path = p;
 		if (strchr(p, '%'))
@@ -327,6 +330,7 @@ purge_thumbnails_cache(void)
 
 	thumbs_in_db[thumbs_in_db_c] = (char *)NULL;
 	rem_files += remove_thumbs_not_in_db(thumbs_in_db, &size_sum, &errors);
+
 	size_t i;
 	for (i = 0; thumbs_in_db[i]; i++)
 		free(thumbs_in_db[i]);
