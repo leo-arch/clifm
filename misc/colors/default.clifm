@@ -217,7 +217,7 @@ ExtColors="7z=ARCHIVE:ace=ARCHIVE:alz=ARCHIVE:apk=ARCHIVE:arc=ARCHIVE:arj=ARCHIV
 
 # AUDIO FILES
 define AUDIO=36 # Cyan
-ExtColors="aac=AUDIO:ac3=AUDIO:aif=AUDIO:aifc=AUDIO:aiff=AUDIO:alac=AUDIO:anx=AUDIO:ape=AUDIO:au=AUDIO:axa=AUDIO:cue=AUDIO:flac=AUDIO:m2a=AUDIO:m4a=AUDIO:mid=AUDIO:midi=AUDIO:mka=AUDIO:mp3=AUDIO:mpc=AUDIO:mpga=AUDIO:oga=AUDIO:ogg=AUDIO:ogx=AUDIO:opus=AUDIO:pcm=AUDIO:ra=AUDIO:ram=AUDIO:spx=AUDIO:wav=AUDIO:wma=AUDIO:wv=AUDIO:"
+ExtColors="aac=AUDIO:ac3=AUDIO:aif=AUDIO:aifc=AUDIO:aiff=AUDIO:alac=AUDIO:anx=AUDIO:ape=AUDIO:au=AUDIO:axa=AUDIO:cue=AUDIO:flac=AUDIO:m2a=AUDIO:m4a=AUDIO:mid=AUDIO:midi=AUDIO:mka=AUDIO:mp2=AUDIO:mp3=AUDIO:mpc=AUDIO:mpga=AUDIO:oga=AUDIO:ogg=AUDIO:ogx=AUDIO:opus=AUDIO:pcm=AUDIO:ra=AUDIO:ram=AUDIO:snd=AUDIO:spx=AUDIO:wav=AUDIO:wma=AUDIO:wv=AUDIO:"
 
 # SOURCE FILES
 define CODE=1;33 # Bold yellow

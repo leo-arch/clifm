@@ -218,11 +218,11 @@ ExtColors="7z=ARCHIVE:ace=ARCHIVE:alz=ARCHIVE:apk=ARCHIVE:arc=ARCHIVE:arj=ARCHIV
 
 # AUDIO FILES
 define AUDIO=@214
-ExtColors="aac=AUDIO:ac3=AUDIO:anx=AUDIO:au=AUDIO:axa=AUDIO:cue=AUDIO:m2a=AUDIO:m4a=AUDIO:mid=AUDIO:midi=AUDIO:mka=AUDIO:mp3=AUDIO:mpc=AUDIO:mpga=AUDIO:oga=AUDIO:ogg=AUDIO:ogx=AUDIO:opus=AUDIO:ra=AUDIO:ram=AUDIO:spx=AUDIO:wma=AUDIO:"
+ExtColors="aac=AUDIO:ac3=AUDIO:anx=AUDIO:au=AUDIO:axa=AUDIO:cue=AUDIO:m2a=AUDIO:m4a=AUDIO:mid=AUDIO:midi=AUDIO:mka=AUDIO:mp2=AUDIO:mp3=AUDIO:mpc=AUDIO:mpga=AUDIO:oga=AUDIO:ogg=AUDIO:ogx=AUDIO:opus=AUDIO:ra=AUDIO:ram=AUDIO:snd=AUDIO:spx=AUDIO:wma=AUDIO:"
 
 # LOSSLESS AUDIO
 define LAUDIO=@214-1
-ExtColors="aif=LAUDIO:aifc=LAUDIO:aiff=LAUDIO:alac=LAUDIO:ape=LAUDIO:flac=LAUDIO:pcm=LAUDIO:wav=LAUDIO:wm=LAUDIO:"
+ExtColors="aif=LAUDIO:aifc=LAUDIO:aiff=LAUDIO:alac=LAUDIO:ape=LAUDIO:flac=LAUDIO:pcm=LAUDIO:wav=LAUDIO:wm=LAUDIO:wv=LAUDIO:"
 
 # SOURCE FILES
 define CODE=@247-1
