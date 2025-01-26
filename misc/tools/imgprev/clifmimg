@@ -39,12 +39,12 @@
 #
 # 1) Edit shotgun's config file (via F7 or "view edit") and uncomment the "clifmimg"
 # lines at the top of the file (this instructs Clifm to use this this script to generate
-# previews for the specified file types.
+# previews for the specified file types).
 #
-# 2) If using the ueberzug method (see IMAGE PREVIEW METHOD below) run clifm via the
+# 2) If using the ueberzug method (see DEFAULT OPTIONS below) run clifm via the
 # 'clifmrun' script. Otherwise, run clifm as usual.
 #
-# Note: clifmrun can be found under ~/.config/clifm/ (or /usr/share/clifm/plugins/)
+# NOTE: clifmrun can be found under ~/.config/clifm/ (or /usr/share/clifm/plugins/).
 
 ######################
 # DEPENDENCIES
@@ -69,7 +69,7 @@
 # gs                      (Postscript files - provided by the ghostscript package)
 # magick                  (image format convertion - provided by the imagemagick package)
 #
-# Note: The exact package names providing these programs may vary depending
+# NOTE: The exact package names providing these programs may vary depending
 # on your OS/distribution, but ususally they have the same name as the program.
 
 #-----------------------------
@@ -84,8 +84,8 @@ file_URI="${3:-$file}"
 # 2. DEFAULT OPTIONS
 #-----------------------------
 
-# Set the preview image method.
-# Available methods: sixel, ueberzug, kitty, ansi (text mode)
+# Set the method used to generate image previews.
+# Available methods: sixel, ueberzug, kitty, ansi (text mode).
 #
 # NOTE 1: To use the ueberzug method, run Clifm via the clifmrun script.
 # NOTE 2: To generate sixel images we use chafa(1).
@@ -97,7 +97,7 @@ method=""
 # Available applications: chafa, pixterm, img2txt, viu, catimg, tiv, timg
 ansi_method="chafa"
 
-# Set the audio preview method (cover, wave, spectogram, info).
+# Set the method used to generate audio previews (cover, wave, spectogram, info).
 # Defaults to 'cover', which falls back to 'info' if there is no attached image.
 audio_method="cover"
 
@@ -246,7 +246,7 @@ display() {
 gen_audio_preview() {
 	case "$audio_method" in
 	""|cover)
-		ffmpeg -hide_banner -loglevel quiet -i "$1" "$2" -y && \
+		ffmpeg -y -hide_banner -loglevel quiet -i "$1" "$2" && \
 			add_to_info_file "$2" && return 0
 		audio_err="$?"
 		if [ "$audio_err" -eq 234 ]; then
@@ -355,6 +355,8 @@ gen_video_preview() {
 #-----------------------------
 
 main() {
+	# Set the $method variable, required by the display() function to display
+	# images according to $method.
 	get_preview_method
 
 	if [ "$type" = "image" ]; then
@@ -362,8 +364,12 @@ main() {
 		exit 0
 	fi
 
+	# Set the $PCACHE variable to the file's URI hash, used by the thumbnail
+	# generation functions to uniquely identify files.
 	hash_file "$file_URI"
 
+	# If the thumbnail already exists, display it. Otherwise, generate it and
+	# display it.
 	case "$type" in
 	"audio")
 		if [ -f "${PCACHE}.$THUMB_FORMAT" ] || gen_audio_preview "$file" "${PCACHE}.$THUMB_FORMAT"; then
