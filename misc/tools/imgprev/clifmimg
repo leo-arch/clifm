@@ -73,13 +73,22 @@
 # on your OS/distribution, but ususally they have the same name as the program.
 
 #-----------------------------
-# 1. DEFAULT OPTIONS
+# 1. COMMAND LINE PARAMETERS
+#-----------------------------
+
+type="$1"
+file="$2"
+file_URI="${3:-$file}"
+
+#-----------------------------
+# 2. DEFAULT OPTIONS
 #-----------------------------
 
 # Set the preview image method.
 # Available methods: sixel, ueberzug, kitty, ansi (text mode)
 #
-# NOTE: To use the ueberzug method, run Clifm via the clifmrun script.
+# NOTE 1: To use the ueberzug method, run Clifm via the clifmrun script.
+# NOTE 2: To generate sixel images we use chafa(1).
 #
 # If unset, we'll make our best guess.
 method=""
@@ -88,11 +97,9 @@ method=""
 # Available applications: chafa, pixterm, img2txt, viu, catimg, tiv, timg
 ansi_method="chafa"
 
-# NOTE: To generate sixel images we use chafa(1).
-
-type="$1"
-file="$2"
-file_URI="${3:-$file}"
+# Set the audio preview method (cover, wave, spectogram, info).
+# Defaults to 'cover', which falls back to 'info' if there is no attached image.
+audio_method="cover"
 
 # The maximum size for a thumbnail is, according to the Freedesktop specification
 # (https://specifications.freedesktop.org/thumbnail-spec/latest/creation.html),
@@ -122,7 +129,7 @@ CACHEDIRTAG_HEADER="Signature: 8a477f597d28d172789f06886806bc55
 THUMBINFO_FILE="$CACHE_DIR/${CLIFM_THUMBINFO_FILE:-.thumbs.info}"
 
 #-----------------------------
-# 2. SOME AUXILIARY FUNCTIONS
+# 3. SOME AUXILIARY FUNCTIONS
 #-----------------------------
 
 get_preview_method() {
@@ -149,18 +156,18 @@ is required.\n" >&2
 
 print_err_msg() {
 	case "$2" in
-		127)
-			if [ "$3" = "sixel" ]; then
-				echo "${1}: Command not found (required to display sixel images)"
-			else
-				echo "${1}: Command not found (required to generate previews for '${3}' files)"
-			fi
-			;;
-		*)
-			echo "${1}: Error generating preview (code: ${2})"
-			# The thumbnail exists, but cannot be displayed. Possibly truncated. Regenerate it.
-			[ -f "${PCACHE}.$THUMB_FORMAT" ] && rm -f -- "${PCACHE}.$THUMB_FORMAT" > /dev/null 2>&1
+	127)
+		if [ "$3" = "sixel" ]; then
+			echo "${1}: Command not found (required to display sixel images)"
+		else
+			echo "${1}: Command not found (required to generate previews for '${3}' files)"
+		fi
 		;;
+	*)
+		echo "${1}: Error generating preview (code: ${2})"
+		# The thumbnail exists, but cannot be displayed. Possibly truncated. Regenerate it.
+		[ -f "${PCACHE}.$THUMB_FORMAT" ] && rm -f -- "${PCACHE}.$THUMB_FORMAT" > /dev/null 2>&1
+	;;
 	esac
 	return 1
 }
@@ -171,7 +178,7 @@ add_to_info_file() {
 }
 
 #-----------------------------
-# 3. DISPLAY IMAGES
+# 4. DISPLAY IMAGES
 #-----------------------------
 
 display() {
@@ -196,54 +203,72 @@ display() {
 	Y=$CLIFM_FZF_LINE
 
 	case "$method" in
-		sixel)
-			chafa -f sixel --view-size "${C}x${L}" "$1" 2>/dev/null && return 0
-			print_err_msg "chafa" "$?" "sixel"
-#			img2sixel -w auto -h "$(((L - 1) * 16))" "$1"
-#			timg -ps -g "${C}x$((L - 1))" "$1"
-#			magick "$1" -dither FloydSteinberg -size ${C}x$((L - 1)) sixel:- 2>/dev/null && return 0
-		;;
+	sixel)
+		chafa -f sixel --view-size "${C}x${L}" "$1" 2>/dev/null && return 0
+#		img2sixel -w auto -h "$(((L - 1) * 16))" "$1" && return 0
+#		timg -ps -g "${C}x$((L - 1))" "$1" && return 0
+#		magick "$1" -dither FloydSteinberg -size ${C}x$((L - 1)) sixel:- 2>/dev/null && return 0
+		print_err_msg "chafa" "$?" "sixel"
+	;;
 
-		kitty)
-			kitty icat --loop=0 --place "${FZF_PREVIEW_COLUMNS}x$((FZF_PREVIEW_LINES - 1))@${X}x${Y}" \
-			--clear --transfer-mode=memory --unicode-placeholder --stdin=no --align=left "$1"
-		;;
+	kitty)
+		kitty icat --loop=0 --place "${FZF_PREVIEW_COLUMNS}x$((FZF_PREVIEW_LINES - 1))@${X}x${Y}" \
+		--clear --transfer-mode=memory --unicode-placeholder --stdin=no --align=left "$1"
+	;;
 
-		ueberzug)
-			if [ -z "$CLIFM_FIFO_UEBERZUG" ]; then
-				echo "To enable ueberzug previews run clifm via clifmrun"
-				exit 0
-			fi
+	ueberzug)
+		if [ -z "$CLIFM_FIFO_UEBERZUG" ]; then
+			echo "To enable ueberzug previews run clifm via clifmrun"
+			exit 0
+		fi
 
-			printf '{"action": "add", "identifier": "clifm-preview", "x": "%s", "y": "%s", "width": "%s", "height": "%s", "scaler" : "contain", "path": "%s"}\n' "$((X - 1))" "$Y" "$COLUMNS" "$((LINES - 1))" "$1" > "$CLIFM_FIFO_UEBERZUG"
-		;;
+		printf '{"action": "add", "identifier": "clifm-preview", "x": "%s", "y": "%s", "width": "%s", "height": "%s", "scaler" : "contain", "path": "%s"}\n' "$((X - 1))" "$Y" "$COLUMNS" "$((LINES - 1))" "$1" > "$CLIFM_FIFO_UEBERZUG"
+	;;
 
-		ansi)
-			case "$ansi_method" in
-				chafa) chafa --symbols=all -s "${C}x${L}" "$1" ;;
-				pixterm) pixterm -s 2 -tc "${C}" -tr "${L}" "$1" ;;
-				img2txt) img2txt -H"${L}" -W"${C}" "$1" ;;
-				viu) viu -b -h"${L}" -w"${C}" "$1" ;;
-				catimg) catimg -H"${L}" "$1" ;;
-				tiv) tiv -h "${L}" -w "${C}" "$1" ;;
-				timg) timg -g "${C}x${L}" "$1" ;;
-			esac
-		;;
+	ansi)
+		case "$ansi_method" in
+		chafa) chafa --symbols=all -s "${C}x${L}" "$1" ;;
+		pixterm) pixterm -s 2 -tc "${C}" -tr "${L}" "$1" ;;
+		img2txt) img2txt -H"${L}" -W"${C}" "$1" ;;
+		viu) viu -b -h"${L}" -w"${C}" "$1" ;;
+		catimg) catimg -H"${L}" "$1" ;;
+		tiv) tiv -h "${L}" -w "${C}" "$1" ;;
+		timg) timg -g "${C}x${L}" "$1" ;;
+		esac
+	;;
 	esac
 }
 
 #-----------------------------
-# 4. THUMBNAILS GENERATION
+# 5. THUMBNAILS GENERATION
 #-----------------------------
 
 gen_audio_preview() {
-	ffmpeg -hide_banner -i "$1" "$2" -y >/dev/null 2>&1 && \
-		add_to_info_file "$2" && return 0
-	audio_err="$?"
-	if [ "$audio_err" -eq 234 ]; then
-		file -b "$1"; return 1 # No image found. Just print file info.
-	fi
-	print_err_msg "ffmpeg" "$audio_err" "audio"
+	case "$audio_method" in
+	""|cover)
+		ffmpeg -hide_banner -loglevel quiet -i "$1" "$2" -y && \
+			add_to_info_file "$2" && return 0
+		audio_err="$?"
+		if [ "$audio_err" -eq 234 ]; then
+			file -b "$1" 2>/dev/null; return 1 # No image found. Just print file info.
+		fi
+		print_err_msg "ffmpeg" "$audio_err" "audio (cover)"
+	;;
+	wave)
+		ffmpeg -y -hide_banner -loglevel quiet -i "$1" -f lavfi -i color=c=black:s=640x320 \
+			-filter_complex "[0:a]showwavespic=s=640x320:colors=white[fg];[1:v][fg]overlay=format=auto" \
+			-frames:v 1 "$2" && add_to_info_file "$2" && return 0
+		print_err_msg "ffmpeg" "$?" "audio (wave)"
+	;;
+	spectogram)
+		ffmpeg -y -hide_banner -loglevel quiet -i "$1" -lavfi "showspectrumpic=s=640x320" -frames:v 1 "$2" \
+			&& add_to_info_file "$2" && return 0
+		print_err_msg "ffmpeg" "$?" "audio (spectogram)"
+	;;
+	*)
+		file -b "$1" 2>/dev/null
+	;;
+	esac
 }
 
 gen_comic_preview() {
@@ -326,7 +351,7 @@ gen_video_preview() {
 }
 
 #-----------------------------
-# 4. MAIN
+# 6. MAIN
 #-----------------------------
 
 main() {
@@ -340,68 +365,67 @@ main() {
 	hash_file "$file_URI"
 
 	case "$type" in
-		"audio")
-			if [ -f "${PCACHE}.$THUMB_FORMAT" ] || gen_audio_preview "$file" "${PCACHE}.$THUMB_FORMAT"; then
-				display "${PCACHE}.$THUMB_FORMAT"
-			fi
-		;;
-		"comic")
-			if [ -f "${PCACHE}.$THUMB_FORMAT" ] || gen_comic_preview "$file" "${PCACHE}.$THUMB_FORMAT"; then
-				display "${PCACHE}.$THUMB_FORMAT"
-			fi
-		;;
-		"djvu")
-			if [ -f "${PCACHE}.$THUMB_FORMAT" ] || gen_djvu_preview "$file" "${PCACHE}.$THUMB_FORMAT"; then
-				display "${PCACHE}.$THUMB_FORMAT"
-			fi
-		;;
-		"doc")
-			if [ -f "${PCACHE}.$THUMB_FORMAT" ] || gen_doc_preview "$file" "$PCACHE"; then
-				display "${PCACHE}.$THUMB_FORMAT"
-			fi
-		;;
-		"epub")
-			if [ -f "${PCACHE}.$THUMB_FORMAT" ] || gen_epub_preview "$file" "${PCACHE}.$THUMB_FORMAT"; then
-				display "${PCACHE}.$THUMB_FORMAT"
-			fi
-		;;
-		"font")
-			if [ -f "${PCACHE}.$THUMB_FORMAT" ] || gen_font_preview "$file" "${PCACHE}.$THUMB_FORMAT"; then
-				display "${PCACHE}.$THUMB_FORMAT"
-			fi
-		;;
-		"gif")
-			if [ -f "${PCACHE}.$THUMB_FORMAT" ] || gen_gif_preview "$file" "${PCACHE}.$THUMB_FORMAT"; then
-				display "${PCACHE}.$THUMB_FORMAT"
-			fi
-		;;
-		"mobi")
-			if [ -f "${PCACHE}.$THUMB_FORMAT" ] || gen_mobi_preview "$file" "${PCACHE}.$THUMB_FORMAT"; then
-				display "${PCACHE}.$THUMB_FORMAT"
-			fi
-		;;
-		"pdf")
-			if [ -f "${PCACHE}.$THUMB_FORMAT" ] || gen_pdf_preview "$file" "$PCACHE"; then
-				display "${PCACHE}.$THUMB_FORMAT"
-			fi
-		;;
-		"postscript")
-			if [ -f "${PCACHE}.$THUMB_FORMAT" ] || gen_postscript_preview "$file" "${PCACHE}.$THUMB_FORMAT"; then
-				display "${PCACHE}.$THUMB_FORMAT"
-			fi
-		;;
-		"svg")
-			if [ -f "${PCACHE}.$THUMB_FORMAT" ] || gen_svg_preview "$file" "${PCACHE}.$THUMB_FORMAT"; then
-				display "${PCACHE}.$THUMB_FORMAT"
-			fi
-		;;
-		"video")
-			if [ -f "${PCACHE}.$THUMB_FORMAT" ] || gen_video_preview "$file" "${PCACHE}.$THUMB_FORMAT"; then
-				display "${PCACHE}.$THUMB_FORMAT"
-			fi
-		;;
-
-        *)
+	"audio")
+		if [ -f "${PCACHE}.$THUMB_FORMAT" ] || gen_audio_preview "$file" "${PCACHE}.$THUMB_FORMAT"; then
+			display "${PCACHE}.$THUMB_FORMAT"
+		fi
+	;;
+	"comic")
+		if [ -f "${PCACHE}.$THUMB_FORMAT" ] || gen_comic_preview "$file" "${PCACHE}.$THUMB_FORMAT"; then
+			display "${PCACHE}.$THUMB_FORMAT"
+		fi
+	;;
+	"djvu")
+		if [ -f "${PCACHE}.$THUMB_FORMAT" ] || gen_djvu_preview "$file" "${PCACHE}.$THUMB_FORMAT"; then
+			display "${PCACHE}.$THUMB_FORMAT"
+		fi
+	;;
+	"doc")
+		if [ -f "${PCACHE}.$THUMB_FORMAT" ] || gen_doc_preview "$file" "$PCACHE"; then
+			display "${PCACHE}.$THUMB_FORMAT"
+		fi
+	;;
+	"epub")
+		if [ -f "${PCACHE}.$THUMB_FORMAT" ] || gen_epub_preview "$file" "${PCACHE}.$THUMB_FORMAT"; then
+			display "${PCACHE}.$THUMB_FORMAT"
+		fi
+	;;
+	"font")
+		if [ -f "${PCACHE}.$THUMB_FORMAT" ] || gen_font_preview "$file" "${PCACHE}.$THUMB_FORMAT"; then
+			display "${PCACHE}.$THUMB_FORMAT"
+		fi
+	;;
+	"gif")
+		if [ -f "${PCACHE}.$THUMB_FORMAT" ] || gen_gif_preview "$file" "${PCACHE}.$THUMB_FORMAT"; then
+			display "${PCACHE}.$THUMB_FORMAT"
+		fi
+	;;
+	"mobi")
+		if [ -f "${PCACHE}.$THUMB_FORMAT" ] || gen_mobi_preview "$file" "${PCACHE}.$THUMB_FORMAT"; then
+			display "${PCACHE}.$THUMB_FORMAT"
+		fi
+	;;
+	"pdf")
+		if [ -f "${PCACHE}.$THUMB_FORMAT" ] || gen_pdf_preview "$file" "$PCACHE"; then
+			display "${PCACHE}.$THUMB_FORMAT"
+		fi
+	;;
+	"postscript")
+		if [ -f "${PCACHE}.$THUMB_FORMAT" ] || gen_postscript_preview "$file" "${PCACHE}.$THUMB_FORMAT"; then
+			display "${PCACHE}.$THUMB_FORMAT"
+		fi
+	;;
+	"svg")
+		if [ -f "${PCACHE}.$THUMB_FORMAT" ] || gen_svg_preview "$file" "${PCACHE}.$THUMB_FORMAT"; then
+			display "${PCACHE}.$THUMB_FORMAT"
+		fi
+	;;
+	"video")
+		if [ -f "${PCACHE}.$THUMB_FORMAT" ] || gen_video_preview "$file" "${PCACHE}.$THUMB_FORMAT"; then
+			display "${PCACHE}.$THUMB_FORMAT"
+		fi
+	;;
+	*)
     esac
 }
 
