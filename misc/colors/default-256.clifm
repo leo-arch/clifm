@@ -242,13 +242,13 @@ ExtColors="azw=EBOOK:azw3=EBOOK:cb7=EBOOK:cba=EBOOK:cbr=EBOOK:cbt=EBOOK:cbz=EBOO
 
 # IMAGES
 define IMAGE=@141
-ExtColors="ai=IMAGE:avif=IMAGE:bmp=IMAGE:dpx=IMAGE:dvi=IMAGE:eps=IMAGE:exr=IMAGE:ff=IMAGE:fit=IMAGE:fts=IMAGE:hdr=IMAGE:heic=IMAGE:heif=IMAGE:gif=IMAGE:ico=IMAGE:j2c=IMAGE:j2k=IMAGE:jfi=IMAGE:jfif=IMAGE:jif=IMAGE:jp2=IMAGE:jpe=IMAGE:jpeg=IMAGE:jpf=IMAGE:jpg=IMAGE:jps=IMAGE:jpx=IMAGE:jxl=IMAGE:kra=IMAGE:miff=IMAGE:mng=IMAGE:pam=IMAGE:pbm=IMAGE:pcx=IMAGE:pdd=IMAGE:pgm=IMAGE:pict=IMAGE:png=IMAGE:pnm=IMAGE:ppm=IMAGE:psd=IMAGE:pxm=IMAGE:qoi=IMAGE:rgba=IMAGE:sgi=IMAGE:svg=IMAGE:svgz=IMAGE:tga=IMAGE:tiff=IMAGE:webp=IMAGE:wmf=IMAGE:xbm=IMAGE:xcf=IMAGE:xpm=IMAGE:xwd=IMAGE:"
+ExtColors="ai=IMAGE:avif=IMAGE:bmp=IMAGE:dpx=IMAGE:dvi=IMAGE:eps=IMAGE:exr=IMAGE:ff=IMAGE:fit=IMAGE:fts=IMAGE:hdr=IMAGE:heic=IMAGE:heif=IMAGE:gif=IMAGE:ico=IMAGE:j2c=IMAGE:j2k=IMAGE:jfi=IMAGE:jfif=IMAGE:jif=IMAGE:jp2=IMAGE:jpe=IMAGE:jpeg=IMAGE:jpf=IMAGE:jpg=IMAGE:jps=IMAGE:jpx=IMAGE:jxl=IMAGE:kra=IMAGE:miff=IMAGE:mng=IMAGE:pam=IMAGE:pbm=IMAGE:pcx=IMAGE:pdd=IMAGE:pgm=IMAGE:pict=IMAGE:png=IMAGE:pnm=IMAGE:ppm=IMAGE:psd=IMAGE:pxm=IMAGE:qoi=IMAGE:rgba=IMAGE:sgi=IMAGE:svg=IMAGE:svgz=IMAGE:tga=IMAGE:tif=IMAGE:tiff=IMAGE:webp=IMAGE:wmf=IMAGE:xbm=IMAGE:xcf=IMAGE:xpm=IMAGE:xwd=IMAGE:"
 
 # RAW IMAGES
 # There are plenty of raw image formats out there. This is an incomplete list taken from "https://en.wikipedia.org/wiki/Raw_image_format".
 # Uncomment to enable.
 #define RAW=@141
-#ExtColors="3fr=RAW:ari=RAW:arw=RAW:bay=RAW:braw=RAW:crw=RAW:cr2=RAW:cr3=RAW:cap=RAW:data=RAW:dcs=RAW:dcr=RAW:dng=RAW:drf=RAW:eip=RAW:erf=RAW:fff=RAW:gpr=RAW:iiq=RAW:k25=RAW:kdc=RAW:mdc=RAW:mef=RAW:mos=RAW:mrw=RAW:nef=RAW:nrw=RAW:obm=RAW:orf=RAW:pef=RAW:ptx=RAW:pxn=RAW:r3d=RAW:raf=RAW:raw=RAW:rwl=RAW:rw2=RAW:rwz=RAW:sr2=RAW:srf=RAW:srw=RAW:tif=RAW:x3f=RAW:"
+#ExtColors="3fr=RAW:ari=RAW:arw=RAW:bay=RAW:braw=RAW:crw=RAW:cr2=RAW:cr3=RAW:cap=RAW:data=RAW:dcs=RAW:dcr=RAW:dng=RAW:drf=RAW:eip=RAW:erf=RAW:fff=RAW:gpr=RAW:iiq=RAW:k25=RAW:kdc=RAW:mdc=RAW:mef=RAW:mos=RAW:mrw=RAW:nef=RAW:nrw=RAW:obm=RAW:orf=RAW:pef=RAW:ptx=RAW:pxn=RAW:r3d=RAW:raf=RAW:raw=RAW:rwl=RAW:rw2=RAW:rwz=RAW:sr2=RAW:srf=RAW:srw=RAW:x3f=RAW:"
 
 # VIDEO FILES
 define VIDEO=@141-1
