@@ -332,13 +332,11 @@ xstrncat(char *restrict dst, const size_t dst_len, const char *restrict src,
 
 /* Compare S1 and S2 as strings holding indices/version numbers,
  * returning less than, equal to or greater than zero if S1 is less than,
- * equal to or greater than S2 (for more info, see the texinfo doc). */
+ * equal to or greater than S2 (for more info, see the texinfo doc).
+ * This function is not UTF8 aware. */
 int
 xstrverscmp(const char *s1, const char *s2)
 {
-	if (IS_UTF8_LEAD_BYTE(*s1) || IS_UTF8_LEAD_BYTE(*s2))
-		return strcoll(s1, s2);
-
 	const unsigned char *p1 = (const unsigned char *)s1;
 	const unsigned char *p2 = (const unsigned char *)s2;
 

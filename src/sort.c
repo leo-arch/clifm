@@ -67,14 +67,16 @@ skip_files(const struct dirent *ent)
 }
 
 /* Return a pointer to the first alphanumeric character in NAME, or to the
- * first character if no alphanumeric character is found */
+ * first character if no alphanumeric character is found.
+ * This function is not UTF8 aware, meaning that UTF8 non-alphanemeric
+ * characters are not supported. */
 static inline void
 skip_name_prefixes(char **name)
 {
 	char *s = *name;
 
 	while (*s) {
-		if (IS_ALNUM(*s))
+		if (IS_ALNUM(*s) || IS_UTF8_LEAD_BYTE(*s))
 			break;
 		s++;
 	}
@@ -101,7 +103,7 @@ compare_strings(char **s1, char **s2)
 }
 
 static int
-namecmp(char *s1, char *s2)
+namecmp(char *s1, char *s2, const int have_utf8)
 {
 	if (conf.skip_non_alnum_prefix == 1) {
 		skip_name_prefixes(&s1);
@@ -136,7 +138,7 @@ namecmp(char *s1, char *s2)
 			return 1;
 	}
 
-	if (!conf.case_sens_list || IS_UTF8_LEAD_BYTE(*s1) || IS_UTF8_LEAD_BYTE(*s2))
+	if (conf.case_sens_list == 0 || have_utf8 == 1)
 		return strcoll(s1, s2);
 
 	return strcmp(s1, s2);
@@ -181,19 +183,19 @@ sort_by_extension(struct fileinfo *pa, struct fileinfo *pb)
 }
 
 static inline int
-sort_by_owner(struct fileinfo *pa, struct fileinfo *pb)
+sort_by_owner(struct fileinfo *pa, struct fileinfo *pb, const int have_utf8)
 {
 	if (pa->uid_i.name && pb->uid_i.name)
-		return namecmp(pa->uid_i.name, pb->uid_i.name);
+		return namecmp(pa->uid_i.name, pb->uid_i.name, have_utf8);
 
 	return F_SORT(pa->uid, pb->uid);
 }
 
 static inline int
-sort_by_group(struct fileinfo *pa, struct fileinfo *pb)
+sort_by_group(struct fileinfo *pa, struct fileinfo *pb, const int have_utf8)
 {
 	if (pa->gid_i.name && pb->gid_i.name)
-		return namecmp(pa->gid_i.name, pb->gid_i.name);
+		return namecmp(pa->gid_i.name, pb->gid_i.name, have_utf8);
 
 	return F_SORT(pa->gid, pb->gid);
 }
@@ -237,17 +239,22 @@ entrycmp(const void *a, const void *b)
 	if (conf.light_mode == 1 && !ST_IN_LIGHT_MODE(st))
 		st = SNAME;
 
+	const int have_utf8 = (pa->utf8 == 1 || pb->utf8 == 1);
+
 	switch (st) {
 	case STSIZE: ret = F_SORT(pa->size, pb->size); break;
 	case SATIME: /* fallthrough */
 	case SBTIME: /* fallthrough */
 	case SCTIME: /* fallthrough */
 	case SMTIME: ret = F_SORT(pa->time, pb->time); break;
-	case SVER: ret = xstrverscmp(pa->name, pb->name); break;
+	case SVER: ret =
+		have_utf8 == 1 ? strcoll(pa->name, pb->name)
+		: xstrverscmp(pa->name, pb->name);
+		break;
 	case SEXT: ret = sort_by_extension(pa, pb); break;
 	case SINO: ret = F_SORT(pa->inode, pb->inode); break;
-	case SOWN: ret = sort_by_owner(pa, pb); break;
-	case SGRP: ret = sort_by_group(pa, pb); break;
+	case SOWN: ret = sort_by_owner(pa, pb, have_utf8); break;
+	case SGRP: ret = sort_by_group(pa, pb, have_utf8); break;
 	case SBLK: ret = F_SORT(pa->blocks, pb->blocks); break;
 	case SLNK: ret = F_SORT(pa->linkn, pb->linkn); break;
 	case STYPE: ret = sort_by_type(pa, pb); break;
@@ -255,7 +262,7 @@ entrycmp(const void *a, const void *b)
 	}
 
 	if (!ret)
-		ret = namecmp(pa->name, pb->name);
+		ret = namecmp(pa->name, pb->name, have_utf8);
 
 	if (!conf.sort_reverse)
 		return ret;
