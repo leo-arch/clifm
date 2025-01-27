@@ -176,7 +176,8 @@ sort_by_extension(struct fileinfo *pa, struct fileinfo *pb)
 		if (!e2)
 			return 1;
 
-		return strcasecmp(e1, e2);
+		return conf.case_sens_list == 1
+			? strcmp(e1, e2) : strcasecmp(e1, e2);
 	}
 
 	return 0;
