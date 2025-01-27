@@ -225,7 +225,7 @@ ExtColors="applescript=CODE:asm=CODE:awk=CODE:bash=CODE:bat=CODE:c=CODE:c++=CODE
 
 # DOCUMENTS
 define DOC=1 # Bold
-ExtColors="abw=DOC:csv=DOC:doc=DOC:docm=DOC:docx=DOC:fodg=DOC:fodp=DOC:fods=DOC:fodt=DOC:odg=DOC:odp=DOC:ods=DOC:odt=DOC:pps=DOC:ppt=DOC:pptm=DOC:pptx=DOC:rtf=DOC:sxi=DOC:sxw=DOC:txt=DOC:xlr=DOC:xls=DOC:xlsm=DOC:xlsx=DOC:"
+ExtColors="abw=DOC:chm=DOC:csv=DOC:doc=DOC:docm=DOC:docx=DOC:fodg=DOC:fodp=DOC:fods=DOC:fodt=DOC:odg=DOC:odp=DOC:ods=DOC:odt=DOC:pps=DOC:ppt=DOC:pptm=DOC:pptx=DOC:rtf=DOC:sxi=DOC:sxw=DOC:txt=DOC:xlr=DOC:xls=DOC:xlsm=DOC:xlsx=DOC:"
 
 # EBOOKS
 define EBOOK=1 # Bold
@@ -247,7 +247,7 @@ ExtColors="css=MARKUP:htm=MARKUP:html=MARKUP:ltx=MARKUP:markdown=MARKUP:md=MARKU
 
 # TEMPORARY FILES
 define TEMP=2;37 # Dimmed white
-ExtColors="aux=TEMP:bak=TEMP:bbl=TEMP:bc=TEMP:cache=TEMP:class=TEMP:git=TEMP:hi=TEMP:idx=TEMP:ilg=TEMP:ind=TEMP:la=TEMP:lo=TEMP:localized=TEMP:lock=TEMP:log=TEMP:o=TEMP:orig=TEMP:out=TEMP:pid=TEMP:pyc=TEMP:pyd=TEMP:pyo=TEMP:rej=TEMP:rlib=TEMP:sty=TEMP:swp=TEMP:tmp=TEMP:toc=TEMP:"
+ExtColors="$$$=TEMP:aux=TEMP:bak=TEMP:bbl=TEMP:bc=TEMP:cache=TEMP:class=TEMP:git=TEMP:hi=TEMP:idx=TEMP:ilg=TEMP:ind=TEMP:la=TEMP:lo=TEMP:localized=TEMP:lock=TEMP:log=TEMP:orig=TEMP:out=TEMP:pid=TEMP:pyc=TEMP:pyd=TEMP:pyo=TEMP:rej=TEMP:rlib=TEMP:sty=TEMP:swp=TEMP:tmp=TEMP:toc=TEMP:"
 
 # VIDEO FILES
 define VIDEO=1;35 # Bold magenta

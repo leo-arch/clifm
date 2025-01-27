@@ -234,7 +234,7 @@ ExtColors="cfg=CONFIG:clifm=CONFIG:conf=CONFIG:desktop=CONFIG:hjson=CONFIG:ini=C
 
 # DOCUMENTS
 define DOC=@228
-ExtColors="abw=DOC:csv=DOC:doc=DOC:docm=DOC:docx=DOC:eml=DOC:fodg=DOC:fodp=DOC:fods=DOC:fodt=DOC:gdoc=DOC:key=DOC:keynote=DOC:numbers=DOC:odg=DOC:odp=DOC:ods=DOC:odt=DOC:pages=DOC:pps=DOC:ppt=DOC:pptm=DOC:pptx=DOC:rtf=DOC:sla=DOC:sxi=DOC:sxw=DOC:txt=DOC:xlr=DOC:xls=DOC:xlsm=DOC:xlsx=DOC:"
+ExtColors="abw=DOC:chm=DOC:csv=DOC:doc=DOC:docm=DOC:docx=DOC:eml=DOC:fodg=DOC:fodp=DOC:fods=DOC:fodt=DOC:gdoc=DOC:key=DOC:keynote=DOC:numbers=DOC:odg=DOC:odp=DOC:ods=DOC:odt=DOC:pages=DOC:pps=DOC:ppt=DOC:pptm=DOC:pptx=DOC:rtf=DOC:sla=DOC:sxi=DOC:sxw=DOC:txt=DOC:xlr=DOC:xls=DOC:xlsm=DOC:xlsx=DOC:"
 
 # EBOOKS
 define EBOOK=@223
@@ -260,7 +260,7 @@ ExtColors="css=MARKUP:htm=MARKUP:html=MARKUP:ltx=MARKUP:markdown=MARKUP:md=MARKU
 
 # TEMPORARY FILES
 define TEMP=@247
-ExtColors="aux=TEMP:bak=TEMP:bbl=TEMP:bc=TEMP:bk=TEMP:bkp=TEMP:cache=TEMP:class=TEMP:git=TEMP:hi=TEMP:idx=TEMP:ilg=TEMP:ind=TEMP:la=TEMP:lo=TEMP:localized=TEMP:lock=TEMP:log=TEMP:o=TEMP:orig=TEMP:out=TEMP:pid=TEMP:pyc=TEMP:pyd=TEMP:pyo=TEMP:rej=TEMP:rlib=TEMP:sty=TEMP:swp=TEMP:tmp=TEMP:toc=TEMP:"
+ExtColors="$$$=TEMP:aux=TEMP:bak=TEMP:bbl=TEMP:bc=TEMP:bk=TEMP:bkp=TEMP:cache=TEMP:class=TEMP:git=TEMP:hi=TEMP:idx=TEMP:ilg=TEMP:ind=TEMP:la=TEMP:lo=TEMP:localized=TEMP:lock=TEMP:log=TEMP:orig=TEMP:out=TEMP:pid=TEMP:pyc=TEMP:pyd=TEMP:pyo=TEMP:rej=TEMP:rlib=TEMP:sty=TEMP:swp=TEMP:tmp=TEMP:toc=TEMP:"
 
 # DATABASES
 define DB=@211
