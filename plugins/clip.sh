@@ -61,7 +61,7 @@ print_help() {
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
 	printf "Interact with the system clipboard\n"
 	printf "\n\x1b[1mUSAGE\x1b[0m\n  %s [e, export] [i, import]\n" "$name"
-	printf "\nUse the 'e, export' parameter to send selected files to the system clipboard (as a newline separated list of entries), and the 'i, import' parameter to import files (as a newline separated list) from the system clipboard to CliFM's Selection Box\n"
+	printf "\nUse the 'e, export' parameter to send selected files to the system clipboard (as a newline separated list of entries), and the 'i, import' parameter to import files (as a newline separated list) from the system clipboard to Clifm's Selection Box\n"
 }
 
 if [ -z "$1" ] || [ "$1" = "--help" ] || [ "$1" = "-h" ] ; then

@@ -21,7 +21,7 @@ if ! [ -f "$file" ]; then
 fi
 
 if [ -z "$CLIFM" ] || ! [ -f "${CLIFM}/bookmarks.clifm" ]; then
-	printf "Bookmarks file for CliFM not found\n" >&2
+	printf "Bookmarks file for Clifm not found\n" >&2
 	exit 1
 fi
 
@@ -44,7 +44,7 @@ while read -r line; do
 	fi
 
 	if [ -z "$name" ] || [ -z "$path" ]; then
-		printf "CliFM: %s: Bookmark cannot be imported\n" "$line" >&2
+		printf "clifm: %s: Bookmark cannot be imported\n" "$line" >&2
 		continue
 	fi
 	bmn=$((bmn + 1))
@@ -52,14 +52,14 @@ while read -r line; do
 done < "$file"
 
 if [ "$bmn" -gt 0 ]; then
-	printf "CliFM: %d bookmark(s) successfully imported\n" "$bmn"
+	printf "clifm: %d bookmark(s) successfully imported\n" "$bmn"
 	if [ -n "$CLIFM_BUS" ]; then
 		echo "bm reload" > "$CLIFM_BUS"
 	else
 		printf "Restart CliFM for changes to take effect\n"
 	fi
 else
-	printf "CliFM: No bookmarks imported\n"
+	printf "clifm: No bookmarks imported\n"
 fi
 
 exit 0

@@ -65,7 +65,7 @@ if [ "$finder" = "fzf" ]; then
 	--bind "tab:accept" --info=inline --color="$(get_fzf_colors)")"
 else
 	# shellcheck disable=SC2012
-	FILE="$(ls -A | rofi -dmenu -p CliFM)"
+	FILE="$(ls -A | rofi -dmenu -p clifm)"
 fi
 
 if [ -n "$FILE" ]; then

@@ -11,7 +11,7 @@
 # Right, Enter: cd into hovered directory or open hovered file and exit.
 # Home/end: go to first/last file
 # TAB: Select files
-# Ctrl-s: Confirm selection: send selected files to CliFM Selbox
+# Ctrl-s: Confirm selection: send selected files to Clifm's Selbox
 # Shift+up/down: Move one line up/down in the preview window
 # Alt+up/down: Move to the beginning/end in the preview window
 # Press Esc or Ctrl-q to exit.

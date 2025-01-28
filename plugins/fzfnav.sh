@@ -158,7 +158,7 @@ $FZF_HEADER" --marker="*" --preview-window=:wrap "$(fzf_borders)" \
 		# If FZF returned no file, exit
 		[ ${#file} -eq 0 ] && return 0
 
-		# If we have selected files, send them to the CliFM Selbox
+		# If we have selected files, send them to the Clifm Selbox
 		if [ -f "$TMP_SEL" ]; then
 			echo "$file" > "$TMP_SEL"
 			while read -r line; do

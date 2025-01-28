@@ -8,7 +8,7 @@
 
 if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "-h" ]; }; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
-	printf "Navigate CliFM's jump database via FZF or Rofi. Press Enter to cd into the selected directory\n"
+	printf "Navigate Clifm's jump database via FZF or Rofi. Press Enter to cd into the selected directory\n"
 	printf "\n\x1b[1mUSAGE\x1b[0m\n  %s\n" "$name"
 	exit 0
 fi
@@ -45,7 +45,7 @@ fzf --reverse --height "$fzf_height" \
 --color="$(get_fzf_colors)" \
 --prompt="$fzf_prompt" --header "Jump to a directory in the jump database")"
 else
-	path="$(cut -d ":" -f4 "$FILE" | grep -v ^"@" | rofi -dmenu -p CliFM)"
+	path="$(cut -d ":" -f4 "$FILE" | grep -v ^"@" | rofi -dmenu -p clifm)"
 fi
 
 if [ -n "$path" ]; then

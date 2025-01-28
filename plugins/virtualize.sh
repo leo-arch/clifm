@@ -6,7 +6,7 @@
 # Author: L. Abramovich
 # License: GPL2+
 
-# Note: A new instance of CliFM will be spawned on a new terminal window
+# Note: A new instance of Clifm will be spawned on a new terminal window
 # using $term_cmd, which defaults to 'xterm -e'. Edit this variable to
 # use your favorite terminal emulator instead, for example:
 # term_cmd="kitty sh -c"

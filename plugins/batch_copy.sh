@@ -21,7 +21,7 @@ fi
 
 DEST=$(mktemp "${TMPDIR:-/tmp}/clifm_bcd.XXXXXX")
 
-printf "# CliFM - Copy files in batch\n\
+printf "# Clifm - Copy files in batch\n\
 # Write here destinty files/directories, one per line.\n\
 # Blank and commented lines are omitted.\n\
 # Just quit the editor to cancel the operation.\n" > "$DEST"

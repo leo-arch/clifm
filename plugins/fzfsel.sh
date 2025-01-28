@@ -18,7 +18,7 @@ starting from the current directory (aka flat or branch view).
 \PATTERN is a glob expression used to filter files. Ex: '-f \*.pdf' \
 will recursively list all .pdf files in the current directory.
 
-At exit, selected files are sent to CliFM's Selection Box.
+At exit, selected files are sent to Clifm's Selection Box.
 
 Dependencies: fzf(1), find(1)\n" "$name"
 	exit 0
@@ -56,7 +56,7 @@ Ctrl-d: Deselect all files
 
 Ctrl-t: Invert selection
 
-Enter: Confirm selection, exit, and send selected files to CliFM
+Enter: Confirm selection, exit, and send selected files to Clifm
 
 Esc: Cancel and exit"
 

@@ -26,7 +26,7 @@ DIRS=$(mktemp "$TMP_DIR/clifm_bn_dirs.XXXXXX")
 dirsn=0
 filesn=0
 
-printf "# CliFM - Create files in batch\n\
+printf "# Clifm - Create files in batch\n\
 #\n\
 # Write below the file names to be created.\n\
 # End file names with a slash to create a directory.\n\
