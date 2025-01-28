@@ -223,6 +223,20 @@ sort_by_type(struct fileinfo *pa, struct fileinfo *pb)
 	return sort_by_extension(pa, pb);
 }
 
+static int
+sort_by_version(char *s1, char *s2, const int have_utf8)
+{
+	if (have_utf8 == 0)
+		return xstrverscmp(s1, s2);
+
+	if (conf.skip_non_alnum_prefix == 1) {
+		skip_name_prefixes(&s1);
+		skip_name_prefixes(&s2);
+	}
+
+	return strcoll(s1, s2);
+}
+
 int
 entrycmp(const void *a, const void *b)
 {
@@ -248,10 +262,7 @@ entrycmp(const void *a, const void *b)
 	case SBTIME: /* fallthrough */
 	case SCTIME: /* fallthrough */
 	case SMTIME: ret = F_SORT(pa->time, pb->time); break;
-	case SVER: ret =
-		have_utf8 == 1 ? strcoll(pa->name, pb->name)
-		: xstrverscmp(pa->name, pb->name);
-		break;
+	case SVER: ret = sort_by_version(pa->name, pb->name, have_utf8); break;
 	case SEXT: ret = sort_by_extension(pa, pb); break;
 	case SINO: ret = F_SORT(pa->inode, pb->inode); break;
 	case SOWN: ret = sort_by_owner(pa, pb, have_utf8); break;
