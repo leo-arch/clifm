@@ -1126,7 +1126,11 @@ Available methods: 0=none, 1=name, 2=size, 3=atime, 4=btime,\n\
     st size (or 'st <TAB>' to choose from a list)\n\
     Sort numbers can be used as well (e.g. 'st 2')\n\
 - Revert the current sorting order (e.g. z-a instead of a-z)\n\
-    st rev"
+    st rev\n\
+- Both of the above at once\n\
+    st size rev\n\n\
+Tip: Pin files at the top of the list using the PrioritySortChar\n\
+option in the configuration file."
 
 #define TAG_USAGE "(Un)tag files and/or directories\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
