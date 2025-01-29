@@ -2687,9 +2687,6 @@ list_dir_light(const int autocmd_ret)
 	file_info[n].name = (char *)NULL;
 	files = n;
 
-	if (hidden_list)
-		free_dothidden(&hidden_list);
-
 	if (checks.scanning == 1)
 		erase_scanning_message();
 
@@ -2737,6 +2734,9 @@ list_dir_light(const int autocmd_ret)
 		list_files_horizontal(&counter, &reset_pager, eln_len, columns_n);
 
 END:
+	if (hidden_list)
+		free_dothidden(&hidden_list);
+
 	exit_code =
 		post_listing(close_dir == 1 ? dir : NULL, reset_pager,
 			excluded_files, autocmd_ret);
@@ -3211,7 +3211,7 @@ list_dir(void)
 
 	if (conf.clear_screen > 0) {
 		/* For some reason we need to clear the screen twice to prevent
-		 * a garbage first line when scrolling up */
+		 * a garbage first line when scrolling up. */
 		CLEAR;
 		fflush(stdout);
 	}
@@ -3439,9 +3439,6 @@ list_dir(void)
 		count++;
 	}
 
-	if (hidden_list)
-		free_dothidden(&hidden_list);
-
 	/* Since we allocate memory by chunks, we might have allocated more
 	 * than needed. Reallocate only actually used memory.
 	 * NOTE: Haven't been able to measure any memory usage difference
@@ -3513,6 +3510,9 @@ list_dir(void)
 				 * ######################### */
 
 END:
+	if (hidden_list)
+		free_dothidden(&hidden_list);
+
 	exit_code =
 		post_listing(close_dir == 1 ? dir : NULL, reset_pager,
 			excluded_files, autocmd_ret);
