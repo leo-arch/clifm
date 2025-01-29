@@ -66,7 +66,7 @@
  * 1. "*~"   Gral purpose temp files (mostly used by text editors)
  * 2. "#*#"  Emacs auto-save temp files
  * 3. ".~*#" Libreoffice lock files
- * 4. "~$*"  Office temp files
+ * 4. "~$*"  MS Office temp files
  * NOTE: MC seems to take only "*~" and "#*" as temp files. */
 #define IS_TEMP_FILE(n, l) ( (l) > 0               \
 	&& ((n)[(l) - 1] == '~'                        \
@@ -2132,32 +2132,30 @@ END:
 /* Execute commands in either AUTOCMD_DIR_IN_FILE or AUTOCMD_DIR_OUT_FILE files.
  * MODE (either AUTOCMD_DIR_IN or AUTOCMD_DIR_OUT) tells the function
  * whether to check for AUTOCMD_DIR_IN_FILE or AUTOCMD_DIR_OUT_FILE files.
- * Used by the autocommands function. */
+ * DIR holds the absolute path to the .cfm.in file whenever we come from
+ * check_autocmd_in_file(). Otherwise, it must be NULL. */
 static void
-run_dir_cmd(const int mode)
+run_dir_cmd(const int mode, const char *dir)
 {
-	char path[PATH_MAX + 1];
+	char dpath[PATH_MAX + 1];
+	const char *path = (char *)NULL;
 
 	if (mode == AUTOCMD_DIR_IN) {
-		snprintf(path, sizeof(path), "%s/%s",
-			workspaces[cur_ws].path, AUTOCMD_DIR_IN_FILE);
+		if (!dir || !*dir)
+			return;
+		path = dir;
 	} else { /* AUTOCMD_DIR_OUT */
 		if (dirhist_cur_index <= 0 || !old_pwd
 		|| !old_pwd[dirhist_cur_index - 1])
 			return;
-		snprintf(path, sizeof(path), "%s/%s",
+		snprintf(dpath, sizeof(dpath), "%s/%s",
 			old_pwd[dirhist_cur_index - 1], AUTOCMD_DIR_OUT_FILE);
+		path = dpath;
 	}
 
 	int fd = 0;
-	FILE *fp;
-	struct stat a;
-
-	/* Non-regular files, empty regular files, or bigger than PATH_MAX bytes,
-	 * are rejected. */
-	if (lstat(path, &a) == -1 || !S_ISREG(a.st_mode)
-	|| a.st_size == 0 || a.st_size > PATH_MAX
-	|| !(fp = open_fread(path, &fd)))
+	FILE *fp = open_fread(path, &fd);
+	if (!fp)
 		return;
 
 	char buf[PATH_MAX + 1];
@@ -2180,24 +2178,6 @@ run_dir_cmd(const int mode)
 	if (xargs.secure_cmds == 0
 	|| sanitize_cmd(buf, SNT_AUTOCMD) == FUNC_SUCCESS)
 		launch_execl(buf);
-}
-
-/* Check if the file extension S is either "in" or "out".
- * We already know it starts with ".cfm.". */
-static void
-check_autocmd_file(const char *s)
-{
-	switch (*s) {
-	case 'i':
-		if (s[1] == 'n' && !s[2])
-			run_dir_cmd(AUTOCMD_DIR_IN);
-		break;
-	case 'o':
-		if (s[1] == 'u' && s[2] == 't' && !s[3])
-			dir_out = 1;
-		break;
-	default: break;
-	}
 }
 
 /* If the file at offset I is largest than SIZE, store information about this
@@ -2429,6 +2409,29 @@ erase_scanning_message(void)
 	fflush(stdout);
 }
 
+static void
+check_autocmd_files(void)
+{
+	struct stat a;
+	char buf[PATH_MAX + 1];
+
+	snprintf(buf, sizeof(buf), "%s/%s", workspaces[cur_ws].path,
+		AUTOCMD_DIR_IN_FILE);
+
+	/* Non-regular files, empty regular files, or bigger than PATH_MAX bytes,
+	 * are rejected. */
+	if (lstat(buf, &a) != -1 && S_ISREG(a.st_mode)
+	&& a.st_size > 0 && a.st_size <= PATH_MAX)
+		run_dir_cmd(AUTOCMD_DIR_IN, buf);
+
+	snprintf(buf, sizeof(buf), "%s/%s", workspaces[cur_ws].path,
+		AUTOCMD_DIR_OUT_FILE);
+
+	if (lstat(buf, &a) != -1 && S_ISREG(a.st_mode)
+	&& a.st_size > 0 && a.st_size <= PATH_MAX)
+		dir_out = 1;
+}
+
 /* List files in the current working directory (global variable 'path').
  * Unlike list_dir(), however, this function uses no color and runs
  * neither stat() nor count_dir(), which makes it quite faster. Return
@@ -2475,6 +2478,9 @@ list_dir_light(const int autocmd_ret)
 	posix_fadvise(fd, 0, 0, POSIX_FADV_SEQUENTIAL);
 #endif /* POSIX_FADV_SEQUENTIAL */
 
+	if (checks.autocmd_files == 1)
+		check_autocmd_files();
+
 	set_events_checker();
 
 	errno = 0;
@@ -2489,11 +2495,6 @@ list_dir_light(const int autocmd_ret)
 		/* Skip self and parent directories */
 		if (SELFORPARENT(ename))
 			continue;
-
-		/* Check .cfm.in and .cfm.out files for the autocommands function */
-		if (checks.autocmd_files == 1 && *ename == '.' && ename[1] == 'c'
-		&& ename[2] == 'f' && ename[3] == 'm' && ename[4] == '.' && ename[5])
-			check_autocmd_file(ename + 5);
 
 		/* Skip files according to a regex filter */
 		if (checks.filter_name == 1) {
@@ -3204,7 +3205,7 @@ list_dir(void)
 	}
 
 	if (dir_changed == 1 && dir_out == 1) {
-		run_dir_cmd(AUTOCMD_DIR_OUT);
+		run_dir_cmd(AUTOCMD_DIR_OUT, NULL);
 		dir_out = 0;
 	}
 
@@ -3273,6 +3274,9 @@ list_dir(void)
 	posix_fadvise(fd, 0, 0, POSIX_FADV_SEQUENTIAL);
 #endif /* POSIX_FADV_SEQUENTIAL */
 
+	if (checks.autocmd_files == 1)
+		check_autocmd_files();
+
 		/* ##########################################
 		 * #    GATHER AND STORE FILE INFORMATION   #
 		 * ########################################## */
@@ -3293,11 +3297,6 @@ list_dir(void)
 		/* Skip self and parent directories */
 		if (SELFORPARENT(ename))
 			continue;
-
-		/* Check .cfm.in and .cfm.out files for the autocommands function */
-		if (checks.autocmd_files == 1 && *ename == '.' && ename[1] == 'c'
-		&& ename[2] == 'f' && ename[3] == 'm' && ename[4] == '.' && ename[5])
-			check_autocmd_file(ename + 5);
 
 		/* Filter files according to a regex filter */
 		if (checks.filter_name == 1) {

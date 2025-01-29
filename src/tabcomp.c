@@ -1624,7 +1624,7 @@ get_finder_offset(const char *query, const char *text, char **matches,
 }
 
 /* Depending on the completion type, either the typed text (input buffer), or
- * the text to be inseted, needs to be modified. Let's do that here. */
+ * the text to be inserted, needs to be modified. Let's do this here. */
 static void
 do_some_cleanup(char **buf, char **matches, const char *query,
 	size_t *prefix_len)
@@ -1782,7 +1782,7 @@ move_cursor_up(const int total_line_len)
  *
  * These files are created immediately after this function returns by
  * store_completions() with permissions 600 (in a directory to which only the
- * current has read/write access). These files are then immediately read
+ * current user has read/write access). These files are then immediately read
  * by the finder application, and deleted as soon as this latter returns. */
 static void
 set_finder_paths(void)
@@ -2083,12 +2083,13 @@ AFTER_USUAL_COMPLETION:
 		char dead_slot;
 		char **temp_array;
 
-		if (cur_comp_type == TCMP_HIST) {// || cur_comp_type == TCMP_EXT_OPTS) {
+		if (cur_comp_type == TCMP_HIST) {
 			/* Sort the array without matches[0]: we need it to stay in
 			 * place no matter what. */
 			for (i = 0; matches[i]; i++);
 			if (i > 0)
-				qsort(matches + 1, i - 1, sizeof(char *), (QSFUNC *)compare_strings);
+				qsort(matches + 1, i - 1, sizeof(char *),
+					(QSFUNC *)compare_strings);
 		}
 
 		/* Remember the lowest common denominator: it may be unique. */
@@ -2189,7 +2190,6 @@ AFTER_USUAL_COMPLETION:
 				/* Found an embedded word break character in a potential
 				 match, so we need to prepend a quote character if we
 				 are replacing the completion string. */
-//				replacement = escape_str(matches[0]);
 				replacement = gen_quoted_str(matches[0]);
 			}
 		}
