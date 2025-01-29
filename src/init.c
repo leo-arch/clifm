@@ -247,6 +247,7 @@ init_conf_struct(void)
 	conf.preview_max_size = DEF_PREVIEW_MAX_SIZE;
 	conf.print_dir_cmds = DEF_PRINT_DIR_CMDS;
 	conf.print_selfiles = UNSET;
+	conf.priority_sort_char = DEF_PRIORITY_SORT_CHAR;
 	conf.private_ws_settings = DEF_PRIVATE_WS_SETTINGS;
 	conf.prompt_b_is_set = 0;
 	conf.prompt_b_min = DEF_PROMPT_B_MIN;

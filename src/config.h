@@ -28,6 +28,7 @@
 #define DUMP_CONFIG_STR  0
 #define DUMP_CONFIG_INT  1
 #define DUMP_CONFIG_BOOL 2
+#define DUMP_CONFIG_CHR  3
 
 __BEGIN_DECLS
 

@@ -90,6 +90,13 @@
 # true (you can also use the --sort-reverse option or the 'st rev' command).
 ;SortReverse=false
 
+# If sorting by 'name' or 'version', file names starting with PrioritySortChar
+# are listed at the top of the files list (do not quote the value).
+# Leave empty to unset (no priority character).
+# Supported values: ASCII characters from SPACE to TILDE.
+# Tip: A common value for this option is underscore (_).
+;PrioritySortChar=
+
 # Display extended file metadata next to file names (long listing format).
 ;LongViewMode=false
 

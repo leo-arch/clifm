@@ -120,6 +120,15 @@ print_config_value(const char *option, void *cur_value, void *def_value,
 				cv == 1 ? "true" : "false", dv == 1 ? "true" : "false", df_c);
 	}
 
+	else if (type == DUMP_CONFIG_CHR) {
+		char cv = *((char *)cur_value), dv = *((char *)def_value);
+		if (cv == dv)
+			printf("  %s: '%c'\n", option, cv);
+		else
+			printf("%s%s%s %s%s: '%c' ['%c']%s\n", mi_c, ptr, df_c, BOLD, option,
+				cv, dv, df_c);
+	}
+
 	else { /* CONFIG_BOOL_INT */
 		int cv = *((int *)cur_value), dv = *((int *)def_value);
 		if (cv == dv)
@@ -454,6 +463,10 @@ dump_config(void)
 	n = DEF_PRINTSEL;
 	print_config_value("PrintSelfiles", &conf.print_selfiles, &n,
 		DUMP_CONFIG_BOOL);
+
+	n = DEF_PRIORITY_SORT_CHAR;
+	print_config_value("PrioritySortChar", &conf.priority_sort_char,
+		&n, DUMP_CONFIG_CHR);
 
 	n = DEF_PRIVATE_WS_SETTINGS;
 	print_config_value("PrivateWorkspaceSettings", &conf.private_ws_settings,
@@ -1910,7 +1923,9 @@ create_main_config_file(char *file)
 # version, extension, inode, owner, group, blocks, links, type.\n\
 ;Sort=version\n\
 # Sort in reverse order\n\
-;SortReverse=%s\n\n"
+;SortReverse=%s\n\
+# Files starting with PrioritySortChar are listed at top of the files list.\n\
+;PrioritySortChar:%c\n\n"
 
 	"# If set to true, settings changed in the current workspace (only via\n\
 # the command line or keyboard shortcuts) are kept private to that workspace\n\
@@ -1961,6 +1976,7 @@ create_main_config_file(char *file)
 		DEF_SHARE_SELBOX == 1 ? "true" : "false",
 		DEF_TERM_CMD,
 		DEF_SORT_REVERSE == 1 ? "true" : "false",
+		DEF_PRIORITY_SORT_CHAR == 0 ? '0' : DEF_PRIORITY_SORT_CHAR,
 		DEF_PRIVATE_WS_SETTINGS == 1 ? "true" : "false",
 		DEF_TIPS == 1 ? "true" : "false",
 		DEF_LIST_DIRS_FIRST == 1 ? "true" : "false",
@@ -3522,6 +3538,12 @@ read_config(void)
 		else if (xargs.print_selfiles == UNSET && *line == 'P'
 		&& strncmp(line, "PrintSelfiles=", 14) == 0) {
 			set_config_bool_value(line + 14, &conf.print_selfiles);
+		}
+
+		else if (*line == 'P' && strncmp(line, "PrioritySortChar=", 17) == 0) {
+			const int c = line[17];
+			if (c >= 32 && c <= 126) /* Same as isprint(c) */
+				conf.priority_sort_char = c;
 		}
 
 		else if (*line == 'P'

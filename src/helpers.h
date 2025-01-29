@@ -1190,6 +1190,7 @@ struct config_t {
 	int preview_max_size;
 	int print_dir_cmds;
 	int print_selfiles;
+	int priority_sort_char;
 	int private_ws_settings;
 	int prompt_b_is_set;
 	int prompt_b_min;
@@ -1228,7 +1229,6 @@ struct config_t {
 #endif /* !_NO_TRASH */
 	int warning_prompt;
 	int welcome_message;
-	int pad3;
 };
 
 extern struct config_t conf;

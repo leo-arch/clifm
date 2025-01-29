@@ -102,9 +102,23 @@ compare_strings(char **s1, char **s2)
 #endif /* HAVE_STRCOLL */
 }
 
+static inline int
+check_priority_sort_char(const char c1, const char c2)
+{
+	return (
+		(c1 == conf.priority_sort_char && c2 != conf.priority_sort_char) ? -1
+		: ((c1 != conf.priority_sort_char && c2 == conf.priority_sort_char) ? 1
+		: 0));
+}
+
 static int
 namecmp(char *s1, char *s2, const int have_utf8)
 {
+	const int p = conf.priority_sort_char != 0
+		? check_priority_sort_char(*s1, *s2) : 0;
+	if (p != 0)
+		return p;
+
 	if (conf.skip_non_alnum_prefix == 1) {
 		skip_name_prefixes(&s1);
 		skip_name_prefixes(&s2);
@@ -226,6 +240,11 @@ sort_by_type(struct fileinfo *pa, struct fileinfo *pb)
 static int
 sort_by_version(char *s1, char *s2, const int have_utf8)
 {
+	const int p = conf.priority_sort_char != 0
+		? check_priority_sort_char(*s1, *s2) : 0;
+	if (p != 0)
+		return p;
+
 	if (have_utf8 == 0)
 		return xstrverscmp(s1, s2);
 
