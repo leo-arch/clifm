@@ -38,6 +38,7 @@
 ^image/svg\+xml$=~/.config/clifm/clifmimg svg %f %u;
 ^image/(jpeg|png|tiff|webp|x-xwindow-dump)$=~/.config/clifm/clifmimg image %f %u;
 ^image/.*=~/.config/clifm/clifmimg gif %f %u;
+N:.*\.ora$=~/.config/clifm/clifmimg gif %f %u;
 ^video/.*|^application/(mxf|x-shockwave-flash|vnd.rn-realmedia)$=~/.config/clifm/clifmimg video %f %u;
 ^audio/.*=~/.config/clifm/clifmimg audio %f %u;
 ^application/postscript$=~/.config/clifm/clifmimg postscript %f %u;
