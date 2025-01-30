@@ -2418,7 +2418,7 @@ create_mime_file_anew(char *file)
 \n\
 X:N:.*\\.djvu$=djview %%x;zathura %%x;xreader %%x;evince %%x;atril %%x\n\
 X:N:.*\\.(fb2|epub)$=mupdf %%x;zathura %%x;xreader %%x;ebook-viewer %%x;FBReader %%x;foliate %%x\n\
-X:N:.*\\.mobi$=mupdf;ebook-viewer %%x;FBReader %%x;foliate %%x\n\
+X:N:.*\\.mobi$=mupdf %%x;ebook-viewer %%x;FBReader %%x;foliate %%x\n\
 X:N:.*\\.(cbr|cbz|cb7|cbt|cba)$=mcomix %%x;xreader %%x;YACReader %%x;qcomicbook %%x;zathura %%x;foliate %%x\n\
 X:N:.*\\.chm$=xchm %%x\n\
 X:N:.*\\.abw$=abiword %%x;libreoffice %%x;soffice %%x;ooffice %%x\n\
