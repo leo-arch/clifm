@@ -1129,8 +1129,8 @@ Available methods: 0=none, 1=name, 2=size, 3=atime, 4=btime,\n\
     st rev\n\
 - Both of the above at once\n\
     st size rev\n\n\
-Tip: Pin files at the top of the list using the PrioritySortChar\n\
-option in the configuration file."
+Tip: Take a look at the configuration file for extra sorting\n\
+options (ListDirsFirst, PrioritySortChar, ShowHiddenFiles)."
 
 #define TAG_USAGE "(Un)tag files and/or directories\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
