@@ -7,7 +7,7 @@
 
 # Lines starting with either '#' or ';' are commented (ignored).
 # Options starting with a ';' hold the default value, but are commented.
-# To override a default value, uncomment the corresponding option.
+# To override a default value uncomment the corresponding option.
 
 
 #=====================================#
@@ -15,6 +15,9 @@
 #=====================================#
 
 # Show hidden files (i.e. files starting with a dot).
+# Supported values: true, false, first, last.
+# If 'true', hidden files are sorted according to the value of the Sort
+# option (see below).
 ;ShowHiddenFiles=false
 
 # Files listed in a '.hidden' file in the current directory will be hidden
@@ -65,23 +68,23 @@
 ;ColorLinksAsTarget=false
 
 # Mas, the files list pager. Possible values are:
-# 0/false: Disable the pager.
-# 1/true: Run the pager whenever the list of files does not fit on the screen.
-# >1: Run the pager whenever the amount of files in the current directory is
-# greater than or equal to this value (say, 1000).
+# 0/false = Disable the pager.
+# 1/true  = Run the pager whenever the list of files does not fit on the screen.
+# >1      = Run the pager whenever the amount of files in the current directory is
+#           greater than or equal to this value (say, 1000).
 ;Pager=false
 
-# How to list files in the pager. Possible values:
-# auto: use the current listing mode
-# long: list files in long view
-# short: list files in short view
+# How to list files in the pager. Supported values:
+# auto  = Use the current listing mode
+# long  = List files in long view
+# short = List files in short view
 ;PagerView=auto
 
 # How to list files: 0 = vertically (like ls(1) would), 1 = horizontally.
 ;ListingMode=0
 
 # How to sort listed files.
-# Available options: none, name, version, extension, type, blocks, size,
+# Supported values: none, name, version, extension, type, blocks, size,
 # links, atime, btime, ctime, mtime, inode, owner, and group.
 ;Sort=version
 
@@ -90,9 +93,8 @@
 # true (you can also use the --sort-reverse option or the 'st rev' command).
 ;SortReverse=false
 
-# If sorting by 'name' or 'version', file names starting with PrioritySortChar
-# are listed at the top of the files list (do not quote the value).
-# Leave empty to unset (no priority character).
+# Sort file names starting with PrioritySortChar first.
+# Do not quote the value. Leave empty to unset (no priority character).
 # Supported values: ASCII characters from SPACE to TILDE.
 # Tip: A common value for this option is underscore (_).
 ;PrioritySortChar=
@@ -101,16 +103,18 @@
 ;LongViewMode=false
 
 # Properties fields to be displayed for each file name in long view mode:
-# f = files counter (for directories)
-# B = file allocated blocks
-# d = inode number
-# l = number of hard links
-# p|n = permissions: either symbolic (p) or numeric/octal (n)
-# i|I = user/group IDs: either as number (i) or name (I)
-# G = if i|I is set, don't print groups
-# a|b|m|c = last (a)ccess, (b)irth, (m)odification, or status (c)hange time
-# s|S = size (either human readable (s) or bytes (S))
-# x = extended attributes/capabilities/ACLs (marked as '@') (requires p|n)
+# f       = Files counter (for directories)
+# B       = File allocated blocks
+# d       = Inode number
+# l       = Number of hard links
+# p|n     = Permissions: either symbolic (p) or numeric/octal (n)
+# i|I     = User/group IDs: either as number (i) or name (I)
+# G       = If i|I is set, don't print groups
+# a|b|m|c = Last (a)ccess, (b)irth, (m)odification, or status (c)hange time
+# s|S     = Size (either human readable (s) or bytes (S))
+# x       = Extended attributes/capabilities/ACLs (marked as '@')
+#           (requires p|n)
+#
 # A single dash ("-") disables all fields
 #
 # Note that, exception made of 'x' and 'G', fields will be displayed in the
@@ -126,7 +130,7 @@
 ;PropFieldsGap=1
 
 # Style used to print timestamps in long view mode.
-# Available styles: default, relative, iso, long-iso, full-iso, +FORMAT
+# Supported values: default, relative, iso, long-iso, full-iso, +FORMAT
 # FORMAT is interpreted like in strftime(3).
 # Defaults to "+%b %e %H:%M" for recent files (< 6 months) and "+%b %e  %Y"
 # for older files.
@@ -146,7 +150,7 @@
 ;TimestampMark=false
 
 # Same as TimeStyle, but for the 'p/pp' command.
-# Available styles: default, iso, long-iso, full-iso, full-iso-nano, +FORMAT
+# Supported values: default, iso, long-iso, full-iso, full-iso-nano, +FORMAT
 # Nano-second precision is available via the %N modifier.
 ;PTimeStyle="+%Y-%m-%d %H:%M:%S.%N %z"
 
@@ -166,9 +170,9 @@
 ;LightMode=false
 
 # Clear the screen before listing files.
-# Possible values: 'true', 'false', 'internal' (restrict this behavior to
+# Supported values: true, false, internal (restrict this behavior to
 # internal commands only: shell commands won't clear the screen).
-# Note: if set to 'internal', the current list of files won't be refreshed
+# Note: If set to 'internal', the current list of files won't be refreshed
 # even if an external command creates, removes, or renames a file in the
 # current directory.
 ;ClearScreen=true
@@ -245,7 +249,7 @@
 # (https://github.com/leo-arch/clifm/wiki) for more information.
 ;Icons=false
 
-# Number of spaces between icons and file names (valid values: 0, 1, 2).
+# Number of spaces between icons and file names (supported values: 0, 1, 2).
 ;IconsGap=1
 
 
@@ -254,7 +258,7 @@
 #=====================================#
 
 # Set quoting style used to expand ELN's (regular files only).
-# Quoting styles: 'backslash' (default), 'single', or 'double' quotes.
+# Supported values: 'backslash' (default), 'single', or 'double' quotes.
 # Useful when using shells not supporting backslashes as quoting
 # mechanism (e.g.: nushell or xonsh).
 ;QuotingStyle=backslash
@@ -262,7 +266,7 @@
 # Enable fuzzy matching for filename/path completions and suggestions.
 ;FuzzyMatching=false
 
-# Fuzzy algorithm. Available options are:
+# Fuzzy algorithm. Supported values:
 # 1 = faster, not Unicode aware
 # 2 = slower, Unicode aware (note that this second algorithm will
 # nonetheless fallback to the first one whenever the query string
@@ -270,13 +274,13 @@
 # penalty).
 ;FuzzyAlgorithm=2
 
-# TAB completion mode: 'standard', 'fzf', 'fnf' or 'smenu'. Defaults
-# to 'fzf' if the binary is found in PATH. Othwerwise, the standard
-# mode is used.
+# TAB completion mode. Supported values: standard, fzf, fnf, smenu.
+# Defaults to 'fzf' if the binary is found in PATH. Othwerwise, the
+# standard mode is used.
 ;TabCompletionMode=
 
-# File previews for TAB completion (fzf mode only). Possible values:
-# 'true', 'false', 'hidden' (enabled, but hidden; toggle with Alt-p).
+# File previews for TAB completion (fzf mode only). Supported values:
+# true, false, hidden (enabled, but hidden; toggle with Alt-p).
 ;FzfPreview=true
 
 # Do not preview files larger than PreviewMaxSize.
@@ -332,20 +336,21 @@
 ;ReadAutocmdFiles=false
 
 # Inform about autocommand options set for the current directory
-# Available values:
-# 'none': Do not print any message.
-# 'mini': Minimal message (no options details).
-# 'short': Add the list of autocommand options (without values).
-# 'long': Like 'short', but displays the value of each option (multiple
-#   matching autocommands are merged into a single line).
-# 'full': Like 'long', but multiple autocommands are printed on separate
-#   lines. Also, a 'T' is appended to mark temporary autocommands (i.e.,
-#   set via the 'auto' command).
-# 'prompt': Print a little notification (a gray 'A') in the prompt.
-#   The color code used for this notification is 'ac' (see the color scheme file).
-#   If Notifications is set to false for the current prompt (see the prompts file),
-#   nothing is printed (you can use the '\y' prompt code in the prompts file to
-#   manually set this notification).
+# Supported values:
+# none   = Do not print any message.
+# mini   = Minimal message (no options details).
+# short  = Add the list of autocommand options (without values).
+# long   = Like 'short', but displays the value of each option (multiple
+#          matching autocommands are merged into a single line).
+# full   = Like 'long', but multiple autocommands are printed on separate
+#          lines. Also, a 'T' is appended to mark temporary autocommands
+#          (i.e., set via the 'auto' command).
+# prompt = Print a little notification (a gray 'A') in the prompt.
+#          The color code used for this notification is 'ac' (see the color
+#          scheme file).
+#          If Notifications is set to false for the current prompt (see the
+#          prompts file), nothing is printed (you can use the '\y' prompt
+#          code in the prompts file to manually set this notification).
 ;InformAutocmd=prompt
 
 # Run in read-only mode (internal commands able to modify the file
@@ -365,21 +370,21 @@
 # confirmation off for a single command. E.g.: 'r -f FILE'.
 ;rmForce=false
 
-# Set the default copy command. Available options are:
-# 0: 'cp -Rp'
-# 1: 'cp -Rp' (force: do not prompt before overwrite)
-# 2: 'advcp -gRp'
-# 3: 'advcp -gRp' (force)
-# 4: 'wcp'
-# 5: 'rsync -avP'
+# Set the default copy command. Supported values:
+# 0 = 'cp -Rp'
+# 1 = 'cp -Rp' (force: do not prompt before overwrite)
+# 2 = 'advcp -gRp'
+# 3 = 'advcp -gRp' (force)
+# 4 = 'wcp'
+# 5 = 'rsync -avP'
 # Note: Options 2-5 include a progress bar.
 ;cpCmd=0
 
-# Set the default move command. Available options are:
-# 0: 'mv'
-# 1: 'mv' (force: do not prompt before overwrite)
-# 2: 'advmv -g'
-# 3: 'advmv -g' (force)
+# Set the default move command. Supported values:
+# 0 = 'mv'
+# 1 = 'mv' (force: do not prompt before overwrite)
+# 2 = 'advmv -g'
+# 3 = 'advmv -g' (force)
 # Note: Options 2 and 3 include a progress bar.
 ;mvCmd=0
 
@@ -387,12 +392,12 @@
 # confirmation prompts. Each field has two values separated by a colon (':').
 #
 # The left value specifies a confirmation prompt:
-#  'o': overwrite files (mostly 'c' and 'm' commands)
-#  'r': remove ('r' command)
-#  't': trash ('t' command)
-#  'R': bulk rename ('br' command)
-#  'd': All confirmation prompts (excluding, if defined, the above ones)
-#  'D': All confirmation prompts (including the above ones, no matter their value)
+#  o = overwrite files (mostly 'c' and 'm' commands)
+#  r = remove ('r' command)
+#  t = trash ('t' command)
+#  R = bulk rename ('br' command)
+#  d = All confirmation prompts (excluding, if defined, the above ones)
+#  D = All confirmation prompts (including the above ones, no matter their value)
 #
 # The right value holds the default answer for the corresponding prompt:
 #  'y', 'n', or 'u' (unset - no default answer, wait for explicit input).
@@ -405,7 +410,7 @@
 # trash, and 'y' for everything else: "r:n,t:u,d:y".
 ;DefaultAnswer="o:n,r:n,t:y,R:n,d:y"
 
-# How should the 'l' command create symbolic links. Possible values:
+# How should the 'l' command create symbolic links. Supported values:
 # absolute = Make the target an absolute path
 # relative = Make the target relative to the link location (like 'ln -rs')
 # literal  = Do not resolve the target at all (like 'ln -s')
