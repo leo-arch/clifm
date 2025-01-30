@@ -1728,7 +1728,7 @@ create_main_config_file(char *file)
 ;TabCompletionMode=\n\n"
 
 		"# File previews for TAB completion (fzf mode only). Possible values:\n\
-# 'true', 'false', 'hidden' (enabled, but hidden; toggle it with Alt-p)\n\
+# true, false, hidden (enabled, but hidden; toggle it with Alt-p)\n\
 ;FzfPreview=%s\n\n"
 
 		"# Do not preview files larger than this value (-1 for unlimited).\n\
@@ -1738,6 +1738,7 @@ create_main_config_file(char *file)
 ;WelcomeMessageStr=\"\"\n\n\
 # Print %s's logo screen at startup.\n\
 ;SplashScreen=%s\n\n\
+# Show hidden files (true, false, first, last)\n\
 ;ShowHiddenFiles=%s\n\n\
 # Display extended file metadata next to file names (long listing format).\n\
 ;LongViewMode=%s\n\
@@ -3221,6 +3222,27 @@ set_preview_max_size(char *val)
 	}
 }
 
+static void
+set_show_hidden_files(const char *val)
+{
+	if (!val || !*val)
+		return;
+
+	if (*val == 't' && strncmp(val, "true\n", 5) == 0) {
+		conf.show_hidden = HIDDEN_TRUE;
+	} else if (*val == 'f') {
+		if (strncmp(val, "false\n", 6) == 0) {
+			conf.show_hidden = HIDDEN_FALSE;
+		} else {
+			if (strncmp(val, "first\n", 6) == 0)
+				conf.show_hidden = HIDDEN_FIRST;
+		}
+	} else {
+		if (*val == 'l' && strncmp(val, "last\n", 5) == 0)
+			conf.show_hidden = HIDDEN_LAST;
+	}
+}
+
 /* Read the main configuration file and set options accordingly */
 static void
 read_config(void)
@@ -3613,7 +3635,7 @@ read_config(void)
 
 		else if (xargs.show_hidden == UNSET && *line == 'S'
 		&& strncmp(line, "ShowHiddenFiles=", 16) == 0) {
-			set_config_bool_value(line + 16, &conf.show_hidden);
+			set_show_hidden_files(line + 16);
 		}
 
 		else if (*line == 'S'

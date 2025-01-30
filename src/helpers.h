@@ -572,6 +572,12 @@ extern time_t curdir_mtime;
 /* Flag to control the search function behavior */
 #define NO_GLOB_CHAR (1 << 0)
 
+/* Control show hidden files mode (true, false, first, last) */
+#define HIDDEN_FALSE 0
+#define HIDDEN_TRUE  1
+#define HIDDEN_FIRST 2
+#define HIDDEN_LAST  3
+
 /* Search strategy */
 #define GLOB_ONLY  0
 #define REGEX_ONLY 1

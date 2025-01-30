@@ -103,6 +103,16 @@ compare_strings(char **s1, char **s2)
 }
 
 static inline int
+check_hidden_file(const char c1, const char c2)
+{
+	const int ret = ((c1 == '.' && c2 != '.') ? -1
+		: ((c1 != '.' && c2 == '.') ? 1 : 0));
+
+	return (ret == 0 ? 0
+		: (conf.show_hidden == HIDDEN_FIRST ? ret : -ret));
+}
+
+static inline int
 check_priority_sort_char(const char c1, const char c2)
 {
 	return (
@@ -114,11 +124,6 @@ check_priority_sort_char(const char c1, const char c2)
 static int
 namecmp(char *s1, char *s2, const int have_utf8)
 {
-	const int p = conf.priority_sort_char != 0
-		? check_priority_sort_char(*s1, *s2) : 0;
-	if (p != 0)
-		return p;
-
 	if (conf.skip_non_alnum_prefix == 1) {
 		skip_name_prefixes(&s1);
 		skip_name_prefixes(&s2);
@@ -240,11 +245,6 @@ sort_by_type(struct fileinfo *pa, struct fileinfo *pb)
 static int
 sort_by_version(char *s1, char *s2, const int have_utf8)
 {
-	const int p = conf.priority_sort_char != 0
-		? check_priority_sort_char(*s1, *s2) : 0;
-	if (p != 0)
-		return p;
-
 	if (have_utf8 == 0)
 		return xstrverscmp(s1, s2);
 
@@ -261,14 +261,21 @@ entrycmp(const void *a, const void *b)
 {
 	struct fileinfo *pa = (struct fileinfo *)a;
 	struct fileinfo *pb = (struct fileinfo *)b;
-	int ret = 0;
 	int st = conf.sort;
 
-	if (conf.list_dirs_first == 1) {
-		ret = F_SORT_DIRS(pa->dir, pb->dir);
-		if (ret != 0)
-			return ret;
-	}
+	int ret = conf.list_dirs_first == 1 ? F_SORT_DIRS(pa->dir, pb->dir) : 0;
+	if (ret != 0)
+		return ret;
+
+	ret = conf.priority_sort_char != 0
+		? check_priority_sort_char(*pa->name, *pb->name) : 0;
+	if (ret != 0)
+		return ret;
+
+	/* > 1 = Either HIDDEN_FIRST or HIDDEN_LAST */
+	ret = conf.show_hidden > 1 ? check_hidden_file(*pa->name, *pb->name) : 0;
+	if (ret != 0)
+		return ret;
 
 	if (conf.light_mode == 1 && !ST_IN_LIGHT_MODE(st))
 		st = SNAME;

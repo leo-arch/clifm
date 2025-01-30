@@ -123,7 +123,9 @@ export_status_values(void)
 		setenv("CLIFM_SELFILE", sel_file, 1);
 	if (sel_n > 0)
 		setenv("CLIFM_SEL_FILES", xitoa((long long)sel_n), 1);
-	setenv("CLIFM_SHOW_HIDDEN", conf.show_hidden == 1 ? "1" : "0", 1);
+	char buf[MAX_INT_STR + 1];
+	snprintf(buf, sizeof(buf), "%d", conf.show_hidden);
+	setenv("CLIFM_SHOW_HIDDEN", buf, 1);
 	setenv("CLIFM_SORT_REVERSE", conf.sort_reverse == 1 ? "1" : "0", 1);
 	setenv("CLIFM_SORT_STYLE", num_to_sort_name(conf.sort), 1);
 	if (trash_n > 0)

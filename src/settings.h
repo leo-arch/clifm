@@ -572,13 +572,14 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define DEF_SECURE_ENV 0
 #define DEF_SECURE_ENV_FULL 0
 #define DEF_SHARE_SELBOX 0
-#define DEF_SHOW_HIDDEN 0
+/* Supported values: HIDDEN_FALSE, HIDDEN_TRUE, HIDDEN_FIRST, and HIDDEN_LAST */
+#define DEF_SHOW_HIDDEN HIDDEN_FALSE
 #define DEF_SHOW_BACKUP_FILES 1
 #define DEF_SKIP_NON_ALNUM_PREFIX 1
 #define DEF_SI 0 /* If 1, compute sizes in powers of 1000 instead of 1024 */
-/* Available sort options:
+/* Supported sort options:
  * SNONE, SNAME, STSIZE, SATIME, SBTIME, SCTIME, SMTIME
- * SVER, SEXT, SINO, SOWN, SGRP */
+ * SVER, SEXT, SINO, SOWN, and SGRP */
 #define DEF_SORT SVER
 #define DEF_SORT_REVERSE 0
 #define DEF_SPLASH_SCREEN 0

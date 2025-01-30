@@ -1487,7 +1487,14 @@ rl_toggle_hidden_files(int count, int key)
 		free_suggestion();
 #endif /* !_NO_SUGGESTIONS */
 
-	conf.show_hidden = conf.show_hidden == 1 ? 0 : 1;
+	static int hidden_bk = 0;
+	if (conf.show_hidden != 0) {
+		hidden_bk = conf.show_hidden;
+	} else {
+		if (hidden_bk == 0)
+			hidden_bk = 1;
+	}
+	conf.show_hidden = conf.show_hidden > 0 ? 0 : hidden_bk;
 
 	update_autocmd_opts(AC_SHOW_HIDDEN);
 
@@ -1497,7 +1504,7 @@ rl_toggle_hidden_files(int count, int key)
 		reload_dirlist();
 	}
 
-	if (conf.show_hidden == 1)
+	if (conf.show_hidden > 0)
 		print_reload_msg(NULL, NULL, _("Showing dotfiles\n"));
 	else
 		print_reload_msg(NULL, NULL, _("Hiding dotfiles\n"));
