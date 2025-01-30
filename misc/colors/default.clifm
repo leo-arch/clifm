@@ -233,7 +233,7 @@ ExtColors="azw=EBOOK:azw3=EBOOK:cb7=EBOOK:cba=EBOOK:cbr=EBOOK:cbt=EBOOK:cbz=EBOO
 
 # IMAGES
 define IMAGE=35 # Magenta
-ExtColors="ai=IMAGE:avif=IMAGE:bmp=IMAGE:dpx=IMAGE:dvi=IMAGE:eps=IMAGE:exr=IMAGE:ff=IMAGE:fit=IMAGE:fts=IMAGE:hdr=IMAGE:heic=IMAGE:heif=IMAGE:gif=IMAGE:ico=IMAGE:j2c=IMAGE:j2k=IMAGE:jfi=IMAGE:jfif=IMAGE:jif=IMAGE:jp2=IMAGE:jpe=IMAGE:jpeg=IMAGE:jpf=IMAGE:jpg=IMAGE:jps=IMAGE:jpx=IMAGE:jxl=IMAGE:kra=IMAGE:miff=IMAGE:mng=IMAGE:pam=IMAGE:pbm=IMAGE:pcx=IMAGE:pdd=IMAGE:pgm=IMAGE:pict=IMAGE:png=IMAGE:pnm=IMAGE:ppm=IMAGE:psd=IMAGE:pxm=IMAGE:qoi=IMAGE:rgba=IMAGE:sgi=IMAGE:svg=IMAGE:svgz=IMAGE:tga=IMAGE:tif=IMAGE:tiff=IMAGE:webp=IMAGE:wmf=IMAGE:xbm=IMAGE:xcf=IMAGE:xpm=IMAGE:xwd=IMAGE:"
+ExtColors="ai=IMAGE:avif=IMAGE:bmp=IMAGE:dpx=IMAGE:dvi=IMAGE:eps=IMAGE:exr=IMAGE:ff=IMAGE:fit=IMAGE:fts=IMAGE:hdr=IMAGE:heic=IMAGE:heif=IMAGE:gif=IMAGE:ico=IMAGE:j2c=IMAGE:j2k=IMAGE:jfi=IMAGE:jfif=IMAGE:jif=IMAGE:jp2=IMAGE:jpe=IMAGE:jpeg=IMAGE:jpf=IMAGE:jpg=IMAGE:jps=IMAGE:jpx=IMAGE:jxl=IMAGE:kra=IMAGE:miff=IMAGE:mng=IMAGE:ora=IMAGE:pam=IMAGE:pbm=IMAGE:pcx=IMAGE:pdd=IMAGE:pgm=IMAGE:pict=IMAGE:png=IMAGE:pnm=IMAGE:ppm=IMAGE:psd=IMAGE:pxm=IMAGE:qoi=IMAGE:rgba=IMAGE:sgi=IMAGE:svg=IMAGE:svgz=IMAGE:tga=IMAGE:tif=IMAGE:tiff=IMAGE:webp=IMAGE:wmf=IMAGE:xbm=IMAGE:xcf=IMAGE:xpm=IMAGE:xwd=IMAGE:"
 
 # RAW IMAGES
 # There are plenty of raw image formats out there. This is an incomplete list taken from "https://en.wikipedia.org/wiki/Raw_image_format".

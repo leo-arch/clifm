@@ -1103,7 +1103,8 @@ create_preview_file(void)
 # Display images directly via the 'image' method\n\
 ;^image/(jpeg|png|tiff|webp|x-xwindow-dump)$=~/.config/clifm/clifmimg image %%f %%u;\n\
 # Convert and display via the 'gif' method\n\
-;^image/.*=~/.config/clifm/clifmimg gif %%f %%u;\n\n\
+;^image/.*=~/.config/clifm/clifmimg gif %%f %%u;\n\
+;N:.*\\.ora$=~/.config/clifm/clifmimg gif %%f %%u;\n\n\
 ;^video/.*|^application/(mxf|x-shockwave-flash|vnd.rn-realmedia)$=~/.config/clifm/clifmimg video %%f %%u;\n\
 ;^audio/.*=~/.config/clifm/clifmimg audio %%f %%u;\n\
 ;^application/postscript$=~/.config/clifm/clifmimg postscript %%f %%u;\n\
@@ -2416,9 +2417,14 @@ create_mime_file_anew(char *file)
 #X:N:.*\\.ext$=cmd\n\
 \n\
 X:N:.*\\.djvu$=djview %%x;zathura %%x;xreader %%x;evince %%x;atril %%x\n\
-X:N:.*\\.epub$=mupdf;zathura %%x;xreader %%x;ebook-viewer %%x;FBReader %%x;foliate %%x\n\
+X:N:.*\\.(fb2|epub)$=mupdf %%x;zathura %%x;xreader %%x;ebook-viewer %%x;FBReader %%x;foliate %%x\n\
 X:N:.*\\.mobi$=mupdf;ebook-viewer %%x;FBReader %%x;foliate %%x\n\
-X:N:.*\\.(cbr|cbz)$=mcomix %%x;xreader %%x;YACReader %%x;qcomicbook %%x;zathura %%x;foliate %%x\n\
+X:N:.*\\.(cbr|cbz|cb7|cbt|cba)$=mcomix %%x;xreader %%x;YACReader %%x;qcomicbook %%x;zathura %%x;foliate %%x\n\
+X:N:.*\\.chm$=xchm %%x\n\
+X:N:.*\\.abw$=abiword %%x;libreoffice %%x;soffice %%x;ooffice %%x\n\
+X:N:.*\\.kra$=krita %%x\n\
+X:N:.*\\.sla$=scribus %%x\n\
+X:N:.*\\.ora$=mypaint %%x;krita %%x;gimp %%x;pinta %%x;scribus %%x;display %%x\n\
 X:N:(.*\\.clifm$|clifmrc)=$EDITOR;$VISUAL;kak;micro;nvim;vim;vi;mg;emacs;nano;mili;leafpad;mousepad;featherpad;gedit;kate;pluma\n\
 !X:N:(.*\\.clifm$|clifmrc)=$EDITOR;$VISUAL;kak;micro;nvim;vim;vi;mg;emacs;nano\n\
 \n\n");

@@ -140,6 +140,10 @@ X:N:.*\.kra$=krita %x
 # most likely want to open them with Scribus.
 X:N:.*\.sla$=scribus %x
 
+# ORA files are OpenRaster image files. These are actually ZIP files,
+# but you most likely want to open them with an image viewer.
+X:N:.*\.ora$=mypaint %x;krita %x;gimp %x;pinta %x;scribus %x;display %x
+
 ################################
 # 2. MIME types                #
 ################################
