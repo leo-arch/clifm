@@ -809,6 +809,13 @@ gen_color(char **line)
 	*p = '}'; /* Restore the trailing '}' */
 	*line = p; /* Set LINE to the end of the color notation */
 	return temp;
+
+#undef GEN_COLOR
+#undef GEN_ATTR
+#undef C_START
+#undef C_END
+#undef C_ESC
+#undef C_LEN
 }
 
 #ifndef NO_WORDEXP
@@ -1767,6 +1774,8 @@ set_prompt_options(void)
 	const int b_is_set = CHECK_PROMPT_OPT("\\b");
 	const int f_is_set = CHECK_PROMPT_OPT("\\f");
 	const int p_is_set = CHECK_PROMPT_OPT("\\p");
+
+#undef CHECK_PROMPT_OPT
 
 	conf.prompt_b_is_set = b_is_set;
 
