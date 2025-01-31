@@ -598,14 +598,28 @@ restore_pager_view(void)
 }
 
 /* If running the pager, set long-view according to the value of PagerView in
- * the config file. the original value of long-view will be restored after
+ * the config file. The original value of long-view will be restored after
  * list_dir() by restore_pager_view() according to the value of LONG_VIEW_BK. */
 static void
-set_pager_view(void)
+set_pager_view(const filesn_t columns_n)
 {
-	if (conf.pager == 1 && conf.pager_view != PAGER_AUTO) {
+	if (conf.pager <= 0 || conf.pager_view == PAGER_AUTO)
+		return;
+
+	const filesn_t lines = (filesn_t)term_lines - 2;
+	/* This is not perfect: COLUMNS_N may be modified after this function
+	 * by get_longest_per_col() in list_files_vertical(), modifying thus
+	 * whether the pager will be executed or not. */
+	const int pager_will_run =
+		(files > ((conf.long_view == 1 || conf.pager_view == PAGER_LONG)
+		? lines : (columns_n * lines)));
+
+	if (pager_will_run == 0)
+		return;
+
+	if (conf.pager == 1 || (conf.pager > 1 && files >= (filesn_t)conf.pager)) {
 		long_view_bk = conf.long_view;
-		conf.long_view = conf.pager_view == PAGER_LONG;
+		conf.long_view = (conf.pager_view == PAGER_LONG);
 	}
 }
 
@@ -629,10 +643,6 @@ post_listing(DIR *dir, const int reset_pager, const filesn_t excluded_files,
 
 	if (dir && closedir(dir) == -1)
 		return FUNC_FAILURE;
-
-/* Let plugins and external programs running in clifm know whether
- * we have changed the current directory (last command) or not. */
-//	setenv("CLIFM_CHPWD", dir_changed == 1 ? "1" : "0", 1);
 
 	if (xargs.list_and_quit == 1)
 		exit(exit_code);
@@ -2059,7 +2069,7 @@ list_files_vertical(size_t *counter, int *reset_pager,
 			int ret = 0;
 			filesn_t bi = i;
 			/* Run the pager only once all columns and rows fitting in
-			 * the screen are filled with the corresponding file names */
+			 * the screen are filled with the corresponding file names. */
 			if (blc && *counter > columns_n * ((size_t)term_lines - 2))
 				ret = run_pager((int)columns_n, reset_pager, &x, counter);
 
@@ -2710,6 +2720,12 @@ list_dir_light(const int autocmd_ret)
 	if (conf.columned == 1 || conf.long_view == 1)
 		get_longest_filename(n, (size_t)eln_len);
 
+	/* Get possible amount of columns for the dirlist screen */
+	columns_n = (conf.pager_view == PAGER_AUTO
+		&& (conf.columned == 0 || conf.long_view == 1)) ? 1 : get_columns();
+
+	set_pager_view((filesn_t)columns_n);
+
 				/* ########################
 				 * #    LONG VIEW MODE    #
 				 * ######################## */
@@ -2724,9 +2740,6 @@ list_dir_light(const int autocmd_ret)
 				/* ########################
 				 * #   NORMAL VIEW MODE   #
 				 * ######################## */
-
-	/* Get possible amount of columns for the dirlist screen */
-	columns_n = conf.columned == 0 ? 1 : get_columns();
 
 	if (conf.listing_mode == VERTLIST) /* ls(1)-like listing */
 		list_files_vertical(&counter, &reset_pager, eln_len, columns_n);
@@ -3216,7 +3229,6 @@ list_dir(void)
 		fflush(stdout);
 	}
 
-	set_pager_view();
 	get_term_size();
 
 	virtual_dir =
@@ -3479,8 +3491,15 @@ list_dir(void)
 	size_t columns_n = 1;
 
 	/* Get the longest file name */
-	if (conf.columned == 1 || conf.long_view == 1)
+	if (conf.columned == 1 || conf.long_view == 1
+	|| conf.pager_view != PAGER_AUTO)
 		get_longest_filename(n, (size_t)eln_len);
+
+	/* Get amount of columns needed to print files in CWD  */
+	columns_n = (conf.pager_view == PAGER_AUTO
+		&& (conf.columned == 0 || conf.long_view == 1)) ? 1 : get_columns();
+
+	set_pager_view((filesn_t)columns_n);
 
 				/* ########################
 				 * #    LONG VIEW MODE    #
@@ -3496,9 +3515,6 @@ list_dir(void)
 				/* ########################
 				 * #   NORMAL VIEW MODE   #
 				 * ######################## */
-
-	/* Get amount of columns needed to print files in CWD  */
-	columns_n = conf.columned == 0 ? 1 : get_columns();
 
 	if (conf.listing_mode == VERTLIST) /* ls(1) like listing */
 		list_files_vertical(&counter, &reset_pager, eln_len, columns_n);
