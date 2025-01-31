@@ -448,12 +448,13 @@ static int
 pager_function(const char *arg)
 {
 	if (!arg || (*arg == 'o' && strcmp(arg, "once") == 0)) {
+		const int pg_bk = conf.pager;
 		conf.pager = 1;
 		conf.pager_once = 1;
 		if (conf.autols == 1)
 			reload_dirlist();
-		else
-			puts(_("Pager enabled (single pass)"));
+		if (!arg) /* pg (no parameter) */
+			conf.pager = pg_bk;
 		return FUNC_SUCCESS;
 	}
 

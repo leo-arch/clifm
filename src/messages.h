@@ -906,13 +906,13 @@ Note: Use the 'pc' command to edit files permissions."
 #define PAGER_USAGE "Set the files list pager on/off\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   pg, pager [on | off | once | status | NUM]\n\n\
+With no parameter, just run the pager.\n\n\
 If set to 'on', run the pager whenever the list of files does no fit on\n\
 the screen.\n\n\
 If set to any positive integer greater than 1, run the pager whenever\n\
 the amount of files in the current directory is greater than or equal to\n\
 this value (say, 1000). 1 amounts to 'on' and 0 to 'off'.\n\n\
-Set to 'once' to run the pager only once. Since this is the default\n\
-parameter, 'pg' (with no parameter) is equivalent to 'pg once'.\n\n\
+Set to 'once' to run the pager only once.\n\n\
 While paging, the following keys are available:\n\n\
 ?, h: Help\n\
 Down arrow, Enter, Space: Advance one line\n\
