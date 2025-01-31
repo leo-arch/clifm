@@ -1830,7 +1830,7 @@ For a full no\-color experience recall to edit your prompt removing all color co
 .TP
 \fBClifm\fR's prompt is taken from the \fIPrompt\fR line in the color scheme file using a prompt name as defined in the prompts file, for example, \fIPrompt="security\-scanner"\fR.
 .TP
-Each prompt is built following almost the same escape codes and rules used by the Bash prompt, except that it does not accept shell functions (like conditionals and loops). Command substitution (in the form \fB$(cmd)\fR), prompt modules (in the form \fB%{module}\fR), color codes (in the form \fB%{color}\fR), string literals, and escape sequences can be used to build the prompt.
+Each prompt is built following almost the same escape codes and rules used by the Bash prompt, except that it does not accept shell functions (like conditionals and loops). Command substitution (in the form \fB$(cmd)\fR), prompt modules (in the form \fB${module}\fR), color codes (in the form \fB%{color}\fR), string literals, and escape sequences can be used to build the prompt.
 .TP
 Consult the prompts file (via the \fIprompt edit\fR command) for detailed information and examples on how to build a prompt.
 .TP
