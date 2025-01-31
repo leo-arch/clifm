@@ -764,13 +764,8 @@ run_pager(const int columns_n, int *reset_pager, filesn_t *i, size_t *counter)
 	case 'c': /* fallthrough */
 	case 'p': /* fallthrough */
 	case 'Q':
-		if (conf.pager_view == PAGER_AUTO
-		|| (conf.pager_view == PAGER_SHORT && long_view_bk == 0)
-		|| (conf.pager_view == PAGER_LONG && long_view_bk == 1)) {
-			pager_bk = conf.pager; conf.pager = 0; *reset_pager = 1;
-			break;
-		}
-		/* fallthrough */
+		pager_bk = conf.pager; conf.pager = 0; *reset_pager = 1;
+		break;
 
 	case 'q':
 		pager_bk = conf.pager; conf.pager = 0; *reset_pager = 1;
