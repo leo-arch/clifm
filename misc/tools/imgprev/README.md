@@ -92,6 +92,14 @@ Note that if **CLIFM_IMG_SUPPORT** is unset, the `clifmimg` script falls back to
 
 <sup>1</sup> Note for devs: see the `check_sixel_support()` function in the `term.c` file.
 
+> [!NOTE]
+> If running non-interactively (e.g. as a parameter to other program or through a pipe), **clifm** will not perform the image support checks and will consequently fallback to `ansi`. If you know what kind of image support your terminal provides, set the **CLIFM_IMG_SUPPORT** environment variable to the corresponding value. For example:
+> ```sh
+> export CLIFM_IMG_SUPPORT=sixel
+> ls | fzf --preview 'clifm --preview {}'
+> ```
+> Or you can also set the `$method` variable in the clifmimg script to the desired method, in this case `sixel`.
+
 ## General procedure
 
 The steps involved in generating image previews are:
