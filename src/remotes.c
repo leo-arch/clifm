@@ -125,7 +125,7 @@ get_remote(char *name)
 	return i;
 }
 
-static inline int
+static int
 create_mountpoint(const int i)
 {
 	char *cmd[] = {"mkdir", "-p", remotes[i].mountpoint, NULL};
@@ -138,7 +138,7 @@ create_mountpoint(const int i)
 	return FUNC_SUCCESS;
 }
 
-static inline int
+static int
 cd_to_mountpoint(const int i)
 {
 	free(workspaces[cur_ws].path);
@@ -147,21 +147,21 @@ cd_to_mountpoint(const int i)
 	add_to_jumpdb(workspaces[cur_ws].path);
 	add_to_dirhist(workspaces[cur_ws].path);
 
-	free_dirlist();
-	if (list_dir() != FUNC_SUCCESS)
-		return FUNC_FAILURE;
+	dir_changed = 1;
+	if (conf.autols == 1)
+		reload_dirlist();
 
 	return FUNC_SUCCESS;
 }
 
-static inline int
+static int
 print_cd_error(const int i)
 {
 	xerror("net: '%s': %s\n", remotes[i].mountpoint, strerror(errno));
 	return FUNC_FAILURE;
 }
 
-static inline int
+static int
 print_no_mount_cmd_error(const int i)
 {
 	xerror(_("net: No mount command specified for '%s'\n"), remotes[i].name);
