@@ -1610,7 +1610,6 @@ char *
 prompt(const int prompt_flag, const int screen_refresh)
 {
 	initialize_prompt_data(prompt_flag);
-
 	/* Generate the prompt string using the prompt line in the config
 	 * file (stored in encoded_prompt at startup). */
 	char *decoded_prompt = decode_prompt(conf.encoded_prompt);
@@ -1651,7 +1650,6 @@ prompt(const int prompt_flag, const int screen_refresh)
 		return (char *)NULL;
 
 	log_and_record(input);
-
 	return input;
 }
 
@@ -1755,8 +1753,8 @@ set_default_prompt(void)
 	return FUNC_SUCCESS;
 }
 
-/* Read environment variables controling options for the '\b', '\f', and
- * '\p' prompt codes and set the appropriate values. */
+/* Read environment variables controlling options for the '\b', '\f', and
+ * '\p' prompt escape codes, and set the appropriate values. */
 void
 set_prompt_options(void)
 {
