@@ -38,8 +38,6 @@
 #include "history.h"    /* add_to_dirhist */
 #include "strings.h"    /* wc_xstrlen */
 
-#define IS_VALID_WS(n) ((n) >= 0 && (n) < MAX_WS && workspaces[(n)].path)
-
 static size_t
 get_longest_workspace_name(void)
 {
@@ -223,6 +221,7 @@ set_workspace_opts(const int n)
 	conf.sort_reverse = workspace_opts[n].sort_reverse;
 }
 
+#define IS_VALID_WS(n) ((n) >= 0 && (n) < MAX_WS && workspaces[(n)].path)
 static int
 switch_workspace(const int tmp_ws)
 {
@@ -279,6 +278,7 @@ switch_workspace(const int tmp_ws)
 	add_to_dirhist(workspaces[cur_ws].path);
 	return FUNC_SUCCESS;
 }
+#undef IS_VALID_WS
 
 /* Return the workspace number corresponding to the workspace name NAME,
  * or -1 if no workspace is named NAME, if error, or if NAME is already

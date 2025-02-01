@@ -415,7 +415,7 @@ check_term_support(const char *env_term)
  * This variable will be read by the clifmimg script to generate images using
  * the specified method. */
 static void
-check_img_support(void)
+check_img_support(const char *env_term)
 {
 	if (getenv("CLIFM_FIFO_UEBERZUG")) { /* Variable set by the clifmrun script */
 		setenv("CLIFM_IMG_SUPPORT", "ueberzug", 1);
@@ -424,7 +424,9 @@ check_img_support(void)
 		/* KITTY_WINDOW_ID is guaranteed to be defined if running on the
 		 * kitty terminal. See https://github.com/kovidgoyal/kitty/issues/957 */
 		setenv("CLIFM_IMG_SUPPORT", "kitty", 1);
-	} else if (term_caps.req_dev_attrs == 1 && check_sixel_support() == 1) {
+	} else if ((term_caps.req_dev_attrs == 1 && check_sixel_support() == 1)
+	/* Yaft supports sixel, but does not report it. */
+	|| (*env_term == 'y' && strcmp(env_term, "yaft-256color") == 0)) {
 		setenv("CLIFM_IMG_SUPPORT", "sixel", 1);
 	} else {
 		setenv("CLIFM_IMG_SUPPORT", "ansi", 1);
@@ -455,7 +457,7 @@ check_term(void)
 		return;
 #endif /* __FreeBSD__ */
 
-	check_img_support();
+	check_img_support(t);
 
 	/* At this point, term_caps.unicode is zero */
 	if (xargs.unicode == 1 || (xargs.unicode == UNSET
