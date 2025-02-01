@@ -23,6 +23,17 @@
 # Automatically unmount this remote at exit
 #AutoUnmount=true
 
+# TIP: When mounting a slow file system (say, an FTP server), it
+# is recommended to set an autocommand for the mount point disabling
+# some Clifm features that might slow things down. Open the
+# configuration file ('config' or F10), go to the AUTOCOMMANDS
+# section and add a new autocommand:
+#
+#autocmd ~/mounts/ftp_server/** lm=1,fc=0
+#
+# The light mode (lm) prevents some files processing, and the files
+# counter (fc) is expensive: disable it.
+
 # A few examples
 
 # A. Samba share
@@ -43,7 +54,16 @@
 #AutoUnmount=false
 #AutoMount=false
 
-# C. Mounting a local file system
+# C. FTP file system
+#[ftp_server]
+#Comment=FTP server
+#Mountpoint="~/mounts/ftp_server"
+#MountCmd=curlftpfs ftp://ftp.example.org %m
+#UnmountCmd=fusermount3 -u %m
+#AutoMount=false
+#AutoUnmount=false
+
+# D. Mounting a local file system
 #[local]
 #Comment=Local filesystem
 #Mountpoint="/media/extra"
@@ -52,7 +72,7 @@
 #AutoUnmount=false
 #AutoMount=true
 
-# D. Mounting a removable device
+# E. Mounting a removable device
 #[USB]
 #Comment=My USB drive
 #Mountpoint="/media/usb"

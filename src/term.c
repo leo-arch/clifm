@@ -425,7 +425,7 @@ check_img_support(const char *env_term)
 		 * kitty terminal. See https://github.com/kovidgoyal/kitty/issues/957 */
 		setenv("CLIFM_IMG_SUPPORT", "kitty", 1);
 	} else if ((term_caps.req_dev_attrs == 1 && check_sixel_support() == 1)
-	/* Yaft supports sixel, but does not report it. */
+	/* Yaft supports sixel (and DA request), but does not report it. */
 	|| (*env_term == 'y' && strcmp(env_term, "yaft-256color") == 0)) {
 		setenv("CLIFM_IMG_SUPPORT", "sixel", 1);
 	} else {
