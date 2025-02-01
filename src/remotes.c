@@ -148,8 +148,7 @@ cd_to_mountpoint(const int i)
 	add_to_dirhist(workspaces[cur_ws].path);
 
 	dir_changed = 1;
-	if (conf.autols == 1)
-		reload_dirlist();
+	reload_dirlist();
 
 	return FUNC_SUCCESS;
 }
@@ -200,7 +199,7 @@ remotes_mount(char *name)
 	if (conf.autols == 1) {
 		exit_status = cd_to_mountpoint(i);
 	} else {
-		printf(_("%s: '%s': Remote mounted on %s\n"), PROGRAM_NAME,
+		printf(_("net: '%s': Changed to mountpoint (%s)\n"),
 			remotes[i].name, remotes[i].mountpoint);
 	}
 
