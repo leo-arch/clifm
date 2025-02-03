@@ -544,6 +544,8 @@ static int
 check_compressed(const char *line, const int test_iso)
 {
 	return (strstr(line, "archive") || strstr(line, "compressed")
+	|| strncmp(line, "Debian binary package ", 22) == 0
+	|| strncmp(line, "RPM ", 4) == 0
 	|| (test_iso && strstr(line, "ISO 9660")));
 }
 
