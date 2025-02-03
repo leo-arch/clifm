@@ -1132,7 +1132,7 @@ N:.*\\.(odt|ods|odp|sxw)$=odt2txt;pandoc -s -t markdown;\n\
 \n\
 # Archives\n\
 N:.*\\.rar=unrar lt -p-;\n\
-application/(zstd|x-rpm|debian.binary-package)=bsdtar --list --file;file -b;true\n\
+application/(zstd|x-rpm|debian.binary-package)=bsdtar --list --file;\n\
 application/(zip|gzip|x-7z-compressed|x-xz|x-bzip*|x-tar)=atool --list;bsdtar --list --file;\n\
 \n\
 # PDF\n\

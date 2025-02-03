@@ -84,7 +84,7 @@ N:.*\.(odt|ods|odp|sxw)$=odt2txt;pandoc -s -t markdown;
 #--------------------------------
 
 N:.*\.rar=unrar lt -p-;
-application/(zstd|x-rpm|debian.binary-package)=bsdtar --list --file;file -b;true
+application/(zstd|x-rpm|debian.binary-package)=bsdtar --list --file;
 application/(zip|gzip|x-7z-compressed|x-xz|x-bzip*|x-tar)=atool --list;bsdtar --list --file;
 
 #--------------------------------
