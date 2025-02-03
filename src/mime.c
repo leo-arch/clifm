@@ -1502,8 +1502,10 @@ handle_no_app(const int info, char **fpath, char **mime, const char *arg)
 	if (xargs.preview == 1) {
 		/* When running the previewer, MIME_FILE points to the path to
 		 * preview.clifm file. */
-		xerror(_("shotgun: '%s': No associated application found\n"
-			"Fix this in the configuration file:\n%s\n"), arg, mime_file);
+		xerror(_("%s: '%s': No associated application found\n"
+			"Fix this in the configuration file:\n%s\n"
+			"(run 'view edit' if running %s)\n"), PROGRAM_NAME,
+			arg, mime_file, PROGRAM_NAME);
 		return FUNC_FAILURE;
 	}
 

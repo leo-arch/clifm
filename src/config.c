@@ -1127,8 +1127,8 @@ N:.*\\.md$=glow -s dark;mdcat;\n\
 N:.*\\.xlsx$=xlsx2csv;file -b;\n\
 N:.*\\.(odt|ods|odp|sxw)$=odt2txt;pandoc -s -t markdown;\n\
 ^application/(.*wordprocessingml.document|.*epub+zip|x-fictionbook+xml)=pandoc -s -t markdown;\n\
-^application/msword=catdoc;file -b;\n\
-^application/ms-excel=xls2csv;file -b;\n\
+^application/msword=catdoc;\n\
+^application/ms-excel=xls2csv;\n\
 \n\
 # Archives\n\
 N:.*\\.rar=unrar lt -p-;\n\
@@ -1148,7 +1148,7 @@ application/(zip|gzip|x-7z-compressed|x-xz|x-bzip*|x-tar)=atool --list;bsdtar --
 application/x-bittorrent=transmission-show;\n\
 \n\
 # Fallback\n\
-.*=file -b;true;\n",
+.*=file -b;\n",
 	lscmd);
 
 	fclose(fp);
