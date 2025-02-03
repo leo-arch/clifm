@@ -2455,8 +2455,8 @@ X:^application/(msword|vnd.ms-excel|vnd.ms-powerpoint|.*(open|office)document.*)
 # Archives\n\
 # Note: 'ad' is Clifm's built-in archives utility (based on atool). Remove it if you\n\
 # prefer another application.\n\
-X:^application/(gzip|java-archive|x-(7z-compressed|arj|compress|xz|bzip*|rpm|tar|iso9660-image|lzma|lzop|lzip)|vnd.(rar|debian.binary-package|ms-cab-compressed)|zip|zstd|)=ad;xarchiver %%x;lxqt-archiver %%x;ark %%x\n\
-!X:^application/(gzip|java-archive|x-(7z-compressed|arj|compress|xz|bzip*|rpm|tar|iso9660-image|lzma|lzop|lzip)|vnd.(rar|debian.binary-package|ms-cab-compressed)|zip|zstd|)=ad\n\
+X:^application/(gzip|java-archive|vnd.(debian.binary-package|ms-cab-compressed|rar)|x-(7z-compressed|arj|bzip*|compress|iso9660-image|lzip|lzma|lzop|rpm|tar|xz)|zip|zstd)=ad;xarchiver %%x;lxqt-archiver %%x;ark %%x\n\
+!X:^application/(gzip|java-archive|vnd.(debian.binary-package|ms-cab-compressed|rar)|x-(7z-compressed|arj|bzip*|compress|iso9660-image|lzip|lzma|lzop|rpm|tar|xz)|zip|zstd)=ad\n\
 \n\
 # PDF\n\
 X:.*/pdf$=mupdf %%x;sioyek %%x;llpp %%x;lpdf %%x;zathura %%x;mupdf-x11 %%x;apvlv %%x;xpdf %%x;xreader %%x;evince %%x;atril %%x;okular %%x;epdfview %%x;qpdfview %%x\n\
