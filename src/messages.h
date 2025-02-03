@@ -664,6 +664,8 @@ link points to (instead of for the link itself) is displayed."
     kb edit\n\
 - Open/edit the key bindings file using mousepad\n\
     kb edit mousepad\n\
+- Unbind a function\n\
+    Run 'kb edit' and comment out the corresponding entry\n\
 - Detect key bindings conflicts\n\
     kb conflict\n\
 - List the current key bindings for readline\n\
