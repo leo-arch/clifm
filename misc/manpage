@@ -901,6 +901,8 @@ To manually edit your key bindings use the \fIedit\fR option (the keybindings fi
 .sp
 If you somehow messed up your keybindings, you can check for key binding conflicts with the \fIconflict\fR option, or use the \fIreset\fR option to create a fresh keybindings file with the default values.
 .sp
+To unbind a function run \fIkb edit\fR and comment out the corresponding entry. Note that some functions may have several entries, associating them to multiple key bindings: comment them out all if required.
+.sp
 To list readline key bindings (defined in \fI~/.config/clifm/readline.clifm\fR), use the \fIreadline\fR option. The syntax is the same as the one used by readline's \fI.inputrc\fR file (consult \fIhttp://tiswww.case.edu/php/chet/readline/readline.html#SEC9\fR for more information.)
 .TP
 .B l, le
