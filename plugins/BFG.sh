@@ -575,9 +575,9 @@ main() {
 
 	# Use hashes instead of file names for cached files
 	if type md5sum > /dev/null 2>&1; then
-		entryhash="$(md5sum "$entry" | cut -d' ' -f1)"
+		entryhash="$(echo "$entry" | md5sum | cut -d' ' -f1)"
 	elif type md5 > /dev/null 2>&1; then
-		entryhash="$(md5 -q "$entry")"
+		entryhash="$(echo "$entry" | md5 -q)"
 	else
 		printf "clifm: No hashing application found. Either md5sum or md5 \
 are required\n" >&2
