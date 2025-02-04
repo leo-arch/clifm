@@ -1289,7 +1289,7 @@ to_hex(char c)
 	return hex[c & 15];
 }
 
-/* Returns an URL-encoded version of STR, prepended with "file://" if
+/* Return an URL-encoded version of STR, prefixed with "file://" if
  * FILE_URI is set to 1. */
 char *
 url_encode(char *str, const int file_uri)
@@ -1301,18 +1301,22 @@ url_encode(char *str, const int file_uri)
 	char *buf = xnmalloc(len, sizeof(char));
 	/* The max lenght of our buffer is 3 times the length of STR (plus
 	 * 7 (length of "file://") if FILE_URI is set to 1, plus 1 extra byte
-	 * for the null byte terminator): each char in STR will be, if
+	 * for the null byte terminator): each byte in STR will be, if
 	 * encoded, %XX (3 chars). */
 
-	if (file_uri == 1)
-		xstrsncpy(buf, "file://", len);
-
 	/* Copies of STR and BUF pointers to be able to increase and/or decrease
-	 * them without loosing the original memory location */
-	char *pstr = str, *pbuf = buf + (file_uri == 1 ? 7 : 0);
+	 * them without loosing the original memory location. */
+	const char *pstr = str;
+	char *pbuf = buf;
+
+	if (file_uri == 1) {
+		buf[0] = 'f'; buf[1] = 'i'; buf[2] = 'l'; buf[3] = 'e';
+		buf[4] = ':'; buf[5] = '/'; buf[6] = '/'; buf[8] = '\0';
+		pbuf += 7;
+	}
 
 	for (; *pstr; pstr++) {
-		if (isalnum((int)*pstr) || *pstr == '-' || *pstr == '_' || *pstr == '.'
+		if (IS_ALNUM(*pstr) || *pstr == '-' || *pstr == '_' || *pstr == '.'
 		|| *pstr == '~' || *pstr == '/') {
 			/* Do not encode any of the above chars */
 			*pbuf = *pstr;

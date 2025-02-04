@@ -729,8 +729,8 @@ copy_field(char **dst, const char *src)
 	xstrsncpy(*dst, src, src_len + 1);
 }
 
-/* Expand %[f|x] placeholder, stderr/stdout flags, and environment variables
- * in the opening application line. */
+/* Expand %[f|m|u|x] placeholders, stderr/stdout flags, and environment
+ * variables in the opening application line. */
 static size_t
 expand_app_fields(char ***cmd, size_t *n, char *fpath, int *exec_flags)
 {
