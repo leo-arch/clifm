@@ -146,15 +146,16 @@ The `audio` method accepts four modes: `cover`, `wave`, `spectogram`, and `info`
 > ``` 
 > Add whatever audio extensions you deem necessary.
 > 
-### The thumbnails database
 
-Every time a thumbnail is generated `clifmimg` adds a new entry to the thumbnails database (`.thumbs.info` in the thumbnails directory<sup>1</sup>). Each entry has this form: **THUMB@PATH**, where **THUMB** is the name of the thumbnail file (an MD5 hash of **PATH** followed by a file extension, either `png` or `jpg`), and **PATH** the file URI for the absolute path to the original file. This database is read by the [`view purge`](https://github.com/leo-arch/clifm/wiki/Introduction#view) command (available since 1.22.12) to keep the thumbnails directory in a clean state.<sup>3</sup>
-
-<sup>1</sup> By default this directory is `$XDG_CACHE_HOME/clifm/thumbnails` (which usually expands to `~/.cache/clifm/thumbnails`). Note that previous versions of this scripts used `$XDG_CACHE_HOME/clifm/previews` instead.
+<sup>1</sup> By default this directory is `$XDG_CACHE_HOME/clifm/thumbnails` (which usually expands to `~/.cache/clifm/thumbnails`). Note that previous versions of this script used `$XDG_CACHE_HOME/clifm/previews` instead.
 
 <sup>2</sup> The third parameter (`%u`) is available since version 1.22.13. Prior to this version, only the first two parameters are recognized.
 
-<sup>3</sup> If running a version prior to 1.22.12, make sure to update your [`clifmimg` script](https://github.com/leo-arch/clifm/blob/master/misc/tools/imgprev/clifmimg): `cp /usr/share/clifm/plugins/clifmimg ~/.config/clifm`.
+### The thumbnails database
+
+Every time a thumbnail is generated `clifmimg` adds a new entry to the thumbnails database (`.thumbs.info` in the thumbnails directory<sup>1</sup>). Each entry has this form: **THUMB@PATH**, where **THUMB** is the name of the thumbnail file (an MD5 hash of **PATH** followed by a file extension, either `png` or `jpg`), and **PATH** the file URI for the absolute path to the original file. This database is read by the [`view purge`](https://github.com/leo-arch/clifm/wiki/Introduction#view) command (available since 1.22.12) to keep the thumbnails directory in a clean state.<sup>1</sup>
+
+<sup>1</sup> If running a version prior to 1.22.12, make sure to update your [`clifmimg` script](https://github.com/leo-arch/clifm/blob/master/misc/tools/imgprev/clifmimg): `cp /usr/share/clifm/plugins/clifmimg ~/.config/clifm`.
 
 ## Dependencies
 
