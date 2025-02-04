@@ -1,4 +1,4 @@
-1.23 (Pirahna poodle) - Jan 20, 2025
+1.23 (Piranha poodle) - Jan 20, 2025
 
 BUG FIXES
 * TAB completion: file names with embedded control chars are not properly colorized.
