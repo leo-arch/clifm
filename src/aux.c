@@ -1311,7 +1311,7 @@ url_encode(char *str, const int file_uri)
 
 	if (file_uri == 1) {
 		buf[0] = 'f'; buf[1] = 'i'; buf[2] = 'l'; buf[3] = 'e';
-		buf[4] = ':'; buf[5] = '/'; buf[6] = '/'; buf[8] = '\0';
+		buf[4] = ':'; buf[5] = '/'; buf[6] = '/'; buf[7] = '\0';
 		pbuf += 7;
 	}
 
