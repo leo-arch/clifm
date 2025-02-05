@@ -39,6 +39,7 @@
 ^image/(jpeg|png|tiff|webp|x-xwindow-dump)$=~/.config/clifm/clifmimg image %f %u;
 ^image/.*=~/.config/clifm/clifmimg gif %f %u;
 N:.*\.ora$=~/.config/clifm/clifmimg gif %f %u;
+N:.*\.kra$=~/.config/clifm/clifmimg krita %f %u;
 ^video/.*|^application/(mxf|x-shockwave-flash|vnd.rn-realmedia)$=~/.config/clifm/clifmimg video %f %u;
 ^audio/.*=~/.config/clifm/clifmimg audio %f %u;
 ^application/postscript$=~/.config/clifm/clifmimg postscript %f %u;
@@ -132,7 +133,7 @@ The first parameter (thumbnailing method) can be any of the following:
 | Method | Description | Thumbnail generation |
 | --- | --- |  --- |
 | `image` | Display image directly, without previous convertion | No |
-| `gif`, `svg` | Convert image and display | Yes |
+| `gif`, `svg`, `krita` | Convert image and display | Yes |
 | `audio`, `djvu`, `doc`, `epub`, `font`, `mobi`, `pdf`, `postscript`, and `video` | Convert file to image and display | Yes |
 
 The `audio` method accepts four modes: `cover`, `wave`, `spectogram`, and `info`. Set the desired mode via the `audio_method` variable (defaults to `cover`, which falls back to `info` if there is no cover image available).
@@ -174,6 +175,7 @@ The following applications are used to generate thumbnails:
 | `librsvg` | SVG image | Required by **magick**(1) to convert SVG files | |
 | `gs` | Postscript | Provided by the `ghostscript` package |
 | `magick` | Several image formats | Provided by the `imagemagick` package |
+| `unzip` | Krita images | | 
 
 > [!NOTE]
 > The exact package names providing the above programs may vary depending on your OS/distribution, but they usually have the same name as the corresponding program.
