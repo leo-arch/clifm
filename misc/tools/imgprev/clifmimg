@@ -341,7 +341,8 @@ gen_gif_preview() {
 # can be removed. Issue open since 2019: https://github.com/ImageMagick/ImageMagick/issues/1547
 # For the krita format see https://docs.krita.org/en/general_concepts/file_formats/file_kra.html
 gen_krita_preview() {
-	TMP_DIR="$(mktemp -d ${TMPDIR:-/tmp}/tmp.XXXXXXXXXX)"
+	TMP_DIR="${TMPDIR:-/tmp}/clifm-$USER"
+	! [ -d "$TMP_DIR" ] && mkdir -p "$TMP_DIR"
 
 	unzip -oq "$1" "*.png" -d "$TMP_DIR" >/dev/null 2>&1
 	ret="$?"
@@ -355,7 +356,7 @@ gen_krita_preview() {
 	magick "${TMP_DIR}/$IMG" -resize "$DEFAULT_SIZE"\> "$2" >/dev/null 2>&1
 	ret="$?"
 
-	rm -rf -- "$TMP_DIR" >/dev/null 2>&1
+	rm -rf -- "${TMP_DIR}/mergedimage.png" "${TMP_DIR}/preview.png" >/dev/null 2>&1
 
 	if [ "$ret" -ne 0 ]; then
 		print_err_msg "magick" "$ret" "krita"
