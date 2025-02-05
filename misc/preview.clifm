@@ -47,7 +47,7 @@
 # OpenRaster images
 ;N:.*\.ora$=~/.config/clifm/clifmimg gif %f %u;
 # Krita images
-;N:.*\.kra$=~/.config/clifm/clifmimg krita %f %u;
+;N:.*\.(kra|krz)$=~/.config/clifm/clifmimg krita %f %u;
 
 ;^video/.*|^application/(mxf|x-shockwave-flash|vnd.rn-realmedia)$=~/.config/clifm/clifmimg video %f %u;
 ;^audio/.*=~/.config/clifm/clifmimg audio %f %u;

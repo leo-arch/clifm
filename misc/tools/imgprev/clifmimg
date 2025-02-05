@@ -329,29 +329,33 @@ gen_font_preview() {
 	print_err_msg "fontpreview" "$?" "font"
 }
 
-# This function converts image files that cannot be displayed directly (like gif, bmp, heif, and so on).
-# For the list of formats supported by imagemagick run 'magick -list format'.
+# This function converts image files that cannot be displayed directly (like gif, bmp,
+# heif, and so on). For the list of formats supported by imagemagick run 'magick -list format'.
 gen_gif_preview() {
 	magick -define bmp:ignore-filesize=true "$1"[0] -resize "$DEFAULT_SIZE"\> "$2" >/dev/null 2>&1 && \
 		add_to_info_file "$2" && return 0
 	print_err_msg "magick" "$?" "image"
 }
 
-# See https://docs.krita.org/en/general_concepts/file_formats/file_kra.html
+# At least up to 7.1.1, magick(1) does not support Krita files. Once it does, this function
+# can be removed. Issue open since 2019: https://github.com/ImageMagick/ImageMagick/issues/1547
+# For the krita format see https://docs.krita.org/en/general_concepts/file_formats/file_kra.html
 gen_krita_preview() {
-	TMPDIR="${TMPDIR:-/tmp}"
-	SRC="mergedimage.png"
+	TMP_DIR="$(mktemp -d ${TMPDIR:-/tmp}/tmp.XXXXXXXXXX)"
 
-	unzip -u -qq "$1" "$SRC" -d "$TMPDIR" >/dev/null 2>&1
+	unzip -oq "$1" "*.png" -d "$TMP_DIR" >/dev/null 2>&1
 	ret="$?"
 	if [ "$ret" -ne 0 ]; then
 		print_err_msg "unzip" "$ret" "krita"
 		return 1
 	fi
 
-	magick "${TMPDIR}/$SRC" -resize "$DEFAULT_SIZE"\> "$2" >/dev/null 2>&1
+	IMG="mergedimage.png"
+	! [ -f "${TMP_DIR}/$IMG" ] && IMG="preview.png"
+	magick "${TMP_DIR}/$IMG" -resize "$DEFAULT_SIZE"\> "$2" >/dev/null 2>&1
 	ret="$?"
-	rm -f -- "${TMPDIR}/$SRC" >/dev/null 2>&1
+
+	rm -rf -- "$TMP_DIR" >/dev/null 2>&1
 
 	if [ "$ret" -ne 0 ]; then
 		print_err_msg "magick" "$ret" "krita"
