@@ -1305,7 +1305,7 @@ url_encode(char *str, const int file_uri)
 	 * encoded, %XX (3 chars). */
 
 	/* Copies of STR and BUF pointers to be able to increase and/or decrease
-	 * them without loosing the original memory location. */
+	 * them without losing the original memory location. */
 	const char *pstr = str;
 	char *pbuf = buf;
 

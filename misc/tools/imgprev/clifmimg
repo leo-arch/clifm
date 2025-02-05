@@ -68,6 +68,7 @@
 # librsvg                 (SVG images)
 # gs                      (Postscript files - provided by the ghostscript package)
 # magick                  (image format convertion - provided by the imagemagick package)
+# unzip                   (Krita image files)
 #
 # NOTE: The exact package names providing these programs may vary depending
 # on your OS/distribution, but ususally they have the same name as the program.
@@ -336,6 +337,29 @@ gen_gif_preview() {
 	print_err_msg "magick" "$?" "image"
 }
 
+# See https://docs.krita.org/en/general_concepts/file_formats/file_kra.html
+gen_krita_preview() {
+	TMPDIR="${TMPDIR:-/tmp}"
+	SRC="mergedimage.png"
+
+	unzip -u -qq "$1" "$SRC" -d "$TMPDIR" >/dev/null 2>&1
+	ret="$?"
+	if [ "$ret" -ne 0 ]; then
+		print_err_msg "unzip" "$ret" "krita"
+		return 1
+	fi
+
+	magick "${TMPDIR}/$SRC" -resize "$DEFAULT_SIZE"\> "$2" >/dev/null 2>&1
+	ret="$?"
+	rm -f -- "${TMPDIR}/$SRC" >/dev/null 2>&1
+
+	if [ "$ret" -ne 0 ]; then
+		print_err_msg "magick" "$ret" "krita"
+	else
+		add_to_info_file "$2"
+	fi
+}
+
 gen_mobi_preview() {
 	gnome-mobi-thumbnailer -s "${DEFAULT_SIZE%%x*}" "$1" "$2" >/dev/null 2>&1 && \
 		add_to_info_file "$2" && return 0
@@ -420,6 +444,11 @@ main() {
 	;;
 	"gif")
 		if [ -f "${PCACHE}.$THUMB_FORMAT" ] || gen_gif_preview "$file" "${PCACHE}.$THUMB_FORMAT"; then
+			display "${PCACHE}.$THUMB_FORMAT"
+		fi
+	;;
+	"krita")
+		if [ -f "${PCACHE}.$THUMB_FORMAT" ] || gen_krita_preview "$file" "${PCACHE}.$THUMB_FORMAT"; then
 			display "${PCACHE}.$THUMB_FORMAT"
 		fi
 	;;

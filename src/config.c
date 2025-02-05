@@ -1104,7 +1104,8 @@ create_preview_file(void)
 ;^image/(jpeg|png|tiff|webp|x-xwindow-dump)$=~/.config/clifm/clifmimg image %%f %%u;\n\
 # Convert and display via the 'gif' method\n\
 ;^image/.*=~/.config/clifm/clifmimg gif %%f %%u;\n\
-;N:.*\\.ora$=~/.config/clifm/clifmimg gif %%f %%u;\n\n\
+;N:.*\\.ora$=~/.config/clifm/clifmimg gif %%f %%u;\n\
+;N:.*\\.kra$=~/.config/clifm/clifmimg krita %%f %%u;\n\n\
 ;^video/.*|^application/(mxf|x-shockwave-flash|vnd.rn-realmedia)$=~/.config/clifm/clifmimg video %%f %%u;\n\
 ;^audio/.*=~/.config/clifm/clifmimg audio %%f %%u;\n\
 ;^application/postscript$=~/.config/clifm/clifmimg postscript %%f %%u;\n\
