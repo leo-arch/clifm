@@ -43,16 +43,11 @@
 #include "history.h"
 #include "jump.h"
 #include "listing.h"
+#include "mime.h" /* xmagic() */
 #include "misc.h"
 #include "navigation.h"
 #include "readline.h"
 #include "spawn.h"
-
-#ifndef _NO_MAGIC
-# include "mime.h"
-#else
-# include <unistd.h> /* dup(), dup2(), unlink(), STDOUT_FILENO */
-#endif /* !_NO_MAGIC */
 
 #define OP_ISO    1
 #define OP_OTHERS 0
@@ -443,7 +438,6 @@ check_iso(char *file)
 
 	int is_iso = 0;
 
-#ifndef _NO_MAGIC
 	char *t = xmagic(file, TEXT_DESC);
 	if (!t) {
 		xerror("%s\n", _("Error querying file type"));
@@ -455,89 +449,6 @@ check_iso(char *file)
 
 	free(t);
 	return (is_iso == 1 ? FUNC_SUCCESS : FUNC_FAILURE);
-
-#else
-	char *rand_ext = gen_rand_str(RAND_SUFFIX_LEN);
-	if (!rand_ext)
-		return (-1);
-
-	char tmp_file[PATH_MAX + 1];
-	snprintf(tmp_file, sizeof(tmp_file), "%s/.temp%s",
-		(xargs.stealth_mode == 1) ? P_tmpdir : tmp_dir, rand_ext);
-	free(rand_ext);
-
-	int fd;
-	FILE *fp_out = open_fwrite(tmp_file, &fd);
-	if (!fp_out) {
-		xerror("archiver: '%s': %s\n", tmp_file, strerror(errno));
-		return (-1);
-	}
-
-	FILE *fp_err = fopen(_PATH_DEVNULL, "w");
-	if (!fp_err) {
-		xerror("archiver: '%s': %s\n", _PATH_DEVNULL, strerror(errno));
-		fclose(fp_out);
-		unlink(tmp_file);
-		return (-1);
-	}
-
-	int stdout_bk = dup(STDOUT_FILENO); /* Store original stdout */
-	int stderr_bk = dup(STDERR_FILENO); /* Store original stderr */
-
-	if (stdout_bk == -1 || stderr_bk == -1)
-		goto ERROR;
-
-	/* Redirect stdout to the desired file */
-	if (dup2(fileno(fp_out), STDOUT_FILENO) == -1)
-		goto ERROR;
-
-	/* Redirect stderr to /dev/null */
-	if (dup2(fileno(fp_err), STDERR_FILENO) == -1)
-		goto ERROR;
-
-	fclose(fp_out);
-	fclose(fp_err);
-
-	char *cmd[] = {"file", "-b", file, NULL};
-	int retval = launch_execv(cmd, FOREGROUND, E_NOFLAG);
-
-	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
-	dup2(stderr_bk, STDERR_FILENO); /* Restore original stderr */
-	close(stdout_bk);
-	close(stderr_bk);
-
-	if (retval != FUNC_SUCCESS) {
-		unlink(tmp_file);
-		return (-1);
-	}
-
-	fp_out = open_fread(tmp_file, &fd);
-	if (fp_out) {
-		char line[NAME_MAX]; *line = '\0';
-		if (fgets(line, (int)sizeof(line), fp_out) == NULL) {
-			fclose(fp_out);
-			unlink(tmp_file);
-			return FUNC_FAILURE;
-		}
-
-		if (strstr(line, "ISO 9660"))
-			is_iso = 1;
-		fclose(fp_out);
-	}
-
-	unlink(tmp_file);
-
-	return (is_iso == 1 ? FUNC_SUCCESS : FUNC_FAILURE);
-
-ERROR:
-	xerror("archiver: %s\n", strerror(errno));
-	fclose(fp_out);
-	fclose(fp_err);
-	unlink(tmp_file);
-	close(stdout_bk);
-	close(stderr_bk);
-	return (-1);
-#endif /* !_NO_MAGIC */
 }
 
 static int
@@ -565,7 +476,6 @@ is_compressed(char *file, const int test_iso)
 		return (-1);
 	}
 
-#ifndef _NO_MAGIC
 	char *t = xmagic(file, TEXT_DESC);
 	if (!t) {
 		xerror("%s\n", _("Error querying file type"));
@@ -576,89 +486,6 @@ is_compressed(char *file, const int test_iso)
 	free(t);
 
 	return (compressed == 1 ? FUNC_SUCCESS : FUNC_FAILURE);
-
-#else
-	char *rand_ext = gen_rand_str(RAND_SUFFIX_LEN);
-	if (!rand_ext)
-		return (-1);
-
-	char tmp_file[PATH_MAX + 1];
-	snprintf(tmp_file, sizeof(tmp_file), "%s/.clifm%s",
-			(xargs.stealth_mode == 1) ? P_tmpdir : tmp_dir, rand_ext);
-	free(rand_ext);
-
-	int fd;
-	FILE *fp_out = open_fwrite(tmp_file, &fd);
-	if (!fp_out) {
-		xerror("archiver: '%s': %s\n", tmp_file, strerror(errno));
-		return (-1);
-	}
-
-	FILE *fp_err = fopen("/dev/null", "w");
-	if (!fp_err) {
-		xerror("archiver: '/dev/null': %s\n", strerror(errno));
-		unlink(tmp_file);
-		fclose(fp_out);
-		return (-1);
-	}
-
-	int stdout_bk = dup(STDOUT_FILENO); /* Store original stdout */
-	int stderr_bk = dup(STDERR_FILENO); /* Store original stderr */
-
-	if (stdout_bk == -1 || stderr_bk == -1)
-		goto ERROR;
-
-	/* Redirect stdout to the desired file */
-	if (dup2(fileno(fp_out), STDOUT_FILENO) == -1)
-		goto ERROR;
-
-	/* Redirect stderr to /dev/null */
-	if (dup2(fileno(fp_err), STDERR_FILENO) == -1)
-		goto ERROR;
-
-	fclose(fp_out);
-	fclose(fp_err);
-
-	char *cmd[] = {"file", "-b", file, NULL};
-	int retval = launch_execv(cmd, FOREGROUND, E_NOFLAG);
-
-	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
-	dup2(stderr_bk, STDERR_FILENO); /* Restore original stderr */
-	close(stdout_bk);
-	close(stderr_bk);
-
-	if (retval != FUNC_SUCCESS) {
-		unlink(tmp_file);
-		return (-1);
-	}
-
-	int compressed = 0;
-	fp_out = open_fread(tmp_file, &fd);
-	if (fp_out) {
-		char line[NAME_MAX + 1]; *line = '\0';
-		if (fgets(line, (int)sizeof(line), fp_out) == NULL) {
-			fclose(fp_out);
-			unlink(tmp_file);
-			return FUNC_FAILURE;
-		}
-
-		compressed = check_compressed(line, test_iso);
-		fclose(fp_out);
-	}
-
-	unlink(tmp_file);
-
-	return (compressed == 1 ? FUNC_SUCCESS : FUNC_FAILURE);
-
-ERROR:
-	xerror("archiver: %s\n", strerror(errno));
-	unlink(tmp_file);
-	fclose(fp_out);
-	fclose(fp_err);
-	close(stdout_bk);
-	close(stderr_bk);
-	return (-1);
-#endif /* !_NO_MAGIC */
 }
 
 static char *
@@ -935,23 +762,15 @@ check_zstandard(char **args)
 	size_t zst = 0, i;
 
 	for (i = 1; args[i]; i++) {
-#ifndef _NO_MAGIC
 		char *mime = xmagic(args[i], MIME_TYPE);
 		if (!mime || !*mime)
 			continue;
-		if (strcmp(mime, "application/zstd") == 0) {
+		if (*mime == 'a' && strcmp(mime, "application/zstd") == 0) {
 			zst = 1;
 			free(mime);
 			break;
 		}
 		free(mime);
-#else
-		char *ret = strrchr(args[i], '.');
-		if (ret && strcmp(ret, ".zst") == 0) {
-			zst = 1;
-			break;
-		}
-#endif /* !_NO_MAGIC */
 	}
 
 	return zst;

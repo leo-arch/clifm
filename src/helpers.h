@@ -786,7 +786,7 @@ extern time_t curdir_mtime;
 #define CS_FREEBUF 1
 #define CS_KEEPBUF 0
 
-/* Macros for the xmagic function */
+/* Macros for the get_file_type function */
 #define MIME_TYPE 1
 #define TEXT_DESC 0
 

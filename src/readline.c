@@ -54,7 +54,7 @@ typedef char *rl_cpvfunc_t;
 # include "highlight.h"
 #endif /* !_NO_HIGHLIGHT */
 #include "keybinds.h"
-#include "mime.h"
+#include "mime.h" /* xmagic() */
 #include "navigation.h"
 #include "readline.h"
 #include "sort.h" /* compare_strings() */
@@ -2317,7 +2317,6 @@ expand_tilde_glob(char *text)
 	return tmp;
 }
 
-#ifndef _NO_MAGIC
 static char **
 rl_mime_list(void)
 {
@@ -2432,7 +2431,6 @@ rl_mime_files(const char *text)
 	t = xnrealloc(t, (size_t)n + 1, sizeof(char *));
 	return t;
 }
-#endif /* !_NO_MAGIC */
 
 /* Return the list of matches for the glob expression TEXT or NULL if
  * there are no matches. */
@@ -3474,7 +3472,6 @@ complete_file_type_filter(char *text, int *exit_status)
 	return matches;
 }
 
-#ifndef _NO_MAGIC
 static char **
 complete_mime_type_filter(char *text, int *exit_status)
 {
@@ -3485,7 +3482,7 @@ complete_mime_type_filter(char *text, int *exit_status)
 		if ((matches = rl_mime_files(text + 1)) == NULL)
 			return (char **)NULL;
 
-		cur_comp_type = TCMP_MIME_FILES; // Same as TCMP_FILE_TYPES_FILES
+		cur_comp_type = TCMP_MIME_FILES; /* Same as TCMP_FILE_TYPES_FILES */
 		rl_filename_completion_desired = 1;
 		flags |= MULTI_SEL;
 		*exit_status = FUNC_SUCCESS;
@@ -3499,7 +3496,6 @@ complete_mime_type_filter(char *text, int *exit_status)
 	cur_comp_type = TCMP_MIME_LIST;
 	return matches;
 }
-#endif /* !_NO_MAGIC */
 
 static char **
 complete_glob(char *text, int *exit_status)
@@ -4150,14 +4146,12 @@ my_rl_completion(const char *text, const int start, const int end)
 			return matches;
 	}
 
-#ifndef _NO_MAGIC
 	/* #### MIME TYPE EXPANSION #### */
 	if (*text == '@') {
 		matches = complete_mime_type_filter((char *)text, &exit_status);
 		if (exit_status == FUNC_SUCCESS)
 			return matches;
 	}
-#endif /* !_NO_MAGIC */
 
 	/* #### FASTBACK EXPANSION #### */
 	if (*text == '.' && text[1] == '.' && text[2] == '.') {

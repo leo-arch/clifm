@@ -93,9 +93,7 @@
 #include "checks.h" /* check_file_access(), is_number() */
 #include "colors.h" /* get_dir_color(), get_regfile_color() */
 #include "messages.h"
-#ifndef _NO_MAGIC
 # include "mime.h"  /* xmagic() */
-#endif /* !_NO_MAGIC */
 #include "misc.h"
 #include "properties.h"
 #include "readline.h"   /* Required by the 'pc' command */
@@ -1595,10 +1593,6 @@ err_no_file(const char *filename, const char *target, const int errnum)
 static void
 print_file_mime(const char *name)
 {
-#ifdef _NO_MAGIC
-	UNUSED(name);
-	return;
-#else
 	fputs("MIME type:\t", stdout);
 	char *n = xmagic(name, MIME_TYPE);
 	if (n) {
@@ -1607,7 +1601,6 @@ print_file_mime(const char *name)
 	} else {
 		printf("%s%c%s\n", dn_c, UNKNOWN_CHR, df_c);
 	}
-#endif /* _NO_MAGIC */
 }
 
 #ifdef USE_DU1

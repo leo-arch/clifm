@@ -22,46 +22,181 @@
  * MA 02110-1301, USA.
 */
 
-#ifndef _NO_LIRA
-
 #include "helpers.h"
-
-#include <errno.h>
-#include <string.h>
-#include <unistd.h>
-#include <readline/tilde.h>
 
 #ifndef _NO_MAGIC
 # include <magic.h>
-#endif /* !_NO_MAGIC */
-
-#if defined(_NO_MAGIC)
+#else
 # if !defined(_BE_POSIX)
 #  include <paths.h>
 # endif /* !_BE_POSIX */
 # ifndef _PATH_DEVNULL
 #  define _PATH_DEVNULL "/dev/null"
 # endif /* _PATH_DEVNULL */
-#endif /* _NO_MAGIC */
+#endif /* !_NO_MAGIC */
 
-#ifndef _NO_ARCHIVING
-#include "archives.h"
-#endif /* !_NO_ARCHIVING */
-#include "aux.h"
-#include "checks.h"
-#include "config.h"
-#include "listing.h"
-#include "messages.h"
-#include "mime.h"
-#include "misc.h"
-#include "readline.h"
-#include "sanitize.h"
-#include "spawn.h"
+#ifndef _NO_LIRA
+# include <errno.h>
+# include <string.h>
+# include <unistd.h>
+# include <readline/tilde.h>
 
+# ifndef _NO_ARCHIVING
+#  include "archives.h"
+# endif /* !_NO_ARCHIVING */
+# include "aux.h"
+# include "checks.h"
+# include "config.h"
+# include "listing.h"
+# include "messages.h"
+# include "mime.h"
+# include "misc.h"
+# include "readline.h"
+# include "sanitize.h"
+# include "spawn.h"
+#else
+# include <string.h>
+# include <unistd.h>
+# include "aux.h" /* open_f* functions */
+# include "spawn.h" /* launch_execv() */
+#endif /* !_NO_LIRA */
+
+#ifndef _NO_LIRA
 static char *err_name = (char *)NULL;
 static int mime_match = 0;
 static char *g_mime_type = (char *)NULL;
+#endif /* !_NO_LIRA */
 
+#ifndef _NO_MAGIC
+/* Get FILE's type using the libmagic library.
+ * Return the MIME type if QUERY_MIME is set to 1, or a text description
+ * otherwise.
+ * NULL is returned in case of error. */
+char *
+xmagic(const char *file, const int query_mime)
+{
+	if (!file || !*file)
+		return (char *)NULL;
+
+	magic_t cookie = magic_open(query_mime ? (MAGIC_MIME_TYPE | MAGIC_ERROR)
+		: MAGIC_ERROR);
+	if (!cookie)
+		return (char *)NULL;
+
+	magic_load(cookie, NULL);
+
+	const char *mime = magic_file(cookie, file);
+
+	char *str = mime ? savestring(mime, strlen(mime)) : (char *)NULL;
+	magic_close(cookie);
+
+	return str;
+}
+
+#else /* _NO_MAGIC */
+/* Get FILE's type using file(1).
+ * Return the MIME type if QUERY_MIME is set to 1, or a text description
+ * otherwise.
+ * NULL is returned in case of error. */
+char *
+xmagic(const char *file, const int query_mime)
+{
+	if (!file || !*file)
+		return (char *)NULL;
+
+	char *mime_type = (char *)NULL;
+	char *rand_ext = gen_rand_str(RAND_SUFFIX_LEN);
+
+	char tmp_file[PATH_MAX + 1];
+	snprintf(tmp_file, sizeof(tmp_file), "%s/mime.%s", tmp_dir,
+		rand_ext ? rand_ext : "Hu?+6545jk");
+	free(rand_ext);
+
+	int fd = 0;
+	FILE *fp_out = open_fwrite(tmp_file, &fd);
+	if (!fp_out)
+		return (char *)NULL;
+
+	FILE *fp_err = fopen(_PATH_DEVNULL, "w");
+	if (!fp_err)
+		goto END;
+
+	int stdout_bk = dup(STDOUT_FILENO); /* Store original stdout */
+	int stderr_bk = dup(STDERR_FILENO); /* Store original stderr */
+
+	if (stdout_bk == -1 || stderr_bk == -1)
+		goto ERROR;
+
+	/* Redirect stdout to the desired file */
+	if (dup2(fileno(fp_out), STDOUT_FILENO) == -1)
+		goto ERROR;
+
+	/* Redirect stderr to /dev/null */
+	if (dup2(fileno(fp_err), STDERR_FILENO) == -1)
+		goto ERROR;
+
+	fclose(fp_out);
+	fclose(fp_err);
+
+/* --mime-type is only available since file 4.24 (Mar, 2008), while the -i
+ * flag (-I in MacOS) is supported since 3.30 (Apr, 2000).
+ * NOTE: the -i flag in the POSIX file(1) specification is a completely
+ * different thing. */
+#ifdef __APPLE__
+	char *cmd[] = {"file", query_mime ? "-bI" : "-b", (char *)file, NULL};
+#else
+	char *cmd[] = {"file", query_mime ? "-bi" : "-b", (char *)file, NULL};
+#endif /* __APPLE__ */
+	int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
+
+	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
+	dup2(stderr_bk, STDERR_FILENO); /* Restore original stderr */
+	close(stdout_bk);
+	close(stderr_bk);
+
+	if (ret != FUNC_SUCCESS
+	|| (fp_out = fopen(tmp_file, "r")) == NULL) {
+		unlink(tmp_file);
+		return (char *)NULL;
+	}
+
+	/* According to the RFC-4288, both type and subtype of a MIME type cannot
+	 * be longer than 127 characters each, So adding the separating slash, we
+	 * get a max of 255 characters.
+	 * See https://datatracker.ietf.org/doc/html/rfc4288#section-4.2 */
+	char line[NAME_MAX + 1]; *line = '\0';
+	if (fgets(line, (int)sizeof(line), fp_out) == NULL)
+		goto END;
+
+	char *s = query_mime ? strrchr(line, ';') : (char *)NULL;
+	if (s)
+		*s = '\0';
+
+	size_t len = strlen(line);
+	if (len > 0 && line[len - 1] == '\n') {
+		line[len - 1] = '\0';
+		len--;
+	}
+
+	mime_type = len > 0 ? savestring(line, len) : (char *)NULL;
+
+END:
+	fclose(fp_out);
+	unlink(tmp_file);
+
+	return mime_type;
+
+ERROR:
+	fclose(fp_out);
+	fclose(fp_err);
+	unlink(tmp_file);
+	close(stdout_bk);
+	close(stderr_bk);
+	return (char *)NULL;
+}
+#endif /* !_NO_MAGIC */
+
+#ifndef _NO_LIRA
 /* Expand all environment variables in the string S.
  * Returns the expanded string or NULL on error. */
 static char *
@@ -353,135 +488,6 @@ get_app(const char *mime, const char *filename)
 	fclose(fp);
 	return app;
 }
-
-#ifndef _NO_MAGIC
-/* Get FILE's MIME type using the libmagic library */
-char *
-xmagic(const char *file, const int query_mime)
-{
-	if (!file || !*file)
-		return (char *)NULL;
-
-	magic_t cookie = magic_open(query_mime ? (MAGIC_MIME_TYPE | MAGIC_ERROR)
-		: MAGIC_ERROR);
-	if (!cookie)
-		return (char *)NULL;
-
-	magic_load(cookie, NULL);
-
-	const char *mime = magic_file(cookie, file);
-
-	char *str = mime ? savestring(mime, strlen(mime)) : (char *)NULL;
-	magic_close(cookie);
-
-	return str;
-}
-
-#else /* _NO_MAGIC */
-static char *
-get_mime(char *file)
-{
-	if (!file || !*file) {
-		xerror("%s\n", _("Error opening temporary file"));
-		return (char *)NULL;
-	}
-
-	char *mime_type = (char *)NULL;
-	char *rand_ext = gen_rand_str(RAND_SUFFIX_LEN);
-
-	char tmp_file[PATH_MAX + 1];
-	snprintf(tmp_file, sizeof(tmp_file), "%s/mime.%s", tmp_dir,
-		rand_ext ? rand_ext : "Hu?+6545jk");
-	free(rand_ext);
-
-	int fd = 0;
-	FILE *fp_out = open_fwrite(tmp_file, &fd);
-	if (!fp_out) {
-		xerror("%s: fopen: '%s': %s\n", err_name, tmp_file, strerror(errno));
-		return (char *)NULL;
-	}
-
-	FILE *fp_err = fopen(_PATH_DEVNULL, "w");
-	if (!fp_err) {
-		xerror("%s: '%s': %s\n", err_name, _PATH_DEVNULL, strerror(errno));
-		goto END;
-	}
-
-	int stdout_bk = dup(STDOUT_FILENO); /* Store original stdout */
-	int stderr_bk = dup(STDERR_FILENO); /* Store original stderr */
-
-	if (stdout_bk == -1 || stderr_bk == -1)
-		goto ERROR;
-
-	/* Redirect stdout to the desired file */
-	if (dup2(fileno(fp_out), STDOUT_FILENO) == -1)
-		goto ERROR;
-
-	/* Redirect stderr to /dev/null */
-	if (dup2(fileno(fp_err), STDERR_FILENO) == -1)
-		goto ERROR;
-
-	fclose(fp_out);
-	fclose(fp_err);
-
-/* --mime-type is only available since file 4.24 (Mar, 2008), while the -i
- * flag (-I in MacOS) is supported since 3.30 (Apr, 2000).
- * NOTE: the -i flag in the POSIX file(1) specification is a completely
- * different thing. */
-#ifdef __APPLE__
-	char *cmd[] = {"file", "-bI", file, NULL};
-#else
-	char *cmd[] = {"file", "-bi", file, NULL};
-#endif /* __APPLE__ */
-	int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
-
-	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
-	dup2(stderr_bk, STDERR_FILENO); /* Restore original stderr */
-	close(stdout_bk);
-	close(stderr_bk);
-
-	if (ret != FUNC_SUCCESS
-	|| (fp_out = fopen(tmp_file, "r")) == NULL) {
-		unlink(tmp_file);
-		return (char *)NULL;
-	}
-
-	/* According to the RFC-4288, both type and subtype of a MIME type cannot
-	 * be longer than 127 characters each, So adding the separating slash, we
-	 * get a max of 255 characters.
-	 * See https://datatracker.ietf.org/doc/html/rfc4288#section-4.2 */
-	char line[NAME_MAX + 1]; *line = '\0';
-	if (fgets(line, (int)sizeof(line), fp_out) == NULL)
-		goto END;
-
-	char *s = strrchr(line, ';');
-	if (s)
-		*s = '\0';
-
-	size_t len = strlen(line);
-	if (len > 0 && line[len - 1] == '\n') {
-		line[len - 1] = '\0';
-		len--;
-	}
-
-	mime_type = len > 0 ? savestring(line, len) : (char *)NULL;
-
-END:
-	fclose(fp_out);
-	unlink(tmp_file);
-
-	return mime_type;
-
-ERROR:
-	xerror("%s: %s\n", err_name, strerror(errno));
-	fclose(fp_out);
-	fclose(fp_err);
-	unlink(tmp_file);
-	close(stdout_bk);
-	close(stderr_bk);
-	return (char *)NULL;
-}
-#endif /* !_NO_MAGIC */
 
 /* Import MIME associations from the system and store them into FILE.
  * Returns the amount of associations found, if any, or -1 in case of error
@@ -1112,12 +1118,7 @@ mime_open_with_tab(char *filename, const char *prefix, const int only_names)
 	if (!name)
 		return (char **)NULL;
 
-#ifndef _NO_MAGIC
 	char *mime = xmagic(name, MIME_TYPE);
-#else
-	err_name = "open";
-	char *mime = get_mime(name);
-#endif /* !_NO_MAGIC */
 	if (!mime) {
 		free(name);
 		return (char **)NULL;
@@ -1337,11 +1338,7 @@ mime_open_with(char *filename, char **args)
 
 	/* Find out the appropriate opening application via either mime type
 	 * or file name. */
-#ifndef _NO_MAGIC
 	char *mime = xmagic(name, MIME_TYPE);
-#else
-	char *mime = get_mime(name);
-#endif /* !_NO_MAGIC */
 	if (!mime) {
 		xerror(_("%s: Error getting MIME type\n"), err_name);
 		goto FAIL;
@@ -1604,21 +1601,6 @@ run_archiver(char **fpath, char **app, char **mime_type)
 }
 #endif /* _NO_ARCHIVING */
 
-#ifdef _NO_MAGIC
-/* Check the existence of the 'file' command */
-static int
-check_file_cmd(void)
-{
-	if (is_cmd_in_path("file") == 0) {
-		xerror("%s: Cannot retrieve MIME type: 'file' command "
-			"not found\n", err_name);
-		return FUNC_FAILURE;
-	}
-
-	return FUNC_SUCCESS;
-}
-#endif /* _NO_MAGIC */
-
 static int
 print_mime_help(void)
 {
@@ -1667,16 +1649,7 @@ mime_open(char **args)
 	}
 
 	/* Get file's MIME type */
-#ifndef _NO_MAGIC
 	char *mime = xmagic(file_path, MIME_TYPE);
-#else
-	if (check_file_cmd() == FUNC_FAILURE) {
-		free(file_path);
-		return FUNC_FAILURE;
-	}
-	char *mime = get_mime(file_path);
-#endif /* !_NO_MAGIC */
-
 	if (!mime)
 		return print_error_no_mime(&file_path);
 
@@ -1720,6 +1693,4 @@ mime_open(char **args)
 	free(file_path);
 	return ret;
 }
-#else
-void *_skip_me_lira;
 #endif /* !_NO_LIRA */
