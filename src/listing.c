@@ -1818,6 +1818,8 @@ get_longest_per_col(size_t *columns_n, filesn_t *rows, const filesn_t files_n)
 		used_cols = 0;
 	}
 
+#undef LONGEST_PLUS_GAP
+
 	free(prev_longest_per_col);
 	return longest_per_col;
 }

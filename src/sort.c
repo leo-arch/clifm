@@ -94,11 +94,8 @@ compare_strings(char **s1, char **s2)
 #if defined(HAVE_STRCOLL)
 	return strcoll(*s2, *s2);
 #else
-	int ret = **s1 - **s2;
-	if (ret == 0)
-		ret = strcmp(*s1, *s2);
-
-	return ret;
+	const int ret = **s1 - **s2;
+	return ret == 0 ? strcmp(*s1, *s2) : ret;
 #endif /* HAVE_STRCOLL */
 }
 
@@ -122,7 +119,7 @@ check_priority_sort_char(const char c1, const char c2)
 }
 
 static int
-namecmp(char *s1, char *s2, const int have_utf8)
+namecmp(char *s1, char *s2)
 {
 	if (conf.skip_non_alnum_prefix == 1) {
 		skip_name_prefixes(&s1);
@@ -140,11 +137,11 @@ namecmp(char *s1, char *s2, const int have_utf8)
 			return 1;
 	}
 
-	char ac = *s1, bc = *s2;
-
 	if (!IS_UTF8_LEAD_BYTE(*s1) && !IS_UTF8_LEAD_BYTE(*s2)) {
 	/* None of the strings starts with a unicode char: compare the first
 	 * byte of both strings */
+		char ac = *s1, bc = *s2;
+
 		if (!conf.case_sens_list) {
 			ac = (char)TOLOWER(*s1);
 			bc = (char)TOLOWER(*s2);
@@ -157,7 +154,7 @@ namecmp(char *s1, char *s2, const int have_utf8)
 			return 1;
 	}
 
-	if (conf.case_sens_list == 0 || have_utf8 == 1)
+	if (conf.case_sens_list == 0)
 		return strcoll(s1, s2);
 
 	return strcmp(s1, s2);
@@ -203,19 +200,19 @@ sort_by_extension(struct fileinfo *pa, struct fileinfo *pb)
 }
 
 static inline int
-sort_by_owner(struct fileinfo *pa, struct fileinfo *pb, const int have_utf8)
+sort_by_owner(struct fileinfo *pa, struct fileinfo *pb)
 {
 	if (pa->uid_i.name && pb->uid_i.name)
-		return namecmp(pa->uid_i.name, pb->uid_i.name, have_utf8);
+		return namecmp(pa->uid_i.name, pb->uid_i.name);
 
 	return F_SORT(pa->uid, pb->uid);
 }
 
 static inline int
-sort_by_group(struct fileinfo *pa, struct fileinfo *pb, const int have_utf8)
+sort_by_group(struct fileinfo *pa, struct fileinfo *pb)
 {
 	if (pa->gid_i.name && pb->gid_i.name)
-		return namecmp(pa->gid_i.name, pb->gid_i.name, have_utf8);
+		return namecmp(pa->gid_i.name, pb->gid_i.name);
 
 	return F_SORT(pa->gid, pb->gid);
 }
@@ -245,15 +242,7 @@ sort_by_type(struct fileinfo *pa, struct fileinfo *pb)
 static int
 sort_by_version(char *s1, char *s2, const int have_utf8)
 {
-	if (have_utf8 == 0)
-		return xstrverscmp(s1, s2);
-
-	if (conf.skip_non_alnum_prefix == 1) {
-		skip_name_prefixes(&s1);
-		skip_name_prefixes(&s2);
-	}
-
-	return strcoll(s1, s2);
+	return have_utf8 == 0 ? xstrverscmp(s1, s2) : namecmp(s1, s2);
 }
 
 int
@@ -291,21 +280,18 @@ entrycmp(const void *a, const void *b)
 	case SVER: ret = sort_by_version(pa->name, pb->name, have_utf8); break;
 	case SEXT: ret = sort_by_extension(pa, pb); break;
 	case SINO: ret = F_SORT(pa->inode, pb->inode); break;
-	case SOWN: ret = sort_by_owner(pa, pb, have_utf8); break;
-	case SGRP: ret = sort_by_group(pa, pb, have_utf8); break;
+	case SOWN: ret = sort_by_owner(pa, pb); break;
+	case SGRP: ret = sort_by_group(pa, pb); break;
 	case SBLK: ret = F_SORT(pa->blocks, pb->blocks); break;
 	case SLNK: ret = F_SORT(pa->linkn, pb->linkn); break;
 	case STYPE: ret = sort_by_type(pa, pb); break;
 	default: break;
 	}
 
-	if (!ret)
-		ret = namecmp(pa->name, pb->name, have_utf8);
+	if (ret == 0)
+		ret = namecmp(pa->name, pb->name);
 
-	if (!conf.sort_reverse)
-		return ret;
-
-	return (-ret);
+	return conf.sort_reverse == 0 ? ret : -ret;
 }
 
 /* Same as alphasort, but is uses strcmp instead of sctroll, which is
