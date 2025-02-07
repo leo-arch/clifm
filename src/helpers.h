@@ -1817,6 +1817,14 @@ struct dir_info_t {
 	int pad0;
 };
 
+/* Store user defined mimetypes */
+struct mime_t {
+	char *ext;
+	char *mimetype;
+	size_t ext_hash;
+};
+extern struct mime_t *user_mimetypes;
+
 enum tab_mode {
 	STD_TAB =   0,
 	FZF_TAB =   1,

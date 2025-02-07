@@ -46,6 +46,7 @@
 #include "jump.h"
 #include "keybinds.h"
 #include "listing.h"
+#include "mimetypes.h" /* load_user_mimetypes() */
 #include "misc.h"
 #ifndef _NO_PROFILES
 # include "profiles.h"
@@ -98,6 +99,7 @@ struct groups_t *sys_users = (struct groups_t *)NULL;
 struct groups_t *sys_groups = (struct groups_t *)NULL;
 struct dircmds_t dir_cmds = {UNSET, 0};
 struct pmsgs_t *messages = (struct pmsgs_t *)NULL;
+struct mime_t *user_mimetypes = (struct mime_t *)NULL;
 
 const struct sort_t sort_methods[] = {
     {"none", 0, 0},
@@ -1398,6 +1400,7 @@ main(int argc, char *argv[])
 
 	load_pinned_dir();
 	init_workspaces_opts();
+	load_user_mimetypes();
 
 	/* Restore user umask */
 	umask(old_mask); /* flawfinder: ignore */

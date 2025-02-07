@@ -1397,6 +1397,14 @@ free_stuff(void)
 	free(alt_preview_file);
 	free(alt_profile);
 
+	if (user_mimetypes) {
+		for (i = 0; user_mimetypes[i].mimetype; i++) {
+			free(user_mimetypes[i].ext);
+			free(user_mimetypes[i].mimetype);
+		}
+		free(user_mimetypes);
+	}
+
 	if (sys_users) {
 		for (i = 0; sys_users[i].name; i++)
 			free(sys_users[i].name);

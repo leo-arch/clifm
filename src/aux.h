@@ -37,24 +37,23 @@
 __BEGIN_DECLS
 
 char *abbreviate_file_name(char *str);
+void clear_term_img(void);
 char *construct_human_size(const off_t size);
 filesn_t count_dir(const char *dir, const int pop);
-
 char from_hex(char c);
 char *gen_date_suffix(const struct tm tm);
 void gen_time_str(char *buf, const size_t size, const time_t curtime);
-char *get_cwd(char *buf, const size_t buflen, const int check_workspace);
-size_t hashme(const char *str, const int case_sensitive);
 #if defined(__sun) && defined(ST_BTIME)
 struct timespec get_birthtime(const char *filename);
 #endif /* __sun && ST_BTIME */
 char *get_cmd_path(const char *cmd);
-int  is_cmd_in_path(const char *cmd);
-int  get_rgb(char *hex, int *attr, int *r, int *g, int *b);
-void clear_term_img(void);
+char *get_cwd(char *buf, const size_t buflen, const int check_workspace);
 mode_t get_dt(const mode_t mode);
 int  get_link_ref(const char *link);
+int  get_rgb(char *hex, int *attr, int *r, int *g, int *b);
+size_t hashme(const char *str, const int case_sensitive);
 char *hex2rgb(char *hex);
+int  is_cmd_in_path(const char *cmd);
 char *normalize_path(char *src, const size_t src_len);
 int  open_config_file(char *app, char *file);
 FILE *open_fread(const char *name, int *fd);

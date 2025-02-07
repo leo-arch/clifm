@@ -37,6 +37,7 @@
 #include "file_operations.h"
 #include "init.h"
 #include "mime.h"
+#include "mimetypes.h" /* load_user_mimetypes() */
 #include "misc.h"
 #include "navigation.h"
 #include "profiles.h"
@@ -832,6 +833,8 @@ RUN:
 	xargs.preview = preview == 1 ? 1 : 0;
 	if (preview == 1)
 		clear_term_img();
+
+	load_user_mimetypes();
 
 	open_reg_exit(fpath, url, preview); /* noreturn */
 }

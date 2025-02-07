@@ -67,6 +67,27 @@ static int mime_match = 0;
 static char *g_mime_type = (char *)NULL;
 #endif /* !_NO_LIRA */
 
+static char *
+check_user_mimetypes(const char *file)
+{
+	char *ext = strrchr(file, '.');
+	if (!ext || !*(++ext))
+		return (char *)NULL;
+
+	const size_t hash = hashme(ext, conf.case_sens_list);
+
+	static filesn_t n = 0;
+	if (n == 0)
+		for (n = 0; user_mimetypes[n].mimetype; n++);
+
+	filesn_t i = n;
+	while (--i >= 0)
+		if (hash == user_mimetypes[i].ext_hash)
+			return user_mimetypes[i].mimetype;
+
+	return (char *)NULL;
+}
+
 #ifndef _NO_MAGIC
 /* Get FILE's type using the libmagic library.
  * Return the MIME type if QUERY_MIME is set to 1, or a text description
@@ -77,6 +98,13 @@ xmagic(const char *file, const int query_mime)
 {
 	if (!file || !*file)
 		return (char *)NULL;
+
+	if (query_mime == 1 && user_mimetypes
+	&& user_mimetypes[0].ext_hash != (size_t)-1) {
+		const char *mime = check_user_mimetypes(file);
+		if (mime)
+			return strdup(mime);
+	}
 
 	magic_t cookie = magic_open(query_mime ? (MAGIC_MIME_TYPE | MAGIC_ERROR)
 		: MAGIC_ERROR);
@@ -103,6 +131,13 @@ xmagic(const char *file, const int query_mime)
 {
 	if (!file || !*file)
 		return (char *)NULL;
+
+	if (query_mime == 1 && user_mimetypes
+	&& user_mimetypes[0].ext_hash != (size_t)-1) {
+		const char *mime = check_user_mimetypes(file);
+		if (mime)
+			return strdup(mime);
+	}
 
 	char *mime_type = (char *)NULL;
 	char *rand_ext = gen_rand_str(RAND_SUFFIX_LEN);
@@ -1499,6 +1534,8 @@ handle_no_app(const int info, char **fpath, char **mime, const char *arg)
 	if (xargs.preview == 1) {
 		/* When running the previewer, MIME_FILE points to the path to
 		 * preview.clifm file. */
+		free(*fpath);
+		free(*mime);
 		xerror(_("%s: '%s': No associated application found\n"
 			"Fix this in the configuration file:\n%s\n"
 			"(run 'view edit' if running %s)\n"), PROGRAM_NAME,
