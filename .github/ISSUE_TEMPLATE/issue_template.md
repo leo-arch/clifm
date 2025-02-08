@@ -25,7 +25,7 @@ If applicable, add screenshots to help explain your problem.
 **Desktop (please complete the following information):**
  - OS: [e.g. FreeBSD]
  - Terminal [e.g. xterm, alacritty]
- - CliFM version [e.g. 1.4]
+ - Clifm version [e.g. 1.4]
 - Installation source [e.g. OBS, AUR, Git]
 
 **Additional context**
