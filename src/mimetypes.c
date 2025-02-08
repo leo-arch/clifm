@@ -30,31 +30,13 @@
 
 #define INIT_BUF_SIZE 1024
 
-typedef int QSFUNC(const void *, const void *);
-
 static int
-hash_sort(const void *a, const void *b)
+check_hash_conflict(const size_t hash, const size_t n)
 {
-	struct mime_t *pa = (struct mime_t *)a;
-	struct mime_t *pb = (struct mime_t *)b;
-
-	if (pa->ext_hash > pb->ext_hash)
-		return 1;
-	if (pa->ext_hash < pb->ext_hash)
-		return -1;
-	return 0;
-}
-
-static int
-check_mime_conflict(struct mime_t *m)
-{
-	size_t i, j;
-	for (i = 0; m[i].mimetype; i++) {
-		for (j = i + 1; m[j].mimetype; j++) {
-			if (m[i].ext_hash == m[j].ext_hash)
-				return 1;
-		}
-	}
+	size_t i;
+	for (i = 0; i < n; i++)
+		if (hash == user_mimetypes[i].ext_hash)
+			return 1;
 
 	return 0;
 }
@@ -128,8 +110,12 @@ load_user_mimetypes(void)
 					buf_size, sizeof(struct mime_t));
 			}
 
+			const size_t hash = hashme(ext, conf.case_sens_list);
+			if (n > 0 && check_hash_conflict(hash, n) == 1)
+				continue;
+
 			user_mimetypes[n].ext = savestring(ext, strlen(ext));
-			user_mimetypes[n].ext_hash = hashme(ext, conf.case_sens_list);
+			user_mimetypes[n].ext_hash = hash;
 			user_mimetypes[n].mimetype = savestring(mimetype, mime_len);
 			n++;
 		}
@@ -147,14 +133,9 @@ load_user_mimetypes(void)
 	user_mimetypes[n].ext = (char *)NULL;
 	user_mimetypes[n].ext_hash = 0;
 
-	if (n != buf_size)
+	if (n != buf_size) {
 		user_mimetypes =
 			realloc(user_mimetypes, (n + 1) * sizeof(struct mime_t));
-
-	if (check_mime_conflict(user_mimetypes) != 0) {
-		user_mimetypes[0].ext_hash = (size_t)-1;
-	} else {
-		qsort(user_mimetypes, n, sizeof(struct mime_t), (QSFUNC *)hash_sort);
 	}
 
 	return FUNC_SUCCESS;
