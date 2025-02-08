@@ -89,7 +89,8 @@ check_user_mimetypes(const char *file)
 
 	filesn_t i = n;
 	while (--i >= 0)
-		if (hash == user_mimetypes[i].ext_hash)
+		/* An extension name starting with NULL byte is duplicated. Skip it. */
+		if (hash == user_mimetypes[i].ext_hash && *user_mimetypes[i].ext)
 			return user_mimetypes[i].mimetype;
 
 	return (char *)NULL;

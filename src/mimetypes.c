@@ -30,15 +30,14 @@
 
 #define INIT_BUF_SIZE 1024
 
-static int
-check_hash_conflict(const size_t hash, const size_t n)
+static void
+check_hash_conflicts(void)
 {
-	size_t i;
-	for (i = 0; i < n; i++)
-		if (hash == user_mimetypes[i].ext_hash)
-			return 1;
-
-	return 0;
+	size_t i, j;
+	for (i = 0; user_mimetypes[i].mimetype; i++)
+		for (j = i + 1; user_mimetypes[j].mimetype; j++)
+			if (user_mimetypes[i].ext_hash == user_mimetypes[j].ext_hash)
+				*user_mimetypes[i].ext = '\0';
 }
 
 static char *
@@ -110,12 +109,8 @@ load_user_mimetypes(void)
 					buf_size, sizeof(struct mime_t));
 			}
 
-			const size_t hash = hashme(ext, conf.case_sens_list);
-			if (n > 0 && check_hash_conflict(hash, n) == 1)
-				continue;
-
 			user_mimetypes[n].ext = savestring(ext, strlen(ext));
-			user_mimetypes[n].ext_hash = hash;
+			user_mimetypes[n].ext_hash = hashme(ext, conf.case_sens_list);
 			user_mimetypes[n].mimetype = savestring(mimetype, mime_len);
 			n++;
 		}
@@ -132,6 +127,8 @@ load_user_mimetypes(void)
 	user_mimetypes[n].mimetype = (char *)NULL;
 	user_mimetypes[n].ext = (char *)NULL;
 	user_mimetypes[n].ext_hash = 0;
+
+	check_hash_conflicts();
 
 	if (n != buf_size) {
 		user_mimetypes =
