@@ -60,9 +60,9 @@
 # Note: Setting this option to false disables the files counter.
 ;Classify=true
 
-# Symbolic links are colored as the target file name. An indicator character
-# (by default '@') is placed at the beginning of the name to mark it as a
-# symbolic link.
+# Symbolic links are colored according to the target file name. An indicator
+# character (by default '@') is placed at the beginning of the name to mark
+# it as a symbolic link.
 # The color of this indicator can be customized via the 'lc' code in the
 # color scheme file (InterfaceColors field).
 ;ColorLinksAsTarget=false
@@ -126,7 +126,7 @@
 #PropFields="pmS"
 ;PropFields="xfpIsm"
 
-# Number of spaces between fields in long view. Possible values: 1-2.
+# Number of spaces between fields in long view. Possible values: 1, 2.
 ;PropFieldsGap=1
 
 # Style used to print timestamps in long view mode.
@@ -204,7 +204,7 @@
 ;PrivateWorkspaceSettings=false
 
 # Print the disk usage of the file system the current directory belongs to
-# in the form "FREE/TOTAL (FREE_PERCENTAGE) FS_TYPE DEV_NAME".
+# in the form "FREE/TOTAL (FREE-PERCENTAGE) FS-TYPE DEV-NAME".
 ;DiskUsage=false
 
 # Print a map of the current position in the directory history list,
@@ -242,7 +242,7 @@
 # is not detected.
 ;ColorScheme=
 
-# Enable/disable icons.
+# Enable icons.
 # By default, emojis (widely available today) are used as icons.
 # Nerd-fonts and icons-in-terminal are supported as well, though Clifm
 # needs to be recompiled in order to enable support. Consult our Wiki
@@ -289,7 +289,7 @@
 # Set to -1 (or empty) to disable this feature (no limit).
 ;PreviewMaxSize=
 
-# Enable auto-suggestions
+# Enable auto-suggestions.
 ;AutoSuggestions=true
 
 # The following suggestion checks will be performed in the order
@@ -325,7 +325,7 @@
 ;AutoLs=true
 
 # If set to true, a command name that is the name of a directory or a
-# file, is executed as if it were the argument to the the 'cd' or the 
+# file, is executed as if it were the argument to the 'cd' or the
 # 'open' commands respectively: 'DIR' is equivalent 'cd DIR' and
 # 'FILE' to 'open FILE'.
 ;Autocd=true
@@ -503,7 +503,8 @@
 # When sorting files (either by 'version' or 'name'), skip
 # non-alphanumeric characters. Ex: '__file' is sorted as 'file'.
 # This also applies to hidden files: if set to false, '.hidden' will
-# be listed before 'afile', otherwise, after 'gfile'.
+# be listed before 'afile', otherwise, after 'gfile' (unless ShowHiddenFiles
+# is set to either 'first' or 'last').
 ;SkipNonAlnumPrefix=true
 
 # Set a custom starting path. If not specified, it defaults to the current
