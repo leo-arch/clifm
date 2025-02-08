@@ -88,16 +88,16 @@ load_user_mimetypes(void)
 		return FUNC_FAILURE;
 
 	struct stat a;
-	if (lstat(mimetypes_file, &a) == -1 || !S_ISREG(a.st_mode)) {
+	int fd = 0;
+	FILE *fp = open_fread(mimetypes_file, &fd);
+	if (!fp || fstatat(fd, mimetypes_file, &a, 0) == -1 || !S_ISREG(a.st_mode)) {
+		if (fp)
+			fclose(fp);
 		free(mimetypes_file);
 		return FUNC_FAILURE;
 	}
 
-	FILE *fp = fopen(mimetypes_file, "r");
 	free(mimetypes_file);
-
-	if (!fp)
-		return FUNC_FAILURE;
 
 	size_t buf_size = INIT_BUF_SIZE;
 	size_t n = 0;
