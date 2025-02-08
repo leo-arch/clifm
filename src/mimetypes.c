@@ -48,23 +48,15 @@ hash_sort(const void *a, const void *b)
 static int
 check_mime_conflict(struct mime_t *m)
 {
-//	int conflict = 0;
-
 	size_t i, j;
 	for (i = 0; m[i].mimetype; i++) {
 		for (j = i + 1; m[j].mimetype; j++) {
-			if (m[i].ext_hash == m[j].ext_hash) {
+			if (m[i].ext_hash == m[j].ext_hash)
 				return 1;
-/*				conflict++;
-				printf(" %s %s (%zu) - %s %s (%zu)\n",
-					m[i].mimetype, m[i].ext, m[i].ext_hash,
-					m[j].mimetype, m[j].ext, m[j].ext_hash); */
-			}
 		}
 	}
 
 	return 0;
-//	return conflict;
 }
 
 static char *
@@ -155,7 +147,7 @@ load_user_mimetypes(void)
 	user_mimetypes[n].ext = (char *)NULL;
 	user_mimetypes[n].ext_hash = 0;
 
-	if (n > 0 && n != buf_size)
+	if (n != buf_size)
 		user_mimetypes =
 			realloc(user_mimetypes, (n + 1) * sizeof(struct mime_t));
 

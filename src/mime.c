@@ -67,9 +67,16 @@ static int mime_match = 0;
 static char *g_mime_type = (char *)NULL;
 #endif /* !_NO_LIRA */
 
+/* Return the MIME type associated to the current file based on its extension.
+ * Associations are taken from ~/.mime.types (or $CLIFM_MIMETYPES_FILE) and
+ * stored in the user_mimetypes struct by load_user_mimetypes() (mimetypes.c). */
 static char *
 check_user_mimetypes(const char *file)
 {
+	if (user_mimetypes[0].ext_hash != (size_t)-1)
+		/* We have hash conflicts. */
+		return (char *)NULL;
+
 	char *ext = strrchr(file, '.');
 	if (!ext || !*(++ext))
 		return (char *)NULL;
@@ -99,8 +106,7 @@ xmagic(const char *file, const int query_mime)
 	if (!file || !*file)
 		return (char *)NULL;
 
-	if (query_mime == 1 && user_mimetypes
-	&& user_mimetypes[0].ext_hash != (size_t)-1) {
+	if (query_mime == 1 && user_mimetypes) {
 		const char *mime = check_user_mimetypes(file);
 		if (mime)
 			return strdup(mime);
