@@ -126,17 +126,6 @@ namecmp(char *s1, char *s2)
 		skip_name_prefixes(&s2);
 	}
 
-	/* If both strings start with number, sort them as numbers, not as strings */
-	if (IS_DIGIT(*s1) && IS_DIGIT(*s2)) {
-		char *p1, *p2;
-		const long long n1 = strtoll(s1, &p1, 10);
-		const long long n2 = strtoll(s2, &p2, 10);
-		if (n2 > n1)
-			return -1;
-		if (n2 < n1)
-			return 1;
-	}
-
 	if (!IS_UTF8_LEAD_BYTE(*s1) && !IS_UTF8_LEAD_BYTE(*s2)) {
 	/* None of the strings starts with a unicode char: compare the first
 	 * byte of both strings */
