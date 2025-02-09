@@ -402,11 +402,6 @@ check_term_support(const char *env_term)
 	}
 
 	set_term_caps(index);
-
-	/* Eterm does not report device attributes (DA), no matter what
-	 * terminfo says. */
-	if (*env_term == 'E' && strcmp(env_term + 1, "term") == 0)
-		term_caps.req_dev_attrs = 0;
 }
 
 /* Try to detect what kind of image capability the running terminal supports
