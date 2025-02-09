@@ -1971,18 +1971,20 @@ When running for the first time, or whenever the MIME list file cannot be found,
 .TP
 \fBA note about MIME types
 .TP
-File MIME types are determined using \fIlibmagic\fR –the same library used by \fBfile\fR(1)–, which, though highly reliable, is not bullet-proof. Sometimes it fails, either because the appropriate MIME type is not in its database, or because the database is just wrong. In either case, you can manually associate file extensions to MIME types using a specific file (by default, \fI~/.mime.types\fR).\fB(1)\fR
+File MIME types are determined using \fIlibmagic\fR –the same library used by \fBfile\fR(1)–, which, though highly reliable, is not bullet-proof. Sometimes it fails, either because the appropriate MIME type is not in its database, or because the database is just wrong. In either case, you can manually map file extensions to MIME types using a specific file (by default, \fI~/.mime.types\fR).\fB(1)\fR
 .TP
 By way of example, \fIlibmagic\fR knows nothing about ILBM image files, and returns \fIapplication/zip\fR for OpenRaster images. Create \fI~/.mime.types\fR with the following content:
 
  image/x-ilbm       iff lbm
  image/openraster   ora
 .TP
-Restart \fBclifm\fR and these MIME types will be immediately associated to all files having the specified extensions.
+Restart \fBclifm\fR and these MIME types will be immediately associated to all files having the specified extensions (to test it, run \fImm info\fR on any of these files).\fB(2)\fR
 .TP
 If required, edit the mimelist and the preview files (\fImm edit\fR and \fIview edit\fR, to specify how files are opened and previewed respectively), and add a new line handling the corresponding MIME types (say, \fIimage/x-ilbm=APP\fR and \fIimage/openraster=APP\fR). See below for more information.
 .TP
 \fB(1)\fR To use a different file, set \fB$CLIFM_MIMETYPES_FILE\fR to the desired file, for example, \fICLIFM_MIMETYPES_FILE=/etc/mime.types clifm\fR.
+.TP
+\fB(2)\fR In case of issues, bear in mind that the \fImime.types\fR file is read top to bottom, and that, in case of conclicts (mostly duplicate extensions), only the last entry is effective.
 .TP
 \fB1. Syntax\fR
 .TP
