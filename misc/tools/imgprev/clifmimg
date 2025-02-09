@@ -230,7 +230,7 @@ display() {
 	;;
 
 	kitty)
-		kitty icat --loop=0 --place "${FZF_PREVIEW_COLUMNS}x$((FZF_PREVIEW_LINES - 1))@${X}x${Y}" \
+		kitty icat --loop=0 --place "${C}x$((L - 1))@${X}x${Y}" \
 		--clear --transfer-mode=memory --unicode-placeholder --stdin=no --align=left "$1"
 	;;
 
