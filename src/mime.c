@@ -73,10 +73,6 @@ static char *g_mime_type = (char *)NULL;
 static char *
 check_user_mimetypes(const char *file)
 {
-	if (user_mimetypes[0].ext_hash == (size_t)-1)
-		/* We have hash conflicts. */
-		return (char *)NULL;
-
 	char *ext = strrchr(file, '.');
 	if (!ext || !*(++ext))
 		return (char *)NULL;
