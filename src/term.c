@@ -415,10 +415,9 @@ check_img_support(const char *env_term)
 	if (getenv("CLIFM_FIFO_UEBERZUG")) { /* Variable set by the clifmrun script */
 		setenv("CLIFM_IMG_SUPPORT", "ueberzug", 1);
 		flags |= UEBERZUG_IMG_PREV;
-	} else if (getenv("KITTY_WINDOW_ID") || getenv("GHOSTTY_RESOURCES_DIR")) {
+	} else if (getenv("KITTY_WINDOW_ID")) {
 		/* KITTY_WINDOW_ID is guaranteed to be defined if running on the
-		 * kitty terminal. See https://github.com/kovidgoyal/kitty/issues/957
-		 * Ghostty supports the kitty protocol. */
+		 * kitty terminal. See https://github.com/kovidgoyal/kitty/issues/957 */
 		setenv("CLIFM_IMG_SUPPORT", "kitty", 1);
 	} else if ((term_caps.req_dev_attrs == 1 && check_sixel_support() == 1)
 	/* Yaft supports sixel (and DA request), but does not report it. */
