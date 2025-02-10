@@ -1419,21 +1419,14 @@ set_profile_dir(const size_t config_gral_len)
 	config_dir_len = strlen(config_dir);
 }
 
-/* Set the main configuration file. Three sources are examined:
+/* Set the main configuration file. Two sources are examined:
  * 1. Alternative config file, from the command line (-c,--config-file).
- * 2. CLIFMRC (if not secure env).
  * 3. PROFILE_DIR/clifmrc: PROFILE_DIR is set by set_profile_dir() */
 static void
-set_main_config_file(const int secure_mode)
+set_main_config_file(void)
 {
 	if (alt_config_file && *alt_config_file) {
 		config_file = savestring(alt_config_file, strlen(alt_config_file));
-		return;
-	}
-
-	char *env = secure_mode == 0 ? getenv("CLIFMRC") : (char *)NULL;
-	if (env && *env) {
-		config_file = savestring(env, strlen(env));
 		return;
 	}
 
@@ -1552,7 +1545,7 @@ define_config_file_names(void)
 	set_main_config_dir(secure_mode); /* config_dir_gral is set here. */
 	const size_t config_gral_len = strlen(config_dir_gral);
 	set_profile_dir(config_gral_len); /* config_dir is set here */
-	set_main_config_file(secure_mode);
+	set_main_config_file();
 
 	tmp_len = config_dir_len + 6;
 	tags_dir = xnmalloc(tmp_len, sizeof(char));
@@ -4207,6 +4200,17 @@ free_regex_filters(void)
 }
 
 static void
+free_msgs(void)
+{
+	size_t i;
+	for (i = 0; i < msgs_n; i++)
+		free(messages[i].text);
+
+	msgs_n = msgs.error = msgs.warning = msgs.notice = 0;
+	pmsg = NOMSG;
+}
+
+static void
 reset_variables(void)
 {
 	/* Free everything */
@@ -4214,6 +4218,9 @@ reset_variables(void)
 	free(conf.ptime_str);
 	free(conf.priority_sort_char);
 	conf.time_str = conf.ptime_str = conf.priority_sort_char = (char *)NULL;
+
+	free(conf.usr_cscheme);
+	conf.usr_cscheme = (char *)NULL;
 
 	free(config_dir_gral);
 	free(config_dir);
@@ -4271,6 +4278,7 @@ reset_variables(void)
 	free_tags();
 	free_remotes(0);
 	free_regex_filters();
+	free_msgs();
 
 	free(conf.opener);
 	free(conf.encoded_prompt);
