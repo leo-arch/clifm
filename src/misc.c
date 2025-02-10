@@ -1436,6 +1436,7 @@ free_stuff(void)
 
 	free(conf.time_str);
 	free(conf.ptime_str);
+	free(conf.priority_sort_char);
 
 #ifdef LINUX_INOTIFY
 	/* Shutdown inotify */

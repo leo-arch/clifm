@@ -464,9 +464,9 @@ dump_config(void)
 	print_config_value("PrintSelfiles", &conf.print_selfiles, &n,
 		DUMP_CONFIG_BOOL);
 
-	n = DEF_PRIORITY_SORT_CHAR;
-	print_config_value("PrioritySortChar", &conf.priority_sort_char,
-		&n, DUMP_CONFIG_CHR);
+	s = DEF_PRIORITY_SORT_CHAR;
+	print_config_value("PrioritySortChar", conf.priority_sort_char,
+		s, DUMP_CONFIG_STR);
 
 	n = DEF_PRIVATE_WS_SETTINGS;
 	print_config_value("PrivateWorkspaceSettings", &conf.private_ws_settings,
@@ -1928,7 +1928,7 @@ create_main_config_file(char *file)
 # Sort in reverse order\n\
 ;SortReverse=%s\n\
 # Files starting with PrioritySortChar are listed at top of the files list.\n\
-;PrioritySortChar:%c\n\n"
+;PrioritySortChar:%s\n\n"
 
 	"# If set to true, settings changed in the current workspace (only via\n\
 # the command line or keyboard shortcuts) are kept private to that workspace\n\
@@ -1979,7 +1979,7 @@ create_main_config_file(char *file)
 		DEF_SHARE_SELBOX == 1 ? "true" : "false",
 		DEF_TERM_CMD,
 		DEF_SORT_REVERSE == 1 ? "true" : "false",
-		DEF_PRIORITY_SORT_CHAR == 0 ? '0' : DEF_PRIORITY_SORT_CHAR,
+		DEF_PRIORITY_SORT_CHAR,
 		DEF_PRIVATE_WS_SETTINGS == 1 ? "true" : "false",
 		DEF_TIPS == 1 ? "true" : "false",
 		DEF_LIST_DIRS_FIRST == 1 ? "true" : "false",
@@ -3250,6 +3250,35 @@ set_show_hidden_files(const char *val)
 	}
 }
 
+static void
+set_priority_sort_char(char *val)
+{
+	char *v;
+	if (!val || !*val || !(v = remove_quotes(val)))
+		return;
+
+	const size_t l = strlen(v);
+	if (l > 1 && v[l - 1] == '\n')
+		v[l - 1] = '\0';
+
+	char *buf = xnmalloc(l + 1, sizeof(char));
+	char *ptr = buf;
+	while (*v) {
+		if (*v >= 32 && *v <= 126) { /* Same as isprint(c) */
+			*ptr = *v;
+			ptr++;
+		}
+		v++;
+	}
+
+	*ptr = '\0';
+
+	if (buf && *buf)
+		conf.priority_sort_char = buf;
+	else
+		free(buf);
+}
+
 /* Read the main configuration file and set options accordingly */
 static void
 read_config(void)
@@ -3570,9 +3599,7 @@ read_config(void)
 		}
 
 		else if (*line == 'P' && strncmp(line, "PrioritySortChar=", 17) == 0) {
-			const int c = line[17];
-			if (c >= 32 && c <= 126) /* Same as isprint(c) */
-				conf.priority_sort_char = c;
+			set_priority_sort_char(line + 17);
 		}
 
 		else if (*line == 'P'
@@ -4184,9 +4211,9 @@ reset_variables(void)
 {
 	/* Free everything */
 	free(conf.time_str);
-	conf.time_str = (char *)NULL;
 	free(conf.ptime_str);
-	conf.ptime_str = (char *)NULL;
+	free(conf.priority_sort_char);
+	conf.time_str = conf.ptime_str = conf.priority_sort_char = (char *)NULL;
 
 	free(config_dir_gral);
 	free(config_dir);

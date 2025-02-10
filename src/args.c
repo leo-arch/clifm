@@ -738,9 +738,7 @@ open_reg_exit(char *filename, const int url, const int preview)
 	UNUSED(url);
 #endif /* !_NO_LIRA */
 
-	char *p = (char *)NULL;
-	if (*filename == '~')
-		p = tilde_expand(filename);
+	char *p = (*filename == '~') ? tilde_expand(filename) : (char *)NULL;
 
 	const int ret = open_file(p ? p : filename);
 	free(p);

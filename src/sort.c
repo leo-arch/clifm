@@ -109,13 +109,25 @@ check_hidden_file(const char c1, const char c2)
 		: (conf.show_hidden == HIDDEN_FIRST ? ret : -ret));
 }
 
-static inline int
+static int
 check_priority_sort_char(const char c1, const char c2)
 {
-	return (
-		(c1 == conf.priority_sort_char && c2 != conf.priority_sort_char) ? -1
-		: ((c1 != conf.priority_sort_char && c2 == conf.priority_sort_char) ? 1
-		: 0));
+	const char *psch = conf.priority_sort_char;
+
+	if (!psch[1]) {  /* Single char */
+		return ((c1 == *psch && c2 != *psch) ? -1
+			: ((c1 != *psch && c2 == *psch) ? 1 : 0));
+	}
+
+	while (*psch) {
+		if (c1 == *psch && c2 != *psch)
+			return -1;
+		if (c1 != *psch && c2 == *psch)
+			return 1;
+		psch++;
+	}
+
+	return 0;
 }
 
 static int
@@ -245,7 +257,7 @@ entrycmp(const void *a, const void *b)
 	if (ret != 0)
 		return ret;
 
-	ret = conf.priority_sort_char != 0
+	ret = (conf.priority_sort_char && *conf.priority_sort_char)
 		? check_priority_sort_char(*pa->name, *pb->name) : 0;
 	if (ret != 0)
 		return ret;
