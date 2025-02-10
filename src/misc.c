@@ -498,7 +498,7 @@ set_term_title(char *str)
 	int free_tmp = 0;
 	char *tmp = home_tilde(str, &free_tmp);
 
-	printf("\033]2;%s - %s\007", PROGRAM_NAME, tmp ? tmp : str);
+	printf("\x1b]2;%s - %s\x1b\\", PROGRAM_NAME, tmp ? tmp : str);
 	fflush(stdout);
 
 	if (free_tmp == 1)
