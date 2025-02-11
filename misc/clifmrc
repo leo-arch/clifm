@@ -98,7 +98,7 @@
 # Leave empty to unset (no priority character).
 # Supported values: ASCII characters from SPACE to TILDE.
 # Tip: A common value for this option is underscore (_).
-# Note: This options takes precedence over SkipNonAlnumPrefix (see below).
+# Note: This option takes precedence over SkipNonAlnumPrefix (see below).
 ;PrioritySortChar=
 
 # Display extended file metadata next to file names (long listing format).
