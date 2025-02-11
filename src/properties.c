@@ -1371,6 +1371,8 @@ has_nsec_modifier(char *fmt)
 	return (char *)NULL;
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
 static void
 gen_user_time_str(char *buf, size_t buf_size, struct tm *t, const size_t nsec)
 {
@@ -1378,14 +1380,7 @@ gen_user_time_str(char *buf, size_t buf_size, struct tm *t, const size_t nsec)
 	if (!ptr) {
 		/* GCC (not clang) complains about format being not a string literal.
 		 * Let's silence this warning until we find a better approach. */
-#ifdef GCC_ALLOWS_PRAGMA_IN_FUNC
-# pragma GCC diagnostic push
-# pragma GCC diagnostic ignored "-Wformat-nonliteral"
-#endif /* GCC_ALLOWS_PRAGMA_IN_FUNC */
 		strftime(buf, buf_size, conf.ptime_str, t);
-#ifdef GCC_ALLOWS_PRAGMA_IN_FUNC
-# pragma GCC diagnostic pop
-#endif /* GCC_ALLOWS_PRAGMA_IN_FUNC */
 		return;
 	}
 
@@ -1398,14 +1393,7 @@ gen_user_time_str(char *buf, size_t buf_size, struct tm *t, const size_t nsec)
 	size_t len = 0;
 	*ptr = '\0';
 	if (ptr != conf.ptime_str)
-#ifdef GCC_ALLOWS_PRAGMA_IN_FUNC
-# pragma GCC diagnostic push
-# pragma GCC diagnostic ignored "-Wformat-nonliteral"
-#endif /* GCC_ALLOWS_PRAGMA_IN_FUNC */
 		len = strftime(buf, buf_size, conf.ptime_str, t);
-#ifdef GCC_ALLOWS_PRAGMA_IN_FUNC
-# pragma GCC diagnostic pop
-#endif /* GCC_ALLOWS_PRAGMA_IN_FUNC */
 
 	*ptr = '%';
 	if (len == 0 && ptr != conf.ptime_str) /* Error or exhausted space in BUF. */
@@ -1419,15 +1407,9 @@ gen_user_time_str(char *buf, size_t buf_size, struct tm *t, const size_t nsec)
 	if (!*ptr)
 		return;
 
-#ifdef GCC_ALLOWS_PRAGMA_IN_FUNC
-# pragma GCC diagnostic push
-# pragma GCC diagnostic ignored "-Wformat-nonliteral"
-#endif /* GCC_ALLOWS_PRAGMA_IN_FUNC */
 	strftime(buf + len, buf_size - len, ptr, t);
-#ifdef GCC_ALLOWS_PRAGMA_IN_FUNC
-# pragma GCC diagnostic pop
-#endif /* GCC_ALLOWS_PRAGMA_IN_FUNC */
 }
+#pragma GCC diagnostic pop
 
 /* Write into BUF, whose size is SIZE, the timestamp TIM, with nanoseconds NSEC,
  * in human readable format.

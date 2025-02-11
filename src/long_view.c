@@ -281,6 +281,8 @@ get_time_char(void)
 	}
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
 static void
 construct_timestamp(char *time_str, const struct fileinfo *props)
 {
@@ -323,14 +325,7 @@ construct_timestamp(char *time_str, const struct fileinfo *props)
 			/* GCC (not clang) complains about tfmt being not a string
 			 * literal. Let's silence this warning until we find a better
 			 * approach. */
-#ifdef GCC_ALLOWS_PRAGMA_IN_FUNC
-# pragma GCC diagnostic push
-# pragma GCC diagnostic ignored "-Wformat-nonliteral"
-#endif /* GCC_ALLOWS_PRAGMA_IN_FUNC */
 			strftime(file_time, sizeof(file_time), tfmt, &tm);
-#ifdef GCC_ALLOWS_PRAGMA_IN_FUNC
-# pragma GCC diagnostic pop
-#endif /* GCC_ALLOWS_PRAGMA_IN_FUNC */
 		} else {
 			xstrsncpy(file_time, invalid_time_str, sizeof(file_time));
 		}
@@ -344,6 +339,7 @@ construct_timestamp(char *time_str, const struct fileinfo *props)
 		? file_time : UNKNOWN_STR, dt_c,
 		conf.timestamp_mark == 1 ? get_time_char() : "", df_c);
 }
+#pragma GCC diagnostic pop
 
 static void
 construct_id_field(const struct fileinfo *props, char *id_str,
