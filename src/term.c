@@ -46,9 +46,13 @@ static struct termios bk_term_attrs;
 static struct termios orig_term_attrs;
 static int reset_term = 0;
 
+/* Set the terminal title using the OSC-2 escape sequence. */
 void
 set_term_title(char *str)
 {
+	if (!str || !*str)
+		return;
+
 	int free_tmp = 0;
 	char *tmp = home_tilde(str, &free_tmp);
 
@@ -67,6 +71,9 @@ set_term_title(char *str)
 void
 report_cwd(char *dir)
 {
+	if (!dir || !*dir)
+		return;
+
 	char *uri = url_encode(dir, 0);
 	if (!uri || !*uri) {
 		free(uri);
