@@ -239,6 +239,9 @@ To start using **clifm** _you don't need to learn anything new_: the usual shell
 You can also take a look at some of both our [FAQ](https://github.com/leo-arch/clifm/wiki/FAQ) and these [basic usage-examples](https://github.com/leo-arch/clifm/wiki/Common-Operations#basic-usage-examples) to get you started. \
 For a complete description please consult our [Wiki](https://github.com/leo-arch/clifm/wiki).
 
+> [!TIP]
+> Start **clifm** and just press a number (techinically, an ELN or [Entry List Number](https://github.com/leo-arch/clifm/wiki/Common-Operations#elns)).
+
 ---
 
 ## :newspaper: What's new?
