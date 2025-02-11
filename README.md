@@ -62,7 +62,7 @@ Most terminal file managers out there (if not all) are built using the **TUI** d
 
 For this reason, **clifm** does not need to be better: it's **just different!** :wink:
 
-For a detailed description consult the [introductory section](https://github.com/leo-arch/clifm/wiki/Introduction#what-is-clifm) of our Wiki.
+For more information consult the [Wiki](https://github.com/leo-arch/clifm/wiki) and our [FAQ](https://github.com/leo-arch/clifm/wiki/FAQ).
 
 <!--
 Unlike most terminal file managers out there, indeed, **clifm** replaces the traditional TUI interface (also known as curses or text-menu based interface) by a command-line interface (CLI),<sup>1</sup> also known as REPL.<sup>2</sup>
