@@ -48,15 +48,16 @@ static int reset_term = 0;
 
 /* Set the terminal title using the OSC-2 escape sequence. */
 void
-set_term_title(char *str)
+set_term_title(char *dir)
 {
-	if (!str || !*str)
-		return;
-
 	int free_tmp = 0;
-	char *tmp = home_tilde(str, &free_tmp);
+	char *tmp = (dir && *dir) ? home_tilde(dir, &free_tmp) : (char *)NULL;
 
-	printf("\x1b]2;%s - %s\x1b\\", PROGRAM_NAME, tmp ? tmp : str);
+	if (!tmp)
+		printf("\x1b]2;%s\x1b\\", PROGRAM_NAME);
+	else
+		printf("\x1b]2;%s - %s\x1b\\", PROGRAM_NAME, tmp);
+
 	fflush(stdout);
 
 	if (free_tmp == 1)
@@ -81,8 +82,8 @@ report_cwd(char *dir)
 	}
 
 	printf("\x1b]7;file://%s%s\x1b\\", *hostname ? hostname : "", uri);
-
 	fflush(stdout);
+
 	free(uri);
 }
 

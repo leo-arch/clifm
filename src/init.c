@@ -2818,6 +2818,9 @@ check_options(void)
 	if (xargs.cwd_in_title == UNSET)
 		xargs.cwd_in_title = DEF_CWD_IN_TITLE;
 
+	if (xargs.report_cwd == UNSET)
+		xargs.report_cwd = DEF_REPORT_CWD;
+
 	if (xargs.secure_cmds == UNSET)
 		xargs.secure_cmds = DEF_SECURE_CMDS;
 

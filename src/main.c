@@ -1082,15 +1082,9 @@ print_splash_screen(void)
 static inline void
 set_term_win_title(void)
 {
-	if (!(flags & GUI) || xargs.list_and_quit == 1 || xargs.vt100 == 1)
-		return;
-
-	if (xargs.cwd_in_title == 0) {
-		printf("\033]2;%s\007", PROGRAM_NAME);
-		fflush(stdout);
-	} else {
-		set_term_title(workspaces[cur_ws].path);
-	}
+	if ((flags & GUI) && xargs.list_and_quit != 1 && xargs.vt100 != 1)
+		set_term_title(xargs.cwd_in_title == 1
+			? workspaces[cur_ws].path : (char *)NULL);
 }
 
 static inline void
