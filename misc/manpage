@@ -97,7 +97,7 @@ ignore entries starting with .
 set an alternative bookmarks file
 .TP
 \fB\-c\fR, \fB\-\-config\-file\fR=\fI\,FILE\/\fR
-set an alternative configuration file (\fB$CLIFMRC\fR can be used as well)
+set an alternative configuration file
 .TP
 \fB\-D\fR, \fB\-\-config\-dir\fR=\fI\,DIR\/\fR
 set an alternative configuration directory (if configuration files do not exist already, they will be created in \fIDIR\fR).
@@ -2834,9 +2834,6 @@ The idea of 'frecency' was, as far as I know, first devised and designed by Mozi
 
 .SH 19. ENVIRONMENT
 The following variables are read at initialization time:
-.TP
-.B CLIFMRC
-Path to the main configuration file (this value is overriden by \fI\-c\fR,\fI\-\-config\-file\fR).
 .TP
 .B NO_COLOR
 If set to any value, \fBclifm\fR will run colorless
