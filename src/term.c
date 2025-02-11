@@ -68,7 +68,11 @@ set_term_title(char *dir)
  * the OSC-7 escape sequence. For more info see
  * https://midnight-commander.org/ticket/3088
  * See also https://github.com/MidnightCommander/mc/commit/6b44fce839b5c2e85fdfb8e1d4e5052c7f1c1c3a
- * for the MC implementation. */
+ * for the Midnight Commander implementation (added recently, in version 4.8.32).
+ * Opinions are quite divided reagarding this escape code, mostly from the
+ * side of terminal emulators: whether to support it or not, and if yes,
+ * how to implement it. We, as a client of the terminal, just emit the code,
+ * and it's up to the terminal to decide what to do with it. */
 void
 report_cwd(char *dir)
 {
