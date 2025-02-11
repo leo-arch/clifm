@@ -54,7 +54,9 @@ href="https://github.com/leo-arch/clifm/issues">Report bug</a></h4>
 
 **Clifm** is a shell-like, text-based terminal file manager that sits on the command line.
 
-Though fully-featured, powerful, and extensible, it is not so much about features, but about design, about the way in which you interact with your file system.
+Some of its features include: bookmarks, selection, search, file tags, file filters, file previews (including image previews), bulk rename, archiving, trash, file opener, directory jumper, autocommands, workspaces, plugins, autosuggestions, and more. Consult the [Features](#heavy_check_mark-features) section below for a more comprehensive list.
+
+Though fully-featured, powerful, and extensible, however, it is not so much about features, but about design, about the way in which you interact with your file system.
 
 Most terminal file managers out there (if not all) are built using the **TUI** design principles, much like the superb `Midnight Commander` and `Ranger`. But **clifm** is built rather having the **CLI** design principles in mind: do not navigate through a big menu of files, **just type it**, exactly as you do in your regular shell, but easier and faster!
 
