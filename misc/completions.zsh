@@ -84,6 +84,7 @@ args=(
 	'--no-history[do not write commands into the history file]'
 	'--no-open-auto[same as no-cd-auto, but for files]'
     '--no-refresh-on-resize[do not update the files list upon window'\''s resize]'
+    '--no-report-cwd[do not report the working directory to the terminal]'
     '--no-restore-last-path[do not restore last visited directory at startup]'
 	'--no-suggestions[disable auto-suggestions]'
 	'--no-tips[disable startup tips]'

@@ -121,6 +121,7 @@ _clifm ()
         --no-history
         --no-open-auto
         --no-refresh-on-resize
+        --no-report-cwd
         --no-restore-last-path
         --no-suggestions
         --no-tips

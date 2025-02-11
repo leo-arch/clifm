@@ -1512,6 +1512,7 @@ and paths\
 \n      --no-history\t\t Do not write commands into the history file\
 \n      --no-open-auto\t\t Same as no-cd-auto, but for files\
 \n      --no-refresh-on-resize\t Do not attempt to refresh the files list upon window's resize\
+\n      --no-report-cwd\t\t Do not report the working directory to the terminal (not supported by old terminals)\
 \n      --no-restore-last-path\t Do not record the last visited directory\
 \n      --no-suggestions\t\t Disable auto-suggestions\
 \n      --no-tips\t\t\t Disable startup tips\
