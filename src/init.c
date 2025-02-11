@@ -1872,6 +1872,7 @@ unset_xargs(void)
 	xargs.readonly = UNSET;
 	xargs.refresh_on_empty_line = UNSET;
 	xargs.refresh_on_resize = UNSET;
+	xargs.report_cwd = UNSET;
 	xargs.restore_last_path = UNSET;
 	xargs.rl_vi_mode = UNSET;
 	xargs.secure_env_full = UNSET;

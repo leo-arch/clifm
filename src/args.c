@@ -157,6 +157,7 @@
 #define LOPT_NO_UNICODE             280
 #define LOPT_UNICODE                281
 #define LOPT_ALT_MIMEFILE           282
+#define LOPT_NO_REPORT_CWD          283
 
 /* Link long (--option) and short options (-o) for the getopt_long function. */
 static struct option const longopts[] = {
@@ -246,6 +247,7 @@ static struct option const longopts[] = {
 	{"no-history", no_argument, 0, LOPT_NO_HISTORY},
 	{"no-open-auto", no_argument, 0, LOPT_NO_OPEN_AUTO},
 	{"no-refresh-on-resize", no_argument, 0, LOPT_NO_REFRESH_ON_RESIZE},
+	{"no-report-cwd", no_argument, 0, LOPT_NO_REPORT_CWD},
 	{"no-restore-last-path", no_argument, 0, LOPT_NO_RESTORE_LAST_PATH},
 	{"no-suggestions", no_argument, 0, LOPT_NO_SUGGESTIONS},
 	{"no-tips", no_argument, 0, LOPT_NO_TIPS},
@@ -1741,6 +1743,8 @@ parse_cmdline_args(const int argc, char **argv)
 			xargs.auto_open = conf.auto_open = 0; break;
 		case LOPT_NO_REFRESH_ON_RESIZE:
 			xargs.refresh_on_resize = 0; break;
+		case LOPT_NO_REPORT_CWD:
+			xargs.report_cwd = 0; break;
 		case LOPT_NO_RESTORE_LAST_PATH:
 			xargs.restore_last_path = conf.restore_last_path = 0; break;
 		case LOPT_NO_SUGGESTIONS:

@@ -1542,6 +1542,7 @@ struct param_t {
 	int readonly;
 	int refresh_on_empty_line;
 	int refresh_on_resize;
+	int report_cwd;
 	int restore_last_path;
 	int rl_vi_mode;
 	int secure_cmds;

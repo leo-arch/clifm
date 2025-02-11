@@ -322,6 +322,9 @@ same as \fI\-\-no\-cd\-auto\fR, but for files instead of directories
 \fB\-\-no\-refresh\-on\-resize\fR
 do not attempt to refresh the list of files upon window's resize
 .TP
+\fB\-\-no\-report\-cwd\fR
+do not inform the working directory to the underlying terminal (uses the OSC-7 escape sequence, not supported by old terminals). Use this switch if you see something like this above \fBclifm\fR's prompt: "^]7;file://<path>^", where <path> is the current working directory.
+.TP
 \fB\-\-no\-restore\-last\-path\fR
 by default, \fBclifm\fR saves the last visited directory for each workspace to be restored in the next session. Use this option to disable this behavior.
 .TP

@@ -370,10 +370,13 @@ xchdir(char *dir, const int cd_flag)
 
 		setenv("PWD", dir, 1);
 
-		report_cwd(dir); /* OSC-7 escape sequence */
+		if (xargs.vt100 != 1) { /* --vt100 */
+			if (xargs.report_cwd != 0) /* --no-report-cwd */
+				report_cwd(dir); /* OSC-7 escape sequence */
 
-		if (xargs.cwd_in_title == 1)
-			set_term_title(dir);
+			if (xargs.cwd_in_title == 1)
+				set_term_title(dir); /* --cwd-in-title */
+		}
 	}
 
 	return ret;
