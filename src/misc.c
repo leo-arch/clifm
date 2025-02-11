@@ -493,19 +493,6 @@ read_kqueue(void)
 #endif /* LINUX_INOTIFY */
 
 void
-set_term_title(char *str)
-{
-	int free_tmp = 0;
-	char *tmp = home_tilde(str, &free_tmp);
-
-	printf("\x1b]2;%s - %s\x1b\\", PROGRAM_NAME, tmp ? tmp : str);
-	fflush(stdout);
-
-	if (free_tmp == 1)
-		free(tmp);
-}
-
-void
 set_filter_type(const char c)
 {
 	if (c == '=')

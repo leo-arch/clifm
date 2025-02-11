@@ -46,6 +46,39 @@ static struct termios bk_term_attrs;
 static struct termios orig_term_attrs;
 static int reset_term = 0;
 
+void
+set_term_title(char *str)
+{
+	int free_tmp = 0;
+	char *tmp = home_tilde(str, &free_tmp);
+
+	printf("\x1b]2;%s - %s\x1b\\", PROGRAM_NAME, tmp ? tmp : str);
+	fflush(stdout);
+
+	if (free_tmp == 1)
+		free(tmp);
+}
+
+/* Inform the underlying terminal about the new working directory using
+ * the OSC-7 escape sequence. For more info see
+ * https://midnight-commander.org/ticket/3088
+ * See also https://github.com/MidnightCommander/mc/commit/6b44fce839b5c2e85fdfb8e1d4e5052c7f1c1c3a
+ * for the MC implementation. */
+void
+report_cwd(char *dir)
+{
+	char *uri = url_encode(dir, 0);
+	if (!uri || !*uri) {
+		free(uri);
+		return;
+	}
+
+	printf("\x1b]7;file://%s%s\x1b\\", *hostname ? hostname : "", uri);
+
+	fflush(stdout);
+	free(uri);
+}
+
 static pid_t
 get_own_pid(void)
 {

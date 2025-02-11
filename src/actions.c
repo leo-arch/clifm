@@ -43,6 +43,7 @@
 #include "sanitize.h"
 #include "sort.h" /* num_to_sort_name() */
 #include "spawn.h"
+#include "term.h" /* set_term_title() */
 
 /* Get the executable's path of the action ACTION
  * Returns this path on success or NULL on error, in which case STATUS

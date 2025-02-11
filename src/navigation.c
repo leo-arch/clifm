@@ -39,6 +39,7 @@
 #include "misc.h"        /* xerror */
 #include "navigation.h"
 #include "readline.h"    /* rl_no_hist */
+#include "term.h" 		 /* report_cwd(), set_term_title() */
 
 #define BD_CONTINUE 2
 
@@ -329,26 +330,6 @@ backdir(char *str)
 	return exit_status;
 }
 
-/* Inform the underlying terminal about the new working directory using
- * the OSC-7 escape sequence. For more info see
- * https://midnight-commander.org/ticket/3088
- * See also https://github.com/MidnightCommander/mc/commit/6b44fce839b5c2e85fdfb8e1d4e5052c7f1c1c3a
- * for the MC implementation. */
-static void
-set_osc7_to_cwd(char *dir)
-{
-	char *uri = url_encode(dir, 0);
-	if (!uri || !*uri) {
-		free(uri);
-		return;
-	}
-
-	printf("\x1b]7;file://%s%s\x1b\\", *hostname ? hostname : "", uri);
-
-	fflush(stdout);
-	free(uri);
-}
-
 /* Change the current directory.
  *
  * Make sure DIR exists, it is actually a directory and is readable.
@@ -389,7 +370,7 @@ xchdir(char *dir, const int cd_flag)
 
 		setenv("PWD", dir, 1);
 
-		set_osc7_to_cwd(dir);
+		report_cwd(dir); /* OSC-7 escape sequence */
 
 		if (xargs.cwd_in_title == 1)
 			set_term_title(dir);

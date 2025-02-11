@@ -55,7 +55,6 @@ void save_last_path(char *last_path_tmp);
 void set_eln_color(void);
 void set_signals_to_ignore(void);
 void set_filter_type(const char c);
-void set_term_title(char *str);
 void splash(void);
 int  unpin_dir(void);
 void version_function(const int full);

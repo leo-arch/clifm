@@ -58,6 +58,7 @@
 #ifdef SECURITY_PARANOID
 # include "sanitize.h"
 #endif /* SECURITY_PARANOID */
+#include "term.h" /* set_term_title() */
 
 /* Globals */
 
