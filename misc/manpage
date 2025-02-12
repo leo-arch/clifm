@@ -1989,6 +1989,8 @@ If required, edit the mimelist and the preview files (\fImm edit\fR and \fIview 
 .TP
 \fB(2)\fR In case of issues, bear in mind that the \fImime.types\fR file is read top to bottom, and that, in case of conclicts (mostly duplicate extensions), only the last entry is effective.
 .TP
+\fBImportant\fR: Though sometimes convenient, determining file types by means of file name extensions alone is unreliable: a file, no matter its type, can bear any file extension, without restriction. Because of this, you might end up executing a command that was not intended due to wrong file identification. Be extra careful when doing this.
+.TP
 \fB1. Syntax\fR
 .TP
 In its most basic form, each line in the MIME list file consists of:
