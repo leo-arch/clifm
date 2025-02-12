@@ -1953,7 +1953,8 @@ rl_profile_next(int count, int key)
 	int next_prof, cur_prof = -1, total_profs = 0;
 	get_cur_prof(&cur_prof, &total_profs);
 
-	if (cur_prof == -1 || !profile_names[cur_prof])
+	if (cur_prof == -1 || !profile_names[cur_prof]
+	|| total_profs <= 1)
 		return FUNC_FAILURE;
 
 	next_prof = cur_prof + 1;
