@@ -217,7 +217,7 @@ st=37;44:su=37;41:tw=37;42:uf=4;2;37:"
 #define DEF_IFACE_COLORS_256 "ac=:db=:dd=:de=:df=0:dg=2;35:dk=:dl=38;5;243:dn=:\
 do=:dp=:dr=:dt=:du=35:dw=:dxd=:dxr=:dz=:el=36:em=1;31:fc=38;5;246:hb=36:hc=2;37:\
 hd=36:he=36:hn=:hp=36:hq=LY:hr=31:hs=32:hv=32:lc=38;5;43:li=1;32:mi=1;36:\
-nm=1;32:ro=:si=1;34:sb=2;33:sc=2;36:sd=38;5;243:sf=4;2;36:sh=38;5;243:sp=2;31:\
+nm=1;32:ro=:si=1;34:sb=2;33:sc=2;36:sd=38;5;240:sf=4;2;36:sh=38;5;240:sp=38;5;239:\
 sx=2;32:sz=4;2;36:ti=1;36:ts=4;35:tt=1;2;36:tx=0:wc=1;36:wm=38;5;228:ws1=34:\
 ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 
@@ -330,7 +330,7 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define DEF_SD_C256  "\x1b[38;5;240m"   /* Internal commands description */
 #define DEF_SH_C256  "\x1b[38;5;240m"   /* Commands history */
 #define DEF_SF_C256  "\x1b[2;4;36m" /* ELN's, bookmark, file, and directory names */
-#define DEF_SP_C256  "\x1b[2;31m"   /* Suggestions pointer (12 > filename) */
+#define DEF_SP_C256  "\x1b[38;5;239m"   /* Suggestions pointer (12 > filename) */
 #define DEF_SX_C256  "\x1b[2;32m"   /* Internal commands and parameters */
 #define DEF_SZ_C256  "\x1b[2;4;36m" /* File names (fuzzy) */
 
