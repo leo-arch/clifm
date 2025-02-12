@@ -64,7 +64,7 @@
 int
 save_sel(void)
 {
-	if (selfile_ok == 0 || config_ok == 0 || !sel_file)
+	if (selfile_ok == 0 || !sel_file)
 		return (xargs.stealth_mode == 1 ? FUNC_SUCCESS : FUNC_FAILURE);
 
 	if (sel_n == 0) {
