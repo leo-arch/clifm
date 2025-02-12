@@ -936,7 +936,7 @@ set_alt_config_dir(char *dir)
 		if (ret != FUNC_SUCCESS) {
 			err('e', PRINT_PROMPT, _("%s: Cannot create directory '%s' "
 				"(error %d)\nFalling back to the default configuration "
-				"directory\n"), PROGRAM_NAME, dir, ret);
+				"directory.\n"), PROGRAM_NAME, dir, ret);
 			dir_ok = 0;
 		}
 	}
@@ -944,7 +944,7 @@ set_alt_config_dir(char *dir)
 	if (access(dir, W_OK) == -1) {
 		if (dir_ok == 1) {
 			err('e', PRINT_PROMPT, _("%s: '%s': %s\n"
-				"Falling back to the default configuration directory\n"),
+				"Falling back to the default configuration directory.\n"),
 				PROGRAM_NAME, dir, strerror(errno));
 		}
 	} else {

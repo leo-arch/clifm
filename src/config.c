@@ -1309,11 +1309,12 @@ END: /* If everything fails, fallback to /tmp */
 static void
 define_selfile(void)
 {
-	/* SEL_FILE should has been set before by set_sel_file(). If not set,
-	 * we do not have access to the config dir. */
+	/* SEL_FILE should have been set before by set_sel_file(). If not,
+	 * we do not have access to the config dir, in which case we use TMP_DIR. */
 	if (sel_file)
 		return;
 
+	const size_t tmpdir_len = strlen(tmp_dir);
 	size_t len = 0;
 	/* If the config directory isn't available, define an alternative
 	 * selection file in TMP_ROOTDIR (if available). */
@@ -1321,19 +1322,19 @@ define_selfile(void)
 		size_t prof_len = alt_profile ? strlen(alt_profile) : 7;
 		/* 7 == lenght of "default" */
 
-		len = tmp_rootdir_len + prof_len + 15;
+		len = tmpdir_len + prof_len + 15;
 		sel_file = xnmalloc(len, sizeof(char));
-		snprintf(sel_file, len, "%s/selbox_%s.clifm", tmp_rootdir,
+		snprintf(sel_file, len, "%s/selbox_%s.clifm", tmp_dir,
 		    alt_profile ? alt_profile : "default");
 	} else {
-		len = tmp_rootdir_len + 14;
+		len = tmpdir_len + 14;
 		sel_file = xnmalloc(len, sizeof(char));
-		snprintf(sel_file, len, "%s/selbox.clifm", tmp_rootdir);
+		snprintf(sel_file, len, "%s/selbox.clifm", tmp_dir);
 	}
 
 	err('w', PRINT_PROMPT, _("%s: %s: Using a temporary directory for "
 		"the Selection Box. Selected files won't be persistent across "
-		"reboots\n"), PROGRAM_NAME, tmp_dir);
+		"reboots.\n"), PROGRAM_NAME, tmp_dir);
 }
 
 void
