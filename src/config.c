@@ -1307,7 +1307,7 @@ END: /* If everything fails, fallback to /tmp */
 }
 
 static void
-define_selfile(const size_t tmp_rootdir_len)
+define_selfile(void)
 {
 	/* SEL_FILE should has been set before by set_sel_file(). If not set,
 	 * we do not have access to the config dir. */
@@ -1347,26 +1347,46 @@ create_tmp_files(void)
 
 	const size_t tmp_rootdir_len = strlen(tmp_rootdir);
 	const size_t pnl_len = sizeof(PROGRAM_NAME) - 1;
-	const size_t user_len = user.name ? strlen(user.name) : 7; /* 7: len of "unknown" */
+	const size_t user_len = user.name ? strlen(user.name) : 7;
+                                       /* 7: len of "unknown" */
 
-	const size_t tmp_len = tmp_rootdir_len + pnl_len + user_len + 3;
+#define MAX_TRIES 100
+
+	const size_t tmp_len = tmp_rootdir_len + pnl_len + user_len
+		+ 3 + DIGINUM(MAX_TRIES) + 1;
 	tmp_dir = xnmalloc(tmp_len, sizeof(char));
 	snprintf(tmp_dir, tmp_len, "%s/%s-%s", tmp_rootdir,
 		PROGRAM_NAME, user.name ? user.name : "unknown");
 
-	struct stat attr;
-	if (stat(tmp_dir, &attr) == -1) {
-		xmkdir(tmp_dir, S_IRWXU);
+	int suffix = 0;
+	struct stat a;
 
-	/* If the directory exists, check if it is writable. */
-	} else if (access(tmp_dir, W_OK) == -1 && !sel_file) {
-		selfile_ok = 0;
-		err('w', PRINT_PROMPT, "%s: '%s': Directory not writable. Selected "
-			"files will be lost after program exit\n",
-			PROGRAM_NAME, tmp_dir);
+	/* Loop until we get a valid tmp directory or MAX_TRIES is reached. */
+	while (1) {
+		const int ret = lstat(tmp_dir, &a);
+		if (ret == 0 && S_ISDIR(a.st_mode)
+		&& check_file_access(a.st_mode, a.st_uid, a.st_uid) == 1)
+			break;
+
+		if (ret == -1 && xmkdir(tmp_dir, S_IRWXU) == FUNC_SUCCESS)
+			break;
+
+		suffix++;
+		if (suffix > MAX_TRIES) {
+			snprintf(tmp_dir, tmp_len, "%s", tmp_rootdir);
+			err('e', PRINT_PROMPT, _("%s: Cannot create temporary directory. "
+				"Falling back to '%s'.\n"), PROGRAM_NAME, tmp_rootdir);
+			break;
+		}
+
+		/* Append suffix and try again. */
+		snprintf(tmp_dir, tmp_len, "%s/%s-%s.%d", tmp_rootdir,
+			PROGRAM_NAME, user.name ? user.name : "unknown", suffix);
 	}
 
-	define_selfile(tmp_rootdir_len);
+#undef MAX_TRIES
+
+	define_selfile();
 }
 
 /* Set the main configuration directory. Three sources are examined:
@@ -2225,7 +2245,7 @@ create_main_config_dir(void)
 		err('e', PRINT_PROMPT, _("%s: Cannot create configuration "
 			"directory '%s': Bookmarks, commands logs, and "
 			"command history are disabled. Program messages won't be "
-			"persistent. Falling back to default options.\n"),
+			"persistent. Falling back to default settings.\n"),
 			PROGRAM_NAME, config_dir);
 		return FUNC_FAILURE;
 	}
@@ -2268,7 +2288,7 @@ create_config_files(const int just_listing)
 		config_ok = 0;
 		err('e', PRINT_PROMPT, _("%s: '%s': Directory not writable. Bookmarks, "
 			"commands logs, and commands history are disabled. Program messages "
-			"won't be persistent. Falling back to default options.\n"),
+			"won't be persistent. Falling back to default settings.\n"),
 		    PROGRAM_NAME, config_dir);
 		return;
 	}
