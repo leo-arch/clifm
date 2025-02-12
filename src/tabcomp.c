@@ -382,9 +382,14 @@ get_comp_entry_color(char *entry, const char *norm_prefix)
 	if (t == TCMP_UNTRASH || t == TCMP_TRASHDEL || t == TCMP_GLOB
 	|| t == TCMP_TAGS_F || t == TCMP_FILE_TYPES_FILES) {
 		char *f = (t == TCMP_GLOB && *vt_file) ? vt_file : entry;
-		if (lstat(f, &attr) != -1)
-			return fzftab_color(f, &attr);
-		return uf_c;
+
+		char p[PATH_MAX + 2]; *p = '\0';
+		if (t == TCMP_GLOB && *f != '/') {
+			snprintf(p, sizeof(p), "%s/%s", workspaces[cur_ws].path, f);
+			f = p;
+		}
+
+		return (lstat(f, &attr) != -1) ? fzftab_color(f, &attr) : uf_c;
 	}
 
 	if (t == TCMP_FILE_TEMPLATES && templates_dir) {
