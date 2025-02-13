@@ -982,18 +982,6 @@ count_dir(const char *dir, const int pop)
 			exit(ENOMEM);
 		return (-1);
 	}
-/* Let's set the O_NOATIME flag (Linux only) to prevent updating atime, avoiding
- * thus unnecessary disk writes. */
-/*#ifdef O_NOATIME
-	int fd = dirfd(p);
-	if (fd != -1) {
-		int fflags = fcntl(fd, F_GETFL);
-		if (fflags != -1) {
-			fflags |= O_NOATIME;
-			fcntl(fd, F_SETFL, fflags);
-		}
-	}
-#endif // O_NOATIME */
 
 	filesn_t c = 0;
 

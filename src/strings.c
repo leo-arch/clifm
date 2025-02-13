@@ -2497,7 +2497,7 @@ expand_regex(char ***substr)
 		snprintf(rstr, l, "^%s$", t);
 		free(dstr);
 
-		int ret = check_regex(rstr);
+		const int ret = check_regex(rstr);
 
 		if (ret != FUNC_SUCCESS
 		|| regcomp(&regex, rstr, reg_flags) != FUNC_SUCCESS) {
