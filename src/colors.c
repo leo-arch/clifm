@@ -789,107 +789,42 @@ strip_color_line(const char *str, const char mode)
 void
 reset_filetype_colors(void)
 {
-	*bd_c = '\0';
-	*bk_c = '\0';
-	*ca_c = '\0';
-	*cd_c = '\0';
-	*di_c = '\0';
-	*ed_c = '\0';
-	*ee_c = '\0';
-	*ef_c = '\0';
-	*ex_c = '\0';
-	*fi_c = '\0';
-	*ln_c = '\0';
-	*mh_c = '\0';
-	*nd_c = '\0';
-	*nf_c = '\0';
-	*no_c = '\0';
+	*bd_c = '\0'; *bk_c = '\0'; *ca_c = '\0'; *cd_c = '\0';
+	*di_c = '\0'; *ed_c = '\0'; *ee_c = '\0'; *ef_c = '\0';
+	*ex_c = '\0'; *fi_c = '\0'; *ln_c = '\0'; *mh_c = '\0';
+	*nd_c = '\0'; *nf_c = '\0'; *no_c = '\0';
 #ifdef SOLARIS_DOORS
 	*oo_c = '\0';
 #endif /* SOLARIS_DOORS */
-	*or_c = '\0';
-	*ow_c = '\0';
-	*pi_c = '\0';
-	*sg_c = '\0';
-	*so_c = '\0';
-	*st_c = '\0';
-	*su_c = '\0';
-	*tw_c = '\0';
+	*or_c = '\0'; *ow_c = '\0'; *pi_c = '\0'; *sg_c = '\0';
+	*so_c = '\0'; *st_c = '\0'; *su_c = '\0'; *tw_c = '\0';
 	*uf_c = '\0';
 }
 
 void
 reset_iface_colors(void)
 {
-	*hb_c = '\0';
-	*hc_c = '\0';
-	*hd_c = '\0';
-	*he_c = '\0';
-	*hn_c = '\0';
-	*hp_c = '\0';
-	*hq_c = '\0';
-	*hr_c = '\0';
-	*hs_c = '\0';
-	*hv_c = '\0';
-	*hw_c = '\0';
+	*hb_c = '\0'; *hc_c = '\0'; *hd_c = '\0'; *he_c = '\0';
+	*hn_c = '\0'; *hp_c = '\0'; *hq_c = '\0'; *hr_c = '\0';
+	*hs_c = '\0'; *hv_c = '\0'; *hw_c = '\0';
 
-	*sb_c = '\0';
-	*sc_c = '\0';
-	*sd_c = '\0';
-	*sf_c = '\0';
-	*sh_c = '\0';
-	*sp_c = '\0';
-	*sx_c = '\0';
-	*sz_c = '\0';
+	*sb_c = '\0'; *sc_c = '\0'; *sd_c = '\0'; *sf_c = '\0';
+	*sh_c = '\0'; *sp_c = '\0'; *sx_c = '\0'; *sz_c = '\0';
 
-	*ac_c = '\0';
-	*df_c = '\0';
-	*dl_c = '\0';
-	*el_c = '\0';
-	*em_c = '\0';
-	*fc_c = '\0';
-	*li_c = '\0';
-	*li_cb = '\0';
-	*mi_c = '\0';
-	*nm_c = '\0';
-	*ro_c = '\0';
-	*si_c = '\0';
-	*ti_c = '\0';
-	*tt_c = '\0';
-	*ts_c = '\0';
-	*tx_c = '\0';
-	*wc_c = '\0';
-	*wm_c = '\0';
-	*wp_c = '\0';
-	*xf_c = '\0';
-	*xf_cb = '\0';
-	*xs_c = '\0';
-	*xs_cb = '\0';
+	*ac_c = '\0'; *df_c = '\0'; *dl_c = '\0'; *el_c = '\0';
+	*em_c = '\0'; *fc_c = '\0'; *li_c = '\0'; *li_cb = '\0';
+	*mi_c = '\0'; *nm_c = '\0'; *ro_c = '\0'; *si_c = '\0';
+	*ti_c = '\0'; *tt_c = '\0'; *ts_c = '\0'; *tx_c = '\0';
+	*wc_c = '\0'; *wm_c = '\0'; *wp_c = '\0'; *xf_c = '\0';
+	*xf_cb = '\0'; *xs_c = '\0'; *xs_cb = '\0';
 
-	*ws1_c = '\0';
-	*ws2_c = '\0';
-	*ws3_c = '\0';
-	*ws4_c = '\0';
-	*ws5_c = '\0';
-	*ws6_c = '\0';
-	*ws7_c = '\0';
-	*ws8_c = '\0';
+	*ws1_c = '\0'; *ws2_c = '\0'; *ws3_c = '\0'; *ws4_c = '\0';
+	*ws5_c = '\0'; *ws6_c = '\0'; *ws7_c = '\0'; *ws8_c = '\0';
 
-	*db_c = '\0';
-	*dd_c = '\0';
-	*de_c = '\0';
-	*dg_c = '\0';
-	*dk_c = '\0';
-	*dn_c = '\0';
-	*do_c = '\0';
-	*dp_c = '\0';
-	*dr_c = '\0';
-	*dt_c = '\0';
-	*du_c = '\0';
-	*dw_c = '\0';
-	*dxd_c = '\0';
-	*dxr_c = '\0';
-	*dz_c = '\0';
+	*db_c = '\0'; *dd_c = '\0'; *de_c = '\0'; *dg_c = '\0';
+	*dk_c = '\0'; *dn_c = '\0'; *do_c = '\0'; *dp_c = '\0';
+	*dr_c = '\0'; *dt_c = '\0'; *du_c = '\0'; *dw_c = '\0';
+	*dxd_c = '\0'; *dxr_c = '\0'; *dz_c = '\0';
 }
 
 /* Import the color scheme NAME from DATADIR (usually /usr/local/share).
