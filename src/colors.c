@@ -69,6 +69,14 @@ struct colors_t {
 	size_t namelen;
 };
 
+/* A struct to map color codes to color variables */
+struct color_mapping_t {
+	const char *prefix; /* Color code name (e.g. "el") */
+	char *color;        /* Pointer to the color variable (.e.g. el_c) */
+	int prefix_len;
+	int printable;      /* Either RL_PRINTABLE or RL_NO_PRINTABLE */
+};
+
 static struct colors_t *defs;
 static size_t defs_n = 0;
 
@@ -1334,6 +1342,24 @@ decode_color_prefix(char *s)
 	return (char *)NULL;
 }
 
+/* Return a pointer to a statically allocated buffer storing the color code
+ * S with starting \001 and ending \002 removed. */
+static char *
+remove_ctrl_chars(char *s)
+{
+	if (*s != 001)
+		return s;
+
+	s++;
+
+	xstrsncpy(tmp_color, s, sizeof(tmp_color));
+
+	const size_t l = strlen(tmp_color);
+	if (l > 0 && tmp_color[l - 1] == 002)
+		tmp_color[l - 1] = '\0';
+
+	return tmp_color;
+}
 
 /* Set color variable VAR (static global) to COLOR.
  * If not printable, add non-printing char flags (\001 and \002). */
@@ -1373,90 +1399,45 @@ set_color(char *color, char var[], const int flag)
 }
 
 static void
-set_filetype_colors(char **colors, const size_t words)
+set_filetype_colors(char **colors, const size_t num_colors)
 {
-	int i = (int)words;
-	while (--i >= 0) {
-		if (!*colors[i] || !colors[i][1] || colors[i][2] != '=') {
+	if (!colors || num_colors == 0)
+		return;
+
+	const int p = RL_PRINTABLE;
+	struct color_mapping_t mappings[] = {
+		{"bd", bd_c, 2, p}, {"ca", ca_c, 2, p}, {"cd", cd_c, 2, p},
+		{"di", di_c, 2, p}, {"ed", ed_c, 2, p}, {"ee", ee_c, 2, p},
+		{"ef", ef_c, 2, p}, {"ex", ex_c, 2, p}, {"fi", fi_c, 2, p},
+		{"ln", ln_c, 2, p}, {"mh", mh_c, 2, p}, {"mi", mi_c, 2, p},
+		{"nd", nd_c, 2, p}, {"nf", nf_c, 2, p}, {"no", no_c, 2, p},
+		{"or", or_c, 2, p}, {"ow", ow_c, 2, p},
+#ifdef SOLARIS_DOORS
+		{"oo", oo_c, 2, p},
+#endif /* SOLARIS_DOORS */
+		{"pi", pi_c, 2, p}, {"sg", sg_c, 2, p}, {"so", so_c, 2, p},
+		{"st", st_c, 2, p}, {"su", su_c, 2, p}, {"tw", tw_c, 2, p},
+		{"uf", uf_c, 2, p},
+	};
+
+	const size_t mappings_n = sizeof(mappings) / sizeof(struct color_mapping_t);
+	size_t i;
+
+	for (i = 0; i < num_colors; i++) {
+		if (!colors[i] || !colors[i][1] || colors[i][2] != '=') {
 			free(colors[i]);
 			continue;
 		}
 
-		if (*colors[i] == 'b' && colors[i][1] == 'd')
-			set_color(colors[i] + 3, bd_c, RL_PRINTABLE);
-
-		else if (*colors[i] == 'c') {
-			switch (colors[i][1]) {
-			case 'a': set_color(colors[i] + 3, ca_c, RL_PRINTABLE); break;
-			case 'd': set_color(colors[i] + 3, cd_c, RL_PRINTABLE); break;
-			default: break;
+		size_t j;
+		char *color_code = colors[i] + 3;
+		for (j = 0; j < mappings_n; j++) {
+			if (*colors[i] == *mappings[j].prefix
+			&& colors[i][1] == mappings[j].prefix[1]) {
+				set_color(color_code, mappings[j].color, mappings[j].printable);
+				break;
 			}
 		}
-
-		else if (*colors[i] == 'd' && colors[i][1] == 'i')
-			set_color(colors[i] + 3, di_c, RL_PRINTABLE);
-
-		else if (*colors[i] == 'e') {
-			switch (colors[i][1]) {
-			case 'd': set_color(colors[i] + 3, ed_c, RL_PRINTABLE); break;
-			case 'e': set_color(colors[i] + 3, ee_c, RL_PRINTABLE); break;
-			case 'f': set_color(colors[i] + 3, ef_c, RL_PRINTABLE); break;
-			case 'x': set_color(colors[i] + 3, ex_c, RL_PRINTABLE); break;
-			default: break;
-			}
-		}
-
-		else if (*colors[i] == 'f' && colors[i][1] == 'i')
-			set_color(colors[i] + 3, fi_c, RL_PRINTABLE);
-
-		else if (*colors[i] == 'l' && colors[i][1] == 'n')
-			set_color(colors[i] + 3, ln_c, RL_PRINTABLE);
-
-		else if (*colors[i] == 'm') {
-			if (colors[i][1] == 'h')
-				set_color(colors[i] + 3, mh_c, RL_PRINTABLE);
-			else if (colors[i][1] == 'i')
-				set_color(colors[i] + 3, uf_c, RL_PRINTABLE);
-		}
-
-		else if (*colors[i] == 'n') {
-			switch (colors[i][1]) {
-			case 'd': set_color(colors[i] + 3, nd_c, RL_PRINTABLE); break;
-			case 'f': set_color(colors[i] + 3, nf_c, RL_PRINTABLE); break;
-			case 'o': set_color(colors[i] + 3, no_c, RL_PRINTABLE); break;
-			default: break;
-			}
-		}
-
-		else if (*colors[i] == 'o') {
-			switch (colors[i][1]) {
-			case 'r': set_color(colors[i] + 3, or_c, RL_PRINTABLE); break;
-			case 'w': set_color(colors[i] + 3, ow_c, RL_PRINTABLE); break;
-#ifdef SOLARIS_DOORS
-			case 'o': set_color(colors[i] + 3, oo_c, RL_PRINTABLE); break;
-#endif /* SOLARIS_DOORS */
-			default: break;
-			}
-		}
-
-		else if (*colors[i] == 'p' && colors[i][1] == 'i')
-			set_color(colors[i] + 3, pi_c, RL_PRINTABLE);
-
-		else if (*colors[i] == 's') {
-			switch (colors[i][1]) {
-			case 'g': set_color(colors[i] + 3, sg_c, RL_PRINTABLE); break;
-			case 'o': set_color(colors[i] + 3, so_c, RL_PRINTABLE); break;
-			case 't': set_color(colors[i] + 3, st_c, RL_PRINTABLE); break;
-			case 'u': set_color(colors[i] + 3, su_c, RL_PRINTABLE); break;
-			default: break;
-			}
-		}
-
-		else if (*colors[i] == 't' && colors[i][1] == 'w')
-			set_color(colors[i] + 3, tw_c, RL_PRINTABLE);
-
-		else if (*colors[i] == 'u' && colors[i][1] == 'f')
-			set_color(colors[i] + 3, uf_c, RL_PRINTABLE);
 
 		free(colors[i]);
 	}
@@ -1464,149 +1445,52 @@ set_filetype_colors(char **colors, const size_t words)
 	free(colors);
 }
 
-/* Set interface colors using colors stored in the COLORS array, which has
- * NUM_COLORS colors. */
 static void
 set_iface_colors(char **colors, const size_t num_colors)
 {
-	int i = (int)num_colors;
-	while (--i >= 0) {
-		if (*colors[i] == 'a' && colors[i][1] == 'c' && colors[i][2] == '=')
-			set_color(colors[i] + 3, ac_c, RL_NO_PRINTABLE);
+	if (!colors || num_colors == 0)
+		return;
 
-		else if (*colors[i] == 'd') {
-			if (colors[i][1] == 'x' && colors[i][2] && colors[i][3] == '=') {
-				if (colors[i][2] == 'd')
-					set_color(colors[i] + 4, dxd_c, RL_PRINTABLE);
-				else if (colors[i][2] == 'r')
-					set_color(colors[i] + 4, dxr_c, RL_PRINTABLE);
-			} else if (colors[i][1] && colors[i][2] == '=') {
-				switch (colors[i][1]) {
-				case 'b': set_color(colors[i] + 3, db_c, RL_PRINTABLE); break;
-				case 'd': set_color(colors[i] + 3, dd_c, RL_PRINTABLE); break;
-				case 'e': set_color(colors[i] + 3, de_c, RL_PRINTABLE); break;
-				case 'f': set_color(colors[i] + 3, df_c, RL_PRINTABLE); break;
-				case 'g': set_color(colors[i] + 3, dg_c, RL_PRINTABLE); break;
-				case 'k': set_color(colors[i] + 3, dk_c, RL_PRINTABLE); break;
-				case 'l': set_color(colors[i] + 3, dl_c, RL_PRINTABLE); break;
-				case 'n': set_color(colors[i] + 3, dn_c, RL_PRINTABLE); break;
-				case 'o': set_color(colors[i] + 3, do_c, RL_PRINTABLE); break;
-				case 'p': set_color(colors[i] + 3, dp_c, RL_PRINTABLE); break;
-				case 'r': set_color(colors[i] + 3, dr_c, RL_PRINTABLE); break;
-				case 't': set_color(colors[i] + 3, dt_c, RL_PRINTABLE); break;
-				case 'u': set_color(colors[i] + 3, du_c, RL_PRINTABLE); break;
-				case 'w': set_color(colors[i] + 3, dw_c, RL_PRINTABLE); break;
-				case 'z': set_color(colors[i] + 3, dz_c, RL_PRINTABLE); break;
-				default: break;
-				}
-			}
-		}
+	const int y = RL_PRINTABLE;
+	const int n = RL_NO_PRINTABLE;
 
-		else if (*colors[i] == 'e' && colors[i][1] && colors[i][2] == '=') {
-			if (colors[i][1] == 'l')
-				set_color(colors[i] + 3, el_c, RL_PRINTABLE);
-			else if (colors[i][1] == 'm')
-				set_color(colors[i] + 3, em_c, RL_NO_PRINTABLE);
-		}
+	struct color_mapping_t mappings[] = {
+		{"ac", ac_c, 2, n}, {"dxd", dxd_c, 3, y}, {"dxr", dxr_c, 3, y},
+		{"db", db_c, 2, y}, {"dd", dd_c, 2, y}, {"de", de_c, 2, y},
+		{"df", df_c, 2, y}, {"dg", dg_c, 2, y}, {"dk", dk_c, 2, y},
+		{"dl", dl_c, 2, y}, {"dn", dn_c, 2, y}, {"do", do_c, 2, y},
+		{"dp", dp_c, 2, y}, {"dr", dr_c, 2, y}, {"dt", dt_c, 2, y},
+		{"du", du_c, 2, y}, {"dw", dw_c, 2, y}, {"dz", dz_c, 2, y},
+		{"el", el_c, 2, y}, {"em", em_c, 2, n}, {"fc", fc_c, 2, y},
+		{"hb", hb_c, 2, y}, {"hc", hc_c, 2, y}, {"hd", hd_c, 2, y},
+		{"he", he_c, 2, y}, {"hn", hn_c, 2, y}, {"hp", hp_c, 2, y},
+		{"hq", hq_c, 2, y}, {"hr", hr_c, 2, y}, {"hs", hs_c, 2, y},
+		{"hv", hv_c, 2, y}, {"hw", hw_c, 2, y}, {"li", li_c, 2, n},
+		{"lc", lc_c, 2, y}, {"mi", mi_c, 2, y}, {"nm", nm_c, 2, n},
+		{"ro", ro_c, 2, n}, {"sb", sb_c, 2, y}, {"sc", sc_c, 2, y},
+		{"sd", sd_c, 2, y}, {"sh", sh_c, 2, y}, {"si", si_c, 2, n},
+		{"sf", sf_c, 2, y}, {"sp", sp_c, 2, y}, {"sx", sx_c, 2, y},
+		{"sz", sz_c, 2, y}, {"ti", ti_c, 2, n}, {"ts", ts_c, 2, y},
+		{"tt", tt_c, 2, y}, {"tx", tx_c, 2, y}, {"wc", wc_c, 2, y},
+		{"wm", wm_c, 2, n}, {"wp", wp_c, 2, y}, {"ws1", ws1_c, 3, n},
+		{"ws2", ws2_c, 3, n}, {"ws3", ws3_c, 3, n}, {"ws4", ws4_c, 3, n},
+		{"ws5", ws5_c, 3, n}, {"ws6", ws6_c, 3, n}, {"ws7", ws7_c, 3, n},
+		{"ws8", ws8_c, 3, n}, {"xs", xs_c, 2, n}, {"xf", xf_c, 2, n},
+	};
 
-		else if (*colors[i] == 'f' && colors[i][1] == 'c'
-		&& colors[i][2] == '=')
-			set_color(colors[i] + 3, fc_c, RL_PRINTABLE);
+	const size_t mappings_n = sizeof(mappings) / sizeof(struct color_mapping_t);
+	size_t i;
 
-		else if (*colors[i] == 'h' && colors[i][1] && colors[i][2] == '=') {
-			switch (colors[i][1]) {
-			case 'b': set_color(colors[i] + 3, hb_c, RL_PRINTABLE); break;
-			case 'c': set_color(colors[i] + 3, hc_c, RL_PRINTABLE); break;
-			case 'd': set_color(colors[i] + 3, hd_c, RL_PRINTABLE); break;
-			case 'e': set_color(colors[i] + 3, he_c, RL_PRINTABLE); break;
-			case 'n': set_color(colors[i] + 3, hn_c, RL_PRINTABLE); break;
-			case 'p': set_color(colors[i] + 3, hp_c, RL_PRINTABLE); break;
-			case 'q': set_color(colors[i] + 3, hq_c, RL_PRINTABLE); break;
-			case 'r': set_color(colors[i] + 3, hr_c, RL_PRINTABLE); break;
-			case 's': set_color(colors[i] + 3, hs_c, RL_PRINTABLE); break;
-			case 'v': set_color(colors[i] + 3, hv_c, RL_PRINTABLE); break;
-			case 'w': set_color(colors[i] + 3, hw_c, RL_PRINTABLE); break;
-			default: break;
-			}
-		}
-
-		else if (*colors[i] == 'l' && colors[i][1] && colors[i][2] == '=') {
-			if (colors[i][1] == 'i') {
-				set_color(colors[i] + 3, li_c, RL_NO_PRINTABLE);
-				set_color(colors[i] + 3, li_cb, RL_PRINTABLE);
-			} else if (colors[i][1] == 'c') {
-				set_color(colors[i] + 3, lc_c, RL_PRINTABLE);
-			}
-		}
-
-		else if (*colors[i] == 'm' && colors[i][1] == 'i'
-		&& colors[i][2] == '=')
-			set_color(colors[i] + 3, mi_c, RL_PRINTABLE);
-
-		else if (*colors[i] == 'n' && colors[i][1] == 'm'
-		&& colors[i][2] == '=')
-			set_color(colors[i] + 3, nm_c, RL_NO_PRINTABLE);
-
-		else if (*colors[i] == 'r' && colors[i][1] == 'o'
-		&& colors[i][2] == '=')
-			set_color(colors[i] + 3, ro_c, RL_NO_PRINTABLE);
-
-		else if (*colors[i] == 's' && colors[i][1] && colors[i][2] == '=') {
-			switch (colors[i][1]) {
-			case 'b': set_color(colors[i] + 3, sb_c, RL_PRINTABLE); break;
-			case 'c': set_color(colors[i] + 3, sc_c, RL_PRINTABLE); break;
-			case 'd': set_color(colors[i] + 3, sd_c, RL_PRINTABLE); break;
-			case 'h': set_color(colors[i] + 3, sh_c, RL_PRINTABLE); break;
-			case 'i': set_color(colors[i] + 3, si_c, RL_NO_PRINTABLE); break;
-			case 'f': set_color(colors[i] + 3, sf_c, RL_PRINTABLE); break;
-			case 'p': set_color(colors[i] + 3, sp_c, RL_PRINTABLE); break;
-			case 'x': set_color(colors[i] + 3, sx_c, RL_PRINTABLE); break;
-			case 'z': set_color(colors[i] + 3, sz_c, RL_PRINTABLE); break;
-			default: break;
-			}
-		}
-
-		else if (*colors[i] == 't' && colors[i][1] && colors[i][2] == '=') {
-			switch (colors[i][1]) {
-			case 'i': set_color(colors[i] + 3, ti_c, RL_NO_PRINTABLE); break;
-			case 's': set_color(colors[i] + 3, ts_c, RL_PRINTABLE); break;
-			case 't': set_color(colors[i] + 3, tt_c, RL_PRINTABLE); break;
-			case 'x': set_color(colors[i] + 3, tx_c, RL_PRINTABLE); break;
-			default: break;
-			}
-		}
-
-		else if (*colors[i] == 'w') {
-			if (colors[i][1] == 'c' && colors[i][2] == '=')
-				set_color(colors[i] + 3, wc_c, RL_PRINTABLE);
-			else if (colors[i][1] == 'm' && colors[i][2] == '=')
-				set_color(colors[i] + 3, wm_c, RL_NO_PRINTABLE);
-			else if (colors[i][1] == 'p' && colors[i][2] == '=')
-				set_color(colors[i] + 3, wp_c, RL_PRINTABLE);
-			else if (colors[i][1] == 's' && colors[i][2]
-			&& colors[i][3] == '=') {
-				switch (colors[i][2]) {
-				case '1': set_color(colors[i] + 4, ws1_c, RL_NO_PRINTABLE); break;
-				case '2': set_color(colors[i] + 4, ws2_c, RL_NO_PRINTABLE); break;
-				case '3': set_color(colors[i] + 4, ws3_c, RL_NO_PRINTABLE); break;
-				case '4': set_color(colors[i] + 4, ws4_c, RL_NO_PRINTABLE); break;
-				case '5': set_color(colors[i] + 4, ws5_c, RL_NO_PRINTABLE); break;
-				case '6': set_color(colors[i] + 4, ws6_c, RL_NO_PRINTABLE); break;
-				case '7': set_color(colors[i] + 4, ws7_c, RL_NO_PRINTABLE); break;
-				case '8': set_color(colors[i] + 4, ws8_c, RL_NO_PRINTABLE); break;
-				default: break;
-				}
-			}
-		}
-
-		else if (*colors[i] == 'x' && colors[i][1] && colors[i][2] == '=') {
-			if (colors[i][1] == 's') {
-				set_color(colors[i] + 3, xs_c, RL_NO_PRINTABLE);
-				set_color(colors[i] + 3, xs_cb, RL_PRINTABLE);
-			}
-			else if (colors[i][1] == 'f') {
-				set_color(colors[i] + 3, xf_c, RL_NO_PRINTABLE);
-				set_color(colors[i] + 3, xf_cb, RL_PRINTABLE);
+	for (i = 0; i < num_colors; i++) {
+		size_t j;
+		for (j = 0; j < mappings_n; j++) {
+			if (*colors[i] == *mappings[j].prefix
+			&& strncmp(colors[i], mappings[j].prefix,
+				(size_t)mappings[j].prefix_len) == 0
+			&& *(colors[i] + mappings[j].prefix_len) == '=') {
+				set_color(colors[i] + mappings[j].prefix_len + 1,
+					mappings[j].color, mappings[j].printable);
+				break;
 			}
 		}
 
@@ -1614,6 +1498,21 @@ set_iface_colors(char **colors, const size_t num_colors)
 	}
 
 	free(colors);
+
+	/* We need a copy of these colors without \001 and \002 escape codes. */
+	if (*li_c) {
+		const char *p = remove_ctrl_chars(li_c);
+		xstrsncpy(li_cb, p, sizeof(li_cb));
+	}
+	if (*xs_c) {
+		const char *p = remove_ctrl_chars(xs_c);
+		xstrsncpy(xs_cb, p, sizeof(xs_cb));
+	}
+	if (*xf_c) {
+		const char *p = remove_ctrl_chars(xf_c);
+		xstrsncpy(xf_cb, p, sizeof(xf_cb));
+	}
+
 }
 
 static void
@@ -3368,25 +3267,6 @@ print_prop_colors(void)
 	printf(_("%sColor%s (dn)  Dot/dash (e.g. %sr%sw%s-.%sr%s--.--%s)\n"),
 		dn_c, df_c, dr_c, dw_c, dn_c, dr_c, dn_c, df_c);
 
-}
-
-/* Return a pointer to a statically allocated buffer storing the color code
- * S with starting \001 and ending \002 removed. */
-static char *
-remove_ctrl_chars(char *s)
-{
-	if (*s != 001)
-		return s;
-
-	s++;
-
-	xstrsncpy(tmp_color, s, sizeof(tmp_color));
-
-	const size_t l = strlen(tmp_color);
-	if (l > 0 && tmp_color[l - 1] == 002)
-		tmp_color[l - 1] = '\0';
-
-	return tmp_color;
 }
 
 static void
