@@ -1895,7 +1895,7 @@ list_files_horizontal(size_t *counter, int *reset_pager,
 	size_t cur_cols = 0;
 	filesn_t i;
 	int last_column = 0;
-	int blc = last_column;
+	int backup_last_column = last_column;
 
 	pager_quit = pager_help = 0;
 
@@ -1920,8 +1920,8 @@ list_files_horizontal(size_t *counter, int *reset_pager,
 			/* Run the pager only once all columns and rows fitting in
 			 * the screen are filled with the corresponding file names */
 			int ret = 0;
-			filesn_t bi = i;
-			if (blc && *counter > columns_n * ((size_t)term_lines - 2))
+			filesn_t backup_i = i;
+			if (backup_last_column && *counter > columns_n * ((size_t)term_lines - 2))
 				ret = run_pager((int)columns_n, reset_pager, &i, counter);
 
 			if (ret == -3) {
@@ -1930,15 +1930,15 @@ list_files_horizontal(size_t *counter, int *reset_pager,
 			}
 
 			if (ret == -1) {
-				i = bi ? bi - 1 : bi;
+				i = backup_i ? backup_i - 1 : backup_i;
 				cur_cols = bcur_cols;
-				last_column = blc;
+				last_column = backup_last_column;
 				continue;
 			}
 			(*counter)++;
 		}
 
-		blc = last_column;
+		backup_last_column = last_column;
 
 			/* #################################
 			 * #    PRINT THE CURRENT ENTRY    #
@@ -1975,29 +1975,31 @@ END:
  * 2 AAB	4 AAD	6 AAF */
 static void
 list_files_vertical(size_t *counter, int *reset_pager,
-	const int eln_len, size_t columns_n)
+	const int eln_len, size_t num_columns)
 {
 	/* Total amount of files to be listed. */
-	const filesn_t nn = (conf.max_files != UNSET
-		&& (filesn_t)conf.max_files < files) ? (filesn_t)conf.max_files : files;
+	const filesn_t total_files = (conf.max_files != UNSET
+		&& (filesn_t)conf.max_files < files)
+		? (filesn_t)conf.max_files : files;
 
 #ifdef TIGHT_COLUMNS
-	filesn_t rows = 0;
-	size_t *longest_per_col = get_longest_per_col(&columns_n, &rows, nn);
+	filesn_t num_rows = 0;
+	size_t *longest_per_col =
+		get_longest_per_col(&num_columns, &num_rows, total_files);
 	size_t cur_col = 0;
 #else
-	/* How many lines (rows) do we need to print NN files? */
+	/* How many lines (rows) do we need to print TOTAL_FILES files? */
 	/* Division/modulo is slow, true. But the compiler will make a much
 	 * better job than us at optimizing this code. */
-	/* COLUMNS_N is guarranteed to be >0 by get_columns() */
-	filesn_t rows = nn / (filesn_t)columns_n;
-	if (nn % (filesn_t)columns_n > 0)
-		++rows;
+	/* NUM_COLUMNS is guarranteed to be >0 by get_columns() */
+	filesn_t num_rows = total_files / (filesn_t)num_columns;
+	if (total_files % (filesn_t)num_columns > 0)
+		++num_rows;
 #endif
 
 	int last_column = 0;
 	/* The previous value of LAST_COLUMN. We need this value to run the pager. */
-	int blc = last_column;
+	int backup_last_column = last_column;
 
 	void (*print_entry_function)(int *, const filesn_t, const int, const int);
 	if (conf.colorize == 1)
@@ -2011,9 +2013,9 @@ list_files_vertical(size_t *counter, int *reset_pager,
 		|| term_caps.suggestions == 0) ? 0 : 1;
 
 	const int int_longest_fc_len = (int)longest.fc_len;
-	size_t cc = columns_n; // Current column number
-	filesn_t x = 0; // Index of the file to be actually printed
-	filesn_t xx = 0; // Current line number
+	size_t column_count = num_columns; // Current column number
+	filesn_t file_index = 0; // Index of the file to be actually printed
+	filesn_t row_index = 0; // Current line number
 	filesn_t i = 0; // Index of the current entry being analyzed
 
 	pager_quit = pager_help = 0;
@@ -2021,29 +2023,28 @@ list_files_vertical(size_t *counter, int *reset_pager,
 	for ( ; ; i++) {
 		/* Copy current values to restore them if necessary: done to
 		 * skip the first two chars of arrow keys : \x1b [ */
-		filesn_t bxx = xx, bx = x; // Copies of X and XX
-		size_t bcc = cc; // Copy of CC
-		if (cc == columns_n) {
-			x = xx;
-			xx++;
-			cc = 1;
+		filesn_t backup_row_index = row_index;
+		filesn_t backup_file_index = file_index; // Copies of file_index and row_index
+		size_t backup_column_count = column_count; // Copy of column_count
+
+		if (column_count == num_columns) {
+			file_index = row_index;
+			row_index++;
+			column_count = 1;
 		} else {
-			x += rows;
-			cc++;
+			file_index += num_rows;
+			column_count++;
 		}
 
-		if (xx > rows)
+		if (row_index > num_rows)
 			break;
 
 		/* If current entry is in the last column, print a new line char */
-		if (cc == columns_n)
-			last_column = 1;
-		else
-			last_column = 0;
+		last_column = (column_count == num_columns);
 
 		int ind_char = (conf.classify != 0);
 
-		if (x >= nn || !file_info[x].name) {
+		if (file_index >= total_files || !file_info[file_index].name) {
 			if (last_column == 1) {
 				/* Last column is empty. E.g.:
 				 * 1 file  3 file3  5 file5
@@ -2064,11 +2065,13 @@ list_files_vertical(size_t *counter, int *reset_pager,
 		if (conf.pager == 1 || (*reset_pager == 0 && conf.pager > 1
 		&& files >= (filesn_t)conf.pager)) {
 			int ret = 0;
-			filesn_t bi = i;
+			filesn_t backup_i = i;
 			/* Run the pager only once all columns and rows fitting in
 			 * the screen are filled with the corresponding file names. */
-			if (blc && *counter > columns_n * ((size_t)term_lines - 2))
-				ret = run_pager((int)columns_n, reset_pager, &x, counter);
+			if (backup_last_column
+			&& *counter > num_columns * ((size_t)term_lines - 2))
+				ret = run_pager((int)num_columns,
+					reset_pager, &file_index, counter);
 
 			if (ret == -3) {
 				pager_quit = 1;
@@ -2077,42 +2080,45 @@ list_files_vertical(size_t *counter, int *reset_pager,
 
 			if (ret == -1) {
 				/* Restore previous values */
-				i = bi ? bi - 1: bi;
-				x = bx;
-				xx = bxx;
-				cc = bcc;
+				i = backup_i ? backup_i - 1: backup_i;
+				file_index = backup_file_index;
+				row_index = backup_row_index;
+				column_count = backup_column_count;
 				continue;
 			} else {
 				if (ret == -2) {
-					i = x = xx = last_column = blc = 0;
+					i = file_index = row_index = 0;
+					last_column = backup_last_column = 0;
 					*counter = 0;
-					cc = columns_n;
+					column_count = num_columns;
 					continue;
 				}
 			}
 			(*counter)++;
 		}
 
-		blc = last_column;
+		backup_last_column = last_column;
 
 			/* #################################
 			 * #    PRINT THE CURRENT ENTRY    #
 			 * ################################# */
 
-		const int fc = file_info[x].dir != 1 ? int_longest_fc_len : 0;
+		const int fc = file_info[file_index].dir != 1 ? int_longest_fc_len : 0;
 		/* Displayed file name will be trimmed to MAX_NAMELEN. */
 		const int max_namelen = conf.max_name_len + fc;
 
-		file_info[x].eln_n = conf.no_eln == 1 ? -1 : DIGINUM(x + 1);
+		file_info[file_index].eln_n = conf.no_eln == 1
+			? -1 : DIGINUM(file_index + 1);
 
-		print_entry_function(&ind_char, x, eln_len, max_namelen);
+		print_entry_function(&ind_char, file_index, eln_len, max_namelen);
 
 		if (last_column == 0) {
 #ifdef TIGHT_COLUMNS
-			pad_filename_new(x, termcap_move_right,	longest_per_col[cur_col]);
+			pad_filename_new(file_index, termcap_move_right,
+				longest_per_col[cur_col]);
 			cur_col++;
 #else
-			pad_filename(ind_char, x, eln_len, termcap_move_right);
+			pad_filename(ind_char, file_index, eln_len, termcap_move_right);
 #endif
 		} else {
 			/* Last column is populated. Example:

@@ -1530,27 +1530,33 @@ get_shell_cmd_opts(char *cmd)
 		}
 
 		/* Get short option */
-		char *q = strstr(line, "-s "), *qq = (char *)NULL;
-		if (q && *(q + 1) && *(q + 2) && *(q + 3)) {
-			qq = strchr(q + 3, ' ');
-			if (qq) *qq = '\0';
-			snprintf(ext_opts[n], MAX_EXT_OPTS_LEN, "-%s", q + 3);
-			if (qq)	*qq = ' ';
+		char *opt_str = strstr(line, "-s ");
+		char *opt_end = (char *)NULL;
+
+		if (opt_str && opt_str[1] && opt_str[2] && opt_str[3]) {
+			opt_end = strchr(opt_str + 3, ' ');
+			if (opt_end) *opt_end = '\0';
+			snprintf(ext_opts[n], MAX_EXT_OPTS_LEN, "-%s", opt_str + 3);
+			if (opt_end) *opt_end = ' ';
 			n++;
 		}
 
 		/* Get long option (-OPT or --OPT) */
-		q = strstr((qq && *(qq + 1)) ? qq + 1 : line, "-l ");
-		if (!q)
-			q = strstr((qq && *(qq + 1)) ? qq + 1 : line, "-o ");
-		if (q && *(q + 1) && *(q + 2) && *(q + 3)) {
-			qq = strchr(q + 3, ' ');
-			if (qq)	*qq = '\0';
+		char *long_str = strstr((opt_end && *(opt_end + 1))
+			? opt_end + 1 : line, "-l ");
+
+		if (!long_str)
+			long_str = strstr((opt_end && opt_end[1])
+				? opt_end + 1 : line, "-o ");
+
+		if (long_str && long_str[1] && long_str[2] && long_str[3]) {
+			char *long_end = strchr(long_str + 3, ' ');
+			if (long_end) *long_end = '\0';
 
 			/* Some long opts are written as optOPT: remove OPT */
-			/* q + 3 is the beginning of the option name, so that OPT could
-			 * begin at q + 4, but not before */
-			char *t = *(q + 4) ? q + 4 : (char *)NULL;
+			/* long_str + 3 is the beginning of the option name, so that OPT could
+			 * begin at long_str + 4, but not before. */
+			char *t = long_str[4] ? long_str + 4 : (char *)NULL;
 			while (t && *t) {
 				if (*t >= 'A' && *t <= 'Z') {
 					*t = '\0';
@@ -1559,11 +1565,12 @@ get_shell_cmd_opts(char *cmd)
 				t++;
 			}
 
-			if (*(q + 1) == 'o')
-				snprintf(ext_opts[n], MAX_EXT_OPTS_LEN, "-%s", q + 3);
+			if (long_str[1] == 'o')
+				snprintf(ext_opts[n], MAX_EXT_OPTS_LEN, "-%s", long_str + 3);
 			else
-				snprintf(ext_opts[n], MAX_EXT_OPTS_LEN, "--%s", q + 3);
-			if (qq)	*qq = ' ';
+				snprintf(ext_opts[n], MAX_EXT_OPTS_LEN, "--%s", long_str + 3);
+			if (long_end)
+				*long_end = ' ';
 			n++;
 		}
 	}
