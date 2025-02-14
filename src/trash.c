@@ -323,7 +323,7 @@ trash_file(const char *suffix, const struct tm *tm, char *file)
 	int ret = renameat(XAT_FDCWD, file, XAT_FDCWD, dest);
 	if (ret != FUNC_SUCCESS && errno == EXDEV) {
 		/* Destination file is on a different file system, which is why
-		 * renameat(2) doesn't work: let's try with mv(1). */
+		 * renameat(2) fails: let's try with mv(1). */
 		char *tmp_cmd[] = {"mv", "--", file, dest, NULL};
 		ret = launch_execv(tmp_cmd, FOREGROUND, E_NOFLAG);
 		mvcmd = 1;
@@ -932,14 +932,13 @@ untrash_function(char **args)
 static void
 print_trashdir_size(void)
 {
-	const int base = xargs.si == 1 ? 1000 : 1024;
 	int status = 0;
 
 	printf(_("\n%sTotal size: "), df_c);
 	if (term_caps.suggestions == 1)
 		{fputs("Calculating...", stdout); fflush(stdout);}
 
-	const off_t full_size = dir_size(trash_files_dir, 0, &status) * base;
+	const off_t full_size = dir_size(trash_files_dir, 0, &status);
 	char *human_size = construct_human_size(full_size);
 
 	char err[sizeof(xf_cb) + 6]; *err = '\0';
