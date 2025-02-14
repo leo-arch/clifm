@@ -2456,60 +2456,70 @@ rl_glob(char *text)
 	free(tmp);
 
 	if (globbuf.gl_pathc == 1) {
-		char **t = xnmalloc(globbuf.gl_pathc + 2, sizeof(char *));
-		char *p = strrchr(globbuf.gl_pathv[0], '/');
-		if (p && *(++p)) {
-			char c = *p;
-			*p = '\0';
-			t[0] = savestring(globbuf.gl_pathv[0], strlen(globbuf.gl_pathv[0]));
-			*p = c;
-			t[1] = savestring(p, strlen(p));
-			t[2] = (char *)NULL;
+		char **matches = xnmalloc(globbuf.gl_pathc + 2, sizeof(char *));
+		char *basename = strrchr(globbuf.gl_pathv[0], '/');
+		if (basename && *(++basename)) {
+			char c = *basename;
+			*basename = '\0';
+			matches[0] =
+				savestring(globbuf.gl_pathv[0], strlen(globbuf.gl_pathv[0]));
+			*basename = c;
+			matches[1] = savestring(basename, strlen(basename));
+			matches[2] = (char *)NULL;
 		} else {
-			t[0] = savestring(globbuf.gl_pathv[0], strlen(globbuf.gl_pathv[0]));
-			t[1] = (char *)NULL;
+			matches[0] =
+				savestring(globbuf.gl_pathv[0], strlen(globbuf.gl_pathv[0]));
+			matches[1] = (char *)NULL;
 		}
 		globfree(&globbuf);
-		return t;
+		return matches;
 	}
 
 	size_t i, j = 1;
-	char **t = xnmalloc(globbuf.gl_pathc + 3, sizeof(char *));
+	char **matches = xnmalloc(globbuf.gl_pathc + 3, sizeof(char *));
 
 	/* If /path/to/dir/GLOB<TAB>, /path/to/dir goes to slot 0 */
-	int c = -1;
-	char *ls = get_last_chr(rl_line_buffer, ' ', rl_point), *q = (char *)NULL;
-	char *ds = ls ? unescape_str(ls, 0) : (char *)NULL;
-	char *p = ds ? ds : (ls ? ls : (char *)NULL);
+	char *last_word = get_last_chr(rl_line_buffer, ' ', rl_point);
+	if (last_word)
+		last_word++;
+	else
+		last_word = rl_line_buffer;
 
-	if (p && *(++p)) {
-		q = strrchr(p, '/');
-		if (q && *(++q)) {
-			c = (int)*q;
-			*q = '\0';
+	char *str = (last_word && *last_word)
+		? unescape_str(last_word, 0) : (char *)NULL;
+	char *word = str ? str : (char *)NULL;
+
+	int char_copy = -1;
+	char *basename = (char *)NULL;
+	if (word && word[1]) {
+		basename = strrchr(word, '/');
+		if (basename && *(++basename)) {
+			char_copy = (int)*basename;
+			*basename = '\0';
 		}
 	}
 
-	if (c != -1) {
-		t[0] = savestring(p, strlen(p));
-		*q = (char)c;
+	if (char_copy != -1) {
+		matches[0] = savestring(word, strlen(word));
+		*basename = (char)char_copy;
 	} else {
-		t[0] = xnmalloc(1, sizeof(char));
-		*t[0] = '\0';
+		matches[0] = xnmalloc(1, sizeof(char));
+		*matches[0] = '\0';
 	}
 
-	free(ds);
+	free(str);
 
 	for (i = 0; i < globbuf.gl_pathc; i++) {
 		if (SELFORPARENT(globbuf.gl_pathv[i]))
 			continue;
-		t[j] = savestring(globbuf.gl_pathv[i], strlen(globbuf.gl_pathv[i]));
+		matches[j] =
+			savestring(globbuf.gl_pathv[i], strlen(globbuf.gl_pathv[i]));
 		j++;
 	}
-	t[j] = (char *)NULL;
+	matches[j] = (char *)NULL;
 
 	globfree(&globbuf);
-	return t;
+	return matches;
 }
 
 #ifndef _NO_TRASH
