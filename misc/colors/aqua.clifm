@@ -79,4 +79,4 @@ WarningPrompt="\[\e[0;1;31m\](!)\[\e[0;2m\] > "
 
 DividingLine="-"
 
-FzfTabOptions="--color='dark,prompt:6,fg+:-1,pointer:4,hl:5,hl+:5,gutter:-1,marker:2:bold,border:7:dim' --marker='*' --bind tab:accept,right:accept,left:abort,alt-p:toggle-preview,change:top,alt-up:preview-page-up,alt-down:preview-page-down --inline-info --layout=reverse-list --preview-window=wrap,border-left"
+FzfTabOptions="--color='dark,prompt:6,fg+:-1,pointer:4,hl:5,hl+:5,gutter:-1,marker:2:bold,border:7:dim' --marker='*' --bind tab:accept,right:accept,left:abort,alt-p:toggle-preview,change:top,alt-up:preview-page-up,alt-down:preview-page-down --tiebreak=begin --inline-info --layout=reverse-list --preview-window=wrap,border-left"

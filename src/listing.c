@@ -2414,6 +2414,7 @@ print_scanned_file(const char *name)
 		di_c, name, df_c);
 	fflush(stdout);
 }
+#undef LIST_SCANNING_MSG
 
 static void
 erase_scanning_message(void)

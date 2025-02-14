@@ -659,13 +659,13 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define DEF_FZFTAB_OPTIONS "--color=16,prompt:6,fg+:-1,pointer:4,\
 hl:2,hl+:2,gutter:-1,marker:2,border:7:dim --bind tab:accept,right:accept,\
 left:abort,alt-p:toggle-preview,change:top,alt-up:preview-page-up,\
-alt-down:preview-page-down --inline-info --layout=reverse-list \
+alt-down:preview-page-down --tiebreak=begin --inline-info --layout=reverse-list \
 --preview-window=wrap,border-left"
 // --preview-window=noborder (0.19, Nov 15, 2019)
 
 #define DEF_FZFTAB_OPTIONS_NO_COLOR "--color=bw --bind tab:accept,\
 right:accept,left:abort,alt-p:toggle-preview,change:top,alt-up:preview-page-up,\
-alt-down:preview-page-down --inline-info --layout=reverse-list \
+alt-down:preview-page-down --tiebreak=begin --inline-info --layout=reverse-list \
 --preview-window=wrap,border-left"
 
 #define DEF_SMENU_OPTIONS "-a t:2,b b:4 c:r ct:2,r sf:6,r st:5,r mt:5,b"
