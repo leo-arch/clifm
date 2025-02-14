@@ -644,26 +644,34 @@ END:
 }
 #endif /* !CLIFM_SUCKLESS */
 
+static int
+bcomp(const void *a, const void *b)
+{
+	size_t pa = *(size_t *)a;
+	struct ext_t *pb = (struct ext_t *)b;
+
+	if (pa < pb->hash) return (-1);
+	if (pa > pb->hash) return 1;
+    return 0;
+}
+
 /* Look for the hash HASH in the hash table for file name extensions.
  * Return a pointer to the corresponding color if found, or NULL.
  * If VAL_LEN isn't NULL, it is updated with the length of the returned value. */
 static char *
 check_ext_hash(const size_t hash, size_t *val_len)
 {
-	ssize_t i = (ssize_t)ext_colors_n;
-	while (--i >= 0) {
-		if (hash != ext_colors[i].hash || !ext_colors[i].value)
-			continue;
+	struct ext_t *ptr = bsearch(&hash, ext_colors, ext_colors_n,
+		sizeof(struct ext_t), bcomp);
 
-		if (val_len)
-			*val_len = ext_colors[i].value_len;
+	if (!ptr || !ptr->value || !*ptr->value)
+		return (char *)NULL;
 
-		return ext_colors[i].value;
-	}
+	if (val_len)
+		*val_len = ptr->value_len;
 
-	return (char *)NULL;
+	return ptr->value;
 }
-
 
 /* Return the color code associated to the file extension EXT, updating
  * VAL_LEN, if not NULL, to the length of this color code. */
@@ -1580,6 +1588,19 @@ set_extra_colors(void)
 	}
 }
 
+static int
+hash_sort(const void *a, const void *b)
+{
+	struct ext_t *pa = (struct ext_t *)a;
+	struct ext_t *pb = (struct ext_t *)b;
+
+	if (pa->hash > pb->hash)
+		return 1;
+	if (pa->hash < pb->hash)
+		return -1;
+	return 0;
+}
+
 void
 set_default_colors(void)
 {
@@ -1595,6 +1616,11 @@ set_default_colors(void)
 	if (!ext_colors)
 		split_extension_colors(term_caps.color >= 256
 			? DEF_EXT_COLORS_256 : DEF_EXT_COLORS);
+
+	if (ext_colors && ext_colors_n > 0) {
+		qsort(ext_colors, ext_colors_n, sizeof(*ext_colors),
+			(QSFUNC *)hash_sort);
+	}
 
 	/* If a definition for TEMP exists in the color scheme file, BK_C should
 	 * have been set to this color in store_defintions(). If not, let's try
