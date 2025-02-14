@@ -1437,6 +1437,9 @@ store_extension_line(const char *line)
 	if (!line || !*line)
 		return FUNC_FAILURE;
 
+	if (xargs.lscolors == 1 && *line != '*')
+		return FUNC_FAILURE;
+
 	/* Remove the leading "*.", if any, from the extension line. */
 	if (*line == '*' && *(line + 1) == '.') {
 		line += 2;
