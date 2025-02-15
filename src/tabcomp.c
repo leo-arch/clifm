@@ -2036,7 +2036,7 @@ tab_complete(const int what_to_do)
 		}
 	}
 
-	int did_chdir = 0;
+	int directory_changed = 0;
 	int start = rl_point;
 	rl_point = end;
 	char *text = rl_copy_text(start, end);
@@ -2199,6 +2199,7 @@ AFTER_USUAL_COMPLETION:
 			}
 		}
 
+		/* Handle replacement string */
 		if (replacement && (cur_comp_type != TCMP_HIST || !matches[1])
 		&& cur_comp_type != TCMP_FILE_TYPES_OPTS
 		&& cur_comp_type != TCMP_MIME_LIST
@@ -2511,47 +2512,49 @@ DISPLAY_MATCHES:
 			if (exp_path) {
 				xchdir(exp_path, NO_TITLE);
 				free(exp_path);
-				did_chdir = 1;
+				directory_changed = 1;
 			}
 		} else {
 			char *dir = matches[0];
 
-			size_t dlen = strlen(dir);
-			if (dlen > FILE_URI_PREFIX_LEN && IS_FILE_URI(dir))
+			size_t dir_len = strlen(dir);
+			if (dir_len > FILE_URI_PREFIX_LEN && IS_FILE_URI(dir))
 				dir += FILE_URI_PREFIX_LEN;
-			char *p = strrchr(dir, '/');
-			if (!p)
+
+			char *last_slash = strrchr(dir, '/');
+			if (!last_slash)
 				goto CALC_OFFSET;
 
-			char *dd = (char *)NULL;
+			char *norm_dir = (char *)NULL;
 			/* MATCHES[0] SHOULD BE DIR!! */
 			if (strstr(matches[0], "/..")) {
-				dd = normalize_path(matches[0], strlen(matches[0]));
-				if (dd) {
-					size_t ddlen = strlen(dd) + 2;
-					char *ddd = xnmalloc(ddlen, sizeof(char *));
-					snprintf(ddd, ddlen, "%s/", dd);
-					free(dd);
-					dd = ddd;
+				norm_dir = normalize_path(matches[0], strlen(matches[0]));
+				if (norm_dir) {
+					size_t norm_dir_len = strlen(norm_dir) + 2;
+					char *ptr = xnmalloc(norm_dir_len, sizeof(char *));
+					snprintf(ptr, norm_dir_len, "%s/", norm_dir);
+					free(norm_dir);
+					norm_dir = ptr;
 				}
 			}
-			dir = dd ? dd : matches[0];
-			did_chdir = 1;
 
-			if (p == dir) {
-				if (*(p + 1)) {
-					char pp = *(p + 1);
-					*(p + 1) = '\0';
+			dir = norm_dir ? norm_dir : matches[0];
+			directory_changed = 1;
+
+			if (last_slash == dir) {
+				if (last_slash[1]) {
+					char c = last_slash[1];
+					*(last_slash + 1) = '\0';
 					xchdir(dir, NO_TITLE);
-					*(p + 1) = pp;
+					*(last_slash + 1) = c;
 				} else {
 					/* We have the root dir */
 					xchdir(dir, NO_TITLE);
 				}
 			} else {
-				*p = '\0';
+				*last_slash = '\0';
 				xchdir(dir, NO_TITLE);
-				*p = '/';
+				*last_slash = '/';
 			}
 
 			if (dir != matches[0])
@@ -2598,7 +2601,7 @@ CALC_OFFSET:
 			tab_offset = strlen(ptr + add);
 		}
 
-		if (cur_comp_type == TCMP_OWNERSHIP && *ptr == ':' && !*(ptr + 1)) {
+		if (cur_comp_type == TCMP_OWNERSHIP && *ptr == ':' && !ptr[1]) {
 			ptr = (char *)NULL;
 			tab_offset = 0;
 		}
@@ -2627,7 +2630,7 @@ CALC_OFFSET:
 		 * to allow files colorization. */
 		if ((cur_comp_type == TCMP_UNTRASH || cur_comp_type == TCMP_TRASHDEL)
 		&& conf.colorize == 1 && trash_files_dir) {
-			did_chdir = 1;
+			directory_changed = 1;
 			xchdir(trash_files_dir, NO_TITLE);
 		}
 #endif /* _NO_TRASH */
@@ -2687,7 +2690,7 @@ RESET_PATH:
 
 RESTART:
 		flags &= ~STATE_COMPLETING;
-		if (did_chdir == 1 && workspaces && workspaces[cur_ws].path)
+		if (directory_changed == 1 && workspaces && workspaces[cur_ws].path)
 			xchdir(workspaces[cur_ws].path, NO_TITLE);
 
 		rl_on_new_line();
