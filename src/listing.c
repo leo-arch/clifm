@@ -527,6 +527,10 @@ get_name_icon(const filesn_t n)
 static void
 get_dir_icon(const filesn_t n)
 {
+	if (file_info[n].user_access == 0)
+		/* Icon already set by load_file_gral_info() */
+		return;
+
 	/* Default values for directories */
 	file_info[n].icon = DEF_DIR_ICON;
 	/* DIR_ICO_C is set from the color scheme file */
@@ -959,16 +963,18 @@ set_long_attribs(const filesn_t n, const struct stat *a)
 static inline char *
 get_ind_char(const filesn_t index, char **ind_chr)
 {
-	if (file_info[index].symlink == 1 && checks.lnk_char == 1) {
-		*ind_chr = file_info[index].sel == 1
-			? (term_caps.unicode == 1 ? SELFILE_STR_U : SELFILE_STR)
-			: (term_caps.unicode == 1 ? LINK_STR_U : LINK_STR);
-		return lc_c;
-	} else {
-		*ind_chr = file_info[index].sel == 1
-			? (term_caps.unicode == 1 ? SELFILE_STR_U : SELFILE_STR) : " ";
-		return file_info[index].sel == 1 ? li_cb : "";
+	if (file_info[index].sel == 1) {
+		*ind_chr = term_caps.unicode == 1 ? SELFILE_STR_U : SELFILE_STR;
+		return li_cb;
 	}
+
+	if (file_info[index].symlink == 1 && checks.lnk_char == 1) {
+		*ind_chr = (term_caps.unicode == 1 ? LINK_STR_U : LINK_STR);
+		return lc_c;
+	}
+
+	*ind_chr = " ";
+	return "";
 }
 
 /* Return a struct maxes_t with the following information: the longest files
@@ -1338,22 +1344,19 @@ print_entry_color(int *ind_char, const filesn_t i, const int pad,
 		if (conf.no_eln == 1) {
 			if (wtrim.type > 0) {
 				xprintf("%s%s%s%s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s", ind_chr_color,
-					(sel_n > 0 || conf.color_lnk_as_target == 1) ? ind_chr : "",
-					df_c, file_info[i].color, (wchar_t *)n, trim_diff,
+					ind_chr, df_c, file_info[i].color, (wchar_t *)n, trim_diff,
 					tt_c, TRIMFILE_CHR,
 					wtrim.type == TRIM_EXT ? file_info[i].color : "",
 					wtrim.type == TRIM_EXT ? file_info[i].ext_name : "",
 					end_color);
 			} else {
-				xprintf("%s%s%s%s%s%s", ind_chr_color,
-					(sel_n > 0 || conf.color_lnk_as_target == 1) ? ind_chr : "",
+				xprintf("%s%s%s%s%s%s", ind_chr_color, ind_chr,
 					df_c, file_info[i].color, n, end_color);
 			}
 		} else {
 			if (wtrim.type > 0) {
 				xprintf("%s%*jd%s%s%s%s%s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
-					el_c, pad, (intmax_t)i + 1, df_c, ind_chr_color,
-					ind_chr,
+					el_c, pad, (intmax_t)i + 1, df_c, ind_chr_color, ind_chr,
 					df_c, file_info[i].color, (wchar_t *)n,
 					trim_diff, tt_c, TRIMFILE_CHR,
 					wtrim.type == TRIM_EXT ? file_info[i].color : "",
@@ -1697,7 +1700,7 @@ calc_item_length(const int eln_len, const int icon_len, const filesn_t i)
 	if (file_info[i].dir == 1) {
 		item_len++;
 		if (file_info[i].filesn > 0 && conf.files_counter == 1
-		&& file_info[i].ruser == 1)
+		&& file_info[i].user_access == 1)
 			item_len += DIGINUM((int)file_info[i].filesn);
 	} else if (conf.colorize == 0 && has_file_type_char(i) == 1) {
 		item_len++;
@@ -1853,7 +1856,7 @@ pad_filename(const int ind_char, const filesn_t i, const int eln_len,
 	if (file_info[i].dir == 1 && conf.classify == 1) {
 		cur_len++;
 		if (file_info[i].filesn > 0 && conf.files_counter == 1
-		&& file_info[i].ruser == 1)
+		&& file_info[i].user_access == 1)
 			cur_len += DIGINUM((int)file_info[i].filesn);
 	}
 
@@ -2318,7 +2321,7 @@ init_fileinfo(const filesn_t n)
 	file_info[n].human_size.len = 0;
 	file_info[n].human_size.unit = 0;
 	file_info[n].linkn = 1;
-	file_info[n].ruser = 1;
+	file_info[n].user_access = 1;
 	file_info[n].size =  1;
 }
 
@@ -2873,6 +2876,14 @@ check_extra_file_types(mode_t *mode, const struct stat *a)
 static inline void
 load_file_gral_info(const struct stat *a, const filesn_t n)
 {
+	if (check_file_access(a->st_mode, a->st_uid, a->st_gid) == 0) {
+		file_info[n].user_access = 0;
+#ifndef _NO_ICONS
+		file_info[n].icon = DEF_NOPERM_ICON;
+		file_info[n].icon_color = DEF_NOPERM_ICON_COLOR;
+#endif /* !_NO_ICONS */
+	}
+
 	switch (a->st_mode & S_IFMT) {
 	case S_IFREG: file_info[n].type = DT_REG; stats.reg++; break;
 	case S_IFDIR: file_info[n].type = DT_DIR; stats.dir++; break;
@@ -2974,18 +2985,11 @@ load_dir_info(const struct stat *a, const filesn_t n)
 		get_dir_icon(n);
 #endif /* !_NO_ICONS */
 
-	const int daccess = (a &&
-		check_file_access(a->st_mode, a->st_uid, a->st_gid) == 1);
-
 	file_info[n].filesn = (checks.files_counter == 1
 		? (count_dir(file_info[n].name, NO_CPOP) - 2) : 1);
 
-	if (daccess == 0 || file_info[n].filesn < 0) {
+	if (file_info[n].user_access == 0 || file_info[n].filesn < 0) {
 		file_info[n].color = nd_c;
-#ifndef _NO_ICONS
-		file_info[n].icon = ICON_LOCK;
-		file_info[n].icon_color = YELLOW;
-#endif /* !_NO_ICONS */
 	} else {
 		file_info[n].color = a ? ((a->st_mode & S_ISVTX)
 			? ((a->st_mode & S_IWOTH) ? tw_c : st_c)
@@ -3002,8 +3006,8 @@ load_dir_info(const struct stat *a, const filesn_t n)
 		stats.sticky++;
 	} else if (file_info[n].color == ow_c) {
 		stats.other_writable++;
-	} else
-		if (file_info[n].color == st_c) {
+	} else {
+		if (file_info[n].color == st_c)
 			stats.sticky++;
 	}
 }
@@ -3052,17 +3056,17 @@ load_link_info(const int fd, const filesn_t n)
 		file_info[n].filesn = conf.files_counter == 1
 			? (count_dir(file_info[n].name, NO_CPOP) - 2) : 1;
 
-		const filesn_t dfiles = (conf.files_counter == 1)
+		const filesn_t dir_files = (conf.files_counter == 1)
 			? (file_info[n].filesn == 2 ? 3
 			: file_info[n].filesn) : 3; /* 3 == populated */
 
-		/* DFILES is negative only if count_dir() failed, which in
+		/* DIR_FILES is negative only if count_dir() failed, which in
 		 * this case only means EACCESS error. */
 		file_info[n].color = conf.color_lnk_as_target == 1
-			? ((dfiles < 0 || check_file_access(a.st_mode,
+			? ((dir_files < 0 || check_file_access(a.st_mode,
 			a.st_uid, a.st_gid) == 0) ? nd_c
 			: get_dir_color(lname, a.st_mode, a.st_nlink,
-			dfiles)) : ln_c;
+			dir_files)) : ln_c;
 	} else {
 		if (conf.color_lnk_as_target == 1)
 			get_link_target_color(lname, &a, n);
@@ -3078,13 +3082,7 @@ load_regfile_info(const struct stat *a, const filesn_t n)
 	cap_t cap;
 #endif /* !LINUX_FILE_CAPS */
 
-	/* Do not perform the access check if the user is root. */
-	if (user.uid != 0 && a
-	&& check_file_access(a->st_mode, a->st_uid, a->st_gid) == 0) {
-#ifndef _NO_ICONS
-		file_info[n].icon = DEF_NOPERM_ICON;
-		file_info[n].icon_color = DEF_NOPERM_ICON_COLOR;
-#endif /* !_NO_ICONS */
+	if (file_info[n].user_access == 0) {
 		file_info[n].color = nf_c;
 	} else if (a && (a->st_mode & S_ISUID)) {
 		file_info[n].exec = 1;

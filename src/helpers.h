@@ -1369,7 +1369,7 @@ struct fileinfo {
 	int dir;
 	int eln_n;     /* Amount of digits in ELN */
 	int exec;
-	int ruser;     /* User read permission for dir */
+	int user_access; /* Read-exec for dirs and read for files */
 	int symlink;
 	int sel;
 	int xattr;
