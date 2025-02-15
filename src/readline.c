@@ -2339,7 +2339,7 @@ rl_mime_list(void)
 	size_t n = 1;
 	filesn_t i = files;
 	while (--i >= 0) {
-		if (file_info[i].color == nf_c) /* No access to file */
+		if (file_info[i].user_access == 0)
 			continue;
 
 		char *name = file_info[i].name;
