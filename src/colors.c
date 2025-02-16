@@ -1219,7 +1219,7 @@ set_filetype_colors(char **colors, const size_t num_colors)
 		{"bd", bd_c, 2, p}, {"ca", ca_c, 2, p}, {"cd", cd_c, 2, p},
 		{"di", di_c, 2, p}, {"ed", ed_c, 2, p}, {"ee", ee_c, 2, p},
 		{"ef", ef_c, 2, p}, {"ex", ex_c, 2, p}, {"fi", fi_c, 2, p},
-		{"ln", ln_c, 2, p}, {"mh", mh_c, 2, p}, {"mi", mi_c, 2, p},
+		{"ln", ln_c, 2, p}, {"mh", mh_c, 2, p}, {"mi", uf_c, 2, p},
 		{"nd", nd_c, 2, p}, {"nf", nf_c, 2, p}, {"no", no_c, 2, p},
 		{"or", or_c, 2, p}, {"ow", ow_c, 2, p},
 #ifdef SOLARIS_DOORS
