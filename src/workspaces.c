@@ -70,9 +70,6 @@ get_workspace_path_color(const uint8_t num)
 	if (lstat(workspaces[num].path, &a) == -1)
 		return uf_c;
 
-	if (check_file_access(a.st_mode, a.st_uid, a.st_gid) == 0)
-		return nd_c;
-
 	if (S_ISLNK(a.st_mode)) {
 		char p[PATH_MAX + 1];
 		*p = '\0';
@@ -80,7 +77,7 @@ get_workspace_path_color(const uint8_t num)
 		return (ret && *p) ? ln_c : or_c;
 	}
 
-	return get_dir_color(workspaces[num].path, a.st_mode, a.st_nlink, -1);
+	return get_dir_color(workspaces[num].path, &a, -1);
 }
 
 static int

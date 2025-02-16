@@ -640,7 +640,7 @@ get_reg_file_color(const char *filename, const struct stat *attr,
 	int *free_color)
 {
 	if (conf.light_mode == 1) return fi_c;
-	if (access(filename, R_OK) == -1) return nf_c;
+	if (*nf_c && access(filename, R_OK) == -1) return nf_c;
 	if (attr->st_mode & S_ISUID) return su_c;
 	if (attr->st_mode & S_ISGID) return sg_c;
 
@@ -680,19 +680,13 @@ get_reg_file_color(const char *filename, const struct stat *attr,
 static char *
 get_comp_color(const char *filename, const struct stat *attr, int *free_color)
 {
-	char *color = (char *)NULL;
-
 	switch (attr->st_mode & S_IFMT) {
 	case S_IFDIR:
-		if (conf.light_mode == 1) return di_c;
-		if (access(filename, R_OK | X_OK) != 0)
-			return nd_c;
-		color = get_dir_color(filename, attr->st_mode, attr->st_nlink, -1);
-		break;
+		return conf.light_mode == 1 ? di_c
+			: get_dir_color(filename, attr, -1);
 
 	case S_IFREG:
-		color = get_reg_file_color(filename, attr, free_color);
-		break;
+		return get_reg_file_color(filename, attr, free_color);
 
 	case S_IFLNK: {
 		if (conf.light_mode == 1) return ln_c;
@@ -710,8 +704,6 @@ get_comp_color(const char *filename, const struct stat *attr, int *free_color)
 	case S_IFIFO: return pi_c;
 	default: return no_c;
 	}
-
-	return color;
 }
 
 static inline int

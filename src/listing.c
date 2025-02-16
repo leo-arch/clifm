@@ -973,6 +973,14 @@ get_ind_char(const filesn_t index, char **ind_chr)
 		return lc_c;
 	}
 
+	if (file_info[index].user_access == 0 && conf.icons == 0) {
+		if ((file_info[index].type != DT_DIR && !*nf_c)
+		|| (file_info[index].type == DT_DIR && !*nd_c)) {
+			*ind_chr = NO_PERM_STR;
+			return xf_cb;
+		}
+	}
+
 	*ind_chr = " ";
 	return "";
 }
@@ -2628,7 +2636,7 @@ list_dir_light(const int autocmd_ret)
 			} else if (file_info[n].filesn == 0) {
 				file_info[n].color = ed_c;
 			} else {
-				file_info[n].color = nd_c;
+				file_info[n].color = *nd_c ? nd_c : di_c;
 #ifndef _NO_ICONS
 				file_info[n].icon = ICON_LOCK;
 				file_info[n].icon_color = YELLOW;
@@ -2813,7 +2821,7 @@ check_seltag(const dev_t dev, const ino_t ino, const nlink_t links,
 /* Get the color of a link target NAME, whose file attributes are ATTR,
  * and write the result into the file_info array at index I. */
 static inline void
-get_link_target_color(const char *name, const struct stat *attr,
+set_link_target_color(const char *name, const struct stat *attr,
 	const filesn_t i)
 {
 	switch (attr->st_mode & S_IFMT) {
@@ -2988,7 +2996,7 @@ load_dir_info(const struct stat *a, const filesn_t n)
 	file_info[n].filesn = (checks.files_counter == 1
 		? (count_dir(file_info[n].name, NO_CPOP) - 2) : 1);
 
-	if (file_info[n].user_access == 0 || file_info[n].filesn < 0) {
+	if (*nd_c && (file_info[n].user_access == 0 || file_info[n].filesn < 0)) {
 		file_info[n].color = nd_c;
 	} else {
 		file_info[n].color = a ? ((a->st_mode & S_ISVTX)
@@ -3037,7 +3045,7 @@ load_link_info(const int fd, const filesn_t n)
 	}
 
 	/* We only need the symlink target name provided the target
-	 * is not a directory, because get_link_target_color() will
+	 * is not a directory, because set_link_target_color() will
 	 * check the file name extension. get_dir_color() only needs
 	 * this name to run count_dir(), but we have already executed
 	 * this function. */
@@ -3063,13 +3071,10 @@ load_link_info(const int fd, const filesn_t n)
 		/* DIR_FILES is negative only if count_dir() failed, which in
 		 * this case only means EACCESS error. */
 		file_info[n].color = conf.color_lnk_as_target == 1
-			? ((dir_files < 0 || check_file_access(a.st_mode,
-			a.st_uid, a.st_gid) == 0) ? nd_c
-			: get_dir_color(lname, a.st_mode, a.st_nlink,
-			dir_files)) : ln_c;
+			? get_dir_color(lname, &a, dir_files) : ln_c;
 	} else {
 		if (conf.color_lnk_as_target == 1)
-			get_link_target_color(lname, &a, n);
+			set_link_target_color(lname, &a, n);
 		else
 			file_info[n].color = ln_c;
 	}
@@ -3082,7 +3087,7 @@ load_regfile_info(const struct stat *a, const filesn_t n)
 	cap_t cap;
 #endif /* !LINUX_FILE_CAPS */
 
-	if (file_info[n].user_access == 0) {
+	if (file_info[n].user_access == 0 && *nf_c) {
 		file_info[n].color = nf_c;
 	} else if (a && (a->st_mode & S_ISUID)) {
 		file_info[n].exec = 1;

@@ -53,9 +53,7 @@
 #endif /* __linux__ || __CYGWIN__ */
 
 #include "aux.h"
-#ifdef __sun
-# include "checks.h" /* check_file_access() */
-#endif /* __sun */
+#include "colors.h" /* get_dir_color() */
 #include "history.h"
 #include "jump.h"
 #include "listing.h"
@@ -278,15 +276,18 @@ list_mounted_devs(const int mode)
 		if (strncmp(ent->mnt_fsname, "/dev/", 5) != 0)
 			continue;
 
+		struct stat a;
+		if (stat(ent->mnt_dir, &a) == -1 || !S_ISDIR(a.st_mode))
+			continue;
+
+		const char *dir_color = get_dir_color(ent->mnt_dir, &a, -1);
+
 		if (mode == MEDIA_LIST) {
 			printf("%s%zu%s %s%s%s [%s]\n", el_c, mp_n + 1,
-				df_c, (access(ent->mnt_dir, R_OK | X_OK) == 0) ? di_c : nd_c,
-				ent->mnt_dir, df_c, ent->mnt_fsname);
+				df_c, dir_color, ent->mnt_dir, df_c, ent->mnt_fsname);
 		} else {
 			printf("%s%zu%s %s [%s%s%s]\n", el_c, mp_n + 1,
-				df_c, ent->mnt_fsname,
-				(access(ent->mnt_dir, R_OK | X_OK) == 0) ? di_c
-				: nd_c, ent->mnt_dir, df_c);
+				df_c, ent->mnt_fsname, dir_color, ent->mnt_dir, df_c);
 		}
 
 		media = xnrealloc(media, mp_n + 2, sizeof(struct mnt_t));
@@ -433,10 +434,13 @@ list_mountpoints_bsd(struct statfs *fslist)
 		if (strncmp(fslist[i].f_mntfromname, "/dev/", 5) != 0)
 			continue;
 
-		printf("%s%zu%s %s%s%s (%s)\n", el_c, j + 1, df_c,
-		    (access(fslist[i].f_mntonname, R_OK | X_OK) == 0)
-		    ? di_c : nd_c, fslist[i].f_mntonname,
-		    df_c, fslist[i].f_mntfromname);
+		struct stat a;
+		if (stat(fslist[i].f_mntonname, &a) == -1 || !S_ISDIR(a.st_mode))
+			continue;
+
+		const char *dir_color = get_dir_color(fslist[i].f_mntonname, &a, -1);
+		printf("%s%zu%s %s%s%s (%s)\n", el_c, j + 1, df_c, dir_color,
+			fslist[i].f_mntonname, df_c, fslist[i].f_mntfromname);
 
 		/* Store the mountpoint into the mounpoints struct */
 		media = xnrealloc(media, j + 2, sizeof(struct mnt_t));
@@ -542,9 +546,9 @@ xgetmntinfo_sun(void)
 		if (stat(mp, &a) == -1 || !S_ISDIR(a.st_mode))
 			continue;
 
-		const int perm = check_file_access(a.st_mode, a.st_uid, a.st_gid);
+		const char *dir_color = get_dir_color(mp, &a, -1);
 		printf("%s%zu%s %s%s%s [%s]\n", el_c, n + 1, df_c,
-			perm == 1 ? di_c : nd_c, mp, df_c, ent.mnt_special);
+			dir_color, mp, df_c, ent.mnt_special);
 
 		media = xnrealloc(media, n + 2, sizeof(struct mnt_t));
 		media[n].mnt = savestring(mp, strlen(mp));

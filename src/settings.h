@@ -405,6 +405,11 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define PORT_PCHR    'P' /* Event port (Solaris) */
 #define UNK_PCHR     UNKNOWN_CHR
 
+/* When any of 'nf' or 'nd' color codes is unset, prepend this character
+ * (a single one) to unaccessible files or directories in the files list
+ * (only if running with colors, not in light mode, and without icons). */
+#define NO_PERM_STR "!"
+
 #define SELFILE_CHR   'S' /* Prompt indicator */
 #define SELFILE_STR   "*" /* Selected file mark for files list (ASCII) */
 #define SELFILE_STR_U "┃" /* Unicode alternative */

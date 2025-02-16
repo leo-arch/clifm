@@ -395,9 +395,6 @@ save_jump_suggestion(char *str)
 static char *
 get_directory_color(const char *filename, const struct stat *a)
 {
-	if (check_file_access(a->st_mode, a->st_uid, a->st_gid) == 0)
-		return nd_c;
-
 	if (S_ISLNK(a->st_mode)) {
 		char *linkname = xrealpath(filename, NULL);
 		if (linkname) {
@@ -407,7 +404,7 @@ get_directory_color(const char *filename, const struct stat *a)
 		return or_c;
 	}
 
-	return get_dir_color(filename, a->st_mode, a->st_nlink, -1);
+	return get_dir_color(filename, a, -1);
 }
 
 /* Compare ranks A and B (used to sort jump entries by rank). */
@@ -529,7 +526,8 @@ print_jump_table(const int reduce, const time_t now)
 		if (lstat(tmp_jump[i].path, &a) == -1)
 			color = uf_c;
 
-		char *dir_color = color == uf_c ? uf_c : get_directory_color(tmp_jump[i].path, &a);
+		char *dir_color = color == uf_c ? uf_c
+			: get_directory_color(tmp_jump[i].path, &a);
 		const int keep = tmp_jump[i].keep;
 		const char keep_char = keep == 1 ? '*'
 			: ((keep == JUMP_ENTRY_PERMANENT)

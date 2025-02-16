@@ -201,10 +201,7 @@ get_link_color(const char *name)
 		return color;
 
 	if (S_ISDIR(a.st_mode)) {
-		if (check_file_access(a.st_mode, a.st_uid, a.st_gid) == 1)
-			color = get_dir_color(name, a.st_mode, a.st_nlink, -1);
-		else
-			color = nd_c;
+		color = get_dir_color(name, &a, -1);
 	} else {
 		switch (a.st_mode & S_IFMT) {
 		case S_IFLNK:  color = stat(name, &a) == -1 ? or_c : ln_c; break;
@@ -1012,10 +1009,7 @@ get_file_type_and_color(const char *filename, const struct stat *attr,
 		if (conf.colorize == 0)
 			break;
 
-		if (check_file_access(attr->st_mode, attr->st_uid, attr->st_gid) == 0)
-			color = nd_c;
-		else
-			color = get_dir_color(filename, attr->st_mode, attr->st_nlink, -1);
+		color = get_dir_color(filename, attr, -1);
 		break;
 
 	case S_IFLNK: {

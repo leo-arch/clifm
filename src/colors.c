@@ -278,20 +278,20 @@ remove_bold_attr(char *str)
 	}
 }
 
-/* Return the color for the regular file FILENAME, whose attributes are ATTR.
+/* Return the color for the regular file FILENAME, whose attributes are A.
  * IF the color comes from the file extension, IS_EXT is updated to the length
  * of the color code (otherwise, it is set to zero). */
 char *
-get_regfile_color(const char *filename, const struct stat *attr, size_t *is_ext)
+get_regfile_color(const char *filename, const struct stat *a, size_t *is_ext)
 {
 	*is_ext = 0;
 	if (conf.colorize == 0)
 		return fi_c;
 
-	if (check_file_access(attr->st_mode, attr->st_uid, attr->st_gid) == 0)
+	if (*nf_c && check_file_access(a->st_mode, a->st_uid, a->st_gid) == 0)
 		return nf_c;
 
-	char *color = get_file_color(filename, attr);
+	char *color = get_file_color(filename, a);
 	if (conf.check_ext == 0 || color != fi_c)
 		return color ? color : fi_c;
 
@@ -313,35 +313,31 @@ get_regfile_color(const char *filename, const struct stat *attr, size_t *is_ext)
 	return tmp_color;
 }
 
-/* Retrieve the color corresponding to dir FILENAME with mode MODE.
- * If LINKS > 2, we know the directory is populated, so that there's no need
- * to run count_dir(). If COUNT > -1, we already know whether the
- * directory is populatoed or not: use this value for FILES_DIR (do not run
- * count_dir() either). */
+/* Retrieve the color corresponding to dir FILENAME whose attributes are A.
+ * If COUNT > -1, we already know whether the directory is populatoed or not:
+ * use this value for FILES_DIR (do not run count_dir()). */
 char *
-get_dir_color(const char *filename, const mode_t mode, const nlink_t links,
+get_dir_color(const char *filename, const struct stat *a,
 	const filesn_t count)
 {
-	char *color = (char *)NULL;
-	int sticky = 0;
-	int is_oth_w = 0;
-	if (mode & S_ISVTX)
-		sticky = 1;
+	if (*nd_c && check_file_access(a->st_mode, a->st_uid, a->st_gid) == 0)
+		return nd_c;
 
-	if (mode & S_IWOTH)
-		is_oth_w = 1;
+	const int sticky = (a->st_mode & S_ISVTX);
+	const int is_oth_w = (a->st_mode & S_IWOTH);
+	const filesn_t links = (filesn_t)a->st_nlink;
 
 	filesn_t files_dir = count > -1 ? count : (links > 2
-		? (filesn_t)links : count_dir(filename, CPOP));
+		? links : count_dir(filename, CPOP));
 
-	color = sticky ? (is_oth_w ? tw_c : st_c) : is_oth_w ? ow_c
+	char *color = sticky ? (is_oth_w ? tw_c : st_c) : is_oth_w ? ow_c
 		: ((files_dir == 2 || files_dir == 0) ? ed_c : di_c);
 
 	return color;
 }
 
 char *
-get_file_color(const char *filename, const struct stat *attr)
+get_file_color(const char *filename, const struct stat *a)
 {
 	char *color = (char *)NULL;
 
@@ -350,9 +346,9 @@ get_file_color(const char *filename, const struct stat *attr)
 #else
 	UNUSED(filename);
 #endif /* LINUX_FILE_CAPS */
-	if (attr->st_mode & 04000) { /* SUID */
+	if (a->st_mode & 04000) { /* SUID */
 		color = su_c;
-	} else if (attr->st_mode & 02000) { /* SGID */
+	} else if (a->st_mode & 02000) { /* SGID */
 		color = sg_c;
 	}
 #ifdef LINUX_FILE_CAPS
@@ -361,12 +357,12 @@ get_file_color(const char *filename, const struct stat *attr)
 		cap_free(cap);
 	}
 #endif /* LINUX_FILE_CAPS */
-	else if ((attr->st_mode & 00100) /* Exec */
-	|| (attr->st_mode & 00010) || (attr->st_mode & 00001)) {
-		color = FILE_SIZE_PTR(attr) == 0 ? ee_c : ex_c;
-	} else if (FILE_SIZE_PTR(attr) == 0) {
+	else if ((a->st_mode & 00100) /* Exec */
+	|| (a->st_mode & 00010) || (a->st_mode & 00001)) {
+		color = FILE_SIZE_PTR(a) == 0 ? ee_c : ex_c;
+	} else if (FILE_SIZE_PTR(a) == 0) {
 		color = ef_c;
-	} else if (attr->st_nlink > 1) { /* Multi-hardlink */
+	} else if (a->st_nlink > 1) { /* Multi-hardlink */
 		color = mh_c;
 	} else { /* Regular file */
 		color = fi_c;
@@ -1711,8 +1707,7 @@ set_default_colors(void)
 	if (!*ef_c) xstrsncpy(ef_c, CVAR(EF), sizeof(ef_c));
 	if (!*ln_c) xstrsncpy(ln_c, CVAR(LN), sizeof(ln_c));
 	if (!*mh_c) xstrsncpy(mh_c, CVAR(MH), sizeof(mh_c));
-	if (!*nd_c) xstrsncpy(nd_c, CVAR(ND), sizeof(nd_c));
-	if (!*nf_c) xstrsncpy(nf_c, CVAR(NF), sizeof(nf_c));
+	/* Both 'nd' and 'nf' codes can be unset */
 	if (!*no_c) xstrsncpy(no_c, CVAR(NO), sizeof(no_c));
 #ifdef SOLARIS_DOORS
 	if (!*oo_c) xstrsncpy(oo_c, CVAR(OO), sizeof(oo_c));
@@ -2673,27 +2668,22 @@ remove_trash_ext(char **ent)
 }
 
 char *
-get_entry_color(char *ent, const struct stat *s)
+get_entry_color(char *ent, const struct stat *a)
 {
 	char *color = (char *)NULL;
 
-	switch (s->st_mode & S_IFMT) {
+	switch (a->st_mode & S_IFMT) {
 	case S_IFREG: {
 		size_t ext = 0;
 		char *d = remove_trash_ext(&ent);
-		color = get_regfile_color(ent, s, &ext);
+		color = get_regfile_color(ent, a, &ext);
 		if (d)
 			*d = '.';
 		}
 		break;
 
 	case S_IFDIR:
-		if (conf.colorize == 0)
-			color = di_c;
-		else if (check_file_access(s->st_mode, s->st_uid, s->st_gid) == 0)
-			color = nd_c;
-		else
-			color = get_dir_color(ent, s->st_mode, s->st_nlink, -1);
+		color = conf.colorize == 0 ? di_c : get_dir_color(ent, a, -1);
 		break;
 
 	case S_IFLNK: {
@@ -2967,12 +2957,14 @@ print_file_type_colors(void)
 
 	printf(_("%sColor%s (di) Directory\n"), di_c, df_c);
 	printf(_("%sColor%s (ed) Empty directory\n"), ed_c, df_c);
-	printf(_("%sColor%s (nd) Directory with no read/exec permission\n"),
-	    nd_c, df_c);
+	if (*nd_c)
+		printf(_("%sColor%s (nd) Directory with no read/exec permission\n"),
+			nd_c, df_c);
 	printf(_("%sColor%s (fi) Regular file\n"), fi_c, df_c);
 	printf(_("%sColor%s (ef) Empty file\n"), ef_c, df_c);
-	printf(_("%sColor%s (nf) File with no read permission\n"),
-	    nf_c, df_c);
+	if (*nf_c)
+		printf(_("%sColor%s (nf) File with no read permission\n"),
+			nf_c, df_c);
 	printf(_("%sColor%s (ex) Executable file\n"), ex_c, df_c);
 	printf(_("%sColor%s (ee) Empty executable file\n"), ee_c, df_c);
 	printf(_("%sColor%s (ln) Symbolic link\n"), ln_c, df_c);
