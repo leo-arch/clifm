@@ -1689,7 +1689,7 @@ set_default_colors(void)
 	if (!*ws7_c) xstrsncpy(ws7_c, CVAR(WS7), sizeof(ws7_c));
 	if (!*ws8_c) xstrsncpy(ws8_c, CVAR(WS8), sizeof(ws8_c));
 	if (!*xs_c) xstrsncpy(xs_c, CVAR(XS), sizeof(xs_c));
-	if (!*xf_cb) xstrsncpy(xf_cb, term_caps.color >= 256
+	if (!*xs_cb) xstrsncpy(xs_cb, term_caps.color >= 256
 		? DEF_XS_CB256 : DEF_XS_CB, sizeof(xs_cb)); /* NOLINT */
 	if (!*xf_c) xstrsncpy(xf_c, CVAR(XF), sizeof(xf_c));
 	if (!*xf_cb) xstrsncpy(xf_cb, term_caps.color >= 256
