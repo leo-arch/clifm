@@ -2904,6 +2904,19 @@ get_longest_ext_name(void)
 	return l;
 }
 
+static int
+color_sort(const void *a, const void *b)
+{
+	struct ext_t *pa = (struct ext_t *)a;
+	struct ext_t *pb = (struct ext_t *)b;
+
+	if (pa->value > pb->value)
+		return 1;
+	if (pa->value < pb->value)
+		return -1;
+	return 0;
+}
+
 static void
 print_ext_colors(void)
 {
@@ -2914,13 +2927,22 @@ print_ext_colors(void)
 	if (cols <= 0)
 		cols = 1;
 
+	/* The ext_colors array is sorted by name hashes (to perform binary
+	 * searches for file extension colors). But here we want to group
+	 * extensions by color. */
+	struct ext_t *ext_colors_copy =
+		xnmalloc(ext_colors_n + 1, sizeof(struct ext_t));
+	memcpy(ext_colors_copy, ext_colors, ext_colors_n * sizeof(struct ext_t));
+	qsort(ext_colors_copy, ext_colors_n, sizeof(*ext_colors_copy),
+			(QSFUNC *)color_sort);
+
 	int n = 1;
 	size_t i;
 
 	for (i = 0; i < ext_colors_n; i++) {
-		const int pad = l - (int)ext_colors[i].len;
-		printf("\x1b[%sm*.%s%s%*s", ext_colors[i].value,
-			ext_colors[i].name, NC, pad, "");
+		const int pad = l - (int)ext_colors_copy[i].len;
+		printf("\x1b[%sm*.%s%s%*s", ext_colors_copy[i].value,
+			ext_colors_copy[i].name, NC, pad, "");
 		if (n == cols) {
 			n = 1;
 			putchar('\n');
@@ -2930,6 +2952,7 @@ print_ext_colors(void)
 	}
 
 	printf("%s\n", df_c);
+	free(ext_colors_copy);
 }
 
 static void
