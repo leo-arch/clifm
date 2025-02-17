@@ -2910,7 +2910,8 @@ color_sort(const void *a, const void *b)
 	struct ext_t *pa = (struct ext_t *)a;
 	struct ext_t *pb = (struct ext_t *)b;
 
-	return strcmp(pa->value, pb->value);
+	const int ret = strcmp(pa->value, pb->value);
+	return ret == 0 ? strcmp(pa->name, pb->name) : ret;
 }
 
 static void
