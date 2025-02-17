@@ -2910,11 +2910,7 @@ color_sort(const void *a, const void *b)
 	struct ext_t *pa = (struct ext_t *)a;
 	struct ext_t *pb = (struct ext_t *)b;
 
-	if (pa->value > pb->value)
-		return 1;
-	if (pa->value < pb->value)
-		return -1;
-	return 0;
+	return strcmp(pa->value, pb->value);
 }
 
 static void
