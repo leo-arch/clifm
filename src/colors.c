@@ -61,6 +61,10 @@
 # include "sort.h" /* compare_string() (used by qsort(3)) */
 #endif /* !CLIFM_SUCKLESS */
 
+#define ON_LSCOLORS (xargs.lscolors == LS_COLORS_GNU              \
+		? _(" (on LS_COLORS)") : (xargs.lscolors == LS_COLORS_BSD \
+		? _(" (on LSCOLORS)") : ""))
+
 #ifndef CLIFM_SUCKLESS
 /* A struct to hold color variables */
 struct colors_t {
@@ -868,11 +872,12 @@ list_colorschemes(void)
 	const char *ptr = SET_MISC_PTR;
 	size_t i;
 	for (i = 0; color_schemes[i]; i++) {
-		if (cur_cscheme == color_schemes[i])
+		if (cur_cscheme == color_schemes[i]) {
 			printf("%s%s%s %s%s\n", mi_c, ptr, df_c, color_schemes[i],
-				xargs.lscolors == 1 ? _(" (on LS_COLORS)") : "");
-		else
+				ON_LSCOLORS);
+		} else {
 			printf("  %s\n", color_schemes[i]);
+		}
 	}
 
 	return FUNC_SUCCESS;
@@ -1027,7 +1032,7 @@ check_ext_color_hash_conflicts(const int cs_check)
 				} else {
 					ext_colors[0].hash = 0;
 					err('w', PRINT_PROMPT, _("%s: File extension conflicts "
-						"found. Run 'cs check-ext' to find out\n"),
+						"found. Run 'cs check-ext' to find out.\n"),
 						PROGRAM_NAME);
 					return FUNC_FAILURE;
 				}
@@ -1434,7 +1439,7 @@ store_extension_line(const char *line)
 		return FUNC_FAILURE;
 
 	/* If --lscolors, make sure all lines have the form "*.ext" */
-	if (xargs.lscolors == 1 && (*line != '*' || line[1] != '.'
+	if (xargs.lscolors == LS_COLORS_GNU && (*line != '*' || line[1] != '.'
 	|| !line[2] || strchr(line + 2, '.')))
 		return FUNC_FAILURE;
 
@@ -1611,7 +1616,7 @@ set_default_colors(void)
 	if (date_shades.type == SHADE_TYPE_UNSET)
 		set_default_date_shades();
 
-	if (xargs.lscolors == 1)
+	if (xargs.lscolors > 0)
 		set_extra_colors();
 
 	if (!ext_colors)
@@ -1907,6 +1912,9 @@ set_lscolors(char **env_filecolors, char **env_extcolors)
 		ls_colors = set_lscolors_bsd();
 		if (!ls_colors || !*ls_colors)
 			return;
+		xargs.lscolors = LS_COLORS_BSD;
+	} else {
+		xargs.lscolors = LS_COLORS_GNU;
 	}
 
 	char *ext_ptr = strchr(ls_colors, '*');
@@ -1926,7 +1934,7 @@ get_colors_from_env(char **file, char **ext, char **iface)
 	char *env_filecolors = (char *)NULL;
 	char *env_extcolors = (char *)NULL;
 
-	if (xargs.lscolors == 1) {
+	if (xargs.lscolors > 0) {
 		set_lscolors(&env_filecolors, &env_extcolors);
 	} else {
 		env_filecolors = getenv("CLIFM_FILE_COLORS");
@@ -2348,7 +2356,7 @@ read_color_scheme_file(const char *colorscheme, char **filecolors,
 		}
 
 		/* File extension colors */
-		else if (xargs.lscolors == UNSET && *line == 'E'
+		else if (xargs.lscolors != LS_COLORS_GNU && *line == 'E'
 		&& strncmp(line, "ExtColors=", 10) == 0) {
 			set_cs_extcolors(line, extcolors, line_len);
 		}
@@ -2452,114 +2460,56 @@ static void
 disable_bold(void)
 {
 	/* File types */
-	remove_bold_attr(bd_c);
-	remove_bold_attr(bk_c);
-	remove_bold_attr(ca_c);
-	remove_bold_attr(cd_c);
-	remove_bold_attr(di_c);
-	remove_bold_attr(ed_c);
-	remove_bold_attr(ee_c);
-	remove_bold_attr(ef_c);
-	remove_bold_attr(ex_c);
-	remove_bold_attr(fi_c);
-	remove_bold_attr(ln_c);
-	remove_bold_attr(mh_c);
-	remove_bold_attr(nd_c);
-	remove_bold_attr(nf_c);
-	remove_bold_attr(no_c);
+	remove_bold_attr(bd_c); remove_bold_attr(bk_c); remove_bold_attr(ca_c);
+	remove_bold_attr(cd_c); remove_bold_attr(di_c); remove_bold_attr(ed_c);
+	remove_bold_attr(ee_c); remove_bold_attr(ef_c); remove_bold_attr(ex_c);
+	remove_bold_attr(fi_c); remove_bold_attr(ln_c); remove_bold_attr(mh_c);
+	remove_bold_attr(nd_c); remove_bold_attr(nf_c); remove_bold_attr(no_c);
 #ifdef SOLARIS_DOORS
 	remove_bold_attr(oo_c);
 #endif /* SOLARIS_DOORS */
-	remove_bold_attr(or_c);
-	remove_bold_attr(ow_c);
-	remove_bold_attr(pi_c);
-	remove_bold_attr(sg_c);
-	remove_bold_attr(so_c);
-	remove_bold_attr(st_c);
-	remove_bold_attr(su_c);
-	remove_bold_attr(tw_c);
-	remove_bold_attr(uf_c);
+	remove_bold_attr(or_c); remove_bold_attr(ow_c); remove_bold_attr(pi_c);
+	remove_bold_attr(sg_c); remove_bold_attr(so_c); remove_bold_attr(st_c);
+	remove_bold_attr(su_c); remove_bold_attr(tw_c); remove_bold_attr(uf_c);
 
 	/* Interface */
-	remove_bold_attr(ac_c);
-	remove_bold_attr(df_c);
-	remove_bold_attr(dl_c);
-	remove_bold_attr(el_c);
-	remove_bold_attr(fc_c);
-	remove_bold_attr(lc_c);
-	remove_bold_attr(mi_c);
-	remove_bold_attr(ts_c);
-	remove_bold_attr(tt_c);
-	remove_bold_attr(wc_c);
-	remove_bold_attr(wp_c);
+	remove_bold_attr(ac_c); remove_bold_attr(df_c); remove_bold_attr(dl_c);
+	remove_bold_attr(el_c); remove_bold_attr(fc_c); remove_bold_attr(lc_c);
+	remove_bold_attr(mi_c); remove_bold_attr(ts_c); remove_bold_attr(tt_c);
+	remove_bold_attr(wc_c); remove_bold_attr(wp_c);
 
 	/* Suggestions */
-	remove_bold_attr(sb_c);
-	remove_bold_attr(sc_c);
-	remove_bold_attr(sd_c);
-	remove_bold_attr(sf_c);
-	remove_bold_attr(sh_c);
-	remove_bold_attr(sp_c);
-	remove_bold_attr(sx_c);
-	remove_bold_attr(sz_c);
+	remove_bold_attr(sb_c); remove_bold_attr(sc_c); remove_bold_attr(sd_c);
+	remove_bold_attr(sf_c); remove_bold_attr(sh_c); remove_bold_attr(sp_c);
+	remove_bold_attr(sx_c); remove_bold_attr(sz_c);
 
 #ifndef _NO_ICONS
 	remove_bold_attr(dir_ico_c);
 #endif /* !_NO_ICONS */
 
 	/* Syntax highlighting */
-	remove_bold_attr(hb_c);
-	remove_bold_attr(hc_c);
-	remove_bold_attr(hd_c);
-	remove_bold_attr(he_c);
-	remove_bold_attr(hn_c);
-	remove_bold_attr(hp_c);
-	remove_bold_attr(hq_c);
-	remove_bold_attr(hr_c);
-	remove_bold_attr(hs_c);
-	remove_bold_attr(hv_c);
-	remove_bold_attr(hw_c);
+	remove_bold_attr(hb_c); remove_bold_attr(hc_c); remove_bold_attr(hd_c);
+	remove_bold_attr(he_c); remove_bold_attr(hn_c); remove_bold_attr(hp_c);
+	remove_bold_attr(hq_c); remove_bold_attr(hr_c); remove_bold_attr(hs_c);
+	remove_bold_attr(hv_c); remove_bold_attr(hw_c);
 
 	/* File properties */
-	remove_bold_attr(db_c);
-	remove_bold_attr(dd_c);
-	remove_bold_attr(de_c);
-	remove_bold_attr(dg_c);
-	remove_bold_attr(dk_c);
-	remove_bold_attr(dn_c);
-	remove_bold_attr(do_c);
-	remove_bold_attr(dp_c);
-	remove_bold_attr(dr_c);
-	remove_bold_attr(dt_c);
-	remove_bold_attr(du_c);
-	remove_bold_attr(dw_c);
-	remove_bold_attr(dxd_c);
-	remove_bold_attr(dxr_c);
-	remove_bold_attr(dz_c);
+	remove_bold_attr(db_c); remove_bold_attr(dd_c); remove_bold_attr(de_c);
+	remove_bold_attr(dg_c); remove_bold_attr(dk_c); remove_bold_attr(dn_c);
+	remove_bold_attr(do_c); remove_bold_attr(dp_c); remove_bold_attr(dr_c);
+	remove_bold_attr(dt_c); remove_bold_attr(du_c); remove_bold_attr(dw_c);
+	remove_bold_attr(dxd_c); remove_bold_attr(dxr_c); remove_bold_attr(dz_c);
 
 	/* Workspaces */
-	remove_bold_attr(ws1_c);
-	remove_bold_attr(ws2_c);
-	remove_bold_attr(ws3_c);
-	remove_bold_attr(ws4_c);
-	remove_bold_attr(ws5_c);
-	remove_bold_attr(ws6_c);
-	remove_bold_attr(ws7_c);
-	remove_bold_attr(ws8_c);
+	remove_bold_attr(ws1_c); remove_bold_attr(ws2_c); remove_bold_attr(ws3_c);
+	remove_bold_attr(ws4_c); remove_bold_attr(ws5_c); remove_bold_attr(ws6_c);
+	remove_bold_attr(ws7_c); remove_bold_attr(ws8_c);
 
 	/* Prompt indicators */
-	remove_bold_attr(em_c);
-	remove_bold_attr(li_c);
-	remove_bold_attr(li_cb);
-	remove_bold_attr(nm_c);
-	remove_bold_attr(ro_c);
-	remove_bold_attr(si_c);
-	remove_bold_attr(ti_c);
-	remove_bold_attr(tx_c);
-	remove_bold_attr(xs_c);
-	remove_bold_attr(xs_cb);
-	remove_bold_attr(xf_c);
-	remove_bold_attr(xf_cb);
+	remove_bold_attr(em_c); remove_bold_attr(li_c); remove_bold_attr(li_cb);
+	remove_bold_attr(nm_c); remove_bold_attr(ro_c); remove_bold_attr(si_c);
+	remove_bold_attr(ti_c); remove_bold_attr(tx_c); remove_bold_attr(xs_c);
+	remove_bold_attr(xs_cb); remove_bold_attr(xf_c); remove_bold_attr(xf_cb);
 
 	remove_bold_attr(wm_c);
 }
@@ -3280,7 +3230,7 @@ static void
 print_color_scheme_name(void)
 {
 	printf(_("%sColor scheme: %s%s%s\n\n"), BOLD, get_color_scheme_name(),
-		df_c, xargs.lscolors == 1 ? " (on LS_COLORS)" : "");
+		df_c, ON_LSCOLORS);
 }
 
 /* List color codes for file types used by the program. */

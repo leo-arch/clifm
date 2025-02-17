@@ -47,6 +47,9 @@
 #define COLOR256_PREFIX  '@'
 #define IS_COLOR_PREFIX(c) ((c) == RGB_COLOR_PREFIX || (c) == COLOR256_PREFIX)
 
+#define LS_COLORS_GNU  1
+#define LS_COLORS_BSD  2
+
 __BEGIN_DECLS
 
 void color_codes(void);
