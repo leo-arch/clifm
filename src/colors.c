@@ -1433,9 +1433,9 @@ store_extension_line(const char *line)
 	if (!line || !*line)
 		return FUNC_FAILURE;
 
-	/* Make sure all lines have the form "*.ext" */
+	/* If --lscolors, make sure all lines have the form "*.ext" */
 	if (xargs.lscolors == 1 && (*line != '*' || line[1] != '.'
-	|| strchr(line + 2, '.')))
+	|| !line[2] || strchr(line + 2, '.')))
 		return FUNC_FAILURE;
 
 	/* Remove the leading "*.", if any, from the extension line. */
@@ -1996,8 +1996,8 @@ store_definition(char *str)
 	 * (bk_c color code). */
 	if (!*bk_c && *name == 'T' && strcmp(name + 1, "EMP") == 0) {
 		char *v = IS_COLOR_PREFIX(*value) ? decode_color_prefix(value) : value;
-
-		snprintf(bk_c, sizeof(bk_c), "\x1b[0;%sm", v);
+		if (v && *v)
+			snprintf(bk_c, sizeof(bk_c), "\x1b[0;%sm", v);
 	}
 
 	defs_n++;
