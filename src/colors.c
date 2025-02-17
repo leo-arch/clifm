@@ -1433,7 +1433,9 @@ store_extension_line(const char *line)
 	if (!line || !*line)
 		return FUNC_FAILURE;
 
-	if (xargs.lscolors == 1 && *line != '*')
+	/* Make sure all lines have the form "*.ext" */
+	if (xargs.lscolors == 1 && (*line != '*' || line[1] != '.'
+	|| strchr(line + 2, '.')))
 		return FUNC_FAILURE;
 
 	/* Remove the leading "*.", if any, from the extension line. */
@@ -2911,7 +2913,11 @@ color_sort(const void *a, const void *b)
 	struct ext_t *pb = (struct ext_t *)b;
 
 	const int ret = strcmp(pa->value, pb->value);
-	return ret == 0 ? strcmp(pa->name, pb->name) : ret;
+	if (ret != 0)
+		return ret;
+
+	return conf.case_sens_list == 1 ? strcmp(pa->name, pb->name)
+		: strcasecmp(pa->name, pb->name);
 }
 
 static void
@@ -3273,7 +3279,8 @@ print_highlight_colors(void)
 static void
 print_color_scheme_name(void)
 {
-	printf(_("%sColor scheme: %s%s\n\n"), BOLD, get_color_scheme_name(), df_c);
+	printf(_("%sColor scheme: %s%s%s\n\n"), BOLD, get_color_scheme_name(),
+		df_c, xargs.lscolors == 1 ? " (on LS_COLORS)" : "");
 }
 
 /* List color codes for file types used by the program. */
