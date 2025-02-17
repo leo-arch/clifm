@@ -1123,7 +1123,7 @@ construct_human_size(const off_t size)
 	snprintf(str, sizeof(str), "%.*f %c%s",
 		(s == 0.00f || s - (float)x == 0.00f) ? 0 : 2,
 		(double)s,
-		u[n],
+		(u[n] == 'K' && xargs.si == 1) ? 'k' : u[n],
 		u[n] != 'B' ? (xargs.si == 1 ? "B" : "iB") : "");
 
 	return str;
