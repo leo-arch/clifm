@@ -61,7 +61,7 @@ define CONFIG=#e8bc92                       # Pale blue
 define MARKUP=#e8bc92                       # Pale blue
 define TEMP=#7e7e7e                         # Gray
 
-FiletypeColors="bd=BW:ca=WGr:cd=BW:di=BS:ed=S:ee=G:ef=DW:ex=BG:fi=W:ln=BC:mh=RC:nd=UBR:nf=UR:no=KW:or=UC:ow=UWR:pi=BM:sg=KY:so=BV:st=WC:su=KR:tw=WR:uf=RK:"
+FiletypeColors="bd=BW:ca=WGr:cd=BW:di=BS:ed=S:ee=G:ef=DW:ex=BG:fi=W:ln=BC:mh=RC:nd=UBR:nf=:no=KW:or=UC:ow=UWR:pi=BM:sg=KY:so=BV:st=WC:su=KR:tw=WR:uf=RK:"
 
 InterfaceColors="ac=:db=Y:dd=:de=C:df=W:dg=R:dk=R:dl=BG2:dn=DW:do=C:dp=M:dr=S:dw=R:dxd=G:dxr=C:dz=:el=BR:em=BR:fc=DS:hb=C:hc=DR:hd=G:he=C:hn=W:hp=C:hq=Y:hr=R:hs=G:hv=G:hw=R:lc=C:li=BG:mi=BC:nm=BG:ro=BC:sb=DY:sc=DR:sd=:sf=UDC:sh=:si=BC:sp=DR:sx=DG:ti=BC:ts=UM:tt=BDC:tx=W:wc=BC:wm=BY:ws1=C:ws2=R:ws3=Y:ws4=G:ws5=C:ws6=C:ws7=C:ws8=C:xs=G:xf=BR:"
 

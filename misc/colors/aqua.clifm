@@ -61,7 +61,7 @@ define IMAGE=1;35   # Bold magenta
 define TEMP=2;37    # Dimmed white
 define VIDEO=1;35   # Bold magenta
 
-FiletypeColors="bd=BB:ca=KR:cd=B:di=BC:ed=DC:ee=G:ef=DW:ex=BG:fi=W:ln=BY:mh=RY:nd=UBR:nf=UDR:no=URW:or=UDY:ow=BGr:pi=RM:so=RM:su=WR:sg=KC:st=WB:tw=KG:uf=UBW:"
+FiletypeColors="bd=BB:ca=KR:cd=B:di=BC:ed=DC:ee=G:ef=DW:ex=BG:fi=W:ln=BY:mh=RY:nd=UBR:nf=:no=URW:or=UDY:ow=BGr:pi=RM:so=RM:su=WR:sg=KC:st=WB:tw=KG:uf=UBW:"
 
 InterfaceColors="ac=:df=D:dl=DW:db=B:dd=:de=C:dg=Y:dk=R:dn=DW:dr=Y:do=C:dp=M:dw=R:dxd=G:dxr=C:dz=:el=BDW:em=BR:fc=DC:hb=C:hc=DR:hd=C:he=C:hn=D:hp=C:hq=Y:hr=R:hs=G:hv=G:hw=R:lc=BY:li=BG:mi=BC:nm=BG:si=BB:sb=DY:sc=DR:sd=:sf=UDC:sh=:sp=DR:sx=DG:ti=BC:ts=UM:tt=BDC:tx=D:wc=BC:wm=BY:ws1=B:ws2=R:ws3=Y:ws4=G:ws5=C:ws6=C:ws7=C:ws8=C:xs=G:xf=BR:"
 

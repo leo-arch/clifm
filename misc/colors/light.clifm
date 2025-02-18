@@ -63,7 +63,7 @@ define MARKUP=2;4;33  # Dimmed underlined yellow
 define TEMP=2;37      # Dimmed white
 define VIDEO=1;35     # Bold magenta
 
-FiletypeColors="bd=BDY:ca=KR:cd=BDK:di=BB:ed=B:ee=DG:ef=DW:ex=BG:fi=K:ln=BDC:mh=KC:nd=UBR:nf=UR:no=URW:or=UDC:ow=BlGr:pi=DM:sg=KY:so=M:st=WB:su=WR:tw=KG:uf=URK:"
+FiletypeColors="bd=BDY:ca=KR:cd=BDK:di=BB:ed=B:ee=DG:ef=DW:ex=BG:fi=K:ln=BDC:mh=KC:nd=UBR:nf=:no=URW:or=UDC:ow=BlGr:pi=DM:sg=KY:so=M:st=WB:su=WR:tw=KG:uf=URK:"
 
 InterfaceColors="ac=:db=K:dd=:de=M:df=K:dg=DG:dk=R:dl=DB:dn=DW:do=C:dp=M:dr=Y:dw=R:dxd=G:dxr=G:dz=:el=DG:em=R:fc=DW:hb=C:hc=DR:hd=C:he=C:hn=D:hp=C:hq=Y:hr=R:hs=G:hv=G:lc=BR:li=G:mi=BDM:nm=G:sb=DY:sc=DR:sf=UDC:sh=DW:si=B:sp=DR:sx=DG:sz=UDC:ti=C:ts=UR:tt=BDC:tx=D:wc=BD:wm=Y:ws1=B:ws2=R:ws3=Y:ws4=G:ws5=C:ws6=C:ws7=C:ws8=C:xf=R:xs=DG:"
 

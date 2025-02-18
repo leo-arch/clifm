@@ -55,7 +55,7 @@ define IMAGE=#dad085     # Pale yellow
 define TEMP=#888888-3    # Italic gray
 define VIDEO=#dad085     # Pale yellow
 
-FiletypeColors="bd=R2:ca=D:cd=R2:di=B2:do=M2:ed=DB2:ee=DO2:ef=DIM:ex=BO2:fi=D:ln=Y2:mh=D:nd=BR2:nf=UD:no=D:or=YR2:ow=D:pi=M2:sg=D:so=M2:st=D:su=D:tw=D:"
+FiletypeColors="bd=R2:ca=D:cd=R2:di=B2:do=M2:ed=DB2:ee=DO2:ef=DIM:ex=BO2:fi=D:ln=Y2:mh=D:nd=BR2:nf=:no=D:or=YR2:ow=D:pi=M2:sg=D:so=M2:st=D:su=D:tw=D:"
 
 InterfaceColors="ac=:db=M:dd=:de=G2:df=D:dg=B2:dk=R2:dl=B:dn=DW:do=C:dp=:dr=Y2:dw=R2:dxd=G2:dxr=C2:dz=:el=Y:em=BR:fc=DB2:hb=C:hc=DR:hd=C:he=C:hn=D:hp=C:hq=Y:hr=R:hs=G:hv=G:lc=Y2:li=BG:mi=BC:nm=BG:sb=DY:sc=DR:sd=:sf=UDC:sh=:si=BB:sp=DR:sx=DG:ti=BC:ts=UM:tt=BDC:tx=D:wc=BC:wm=BY:ws1=B:ws2=R:ws3=Y:ws4=G:ws5=C:ws6=C:ws7=C:ws8=C:xf=BR:xs=G:"
 

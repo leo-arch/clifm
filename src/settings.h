@@ -39,7 +39,7 @@
  * (usually $HOME/.config/clifm/colors/) nor in the data dir, (usually
  * /usr/local/share/clifm/colors/). */
 #define DEF_FILE_COLORS "bd=1;33:ca=30;41:cd=1:di=1;34:ed=2;34:\
-ee=32:ef=2:ex=1;32:fi=0:ln=1;36:mh=30;46:nd=4;1;31:nf=2;4;31:\
+ee=32:ef=2:ex=1;32:fi=0:ln=1;36:mh=30;46:nd=4;1;31:nf=:\
 no=31;47:or=2;4;36:ow=34;40:pi=4;45;37:so=45;37:su=37;41:sg=30;43:st=37;44:\
 tw=37;42:uf=2;4;37:"
 
@@ -105,7 +105,7 @@ xf=1;31:xs=32:"
 #define DEF_LN_C  "\x1b[1;36m"    /* Symbolic link */
 #define DEF_MH_C  "\x1b[30;46m"   /* Multi-link */
 #define DEF_ND_C  "\x1b[1;31m"    /* Unaccessible dir */
-#define DEF_NF_C  "\x1b[2;31m"    /* Unaccessible file */
+#define DEF_NF_C  ""              /* Unaccessible file */
 #define DEF_NO_C  "\x1b[0;31;47m" /* Unknown file type */
 #ifdef __sun
 #define DEF_OO_C  "\x1b[0;35m"    /* Solaris door/port (ls default is 1;35) */
@@ -210,7 +210,7 @@ xf=1;31:xs=32:"
 		 * ############################################# */
 
 #define DEF_FILE_COLORS_256 "bd=1;38;5;229:ca=30;41:cd=1;38;5;214:di=1;34:\
-ed=2;34:ee=32:ef=2:ex=1;32:fi=0:ln=1;36:mh=7;36:nd=1;31:nf=2;31:no=4;31;47:\
+ed=2;34:ee=32:ef=2:ex=1;32:fi=0:ln=1;36:mh=7;36:nd=1;31:nf=:no=4;31;47:\
 or=4;2;36:ow=48;5;235;38;5;33:pi=38;5;5;48;5;238:sg=30;43:so=1;38;5;5;48;5;238:\
 st=37;44:su=37;41:tw=37;42:uf=4;2;37:"
 
@@ -270,7 +270,7 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define DEF_LN_C256  "\x1b[1;36m"       /* Symbolic link */
 #define DEF_MH_C256  "\x1b[7;36m"       /* Multi-link */
 #define DEF_ND_C256  "\x1b[1;31m"       /* Unaccessible dir */
-#define DEF_NF_C256  "\x1b[2;31m"       /* Unaccessible file */
+#define DEF_NF_C256  ""                 /* Unaccessible file */
 #define DEF_NO_C256  "\x1b[4;31;47m"    /* Unknown file type */
 #ifdef __sun
 #define DEF_OO_C256  "\x1b[0;35m"    /* Solaris door/port (ls default is 1;35) */

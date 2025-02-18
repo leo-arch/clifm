@@ -58,7 +58,7 @@ define MARKUP=#e5c07b    # Yellow
 define TEMP=#abb2bf-2    # Dimmed white
 define VIDEO=#c678dd-1   # Bold magenta
 
-FiletypeColors="bd=BY:ca=KR:cd=BD:di=BB:ed=DB:ee=G:ef=DW:ex=BG:fi=D:ln=BC:mh=RC:nd=BR:nf=DR:no=RW:or=DC:ow=BK:pi=BMK:sg=KY:so=MK:st=KB:su=WR:tw=KG:uf=URK:"
+FiletypeColors="bd=BY:ca=KR:cd=BD:di=BB:ed=DB:ee=G:ef=DW:ex=BG:fi=D:ln=BC:mh=RC:nd=BR:nf=:no=RW:or=DC:ow=BK:pi=BMK:sg=KY:so=MK:st=KB:su=WR:tw=KG:uf=URK:"
 
 InterfaceColors="ac=:de=C:df=D:dk=R:dl=DW:bm=BC:dn=DW:dr=Y:dw=R:dxd=G:dxr=C:dg=Y:dd=:dz=:do=C:dp=M:el=C:em=BR:fc=DB:hb=C:hc=DR:hd=C:he=C:hn=D:hp=C:hq=Y:hr=R:hs=G:hv=G:hw=R:lc=G:li=BG:mi=BC:nm=BG:sb=DY:sc=DR:sd=:sf=UDC:sh=:si=BB:sp=DR:sx=DG:ti=BC:ts=UM:tt=BDC:tx=D:wc=BC:wm=BY:ws1=B:ws2=R:ws3=Y:ws4=G:ws5=C:ws6=C:ws7=C:ws8=C:xf=BR:xs=G:"
 
