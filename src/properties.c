@@ -1639,11 +1639,13 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 		if (bigger_than_bytes == 1)
 			printf(" / %s%jd B%s", csize, (intmax_t)size, cend);
 
+		const int is_sparse = (S_ISREG(attr->st_mode) &&
+			(intmax_t)(attr->st_blocks * S_BLKSIZE) < (intmax_t)attr->st_size
+			 && attr->st_blocks > 0);
+
 		printf(" (%s%s%s)\n", conf.apparent_size == 1 ? _("apparent")
 			: _("disk usage"), (xargs.si == 1 && bigger_than_bytes == 1)
-			? ",si" : "", (S_ISREG(attr->st_mode)
-			&& (intmax_t)(attr->st_blocks * S_BLKSIZE) < (intmax_t)attr->st_size)
-			? ",sparse" : "");
+			? ",si" : "", is_sparse == 1 ? ",sparse" : "");
 
 		return;
 	}
@@ -1759,14 +1761,15 @@ print_size(const struct stat *attr, const int apparent)
 
 	const int bigger_than_bytes = size > (xargs.si == 1 ? 1000 : 1024);
 
+	const int is_sparse = (S_ISREG(attr->st_mode) && attr->st_blocks > 0
+		&& (intmax_t)(attr->st_blocks * S_BLKSIZE) < (intmax_t)attr->st_size);
+
 	if (bigger_than_bytes == 1)
 		printf(" / %s%jd B%s", csize, (intmax_t)size, cend);
 
 	printf(" (%s%s%s)\n", apparent == 1 ? _("apparent")
 		: _("on disk"), (xargs.si == 1 && bigger_than_bytes == 1)
-		? ",si" : "", (S_ISREG(attr->st_mode)
-		&& (intmax_t)(attr->st_blocks * S_BLKSIZE) < (intmax_t)attr->st_size)
-		? ",sparse" : "");
+		? ",si" : "", is_sparse == 1 ? ",sparse" : "");
 }
 
 static void

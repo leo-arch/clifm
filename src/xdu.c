@@ -98,8 +98,8 @@ free_xdu_hardlinks(void)
  * The total size in bytes is stored in the SIZE field of the struct, and
  * the total amount of used blocks in the BLOCKS field.
  * Translate this info into apparent and physical sizes of DIR as follows:
- *   apparent = info->size (same as 'du -s -B1')
- *   physical = info->blocks * S_BLKSIZE (same as 'du -s -B1 --apparent-size')
+ *   apparent = info->size (same as 'du -s -B1 --apparent-size')
+ *   physical = info->blocks * S_BLKSIZE (same as 'du -s -B1')
  *
  * The amount of directories, symbolic links, and other file types is stored
  * in the DIRS, LINKS, and FILES fields respectively.
