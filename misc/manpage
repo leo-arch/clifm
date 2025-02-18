@@ -1574,10 +1574,10 @@ This is the list of \fBfile type codes\fR (you will find them in the \fIFiletype
 .sp
  di = directory
  ed = empty directory
- nd = directory with no read/exec permission
+ nd = directory with no read/exec permission \fB(1)\fR
  fi = regular file
  ef = empty regular file
- nf = file with no access permission
+ nf = file with no read permission \fB(1)\fR
  ln = symlink
  mh = multi\-hardlink file
  or = orphaned or broken symlink
@@ -1596,7 +1596,8 @@ This is the list of \fBfile type codes\fR (you will find them in the \fIFiletype
  oo = door/port (Solaris only)
  no = unknown file type
  uf = unaccessible files (\fBfstatat\fR(3) error)
-
+.sp
+\fB(1)\fR If unset, the corresponding file type color is used and an exclamation mark is printed before the file name in the files list (provided icons are disabled -otherwise the lock icon is used- and \fBclifm\fR is not running in light mode -in light mode access checks are not performed). The color used for the exclamation mark is \fIxf\fR (see below).
 .TP
 The following codes are used for different interface elements (in the \fIInterfaceColors\fR section of the current color scheme file):
 .sp
