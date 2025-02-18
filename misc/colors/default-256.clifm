@@ -76,10 +76,10 @@
 
 define FTYPE_DIR=@4-1               # Directory
 define FTYPE_EMPTY_DIR=@4-2         # Empty directory
-define FTYPE_DIR_NO_PERM=@1-1       # Directory with no read permission
+define FTYPE_DIR_NO_PERM=@1-1       # Directory with no read permission (1)
 define FTYPE_REG=0                  # Regular file
 define FTYPE_EMPTY_REG=2            # Empty regular file
-define FTYPE_REG_NO_PERM=@1-2       # Regular file with no read permission
+define FTYPE_REG_NO_PERM=@1-2       # Regular file with no read permission (1)
 define FTYPE_EXEC=@2-1              # Executable file
 define FTYPE_EMPTY_EXEC=@2          # Empty executable file
 define FTYPE_LINK=@6-1              # Symbolic link
@@ -98,6 +98,13 @@ define FTYPE_STICKY_NOT_OW=37;44    # Sticky (not other-writable)
 define FTYPE_STICKY_OW=37;42        # Sticky and other-writable
 define FTYPE_UNKNOWN=4;31;47        # Unknown file type
 define FTYPE_NON_STAT=4;2;37        # Non-stat'able file
+
+# (1) If unset, the corresponding file type color is used and an
+# exclamation mark is printed before the file name in the files list
+# (provided icons are disabled -otherwise the lock icon is used- and
+# clifm is not running in light mode -in light mode access checks are
+# not performed). The color used for the exclamation mark is
+# PROMPT_EXIT_FAILURE (see below).
 
 #=====================================#
 #       PROPERTIES / LONG VIEW        #
