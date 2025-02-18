@@ -1093,12 +1093,15 @@ is_cmd_in_path(const char *cmd)
 
 /* Convert SIZE to human readable form (at most 2 decimal places).
  * Returns a pointer to a string of at most MAX_UNIT_SIZE.
- * We follow here the du(1) notation: K, M, G... for powers of 1024
- * and KB, MB, KB... for power of 1000. */
+ * We use KiB, MiB, GiB... suffixes for powers of 1024
+ * and kB, MB, GB... for power of 1000. */
 char *
 construct_human_size(const off_t size)
 {
 	static char str[MAX_HUMAN_SIZE + 2];
+
+	if (size < 0)
+		return UNKNOWN_STR;
 
 	const float base = xargs.si == 1 ? 1000 : 1024;
 	static float mult_factor = 0;
@@ -1118,7 +1121,9 @@ construct_human_size(const off_t size)
 	 * We don't want to print the reminder when it is zero.
 	 *
 	 * R: Ronnabyte, Q: Quettabyte. It's highly unlikely to have files of
-	 * such huge sizes (and even less) in the near future, but anyway... */
+	 * such huge sizes (and even less) in the near future. Even more, since
+	 * our original value is off_t (whose maximum value is INT64_MAX,
+	 * i.e. 2^63 - 1), we will never reach even a Zettabyte. */
 	static const char *const u = "BKMGTPEZYRQ";
 	snprintf(str, sizeof(str), "%.*f %c%s",
 		(s == 0.00f || s - (float)x == 0.00f) ? 0 : 2,

@@ -2365,7 +2365,7 @@ construct_human_sizes(void)
 
 	filesn_t i = files;
 	while (--i >= 0) {
-		if (file_info[i].size < ibase) {
+		if (file_info[i].size < ibase) { /* This includes negative values */
 			const int ret = snprintf(file_info[i].human_size.str,
 				MAX_HUMAN_SIZE, "%jd", (intmax_t)file_info[i].size);
 			file_info[i].human_size.len = ret > 0 ? (size_t)ret : 0;
