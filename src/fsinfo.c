@@ -1,4 +1,4 @@
-/* fsinfo.c - Get file system information */
+/* fsinfo.c - Get filesystem information */
 
 /*
  * This file is part of Clifm
@@ -30,7 +30,7 @@
 # include <sys/statfs.h> /* statfs(2) */
 # include <sys/sysmacros.h> /* major() and minor(), used by get_dev_name() */
 # include "aux.h" /* open_fread() */
-# include "linuxfs.h" /* FS_MAGIC macros for file system types */
+# include "linuxfs.h" /* FS_MAGIC macros for filesystem types */
 #elif defined(HAVE_STATFS)
 # include <sys/mount.h> /* statfs(2) */
 #elif defined(__sun)
@@ -39,13 +39,13 @@
 #endif /* __linux__ */
 
 #if defined(LINUX_FSINFO)
-/* Given an ext file system, tell whether it is version 2, 3, or 4.
+/* Given an ext filesystem, tell whether it is version 2, 3, or 4.
  * Returns a pointer to a constant string with the proper name. If none is
  * found a generic "ext2/3/4" is returned.
  *
  * This function just checks information gathered at startup, which is way
  * faster than performing the whole thing each time it is needed. However,
- * File systems mounted in the current session won't be checked here. */
+ * Filesystems mounted in the current session won't be checked here. */
 static char *
 get_ext_fs_type(const char *file)
 {
@@ -81,9 +81,9 @@ get_ext_fs_type(const char *file)
 	return type;
 }
 
-/* Return a pointer to a constant string with the name of the file system
- * to which the file FILE belongs. REMOTE is set to one if the corresponding
- * file system is a remote one. */
+/* Return a pointer to a constant string with the name of the filesystem
+ * where the file FILE resides. REMOTE is set to 1 if the corresponding
+ * filesystem is a remote one. */
 char *
 get_fs_type_name(const char *file, int *remote)
 {
@@ -308,7 +308,7 @@ get_dev_name(const dev_t dev)
 
 #elif defined(HAVE_STATFS)
 /* Update DEVNAME and DEVTYPE to make it point to the device name and device
- * type of the file system to which the file FILE belongs. */
+ * type of the filesystem where the file FILE resides. */
 void
 get_dev_info(const char *file, char **devname, char **devtype)
 {

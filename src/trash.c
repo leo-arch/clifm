@@ -322,7 +322,7 @@ trash_file(const char *suffix, const struct tm *tm, char *file)
 	int mvcmd = 0;
 	int ret = renameat(XAT_FDCWD, file, XAT_FDCWD, dest);
 	if (ret != FUNC_SUCCESS && errno == EXDEV) {
-		/* Destination file is on a different file system, which is why
+		/* Destination file is on a different filesystem, which is why
 		 * renameat(2) fails: let's try with mv(1). */
 		char *tmp_cmd[] = {"mv", "--", file, dest, NULL};
 		ret = launch_execv(tmp_cmd, FOREGROUND, E_NOFLAG);
@@ -741,7 +741,7 @@ untrash_file(char *file)
 	ret = renameat(XAT_FDCWD, undel_file, XAT_FDCWD, orig_path);
 	if (ret == -1) {
 		if (errno == EXDEV) {
-			/* Destination file is on a different file system, which is why
+			/* Destination file is on a different filesystem, which is why
 			 * rename(3) doesn't work: let's try with mv(1). */
 			char *cmd[] = {"mv", "--", undel_file, orig_path, NULL};
 			ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);

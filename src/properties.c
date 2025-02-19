@@ -1897,7 +1897,7 @@ do_stat(char *filename, const int follow_link)
 		check_file_access(attr.st_mode, attr.st_uid, attr.st_gid);
 #else
 		/* check_file_access() checks Unix-style permissions, which does
-		 * not make much sense on Windows file systems (particularly, on
+		 * not make much sense on Windows filesystems (particularly, on
 		 * system directories). */
 		1;
 #endif /* !__CYGWIN__ */

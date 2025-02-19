@@ -209,11 +209,11 @@ NAME is not specified, print the list of all parent directories\n\n\
     bl sel\n\n\
 Note: Links are always created in the current directory."
 
-#define BLEACH_USAGE "Clean up file names from non-ASCII characters\n\n\
+#define BLEACH_USAGE "Clean up filenames from non-ASCII characters\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   bb, bleach ELN/FILE...\n\n\
 \x1b[1mEXAMPLE\x1b[22m\n\
-- Bleach file names in your Downloads directory\n\
+- Bleach filenames in your Downloads directory\n\
     bb ~/Downloads/*"
 
 #define BOOKMARKS_USAGE "Manage bookmarks\n\n\
@@ -242,7 +242,7 @@ Note: Links are always created in the current directory."
 \x1b[1mUSAGE\x1b[22m\n\
   br, bulk ELN/FILE... [:EDITOR]\n\n\
 The list of files to be renamed is opened via EDITOR (default associated\n\
-application for text files if omitted). Edit the file names you want to \n\
+application for text files if omitted). Edit the filenames you want to \n\
 rename, save, and quit the editor (quit without saving to cancel the \n\
 operation).\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
@@ -598,7 +598,7 @@ from the history list."
 \x1b[1mUSAGE\x1b[22m\n\
   icons [on, off]\n\n\
 Note: Depending on how the terminal renders icons, the apparent space\n\
-between icons and file names may not be the most appropiate. This space\n\
+between icons and filenames may not be the most appropiate. This space\n\
 can be adjusted using the IconsGap option in the configuration file\n\
 (valid values: 0, 1, 2)."
 
@@ -748,7 +748,7 @@ To get information about a device, enter iELN. For example: 'i12'."
 \x1b[1mUSAGE\x1b[22m\n\
   mf [NUM | unset]"
 
-#define MIME_USAGE "Set default opening applications based on MIME types or file names\n\n\
+#define MIME_USAGE "Set default opening applications based on MIME types or filenames\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   mm, mime [open FILE | info FILE | edit [APP] | import]\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
@@ -765,7 +765,7 @@ To get information about a device, enter iELN. For example: 'i12'."
 - Try to import MIME file associations from the system\n\
     mm import\n\
 - Add/modify default opening application for myfile\n\
-    1) Find out the MIME type (or file name) of the file\n\
+    1) Find out the MIME type (or filename) of the file\n\
       mm info myfile\n\
     2) Edit the mimelist file\n\
       mm edit (or F6)\n\
@@ -816,32 +816,33 @@ To get information about a device, enter iELN. For example: 'i12'."
     n file1 file2\n\
 - Create two directories named dir1 and dir2\n\
     n dir1/ dir2/\n\
-  Note: Note the ending slashes.\n\
-- Both of the above at once:\n\
+  Note: Be sure to include the ending slashes.\n\
+- Create both files and directories at once:\n\
     n file1 file2 dir1/ dir2/\n\
-- Create a file from a file template (see below for more information)\n\
+- Create a file from a template (see below for more information)\n\
     n file1@my_template\n\n\
-Parent directories are created if necessary. For example, if you run\n\
+Parent directories will be created as needed. For example, if you run\n\
     n dir/subdir/file\n\
-both 'dir' and 'subdir' directories will be created if they do not exist.\n\n\
+both the 'dir' and 'subdir' directories will be created if they do not\n\
+already exist.\n\n\
 \x1b[1mFILE TEMPLATES\x1b[22m\n\n\
 \x1b[1m1. Automatic templates\x1b[22m\n\n\
-New regular files will be created from a template file if:\n\n\
-  a. The file to be created has a file name extension (e.g., 'file.html').\n\
-  b. A file named like this extension, here 'html', exists in the\n\
+New regular files can be created from a template file if:\n\n\
+  a. The file to be created has a filename extension (e.g., 'file.html').\n\
+  b. A file named like this extension (in this case 'html') exists in the\n\
      templates directory (1).\n\n\
-If both conditions are met, running 'n file.html' will create a new file\n\
+If both conditions are satisfied, running 'n file.html' will create a new file\n\
 named 'file.html' which is a copy of the 'html' file in the templates\n\
 directory.\n\n\
-Note that template names are not limited to actual file extensions: you\n\
-can name your templates whatever you like (with any content you want)\n\
-provided new files are created using the template name as extension. E.g.:\n\
+Note that template names are not restricted to actual file extensions: you\n\
+can name your templates as you wish (with any content you desire) as long as\n\
+new files are created using the template name as the extension. E.g.:\n\
 'n file.my_super_cool_template'.\n\n\
 \x1b[1m2. Explicit templates\x1b[22m\n\n\
-If a file name is followed by '@TEMPLATE', where TEMPLATE is any regular\n\
+If a filename is followed by '@TEMPLATE', where TEMPLATE is any regular\n\
 file found in the templates directory (1), the file will be created as a\n\
-copy of the corresponding file template. E.g.: 'n file.sh@my_script.sh'.\n\n\
-TAB completion is available for explicit templates: 'n file@<TAB>'.\n\n\
+copy of the specified template. E.g.: 'n file.sh@my_script.sh'.\n\n\
+TAB completion is available for explicit templates: simply type 'n file@<TAB>'.\n\n\
 (1) The templates directory is $CLIFM_TEMPLATES_DIR, $XDG_TEMPLATES_DIR,\n\
 or ~/Templates, in this precedence order."
 
@@ -912,20 +913,20 @@ With no parameter, just run the pager.\n\n\
 If set to 'on', run the pager whenever the list of files does no fit on\n\
 the screen.\n\n\
 If set to any positive integer greater than 1, run the pager whenever\n\
-the amount of files in the current directory is greater than or equal to\n\
-this value (say, 1000). 1 amounts to 'on' and 0 to 'off'.\n\n\
-Set to 'once' to run the pager only once.\n\n\
+the number of files in the current directory is greater than or equal to\n\
+that value (e.g., 1000). A value of 1 is equivalent to 'on', while 0 means 'off'.\n\n\
+Set to 'once' to run the pager only a single time.\n\n\
 While paging, the following keys are available:\n\n\
 ?, h: Help\n\
 Down arrow, Enter, Space: Advance one line\n\
 Page down: Advance one page\n\
 q: Stop paging (without printing remaining files)\n\
 c: Stop paging (printing remaining files)\n\n\
-Note: For upwards scrolling, use whatever your terminal emulator\n\
-has to offer (e.g., mouse scrolling or some keybinding)\n\n\
+Note: For upward scrolling, use the scrolling options available in your\n\
+terminal emulator (e.g., mouse scrolling or specific keybindings)\n\n\
 By default, the pager lists files using the current listing mode (long\n\
-or short). Use PagerView in the configuration file (or --pager-view in\n\
-the command line) to force the use of a specific mode. Possibles values:\n\n\
+or short). You can specify a particular mode using the PagerView option in the\n\
+configuration file or the --pager-view command line option. Possibles values:\n\n\
 'auto': Use the current listing mode (default)\n\
 'long': List files in long view\n\
 'short': List files in short view\n\n\
@@ -935,7 +936,7 @@ Note: You can also try the 'gg' plugin (just enter 'gg')."
 \x1b[1mUSAGE\x1b[22m\n\
   pc FILE...\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
-- Change permissions of file named file.txt\n\
+- Change permissions of the file named 'file.txt'\n\
     pc file.txt\n\
 - Change permissions of all selected files at once\n\
     pc sel\n\n\
@@ -974,7 +975,7 @@ Note: Use the 'oc' command to edit files ownership."
 - Rename the profile 'myprofile' as 'cool_name'\n\
     pf rename myprofile cool_name"
 
-#define PROMPT_USAGE "Change current prompt\n\n\
+#define PROMPT_USAGE "Change the current prompt\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   prompt [set NAME | list | unset | edit [APP] | reload]\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
@@ -1006,7 +1007,7 @@ whatever prompt you like."
 - Print the properties of the directory 'dir' (including total size)\n\
     pp dir\n\n\
 Note that, in case of symbolic links to directories, the 'p' command displays\n\
-information about the link target if the provided file name ends with a slash.\n\
+information about the link target if the provided filename ends with a slash.\n\
 Otherwise, information about the link itself is displayed.\n\
 Unlike 'p', however, 'pp' always follows symlinks to their target file."
 
@@ -1071,21 +1072,21 @@ by default to the \"//\" action name. For example:\n\
     // content I\\'m looking for\n\n\
 Note: This plugin depends on fzf(1) and rg(1) (ripgrep)."
 
-#define SECURITY_USAGE "Clifm provides three different security mechanisms:\n\n\
-1. Stealth mode (aka incognito/private mode): No file is read nor written\n\
-to the file system (unless explicitly required by the user via a command).\n\
+#define SECURITY_USAGE "Clifm offers three distinct security mechanisms:\n\n\
+1. Stealth Mode (Incognito/Private Mode): In this mode, no files are read\n\
+from or written to the filesystem unless explicitly requested by the user\n\
+through a command.\n\
 Default values are used.\n\
-Enable this mode via the -S,--stealth-mode command line switch.\n\n\
-2. Secure environment: Clifm runs on a sanitized environment (most\n\
-environment variables are cleared and a few of them set to sane defaults).\n\
-Enable this mode via the --secure-env or --secure-env-full command line\n\
-switches.\n\n\
-3. Secure commands: Automatically executed shell commands (autocommands,\n\
-(un)mount, opening applications, just as prompt and profile commands) are\n\
-sanitized before being executed: a secure environment is set and the\n\
-command is validated using a whitelist to prevent unexpected/insecure\n\
-behavior and command injection. Enable this mode using the --secure-cmds\n\
-command line switch."
+You can enable this mode using the -S or --stealth-mode command line switch.\n\n\
+2. Secure Environment: Clifm operates within a sanitized environment where most\n\
+environment variables are cleared, and a select few are set to secure defaults.\n\
+This mode can be activated with the --secure-env or --secure-env-full command\n\
+line switches.\n\n\
+3. Secure Commands: Automatically executed shell commands (such as autocommands,\n\
+(un)mounting, and opening applications) are sanitized prior to execution. A\n\
+secure environment is established, and commands are validated against a\n\
+whitelist to prevent unexpected or insecure behavior, as well as command\n\
+injection. To enable this mode, use the --secure-cmds command line switch."
 
 #define SEL_USAGE "Select one or multiple files\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
@@ -1117,7 +1118,7 @@ Recognized file types: (d)irectory, regular (f)ile, symbolic (l)ink,\n\
 - Deselect files selectively\n\
     ds <TAB> (multi-selection is allowed)"
 
-#define SORT_USAGE "Change files sorting order\n\n\
+#define SORT_USAGE "Change file sorting preferences\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   st [METHOD] [rev]\n\n\
 Available methods: 0=none, 1=name, 2=size, 3=atime, 4=btime,\n\
@@ -1406,7 +1407,7 @@ c: Stop paging (printing remaining files)\n"
 \n -M       Disable colors\
 \n -n       Disable commands history\
 \n -N       Disable bold colors\
-\n -o PATH  Set a custom resource opener (instead of the built-in Lira)\
+\n -o PATH  Set a custom resource opener (instead of the builtin Lira)\
 \n -O FILE  Open FILE (via Lira) and exit\
 \n -p NAME  Set/create the profile NAME\
 \n -P FILE  Generate a preview of FILE and exit\
@@ -1417,7 +1418,7 @@ c: Stop paging (printing remaining files)\n"
 \n -s       Run in stealth mode (incognito)\
 \n -S       Disable suggestions\
 \n -t NAME  Use the color scheme NAME\
-\n -T       Do not trim file names\
+\n -T       Do not trim filenames\
 \n -u       Run in disk usage analyzer mode\
 \n -U       Disable Unicode decorations\
 \n -v       Print version information and exit\
@@ -1480,7 +1481,7 @@ database (via the 'j' command)\
 \n      --disk-usage\t\t Show disk usage (free/total FS MOUNTPOINT)\
 \n      --full-dir-size\t\t Recursively calculate directories size (long view only)\
 \n      --fuzzy-algo=NUM\t\t Set fuzzy algorithm for fuzzy matching (1 or 2)\
-\n      --fuzzy-matching\t\t Enable fuzzy TAB completion/suggestions for file names \
+\n      --fuzzy-matching\t\t Enable fuzzy TAB completion/suggestions for filenames \
 and paths\
 \n      --fzfpreview-hidden\t Enable file previews for TAB completion (fzf mode only) with the preview window hidden (toggle with Alt-p)\
 \n      --fzftab\t\t\t Use fzf to display completion matches (default if the fzf binary is found in PATH)\
@@ -1516,14 +1517,14 @@ and paths\
 \n      --no-restore-last-path\t Do not record the last visited directory\
 \n      --no-suggestions\t\t Disable auto-suggestions\
 \n      --no-tips\t\t\t Disable startup tips\
-\n      --no-trim-names\t\t Do not trim file names\
+\n      --no-trim-names\t\t Do not trim filenames\
 \n      --no-unicode\t\t Disable Unicode decorations\
 \n      --no-warning-prompt\t Disable the warning prompt\
 \n      --no-welcome-message\t Disable the welcome message\
 \n      --only-dirs\t\t List only directories and symbolic links to directories\
 \n      --open=FILE\t\t Open FILE (via Lira) and exit\
 \n      --opener=APPLICATION\t Use APPLICATION as resource opener (instead of Lira, \
-our built-in opener)\
+our builtin opener)\
 \n      --pager-view=MODE\t\t How to list files in the pager (auto, long, short)\
 \n      --physical-size\t\t Same as --no-apparent-size\
 \n      --preview=FILE\t\t Display a preview of FILE (via Shotgun) and exit\
@@ -1533,7 +1534,7 @@ our built-in opener)\
       --prop-fields=FORMAT\t Set a custom format string for the long view (see \
 PropFields in the config file)\
 \n      --ptime-style=STYLE\t Time/date style used by the 'p/pp' command (see PTimeStyle in the config file)\
-\n      --readonly\t\t Disable internal commands able to modify the file system\
+\n      --readonly\t\t Disable internal commands able to modify the filesystem\
 \n      --rl-vi-mode\t\t Set readline to vi editing mode (defaults to emacs mode)\
 \n      --secure-cmds\t\t Filter commands to prevent command injection\
 \n      --secure-env\t\t Run in a sanitized environment (regular mode)\
@@ -1577,7 +1578,7 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  ao, auto-open      Set auto-open on/off\n\
  auto               Set an autocommand for the current directory\n\
  b, back            Go back in the directory history list\n\
- bb, bleach         Clean up non-ASCII file names\n\
+ bb, bleach         Clean up non-ASCII filenames\n\
  bd                 Go back to a parent directory\n\
  bl                 Create symbolic links in bulk\n\
  bm, bookmarks      Manage bookmarks\n\
@@ -1592,7 +1593,7 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  d, dup             Duplicate files\n\
  dh                 Access the directory history list\n\
  ds, desel          Deselect selected files\n\
- exp                Export file names to a temporary file\n\
+ exp                Export filenames to a temporary file\n\
  ext                Set external/shell commands on/off\n\
  f, forth           Go forth in the directory history list\n\
  fc                 Set the files counter on/off\n\
@@ -1860,7 +1861,7 @@ q | F12         I'm tired, quit"
 #define B_DESC       " (go back in the directory history list)"
 #define BD_DESC      " (change to a parent directory)"
 #define BL_DESC      " (create symbolic links in bulk)"
-#define BB_DESC      " (clean up non-ASCII file names)"
+#define BB_DESC      " (clean up non-ASCII filenames)"
 #define BM_DESC      " (manage bookmarks)"
 #define BR_DESC      " (rename files in bulk)"
 #define C_DESC       " (copy files)"
@@ -1875,7 +1876,7 @@ q | F12         I'm tired, quit"
 #define DH_DESC      " (query the directory history list)"
 #define DS_DESC      " (deselect files)"
 #define EDIT_DESC    " (edit the main configuration file)"
-#define EXP_DESC     " (export file names to a temporary file)"
+#define EXP_DESC     " (export filenames to a temporary file)"
 #define EXT_DESC     " (set external/shell commands on/off)"
 #define F_DESC       " (go forth in the directory history list)"
 #define FC_DESC      " (set the files counter on/off)"

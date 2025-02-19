@@ -1928,7 +1928,7 @@ create_main_config_file(char *file)
 ;ShareSelbox=%s\n\n"
 
 	    "# Choose the resource opener to open files with their default associated\n\
-# application. If not set, Lira, Clifm's built-in opener, is used.\n\
+# application. If not set, Lira, Clifm's builtin opener, is used.\n\
 ;Opener=\n\n"
 
 	    "# Only used when opening a directory via a new Clifm instance (with the 'x'\n\
@@ -2368,7 +2368,7 @@ create_mime_file_anew(char *file)
 # For example: X:^text/.*:~/scripts/my_cool_script.sh\n\
 \n\
 # Use 'X' to specify a GUI environment and '!X' for non-GUI environments,\n\
-# like the kernel built-in console or a remote SSH session.\n\
+# like the kernel builtin console or a remote SSH session.\n\
 \n\
 # Use 'N' to match file names instead of MIME types.\n\
 \n\
@@ -2468,7 +2468,7 @@ X:(^text/.*|application/(json|javascript)|inode/x-empty)=$EDITOR;$VISUAL;kak;mic
 X:^application/(msword|vnd.ms-excel|vnd.ms-powerpoint|.*(open|office)document.*)=libreoffice %%x;soffice %%x;ooffice %%x\n\
 \n\
 # Archives\n\
-# Note: 'ad' is Clifm's built-in archives utility (based on atool). Remove it if you\n\
+# Note: 'ad' is Clifm's builtin archives utility (based on atool). Remove it if you\n\
 # prefer another application.\n\
 X:^application/(gzip|java-archive|vnd.(debian.binary-package|ms-cab-compressed|rar)|x-(7z-compressed|arj|bzip*|compress|iso9660-image|lzip|lzma|lzop|rpm|tar|xz)|zip|zstd)=ad;xarchiver %%x;lxqt-archiver %%x;ark %%x\n\
 !X:^application/(gzip|java-archive|vnd.(debian.binary-package|ms-cab-compressed|rar)|x-(7z-compressed|arj|bzip*|compress|iso9660-image|lzip|lzma|lzop|rpm|tar|xz)|zip|zstd)=ad\n\

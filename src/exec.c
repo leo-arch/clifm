@@ -708,7 +708,7 @@ static int
 opener_function(const char *arg)
 {
 	if (!arg) {
-		printf("opener: %s\n", conf.opener ? conf.opener : "lira (built-in)");
+		printf("opener: %s\n", conf.opener ? conf.opener : "lira (builtin)");
 		return FUNC_SUCCESS;
 	}
 
@@ -724,7 +724,7 @@ opener_function(const char *arg)
 		conf.opener = savestring(arg, strlen(arg));
 
 	printf(_("Opener set to '%s'\n"), conf.opener
-		? conf.opener : "lira (built-in)");
+		? conf.opener : "lira (builtin)");
 
 	return FUNC_SUCCESS;
 }
@@ -1134,7 +1134,7 @@ check_actions(char **args)
 			if (*usr_actions[i].name == 'd' && usr_actions[i].name[1] == 'h'
 			&& !usr_actions[i].name[2]) {
 				err('n', PRINT_PROMPT, _("%s: The 'dh' plugin is deprecated. "
-					"Use the built-in 'dh' command instead disabling the "
+					"Use the builtin 'dh' command instead disabling the "
 					"'dh' plugin ('actions edit'). Once done, run 'dh --help' "
 					"for more information about the new command.\n"),
 					PROGRAM_NAME);

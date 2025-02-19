@@ -1,4 +1,4 @@
-/* linuxfs.h - Macros for file system magic numbers */
+/* linuxfs.h - Macros for filesystem magic numbers */
 
 /*
  * This file is part of Clifm

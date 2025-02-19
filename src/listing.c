@@ -384,8 +384,8 @@ get_devname(const char *file)
 		return DEV_NO_NAME;
 
 #if defined(__CYGWIN__)
-	/* There's no sys file system on Cygwin (used by get_dev_name()), so
-	 * let's try with the proc file system. */
+	/* There's no sys filesystem on Cygwin (used by get_dev_name()), so
+	 * let's try with the proc filesystem. */
 	return get_dev_name_mntent(file);
 #else
 	if (major(b.st_dev) == 0)
@@ -396,8 +396,8 @@ get_devname(const char *file)
 }
 #endif /* LINUX_FSINFO */
 
-/* Print free/total space for the file system to which the current directory
- * belongs, plus device name and file system type name if available. */
+/* Print free/total space for the filesystem where the current directory
+ * resides, plus device name and filesystem type name if available. */
 static void
 print_disk_usage(void)
 {
@@ -448,7 +448,7 @@ print_disk_usage(void)
 		fstype, devname);
 
 /* NOTE: If the f_blocks, f_bfree, f_files, f_ffree, f_bavail, and f_favail
- * fields of the statvfs struct are all zero, the file system is likely
+ * fields of the statvfs struct are all zero, the filesystem is likely
  * virtual (for example, /proc, /sys, or /dev/pts). */
 
 	free(free_space);
@@ -2587,7 +2587,7 @@ list_dir_light(const int autocmd_ret)
 #ifndef _DIRENT_HAVE_D_TYPE
 		file_info[n].type = get_dt(attr.st_mode);
 #else
-		/* If type is unknown, we might be facing a file system not
+		/* If type is unknown, we might be facing a filesystem not
 		 * supporting d_type, for example, loop devices. In this case,
 		 * try falling back to lstat(2). */
 		if (ent->d_type == DT_UNKNOWN) {

@@ -981,9 +981,9 @@ get_color_scheme_name(void)
 		return cur_cscheme;
 
 	if (term_caps.color >= 256)
-		return _("built-in (256 colors)");
+		return _("builtin (256 colors)");
 
-	return _("built-in (8 colors)");
+	return _("builtin (8 colors)");
 }
 
 static int

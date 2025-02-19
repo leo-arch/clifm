@@ -16,17 +16,17 @@ clifm \- The Command Line File Manager
 .sp
 \fB4.\fR Commands
 .sp
-\fB5.\fR File Filters (by file name, file type, and MIME type)
+\fB5.\fR File Filters (by filename, file type, and MIME type)
 .sp
 \fB6.\fR Keyboard shortcuts
 .sp
 \fB7.\fR Theming
 .sp
-\fB8.\fR Built\-in expansions
+\fB8.\fR Builtin expansions
 .sp
 \fB9.\fR Resource opener (third\-party openers are also supported)
 .sp
-\fB10.\fR Shotgun, a built\-in files previewer
+\fB10.\fR Shotgun, a builtin files previewer
 .sp
 \fB11.\fR Auto\-suggestions (including a warning prompt for invalid command names)
 .sp
@@ -103,7 +103,7 @@ set an alternative configuration file
 set an alternative configuration directory (if configuration files do not exist already, they will be created in \fIDIR\fR).
 .TP
 \fB\-e\fR, \fB\-\-no\-eln\fR
-do not print ELN's (entry list number) at the left of file names. Bear in mind, however, that though ELN's are not printed, they are still there and can be used as always.
+do not print ELN's (entry list number) at the left of filenames. Bear in mind, however, that though ELN's are not printed, they are still there and can be used as always.
 .TP
 \fB\-E\fR, \fB\-\-eln\-use\-workspace\-color\fR
 ELN's use the current workspace color
@@ -115,7 +115,7 @@ list directories first
 do not list directories first
 .TP
 \fB\-g\fR, \fB\-\-pager\fR
-enable \fIMas\fR, the built-in pager for files listing
+enable \fIMas\fR, the builtin pager for files listing
 .TP
 \fB\-G\fR, \fB\-\-no\-pager\fR
 disable the files pager
@@ -136,7 +136,7 @@ do not ignore case distinctions when listing files
 set an alternative keybindings file
 .TP
 \fB\-l\fR, \fB\-\-long\-view\fR
-print file extended metadata next to file names. Displayed fields can be customized via \fI\-\-prop\-fields\fR (\fIPropFields\fR in the configuration file). Set a custom time/date format using \fI\-\-time\-style\fR (\fITimeStyle\fR in the configuration file).
+print file extended metadata next to filenames. Displayed fields can be customized via \fI\-\-prop\-fields\fR (\fIPropFields\fR in the configuration file). Set a custom time/date format using \fI\-\-time\-style\fR (\fITimeStyle\fR in the configuration file).
 .TP
 \fB\-L\fR, \fB\-\-follow\-symlinks\-long\fR
 when running in long view, show information for the file symbolic links reference rather than for the symbolic links themselves
@@ -211,7 +211,7 @@ load data files, such as plugins, color schemes, and default configuration files
 enable desktop notifications. Enter \fIhelp desktop\-notifications\fR in \fBclifm\fR for more information.
 .TP
 \fB\-\-disk\-usage\fR
-show disk usage for the file system the current directory belongs to (in the form \fIfree/total (free-percentage) fs-type dev-name\fR)
+show disk usage for the filesystem where the current directory resides (in the form \fIfree/total (free-percentage) fs-type dev-name\fR)
 .TP
 \fB\-\-full\-dir\-size\fR
 when running in long view, print the full (or total) size of directories
@@ -235,7 +235,7 @@ use \fIfnf\fR to display completion matches
 enable icons
 .TP
 \fB\-\-icons\-use\-file\-color\fR
-instead of a specific color, icons take the color of the corresponding file name (specified either via file type or file extension). Useful when building custom color schemes. This option implies \fB\-\-icons\fR. Only if compiled with support for either icons\-in\-terminal or Nerdfonts. The default build is compiled with emoji\-icons support, in which case this option is ignored (Unicode icons has their own color built\-in)
+instead of a specific color, icons take the color of the corresponding filename (specified either via file type or file extension). Useful when building custom color schemes. This option implies \fB\-\-icons\fR. Only if compiled with support for either icons\-in\-terminal or Nerdfonts. The default build is compiled with emoji\-icons support, in which case this option is ignored (Unicode icons have their own color builtin)
 .TP
 \fB\-\-int\-vars
 allow the use of internal variables (e.g.: \fIVAR=/bin; cd $VAR\fR)
@@ -247,7 +247,7 @@ list files and quit. Useful in conjunction with positional parameters. E.g.: \'c
 short for \fI\-\-list\-and\-quit\fR
 .TP
 \fB\-\-lscolors\fR
-read file colors from the \fBLS_COLORS\fR environment variable (BSD \fBLSCOLORS\fR is also supported). Bear in mind that clifm-specific colors (like empty directory or inaccessible file) will be disabled. Note also that colors for specific file names, as defined in \fBLS_COLORS\fR, are not supported. Consult \fBdircolors\fR(1) for more information about \fBLS_COLORS\fR, or the \fBls\fR(1) BSD manpage in the case of \fBLSCOLORS\fR.
+read file colors from the \fBLS_COLORS\fR environment variable (BSD \fBLSCOLORS\fR is also supported). Bear in mind that clifm-specific colors (like empty directory or inaccessible file) will be disabled. Note also that colors for specific filenames, as defined in \fBLS_COLORS\fR, are not supported. Consult \fBdircolors\fR(1) for more information about \fBLS_COLORS\fR, or the \fBls\fR(1) BSD manpage in the case of \fBLSCOLORS\fR.
 .TP
 \fB\-\-max\-dirhist\fR
 maximum number of visited directories to remember
@@ -271,7 +271,7 @@ disable bold colors (applies to all color schemes)
 by default, \fBclifm\fR changes directories by just specifying the corresponding ELN (e.g. \'12\' instead of \'cd 12\'). This option forces the use of \fIcd\fR.
 .TP
 \fB\-\-no\-classify\fR
-by default, \fBclifm\fR appends a file type indicator character to file names when running with no colors (see the \fB\-\-no\-color\fR option below) and a directory indicator (plus a files counter) when running with colors. Classification characters are: 
+by default, \fBclifm\fR appends a file type indicator character to filenames when running with no colors (see the \fB\-\-no\-color\fR option below) and a directory indicator (plus a files counter) when running with colors. Classification characters are: 
  /n: directory (n = files counter)
  @:  symbolic link
  !:  broken symbolic link
@@ -299,7 +299,7 @@ disable the directory jumper function
 do not check file capabilities when listing files (only meaningful for performance reasons)
 .TP
 \fB\-\-no\-file\-ext\fR
-do not check file extensions (mostly used to colorize specific file names) when listing files
+do not check file extensions (mostly used to colorize specific filenames) when listing files
 .TP
 \fB\-\-no\-files\-counter\fR
 disable the files counter for directories (speeding up thus the listing process: counting files in directories is particularly expensive).
@@ -335,7 +335,7 @@ disable the auto\-suggestions system
 disable startup tips
 .TP
 \fB\-\-no\-trim\-names\fR
-do not trim file names (see \fIMaxFilenameLen\fR in the configuration file)
+do not truncate filenames (see \fIMaxFilenameLen\fR in the configuration file)
 .TP
 \fB\-\-no\-unicode\fR
 do not use Unicode characters
@@ -374,7 +374,7 @@ set fields to be displayed in long view mode. For information on how to construc
 time/date style used by the \fIp/pp\fR command and the \fI\-\-stat\fR/\fI\-\-stat\-full\fR command line switches. Available styles: \fBdefault\fR, \fBiso\fR, \fBlong-iso\fR, \fBfull\-iso\fR, \fBfull\-iso\-nano\fR, \fB+FORMAT\fR. FORMAT is interpreted like in \fBstrftime\fR(3). Nano-second precision is available via the \fB%N\fR modifier (like in \fBdate\fR(1)).
 .TP
 \fB\-\-readonly\fR
-run in read\-only mode (internal commands able to modify the file system are disabled). Disabled commands are: ac, ad, bb, bl/bleach, br/bulk, c, dup, l, le, m, md, n/new, oc, paste, pc, r, rr, t/trash, tag, te, u/undel/untrash, and vv, plus the shell commands cp, rm, mv, ln, mkdir, rmdir, link, and unlink.
+run in read\-only mode (internal commands able to modify the filesystem are disabled). Disabled commands are: ac, ad, bb, bl/bleach, br/bulk, c, dup, l, le, m, md, n/new, oc, paste, pc, r, rr, t/trash, tag, te, u/undel/untrash, and vv, plus the shell commands cp, rm, mv, ln, mkdir, rmdir, link, and unlink.
 .TP
 \fB\-\-rl\-vi\-mode\fR
 set readline to vi editing mode (defaults to emacs editing mode)
@@ -413,13 +413,13 @@ run the \fIp\fR command on FILE(s) and exit. This must be the \fBlast option\fR 
 same as \fI\-\-stat\fR, but it runs the \fIpp\fR command (instead of \fIp\fR) on FILE(s)
 .TP
 \fB\-\-stdtab\fR
-use the standard mode (readline\'s built\-in) for TAB completion
+use the standard mode (readline\'s builtin) for TAB completion
 .TP
 \fB\-\-time\-style\fR=\fI\,STYLE\/\fR
 time/date style used in long view. Available styles: \fBdefault\fR, \fBrelative\fR, \fBiso\fR, \fBlong-iso\fR, \fBfull-iso\fR, \fB+FORMAT\fR. FORMAT is interpreted like in \fBstrftime\fR(3).
 .TP
 \fB\-\-trash\-as\-rm\fR
-the \fIr\fR command executes the built-in \fItrash\fR (see the \fIt\fR command) instead of \fBrm\fR(1) to prevent accidental deletions
+the \fIr\fR command executes the builtin \fItrash\fR (see the \fIt\fR command) instead of \fBrm\fR(1) to prevent accidental deletions
 .TP
 \fB\-\-unicode\fR
 Unicode decorations are used provided Unicode support is detected for the running terminal. Use this option to force Unicode decorations.
@@ -428,7 +428,7 @@ Unicode decorations are used provided Unicode support is detected for the runnin
 use PATH as \fBClifm\fR\'s virtual directory
 .TP
 \fB\-\-virtual\-dir\-full\-paths\fR
-print file names in virtual directories as full paths instead of just base names
+print filenames in virtual directories as full paths instead of just base names
 .TP
 \fB\-\-vt100\fR
 run in VT100 compatibility mode
@@ -440,9 +440,9 @@ Help for all commands listed here can be accessed via the \fI\-h\fR or \fI\-\-he
 .sp
 \fBNOTE:\fR ELN = Entry List Number. Example: in the line "12 openbox" (when listing files), 12 is the ELN corresponding to the file named "openbox". The slash followed by a number (/xx) after directories and symbolic links to directories (the files counter) indicates the amount of files contained by the corresponding directory, excluding self and parent directories ("." and ".." respectively).
 .sp
-\fBNOTE 2:\fR In case of ELN\-filename conflict the backslash can be used to prevent ELN expansion. For example, if we have at least two files and one of them is named "2", then \fBclifm\fR cannot know in advance if the command refers to the ELN 2 or to the file name "2". In we want the ELN, we just write the ELN number, for example: \fIs\ 2\fR. But if we want the file name, we need to escape the file name using the backlash character: \fIs\ \\2\fR.
+\fBNOTE 2:\fR In case of ELN\-filename conflict the backslash can be used to prevent ELN expansion. For example, if we have at least two files and one of them is named "2", then \fBclifm\fR cannot know in advance if the command refers to the ELN 2 or to the filename "2". In we want the ELN, we just write the ELN number, for example: \fIs\ 2\fR. But if we want the filename, we need to escape the filename using the backlash character: \fIs\ \\2\fR.
 .sp
-\fBNOTE 3:\fR \fBclifm\fR supports \fBfused parameters\fR for internal commands taking an ELN or range of ELN\'s as parameters. Much like short options for command line programs, you can drop or omit the space between internal commands and the corresponding ELN passed as argument. In general, you can write \fICMDELN\fR instead of \fICMD\ ELN\fR. For example: \fIo12\fR or \fIs1\-5\fR instead of \fIo\ 12\fR and \fIs\ 1\-5\fR respectively. Bear in mind, however, that in thus omitting the space char TAB completion for ELN's will not be available. If there is a file named \fIo12\fR (more generally, CMDELN), and if you want to refer to this file instead of a \fBclifm\fR command, escape the file name to prevent the split; for example: \fIs\ \\o12\fR.
+\fBNOTE 3:\fR \fBclifm\fR supports \fBfused parameters\fR for internal commands taking an ELN or range of ELN\'s as parameters. Much like short options for command line programs, you can drop or omit the space between internal commands and the corresponding ELN passed as argument. In general, you can write \fICMDELN\fR instead of \fICMD\ ELN\fR. For example: \fIo12\fR or \fIs1\-5\fR instead of \fIo\ 12\fR and \fIs\ 1\-5\fR respectively. Bear in mind, however, that in thus omitting the space char TAB completion for ELN's will not be available. If there is a file named \fIo12\fR (more generally, CMDELN), and if you want to refer to this file instead of a \fBclifm\fR command, escape the filename to prevent the split; for example: \fIs\ \\o12\fR.
 .sp
 \fBNOTE 4:\fR \fBclifm\fR implements a \fBfastback\fR function, that is to say, the conversion of "... n" or "cmd ... n" into "../.. n" or "cmd ../.. n". In other words, subsequent dots after ".." will be converted each into "/..". For example, if you are in your home directory and type "..." or "cd ...", and since "..." amounts to "../..", you will be taken to the root directory. TAB completion is available for the fastback function: "....bin" \-> TAB \-> "../../../bin".
 
@@ -495,7 +495,7 @@ If no CMD, run the system shell in the current working directory. If CMD is spec
 .B ac, ad \fIELN/FILE\fR...
 archive/compress and dearchive/decompress one or multiple files and/or directories. The archiver function brings two modes: \fIac\fR, to generate archives or compressed files, and \fIad\fR, to decompress or dearchive files, either just listing, extracting, recompressing, or mounting their content. In this latter case, the mountpoint used automatically is \fI$HOME/.config/clifm/PROFILE/mounts/ARCHIVE_NAME\fR.
 .sp
-The function accepts single and multiple file names, wildcards, ELN ranges, and the 'sel' keyword. For example: \fIac\ sel\fR, \fIac\ 4\-25\ myfile\fR, or \fIad\ *.tar.gz\fR. Multiple archive/compression formats are supported, including Zstandard. When it comes to ISO 9660 files only single files are supported.
+The function accepts single and multiple filenames, wildcards, ELN ranges, and the 'sel' keyword. For example: \fIac\ sel\fR, \fIac\ 4\-25\ myfile\fR, or \fIad\ *.tar.gz\fR. Multiple archive/compression formats are supported, including Zstandard. When it comes to ISO 9660 files only single files are supported.
 .sp
 The archive mount function for non ISO files depends on \fBarchivemount\fR, while the remaining functions depend on \fBatool\fR and other third\-party utilities for achive formats support, for example, \fBp7zip\fR. \fBp7zip\fR is also used to manage most decompressing options for ISO 9660 files, except for mount, in which case \fBmount(8)\fR is used. Creation of ISO files is done via \fBgenisoimage\fR(1). For more information consult \fBatool\fR(1), \fBarchivemount\fR(1), \fBzstd\fR(1), and \fB7z\fR(1).
 .TP
@@ -522,7 +522,7 @@ with no argument (or with \fIls,list\fR parameters), it prints the list of avail
 .sp
 To import aliases from a file, provided it contains aliases in the specified form (i.e. the POSIX syntax for the \fIalias\fR shell command), use the \fIimport\fR parameter. Aliases conflicting with some of the internal commands won\'t be imported.
 .sp
-However, a neat usage for the alias function is not so much to bind short keys to commands, but to files and directories visited regularly. In this way, it is possible to bind as many files or directories, no matter how deep they are in the file system, to very short strings, even single characters. For example, "alias w=\'/some/file/deep/in/the/filesystem\'. Now, no matter where we are, we can just enter \'w\', provided \fIautocd\fR and/or \fIauto\-open\fR function is enabled, to access the file or directory we want. Theoretically at least, this procedure can be repeated until the system memory is exhausted.
+However, a neat usage for the alias function is not so much to bind short keys to commands, but to files and directories visited regularly. In this way, it is possible to bind as many files or directories, no matter how deep they are in the filesystem, to very short strings, even single characters. For example, "alias w=\'/some/file/deep/in/the/filesystem\'. Now, no matter where we are, we can just enter \'w\', provided \fIautocd\fR and/or \fIauto\-open\fR function is enabled, to access the file or directory we want. Theoretically at least, this procedure can be repeated until the system memory is exhausted.
 .sp
 To create multiple aliases for files at once, this is the recommended procedure: 1) Select all files you want to alias with the \fIsel\fR function: \fIs\ file1\ file2\ file3\ ...\fR. 2) Export the selected files into a temporary file running \fIexp\ sel\fR; 3) Edit this file to contain only valid alias lines:
 
@@ -589,23 +589,23 @@ Finally, you can also clear this history list by typing \fIb\ clear\fR.
 The best way of navigating the directory history list, however, is via the \fIdirectory jumper\fR function. See the \fIj\fR command below. You can take a look at the \fIdh\fR command as well.
 .TP
 .B bb, bleach \fIELN/FILE\fR...
-\fIBleach\fR is a built\-in file names cleaner (based on detox [\fIhttps://github.com/dharple/detox\fR]), whose main aim is to rename file names using only safe characters.
-Bleach cleans up file names either by removing unsafe (extended\-ASCII/Unicode) characters without an ASCII alternative/similar character, or by translating these unsafe characters into an alternative ASCII character based on familiarity/similarity.
+\fIBleach\fR is a builtin filenames cleaner (based on detox [\fIhttps://github.com/dharple/detox\fR]), whose main aim is to rename filenames using only safe characters.
+Bleach cleans up filenames either by removing unsafe (extended\-ASCII/Unicode) characters without an ASCII alternative/similar character, or by translating these unsafe characters into an alternative ASCII character based on familiarity/similarity.
 .sp
-These following simple rules are used to compose clean/safe file names:
+These following simple rules are used to compose clean/safe filenames:
     \- NUL (\\0) and slash (/) characters are completely disallowed
     \- Only characters from the \fBPortable Filename Characters Set\fR (a\-zA\-Z0-9._\-) are allowed
     \- { [ ( ) ] } are replaced by a dash (\-). Everything else is replaced by an underscore (_)
     \- Unicode characters are translated, whenever possible, into an ASCII replacement. Otherwise, they are just ignored. For example, an upper case A with diacritic (accent, umlaut, diaresis, and so on) will be replaced by an ASCII A, but the smiley face emoji will be simply ignored. A few special signs will be translated into text, for instance, the pound sign will be replaced by "_pound_" and the Euro symbol by "EUR". Translations are made via a translation table (see the \fIcleaner_table.h\fR in the source code).
-    \- File names never start with a dash (\-)
+    \- Filenames never start with a dash (\-)
     \- Files named . and .. are not allowed
-    \- Append .bleach to single character file names
-    \- Do not let a replacement file name start with a dot (hidden) if the original does not
-    \- Max file name length is NAME_MAX (usually 255)
+    \- Append .bleach to single character filenames
+    \- Do not let a replacement filename start with a dot (hidden) if the original does not
+    \- Max filename length is NAME_MAX (usually 255)
 .sp
-Modified file names will be listed on screen asking the user for confirmation, allowing besides to edit (by pressing 'e') the list of modified file names via a text editor.
+Modified filenames will be listed on screen asking the user for confirmation, allowing besides to edit (by pressing 'e') the list of modified filenames via a text editor.
 .sp
-If the replacement file name already exists, a dash and a number (starting from 1) will be appended. E.g.: file\-3.
+If the replacement filename already exists, a dash and a number (starting from 1) will be appended. E.g.: file\-3.
 .TP
 .B bd \fR[\fINAME\fR]
 \fIbd\fR is the \fBbackdir\fR function: it takes you back to the parent directory matching NAME.
@@ -681,11 +681,11 @@ T}	Select all bookmarks at once
  \fB(1)\fR If your are not sure about where a bookmark points to, type \fIb:NAME<TAB>\fR.
 .TP
 .B br, bulk \fIELN/FILE\fR... [:EDITOR]
-rename at once all files passed as arguments to the function. It accepts single and multiple file names, wildcards, ELN ranges, and the \fIsel\fR keyword. Example: \fIbr\ myfile\ 4\-10\ sel\fR.
+rename at once all files passed as arguments to the function. It accepts single and multiple filenames, wildcards, ELN ranges, and the \fIsel\fR keyword. Example: \fIbr\ myfile\ 4\-10\ sel\fR.
 .sp
-Each file name will be copied into a temporary file, which will be opened via EDITOR (default associated application for plain text files if omitted), letting the user modify it. Once the file has been modified and saved, the modifications are printed on the screen and the user is asked for confirmation.
+Each filename will be copied into a temporary file, which will be opened via EDITOR (default associated application for plain text files if omitted), letting the user modify it. Once the file has been modified and saved, the modifications are printed on the screen and the user is asked for confirmation.
 .sp
-This built\-in bulk rename function won\'t deal with deletions, replacements, file name conflicts and the like. For a smarter alternative use \fBqmv\fR(1).
+This builtin bulk rename function won\'t deal with deletions, replacements, filename conflicts and the like. For a smarter alternative use \fBqmv\fR(1).
 .TP
 \fBc\fR, \fBm\fR, \fBmd\fR, \fBr\fR
 short for the following commands respectively: \fIcp\ \-iRp\fR, \fImv\ \-i\fR, \fImkdir\ \-p\fR, and \fIrm\fR (for files) or \fIrm\ \-r\fR (for directories).
@@ -702,7 +702,7 @@ The \fIl\fR command allows the use of the \fIe, edit\fR option to modify the des
 .sp
 When using the \fIsel\fR keyword and no destiny is provided, \fIc\fR and \fIm\fR will copy/move selected files into the current directory.
 .sp
-Whenever \fIsel\fR is not used, but just a source file name (and no destiny is provided), the \fIm\fR command behaves much like the \fBimv\fR(1) shell command (from the \'renameutils\' package), providing an interactive renaming function: it prompts the user to enter a new name using the source file name as base, so that it does not need to be typed twice. For this alternative prompt, only TAB completion for file names is available.
+Whenever \fIsel\fR is not used, but just a source filename (and no destiny is provided), the \fIm\fR command behaves much like the \fBimv\fR(1) shell command (from the \'renameutils\' package), providing an interactive renaming function: it prompts the user to enter a new name using the source filename as base, so that it does not need to be typed twice. For this alternative prompt, only TAB completion for filenames is available.
 .sp
 \fBClifm\fR supports \fBadvcp\fR(1), \fBwcp\fR, and \fBrsync\fR(1) to copy files (they include a progress bar). To use them instead of \fBcp\fR(1) set the corresponding option (\fIcpCmd\fR) in the configuration file. If \fIadvcp\fR is selected, the command used is \fIadvcp\ \-giRp\fR (or \fIadvcp \-gRp\fR, for non\-interactive mode). If \fIrsync\fR, the command is \fIrsync\ \-avP\fR. \fIwcp\fR takes no argument.
 .sp
@@ -720,7 +720,7 @@ Directories check order:
 .sp
 You can use either ELN\'s or a string to indicate the directory you want. E.g.: \fIcd\ 12\fR or \fIcd\ ~/media\fR. If \fIautocd\fR is enabled (default), \fIcd\ 12\fR and \fIcd\ ~/media\fR can be written as \fI12\fR and \fI~/media\fR respectively as well.
 .sp
-Unlike the shell \fBcd\fR(1) command, \fBclifm\fR's built\-in \fIcd\fR function not only changes the current directory, but also lists its content (provided the option \fIAutoLs\fR is enabled, which is the default) according to a comprehensive list of color codes. By default, the output of \fIcd\fR is much like this shell command: \fIcd\ DIR\ &&\ ls\ \-\-color=auto\ \-\-group\-directories\-first\fR.
+Unlike the shell \fBcd\fR(1) command, \fBclifm\fR's builtin \fIcd\fR function not only changes the current directory, but also lists its content (provided the option \fIAutoLs\fR is enabled, which is the default) according to a comprehensive list of color codes. By default, the output of \fIcd\fR is much like this shell command: \fIcd\ DIR\ &&\ ls\ \-\-color=auto\ \-\-group\-directories\-first\fR.
 .sp
 Automatic files listing can be disabled by either setting \fIAutoLs\fR to "false" in the configuration file or running \fBclifm\fR with the \fI\-O\fR or \fI\-\-no\-autols\fR option.
 .TP
@@ -756,7 +756,7 @@ Use the \fIedit\fR subcommand to open/edit the configuration file of the current
 To switch color schemes, specify the color scheme name: \fIcs NAME\fR. (TAB completion is available: \fIcs <TAB>\fR).
 .TP
 .B d, dup \fIFILE\fR...
-Duplicate files passed as parameters, either directories or regular files. The user will be asked for a destiny directory. Duplicated file names are generated by appending ".copy" to the basename of each source file. For example: \fId\ /my/file\fR will copy \fI/my/file\fR into the directory selected by the user as \fIfile.copy\fR. If \fIfile.copy\fR already exists, an extra suffix will be added as follows: \fIfile.copy\-N\fR, where N is a positive integer (starting at 1).
+Duplicate files passed as parameters, either directories or regular files. The user will be asked for a destiny directory. Duplicated filenames are generated by appending ".copy" to the basename of each source file. For example: \fId\ /my/file\fR will copy \fI/my/file\fR into the directory selected by the user as \fIfile.copy\fR. If \fIfile.copy\fR already exists, an extra suffix will be added as follows: \fIfile.copy\-N\fR, where N is a positive integer (starting at 1).
 .sp
 If \fBrsync\fR(1) is found, it will be used as follows: \fIrsync\ \-aczvAXHS\ \-\-progress\fR. Else, \fBcp\fR(1) will be used: \fIcp\ \-a\fR.
 .TP
@@ -776,12 +776,12 @@ If no parameter is passed, the user is prompted to either mark selected files to
 .sp
 Use \fI*\fR, \fIa\fR or \fIall\fR to deselect all selected entries at once. E.g.: \fIds\ *\fR.
 .sp
-You can also pass the file name(s) (or ELN\'s) to be deselected as a parameter. For example: \fIds\ myfile\ 24\fR.
+You can also pass the filename(s) (or ELN\'s) to be deselected as a parameter. For example: \fIds\ myfile\ 24\fR.
 .sp
 TAB completion is available for this command.
 .TP
 .B exp \fR[\fIFILE\fR]...
-with no argument, export the list of files in the current working directory to a temporary file. Otherwise, export only those specified as further arguments: they can be directories, file names, ELN\'s or some search expression like "*.c".
+with no argument, export the list of files in the current working directory to a temporary file. Otherwise, export only those specified as further arguments: they can be directories, filenames, ELN\'s or some search expression like "*.c".
 .TP
 .B ext \fR[\fIon\fR, \fIoff\fR, \fIstatus\fR]
 toggle external commands on/off.
@@ -796,7 +796,7 @@ By default, \fBclifm\fR prints the amount of files contained by listed directori
 toggle list directories first on/off.
 .TP
 .B ft, filter \fR[\fIunset\fR] [[\fI!\fR]REGEX,=FILE\-TYPE\-CHAR]
-filter the current list of files, either by file name (via a regular expression) or file type (via a file type character).
+filter the current list of files, either by filename (via a regular expression) or file type (via a file type character).
 .sp
 With no argument, \fIft\fR prints the current filter. To remove the current filter use the \fIunset\fR option. To set a new filter enter \fIft\fR followed by a filter expression (use the exclamation mark to reverse the meaning of a filter). Examples:
 .sp
@@ -835,7 +835,7 @@ You can use the exclamation mark (!) to perform some history commands:
 .B icons \fR[\fIon\fR, \fIoff\fR]
 toggle icons on/off
 .sp
-\fBNote\fR: Depending on how the terminal renders icons, the apparent space between icons and file names may not be the most appropiate. This space can be adjusted using the \fIIconsGap\fR option in the configuration file (valid values: 0, 1, 2).
+\fBNote\fR: Depending on how the terminal renders icons, the apparent space between icons and filenames may not be the most appropiate. This space can be adjusted using the \fIIconsGap\fR option in the configuration file (valid values: 0, 1, 2).
 .TP
 .B j [\fI\-\-purge\fR [\fINUM\fR]] [\fI\-\-edit\fR], jc, jl, jp \fR[\fISTR\fR]..., \fBje\fR
 \fIj\fR is the fastest way of using \fBKangaroo\fR, a \fBdirectory jumper\fR function used to quickly navigate through the jump database (i.e. a database of visited directories).
@@ -948,7 +948,7 @@ This is \fILira\fR, \fBclifm\fR's resource opener.
 .sp
 Use the \fIopen\fR subcommand to open a file with the default associated application. Note that, since \fIopen\fR is the default action, it can be omitted. For example: \fImm file.pdf\fR. The same can be achieved more easily via the \fIopen\fI command: \fIopen file.pdf\fR (or using the short command, \fIo file.pdf\fR). Or, even shorter, just \fIfile.pdf\fR.
 .sp
-The \fIinfo\fR option prints MIME information about FILE: its MIME type, and, if any, the application associated to this file name or to the file's MIME type.
+The \fIinfo\fR option prints MIME information about FILE: its MIME type, and, if any, the application associated to this filename or to the file's MIME type.
 .sp
 The \fIedit\fR option allows you to edit and customize the MIME list file. So, if a file has no default associated application, first get its MIME info or its file extension (running \fImm\ info\ FILE\fR), and then add a value for it to the MIME list file using the \fIedit\fR option (\fImm\ edit\fR or F6). Check the \fBRESOURCE OPENER\fR section below for information about the mimelist file syntax.
 .sp
@@ -963,13 +963,13 @@ with no arguments, prints the list of messages in the current session. The \fIcl
 .B n, new \fR[\fIFILE[@TEMPLATE]\fR]... [\fIDIR/\fR]...
 create new regular files and/or directories.
 .sp
-If a file name ends with a slash (/), it will be taken as a directory name. Else, it will be created as a regular file. E.g.: \fIn\ myfile\ mydir/\fR, to create a file named \fImyfile\fR and a directory named \fImydir\fR. If no file name is provided, the user will be prompted to enter one.
+If a filename ends with a slash (/), it will be taken as a directory name. Else, it will be created as a regular file. E.g.: \fIn\ myfile\ mydir/\fR, to create a file named \fImyfile\fR and a directory named \fImydir\fR. If no filename is provided, the user will be prompted to enter one.
 .sp
 \fBAutomatic templates\fR
 .sp
 New regular files will be created from a \fBtemplate file\fR if:
 .sp
- 1. The file to be created has a file name extension (e.g., \fIfile.html\fR).
+ 1. The file to be created has a filename extension (e.g., \fIfile.html\fR).
  2. A file named like this extension, here \fIhtml\fR, exists in the templates directory \fB(1)\fR.
 .sp
 If both conditions are met, running \fIn file.html\fR will create a new file named \fIfile.html\fR which is a copy of the \fIhtml\fR file in the templates directory.
@@ -978,13 +978,13 @@ Note that template names are not limited to actual file extensions: you can name
 .sp
 \fBExplicit templates\fR
 .sp
-If a file name is followed by the expression \fI@TEMPLATE\fR, where TEMPLATE is any regular file found in the templates directory\fB(1)\fR, the file will be created as a copy of the corresponding file template. E.g., \fIn file.sh@my_script.sh\fR.
+If a filename is followed by the expression \fI@TEMPLATE\fR, where TEMPLATE is any regular file found in the templates directory\fB(1)\fR, the file will be created as a copy of the corresponding file template. E.g., \fIn file.sh@my_script.sh\fR.
 .sp
 TAB completion is available for explicit templates: \fIn file@<TAB>\fR
 .sp
 \fB(1)\fR The templates directory is \fB$CLIFM_TEMPLATES_DIR\fR, \fB$XDG_TEMPLATES_DIR\fR, or \fI~/Templates\fR, in this precendence order.
 .sp
-\fBFile name validation\fR is performed over names before creation. In case of an unsafe name, the user is warned and asked for confirmation.
+\fBFilename validation\fR is performed over names before creation. In case of an unsafe name, the user is warned and asked for confirmation.
 .sp
 A name (namely, any component of a path) is considered unsafe if:
   1. Starts with a dash (\-): command option flags collision
@@ -994,7 +994,7 @@ A name (namely, any component of a path) is considered unsafe if:
   5. Contains embedded shell meta\-characters (*?:[]"<>|(){}&'!\\;$)
   6. It is too long (larger than NAME_MAX, usually 255 bytes)
 .sp
-For more information about unsafe file names consult \fIhttps://dwheeler.com/essays/fixing\-unix\-linux\-filenames.html\fR.
+For more information about unsafe filenames consult \fIhttps://dwheeler.com/essays/fixing\-unix\-linux\-filenames.html\fR.
 .TP
 .B net \fR[\fINAME\fR] [\fIlist\fR] [\fIedit\fR] [\fIm\fR, \fImount NAME\fR] [\fIu\fR, \fIunmount NAME\fR]
 \fB1. The configuration file\fR
@@ -1011,7 +1011,7 @@ The \fInet\fR command manages connections to remote systems via a simple samba\-
 .sp
 \fBNote\fR: \fI%m\fR can be used as a placeholder for \fIMountpoint\fR. \fI%m\fR will be replaced by the value of \fIMountpoint\fR.
 .sp
-\fB1.a.\fR Mounting remote file systems
+\fB1.a.\fR Mounting remote filesystems
 .sp
 \fBA Samba share\fR:
   [samba_share]
@@ -1022,7 +1022,7 @@ The \fInet\fR command manages connections to remote systems via a simple samba\-
   AutoUnmount=false
   AutoMount=false
 
-\fBA SSH file system (sshfs)\fR:
+\fBA SSH filesystem (sshfs)\fR:
   [ssh_share]
   Comment=My ssh share
   Mountpoint="/media/ssh"
@@ -1031,13 +1031,13 @@ The \fInet\fR command manages connections to remote systems via a simple samba\-
   AutoUnmount=true
   AutoMount=false
 .sp
-\fB1.b.\fR Mounting local file systems
+\fB1.b.\fR Mounting local filesystems
 .sp
-Though originally intended to manage remote file systems, \fInet\fR can also manage \fBlocal file systems\fR. Just provide the appropriate mount and unmount commands. Since the device name assigned by the kernel might change accross reboots (specially when it comes to removable drives), it is recommended to mount using the device\'s UUID (Universal Unique Identifier) instead of the drive name. For example:
+Though originally intended to manage remote filesystems, \fInet\fR can also manage \fBlocal filesystems\fR. Just provide the appropriate mount and unmount commands. Since the device name assigned by the kernel might change accross reboots (specially when it comes to removable drives), it is recommended to mount using the device\'s UUID (Universal Unique Identifier) instead of the drive name. For example:
 
   MountCmd=sudo mount \-U c98d91g4\-6781... %m
 
-Here\'s an example of how to set up \fInet\fR to mount USB devices, one with a FAT file system, and another with an ISO9660 file system:
+Here\'s an example of how to set up \fInet\fR to mount USB devices, one with a FAT filesystem, and another with an ISO9660 filesystem:
 
   [Sandisk USB]
   Comment=Sandisk USB drive
@@ -1074,7 +1074,7 @@ The \fIu\fR, \fIunmount\fR option unmounts the specified remote using the unmoun
 .B o, open \fIELN/FILE\fR [\fIAPPLICATION\fR]
 open FILE, which can be either a directory, in which case it works just like the \fIcd\fR command (see above), a regular file, or a symbolic link to either of the two. For example: \fIo\ 12\fR, \fIo\ filename\fR, \fIo\ /path/to/filename\fR.
 .sp
-By default, the \fIopen\fR function will open files with the default application associated to them via \fILira\fR, the built\-in resource opener (see the \fImime\fR command above). However, if you want to open a file with a different application, add the application name as second argument, e.g. \fIo\ 12\ leafpad\fR or \fIo12\ leafpad\fR.
+By default, the \fIopen\fR function will open files with the default application associated to them via \fILira\fR, the builtin resource opener (see the \fImime\fR command above). However, if you want to open a file with a different application, add the application name as second argument, e.g. \fIo\ 12\ leafpad\fR or \fIo12\ leafpad\fR.
 .sp
 If you want to run the program in the background, simply add the ampersand character, as usual: \fIo\ 12\ &\fR, \fIo\ 12&\fR, \fIo12&\fR or (if auto\-open is enabled) just \fI12&\fR.
 .sp
@@ -1094,7 +1094,7 @@ If only a name/number is entered, it is taken as the user who owns the file(s).
 Use the \fIpc\fR command to edit files permissions.
 .TP
 .B opener \fR[\fIdefault\fR] [\fIAPPLICATION\fR]
-with no argument, prints the currently used resource opener (by default, \fILira\fR, \fBclifm\fR\'s built\-in opener). Otherwise, set APPLICATION (say \fIrifle\fR or \fIxdg\-open\fR) as opener or, if \fIdefault\fR is passed instead, use \fILira\fR.
+with no argument, prints the currently used resource opener (by default, \fILira\fR, \fBclifm\fR\'s builtin opener). Otherwise, set APPLICATION (say \fIrifle\fR or \fIxdg\-open\fR) as opener or, if \fIdefault\fR is passed instead, use \fILira\fR.
 .TP
 .B ow \fIELN/FILE\fR [\fIAPPLICATION\fR]
 If APPLICATION is specified, open ELN/FILE with APPLICATION. In case you need to add parameters to APPLICATION, it is recommended to quote the expression: \fIow FILE "APP ARG..."\fR.
@@ -1106,7 +1106,7 @@ This command supports TAB completion. Type "\fIow filename <TAB>\fR" and those a
 .B p, pp, prop \fIELN/FILE\fR...
 print file properties for ELN/FILE. The output of this function is much like the combined output of \fIls\ \-l\fR and \fIstat\fR.
 .sp
-By default, directories size is not shown. Use \fIpp\fR instead of just \fIp\fR to print directories size as well (it could take longer depending on the directory's content). On the other side, and unlike \fIp\fR, \fIpp\fR provides information about the dereferenced symlinks (namely, the symlink target) instead of the symlink itself. However, note that, in case of symbolic links to directories, \fIp\fR provides information about the link \fItarget\fR if the provided file name ends with a slash. Otherwise, information about the link \fIitself\fR is displayed.
+By default, directories size is not shown. Use \fIpp\fR instead of just \fIp\fR to print directories size as well (it could take longer depending on the directory's content). On the other side, and unlike \fIp\fR, \fIpp\fR provides information about the dereferenced symlinks (namely, the symlink target) instead of the symlink itself. However, note that, in case of symbolic links to directories, \fIp\fR provides information about the link \fItarget\fR if the provided filename ends with a slash. Otherwise, information about the link \fIitself\fR is displayed.
 .sp
 The time format used to display time information can be customized via the \fIPTimeStyle\fR option in the configuration file (defaults to "%Y\-%m\-%d %H:%M:%S.%N %z", where %N stands for nano\-second precision).
 .sp
@@ -1133,7 +1133,7 @@ Use the \fIoc\fR command to edit files ownership.
 with no arguments, prints the name of the currently used profile. Use the \fIls\fR or \fIlist\fR option to list available profiles. To switch, add, delete, or rename a profile, use the \fIset\fR, \fIadd\fR, \fIdel\fR, and \fIrename\fR options respectively.
 .TP
 .B pg, pager \fR[\fIon\fR, \fIoff\fR, \fIonce\fR, \fIstatus\fR, [\fINUM\fR]]
-run or set \fBMas\fR, \fBClifm\fR's built\-in files pager.
+run or set \fBMas\fR, \fBClifm\fR's builtin files pager.
 .sp
 With no parameter, just run the pager (\fIAlt\-0\fR is also available).
 .sp
@@ -1162,7 +1162,7 @@ By default, the pager lists files using the current listing mode (long or short)
 .B pin \fR[\fIFILE/DIR\fR]
 pin a file or directory to be accessed later via the comma (,) keyword. For example, run \fIpin mydir\fR and then access \fImydir\fR as follows: \fIcd\ ,\fR where the comma is automatically expanded to the pinned file, in this case \fImydir\fR. The comma keyword could be used with any command, either internal or external, e.g, \fIls\ ,\fR.
 .sp
-With no arguments, the \fIpin\fR command prints the current pinned file, if any. If an argument is given, it will be taken as a file name to be pinned. Running this command again, frees the previous pinned file and sets a new one. In other words, only one pin is supported at a time. 
+With no arguments, the \fIpin\fR command prints the current pinned file, if any. If an argument is given, it will be taken as a filename to be pinned. Running this command again, frees the previous pinned file and sets a new one. In other words, only one pin is supported at a time. 
 .sp
 An easy alternative to create as many pins or shortcuts as you want, and how you want, is to use the \fIalias\fR function. Bookmarks could also be used to achieve a very similar result.
 .sp
@@ -1183,14 +1183,14 @@ Reload all settings, except those passed as command line arguments, from the con
 .B rr \fR[\fIDIR\fR] [\fIEDITOR\fR]
 Remove files and/or directories in bulk using a text editor.
 .sp
-\fIrr\fR writes all file names in \fIDIR\fR (or in the current directory if \fIDIR\fR is omitted) to a temporary file and opens it using \fIEDITOR\fR (or the default associated application for \fItext/plain\fR MIME type, if \fIEDITOR\fR is omitted).
+\fIrr\fR writes all filenames in \fIDIR\fR (or in the current directory if \fIDIR\fR is omitted) to a temporary file and opens it using \fIEDITOR\fR (or the default associated application for \fItext/plain\fR MIME type, if \fIEDITOR\fR is omitted).
 .sp
 Once in the editor, remove the lines corresponding to the files you want to delete. Save changes and close the editor. Removed files will be listed and the user asked for confirmation.
 .TP
 .B s, sel \fIELN/FILE\fR... [[\fI!\fR]\fIPATTERN\fR] [\fI\-filetype\fR] [\fI:PATH\fR]
-mark one or multiple files (either regular files or directories) as selected (send to the Selection Box). \fIsel\fR accepts individual elements, range of elements, say 1\-6, file names and paths, just as wildcards (globbing) and regular expressions. Example: \fIs 1 4\-10 ^r file* filename /path/to/filename\fR.
+mark one or multiple files (either regular files or directories) as selected (send to the Selection Box). \fIsel\fR accepts individual elements, range of elements, say 1\-6, filenames and paths, just as wildcards (globbing) and regular expressions. Example: \fIs 1 4\-10 ^r file* filename /path/to/filename\fR.
 .sp
-If not in light mode, once a file is selected, and if the file is in the current directory, the corresponding file name will be highlighted with a mark (colored according to the value of \fIli\fR in the color scheme file (by default bold green)) at the left of the file name (and at the right of its ELN).
+If not in light mode, once a file is selected, and if the file is in the current directory, the corresponding filename will be highlighted with a mark (colored according to the value of \fIli\fR in the color scheme file (by default bold green)) at the left of the filename (and at the right of its ELN).
 .sp
 Just as in the \fIsearch\fR function, it is also possible to further filter the list of matches indicating the desired file type. For instance, \fIs ^ \-d\fR will select all directories in the current working directory. For available file type filters see the \fIsearch\fR function above.
 .sp
@@ -1248,7 +1248,7 @@ Since this trash system follows the Freedesktop specification, it is able to han
 To restore trashed files (to their original location) see the \fIundel\fR command below.
 .TP
 .B tag \fR[\fIadd\fR, \fIdel\fR, \fIlist\fR, \fIlist\-full\fR, \fInew\fR, \fImerge\fR, \fIrename\fR, \fIuntag\fR] [\fIFILE\fR]... [[\fI:\fR]\fITAG\fR]
-\fItag\fR is the main \fIEtiqueta\fR command, \fBclifm\fR's built\-in files tagging system. See the \fBFILE TAGS\fR section for a complete description of this command.
+\fItag\fR is the main \fIEtiqueta\fR command, \fBclifm\fR's builtin files tagging system. See the \fBFILE TAGS\fR section for a complete description of this command.
 .TP
 .B te \fIFILE\fR...
 toggle executable bit (on user, group, and others) on FILE(s). It is equivalent to the \fB\-x\fR and \fB+x\fR options for the \fBchmod\fR(1) command.
@@ -1257,7 +1257,7 @@ toggle executable bit (on user, group, and others) on FILE(s). It is equivalent 
 print the list of \fBclifm\fR tips
 .TP
 .B u, undel, untrash \fR[\fI*\fR, \fIa\fR, \fIall\fR] [\fIFILE\fR]...
-If file names are passed as parameters, undelete these files, that is, restore them to their original location. Otherwise, this function prints a list of currently trashed files allowing the user to choose one or more of these files to be restored. Use the \fI*\fR, \fIa\fR or \fIall\fR parameters to restore all trashed files at once. TAB completion to list/select currently trashed files is available.
+If filenames are passed as parameters, undelete these files, that is, restore them to their original location. Otherwise, this function prints a list of currently trashed files allowing the user to choose one or more of these files to be restored. Use the \fI*\fR, \fIa\fR or \fIall\fR parameters to restore all trashed files at once. TAB completion to list/select currently trashed files is available.
 .TP
 .B unpin
 this command takes no argument. It just frees the current pin and, if it exists, deletes the \fI.pin\fR file generated by the \fIpin\fR command.
@@ -1332,7 +1332,7 @@ Files listed in a file named \fI.hidden\fR in the current directory will be hidd
 .sp
 \fBb)\fR Directories: via the \fI\-\-only\-dirs\fR command line switch and the \fIAlt\-,\fR keybinding.
 .sp
-\fBc)\fR File names and file types: either via a regular expression or a file type character (see below) using the \fIft\fR command (the \fIFilter\fR option in the configuration file and the \fBCLIFM_FILTER\fR environment variable are also available). For example, to exclude backup files (ending with a tilde):
+\fBc)\fR Filenames and file types: either via a regular expression or a file type character (see below) using the \fIft\fR command (the \fIFilter\fR option in the configuration file and the \fBCLIFM_FILTER\fR environment variable are also available). For example, to exclude backup files (ending with a tilde):
 .sp
  \fBCLIFM_FILTER=\'!.*~$\' clifm\fR
 .sp
@@ -1423,9 +1423,9 @@ Alt\-l : Toggle long view mode on/off
 Alt\-+ : Toggle follow links (long view only)
 Alt\-g : Toggle list\-directories\-first on/off
 Alt\-, : Toggle list only directories on/off
-Ctrl\-Alt\-l : Toggle max file name length on/off
+Ctrl\-Alt\-l : Toggle max filename length on/off
 Ctrl\-Alt\-i, Alt\-TAB : Toggle disk usage analyzer on/off
-Alt\-w : Toggle full path file names in virtual directories
+Alt\-w : Toggle full path filenames in virtual directories
 Ctrl\-l : Refresh the screen (reprint the list of files in the current directory)
 Alt\-t : Clear program messages
 Alt\-m : List mountpoints
@@ -1508,7 +1508,7 @@ Some of these key bindings might not work on your console/terminal emulator, dep
 .TP
 Haiku terminal: Most of these keybindings won\'t work on the Haiku terminal, since Alt plays here the role Ctrl usually plays in most other systems (see the Haiku documentation). To fix this, set your custom keybindings.
 .TP
-Kernel built-in console: Key sequences involving the Shift key (S\-up, S\-left, and S\-right in our case) will just not work. Use the alternative key sequences instead: M\-u, M\-j, and M\-k respectively
+Kernel builtin console: Key sequences involving the Shift key (S\-up, S\-left, and S\-right in our case) will just not work. Use the alternative key sequences instead: M\-u, M\-j, and M\-k respectively
 .TP
 NetBSD (wsvt25) and OpenBSD (vt220) kernel consoles: Key sequences involving the Alt key won\'t work out of the box. Here\'s how to make them work:
 
@@ -1544,7 +1544,7 @@ Each color scheme may include any (or all) of the below options:
 .TP
  \fIInterfaceColors\fR = Colors for \fBclifm\fR's interface, such as ELN's, file properties bits, suggestions, syntax highlighting, etc. See the \fBCOLORS\fR section below.
 .TP
- \fIExtColors\fR = Colors for files based of file name's extension. See the \fBCOLORS\fR section below.
+ \fIExtColors\fR = Colors for files based on filename extensions. See the \fBCOLORS\fR section below.
 .TP
  \fIDateShades\fR = A comma delimited list of colors used to print timestamps (long view). Consult the default color scheme file for more information.
 .TP
@@ -1597,19 +1597,19 @@ This is the list of \fBfile type codes\fR (you will find them in the \fIFiletype
  no = unknown file type
  uf = unaccessible files (\fBfstatat\fR(3) error)
 .sp
-\fB(1)\fR If unset, the corresponding file type color is used and an exclamation mark is printed before the file name in the files list (provided icons are disabled -otherwise the lock icon is used- and \fBclifm\fR is not running in light mode -in light mode access checks are not performed). The color used for the exclamation mark is \fIxf\fR (see below).
+\fB(1)\fR If unset, the corresponding file type color is used and an exclamation mark is printed before the filename in the files list (provided icons are disabled -otherwise the lock icon is used- and \fBclifm\fR is not running in light mode -in light mode access checks are not performed). The color used for the exclamation mark is \fIxf\fR (see below).
 .TP
 The following codes are used for different interface elements (in the \fIInterfaceColors\fR section of the current color scheme file):
 .sp
  \fBSuggestions\fR
- sb = shell built\-ins
+ sb = shell builtins
  sc = aliases and shell command names
  sd = internal commands description
- sf = ELN's, bookmarks, tag, and file names
+ sf = ELN's, bookmarks, tag, and filenames
  sh = commands history entries
  sx = suggestions for \fBclifm\fR's internal commands and parameters
  sp = suggestions pointer (e.g.: 56 > filename, where '>' is the suggestion pointer)
- sz = file names (fuzzy)
+ sz = filenames (fuzzy)
 
  \fBSyntax highlighting\fR
  hb = brackets \'()[]{}\'
@@ -1666,7 +1666,7 @@ The following codes are used for different interface elements (in the \fIInterfa
  lc  = symbolic link indicator (\fIColorLinksAsTarget\fR only)
  mi  = misc indicators (disk usage, sort method, bulk rename, jump database list)
  ts  = matching suffix for possible TAB completed entries
- tt  = tilde for trimmed file names
+ tt  = tilde for truncated filenames
  wc  = welcome message
  wsN = color for workspace N (1\-8)
  xs  = exit code: success
@@ -1944,13 +1944,13 @@ Consult \fBsmenu\fR(1) for more information.
 .TP
 For information about how to customize \fIfnf\fR consult \fBfnf\fR(1).
 .TP
-\fBClifm\fR can perform fuzzy TAB completion (just as suggestions) for file names and paths (e.g. "dwn" is completed/suggested as "Downloads"). To enable this feature use the \fI\-\-fuzzy\-matching\fR command line switch or set \fIFuzzyMatching\fR to \fItrue\fR in the configuration file.
+\fBClifm\fR can perform fuzzy TAB completion (just as suggestions) for filenames and paths (e.g. "dwn" is completed/suggested as "Downloads"). To enable this feature use the \fI\-\-fuzzy\-matching\fR command line switch or set \fIFuzzyMatching\fR to \fItrue\fR in the configuration file.
 .TP
-Besides the default \fITAB completion\fR for command \fBnames and paths\fR, you can also expand \fBELN's\fR using the TAB key. Example: type 'o 12', press TAB, and it becomes 'o filename ', or, if 12 refers to a directory, 'o dir/'. \fBclifm\fR uses a Bash\-style quoting system, so that this file name: "this is a test@version{1}" is expanded as follows: this\\ is\\ a\\ test\\@version\\{1\\}
+Besides the default \fITAB completion\fR for command \fBnames and paths\fR, you can also expand \fBELN's\fR using the TAB key. Example: type 'o 12', press TAB, and it becomes 'o filename ', or, if 12 refers to a directory, 'o dir/'. \fBclifm\fR uses a Bash\-style quoting system, so that this filename: "this is a test@version{1}" is expanded as follows: this\\ is\\ a\\ test\\@version\\{1\\}
 .TP
-ELN's and \fBELN ranges\fR will be also automatically expanded, provided the corresponding ELN's actually exist, that is to say, provided some file name is listed on the screen under those numbers. For example: 'diff 1 118' will only expand '1', but not '118', if there is no ELN 118. In the same way, the range 1\-118 will only be expanded provided there are 118 or more elements listed on the screen. Note that the second field oa a range can be omitted, in which case the ELN of the last listed file is assumed (e.g.: provided there are 100 listed files, 12\- is equivalent to 12\-100).
+ELN's and \fBELN ranges\fR will be also automatically expanded, provided the corresponding ELN's actually exist, that is to say, provided some filename is listed on the screen under those numbers. For example: 'diff 1 118' will only expand '1', but not '118', if there is no ELN 118. In the same way, the range 1\-118 will only be expanded provided there are 118 or more elements listed on the screen. Note that the second field oa a range can be omitted, in which case the ELN of the last listed file is assumed (e.g.: provided there are 100 listed files, 12\- is equivalent to 12\-100).
 .TP
-Since ranges can be a bit tricky, TAB completion is available to make sure this range actually includes the desired file names.
+Since ranges can be a bit tricky, TAB completion is available to make sure this range actually includes the desired filenames.
 .TP
 If this feature somehow conflicts with the command you want to run, say, 'chmod 644 ...', because the current amount of files is equal or larger than 644 (in which case \fBclifm\fR will expand that number), then you can simply run the command as external: ';chmod 644 ...'
 .TP
@@ -1963,7 +1963,7 @@ Of course, combinations of all these features is also possible. Example: \fIcp s
 In addition to completions and expansions, an \fIauto\-suggestions system\fR is also available. See the \fBAUTO\-SUGGESTIONS\fR section below.
 
 .SH 9. RESOURCE OPENER
-As \fBclifm\fR\'s built\-in resource opener, \fILira\fR takes care of opening files when no opening application has been specified in the command line. It does this by automatically parsing a MIME list file (see the \fBFILES\fR section below): it looks first for a matching pattern (either a MIME type or a file name), then checks the existence of the command associated to this pattern, and finally executes it.
+As \fBclifm\fR\'s builtin resource opener, \fILira\fR takes care of opening files when no opening application has been specified in the command line. It does this by automatically parsing a MIME list file (see the \fBFILES\fR section below): it looks first for a matching pattern (either a MIME type or a filename), then checks the existence of the command associated to this pattern, and finally executes it.
 .TP
 \fILira\fR is controlled via the \fImime\fR command. File associations are stored in the MIME list file.
 .TP
@@ -1990,13 +1990,13 @@ If required, edit the mimelist and the preview files (\fImm edit\fR and \fIview 
 .TP
 \fB(2)\fR In case of issues, bear in mind that the \fImime.types\fR file is read top to bottom, and that, in case of conclicts (mostly duplicate extensions), only the last entry is effective.
 .TP
-\fBImportant\fR: Though sometimes convenient, determining file types by means of file name extensions alone is unreliable: a file, no matter its type, can bear any file extension, without restriction. Because of this, you might end up executing a command that was not intended due to wrong file identification. Be extra careful when doing this.
+\fBImportant\fR: Though sometimes convenient, determining file types by means of filename extensions alone is unreliable: a file, no matter its type, can bear any file extension, without restriction. Because of this, you might end up executing a command that was not intended due to wrong file identification. Be extra careful when doing this.
 .TP
 \fB1. Syntax\fR
 .TP
 In its most basic form, each line in the MIME list file consists of:
 .TP
-\fBa)\fR A left value: this is just a regular expression indicating what we are trying to match (it can be a file name, a file extension, or a MIME type).
+\fBa)\fR A left value: this is just a regular expression indicating what we are trying to match (it can be a filename, a file extension, or a MIME type).
 .TP
 \fBb)\fR A right value: a semicolon separated list of commands to be used as the opening application (the first existing program found in this list will be used).
 .TP
@@ -2033,17 +2033,17 @@ where the first rule (via the \fBX\fR prefix) is intended for use on graphical e
 .TP
 \fB2.2. The N prefix\fR
 .TP
-Sometimes MIME types are not enough to identify a file, or we just want to match a specific file name. In this case, we can use the \fBN\fR prefix to tell \fBLira\fR that we want to match a file name instead of a MIME type. For example:
+Sometimes MIME types are not enough to identify a file, or we just want to match a specific filename. In this case, we can use the \fBN\fR prefix to tell \fBLira\fR that we want to match a filename instead of a MIME type. For example:
 
  \fBX:N:^filename.txt$=leafpad\fR
 .TP
-in which case we want to match exactly the file name \fIfilename.txt\fR (no matter its MIME type).
+in which case we want to match exactly the filename \fIfilename.txt\fR (no matter its MIME type).
 .TP
-If we want to match file extensions, instead of entire file names, we can use a regular expression, as follows:
+If we want to match file extensions, instead of entire filenames, we can use a regular expression, as follows:
 
  \fBX:N:.*\.txt$=leafpad\fR
 .TP
-Here, we are not matching a specific file name, but a specific file extension, so that the rule reads as follows: open all files ending with .txt using \fBleafpad\fR.
+Here, we are not matching a specific filename, but a specific file extension, so that the rule reads as follows: open all files ending with .txt using \fBleafpad\fR.
 .TP
 \fB3. The right value (CMD)\fR
 .TP
@@ -2085,7 +2085,7 @@ For terminal applications:
 .TP
 Replace TERM and APP by the appropriate values (say, xterm and vi respectively). The -e option might vary depending on the terminal emulator used.
 .TP
-\fBNote\fR: In case of archives, the built-in \fIad\fR command can be used as opening application.
+\fBNote\fR: In case of archives, the builtin \fIad\fR command can be used as opening application.
 .TP
 \fB3.5. Environment variables\fR
 .TP
@@ -2101,11 +2101,11 @@ Bear in mind that commands will be executed directly without shell intervention,
 .TP
 \fB4. Examples\fR:
 .TP
-Match a full file name:
+Match a full filename:
 
  \fBX:N:some_filename=nano;vim;vi;emacs\fR
 .TP
-\fBNote\fR: If the file name contains a dot, quote it like this: some_filename\\.ext (to prevent the REGEX parser from interpreting the dot).
+\fBNote\fR: If the filename contains a dot, quote it like this: some_filename\\.ext (to prevent the REGEX parser from interpreting the dot).
 .TP
 Open video files with \fBmpv\fR in the foreground and silence STDERR:
 
@@ -2115,7 +2115,7 @@ Open video files with \fBgmplayer\fR in the background and silence both STDERR a
 
  \fB^video/.*=gmplayer %f !EO & (or 'gmplayer %x')\fR
 .TP
-Match multiple file names (starting with "str"):
+Match multiple filenames (starting with "str"):
 
  \fBX:N:^str.*=leafpad %x;mousepad %x;kate %x;gedit %x\fR
 .TP
@@ -2154,7 +2154,7 @@ or, if you prefer \fBxdg\-open\fR(1):
 
  \fBOpener=xdg\-open\fR
 .TP
-\fBb.\fR Tell \fILira\fR to open all files, no matter the MIME type or file name, via the desired opener. For example:
+\fBb.\fR Tell \fILira\fR to open all files, no matter the MIME type or filename, via the desired opener. For example:
 
  \fB.*=rifle\fR
 .TP
@@ -2171,7 +2171,7 @@ Though \fBclifm\fR is a file manager, it can be used as a simple resource opener
 .SH 10. SHOTGUN
 \fB1. TAB completion with file previews\fR
 .TP
-\fIShotgun\fR is \fBclifm\fR\'s built\-in files previewer. Though, as described below, it may be used as a standalone and general purpose file previewer (similar in this regard to \fBpistol\fR(1)), it is mainly intended to be used by \fBclifm\fR's TAB completion function running in FZF mode: every time TAB completion is invoked for files, \fIshotgun\fR will be executed with the currently highlighted file as argument (as shown below) to generate the preview. Set the \fIFzfPreview\fR option in the configuration file to \fIfalse\fR (or run with \fI\-\-no\-fzfpreview\fR) to disable this feature.
+\fIShotgun\fR is \fBclifm\fR\'s builtin files previewer. Though, as described below, it may be used as a standalone and general purpose file previewer (similar in this regard to \fBpistol\fR(1)), it is mainly intended to be used by \fBclifm\fR's TAB completion function running in FZF mode: every time TAB completion is invoked for files, \fIshotgun\fR will be executed with the currently highlighted file as argument (as shown below) to generate the preview. Set the \fIFzfPreview\fR option in the configuration file to \fIfalse\fR (or run with \fI\-\-no\-fzfpreview\fR) to disable this feature.
 .TP
 \fIShotgun\fR is also used by the \fIview\fR command to display file previews in full screen.
 .TP
@@ -2185,7 +2185,7 @@ This command generates a preview of the file \fImyfile.txt\fR and then quits \fB
 .TP
 \fB3. Customization
 .TP
-Previewing applications (based on either MIME type or file name) are defined in a configuration file (\fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/preview.clifm\fR) using the same syntax used by \fILira\fR (the built\-in resource opener). See the \fBRESOURCE OPENER\fR section above.
+Previewing applications (based on either MIME type or filename) are defined in a configuration file (\fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/preview.clifm\fR) using the same syntax used by \fILira\fR (the builtin resource opener). See the \fBRESOURCE OPENER\fR section above.
 .TP
 You can set an alternative configuration file via the \fI\-\-shotgun\-file\fR command line switch:
 
@@ -2212,7 +2212,7 @@ Consult \fBfzf\fR(1) for more information.
 Image previews are available via the \fIclifmimg\fR plugin. Run \fIhelp image-previews\fR or consult the Wiki for more information: \fIhttps://github.com/leo\-arch/clifm/tree/master/misc/tools/imgprev\fR
 
 .SH 11. AUTO\-SUGGESTIONS
-\fIGemini\fR is a built\-in suggestions system (similar to that provided by the Fish shell). As you type, \fIGemini\fR will suggest possible completions right after the current cursor position.
+\fIGemini\fR is a builtin suggestions system (similar to that provided by the Fish shell). As you type, \fIGemini\fR will suggest possible completions right after the current cursor position.
 
 The following checks are availabe (the order can be customized, see below):
 .sp
@@ -2222,7 +2222,7 @@ b. \fBclifm\fR commands and parameters (including the \fIsel\fR keyword)
 .sp
 c. Entries in the command history list (already used commands)
 .sp
-d. File names in the current working directory and paths \fB(1)\fR
+d. Filenames in the current working directory and paths \fB(1)\fR
 .sp
 e. Entries in the jump database
 .sp
@@ -2244,7 +2244,7 @@ To accept the entire suggestion press \fBRight\fR or \fBCtrl\-f\fR: the cursor w
 
 To accept the first suggested word only (up to first slash or space), press rather \fIAlt\-Right\fR or \fIAlt\-f\fR. Not available for ELN\'s, aliases and bookmarks names.
 
-Bear in mind that suggestions for ELN\'s, aliases, bookmarks names, the jump function (invoked by the \fIj\fR command), just as file names and paths (if fuzzy\-suggestions are enabled) do not work as the remaining suggestions: they do not suggest possible completions for the current input, but rather the value pointed to by it. For example, if you type "12" and the current list of files includes a file name whose ELN is '12', the file name corresponding to this ELN will be printed next to "12" as follows: \fB12_ > filename\fR (where the underscore is the current cursor position). Press \fIRight\fR or \fICtrl\-f\fR to accept the suggestion, in which case the text typed so far will be replaced by the suggestion.
+Bear in mind that suggestions for ELN\'s, aliases, bookmarks names, the jump function (invoked by the \fIj\fR command), just as filenames and paths (if fuzzy\-suggestions are enabled) do not work as the remaining suggestions: they do not suggest possible completions for the current input, but rather the value pointed to by it. For example, if you type "12" and the current list of files includes a filename whose ELN is '12', the filename corresponding to this ELN will be printed next to "12" as follows: \fB12_ > filename\fR (where the underscore is the current cursor position). Press \fIRight\fR or \fICtrl\-f\fR to accept the suggestion, in which case the text typed so far will be replaced by the suggestion.
 
 The order of the suggestion checks can be customized via the \fISuggestionStrategy\fR option in the configuration file. Each check is assigned a lowercase character:
 
@@ -2271,7 +2271,7 @@ Suggestions will be printed using one of the following color codes (see the \fBC
 
 \fIsp\fR: Greater\-than sign (>) used when suggesting ELN\'s, bookmarks, and aliases names.
 
-You can set \fISuggestFiletypeColor\fR to \fItrue\fR in the configuration file to use the color of the file type of the current file name (as set in the color scheme file) instead of the value of
+You can set \fISuggestFiletypeColor\fR to \fItrue\fR in the configuration file to use the color of the file type of the current filename (as set in the color scheme file) instead of the value of
 \fIsf\fR. For example, if a suggestion is printed for a file that is a symbolic link, \fIln\fR or \fIor\fR (if it's a broken link) will be used instead of \fIsf\fR.
 
 .SH 12. SHELL FUNCTIONS
@@ -2458,17 +2458,17 @@ Whereas this plugin provides basic Git integration, it could be easily modified 
 .TP
 To run the \fIpager.sh\fR plugin, for example, you only need to enter the corresponding action name, in this case \fIgg\fR. In case of need, all plugins provide a \fI\-h,\-\-help\fR switch for a brief usage description.
 .TP
-\fBNote\fR: The \fIfzfnav\fR plugin uses \fBfzf\fR(1) to navigate the file system and \fIBFG\fR (a script located in the plugins directory) to show previews (to display image previews \fIBFG\fR requires \fBueberzug\fR(1) or the Kitty protocol via the Kitty terminal). A configuration file (\fIBFG.cfg\fR, in the plugins directory itself) is provided to customize the previewer's behavior.
+\fBNote\fR: The \fIfzfnav\fR plugin uses \fBfzf\fR(1) to navigate the filesystem and \fIBFG\fR (a script located in the plugins directory) to show previews (to display image previews \fIBFG\fR requires \fBueberzug\fR(1) or the Kitty protocol via the Kitty terminal). A configuration file (\fIBFG.cfg\fR, in the plugins directory itself) is provided to customize the previewer's behavior.
 .TP
-\fBNote 2\fR: An alternative files previewing function (built\-in, and thereby faster than \fIBFG\fR) is provided by \fIshotgun\fR. See the \fBSHOTGUN\fR section above for more information.
+\fBNote 2\fR: An alternative files previewing function (builtin, and thereby faster than \fIBFG\fR) is provided by \fIshotgun\fR. See the \fBSHOTGUN\fR section above for more information.
 .TP
-In addition to the built\-in \fIBFG\fR previewer, \fIfzfnav\fR supports the use of both Ranger\'s \fIscope.sh\fR script and \fBpistol\fR(1). To use \fBscope\fR, edit the \fIBFG\fR configuration file and set USE_SCOPE to 1 and SCOPE_FILE to the correct path to the \fIscope.sh\fR file (normally \fI$HOME/.config/ranger/scope.sh\fR). To use \fBpistol\fR instead, set USE_PISTOL to 1.
+In addition to the builtin \fIBFG\fR previewer, \fIfzfnav\fR supports the use of both Ranger\'s \fIscope.sh\fR script and \fBpistol\fR(1). To use \fBscope\fR, edit the \fIBFG\fR configuration file and set USE_SCOPE to 1 and SCOPE_FILE to the correct path to the \fIscope.sh\fR file (normally \fI$HOME/.config/ranger/scope.sh\fR). To use \fBpistol\fR instead, set USE_PISTOL to 1.
 .TP
 .TP
 Take a look at the Wiki for more information: \fIhttps://github.com/clifm/wiki/Advanced#plugins\fR
 
 .SH 14. AUTOCOMMANDS
-Heavily inspired by \fBVifm\fR, the \fIautocommands\fR function allows the user a fine\-grained control over \fBclifm\fR settings. It is mostly devised as a way to improve performance for remote file systems (usually slower than local ones) by allowing you to turn off some features (like the files counter) that might greatly affect performance under some circumstances (like remote connections). However, the \fIautocommands\fR function is not restricted to this specific use case: use it for whatever purpose you find useful.
+Heavily inspired by \fBVifm\fR, the \fIautocommands\fR function allows the user a fine\-grained control over \fBclifm\fR settings. It is mostly devised as a way to improve performance for remote filesystems (usually slower than local ones) by allowing you to turn off some features (like the files counter) that might greatly affect performance under some circumstances (like remote connections). However, the \fIautocommands\fR function is not restricted to this specific use case: use it for whatever purpose you find useful.
 .sp
 \fBNote\fR: We describe here \fBpermanent\fR autocommands, which need to be defined in the configuration file. \fBTemporary\fR autocommands (set via the command line and valid only for the current directory and the current session) are also available via the \fIauto\fR command. See above.
 .sp
@@ -2502,7 +2502,7 @@ The following codes are used to control \fBclifm\fR's files list:
  \fBlm\fR     Light mode            lm=1
  \fBlv,ll\fR  Long/detail view      lv=0
  \fBmf\fR     Max files             mf=100 \fB(1)\fR
- \fBmn\fR     Max file name length  mn=20 \fB(1)\fR
+ \fBmn\fR     Max filename length  mn=20 \fB(1)\fR
  \fBod\fR     Only directories      od=1
  \fBpg\fR     Pager                 pg=0
  \fBst\fR     Sort method           st=5
@@ -2523,7 +2523,7 @@ To remove a value, set the option to an empty value. For example, to remove the 
  \fB3.\fR This directory has thousands of files. Show only the first hundred and enable the pager:
     \fBautocmd /usr/bin mf=100,pg=1\fR
 
- \fB4.\fR Lots of media files (with large file names). Trim file names to 20 chars max and  run the files previewer:\fB(2)\fR
+ \fB4.\fR Lots of media files (with large filenames). Truncate filenames to 20 chars max and run the files previewer:\fB(2)\fR
     \fBautocmd ~/Downloads mn=20,!~/.config/clifm/plugins/fzfnav.sh\fR
 
  \fB5.\fR I want the second workspace, no matter what the current directory is, to list files in long view:
@@ -2533,7 +2533,7 @@ To remove a value, set the option to an empty value. For example, to remove the 
     \fBautocmd /home/user hf=0,cs=nord,lv=1
     autocmd / lv=1,fc=0,cs=solarized,st=5\fR
 .sp
-\fB(1)\fR This is the recommended configuration for remote file systems
+\fB(1)\fR This is the recommended configuration for remote filesystems
 .sp 0
 \fB(2)\fR As seen here, plugins can be used as well: in this case, we want to run \fIfzfnav\fR (to make use of the files preview capability) whenever we enter into the \fIDownloads\fR directory, usually containing videos, music, and images.
 \fBNOTE\fR: If you decide to use a plugin, bear in mind that it won\'t be able to communicate with \fBclifm\fR, because the \fIautocommand\fR function always executes commands as external applications using the system shell.
@@ -2568,7 +2568,7 @@ For \fI.cfm.out\fR:
 
 .SH 15. FILE TAGS
 .sp
-\fIEtiqueta\fR is \fBclifm\fR's built\-in files tagging system
+\fIEtiqueta\fR is \fBclifm\fR's builtin files tagging system
 .sp
 \fB1. How does Etiqueta work?\fR
 .sp
@@ -2713,7 +2713,7 @@ The user can operate on these files as if they were any other regular file, sinc
 .sp
 Once in the virtual directory, files are listed by default using only the base name of the target file. For example, if the target file is \fI/home/user/Downloads/myfile.tar.gz\fR, this file will be listed as \fImyfile.tar.gz\fR. If this file already exists in the virtual directory (because there is another target file with the same base name, say, \fI/home/user/Documents/tars/myfile.tar.gz\fR), a random six digits suffix will be appended to the file (for instance, \fImyfile.tar.gz.12Rgj6\fR).
 .sp
-Since this listing mode does not allow the user to get a clear idea of the actual location of each listed file, a keybinding (by default \fIAlt\-w\fR) is available to toggle short (base names only) and long file names: in this latter case, file names are listed using the full path to the target file, replacing slashes by colons (:). For example, if the target file is \fI/home/user/Downloads/myfile.tar.gz\fR, it will be listed in the virtual directory as \fIhome:user:Downloads:myfile.tar.gz\fR.
+Since this listing mode does not allow the user to get a clear idea of the actual location of each listed file, a keybinding (by default \fIAlt\-w\fR) is available to toggle short (base names only) and long filenames: in this latter case, filenames are listed using the full path to the target file, replacing slashes by colons (:). For example, if the target file is \fI/home/user/Downloads/myfile.tar.gz\fR, it will be listed in the virtual directory as \fIhome:user:Downloads:myfile.tar.gz\fR.
 .sp
 If you prefer the long names approach, you can use the \fI\-\-virtual\-dir\-full\-paths\fR command line flag.
 .sp
@@ -2762,7 +2762,7 @@ Once executed, the vt plugin will launch a new instance of CliFM (on a new termi
 .sp
 \fBNote\fR: By default, the terminal emulator used is \fBxterm\fR(1), but it can be changed by editing the plugin script (\fIvirtualize.sh\fR).
 .sp
-If navigating the file system, you can quickly go back to the virtual directory using the \fI\-d\fR option: \fIvt \-d\fR. The navigation keys (see the \fBKEYBOARD SHORTCUTS\fR section above) and the \fBCLIFM_VIRTUAL_DIR\fR environment variable are also available (\fIShift\-Left\fR/\fIShift\-Right\fR or \fRcd $CLIFM_VIRTUAL_DIR\fR).
+If navigating the filesystem, you can quickly go back to the virtual directory using the \fI\-d\fR option: \fIvt \-d\fR. The navigation keys (see the \fBKEYBOARD SHORTCUTS\fR section above) and the \fBCLIFM_VIRTUAL_DIR\fR environment variable are also available (\fIShift\-Left\fR/\fIShift\-Right\fR or \fRcd $CLIFM_VIRTUAL_DIR\fR).
 .sp
 \fBTip\fR: Write an alias to make this even easier:
 .sp
@@ -2779,7 +2779,7 @@ The two most time consuming features are:
 .sp
 When running in light mode, however, a few features are lost:
 .sp
- 1. Only basic file classification is performed, namely, that provided by the \fId_type\fR field of a dirent struct (see \fBreaddir\fR(3)). Bear in mind, nonetheless, that whenever _DIRENT_HAVE_D_TYPE was not set at compile time, or in case of a DT_UNKNOWN value for a given entry (we might be facing a file system not returning the \fId_type\fR value, for example, loop devices), \fBclifm\fR will fall back to \fBstat\fR(3) to get basic files classification.
+ 1. Only basic file classification is performed, namely, that provided by the \fId_type\fR field of a dirent struct (see \fBreaddir\fR(3)). Bear in mind, nonetheless, that whenever _DIRENT_HAVE_D_TYPE was not set at compile time, or in case of a DT_UNKNOWN value for a given entry (we might be facing a filesystem not returning the \fId_type\fR value, for example, loop devices), \fBclifm\fR will fall back to \fBstat\fR(3) to get basic files classification.
 .sp
  2. Color per file extension is disabled for performance reasons.
 .sp
@@ -2787,7 +2787,7 @@ When running in light mode, however, a few features are lost:
 .sp
 Besides these two features, a few more things can be disabled to get some extra speed (though perhaps unnoticeable): icons (if enabled), columns, colors, and, if already running without colors, file type indicators. Because listing lots of files could be expensive and time consuming, you can also try to limit the amount of files printed for each visited directory (see the \fImf\fR command above).
 .sp
-Despite the above, however, it is important to bear in mind that listing speed does not only depend on the program\'s code and enabled features, but also on the terminal emulator used. Old, basic terminal emulators like Xterm, Aterm, and the kernel built\-in console are really slow compared to more modern ones like Urxvt, Lxterminal, ST, and Terminator, to name just a few.
+Despite the above, however, it is important to bear in mind that listing speed does not only depend on the program\'s code and enabled features, but also on the terminal emulator used. Old, basic terminal emulators like Xterm, Aterm, and the kernel builtin console are really slow compared to more modern ones like Urxvt, Lxterminal, ST, and Terminator, to name just a few.
 .sp
 If using Xterm, a nice speed boost is provided by the fast scroll option: set \fIfastScroll\fR to true in your \fI~/.Xresources\fR file. See \fBxterm\fR(1).
 
@@ -2825,7 +2825,7 @@ Once all entries in the initial list of matches have been filtered via the above
 .sp
 Automatic maintenance is done on the database applying a few simple procedures:
 
- a) If \fIPurgeJumpDB\fR is set to \fItrue\fR (see the main configuration file), each entry in the database is checked at startup to remove non\-existent directories. This option is set to \fIfalse\fR by default to avoid removing paths pointing to unmounted file systems (like removable devices or remote locations) which you still might want to keep. Non\-existent directories, however, will be removed soon or later anyway due to their low rank value (see below).
+ a) If \fIPurgeJumpDB\fR is set to \fItrue\fR (see the main configuration file), each entry in the database is checked at startup to remove non\-existent directories. This option is set to \fIfalse\fR by default to avoid removing paths pointing to unmounted filesystems (like removable devices or remote locations) which you still might want to keep. Non\-existent directories, however, will be removed soon or later anyway due to their low rank value (see below).
 
  b) Once the rank of a directory falls below \fIMinJumpRank\fR (by default 10), it is forgotten and deleted from the database. The \fIMinJumpRank\fR value can be customized in the configuration file. To make non\-frequently visited directories disappear quicker from the database, increase this value. If set to 0, by contrast, directories will never be removed from the database.
 
@@ -3122,12 +3122,12 @@ Bear in mind that \fBclifm\fR is not intended to be used as a shell, but as the 
 
 \fBTerminal emulators and non\-ASCII characters\fR:
 
-It depends on the terminal emulator you use to correctly display non\-ASCII characters and characters from the extended ASCII charset. If, for example, you create a file named "ñandú" (the Spanish word for \'rhea\'), it will be correctly displayed by the Linux console, Lxterminal, and Urxvt, but not thus by more basic terminal emulators like Aterm.
+It depends on the terminal emulator you use to correctly display non\-ASCII characters and characters from the extended ASCII charset. If, for example, you create a filenamed "ñandú" (the Spanish word for \'rhea\'), it will be correctly displayed by the Linux console, Lxterminal, and Urxvt, but not thus by more basic terminal emulators like Aterm.
 .sp
 
-\fBSpaces and file names\fR:
+\fBSpaces and filenames\fR:
 
-When dealing with file names containing spaces, you can use both single and double quotes (e.g.: "this file" or 'this file') plus the backslash character (e.g.: this\\ file).
+When dealing with filenames containing spaces, you can use both single and double quotes (e.g.: "this file" or 'this file') plus the backslash character (e.g.: this\\ file).
 .sp
 
 \fBStarting path\fR:

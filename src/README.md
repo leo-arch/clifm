@@ -219,7 +219,7 @@ Manual memory management is another of the greatest (dis)advantages of C. Use a 
 
 Static analysis tools are an invaluable resource: use them! **Always** check your code via tools like `cppcheck`, GCC's analyzer (`-fanalyzer`),<sup>1</sup> Clang's `scan-build`, `flawfinder`, or `splint`. Use them all if necessary. Once done, fix all warnings and errors (provided they are not false positives, of course). This said, we use three online platforms to check our code quality: [Codacy](https://app.codacy.com/gh/leo-arch/clifm/dashboard), [~~Codiga~~](https://app.codiga.io/project/30518/dashboard), and [CodeQL](https://github.com/leo-arch/clifm/actions/workflows/codeql-analysis.yml).
 
-<sup>1</sup> On the state of the built-in static analyzer provided by GCC see https://www.reddit.com/r/C_Programming/comments/u1ylub/static_analysis_of_c_code_in_gcc_12/
+<sup>1</sup> On the state of the builtin static analyzer provided by GCC see https://www.reddit.com/r/C_Programming/comments/u1ylub/static_analysis_of_c_code_in_gcc_12/
 
 When it comes to plugins, we mostly use `POSIX shell scripts`. In this case, always use `shellcheck` to check your plugins.
 
@@ -259,7 +259,7 @@ If not obvious, comment what your code is trying to achieve: there is no good so
 3)  Execute command
  And take more input...
 
-**C)** The last step above (3) calls the `exec_cmd()` function (`in exec.c`) to find out what needs to be done based on the user's input. The structure of the `exec_cmd` function is a big if-else chain: if the command is internal, that is, one of **clifm**'s built-in commands, the corresponding function will be called and executed; if not, if it is rather an external command, it will be executed by the system shell (via `launch_execl()`, also in `exec.c`).<sup>1</sup>
+**C)** The last step above (3) calls the `exec_cmd()` function (`in exec.c`) to find out what needs to be done based on the user's input. The structure of the `exec_cmd` function is a big if-else chain: if the command is internal, that is, one of **clifm**'s builtin commands, the corresponding function will be called and executed; if not, if it is rather an external command, it will be executed by the system shell (via `launch_execl()`, also in `exec.c`).<sup>1</sup>
 
 <sup>1</sup> The shell used to launch external commands is taken from: 1) **CLIFM_SHELL** environment variable, 2) **SHELL** environment variable, or 3) the `password` database (via **getpwuid**(3)), in this order. Note that if running with `--secure-cmds`, `--secure-env`, or `--secure-env-full`, steps 1 and 2 are skipped. 
 
@@ -295,7 +295,7 @@ This is the basic structure of **clifm**: generally speaking, it is just a shell
 | Suggestions | `suggestions.c` and `keybinds.c` | `rl_suggestions` and `rl_accept_suggestion` respectively | |
 | Syntax highlighting | `highlight.c` | `rl_highlight` | See also `readline.c` and `keybinds.c` |
 | Autocommands | `autocmds.c` | `check_autocmds` | |
-| File names cleaner(`bleach`) | `name_cleaner.c` and `cleaner_table.h` | `bleach_files` | |
+| Filenames cleaner(`bleach`) | `name_cleaner.c` and `cleaner_table.h` | `bleach_files` | |
 | Improve my security | `sanitize.c` | `sanitize_cmd`, `sanitize_cmd_environ`, and `xsecure_env` | |
 | The tags system | `tags.c` | `tags_function` | |
 | `mounpoint` and `media` commands | `media.c` | `media_menu` | |
@@ -393,7 +393,7 @@ make -f misc/GNU/Makefile _NO_GETTEXT=1 _NO_ICONS=1
 | `_NERD` | Use Nerdfonts for [icons](https://github.com/leo-arch/clifm/wiki/Advanced/#icons-smirk) instead of the default (emoji-icons) |
 | `_NO_ARCHIVING` | Disable [archiving](https://github.com/leo-arch/clifm/wiki/Advanced#archives) support |
 | `_NO_ARC4RANDOM` | Disable support for [**arc4random**(3)](https://man.openbsd.org/arc4random.3) (**random**(3) will be used instead) |
-| `_NO_BLEACH` | Disable support for [`Bleach`, the built-in file names cleaner](https://github.com/leo-arch/clifm/wiki/Introduction#bb-bleach-elnfile--n) |
+| `_NO_BLEACH` | Disable support for [`Bleach`, the builtin filenames cleaner](https://github.com/leo-arch/clifm/wiki/Introduction#bb-bleach-elnfile--n) |
 | `_NO_GETTEXT` | Disable translations support (via `gettext`) |
 | `_NO_FZF` | Disable support for [alternative TAB completers](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion) (fzf, fnf, and smenu) |
 | `_NO_HIGHLIGHT`| Disable [syntax highlighting](https://github.com/leo-arch/clifm/wiki/Specifics#syntax-highlighting) support |
@@ -411,11 +411,11 @@ make -f misc/GNU/Makefile _NO_GETTEXT=1 _NO_ICONS=1
 | `_TOURBIN_QSORT` | Use Alexey Tourbin faster [qsort implementation](https://github.com/svpv/qsort) instead of [qsort(3)](https://www.man7.org/linux/man-pages/man3/qsort.3.html) |
 | `ALLOW_COREDUMPS` | If running in [secure mode](https://github.com/leo-arch/clifm/wiki/Specifics#security), core dumps are disabled. Compile with this flag to allow them. |
 | `SECURITY_PARANOID=1-3` | If compiled with this flag, **clifm** runs always in [secure mode](https://github.com/leo-arch/clifm/wiki/Specifics#security). If the value is `1`, the following flags are set: `--secure-cmds --secure-env`; if the value is `2`: `--secure-cmds --secure-env-full`; if the value is `3`: `--secure-cmds --secure-env-full --stealth-mode`. A value of `0` has no effect at all. |
-| `USE_GENERIC_FS_MONITOR` | Use the generic file system events monitor instead of inotify (Linux) or kqueue (BSD) |
-| `USE_DU1` | Use [**du**(1)](https://www.man7.org/linux/man-pages/man1/du.1.html) instead of our built-in trimmed down implementation ([xdu](https://github.com/leo-arch/clifm/blob/master/src/xdu.c)) |
+| `USE_GENERIC_FS_MONITOR` | Use the generic filesystem events monitor instead of inotify (Linux) or kqueue (BSD) |
+| `USE_DU1` | Use [**du**(1)](https://www.man7.org/linux/man-pages/man1/du.1.html) instead of our builtin trimmed down implementation ([xdu](https://github.com/leo-arch/clifm/blob/master/src/xdu.c)) |
 | `VANILLA_READLINE` | Disable all **clifm** specific features added to readline: syntax highlighting, autosuggestions, TAB completion for **clifm** specific features/commands, and alternative TAB completion modes (fzf, fnf, and smenu) |
 
-<sup>1</sup> By POSIX-compliance `strict POSIX-1.2008/XSI compliance` is understood: features/fuctions _not_ specified in the POSIX standard are avoided _as much as possible_ (mostly because we still rely heavily on **readline**(3), which is not POSIX). Features/functions disabled in POSIX mode: ACLs, files birth time, capabilities, attributes, and extended attributes, BSD file flags, Solaris doors, non-POSIX options for shell utilities (rm, cp, mv, etc), `inotify`/`kqueue` (replaced by a built-in file system events monitor), non-POSIX C functions (like **strcasestr**(3) and **memrchr**(3)) are replaced by built-in functions, and **arc4random**(3) is replaced by the older and less secure **random**(3). For more information about POSIX compliance see https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap02.html#tag_02_01_04.
+<sup>1</sup> By POSIX-compliance `strict POSIX-1.2008/XSI compliance` is understood: features/fuctions _not_ specified in the POSIX standard are avoided _as much as possible_ (mostly because we still rely heavily on **readline**(3), which is not POSIX). Features/functions disabled in POSIX mode: ACLs, files birth time, capabilities, attributes, and extended attributes, BSD file flags, Solaris doors, non-POSIX options for shell utilities (rm, cp, mv, etc), `inotify`/`kqueue` (replaced by a builtin filesystem events monitor), non-POSIX C functions (like **strcasestr**(3) and **memrchr**(3)) are replaced by builtin functions, and **arc4random**(3) is replaced by the older and less secure **random**(3). For more information about POSIX compliance see https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap02.html#tag_02_01_04.
 
 <sup>2</sup> The [stealth mode](https://github.com/leo-arch/clifm/wiki/Specifics#stealth-mode) achieves basically the same functionality: disabling access to config files. However, there is an important difference: if compiled with `CLIFM_SUCKLESS`, functions handling configuration files are directly removed from the source code, resulting in a smaller binary.
 

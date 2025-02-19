@@ -1594,7 +1594,7 @@ static int
 print_mime_info(char **app, char **fpath, char **mime)
 {
 	if (*(*app) == 'a' && (*app)[1] == 'd' && !(*app)[2]) {
-		printf(_("Opening application:    ad [built-in] [%s]\n"),
+		printf(_("Opening application:    ad [builtin] [%s]\n"),
 			mime_match ? "MIME" : "FILENAME");
 	} else {
 		printf(_("Opening application:    %s [%s]\n"), *app,

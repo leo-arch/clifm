@@ -290,7 +290,7 @@ if (S_ISNWK(mode)) return 'n'; // HP/UX: network special file
 # include <inttypes.h> /* uintmax_t, intmax_t */
 #endif /* BSD */
 
-/* File system event monitors (inotify and kqueue) are OS-specific.
+/* Filesystem event monitors (inotify and kqueue) are OS-specific.
  * Let's fallback to our own generic monitor. */
 #if defined(_BE_POSIX) && !defined(USE_GENERIC_FS_MONITOR)
 # define USE_GENERIC_FS_MONITOR
@@ -396,7 +396,7 @@ if (S_ISNWK(mode)) return 'n'; // HP/UX: network special file
 #ifndef _BE_POSIX
 # ifdef LINUX_STATX
 #  define ST_BTIME stx_btime
-/* OpenBSD defines the interface (see sys/stat.h), but the file system doesn't
+/* OpenBSD defines the interface (see sys/stat.h), but the filesystem doesn't
  * actually store creation times: the value of __st_birthtim is always zero.
 #elif defined(__OpenBSD__)
 # define ST_BTIME __st_birthtim */
@@ -422,7 +422,7 @@ if (S_ISNWK(mode)) return 'n'; // HP/UX: network special file
 # define ST_BTIME_LIGHT
 #endif /* ST_BTIME && !LINUX_STATX && !__sun */
 
-/* File system events handling */
+/* Filesystem events handling */
 #if defined(LINUX_INOTIFY)
 # define NUM_EVENT_SLOTS 32 /* Make room for 32 events */
 # define EVENT_SIZE (sizeof(struct inotify_event))
@@ -484,7 +484,7 @@ extern time_t curdir_mtime;
 # define LINUX_FSINFO
 #endif
 
-#define DEV_NO_NAME "-" /* String used when no file system name/type is found */
+#define DEV_NO_NAME "-" /* String used when no filesystem name/type is found */
 
 /* This is a more or less arbitrary value, but better than some huge value
  * like INT_MAX (which most likely will cause problems long before reaching
