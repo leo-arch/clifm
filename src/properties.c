@@ -1948,7 +1948,7 @@ properties_function(char **args, const int follow_link)
 		if (strchr(args[i], '\\')) {
 			char *deq_file = unescape_str(args[i], 0);
 			if (!deq_file) {
-				xerror(_("p: '%s': Cannot unescape file name\n"), args[i]);
+				xerror(_("p: '%s': Cannot unescape filename\n"), args[i]);
 				exit_status = FUNC_FAILURE;
 				continue;
 			}

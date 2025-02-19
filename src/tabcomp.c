@@ -605,7 +605,7 @@ get_last_word(char *str, const int original_query)
 
 /* We have an alternative preview file (set either via --shotgun-file,
  * --config-dir, or --profile).
- * Let's write the file name into an environment variable
+ * Let's write the filename into an environment variable
  * (CLIFM_ALT_PREVIEW_FILE), so that the clifm instance invoked by fzf
  * can handle it. */
 static void
@@ -1105,7 +1105,7 @@ store_completions(char **matches)
 		|| ct == TCMP_NET || ct == TCMP_PROF || ct == TCMP_PROMPTS
 		|| ct == TCMP_BM_PREFIX || ct == TCMP_WS_PREFIX
 		|| ct == TCMP_WORKSPACES);
-			/* We're not completing file names. */
+			/* We're not completing filenames. */
 
 	char *norm_prefix = (char *)NULL;
 	/* "./_", "../_", and "_/.._" */
@@ -1361,7 +1361,7 @@ is_multi_sel(void)
 	char *l = rl_line_buffer;
 	char *lws = get_last_chr(rl_line_buffer, ' ', rl_point);
 
-	/* Do not allow multi-sel if we have a path, only file names */
+	/* Do not allow multi-sel if we have a path, only filenames */
 	if (t == TCMP_PATH && *l != '/' && (!lws || !strchr(lws, '/'))) {
 		if (
 		/* Select */
@@ -1781,7 +1781,7 @@ move_cursor_up(const int total_line_len)
  * NOTE: Why do the random file extensions have different lengths? If
  * compiled in POSIX mode, gen_rand_ext() uses srandom(3) and random(3) to
  * generate the string, but since both extensions are generated at the same
- * time, they happen to be the same, resulting in both file names being
+ * time, they happen to be the same, resulting in both filenames being
  * identical. As a workaround, we use different lengths for both extensions.
  *
  * These files are created immediately after this function returns by
@@ -1825,7 +1825,7 @@ set_finder_paths(void)
 static int
 finder_tabcomp(char **matches, const char *text, char *original_query)
 {
-	/* Set random file names for both FINDER_IN_FILE and FINDER_OUT_FILE. */
+	/* Set random filenames for both FINDER_IN_FILE and FINDER_OUT_FILE. */
 	set_finder_paths();
 
 	/* Store possible completions in FINDER_IN_FILE to pass them to the finder. */

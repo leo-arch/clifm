@@ -187,11 +187,11 @@ run_action(char *action, char **args)
 
 	free(cmd);
 
-	/* 1.b Escape non-escaped file names */
+	/* 1.b Escape non-escaped filenames */
 	size_t i;
 	for (i = 1; args[i]; i++) {
 		struct stat a;
-		/* If the file name is already escaped, lstat(2) will fail, so that
+		/* If the filename is already escaped, lstat(2) will fail, so that
 		 * it won't be reescaped. */
 		if (!strchr(args[i], ' ') || lstat(args[i], &a) == -1)
 			continue;

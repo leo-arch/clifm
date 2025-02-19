@@ -302,7 +302,7 @@ profile_add(const char *prof)
 		return FUNC_FAILURE;
 	}
 
-	/* If the config dir is fine, generate config file names */
+	/* If the config dir is fine, generate config filenames */
 	int exit_status = FUNC_SUCCESS;
 	const size_t config_len = strlen(nconfig_dir);
 

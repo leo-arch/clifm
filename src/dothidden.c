@@ -118,7 +118,7 @@ load_dothidden(void)
 	return h;
 }
 
-/* Return 1 if the file name NAME is contained in the list of dot-hidden
+/* Return 1 if the file named NAME is contained in the list of dot-hidden
  * files H. Otherwise, return 0. */
 int
 check_dothidden(const char *restrict name, struct dothidden_t **h)

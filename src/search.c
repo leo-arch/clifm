@@ -199,7 +199,7 @@ chdir_search_path(char **search_path, const char *arg)
 	if (strchr(*search_path, '\\')) {
 		char *deq_dir = unescape_str(*search_path, 0);
 		if (!deq_dir) {
-			xerror(_("search: %s: Error unescaping file name\n"), arg);
+			xerror(_("search: %s: Error unescaping filename\n"), arg);
 			return FUNC_FAILURE;
 		}
 
@@ -286,7 +286,7 @@ get_glob_matches(char **gfiles, const char *search_path,
 
 		matches[n].name = savestring(gfiles[i], strlen(gfiles[i]));
 
-		/* Get the longest file name in the list. */
+		/* Get the longest filename in the list. */
 		/* If not in CWD, we only need to know the file's length (no ELN) */
 		if (search_path) {
 			/* This will be passed to colors_list(): -1 means no ELN */
@@ -536,7 +536,7 @@ print_glob_matches(struct search_t *matches, const char *search_path)
 				df_c, conf.icons == 1 ? ' ' : 0);
 		}
 
-		/* Print file name. */
+		/* Print filename. */
 		int name_pad = (last_column == 1 || i == (found - 1)) ? NO_PAD :
 		    (int)(flongest - matches[i].len - ( search_path ? 0
 		    : (size_t)(eln_pad - DIGINUM(matches[i].eln)) ) + 1);
@@ -556,7 +556,7 @@ print_glob_matches(struct search_t *matches, const char *search_path)
 	return found;
 }
 
-/* List matching file names in the specified directory. */
+/* List matching filenames in the specified directory. */
 static int
 search_glob(char **args)
 {
@@ -608,8 +608,8 @@ search_glob(char **args)
 	if (conf.list_dirs_first == 1)
 		gfiles = glob_sort_dirs(&globbed_files, &g);
 
-	/* We need to store pointers to matching file names in array of pointers,
-	 * just as the file name length (to construct the columned output), and,
+	/* We need to store pointers to matching filenames in array of pointers,
+	 * just as the filename length (to construct the columned output), and,
 	 * if searching in CWD, its index (ELN) in the dirlist array as well. */
 	struct search_t *list = (struct search_t *)NULL;
 
@@ -891,7 +891,7 @@ END:
 	return count;
 }
 
-/* List matching (or non-marching if INVERT is set to 1) file names
+/* List matching (or non-marching if INVERT is set to 1) filenames
  * in the specified directory. */
 static int
 search_regex(char **args)

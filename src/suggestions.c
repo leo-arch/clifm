@@ -675,7 +675,7 @@ get_reg_file_color(const char *filename, const struct stat *attr,
 	return ext_color;
 }
 
-/* Used by the check_completions function to get file names color
+/* Used by the check_completions function to get filenames color
  * according to file type. */
 static char *
 get_comp_color(const char *filename, const struct stat *attr, int *free_color)
@@ -926,7 +926,7 @@ print_reg_file_suggestion(char *str, const filesn_t i, size_t len,
 			s++;
 		}
 
-		if (dot_slash) { /* Reinsert './', removed to check file name. */
+		if (dot_slash) { /* Reinsert './', removed to check filename. */
 			*tmp_buf = '\0';
 			snprintf(tmp_buf, sizeof(tmp_buf), "./%s", tmp);
 			print_suggestion(tmp_buf, len + 2, color);
@@ -2309,7 +2309,7 @@ rl_suggestions(const unsigned char c)
 			if (!last_space && conf.autocd == 0 && conf.auto_open == 0)
 				break;
 
-			/* Skip internal commands not dealing with file names. */
+			/* Skip internal commands not dealing with filenames. */
 			if (first_word) {
 				flags |= STATE_COMPLETING;
 				if (is_internal_cmd(first_word, NO_FNAME_NUM, 1, 1)) {
@@ -2381,7 +2381,7 @@ rl_suggestions(const unsigned char c)
 			}
 			break;
 
-		case 'f': /* 3.e.4) File names in CWD */
+		case 'f': /* 3.e.4) Filenames in CWD */
 			/* Do not check dirs and filenames if first word and
 			 * neither autocd nor auto-open are enabled. */
 			if (!last_space && conf.autocd == 0 && conf.auto_open == 0)
@@ -2409,7 +2409,7 @@ rl_suggestions(const unsigned char c)
 			if (p && *(p + 1))
 				break;
 
-			/* Skip internal commands not dealing with file names. */
+			/* Skip internal commands not dealing with filenames. */
 			if (first_word) {
 				flags |= STATE_COMPLETING;
 				if (is_internal_cmd(first_word, NO_FNAME_NUM, 1, 1)) {
@@ -2512,7 +2512,7 @@ CHECK_FIRST_WORD:
 	} else if (point_is_first_word && rl_point < rl_end
 	&& (printed = check_completions(word, wlen, CHECK_MATCH)) != NO_MATCH) {
 		if (c == ' ' && printed != FULL_MATCH)
-			/* We have a partial match for a file name. If not a command
+			/* We have a partial match for a filename. If not a command
 			 * name, let's return NO_MATCH. */
 			printed = check_cmds(word, wlen, CHECK_MATCH);
 

@@ -1,4 +1,4 @@
-/* name_cleaner.c -- functions to clean up file names
+/* name_cleaner.c -- functions to sanitize filenames
  * 
  * This file is part of Clifm
  *
@@ -74,7 +74,7 @@
 #define UTF_8_ENCODED_2_BYTES      0xC0
 
 #define BLEACH_TMP_HEADER "# CliFM - Bleach\n\
-# Edit replacement file names as you wish, save, and close the editor.\n\
+# Edit replacement filenames as you wish, save, and close the editor.\n\
 # You will be asked for confirmation at exit.\n\n"
 
 #define check_width(chr, size) if (((chr) & UTF_8_ENCODED_ ## size ## _BYTES_MASK) == UTF_8_ENCODED_ ## size ## _BYTES) { return size; }
@@ -169,16 +169,16 @@ get_uft8_dec_value(size_t *i, const char *str)
  * without an ASCII alternative/similar character, or by translating (based
  * on the unitable table (in cleaner_table.h)) extended-ASCII/Unicode characters
  * into an alternative ASCII character based on familiarity/similarity. Disallowed
- * characters (NUL and slash) will be simply removed. The file name length will
- * be trimmed to NAME_MAX (usually 255). If the replacement file name is
+ * characters (NUL and slash) will be simply removed. The filename length will
+ * be trimmed to NAME_MAX (usually 255). If the replacement filename is
  * only one character long, "bleach" will be appended to avoid too short
- * file names.
+ * filenames.
  *
- * @parameter: the file name to be cleaned up. If it contains a slash, only
- * the string after the slash will be taken a the actual file name
+ * @parameter: the filename to be sanitized. If it contains a slash, only
+ * the string after the slash will be taken a the actual filename
  *
- * @return: the cleaned file name or NULL in case of error. If the translated
- * file name is empty, it will be replaced by "bleach.YYYYMMDDHHMMS"
+ * @return: the sanitized filename or NULL in case of error. If the translated
+ * filename is empty, it will be replaced by "bleach.YYYYMMDDHHMMS"
  * */
 static char *
 clean_file_name(char *restrict name)
@@ -296,9 +296,9 @@ clean_file_name(char *restrict name)
 	if (too_long)
 		p[NAME_MAX] = '\0';
 
-	/* Handle some file names that should be avoided */
+	/* Handle some filenames that should be avoided */
 
-	if (!*p) { /* Empty file name */
+	if (!*p) { /* Empty filename */
 		time_t rawtime = time(NULL);
 		struct tm t;
 		char *suffix = localtime_r(&rawtime, &t)
@@ -311,7 +311,7 @@ clean_file_name(char *restrict name)
 		free(suffix);
 	} else {
 		if (!*(p + 1)) {
-			/* Avoid one character long file names. Specially because files
+			/* Avoid one character long filenames. Specially because files
 			 * named with a single dot should be avoided */
 			char c = *p;
 			snprintf(p, NAME_MAX, "%c.%s", c, FUNC_NAME);
@@ -322,19 +322,19 @@ clean_file_name(char *restrict name)
 	if (*name != '.' && *p == '.')
 		*p = DEFAULT_TRANSLATION;
 
-	/* File names shouldn't start with a dash/hyphen (reserved for command options)*/
+	/* Filenames shouldn't start with a dash/hyphen (reserved for command options)*/
 	if (*p == '-')
 		*p = DEFAULT_TRANSLATION;
 
-	/* No file name should be named dot-dot (..) */
+	/* No filename should be named dot-dot (..) */
 	if (cur_len == 3 && *p == '.' && *(p + 1) == '.' && !*(p + 2))
 		*(p + 1) = DEFAULT_TRANSLATION;
 
 	return p;
 }
 
-/* Let the user edit replacement file names via a text editor and return
- * a new array with the updated file names. If the temp file is not modified
+/* Let the user edit replacement filenames via a text editor and return
+ * a new array with the updated filenames. If the temp file is not modified
  * the original list of files is returned instead. In case of error
  * returns NULL */
 static struct bleach_t *
@@ -442,7 +442,7 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 				bfiles[i].original = (char *)NULL;
 			}
 			bfiles[i].original = savestring(p, strlen(p));
-		/* Do not store the replacement file name is there is no original */
+		/* Do not store the replacement filename is there is no original */
 		} else if (strncmp(line, "replacement: ", 13) == 0
 		&& bfiles[i].original) {
 			bfiles[i].replacement = savestring(p, strlen(p));
@@ -488,9 +488,9 @@ ERROR:
 	return bfiles;
 }
 
-/* Clean up the list of file names (NAMES), print the list of the cleaned
- * file names (allowing the user to edit this list), and finally
- * rename the original file names into the clean ones */
+/* Clean up the list of filenames (NAMES), print the list of the sanitized
+ * filenames (allowing the user to edit this list), and finally
+ * rename the original filenames into the clean ones */
 int
 bleach_files(char **names)
 {
@@ -506,7 +506,7 @@ bleach_files(char **names)
 	for (; names[i]; i++) {
 		char *dstr = unescape_str(names[i], 0);
 		if (!dstr) {
-			xerror(_("bleach: '%s': Error unescaping file name\n"), names[i]);
+			xerror(_("bleach: '%s': Error unescaping filename\n"), names[i]);
 			continue;
 		}
 
@@ -599,7 +599,7 @@ CONFIRM:
 	free(input);
 
 	if (f == 0) {
-		/* Just in case either the original or the replacement file name
+		/* Just in case either the original or the replacement filename
 		 * was removed from the list by the user, leaving only one of the two. */
 		free(bfiles[0].original);
 		free(bfiles[0].replacement);
@@ -621,7 +621,7 @@ CONFIRM:
 	 * Ask for confirmation in case the user just wanted to see what would
 	 * be done. */
 	if (do_edit == 1) {
-		printf(_("%zu file name(s) will be bleached\n"), f);
+		printf(_("%zu filename(s) will be bleached\n"), f);
 		if (rl_get_y_or_n(_("Continue?"), 0) != 1) {
 			for (i = 0; i < f; i++) {
 				free(bfiles[i].original);
@@ -644,7 +644,7 @@ CONFIRM:
 		char *o = bfiles[i].original ? bfiles[i].original : (char *)NULL;
 		char *r = bfiles[i].replacement ? bfiles[i].replacement : (char *)NULL;
 		if (o && *o && r && *r && rename) {
-			/* Make sure the replacement file name does not exist. If
+			/* Make sure the replacement filename does not exist. If
 			 * it does, append REP_SUFFIX and try again. */
 			struct stat a;
 			while (lstat(r, &a) == 0) {
@@ -671,12 +671,12 @@ CONFIRM:
 	free(bfiles);
 
 	if (exit_status == FUNC_FAILURE || total_rename == 0) {
-		printf(_("%s: %d file names(s) bleached\n"), FUNC_NAME, total_rename);
+		printf(_("%s: %d filenames(s) bleached\n"), FUNC_NAME, total_rename);
 	} else {
 		if (conf.autols == 1)
 			reload_dirlist();
 		print_reload_msg(SET_SUCCESS_PTR, xs_cb,
-			_("%d file name(s) bleached\n"), total_rename);
+			_("%d filename(s) bleached\n"), total_rename);
 	}
 
 	return exit_status;

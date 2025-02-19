@@ -791,7 +791,7 @@ extern time_t curdir_mtime;
 #define SET_COLOR    1
 #define INFORM_COLOR 0
 
-/* Are we trimming a file name with a extension? */
+/* Are we truncating a filename with an extension? */
 #define TRIM_NO_EXT 1
 #define TRIM_EXT    2
 
@@ -1352,8 +1352,8 @@ struct fileinfo {
 	char *name;
 	filesn_t filesn;
 	blkcnt_t blocks;
-	size_t len;    /* File name len (columns needed to display file name) */
-	size_t bytes;  /* Bytes consumed by file name */
+	size_t len;    /* Filename len (columns needed to display filename) */
+	size_t bytes;  /* Bytes consumed by filename */
 #ifdef TIGHT_COLUMNS
 	size_t total_entry_len;
 #endif
@@ -1706,11 +1706,11 @@ extern struct props_t prop_fields;
 
 #define ALL_CMDS        (1 << 0) // Check all commands (ignore parameters)
 #define NO_PARAM        (1 << 1) // Command takes no parameter
-#define PARAM_STR       (1 << 2) // Command takes a string (not file name)
-#define PARAM_FNAME     (1 << 3) // Command takes file names
+#define PARAM_STR       (1 << 2) // Command takes a string (not filename)
+#define PARAM_FNAME     (1 << 3) // Command takes filenames
 #define PARAM_NUM       (1 << 4) // Command takes numbers
-#define NO_FNAME_NUM    (NO_PARAM | PARAM_STR) // Neither file name nor number
-#define PARAM_FNAME_NUM (PARAM_FNAME | PARAM_NUM) // Either file name or number
+#define NO_FNAME_NUM    (NO_PARAM | PARAM_STR) // Neither filename nor number
+#define PARAM_FNAME_NUM (PARAM_FNAME | PARAM_NUM) // Either filename or number
 
 struct cmdslist_t {
 	char *name;
@@ -2076,7 +2076,7 @@ extern regex_t regex_hist;    /* Commands history */
 extern regex_t regex_dirhist; /* Directory history */
 extern char **environ;
 
-/* A buffer to store file names to be displayed (wide string) */
+/* A buffer to store filenames to be displayed (wide string) */
 #define NAME_BUF_SIZE (NAME_MAX + 1)
 extern char name_buf[NAME_BUF_SIZE * sizeof(wchar_t)];
 
@@ -2133,11 +2133,11 @@ extern char
 	sb_c[MAX_COLOR], /* Auto-suggestions: shell builtins */
 	sc_c[MAX_COLOR], /* Auto-suggestions: external commands and aliases */
 	sd_c[MAX_COLOR], /* Auto-suggestions: internal commands description */
-	sf_c[MAX_COLOR], /* Auto-suggestions: file names */
+	sf_c[MAX_COLOR], /* Auto-suggestions: filenames */
 	sh_c[MAX_COLOR], /* Auto-suggestions: history */
 	sp_c[MAX_COLOR], /* Auto-suggestions: BAEJ suggestions pointer */
 	sx_c[MAX_COLOR], /* Auto-suggestions: internal commands and parameters */
-	sz_c[MAX_COLOR], /* Auto-suggestions: file names (fuzzy) */
+	sz_c[MAX_COLOR], /* Auto-suggestions: filenames (fuzzy) */
 
 #ifndef _NO_ICONS
     dir_ico_c[MAX_COLOR], /* Directories icon color */

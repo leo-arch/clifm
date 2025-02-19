@@ -556,7 +556,7 @@ check_regex(char *str)
 		p++;
 	}
 
-	/* And if STR is not a file name, take it as a possible regex */
+	/* And if STR is not a filename, take it as a possible regex */
 	if (char_found == 1 && access(str, F_OK) == -1)
 		return FUNC_SUCCESS;
 

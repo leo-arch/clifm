@@ -1699,7 +1699,7 @@ create_main_config_file(char *file)
 # history list, showing previous, current, and next entries.\n\
 ;DirhistMap=%s\n\n"
 
-		"# Use a regex expression to filter file names when listing files.\n\
+		"# Use a regex expression to filter filenames when listing files.\n\
 # Run 'help file-filters' for more information.\n\
 ;Filter=""\n\n"
 
@@ -1756,7 +1756,7 @@ create_main_config_file(char *file)
 ;SplashScreen=%s\n\n\
 # Show hidden files (true, false, first, last)\n\
 ;ShowHiddenFiles=%s\n\n\
-# Display extended file metadata next to file names (long listing format).\n\
+# Display extended file metadata next to filenames (long listing format).\n\
 ;LongViewMode=%s\n\
 # Properties fields to be printed in long view mode.\n\
 # f = files counter for directories\n\
@@ -1791,7 +1791,7 @@ create_main_config_file(char *file)
 # Log commands entered in the command line\n\
 ;LogCmds=%s\n\n"
 
-	    "# Minimum length at which a file name can be trimmed in long view mode.\n\
+	    "# Minimum length at which a filename can be trimmed in long view mode.\n\
 # If running in long mode, this setting overrides MaxFilenameLen whenever\n\
 # this latter is smaller than MINFILENAMETRIM.\n\
 ;MinFilenameTrim=%d\n\n"
@@ -1871,12 +1871,12 @@ create_main_config_file(char *file)
 # a = Aliases names\n\
 # c = Path completion\n\
 # e = ELN's\n\
-# f = File names in current directory\n\
+# f = Filenames in current directory\n\
 # h = Commands history\n\
 # j = Jump database\n\
 ;SuggestionStrategy=%s\n\n"
 
-	    "# Suggest file names using the corresponding file type color\n\
+	    "# Suggest filenames using the corresponding file type color\n\
 # (set via the color scheme file).\n\
 ;SuggestFiletypeColor=%s\n\n"
 
@@ -1918,10 +1918,10 @@ create_main_config_file(char *file)
 
 	    "# If running with colors, append directory indicator\n\
 # to directories. If running without colors (via the --no-color option),\n\
-# append file type indicator at the end of file names.\n\
+# append file type indicator at the end of filenames.\n\
 ;Classify=%s\n\n"
 
-		"# Color links as target file name.\n\
+		"# Color links as target filename.\n\
 ;ColorLinksAsTarget=%s\n\n"
 
 	    "# Should the Selection Box be shared among different profiles?\n\
@@ -1962,7 +1962,7 @@ create_main_config_file(char *file)
 # Enable case sensitive lookup for the directory jumper function (via \n\
 # the 'j' command).\n\
 ;CaseSensitiveDirJump=%s\n\n\
-# Enable case sensitive completion for file names.\n\
+# Enable case sensitive completion for filenames.\n\
 ;CaseSensitivePathComp=%s\n\n\
 # Enable case sensitive search.\n\
 ;CaseSensitiveSearch=%s\n\
@@ -1977,14 +1977,14 @@ create_main_config_file(char *file)
 # How to list files in the pager: auto (default), short, long\n\
 ;PagerView=%s\n\n"
 
-	"# Maximum file name length for listed files. If TrimNames is set to\n\
+	"# Maximum filename length for listed files. If TrimNames is set to\n\
 # true, names larger than MAXFILENAMELEN will be truncated at MAXFILENAMELEN\n\
 # using a tilde.\n\
 # Set it to -1 (or empty) to remove this limit.\n\
 # When running in long mode, this setting is overriden by MinFilenameTrim\n\
 # whenever MAXFILENAMELEN is smaller than MINFILENAMETRIM.\n\
 ;MaxFilenameLen=%d\n\n\
-# Trim file names longer than MAXFILENAMELEN.\n\
+# Truncate filenames longer than MAXFILENAMELEN.\n\
 ;TrimNames=%s\n\n",
 
 		DEF_LIGHT_MODE == 1 ? "true" : "false",
@@ -2370,17 +2370,17 @@ create_mime_file_anew(char *file)
 # Use 'X' to specify a GUI environment and '!X' for non-GUI environments,\n\
 # like the kernel builtin console or a remote SSH session.\n\
 \n\
-# Use 'N' to match file names instead of MIME types.\n\
+# Use 'N' to match filenames instead of MIME types.\n\
 \n\
-# Regular expressions are allowed for both file types and file names.\n\
+# Regular expressions are allowed for both file types and filenames.\n\
 \n\
-# Use the %%f placeholder to specify the position of the file name to be\n\
+# Use the %%f placeholder to specify the position of the filename to be\n\
 # opened in the command. Example:\n\
 # 'mpv %%f --terminal=no' -> 'mpv FILE --terminal=no'\n\
 #\n\
 # The %%u placeholder is expanded to the file URI for the original file.\n\
 #\n\
-# If neither %%f nor %%u are specified, the file name will be appended to the\n\
+# If neither %%f nor %%u are specified, the filename will be appended to the\n\
 # end of the command. E.g.: 'mpv --terminal=no' -> 'mpv --terminal=no FILE'\n\
 #\n\
 # The %%m placeholder is expanded to the file's MIME type.\n\
@@ -2422,10 +2422,10 @@ create_mime_file_anew(char *file)
 #  File names/extensions  #\n\
 ###########################\n\
 \n\
-# Match a full file name\n\
+# Match a full filename\n\
 #X:N:some_filename=cmd\n\
 \n\
-# Match all file names starting with 'str'\n\
+# Match all filenames starting with 'str'\n\
 #X:N:^str.*=cmd\n\
 \n\
 # Match files with extension 'ext'\n\

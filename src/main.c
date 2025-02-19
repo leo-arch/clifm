@@ -367,10 +367,10 @@ char
 	sc_c[MAX_COLOR], /* Auto-suggestions: external commands */
 	sd_c[MAX_COLOR], /* Auto-suggestions: internal commands description */
 	sh_c[MAX_COLOR], /* Auto-suggestions: history */
-	sf_c[MAX_COLOR], /* Auto-suggestions: file names */
+	sf_c[MAX_COLOR], /* Auto-suggestions: filenames */
 	sx_c[MAX_COLOR], /* Auto-suggestions: internal commands and params */
 	sp_c[MAX_COLOR], /* Auto-suggestions: suggestions pointer */
-	sz_c[MAX_COLOR], /* Auto-suggestions: file names (fuzzy) */
+	sz_c[MAX_COLOR], /* Auto-suggestions: filenames (fuzzy) */
 
 #ifndef _NO_ICONS
 	dir_ico_c[MAX_COLOR], /* Directories icon color */
@@ -434,7 +434,7 @@ char
 	tmp_color[MAX_COLOR + 2], /* A temp buffer to store color codes */
 	dim_c[] = "\x1b[2m";
 
-/* A buffer to store file names to be displayed (wide string) */
+/* A buffer to store filenames to be displayed (wide string) */
 char name_buf[NAME_BUF_SIZE * sizeof(wchar_t)];
 
 /* A list of all internal commands, including command name, name length,
@@ -449,7 +449,7 @@ const struct cmdslist_t internal_cmds[] = {
 	{"auto", 4, PARAM_STR, 0},
 	{"autocd", 6, PARAM_STR, 0},
 	{"actions", 7, PARAM_STR, 0},
-	{"alias", 5, PARAM_FNAME, 0}, // diff (old 0110, new 1110) // 'alias import' takes file names
+	{"alias", 5, PARAM_FNAME, 0}, // diff (old 0110, new 1110) // 'alias import' takes filenames
 	{"ao", 2, PARAM_STR, 0},
 	{"auto-open", 9, PARAM_STR, 0},
 	{"b", 1, PARAM_STR, 0},

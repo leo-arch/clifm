@@ -38,7 +38,7 @@
 #include "spawn.h" /* launch_execv() */
 
 #define BULK_RM_TMP_FILE_HEADER "# Clifm - Remove files in bulk\n\
-# Remove the file names you want to be deleted, save, and quit the\n\
+# Remove the filenames you want to be deleted, save, and quit the\n\
 # editor (you will be asked for confirmation).\n\
 # Quit the editor without saving to cancel the operation.\n\n"
 

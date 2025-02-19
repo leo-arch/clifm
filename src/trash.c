@@ -226,7 +226,7 @@ remove_trashinfo_file(const char *name)
 	free(info_file);
 }
 
-/* Create the trashed file name: orig_filename.suffix, where SUFFIX is
+/* Create the trashed filename: orig_filename.suffix, where SUFFIX is
  * the current date and time (plus an integer in case of dups).
  * Returns the absolute path to this file and updates FILE_SUFFIX to
  * its basename. */
@@ -239,7 +239,7 @@ gen_dest_file(const char *file, const char *suffix, char **file_suffix)
 		return (char *)NULL;
 	}
 
-	/* If the length of the trashed file name (orig_filename.suffix) is
+	/* If the length of the trashed filename (orig_filename.suffix) is
 	 * longer than NAME_MAX (255), trim the original filename, so that
 	 * (original_filename_len + 1 (dot) + suffix_len) won't be longer
 	 * than NAME_MAX. */
@@ -250,9 +250,9 @@ gen_dest_file(const char *file, const char *suffix, char **file_suffix)
 
 	if (size > 0) {
 		/* THIS IS NOT UNICODE AWARE */
-		/* If SIZE is a positive value, that is, the trashed file name
-		 * exceeds NAME_MAX by SIZE bytes, reduce the original file name
-		 * SIZE bytes. Terminate the original file name (FILENAME) with
+		/* If SIZE is a positive value, that is, the trashed filename
+		 * exceeds NAME_MAX by SIZE bytes, reduce the original filename
+		 * SIZE bytes. Terminate the original filename (FILENAME) with
 		 * a tilde (~), to let the user know it was trimmed. */
 		filename[filename_len - (size_t)size - 1] = '~';
 		filename[filename_len - (size_t)size] = '\0';
@@ -674,7 +674,7 @@ static int
 check_untrash_dest(char *file)
 {
 	if (!file || !*file) {
-		xerror(_("undel: File name is NULL or empty\n"));
+		xerror(_("undel: Filename is NULL or empty\n"));
 		return FUNC_FAILURE;
 	}
 
@@ -1062,14 +1062,14 @@ list_ok_trashed_files(char **args, const int *trashed, const size_t trashed_n)
 		char *p = args[trashed[i]];
 		if (strchr(args[trashed[i]], '\\')
 		&& !(p = unescape_str(args[trashed[i]], 0)) ) {
-			xerror(_("trash: '%s': Error unescaping file name\n"),
+			xerror(_("trash: '%s': Error unescaping filename\n"),
 				args[trashed[i]]);
 			continue;
 		}
 
 		char *tmp = abbreviate_file_name(p);
 		if (!tmp) {
-			xerror(_("trash: '%s': Error abbreviating file name\n"), p);
+			xerror(_("trash: '%s': Error abbreviating filename\n"), p);
 			if (p && p != args[trashed[i]])
 				free(p);
 			continue;
@@ -1086,7 +1086,7 @@ list_ok_trashed_files(char **args, const int *trashed, const size_t trashed_n)
 	}
 }
 
-/* Print file names in ARGS and ask for confirmation.
+/* Print filenames in ARGS and ask for confirmation.
  * Return the number of files to be trashed if the answer is afirmative,
  * or zero otherwise. */
 static size_t
@@ -1151,7 +1151,7 @@ trash_files_args(char **args)
 
 		char *deq_file = unescape_str(args[i], 0);
 		if (!deq_file) {
-			xerror(_("trash: '%s': Error unescaping file name\n"), args[i]);
+			xerror(_("trash: '%s': Error unescaping filename\n"), args[i]);
 			continue;
 		}
 

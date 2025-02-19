@@ -86,7 +86,7 @@ static char *const unsafe_name_msgs[] = {
 # define PORTABLE_CHARSET "abcdefghijklmnopqrstuvwxyz\
 ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-_"
 
-/* Return 0 if NAME is a portable file name. Otherwise, return 1. */
+/* Return 0 if NAME is a portable filename. Otherwise, return 1. */
 static int
 is_portable_filename(const char *name, const size_t len)
 {
@@ -140,7 +140,7 @@ run_mime(char *file)
 
 	char *p = rl_line_buffer ? rl_line_buffer : (char *)NULL;
 
-	/* Convert ELN into file name (rl_line_buffer) */
+	/* Convert ELN into filename (rl_line_buffer) */
 	if (p && *p >= '1' && *p <= '9') {
 		const filesn_t a = xatof(p);
 		if (a > 0 && a <= files && file_info[a - 1].name)
@@ -204,7 +204,7 @@ xchmod(const char *file, const char *mode_str, const int flag)
 {
 	if (!file || !*file) {
 		err(flag == 1 ? 'e' : 0, flag == 1 ? PRINT_PROMPT : NOPRINT_PROMPT,
-			_("xchmod: Empty buffer for file name\n"));
+			_("xchmod: Empty buffer for filename\n"));
 		return FUNC_FAILURE;
 	}
 
@@ -332,12 +332,12 @@ dup_file(char **cmd)
 		if (!cmd[i] || !*cmd[i])
 			continue;
 
-		/* 1. Construct file names. */
+		/* 1. Construct filenames. */
 		char *source = cmd[i];
 		if (strchr(source, '\\')) {
 			char *deq_str = unescape_str(source, 0);
 			if (!deq_str) {
-				xerror(_("dup: '%s': Error unescaping file name\n"), source);
+				xerror(_("dup: '%s': Error unescaping filename\n"), source);
 				continue;
 			}
 
@@ -345,7 +345,7 @@ dup_file(char **cmd)
 			free(deq_str);
 		}
 
-		/* Use source as destiny file name: source.copy, and, if already
+		/* Use source as destiny filename: source.copy, and, if already
 		 * exists, source.copy-n, where N is an integer greater than zero. */
 		const size_t source_len = strlen(source);
 		int rem_slash = 0;
@@ -490,7 +490,7 @@ create_from_template(char *abs_path, char *basename)
 	}
 
 	if (t_auto == 0) {
-		/* src_file@template: Remove template name from source file name. */
+		/* src_file@template: Remove template name from source filename. */
 		char *p = strrchr(abs_path, '@');
 		if (p)
 			*p = '\0';
@@ -736,7 +736,7 @@ validate_filename(char **name, const int is_md)
 
 	char *deq = unescape_str(*name, 0);
 	if (!deq) {
-		xerror(_("%s: '%s': Error unescaping file name\n"),
+		xerror(_("%s: '%s': Error unescaping filename\n"),
 			is_md ? "md" : "new", *name);
 		return 0;
 	}
@@ -825,11 +825,11 @@ format_new_filename(char **name)
 	return FUNC_SUCCESS;
 }
 
-/* Ask the user for a new file name and create the file. */
+/* Ask the user for a new filename and create the file. */
 static int
 ask_and_create_file(void)
 {
-	puts(_("Enter new file name (Ctrl-d to quit)\n"
+	puts(_("Enter new filename (Ctrl-d to quit)\n"
 		"Tip: End name with a slash to create a directory"));
 	char _prompt[NAME_MAX];
 	snprintf(_prompt, sizeof(_prompt), "\001%s\002>\001%s\002 ", mi_c, tx_c);
@@ -840,7 +840,7 @@ ask_and_create_file(void)
 		return FUNC_SUCCESS;
 
 	if (validate_filename(&filename, 0) == 0) {
-		xerror(_("new: '%s': Unsafe file name\n"), filename);
+		xerror(_("new: '%s': Unsafe filename\n"), filename);
 		if (rl_get_y_or_n(_("Continue?"), 0) == 0) {
 			free(filename);
 			return FUNC_SUCCESS;
@@ -870,7 +870,7 @@ ERROR:
 }
 
 /* (l)stat(2), just as access(2), sees "file" and "file/" as different
- * file names. So, let's check the existence of the file FILE ignoring the
+ * filenames. So, let's check the existence of the file FILE ignoring the
  * trailing slash, if any. */
 static int
 check_file_existence(char *file)
@@ -920,7 +920,7 @@ create_files(char **args, const int is_md)
 
 	for (i = 0; args[i]; i++) {
 		if (validate_filename(&args[i], is_md) == 0) {
-			xerror(_("%s: '%s': Unsafe file name\n"),
+			xerror(_("%s: '%s': Unsafe filename\n"),
 				is_md ? "md" : "new", args[i]);
 			if (rl_get_y_or_n(_("Continue?"), 0) == 0)
 				continue;
@@ -1021,7 +1021,7 @@ open_function(char **cmd)
 		if (strchr(cmd[1], '\\')) {
 			char *deq_path = unescape_str(cmd[1], 0);
 			if (!deq_path) {
-				xerror(_("%s: '%s': Error unescaping file name\n"),
+				xerror(_("%s: '%s': Error unescaping filename\n"),
 					errname, cmd[1]);
 				return FUNC_FAILURE;
 			}
@@ -1181,11 +1181,11 @@ edit_link(char *link)
 		return FUNC_SUCCESS;
 	}
 
-	/* Dequote the file name, if necessary. */
+	/* Dequote the filename, if necessary. */
 	if (strchr(link, '\\')) {
 		char *tmp = unescape_str(link, 0);
 		if (!tmp) {
-			xerror(_("le: '%s': Error unescaping file name\n"), link);
+			xerror(_("le: '%s': Error unescaping filename\n"), link);
 			return FUNC_FAILURE;
 		}
 
@@ -1660,7 +1660,7 @@ run_cp_mv_cmd(char **cmd, const int skip_force, const size_t files_num)
 
 		/* If we have a number, either it was not expanded by parse_input_str(),
 		 * in which case it is an invalid ELN, or it was expanded to a file
-		 * named as a number. Let's check if we have such file name in the
+		 * named as a number. Let's check if we have such filename in the
 		 * files list. */
 		if (is_number(cmd[1])) {
 			filesn_t i = files;
@@ -2095,7 +2095,7 @@ remove_files(char **args)
 		rm_force = 1;
 
 	for (j = 3; args[i]; i++) {
-		/* Let's start storing file names in 3: 0 is for 'rm', and 1
+		/* Let's start storing filenames in 3: 0 is for 'rm', and 1
 		 * and 2 for parameters, including end of parameters (--). */
 
 		/* If we have a symlink to dir ending with a slash, stat(2) takes it
@@ -2114,7 +2114,7 @@ remove_files(char **args)
 
 		char *tmp = unescape_str(args[i], 0);
 		if (!tmp) {
-			xerror(_("%s: '%s': Error unescaping file name\n"), err_name, args[i]);
+			xerror(_("%s: '%s': Error unescaping filename\n"), err_name, args[i]);
 			continue;
 		}
 
@@ -2251,9 +2251,9 @@ export_files(char **filenames, const int open)
 	return (char *)NULL;
 }
 
-/* Create a symlink in CWD for each file name in ARGS.
+/* Create a symlink in CWD for each filename in ARGS.
  * If the destiny file exists, a positive integer suffix is appended to
- * make the file name unique. */
+ * make the filename unique. */
 int
 batch_link(char **args)
 {

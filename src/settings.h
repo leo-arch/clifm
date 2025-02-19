@@ -142,7 +142,7 @@ xf=1;31:xs=32:"
 #define DEF_LC_C  "\x1b[1;36m"
 
 #define DEF_TS_C  "\x1b[4;35m" /* Matching prefix for TAB completed possible entries */
-#define DEF_TT_C  "\x1b[1;2;36m" /* Tilde for trimmed file names */
+#define DEF_TT_C  "\x1b[1;2;36m" /* Tilde for truncated filenames */
 #define DEF_WP_C  "\x1b[0;2;31m" /* Warning prompt input text */
 #define DEF_XS_C  "\001\x1b[32m\002" /* Exit code: success */
 #define DEF_XS_CB "\x1b[32m"     /* Exit code: Unicode success indicator */
@@ -167,7 +167,7 @@ xf=1;31:xs=32:"
 #define DEF_SF_C  "\x1b[2;4;36m" /* ELN's, bookmark, file, and directory names */
 #define DEF_SP_C  "\x1b[2;31m"   /* Suggestions pointer (12 > filename) */
 #define DEF_SX_C  "\x1b[2;32m"   /* Internal commands and parameters */
-#define DEF_SZ_C  "\x1b[2;4;36m" /* File names (fuzzy) */
+#define DEF_SZ_C  "\x1b[2;4;36m" /* Filenames (fuzzy) */
 
 /* Highlight */
 #define DEF_HB_C  "\x1b[0;36m" /* Parenthesis, Brackets ( {[()]} ) */
@@ -307,7 +307,7 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define DEF_LC_C256 "\x1b[0;38;5;43m"
 
 #define DEF_TS_C256   "\x1b[4;35m" /* Matching prefix for TAB completed possible entries */
-#define DEF_TT_C256   "\x1b[1;2;36m" /* Tilde for trimmed file names */
+#define DEF_TT_C256   "\x1b[1;2;36m" /* Tilde for truncated filenames */
 #define DEF_WP_C256   "\x1b[0;2;31m" /* Warning prompt input text */
 #define DEF_XS_C256   "\001\x1b[32m\002" /* Exit code: success */
 #define DEF_XS_CB256  "\x1b[32m"     /* Exit code: Unicode success indicator */
@@ -332,7 +332,7 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define DEF_SF_C256  "\x1b[2;4;36m" /* ELN's, bookmark, file, and directory names */
 #define DEF_SP_C256  "\x1b[38;5;239m"   /* Suggestions pointer (12 > filename) */
 #define DEF_SX_C256  "\x1b[2;32m"   /* Internal commands and parameters */
-#define DEF_SZ_C256  "\x1b[2;4;36m" /* File names (fuzzy) */
+#define DEF_SZ_C256  "\x1b[2;4;36m" /* Filenames (fuzzy) */
 
 /* Highlight */
 #define DEF_HB_C256  "\x1b[0;36m" /* Parenthesis, Brackets ( {[()]} ) */
@@ -428,7 +428,7 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define DU_ERR_CHAR '!'
 
 /* Character used to replace invalid characters (either a control char or an
- * invalid UTF-8 char) in file names. */
+ * invalid UTF-8 char) in filenames. */
 #define INVALID_CHR '^'
 
 /* A few identifiers used in the prompt */
@@ -489,7 +489,7 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define DEF_CASE_SENS_SEARCH 0
 #define DEF_CD_ON_QUIT 0
 #define DEF_CHECK_CAP 1 /* Check files capabilities */
-#define DEF_CHECK_EXT 1 /* Check file names extension (for color) */
+#define DEF_CHECK_EXT 1 /* Check filenames extension (for color) */
 #define DEF_CLASSIFY 1
 #define DEF_CLEAR_SCREEN 1
 #define DEF_CMD_DESC_SUG 1
@@ -523,7 +523,7 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define DEF_HIST_STATUS 1
 #define DEF_HISTIGNORE "^[q,Q]$|^quit$|^exit$|^ .*|^#.*|^[0-9]+$|^\\.+$"
 #define DEF_ICONS 0
-#define DEF_ICONS_GAP 1 /* Number of spaces between icons and file names */
+#define DEF_ICONS_GAP 1 /* Number of spaces between icons and filenames */
 #define DEF_INT_VARS 0
 #define DEF_LIGHT_MODE 0
 /* Possible values: LNK_CREAT_REG, LNK_CREAT_ABS, and LNK_CREAT_REL */
@@ -678,7 +678,7 @@ alt-down:preview-page-down --tiebreak=begin --inline-info --layout=reverse-list 
 /* Name of the file to store thumbnails original paths.
  * Each line in this file has this format: THUMB_FILE@FILE_URI,
  * where THUMB_FILE is the name of the thumbnail file (MD5 hash of FILE_URI),
- * and FILE_URI is the file URI for the absolute path to the original file name.
+ * and FILE_URI is the file URI for the absolute path to the original filename.
  * This file is located in $XDG_CACHE_HOME/clifm/thumbnails */
 #define THUMBNAILS_INFO_FILE ".thumbs.info"
 

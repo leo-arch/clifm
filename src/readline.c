@@ -1391,7 +1391,7 @@ int_cmds_generator(const char *text, int state)
 		"b       (go back in the directory history list)",
 		"bd      (change to a parent directory)",
 		"bl      (create symbolic links in bulk)",
-		"bb      (clean up non-ASCII file names)",
+		"bb      (sanitize non-ASCII filenames)",
 		"bm      (manage bookmarks)",
 		"br      (bulk rename files)",
 		"c       (copy files)",
@@ -1403,7 +1403,7 @@ int_cmds_generator(const char *text, int state)
 		"cs      (manage color schemes)",
 		"dup     (duplicate files)",
 		"ds      (deselect files)",
-		"exp     (export file names to a temporary file)",
+		"exp     (export filenames to a temporary file)",
 		"ext     (set external/shell commands on/off)",
 		"f       (go forth in the directory history list)",
 		"fc      (toggle the files counter on/off)",
@@ -4384,7 +4384,7 @@ FIRST_WORD_COMP:
 #ifndef _NO_LIRA
 	/* #### OPENING APPS FOR INTERNAL CMDS TAKING 'EDIT' AS SUBCOMMAND */
 	if (s && is_edit(s, words_n) == 1 && config_file) {
-		/* mime_open_with_tab needs a file name to match against the
+		/* mime_open_with_tab needs a filename to match against the
 		 * mimelist file and get the list of opening applications.
 		 * Now, since here we are listing apps to open config files,
 		 * i.e. text files, any config file will do the trick, in this
@@ -4513,7 +4513,7 @@ FIRST_WORD_COMP:
 	if (s && *s == 'n' && strncmp(s, "net ", 4) == 0)
 		return complete_net((char *)text);
 
-	/* If we have an internal command not dealing with file names,
+	/* If we have an internal command not dealing with filenames,
 	 * do not perform any further completion. */
 	if (s && int_cmd_no_filename(s) == 1)
 		return (char **)NULL;
@@ -4690,7 +4690,7 @@ initialize_readline(void)
 	/* This function is executed inmediately before path completion. So,
 	 * if the string to be completed is, for instance, "user\ file" (see
 	 * the above comment), this function should return the dequoted
-	 * string so it won't conflict with system file names: you want
+	 * string so it won't conflict with system filenames: you want
 	 * "user file", because "user\ file" does not exist, and, in this
 	 * latter case, readline won't find any matches. */
 	rl_filename_dequoting_function = unescape_str;

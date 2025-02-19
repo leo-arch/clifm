@@ -46,7 +46,7 @@
 # undef dirfd
 #endif /* dirfd */
 /* A dummy value, since we're not using file descriptors. Functions using
- * them are replaced by functions using plain file names instead. */
+ * them are replaced by functions using plain filenames instead. */
 #define dirfd(d)   (0)
 
 #define alphasort  x_alphasort

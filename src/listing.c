@@ -115,7 +115,7 @@
 # define COLUMNS_GAP 2
 #endif
 
-/* Information about the longest file name in the curent list of files. */
+/* Information about the longest filename in the curent list of files. */
 struct longest_t {
 	size_t fc_len;   /* Length of the files counter (if a directory). */
 	size_t name_len; /* Length of the longest name. */
@@ -149,9 +149,9 @@ static int pager_quit = 0;
 static int pager_help = 0;
 static int long_view_bk = UNSET;
 
-/* Struct to store information about trimmed file names. */
+/* Struct to store information about truncated filenames. */
 struct wtrim_t {
-	char *wname; /* Address to store file name with replaced control chars */
+	char *wname; /* Address to store filename with replaced control chars */
 	int type; /* Truncation type: with or without file extension. */
 	int diff; /* */
 };
@@ -259,7 +259,7 @@ swap_ent(const size_t id1, const size_t id2)
  * otherwise. BYTES is updated to the number of bytes needed to read the
  * entire name (excluding the terminating NUL char).
  *
- * This check is performed over file names to be listed. If the file name is
+ * This check is performed over filenames to be listed. If the filename is
  * not UTF8, we get its visible length from BYTES, instead of running
  * wc_xstrlen(). This gives us a little performance improvement: 3% faster
  * over 100,000 files. */
@@ -790,7 +790,7 @@ run_pager(const int columns_n, int *reset_pager, filesn_t *i, size_t *counter)
 		return (-3);
 
 	/* If another key is pressed, go back one position.
-	 * Otherwise, some file names won't be listed.*/
+	 * Otherwise, some filenames won't be listed.*/
 	default:
 		putchar('\r');
 		ERASE_TO_RIGHT;
@@ -908,9 +908,9 @@ get_longest_filename(const filesn_t n, const size_t eln_len)
 		longest.name_len += (size_t)ICON_LEN;
 
 	/* LONGEST.FC_LEN stores the amount of digits taken by the files counter of
-	 * the longest file name, provided it is a directory.
-	 * We use this to trim file names up to MAX_NAME_LEN + LONGEST.FC_LEN, so
-	 * that we can make use of the space taken by the files counter.
+	 * the longest filename, provided it is a directory.
+	 * We use this to truncate filenames up to MAX_NAME_LEN + LONGEST.FC_LEN,
+	 * so that we can make use of the space taken by the files counter.
 	 * Example:
 	 *    longest_dirname/13
 	 *    very_long_file_na~
@@ -1100,7 +1100,7 @@ print_long_mode(size_t *counter, int *reset_pager, const int eln_len,
 	if (prop_fields.xattr == 0)
 		have_xattr = 0;
 
-	/* Available space (term cols) to print the file name. */
+	/* Available space (term cols) to print the filename. */
 	int space_left = (int)term_cols - (prop_fields.len + have_xattr
 		+ maxes.files_counter + maxes.size + maxes.links + maxes.inode
 		+ maxes.id_user + (prop_fields.no_group == 0 ? maxes.id_group : 0)
@@ -1172,7 +1172,7 @@ get_columns(void)
 #else
 	size_t n = (size_t)term_cols / (longest.name_len + 1);
 #endif
-	/* +1 for the space between file names. */
+	/* +1 for the space between filenames. */
 
 	/* If LONGEST.NAME_LEN is bigger than terminal columns, N will zero.
 	 * To avoid this: */
@@ -1227,8 +1227,8 @@ get_ext_info(const filesn_t i, int *trim_type)
 	return ext_len;
 }
 
-/* Construct the file name to be displayed.
- * The file name is trimmed if longer than MAX_NAMELEN (if conf.max_name_len
+/* Construct the filename to be displayed.
+ * The filename is truncated if longer than MAX_NAMELEN (if conf.max_name_len
  * is set). */
 static char *
 construct_filename(const filesn_t i, struct wtrim_t *wtrim,
@@ -1248,7 +1248,7 @@ construct_filename(const filesn_t i, struct wtrim_t *wtrim,
 		: file_info[i].bytes) : file_info[i].len;
 
 	/* file_info[i].len is zero whenever an invalid character was found in
-	 * the file name. Let's recalculate the name length. */
+	 * the filename. Let's recalculate the name length. */
 	if (namelen == 0) {
 		wtrim->wname = replace_invalid_chars(file_info[i].name);
 		namelen = file_info[i].len = wc_xstrlen(wtrim->wname);
@@ -1260,7 +1260,7 @@ construct_filename(const filesn_t i, struct wtrim_t *wtrim,
 	|| (int)namelen <= max_namelen)
 		return name;
 
-	/* Let's trim the file name (at MAX_NAMELEN, in this example, 11).
+	/* Let's truncate the filename (at MAX_NAMELEN, in this example, 11).
 	 * A. If no file extension, just trim at 11:  "long_filen~"
 	 * B. If we have an extension, keep it:       "long_f~.ext"
 	 *
@@ -1846,8 +1846,8 @@ pad_filename_new(const filesn_t i, const int termcap_move_right,
 }
 #endif /* TIGHT_COLUMNS */
 
-/* Right pad the current file name (adding spaces) to equate the longest
- * file name length. */
+/* Right pad the current filename (adding spaces) to equate the longest
+ * filename length. */
 static void
 pad_filename(const int ind_char, const filesn_t i, const int eln_len,
 	const int termcap_move_right)
@@ -1923,7 +1923,7 @@ list_files_horizontal(size_t *counter, int *reset_pager,
 		if (conf.pager == 1 || (*reset_pager == 0 && conf.pager > 1
 		&& files >= (filesn_t)conf.pager)) {
 			/* Run the pager only once all columns and rows fitting in
-			 * the screen are filled with the corresponding file names */
+			 * the screen are filled with the corresponding filenames */
 			int ret = 0;
 			filesn_t backup_i = i;
 			if (backup_last_column && *counter > columns_n * ((size_t)term_lines - 2))
@@ -1950,7 +1950,7 @@ list_files_horizontal(size_t *counter, int *reset_pager,
 			 * ################################# */
 
 		const int fc = file_info[i].dir != 1 ? int_longest_fc_len : 0;
-		/* Displayed file name will be trimmed to MAX_NAME_LEN. */
+		/* Displayed filename will be trimmed to MAX_NAME_LEN. */
 		const int max_namelen = conf.max_name_len + fc;
 
 		file_info[i].eln_n = conf.no_eln == 1 ? -1 : DIGINUM(i + 1);
@@ -2072,7 +2072,7 @@ list_files_vertical(size_t *counter, int *reset_pager,
 			int ret = 0;
 			filesn_t backup_i = i;
 			/* Run the pager only once all columns and rows fitting in
-			 * the screen are filled with the corresponding file names. */
+			 * the screen are filled with the corresponding filenames. */
 			if (backup_last_column
 			&& *counter > num_columns * ((size_t)term_lines - 2))
 				ret = run_pager((int)num_columns,
@@ -2109,7 +2109,7 @@ list_files_vertical(size_t *counter, int *reset_pager,
 			 * ################################# */
 
 		const int fc = file_info[file_index].dir != 1 ? int_longest_fc_len : 0;
-		/* Displayed file name will be trimmed to MAX_NAMELEN. */
+		/* Displayed filename will be truncated to MAX_NAMELEN. */
 		const int max_namelen = conf.max_name_len + fc;
 
 		file_info[file_index].eln_n = conf.no_eln == 1
@@ -2725,7 +2725,7 @@ list_dir_light(const int autocmd_ret)
 	size_t counter = 0;
 	size_t columns_n = 1;
 
-	/* Get the longest file name */
+	/* Get the longest filename */
 	if (conf.columned == 1 || conf.long_view == 1)
 		get_longest_filename(n, (size_t)eln_len);
 
@@ -3040,7 +3040,7 @@ load_link_info(const int fd, const filesn_t n)
 
 	/* We only need the symlink target name provided the target
 	 * is not a directory, because set_link_target_color() will
-	 * check the file name extension. get_dir_color() only needs
+	 * check the filename extension. get_dir_color() only needs
 	 * this name to run count_dir(), but we have already executed
 	 * this function. */
 	static char tmp[PATH_MAX + 1]; *tmp = '\0';
@@ -3146,7 +3146,7 @@ load_regfile_info(const struct stat *a, const filesn_t n)
 	 * 1. filename or filename.extension
 	 * 2. extension
 	 * 3. file type */
-	/* Check icons for specific file names */
+	/* Check icons for specific filenames */
 	const int name_icon_found = (conf.icons == 1)
 		? get_name_icon(n) : 0;
 #endif /* !_NO_ICONS */
@@ -3379,7 +3379,7 @@ list_dir(void)
 		}
 
 		/* Both is_utf8_name() and wc_xstrlen() calculate the number of
-		 * columns needed to display the current file name on the screen
+		 * columns needed to display the current filename on the screen
 		 * (the former for ASCII names, where 1 char = 1 byte = 1 column, and
 		 * the latter for UTF-8 names, i.e. containing at least one non-ASCII
 		 * character).
@@ -3395,7 +3395,7 @@ list_dir(void)
 		file_info[n].name = xnmalloc(file_info[n].bytes + 1, sizeof(char));
 		memcpy(file_info[n].name, ename, file_info[n].bytes + 1);
 
-		/* Columns needed to display file name */
+		/* Columns needed to display filename */
 		file_info[n].len = file_info[n].utf8 == 0
 			? file_info[n].bytes : wc_xstrlen(ename);
 
@@ -3491,7 +3491,7 @@ list_dir(void)
 	size_t counter = 0;
 	size_t columns_n = 1;
 
-	/* Get the longest file name */
+	/* Get the longest filename */
 	if (conf.columned == 1 || conf.long_view == 1
 	|| conf.pager_view != PAGER_AUTO)
 		get_longest_filename(n, (size_t)eln_len);

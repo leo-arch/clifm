@@ -460,7 +460,7 @@ check_compressed(const char *line, const int test_iso)
 	|| (test_iso && strstr(line, "ISO 9660")));
 }
 
-/* Check the MIME type of the file names FILE and look for "archive" and
+/* Check the MIME type of the file named FILE and look for "archive" and
  * "compressed" strings. Returns zero if compressed, one if not, and -1
  * in case of error.
  * test_iso is used to determine if ISO files should be checked as
@@ -510,7 +510,7 @@ get_archive_filename(void)
 	char *name = (char *)NULL;
 	while (!name) {
 		flags |= NO_FIX_RL_POINT;
-		name = rl_no_hist(_("File name ('q' to quit): "), 0);
+		name = rl_no_hist(_("Filename ('q' to quit): "), 0);
 		flags &= ~NO_FIX_RL_POINT;
 
 		if (!name || !*name) {
@@ -529,7 +529,7 @@ get_archive_filename(void)
 			return add_default_extension(name);
 
 		if (dot == name) { /* Dot is first char */
-			xerror("%s\n", _("Invalid file name"));
+			xerror("%s\n", _("Invalid filename"));
 			free(name);
 			name = (char *)NULL;
 			continue;
@@ -550,7 +550,7 @@ zstandard(char *in_file, char *out_file, const char mode, const char op)
 	int exit_status = FUNC_SUCCESS;
 	char *deq_file = unescape_str(in_file, 0);
 	if (!deq_file) {
-		xerror(_("archiver: '%s': Error unescaping file name\n"), in_file);
+		xerror(_("archiver: '%s': Error unescaping filename\n"), in_file);
 		return FUNC_FAILURE;
 	}
 
@@ -656,7 +656,7 @@ compress_zstandard(char *name, char **args)
 	printf(_("\n%sNOTE%s: Zstandard does not support compression of "
 		 "multiple files into one single compressed file. Files will "
 		 "be compressed rather into multiple compressed files using the "
-		 "original file names.\n"), BOLD, df_c);
+		 "original filenames.\n"), BOLD, df_c);
 
 	size_t i;
 	for (i = 1; args[i]; i++) {

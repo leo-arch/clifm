@@ -209,11 +209,11 @@ NAME is not specified, print the list of all parent directories\n\n\
     bl sel\n\n\
 Note: Links are always created in the current directory."
 
-#define BLEACH_USAGE "Clean up filenames from non-ASCII characters\n\n\
+#define BLEACH_USAGE "Sanitize filenames by removing or converting non-ASCII characters\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   bb, bleach ELN/FILE...\n\n\
 \x1b[1mEXAMPLE\x1b[22m\n\
-- Bleach filenames in your Downloads directory\n\
+- Sanitize filenames in your Downloads directory\n\
     bb ~/Downloads/*"
 
 #define BOOKMARKS_USAGE "Manage bookmarks\n\n\
@@ -1578,7 +1578,7 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  ao, auto-open      Set auto-open on/off\n\
  auto               Set an autocommand for the current directory\n\
  b, back            Go back in the directory history list\n\
- bb, bleach         Clean up non-ASCII filenames\n\
+ bb, bleach         Sanitize non-ASCII filenames\n\
  bd                 Go back to a parent directory\n\
  bl                 Create symbolic links in bulk\n\
  bm, bookmarks      Manage bookmarks\n\
@@ -1861,7 +1861,7 @@ q | F12         I'm tired, quit"
 #define B_DESC       " (go back in the directory history list)"
 #define BD_DESC      " (change to a parent directory)"
 #define BL_DESC      " (create symbolic links in bulk)"
-#define BB_DESC      " (clean up non-ASCII filenames)"
+#define BB_DESC      " (sanitize non-ASCII filenames)"
 #define BM_DESC      " (manage bookmarks)"
 #define BR_DESC      " (rename files in bulk)"
 #define C_DESC       " (copy files)"

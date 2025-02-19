@@ -482,7 +482,7 @@ retrieve_app(char *line)
 	return (char *)NULL; /* No app was found */
 }
 
-/* Get application associated to a given MIME type or file name.
+/* Get application associated to a given MIME type or filename.
  * Returns the first matching line in the MIME file or NULL if none is
  * found. */
 static char *
@@ -656,7 +656,7 @@ mime_edit(char **args)
 	}
 
 	if (!mime_file || !*mime_file) {
-		xerror("%s: The mimelist file name is undefined\n", err_name);
+		xerror("%s: The mimelist filename is undefined\n", err_name);
 		return FUNC_FAILURE;
 	}
 
@@ -808,7 +808,7 @@ expand_app_fields(char ***cmd, size_t *n, char *fpath, int *exec_flags)
 			continue;
 		}
 
-		/* Expand %u to the file URI for the original file name */
+		/* Expand %u to the file URI for the original filename */
 		if (*a[i] == '%' && a[i][1] == 'u') {
 			char *p = url_encode(fpath, 1);
 			if (!p)
@@ -864,7 +864,7 @@ run_mime_app(char *app, char *file)
 	size_t i = 0;
 	const size_t f = expand_app_fields(&cmd, &i, file, &exec_flags);
 
-	/* If no %f placeholder was found, append file name */
+	/* If no %f placeholder was found, append filename */
 	if (f == 0) {
 		cmd = xnrealloc(cmd, i + 2, sizeof(char *));
 		cmd[i] = savestring(file, strlen(file));
@@ -1367,7 +1367,7 @@ mime_open_with(char *filename, char **args)
 
 	/* ow FILE APP [ARGS]
 	 * We already have the opening app. Just join the app, option
-	 * parameters, and file name, and execute the command. */
+	 * parameters, and filename, and execute the command. */
 	if (args && args[0]) {
 		const int ret = join_and_run(args, name);
 		free(name);
@@ -1375,7 +1375,7 @@ mime_open_with(char *filename, char **args)
 	}
 
 	/* Find out the appropriate opening application via either mime type
-	 * or file name. */
+	 * or filename. */
 	char *mime = xmagic(name, MIME_TYPE);
 	if (!mime) {
 		xerror(_("%s: Error getting MIME type\n"), err_name);
@@ -1511,7 +1511,7 @@ get_open_file_path(char **args, char **fpath, char **deq)
 	else
 		f = args[1];
 
-	/* Only dequote the file name if coming from the mime command */
+	/* Only dequote the filename if coming from the mime command */
 	if (*args[0] == 'm' && strchr(f, '\\')) {
 		*deq = unescape_str(f, 0);
 		*fpath = xrealpath(*deq, NULL);
@@ -1716,11 +1716,11 @@ mime_open(char **args)
 	int ret = 0;
 #ifdef __CYGWIN__
 	/* Some Windows programs, like Word and Powerpoint (but not Excel!!), do
-	 * not like absolute paths when the file name contains spaces. So, let's
-	 * pass the file name as it was passed to this function, without
+	 * not like absolute paths when the filename contains spaces. So, let's
+	 * pass the filename as it was passed to this function, without
 	 * expanding it to an absolute path.
 	 * This hack must be removed as soon as the real cause is discovered:
-	 * why Word/Powerpoint fails to open absolute paths when the file name
+	 * why Word/Powerpoint fails to open absolute paths when the filename
 	 * contains spaces? */
 	ret = run_mime_app(app, args[file_index]);
 #else

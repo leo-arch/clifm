@@ -42,7 +42,7 @@
 #define WORD_BEGINNING_BONUS    5
 #define CONSECUTIVE_CHAR_BONUS  4
 #define SINGLE_CHAR_MATCH_BONUS 2
-/* When suggesting file names, an exact match doesn't provide anything
+/* When suggesting filenames, an exact match doesn't provide anything
  * else for suggesting, so that it isn't useful */
 #define EXACT_MATCH_BONUS       1
 

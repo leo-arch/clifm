@@ -295,7 +295,7 @@ This is the basic structure of **clifm**: generally speaking, it is just a shell
 | Suggestions | `suggestions.c` and `keybinds.c` | `rl_suggestions` and `rl_accept_suggestion` respectively | |
 | Syntax highlighting | `highlight.c` | `rl_highlight` | See also `readline.c` and `keybinds.c` |
 | Autocommands | `autocmds.c` | `check_autocmds` | |
-| Filenames cleaner(`bleach`) | `name_cleaner.c` and `cleaner_table.h` | `bleach_files` | |
+| Filenames sanitizer(`bleach`) | `name_cleaner.c` and `cleaner_table.h` | `bleach_files` | |
 | Improve my security | `sanitize.c` | `sanitize_cmd`, `sanitize_cmd_environ`, and `xsecure_env` | |
 | The tags system | `tags.c` | `tags_function` | |
 | `mounpoint` and `media` commands | `media.c` | `media_menu` | |
@@ -393,7 +393,7 @@ make -f misc/GNU/Makefile _NO_GETTEXT=1 _NO_ICONS=1
 | `_NERD` | Use Nerdfonts for [icons](https://github.com/leo-arch/clifm/wiki/Advanced/#icons-smirk) instead of the default (emoji-icons) |
 | `_NO_ARCHIVING` | Disable [archiving](https://github.com/leo-arch/clifm/wiki/Advanced#archives) support |
 | `_NO_ARC4RANDOM` | Disable support for [**arc4random**(3)](https://man.openbsd.org/arc4random.3) (**random**(3) will be used instead) |
-| `_NO_BLEACH` | Disable support for [`Bleach`, the builtin filenames cleaner](https://github.com/leo-arch/clifm/wiki/Introduction#bb-bleach-elnfile--n) |
+| `_NO_BLEACH` | Disable support for [`Bleach`, the builtin filenames sanitizer](https://github.com/leo-arch/clifm/wiki/Introduction#bb-bleach-elnfile--n) |
 | `_NO_GETTEXT` | Disable translations support (via `gettext`) |
 | `_NO_FZF` | Disable support for [alternative TAB completers](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion) (fzf, fnf, and smenu) |
 | `_NO_HIGHLIGHT`| Disable [syntax highlighting](https://github.com/leo-arch/clifm/wiki/Specifics#syntax-highlighting) support |

@@ -887,7 +887,7 @@ list_selected_files(void)
 				conf.pager = 0; reset_pager = 1; /* 'q' */
 				break;
 			/* If another key is pressed, go back one position.
-			 * Otherwise, some file names won't be listed.*/
+			 * Otherwise, some filenames won't be listed.*/
 			default:
 				i--;
 				continue;

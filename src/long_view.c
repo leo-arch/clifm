@@ -97,12 +97,12 @@ static void
 construct_and_print_filename(const struct fileinfo *props,
 	const int max_namelen)
 {
-	/* If file name length is greater than max, truncate it to max (later a
-	 * tilde (~) will be appended to let the user know the file name was
+	/* If filename length is greater than max, truncate it to max (later a
+	 * tilde (~) will be appended to let the user know the filename was
 	 * truncated). */
 	int trim = 0;
 
-	/* Handle file names with embedded control characters */
+	/* Handle filenames with embedded control characters */
 	size_t plen = props->len;
 	char *wname = (char *)NULL;
 	if (props->len == 0) {
@@ -153,7 +153,7 @@ construct_and_print_filename(const struct fileinfo *props,
 
 	free(wname);
 
-	/* Calculate pad for each file name */
+	/* Calculate pad for each filename */
 	int pad = max_namelen - (int)cur_len;
 	if (pad < 0)
 		pad = 0;
@@ -484,8 +484,8 @@ construct_blocks_str(const struct fileinfo *props, char *blk_str, const int max)
 		db_c, max, (intmax_t)props->blocks, df_c);
 }
 
-/* Compose the properties line for the current file name.
- * This function is called by list_dir(), in listing.c, for each file name
+/* Compose the properties line for the current filename.
+ * This function is called by list_dir(), in listing.c, for each filename
  * in the current directory when running in long view mode (after
  * printing the corresponding ELN). */
 int

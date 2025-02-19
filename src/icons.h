@@ -728,7 +728,7 @@ struct icons_t const icon_dirnames[] = {
     {"Videos", ICON_VIDEOS, DEF_DIR_ICON_COLOR},
 };
 
-/* Icons for some specific file names */
+/* Icons for some specific filenames */
 struct icons_t const icon_filenames[] = {
 /* More specific filenames from here https://github.com/alexanderjeurissen/ranger_devicons/blob/main/devicons.py */
     {".bash_history", ICON_CONF, WHITE},

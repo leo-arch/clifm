@@ -1385,7 +1385,7 @@ expand_tag(char ***args, const int tag_index)
 	}
 	p[j] = (char *)NULL;
 
-	/* Append the file names pointed to by the tag expression */
+	/* Append all filenames pointed to by the tag expression */
 	for (i = 0; i < (size_t)n; i++) {
 		if (SELFORPARENT(t[i]->d_name))
 			continue;
@@ -1711,7 +1711,7 @@ insert_fields(char ***dst, char ***src, const size_t i, size_t *num)
 	return d;
 }
 
-/* Expand the ELN at SUBSTR[I] into the corresponding file name, which is
+/* Expand the ELN at SUBSTR[I] into the corresponding filename, which is
  * quoted, if necessary, according to the value of conf.quoting_style. */
 static void
 eln_expand(char ***substr, const size_t i)
@@ -1726,9 +1726,9 @@ eln_expand(char ***substr, const size_t i)
 	 * never bigger than FILESN_MAX). */
 	const filesn_t j = num - 1;
 
-	/* If file name starts with a dash, and the command is external,
-	 * use the absolute path to the file name, to prevent the command from
-	 * taking the file name as a command option. */
+	/* If filename starts with a dash, and the command is external,
+	 * use the absolute path to the filename, to prevent the command from
+	 * taking the filename as a command option. */
 	char *abs_path = (char *)NULL;
 	if (file_info[j].name && *file_info[j].name == '-'
 	&& !is_internal_cmd((*substr)[0], ALL_CMDS, 1, 1))
@@ -1749,7 +1749,7 @@ eln_expand(char ***substr, const size_t i)
 	if (i == 0)
 		flags |= FIRST_WORD_IS_ELN;
 
-	/* Replace the ELN by the corresponding escaped file name */
+	/* Replace the ELN by the corresponding escaped filename */
 	struct stat a;
 	if (file_info[j].type == DT_DIR && file_info[j].name[file_info[j].len > 0
 	? file_info[j].len - 1 : 0] != '/'
@@ -1791,7 +1791,7 @@ expand_sel(char ***substr)
 
 	/* 2. Add all selected files (in place of 'sel') */
 	for (i = 0; i < sel_n; i++) {
-		/* Escape selected file names and copy them into tmp array */
+		/* Escape selected filenames and copy them into tmp array */
 		char *esc_str = escape_str(sel_elements[i].name);
 		if (!esc_str)
 			continue;
@@ -2156,7 +2156,7 @@ expand_glob(char ***substr, const int *glob_array, const size_t glob_n)
 				continue;
 
 			char *esc_str = (char *)NULL;
-			/* Escape the globbed file name and copy it */
+			/* Escape the globbed filename and copy it */
 			if (virtual_dir == 1 && is_file_in_cwd(globbuf.gl_pathv[i])) {
 				char buf[PATH_MAX + 1]; *buf = '\0';
 				if (xreadlink(XAT_FDCWD, globbuf.gl_pathv[i], buf,
@@ -2171,7 +2171,7 @@ expand_glob(char ***substr, const int *glob_array, const size_t glob_n)
 				glob_cmd[j] = esc_str;
 				j++;
 			} else {
-				xerror(_("%s: '%s': Error quoting file name\n"),
+				xerror(_("%s: '%s': Error quoting filename\n"),
 					PROGRAM_NAME, globbuf.gl_pathv[i]);
 				continue;
 			}
@@ -2239,13 +2239,13 @@ expand_word(char ***substr, const int *word_array, const size_t word_n)
 			}
 
 			for (i = 0; i < wordbuf.we_wordc; i++) {
-				/* Escape the globbed file name and copy it */
+				/* Escape the globbed filename and copy it */
 				char *esc_str = escape_str(wordbuf.we_wordv[i]);
 				if (esc_str) {
 					word_cmd[j] = esc_str;
 					j++;
 				} else {
-					xerror(_("%s: '%s': Error quoting file name\n"),
+					xerror(_("%s: '%s': Error quoting filename\n"),
 						PROGRAM_NAME, wordbuf.we_wordv[i]);
 
 					size_t k = 0;
@@ -2470,7 +2470,7 @@ expand_regex(char ***substr)
 
 		/* Ignore the first string of the search function: it will be
 		 * expanded by the search function itself.
-		 * Also, ignore quoted words and existent file names. */
+		 * Also, ignore quoted words and existent filenames. */
 		struct stat a;
 		if (*(*substr)[0] == '/' || is_quoted_word((size_t)i)
 		|| lstat((*substr)[i], &a) != -1) {
@@ -2479,8 +2479,8 @@ expand_regex(char ***substr)
 			continue;
 		}
 
-		/* At this point, all file names are escaped. But check_regex()
-		 * needs unescaped file names. So, let's deescape it. */
+		/* At this point, all filenames are escaped. But check_regex()
+		 * needs unescaped filenames. So, let's deescape it. */
 		char *p = strchr((*substr)[i], '\\');
 		char *dstr = (char *)NULL;
 		if (p)
@@ -2516,7 +2516,7 @@ expand_regex(char ***substr)
 			if (regexec(&regex, file_info[j].name, 0, NULL, 0) != FUNC_SUCCESS)
 				continue;
 
-			/* Make sure the matching file name is not already in the tmp array */
+			/* Make sure the matching filename is not already in the tmp array */
 			filesn_t m = (filesn_t)n, found = 0;
 			while (--m >= 0) {
 				if (*file_info[j].name == *tmp[m]
@@ -2723,7 +2723,7 @@ static int
 check_chained_cmds(char *str)
 {
 	/* If the user wants to create a file containing either '|' or ';' in the
-	 * name, they should be allowed. The file name will be later validated by
+	 * name, they should be allowed. The filename will be later validated by
 	 * the 'new' function itself. */
 	if (str && (strncmp(str, "n ", 2) == 0 || strncmp(str, "new ", 4) == 0))
 		return 0;
@@ -2934,7 +2934,7 @@ parse_input_str(char *str)
 	const int is_int_cmd = is_internal_cmd(substr[0], PARAM_FNAME, 0, 1);
 
 	/* Let's expand ranges first: the numbers resulting from the expanded range
-	 * will be expanded into the corresponding file names by eln_expand() below. */
+	 * will be expanded into the corresponding filenames by eln_expand() below. */
 	expand_ranges(&substr);
 
 	for (i = 0; i <= args_n; i++) {
@@ -3149,11 +3149,11 @@ parse_input_str(char *str)
 		if ((is_action == 1 && i == 0) || is_quoted_word(i))
 			continue;
 		/* Do not perform any of the expansions below for selected
-		 * elements: they are full path file names that, as such, do not
+		 * elements: they are full path filenames that, as such, do not
 		 * need any expansion. */
 		if (is_sel > 0) { /* is_sel is true only for the current input and if
 			there was some "sel" keyword in it. */
-			/* Strings between is_sel and sel_n are selected file names.
+			/* Strings between is_sel and sel_n are selected filenames.
 			 * Skip them. */
 			if (i >= (size_t)is_sel && i <= sel_n)
 				continue;
@@ -3164,7 +3164,7 @@ parse_input_str(char *str)
 		if (substr[0][0] == '/' && i == 0)
 			continue;
 
-		/* Ignore existent file names as well. */
+		/* Ignore existent filenames as well. */
 		struct stat a;
 		if (lstat(substr[i], &a) != -1)
 			continue;

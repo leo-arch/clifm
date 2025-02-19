@@ -100,7 +100,7 @@ press_any_key_to_continue(const int init_newline)
 	errno = saved_errno;
 }
 
-/* Print the file name FNAME, quoted if it contains an space.
+/* Print the file named FNAME, quoted if it contains a space.
  * A slash is appended if FNAME is a directory (ISDIR >= 1). */
 void
 print_file_name(char *fname, const int isdir)
@@ -396,7 +396,7 @@ msleep(const long msec)
  * Change absolute paths into:
  * "./" if file is in CWD
  * "~" if file is in HOME
- * The reformated file name is returned if actually reformated, in which case
+ * The reformated filename is returned if actually reformated, in which case
  * the returned value should be free'd by the caller.
  * Otherwise, a pointer to the original string is returned and must not be
  * free'd by the caller.

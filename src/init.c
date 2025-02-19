@@ -409,7 +409,7 @@ set_prop_fields(const char *line)
 	prop_fields.links =    0;
 	prop_fields.blocks =   0;
 	prop_fields.xattr =    0;
-	prop_fields.len =      2; /* Two spaces between file name and props string */
+	prop_fields.len =      2; /* Two spaces between filename and props string */
 
 	size_t i;
 	for (i = 0; i < PROP_FIELDS_SIZE && line[i]; i++) {
@@ -1963,7 +1963,7 @@ get_sel_files(void)
 		}
 
 		/* Remove the ending slash: fstatat() won't take a symlink to dir as
-		 * a symlink (but as a dir), if the file name ends with a slash. */
+		 * a symlink (but as a dir), if the filename ends with a slash. */
 		if (len > 1 && line[len - 1] == '/') {
 			len--;
 			line[len] = '\0';
@@ -2288,7 +2288,7 @@ check_cmd_ext(const char *s)
 }
 
 /* Keep only files with executable extension.
- * Returns 1 if the file NAME must be excluded or 0 otherwise */
+ * Returns 1 if the file named NAME must be excluded or 0 otherwise */
 static int
 cygwin_exclude_file(char *name)
 {
@@ -2659,7 +2659,7 @@ get_prompt_cmds(void)
 
 /* Get the length of the current time format.
  * We need this to construct the time string in case of invalid timestamp (0),
- * and to calculate the space left to print file names in long view. */
+ * and to calculate the space left to print filenames in long view. */
 
 /* GCC (not clang though) complains about tfmt being not a string literal.
  * Let's silence this warning until we find a better approach.
@@ -2699,7 +2699,7 @@ check_time_str(void)
 	invalid_time_str[i] = '\0';
 
 	/* Append the time string length to the properties total length, so that
-	 * we can better calculate how much space left we have to print file names. */
+	 * we can better calculate how much space left we have to print filenames. */
 	prop_fields.len += (int)(l + 1) + (conf.timestamp_mark == 1 ? 1 : 0);
 }
 #pragma GCC diagnostic pop

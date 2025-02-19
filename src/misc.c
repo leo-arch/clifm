@@ -413,7 +413,7 @@ read_inotify(void)
 					break;
 			}
 
-			/* If destiny file name is already in the files list (j >= 0),
+			/* If destiny filename is already in the files list (j >= 0),
 			 * ignore this event. */
 			ignore_event = (j < 0) ? 0 : 1;
 		}
@@ -836,7 +836,7 @@ new_instance(char *dir, int sudo)
 	char *deq_dir = unescape_str(dir, 0);
 	if (!deq_dir) {
 		free(sudo_prog);
-		xerror(_("%s: '%s': Cannot escape file name\n"), PROGRAM_NAME, dir);
+		xerror(_("%s: '%s': Cannot escape filename\n"), PROGRAM_NAME, dir);
 		return FUNC_FAILURE;
 	}
 
@@ -873,7 +873,7 @@ alias_import(char *file)
 
 	char *npath = normalize_path(file, strlen(file));
 	if (!npath) {
-		xerror(_("alias: '%s': Error normalizing file name\n"), file);
+		xerror(_("alias: '%s': Error normalizing filename\n"), file);
 		return FUNC_FAILURE;
 	}
 
@@ -1781,7 +1781,7 @@ construct_name(char *file, const size_t flen)
 	if (!name || !*name) {
 		free(name);
 		err('w', PRINT_PROMPT, "%s: '%s': Error constructing "
-			"file name\n", PROGRAM_NAME, file);
+			"filename\n", PROGRAM_NAME, file);
 		return (char *)NULL;
 	}
 
@@ -1822,7 +1822,7 @@ gen_symlink(char *file, const char *cwd)
 
 	/* Construct source and destiny files */
 
-	/* symlink(3) doesn't like file names ending with slash */
+	/* symlink(3) doesn't like filenames ending with slash */
 	size_t file_len = strlen(file);
 	if (file_len > 1 && file[file_len - 1] == '/') {
 		file[file_len - 1] = '\0';
@@ -1970,7 +1970,7 @@ handle_stdin(void)
 
 	if (links_counter == 0) { /* No symlink was created. Exit */
 		dup2(STDOUT_FILENO, STDIN_FILENO);
-		xerror(_("%s: Empty file names buffer. Nothing to do\n"), PROGRAM_NAME);
+		xerror(_("%s: Empty filenames buffer. Nothing to do\n"), PROGRAM_NAME);
 		if (getenv("CLIFM_VT_RUNNING"))
 			press_any_key_to_continue(0);
 

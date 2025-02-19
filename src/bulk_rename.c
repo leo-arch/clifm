@@ -49,7 +49,7 @@
 #include "spawn.h" /* launch_execv() */
 
 #define BULK_RENAME_TMP_FILE_HEADER "# Clifm - Rename files in bulk\n\
-# Edit file names, save, and quit the editor (you will be\n\
+# Edit filenames, save, and quit the editor (you will be\n\
 # asked for confirmation).\n\
 # Quit the editor without saving to cancel the operation.\n\n"
 
@@ -116,10 +116,10 @@ rename_file(char *oldpath, char *newpath)
 	return ret;
 }
 
-/* Write file names in ARGS into the temporary file TMPFILE, whose file
+/* Write filenames in ARGS into the temporary file TMPFILE, whose file
  * descriptor is FD. Update WRITTEN to the number of actually written
- * file names, and make ATTR hold the stat attributes of the temporary
- * file after writing into it all file names. */
+ * filenames, and make ATTR hold the stat attributes of the temporary
+ * file after writing into it all filenames. */
 static int
 write_files_to_tmp(char ***args, const char *tmpfile, const int fd,
 	struct stat *attr, size_t *written)
@@ -133,11 +133,11 @@ write_files_to_tmp(char ***args, const char *tmpfile, const int fd,
 
 	/* Copy all files to be renamed into the bulk file */
 	for (i = 1; (*args)[i]; i++) {
-		/* Dequote file name, if necessary */
+		/* Dequote filename, if necessary */
 		if (strchr((*args)[i], '\\')) {
 			char *deq_file = unescape_str((*args)[i], 0);
 			if (!deq_file) {
-				xerror(_("br: '%s': Error unescaping file name\n"), (*args)[i]);
+				xerror(_("br: '%s': Error unescaping filename\n"), (*args)[i]);
 				press_any_key_to_continue(0);
 				continue;
 			}
@@ -395,9 +395,9 @@ check_dups(FILE *fp)
  * If reload_list is set to 1, the list of files is reload and a summary
  * message is displayed.
  *
- * The procedure is simple: file names to be renamed are copied into a
+ * The procedure is simple: filenames to be renamed are copied into a
  * temporary file, which is opened via the mime function and shown to
- * the user to modify it. Once the file names have been modified and saved,
+ * the user to modify it. Once the filenames have been modified and saved,
  * modifications are printed on the screen and the user is asked wehther to
  * perform the actual bulk renaming or not. */
 int

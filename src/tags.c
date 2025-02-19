@@ -97,7 +97,7 @@ check_tagged_file(const char *tag, const char *name)
 }
 #endif /* _DIRENT_HAVE_D_TPYE */
 
-/* Print the tagged file NAME tagged as TAG. */
+/* Print the tagged file named NAME tagged as TAG. */
 static void
 print_tagged_file(char *name, const char *tag)
 {
@@ -522,7 +522,7 @@ get_tags(char **args)
 	return t;
 }
 
-/* Tag file names found in ARGS as all tags (:TAG) found in ARGS. */
+/* Tag filenames found in ARGS as all tags (:TAG) found in ARGS. */
 static int
 tag_files(char **args)
 {
@@ -564,7 +564,7 @@ tag_files(char **args)
 	return FUNC_SUCCESS;
 }
 
-/* Untag file names found in ARGS tagged as ARGS[N]. */
+/* Untag filenames found in ARGS tagged as ARGS[N]. */
 static int
 untag(char **args, const size_t n, size_t *t)
 {
@@ -618,7 +618,7 @@ untag(char **args, const size_t n, size_t *t)
 	return exit_status;
 }
 
-/* Untag file names found in ARGS as all tags (:TAG) found in ARGS. */
+/* Untag filenames found in ARGS as all tags (:TAG) found in ARGS. */
 static int
 untag_files(char **args)
 {
@@ -649,7 +649,7 @@ rename_tag(char **args)
 		return print_no_such_tag(old);
 
 	if (*old == *new && strcmp(old, new) == 0) {
-		xerror("%s\n", "tag: New and old file names are the same");
+		xerror("%s\n", "tag: New and old filenames are the same");
 		return FUNC_FAILURE;
 	}
 

@@ -1179,7 +1179,7 @@ expand_and_deescape(char **arg, char **deq_str)
 		}
 	}
 
-	/* Deescape the string (only if file name) */
+	/* Deescape the string (only if filename) */
 	if (strchr(*arg, '\\'))
 		*deq_str = unescape_str(*arg, 0);
 }
@@ -1380,7 +1380,7 @@ check_comments(char *name)
 		? unescape_str(name, 0) : (char *)NULL;
 	char * n = p ? p : name;
 
-	/* Skip lines starting with '#' if there is no such file name
+	/* Skip lines starting with '#' if there is no such filename
 	 * in the current directory. This implies that no command starting
 	 * with '#' will be executed */
 	struct stat a;
@@ -2036,7 +2036,7 @@ exec_cmd(char **comm)
 
 	/* # AUTOCD & AUTO-OPEN (1) # */
 	/* rl_dispatching is set to 1 if coming from a keybind: we have a
-	 * command, not a file name. So, skip this check. */
+	 * command, not a filename. So, skip this check. */
 	if (rl_dispatching == 0 && (exit_code = check_auto_first(comm)) != -1)
 		return exit_code;
 
@@ -2294,7 +2294,7 @@ exec_cmd(char **comm)
 	|| strcmp(comm[0], "sort") == 0))
 		return (exit_code = sort_func(comm));
 
-	/*    ############ FILE NAMES CLEANER ############## */
+	/*    ############ FILENAMES SANITIZER ############## */
 	else if (*comm[0] == 'b' && ((comm[0][1] == 'b' && !comm[0][2])
 	|| strcmp(comm[0], "bleach") == 0)) {
 #ifndef _NO_BLEACH

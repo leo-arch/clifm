@@ -188,7 +188,7 @@ remove_thumbs_not_in_db(char **thumbs, off_t *size_sum, int *errors)
  * Each entry has this form: THUMB_FILE@FILE_URI
  * THUMB_FILE is the name of the thumbnail file (i.e. an MD5 hash of
  * FILE_URI followed by a file extension, either jpg or png).
- * FILE_URI is the file URI for the absolute path to the original file name.
+ * FILE_URI is the file URI for the absolute path to the original filename.
  *
  * If THUMB_FILE does not exist, the entry is removed from the info file.
  * If both THUMB_FILE and FILE_URI exist, the entry is preserved.

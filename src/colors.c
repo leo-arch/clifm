@@ -655,7 +655,7 @@ bcomp(const void *a, const void *b)
     return 0;
 }
 
-/* Look for the hash HASH in the hash table for file name extensions.
+/* Look for the hash HASH in the hash table for filename extensions.
  * Return a pointer to the corresponding color if found, or NULL.
  * If VAL_LEN isn't NULL, it is updated with the length of the returned value. */
 static char *
@@ -678,7 +678,7 @@ check_ext_hash(const size_t hash, size_t *val_len)
 static char *
 check_ext_string(const char *ext, size_t *val_len)
 {
-	/* Hold extension names. NAME_MAX should be enough: no file name should
+	/* Hold extension names. NAME_MAX should be enough: no filename should
 	 * go beyond NAME_MAX, so it's pretty safe to assume that no file extension
 	 * will be larger than this. */
 	static char tmp_ext[NAME_MAX];
@@ -1012,7 +1012,7 @@ print_ext_conflict(const char *a, const char *b)
 		printf(_("'%s' conflicts with '%s'\n"), a, b);
 }
 
-/* Make sure hashes for file name extensions do not conflict.
+/* Make sure hashes for filename extensions do not conflict.
  * CS_CHECK is 0 when this function is called at startup: if a hash conflict
  * is found, the hash field at index zero (of the ext_colors struct) is set
  * to 0 to indicate that we must use regular string comparison (slower).
@@ -2707,7 +2707,7 @@ colors_list(char *ent, const int eln, const int pad, const int new_line)
 	size_t len = strlen(p);
 	int rem_slash = 0;
 	/* Remove the ending slash: lstat(3) won't take a symlink to dir as
-	 * a symlink (but as a dir), if the file name ends with a slash. */
+	 * a symlink (but as a dir), if the filename ends with a slash. */
 	if (len > 1 && p[len - 1] == '/') {
 		p[len - 1] = '\0';
 		rem_slash = 1;
@@ -2740,7 +2740,7 @@ colors_list(char *ent, const int eln, const int pad, const int new_line)
 }
 
 #ifndef CLIFM_SUCKLESS
-/* Returns 1 if the file NAME is a valid color scheme name, or 0 otherwise.
+/* Returns 1 if the file named NAME is a valid color scheme name, or 0 otherwise.
  * If true, NAME is truncated to its last dot (the file extension is removed). */
 static int
 is_valid_colorscheme_name(char *name)
@@ -3095,7 +3095,7 @@ print_interface_colors(void)
 	printf(_("%sColor%s (li) Selected file indicator (e.g. %s12%s"
 		"%s%s%sfilename)\n"), li_cb, df_c, el_c, df_c, li_cb,
 		term_caps.unicode == 1 ? SELFILE_STR_U : SELFILE_STR, df_c);
-	printf(_("%sColor%s (tt) Trimmed file names mark (e.g. "
+	printf(_("%sColor%s (tt) Truncated filenames mark (e.g. "
 		"filenam%s%c%s.odt)\n"), tt_c, df_c, tt_c, TRIMFILE_CHR, df_c);
 	printf(_("%sColor%s (dl) Dividing line (e.g. %s------>%s)\n"),
 		dl_c, df_c, dl_c, df_c);
@@ -3182,9 +3182,9 @@ print_suggestion_colors(void)
 	printf("\n%sSuggestions%s\n\n", BOLD, df_c);
 	printf("%sColor%s (sh) History (e.g. sud%so vim clifmrc%s)\n",
 		sh_c, df_c, sh_c, df_c);
-	printf("%sColor%s (sf) File names (e.g. thi%ss_filename%s)\n",
+	printf("%sColor%s (sf) Filenames (e.g. thi%ss_filename%s)\n",
 		sf_c, df_c, sf_c, df_c);
-	printf("%sColor%s (sz) File names (fuzzy) (e.g. dwn %s%c%s "
+	printf("%sColor%s (sz) Filenames (fuzzy) (e.g. dwn %s%c%s "
 		"%sDownloads%s)\n", sz_c, df_c, sp_c, SUG_POINTER, df_c,
 		sz_c, df_c);
 	printf("%sColor%s (sx) Internal command names and parameters "
