@@ -447,6 +447,10 @@ print_disk_usage(void)
 		free_space ? free_space : "?", size ? size : "?", free_percentage,
 		fstype, devname);
 
+/* NOTE: If the f_blocks, f_bfree, f_files, f_ffree, f_bavail, and f_favail
+ * fields of the statvfs struct are all zero, the file system is likely
+ * virtual (for example, /proc, /sys, or /dev/pts). */
+
 	free(free_space);
 }
 

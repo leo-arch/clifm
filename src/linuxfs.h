@@ -36,30 +36,30 @@
 #define T_AFS_MAGIC            0x5346414f /* remote */
 #define T_ANON_INODE_FS_MAGIC  0x09041934
 #define T_AUFS_MAGIC           0x61756673 /* remote */
-#define T_AUTOFS_MAGIC         0x0187
+#define T_AUTOFS_MAGIC         0x0187 /* pseudo FS */
 #define T_BALLONFS_MAGIC       0x13661366
-#define T_BDEVFS_MAGIC         0x62646576
+#define T_BDEVFS_MAGIC         0x62646576 /* pseudo FS */
 #define T_BEFS_MAGIC           0x42465331
 #define T_BFS_MAGIC            0x1badface
 #define T_BINDERFS_MAGIC       0x6c6f6f70
-#define T_BINFMTFS_MAGIC       0x42494e4d
+#define T_BINFMTFS_MAGIC       0x42494e4d /* pseudo FS */
 #define T_BPF_FS_MAGIC         0xcafe4a11
 #define T_BTRFS_MAGIC          0x9123683e
 #define T_BTRFS_TEST_MAGIC     0x73727279
 #define T_CEPH_MAGIC	       0x00c36400 /* remote */
-#define T_CGROUP_MAGIC         0x27e0eb
+#define T_CGROUP_MAGIC         0x27e0eb /* pseudo FS */
 #define T_CGROUP2_MAGIC        0x63677270
 #define T_CIFS_MAGIC           0xff534D42 /* remote */
 #define T_CODA_MAGIC	       0x73757245 /* remote */
 #define T_COH_MAGIC            0x012ff7b7
-#define T_CONFIGFS_MAGIC       0x62656570
+#define T_CONFIGFS_MAGIC       0x62656570 /* pseudo FS */
 #define T_CRAMFS_MAGIC		   0x28cd3d45
 #define T_CRAMFS_MAGIC_WEND	   0x453dcd28
 #define T_DAXFS_MAGIC          0x64646178
-#define T_DEBUGFS_MAGIC        0x64626720
+#define T_DEBUGFS_MAGIC        0x64626720 /* pseudo FS */
 #define T_DEVMEM_MAGIC         0x454d444d
-#define T_DEVFS_MAGIC          0x1373 /* Linux 2.6.17 and earlier */
-#define T_DEVPTS_MAGIC         0x1cd1
+#define T_DEVFS_MAGIC          0x1373 /* Linux 2.6.17 and earlier */ /* pseudo FS */
+#define T_DEVPTS_MAGIC         0x1cd1 /* pseudo FS */
 #define T_DMA_BUF_MAGIC        0x444d4142
 #define T_ECRYPTFS_MAGIC       0xf15f
 #define T_EFIVARFS_MAGIC       0xde5e81e4
@@ -74,7 +74,7 @@
 #define T_F2FS_MAGIC           0xf2f52010
 #define T_FAT_MAGIC            0x4006
 #define T_FHGFS_MAGIC          0x19830326 /* remote */
-#define T_FUSE_MAGIC           0x65735546 /* remote */
+#define T_FUSE_MAGIC           0x65735546 /* remote */ /* pseudo FS */
 #define T_FUSECTL_MAGIC        0x65735543 /* remote */
 #define T_FUTEXFS_MAGIC        0xbad1dea
 #define T_GFS2_MAGIC           0x01161970 /* remote */
@@ -84,7 +84,7 @@
 #define T_HFSX_MAGIC           0x4858
 #define T_HOSTFS_MAGIC         0x00c0ffee
 #define T_HPFS_MAGIC           0xf995e849
-#define T_HUGETLBFS_MAGIC      0x958458f6
+#define T_HUGETLBFS_MAGIC      0x958458f6 /* pseudo FS */
 #define T_IBRIX_MAGIC          0x013111a8 /* remote */
 #define T_INOTIFYFS_MAGIC      0x2bad1dea
 #define T_ISOFS_MAGIC          0x9660
@@ -101,7 +101,7 @@
 #define T_MINIX2_MAGIC         0x2468 /* minix v2 fs, 14 char names */
 #define T_MINIX2_MAGIC2        0x2478 /* minix v2 fs, 30 char names */
 #define T_MINIX3_MAGIC         0x4d5a /* minix v3 fs, 60 char names */
-#define T_MQUEUE_MAGIC         0x19800202
+#define T_MQUEUE_MAGIC         0x19800202 /* pseudo FS */
 #define T_MSDOS_MAGIC          0x4d44
 #define T_MTD_INODE_FS_MAGIC   0x11307854
 #define T_NCP_MAGIC            0x564c /* remote */
@@ -116,10 +116,10 @@
 #define T_OVERLAYFS_MAGIC      0x794c7630 /* remote */
 #define T_PANFS_MAGIC          0xaad7aaea /* remote */
 #define T_PID_FS_MAGIC         0x50494446
-#define T_PIPEFS_MAGIC         0x50495045 /* remote */
+#define T_PIPEFS_MAGIC         0x50495045 /* remote */ /* pseudo FS */
 #define T_PPC_CMM_FS_MAGIC     0xc7571590
 #define T_PRL_FS_MAGIC         0x7c7c6673 /* remote */
-#define T_PROC_MAGIC           0x9fa0
+#define T_PROC_MAGIC           0x9fa0 /* pseudo FS */
 #define T_PSTOREFS_MAGIC       0x6165676c
 #define T_QNX4_MAGIC           0x002f
 #define T_QNX6_MAGIC           0x68191122
@@ -129,8 +129,8 @@
 #define T_RPC_PIPEFS_MAGIC     0x67596969
 #define T_SDCARDFS_MAGIC       0x5dca2df5
 #define T_SECRETMEM_MAGIC	   0x5345434d
-#define T_SECURITYFS_MAGIC	   0x73636673
-#define T_SELINUX_MAGIC		   0xf97cff8c
+#define T_SECURITYFS_MAGIC	   0x73636673 /* pseudo FS */
+#define T_SELINUX_MAGIC		   0xf97cff8c /* pseudo FS */
 #define T_SMACK_MAGIC	       0x43415d53
 #define T_SMB_MAGIC            0x517b /* remote */
 #define T_SMB2_MAGIC           0xfe534d42 /* remote */
@@ -140,8 +140,8 @@
 #define T_STACK_END_MAGIC      0x57ac6e9d
 #define T_SYSV2_MAGIC          0x012ff7b6
 #define T_SYSV4_MAGIC          0x012ff7b5
-#define T_SYSFS_MAGIC          0x62656572
-#define T_TMPFS_MAGIC          0x01021994
+#define T_SYSFS_MAGIC          0x62656572 /* pseudo FS */
+#define T_TMPFS_MAGIC          0x01021994 /* pseudo FS */
 #define T_TRACEFS_MAGIC        0x74726163
 #define T_UBIFS_MAGIC          0x24051905
 #define T_UDF_MAGIC            0x15013346
