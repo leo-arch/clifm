@@ -1007,7 +1007,7 @@ print_ext_conflict(const char *a, const char *b)
 		return;
 
 	if (*a == *b && strcmp(a, b) == 0)
-		printf(_("'%s' is duplicated\n"), a);
+		printf(_("'%s' has conflicting definitions\n"), a);
 	else
 		printf(_("'%s' conflicts with '%s'\n"), a, b);
 }
@@ -1025,18 +1025,26 @@ check_ext_color_hash_conflicts(const int cs_check)
 
 	for (i = 0; i < ext_colors_n; i++) {
 		for (j = i + 1; j < ext_colors_n; j++) {
-			if (ext_colors[i].hash == ext_colors[j].hash) {
-				if (cs_check == 1) {
-					print_ext_conflict(ext_colors[i].name, ext_colors[j].name);
-					conflicts++;
-				} else {
-					ext_colors[0].hash = 0;
-					err('w', PRINT_PROMPT, _("%s: File extension conflicts "
-						"found. Run 'cs check-ext' to find out.\n"),
-						PROGRAM_NAME);
-					return FUNC_FAILURE;
-				}
+			if (ext_colors[i].hash != ext_colors[j].hash)
+				continue;
+
+			if (ext_colors[i].value_len == ext_colors[j].value_len
+			&& strcmp(ext_colors[i].value, ext_colors[j].value) == 0)
+				/* Two extensions with the same hash, but pointing to the
+				 * same color. Most likely a duplicate entry: let it be. */
+				continue;
+
+			if (cs_check == 1) {
+				print_ext_conflict(ext_colors[i].name, ext_colors[j].name);
+				conflicts++;
+				continue;
 			}
+
+			ext_colors[0].hash = 0;
+			err('w', PRINT_PROMPT, _("%s: File extension conflicts "
+				"found. Run 'cs check-ext' to see the details.\n"),
+				PROGRAM_NAME);
+			return FUNC_FAILURE;
 		}
 	}
 
@@ -1044,7 +1052,8 @@ check_ext_color_hash_conflicts(const int cs_check)
 		return FUNC_SUCCESS;
 
 	if (conflicts > 0) {
-		puts(_("Run 'cs edit' to fix these conflicts"));
+		if (xargs.lscolors != LS_COLORS_GNU)
+			puts(_("Run 'cs edit' to fix these conflicts"));
 		return FUNC_FAILURE;
 	}
 

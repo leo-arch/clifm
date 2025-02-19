@@ -51,7 +51,7 @@
 # include <mntent.h> /* xxxmntent functions, used by get_ext_mountpoints() */
 #endif /* LINUX_FSINFO */
 
-#include "autocmds.h"
+#include "autocmds.h" /* reset_opts() */
 #include "aux.h"
 #include "checks.h" /* truncate_file(), is_number() */
 #include "config.h"
