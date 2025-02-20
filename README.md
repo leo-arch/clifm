@@ -43,7 +43,7 @@ href="https://github.com/leo-arch/clifm/issues">Report bug</a></h4>
 [![demo](https://asciinema.org/a/ov5HnwdlPvnR7ucfDrQMfeg2N.svg)](https://asciinema.org/a/ov5HnwdlPvnR7ucfDrQMfeg2N?autoplay=1)
 
 <!---
-<h4 align="center">CliFM's interface</h4>
+<h4 align="center">Clifm's interface</h4>
 <p align="center"><img src="https://i.postimg.cc/YC77qSLK/interface-1-7-9.png"></p>
 <p align="center">You only need 7 keystrokes to move all selected files into the <i>images</i> directory: <b>m sel 8</b></p>
 -->
@@ -54,29 +54,13 @@ href="https://github.com/leo-arch/clifm/issues">Report bug</a></h4>
 
 **Clifm** is a shell-like, text-based terminal file manager that sits on the command line.
 
-Some of its features include: bookmarks, selection, search, file tags, file filters, file previews (including image previews), bulk rename, archiving, trash, file opener, directory jumper, autocommands, workspaces, plugins, autosuggestions, and more. Consult the [Features](#heavy_check_mark-features) section below for a more comprehensive list.
+Some of its key features include: bookmarks, search, file selection, file tags, file filters, file previews (including image previews), bulk rename, archiving, trash, file opener, directory jumper, autocommands, workspaces, plugins, autosuggestions, and more. Consult the [Features](#heavy_check_mark-features) section below for a more comprehensive list.
 
-Though fully-featured, powerful, and extensible, however, it is not so much about features, but about design, about the way in which you interact with your file system.
-
-Most terminal file managers out there (if not all) are built using the **TUI** design principles, much like the superb `Midnight Commander` and `Ranger`. But **clifm** is built rather having the **CLI** design principles in mind: do not navigate through a big menu of files, **just type it**, exactly as you do in your regular shell, but easier and faster!
+While feature-rich, powerful, and extensible, its true strength lies in its design philosophy. Unlike traditional terminal file managers, based on the text user interface (TUI), **clifm** embraces the command-line interface (CLI). This means you can interact with your filesystem by typing commands directly, just as you would in a regular shell, but with greater ease, speed, and advanced capabilities.
 
 For this reason, **clifm** does not need to be better: it's **just different!** :wink:
 
-To get you started consult the [Getting started](#bulb-getting-started) section below.
-
-<!--
-Unlike most terminal file managers out there, indeed, **clifm** replaces the traditional TUI interface (also known as curses or text-menu based interface) by a command-line interface (CLI),<sup>1</sup> also known as REPL.<sup>2</sup>
-
-If working with the command-line, your workflow is not affected at all, but just enriched with file management functionalities: automatic files listing, files selection, bookmarks, tags, directory jumper, directory and commands history, auto-cd and auto-open, bulk rename, TAB completion, autosuggestions, and a trash system, among [other features](#features). In this sense, **clifm** is certainly a file manager, but also a shell extension.
-
-Briefly put, with **clifm** the command-line is always already there, never hidden :godmode: :muscle:
-
----
-
-<sup>1</sup> <i>For more information about these concepts see the [resources page](https://github.com/leo-arch/clifm/wiki/Resources#gui-tui-and-cli) </i>.
-
-For a detailed description consult the [introductory section](https://github.com/leo-arch/clifm/wiki/Introduction#what-is-clifm) of our Wiki</i>.
--->
+To get started consult the [Getting started](#bulb-getting-started) section below.
 
 ---
 
@@ -92,7 +76,7 @@ Besides common file operations such as copy, move, remove, etc., _clifm_ provide
   - Highly compatible with old VT102-only terminal emulators like Rxvt and Rxvt-based ones: even on a terminal with only 8 colors and no Unicode support, **clifm** will just work. [It can run even on an old DEC-VT100 terminal!](https://github.com/leo-arch/clifm/wiki/Extra#clifm-running-on-a-dec-vt100-terminal-1978)
   - [High performance](https://github.com/leo-arch/clifm/wiki/Performance). Incredibly lightweight and fast even on really old hardware
   - [Short (and even one-character) commands](https://github.com/leo-arch/clifm/wiki/Introduction#commands-short-summary)
-  - [Entry list numbers (ELN's)](https://github.com/leo-arch/clifm/wiki/Common-Operations#elns) for file names
+  - [Entry list numbers (ELNs)](https://github.com/leo-arch/clifm/wiki/Common-Operations#elns) for filenames
   - [Extended color codes](https://github.com/leo-arch/clifm/wiki/Customization#colors) for file-types and -extensions
   - [Files counter](https://github.com/leo-arch/clifm/wiki/Introduction#interface) for directories and symlinks to directories
   - Support for files attributes, extended attributes, birth time, BSD flags, and Solaris doors.
@@ -106,7 +90,7 @@ Besides common file operations such as copy, move, remove, etc., _clifm_ provide
   - [Files search](https://github.com/leo-arch/clifm/wiki/Common-Operations#searching) (supports both glob and regular expressions)
   - [File templates](https://github.com/leo-arch/clifm/wiki/Introduction#n-new)
   - [copy(-as), move(-as)](https://github.com/leo-arch/clifm/wiki/Introduction#c-l-e-edit-m-md-r), [interactive rename](https://github.com/leo-arch/clifm/wiki/Introduction#c-l-e-edit-m-md-r), and [open-with](https://github.com/leo-arch/clifm/wiki/Introduction#ow) functions
-  - [File names cleaner](https://github.com/leo-arch/clifm/wiki/Introduction#bb-bleach)
+  - [Filenames sanitizer](https://github.com/leo-arch/clifm/wiki/Introduction#bb-bleach)
   - [Autocommands](https://github.com/leo-arch/clifm/wiki/Specifics#autocommands)
   - [Auto-cd](https://github.com/leo-arch/clifm/wiki/Introduction#acd-autocd), [auto-open](https://github.com/leo-arch/clifm/wiki/Introduction#ao-auto-open), and [autols](https://github.com/leo-arch/clifm/wiki/Common-Operations#navigation)
   - [Directory jumper](https://github.com/leo-arch/clifm/wiki/Specifics#kangaroos-frecency-algorithm), similar to [autojump](https://github.com/wting/autojump), [z.lua](https://github.com/skywind3000/z.lua), and [zoxide](https://github.com/ajeetdsouza/zoxide)
@@ -122,17 +106,17 @@ Besides common file operations such as copy, move, remove, etc., _clifm_ provide
   - [Archiving and compression](https://github.com/leo-arch/clifm/wiki/Advanced#archives) support (including Zstandard and ISO 9660)
   - [Symlinks editor](https://github.com/leo-arch/clifm/wiki/Introduction#l-le)
   - File permissions/ownership editor via the [`pc`](https://github.com/leo-arch/clifm/wiki/Introduction#pc) and [`oc`](https://github.com/leo-arch/clifm/wiki/Introduction#oc) commands respectively 
-  - [Remote file systems management](https://github.com/leo-arch/clifm/wiki/Introduction#net)
+  - [Remote filesystems management](https://github.com/leo-arch/clifm/wiki/Introduction#net)
   - [Mount/unmount storage devices](https://github.com/leo-arch/clifm/wiki/Introduction#media)
   - [Advanced Copy](https://github.com/leo-arch/clifm/wiki/Advanced#cpmv-with-a-progress-bar) support (just `cp` and `mv` with a nice progress bar)
   - Directory history map to keep in sight previous, current, and next entries in the directory history list
 - Shell
   - [Auto-suggestions](https://github.com/leo-arch/clifm/wiki/Specifics#auto-suggestions)
-  - [TAB completion](https://github.com/leo-arch/clifm/wiki/Specifics#expansions-completions-and-suggestions), with _fzf_ integration (including [file previews](https://github.com/leo-arch/clifm/wiki/Advanced#files-preview))
+  - [Tab completion](https://github.com/leo-arch/clifm/wiki/Specifics#expansions-completions-and-suggestions), with _fzf_ integration (including [file previews](https://github.com/leo-arch/clifm/wiki/Advanced#files-preview))
   - [Syntax highlighting](https://github.com/leo-arch/clifm/wiki/Specifics#syntax-highlighting)
   - [Warning prompt for invalid command names](https://github.com/leo-arch/clifm/wiki/Customization#the-warning-prompt)
-  - [Fused parameters for ELN's](https://github.com/leo-arch/clifm/wiki/Introduction#fused-parameters)
-  - [Fuzzy completion for file names and paths](https://github.com/leo-arch/clifm/wiki/Specifics#fuzzy-match)
+  - [Fused parameters for ELNs](https://github.com/leo-arch/clifm/wiki/Introduction#fused-parameters)
+  - [Fuzzy completion for filenames and paths](https://github.com/leo-arch/clifm/wiki/Specifics#fuzzy-match)
   - [Wildcards expansion via <kbd>TAB</kbd>](https://github.com/leo-arch/clifm/wiki/Introduction#filter-files-with-the-tab-key) (`s *.[ch]<TAB>`)
   - [File types expansion via <kbd>TAB</kbd>](https://github.com/leo-arch/clifm/wiki/Introduction#filter-files-with-the-tab-key) (`=l<TAB>` to list all symlinks in the current dir)
   - [MIME types expansion](https://github.com/leo-arch/clifm/wiki/Advanced/#quickly-filtering-files-with-the-tab-key) (`@image<TAB>`)
@@ -162,7 +146,7 @@ Besides common file operations such as copy, move, remove, etc., _clifm_ provide
   - [Compile features in/out](https://github.com/leo-arch/clifm/blob/master/src/README.md#compiling-features-inout)
 - Misc
   - [Plugins](https://github.com/leo-arch/clifm/wiki/Advanced#plugins)
-  - [File previews](https://github.com/leo-arch/clifm/wiki/Advanced#files-preview) (via TAB completion or the [`view` command](https://github.com/leo-arch/clifm/wiki/Introduction#view))
+  - [File previews](https://github.com/leo-arch/clifm/wiki/Advanced#files-preview) (via tab completion or the [`view` command](https://github.com/leo-arch/clifm/wiki/Introduction#view))
   - [Icons support](https://github.com/leo-arch/clifm/wiki/Advanced#icons-smirk), including emoji-icons :smirk:
   - [Git integration](https://github.com/leo-arch/clifm/wiki/Advanced#git-integration)
   - [Desktop notifications](https://github.com/leo-arch/clifm/wiki/Specifics#desktop-notifications)
@@ -293,16 +277,16 @@ For a complete description please consult our [Wiki](https://github.com/leo-arch
   - Nano-second precision for timestamps (`p`/`pp` command).
   - Ported to Solaris (including doors support). If you experience some issue with the warning prompt, please consult the [troubleshooting section](https://github.com/leo-arch/clifm/wiki/Troubleshooting#warning-prompt).
   - Since `fzy` has been [inactive for more than a year](https://github.com/jhawthorn/fzy), we have forked it as [fnf](https://github.com/leo-arch/fnf) (including some features needed to make it work with **clifm**). Because of this, `--fzytab` has been renamed to `--fnftab`, just as the `TabCompletionMode` option in the config file now takes `fnf` instead of `fzy` as value.
-  - [File names validation via the `new` command](https://github.com/leo-arch/clifm/wiki/Introduction#n-new).
+  - [Filenames validation via the `new` command](https://github.com/leo-arch/clifm/wiki/Introduction#n-new).
   - If using the [new ueberzug](https://github.com/ueber-devel/ueberzug) (18.2.0), please update your [`clifmrun` file](https://github.com/leo-arch/clifm/blob/master/misc/tools/imgprev/clifmrun) to get image previews working again.
   - [Run external commands using any shell you like via the **CLIFM_SHELL** environment variable](https://github.com/leo-arch/clifm/wiki/FAQ#large_blue_diamond-how-do-i-run-with-a-different-shell.).
 * `1.12 (Blondebeard)`
   - [Improved logs system](https://github.com/leo-arch/clifm/wiki/Introduction#log).
-  - Better TAB completion for internal commands.
+  - Better tab completion for internal commands.
   - Allow the use of [Xterm-like color names in color schemes](https://github.com/leo-arch/clifm/wiki/Customization#xterm-like-color-names-256-colors).
   - Disable bold colors via `--no-bold`.
   - Colorize symlinks according to the target file via `ColorLinksAsTarget` in the config file.
-  - File names trimming can now be disabled permanently via the `TrimNames` option in the config file and `--no-trim-names`.
+  - Filenames truncation can now be disabled permanently via the `TrimNames` option in the config file and `--no-trim-names`.
   - Improved interface fot the [`tag` command](https://github.com/leo-arch/clifm/wiki/Introduction#tag).
   - Improved synchronization between multiple instances.
 * `version 1.11 (Cobb)`
@@ -313,7 +297,7 @@ For a complete description please consult our [Wiki](https://github.com/leo-arch
   - [Color gradients for file sizes and timestamps (long view)](https://github.com/leo-arch/clifm/wiki/Common-Operations#file-details)
   - [Use `config dump` to print the list of settings and their current value (highlighting those differing from default values)](https://github.com/leo-arch/clifm/wiki/Introduction#config)
   - The [`config` command](https://github.com/leo-arch/clifm/wiki/Introduction#config) is now used to open/edit the main configuration file (`edit` can still be used, but is deprecated and might be removed in a future release)
-  - `FzfPreview` (file previews in TAB completion - fzf mode only) is now enabled by default (disable via `--no-fzfpreview`)
+  - `FzfPreview` (file previews in tab completion - fzf mode only) is now enabled by default (disable via `--no-fzfpreview`)
   - Improved jump table screen (via the [`j` command](https://github.com/leo-arch/clifm/wiki/Introduction#j-jc-jl-jp-jo-je))
   - [Purge the jump database via the `--purge` option](https://github.com/leo-arch/clifm/wiki/Introduction#j-jc-jl-jp-jo-je)
 * `version 1.10 (Swordmaster)`:
@@ -328,7 +312,7 @@ For a complete description please consult our [Wiki](https://github.com/leo-arch
   - [Suggest a brief description for internal commands](https://github.com/leo-arch/clifm/wiki/Specifics#auto-suggestions)
   - Set a custom selections file via the `--sel-file` flag
 * `version 1.9 (Sharptooth)`:
-  - [Improved fuzzy suggestions/completions for file names and paths](https://github.com/leo-arch/clifm/wiki/Specifics#auto-suggestions)
+  - [Improved fuzzy suggestions/completions for filenames and paths](https://github.com/leo-arch/clifm/wiki/Specifics#auto-suggestions)
   - [Automatic expansion for bookmarks, file type, and MIME type filters](https://github.com/leo-arch/clifm/wiki/Advanced#grouping-files-via-automatic-expansion)
   - [Private workspace settings](https://github.com/leo-arch/clifm/wiki/Specifics#workspace-settings)
   - [Run autocommands based on workspaces, and not just on paths](https://github.com/leo-arch/clifm/wiki/Specifics#autocommands)
@@ -347,7 +331,7 @@ For a complete description please consult our [Wiki](https://github.com/leo-arch
     - New specific options to control the files preview window. Add the following options to the `FzfTabOptions` line in your theme file (via the `cs edit` command) or just copy the theme file from the data directory (usually `/usr/local/share/clifm/colors`): `--bind alt-p:toggle-preview,change:top,alt-up:preview-page-up,alt-down:preview-page-down --preview-window=wrap,border-left --color="border:7:dim"`.
   - [`clifmimg` plugin, for image previews](https://github.com/leo-arch/clifm/tree/master/misc/tools/imgprev#image-previews)
   - [`view` command, to preview files in full screen](https://github.com/leo-arch/clifm/wiki/Introduction#view)
-  - [TAB completion with file previews](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion-with-file-previews)
+  - [Tab completion with file previews](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion-with-file-previews)
   - [Shotgun, a built-in files previewer](https://github.com/leo-arch/clifm/wiki/Advanced#shotgun)
   - Improved Unicode support for the suggestions system
   - Flat-view for the [`fzfsel` plugin](https://github.com/leo-arch/clifm/wiki/Advanced#plugins) via the `-f` option
@@ -360,14 +344,14 @@ For a complete description please consult our [Wiki](https://github.com/leo-arch
   - `cc` command removed to avoid conflicts with `/bin/cc` (use `colors` instead)
   - `--std-tab-comp` option renamed to `--stdtab` (to match `--fzytab` and `--smenutab` options)
 * `version 1.6 (Guybrush)`:
-  - ELN's color defaults now to cyan
+  - ELNs color defaults now to cyan
   - `--no-folders-first` and `--folders-first` options renamed to `--no-dirs-first` and `--dirs-first` respectively. In the same way, the `folders-first` command was renamed to `dirs-first`.
   - `PromptStyle` option renamed as `Notifications` (taking `true` and `false` as values)
 * `version 1.5 (Nano)`:
   - `Prompt`, `WarningPromptStr`, `DividingLine`, and `FfzTabOptions` options were moved from the config file to the color scheme file to get a **centralized and single theming file**. However, to keep backwards compatibility, the old location is still recognized. If any of these options is found in the color scheme file, values taken from the main configuration file will be overriden.
   - The [warning prompt](https://github.com/leo-arch/clifm/wiki/Customization#the-warning-prompt) color is set now via escape codes (exactly as the regular prompt). The `wp` color code is used now only for the _input text color_ of the warning prompt.
 * `version 1.4 (Alma)`:
-  - In order to make _Lira_ more powerful (it can now match entire file names instead of just file extensions) it was necessary to introduce [a little syntax modification](https://github.com/leo-arch/clifm/wiki/Specifics#syntax) in its configuration file.
+  - In order to make _Lira_ more powerful (it can now match entire filenames instead of just file extensions) it was necessary to introduce [a little syntax modification](https://github.com/leo-arch/clifm/wiki/Specifics#syntax) in its configuration file.
 
 </details>
 -->

@@ -7,7 +7,7 @@
 # The syntax is as follows:
 
 # A name for this remote. It will be used by the 'net' command
-# and will be available for TAB completion
+# and will be available for tab completion
 #[work_smb]
 
 # Comment=My work samba server
