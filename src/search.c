@@ -757,7 +757,7 @@ load_entry_info(struct dirent **reg_dirlist, const int index)
 	return list;
 }
 
-/* Return the length of the longest entry in the files list LIST. */
+/* Return the length of the longest entry in the file list LIST. */
 static size_t
 get_regex_longest(struct search_t *list, const int total, int *elnpad)
 {

@@ -1903,7 +1903,7 @@ unset_xargs(void)
 }
 
 /* Store device and inode number of each selected file to identify them
- * later and mark them as selected in the files list. */
+ * later and mark them as selected in the file list. */
 static int
 set_sel_devino(void)
 {

@@ -419,7 +419,7 @@ char
 
 	em_c[MAX_COLOR + 2], /* Error msg color */
 	li_c[MAX_COLOR + 2], /* Sel indicator color */
-	li_cb[MAX_COLOR], /* Sel indicator color (for the files list) */
+	li_cb[MAX_COLOR], /* Sel indicator color (for the file list) */
 	nm_c[MAX_COLOR + 2], /* Notice msg color */
 	wm_c[MAX_COLOR + 2], /* Warning msg color */
 	ro_c[MAX_COLOR + 2], /* read-only indicator color */

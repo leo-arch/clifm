@@ -721,7 +721,7 @@ merge_tags(char **args)
 	char *src = args[2], *dst = args[3];
 
 	if (strcmp(src, dst) == 0) {
-		xerror("%s\n", _("tag: Source and destiny are the same tag"));
+		xerror("%s\n", _("tag: Source and destination are the same tag"));
 		return FUNC_FAILURE;
 	}
 

@@ -1739,7 +1739,7 @@ create_main_config_file(char *file)
 		"# Fuzzy matching algorithm: 1 (faster, non-Unicode), 2 (slower, Unicode).\n\
 ;FuzzyAlgorithm=%d\n\n"
 
-		"# Tab completion mode: 'standard', 'fzf', 'fnf', or 'smenu'. Defaults to\n\
+		"# letion mode: 'standard', 'fzf', 'fnf', or 'smenu'. Defaults to\n\
 # 'fzf' if the binary is found in PATH. Otherwise, the standard mode is used.\n\
 ;TabCompletionMode=\n\n"
 
@@ -1941,7 +1941,7 @@ create_main_config_file(char *file)
 ;Sort=version\n\
 # Sort in reverse order\n\
 ;SortReverse=%s\n\
-# Files starting with PrioritySortChar are listed at top of the files list.\n\
+# Files starting with PrioritySortChar are listed at top of the file list.\n\
 ;PrioritySortChar:%s\n\n"
 
 	"# If set to true, settings changed in the current workspace (only via\n\
@@ -1968,7 +1968,7 @@ create_main_config_file(char *file)
 ;CaseSensitiveSearch=%s\n\
 # Skip non-alphanumeric characters when sorting files ('version' or 'name').\n\
 ;SkipNonAlnumPrefix=%s\n\n\
-# Mas, the files list pager. Possible values are:\n\
+# Mas, the file list pager. Possible values are:\n\
 # 0/false: Disable the pager\n\
 # 1/true: Run the pager whenever the list of files does not fit on the screen\n\
 # >1: Run the pager whenever the amount of files in the current directory is\n\

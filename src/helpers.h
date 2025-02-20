@@ -1133,7 +1133,7 @@ struct config_t {
 	int case_sens_dirjump;
 	int case_sens_path_comp;
 	int case_sens_search;
-	int case_sens_list; /* files list */
+	int case_sens_list; /* File list */
 	int cd_on_quit;
 	int check_cap;
 	int check_ext;
@@ -2187,7 +2187,7 @@ extern char
 
 	em_c[MAX_COLOR + 2], /* Error msg */
 	li_c[MAX_COLOR + 2], /* Sel indicator */
-	li_cb[MAX_COLOR],    /* Sel indicator (for the files list) */
+	li_cb[MAX_COLOR],    /* Sel indicator (for the file list) */
 	nm_c[MAX_COLOR + 2], /* Notice msg */
 	ti_c[MAX_COLOR + 2], /* Trash indicator */
 	tx_c[MAX_COLOR + 2], /* Text */

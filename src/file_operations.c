@@ -254,8 +254,8 @@ get_dup_file_dest_dir(void)
 {
 	char *dir = (char *)NULL;
 
-	puts(_("Enter destiny directory (Ctrl-d to quit)\n"
-		"Tip: \".\" for current directory"));
+	puts(_("Enter destination directory (Ctrl-d to quit)\n"
+		"Tip: \".\" for the current directory"));
 	char _prompt[NAME_MAX];
 	snprintf(_prompt, sizeof(_prompt), "\001%s\002>\001%s\002 ", mi_c, tx_c);
 
@@ -345,7 +345,7 @@ dup_file(char **cmd)
 			free(deq_str);
 		}
 
-		/* Use source as destiny filename: source.copy, and, if already
+		/* Use source as destination filename: source.copy, and, if already
 		 * exists, source.copy-n, where N is an integer greater than zero. */
 		const size_t source_len = strlen(source);
 		int rem_slash = 0;
@@ -561,7 +561,7 @@ CONT:
 		const int retval = create_from_template(name, n);
 		if (retval != 0) {
 			if (retval == -1)
-				// file@template: No such template, or destiny file exists
+				// file@template: No such template, or destination file exists
 				status = FUNC_FAILURE;
 			goto END;
 		}
@@ -1661,7 +1661,7 @@ run_cp_mv_cmd(char **cmd, const int skip_force, const size_t files_num)
 		/* If we have a number, either it was not expanded by parse_input_str(),
 		 * in which case it is an invalid ELN, or it was expanded to a file
 		 * named as a number. Let's check if we have such filename in the
-		 * files list. */
+		 * file list. */
 		if (is_number(cmd[1])) {
 			filesn_t i = files;
 			while (--i >= 0) {
@@ -1838,7 +1838,7 @@ check_overwrite(char **args, const int force, size_t *skipped)
 	}
 
 	/* If skipped == files_num - 1, there are no source files left, only
-	 * the destiny file. There's nothing to do. */
+	 * the destination file. There's nothing to do. */
 	return (*skipped < files_num - 1);
 }
 
@@ -2252,7 +2252,7 @@ export_files(char **filenames, const int open)
 }
 
 /* Create a symlink in CWD for each filename in ARGS.
- * If the destiny file exists, a positive integer suffix is appended to
+ * If the destination file exists, a positive integer suffix is appended to
  * make the filename unique. */
 int
 batch_link(char **args)

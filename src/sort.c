@@ -390,7 +390,7 @@ re_sort_files_list(void)
 		return FUNC_SUCCESS;
 
 	/* sort_switch just tells list_dir() to print a line with the current
-	 * sorting order at the end of the files list. */
+	 * sorting order at the end of the file list. */
 	sort_switch = 1;
 	free_dirlist();
 	const int ret = list_dir();

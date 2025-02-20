@@ -320,7 +320,7 @@ open_bookmark(void)
 			continue;
 		}
 
-		struct stat a; /* If not a dir, refresh files list */
+		struct stat a; /* If not a dir, refresh the file list */
 		if (stat(tmp_path, &a) != -1 && S_ISDIR(a.st_mode))
 			is_dir = 1;
 

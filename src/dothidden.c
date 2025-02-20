@@ -38,7 +38,7 @@
 #include "strings.h"   /* savestring */
 
 /* Read .hidden file in the current directory and return a struct containing
- * the names of the files listed in it, expanding wildacards, if any.
+ * the names of the files listed in it, expanding wildcards, if any.
  * Empty lines and lines containing a slash are ignored.
  * The length of each entry is stored in the "len" field of the struct. */
 struct dothidden_t *

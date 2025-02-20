@@ -118,7 +118,7 @@ and regular options (set via either the command line or the configuration file).
     auto none\n\n\
 For the list of available option codes enter 'help autocommands'."
 
-#define AUTOCMDS_USAGE "Tweak settings or run custom commands on a per directory basis\n\n\
+#define AUTOCMDS_USAGE "Tweak settings or run custom commands on a per-directory basis\n\n\
 There are two ways to set autocommands:\n\
   1) Via the 'autocmd' keyword in the configuration file\n\
   2) Via specifically named files in the corresponding directory\n\n\
@@ -169,7 +169,7 @@ are not available here.\n\n\
 Note 3: To set a temporary autocommand for the current directory use the\n\
 'auto' command. Run 'auto --help' for details."
 
-#define AUTO_OPEN_USAGE "Turn auto-open on/off\n\n\
+#define AUTO_OPEN_USAGE "Toggle auto-open on/off\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   ao, auto-open [on | off | status]"
 
@@ -238,13 +238,12 @@ Note: Links are always created in the current directory."
 - Select all bookmarks at once\n\
     s b:"
 
-#define BULK_RENAME_USAGE "Bulk rename files\n\n\
+#define BULK_RENAME_USAGE "Rename files in bulk\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   br, bulk ELN/FILE... [:EDITOR]\n\n\
 The list of files to be renamed is opened via EDITOR (default associated\n\
-application for text files if omitted). Edit the filenames you want to \n\
-rename, save, and quit the editor (quit without saving to cancel the \n\
-operation).\n\n\
+application for text files if omitted). Edit filenames as desired, rename,\n\
+save changes, and quit the editor (quit without saving to cancel the operation).\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
 - Bulk rename all files ending with .pdf in the current directory\n\
     br *.pdf\n\
@@ -290,11 +289,11 @@ operation).\n\n\
     cs edit vi\n\
 - Switch to the color scheme named 'mytheme'\n\
     cs mytheme\n\n\
-Tip: Theming via LS_COLORS is also possible.\n\
-Run with --lscolors. Consult the Wiki for details:\n\
+Tip: Theming via LS_COLORS is also possible. To enable this,\n\
+run with the --lscolors option. Consult the Wiki for more information:\n\
 https://github.com/leo-arch/clifm/wiki/Customization#ls_colors-support"
 
-#define DESEL_USAGE "Deselect one or more selected files\n\n\
+#define DESEL_USAGE "Deselect files\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   ds, desel [*, a, all]\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
@@ -303,16 +302,16 @@ https://github.com/leo-arch/clifm/wiki/Customization#ls_colors-support"
 - Deselect files from a menu\n\
     ds (or 'ds <TAB>' to choose from a list - multi-selection is allowed)"
 
-#define DESKTOP_NOTIFICATIONS_USAGE "Errors, warnings, and notices are send \
-to the notification daemon instead of\n\
+#define DESKTOP_NOTIFICATIONS_USAGE "Errors, warnings, and notices are sent \
+to the desktop notifications daemon instead of\n\
 being printed immediately before the next prompt\n\n\
 To enable this feature use the --desktop-notifications command line flag or\n\
 set DesktopNotifications to true in the configuration file (F10).\n\n\
-Notifications are sent using the following command:\n\n\
+Notifications are sent using one of the following commands:\n\n\
 Linux/BSD: notify-send -u \"TYPE\" \"TITLE\" \"MSG\"\n\
 MacOS:     osascript -e 'display notification \"MSG\" subtitle \"TYPE\" with title \"TITLE\"'\n\
 Haiku:     notify --type \"TYPE\" --title \"TITLE\" \"MSG\"\n\n\
-Note: It is the notification daemon itself who takes care of actually printing\n\
+Note: It is the notifications daemon itself who takes care of actually printing\n\
 notifications on your screen. For troubleshoting, consult your \
 daemon's documentation.\n\n\
 Tip: You can always check notifications using the 'msg' command."
@@ -328,7 +327,7 @@ Tip: You can always check notifications using the 'msg' command."
 - Change to the entry number (ELN) 12\n\
     dh !12\n\
   Note: Entry numbers are not displayed when using tab completion.\n\n\
-Note: If the first argument is an absolute path, 'dh' works just as 'cd'.\n\
+Note: If the first argument is an absolute path, 'dh' works just like 'cd'.\n\
 Tip: Take a look at the 'j' command as well."
 
 #define DIRHIST_USAGE "List or access entries in the directory history list\n\n\
@@ -349,11 +348,11 @@ Tip: See also the 'dh' and 'j' commands."
 \x1b[1mEXAMPLE\x1b[22m\n\
 - Duplicate files whose ELN's are 12 through 20\n\
     d 12-20\n\n\
-You will be asked for a destiny directory.\n\
+You will be prompted to enter a destination directory.\n\
 Duplicated files are created as SRC.copy, and, if SRC.copy exists, as \n\
 SRC.copy-n, where n is an positive integer (starting at 1).\n\n\
 Parameters passed to rsync: --aczvAXHS --progress\n\n\
-Parameters passed to cp: -a"
+Parameters passed to cp:    -a"
 
 #define EDIT_USAGE "Edit the main configuration file\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
@@ -456,7 +455,7 @@ available previewing methods: sixel, ueberzug, kitty, ansi (text mode).\n\
 If using the 'ueberzug' method, you must start Clifm via the 'clifmrun' script\n\
 (~/.config/clifm/clifmrun)"
 
-#define FILTER_USAGE "Set a filter for the files list\n\n\
+#define FILTER_USAGE "Set a filter for the file list\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   ft, filter [unset | [!]REGEX,=FILE-TYPE-CHAR]\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
@@ -1280,11 +1279,9 @@ cp(1), mv(1), and rm(1) shell\ncommands respectively.\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
 c  -> cp -iRp\n\
 m  -> mv -i\n\
-r  -> rm -f ('-rf' for directories) (1)\n\n\
-(1) The user is asked for confirmation if the list of files contains:\n\
-a. At least one directory\n\
-b. Three or more files\n\
-c. At least one non-explicitly-expanded ELN (e.g.: 'r 12')\n\n\
+r  -> rm ('rm -r' for directories) (1)\n\n\
+(1) By default, the user will asked for confirmation (set rmForce to true\n\
+in the configuration file to disable the confirmation prompt).\n\n\
 The 'paste' command is equivalent to 'c' and exists only for semantic\n\
 reasons. For example, if you want to copy selected files into the current\n\
 directory, it makes sense to write 'paste sel'.\n\n\
@@ -1305,7 +1302,7 @@ Example: cp -abf ...\n\n\
     c file1 dir1/file2\n\
 - Copy all selected files into the current directory\n\
     c sel\n\
-  Note: If destiny directory is omitted, the current directory is assumed.\n\
+  Note: If destination directory is omitted, the current directory is assumed.\n\
 - Copy all selected files into the current directory (non-interactively):\n\
     c -f sel\n\
 - Move all selected files into the directory named testdir\n\
@@ -1512,7 +1509,7 @@ and paths\
 \n      --no-highlight\t\t Disable syntax highlighting\
 \n      --no-history\t\t Do not write commands into the history file\
 \n      --no-open-auto\t\t Same as no-cd-auto, but for files\
-\n      --no-refresh-on-resize\t Do not attempt to refresh the files list upon window's resize\
+\n      --no-refresh-on-resize\t Do not attempt to refresh the file list upon window's resize\
 \n      --no-report-cwd\t\t Do not report the working directory to the terminal (not supported by old terminals)\
 \n      --no-restore-last-path\t Do not record the last visited directory\
 \n      --no-suggestions\t\t Disable auto-suggestions\

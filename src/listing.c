@@ -160,7 +160,7 @@ struct wtrim_t {
  * conditions out of the loop to reduce the amount of conditions in each
  * loop pass.
  * In this case, instead of checking multiple loop-invariant conditions
- * in each pass of the main files listing loop (in list_dir()), we check
+ * in each pass of the main file listing loop (in list_dir()), we check
  * only one (i.e. the appropriate member of the checks struct).
  * The most important here is checks.lnk_char: instead of checking 4
  * conditions per listed file, we check only one. Thus, if we have 100 files,
@@ -1731,7 +1731,7 @@ get_longest_per_col(size_t *columns_n, filesn_t *rows, const filesn_t files_n)
 		*rows = 1;
 
 	/* Make enough room to hold columns information. We'll never get more
-	 * columns for the current files list than the amount of terminal columns. */
+	 * columns for the current file list than the amount of terminal columns. */
 	size_t *longest_per_col = xnmalloc((size_t)term_cols + 1, sizeof(size_t));
 
 	/* Hold info about the previous columns state */
@@ -2258,7 +2258,7 @@ exclude_file_type_light(const unsigned char type)
 }
 
 /* Returns FUNC_SUCCESS if the file with mode MODE and LINKS number
- * of links must be excluded from the files list, or FUNC_FAILURE. */
+ * of links must be excluded from the file list, or FUNC_FAILURE. */
 static int
 exclude_file_type(const char *name, const mode_t mode,
 	const nlink_t links, const off_t size)
@@ -2784,7 +2784,7 @@ END:
 }
 
 /* Check whether the file in the device DEV with inode INO is selected.
- * Used to mark selected files in the files list. */
+ * Used to mark selected files in the file list. */
 static int
 check_seltag(const dev_t dev, const ino_t ino, const nlink_t links,
 	const filesn_t index)

@@ -287,7 +287,7 @@ ERROR:
  * Use PTR as pointer, or ">" if PTR is NULL.
  * Use COLOR as pointer color, or mi_c if COLOR is NULL.
  * This function is used to inform the user about changes that require a
- * a files list reload (either upon files or interface modifications). */
+ * a file list reload (either upon files or interface modifications). */
 __attribute__((__format__(__printf__, 3, 4)))
 int
 print_reload_msg(const char *ptr, const char *color, const char *msg, ...)
@@ -413,7 +413,7 @@ read_inotify(void)
 					break;
 			}
 
-			/* If destiny filename is already in the files list (j >= 0),
+			/* If destiny filename is already in the file list (j >= 0),
 			 * ignore this event. */
 			ignore_event = (j < 0) ? 0 : 1;
 		}
