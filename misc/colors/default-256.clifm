@@ -49,11 +49,11 @@
 # define BOLD_CYAN=@6-1
 # el=BOLD_CYAN
 #
-# Here we define 'BOLD_CYAN' as "@6-1", and then we use this color for ELN's,
+# Here we define 'BOLD_CYAN' as "@6-1", and then we use this color for ELNs,
 # whose code is 'el' (see below).
 
 ### Xterm-like color names are also supported. For example, let's use DarkSeaGreen1
-# for ELN's:
+# for ELNs:
 #
 # el=DarkSeaGreen1
 #
@@ -134,14 +134,14 @@ define PROP_TIME_MARK=      # Timestamp identification character (2)
 #            INTERFACE                #
 #=====================================#
 
-define IFACE_ELN=@6               # ELN's (e.g. "12 myfile")
+define IFACE_ELN=@6               # ELNs (e.g. "12 myfile")
 define IFACE_FILES_COUNTER=@247   # Files counter (e.g. "dir/12")
 define IFACE_DIV_LINE=@243        # Dividing line
 define IFACE_LINK_IND=@43         # Symbolic link indicator ('@')
 define IFACE_MISC_IND=@6-1        # Miscellaneous indicator ("->")
 define IFACE_TABCOMP_PREFIX=@5-4  # Matching prefix (tab completion)
 define IFACE_WELCOME_MSG=@6-1     # Welcome message
-define IFACE_TRIM_CHAR=1;2;36     # Character used to mark trimmed file names ('~')
+define IFACE_TRIM_CHAR=1;2;36     # Character used to mark truncated file names ('~')
 define IFACE_DEF_COLOR=0          # Default color
 
 #=====================================#

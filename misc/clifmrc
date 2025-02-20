@@ -261,7 +261,7 @@
 #         2. COMMAND LINE             #
 #=====================================#
 
-# Set the quoting style used to expand ELN's (regular files only).
+# Set the quoting style used to expand ELNs (regular files only).
 # Supported values: 'backslash' (default), 'single', or 'double' quotes.
 # This option is particularly useful for shells that do not support
 # backslashes as quoting mechanism, such as nushell or xonsh.
@@ -273,7 +273,7 @@
 # Choose the fuzzy matching algorithm to use. Supported values:
 # 1 = faster, but not Unicode aware
 # 2 = slower, but Unicode aware (note that this algorithm will nonetheless
-# fallback to the first one whenever the query string does not contain
+# fall back to the first one whenever the query string does not contain
 # Unicode characters, minimizing thus the performance impact).
 ;FuzzyAlgorithm=2
 
@@ -299,7 +299,7 @@
 # specified by SuggestionStrategy. Available checks include:
 # a = Aliases names
 # c = Path completion
-# e = ELN's
+# e = ELNs
 # f = Filenames in current directory
 # h = Commands history
 # j = Jump database

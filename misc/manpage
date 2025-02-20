@@ -103,10 +103,10 @@ set an alternative configuration file
 set an alternative configuration directory (if configuration files do not exist already, they will be created in \fIDIR\fR).
 .TP
 \fB\-e\fR, \fB\-\-no\-eln\fR
-do not print ELN's (entry list number) at the left of filenames. Bear in mind, however, that though ELN's are not printed, they are still there and can be used as always.
+do not print ELNs (entry list number) at the left of filenames. Bear in mind, however, that though ELNs are not printed, they are still there and can be used as always.
 .TP
 \fB\-E\fR, \fB\-\-eln\-use\-workspace\-color\fR
-ELN's use the current workspace color
+ELNs use the current workspace color
 .TP
 \fB\-f\fR, \fB\-\-dirs\-first\fR
 list directories first
@@ -442,13 +442,13 @@ Help for all commands listed here can be accessed via the \fI\-h\fR or \fI\-\-he
 .sp
 \fBNOTE 2:\fR In case of ELN\-filename conflict the backslash can be used to prevent ELN expansion. For example, if we have at least two files and one of them is named "2", then \fBclifm\fR cannot know in advance if the command refers to the ELN 2 or to the filename "2". In we want the ELN, we just write the ELN number, for example: \fIs\ 2\fR. But if we want the filename, we need to escape the filename using the backlash character: \fIs\ \\2\fR.
 .sp
-\fBNOTE 3:\fR \fBclifm\fR supports \fBfused parameters\fR for internal commands taking an ELN or range of ELN\'s as parameters. Much like short options for command line programs, you can drop or omit the space between internal commands and the corresponding ELN passed as argument. In general, you can write \fICMDELN\fR instead of \fICMD\ ELN\fR. For example: \fIo12\fR or \fIs1\-5\fR instead of \fIo\ 12\fR and \fIs\ 1\-5\fR respectively. Bear in mind, however, that in thus omitting the space char tab completion for ELN's will not be available. If there is a file named \fIo12\fR (more generally, CMDELN), and if you want to refer to this file instead of a \fBclifm\fR command, escape the filename to prevent the split; for example: \fIs\ \\o12\fR.
+\fBNOTE 3:\fR \fBclifm\fR supports \fBfused parameters\fR for internal commands taking an ELN or range of ELNs as parameters. Much like short options for command line programs, you can drop or omit the space between internal commands and the corresponding ELN passed as argument. In general, you can write \fICMDELN\fR instead of \fICMD\ ELN\fR. For example: \fIo12\fR or \fIs1\-5\fR instead of \fIo\ 12\fR and \fIs\ 1\-5\fR respectively. Bear in mind, however, that in thus omitting the space char tab completion for ELNs will not be available. If there is a file named \fIo12\fR (more generally, CMDELN), and if you want to refer to this file instead of a \fBclifm\fR command, escape the filename to prevent the split; for example: \fIs\ \\o12\fR.
 .sp
 \fBNOTE 4:\fR \fBclifm\fR implements a \fBfastback\fR function, that is to say, the conversion of "... n" or "cmd ... n" into "../.. n" or "cmd ../.. n". In other words, subsequent dots after ".." will be converted each into "/..". For example, if you are in your home directory and type "..." or "cd ...", and since "..." amounts to "../..", you will be taken to the root directory. Tab completion is available for the fastback function: "....bin" \-> TAB \-> "../../../bin".
 
 .TP
 .B \fIFILE/DIR\fR
-if the \fIautocd\fR and \fIauto-open\fR functions are enabled, which is the default value, open FILE or change directory to DIR. In other words, \fIFILE\fR amounts to \fIopen\ FILE\fR or \fIo\ FILE\fR, and \fIDIR\fR to \fIcd\ DIR\fR. ELN's, of course, are allowed. Example: \fI12\fR.
+if the \fIautocd\fR and \fIauto-open\fR functions are enabled, which is the default value, open FILE or change directory to DIR. In other words, \fIFILE\fR amounts to \fIopen\ FILE\fR or \fIo\ FILE\fR, and \fIDIR\fR to \fIcd\ DIR\fR. ELNs, of course, are allowed. Example: \fI12\fR.
 .TP
 .B /\fIPATTERN\fR [\fI\-filetype\fR] [\fI\-x\fR] [\fIDIR\fR]
 this is the \fBquick search\fR function. Type \fI/\fR followed by a glob or regular (or extended regular) expression, and \fBclifm\fR will list all matches in the current working directory. For example, both \fI/*.pdf\fR and \fI/.pdf$\fR expressions will list all PDF files in the current working directory, the former using wildcards, and the second a regular expression.
@@ -718,7 +718,7 @@ Directories check order:
   3. Check \fBCDPATH\fR environment variable and append /DIR to each of the paths specified here. If the result of the concatenation is a valid directory, change into it.
   4. Check directories in the current working directory. If a matching directory is found, change to it.
 .sp
-You can use either ELN\'s or a string to indicate the directory you want. E.g.: \fIcd\ 12\fR or \fIcd\ ~/media\fR. If \fIautocd\fR is enabled (default), \fIcd\ 12\fR and \fIcd\ ~/media\fR can be written as \fI12\fR and \fI~/media\fR respectively as well.
+You can use either ELNs or a string to indicate the directory you want. E.g.: \fIcd\ 12\fR or \fIcd\ ~/media\fR. If \fIautocd\fR is enabled (default), \fIcd\ 12\fR and \fIcd\ ~/media\fR can be written as \fI12\fR and \fI~/media\fR respectively as well.
 .sp
 Unlike the shell \fBcd\fR(1) command, \fBclifm\fR's builtin \fIcd\fR function not only changes the current directory, but also lists its content (provided the option \fIAutoLs\fR is enabled, which is the default) according to a comprehensive list of color codes. By default, the output of \fIcd\fR is much like this shell command: \fIcd\ DIR\ &&\ ls\ \-\-color=auto\ \-\-group\-directories\-first\fR.
 .sp
@@ -776,12 +776,12 @@ If no parameter is passed, the user is prompted to either mark selected files to
 .sp
 Use \fI*\fR, \fIa\fR or \fIall\fR to deselect all selected entries at once. E.g.: \fIds\ *\fR.
 .sp
-You can also pass the filename(s) (or ELN\'s) to be deselected as a parameter. For example: \fIds\ myfile\ 24\fR.
+You can also pass the filename(s) (or ELNs) to be deselected as a parameter. For example: \fIds\ myfile\ 24\fR.
 .sp
 Tab completion is available for this command.
 .TP
 .B exp \fR[\fIFILE\fR]...
-with no argument, export the list of files in the current working directory to a temporary file. Otherwise, export only those specified as further arguments: they can be directories, filenames, ELN\'s or some search expression like "*.c".
+with no argument, export the list of files in the current working directory to a temporary file. Otherwise, export only those specified as further arguments: they can be directories, filenames, ELNs or some search expression like "*.c".
 .TP
 .B ext \fR[\fIon\fR, \fIoff\fR, \fIstatus\fR]
 toggle external commands on/off.
@@ -1542,7 +1542,7 @@ Each color scheme may include any (or all) of the below options:
 .TP
  \fIFiletypeColors\fR = Colors for different file types, such as directory, regular files, and so on. See the \fBCOLORS\fR section below.
 .TP
- \fIInterfaceColors\fR = Colors for \fBclifm\fR's interface, such as ELN's, file properties bits, suggestions, syntax highlighting, etc. See the \fBCOLORS\fR section below.
+ \fIInterfaceColors\fR = Colors for \fBclifm\fR's interface, such as ELNs, file properties bits, suggestions, syntax highlighting, etc. See the \fBCOLORS\fR section below.
 .TP
  \fIExtColors\fR = Colors for files based on filename extensions. See the \fBCOLORS\fR section below.
 .TP
@@ -1605,7 +1605,7 @@ The following codes are used for different interface elements (in the \fIInterfa
  sb = shell builtins
  sc = aliases and shell command names
  sd = internal commands description
- sf = ELN's, bookmarks, tag, and filenames
+ sf = ELNs, bookmarks, tag, and filenames
  sh = commands history entries
  sx = suggestions for \fBclifm\fR's internal commands and parameters
  sp = suggestions pointer (e.g.: 56 > filename, where '>' is the suggestion pointer)
@@ -1946,9 +1946,9 @@ For information about how to customize \fIfnf\fR consult \fBfnf\fR(1).
 .TP
 \fBClifm\fR can perform fuzzy tab completion (just as suggestions) for filenames and paths (e.g. "dwn" is completed/suggested as "Downloads"). To enable this feature use the \fI\-\-fuzzy\-matching\fR command line switch or set \fIFuzzyMatching\fR to \fItrue\fR in the configuration file.
 .TP
-Besides the default \fItab completion\fR for command \fBnames and paths\fR, you can also expand \fBELN's\fR using the TAB key. Example: type 'o 12', press TAB, and it becomes 'o filename ', or, if 12 refers to a directory, 'o dir/'. \fBclifm\fR uses a Bash\-style quoting system, so that this filename: "this is a test@version{1}" is expanded as follows: this\\ is\\ a\\ test\\@version\\{1\\}
+Besides the default \fItab completion\fR for command \fBnames and paths\fR, you can also expand \fBELNs\fR using the TAB key. Example: type 'o 12', press TAB, and it becomes 'o filename ', or, if 12 refers to a directory, 'o dir/'. \fBclifm\fR uses a Bash\-style quoting system, so that this filename: "this is a test@version{1}" is expanded as follows: this\\ is\\ a\\ test\\@version\\{1\\}
 .TP
-ELN's and \fBELN ranges\fR will be also automatically expanded, provided the corresponding ELN's actually exist, that is to say, provided some filename is listed on the screen under those numbers. For example: 'diff 1 118' will only expand '1', but not '118', if there is no ELN 118. In the same way, the range 1\-118 will only be expanded provided there are 118 or more elements listed on the screen. Note that the second field oa a range can be omitted, in which case the ELN of the last listed file is assumed (e.g.: provided there are 100 listed files, 12\- is equivalent to 12\-100).
+ELNs and \fBELN ranges\fR will be also automatically expanded, provided the corresponding ELNs actually exist, that is to say, provided some filename is listed on the screen under those numbers. For example: 'diff 1 118' will only expand '1', but not '118', if there is no ELN 118. In the same way, the range 1\-118 will only be expanded provided there are 118 or more elements listed on the screen. Note that the second field oa a range can be omitted, in which case the ELN of the last listed file is assumed (e.g.: provided there are 100 listed files, 12\- is equivalent to 12\-100).
 .TP
 Since ranges can be a bit tricky, tab completion is available to make sure this range actually includes the desired filenames.
 .TP
@@ -1958,7 +1958,7 @@ Tab completion for commands, paths, users home directory, workspaces, wildcards\
 .TP
 \fB*\fR When using fzf mode for tab completion, multi\-selection is available: Press TAB to expand possible selections, then press TAB again to mark desired entries. Once desired entries are marked, press Enter or the Right arrow key: marked entries will be inserted into the command line. Multi\-selection is also available for the following commands, provided there is no slash in the query string: \fIac\fR, \fIad\fR, \fIbb\fR, \fIbr\fR, \fId/dup\fR, \fIp/pr/prop\fR, \fIr\fR, \fIs\fR, \fIt/tr/trash\fR, and \fIte\fR.
 .TP
-Of course, combinations of all these features is also possible. Example: \fIcp sel file* 2 23\-31 .\fR will copy all selected files, plus all files whose name starts with "file", plus those files corresponding to the ELN\'s 2, and 23 to 31, into the current working directory.
+Of course, combinations of all these features is also possible. Example: \fIcp sel file* 2 23\-31 .\fR will copy all selected files, plus all files whose name starts with "file", plus those files corresponding to the ELNs 2, and 23 to 31, into the current working directory.
 .TP
 In addition to completions and expansions, an \fIauto\-suggestions system\fR is also available. See the \fBAUTO\-SUGGESTIONS\fR section below.
 
@@ -2216,7 +2216,7 @@ Image previews are available via the \fIclifmimg\fR plugin. Run \fIhelp image-pr
 
 The following checks are availabe (the order can be customized, see below):
 .sp
-a. ELN\'s
+a. ELNs
 .sp
 b. \fBclifm\fR commands and parameters (including the \fIsel\fR keyword)
 .sp
@@ -2242,26 +2242,26 @@ i. Shell builtins \fB(2)\fR
 .sp
 To accept the entire suggestion press \fBRight\fR or \fBCtrl\-f\fR: the cursor will move to the end of the suggested command and the suggestion color will change to that of the typed text; next, you can press \fBEnter\fR to execute the command as usual. Otherwise, if the suggestion is not accepted, it will be simply ignored and you can continue editing the current command line however you want.
 
-To accept the first suggested word only (up to first slash or space), press rather \fIAlt\-Right\fR or \fIAlt\-f\fR. Not available for ELN\'s, aliases and bookmarks names.
+To accept the first suggested word only (up to first slash or space), press rather \fIAlt\-Right\fR or \fIAlt\-f\fR. Not available for ELNs, aliases and bookmarks names.
 
-Bear in mind that suggestions for ELN\'s, aliases, bookmarks names, the jump function (invoked by the \fIj\fR command), just as filenames and paths (if fuzzy\-suggestions are enabled) do not work as the remaining suggestions: they do not suggest possible completions for the current input, but rather the value pointed to by it. For example, if you type "12" and the current list of files includes a filename whose ELN is '12', the filename corresponding to this ELN will be printed next to "12" as follows: \fB12_ > filename\fR (where the underscore is the current cursor position). Press \fIRight\fR or \fICtrl\-f\fR to accept the suggestion, in which case the text typed so far will be replaced by the suggestion.
+Bear in mind that suggestions for ELNs, aliases, bookmarks names, the jump function (invoked by the \fIj\fR command), just as filenames and paths (if fuzzy\-suggestions are enabled) do not work as the remaining suggestions: they do not suggest possible completions for the current input, but rather the value pointed to by it. For example, if you type "12" and the current list of files includes a filename whose ELN is '12', the filename corresponding to this ELN will be printed next to "12" as follows: \fB12_ > filename\fR (where the underscore is the current cursor position). Press \fIRight\fR or \fICtrl\-f\fR to accept the suggestion, in which case the text typed so far will be replaced by the suggestion.
 
 The order of the suggestion checks can be customized via the \fISuggestionStrategy\fR option in the configuration file. Each check is assigned a lowercase character:
 
  a = Aliases names
  c = Possible completions
- e = ELN's
+ e = ELNs
  f = Files in the current directory
  h = Entries in the commands history
  j = Entries in the jump database
 
-The value taken by \fISuggestionStrategy\fR is a string containing one or more of the above characters. The characters order in this string specifies the order in which the suggestion checks will be performed. For example, to perform all checks in the same order above, the value of the string should be \fBacefhj\fR (without quotes). Or, if you prefer to run the history check first: \fBhacefj\fR. Finally, you can ignore one or more checks by just omitting the corresponding character (to skip all checks, set the option value to a single dash (\-)). So, to ignore the aliases and the ELN's checks, set \fISuggestionStrategy\fR to \fBhcfj\fR. The default value for this option is \fBehfjac\fR.
+The value taken by \fISuggestionStrategy\fR is a string containing one or more of the above characters. The characters order in this string specifies the order in which the suggestion checks will be performed. For example, to perform all checks in the same order above, the value of the string should be \fBacefhj\fR (without quotes). Or, if you prefer to run the history check first: \fBhacefj\fR. Finally, you can ignore one or more checks by just omitting the corresponding character (to skip all checks, set the option value to a single dash (\-)). So, to ignore the aliases and the ELN checks, set \fISuggestionStrategy\fR to \fBhcfj\fR. The default value for this option is \fBehfjac\fR.
 
 \fBNote\fR: The check for program names in \fBPATH\fR is always executed at last, except when the \fIExternalCommands\fR option is disabled, in which case suggestions for them are simply not displayed.
 
 Suggestions will be printed using one of the following color codes (see the \fBCOLOR CODES\fR section above):
 
-\fIsf\fR: Used for file and directory names. This includes suggestions for ELN\'s, bookmarks names, files in the current directory, and possible completions. Default value: 2;4;36 (dimmed underlined cyan)
+\fIsf\fR: Used for file and directory names. This includes suggestions for ELNs, bookmarks names, files in the current directory, and possible completions. Default value: 2;4;36 (dimmed underlined cyan)
 
 \fIsh\fR: Used for entries in the commands history.
 
@@ -2269,7 +2269,7 @@ Suggestions will be printed using one of the following color codes (see the \fBC
 
 \fIsx\fR: Used for \fBclifm\fR internal commands and parameters.
 
-\fIsp\fR: Greater\-than sign (>) used when suggesting ELN\'s, bookmarks, and aliases names.
+\fIsp\fR: Greater\-than sign (>) used when suggesting ELNs, bookmarks, and aliases names.
 
 You can set \fISuggestFiletypeColor\fR to \fItrue\fR in the configuration file to use the color of the file type of the current filename (as set in the color scheme file) instead of the value of
 \fIsf\fR. For example, if a suggestion is printed for a file that is a symbolic link, \fIln\fR or \fIor\fR (if it's a broken link) will be used instead of \fIsf\fR.
@@ -3103,7 +3103,7 @@ For each of the internal commands (see the \fBCOMMANDS\fR section above) you can
 .sp
 Though you can use here external commands as well, bear in mind that, whenever at least one internal command is involved in a chained list of commands, \fBclifm\fR will take care of executing this list (simply because the system shell isn't able to understand any of these commands), so that no shell inter\-process function (like pipes), nor any stream redirection or shell expression (like IF blocks or FOR loops) will be available. However, the shell is still used to run single external commands found in the chained list, but in isolation from the remaining commands in this list.
 .sp
-As a rule of thumb, when using chained commands make sure to always expand ELN's to avoid undesired consequences. If, for instance, you issue this command: \fItouch\ aaa\ &&\ r\ 3\fR, you will end up deleting a file you were not intended to delete, simple because after the successful execution of the first command, the ELN 3 corresponds now to a different file.
+As a rule of thumb, when using chained commands make sure to always expand ELNs to avoid undesired consequences. If, for instance, you issue this command: \fItouch\ aaa\ &&\ r\ 3\fR, you will end up deleting a file you were not intended to delete, simple because after the successful execution of the first command, the ELN 3 corresponds now to a different file.
 .sp
 
 \fBExternal commands\fR:
