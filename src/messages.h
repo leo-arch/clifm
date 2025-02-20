@@ -297,7 +297,7 @@ https://github.com/leo-arch/clifm/wiki/Customization#ls_colors-support"
 \x1b[1mUSAGE\x1b[22m\n\
   ds, desel [*, a, all]\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
-- Deselect all selected files\n\
+- Deselect all files\n\
     ds * (or Alt-d)\n\
 - Deselect files from a menu\n\
     ds (or 'ds <TAB>' to choose from a list - multi-selection is allowed)"
@@ -887,9 +887,9 @@ Note: Use the 'pc' command to edit files permissions."
 \x1b[1mUSAGE\x1b[22m\n\
   opener APPLICATION\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
-- Set the resources opener to xdg-open (instead of the default, Lira)\n\
+- Set the file opener to xdg-open (instead of the default, Lira)\n\
     opener xdg-open\n\
-- Set the resources opener back to the default (Lira)\n\
+- Set the file opener back to the default (Lira)\n\
     opener default"
 
 #define OW_USAGE "Open a file with a specific application\n\n\
@@ -1112,7 +1112,7 @@ Recognized file types: (d)irectory, regular (f)ile, symbolic (l)ink,\n\
     c sel\n\
 - Move selected files into the directory whose ELN is 24\n\
     m sel 24\n\
-- Deselect all selected files\n\
+- Deselect all files\n\
     ds * (or Alt-d)\n\
 - Deselect files selectively\n\
     ds <TAB> (multi-selection is allowed)"
@@ -1589,7 +1589,7 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  cs, colorscheme    Switch/edit color schemes\n\
  d, dup             Duplicate files\n\
  dh                 Access the directory history list\n\
- ds, desel          Deselect selected files\n\
+ ds, desel          Deselect files\n\
  exp                Export filenames to a temporary file\n\
  ext                Set external/shell commands on/off\n\
  f, forth           Go forth in the directory history list\n\
@@ -1597,11 +1597,11 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  ff, dirs-first     Toggle list-directories-first on/off\n\
  ft, filter         Set a files filter\n\
  fz                 Print directories full size (long view mode only)\n\
- hh, hidden         Toggle hidden files on/off\n\
+ hh, hidden         Toggle hidden files\n\
  history            Manage the commands history\n\
  icons              Set icons on/off\n\
- k                  Toggle follow-links on/off (long view only)\n\
- kk                 Toggle max-filename-len on/off\n\
+ k                  Toggle follow-links (long view only)\n\
+ kk                 Toggle max-filename-len\n\
  j                  Jump to a visited directory\n\
  kb, keybinds       Manage keybindings\n\
  le                 Edit symbolic link target\n\
@@ -1657,11 +1657,11 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  M-Right, M-f  Accept the first suggested word\n\
  M-c           Clear the current command line buffer\n\
  M-q           Delete the last entered word\n\
- M-g           Toggle list directories first on/off\n\
- M-l           Toggle long/detail view mode on/off\n\
- M-+           Toggle follow links (long view only) on/off\n\
- M-.           Toggle hidden files on/off\n\
- M-,           Toggle list only directories on/off\n\
+ M-g           Toggle list directories first\n\
+ M-l           Toggle long/detail view mode\n\
+ M-+           Toggle follow links (long view only)\n\
+ M-.           Toggle hidden files\n\
+ M-,           Toggle list only directories\n\
  M--           Preview files in the current directory (requires fzf)\n\
  M-m           List mountpoints\n\
  M-h           Show directory history\n\
@@ -1670,14 +1670,14 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  C-y           Copy the current line buffer to the clipboard\n\
  M-s           Open the Selection Box\n\
  M-a           Select all files in the current working directory\n\
- M-d           Deselect all selected files\n\
+ M-d           Deselect all files\n\
  M-r           Change to the root directory\n\
  M-e, Home     Change to the home directory\n\
  M-u, S-Up     Change to the parent directory\n\
  M-j, S-Left   Change to previous visited directory\n\
  M-k, S-Right  Change to next visited directory\n\
  M-o           Lock terminal\n\
- M-p           Change to pinned directory\n\
+ M-p           Change to the pinned directory\n\
  M-v           Toggle prepend sudo\n\
  M-0           Run the files pager\n\
  M-[1-4]       Switch to workspace 1-4\n\
@@ -1692,8 +1692,8 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  C-M-g         Open/change-into last selected file/directory\n\
  C-M-n         Move selected files into the current working directory\n\
  C-M-v         Copy selected files into the current working directory\n\
- C-M-l         Toggle max name length on/off\n\
- M-y           Toggle light mode on/off\n\
+ C-M-l         Toggle max name length\n\
+ M-y           Toggle light mode\n\
  M-z           Switch to previous sorting method\n\
  M-x           Switch to next sorting method\n\
  C-x           Launch a new instance\n\
@@ -1744,7 +1744,7 @@ bm mybm | b:mybm         Change to the bookmark named 'mybm'\n\
 ws2 | Alt-2              Switch to the second workspace\n\
 mp                       Change to a mountpoint\n\
 pin mydir                Pin the directory 'mydir'\n\
-,                        Change to pinned directory\n\
+,                        Change to the pinned directory\n\
 x                        Run new instance in the current directory\n\
 /*.pdf<TAB>              File-name filter: List all PDF files in the current directory\n\
 =x<TAB>                  File-type filter: List all executable files in the current directory (1)\n\
@@ -1765,8 +1765,8 @@ p 4                  Print the properties of the file whose ELN is 4\n\
 s *.c                Select all C files\n\
 s 1-4 8 19-26        Select multiple files by ELN\n\
 sb | s:<TAB>         List currently selected files\n\
-ds | ds <TAB>        Deselect a few selected files\n\
-ds * | Alt-d         Deselect all selected files\n\
+ds | ds <TAB>        Deselect a few files\n\
+ds * | Alt-d         Deselect all files\n\
 bm add mydir mybm    Bookmark the directory named 'mydir' as 'mybm'\n\
 bm del mybm          Remove the bookmark named 'mybm'\n\
 tag --help           Learn about file tags\n\
@@ -1775,7 +1775,7 @@ n mydir/             Create a new directory named 'mydir'\n\
 c sel                Copy selected files into the current directory (1)\n\
 r sel                Remove all selected files (1)\n\
 br sel               Bulk rename selected files (1)\n\
-c 34 file_copy       Copy the file whose ELN is 34 as 'file_copy'\n\
+c 34 file_copy       Copy the file whose ELN is 34 to 'file_copy'\n\
 cr myfile            Copy 'myfile' to a remote location\n\
 m 45 3               Move the file whose ELN is 45 to the dir whose ELN is 3\n\
 m myfile.txt         Interactively rename 'myfile.txt'\n\
@@ -1794,7 +1794,7 @@ ac sel               Compress/archive selected files (1)\n\n\
 #define QUICK_HELP_MISC "\
 MISC\n\
 ----\n\
-CMD --help      Get help for command CMD\n\
+CMD --help      Get help for the command CMD\n\
 help <TAB>      List available help topics\n\
 F1              Open the manpage\n\
 ih              Run the interactive help plugin (requires fzf)\n\
@@ -1815,7 +1815,7 @@ Right           Accept the entire suggestion\n\
 Alt-f           Accept the first/next word of the current suggestion\n\
 pf set test     Change to the profile named 'test'\n\
 st size rev     Sort files by size in reverse order\n\
-Alt-x | Alt-z   Switch sort order\n\
+Alt-x | Alt-z   Switch to next/previous sort order\n\
 media           (Un)mount storage devices\n\
 net work        Mount the network resource named 'work'\n\
 actions         List available actions/plugins\n\
