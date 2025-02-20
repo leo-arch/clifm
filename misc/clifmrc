@@ -419,7 +419,7 @@
 # literal  = Do not resolve the target at all (like 'ln -s')
 ;LinkCreationMode=literal
 
-# Choose the resource opener for opening files with their default associated
+# Choose the file opener for opening files with their default associated
 # application (e.g. Ranger's rifle or xdg-open). If not specified, 'lira',
 # Clifm's builtin opener, will be used.
 ;Opener=

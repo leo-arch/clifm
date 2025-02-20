@@ -24,7 +24,7 @@ clifm \- The Command Line File Manager
 .sp
 \fB8.\fR Builtin expansions
 .sp
-\fB9.\fR Resource opener (third\-party openers are also supported)
+\fB9.\fR File opener (third\-party openers are also supported)
 .sp
 \fB10.\fR Shotgun, a builtin files previewer
 .sp
@@ -256,7 +256,7 @@ maximum number of visited directories to remember
 list only up to \fINUM\fR files. Use \-1 or \'unset\' to remove this limit (default). See the \fImf\fR command for a more detailed description.
 .TP
 \fB\-\-mimelist\-file\fR=\fI\,FILE\/\fR
-set \fIFILE\fR as Lira\'s configuration file. See the \fBRESOURCE OPENER\fR section below for more information
+set \fIFILE\fR as Lira\'s configuration file. See the \fBFILE OPENER\fR section below for more information
 .TP
 \fB\-\-mnt\-udisks2\fR
 use \fIudisks2\fR instead of \fIudevil\fR (default), for the \fImedia\fR command
@@ -350,7 +350,7 @@ disable the welcome message
 list directories only
 .TP
 \fB\-\-open\fR=\fI\,FILE\/\fR
-run as a standalone resource opener: open \fIFILE\fR and exit, where FILE can be a regular file or a directory, using either standard notation (/dir/file) or the URI file scheme (file://dir/file), or a URL (www.domain or https://domain).
+run as a standalone file opener: open \fIFILE\fR and exit, where FILE can be a regular file or a directory, using either standard notation (/dir/file) or the URI file scheme (file://dir/file), or a URL (www.domain or https://domain).
 .TP
 \fB\-\-opener\fR=\fI\,APPLICATION\/\fR
 use APPLICATION (e.g.: \fIrifle\fR or \fIxdg\-open\fR) as files opener/launcher (instead of \fILira\fR, \fBclifm\fR's default opener).
@@ -944,13 +944,13 @@ To get information about a device, enter \fIiELN\fR, for example, \fIi12\fR, pro
 List only up to NUM files (valid range: >= 0). Use \fIunset\fR to list all files (default). An indicator (listed_files/total_files) will be printed below the list of files whenever some file is excluded from the current list (e.g. 20/310). Note however that though some files are excluded, all of them are loaded anyway, so that you can still perform any valid operation on them. For example, even if only 10 files are listed, you can still search for ALL symbolic links in the corresponding directory using the appropriate command: \fI/*\ \-l\fR.
 .TP
 .B mm, mime \fR[\fIopen FILE\fR] [\fIinfo FILE\fR] [\fIedit\fR [\fIAPP\fR]] [\fIimport\fR]
-This is \fILira\fR, \fBclifm\fR's resource opener.
+This is \fILira\fR, \fBclifm\fR's file opener.
 .sp
 Use the \fIopen\fR subcommand to open a file with the default associated application. Note that, since \fIopen\fR is the default action, it can be omitted. For example: \fImm file.pdf\fR. The same can be achieved more easily via the \fIopen\fI command: \fIopen file.pdf\fR (or using the short command, \fIo file.pdf\fR). Or, even shorter, just \fIfile.pdf\fR.
 .sp
 The \fIinfo\fR option prints MIME information about FILE: its MIME type, and, if any, the application associated to this filename or to the file's MIME type.
 .sp
-The \fIedit\fR option allows you to edit and customize the MIME list file. So, if a file has no default associated application, first get its MIME info or its file extension (running \fImm\ info\ FILE\fR), and then add a value for it to the MIME list file using the \fIedit\fR option (\fImm\ edit\fR or F6). Check the \fBRESOURCE OPENER\fR section below for information about the mimelist file syntax.
+The \fIedit\fR option allows you to edit and customize the MIME list file. So, if a file has no default associated application, first get its MIME info or its file extension (running \fImm\ info\ FILE\fR), and then add a value for it to the MIME list file using the \fIedit\fR option (\fImm\ edit\fR or F6). Check the \fBFILE OPENER\fR section below for information about the mimelist file syntax.
 .sp
 Finally, via the \fIimport\fR option \fBclifm\fR will try to import MIME associations from the system looking for \fImimeapps.list\fR files in those paths specified by the Freedesktop specification (see \fIhttps://specifications.freedesktop.org/mime\-apps\-spec/mime\-apps\-spec\-latest.html\fR). If at least one MIME association is successfuly imported, it will be stored as \fImimelist.clifm.XXXXXX\fR (where XXXXXX is a random six digits alphanumerical string). You can add these new associations to your mimelist file using the \fImime edit\fR command.
 .TP
@@ -1063,7 +1063,7 @@ If the device data is unknown, as it often happens when it comes to removable de
 .sp
 Without arguments (or via the \fIlist\fR subcommand), \fInet\fR lists the configuration for each remote available in the configuration file.
 .sp
-Use the \fIedit\fR option to edit the remotes configuration file. If no further argument is specified, the file will be opened with the current resource opener. However, you can pass an application as second parameter to open to configuration file. Example: \fInet edit nano\fR.
+Use the \fIedit\fR option to edit the remotes configuration file. If no further argument is specified, the file will be opened with the current file opener. However, you can pass an application as second parameter to open to configuration file. Example: \fInet edit nano\fR.
 .sp
 If not already mounted, the \fIm\fR, \fImount\fR option mounts the specified remote using the mount command and the mounpoint specified in the confifuration file and automatically cd into the corresponding mountpoint. Example: \fInet m smb_work\fR. Since \fImount\fR is the default action, it can be omitted: \fInet smb_work\fR.
 .sp
@@ -1074,7 +1074,7 @@ The \fIu\fR, \fIunmount\fR option unmounts the specified remote using the unmoun
 .B o, open \fIELN/FILE\fR [\fIAPPLICATION\fR]
 open FILE, which can be either a directory, in which case it works just like the \fIcd\fR command (see above), a regular file, or a symbolic link to either of the two. For example: \fIo\ 12\fR, \fIo\ filename\fR, \fIo\ /path/to/filename\fR.
 .sp
-By default, the \fIopen\fR function will open files with the default application associated to them via \fILira\fR, the builtin resource opener (see the \fImime\fR command above). However, if you want to open a file with a different application, add the application name as second argument, e.g. \fIo\ 12\ leafpad\fR or \fIo12\ leafpad\fR.
+By default, the \fIopen\fR function will open files with the default application associated to them via \fILira\fR, the builtin file opener (see the \fImime\fR command above). However, if you want to open a file with a different application, add the application name as second argument, e.g. \fIo\ 12\ leafpad\fR or \fIo12\ leafpad\fR.
 .sp
 If you want to run the program in the background, simply add the ampersand character, as usual: \fIo\ 12\ &\fR, \fIo\ 12&\fR, \fIo12&\fR or (if auto\-open is enabled) just \fI12&\fR.
 .sp
@@ -1094,7 +1094,7 @@ If only a name/number is entered, it is taken as the user who owns the file(s).
 Use the \fIpc\fR command to edit files permissions.
 .TP
 .B opener \fR[\fIdefault\fR] [\fIAPPLICATION\fR]
-with no argument, prints the currently used resource opener (by default, \fILira\fR, \fBclifm\fR\'s builtin opener). Otherwise, set APPLICATION (say \fIrifle\fR or \fIxdg\-open\fR) as opener or, if \fIdefault\fR is passed instead, use \fILira\fR.
+with no argument, prints the currently used file opener (by default, \fILira\fR, \fBclifm\fR\'s builtin opener). Otherwise, set APPLICATION (say \fIrifle\fR or \fIxdg\-open\fR) as opener or, if \fIdefault\fR is passed instead, use \fILira\fR.
 .TP
 .B ow \fIELN/FILE\fR [\fIAPPLICATION\fR]
 If APPLICATION is specified, open ELN/FILE with APPLICATION. In case you need to add parameters to APPLICATION, it is recommended to quote the expression: \fIow FILE "APP ARG..."\fR.
@@ -1962,8 +1962,8 @@ Of course, combinations of all these features is also possible. Example: \fIcp s
 .TP
 In addition to completions and expansions, an \fIauto\-suggestions system\fR is also available. See the \fBAUTO\-SUGGESTIONS\fR section below.
 
-.SH 9. RESOURCE OPENER
-As \fBclifm\fR\'s builtin resource opener, \fILira\fR takes care of opening files when no opening application has been specified in the command line. It does this by automatically parsing a MIME list file (see the \fBFILES\fR section below): it looks first for a matching pattern (either a MIME type or a filename), then checks the existence of the command associated to this pattern, and finally executes it.
+.SH 9. FILE OPENER
+As \fBclifm\fR\'s builtin file opener, \fILira\fR takes care of opening files when no opening application has been specified in the command line. It does this by automatically parsing a MIME list file (see the \fBFILES\fR section below): it looks first for a matching pattern (either a MIME type or a filename), then checks the existence of the command associated to this pattern, and finally executes it.
 .TP
 \fILira\fR is controlled via the \fImime\fR command. File associations are stored in the MIME list file.
 .TP
@@ -2158,9 +2158,9 @@ or, if you prefer \fBxdg\-open\fR(1):
 
  \fB.*=rifle\fR
 .TP
-\fB6. Using Clifm as a standalone resource opener\fR
+\fB6. Using Clifm as a standalone file opener\fR
 .TP
-Though \fBclifm\fR is a file manager, it can be used as a simple resource opener via the \fI\-\-open\fR command line option. For example:
+Though \fBclifm\fR is a file manager, it can be used as a simple file opener via the \fI\-\-open\fR command line option. For example:
 
  \fBclifm \-\-open /path/to/my_file.jpg
  clifm \-\-open /path/to/my_dir
@@ -2185,7 +2185,7 @@ This command generates a preview of the file \fImyfile.txt\fR and then quits \fB
 .TP
 \fB3. Customization
 .TP
-Previewing applications (based on either MIME type or filename) are defined in a configuration file (\fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/preview.clifm\fR) using the same syntax used by \fILira\fR (the builtin resource opener). See the \fBRESOURCE OPENER\fR section above.
+Previewing applications (based on either MIME type or filename) are defined in a configuration file (\fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/preview.clifm\fR) using the same syntax used by \fILira\fR (the builtin file opener). See the \fBFILE OPENER\fR section above.
 .TP
 You can set an alternative configuration file via the \fI\-\-shotgun\-file\fR command line switch:
 
@@ -2300,7 +2300,7 @@ A convenient helper script is provided to get a consistent look across all plugi
     # shellcheck source=/dev/null
     . "$CLIFM_PLUGINS_HELPER"
 
-Plugins can talk to \fBclifm\fR via a dedicated pipe created for this purpose and exposed via an environment variable (\fBCLIFM_BUS\fR). Write to the pipe and \fBclifm\fR will hear and handle the message immediately after the plugin's execution. If the message is a path, \fBclifm\fR will run the \fIopen\fR function, changing the current directory to the new path, if a directory, or opening it with the \fIresource opener\fR, if a file. Otherwise, if the message is not a path, it will be taken and executed as a command. Examples:
+Plugins can talk to \fBclifm\fR via a dedicated pipe created for this purpose and exposed via an environment variable (\fBCLIFM_BUS\fR). Write to the pipe and \fBclifm\fR will hear and handle the message immediately after the plugin's execution. If the message is a path, \fBclifm\fR will run the \fIopen\fR function, changing the current directory to the new path, if a directory, or opening it with the \fIfile opener\fR, if a file. Otherwise, if the message is not a path, it will be taken and executed as a command. Examples:
 
     \'echo "/tmp" > "$CLIFM_BUS"\' tells \fBclifm\fR to change the current directory to \fI/tmp\fR
 
@@ -2920,7 +2920,7 @@ The number of terminal columns
 The number of terminal lines
 .TP
 .B CLIFM_MIMETYPES_FILE
-Set a custom mime.types file (instead of the default, \fI~/.mime.types\fR). Consult the \fBRESOURCE OPENER\fR section form more information.
+Set a custom mime.types file (instead of the default, \fI~/.mime.types\fR). Consult the \fBFILE OPENER\fR section form more information.
 .TP
 Except when running in \fBstealth mode\fR, \fBclifm\fR sets the following environment variables:
 .TP

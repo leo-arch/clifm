@@ -883,7 +883,7 @@ Note: Use the 'pc' command to edit files permissions."
     12\n\
     12 vi"
 
-#define OPENER_USAGE "Set the resource opener\n\n\
+#define OPENER_USAGE "Set the file opener\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   opener APPLICATION\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
@@ -1404,7 +1404,7 @@ c: Stop paging (printing remaining files)\n"
 \n -M       Disable colors\
 \n -n       Disable commands history\
 \n -N       Disable bold colors\
-\n -o PATH  Set a custom resource opener (instead of the builtin Lira)\
+\n -o PATH  Set a custom file opener (instead of the builtin Lira)\
 \n -O FILE  Open FILE (via Lira) and exit\
 \n -p NAME  Set/create the profile NAME\
 \n -P FILE  Generate a preview of FILE and exit\
@@ -1520,7 +1520,7 @@ and paths\
 \n      --no-welcome-message\t Disable the welcome message\
 \n      --only-dirs\t\t List only directories and symbolic links to directories\
 \n      --open=FILE\t\t Open FILE (via Lira) and exit\
-\n      --opener=APPLICATION\t Use APPLICATION as resource opener (instead of Lira, \
+\n      --opener=APPLICATION\t Use APPLICATION as file opener (instead of Lira, \
 our builtin opener)\
 \n      --pager-view=MODE\t\t How to list files in the pager (auto, long, short)\
 \n      --physical-size\t\t Same as --no-apparent-size\
@@ -1618,7 +1618,7 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  o, open            Open a file\n\
  oc                 Change files ownership interactively\n\
  ow                 Open a file with ...\n\
- opener             Set a custom resource opener\n\
+ opener             Set a custom file opener\n\
  p, pp, prop        Print files properties\n\
  pc                 Change files permissions interactively\n\
  pf, profile        Manage profiles\n\
@@ -1903,7 +1903,7 @@ q | F12         I'm tired, quit"
 #define NET_DESC     " (manage remote resources)"
 #define O_DESC       " (open file)"
 #define OC_DESC      " (change files ownership)"
-#define OPENER_DESC  " (set a custom resource opener)"
+#define OPENER_DESC  " (set a custom file opener)"
 #define OW_DESC      " (open file with...)"
 #define P_DESC       " (print files properties)"
 #define PC_DESC      " (change files permissions)"

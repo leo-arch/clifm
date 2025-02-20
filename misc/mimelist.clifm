@@ -1,6 +1,6 @@
                   ###################################
                   #   Configuration File for Lira   #
-                  #     Clifm's Resource Opener     #
+                  #       Clifm's File Opener       #
                   ###################################
 
 #-----------------------------
@@ -8,7 +8,7 @@
 #-----------------------------
 
 # This configuration file allows the user to define how different files are
-# opened by Lira, Clifm's resource opener.
+# opened by Lira, Clifm's file opener.
 
 # Commented and blank lines are ignored.
 # Lines starting with either '#' or ';' are comments.

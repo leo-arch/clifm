@@ -94,7 +94,7 @@ args=(
 	'--no-welcome-message[disable the welcome message]'
 	'--only-dirs[list only directories and symbolic links to directories]'
 	'--open=[open FILE and exit]:filename:_files'
-	'--opener=[resource opener to use instead of '\''Lira'\'', CliFM built-in opener]:opener:_command_names'
+	'--opener=[file opener to use instead of the builtin opener]:opener:_command_names'
 	'--pager-view=[how to list files in the pager: auto (default), long, short]:pager_view:->pager_views'
 	'--physical-size[same as --no-apparent-size]'
 	'--preview=[display a preview of FILE and exit]:filename:_files'

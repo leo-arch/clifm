@@ -1,6 +1,6 @@
                   ###################################
                   #   Configuration file for Lira   #
-                  #     CliFM's resource opener     #
+                  #       Clifm's file opener       #
                   ###################################
 
 # Commented and blank lines are omitted
@@ -121,5 +121,5 @@ X:^font/.*=fontforge;fontpreview
 # Torrent:
 X:application/x-bittorrent=rtorrent;transimission-gtk;transmission-qt;deluge-gtk;ktorrent
 
-# Fallback to another resource opener as last resource
+# Fallback to another file opener as last resource
 .*=xdg-open;mimeo;mimeopen -n;whippet -m;open;linopen;

@@ -1927,8 +1927,8 @@ create_main_config_file(char *file)
 	    "# Should the Selection Box be shared among different profiles?\n\
 ;ShareSelbox=%s\n\n"
 
-	    "# Choose the resource opener to open files with their default associated\n\
-# application. If not set, Lira, Clifm's builtin opener, is used.\n\
+	    "# Choose the file opener for opening files with their default associated\n\
+# application. If not set, Lira (Clifm's builtin opener) is used.\n\
 ;Opener=\n\n"
 
 	    "# Only used when opening a directory via a new Clifm instance (with the 'x'\n\
@@ -2347,7 +2347,7 @@ create_mime_file_anew(char *file)
 
 	fprintf(fp, "                  ###################################\n\
                   #   Configuration file for Lira   #\n\
-                  #     Clifm's resource opener     #\n\
+                  #       Clifm's file opener       #\n\
                   ###################################\n\
 \n\
 # Commented and blank lines are omitted.\n\

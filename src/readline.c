@@ -1433,7 +1433,7 @@ int_cmds_generator(const char *text, int state)
 		"net     (manage remote resources)",
 		"o       (open file)",
 		"oc      (change files ownership)",
-		"opener  (set a custom resource opener)",
+		"opener  (set a custom file opener)",
 		"ow      (open file with...)",
 		"p       (print files properties)",
 		"pc      (change files permissions)",

@@ -1,4 +1,4 @@
-/* mime.c -- functions controlling Lira, the resource opener */
+/* mime.c -- functions controlling Lira, the file opener */
 
 /*
  * This file is part of Clifm

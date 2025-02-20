@@ -135,7 +135,7 @@ print_tips(const int all)
 		"Set the starting path. E.g.: 'clifm ~/media'",
 		"Use the 'o' command to open files and directories. E.g.: 'o 12'",
 		"Open a file or directory by just entering its ELN or filename",
-		"Bypass the resource opener specifying an application. E.g.: '12 leafpad'",
+		"Bypass the file opener by specifying an application. E.g.: '12 leafpad'",
 		"Open a file and send it to the background. E.g.: '24&'",
 		"Create a custom prompt by editing the prompts file ('prompt edit')",
 		"Customize your color scheme: 'cs edit' or F8",
