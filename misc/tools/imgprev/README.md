@@ -13,7 +13,7 @@
 
 ---
 
-<h4 align="right">TAB completion with image previews</h4>
+<h4 align="right">Tab completion with image previews</h4>
 <p align="right"><img src="https://i.postimg.cc/fTG6W3yb/fzf-preview.jpg"></p>
 
 <h4 align="left">Preview files in full screen (via the <i>view</i> command)</h4>
@@ -51,7 +51,7 @@ N:.*\.(cbz|cbr|cbt)$=~/.config/clifm/clifmimg comic %f %u;
 
 ```
 
-This instructs **clifm** to use the [clifmimg script](#the-clifmimg-script) to generate previews for the specified file types (both for TAB completion (in [fzf mode](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion)) and via the [`view` command](https://github.com/leo-arch/clifm/wiki/Introduction#view)).
+This instructs **clifm** to use the [clifmimg script](#the-clifmimg-script) to generate previews for the specified file types (both for tab completion (in [fzf mode](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion)) and via the [`view` command](https://github.com/leo-arch/clifm/wiki/Introduction#view)).
 
 Note: In case you don't want image previews for some of these files types, just comment out the corresponding line or change its value to your preferred previewing application.
 
@@ -106,7 +106,7 @@ Note that if **CLIFM_IMG_SUPPORT** is unset, the `clifmimg` script falls back to
 The steps involved in generating image previews are:
 
 1. The `clifmrun` script prepares the environment to generate image previews via `ueberzug` and then launches **clifm**.<sup>1</sup> (If not using the [`ueberzug` method](#previewing-methods), this step is ommited).
-2. Every time TAB completion is invoked for files (if running in [fzf mode](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion)), or the [view command](https://github.com/leo-arch/clifm/wiki/Introduction#view) is executed, `fzf` is launched.
+2. Every time tab completion is invoked for files (if running in [fzf mode](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion)), or the [view command](https://github.com/leo-arch/clifm/wiki/Introduction#view) is executed, `fzf` is launched.
 3. `fzf` calls shotgun (via `clifm --preview`) to generate a preview of the currently hovered file.
 4. Shotgun executes `clifmimg`, which takes care of genereting a thumbnail of the corresponding file.
 5. Once the thumbnail is generated, `clifmimg` takes care of disaplying the thumbnail via any of the available [previewing methods](#previewing-methods).
@@ -119,7 +119,7 @@ The steps involved in generating image previews are:
 
 For performance reasons, thumbnails are cached (in the directory pointed to by the `CACHE_DIR` variable<sup>1</sup>) using MD5 hashes as names.
 
-The script takes three parameters: the first one tells the type of file to be previewed, the second one is the file name to be previewed, and the third one is the file URI for the file name to be previewed.<sup>2</sup> For example:
+The script takes three parameters: the first one tells the type of file to be previewed, the second one is the filename to be previewed, and the third one is the file URI for the filename to be previewed.<sup>2</sup> For example:
 
 ```sh
 clifmimg doc %f %u

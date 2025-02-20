@@ -953,8 +953,8 @@ is_dup_entry(const char *prefix, char **apps, const char *app)
 
 /* Return the list of opening apps for FILE_NAME, whose MIME type is MIME,
  * reading the file whose file pointer is FP.
- * If PREFIX is not NULL, we're TAB completing.
- * If ONLY_NAMES is 1, we're TAB completing for 'edit' subcommands (in which
+ * If PREFIX is not NULL, we're tab completing.
+ * If ONLY_NAMES is 1, we're tab completing for 'edit' subcommands (in which
  * case we want only command names, not parameters). */
 static char **
 get_apps_from_file(FILE *fp, char *file_name, const char *mime,
@@ -1170,7 +1170,7 @@ mime_open_with_tab(char *filename, const char *prefix, const int only_names)
 	}
 
 	/* Do not let PREFIX be NULL, so that get_apps_from_file() knows
-	 * we're TAB completing. */
+	 * we're tab completing. */
 	char **apps = get_apps_from_file(fp, name, mime,
 		prefix ? prefix : "", only_names);
 

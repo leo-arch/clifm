@@ -545,7 +545,7 @@ bookmark_add(char *file, char *name, char *shortcut)
 	free(p);
 	free(q);
 
-	reload_bookmarks(); /* Update bookmarks for TAB completion. */
+	reload_bookmarks(); /* Update bookmarks for tab completion. */
 
 	return FUNC_SUCCESS;
 

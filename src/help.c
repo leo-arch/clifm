@@ -64,7 +64,7 @@ print_tips(const int all)
 		"commands respectively. E.g.: 'ac sel' or 'ad file.zip'",
 		"Disallow the use of shell commands with the -x option: 'clifm -x'",
 		"Don't like ELN's? Disable them using the -e command line switch",
-		"Disable file previews for TAB completion (fzf mode only) via --no-fzfpreview",
+		"Disable file previews for tab completion (fzf mode only) via --no-fzfpreview",
 # ifdef __linux__
 		"Manage removable devices via the 'media' command",
 # endif /* __linux__ */
@@ -214,7 +214,7 @@ print_tips(const int all)
 		"List symlinks in the current directory: '=l<TAB>'. Try 'help file-filters' for more information",
 		"Use PropFields in the configuration file to customize fields in long view mode",
 		"Preview files in the current directory using the 'view' command (requires fzf)",
-		"Press Alt+- to launch the files previewer (requires fzf)",
+		"Press Alt+- to launch the file previewer (requires fzf)",
 		"Interactively select files (requires fzf, fnf, or smenu). E.g.: 's /dir/*<TAB>'",
 		"Change files permissions/ownership using the 'pc' and 'oc' commands respectively",
 		"Set a custom shell to run external commands. E.g.: 'CLIFM_SHELL=/bin/dash clifm'",

@@ -1,4 +1,4 @@
-/* tabcomp.c -- functions for TAB completion */
+/* tabcomp.c -- functions for tab completion */
 
 /*
  * This file is part of Clifm
@@ -78,7 +78,7 @@ static size_t longest_prev_entry;
 #endif /* _NO_FZF */
 
 /* The following three functions are used to get current cursor position
- * (both vertical and horizontal), needed by TAB completion in fzf mode
+ * (both vertical and horizontal), needed by tab completion in fzf mode
  * with previews enabled */
 
 /* Return the character which best describes FILENAME.
@@ -1858,7 +1858,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	int finder_offset = get_finder_offset(query, text, matches, lw,
 		&height, &total_line_len);
 
-	/* TAB completion cases allowing multi-selection. */
+	/* Tab completion cases allowing multi-selection. */
 	int multi = is_multi_sel();
 
 	char *q = query;
@@ -2562,7 +2562,7 @@ DISPLAY_MATCHES:
 
 CALC_OFFSET:
 #ifndef _NO_FZF
-		/* Alternative TAB completion: fzf, fnf, smenu. */
+		/* Alternative tab completion: fzf, fnf, smenu. */
 		if (fzftab == 1) {
 			char *t = text ? text : (char *)NULL;
 			if (finder_tabcomp(matches, common_prefix_added == 1 ? t : NULL,
@@ -2574,7 +2574,7 @@ CALC_OFFSET:
 		if (1) {} /* This just silences a warning. */
 #endif /* !_NO_FZF */
 
-		/* Standard TAB completion. */
+		/* Standard tab completion. */
 		char *ptr = matches[0];
 		/* Skip leading backslashes. */
 		while (*ptr) {

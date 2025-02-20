@@ -327,7 +327,7 @@ Tip: You can always check notifications using the 'msg' command."
     dh query (also 'dh query<TAB>')\n\
 - Change to the entry number (ELN) 12\n\
     dh !12\n\
-  Note: Entry numbers are not displayed when using TAB completion.\n\n\
+  Note: Entry numbers are not displayed when using tab completion.\n\n\
 Note: If the first argument is an absolute path, 'dh' works just as 'cd'.\n\
 Tip: Take a look at the 'j' command as well."
 
@@ -446,7 +446,7 @@ Edit shotgun's configuration file ('view edit' or F7) and uncomment the\n\
 'clifmimg' lines from the top of the file.\n\
 \n\
 This instructs Clifm to use the 'clifmimg' script (~/.config/clifm/clifmimg)\n\
-to generate image previews (for both TAB completion -in fzf mode- and the\n\
+to generate image previews (for both tab completion -in fzf mode- and the\n\
 'view' command).\n\
 \n\
 By default, Clifm will try to guess the best previewing method. However, you\n\
@@ -499,7 +499,7 @@ Available file type characters:\n\
   u: SUID files (2)\n\
   g: SGID files (2)\n\
   x: Executable files (2)\n\n\
-(1) Only via TAB completion\n\
+(1) Only via tab completion\n\
 (2) Not available in light mode\n\n\
 Type '=<TAB>' to get the list of available file type filters.\n\n\
 Other ways of filtering files in the current directory:\n\n\
@@ -842,7 +842,7 @@ new files are created using the template name as the extension. E.g.:\n\
 If a filename is followed by '@TEMPLATE', where TEMPLATE is any regular\n\
 file found in the templates directory (1), the file will be created as a\n\
 copy of the specified template. E.g.: 'n file.sh@my_script.sh'.\n\n\
-TAB completion is available for explicit templates: simply type 'n file@<TAB>'.\n\n\
+Tab completion is available for explicit templates: simply type 'n file@<TAB>'.\n\n\
 (1) The templates directory is $CLIFM_TEMPLATES_DIR, $XDG_TEMPLATES_DIR,\n\
 or ~/Templates, in this precedence order."
 
@@ -860,7 +860,7 @@ Only user and primary group common to all files passed as\n\
 parameters are set in the ownership template.\n\n\
 Ownership (both user and primary group, if specified) is\n\
 changed for all files passed as parameters.\n\n\
-Both names and ID numbers are allowed (TAB completion is available).\n\n\
+Both names and ID numbers are allowed (tab completion is available).\n\n\
 If only a name/number is entered, it is taken as user.\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
 - Change user to root\n\
@@ -1105,7 +1105,7 @@ Recognized file types: (d)irectory, regular (f)ile, symbolic (l)ink,\n\
 - Select all files in the current directory (including hidden files)\n\
     s * .* (or Alt-a)\n\
 - Interactively select files in '/media' (requires fzf, fnf, or smenu\n\
-  TAB completion mode)\n\
+  tab completion mode)\n\
     s /media/*<TAB>\n\
 - List currently selected files\n\
     sb\n\
@@ -1481,9 +1481,9 @@ database (via the 'j' command)\
 \n      --disk-usage\t\t Show disk usage (free/total FS MOUNTPOINT)\
 \n      --full-dir-size\t\t Recursively calculate directories size (long view only)\
 \n      --fuzzy-algo=NUM\t\t Set fuzzy algorithm for fuzzy matching (1 or 2)\
-\n      --fuzzy-matching\t\t Enable fuzzy TAB completion/suggestions for filenames \
+\n      --fuzzy-matching\t\t Enable fuzzy tab completion/suggestions for filenames \
 and paths\
-\n      --fzfpreview-hidden\t Enable file previews for TAB completion (fzf mode only) with the preview window hidden (toggle with Alt-p)\
+\n      --fzfpreview-hidden\t Enable file previews for tab completion (fzf mode only) with the preview window hidden (toggle with Alt-p)\
 \n      --fzftab\t\t\t Use fzf to display completion matches (default if the fzf binary is found in PATH)\
 \n      --fnftab\t\t\t Use fnf to display completion matches\
 \n      --icons\t\t\t Enable icons\
@@ -1508,7 +1508,7 @@ and paths\
 \n      --no-file-ext\t\t Do not check file extensions when listing files\
 \n      --no-files-counter\t Disable the files counter for directories\
 \n      --no-follow-symlink\t Do not follow symbolic links when listing files (overrides -L and --color-links-as-target)\
-\n      --no-fzfpreview\t\t Disable file previews for TAB completion (fzf mode only)\
+\n      --no-fzfpreview\t\t Disable file previews for tab completion (fzf mode only)\
 \n      --no-highlight\t\t Disable syntax highlighting\
 \n      --no-history\t\t Do not write commands into the history file\
 \n      --no-open-auto\t\t Same as no-cd-auto, but for files\
@@ -1547,7 +1547,7 @@ PropFields in the config file)\
 \n      --sort-reverse\t\t Sort in reverse order, e.g., z-a instead of a-z\
 \n      --stat FILE...\t\t Run the 'p' command on FILE(s) and exit\
 \n      --stat-full FILE...\t Run the 'pp' command on FILE(s) and exit\
-\n      --stdtab\t\t\t Force the use of the standard TAB completion mode (readline)\
+\n      --stdtab\t\t\t Force the use of the standard tab completion mode (readline)\
 \n      --time-style=STYLE\t Time/date style used in long view (see TimeStyle in the config file)\
 \n      --trash-as-rm\t\t The 'r' command runs 'trash' instead of \
 rm(1) to prevent accidental deletions\

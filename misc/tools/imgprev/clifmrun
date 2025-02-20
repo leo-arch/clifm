@@ -15,7 +15,7 @@
 # Consult this script itself ('~/.config/clifm/clifmimg') for instructions on how to
 # set up Clifm to generate image previews.
 #
-# Previews for TAB completion (in FZF mode) are enabled by default. In any case,
+# Previews for tab completion (in fzf mode) are enabled by default. In any case,
 # check the FzfPreview option in Clifm's main configuration file (run 'config' or
 # press F10).
 

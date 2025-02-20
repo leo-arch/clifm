@@ -104,7 +104,7 @@ get_bd_matches(const char *str, int *n, const int mode)
 	char **matches = (char **)NULL;
 
 	if (mode == BD_TAB) {
-		/* matches will be passed to readline for TAB completion, so
+		/* matches will be passed to readline for tab completion, so
 		 * that we need to reserve the first slot to hold the query
 		 * string */
 		*n = 1;

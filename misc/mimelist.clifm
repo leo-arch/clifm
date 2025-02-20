@@ -1,11 +1,14 @@
                   ###################################
-                  #   Configuration file for Lira   #
-                  #     Clifm's resource opener     #
+                  #   Configuration File for Lira   #
+                  #     Clifm's Resource Opener     #
                   ###################################
 
 #-----------------------------
 # Description
 #-----------------------------
+
+# This configuration file allows the user to define how different files are
+# opened by Lira, Clifm's resource opener.
 
 # Commented and blank lines are ignored.
 # Lines starting with either '#' or ';' are comments.
@@ -19,92 +22,89 @@
 
 # Applications defined here are NOT desktop files, but commands (arguments
 # can be used as well). Bear in mind that these commands will be executed
-# directly without shell intervention, so that no shell goodies (like pipes,
-# conditions, loops, etc) are available. In case you need something more
-# complex than a single command (including shell capabilities) write your
-# own script and place the path to the script in place of the command.
+# directly without shell features (like pipes, conditions, loops, etc). For
+# more complex commands, create a script and place its path instead.
 # For example:
 #    X:^text/.*:~/scripts/my_cool_script.sh
 
 # Use 'X' to specify a GUI environment and '!X' for non-GUI environments:
 # X  = GUI only
-# !X = Non-GUI only (like the kernel console or an SSH session)
+# !X = Non-GUI only (like the kernel console or a SSH session)
 #
-# If the current line applies to both GUI and non-GUI environments, just omit
-# the X. E.g.: 'text/plain=vi'
+# If a line applies to both environments, simply omit the 'X'. For example:
+# 'text/plain=vi'
 
-# Use 'N' to match file names instead of MIME types.
+# Use 'N' to match filenames instead of MIME types.
 # 'N:.*\.txt$=vi' to open all .txt files with vi (both GUI and non-GUI)
 # 'X:N:.*\.txt$=geany' (GUI only)
 # '!X:N:.*\.txt$=vi' (non-GUI only)
 
-# Regular expressions are allowed for both MIME types and file names.
+# Regular expressions are supported for both MIME types and filenames.
 
-# Use the '%f' placeholder to specify the position of the file name to be
+# Use the '%f' placeholder to specify the position of the filename to be
 # opened in the command. For example:
-#    'mpv %f --no-terminal' -> 'mpv FILE --no-terminal' 
+#    'mpv %f --no-terminal' will expand to 'mpv FILE --no-terminal' 
 #
-# The '%u' placeholder is expanded to the file URI for the original file.
-# For example, if the file name is '/home/user/this is a test',
-# 'cmd %u' is expanded to 'cmd file:///home/user/this%20is%20a%20test'.
+# The '%u' placeholder is expanded to the file URI. For example, if the
+# filename is '/home/user/this is a test', 'cmd %u' is expanded to
+# 'cmd file:///home/user/this%20is%20a%20test'.
 #
-# If neither %f nor %u are specified, the file name will be appended to the
-# end of the command. For example:
-#    'mpv --no-terminal' -> 'mpv --no-terminal FILE'
+# If neither %f nor %u is specified, the filename will be appended to the
+# command. For example:
+#    'mpv --no-terminal' becomes 'mpv --no-terminal FILE'
 #
-# The '%m' placeholder is expanded to the file's MIME type.
+# The '%m' placeholder expands to the file's MIME type.
 
-# To silence STDERR and/or STDOUT use !E and !O respectively (they can be
-# used together). Examples:
-# Silence STDERR only and run in the foreground:
+# To suppress STDERR and/or STDOUT use !E and !O respectively (they can be
+# combined). Examples:
+# Supress STDERR only and run in the foreground:
 #    mpv %f !E
-# Silence both (STDERR and STDOUT) and run in the background:
+# Supress both (STDERR and STDOUT) and run in the background:
 #    mpv %f !EO &
 
-# The '%x' flag can be used as a shorthand for "%f !EO &". For example:
+# The '%x' flag is a shorthand for "%f !EO &". For example:
 #    mpv %x
 #
-# When using this flag the opening application is executed in a new
-# session, i.e., detached from the running terminal (via setsid(3)).
+# This flag runs the application is in a new session, detached from the
+# running terminal (via setsid(3)).
 #
 # For Ranger users, the '%x' flag is equivalent to "flag f" in rifle.conf.
 
-# Running the opening application in the background:
+# Running opening applications in the background:
 # For GUI applications:
 #    APP %x
 # For terminal applications:
 #    TERM -e APP %x
-# Replace 'TERM' and 'APP' by the corresponding values. The -e option
+# Replace 'TERM' and 'APP' with the corresponding values. The -e option
 # might vary depending on the terminal emulator used (TERM).
 #
-# Bear in mind that this will hide error messages. To print error
-# messages write the command as follows:
+# Note: This will hide error messages. To display error messages use:
 #    cmd %f !O &
-# This will run 'cmd' in the background silencing STDOUT only.
+# This will run 'cmd' in the background supressing STDOUT only.
 
-# Note on graphical applications: If the opening application is already
-# running, the file will be opened, usually in a new tab, and Clifm won't
-# wait for the file to be closed (because the procecss already returned).
-# To avoid this, instruct the application to execute a new instance. For example:
-# geany -i, gedit -s, kate -n, pluma --new-window, and so on.
+# Important: If the opening application is already running, the file will
+# typically open in a new tab, and Clifm will not wait for the file to be
+# closed (as the procecss already returned).
+# To ensure a new instance is created, use options like:
+# geany -i, gedit -s, kate -n, pluma --new-window, etc.
 
-# Environment variables can be used as well. Example:
+# Environment variables can also be used. Example:
 #    X:text/plain=$EDITOR %f &;$VISUAL;nano;vi
 
-# Use Ranger's rifle (or whatever opener you prefer) to open all files
+# Use Ranger's rifle (or your preferred opener) for all files
 #.*=rifle
 
 ################################
 #  1. File names/extensions    #
 ################################
 
-# Match a full file name
+# Match a complete filename
 #X:N:some_filename=cmd
 
-# Match all file names starting with 'str'
+# Match all filenames starting with 'str'
 #X:N:^str.*=cmd
 
-# Match files with extension 'ext'
+# Match filenames with extension '.ext'
 #X:N:.*\.ext$=cmd
 
 #-----------------------------

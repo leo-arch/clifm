@@ -1739,11 +1739,11 @@ create_main_config_file(char *file)
 		"# Fuzzy matching algorithm: 1 (faster, non-Unicode), 2 (slower, Unicode).\n\
 ;FuzzyAlgorithm=%d\n\n"
 
-		"# TAB completion mode: 'standard', 'fzf', 'fnf', or 'smenu'. Defaults to\n\
+		"# Tab completion mode: 'standard', 'fzf', 'fnf', or 'smenu'. Defaults to\n\
 # 'fzf' if the binary is found in PATH. Otherwise, the standard mode is used.\n\
 ;TabCompletionMode=\n\n"
 
-		"# File previews for TAB completion (fzf mode only). Possible values:\n\
+		"# File previews for tab completion (fzf mode only). Possible values:\n\
 # true, false, hidden (enabled, but hidden; toggle it with Alt-p)\n\
 ;FzfPreview=%s\n\n"
 
@@ -2220,7 +2220,7 @@ create_remotes_file(void)
 		"# Blank and commented lines are omitted\n\n"
 		"# Example:\n"
 		"# A name for this remote. It will be used by the 'net' command\n"
-		"# and will be available for TAB completion\n"
+		"# and will be available for tab completion\n"
 		"# [work_smb]\n\n"
 		"# Comment=My work samba server\n"
 		"# Mountpoint=/home/user/.config/clifm/mounts/work_smb\n\n"

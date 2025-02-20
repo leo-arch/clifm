@@ -1,22 +1,26 @@
                   ######################################
-                  #   Configuration file for Shotgun   #
-                  #      Clifm's files previewer       #
+                  #   Configuration File for Shotgun   #
+                  #      Clifm's File Previewer        #
                   ######################################
 
 #--------------------------------
 # Description
 #--------------------------------
 
-# Commented and blank lines are ignored.
-# Lines starting with either '#' or ';' are comments.
+# This configuration file is used to customize the behavior of Clifm's
+# file previewer.
 
-# It is recommended to edit this file setting your preferred applications
-# first: the previewing process will be smoother and faster this way.
-# You can even remove whatever applications you don't use.
+# Blank and commented out lines are ignored.
+# Lines starting with '#' or ';' are comments.
 
-# For syntax details consult the mimelist.clifm file (via 'mm edit' or F6).
+# To ensure optimal performance, it is recommended to edit this file
+# setting your preferred applications first. You may also remove any
+# applications that you do not intend to use.
 
-# Uncomment this line to use pistol (or any other previewing application):
+# For detailed syntax and options, consult the mimelist.clifm file
+# (run 'mm edit' or press F6).
+
+# Uncomment this line to use Pistol (or any other previewing application):
 ;.*=pistol
 
 # Uncomment and edit this line to use Ranger's scope script:
@@ -26,7 +30,8 @@
 # Image previews
 #--------------------------------
 #
-# Uncomment the below lines to enable image previews for the specified file types.
+# Uncomment the below lines to enable image previews for the specified file
+# types.
 #
 # Consult the clifmimg script for information on how images are displayed
 # (supported methods: sixel, ueberzug, kitty, ansi).

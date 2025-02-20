@@ -486,7 +486,7 @@ check_term(void)
 	check_term_support(t);
 
 	/* Skip below checks if STDOUT is not interactive (this includes running
-	 * Clifm from 'fzf --preview', i.e. TAB completion), or if not required
+	 * Clifm from 'fzf --preview', i.e. tab completion), or if not required
 	 * (--ls, --stat, --stat-full, and --open). */
 	if (xargs.list_and_quit == 1 || xargs.stat > 0 || xargs.open == 1
 	|| isatty(STDOUT_FILENO) == 0)

@@ -1,4 +1,4 @@
-/* tabcomp.h -- functions to perform TAB completion */
+/* tabcomp.h -- functions to perform tab completion */
 
 /*
  * This file is part of Clifm

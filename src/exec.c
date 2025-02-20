@@ -136,11 +136,11 @@ check_paths_timestamps(void)
 	return status;
 }
 
-/* Reload the list of available commands in PATH for TAB completion.
+/* Reload the list of available commands in PATH for tab completion.
  * Why? If this list is not updated, whenever some new program is
  * installed, renamed, or removed from some of the paths in PATH
  * while in CliFM, this latter needs to be restarted in order
- * to be able to recognize the new program for TAB completion */
+ * to be able to recognize the new program for tab completion */
 static void
 reload_binaries(void)
 {

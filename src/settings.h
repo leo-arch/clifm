@@ -141,7 +141,7 @@ xf=1;31:xs=32:"
 /* Symlink char indicator (for ColorLinksAsTarget only) */
 #define DEF_LC_C  "\x1b[1;36m"
 
-#define DEF_TS_C  "\x1b[4;35m" /* Matching prefix for TAB completed possible entries */
+#define DEF_TS_C  "\x1b[4;35m" /* Matching prefix for tab completed possible entries */
 #define DEF_TT_C  "\x1b[1;2;36m" /* Tilde for truncated filenames */
 #define DEF_WP_C  "\x1b[0;2;31m" /* Warning prompt input text */
 #define DEF_XS_C  "\001\x1b[32m\002" /* Exit code: success */
@@ -306,7 +306,7 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 /* Symlink char indicator (for ColorLinksAsTarget only) */
 #define DEF_LC_C256 "\x1b[0;38;5;43m"
 
-#define DEF_TS_C256   "\x1b[4;35m" /* Matching prefix for TAB completed possible entries */
+#define DEF_TS_C256   "\x1b[4;35m" /* Matching prefix for tab completed possible entries */
 #define DEF_TT_C256   "\x1b[1;2;36m" /* Tilde for truncated filenames */
 #define DEF_WP_C256   "\x1b[0;2;31m" /* Warning prompt input text */
 #define DEF_XS_C256   "\001\x1b[32m\002" /* Exit code: success */

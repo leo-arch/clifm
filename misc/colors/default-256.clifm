@@ -139,7 +139,7 @@ define IFACE_FILES_COUNTER=@247   # Files counter (e.g. "dir/12")
 define IFACE_DIV_LINE=@243        # Dividing line
 define IFACE_LINK_IND=@43         # Symbolic link indicator ('@')
 define IFACE_MISC_IND=@6-1        # Miscellaneous indicator ("->")
-define IFACE_TABCOMP_PREFIX=@5-4  # Matching prefix (TAB completion)
+define IFACE_TABCOMP_PREFIX=@5-4  # Matching prefix (tab completion)
 define IFACE_WELCOME_MSG=@6-1     # Welcome message
 define IFACE_TRIM_CHAR=1;2;36     # Character used to mark trimmed file names ('~')
 define IFACE_DEF_COLOR=0          # Default color
@@ -343,7 +343,7 @@ DividingLine="-"
 #               FZF                   #
 #=====================================#
 
-### If the fzf TAB completion mode is enabled, pass these options to fzf:
+### If the fzf tab completion mode is enabled, pass these options to fzf:
 FzfTabOptions="--color='16,prompt:6,fg+:-1,pointer:4,hl:2,hl+:2,gutter:-1,marker:2,border:7:dim' --marker='*' --bind tab:accept,right:accept,left:abort,alt-p:toggle-preview,change:top,alt-up:preview-page-up,alt-down:preview-page-down --tiebreak=begin --inline-info --layout=reverse-list --preview-window=wrap,border-left"
 
 # Same options, but colorless

@@ -525,7 +525,7 @@ fix_rl_point(const unsigned char c)
 }
 
 /* Custom implementation of readline's rl_getc() hacked to introduce
- * suggestions, alternative TAB completion, and syntax highlighting.
+ * suggestions, alternative tab completion, and syntax highlighting.
  * This function is automatically called by readline() to handle input. */
 static int
 my_rl_getc(FILE *stream)
@@ -1187,7 +1187,7 @@ my_rl_path_completion(const char *text, int state)
 						continue;
 					}
 				} else {
-					/* This is for TAB completion: accept all matches */
+					/* This is for tab completion: accept all matches */
 					if (fuzzy_match(filename, ent->d_name, filename_len, fuzzy_str_type) == 0)
 						continue;
 				}
@@ -4088,7 +4088,7 @@ complete_eln(char *text, int *exit_status, const size_t words_n, char *cmd_name)
 }
 
 
-/* Handle TAB completion.
+/* Handle tab completion.
  *
  * This function has three main blocks:
  * 1) General expansions: These expansions can be performed in any part of

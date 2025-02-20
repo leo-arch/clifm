@@ -2124,7 +2124,7 @@ extern char
 	fc_c[MAX_COLOR], /* Files counter */
 	lc_c[MAX_COLOR], /* Symlink character (ColorLinkAsTarget only) */
 	mi_c[MAX_COLOR], /* Misc indicators */
-	ts_c[MAX_COLOR], /* TAB completion suffix */
+	ts_c[MAX_COLOR], /* Tab completion suffix */
 	tt_c[MAX_COLOR], /* Tilde for trimmed files */
 	wc_c[MAX_COLOR], /* Welcome message */
 	wp_c[MAX_COLOR], /* Warning prompt */

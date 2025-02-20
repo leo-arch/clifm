@@ -3108,8 +3108,8 @@ print_interface_colors(void)
 	printf(_("\n(%s1%s) Used only when ColorLinksAsTarget is "
 		"enabled\n"), BOLD, df_c);
 	printf(_("(%s2%s) Also used for miscellaneous names (like bookmarks "
-		"and color schemes) in TAB completion\n"), BOLD, df_c);
-	printf(_("(%s3%s) Used only for the standard TAB completion "
+		"and color schemes) in tab completion\n"), BOLD, df_c);
+	printf(_("(%s3%s) Used only for the standard tab completion "
 		"mode\n"), BOLD, df_c);
 }
 

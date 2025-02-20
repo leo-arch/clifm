@@ -1,13 +1,14 @@
 		###########################################
 		#                  CLIFM                  #
-		#      The command line file manager      #
+		#      The Command Line File Manager      #
 		###########################################
 
 # This is Clifm's main configuration file.
 
-# Lines starting with either '#' or ';' are commented (ignored).
-# Options starting with a ';' hold the default value, but are commented.
-# To override a default value uncomment the corresponding option.
+# Lines starting with either '#' or ';' are commented out (ignored).
+# Options starting with a ';' hold the default value, but are commented out.
+# To override a default value uncomment the corresponding option (remove
+# the leading ';') and set the option to any supported value.
 
 
 #=====================================#
@@ -21,31 +22,31 @@
 ;ShowHiddenFiles=false
 
 # Files listed in a '.hidden' file in the current directory will be hidden
-# whenever hidden files are not shown (i.e. ShowHiddenFiles is set to false).
-# Both plain file names and wildcards are supported.
+# when hidden files are not shown (i.e. when ShowHiddenFiles is set to false).
+# Both plain filenames and wildcards are supported for specifying hidden files.
 ;ReadDotHidden=false
 
 # Use a regular expression to filter files from the files list.
-# Example: "!.*~$" to exclude backup files (ending with ~), or "^\." to
-# list only hidden files. File type filters are also supported. Example:
-# "=d" to list directories only, or "!=l" to exclude symlinks.
-# Run 'help file-filters' for more information.
+# For example: "!.*~$" to exclude backup files (ending with ~), or "^\." to
+# list only hidden files. File type filters are also supported, such as
+# "=d" to list directories only, or "!=l" to exclude symbolic links.
+# Run 'help file-filters' for more information on how to use this feature.
 ;Filter=""
 
 # List directories first.
 ;ListDirsFirst=true
 
-# The amount of files contained by a directory is informed next
-# to the directory name. However, this feature might slow things down
-# when, for example, listing files on a remote server. The files counter
+# Display the number of files contained in each directory next to the
+# directory name. This feature may slow down performance when, for example,
+# listing files on a remote server. The files counter
 # can be disabled here, via the --no-files-counter option, or using the
 # 'fc' command while in the program itself.
-# Note: Classify (see below) must be set to true.
+# Note: This option requires Classify (see below) to be set to true.
 ;FilesCounter=true
 
-# If running with colors, append directory indicator to directories. If
-# running without colors (via the --no-color option), append file type
-# indicator at the end of file names:
+# When using colors, append directory indicator to directories. If colors
+# are disabled (via the --no-color option), append file type
+# indicator to filenames instead:
 # '/' for directories
 # '@' for symbolic links
 # '=' for sockets
@@ -57,54 +58,55 @@
 # Bear in mind that when running in light mode the check for executable
 # files won't be performed, and thereby no indicator will be added to
 # executable files.
-# Note: Setting this option to false disables the files counter.
+# Note: Disabling this option also disables the files counter.
 ;Classify=true
 
-# Symbolic links are colored according to the target file name. An indicator
+# Color symbolic links according to their target filename. An indicator
 # character (by default '@') is placed at the beginning of the name to mark
 # it as a symbolic link.
-# The color of this indicator can be customized via the 'lc' code in the
-# color scheme file (InterfaceColors field).
+# The color of this indicator can be customized in the color scheme file
+# (InterfaceColors field) via the 'lc' code.
 ;ColorLinksAsTarget=false
 
-# Mas, the files list pager. Possible values are:
+# Control the use of the files list pager. Supported values are:
 # 0/false = Disable the pager.
 # 1/true  = Run the pager whenever the list of files does not fit on the screen.
-# >1      = Run the pager whenever the amount of files in the current directory is
-#           greater than or equal to this value (say, 1000).
+# >1      = Run the pager whenever the number of files in the current directory is
+#           greater than or equal to this value (e.g., 1000).
 ;Pager=false
 
-# How to list files in the pager. Supported values:
+# Specify how to list files in the pager. Supported values:
 # auto  = Use the current listing mode
 # long  = List files in long view
 # short = List files in short view
 ;PagerView=auto
 
-# How to list files: 0 = vertically (like ls(1) would), 1 = horizontally.
+# Choose how to list files: 0 = vertically (like ls), 1 = horizontally.
 ;ListingMode=0
 
-# How to sort listed files.
-# Supported values: none, name, version, extension, type, blocks, size,
-# links, atime, btime, ctime, mtime, inode, owner, and group.
+# Determine the sorting method for listed files.
+# Supported values include: none, name, version, extension, type, blocks,
+# size, links, atime, btime, ctime, mtime, inode, owner, and group.
 ;Sort=version
 
-# By default, files are sorted from less to more (ex: from 'a' to 'z' if
-# using the "name" method). To invert this ordering, set SortReverse to
-# true (you can also use the --sort-reverse option or the 'st rev' command).
+# By default, files are sorted in ascending order (e.g.: from 'a' to 'z' if
+# using the "name" method). Set SortReverse to true to invert this ordering.
+# You can also use the --sort-reverse option or the 'st rev' command to achieve
+# the same effect.
 ;SortReverse=false
 
-# Sort file names starting with PrioritySortChar first.
+# Sort filenames starting with PrioritySortChar first.
 # Multiple values are allowed (e.g. 'PrioritySortChar=._#')
-# Leave empty to unset (no priority character).
-# Supported values: ASCII characters from SPACE to TILDE.
+# Leave empty to unset this option (no priority character).
+# Supported values are ASCII characters from SPACE to TILDE.
 # Tip: A common value for this option is underscore (_).
 # Note: This option takes precedence over SkipNonAlnumPrefix (see below).
 ;PrioritySortChar=
 
-# Display extended file metadata next to file names (long listing format).
+# Display extended file metadata next to filenames (long listing format).
 ;LongViewMode=false
 
-# Properties fields to be displayed for each file name in long view mode:
+# Specify which properties to display for each filename in long view mode:
 # f       = Files counter (for directories)
 # B       = File allocated blocks
 # d       = Inode number
@@ -128,10 +130,10 @@
 #PropFields="pmS"
 ;PropFields="xfpIsm"
 
-# Number of spaces between fields in long view. Possible values: 1, 2.
+# Set the number of spaces between fields in long view. Possible values: 1 or 2.
 ;PropFieldsGap=1
 
-# Style used to print timestamps in long view mode.
+# Choose the style for printing timestamps in long view mode.
 # Supported values: default, relative, iso, long-iso, full-iso, +FORMAT
 # FORMAT is interpreted like in strftime(3).
 # Defaults to "+%b %e %H:%M" for recent files (< 6 months) and "+%b %e  %Y"
@@ -141,37 +143,37 @@
 ;TimeStyle="relative"
 ;TimeStyle="+%F %T"
 
-# If sorting files by time, use the same time files are sorted by for the time
-# field in long view (disregarding the value set in PropFields).
+# If files are sorted by time in the files list, this option specifies whether
+# to use the same timestamp in long view mode, regardless of the value set in
+# PropFields.
 ;TimeFollowsSort=true
 
-# Append an 'a', 'b', 'c', or 'm' to the timestamp (long view only) to indicate
-# the kind of timestamp, i.e, access, birth, status change, or modification
-# time respectively. In case of relative times, uppercase characters are used
-# instead for better visibility.
+# Append an indicator ('a', 'b', 'c', or 'm') to the timestamp in long view
+# mode to indicate the type of timestamp: access, birth, status change, or
+# modification time, respectively. For relative times, uppercase characters
+# are used for better visibility.
 ;TimestampMark=false
 
-# Same as TimeStyle, but for the 'p/pp' command.
+# Similar to TimeStyle, but specifically for the 'p/pp' command.
 # Supported values: default, iso, long-iso, full-iso, full-iso-nano, +FORMAT
 # Nano-second precision is available via the %N modifier.
 ;PTimeStyle="+%Y-%m-%d %H:%M:%S.%N %z"
 
-# If running in long view, print directories full size (i.e. recursively).
+# When in long view, print the full size of directories (i.e. recursively
+# include all files and subdirectories).
 ;FullDirSize=false
 
-# Print files apparent size instead of actual device usage.
+# Print the apparent size of files (logical size) instead of actual device
+# usage (physical size).
 ;ApparentSize=true
 
-# In light mode, extra file type checks (except those provided by
-# the d_type field of the dirent structure (see readdir(3))
-# are disabled to speed up the listing process. stat(3) and access(3)
-# are not executed at all, so that we cannot know in advance if a file
-# is readable by the current user, if it is executable, SUID, SGID, if a
-# symlink is broken, and so on. The file extension check is ignored as
-# well, so that the color per extension feature is disabled.
+# In light mode, extra file type checks are disabled to speed up the listing
+# process. This means that checks for readability, executability, SUID, SGID,
+# broken symlinks, etc., are not performed. The file extension check is also
+# ignored, disabling the color per-extension feature.
 ;LightMode=false
 
-# Clear the screen before listing files.
+# Clear the terminal screen before listing files.
 # Supported values: true, false, internal (restrict this behavior to
 # internal commands only: shell commands won't clear the screen).
 # Note: If set to 'internal', the current list of files won't be refreshed
@@ -179,23 +181,23 @@
 # current directory.
 ;ClearScreen=true
 
-# Maximum file name length for listed files. If TrimNames is set to true,
-# names larger than MaxFilenameLen will be truncated at MaxFilenameLen
+# Set the maximum filename length for listed files. If TrimNames is enabled,
+# names longer than MaxFilenameLen will be truncated at MaxFilenameLen
 # using a tilde (~).
-# Set it to -1 (or empty) to remove this limit.
-# If running in long mode, this setting is overriden by MinFilenameTrim
-# whenever MaxFilenameLen is smaller than MinFilenameTrim.
+# Set it to -1 (or leave empty) to remove this limit.
+# If running in long view mode, this setting is overriden by MinFilenameTrim
+# if MaxFilenameLen is smaller than MinFilenameTrim.
 ;MaxFilenameLen=20
 
-# Trim file names longer than MaxFilenameLen.
+# Truncate filenames longer than MaxFilenameLen.
 ;TrimNames=true
 
-# Minimum length at which a file name can be trimmed in long view mode.
+# Minimum length at which a filename can be truncated in long view mode.
 # When running in long mode, this setting overrides MaxFilenameLen
 # whenever MaxFilenameLen is smaller than MinFilenameTrim.
 ;MinFilenameTrim=20
 
-# A comma separated list of workspace names in the form NUM=NAME.
+# A comma separated list of workspace names in the format NUM=NAME.
 # Example: "1=MAIN,2=EXTRA,3=GIT" or "1=α,2=β,3=γ"
 ;WorkspaceNames=""
 
@@ -205,8 +207,8 @@
 # when switching workspaces.
 ;PrivateWorkspaceSettings=false
 
-# Print the disk usage of the file system the current directory belongs to
-# in the form "FREE/TOTAL (FREE-PERCENTAGE) FS-TYPE DEV-NAME".
+# Print the disk usage of the filesystem where the current directory resides
+# in the format "FREE/TOTAL (FREE-PERCENTAGE) FS-TYPE DEV-NAME".
 ;DiskUsage=false
 
 # Print a map of the current position in the directory history list,
@@ -214,12 +216,12 @@
 ;DirhistMap=false
 
 # Print the list of selected files after the files list. Since this
-# list could become quite extensive, you can limit the number of printed 
+# list can become extensive, you can limit the number of printed
 # entries using the MaxPrintSelfiles option below.
 ;PrintSelfiles=false
 
-# Maximum amount of selected files to be printed if PrinSelFiles is set
-# to true. Possible values: -1 = no limit, 0 = auto (never print more
+# Maximum number of selected files to be printed if PrinSelFiles is
+# enabled. Supported values: -1 = no limit, 0 = auto (never print more
 # than half terminal height), or any positive value.
 ;MaxPrintSelfiles=0
 
@@ -231,27 +233,27 @@
 # Use the 'cs' command or the '--color-scheme' command line option to set
 # a theme.
 #
-# Run 'cs edit' to edit the current theme.
+# Run 'cs edit' to modify the current theme.
 #
 # Each theme includes color definitions, just as definitions for the
 # prompt, the warning prompt, the dividing line, and the FZF window.
 #
-# Use TAB to list available themes: 'cs TAB'.
+# Use TAB to list available themes: 'cs <TAB>'.
 #
-# Visit https://github.com/leo-arch/clifm-colors to get a few extra themes.
+# For additional themes, visit https://github.com/leo-arch/clifm-colors.
 #
-# Defaults to 'default-256', or 'default' (16 colors) if 256 colors support
+# Defaults to 'default-256', or 'default' (16 colors) if 256-color support
 # is not detected.
 ;ColorScheme=
 
-# Enable icons.
-# By default, emojis (widely available today) are used as icons.
+# Enable the use of icons in the files list.
+# By default, emojis (widely available today) are used as icons, but
 # Nerd-fonts and icons-in-terminal are supported as well, though Clifm
 # needs to be recompiled in order to enable support. Consult our Wiki
 # (https://github.com/leo-arch/clifm/wiki) for more information.
 ;Icons=false
 
-# Number of spaces between icons and file names (supported values: 0, 1, 2).
+# Number of spaces between icons and filenames (supported values: 0, 1, or 2).
 ;IconsGap=1
 
 
@@ -259,63 +261,62 @@
 #         2. COMMAND LINE             #
 #=====================================#
 
-# Set quoting style used to expand ELN's (regular files only).
+# Set the quoting style used to expand ELN's (regular files only).
 # Supported values: 'backslash' (default), 'single', or 'double' quotes.
-# Useful when using shells not supporting backslashes as quoting
-# mechanism (e.g.: nushell or xonsh).
+# This option is particularly useful for shells that do not support
+# backslashes as quoting mechanism, such as nushell or xonsh.
 ;QuotingStyle=backslash
 
-# Enable fuzzy matching for filename/path completions and suggestions.
+# Enable fuzzy matching for filename and path completions and suggestions.
 ;FuzzyMatching=false
 
-# Fuzzy algorithm. Supported values:
-# 1 = faster, not Unicode aware
-# 2 = slower, Unicode aware (note that this second algorithm will
-# nonetheless fallback to the first one whenever the query string
-# does not contain unicode characters, minimizing thus the performance
-# penalty).
+# Choose the fuzzy matching algorithm to use. Supported values:
+# 1 = faster, but not Unicode aware
+# 2 = slower, but Unicode aware (note that this algorithm will nonetheless
+# fallback to the first one whenever the query string does not contain
+# Unicode characters, minimizing thus the performance impact).
 ;FuzzyAlgorithm=2
 
-# TAB completion mode. Supported values: standard, fzf, fnf, smenu.
+# Set the tab completion mode. Supported values: standard, fzf, fnf, smenu.
 # Defaults to 'fzf' if the binary is found in PATH. Othwerwise, the
 # standard mode is used.
 ;TabCompletionMode=
 
-# File previews for TAB completion (fzf mode only). Supported values:
+# Enable file previews for tab completion (fzf mode only). Supported values:
 # true, false, hidden (enabled, but hidden; toggle with Alt-p).
 ;FzfPreview=true
 
 # Do not preview files larger than PreviewMaxSize.
 # Supported size units: K, M, G, T (e.g. 100M).
 # Supported size range: 1K-2047G.
-# Set to -1 (or empty) to disable this feature (no limit).
+# Set to -1 (or leave empty) to disable this feature (allow all file sizes).
 ;PreviewMaxSize=
 
-# Enable auto-suggestions.
+# Enable auto-suggestions for commands, file paths, and options as you type.
 ;AutoSuggestions=true
 
 # The following suggestion checks will be performed in the order
-# specified by SuggestionStrategy. Available checks are:
+# specified by SuggestionStrategy. Available checks include:
 # a = Aliases names
 # c = Path completion
 # e = ELN's
-# f = File names in current directory
+# f = Filenames in current directory
 # h = Commands history
 # j = Jump database
-# Use a single dash (-) to skip all these checks.
+# Use a single dash (-) to skip all of these checks.
 ;SuggestionStrategy=ehfjac
 
-# Suggest file names using the corresponding file type color (set
-# via the color scheme file).
+# Suggest filenames using the corresponding file type color (as defined in
+# the color scheme file).
 ;SuggestFiletypeColor=false
 
-# Suggest a brief description for internal commands.
+# Provide a brief description for internal commands as part of the suggestions.
 ;SuggestCmdDesc=true
 
-# Enable syntax highlighting.
+# Enable syntax highlighting for improved readability of commands as you type.
 ;SyntaxHighlighting=true
 
-# Allow external, shell commands.
+# Allow the execution of external shell commands within Clifm.
 ;ExternalCommands=true
 
 
@@ -323,31 +324,31 @@
 #           3. COMMANDS               #
 #=====================================#
 
-# List files automatically after changing the current directory.
+# Automatically list files after changing the current directory.
 ;AutoLs=true
 
-# If set to true, a command name that is the name of a directory or a
+# If enabled, a command name that is the name of a directory or a
 # file, is executed as if it were the argument to the 'cd' or the
 # 'open' commands respectively: 'DIR' is equivalent 'cd DIR' and
 # 'FILE' to 'open FILE'.
 ;Autocd=true
 ;AutoOpen=true
 
-# Run autocommand files (.cfm.in and .cfm.out) found in the current
-# directory. For more information consult the manpage.
+# Execute autocommand files (.cfm.in and .cfm.out) found in the current
+# directory upon entering it. For more information consult the manpage.
 ;ReadAutocmdFiles=false
 
-# Inform about autocommand options set for the current directory
+# Inform about autocommand options set for the current directory.
 # Supported values:
-# none   = Do not print any message.
-# mini   = Minimal message (no options details).
-# short  = Add the list of autocommand options (without values).
-# long   = Like 'short', but displays the value of each option (multiple
+# none   = No message is displayed.
+# mini   = Minimal message with no option details.
+# short  = List of autocommand options without their values.
+# long   = Like 'short', but includes the value of each option (multiple
 #          matching autocommands are merged into a single line).
 # full   = Like 'long', but multiple autocommands are printed on separate
 #          lines. Also, a 'T' is appended to mark temporary autocommands
 #          (i.e., set via the 'auto' command).
-# prompt = Print a little notification (a gray 'A') in the prompt.
+# prompt = Display a small notification (a gray 'A') in the prompt.
 #          The color code used for this notification is 'ac' (see the color
 #          scheme file).
 #          If Notifications is set to false for the current prompt (see the
@@ -355,24 +356,24 @@
 #          code in the prompts file to manually set this notification).
 ;InformAutocmd=prompt
 
-# Run in read-only mode (internal commands able to modify the file
-# system are disabled). Consult the manpage for the list of affected
-# commands.
+# Run in read-only mode (internal commands able to modify the filesystem
+# are disabled). Consult the manpage for the list of affected commands.
 ;Readonly=false
 
-# Make the 'r' command trash files instead of removing them.
+# Make the 'r' command move files to the trash instead of permanently
+# removing them.
 ;TrashAsRm=false
 
-# If set to true, do not ask for confirmation before trashing files.
+# If set to true, do not ask for confirmation before moving files to the trash.
 ;TrashForce=false
 
-# If set to true, do not ask for confirmation before removing files
-# ('r' command only).
+# If set to true, do not ask for confirmation before removing files with the
+# 'r' command.
 # Note: If set to false, you can still use the '-f' parameter to turn
 # confirmation off for a single command. E.g.: 'r -f FILE'.
 ;rmForce=false
 
-# Set the default copy command. Supported values:
+# Set the default command used for copying files. Supported values:
 # 0 = 'cp -Rp'
 # 1 = 'cp -Rp' (force: do not prompt before overwrite)
 # 2 = 'advcp -gRp'
@@ -382,7 +383,7 @@
 # Note: Options 2-5 include a progress bar.
 ;cpCmd=0
 
-# Set the default move command. Supported values:
+# Set the default command used for moving files. Supported values:
 # 0 = 'mv'
 # 1 = 'mv' (force: do not prompt before overwrite)
 # 2 = 'advmv -g'
@@ -390,8 +391,8 @@
 # Note: Options 2 and 3 include a progress bar.
 ;mvCmd=0
 
-# A command separated line of fields defining default answers for
-# confirmation prompts. Each field has two values separated by a colon (':').
+# Define default responses for confirmation prompts using a comma-separated
+# line of fields. Each field consists of two values separated by a colon (':').
 #
 # The left value specifies a confirmation prompt:
 #  o = overwrite files (mostly 'c' and 'm' commands)
@@ -412,20 +413,19 @@
 # trash, and 'y' for everything else: "r:n,t:u,d:y".
 ;DefaultAnswer="o:n,r:n,t:y,R:n,d:y"
 
-# How should the 'l' command create symbolic links. Supported values:
+# Specify how the 'l' command creates symbolic links. Supported values:
 # absolute = Make the target an absolute path
 # relative = Make the target relative to the link location (like 'ln -rs')
 # literal  = Do not resolve the target at all (like 'ln -s')
 ;LinkCreationMode=literal
 
-# Choose the resource opener to open files with their default associated
-# application (e.g. Ranger's rifle or xdg-open). If not set, 'lira',
-# Clifm's built-in opener, is used instead.
+# Choose the resource opener for opening files with their default associated
+# application (e.g. Ranger's rifle or xdg-open). If not specified, 'lira',
+# Clifm's builtin opener, will be used.
 ;Opener=
 
-# Only used when opening a directory via a new Clifm instance (with the
-# 'x' command), this option specifies the command to be used to launch a
-# terminal emulator to run Clifm on it.
+# Command used to launch a terminal emulator for opening a new Clifm instance
+# (with the 'x' command).
 ;TerminalCmd="xterm -e"
 
 # Set the file mode creation mask. Defaults to the value inherited from
@@ -433,27 +433,29 @@
 # This option is ignored in secure mode (umask is forcefully set to 077).
 ;Umask=077
 
-# We have three search strategies: 0 = glob-only, 1 = regex-only,
-# and 2 = glob-regex. Used by the quick search function.
+# Choose the search strategy for the quick search function. Supported values:
+# 0 = glob-only
+# 1 = regex-only
+# 2 = glob-regex (default)
 ;SearchStrategy=2
 
-# When a directory rank in the jump database falls below MinJumpRank, it
-# will be removed. If set to 0, directories are kept indefinitely.
+# Minimum rank for directories in the jump database. Directories with a rank
+# below this value will be removed. If set to 0, directories will be retained
+# indefinitely.
 ;MinJumpRank=10
 
-# When the sum of all ranks in the jump database reaches MaxJumpTotalRank,
-# all ranks will be reduced using a dynamic factor so that the total sum falls
-# below MaxJumpTotalRank again. Those entries falling below MinJumpRank will
-# be deleted.
+# Maximum total rank allowed in the jump database. When exceeded, all ranks
+# will be reduced dynamically to ensure the total falls below this limit.
+# Entries below MinJumpRank will be deleted.
 ;MaxJumpTotalRank=100000
 
-# Automatically purge the jump database from non-existing directories at
-# startup. Note that this will remove paths pointing to unmounted removable
-# devices and remote file systems.
+# Automatically remove non-existing directories from the jump database at
+# startup. Note that this will also remove paths pointing to unmounted
+# removable devices and remote filesystems.
 ;PurgeJumpDB=false
 
-# Print the list of commands executed in the current directory (the list is
-# cleared after changing the directory).
+# Print the list of commands executed in the current directory (the list will
+# be cleared after changing the directory).
 ;PrintDirCmds=false
 
 
@@ -461,18 +463,19 @@
 #        4. LOGS AND HISTORY          #
 #=====================================#
 
-# Send errors, warnings, and notices to the notification daemon.
+# Send errors, warnings, and notices to the desktop notification daemon for
+# user alerts.
 ;DesktopNotifications=false
 
 # Log errors and warnings.
 ;LogMsgs=false
 # Log commands entered in the command line.
 ;LogCmds=false
-# Keep only the last N lines of the log file.
+# Keep only the last MaxLog lines in the log files.
 ;MaxLog=1000
 
-# A regular expression to prevent command lines from being added to the
-# history list. Set this line to the empty string to disable history filters.
+# A regular expression to filter out specific command lines from being added to
+# the history list. Set this line to the empty string to disable history filters.
 ;HistIgnore="^[q,Q]$|^quit$|^exit$|^ .*|^#.*|^[0-9]+$|^\.+$"
 
 # Limit the size of the commands history file to MaxHistory entries.
@@ -489,39 +492,39 @@
 #             5. MISC                 #
 #=====================================#
 
-# Enable case sensitive listing for files in the current directory.
+# Enable case-sensitive listing of files in the current directory.
 ;CaseSensitiveList=false
 
-# Enable case sensitive lookup for the directory jumper function (via 
+# Enable case-sensitive lookups for the directory jumper function (via
 # the 'j' command).
 ;CaseSensitiveDirJump=false
 
-# Enable case sensitive completion for file names.
+# Enable case-sensitive filename completion.
 ;CaseSensitivePathComp=false
 
-# Enable case sensitive search.
+# Enable case-sensitive search.
 ;CaseSensitiveSearch=false
 
-# When sorting files (either by 'version' or 'name'), skip
-# non-alphanumeric characters. Ex: '__file' is sorted as 'file'.
-# This also applies to hidden files: if set to false, '.hidden' will
-# be listed before 'afile', otherwise, after 'gfile' (unless ShowHiddenFiles
-# is set to either 'first' or 'last').
+# When sorting files by 'version' or 'name', skip non-alphanumeric characters.
+# For example, '__file' will be sorted as 'file'.
+# This also affects hidden files: if set to false, '.hidden' will appear
+# before 'afile'; if set to true, it will appear after 'gfile' (unless
+# ShowHiddenFiles is set to 'first' or 'last').
 ;SkipNonAlnumPrefix=true
 
 # Set a custom starting path. If not specified, it defaults to the current
-# working directory. If set, it overrides RestoreLastPath.
+# working directory. If set, this option overrides RestoreLastPath.
 ;StartingPath=
 
 # Start Clifm in the last visited directory (and in the last used
 # workspace). This option is overriden by StartingPath (if set).
 ;RestoreLastPath=true
 
-# Set readline editing mode: 0 for vi and 1 for emacs (default).
+# Set the readline editing mode: 0 for vi and 1 for emacs (default).
 ;RlEditMode=1
 
-# Write the last visited directory to $XDG_CONFIG_HOME/clifm/.last to be
-# later accessed by the corresponding shell function at program exit.
+# Save the last visited directory to $XDG_CONFIG_HOME/clifm/.last, allowing
+# it to be accessed by the corresponding shell function upon program exit.
 # To enable this feature consult the manpage.
 ;CdOnQuit=false
 
@@ -547,41 +550,43 @@
 #            6. ALIASES               #
 #=====================================#
 
-# Bind '?' to the interactive help plugin. Run 'actions' to print the
-# list of available plugins.
+# Bind '?' to the interactive help plugin. Use the 'actions' command to
+# display a list of available plugins.
 #alias ?='ih'
 # Bind 'b' to the directory history navigation plugin.
 #alias b='dh'
-# Replace the standard deselect command (ds) by the fzfdesel plugin.
+# Replace the builtin deselect command (ds) with the fzfdesel plugin.
 #alias ds='**'
 # You can use this alias to quickly change to the current virtual directory.
 #alias vtd='cd $CLIFM_VIRTUAL_DIR'
-# Replace the built-in bulk rename function (br) by vidir(1).
+# Replace the builtin bulk rename function (br) with vidir(1).
 #br='vidir'
+
 
 #=====================================#
 #         7. PROMPT COMMANDS          #
 #=====================================#
 
-# Write below the commands you want to be executed before each prompt. Ex:
+# Specify commands to be executed before each prompt is displayed. For example:
 #promptcmd /usr/local/share/clifm/plugins/git_status.sh
 #promptcmd date | awk '{print $1", "$2,$3", "$4}'
+
 
 #=====================================#
 #         8. AUTOCOMMANDS             #
 #=====================================#
 
-# Control Clifm's settings on a per directory basis. For more information
+# Control Clifm's settings on a per-directory basis. For more information
 # consult the manpage.
 
 # Remote file systems are slow: let's speed this up by enabling the light
 # mode and disabling the files counter.
 #autocmd /media/remotes/** lm=1,fc=0
 
-# Just a friendly reminder.
+# Just a friendly reminder when entering the ~/important directory.
 #autocmd ~/important !printf "Keep your fingers outta here!\n" && read -n1
 
-# Plenty of images and vids? Launch the files previewer plugin.
+# Plenty of images and videos? Launch the files previewer plugin.
 #autocmd ~/Downloads !/usr/local/share/clifm/plugins/fzfnav.sh
 
 # Use the nord color scheme and disable hidden files in the ~/Documents

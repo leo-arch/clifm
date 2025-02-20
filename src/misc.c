@@ -984,7 +984,7 @@ alias_import(char *file)
 	/* Add new aliases to the internal list of aliases. */
 	get_aliases();
 
-	/* Add new aliases to the commands list for TAB completion. */
+	/* Add new aliases to the commands list for tab completion. */
 	if (bin_commands) {
 		for (i = 0; bin_commands[i]; i++)
 			free(bin_commands[i]);
