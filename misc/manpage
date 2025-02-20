@@ -115,7 +115,7 @@ list directories first
 do not list directories first
 .TP
 \fB\-g\fR, \fB\-\-pager\fR
-enable \fIMas\fR, the builtin pager for files listing
+enable \fIMas\fR, the builtin pager for file listing
 .TP
 \fB\-G\fR, \fB\-\-no\-pager\fR
 disable the files pager
@@ -253,7 +253,7 @@ read file colors from the \fBLS_COLORS\fR environment variable (BSD \fBLSCOLORS\
 maximum number of visited directories to remember
 .TP
 \fB\-\-max\-files\fR=\fI\,NUM\/\fR
-list only up to \fINUM\fR files. Use \-1 or \'unset\' to remove the files limit (default). See the \fImf\fR command for a more detailed description.
+list only up to \fINUM\fR files. Use \-1 or \'unset\' to remove this limit (default). See the \fImf\fR command for a more detailed description.
 .TP
 \fB\-\-mimelist\-file\fR=\fI\,FILE\/\fR
 set \fIFILE\fR as Lira\'s configuration file. See the \fBRESOURCE OPENER\fR section below for more information
@@ -290,7 +290,7 @@ do not clear the screen before listing files
 disable colors
 .TP
 \fB\-\-no\-columns\fR
-disable columns for files listing (use a single column)
+disable columns when listing files (use a single column)
 .TP
 \fB\-\-no\-dir\-jumper\fR
 disable the directory jumper function
@@ -722,7 +722,7 @@ You can use either ELNs or a string to indicate the directory you want. E.g.: \f
 .sp
 Unlike the shell \fBcd\fR(1) command, \fBclifm\fR's builtin \fIcd\fR function not only changes the current directory, but also lists its content (provided the option \fIAutoLs\fR is enabled, which is the default) according to a comprehensive list of color codes. By default, the output of \fIcd\fR is much like this shell command: \fIcd\ DIR\ &&\ ls\ \-\-color=auto\ \-\-group\-directories\-first\fR.
 .sp
-Automatic files listing can be disabled by either setting \fIAutoLs\fR to "false" in the configuration file or running \fBclifm\fR with the \fI\-O\fR or \fI\-\-no\-autols\fR option.
+Automatic file listing can be disabled by either setting \fIAutoLs\fR to "false" in the configuration file or running \fBclifm\fR with the \fI\-O\fR or \fI\-\-no\-autols\fR option.
 .TP
 .B cl, columns \fR[\fIon\fR, \fIoff\fR]
 toggle columns on/off.
@@ -921,7 +921,7 @@ To edit the target of a symbolic link use the \fIle\fR command followed by the d
 Toggle long/detail view mode
 .TP
 .B lm \fR[\fIon\fR, \fIoff\fR]
-Toggle the light mode on/off. This option, aimed at making files listing faster than the default mode, is especially useful for really old hardware or when working on remote machines (for more information see the \fBNOTE ON SPEED\fR section below).
+Toggle the light mode on/off. This option, aimed at making file listing faster than the default mode, is especially useful for really old hardware or when working on remote machines (for more information see the \fBNOTE ON SPEED\fR section below).
 .TP
 .B log \fR[\fIcmd\fR [\fIlist\fR, \fIon\fR, \fIoff\fR, \fIstatus\fR, \fIclear\fR]] [\fImsg\fR [\fIlist\fR, \fIon\fR, \fIoff\fR, \fIstatus\fR, \fIclear\fR]]
 Enable, disable, clear, list or check the status of the program logs, either message (errors and warnings) or command logs. Example: \fIlog cmd on\fR, to enable command logs, or \fIlog msg clear\fR, to clear/remove message logs.
