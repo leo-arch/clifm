@@ -436,7 +436,7 @@ dump_config(void)
 		DUMP_CONFIG_INT);
 
 	n = DEF_MIN_NAME_TRIM;
-	print_config_value("MinFilenameTrim", &conf.min_name_trim, &n,
+	print_config_value("MinNameTruncate", &conf.min_name_trim, &n,
 		DUMP_CONFIG_INT);
 
 	n = DEF_MIN_JUMP_RANK;
@@ -590,7 +590,7 @@ dump_config(void)
 #endif /* !_NO_TRASH */
 
 	n = DEF_TRIM_NAMES;
-	print_config_value("TrimNames", &conf.trim_names, &n, DUMP_CONFIG_BOOL);
+	print_config_value("TruncateNames", &conf.trim_names, &n, DUMP_CONFIG_BOOL);
 
 	n = DEF_WELCOME_MESSAGE;
 	print_config_value("WelcomeMessage", &conf.welcome_message, &n,
@@ -1791,10 +1791,10 @@ create_main_config_file(char *file)
 # Log commands entered in the command line\n\
 ;LogCmds=%s\n\n"
 
-	    "# Minimum length at which a filename can be trimmed in long view mode.\n\
+	    "# Minimum length at which a filename can be truncated in long view mode.\n\
 # If running in long mode, this setting overrides MaxFilenameLen whenever\n\
-# this latter is smaller than MINFILENAMETRIM.\n\
-;MinFilenameTrim=%d\n\n"
+# this latter is smaller than MINNAMETRUNCATE.\n\
+;MinNameTruncate=%d\n\n"
 
 	    "# When a directory rank in the jump database is below MinJumpRank, it\n\
 # is removed. If set to 0, directories are kept indefinitely.\n\
@@ -1959,7 +1959,7 @@ create_main_config_file(char *file)
 ;ListDirsFirst=%s\n\n\
 # Enable case sensitive listing for files in the current directory.\n\
 ;CaseSensitiveList=%s\n\n\
-# Enable case sensitive lookup for the directory jumper function (via \n\
+# Enable case sensitive lookups for the directory jumper function (via \n\
 # the 'j' command).\n\
 ;CaseSensitiveDirJump=%s\n\n\
 # Enable case sensitive completion for filenames.\n\
@@ -1971,21 +1971,21 @@ create_main_config_file(char *file)
 # Mas, the file list pager. Possible values are:\n\
 # 0/false: Disable the pager\n\
 # 1/true: Run the pager whenever the list of files does not fit on the screen\n\
-# >1: Run the pager whenever the amount of files in the current directory is\n\
-# greater than or equal to this value (say, 1000)\n\
+# >1: Run the pager whenever the number of files in the current directory is\n\
+# greater than or equal to this value (e.g., 1000)\n\
 ;Pager=%s\n\
-# How to list files in the pager: auto (default), short, long\n\
+# Define how to list files in the pager: auto (default), short, long\n\
 ;PagerView=%s\n\n"
 
-	"# Maximum filename length for listed files. If TrimNames is set to\n\
+	"# Maximum filename length for listed files. If TruncateNames is set to\n\
 # true, names larger than MAXFILENAMELEN will be truncated at MAXFILENAMELEN\n\
 # using a tilde.\n\
-# Set it to -1 (or empty) to remove this limit.\n\
-# When running in long mode, this setting is overriden by MinFilenameTrim\n\
-# whenever MAXFILENAMELEN is smaller than MINFILENAMETRIM.\n\
+# Set it to -1 (or leave empty) to remove this limit.\n\
+# When running in long mode, this setting is overriden by MinNameTruncate\n\
+# whenever MAXFILENAMELEN is smaller than MINNAMETRUNCATE.\n\
 ;MaxFilenameLen=%d\n\n\
 # Truncate filenames longer than MAXFILENAMELEN.\n\
-;TrimNames=%s\n\n",
+;TruncateNames=%s\n\n",
 
 		DEF_LIGHT_MODE == 1 ? "true" : "false",
 		DEF_CLASSIFY == 1 ? "true" : "false",
@@ -3571,6 +3571,10 @@ read_config(void)
 			set_config_int_value(line + 16, &conf.min_name_trim, 1, INT_MAX);
 		}
 
+		else if (*line == 'M' && strncmp(line, "MinNameTruncate=", 16) == 0) {
+			set_config_int_value(line + 16, &conf.min_name_trim, 1, INT_MAX);
+		}
+
 		else if (*line == 'M' && strncmp(line, "MinJumpRank=", 12) == 0) {
 			set_config_int_value(line + 12, &conf.min_jump_rank, -1, INT_MAX);
 		}
@@ -3781,6 +3785,11 @@ read_config(void)
 		else if (xargs.trim_names == UNSET && *line == 'T'
 		&& strncmp(line, "TrimNames=", 10) == 0) {
 			set_config_bool_value(line + 10, &conf.trim_names);
+		}
+
+		else if (xargs.trim_names == UNSET && *line == 'T'
+		&& strncmp(line, "TruncateNames=", 14) == 0) {
+			set_config_bool_value(line + 14, &conf.trim_names);
 		}
 
 		else if (xargs.secure_env != 1 && xargs.secure_env_full != 1

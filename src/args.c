@@ -251,7 +251,8 @@ static struct option const longopts[] = {
 	{"no-restore-last-path", no_argument, 0, LOPT_NO_RESTORE_LAST_PATH},
 	{"no-suggestions", no_argument, 0, LOPT_NO_SUGGESTIONS},
 	{"no-tips", no_argument, 0, LOPT_NO_TIPS},
-	{"no-trim-names", no_argument, 0, LOPT_NO_TRIM_NAMES},
+	{"no-trim-names", no_argument, 0, LOPT_NO_TRIM_NAMES}, // Deprecated
+	{"no-truncate-names", no_argument, 0, LOPT_NO_TRIM_NAMES},
 	{"no-unicode", no_argument, 0, LOPT_NO_UNICODE},
 	{"no-warning-prompt", no_argument, 0, LOPT_NO_WARNING_PROMPT},
 	{"no-welcome-message", no_argument, 0, LOPT_NO_WELCOME_MESSAGE},

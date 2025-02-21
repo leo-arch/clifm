@@ -181,21 +181,20 @@
 # current directory.
 ;ClearScreen=true
 
-# Set the maximum filename length for listed files. If TrimNames is enabled,
-# names longer than MaxFilenameLen will be truncated at MaxFilenameLen
-# using a tilde (~).
+# Set the maximum filename length for listed files. If TruncateNames is enabled,
+# names longer than MaxFilenameLen will be truncated using a tilde (~).
 # Set it to -1 (or leave empty) to remove this limit.
-# If running in long view mode, this setting is overriden by MinFilenameTrim
-# if MaxFilenameLen is smaller than MinFilenameTrim.
+# If running in long view mode, this setting is overriden by MinNameTruncate
+# if MaxFilenameLen is smaller than MinNameTruncate.
 ;MaxFilenameLen=20
 
 # Truncate filenames longer than MaxFilenameLen.
-;TrimNames=true
+;TruncateNames=true
 
 # Minimum length at which a filename can be truncated in long view mode.
 # When running in long mode, this setting overrides MaxFilenameLen
-# whenever MaxFilenameLen is smaller than MinFilenameTrim.
-;MinFilenameTrim=20
+# if MaxFilenameLen is smaller than MinNameTruncate.
+;MinNameTruncate=20
 
 # A comma separated list of workspace names in the format NUM=NAME.
 # Example: "1=MAIN,2=EXTRA,3=GIT" or "1=α,2=β,3=γ"

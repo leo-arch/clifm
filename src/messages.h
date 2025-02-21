@@ -1415,7 +1415,7 @@ c: Stop paging (printing remaining files)\n"
 \n -s       Run in stealth mode (incognito)\
 \n -S       Disable suggestions\
 \n -t NAME  Use the color scheme NAME\
-\n -T       Do not trim filenames\
+\n -T       Do not truncate filenames\
 \n -u       Run in disk usage analyzer mode\
 \n -U       Disable Unicode decorations\
 \n -v       Print version information and exit\
@@ -1435,7 +1435,7 @@ c: Stop paging (printing remaining files)\n"
 \n  -b, --bookmarks-file=FILE\t Set an alternative bookmarks file\
 \n  -c, --config-file=FILE\t Set an alternative configuration file\
 \n  -D, --config-dir=DIR\t\t Set an alternative configuration directory\
-\n  -e, --no-eln\t\t\t Do not print ELNs (entry list number)\
+\n  -e, --no-eln\t\t\t Do not print ELNs (entry list numbers)\
 \n  -E, --eln-use-workspace-color\t ELNs use the current workspace color\
 \n  -f, --dirs-first\t\t List directories first (default)\
 \n  -F, --no-dirs-first\t\t Do not list directories first\
@@ -1493,7 +1493,7 @@ and paths\
 \n      --max-files=NUM\t\t List only up to NUM files\
 \n      --mimelist-file=FILE\t Set FILE as Lira's configuration file\
 \n      --mnt-udisks2\t\t Use udisks2(1) instead of udevil(1) for the 'media' command\
-\n      --no-apparent-size\t Inform file sizes as used blocks instead of used bytes (apparent size)\
+\n      --no-apparent-size\t Display file sizes in terms of used blocks rather than used bytes (apparent size)\
 \n      --no-bold\t\t\t Disable bold colors (applies to all color schemes)\
 \n      --no-cd-auto\t\t Disable the autocd function\
 \n      --no-classify\t\t Do not append file type indicators\
@@ -1514,7 +1514,7 @@ and paths\
 \n      --no-restore-last-path\t Do not record the last visited directory\
 \n      --no-suggestions\t\t Disable auto-suggestions\
 \n      --no-tips\t\t\t Disable startup tips\
-\n      --no-trim-names\t\t Do not trim filenames\
+\n      --no-truncate-names\t Do not truncate filenames\
 \n      --no-unicode\t\t Disable Unicode decorations\
 \n      --no-warning-prompt\t Disable the warning prompt\
 \n      --no-welcome-message\t Disable the welcome message\

@@ -125,7 +125,7 @@ _clifm ()
         --no-restore-last-path
         --no-suggestions
         --no-tips
-        --no-trim-names
+        --no-truncate-names
         --no-unicode
 		--no-warning-prompt
         --no-welcome-message
