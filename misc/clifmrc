@@ -38,15 +38,15 @@
 
 # Display the number of files contained in each directory next to the
 # directory name. This feature may slow down performance when, for example,
-# listing files on a remote server. The files counter
-# can be disabled here, via the --no-files-counter option, or using the
-# 'fc' command while in the program itself.
+# listing files on a remote server. The files counter can be disabled here,
+# via the --no-files-counter option, or using the 'fc' command while in the
+# program itself.
 # Note: This option requires Classify (see below) to be set to true.
 ;FilesCounter=true
 
 # When using colors, append directory indicator to directories. If colors
-# are disabled (via the --no-color option), append file type
-# indicator to filenames instead:
+# are disabled (via the --no-color option), append file type indicator to
+# filenames instead:
 # '/' for directories
 # '@' for symbolic links
 # '=' for sockets
@@ -68,7 +68,7 @@
 # (InterfaceColors field) via the 'lc' code.
 ;ColorLinksAsTarget=false
 
-# Control the use of the files list pager. Supported values are:
+# Control the use of the file list pager. Supported values are:
 # 0/false = Disable the pager.
 # 1/true  = Run the pager whenever the list of files does not fit on the screen.
 # >1      = Run the pager whenever the number of files in the current directory is
@@ -119,7 +119,7 @@
 # x       = Extended attributes/capabilities/ACLs (marked as '@')
 #           (requires p|n)
 #
-# A single dash ("-") disables all fields
+# A single dash ("-") disables all fields.
 #
 # Note that, exception made of 'x' and 'G', fields will be displayed in the
 # order specified here.
@@ -143,7 +143,7 @@
 ;TimeStyle="relative"
 ;TimeStyle="+%F %T"
 
-# If files are sorted by time in the files list, this option specifies whether
+# If files are sorted by time in the file list, this option specifies whether
 # to use the same timestamp in long view mode, regardless of the value set in
 # PropFields.
 ;TimeFollowsSort=true
@@ -215,7 +215,7 @@
 # showing previous, current, and next entries.
 ;DirhistMap=false
 
-# Print the list of selected files after the files list. Since this
+# Print the list of selected files after the file list. Since this
 # list can become extensive, you can limit the number of printed
 # entries using the MaxPrintSelfiles option below.
 ;PrintSelfiles=false
@@ -246,7 +246,7 @@
 # is not detected.
 ;ColorScheme=
 
-# Enable the use of icons in the files list.
+# Enable the use of icons in the file list.
 # By default, emojis (widely available today) are used as icons, but
 # Nerd-fonts and icons-in-terminal are supported as well, though Clifm
 # needs to be recompiled in order to enable support. Consult our Wiki
@@ -297,11 +297,11 @@
 
 # The following suggestion checks will be performed in the order
 # specified by SuggestionStrategy. Available checks include:
-# a = Aliases names
+# a = Alias names
 # c = Path completion
 # e = ELNs
 # f = Filenames in current directory
-# h = Commands history
+# h = Command history
 # j = Jump database
 # Use a single dash (-) to skip all of these checks.
 ;SuggestionStrategy=ehfjac
@@ -335,7 +335,7 @@
 ;AutoOpen=true
 
 # Execute autocommand files (.cfm.in and .cfm.out) found in the current
-# directory upon entering it. For more information consult the manpage.
+# directory. For more information consult the manpage.
 ;ReadAutocmdFiles=false
 
 # Inform about autocommand options set for the current directory.
@@ -478,7 +478,7 @@
 # the history list. Set this line to the empty string to disable history filters.
 ;HistIgnore="^[q,Q]$|^quit$|^exit$|^ .*|^#.*|^[0-9]+$|^\.+$"
 
-# Limit the size of the commands history file to MaxHistory entries.
+# Limit the size of the command history file to MaxHistory entries.
 ;MaxHistory=1000
 
 # Same as HistIgnore, but for the directory history list.

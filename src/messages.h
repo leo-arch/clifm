@@ -346,7 +346,7 @@ Tip: See also the 'dh' and 'j' commands."
 \x1b[1mUSAGE\x1b[22m\n\
   d, dup ELN/FILE...\n\n\
 \x1b[1mEXAMPLE\x1b[22m\n\
-- Duplicate files whose ELN's are 12 through 20\n\
+- Duplicate files whose ELNs are 12 through 20\n\
     d 12-20\n\n\
 You will be prompted to enter a destination directory.\n\
 Duplicated files are created as SRC.copy, and, if SRC.copy exists, as \n\
@@ -735,7 +735,7 @@ Note: Either udevil(1) or udisks2(1) is required\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   media\n\n\
 The list of mounted and unmounted devices will be displayed.\n\
-Choose the device you want using ELN's.\n\
+Choose the device you want using ELNs.\n\
 If the device is mounted, it will be unmounted; if unmounted, it will \
 be mounted.\n\
 If mounting a device, Clifm will change automatically to the corresponding\n\
@@ -1426,7 +1426,7 @@ c: Stop paging (printing remaining files)\n"
 \n -X       Run in secure-environment mode (paranoid)\
 \n -y       Run in light mode\
 \n -Y       Run in secure-commands mode\
-\n -z NUM   Set a files sorting method (NUM=[1-13])\
+\n -z NUM   Set a file sort order (NUM=[1-13])\
 \n -Z NUM   List only up to NUM files"
 #else
 #define SHORT_OPTIONS "\
@@ -1435,8 +1435,8 @@ c: Stop paging (printing remaining files)\n"
 \n  -b, --bookmarks-file=FILE\t Set an alternative bookmarks file\
 \n  -c, --config-file=FILE\t Set an alternative configuration file\
 \n  -D, --config-dir=DIR\t\t Set an alternative configuration directory\
-\n  -e, --no-eln\t\t\t Do not print ELN's (entry list number)\
-\n  -E, --eln-use-workspace-color\t ELN's use the current workspace color\
+\n  -e, --no-eln\t\t\t Do not print ELNs (entry list number)\
+\n  -E, --eln-use-workspace-color\t ELNs use the current workspace color\
 \n  -f, --dirs-first\t\t List directories first (default)\
 \n  -F, --no-dirs-first\t\t Do not list directories first\
 \n  -g, --pager\t\t\t Enable the pager\
@@ -1633,7 +1633,7 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  s, sel             Select files\n\
  sb, selbox         Access the Selection Box\n\
  splash             Print the splash screen\n\
- st, sort           Change files sorting order\n\
+ st, sort           Change file sort order\n\
  stats              Print files statistics\n\
  t, trash           Move files to the trash can\n\
  tag                Tag files\n\
@@ -1784,7 +1784,7 @@ le mylink            Edit the symbolic link 'mylink'\n\
 oc myfile            Edit ownership of the file 'myfile'\n\
 pc myfile            Edit permissions of the file 'myfile'\n\
 te *.sh              Toggle the executable bit on all .sh files\n\
-t 12-18              Move the files whose ELN's are 12-18 to the trash can\n\
+t 12-18              Move files whose ELNs are 12-18 to the trash can\n\
 t del | t del <TAB>  Permanently remove trashed files using a menu\n\
 t empty              Empty the trash can\n\
 u | u <TAB>          Undelete trashed files using a menu\n\
@@ -1877,10 +1877,10 @@ q | F12         I'm tired, quit"
 #define EXT_DESC     " (set external/shell commands on/off)"
 #define F_DESC       " (go forth in the directory history list)"
 #define FC_DESC      " (set the files counter on/off)"
-#define FF_DESC      " (toggle list-directories-first on/off)"
+#define FF_DESC      " (toggle list-directories-first)"
 #define FT_DESC      " (set a files filter)"
 #define FZ_DESC      " (print directories full size - long view only)"
-#define HF_DESC      " (toggle show-hidden-files on/off)"
+#define HF_DESC      " (toggle hidden files)"
 #define HIST_DESC    " (manage the commands history)"
 #define ICONS_DESC   " (set icons on/off)"
 #define J_DESC       " (jump to a visited directory)"
@@ -1889,8 +1889,8 @@ q | F12         I'm tired, quit"
 #define KB_DESC      " (manage keybindings)"
 #define L_DESC       " (create a symbolic link)"
 #define LE_DESC      " (edit a symbolic link)"
-#define LL_DESC      " (toggle long view on/off)"
-#define LM_DESC      " (toggle light mode on/off)"
+#define LL_DESC      " (toggle long view)"
+#define LM_DESC      " (toggle light mode)"
 #define LOG_DESC     " (manage logs)"
 #define M_DESC       " (move files)"
 #define MD_DESC      " (create directories)"
@@ -1902,15 +1902,15 @@ q | F12         I'm tired, quit"
 #define N_DESC       " (create files)"
 #define NET_DESC     " (manage remote resources)"
 #define O_DESC       " (open file)"
-#define OC_DESC      " (change files ownership)"
+#define OC_DESC      " (change file ownership)"
 #define OPENER_DESC  " (set a custom file opener)"
 #define OW_DESC      " (open file with...)"
-#define P_DESC       " (print files properties)"
-#define PC_DESC      " (change files permissions)"
+#define P_DESC       " (print file properties)"
+#define PC_DESC      " (change file permissions)"
 #define PF_DESC      " (manage profiles)"
-#define PG_DESC      " (set the files pager on/off)"
+#define PG_DESC      " (set the file pager on/off)"
 #define PIN_DESC     " (pin a directory)"
-#define PP_DESC      " (print files properties - follow links/full dir size)"
+#define PP_DESC      " (print file properties - follow links/full dir size)"
 #define PROMPT_DESC  " (switch/edit prompt)"
 #define Q_DESC       " (quit)"
 #define QU_DESC      " (exit - cd on quit)"
@@ -1921,7 +1921,7 @@ q | F12         I'm tired, quit"
 #define SB_DESC      " (access the selection box)"
 #define SEL_DESC     " (select files)"
 #define SPLASH_DESC  " (print the splash screen)"
-#define ST_DESC      " (change files sorting order)"
+#define ST_DESC      " (change file sort order)"
 #define STATS_DESC   " (print file statistics)"
 #define TAG_DESC     " (manage file tags)"
 #define TA_DESC      " (tag files as ...)"
