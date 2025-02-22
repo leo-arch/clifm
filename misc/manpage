@@ -1415,29 +1415,29 @@ Key : Description
 Ctrl\-Alt\-j : Switch to vi editing mode
 Ctrl\-Alt\-e : Switch back to emacs editing mode (default)
 Right, Ctrl\-f : Accept the entire current suggestion
-Alt\-Right, Alt\-f : Accept the first suggested word (up to first slash or space)
+Alt\-Right, Alt\-f : Accept the first suggested word (up to the first slash or space)
 Alt\-c : Clear the current command line buffer
 Alt\-q : Delete last word (up to last slash or space)
-Alt\-i, Alt\-. : Toggle hidden files on/off
-Alt\-l : Toggle long view mode on/off
-Alt\-+ : Toggle follow links (long view only)
-Alt\-g : Toggle list\-directories\-first on/off
-Alt\-, : Toggle list only directories on/off
-Ctrl\-Alt\-l : Toggle max filename length on/off
-Ctrl\-Alt\-i, Alt\-TAB : Toggle disk usage analyzer on/off
-Alt\-w : Toggle full path filenames in virtual directories
+Alt\-i, Alt\-. : Toggle hidden\-files
+Alt\-l : Toggle long\-view
+Alt\-+ : Toggle follow\-links (long view only)
+Alt\-g : Toggle list\-directories\-first
+Alt\-, : Toggle list\-only\-directories
+Ctrl\-Alt\-l : Toggle max\-filename\-length
+Ctrl\-Alt\-i, Alt\-TAB : Toggle disk\-usage\-analyzer
+Alt\-w : Toggle full\-path\-filenames (virtual directories)
 Ctrl\-l : Refresh the screen (reprint the list of files in the current directory)
 Alt\-t : Clear program messages
 Alt\-m : List mountpoints
 Alt\-b : Launch the Bookmarks Manager
-Alt\-h : Show directory history
+Alt\-h : Show the directory history
 Alt\-n : Create new file or directory
 Alt\-s : Open the Selection Box
 Alt\-\- : Launch the files previewer (\fIview\fR command)
 Alt\-a : Select all files in the current working directory
-Alt\-d : Deselect all selected files
-Alt\-0 : Run MAS, the files pager
-Alt\-p : Change to pinned directory
+Alt\-d : Deselect all files
+Alt\-0 : Run MAS, the file pager
+Alt\-p : Change to the pinned directory
 Alt\-1 : Switch to workspace 1
 Alt\-2 : Switch to workspace 2
 Alt\-3 : Switch to workspace 3
@@ -1449,23 +1449,20 @@ allbox tab(:);
 lb lb
 lb l.
 Key : Description
-Alt\-r : Change to root directory
-Alt\-e, Home : Change to home directory
-Alt\-u, Shift\-Up : Change to parent directory
-Alt\-j, Shift\-Left : Change to previous visited directory
-Alt\-k, Shift\-Right : Change to next visited directory
-Ctrl\-Alt\-o : Switch to previous profile
-Ctrl\-Alt\-p : Switch to next profile
+Alt\-r : Change to the root directory
+Alt\-e, Home : Change to the home directory
+Alt\-u, Shift\-Up : Change to the parent directory
+Alt\-j, Shift\-Left : Change to the previously visited directory
+Alt\-k, Shift\-Right : Change to the next visited directory
+Ctrl\-Alt\-o : Switch to the previous profile
+Ctrl\-Alt\-p : Switch to the next profile
 Ctrl\-Alt\-a : Archive selected files
 Ctrl\-Alt\-e : Export selected files
 Ctrl\-Alt\-r : Rename selected files
 Ctrl\-Alt\-d : Remove selected files
 Ctrl\-Alt\-t : Trash selected files
-Ctrl\-Alt\-u : Restore trashed files
-Ctrl\-Alt\-g : Open/change-to last selected file/directory
-Ctrl\-Alt\-n : Move selected files to the current directory
 Ctrl\-Alt\-v : Copy selected files to the current directory
-Alt\-y : Toggle light mode on/off
+Alt\-y : Toggle light-mode
 Alt\-z : Switch to previous sorting method
 Alt\-x : Switch to next sorting method
 Ctrl\-x : Launch a new instance of \fBclifm\fR
