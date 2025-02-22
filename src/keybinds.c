@@ -2691,6 +2691,7 @@ set_keybinds_from_file(void)
 	rl_bind_keyseq(find_key("trash-sel"), rl_trash_sel);
 	rl_bind_keyseq(find_key("untrash-all"), rl_untrash_all);
 	rl_bind_keyseq(find_key("paste-sel"), rl_paste_sel);
+	rl_bind_keyseq(find_key("copy-sel"), rl_paste_sel);
 	rl_bind_keyseq(find_key("select-all"), rl_select_all);
 	rl_bind_keyseq(find_key("deselect-all"), rl_deselect_all);
 

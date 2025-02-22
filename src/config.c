@@ -1009,7 +1009,7 @@ toggle-max-name-len:\\e\\C-l\n\
 toggle-disk-usage:\\e\\C-i\n\
 toggle-virtualdir-full-paths:\\ew\n\
 trash-sel:\\e\\C-t\n\
-untrash-all:\\e\\C-u\n\n\
+#untrash-all:\\e\\C-u\n\n\
 # F6-12\n\
 open-mime:\\e[17~\n\
 open-preview:\\e[18~\n\
