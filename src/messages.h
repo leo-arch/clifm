@@ -1108,9 +1108,9 @@ Recognized file types: (d)irectory, regular (f)ile, symbolic (l)ink,\n\
     s /media/*<TAB>\n\
 - List currently selected files\n\
     sb\n\
-- Copy selected files into the current directory:\n\
+- Copy selected files to the current directory:\n\
     c sel\n\
-- Move selected files into the directory whose ELN is 24\n\
+- Move selected files to the directory whose ELN is 24\n\
     m sel 24\n\
 - Deselect all files\n\
     ds * (or Alt-d)\n\
@@ -1162,7 +1162,7 @@ following shortcuts as well:\n\n\
   Note 2: Since 'add' is the default action, it can be omitted.\n\
 - Tag all selected files as 'special'\n\
     tag add sel :special\n\
-- Rename tag 'documents' as 'docs'\n\
+- Rename tag 'documents' to 'docs'\n\
     tag rename documents docs\n\
 - Merge tag 'png' into 'images'\n\
     tag merge png images\n\
@@ -1248,13 +1248,13 @@ Note: To permanently set the umask, use the Umask option in the config file."
     'u <TAB>' to choose from a list (multi-selection is allowed)\n\n\
 Note: Use the 'trash' command to trash files. Try 'trash --help'."
 
-#define VV_USAGE "Copy files into a directory and bulk rename them at once\n\n\
+#define VV_USAGE "Copy files to a directory and bulk rename them at once\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   vv FILE... DIR\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
-- Copy selected files into 'mydir' and rename them\n\
+- Copy selected files to 'mydir' and rename them\n\
     vv sel mydir\n\
-- Copy all PDF files into the directory whose ELN is 4 and rename them\n\
+- Copy all PDF files to the directory whose ELN is 4 and rename them\n\
     vv *.pdf 4\n\n\
 Note: If DIR does not exist, it will be created"
 
@@ -1283,7 +1283,7 @@ r  -> rm ('rm -r' for directories) (1)\n\n\
 (1) By default, the user will asked for confirmation (set rmForce to true\n\
 in the configuration file to disable the confirmation prompt).\n\n\
 The 'paste' command is equivalent to 'c' and exists only for semantic\n\
-reasons. For example, if you want to copy selected files into the current\n\
+reasons. For example, if you want to copy selected files to the current\n\
 directory, it makes sense to write 'paste sel'.\n\n\
 By default, both the 'c' and 'm' commands run cp(1)/mv(1) interactively\n\
 (-i), i.e. prompting before overwriting a file. To run non-interactivelly\n\
@@ -1300,12 +1300,12 @@ Example: cp -abf ...\n\n\
     c file1 file2\n\
 - Create a copy of file1 in the directory dir1 named file2\n\
     c file1 dir1/file2\n\
-- Copy all selected files into the current directory\n\
+- Copy all selected files to the current directory\n\
     c sel\n\
   Note: If destination directory is omitted, the current directory is assumed.\n\
-- Copy all selected files into the current directory (non-interactively):\n\
+- Copy all selected files to the current directory (non-interactively):\n\
     c -f sel\n\
-- Move all selected files into the directory named testdir\n\
+- Move all selected files to the directory named testdir\n\
     m sel testdir\n\
 - Rename 'file1' as 'file_test'\n\
     m file1 file_test\n\
@@ -1313,7 +1313,7 @@ Example: cp -abf ...\n\n\
     m file1\n\
   Note: The user is prompted to enter a new name using the old name as\n\
   template.\n\
-- Move all selected files into the current directory (non-interactively)\n\
+- Move all selected files to the current directory (non-interactively)\n\
     m -f sel\n\
 - Remove all selected files\n\
     r sel\n\
@@ -1322,7 +1322,7 @@ Example: cp -abf ...\n\n\
   Note: Use the 't' command to move files to the trash can. Try 't --help'.\n\n\
 To create files and directories you can use the 'md' and 'n' commands.\n\
 Try 'md --help' and 'n --help' for more details.\n\n\
-Use the 'vv' command to copy files into a directory and bulk rename them\n\
+Use the 'vv' command to copy files to a directory and bulk rename them\n\
 at once. Try 'vv --help'.\n\n\
 Use the 'cr' plugin to copy a file to a remote location:\n\
     cr FILE (run 'cr --edit' before to set up your remotes)\n\n\
@@ -1507,7 +1507,7 @@ and paths\
 \n      --no-follow-symlink\t Do not follow symbolic links when listing files (overrides -L and --color-links-as-target)\
 \n      --no-fzfpreview\t\t Disable file previews for tab completion (fzf mode only)\
 \n      --no-highlight\t\t Disable syntax highlighting\
-\n      --no-history\t\t Do not write commands into the history file\
+\n      --no-history\t\t Do not write commands to the history file\
 \n      --no-open-auto\t\t Same as no-cd-auto, but for files\
 \n      --no-refresh-on-resize\t Do not attempt to refresh the file list upon window's resize\
 \n      --no-report-cwd\t\t Do not report the working directory to the terminal (not supported by old terminals)\
@@ -1689,9 +1689,9 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  C-M-d         Remove selected files\n\
  C-M-t         Trash selected files\n\
  C-M-u         Restore trashed files\n\
- C-M-g         Open/change-into last selected file/directory\n\
- C-M-n         Move selected files into the current working directory\n\
- C-M-v         Copy selected files into the current working directory\n\
+ C-M-g         Open/change-to last selected file/directory\n\
+ C-M-n         Move selected files to the current working directory\n\
+ C-M-v         Copy selected files to the current working directory\n\
  C-M-l         Toggle max name length\n\
  M-y           Toggle light mode\n\
  M-z           Switch to previous sorting method\n\
@@ -1772,7 +1772,7 @@ bm del mybm          Remove the bookmark named 'mybm'\n\
 tag --help           Learn about file tags\n\
 n myfile             Create a new file named 'myfile'\n\
 n mydir/             Create a new directory named 'mydir'\n\
-c sel                Copy selected files into the current directory (1)\n\
+c sel                Copy selected files to the current directory (1)\n\
 r sel                Remove all selected files (1)\n\
 br sel               Bulk rename selected files (1)\n\
 c 34 file_copy       Copy the file whose ELN is 34 to 'file_copy'\n\

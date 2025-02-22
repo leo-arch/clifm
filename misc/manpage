@@ -314,7 +314,7 @@ disable file previews for tab completion (fzf mode only)
 disable syntax highlighting. To customize highlighting colors see the \fBCOLOR CODES\fR section below.
 .TP
 \fB\-\-no\-history\fR
-do not write commands into the history file (see also the \fIHistIgnore\fR option in the configuration file)
+do not write commands to the history file (see also the \fIHistIgnore\fR option in the configuration file)
 .TP
 \fB\-\-no\-open\-auto\fR
 same as \fI\-\-no\-cd\-auto\fR, but for files instead of directories
@@ -630,7 +630,7 @@ Bookmarks can be managed either from the bookmarks manager screen or from the co
 .sp
 \fB1. The bookmarks manager screen\fR
 .sp
-To access the bookmarks manager screen simply enter \fIbm\fR. Here you can cd into the desired bookmark by entering either its ELN or name (regular files can be bookmarked as well). In this screen you can also add, remove, or edit your bookmarks by simply entering 'e' to edit the bookmarks file (which is simply a list of lines with this format: \fIname:path\fR. E.g.: "docs:/home/user/documents"). Make your changes, save, and exit.
+To access the bookmarks manager screen simply enter \fIbm\fR. Here you can cd to the desired bookmark by entering either its ELN or name (regular files can be bookmarked as well). In this screen you can also add, remove, or edit your bookmarks by simply entering 'e' to edit the bookmarks file (which is simply a list of lines with this format: \fIname:path\fR. E.g.: "docs:/home/user/documents"). Make your changes, save, and exit.
 .sp
 \fB2. The command line\fR
 .TS
@@ -683,7 +683,7 @@ T}	Select all bookmarks at once
 .B br, bulk \fIELN/FILE\fR... [:EDITOR]
 rename at once all files passed as arguments to the function. It accepts single and multiple filenames, wildcards, ELN ranges, and the \fIsel\fR keyword. Example: \fIbr\ myfile\ 4\-10\ sel\fR.
 .sp
-Each filename will be copied into a temporary file, which will be opened via EDITOR (default associated application for plain text files if omitted), letting the user modify it. Once the file has been modified and saved, the modifications are printed on the screen and the user is asked for confirmation.
+Each filename will be copied to a temporary file, which will be opened via EDITOR (default associated application for plain text files if omitted), letting the user modify it. Once the file has been modified and saved, the modifications are printed on the screen and the user is asked for confirmation.
 .sp
 This builtin bulk rename function won\'t deal with deletions, replacements, filename conflicts and the like. For a smarter alternative use \fBqmv\fR(1).
 .TP
@@ -700,7 +700,7 @@ To use these commands without any of these arguments, or with any other argument
 .sp
 The \fIl\fR command allows the use of the \fIe, edit\fR option to modify the destination of a symbolic link. Example: \fIl\ edit\ 12\fR (or \fIle\ 12\fR)  to relink the symbolic link corresponding to the file whose ELN is 12.
 .sp
-When using the \fIsel\fR keyword and no destination is provided, \fIc\fR and \fIm\fR will copy/move selected files into the current directory.
+When using the \fIsel\fR keyword and no destination is provided, \fIc\fR and \fIm\fR will copy/move selected files to the current directory.
 .sp
 Whenever \fIsel\fR is not used, but just a source filename (and no destination is provided), the \fIm\fR command behaves much like the \fBimv\fR(1) shell command (from the \'renameutils\' package), providing an interactive renaming function: it prompts the user to enter a new name using the source filename as base, so that it does not need to be typed twice. For this alternative prompt, only tab completion for filenames is available.
 .sp
@@ -714,8 +714,8 @@ Change the current working directory to ELN/DIR.
 .sp
 Directories check order:
   1. If no argument, change to the home directory (\fBHOME\fR, or, if \fBHOME\fR is not set, the sixth field of the entry corresponding to the current user in \fI/etc/passwd\fR)
-  2. If argument is an absolute path (begins with a slash character), or the first component is dot (.) or dot\-dot (..), convert to canonical form (via \fBrealpath\fR(3)) and, if a valid directory, change into this directory.
-  3. Check \fBCDPATH\fR environment variable and append /DIR to each of the paths specified here. If the result of the concatenation is a valid directory, change into it.
+  2. If argument is an absolute path (begins with a slash character), or the first component is dot (.) or dot\-dot (..), convert to canonical form (via \fBrealpath\fR(3)) and, if a valid directory, change to this directory.
+  3. Check \fBCDPATH\fR environment variable and append /DIR to each of the paths specified here. If the result of the concatenation is a valid directory, change to it.
   4. Check directories in the current working directory. If a matching directory is found, change to it.
 .sp
 You can use either ELNs or a string to indicate the directory you want. E.g.: \fIcd\ 12\fR or \fIcd\ ~/media\fR. If \fIautocd\fR is enabled (default), \fIcd\ 12\fR and \fIcd\ ~/media\fR can be written as \fI12\fR and \fI~/media\fR respectively as well.
@@ -756,7 +756,7 @@ Use the \fIedit\fR subcommand to open/edit the configuration file of the current
 To switch color schemes, specify the color scheme name: \fIcs NAME\fR. (Tab completion is available: \fIcs <TAB>\fR).
 .TP
 .B d, dup \fIFILE\fR...
-Duplicate files passed as parameters, either directories or regular files. The user will be asked for a destination directory. Duplicated filenames are generated by appending ".copy" to the basename of each source file. For example: \fId\ /my/file\fR will copy \fI/my/file\fR into the directory selected by the user as \fIfile.copy\fR. If \fIfile.copy\fR already exists, an extra suffix will be added as follows: \fIfile.copy\-N\fR, where N is a positive integer (starting at 1).
+Duplicate files passed as parameters, either directories or regular files. The user will be asked for a destination directory. Duplicated filenames are generated by appending ".copy" to the basename of each source file. For example: \fId\ /my/file\fR will copy \fI/my/file\fR to the directory selected by the user as \fIfile.copy\fR. If \fIfile.copy\fR already exists, an extra suffix will be added as follows: \fIfile.copy\-N\fR, where N is a positive integer (starting at 1).
 .sp
 If \fBrsync\fR(1) is found, it will be used as follows: \fIrsync\ \-aczvAXHS\ \-\-progress\fR. Else, \fBcp\fR(1) will be used: \fIcp\ \-a\fR.
 .TP
@@ -846,9 +846,9 @@ With no argument, \fIj\fR just lists the entries in the jump database \fB(1)(2)\
 .sp
 \fB(2)\fR To prevent a directory from being \fIremoved\fR from the jump database, edit the database (\fIj edit\fR) and prepend a plus sign (+) to the corresponding line.
 .sp
-Otherwise, if a query string is provided as parameter, \fIj\fR searches for this string in the database and cd into the best ranked matching entry. Example: \fIj\ Down\fR will probably take you to \fI/home/user/Downloads\fR, provided this directory has been already visited and is the best ranked match in the database. For a more detailed description of the matching algorithm see the \fBKANGAROO FRECENCY ALGORITHM\fR section below.
+Otherwise, if a query string is provided as parameter, \fIj\fR searches for this string in the database and cd to the best ranked matching entry. Example: \fIj\ Down\fR will probably take you to \fI/home/user/Downloads\fR, provided this directory has been already visited and is the best ranked match in the database. For a more detailed description of the matching algorithm see the \fBKANGAROO FRECENCY ALGORITHM\fR section below.
 .sp
-Multiple query strings can be passed to the function. For example, \fIj\ et\ mo\fR will first check for "et" in the jump database and then will further filter the search using the second parameter: "mo". It will most probably take you (again, provided the directory has been already visited and is the best ranked match) to \fI/etc/modprobe.d\fR directory. Bear in mind that if STR is an actual directory, \fIjump\fR will just cd into it without performing any query.
+Multiple query strings can be passed to the function. For example, \fIj\ et\ mo\fR will first check for "et" in the jump database and then will further filter the search using the second parameter: "mo". It will most probably take you (again, provided the directory has been already visited and is the best ranked match) to \fI/etc/modprobe.d\fR directory. Bear in mind that if STR is an actual directory, \fIjump\fR will just cd to it without performing any query.
 .sp
 The backslash (\\) and the slash (/) can be used to instruct \fBKangaroo\fR to search for the string query only in the first or last path segment of each entry in the database respectively. Let\'s suppose we have two entries matching \fBsrc\fR in the database: \fI/media/src/images\fR and \fI/home/user/Downloads/clifm/src\fR. If the first entry is better ranked than the second, \fIj src\fR will match this first entry. However, if what we really want is the second entry, appending a slash to the query string instructs \fBKangaroo\fR to only match entries having src in the last path segment, here \fI/home/user/Downloads/clifm/src\fR.
 .sp
@@ -926,7 +926,7 @@ Toggle the light mode on/off. This option, aimed at making file listing faster t
 .B log \fR[\fIcmd\fR [\fIlist\fR, \fIon\fR, \fIoff\fR, \fIstatus\fR, \fIclear\fR]] [\fImsg\fR [\fIlist\fR, \fIon\fR, \fIoff\fR, \fIstatus\fR, \fIclear\fR]]
 Enable, disable, clear, list or check the status of the program logs, either message (errors and warnings) or command logs. Example: \fIlog cmd on\fR, to enable command logs, or \fIlog msg clear\fR, to clear/remove message logs.
 .sp
-Consult the \fBFILES\fR section below for information about how logs are written into the logs file.
+Consult the \fBFILES\fR section below for information about how logs are written to the logs file.
 .TP
 .B media
 .sp 0
@@ -934,9 +934,9 @@ Consult the \fBFILES\fR section below for information about how logs are written
 .sp
 List available storage devices and mount/unmount the selected one using either \fIudevil\fR or \fIudisks2\fR (at least one of these must be installed. \fIudevil\fR will be preferred over \fIudisks2\fR). If the device is unmounted, it will be automatically mounted, and if mounted, it will be automatically unmounted.
 .sp
-Though mountpoints are determined by the mounting application itself (\fIudevil\fR or \fIudisks2\fR), \fBclifm\fR will automatically cd into the corresponding mountpoint whenever the mount operation was succesfull.
+Though mountpoints are determined by the mounting application itself (\fIudevil\fR or \fIudisks2\fR), \fBclifm\fR will automatically cd to the corresponding mountpoint whenever the mount operation was succesfull.
 .sp
-When unmounting, and if the current directory is inside the mountpoint, \fBclifm\fR will attempt to cd into the previous visited directory, and, if none, into the home directory, before unmounting the device.
+When unmounting, and if the current directory is inside the mountpoint, \fBclifm\fR will attempt to cd to the previous visited directory, and, if none, to the home directory, before unmounting the device.
 .sp
 To get information about a device, enter \fIiELN\fR, for example, \fIi12\fR, provided \'12\' is the ELN of the device you want.
 .TP
@@ -1065,7 +1065,7 @@ Without arguments (or via the \fIlist\fR subcommand), \fInet\fR lists the config
 .sp
 Use the \fIedit\fR option to edit the remotes configuration file. If no further argument is specified, the file will be opened with the current file opener. However, you can pass an application as second parameter to open to configuration file. Example: \fInet edit nano\fR.
 .sp
-If not already mounted, the \fIm\fR, \fImount\fR option mounts the specified remote using the mount command and the mounpoint specified in the confifuration file and automatically cd into the corresponding mountpoint. Example: \fInet m smb_work\fR. Since \fImount\fR is the default action, it can be omitted: \fInet smb_work\fR.
+If not already mounted, the \fIm\fR, \fImount\fR option mounts the specified remote using the mount command and the mounpoint specified in the confifuration file and automatically cd to the corresponding mountpoint. Example: \fInet m smb_work\fR. Since \fImount\fR is the default action, it can be omitted: \fInet smb_work\fR.
 .sp
 The \fIu\fR, \fIunmount\fR option unmounts the specified remote using the unmount command specified in the configuration file. For example: \fInet u smb_work\fR. Tab completion is also available for this function.
 .sp
@@ -1263,7 +1263,7 @@ If filenames are passed as parameters, undelete these files, that is, restore th
 this command takes no argument. It just frees the current pin and, if it exists, deletes the \fI.pin\fR file generated by the \fIpin\fR command.
 .TP
 .B vv \fIFILE\fR... \fIDIR\fR
-copy FILE(s) into DIR and bulk rename them at once.
+copy FILE(s) to DIR and bulk rename them at once.
 .TP
 .B ver, version
 show \fBclifm\fR version details.
@@ -1463,8 +1463,8 @@ Ctrl\-Alt\-d : Remove selected files
 Ctrl\-Alt\-t : Trash selected files
 Ctrl\-Alt\-u : Restore trashed files
 Ctrl\-Alt\-g : Open/change-to last selected file/directory
-Ctrl\-Alt\-n : Move selected files into the current directory
-Ctrl\-Alt\-v : Copy selected files into the current directory
+Ctrl\-Alt\-n : Move selected files to the current directory
+Ctrl\-Alt\-v : Copy selected files to the current directory
 Alt\-y : Toggle light mode on/off
 Alt\-z : Switch to previous sorting method
 Alt\-x : Switch to next sorting method
@@ -1536,7 +1536,7 @@ In case some of these keybindings are already used by your Window Manager, you o
 .TP
 All customization settings (theming) are made from a single configuration file (the color scheme file), installed by default in \fI$XDG_DATA_DIRS/clifm/colors\fR (usually \fI/usr/local/share/clifm/colors\fR or \fI/usr/share/clifm/colors\fR), though color scheme files found in \fI$XDG_CONFIG_HOME/clifm/colors\fR (usually \fI$HOME/.config/clifm/colors\fR) take precedence.
 .TP
-\fBNote\fR: Color scheme files are copied automatically into the local colors directory when running the \fIcs edit\fR command.
+\fBNote\fR: Color scheme files are copied automatically to the local colors directory when running the \fIcs edit\fR command.
 .TP
 Each color scheme may include any (or all) of the below options:
 .TP
@@ -1909,9 +1909,9 @@ Refer to the \fBTab completion\fR section below.
 .TP
 \fBClifm\fR will automatically expand the \fIsel\fR keyword\fR: \fIsel\fR indeed amounts to \'file1 file2 file3 ...\' In this way, you can use the \fIsel\fR keyword with any command. \fIs:\fR can be used interchangeably (with the difference that \fIs:\fR can be used as first word, and not only as parameter to other commands).
 .TP
-If you want to set the executable bit on several files, for instance, simply select the files you want and then run this command: \fIchmod +x sel\fR. Or, if you want to copy or move several files into some directory: \fIcp sel 12\fR, or \fImv sel 12\fR (provided the ELN 12 corresponds to a directory), respectively.
+If you want to set the executable bit on several files, for instance, simply select the files you want and then run this command: \fIchmod +x sel\fR. Or, if you want to copy or move several files to some directory: \fIcp sel 12\fR, or \fImv sel 12\fR (provided the ELN 12 corresponds to a directory), respectively.
 .TP
-If the destination directory is omitted, selected files are copied into the current working directory, that is to say, \fImv sel\fR amounts to \fImv sel .\fR.
+If the destination directory is omitted, selected files are copied to the current working directory, that is to say, \fImv sel\fR amounts to \fImv sel .\fR.
 .TP
 To trash or remove selected files, simply run \fItr sel\fR or \fIrm sel\fR respectively. The same goes for wildcards and braces: \fIchmod +x *\fR, for example, will set the executable bit on all files (excluding hidden files) in the current working directory, while \fIchmod +x file{1,2,3}\fR will do it for file1, file2, and file3 respectively.
 .TP
@@ -1958,7 +1958,7 @@ Tab completion for commands, paths, users home directory, workspaces, wildcards\
 .TP
 \fB*\fR When using fzf mode for tab completion, multi\-selection is available: Press TAB to expand possible selections, then press TAB again to mark desired entries. Once desired entries are marked, press Enter or the Right arrow key: marked entries will be inserted into the command line. Multi\-selection is also available for the following commands, provided there is no slash in the query string: \fIac\fR, \fIad\fR, \fIbb\fR, \fIbr\fR, \fId/dup\fR, \fIp/pr/prop\fR, \fIr\fR, \fIs\fR, \fIt/tr/trash\fR, and \fIte\fR.
 .TP
-Of course, combinations of all these features is also possible. Example: \fIcp sel file* 2 23\-31 .\fR will copy all selected files, plus all files whose name starts with "file", plus those files corresponding to the ELNs 2, and 23 to 31, into the current working directory.
+Of course, combinations of all these features is also possible. Example: \fIcp sel file* 2 23\-31 .\fR will copy all selected files, plus all files whose name starts with "file", plus those files corresponding to the ELNs 2, and 23 to 31, to the current working directory.
 .TP
 In addition to completions and expansions, an \fIauto\-suggestions system\fR is also available. See the \fBAUTO\-SUGGESTIONS\fR section below.
 
@@ -2535,7 +2535,7 @@ To remove a value, set the option to an empty value. For example, to remove the 
 .sp
 \fB(1)\fR This is the recommended configuration for remote filesystems
 .sp 0
-\fB(2)\fR As seen here, plugins can be used as well: in this case, we want to run \fIfzfnav\fR (to make use of the files preview capability) whenever we enter into the \fIDownloads\fR directory, usually containing videos, music, and images.
+\fB(2)\fR As seen here, plugins can be used as well: in this case, we want to run \fIfzfnav\fR (to make use of the files preview capability) whenever we enter the \fIDownloads\fR directory, usually containing videos, music, and images.
 \fBNOTE\fR: If you decide to use a plugin, bear in mind that it won\'t be able to communicate with \fBclifm\fR, because the \fIautocommand\fR function always executes commands as external applications using the system shell.
 .sp
 Bear in mind that \fIautocmd\fR directives are evaluated from top to bottom, so that subsequent matching entries will overwrite options set by previous entries.
@@ -2926,7 +2926,7 @@ Except when running in \fBstealth mode\fR, \fBclifm\fR sets the following enviro
 .TP
 .B CLIFM
 .sp 0
-Path to the configuration directory. By inspecting this variable other programs can find out if they were spawned by \fBclifm\fR. It can also be used to quickly jump into the configuration directory: \fIcd $CLIFM\fR or just \fI$CLIFM\fR
+Path to the configuration directory. By inspecting this variable other programs can find out if they were spawned by \fBclifm\fR. It can also be used to quickly jump to the configuration directory: \fIcd $CLIFM\fR or just \fI$CLIFM\fR
 .TP
 .B CLIFMRC
 Path to the main configuration file (by default \fI~/.config/clifm/profiles/default/clifmrc\fR)
@@ -3161,7 +3161,7 @@ The profile file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/profile.clifm\fR.
 In this file you can add those commands you want to be executed at startup. You can also permanently set here some custom variables, e.g.: 'dir="/path/to/dir"'. This variable may be used as a shortcut to that directory, for instance: \fIcd $dir\fR. Custom variables could also be temporarily defined via the command prompt: E.g.: user@hostname ~ $ var="This is a test". Temporary variables will be removed at program exit. Internal variables are disabled by default; enable them via the \fI\-\-int\-vars\fR command line switch.
 .TP
 .B PROMPTS FILE
-This file contains prompts definitions and is located in \fIDATADIR/clifm/prompts.clifm\fR. It will be copied automatically into \fI$XDG_CONFIG_HOME/clifm/prompts.clifm\fR if it doesn't exist. The \fIPrompt\fR line in the color scheme file should point to one of the prompt names defined in this file. See the \fBPROMPT\fR section for more information.
+This file contains prompts definitions and is located in \fIDATADIR/clifm/prompts.clifm\fR. It will be copied automatically to \fI$XDG_CONFIG_HOME/clifm/prompts.clifm\fR if it doesn't exist. The \fIPrompt\fR line in the color scheme file should point to one of the prompt names defined in this file. See the \fBPROMPT\fR section for more information.
 .TP
 .B KEYBINDINGS FILE
 The keybindings file is \fI$XDG_CONFIG_HOME/clifm/keybindings,cfm\fR. It will be copied from \fIDATADIR/clifm\fR (usually \fI/usr/share/clifm\fR), and if not found, it will be created anew with default values. This file is used to specify the keyboard shortcuts used for some ClifM's functions. The format for each keybinding is always "keyseq:function", where 'keyseq' is an escape sequence in GNU emacs style. A more detailed explanation can be found in the keybindings file itself.
@@ -3362,10 +3362,10 @@ T{
 T}	Search for all PDF files in the current directory
 T{
 c sel
-T}	Copy selected files into the current directory
+T}	Copy selected files to the current directory
 T{
 c *.txt 2
-T}	Copy all txt file into the directory whose ELN is 2
+T}	Copy all txt file to the directory whose ELN is 2
 T{
 r sel
 T}	Remove all selected files \fB(7)\fR
