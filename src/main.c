@@ -357,10 +357,10 @@ char
 	fc_c[MAX_COLOR], /* Files counter */
 	lc_c[MAX_COLOR], /* Symlink character (ColorLinkAsTarget only) */
 	mi_c[MAX_COLOR], /* Misc indicators */
-	ts_c[MAX_COLOR], /* TAB completion suffix */
+	ts_c[MAX_COLOR], /* Tab completion suffix */
 	wc_c[MAX_COLOR], /* Welcome message color */
 	wp_c[MAX_COLOR], /* Warning prompt */
-	tt_c[MAX_COLOR], /* Tilde for trimmed files */
+	tt_c[MAX_COLOR], /* Character to mark truncated filenames */
 
 	/* Suggestions */
 	sb_c[MAX_COLOR], /* Auto-suggestions: shell builtins */

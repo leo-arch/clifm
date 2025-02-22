@@ -1074,7 +1074,7 @@ rl_accept_suggestion(int count, int key)
 	/* If accepting the first suggested word, accept only up to next
 	 * word delimiter. */
 	char *s = (char *)NULL, _s = 0;
-	int trimmed = 0, accept_first_word_last = 0;
+	int truncated = 0, accept_first_word_last = 0;
 	if (accept_first_word == 1) {
 		char *p = suggestion_buf + (rl_point - suggestion.offset);
 		/* Skip leading spaces */
@@ -1088,12 +1088,12 @@ rl_accept_suggestion(int count, int key)
 		if (s && s != p && *(s - 1) == ' ')
 			s = strpbrk(p, WORD_DELIMITERS);
 
-		if (s && *(s + 1)) { /* Trim suggestion after word delimiter */
+		if (s && *(s + 1)) { /* Truncate suggestion after word delimiter */
 			if (*s == '/')
 				++s;
 			_s = *s;
 			*s = '\0';
-			trimmed = 1;
+			truncated = 1;
 		} else { /* Last word: No word delimiter */
 			size_t len = strlen(suggestion_buf);
 			if (len > 0 && suggestion_buf[len - 1] != '/'
@@ -1254,7 +1254,7 @@ rl_accept_suggestion(int count, int key)
 	} else {
 		if (s) {
 			/* Reinsert the char we removed to print only the first word */
-			if (trimmed == 1)
+			if (truncated == 1)
 				*s = _s;
 /*			if (slash)
 				*s = _s;

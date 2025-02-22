@@ -501,7 +501,7 @@ append_ending_char(const enum comp_type ct)
 			rl_stuff_char(' ');
 	}
 
-	/* Restore the character we removed to trim the line at cursor position. */
+	/* Restore the character we removed to truncate the line at cursor position. */
 	rl_line_buffer[rl_point] = cur_char;
 
 	if (name == p)
