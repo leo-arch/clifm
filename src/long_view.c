@@ -36,13 +36,13 @@
 
 static char *
 get_ext_info_long(const struct fileinfo *props, const size_t name_len,
-	int *trim, size_t *ext_len)
+	int *trunc, size_t *ext_len)
 {
 	char *ext_name = (char *)NULL;
 	char *e = strrchr(props->name, '.');
 	if (e && e != props->name && e[1]) {
 		ext_name = e;
-		*trim = TRIM_EXT;
+		*trunc = TRUNC_EXT;
 		if (props->utf8 == 0)
 			*ext_len = name_len - (size_t)(ext_name - props->name);
 		else
@@ -51,7 +51,7 @@ get_ext_info_long(const struct fileinfo *props, const size_t name_len,
 
 	if ((int)*ext_len >= conf.max_name_len || (int)*ext_len <= 0) {
 		*ext_len = 0;
-		*trim = TRIM_NO_EXT;
+		*trunc = TRUNC_NO_EXT;
 	}
 
 	return ext_name;
@@ -100,7 +100,7 @@ construct_and_print_filename(const struct fileinfo *props,
 	/* If filename length is greater than max, truncate it to max (later a
 	 * tilde (~) will be appended to let the user know the filename was
 	 * truncated). */
-	int trim = 0;
+	int trunc = 0;
 
 	/* Handle filenames with embedded control characters */
 	size_t plen = props->len;
@@ -122,14 +122,14 @@ construct_and_print_filename(const struct fileinfo *props,
 
 	if (cur_len > (size_t)max_namelen) {
 		const int rest = (int)cur_len - max_namelen;
-		trim = TRIM_NO_EXT;
+		trunc = TRUNC_NO_EXT;
 		size_t ext_len = 0;
-		ext_name = get_ext_info_long(props, plen, &trim, &ext_len);
+		ext_name = get_ext_info_long(props, plen, &trunc, &ext_len);
 
-		int trim_point = (int)plen - rest - 1 - (int)ext_len;
-		if (trim_point <= 0) {
-			trim_point = (int)plen - rest - 1;
-			trim = TRIM_NO_EXT;
+		int trunc_point = (int)plen - rest - 1 - (int)ext_len;
+		if (trunc_point <= 0) {
+			trunc_point = (int)plen - rest - 1;
+			trunc = TRUNC_NO_EXT;
 		}
 
 		if (props->utf8 == 1) {
@@ -138,12 +138,12 @@ construct_and_print_filename(const struct fileinfo *props,
 			else /* memcpy is faster: use it whenever possible. */
 				memcpy(name_buf, name, props->bytes + 1);
 
-			diff = u8truncstr(name_buf, (size_t)trim_point);
+			diff = u8truncstr(name_buf, (size_t)trunc_point);
 		} else { /* Let's avoid u8truncstr() to get some extra speed. */
-			const char c = name[trim_point];
-			name[trim_point] = '\0';
+			const char c = name[trunc_point];
+			name[trunc_point] = '\0';
 			mbstowcs((wchar_t *)name_buf, name, NAME_BUF_SIZE);
-			name[trim_point] = c;
+			name[trunc_point] = c;
 		}
 
 		cur_len -= (size_t)rest;
@@ -158,22 +158,22 @@ construct_and_print_filename(const struct fileinfo *props,
 	if (pad < 0)
 		pad = 0;
 
-	const char *trim_diff = diff > 0 ? gen_diff_str(diff) : "";
+	const char *trunc_diff = diff > 0 ? gen_diff_str(diff) : "";
 
-	static char trim_s[2] = {0};
-	*trim_s = trim > 0 ? TRIMFILE_CHR : 0;
+	static char trunc_s[2] = {0};
+	*trunc_s = trunc > 0 ? TRUNC_FILE_CHR : 0;
 
 	printf("%s%s%s%s%s%ls%s%s%-*s%s\x1b[0m%s%s\x1b[0m%s%s%s  ",
 		(conf.colorize == 1 && conf.icons == 1) ? props->icon_color : "",
 		conf.icons == 1 ? props->icon : "", conf.icons == 1 ? " " : "", df_c,
 
 		conf.colorize == 1 ? props->color : "",
-		(wchar_t *)name_buf, trim_diff,
+		(wchar_t *)name_buf, trunc_diff,
 		conf.light_mode == 1 ? "\x1b[0m" : df_c, pad, "", df_c,
-		trim ? tt_c : "", trim_s,
-		trim == TRIM_EXT ? props->color : "",
-		trim == TRIM_EXT ? ext_name : "",
-		trim == TRIM_EXT ? df_c : "");
+		trunc ? tt_c : "", trunc_s,
+		trunc == TRUNC_EXT ? props->color : "",
+		trunc == TRUNC_EXT ? ext_name : "",
+		trunc == TRUNC_EXT ? df_c : "");
 }
 
 static void

@@ -792,8 +792,8 @@ extern time_t curdir_mtime;
 #define INFORM_COLOR 0
 
 /* Are we truncating a filename with an extension? */
-#define TRIM_NO_EXT 1
-#define TRIM_EXT    2
+#define TRUNC_NO_EXT 1
+#define TRUNC_EXT    2
 
 /* OpenBSD recommends the use of 10 trailing X's. See mkstemp(3). */
 #if defined(__OpenBSD__)
@@ -1175,7 +1175,7 @@ struct config_t {
 	int max_name_len_bk;
 	int max_printselfiles;
 	int min_jump_rank;
-	int min_name_trim;
+	int min_name_trunc;
 	int mv_cmd;
 	int no_eln;
 	int only_dirs;
@@ -1214,7 +1214,7 @@ struct config_t {
 	int time_follows_sort;
 	int timestamp_mark;
 	int tips;
-	int trim_names;
+	int trunc_names;
 #ifndef _NO_TRASH
 	int tr_as_rm;
 	int trash_force;
@@ -1554,7 +1554,7 @@ struct param_t {
 #ifndef _NO_TRASH
 	int trasrm;
 #endif /* !_NO_TRASH */
-	int trim_names;
+	int trunc_names;
 	int unicode;
 	int virtual_dir_full_paths;
 	int vt100;
@@ -2125,7 +2125,7 @@ extern char
 	lc_c[MAX_COLOR], /* Symlink character (ColorLinkAsTarget only) */
 	mi_c[MAX_COLOR], /* Misc indicators */
 	ts_c[MAX_COLOR], /* Tab completion suffix */
-	tt_c[MAX_COLOR], /* Tilde for trimmed files */
+	tt_c[MAX_COLOR], /* Tilde for truncated filenames */
 	wc_c[MAX_COLOR], /* Welcome message */
 	wp_c[MAX_COLOR], /* Warning prompt */
 

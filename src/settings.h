@@ -418,7 +418,7 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define LINK_STR   "@" /* ASCII */
 #define LINK_STR_U "@" /* Unicode alternative */
 
-#define TRIMFILE_CHR '~'
+#define TRUNC_FILE_CHR '~'
 
 /* Character used to mark files with extended attributes (long view) */
 #define XATTR_CHAR '@'
@@ -541,7 +541,7 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define DEF_MAX_LOG 1000
 #define DEF_MAX_PRINTSEL 0
 #define DEF_MIN_JUMP_RANK 10
-#define DEF_MIN_NAME_TRIM 20
+#define DEF_MIN_NAME_TRUNC 20
 #define DEF_MOUNT_CMD MNT_UDEVIL
 #define DEF_MV_CMD MV_MV
 #define DEF_NOELN 0
@@ -605,7 +605,7 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define DEF_TIPS 1
 #define DEF_TRASRM 0
 #define DEF_TRASH_FORCE 0
-#define DEF_TRIM_NAMES 1
+#define DEF_TRUNC_NAMES 1
 #define DEF_WELCOME_MESSAGE 1
 
 /* This expands to "CliFM > The command line file manager" */

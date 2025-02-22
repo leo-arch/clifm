@@ -141,7 +141,7 @@
 #define LOPT_DATA_DIR               265
 #define LOPT_FUZZY_ALGO             266
 #define LOPT_SEL_FILE               267
-#define LOPT_NO_TRIM_NAMES          268
+#define LOPT_NO_TRUNC_NAMES         268
 #define LOPT_NO_BOLD                269
 #define LOPT_FNFTAB                 270
 
@@ -251,8 +251,8 @@ static struct option const longopts[] = {
 	{"no-restore-last-path", no_argument, 0, LOPT_NO_RESTORE_LAST_PATH},
 	{"no-suggestions", no_argument, 0, LOPT_NO_SUGGESTIONS},
 	{"no-tips", no_argument, 0, LOPT_NO_TIPS},
-	{"no-trim-names", no_argument, 0, LOPT_NO_TRIM_NAMES}, // Deprecated
-	{"no-truncate-names", no_argument, 0, LOPT_NO_TRIM_NAMES},
+	{"no-trim-names", no_argument, 0, LOPT_NO_TRUNC_NAMES}, // Deprecated
+	{"no-truncate-names", no_argument, 0, LOPT_NO_TRUNC_NAMES},
 	{"no-unicode", no_argument, 0, LOPT_NO_UNICODE},
 	{"no-warning-prompt", no_argument, 0, LOPT_NO_WARNING_PROMPT},
 	{"no-welcome-message", no_argument, 0, LOPT_NO_WELCOME_MESSAGE},
@@ -1500,7 +1500,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case 's': xargs.stealth_mode = 1; break;
 		case 'S': set_no_suggestions(); break;
 		case 't': set_color_scheme(optarg, "-t"); break;
-		case 'T': xargs.trim_names = conf.trim_names = 0; break;
+		case 'T': xargs.trunc_names = conf.trunc_names = 0; break;
 		case 'u': xargs.disk_usage_analyzer = 1; break;
 		case 'U': xargs.unicode = 0; break;
 		case 'v': version_function(0); break; /* noreturn */
@@ -1752,8 +1752,8 @@ parse_cmdline_args(const int argc, char **argv)
 			set_no_suggestions(); break;
 		case LOPT_NO_TIPS:
 			xargs.tips = conf.tips = 0; break;
-		case LOPT_NO_TRIM_NAMES:
-			xargs.trim_names = conf.trim_names = 0; break;
+		case LOPT_NO_TRUNC_NAMES:
+			xargs.trunc_names = conf.trunc_names = 0; break;
 		case LOPT_NO_UNICODE:
 			xargs.unicode = 0; break;
 		case LOPT_NO_WARNING_PROMPT:

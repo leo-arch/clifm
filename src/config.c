@@ -435,8 +435,8 @@ dump_config(void)
 	print_config_value("MaxPrintSelfiles", &conf.max_printselfiles, &n,
 		DUMP_CONFIG_INT);
 
-	n = DEF_MIN_NAME_TRIM;
-	print_config_value("MinNameTruncate", &conf.min_name_trim, &n,
+	n = DEF_MIN_NAME_TRUNC;
+	print_config_value("MinNameTruncate", &conf.min_name_trunc, &n,
 		DUMP_CONFIG_INT);
 
 	n = DEF_MIN_JUMP_RANK;
@@ -589,8 +589,8 @@ dump_config(void)
 	print_config_value("TrashForce", &conf.trash_force, &n, DUMP_CONFIG_BOOL);
 #endif /* !_NO_TRASH */
 
-	n = DEF_TRIM_NAMES;
-	print_config_value("TruncateNames", &conf.trim_names, &n, DUMP_CONFIG_BOOL);
+	n = DEF_TRUNC_NAMES;
+	print_config_value("TruncateNames", &conf.trunc_names, &n, DUMP_CONFIG_BOOL);
 
 	n = DEF_WELCOME_MESSAGE;
 	print_config_value("WelcomeMessage", &conf.welcome_message, &n,
@@ -1837,7 +1837,7 @@ create_main_config_file(char *file)
 		DEF_FULL_DIR_SIZE == 1 ? "true" : "false",
 		DEF_LOG_MSGS == 1 ? "true" : "false",
 		DEF_LOG_CMDS == 1 ? "true" : "false",
-		DEF_MIN_NAME_TRIM,
+		DEF_MIN_NAME_TRUNC,
 		DEF_MIN_JUMP_RANK,
 		DEF_MAX_JUMP_TOTAL_RANK,
 		DEF_PURGE_JUMPDB == 1 ? "true" : "false",
@@ -2006,7 +2006,7 @@ create_main_config_file(char *file)
 		DEF_PAGER_VIEW == PAGER_AUTO ? "auto"
 			: (DEF_PAGER_VIEW == PAGER_LONG ? "long" : "short"),
 		DEF_MAX_NAME_LEN,
-		DEF_TRIM_NAMES == 1 ? "true" : "false"
+		DEF_TRUNC_NAMES == 1 ? "true" : "false"
 		);
 
 	fprintf(config_fp,
@@ -3556,9 +3556,9 @@ read_config(void)
 
 		else if (xargs.prompt_p_max_path == UNSET && *line == 'M'
 		&& strncmp(line, "MaxPath=", 8) == 0) {
-			err('n', PRINT_PROMPT, "%s: MaxPath: This option is "
+			err('n', PRINT_PROMPT, _("%s: MaxPath: This option is "
 				"deprecated. Use the CLIFM_PROMPT_P_MAX_PATH environment "
-				"variable instead.\n", PROGRAM_NAME);
+				"variable instead.\n"), PROGRAM_NAME);
 			set_config_int_value(line + 8, &conf.prompt_p_max_path, 1, INT_MAX);
 		}
 
@@ -3568,11 +3568,11 @@ read_config(void)
 		}
 
 		else if (*line == 'M' && strncmp(line, "MinFilenameTrim=", 16) == 0) {
-			set_config_int_value(line + 16, &conf.min_name_trim, 1, INT_MAX);
+			set_config_int_value(line + 16, &conf.min_name_trunc, 1, INT_MAX);
 		}
 
 		else if (*line == 'M' && strncmp(line, "MinNameTruncate=", 16) == 0) {
-			set_config_int_value(line + 16, &conf.min_name_trim, 1, INT_MAX);
+			set_config_int_value(line + 16, &conf.min_name_trunc, 1, INT_MAX);
 		}
 
 		else if (*line == 'M' && strncmp(line, "MinJumpRank=", 12) == 0) {
@@ -3782,14 +3782,14 @@ read_config(void)
 		}
 #endif /* !_NO_TRASH */
 
-		else if (xargs.trim_names == UNSET && *line == 'T'
+		else if (xargs.trunc_names == UNSET && *line == 'T'
 		&& strncmp(line, "TrimNames=", 10) == 0) {
-			set_config_bool_value(line + 10, &conf.trim_names);
+			set_config_bool_value(line + 10, &conf.trunc_names);
 		}
 
-		else if (xargs.trim_names == UNSET && *line == 'T'
+		else if (xargs.trunc_names == UNSET && *line == 'T'
 		&& strncmp(line, "TruncateNames=", 14) == 0) {
-			set_config_bool_value(line + 14, &conf.trim_names);
+			set_config_bool_value(line + 14, &conf.trunc_names);
 		}
 
 		else if (xargs.secure_env != 1 && xargs.secure_env_full != 1

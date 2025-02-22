@@ -131,7 +131,7 @@ export_status_values(void)
 	setenv("CLIFM_SORT_STYLE", num_to_sort_name(conf.sort), 1);
 	if (trash_n > 0)
 		setenv("CLIFM_TRASH_FILES", xitoa((long long)trash_n), 1);
-	setenv("CLIFM_TRUNCATE_NAMES", conf.trim_names == 1 ? "1" : "0", 1);
+	setenv("CLIFM_TRUNCATE_NAMES", conf.trunc_names == 1 ? "1" : "0", 1);
 }
 
 static void
@@ -156,7 +156,7 @@ unset_export_values(void) {
 	unsetenv("CLIFM_SORT_REVERSE");
 	unsetenv("CLIFM_SORT_STYLE");
 	unsetenv("CLIFM_TRASH_FILES");
-	unsetenv("CLIFM_TRIM_NAMES");
+	unsetenv("CLIFM_TRUNCATE_NAMES");
 }
 
 int

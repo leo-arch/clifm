@@ -237,7 +237,7 @@ init_conf_struct(void)
 	conf.max_name_len_bk = 0;
 	conf.max_printselfiles = DEF_MAX_PRINTSEL;
 	conf.min_jump_rank = DEF_MIN_JUMP_RANK;
-	conf.min_name_trim = DEF_MIN_NAME_TRIM;
+	conf.min_name_trunc = DEF_MIN_NAME_TRUNC;
 	conf.mv_cmd = DEF_MV_CMD;
 	conf.no_eln = UNSET;
 	conf.only_dirs = UNSET;
@@ -276,7 +276,7 @@ init_conf_struct(void)
 	conf.time_follows_sort = DEF_TIME_FOLLOWS_SORT;
 	conf.timestamp_mark = DEF_TIMESTAMP_MARK;
 	conf.tips = UNSET;
-	conf.trim_names = UNSET;
+	conf.trunc_names = UNSET;
 #ifndef _NO_TRASH
 	conf.tr_as_rm = UNSET;
 	conf.trash_force = DEF_TRASH_FORCE;
@@ -1895,7 +1895,7 @@ unset_xargs(void)
 #ifndef _NO_TRASH
 	xargs.trasrm = UNSET;
 #endif /* !_NO_TRASH */
-	xargs.trim_names = UNSET;
+	xargs.trunc_names = UNSET;
 	xargs.virtual_dir_full_paths = UNSET;
 	xargs.vt100 = UNSET;
 	xargs.welcome_message = UNSET;
@@ -2759,15 +2759,15 @@ check_options(void)
 			conf.color_lnk_as_target = xargs.color_lnk_as_target;
 	}
 
-	if (conf.trim_names == UNSET) {
-		if (xargs.trim_names == UNSET)
-			conf.trim_names = DEF_TRIM_NAMES;
+	if (conf.trunc_names == UNSET) {
+		if (xargs.trunc_names == UNSET)
+			conf.trunc_names = DEF_TRUNC_NAMES;
 		else
-			conf.trim_names = xargs.trim_names;
+			conf.trunc_names = xargs.trunc_names;
 	}
 
 	conf.max_name_len_bk = conf.max_name_len;
-	if (conf.trim_names == 0)
+	if (conf.trunc_names == 0)
 		conf.max_name_len = UNSET;
 
 	if (conf.fuzzy_match == UNSET) {

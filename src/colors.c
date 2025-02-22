@@ -3096,7 +3096,7 @@ print_interface_colors(void)
 		"%s%s%sfilename)\n"), li_cb, df_c, el_c, df_c, li_cb,
 		term_caps.unicode == 1 ? SELFILE_STR_U : SELFILE_STR, df_c);
 	printf(_("%sColor%s (tt) Truncated filenames mark (e.g. "
-		"filenam%s%c%s.odt)\n"), tt_c, df_c, tt_c, TRIMFILE_CHR, df_c);
+		"filenam%s%c%s.odt)\n"), tt_c, df_c, tt_c, TRUNC_FILE_CHR, df_c);
 	printf(_("%sColor%s (dl) Dividing line (e.g. %s------>%s)\n"),
 		dl_c, df_c, dl_c, df_c);
 	printf(_("%sColor%s (mi) Miscellaneous indicator (%s%s%s) (%s2%s)\n"),

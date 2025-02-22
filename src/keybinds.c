@@ -809,7 +809,7 @@ rl_toggle_max_filename_len(int count, int key)
 
 	static int mnl_bk = 0, flag = 0;
 
-	if (flag == 0 || conf.trim_names == 0) {
+	if (flag == 0 || conf.trunc_names == 0) {
 		mnl_bk = conf.max_name_len_bk;
 		flag = 1;
 	}
