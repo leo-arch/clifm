@@ -3568,6 +3568,8 @@ read_config(void)
 		}
 
 		else if (*line == 'M' && strncmp(line, "MinFilenameTrim=", 16) == 0) {
+			err('n', PRINT_PROMPT, _("%s: MinFilenameTrim: This option is "
+				"deprecated. Use MinNameTruncate instead.\n"), PROGRAM_NAME);
 			set_config_int_value(line + 16, &conf.min_name_trunc, 1, INT_MAX);
 		}
 
@@ -3784,6 +3786,8 @@ read_config(void)
 
 		else if (xargs.trunc_names == UNSET && *line == 'T'
 		&& strncmp(line, "TrimNames=", 10) == 0) {
+			err('n', PRINT_PROMPT, _("%s: TrimNames: This option is "
+				"deprecated. Use TruncateNames instead.\n"), PROGRAM_NAME);
 			set_config_bool_value(line + 10, &conf.trunc_names);
 		}
 

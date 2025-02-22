@@ -1256,10 +1256,6 @@ rl_accept_suggestion(int count, int key)
 			/* Reinsert the char we removed to print only the first word */
 			if (truncated == 1)
 				*s = _s;
-/*			if (slash)
-				*s = _s;
-			else
-				*s = ' '; */
 		}
 		accept_first_word = 0;
 	}
