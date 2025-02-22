@@ -75,6 +75,7 @@ bookmarks:\eb
 clear-line:\ec
 clear-msgs:\et
 #cmd-hist:
+copy-sel:\e\C-v
 create-file:\en
 deselect-all:\ed
 dirs-first:\eg
@@ -87,7 +88,6 @@ new-instance:\C-x
 next-profile:\e\C-p
 only-dirs:\e,
 #open-sel:\e\C-g
-paste-sel:\e\C-v
 prepend-sudo:\ev
 previous-profile:\e\C-o
 rename-sel:\e\C-r

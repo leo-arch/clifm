@@ -976,6 +976,7 @@ bookmarks:\\eb\n\
 clear-line:\\ec\n\
 clear-msgs:\\et\n\
 #cmd-hist:\n\
+copy-sel:\\e\\C-v\n\
 create-file:\\en\n\
 deselect-all:\\ed\n\
 export-sel:\\e\\C-e\n\
@@ -988,7 +989,6 @@ new-instance:\\C-x\n\
 next-profile:\\e\\C-p\n\
 only-dirs:\\e,\n\
 #open-sel:\\e\\C-g\n\
-paste-sel:\\e\\C-v\n\
 prepend-sudo:\\ev\n\
 previous-profile:\\e\\C-o\n\
 rename-sel:\\e\\C-r\n\
