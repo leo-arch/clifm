@@ -991,7 +991,7 @@ export_files_function(char **args)
 
 	char *ret = export_files(args, 1);
 	if (ret) {
-		printf(_("Files exported to '%s'\n"), ret);
+		printf(_("Filenames exported to '%s'\n"), ret);
 		free(ret);
 		return FUNC_SUCCESS;
 	}

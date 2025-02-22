@@ -373,7 +373,7 @@ Parameters passed to cp:    -a"
 \x1b[1mUSAGE\x1b[22m\n\
   ext [on, off, status]"
 
-#define EXPORT_FILES_USAGE "Export files to a temporary file\n\n\
+#define EXPORT_FILES_USAGE "Export filenames to a temporary file\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   exp [ELN/FILE...]\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\

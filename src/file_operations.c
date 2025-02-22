@@ -2182,7 +2182,7 @@ END:
 }
 
 /* Export files in CWD (if FILENAMES is NULL), or files in FILENAMES,
- * into a temporary file. Return the address of this empty file if
+ * to a temporary file. Return the address of this empty file if
  * success (it must be freed) or NULL in case of error. */
 char *
 export_files(char **filenames, const int open)

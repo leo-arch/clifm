@@ -304,9 +304,7 @@ print_autocmds_topic(void)
 static int
 print_basics_topic(void)
 {
-	puts(_("Run '?' and consult the BASIC FILE OPERATIONS section\n"
-		"Try also 'c --help' for more information about basic "
-		"file management commands"));
+	printf(_("Run '?' or 'help' to get started with %s\n"), PROGRAM_NAME);
 	return FUNC_SUCCESS;
 }
 

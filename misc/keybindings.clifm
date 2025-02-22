@@ -71,7 +71,6 @@ show-kbinds:\eOR
 show-kbinds2:\e[13~
 
 archive-sel:\e\C-a
-bookmark-sel:\e\C-b
 bookmarks:\eb
 clear-line:\ec
 clear-msgs:\et
@@ -83,11 +82,11 @@ export-sel:\e\C-e
 launch-view:\e-
 lock:\eo
 mountpoints:\em
-move-sel:\e\C-n
+#move-sel:\e\C-n
 new-instance:\C-x
 next-profile:\e\C-p
 only-dirs:\e,
-open-sel:\e\C-g
+#open-sel:\e\C-g
 paste-sel:\e\C-v
 prepend-sudo:\ev
 previous-profile:\e\C-o

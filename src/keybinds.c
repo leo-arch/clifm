@@ -582,64 +582,6 @@ kbinds_function(char **args)
 	return FUNC_FAILURE;
 }
 
-/*
-static void
-copy_key(char *buf, const size_t buf_size, char *ptr, size_t *len)
-{
-	if (strcasecmp(ptr, "control") == 0 || strcasecmp(ptr, "ctrl") == 0) {
-		xstrsncpy(buf + *len, "\\C", buf_size); *len += 2;
-	} else if (strcasecmp(ptr, "alt") == 0 || strcasecmp(ptr, "meta") == 0) {
-		xstrsncpy(buf + *len, "\\M", buf_size); *len += 2;
-	} else if (strcasecmp(ptr, "del") == 0 || strcasecmp(ptr, "rubout") == 0) {
-		xstrsncpy(buf + *len, "\\d", buf_size); *len += 2;
-	} else if (strcasecmp(ptr, "esc") == 0 || strcasecmp(ptr, "escape") == 0) {
-		xstrsncpy(buf + *len, "\\e", buf_size); *len += 2;
-	} else if (strcasecmp(ptr, "spc") == 0 || strcasecmp(ptr, "space") == 0) {
-		xstrsncpy(buf + *len, "\\ ", buf_size); *len += 2;
-	} else if (strcasecmp(ptr, "ret") == 0 || strcasecmp(ptr, "return") == 0) {
-		xstrsncpy(buf + *len, "\\r", buf_size); *len += 2;
-	} else if (strcasecmp(ptr, "lfd") == 0 || strcasecmp(ptr, "newline") == 0) {
-		xstrsncpy(buf + *len, "\\n", buf_size); *len += 2;
-	} else if (strcasecmp(ptr, "tab") == 0) {
-		xstrsncpy(buf + *len, "\\t", buf_size); *len += 2;
-	} else {
-		xstrsncpy(buf + *len, ptr, buf_size); *len += strlen(ptr);
-	}
-}
-
-static char *
-save_key(char *key)
-{
-	if (!key || !*key)
-		return (char *)NULL;
-
-	if (*key == '\\')
-		return savestring(key, strlen(key));
-
-	char buf[NAME_MAX]; *buf = '\0';
-	char *ptr = key;
-	char *dash = (char *)NULL;
-	size_t len = 0;
-
-	while (len < sizeof(buf) && *ptr && (dash = strchr(ptr, '-')) && dash[1]) {
-		*dash = '\0';
-
-		copy_key(buf, sizeof(buf), ptr, &len);
-
-		ptr = dash + 1;
-		buf[len] = '-';
-		len++;
-		*dash = '-';
-	}
-
-	if (*ptr)
-		copy_key(buf, sizeof(buf), ptr, &len);
-	else
-		buf[len - (len > 0)] = '\0';
-
-	return savestring(buf, strlen(buf));
-} */
-
 /* Store keybinds from the keybinds file into a struct. */
 int
 load_keybinds(void)
@@ -682,10 +624,9 @@ load_keybinds(void)
 		if (!tmp || !*(tmp + 1))
 			continue;
 
-		/* Now copy left and right value of each keybind into the
-		 * keybinds struct */
+		/* Now copy left and right value of each keybind to the
+		 * keybinds struct. */
 		kbinds = xnrealloc(kbinds, kbinds_n + 1, sizeof(struct kbinds_t));
-/*		kbinds[kbinds_n].key = save_key(tmp + 1); */
 		kbinds[kbinds_n].key = savestring(tmp + 1, strlen(tmp + 1));
 
 		*tmp = '\0';
@@ -839,7 +780,7 @@ rl_toggle_max_filename_len(int count, int key)
 	return FUNC_SUCCESS;
 }
 
-/* Prepend authentication program name (usually sudo or doas) to the current
+/* Prepend authentication program name (typically sudo or doas) to the current
  * input string. */
 static int
 rl_prepend_sudo(int count, int key)
@@ -1767,7 +1708,7 @@ handle_no_sel(const char *func)
 		rl_point = rl_end = 0;
 	}
 
-	printf(_("\n%s: sel: %s\n"), func, strerror(ENOENT));
+	printf(_("\n%s: No selected files\n"), func);
 	rl_reset_line_state();
 
 	return FUNC_SUCCESS;
@@ -1783,6 +1724,7 @@ rl_archive_sel(int count, int key)
 	if (sel_n == 0)
 		return handle_no_sel("ac");
 
+	fputs(_("\nReady to archive/compress selected files."), stdout);
 	return run_kb_cmd("ac sel");
 }
 
@@ -1814,6 +1756,7 @@ rl_export_sel(int count, int key)
 	if (sel_n == 0)
 		return handle_no_sel("exp");
 
+	fputs(_("\nReady to export selected filenames"), stdout);
 	return run_kb_cmd("exp sel");
 }
 

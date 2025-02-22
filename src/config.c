@@ -972,7 +972,6 @@ show-cmds2:\\e[12~\n\
 show-kbinds:\\eOR\n\
 show-kbinds2:\\e[13~\n\n\
 archive-sel:\\e\\C-a\n\
-bookmark-sel:\\e\\C-b\n\
 bookmarks:\\eb\n\
 clear-line:\\ec\n\
 clear-msgs:\\et\n\
@@ -984,11 +983,11 @@ dirs-first:\\eg\n\
 launch-view:\\e-\n\
 lock:\\eo\n\
 mountpoints:\\em\n\
-move-sel:\\e\\C-n\n\
+#move-sel:\\e\\C-n\n\
 new-instance:\\C-x\n\
 next-profile:\\e\\C-p\n\
 only-dirs:\\e,\n\
-open-sel:\\e\\C-g\n\
+#open-sel:\\e\\C-g\n\
 paste-sel:\\e\\C-v\n\
 prepend-sudo:\\ev\n\
 previous-profile:\\e\\C-o\n\
