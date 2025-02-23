@@ -139,7 +139,7 @@ print_tips(const int all)
 		"Open a file and send it to the background. E.g.: '24&'",
 		"Create a custom prompt by editing the prompts file ('prompt edit')",
 		"Customize your color scheme: 'cs edit' or F8",
-		"Launch the bookmarks manager: 'bm' or Alt-b",
+		"Launch the bookmark manager: 'bm' or Alt-b",
 		"Quickly list your bookmarks: 'b:<TAB>'",
 		"Change to a bookmark: 'bm NAME' or 'b:NAME'",
 		"Chain commands using ';' and '&&'. E.g.: 's 2 7-10; r sel'",

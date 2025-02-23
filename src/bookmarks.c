@@ -175,7 +175,7 @@ static void
 print_bookmarks(void)
 {
 	HIDE_CURSOR;
-	printf(_("%sBookmarks Manager%s\n\n"), BOLD, df_c);
+	printf(_("%sBookmark Manager%s\n\n"), BOLD, df_c);
 
 	struct stat attr;
 	const int eln_pad = DIGINUM(bm_n);

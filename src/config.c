@@ -982,7 +982,7 @@ deselect-all:\\ed\n\
 export-sel:\\e\\C-e\n\
 dirs-first:\\eg\n\
 launch-view:\\e-\n\
-lock:\\eo\n\
+#lock:\\eo\n\
 mountpoints:\\em\n\
 #move-sel:\\e\\C-n\n\
 new-instance:\\C-x\n\

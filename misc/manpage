@@ -626,11 +626,11 @@ The query string can match any part of a directory name: \fIbd er\fR, for instan
 Create symbolic links (in the current directory) for each specified file. For example, to create symbolic links in the directory \fIdir\fR for all PNG files in the current directory, issue these commands: \fIs *.png\fR, \fIcd dir\fR, and then \fIbl sel\fR.
 .TP
 .B bm, bookmarks \fR[\fIa\fR, \fIadd\fR \fIFILENAME\fR \fINAME\fR [\fISHORTCUT\fR]] [\fId\fR, \fIdel\fR \fINAME\fR] [\fIe, edit\fR [\fIAPP\fR]] [\fINAME\fR, \fISHORTCUT\fR]
-Bookmarks can be managed either from the bookmarks manager screen or from the command line.
+Bookmarks can be managed either from the bookmark manager screen or from the command line.
 .sp
-\fB1. The bookmarks manager screen\fR
+\fB1. The bookmark manager screen\fR
 .sp
-To access the bookmarks manager screen simply enter \fIbm\fR. Here you can cd to the desired bookmark by entering either its ELN or name (regular files can be bookmarked as well). In this screen you can also add, remove, or edit your bookmarks by simply entering 'e' to edit the bookmarks file (which is simply a list of lines with this format: \fIname:path\fR. E.g.: "docs:/home/user/documents"). Make your changes, save, and exit.
+To access the bookmark manager screen simply enter \fIbm\fR. Here you can cd to the desired bookmark by entering either its ELN or name (regular files can be bookmarked as well). In this screen you can also add, remove, or edit your bookmarks by simply entering 'e' to edit the bookmarks file (which is simply a list of lines with this format: \fIname:path\fR. E.g.: "docs:/home/user/documents"). Make your changes, save, and exit.
 .sp
 \fB2. The command line\fR
 .TS
@@ -1429,12 +1429,12 @@ Alt\-w : Toggle full\-path\-filenames (virtual directories)
 Ctrl\-l : Refresh the screen (reprint the list of files in the current directory)
 Alt\-t : Clear program messages
 Alt\-m : List mountpoints
-Alt\-b : Launch the Bookmarks Manager
+Alt\-b : Launch the Bookmark Manager
 Alt\-h : Show the directory history
 Alt\-n : Create new file or directory
 Alt\-s : Open the Selection Box
-Alt\-\- : Launch the files previewer (\fIview\fR command)
-Alt\-a : Select all files in the current working directory
+Alt\-\- : Launch the file previewer (\fIview\fR command)
+Alt\-a : Select all files in the current directory
 Alt\-d : Deselect all files
 Alt\-0 : Run MAS, the file pager
 Alt\-p : Change to the pinned directory
@@ -3335,7 +3335,7 @@ bm del mybm
 T}	Remove the bookmark named \fImybm\fR
 T{
 bm (Alt\-b or b:<TAB>)
-T}	Open the bookmarks manager
+T}	Open the bookmark manager
 T{
 t 1\-3 *.old
 T}	Trash a few files

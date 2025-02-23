@@ -81,7 +81,7 @@ deselect-all:\ed
 dirs-first:\eg
 export-sel:\e\C-e
 launch-view:\e-
-lock:\eo
+#lock:\eo
 mountpoints:\em
 #move-sel:\e\C-n
 new-instance:\C-x

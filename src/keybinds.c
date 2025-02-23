@@ -60,6 +60,7 @@ typedef char *rl_cpvfunc_t;
 #include "profiles.h"
 #include "prompt.h"
 #include "readline.h"
+#include "sort.h" /* QSFUNC macro for qsort(3) */
 #include "spawn.h"
 #include "tabcomp.h" /* tab_complete() */
 
@@ -538,23 +539,36 @@ bind_kb_func(const char *func_name)
 	return ret;
 }
 
+static int
+list_kbinds(void)
+{
+	if (kbinds_n == 0) {
+		puts(_("kb: No keybindings defined\n"));
+		return FUNC_SUCCESS;
+	}
+
+	size_t len = 0;
+	size_t i;
+	for (i = 0; i < kbinds_n; i++) {
+		const size_t l = kbinds[i].function ? strlen(kbinds[i].function) : 0;
+		if (l > len)
+			len = l;
+	}
+
+	for (i = 0; i < kbinds_n; i++)
+		printf("%-*s %s\n", (int)len, kbinds[i].function, kbinds[i].key);
+
+	return FUNC_SUCCESS;
+}
+
 int
 kbinds_function(char **args)
 {
 	if (!args)
 		return FUNC_FAILURE;
 
-	if (!args[1] || strcmp(args[1], "list") == 0) {
-		if (kbinds_n == 0) {
-			puts(_("kb: No keybindings defined\n"));
-			return FUNC_SUCCESS;
-		}
-		size_t i;
-		for (i = 0; i < kbinds_n; i++)
-			printf("%s: %s\n", kbinds[i].key, kbinds[i].function);
-
-		return FUNC_SUCCESS;
-	}
+	if (!args[1] || strcmp(args[1], "list") == 0)
+		return list_kbinds();
 
 	if (IS_HELP(args[1])) {
 		puts(_(KB_USAGE));
@@ -637,6 +651,9 @@ load_keybinds(void)
 
 	fclose(fp);
 	free(line);
+
+	qsort(kbinds, kbinds_n, sizeof(*kbinds), (QSFUNC *)compare_strings);
+
 	return FUNC_SUCCESS;
 }
 
