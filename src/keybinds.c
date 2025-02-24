@@ -461,8 +461,10 @@ check_clifm_kb(const char *kb, const char *func_name)
 				kbinds[i].function ? kbinds[i].function : "unnamed",
 				func_name);
 		} else {
-			fprintf(stderr, _("kb: Key already in use by '%s'\n"),
-				kbinds[i].function ? kbinds[i].function : "unnamed");
+			const char *func = kbinds[i].function
+				? kbinds[i].function : "unnamed";
+			fprintf(stderr, _("kb: Key already in use by '%s'.\n"
+				"Unset or rebind '%s' and try again.\n"), func, func);
 		}
 		ret = FUNC_FAILURE;
 	}
