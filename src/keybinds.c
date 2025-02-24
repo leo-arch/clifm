@@ -519,7 +519,7 @@ static int
 check_kbinds_conflict(void)
 {
 	if (kbinds_n == 0) {
-		puts(_("kb: No key bindings defined"));
+		puts(_("kb: No keybindings defined"));
 		return FUNC_SUCCESS;
 	}
 
@@ -751,7 +751,7 @@ static int
 validate_new_kb(const char *kb)
 {
 	if (!strchr(kb, '\\')) {
-		fprintf(stderr, _("kb: Invalid key binding\n"));
+		fprintf(stderr, _("kb: Invalid keybinding\n"));
 		return FUNC_FAILURE;
 	}
 
@@ -793,7 +793,7 @@ bind_kb_func(const char *func_name)
 		return FUNC_FAILURE;
 
 	const char *cur_key = find_key(func_name);
-	printf(_("Enter a key binding for %s%s%s (current: %s%s%s)\n"),
+	printf(_("Enter a keybinding for %s%s%s (current: %s%s%s)\n"),
 		BOLD, func_name, df_c, BOLD, cur_key ? cur_key : "unset", df_c);
 	puts(_("(Enter:accept, Ctrl-d:abort, Ctrl-c:clear-line)"));
 	puts(_("To unset the function enter '-'"));

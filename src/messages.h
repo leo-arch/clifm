@@ -649,27 +649,27 @@ link points to (instead of for the link itself) is displayed."
 \x1b[1mUSAGE\x1b[22m\n\
   kk"
 
-#define KB_USAGE "Manage key bindings\n\n\
+#define KB_USAGE "Manage keybindings\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   kb, keybinds [list | bind FUNC | edit [APP] | conflict | reset | readline]\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
-- List your current key bindings\n\
+- List your current keybindings\n\
     kb (or 'kb list')\n\
 - List available function names\n\
     kb bind <TAB>\n\
 - Bind toggle-hidden to a key\n\
     kb bind toggle-hidden\n\
-- Open/edit the key bindings file\n\
+- Open/edit the keybindings file\n\
     kb edit\n\
-- Open/edit the key bindings file using mousepad\n\
+- Open/edit the keybindings file using mousepad\n\
     kb edit mousepad\n\
 - Unbind a function\n\
     Run 'kb edit' and comment out the corresponding entry\n\
-- Detect key bindings conflicts\n\
+- Detect keybinding conflicts\n\
     kb conflict\n\
-- List the current key bindings for readline\n\
+- List the current keybindings for readline\n\
     kb readline\n\
-- Reset your key bindings settings\n\
+- Reset your keybinding settings\n\
     kb reset"
 
 #define LE_USAGE "Edit a symbolic link\n\n\

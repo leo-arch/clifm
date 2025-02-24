@@ -892,21 +892,21 @@ if running in long view, toggle follow-links (\fIAlt\-+\fR is also available). S
 toggle max-filename-len on/off (\fICtrl\-Alt\-l\fR is also available)
 .TP
 .B kb, keybinds \fR[\fIlist\fR] \fR[\fIbind FUNCTION\fR]  [\fIedit\fR [\fIAPP\fR]] [\fIconflict\fR] [\fIreset\fR] [\fIreadline\fR]
-with no argument (or if the argument is \fIlist\fR), prints the current key bindings and their associated functions.
+with no argument (or if the argument is \fIlist\fR), prints the current keybindings and their associated functions.
 .sp
-To change a key binding use the \fIbind\fR subcommand.
+To change a keybinding use the \fIbind\fR subcommand.
 .sp
 Type \fIkb bind <TAB>\fR to get the list of bindable functions.
 .sp
-Enter \fIkb bind FUNCTION\fR to set a new key binding for FUNCTION. For example, to bind the function \fIprevious-dir\fR to a new key, enter \fIkb bind previous-dir\fR. You'll see a little prompt: press the key combination you want to associate to the specified function and the press \fBEnter\fR (while in this prompt, press \fBCtrl-d\fR to abort or \fBCtrl-c\fR to clear the current line).
+Enter \fIkb bind FUNCTION\fR to set a new keybinding for FUNCTION. For example, to bind the function \fIprevious-dir\fR to a new key, enter \fIkb bind previous-dir\fR. You'll see a little prompt: press the key combination you want to associate to the specified function and the press \fBEnter\fR (while in this prompt, press \fBCtrl-d\fR to abort or \fBCtrl-c\fR to clear the current line).
 .sp
-To manually edit your key bindings use the \fIedit\fR option (the keybindings file will be opened with APP, if specified, or with the default associated application otherwise).
+To manually edit your keybindings use the \fIedit\fR option (the keybindings file will be opened with APP, if specified, or with the default associated application otherwise).
 .sp
-If you somehow messed up your keybindings, you can check for key binding conflicts with the \fIconflict\fR option, or use the \fIreset\fR option to create a fresh keybindings file with the default values.
+If you somehow messed up your keybindings, you can check for keybinding conflicts with the \fIconflict\fR option, or use the \fIreset\fR option to create a fresh keybindings file with the default values.
 .sp
-To unbind a function run \fIkb edit\fR and comment out the corresponding entry. Note that some functions may have several entries, associating them to multiple key bindings: comment them out all if required.
+To unbind a function run \fIkb edit\fR and comment out the corresponding entry. Note that some functions may have several entries, associating them to multiple keybindings: comment them out all if required.
 .sp
-To list readline key bindings (defined in \fI~/.config/clifm/readline.clifm\fR), use the \fIreadline\fR option. The syntax is the same as the one used by readline's \fI.inputrc\fR file (consult \fIhttp://tiswww.case.edu/php/chet/readline/readline.html#SEC9\fR for more information.)
+To list readline keybindings (defined in \fI~/.config/clifm/readline.clifm\fR), use the \fIreadline\fR option. The syntax is the same as the one used by readline's \fI.inputrc\fR file (consult \fIhttp://tiswww.case.edu/php/chet/readline/readline.html#SEC9\fR for more information.)
 .TP
 .B l, le
 Create (\fIl\fR) or edit (\fIle\fR) symbolic links.
@@ -1486,11 +1486,11 @@ F12 : Quit
 .TP
 The above are the default keyboard shortcuts. However, they can be customized using the \fIkb bind\fR command (for more information consult the description for the \fIkb\fR command above).
 .TP
-The key bindings configuration file can also be manually edited using the \fIkb edit\fR command (for more details take a look at the description provided by this file itself).
+The keybindings configuration file can also be manually edited using the \fIkb edit\fR command (for more details take a look at the description provided by this file itself).
 .TP
-.B Readline key bindings
+.B Readline keybindings
 .TP
-Readline key bindings for command line editing, such as \fICtrl\-a\fR, to move the cursor to the beginning of the line, or \fICtrl\-e\fR, to move it to the end, should work out of the box. Of course, you can modify these key bindings by editing the \fI~/.config/clifm/readline.clifm\fR file, following the same rules used by readline itself for the \fI~/.inputrc\fR file. For more information consult the readline documentation (\fBreadline\fR(3)).
+Readline keybindings for command line editing, such as \fICtrl\-a\fR, to move the cursor to the beginning of the line, or \fICtrl\-e\fR, to move it to the end, should work out of the box. Of course, you can modify these keybindings by editing the \fI~/.config/clifm/readline.clifm\fR file, following the same rules used by readline itself for the \fI~/.inputrc\fR file. For more information consult the readline documentation (\fBreadline\fR(3)).
 .TP
 .B Keybindings for plugins
 .TP
@@ -1501,7 +1501,7 @@ Readline key bindings for command line editing, such as \fICtrl\-a\fR, to move t
 .TP
 .B Troubleshooting
 .TP
-Some of these key bindings might not work on your console/terminal emulator, depending on your system. Some useful tips on this regard:
+Some of these keybindings might not work on your console/terminal emulator, depending on your system. Some useful tips on this regard:
 .TP
 Haiku terminal: Most of these keybindings won\'t work on the Haiku terminal, since Alt plays here the role Ctrl usually plays in most other systems (see the Haiku documentation). To fix this, set your custom keybindings.
 .TP

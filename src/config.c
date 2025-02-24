@@ -1671,12 +1671,12 @@ create_main_config_file(char *file)
 
 "\t\t###########################################\n\
 \t\t#                  CLIFM                  #\n\
-\t\t#      The command line file manager      #\n\
+\t\t#      The Command Line File Manager      #\n\
 \t\t###########################################\n\n"
 
 	    "# This is the configuration file for Clifm\n\n"
 
-		"# Lines starting with '#' or ';' are commented (ignored).\n\
+		"# Lines starting with '#' or ';' are commented out (ignored).\n\
 # Uncomment an option to override the default value.\n\n"
 
 	    "# Set the color scheme.\n\
@@ -2345,11 +2345,11 @@ create_mime_file_anew(char *file)
 	}
 
 	fprintf(fp, "                  ###################################\n\
-                  #   Configuration file for Lira   #\n\
-                  #       Clifm's file opener       #\n\
+                  #   Configuration File for Lira   #\n\
+                  #       Clifm's File Opener       #\n\
                   ###################################\n\
 \n\
-# Commented and blank lines are omitted.\n\
+# Commented and blank lines are ignored.\n\
 \n\
 # The below settings cover the most common filetypes.\n\
 # It is recommended to edit this file placing your prefered applications\n\
@@ -2540,7 +2540,7 @@ create_bm_file(void)
 	}
 
 	fprintf(fp, "### This is the bookmarks file for %s ###\n\n"
-		"# Empty and commented lines are omitted.\n"
+		"# Empty and commented lines are ignored.\n"
 		"# Make your changes, save, and exit.\n"
 		"# To remove a bookmark, delete the corresponding line, save, and exit\n"
 		"# Changes are applied automatically at exit (to cancel just quit the editor).\n\n"
