@@ -115,46 +115,54 @@ translate_key_nofunc(const char *key)
 
 #define KBUF_SIZE 128 /* This should be enough to handle most keybindings. */
 #define END_KEYSEQ_CHAR ','
-	static char buf[KBUF_SIZE];
+	static char buf[KBUF_SIZE] = {0};
 	size_t buf_len = 0;
 
 	while (*key) {
-		if (*key == '\\' && (key[1] == 'e'
-		|| (key[1] == 'M' && key[2] ==  '-'))) {
-			if (append_str(buf, KBUF_SIZE, &buf_len, "Alt-") == -1)
-				return NULL;
-			/* If "\M-" we want to advance 3 bytes, not 2. */
-			key += 2 + (key[1] ==  'M');
-			continue;
-		}
+		if (*key == '\\') {
+			if (key[1] == 'e' || (key[1] == 'M' && key[2] ==  '-')) {
+				if (append_str(buf, KBUF_SIZE, &buf_len, "Alt-") == -1)
+					return NULL;
+				/* If "\M-" we want to advance 3 bytes, not 2. */
+				key += 2 + (key[1] ==  'M');
+				if (!*key) /* Icomplete sequence: Alt without modified key. */
+					return NULL;
+				continue;
+			}
 
-		if (*key == '\\' && key[1] == 'C' && key[2] == '-') {
-			if (append_str(buf, KBUF_SIZE, &buf_len, "Ctrl-") == -1)
-				return NULL;
-			key += 3;
-			continue;
+			if (key[1] == 'C' && key[2] == '-') {
+				if (append_str(buf, KBUF_SIZE, &buf_len, "Ctrl-") == -1)
+					return NULL;
+				key += 3;
+				if (!*key) /* Icomplete sequence: Ctrl without modified key. */
+					return NULL;
+				continue;
+			}
+
+			/* Unrecognized escape sequence */
+			return NULL;
 		}
 
 		/* Append single character to the buffer. */
 		if (*key && buf_len < sizeof(buf) - 2) {
 			buf[buf_len] = *key;
+			buf_len++;
 			key++;
 			/* A character that is not a modifier key marks the end of the
 			 * key sequence. Append an ',' in this case, provided it is
 			 * not the end of the string. */
 			if (*key) {
-				buf[buf_len + 1] = END_KEYSEQ_CHAR;
-				buf[buf_len + 2] = '\0';
-				buf_len += 2;
-			} else {
-				buf[buf_len + 1] = '\0';
+				buf[buf_len] = END_KEYSEQ_CHAR;
 				buf_len++;
 			}
+		} else {
+			return NULL;
 		}
 	}
 #undef KBUF_SIZE
 #undef END_KEYSEQ_CHAR
 
+	buf[buf_len] = '\0';
 	return *buf ? buf : NULL;
 }
 
