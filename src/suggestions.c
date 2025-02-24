@@ -160,6 +160,7 @@ check_int_cmd_desc(const char *s, const size_t l)
 		}
 
 		else if (*s == 'l') {
+			if (*(s + 1) == 'e') return LE_DESC;
 			if (*(s + 1) == 'l' || *(s + 1) == 'v') return LL_DESC;
 			if (*(s + 1) == 'm') return LM_DESC;
 		}
@@ -169,10 +170,6 @@ check_int_cmd_desc(const char *s, const size_t l)
 			if (*(s + 1) == 'f') return MF_DESC;
 			if (*(s + 1) == 'm') return MM_DESC;
 			if (*(s + 1) == 'p') return MP_DESC;
-		}
-
-		else if (*s == 'l') {
-			if (*(s + 1) == 'e') return LE_DESC;
 		}
 
 		else if (*s == 'o') {

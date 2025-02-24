@@ -570,7 +570,7 @@ check_names(const char *str)
 	}
 
 	int found = -1;
-	char up_str = TOUPPER(*str);
+	char up_str = (char)TOUPPER(*str);
 	size_t len = strlen(str);
 	size_t i;
 
@@ -1810,7 +1810,7 @@ bsd_to_ansi_color(char color, const int bg)
 
 	if (IS_ALPHA_UP(color)) {
 		up = 1;
-		c = TOLOWER(color);
+		c = (char)TOLOWER(color);
 	}
 
 	/* An uppercase letter for background sets the underline attribute.

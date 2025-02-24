@@ -3214,7 +3214,7 @@ set_preview_max_size(char *val)
 
 	char unit = 'B'; /* If no unit is specified, we fallback to bytes. */
 	if (*u && u != tmp) {
-		unit = TOUPPER(*u);
+		unit = (char)TOUPPER(*u);
 		*u = '\0';
 	}
 

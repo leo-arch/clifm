@@ -225,7 +225,7 @@ xstrcasechr(char *s, char c)
 	if (!s || !*s)
 		return (char *)NULL;
 
-	const char uc = TOUPPER(c);
+	const char uc = (char)TOUPPER(c);
 	while (*s) {
 		if (TOUPPER(*s) != uc) {
 			s++;
@@ -386,9 +386,9 @@ xstrverscmp(const char *s1, const char *s2)
 		return 0;
 
 	if (!conf.case_sens_list) {
-		c1 = TOLOWER(*p1);
+		c1 = (unsigned char)TOLOWER(*p1);
 		++p1;
-		c2 = TOLOWER(*p2);
+		c2 = (unsigned char)TOLOWER(*p2);
 		++p2;
 	} else {
 		c1 = *p1;
@@ -406,9 +406,9 @@ xstrverscmp(const char *s1, const char *s2)
 
 		state = next_state[state];
 		if (!conf.case_sens_list) {
-			c1 = TOLOWER(*p1);
+			c1 = (unsigned char)TOLOWER(*p1);
 			++p1;
-			c2 = TOLOWER(*p2);
+			c2 = (unsigned char)TOLOWER(*p2);
 			++p2;
 		} else {
 			c1 = *p1;
