@@ -94,35 +94,62 @@ xrl_reset_line_state(void)
 	rl_reset_line_state();
 }
 
+static int
+append_str(char *buf, const int buf_size, size_t *len, const char *str)
+{
+	const size_t length = strlen(str);
+	if (length >= (size_t)buf_size - *len)
+		return (-1); /* Buffer overflow */
+
+	xstrsncpy(buf + *len, str, (size_t)buf_size - *len);
+	*len += length;
+
+	return 0;
+}
+
 static const char *
 translate_key_nofunc(const char *key)
 {
-	if (!key || !*key)
+	if (!key || !*key || *key != '\\')
 		return NULL;
 
-	if (*key != '\\')
-		return key;
+#define KBUF_SIZE 128 /* This should be enough to handle most keybindings. */
+	static char buf[KBUF_SIZE];
+	size_t buf_len = 0;
+	int keyseq_counter = 0;
 
-	static char buf[32]; /* Ctrl-Alt-x == 11 bytes */
-	if (key[1] == 'C' && key[2] == '-' && key[3] && !key[4]) {
-		snprintf(buf, sizeof(buf), "Ctrl-%c", key[3]);
-		return buf;
-	}
-
-	if (key[1] == 'e') {
-		if (key[2] == '\\' && key[3] == 'C' && key[4] == '-' && key[5]
-		&& !key[6]) {
-			snprintf(buf, sizeof(buf), "Ctrl-Alt-%c", key[5]);
-			return buf;
+	while (*key) {
+		if (keyseq_counter > 0) {
+			/* Add comma separation between key sequences */
+			if (append_str(buf, KBUF_SIZE, &buf_len, ",") == -1)
+				return NULL;
 		}
 
-		if (key[2] && !key[3]) {
-			snprintf(buf, sizeof(buf), "Alt-%c", key[2]);
-			return buf;
+		if (*key == '\\' && key[1] == 'e') {
+			if (append_str(buf, KBUF_SIZE, &buf_len, "Alt-") == -1)
+				return NULL;
+			key += 2;
 		}
-	}
 
-	return NULL;
+		if (*key == '\\' && key[1] == 'C' && key[2] == '-') {
+			if (append_str(buf, KBUF_SIZE, &buf_len, "Ctrl-") == -1)
+				return NULL;
+			key += 3;
+		}
+
+		/* Append single character to the buffer */
+		if (*key && buf_len < sizeof(buf) - 1) {
+			buf[buf_len] = *key;
+			buf[buf_len + 1] = '\0';
+			buf_len++;
+			key++;
+		}
+
+		keyseq_counter++;
+	}
+#undef KBUF_SIZE
+
+	return *buf ? buf : NULL;
 }
 
 /* Translate the raw escape code KEY (sent by the terminal upon a key press)
