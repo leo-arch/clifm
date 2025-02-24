@@ -453,11 +453,17 @@ print_jump_table_header(void)
 		conf.colorize == 1 ? BOLD : "", NC);
 }
 
+/* Print the jump database, field by field, incuding the current rank.
+ * If REDUCE is greater than zero, each rank is divided by this value to keep
+ * the total database rank below MaxJumpTotalRank.
+ * NOW is the current time in seconds since epoch, and is used to calculate
+ * each rank.
+ * It always returns FUNC_SUCESS. */
 static int
 print_jump_table(const int reduce, const time_t now)
 {
 	if (jump_n == 0) {
-		printf("jump: Database still empty\n");
+		puts(_("jump: Database still empty"));
 		return FUNC_SUCCESS;
 	}
 
@@ -481,7 +487,7 @@ print_jump_table(const int reduce, const time_t now)
 		int rank = rank_entry((int)i, now, &days_since_first, &hours_since_last);
 
 		if (reduce) {
-			int tmp_rank = rank;
+			const int tmp_rank = rank;
 			rank = tmp_rank / reduce;
 		}
 
@@ -518,7 +524,7 @@ print_jump_table(const int reduce, const time_t now)
 		if (!tmp_jump[i].path)
 			continue;
 
-		char *color = (workspaces[cur_ws].path
+		const char *color = (workspaces[cur_ws].path
 		&& workspaces[cur_ws].path[1] == tmp_jump[i].path[1]
 		&& strcmp(workspaces[cur_ws].path, tmp_jump[i].path) == 0) ? mi_c : df_c;
 
@@ -526,7 +532,7 @@ print_jump_table(const int reduce, const time_t now)
 		if (lstat(tmp_jump[i].path, &a) == -1)
 			color = uf_c;
 
-		char *dir_color = color == uf_c ? uf_c
+		const char *dir_color = color == uf_c ? uf_c
 			: get_directory_color(tmp_jump[i].path, &a);
 		const int keep = tmp_jump[i].keep;
 		const char keep_char = keep == 1 ? '*'
@@ -785,7 +791,7 @@ dirjump(char **args, const int mode)
 		reduce = (jump_total_rank / conf.max_jump_total_rank) + 1;
 
 	if (mode == NO_SUG_JUMP) {
-		int ret = check_jump_params(args, now, reduce);
+		const int ret = check_jump_params(args, now, reduce);
 		if (ret != -1)
 			return ret;
 	}

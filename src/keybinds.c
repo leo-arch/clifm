@@ -1,4 +1,4 @@
-/* keybinds.c -- functions keybindings configuration */
+/* keybinds.c -- handle keybindings */
 
 /*
  * This file is part of Clifm

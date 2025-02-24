@@ -1,4 +1,4 @@
-/* autocmds.c -- run cmds on a per directory basis */
+/* autocmds.c -- run cmds on a per-directory basis */
 
 /*
  * This file is part of Clifm
