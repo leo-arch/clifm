@@ -114,40 +114,46 @@ translate_key_nofunc(const char *key)
 		return NULL;
 
 #define KBUF_SIZE 128 /* This should be enough to handle most keybindings. */
+#define END_KEYSEQ_CHAR ','
 	static char buf[KBUF_SIZE];
 	size_t buf_len = 0;
-	int keyseq_counter = 0;
 
 	while (*key) {
-		if (keyseq_counter > 0) {
-			/* Add comma separation between key sequences */
-			if (append_str(buf, KBUF_SIZE, &buf_len, ",") == -1)
-				return NULL;
-		}
-
-		if (*key == '\\' && key[1] == 'e') {
+		if (*key == '\\' && (key[1] == 'e'
+		|| (key[1] == 'M' && key[2] ==  '-'))) {
 			if (append_str(buf, KBUF_SIZE, &buf_len, "Alt-") == -1)
 				return NULL;
-			key += 2;
+			/* If "\M-" we want to advance 3 bytes, not 2. */
+			key += 2 + (key[1] ==  'M');
+			continue;
 		}
 
 		if (*key == '\\' && key[1] == 'C' && key[2] == '-') {
 			if (append_str(buf, KBUF_SIZE, &buf_len, "Ctrl-") == -1)
 				return NULL;
 			key += 3;
+			continue;
 		}
 
-		/* Append single character to the buffer */
-		if (*key && buf_len < sizeof(buf) - 1) {
+		/* Append single character to the buffer. */
+		if (*key && buf_len < sizeof(buf) - 2) {
 			buf[buf_len] = *key;
-			buf[buf_len + 1] = '\0';
-			buf_len++;
 			key++;
+			/* A character that is not a modifier key marks the end of the
+			 * key sequence. Append an ',' in this case, provided it is
+			 * not the end of the string. */
+			if (*key) {
+				buf[buf_len + 1] = END_KEYSEQ_CHAR;
+				buf[buf_len + 2] = '\0';
+				buf_len += 2;
+			} else {
+				buf[buf_len + 1] = '\0';
+				buf_len++;
+			}
 		}
-
-		keyseq_counter++;
 	}
 #undef KBUF_SIZE
+#undef END_KEYSEQ_CHAR
 
 	return *buf ? buf : NULL;
 }
@@ -365,6 +371,7 @@ translate_key(const char *key)
 
 		{"\\e[4h", "Ins"}, {"\\e[L", "Ctrl-Ins"}, /* st */
 		/* sun-color uses \e[224z-\e[235z for F1-F12 keys. */
+		/* cons25 uses \e[M-\e[X for F1-F12 keys. */
 
 		{NULL, NULL},
 	};
