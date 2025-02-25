@@ -1510,7 +1510,6 @@ and paths\
 \n      --no-history\t\t Do not write commands to the history file\
 \n      --no-open-auto\t\t Same as no-cd-auto, but for files\
 \n      --no-refresh-on-resize\t Do not attempt to refresh the file list upon window's resize\
-\n      --no-report-cwd\t\t Do not report the working directory to the terminal (not supported by old terminals)\
 \n      --no-restore-last-path\t Do not record the last visited directory\
 \n      --no-suggestions\t\t Disable auto-suggestions\
 \n      --no-tips\t\t\t Disable startup tips\
@@ -1532,6 +1531,7 @@ our builtin opener)\
 PropFields in the config file)\
 \n      --ptime-style=STYLE\t Time/date style used by the 'p/pp' command (see PTimeStyle in the config file)\
 \n      --readonly\t\t Disable internal commands able to modify the filesystem\
+\n      --report-cwd\t\t Report the current directory to the terminal (OSC-7)\
 \n      --rl-vi-mode\t\t Set readline to vi editing mode (defaults to emacs mode)\
 \n      --secure-cmds\t\t Filter commands to prevent command injection\
 \n      --secure-env\t\t Run in a sanitized environment (regular mode)\
@@ -1556,7 +1556,7 @@ Use this option to force Unicode decorations.\
 #endif /* _BE_POSIX */
 
 #define CLIFM_COMMANDS_HEADER "\
-For a complete description of all the below \
+For a complete description of the below \
 commands run 'cmd' (or press F2) or consult the manpage (F1).\n\
 You can also try the interactive help plugin (it depends on FZF): just \
 enter 'ih', that's it.\n\
@@ -1657,11 +1657,11 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  M-Right, M-f  Accept the first suggested word\n\
  M-c           Clear the current command line buffer\n\
  M-q           Delete the last entered word\n\
- M-g           Toggle list directories first\n\
- M-l           Toggle long/detail view mode\n\
- M-+           Toggle follow links (long view only)\n\
+ M-g           Toggle list-directories-first\n\
+ M-l           Toggle long-view-mode\n\
+ M-+           Toggle follow-links (long view only)\n\
  M-.           Toggle hidden files\n\
- M-,           Toggle list only directories\n\
+ M-,           Toggle list-only-directories\n\
  M--           Preview files in the current directory (requires fzf)\n\
  M-m           List mountpoints\n\
  M-h           Show directory history\n\
@@ -1669,17 +1669,16 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  C-l           Clear the screen\n\
  C-y           Copy the current line buffer to the clipboard\n\
  M-s           Open the Selection Box\n\
- M-a           Select all files in the current working directory\n\
+ M-a           Select all files in the current directory\n\
  M-d           Deselect all files\n\
  M-r           Change to the root directory\n\
  M-e, Home     Change to the home directory\n\
  M-u, S-Up     Change to the parent directory\n\
  M-j, S-Left   Change to previous visited directory\n\
  M-k, S-Right  Change to next visited directory\n\
- M-o           Lock terminal\n\
  M-p           Change to the pinned directory\n\
  M-v           Toggle prepend sudo\n\
- M-0           Run the files pager\n\
+ M-0           Run the file pager\n\
  M-[1-4]       Switch to workspace 1-4\n\
  C-M-o         Switch to previous profile\n\
  C-M-p         Switch to next profile\n\
@@ -1688,19 +1687,17 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  C-M-r         Rename selected files\n\
  C-M-d         Remove selected files\n\
  C-M-t         Trash selected files\n\
- C-M-u         Restore trashed files\n\
- C-M-g         Open/change-to last selected file/directory\n\
- C-M-n         Move selected files to the current working directory\n\
- C-M-v         Copy selected files to the current working directory\n\
- C-M-l         Toggle max name length\n\
- M-y           Toggle light mode\n\
- M-z           Switch to previous sorting method\n\
- M-x           Switch to next sorting method\n\
+ C-M-n         Move selected files to the current directory\n\
+ C-M-v         Copy selected files to the current directory\n\
+ C-M-l         Toggle max-name-length\n\
+ M-y           Toggle light-mode\n\
+ M-z           Switch to the previous sort method\n\
+ M-x           Switch to the next sort method\n\
  C-x           Launch a new instance\n\
  F1            Manual page\n\
  F2            Commands help\n\
  F3            Keybindings help\n\
- F6            Open the MIME list file\n\
+ F6            Open the mimelist file\n\
  F7            Open the shotgun configuration file\n\
  F8            Open the current color scheme file\n\
  F9            Open the keybindings file\n\

@@ -322,9 +322,6 @@ same as \fI\-\-no\-cd\-auto\fR, but for files instead of directories
 \fB\-\-no\-refresh\-on\-resize\fR
 do not attempt to refresh the list of files upon window's resize
 .TP
-\fB\-\-no\-report\-cwd\fR
-do not inform the working directory to the underlying terminal (uses the OSC-7 escape sequence, not supported by old terminals). Use this switch if you see something like this above \fBclifm\fR's prompt: "^]7;file://<path>^", where <path> is the current working directory.
-.TP
 \fB\-\-no\-restore\-last\-path\fR
 by default, \fBclifm\fR saves the last visited directory for each workspace to be restored in the next session. Use this option to disable this behavior.
 .TP
@@ -375,6 +372,9 @@ time/date style used by the \fIp/pp\fR command and the \fI\-\-stat\fR/\fI\-\-sta
 .TP
 \fB\-\-readonly\fR
 run in read\-only mode (internal commands able to modify the filesystem are disabled). Disabled commands are: ac, ad, bb, bl/bleach, br/bulk, c, dup, l, le, m, md, n/new, oc, paste, pc, r, rr, t/trash, tag, te, u/undel/untrash, and vv, plus the shell commands cp, rm, mv, ln, mkdir, rmdir, link, and unlink.
+.TP
+\fB\-\-report\-cwd\fR
+report the current directory to the underlying terminal (via the OSC-7 escape sequence, not supported by all terminals)
 .TP
 \fB\-\-rl\-vi\-mode\fR
 set readline to vi editing mode (defaults to emacs editing mode)
