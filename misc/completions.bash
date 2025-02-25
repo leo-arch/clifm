@@ -121,7 +121,6 @@ _clifm ()
         --no-history
         --no-open-auto
         --no-refresh-on-resize
-        --no-report-cwd
         --no-restore-last-path
         --no-suggestions
         --no-tips
@@ -138,6 +137,7 @@ _clifm ()
         --print-sel
         --ptime-style
         --readonly
+        --report-cwd
         --rl-vi-mode
         --secure-cmds
         --secure-env
