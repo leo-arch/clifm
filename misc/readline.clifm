@@ -32,7 +32,7 @@ set completion-ignore-case on
 
 $if mode=vi
 "\e\C-e": emacs-editing-mode
-#set keymap vi-move                                 
+#set keymap vi-move
 #"i": backward-char
 $endif
 

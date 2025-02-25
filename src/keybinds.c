@@ -387,6 +387,7 @@ translate_key(const char *key)
 		{"\\e[1~", "Home"}, {"\\e[4~", "End"},
 
 		{"\\e[4h", "Ins"}, {"\\e[L", "Ctrl-Ins"}, /* st */
+		{"\\e[M", "Ctrl-Del"},
 
 		/* sun-color uses \e[224z-\e[235z for F1-F12 keys. */
 		/* cons25 uses \e[M-\e[X for F1-F12 keys. */
