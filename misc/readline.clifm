@@ -5,6 +5,9 @@
 # For the complete list of Readline options see:
 # https://www.gnu.org/software/bash/manual/html_node/Readline-Init-File-Syntax.html#Readline-Init-File-Syntax
 
+# Important: When setting keybindings, bear in mind that clifm's keybindings take precedence
+# over readline's. Run 'kb list' for the list of clifm's keybindings.
+
 #$include /etc/inputrc
 
 # Color files by types
@@ -29,7 +32,7 @@ set completion-ignore-case on
 
 $if mode=vi
 "\e\C-e": emacs-editing-mode
-#set keymap vi-move
+#set keymap vi-move                                 
 #"i": backward-char
 $endif
 
@@ -69,8 +72,11 @@ $if mode=emacs
 "\M-8":
 "\M-9":
 
-# Rebind some keybindings
+# Rebind some keys
 "\e\C-j": vi-editing-mode
-"\C-r\C-r": re-read-init-file
+
+# Keyboard macros
+# Ctrl-Alt-w: move the cursor to the end of the line and insert " # macro example"
+#"\e\C-w": "\C-e # macro example"
 
 $endif
