@@ -139,6 +139,9 @@ translate_key_nofunc(const char *key)
 				continue;
 			}
 
+			// Additional escape sequences:
+			// https://www.gnu.org/software/bash/manual/html_node/Readline-Init-File-Syntax.html
+
 			/* Unrecognized escape sequence */
 			return NULL;
 		}
@@ -185,6 +188,7 @@ translate_key(const char *key)
 	};
 
 	struct keys_t keys[] = {
+		{"-", "not bound"},
 #ifdef __HAIKU__
 		{"\\eOA", "Up"}, {"\\eOB", "Down"},
 		{"\\eOC", "Right"}, {"\\eOD", "Left"},
@@ -767,10 +771,13 @@ check_func_name(const char *func_name)
 static int
 validate_new_kb(const char *kb)
 {
-	if (!strchr(kb, '\\')) {
+	if (!strchr(kb, '\\') && strcmp(kb, "-") != 0) {
 		fprintf(stderr, _("kb: Invalid keybinding\n"));
 		return FUNC_FAILURE;
 	}
+
+	if (*kb == '-' && !kb[1])
+		return FUNC_SUCCESS;
 
 	int ret = check_clifm_kb(kb, NULL);
 
@@ -819,14 +826,21 @@ bind_kb_func(const char *func_name)
 	if (kb == NULL)
 		return FUNC_SUCCESS;
 
-	if (validate_new_kb(kb) == FUNC_FAILURE) {
-		free(kb);
-		return FUNC_FAILURE;
+	const int unset_key = (*kb == '-' && !kb[1]);
+	if (unset_key == 0) {
+		if (validate_new_kb(kb) == FUNC_FAILURE) {
+			free(kb);
+			return FUNC_FAILURE;
+		}
+
+		const char *translation = translate_key(kb);
+		printf(_("New key: %s\n"), translation ? translation : kb);
 	}
 
-	const char *translation = translate_key(kb);
-	printf(_("New key: %s\n"), translation ? translation : kb);
-	if (rl_get_y_or_n(_("Bind function to this new key?"), 0) == 0) {
+	const char *msg = unset_key == 1 ? _("Unset this function?")
+		: _("Bind function to this new key?");
+
+	if (rl_get_y_or_n(msg, 0) == 0) {
 		free(kb);
 		return FUNC_SUCCESS;
 	}
