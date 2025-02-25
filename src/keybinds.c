@@ -890,6 +890,7 @@ list_kbinds(void)
 	return FUNC_SUCCESS;
 }
 
+/* Print the list of readline functions and associated keys. */
 static int
 list_rl_kbinds(void)
 {
@@ -935,6 +936,10 @@ list_rl_kbinds(void)
 	}
 
 	free(names);
+
+	puts(_("\nNote: Bear in mind that clifm's keybindings take precedence "
+		"over readline's.\nTo modify readline's keybindings edit "
+		"~/.config/clifm/readline.clifm"));
 
 	return FUNC_SUCCESS;
 }

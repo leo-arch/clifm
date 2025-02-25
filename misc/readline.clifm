@@ -18,17 +18,19 @@ set colored-completion-prefix on
 # Color the common prefix in menu-complete
 set menu-complete-display-prefix on
 # Disable paste protection
-set enable-bracketed-paste off
+set enable-bracketed-paste on
 
 set show-all-if-ambiguous on
 set completion-ignore-case on
 
-set meta-flag on
-set input-meta on
-set output-meta on
+#set meta-flag on
+#set input-meta on
+#set output-meta on
 
 $if mode=vi
 "\e\C-e": emacs-editing-mode
+#set keymap vi-move
+#"i": backward-char
 $endif
 
 $if mode=emacs
@@ -45,46 +47,30 @@ $if mode=emacs
 "\x1b\x4f\x64": backward-word
 "\x1b\x4f\x63": forward-word
 
-# A few keybinds to avoid conflicts with Clifm specific keybinds
+# Unset keybindings conflicting with Clifm's own
 "\x1b\xd":
+"\C-x(":
+"\C-x\C-u":
+"\C-x\C-x":
+"\C-x\C-g":
+"\C-x\C-?":
+"\C-x\C-r":
+"\C-xe":
+"\C-x)":
+"\C-q":
 "\C-d":
+"\C-]":
+"\e\C-]":
+"\e\\":
 "\e\e":
 "\M-5":
 "\M-6":
 "\M-7":
 "\M-8":
 "\M-9":
+
+# Rebind some keybindings
 "\e\C-j": vi-editing-mode
 "\C-r\C-r": re-read-init-file
-"\C-zA": do-lowercase-version
-"\C-zB": do-lowercase-version
-"\C-zC": do-lowercase-version
-"\C-zD": do-lowercase-version
-"\C-zE": do-lowercase-version
-"\C-zF": do-lowercase-version
-"\C-zG": do-lowercase-version
-"\C-zH": do-lowercase-version
-"\C-zI": do-lowercase-version
-"\C-zJ": do-lowercase-version
-"\C-zK": do-lowercase-version
-"\C-zL": do-lowercase-version
-"\C-zM": do-lowercase-version
-"\C-zN": do-lowercase-version
-"\C-zO": do-lowercase-version
-"\C-zP": do-lowercase-version
-"\C-zQ": do-lowercase-version
-"\C-zR": do-lowercase-version
-"\C-zS": do-lowercase-version
-"\C-zT": do-lowercase-version
-"\C-zU": do-lowercase-version
-"\C-zV": do-lowercase-version
-"\C-zW": do-lowercase-version
-"\C-zX": do-lowercase-version
-"\C-zY": do-lowercase-version
-"\C-zZ": do-lowercase-version
-
-# History completion based on prefix
-#"\e[A": history-search-backward
-#"\e[B": history-search-forward
 
 $endif
