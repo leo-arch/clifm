@@ -188,13 +188,8 @@ translate_key(const char *key)
 	};
 
 	struct keys_t keys[] = {
-		{"-", "not bound"},
-#ifdef __HAIKU__
-		{"\\eOA", "Up"}, {"\\eOB", "Down"},
-		{"\\eOC", "Right"}, {"\\eOD", "Left"},
-		{"\\eO5A", "Ctrl-Up"}, {"\\eO5B", "Ctrl-Down"},
-		{"\\eO5C", "Ctrl-Right"}, {"\\eO5D", "Ctrl-Left"},
-#endif /* __HAIKU__ */
+		{"-", _("not bound")},
+
 		/* xterm */
 		{"\\e[A", "Up"}, {"\\e[B", "Down"},
 		{"\\e[C", "Right"}, {"\\e[D", "Left"},
@@ -377,11 +372,22 @@ translate_key(const char *key)
 
 		{"\\eOH", "Home"}, {"\\eOF", "End"},
 
-		/* Others (but which? can't remember) */
+		/* emacs and others */
+		{"\\eOA", "Up"}, {"\\eOB", "Down"},
+		{"\\eOC", "Right"}, {"\\eOD", "Left"},
+		{"\\eO5A", "Ctrl-Up"}, {"\\eO5B", "Ctrl-Down"},
+		{"\\eO5C", "Ctrl-Right"}, {"\\eO5D", "Ctrl-Left"},
+
+		{"\\e[5A", "Ctrl-Up"},{"\\e[5B", "Ctrl-Down"},
+		{"\\e[5C", "Ctrl-Right"},{"\\e[5D", "Ctrl-Left"},
+
 		{"\\e[2A", "Shift-Up"}, {"\\e[2B", "Shift-Down"},
 		{"\\e[2C", "Shift-Right"}, {"\\e[2D", "Shift-Left"},
 
+		{"\\e[1~", "Home"}, {"\\e[4~", "End"},
+
 		{"\\e[4h", "Ins"}, {"\\e[L", "Ctrl-Ins"}, /* st */
+
 		/* sun-color uses \e[224z-\e[235z for F1-F12 keys. */
 		/* cons25 uses \e[M-\e[X for F1-F12 keys. */
 
@@ -884,6 +890,55 @@ list_kbinds(void)
 	return FUNC_SUCCESS;
 }
 
+static int
+list_rl_kbinds(void)
+{
+	size_t i, j;
+	char *name = (char *)NULL;
+	char **names = (char **)rl_funmap_names();
+
+	if (!names)
+		return FUNC_SUCCESS;
+
+	size_t flen = 0;
+	for (i = 0; (name = names[i]); i++) {
+		rl_command_func_t *function = rl_named_function(name);
+		char **keys = rl_invoking_keyseqs(function);
+		if (!keys)
+			continue;
+
+		for (j = 0; keys[j]; j++)
+			free(keys[j]);
+		free(keys);
+
+		size_t l = strlen(name);
+		if (l > flen)
+			flen = l;
+	}
+
+	for (i = 0; (name = names[i]); i++) {
+		if ((*name == 's' && strcmp(name, "self-insert") == 0)
+		|| (*name == 'd' && strcmp(name, "do-lowercase-version") == 0))
+			continue;
+
+		rl_command_func_t *function = rl_named_function(name);
+		char **keys = rl_invoking_keyseqs(function);
+		if (!keys)
+			continue;
+
+		for (j = 0; keys[j]; j++) {
+			const char *t = translate_key(keys[j]);
+			printf("%-*s (%s)\n", (int)flen, name, t ? t : keys[j]);
+			free(keys[j]);
+		}
+		free(keys);
+	}
+
+	free(names);
+
+	return FUNC_SUCCESS;
+}
+
 int
 kbinds_function(char **args)
 {
@@ -910,10 +965,8 @@ kbinds_function(char **args)
 	if (*args[1] == 'r' && strcmp(args[1], "reset") == 0)
 		return kbinds_reset();
 
-	if (*args[1] == 'r' && strcmp(args[1], "readline") == 0) {
-		rl_function_dumper(1);
-		return FUNC_SUCCESS;
-	}
+	if (*args[1] == 'r' && strcmp(args[1], "readline") == 0)
+		return list_rl_kbinds();
 
 	fprintf(stderr, "%s\n", _(KB_USAGE));
 	return FUNC_FAILURE;
