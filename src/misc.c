@@ -211,7 +211,7 @@ set_eln_color(void)
  * to the previous one, without printing any message mark.
  * MSG_TYPE also accepts ERR_NO_LOG (-1) and ERR_NO_STORE (-2) as values:
  * ERR_NO_LOG: Print the message but do not log it.
- * ERR_NO_STORE: Log but do not store the message into the messages array.
+ * ERR_NO_STORE: Log but do not store the message in the messages array.
  *
  * PROMPT_FLAG tells whether to print the message immediately before the next
  * prompt or rather in place.

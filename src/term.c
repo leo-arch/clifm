@@ -228,7 +228,7 @@ disable_raw_mode(const int fd)
 }
 
 /* Use the "ESC [6n" escape sequence to query the cursor position (both
- * vertical and horizontal) and store both values into C (columns) and L (lines).
+ * vertical and horizontal) and store both values in C (columns) and L (lines).
  * Returns 0 on success and 1 on error. */
 int
 get_cursor_position(int *c, int *l)

@@ -978,7 +978,7 @@ kbinds_function(char **args)
 	return FUNC_FAILURE;
 }
 
-/* Store keybinds from the keybinds file into a struct. */
+/* Store keybinds from the keybinds file in a struct. */
 int
 load_keybinds(void)
 {

@@ -262,7 +262,7 @@ add_to_jumpdb(char *dir)
 	return add_new_jump_entry(dir, dir_len);
 }
 
-/* Store the jump database into a file. */
+/* Save the jump database into a file. */
 void
 save_jumpdb(void)
 {

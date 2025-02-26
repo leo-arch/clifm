@@ -913,7 +913,7 @@ create_files(char **args, const int is_md)
 	size_t argsn;
 	for (argsn = 0; args[argsn]; argsn++);
 
-	/* Store pointers to actually created files into a pointers array.
+	/* Store pointers to actually created files in a pointers array.
 	 * We'll use this later to print the names of actually created files. */
 	char **new_files = xnmalloc(argsn + 1, sizeof(char *));
 	filesn_t new_files_n = 0;

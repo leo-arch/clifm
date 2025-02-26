@@ -1438,7 +1438,7 @@ set_default_size_shades(void)
 	set_shades(tmp, SIZE_SHADES);
 }
 
-/* Check if LINE contains a valid color code, and store it into the
+/* Check if LINE contains a valid color code, and store it in the
  * ext_colors global array.
  * If LINE contains a color variable, expand it, check it, and store it. */
 static int
@@ -1971,7 +1971,7 @@ get_colors_from_env(char **file, char **ext, char **iface)
 }
 
 #ifndef CLIFM_SUCKLESS
-/* Store the color variable STR (in the form VAR=VALUE) into the global
+/* Store the color variable STR (in the form VAR=VALUE) in the global
  * defs struct. */
 static void
 store_definition(char *str)

@@ -618,8 +618,8 @@ mark_bookmarks_for_deletion(char **args, int *exit_status)
 	return counter;
 }
 
-/* Extract name and shortcut from the bookmark line LINE and store it into
- * a bookmarks_t struct. */
+/* Extract name and shortcut from the bookmark line LINE and store it in a
+ * bookmarks_t struct. */
 static struct bookmarks_t
 extract_shortcut_and_name(char *line)
 {

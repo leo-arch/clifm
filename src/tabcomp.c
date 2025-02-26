@@ -429,7 +429,7 @@ get_last_input_word(void)
 	return lastword;
 }
 
-/* Store the unescaped string STR into the buffer BUF (only up to MAX bytes).
+/* Store the unescaped string STR in the buffer BUF (only up to MAX bytes).
  * Returns the number of copied bytes. */
 static size_t
 unescape_word(char *str, char *buf, const size_t max)
@@ -1871,7 +1871,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 
 	char *deq = q ? (strchr(q, '\\') ? unescape_str(q, 0) : q) : (char *)NULL;
 
-	/* Run the finder application and store the ouput into FINDER_OUT_FILE. */
+	/* Run the finder application and store the ouput in FINDER_OUT_FILE. */
 	const int ret = run_finder(height, finder_offset, deq, multi);
 
 	if (deq && deq != q)

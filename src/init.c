@@ -1997,8 +1997,8 @@ get_sel_files(void)
 	return FUNC_SUCCESS;
 }
 
-/* Store each path in CDPATH env variable into an array (CDPATHS)
- * Returns the number of paths found or zero if none */
+/* Store each path in CDPATH env variable in an array (CDPATHS).
+ * Returns the number of paths found or zero if none. */
 size_t
 get_cdpath(void)
 {
@@ -2060,7 +2060,7 @@ get_paths_timestamps(const size_t n)
 	}
 }
 
-/* Store all paths in the PATH environment variable into the path field of
+/* Store all paths in the PATH environment variable in the path field of
  * the paths_t struct paths, skipping duplicates.
  * If CHECK_TIMESTAMPS is set to 1, modification time for each path in PATH
  * is stored in the mtime field of the paths struct.
@@ -2339,7 +2339,7 @@ skip_this_path(char *name)
 }
 
 /* Get the list of files in PATH, plus CliFM internal commands, aliases, and
- * action names, and store them into an array (bin_commands) to be read by
+ * action names, and store them in an array (bin_commands) to be read by
  * my_rl_completion(). */
 void
 get_path_programs(void)

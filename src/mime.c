@@ -527,7 +527,7 @@ get_app(const char *mime, const char *filename)
 	return app;
 }
 
-/* Import MIME associations from the system and store them into FILE.
+/* Import MIME associations from the system and save them into FILE.
  * Returns the amount of associations found, if any, or -1 in case of error
  * or no association found */
 static int
@@ -589,7 +589,7 @@ mime_import(char *file)
 	    "/etc/xdg/mimeapps.list",
 	    NULL};
 
-	/* Check each mimeapps.list file and store its associations into FILE */
+	/* Check each mimeapps.list file and save its associations into FILE */
 	size_t i;
 	int mime_defs = 0;
 
@@ -1074,7 +1074,7 @@ get_apps_from_file(FILE *fp, char *file_name, const char *mime,
 				continue;
 			}
 
-			/* If the app exists, store it into the APPS array */
+			/* If the app exists, store it in the APPS array */
 			if (*app != '/') {
 				free(file_path);
 				file_path = (char *)NULL;
@@ -1459,7 +1459,7 @@ import_mime(void)
 	if (mime_defs > 0) {
 		printf(_("%d MIME association(s) imported from the system.\n"
 			"File stored as '%s'\nAdd these new associations to your mimelist "
-			"file running 'mm edit'.\n"), mime_defs, new);
+			"file by running 'mm edit'.\n"), mime_defs, new);
 		return FUNC_SUCCESS;
 	}
 

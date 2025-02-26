@@ -442,7 +442,7 @@ list_mountpoints_bsd(struct statfs *fslist)
 		printf("%s%zu%s %s%s%s (%s)\n", el_c, j + 1, df_c, dir_color,
 			fslist[i].f_mntonname, df_c, fslist[i].f_mntfromname);
 
-		/* Store the mountpoint into the mounpoints struct */
+		/* Store the mountpoint in the mounpoints struct */
 		media = xnrealloc(media, j + 2, sizeof(struct mnt_t));
 		media[j].mnt = savestring(fslist[i].f_mntonname,
 			strlen(fslist[i].f_mntonname));

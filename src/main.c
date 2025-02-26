@@ -1386,7 +1386,7 @@ main(int argc, char *argv[])
 	if (config_ok == 1)
 		init_history();
 
-	/* Store history into an array to be able to manipulate it. */
+	/* Store history in an array to be able to manipulate it. */
 	get_history();
 
 #ifndef _NO_PROFILES

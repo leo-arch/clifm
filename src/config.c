@@ -697,7 +697,7 @@ config_reload(const char *arg)
 	return exit_status;
 }
 
-/* Find the plugins-helper file and store its path into the PLUGINS_HELPER_FILE
+/* Find the plugins-helper file and store its path in the PLUGINS_HELPER_FILE
  * global variable. It will used to set CLIFM_PLUGINS_HELPER environment
  * variable when running a plugin.
  * Returns zero on success or one on error.
@@ -1646,7 +1646,7 @@ import_data_file(const char *src, const char *dst, const int exec)
 	return import_from_data_dir(src, dest_file, exec);
 }
 
-/* Create the main configuration file and store in FILE. */
+/* Create the main configuration file and save it into FILE. */
 int
 create_main_config_file(char *file)
 {
@@ -2846,7 +2846,7 @@ free_workspaces_names(void)
 }
 
 /* Get workspaces names from the WorkspacesNames line in the configuration
- * file and store them in the workspaces array */
+ * file and store them in the workspaces array. */
 void
 set_workspace_names(char *line)
 {
