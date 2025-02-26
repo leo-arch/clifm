@@ -26,9 +26,10 @@ set enable-bracketed-paste on
 set show-all-if-ambiguous on
 set completion-ignore-case on
 
-#set meta-flag on
-#set input-meta on
-#set output-meta on
+set meta-flag on
+set input-meta on
+set convert-meta off
+set output-meta on
 
 $if mode=vi
 "\e\C-e": emacs-editing-mode
@@ -38,7 +39,14 @@ $endif
 
 $if mode=emacs
 
-# For linux console and RH/Debian xterm
+# For the Linux console and RH/Debian xterm
+"\e[1~": beginning-of-line
+"\e[4~": end-of-line
+"\e[5~": beginning-of-history
+"\e[6~": end-of-history
+"\e[7~": beginning-of-line
+"\e[3~": delete-char
+"\e[2~": quoted-insert
 "\e[5C": forward-word
 "\e[5D": backward-word
 "\e\e[C": forward-word
@@ -47,8 +55,18 @@ $if mode=emacs
 "\e[1;5D": backward-word
 
 # For rxvt
+"\e[8~": end-of-line
+# Ctrl-Left and Ctrl-Right
 "\x1b\x4f\x64": backward-word
 "\x1b\x4f\x63": forward-word
+
+# For non RH/Debian xterm, can't hurt for RH/DEbian xterm
+"\eOH": beginning-of-line
+"\eOF": end-of-line
+
+# For the FreeBSD console
+"\e[H": beginning-of-line
+"\e[F": end-of-line
 
 # Unset keybindings conflicting with Clifm's own
 "\x1b\xd":
