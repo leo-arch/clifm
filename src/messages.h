@@ -637,7 +637,7 @@ For information about the matching algorithm consult the manpage\n\n\
     j --purge 100\n\
   Note: To remove a specific entry, delete the corresponding line\n\
   from the database ('je' or 'j --edit'). Note that if the directory\n\
-  is in the directory history, it will be not removed from the database."
+  is in the directory history, it will not be removed from the database."
 
 #define K_USAGE "Toggle follow-links in long view mode\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
