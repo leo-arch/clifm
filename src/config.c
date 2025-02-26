@@ -1332,7 +1332,7 @@ define_selfile(void)
 	}
 
 	err('w', PRINT_PROMPT, _("%s: %s: Using a temporary directory for "
-		"the Selection Box. Selected files won't be persistent across "
+		"the Selection Box. Selected files will not be persistent across "
 		"reboots.\n"), PROGRAM_NAME, tmp_dir);
 }
 
@@ -2244,7 +2244,7 @@ create_main_config_dir(void)
 		config_ok = 0;
 		err('e', PRINT_PROMPT, _("%s: Cannot create configuration "
 			"directory '%s': Bookmarks, commands logs, and "
-			"command history are disabled. Program messages won't be "
+			"command history are disabled. Program messages will not be "
 			"persistent. Falling back to default settings.\n"),
 			PROGRAM_NAME, config_dir);
 		return FUNC_FAILURE;
@@ -2288,7 +2288,7 @@ create_config_files(const int just_listing)
 		config_ok = 0;
 		err('e', PRINT_PROMPT, _("%s: '%s': Directory not writable. Bookmarks, "
 			"commands logs, and commands history are disabled. Program messages "
-			"won't be persistent. Falling back to default settings.\n"),
+			"will not be persistent. Falling back to default settings.\n"),
 		    PROGRAM_NAME, config_dir);
 		return;
 	}
@@ -2406,7 +2406,7 @@ create_mime_file_anew(char *file)
 # might vary depending on the terminal emulator used (TERM).\n\
 \n\
 # Note on graphical applications: If the opening application is already running\n\
-# the file might be opened in a tab, and Clifm won't wait for the file to be\n\
+# the file might be opened in a tab, and Clifm will not wait for the file to be\n\
 # closed (because the process already returned). To avoid this, instruct the\n\
 # application to run a new instance: e.g.: geany -i, gedit -s, kate -n,\n\
 # pluma --new-window, and so on.\n\

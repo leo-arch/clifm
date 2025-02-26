@@ -556,7 +556,7 @@ get_home(void)
 		err('e', PRINT_PROMPT, _("%s: Cannot access the home directory. "
 			"Bookmarks, commands logs, and commands history are "
 			"disabled. Program messages, selected files, and the jump database "
-			"won't be persistent. Using default options\n"), PROGRAM_NAME);
+			"will not be persistent. Using default settings.\n"), PROGRAM_NAME);
 		return FUNC_FAILURE;
 	}
 

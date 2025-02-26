@@ -437,7 +437,7 @@ print_jump_table_header(void)
 		"it is bookmarked, pinned, or currently active in some "
 		"workspace.\n"), item);
 	printf(_("%s A plus sign next rank values means that the "
-		"corresponding directory is marked as permanent (it won't be "
+		"corresponding directory is marked as permanent (it will not be "
 		"removed).\n"), item);
 
 	if (conf.min_jump_rank <= 0) {

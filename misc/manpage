@@ -875,7 +875,7 @@ T}	Print all entries in the database containing the word "foo"
 .sp
 Use the \fI\-\-purge\fR option to shrink the database. Without further parameters, \fI\-\-purge\fR removes all non\-existent (un\-stat\'able) directories from the database. If a numeric parameter is passed, by contrast, all entries ranked below this number will be removed from the database. For example, \fIj \-\-purge 100\fR will remove all entries ranked below 100.
 .sp
-You can also manually edit the database file using the \fIje\fR (or \fIj \-\-edit\fR) command: edit whatever needs to be edited, save changes, and close the editor. This is useful, for example, to remove a specific entry/directory from the database (however, bear in mind that if the directory is in the directory history, it won't be removed from the jump database).
+You can also manually edit the database file using the \fIje\fR (or \fIj \-\-edit\fR) command: edit whatever needs to be edited, save changes, and close the editor. This is useful, for example, to remove a specific entry/directory from the database (however, bear in mind that if the directory is in the directory history, it will not be removed from the jump database).
 .sp
 To mark an entry as permanent (prevent it from being removed from the database), follow any of these procedures:
  a. Bookmark it.
@@ -2547,7 +2547,7 @@ The color code used to colorize this indicator is \fIac\fR (see the \fBCOLORS\fR
 .sp
 \fBAutocommand files: \fI.cfm.in\fB and \fI.cfm.out\fR
 .sp
-To use this feature, you must first set \fIReadAutocmdFiles\fR to \fItrue\fR in the main configuration file. However, bear in mind that autocommand files won't ever be read if running on an untrusted environment (i.e. if running with \fI\-\-secure\-cmds\fR, \fI\-\-secure\-env\fR, or \fI\-\-secure\-env\-full\fR).
+To use this feature, you must first set \fIReadAutocmdFiles\fR to \fItrue\fR in the main configuration file. However, bear in mind that autocommand files will never be read if running on an untrusted environment (i.e. if running with \fI\-\-secure\-cmds\fR, \fI\-\-secure\-env\fR, or \fI\-\-secure\-env\-full\fR).
 .sp
 Two files are specifically checked by the autocommands function: \fI.cfm.in\fR and \fI.cfm.out\fR (they must be non-empty regular files of at most \fBPATH_MAX\fR (usually 4096) bytes, and no NUL byte must be contained in them).
 .sp
@@ -2792,7 +2792,7 @@ If using Xterm, a nice speed boost is provided by the fast scroll option: set \f
 The directory jumper function is designed to learn the navigation habits of the user. The information is stored in a database (see the \fBFILES\fR section below) used to get the best match for a given string provided by the user. In this sense, Kangaroo is like a quick, smart, and evolved cd function.
 .sp
 The information stored in the database, always per directory, is:
- a) Permanent entry ('+'): this directory won't be removed from the database, no matter its rank
+ a) Permanent entry ('+'): this directory will not be removed from the database, no matter its rank
  b) Number of visits
  c) Date of first visit (seconds since the Unix epoch)
  d) Date of the last visit (seconds since Unix epoch)

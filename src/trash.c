@@ -99,7 +99,7 @@ print_removal_result(const size_t n)
 
 /* Remove the file named NAME and the corresponding .trashinfo file from
  * the trash can.
- * Return 0 on success or >0 on error. */
+ * Returns 0 on success or >0 on error. */
 static int
 remove_file_from_trash(const char *name)
 {
@@ -268,8 +268,8 @@ gen_dest_file(const char *file, const char *suffix, char **file_suffix)
 	char *dest = xnmalloc(dlen, sizeof(char));
 	snprintf(dest, dlen, "%s/%s", trash_files_dir, *file_suffix);
 
-	/* If destiny file exists (there's already a trashed file with this name),
-	 * append an integer until it is made unique. */
+	/* If the destination file exists (there's already a trashed file with
+	 * this name), append an integer until it is made unique. */
 	struct stat a;
 	int inc = 1;
 	while (lstat(dest, &a) == 0 && inc > 0) {
