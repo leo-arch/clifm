@@ -56,7 +56,7 @@
 # '-' for character special files
 # '?' for unknown file types
 # Bear in mind that when running in light mode the check for executable
-# files won't be performed, and thereby no indicator will be added to
+# files will not be performed, and thereby no indicator will be added to
 # executable files.
 # Note: Disabling this option also disables the files counter.
 ;Classify=true
@@ -175,8 +175,8 @@
 
 # Clear the terminal screen before listing files.
 # Supported values: true, false, internal (restrict this behavior to
-# internal commands only: shell commands won't clear the screen).
-# Note: If set to 'internal', the current list of files won't be refreshed
+# internal commands only: shell commands will not clear the screen).
+# Note: If set to 'internal', the current list of files will not be refreshed
 # even if an external command creates, removes, or renames a file in the
 # current directory.
 ;ClearScreen=true

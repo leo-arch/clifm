@@ -139,7 +139,7 @@ The first parameter (thumbnailing method) can be any of the following:
 The `audio` method accepts four modes: `cover`, `wave`, `spectogram`, and `info`. Set the desired mode via the `audio_method` variable (defaults to `cover`, which falls back to `info` if there is no cover image available).
 
 > [!TIP]
-> When changing the `audio` mode, thumbnails for already thumbnailed files won't be regenerated according to the newly set mode. You need to delete the corresponding thumbnails and purge the thumbnails database. Running this in **clifm** should be enough:
+> When changing the `audio` mode, thumbnails for already thumbnailed files will not be regenerated according to the newly set mode. You need to delete the corresponding thumbnails and purge the thumbnails database. Running this in **clifm** should be enough:
 > ```sh
 > cd ~/.cache/clifm/thumbnails
 > rm $(grep -E ".*\.(mp3|ogg|wav)" .thumbs.info | cut -d'@' -f1)
