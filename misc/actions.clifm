@@ -36,7 +36,6 @@ gg=pager.sh
 h=fzfhist.sh
 i=img_viewer.sh
 ih=ihelp.sh
-kbgen=kbgen
 kd=decrypt.sh
 ke=encrypt.sh
 ml=mime_list.sh
