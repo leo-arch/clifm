@@ -3197,13 +3197,13 @@ set_default_keybinds(void)
 	/* Operations on files */
 	rl_bind_keyseq("\\M-n", rl_create_file);
 	rl_bind_keyseq("\\C-\\M-a", rl_archive_sel);
-	rl_bind_keyseq("\\C-\\M-g", rl_open_sel);
+/*	rl_bind_keyseq("\\C-\\M-g", rl_open_sel); // Disabled by default */
 	rl_bind_keyseq("\\C-\\M-e", rl_export_sel);
-	rl_bind_keyseq("\\C-\\M-n", rl_move_sel);
+/*	rl_bind_keyseq("\\C-\\M-n", rl_move_sel); // Disabled by default */
 	rl_bind_keyseq("\\C-\\M-r", rl_rename_sel);
 	rl_bind_keyseq("\\C-\\M-d", rl_remove_sel);
 	rl_bind_keyseq("\\C-\\M-t", rl_trash_sel);
-	rl_bind_keyseq("\\C-\\M-u", rl_untrash_all);
+/*	rl_bind_keyseq("\\C-\\M-u", rl_untrash_all); // Disabled by default */
 	rl_bind_keyseq("\\C-\\M-v", rl_paste_sel);
 	rl_bind_keyseq("\\M-a", rl_select_all);
 	rl_bind_keyseq("\\M-d", rl_deselect_all);
@@ -3211,7 +3211,8 @@ set_default_keybinds(void)
 
 	/* Config files */
 	rl_bind_keyseq("\\e[17~", rl_open_mime);
-	rl_bind_keyseq("\\e[18~", rl_open_jump_db);
+	rl_bind_keyseq("\\e[18~", rl_open_preview);
+/*	rl_bind_keyseq("\\e[18~", rl_open_jump_db); // Disabled by default */
 	rl_bind_keyseq("\\e[19~", rl_open_cscheme);
 	rl_bind_keyseq("\\e[20~", rl_open_keybinds);
 	rl_bind_keyseq("\\e[21~", rl_open_config);
