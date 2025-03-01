@@ -489,8 +489,10 @@ check_clifm_kb(const char *kb, const char *func_name)
 		} else {
 			const char *func = kbinds[i].function
 				? kbinds[i].function : "unnamed";
-			fprintf(stderr, _("kb: Key already in use by '%s'.\n"
-				"Unset or rebind '%s' and try again.\n"), func, func);
+			const char *t = translate_key(kbinds[i].key);
+			fprintf(stderr, _("kb: %s: Key already in use by '%s'.\n"
+				"Unset or rebind '%s' and try again.\n"),
+				t ? t : kbinds[i].key, func, func);
 		}
 		ret = FUNC_FAILURE;
 	}
@@ -527,8 +529,9 @@ check_rl_kbinds(const char *kb)
 					conflict++;
 			} else {
 				if (strcmp(kb, keys[j]) == 0) {
-					fprintf(stderr, _("kb: Key already in use by '%s' "
-						"(readline)\n"), name);
+					const char *t = translate_key(kb);
+					fprintf(stderr, _("kb: %s: Key already in use by '%s' "
+						"(readline)\n"), t ? t : kb, name);
 					if (rl_get_y_or_n("Overwrite?", 0) == 0)
 						conflict++;
 				}
@@ -592,10 +595,10 @@ find_key(const char *function)
 static char *
 get_new_keybind(void)
 {
-	char buf[NAME_MAX];
+	char buf[64];
 	size_t len = 0;
 	int ret = 0;
-	int result;
+	int result = 0;
 	int ch = 0;
 	int prev = 0;
 
