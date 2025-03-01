@@ -276,8 +276,8 @@ check_shell_cmd_conditions(char **args)
 	}
 
 	if (conf.ext_cmd_ok == 0) {
-		xerror(_("%s: External commands are not allowed. "
-			"Run 'ext on' to enable them.\n"), PROGRAM_NAME);
+		xerror(_("%s: External commands are currently disabled. "
+			"To enable them, run 'ext on'.\n"), PROGRAM_NAME);
 		return FUNC_FAILURE;
 	}
 

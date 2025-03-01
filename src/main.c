@@ -1112,7 +1112,7 @@ init_trash(void)
 }
 #endif /* _NO_TRASH */
 
-static inline void
+static void
 get_hostname(void)
 {
 	if (gethostname(hostname, sizeof(hostname)) == -1) {
@@ -1123,7 +1123,7 @@ get_hostname(void)
 	}
 }
 
-/* Initialize the files filter struct */
+/* Initialize the file filter struct */
 static void
 init_filter(void)
 {

@@ -60,7 +60,7 @@ change_word_color(const char *_last_word, const int offset, const char *color)
  * STR and print the color if SET_COLOR is set to 1 (in which case NULL is
  * returned); otherwise, just return a pointer to the corresponding color.
  * This function is used to colorize input, history entries, and accepted
- * suggestions */
+ * suggestions. */
 char *
 rl_highlight(const char *str, const size_t pos, const int flag)
 {

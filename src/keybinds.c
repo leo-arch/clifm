@@ -611,8 +611,10 @@ get_new_keybind(void)
 
 	while (1) {
 		result = (int)read(STDIN_FILENO, &ch, sizeof(unsigned char)); /* flawfinder: ignore */
-		if (result == 0 || len >= sizeof(buf))
+		if (result <= 0 || len >= sizeof(buf) - 1) {
+			buf[len] = '\0';
 			break;
+		}
 
 		if (result != sizeof(unsigned char))
 			continue;
@@ -639,21 +641,20 @@ get_new_keybind(void)
 			}
 		}
 
+		const size_t remaining = sizeof(buf) - len - 1;
+
 		if (c == KEY_ESC) {
-			ret = snprintf(buf + len, sizeof(buf), "\\e");
+			ret = snprintf(buf + len, remaining, "\\e");
 		} else if (isprint(c) && c != ' ') {
-			ret = snprintf(buf + len, sizeof(buf), "%c", c);
+			ret = snprintf(buf + len, remaining, "%c", c);
+		} else if (c <= 31) {
+			ret = snprintf(buf + len, remaining, "\\C-%c", c + '@' - 'A' + 'a');
 		} else {
-			if (c <= 31) {
-				ret = snprintf(buf + len, sizeof(buf),
-					"\\C-%c", c + '@' - 'A' + 'a');
-			} else {
-				ret = snprintf(buf + len, sizeof(buf), "\\x%x", c);
-			}
+			ret = snprintf(buf + len, remaining, "\\x%x", c);
 		}
 
 		prev = ch;
-		if (ret < 0)
+		if (ret < 0 || (size_t)ret >= remaining)
 			continue;
 
 		if (*buf) {

@@ -765,8 +765,8 @@ static void
 warn_fzf_error(void)
 {
 	fprintf(stderr, _("%s: Fzf failed. Check the FzfTabOptions "
-		"line by running 'cs edit'\n(some parameter may not "
-		"be supported by the installed fzf version).\n"), PROGRAM_NAME);
+		"line by running 'cs edit'\n(some option may not "
+		"be supported by your fzf version).\n"), PROGRAM_NAME);
 	press_any_key_to_continue(0);
 	if (term_caps.suggestions == 1) {
 		MOVE_CURSOR_UP(3);
