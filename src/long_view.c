@@ -281,6 +281,8 @@ get_time_char(void)
 	}
 }
 
+/* GCC (not clang) complains about tfmt being not a string literal. Let's
+ * silence this warning until we find a better approach. */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-nonliteral"
 static void
@@ -322,9 +324,6 @@ construct_timestamp(char *time_str, const struct fileinfo *props)
 			const char *tfmt = conf.time_str ? conf.time_str :
 				(recent ? DEF_TIME_STYLE_RECENT : DEF_TIME_STYLE_OLDER);
 
-			/* GCC (not clang) complains about tfmt being not a string
-			 * literal. Let's silence this warning until we find a better
-			 * approach. */
 			strftime(file_time, sizeof(file_time), tfmt, &tm);
 		} else {
 			xstrsncpy(file_time, invalid_time_str, sizeof(file_time));
@@ -370,7 +369,6 @@ construct_id_field(const struct fileinfo *props, char *id_str,
 		return;
 	}
 
-//	const char *dim = conf.colorize == 0 ? "" : dim_c;
 	const char *gid_color = conf.colorize == 0 ? "" :
 		(file_perm == 1 ? dg_c : dim_c);
 
@@ -390,6 +388,9 @@ construct_id_field(const struct fileinfo *props, char *id_str,
 			props->stat_err == 1 ? "" : gid_color,
 			maxes->id_group, GROUP_NAME, df_c);
 	}
+
+#undef USER_NAME
+#undef GROUP_NAME
 }
 
 static void

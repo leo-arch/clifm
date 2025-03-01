@@ -596,10 +596,10 @@ init_history(void)
 			    PROGRAM_NAME, hist_file, strerror(errno));
 		} else {
 			/* To avoid malloc errors in read_history(), do not
-			 * create an empty file */
+			 * create an empty file. */
 			fputs("edit\n", hist_fp);
 			/* There is no need to run read_history() here, since
-			 * the history file is still empty */
+			 * the history file is still empty. */
 			fclose(hist_fp);
 		}
 	}
@@ -693,7 +693,7 @@ get_user_groups(const char *name, const gid_t gid, int *ngroups)
 
 	if (NGROUPS_MAX > n)
 		g = xnrealloc(g, (size_t)n, sizeof(g));
-#endif /* __TERMUX__ */
+#endif /* __TERMUX__ || _BE_POSIX */
 
 	*ngroups = n;
 	return g;

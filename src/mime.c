@@ -1458,7 +1458,7 @@ import_mime(void)
 	const int mime_defs = mime_import(new);
 	if (mime_defs > 0) {
 		printf(_("%d MIME association(s) imported from the system.\n"
-			"File stored as '%s'\nAdd these new associations to your mimelist "
+			"File saved as '%s'\nAdd these new associations to your mimelist "
 			"file by running 'mm edit'.\n"), mime_defs, new);
 		return FUNC_SUCCESS;
 	}
