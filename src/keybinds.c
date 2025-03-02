@@ -125,7 +125,7 @@ translate_key_nofunc(const char *key)
 					return NULL;
 				/* If "\M-" we want to advance 3 bytes, not 2. */
 				key += 2 + (key[1] ==  'M');
-				if (!*key) /* Icomplete sequence: Alt without modified key. */
+				if (!*key) /* Incomplete sequence: Alt without modified key. */
 					return NULL;
 				continue;
 			}
@@ -134,7 +134,7 @@ translate_key_nofunc(const char *key)
 				if (append_str(buf, KBUF_SIZE, &buf_len, "Ctrl-") == -1)
 					return NULL;
 				key += 3;
-				if (!*key) /* Icomplete sequence: Ctrl without modified key. */
+				if (!*key) /* Incomplete sequence: Ctrl without modified key. */
 					return NULL;
 				continue;
 			}
@@ -150,9 +150,11 @@ translate_key_nofunc(const char *key)
 			return NULL;
 
 		/* Let's try to skip non-keyboard related escape sequences:
-		 * CSI, OSC, DCS, APC, and PM escape sequences. */
+		 * CSI, OSC, DCS, APC, and PM escape sequences, plus
+		 * characters set switching sequences (e.g. "\e(A". */
 		if ((*key == '[' || *key == ']' || *key == 'P' || *key == '_'
-		|| *key == '^') && key[1] && key[1] != '\\')
+		|| *key == '^' || *key == '(' || *key == ')')
+		&& key[1] && key[1] != '\\')
 			return NULL;
 
 		/* Append single character to the buffer. */
