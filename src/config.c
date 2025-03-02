@@ -2237,7 +2237,7 @@ create_remotes_file(void)
 static int
 create_main_config_dir(void)
 {
-	/* Use the mkdir(1) to let it handle parent directories. */
+	/* Use mkdir(1) to let it handle parent directories. */
 	char *tmp_cmd[] = {"mkdir", "-p", "--", config_dir, NULL};
 	if (launch_execv(tmp_cmd, FOREGROUND, E_NOSTDERR) != FUNC_SUCCESS) {
 		config_ok = 0;

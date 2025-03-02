@@ -1,3 +1,58 @@
+1.24 (Toothrot) - Mar 2, 2025
+
+BUG FIXES
+* File extension conflicts in 'default' color scheme (16-color version).
+* Wrongly sorting Unicode file names ('name' and 'version' sort).
+* When sorting by 'extension', 'CaseSensitiveList=true' is ignored.
+* The value of 'PagerView' is ignored when 'Pager' is set to a value >=1.
+* Pressing 'c' while in the pager stops listing (like 'q').
+* Running plain 'pg' overwrites the value of 'Pager' in the configuration file.
+* When mounting a FS via 'net mount', autocommands for this directory are not immediately executed.
+* The 'ad' command complains that '.rpm' and '.deb' files are not archive/compressed files.
+* 'name' sort behaves like 'version' when file names start with numbers.
+* Not properly clearing the screen on Eterm terminal.
+* Wrong image size when previewing images on the Ghostty terminal.
+* The profiles function is broken (no config file change, system messages are not reset).
+* Wrong file color when TAB completing globs after a path (e.g. dir/*.jpg<TAB>).
+* When there's only one profile Ctrl-Alt-p clears the screen and still attempts to the change the profile.
+* If we have no access to the main configuration directory, the selections file is created in '/tmp' instead of '/tmp/clifm_$USER'.
+* If we have no access to the main configuration directory, selected files are not written to the selections file.
+* TAB completion: Matches not sorted alphabetically in FZF (e.g. ls --<TAB>). Update your color scheme files.
+* Wrongly identifying extension conflicts when running with '--lscolors'.
+* '/dir/GLOB<TAB>' (e.g. '/bin/p*<TAB>') do not generate previews whenever it is the first word.
+* The 't' command informs a wrong size for the trash directory.
+* No lock icon for non-regular files.
+* A few wrong colors when any of 'xs' and/or 'xf' color codes are unset (affects old color schemes).
+* Kilobyte written as 'KB' instead of 'kB' when using decimal sizes ('--si').
+* Ctrl-Alt-b does nothing (points to non-existent function). Removed.
+* Cannot rebind 'bookmarks' to 'Alt-b': clifm complains that this key conflicts with readline and refuses to continue.
+* Unsetting a keybinding via 'kb bind' does not work.
+
+NEW FEATURES/IMPROVEMENTS
+* clifmimg: Drastically reduce the size of postscript thumbnails (1500%!). Update your 'clifmimg' script.
+* Preview: add support for several image formats (dpx, jp2, miff, sgi, and wmf among others). Please update your 'preview.clifm' file.
+* 'mimelist.clifm' and 'preview.clifm' config files: The '%m' placeholder expands to the file's MIME type.
+* Add support for OpenRaster images (open/preview).
+* Add sixel support auto-detection for Yaft.
+* Add support for '.rpm', '.deb', '.arj', '.Z', and '.cab' archives (open)
+* Preview: list files in '.ztd', '.rpm', and '.deb' archives.
+* Preview: add support for krita images ('.kra' and '.krz'), via the 'krita' method in cligmimg.
+* Use 'PrioritySortChar' in the configuration file (new) to pin file names starting with 'PrioritySortChar' to the top of the files list.
+* Two new values added to the 'ShowHiddenFiles' option: 'first' and 'last', to list hidden files first or last.
+* Manually map file extensions to MIME types using the '~/.mime.types' file. Consult the manpage for more information.
+* Allow setting multiple chars in 'PrioritySortChar' option.
+* Report the current directory to the underlying terminal (via the OSC-7 escape sequence). To disable this behavior, run with '--no-report-cwd'.
+* Try harder to create a valid temporary directory (mostly in case of denied access to the directory).
+* If '--lscolors' (using FreeBSD LSCOLORS), read extension colors from the color scheme file.
+* Improve 'kb' command: attempt to display human-readable key presses (e.g. Shift-Up) instead of raw escape sequences (e.g. "\e[1;2A").
+
+MISC
+* $CLIFMRC cannot be used anymore to set the path to the main configuration file (use '-c,--config-file' instead).
+* If 'nf' color code (unaccesible file) isn't set, use whatever color corresponds to the current file type and prepend and exclamation mark to the corresponding entry in the files list to mark it as unaccessible. Same for 'nd' (unaccessible directory).
+* --no-trim-names, TrimNames, and MinFilenameTrim were renamed to --no-truncate-names, TruncateNames, and MinNameTruncate respectively (old names are deprecated).
+* 'open-sel', 'untrash-all', and 'move-sel' keybindings are unset by default.
+* 'copy-sel' can be used as an alias for 'paste-sel' in keybindings.
+
 1.23 (Piranha poodle) - Jan 20, 2025
 
 BUG FIXES
