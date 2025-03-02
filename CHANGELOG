@@ -41,7 +41,7 @@ NEW FEATURES/IMPROVEMENTS
 * Two new values added to the 'ShowHiddenFiles' option: 'first' and 'last', to list hidden files first or last.
 * Manually map file extensions to MIME types using the '~/.mime.types' file. Consult the manpage for more information.
 * Allow setting multiple chars in 'PrioritySortChar' option.
-* Report the current directory to the underlying terminal (via the OSC-7 escape sequence). To disable this behavior, run with '--no-report-cwd'.
+* Report the current directory to the underlying terminal (via the OSC-7 escape sequence). To enable, run with '--report-cwd'.
 * Try harder to create a valid temporary directory (mostly in case of denied access to the directory).
 * If '--lscolors' (using FreeBSD LSCOLORS), read extension colors from the color scheme file.
 * Improve 'kb' command: attempt to display human-readable key presses (e.g. Shift-Up) instead of raw escape sequences (e.g. "\e[1;2A").
