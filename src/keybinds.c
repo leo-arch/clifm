@@ -151,7 +151,7 @@ translate_key_nofunc(const char *key)
 
 		/* Let's try to skip non-keyboard related escape sequences:
 		 * CSI, OSC, DCS, APC, and PM escape sequences, plus
-		 * characters set switching sequences (e.g. "\e(A". */
+		 * character set switching sequences (e.g. "\e(A". */
 		if ((*key == '[' || *key == ']' || *key == 'P' || *key == '_'
 		|| *key == '^' || *key == '(' || *key == ')')
 		&& key[1] && key[1] != '\\')
