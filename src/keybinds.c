@@ -146,20 +146,25 @@ translate_key_nofunc(const char *key)
 			return NULL;
 		}
 
-		/* Append single character to the buffer. */
-		if (*key && buf_len < sizeof(buf) - 2) {
-			buf[buf_len] = *key;
-			buf_len++;
-			key++;
-			/* A character that is not a modifier key marks the end of the
-			 * key sequence. Append an ',' in this case, provided it is
-			 * not the end of the string. */
-			if (*key) {
-				buf[buf_len] = END_KEYSEQ_CHAR;
-				buf_len++;
-			}
-		} else {
+		if (!*key || buf_len >= sizeof(buf) - 2)
 			return NULL;
+
+		/* Let's try to skip non-keyboard related escape sequences:
+		 * CSI, OSC, DCS, APC, and PM escape sequences. */
+		if ((*key == '[' || *key == ']' || *key == 'P' || *key == '_'
+		|| *key == '^') && key[1] && key[1] != '\\')
+			return NULL;
+
+		/* Append single character to the buffer. */
+		buf[buf_len] = *key;
+		buf_len++;
+		key++;
+		/* A character that is not a modifier key marks the end of the
+		 * key sequence. Append an ',' in this case, provided it is
+		 * not the end of the string. */
+		if (*key) {
+			buf[buf_len] = END_KEYSEQ_CHAR;
+			buf_len++;
 		}
 	}
 #undef KBUF_SIZE
