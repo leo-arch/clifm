@@ -685,12 +685,8 @@ check_ext_string(const char *ext, size_t *val_len)
 	char *ptr = tmp_ext;
 
 	int i;
-	for (i = 0; i < NAME_MAX && ext[i]; i++) {
-		if (ext[i] >= 'A' && ext[i] <= 'Z')
-			tmp_ext[i] = ext[i] + ' '; /* Tolower */
-		else
-			tmp_ext[i] = ext[i];
-	}
+	for (i = 0; i < NAME_MAX && ext[i]; i++)
+		tmp_ext[i] = TOLOWER(ext[i]);
 	tmp_ext[i] = '\0';
 
 	const size_t len = (size_t)i;
@@ -698,14 +694,14 @@ check_ext_string(const char *ext, size_t *val_len)
 	i = (int)ext_colors_n;
 	while (--i >= 0) {
 		if (!ext_colors[i].name || !*ext_colors[i].name
-		|| ext_colors[i].len != len || *ptr != *ext_colors[i].name)
+		|| ext_colors[i].len != len || *ptr != TOLOWER(*ext_colors[i].name))
 			continue;
 
 		char *p = ptr + 1, *q = ext_colors[i].name + 1;
 
 		size_t match = 1;
 		while (*p) {
-			if (*p != *q) {
+			if (*p != TOLOWER(*q)) {
 				match = 0;
 				break;
 			}
