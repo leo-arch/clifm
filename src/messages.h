@@ -1486,6 +1486,7 @@ and paths\
 \n      --icons\t\t\t Enable icons\
 \n      --icons-use-file-color\t Icon colors follow file colors\
 \n      --int-vars\t\t Enable internal variables\
+\n      --kitty-keys\t\t Ask the terminal to enable the kitty keyboard protocol\
 \n      --list-and-quit\t\t List files and quit\
 \n      --ls\t\t\t Short for --list-and-quit\
 \n      --lscolors\t\t Read file colors from LS_COLORS or LSCOLORS (BSD style)\

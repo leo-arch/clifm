@@ -1507,6 +1507,7 @@ struct param_t {
 #endif /* !_NO_ICONS */
 	int icons_use_file_color;
 	int int_vars;
+	int kitty_keys; /* kitty keyboard protocol */
 	int list_and_quit;
 	int light_mode;
 	int list_dirs_first;

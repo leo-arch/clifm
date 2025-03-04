@@ -499,6 +499,9 @@ check_term(void)
 
 	check_img_support(t);
 
+	if (xargs.kitty_keys == 1)
+		SET_KITTY_KEYS;
+
 	/* At this point, term_caps.unicode is zero */
 	if (xargs.unicode == 1 || (xargs.unicode == UNSET
 	&& term_caps.req_cur_pos == 1 && check_unicode_support() == 1))

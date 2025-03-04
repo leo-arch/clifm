@@ -1849,6 +1849,7 @@ unset_xargs(void)
 	xargs.icons_use_file_color = UNSET;
 #endif /* !_NO_ICONS */
 	xargs.int_vars = UNSET;
+	xargs.kitty_keys = UNSET;
 	xargs.light_mode = UNSET;
 	xargs.list_and_quit = UNSET;
 	xargs.list_dirs_first = UNSET;

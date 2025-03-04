@@ -97,6 +97,7 @@ _clifm ()
         --icons
         --icons-use-file-color
         --int-vars
+        --kitty-keys
         --list-and-quit
         --lscolors
         --max-dirhist

@@ -158,6 +158,7 @@
 #define LOPT_UNICODE                281
 #define LOPT_ALT_MIMEFILE           282
 #define LOPT_REPORT_CWD             283
+#define LOPT_KITTY_KEYS             284
 
 /* Link long (--option) and short options (-o) for the getopt_long function. */
 static struct option const longopts[] = {
@@ -222,6 +223,7 @@ static struct option const longopts[] = {
 	{"icons", no_argument, 0, LOPT_ICONS},
 	{"icons-use-file-color", no_argument, 0, LOPT_ICONS_USE_FILE_COLOR},
 	{"int-vars", no_argument, 0, LOPT_INT_VARS},
+	{"kitty-keys", no_argument, 0, LOPT_KITTY_KEYS},
 	{"list-and-quit", no_argument, 0, LOPT_LIST_AND_QUIT},
 	{"ls", no_argument, 0, LOPT_LIST_AND_QUIT},
 	{"lscolors", no_argument, 0, LOPT_LSCOLORS},
@@ -1687,6 +1689,7 @@ parse_cmdline_args(const int argc, char **argv)
 
 		case LOPT_INT_VARS:
 			xargs.int_vars = conf.int_vars = 1; break;
+		case LOPT_KITTY_KEYS: xargs.kitty_keys = 1; break;
 		case LOPT_LIST_AND_QUIT:
 			xargs.list_and_quit = 1;
 			xargs.no_dirjump = 1;

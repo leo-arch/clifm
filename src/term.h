@@ -70,6 +70,10 @@
 
 #define CPR_CODE "\x1b[6n" /* Cursor position report */
 
+/* Kitty keyboard protocol */
+#define SET_KITTY_KEYS   fputs("\x1b[>1u", stdout)
+#define UNSET_KITTY_KEYS fputs("\x1b[<u", stdout)
+
 __BEGIN_DECLS
 
 void check_term(void);

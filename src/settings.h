@@ -525,6 +525,7 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define DEF_ICONS 0
 #define DEF_ICONS_GAP 1 /* Number of spaces between icons and filenames */
 #define DEF_INT_VARS 0
+#define DEF_KITTY_KEYS 0 /* Kitty keyboard protocol */
 #define DEF_LIGHT_MODE 0
 /* Possible values: LNK_CREAT_REG, LNK_CREAT_ABS, and LNK_CREAT_REL */
 #define DEF_LINK_CREATION_MODE LNK_CREAT_REG

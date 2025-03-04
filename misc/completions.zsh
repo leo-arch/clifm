@@ -60,6 +60,7 @@ args=(
 	'--icons[enable icons]'
 	'--icons-use-file-color[icon colors follows file colors]'
 	'--int-vars[enable internal variables]'
+	'--kitty-keys[ask the terminal to enable the kitty keyboard protocol]'
 	'--list-and-quit[list files and quit]'
 	'--lscolors[read file colors from LS_COLORS]'
 	'--max-dirhist=[maximum number of visited directories to remember]:int:'
