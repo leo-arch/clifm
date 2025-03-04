@@ -108,18 +108,143 @@ append_str(char *buf, const int buf_size, size_t *len, const char *str)
 }
 
 static const char *
+get_key_symbol(const int key)
+{
+	switch (key) {
+	case 0: return "NULL"; case 1: return "SOH"; case 2: return "STX";
+	case 3: return "ETX"; case 4: return "EOT"; case 5: return "ENQ";
+	case 6: return "ACK"; case 7: return "BELL"; case 8: return "BS";
+	case 9: return "Tab"; case 10: return "LF"; case 11: return "VT";
+	case 12: return "FF"; case 13: return "CR"; case 14: return "SO";
+	case 15: return "SI"; case 16: return "DLE"; case 17: return "DC1";
+	case 18: return "DC2"; case 19: return "DC3"; case 20: return "DC4";
+	case 21: return "NAK"; case 22: return "SYN"; case 23: return "ETB";
+	case 24: return "CAN"; case 25: return "EM"; case 26: return "SUB";
+	case 27: return "ESC"; case 28: return "FS"; case 29: return "GS";
+	case 30: return "RS"; case 31: return "US"; case 32: return "Space";
+	default: return "UNKNOWN";
+	}
+}
+
+/* Translate the modifier number MOD_NUM into human-readable form. */
+static const char *
+get_mod_symbol(const int mod_num)
+{
+	/* The biggest value mod_num can take is 255 (since
+	 * 1 + 2 + 4 + 8 + 16 + 32 + 64 + 128 = 255). In this case, the modifier
+	 * string would be "Shift-Alt-Ctrl-Super-Hyper-Meta-CapsLock-NumLock-",
+	 * which is 50 bytes long, including the terminating NUL char. */
+	static char mod[64];
+	memset(mod, '\0', sizeof(mod));
+
+	const int modifiers = mod_num - 1;
+	int len = 0;
+
+	if (modifiers & 1)
+		len += snprintf(mod + len, sizeof(mod) - (size_t)len, "Shift-");
+
+	if (modifiers & 2)
+		len += snprintf(mod + len, sizeof(mod) - (size_t)len, "Alt-");
+
+	if (modifiers & 4)
+		len += snprintf(mod + len, sizeof(mod) - (size_t)len, "Ctrl-");
+
+	if (modifiers & 8)
+		len += snprintf(mod + len, sizeof(mod) - (size_t)len, "Super-");
+
+	if (modifiers & 16)
+		len += snprintf(mod + len, sizeof(mod) - (size_t)len, "Hyper-");
+
+	if (modifiers & 32)
+		len += snprintf(mod + len, sizeof(mod) - (size_t)len, "Meta-");
+
+	if (modifiers & 64)
+		len += snprintf(mod + len, sizeof(mod) - (size_t)len, "CapsLock-");
+
+	if (modifiers & 128)
+		len += snprintf(mod + len, sizeof(mod) - (size_t)len, "NumLock-");
+
+	return mod;
+}
+
+static int
+append_str_kitty(char *buf, const int buf_size, size_t *len, char *str)
+{
+	const size_t length = strlen(str);
+
+	if (length >= (size_t)buf_size - *len)
+		return (-1); /* Buffer overflow */
+
+	if (length <= 2)
+		return 0;
+
+	const char *orig_str = str;
+	str += 3; // move past '['
+
+	char *key_end = strchr(str, ';');
+	if (!key_end || !key_end[1])
+		return 0;
+
+	*key_end = '\0';
+	const int key_num = atoi(str);
+	*key_end = ';';
+	if (key_num < 0 || key_num > 255)
+		return 0;
+
+	char *mod_end = strchr(key_end + 1, 'u');
+	if (!mod_end)
+		return 0;
+
+	*mod_end = '\0';
+	const int mod_num = atoi(key_end + 1);
+	*mod_end = 'u';
+	if (mod_num < 0 || mod_num > 512)
+		return 0;
+
+	const char *mod = get_mod_symbol(mod_num);
+	if (!mod || !*mod)
+		return 0;
+
+	/* Check whether there's another key sequence after the one currently
+	 * analyzed, in which case we append an ending comma (,). */
+	const int cont = (mod_end[1] != '\0');
+
+	int bytes = 0;
+
+	const char key_num_str[2] = {(char)key_num, '\0'};
+	const char *keysym = key_num > 32 ? key_num_str : get_key_symbol(key_num);
+
+	bytes = snprintf(buf + *len, (size_t)buf_size - *len, "%s%s%s",
+		mod ? mod : "", keysym, cont == 1 ? "," : "");
+
+	*len += (size_t)bytes;
+
+	return (int)((mod_end + 1) - orig_str);
+}
+
+static const char *
 translate_key_nofunc(const char *key)
 {
 	if (!key || !*key || *key != '\\')
 		return NULL;
 
-#define KBUF_SIZE 128 /* This should be enough to handle most keybindings. */
+#define KBUF_SIZE 256 /* This should be enough to handle most keybindings. */
 #define END_KEYSEQ_CHAR ','
 	static char buf[KBUF_SIZE] = {0};
 	size_t buf_len = 0;
 
 	while (*key) {
 		if (*key == '\\') {
+
+			if (key[1] == 'e' && key[2] == '[' && key[3]) {
+				const int len =
+					append_str_kitty(buf, KBUF_SIZE, &buf_len, (char *)key);
+				if (len <= 0)
+					return NULL;
+				key += len;
+				continue;
+			}
+
 			if (key[1] == 'e' || (key[1] == 'M' && key[2] ==  '-')) {
 				if (append_str(buf, KBUF_SIZE, &buf_len, "Alt-") == -1)
 					return NULL;
@@ -380,6 +505,9 @@ translate_key(const char *key)
 		{"\\e[01;5R", "Ctrl-F3"}, {"\\e[01;5S", "Ctrl-F4"},
 
 		{"\\eOH", "Home"}, {"\\eOF", "End"},
+
+		/* kitty keyboard protocol */
+		{"\\e[P", "F1"}, {"\\e[Q", "F2"}, {"\\e[S", "F4"},
 
 		/* emacs and others */
 		{"\\eOA", "Up"}, {"\\eOB", "Down"},
@@ -644,8 +772,8 @@ get_new_keybind(void)
 
 			if (c == CTRL('C')) {
 				putchar('\r');
+				MOVE_CURSOR_RIGHT(1);
 				ERASE_TO_RIGHT;
-				putchar(':');
 				fflush(stdout);
 				buf[0] = '\0';
 				len = 0;
@@ -668,6 +796,25 @@ get_new_keybind(void)
 		prev = ch;
 		if (ret < 0 || (size_t)ret >= remaining)
 			continue;
+
+		/* Kitty keyboard protocol */
+		if (*buf && strstr(buf, "\\e[100;5u")) { /* Ctrl-D */
+			MOVE_CURSOR_LEFT(8);
+			ERASE_TO_RIGHT;
+			fflush(stdout);
+			buf[0] = '\0';
+			break;
+		}
+
+		if (*buf && strstr(buf, "\\e[99;5u")) { /* Ctrl-C */
+			putchar('\r');
+			MOVE_CURSOR_RIGHT(1);
+			ERASE_TO_RIGHT;
+			fflush(stdout);
+			buf[0] = '\0';
+			len = 0;
+			continue;
+		}
 
 		if (*buf) {
 			fputs(buf + len, stdout);
@@ -836,9 +983,13 @@ bind_kb_func(const char *func_name)
 	if (stat(kbinds_file, &a) == -1 && create_kbinds_file() == FUNC_FAILURE)
 		return FUNC_FAILURE;
 
-	const char *cur_key = find_key(func_name);
+	const char *func_key = find_key(func_name);
+	const char *translated_key = func_key ? translate_key(func_key) : "unset";
+	/* translated_key can only be NULL if func_key is not NULL. */
+	const char *cur_key = translated_key ? translated_key : func_key;
+
 	printf(_("Enter a keybinding for %s%s%s (current: %s%s%s)\n"),
-		BOLD, func_name, df_c, BOLD, cur_key ? cur_key : "unset", df_c);
+		BOLD, func_name, df_c, BOLD, cur_key, df_c);
 	puts(_("(Enter:accept, Ctrl-d:abort, Ctrl-c:clear-line)"));
 	puts(_("To unset the function enter '-'"));
 

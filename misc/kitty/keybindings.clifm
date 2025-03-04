@@ -1,0 +1,171 @@
+                ##################################
+                #   Keybindings File for Clifm   #
+                ##################################
+
+# Empty and commented lines are ignored.
+
+# This file is specially crafted to make use of the kitty keyboard protocol:
+# https://sw.kovidgoyal.net/kitty/keyboard-protocol/
+
+# Below is the list of available functions and their default key bindings.
+# To edit a keybinding use the 'kb bind' command. For example, to bind
+# the previous-dir function run 'kb bind previous-dir', enter a new
+# key binding, and confirm.
+
+# Alt-j
+previous-dir:\e[106;3u
+# Shift-left (rxvt)
+previous-dir2:\e[d
+# Shift-left (xterm)
+previous-dir3:\e[1;2D
+# Shift-left (others)
+previous-dir4:\e[2D
+
+# Alt-k
+next-dir:\e[107;3u
+# Shift-right
+next-dir3:\e[1;2C
+
+# Alt-u
+parent-dir:\e[117;3u
+# Shift-up
+parent-dir3:\e[1;2A
+
+# Alt-e
+home-dir:\e[101;3u
+
+# Alt-r
+root-dir:\e[114;3u
+
+# Alt-,
+pinned-dir:\e[112;3u
+# Alt-1
+workspace1:\e[49;3u
+# Alt-2
+workspace2:\e[50;3u
+# Alt-3
+workspace3:\e[51;3u
+# Alt-4
+workspace4:\e[52;3u
+
+# Help
+# F1
+show-manpage:\e[P
+# F2
+show-cmds:\e[Q
+# F3
+show-kbinds:\e[13~
+
+# Ctrl-Alt-a
+archive-sel:\e[97;7u
+# Alt-b
+bookmarks:\e[98;3u
+# Alt-c
+clear-line:\e[99;3u
+# Alt-t
+clear-msgs:\e[116;3u
+# Ctrl-Alt-v
+copy-sel:\e[118;7u
+# Alt-n
+create-file:\e[110;3u
+# Alt-d
+deselect-all:\e[100;3u
+# Alt-g
+dirs-first:\e[103;3u
+# Ctrl-Alt-e
+export-sel:\e[101;7u
+# Alt--
+launch-view:\e[45;3u
+# Alt-o
+#lock:\e[11;3u
+# Alt-m
+mountpoints:\e[109;3u
+# Ctrl-Alt-n
+#move-sel:\e[110;7u
+# Ctrl-Alt-x
+new-instance:\e[120;7u
+# Ctrl-Alt-p
+next-profile:\e[112;7u
+# Alt-,
+only-dirs:\e[44;3u
+# Ctrl-Alt-u
+#open-sel:\e[117;7u
+# Ctrl-Alt-v
+#paste-sel:\e[118;7u
+# Alt-v
+prepend-sudo:\e[118;3u
+# Ctrl-Alt-o
+previous-profile:\e[111;7u
+# Ctrl-Alt-r
+rename-sel:\e[114;7u
+# Ctrl-Alt-d
+remove-sel:\e[100;7u
+# Ctrl-r
+refresh-screen:\e[114;5u
+# Alt-0
+run-pager:\e[48;3u
+# Alt-s
+selbox:\e[115;3u
+# Alt-a
+select-all:\e[97;3u
+# Alt-h
+show-dirhist:\e[104;3u
+# Alt-z
+sort-previous:\e[122;3u
+# Alt-x
+sort-next:\e[120;3u
+# Alt-i
+toggle-hidden:\e[105;3u
+# Alt-.
+toggle-hidden2:\e[46;3u
+# Alt-y
+toggle-light:\e[121;3u
+# Alt-l
+toggle-long:\e[108;3u
+# Alt-+
+toggle-follow-links-long:\e[43;3u
+# Ctrl-Alt-l
+toggle-max-name-len:\e[108;7u
+# Alt-Tab
+toggle-disk-usage:\e[9;3u
+# Alt-w
+toggle-virtualdir-full-paths:\e[119;3u
+# Ctrl-Alt-t
+trash-sel:\e[116;7u
+# Ctrl-Alt-u
+#untrash-all:\e[117;7u
+
+# F6
+open-mime:\e[17~
+# F7
+open-preview:\e[18~
+#open-jump-db:\e[18~
+# F8
+edit-color-scheme:\e[19~
+# F9
+open-keybinds:\e[20~
+# F10
+open-config:\e[21~
+# F11
+open-bookmarks:\e[23~
+# F12
+quit:\e[24~
+
+# Plugins
+# 1) Make sure your plugin is in the plugins directory (or use any of the
+# plugins in there)
+# 2) Link pluginx to your plugin using the 'actions edit' command. E.g.:
+# "plugin1=myplugin.sh"
+# 3) Set a keybinding here for pluginx. E.g.: "plugin1:\M-7"
+
+# Bound to the xclip plugin
+# Ctrl-y
+plugin1:\e[121;5u
+
+# Bound to sort_mtime plugin
+# Ctrl-r
+#plugin2:\e[114;5u
+
+#plugin2:
+#plugin3:
+#plugin4:

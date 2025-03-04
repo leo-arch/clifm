@@ -4203,7 +4203,7 @@ init_config(void)
 	char *t = getenv("TERM");
 	if (t && *t == 'x' && strncmp(t, "xterm", 5) == 0)
 		/* If running Xterm, instruct it to send an escape code (27) for
-		 * Meta (Alt) key sequences. Otherwise, Alt keybindings won't work */
+		 * Meta (Alt) key sequences. Otherwise, Alt keybindings won't work. */
 		META_SENDS_ESC;
 }
 

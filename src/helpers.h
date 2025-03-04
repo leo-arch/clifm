@@ -1240,7 +1240,7 @@ struct filter_t {
 
 extern struct filter_t filter;
 
-/* Struct to store information about the current user */
+/* Struct to store information about the current user. */
 struct user_t {
 	char *home;
 	char *name;
