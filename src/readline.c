@@ -636,6 +636,7 @@ alt_rl_getc(FILE *stream)
 			fix_rl_point(c);
 			return c;
 		}
+
 		/* If zero characters are returned, then the file that we are
 		reading from is empty! Return EOF in that case. */
 		if (result == 0)
@@ -675,7 +676,7 @@ alt_rl_getc(FILE *stream)
 
 		  /* If the error that we received was SIGINT, then try again,
 		 this is simply an interrupted system call to read().
-		 Otherwise, some error ocurred, also signifying EOF. */
+		 Otherwise, some error occurred, also signifying EOF. */
 	}
 }
 
@@ -713,6 +714,8 @@ cb_linehandler(char *line)
 
 		free(line);
 	}
+
+	rl_default_answer = 0;
 }
 
 static int
