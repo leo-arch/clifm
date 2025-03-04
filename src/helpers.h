@@ -28,7 +28,7 @@
 #define PROGRAM_NAME_UPPERCASE "Clifm"
 #define PROGRAM_NAME "clifm"
 #define PROGRAM_DESC "The command line file manager"
-#define VERSION "1.24.2"
+#define VERSION "1.24.3"
 #define DATE "Mar 4, 2025"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "https://github.com/leo-arch/clifm"
