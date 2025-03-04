@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Mar 2, 2025" "clifm 1.24" "Clifm Manual"
+.TH "CLIFM" "1" "Mar 4, 2025" "clifm 1.24.3" "Clifm Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -1494,14 +1494,41 @@ Readline keybindings for command line editing, such as \fICtrl\-a\fR, to move th
 .TP
 .B Keybindings for plugins
 .TP
-\fBclifm\fR provides sixteen customizable keybindings for custom plugins. The procedure for setting a keybinding for a plugin is the following:.sp
- 1) Copy your plugin to the plugins directory (or use any of the plugins already in there)
- 2) Link pluginx (where \'x\' is the plugin number [1\-16]) to your plugin using the \fIactions edit\fR command. E.g.: "plugin1=myplugin.sh"
- 3) Set a keybinding for pluginx using the \fIkb edit\fR command. E.g.: "plugin1:\\M\-7"
+\fBclifm\fR provides sixteen customizable keybindings for custom plugins. The procedure for setting a keybinding for a plugin is the following:
+.TP
+\fB1\fR. Copy your plugin to the plugins directory (or use any of the plugins already in there)
+.TP
+\fB2\fR. Link pluginx (where \'x\' is the plugin number [1\-16]) to your plugin using the \fIactions edit\fR command. E.g.: "plugin1=myplugin.sh"
+.TP
+\fB3\fR. Set a keybinding for pluginx using the \fIkb edit\fR command. E.g.: "plugin1:\\M\-7"
+.TP
+.B Kitty keyboard protocol support
+.TP
+The Kitty Keyboard Protocol offers a significant improvement over the current handling of keyboard events in terminals. This protocol utilizes \fICSI u\fR escape sequences and introduces several enhancements, including the ability to use extra modifier keys such as Super, Meta, and Hyper.
+.TP
+To enable the Kitty Keyboard Protocol, follow these steps:
+.TP
+\fB1\fR. Download the specially crafted keybindings configuration file designed to handle \fICSI u\fR escape sequences (\fIhttps://github.com/leo-arch/clifm/blob/master/misc/kitty/keybindings.clifm\fR).
+.TP
+\fB2\fR. Configure \fBclifm\fR to use this new file instead of the default one (\fI~/.config/clifm/keybindings.clifm\fR) by using the \fI\-k\fR command line switch. Alternatively, you can replace the default file with the new one.
+.TP
+\fB3\fR. If your terminal is not already set up to send \fICSI u\fR sequences, use the \fI\-\-kitty\-keys\fR command line switch.
+.TP
+Summarizing, and once you have the replacement keybindings file in place, run the following command:
+
+ \fBclifm -k /path/to/keybindings/file --kitty-keys\fR
+.TP
+Important
+.TP
+When using the Kitty Keyboard Protocol, the Ctrl-D shortcut (used to quit secondary prompts) will no longer work. To resolve this issue, add the following line to your \fIkitty.conf\fR file:
+
+ \fBmap control+d send_text kitty \\x04\fR
+.TP
+This will force the terminal to emit the old value for this specific key binding, providing a workaround for the issue.
 .TP
 .B Troubleshooting
 .TP
-Some of these keybindings might not work on your console/terminal emulator, depending on your system. Some useful tips on this regard:
+Some of these default keybindings may not work on your console/terminal emulator, depending on your system. Some useful tips on this regard:
 .TP
 Haiku terminal: Most of these keybindings won\'t work on the Haiku terminal, since Alt plays here the role Ctrl usually plays in most other systems (see the Haiku documentation). To fix this, set your custom keybindings.
 .TP
