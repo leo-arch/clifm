@@ -3415,9 +3415,11 @@ static void
 set_hardcoded_keybinds(void)
 {
 	rl_bind_keyseq("\\M-*", do_nothing);
+	rl_bind_keyseq("\x1b[42;3u", do_nothing);
 
 #ifndef __HAIKU__
 	rl_bind_keyseq("\\C-l", rl_refresh);
+	rl_bind_keyseq("\x1b[108;5u", rl_refresh);
 	rl_bind_keyseq("\\C-p", rl_cmdhist);
 	rl_bind_keyseq("\\C-n", rl_cmdhist);
 #endif /* !__HAIKU__ */
@@ -3425,15 +3427,18 @@ set_hardcoded_keybinds(void)
 	rl_bind_keyseq("\x1b[B", rl_cmdhist);
 
 	rl_bind_keyseq("\\M-q", rl_del_last_word);
+	rl_bind_keyseq("\x1b[113;3u", rl_del_last_word);
 	rl_bind_key('\t', rl_tab_comp);
 
 #ifndef _NO_SUGGESTIONS
 # ifndef __HAIKU__
+	rl_bind_keyseq("\x1b[102;5u", rl_accept_suggestion);
 	rl_bind_keyseq("\\C-f", rl_accept_suggestion);
 	rl_bind_keyseq("\x1b[C", rl_accept_suggestion);
 	rl_bind_keyseq("\x1bOC", rl_accept_suggestion);
 
 	/* Bind Alt-Right and Alt-f to accept the first suggested word */
+	rl_bind_keyseq("\x1b[102;3u", rl_accept_first_word);
 	rl_bind_keyseq("\x1b\x66", rl_accept_first_word);
 	rl_bind_keyseq("\x1b[3C", rl_accept_first_word);
 	rl_bind_keyseq("\x1b\x1b[C", rl_accept_first_word);
