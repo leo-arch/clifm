@@ -1183,11 +1183,26 @@ list_rl_kbinds(void)
 		if (!keys)
 			continue;
 
+		printf("%-*s ", (int)flen, name);
+
+		char *prev = NULL;
 		for (j = 0; keys[j]; j++) {
 			const char *t = translate_key(keys[j]);
-			printf("%-*s (%s)\n", (int)flen, name, t ? t : keys[j]);
+
+			/* Skip consecutive duplicates. */
+			if (prev && t && *prev == *t && strcmp(prev, t) == 0) {
+				free(keys[j]);
+				continue;
+			}
+
+			printf("(%s) ", t ? t : keys[j]);
 			free(keys[j]);
+
+			if (t)
+				prev = (char *)t;
 		}
+
+		putchar('\n');
 		free(keys);
 	}
 

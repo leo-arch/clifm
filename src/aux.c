@@ -998,7 +998,7 @@ count_dir(const char *dir, const int pop)
 	return c;
 }
 
-/* Get the path of a the command CMD inspecting all paths in the PATH
+/* Get the path of the command CMD inspecting all paths in the PATH
  * environment variable (it basically does the same as which(1)).
  * Returns the appropriate path or NULL in case of error (in which case
  * errno is set to either EINVAL or ENOENT). */

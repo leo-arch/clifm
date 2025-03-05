@@ -234,11 +234,11 @@ read_timeout(struct pollfd *pfd, const int timeout)
 	pfd->fd = STDIN_FILENO;
 	pfd->events = POLLIN;
 
-	if (poll(pfd, 1, timeout) == -1) // 1 second timeout
+	if (poll(pfd, 1, timeout) == -1)
 		return (-1);
 
 	if (!(pfd->revents & POLLIN))
-		// timeout, no input received
+		/* Time out, no input received. */
 		return 0;
 
 	return 1;
