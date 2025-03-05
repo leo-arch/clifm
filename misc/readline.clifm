@@ -28,10 +28,11 @@ set completion-ignore-case on
 
 set meta-flag on
 set input-meta on
-set convert-meta off
+#set convert-meta off
 set output-meta on
 
 $if mode=vi
+"\e[101;7u": emacs-editing-mode
 "\e\C-e": emacs-editing-mode
 #set keymap vi-move
 #"i": backward-char
@@ -93,8 +94,29 @@ $if mode=emacs
 # Rebind some keys
 "\e\C-j": vi-editing-mode
 
+# These are for the Kitty Keyboard Protocol 
+"\e[106;7u": vi-editing-mode
+"\e[117;5u": unix-line-discard
+"\e[119;5u": unix-word-rubout
+"\e[116;5u": transpose-chars
+"\e[54;3u": tilde-expand
+"\e[126;3u": tilde-expand
+"\e[121;5u": yank
+"\e[35;3u": yank-last-arg
+"\e[107;5u": kill-line
+"\e[101;5u": end-of-line
+"\e[97;5u": beginning-of-line
+"\e[98;5u": backward-char
+"\e[102;5u": forward-char
+"\e[106;5u": accept-line
+"\e[109;5u": accept-line
+"\e[118;5u": quoted-insert
+"\e[104;5u": backward-delete-char
+
 # Keyboard macros
 # Ctrl-Alt-w: move the cursor to the end of the line and insert " # macro example"
 #"\e\C-w": "\C-e # macro example"
+# Same thing, but for the kitty protocol
+#"\e[119;7u": "\e[101;5u # macro example"
 
 $endif
