@@ -29,6 +29,7 @@
 
 #include "helpers.h"
 
+#include <poll.h>   /* poll */
 #include <signal.h> /* signal */
 #include <stdlib.h> /* getenv */
 #include <string.h> /* strchr */
@@ -227,6 +228,22 @@ disable_raw_mode(const int fd)
 		? FUNC_FAILURE : FUNC_SUCCESS;
 }
 
+static int
+read_timeout(struct pollfd *pfd, const int timeout)
+{
+	pfd->fd = STDIN_FILENO;
+	pfd->events = POLLIN;
+
+	if (poll(pfd, 1, timeout) == -1) // 1 second timeout
+		return (-1);
+
+	if (!(pfd->revents & POLLIN))
+		// timeout, no input received
+		return 0;
+
+	return 1;
+}
+
 /* Use the "ESC [6n" escape sequence to query the cursor position (both
  * vertical and horizontal) and store both values in C (columns) and L (lines).
  * Returns 0 on success and 1 on error. */
@@ -235,6 +252,7 @@ get_cursor_position(int *c, int *l)
 {
 	char buf[32];
 	unsigned int i = 0;
+	struct pollfd pfd;
 
 	if (enable_raw_mode(STDIN_FILENO) == -1)
 		return FUNC_FAILURE;
@@ -249,7 +267,8 @@ get_cursor_position(int *c, int *l)
 	/* 2. Read the response: "ESC [ rows ; cols R" */
 	int read_err = 0;
 	while (i < sizeof(buf) - 1) {
-		if (read(STDIN_FILENO, buf + i, 1) != 1) { /* flawfinder: ignore */
+		if (read_timeout(&pfd, DEF_READ_TIMEOUT) != 1
+		|| read(STDIN_FILENO, buf + i, 1) != 1) { // flawfinder: ignore
 			read_err = 1;
 			break;
 		}
@@ -286,6 +305,7 @@ check_sixel_support(void)
 {
 	char buf[64];
 	unsigned int i = 0;
+	struct pollfd pfd;
 
 	if (enable_raw_mode(STDIN_FILENO) == -1)
 		return (-1);
@@ -299,7 +319,8 @@ check_sixel_support(void)
 	/* 2. Read the response: "n;n;n;...c" */
 	int read_err = 0;
 	while (i < sizeof(buf) - 1) {
-		if (read(STDIN_FILENO, buf + i, 1) != 1) { /* flawfinder: ignore */
+		if (read_timeout(&pfd, DEF_READ_TIMEOUT) != 1
+		|| read(STDIN_FILENO, buf + i, 1) != 1) { // flawfinder: ignore
 			read_err = 1;
 			break;
 		}
@@ -334,6 +355,7 @@ check_unicode_support(void)
 {
 	char buf[64];
 	unsigned int i = 0;
+	struct pollfd pfd;
 
 	if (enable_raw_mode(STDIN_FILENO) == -1)
 		return (-1);
@@ -349,7 +371,8 @@ check_unicode_support(void)
 	/* 2. Read the response: "...;nR" */
 	int read_err = 0;
 	while (i < sizeof(buf) - 1) {
-		if (read(STDIN_FILENO, buf + i, 1) != 1) { /* flawfinder: ignore */
+		if (read_timeout(&pfd, DEF_READ_TIMEOUT) != 1
+		|| read(STDIN_FILENO, buf + i, 1) != 1) { // flawfinder: ignore
 			read_err = 1;
 			break;
 		}

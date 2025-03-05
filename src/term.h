@@ -74,6 +74,9 @@
 #define SET_KITTY_KEYS   fputs("\x1b[>1u", stdout)
 #define UNSET_KITTY_KEYS fputs("\x1b[<u", stdout)
 
+/* Time in millisenconds to wait for terminal responses. */
+#define DEF_READ_TIMEOUT 50
+
 __BEGIN_DECLS
 
 void check_term(void);
