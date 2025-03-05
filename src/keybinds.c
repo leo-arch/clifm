@@ -110,7 +110,16 @@ append_str(char *buf, const int buf_size, size_t *len, const char *str)
 static const char *
 get_key_symbol(const int key)
 {
+	static char keysym_str[2] = {0};
+
+	/* These are directly printable */
+	if (key > 32 && key < 256 && key != 127  && key != 160 && key != 173) {
+		keysym_str[0] = (char)key;
+		return keysym_str;
+	}
+
 	switch (key) {
+	/* Control keys */
 	case 0: return "NULL"; case 1: return "SOH"; case 2: return "STX";
 	case 3: return "ETX"; case 4: return "EOT"; case 5: return "ENQ";
 	case 6: return "ACK"; case 7: return "BELL"; case 8: return "BS";
@@ -121,7 +130,57 @@ get_key_symbol(const int key)
 	case 21: return "NAK"; case 22: return "SYN"; case 23: return "ETB";
 	case 24: return "CAN"; case 25: return "EM"; case 26: return "SUB";
 	case 27: return "ESC"; case 28: return "FS"; case 29: return "GS";
-	case 30: return "RS"; case 31: return "US"; case 32: return "Space";
+	case 30: return "RS"; case 31: return "US";
+
+	/* Non-printable regular keys */
+	case 32: return "Space"; case 127: return "Del";
+	case 160: return "NSBP"; case 173: return "SHY";
+
+	/* Special keyboard keys */
+	case 57358: return "CapsLock"; case 57359: return "ScrollLock";
+	case 57360: return "NumLock"; case 57361: return "PrtScr";
+	case 57362: return "Pause"; case 57363: return "Menu";
+	case 57376: return "F13"; case 57377: return "F14";
+	case 57378: return "F15"; case 57379: return "F16";
+	case 57380: return "F17"; case 57381: return "F18";
+	case 57382: return "F19"; case 57383: return "F20";
+	case 57384: return "F21"; case 57385: return "F22";
+	case 57386: return "F23"; case 57387: return "F24";
+	case 57388: return "F25"; case 57389: return "F26";
+	case 57390: return "F27"; case 57391: return "F28";
+	case 57392: return "F29"; case 57393: return "F30";
+	case 57394: return "F31"; case 57395: return "F32";
+	case 57396: return "F33"; case 57397: return "F34";
+	case 57398: return "F35"; case 57399: return "Numpad0";
+	case 57400: return "Numpad1"; case 57401: return "Numpad2";
+	case 57402: return "Numpad3"; case 57403: return "Numpad4";
+	case 57404: return "Numpad5"; case 57405: return "Numpad6";
+	case 57406: return "Numpad7"; case 57407: return "Numpad8";
+	case 57408: return "Numpad9"; case 57409: return "NumpadDecimal";
+	case 57410: return "NumpadDivide"; case 57411: return "NumpadMultiply";
+	case 57412: return "NumpadSubtract"; case 57413: return "NumpadAdd";
+	case 57414: return "NumpadEnter"; case 57415: return "NumpadEquals";
+	case 57416: return "NumpadSeparator"; case 57417: return "NumpadLeft";
+	case 57418: return "NumpadRight"; case 57419: return "NumpadUp";
+	case 57420: return "NumpadDown"; case 57421: return "NumpadPageUp";
+	case 57422: return "NumpadPageDown"; case 57423: return "NumpadHome";
+	case 57424: return "NumpadEnd"; case 57425: return "NumpadInsert";
+	case 57426: return "NumpadDelete"; case 57427: return "NumpadBegin";
+	case 57428: return "MediaPlay"; case 57429: return "MediaPause";
+	case 57430: return "MediaPlayPause"; case 57431: return "MediaReverse";
+	case 57432: return "MediaStop"; case 57433: return "MediaFastForward";
+	case 57434: return "MediaRewind"; case 57435: return "MediaTrackNext";
+	case 57436: return "MediaTrackPrevious"; case 57437: return "MediaRecord";
+	case 57438: return "VolumeDown"; case 57439: return "VolumeUp";
+	case 57440: return "VolumeMute"; case 57441: return "LShift";
+	case 57442: return "LControl"; case 57443: return "LAlt";
+	case 57444: return "LSuper"; case 57445: return "LHyper";
+	case 57446: return "LMeta"; case 57447: return "RShift";
+	case 57448: return "RControl"; case 57449: return "RAlt";
+	case 57450: return "RSuper"; case 57451: return "RHyper";
+	case 57452: return "RMeta"; case 57453: return "ISO_Level3_Shift";
+	case 57454: return "ISO_Level5_Shift";
+
 	default: return "UNKNOWN";
 	}
 }
@@ -167,6 +226,38 @@ get_mod_symbol(const int mod_num)
 	return mod;
 }
 
+#define VALID_KITTY_KEY(n) (((n) >= 0 && (n) <= 255) \
+	|| ((n) >= 57344 && (n) <= 63743))
+
+static int
+append_kitty_key_no_mod(char *buf, const int buf_size, size_t *len, char *str)
+{
+	char *key_end = strchr(str, 'u');
+	if (!key_end)
+		return 0;
+
+	*key_end = '\0';
+	/* STR is "\e[NNN", so that we move past '[' to get the number */
+	const int key_num = atoi(str + 3);
+	*key_end = 'u';
+
+	if (!VALID_KITTY_KEY(key_num))
+		return 0;
+
+	const int cont = (key_end[1] != '\0');
+	const char *keysym = get_key_symbol(key_num);
+	if (!keysym)
+		return 0;
+
+	const int bytes = snprintf(buf + *len, (size_t)buf_size - *len,
+		"%s%s", keysym, cont == 1 ? "," : "");
+
+	*len += (size_t)bytes;
+
+	return (int)((key_end + 1) - str);
+
+}
+
 static int
 append_str_kitty(char *buf, const int buf_size, size_t *len, char *str)
 {
@@ -178,17 +269,18 @@ append_str_kitty(char *buf, const int buf_size, size_t *len, char *str)
 	if (length <= 2)
 		return 0;
 
-	const char *orig_str = str;
-	str += 3; // move past '['
+	char *orig_str = str;
+	str += 3; /* Move past '[' */
 
 	char *key_end = strchr(str, ';');
 	if (!key_end || !key_end[1])
-		return 0;
+		/* We may have a key with no modifier. */
+		return append_kitty_key_no_mod(buf, buf_size, len, orig_str);
 
 	*key_end = '\0';
 	const int key_num = atoi(str);
 	*key_end = ';';
-	if (key_num < 0 || key_num > 255)
+	if (!VALID_KITTY_KEY(key_num))
 		return 0;
 
 	char *mod_end = strchr(key_end + 1, 'u');
@@ -209,18 +301,17 @@ append_str_kitty(char *buf, const int buf_size, size_t *len, char *str)
 	 * analyzed, in which case we append an ending comma (,). */
 	const int cont = (mod_end[1] != '\0');
 
-	int bytes = 0;
+	const char *keysym = get_key_symbol(key_num);
 
-	const char key_num_str[2] = {(char)key_num, '\0'};
-	const char *keysym = key_num > 32 ? key_num_str : get_key_symbol(key_num);
-
-	bytes = snprintf(buf + *len, (size_t)buf_size - *len, "%s%s%s",
-		mod ? mod : "", keysym, cont == 1 ? "," : "");
+	const int bytes = snprintf(buf + *len, (size_t)buf_size - *len,
+		"%s%s%s", mod ? mod : "", keysym, cont == 1 ? "," : "");
 
 	*len += (size_t)bytes;
 
 	return (int)((mod_end + 1) - orig_str);
 }
+
+#undef VALID_KITTY_KEY
 
 static const char *
 translate_key_nofunc(const char *key)
