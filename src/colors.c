@@ -454,12 +454,16 @@ is_color_code(const char *str)
 		if (*str >= '0' && *str <= '9') {
 			digits++;
 		} else if (*str == ';') {
-			if (*(str + 1) == ';') /* Consecutive semicolons */
+			if (str[1] == ';') /* Consecutive semicolons. */
 				return 0;
 			digits = 0;
 			semicolon++;
 		} else {
-			if (*str != '\n') /* Neither digit nor semicolon */
+			if (*str != '\n'
+			/* Allow styled unerlines. */
+			&& !(digits > 0 && *(str - 1) == '4' && *str == ':'
+			&& str[1] && str[1] >= '0' && str[1] <= '5'))
+				/* Neither digit nor semicolon. */
 				return 0;
 		}
 		str++;
