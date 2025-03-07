@@ -84,7 +84,7 @@ launch-view:\e-
 #lock:\eo
 mountpoints:\em
 #move-sel:\e\C-n
-new-instance:\C-x
+new-instance:\e\C-x
 next-profile:\e\C-p
 only-dirs:\e,
 #open-sel:\e\C-g

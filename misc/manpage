@@ -1465,7 +1465,7 @@ Ctrl+Alt+v : Copy selected files to the current directory
 Alt+y : Toggle light-mode
 Alt+z : Switch to previous sorting method
 Alt+x : Switch to next sorting method
-Ctrl+x : Launch a new instance of \fBclifm\fR
+Ctrl+Alt+x : Launch a new instance of \fBclifm\fR
 Ctrl+y : Copy the contents of the line buffer to the clipboard \fB(1)\fR
 F1 : Go to the manpage
 F2 : List commands

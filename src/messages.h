@@ -1696,7 +1696,7 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  Alt+y              Toggle light-mode\n\
  Alt+z              Switch to the previous sort method\n\
  Alt+x              Switch to the next sort method\n\
- Ctrl+x             Launch a new instance\n\
+ Ctrl+Alt+x         Launch a new instance\n\
  F1                 Manual page\n\
  F2                 Commands help\n\
  F3                 Keybindings help\n\
@@ -1706,9 +1706,7 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  F9                 Open the keybindings file\n\
  F10                Open the configuration file\n\
  F11                Open the bookmarks file\n\
- F12                Quit\n\n\
-NOTE: C stands for Ctrl, S for Shift, and M for Meta (Alt key in \
-most keyboards)\n"
+ F12                Quit\n"
 
 #define HELP_END_NOTE "For a full description consult the manpage and/or the \
 Wiki (https://github.com/leo-arch/clifm/wiki)."

@@ -993,7 +993,7 @@ launch-view:\\e-\n\
 #lock:\\eo\n\
 mountpoints:\\em\n\
 #move-sel:\\e\\C-n\n\
-new-instance:\\C-x\n\
+new-instance:\\e\\C-x\n\
 next-profile:\\e\\C-p\n\
 only-dirs:\\e,\n\
 #open-sel:\\e\\C-g\n\
