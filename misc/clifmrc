@@ -462,8 +462,12 @@
 #        4. LOGS AND HISTORY          #
 #=====================================#
 
-# Send errors, warnings, and notices to the desktop notification daemon for
-# user alerts.
+# Display user alerts (errors, warnings, and notices) using desktop notifications.
+# Supported values:
+# kitty  = Use the Kitty Notifications Protocol (requires the Kitty terminal or a
+#          terminal supporting this protocol).
+# system = Use the system notifications daemon.
+# false  = Print alerts before the prompt (no desktop notification is displayed).
 ;DesktopNotifications=false
 
 # Log errors and warnings.

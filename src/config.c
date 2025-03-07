@@ -1698,7 +1698,7 @@ create_main_config_file(char *file)
 		"# List files automatically after changing the current directory.\n\
 ;AutoLs=%s\n\n"
 
-		"# Send errors, warnings, and notices to the notification daemon.\n\
+		"# Display errors, warnings, and notices using desktop notifications ('kitty', 'system', or 'false')\n\
 ;DesktopNotifications=%s\n\n"
 
 	    "# Print a map of the current position in the directory\n\
