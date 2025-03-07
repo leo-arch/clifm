@@ -567,6 +567,10 @@ extern time_t curdir_mtime;
 #define HIDDEN_FIRST 2
 #define HIDDEN_LAST  3
 
+#define DESKTOP_NOTIF_NONE   0
+#define DESKTOP_NOTIF_SYSTEM 1
+#define DESKTOP_NOTIF_KITTY  2
+
 /* Search strategy */
 #define GLOB_ONLY  0
 #define REGEX_ONLY 1

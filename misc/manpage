@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Mar 4, 2025" "clifm 1.24.3" "Clifm Manual"
+.TH "CLIFM" "1" "Mar 6, 2025" "clifm 1.24.3" "Clifm Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -207,8 +207,8 @@ print the current working directory in the terminal window title (otherwise, onl
 \fB\-\-data\-dir=\fI\,DIR\/\fR
 load data files, such as plugins, color schemes, and default configuration files, from \fIDIR\fR 
 .TP
-\fB\-\-desktop\-notifications\fR
-enable desktop notifications. Enter \fIhelp desktop\-notifications\fR in \fBclifm\fR for more information.
+\fB\-\-desktop\-notifications[=STYLE]\fR
+set the desktop notifications style. Supported values: \fIkitty\fR (requires the Kitty terminal or a terminal supporting the Kitty Notifications Protocol), \fIsystem\fR, or \fIfalse\fR. If STYLE is omitted, it defaults to \fIsystem\fR. Enter \fIhelp desktop\-notifications\fR in \fBclifm\fR for more information.
 .TP
 \fB\-\-disk\-usage\fR
 show disk usage for the filesystem where the current directory resides (in the form \fIfree/total (free-percentage) fs-type dev-name\fR)

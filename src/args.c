@@ -210,7 +210,7 @@ static struct option const longopts[] = {
 	{"color-links-as-target", no_argument, 0, LOPT_COLOR_LNK_AS_TARGET},
 	{"cwd-in-title", no_argument, 0, LOPT_CWD_IN_TITLE},
 	{"data-dir", required_argument, 0, LOPT_DATA_DIR},
-	{"desktop-notifications", no_argument, 0, LOPT_DESKTOP_NOTIFICATIONS},
+	{"desktop-notifications", optional_argument, 0, LOPT_DESKTOP_NOTIFICATIONS},
 	{"disk-usage", no_argument, 0, LOPT_DISK_USAGE},
 	{"fnftab", no_argument, 0, LOPT_FNFTAB},
 	{"full-dir-size", no_argument, 0, LOPT_FULL_DIR_SIZE},
@@ -1374,6 +1374,31 @@ xset_prop_fields(const char *optval)
 }
 
 static void
+set_desktop_notifications(const char *val)
+{
+	if (!val || !*val || *val == '-') {
+		xargs.desktop_notifications = conf.desktop_notifications =
+			DESKTOP_NOTIF_SYSTEM;
+		return;
+	}
+
+	if (*val == 'k' && strcmp(val, "kitty") == 0) {
+		xargs.desktop_notifications = conf.desktop_notifications =
+			DESKTOP_NOTIF_KITTY;
+	} else if (*val == 's' && strcmp(val, "system") == 0) {
+		xargs.desktop_notifications = conf.desktop_notifications =
+			DESKTOP_NOTIF_SYSTEM;
+	} else if (*val == 'f' && strcmp(val, "false") == 0) {
+		xargs.desktop_notifications = conf.desktop_notifications =
+			DESKTOP_NOTIF_NONE;
+	} else {
+		fprintf(stderr, _("%s: '--desktop-notifications': Valid values "
+			"are 'kitty','system', or 'false'.\n"), PROGRAM_NAME);
+		exit(EXIT_FAILURE);
+	}
+}
+
+static void
 xset_pager_view(char *arg)
 {
 	if (!arg || !*arg || *arg == '-')
@@ -1654,8 +1679,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case LOPT_DATA_DIR:
 			set_datadir(optarg); break;
 		case LOPT_DESKTOP_NOTIFICATIONS:
-			xargs.desktop_notifications = conf.desktop_notifications = 1;
-			break;
+			set_desktop_notifications(optarg); break;
 		case LOPT_DISK_USAGE:
 			xargs.disk_usage = conf.disk_usage = 1; break;
 		case LOPT_FNFTAB:

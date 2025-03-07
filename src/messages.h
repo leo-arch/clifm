@@ -302,12 +302,15 @@ https://github.com/leo-arch/clifm/wiki/Customization#ls_colors-support"
 - Deselect files from a menu\n\
     ds (or 'ds <TAB>' to choose from a list - multi-selection is allowed)"
 
-#define DESKTOP_NOTIFICATIONS_USAGE "Errors, warnings, and notices are sent \
-to the desktop notifications daemon instead of\n\
-being printed immediately before the next prompt\n\n\
+#define DESKTOP_NOTIFICATIONS_USAGE "Errors, warnings, and notices are displayed \
+using desktop notifications instead of\n\
+being printed immediately before the next prompt.\n\n\
 To enable this feature use the --desktop-notifications command line flag or\n\
-set DesktopNotifications to true in the configuration file (F10).\n\n\
-Notifications are sent using one of the following commands:\n\n\
+the DesktopNotifications option in the configuration file (F10). Supported values\n\
+are: 'kitty', 'system', or 'false'.\n\n\
+If set to 'kitty', notifications are displayed using the Kitty Notifications\n\
+Protocol (requires the Kitty terminal or a terminal supporting this protocol).\n\n\
+If set to 'system', notifications are displayed using one of the following commands:\n\n\
 Linux/BSD: notify-send -u \"TYPE\" \"TITLE\" \"MSG\"\n\
 MacOS:     osascript -e 'display notification \"MSG\" subtitle \"TYPE\" with title \"TITLE\"'\n\
 Haiku:     notify --type \"TYPE\" --title \"TITLE\" \"MSG\"\n\n\
@@ -892,7 +895,7 @@ Note: Use the 'pc' command to edit files permissions."
 - Set the file opener back to the default (Lira)\n\
     opener default"
 
-#define OW_USAGE "Open a file with a specific application\n\n\
+#define OW_USAGE "Open a file using a specific application\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   ow FILE [APP]\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
@@ -1474,7 +1477,7 @@ database (via the 'j' command)\
 \n      --color-links-as-target\t Colorize symbolic links according to the target file\
 \n      --cwd-in-title\t\t Print the current directory in the terminal window title\
 \n      --data-dir=PATH\t\t Use PATH as data directory (e.g.: /usr/local/share)\
-\n      --desktop-notifications\t Enable desktop notifications\
+\n      --desktop-notifications\t Set the desktop notifications style: 'kitty', 'system', or 'false' (default)\
 \n      --disk-usage\t\t Show disk usage (free/total FS MOUNTPOINT)\
 \n      --full-dir-size\t\t Recursively calculate directories size (long view only)\
 \n      --fuzzy-algo=NUM\t\t Set fuzzy algorithm for fuzzy matching (1 or 2)\
@@ -1568,7 +1571,7 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
 #define CLIFM_COMMANDS "\
  ELN/FILE/DIR       Auto-open/autocd files/directories\n\
  /PATTERN           Search for files\n\
- ;[CMD], :[CMD]     Run CMD via the system shell\n\
+ ;[CMD], :[CMD]     Run CMD using the system shell\n\
  ac, ad             (De)archive files\n\
  acd, autocd        Set auto-cd on/off\n\
  actions            Manage actions/plugins\n\
@@ -1594,11 +1597,11 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  exp                Export filenames to a temporary file\n\
  ext                Set external/shell commands on/off\n\
  f, forth           Go forth in the directory history list\n\
- fc                 Set the files counter on/off\n\
+ fc                 Set the file counter on/off\n\
  ff, dirs-first     Toggle list-directories-first on/off\n\
- ft, filter         Set a files filter\n\
+ ft, filter         Set a file filter\n\
  fz                 Print directories full size (long view mode only)\n\
- hh, hidden         Toggle hidden files\n\
+ hh, hidden         Toggle hidden-files\n\
  history            Manage the commands history\n\
  icons              Set icons on/off\n\
  k                  Toggle follow-links (long view only)\n\
@@ -1606,8 +1609,8 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  j                  Jump to a visited directory\n\
  kb, keybinds       Manage keybindings\n\
  le                 Edit symbolic link target\n\
- ll, lv             Toggle long view mode on/off\n\
- lm                 Toggle the light mode on/off\n\
+ ll, lv             Toggle long-view\n\
+ lm                 Toggle light-mode\n\
  log                Manage your logs\n\
  media              (Un)mount storage devices\n\
  mf                 Limit the number of listed files\n\
@@ -1620,14 +1623,13 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  oc                 Change files ownership interactively\n\
  ow                 Open a file with ...\n\
  opener             Set a custom file opener\n\
- p, pp, prop        Print files properties\n\
- pc                 Change files permissions interactively\n\
+ p, pp, prop        Print file properties\n\
+ pc                 Change file permissions interactively\n\
  pf, profile        Manage profiles\n\
- pg, pager          Set the files pager on/off\n\
+ pg, pager          Set the file pager on/off\n\
  pin                Pin a directory\n\
  prompt             Switch/edit the prompt\n\
  q, quit, exit      Quit Clifm\n\
- Q                  CD on quit\n\
  rf, refresh        Refresh/clear the screen\n\
  rl, reload         Reload the main configuration file\n\
  rr                 Remove files in bulk\n\
@@ -1635,7 +1637,7 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  sb, selbox         Access the Selection Box\n\
  splash             Print the splash screen\n\
  st, sort           Change file sort order\n\
- stats              Print files statistics\n\
+ stats              Print file statistics\n\
  t, trash           Move files to the trash can\n\
  tag                Tag files\n\
  te                 Toggle the executable bit on files\n\

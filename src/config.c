@@ -254,6 +254,17 @@ gen_default_answer_value_str(const int cfg)
 	return p;
 }
 
+static char *
+gen_desktop_notif_str(const int value)
+{
+	switch (value) {
+	case DESKTOP_NOTIF_NONE: return "false";
+	case DESKTOP_NOTIF_SYSTEM: return "system";
+	case DESKTOP_NOTIF_KITTY: return "kitty";
+	default: return "system";
+	}
+}
+
 /* Dump current value of config options (as defined in the config file),
  * highlighting those that differ from default values.
  * Note that values displayed here represent the CURRENT status of the
@@ -331,9 +342,11 @@ dump_config(void)
 	char *cur_da_value = gen_default_answer_value_str(1);
 	print_config_value("DefaultAnswer", cur_da_value, s, DUMP_CONFIG_STR);
 
-	n = DEF_DESKTOP_NOTIFICATIONS;
-	print_config_value("DesktopNotifications", &conf.desktop_notifications,
-		&n, DUMP_CONFIG_BOOL);
+	s = gen_desktop_notif_str(DEF_DESKTOP_NOTIFICATIONS);
+	char *cur_desktop_notif_val =
+		gen_desktop_notif_str(conf.desktop_notifications);
+	print_config_value("DesktopNotifications", cur_desktop_notif_val,
+		s, DUMP_CONFIG_STR);
 
 	s = "";
 	print_config_value("DirhistIgnore", &conf.dirhistignore_regex,
@@ -1722,7 +1735,9 @@ create_main_config_file(char *file)
 		DEF_FILES_COUNTER == 1 ? "true" : "false",
 		DEF_LISTING_MODE,
 		DEF_AUTOLS == 1 ? "true" : "false",
-		DEF_DESKTOP_NOTIFICATIONS == 1 ? "true" : "false",
+		DEF_DESKTOP_NOTIFICATIONS == DESKTOP_NOTIF_SYSTEM ? "system"
+			: (DEF_DESKTOP_NOTIFICATIONS == DESKTOP_NOTIF_KITTY ? "kitty"
+			: "false"),
 		DEF_DIRHIST_MAP == 1 ? "true" : "false",
 		DEF_CP_CMD,
 		DEF_MV_CMD,
@@ -3291,6 +3306,28 @@ set_priority_sort_char(char *val)
 		free(buf);
 }
 
+static void
+set_desktop_notis(char *val)
+{
+	char *v;
+	if (!val || !*val || !(v = remove_quotes(val)))
+		return;
+
+	const size_t l = strlen(v);
+	if (l > 1 && v[l - 1] == '\n')
+		v[l - 1] = '\0';
+
+	if (*v == 'k' && strcmp(v, "kitty") == 0) {
+		conf.desktop_notifications = DESKTOP_NOTIF_KITTY;
+	} else if ((*v == 's' && strcmp(v, "system") == 0)
+	|| (*v == 't' && strcmp(v, "true") == 0)) {
+		conf.desktop_notifications = DESKTOP_NOTIF_SYSTEM;
+	} else {
+		if (*v == 'f' && strcmp(v, "false") == 0)
+			conf.desktop_notifications =  DESKTOP_NOTIF_NONE;
+	}
+}
+
 /* Read the main configuration file and set options accordingly */
 static void
 read_config(void)
@@ -3410,7 +3447,7 @@ read_config(void)
 
 		else if (xargs.desktop_notifications == UNSET && *line == 'D'
 		&& strncmp(line, "DesktopNotifications=", 21) == 0) {
-			set_config_bool_value(line + 21, &conf.desktop_notifications);
+			set_desktop_notis(line + 21);
 		}
 
 		else if (xargs.dirhist_map == UNSET && *line == 'D'

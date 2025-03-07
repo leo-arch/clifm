@@ -193,13 +193,52 @@ write_msg_into_logfile(const char *msg_str)
 	free(date);
 }
 
+static void
+send_kitty_notification(const char *msg)
+{
+	static int kitty_msg_id = 1;
+	const int urgency = pmsg == ERROR ? 2 : (pmsg == WARNING ? 1 : 0);
+
+	printf("\x1b]99;i=%d:d=0:p=title;%s\x1b\\",
+		kitty_msg_id, PROGRAM_NAME);
+	printf("\x1b]99;i=%d:d=1:n=file-manager:f=%s:u=%d:p=body;%s\x1b\\",
+		kitty_msg_id, PROGRAM_NAME, urgency, msg);
+
+	fflush(stdout);
+
+	if (kitty_msg_id < INT_MAX)
+		kitty_msg_id++;
+}
+
 /* Let's send a desktop notification */
 static void
 send_desktop_notification(char *msg)
 {
-/*	if (!msg || !*msg || !(flags & GUI) || desktop_noti != 1) */
-	if (!msg || !*msg)
+	if (!msg || !*msg || *msg == '\n')
 		return;
+
+	size_t mlen = strlen(msg);
+	if (msg[mlen - 1] == '\n') {
+		msg[mlen - 1] = '\0';
+		mlen--;
+	}
+
+	/* Some messages are written in the form "PROGRAM_NAME: MSG". We only
+	 * want the MSG part. */
+	int ret = 0;
+	const size_t s = sizeof(PROGRAM_NAME) - 1;
+	char *p = msg;
+	if (strncmp(msg, PROGRAM_NAME, s) == 0
+	&& msg[s] == ':' && msg[s + 1] == ' ') {
+		p += s + 2;
+		if (!*p)
+			return;
+	}
+
+	if (conf.desktop_notifications == DESKTOP_NOTIF_KITTY) {
+		send_kitty_notification(p);
+		return;
+	}
 
 	char type[12];
 	*type = '\0';
@@ -221,27 +260,6 @@ send_desktop_notification(char *msg)
 	case NOTICE: /* fallthrough */
 	default: snprintf(type, sizeof(type), "low"); break;
 #endif /* __HAIKU__ */
-	}
-
-	size_t mlen = strlen(msg);
-	if (mlen > 0 && msg[mlen - 1] == '\n') {
-		msg[mlen - 1] = '\0';
-		mlen--;
-		if (mlen == 0)
-			return;
-	}
-
-	/* Some messages are written in the form PROGRAM_NAME: MSG. We only
-	 * want the MSG part */
-	char name[NAME_MAX];
-	snprintf(name, sizeof(name), "%s: ", PROGRAM_NAME);
-	char *p = msg;
-	const size_t nlen = strnlen(name, sizeof(name));
-	int ret = strncmp(p, name, nlen);
-	if (ret == 0) {
-		if (mlen <= nlen)
-			return;
-		p = msg + nlen;
 	}
 
 #if defined(__HAIKU__)
@@ -313,7 +331,7 @@ log_msg(char *msg_str, const int print_prompt, const int logme,
 	}
 
 	if (print_prompt == 1) {
-		if (conf.desktop_notifications == 1 && logme != 0)
+		if (conf.desktop_notifications > 0 && logme != 0)
 			send_desktop_notification(msg_str);
 		else
 			print_msg = 1;
