@@ -3506,7 +3506,7 @@ set_default_keybinds(void)
 	rl_bind_keyseq("\\M-0", rl_run_pager);
 
 	rl_bind_keyseq("\\M--", rl_launch_view);
-	rl_bind_keyseq("\\C-x", rl_new_instance);
+	rl_bind_keyseq("\\C-\\M-x", rl_new_instance);
 	rl_bind_keyseq("\\M-h", rl_dirhist);
 	rl_bind_keyseq("\\M-b", rl_bookmarks);
 	rl_bind_keyseq("\\M-m", rl_mountpoints);
