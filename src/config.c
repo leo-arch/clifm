@@ -342,11 +342,9 @@ dump_config(void)
 	char *cur_da_value = gen_default_answer_value_str(1);
 	print_config_value("DefaultAnswer", cur_da_value, s, DUMP_CONFIG_STR);
 
-	s = gen_desktop_notif_str(DEF_DESKTOP_NOTIFICATIONS);
-	char *cur_desktop_notif_val =
-		gen_desktop_notif_str(conf.desktop_notifications);
-	print_config_value("DesktopNotifications", cur_desktop_notif_val,
-		s, DUMP_CONFIG_STR);
+	print_config_value("DesktopNotifications",
+		gen_desktop_notif_str(conf.desktop_notifications),
+		gen_desktop_notif_str(DEF_DESKTOP_NOTIFICATIONS), DUMP_CONFIG_STR);
 
 	s = "";
 	print_config_value("DirhistIgnore", &conf.dirhistignore_regex,
