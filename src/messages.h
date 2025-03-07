@@ -179,13 +179,13 @@ history list\n\n\
   b, back [h, hist | clear | !ELN]\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
 - Just change to the previously visited directory\n\
-    b (also Alt-j or Shift-Left)\n\
+    b (also Alt+j or Shift+Left)\n\
 - Print the directory history list\n\
     b hist (or 'dh')\n\
 - Change to the directory whose ELN in the list is 24\n\
     b !24\n\
 - Use the 'f' command to go forward\n\
-    f (also Alt-k or Shift-Right)"
+    f (also Alt+k or Shift+Right)"
 
 #define BD_USAGE "Quickly change to a parent directory matching NAME. If \
 NAME is not specified, print the list of all parent directories\n\n\
@@ -221,7 +221,7 @@ Note: Links are always created in the current directory."
   bm, bookmarks [a, add FILENAME NAME | d, del NAME | e, edit [APP] | NAME]\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
 - List bookmarks\n\
-    bm (also Alt-b, 'bm <TAB>' or 'b:<TAB>')\n\
+    bm (also Alt+b, 'bm <TAB>' or 'b:<TAB>')\n\
 - Bookmark the directory /media/mount as 'mnt'\n\
     bm add /media/mount mnt\n\
   Note: Regular files can be bookmarked too\n\
@@ -298,7 +298,7 @@ https://github.com/leo-arch/clifm/wiki/Customization#ls_colors-support"
   ds, desel [*, a, all]\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
 - Deselect all files\n\
-    ds * (or Alt-d)\n\
+    ds * (or Alt+d)\n\
 - Deselect files from a menu\n\
     ds (or 'ds <TAB>' to choose from a list - multi-selection is allowed)"
 
@@ -396,7 +396,7 @@ Parameters passed to cp:    -a"
 #define FILE_DETAILS "List file details\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
 - Toggle long/detail view mode\n\
-    ll (also Alt-l)\n\
+    ll (also Alt+l)\n\
   Note: Use PropFields in the configuration file to customize output\n\
   fields (and TimeStyle for custom timestamp formats).\n\
 - Print properties of the file whose ELN is 4\n\
@@ -412,7 +412,7 @@ Note 2: Unlink 'p', 'pp' always follows symlinks to their target file."
 - Enable full directory size (long view)\n\
     fz on (or --full-dir-size)\n\
 - Toggle the disk usage analyzer mode on/off\n\
-    Alt-TAB (or -t,--disk-usage-analyzer)\n\
+    Alt+Tab (or -t,--disk-usage-analyzer)\n\
 - Print files sizes as used blocks instead of used bytes (apparent size)\n\
     Run with --no-apparent-size or set ApparentSize to false in the\n\
     configuration file.\n\
@@ -425,7 +425,7 @@ Note 2: Unlink 'p', 'pp' always follows symlinks to their target file."
 \x1b[1mEXAMPLE\x1b[22m\n\
 - Disable list directories-first\n\
     ff off\n\
-  Note: Toggle directories-first on/off pressing Alt-g."
+  Note: Toggle directories-first on/off pressing Alt+g."
 
 #define FILE_PREVIEWS "\
 File previews are enabled by default if running in fzf mode.\n\n\
@@ -508,8 +508,8 @@ Other ways of filtering files in the current directory:\n\n\
 * @<TAB>       List all MIME-types found\n\
 * @query<TAB>  MIME-type filter. E.g.: @pdf<TAB> to list all PDF files\n\
 * /query       Quick search function: consult the 'search' help topic\n\
-* Alt-.        Toggle hidden files\n\
-* Alt-,        Toggle list-only-dirs\n\
+* Alt+.        Toggle hidden files\n\
+* Alt+,        Toggle list-only-dirs\n\
 * Just press TAB (fzf/fnf mode) and perform a fuzzy search\n\n\
 You can also operate on files filtered by file type and/or MIME type as\n\
 follows:\n\n\
@@ -523,13 +523,13 @@ files in the current directory:\n\n\
   f, forth [h, hist | clear | !ELN]\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
 - Just change to the next visited directory\n\
-    f (also Alt-k or Shift-Right)\n\
+    f (also Alt+k or Shift+Right)\n\
 - Print the directory history list\n\
     f hist (or 'dh')\n\
 - Change to the directory whose ELN in the list is 24\n\
     f !24\n\
 - Use the 'b' command to go backwards\n\
-    b (also Alt-j or Shift-Left)"
+    b (also Alt+j or Shift+Left)"
 
 #define FZ_USAGE "Toggle full directory size on/off (only for long view mode)\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
@@ -553,7 +553,7 @@ files in the current directory:\n\n\
 - Show hidden files\n\
     hh on\n\
 - Toggle hidden files\n\
-    hh (or Alt-.)"
+    hh (or Alt+.)"
 
 #define HISTEXEC_USAGE "Access commands history entries\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
@@ -704,7 +704,7 @@ Tip: Use the 'le' command to edit a symbolic link. Try 'le --help'."
 - Change to long view\n\
     ll on\n\
 - Toggle long view\n\
-    ll (or Alt-l)"
+    ll (or Alt+l)"
 
 #define LM_USAGE "Set light mode on/off\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
@@ -782,14 +782,14 @@ To get information about a device, enter iELN. For example: 'i12'."
 - List available messages\n\
     msg\n\
 - Clear the current list of messages\n\
-    msg clear (or Alt-t)"
+    msg clear (or Alt+t)"
 
 #define MOUNTPOINTS_USAGE "List and change to a mountpoint\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   mp, mountpoints\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
 - List available mountpoints\n\
-    mp (or Alt-m)\n\
+    mp (or Alt+m)\n\
   Once there, select the mountpoint you want to change to."
 
 #define NET_USAGE "Manage network resources\n\n\
@@ -1105,7 +1105,7 @@ Recognized file types: (d)irectory, regular (f)ile, symbolic (l)ink,\n\
 - Select all regular files in /etc starting with 'd'\n\
     s ^d.* -f :/etc\n\
 - Select all files in the current directory (including hidden files)\n\
-    s * .* (or Alt-a)\n\
+    s * .* (or Alt+a)\n\
 - Interactively select files in '/media' (requires fzf, fnf, or smenu\n\
   tab completion mode)\n\
     s /media/*<TAB>\n\
@@ -1116,7 +1116,7 @@ Recognized file types: (d)irectory, regular (f)ile, symbolic (l)ink,\n\
 - Move selected files to the directory whose ELN is 24\n\
     m sel 24\n\
 - Deselect all files\n\
-    ds * (or Alt-d)\n\
+    ds * (or Alt+d)\n\
 - Deselect files selectively\n\
     ds <TAB> (multi-selection is allowed)"
 
@@ -1338,7 +1338,7 @@ Use the 'l' command to create symbolic links, and 'le' to edit them."
 - List available workspaces\n\
     ws (or 'ws <TAB>')\n\
 - Switch to the first workspace\n\
-    ws 1 (or Alt-1)\n\
+    ws 1 (or Alt+1)\n\
 - Switch to worksapce named 'main'\n\
     ws main\n\
 - Switch to the next workspace\n\
@@ -1483,7 +1483,7 @@ database (via the 'j' command)\
 \n      --fuzzy-algo=NUM\t\t Set fuzzy algorithm for fuzzy matching (1 or 2)\
 \n      --fuzzy-matching\t\t Enable fuzzy tab completion/suggestions for filenames \
 and paths\
-\n      --fzfpreview-hidden\t Enable file previews for tab completion (fzf mode only) with the preview window hidden (toggle with Alt-p)\
+\n      --fzfpreview-hidden\t Enable file previews for tab completion (fzf mode only) with the preview window hidden (toggle with Alt+p)\
 \n      --fzftab\t\t\t Use fzf to display completion matches (default if the fzf binary is found in PATH)\
 \n      --fnftab\t\t\t Use fnf to display completion matches\
 \n      --icons\t\t\t Enable icons\
@@ -1656,57 +1656,57 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  unset              Remove variables from the environment\n"
 
 #define CLIFM_KEYBOARD_SHORTCUTS "DEFAULT KEYBOARD SHORTCUTS:\n\n\
- Right, C-f    Accept the entire suggestion\n\
- M-Right, M-f  Accept the first suggested word\n\
- M-c           Clear the current command line buffer\n\
- M-q           Delete the last entered word\n\
- M-g           Toggle list-directories-first\n\
- M-l           Toggle long-view-mode\n\
- M-+           Toggle follow-links (long view only)\n\
- M-.           Toggle hidden files\n\
- M-,           Toggle list-only-directories\n\
- M--           Preview files in the current directory (requires fzf)\n\
- M-m           List mountpoints\n\
- M-h           Show directory history\n\
- M-t           Clear messages\n\
- C-l           Clear the screen\n\
- C-y           Copy the current line buffer to the clipboard\n\
- M-s           Open the Selection Box\n\
- M-a           Select all files in the current directory\n\
- M-d           Deselect all files\n\
- M-r           Change to the root directory\n\
- M-e, Home     Change to the home directory\n\
- M-u, S-Up     Change to the parent directory\n\
- M-j, S-Left   Change to previous visited directory\n\
- M-k, S-Right  Change to next visited directory\n\
- M-p           Change to the pinned directory\n\
- M-v           Toggle prepend sudo\n\
- M-0           Run the file pager\n\
- M-[1-4]       Switch to workspace 1-4\n\
- C-M-o         Switch to previous profile\n\
- C-M-p         Switch to next profile\n\
- C-M-a         Archive selected files\n\
- C-M-e         Export selected files\n\
- C-M-r         Rename selected files\n\
- C-M-d         Remove selected files\n\
- C-M-t         Trash selected files\n\
- C-M-n         Move selected files to the current directory\n\
- C-M-v         Copy selected files to the current directory\n\
- C-M-l         Toggle max-name-length\n\
- M-y           Toggle light-mode\n\
- M-z           Switch to the previous sort method\n\
- M-x           Switch to the next sort method\n\
- C-x           Launch a new instance\n\
- F1            Manual page\n\
- F2            Commands help\n\
- F3            Keybindings help\n\
- F6            Open the mimelist file\n\
- F7            Open the shotgun configuration file\n\
- F8            Open the current color scheme file\n\
- F9            Open the keybindings file\n\
- F10           Open the configuration file\n\
- F11           Open the bookmarks file\n\
- F12           Quit\n\n\
+ Right, Ctrl+f      Accept the entire suggestion\n\
+ Alt+Right, Alt+f   Accept the first suggested word\n\
+ Alt+c              Clear the current command line buffer\n\
+ Alt+q              Delete the last entered word\n\
+ Alt+g              Toggle list-directories-first\n\
+ Alt+l              Toggle long-view-mode\n\
+ Alt++              Toggle follow-links (long view only)\n\
+ Alt+.              Toggle hidden-files\n\
+ Alt+,              Toggle list-only-directories\n\
+ Alt+-              Preview files in the current directory (requires fzf)\n\
+ Alt+m              List mountpoints\n\
+ Alt+h              Show directory history\n\
+ Alt+t              Clear messages\n\
+ Ctrl+l             Clear the screen\n\
+ Ctrl+y             Copy the current line buffer to the clipboard\n\
+ Alt+s              Open the Selection Box\n\
+ Alt+a              Select all files in the current directory\n\
+ Alt+d              Deselect all files\n\
+ Alt+r              Change to the root directory\n\
+ Alt+e, Home        Change to the home directory\n\
+ Alt+u, Shift+Up    Change to the parent directory\n\
+ Alt+j, Shift+Left  Change to previous visited directory\n\
+ Alt+k, Shift+Right Change to next visited directory\n\
+ Alt+p              Change to the pinned directory\n\
+ Alt+v              Toggle prepend sudo\n\
+ Alt+0              Run the file pager\n\
+ Alt+[1-4]          Switch to workspace 1-4\n\
+ Ctrl+Alt+o         Switch to previous profile\n\
+ Ctrl+Alt+p         Switch to next profile\n\
+ Ctrl+Alt+a         Archive selected files\n\
+ Ctrl+Alt+e         Export selected files\n\
+ Ctrl+Alt+r         Rename selected files\n\
+ Ctrl+Alt+d         Remove selected files\n\
+ Ctrl+Alt+t         Trash selected files\n\
+ Ctrl+Alt+n         Move selected files to the current directory\n\
+ Ctrl+Alt+v         Copy selected files to the current directory\n\
+ Ctrl+Alt+l         Toggle max-name-length\n\
+ Alt+y              Toggle light-mode\n\
+ Alt+z              Switch to the previous sort method\n\
+ Alt+x              Switch to the next sort method\n\
+ Ctrl+x             Launch a new instance\n\
+ F1                 Manual page\n\
+ F2                 Commands help\n\
+ F3                 Keybindings help\n\
+ F6                 Open the mimelist file\n\
+ F7                 Open the shotgun configuration file\n\
+ F8                 Open the current color scheme file\n\
+ F9                 Open the keybindings file\n\
+ F10                Open the configuration file\n\
+ F11                Open the bookmarks file\n\
+ F12                Quit\n\n\
 NOTE: C stands for Ctrl, S for Shift, and M for Meta (Alt key in \
 most keyboards)\n"
 
@@ -1733,15 +1733,15 @@ NAVIGATION\n\
 ----------\n\
 /etc                     Change the current directory to '/etc'\n\
 5                        Change to the directory whose ELN is 5\n\
-b | Shift-left | Alt-j   Go back in the directory history list\n\
-f | Shift-right | Alt-k  Go forth in the directory history list\n\
-.. | Shift-up | Alt-u    Change to the parent directory\n\
+b | Shift+left | Alt+j   Go back in the directory history list\n\
+f | Shift+right | Alt+k  Go forth in the directory history list\n\
+.. | Shift+up | Alt+u    Change to the parent directory\n\
 bd media                 Change to the parent directory matching 'media'\n\
 j <TAB> | dh <TAB>       Navigate the directory history list\n\
 j xproj                  Jump to the best ranked directory matching 'xproj'\n\
-bm | b:<TAB> | Alt-b     List bookmarks\n\
+bm | b:<TAB> | Alt+b     List bookmarks\n\
 bm mybm | b:mybm         Change to the bookmark named 'mybm'\n\
-ws2 | Alt-2              Switch to the second workspace\n\
+ws2 | Alt+2              Switch to the second workspace\n\
 mp                       Change to a mountpoint\n\
 pin mydir                Pin the directory 'mydir'\n\
 ,                        Change to the pinned directory\n\
@@ -1766,7 +1766,7 @@ s *.c                Select all C files\n\
 s 1-4 8 19-26        Select multiple files by ELN\n\
 sb | s:<TAB>         List currently selected files\n\
 ds | ds <TAB>        Deselect a few files\n\
-ds * | Alt-d         Deselect all files\n\
+ds * | Alt+d         Deselect all files\n\
 bm add mydir mybm    Bookmark the directory named 'mydir' as 'mybm'\n\
 bm del mybm          Remove the bookmark named 'mybm'\n\
 tag --help           Learn about file tags\n\
@@ -1798,10 +1798,10 @@ CMD --help      Get help for the command CMD\n\
 help <TAB>      List available help topics\n\
 F1              Open the manpage\n\
 ih              Run the interactive help plugin (requires fzf)\n\
-ll | Alt-l      Toggle detail/long view mode\n\
-hh | Alt-.      Toggle hidden files\n\
-rf | Ctrl-l     Clear the screen (also Enter on empty line)\n\
-pg | Alt-0      Run the pager (builtin)\n\
+ll | Alt+l      Toggle detail/long view mode\n\
+hh | Alt+.      Toggle hidden files\n\
+rf | Ctrl+l     Clear the screen (also Enter on empty line)\n\
+pg | Alt+0      Run the pager (builtin)\n\
 gg              Run the pager (plugin)\n\
 auto            Add an autocommand to the current directory\n\
 config | F10    View/edit the configuration file\n\
@@ -1809,13 +1809,13 @@ mm edit | F6    Change default associated applications\n\
 kb edit | F9    Edit keybindings\n\
 view edit | F7  Change previewing applications\n\
 mm info 12      Get MIME information for the file whose ELN is 12\n\
-Alt-TAB         Toggle the disk usage analyzer mode\n\
+Alt+Tab         Toggle the disk usage analyzer mode\n\
 cs              Manage color schemes\n\
 Right           Accept the entire suggestion\n\
-Alt-f           Accept the first/next word of the current suggestion\n\
+Alt+f           Accept the first/next word of the current suggestion\n\
 pf set test     Change to the profile named 'test'\n\
 st size rev     Sort files by size in reverse order\n\
-Alt-x | Alt-z   Switch to next/previous sort order\n\
+Alt+x | Alt+z   Switch to next/previous sort order\n\
 media           (Un)mount storage devices\n\
 net work        Mount the network resource named 'work'\n\
 actions         List available actions/plugins\n\

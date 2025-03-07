@@ -191,7 +191,7 @@ get_mod_symbol(const int mod_num)
 {
 	/* The biggest value mod_num can take is 255 (since
 	 * 1 + 2 + 4 + 8 + 16 + 32 + 64 + 128 = 255). In this case, the modifier
-	 * string would be "Shift-Alt-Ctrl-Super-Hyper-Meta-CapsLock-NumLock-",
+	 * string would be "Shift+Alt+Ctrl+Super+Hyper+Meta+CapsLock+NumLock-",
 	 * which is 50 bytes long, including the terminating NUL char. */
 	static char mod[64];
 	memset(mod, '\0', sizeof(mod));
@@ -200,28 +200,28 @@ get_mod_symbol(const int mod_num)
 	int len = 0;
 
 	if (modifiers & 1)
-		len += snprintf(mod + len, sizeof(mod) - (size_t)len, "Shift-");
+		len += snprintf(mod + len, sizeof(mod) - (size_t)len, "Shift+");
 
 	if (modifiers & 2)
-		len += snprintf(mod + len, sizeof(mod) - (size_t)len, "Alt-");
+		len += snprintf(mod + len, sizeof(mod) - (size_t)len, "Alt+");
 
 	if (modifiers & 4)
-		len += snprintf(mod + len, sizeof(mod) - (size_t)len, "Ctrl-");
+		len += snprintf(mod + len, sizeof(mod) - (size_t)len, "Ctrl+");
 
 	if (modifiers & 8)
-		len += snprintf(mod + len, sizeof(mod) - (size_t)len, "Super-");
+		len += snprintf(mod + len, sizeof(mod) - (size_t)len, "Super+");
 
 	if (modifiers & 16)
-		len += snprintf(mod + len, sizeof(mod) - (size_t)len, "Hyper-");
+		len += snprintf(mod + len, sizeof(mod) - (size_t)len, "Hyper+");
 
 	if (modifiers & 32)
-		len += snprintf(mod + len, sizeof(mod) - (size_t)len, "Meta-");
+		len += snprintf(mod + len, sizeof(mod) - (size_t)len, "Meta+");
 
 	if (modifiers & 64)
-		len += snprintf(mod + len, sizeof(mod) - (size_t)len, "CapsLock-");
+		len += snprintf(mod + len, sizeof(mod) - (size_t)len, "CapsLock+");
 
 	if (modifiers & 128)
-		len += snprintf(mod + len, sizeof(mod) - (size_t)len, "NumLock-");
+		len += snprintf(mod + len, sizeof(mod) - (size_t)len, "NumLock+");
 
 	return mod;
 }
@@ -337,7 +337,7 @@ translate_key_nofunc(const char *key)
 			}
 
 			if (key[1] == 'e' || (key[1] == 'M' && key[2] ==  '-')) {
-				if (append_str(buf, KBUF_SIZE, &buf_len, "Alt-") == -1)
+				if (append_str(buf, KBUF_SIZE, &buf_len, "Alt+") == -1)
 					return NULL;
 				/* If "\M-" we want to advance 3 bytes, not 2. */
 				key += 2 + (key[1] ==  'M');
@@ -347,7 +347,7 @@ translate_key_nofunc(const char *key)
 			}
 
 			if (key[1] == 'C' && key[2] == '-') {
-				if (append_str(buf, KBUF_SIZE, &buf_len, "Ctrl-") == -1)
+				if (append_str(buf, KBUF_SIZE, &buf_len, "Ctrl+") == -1)
 					return NULL;
 				key += 3;
 				if (!*key) /* Incomplete sequence: Ctrl without modified key. */
@@ -419,181 +419,181 @@ translate_key(const char *key)
 		{"\\e[A", "Up"}, {"\\e[B", "Down"},
 		{"\\e[C", "Right"}, {"\\e[D", "Left"},
 
-		{"\\e[1;2A", "Shift-Up"}, {"\\e[1;2B", "Shift-Down"},
-		{"\\e[1;2C", "Shift-Right"}, {"\\e[1;2D", "Shift-Left"},
+		{"\\e[1;2A", "Shift+Up"}, {"\\e[1;2B", "Shift+Down"},
+		{"\\e[1;2C", "Shift+Right"}, {"\\e[1;2D", "Shift+Left"},
 
-		{"\\e[1;3A", "Alt-Up"}, {"\\e[1;3B", "Alt-Down"},
-		{"\\e[1;3C", "Alt-Right"}, {"\\e[1;3D", "Alt-Left"},
+		{"\\e[1;3A", "Alt+Up"}, {"\\e[1;3B", "Alt+Down"},
+		{"\\e[1;3C", "Alt+Right"}, {"\\e[1;3D", "Alt+Left"},
 
-		{"\\e[1;5A", "Ctrl-Up"}, {"\\e[1;5B", "Ctrl-Down"},
-		{"\\e[1;5C", "Ctrl-Right"}, {"\\e[1;5D", "Ctrl-Left"},
+		{"\\e[1;5A", "Ctrl+Up"}, {"\\e[1;5B", "Ctrl+Down"},
+		{"\\e[1;5C", "Ctrl+Right"}, {"\\e[1;5D", "Ctrl+Left"},
 
-		{"\\e[1;6A", "Ctrl-Shift-Up"}, {"\\e[1;6B", "Ctrl-Shift-Down"},
-		{"\\e[1;6C", "Ctrl-Shift-Right"}, {"\\e[1;6D", "Ctrl-Shift-Left"},
+		{"\\e[1;6A", "Ctrl+Shift+Up"}, {"\\e[1;6B", "Ctrl+Shift+Down"},
+		{"\\e[1;6C", "Ctrl+Shift+Right"}, {"\\e[1;6D", "Ctrl+Shift+Left"},
 
-		{"\\e[1;7A", "Ctrl-Alt-Up"}, {"\\e[1;7B", "Ctrl-Alt-Down"},
-		{"\\e[1;7C", "Ctrl-Alt-Right"}, {"\\e[1;7D", "Ctrl-Alt-Left"},
+		{"\\e[1;7A", "Ctrl+Alt+Up"}, {"\\e[1;7B", "Ctrl+Alt+Down"},
+		{"\\e[1;7C", "Ctrl+Alt+Right"}, {"\\e[1;7D", "Ctrl+Alt+Left"},
 
-		{"\\e[1;8A", "Ctrl-Alt-Shift-Up"}, {"\\e[1;8B", "Ctrl-Alt-Shift-Down"},
-		{"\\e[1;8C", "Ctrl-Alt-Shift-Right"}, {"\\e[1;8D", "Ctrl-Alt-Shift-Left"},
+		{"\\e[1;8A", "Ctrl+Alt+Shift+Up"}, {"\\e[1;8B", "Ctrl+Alt+Shift+Down"},
+		{"\\e[1;8C", "Ctrl+Alt+Shift+Right"}, {"\\e[1;8D", "Ctrl+Alt+Shift+Left"},
 
 		{"\\eOP", "F1"}, {"\\eOQ", "F2"}, {"\\eOR", "F3"},
 		{"\\eOS", "F4"}, {"\\e[15~", "F5"}, {"\\e[17~", "F6"},
 		{"\\e[18~", "F7"}, {"\\e[19~", "F8"}, {"\\e[20~", "F9"},
 		{"\\e[21~", "F10"}, {"\\e[23~", "F11"}, {"\\e[24~", "F12"},
 
-		{"\\e[1;2P", "Shift-F1"}, {"\\e[1;2Q", "Shift-F2"},
-		{"\\e[1;2R", "Shift-F3"}, {"\\e[1;2S", "Shift-F4"},
-		{"\\e[15;2~", "Shift-F5"}, {"\\e[17;2~", "Shift-F6"},
-		{"\\e[18;2~", "Shift-F7"}, {"\\e[19;2~", "Shift-F8"},
-		{"\\e[20;2~", "Shift-F9"}, {"\\e[21;2~", "Shift-F10"},
-		{"\\e[23;2~", "Shift-F11"}, {"\\e[24;2~", "Shift-F12"},
+		{"\\e[1;2P", "Shift+F1"}, {"\\e[1;2Q", "Shift+F2"},
+		{"\\e[1;2R", "Shift+F3"}, {"\\e[1;2S", "Shift+F4"},
+		{"\\e[15;2~", "Shift+F5"}, {"\\e[17;2~", "Shift+F6"},
+		{"\\e[18;2~", "Shift+F7"}, {"\\e[19;2~", "Shift+F8"},
+		{"\\e[20;2~", "Shift+F9"}, {"\\e[21;2~", "Shift+F10"},
+		{"\\e[23;2~", "Shift+F11"}, {"\\e[24;2~", "Shift+F12"},
 
-		{"\\e[1;3P", "Alt-F1"}, {"\\e[1;3Q", "Alt-F2"},
-		{"\\e[1;3R", "Alt-F3"}, {"\\e[1;3S", "Alt-F4"},
-		{"\\e[15;3~", "Alt-F5"}, {"\\e[17;3~", "Alt-F6"},
-		{"\\e[18;3~", "Alt-F7"}, {"\\e[19;3~", "Alt-F8"},
-		{"\\e[20;3~", "Alt-F9"}, {"\\e[21;3~", "Alt-F10"},
-		{"\\e[23;3~", "Alt-F11"}, {"\\e[24;3~", "Alt-F12"},
+		{"\\e[1;3P", "Alt+F1"}, {"\\e[1;3Q", "Alt+F2"},
+		{"\\e[1;3R", "Alt+F3"}, {"\\e[1;3S", "Alt+F4"},
+		{"\\e[15;3~", "Alt+F5"}, {"\\e[17;3~", "Alt+F6"},
+		{"\\e[18;3~", "Alt+F7"}, {"\\e[19;3~", "Alt+F8"},
+		{"\\e[20;3~", "Alt+F9"}, {"\\e[21;3~", "Alt+F10"},
+		{"\\e[23;3~", "Alt+F11"}, {"\\e[24;3~", "Alt+F12"},
 
-		{"\\e[1;4P", "Alt-Shift-F1"}, {"\\e[1;4Q", "Alt-Shift-F2"},
-		{"\\e[1;4R", "Alt-Shift-F3"}, {"\\e[1;4S", "Alt-Shift-F4"},
-		{"\\e[15;4~", "Alt-Shift-F5"}, {"\\e[17;4~", "Alt-Shift-F6"},
-		{"\\e[18;4~", "Alt-Shift-F7"}, {"\\e[19;4~", "Alt-Shift-F8"},
-		{"\\e[20;4~", "Alt-Shift-F9"}, {"\\e[21;4~", "Alt-Shift-F10"},
-		{"\\e[23;4~", "Alt-Shift-F11"}, {"\\e[24;4~", "Alt-Shift-F12"},
+		{"\\e[1;4P", "Alt+Shift+F1"}, {"\\e[1;4Q", "Alt+Shift+F2"},
+		{"\\e[1;4R", "Alt+Shift+F3"}, {"\\e[1;4S", "Alt+Shift+F4"},
+		{"\\e[15;4~", "Alt+Shift+F5"}, {"\\e[17;4~", "Alt+Shift+F6"},
+		{"\\e[18;4~", "Alt+Shift+F7"}, {"\\e[19;4~", "Alt+Shift+F8"},
+		{"\\e[20;4~", "Alt+Shift+F9"}, {"\\e[21;4~", "Alt+Shift+F10"},
+		{"\\e[23;4~", "Alt+Shift+F11"}, {"\\e[24;4~", "Alt+Shift+F12"},
 
-		{"\\e[1;5P", "Ctrl-F1"}, {"\\e[1;5Q", "Ctrl-F2"},
-		{"\\e[1;5R", "Ctrl-F3"}, {"\\e[1;5S", "Ctrl-F4"},
-		{"\\e[15;5~", "Ctrl-F5"}, {"\\e[17;5~", "Ctrl-F6"},
-		{"\\e[18;5~", "Ctrl-F7"}, {"\\e[19;5~", "Ctrl-F8"},
-		{"\\e[20;5~", "Ctrl-F9"}, {"\\e[21;5~", "Ctrl-F10"},
-		{"\\e[23;5~", "Ctrl-F11"}, {"\\e[24;5~", "Ctrl-F12"},
+		{"\\e[1;5P", "Ctrl+F1"}, {"\\e[1;5Q", "Ctrl+F2"},
+		{"\\e[1;5R", "Ctrl+F3"}, {"\\e[1;5S", "Ctrl+F4"},
+		{"\\e[15;5~", "Ctrl+F5"}, {"\\e[17;5~", "Ctrl+F6"},
+		{"\\e[18;5~", "Ctrl+F7"}, {"\\e[19;5~", "Ctrl+F8"},
+		{"\\e[20;5~", "Ctrl+F9"}, {"\\e[21;5~", "Ctrl+F10"},
+		{"\\e[23;5~", "Ctrl+F11"}, {"\\e[24;5~", "Ctrl+F12"},
 
-		{"\\e[1;6P", "Ctrl-Shift-F1"}, {"\\e[1;6Q", "Ctrl-Shift-F2"},
-		{"\\e[1;6R", "Ctrl-Shift-F3"}, {"\\e[1;6S", "Ctrl-Shift-F4"},
-		{"\\e[15;6~", "Ctrl-Shift-F5"}, {"\\e[17;6~", "Ctrl-Shift-F6"},
-		{"\\e[18;6~", "Ctrl-Shift-F7"}, {"\\e[19;6~", "Ctrl-Shift-F8"},
-		{"\\e[20;6~", "Ctrl-Shift-F9"}, {"\\e[21;6~", "Ctrl-Shift-F10"},
-		{"\\e[23;6~", "Ctrl-Shift-F11"}, {"\\e[24;6~", "Ctrl-Shift-F12"},
+		{"\\e[1;6P", "Ctrl+Shift+F1"}, {"\\e[1;6Q", "Ctrl+Shift+F2"},
+		{"\\e[1;6R", "Ctrl+Shift+F3"}, {"\\e[1;6S", "Ctrl+Shift+F4"},
+		{"\\e[15;6~", "Ctrl+Shift+F5"}, {"\\e[17;6~", "Ctrl+Shift+F6"},
+		{"\\e[18;6~", "Ctrl+Shift+F7"}, {"\\e[19;6~", "Ctrl+Shift+F8"},
+		{"\\e[20;6~", "Ctrl+Shift+F9"}, {"\\e[21;6~", "Ctrl+Shift+F10"},
+		{"\\e[23;6~", "Ctrl+Shift+F11"}, {"\\e[24;6~", "Ctrl+Shift+F12"},
 
-		{"\\e[1;8P", "Ctrl-Alt-Shift-F1"}, {"\\e[1;8Q", "Ctrl-Alt-Shift-F2"},
-		{"\\e[1;8R", "Ctrl-Alt-Shift-F3"}, {"\\e[1;8S", "Ctrl-Alt-Shift-F4"},
-		{"\\e[15;8~", "Ctrl-Alt-Shift-F5"}, {"\\e[17;8~", "Ctrl-Alt-Shift-F6"},
-		{"\\e[18;8~", "Ctrl-Alt-Shift-F7"}, {"\\e[19;8~", "Ctrl-Alt-Shift-F8"},
-		{"\\e[20;8~", "Ctrl-Alt-Shift-F9"}, {"\\e[21;8~", "Ctrl-Alt-Shift-F10"},
-		{"\\e[23;8~", "Ctrl-Alt-Shift-F11"}, {"\\e[24;8~", "Ctrl-Alt-Shift-F12"},
+		{"\\e[1;8P", "Ctrl+Alt+Shift+F1"}, {"\\e[1;8Q", "Ctrl+Alt+Shift+F2"},
+		{"\\e[1;8R", "Ctrl+Alt+Shift+F3"}, {"\\e[1;8S", "Ctrl+Alt+Shift+F4"},
+		{"\\e[15;8~", "Ctrl+Alt+Shift+F5"}, {"\\e[17;8~", "Ctrl+Alt+Shift+F6"},
+		{"\\e[18;8~", "Ctrl+Alt+Shift+F7"}, {"\\e[19;8~", "Ctrl+Alt+Shift+F8"},
+		{"\\e[20;8~", "Ctrl+Alt+Shift+F9"}, {"\\e[21;8~", "Ctrl+Alt+Shift+F10"},
+		{"\\e[23;8~", "Ctrl+Alt+Shift+F11"}, {"\\e[24;8~", "Ctrl+Alt+Shift+F12"},
 
 		{"\\e[H", "Home"}, {"\\e[F", "End"},
 		{"\\e[2~", "Ins"}, {"\\e[3~", "Del"},
 		{"\\e[5~", "PgUp"}, {"\\e[6~", "PgDn"},
 
-		{"\\e[1;3H", "Alt-Home"}, {"\\e[1;3F", "Alt-End"},
-		{"\\e[2;3~", "Alt-Ins"}, {"\\e[3;3~", "Alt-Del"},
-		{"\\e[5;3~", "Alt-PgUp"}, {"\\e[6;3~", "Alt-PgDn"},
+		{"\\e[1;3H", "Alt+Home"}, {"\\e[1;3F", "Alt+End"},
+		{"\\e[2;3~", "Alt+Ins"}, {"\\e[3;3~", "Alt+Del"},
+		{"\\e[5;3~", "Alt+PgUp"}, {"\\e[6;3~", "Alt+PgDn"},
 
-		{"\\e[1;5H", "Ctrl-Home"}, {"\\e[1;5F", "Ctrl-End"},
-		{"\\e[2;5~", "Ctrl-Ins"}, {"\\e[3;5~", "Ctrl-Del"},
-		{"\\e[5;5~", "Ctrl-PgUp"}, {"\\e[6;5~", "Ctrl-PgDn"},
+		{"\\e[1;5H", "Ctrl+Home"}, {"\\e[1;5F", "Ctrl+End"},
+		{"\\e[2;5~", "Ctrl+Ins"}, {"\\e[3;5~", "Ctrl+Del"},
+		{"\\e[5;5~", "Ctrl+PgUp"}, {"\\e[6;5~", "Ctrl+PgDn"},
 
-		{"\\e[1;7H", "Ctrl-Alt-Home"}, {"\\e[1;7F", "Ctrl-Alt-End"},
-		{"\\e[2;7~", "Ctrl-Alt-Ins"}, {"\\e[3;7~", "Ctrl-Alt-Del"},
-		{"\\e[5;7~", "Ctrl-Alt-PgUp"}, {"\\e[6;7~", "Ctrl-Alt-PgDn"},
+		{"\\e[1;7H", "Ctrl+Alt+Home"}, {"\\e[1;7F", "Ctrl+Alt+End"},
+		{"\\e[2;7~", "Ctrl+Alt+Ins"}, {"\\e[3;7~", "Ctrl+Alt+Del"},
+		{"\\e[5;7~", "Ctrl+Alt+PgUp"}, {"\\e[6;7~", "Ctrl+Alt+PgDn"},
 
-		{"\\e[1;4H", "Alt-Shift-Home"}, {"\\e[1;4F", "Alt-Shift-End"},
-		{"\\e[2;4~", "Alt-Shift-Ins"}, {"\\e[3;4~", "Alt-Shift-Del"},
-		{"\\e[5;4~", "Alt-Shift-PgUp"}, {"\\e[6;4~", "Alt-Shift-PgDn"},
+		{"\\e[1;4H", "Alt+Shift+Home"}, {"\\e[1;4F", "Alt+Shift+End"},
+		{"\\e[2;4~", "Alt+Shift+Ins"}, {"\\e[3;4~", "Alt+Shift+Del"},
+		{"\\e[5;4~", "Alt+Shift+PgUp"}, {"\\e[6;4~", "Alt+Shift+PgDn"},
 
-		{"\\e[1;6H", "Ctrl-Shift-Home"}, {"\\e[1;6F", "Ctrl-Shift-End"},
-		{"\\e[2;6~", "Ctrl-Shift-Ins"}, {"\\e[3;6~", "Ctrl-Shift-Del"},
-		{"\\e[5;6~", "Ctrl-Shift-PgUp"}, {"\\e[6;6~", "Ctrl-Shift-PgDn"},
+		{"\\e[1;6H", "Ctrl+Shift+Home"}, {"\\e[1;6F", "Ctrl+Shift+End"},
+		{"\\e[2;6~", "Ctrl+Shift+Ins"}, {"\\e[3;6~", "Ctrl+Shift+Del"},
+		{"\\e[5;6~", "Ctrl+Shift+PgUp"}, {"\\e[6;6~", "Ctrl+Shift+PgDn"},
 
-		{"\\e[1;8H", "Ctrl-Alt-Shift-Home"}, {"\\e[1;8F", "Ctrl-Alt-Shift-End"},
-		{"\\e[2;8~", "Ctrl-Alt-Shift-Ins"}, {"\\e[3;8~", "Ctrl-Alt-Shift-Del"},
-		{"\\e[5;8~", "Ctrl-Alt-Shift-PgUp"}, {"\\e[6;8~", "Ctrl-Alt-Shift-PgDn"},
+		{"\\e[1;8H", "Ctrl+Alt+Shift+Home"}, {"\\e[1;8F", "Ctrl+Alt+Shift+End"},
+		{"\\e[2;8~", "Ctrl+Alt+Shift+Ins"}, {"\\e[3;8~", "Ctrl+Alt+Shift+Del"},
+		{"\\e[5;8~", "Ctrl+Alt+Shift+PgUp"}, {"\\e[6;8~", "Ctrl+Alt+Shift+PgDn"},
 
-		{"\\e[3;2~", "Shift-Del"}, {"\\e[1;2H", "Shift-Home"},
-		{"\\e[1;2F", "Shift-End"},
+		{"\\e[3;2~", "Shift+Del"}, {"\\e[1;2H", "Shift+Home"},
+		{"\\e[1;2F", "Shift+End"},
 
 		{"\\e", "Esc"},
 
-		{"\\C-i", "Tab"}, {"\\e\\C-i", "Alt-Tab"},
-		{"\\e[Z", "Shift-Tab"},
+		{"\\C-i", "Tab"}, {"\\e\\C-i", "Alt+Tab"},
+		{"\\e[Z", "Shift+Tab"},
 
-		/* Note: xterm sends \x7f for Ctrl-Backspace  and \C-h for Backspace */
-		{"\\x7f", "Backspace"}, {"\\e\\x7f", "Alt-Backspace"},
+		/* Note: xterm sends \x7f for Ctrl+Backspace and \C-h for Backspace */
+		{"\\x7f", "Backspace"}, {"\\e\\x7f", "Alt+Backspace"},
 
 		/* rxvt-specific */
 		{"\\e[11~", "F1"}, {"\\e[12~", "F2"},
 		{"\\e[13~", "F3"}, {"\\e[14~", "F4"},
 
-		{"\\e[11^", "Ctrl-F1"}, {"\\e[12^", "Ctrl-F2"},
-		{"\\e[13^", "Ctrl-F3"}, {"\\e[14^", "Ctrl-F4"},
-		{"\\e[15^", "Ctrl-F5"}, {"\\e[17^", "Ctrl-F6"},
-		{"\\e[18^", "Ctrl-F7"}, {"\\e[19^", "Ctrl-F8"},
-		{"\\e[20^", "Ctrl-F9"}, {"\\e[21^", "Ctrl-F10"},
-		{"\\e[23^", "Ctrl-F11"}, {"\\e[24^", "Ctrl-F12"},
+		{"\\e[11^", "Ctrl+F1"}, {"\\e[12^", "Ctrl+F2"},
+		{"\\e[13^", "Ctrl+F3"}, {"\\e[14^", "Ctrl+F4"},
+		{"\\e[15^", "Ctrl+F5"}, {"\\e[17^", "Ctrl+F6"},
+		{"\\e[18^", "Ctrl+F7"}, {"\\e[19^", "Ctrl+F8"},
+		{"\\e[20^", "Ctrl+F9"}, {"\\e[21^", "Ctrl+F10"},
+		{"\\e[23^", "Ctrl+F11"}, {"\\e[24^", "Ctrl+F12"},
 
-		{"\\e[23~", "Shift-F1"}, {"\\e[24~", "Shift-F2"},
-		{"\\e[25~", "Shift-F3"}, {"\\e[26~", "Shift-F4"},
-		{"\\e[28~", "Shift-F5"}, {"\\e[29~", "Shift-F6"},
-		{"\\e[31~", "Shift-F7"}, {"\\e[32~", "Shift-F8"},
-		{"\\e[33~", "Shift-F9"}, {"\\e[34~", "Shift-F10"},
-		{"\\e[23$", "Shift-F11"}, {"\\e[24$", "Shift-F12"},
+		{"\\e[23~", "Shift+F1"}, {"\\e[24~", "Shift+F2"},
+		{"\\e[25~", "Shift+F3"}, {"\\e[26~", "Shift+F4"},
+		{"\\e[28~", "Shift+F5"}, {"\\e[29~", "Shift+F6"},
+		{"\\e[31~", "Shift+F7"}, {"\\e[32~", "Shift+F8"},
+		{"\\e[33~", "Shift+F9"}, {"\\e[34~", "Shift+F10"},
+		{"\\e[23$", "Shift+F11"}, {"\\e[24$", "Shift+F12"},
 
-		{"\\e\\e[11~", "Alt-F1"}, {"\\e\\e[12~", "Alt-F2"},
-		{"\\e\\e[13~", "Alt-F3"}, {"\\e\\e[14~", "Alt-F4"},
-		{"\\e\\e[15~", "Alt-F5"}, {"\\e\\e[17~", "Alt-F6"},
-		{"\\e\\e[18~", "Alt-F7"}, {"\\e\\e[19~", "Alt-F8"},
-		{"\\e\\e[20~", "Alt-F9"}, {"\\e\\e[21~", "Alt-F10"},
-		{"\\e\\e[23~", "Alt-F11"}, {"\\e\\e[24~", "Alt-F12"},
+		{"\\e\\e[11~", "Alt+F1"}, {"\\e\\e[12~", "Alt+F2"},
+		{"\\e\\e[13~", "Alt+F3"}, {"\\e\\e[14~", "Alt+F4"},
+		{"\\e\\e[15~", "Alt+F5"}, {"\\e\\e[17~", "Alt+F6"},
+		{"\\e\\e[18~", "Alt+F7"}, {"\\e\\e[19~", "Alt+F8"},
+		{"\\e\\e[20~", "Alt+F9"}, {"\\e\\e[21~", "Alt+F10"},
+		{"\\e\\e[23~", "Alt+F11"}, {"\\e\\e[24~", "Alt+F12"},
 
-		{"\\e[23^", "Ctrl-Shift-F1"}, {"\\e[24^", "Ctrl-Shift-F2"},
-		{"\\e[25^", "Ctrl-Shift-F3"}, {"\\e[26^", "Ctrl-Shift-F4"},
-		{"\\e[28^", "Ctrl-Shift-F5"}, {"\\e[29^", "Ctrl-Shift-F6"},
-		{"\\e[31^", "Ctrl-Shift-F7"}, {"\\e[32^", "Ctrl-Shift-F8"},
-		{"\\e[33^", "Ctrl-Shift-F9"}, {"\\e[34^", "Ctrl-Shift-F10"},
-		{"\\e[23@", "Ctrl-Shift-F11"}, {"\\e[24@", "Ctrl-Shift-F12"},
+		{"\\e[23^", "Ctrl+Shift+F1"}, {"\\e[24^", "Ctrl+Shift+F2"},
+		{"\\e[25^", "Ctrl+Shift+F3"}, {"\\e[26^", "Ctrl+Shift+F4"},
+		{"\\e[28^", "Ctrl+Shift+F5"}, {"\\e[29^", "Ctrl+Shift+F6"},
+		{"\\e[31^", "Ctrl+Shift+F7"}, {"\\e[32^", "Ctrl+Shift+F8"},
+		{"\\e[33^", "Ctrl+Shift+F9"}, {"\\e[34^", "Ctrl+Shift+F10"},
+		{"\\e[23@", "Ctrl+Shift+F11"}, {"\\e[24@", "Ctrl+Shift+F12"},
 
-		{"\\e[a", "Shift-Up"}, {"\\e[b", "Shift-Down"},
-		{"\\e[c", "Shift-Right"}, {"\\e[d", "Shift-Left"},
+		{"\\e[a", "Shift+Up"}, {"\\e[b", "Shift+Down"},
+		{"\\e[c", "Shift+Right"}, {"\\e[d", "Shift+Left"},
 
-		{"\\e\\e[A", "Alt-Up"}, {"\\e\\e[B", "Alt-Down"},
-		{"\\e\\e[C", "Alt-Right"}, {"\\e\\e[D", "Alt-Left"},
+		{"\\e\\e[A", "Alt+Up"}, {"\\e\\e[B", "Alt+Down"},
+		{"\\e\\e[C", "Alt+Right"}, {"\\e\\e[D", "Alt+Left"},
 
-		{"\\eOa", "Ctrl-Up"}, {"\\eOb", "Ctrl-Down"},
-		{"\\eOc", "Ctrl-Right"}, {"\\eOd", "Ctrl-Left"},
+		{"\\eOa", "Ctrl+Up"}, {"\\eOb", "Ctrl+Down"},
+		{"\\eOc", "Ctrl+Right"}, {"\\eOd", "Ctrl+Left"},
 
 		{"\\e[7~", "Home"}, {"\\e[8~", "End"},
 
-		{"\\e\\e[7~", "Alt-Home"}, {"\\e\\e[8~", "Alt-End"},
-		{"\\e\\e[2~", "Alt-Ins"}, {"\\e\\e[3~", "Alt-Del"},
-		{"\\e\\e[5~", "Alt-PgUp"}, {"\\e\\e[6~", "Alt-PgDn"},
+		{"\\e\\e[7~", "Alt+Home"}, {"\\e\\e[8~", "Alt+End"},
+		{"\\e\\e[2~", "Alt+Ins"}, {"\\e\\e[3~", "Alt+Del"},
+		{"\\e\\e[5~", "Alt+PgUp"}, {"\\e\\e[6~", "Alt+PgDn"},
 
-		{"\\e[7^", "Ctrl-Home"}, {"\\e[8^", "Ctrl-End"},
-		{"\\e[2^", "Ctrl-Ins"}, {"\\e[3^", "Ctrl-Del"},
-		{"\\e[5^", "Ctrl-PgUp"}, {"\\e[6^", "Ctrl-PgDn"},
+		{"\\e[7^", "Ctrl+Home"}, {"\\e[8^", "Ctrl+End"},
+		{"\\e[2^", "Ctrl+Ins"}, {"\\e[3^", "Ctrl+Del"},
+		{"\\e[5^", "Ctrl+PgUp"}, {"\\e[6^", "Ctrl+PgDn"},
 
-		{"\\e[7$", "Shift-Home"}, {"\\e[8$", "Shift-End"},
-		{"\\e[5^", "Ctrl-PgUp"}, {"\\e[6^", "Ctrl-PgDn"},
-		{"\\e[7^", "Ctrl-Home"}, {"\\e[8^", "Ctrl-End"},
+		{"\\e[7$", "Shift+Home"}, {"\\e[8$", "Shift+End"},
+		{"\\e[5^", "Ctrl+PgUp"}, {"\\e[6^", "Ctrl+PgDn"},
+		{"\\e[7^", "Ctrl+Home"}, {"\\e[8^", "Ctrl+End"},
 
-		{"\\e\\e[7^", "Ctrl-Alt-Home"}, {"\\e\\e[8^", "Ctrl-Alt-End"},
-		{"\\e\\e[2^", "Ctrl-Alt-Ins"}, {"\\e\\e[3^", "Ctrl-Alt-Del"},
-		{"\\e\\e[5^", "Ctrl-Alt-PgUp"}, {"\\e\\e[6^", "Ctrl-Alt-PgDn"},
+		{"\\e\\e[7^", "Ctrl+Alt+Home"}, {"\\e\\e[8^", "Ctrl+Alt+End"},
+		{"\\e\\e[2^", "Ctrl+Alt+Ins"}, {"\\e\\e[3^", "Ctrl+Alt+Del"},
+		{"\\e\\e[5^", "Ctrl+Alt+PgUp"}, {"\\e\\e[6^", "Ctrl+Alt+PgDn"},
 
-		{"\\e[2@", "Ctrl-Shift-Ins"},	{"\\e[3@", "Ctrl-Shift-Del"},
-		{"\\e[7@", "Ctrl-Shift-Home"}, {"\\e[8@", "Ctrl-Shift-End"},
+		{"\\e[2@", "Ctrl+Shift+Ins"},	{"\\e[3@", "Ctrl+Shift+Del"},
+		{"\\e[7@", "Ctrl+Shift+Home"}, {"\\e[8@", "Ctrl+Shift+End"},
 
 		/* Vte-specific */
-		{"\\e[01;2P", "Shift-F1"}, {"\\e[01;2Q", "Shift-F2"},
-		{"\\e[01;2R", "Shift-F3"}, {"\\e[01;2S", "Shift-F4"},
+		{"\\e[01;2P", "Shift+F1"}, {"\\e[01;2Q", "Shift+F2"},
+		{"\\e[01;2R", "Shift+F3"}, {"\\e[01;2S", "Shift+F4"},
 
-		{"\\e[01;3P", "Alt-F1"}, {"\\e[01;3Q", "Alt-F2"},
-		{"\\e[01;3R", "Alt-F3"}, {"\\e[01;3S", "Alt-F4"},
+		{"\\e[01;3P", "Alt+F1"}, {"\\e[01;3Q", "Alt+F2"},
+		{"\\e[01;3R", "Alt+F3"}, {"\\e[01;3S", "Alt+F4"},
 
-		{"\\e[01;5P", "Ctrl-F1"}, {"\\e[01;5Q", "Ctrl-F2"},
-		{"\\e[01;5R", "Ctrl-F3"}, {"\\e[01;5S", "Ctrl-F4"},
+		{"\\e[01;5P", "Ctrl+F1"}, {"\\e[01;5Q", "Ctrl+F2"},
+		{"\\e[01;5R", "Ctrl+F3"}, {"\\e[01;5S", "Ctrl+F4"},
 
 		{"\\eOH", "Home"}, {"\\eOF", "End"},
 
@@ -603,19 +603,19 @@ translate_key(const char *key)
 		/* emacs and others */
 		{"\\eOA", "Up"}, {"\\eOB", "Down"},
 		{"\\eOC", "Right"}, {"\\eOD", "Left"},
-		{"\\eO5A", "Ctrl-Up"}, {"\\eO5B", "Ctrl-Down"},
-		{"\\eO5C", "Ctrl-Right"}, {"\\eO5D", "Ctrl-Left"},
+		{"\\eO5A", "Ctrl+Up"}, {"\\eO5B", "Ctrl+Down"},
+		{"\\eO5C", "Ctrl+Right"}, {"\\eO5D", "Ctrl+Left"},
 
-		{"\\e[5A", "Ctrl-Up"},{"\\e[5B", "Ctrl-Down"},
-		{"\\e[5C", "Ctrl-Right"},{"\\e[5D", "Ctrl-Left"},
+		{"\\e[5A", "Ctrl+Up"},{"\\e[5B", "Ctrl+Down"},
+		{"\\e[5C", "Ctrl+Right"},{"\\e[5D", "Ctrl+Left"},
 
-		{"\\e[2A", "Shift-Up"}, {"\\e[2B", "Shift-Down"},
-		{"\\e[2C", "Shift-Right"}, {"\\e[2D", "Shift-Left"},
+		{"\\e[2A", "Shift+Up"}, {"\\e[2B", "Shift+Down"},
+		{"\\e[2C", "Shift+Right"}, {"\\e[2D", "Shift+Left"},
 
 		{"\\e[1~", "Home"}, {"\\e[4~", "End"},
 
-		{"\\e[4h", "Ins"}, {"\\e[L", "Ctrl-Ins"}, /* st */
-		{"\\e[M", "Ctrl-Del"},
+		{"\\e[4h", "Ins"}, {"\\e[L", "Ctrl+Ins"}, /* st */
+		{"\\e[M", "Ctrl+Del"},
 
 		/* sun-color uses \e[224z-\e[235z for F1-F12 keys. */
 		/* cons25 uses \e[M-\e[X for F1-F12 keys. */
@@ -889,7 +889,7 @@ get_new_keybind(void)
 			continue;
 
 		/* Kitty keyboard protocol */
-		if (*buf && strstr(buf, "\\e[100;5u")) { /* Ctrl-D */
+		if (*buf && strstr(buf, "\\e[100;5u")) { /* Ctrl+d */
 			MOVE_CURSOR_LEFT(8);
 			ERASE_TO_RIGHT;
 			fflush(stdout);
@@ -897,7 +897,7 @@ get_new_keybind(void)
 			break;
 		}
 
-		if (*buf && strstr(buf, "\\e[99;5u")) { /* Ctrl-C */
+		if (*buf && strstr(buf, "\\e[99;5u")) { /* Ctrl+c */
 			putchar('\r');
 			MOVE_CURSOR_RIGHT(1);
 			ERASE_TO_RIGHT;
@@ -1081,7 +1081,7 @@ bind_kb_func(const char *func_name)
 
 	printf(_("Enter a keybinding for %s%s%s (current: %s%s%s)\n"),
 		BOLD, func_name, df_c, BOLD, cur_key, df_c);
-	puts(_("(Enter:accept, Ctrl-d:abort, Ctrl-c:clear-line)"));
+	puts(_("(Enter:accept, Ctrl+d:abort, Ctrl+c:clear-line)"));
 	puts(_("To unset the function enter '-'"));
 
 	char *kb = get_new_keybind();
@@ -3543,7 +3543,7 @@ set_hardcoded_keybinds(void)
 	rl_bind_keyseq("\x1b[C", rl_accept_suggestion);
 	rl_bind_keyseq("\x1bOC", rl_accept_suggestion);
 
-	/* Bind Alt-Right and Alt-f to accept the first suggested word */
+	/* Bind Alt+Right and Alt+f to accept the first suggested word */
 	rl_bind_keyseq("\x1b[102;3u", rl_accept_first_word);
 	rl_bind_keyseq("\x1b\x66", rl_accept_first_word);
 	rl_bind_keyseq("\x1b[3C", rl_accept_first_word);

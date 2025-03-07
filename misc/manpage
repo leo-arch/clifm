@@ -163,7 +163,7 @@ enable the splash screen
 in stealth mode (also known as incognito or private mode) no trace is left on the host system. Nothing is read from files nor any file is created: all settings are set to the default values. However, most settings can still be controlled via command line options and dedicated environment variables (see the \fBENVIRONMENT\fR section below). Take a look as well to the \fIhistory\fR command and the \fI\-\-no\-history\fR command line switch.
 .TP
 \fB\-t\fR, \fB\-\-disk\-usage\-analyzer\fR
-run in disk usage analyzer mode. Equivalent to \fI\-\-sort=size \-\-long\-view \-\-full\-dir\-size \-\-no\-dirs\-first\fR. The total size of the current directory will be printed after the list of files. Press \fICtrl\-Alt\-i\fR (or \fIAlt\-TAB\fR) to toggle this mode on/off in\-place.
+run in disk usage analyzer mode. Equivalent to \fI\-\-sort=size \-\-long\-view \-\-full\-dir\-size \-\-no\-dirs\-first\fR. The total size of the current directory will be printed after the list of files. Press \fICtrl+Alt+i\fR (or \fIAlt+TAB\fR) to toggle this mode on/off in\-place.
 .TP
 \fB\-T\fR, \fB\-\-trash\-dir\fR=\fI\,DIR\/\fR
 set an alternative trash directory
@@ -223,7 +223,7 @@ fuzzy matching algorithm, where \fIVER\fR is either \fI1\fR (faster, but not Uni
 enable fuzzy matches for filename/path completions and suggestions
 .TP
 \fB\-\-fzfpreview\-hidden\fR
-enable file previews for tab completion (fzf mode only) with the preview window hidden (toggle it via \fIAlt\-p\fR)
+enable file previews for tab completion (fzf mode only) with the preview window hidden (toggle it via \fIAlt+p\fR)
 .TP
 \fB\-\-fzftab\fR
 use \fIfzf\fR to display completion matches
@@ -886,10 +886,10 @@ An alternative way of navigating the jump database is using the jumper plugin (l
 Take a look at the \fIdh\fR command as well.
 .TP
 .B k
-if running in long view, toggle follow-links (\fIAlt\-+\fR is also available). See the \fI\-L,\-\-follow\-symlinks\-long\fR command line switch.
+if running in long view, toggle follow-links (\fIAlt++\fR is also available). See the \fI\-L,\-\-follow\-symlinks\-long\fR command line switch.
 .TP
 .B kk
-toggle max-filename-len on/off (\fICtrl\-Alt\-l\fR is also available)
+toggle max-filename-len on/off (\fICtrl+Alt+l\fR is also available)
 .TP
 .B kb, keybinds \fR[\fIlist\fR] \fR[\fIbind FUNCTION\fR]  [\fIedit\fR [\fIAPP\fR]] [\fIconflict\fR] [\fIreset\fR] [\fIreadline\fR]
 with no argument (or if the argument is \fIlist\fR), prints the current keybindings and their associated functions.
@@ -898,7 +898,7 @@ To change a keybinding use the \fIbind\fR subcommand.
 .sp
 Type \fIkb bind <TAB>\fR to get the list of bindable functions.
 .sp
-Enter \fIkb bind FUNCTION\fR to set a new keybinding for FUNCTION. For example, to bind the function \fIprevious-dir\fR to a new key, enter \fIkb bind previous-dir\fR. You'll see a little prompt: press the key combination you want to associate to the specified function and the press \fBEnter\fR (while in this prompt, press \fBCtrl-d\fR to abort or \fBCtrl-c\fR to clear the current line).
+Enter \fIkb bind FUNCTION\fR to set a new keybinding for FUNCTION. For example, to bind the function \fIprevious-dir\fR to a new key, enter \fIkb bind previous-dir\fR. You'll see a little prompt: press the key combination you want to associate to the specified function and the press \fBEnter\fR (while in this prompt, press \fBCtrl+d\fR to abort or \fBCtrl+c\fR to clear the current line).
 .sp
 To manually edit your keybindings use the \fIedit\fR option (the keybindings file will be opened with APP, if specified, or with the default associated application otherwise).
 .sp
@@ -1110,7 +1110,7 @@ By default, directories size is not shown. Use \fIpp\fR instead of just \fIp\fR 
 .sp
 The time format used to display time information can be customized via the \fIPTimeStyle\fR option in the configuration file (defaults to "%Y\-%m\-%d %H:%M:%S.%N %z", where %N stands for nano\-second precision).
 .sp
-If you need to list the properties of all files in the current directory, try the long view mode (\fIll\fR or \fIAlt\-l\fR). Fields displayed in this mode can be customized using the \fIPropFields\fR option in the configuration file. For custom timestamp formats use the \fITimeStyle\fR option.
+If you need to list the properties of all files in the current directory, try the long view mode (\fIll\fR or \fIAlt+l\fR). Fields displayed in this mode can be customized using the \fIPropFields\fR option in the configuration file. For custom timestamp formats use the \fITimeStyle\fR option.
 .sp
 For more information about file details consult the \fIfile\-details\fR help topic: \fIhelp file\-details\fR.
 .TP
@@ -1135,7 +1135,7 @@ with no arguments, prints the name of the currently used profile. Use the \fIls\
 .B pg, pager \fR[\fIon\fR, \fIoff\fR, \fIonce\fR, \fIstatus\fR, [\fINUM\fR]]
 run or set \fBMas\fR, \fBClifm\fR's builtin files pager.
 .sp
-With no parameter, just run the pager (\fIAlt\-0\fR is also available).
+With no parameter, just run the pager (\fIAlt+0\fR is also available).
 .sp
 If set to \fIon\fR, run the pager whenever the list of files does not fit on the screen.
 .sp
@@ -1200,7 +1200,7 @@ Just as in the case of the \fIsearch\fR function, inverse matching is supported 
 .sp
 Glob and regular expressions can be used together. For example: \fIs ^[r|R].*d$ /etc/*.conf\fR will select all files starting with either 'r' or 'R' and ending with 'd' in the current working directory, plus all .conf files in the \fI/etc\fR directory. However, this use is discouraged if both patterns refer to the same directory, since the second one will probably override the result of the first one.
 .sp
-It is important to note that glob expressions are evaluated before regular expressions, in such a way that any pattern that could be understood by both kinds of pattern matching mechanisms will be evaluated first according to the former, that is, as a glob expression. For example, '.*', as regular expression, should match all files. However, since glob expressions are evaluated first, it will only match hidden files. To select all files using a glob expression, try \'.* *\', or, with a regular expression: \'^\' or \'(.*?)\'. The keyboard shortcut \fIAlt\-a\fR is also available to perform the same operation.
+It is important to note that glob expressions are evaluated before regular expressions, in such a way that any pattern that could be understood by both kinds of pattern matching mechanisms will be evaluated first according to the former, that is, as a glob expression. For example, '.*', as regular expression, should match all files. However, since glob expressions are evaluated first, it will only match hidden files. To select all files using a glob expression, try \'.* *\', or, with a regular expression: \'^\' or \'(.*?)\'. The keyboard shortcut \fIAlt+a\fR is also available to perform the same operation.
 .sp
 The Selection Box is accessible from different instances of the program, provided they use the same profile (see the \fIprofile\fR command below). By default, indeed, each profile keeps a private Selection Box, being thus not accessible to other profiles. You can nonetheless modify this behavior via the \fIShareSelbox\fR option in the configuration file. If \fIShareSelbox\fR is enabled, selected files are stored in \fI/tmp/clifm/username/.selbox.clifm\fR. Otherwise, \fI/tmp/clifm/username/.selbox_profilename.clifm\fR is used (this is the default).
 .sp
@@ -1214,7 +1214,7 @@ To list selected files use the \fIsb\fR command (standing for Selection Box). Yo
 .sp
 \fBDeselecting files\fR
 .sp
-To deselect files use the \fIds\fR command. See above. You can also press \fIAlt\-d\fR to deselect all files at once.
+To deselect files use the \fIds\fR command. See above. You can also press \fIAlt+d\fR to deselect all files at once.
 .sp
 \fBNote\fR:  If there is a file named \fIsel\fR in the current directory, use \fI./sel\fR to distinguish it from the \fIsel\fR keyword. For example, enter \fIp ./sel\fR to tell \fBclifm\fR that you want to get the properties of the file named \fIsel\fR rather than the properties of the currently selected files.
 .sp
@@ -1290,7 +1290,7 @@ Use \fINUM\fR to switch to the workspace number NUM, \fINAME\fR to switch to the
 .sp
 To unset a workspace use the \fIunset\fR subcommand preceded by the workspace (either number or name) to be unset. For example: \fIws 2 unset\fR.
 .sp
-Four keyboard shortcuts are available to easily switch to any of the first four workspaces: \fBAlt\-[1\-4]\fR.
+Four keyboard shortcuts are available to easily switch to any of the first four workspaces: \fBAlt+[1\-4]\fR.
 .sp
 Every time an empty workspace is created, it starts in the current working directory.
 .sp
@@ -1298,7 +1298,7 @@ Though by default workspaces are unnamed, you can name them however you like usi
 .sp
 Use autocommands to persistenly set options per workspace, for example, to always list files in the third workspace in long view. See the \fBAUTOCOMMANDS\fR section below for more information.
 .sp
-Make local settings private to the current workspace by setting the \fIPrivateWorkspaceSettings\fR option to \fItrue\fR in the configuration file: settings changed via either the command line or keyboard shortcuts (say Alt\-l, to toggle the long view) will apply only to the current workspace and will be remembered even when switching workspaces.
+Make local settings private to the current workspace by setting the \fIPrivateWorkspaceSettings\fR option to \fItrue\fR in the configuration file: settings changed via either the command line or keyboard shortcuts (say Alt+l, to toggle the long view) will apply only to the current workspace and will be remembered even when switching workspaces.
 .sp
 To directly operate on a workspace (namely, the path it points to) you can use the \fIw:\fR construct followed by a workspace number or name. For example, to copy all .png files in the current directory to the third workspace, enter \fIc *.png w:3\fR. Press TAB immediately after \fIw:\fR to get the list of available workspaces. 
 .TP
@@ -1326,11 +1326,11 @@ open DIR, or the current working directory if DIR is not specified, in a new ins
 .SH 5. FILE FILTERS
 \fBClifm\fR provides multiple ways to filter the current list of files:
 .sp
-\fBa)\fR Hidden files: via the \fB\-A\fR and \fB\-a\fR command line flags, the \fIhh\fR command, and the \fIAlt\-.\fR keybinding.
+\fBa)\fR Hidden files: via the \fB\-A\fR and \fB\-a\fR command line flags, the \fIhh\fR command, and the \fIAlt+.\fR keybinding.
 .sp
 Files listed in a file named \fI.hidden\fR in the current directory will be hidden as well whenever dotfiles are not shown (wildcards are supported).
 .sp
-\fBb)\fR Directories: via the \fI\-\-only\-dirs\fR command line switch and the \fIAlt\-,\fR keybinding.
+\fBb)\fR Directories: via the \fI\-\-only\-dirs\fR command line switch and the \fIAlt+,\fR keybinding.
 .sp
 \fBc)\fR Filenames and file types: either via a regular expression or a file type character (see below) using the \fIft\fR command (the \fIFilter\fR option in the configuration file and the \fBCLIFM_FILTER\fR environment variable are also available). For example, to exclude backup files (ending with a tilde):
 .sp
@@ -1412,36 +1412,36 @@ allbox tab(:);
 lb lb
 lb l.
 Key : Description
-Ctrl\-Alt\-j : Switch to vi editing mode
-Ctrl\-Alt\-e : Switch back to emacs editing mode (default)
-Right, Ctrl\-f : Accept the entire current suggestion
-Alt\-Right, Alt\-f : Accept the first suggested word (up to the first slash or space)
-Alt\-c : Clear the current command line buffer
-Alt\-q : Delete last word (up to last slash or space)
-Alt\-i, Alt\-. : Toggle hidden\-files
-Alt\-l : Toggle long\-view
-Alt\-+ : Toggle follow\-links (long view only)
-Alt\-g : Toggle list\-directories\-first
-Alt\-, : Toggle list\-only\-directories
-Ctrl\-Alt\-l : Toggle max\-filename\-length
-Ctrl\-Alt\-i, Alt\-TAB : Toggle disk\-usage\-analyzer
-Alt\-w : Toggle full\-path\-filenames (virtual directories)
-Ctrl\-l : Refresh the screen (reprint the list of files in the current directory)
-Alt\-t : Clear program messages
-Alt\-m : List mountpoints
-Alt\-b : Launch the Bookmark Manager
-Alt\-h : Show the directory history
-Alt\-n : Create new file or directory
-Alt\-s : Open the Selection Box
-Alt\-\- : Launch the file previewer (\fIview\fR command)
-Alt\-a : Select all files in the current directory
-Alt\-d : Deselect all files
-Alt\-0 : Run MAS, the file pager
-Alt\-p : Change to the pinned directory
-Alt\-1 : Switch to workspace 1
-Alt\-2 : Switch to workspace 2
-Alt\-3 : Switch to workspace 3
-Alt\-4 : Switch to workspace 4
+Ctrl+Alt+j : Switch to vi editing mode
+Ctrl+Alt+e : Switch back to emacs editing mode (default)
+Right, Ctrl+f : Accept the entire current suggestion
+Alt+Right, Alt+f : Accept the first suggested word (up to the first slash or space)
+Alt+c : Clear the current command line buffer
+Alt+q : Delete last word (up to last slash or space)
+Alt+i, Alt+. : Toggle hidden\-files
+Alt+l : Toggle long\-view
+Alt++ : Toggle follow\-links (long view only)
+Alt+g : Toggle list\-directories\-first
+Alt+, : Toggle list\-only\-directories
+Ctrl+Alt+l : Toggle max\-filename\-length
+Ctrl+Alt+i, Alt+Tab : Toggle disk\-usage\-analyzer
+Alt+w : Toggle full\-path\-filenames (virtual directories)
+Ctrl+l : Refresh the screen (reprint the list of files in the current directory)
+Alt+t : Clear program messages
+Alt+m : List mountpoints
+Alt+b : Launch the Bookmark Manager
+Alt+h : Show the directory history
+Alt+n : Create new file or directory
+Alt+s : Open the Selection Box
+Alt+\- : Launch the file previewer (\fIview\fR command)
+Alt+a : Select all files in the current directory
+Alt+d : Deselect all files
+Alt+0 : Run MAS, the file pager
+Alt+p : Change to the pinned directory
+Alt+1 : Switch to workspace 1
+Alt+2 : Switch to workspace 2
+Alt+3 : Switch to workspace 3
+Alt+4 : Switch to workspace 4
 .TE
 
 .TS
@@ -1449,24 +1449,24 @@ allbox tab(:);
 lb lb
 lb l.
 Key : Description
-Alt\-r : Change to the root directory
-Alt\-e, Home : Change to the home directory
-Alt\-u, Shift\-Up : Change to the parent directory
-Alt\-j, Shift\-Left : Change to the previously visited directory
-Alt\-k, Shift\-Right : Change to the next visited directory
-Ctrl\-Alt\-o : Switch to the previous profile
-Ctrl\-Alt\-p : Switch to the next profile
-Ctrl\-Alt\-a : Archive selected files
-Ctrl\-Alt\-e : Export selected files
-Ctrl\-Alt\-r : Rename selected files
-Ctrl\-Alt\-d : Remove selected files
-Ctrl\-Alt\-t : Trash selected files
-Ctrl\-Alt\-v : Copy selected files to the current directory
-Alt\-y : Toggle light-mode
-Alt\-z : Switch to previous sorting method
-Alt\-x : Switch to next sorting method
-Ctrl\-x : Launch a new instance of \fBclifm\fR
-Ctrl\-y : Copy the contents of the line buffer to the clipboard \fB(1)\fR
+Alt+r : Change to the root directory
+Alt+e, Home : Change to the home directory
+Alt+u, Shift+Up : Change to the parent directory
+Alt+j, Shift+Left : Change to the previously visited directory
+Alt+k, Shift+Right : Change to the next visited directory
+Ctrl+Alt+o : Switch to the previous profile
+Ctrl+Alt+p : Switch to the next profile
+Ctrl+Alt+a : Archive selected files
+Ctrl+Alt+e : Export selected files
+Ctrl+Alt+r : Rename selected files
+Ctrl+Alt+d : Remove selected files
+Ctrl+Alt+t : Trash selected files
+Ctrl+Alt+v : Copy selected files to the current directory
+Alt+y : Toggle light-mode
+Alt+z : Switch to previous sorting method
+Alt+x : Switch to next sorting method
+Ctrl+x : Launch a new instance of \fBclifm\fR
+Ctrl+y : Copy the contents of the line buffer to the clipboard \fB(1)\fR
 F1 : Go to the manpage
 F2 : List commands
 F3 : List keybindings
@@ -1490,7 +1490,7 @@ The keybindings configuration file can also be manually edited using the \fIkb e
 .TP
 .B Readline keybindings
 .TP
-Readline keybindings for command line editing, such as \fICtrl\-a\fR, to move the cursor to the beginning of the line, or \fICtrl\-e\fR, to move it to the end, should work out of the box. Of course, you can modify these keybindings by editing the \fI~/.config/clifm/readline.clifm\fR file, following the same rules used by readline itself for the \fI~/.inputrc\fR file. For more information consult the readline documentation (\fBreadline\fR(3)).
+Readline keybindings for command line editing, such as \fICtrl+a\fR, to move the cursor to the beginning of the line, or \fICtrl+e\fR, to move it to the end, should work out of the box. Of course, you can modify these keybindings by editing the \fI~/.config/clifm/readline.clifm\fR file, following the same rules used by readline itself for the \fI~/.inputrc\fR file. For more information consult the readline documentation (\fBreadline\fR(3)).
 .TP
 .B Keybindings for plugins
 .TP
@@ -1520,7 +1520,7 @@ Summarizing, and once you have the replacement keybindings file in place, run th
 .TP
 Important
 .TP
-When using the Kitty Keyboard Protocol, the Ctrl-D shortcut (used to quit secondary prompts) will no longer work. To resolve this issue, add the following line to your \fIkitty.conf\fR file:
+When using the Kitty Keyboard Protocol, the Ctrl+d shortcut (used to quit secondary prompts) will no longer work. To resolve this issue, add the following line to your \fIkitty.conf\fR file:
 
  \fBmap control+d send_text kitty \\x04\fR
 .TP
@@ -2221,11 +2221,11 @@ To customize the appearance of the preview window, use the \fI\-\-preview\-windo
 .TP
 Default keybindings for the preview window:
 .sp
- \fBAlt\-p\fR: Toggle the preview window on/off
- \fBCtrl\-Up\fR / \fBShift\-Up\fR: Scroll the preview window up one line
- \fBCtrl\-Down\fR / \fBShift\-Down\fR: Scroll the preview window down one line
- \fBAlt\-Up\fR: Scroll the preview window up one page
- \fBAlt\-Down\fR: Scroll the preview window down one page
+ \fBAlt+p\fR: Toggle the preview window on/off
+ \fBCtrl+Up\fR / \fBShift+Up\fR: Scroll the preview window up one line
+ \fBCtrl+Down\fR / \fBShift+Down\fR: Scroll the preview window down one line
+ \fBAlt+Up\fR: Scroll the preview window up one page
+ \fBAlt+Down\fR: Scroll the preview window down one page
 .TP
 Keybindings can be customized using the \fI\-\-bind\fR option in the \fIFzfTabOptions\fR field in the color scheme file.
 .TP
@@ -2264,11 +2264,11 @@ i. Shell builtins \fB(2)\fR
 .sp
 \fBNote\fR: By default, a brief description for internal commands is suggested. You can disable this feature via the \fISuggestCmdDesc\fR option in the configuration file.
 .sp
-To accept the entire suggestion press \fBRight\fR or \fBCtrl\-f\fR: the cursor will move to the end of the suggested command and the suggestion color will change to that of the typed text; next, you can press \fBEnter\fR to execute the command as usual. Otherwise, if the suggestion is not accepted, it will be simply ignored and you can continue editing the current command line however you want.
+To accept the entire suggestion press \fBRight\fR or \fBCtrl+f\fR: the cursor will move to the end of the suggested command and the suggestion color will change to that of the typed text; next, you can press \fBEnter\fR to execute the command as usual. Otherwise, if the suggestion is not accepted, it will be simply ignored and you can continue editing the current command line however you want.
 
-To accept the first suggested word only (up to first slash or space), press rather \fIAlt\-Right\fR or \fIAlt\-f\fR. Not available for ELNs, aliases and bookmarks names.
+To accept the first suggested word only (up to first slash or space), press rather \fIAlt+Right\fR or \fIAlt+f\fR. Not available for ELNs, aliases and bookmarks names.
 
-Bear in mind that suggestions for ELNs, aliases, bookmarks names, the jump function (invoked by the \fIj\fR command), just as filenames and paths (if fuzzy\-suggestions are enabled) do not work as the remaining suggestions: they do not suggest possible completions for the current input, but rather the value pointed to by it. For example, if you type "12" and the current list of files includes a filename whose ELN is '12', the filename corresponding to this ELN will be printed next to "12" as follows: \fB12_ > filename\fR (where the underscore is the current cursor position). Press \fIRight\fR or \fICtrl\-f\fR to accept the suggestion, in which case the text typed so far will be replaced by the suggestion.
+Bear in mind that suggestions for ELNs, aliases, bookmarks names, the jump function (invoked by the \fIj\fR command), just as filenames and paths (if fuzzy\-suggestions are enabled) do not work as the remaining suggestions: they do not suggest possible completions for the current input, but rather the value pointed to by it. For example, if you type "12" and the current list of files includes a filename whose ELN is '12', the filename corresponding to this ELN will be printed next to "12" as follows: \fB12_ > filename\fR (where the underscore is the current cursor position). Press \fIRight\fR or \fICtrl+f\fR to accept the suggestion, in which case the text typed so far will be replaced by the suggestion.
 
 The order of the suggestion checks can be customized via the \fISuggestionStrategy\fR option in the configuration file. Each check is assigned a lowercase character:
 
@@ -2435,7 +2435,7 @@ T{
 \fIunset\fR
 T}	Pick/select files via \fBclifm\fR	\fB(7)\fR
 T{
-Ctrl-y
+Ctrl+y
 T}	Copy the line buffer to the clipboard	\fB(8)\fR
 .TE
 
@@ -2737,7 +2737,7 @@ The user can operate on these files as if they were any other regular file, sinc
 .sp
 Once in the virtual directory, files are listed by default using only the base name of the target file. For example, if the target file is \fI/home/user/Downloads/myfile.tar.gz\fR, this file will be listed as \fImyfile.tar.gz\fR. If this file already exists in the virtual directory (because there is another target file with the same base name, say, \fI/home/user/Documents/tars/myfile.tar.gz\fR), a random six digits suffix will be appended to the file (for instance, \fImyfile.tar.gz.12Rgj6\fR).
 .sp
-Since this listing mode does not allow the user to get a clear idea of the actual location of each listed file, a keybinding (by default \fIAlt\-w\fR) is available to toggle short (base names only) and long filenames: in this latter case, filenames are listed using the full path to the target file, replacing slashes by colons (:). For example, if the target file is \fI/home/user/Downloads/myfile.tar.gz\fR, it will be listed in the virtual directory as \fIhome:user:Downloads:myfile.tar.gz\fR.
+Since this listing mode does not allow the user to get a clear idea of the actual location of each listed file, a keybinding (by default \fIAlt+w\fR) is available to toggle short (base names only) and long filenames: in this latter case, filenames are listed using the full path to the target file, replacing slashes by colons (:). For example, if the target file is \fI/home/user/Downloads/myfile.tar.gz\fR, it will be listed in the virtual directory as \fIhome:user:Downloads:myfile.tar.gz\fR.
 .sp
 If you prefer the long names approach, you can use the \fI\-\-virtual\-dir\-full\-paths\fR command line flag.
 .sp
@@ -2786,7 +2786,7 @@ Once executed, the vt plugin will launch a new instance of CliFM (on a new termi
 .sp
 \fBNote\fR: By default, the terminal emulator used is \fBxterm\fR(1), but it can be changed by editing the plugin script (\fIvirtualize.sh\fR).
 .sp
-If navigating the filesystem, you can quickly go back to the virtual directory using the \fI\-d\fR option: \fIvt \-d\fR. The navigation keys (see the \fBKEYBOARD SHORTCUTS\fR section above) and the \fBCLIFM_VIRTUAL_DIR\fR environment variable are also available (\fIShift\-Left\fR/\fIShift\-Right\fR or \fRcd $CLIFM_VIRTUAL_DIR\fR).
+If navigating the filesystem, you can quickly go back to the virtual directory using the \fI\-d\fR option: \fIvt \-d\fR. The navigation keys (see the \fBKEYBOARD SHORTCUTS\fR section above) and the \fBCLIFM_VIRTUAL_DIR\fR environment variable are also available (\fIShift+Left\fR/\fIShift+Right\fR or \fRcd $CLIFM_VIRTUAL_DIR\fR).
 .sp
 \fBTip\fR: Write an alias to make this even easier:
 .sp
@@ -2905,7 +2905,7 @@ A custom commands history file
 Define a file filter. If set, this variable overrides the \fIFilter\fR option in the configuration file
 .TP
 .B CLIFM_SUDO_CMD
-Name of the authenticator program. Used by the \fIX\fR command (to launch a new instance of **clifm** as root), the \fIAlt\-v\fR keybinding (to prepend the authenticator program name to the current command line), and for some operations on archives (ISO files). Defaults to \fIsudo\fR (or \fIdoas\fR if compiled on OpenBSD). Example: \fICLIFM_SUDO_CMD=doas clifm\fI.
+Name of the authenticator program. Used by the \fIX\fR command (to launch a new instance of **clifm** as root), the \fIAlt+v\fR keybinding (to prepend the authenticator program name to the current command line), and for some operations on archives (ISO files). Defaults to \fIsudo\fR (or \fIdoas\fR if compiled on OpenBSD). Example: \fICLIFM_SUDO_CMD=doas clifm\fI.
 .TP
 .B SHELL
 .sp 0
@@ -3227,7 +3227,7 @@ The directory jumper database is stored in \fI$XDG_CONFIG_HOME/clifm/profiles/PR
 .SH 23. EXAMPLES
 \fBNOTE\fR: Always try TAB. Tab completion is available for many things
 
-\fBNOTE 2\fR: Suggestions for possible completions are printed next to the text typed so far. To accept the given suggestion press \fIRight\fR (or \fIAlt\-f\fR to accept only the first/next suggested word). Otherwise, the suggestion is just ignored
+\fBNOTE 2\fR: Suggestions for possible completions are printed next to the text typed so far. To accept the given suggestion press \fIRight\fR (or \fIAlt+f\fR to accept only the first/next suggested word). Otherwise, the suggestion is just ignored
 
 Get help:
 \fBF1\fR: manpage
@@ -3254,13 +3254,13 @@ T{
 j xproj
 T}	Jump to \fI~/media/data/docs/work/mike/xproject\fR \fB(3)\fR
 T{
-b (Shift\-Left, Alt\-j)
+b (Shift+Left, Alt+j)
 T}	Go back in the directory history list
 T{
-f (Shift\-Right, Alt\-k)
+f (Shift+Right, Alt+k)
 T}	Go forth in the directory history list
 T{
-\fR.. (Shift\-Up, Alt\-u)
+\fR.. (Shift+Up, Alt+u)
 T}	Change to the parent directory
 T{
 \fR...
@@ -3269,7 +3269,7 @@ T{
 bd w
 T}	Change to the parent directory matching "w" \fB(5)\fR
 T{
-ws2 (Alt\-2)
+ws2 (Alt+2)
 T}	Swtich to the second workspace \fB(6)\fR
 T{
 /*.pdf<TAB>
@@ -3305,7 +3305,7 @@ T}	Run MAS, the files pager, on the current directory\fR
 .sp 0
  \fB(5)\fR Type \fIbd <TAB>\fR to list all parent directories
 .sp 0
- \fB(6)\fR \fIAlt\-[1\-4]\fR is available for workspaces 1\-4
+ \fB(6)\fR \fIAlt+[1\-4]\fR is available for workspaces 1\-4
 .sp 0
  \fB(7)\fR Type \fI=<TAB>\fR to get the list of available file type characters. Consult the \fBFILE FILTERS\fR section above for more information
 .sp 0
@@ -3361,7 +3361,7 @@ T{
 bm del mybm
 T}	Remove the bookmark named \fImybm\fR
 T{
-bm (Alt\-b or b:<TAB>)
+bm (Alt+b or b:<TAB>)
 T}	Open the bookmark manager
 T{
 t 1\-3 *.old
@@ -3423,19 +3423,19 @@ lb lb
 l l.
 Command	Description
 T{
-hh (Alt\-.)
+hh (Alt+.)
 T}	Toggle hidden files
 T{
-ll (Alt\-l)
+ll (Alt+l)
 T}	Toggle detail/long view mode
 T{
-rf (Enter \-on empty line\- or Ctrl\-l)
+rf (Enter \-on empty line\- or Ctrl+l)
 T}	Clear/refresh the screen
 T{
-Alt\-,
+Alt+,
 T}	Toggle list-directories-only
 T{
-Alt\-TAB, Ctrl\-Alt\-i
+Alt+Tab, Ctrl+Alt+i
 T}	Toggle disk usage analyzer mode
 T{
 !<TAB>

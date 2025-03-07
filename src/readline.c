@@ -540,8 +540,8 @@ my_rl_getc(FILE *stream)
 	while (1) {
 		result = (int)read(fileno(stream), &c, sizeof(unsigned char)); /* flawfinder: ignore */
 		if (result == sizeof(unsigned char)) {
-			/* Ctrl-d (empty command line only). Let's check that the previous
-			 * char wasn't ESC to prevent Ctrl-Alt-d to be taken as Ctrl-d */
+			/* Ctrl+d (empty command line only). Let's check that the previous
+			 * char wasn't ESC to prevent Ctrl+Alt+d to be taken as Ctrl+d */
 			if (c == CTRL('D') && prev != KEY_ESC && rl_nohist == 0
 			&& (!rl_line_buffer || !*rl_line_buffer))
 				rl_quit(0, 0);
@@ -686,7 +686,7 @@ alt_rl_getc(FILE *stream)
 static void
 cb_linehandler(char *line)
 {
-	/* alt_rl_getc returns EOF in case of Ctrl-d and Ctrl-x, in which case
+	/* alt_rl_getc returns EOF in case of Ctrl+d and Ctrl+x, in which case
 	 * LINE is NULL. */
 	if (line == NULL) {
 		if (line == 0)
@@ -790,7 +790,7 @@ rl_no_hist(const char *prompt_str, const int tabcomp)
 	char *input = secondary_prompt(prompt_str, NULL);
 	rl_nohist = rl_notab = 0;
 
-	if (!input) /* Ctrl-d */
+	if (!input) /* Ctrl+d */
 		return savestring("q", 1);
 
 	if (!*input) {

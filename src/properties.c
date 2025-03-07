@@ -436,7 +436,7 @@ get_new_perms(const char *str, const int diff)
 		printf(_("%sFiles with different sets of permissions\n"
 			"Only shared permission bits are set in the template\n"), tx_c);
 	}
-	printf(_("%sEdit file permissions (Ctrl-d to quit)\n"
+	printf(_("%sEdit file permissions (Ctrl+d to quit)\n"
 		"Both symbolic and numeric notation are supported\n"), tx_c);
 	char m[(MAX_COLOR * 2) + 7];
 	snprintf(m, sizeof(m), "\001%s\002>\001%s\002 ", mi_c, tx_c);
@@ -614,7 +614,7 @@ get_new_ownership(const char *str, const int diff)
 		printf(_("%sFiles with different owners\n"
 			"Only common owners are set in the template\n"), tx_c);
 	}
-	printf(_("%sEdit file ownership (Ctrl-d to quit)\n"
+	printf(_("%sEdit file ownership (Ctrl+d to quit)\n"
 		"Both ID numbers and names are supported\n"), tx_c);
 	char m[(MAX_COLOR * 2) + 7];
 	snprintf(m, sizeof(m), "\001%s\002>\001%s\002 ", mi_c, tx_c);

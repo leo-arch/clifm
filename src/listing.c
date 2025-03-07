@@ -994,7 +994,7 @@ get_ind_char(const filesn_t index, char **ind_chr)
 	return "";
 }
 
-/* Return a struct maxes_t with the following information: the longest files
+/* Return a struct maxes_t with the following information: the longest file
  * counter, user ID, group ID, file size, inode, and file links in the
  * current list of files.
  * This information is required to build the properties line for each entry
@@ -1070,7 +1070,7 @@ compute_maxes(void)
 	if (conf.full_dir_size != 1 || prop_fields.size == PROP_SIZE_HUMAN)
 		return maxes;
 
-	/* If at least one directory size length equals the maxmimum size lenght
+	/* If at least one directory size length equals the maximum size lenght
 	 * in the current directory, and we have a du(1) error for this directory,
 	 * we need to make room for the du error char (!). */
 	i = files;

@@ -254,7 +254,7 @@ get_dup_file_dest_dir(void)
 {
 	char *dir = (char *)NULL;
 
-	puts(_("Enter destination directory (Ctrl-d to quit)\n"
+	puts(_("Enter destination directory (Ctrl+d to quit)\n"
 		"Tip: \".\" for the current directory"));
 	char _prompt[NAME_MAX];
 	snprintf(_prompt, sizeof(_prompt), "\001%s\002>\001%s\002 ", mi_c, tx_c);
@@ -263,7 +263,7 @@ get_dup_file_dest_dir(void)
 		int quoted = 0;
 		dir = get_newname(_prompt, (char *)NULL, &quoted);
 		UNUSED(quoted);
-		if (!dir) /* The user pressed ctrl-d */
+		if (!dir) /* The user pressed ctrl+d */
 			return (char *)NULL;
 
 		/* Expand ELN */
@@ -829,14 +829,14 @@ format_new_filename(char **name)
 static int
 ask_and_create_file(void)
 {
-	puts(_("Enter new filename (Ctrl-d to quit)\n"
+	puts(_("Enter new filename (Ctrl+d to quit)\n"
 		"Tip: End name with a slash to create a directory"));
 	char _prompt[NAME_MAX];
 	snprintf(_prompt, sizeof(_prompt), "\001%s\002>\001%s\002 ", mi_c, tx_c);
 
 	int quoted = 0;
 	char *filename = get_newname(_prompt, (char *)NULL, &quoted);
-	if (!filename) /* The user pressed Ctrl-d */
+	if (!filename) /* The user pressed Ctrl+d */
 		return FUNC_SUCCESS;
 
 	if (validate_filename(&filename, 0) == 0) {
@@ -1128,7 +1128,7 @@ open_function(char **cmd)
 static char *
 get_new_link_target(char *cur_target)
 {
-	puts(_("Edit target (Ctrl-d to quit)"));
+	puts(_("Edit target (Ctrl+d to quit)"));
 	char _prompt[NAME_MAX];
 	snprintf(_prompt, sizeof(_prompt), "\001%s\002>\001%s\002 ", mi_c, tx_c);
 
@@ -1138,7 +1138,7 @@ get_new_link_target(char *cur_target)
 		new_target = get_newname(_prompt, cur_target, &quoted);
 		UNUSED(quoted);
 
-		if (!new_target) /* The user pressed Ctrl-d */
+		if (!new_target) /* The user pressed Ctrl+d */
 			return (char *)NULL;
 	}
 
@@ -1584,7 +1584,7 @@ static char *
 get_new_filename(char *cur_name)
 {
 	char _prompt[NAME_MAX];
-	snprintf(_prompt, sizeof(_prompt), _("Enter new name (Ctrl-d to quit)\n"
+	snprintf(_prompt, sizeof(_prompt), _("Enter new name (Ctrl+d to quit)\n"
 		"\001%s\002>\001%s\002 "), mi_c, tx_c);
 
 	char *new_name = (char *)NULL;
@@ -1593,7 +1593,7 @@ get_new_filename(char *cur_name)
 		new_name = get_newname(_prompt, cur_name, &quoted);
 		UNUSED(quoted);
 
-		if (!new_name) /* The user pressed Ctrl-d */
+		if (!new_name) /* The user pressed Ctrl+d */
 			return (char *)NULL;
 
 		if (is_blank_name(new_name) == 1) {
