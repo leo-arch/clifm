@@ -261,7 +261,7 @@ gen_desktop_notif_str(const int value)
 	case DESKTOP_NOTIF_NONE: return "false";
 	case DESKTOP_NOTIF_SYSTEM: return "system";
 	case DESKTOP_NOTIF_KITTY: return "kitty";
-	default: return "system";
+	default: return "unknown";
 	}
 }
 
@@ -395,16 +395,15 @@ dump_config(void)
 	print_config_value("IconsGap", &conf.icons_gap, &n, DUMP_CONFIG_INT);
 #endif /* !_NO_ICONS */
 
-	s = get_ia_value_str(DEF_AUTOCMD_MSG);
-	char *ia_value = get_ia_value_str(conf.autocmd_msg);
-	print_config_value("InformAutocmd", ia_value, s, DUMP_CONFIG_STR);
+	print_config_value("InformAutocmd", get_ia_value_str(conf.autocmd_msg),
+		get_ia_value_str(DEF_AUTOCMD_MSG), DUMP_CONFIG_STR);
 
 	n = DEF_LIGHT_MODE;
 	print_config_value("LightMode", &conf.light_mode, &n, DUMP_CONFIG_BOOL);
 
-	s = get_link_creat_mode(DEF_LINK_CREATION_MODE);
-	char *cur_lnk_mode = get_link_creat_mode(conf.link_creat_mode);
-	print_config_value("LinkCreationMode", cur_lnk_mode, s, DUMP_CONFIG_STR);
+	print_config_value("LinkCreationMode",
+		get_link_creat_mode(conf.link_creat_mode),
+		get_link_creat_mode(DEF_LINK_CREATION_MODE), DUMP_CONFIG_STR);
 
 	n = DEF_LIST_DIRS_FIRST;
 	print_config_value("ListDirsFirst", &conf.list_dirs_first, &n,
@@ -495,9 +494,8 @@ dump_config(void)
 	n = DEF_PURGE_JUMPDB;
 	print_config_value("PurgeJumpDB", &conf.purge_jumpdb, &n, DUMP_CONFIG_BOOL);
 
-	s = get_quoting_style(DEF_QUOTING_STYLE);
-	char *cur_qs = get_quoting_style(conf.quoting_style);
-	print_config_value("QuotingStyle", cur_qs, s, DUMP_CONFIG_STR);
+	print_config_value("QuotingStyle", get_quoting_style(conf.quoting_style),
+		get_quoting_style(DEF_QUOTING_STYLE), DUMP_CONFIG_STR);
 
 	n = DEF_READ_AUTOCMD_FILES;
 	print_config_value("ReadAutocmdFiles", &conf.read_autocmd_files, &n,
@@ -532,9 +530,8 @@ dump_config(void)
 	print_config_value("SkipNonAlnumPrefix", &conf.skip_non_alnum_prefix, &n,
 		DUMP_CONFIG_BOOL);
 
-	s = num_to_sort_name(DEF_SORT);
-	char *cur_sort_mode = num_to_sort_name(conf.sort);
-	print_config_value("Sort", cur_sort_mode, s, DUMP_CONFIG_STR);
+	print_config_value("Sort", num_to_sort_name(conf.sort),
+		num_to_sort_name(DEF_SORT), DUMP_CONFIG_STR);
 
 	n = DEF_SORT_REVERSE;
 	print_config_value("SortReverse", &conf.sort_reverse, &n, DUMP_CONFIG_BOOL);
