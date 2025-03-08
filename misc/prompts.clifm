@@ -63,6 +63,8 @@
 #     print times only if bigger than the specified value (defaults to 0), and
 #     $CLIFM_PROMPT_B_PRECISION to print only the specified value of decimal
 #     places (defaults to 2).
+# \v: If running in vi editing mode, print '(ins)' or '(cmd)' for insert and
+#     command modes respectively.
 # \y: Print an 'A' if an autocommand was executed in the current directory
 # \i: The value of CLIFMLVL (number of clifm nested instances)
 # \I: Same as \i, but formatted as '(n)' (nothing is printed if CLIFMLVL is 1)

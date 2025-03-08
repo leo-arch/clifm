@@ -102,6 +102,22 @@ gen_time(const int c)
 }
 
 static inline char *
+gen_rl_editing_mode(void)
+{
+	if (rl_editing_mode == 1) {
+		char *tmp = xnmalloc(1, sizeof(char));
+		*tmp = '\0';
+		return tmp;
+	}
+
+	Keymap keymap = rl_get_keymap();
+	if (keymap == vi_insertion_keymap)
+		return savestring(RL_VI_INS_MODESTR, RL_VI_INS_MODESTR_LEN);
+
+	return savestring(RL_VI_CMD_MODESTR, RL_VI_CMD_MODESTR_LEN);
+}
+
+static inline char *
 get_dir_basename(const char *str)
 {
 	/* If not root dir (/), get last path component */
@@ -989,6 +1005,7 @@ decode_prompt(char *line)
 			case '(': temp = gen_notification(NOTIF_ERROR); goto ADD_STRING;
 			case '=': temp = gen_notification(NOTIF_NOTICE); goto ADD_STRING;
 
+			case 'v': temp = gen_rl_editing_mode(); goto ADD_STRING;
 			case 'y': temp = gen_notification(NOTIF_AUTOCMD); goto ADD_STRING;
 
 			case 'z': /* Exit status of last executed command */

@@ -88,6 +88,11 @@ emergency prompt"
 #define NOTIF_ROOT    5
 #define NOTIF_AUTOCMD 6
 
+#define RL_VI_INS_MODESTR "(ins)"
+#define RL_VI_INS_MODESTR_LEN 5
+#define RL_VI_CMD_MODESTR "(cmd)"
+#define RL_VI_CMD_MODESTR_LEN 5
+
 /* Size of the indicator for msgs, trash, and sel. */
 #define N_IND (MAX_COLOR + 1 + 21 + (sizeof(RL_NC) - 1) + 1)
 /* Color + 1 letter + plus unsigned integer (20 digits max)
