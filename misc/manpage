@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Mar 6, 2025" "clifm 1.24.3" "Clifm Manual"
+.TH "CLIFM" "1" "Mar 8, 2025" "clifm 1.24.3" "Clifm Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -1862,7 +1862,7 @@ For a full no\-color experience recall to edit your prompt removing all color co
 .TP
 Each prompt is built following almost the same escape codes and rules used by the Bash prompt, except that it does not accept shell functions (like conditionals and loops). Command substitution (in the form \fB$(cmd)\fR), prompt modules (in the form \fB${module}\fR), color codes (in the form \fB%{color}\fR), string literals, and escape sequences can be used to build the prompt.
 .TP
-Consult the prompts file (via the \fIprompt edit\fR command) for detailed information and examples on how to build a prompt.
+Consult the prompts file (using the \fIprompt edit\fR command) for detailed information and examples on how to build a prompt.
 .TP
 By default, for intstance, \fBclifm\fR's prompt line is this:
 
@@ -1913,7 +1913,7 @@ the last line of the regular prompt will become "\fB(!) > \fR", with "(!)" print
 .TP
 To disable this feature use the \fI\-\-no\-warning\-prompt\fR command line switch or set the \fIEnableWarningPrompt\fR option to \fBfalse\fR in the prompts file.
 .TP
-\fBNOTE\fR: Bear in mind that the warning prompt depends on the suggestions system, so that it won\'t be available if this system is disabled.
+\fBNOTE\fR: Bear in mind that the warning prompt depends on the suggestions system, so that it will not be available if this system is disabled.
 .TP
 
 \fB3. THE DIVIDING LINE\fR
