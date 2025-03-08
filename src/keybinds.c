@@ -3559,11 +3559,29 @@ set_hardcoded_keybinds(void)
 void
 readline_kbinds(void)
 {
-	/* Disable "Esc + Enter". Otherwise, it switches to vi mode, which is not
-	 * intended (for instance, in a secondary prompt).
-	 * Disable it here so that the user can rebind it using the config file
-	 * (readline.clifm or keybindings.clifm). */
-	rl_bind_keyseq("\x1b\xd", do_nothing);
+	/* Disable readline keybindings conflicting with clifm's.
+	 * We disable them here so that the user can rebind them using the config
+	 * file (readline.clifm or keybindings.clifm). */
+	rl_bind_keyseq("\\x1b\\xd", do_nothing); /* Alt-Enter */
+	rl_bind_keyseq("\\C-x(", do_nothing);
+	rl_bind_keyseq("\\C-x\\C-u", do_nothing);
+	rl_bind_keyseq("\\C-x\\C-x", do_nothing);
+	rl_bind_keyseq("\\C-x\\C-g", do_nothing);
+	rl_bind_keyseq("\\C-x\\C-?", do_nothing);
+	rl_bind_keyseq("\\C-x\\C-r", do_nothing);
+	rl_bind_keyseq("\\C-xe", do_nothing);
+	rl_bind_keyseq("\\C-x)", do_nothing);
+	rl_bind_keyseq("\\C-q", do_nothing);
+	rl_bind_keyseq("\\C-d", do_nothing);
+	rl_bind_keyseq("\\C-]", do_nothing);
+	rl_bind_keyseq("\\e\\C-]", do_nothing);
+	rl_bind_keyseq("\\e\\", do_nothing);
+	rl_bind_keyseq("\\e\\e", do_nothing);
+	rl_bind_keyseq("\\M-5", do_nothing);
+	rl_bind_keyseq("\\M-6", do_nothing);
+	rl_bind_keyseq("\\M-7", do_nothing);
+	rl_bind_keyseq("\\M-8", do_nothing);
+	rl_bind_keyseq("\\M-9", do_nothing);
 
 	if (kbinds_file)
 		set_keybinds_from_file();
