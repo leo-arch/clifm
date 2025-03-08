@@ -105,6 +105,8 @@ static inline char *
 gen_rl_vi_mode(const int alloc)
 {
 	if (rl_editing_mode == RL_EMACS_MODE
+	/*"Ignore if running in vi mode and notifications are enabled: the
+	 * notification will be printed by the prompt itself. */
 	|| (alloc == 1 && prompt_notif == 1)) {
 		if (alloc == 0)
 			return "";

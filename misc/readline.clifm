@@ -30,13 +30,6 @@ set meta-flag on
 set input-meta on
 set output-meta on
 
-$if mode=vi
-"\e[101;7u": emacs-editing-mode
-"\e\C-e": emacs-editing-mode
-#set keymap vi-move
-#"i": backward-char
-$endif
-
 $if mode=emacs
 
 # For the Linux console and RH/Debian xterm
@@ -68,11 +61,7 @@ $if mode=emacs
 "\e[H": beginning-of-line
 "\e[F": end-of-line
 
-# Rebind some keys
-"\e\C-j": vi-editing-mode
-
-# These are for the Kitty Keyboard Protocol 
-"\e[106;7u": vi-editing-mode
+# Bind some keys using the Kitty Keyboard Protocol
 "\e[117;5u": unix-line-discard
 "\e[119;5u": unix-word-rubout
 "\e[116;5u": transpose-chars

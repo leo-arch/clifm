@@ -3303,6 +3303,37 @@ rl_cmdhist_tab(int count, int key)
 	return FUNC_SUCCESS;
 }
 
+static int
+rl_toggle_vi_mode(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+
+	Keymap keymap = rl_get_keymap();
+	if (keymap == vi_insertion_keymap) {
+		keymap = rl_get_keymap_by_name("emacs-standard");
+		rl_set_keymap(keymap);
+		rl_editing_mode = RL_EMACS_MODE;
+	} else if (keymap == emacs_standard_keymap) {
+		keymap = rl_get_keymap_by_name("vi-insert");
+		rl_set_keymap(keymap);
+		keymap = rl_get_keymap();
+		rl_editing_mode = RL_VI_MODE;
+	} else {
+		return FUNC_SUCCESS;
+	}
+
+	const size_t n = rl_prompt ? count_chars(rl_prompt, '\n') : 0;
+	if (n > 0)
+		MOVE_CURSOR_UP((int)n);
+	putchar('\r');
+	ERASE_TO_RIGHT_AND_BELOW;
+	fflush(stdout);
+	xrl_reset_line_state();
+	rl_update_prompt();
+
+	return FUNC_SUCCESS;
+}
+
 /* Used to disable keybindings. */
 static int
 do_nothing(int count, int key)
@@ -3395,6 +3426,14 @@ set_keybinds_from_file(void)
 	rl_bind_keyseq(find_key("sort-next"), rl_sort_next);
 	rl_bind_keyseq(find_key("only-dirs"), rl_toggle_only_dirs);
 	rl_bind_keyseq(find_key("run-pager"), rl_run_pager);
+
+	const char *vi_mode_keyseq = find_key("toggle-vi-mode");
+	if (vi_mode_keyseq) {
+		rl_bind_keyseq(vi_mode_keyseq, rl_toggle_vi_mode);
+		Keymap keymap = rl_get_keymap_by_name("vi-insert");
+		if (keymap)
+			rl_bind_keyseq_in_map(vi_mode_keyseq, rl_toggle_vi_mode, keymap);
+	}
 
 	/* Misc */
 	rl_bind_keyseq(find_key("launch-view"), rl_launch_view);
@@ -3504,6 +3543,11 @@ set_default_keybinds(void)
 	rl_bind_keyseq("\\M-x", rl_sort_next);
 	rl_bind_keyseq("\\M-,", rl_toggle_only_dirs);
 	rl_bind_keyseq("\\M-0", rl_run_pager);
+
+	rl_bind_keyseq("\\C-\\M-j", rl_toggle_vi_mode);
+	Keymap keymap = rl_get_keymap_by_name("vi-insert");
+	if (keymap)
+		rl_bind_keyseq_in_map("\\C-\\M-j", rl_toggle_vi_mode, keymap);
 
 	rl_bind_keyseq("\\M--", rl_launch_view);
 	rl_bind_keyseq("\\C-\\M-x", rl_new_instance);
