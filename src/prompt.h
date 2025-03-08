@@ -88,6 +88,8 @@ emergency prompt"
 #define NOTIF_ROOT    5
 #define NOTIF_AUTOCMD 6
 
+#define RL_EMACS_MODE 1
+#define RL_VI_MODE    0
 #define RL_VI_INS_MODESTR "(ins)"
 #define RL_VI_INS_MODESTR_LEN 5
 #define RL_VI_CMD_MODESTR "(cmd)"

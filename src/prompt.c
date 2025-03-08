@@ -102,19 +102,26 @@ gen_time(const int c)
 }
 
 static inline char *
-gen_rl_editing_mode(void)
+gen_rl_vi_mode(const int alloc)
 {
-	if (rl_editing_mode == 1) {
+	if (rl_editing_mode == RL_EMACS_MODE
+	|| (alloc == 1 && prompt_notif == 1)) {
+		if (alloc == 0)
+			return "";
 		char *tmp = xnmalloc(1, sizeof(char));
 		*tmp = '\0';
 		return tmp;
 	}
 
 	Keymap keymap = rl_get_keymap();
-	if (keymap == vi_insertion_keymap)
-		return savestring(RL_VI_INS_MODESTR, RL_VI_INS_MODESTR_LEN);
+	if (keymap == vi_insertion_keymap) {
+		return alloc == 1
+			? savestring(RL_VI_INS_MODESTR, RL_VI_INS_MODESTR_LEN)
+			: RL_VI_INS_MODESTR;
+	}
 
-	return savestring(RL_VI_CMD_MODESTR, RL_VI_CMD_MODESTR_LEN);
+	return alloc == 1 ? savestring(RL_VI_CMD_MODESTR, RL_VI_CMD_MODESTR_LEN)
+		: RL_VI_CMD_MODESTR;
 }
 
 static inline char *
@@ -1005,7 +1012,7 @@ decode_prompt(char *line)
 			case '(': temp = gen_notification(NOTIF_ERROR); goto ADD_STRING;
 			case '=': temp = gen_notification(NOTIF_NOTICE); goto ADD_STRING;
 
-			case 'v': temp = gen_rl_editing_mode(); goto ADD_STRING;
+			case 'v': temp = gen_rl_vi_mode(1); goto ADD_STRING;
 			case 'y': temp = gen_notification(NOTIF_AUTOCMD); goto ADD_STRING;
 
 			case 'z': /* Exit status of last executed command */
@@ -1335,6 +1342,7 @@ set_prompt_length(const size_t decoded_prompt_len, const size_t ac_matches)
 static inline char *
 construct_prompt(const char *decoded_prompt)
 {
+	char *rl_vi_mode = (char *)NULL;
 	/* Construct indicators: MSGS (ERR, WARN, and NOTICE), SEL, and TRASH */
 	char err_ind[N_IND], warn_ind[N_IND],
 		notice_ind[N_IND], trash_ind[N_IND], sel_ind[N_IND],
@@ -1345,6 +1353,8 @@ construct_prompt(const char *decoded_prompt)
 	size_t ac_matches = 0;
 
 	if (prompt_notif == 1) {
+		if (rl_editing_mode == RL_VI_MODE)
+			rl_vi_mode = gen_rl_vi_mode(0);
 		if (conf.autocmd_msg == AUTOCMD_MSG_PROMPT
 		&& (ac_matches = count_autocmd_matches()) > 0)
 			snprintf(acmd_ind, N_IND, "%sA%s", ac_c, RL_NC);
@@ -1362,13 +1372,14 @@ construct_prompt(const char *decoded_prompt)
 				sel_n, RL_NC);
 	}
 
-	const size_t prompt_len =
+	const size_t prompt_len = (rl_vi_mode ? strlen(rl_vi_mode) : 0) +
 		set_prompt_length(strlen(decoded_prompt), ac_matches);
 	char *the_prompt = xnmalloc(prompt_len, sizeof(char));
 
 	if (prompt_notif == 1) {
 		snprintf(the_prompt, prompt_len,
-			"%s%s%s%s%s%s%s%s%s%s%s%s%s\001%s\002",
+			"%s%s%s%s%s%s%s%s%s%s%s%s%s%s\001%s\002",
+			rl_vi_mode ? rl_vi_mode : "",
 			ac_matches > 0 ? acmd_ind : "",
 			(user.uid == 0) ? (conf.colorize == 1
 				? ROOT_IND : ROOT_IND_NO_COLOR) : "",
