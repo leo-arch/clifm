@@ -1016,6 +1016,7 @@ toggle-follow-links-long:\\e+\n\
 toggle-max-name-len:\\e\\C-l\n\
 toggle-disk-usage:\\e\\C-i\n\
 toggle-virtualdir-full-paths:\\ew\n\
+toggle-vi-mode:\\e\\C-j\n\
 trash-sel:\\e\\C-t\n\
 #untrash-all:\\e\\C-u\n\n\
 # F6-12\n\

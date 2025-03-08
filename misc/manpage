@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Mar 8, 2025" "clifm 1.24.3" "Clifm Manual"
+.TH "CLIFM" "1" "Mar 8, 2025" "clifm 1.24.4" "Clifm Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -163,7 +163,7 @@ enable the splash screen
 in stealth mode (also known as incognito or private mode) no trace is left on the host system. Nothing is read from files nor any file is created: all settings are set to the default values. However, most settings can still be controlled via command line options and dedicated environment variables (see the \fBENVIRONMENT\fR section below). Take a look as well to the \fIhistory\fR command and the \fI\-\-no\-history\fR command line switch.
 .TP
 \fB\-t\fR, \fB\-\-disk\-usage\-analyzer\fR
-run in disk usage analyzer mode. Equivalent to \fI\-\-sort=size \-\-long\-view \-\-full\-dir\-size \-\-no\-dirs\-first\fR. The total size of the current directory will be printed after the list of files. Press \fICtrl+Alt+i\fR (or \fIAlt+TAB\fR) to toggle this mode on/off in\-place.
+run in disk usage analyzer mode. Equivalent to \fI\-\-sort=size \-\-long\-view \-\-full\-dir\-size \-\-no\-dirs\-first\fR. The total size of the current directory will be printed after the list of files. Press \fICtrl+Alt+i\fR (or \fIAlt+Tab\fR) to toggle this mode in\-place.
 .TP
 \fB\-T\fR, \fB\-\-trash\-dir\fR=\fI\,DIR\/\fR
 set an alternative trash directory
@@ -500,7 +500,7 @@ The function accepts single and multiple filenames, wildcards, ELN ranges, and t
 The archive mount function for non ISO files depends on \fBarchivemount\fR, while the remaining functions depend on \fBatool\fR and other third\-party utilities for achive formats support, for example, \fBp7zip\fR. \fBp7zip\fR is also used to manage most decompressing options for ISO 9660 files, except for mount, in which case \fBmount(8)\fR is used. Creation of ISO files is done via \fBgenisoimage\fR(1). For more information consult \fBatool\fR(1), \fBarchivemount\fR(1), \fBzstd\fR(1), and \fB7z\fR(1).
 .TP
 .B acd, autocd \fR[\fIon\fR, \fIoff\fR, \fIstatus\fR]
-toggle the autocd function on/off. If set to on, \fIDIR\fR amounts to \fIcd\ DIR\fR.
+toggle the autocd function. If set to on, \fIDIR\fR amounts to \fIcd\ DIR\fR.
 .TP
 .B actions \fR[\fIlist\fR] [\fIedit\fR [\fIAPP\fR]]
 to list available actions (or plugins) use the \fIlist\fR subcommand. Note that, since \fIlist\fR is the default action, it can be omitted.
@@ -569,7 +569,7 @@ Reload the current directory ignoring all autocommands (including permanent auto
 For the list of available option codes consult the \fBAUTOCOMMANDS\fR section or enter \fIhelp autocommands\fR.
 .TP
 .B ao, auto\-open \fR[\fIon\fR, \fIoff\fR, \fIstatus\fR]
-toggle the auto\-open function on/off. If set to on, \fIFILE\fR amounts to \fIopen\ FILE\fR.
+toggle the auto\-open function. If set to on, \fIFILE\fR amounts to \fIopen\ FILE\fR.
 .TP
 .B b, back \fR[\fIh\fR, \fIhist\fR] [\fIclear\fR] [\fIW!ELN\fR]
 unlike \fIcd\ ..\fR, which sends you to the parent directory of the current directory, this command (with no argument) sends you back to the previously visited directory.
@@ -725,7 +725,7 @@ Unlike the shell \fBcd\fR(1) command, \fBclifm\fR's builtin \fIcd\fR function no
 Automatic file listing can be disabled by either setting \fIAutoLs\fR to "false" in the configuration file or running \fBclifm\fR with the \fI\-O\fR or \fI\-\-no\-autols\fR option.
 .TP
 .B cl, columns \fR[\fIon\fR, \fIoff\fR]
-toggle columns on/off.
+toggle columns.
 .TP
 .B cmd, commands
 show this list of commands. A more convenient way of getting information about \fBclifm\fR commands is via the interactive help plugin (depends on \fIfzf\fR), by default bound to the "ihelp" action name.
@@ -784,7 +784,7 @@ Tab completion is available for this command.
 with no argument, export the list of files in the current working directory to a temporary file. Otherwise, export only those specified as further arguments: they can be directories, filenames, ELNs or some search expression like "*.c".
 .TP
 .B ext \fR[\fIon\fR, \fIoff\fR, \fIstatus\fR]
-toggle external commands on/off.
+toggle external commands.
 .TP
 .B f, forth \fR[\fIh\fR, \fIhist\fR] [\fIclear\fR] [\fI!ELN\fR]
 it works just like the \fIback\fR function, but it goes forward in the history record. Of course, you can use \fIf\ hist\fR, \fIf\ h\fR, and \fIf\ !ELN\fR.
@@ -793,7 +793,7 @@ it works just like the \fIback\fR function, but it goes forward in the history r
 By default, \fBclifm\fR prints the amount of files contained by listed directories next to the directory name. However, since this is an expensive feature, it might be desirable (for example, when listing files in a remote machine) to disable this feature. Use the \fIoff\fR subcommand to disable it. To permanently disable it, use the \fIFilesCounter\fR option in the configuration file.
 .TP
 .B ff, dirs\-first \fR[\fIon\fR, \fIoff\fR, \fIstatus\fI]
-toggle list directories first on/off.
+toggle list directories first.
 .TP
 .B ft, filter \fR[\fIunset\fR] [[\fI!\fR]REGEX,=FILE\-TYPE\-CHAR]
 filter the current list of files, either by filename (via a regular expression) or file type (via a file type character).
@@ -817,10 +817,10 @@ The list of file type characters is included in the \fBFILE FILTERS\fR section b
 The filter will be lost at program exit. To permanently set a filter use the \fIFilter\fR option (in the configuration file) or the \fBCLIFM_FILTER\fR environment variable (consult the \fBENVIRONMENT\fR and the \fBFILE FILTERS\fR sections below).
 .TP
 .B fz \fR[\fIon\fR, \fIoff\fR]
-Toggle full directory size on/off (only for long view mode).
+Toggle full directory size (long view mode only).
 .TP
 .B hf, hh, hidden \fR[\fIon\fR, \fIoff\fR, status\fR]
-toggle hidden files on/off.
+toggle hidden files.
 .TP
 .B history \fR[\fIedit\fR [\fIAPP\fR]] [\fIclear\fR] [\fI\-n\fR] [\fIon\fR, \fIoff\fR, \fIstatus\fR, \fIshow\-time\fR]
 with no arguments, it prints the commands history list (use \fIshow\-time\fR to print timestamps as well). If \fIclear\fR is passed as argument, it will delete all entries in the history file. Use \fIedit\fR to open the history file and modify it as required (the file will be opened with APP, if specified, or with the default associated application otherwise). \fI\-n\fR tells the \fIhistory\fR command to list only the last 'n' commands in the history list. Finally, you can disable history (subsequent entries won\'t be written to the history file) via \fIhistory\ off\fR (you can also use the \fIHistIgnore\fR option in the configuration file to prevent specific command lines from being added to the history list).
@@ -833,7 +833,7 @@ You can use the exclamation mark (!) to perform some history commands:
   !STRING: Execute the command starting with STRING. Tab completion is available in this case: \fI!STRING<TAB>\fR.
 .TP
 .B icons \fR[\fIon\fR, \fIoff\fR]
-toggle icons on/off
+toggle icons.
 .sp
 \fBNote\fR: Depending on how the terminal renders icons, the apparent space between icons and filenames may not be the most appropiate. This space can be adjusted using the \fIIconsGap\fR option in the configuration file (valid values: 0, 1, 2).
 .TP
@@ -889,7 +889,7 @@ Take a look at the \fIdh\fR command as well.
 if running in long view, toggle follow-links (\fIAlt++\fR is also available). See the \fI\-L,\-\-follow\-symlinks\-long\fR command line switch.
 .TP
 .B kk
-toggle max-filename-len on/off (\fICtrl+Alt+l\fR is also available)
+toggle max-filename-len (\fICtrl+Alt+l\fR is also available)
 .TP
 .B kb, keybinds \fR[\fIlist\fR] \fR[\fIbind FUNCTION\fR]  [\fIedit\fR [\fIAPP\fR]] [\fIconflict\fR] [\fIreset\fR] [\fIreadline\fR]
 with no argument (or if the argument is \fIlist\fR), prints the current keybindings and their associated functions.
@@ -918,10 +918,10 @@ By default, the link target is created literally (like \fIln -s\fR would). The l
 To edit the target of a symbolic link use the \fIle\fR command followed by the desired link name. The user will be prompted to enter a new link target, using the current one as template.
 .TP
 .B ll, lv \fR[\fIon\fR, \fIoff\fR]
-Toggle long/detail view mode
+Toggle long/detail view mode.
 .TP
 .B lm \fR[\fIon\fR, \fIoff\fR]
-Toggle the light mode on/off. This option, aimed at making file listing faster than the default mode, is especially useful for really old hardware or when working on remote machines (for more information see the \fBNOTE ON SPEED\fR section below).
+Toggle the light mode. This option, aimed at making file listing faster than the default mode, is especially useful for really old hardware or when working on remote machines (for more information see the \fBNOTE ON SPEED\fR section below).
 .TP
 .B log \fR[\fIcmd\fR [\fIlist\fR, \fIon\fR, \fIoff\fR, \fIstatus\fR, \fIclear\fR]] [\fImsg\fR [\fIlist\fR, \fIon\fR, \fIoff\fR, \fIstatus\fR, \fIclear\fR]]
 Enable, disable, clear, list or check the status of the program logs, either message (errors and warnings) or command logs. Example: \fIlog cmd on\fR, to enable command logs, or \fIlog msg clear\fR, to clear/remove message logs.
@@ -1412,9 +1412,8 @@ allbox tab(:);
 lb lb
 lb l.
 Key : Description
-Ctrl+Alt+j : Switch to vi editing mode
-Ctrl+Alt+e : Switch back to emacs editing mode (default)
-Right, Ctrl+f : Accept the entire current suggestion
+Ctrl+Alt+j : Toggle the vi editing mode
+Right, Ctrl+f : Accept the current suggestion
 Alt+Right, Alt+f : Accept the first suggested word (up to the first slash or space)
 Alt+c : Clear the current command line buffer
 Alt+q : Delete last word (up to last slash or space)
