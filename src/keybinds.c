@@ -3611,33 +3611,15 @@ set_hardcoded_keybinds(void)
 void
 disable_rl_conflicting_kbinds(void)
 {
-	rl_bind_keyseq("\\x1b\\xd", do_nothing); /* Alt-Enter */
-	rl_bind_keyseq("\\C-x(", do_nothing);
-	rl_bind_keyseq("\\C-x\\C-u", do_nothing);
-	rl_bind_keyseq("\\C-x\\C-x", do_nothing);
-	rl_bind_keyseq("\\C-x\\C-g", do_nothing);
-	rl_bind_keyseq("\\C-x\\C-?", do_nothing);
-	rl_bind_keyseq("\\C-x\\C-r", do_nothing);
-	rl_bind_keyseq("\\C-xe", do_nothing);
-	rl_bind_keyseq("\\C-x)", do_nothing);
-	rl_bind_keyseq("\\C-q", do_nothing);
-	rl_bind_keyseq("\\C-d", do_nothing);
-	rl_bind_keyseq("\\C-]", do_nothing);
-	rl_bind_keyseq("\\e\\C-]", do_nothing);
-	rl_bind_keyseq("\\e\\C-i", do_nothing);
-	rl_bind_keyseq("\\e\\", do_nothing);
-	rl_bind_keyseq("\\e\\e", do_nothing);
-	rl_bind_keyseq("\\eb", do_nothing);
-	rl_bind_keyseq("\\e.", do_nothing);
-	rl_bind_keyseq("\\et", do_nothing);
-	rl_bind_keyseq("\\ey", do_nothing);
-	rl_bind_keyseq("\\e-", do_nothing);
-	rl_bind_keyseq("\\eu", do_nothing);
-	rl_bind_keyseq("\\M-5", do_nothing);
-	rl_bind_keyseq("\\M-6", do_nothing);
-	rl_bind_keyseq("\\M-7", do_nothing);
-	rl_bind_keyseq("\\M-8", do_nothing);
-	rl_bind_keyseq("\\M-9", do_nothing);
+	const char *const keys[] = {"\\x1b\\xd", "\\C-x(", "\\C-x\\C-u",
+		"\\C-x\\C-x", "\\C-x\\C-g", "\\C-x\\C-?","\\C-x\\C-r", "\\C-xe",
+		"\\C-x", "\\C-q", "\\C-d", "\\C-]", "\\e\\C-]", "\\e\\C-i",
+		"\\e\\", "\\e\\e", "\\eb", "\\e.", "\\et", "\\ey", "\\e-",
+		"\\eu", "\\M-5", "\\M-6", "\\M-7", "\\M-8", "\\M-9", NULL};
+
+	size_t i;
+	for (i = 0; keys[i]; i++)
+		rl_bind_keyseq(keys[i], do_nothing);
 }
 
 void
