@@ -61,14 +61,14 @@ $if mode=emacs
 "\e[H": beginning-of-line
 "\e[F": end-of-line
 
-# Bind some keys using the Kitty Keyboard Protocol
+# These are for terminals supporting the Kitty Keyboard Protocol 
 "\e[117;5u": unix-line-discard
 "\e[119;5u": unix-word-rubout
 "\e[116;5u": transpose-chars
 "\e[54;3u": tilde-expand
 "\e[126;3u": tilde-expand
 "\e[121;5u": yank
-"\e[35;3u": yank-last-arg
+"\e[95;3u": yank-last-arg
 "\e[107;5u": kill-line
 "\e[101;5u": end-of-line
 "\e[97;5u": beginning-of-line

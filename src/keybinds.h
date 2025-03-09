@@ -31,6 +31,7 @@
 
 __BEGIN_DECLS
 
+void disable_rl_conflicting_kbinds(void);
 int  keybind_exec_cmd(char *str);
 int  kbinds_function(char **args);
 int  load_keybinds(void);

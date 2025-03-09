@@ -4630,6 +4630,7 @@ initialize_readline(void)
 	if (bin_name && *bin_name)
 		rl_readline_name = bin_name;
 
+	disable_rl_conflicting_kbinds();
 	set_rl_init_file();
 
 	/* The character that introduces a history event. Defaults to '!'.

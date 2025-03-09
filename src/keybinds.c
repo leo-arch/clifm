@@ -3604,12 +3604,13 @@ set_hardcoded_keybinds(void)
 #endif /* !_NO_SUGGESTIONS */
 }
 
+/* Disable readline keybindings conflicting with clifm's.
+ * This function is called before reading the readline config file (by
+ * default ~/.inputrc), so that the user can rebind them using any of config
+ * files (either readline.clifm or keybindings.clifm). */
 void
-readline_kbinds(void)
+disable_rl_conflicting_kbinds(void)
 {
-	/* Disable readline keybindings conflicting with clifm's.
-	 * We disable them here so that the user can rebind them using the config
-	 * file (readline.clifm or keybindings.clifm). */
 	rl_bind_keyseq("\\x1b\\xd", do_nothing); /* Alt-Enter */
 	rl_bind_keyseq("\\C-x(", do_nothing);
 	rl_bind_keyseq("\\C-x\\C-u", do_nothing);
@@ -3623,14 +3624,25 @@ readline_kbinds(void)
 	rl_bind_keyseq("\\C-d", do_nothing);
 	rl_bind_keyseq("\\C-]", do_nothing);
 	rl_bind_keyseq("\\e\\C-]", do_nothing);
+	rl_bind_keyseq("\\e\\C-i", do_nothing);
 	rl_bind_keyseq("\\e\\", do_nothing);
 	rl_bind_keyseq("\\e\\e", do_nothing);
+	rl_bind_keyseq("\\eb", do_nothing);
+	rl_bind_keyseq("\\e.", do_nothing);
+	rl_bind_keyseq("\\et", do_nothing);
+	rl_bind_keyseq("\\ey", do_nothing);
+	rl_bind_keyseq("\\e-", do_nothing);
+	rl_bind_keyseq("\\eu", do_nothing);
 	rl_bind_keyseq("\\M-5", do_nothing);
 	rl_bind_keyseq("\\M-6", do_nothing);
 	rl_bind_keyseq("\\M-7", do_nothing);
 	rl_bind_keyseq("\\M-8", do_nothing);
 	rl_bind_keyseq("\\M-9", do_nothing);
+}
 
+void
+readline_kbinds(void)
+{
 	if (kbinds_file)
 		set_keybinds_from_file();
 	else
