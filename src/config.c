@@ -3885,6 +3885,28 @@ read_config(void)
 }
 #endif /* CLIFM_SUCKLESS */
 
+static int
+set_force_color(const char *val)
+{
+	const int fallback = 8;
+
+	if (!val || !*val)
+		return fallback;
+
+	if ((*val == '2' && strcmp(val + 1, "4bit") == 0)
+	|| (*val == 't' && strcmp(val + 1, "ruecolor") == 0))
+		return 16777216;
+
+	if (!is_number(val))
+		return fallback;
+
+	const int n = atoi(val);
+	if (n == 8 || n == 16 || n == 256 || n == 16777216)
+		return n;
+
+	return fallback;
+}
+
 static void
 check_colors(void)
 {
@@ -3897,9 +3919,8 @@ check_colors(void)
 	if (xargs.colorize == UNSET && !nc && !cnc && (ccf || cfc)) {
 		if (term_caps.color == 0)
 			/* The user is forcing the use of colors even when the terminal
-			 * reports no color capability. Let's assume a highly compatible
-			 * value. */
-			term_caps.color = 8;
+			 * reports no color capability. */
+			term_caps.color = cfc ? set_force_color(cfc) : 8;
 		conf.colorize = 1;
 	} else if (xargs.colorize == 0 || term_caps.color == 0 || nc || cnc) {
 		conf.colorize = 0;
