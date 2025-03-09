@@ -41,8 +41,6 @@
 #include "misc.h" /* set_signals_to_ignore, handle_stdin */
 #include "term_info.h"
 
-#define TRUE_COLOR 16777216
-
 static struct termios bk_term_attrs;
 static struct termios orig_term_attrs;
 static int reset_term = 0;
@@ -415,7 +413,7 @@ set_term_caps(const int i)
 	term_caps.unicode = 0;
 
 	if (i == -1) { /* TERM not found in our terminfo database */
-		term_caps.color = true_color == 1 ? TRUE_COLOR : 0;
+		term_caps.color = true_color == 1 ? TRUECOLOR_NUM : 0;
 		if (term_caps.color <= 8)
 			memset(dim_c, '\0', sizeof(dim_c));
 		/* All fields of the term_caps struct are already set to zero */
@@ -429,7 +427,7 @@ set_term_caps(const int i)
 	term_caps.req_cur_pos = TERM_INFO[i].req_cur_pos;
 	term_caps.req_dev_attrs = TERM_INFO[i].req_dev_attrs;
 
-	term_caps.color = true_color == 1 ? TRUE_COLOR
+	term_caps.color = true_color == 1 ? TRUECOLOR_NUM
 		: (TERM_INFO[i].color > 0 ? TERM_INFO[i].color : 0);
 	if (term_caps.color <= 8)
 		memset(dim_c, '\0', sizeof(dim_c));

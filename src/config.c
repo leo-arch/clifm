@@ -3895,13 +3895,13 @@ set_force_color(const char *val)
 
 	if ((*val == '2' && strcmp(val + 1, "4bit") == 0)
 	|| (*val == 't' && strcmp(val + 1, "ruecolor") == 0))
-		return 16777216;
+		return TRUECOLOR_NUM;
 
 	if (!is_number(val))
 		return fallback;
 
 	const int n = atoi(val);
-	if (n == 8 || n == 16 || n == 256 || n == 16777216)
+	if (n == 8 || n == 16 || n == 256 || n == TRUECOLOR_NUM)
 		return n;
 
 	return fallback;

@@ -199,14 +199,14 @@ get_mod_symbol(const int mod_num)
 	const int modifiers = mod_num - 1;
 	int len = 0;
 
-	if (modifiers & 1)
-		len += snprintf(mod + len, sizeof(mod) - (size_t)len, "Shift+");
+	if (modifiers & 4)
+		len += snprintf(mod + len, sizeof(mod) - (size_t)len, "Ctrl+");
 
 	if (modifiers & 2)
 		len += snprintf(mod + len, sizeof(mod) - (size_t)len, "Alt+");
 
-	if (modifiers & 4)
-		len += snprintf(mod + len, sizeof(mod) - (size_t)len, "Ctrl+");
+	if (modifiers & 1)
+		len += snprintf(mod + len, sizeof(mod) - (size_t)len, "Shift+");
 
 	if (modifiers & 8)
 		len += snprintf(mod + len, sizeof(mod) - (size_t)len, "Super+");
@@ -391,6 +391,10 @@ translate_key_nofunc(const char *key)
 #undef END_KEYSEQ_CHAR
 
 	buf[buf_len] = '\0';
+
+	if (*buf == 'A' && strncmp(buf, "Alt+Ctrl+", 9) == 0)
+		memcpy(buf, "Ctrl+Alt+", 9);
+
 	return *buf ? buf : NULL;
 }
 

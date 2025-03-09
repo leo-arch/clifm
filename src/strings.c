@@ -259,7 +259,7 @@ xstrrpbrk(char *s, const char *accept)
 }
 
 #ifdef _BE_POSIX
-/* strcasestr(3) is a not POSIX: let's use this as replacement.
+/* strcasestr(3) is a not POSIX function: let's use this as replacement.
  * Find the first occurrence of the string B in the string A, ignoring case. */
 char *
 x_strcasestr(char *a, char *b)

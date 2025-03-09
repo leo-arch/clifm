@@ -486,6 +486,8 @@ extern time_t curdir_mtime;
 
 #define DEV_NO_NAME "-" /* String used when no filesystem name/type is found */
 
+#define TRUECOLOR_NUM 16777216
+
 /* This is a more or less arbitrary value, but better than some huge value
  * like INT_MAX (which most likely will cause problems long before reaching
  * this value). */

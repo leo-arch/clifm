@@ -101,7 +101,7 @@ set_cmd_signals(void)
 /* Implementation of system(3).
  * Unlike system(3), which runs a command using '/bin/sh' as the executing
  * shell, xsystem() uses a custom shell (user.shell) specified via CLIFM_SHELL
- * or SHELL, falling back to '/bin/sh' only if none of these variables are set. */
+ * or SHELL, falling back to '/bin/sh' only if none of these variables is set. */
 static int
 xsystem(const char *cmd)
 {
