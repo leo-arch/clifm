@@ -304,7 +304,7 @@ append_str_kitty(char *buf, const int buf_size, size_t *len, char *str)
 	const char *keysym = get_key_symbol(key_num);
 
 	const int bytes = snprintf(buf + *len, (size_t)buf_size - *len,
-		"%s%s%s", mod ? mod : "", keysym, cont == 1 ? "," : "");
+		"%s%s%s", mod, keysym, cont == 1 ? "," : "");
 
 	*len += (size_t)bytes;
 

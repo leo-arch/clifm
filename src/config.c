@@ -1411,13 +1411,18 @@ set_main_config_dir(const int secure_mode)
 	}
 
 	char *env = secure_mode == 0 ? getenv("XDG_CONFIG_HOME") : (char *)NULL;
+	char *home_env = (env && *env) ? normalize_path(env, strlen(env))
+		: (char *)NULL;
 
-	if (env && *env) {
-		const size_t len = strlen(env) + (sizeof(PROGRAM_NAME) - 1) + 2;
+	if (home_env && *home_env) {
+		const size_t len = strlen(home_env) + (sizeof(PROGRAM_NAME) - 1) + 2;
 		config_dir_gral = xnmalloc(len, sizeof(char));
-		snprintf(config_dir_gral, len, "%s/%s", env, PROGRAM_NAME);
+		snprintf(config_dir_gral, len, "%s/%s", home_env, PROGRAM_NAME);
+		free(home_env);
 		return;
 	}
+
+	free(home_env);
 
 	const size_t len = user.home_len + (sizeof(PROGRAM_NAME) - 1) + 10;
 	config_dir_gral = xnmalloc(len, sizeof(char));
@@ -4111,13 +4116,17 @@ set_trash_dirs(void)
 			return;
 		}
 
-		char *p = (char *)NULL;
+		char *env = (char *)NULL;
+		char *data_home = (char *)NULL;
 		if (xargs.secure_env != 1 && xargs.secure_env_full != 1
-		&& (p = getenv("XDG_DATA_HOME")) && *p) {
-			len = strlen(p) + 7;
+		&& (env = getenv("XDG_DATA_HOME")) && *env
+		&& (data_home = normalize_path(env, strlen(env))) && *data_home) {
+			len = strlen(data_home) + 7;
 			trash_dir = xnmalloc(len, sizeof(char));
-			snprintf(trash_dir, len, "%s/Trash", p);
+			snprintf(trash_dir, len, "%s/Trash", data_home);
+			free(data_home);
 		} else {
+			free(data_home); /* In case it is not NULL, but starts with NUL. */
 			len = user.home_len + 20;
 			trash_dir = xnmalloc(len, sizeof(char));
 			snprintf(trash_dir, len, "%s/.local/share/Trash", user.home);
