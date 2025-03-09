@@ -1847,7 +1847,7 @@ More complex combinations can be achieved using complete SGR sequences (for exam
 .TP
 will print regular files underlined and using a bold orange color on a blue background. In this case, just make sure to use a terminal emulator supporting true colors. To test your terminal color capabilities use the \fIcolors.sh\fR script (in the plugins directory).
 .TP
-\fBNOTE\fR: It may happen that, for some reason, you need to force \fBclifm\fR to use colors despite the value of the \fBTERM\fR variable. The OpenBSD console, for example, sets \fBTERM\fR to \fIvt220\fR by default, which, according to the \fIterminfo\fR database, does not support color. However, the OpenBSD console does actually support color. In this case, you can set the \fBCLIFM_FORCE_COLOR\fR to either \fItrue\fR or  \fI1\fR to use color even if the value of \fBTERM\fR says otherwise.
+\fBNOTE\fR: It may happen that, for some reason, you need to force \fBclifm\fR to use colors despite the value of the \fBTERM\fR variable. The OpenBSD console, for example, sets \fBTERM\fR to \fIvt220\fR by default, which, according to the \fIterminfo\fR database, does not support color. However, the OpenBSD console does actually support color. In this case, you can set the \fBCLIFM_FORCE_COLOR\fR a specific value even if the value of \fBTERM\fR says otherwise. Supported values are: 8, 16, 256, truecolor (or 24bit).
 .TP
 To see a colored list of the currently used colors run the \fIcs preview\fR command.
 .TP
@@ -2868,10 +2868,10 @@ If set to any value, \fBclifm\fR will run colorless
 Same as \fBNO_COLOR\fR, but specific to \fBclifm\fR
 .TP
 .B CLICOLOR_FORCE
-Force the use of colors, even if the terminal informs not supporting colors
+Force the use of colors, even if the terminal does not report color support
 .TP
 .B CLIFM_FORCE_COLOR
-Same as \fBCLICOLOR_FORCE\fR, but specific to \fBclifm\fR
+Same as \fBCLICOLOR_FORCE\fR, but accepts a specific color value (8, 16, 256, truecolor or 24bit).
 .TP
 .B COLORTERM
 If set to either \fItruecolor\fR or \fI24bit\fR, \fBclifm\fR assumes the terminal emulator to be capable of displaying true colors (and thereby also 256 colors), despite what the \fBterminfo\fR(5) database informs.
