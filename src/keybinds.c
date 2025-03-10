@@ -221,7 +221,7 @@ get_mod_symbol(const int mod_num)
 		len += snprintf(mod + len, sizeof(mod) - (size_t)len, "CapsLock+");
 
 	if (modifiers & 128)
-		len += snprintf(mod + len, sizeof(mod) - (size_t)len, "NumLock+");
+		snprintf(mod + len, sizeof(mod) - (size_t)len, "NumLock+");
 
 	return mod;
 }
@@ -695,7 +695,7 @@ kbinds_edit(char *app)
 		return FUNC_SUCCESS;
 
 	err('n', PRINT_PROMPT, _("kb: Restart %s for changes to "
-			"take effect\n"), PROGRAM_NAME);
+		"take effect\n"), PROGRAM_NAME);
 	return FUNC_SUCCESS;
 }
 
@@ -703,12 +703,12 @@ kbinds_edit(char *app)
  * check a readline key sequence). Otherwise, if invoked by 'kb bind',
  * FUNC_NAME isn't set.
  * We display different messages depending on the invoking command.
- * Return the index of the last conflicting clifm key sequence (stored in the
- * kbinds struct). */
+ * Returns the number of conflicts found. */
 static int
 check_clifm_kb(const char *kb, const char *func_name)
 {
-	int ret = FUNC_SUCCESS;
+	int conflicts = 0;
+
 	size_t i;
 	for (i = 0; i < kbinds_n; i++) {
 		if (!kbinds[i].key || strcmp(kb, kbinds[i].key) != 0)
@@ -716,35 +716,34 @@ check_clifm_kb(const char *kb, const char *func_name)
 
 		if (func_name != NULL) {
 			fprintf(stderr, _("kb: '%s' conflicts with '%s' (readline)\n"),
-				kbinds[i].function ? kbinds[i].function : "unnamed",
-				func_name);
+				kbinds[i].function ? kbinds[i].function : "unnamed", func_name);
 		} else {
 			const char *func = kbinds[i].function
 				? kbinds[i].function : "unnamed";
 			const char *t = translate_key(kbinds[i].key);
-			fprintf(stderr, _("kb: %s: Key already in use by '%s'.\n"
-				"Unset or rebind '%s' and try again.\n"),
-				t ? t : kbinds[i].key, func, func);
+
+			fprintf(stderr, _("kb: %s: Key already in use by '%s'.\n"),
+				t ? t : kbinds[i].key, func);
 		}
-		ret = FUNC_FAILURE;
+
+		conflicts++;
 	}
 
-	return ret;
+	return conflicts;
 }
 
 /* Check all readline key sequences against the key seqeunce KB, if not NULL
  * (this is the case when validating a key entered via 'kb bind').
  * Otherwise the check is made against all clifm key sequences (i.e., when
  * the invoking command is 'kb conflict').
- * Return FUNC_FAILURE if at least one conflict is found. Otherwise,
- * return FUNC_SUCCESS. */
+ * Returns the number of conflicts found. */
 static int
 check_rl_kbinds(const char *kb)
 {
 	size_t i, j;
 	char *name = (char *)NULL;
 	char **names = (char **)rl_funmap_names();
-	int conflict = 0;
+	int conflicts = 0;
 
 	if (!names)
 		return FUNC_SUCCESS;
@@ -757,15 +756,13 @@ check_rl_kbinds(const char *kb)
 
 		for (j = 0; keys[j]; j++) {
 			if (kb == NULL) {
-				if (check_clifm_kb(keys[j], name) == FUNC_FAILURE)
-					conflict++;
+				conflicts += check_clifm_kb(keys[j], name);
 			} else {
 				if (strcmp(kb, keys[j]) == 0) {
 					const char *t = translate_key(kb);
 					fprintf(stderr, _("kb: %s: Key already in use by '%s' "
 						"(readline)\n"), t ? t : kb, name);
-					if (rl_get_y_or_n("Overwrite?", 0) == 0)
-						conflict++;
+					conflicts++;
 				}
 			}
 			free(keys[j]);
@@ -775,7 +772,7 @@ check_rl_kbinds(const char *kb)
 
 	free(names);
 
-	return conflict > 0 ? FUNC_FAILURE : FUNC_SUCCESS;
+	return conflicts;
 }
 
 static int
@@ -798,7 +795,7 @@ check_kbinds_conflict(void)
 		}
 	}
 
-	if (check_rl_kbinds(NULL) == FUNC_FAILURE)
+	if (check_rl_kbinds(NULL) > 0)
 		ret = FUNC_FAILURE;
 
 	return ret;
@@ -1029,9 +1026,9 @@ check_func_name(const char *func_name)
 }
 
 /* Check the key sequence KB against both clifm and readline key sequences.
- * Return FUNC_FAILURE in case of conflict, or FUNC_SUCCESS. */
+ * Return the number of conflicts found. */
 static int
-validate_new_kb(const char *kb)
+check_kb_conflicts(const char *kb)
 {
 	if (!strchr(kb, '\\') && strcmp(kb, "-") != 0) {
 		fprintf(stderr, _("kb: Invalid keybinding\n"));
@@ -1041,12 +1038,11 @@ validate_new_kb(const char *kb)
 	if (*kb == '-' && !kb[1])
 		return FUNC_SUCCESS;
 
-	int ret = check_clifm_kb(kb, NULL);
+	int conflicts = 0;
+	conflicts += check_clifm_kb(kb, NULL);
+	conflicts += check_rl_kbinds(kb);
 
-	if (check_rl_kbinds(kb) == FUNC_FAILURE)
-		ret = FUNC_FAILURE;
-
-	return ret;
+	return conflicts;
 }
 
 /* Bind the function FUNC_NAME to a new key sequence. */
@@ -1093,12 +1089,9 @@ bind_kb_func(const char *func_name)
 		return FUNC_SUCCESS;
 
 	const int unset_key = (*kb == '-' && !kb[1]);
-	if (unset_key == 0) {
-		if (validate_new_kb(kb) == FUNC_FAILURE) {
-			free(kb);
-			return FUNC_FAILURE;
-		}
-
+	if (unset_key == 0 && check_kb_conflicts(kb) == 0) {
+		/* If check_kb_conflicts() is greater than zero, it already displayed
+		 * the keybinding translation. */
 		const char *translation = translate_key(kb);
 		printf(_("New key: %s\n"), translation ? translation : kb);
 	}
@@ -3320,14 +3313,13 @@ rl_toggle_vi_mode(int count, int key)
 	} else if (keymap == emacs_standard_keymap) {
 		keymap = rl_get_keymap_by_name("vi-insert");
 		rl_set_keymap(keymap);
-		keymap = rl_get_keymap();
 		rl_editing_mode = RL_VI_MODE;
 	} else {
 		return FUNC_SUCCESS;
 	}
 
 	const size_t n = rl_prompt ? count_chars(rl_prompt, '\n') : 0;
-	if (n > 0)
+	if (n > 0 && n <= INT_MAX)
 		MOVE_CURSOR_UP((int)n);
 	putchar('\r');
 	ERASE_TO_RIGHT_AND_BELOW;
@@ -3346,90 +3338,85 @@ do_nothing(int count, int key)
 	return FUNC_SUCCESS;
 }
 
+/* Hold kebinding names and associated functions. */
+struct keyfuncs_t {
+	char *name;
+	int (*func)(int, int);
+};
+
+/* Return a pointer to the function associated to the keybinding name NAME. */
+static int (*get_function(struct keyfuncs_t *s, const char *name))(int, int)
+{
+	while (s->name) {
+		if (*name == *s->name && strncmp(name, s->name, strlen(s->name)) == 0)
+			return s->func;
+		s++;
+	}
+
+	return NULL;
+}
+
 static void
 set_keybinds_from_file(void)
 {
-	/* Help */
-	rl_bind_keyseq(find_key("show-manpage"), rl_manpage);
-	rl_bind_keyseq(find_key("show-manpage2"), rl_manpage);
-	rl_bind_keyseq(find_key("show-cmds"), rl_cmds_help);
-	rl_bind_keyseq(find_key("show-cmds2"), rl_cmds_help);
-	rl_bind_keyseq(find_key("show-kbinds"), rl_kbinds_help);
-	rl_bind_keyseq(find_key("show-kbinds2"), rl_kbinds_help);
+	struct keyfuncs_t keys[] = {
+		{"show-manpage", rl_manpage}, {"show-cmds", rl_cmds_help},
+		{"show-kbinds", rl_kbinds_help}, {"parent-dir", rl_dir_parent},
+		{"previous-dir", rl_dir_previous}, {"next-dir", rl_dir_next},
+		{"home-dir", rl_dir_home}, {"root-dir", rl_dir_root},
+		{"workspace1", rl_ws1}, {"workspace2", rl_ws2},
+		{"workspace3", rl_ws3}, {"workspace4", rl_ws4},
 
-	/* Navigation */
-	/* Define multiple keybinds for different terminals:
-	 * rxvt, xterm, kernel console. */
-	rl_bind_keyseq(find_key("parent-dir"), rl_dir_parent);
-	rl_bind_keyseq(find_key("parent-dir2"), rl_dir_parent);
-	rl_bind_keyseq(find_key("parent-dir3"), rl_dir_parent);
-	rl_bind_keyseq(find_key("parent-dir4"), rl_dir_parent);
-	rl_bind_keyseq(find_key("previous-dir"), rl_dir_previous);
-	rl_bind_keyseq(find_key("previous-dir2"), rl_dir_previous);
-	rl_bind_keyseq(find_key("previous-dir3"), rl_dir_previous);
-	rl_bind_keyseq(find_key("previous-dir4"), rl_dir_previous);
-	rl_bind_keyseq(find_key("next-dir"), rl_dir_next);
-	rl_bind_keyseq(find_key("next-dir2"), rl_dir_next);
-	rl_bind_keyseq(find_key("next-dir3"), rl_dir_next);
-	rl_bind_keyseq(find_key("next-dir4"), rl_dir_next);
-	rl_bind_keyseq(find_key("home-dir"), rl_dir_home);
-	rl_bind_keyseq(find_key("home-dir2"), rl_dir_home);
-	rl_bind_keyseq(find_key("home-dir3"), rl_dir_home);
-	rl_bind_keyseq(find_key("home-dir4"), rl_dir_home);
-	rl_bind_keyseq(find_key("root-dir"), rl_dir_root);
-	rl_bind_keyseq(find_key("root-dir2"), rl_dir_root);
-	rl_bind_keyseq(find_key("root-dir3"), rl_dir_root);
-	rl_bind_keyseq(find_key("pinned-dir"), rl_dir_pinned);
-	rl_bind_keyseq(find_key("workspace1"), rl_ws1);
-	rl_bind_keyseq(find_key("workspace2"), rl_ws2);
-	rl_bind_keyseq(find_key("workspace3"), rl_ws3);
-	rl_bind_keyseq(find_key("workspace4"), rl_ws4);
+		{"create-file", rl_create_file}, {"archive-sel",rl_archive_sel},
+		{"open-sel", rl_open_sel}, {"export-sel", rl_export_sel},
+		{"move-sel", rl_move_sel}, {"rename-sel", rl_rename_sel},
+		{"remove-sel", rl_remove_sel}, {"trash-sel", rl_trash_sel},
+		{"untrash-all", rl_untrash_all}, {"paste-sel", rl_paste_sel},
+		{"copy-sel", rl_paste_sel}, {"select-all", rl_select_all},
+		{"deselect-all", rl_deselect_all},
 
-	/* Operations on files */
-	rl_bind_keyseq(find_key("create-file"), rl_create_file);
-	rl_bind_keyseq(find_key("archive-sel"), rl_archive_sel);
-	rl_bind_keyseq(find_key("open-sel"), rl_open_sel);
-	rl_bind_keyseq(find_key("export-sel"), rl_export_sel);
-	rl_bind_keyseq(find_key("move-sel"), rl_move_sel);
-	rl_bind_keyseq(find_key("rename-sel"), rl_rename_sel);
-	rl_bind_keyseq(find_key("remove-sel"), rl_remove_sel);
-	rl_bind_keyseq(find_key("trash-sel"), rl_trash_sel);
-	rl_bind_keyseq(find_key("untrash-all"), rl_untrash_all);
-	rl_bind_keyseq(find_key("paste-sel"), rl_paste_sel);
-	rl_bind_keyseq(find_key("copy-sel"), rl_paste_sel);
-	rl_bind_keyseq(find_key("select-all"), rl_select_all);
-	rl_bind_keyseq(find_key("deselect-all"), rl_deselect_all);
+		{"open-mime", rl_open_mime}, {"open-jump-db", rl_open_jump_db},
+		{"open-preview", rl_open_preview}, {"open-config", rl_open_config},
+		{"edit-color-scheme", rl_open_cscheme},
+		{"open-keybinds", rl_open_keybinds}, {"open-bookmarks", rl_open_bm_file},
 
-	/* Config files */
-	rl_bind_keyseq(find_key("open-mime"), rl_open_mime);
-	rl_bind_keyseq(find_key("open-jump-db"), rl_open_jump_db);
-	rl_bind_keyseq(find_key("open-preview"), rl_open_preview);
-	rl_bind_keyseq(find_key("edit-color-scheme"), rl_open_cscheme);
-	rl_bind_keyseq(find_key("open-config"), rl_open_config);
-	rl_bind_keyseq(find_key("open-keybinds"), rl_open_keybinds);
-	rl_bind_keyseq(find_key("open-bookmarks"), rl_open_bm_file);
-
-	/* Settings */
-	rl_bind_keyseq(find_key("toggle-virtualdir-full-paths"), rl_toggle_virtualdir_full_paths);
-	rl_bind_keyseq(find_key("clear-msgs"), rl_clear_msgs);
+		{"toggle-virtualdir-full-paths", rl_toggle_virtualdir_full_paths},
+		{"clear-msgs", rl_clear_msgs},
 #ifndef _NO_PROFILES
-	rl_bind_keyseq(find_key("next-profile"), rl_profile_next);
-	rl_bind_keyseq(find_key("previous-profile"), rl_profile_previous);
-#endif /* _NO_PROFILES */
-	rl_bind_keyseq(find_key("quit"), rl_quit);
-	rl_bind_keyseq(find_key("lock"), rl_lock);
-	rl_bind_keyseq(find_key("refresh-screen"), rl_refresh);
-	rl_bind_keyseq(find_key("clear-line"), rl_clear_line);
-	rl_bind_keyseq(find_key("toggle-hidden"), rl_toggle_hidden_files);
-	rl_bind_keyseq(find_key("toggle-hidden2"), rl_toggle_hidden_files);
-	rl_bind_keyseq(find_key("toggle-long"), rl_toggle_long_view);
-	rl_bind_keyseq(find_key("toggle-follow-links-long"), rl_toggle_follow_link_long);
-	rl_bind_keyseq(find_key("toggle-light"), rl_toggle_light_mode);
-	rl_bind_keyseq(find_key("dirs-first"), rl_toggle_dirs_first);
-	rl_bind_keyseq(find_key("sort-previous"), rl_sort_previous);
-	rl_bind_keyseq(find_key("sort-next"), rl_sort_next);
-	rl_bind_keyseq(find_key("only-dirs"), rl_toggle_only_dirs);
-	rl_bind_keyseq(find_key("run-pager"), rl_run_pager);
+		{"next-profile", rl_profile_next},
+		{"previous-profile", rl_profile_previous},
+#endif // _NO_PROFILES
+		{"quit", rl_quit}, {"lock", rl_lock}, {"refresh-screen", rl_refresh},
+		{"clear-line", rl_clear_line}, {"toggle-hidden", rl_toggle_hidden_files},
+		{"toggle-long", rl_toggle_long_view},
+		{"toggle-follow-links-long", rl_toggle_follow_link_long},
+		{"toggle-light", rl_toggle_light_mode},
+		{"dirs-first", rl_toggle_dirs_first},
+		{"sort-previous", rl_sort_previous}, {"sort-next", rl_sort_next},
+		{"only-dirs", rl_toggle_only_dirs},
+		{"run-pager", rl_run_pager},
+
+		{"launch-view", rl_launch_view}, {"new-instance", rl_new_instance},
+		{"show-dirhist", rl_dirhist}, {"bookmarks", rl_bookmarks},
+		{"mountpoints", rl_mountpoints}, {"selbox", rl_selbox},
+		{"prepend-sudo", rl_prepend_sudo},
+		{"toggle-disk-usage", rl_toggle_disk_usage},
+		{"toggle-max-name-len", rl_toggle_max_filename_len},
+		{"cmd-hist", rl_cmdhist_tab},
+
+		{"plugin1", rl_plugin1}, {"plugin2", rl_plugin2},
+		{"plugin3", rl_plugin3}, {"plugin4", rl_plugin4},
+		{"plugin5", rl_plugin5}, {"plugin6", rl_plugin6},
+		{"plugin7", rl_plugin7}, {"plugin8", rl_plugin8},
+		{"plugin9", rl_plugin9}, {"plugin10", rl_plugin10},
+		{"plugin11", rl_plugin11}, {"plugin12", rl_plugin12},
+		{"plugin13", rl_plugin13}, {"plugin14", rl_plugin14},
+		{"plugin15", rl_plugin15}, {"plugin16", rl_plugin16},
+		{NULL, NULL}
+	};
+
+	for (size_t i = 0; i < kbinds_n; i++)
+		rl_bind_keyseq(kbinds[i].key, get_function(keys, kbinds[i].function));
 
 	const char *vi_mode_keyseq = find_key("toggle-vi-mode");
 	if (vi_mode_keyseq) {
@@ -3438,37 +3425,6 @@ set_keybinds_from_file(void)
 		if (keymap)
 			rl_bind_keyseq_in_map(vi_mode_keyseq, rl_toggle_vi_mode, keymap);
 	}
-
-	/* Misc */
-	rl_bind_keyseq(find_key("launch-view"), rl_launch_view);
-	rl_bind_keyseq(find_key("new-instance"), rl_new_instance);
-	rl_bind_keyseq(find_key("show-dirhist"), rl_dirhist);
-	rl_bind_keyseq(find_key("bookmarks"), rl_bookmarks);
-	rl_bind_keyseq(find_key("mountpoints"), rl_mountpoints);
-	rl_bind_keyseq(find_key("selbox"), rl_selbox);
-	rl_bind_keyseq(find_key("prepend-sudo"), rl_prepend_sudo);
-	rl_bind_keyseq(find_key("toggle-disk-usage"), rl_toggle_disk_usage);
-	rl_bind_keyseq(find_key("toggle-max-name-len"), rl_toggle_max_filename_len);
-	rl_bind_keyseq(find_key("cmd-hist"), rl_cmdhist_tab);
-	rl_bind_keyseq(find_key("quit"), rl_quit);
-
-	/* Plugins */
-	rl_bind_keyseq(find_key("plugin1"), rl_plugin1);
-	rl_bind_keyseq(find_key("plugin2"), rl_plugin2);
-	rl_bind_keyseq(find_key("plugin3"), rl_plugin3);
-	rl_bind_keyseq(find_key("plugin4"), rl_plugin4);
-	rl_bind_keyseq(find_key("plugin5"), rl_plugin5);
-	rl_bind_keyseq(find_key("plugin6"), rl_plugin6);
-	rl_bind_keyseq(find_key("plugin7"), rl_plugin7);
-	rl_bind_keyseq(find_key("plugin8"), rl_plugin8);
-	rl_bind_keyseq(find_key("plugin9"), rl_plugin9);
-	rl_bind_keyseq(find_key("plugin10"), rl_plugin10);
-	rl_bind_keyseq(find_key("plugin11"), rl_plugin11);
-	rl_bind_keyseq(find_key("plugin12"), rl_plugin12);
-	rl_bind_keyseq(find_key("plugin13"), rl_plugin13);
-	rl_bind_keyseq(find_key("plugin14"), rl_plugin14);
-	rl_bind_keyseq(find_key("plugin15"), rl_plugin15);
-	rl_bind_keyseq(find_key("plugin16"), rl_plugin16);
 }
 
 static void
