@@ -172,7 +172,7 @@ sort_by_extension(struct fileinfo *pa, struct fileinfo *pb)
 			e1 = pa->ext_name + (pa->ext_name[1] != '\0');
 		} else {
 			char *p = strrchr(pa->name, '.');
-			if (p && p[1])
+			if (p && p != pa->name && p[1])
 				e1 = p + 1;
 		}
 	}
@@ -182,7 +182,7 @@ sort_by_extension(struct fileinfo *pa, struct fileinfo *pb)
 			e2 = pb->ext_name + (pb->ext_name[1] != '\0');
 		} else {
 			char *p = strrchr(pb->name, '.');
-			if (p && p[1])
+			if (p && p != pb->name && p[1])
 				e2 = p + 1;
 		}
 	}
