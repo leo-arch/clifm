@@ -1,59 +1,67 @@
                 ##################################
-                #   Keybindings file for Clifm   #
+                #   Keybindings File for Clifm   #
                 ##################################
 
 # Empty and commented lines are ignored.
 
-# Below is the list of available functions and their default key bindings.
+# Below is the list of available functions and their default keybindings.
 # To edit a keybinding use the 'kb bind' command. For example, to bind
-# the previous-dir function run 'kb bind previous-dir', enter a new
-# key binding and confirm.
+# the 'previous-dir' function, run 'kb bind previous-dir', enter a new
+# keybinding, and confirm.
 #
-# In case you wan to edit this file manually, use Emacs style key sequences.
-# For example, use "action:\C-t" to bind the action name 'action' to Ctrl-t,
-# or "action:\et" to bind it to Alt-t.
+# In case you want to edit this file manually, use Emacs style key sequences.
+# For example, use "action:\C-t" to bind the action name 'action' to Ctrl+t,
+# "action:\et" to bind it to Alt+t, or "action:\e\C-t" to bind it to
+# Ctrl+Alt+t.
+#
+# Multiple keys can be bound to a single action name. For example, the lines
+#
+# bookmarks:\eb
+# bookmarks:\e\C-b
+# bookmarks:\C-t
+#
+# will bind Alt+b, Ctrl+Alt+b, and Ctrl-t to the bookmarks function.
 
-# Alt-j
+# Alt+j
 previous-dir:\ej
-# Shift-left (rxvt)
-previous-dir2:\e[d
-# Shift-left (xterm)
-previous-dir3:\e[1;2D
-# Shift-left (others)
-previous-dir4:\e[2D
+# Shift+Left (rxvt)
+previous-dir:\e[d
+# Shift+Left (xterm)
+previous-dir:\e[1;2D
+# Shift+Left (others)
+previous-dir:\e[2D
 
-# Alt-k
+# Alt+k
 next-dir:\ek
-# Shift-right (rxvt)
-next-dir2:\e[c
-# Shift-right (xterm)
+# Shift+Right (rxvt)
+next-dir:\e[c
+# Shift+Right (xterm)
 next-dir3:\e[1;2C
-# Shift-right (others)
+# Shift+Right (others)
 next-dir4:\e[2C
 
-# Alt-u
+# Alt+u
 parent-dir:\eu
-# Shift-up (rxvt)
-parent-dir2:\e[a
-# Shift-up (xterm)
-parent-dir3:\e[1;2A
-# Shift-up (others)
-parent-dir4:\e[2A
+# Shift+Up (rxvt)
+parent-dir:\e[a
+# Shift+Up (xterm)
+parent-dir:\e[1;2A
+# Shift+Up (others)
+parent-dir:\e[2A
 
-# Alt-e
+# Alt+e
 home-dir:\ee
 # Home key (rxvt)
-#home-dir2:\e[7~
+#home-dir:\e[7~
 # Home key (xterm)
-#home-dir3:\e[H
+#home-dir:\e[H
 # Home key (Emacs term)
-#home-dir4:\e[1~
+#home-dir:\e[1~
 
-# Alt-r
+# Alt+r
 root-dir:\er
-# Alt-/ (rxvt)
-root-dir2:\e/
-#root-dir3:
+# Alt+/
+root-dir:\e/
 
 pinned-dir:\ep
 workspace1:\e1
@@ -62,13 +70,13 @@ workspace3:\e3
 workspace4:\e4
 
 # Help
-# F1-3
+# F1-F3
 show-manpage:\eOP
-show-manpage2:\e[11~
+show-manpage:\e[11~
 show-cmds:\eOQ
-show-cmds2:\e[12~
+show-cmds:\e[12~
 show-kbinds:\eOR
-show-kbinds2:\e[13~
+show-kbinds:\e[13~
 
 archive-sel:\e\C-a
 bookmarks:\eb
@@ -100,7 +108,7 @@ show-dirhist:\eh
 sort-previous:\ez
 sort-next:\ex
 toggle-hidden:\ei
-toggle-hidden2:\e.
+toggle-hidden:\e.
 toggle-light:\ey
 toggle-long:\el
 toggle-follow-links-long:\e+
@@ -111,7 +119,7 @@ toggle-vi-mode:\e\C-j
 trash-sel:\e\C-t
 #untrash-all:\e\C-u
 
-# F6-12
+# F6-F12
 open-mime:\e[17~
 open-preview:\e[18~
 #open-jump-db:\e[18~
@@ -121,16 +129,15 @@ open-config:\e[21~
 open-bookmarks:\e[23~
 quit:\e[24~
 
-# Plugins
+# Keybindings for plugins
+#
 # 1) Make sure your plugin is in the plugins directory (or use any of the
-# plugins in there)
+#    plugins in there)
 # 2) Link pluginx to your plugin using the 'actions edit' command. E.g.:
-# "plugin1=myplugin.sh"
-# 3) Set a keybinding here for pluginx. E.g.: "plugin1:\M-7"
+#    "plugin1=myplugin.sh"
+# 3) Set a keybinding here for pluginx. E.g.: "plugin1:\C-y"
+#
+# Note: Up to 16 plugins are supported, i.e. from plugin1 through plugin16.
 
 # Bound to the xclip plugin
 plugin1:\C-y
-
-#plugin2:
-#plugin3:
-#plugin4:

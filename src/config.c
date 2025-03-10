@@ -923,47 +923,46 @@ create_kbinds_file(void)
 \n\
 # Alt+j\n\
 previous-dir:\\ej\n\
-# Shift+left (rxvt)\n\
-previous-dir2:\\e[d\n\
-# Shift+left (xterm)\n\
-previous-dir3:\\e[1;2D\n\
-# Shift+left (others)\n\
-previous-dir4:\\e[2D\n\
+# Shift+Left (rxvt)\n\
+previous-dir:\\e[d\n\
+# Shift+Left (xterm)\n\
+previous-dir:\\e[1;2D\n\
+# Shift+Left (others)\n\
+previous-dir:\\e[2D\n\
 \n\
 # Alt+k\n\
 next-dir:\\ek\n\
-# Shift+right (rxvt)\n\
-next-dir2:\\e[c\n\
-# Shift+right (xterm)\n\
-next-dir3:\\e[1;2C\n\
-# Shift+right (others)\n\
-next-dir4:\\e[2C\n\
+# Shift+Right (rxvt)\n\
+next-dir:\\e[c\n\
+# Shift+Right (xterm)\n\
+next-dir:\\e[1;2C\n\
+# Shift+Right (others)\n\
+next-dir:\\e[2C\n\
 first-dir:\\e\\C-j\n\
 last-dir:\\e\\C-k\n\
 \n\
 # Alt+u\n\
 parent-dir:\\eu\n\
-# Shift+up (rxvt)\n\
-parent-dir2:\\e[a\n\
-# Shift+up (xterm)\n\
-parent-dir3:\\e[1;2A\n\
-# Shift+up (others)\n\
-parent-dir4:\\e[2A\n\
+# Shift+Up (rxvt)\n\
+parent-dir:\\e[a\n\
+# Shift+Up (xterm)\n\
+parent-dir:\\e[1;2A\n\
+# Shift+Up (others)\n\
+parent-dir:\\e[2A\n\
 \n\
 # Alt+e\n\
 home-dir:\\ee\n\
 # Home key (rxvt)\n\
-#home-dir2:\\e[7~\n\
+#home-dir:\\e[7~\n\
 # Home key (xterm)\n\
-#home-dir3:\\e[H\n\
+#home-dir:\\e[H\n\
 # Home key (Emacs term)\n\
-#home-dir4:\\e[1~\n\
+#home-dir:\\e[1~\n\
 \n\
 # Alt+r\n\
 root-dir:\\er\n\
-# Alt+/ (rxvt)\n\
-root-dir2:\\e/\n\
-#root-dir3:\n\
+# Alt+/\n\
+root-dir:\\e/\n\
 \n\
 pinned-dir:\\ep\n\
 workspace1:\\e1\n\
@@ -972,13 +971,13 @@ workspace3:\\e3\n\
 workspace4:\\e4\n\
 \n\
 # Help\n\
-# F1-3\n\
+# F1-F3\n\
 show-manpage:\\eOP\n\
-show-manpage2:\\e[11~\n\
+show-manpage:\\e[11~\n\
 show-cmds:\\eOQ\n\
-show-cmds2:\\e[12~\n\
+show-cmds:\\e[12~\n\
 show-kbinds:\\eOR\n\
-show-kbinds2:\\e[13~\n\n\
+show-kbinds:\\e[13~\n\n\
 archive-sel:\\e\\C-a\n\
 bookmarks:\\eb\n\
 clear-line:\\ec\n\
@@ -1009,7 +1008,7 @@ show-dirhist:\\eh\n\
 sort-previous:\\ez\n\
 sort-next:\\ex\n\
 toggle-hidden:\\ei\n\
-toggle-hidden2:\\e.\n\
+toggle-hidden:\\e.\n\
 toggle-light:\\ey\n\
 toggle-long:\\el\n\
 toggle-follow-links-long:\\e+\n\
@@ -1019,7 +1018,7 @@ toggle-virtualdir-full-paths:\\ew\n\
 toggle-vi-mode:\\e\\C-j\n\
 trash-sel:\\e\\C-t\n\
 #untrash-all:\\e\\C-u\n\n\
-# F6-12\n\
+# F6-F12\n\
 open-mime:\\e[17~\n\
 open-preview:\\e[18~\n\
 #open-jump-db:\\e[18~\n\
@@ -1034,13 +1033,11 @@ quit:\\e[24~\n\
 # plugins in there)\n\
 # 2) Link pluginx to your plugin using the 'actions edit' command. E.g.:\n\
 # \"plugin1=myplugin.sh\"\n\
-# 3) Set a keybinding here for pluginx. E.g.: \"plugin1:\\M-7\"\n\n\
+# 3) Set a keybinding here for pluginx. E.g.: \"plugin1:\\C-y\"\n\n\
+# Note: Up to 16 plugins are supported, i.e. from plugin1 through plugin16\n\n\
 \n\
 # Bound to the xclip plugin\n\
-plugin1:\\C-y\n\n\
-#plugin2:\n\
-#plugin3:\n\
-#plugin4:\n",
+plugin1:\\C-y\n",
 	    PROGRAM_NAME);
 
 	fclose(fp);
