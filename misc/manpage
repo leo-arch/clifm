@@ -88,190 +88,190 @@ If no positional parameter, and the \fI\-w\fR option is not used, \fBclifm\fR st
 \fBNote\fR: If compiled in POSIX mode, the following list of options does not apply. In this case, run \fIclifm \-h\fR to get the actual list of options. (To make sure run \fIclifm \-v\fR: if compiled in POSIX mode the version number is followed by "\-POSIX").
 .TP
 \fB\-a\fR, \fB\-\-show\-hidden[\fR=\fI\,VAL\/\fR]
-show hidden files (filenames starting with '.'). Supported values: \fIfirst\fR, \fIlast\fR, \fItrue\fR, and \fIfalse\fR. If no value is specified, it defaults to \fItrue\fR.
+Show hidden files (filenames starting with '.'). Supported values: \fIfirst\fR, \fIlast\fR, \fItrue\fR, and \fIfalse\fR. If no value is specified, it defaults to \fItrue\fR.
 .TP
 \fB\-A\fR, \fB\-\-no\-hidden\fR
-do not show hidden files
+Do not show hidden files
 .TP
 \fB\-b\fR, \fB\-\-bookmarks\-file\fR=\fI\,FILE\/\fR
-set an alternative bookmarks file
+Set an alternative bookmarks file
 .TP
 \fB\-c\fR, \fB\-\-config\-file\fR=\fI\,FILE\/\fR
-set an alternative configuration file
+Set an alternative configuration file
 .TP
 \fB\-D\fR, \fB\-\-config\-dir\fR=\fI\,DIR\/\fR
-set an alternative configuration directory (if configuration files do not exist already, they will be created in \fIDIR\fR).
+Set an alternative configuration directory (if configuration files do not exist already, they will be created in \fIDIR\fR).
 .TP
 \fB\-e\fR, \fB\-\-no\-eln\fR
-do not print ELNs (entry list number) at the left of filenames. Bear in mind, however, that though ELNs are not printed, they are still there and can be used as always.
+Do not print ELNs (entry list number) at the left of filenames. Bear in mind, however, that though ELNs are not printed, they are still there and can be used as always.
 .TP
 \fB\-E\fR, \fB\-\-eln\-use\-workspace\-color\fR
 ELNs use the current workspace color
 .TP
 \fB\-f\fR, \fB\-\-dirs\-first\fR
-list directories first
+List directories first
 .TP
 \fB\-F\fR, \fB\-\-no\-dirs\-first\fR
-do not list directories first
+Do not list directories first
 .TP
 \fB\-g\fR, \fB\-\-pager\fR
-enable \fIMas\fR, the builtin pager for file listing
+Enable \fIMas\fR, the builtin pager for file listing
 .TP
 \fB\-G\fR, \fB\-\-no\-pager\fR
-disable the files pager
+Disable the file pager
 .TP
 \fB\-h\fR, \fB\-\-help\fR
-show this help and exit
+Show this help and exit
 .TP
 \fB\-H\fR, \fB\-\-horizontal\-list\fR
-list files horizontally (instead of vertically)
+List files horizontally (instead of vertically)
 .TP
 \fB\-i\fR, \fB\-\-no\-case\-sensitive\fR
-ignore case distinctions when listing files
+Ignore case distinctions when listing files
 .TP
 \fB\-I\fR, \fB\-\-case\-sensitive\fR
-do not ignore case distinctions when listing files
+Do not ignore case distinctions when listing files
 .TP
 \fB\-k\fR, \fB\-\-keybindings\-file\fR=\fI\,FILE\/\fR
-set an alternative keybindings file
+Set an alternative keybindings file
 .TP
 \fB\-l\fR, \fB\-\-long\-view\fR
-print file extended metadata next to filenames. Displayed fields can be customized via \fI\-\-prop\-fields\fR (\fIPropFields\fR in the configuration file). Set a custom time/date format using \fI\-\-time\-style\fR (\fITimeStyle\fR in the configuration file).
+Print file extended metadata next to filenames. Displayed fields can be customized via \fI\-\-prop\-fields\fR (\fIPropFields\fR in the configuration file). Set a custom time/date format using \fI\-\-time\-style\fR (\fITimeStyle\fR in the configuration file).
 .TP
 \fB\-L\fR, \fB\-\-follow\-symlinks\-long\fR
-when running in long view, show information for the file symbolic links reference rather than for the symbolic links themselves
+When running in long view, show information for the file symbolic links reference rather than for the symbolic links themselves
 .TP
 \fB\-m\fR, \fB\-\-dirhist\-map\fR
-enable the directory history map to keep in view previous, current, and next entries in the directory history list
+Enable the directory history map to keep in view previous, current, and next entries in the directory history list
 .TP
 \fB\-o\fR, \fB\-\-autols\fR
-the \fIcd\fR command changes directory \fBand\fR lists files automatically
+The \fIcd\fR command changes directory \fBand\fR lists files automatically
 .TP
 \fB\-O\fR, \fB\-\-no\-autols\fR
-the internal \fIcd\fR command works like the shell \fIcd\fR command: change directory but \fBdo not\fR list files automatically
+The internal \fIcd\fR command works like the shell \fIcd\fR command: change directory but \fBdo not\fR list files automatically
 .TP
 \fB\-P\fR, \fB\-\-profile\fR=\fI\,PROFILE\/\fR
-use \fIPROFILE\fR as profile. If \fIPROFILE\fR does not exist, it will be created. The default profile is \fIdefault\fR.
+Use \fIPROFILE\fR as profile. If \fIPROFILE\fR does not exist, it will be created. The default profile is \fIdefault\fR.
 .TP
 \fB\-r\fR, \fB\-\-no\-refresh\-on\-empty\-line\fR
-do not refresh the current list of files when pressing \fIEnter\fR on an empty line
+Do not refresh the current list of files when pressing \fIEnter\fR on an empty line
 .TP
 \fB\-s\fR, \fB\-\-splash\fR
-enable the splash screen
+Enable the splash screen
 .TP
 \fB\-S\fR, \fB\-\-stealth\-mode\fR
-in stealth mode (also known as incognito or private mode) no trace is left on the host system. Nothing is read from files nor any file is created: all settings are set to the default values. However, most settings can still be controlled via command line options and dedicated environment variables (see the \fBENVIRONMENT\fR section below). Take a look as well to the \fIhistory\fR command and the \fI\-\-no\-history\fR command line switch.
+In stealth mode (also known as incognito or private mode) no trace is left on the host system. Nothing is read from files nor any file is created: all settings are set to the default values. However, most settings can still be controlled via command line options and dedicated environment variables (see the \fBENVIRONMENT\fR section below). Take a look as well to the \fIhistory\fR command and the \fI\-\-no\-history\fR command line switch.
 .TP
 \fB\-t\fR, \fB\-\-disk\-usage\-analyzer\fR
-run in disk usage analyzer mode. Equivalent to \fI\-\-sort=size \-\-long\-view \-\-full\-dir\-size \-\-no\-dirs\-first\fR. The total size of the current directory will be printed after the list of files. Press \fICtrl+Alt+i\fR (or \fIAlt+Tab\fR) to toggle this mode in\-place.
+Run in disk usage analyzer mode. Equivalent to \fI\-\-sort=size \-\-long\-view \-\-full\-dir\-size \-\-no\-dirs\-first\fR. The total size of the current directory will be printed after the list of files. Press \fICtrl+Alt+i\fR (or \fIAlt+Tab\fR) to toggle this mode in\-place.
 .TP
 \fB\-T\fR, \fB\-\-trash\-dir\fR=\fI\,DIR\/\fR
-set an alternative trash directory
+Set an alternative trash directory
 .TP
 \fB\-v\fR, \fB\-\-version\fR
-show version details and exit
+Show version details and exit
 .TP
 \fB\-w\fR, \fB\-\-workspace\fR=\fI\,NUM\/\fR
-start in workspace \fINUM\fR. By default, \fBclifm\fR will recover the last visited directory for each workspace. However, you can override this behaviour using positional parameters to start in workspace \fINUM\fR and in path \fIPATH\fR. E.g.: \fIclifm -w4 /etc\fR.
+Start in workspace \fINUM\fR. By default, \fBclifm\fR will recover the last visited directory for each workspace. However, you can override this behaviour using positional parameters to start in workspace \fINUM\fR and in path \fIPATH\fR. E.g.: \fIclifm -w4 /etc\fR.
 .TP
 \fB\-x\fR, \fB\-\-no\-ext\-cmds\fR
-disallow the use of external (shell) commands
+Disallow the use of external (shell) commands
 .TP
 \fB\-y\fR, \fB\-\-light\-mode\fR
-enable the light mode to speed up \fBclifm\fR. See the \fBNOTE ON SPEED\fR section below.
+Enable the light mode to speed up \fBclifm\fR. See the \fBNOTE ON SPEED\fR section below.
 .TP
 \fB\-z\fR, \fB\-\-sort\fR=\fI\,METHOD\/\fR
-sort files by \fIMETHOD\fR, where \fIMETHOD\fR is one of: 0 = none, 1 = name, 2 = size, 3 = atime, 4 = btime, 5 = ctime, 6 = mtime, 7 = version, 8 =  extension, 9 = inode, 10 = owner, 11 = group, 12 = blocks, 13 = links, or 14 = type. Both numbers and names are allowed. E.g: \fI\-\-sort=9\fR or \fI\-\-sort=inode\fR.
+Sort files by \fIMETHOD\fR, where \fIMETHOD\fR is one of: 0 = none, 1 = name, 2 = size, 3 = atime, 4 = btime, 5 = ctime, 6 = mtime, 7 = version, 8 =  extension, 9 = inode, 10 = owner, 11 = group, 12 = blocks, 13 = links, or 14 = type. Both numbers and names are allowed. E.g: \fI\-\-sort=9\fR or \fI\-\-sort=inode\fR.
 .TP
 \fB\-\-bell\fR=\fI\,TYPE\/\fR
-set the terminal bell type, where TYPE is: 0 = none, 1 = audible, 2 = visible (requires readline >= 8.1), and 3 = flash. Defaults to \fB1\fR (\fBvisible\fR), and, if not available, \fB0\fR (\fBnone\fR). Only numbers are allowed.
+Set the terminal bell type, where TYPE is: 0 = none, 1 = audible, 2 = visible (requires readline >= 8.1), and 3 = flash. Defaults to \fB1\fR (\fBvisible\fR), and, if not available, \fB0\fR (\fBnone\fR). Only numbers are allowed.
 .TP
 \fB\-\-case\-sens\-dirjump\fR
-do not ignore case when consulting the jump database (via the \fIj\fR command)
+Do not ignore case when consulting the jump database (via the \fIj\fR command)
 .TP
 \fB\-\-case\-sens\-path\-comp\fR
-enable case sensitive path completion
+Enable case sensitive path completion
 .TP
 \fB\-\-cd\-on\-quit\fR
-write the last visited directory to \fI$XDG_CONFIG_HOME/clifm/.last\fR to be later accessed by the corresponding shell function at program exit. Consult the \fBSHELL FUNCTIONS\fR section below for more information.
+Write the last visited directory to \fI$XDG_CONFIG_HOME/clifm/.last\fR to be later accessed by the corresponding shell function at program exit. Consult the \fBSHELL FUNCTIONS\fR section below for more information.
 .TP
 \fB\-\-color\-scheme\fR=\fI\,NAME\/\fR
-use the color scheme named \fINAME\fR
+Use the color scheme named \fINAME\fR
 .TP
 \fB\-\-color\-links\-as\-target\fR
-colorize symbolic links using the target file color
+Colorize symbolic links using the target file color
 .TP
 \fB\-\-cwd\-in\-title\fR
-print the current working directory in the terminal window title (otherwise, only the program name is printed)
+Print the current working directory in the terminal window title (otherwise, only the program name is printed)
 .TP
 \fB\-\-data\-dir=\fI\,DIR\/\fR
-load data files, such as plugins, color schemes, and default configuration files, from \fIDIR\fR 
+Load data files, such as plugins, color schemes, and default configuration files, from \fIDIR\fR 
 .TP
 \fB\-\-desktop\-notifications[=STYLE]\fR
-set the desktop notifications style. Supported values: \fIkitty\fR (requires the Kitty terminal or a terminal supporting the Kitty Notifications Protocol), \fIsystem\fR, or \fIfalse\fR. If STYLE is omitted, it defaults to \fIsystem\fR. Enter \fIhelp desktop\-notifications\fR in \fBclifm\fR for more information.
+Enable desktop notifications. The nofification style can be optionally specified: \fIkitty\fR (requires the Kitty terminal or a terminal supporting the Kitty Notifications Protocol), \fIsystem\fR, or \fIfalse\fR. If STYLE is omitted, it defaults to \fIsystem\fR. Enter \fIhelp desktop\-notifications\fR in \fBclifm\fR for more information.
 .TP
 \fB\-\-disk\-usage\fR
-show disk usage for the filesystem where the current directory resides (in the form \fIfree/total (free-percentage) fs-type dev-name\fR)
+Show disk usage for the filesystem where the current directory resides (in the form \fIfree/total (free-percentage) fs-type dev-name\fR)
 .TP
 \fB\-\-full\-dir\-size\fR
-when running in long view, print the full (or total) size of directories
+When running in long view, print the full (or total) size of directories
 .TP
 \fB\-\-fuzzy\-algo\fR=\fI\,VER\/\fR
-fuzzy matching algorithm, where \fIVER\fR is either \fI1\fR (faster, but not Unicode aware), or \fI2\fR (slower, Unicode aware). Bear in mind however that the second algorithm will fallback to the first one (because it's faster) whenever the query string contains only ASCII characters, to minimize thus the performance penalty.
+Fuzzy matching algorithm, where \fIVER\fR is either \fI1\fR (faster, but not Unicode aware), or \fI2\fR (slower, Unicode aware). Bear in mind however that the second algorithm will fallback to the first one (because it's faster) whenever the query string contains only ASCII characters, to minimize thus the performance penalty.
 .TP
 \fB\-\-fuzzy\-matching\fR
-enable fuzzy matches for filename/path completions and suggestions
+Enable fuzzy matches for filename/path completions and suggestions
 .TP
 \fB\-\-fzfpreview\-hidden\fR
-enable file previews for tab completion (fzf mode only) with the preview window hidden (toggle it via \fIAlt+p\fR)
+Enable file previews for tab completion (fzf mode only) with the preview window hidden (toggle it via \fIAlt+p\fR)
 .TP
 \fB\-\-fzftab\fR
-use \fIfzf\fR to display completion matches
+Use \fIfzf\fR to display completion matches
 .TP
 \fB\-\-fnftab\fR
-use \fIfnf\fR to display completion matches
+Use \fIfnf\fR to display completion matches
 .TP
 \fB\-\-icons\fR
-enable icons
+Enable icons
 .TP
 \fB\-\-icons\-use\-file\-color\fR
-instead of a specific color, icons take the color of the corresponding filename (specified either via file type or file extension). Useful when building custom color schemes. This option implies \fB\-\-icons\fR. Only if compiled with support for either icons\-in\-terminal or Nerdfonts. The default build is compiled with emoji\-icons support, in which case this option is ignored (Unicode icons have their own color builtin)
+Instead of a specific color, icons take the color of the corresponding filename (specified either via file type or file extension). Useful when building custom color schemes. This option implies \fB\-\-icons\fR. Only if compiled with support for either icons\-in\-terminal or Nerdfonts. The default build is compiled with emoji\-icons support, in which case this option is ignored (Unicode icons have their own color builtin)
 .TP
 \fB\-\-int\-vars
-allow the use of internal variables (e.g.: \fIVAR=/bin; cd $VAR\fR)
+Allow the use of internal variables (e.g.: \fIVAR=/bin; cd $VAR\fR)
 .TP
 \fB\-\-list\-and\-quit\fR
-list files and quit. Useful in conjunction with positional parameters. E.g.: \'clifm \-\-list\-and\-quit /etc\'
+List files and quit. Useful in conjunction with positional parameters. E.g.: \'clifm \-\-list\-and\-quit /etc\'
 .TP
 \fB\-\-ls\fR
-short for \fI\-\-list\-and\-quit\fR
+Short for \fI\-\-list\-and\-quit\fR
 .TP
 \fB\-\-lscolors\fR
-read file colors from the \fBLS_COLORS\fR environment variable (BSD \fBLSCOLORS\fR is also supported). Bear in mind that clifm-specific colors (like empty directory or inaccessible file) will be disabled. Note also that colors for specific filenames, as defined in \fBLS_COLORS\fR, are not supported. Consult \fBdircolors\fR(1) for more information about \fBLS_COLORS\fR, or the \fBls\fR(1) BSD manpage in the case of \fBLSCOLORS\fR.
+Read file colors from the \fBLS_COLORS\fR environment variable (BSD \fBLSCOLORS\fR is also supported). Bear in mind that clifm-specific colors (like empty directory or inaccessible file) will be disabled. Note also that colors for specific filenames, as defined in \fBLS_COLORS\fR, are not supported. Consult \fBdircolors\fR(1) for more information about \fBLS_COLORS\fR, or the \fBls\fR(1) BSD manpage in the case of \fBLSCOLORS\fR.
 .TP
 \fB\-\-max\-dirhist\fR
-maximum number of visited directories to remember
+Maximum number of visited directories to remember
 .TP
 \fB\-\-max\-files\fR=\fI\,NUM\/\fR
-list only up to \fINUM\fR files. Use \-1 or \'unset\' to remove this limit (default). See the \fImf\fR command for a more detailed description.
+List only up to \fINUM\fR files. Use \-1 or \'unset\' to remove this limit (default). See the \fImf\fR command for a more detailed description.
 .TP
 \fB\-\-mimelist\-file\fR=\fI\,FILE\/\fR
-set \fIFILE\fR as Lira\'s configuration file. See the \fBFILE OPENER\fR section below for more information
+Set \fIFILE\fR as Lira\'s configuration file. See the \fBFILE OPENER\fR section below for more information
 .TP
 \fB\-\-mnt\-udisks2\fR
-use \fIudisks2\fR instead of \fIudevil\fR (default), for the \fImedia\fR command
+Use \fIudisks2\fR instead of \fIudevil\fR (default), for the \fImedia\fR command
 .TP
 \fB\-\-no\-apparent\-size\fR
-print file sizes as used blocks (actual device usage) instead of used bytes (apparent size). Equivalent to \fI--physical-size\fR.
+Print file sizes as used blocks (actual device usage) instead of used bytes (apparent size). Equivalent to \fI--physical-size\fR.
 .TP
 \fB\-\-no\-bold\fR
-disable bold colors (applies to all color schemes)
+Disable bold colors (applies to all color schemes)
 .TP
 \fB\-\-no\-cd\-auto\fR
-by default, \fBclifm\fR changes directories by just specifying the corresponding ELN (e.g. \'12\' instead of \'cd 12\'). This option forces the use of \fIcd\fR.
+By default, \fBclifm\fR changes directories by just specifying the corresponding ELN (e.g. \'12\' instead of \'cd 12\'). This option forces the use of \fIcd\fR.
 .TP
 \fB\-\-no\-classify\fR
-by default, \fBclifm\fR appends a file type indicator character to filenames when running with no colors (see the \fB\-\-no\-color\fR option below) and a directory indicator (plus a files counter) when running with colors. Classification characters are: 
+By default, \fBclifm\fR appends a file type indicator character to filenames when running with no colors (see the \fB\-\-no\-color\fR option below) and a directory indicator (plus a files counter) when running with colors. Classification characters are: 
  /n: directory (n = files counter)
  @:  symbolic link
  !:  broken symbolic link
@@ -284,154 +284,154 @@ by default, \fBclifm\fR appends a file type indicator character to filenames whe
 Use this option to disable file type classification. Note that this option disables the files counter too.
 .TP
 \fB\-\-no\-clear\-screen\fR
-do not clear the screen before listing files
+Do not clear the screen before listing files
 .TP
 \fB\-\-no\-color\fR
-disable colors
+Disable colors
 .TP
 \fB\-\-no\-columns\fR
-disable columns when listing files (use a single column)
+Disable columns when listing files (use a single column)
 .TP
 \fB\-\-no\-dir\-jumper\fR
-disable the directory jumper function
+Disable the directory jumper function
 .TP
 \fB\-\-no\-file\-cap\fR
-do not check file capabilities when listing files (only meaningful for performance reasons)
+Do not check file capabilities when listing files (only meaningful for performance reasons)
 .TP
 \fB\-\-no\-file\-ext\fR
-do not check file extensions (mostly used to colorize specific filenames) when listing files
+Do not check file extensions (mostly used to colorize specific filenames) when listing files
 .TP
 \fB\-\-no\-files\-counter\fR
-disable the files counter for directories (speeding up thus the listing process: counting files in directories is particularly expensive).
+Disable the files counter for directories (speeding up thus the listing process: counting files in directories is particularly expensive).
 .TP
 \fB\-\-no\-follow\-symlinks\fR
-do not follow symbolic links when listing files. Overrides both \fI\-L\fR and \fI\-\-color\-links\-as\-target\fR.
+Do not follow symbolic links when listing files. Overrides both \fI\-L\fR and \fI\-\-color\-links\-as\-target\fR.
 .TP
 \fB\-\-no\-fzfpreview\fR
-disable file previews for tab completion (fzf mode only)
+Disable file previews for tab completion (fzf mode only)
 .TP
 \fB\-\-no\-highlight\fR
-disable syntax highlighting. To customize highlighting colors see the \fBCOLOR CODES\fR section below.
+Disable syntax highlighting. To customize highlighting colors see the \fBCOLOR CODES\fR section below.
 .TP
 \fB\-\-no\-history\fR
-do not write commands to the history file (see also the \fIHistIgnore\fR option in the configuration file)
+Do not write commands to the history file (see also the \fIHistIgnore\fR option in the configuration file)
 .TP
 \fB\-\-no\-open\-auto\fR
-same as \fI\-\-no\-cd\-auto\fR, but for files instead of directories
+Same as \fI\-\-no\-cd\-auto\fR, but for files instead of directories
 .TP
 \fB\-\-no\-refresh\-on\-resize\fR
-do not attempt to refresh the list of files upon window's resize
+Do not attempt to refresh the list of files upon window's resize
 .TP
 \fB\-\-no\-restore\-last\-path\fR
-by default, \fBclifm\fR saves the last visited directory for each workspace to be restored in the next session. Use this option to disable this behavior.
+By default, \fBclifm\fR saves the last visited directory for each workspace to be restored in the next session. Use this option to disable this behavior.
 .TP
 \fB\-\-no\-suggestions\fR
-disable the auto\-suggestions system
+Disable the auto\-suggestions system
 .TP
 \fB\-\-no\-tips\fR
-disable startup tips
+Disable startup tips
 .TP
 \fB\-\-no\-truncate\-names\fR
-do not truncate filenames (see \fIMaxFilenameLen\fR in the configuration file)
+Do not truncate filenames (see \fIMaxFilenameLen\fR in the configuration file)
 .TP
 \fB\-\-no\-unicode\fR
-do not use Unicode decorations
+Do not use Unicode decorations
 .TP
 \fB\-\-no\-warning\-prompt\fR
-disable the warning prompt (used to highlight invalid command names)
+Disable the warning prompt (used to highlight invalid command names)
 .TP
 \fB\-\-no\-welcome\-message\fR
-disable the welcome message
+Disable the welcome message
 .TP
 \fB\-\-only\-dirs\fR
-list directories only
+List directories only
 .TP
 \fB\-\-open\fR=\fI\,FILE\/\fR
-run as a standalone file opener: open \fIFILE\fR and exit, where FILE can be a regular file or a directory, using either standard notation (/dir/file) or the URI file scheme (file://dir/file), or a URL (www.domain or https://domain).
+Run as a standalone file opener: open \fIFILE\fR and exit, where FILE can be a regular file or a directory, using either standard notation (/dir/file) or the URI file scheme (file://dir/file), or a URL (www.domain or https://domain).
 .TP
 \fB\-\-opener\fR=\fI\,APPLICATION\/\fR
-use APPLICATION (e.g.: \fIrifle\fR or \fIxdg\-open\fR) as files opener/launcher (instead of \fILira\fR, \fBclifm\fR's default opener).
+Use APPLICATION (e.g.: \fIrifle\fR or \fIxdg\-open\fR) as files opener/launcher (instead of \fILira\fR, \fBclifm\fR's default opener).
 .TP
 \fB\-\-pager\-view\fR=\fI\,MODE\/\fR
-list files in the pager according to MODE. Possible values: \fIauto\fR (use the current listing mode - this is the default), \fIlong\fR (list files in long view), and \fIshort\fR (list files in short view).
+List files in the pager according to MODE. Possible values: \fIauto\fR (use the current listing mode - this is the default), \fIlong\fR (list files in long view), and \fIshort\fR (list files in short view).
 .TP
 \fB\-\-physical\-size\fR
-same as \fI\-\-no\-apparent\-size\fR
+Same as \fI\-\-no\-apparent\-size\fR
 .TP
 \fB\-\-preview\fR=\fI\,FILE\/\fR
-display a preview of \fIFILE\fR (via \fIShotgun\fR) and exit. Use \fI\-\-shotgun\-file\fR to set an alternative configuration file via. Consult the \fBSHOTGUN\fR section below for more information.
+Display a preview of \fIFILE\fR (via \fIShotgun\fR) and exit. Use \fI\-\-shotgun\-file\fR to set an alternative configuration file via. Consult the \fBSHOTGUN\fR section below for more information.
 .TP
 \fB\-\-print\-sel\fR
-print the list of selected files. The maximum number of selected files to be printed can be specified via the \fIMaxPrintSelfiles\fR option in the configuration file. Defaults to 0 (auto, i.e. never take more than half terminal height). Use \-1 to remove the limit or any other positive value.
+Print the list of selected files. The maximum number of selected files to be printed can be specified via the \fIMaxPrintSelfiles\fR option in the configuration file. Defaults to 0 (auto, i.e. never take more than half terminal height). Use \-1 to remove the limit or any other positive value.
 .TP
 \fB\-\-prop\-fields\fR=\fI\,FORMAT\/\fR
-set fields to be displayed in long view mode. For information on how to construct this format string consult the \fIPropFields\fR option in the configuration file.
+Set fields to be displayed in long view mode. For information on how to construct this format string consult the \fIPropFields\fR option in the configuration file.
 .TP
 \fB\-\-ptime\-style\fR=\fI\,STYLE\/\fR
-time/date style used by the \fIp/pp\fR command and the \fI\-\-stat\fR/\fI\-\-stat\-full\fR command line switches. Available styles: \fBdefault\fR, \fBiso\fR, \fBlong-iso\fR, \fBfull\-iso\fR, \fBfull\-iso\-nano\fR, \fB+FORMAT\fR. FORMAT is interpreted like in \fBstrftime\fR(3). Nano-second precision is available via the \fB%N\fR modifier (like in \fBdate\fR(1)).
+Time/date style used by the \fIp/pp\fR command and the \fI\-\-stat\fR/\fI\-\-stat\-full\fR command line switches. Available styles: \fBdefault\fR, \fBiso\fR, \fBlong-iso\fR, \fBfull\-iso\fR, \fBfull\-iso\-nano\fR, \fB+FORMAT\fR. FORMAT is interpreted like in \fBstrftime\fR(3). Nano-second precision is available via the \fB%N\fR modifier (like in \fBdate\fR(1)).
 .TP
 \fB\-\-readonly\fR
-run in read\-only mode (internal commands able to modify the filesystem are disabled). Disabled commands are: ac, ad, bb, bl/bleach, br/bulk, c, dup, l, le, m, md, n/new, oc, paste, pc, r, rr, t/trash, tag, te, u/undel/untrash, and vv, plus the shell commands cp, rm, mv, ln, mkdir, rmdir, link, and unlink.
+Run in read\-only mode (internal commands able to modify the filesystem are disabled). Disabled commands are: ac, ad, bb, bl/bleach, br/bulk, c, dup, l, le, m, md, n/new, oc, paste, pc, r, rr, t/trash, tag, te, u/undel/untrash, and vv, plus the shell commands cp, rm, mv, ln, mkdir, rmdir, link, and unlink.
 .TP
 \fB\-\-report\-cwd\fR
-report the current directory to the underlying terminal (via the OSC-7 escape sequence, not supported by all terminals)
+Report the current directory to the underlying terminal (via the OSC-7 escape sequence, not supported by all terminals)
 .TP
 \fB\-\-rl\-vi\-mode\fR
-set readline to vi editing mode (defaults to emacs editing mode)
+Set readline to vi editing mode (defaults to emacs editing mode)
 .TP
 \fB\-\-secure\-cmds\fR
-filter commands passed to the OS to mitigate command injection attacks (\fI\-\-secure\-env\fR is implied). Consult the \fBSECURITY\fR section below
+Filter commands passed to the OS to mitigate command injection attacks (\fI\-\-secure\-env\fR is implied). Consult the \fBSECURITY\fR section below
 .TP
 \fB\-\-secure\-env\fR
-run \fBclifm\fR in a secure environment (regular mode). Consult the \fBSECURITY\fR section below
+Run \fBclifm\fR in a secure environment (regular mode). Consult the \fBSECURITY\fR section below
 .TP
 \fB\-\-secure\-env\-full\fR
-run \fBclifm\fR in a secure environment (full mode). Consult the \fBSECURITY\fR section below
+Run \fBclifm\fR in a secure environment (full mode). Consult the \fBSECURITY\fR section below
 .TP
 \fB\-\-sel\-file\fR=\fI\,FILE\/\fR
-set \fIFILE\fR as selections file
+Set \fIFILE\fR as selections file
 .TP
 \fB\-\-share\-selbox\fR
-make the Selection Box common (that is, accessible) to different profiles. By default, each profile has a private Selection Box.
+Make the Selection Box common (that is, accessible) to different profiles. By default, each profile has a private Selection Box.
 .TP
 \fB\-\-shotgun\-file\fR=\fI\,FILE\/\fR
-set \fIFILE\fR as shotgun\'s configuration file. See the \fBSHOTGUN\fR section below for more information
+Set \fIFILE\fR as shotgun\'s configuration file. See the \fBSHOTGUN\fR section below for more information
 .TP
 \fB\-\-si\fR
-print file sizes in powers of 1000, as defined by the International System of Units (SI), instead of 1024
+Print file sizes in powers of 1000, as defined by the International System of Units (SI), instead of 1024
 .TP
 \fB\-\-smenutab\fR
-use \fIsmenu\fR to display completion matches
+Use \fIsmenu\fR to display completion matches
 .TP
 \fB\-\-sort\-reverse\fR
-sort files in reverse order (e.g.: z\-a instead of a\-z)
+Sort files in reverse order (e.g.: z\-a instead of a\-z)
 .TP
 \fB\-\-stat\fR \fI\,FILE...\/\fR
-run the \fIp\fR command on FILE(s) and exit. This must be the \fBlast option\fR on the command line. Use \fI\-\-ptime\-style\fR to set a custom date/time format.
+Run the \fIp\fR command on FILE(s) and exit. This must be the \fBlast option\fR on the command line. Use \fI\-\-ptime\-style\fR to set a custom date/time format.
 .TP
 \fB\-\-stat\-full\fR \fI\,FILE..\/\fR
-same as \fI\-\-stat\fR, but it runs the \fIpp\fR command (instead of \fIp\fR) on FILE(s)
+Same as \fI\-\-stat\fR, but it runs the \fIpp\fR command (instead of \fIp\fR) on FILE(s)
 .TP
 \fB\-\-stdtab\fR
-use the standard mode (readline\'s builtin) for tab completion
+Use the standard mode (readline\'s builtin) for tab completion
 .TP
 \fB\-\-time\-style\fR=\fI\,STYLE\/\fR
-time/date style used in long view. Available styles: \fBdefault\fR, \fBrelative\fR, \fBiso\fR, \fBlong-iso\fR, \fBfull-iso\fR, \fB+FORMAT\fR. FORMAT is interpreted like in \fBstrftime\fR(3).
+Time/date style used in long view. Available styles: \fBdefault\fR, \fBrelative\fR, \fBiso\fR, \fBlong-iso\fR, \fBfull-iso\fR, \fB+FORMAT\fR. FORMAT is interpreted like in \fBstrftime\fR(3).
 .TP
 \fB\-\-trash\-as\-rm\fR
-the \fIr\fR command executes the builtin \fItrash\fR (see the \fIt\fR command) instead of \fBrm\fR(1) to prevent accidental deletions
+The \fIr\fR command executes the builtin \fItrash\fR (see the \fIt\fR command) instead of \fBrm\fR(1) to prevent accidental deletions
 .TP
 \fB\-\-unicode\fR
 Unicode decorations are used provided Unicode support is detected for the running terminal. Use this option to force Unicode decorations.
 .TP
 \fB\-\-virtual\-dir\fR=\fI\,PATH\/\fR
-use PATH as \fBClifm\fR\'s virtual directory
+Use PATH as \fBClifm\fR\'s virtual directory
 .TP
 \fB\-\-virtual\-dir\-full\-paths\fR
-print filenames in virtual directories as full paths instead of just base names
+Print filenames in virtual directories as full paths instead of just base names
 .TP
 \fB\-\-vt100\fR
-run in VT100 compatibility mode
+Run in VT100 compatibility mode
 .PP
 Options precedence order: 1) command line flags; 2) configuration file; 3) default values.
 
