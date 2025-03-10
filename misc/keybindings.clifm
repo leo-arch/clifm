@@ -40,9 +40,9 @@ next-dir:\ek
 # Shift+Right (rxvt)
 next-dir:\e[c
 # Shift+Right (xterm)
-next-dir3:\e[1;2C
+next-dir:\e[1;2C
 # Shift+Right (others)
-next-dir4:\e[2C
+next-dir:\e[2C
 
 # Alt+u
 parent-dir:\eu
