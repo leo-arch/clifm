@@ -2431,8 +2431,6 @@ static int
 rl_move_sel(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	if (kbind_busy == 1)
-		return FUNC_SUCCESS;
 
 	if (sel_n == 0)
 		return handle_no_sel("m");
@@ -2445,8 +2443,6 @@ static int
 rl_rename_sel(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	if (kbind_busy == 1)
-		return FUNC_SUCCESS;
 
 	if (sel_n == 0)
 		return handle_no_sel("br");
@@ -2610,6 +2606,10 @@ static int
 rl_trash_sel(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
+
+	if (sel_n == 0)
+		return handle_no_sel("trash");
+
 	exec_prompt_cmds = 1;
 	return run_kb_cmd("t sel");
 }
@@ -2626,12 +2626,12 @@ static int
 rl_open_sel(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	if (kbind_busy == 1)
-		return FUNC_SUCCESS;
+
+	if (sel_n == 0)
+		return handle_no_sel("open");
 
 	char cmd[PATH_MAX + 4];
-	snprintf(cmd, sizeof(cmd), "o %s", (sel_n && sel_elements[sel_n - 1].name)
-		? sel_elements[sel_n - 1].name : "sel");
+	snprintf(cmd, sizeof(cmd), "o %s", sel_elements[sel_n - 1].name);
 
 	return run_kb_cmd(cmd);
 }
@@ -2724,10 +2724,7 @@ rl_dir_pinned(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 
-	if (kbind_busy == 1)
-		return FUNC_SUCCESS;
-
-	if (!pinned_dir) {
+	if (pinned_dir == NULL) {
 		printf(_("\n%s: No pinned file\n"), PROGRAM_NAME);
 		rl_reset_line_state();
 		return FUNC_SUCCESS;
