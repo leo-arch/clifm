@@ -1328,7 +1328,7 @@ open DIR, or the current working directory if DIR is not specified, in a new ins
 .sp
 \fBa)\fR Hidden files: via the \fB\-A\fR and \fB\-a\fR command line flags, the \fIhh\fR command, and the \fIAlt+.\fR keybinding.
 .sp
-Files listed in a file named \fI.hidden\fR in the current directory will be hidden as well whenever dotfiles are not shown (wildcards are supported).
+Files listed in a file named \fI.hidden\fR in the current directory will be hidden as well whenever hidden files are not shown (wildcards are supported).
 .sp
 \fBb)\fR Directories: via the \fI\-\-only\-dirs\fR command line switch and the \fIAlt+,\fR keybinding.
 .sp
