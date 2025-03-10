@@ -1090,8 +1090,8 @@ bind_kb_func(const char *func_name)
 
 	const int unset_key = (*kb == '-' && !kb[1]);
 	if (unset_key == 0 && check_kb_conflicts(kb) == 0) {
-		/* If check_kb_conflicts() is greater than zero, it already displayed
-		 * the keybinding translation. */
+		/* If any conflict was found (check_kb_conflicts() is greater than
+		 * zero), the function already displayed the keybinding translation. */
 		const char *translation = translate_key(kb);
 		printf(_("New key: %s\n"), translation ? translation : kb);
 	}
@@ -2587,7 +2587,7 @@ static int
 rl_dirhist(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	return run_kb_cmd("bh");
+	return run_kb_cmd("dh");
 }
 
 static int
