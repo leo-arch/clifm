@@ -62,12 +62,12 @@
 #endif /* CLIFM_DATADIR */
 
 #ifdef _BE_POSIX
-# define OPTSTRING ":aAb:B:c:CdDeEfFgGhHiI:j:J:k:lLmMnNo:O:p:P:qQrRsSt:TuUvV:w:WxXyYz:Z"
+# define OPTSTRING ":a::Ab:B:c:CdDeEfFgGhHiI:j:J:k:lLmMnNo:O:p:P:qQrRsSt:TuUvV:w:WxXyYz:Z"
 #else
 # ifdef RUN_CMD
-#  define OPTSTRING "+:aAb:c:C:D:eEfFgGhHiIk:lLmoOp:P:rsStT:vw:xyz:"
+#  define OPTSTRING "+:a::Ab:c:C:D:eEfFgGhHiIk:lLmoOp:P:rsStT:vw:xyz:"
 # else
-#  define OPTSTRING "+:aAb:c:D:eEfFgGhHiIk:lLmoOp:P:rsStT:vw:xyz:"
+#  define OPTSTRING "+:a::Ab:c:D:eEfFgGhHiIk:lLmoOp:P:rsStT:vw:xyz:"
 # endif /* RUN_CMD */
 #endif /* _BE_POSIX */
 
@@ -162,7 +162,7 @@
 
 /* Link long (--option) and short options (-o) for the getopt_long function. */
 static struct option const longopts[] = {
-	{"show-hidden", no_argument, 0, 'a'},
+	{"show-hidden", optional_argument, 0, 'a'},
 	{"no-hidden", no_argument, 0, 'A'},
 	{"bookmarks-file", required_argument, 0, 'b'},
 	{"config-file", required_argument, 0, 'c'},
@@ -1337,6 +1337,34 @@ set_stat(const int optc, const char *optval)
 	xargs.restore_last_path = conf.restore_last_path = 0;
 }
 
+static void
+set_show_hidden(const char *val)
+{
+	if (!val || !*val || *val == '-') {
+		xargs.show_hidden = conf.show_hidden = HIDDEN_TRUE;
+		return;
+	}
+
+	if (*val == 't' && strcmp(val, "true") == 0) {
+		xargs.show_hidden = conf.show_hidden = HIDDEN_TRUE;
+	} else if (*val == 'f' && strcmp(val, "false") == 0) {
+		xargs.show_hidden = conf.show_hidden = HIDDEN_FALSE;
+	} else if (*val == 'f' && strcmp(val, "first") == 0) {
+		xargs.show_hidden = conf.show_hidden = HIDDEN_FIRST;
+	} else if (*val == 'l' && strcmp(val, "last") == 0) {
+		xargs.show_hidden = conf.show_hidden = HIDDEN_LAST;
+	} else {
+#ifndef _BE_POSIX
+		fprintf(stderr, _("%s: '--show-hidden': Valid values "
+			"are 'true','first', 'last', or 'false'.\n"), PROGRAM_NAME);
+#else
+		fprintf(stderr, _("%s: '-a': Valid values "
+			"are 'true','first', 'last', or 'false'.\n"), PROGRAM_NAME);
+#endif /* !_BE_POSIX */
+		exit(EXIT_FAILURE);
+	}
+}
+
 #ifndef _BE_POSIX
 static void
 xset_time_style(char *optval, const int ptime)
@@ -1457,7 +1485,7 @@ parse_cmdline_args(const int argc, char **argv)
 
 	while ((optc = getopt(argc, argv, OPTSTRING)) != EOF) {
 		switch (optc) {
-		case 'a': xargs.show_hidden = conf.show_hidden = 1; break;
+		case 'a': set_show_hidden(optarg); break;
 		case 'A': xargs.show_hidden = conf.show_hidden = 0; break;
 		case 'b':
 			xargs.bm_file = 1;
@@ -1610,7 +1638,7 @@ parse_cmdline_args(const int argc, char **argv)
 
 		switch (optc) {
 		/* Short options */
-		case 'a': xargs.show_hidden = conf.show_hidden = 1; break;
+		case 'a': set_show_hidden(optarg); break;
 		case 'A': xargs.show_hidden = conf.show_hidden = 0; break;
 		case 'b':
 			xargs.bm_file = 1;

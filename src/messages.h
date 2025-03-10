@@ -1380,7 +1380,7 @@ c: Stop paging (printing remaining files)\n"
 
 #ifdef _BE_POSIX
 #define OPTIONS_LIST "\
-\n -a       List hidden files\
+\n -a[VAL]  List hidden files ('first', 'last', 'true', or 'false')\
 \n -A       Do not list hidden files\
 \n -b FILE  Set an alternative bookmarks file\
 \n -B NUM   Set TAB-completion mode (NUM=[0-3])\
@@ -1433,7 +1433,7 @@ c: Stop paging (printing remaining files)\n"
 \n -Z NUM   List only up to NUM files"
 #else
 #define SHORT_OPTIONS "\
-\n  -a, --show-hidden\t\t Show hidden files\
+\n  -a, --show-hidden[=VAL]\t\t Show hidden files ('first', 'last', 'true', or 'false')\
 \n  -A, --no-hidden\t\t Do not show hidden files\
 \n  -b, --bookmarks-file=FILE\t Set an alternative bookmarks file\
 \n  -c, --config-file=FILE\t Set an alternative configuration file\

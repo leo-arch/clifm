@@ -87,11 +87,11 @@ If no positional parameter, and the \fI\-w\fR option is not used, \fBclifm\fR st
 .TP
 \fBNote\fR: If compiled in POSIX mode, the following list of options does not apply. In this case, run \fIclifm \-h\fR to get the actual list of options. (To make sure run \fIclifm \-v\fR: if compiled in POSIX mode the version number is followed by "\-POSIX").
 .TP
-\fB\-a\fR, \fB\-\-show\-hidden\fR
-do not ignore entries starting with .
+\fB\-a\fR, \fB\-\-show\-hidden[\fR=\fI\,VAL\/\fR]
+show hidden files (filenames starting with '.'). Supported values: \fIfirst\fR, \fIlast\fR, \fItrue\fR, and \fIfalse\fR. If no value is specified, it defaults to \fItrue\fR.
 .TP
 \fB\-A\fR, \fB\-\-no\-hidden\fR
-ignore entries starting with .
+do not show hidden files
 .TP
 \fB\-b\fR, \fB\-\-bookmarks\-file\fR=\fI\,FILE\/\fR
 set an alternative bookmarks file
