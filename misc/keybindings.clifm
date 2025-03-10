@@ -22,6 +22,10 @@
 #
 # will bind Alt+b, Ctrl+Alt+b, and Ctrl-t to the bookmarks function.
 
+# ---------------------------
+# 1. NAVIGATION
+# ---------------------------
+
 # Alt+j
 previous-dir:\ej
 # Shift+Left (rxvt)
@@ -69,44 +73,37 @@ workspace2:\e2
 workspace3:\e3
 workspace4:\e4
 
-# Help
-# F1-F3
-show-manpage:\eOP
-show-manpage:\e[11~
-show-cmds:\eOQ
-show-cmds:\e[12~
-show-kbinds:\eOR
-show-kbinds:\e[13~
+bookmarks:\eb
+mountpoints:\em
+show-dirhist:\eh
+launch-view:\e-
+
+# ---------------------------
+# 2. FILE OPERATIONS
+# ---------------------------
 
 archive-sel:\e\C-a
-bookmarks:\eb
-clear-line:\ec
-clear-msgs:\et
-#cmd-hist:
 copy-sel:\e\C-v
 create-file:\en
-deselect-all:\ed
-dirs-first:\eg
 export-sel:\e\C-e
-launch-view:\e-
-#lock:\eo
-mountpoints:\em
 #move-sel:\e\C-n
-new-instance:\e\C-x
-next-profile:\e\C-p
-only-dirs:\e,
-#open-sel:\e\C-g
-prepend-sudo:\ev
-previous-profile:\e\C-o
 rename-sel:\e\C-r
 remove-sel:\e\C-d
-refresh-screen:\C-r
-run-pager:\e0
-selbox:\es
 select-all:\ea
-show-dirhist:\eh
-sort-previous:\ez
+deselect-all:\ed
+selbox:\es
+#open-sel:\e\C-g
+trash-sel:\e\C-t
+#untrash-all:\e\C-u
+
+# ---------------------------
+# 3. SETTINGS
+# ---------------------------
+
+dirs-first:\eg
+only-dirs:\e,
 sort-next:\ex
+sort-previous:\ez
 toggle-hidden:\ei
 toggle-hidden:\e.
 toggle-light:\ey
@@ -115,11 +112,28 @@ toggle-follow-links-long:\e+
 toggle-max-name-len:\e\C-l
 toggle-disk-usage:\e\C-i
 toggle-virtualdir-full-paths:\ew
-toggle-vi-mode:\e\C-j
-trash-sel:\e\C-t
-#untrash-all:\e\C-u
+next-profile:\e\C-p
+previous-profile:\e\C-o
 
-# F6-F12
+# ---------------------------
+# 4. MISC
+# ---------------------------
+
+clear-line:\ec
+clear-msgs:\et
+#cmd-hist:
+#lock:\eo
+new-instance:\e\C-x
+prepend-sudo:\ev
+refresh-screen:\C-r
+run-pager:\e0
+toggle-vi-mode:\e\C-j
+quit:\e[24~
+
+# ---------------------------
+# 5. CONFIG FILES (F6-F11)
+# ---------------------------
+
 open-mime:\e[17~
 open-preview:\e[18~
 #open-jump-db:\e[18~
@@ -127,9 +141,21 @@ edit-color-scheme:\e[19~
 open-keybinds:\e[20~
 open-config:\e[21~
 open-bookmarks:\e[23~
-quit:\e[24~
 
-# Keybindings for plugins
+# ---------------------------
+# 6. HELP (F1-F3)
+# ---------------------------
+
+show-manpage:\eOP
+show-manpage:\e[11~
+show-cmds:\eOQ
+show-cmds:\e[12~
+show-kbinds:\eOR
+show-kbinds:\e[13~
+
+# ---------------------------
+# 7. KEYBINDINGS FOR PLUGINS
+# ---------------------------
 #
 # 1) Make sure your plugin is in the plugins directory (or use any of the
 #    plugins in there)
