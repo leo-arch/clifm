@@ -1028,7 +1028,7 @@ open-config:\\e[21~\n\
 open-bookmarks:\\e[23~\n\
 quit:\\e[24~\n\
 \n\
-# Plugins\n\
+# Keybindings for plugins\n\
 # 1) Make sure your plugin is in the plugins directory (or use any of the\n\
 # plugins in there)\n\
 # 2) Link pluginx to your plugin using the 'actions edit' command. E.g.:\n\

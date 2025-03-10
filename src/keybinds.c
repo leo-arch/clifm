@@ -1287,8 +1287,8 @@ load_keybinds(void)
 		if (!tmp || !*(tmp + 1))
 			continue;
 
-		/* Now copy left and right value of each keybind to the
-		 * keybinds struct. */
+		/* Now copy left and right values of each keybinding to the
+		 * kbinds struct. */
 		kbinds = xnrealloc(kbinds, kbinds_n + 1, sizeof(struct kbinds_t));
 		kbinds[kbinds_n].key = savestring(tmp + 1, strlen(tmp + 1));
 
@@ -1337,7 +1337,7 @@ rl_update_prompt_old(void)
 }
 #endif /* __HAIKU__ || !_NO_PROFILES */
 
-/* Runs any command recognized by Clifm via a keybind. Example:
+/* Run any command recognized by Clifm via a keybind. Example:
  * keybind_exec_cmd("sel *") */
 int
 keybind_exec_cmd(char *str)
@@ -1438,10 +1438,12 @@ rl_toggle_max_filename_len(int count, int key)
 		reload_dirlist();
 	}
 
-	if (conf.max_name_len == UNSET)
+	if (conf.max_name_len == UNSET) {
 		print_reload_msg(NULL, NULL, _("Max name length unset\n"));
-	else
-		print_reload_msg(NULL, NULL, _("Max name length set to %d\n"), conf.max_name_len);
+	} else {
+		print_reload_msg(NULL, NULL, _("Max name length set to %d\n"),
+			conf.max_name_len);
+	}
 
 	xrl_reset_line_state();
 	return FUNC_SUCCESS;
@@ -2109,9 +2111,9 @@ rl_toggle_hidden_files(int count, int key)
 	}
 
 	if (conf.show_hidden > 0)
-		print_reload_msg(NULL, NULL, _("Showing dotfiles\n"));
+		print_reload_msg(NULL, NULL, _("Hidden files: on\n"));
 	else
-		print_reload_msg(NULL, NULL, _("Hiding dotfiles\n"));
+		print_reload_msg(NULL, NULL, _("Hidden files: off\n"));
 
 	xrl_reset_line_state();
 	return FUNC_SUCCESS;
