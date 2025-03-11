@@ -102,7 +102,6 @@ _clifm ()
         --lscolors
         --max-dirhist
         --max-files
-        --max-path
         --mimelist-file
         --mnt-udisk2
         --no-apparent-size

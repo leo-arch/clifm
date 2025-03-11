@@ -63,7 +63,7 @@ For a list of available commands and a brief description type \fIcmd<TAB>\fR.
 .sp
 Help for all internal commands can be accessed via the \fI\-h\fR or \fI\-\-help\fR flags. For example, to get help about the selection function, \fIs \-h\fR or \fIs \-\-help\fR.
 .sp
-A convenient way of getting full information about \fBclifm\fR commands is via the \fIih\fR action, bound by default to the interactive help plugin (\fIihelp.sh\fR). Enter \fIih\fR to run the plugin (it depends on \fBfzf\fR(1)) and select the command you want to obtain information about.
+A convenient way of getting comprehensive information about \fBclifm\fR commands is via the \fIih\fR action, bound by default to the interactive help plugin (\fIihelp.sh\fR). Enter \fIih\fR to run the plugin (it depends on \fBfzf\fR(1)) and select the command you want to obtain information about.
 .sp
 For a quick introduction jump to the \fBEXAMPLES\fR section at the bottom of this document.
 
@@ -214,13 +214,13 @@ Enable desktop notifications. The nofification style can be optionally specified
 Show disk usage for the filesystem where the current directory resides (in the form \fIfree/total (free-percentage) fs-type dev-name\fR)
 .TP
 \fB\-\-full\-dir\-size\fR
-When running in long view, print the full (or total) size of directories
+Display recursive directory sizes (long view only)
 .TP
 \fB\-\-fuzzy\-algo\fR=\fI\,VER\/\fR
 Fuzzy matching algorithm, where \fIVER\fR is either \fI1\fR (faster, but not Unicode aware), or \fI2\fR (slower, Unicode aware). Bear in mind however that the second algorithm will fallback to the first one (because it's faster) whenever the query string contains only ASCII characters, to minimize thus the performance penalty.
 .TP
 \fB\-\-fuzzy\-matching\fR
-Enable fuzzy matches for filename/path completions and suggestions
+Enable fuzzy matching for filename/path completions and suggestions
 .TP
 \fB\-\-fzfpreview\-hidden\fR
 Enable file previews for tab completion (fzf mode only) with the preview window hidden (toggle it via \fIAlt+p\fR)
@@ -262,7 +262,7 @@ Set \fIFILE\fR as Lira\'s configuration file. See the \fBFILE OPENER\fR section 
 Use \fIudisks2\fR instead of \fIudevil\fR (default), for the \fImedia\fR command
 .TP
 \fB\-\-no\-apparent\-size\fR
-Print file sizes as used blocks (actual device usage) instead of used bytes (apparent size). Equivalent to \fI--physical-size\fR.
+Display physical file sizes (actual device usage) instead of used bytes (apparent size). Equivalent to \fI--physical-size\fR.
 .TP
 \fB\-\-no\-bold\fR
 Disable bold colors (applies to all color schemes)
@@ -398,7 +398,7 @@ Make the Selection Box common (that is, accessible) to different profiles. By de
 Set \fIFILE\fR as shotgun\'s configuration file. See the \fBSHOTGUN\fR section below for more information
 .TP
 \fB\-\-si\fR
-Print file sizes in powers of 1000, as defined by the International System of Units (SI), instead of 1024
+Display file sizes in SI units (powers of 1000) instead of 1024
 .TP
 \fB\-\-smenutab\fR
 Use \fIsmenu\fR to display completion matches
@@ -419,16 +419,16 @@ Use the standard mode (readline\'s builtin) for tab completion
 Time/date style used in long view. Available styles: \fBdefault\fR, \fBrelative\fR, \fBiso\fR, \fBlong-iso\fR, \fBfull-iso\fR, \fB+FORMAT\fR. FORMAT is interpreted like in \fBstrftime\fR(3).
 .TP
 \fB\-\-trash\-as\-rm\fR
-The \fIr\fR command executes the builtin \fItrash\fR (see the \fIt\fR command) instead of \fBrm\fR(1) to prevent accidental deletions
+Make the \fIr\fR command move files to the trash instead of removing them
 .TP
 \fB\-\-unicode\fR
-Unicode decorations are used provided Unicode support is detected for the running terminal. Use this option to force Unicode decorations.
+Unicode decorations are used if Unicode support is detected for the running terminal. Use this option to force Unicode decorations.
 .TP
 \fB\-\-virtual\-dir\fR=\fI\,PATH\/\fR
 Use PATH as \fBClifm\fR\'s virtual directory
 .TP
 \fB\-\-virtual\-dir\-full\-paths\fR
-Print filenames in virtual directories as full paths instead of just base names
+Print filenames in virtual directories as absolute paths instead of just base names
 .TP
 \fB\-\-vt100\fR
 Run in VT100 compatibility mode
@@ -817,7 +817,7 @@ The list of file type characters is included in the \fBFILE FILTERS\fR section b
 The filter will be lost at program exit. To permanently set a filter use the \fIFilter\fR option (in the configuration file) or the \fBCLIFM_FILTER\fR environment variable (consult the \fBENVIRONMENT\fR and the \fBFILE FILTERS\fR sections below).
 .TP
 .B fz \fR[\fIon\fR, \fIoff\fR]
-Toggle full directory size (long view mode only).
+Toggle recursive directory sizes (long view only).
 .TP
 .B hf, hh, hidden \fR[\fIon\fR, \fIoff\fR, \fIfirst\fR, \fIlast\fR, \fIstatus\fR]
 Set hidden files on/off (use \fIfirst\fR/\fIlast\fR to sort hidden files before/after non-hidden files respectively).
@@ -2124,7 +2124,7 @@ Bear in mind that commands will be executed directly without shell intervention,
 .TP
 \fB4. Examples\fR:
 .TP
-Match a full filename:
+Match a complete filename:
 
  \fBX:N:some_filename=nano;vim;vi;emacs\fR
 .TP
@@ -2520,7 +2520,7 @@ The following codes are used to control \fBclifm\fR's file list:
  \fBcs\fR     Color scheme          cs=zenburn
  \fBfc\fR     Files counter         fc=0
  \fBft\fR     Files filter          ft=.*\\.pdf$
- \fBfz\fR     Full dir size         fz=1
+ \fBfz\fR     Recursive dir sizes   fz=1
  \fBhf,hh\fR  Hidden files          hf=0
  \fBlm\fR     Light mode            lm=1
  \fBlv,ll\fR  Long/detail view      lv=0
@@ -2725,7 +2725,7 @@ Let's suppose you have a tag named \fIwork\fR which contains ten tagged files, b
 .sp
  \fBp t:work<TAB>\fR
 
-The list of files tagged as \fIwork\fR will be displayed via fzf. Now mark the two files you need using \fBTAB\fR, press \fBEnter\fR or \fBRight\fR, and the full path to both files will be inserted into the command line. So, '\fBp t:work\fR' will be replaced by '\fBp /path/to/work1.odt /path/to/work2.odt\fR'.
+The list of files tagged as \fIwork\fR will be displayed via fzf. Now mark the two files you need using \fBTAB\fR, press \fBEnter\fR or \fBRight\fR, and the absolute path to both files will be inserted into the command line. So, '\fBp t:work\fR' will be replaced by '\fBp /path/to/work1.odt /path/to/work2.odt\fR'.
 
 .SH 16. VIRTUAL DIRECTORIES
 CliFM is able to read and list files from the standard input stream (STDIN). Each file in the list should be an absolute path, terminated with a new line character (\\n) and stripped from extra characters not belonging to the path itself. The size of the input stream buffer is 262MiB (65536 paths, provided each path takes PATH_MAX bytes (4096 by default)).
@@ -2736,7 +2736,7 @@ The user can operate on these files as if they were any other regular file, sinc
 .sp
 Once in the virtual directory, files are listed by default using only the base name of the target file. For example, if the target file is \fI/home/user/Downloads/myfile.tar.gz\fR, this file will be listed as \fImyfile.tar.gz\fR. If this file already exists in the virtual directory (because there is another target file with the same base name, say, \fI/home/user/Documents/tars/myfile.tar.gz\fR), a random six digits suffix will be appended to the file (for instance, \fImyfile.tar.gz.12Rgj6\fR).
 .sp
-Since this listing mode does not allow the user to get a clear idea of the actual location of each listed file, a keybinding (by default \fIAlt+w\fR) is available to toggle short (base names only) and long filenames: in this latter case, filenames are listed using the full path to the target file, replacing slashes by colons (:). For example, if the target file is \fI/home/user/Downloads/myfile.tar.gz\fR, it will be listed in the virtual directory as \fIhome:user:Downloads:myfile.tar.gz\fR.
+Since this listing mode does not allow the user to get a clear idea of the actual location of each listed file, a keybinding (by default \fIAlt+w\fR) is available to toggle short (base names only) and long filenames: in this latter case, filenames are listed using the absolute path to the target file, replacing slashes by colons (:). For example, if the target file is \fI/home/user/Downloads/myfile.tar.gz\fR, it will be listed in the virtual directory as \fIhome:user:Downloads:myfile.tar.gz\fR.
 .sp
 If you prefer the long names approach, you can use the \fI\-\-virtual\-dir\-full\-paths\fR command line flag.
 .sp
@@ -2822,7 +2822,7 @@ The information stored in the database, always per directory, is:
  b) Number of visits
  c) Date of first visit (seconds since the Unix epoch)
  d) Date of the last visit (seconds since Unix epoch)
- e) The full path to each visited directory
+ e) The absolute path to each visited directory
 .sp
 With this information it is possible to build a ranking of directories to offer the user the most accurate matches for each query string. The matching algorithm takes into account mainly two factors: frequency and recency (which is why this kind of algorithm is often called a \fBfrecency\fR algorithm).
 .sp
@@ -3044,7 +3044,7 @@ Set to MAX_FILES if max-files is set. Unset otherwise.
 Set to 1 if only-dirs is enabled. Otherwise it is set to 0
 .TP
 .B CLIFM_PLUGINS_HELPER
-Set to the full path to the plugins\-helper script used by many plugins.
+Set to the absolute path to the plugins\-helper script used by several plugins.
 .TP
 .B CLIFM_PROFILE
 Set to the name of the current profile.

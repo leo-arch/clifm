@@ -158,7 +158,7 @@ a. Set 'ReadAutocmdFiles' to 'true' in the configuration file.\n\
 b. Create a '.cfm.in' file in the '~/Important' directory with the following\n\
 content:\n\n\
   echo \"Please keep me in sync with work files\" && read -n1\n\n\
-This little reminder will be printed every time you enter the 'Important'\n\
+This little reminder will be displayed every time you enter the 'Important'\n\
 directory.\n\n\
 If the file is named rather '.cfm.out', the command will be executed when\n\
 leaving, instead of entering, the directory.\n\n\
@@ -314,7 +314,7 @@ If set to 'system', notifications are displayed using one of the following comma
 Linux/BSD: notify-send -u \"TYPE\" \"TITLE\" \"MSG\"\n\
 MacOS:     osascript -e 'display notification \"MSG\" subtitle \"TYPE\" with title \"TITLE\"'\n\
 Haiku:     notify --type \"TYPE\" --title \"TITLE\" \"MSG\"\n\n\
-Note: It is the notifications daemon itself who takes care of actually printing\n\
+Note: It is the notifications daemon itself who takes care of actually displaying\n\
 notifications on your screen. For troubleshoting, consult your \
 daemon's documentation.\n\n\
 Tip: You can always check notifications using the 'msg' command."
@@ -357,7 +357,7 @@ SRC.copy-n, where n is an positive integer (starting at 1).\n\n\
 Parameters passed to rsync: --aczvAXHS --progress\n\n\
 Parameters passed to cp:    -a"
 
-#define EDIT_USAGE "Edit the main configuration file\n\n\
+#define CONFIG_USAGE "Edit the main configuration file\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   config [reload | reset | dump | APPLICATION]\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
@@ -369,7 +369,7 @@ Parameters passed to cp:    -a"
     config dump\n\
 - Reload the main configuration file and update settings accordingly\n\
     config reload\n\
-- Create a fresh configuration file (making a backup of the old one)\n\
+- Reset the configuration file to its default state (keeping a backup of the existing file)\n\
     config reset"
 
 #define EXT_USAGE "Turn on/off the use of external commands\n\n\
@@ -389,7 +389,7 @@ Parameters passed to cp:    -a"
 \x1b[1mUSAGE\x1b[22m\n\
   export NAME=VALUE..."
 
-#define FC_USAGE "Toggle the files counter for directories on/off\n\n\
+#define FC_USAGE "Toggle the file counter for directories\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   fc [on | off | status]"
 
@@ -399,9 +399,9 @@ Parameters passed to cp:    -a"
     ll (also Alt+l)\n\
   Note: Use PropFields in the configuration file to customize output\n\
   fields (and TimeStyle for custom timestamp formats).\n\
-- Print properties of the file whose ELN is 4\n\
+- Print file properties of the file whose ELN is 4\n\
     p4\n\
-- Print file properties, including directory full size\n\
+- Print file properties, including recursive directory sizes\n\
     pp DIR\n\n\
 Note: An exclamation mark (!) before directory sizes means that an\n\
 error ocurred while reading a subdirectory, so sizes may not be accurate\n\n\
@@ -409,14 +409,14 @@ Note 2: Unlink 'p', 'pp' always follows symlinks to their target file."
 
 #define FILE_SIZE_USAGE "File sizes/disk usage\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
-- Enable full directory size (long view)\n\
+- Enable recursive directory sizes (long view)\n\
     fz on (or --full-dir-size)\n\
-- Toggle the disk usage analyzer mode on/off\n\
+- Toggle the disk usage analyzer mode\n\
     Alt+Tab (or -t,--disk-usage-analyzer)\n\
-- Print files sizes as used blocks instead of used bytes (apparent size)\n\
-    Run with --no-apparent-size or set ApparentSize to false in the\n\
+- Display physical file sizes (disk usage) instead of logical sizes (apparent size)\n\
+    Run with --physical-size or set ApparentSize to false in the\n\
     configuration file.\n\
-- Use powers of 1000 instead of 1024 for file sizes\n\
+- Display file sizes in SI units (powers of 1000) instead of 1024\n\
     Run with --si"
 
 #define FF_USAGE "Set list-directories-first on/off\n\n\
@@ -425,7 +425,7 @@ Note 2: Unlink 'p', 'pp' always follows symlinks to their target file."
 \x1b[1mEXAMPLE\x1b[22m\n\
 - Disable list directories-first\n\
     ff off\n\
-  Note: Toggle directories-first on/off pressing Alt+g."
+  Note: Toggle directories-first by pressing Alt+g."
 
 #define FILE_PREVIEWS "\
 File previews are enabled by default if running in fzf mode.\n\n\
@@ -531,7 +531,7 @@ files in the current directory:\n\n\
 - Use the 'b' command to go backwards\n\
     b (also Alt+j or Shift+Left)"
 
-#define FZ_USAGE "Toggle full directory size on/off (only for long view mode)\n\n\
+#define FZ_USAGE "Toggle recursive directory sizes (long view only)\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   fz [on, off]"
 
@@ -556,14 +556,14 @@ files in the current directory:\n\n\
 - Toggle hidden files\n\
     hh (or Alt+.)"
 
-#define HISTEXEC_USAGE "Access commands history entries\n\n\
+#define HISTEXEC_USAGE "Access command history entries\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
 history or !<TAB>: List available commands\n\
 !!: Execute the last command\n\
 !n: Execute the command number 'n' in the history list\n\
 !-n: Execute the last - n command in the history list"
 
-#define HISTORY_USAGE "List or access commands history entries\n\n\
+#define HISTORY_USAGE "List or access command history entries\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   history [edit [APP] | clear | -N | on | off | status | show-time [-N]]\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
@@ -583,7 +583,7 @@ history or !<TAB>: List available commands\n\
     history edit vi\n\
 - Clear the history list\n\
     history clear\n\n\
-You can also access the commands history via the exclamation mark (!).\n\
+You can also access the command history via the exclamation mark (!).\n\
 - List available commands\n\
     !<TAB>\n\
 - List all history entries matching 'sudo'\n\
@@ -603,7 +603,7 @@ from the history list."
 Note: Depending on how the terminal renders icons, the apparent space\n\
 between icons and filenames may not be the most appropiate. This space\n\
 can be adjusted using the IconsGap option in the configuration file\n\
-(valid values: 0, 1, 2)."
+(valid values: 0, 1, or 2)."
 
 #define JUMP_USAGE "Change to a directory in the jump database (visited directories)\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
@@ -646,8 +646,8 @@ For information about the matching algorithm consult the manpage\n\n\
 #define K_USAGE "Toggle follow-links in long view mode\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   k\n\n\
-If enabled, when running in long view information for the file a symbolic\n\
-link points to (instead of for the link itself) is displayed."
+When enabled, the long view displays information about the file a symbolic\n\
+link points to, rather than the link itself."
 
 #define KK_USAGE "Toggle max-filename-len on/off\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
@@ -657,7 +657,7 @@ link points to (instead of for the link itself) is displayed."
 \x1b[1mUSAGE\x1b[22m\n\
   kb, keybinds [list | bind FUNC | edit [APP] | conflict | reset | readline]\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
-- List your current keybindings\n\
+- List the current keybindings\n\
     kb (or 'kb list')\n\
 - List available function names\n\
     kb bind <TAB>\n\
@@ -668,12 +668,13 @@ link points to (instead of for the link itself) is displayed."
 - Open/edit the keybindings file using mousepad\n\
     kb edit mousepad\n\
 - Unbind a function\n\
-    Run 'kb edit' and comment out the corresponding entry\n\
+    Method 1: run 'kb bind FUNC' and bind it to '-'\n\
+    Method 2: Run 'kb edit' and comment out the corresponding entry\n\
 - Detect keybinding conflicts\n\
     kb conflict\n\
 - List the current keybindings for readline\n\
     kb readline\n\
-- Reset your keybinding settings\n\
+- Reset the keybindings file to its default state (keeping a backup of the existing file)\n\
     kb reset"
 
 #define LE_USAGE "Edit a symbolic link\n\n\
@@ -999,7 +1000,7 @@ Note: To permanently set a new prompt edit the current\n\
 color scheme file ('cs edit'), and set the Prompt field to\n\
 whatever prompt you like."
 
-#define PROP_USAGE "Print files properties\n\n\
+#define PROP_USAGE "Print file properties\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   p, pp, prop [ELN/FILE...]\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
@@ -1007,7 +1008,7 @@ whatever prompt you like."
     p 12 (or 'p <TAB>' to choose from a list)\n\
 - Print the properties of all selected files\n\
     p sel\n\
-- Print the properties of the directory 'dir' (including total size)\n\
+- Print the properties of the directory 'dir' (including recursive size)\n\
     pp dir\n\n\
 Note that, in case of symbolic links to directories, the 'p' command displays\n\
 information about the link target if the provided filename ends with a slash.\n\
@@ -1391,10 +1392,10 @@ c: Stop paging (printing remaining files)\n"
 \n -D       List directories only\
 \n -e       Force the use of the 'o/open' command to open files\
 \n -E       Force the use of 'cd' to change directories\
-\n -f       Print full directories size (long view mode only)\
+\n -f       Display recursive directories sizes (long view mode only)\
 \n -F       Disable the files counter (directories)\
-\n -g       Print file sizes in powers of 1000 instead of 1024\
-\n -G       Print file sizes as used blocks instead of apparent size (used bytes)\
+\n -g       Display file sizes in SI units (powers of 1000) instead of 1024\
+\n -G       Display physical file sizes (disk usage) instead of logical sizes (apparent size)\
 \n -h       Print this help and exit\
 \n -H       Disable syntax-highlighting\
 \n -i       Enable icons\
@@ -1480,7 +1481,7 @@ database (via the 'j' command)\
 \n      --data-dir=PATH\t\t Use PATH as data directory (e.g.: /usr/local/share)\
 \n      --desktop-notifications\t Set the desktop notifications style: 'kitty', 'system', or 'false' (default)\
 \n      --disk-usage\t\t Show disk usage (free/total FS MOUNTPOINT)\
-\n      --full-dir-size\t\t Recursively calculate directories size (long view only)\
+\n      --full-dir-size\t\t Display recursive directory sizes (long view only)\
 \n      --fuzzy-algo=NUM\t\t Set fuzzy algorithm for fuzzy matching (1 or 2)\
 \n      --fuzzy-matching\t\t Enable fuzzy tab completion/suggestions for filenames \
 and paths\
@@ -1498,7 +1499,7 @@ and paths\
 \n      --max-files=NUM\t\t List only up to NUM files\
 \n      --mimelist-file=FILE\t Set FILE as Lira's configuration file\
 \n      --mnt-udisks2\t\t Use udisks2(1) instead of udevil(1) for the 'media' command\
-\n      --no-apparent-size\t Display file sizes in terms of used blocks rather than used bytes (apparent size)\
+\n      --no-apparent-size\t Display physical file sizes (disk usage) rather than logical sizes (apparent size)\
 \n      --no-bold\t\t\t Disable bold colors (applies to all color schemes)\
 \n      --no-cd-auto\t\t Disable the autocd function\
 \n      --no-classify\t\t Do not append file type indicators\
@@ -1544,7 +1545,7 @@ PropFields in the config file)\
 \n      --sel-file=FILE\t\t Set FILE as custom selections file\
 \n      --share-selbox\t\t Make the Selection Box common to different profiles\
 \n      --shotgun-file=FILE\t Set FILE as shotgun's configuration file\
-\n      --si\t\t\t Print sizes in powers of 1000 instead of 1024\
+\n      --si\t\t\t Display file sizes in SI units (powers of 1000) instead of 1024\
 \n      --smenutab\t\t Use smenu to display completion matches\
 \n      --sort-reverse\t\t Sort in reverse order, e.g., z-a instead of a-z\
 \n      --stat FILE...\t\t Run the 'p' command on FILE(s) and exit\
@@ -1601,7 +1602,7 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  fc                 Set the file counter on/off\n\
  ff, dirs-first     Toggle list-directories-first on/off\n\
  ft, filter         Set a file filter\n\
- fz                 Print directories full size (long view mode only)\n\
+ fz                 Display recursive directory sizes (long view only)\n\
  hh, hidden         Toggle hidden-files\n\
  history            Manage the commands history\n\
  icons              Set icons on/off\n\
@@ -1759,7 +1760,7 @@ myfile.txt vi        Open 'myfile.txt' with vi (also 'vi myfile.txt')\n\
 12                   Open the file whose ELN is 12\n\
 12&                  Open the file whose ELN is 12 in the background\n\
 ow 10 | ow 10 <TAB>  Choose opening application for the file whose ELN is 10\n\
-p 4                  Print the properties of the file whose ELN is 4\n\
+p 4                  Print file properties of the file whose ELN is 4\n\
 /*.png               Search for files ending with .png in the current directory\n\
 s *.c                Select all C files\n\
 s 1-4 8 19-26        Select multiple files by ELN\n\
@@ -1864,7 +1865,7 @@ q | F12         I'm tired, quit"
 #define CD_DESC      " (change directory)"
 #define CL_DESC      " (set columns on/off)"
 #define CMD_DESC     " (jump to the COMMANDS section in the manpage)"
-#define COLORS_DESC  " (print currently used file type colors)"
+#define COLORS_DESC  " (preview the current color scheme)"
 #define CONFIG_DESC  " (edit the main configuration file)"
 #define CS_DESC      " (manage color schemes)"
 #define CWD_DESC     " (print the current directory)"
@@ -1878,7 +1879,7 @@ q | F12         I'm tired, quit"
 #define FC_DESC      " (set the files counter on/off)"
 #define FF_DESC      " (toggle list-directories-first)"
 #define FT_DESC      " (set a files filter)"
-#define FZ_DESC      " (print directories full size - long view only)"
+#define FZ_DESC      " (display recursive directory sizes - long view only)"
 #define HF_DESC      " (toggle hidden files)"
 #define HIST_DESC    " (manage the commands history)"
 #define ICONS_DESC   " (set icons on/off)"

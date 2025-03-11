@@ -625,7 +625,7 @@ config_edit(char **args)
 	}
 
 	if (args[1] && IS_HELP(args[1])) {
-		printf("%s\n", EDIT_USAGE);
+		printf("%s\n", CONFIG_USAGE);
 		return FUNC_SUCCESS;
 	}
 

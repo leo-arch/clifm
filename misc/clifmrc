@@ -159,11 +159,10 @@
 # Nano-second precision is available via the %N modifier.
 ;PTimeStyle="+%Y-%m-%d %H:%M:%S.%N %z"
 
-# When in long view, print the full size of directories (i.e. recursively
-# include all files and subdirectories).
+# Display recursive directory sizes (long view only).
 ;FullDirSize=false
 
-# Print the apparent size of files (logical size) instead of actual device
+# Display apparent file sizes (logical size) instead of actual device
 # usage (physical size).
 ;ApparentSize=true
 
