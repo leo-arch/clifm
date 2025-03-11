@@ -548,10 +548,11 @@ files in the current directory:\n\n\
 
 #define HF_USAGE "Set hidden files on/off\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
-  hf, hh, hidden [on | off | status]\n\n\
+  hf, hh, hidden [on | off | first | last | status]\n\n\
 \x1b[1mEXAMPLE\x1b[22m\n\
 - Show hidden files\n\
     hh on\n\
+  Note: Use first/last to sort hidden files before/after non-hidden files.\n\
 - Toggle hidden files\n\
     hh (or Alt+.)"
 

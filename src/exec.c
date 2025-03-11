@@ -851,6 +851,18 @@ alias_function(char **args)
 	return print_alias(args[1]);
 }
 
+static const char *
+gen_hidden_status(void)
+{
+	switch (conf.show_hidden) {
+	case HIDDEN_FALSE: return _("disabled");
+	case HIDDEN_FIRST: return _("enabled (list first)");
+	case HIDDEN_LAST: return _("enabled (list last)");
+	case HIDDEN_TRUE: /* fallthrough */
+	default: return _("enabled");
+	}
+}
+
 static int
 hidden_files_function(const char *arg)
 {
@@ -863,14 +875,21 @@ hidden_files_function(const char *arg)
 	}
 
 	if (strcmp(arg, "status") == 0) {
-		printf(_("Show-hidden-files is %s\n"), conf.show_hidden
-			? _("enabled") : _("disabled"));
+		printf(_("Show-hidden-files is %s\n"), gen_hidden_status());
+	} else if (strcmp(arg, "first") == 0) {
+		conf.show_hidden = HIDDEN_FIRST;
+		if (conf.autols == 1) reload_dirlist();
+		print_reload_msg(NULL, NULL, _("Hidden files: on (list first)\n"));
+	} else if (strcmp(arg, "last") == 0) {
+		conf.show_hidden = HIDDEN_LAST;
+		if (conf.autols == 1) reload_dirlist();
+		print_reload_msg(NULL, NULL, _("Hidden files: on (list last)\n"));
 	} else if (strcmp(arg, "off") == 0) {
-		conf.show_hidden = 0;
+		conf.show_hidden = HIDDEN_FALSE;
 		if (conf.autols == 1) reload_dirlist();
 		print_reload_msg(NULL, NULL, _("Hidden files: off\n"));
 	} else if (strcmp(arg, "on") == 0) {
-		conf.show_hidden = 1;
+		conf.show_hidden = HIDDEN_TRUE;
 		if (conf.autols == 1) reload_dirlist();
 		print_reload_msg(NULL, NULL, _("Hidden files: on\n"));
 	}

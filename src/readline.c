@@ -2816,13 +2816,18 @@ options_generator(const char *text, int state)
 #define MAX_OPTS 23
 	char *c_opts[MAX_OPTS] = {0};
 
-	/* acd, ao, ext, ff, hf (w == 2 -> second word only) */
+	/* acd, ao, ext, ff (w == 2 -> second word only) */
 	if (w == 2 && ( ( *c == 'a' && ((c[1] == 'o' && !c[2])
 	|| strcmp(c, "acd") == 0) )
 	|| (*c == 'e' && strcmp(c, "ext") == 0)
-	|| (*c == 'f' && (c[1] == 'f' || c[1] == 'c') && !c[2])
-	|| (*c == 'h' && (c[1] == 'f' || c[1] == 'h') && !c[2]) ) ) {
+	|| (*c == 'f' && (c[1] == 'f' || c[1] == 'c') && !c[2])) ) {
 		c_opts[0] = "on"; c_opts[1] = "off"; c_opts[2] = "status"; c_opts[3] = NULL;
+
+	/* hf/hh/hidden */
+	} else if (w == 2 && (*c == 'h' && (((c[1] == 'f' || c[1] == 'h') && !c[2])
+	|| strcmp(c, "hidden") == 0))) {
+		c_opts[0] = "on"; c_opts[1] = "off"; c_opts[2] = "first";
+		c_opts[3] = "last"; c_opts[4] = "status"; c_opts[5] = NULL;
 
 	/* pg, pager */
 	} else if (w == 2 && (*c == 'p' && ((c[1] == 'g' && !c[2])

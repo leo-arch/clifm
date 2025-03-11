@@ -819,8 +819,8 @@ The filter will be lost at program exit. To permanently set a filter use the \fI
 .B fz \fR[\fIon\fR, \fIoff\fR]
 Toggle full directory size (long view mode only).
 .TP
-.B hf, hh, hidden \fR[\fIon\fR, \fIoff\fR, status\fR]
-toggle hidden files.
+.B hf, hh, hidden \fR[\fIon\fR, \fIoff\fR, \fIfirst\fR, \fIlast\fR, \fIstatus\fR]
+Set hidden files on/off (use \fIfirst\fR/\fIlast\fR to sort hidden files before/after non-hidden files respectively).
 .TP
 .B history \fR[\fIedit\fR [\fIAPP\fR]] [\fIclear\fR] [\fI\-n\fR] [\fIon\fR, \fIoff\fR, \fIstatus\fR, \fIshow\-time\fR]
 with no arguments, it prints the commands history list (use \fIshow\-time\fR to print timestamps as well). If \fIclear\fR is passed as argument, it will delete all entries in the history file. Use \fIedit\fR to open the history file and modify it as required (the file will be opened with APP, if specified, or with the default associated application otherwise). \fI\-n\fR tells the \fIhistory\fR command to list only the last 'n' commands in the history list. Finally, you can disable history (subsequent entries won\'t be written to the history file) via \fIhistory\ off\fR (you can also use the \fIHistIgnore\fR option in the configuration file to prevent specific command lines from being added to the history list).
