@@ -636,6 +636,29 @@ translate_key(const char *key)
 	return translate_key_nofunc(key);
 }
 
+static int
+backup_and_create_kbinds_file(void)
+{
+	char *backup = gen_backup_file(kbinds_file, 1);
+	if (!backup)
+		return FUNC_FAILURE;
+
+	if (renameat(XAT_FDCWD, kbinds_file, XAT_FDCWD, backup) != 0) {
+		xerror(_("kb: Cannot rename '%s' to '%s': %s\n"),
+			kbinds_file, backup, strerror(errno));
+		free(backup);
+		return FUNC_FAILURE;
+	}
+
+	char *abbrev = abbreviate_file_name(backup);
+	printf(_("Old keybindings file saved as '%s'\n"),
+		abbrev ? abbrev : backup);
+	free(backup);
+	free(abbrev);
+
+	return create_kbinds_file();
+}
+
 int
 kbinds_reset(void)
 {
@@ -647,16 +670,10 @@ kbinds_reset(void)
 		return FUNC_FAILURE;
 	}
 
-	if (stat(kbinds_file, &attr) == -1) {
+	if (stat(kbinds_file, &attr) == -1)
 		exit_status = create_kbinds_file();
-	} else {
-		if (unlink(kbinds_file) == 0) {
-			exit_status = create_kbinds_file();
-		} else {
-			xerror("kb: '%s': %s\n", kbinds_file, strerror(errno));
-			exit_status = FUNC_FAILURE;
-		}
-	}
+	else
+		exit_status = backup_and_create_kbinds_file();
 
 	if (exit_status == FUNC_SUCCESS)
 		err('n', PRINT_PROMPT, _("kb: Restart %s for changes "

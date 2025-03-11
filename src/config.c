@@ -67,24 +67,22 @@ regen_config(void)
 	}
 
 	if (config_found == 1) {
-		const time_t rawtime = time(NULL);
-		struct tm t;
-		if (!localtime_r(&rawtime, &t))
+		char *backup = gen_backup_file(config_file, 1);
+		if (!backup)
 			return FUNC_FAILURE;
 
-		char date[18] = "";
-		strftime(date, sizeof(date), "%Y%m%d@%H:%M:%S", &t);
-
-		char bk[PATH_MAX + 1];
-		snprintf(bk, sizeof(bk), "%s-%s", config_file, date);
-
-		if (renameat(XAT_FDCWD, config_file, XAT_FDCWD, bk) == -1) {
+		if (renameat(XAT_FDCWD, config_file, XAT_FDCWD, backup) == -1) {
 			xerror(_("Cannot rename '%s' to '%s': %s\n"),
-				config_file, bk, strerror(errno));
+				config_file, backup, strerror(errno));
+			free(backup);
 			return errno;
 		}
 
-		printf(_("Old configuration file written to '%s'\n"), bk);
+		char *abbrev = abbreviate_file_name(backup);
+		printf(_("Old configuration file saved as '%s'\n"),
+			abbrev ? abbrev : backup);
+		free(backup);
+		free(abbrev);
 	}
 
 	if (create_main_config_file(config_file) != FUNC_SUCCESS)

@@ -41,7 +41,8 @@ void clear_term_img(void);
 char *construct_human_size(const off_t size);
 filesn_t count_dir(const char *dir, const int pop);
 char from_hex(char c);
-char *gen_date_suffix(const struct tm tm);
+char *gen_backup_file(const char *file, const int human);
+char *gen_date_suffix(const struct tm tm, const int human);
 void gen_time_str(char *buf, const size_t size, const time_t curtime);
 #if defined(__sun) && defined(ST_BTIME)
 struct timespec get_birthtime(const char *filename);

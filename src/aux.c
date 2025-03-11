@@ -671,13 +671,42 @@ rl_ring_bell(void)
  * This function is used mostly by the trash function to generate unique
  * suffixes for trashed files. */
 char *
-gen_date_suffix(const struct tm tm)
+gen_date_suffix(const struct tm tm, const int human)
 {
-	char *suffix = xnmalloc(68, sizeof(char));
-	snprintf(suffix, 67, "%04d%02d%02d%02d%02d%02d", tm.tm_year + 1900,
-	    tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+	char *suffix = NULL;
+
+	if (human == 0) {
+		suffix = xnmalloc(68, sizeof(char));
+		snprintf(suffix, 67, "%04d%02d%02d%02d%02d%02d", tm.tm_year + 1900,
+			tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+	} else {
+		char date[18] = "";
+		const size_t bytes = strftime(date, sizeof(date), "%Y%m%d-%H:%M:%S", &tm);
+		if (bytes > 0)
+			suffix = savestring(date, bytes);
+	}
 
 	return suffix;
+}
+
+char *
+gen_backup_file(const char *file, const int human)
+{
+	time_t rawtime = time(NULL);
+	struct tm t;
+	char *suffix = localtime_r(&rawtime, &t) ? gen_date_suffix(t, human) : NULL;
+	if (!suffix) {
+		xerror(_("kb: Cannot generate time suffix string for "
+			"the backup file\n"));
+		return NULL;
+	}
+
+	char backup[PATH_MAX + 1];
+	snprintf(backup, sizeof(backup), "%s-%s", file, suffix);
+
+	free(suffix);
+
+	return strdup(backup);
 }
 
 /* Create directory DIR with permissions set to MODE (this latter modified

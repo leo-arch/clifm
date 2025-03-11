@@ -1136,7 +1136,7 @@ trash_files_args(char **args)
 
 	time_t rawtime = time(NULL);
 	struct tm t;
-	char *suffix = localtime_r(&rawtime, &t) ? gen_date_suffix(t) : (char *)NULL;
+	char *suffix = localtime_r(&rawtime, &t) ? gen_date_suffix(t, 0) : NULL;
 	if (!suffix)
 		return FUNC_FAILURE;
 
