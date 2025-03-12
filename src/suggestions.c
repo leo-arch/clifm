@@ -109,7 +109,6 @@ check_int_cmd_desc(const char *s, const size_t l)
 		if (*s == 'o') return O_DESC;
 		if (*s == 'p') return P_DESC;
 		if (*s == 'q') return Q_DESC;
-		if (*s == 'Q') return QU_DESC;
 		if (*s == 'r') return R_DESC;
 		if (*s == 's') return SEL_DESC;
 		if (*s == 't') return TRASH_DESC;

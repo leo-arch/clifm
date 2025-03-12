@@ -1805,9 +1805,9 @@ pg | Alt+0      Run the pager (builtin)\n\
 gg              Run the pager (plugin)\n\
 auto            Add an autocommand to the current directory\n\
 config | F10    View/edit the configuration file\n\
-mm edit | F6    Change default associated applications\n\
+mm edit | F6    Change default opening applications\n\
 kb edit | F9    Edit keybindings\n\
-view edit | F7  Change previewing applications\n\
+view edit | F7  Change default previewing applications\n\
 mm info 12      Get MIME information for the file whose ELN is 12\n\
 Alt+Tab         Toggle the disk usage analyzer mode\n\
 cs              Manage color schemes\n\
@@ -1855,7 +1855,7 @@ q | F12         I'm tired, quit"
 #define ALIAS_DESC   " (list aliases)"
 #define AO_DESC      " (set auto-open on/off)"
 #define AUTO_DESC    " (set a temporary autocommand)"
-#define B_DESC       " (go back in the directory history list)"
+#define B_DESC       " (change to the previously visited directory)"
 #define BD_DESC      " (change to a parent directory)"
 #define BL_DESC      " (create symbolic links in bulk)"
 #define BB_DESC      " (sanitize non-ASCII filenames)"
@@ -1875,13 +1875,13 @@ q | F12         I'm tired, quit"
 #define EDIT_DESC    " (edit the main configuration file)"
 #define EXP_DESC     " (export filenames to a temporary file)"
 #define EXT_DESC     " (set external/shell commands on/off)"
-#define F_DESC       " (go forth in the directory history list)"
-#define FC_DESC      " (set the files counter on/off)"
+#define F_DESC       " (change to the next visited directory)"
+#define FC_DESC      " (set the file counter on/off)"
 #define FF_DESC      " (toggle list-directories-first)"
-#define FT_DESC      " (set a files filter)"
+#define FT_DESC      " (set a file filter)"
 #define FZ_DESC      " (display recursive directory sizes - long view only)"
 #define HF_DESC      " (toggle hidden files)"
-#define HIST_DESC    " (manage the commands history)"
+#define HIST_DESC    " (manage the command history)"
 #define ICONS_DESC   " (set icons on/off)"
 #define J_DESC       " (jump to a visited directory)"
 #define K_DESC       " (toggle follow-links - long view only)"
@@ -1892,7 +1892,7 @@ q | F12         I'm tired, quit"
 #define LL_DESC      " (toggle long view)"
 #define LM_DESC      " (toggle light mode)"
 #define LOG_DESC     " (manage logs)"
-#define M_DESC       " (move files)"
+#define M_DESC       " (move/rename files)"
 #define MD_DESC      " (create directories)"
 #define MEDIA_DESC   " (mount/unmount storage devices)"
 #define MF_DESC      " (limit the number of listed files)"
@@ -1907,13 +1907,12 @@ q | F12         I'm tired, quit"
 #define OW_DESC      " (open file with...)"
 #define P_DESC       " (print file properties)"
 #define PC_DESC      " (change file permissions)"
-#define PF_DESC      " (manage profiles)"
+#define PF_DESC      " (manage user profiles)"
 #define PG_DESC      " (set the file pager on/off)"
 #define PIN_DESC     " (pin a directory)"
 #define PP_DESC      " (print file properties - follow links/full dir size)"
-#define PROMPT_DESC  " (switch/edit prompt)"
+#define PROMPT_DESC  " (switch/edit the command prompt)"
 #define Q_DESC       " (quit)"
-#define QU_DESC      " (exit - cd on quit)"
 #define R_DESC       " (remove files)"
 #define RF_DESC      " (refresh/clear the screen)"
 #define RL_DESC      " (reload the configuration file)"
