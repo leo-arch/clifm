@@ -2944,8 +2944,18 @@ parse_input_str(char *str)
 
 		/* The following expansions expand into a SINGLE field */
 
+			/* ###################################
+			 * #   2.1) USER DEFINED VARIABLES   #
+			 * ###################################*/
+
+		if (conf.int_vars == 1 && usrvar_n > 0) {
+			if (substr[i][0] == '$' && substr[i][1] && substr[i][1] != '('
+			&& substr[i][1] != '{')
+				expand_int_var(&substr[i]);
+		}
+
 				/* ##########################
-				 * #   2.1) ELN EXPANSION   #
+				 * #   2.2) ELN EXPANSION   #
 				 * ########################## */
 
 		/* should_expand_eln() will check rl_line_buffer looking for the
@@ -2961,7 +2971,7 @@ parse_input_str(char *str)
 		rl_line_buffer = lb_tmp;
 
 				/* ################################
-				 * #  2.2) ENVIRONEMNT VARIABLES  #
+				 * #  2.3) ENVIRONEMNT VARIABLES  #
 				 * ###############################*/
 
 		if (*substr[i] == '$') {
@@ -2974,7 +2984,7 @@ parse_input_str(char *str)
 		}
 
 				/* ################################
-				 * #  2.3) TILDE: ~user and home  #
+				 * #  2.4) TILDE: ~user and home  #
 				 * ################################ */
 
 		if (*substr[i] == '~') {
@@ -2986,7 +2996,7 @@ parse_input_str(char *str)
 		}
 
 			/* ##################################
-			 * #     2.4) URI file scheme       #
+			 * #     2.5) URI file scheme       #
 			 * ################################## */
 			/* file:///some/file -> /some/file */
 
@@ -2999,7 +3009,7 @@ parse_input_str(char *str)
 		}
 
 			/* ###############################
-			 * #     2.5) "." and ".."       #
+			 * #     2.6) "." and ".."       #
 			 * ############################### */
 
 		if ((*substr[i] == '.' && (!substr[i][1] || (substr[i][1] == '.'
@@ -3015,7 +3025,7 @@ parse_input_str(char *str)
 		}
 
 			/* ######################################
-			 * #     2.6) FASTBACK EXPANSION        #
+			 * #     2.7) FASTBACK EXPANSION        #
 			 * ###################################### */
 
 		if (*substr[i] == '.' && substr[i][1] == '.' && substr[i][2] == '.') {
@@ -3027,7 +3037,7 @@ parse_input_str(char *str)
 		}
 
 			/* ######################################
-			 * #     2.7) PINNED DIR EXPANSION      #
+			 * #     2.8) PINNED DIR EXPANSION      #
 			 * ###################################### */
 
 		if (*substr[i] == ',' && !substr[i][1] && pinned_dir) {
@@ -3037,7 +3047,7 @@ parse_input_str(char *str)
 		}
 
 			/* ######################################
-			 * #   2.8) BOOKMARK NAMES EXPANSION    #
+			 * #   2.9) BOOKMARK NAMES EXPANSION    #
 			 * ###################################### */
 
 		/* Expand bookmark name (b:NAME) into the corresponding path */
@@ -3047,22 +3057,12 @@ parse_input_str(char *str)
 		}
 
 			/* ######################################
-			 * #     2.9) WORKSPACE EXPANSION       #
+			 * #     2.10) WORKSPACE EXPANSION       #
 			 * ###################################### */
 
 		if (*substr[i] == 'w' && substr[i][1] == ':' && substr[i][2]) {
 			if (expand_workspace(&substr[i]) == FUNC_SUCCESS)
 				continue;
-		}
-
-			/* ###################################
-			 * #   2.10) USER DEFINED VARIABLES   #
-			 * ###################################*/
-
-		if (conf.int_vars == 1 && usrvar_n > 0) {
-			if (substr[i][0] == '$' && substr[i][1] && substr[i][1] != '('
-			&& substr[i][1] != '{')
-				expand_int_var(&substr[i]);
 		}
 
 			/* ###################################
