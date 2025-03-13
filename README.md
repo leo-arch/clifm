@@ -105,12 +105,12 @@ In addition to common file operations, such as copy, move, remove, etc., **clifm
   - [Auto-cd](https://github.com/leo-arch/clifm/wiki/Introduction#acd-autocd), [auto-open](https://github.com/leo-arch/clifm/wiki/Introduction#ao-auto-open), and [autols](https://github.com/leo-arch/clifm/wiki/Common-Operations#navigation)
   - [Directory jumper](https://github.com/leo-arch/clifm/wiki/Specifics#kangaroos-frecency-algorithm) (similar to [autojump](https://github.com/wting/autojump), [z.lua](https://github.com/skywind3000/z.lua), and [zoxide](https://github.com/ajeetdsouza/zoxide))
   - [Virtual directories](https://github.com/leo-arch/clifm/wiki/Advanced#virtual-directories)
-  - [Fastback - Quickly change to any parent directory](https://github.com/leo-arch/clifm/wiki/Introduction#fastback)
+  - [Fastback](https://github.com/leo-arch/clifm/wiki/Introduction#fastback) (quickly change to any parent directory)
   - [Up to eight workspaces](https://github.com/leo-arch/clifm/wiki/Specifics#workspaces)
   - [More than a dozen sorting methods](https://github.com/leo-arch/clifm/wiki/Introduction#st-sort)
   - [Remote filesystems management](https://github.com/leo-arch/clifm/wiki/Introduction#net)
   - [Mount/unmount storage devices](https://github.com/leo-arch/clifm/wiki/Introduction#media)
-  - Directory history map to keep in sight previous, current, and next entries in the directory history list
+  - Directory history map (keep in sight previous, current, and next entries in the directory history list)
 - Shell
   - [Tab completion](https://github.com/leo-arch/clifm/wiki/Specifics#expansions-completions-and-suggestions), with _fzf_ integration (including [file previews](https://github.com/leo-arch/clifm/wiki/Advanced#files-preview))
   - [Command line expansions](https://github.com/leo-arch/clifm/wiki/Introduction#command-line-expansions) (including bookmarks, selected files, tags, MIME types, and file types)
@@ -128,11 +128,11 @@ In addition to common file operations, such as copy, move, remove, etc., **clifm
   - [Logs](https://github.com/leo-arch/clifm/wiki/Introduction#log)
   - [Prompt and profile commands](https://github.com/leo-arch/clifm/wiki/Customization#profile-and-prompt-commands) (run commands with each new prompt or at program startup)
 - Modes
-  - [Stealth mode](https://github.com/leo-arch/clifm/wiki/Specifics#stealth-mode), also known as incognito or private mode
+  - [Stealth mode](https://github.com/leo-arch/clifm/wiki/Specifics#stealth-mode) (also known as incognito or private mode)
   - [Light mode](https://github.com/leo-arch/clifm/wiki/Specifics#light-mode) (just in case it is not fast enough for you)
   - [File opener](https://github.com/leo-arch/clifm/wiki/Specifics#using-clifm-as-a-standalone-file-opener) (similar to `xdg` and Ranger's `rifle`)
   - [File previewer](https://github.com/leo-arch/clifm/wiki/Advanced#shotgun) (similar to [`pistol`](https://github.com/yonasBSD/pistol) and Ranger's `scope.sh`)
-  - [Disk usage analyzer mode](https://github.com/leo-arch/clifm/wiki/Specifics#disk-usage-analyzer)
+  - [Disk usage analyzer](https://github.com/leo-arch/clifm/wiki/Specifics#disk-usage-analyzer)
   - [File lister (ls-mode)](https://github.com/leo-arch/clifm/wiki/Advanced#files-lister-ls-mode)
   - [Stat mode](https://github.com/leo-arch/clifm/wiki/Advanced/#stat1-replacement) (just like the shell command **stat**)
 - Customization
@@ -148,7 +148,7 @@ In addition to common file operations, such as copy, move, remove, etc., **clifm
   - [Icons support](https://github.com/leo-arch/clifm/wiki/Advanced#icons-smirk) (including emoji-icons :smirk:)
   - [Git integration](https://github.com/leo-arch/clifm/wiki/Advanced#git-integration)
   - [Desktop notifications](https://github.com/leo-arch/clifm/wiki/Specifics#desktop-notifications)
-  - Unicode support (specifically UTF-8).
+  - Unicode support.
   - [CD on quit](https://github.com/leo-arch/clifm/wiki/Advanced#cd-on-quit) and [file picker](https://github.com/leo-arch/clifm/wiki/Advanced#file-picker) functions
   - [A built-in pager](https://github.com/leo-arch/clifm/wiki/Introduction#pg-pager) for files listing
   - Read and list files from [STDIN (standard input)](https://github.com/leo-arch/clifm/wiki/Advanced#standard-input)
