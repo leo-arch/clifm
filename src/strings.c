@@ -2772,7 +2772,7 @@ check_chained_cmds(char *str)
 }
 
 /*
- * This function is one of the keys of CliFM. It will perform a series of
+ * This function is one of the keys of clifm. It will perform a series of
  * actions:
  * 1) Take the string stored by readline and get its substrings without
  * leading and trailing spaces (dequoting/unescaping if necessary).
@@ -2782,7 +2782,7 @@ check_chained_cmds(char *str)
  * 3) If the input string begins with ';' or ':' the whole string is
  * sent to exec_cmd(), where it will be directly executed by the system
  * shell.
- * 4) The following expansions (especific to CLiFM) are performed here:
+ * 4) The following expansions (especific to clifm) are performed here:
  * ELN's, "sel" keyword, ranges of numbers (ELN's), tags, pinned dir,
  * bookmark names, environment variables, file types (=x), mime types (@...),
  * path normalization, fastback, and, for internal commands only, tilde,
@@ -2800,7 +2800,7 @@ parse_input_str(char *str)
 	flags &= ~FIRST_WORD_IS_ELN;
 	flags &= ~IS_USRVAR_DEF;
 
-	/* If internal command plus fused parameter, split it */
+	/* If internal command plus fused parameter, split it. */
 	if (is_fused_param(str) == FUNC_SUCCESS) {
 		char *p = split_fused_param(str);
 		if (p) {
@@ -2816,13 +2816,12 @@ parse_input_str(char *str)
 	int chaining = 0, cond_cmd = 0, send_shell = 0;
 
 				/* ###########################
-				 * #  0.a) RUN AS EXTERNAL   #
+				 * #  0.1) RUN AS EXTERNAL   #
 				 * ###########################*/
 
-	/* If invoking a command via ';' or ':' set the send_shell flag to
+	/* If invoking a command via ';' or ':', set the send_shell flag to
 	 * true and send the whole string to exec_cmd(), in which case no
-	 * expansion is made: the command is send to the system shell as
-	 * is. */
+	 * expansion is made: the command is send to the system shell as is. */
 	if (*str == ';' || *str == ':' || check_shell_functions(str) == 1)
 		send_shell = 1;
 
@@ -2830,25 +2829,24 @@ parse_input_str(char *str)
 		for (i = 0; str[i]; i++) {
 
 				/* ##################################
-				 * #   0.b) CONDITIONAL EXECUTION   #
+				 * #   0.2) CONDITIONAL EXECUTION   #
 				 * ##################################*/
 
-			/* Check for chained commands (cmd1;cmd2) */
+			/* Check for chained commands (cmd1;cmd2). */
 			if (chaining == 0 && str[i] == ';' && i > 0 && str[i - 1] != '\\')
 				chaining = 1;
 
-			/* Check for conditional execution (cmd1 && cmd 2)*/
+			/* Check for conditional execution (cmd1 && cmd 2). */
 			if (cond_cmd == 0 && str[i] == '&' && i > 0 && str[i - 1] != '\\'
 			&& str[i + 1] == '&')
 				cond_cmd = 1;
 
 				/* ##################################
-				 * #   0.c) USER DEFINED VARIABLE   #
+				 * #   0.3) USER DEFINED VARIABLE   #
 				 * ##################################*/
 
-			/* If user defined variable send the whole string to
-			 * exec_cmd(), which will take care of storing the
-			 * variable. */
+			/* If user defined variable, send the whole string to
+			 * exec_cmd(), which will take care of storing the variable. */
 			if (!(flags & IS_USRVAR_DEF) && conf.int_vars == 1 && str[i] == '='
 			&& i > 0 && str[i - 1] != '\\' && str[0] != '=') {
 				if (check_int_var(str) == 1)
@@ -2860,13 +2858,11 @@ parse_input_str(char *str)
 	/* If chained commands, check each of them. If at least one of them
 	 * is internal, take care of the job (the system shell does not know
 	 * our internal commands and therefore cannot execute them); else,
-	 * if no internal command is found, let it to the system shell */
-	if (chaining == 1 || cond_cmd == 1) {
-		if (check_chained_cmds(str) == 1) {
-			if (fusedcmd_ok == 1)
-				free(str);
-			return (char **)NULL;
-		}
+	 * if no internal command is found, leave it to the system shell. */
+	if ((chaining == 1 || cond_cmd == 1) && check_chained_cmds(str) == 1) {
+		if (fusedcmd_ok == 1)
+			free(str);
+		return (char **)NULL;
 	}
 
 	if ((flags & IS_USRVAR_DEF) || send_shell == 1)
@@ -2880,17 +2876,17 @@ parse_input_str(char *str)
 	 * terminating and double spaces. */
 	char **substr = split_str(str, UPDATE_ARGS);
 
-	if (fusedcmd_ok == 1) /* Just in case split_fusedcmd returned NULL */
+	if (fusedcmd_ok == 1) /* Just in case split_fusedcmd returned NULL. */
 		free(str);
 
 	if (!substr)
 		return (char **)NULL;
 
-	/* Do not perform expansions for the 'n/new' command */
+	/* Do not perform expansions for the 'n/new' command. */
 	if (*substr[0] == 'n' && (!substr[0][1] || strcmp(substr[0], "new") == 0))
 		return substr;
 
-	/* Handle background/foreground process */
+	/* Handle background/foreground process. */
 	bg_proc = 0;
 
 	if (args_n > 0 && *substr[args_n] == '&' && !*(substr[args_n] + 1)) {
@@ -2910,11 +2906,8 @@ parse_input_str(char *str)
 					 * #     TRASH AS RM    #
 					 * ###################### */
 #ifndef _NO_TRASH
-	if (conf.tr_as_rm && substr[0] && *substr[0] == 'r' && !substr[0][1]) {
-		substr[0] = xnrealloc(substr[0], 2, sizeof(char));
+	if (conf.tr_as_rm == 1 && substr[0] && *substr[0] == 'r' && !substr[0][1])
 		*substr[0] = 't';
-		substr[0][1] = '\0';
-	}
 #endif /* !_NO_TRASH*/
 
 				/* ##############################
@@ -2922,9 +2915,9 @@ parse_input_str(char *str)
 				 * ##############################
 
 	 * Ranges, sel, ELN, pinned dirs, bookmarks, and internal variables.
-	 * These expansions are specific to CliFM. To be able to use them
+	 * These expansions are specific to clifm. To be able to use them
 	 * even with external commands, they must be expanded here, before
-	 * sending the input string, in case the command is external, to
+	 * sending the input string (in case the command is external) to
 	 * the system shell. */
 	is_sel = 0; sel_is_last = 0;
 
@@ -2942,17 +2935,15 @@ parse_input_str(char *str)
 		&& (virtual_dir == 0 || is_file_in_cwd(substr[i]) == 0)))
 			continue;
 
-		/* The following expansions expand into a SINGLE field */
+		/* The following expansions expand to a SINGLE field. */
 
 			/* ###################################
 			 * #   2.1) USER DEFINED VARIABLES   #
 			 * ###################################*/
 
-		if (conf.int_vars == 1 && usrvar_n > 0) {
-			if (substr[i][0] == '$' && substr[i][1] && substr[i][1] != '('
-			&& substr[i][1] != '{')
-				expand_int_var(&substr[i]);
-		}
+		if (conf.int_vars == 1 && usrvar_n > 0 && substr[i][0] == '$'
+		&& substr[i][1] && substr[i][1] != '(' && substr[i][1] != '{')
+			expand_int_var(&substr[i]);
 
 				/* ##########################
 				 * #   2.2) ELN EXPANSION   #
@@ -2975,11 +2966,10 @@ parse_input_str(char *str)
 				 * ###############################*/
 
 		if (*substr[i] == '$') {
-			char *p = getenv(substr[i] + 1);
+			char *p = xgetenv(substr[i] + 1, 1);
 			if (p) {
-				const size_t plen = strlen(p) + 1;
-				substr[i] = xnrealloc(substr[i], plen, sizeof(char));
-				xstrsncpy(substr[i], p, plen);
+				free(substr[i]);
+				substr[i] = p;
 			}
 		}
 
@@ -3050,26 +3040,24 @@ parse_input_str(char *str)
 			 * #   2.9) BOOKMARK NAMES EXPANSION    #
 			 * ###################################### */
 
-		/* Expand bookmark name (b:NAME) into the corresponding path */
-		if (*substr[i] == 'b' && substr[i][1] == ':' && substr[i][2]) {
-			if (expand_bm_name(&substr[i]) == FUNC_SUCCESS)
-				continue;
-		}
+		/* Expand bookmark name (b:NAME) into the corresponding path. */
+		if (*substr[i] == 'b' && substr[i][1] == ':' && substr[i][2]
+		&& expand_bm_name(&substr[i]) == FUNC_SUCCESS)
+			continue;
 
 			/* ######################################
-			 * #     2.10) WORKSPACE EXPANSION       #
+			 * #     2.10) WORKSPACE EXPANSION      #
 			 * ###################################### */
 
-		if (*substr[i] == 'w' && substr[i][1] == ':' && substr[i][2]) {
-			if (expand_workspace(&substr[i]) == FUNC_SUCCESS)
-				continue;
-		}
+		if (*substr[i] == 'w' && substr[i][1] == ':' && substr[i][2]
+		&& expand_workspace(&substr[i]) == FUNC_SUCCESS)
+			continue;
 
 			/* ###################################
 			 * #  2.11) SYMLINKS IN VIRTUAL DIR  #
 			 * ################################### */
 
-		/* We are in STDIN_TMP_DIR: Expand symlinks to target */
+		/* We are in STDIN_TMP_DIR: Expand symlinks to target. */
 		if (stdin_dir_ok == 1 && expand_symlink(&substr[i]) == -1) {
 			for (i = 0; i <= args_n; i++)
 				free(substr[i]);
@@ -3078,7 +3066,7 @@ parse_input_str(char *str)
 		}
 	}
 
-	/* The following expansions expand into MULTIPLE fields */
+	/* The following expansions expand to MULTIPLE fields. */
 
 				/* ###########################
 				 * #   2.12) SEL EXPANSION   #
@@ -3123,7 +3111,7 @@ parse_input_str(char *str)
 		return substr;
 
 		/* ####################################################
-		 * #          3) SHELL-LIKE EXPANSIONS                #
+		 * #            3) SHELL-LIKE EXPANSIONS              #
 		 * #      Only for internal commands and plugins      #
 		 * #################################################### */
 
@@ -3188,10 +3176,11 @@ parse_input_str(char *str)
 
 #ifdef HAVE_WORDEXP
 			/* Command substitution, tilde, and environment variables
-			 * expansion is made by wordexp(3) */
+			 * expansion is made by wordexp(3). */
 			if (is_escaped == 0 && IS_WORD(substr[i][j], substr[i][j + 1])) {
 				/* Unlike glob() and tilde_expand(), wordexp() can expand tilde
-				 * and env vars even in the middle of a string. E.g.: $HOME/Downloads */
+				 * and env vars even in the middle of a string. E.g.:
+				 * '$HOME/Downloads'. */
 				if (word_n < INT_ARRAY_MAX) {
 					word_array[word_n] = (int)i;
 					word_n++;
@@ -3205,10 +3194,9 @@ parse_input_str(char *str)
 			 * #   3.1) WILDCARDS AND BRACE EXPANSION   #
 			 * ########################################## */
 
-	if (glob_n > 0 && glob_expand(substr) == 1) {
-		if (expand_glob(&substr, glob_array, glob_n) == -1)
-			return (char **)NULL;
-	}
+	if (glob_n > 0 && glob_expand(substr) == 1
+	&& expand_glob(&substr, glob_array, glob_n) == -1)
+		return (char **)NULL;
 
 	free(glob_array);
 
@@ -3217,10 +3205,8 @@ parse_input_str(char *str)
 		 * ############################################### */
 
 #ifdef HAVE_WORDEXP
-	if (word_n > 0) {
-		if (expand_word(&substr, word_array, word_n) == -1)
-			return (char **)NULL;
-	}
+	if (word_n > 0 && expand_word(&substr, word_array, word_n) == -1)
+		return (char **)NULL;
 
 	free(word_array);
 #endif /* HAVE_WORDEXP */

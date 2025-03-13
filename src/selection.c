@@ -767,7 +767,7 @@ select_pattern(char *arg, const char *dir, const mode_t filetype, int *err)
 	int ret = sel_glob(arg, dir, filetype);
 
 	/* Glob failed. Try REGEX (if at least one regex metacharacter not being
-	 * asterisk if found). */
+	 * asterisk is found). */
 	if (ret == -1)
 		ret = not_just_star(arg) == 1 ? sel_regex(arg, dir, filetype) : 0;
 
