@@ -69,7 +69,7 @@ To get started consult the [Getting started](#bulb-getting-started) section belo
 <details>
 <summary>Click here to expand</summary>
 
-Besides common file operations such as copy, move, remove, etc., _clifm_ provides the following features:
+In addition to common file operations, such as copy, move, remove, etc., **clifm** provides the following features:
 - Specific
   - [Really CLI-based](https://github.com/leo-arch/clifm/wiki/Introduction#main-design-and-goals). No GUI nor TUI at all, but just a command-line
   - It can run on the kernel built-in console and even on a SSH or any other remote session
