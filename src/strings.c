@@ -2848,10 +2848,9 @@ parse_input_str(char *str)
 			/* If user defined variable, send the whole string to
 			 * exec_cmd(), which will take care of storing the variable. */
 			if (!(flags & IS_USRVAR_DEF) && conf.int_vars == 1 && str[i] == '='
-			&& i > 0 && str[i - 1] != '\\' && str[0] != '=') {
-				if (check_int_var(str) == 1)
-					flags |= IS_USRVAR_DEF;
-			}
+			&& i > 0 && str[i - 1] != '\\' && str[0] != '='
+			&& check_int_var(str) == 1)
+				flags |= IS_USRVAR_DEF;
 		}
 	}
 

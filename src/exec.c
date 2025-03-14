@@ -974,7 +974,7 @@ props_function(char **args)
 }
 
 static int
-ow_function(char **args)
+open_with_function(char **args)
 {
 #ifndef _NO_LIRA
 	if (args[1]) {
@@ -1996,6 +1996,49 @@ toggle_follow_links(const char *arg)
 	return FUNC_SUCCESS;
 }
 
+/* Handle one of c, m, vv, or paste commands.
+ * Returns -1 if we should not continue, or 0 otherwise. */
+static int
+handle_copy_move_cmds(char ***cmd)
+{
+    int copy_and_rename = 0;
+    int use_force = 0;
+
+    if ((*cmd)[0][0] != 'm') { // Either c, vv, or paste commands
+        if ((*cmd)[1] && IS_HELP((*cmd)[1])) {
+            if ((*cmd)[0][1] == 'v')
+                puts(_(VV_USAGE));
+            else
+                puts(_(WRAPPERS_USAGE));
+            return (-1);
+        }
+
+        if ((*cmd)[0][1]== 'v')
+            copy_and_rename = 1;
+
+        use_force = is_force_param((*cmd)[1]);
+        set_cp_cmd(*cmd, &use_force);
+
+    } else { // The m command
+        if ((*cmd)[1] && IS_HELP((*cmd)[1])) {
+            puts(_(WRAPPERS_USAGE));
+            return (-1);
+        }
+
+        if (sel_is_last == 0 && (*cmd)[1] && !(*cmd)[2])
+            alt_prompt = FILES_PROMPT; // Interactive rename
+
+        use_force = is_force_param((*cmd)[1]);
+        set_mv_cmd(*cmd, &use_force);
+    }
+
+    kbind_busy = 1;
+    exit_code = cp_mv_file(*cmd, copy_and_rename, use_force);
+    kbind_busy = 0;
+
+    return 0;
+}
+
 /* Take the command entered by the user, already splitted into substrings
  * by parse_input_str(), and call the corresponding function. Return zero
  * in case of success and one in case of error.
@@ -2082,7 +2125,7 @@ exec_cmd(char **comm)
 
 	/*      ################ OPEN WITH ##################     */
 	else if (*comm[0] == 'o' && comm[0][1] == 'w' && !comm[0][2])
-		return (exit_code = ow_function(comm));
+		return (exit_code = open_with_function(comm));
 
 	/*   ################ DIRECTORY JUMPER ##################     */
 	else if (*comm[0] == 'j' && (!comm[0][1] || ((comm[0][1] == 'c'
@@ -2153,51 +2196,11 @@ exec_cmd(char **comm)
 	}
 
 	/*     ############### COPY AND MOVE ##################     */
-	/* c, m, v, vv, and paste commands */
-	else if ((*comm[0] == 'c' && !comm[0][1])
-
-	|| (*comm[0] == 'm' && !comm[0][1])
-
-	|| (*comm[0] == 'v' && (!comm[0][1] || (comm[0][1] == 'v'
-	&& !comm[0][2])))
-
-	|| (*comm[0] == 'p' && strcmp(comm[0], "paste") == 0)) {
-		int copy_and_rename = 0, use_force = 0;
-
-		/* c, v, vv, and paste commands */
-		if (((*comm[0] == 'c' || *comm[0] == 'v') && !comm[0][1])
-		|| (*comm[0] == 'v' && comm[0][1] == 'v' && !comm[0][2])
-		|| strcmp(comm[0], "paste") == 0) {
-
-			if (comm[1] && IS_HELP(comm[1])) {
-				if (*comm[0] == 'v' && comm[0][1] == 'v' && !comm[0][2])
-					puts(_(VV_USAGE));
-				else
-					puts(_(WRAPPERS_USAGE));
-				return FUNC_SUCCESS;
-			}
-
-			if (*comm[0] == 'v' && comm[0][1] == 'v' && !comm[0][2])
-				copy_and_rename = 1;
-
-			use_force = is_force_param(comm[1]);
-			set_cp_cmd(&comm[0], &use_force);
-
-		} else if (*comm[0] == 'm' && !comm[0][1]) {
-			if (comm[1] && IS_HELP(comm[1])) {
-				puts(_(WRAPPERS_USAGE));
-				return FUNC_SUCCESS;
-			}
-			if (!sel_is_last && comm[1] && !comm[2])
-				alt_prompt = FILES_PROMPT;
-
-			use_force = is_force_param(comm[1]);
-			set_mv_cmd(&comm[0], &use_force);
-		}
-
-		kbind_busy = 1;
-		exit_code = cp_mv_file(comm, copy_and_rename, use_force);
-		kbind_busy = 0;
+	/* Handle c, m, vv, and paste commands */
+	else if (strcmp(comm[0], "c") == 0 || strcmp(comm[0], "m") == 0
+	|| strcmp(comm[0], "vv") == 0 || strcmp(comm[0], "paste") == 0) {
+		if (handle_copy_move_cmds(&comm) != 0)
+			return FUNC_SUCCESS;
 	}
 
 	/*         ############# (UN)TRASH ##################     */

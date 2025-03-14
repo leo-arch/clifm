@@ -642,7 +642,7 @@ extern time_t curdir_mtime;
 #define SET_ERROR_PTR (term_caps.unicode == 1 ? ERROR_PTR_STR_U : ERROR_PTR_STR)
 */
 
-#define UNSET  (-1)
+#define UNSET (-1)
 
 /* Macros for the update_autocmd_opts() function */
 #define AC_COLOR_SCHEME  0
