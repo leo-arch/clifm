@@ -1440,7 +1440,7 @@ c: Stop paging (printing remaining files)\n"
 \n  -b, --bookmarks-file=FILE\t Set an alternative bookmarks file\
 \n  -c, --config-file=FILE\t Set an alternative configuration file\
 \n  -D, --config-dir=DIR\t\t Set an alternative configuration directory\
-\n  -e, --no-eln\t\t\t Do not print ELNs (entry list numbers)\
+\n  -e, --no-eln\t\t\t Do not print ELNs (Entry List Numbers)\
 \n  -E, --eln-use-workspace-color\t ELNs use the current workspace color\
 \n  -f, --dirs-first\t\t List directories first (default)\
 \n  -F, --no-dirs-first\t\t Do not list directories first\
@@ -1467,7 +1467,7 @@ on an empty line\
 \n  -w, --workspace=NUM\t\t Start in the workspace NUM\
 \n  -x, --no-ext-cmds\t\t Disallow the use of external commands\
 \n  -y, --light-mode\t\t Run in light mode\
-\n  -z, --sort=METHOD\t\t Sort files by METHOD (see the manpage)"
+\n  -z, --sort=METHOD\t\t Sort files by METHOD (for available methods see the manpage)"
 
 #define LONG_OPTIONS_A "\
 \n      --bell=STYLE\t\t Set terminal bell style to: 0 (none), 1 (audible), 2 (visible), 3 (flash)\
@@ -1490,11 +1490,11 @@ and paths\
 \n      --fnftab\t\t\t Use fnf to display completion matches\
 \n      --icons\t\t\t Enable icons\
 \n      --icons-use-file-color\t Icon colors follow file colors\
-\n      --int-vars\t\t Enable internal variables\
+\n      --int-vars\t\t Enable the use internal variables\
 \n      --kitty-keys\t\t Ask the terminal to enable the kitty keyboard protocol\
 \n      --list-and-quit\t\t List files and quit\
 \n      --ls\t\t\t Short for --list-and-quit\
-\n      --lscolors\t\t Read file colors from LS_COLORS or LSCOLORS (BSD style)\
+\n      --lscolors\t\t Read file colors from LS_COLORS or LSCOLORS (FreeBSD style)\
 \n      --max-dirhist=NUM\t\t Maximum number of visited directories to recall\
 \n      --max-files=NUM\t\t List only up to NUM files\
 \n      --mimelist-file=FILE\t Set FILE as Lira's configuration file\
@@ -1523,9 +1523,9 @@ and paths\
 \n      --no-warning-prompt\t Disable the warning prompt\
 \n      --no-welcome-message\t Disable the welcome message\
 \n      --only-dirs\t\t List only directories and symbolic links to directories\
-\n      --open=FILE\t\t Open FILE (via Lira) and exit\
+\n      --open=FILE\t\t Open FILE (using Lira) and exit\
 \n      --opener=APPLICATION\t Use APPLICATION as file opener (instead of Lira, \
-our builtin opener)\
+the builtin opener)\
 \n      --pager-view=MODE\t\t How to list files in the pager (auto, long, short)\
 \n      --physical-size\t\t Display physical file sizes (disk usage) rather than logical sizes (apparent size)\
 \n      --preview=FILE\t\t Display a preview of FILE (via Shotgun) and exit\
@@ -1551,10 +1551,8 @@ PropFields in the config file)\
 \n      --stat-full FILE...\t Run the 'pp' command on FILE(s) and exit\
 \n      --stdtab\t\t\t Force the use of the standard tab completion mode (readline)\
 \n      --time-style=STYLE\t Time/date style used in long view (see TimeStyle in the config file)\
-\n      --trash-as-rm\t\t The 'r' command runs 'trash' instead of \
-rm(1) to prevent accidental deletions\
-\n      --unicode\t\t\t Unicode decorations are used if Unicode support is detected. \
-Use this option to force Unicode decorations.\
+\n      --trash-as-rm\t\t The 'r' command moves files to the trash instead of removing them\
+\n      --unicode\t\t\t Force the use of Unicode decorations\
 \n      --virtual-dir-full-paths\t Files in virtual directories are listed as full paths instead of target base names\
 \n      --virtual-dir=PATH\t Absolute path to a directory to be used as virtual directory\
 \n      --vt100\t\t\t Run in vt100 compatibility mode\n"
@@ -1579,9 +1577,9 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  alias              Manage aliases\n\
  ao, auto-open      Set auto-open on/off\n\
  auto               Set an autocommand for the current directory\n\
- b, back            Go back in the directory history list\n\
+ b, back            Change to the previously visited directory\n\
  bb, bleach         Sanitize non-ASCII filenames\n\
- bd                 Go back to a parent directory\n\
+ bd                 Change to a parent directory\n\
  bl                 Create symbolic links in bulk\n\
  bm, bookmarks      Manage bookmarks\n\
  br, bulk           Rename files in bulk\n\
@@ -1597,9 +1595,9 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  ds, desel          Deselect files\n\
  exp                Export filenames to a temporary file\n\
  ext                Set external/shell commands on/off\n\
- f, forth           Go forth in the directory history list\n\
+ f, forth           Change to the next visited directory\n\
  fc                 Set the file counter on/off\n\
- ff, dirs-first     Toggle list-directories-first on/off\n\
+ ff, dirs-first     Toggle list-directories-first\n\
  ft, filter         Set a file filter\n\
  fz                 Display recursive directory sizes (long view only)\n\
  hh, hidden         Toggle hidden-files\n\
@@ -1736,7 +1734,7 @@ b | Shift+left | Alt+j   Go back in the directory history list\n\
 f | Shift+right | Alt+k  Go forth in the directory history list\n\
 .. | Shift+up | Alt+u    Change to the parent directory\n\
 bd media                 Change to the parent directory matching 'media'\n\
-j <TAB> | dh <TAB>       Navigate the directory history list\n\
+j <TAB> | dh <TAB>       Browse the directory history list\n\
 j xproj                  Jump to the best ranked directory matching 'xproj'\n\
 bm | b:<TAB> | Alt+b     List bookmarks\n\
 bm mybm | b:mybm         Change to the bookmark named 'mybm'\n\
@@ -1805,8 +1803,8 @@ gg              Run the pager (plugin)\n\
 auto            Add an autocommand to the current directory\n\
 config | F10    View/edit the configuration file\n\
 mm edit | F6    Change default opening applications\n\
-kb edit | F9    Edit keybindings\n\
 view edit | F7  Change default previewing applications\n\
+kb edit | F9    Edit keybindings\n\
 mm info 12      Get MIME information for the file whose ELN is 12\n\
 Alt+Tab         Toggle the disk usage analyzer mode\n\
 cs              Manage color schemes\n\
