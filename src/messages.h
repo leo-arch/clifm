@@ -110,7 +110,7 @@ and regular options (set via either the command line or the configuration file).
     auto ft=.*\\.pdf$\n\
     auto cs=nord\n\
     auto st=size\n\
-- Unset the files filter and the color scheme, and change sort to blocks\n\
+- Unset the file filter and the color scheme, and change sort to blocks\n\
     auto ft=,cs=,st=blocks\n\
 - Unset all temporary options previously set for the current directory\n\
     auto unset\n\
@@ -125,7 +125,7 @@ There are two ways to set autocommands:\n\
 1) Example using the first method:\n\n\
 Edit the configuration file ('config' or F10) and add the following line:\n\n\
   autocmd /media/remotes/** fc=0,lm=1\n\n\
-This instructs Clifm to always disable the files counter and to run in\n\
+This instructs Clifm to always disable the file counter and to run in\n\
 light mode whenever you enter the '/media/remotes' directory (or any\n\
 subdirectory).\n\n\
 Note: To match only '/media/remotes' write \"/media/remotes\" instead,\n\
@@ -134,8 +134,8 @@ write \"/media/remotes/*\".\n\n\
 The following codes are used to control Clifm's settings:\n\n\
   Code | Description     | Example\n\
   cs     Color scheme      cs=nord\n\
-  fc     Files counter     fc=0\n\
-  ft     Files filter      ft=.*\\.pdf$\n\
+  fc     File counter      fc=0\n\
+  ft     File filter       ft=.*\\.pdf$\n\
   fz     Full dir size     fz=1\n\
   hf,hh  Hidden files      hf=0\n\
   lm     Light mode        lm=1\n\
@@ -267,7 +267,7 @@ save changes, and quit the editor (quit without saving to cancel the operation).
 \x1b[1mUSAGE\x1b[22m\n\
   colors"
 
-#define COLUMNS_USAGE "Toggle columned list of files on/off\n\n\
+#define COLUMNS_USAGE "Toggle columned file listing\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   cl, columns [on | off]"
 
@@ -1393,7 +1393,7 @@ c: Stop paging (printing remaining files)\n"
 \n -e       Force the use of the 'o/open' command to open files\
 \n -E       Force the use of 'cd' to change directories\
 \n -f       Display recursive directories sizes (long view mode only)\
-\n -F       Disable the files counter (directories)\
+\n -F       Disable the file counter (directories)\
 \n -g       Display file sizes in SI units (powers of 1000) instead of 1024\
 \n -G       Display physical file sizes (disk usage) instead of logical sizes (apparent size)\
 \n -h       Print this help and exit\
@@ -1504,11 +1504,11 @@ and paths\
 \n      --no-classify\t\t Do not append file type indicators\
 \n      --no-clear-screen\t\t Do not clear the screen when listing files\
 \n      --no-color\t\t Disable colors \
-\n      --no-columns\t\t Disable columned files listing\
+\n      --no-columns\t\t Disable columned file listing\
 \n      --no-dir-jumper\t\t Disable the directory jumper function\
 \n      --no-file-cap\t\t Do not check file capabilities when listing files\
 \n      --no-file-ext\t\t Do not check file extensions when listing files\
-\n      --no-files-counter\t Disable the files counter for directories\
+\n      --no-files-counter\t Disable the file counter for directories\
 \n      --no-follow-symlink\t Do not follow symbolic links when listing files (overrides -L and --color-links-as-target)\
 \n      --no-fzfpreview\t\t Disable file previews for tab completion (fzf mode only)\
 \n      --no-highlight\t\t Disable syntax highlighting\

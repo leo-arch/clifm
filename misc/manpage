@@ -287,7 +287,7 @@ Do not clear the screen before listing files.
 Disable colors.
 .TP
 \fB\-\-no\-columns\fR
-Disable columns when listing files (use a single column).
+Disable columned file listing (use a single column).
 .TP
 \fB\-\-no\-dir\-jumper\fR
 Disable the directory jumper function.
@@ -722,7 +722,7 @@ Unlike the shell \fBcd\fR(1) command, \fBclifm\fR's builtin \fIcd\fR function no
 Automatic file listing can be disabled by either setting \fIAutoLs\fR to "false" in the configuration file or running \fBclifm\fR with the \fI\-O\fR or \fI\-\-no\-autols\fR option.
 .TP
 .B cl, columns \fR[\fIon\fR, \fIoff\fR]
-Toggle columns.
+Toggle columned file listing.
 .TP
 .B cmd, commands
 Show this list of commands. A more convenient way of getting information about \fBclifm\fR commands is via the interactive help plugin (depends on \fIfzf\fR), by default bound to the "ihelp" action name.
