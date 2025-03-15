@@ -1690,7 +1690,7 @@ create_main_config_file(char *file)
 	    "# Set the color scheme.\n\
 ;ColorScheme=%s\n\n"
 
-	    "# Inform amount of files contained by a directories when listing files.\n\
+	    "# Display number of files contained by directories when listing files.\n\
 ;FilesCounter=%s\n\n"
 
 		"# How to list files: 0 = vertically (like ls(1) would), 1 = horizontally.\n\

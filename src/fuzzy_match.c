@@ -38,7 +38,7 @@
 #include "utf8.h"
 
 /* Three functions added to the utf8.h library */
-/* Return the amount of bytes needed to advance to the character next to S */
+/* Return the number of bytes needed to advance to the character next to S. */
 static int
 utf8nextcodepoint(const char *s)
 {

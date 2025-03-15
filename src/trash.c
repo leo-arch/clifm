@@ -48,7 +48,7 @@ xatoi, url_encode, xnmalloc, print_file_name */
 #include "spawn.h"      /* launch_execv */
 #include "xdu.h"        /* dir_size */
 
-/* Return the amount of currently trashed files. */
+/* Return the number of currently trashed files. */
 static size_t
 count_trashed_files(void)
 {

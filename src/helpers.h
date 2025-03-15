@@ -764,7 +764,7 @@ extern time_t curdir_mtime;
 #define E_SETSID   (1 << 4)
 #define E_MUTE     (E_NOSTDOUT | E_NOSTDERR)
 
-/* Amount of available suggestion strategies (a,b,c,e,f,h,j).
+/* Number of available suggestion strategies (a,b,c,e,f,h,j).
  * 'b' is deprecated (kept only for compatibility with old versions) */
 #define SUG_STRATS 7
 
@@ -1373,7 +1373,7 @@ struct fileinfo {
 	mode_t mode;   /* Store st_mode (for long view mode) */
 	mode_t type;   /* Store d_type value */
 	int dir;
-	int eln_n;     /* Amount of digits in ELN */
+	int eln_n;     /* Number of digits in ELN */
 	int exec;
 	int user_access; /* Read-exec for dirs and read for files */
 	int symlink;

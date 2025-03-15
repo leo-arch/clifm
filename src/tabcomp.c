@@ -897,7 +897,7 @@ ctrl-d:deselect-all,ctrl-t:toggle-all" : "",
 static inline size_t
 set_fzf_max_win_height(void)
 {
-	/* On some terminals, like lxterminal, urxvt, and vte, the amount
+	/* On some terminals, like lxterminal, urxvt, and vte, the number
 	 * of terminal lines is not properly detected when first running
 	 * the finder. So, let's update this value. */
 	static int first_run = 0;
@@ -1841,7 +1841,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	char *query = get_query_str(lw);
 
 	/* If not already defined (environment or config file), calculate the
-	 * height of the finder's window based on the amount of entries. This
+	 * height of the finder's window based on the number of entries. This
 	 * specifies how many entries will be displayed at once. */
 	size_t height = 0;
 

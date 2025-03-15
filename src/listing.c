@@ -157,7 +157,7 @@ struct wtrunc_t {
 };
 
 /* A version of the loop-unswitching optimization: move loop-invariant
- * conditions out of the loop to reduce the amount of conditions in each
+ * conditions out of the loop to reduce the number of conditions in each
  * loop pass.
  * In this case, instead of checking multiple loop-invariant conditions
  * in each pass of the main file listing loop (in list_dir()), we check
@@ -288,7 +288,7 @@ is_utf8_name(const char *name, size_t *bytes)
 	return is_utf8;
 }
 
-/* Return the amount of ASCII/UTF-8 characters in the string S. */
+/* Return the number of ASCII/UTF-8 characters in the string S. */
 static size_t
 count_utf8_chars(const char *s)
 {
@@ -723,7 +723,7 @@ post_listing(DIR *dir, const int reset_pager, const filesn_t excluded_files,
 	return FUNC_SUCCESS;
 }
 
-/* A basic pager for directories containing large amount of files.
+/* A basic pager for directories containing large number of files.
  * What's missing? It only goes downwards. To go backwards, use the
  * terminal scrollback function */
 static int
@@ -907,7 +907,7 @@ get_longest_filename(const filesn_t n, const size_t eln_len)
 	if (conf.long_view == 0 && conf.icons == 1 && conf.columned == 1)
 		longest.name_len += (size_t)ICON_LEN;
 
-	/* LONGEST.FC_LEN stores the amount of digits taken by the files counter of
+	/* LONGEST.FC_LEN stores the number of digits taken by the files counter of
 	 * the longest filename, provided it is a directory.
 	 * We use this to truncate filenames up to MAX_NAME_LEN + LONGEST.FC_LEN,
 	 * so that we can make use of the space taken by the files counter.
@@ -1160,7 +1160,7 @@ print_long_mode(size_t *counter, int *reset_pager, const int eln_len,
 		printf("... (%zd/%zd)\n", i, files);
 }
 
-/* Return the minimal amount of columns we can use for the current list
+/* Return the minimal number of columns we can use for the current list
  * of files. If possible, this number will be increased later by the
  * get_longest_per_col() function. */
 static size_t
@@ -1731,7 +1731,7 @@ get_longest_per_col(size_t *columns_n, filesn_t *rows, const filesn_t files_n)
 		*rows = 1;
 
 	/* Make enough room to hold columns information. We'll never get more
-	 * columns for the current file list than the amount of terminal columns. */
+	 * columns for the current file list than the number of terminal columns. */
 	size_t *longest_per_col = xnmalloc((size_t)term_cols + 1, sizeof(size_t));
 
 	/* Hold info about the previous columns state */
@@ -1778,7 +1778,7 @@ get_longest_per_col(size_t *columns_n, filesn_t *rows, const filesn_t files_n)
 		}
 
 		/* Count last column as well: If the number of files in the last
-		 * column is less than the amount of rows (in which case
+		 * column is less than the number of rows (in which case
 		 * LONGEST_NAME_LEN is bigger than zero), the longest name in this
 		 * column isn't taken into account: let's do it here. */
 		if (longest_name_len > 0) {
@@ -1982,7 +1982,7 @@ static void
 list_files_vertical(size_t *counter, int *reset_pager,
 	const int eln_len, size_t num_columns)
 {
-	/* Total amount of files to be listed. */
+	/* Total number of files to be listed. */
 	const filesn_t total_files = (conf.max_files != UNSET
 		&& (filesn_t)conf.max_files < files)
 		? (filesn_t)conf.max_files : files;
@@ -2729,7 +2729,7 @@ list_dir_light(const int autocmd_ret)
 	if (conf.columned == 1 || conf.long_view == 1)
 		get_longest_filename(n, (size_t)eln_len);
 
-	/* Get possible amount of columns for the dirlist screen */
+	/* Get possible number of columns for the dirlist screen */
 	columns_n = (conf.pager_view == PAGER_AUTO
 		&& (conf.columned == 0 || conf.long_view == 1)) ? 1 : get_columns();
 
@@ -3496,7 +3496,7 @@ list_dir(void)
 	|| conf.pager_view != PAGER_AUTO)
 		get_longest_filename(n, (size_t)eln_len);
 
-	/* Get amount of columns needed to print files in CWD  */
+	/* Get number of columns needed to print files in CWD  */
 	columns_n = (conf.pager_view == PAGER_AUTO
 		&& (conf.columned == 0 || conf.long_view == 1)) ? 1 : get_columns();
 

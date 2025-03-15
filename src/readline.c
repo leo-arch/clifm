@@ -440,7 +440,7 @@ END:
 }
 
 /* Unicode aware implementation of readline's rl_expand_prompt()
- * Returns the amount of terminal columns taken by the last prompt line,
+ * Returns the number of terminal columns taken by the last prompt line,
  * 0 if STR is NULL or empty, and FALLBACK_PROMPT_OFFSET in case of error
  * (malformed prompt: either RL_PROMPT_START_IGNORE or RL_PROMPT_END_IGNORE
  * is missing). */
@@ -492,7 +492,7 @@ xrl_expand_prompt(char *str)
 	return count;
 }
 
-/* Get amount of visible chars in the last line of the prompt (STR). */
+/* Get the number of visible chars in the last line of the prompt (STR). */
 static int
 get_prompt_offset(char *str)
 {

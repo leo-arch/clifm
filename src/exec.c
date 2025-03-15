@@ -1851,7 +1851,7 @@ run_log_cmd(char **args)
 /* Update the current list of files if the modification time of the current
  * directory changed and if the number of files differ. Sometimes, processes
  * create temporary files (changing modification time) that are immediately
- * deleted (resulting in the same amount of files), in which case there is no
+ * deleted (resulting in the same number of files), in which case there is no
  * need to update the list of files (this happens for example with 'git pull',
  * or with a command along the lines of 'touch file && rm file'). */
 static void

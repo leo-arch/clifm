@@ -33,7 +33,7 @@
 #define SPLIT_INTERFACE_COLORS 0
 #define SPLIT_FILETYPE_COLORS  1
 
-/* Max amount of custom color variables in the color scheme file. */
+/* Max number of custom color variables in the color scheme file. */
 #define MAX_DEFS 128
 
 /* Macros for the set_shades function. */

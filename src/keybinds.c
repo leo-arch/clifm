@@ -2501,7 +2501,7 @@ rl_quit(int count, int key)
 }
 
 #ifndef _NO_PROFILES
-/* Get current profile and total amount of profiles and store this info
+/* Get current profile and total number of profiles and store this info
  * in pointers CUR and TOTAL. */
 static void
 get_cur_prof(int *cur, int *total)

@@ -747,7 +747,7 @@ If mounting a device, Clifm will change automatically to the corresponding\n\
 mountpoint.\n\n\
 To get information about a device, enter iELN. For example: 'i12'."
 
-#define MF_USAGE "Limit the amount of files listed on the screen to NUM \
+#define MF_USAGE "Limit the number of files listed on the screen to NUM \
 (valid range: >= 0). Use 'unset' to remove the files limit.\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   mf [NUM | unset]"
@@ -884,7 +884,7 @@ Note: Use the 'pc' command to edit files permissions."
     o 12\n\
 - Open the file whose ELN is 12 with vi\n\
     o 12 vi\n\
-  Note: If auto-open is enabled (default), 'o' could be just omitted\n\
+  Note: If auto-open is enabled (default), 'o' can be omitted\n\
     12\n\
     12 vi"
 
@@ -1291,7 +1291,7 @@ The 'paste' command is equivalent to 'c' and exists only for semantic\n\
 reasons. For example, if you want to copy selected files to the current\n\
 directory, it makes sense to write 'paste sel'.\n\n\
 By default, both the 'c' and 'm' commands run cp(1)/mv(1) interactively\n\
-(-i), i.e. prompting before overwriting a file. To run non-interactivelly\n\
+(-i), i.e. prompting before overwriting a file. To run non-interactively\n\
 instead, use the -f,--force parameter (see the examples below). You can\n\
 also permanently run in non-interactive mode using the cpCmd/mvCmd options\n\
 in the configuration file ('config' or F10).\n\n\
@@ -1676,7 +1676,7 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  Alt+r              Change to the root directory\n\
  Alt+e, Home        Change to the home directory\n\
  Alt+u, Shift+Up    Change to the parent directory\n\
- Alt+j, Shift+Left  Change to previous visited directory\n\
+ Alt+j, Shift+Left  Change to previously visited directory\n\
  Alt+k, Shift+Right Change to next visited directory\n\
  Alt+p              Change to the pinned directory\n\
  Alt+v              Toggle prepend sudo\n\
@@ -1730,8 +1730,8 @@ NAVIGATION\n\
 ----------\n\
 /etc                     Change the current directory to '/etc'\n\
 5                        Change to the directory whose ELN is 5\n\
-b | Shift+left | Alt+j   Go back in the directory history list\n\
-f | Shift+right | Alt+k  Go forth in the directory history list\n\
+b | Shift+left | Alt+j   Change to the previously visited directory\n\
+f | Shift+right | Alt+k  Change to the next visited directory\n\
 .. | Shift+up | Alt+u    Change to the parent directory\n\
 bd media                 Change to the parent directory matching 'media'\n\
 j <TAB> | dh <TAB>       Browse the directory history list\n\

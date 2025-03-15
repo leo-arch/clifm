@@ -687,7 +687,7 @@ This builtin bulk rename function won\'t deal with deletions, replacements, file
 \fBc\fR, \fBm\fR, \fBmd\fR, \fBr\fR
 Short for the following commands respectively: \fIcp\ \-iRp\fR, \fImv\ \-i\fR, \fImkdir\ \-p\fR, and \fIrm\fR (for files) or \fIrm\ \-r\fR (for directories).
 .sp
-By default, the \fIc\fR, \fIm\fR, and \fIr\fR commands ask for confirmation before operations. Since this might sometimes be quite intrusive (specially when operating on large amount of files), it is possible to turn interactivity off in two different ways:
+By default, the \fIc\fR, \fIm\fR, and \fIr\fR commands ask for confirmation before operations. Since this might sometimes be quite intrusive (specially when operating on large number of files), it is possible to turn interactivity off in two different ways:
 
   a) For the current command only: via the \fI\-f\fR, \fI\-\-force\fR switch. Example: \fIc \-f sel\fR, \fIm \-f sel\fR, or \fIr \-f *\fR.
 
@@ -787,7 +787,7 @@ Toggle the ability external commands.
 It works just like the \fIback\fR function, but it goes forward in the history record. Of course, you can use \fIf\ hist\fR, \fIf\ h\fR, and \fIf\ !ELN\fR.
 .TP
 .B  fc \fR[\fIon\fR, \fIoff\fR, \fIstatus\fR]
-By default, \fBclifm\fR prints the amount of files contained by listed directories next to the directory name. However, since this is an expensive feature, it might be desirable (for example, when listing files in a remote machine) to disable this feature. Use the \fIoff\fR subcommand to disable it. To permanently disable it, use the \fIFilesCounter\fR option in the configuration file.
+By default, \fBclifm\fR prints the number of files contained by listed directories next to the directory name. However, since this is an expensive feature, it might be desirable (for example, when listing files in a remote machine) to disable this feature. Use the \fIoff\fR subcommand to disable it. To permanently disable it, use the \fIFilesCounter\fR option in the configuration file.
 .TP
 .B ff, dirs\-first \fR[\fIon\fR, \fIoff\fR, \fIstatus\fI]
 Toggle list directories first.
@@ -1136,7 +1136,7 @@ With no parameter, just run the pager (\fIAlt+0\fR is also available).
 .sp
 If set to \fIon\fR, run the pager whenever the list of files does not fit on the screen.
 .sp
-Set it to any positive integer greater than 1 to run the pager whenever the amount of files in the current directory is greater than or equal to this value, say 1000 (0 amounts to \fIoff\fR and 1 to \fIon\fR).
+Set it to any positive integer greater than 1 to run the pager whenever the number of files in the current directory is greater than or equal to this value, say 1000 (0 amounts to \fIoff\fR and 1 to \fIon\fR).
 .sp
 Set to \fIonce\fR to run the pager only once (overwriting whatever was its previous value).
 .sp
@@ -1948,7 +1948,7 @@ Default values for this option are:
 .TP
 Consult \fBfzf\fR(1) for more information.
 .TP
-If set neither in \fIFzfTabOptions\fR nor in \fBFZF_DEFAULT_OPTS\fR (in this order), the height of the fzf window is set to the default value: 40% of the current terminal amount of line/rows.
+If set neither in \fIFzfTabOptions\fR nor in \fBFZF_DEFAULT_OPTS\fR (in this order), the height of the fzf window is set to the default value: 40% of the current terminal number of line/rows.
 .TP
 To use fzf global values (defined in \fBFZF_DEFAULT_OPTS\fR), set \fIFzfTabOptions\fR to \fInone\fR.
 .TP
@@ -1972,7 +1972,7 @@ ELNs and \fBELN ranges\fR will be also automatically expanded, provided the corr
 .TP
 Since ranges can be a bit tricky, tab completion is available to make sure this range actually includes the desired filenames.
 .TP
-If this feature somehow conflicts with the command you want to run, say, 'chmod 644 ...', because the current amount of files is equal or larger than 644 (in which case \fBclifm\fR will expand that number), then you can simply run the command as external: ';chmod 644 ...'
+If this feature somehow conflicts with the command you want to run, say, 'chmod 644 ...', because the current number of files is equal or larger than 644 (in which case \fBclifm\fR will expand that number), then you can simply run the command as external: ';chmod 644 ...'
 .TP
 Tab completion for commands, paths, users home directory, workspaces, wildcards\fB*\fR, file types\fB*\fR, environment variables, bookmarks, profiles, color schemes, file tags, commands history, directory history (via the \fIjump\fR command), remote resources, sort methods, ranges\fB*\fR, the 'sel' keyword\fB*\fR, trashed files\fB*\fR, plus the deselect\fB*\fR and the open\-with commands (\fIow\fR) is also available. To make use of the bookmarks completion, make sure to specify some name for your bookmarks, since these names are used by the completion function.
 .TP
@@ -2793,7 +2793,7 @@ If navigating the filesystem, you can quickly go back to the virtual directory u
 .sp
 The two most time consuming features are:
 
- \fB1)\fR The files counter, used to print the amount of files contained by listed directories. Disabling this option produces a nice performance boost.
+ \fB1)\fR The files counter, used to print the number of files contained by listed directories. Disabling this option produces a nice performance boost.
 
  \fB2)\fR In normal mode, \fBfstatat\fR(3) is used to gather information about listed files. Since this function, especially when executed hundreds (and even thousands) of times, is quite time consuming, the \fIlight mode\fR was implemented as an alternative listing process omitting all calls to this function (this does not apply, however, to the long view: since we need to display files information, \fBfstatat\fR(3) is required).
 .sp
@@ -2805,7 +2805,7 @@ When running in light mode, however, a few features are lost:
 .sp
  3. The marker for selected files (*) is lost as well: to keep track of selected files and thus recognize them in the current list of files, we make use of files device and inode number, which is provided by \fBfstatat(3)\fR.
 .sp
-Besides these two features, a few more things can be disabled to get some extra speed (though perhaps unnoticeable): icons (if enabled), columns, colors, and, if already running without colors, file type indicators. Because listing lots of files could be expensive and time consuming, you can also try to limit the amount of files printed for each visited directory (see the \fImf\fR command above).
+Besides these two features, a few more things can be disabled to get some extra speed (though perhaps unnoticeable): icons (if enabled), columns, colors, and, if already running without colors, file type indicators. Because listing lots of files could be expensive and time consuming, you can also try to limit the number of files printed for each visited directory (see the \fImf\fR command above).
 .sp
 Despite the above, however, it is important to bear in mind that listing speed does not only depend on the program\'s code and enabled features, but also on the terminal emulator used. Old, basic terminal emulators like Xterm, Aterm, and the kernel builtin console are really slow compared to more modern ones like Urxvt, Lxterminal, ST, and Terminator, to name just a few.
 .sp
@@ -2970,19 +2970,19 @@ Same as \fBSHLVL\fR, but specific to \fBclifm\fR.
 If \fINotifications\fR is set to \fIfalse\fR for the current prompt, the following variables are exported to the environment to be used, if needed, by your custom prompt:
 .TP
 .B CLIFM_STAT_SEL
-Current amount of selected files
+Current number of selected files
 .TP
 .B CLIFM_STAT_TRASH
-Current amount of trashed files
+Current number of trashed files
 .TP
 .B CLIFM_STAT_ERROR_MSGS
-Current amount of error messages
+Current number of error messages
 .TP
 .B CLIFM_STAT_WARNING_MSGS
-Current amount of warning messages
+Current number of warning messages
 .TP
 .B CLIFM_STAT_NOTICE_MSGS
-Current amount of notice messages
+Current number of notice messages
 .TP
 .B CLIFM_STAT_WS
 Current workspace number

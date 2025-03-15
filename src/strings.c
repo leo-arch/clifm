@@ -867,7 +867,7 @@ init_quoted_words(void)
  * expansion of the 'sel' keyword, the index 2 points now to a selected file.
  *
  * This function updates quoted word indices taking into account the starting
- * point, i.e. the word after the expandable expression (START), and the amount
+ * point, i.e. the word after the expandable expression (START), and the number
  * of actually expanded fields (N). */
 static void
 update_quoted_words_index(const size_t start, const size_t added_items)
@@ -1460,7 +1460,7 @@ expand_tags(char ***substr)
 
 	for (i = 0; i < ntags; i++) {
 		const size_t tn = expand_tag(substr, tag_index[i]);
-		/* TN is the amount of files tagged as SUBSTR[TAG_INDEX[I]]
+		/* TN is the number of files tagged as SUBSTR[TAG_INDEX[I]]
 		 * Let's update the index of the next tag expression using this
 		 * value: if the next tag expression was at index 2, and if
 		 * the current tag expression was expanded to 3 files,
@@ -1665,7 +1665,7 @@ insert_fields(char ***dst, char ***src, const size_t i, size_t *num)
 
 	char **s = *src;
 
-	/* 1. Get amount of fields in SRC */
+	/* 1. Get number of fields in SRC */
 	size_t sn;
 	for (sn = 0; s[sn]; sn++);
 
@@ -1722,7 +1722,7 @@ eln_expand(char ***substr, const size_t i)
 
 	/* Because of should_expand_eln(), which is called immediately before this
 	 * function, it is guaranteed that NUM won't over/under-flow:
-	 * NUM is > 0 and <= the amount of listed files (and this latter is
+	 * NUM is > 0 and <= the number of listed files (and this latter is
 	 * never bigger than FILESN_MAX). */
 	const filesn_t j = num - 1;
 
@@ -2320,7 +2320,7 @@ check_ranges(char ***substr, int **range_array)
 
 /* Expand a range of numbers given by STR. It will expand the range
  * provided that both extremes are numbers, bigger than zero, equal or
- * smaller than the amount of files currently listed on the screen, and
+ * smaller than the number of files currently listed on the screen, and
  * the second (right) extreme is bigger than the first (left). Returns
  * an array of int's with the expanded range or NULL if one of the
  * above conditions is not met. */

@@ -674,7 +674,7 @@ get_user_groups(const char *name, const gid_t gid, int *ngroups)
 		free(g);
 		return (gid_t *)NULL;
 	}
-	if (NGROUPS_MAX > n) /* Reduce array to actual amount of groups (N) */
+	if (NGROUPS_MAX > n) /* Reduce array to actual number of groups (N) */
 		g = xnrealloc(g, (size_t)n, sizeof(g));
 
 #elif defined(__linux__)
@@ -1989,7 +1989,7 @@ get_sel_files(void)
 	if (sel_n > 0)
 		set_sel_devino();
 
-	/* If previous and current amount of sel files don't match (mostly
+	/* If previous and current number of sel files don't match (mostly
 	 * because some selected files were removed), recreate the selections
 	 * file to reflect the current state. */
 	if (selnbk != sel_n)

@@ -528,7 +528,7 @@ get_app(const char *mime, const char *filename)
 }
 
 /* Import MIME associations from the system and save them into FILE.
- * Returns the amount of associations found, if any, or -1 in case of error
+ * Returns the number of associations found, if any, or -1 in case of error
  * or no association found */
 static int
 mime_import(char *file)
@@ -712,7 +712,7 @@ get_basename(char *file_path)
 
 /* Get user input for the 'open with' function.
  * NUM is a pointer to an integer storing the item selected by the user.
- * MAX is the amount of available items. */
+ * MAX is the number of available items. */
 static int
 get_user_input(const size_t max)
 {

@@ -454,7 +454,7 @@ calculate_suggestion_lines(int *baej, const size_t suggestion_len)
 	if (conf.highlight == 0 && rl_point < rl_end)
 		cucs += (size_t)(rl_end - rl_point - 1);
 
-	/* slines: amount of lines we need to print the suggestion, including
+	/* slines: number of lines we need to print the suggestion, including
 	 * the current line. */
 	size_t slines = 1;
 
@@ -621,7 +621,7 @@ print_suggestion(const char *str, size_t offset, char *color)
 
 	restore_cursor_position(slines);
 
-	/* Store the amount of lines taken by the current command line (plus the
+	/* Store the number of lines taken by the current command line (plus the
 	 * suggestion's length) to be able to correctly remove it later (via the
 	 * clear_suggestion function). */
 	suggestion.nlines = slines;

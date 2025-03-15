@@ -96,12 +96,12 @@ free_xdu_hardlinks(void)
  * values in the INFO struct.
  *
  * The total size in bytes is stored in the SIZE field of the struct, and
- * the total amount of used blocks in the BLOCKS field.
+ * the total number of used blocks in the BLOCKS field.
  * Translate this info into apparent and physical sizes of DIR as follows:
  *   apparent = info->size (same as 'du -s -B1 --apparent-size')
  *   physical = info->blocks * S_BLKSIZE (same as 'du -s -B1')
  *
- * The amount of directories, symbolic links, and other file types is stored
+ * The number of directories, symbolic links, and other file types is stored
  * in the DIRS, LINKS, and FILES fields respectively.
  * FIRST_LEVEL must be always 1 when calling this function (this value will
  * be zero whenever the function calls itself recursively).
