@@ -104,7 +104,6 @@ _clifm ()
         --max-files
         --mimelist-file
         --mnt-udisk2
-        --no-apparent-size
         --no-bold
         --no-cd-auto
         --no-classify

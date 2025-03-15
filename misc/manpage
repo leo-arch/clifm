@@ -261,9 +261,6 @@ Set \fIFILE\fR as Lira\'s configuration file. See the \fBFILE OPENER\fR section 
 \fB\-\-mnt\-udisks2\fR
 Use \fIudisks2\fR instead of \fIudevil\fR (default) for the \fImedia\fR command.
 .TP
-\fB\-\-no\-apparent\-size\fR
-Display physical file sizes (actual device usage) instead of used bytes (apparent size). Equivalent to \fI--physical-size\fR.
-.TP
 \fB\-\-no\-bold\fR
 Disable bold colors (applies to all color schemes).
 .TP
@@ -356,7 +353,7 @@ Use APPLICATION (e.g.: \fIrifle\fR or \fIxdg\-open\fR) as file opener/launcher (
 List files in the pager according to MODE. Possible values: \fIauto\fR (use the current listing mode - this is the default), \fIlong\fR (list files in long view), and \fIshort\fR (list files in short view).
 .TP
 \fB\-\-physical\-size\fR
-Same as \fI\-\-no\-apparent\-size\fR.
+Display physical file sizes (device usage) instead of logical sizes (apparent size).
 .TP
 \fB\-\-preview\fR=\fI\,FILE\/\fR
 Display a preview of \fIFILE\fR (via \fIShotgun\fR) and exit. Use \fI\-\-shotgun\-file\fR to set an alternative configuration file. Consult the \fBSHOTGUN\fR section below for more information.

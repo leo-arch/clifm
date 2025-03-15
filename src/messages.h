@@ -1499,7 +1499,6 @@ and paths\
 \n      --max-files=NUM\t\t List only up to NUM files\
 \n      --mimelist-file=FILE\t Set FILE as Lira's configuration file\
 \n      --mnt-udisks2\t\t Use udisks2(1) instead of udevil(1) for the 'media' command\
-\n      --no-apparent-size\t Display physical file sizes (disk usage) rather than logical sizes (apparent size)\
 \n      --no-bold\t\t\t Disable bold colors (applies to all color schemes)\
 \n      --no-cd-auto\t\t Disable the autocd function\
 \n      --no-classify\t\t Do not append file type indicators\
@@ -1528,7 +1527,7 @@ and paths\
 \n      --opener=APPLICATION\t Use APPLICATION as file opener (instead of Lira, \
 our builtin opener)\
 \n      --pager-view=MODE\t\t How to list files in the pager (auto, long, short)\
-\n      --physical-size\t\t Same as --no-apparent-size\
+\n      --physical-size\t\t Display physical file sizes (disk usage) rather than logical sizes (apparent size)\
 \n      --preview=FILE\t\t Display a preview of FILE (via Shotgun) and exit\
 \n      --print-sel\t\t Keep the list of selected files in sight\n"
 
