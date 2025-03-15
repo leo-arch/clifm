@@ -405,7 +405,7 @@ Parameters passed to cp:    -a"
     pp DIR\n\n\
 Note: An exclamation mark (!) before directory sizes means that an\n\
 error ocurred while reading a subdirectory, so sizes may not be accurate\n\n\
-Note 2: Unlink 'p', 'pp' always follows symlinks to their target file."
+Note 2: Unlike 'p', 'pp' always dereferences symbolic links."
 
 #define FILE_SIZE_USAGE "File sizes/disk usage\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
@@ -429,26 +429,25 @@ Note 2: Unlink 'p', 'pp' always follows symlinks to their target file."
 
 #define FILE_PREVIEWS "\
 File previews are enabled by default if running in fzf mode.\n\n\
-To disable this feature run with '--no-fzfpreview' or set 'FzfPreview' to\n\
+To disable this feature, run with '--no-fzfpreview' or set 'FzfPreview' to\n\
 false in the configuration file.\n\n\
-Clifm runs in fzf mode if the fzf binary is found somewhere in your $PATH\n\
-('--fzftab' and 'TabCompletionMode' in the configuration file are also\n\
-available).\n\n\
+Clifm operates in fzf mode if the fzf binary is found in your $PATH.\n\
+You can also use '--fzftab' or 'TabCompletionMode' in the configuration file.\n\n\
 File previews are generated using a configuration file, which you can edit to\n\
-your liking running 'view edit' (or pressing F7).\n\n\
+your liking by running 'view edit' (or pressing F7).\n\n\
 Use the 'view' command to preview files in the current directory in full screen.\n\n\
-Prevent big files from generating a preview using the PreviewMaxSize option in\n\
+To prevent large files from generating a preview, use the PreviewMaxSize option in\n\
 the configuration file. For example: 'PreviewMaxSize=100M' (supported size\n\
 units: K, M, G, T; supported range: 1K-2047G). By default, there is no limit.\n\n\
-To know how to enable image previews run 'help image-previews'."
+To learn how to enable image previews run 'help image-previews'."
 
 #define IMAGE_PREVIEWS "\x1b[1mENABLING IMAGE PREVIEWS\x1b[22m\n\
 \n\
 Edit shotgun's configuration file ('view edit' or F7) and uncomment the\n\
-'clifmimg' lines from the top of the file.\n\
+'clifmimg' lines at the top of the file.\n\
 \n\
 This instructs Clifm to use the 'clifmimg' script (~/.config/clifm/clifmimg)\n\
-to generate image previews (for both tab completion -in fzf mode- and the\n\
+to generate image previews (for both tab completion in fzf mode and the\n\
 'view' command).\n\
 \n\
 By default, Clifm will try to guess the best previewing method. However, you\n\
@@ -475,7 +474,7 @@ If using the 'ueberzug' method, you must start Clifm via the 'clifmrun' script\n
   Note: See below for the list of available file type characters.\n\
 - Unset the current filter\n\
     ft unset\n\n\
-You can also filter files in the current directory using TAB\n\
+You can also filter files in the current directory using tab\n\
 completion via wildcards and the file type filter:\n\
 - List PDF files\n\
     /*.pdf<TAB>\n\
@@ -505,8 +504,8 @@ Available file type characters:\n\
 (2) Not available in light mode\n\n\
 Type '=<TAB>' to get the list of available file type filters.\n\n\
 Other ways of filtering files in the current directory:\n\n\
-* @<TAB>       List all MIME-types found\n\
-* @query<TAB>  MIME-type filter. E.g.: @pdf<TAB> to list all PDF files\n\
+* @<TAB>       List all MIME types found\n\
+* @query<TAB>  MIME type filter. E.g.: @pdf<TAB> to list all PDF files\n\
 * /query       Quick search function: consult the 'search' help topic\n\
 * Alt+.        Toggle hidden files\n\
 * Alt+,        Toggle list-only-dirs\n\
@@ -518,7 +517,7 @@ For example, to select all executable files, symbolic links, and image\n\
 files in the current directory:\n\n\
     s =x =l @image"
 
-#define FORTH_USAGE "Change to the next directory in the directory history list\n\n\
+#define FORTH_USAGE "Change to the next visited directory\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   f, forth [h, hist | clear | !ELN]\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
@@ -528,7 +527,7 @@ files in the current directory:\n\n\
     f hist (or 'dh')\n\
 - Change to the directory whose ELN in the list is 24\n\
     f !24\n\
-- Use the 'b' command to go backwards\n\
+- Use the 'b' command to change to the previously visited directory\n\
     b (also Alt+j or Shift+Left)"
 
 #define FZ_USAGE "Toggle recursive directory sizes (long view only)\n\n\
@@ -601,9 +600,8 @@ from the history list."
 \x1b[1mUSAGE\x1b[22m\n\
   icons [on, off]\n\n\
 Note: Depending on how the terminal renders icons, the apparent space\n\
-between icons and filenames may not be the most appropiate. This space\n\
-can be adjusted using the IconsGap option in the configuration file\n\
-(valid values: 0, 1, or 2)."
+between icons and filenames may not be optimal. This space can be adjusted\n\
+using the IconsGap option in the configuration file (valid values: 0, 1, or 2)."
 
 #define JUMP_USAGE "Change to a directory in the jump database (visited directories)\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
@@ -614,15 +612,15 @@ For information about the matching algorithm consult the manpage\n\n\
     j (or jl)\n\
 - List all entries matching \"str\"\n\
     jl str\n\
-- Jump (cd) to the best ranked directory matching \"bui\"\n\
+- Jump (cd) to the best-ranked directory matching \"bui\"\n\
     j bui\n\
   Note: Hit TAB to get a list of possible matches: 'j bui<TAB>'.\n\
 - If not enough, use multiple query strings\n\
     j ho bui\n\
   Note: Most likey, this will take you to '/home/build'\n\
-- Jump to the best ranked PARENT directory matching \"str\"\n\
+- Jump to the best-ranked PARENT directory matching \"str\"\n\
     jp str\n\
-- Jump to the best ranked CHILD directory matching \"str\"\n\
+- Jump to the best-ranked CHILD directory matching \"str\"\n\
     jc str\n\
 - Mark an entry as permanent\n\
     You can accomplish this in two different ways:\n\
@@ -633,11 +631,11 @@ For information about the matching algorithm consult the manpage\n\n\
     je (also 'j --edit')\n\
 - Open/edit the jump database using vim\n\
     j --edit vim\n\
-- Purge the database from non-existent directories\n\
+- Purge the database of non-existent directories\n\
     j --purge\n\
-  Note: To automatically purge the database from non-existent directories\n\
+  Note: To automatically purge the database of non-existent directories\n\
   at startup, set PurgeJumpDB to true in the configuration file.\n\
-- Purge the database from entries ranked below 100\n\
+- Purge the database of entries ranked below 100\n\
     j --purge 100\n\
   Note: To remove a specific entry, delete the corresponding line\n\
   from the database ('je' or 'j --edit'). Note that if the directory\n\
@@ -649,7 +647,7 @@ For information about the matching algorithm consult the manpage\n\n\
 When enabled, the long view displays information about the file a symbolic\n\
 link points to, rather than the link itself."
 
-#define KK_USAGE "Toggle max-filename-len on/off\n\n\
+#define KK_USAGE "Toggle max-filename-len\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   kk"
 
@@ -748,7 +746,7 @@ mountpoint.\n\n\
 To get information about a device, enter iELN. For example: 'i12'."
 
 #define MF_USAGE "Limit the number of files listed on the screen to NUM \
-(valid range: >= 0). Use 'unset' to remove the files limit.\n\n\
+(valid range: >= 0). Use 'unset' to remove the file limit.\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   mf [NUM | unset]"
 
@@ -850,7 +848,7 @@ Tab completion is available for explicit templates: simply type 'n file@<TAB>'.\
 (1) The templates directory is $CLIFM_TEMPLATES_DIR, $XDG_TEMPLATES_DIR,\n\
 or ~/Templates, in this precedence order."
 
-#define OC_USAGE "Interactively change files ownership\n\n\
+#define OC_USAGE "Interactively change file ownership\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   oc FILE...\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
@@ -873,7 +871,7 @@ If only a name/number is entered, it is taken as user.\n\n\
     :video (or \":981\")\n\
 - Change user to peter and primary group to audio\n\
     peter:audio (or \"1000:986\" or \"peter:986\" or \"1000:audio\")\n\n\
-Note: Use the 'pc' command to edit files permissions."
+Note: Use the 'pc' command to edit file permissions."
 
 #define OPEN_USAGE "Open a file\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
@@ -936,7 +934,7 @@ configuration file or the --pager-view command line option. Possibles values:\n\
 'short': List files in short view\n\n\
 Note: You can also try the 'gg' plugin (just enter 'gg')."
 
-#define PC_USAGE "Interactively edit files permissions\n\n\
+#define PC_USAGE "Interactively edit file permissions\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   pc FILE...\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
@@ -949,7 +947,7 @@ only shared permission bits will be set in the permissions template.\n\
 Bear in mind that the new permissions set will be applied to all files\n\
 passed as arguments.\n\n\
 Both symbolic and octal notation for the new permissions set are allowed.\n\n\
-Note: Use the 'oc' command to edit files ownership."
+Note: Use the 'oc' command to edit file ownership."
 
 #define PIN_USAGE "Pin a file or directory\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
@@ -1013,7 +1011,7 @@ whatever prompt you like."
 Note that, in case of symbolic links to directories, the 'p' command displays\n\
 information about the link target if the provided filename ends with a slash.\n\
 Otherwise, information about the link itself is displayed.\n\
-Unlike 'p', however, 'pp' always follows symlinks to their target file."
+Unlike 'p', however, 'pp' always dereferences symbolic links."
 
 #define PWD_DESC "Print the name of the current working directory\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
@@ -1071,10 +1069,10 @@ with 'd' in the directory named Documents\n\
     /[.-].*d$ -d Documents/\n\n\
 To perform a recursive search, use the -x modifier (file types not allowed)\n\
     /str -x /boot\n\n\
-To search for files by content instead of names use the rgfind plugin, bound\n\
+To search for files by content instead of names, use the rgfind plugin, bound\n\
 by default to the \"//\" action name. For example:\n\
     // content I\\'m looking for\n\n\
-Note: This plugin depends on fzf(1) and rg(1) (ripgrep)."
+Note: This plugin requires fzf and rg (ripgrep)."
 
 #define SECURITY_USAGE "Clifm offers three distinct security mechanisms:\n\n\
 1. Stealth Mode (Incognito/Private Mode): In this mode, no files are read\n\
@@ -1261,7 +1259,7 @@ Note: Use the 'trash' command to trash files. Try 'trash --help'."
     vv sel mydir\n\
 - Copy all PDF files to the directory whose ELN is 4 and rename them\n\
     vv *.pdf 4\n\n\
-Note: If DIR does not exist, it will be created"
+Note: If DIR does not exist, it will be created."
 
 #define VIEW_USAGE "Preview files in the current directory (requires fzf)\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
@@ -1280,7 +1278,7 @@ Note: If DIR does not exist, it will be created"
 Enter 'help file-previews' for more information."
 
 #define WRAPPERS_USAGE "c, m, and r commands are wrappers for \
-cp(1), mv(1), and rm(1) shell\ncommands respectively.\n\n\
+cp(1), mv(1), and rm(1) shell\ncommands, respectively.\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
 c  -> cp -iRp\n\
 m  -> mv -i\n\
@@ -1288,29 +1286,29 @@ r  -> rm ('rm -r' for directories) (1)\n\n\
 (1) By default, the user will asked for confirmation (set rmForce to true\n\
 in the configuration file to disable the confirmation prompt).\n\n\
 The 'paste' command is equivalent to 'c' and exists only for semantic\n\
-reasons. For example, if you want to copy selected files to the current\n\
-directory, it makes sense to write 'paste sel'.\n\n\
+reasons: if you want to copy selected files to the current directory, it\n\
+makes sense to write 'paste sel'.\n\n\
 By default, both the 'c' and 'm' commands run cp(1)/mv(1) interactively\n\
 (-i), i.e. prompting before overwriting a file. To run non-interactively\n\
-instead, use the -f,--force parameter (see the examples below). You can\n\
+instead, use the -f, --force parameter (see the examples below). You can\n\
 also permanently run in non-interactive mode using the cpCmd/mvCmd options\n\
 in the configuration file ('config' or F10).\n\n\
-Just as 'c' and 'm', the 'r' command accepts -f,--force as paramater to\n\
+Just as 'c' and 'm', the 'r' command accepts -f, --force as paramater to\n\
 prevent 'r' from prompting before removals. Set rmForce to true in the\n\
 configuration file to make this option permanent.\n\n\
-To use different parameters, run the corresponding utility, as usual.\n\
-Example: cp -abf ...\n\n\
+To use different parameters, run the corresponding utility as usual.\n\
+For example: cp -abf ...\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
-- Create a copy of file1 named file2\n\
+- Create a copy of 'file1' named 'file2'\n\
     c file1 file2\n\
-- Create a copy of file1 in the directory dir1 named file2\n\
+- Create a copy of 'file1' in the directory 'dir1' named 'file2'\n\
     c file1 dir1/file2\n\
 - Copy all selected files to the current directory\n\
     c sel\n\
   Note: If destination directory is omitted, the current directory is assumed.\n\
 - Copy all selected files to the current directory (non-interactively):\n\
     c -f sel\n\
-- Move all selected files to the directory named testdir\n\
+- Move all selected files to the directory named 'testdir'\n\
     m sel testdir\n\
 - Rename 'file1' as 'file_test'\n\
     m file1 file_test\n\
@@ -1325,7 +1323,7 @@ Example: cp -abf ...\n\n\
 - Remove all selected files (non-interactively)\n\
     r -f sel\n\
   Note: Use the 't' command to move files to the trash can. Try 't --help'.\n\n\
-To create files and directories you can use the 'md' and 'n' commands.\n\
+To create files and directories, you can use the 'md' and 'n' commands.\n\
 Try 'md --help' and 'n --help' for more details.\n\n\
 Use the 'vv' command to copy files to a directory and bulk rename them\n\
 at once. Try 'vv --help'.\n\n\
@@ -1341,7 +1339,7 @@ Use the 'l' command to create symbolic links, and 'le' to edit them."
     ws (or 'ws <TAB>')\n\
 - Switch to the first workspace\n\
     ws 1 (or Alt+1)\n\
-- Switch to worksapce named 'main'\n\
+- Switch to the workspace named 'main'\n\
     ws main\n\
 - Switch to the next workspace\n\
     ws +\n\
@@ -1352,17 +1350,17 @@ Use the 'l' command to create symbolic links, and 'le' to edit them."
 Note: Use the WorkspaceNames option in the configuration file to name\n\
 your workspaces."
 
-#define X_USAGE "Launch a new instance of Clifm on a new terminal window\n\n\
+#define X_USAGE "Launch a new instance of Clifm in a new terminal window\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   x, X [DIR]\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
 - Launch a new instance in the current directory\n\
     x\n\
-- Open the directory mydir in a new instance\n\
+- Open the directory 'mydir' in a new instance\n\
     x mydir\n\
 - Launch a new instance as root\n\
     X\n\n\
-Note: By default xterm(1) is used. Set your preferred terminal\n\
+Note: By default, xterm is used. Set your preferred terminal\n\
 emulator using the TerminalCmd option in the configuration file."
 
 /* Misc messages */
@@ -1407,7 +1405,7 @@ c: Stop paging (printing remaining files)\n"
 \n -L       Follow symbolic links when running in long view\
 \n -m       Enable fuzzy matching\
 \n -M       Disable colors\
-\n -n       Disable commands history\
+\n -n       Disable the command history\
 \n -N       Disable bold colors\
 \n -o PATH  Set a custom file opener (instead of the builtin Lira)\
 \n -O FILE  Open FILE (via Lira) and exit\
