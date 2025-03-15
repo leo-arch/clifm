@@ -60,7 +60,7 @@ While feature-rich, powerful, and extensible, its true strength lies in its desi
 
 For this reason, **clifm** does not need to be better: it's **just different!** :wink:
 
-To get started consult the [Getting started](#bulb-getting-started) section below.
+To get started, consult the [Getting started](#bulb-getting-started) section below.
 
 ---
 
@@ -195,7 +195,7 @@ If running on Linux, [binary packages](https://software.opensuse.org//download.h
 
 ### From source (Linux/BSD)
 
-**Note**: Dependencies are most likely already satisfied, but in any case consult the [dependencies section](https://github.com/leo-arch/clifm/wiki/Introduction#1-satisfy-dependencies).
+**Note**: Dependencies are most likely already satisfied, but, in any case, consult the [dependencies section](https://github.com/leo-arch/clifm/wiki/Introduction#1-satisfy-dependencies).
 
 ```sh
 git clone https://github.com/leo-arch/clifm.git
@@ -203,13 +203,13 @@ cd clifm
 sudo make install
 ```
 
-For more information/supported platforms consult the [installation page](https://github.com/leo-arch/clifm/wiki/Introduction#installation).
+For more information/supported platforms, consult the [installation page](https://github.com/leo-arch/clifm/wiki/Introduction#installation).
 
 ---
 
 ## :bulb: Getting started
 
-To start using **clifm** _you don't need to learn anything new_: the usual shell commands will just work. However, there is much more than just shell commands... \
+To start using **clifm**, _you don't need to learn anything new_: the usual shell commands will just work. However, there is much more than just shell commands... \
 ✓ The `help` command gives you a quick introduction to **clifm**: once in the **clifm** prompt, enter `help` or `?`. \
 ✓ Type `cmd<TAB>` to get the list of available commands and a brief description. \
 ✓ Type `help <TAB>` to get the list of available _help topics_. Select the one you want and press <kbd>Enter</kbd>. \
@@ -217,8 +217,8 @@ To start using **clifm** _you don't need to learn anything new_: the usual shell
 ✓ Press <kbd>F1</kbd> to access the full manpage and <kbd>F3</kbd> to access the keybindings help-page. \
 ✓ To get help about some specific command just type `CMD -h`. For instance, `s -h`.
 
-You can also take a look at some of both our [FAQ](https://github.com/leo-arch/clifm/wiki/FAQ) and these [basic usage-examples](https://github.com/leo-arch/clifm/wiki/Common-Operations#basic-usage-examples) to get you started. \
-For a complete description please consult our [Wiki](https://github.com/leo-arch/clifm/wiki).
+You can also take a look at some of both our [FAQ](https://github.com/leo-arch/clifm/wiki/FAQ), and these [basic usage-examples](https://github.com/leo-arch/clifm/wiki/Common-Operations#basic-usage-examples) to get you started. \
+For a complete description, please consult our [Wiki](https://github.com/leo-arch/clifm/wiki).
 
 > [!TIP]
 > Start **clifm** and just press a number (technically, an ELN or [Entry List Number](https://github.com/leo-arch/clifm/wiki/Common-Operations#elns)).
