@@ -173,8 +173,7 @@ Note 3: To set a temporary autocommand for the current directory use the\n\
 \x1b[1mUSAGE\x1b[22m\n\
   ao, auto-open [on | off | status]"
 
-#define BACK_USAGE "Change to the previous directory in the directory \
-history list\n\n\
+#define BACK_USAGE "Change to the previously visited directory\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   b, back [h, hist | clear | !ELN]\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
