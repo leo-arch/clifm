@@ -1,0 +1,3116 @@
+# Clifm File Manager.
+# Copyright (C) 2025 L. Abramovich
+# This file is distributed under the same license as the Clifm package.
+# L. Abramovich <leo.clifm@outlook.com>, 2025.
+msgid ""
+msgstr ""
+"Project-Id-Version: clifm\n"
+"Report-Msgid-Bugs-To: https://github.com/leo-arch/clifm/issues\n"
+"POT-Creation-Date: 2025-03-16 00:42-0300\n"
+"PO-Revision-Date: 2025-03-16 19:25-0300\n"
+"Last-Translator: L. Abramovich <leo.clifm@outlook.com>\n"
+"Language-Team: \n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "\tBlocks: %s%jd%s"
+msgstr "\tBloques: %s%jd%s"
+
+msgid "\tInode: %s%ju%s"
+msgstr "\tInodo: %s%ju%s"
+
+msgid "\tName: %s%s%s\n"
+msgstr "\tNombre: %s%s%s\n"
+
+msgid "\tName: %s%s%s %s%s ???%s\n"
+msgstr "\tNombre: %s%s%s %s%s ???%s\n"
+
+msgid "\tName: %s%s%s %s%s%s %s%s%s\n"
+msgstr "\tNombre: %s%s%s %s%s%s %s%s%s\n"
+
+msgid "\tName: %s%s%s %s%s%s %s%s%s (broken link)\n"
+msgstr "\tNombre: %s%s%s %s%s%s %s%s%s (enlace roto)\n"
+
+msgid ""
+"\n"
+" %sOrder\tVisits\tFirst\tLast\tRank\tDirectory%s\n"
+msgstr ""
+"\n"
+" %sOrden\tVisitas\tPrimero\tÚltimo\tRango\tDirectorio%s\n"
+
+msgid ""
+"\n"
+"%s: No pinned file\n"
+msgstr ""
+"\n"
+"%s: No hay archivo fijado\n"
+
+msgid ""
+"\n"
+"%s: No selected files\n"
+msgstr ""
+"\n"
+"%s: No hay archivos seleccionados\n"
+
+msgid ""
+"\n"
+"%sEnter 'q' to quit\n"
+"File(s) to be %s (e.g.: 1 2-6, or *):\n"
+msgstr ""
+"\n"
+"%sIntroduzca 'q' para salir\n"
+"Archivo(s) a ser %s (por ejemplo: 1 2-6, o *):\n"
+
+msgid ""
+"\n"
+"%sEnter 'q' to quit or 'e' to edit the selections file\n"
+"File(s) to be deselected (e.g.: 1 2-6, or *):\n"
+msgstr ""
+"\n"
+"%sIntroduzca 'q' para salir o 'e' para editar el archivo de selecciones\n"
+"Archivo(s) a ser deseleccionados (por ejemplo: 1 2-6, o *):\n"
+
+msgid ""
+"\n"
+"%sFile extensions%s\n"
+"\n"
+msgstr ""
+"\n"
+"%sExtensiones de archivo%s\n"
+"\n"
+
+msgid ""
+"\n"
+"%sInterface%s\n"
+"\n"
+msgstr ""
+"\n"
+"%sInterfaz%s\n"
+"\n"
+
+msgid ""
+"\n"
+"%sNOTE%s: Zstandard does not support compression of multiple files into a "
+"single compressed file. Instead, files will be compressed into multiple "
+"compressed files using their original filenames.\n"
+msgstr ""
+"\n"
+"%sNOTA%s: Zstandard no admite la compresión de múltiples archivos en un solo archivo comprimido. En su lugar, los archivos se comprimirán en múltiples archivos comprimidos utilizando sus nombres de archivo originales.\n"
+
+msgid ""
+"\n"
+"%sPrompt%s\n"
+"\n"
+msgstr ""
+"\n"
+"%sPrompt%s\n"
+"\n"
+
+msgid ""
+"\n"
+"%sProperties / Long view%s\n"
+"\n"
+msgstr ""
+"\n"
+"%sPropiedades / Vista larga%s\n"
+"\n"
+
+msgid ""
+"\n"
+"%sSyntax highlighting%s\n"
+"\n"
+msgstr ""
+"\n"
+"%sResaltado de sintaxis%s\n"
+"\n"
+
+msgid ""
+"\n"
+"%sTotal size: "
+msgstr ""
+"\n"
+"%sTamaño total: "
+
+msgid ""
+"\n"
+"%sTotal size: %s%s%s%s\n"
+msgstr ""
+"\n"
+"%sTamaño total: %s%s%s%s\n"
+
+msgid ""
+"\n"
+"%sUnmounted devices%s\n"
+"\n"
+msgstr ""
+"\n"
+"%sDispositivos sin montar%s\n"
+"\n"
+
+msgid ""
+"\n"
+"%sWorkspaces%s\n"
+"\n"
+msgstr ""
+"\n"
+"%sEspacios de trabajo%s\n"
+"\n"
+
+msgid ""
+"\n"
+"(%s1%s) Used only when ColorLinksAsTarget is enabled\n"
+msgstr ""
+"\n"
+"(%s1%s) Se utiliza solo cuando ColorLinksAsTarget está habilitado\n"
+
+msgid ""
+"\n"
+"Note: Bear in mind that clifm's keybindings take precedence over "
+"readline's.\n"
+"To modify readline's keybindings edit ~/.config/clifm/readline.clifm"
+msgstr ""
+"\n"
+"Nota: Ten en cuenta que las asignaciones de teclas de clifm tienen prioridad sobre las de readline.\n"
+"Para modificar las asignaciones de teclas de readline, edita ~/.config/clifm/readline.clifm"
+
+msgid ""
+"\n"
+"Ready to archive/compress selected files."
+msgstr ""
+"\n"
+"Listo para archivar/comprimir los archivos seleccionados."
+
+msgid ""
+"\n"
+"Ready to export selected filenames"
+msgstr ""
+"\n"
+"Listo para exportar los archivos seleccionados"
+
+msgid ""
+"\n"
+"The bracketed field is the code required to modify the color of the "
+"corresponding element in the color scheme file.\n"
+"\n"
+msgstr ""
+"\n"
+"El campo entre corchetes es el código requerido para modificar el color del elemento correspondiente en el archivo de esquema de colores.\n"
+"\n"
+
+msgid ""
+"\n"
+"Total rank: %d/%d\n"
+"Total visits: %d\n"
+msgstr ""
+"\n"
+"Clasificación total: %d/%d\n"
+"Visitas totales: %d\n"
+
+msgid ""
+"\n"
+"You can also edit 'settings.h' in the source code and recompile.\n"
+msgstr ""
+"\n"
+"También puedes editar 'settings.h' en el código fuente y recompilar.\n"
+
+msgid ""
+"\n"
+"jump: Purged %d %s\n"
+msgstr ""
+"\n"
+"jump: Purgado %d %s\n"
+
+msgid ""
+"\n"
+"jump: Purged %d invalid %s\n"
+msgstr ""
+"\n"
+"jump: Purgado %d %s inválido\n"
+
+msgid ""
+"      (dd)  Date (unset: using shades)\n"
+"              "
+msgstr ""
+"      (dd)  Fecha (no establecida: usando sombreados)\n"
+"              "
+
+msgid ""
+"      (dz)  Size (unset: using shades)\n"
+"              "
+msgstr ""
+"      (dz)  Tamaño (no establecido: usando sombreados)\n"
+"              "
+
+msgid "  Block size: %s%d%s"
+msgstr "  Tamaño de bloque: %s%d%s"
+
+msgid "  Device type: %s%ju,%ju%s\n"
+msgstr "  Tipo de dispositivo: %s%ju,%ju%s\n"
+
+msgid "  Gid: %s%u (%s)%s"
+msgstr "  Gid: %s%u (%s)%s"
+
+msgid "  IO Block: %s%jd%s\n"
+msgstr "  Bloque de E/S: %s%jd%s\n"
+
+msgid "  Uid: %s%u (%s)%s"
+msgstr "  Uid: %s%u (%s)%s"
+
+msgid " (not available in light mode: using %sname%s)\n"
+msgstr " (no disponible en modo ligero: usando %snombre%s)\n"
+
+msgid " (on LSCOLORS)"
+msgstr " (en LSCOLORS)"
+
+msgid " (on LS_COLORS)"
+msgstr " (en LS_COLORS)"
+
+msgid " (recursively)"
+msgstr " (de forma recursiva)"
+
+msgid " Auto-mount: %s\n"
+msgstr " Montaje automático: %s\n"
+
+msgid " Auto-unmount: %s\n"
+msgstr " Desmontaje automático: %s\n"
+
+msgid " Comment: %s\n"
+msgstr " Comentario: %s\n"
+
+msgid " Mount command: %s\n"
+msgstr " Comando de montaje: %s\n"
+
+msgid " Mounted: %s%s%s\n"
+msgstr " Montado: %s%s%s\n"
+
+msgid " Mountpoint: %s\n"
+msgstr " Punto de montaje: %s\n"
+
+msgid " Unmount command: %s\n"
+msgstr " Comando de desmontaje: %s\n"
+
+msgid ""
+"%d MIME association(s) imported from the system.\n"
+"File saved as '%s'\n"
+"Add these new associations to your mimelist file by running 'mm edit'.\n"
+msgstr ""
+"%d asociación(es) MIME importada(s) del sistema.\n"
+"Archivo guardado como '%s'\n"
+"Agrega estas nuevas asociaciones a tu archivo mimelist ejecutando 'mm edit'.\n"
+
+msgid "%d file(s) deselected\n"
+msgstr "%d archivo(s) deseleccionado(s)\n"
+
+msgid "%d file(s) selected\n"
+msgstr "%d archivo(s) seleccionado(s)\n"
+
+msgid "%d filename(s) bleached\n"
+msgstr "%d nombre(s) de archivo blanqueado(s)\n"
+
+msgid "%s %s (%s), by %s\n"
+msgstr "%s %s (%s), por %s\n"
+
+msgid ""
+"%s %s%s%s%s%s (%s)\n"
+"%s\n"
+"License %s\n"
+"Written by %s\n"
+msgstr ""
+"%s %s%s%s%s%s (%s)\n"
+"%s\n"
+"Licencia %s\n"
+"Escrito por %s\n"
+
+msgid "%s (error resolving link target)\n"
+msgstr "%s (error al resolver el objetivo del enlace)\n"
+
+msgid ""
+"%s A plus sign next rank values means that the corresponding directory is "
+"marked as permanent (it will not be removed).\n"
+msgstr ""
+"%s Un signo más junto a los valores de clasificación significa que el directorio correspondiente está marcado como permanente (no será eliminado).\n"
+
+msgid ""
+"%s An asterisk next rank values means that the corresponding directory will "
+"not be removed despite its rank, either because it was visited in the last "
+"24 hours, or because it is bookmarked, pinned, or currently active in some "
+"workspace.\n"
+msgstr ""
+"%s Un asterisco junto a los valores de clasificación significa que el directorio correspondiente no será eliminado a pesar de su clasificación, ya sea porque fue visitado en las últimas 24 horas, o porque está marcado como favorito, fijado o actualmente activo en algún espacio de trabajo.\n"
+
+msgid ""
+"%s Entries ranked below MinJumpRank (currently %d) will be removed at "
+"program exit.\n"
+msgstr ""
+"%s Las entradas con clasificación por debajo de MinJumpRank (actualmente %d) serán eliminadas al salir del programa.\n"
+
+msgid ""
+"%s First time access is displayed in days, while last time access is "
+"displayed in hours.\n"
+msgstr ""
+"%s La primera vez que se accede se muestra en días, mientras que la última vez en horas.\n"
+
+msgid ""
+"%s MinJumpRank is set to %d: entries will not be removed from the database "
+"(no matter their rank).\n"
+msgstr ""
+"%s MinJumpRank está establecido en %d: las entradas no serán eliminadas de la base de datos (sin importar su clasificación).\n"
+
+msgid ""
+"%s%s\n"
+"Enter '%c' to edit your bookmarks or '%c' to quit\n"
+"Choose a bookmark (by ELN, shortcut, or name):\n"
+msgstr ""
+"%s%s\n"
+"Introduzca '%c' para editar sus marcadores o '%c' para salir\n"
+"Elige un marcador (por ELN, atajo o nombre):\n"
+
+msgid "%s%s%s %s: Primary group set to %d (%s%s%s)\n"
+msgstr "%s%s%s %s: Grupo principal establecido en %d (%s%s%s)\n"
+
+msgid "%s%s%s %s: User set to %d (%s%s%s)\n"
+msgstr "%s%s%s %s: Usuario establecido en %d (%s%s%s)\n"
+
+msgid "%s%s%s (broken link)\n"
+msgstr "%s%s%s (enlace roto)\n"
+
+msgid "%s%s%s Running as root%s\n"
+msgstr "%s%s%s Ejecutando como root%s\n"
+
+msgid "%s%s%s is tagged as:\n"
+msgstr "%s%s%s está etiquetado como:\n"
+
+msgid "%s%s%s%s\n"
+msgstr "%s%s%s%s\n"
+
+msgid "%s%s%s: Succesfully mounted on %s\n"
+msgstr "%s%s%s: Montado con éxito en %s\n"
+
+msgid "%s%sColor%s (dg)  Group ID (e.g. %s%swheel%s)\n"
+msgstr "%s%sColor%s (dg)  ID de grupo (por ejemplo, %s%swheel%s)\n"
+
+msgid "%s%sColor%s (dt)  Timestamp mark (e.g. %sMay 25 22:08%sm%s)\n"
+msgstr "%s%sColor%s (dt)  Marca de timestamp (por ejemplo, %s25 de mayo 22:08%sm%s)\n"
+
+msgid "%s%sFile%s: %s\n"
+msgstr "%s%sArchivo%s: %s\n"
+
+msgid "%s%sSelection Box%s\n"
+msgstr "%s%sCaja de selección%s\n"
+
+msgid ""
+"%s%sTrashed files%s\n"
+"\n"
+msgstr ""
+"%s%sArchivos eliminados%s\n"
+"\n"
+
+msgid "%s/%s (%d%% free) %s %s\n"
+msgstr "%s/%s (%d%% libre) %s %s\n"
+
+msgid "%s: %d filenames(s) bleached\n"
+msgstr "%s: %d nombre(s) de archivo blanqueado(s)\n"
+
+msgid "%s: %d: Invalid ELN\n"
+msgstr "%s: %d: ELN no válido\n"
+
+msgid "%s: %s %s%s%s %s: Broken symbolic link\n"
+msgstr "%s: %s %s%s%s %s: Enlace simbólico roto\n"
+
+msgid "%s: %s failed to allocate %zux%zu bytes\n"
+msgstr "%s: %s no pudo asignar %zux%zu bytes\n"
+
+msgid ""
+"%s: %s.\n"
+"TIP: To edit the color scheme use the following environment variables: "
+"CLIFM_FILE_COLORS, CLIFM_IFACE_COLORS, and CLIFM_EXT_COLORS.\n"
+"Example:\n"
+"\n"
+"CLIFM_FILE_COLORS="di=31:ln=33:" CLIFM_IFACE_COLORS="el=35:fc=34:" "
+"CLIFM_EXT_COLORS=".c=1;33:.odt=4;35:" clifm\n"
+"\n"
+"Consult the manpage for more information.\n"
+msgstr ""
+"%s: %s.\n"
+"CONSEJO: Para editar el esquema de colores, use las siguientes variables de entorno: CLIFM_FILE_COLORS, CLIFM_IFACE_COLORS y CLIFM_EXT_COLORS.\n"
+"Ejemplo:\n"
+"\n"
+"CLIFM_FILE_COLORS="di=31:ln=33:" CLIFM_IFACE_COLORS="el=35:fc=34:" "
+"CLIFM_EXT_COLORS=".c=1;33:.odt=4;35:" clifm\n"
+"\n"
+"Consulte la página del manual para obtener más información.\n"
+
+msgid ""
+"%s: %s: %s\n"
+"Invalid authentication program (falling back to '%s')\n"
+msgstr ""
+"%s: %s: %s\n"
+"Programa de autenticación no válido (volviendo a '%s')\n"
+
+msgid "%s: %s: Cannot create tags directory. Tag function disabled\n"
+msgstr "%s: %s: No se puede crear el directorio de etiquetas. Función de etiquetas deshabilitada\n"
+
+msgid "%s: %s: Command not allowed in read-only mode\n"
+msgstr "%s: %s: Comando no permitido en modo de solo lectura\n"
+
+msgid "%s: %s: Invalid number\n"
+msgstr "%s: %s: Número no válido\n"
+
+msgid "%s: %s: No such ELN\n"
+msgstr "%s: %s: No existe ELN\n"
+
+msgid ""
+"%s: %s: Using a temporary directory for the Selection Box. Selected files "
+"will not be persistent across reboots.\n"
+msgstr ""
+"%s: %s: Se está utilizando un directorio temporal para la Caja de selección. Los archivos seleccionados no serán persistentes entre reinicios.\n"
+
+msgid ""
+"%s: '%c': Invalid file type filter. Run 'help file-filters' for more "
+"information\n"
+msgstr ""
+"%s: '%c': Filtro de tipo de archivo no válido. Ejecute 'help file-filters' para obtener más información\n"
+
+msgid ""
+"%s: '%s' (%s): Cannot open file\n"
+"Try 'APP FILE' or 'open FILE APP'\n"
+msgstr ""
+"%s: '%s' (%s): No se puede abrir el archivo\n"
+"Intente 'APP ARCHIVO' o 'open ARCHIVO APP'\n"
+
+msgid "%s: '%s' is not a shell. Setting SHELL to '%s'.\n"
+msgstr "%s: '%s' no es una shell. Estableciendo SHELL en '%s'.\n"
+
+msgid ""
+"%s: '%s': %s\n"
+"Falling back to the default configuration directory\n"
+msgstr ""
+"%s: '%s': %s\n"
+"Volviendo al directorio de configuración predeterminado\n"
+
+msgid ""
+"%s: '%s': %s.\n"
+"Cannot create temporary directory. Falling back to '%s'.\n"
+msgstr ""
+"%s: '%s': %s.\n"
+"No se puede crear el directorio temporal. Volviendo a '%s'.\n"
+
+msgid ""
+"%s: '%s': %s.\n"
+"Cannot validate shell. Falling back to '%s'.\n"
+msgstr ""
+"%s: '%s': %s.\n"
+"No se puede validar la shell. Volviendo a '%s'.\n"
+
+msgid ""
+"%s: '%s': %s. Trash function disabled. If needed, create the directories "
+"manually and restart %s.\n"
+"E.g.: mkdir -p ~/.local/share/Trash/{files,info}\n"
+msgstr ""
+"%s: '%s': %s. Función de papelera deshabilitada. Si es necesario, cree los directorios manualmente y reinicie %s.\n"
+"Ej.: mkdir -p ~/.local/share/Trash/{files,info}\n"
+
+msgid "%s: '%s': %s. Using default values.\n"
+msgstr "%s: '%s': %s. Utilizando valores predeterminados.\n"
+
+msgid "%s: '%s': Absolute path is required as argument\n"
+msgstr "%s: '%s': Se requiere la ruta absoluta como argumento\n"
+
+msgid ""
+"%s: '%s': Cannot create the trash directory (or one of its subdirectories: "
+"'files' and 'info').\n"
+"Try creating them manually and restart %s.\n"
+"E.g.: mkdir -p ~/.local/share/Trash/{files,info}\n"
+msgstr ""
+"%s: '%s': No se puede crear el directorio Trash (o uno de sus subdirectorios: 'files' y 'info').\n"
+"Intente crearlos manualmente y reinicie %s.\n"
+"Ej.: mkdir -p ~/.local/share/Trash/{files,info}\n"
+
+msgid "%s: '%s': Cannot escape filename\n"
+msgstr "%s: '%s': No se puede escapar el nombre del archivo\n"
+
+msgid ""
+"%s: '%s': Directory not writable. Bookmarks, commands logs, and commands "
+"history are disabled. Program messages will not be persistent. Falling back "
+"to default settings.\n"
+msgstr ""
+"%s: '%s': El directorio no es editable. Los marcadores, registros de comandos y el historial de comandos están deshabilitados. Los mensajes del programa no serán persistentes. Volviendo a la configuración predeterminada.\n"
+
+msgid "%s: '%s': Error expanding tilde\n"
+msgstr "%s: '%s': Error al expandir el tilde\n"
+
+msgid "%s: '%s': Error quoting filename\n"
+msgstr "%s: '%s': Error al citar el nombre del archivo\n"
+
+msgid "%s: '%s': Error reading file\n"
+msgstr "%s: '%s': Error al leer el archivo\n"
+
+msgid "%s: '%s': Error saving directory entry: %s\n"
+msgstr "%s: '%s': Error al guardar la entrada del directorio: %s\n"
+
+msgid "%s: '%s': Error setting custom selections file\n"
+msgstr "%s: '%s': Error al establecer el archivo de selecciones personalizado\n"
+
+msgid "%s: '%s': Error unescaping filename\n"
+msgstr "%s: '%s': Error al desescapar el nombre del archivo\n"
+
+msgid "%s: '%s': Error unescaping string\n"
+msgstr "%s: '%s': Error al desescapar el texto\n"
+
+msgid "%s: '%s': File changed on disk!\n"
+msgstr "%s: '%s': ¡El archivo ha cambiado en el disco!\n"
+
+msgid ""
+"%s: '%s': Home directory not found\n"
+"Falling back to '%s'\n"
+msgstr ""
+"%s: '%s': No se encontró el directorio principal\n"
+"Volviendo a '%s'\n"
+
+msgid "%s: '%s': Invalid argument. Try 'fz -h'\n"
+msgstr "%s: '%s': Argumento no válido. Intente 'fz -h'\n"
+
+msgid ""
+"%s: '%s': Invalid bell style. Valid values are 0:none, 1:audible, 2:visible "
+"(requires readline >= 8.1), 3:flash. Defaults to 'visible', and, if not "
+"possible, 'none'.\n"
+msgstr ""
+"%s: '%s': Estilo de timbre no válido. Los valores válidos son 0:none, 1:audible, 2:visible (requiere readline >= 8.1), 3:flash. Por defecto, 'visible', y si no es posible, 'none'.\n"
+
+msgid "%s: '%s': Invalid fuzzy algorithm. Valid values are either 1 or 2.\n"
+msgstr "%s: '%s': Algoritmo difuso no válido. Los valores válidos son 1 o 2.\n"
+
+msgid ""
+"%s: '%s': Invalid home directory in the password database.\n"
+"Something is really wrong! Exiting.\n"
+msgstr ""
+"%s: '%s': Directorio principal no válido en la base de datos de contraseñas.\n"
+"¡Algo está realmente mal! Saliendo.\n"
+
+msgid "%s: '%s': Invalid profile name\n"
+msgstr "%s: '%s': Nombre de perfil no válido\n"
+
+msgid "%s: '%s': Invalid regular expression\n"
+msgstr "%s: '%s': Expresión regular no válida\n"
+
+msgid ""
+"%s: '%s': Invalid shell. Falling back to '%s'.\n"
+"Check '%s' for a list of valid shells.\n"
+msgstr ""
+"%s: '%s': Shell no válida. Volviendo a '%s'.\n"
+"Verifique '%s' para obtener una lista de shells válidas.\n"
+
+msgid "%s: '%s': Invalid workspace. Valid values are 1-8.\n"
+msgstr "%s: '%s': Espacio de trabajo no válido. Los valores válidos son 1-8.\n"
+
+msgid "%s: '%s': No associated application found\n"
+msgstr "%s: '%s': No se encontró aplicación asociada\n"
+
+msgid ""
+"%s: '%s': No associated application found\n"
+"Fix this in the configuration file:\n"
+"%s\n"
+"(run 'view edit' if running %s)\n"
+msgstr ""
+"%s: '%s': No se encontró aplicación asociada\n"
+"Corrija esto en el archivo de configuración:\n"
+"%s\n"
+"(ejecute 'view edit' si está ejecutando %s)\n"
+
+msgid "%s: '%s': No such alias\n"
+msgstr "%s: '%s': No existe el alias\n"
+
+msgid "%s: '%s': No such selected file\n"
+msgstr "%s: '%s': No existe tal archivo seleccionado\n"
+
+msgid "%s: '%s': Not a directory\n"
+msgstr "%s: '%s': No es un directorio\n"
+
+msgid ""
+"%s: '%s': Only command base names are allowed. E.g.: 'nano' instead of '/usr/"
+"bin/nano'\n"
+msgstr ""
+"%s: '%s': Solo se permiten nombres base de comandos. Por ejemplo: 'nano' en lugar de '/usr/bin/nano'\n"
+
+msgid ""
+"%s: '%s': Option requires an argument\n"
+"Try '%s %s' for more information.\n"
+msgstr ""
+"%s: '%s': La opción requiere un argumento\n"
+"Intente '%s %s' para obtener más información.\n"
+
+msgid "%s: '%s': Syntax error\n"
+msgstr "%s: '%s': Error de sintaxis\n"
+
+msgid ""
+"%s: '%s': Terminal type not supported. Limited functionality is expected.\n"
+msgstr ""
+"%s: '%s': El tipo de terminal no es compatible. Se espera una funcionalidad limitada.\n"
+
+msgid ""
+"%s: '%s': Unrecognized option\n"
+"Try '%s --help' for more information.\n"
+msgstr ""
+"%s: '%s': Opción no reconocida\n"
+"Intente '%s --help' para obtener más información.\n"
+
+msgid "%s: '%s': Unsafe filename\n"
+msgstr "%s: '%s': Nombre de archivo no seguro\n"
+
+msgid "%s: '%s': Using an alternative configuration directory\n"
+msgstr "%s: '%s': Utilizando un directorio de configuración alternativo\n"
+
+msgid "%s: '%s': Valid values are 0-3\n"
+msgstr "%s: '%s': Los valores válidos son 0-3\n"
+
+msgid ""
+"%s: '%zu': Invalid workspace.\n"
+"Falling back to workspace %zu.\n"
+msgstr ""
+"%s: '%zu': Espacio de trabajo no válido.\n"
+"Volviendo al espacio de trabajo %zu.\n"
+
+msgid ""
+"%s: '--desktop-notifications': Valid values are 'kitty','system', or "
+"'false'.\n"
+msgstr ""
+"%s: '--desktop-notifications': Los valores válidos son 'kitty', 'system' o 'false'.\n"
+
+msgid ""
+"%s: '--show-hidden': Valid values are 'true','first', 'last', or 'false'.\n"
+msgstr ""
+"%s: '--show-hidden': Los valores válidos son 'true', 'first', 'last' o 'false'.\n"
+
+msgid ""
+"%s: '--stat': Option requires an argument\n"
+"Try '%s --help' for more information.\n"
+msgstr ""
+"%s: '--stat': La opción requiere un argumento\n"
+"Intente '%s --help' para obtener más información.\n"
+
+msgid "%s: '-a': Valid values are 'true','first', 'last', or 'false'.\n"
+msgstr "%s: '-a': Los valores válidos son 'true', 'first', 'last' o 'false'.\n"
+
+msgid ""
+"%s: --fzytab: We have migrated to 'fnf'.\n"
+"Install 'fnf' (https://github.com/leo-arch/fnf) and then use --fnftab "
+"instead.\n"
+msgstr ""
+"%s: --fzytab: Hemos migrado a 'fnf'.\n"
+"Instale 'fnf' (https://github.com/leo-arch/fnf) y luego utilice --fnftab en su lugar.\n"
+
+msgid ""
+"%s: --pager-view: '%s': Invalid value.\n"
+"Valid values are 'auto', 'long', and 'short'.\n"
+msgstr ""
+"%s: --pager-view: '%s': Valor no válido.\n"
+"Los valores válidos son 'auto', 'long' y 'short'.
+
+msgid "%s: --prop-fields: 'b': Birth time is not available on this platform\n"
+msgstr "%s: --prop-fields: 'b': La hora de creación no está disponible en esta plataforma\n"
+
+msgid ""
+"%s: --sort: '%s': Invalid value\n"
+"Valid values: atime, btime, ctime, mtime, extension, group, inode, name,\n"
+"              none, owner, size, version, blocks, links, type.\n"
+msgstr ""
+"%s: --sort: '%s': Valor no válido\n"
+"Valores válidos: atime, btime, ctime, mtime, extension, group, inode, name,\n"
+"              none, owner, size, version, blocks, links, type.\n"
+
+msgid "%s: --sort: '%s': Valid values are 0-%d\n"
+msgstr "%s: --sort: '%s': Los valores válidos son 0-%d\n"
+
+msgid ""
+"%s: An input file must be provided via the CLIFM_TEST_INPUT_FILE environment "
+"variable\n"
+msgstr ""
+"%s: Debe proporcionar un archivo de entrada a través de la variable de entorno CLIFM_TEST_INPUT_FILE\n"
+
+msgid "%s: Bookmarks function disabled\n"
+msgstr "%s: Función de marcadores deshabilitada\n"
+
+msgid "%s: Cannot access the configuration file\n"
+msgstr "%s: No se puede acceder al archivo de configuración\n"
+
+msgid ""
+"%s: Cannot access the home directory. Bookmarks, commands logs, and commands "
+"history are disabled. Program messages, selected files, and the jump "
+"database will not be persistent. Using default settings.\n"
+msgstr ""
+"%s: No se puede acceder al directorio principal. Los marcadores, registros de comandos y el historial de comandos están deshabilitados. Los mensajes del programa, los archivos seleccionados y la base de datos de saltos no serán persistentes. Utilizando la configuración predeterminada.\n"
+
+msgid ""
+"%s: Cannot create colors directory '%s': Falling back to the default color "
+"scheme\n"
+msgstr ""
+"%s: No se puede crear el directorio de colores '%s': Volviendo al esquema de colores predeterminado\n"
+
+msgid ""
+"%s: Cannot create configuration directory '%s': Bookmarks, commands logs, "
+"and command history are disabled. Program messages will not be persistent. "
+"Falling back to default settings.\n"
+msgstr ""
+"%s: No se puede crear el directorio de configuración '%s': Los marcadores, registros de comandos y el historial de comandos están deshabilitados. Los mensajes del programa no serán persistentes. Volviendo a la configuración predeterminada.\n"
+
+msgid ""
+"%s: Cannot create directory '%s' (error %d)\n"
+"Falling back to the default configuration directory.\n"
+msgstr ""
+"%s: No se puede crear el directorio '%s' (error %d)\n"
+"Volviendo al directorio de configuración predeterminado.\n"
+
+msgid ""
+"%s: Cannot create plugins directory '%s': The actions function is disabled\n"
+msgstr ""
+"%s: No se puede crear el directorio de plugins '%s': La función de acciones está deshabilitada\n"
+
+msgid "%s: Cannot create temporary directory. Falling back to '%s'.\n"
+msgstr "%s: No se puede crear el directorio temporal. Volviendo a '%s'.\n"
+
+msgid "%s: Cannot retrieve the home directory\n"
+msgstr "%s: No se puede determinar el directorio principal\n"
+
+msgid "%s: Colors are disabled\n"
+msgstr "%s: Los colores están deshabilitados\n"
+
+msgid "%s: Currently running without colors\n"
+msgstr "%s: Se está ejecutando sin colores\n"
+
+msgid ""
+"%s: Default terminal not set. Use the configuration file (F10) to set it.\n"
+msgstr ""
+"%s: La terminal predeterminada no está establecida. Utilice el archivo de configuración (F10) para establecerla.\n"
+
+msgid "%s: Directory history cleared\n"
+msgstr "%s: Historial de directorios borrado\n"
+
+msgid "%s: Directory jumper function disabled\n"
+msgstr "%s: Función de salto de directorios deshabilitada\n"
+
+msgid "%s: Empty filenames buffer. Nothing to do\n"
+msgstr "%s: Buffer de nombres de archivos vacío. No hay nada que hacer\n"
+
+msgid "%s: Error dropping group privileges. Aborting.\n"
+msgstr "%s: Error al descartar privilegios de grupo. Abortando.\n"
+
+msgid "%s: Error dropping user privileges. Aborting.\n"
+msgstr "%s: Error al descartar privilegios de usuario. Abortando.\n"
+
+msgid "%s: Error expanding tilde. Using default opener.\n"
+msgstr "%s: Error al expandir el tilde. Utilizando el abridor predeterminado.\n"
+
+msgid "%s: Error getting MIME type\n"
+msgstr "%s: Error al obtener el tipo MIME\n"
+
+msgid "%s: Error getting current directory\n"
+msgstr "%s: Error al obtener el directorio actual\n"
+
+msgid "%s: Error getting file descriptor for the current directory: %s\n"
+msgstr "%s: Error al obtener el descriptor de archivo para el directorio actual: %s\n"
+
+msgid "%s: Error getting home directory\n"
+msgstr "%s: Error al obtener el directorio principal\n"
+
+msgid "%s: Error getting hostname\n"
+msgstr "%s: Error al obtener el nombre del host\n"
+
+msgid "%s: Error getting the current working directory\n"
+msgstr "%s: Error al obtener el directorio de trabajo actual\n"
+
+msgid "%s: Error getting variable value\n"
+msgstr "%s: Error al obtener el valor de la variable\n"
+
+msgid "%s: Error retrieving mountpoint\n"
+msgstr "%s: Error al recuperar el punto de montaje\n"
+
+msgid "%s: Error saving last visited directory: %s\n"
+msgstr "%s: Error al guardar el último directorio visitado: %s\n"
+
+msgid ""
+"%s: Escape sequence detected in the warning prompt string: this might cause "
+"a few glichtes in the prompt due to some bugs in the current readline "
+"library (%s). Please consider removing these escape sequences (via either "
+"'prompt edit' or 'cs edit') or upgrading to a newer version of the library "
+"(>= 7.0 is recommended).\n"
+msgstr ""
+"%s: Secuencia de escape detectada en la cadena del prompt de advertencia: esto podría causar algunos errores en el prompt debido a algunos errores en la biblioteca readline actual (%s). Por favor, considere eliminar estas secuencias de escape (mediante 'prompt edit' o 'cs edit') o actualizar a una versión más nueva de la biblioteca (>= 7.0 se recomienda).\n"
+
+msgid ""
+"%s: External commands are currently disabled. To enable them, run 'ext on'.\n"
+msgstr ""
+"%s: Los comandos externos están deshabilitados. Para habilitarlos, ejecute 'ext on'.\n"
+
+msgid "%s: Fatal error! Failure retrieving the current working directory\n"
+msgstr "%s: ¡Error fatal! No se pudo recuperar el directorio de trabajo actual\n"
+
+msgid "%s: Fatal error! Failure retrieving the current working directory.\n"
+msgstr "%s: ¡Error fatal! No se pudo recuperar el directorio de trabajo actual.\n"
+
+msgid ""
+"%s: File extension conflicts found. Run 'cs check-ext' to see the details.\n"
+msgstr ""
+"%s: Se encontraron conflictos de extensiones de archivo. Ejecute 'cs check-ext' para ver los detalles.\n"
+
+msgid "%s: File may be unsafe\n"
+msgstr "%s: El archivo puede ser inseguro\n"
+
+msgid "%s: Function only available for graphical environments\n"
+msgstr "%s: La función solo está disponible para entornos gráficos\n"
+
+msgid ""
+"%s: Fzf failed. Check the FzfTabOptions line by running 'cs edit'\n"
+"(some option may not be supported by your fzf version).\n"
+msgstr ""
+"%s: Fzf falló. Verifique la línea FzfTabOptions ejecutando 'cs edit'\n"
+"(algunas opciones pueden no ser compatibles con su versión de fzf).\n"
+
+msgid ""
+"%s: FzfTabOptions contains unsafe characters (<>|;&$`). Falling back to "
+"default values.\n"
+msgstr ""
+"%s: FzfTabOptions contiene caracteres no seguros (<>|;&$`). Utilizando los valores predeterminados.\n"
+
+msgid "%s: History function disabled\n"
+msgstr "%s: La función de historial está deshabilitada\n"
+
+msgid ""
+"%s: Home directory not found.\n"
+"Something is really wrong! Exiting.\n"
+msgstr ""
+"%s: No se encontró el directorio principal.\n"
+"¡Algo está realmente mal! Salir.\n"
+
+msgid "%s: Integer overflow detected (showing only %jd files)\n"
+msgstr "%s: Se detectó un desbordamiento de enteros (mostrando solo %jd archivos)\n"
+
+msgid ""
+"%s: Invalid sort value: only none, name, extension, version, and inode are "
+"allowed in light mode\n"
+msgstr ""
+"%s: Valor de clasificación no válido: solo none, name, extension, version y inode están permitidos en modo ligero\n"
+
+msgid "%s: Is a symbolic link\n"
+msgstr "%s: Es un enlace simbólico\n"
+
+msgid "%s: Is not a regular file\n"
+msgstr "%s: No es un archivo regular\n"
+
+msgid "%s: Light mode is not supported in virtual directories\n"
+msgstr "%s: El modo ligero no es compatible con directorios virtuales\n"
+
+msgid ""
+"%s: Locale is not UTF-8. To avoid encoding issues you might want to set an "
+"UTF-8 locale. For example: export LANG=es_AR.UTF-8\n"
+msgstr ""
+"%s: La configuración regional no es UTF-8. Para evitar problemas de codificación, es posible que desee establecer una configuración regional UTF-8. Por ejemplo: export LANG=es_AR.UTF-8\n"
+
+msgid "%s: Log function disabled\n"
+msgstr "%s: La función de registro está deshabilitada\n"
+
+msgid ""
+"%s: MaxPath: This option is deprecated. Use the CLIFM_PROMPT_P_MAX_PATH "
+"environment variable instead.\n"
+msgstr ""
+"%s: MaxPath: Esta opción está en desuso. Utilice la variable de entorno CLIFM_PROMPT_P_MAX_PATH en su lugar.\n"
+
+msgid ""
+"%s: MinFilenameTrim: This option is deprecated. Use MinNameTruncate "
+"instead.\n"
+msgstr ""
+"%s: MinFilenameTrim: Esta opción está en desuso. Utilice MinNameTruncate en su lugar.\n"
+
+msgid "%s: Missing '%c'\n"
+msgstr "%s: Falta '%c'\n"
+
+msgid "%s: Missing closing quote: '%c'\n"
+msgstr "%s: Falta comilla de cierre: '%c'\n"
+
+msgid "%s: Nested instances are not allowed in stealth mode\n"
+msgstr "%s: Las instancias anidadas no están permitidas en modo sigilo\n"
+
+msgid "%s: No aliases found\n"
+msgstr "%s: No se encontraron aliases\n"
+
+msgid ""
+"%s: No data directory found. Data files, such as plugins and color schemes, "
+"may not be available.\n"
+"Set a custom data directory via the '--data-dir' option.\n"
+msgstr ""
+"%s: No se encontró el directorio de datos. Los archivos de datos, como plugins y esquemas de color, "
+"pueden no estar disponibles.\n"
+"Establezca un directorio de datos personalizado a través de la opción '--data-dir'.\n"
+
+msgid "%s: No messages\n"
+msgstr "%s: No hay mensajes\n"
+
+msgid "%s: No mount application found. Install either udevil or udisks2\n"
+msgstr "%s: No se encontró la aplicación de montaje. Instale udevil o udisks2\n"
+
+msgid ""
+"%s: No opening application found\n"
+"Tip: Run 'APP FILE', or 'mm edit' to add an opening application\n"
+msgstr ""
+"%s: No se encontró ninguna aplicación de apertura\n"
+"Tip: Ejecute 'APP FILE' o 'mm edit' para agregar una aplicación de apertura\n"
+
+msgid "%s: No pinned file\n"
+msgstr "%s: No hay archivo fijado\n"
+
+msgid "%s: No remotes defined. Run 'net edit' to add one.\n"
+msgstr "%s: No se han definido remotos. Ejecute 'net edit' para agregar uno.\n"
+
+msgid "%s: No such ELN\n"
+msgstr "%s: No existe ese ELN\n"
+
+msgid "%s: No tags found. Use 'tag new' to create new tags.\n"
+msgstr "%s: No se encontraron etiquetas. Use 'tag new' para crear nuevas etiquetas.\n"
+
+msgid "%s: Nothing to do\n"
+msgstr "%s: Nada que hacer\n"
+
+msgid "%s: Nothing was imported. No MIME association found\n"
+msgstr "%s: No se importó nada. No se encontró asociación MIME\n"
+
+msgid "%s: Nothing was imported. No graphical environment found\n"
+msgstr "%s: No se importó nada. No se encontró entorno gráfico\n"
+
+msgid ""
+"%s: Notification daemon error: %s\n"
+"Disable desktop notifications (run 'help desktop-notifications' for details) "
+"or %s to silence this warning (original message printed below)\n"
+msgstr ""
+"%s: Error en el daemon de notificaciones: %s\n"
+"Deshabilite las notificaciones de escritorio (ejecute 'help desktop-notifications' para más detalles) "
+"o %s para silenciar esta advertencia (mensaje original impreso a continuación)\n"
+
+msgid ""
+"%s: Option '-%c' requires an argument.\n"
+"Try '%s -h' for more information.\n"
+msgstr ""
+"%s: La opción '-%c' requiere un argumento.\n"
+"Intente '%s -h' para más información.\n"
+
+msgid "%s: Plugins are not allowed in secure-cmds mode\n"
+msgstr "%s: Los plugins no están permitidos en modo secure-cmds\n"
+
+msgid "%s: Prompts successfully reloaded\n"
+msgstr "%s: Prompts recargados con éxito\n"
+
+msgid "%s: PropFields: 'b': Birth time is not allowed in light mode\n"
+msgstr "%s: PropFields: 'b': La hora de creación no está permitida en modo ligero\n"
+
+msgid ""
+"%s: Running in stealth mode. Access to configuration files is not allowed.\n"
+msgstr ""
+"%s: Ejecutando en modo sigilo. No se permite el acceso a los archivos de configuración.\n"
+
+msgid ""
+"%s: Running in stealth mode: persistent selection, bookmarks, jump database "
+"and directory history, just as plugins, logs and configuration files, are "
+"disabled.\n"
+msgstr ""
+"%s: Ejecutando en modo sigilo: la selección persistente, los favoritos, la base de datos de saltos "
+"y el historial de directorios, al igual que los plugins, los registros y los archivos de configuración, están deshabilitados.\n"
+
+msgid "%s: Successfully created tag\n"
+msgstr "%s: Etiqueta creada con éxito\n"
+
+msgid "%s: TERM variable unset. Running in xterm compatibility mode.\n"
+msgstr "%s: La variable TERM no está establecida. Ejecutando en modo de compatibilidad con xterm.\n"
+
+msgid ""
+"%s: The 'dh' plugin is deprecated. Use the builtin 'dh' command instead "
+"disabling the 'dh' plugin ('actions edit'). Once done, run 'dh --help' for "
+"more information about the new command.\n"
+msgstr ""
+"%s: El plugin 'dh' está en desuso. Use el comando 'dh' integrado en su lugar "
+"deshabilitando el plugin 'dh' ('actions edit'). Una vez hecho, ejecute 'dh --help' para más información sobre el nuevo comando.\n"
+
+msgid "%s: There are no available %s\n"
+msgstr "%s: No hay %s disponibles\n"
+
+msgid "%s: There is another name hard linked to this file\n"
+msgstr "%s: Hay otro nombre enlazado a este archivo\n"
+
+msgid "%s: This feature is not available on Haiku\n"
+msgstr "%s: Esta función no está disponible en Haiku\n"
+
+msgid "%s: To gracefully quit enter 'q'\n"
+msgstr "%s: Para salir correctamente, ingrese 'q'\n"
+
+msgid "%s: Trash function disabled\n"
+msgstr "%s: La función de papelera de reciclaje está deshabilitada\n"
+
+msgid "%s: TrimNames: This option is deprecated. Use TruncateNames instead.\n"
+msgstr "%s: TrimNames: Esta opción está en desuso. Use TruncateNames en su lugar.\n"
+
+msgid "%s: Unmounted %s\n"
+msgstr "%s: Desmontado %s\n"
+
+msgid ""
+"%s: Unrecognized option: '-%c'\n"
+"Try '%s -h' for more information.\n"
+msgstr ""
+"%s: Opción no reconocida: '-%c'\n"
+"Intente '%s -h' para más información.\n"
+
+msgid "%s: br: Feature not allowed in virtual directories\n"
+msgstr "%s: br: La función no está permitida en directorios virtuales\n"
+
+msgid "%s: cd-on-quit: Cannot create symbolic link '%s': %s\n"
+msgstr "%s: cd-on-quit: No se puede crear el enlace simbólico '%s': %s\n"
+
+msgid "%s: cd: '%s': Is a directory\n"
+msgstr "%s: cd: '%s': Es un directorio\n"
+
+msgid ""
+"%s: chdir: '%s': %s. Using the current working directory as starting path\n"
+msgstr ""
+"%s: chdir: '%s': %s. Utilizando el directorio de trabajo actual como ruta de inicio\n"
+
+msgid "%s: colors: %s: No such color scheme. Falling back to default\n"
+msgstr "%s: colors: %s: No existe este esquema de color. Volviendo al predeterminado\n"
+
+msgid "%s: colors: '%s': No such color scheme. Falling back to default\n"
+msgstr "%s: colors: '%s': No existe este esquema de color. Volviendo al predeterminado\n"
+
+msgid ""
+"%s: fnf: Command not found. Falling back to the default value (fzf, if "
+"found, or standard)\n"
+msgstr ""
+"%s: fnf: Comando no encontrado. Volviendo al valor predeterminado (fzf, si se encuentra, o standard)\n"
+
+msgid "%s: fzf: Command not found. Falling back to standard tab completion\n"
+msgstr "%s: fzf: Comando no encontrado. Volviendo al autocompletado estándar\n"
+
+msgid "%s: history: %s\n"
+msgstr "%s: historial: %s\n"
+
+msgid "%s: icons: %s\n"
+msgstr "%s: iconos: %s\n"
+
+msgid "%s: net: %s: Mounting remote...\n"
+msgstr "%s: net: %s: Montando remoto...\n"
+
+msgid "%s: net: %s: Unmount command failed with error code %d\n"
+msgstr "%s: net: %s: El comando de desmontaje falló con el código de error %d\n"
+
+msgid "%s: net: %s: Unmounting remote...\n"
+msgstr "%s: net: %s: Desmontando remoto...\n"
+
+msgid "%s: rr: Feature not allowed in virtual directories\n"
+msgstr "%s: rr: La función no está permitida en directorios virtuales\n"
+
+msgid ""
+"%s: smenu: Command not found. Falling back to the default value (fzf, if "
+"found, or standard)\n"
+msgstr ""
+"%s: smenu: Comando no encontrado. Volviendo al valor predeterminado (fzf, si se encuentra, o standard)\n"
+
+msgid "%s: trash: %s\n"
+msgstr "%s: papelera: %s\n"
+
+msgid "%s: udisks2: Command not found. Falling back to udevil\n"
+msgstr "%s: udisks2: Comando no encontrado. Volviendo a udevil\n"
+
+msgid ""
+"%sBookmark Manager%s\n"
+"\n"
+msgstr ""
+"%sAdministrador de marcadores%s\n"
+"\n"
+
+msgid ""
+"%sColor scheme: %s%s%s\n"
+"\n"
+msgstr ""
+"%sEsquema de color: %s%s%s\n"
+"\n"
+
+msgid "%sColor%s (ac) Autocommand indicator (%sA%s)\n"
+msgstr "%sColor%s (ac) Indicador de autocomando (%sA%s)\n"
+
+msgid "%sColor%s (bd) Block device\n"
+msgstr "%sColor%s (bd) Dispositivo de bloque\n"
+
+msgid "%sColor%s (ca) File with capabilities\n"
+msgstr "%sColor%s (ca) Archivo con capacidades\n"
+
+msgid "%sColor%s (cd) Character device\n"
+msgstr "%sColor%s (cd) Dispositivo de caracter\n"
+
+msgid "%sColor%s (db)  Used blocks (e.g. %s1576%s)\n"
+msgstr "%sColor%s (db)  Bloques utilizados (p. ej. %s1576%s)\n"
+
+msgid "%sColor%s (dd)  Date (e.g. %sJul 9 08:12%s)\n"
+msgstr "%sColor%s (dd)  Fecha (p. ej. %sJul 9 08:12%s)\n"
+
+msgid "%sColor%s (de)  Inode number (e.g. %s802721%s)\n"
+msgstr "%sColor%s (de)  Número de inodo (p. ej. %s802721%s)\n"
+
+msgid "%sColor%s (df) Default color\n"
+msgstr "%sColor%s (df) Color predeterminado\n"
+
+msgid "%sColor%s (di) Directory\n"
+msgstr "%sColor%s (di) Directorio\n"
+
+msgid "%sColor%s (dk)  Links number (e.g. %s92%s)\n"
+msgstr "%sColor%s (dk)  Número de enlaces (p. ej. %s92%s)\n"
+
+msgid "%sColor%s (dl) Dividing line (e.g. %s------>%s)\n"
+msgstr "%sColor%s (dl) Línea divisoria (p. ej. %s------>%s)\n"
+
+msgid "%sColor%s (dn)  Dot/dash (e.g. %sr%sw%s-.%sr%s--.--%s)\n"
+msgstr "%sColor%s (dn)  Punto/guion (p. ej. %sr%sw%s-.%sr%s--.--%s)\n"
+
+msgid "%sColor%s (do)  Octal permissions (e.g. %s0640%s)\n"
+msgstr "%sColor%s (do)  Permisos octales (p. ej. %s0640%s)\n"
+
+msgid "%sColor%s (dp)  SUID/SGID bit (e.g. %ss%s)\n"
+msgstr "%sColor%s (dp)  Bit SUID/SGID (p. ej. %ss%s)\n"
+
+msgid "%sColor%s (dr)  Read bit (%sr%s)\n"
+msgstr "%sColor%s (dr)  Bit de lectura (%sr%s)\n"
+
+msgid "%sColor%s (du)  User ID (e.g. %sjane%s)\n"
+msgstr "%sColor%s (du)  ID de usuario (p. ej. %sjane%s)\n"
+
+msgid "%sColor%s (dw)  Write bit (%sw%s)\n"
+msgstr "%sColor%s (dw)  Bit de escritura (%sw%s)\n"
+
+msgid "%sColor%s (dxd) Execute bit - directory (%sx%s)\n"
+msgstr "%sColor%s (dxd) Bit de ejecución - directorio (%sx%s)\n"
+
+msgid "%sColor%s (dxr) Execute bit - file (%sx%s)\n"
+msgstr "%sColor%s (dxr) Bit de ejecución - archivo (%sx%s)\n"
+
+msgid "%sColor%s (dz)  Size (e.g. %s12.69k%s)\n"
+msgstr "%sColor%s (dz)  Tamaño (p. ej. %s12.69k%s)\n"
+
+msgid "%sColor%s (ed) Empty directory\n"
+msgstr "%sColor%s (ed) Directorio vacío\n"
+
+msgid "%sColor%s (ee) Empty executable file\n"
+msgstr "%sColor%s (ee) Archivo ejecutable vacío\n"
+
+msgid "%sColor%s (ef) Empty file\n"
+msgstr "%sColor%s (ef) Archivo vacío\n"
+
+msgid "%sColor%s (el) ELN's (e.g. %s12%s filename)\n"
+msgstr "%sColor%s (el) ELN (p. ej. %s12%s nombre de archivo)\n"
+
+msgid "%sColor%s (em) Error message indicator (%sE%s)\n"
+msgstr "%sColor%s (em) Indicador de mensaje de error (%sE%s)\n"
+
+msgid "%sColor%s (ex) Executable file\n"
+msgstr "%sColor%s (ex) Archivo ejecutable\n"
+
+msgid "%sColor%s (fc) File counter (e.g. dir%s/24%s)\n"
+msgstr "%sColor%s (fc) Contador de archivos (p. ej. dir%s/24%s)\n"
+
+msgid "%sColor%s (fi) Regular file\n"
+msgstr "%sColor%s (fi) Archivo regular\n"
+
+msgid "%sColor%s (hb) Brackets: %s(){}[]%s\n"
+msgstr "%sColor%s (hb) Corchetes: %s(){}[]%s\n"
+
+msgid "%sColor%s (hc) Commented out text (e.g. some text %s#comment%s)\n"
+msgstr "%sColor%s (hc) Texto comentado (p. ej. some text %s#comment%s)\n"
+
+msgid "%sColor%s (hd) Slash (e.g. dir%s/%sfile)\n"
+msgstr "%sColor%s (hd) Barra (p. ej. dir%s/%sarchivo)\n"
+
+msgid "%sColor%s (he) Expansion characters: %s~%s\n"
+msgstr "%sColor%s (he) Caracteres de expansión: %s~%s\n"
+
+msgid "%sColor%s (hn) Number (e.g. pp %s12%s)\n"
+msgstr "%sColor%s (hn) Número (p. ej. pp %s12%s)\n"
+
+msgid "%sColor%s (hp) Command parameter (e.g. cmd %s--param%s)\n"
+msgstr "%sColor%s (hp) Parámetro de comando (p. ej. cmd %s--param%s)\n"
+
+msgid "%sColor%s (hq) Quoted text (e.g. %s"some text"%s)\n"
+msgstr "%sColor%s (hq) Texto entre comillas (p. ej. %s"some text"%s)\n"
+
+msgid "%sColor%s (hr) Redirection characters: %s><%s\n"
+msgstr "%sColor%s (hr) Caracteres de redirección: %s><%s\n"
+
+msgid "%sColor%s (hs) Process separator characters: %s|;&%s \n"
+msgstr "%sColor%s (hs) Caracteres de separación de procesos: %s|;&%s \n"
+
+msgid "%sColor%s (hw) Backslash (e.g. sel this%s\%s file%s\%s name)\n"
+msgstr "%sColor%s (hw) Barra invertida (p. ej. sel this%s\%s archivo%s\%s nombre)\n"
+
+msgid ""
+"%sColor%s (lc) Symbolic link indicator (e.g. %s36%s%s%s%ssymlink) (%s1%s)\n"
+msgstr ""
+"%sColor%s (lc) Indicador de enlace simbólico (p. ej. %s36%s%s%s%senlace simbólico) (%s1%s)\n"
+
+msgid "%sColor%s (li) Selected file indicator (e.g. %s12%s%s%s%sfilename)\n"
+msgstr "%sColor%s (li) Indicador de archivo seleccionado (p. ej. %s12%s%s%s%snombre de archivo)\n"
+
+msgid "%sColor%s (li) Selected files indicator (%s%c%s)\n"
+msgstr "%sColor%s (li) Indicador de archivos seleccionados (%s%c%s)\n"
+
+msgid "%sColor%s (ln) Symbolic link\n"
+msgstr "%sColor%s (ln) Enlace simbólico\n"
+
+msgid "%sColor%s (mh) Multi-hardlink\n"
+msgstr "%sColor%s (mh) Multi-enlace\n"
+
+msgid "%sColor%s (mi) Miscellaneous indicator (%s%s%s) (%s2%s)\n"
+msgstr "%sColor%s (mi) Indicador misceláneo (%s%s%s) (%s2%s)\n"
+
+msgid "%sColor%s (nd) Directory with no read/exec permission\n"
+msgstr "%sColor%s (nd) Directorio sin permiso de lectura/ejecución\n"
+
+msgid "%sColor%s (nf) File with no read permission\n"
+msgstr "%sColor%s (nf) Archivo sin permiso de lectura\n"
+
+msgid "%sColor%s (nm) Notice message indicator (%sN%s)\n"
+msgstr "%sColor%s (nm) Indicador de mensaje de notificación (%sN%s)\n"
+
+msgid "%sColor%s (no) Unknown file type\n"
+msgstr "%sColor%s (no) Tipo de archivo desconocido\n"
+
+msgid "%sColor%s (oo) Door/Port file\n"
+msgstr "%sColor%s (oo) Archivo de puerta/puerto\n"
+
+msgid "%sColor%s (or) Broken symbolic link\n"
+msgstr "%sColor%s (or) Enlace simbólico roto\n"
+
+msgid "%sColor%s (ow) Other-writable and NOT sticky directory\n"
+msgstr "%sColor%s (ow) Directorio editable por otros y NO sticky\n"
+
+msgid "%sColor%s (pi) Pipe or FIFO special file\n"
+msgstr "%sColor%s (pi) Archivo especial de tubería o FIFO\n"
+
+msgid "%sColor%s (ro) Read-only mode indicator (%sRO%s)\n"
+msgstr "%sColor%s (ro) Indicador de modo de solo lectura (%sRO%s)\n"
+
+msgid "%sColor%s (sg) SGID file\n"
+msgstr "%sColor%s (sg) Archivo SGID\n"
+
+msgid "%sColor%s (si) Stealth mode indicator (%sS%s)\n"
+msgstr "%sColor%s (si) Indicador de modo sigilo (%sS%s)\n"
+
+msgid "%sColor%s (so) Socket file\n"
+msgstr "%sColor%s (so) Archivo de socket\n"
+
+msgid "%sColor%s (st) Sticky and NOT other-writable directory\n"
+msgstr "%sColor%s (st) Directorio sticky y NO editable por otros\n"
+
+msgid "%sColor%s (su) SUID file\n"
+msgstr "%sColor%s (su) Archivo SUID\n"
+
+msgid "%sColor%s (ti) Trashed files indicator (%sT%s)\n"
+msgstr "%sColor%s (ti) Indicador de archivos eliminados (%sT%s)\n"
+
+msgid "%sColor%s (ts) Matching completion prefix (e.g. %sfile%sname) (%s3%s)\n"
+msgstr "%sColor%s (ts) Prefijo de completado coincidente (p. ej. %sarchivo%snombre) (%s3%s)\n"
+
+msgid "%sColor%s (tt) Truncated filenames mark (e.g. filenam%s%c%s.odt)\n"
+msgstr "%sColor%s (tt) Marca de nombres de archivo truncados (p. ej. filenam%s%c%s.odt)\n"
+
+msgid "%sColor%s (tw) Sticky and other-writable directory\n"
+msgstr "%sColor%s (tw) Directorio sticky y editable por otros\n"
+
+msgid ""
+"%sColor%s (tx) Input text (e.g.  [1m [0m %sls%s %s-l%s %sfilename.zst%s)\n"
+msgstr ""
+"%sColor%s (tx) Texto de entrada (p. ej.  [1m [0m %sls%s %s-l%s %snombre.zst%s)\n"
+
+msgid "%sColor%s (uf) Unaccessible (non-stat'able) file\n"
+msgstr "%sColor%s (uf) Archivo inaccesible (no stat'able)\n"
+
+msgid "%sColor%s (wm) Warning message indicator (%sW%s)\n"
+msgstr "%sColor%s (wm) Indicador de mensaje de advertencia (%sW%s)\n"
+
+msgid "%sColor%s (ws1) Workspace [%s1%s]\n"
+msgstr "%sColor%s (ws1) Espacio de trabajo [%s1%s]\n"
+
+msgid "%sColor%s (ws2) Workspace [%s2%s]\n"
+msgstr "%sColor%s (ws2) Espacio de trabajo [%s2%s]\n"
+
+msgid "%sColor%s (ws3) Workspace [%s3%s]\n"
+msgstr "%sColor%s (ws3) Espacio de trabajo [%s3%s]\n"
+
+msgid "%sColor%s (ws4) Workspace [%s4%s]\n"
+msgstr "%sColor%s (ws4) Espacio de trabajo [%s4%s]\n"
+
+msgid "%sColor%s (ws5) Workspace [%s5%s]\n"
+msgstr "%sColor%s (ws5) Espacio de trabajo [%s5%s]\n"
+
+msgid "%sColor%s (ws6) Workspace [%s6%s]\n"
+msgstr "%sColor%s (ws6) Espacio de trabajo [%s6%s]\n"
+
+msgid "%sColor%s (ws6) Workspace [%s6%s]\n"
+msgstr "%sColor%s (ws6) Espacio de trabajo [%s6%s]\n"
+
+msgid "%sColor%s (ws7) Workspace [%s7%s]\n"
+msgstr "%sColor%s (ws7) Espacio de trabajo [%s7%s]\n"
+
+msgid "%sColor%s (ws8) Workspace [%s8%s]\n"
+msgstr "%sColor%s (ws8) Espacio de trabajo [%s8%s]\n"
+
+msgid "%sColor%s (xf) Error exit code (e.g. <%s1%s>)\n"
+msgstr "%sColor%s (xf) Código de salida de error (p. ej. <%s1%s>)\n"
+
+msgid "%sColor%s (xs) Success exit code (<%s0%s>)\n"
+msgstr "%sColor%s (xs) Código de salida de éxito (<%s0%s>)\n"
+
+msgid ""
+"%sEdit file ownership (Ctrl+d to quit)\n"
+"Both ID numbers and names are supported\n"
+msgstr ""
+"%sEditar propiedad del archivo (Ctrl+d para salir)\n"
+"Se admiten tanto números de ID como nombres\n"
+
+msgid ""
+"%sEdit file permissions (Ctrl+d to quit)\n"
+"Both symbolic and numeric notation are supported\n"
+msgstr ""
+"%sEditar permisos del archivo (Ctrl+d para salir)\n"
+"Se admiten tanto notación simbólica como numérica\n"
+
+msgid ""
+"%sFile types%s\n"
+"\n"
+msgstr ""
+"%sTipos de archivo%s\n"
+"\n"
+
+msgid "%sFile%s: %s\n"
+msgstr "%sArchivo%s: %s\n"
+
+msgid ""
+"%sFiles with different owners\n"
+"Only common owners are set in the template\n"
+msgstr ""
+"%sArchivos con diferentes propietarios\n"
+"Solo se muestran los propietarios comunes en la plantilla\n"
+
+msgid ""
+"%sFiles with different sets of permissions\n"
+"Only shared permission bits are set in the template\n"
+msgstr ""
+"%sArchivos con diferentes conjuntos de permisos\n"
+"Solo se muestran los bits de permiso compartidos en la plantilla\n"
+
+msgid ""
+"%sMountpoints%s\n"
+"\n"
+msgstr ""
+"%sPuntos de montaje%s\n"
+"\n"
+
+msgid "%sNOTE%s: Using Zstandard\n"
+msgstr "%sNOTA%s: Utilizando Zstandard\n"
+
+msgid "%sPress any key to continue... "
+msgstr "%sPresiona cualquier tecla para continuar... "
+
+msgid ""
+"%s[e]%sxtract %s[E]%sxtract-to-dir %s[l]%sist %s[m]%sount %s[r]%sepack %s[q]"
+"%suit\n"
+msgstr ""
+"%s[e]%sxtraer %s[E]%sxtraer-a-dir %s[l]%sista %s[m]%sontar %s[r]%seempaquetar %s[q]"
+"%ssalir\n"
+
+msgid ""
+"%s[e]%sxtract %s[E]%sxtract-to-dir %s[l]%sist %s[t]%sest %s[m]%sount %s[q]"
+"%suit\n"
+msgstr ""
+"%s[e]%sxtraer %s[E]%sxtraer-a-dir %s[l]%sista %s[t]%sest %s[m]%sontar %s[q]"
+"%ssalir\n"
+
+msgid "%s[e]%sxtract %s[t]%sest %s[i]%snfo %s[q]%suit\n"
+msgstr "%s[e]%sxtraer %s[t]%sest %s[i]%snformación %s[q]%ssalir\n"
+
+msgid "%sbigger%s\n"
+msgstr "%smás grande%s\n"
+
+msgid "%sday%s "
+msgstr "%sdía%s "
+
+msgid "%shour%s "
+msgstr "%shora%s "
+
+msgid "%smonth%s "
+msgstr "%smes%s "
+
+msgid "%solder%s\n"
+msgstr "%smás antiguo%s\n"
+
+msgid "%sweek%s "
+msgstr "%ssemána%s "
+
+msgid "%zu file(s) copied\n"
+msgstr "%zu archivo(s) copiado(s)\n"
+
+msgid "%zu file(s) created\n"
+msgstr "%zu archivo(s) creado(s)\n"
+
+msgid "%zu file(s) deselected\n"
+msgstr "%zu archivo(s) deseleccionado(s)\n"
+
+msgid "%zu file(s) moved\n"
+msgstr "%zu archivo(s) movido(s)\n"
+
+msgid "%zu file(s) removed\n"
+msgstr "%zu archivo(s) eliminado(s)\n"
+
+msgid "%zu file(s) removed from the trash can\n"
+msgstr "%zu archivo(s) eliminado(s) de la papelera de reciclaje\n"
+
+msgid "%zu file(s) renamed\n"
+msgstr "%zu archivo(s) renombrado(s)\n"
+
+msgid "%zu file(s) restored\n"
+msgstr "%zu archivo(s) restaurado(s)\n"
+
+msgid "%zu file(s) selected\n"
+msgstr "%zu archivo(s) seleccionado(s)\n"
+
+msgid "%zu file(s) trashed\n"
+msgstr "%zu archivo(s) eliminado(s) a la papelera de reciclaje\n"
+
+msgid "%zu filename(s) will be bleached\n"
+msgstr "%zu nombre(s) de archivo serán blanqueado(s)\n"
+
+msgid "%zu selected file(s)\n"
+msgstr "%zu archivo(s) seleccionado(s)\n"
+
+msgid "%zu symbolic link(s) created\n"
+msgstr "%zu enlace(s) simbólico(s) creado(s)\n"
+
+msgid "%zu total selected file(s)\n"
+msgstr "%zu archivo(s) seleccionado(s) total(es)\n"
+
+msgid "%zu total trashed file(s)\n"
+msgstr "%zu archivo(s) en la papelera\n"
+
+msgid "%zu trashed file(s)\n"
+msgstr "%zu archivo(s) enviado(s) a la papelera\n"
+
+msgid "'%s' conflicts with '%s'\n"
+msgstr "'%s' entra en conflicto con '%s'\n"
+
+msgid "'%s' has conflicting definitions\n"
+msgstr "'%s' tiene definiciones conflictivas\n"
+
+msgid "'%s' relinked to "
+msgstr "'%s' reenlazado a "
+
+msgid ""
+"'%s': %s\n"
+"bookmarks: Error creating temporary file\n"
+msgstr ""
+"'%s': %s\n"
+"marcadores: Error al crear archivo temporal\n"
+
+msgid ""
+"'%s': %s\n"
+"bookmarks: Error reading the bookmarks file\n"
+msgstr ""
+"'%s': %s\n"
+"marcadores: Error al leer el archivo de marcadores\n"
+
+msgid "'%s': Alias already exists\n"
+msgstr "'%s': El alias ya existe\n"
+
+msgid "'%s': Alias conflicts with internal command\n"
+msgstr "'%s': El alias está conflicto con un comando interno\n"
+
+msgid "'%s': Invalid bookmark\n"
+msgstr "'%s': Marcador no válido\n"
+
+msgid "'%s': Invalid regular expression\n"
+msgstr "'%s': Expresión regular no válida\n"
+
+msgid "'%s': No such bookmark\n"
+msgstr "'%s': No existe este marcador\n"
+
+msgid "'%s': Successfully removed tag\n"
+msgstr "'%s': Etiqueta eliminada con éxito\n"
+
+msgid ""
+"(%s%04o%s)%s%c%s/%s%c%s%c%s%c%s.%s%c%s%c%s%c%s.%s%c%s%c%s%c%s%s Links: "
+"%s%zu%s "
+msgstr ""
+"(%s%04o%s)%s%c%s/%s%c%s%c%s%c%s.%s%c%s%c%s%c%s.%s%c%s%c%s%c%s%s Enlaces: "
+"%s%zu%s "
+
+msgid ""
+"(%s2%s) Also used for miscellaneous names (like bookmarks and color schemes) "
+"in tab completion\n"
+msgstr ""
+"(%s2%s) También usada para nombres varios (como marcadores y esquemas de color) "
+"en el autocompletado\n"
+
+msgid "(%s3%s) Used only for the standard tab completion mode\n"
+msgstr "(%s3%s) Se usa solo para el modo estándar de autocompletado\n"
+
+msgid "(Enter:accept, Ctrl+d:abort, Ctrl+c:clear-line)"
+msgstr "(Intro:aceptar, Ctrl+d:abortar, Ctrl+c:limpiar línea)"
+
+msgid "0 total selected file(s)\n"
+msgstr "0 archivo(s) seleccionado(s) en total\n"
+
+msgid ""
+msgstr ""
+
+msgid "??? (broken link)"
+msgstr "??? (enlace roto)"
+
+msgid "ACL-extended:\t"
+msgstr "ACL-extendido:\t"
+
+msgid "Access: \t%s%s%s\n"
+msgstr "Acceso: \t%s%s%s\n"
+
+msgid "Active filter: %s%s%s%s\n"
+msgstr "Filtro activo: %s%s%s%s\n"
+
+msgid "Archive state 1"
+msgstr "Estado de archivo 1"
+
+msgid "Archive state 1:       %zu\n"
+msgstr "Estado de archivo 1:       %zu\n"
+
+msgid "Archive state 2"
+msgstr "Estado de archivo 2"
+
+msgid "Archive state 2:       %zu\n"
+msgstr "Estado de archivo 2:       %zu\n"
+
+msgid "Associated application: None\n"
+msgstr "Aplicación asociada: Ninguna\n"
+
+msgid "Attributes: \t"
+msgstr "Atributos: \t"
+
+msgid "Auto-open disabled"
+msgstr "Auto-apertura deshabilitada"
+
+msgid "Auto-open enabled"
+msgstr "Auto-apertura habilitada"
+
+msgid "Auto-open is %s\n"
+msgstr "La auto-apertura es %s\n"
+
+msgid "Autocd disabled"
+msgstr "Autocd deshabilitado"
+
+msgid "Autocd enabled"
+msgstr "Autocd habilitado"
+
+msgid "Autocd is %s\n"
+msgstr "Autocd es %s\n"
+
+msgid "Bind function to this new key?"
+msgstr "¿Asociar función a esta nueva tecla?"
+
+msgid "Birth: \t\t%s%s%s\n"
+msgstr "Creación: \t\t%s%s%s\n"
+
+msgid "Birth: \t\t%s-%s\n"
+msgstr "Creación: \t\t%s-%s\n"
+
+msgid "Block special file"
+msgstr "Archivo especial de bloque"
+
+msgid "Calculating file size... "
+msgstr "Calculando tamaño de archivo... "
+
+msgid "Cannot rename '%s' to '%s': %s\n"
+msgstr "No se puede renombrar '%s' a '%s': %s\n"
+
+msgid "Capabilities:\t"
+msgstr "Capacidades:\t"
+
+msgid "Change: \t%s%s%s\n"
+msgstr "Cambio: \t%s%s%s\n"
+
+msgid "Character special file"
+msgstr "Archivo especial de caracter"
+
+msgid "Choose a directory ('q' to quit): "
+msgstr "Elige un directorio ('q' para salir): "
+
+msgid "Choose a mountpoint/device: "
+msgstr "Elige un punto de montaje/dispositivo: "
+
+msgid "Choose a mountpoint: "
+msgstr "Elige un punto de montaje: "
+
+msgid "Choose an application ('q' to quit): "
+msgstr "Elige una aplicación ('q' para salir): "
+
+msgid "Clear history?"
+msgstr "¿Borrar historial?"
+
+msgid "Color scheme %s%s%s %s\n"
+msgstr "Esquema de color %s%s%s %s\n"
+
+msgid "Columns %s\n"
+msgstr "Columnas %s\n"
+
+msgid "Columns disabled\n"
+msgstr "Columnas deshabilitadas\n"
+
+msgid "Columns enabled\n"
+msgstr "Columnas habilitadas\n"
+
+msgid "Configuration file not found"
+msgstr "Archivo de configuración no encontrado"
+
+msgid "Continue?"
+msgstr "¿Continuar?"
+
+msgid "Create broken symbolic link?"
+msgstr "¿Crear enlace simbólico roto?"
+
+msgid "Create it?"
+msgstr "¿Crearlo?"
+
+msgid "Created new tag %s%s%s\n"
+msgstr "Etiqueta nueva creada %s%s%s\n"
+
+msgid "Current color scheme: '%s'\n"
+msgstr "Esquema de color actual: '%s'\n"
+
+msgid "Current filter: %c%s\n"
+msgstr "Filtro actual: %c%s\n"
+
+msgid "Current target %s%s%s "
+msgstr "Objetivo actual %s%s%s "
+
+msgid "Device: %s%ju,%ju%s"
+msgstr "Dispositivo: %s%ju,%ju%s"
+
+msgid "Directories first %s\n"
+msgstr "Directorios-primero %s\n"
+
+msgid "Directories first disabled\n"
+msgstr "Directorios-primero deshabilitado\n"
+
+msgid "Directories first enabled\n"
+msgstr "Directorios-primero habilitado\n"
+
+msgid "Directories first is %s\n"
+msgstr "Directorios-primero es %s\n"
+
+msgid "Directory"
+msgstr "Directorio"
+
+msgid "Disk usage analyzer %s\n"
+msgstr "Analizador de uso de disco %s\n"
+
+msgid "Door    "
+msgstr "Puerta    "
+
+msgid "Doors:                 %zu\n"
+msgstr "Puertas:                 %zu\n"
+
+msgid "Edit target (Ctrl+d to quit)"
+msgstr "Editar objetivo (Ctrl+d para salir)"
+
+msgid "Enter 'iELN' for device information. E.g.: i4"
+msgstr "Ingrese 'iELN' para obtener información del dispositivo. Ej.: i4"
+
+msgid "Enter 'q' to quit"
+msgstr "Ingrese 'q' para salir"
+
+msgid "Enter a keybinding for %s%s%s (current: %s%s%s)\n"
+msgstr "Ingrese una asociación de tecla para %s%s%s (actual: %s%s%s)\n"
+
+msgid ""
+"Enter destination directory (Ctrl+d to quit)\n"
+"Tip: "." for the current directory"
+msgstr ""
+"Ingrese el directorio de destino (Ctrl+d para salir)\n"
+"Consejo: "." para usar el directorio actual"
+
+msgid ""
+"Enter new filename (Ctrl+d to quit)\n"
+"Tip: End name with a slash to create a directory"
+msgstr ""
+"Ingrese el nuevo nombre (Ctrl+d para salir)\n"
+"Consejo: Termine el nombre con una barra para crear un directorio"
+
+msgid ""
+"Enter new name (Ctrl+d to quit)\n"
+"%s>%s "
+msgstr ""
+"Ingrese el nuevo nombre (Ctrl+d para salir)\n"
+"%s>%s "
+
+msgid "Error opening temporary file"
+msgstr "Error al abrir archivo temporal"
+
+msgid "Error querying file type"
+msgstr "Error al consultar el tipo de archivo"
+
+msgid "External commands allowed"
+msgstr "Comandos externos permitidos"
+
+msgid "External commands are %s\n"
+msgstr "Los comandos externos están %s\n"
+
+msgid "External commands disallowed"
+msgstr "Comandos externos no permitidos"
+
+msgid "Fifo    "
+msgstr "Fifo    "
+
+msgid "File modified. Actions reloaded.\n"
+msgstr "Archivo modificado. Acciones recargadas.\n"
+
+msgid "File modified. Bookmarks reloaded.\n"
+msgstr "Archivo modificado. Marcadores recargados.\n"
+
+msgid "File modified. History entries reloaded\n"
+msgstr "Archivo modificado. Entradas de historial recargadas\n"
+
+msgid "File modified. Prompts reloaded\n"
+msgstr "Archivo modificado. Prompts recargados.\n"
+
+msgid "File modified. Remotes reloaded.\n"
+msgstr "Archivo modificado. Remotos recargados.\n"
+
+msgid "File succesfully bookmarked"
+msgstr "Archivo marcado con éxito"
+
+msgid "File(s) to be removed%s:\n"
+msgstr "Archivo(s) a eliminar%s:\n"
+
+msgid "File(s) to be trashed:\n"
+msgstr "Archivo(s) a mover a la papelera:\n"
+
+msgid "File-creation mask set to '%04o'\n"
+msgstr "Máscara de creación de archivo establecida en '%04o'\n"
+
+msgid "Filename ('q' to quit): "
+msgstr "Nombre de archivo ('q' para salir): "
+
+msgid "Filenames exported to '%s'\n"
+msgstr "Nombres de archivo exportados a '%s'\n"
+
+msgid "File counter %s\n"
+msgstr "Contador de archivos %s\n"
+
+msgid "File counter disabled\n"
+msgstr "Contador de archivos deshabilitado\n"
+
+msgid "File counter enabled\n"
+msgstr "Contador de archivos habilitado\n"
+
+msgid "Files tagged as %s%s%s%s:\n"
+msgstr "Archivos etiquetados como %s%s%s%s:\n"
+
+msgid "Files tagged as %s%s%s:\n"
+msgstr "Archivos etiquetados como %s%s%s:\n"
+
+msgid "Filter unset\n"
+msgstr "Filtro desestablecido\n"
+
+msgid "Flags: \t\t"
+msgstr "Indicadores: \t\t"
+
+msgid "Follow links %s\n"
+msgstr "Seguir enlaces %s\n"
+
+msgid ""
+"For more information consult the manpage and/or the Wiki:\n"
+"https://github.com/leo-arch/clifm/wiki"
+msgstr ""
+"Para más información, consulte la página del manual y/o la Wiki:\n"
+"https://github.com/leo-arch/clifm/wiki"
+
+msgid "Full directory size disabled\n"
+msgstr "Tamaño de directorio completo deshabilitado\n"
+
+msgid "Full directory size enabled\n"
+msgstr "Tamaño de directorio completo habilitado\n"
+
+msgid "Full directory size is already disabled"
+msgstr "El tamaño de directorio completo ya está deshabilitado"
+
+msgid "Full directory size is already enabled"
+msgstr "El tamaño de directorio completo ya está habilitado"
+
+msgid "Glob: No matches found. Trying regex...\n"
+msgstr "Glob: No se encontraron coincidencias. Intentando regex...\n"
+
+msgid "Hidden files: off\n"
+msgstr "Archivos ocultos: desactivados\n"
+
+msgid "Hidden files: on\n"
+msgstr "Archivos ocultos: activados\n"
+
+msgid "Hidden files: on (list first)\n"
+msgstr "Archivos ocultos: activados (listar primero)\n"
+
+msgid "Hidden files: on (list last)\n"
+msgstr "Archivos ocultos: activados (listar al final)\n"
+
+msgid "History is %s\n"
+msgstr "Historial es %s\n"
+
+msgid "Icons disabled\n"
+msgstr "Iconos deshabilitados\n"
+
+msgid "Icons enabled\n"
+msgstr "Iconos habilitados\n"
+
+msgid "Invalid filename"
+msgstr "Nombre de archivo no válido"
+
+msgid "Is this OK? [y/n/(e)dit] "
+msgstr "¿Esto es correcto? [y/n/(e)ditar] "
+
+msgid "Items:\t\t%s%c%s\n"
+msgstr "Elementos:\t\t%s%c%s\n"
+
+msgid "Items:\t\t%s%s%llu%s (%s%llu%s %s, %s%llu%s %s, %s%llu%s %s)\n"
+msgstr "Elementos:\t\t%s%s%llu%s (%s%llu%s %s, %s%llu%s %s, %s%llu%s %s)\n"
+
+msgid "Largest file: %s%s%s %s%s%s%s%s\n"
+msgstr "Archivo más grande: %s%s%s %s%s%s%s%s\n"
+
+msgid "Light mode %s\n"
+msgstr "Modo ligero %s\n"
+
+msgid "Light mode already off"
+msgstr "El modo ligero ya está desactivado"
+
+msgid "Light mode already on"
+msgstr "El modo ligero ya está activado"
+
+msgid "Light mode disabled\n"
+msgstr "Modo ligero deshabilitado\n"
+
+msgid "Light mode enabled\n"
+msgstr "Modo ligero habilitado\n"
+
+msgid "Long view %s\n"
+msgstr "Vista larga %s\n"
+
+msgid "MIME type: %s\n"
+msgstr "Tipo MIME: %s\n"
+
+msgid "Matches found: %d%s\n"
+msgstr "Coincidencias encontradas: %d%s\n"
+
+msgid "Matches found: %zu\n"
+msgstr "Se encontraron coincidencias: %zu\n"
+
+msgid "Max files set to %d\n"
+msgstr "Archivos máximos establecidos en %d\n"
+
+msgid "Max files unset\n"
+msgstr "Archivos máximos desestablecidos\n"
+
+msgid "Max files: %d\n"
+msgstr "Archivos máximos: %d\n"
+
+msgid "Max files: unset"
+msgstr "Archivos máximos: desestablecidos"
+
+msgid "Max name length set to %d\n"
+msgstr "Longitud máxima de nombre establecida en %d\n"
+
+msgid "Max name length unset\n"
+msgstr "Longitud máxima de nombre desestablecida\n"
+
+msgid "Messages cleared\n"
+msgstr "Mensajes borrados\n"
+
+msgid "Missing parameter. Try 's --help'\n"
+msgstr "Parámetro faltante. Intenta 's --help'\n"
+
+msgid "Modify: \t%s%s%s\n"
+msgstr "Modificar: \t%s%s%s\n"
+
+msgid "Mounted devices"
+msgstr "Dispositivos montados"
+
+msgid "Mountpoints"
+msgstr "Puntos de montaje"
+
+msgid "Name: %s\n"
+msgstr "Nombre: %s\n"
+
+msgid "Name: %s%s%s\n"
+msgstr "Nombre: %s%s%s\n"
+
+msgid "New configuration file written to '%s'\n"
+msgstr "Nuevo archivo de configuración escrito en '%s'\n"
+
+msgid "New format (e.g.: .tar.xz): "
+msgstr "Nuevo formato (p. ej.: .tar.xz): "
+
+msgid "New key: %s\n"
+msgstr "Nueva clave: %s\n"
+
+msgid "New ownership set for %zu file(s)\n"
+msgstr "Nueva propiedad establecida para %zu archivo(s)\n"
+
+msgid "No"
+msgstr "No"
+
+msgid "No matches found\n"
+msgstr "No se encontraron coincidencias\n"
+
+msgid "No such ELN"
+msgstr "No existe ELN"
+
+msgid "None"
+msgstr "Ninguno"
+
+msgid "Old configuration file saved as '%s'\n"
+msgstr "Archivo de configuración antiguo guardado como '%s'\n"
+
+msgid "Old keybindings file saved as '%s'\n"
+msgstr "Archivo de enlaces de teclas antiguo guardado como '%s'\n"
+
+msgid "Only directories %s\n"
+msgstr "Solo directorios %s\n"
+
+msgid "Opener set to '%s'\n"
+msgstr "Aperturador establecido en '%s'\n"
+
+msgid "Opening application:    %s [%s]\n"
+msgstr "Abriendo aplicación:    %s [%s]\n"
+
+msgid "Opening application:    ad [builtin] [%s]\n"
+msgstr "Abriendo aplicación:    ad [integrado] [%s]\n"
+
+msgid "Operation: "
+msgstr "Operación: "
+
+msgid "Overwrite this file?"
+msgstr "¿Sobrescribir este archivo?"
+
+msgid "Pager disabled"
+msgstr "Paginador deshabilitado"
+
+msgid "Pager enabled"
+msgstr "Paginador habilitado"
+
+msgid "Pager set to %d\n"
+msgstr "Paginador establecido en %d\n"
+
+msgid "Pinned file: '%s'\n"
+msgstr "Archivo fijado: '%s'\n"
+
+msgid "Port    "
+msgstr "Puerto    "
+
+msgid "Ports:                 %zu\n"
+msgstr "Puertos:                 %zu\n"
+
+msgid "PreviewMaxSize: '%c': Invalid unit.\n"
+msgstr "PreviewMaxSize: '%c': Unidad inválida.\n"
+
+msgid "PreviewMaxSize: Value too large (max %dGiB).\n"
+msgstr "PreviewMaxSize: Valor demasiado grande (máx %dGiB).\n"
+
+msgid "Previewing application: %s %s\n"
+msgstr "Previsualizando aplicación: %s %s\n"
+
+msgid "Querying MIME types... "
+msgstr "Consultando tipos MIME... "
+
+msgid "Regular file"
+msgstr "Archivo regular"
+
+msgid "Relink as broken symbolic link?"
+msgstr "Volver a enlazar como enlace simbólico roto?"
+
+msgid "Remove %zu file(s)?"
+msgstr "¿Eliminar %zu archivo(s)?"
+
+msgid "Remove files anyway?"
+msgstr "¿Eliminar archivos de cualquier manera?"
+
+msgid "Removed %zu bookmark(s)\n"
+msgstr "Eliminados %zu marcador(es)\n"
+
+msgid "Removed %zu thumbnail(s): %s freed\n"
+msgstr "Eliminadas %zu miniatura(s): %s liberado\n"
+
+msgid "Run '?' and consult the NAVIGATION section"
+msgstr "Ejecuta '?' y consulta la sección de NAVEGACIÓN"
+
+msgid "Run '?' or 'help' to get started with %s\n"
+msgstr "Ejecuta '?' o 'help' para empezar con %s\n"
+
+msgid "Run 'cs edit' to fix these conflicts"
+msgstr "Ejecuta 'cs edit' para solucionar estos conflictos"
+
+msgid "Run command?"
+msgstr "¿Ejecutar comando?"
+
+msgid "Running in light mode: Some files statistics are not available\n"
+msgstr "Ejecutando en modo ligero: Algunas estadísticas de archivos no están disponibles\n"
+
+msgid "Show-hidden-files is %s\n"
+msgstr "Mostrar-archivos-ocultos es %s\n"
+
+msgid "Showing %jd/%jd files\n"
+msgstr "Mostrando %jd/%jd archivos\n"
+
+msgid "Size:\t\t"
+msgstr "Tamaño:\t\t"
+
+msgid "Size: \t\t%s%s%s"
+msgstr "Tamaño: \t\t%s%s%s"
+
+msgid "Socket  "
+msgstr "Socket  "
+
+msgid "Sorted by "
+msgstr "Ordenado por "
+
+msgid "Succesfully created profile %s%s%s\n"
+msgstr "Perfil creado con éxito %s%s%s\n"
+
+msgid "Successfully merged %s%s%s into %s%s%s\n"
+msgstr "Combinado con éxito %s%s%s en %s%s%s\n"
+
+msgid "Successfully removed profile %s%s%s\n"
+msgstr "Perfil eliminado con éxito %s%s%s\n"
+
+msgid "Successfully tagged %zu file(s)\n"
+msgstr "Etiquetado con éxito %zu archivo(s)\n"
+
+msgid "Successfully untagged %zu file(s)\n"
+msgstr "Desetiquetado con éxito %zu archivo(s)\n"
+
+msgid "Switched to %s names\n"
+msgstr "Cambiado a nombres %s\n"
+
+msgid "Switched to profile %s%s%s\n"
+msgstr "Cambiado a perfil %s%s%s\n"
+
+msgid "Symbolic link"
+msgstr "Enlace simbólico"
+
+msgid "Take a look at the 'colorschemes', 'prompt', and 'config' commands"
+msgstr "Echa un vistazo a los comandos 'colorschemes', 'prompt' y 'config'"
+
+msgid "The file counter is disabled"
+msgstr "El contador de archivos está deshabilitado"
+
+msgid "The file counter is enabled"
+msgstr "El contador de archivos está habilitado"
+
+msgid ""
+"The following is the list of options (as defined in the configuration file) "
+"and their current values. Whenever a value differs from the default, the "
+"entry is highlighted and the default value is displayed in square brackets.\n"
+msgstr ""
+"Lo siguiente es la lista de opciones (como se define en el archivo de configuración) "
+"y sus valores actuales. Siempre que un valor difiere del valor predeterminado, la "
+"entrada se resalta y el valor predeterminado se muestra entre corchetes.\n"
+
+msgid "The pager is disabled"
+msgstr "El paginador está deshabilitado"
+
+msgid "The pager is enabled"
+msgstr "El paginador está habilitado"
+
+msgid "The pager is set to %d\n"
+msgstr "El paginador está establecido en %d\n"
+
+msgid ""
+"To run a plugin just enter its action name\n"
+"Example: enter '//' to run the rgfind plugin"
+msgstr ""
+"Para ejecutar un plugin, solo ingresa su nombre de acción\n"
+"Ejemplo: ingresa '//' para ejecutar el plugin rgfind"
+
+msgid "To unset the function enter '-'"
+msgstr "Para desestablecer la función, ingresa '-'"
+
+msgid "Toggled executable bit on %zu %s\n"
+msgstr "Alternado el bit ejecutable en %zu %s\n"
+
+msgid "Too few"
+msgstr "Demasiado pocos"
+
+msgid "Too many"
+msgstr "Demasiados"
+
+msgid ""
+"Total files:                 %jd\n"
+"Directories:                 %zu%s\n"
+"Regular files:               %zu%s\n"
+"Executable files:            %zu\n"
+"Hidden files:                %zu\n"
+"SUID files:                  %zu\n"
+"SGID files:                  %zu\n"
+"Files w/capabilities:        %zu\n"
+"FIFO/pipes:                  %zu\n"
+"Sockets:                     %zu\n"
+"Block devices:               %zu\n"
+"Character devices:           %zu\n"
+"Symbolic links:              %zu%s\n"
+"Multi-link files:            %zu\n"
+"Files w/extended attributes: %zu\n"
+"Other-writable files:        %zu\n"
+"Sticky files:                %zu\n"
+"Unknown file types:          %zu\n"
+"Unstatable files:            %zu\n"
+msgstr ""
+"Archivos totales:                 %jd\n"
+"Directorios:                 %zu%s\n"
+"Archivos regulares:               %zu%s\n"
+"Archivos ejecutables:            %zu\n"
+"Archivos ocultos:                %zu\n"
+"Archivos SUID:                  %zu\n"
+"Archivos SGID:                  %zu\n"
+"Archivos con capacidades:        %zu\n"
+"FIFO/tuberías:                  %zu\n"
+"Socket:                     %zu\n"
+"Dispositivos de bloque:               %zu\n"
+"Dispositivos de caracter:           %zu\n"
+"Enlaces simbólicos:              %zu%s\n"
+"Archivos de multi-enlace:            %zu\n"
+"Archivos con atributos extendidos: %zu\n"
+"Archivos escribibles por otros:        %zu\n"
+"Archivos pegajosos:                %zu\n"
+"Tipos de archivo desconocidos:          %zu\n"
+"Archivos no estadísticos:            %zu\n"
+
+msgid "Total size:\t"
+msgstr "Tamaño total:\t"
+
+msgid "Total size: \t"
+msgstr "Tamaño total: \t"
+
+msgid "Total size: \t%s%c%s\n"
+msgstr "Tamaño total: \t%s%c%s\n"
+
+msgid "Total size: %s%s%s%s\n"
+msgstr "Tamaño total: %s%s%s%s\n"
+
+msgid "Trash can emptied: %zu file(s) removed\n"
+msgstr "Papelera vaciada: %zu archivo(s) eliminado(s)\n"
+
+msgid "Try 'mm edit APPLICATION'\n"
+msgstr "Intenta 'mm edit APLICACIÓN'\n"
+
+msgid "UNKNOWN"
+msgstr "DESCONOCIDO"
+
+msgid "Unset this function?"
+msgstr "¿Desestablecer esta función?"
+
+msgid ""
+"Use extension to specify archive/compression type (defaults to .tar.gz)\n"
+"Example: myarchive.xz"
+msgstr ""
+"Utilice la extensión para especificar el tipo de archivo/compresión (predeterminado .tar.gz)\n"
+"Ejemplo: myarchive.xz"
+
+msgid "Virtual directory\n"
+msgstr "Directorio virtual\n"
+
+msgid "Whiteout"
+msgstr "Borrado"
+
+msgid "Whiteout:              %zu\n"
+msgstr "Borrado:              %zu\n"
+
+msgid "Xattributes:\t"
+msgstr "Atributos X:\t"
+
+msgid "Yes"
+msgstr "Sí"
+
+msgid "actions: Access to configuration files is not allowed in stealth mode"
+msgstr "actions: El acceso a los archivos de configuración no está permitido en modo sigilo"
+
+msgid ""
+"actions: No actions defined. Use the 'actions edit' command to add new "
+"actions\n"
+msgstr ""
+"actions: No se han definido acciones. Utilice el comando 'actions edit' para agregar nuevas acciones\n"
+
+msgid "actions: Plugins are not allowed in stealth mode\n"
+msgstr "actions: Los plugins no están permitidos en modo sigilo\n"
+
+msgid "actions: Plugins directory not defined"
+msgstr "actions: El directorio de plugins no está definido"
+
+msgid "alias: %zu alias(es) imported\n"
+msgstr "alias: %zu alias(es) importado(s)\n"
+
+msgid "alias: '%s': Error normalizing filename\n"
+msgstr "alias: '%s': Error al normalizar el nombre del archivo\n"
+
+msgid "alias: No alias found in '%s'\n"
+msgstr "alias: No se encontró alias en '%s'\n"
+
+msgid "alias: No alias imported\n"
+msgstr "alias: No se importaron aliases\n"
+
+msgid "allowed"
+msgstr "permitido"
+
+msgid "apparent"
+msgstr "aparente"
+
+msgid "archiver: '%s': Error unescaping filename\n"
+msgstr "archiver: '%s': Error al desescapar el nombre del archivo\n"
+
+msgid ""
+"archiver: '%s': Invalid file format. File should be either a directory or a "
+"block device.\n"
+msgstr ""
+"archiver: '%s': Formato de archivo inválido. El archivo debe ser un directorio o un dispositivo de bloque.\n"
+
+msgid "archiver: '%s': Not an archive/compressed file\n"
+msgstr "archiver: '%s': No es un archivo comprimido\n"
+
+msgid "auto: No temporary autocommand defined for the current directory\n"
+msgstr "auto: No se ha definido un autocomando temporal para el directorio actual\n"
+
+msgid "auto: The current directory is undefined\n"
+msgstr "auto: El directorio actual está indefinido\n"
+
+msgid "autocmd: '%s': Invalid option format  (it must be 'OPTION=VALUE')\n"
+msgstr "autocmd: '%s': Formato de opción inválido (debe ser 'OPCIÓN=VALOR')\n"
+
+msgid "autocmd: '%s': Invalid option name\n"
+msgstr "autocmd: '%s': Nombre de opción inválido\n"
+
+msgid "autocmd: '%s': Invalid value for '%s'\n"
+msgstr "autocmd: '%s': Valor inválido para '%s'\n"
+
+msgid "autocmd: '%s': Invalid value for 'cs'\n"
+msgstr "autocmd: '%s': Valor inválido para 'cs'\n"
+
+msgid "autocmd: '%s': Invalid value for 'st'\n"
+msgstr "autocmd: '%s': Valor inválido para 'st'\n"
+
+msgid "bd: %s: No matches found\n"
+msgstr "bd: %s: No se encontraron coincidencias\n"
+
+msgid "bd: '%s': Error expanding tilde\n"
+msgstr "bd: '%s': Error al expandir el tilde\n"
+
+msgid "bd: '%s': Error unescaping string\n"
+msgstr "bd: '%s': Error al desescapar la cadena\n"
+
+msgid "bd: '/': No parent directory"
+msgstr "bd: '/': No hay directorio padre"
+
+msgid "bl: '%s': Error unescaping name\n"
+msgstr "bl: '%s': Error al desescapar el nombre\n"
+
+msgid "bl: Cannot create symbolic link '%s': %s\n"
+msgstr "bl: No se puede crear el enlace simbólico '%s': %s\n"
+
+msgid "bleach: '%s': Error unescaping filename\n"
+msgstr "bleach: '%s': Error al desescapar el nombre del archivo\n"
+
+msgid "bleach: Cannot rename '%s' to '%s': %s\n"
+msgstr "bleach: No se puede renombrar '%s' a '%s': %s\n"
+
+msgid "bookmarks: '%s': Already bookmarked as '%s'\n"
+msgstr "bookmarks: '%s': Ya está marcado como '%s'\n"
+
+msgid "bookmarks: '%s': Colons and square brackets are not allowed\n"
+msgstr "bookmarks: '%s': No se permiten ni dos puntos ni corchetes\n"
+
+msgid "bookmarks: '%s': Error unescaping filename\n"
+msgstr "bookmarks: '%s': Error al desescapar el nombre del archivo\n"
+
+msgid "bookmarks: '%s': Name already in use\n"
+msgstr "bookmarks: '%s': El nombre ya está en uso\n"
+
+msgid "bookmarks: '%s': Reserved bookmark keyword\n"
+msgstr "bookmarks: '%s': Palabra clave de marcador reservada\n"
+
+msgid "bookmarks: '%s': Shortcut already in use\n"
+msgstr "bookmarks: '%s': El acceso directo ya está en uso\n"
+
+msgid "bookmarks: Cannot add any more bookmarks"
+msgstr "bookmarks: No se pueden agregar más marcadores\n"
+
+msgid "bookmarks: Cannot open the bookmarks file"
+msgstr "bookmarks: No se puede abrir el archivo de marcadores\n"
+
+msgid ""
+"bookmarks: Error updating bookmarks\n"
+"Cannot rename temporary file '%s': %s\n"
+msgstr ""
+"bookmarks: Error al actualizar los marcadores\n"
+"No se puede renombrar el archivo temporal '%s': %s\n"
+
+msgid "br: '%s' is duplicated\n"
+msgstr "br: '%s' está duplicado\n"
+
+msgid "br: '%s': Error normalizing path\n"
+msgstr "br: '%s': Error al normalizar la ruta\n"
+
+msgid "br: '%s': Error unescaping filename\n"
+msgstr "br: '%s': Error al desescapar el nombre del archivo\n"
+
+msgid "br: Cannot rename '%s' to '%s': %s\n"
+msgstr "br: No se puede renombrar '%s' a '%s': %s\n"
+
+msgid "br: Line mismatch in temporary file"
+msgstr "br: Error de coincidencia de línea en el archivo temporal\n"
+
+msgid "br: Nothing to do"
+msgstr "br: No hay nada que hacer\n"
+
+msgid "br: Temporary file changed on disk! Aborting."
+msgstr "br: ¡El archivo temporal ha cambiado en disco! Cancelando.\n"
+
+msgid "builtin (256 colors)"
+msgstr "integrado (256 colores)"
+
+msgid "builtin (8 colors)"
+msgstr "integrado (8 colores)"
+
+msgid "cd: '%s': Error normalizing path\n"
+msgstr "cd: '%s': Error al normalizar la ruta\n"
+
+msgid "cd: Home directory not found"
+msgstr "cd: No se encontró el directorio principal\n"
+
+msgid "cd: Path is NULL or empty"
+msgstr "cd: La ruta es NULL o vacía\n"
+
+msgid "cs: '%s': No such color scheme\n"
+msgstr "cs: '%s': No existe este esquema de colores\n"
+
+msgid "cs: Current color scheme is unknown"
+msgstr "cs: El esquema de colores actual es desconocido\n"
+
+msgid "cs: No color scheme found"
+msgstr "cs: No se halló ningún esquema de colores\n"
+
+msgid "cs: No conflicts found"
+msgstr "cs: No se encontraron conflictos\n"
+
+msgid "desel: %s: Invalid ELN\n"
+msgstr "desel: %s: ELN inválido\n"
+
+msgid "desel: '%s': Invalid entry\n"
+msgstr "desel: '%s': Entrada inválida\n"
+
+msgid "desel: No selected files"
+msgstr "desel: No hay archivos seleccionados\n"
+
+msgid "devices"
+msgstr "dispositivos"
+
+msgid "dh: '%d': No such entry number\n"
+msgstr "dh: '%d': No existe este número de entrada\n"
+
+msgid "dh: Invalid history entry"
+msgstr "dh: Entrada de historia inválida\n"
+
+msgid "directories"
+msgstr "directorios"
+
+msgid "directory"
+msgstr "directorio"
+
+msgid "disabled"
+msgstr "deshabilitado"
+
+msgid "disk usage"
+msgstr "uso de disco"
+
+msgid "dup: '%s': Error unescaping filename\n"
+msgstr "dup: '%s': Error al desescapar el nombre del archivo\n"
+
+msgid "enabled"
+msgstr "habilitado"
+
+msgid "enabled (list first)"
+msgstr "habilitado (lista primero)"
+
+msgid "enabled (list last)"
+msgstr "habilitado (lista último)"
+
+msgid "entries"
+msgstr "entradas"
+
+msgid "entry"
+msgstr "entrada"
+
+msgid "export: %s: Empty assignement\n"
+msgstr "export: %s: Asignación vacía\n"
+
+msgid "export: A parameter, in the form VAR=VALUE, is required"
+msgstr "export: Se requiere un parámetro en el formato VAR=VALOR"
+
+msgid "export: Error unescaping argument"
+msgstr "export: Error al desescapar el argumento"
+
+msgid "false"
+msgstr "falso"
+
+msgid "file"
+msgstr "archivo"
+
+msgid "files"
+msgstr "archivos"
+
+msgid "fix the error (consult your daemon's documentation)"
+msgstr "corrija el error (consulte la documentación de su daemon)"
+
+msgid "ft: Error removing quotes: Filter unset"
+msgstr "ft: Error al eliminar comillas: Filtro desestablecido"
+
+msgid "ft: Invalid file type filter"
+msgstr "ft: Filtro de tipo de archivo inválido"
+
+msgid "ft: Invalid filter"
+msgstr "ft: Filtro inválido"
+
+msgid "ft: No filter set"
+msgstr "ft: No se ha establecido ningún filtro"
+
+msgid "history: %d: No such ELN\n"
+msgstr "historial: %d: No existe tal ELN\n"
+
+msgid "history: Invalid history entry"
+msgstr "historial: Entrada de historial inválida"
+
+msgid "install a notification daemon"
+msgstr "instale un daemon de notificación"
+
+msgid "invalid ACL"
+msgstr "ACL inválido"
+
+msgid "je: Configuration directory not found\n"
+msgstr "je: No se encontró el directorio de configuración\n"
+
+msgid "jump: '%c': Invalid option\n"
+msgstr "jump: '%c': Opción inválida\n"
+
+msgid "jump: '%s': Invalid value\n"
+msgstr "jump: '%s': Valor inválido\n"
+
+msgid "jump: Database still empty"
+msgstr "jump: La base de datos está vacía"
+
+msgid "jump: No entry ranked below %d\n"
+msgstr "jump: No hay entrada clasificada debajo de %d\n"
+
+msgid "jump: No invalid entries"
+msgstr "jump: No hay entradas inválidas"
+
+msgid "jump: No matches found"
+msgstr "jump: No se encontraron coincidencias"
+
+msgid "k: Feature not available in light mode"
+msgstr "k: La función no está disponible en modo ligero"
+
+msgid "k: Not in long view"
+msgstr "k: No en vista larga"
+
+msgid "kb: %s: Key already in use by '%s' (readline)\n"
+msgstr "kb: %s: La tecla ya está en uso por '%s' (readline)\n"
+
+msgid "kb: %s: Key already in use by '%s'.\n"
+msgstr "kb: %s: La tecla ya está en uso por '%s'.\n"
+
+msgid "kb: '%s' conflicts with '%s'\n"
+msgstr "kb: '%s' entra en conflicto con '%s'\n"
+
+msgid "kb: '%s' conflicts with '%s' (readline)\n"
+msgstr "kb: '%s' entra en conflicto con '%s' (readline)\n"
+
+msgid ""
+"kb: '%s': Invalid function name\n"
+"Type 'kb bind ' to list available function names\n"
+msgstr ""
+"kb: '%s': Nombre de función inválido\n"
+"Escribe 'kb bind ' para listar los nombres de función disponibles\n"
+
+msgid "kb: Cannot generate time suffix string for the backup file\n"
+msgstr "kb: No se puede generar el sufijo para el archivo de respaldo\n"
+
+msgid "kb: Cannot open '%s': %s\n"
+msgstr "kb: No se puede abrir '%s': %s\n"
+
+msgid "kb: Cannot open temporary file: %s\n"
+msgstr "kb: No se puede abrir el archivo temporal: %s\n"
+
+msgid "kb: Cannot rename '%s' to '%s': %s\n"
+msgstr "kb: No se puede renombrar '%s' a '%s': %s\n"
+
+msgid "kb: Error creating temporary file: %s\n"
+msgstr "kb: Error al crear el archivo temporal: %s\n"
+
+msgid "kb: Invalid keybinding\n"
+msgstr "kb: Enlace de tecla inválido\n"
+
+msgid "kb: No keybindings defined"
+msgstr "kb: No se han definido enlaces de tecla"
+
+msgid "kb: No keybindings defined\n"
+msgstr "kb: No se han definido enlaces de tecla\n"
+
+msgid "kb: No keybindings file found\n"
+msgstr "kb: No se encontró el archivo de enlaces de tecla\n"
+
+msgid "kb: Restart %s for changes to take effect\n"
+msgstr "kb: Reinicie %s para que los cambios tengan efecto\n"
+
+msgid "le: '%s': Error unescaping filename\n"
+msgstr "le: '%s': Error al desescapar el nombre del archivo\n"
+
+msgid "le: '%s': Not a symbolic link\n"
+msgstr "le: '%s': No es un enlace simbólico\n"
+
+msgid "le: Cannot relink symbolic link '%s': %s\n"
+msgstr "le: No se puede reenlazar el enlace simbólico '%s': %s\n"
+
+msgid "le: Nothing to do"
+msgstr "le: No hay nada que hacer"
+
+msgid "link"
+msgstr "enlace"
+
+msgid "link: '%s': Error normalizing path\n"
+msgstr "link: '%s': Error al normalizar la ruta\n"
+
+msgid "link: Cannot create symbolic link '%s': %s\n"
+msgstr "link: No se puede crear el enlace simbólico '%s': %s\n"
+
+msgid "link: Cannot unlink '%s': %s\n"
+msgstr "link: No se puede remover '%s': %s\n"
+
+msgid "link: Error generating relative path: %s\n"
+msgstr "link: Error al generar la ruta relativa: %s\n"
+
+msgid "links"
+msgstr "enlaces"
+
+msgid "log: Command logs are %s\n"
+msgstr "log: Los registros de comandos están %s\n"
+
+msgid "log: Command logs cleared"
+msgstr "log: Los registros de comandos se han borrado"
+
+msgid "log: Command logs disabled"
+msgstr "log: Los registros de comandos están deshabilitados"
+
+msgid "log: Command logs enabled"
+msgstr "log: Los registros de comandos están habilitados"
+
+msgid "log: Message logs are %s\n"
+msgstr "log: Los registros de mensajes están %s\n"
+
+msgid "log: Message logs cleared"
+msgstr "log: Los registros de mensajes se han borrado"
+
+msgid "log: Message logs disabled"
+msgstr "log: Los registros de mensajes están deshabilitados"
+
+msgid "log: Message logs enabled"
+msgstr "log: Los registros de mensajes están habilitados"
+
+msgid "long"
+msgstr "largo"
+
+msgid "media"
+msgstr "medios"
+
+msgid "media: Function not available\n"
+msgstr "media: La función no está disponible\n"
+
+msgid "media: Function only available on Linux systems"
+msgstr "media: La función solo está disponible en sistemas Linux"
+
+msgid "media: No mount application found. Install either udevil or udisks2"
+msgstr "media: No se encontró aplicación de montaje. Instale udevil o udisks2"
+
+msgid "mount: This feature is available for Linux only."
+msgstr "montar: Esta función solo está disponible para Linux"
+
+msgid "mountpoints"
+msgstr "puntos de montaje"
+
+msgid "mountpoints: Function not available\n"
+msgstr "puntos de montaje: La función no está disponible\n"
+
+msgid "mp: There are no available mountpoints\n"
+msgstr "mp: No hay puntos de montaje disponibles\n"
+
+msgid "name was"
+msgstr "el nombre era"
+
+msgid "names were"
+msgstr "los nombres eran"
+
+msgid "net: '%s': Changed to mountpoint (%s)\n"
+msgstr "net: '%s': Cambiado a punto de montaje (%s)\n"
+
+msgid "net: '%s': Error getting parent directory\n"
+msgstr "net: '%s': Error al obtener el directorio padre\n"
+
+msgid "net: '%s': Mount command failed with error code %d\n"
+msgstr "net: '%s': El comando de montaje falló con el código de error %d\n"
+
+msgid "net: '%s': No such remote\n"
+msgstr "net: '%s': No existe el recurso remoto\n"
+
+msgid "net: '%s': Not mounted\n"
+msgstr "net: '%s': No está montado\n"
+
+msgid "net: Error getting mountpoint for '%s'\n"
+msgstr "net: Error al obtener el punto de montaje para '%s'\n"
+
+msgid "net: No mount command specified for '%s'\n"
+msgstr "net: No se especificó comando de montaje para '%s'\n"
+
+msgid "net: No mountpoint specified for '%s'\n"
+msgstr "net: No se especificó punto de montaje para '%s'\n"
+
+msgid "net: No unmount command for '%s'\n"
+msgstr "net: No se especificó comando de desmontaje para '%s'\n"
+
+msgid "net: Remotes file is undefined\n"
+msgstr "net: El archivo de recursos remotos no está definido\n"
+
+msgid "new: '%s': No such template\n"
+msgstr "new: '%s': No existe la plantilla\n"
+
+msgid "new: '%s': Unsafe filename\n"
+msgstr "new: '%s': Nombre de archivo no seguro\n"
+
+msgid "none"
+msgstr "ninguno"
+
+msgid "not allowed"
+msgstr "no permitido"
+
+msgid "not bound"
+msgstr "no enlazado"
+
+msgid "oc: '%s': Invalid group\n"
+msgstr "oc: '%s': Grupo inválido\n"
+
+msgid "oc: '%s': Invalid user\n"
+msgstr "oc: '%s': Usuario inválido\n"
+
+msgid "oc: Nothing to do"
+msgstr "oc: No hay nada que hacer"
+
+msgid "oc: Nothing to do\n"
+msgstr "oc: No hay nada que hacer\n"
+
+msgid "on disk"
+msgstr "en disco"
+
+msgid "open: '%s': Broken symbolic link to '%s'\n"
+msgstr "open: '%s': Enlace simbólico roto a '%s'\n"
+
+msgid "p: '%s': Cannot unescape filename\n"
+msgstr "p: '%s': No se puede desescapar el nombre del archivo\n"
+
+msgid "pc: %s characters: 9 are expected\n"
+msgstr "pc: %s caracteres: se esperan 9\n"
+
+msgid "pc: %s digits. Either 3 or 4 are expected\n"
+msgstr "pc: %s dígitos. Se esperan 3 o 4\n"
+
+msgid ""
+"pc: '%c': Invalid digit. Values in the range 0-7 are expected for each "
+"field\n"
+msgstr ""
+"pc: '%c': Dígito inválido. Se esperan valores en el rango 0-7 para cada campo\n"
+
+msgid "pc: Applied new permissions to %zu file(s)\n"
+msgstr "pc: Se aplicaron nuevos permisos a %zu archivo(s)\n"
+
+msgid "pc: Changing permissions of '%s': %s\n"
+msgstr "pc: Cambiando permisos de '%s': %s\n"
+
+msgid "pc: Invalid character in field %zu: %s-r%s are expected\n"
+msgstr "pc: Carácter inválido en el campo %zu: %s-r%s se esperan\n"
+
+msgid "pc: Invalid character in field %zu: %s-w%s are expected\n"
+msgstr "pc: Carácter inválido en el campo %zu: %s-w%s se esperan\n"
+
+msgid "pc: Invalid character in field %zu: %s-xsS%s are expected\n"
+msgstr "pc: Carácter inválido en el campo %zu: %s-xsS%s se esperan\n"
+
+msgid "pc: Invalid character in field %zu: %s-xtT%s are expected\n"
+msgstr "pc: Carácter inválido en el campo %zu: %s-xtT%s se esperan\n"
+
+msgid "pc: Nothing to do\n"
+msgstr "pc: No hay nada que hacer\n"
+
+msgid "pf: '%s' is the current profile\n"
+msgstr "pf: '%s' es el perfil actual\n"
+
+msgid "pf: '%s': Cannot create profile: Home directory not found\n"
+msgstr "pf: '%s': No se puede crear perfil: No se encontró el directorio principal\n"
+
+msgid "pf: '%s': Error removing profile\n"
+msgstr "pf: '%s': Error al eliminar perfil\n"
+
+msgid "pf: '%s': Invalid profile name\n"
+msgstr "pf: '%s': Nombre de perfil inválido\n"
+
+msgid "pf: '%s': Is the current profile\n"
+msgstr "pf: '%s': Es el perfil actual\n"
+
+msgid "pf: '%s': No such profile\n"
+msgstr "pf: '%s': No existe el perfil\n"
+
+msgid ""
+"pf: '%s': No such profile\n"
+"To add a new profile enter 'pf add PROFILE'\n"
+msgstr ""
+"pf: '%s': No existe el perfil\n"
+"Para agregar un nuevo perfil, ingrese 'pf add PROFILE'\n"
+
+msgid "pf: '%s': Profile already exists\n"
+msgstr "pf: '%s': El perfil ya existe\n"
+
+msgid "pf: '%s': Profile successfully renamed to %s%s%s\n"
+msgstr "pf: '%s': Perfil renombrado con éxito a %s%s%s\n"
+
+msgid "pf: 's': Error creating profile\n"
+msgstr "pf: 's': Error al crear perfil\n"
+
+msgid "pf: Cannot rename profile '%s': %s\n"
+msgstr "pf: No se puede renombrar el perfil '%s': %s\n"
+
+msgid "pf: Configuration directory is not set\n"
+msgstr "pf: El directorio de configuración no está establecido\n"
+
+msgid "pf: Error opening the history file\n"
+msgstr "pf: Error al abrir el archivo de historial\n"
+
+msgid "pf: Nothing to do. Source and destination names are the same."
+msgstr "pf: No hay nada que hacer. Los nombres de origen y destino son los mismos."
+
+msgid "pf: mkdir: '%s': Error creating configuration directory\n"
+msgstr "pf: mkdir: '%s': Error al crear el directorio de configuración\n"
+
+msgid "pg: xatoi: Error converting to integer"
+msgstr "pg: xatoi: Error al convertir a entero"
+
+msgid "pin: Error saving pinned directory: %s\n"
+msgstr "pin: Error al guardar el directorio fijado: %s\n"
+
+msgid "pin: No pinned file"
+msgstr "pin: No hay archivo fijado"
+
+msgid "pin: Succesfully pinned '%s'\n"
+msgstr "pin: Fijado con éxito '%s'\n"
+
+msgid "prompt: %s: Error unescaping string\n"
+msgstr "prompt: %s: Error al desescapar la cadena\n"
+
+msgid "prompt: %s: No such prompt\n"
+msgstr "prompt: %s: No existe este prompt\n"
+
+msgid "prompt: No extra prompts defined. Using the default prompt"
+msgstr "prompt: No se han definido prompts adicionales. Usando el prompt predeterminado"
+
+msgid "prompt: No extra prompts found. Using the default prompt"
+msgstr "prompt: No se encontraron prompts adicionales. Usando el prompt predeterminado"
+
+msgid "prompt: Prompts file not found"
+msgstr "prompt: No se encontró el archivo de prompts"
+
+msgid ""
+"pwd: '%s': Invalid option\n"
+"Usage: pwd [-LP]\n"
+msgstr ""
+"pwd: '%s': Opción inválida\n"
+"Uso: pwd [-LP]\n"
+
+msgid ""
+"r: '%s': File may still exist (%jd more %s linked to this file before this "
+"operation)\n"
+msgstr ""
+"r: '%s': El archivo puede seguir existiendo (%jd más %s enlazados a este archivo antes de esta operación)\n"
+
+msgid "removed"
+msgstr "eliminado"
+
+msgid "restored"
+msgstr "restaurado"
+
+msgid "rr: '%s': Cannot open file\n"
+msgstr "rr: '%s': No se puede abrir el archivo\n"
+
+msgid "rr: '%s': Directory empty\n"
+msgstr "rr: '%s': Directorio vacío\n"
+
+msgid "rr: Nothing to do"
+msgstr "rr: No hay nada que hacer"
+
+msgid "rr: Temporary file changed on disk! Aborting."
+msgstr "rr: ¡El archivo temporal ha cambiado en disco! Cancelando."
+
+msgid "search: %s: Error unescaping filename\n"
+msgstr "search: %s: Error al desescapar el nombre del archivo\n"
+
+msgid "search: '%c': Unrecognized file type\n"
+msgstr "search: '%c': Tipo de archivo no reconocido\n"
+
+msgid "search: No matches found\n"
+msgstr "search: No se encontraron coincidencias\n"
+
+msgid "sel: %s: Invalid regular expression\n"
+msgstr "sel: %s: Expresión regular inválida\n"
+
+msgid ""
+"sel: '%c': Unrecognized file type.\n"
+"Try 'sel --help' for more information.\n"
+msgstr ""
+"sel: '%c': Tipo de archivo no reconocido.\n"
+"Pruebe 'sel --help' para obtener más información.\n"
+
+msgid "sel: '%s': Already selected\n"
+msgstr "sel: '%s': Ya seleccionado\n"
+
+msgid "sel: Cannot open the selections file"
+msgstr "sel: No se puede abrir el archivo de selecciones"
+
+msgid "sel: Cannot select any more files"
+msgstr "sel: No se pueden seleccionar más archivos"
+
+msgid "sel: Cannot select file '%s': %s\n"
+msgstr "sel: No se puede seleccionar el archivo '%s': %s\n"
+
+msgid "sel: Error expanding path"
+msgstr "sel: Error al expandir la ruta"
+
+msgid "sel: Error writing files into the selections file\n"
+msgstr "sel: Error al escribir archivos en el archivo de selecciones\n"
+
+msgid "sel: No matches found\n"
+msgstr "sel: No se encontraron coincidencias\n"
+
+msgid "sel: No selected files"
+msgstr "sel: No hay archivos seleccionados"
+
+msgid "short"
+msgstr "corto"
+
+msgid "st: %d (%s): Not available in light mode\n"
+msgstr "st: %d (%s): No disponible en modo ligero\n"
+
+msgid "st: %s: No such sort order\n"
+msgstr "st: %s: No existe este orden de clasificación\n"
+
+msgid "st: '%s': Not available in light mode\n"
+msgstr "st: '%s': No disponible en modo ligero\n"
+
+msgid "st: Birth time is not available on this platform"
+msgstr "st: La hora de creación no está disponible en esta plataforma"
+
+msgid "tag: '%s': Cannot create tag: %s\n"
+msgstr "tag: '%s': No se puede crear la etiqueta: %s\n"
+
+msgid "tag: '%s': Cannot create tag: file already exists\n"
+msgstr "tag: '%s': No se puede crear la etiqueta: el archivo ya existe\n"
+
+msgid "tag: '%s': Error creating tag: %s\n"
+msgstr "tag: '%s': Error al crear la etiqueta: %s\n"
+
+msgid "tag: '%s': File already tagged\n"
+msgstr "tag: '%s': El archivo ya está etiquetado\n"
+
+msgid "tag: '%s': File not tagged as %s%s%s\n"
+msgstr "tag: '%s': El archivo no está etiquetado como %s%s%s\n"
+
+msgid "tag: '%s': No such tag\n"
+msgstr "tag: '%s': No existe esa etiqueta\n"
+
+msgid "tag: '%s': Tag already exists\n"
+msgstr "tag: '%s': La etiqueta ya existe\n"
+
+msgid "tag: Cannot merge tags: error moving tagged files"
+msgstr "tag: No se pueden fusionar etiquetas: error al mover archivos etiquetados"
+
+msgid ""
+"tag: No tag specified. Specify a tag via :TAG. E.g. 'tag add FILE1 "
+"FILE2 :TAG'"
+msgstr ""
+"tag: No se ha especificado una etiqueta. Especifique una etiqueta a través de :TAG. Ej. 'tag add FILE1 FILE2 :TAG'"
+
+msgid "tag: No tags"
+msgstr "tag: No hay etiquetas"
+
+msgid "tag: Source and destination are the same tag"
+msgstr "tag: Origen y destino son la misma etiqueta"
+
+msgid "te: Changing permissions of '%s': %s\n"
+msgstr "te: Cambiando permisos de '%s': %s\n"
+
+msgid "trash: %s: Invalid ELN\n"
+msgstr "trash: %s: ELN no válido\n"
+
+msgid "trash: '%s': Cannot remove file from the trash can\n"
+msgstr "trash: '%s': No se puede eliminar el archivo de la papelera\n"
+
+msgid "trash: '%s': Error abbreviating filename\n"
+msgstr "trash: '%s': Error al abreviar el nombre del archivo\n"
+
+msgid "trash: '%s': Error encoding path\n"
+msgstr "trash: '%s': Error al codificar la ruta\n"
+
+msgid "trash: '%s': Error getting file base name\n"
+msgstr "trash: '%s': Error al obtener el nombre base del archivo\n"
+
+msgid "trash: '%s': Error unescaping filename\n"
+msgstr "trash: '%s': Error al desescapar el nombre del archivo\n"
+
+msgid "trash: Cannot trash '%s'\n"
+msgstr "trash: No se puede enviar '%s' a la papelera\n"
+
+msgid "trash: Cannot trash '%s': %s\n"
+msgstr "trash: No se puede enviar '%s' a la papelera: %s\n"
+
+msgid "trash: Cannot trash any more files"
+msgstr "trash: No se pueden enviar más archivos a la papelera"
+
+msgid "trash: No trashed files"
+msgstr "trash: No hay archivos en la papelera"
+
+msgid "trash: The trash directory is undefined\n"
+msgstr "trash: El directorio de la papelera no está definido\n"
+
+msgid "trash: Use 'trash del' to remove trashed files\n"
+msgstr "trash: Use 'trash del' para eliminar archivos de la papelera\n"
+
+msgid "true"
+msgstr "verdadero"
+
+msgid "umask: %s: Out of range (valid values are 000-777)\n"
+msgstr "umask: %s: Fuera de rango (valores válidos son 000-777)\n"
+
+msgid "unavailable"
+msgstr "no disponible"
+
+msgid "undel: %s: Invalid ELN\n"
+msgstr "undel: %s: ELN no válido\n"
+
+msgid "undel: '%s': %s\n"
+msgstr "undel: '%s': %s\n"
+
+msgid "undel: '%s': Destination file exists\n"
+msgstr "undel: '%s': El archivo de destino ya existe\n"
+
+msgid "undel: '%s': Error decoding original path\n"
+msgstr "undel: '%s': Error al decodificar la ruta original\n"
+
+msgid "undel: '%s': No directory specified\n"
+msgstr "undel: '%s': No se ha especificado un directorio\n"
+
+msgid "undel: Filename is NULL or empty\n"
+msgstr "undel: El nombre del archivo es NULL o vacío\n"
+
+msgid "undel: Info file for '%s' not found. Try restoring the file manually.\n"
+msgstr "undel: No se encontró el archivo de información para '%s'. Intente restaurar el archivo manualmente.\n"
+
+msgid "unnamed"
+msgstr "sin nombre"
+
+msgid "unpin: No pinned file"
+msgstr "unpin: No hay archivo fijado"
+
+msgid "unpin: Succesfully unpinned '%s'\n"
+msgstr "unpin: Desfijado '%s' con éxito\n"
+
+msgid "unset: A variable name is required"
+msgstr "unset: Se requiere un nombre de variable"
+
+msgid "view: '%s' does not exist. Entry removed.\n"
+msgstr "view: '%s' no existe. Entrada eliminada.\n"
+
+msgid "view: '%s': Not a regular file\n"
+msgstr "view: '%s': No es un archivo regular\n"
+
+msgid "view: '%s': Removing dangling thumbnail... "
+msgstr "view: '%s': Eliminando miniatura huérfana... "
+
+msgid "view: Cannot access '%s': %s\n"
+msgstr "view: No se puede acceder a '%s': %s\n"
+
+msgid "view: Cannot create temporary file '%s': %s\n"
+msgstr "view: No se puede crear el archivo temporal '%s': %s\n"
+
+msgid "view: Cannot open '%s': %s\n"
+msgstr "view: No se puede abrir '%s': %s\n"
+
+msgid "view: Cannot open temporary file '%s': %s\n"
+msgstr "view: No se puede abrir el archivo temporal '%s': %s\n"
+
+msgid "view: No dangling thumbnails"
+msgstr "view: No hay miniaturas huérfanas"
+
+msgid ""
+"view: The thumbnails directory does not exist, is not a directory, or there "
+"are no thumbnails\n"
+msgstr ""
+"view: El directorio de miniaturas no existe, no es un directorio o no hay miniaturas\n"
+
+msgid "vv: '%s': directory does not exist.\n"
+msgstr "vv: '%s': el directorio no existe.\n"
+
+msgid "ws: %d: Is the current workspace\n"
+msgstr "ws: %d: Es el espacio de trabajo actual\n"
+
+msgid "ws: %d: No such workspace (valid workspaces: 1-%d)\n"
+msgstr "ws: %d: No existe este espacio de trabajo (espacios de trabajo válidos: 1-%d)\n"
+
+msgid "ws: %s: Is the current workspace\n"
+msgstr "ws: %s: Es el espacio de trabajo actual\n"
+
+msgid "ws: %s: No such workspace\n"
+msgstr "ws: %s: No existe este espacio de trabajo\n"
+
+msgid "ws: '%s': Already unset\n"
+msgstr "ws: '%s': Ya está desestablecido\n"
+
+msgid "ws: '%s': Is the current workspace\n"
+msgstr "ws: '%s': Es el espacio de trabajo actual\n"
+
+msgid "ws: '%s': No such workspace (valid workspaces: 1-%d)\n"
+msgstr "ws: '%s': No existe este espacio de trabajo (espacios de trabajo válidos: 1-%d)\n"
+
+msgid "ws: '%s': Workspace unset\n"
+msgstr "ws: '%s': Espacio de trabajo desestablecido\n"
+
+msgid "ws: Current workspace is invalid\n"
+msgstr "ws: El espacio de trabajo actual es inválido\n"
+
+msgid "ws: There are no defined workspaces\n"
+msgstr "ws: No hay espacios de trabajo definidos\n"
+
+msgid "ws: This is already the first workspace\n"
+msgstr "ws: Este ya es el primer espacio de trabajo\n"
+
+msgid "ws: This is already the last workspace\n"
+msgstr "ws: Este ya es el último espacio de trabajo\n"
+
+msgid "xchmod: Empty buffer for filename\n"
+msgstr "xchmod: Buffer vacío para el nombre del archivo\n"
+
+msgid "xchmod: Empty buffer for mode\n"
+msgstr "xchmod: Buffer vacío para el modo\n"
