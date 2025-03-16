@@ -169,7 +169,7 @@ are not available here.\n\n\
 Note 3: To set a temporary autocommand for the current directory use the\n\
 'auto' command. Run 'auto --help' for details."
 
-#define AUTO_OPEN_USAGE "Toggle auto-open on/off\n\n\
+#define AUTO_OPEN_USAGE "Toggle auto-open\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   ao, auto-open [on | off | status]"
 
@@ -222,7 +222,7 @@ Note: Links are always created in the current directory."
 \x1b[1mEXAMPLES\x1b[22m\n\
 - List bookmarks\n\
     bm (also Alt+b, 'bm <TAB>' or 'b:<TAB>')\n\
-- Bookmark the directory /media/mount as 'mnt'\n\
+- Bookmark the directory '/media/mount' as 'mnt'\n\
     bm add /media/mount mnt\n\
   Note: Regular files can be bookmarked too\n\
 - Access the bookmark named 'mnt'\n\
@@ -289,7 +289,7 @@ save changes, and quit the editor (quit without saving to cancel the operation).
     cs edit vi\n\
 - Switch to the color scheme named 'mytheme'\n\
     cs mytheme\n\n\
-Tip: Theming via LS_COLORS is also possible. To enable this,\n\
+Tip: Theming via LS_COLORS is also possible. To enable this feature,\n\
 run with the --lscolors option. Consult the Wiki for more information:\n\
 https://github.com/leo-arch/clifm/wiki/Customization#ls_colors-support"
 
@@ -404,7 +404,7 @@ Parameters passed to cp:    -a"
 - Print file properties, including recursive directory sizes\n\
     pp DIR\n\n\
 Note: An exclamation mark (!) before directory sizes means that an\n\
-error ocurred while reading a subdirectory, so sizes may not be accurate\n\n\
+error ocurred while reading a subdirectory, so sizes may not be accurate.\n\n\
 Note 2: Unlike 'p', 'pp' always dereferences symbolic links."
 
 #define FILE_SIZE_USAGE "File sizes/disk usage\n\n\
@@ -681,7 +681,7 @@ link points to, rather than the link itself."
 The user is prompted to enter a new link target using the current\n\
 target as template.\n\n\
 \x1b[1mEXAMPLE\x1b[22m\n\
-- Edit the symbolic link named file.link\n\
+- Edit the symbolic link named 'file.link'\n\
     le file.link"
 
 #define LINK_USAGE "Create a symbolic link\n\n\
@@ -690,7 +690,7 @@ target as template.\n\n\
 If LINK_NAME is omitted, it is created as TARGET_BASENAME.link in\n\
 the current directory.\n\n\
 \x1b[1mEXAMPLE\x1b[22m\n\
-- Create a symbolic link to file.zst named mylink\n\
+- Create a symbolic link to 'file.zst' named 'mylink'\n\
     l file.zst mylink\n\n\
 Note: The link creation mode (by default 'literal', like 'ln -s')\n\
 can be set in the configuration file via the LinkCreationMode option\n\
@@ -732,8 +732,7 @@ Tip: Use the 'le' command to edit a symbolic link. Try 'le --help'."
 Note: Use the 'n' command to create both files and directories.\n\
 Try 'n --help' for more details."
 
-#define MEDIA_USAGE "List available media devices, allowing you to mount or \
-unmount them\n\
+#define MEDIA_USAGE "List, mount, and unmount media devices\n\
 Note: Either udevil(1) or udisks2(1) is required\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   media\n\n\
@@ -745,7 +744,7 @@ If mounting a device, Clifm will change automatically to the corresponding\n\
 mountpoint.\n\n\
 To get information about a device, enter iELN. For example: 'i12'."
 
-#define MF_USAGE "Limit the number of files listed on the screen to NUM \
+#define MF_USAGE "Limit the number of listed files to NUM \
 (valid range: >= 0). Use 'unset' to remove the file limit.\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   mf [NUM | unset]"
@@ -814,9 +813,9 @@ To get information about a device, enter iELN. For example: 'i12'."
 \x1b[1mUSAGE\x1b[22m\n\
   n, new [FILE[@TEMPLATE]...] [DIR/...]\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
-- Create two files named file1 and file2\n\
+- Create two files named 'file1' and 'file2'\n\
     n file1 file2\n\
-- Create two directories named dir1 and dir2\n\
+- Create two directories named 'dir1' and 'dir2'\n\
     n dir1/ dir2/\n\
   Note: Be sure to include the ending slashes.\n\
 - Create both files and directories at once:\n\
@@ -953,7 +952,7 @@ Note: Use the 'oc' command to edit file ownership."
 \x1b[1mUSAGE\x1b[22m\n\
   pin FILE/DIR\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
-- Pin the directory ~/my_important_dir\n\
+- Pin the directory '~/my_important_dir'\n\
     pin ~/my_important_dir\n\
 - Change to the pinned directory\n\
     , (yes, just a comma)\n\
@@ -1050,11 +1049,11 @@ the editor (quit without saving to cancel the operation).\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   /PATTERN [-filetype] [-x] [DIR]\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
-- List all PDF files in the current working directory\n\
+- List all PDF files in the current directory\n\
     /*.pdf (or, as a regular expression, '/.*\\.pdf$')\n\
 - List all files starting with 'A' in the directory whose ELN is 7\n\
     /A* 7\n\
-- List all .conf files in /etc\n\
+- List all .conf files in the directory '/etc'\n\
     /*.conf /etc\n\n\
 You can further filter the search using a file type filter:\n\
   -b	block device\n\
@@ -1065,7 +1064,7 @@ You can further filter the search using a file type filter:\n\
   -p	FIFO/pipe\n\
   -s	socket\n\
 - For example, to list all directories containing a dot or a dash and ending \
-with 'd' in the directory named Documents\n\
+with 'd' in the directory named 'Documents'\n\
     /[.-].*d$ -d Documents/\n\n\
 To perform a recursive search, use the -x modifier (file types not allowed)\n\
     /str -x /boot\n\n\
@@ -1102,7 +1101,7 @@ Recognized file types: (d)irectory, regular (f)ile, symbolic (l)ink,\n\
     s *.odt\n\
 - Select multiple files at once\n\
     s 12 15-21 *.pdf\n\
-- Select all regular files in /etc starting with 'd'\n\
+- Select all regular files in the directory '/etc' starting with 'd'\n\
     s ^d.* -f :/etc\n\
 - Select all files in the current directory (including hidden files)\n\
     s * .* (or Alt+a)\n\
@@ -1429,7 +1428,7 @@ c: Stop paging (printing remaining files)\n"
 \n -X       Run in secure-environment mode (paranoid)\
 \n -y       Run in light mode\
 \n -Y       Run in secure-commands mode\
-\n -z NUM   Set a file sort order (NUM=[1-13])\
+\n -z NUM   Set a file sort order (1-13)\
 \n -Z NUM   List only up to NUM files"
 #else
 #define SHORT_OPTIONS "\
