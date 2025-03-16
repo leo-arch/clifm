@@ -406,7 +406,7 @@ filescounter_function(const char *arg)
 		conf.files_counter = conf.files_counter == 1 ? 0 : 1;
 		update_autocmd_opts(AC_FILES_COUNTER);
 		if (conf.autols == 1) reload_dirlist();
-		print_reload_msg(NULL, NULL, _("Files counter %s\n"),
+		print_reload_msg(NULL, NULL, _("File counter %s\n"),
 			conf.files_counter == 1 ? _("enabled") : _("disabled"));
 		return FUNC_SUCCESS;
 	}
@@ -420,7 +420,7 @@ filescounter_function(const char *arg)
 		conf.files_counter = 1;
 		update_autocmd_opts(AC_FILES_COUNTER);
 		if (conf.autols == 1) reload_dirlist();
-		print_reload_msg(NULL, NULL, _("Files counter enabled\n"));
+		print_reload_msg(NULL, NULL, _("File counter enabled\n"));
 		return FUNC_SUCCESS;
 	}
 
@@ -428,15 +428,15 @@ filescounter_function(const char *arg)
 		conf.files_counter = 0;
 		update_autocmd_opts(AC_FILES_COUNTER);
 		if (conf.autols == 1) reload_dirlist();
-		print_reload_msg(NULL, NULL, _("Files counter disabled\n"));
+		print_reload_msg(NULL, NULL, _("File counter disabled\n"));
 		return FUNC_SUCCESS;
 	}
 
 	if (*arg == 's' && strcmp(arg, "status") == 0) {
 		if (conf.files_counter == 1)
-			puts(_("The files counter is enabled"));
+			puts(_("The file counter is enabled"));
 		else
-			puts(_("The files counter is disabled"));
+			puts(_("The file counter is disabled"));
 		return FUNC_SUCCESS;
 	}
 
@@ -2461,9 +2461,9 @@ exec_cmd(char **comm)
 	|| strcmp(comm[0], "pager") == 0))
 		return (exit_code = pager_function(comm[1]));
 
-	/* #### FILES COUNTER #### */
+	/* #### FILE COUNTER #### */
 	else if (*comm[0] == 'f' && ((comm[0][1] == 'c' && !comm[0][2])
-	|| strcmp(comm[0], "filescounter") == 0))
+	|| strcmp(comm[0], "filecounter") == 0))
 		return (exit_code = filescounter_function(comm[1]));
 
 	/* #### DIRECTORIES FIRST #### */

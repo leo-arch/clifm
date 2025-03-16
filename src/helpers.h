@@ -1695,7 +1695,7 @@ extern struct termcaps_t term_caps;
 
 /* Data to be displayed in the properties string in long mode */
 struct props_t {
-	int counter; /* Files counter */
+	int counter; /* File counter */
 	int ids; /* User/group IDs: either NUMBER or NAME */
 	int inode; /* File inode number */
 	int len; /* Approx len of the entire properties string taking into account
@@ -2128,7 +2128,7 @@ extern char
 	df_c[MAX_COLOR], /* Default color */
 	dl_c[MAX_COLOR], /* Dividing line */
 	el_c[MAX_COLOR], /* ELN color */
-	fc_c[MAX_COLOR], /* Files counter */
+	fc_c[MAX_COLOR], /* File counter */
 	lc_c[MAX_COLOR], /* Symlink character (ColorLinkAsTarget only) */
 	mi_c[MAX_COLOR], /* Misc indicators */
 	ts_c[MAX_COLOR], /* Tab completion suffix */

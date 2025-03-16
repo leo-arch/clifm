@@ -44,7 +44,7 @@
 #define INO_STR_LEN   ((MAX_COLOR * 2) + ((12 + 1) * 2) + 4)
 
 #define LINKS_STR_LEN ((MAX_COLOR * 2) + 32)
-/* Files counter */
+/* File counter */
 #define FC_STR_LEN    ((MAX_COLOR * 2) + 32)
 /* File allocated blocks */
 #define BLK_STR_LEN   ((MAX_COLOR * 2) + 32)

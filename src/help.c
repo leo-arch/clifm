@@ -154,7 +154,7 @@ print_tips(const int all)
 		"Selectively restore trashed files using the 'u' command",
 		"Empty the trash can: 't empty'",
 		"Toggle list-directories-first: 'ff' or Alt+g",
-		"Set the files counter on/off: 'fc'",
+		"Set the file counter on/off: 'fc'",
 		"Take a look at the splash screen with the 'splash' command",
 		"Have some fun trying the 'bonus' command",
 		"Launch the default system shell in CWD using ':' or ';'",

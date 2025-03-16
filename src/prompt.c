@@ -1687,7 +1687,7 @@ static int
 list_prompts(void)
 {
 	if (prompts_n == 0) {
-		puts(_("prompt: No extra prompts found. Using the default prompt"));
+		puts(_("prompt: No extra prompts found. Using the default prompt."));
 		return FUNC_SUCCESS;
 	}
 
@@ -1871,7 +1871,7 @@ edit_prompts_file(char *app)
 		reload_dirlist();
 
 	ret = load_prompts();
-	print_reload_msg(NULL, NULL, _("File modified. Prompts reloaded\n"));
+	print_reload_msg(NULL, NULL, _("File modified. Prompts reloaded.\n"));
 
 	if (*cur_prompt_name)
 		set_prompt(cur_prompt_name);

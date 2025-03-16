@@ -117,7 +117,7 @@
 
 /* Information about the longest filename in the curent list of files. */
 struct longest_t {
-	size_t fc_len;   /* Length of the files counter (if a directory). */
+	size_t fc_len;   /* Length of the file counter (if a directory). */
 	size_t name_len; /* Length of the longest name. */
 };
 
@@ -907,10 +907,10 @@ get_longest_filename(const filesn_t n, const size_t eln_len)
 	if (conf.long_view == 0 && conf.icons == 1 && conf.columned == 1)
 		longest.name_len += (size_t)ICON_LEN;
 
-	/* LONGEST.FC_LEN stores the number of digits taken by the files counter of
+	/* LONGEST.FC_LEN stores the number of digits taken by the file counter of
 	 * the longest filename, provided it is a directory.
 	 * We use this to truncate filenames up to MAX_NAME_LEN + LONGEST.FC_LEN,
-	 * so that we can make use of the space taken by the files counter.
+	 * so that we can make use of the space taken by the file counter.
 	 * Example:
 	 *    longest_dirname/13
 	 *    very_long_file_na~
@@ -1384,7 +1384,7 @@ print_entry_color(int *ind_char, const filesn_t i, const int pad,
 	}
 
 	if (conf.classify == 1) {
-		/* Append directory indicator and files counter */
+		/* Append directory indicator and file counter */
 		switch (file_info[i].type) {
 		case DT_DIR: /* fallthrough */
 		case DT_LNK:

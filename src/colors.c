@@ -3087,7 +3087,7 @@ print_interface_colors(void)
 
 	printf(_("%sColor%s (el) ELN's (e.g. %s12%s filename)\n"),
 		el_c, df_c, el_c, df_c);
-	printf(_("%sColor%s (fc) Files counter (e.g. dir%s/24%s)\n"),
+	printf(_("%sColor%s (fc) File counter (e.g. dir%s/24%s)\n"),
 		fc_c, df_c, fc_c, df_c);
 	printf(_("%sColor%s (lc) Symbolic link indicator (e.g. %s36%s"
 		"%s%s%ssymlink) (%s1%s)\n"), lc_c, df_c, el_c, df_c, lc_c,

@@ -354,7 +354,7 @@ char
 	df_c[MAX_COLOR], /* Default color */
 	dl_c[MAX_COLOR], /* Dividing line index */
 	el_c[MAX_COLOR], /* ELN */
-	fc_c[MAX_COLOR], /* Files counter */
+	fc_c[MAX_COLOR], /* File counter */
 	lc_c[MAX_COLOR], /* Symlink character (ColorLinkAsTarget only) */
 	mi_c[MAX_COLOR], /* Misc indicators */
 	ts_c[MAX_COLOR], /* Tab completion suffix */

@@ -1768,7 +1768,7 @@ create_main_config_file(char *file)
 # Display extended file metadata next to filenames (long listing format).\n\
 ;LongViewMode=%s\n\
 # Properties fields to be printed in long view mode.\n\
-# f = files counter for directories\n\
+# f = file counter for directories\n\
 # B = file allocated blocks\n\
 # d = inode number\n\
 # l = number of hard links\n\
@@ -2173,7 +2173,7 @@ create_def_color_scheme(void)
 
 			"# If set to 'true', automatically print notifications at the left\n\
 # of the prompt. If set to 'false', let the prompt string handle these notifications\n\
-# itself via escape codes. See the manpage for more information\n"
+# itself via escape codes. See the manpage for more information.\n"
 			"Notifications=\"%s\"\n\n"
 			"Prompt=\"%s\"\n\n"
 
@@ -2272,12 +2272,12 @@ create_profile_file(void)
 		err('e', PRINT_PROMPT, "%s: Cannot create profile file "
 			"'%s': %s\n", PROGRAM_NAME, profile_file, strerror(errno));
 	} else {
-		fprintf(profile_fp, _("# This is %s's profile file\n#\n"
+		fprintf(profile_fp, "# This is %s's profile file\n#\n"
 			"# Write here the commands you want to be executed at startup.\n"
 			"# E.g.:\n#echo \"%s, the command line file manager\"; read -r\n#\n"
 			"# Uncommented, non-empty lines are executed line by line. If you\n"
 			"# want a multi-line command, just write a script for it:\n"
-			"#sh /path/to/my/script.sh\n"),
+			"#sh /path/to/my/script.sh\n",
 			PROGRAM_NAME_UPPERCASE, PROGRAM_NAME_UPPERCASE);
 		fclose(profile_fp);
 	}

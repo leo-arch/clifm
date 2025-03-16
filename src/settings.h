@@ -126,7 +126,7 @@ xf=1;31:xs=32:"
 #define DEF_DL_C  "\x1b[2;37m"   /* Dividing line */
 #define DEF_EL_C  "\x1b[0;36m"   /* ELN's */
 #define DEF_EM_C  "\001\x1b[1;31m\002" /* Error msg indicator */
-#define DEF_FC_C  "\x1b[0;2;37m" /* Files counter */
+#define DEF_FC_C  "\x1b[0;2;37m" /* File counter */
 #define DEF_LI_C  "\001\x1b[1;32m\002" /* Sel files indicator (prompt) */
 #define DEF_LI_CB "\x1b[1;32m"   /* Sel files indicator (files list) */
 #define DEF_MI_C  "\x1b[1;36m"   /* Misc */
@@ -291,7 +291,7 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define DEF_DL_C256  "\x1b[38;5;243m"   /* Dividing line */
 #define DEF_EL_C256  "\x1b[0;36m"   /* ELN's */
 #define DEF_EM_C256  "\001\x1b[1;31m\002" /* Error msg indicator */
-#define DEF_FC_C256  "\x1b[0;38;5;247m" /* Files counter */
+#define DEF_FC_C256  "\x1b[0;38;5;247m" /* File counter */
 #define DEF_LI_C256  "\001\x1b[1;32m\002" /* Sel files indicator (prompt) */
 #define DEF_LI_CB256 "\x1b[1;32m"   /* Sel files indicator (file list) */
 #define DEF_MI_C256  "\x1b[1;36m"   /* Misc */
@@ -562,7 +562,7 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define DEF_PROMPT_F_FULL_LEN_DIRS 1
 #define DEF_PROMPT_P_MAX_PATH 40
 /* "xfpIsm" =
- * xattrs/caps/ACLs, files counter, perms, owner/grp names, size (human), mtime */
+ * xattrs/caps/ACLs, file counter, perms, owner/grp names, size (human), mtime */
 #define DEF_PROP_FIELDS "xfpIsm"
 #define DEF_PROP_FIELDS_GAP 1 /* Spaces between columns in long view */
 #define DEF_PURGE_JUMPDB 0
