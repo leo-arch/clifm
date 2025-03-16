@@ -891,7 +891,7 @@ END:
 	return count;
 }
 
-/* List matching (or non-marching if INVERT is set to 1) filenames
+/* List matching (or non-matching if INVERT is set to 1) filenames
  * in the specified directory. */
 static int
 search_regex(char **args)
@@ -1011,7 +1011,7 @@ err_glob_no_match(const char *arg)
 	return FUNC_FAILURE;
 }
 
-/* We have three search strategies:
+/* We provide three search strategies:
  * 1 - Only glob
  * 2 - Only regex
  * 3 - Glob-regex */

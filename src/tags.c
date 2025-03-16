@@ -1,4 +1,4 @@
-/* tags.c -- functions to handle the files tag system */
+/* tags.c -- functions to handle the file tagging system */
 
 /*
  * This file is part of Clifm
@@ -61,8 +61,8 @@ print_symlink_error(const char *name)
 static int
 print_no_tags(void)
 {
-	printf(_("%s: No tags found, Use 'tag new' to create new "
-		"tags\n"), PROGRAM_NAME);
+	printf(_("%s: No tags found. Use 'tag new' to create new "
+		"tags.\n"), PROGRAM_NAME);
 	return FUNC_SUCCESS;
 }
 

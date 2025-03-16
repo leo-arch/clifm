@@ -397,7 +397,7 @@ edit_actions(char *app)
 	path_n = get_path_env(1);
 	get_path_programs();
 
-	print_reload_msg(NULL, NULL, _("File modified. Actions reloaded\n"));
+	print_reload_msg(NULL, NULL, _("File modified. Actions reloaded.\n"));
 	return FUNC_SUCCESS;
 }
 

@@ -1776,7 +1776,7 @@ move_cursor_up(const int total_line_len)
 /* Determine input and output files to be used by the fuzzy finder (either
  * fzf or fnf).
  * Let's do this even if fzftab is not enabled at startup, because this feature
- * can be enabled in place editing the config file.
+ * can be enabled in place by editing the config file.
  *
  * NOTE: Why do the random file extensions have different lengths? If
  * compiled in POSIX mode, gen_rand_ext() uses srandom(3) and random(3) to
@@ -1808,7 +1808,7 @@ set_finder_paths(void)
 /* Display possible completions using the corresponding finder. If one of these
  * possible completions is selected, insert it into the current line buffer.
  *
- * What is ORIGINAL_QUERY and why we need it?
+ * What is ORIGINAL_QUERY and why do we need it?
  * MATCHES[0] is supposed to hold the common prefix among all possible
  * completions. This common prefix should be the same as the query string when
  * performing regular matches. But it might not be the same as the

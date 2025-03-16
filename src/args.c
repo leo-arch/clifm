@@ -364,7 +364,7 @@ set_start_path(void)
 	if (cur_ws > MAX_WS - 1) {
 		cur_ws = DEF_CUR_WS;
 		err('w', PRINT_PROMPT, _("%s: '%zu': Invalid workspace."
-			"\nFalling back to workspace %zu\n"),
+			"\nFalling back to workspace %zu.\n"),
 			PROGRAM_NAME, cur_ws, cur_ws + 1);
 	}
 
@@ -385,7 +385,7 @@ set_start_path(void)
 
 		if (!pwd || !*pwd) {
 			err(0, NOPRINT_PROMPT, _("%s: Fatal error! Failure "
-				"retrieving current working directory\n"), PROGRAM_NAME);
+				"retrieving the current working directory.\n"), PROGRAM_NAME);
 			exit(EXIT_FAILURE);
 		}
 
@@ -794,7 +794,7 @@ open_preview_file(char *file, const int mode)
 {
 	if (xargs.stealth_mode == 1) {
 		fprintf(stderr, _("%s: Running in stealth mode. Access to "
-			"configuration files is not allowed\n"), PROGRAM_NAME);
+			"configuration files is not allowed.\n"), PROGRAM_NAME);
 		exit(EXIT_FAILURE);
 	}
 
@@ -860,7 +860,7 @@ set_fzytab(void)
 {
 	fprintf(stderr, _("%s: --fzytab: We have migrated to 'fnf'.\n"
 		"Install 'fnf' (https://github.com/leo-arch/fnf) and then "
-		"use --fnftab instead\n"), PROGRAM_NAME);
+		"use --fnftab instead.\n"), PROGRAM_NAME);
 	exit(EXIT_FAILURE);
 }
 
@@ -948,7 +948,7 @@ set_alt_config_dir(char *dir)
 	if (access(dir, W_OK) == -1) {
 		if (dir_ok == 1) {
 			err('e', PRINT_PROMPT, _("%s: '%s': %s\n"
-				"Falling back to the default configuration directory.\n"),
+				"Falling back to the default configuration directory\n"),
 				PROGRAM_NAME, dir, strerror(errno));
 		}
 	} else {
@@ -1440,7 +1440,7 @@ xset_pager_view(char *arg)
 		xargs.pager_view = conf.pager_view = PAGER_SHORT;
 	} else {
 		fprintf(stderr, _("%s: --pager-view: '%s': Invalid value.\n"
-			"Valid values are 'auto', 'long', and 'short'\n"),
+			"Valid values are 'auto', 'long', and 'short'.\n"),
 			PROGRAM_NAME, arg);
 		exit(EXIT_FAILURE);
 	}

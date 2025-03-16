@@ -647,7 +647,7 @@ fill_autocmd_opt(char *opt, const size_t n)
 	char *p = strchr(opt, '=');
 	if (!p) {
 		err(ERR_NO_LOG, PRINT_PROMPT, _("autocmd: '%s': Invalid option format "
-			" (it must be 'OPTION=VALUE').\n"), opt);
+			" (it must be 'OPTION=VALUE')\n"), opt);
 		return FUNC_FAILURE;
 	}
 

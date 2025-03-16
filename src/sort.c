@@ -140,7 +140,7 @@ namecmp(char *s1, char *s2)
 
 	if (!IS_UTF8_LEAD_BYTE(*s1) && !IS_UTF8_LEAD_BYTE(*s2)) {
 	/* None of the strings starts with a unicode char: compare the first
-	 * byte of both strings */
+	 * byte of both strings. */
 		char ac = *s1, bc = *s2;
 
 		if (!conf.case_sens_list) {
@@ -436,7 +436,7 @@ sort_function(char **arg)
 		return FUNC_SUCCESS;
 	}
 
-	/* Argument is alphanumerical string */
+	/* Argument is an alphanumerical string */
 	if (!is_number(arg[1])) {
 		if (*arg[1] == 'r' && strcmp(arg[1], "rev") == 0) {
 			toggle_sort_reverse();
@@ -474,7 +474,7 @@ sort_function(char **arg)
 		return re_sort_files_list();
 	}
 
-	/* If arg1 is a number but is not in the range 0-SORT_TYPES, error */
+	/* If arg1 is a number but is not in the range 0-SORT_TYPES, err. */
 	fprintf(stderr, "%s\n", _(SORT_USAGE));
 	return FUNC_FAILURE;
 }

@@ -299,7 +299,7 @@ mount_iso(char *file)
 {
 #if !defined(__linux__)
 	UNUSED(file);
-	xerror("%s\n", _("mount: This feature is for Linux only"));
+	xerror("%s\n", _("mount: This feature is available for Linux only."));
 	return FUNC_SUCCESS;
 #else
 	char *mountpoint = create_mountpoint(file);
@@ -422,7 +422,7 @@ create_iso(char *in_file, char *out_file)
 
 	/* If any other file format */
 	xerror(_("archiver: '%s': Invalid file format. File should be either "
-		"a directory or a block device\n"), in_file);
+		"a directory or a block device.\n"), in_file);
 	return FUNC_FAILURE;
 }
 
@@ -654,8 +654,8 @@ compress_zstandard(char *name, char **args)
 
 	/* Multiple files */
 	printf(_("\n%sNOTE%s: Zstandard does not support compression of "
-		 "multiple files into one single compressed file. Files will "
-		 "be compressed rather into multiple compressed files using the "
+		 "multiple files into a single compressed file. Instead, files "
+		 "will be compressed into multiple compressed files using their "
 		 "original filenames.\n"), BOLD, df_c);
 
 	size_t i;
