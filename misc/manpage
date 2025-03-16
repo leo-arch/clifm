@@ -1224,11 +1224,11 @@ Print the elements currently contained in the Selection Box.
 Print the splash screen.
 .TP
 .B st, sort \fR[\fIMETHOD\fR] [\fIrev\fR]
-With no argument, print the current sorting order. Else, sort files by METHOD, where METHOD is one of: 0=none, 1=name, 2=size, 3=atime, 4=btime, 5=ctime, 6=mtime, 7=version, 8=extension, 9=inode, 10=owner, 11=group, 12=blocks, 13=links, or 14=type (e.g.: \fIst atime\fR or \fIst 3\fR). Methods 10 and 11 sort by owner and group ID names if using ID names in long view (see the \fIPropFields\fR option in the configuration file). Else, ID numbers are used. The default order is \fIversion\fR.
+With no argument, print the current sort order. Else, sort files by METHOD, where METHOD is one of: 0=none, 1=name, 2=size, 3=atime, 4=btime, 5=ctime, 6=mtime, 7=version, 8=extension, 9=inode, 10=owner, 11=group, 12=blocks, 13=links, or 14=type (e.g.: \fIst atime\fR or \fIst 3\fR). Methods 10 and 11 sort by owner and group ID names if using ID names in long view (see the \fIPropFields\fR option in the configuration file). Else, ID numbers are used. The default order is \fIversion\fR.
 .sp
 By default, files are sorted from less to more (e.g.: from \'a\' to \'z\' if sorting by \fBname\fR). Use the \fIrev\fR subcommand to invert this order. E.g.: \fIst\ rev\fR or \fIst\ inode\ rev\fR. Switch back to the previous state running \fIst rev\fR again.
 .sp
-Take a look at the configuration file for extra sorting options (\fIListDirsFirst\fR, \fIPrioritySortChar\fR, \fIShowHiddenFiles\fR).
+Take a look at the configuration file for extra sort options (\fIListDirsFirst\fR, \fIPrioritySortChar\fR, \fIShowHiddenFiles\fR).
 .TP
 .B stats
 Print file statistics for files in the current directory (not available in light mode).
@@ -1459,8 +1459,8 @@ Ctrl+Alt+d : Remove selected files
 Ctrl+Alt+t : Trash selected files
 Ctrl+Alt+v : Copy selected files to the current directory
 Alt+y : Toggle light-mode
-Alt+z : Switch to previous sorting method
-Alt+x : Switch to next sorting method
+Alt+z : Switch to previous sort method
+Alt+x : Switch to next sort method
 Ctrl+Alt+x : Launch a new instance of \fBclifm\fR
 Ctrl+y : Copy the contents of the line buffer to the clipboard \fB(1)\fR
 F1 : Go to the manpage
@@ -3059,7 +3059,7 @@ Set to 1-3 if show-hidden is enabled (true, first, last, in this order). Otherwi
 Set to 1 if sort-reverse is enabled. Otherwise it is set to 0
 .TP
 .B CLIFM_SORT_STYLE
-Set to the current sorting method
+Set to the current sort method
 .TP
 .B CLIFM_TRASH_FILES
 Set to the number of currently trashed files (unset if there are no trashed files)

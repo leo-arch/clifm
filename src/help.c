@@ -158,8 +158,8 @@ print_tips(const int all)
 		"Take a look at the splash screen with the 'splash' command",
 		"Have some fun trying the 'bonus' command",
 		"Launch the default system shell in CWD using ':' or ';'",
-		"Switch files sorting order: Alt+z and Alt+x",
-		"Reverse files sorting order: 'st rev'",
+		"Cycle through file sort orders: Alt+z and Alt+x",
+		"Reverse the file sort order: 'st rev'",
 		"Rename multiple files at once. E.g.: 'br *.txt'",
 		"Need no more tips? Disable this feature in the configuration file",
 		"Need root privileges? Launch a new instance of Clifm as root "

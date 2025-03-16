@@ -84,7 +84,7 @@
 # Choose how to list files: 0 = vertically (like ls), 1 = horizontally.
 ;ListingMode=0
 
-# Determine the sorting method for listed files.
+# Determine the sort method for listed files.
 # Supported values include: none, name, version, extension, type, blocks,
 # size, links, atime, btime, ctime, mtime, inode, owner, and group.
 ;Sort=version

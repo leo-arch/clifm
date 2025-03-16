@@ -1120,7 +1120,7 @@ Recognized file types: (d)irectory, regular (f)ile, symbolic (l)ink,\n\
 - Deselect files selectively\n\
     ds <TAB> (multi-selection is allowed)"
 
-#define SORT_USAGE "Change file sorting preferences\n\n\
+#define SORT_USAGE "Change file sort preferences\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   st [METHOD] [rev]\n\n\
 Available methods: 0=none, 1=name, 2=size, 3=atime, 4=btime,\n\
@@ -1129,12 +1129,12 @@ Available methods: 0=none, 1=name, 2=size, 3=atime, 4=btime,\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
 - List files by size\n\
     st size (or 'st <TAB>' to choose from a list)\n\
-    Sort numbers can be used as well (e.g. 'st 2')\n\
-- Revert the current sorting order (e.g. z-a instead of a-z)\n\
+    Numbers can be used as well (e.g. 'st 2')\n\
+- Revert the current sort order (e.g. z-a instead of a-z)\n\
     st rev\n\
 - Both of the above at once\n\
     st size rev\n\n\
-Tip: Take a look at the configuration file for extra sorting\n\
+Tip: Take a look at the configuration file for extra sort\n\
 options (ListDirsFirst, PrioritySortChar, ShowHiddenFiles)."
 
 #define TAG_USAGE "(Un)tag files and/or directories\n\n\

@@ -1452,7 +1452,7 @@ int_cmds_generator(const char *text, int state)
 		"rr      (remove files in bulk)",
 		"sb      (access the selection box)",
 		"s       (select files)",
-		"st      (change files sorting order)",
+		"st      (change file sort order)",
 		"stats   (print files statistics)",
 		"tag     (tag files)",
 		"te      (toggle the executable bit on files)",

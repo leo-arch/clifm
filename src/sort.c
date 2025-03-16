@@ -390,7 +390,7 @@ re_sort_files_list(void)
 		return FUNC_SUCCESS;
 
 	/* sort_switch just tells list_dir() to print a line with the current
-	 * sorting order at the end of the file list. */
+	 * sort order at the end of the file list. */
 	sort_switch = 1;
 	free_dirlist();
 	const int ret = list_dir();
@@ -400,7 +400,7 @@ re_sort_files_list(void)
 }
 
 /* If ARG is a string, write the corresponding integer to ARG itself.
- * Return zero if ARG corresponds to a valid sorting method or one
+ * Return zero if ARG corresponds to a valid sort method or one
  * otherwise. */
 static inline int
 set_sort_by_name(char **arg)
@@ -422,14 +422,14 @@ set_sort_by_name(char **arg)
 		}
 	}
 
-	fprintf(stdout, _("st: %s: No such sorting order\n"), *arg);
+	fprintf(stdout, _("st: %s: No such sort order\n"), *arg);
 	return FUNC_FAILURE;
 }
 
 int
 sort_function(char **arg)
 {
-	/* No argument: Just print current sorting order */
+	/* No argument: Just print the current sort order. */
 	if (!arg[1]) {
 		fputs(_("Sorted by "), stdout);
 		print_sort_method();
