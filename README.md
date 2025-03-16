@@ -107,7 +107,7 @@ In addition to common file operations, such as copy, move, remove, etc., **clifm
   - [Virtual directories](https://github.com/leo-arch/clifm/wiki/Advanced#virtual-directories)
   - [Fastback](https://github.com/leo-arch/clifm/wiki/Introduction#fastback) (quickly change to any parent directory)
   - [Up to eight workspaces](https://github.com/leo-arch/clifm/wiki/Specifics#workspaces)
-  - [More than a dozen sorting methods](https://github.com/leo-arch/clifm/wiki/Introduction#st-sort)
+  - [More than a dozen sort methods](https://github.com/leo-arch/clifm/wiki/Introduction#st-sort)
   - [Remote filesystems management](https://github.com/leo-arch/clifm/wiki/Introduction#net)
   - [Mount/unmount storage devices](https://github.com/leo-arch/clifm/wiki/Introduction#media)
   - Directory history map (keep in sight previous, current, and next entries in the directory history list)
