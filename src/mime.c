@@ -85,7 +85,7 @@ check_user_mimetypes(const char *file)
 
 	filesn_t i = n;
 	while (--i >= 0)
-		/* An extension name starting with NULL byte is duplicated. Skip it. */
+		/* An extension name starting with NUL byte is duplicated. Skip it. */
 		if (hash == user_mimetypes[i].ext_hash && *user_mimetypes[i].ext)
 			return user_mimetypes[i].mimetype;
 
@@ -296,14 +296,14 @@ skip_line_prefix(char *line)
 	char *p = line;
 
 	if (!(flags & GUI)) {
-		if (*p == 'X' && *(p + 1) == ':')
+		if (*p == 'X' && p[1] == ':')
 			return (char *)NULL;
-		if (*p == '!' && *(p + 1) == 'X' && *(p + 2) == ':')
+		if (*p == '!' && p[1] == 'X' && p[2] == ':')
 			p += 3;
 	} else {
-		if (*p == '!' && *(p + 1) == 'X')
+		if (*p == '!' && p[1] == 'X')
 			return (char *)NULL;
-		if (*p == 'X' && *(p + 1) == ':')
+		if (*p == 'X' && p[1] == ':')
 			p += 2;
 	}
 
@@ -641,7 +641,7 @@ mime_import(char *file)
 
 	if (mime_defs == 0)
 		xerror(_("%s: Nothing was imported. No MIME association "
-			"found\n"), err_name);
+			"found.\n"), err_name);
 
 	fclose(mime_fp);
 	return mime_defs;
@@ -756,11 +756,11 @@ set_exec_flags(const char *str, int *exec_flags)
 {
 	if (*str == 'E') {
 		*exec_flags |= E_NOSTDERR;
-		if (*(str + 1) == 'O')
+		if (str[1] == 'O')
 			*exec_flags |= E_NOSTDOUT;
 	} else if (*str == 'O') {
 		*exec_flags |= E_NOSTDOUT;
-		if (*(str + 1) == 'E')
+		if (str[1] == 'E')
 			*exec_flags |= E_NOSTDERR;
 	}
 }
@@ -851,7 +851,7 @@ expand_app_fields(char ***cmd, size_t *n, char *fpath, int *exec_flags)
 	return f;
 }
 
-/* Open the file named FILE via the application APP, splitting APP and
+/* Open the file named FILE using the application APP, splitting APP and
  * expanding fields to the appropriate values. */
 static int
 run_mime_app(char *app, char *file)
@@ -864,7 +864,7 @@ run_mime_app(char *app, char *file)
 	size_t i = 0;
 	const size_t f = expand_app_fields(&cmd, &i, file, &exec_flags);
 
-	/* If no %f placeholder was found, append filename */
+	/* If no %f placeholder was found, append filename. */
 	if (f == 0) {
 		cmd = xnrealloc(cmd, i + 2, sizeof(char *));
 		cmd[i] = savestring(file, strlen(file));
@@ -881,7 +881,7 @@ run_mime_app(char *app, char *file)
 	return ret;
 }
 
-/* Open the file named FILE via the application APP.
+/* Open the file named FILE using the application APP.
  * No field expansion is made on APP, since it must be just an application
  * name. If expansion is required, use run_mime_app() instead. */
 static int
@@ -932,7 +932,7 @@ mime_list_open(char **apps, char *file)
 
 	if (strchr(app, ' '))
 		ret = run_mime_app(app, file);
-	else /* We have just a command name: no parameter nor placeholder */
+	else /* We have just a command name: no parameter nor placeholder. */
 		ret = run_cmd(app, file);
 
 	return ret;
@@ -978,7 +978,7 @@ get_apps_from_file(FILE *fp, char *file_name, const char *mime,
 			continue;
 
 		char *tmp = strchr(p, '=');
-		if (!tmp || !*(tmp + 1))
+		if (!tmp || !tmp[1])
 			continue;
 
 		/* Truncate line in '=' to get only the ext/mimetype pattern/string */
@@ -1432,7 +1432,7 @@ mime_open_url(char *url)
 	err_name = (xargs.open == 1 || xargs.preview == 1) ? PROGRAM_NAME : "lira";
 
 	char *app = get_app("text/html", 0);
-	if (!app) /* The error message might not be printed by get_app(). Fix. */
+	if (!app) /* The error message may not be printed by get_app(). Fix. */
 		return FUNC_FAILURE;
 
 	char *p = strchr(app, ' ');
@@ -1511,7 +1511,7 @@ get_open_file_path(char **args, char **fpath, char **deq)
 	else
 		f = args[1];
 
-	/* Only dequote the filename if coming from the mime command */
+	/* Only dequote the filename if coming from the mime command. */
 	if (*args[0] == 'm' && strchr(f, '\\')) {
 		*deq = unescape_str(f, 0);
 		*fpath = xrealpath(*deq, NULL);
@@ -1587,7 +1587,7 @@ static void
 print_info_name_mime(char *filename, char *mime)
 {
 	printf(_("Name: %s\n"), filename ? filename : _("None"));
-	printf(_("MIME type: %s\n"), mime);
+	printf(_("MIME type: %s\n"), mime ? mime : _("unknown"));
 }
 
 static int
