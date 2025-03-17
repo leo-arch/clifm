@@ -1429,7 +1429,7 @@ int_cmds_generator(const char *text, int state)
 		"md      (create directories)",
 		"media   (mount/unmount storage devices)",
 		"mf      (limit the number of listed files)",
-		"mm      (manage default opening applications)",
+		"mm      (manage opening applications)",
 		"mp      (change to a mountpoint)",
 		"msg     (print program messages)",
 		"n       (create files/directories)",

@@ -403,7 +403,8 @@ Parameters passed to cp:    -a"
 - Print file properties, including recursive directory sizes\n\
     pp DIR\n\n\
 Note: An exclamation mark (!) before directory sizes means that an\n\
-error ocurred while reading a subdirectory, so sizes may not be accurate.\n\n\
+error ocurred while reading a subdirectory (most of the time due to\n\
+insufficient permissions), so that sizes may not be accurate.\n\n\
 Note 2: Unlike 'p', 'pp' always dereferences symbolic links."
 
 #define FILE_SIZE_USAGE "File sizes/disk usage\n\n\
@@ -748,7 +749,7 @@ To get information about a device, enter iELN. For example: 'i12'."
 \x1b[1mUSAGE\x1b[22m\n\
   mf [NUM | unset]"
 
-#define MIME_USAGE "Set default opening applications based on MIME types or filenames\n\n\
+#define MIME_USAGE "Manage opening applications\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   mm, mime [open FILE | info FILE | edit [APP] | import]\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
@@ -773,7 +774,7 @@ To get information about a device, enter iELN. For example: 'i12'."
     opening application.\n\
   For more information consult the manpage."
 
-#define MSG_USAGE "List available Clifm messages\n\n\
+#define MSG_USAGE "List available program messages\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   msg, messages [clear]\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
@@ -805,7 +806,7 @@ To get information about a device, enter iELN. For example: 'i12'."
     net edit\n\
 - Open/edit the net configuration file using nano\n\
     net edit nano\n\
-- Copy a file to a remote location via the 'cr' plugin\n\
+- Copy a file to a remote location using the 'cr' plugin\n\
     cr FILE (run 'cr --edit' before to set up your remotes)"
 
 #define NEW_USAGE "Create new files and/or directories\n\n\
@@ -856,10 +857,10 @@ or ~/Templates, in this precedence order."
     oc *.iso\n\n\
 \x1b[1mNOTES\x1b[22m\n\
 A template is presented to the user to be edited.\n\n\
-Only user and primary group common to all files passed as\n\
-parameters are set in the ownership template.\n\n\
+Only user and primary group common to all specified files\n\
+are set in the ownership template.\n\n\
 Ownership (both user and primary group, if specified) is\n\
-changed for all files passed as parameters.\n\n\
+changed for all specified files.\n\n\
 Both names and ID numbers are allowed (tab completion is available).\n\n\
 If only a name/number is entered, it is taken as user.\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
@@ -869,7 +870,7 @@ If only a name/number is entered, it is taken as user.\n\n\
     :video (or \":981\")\n\
 - Change user to peter and primary group to audio\n\
     peter:audio (or \"1000:986\" or \"peter:986\" or \"1000:audio\")\n\n\
-Note: Use the 'pc' command to edit file permissions."
+Tip: Use the 'pc' command to change file permissions."
 
 #define OPEN_USAGE "Open a file\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
@@ -890,14 +891,14 @@ Note: Use the 'pc' command to edit file permissions."
 \x1b[1mEXAMPLES\x1b[22m\n\
 - Set the file opener to xdg-open (instead of the default, Lira)\n\
     opener xdg-open\n\
-- Set the file opener back to the default (Lira)\n\
+- Set the file opener back to the default\n\
     opener default"
 
 #define OW_USAGE "Open a file using a specific application\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   ow FILE [APP]\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
-- Choose opening application for the file 'test.c' from a menu\n\
+- Choose the opening application for the file 'test.c' from a menu\n\
     ow test.c\n\
   or\n\
     'ow test.c <TAB>' (to get a list of available applications)\n\
@@ -906,13 +907,13 @@ Note: Use the 'pc' command to edit file permissions."
 - Open the file 'test.c' with geany\n\
     ow test.c geany"
 
-#define PAGER_USAGE "Set the files list pager on/off\n\n\
+#define PAGER_USAGE "Toggle/run the file list pager\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   pg, pager [on | off | once | status | NUM]\n\n\
 With no parameter, just run the pager.\n\n\
 If set to 'on', run the pager whenever the list of files does no fit on\n\
 the screen.\n\n\
-If set to any positive integer greater than 1, run the pager whenever\n\
+If set to a positive integer greater than 1, run the pager whenever\n\
 the number of files in the current directory is greater than or equal to\n\
 that value (e.g., 1000). A value of 1 is equivalent to 'on', while 0 means 'off'.\n\n\
 Set to 'once' to run the pager only a single time.\n\n\
@@ -1842,11 +1843,11 @@ q | F12         I'm tired, quit"
 
 /* Brief commands description */
 #define AC_DESC      " (archive/compress files)"
-#define ACD_DESC     " (set autocd on/off)"
+#define ACD_DESC     " (toggle autocd)"
 #define ACTIONS_DESC " (manage actions/plugins)"
 #define AD_DESC      " (dearchive/decompress files)"
 #define ALIAS_DESC   " (list aliases)"
-#define AO_DESC      " (set auto-open on/off)"
+#define AO_DESC      " (toggle auto-open)"
 #define AUTO_DESC    " (set a temporary autocommand)"
 #define B_DESC       " (change to the previously visited directory)"
 #define BD_DESC      " (change to a parent directory)"
@@ -1856,7 +1857,7 @@ q | F12         I'm tired, quit"
 #define BR_DESC      " (rename files in bulk)"
 #define C_DESC       " (copy files)"
 #define CD_DESC      " (change directory)"
-#define CL_DESC      " (set columns on/off)"
+#define CL_DESC      " (toggle columns)"
 #define CMD_DESC     " (jump to the COMMANDS section in the manpage)"
 #define COLORS_DESC  " (preview the current color scheme)"
 #define CONFIG_DESC  " (edit the main configuration file)"
@@ -1865,17 +1866,16 @@ q | F12         I'm tired, quit"
 #define D_DESC       " (duplicate files)"
 #define DH_DESC      " (query the directory history list)"
 #define DS_DESC      " (deselect files)"
-#define EDIT_DESC    " (edit the main configuration file)"
 #define EXP_DESC     " (export filenames to a temporary file)"
 #define EXT_DESC     " (set external/shell commands on/off)"
 #define F_DESC       " (change to the next visited directory)"
-#define FC_DESC      " (set the file counter on/off)"
+#define FC_DESC      " (toggle the file counter)"
 #define FF_DESC      " (toggle list-directories-first)"
 #define FT_DESC      " (set a file filter)"
 #define FZ_DESC      " (display recursive directory sizes - long view only)"
 #define HF_DESC      " (toggle hidden files)"
 #define HIST_DESC    " (manage the command history)"
-#define ICONS_DESC   " (set icons on/off)"
+#define ICONS_DESC   " (toggle icons)"
 #define J_DESC       " (jump to a visited directory)"
 #define K_DESC       " (toggle follow-links - long view only)"
 #define KK_DESC      " (toggle max-filename-len)"
@@ -1889,9 +1889,9 @@ q | F12         I'm tired, quit"
 #define MD_DESC      " (create directories)"
 #define MEDIA_DESC   " (mount/unmount storage devices)"
 #define MF_DESC      " (limit the number of listed files)"
-#define MM_DESC      " (manage default opening applications)"
+#define MM_DESC      " (manage opening applications)"
 #define MP_DESC      " (change to a mountpoint)"
-#define MSG_DESC     " (print system messages)"
+#define MSG_DESC     " (print program messages)"
 #define N_DESC       " (create files)"
 #define NET_DESC     " (manage remote resources)"
 #define O_DESC       " (open file)"
@@ -1901,9 +1901,9 @@ q | F12         I'm tired, quit"
 #define P_DESC       " (print file properties)"
 #define PC_DESC      " (change file permissions)"
 #define PF_DESC      " (manage user profiles)"
-#define PG_DESC      " (set the file pager on/off)"
+#define PG_DESC      " (toggle/run the file pager)"
 #define PIN_DESC     " (pin a directory)"
-#define PP_DESC      " (print file properties - follow links/full dir size)"
+#define PP_DESC      " (print file properties - follow links/total dir size)"
 #define PROMPT_DESC  " (switch/edit the command prompt)"
 #define Q_DESC       " (quit)"
 #define R_DESC       " (remove files)"
