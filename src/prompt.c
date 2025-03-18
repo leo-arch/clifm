@@ -47,6 +47,7 @@
 #include "misc.h"
 #include "navigation.h"
 #include "prompt.h"
+#include "properties.h" /* get_file_perms() */
 #include "sanitize.h"
 #include "sort.h" /* num_to_sort_name() */
 #include "spawn.h"
@@ -967,6 +968,21 @@ END:
 	return (char *)NULL;
 }
 
+static char *
+gen_cwd_perms(void)
+{
+	struct stat a;
+	if (!workspaces || !workspaces[cur_ws].path
+	|| lstat(workspaces[cur_ws].path, &a) == -1)
+		return savestring(UNKNOWN_STR, sizeof(UNKNOWN_STR) - 1);
+
+	char *buf = NULL;
+	buf = xnmalloc(5, sizeof(char));
+	snprintf(buf, 5, "%04o", a.st_mode & 07777);
+
+	return buf;
+}
+
 /* Decode the prompt string (encoded_prompt global variable) taken from
  * the configuration file. */
 char *
@@ -1034,6 +1050,8 @@ decode_prompt(char *line)
 
 			case 'e': /* Escape char */
 				temp = gen_escape_char(&line, &c); goto ADD_STRING;
+
+			case 'j': temp = gen_cwd_perms(); goto ADD_STRING;
 
 			case '0': /* fallthrough */ /* Octal char */
 			case '1': /* fallthrough */
