@@ -274,6 +274,13 @@ RegularPrompt="%{reset}\I[\S%{reset}]\l %{b:red}\U%{reset}:%{b:yellow}\G%{reset}
 EnableWarningPrompt=true
 WarningPrompt="%{reset}%{b:red}(!)%{n:dim} > "
 
+[counter]
+# Print sort order, current directory permissions, number of directories, regular files, and links
+Notifications=true
+RegularPrompt="%{reset}\I[\S%{reset}]\l \A [\g:%{cyan}\j%{reset}:%{blue}\D%{reset}|%{d:white}\Q%{reset}|%{cyan}\L%{reset}] %{cyan}\w%{reset}\n<\z%{reset}> %{blue}\$%{reset} "
+EnableWarningPrompt=true
+WarningPrompt="%{reset}%{b:red}(!)%{n:dim} > "
+
 [info]
 Notifications=true
 RegularPrompt="%{reset}\I[\S%{reset}]\l %{green}\w%{reset}\n%{cyan}\$%{reset} "
