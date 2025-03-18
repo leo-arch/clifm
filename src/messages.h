@@ -1535,7 +1535,7 @@ PropFields in the config file)\
 \n      --readonly\t\t Disable internal commands able to modify the filesystem\
 \n      --report-cwd\t\t Report the current directory to the terminal (OSC-7)\
 \n      --rl-vi-mode\t\t Set readline to vi editing mode (defaults to emacs mode)\
-\n      --secure-cmds\t\t Filter commands to prevent command injection\
+\n      --secure-cmds\t\t Sanitize commands to prevent command injection\
 \n      --secure-env\t\t Run in a sanitized environment (regular mode)\
 \n      --secure-env-full\t\t Run in a sanitized environment (full mode)\
 \n      --sel-file=FILE\t\t Set FILE as custom selections file\

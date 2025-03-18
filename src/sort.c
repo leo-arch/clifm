@@ -338,7 +338,7 @@ alphasort_insensitive(const struct dirent **a, const struct dirent **b)
 }
 
 char *
-num_to_sort_name(const int n)
+num_to_sort_name(const int n, const int abbrev)
 {
 	switch (n) {
 	case SNONE:	 return "none";
@@ -348,22 +348,22 @@ num_to_sort_name(const int n)
 	case SBTIME: return "btime";
 	case SCTIME: return "ctime";
 	case SMTIME: return "mtime";
-	case SVER:   return "version";
-	case SEXT:   return "extension";
-	case SINO:   return "inode";
-	case SOWN:   return "owner";
-	case SGRP:   return "group";
-	case SBLK:   return "blocks";
-	case SLNK:   return "links";
+	case SVER:   return abbrev ? "ver" : "version";
+	case SEXT:   return abbrev ? "ext" : "extension";
+	case SINO:   return abbrev ? "ino" : "inode";
+	case SOWN:   return abbrev ? "own" : "owner";
+	case SGRP:   return abbrev ? "grp" : "group";
+	case SBLK:   return abbrev ? "blk" : "blocks";
+	case SLNK:   return abbrev ? "lnk" : "links";
 	case STYPE:  return "type";
-	default:     return "unknown";
+	default:     return abbrev ? "unk" : "unknown";
 	}
 }
 
 void
 print_sort_method(void)
 {
-	char *name = num_to_sort_name(conf.sort);
+	char *name = num_to_sort_name(conf.sort, 0);
 
 	printf("%s%s%s%s", BOLD, name, NC,
 		(conf.sort_reverse == 1) ? " [rev]" : "");
@@ -452,7 +452,7 @@ sort_function(char **arg)
 
 	if (conf.light_mode == 1 && !ST_IN_LIGHT_MODE(n)) {
 		fprintf(stderr, _("st: %d (%s): Not available in light mode\n"),
-			n, num_to_sort_name(n));
+			n, num_to_sort_name(n, 0));
 		return FUNC_FAILURE;
 	}
 

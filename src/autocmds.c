@@ -320,7 +320,7 @@ gen_autocmd_options_list(char *buf, struct autocmds_t *a, const int print_filter
 		len += gen_opt_entry(buf + len, "pg", xitoa(a->pager), &c, lm);
 
 	if (a->sort != UNSET)
-		len += gen_opt_entry(buf + len, "st", num_to_sort_name(a->sort), &c, lm);
+		len += gen_opt_entry(buf + len, "st", num_to_sort_name(a->sort, 0), &c, lm);
 
 	if (a->sort_reverse != UNSET)
 		len += gen_opt_entry(buf + len, "sr", xitoa(a->sort_reverse), &c, lm);

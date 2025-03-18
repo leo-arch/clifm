@@ -48,6 +48,7 @@
 #include "navigation.h"
 #include "prompt.h"
 #include "sanitize.h"
+#include "sort.h" /* num_to_sort_name() */
 #include "spawn.h"
 #ifndef _NO_SUGGESTIONS
 # include "suggestions.h"
@@ -385,6 +386,12 @@ gen_user_name(void)
 		return savestring(UNKNOWN_STR, sizeof(UNKNOWN_STR) - 1);
 
 	return savestring(user.name, strlen(user.name));
+}
+
+static inline char *
+gen_sort_name(void)
+{
+	return strdup(num_to_sort_name(conf.sort, 1));
 }
 
 static inline char *
@@ -982,7 +989,7 @@ decode_prompt(char *line)
 			/* Now move on to the next char */
 			c = (int)*line;
 			switch (c) {
-			/* Files statistics */
+			/* File statistics */
 			case 'B': temp = gen_stats_str(STATS_BLK); goto ADD_STRING;
 			case 'C': temp = gen_stats_str(STATS_CHR); goto ADD_STRING;
 			case 'D': temp = gen_stats_str(STATS_DIR); goto ADD_STRING;
@@ -1052,6 +1059,9 @@ decode_prompt(char *line)
 
 			case 'u': /* User name */
 				temp = gen_user_name(); goto ADD_STRING;
+
+			case 'g':
+				temp = gen_sort_name(); goto ADD_STRING;
 
 			case 'h': /* fallthrough */ /* Hostname up to first '.' */
 			case 'H': /* Full hostname */

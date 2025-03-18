@@ -1354,6 +1354,16 @@ rl_update_prompt_old(void)
 }
 #endif /* __HAIKU__ || !_NO_PROFILES */
 
+static void
+xrl_update_prompt(void)
+{
+#ifdef __HAIKU__
+	rl_update_prompt_old();
+#else
+	rl_update_prompt();
+#endif /* __HAIKU__ */
+}
+
 /* Run any command recognized by Clifm via a keybind. Example:
  * keybind_exec_cmd("sel *") */
 int
@@ -1386,11 +1396,7 @@ keybind_exec_cmd(char *str)
 			free(cmd[i]);
 		free(cmd);
 
-#ifdef __HAIKU__
-		rl_update_prompt_old();
-#else
-		rl_update_prompt();
-#endif /* __HAIKU__ */
+		xrl_update_prompt();
 	}
 
 	args_n = old_args;
@@ -2302,6 +2308,7 @@ rl_sort_next(int count, int key)
 		sort_switch = 0;
 	}
 
+	xrl_update_prompt();
 	update_autocmd_opts(AC_SORT);
 
 	xrl_reset_line_state();
@@ -2341,6 +2348,8 @@ rl_sort_previous(int count, int key)
 		sort_switch = 0;
 	}
 
+
+	xrl_update_prompt();
 	update_autocmd_opts(AC_SORT);
 
 	xrl_reset_line_state();

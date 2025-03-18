@@ -128,7 +128,7 @@ export_status_values(void)
 	snprintf(buf, sizeof(buf), "%d", conf.show_hidden);
 	setenv("CLIFM_SHOW_HIDDEN", buf, 1);
 	setenv("CLIFM_SORT_REVERSE", conf.sort_reverse == 1 ? "1" : "0", 1);
-	setenv("CLIFM_SORT_STYLE", num_to_sort_name(conf.sort), 1);
+	setenv("CLIFM_SORT_STYLE", num_to_sort_name(conf.sort, 0), 1);
 	if (trash_n > 0)
 		setenv("CLIFM_TRASH_FILES", xitoa((long long)trash_n), 1);
 	setenv("CLIFM_TRUNCATE_NAMES", conf.trunc_names == 1 ? "1" : "0", 1);

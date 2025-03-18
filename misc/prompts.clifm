@@ -42,7 +42,7 @@
 # \n: A newline character
 # \r: A carriage return
 # \a: A bell character
-# \d: The date, in abbreviated form (ex: Tue May 26)
+# \d: The date, in abbreviated form (e.g.: Tue May 26)
 # \t: The time, in 24-hour HH:MM:SS format
 # \T: The time, in 12-hour HH:MM:SS format
 # \@: The time, in 12-hour am/pm format
@@ -63,6 +63,7 @@
 #     print times only if bigger than the specified value (defaults to 0), and
 #     $CLIFM_PROMPT_B_PRECISION to print only the specified value of decimal
 #     places (defaults to 2).
+# \g: The current sort order name
 # \y: Print an 'A' if an autocommand was executed in the current directory
 # \i: The value of CLIFMLVL (number of clifm nested instances)
 # \I: Same as \i, but formatted as '(n)' (nothing is printed if CLIFMLVL is 1)
@@ -261,8 +262,8 @@ EnableWarningPrompt=true
 WarningPrompt="%{reset}%{red}\$%{n:dim} "
 
 [security-scanner]
-# Print file statistics about the current directory (-:-:-:-) in this order:
-# SUID, SGID, other-writable, and executable files
+# Print file statistics about the current directory, including the number of SUID, SGID,
+# other-writable, and executable files, in this order.
 Notifications=true
 RegularPrompt="%{reset}\I[\S%{reset}]\l %{b:red}\U%{reset}:%{b:yellow}\G%{reset}:%{b:blue}\O%{reset}:%{b:green}\X%{reset} \A %{cyan}\w%{reset}\n<\z%{reset}> %{blue}\$%{reset} "
 EnableWarningPrompt=true

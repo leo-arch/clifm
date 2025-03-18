@@ -528,8 +528,8 @@ dump_config(void)
 	print_config_value("SkipNonAlnumPrefix", &conf.skip_non_alnum_prefix, &n,
 		DUMP_CONFIG_BOOL);
 
-	print_config_value("Sort", num_to_sort_name(conf.sort),
-		num_to_sort_name(DEF_SORT), DUMP_CONFIG_STR);
+	print_config_value("Sort", num_to_sort_name(conf.sort, 0),
+		num_to_sort_name(DEF_SORT, 0), DUMP_CONFIG_STR);
 
 	n = DEF_SORT_REVERSE;
 	print_config_value("SortReverse", &conf.sort_reverse, &n, DUMP_CONFIG_BOOL);

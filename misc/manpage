@@ -1983,9 +1983,9 @@ Of course, combinations of all these features is also possible. Example: \fIcp s
 In addition to completions and expansions, an \fIauto\-suggestions system\fR is also available. See the \fBAUTO\-SUGGESTIONS\fR section below.
 
 .SH 9. FILE OPENER
-As \fBclifm\fR\'s builtin file opener, \fILira\fR takes care of opening files when no opening application has been specified in the command line. It does this by automatically parsing a MIME list file (see the \fBFILES\fR section below): it looks first for a matching pattern (either a MIME type or a filename), then checks the existence of the command associated to this pattern, and finally executes it.
+As \fBclifm\fR\'s builtin file opener, \fILira\fR takes care of opening files when no opening application has been specified in the command line (or when running as a standalone file opener, via the \fI--open\fR command line switch). It does this by automatically parsing a MIME list file (see the \fBFILES\fR section below): it looks first for a matching pattern (either a MIME type or a filename), then checks the existence of the command associated to this pattern, and finally executes it.
 .TP
-\fILira\fR is controlled via the \fImime\fR command. File associations are stored in the MIME list file.
+\fILira\fR is controlled via the \fImime\fR command. File associations are stored in the MIME list file and can be edited using the \fImime edit\fR command.
 .TP
 When running for the first time, or whenever the MIME list file cannot be found, \fBclifm\fR will copy the MIME definitions file from the \fBDATADIR\fR directory (usually \fI/usr/share/clifm/mimelist.clifm\fR) to the local configuration directory.
 .TP
