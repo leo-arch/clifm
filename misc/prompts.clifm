@@ -78,6 +78,9 @@
 #
 # \D: Number of sub-directories
 # \R: Number of regular files
+# \L: Number of symbolic links
+# \o: Number of broken symbolic links
+# \Q: Number of regular and special files (1)
 # \X: Number of executable files
 # \.: Number of hidden files
 # \U: Number of SUID files
@@ -87,14 +90,15 @@
 # \B: Number of block device files
 # \C: Number of character device files
 # \x: Number of files with capabilities
-# \L: Number of symbolic links
-# \o: Number of broken symbolic links
 # \M: Number of multi-link files (hardlinks)
 # \E: Number of files with extended attributes
 # \O: Number of other-writable files
 # \": Number of files with the sticky bit set
 # \?: Number of files of unknown file type
 # \!: Number of unstatable files
+#
+# (1) This includes: regular files, sockets, FIFO/pipes, block devices and
+# character devices (i.e. non-directory and non-symlink files).
 #
 # Escape codes to control prompt notifications:
 #

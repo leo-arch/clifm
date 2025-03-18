@@ -594,6 +594,10 @@ gen_stats_str(const int flag)
 	case STATS_STICKY: val = stats.sticky; break;
 	case STATS_UNKNOWN: val = stats.unknown; break;
 	case STATS_UNSTAT: val = stats.unstat; break;
+	case STATS_NON_DIR:
+		val = stats.reg + stats.block_dev + stats.char_dev
+			+ stats.socket + stats.fifo;
+		break;
 	default: break;
 	}
 
@@ -1001,6 +1005,7 @@ decode_prompt(char *line)
 			case 'M': temp = gen_stats_str(STATS_MULTI_L); goto ADD_STRING;
 			case 'o': temp = gen_stats_str(STATS_BROKEN_L); goto ADD_STRING;
 			case 'O': temp = gen_stats_str(STATS_OTHER_W); goto ADD_STRING;
+			case 'Q': temp = gen_stats_str(STATS_NON_DIR); goto ADD_STRING;
 			case 'R': temp = gen_stats_str(STATS_REG); goto ADD_STRING;
 			case 'U': temp = gen_stats_str(STATS_SUID); goto ADD_STRING;
 			case 'x': temp = gen_stats_str(STATS_CAP); goto ADD_STRING;

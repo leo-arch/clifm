@@ -79,6 +79,7 @@ emergency prompt"
 # define STATS_DOOR    19
 # define STATS_PORT    20
 #endif /* SOLARIS_DOORS */
+#define STATS_NON_DIR  21
 
 #define NOTIF_SEL     0
 #define NOTIF_TRASH   1
