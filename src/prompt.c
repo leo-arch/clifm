@@ -973,7 +973,7 @@ gen_cwd_perms(void)
 {
 	struct stat a;
 	if (!workspaces || !workspaces[cur_ws].path
-	|| lstat(workspaces[cur_ws].path, &a) == -1)
+	|| stat(workspaces[cur_ws].path, &a) == -1)
 		return savestring(UNKNOWN_STR, sizeof(UNKNOWN_STR) - 1);
 
 	char *buf = NULL;
