@@ -69,7 +69,7 @@ struct p_mod_paths_t {
 static struct p_mod_paths_t p_mod_paths[MAX_PMOD_PATHS];
 #endif /* __HAIKU__ || __OpenBSD__ || __ANDROID__ */
 
-static inline char *
+static char *
 gen_time(const int c)
 {
 	char *temp = (char *)NULL;
@@ -103,7 +103,7 @@ gen_time(const int c)
 	return temp;
 }
 
-static inline char *
+static char *
 gen_rl_vi_mode(const int alloc)
 {
 	if (rl_editing_mode == RL_EMACS_MODE
@@ -128,7 +128,7 @@ gen_rl_vi_mode(const int alloc)
 		: RL_VI_CMD_MODESTR;
 }
 
-static inline char *
+static char *
 get_dir_basename(const char *str)
 {
 	/* If not root dir (/), get last path component */
@@ -141,7 +141,7 @@ get_dir_basename(const char *str)
 	return savestring(ret + 1, strlen(ret + 1));
 }
 
-static inline char *
+static char *
 reduce_path(const char *str)
 {
 	char *temp = (char *)NULL;
@@ -180,7 +180,7 @@ copy_char(char *buf, char *s)
 	return (size_t)c;
 }
 
-static inline char *
+static char *
 reduce_path_fish(char *str)
 {
 	if ((*str == '~' || *str == '/') && !str[1])
@@ -253,7 +253,7 @@ reduce_path_fish(char *str)
 	return buf;
 }
 
-static inline char *
+static char *
 gen_pwd(const int c)
 {
 	char *temp = (char *)NULL;
@@ -282,7 +282,7 @@ gen_pwd(const int c)
 	return temp;
 }
 
-static inline char *
+static char *
 gen_workspace(void)
 {
 	/* An int (or workspace name) + workspaces color + NUL byte */
@@ -312,7 +312,7 @@ gen_workspace(void)
 	return savestring(s, strnlen(s, sizeof(s)));
 }
 
-static inline char *
+static char *
 gen_exit_status(void)
 {
 	const size_t code_len = (size_t)DIGINUM(exit_code);
@@ -326,7 +326,7 @@ gen_exit_status(void)
 	return temp;
 }
 
-static inline char *
+static char *
 gen_escape_char(char **line, int *c)
 {
 	(*line)++;
@@ -339,7 +339,7 @@ gen_escape_char(char **line, int *c)
 	return temp;
 }
 
-static inline char *
+static char *
 gen_octal(char **line, int *c)
 {
 	char octal_string[4];
@@ -369,7 +369,7 @@ gen_octal(char **line, int *c)
 	return temp;
 }
 
-static inline char *
+static char *
 gen_profile(void)
 {
 	if (!alt_profile)
@@ -378,7 +378,7 @@ gen_profile(void)
 	return savestring(alt_profile, strlen(alt_profile));
 }
 
-static inline char *
+static char *
 gen_user_name(void)
 {
 	if (!user.name)
@@ -387,13 +387,13 @@ gen_user_name(void)
 	return savestring(user.name, strlen(user.name));
 }
 
-static inline char *
+static char *
 gen_sort_name(void)
 {
 	return strdup(num_to_sort_name(conf.sort, 1));
 }
 
-static inline char *
+static char *
 gen_hostname(const int c)
 {
 	/* Using strnlen() here avoids a Redhat hardened compilation warning. */
@@ -408,7 +408,7 @@ gen_hostname(const int c)
 	return temp;
 }
 
-static inline char *
+static char *
 gen_user_flag(void)
 {
 	char *temp = xnmalloc(2, sizeof(char));
@@ -418,7 +418,7 @@ gen_user_flag(void)
 	return temp;
 }
 
-static inline char *
+static char *
 gen_mode(void)
 {
 	char *temp = xnmalloc(2, sizeof(char));
@@ -433,7 +433,7 @@ gen_mode(void)
 	return temp;
 }
 
-static inline char*
+static char *
 gen_misc(const int c)
 {
 	char *temp = xnmalloc(2, sizeof(char));
@@ -450,7 +450,7 @@ gen_misc(const int c)
 	return temp;
 }
 
-static inline char *
+static char *
 gen_non_print_sequence(const int c)
 {
 	char *temp = xnmalloc(2, sizeof(char));
@@ -460,7 +460,7 @@ gen_non_print_sequence(const int c)
 	return temp;
 }
 
-static inline char *
+static char *
 gen_shell_name(void)
 {
 	if (user.shell && user.shell_basename)
@@ -469,7 +469,7 @@ gen_shell_name(void)
 	return savestring("unknown", 7);
 }
 
-static inline void
+static void
 add_string(char **tmp, const int c, char **line, char **res, size_t *len)
 {
 	if (!*tmp)
@@ -493,7 +493,7 @@ add_string(char **tmp, const int c, char **line, char **res, size_t *len)
 }
 
 #ifndef NO_WORDEXP
-static inline void
+static void
 reset_ifs(const char *value)
 {
 	if (value)
@@ -502,7 +502,7 @@ reset_ifs(const char *value)
 		unsetenv("IFS");
 }
 
-static inline void
+static void
 substitute_cmd(char **line, char **res, size_t *len)
 {
 	char *p = strchr(*line, ')');
@@ -552,7 +552,7 @@ END:
 }
 #endif /* !NO_WORDEXP */
 
-static inline char *
+static char *
 gen_emergency_prompt(void)
 {
 	static int f = 0;
@@ -564,7 +564,7 @@ gen_emergency_prompt(void)
 	return savestring(EMERGENCY_PROMPT, sizeof(EMERGENCY_PROMPT) - 1);
 }
 
-static inline char *
+static char *
 gen_stats_str(const int flag)
 {
 	size_t val = 0;
@@ -627,7 +627,7 @@ count_autocmd_matches(void)
 	return c;
 }
 
-static inline char *
+static char *
 gen_notification(const int flag)
 {
 	const size_t len = MAX_INT_STR + 2;
@@ -670,7 +670,7 @@ gen_notification(const int flag)
 	return p;
 }
 
-static inline char *
+static char *
 gen_nesting_level(const int mode)
 {
 	char *p = (char *)NULL;
@@ -1175,7 +1175,7 @@ ADD_STRING:
 }
 
 /* Make sure CWD exists; if not, go up to the parent, and so on */
-static inline void
+static void
 check_cwd(void)
 {
 	int cwd_change = 0;
@@ -1195,7 +1195,7 @@ check_cwd(void)
 }
 
 /* Remove all final slash(es) from path, if any */
-static inline void
+static void
 trim_final_slashes(void)
 {
 	const size_t path_len = strlen(workspaces[cur_ws].path);
@@ -1250,7 +1250,7 @@ print_user_message(void)
 	fputs(df_c, stdout);
 }
 
-static inline void
+static void
 print_welcome_msg(void)
 {
 	static int message_shown = 0;
@@ -1268,7 +1268,7 @@ print_welcome_msg(void)
 	message_shown = 1;
 }
 
-static inline void
+static void
 print_tips_func(void)
 {
 	if (conf.tips == 0)
@@ -1281,7 +1281,7 @@ print_tips_func(void)
 	}
 }
 
-static inline void
+static void
 run_prompt_cmds(void)
 {
 	if (conf.ext_cmd_ok == 0 || prompt_cmds_n == 0)
@@ -1326,7 +1326,7 @@ update_trash_indicator(void)
 }
 #endif /* !_NO_TRASH */
 
-static inline void
+static void
 setenv_prompt(void)
 {
 	if (prompt_notif == 1)
@@ -1348,7 +1348,7 @@ setenv_prompt(void)
 	setenv("CLIFM_STAT_STEALTH", (xargs.stealth_mode == 1) ? "1" : "0", 1);
 }
 
-static inline size_t
+static size_t
 set_prompt_length(const size_t decoded_prompt_len, const size_t ac_matches)
 {
 	size_t len = 0;
@@ -1372,7 +1372,7 @@ set_prompt_length(const size_t decoded_prompt_len, const size_t ac_matches)
 	return len;
 }
 
-static inline char *
+static char *
 construct_prompt(const char *decoded_prompt)
 {
 	char *rl_vi_mode = (char *)NULL;
@@ -1449,7 +1449,7 @@ print_prompt_messages(void)
 	print_msg = 0;
 }
 
-static inline void
+static void
 initialize_prompt_data(const int prompt_flag)
 {
 	check_cwd();
@@ -1491,7 +1491,7 @@ initialize_prompt_data(const int prompt_flag)
 		print_prompt_messages();
 }
 
-static inline void
+static void
 log_and_record(char *input)
 {
 	if (conf.log_cmds == 1) {
