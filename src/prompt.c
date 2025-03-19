@@ -287,7 +287,7 @@ gen_workspace(void)
 {
 	/* An int (or workspace name) + workspaces color + NUL byte */
 	char s[NAME_MAX + sizeof(ws1_c) + 1];
-	char *cl = (char *)NULL;
+	char *cl = df_c;
 
 	if (conf.colorize == 1) {
 		switch (cur_ws + 1) {
@@ -301,8 +301,6 @@ gen_workspace(void)
 		case 8: cl = *ws8_c ? ws8_c : DEF_WS8_C; break;
 		default: break;
 		}
-	} else {
-		cl = df_c;
 	}
 
 	if (workspaces[cur_ws].name)
