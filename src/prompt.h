@@ -45,14 +45,14 @@
 # define ROOT_IND "\001\x1b[1;31m\002R\001\x1b[0m\002"
 # define ROOT_IND_NO_COLOR "R"
 #endif /* __HAIKU__ */
-#define ROOT_IND_SIZE 17
+#define ROOT_IND_SIZE sizeof(ROOT_IND)
 #define RDONLY_IND "RO\001\x1b[0m\002"
 #define RDONLY_IND_SIZE (MAX_COLOR + 8 + 1)
 #define STEALTH_IND "S\001\x1b[0m\002"
 #define STEALTH_IND_SIZE (MAX_COLOR + 7 + 1)
 
 #define EMERGENCY_PROMPT_MSG "Error decoding prompt line. Using an \
-emergency prompt"
+emergency prompt."
 #define EMERGENCY_PROMPT "\001\x1b[0m\002> "
 
 /* Flag macros to generate files statistic string for the prompt */
