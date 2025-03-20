@@ -47,9 +47,9 @@
 #endif /* __HAIKU__ */
 #define ROOT_IND_SIZE sizeof(ROOT_IND)
 #define RDONLY_IND "RO\001\x1b[0m\002"
-#define RDONLY_IND_SIZE (MAX_COLOR + 8 + 1)
+#define RDONLY_IND_SIZE (MAX_COLOR + sizeof(RDONLY_IND))
 #define STEALTH_IND "S\001\x1b[0m\002"
-#define STEALTH_IND_SIZE (MAX_COLOR + 7 + 1)
+#define STEALTH_IND_SIZE (MAX_COLOR + sizeof(STEALTH_IND))
 
 #define EMERGENCY_PROMPT_MSG "Error decoding prompt line. Using an \
 emergency prompt."
@@ -92,9 +92,9 @@ emergency prompt."
 #define RL_EMACS_MODE 1
 #define RL_VI_MODE    0
 #define RL_VI_INS_MODESTR "(ins)"
-#define RL_VI_INS_MODESTR_LEN 5
+#define RL_VI_INS_MODESTR_LEN (sizeof(RL_VI_INS_MODESTR) - 1)
 #define RL_VI_CMD_MODESTR "(cmd)"
-#define RL_VI_CMD_MODESTR_LEN 5
+#define RL_VI_CMD_MODESTR_LEN (sizeof(RL_VI_CMD_MODESTR) - 1)
 
 /* Size of the indicator for msgs, trash, and sel. */
 #define N_IND (MAX_COLOR + 1 + 21 + (sizeof(RL_NC) - 1) + 1)
