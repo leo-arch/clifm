@@ -490,6 +490,13 @@ check_img_support(const char *env_term)
 	|| (*env_term == 'y' && strcmp(env_term, "yaft-256color") == 0)) {
 		setenv("CLIFM_IMG_SUPPORT", "sixel", 1);
 	} else {
+#ifdef __APPLE__
+		char *p = getenv("TERM_PROGRAM");
+		if (p && *p == 'i' && strcmp(p, "iTerm.app") == 0) {
+			setenv("CLIFM_IMG_SUPPORT", "iterm", 1);
+			return;
+		}
+#endif /* __APPLE__ */
 		setenv("CLIFM_IMG_SUPPORT", "ansi", 1);
 	}
 }

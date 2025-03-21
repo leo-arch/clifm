@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # clifmimg
-# Version: 1.3
+# Version: 1.4
 
 # Based on https://github.com/cirala/vifmimg, licensed GPL-3.0
 # All changes are licensed GPL-2.0+
@@ -103,7 +103,7 @@ file_URI="${3:-$file}"
 #-----------------------------
 
 # Set the method used to generate image previews.
-# Available methods: sixel, ueberzug, kitty, ansi (text mode).
+# Available methods: sixel, iterm, ueberzug, kitty, ansi (text mode).
 #
 # NOTE 1: To use the ueberzug method, run Clifm via the clifmrun script.
 # NOTE 2: To generate sixel images we use chafa(1).
@@ -227,6 +227,11 @@ display() {
 #		timg -ps -g "${C}x$((L - 1))" "$1" && return 0
 #		magick "$1" -dither FloydSteinberg -size ${C}x$((L - 1)) sixel:- 2>/dev/null && return 0
 		print_err_msg "chafa" "$?" "sixel"
+	;;
+
+	iterm)
+		chafa -f iterm --view-size "${C}x${L}" "$1" 2>/dev/null && return 0
+		print_err_msg "chafa" "$?" "iterm"
 	;;
 
 	kitty)
