@@ -72,6 +72,7 @@ By default, this variable is unset, meaning that **clifm** will try to [guess th
 | `sixel` | Preview images in full color using the sixel protocol | [**chafa**(1)](https://github.com/hpjansson/chafa) is used to generate sixel images. Note that not all terminal emulators support this protocol. Visit https://www.arewesixelyet.com/ for more information. | XTerm, Wezterm, Mlterm, [st (sixel patch)](https://github.com/bakkeby/st-flexipatch), Contour, Foot |
 | `ueberzug` | Preview images  in full color using [ueberzug](https://github.com/ueber-devel/ueberzug) | Run **clifm** via the `clifmrun` script (see point 2 in the Usage section).  | Any (X11 only) |
 | `kitty` | Preview images  in full color using the [kitty image protocol](https://sw.kovidgoyal.net/kitty/graphics-protocol/) | The Kitty terminal is required. | Kitty |
+| `iterm` | Preview images using the [iTerm2 graphics protocol](https://iterm2.com/documentation-images.html) | | iTerm2, Wezterm |
 | `ansi` | Preview images using ANSI art (text mode) | Several applications to generate ANSI previews are available: `chafa`, `pixterm`, `img2text`, `viu`, `catimg`, `tiv`, and `timg`. Use the `ansi_method` variable in the [`clifmimg` script](#the-clifmimg-script) to set your preferred application. It defaults to `chafa`. | Any |
 
 > [!NOTE]
@@ -87,6 +88,7 @@ At startup, **clifm** tries to guess the previewing method supported by the runn
 1. If **CLIFM_FIFO_UEBERZUG** is set (this vartiable is set by the [clifmrun script](https://github.com/leo-arch/clifm/blob/master/misc/tools/imgprev/clifmrun)), **CLIFM_IMG_SUPPORT** is set to `ueberzug`.
 2. If **KITTY_WINDOW_ID** is set, **CLIFM_IMG_SUPPORT** is set to `kitty`.
 3. If sixel support is detected<sup>1</sup>, **CLIFM_IMG_SUPPORT** is set to `sixel`.
+4. If **TERM_PROGRAM** is set to `iTerm.app`, **CLIFM_IMG_SUPPORT** is set to `iterm`.
 4. Otherwise, **CLIFM_IMG_SUPPORT** is set to `ansi`.
 
 Note that if **CLIFM_IMG_SUPPORT** is unset, the `clifmimg` script falls back to the `ansi` method.
