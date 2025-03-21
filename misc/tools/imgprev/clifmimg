@@ -53,6 +53,7 @@
 # ueberzug                (optional)
 # kitty terminal          (optional)
 # sixel capable terminal  (optional)
+# iTerm2 terminal         (optional)
 # md5sum/md5              (generate file name hashes)
 #
 # The following applications are used to generate thumbnails:
