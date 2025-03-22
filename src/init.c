@@ -437,7 +437,7 @@ set_prop_fields(const char *line)
 	}
 
 	/* How much space needs to be reserved to print enabled fields?
-	 * Only fixed values are counted: dinamical values are calculated
+	 * Only fixed values are counted: dynamic values are calculated
 	 * and added in place: for these values we only count here the space
 	 * that follows each of them, if enabled. */
 	/* Static lengths */

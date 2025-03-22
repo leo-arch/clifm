@@ -16,7 +16,7 @@
 #
 # The first parameter is the file type to be previewed. Supported types:
 # image (direct image display)
-# gif, svg (image format convertion and display)
+# gif, svg, krita (image format convertion and display)
 # video, epub, mobi, djvu, pdf, doc, audio, font, and postscript (convertion to image and display)
 #
 # The second parameter is the file name to be previewed.
@@ -54,7 +54,7 @@
 # kitty terminal          (optional)
 # sixel capable terminal  (optional)
 # iTerm2 terminal         (optional)
-# md5sum/md5              (generate file name hashes)
+# md5sum/md5              (generate filename hashes)
 #
 # The following applications are used to generate thumbnails:
 #

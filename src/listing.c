@@ -3038,16 +3038,14 @@ load_link_info(const int fd, const filesn_t n)
 		return;
 	}
 
-	/* We only need the symlink target name provided the target
-	 * is not a directory, because set_link_target_color() will
-	 * check the filename extension. get_dir_color() only needs
-	 * this name to run count_dir(), but we have already executed
-	 * this function. */
+	/* We only need the symlink target name provided the target is not a
+	 * directory, because set_link_target_color() will check the filename
+	 * extension. get_dir_color() only needs this name to run count_dir(),
+	 * but we have already executed this function. */
 	static char tmp[PATH_MAX + 1]; *tmp = '\0';
 	const ssize_t ret =
 		(conf.color_lnk_as_target == 1 && !S_ISDIR(a.st_mode))
-		? readlinkat(XAT_FDCWD, file_info[n].name, tmp, sizeof(tmp) - 1)
-		: 0;
+		? readlinkat(XAT_FDCWD, file_info[n].name, tmp, sizeof(tmp) - 1)  : 0;
 	if (ret > 0)
 		tmp[ret] = '\0';
 
@@ -3155,7 +3153,7 @@ load_regfile_info(const struct stat *a, const filesn_t n)
 	char *ext = (override_color == 1 && conf.check_ext == 1)
 		? xmemrchr(file_info[n].name, '.', file_info[n].bytes) : (char *)NULL;
 
-	if (!ext || ext == file_info[n].name || !*(ext + 1))
+	if (!ext || ext == file_info[n].name || !ext[1])
 		return;
 
 	file_info[n].ext_name = ext;
@@ -3491,12 +3489,12 @@ list_dir(void)
 	size_t counter = 0;
 	size_t columns_n = 1;
 
-	/* Get the longest filename */
+	/* Get the longest filename. */
 	if (conf.columned == 1 || conf.long_view == 1
 	|| conf.pager_view != PAGER_AUTO)
 		get_longest_filename(n, (size_t)eln_len);
 
-	/* Get number of columns needed to print files in CWD  */
+	/* Get number of columns needed to print files in CWD. */
 	columns_n = (conf.pager_view == PAGER_AUTO
 		&& (conf.columned == 0 || conf.long_view == 1)) ? 1 : get_columns();
 
@@ -3586,7 +3584,7 @@ refresh_screen(void)
 		return;
 	}
 
-	int bk = conf.clear_screen;
+	const int bk = conf.clear_screen;
 	conf.clear_screen = 1;
 	reload_dirlist();
 	conf.clear_screen = bk;
