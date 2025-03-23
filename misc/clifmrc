@@ -205,8 +205,8 @@
 # when switching workspaces.
 ;PrivateWorkspaceSettings=false
 
-# Print the disk usage of the filesystem where the current directory resides
-# in the format "FREE/TOTAL (FREE-PERCENTAGE) FS-TYPE DEV-NAME".
+# Show disk usage of the filesystem where the current directory resides,
+# in the format "FREE/TOTAL (FREE %) TYPE DEVICE".
 ;DiskUsage=false
 
 # Print a map of the current position in the directory history list,
