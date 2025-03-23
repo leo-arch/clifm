@@ -211,7 +211,7 @@ Load data files, such as plugins, color schemes, and default configuration files
 Enable desktop notifications. The nofification style can be optionally specified: \fIkitty\fR (requires the Kitty terminal or a terminal supporting the Kitty Notifications Protocol), \fIsystem\fR, or \fIfalse\fR. If STYLE is omitted, it defaults to \fIsystem\fR. Enter \fIhelp desktop\-notifications\fR in \fBclifm\fR for more information.
 .TP
 \fB\-\-disk\-usage\fR
-Show disk usage for the filesystem where the current directory resides (in the form \fIfree/total (free-percentage) fs-type dev-name\fR).
+Show disk usage for the filesystem where the current directory resides, in the form \fIFREE/TOTAL (FREE %) TYPE DEVICE\fR.
 .TP
 \fB\-\-full\-dir\-size\fR
 Display recursive directory sizes (long view only).

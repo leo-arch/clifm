@@ -1477,7 +1477,7 @@ database (via the 'j' command)\
 \n      --cwd-in-title\t\t Print the current directory in the terminal window title\
 \n      --data-dir=PATH\t\t Use PATH as data directory (e.g.: /usr/local/share)\
 \n      --desktop-notifications\t Set the desktop notifications style: 'kitty', 'system', or 'false' (default)\
-\n      --disk-usage\t\t Show disk usage (free/total FS MOUNTPOINT)\
+\n      --disk-usage\t\t Show disk usage (FREE/TOTAL (FREE %) TYPE DEVICE)\
 \n      --full-dir-size\t\t Display recursive directory sizes (long view only)\
 \n      --fuzzy-algo=NUM\t\t Set fuzzy algorithm for fuzzy matching (1 or 2)\
 \n      --fuzzy-matching\t\t Enable fuzzy tab completion/suggestions for filenames \
