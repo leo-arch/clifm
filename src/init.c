@@ -78,6 +78,10 @@
 #endif /* !NGROUPS_MAX */
 
 #ifdef LINUX_FSINFO
+
+# ifndef _PATH_MOUNTED
+#  define _PATH_MOUNTED "/proc/mounts"
+# endif /* !_PATH_MOUNTED */
 void
 get_ext_mountpoints(void)
 {

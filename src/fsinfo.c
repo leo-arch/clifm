@@ -55,7 +55,7 @@
 
 /* Given an ext filesystem, tell whether it is version 2, 3, or 4.
  * Returns a pointer to a constant string with the proper name. If none is
- * found a generic "ext2/3/4" is returned.
+ * found, a generic "ext2/3/4" is returned.
  *
  * This function just checks information gathered at startup, which is way
  * faster than performing the whole thing each time it is needed. However,
@@ -294,7 +294,8 @@ struct devs_t {
 static struct devs_t devnames[MAX_DEVNAMES];
 static size_t devnames_count = 0;
 
-char *get_dev_name_cached(const dev_t dev)
+static char *
+get_dev_name_cached(const dev_t dev)
 {
 	if (devnames_count == 0)
 		return NULL;
