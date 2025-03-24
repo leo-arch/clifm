@@ -281,7 +281,7 @@ get_dev_name_mntent(const char *file)
 	return (*name ? name : DEV_NO_NAME);
 }
 
-#ifndef __CYGWIN__
+#if !defined(__CYGWIN__) && !defined(__ANDROID__)
 #define MAX_DEVNAMES 64
 #define MAX_DEVNAME_LEN 32
 
@@ -358,7 +358,7 @@ get_dev_name(const dev_t dev)
 #undef MAX_DEVNAMES
 #undef MAX_DEVNAME_LEN
 
-#endif /* !__CYGWIN__ */
+#endif /* !__CYGWIN__ && !__ANDROID__ */
 
 #elif defined(HAVE_STATFS)
 /* Update DEVNAME and DEVTYPE to make it point to the device name and device
