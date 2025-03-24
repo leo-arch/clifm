@@ -383,16 +383,16 @@ get_devname(const char *file)
 	if (stat(file, &b) == -1)
 		return DEV_NO_NAME;
 
-#if defined(__CYGWIN__)
-	/* There's no sys filesystem on Cygwin (used by get_dev_name()), so
-	 * let's try with the proc filesystem. */
+#if defined(__CYGWIN__) || defined(__ANDROID__)
+	/* There's no sys filesystem on Cygwin/Termux (used by get_dev_name()),
+	 * so let's try with the proc filesystem. */
 	return get_dev_name_mntent(file);
 #else
 	if (major(b.st_dev) == 0)
 		return get_dev_name_mntent(file);
 
 	return get_dev_name(b.st_dev);
-#endif /* __CYGWIN__ */
+#endif /* __CYGWIN__ || __ANDROID__ */
 }
 #endif /* LINUX_FSINFO */
 
