@@ -39,6 +39,20 @@
 #endif /* __linux__ */
 
 #if defined(LINUX_FSINFO)
+
+# if defined(__ANDROID__)
+/* Bionic versions from between 2014-01-09 and 2015-01-08 define MOUNTED to
+ * an incorrect value; older Bionic versions don't define it at all. */
+#  undef MOUNTED
+#  define MOUNTED "/proc/mounts"
+# elif !defined(MOUNTED)
+#  if defined(_PATH_MOUNTED) /* GNU libc */
+#   define MOUNTED _PATH_MOUNTED
+#  else
+#   define MOUNTED "/etc/mtab"
+#  endif /* _PATH_MOUNTED */
+# endif /* __ANDROID__ */
+
 /* Given an ext filesystem, tell whether it is version 2, 3, or 4.
  * Returns a pointer to a constant string with the proper name. If none is
  * found a generic "ext2/3/4" is returned.
@@ -89,7 +103,7 @@ get_fs_type_name(const char *file, int *remote)
 {
 	struct statfs a;
 	if (!file || !*file || statfs(file, &a) == -1)
-		return "?";
+		return UNKNOWN_STR;
 
 	switch (a.f_type) {
 	case T_AAFS_MAGIC: return "aafs";
@@ -230,7 +244,7 @@ get_fs_type_name(const char *file, int *remote)
 	}
 }
 
-/* Return a pointer to the name of the device to which the file FILE belongs
+/* Return a pointer to the name of the device where the file FILE resides
  * (e.g.: "/dev/sda2" or "//192.168.10.27/share").
  *
  * NOTE: It performs the same function as get_dev_name(), but it's 3X slower,
@@ -242,7 +256,7 @@ get_dev_name_mntent(const char *file)
 	if (!file || !*file)
 		return DEV_NO_NAME;
 
-	FILE *fp = setmntent("/proc/self/mounts", "r");
+	FILE *fp = setmntent(MOUNTED, "r");
 	if (!fp)
 		return DEV_NO_NAME;
 
@@ -268,10 +282,39 @@ get_dev_name_mntent(const char *file)
 }
 
 #ifndef __CYGWIN__
+#define MAX_DEVNAMES 64
+#define MAX_DEVNAME_LEN 32
+
+struct devs_t {
+	char name[MAX_DEVNAME_LEN];
+	dev_t dev;
+};
+
+/* Struct to store cached device names. We can cache 64 entries, totaling 2Kb. */
+static struct devs_t devnames[MAX_DEVNAMES];
+static size_t devnames_count = 0;
+
+char *get_dev_name_cached(const dev_t dev)
+{
+	if (devnames_count == 0)
+		return NULL;
+
+	size_t i;
+	for (i = 0; i < devnames_count; i++)
+		if (dev == devnames[i].dev && *devnames[i].name)
+			return devnames[i].name;
+
+	return NULL;
+}
+
 /* Return a pointer to the name of the block device whose ID is DEV. */
 char *
 get_dev_name(const dev_t dev)
 {
+	char *dname = get_dev_name_cached(dev);
+	if (dname)
+		return dname;
+
 	const unsigned int maj = major(dev);
 	if (maj == 0) /* special devices (tmp, dev, sys, proc, etc) */
 		return DEV_NO_NAME;
@@ -287,7 +330,7 @@ get_dev_name(const dev_t dev)
 	if (!fp)
 		return DEV_NO_NAME;
 
-	static char name[NAME_MAX]; *name = '\0';
+	static char name[NAME_MAX + 1]; *name = '\0';
 
 	char line[NAME_MAX]; *line = '\0';
 	while (fgets(line, (int)sizeof(line), fp)) {
@@ -297,6 +340,14 @@ get_dev_name(const dev_t dev)
 		const int len = snprintf(name, sizeof(name), "/dev/%s", line + 8);
 		if (len > 1) /* Remove ending new line char */
 			name[len - 1] = '\0';
+
+		/* Cache the result (provided it fits in our cache buffer). */
+		if (len < MAX_DEVNAME_LEN && devnames_count < MAX_DEVNAMES) {
+			devnames[devnames_count].dev = dev;
+			xstrsncpy(devnames[devnames_count].name, name,
+				sizeof(devnames[devnames_count].name));
+			devnames_count++;
+		}
 		break;
 	}
 
@@ -304,6 +355,9 @@ get_dev_name(const dev_t dev)
 
 	return (*name ? name : DEV_NO_NAME);
 }
+#undef MAX_DEVNAMES
+#undef MAX_DEVNAME_LEN
+
 #endif /* !__CYGWIN__ */
 
 #elif defined(HAVE_STATFS)
