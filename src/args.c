@@ -65,9 +65,9 @@
 # define OPTSTRING ":a::Ab:B:c:CdDeEfFgGhHiI:j:J:k:lLmMnNo:O:p:P:qQrRsSt:TuUvV:w:WxXyYz:Z"
 #else
 # ifdef RUN_CMD
-#  define OPTSTRING "+:a::Ab:c:C:D:eEfFgGhHiIk:lLmoOp:P:rsStT:vw:xyz:"
+#  define OPTSTRING "+:a::Ab:c:C:D:eEfFgGhHiIk:lLmoOP:rsStT:vw:xyz:"
 # else
-#  define OPTSTRING "+:a::Ab:c:D:eEfFgGhHiIk:lLmoOp:P:rsStT:vw:xyz:"
+#  define OPTSTRING "+:a::Ab:c:D:eEfFgGhHiIk:lLmoOP:rsStT:vw:xyz:"
 # endif /* RUN_CMD */
 #endif /* _BE_POSIX */
 
@@ -1441,20 +1441,6 @@ xset_pager_view(char *arg)
 	}
 }
 
-static int
-resolve_and_set_starting_path_p(char *dir)
-{
-	if (!dir || !*dir)
-		return 0;
-
-	char *spath = resolve_starting_path(dir);
-	if (spath) {
-		set_starting_path(spath);
-		free(spath);
-	}
-
-	return 1;
-}
 #endif /* !_BE_POSIX */
 
 #ifdef _BE_POSIX
@@ -1674,14 +1660,13 @@ parse_cmdline_args(const int argc, char **argv)
 	opterr = optind = 0;
 
 	int optc;
-	char *path_value = (char *)NULL;
 #ifndef _NO_LIRA
 	int open_prev_mode = 0;
 	char *open_prev_file = (char *)NULL;
 #endif /* _NO_LIRA */
 
 	while ((optc = getopt_long(argc, argv, OPTSTRING,
-		longopts, (int *)0)) != EOF) {
+		longopts, NULL)) != EOF) {
 
 		switch (optc) {
 		/* Short options */
@@ -1723,7 +1708,6 @@ parse_cmdline_args(const int argc, char **argv)
 		case 'm': xargs.dirhist_map = conf.dirhist_map = 1; break;
 		case 'o': xargs.autols = conf.autols = 1; break;
 		case 'O': xargs.autols = conf.autols = 0; break;
-		case 'p': path_value = optarg; xargs.path = 1; break;
 		case 'P': set_alt_profile(optarg); break;
 		case 'r': xargs.refresh_on_empty_line = 0; break;
 		case 's': xargs.splash_screen = conf.splash_screen = 1; break;
@@ -1958,13 +1942,9 @@ parse_cmdline_args(const int argc, char **argv)
 #endif /* !_NO_LIRA */
 
 	int start_path_set = 0;
-	if (xargs.stat == 0 && argv[optind]) {
+	if (xargs.stat == 0 && argv[optind])
 		/* Starting paths passed as positional parameters. */
 		start_path_set = resolve_and_set_starting_paths(argv + optind);
-	} else {
-		if (path_value) /* Starting path passed via -p or --path */
-			start_path_set = resolve_and_set_starting_path_p(path_value);
-	}
 
 	if (start_path_set == 0 && xargs.list_and_quit == 1) {
 		/* Starting path not specified in the command line. Let's use
