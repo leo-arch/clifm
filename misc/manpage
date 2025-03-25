@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Mar 8, 2025" "clifm 1.24.4" "Clifm Manual"
+.TH "CLIFM" "1" "Mar 25, 2025" "clifm 1.24.7" "Clifm Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -77,11 +77,11 @@ In summary, \fBclifm\fR keeps the command line visible and accessible, enhancing
 .SH 3. PARAMETERS
 .SH POSITIONAL PARAMETERS
 .TP
-If the first non\-option parameter is a directory, \fBclifm\fR will start in that directory (for example, the command \fIclifm\ /etc\fR instructs \fBclifm\fR to start in the \fI/etc\fR directory).
+If you specify a directory as the first non\-option parameter, \fBclifm\fR will start in that directory. Subsequent directory names are used to initialize subsequent workspaces. For example, the command \fIclifm\ /etc ~/Downloads\fR instructs \fBclifm\fR to start in the \fI/etc\fR directory (in the first workspace) and to set the second workspace to \fI~/Downloads\fR.
 .TP
-If no directory is specified, \fBclifm\fR will use the first workspace by default. To start in a different workspace use the \fI\-w\fR option. For instance, \fIclifm -w4 /etc\fR will start \fBclifm\fR in the \fI/etc\fR directory within workspace 4.
+If no workspace is specified, \fBclifm\fR will use the first workspace by default. To start in a specific workspace use the \fI\-w\fR option followed by the workspace number. For instance, \fIclifm -w4 /etc ~/Downloads\fR will start \fBclifm\fR in the \fI/etc\fR directory within workspace 4, setting the workspace 5 to \fI~/Downloads\fR.
 .TP
-If no positional parameter is provided and the \fI\-w\fR option is not used, \fBclifm\fR will start by default in the last visited directory (and in the last active workspace). To disable this behavior, use the \fI\-\-no\-restore\-last\-path\fR option (see below).
+If no positional parameter is provided and the \fI\-w\fR option is not used, \fBclifm\fR will start by default in the last visited directory (and in the last active workspace). You can disable this behavior by using the \fI\-\-no\-restore\-last\-path\fR option.
 
 .SH OPTIONS
 .TP

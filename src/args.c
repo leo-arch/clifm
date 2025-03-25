@@ -1440,6 +1440,21 @@ xset_pager_view(char *arg)
 		exit(EXIT_FAILURE);
 	}
 }
+
+static int
+resolve_and_set_starting_path_p(char *dir)
+{
+	if (!dir || !*dir)
+		return 0;
+
+	char *spath = resolve_starting_path(dir);
+	if (spath) {
+		set_starting_path(spath);
+		free(spath);
+	}
+
+	return 1;
+}
 #endif /* !_BE_POSIX */
 
 #ifdef _BE_POSIX
@@ -1462,6 +1477,47 @@ set_tab_mode(const char *opt)
 	}
 }
 #endif /* _BE_POSIX */
+
+/* Set directories passed as positional parameters. */
+static int
+resolve_and_set_starting_paths(char **dirs)
+{
+	/* By default, the current workspace is the first one (0), unless
+	 * specified otherwise using the -w option. */
+	int ws_num = cur_ws == UNSET ? DEF_CUR_WS : cur_ws;
+	int start_path_set = 0;
+	size_t i = 0;
+
+	for (i = 0; dirs[i]; i++) {
+		char *spath = resolve_starting_path(dirs[i]);
+		if (!spath)
+			continue;
+
+		if (i == 0) {
+			/* The first positional parameters is used as starting path,
+			 * in the current workspace. */
+			set_starting_path(spath);
+			start_path_set = 1;
+		} else {
+			/* Subsequent parameters define subsequent workspaces. */
+			ws_num++;
+			if (ws_num >= MAX_WS) {
+				free(spath);
+				continue;
+			}
+
+			free(workspaces[ws_num].path);
+			workspaces[ws_num].path = savestring(spath, strlen(spath));
+			workspaces[ws_num].num = ws_num;
+			free(workspaces[ws_num].name);
+			workspaces[ws_num].name = NULL;
+		}
+
+		free(spath);
+	}
+
+	return start_path_set;
+}
 
 /* Evaluate command line arguments, if any, and change initial variables to
  * their corresponding values. */
@@ -1597,12 +1653,8 @@ parse_cmdline_args(const int argc, char **argv)
 		open_preview_file(open_prev_file, open_prev_mode); /* noreturn */
 #endif /* !_NO_LIRA */
 
-	if (argv[optind]) { /* Starting path passed as positional parameter */
-		char *spath = resolve_starting_path(argv[optind]);
-		if (spath) {
-			set_starting_path(spath);
-			free(spath);
-		}
+	if (argv[optind]) { /* Starting paths passed as positional parameters. */
+		resolve_and_set_starting_paths(argv + optind);
 	} else {
 		if (xargs.list_and_quit == 1) {
 			conf.restore_last_path = 0;
@@ -1905,25 +1957,20 @@ parse_cmdline_args(const int argc, char **argv)
 		open_preview_file(open_prev_file, open_prev_mode); /* noreturn */
 #endif /* !_NO_LIRA */
 
-	char *spath = (char *)NULL;
+	int start_path_set = 0;
 	if (xargs.stat == 0 && argv[optind]) {
-		/* Starting path passed as positional parameter */
-		spath = resolve_starting_path(argv[optind]);
+		/* Starting paths passed as positional parameters. */
+		start_path_set = resolve_and_set_starting_paths(argv + optind);
 	} else {
-		if (path_value) /* Starting path passed via -p */
-			spath = resolve_starting_path(path_value);
+		if (path_value) /* Starting path passed via -p or --path */
+			start_path_set = resolve_and_set_starting_path_p(path_value);
 	}
 
-	if (spath) {
-		set_starting_path(spath);
-		free(spath);
-	} else {
-		if (xargs.list_and_quit == 1) {
-			/* Starting path not specified in the command line. Let's use
-			 * the current directory. */
-			conf.restore_last_path = 0;
-			set_start_path();
-		}
+	if (start_path_set == 0 && xargs.list_and_quit == 1) {
+		/* Starting path not specified in the command line. Let's use
+		 * the current directory. */
+		conf.restore_last_path = 0;
+		set_start_path();
 	}
 }
 #endif /* _BE_POSIX */
