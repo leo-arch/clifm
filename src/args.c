@@ -1066,19 +1066,19 @@ resolve_path(char *file)
 {
 	char *s_path = (char *)NULL;
 
-	if (*file == '.') {
+	if (IS_FILE_URI(file)) {
+		s_path = url_decode(file + FILE_URI_PREFIX_LEN);
+		if (!s_path) {
+			fprintf(stderr, _("%s: '%s': Error decoding filename\n"),
+				PROGRAM_NAME, file);
+			exit(EXIT_FAILURE);
+		}
+
+	} else if (*file == '.' || *file == '~' || strstr(file, "/..")) {
 		s_path = normalize_path(file, strlen(file));
 		if (!s_path) {
 			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, file, strerror(errno));
 			exit(errno);
-		}
-
-	} else if (*file == '~') {
-		s_path = tilde_expand(file);
-		if (!s_path) {
-			fprintf(stderr, _("%s: '%s': Error expanding tilde\n"),
-				PROGRAM_NAME, file);
-			exit(EXIT_FAILURE);
 		}
 
 	} else if (*file == '/') {
@@ -1104,15 +1104,10 @@ resolve_path(char *file)
 static char *
 resolve_starting_path(char *file)
 {
-	char *s_path = (char *)NULL;
+	char *s_path = resolve_path(file);
 
-	if (IS_FILE_URI(file)) {
-		s_path = savestring(file + 7, strlen(file + 7));
-	} else if (is_url(file) == FUNC_SUCCESS) {
+	if (!IS_FILE_URI(file) && is_url(file) == FUNC_SUCCESS)
 		open_reg_exit(file, 1, 0); /* noreturn */
-	} else {
-		s_path = resolve_path(file);
-	}
 
 	struct stat a;
 	if (stat(s_path, &a) == -1) {

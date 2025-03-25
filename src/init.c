@@ -2180,8 +2180,7 @@ validate_line(char *line, char **p, const size_t buflen)
 	return cur;
 }
 
-/* Set PATH to last visited directory and CUR_WS to last used
- * workspace */
+/* Set PATH to last visited directory and CUR_WS to last used workspace. */
 int
 get_last_path(void)
 {
@@ -2203,11 +2202,11 @@ get_last_path(void)
 	char line[PATH_MAX + 4]; *line = '\0';
 	while (fgets(line, (int)sizeof(line), fp) != NULL) {
 		char *p = (char *)NULL;
-		int cur = validate_line(line, &p, sizeof(line));
+		const int cur = validate_line(line, &p, sizeof(line));
 		if (cur == -1)
 			continue;
-		int ws_n = *p - '0';
 
+		const int ws_n = *p - '0';
 		if (cur && cur_ws == UNSET)
 			cur_ws = ws_n;
 
