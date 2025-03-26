@@ -79,9 +79,9 @@ In summary, \fBclifm\fR keeps the command line visible and accessible, enhancing
 .TP
 If you specify a directory as the first non\-option parameter, \fBclifm\fR will start in that directory. Subsequent directory names are used to initialize subsequent workspaces. For example, the command \fIclifm\ /etc ~/Downloads\fR instructs \fBclifm\fR to start in the \fI/etc\fR directory (in the first workspace) and to set the second workspace to \fI~/Downloads\fR.
 .TP
-If no workspace is specified, \fBclifm\fR will use the first workspace by default. To start in a specific workspace use the \fI\-w\fR option followed by the workspace number. For instance, \fIclifm -w4 /etc ~/Downloads\fR will start \fBclifm\fR in the \fI/etc\fR directory within workspace 4, setting the workspace 5 to \fI~/Downloads\fR.
+If no workspace is specified, \fBclifm\fR will use the first workspace. To start in a specific workspace use the \fI\-w\fR option followed by the workspace number. For instance, \fIclifm -w4 /etc ~/Downloads\fR will start \fBclifm\fR in the \fI/etc\fR directory within workspace 4, setting the workspace 5 to \fI~/Downloads\fR.
 .TP
-If no positional parameter is provided and the \fI\-w\fR option is not used, \fBclifm\fR will start by default in the last visited directory (and in the last active workspace). You can disable this behavior by using the \fI\-\-no\-restore\-last\-path\fR option.
+If no positional parameter is provided and the \fI\-w\fR option is not used, \fBclifm\fR will start in the last visited directory (and in the last active workspace). You can disable this behavior by using the \fI\-\-no\-restore\-last\-path\fR option, in which case the current directory will be used as starting path and all workspaces will be unset.
 
 .SH OPTIONS
 .TP
