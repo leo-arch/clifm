@@ -1505,7 +1505,7 @@ and paths\
 \n      --no-dir-jumper\t\t Disable the directory jumper function\
 \n      --no-file-cap\t\t Do not check file capabilities when listing files\
 \n      --no-file-ext\t\t Do not check file extensions when listing files\
-\n      --no-files-counter\t Disable the file counter for directories\
+\n      --no-file-counter\t Disable the file counter for directories\
 \n      --no-follow-symlink\t Do not follow symbolic links when listing files (overrides -L and --color-links-as-target)\
 \n      --no-fzfpreview\t\t Disable file previews for tab completion (fzf mode only)\
 \n      --no-highlight\t\t Disable syntax highlighting\

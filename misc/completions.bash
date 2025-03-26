@@ -113,7 +113,7 @@ _clifm ()
         --no-dir-jumper
         --no-file-cap
         --no-file-ext
-        --no-files-counter
+        --no-file-counter
         --no-follow-symlinks
         --no-fzfpreview
         --no-highlight

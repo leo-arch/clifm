@@ -76,7 +76,7 @@ args=(
 	'--no-dir-jumper[disable the directory jumper function]'
 	'--no-file-cap[do not check file capabilities when listing files]'
 	'--no-file-ext[do not check file extensions when listing files]'
-	'--no-files-counter[disable the file counter for directories]'
+	'--no-file-counter[disable the file counter for directories]'
 	'--no-follow-symlinks[do not follow symbolic links when listing files]'
 	'--no-fzfpreview[disable file previews for tab completion (fzf mode only)]'
 	'--no-highlight[disable syntax highlighting]'

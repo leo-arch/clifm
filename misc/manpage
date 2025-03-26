@@ -103,7 +103,7 @@ Set an alternative configuration file.
 Set an alternative configuration directory (if configuration files do not already exist, they will be created in \fIDIR\fR).
 .TP
 \fB\-e\fR, \fB\-\-no\-eln\fR
-Do not display Entry List Numbers (ELNs) to the left of filenames. Note that while ELNs are not printed, they remain accessible and can still be used as usual.
+Do not display Entry List Numbers (ELNs) to the left of filenames (note that while ELNs are not printed, they remain accessible and can still be used as usual).
 .TP
 \fB\-E\fR, \fB\-\-eln\-use\-workspace\-color\fR
 Color ELNs using the current workspace color.
@@ -136,7 +136,7 @@ Do not ignore case distinctions when listing files.
 Set an alternative keybindings file.
 .TP
 \fB\-l\fR, \fB\-\-long\-view\fR
-Print file extended metadata next to filenames. The displayed fields can be customized using \fI\-\-prop\-fields\fR (\fIPropFields\fR in the configuration file). Set a custom time/date format with \fI\-\-time\-style\fR (\fITimeStyle\fR in the configuration file).
+Print file extended metadata next to filenames. The displayed fields can be customized using \fI\-\-prop\-fields\fR (or \fIPropFields\fR in the configuration file). Set a custom time/date format with \fI\-\-time\-style\fR (or \fITimeStyle\fR in the configuration file).
 .TP
 \fB\-L\fR, \fB\-\-follow\-symlinks\-long\fR
 When in long view, display information for the files referenced by symbolic links instead of the symbolic links themselves.
@@ -163,7 +163,7 @@ Enable the splash screen.
 In stealth mode (also known as incognito or private mode), no trace is left on the host system. No files are read or created, and all settings revert to their default values. However, most settings can still be controlled via command line options and dedicated environment variables (see the \fBENVIRONMENT\fR section below). Additionally, refer to the \fIhistory\fR command and the \fI--no-history\fR command line switch for more options.
 .TP
 \fB\-t\fR, \fB\-\-disk\-usage\-analyzer\fR
-Run in disk usage analyzer mode. This is equivalent to using \fI\-\-sort=size \-\-long\-view \-\-full\-dir\-size \-\-no\-dirs\-first\fR. The recursive size of the current directory will be diplayed after the list of files. You can toggle this mode in place by pressing \fICtrl+Alt+i\fR (or \fIAlt+Tab\fR).
+Run in disk usage analyzer mode. This is equivalent to using \fI\-\-sort=size \-\-long\-view \-\-full\-dir\-size \-\-no\-dirs\-first\fR. The recursive size of the current directory will be diplayed after the list of files. You can toggle this mode in place by pressing \fIAlt+Tab\fR (or \fICtrl+Alt+i\fR).
 .TP
 \fB\-T\fR, \fB\-\-trash\-dir\fR=\fI\,DIR\/\fR
 Set an alternative trash directory.
@@ -199,7 +199,7 @@ Write the last visited directory to \fI$XDG_CONFIG_HOME/clifm/.last\fR for later
 Use the color scheme specified by \fINAME\fR.
 .TP
 \fB\-\-color\-links\-as\-target\fR
-Colorize symbolic links using the color of the target file.
+Color symbolic links using the color of the target file.
 .TP
 \fB\-\-cwd\-in\-title\fR
 Print the current working directory in the terminal window title (otherwise, only the program name is printed).
@@ -247,7 +247,7 @@ List files and quit. Useful in conjunction with positional parameters. E.g.: \'c
 Short for \fI\-\-list\-and\-quit\fR.
 .TP
 \fB\-\-lscolors\fR
-Read file colors from the \fBLS_COLORS\fR environment variable (BSD \fBLSCOLORS\fR is also supported). Note that clifm-specific colors (like empty directories or inaccessible files) will be disabled. Note also that colors for specific filenames, as defined in \fBLS_COLORS\fR, are not supported. For more information about \fBLS_COLORS\fR, consult \fBdircolors\fR(1), or refer to the \fBls\fR(1) FreeBSD manpage for \fBLSCOLORS\fR.
+Read file colors from the \fBLS_COLORS\fR environment variable (the FreeBSD \fBLSCOLORS\fR format is also supported). Note that clifm-specific colors (like empty directories or inaccessible files) will be disabled. Note also that colors for specific filenames, as defined in \fBLS_COLORS\fR, are not supported. For more information about \fBLS_COLORS\fR, consult \fBdircolors\fR(1), or refer to the \fBls\fR(1) FreeBSD manpage for \fBLSCOLORS\fR.
 .TP
 \fB\-\-max\-dirhist\fR
 Maximum number of visited directories to remember.
@@ -256,7 +256,7 @@ Maximum number of visited directories to remember.
 List only up to \fINUM\fR files. Use \-1 or \'unset\' to remove this limit (default). See the \fImf\fR command for a more detailed description.
 .TP
 \fB\-\-mimelist\-file\fR=\fI\,FILE\/\fR
-Set \fIFILE\fR as Lira\'s configuration file. See the \fBFILE OPENER\fR section below for more information.
+Set \fIFILE\fR as Lira\'s configuration file (see the \fBFILE OPENER\fR section below for more information).
 .TP
 \fB\-\-mnt\-udisks2\fR
 Use \fIudisks2\fR instead of \fIudevil\fR (default) for the \fImedia\fR command.
@@ -298,7 +298,7 @@ Do not check file capabilities when listing files (only meaningful for performan
 \fB\-\-no\-file\-ext\fR
 Do not check file extensions (mostly used to colorize specific filenames) when listing files.
 .TP
-\fB\-\-no\-files\-counter\fR
+\fB\-\-no\-file\-counter\fR
 Disable the file counter for directories (speeding up the listing process: counting files in directories is particularly expensive).
 .TP
 \fB\-\-no\-follow\-symlinks\fR
