@@ -83,7 +83,9 @@ If you specify a directory as the first non\-option parameter, \fBclifm\fR will 
 .TP
 If no workspace is specified, \fBclifm\fR will use the first workspace. To start in a specific workspace use the \fB\-w\fR option followed by the workspace number. For instance, `\fBclifm -w4 /etc ~/Downloads\fR` will start \fBclifm\fR in the \fI/etc\fR directory within workspace 4, setting the workspace 5 to \fI~/Downloads\fR.
 .TP
-If no positional parameter is provided and the \fB\-w\fR option is not used, \fBclifm\fR will start in the last visited directory (and in the last active workspace). You can disable this behavior by using the \fB\-\-no\-restore\-last\-path\fR option, in which case the current directory will be used as starting path and all workspaces will be unset.
+If no positional parameter is provided and the \fB\-w\fR option is not used, \fBclifm\fR will start in the last visited directory (and in the last active workspace). You can disable this behavior by using the \fB\-\-no\-restore\-last\-path\fR command line switch (or by setting the \fBRestoreLastPath\fR option to \fBfalse\fR in the configuration file), in which case the current directory will be used as starting path and all workspaces will be unset.
+.TP
+To start always in a specific directory, disregarding the current directory, you can use the \fBStartingPath\fR option in the configuration file.
 
 .SH OPTIONS
 .TP
@@ -117,7 +119,7 @@ List directories first.
 Do not list directories first.
 .TP
 \fB\-g\fR, \fB\-\-pager\fR
-Enable \fIMas\fR, the builtin pager for file listing.
+Enable \fBMas\fR, the builtin pager for file listing.
 .TP
 \fB\-G\fR, \fB\-\-no\-pager\fR
 Disable the file pager.
@@ -174,19 +176,19 @@ Set an alternative trash directory.
 Print version details and exit.
 .TP
 \fB\-w\fR, \fB\-\-workspace\fR=\fI\,NUM\/\fR
-Start in workspace \fINUM\fR. By default, \fBclifm\fR will recover the last visited directory for each workspace. However, you can override this behaviour using positional parameters to start in workspace \fINUM\fR and at path \fIPATH\fR (e.g.: `\fBclifm -w4 /etc\fR`).
+Start in workspace \fINUM\fR. By default, \fBclifm\fR will recover the last visited directory for each workspace. However, you can override this behaviour using positional parameters to start in workspace \fINUM\fR and in the specified directory (e.g.: `\fBclifm -w4 /etc\fR`). Consult the \fBPOSITIONAL PARAMETERS\fR section above for more information.
 .TP
 \fB\-x\fR, \fB\-\-no\-ext\-cmds\fR
 Disallow the use of external (shell) commands.
 .TP
 \fB\-y\fR, \fB\-\-light\-mode\fR
-Enable the light mode to speed up \fBclifm\fR. See the \fBNOTE ON SPEED\fR section below.
+Enable the light mode to speed up \fBclifm\fR (see the \fBNOTE ON SPEED\fR section below).
 .TP
 \fB\-z\fR, \fB\-\-sort\fR=\fI\,METHOD\/\fR
 Sort files by \fIMETHOD\fR, where \fIMETHOD\fR is one of: 0 = none, 1 = name, 2 = size, 3 = atime, 4 = btime, 5 = ctime, 6 = mtime, 7 = version, 8 =  extension, 9 = inode, 10 = owner, 11 = group, 12 = blocks, 13 = links, or 14 = type. Both numbers and names are accepted. For example, you can use \fB\-\-sort=9\fR or \fB\-\-sort=inode\fR.
 .TP
 \fB\-\-bell\fR=\fI\,TYPE\/\fR
-Set the terminal bell type, where \fITYPE\fR is: 0 = none, 1 = audible, 2 = visible (requires readline >= 8.1), and 3 = flash. Defaults to \fB1\fR (\fBvisible\fR), and, if not available, \fB0\fR (\fBnone\fR). Only numbers are allowed.
+Set the terminal bell type, where \fITYPE\fR is: 0 = none, 1 = audible, 2 = visible (requires readline >= 8.1), and 3 = flash. Defaults to \fB2\fR (\fBvisible\fR), and, if not available, \fB0\fR (\fBnone\fR). Only numbers are allowed.
 .TP
 \fB\-\-case\-sens\-dirjump\fR
 Do not ignore case when consulting the jump database (via the \fBj\fR command).
@@ -210,7 +212,7 @@ Print the current working directory in the terminal window title (otherwise, onl
 Load data files, such as plugins, color schemes, and default configuration files, from \fIDIR\fR (this is by default the installation directory, usually \fI/usr/share/clifm\fR).
 .TP
 \fB\-\-desktop\-notifications[=\fISTYLE\fR]
-Enable desktop notifications. The nofification style can be optionally specified: \fBkitty\fR (requires the Kitty terminal or a terminal supporting the Kitty Notifications Protocol), \fBsystem\fR, or \fBfalse\fR. If \fISTYLE\fR is omitted, it defaults to \fBsystem\fR. Enter `\fBhelp desktop\-notifications\fR` in \fBclifm\fR for more information.
+Enable desktop notifications. The notification style can be optionally specified: \fBkitty\fR (requires the Kitty terminal or a terminal supporting the Kitty Notifications Protocol), \fBsystem\fR, or \fBfalse\fR. If \fISTYLE\fR is omitted, it defaults to \fBsystem\fR. Enter `\fBhelp desktop\-notifications\fR` in \fBclifm\fR for more information.
 .TP
 \fB\-\-disk\-usage\fR
 Show disk usage of the filesystem where the current directory resides, in the format \fIFREE/TOTAL (FREE %) TYPE DEVICE\fR.
@@ -246,7 +248,8 @@ Allow the use of internal variables (e.g.: `\fBVAR=/bin; cd $VAR\fR`).
 List files and quit. Useful in conjunction with positional parameters (e.g.: `\fBclifm \-\-list\-and\-quit /etc\fR`).
 .TP
 \fB\-\-ls\fR
-Short for \fB\-\-list\-and\-quit\fR.
+.br
+Shortcut for \fB\-\-list\-and\-quit\fR.
 .TP
 \fB\-\-lscolors\fR
 Read file colors from the \fBLS_COLORS\fR environment variable (the FreeBSD \fBLSCOLORS\fR format is also supported). Note that clifm-specific colors (like empty directories or inaccessible files) will be disabled. Note also that colors for specific filenames, as defined in \fBLS_COLORS\fR, are not supported. For more information about \fBLS_COLORS\fR, consult \fBdircolors\fR(1), or refer to the \fBls\fR(1) FreeBSD manpage for \fBLSCOLORS\fR.
@@ -399,6 +402,7 @@ By default, each user profile has a private Selection Box. Use this option to ma
 Set \fIFILE\fR as shotgun\'s configuration file. See the \fBSHOTGUN\fR section below for more information.
 .TP
 \fB\-\-si\fR
+.br
 Display file sizes in SI units (powers of 1000) instead of IEC units (powers of 1024).
 .TP
 \fB\-\-smenutab\fR
