@@ -1432,7 +1432,7 @@ c: Stop paging (printing remaining files)\n"
 \n -Z NUM   List only up to NUM files"
 #else
 #define SHORT_OPTIONS "\
-\n  -a, --show-hidden[=VAL]\t\t Show hidden files ('first', 'last', 'true', or 'false')\
+\n  -a, --show-hidden[=VAL]\t Show hidden files ('first', 'last', 'true', or 'false')\
 \n  -A, --no-hidden\t\t Do not show hidden files\
 \n  -b, --bookmarks-file=FILE\t Set an alternative bookmarks file\
 \n  -c, --config-file=FILE\t Set an alternative configuration file\
@@ -1505,7 +1505,7 @@ and paths\
 \n      --no-dir-jumper\t\t Disable the directory jumper function\
 \n      --no-file-cap\t\t Do not check file capabilities when listing files\
 \n      --no-file-ext\t\t Do not check file extensions when listing files\
-\n      --no-file-counter\t Disable the file counter for directories\
+\n      --no-file-counter\t\t Disable the file counter for directories\
 \n      --no-follow-symlink\t Do not follow symbolic links when listing files (overrides -L and --color-links-as-target)\
 \n      --no-fzfpreview\t\t Disable file previews for tab completion (fzf mode only)\
 \n      --no-highlight\t\t Disable syntax highlighting\

@@ -63,16 +63,16 @@ To get help about some specific topic, type `\fBhelp <TAB>\fR` to get a list of 
 .sp
 For a list of available commands along with brief descriptions, type `\fBcmd<TAB>\fR`.
 .sp
-You can also access help for internal commands using the \fB\-h\fR or \fB\-\-help\fR flags. For example, to get help on the selection function, `\fBs \-h\fR` or `\fBs \-\-help\fR`.
+You can also access help for internal commands using the \fB\-h\fR or \fB\-\-help\fR flags. For example, to get help about the selection function, enter `\fBs \-h\fR` or `\fBs \-\-help\fR`.
 .sp
-A convenient way to obtain comprehensive information about \fBclifm\fR commands is through the \fIih\fR action, which is bound by default to the interactive help plugin (\fIihelp.sh\fR). Enter `\fBih\fR` to run the plugin (note that it requires \fBfzf\fR(1)) and select the command you wish to learn more about.
+A convenient way to obtain comprehensive information about \fBclifm\fR commands is through the \fBih\fR action, which is bound by default to the interactive help plugin (\fIihelp.sh\fR). Enter `\fBih\fR` to run the plugin (note that it requires \fBfzf\fR(1)) and select the command you wish to learn more about.
 .sp
 For a quick introduction, please refer to the \fBEXAMPLES\fR section at the end of this document.
 
 .SH 2. DESCRIPTION
 \fBClifm\fR is a Command Line Interface File Manager. Its main feature and strength lie in the fact that all input and interacion are conducted through commands typed directly into a prompt. In other words, \fBclifm\fR operates as a Read-Eval-Print Loop (REPL), following this basic structure: \fBR\fRead (user input via the command line), \fBE\fRvaluate/\fBE\fRxecute the command, \fBP\fRrint the results, \fBL\fRoop (repeat the process).
 .sp
-Unlike most terminal file managers out there, indeed, \fBclifm\fR replaces the traditional Text User Interface (TUI), often referred to as curses or text\-menu based interface, with a straightforward command\-line interface (REPL). This design allows it to function not only as a file manager but also as a \fBshell extension\fR. You can search for files, copy, rename, remove them, while also performing system tasks such as updating or upgrading your system, adding cron jobs, stopping services, and launching text editors like nano, vi, or emacs.
+Unlike most terminal file managers out there, indeed, \fBclifm\fR replaces the traditional Text User Interface (TUI), often referred to as curses or text\-menu based interface, with a straightforward command\-line interface (REPL). This design allows it to function not only as a file manager, but also as a \fBshell extension\fR. You can search for files, copy, rename, remove them, while also performing system tasks such as updating or upgrading your system, adding cron jobs, stopping services, and launching text editors like nano, vi, or emacs.
 .sp
 In summary, \fBclifm\fR keeps the command line visible and accessible, enhancing it with functionalities specifically tailored for file management.
 
@@ -309,7 +309,7 @@ Do not check file extensions (mostly used to colorize specific filenames) when l
 Disable the file counter for directories (speeding up the listing process: counting files in directories is particularly expensive).
 .TP
 \fB\-\-no\-follow\-symlinks\fR
-Do not follow symbolic links when listing files (overrides both \fB\-L\fR and \fB\-\-color\-links\-as\-target\fR).
+Do not follow symbolic links when listing files (overrides both \fB\-\-follow\-symlinks\-long\fR and \fB\-\-color\-links\-as\-target\fR).
 .TP
 \fB\-\-no\-fzfpreview\fR
 Disable file previews for tab completion (fzf mode only).
@@ -475,13 +475,13 @@ To search for files in any directory other than the current directory, specify t
 .sp
 The result of the search can be further filtered by specifying a filter type: \fB-b\fR, \fB-c\fR, \fB-d\fR, \fB-f\fR, \fB-l\fR, \fB-p\fR, \fB-s\fR, \fB-O\fR, and \fB-P\fR (block device, character device, directory, regular file, symbolic link, FIFO/pipe, socket, door (Solaris), and port (Solaris) respectively. For example, `\fB/[.\-].*d$\ \-d Documents/\fR` will list all directories containing a dot or a dash and ending with \'d\' in the directory named \fIDocuments\fR.
 .sp
-\fB4. Pattern negation\fR
+\fB4. Invert matching\fR
 .sp
-The quick search function also supports invert matching: prepend the exclamation mark (!) to negate a given search pattern. For example: `\fB!.*s$\ \-d\ /etc\fR` will match all directories in \fI/etc\fR \fBnot\fR ending with \'s\', just as `\fB!D*\fR` will match all files in the current directory \fBnot\fR starting with \'D\'.
+Prepend the exclamation mark (!) to invert the meaning of a given search pattern. For example: `\fB!.*s$\ \-d\ /etc\fR` will match all directories in \fI/etc\fR \fBnot\fR ending with \'s\', just as `\fB!D*\fR` will match all files in the current directory \fBnot\fR starting with \'D\'.
 .sp
 \fB5. Recursive search\fR
 .sp
-To perform a recursive search use the \fB\-x\fR parameter, and, optionally, a search path (\fIDIR\fR) (file type filter is not allowed). The search will be performed using \fBfind\fR(1) as follows: \fIfind\ DIR\ MODE PATTERN\fR. If no search path is provided, the search is executed starting in the current directory. Otherwise, the search starts in \fIDIR\fR. \fIMODE\fR is one of:
+To perform a recursive search use the \fB\-x\fR parameter, and, optionally, a search path (\fIDIR\fR) (file type filter is not allowed). The search will be performed using \fBfind\fR(1) as follows: \fBfind\ \fIDIR\ MODE PATTERN\fR. If no search path is provided, the search is executed starting in the current directory. Otherwise, the search starts in \fIDIR\fR. \fIMODE\fR is one of:
 .sp
  \-name: if \fBSearchStrategy\fR is not \fBregex\-only\fR and \fBCaseSensitiveSearch\fR is set to \fBtrue\fR
 .sp
@@ -492,12 +492,16 @@ To perform a recursive search use the \fB\-x\fR parameter, and, optionally, a se
  \-iregex: if \fBSearchStrategy\fR is \fBregex\-only\fR and \fBCaseSensitiveSearch\fR is set to \fBfalse\fR
 .TP
 .B ;\fR[\fICMD\fR], \fB:\fR[\fICMD\fR]
-If no \fICMD\fR is specified, run the system shell in the current directory. If \fICMD\fR is specified, skip all \fBclifm\fR expansions (see the \fBBUILT\-IN EXPANSIONS\fR section below) and run the input string (\fICMD\fR) as is via the default system shell.
+If \fICMD\fR is not specified, run the system shell in the current directory. If \fICMD\fR is specified, skip all \fBclifm\fR expansions (see the \fBBUILT\-IN EXPANSIONS\fR section below) and run the input string (\fICMD\fR) as is via the default system shell (consult the \fBMISCELLANEOUS NOTES\fR section for information on how shell commands are executed).
 .TP
 .B ac, ad \fIFILE\fR...
-Archive/compress and dearchive/decompress one or multiple files and/or directories. The archiver function brings two modes: \fBac\fR, to generate archives or compressed files, and \fBad\fR, to decompress or dearchive files, either just listing, extracting, recompressing, or mounting their content. In this latter case, the mountpoint used automatically is \fI$HOME/.config/clifm/PROFILE/mounts/ARCHIVE_NAME\fR.
+Archive/compress and dearchive/decompress one or multiple files and/or directories.
 .sp
-The function accepts single and multiple filenames, wildcards, ELN ranges, and the 'sel' keyword. For example: `\fBac\ sel\fR`, `\fBac\ 4\-25\ myfile\fR`, or `\fBad\ *.tar.gz\fR`. Multiple archive/compression formats are supported, including Zstandard. When it comes to ISO 9660 files only a single file is supported.
+The archiver function brings two modes: \fBac\fR, to generate archives or compressed files, and \fBad\fR, to decompress or dearchive files, either just listing, extracting, recompressing, or mounting their content. In this latter case, the mountpoint used automatically is \fI$HOME/.config/clifm/PROFILE/mounts/ARCHIVE_NAME\fR.
+.sp
+Example: `\fBac\ sel\fR`, `\fBac\ 4\-25\ myfile\fR`, or `\fBad\ *.tar.gz\fR`.
+.sp
+Multiple archive/compression formats are supported, including Zstandard. Note that when it comes to ISO 9660 files only a single file is supported.
 .sp
 The archive mount function for non ISO files depends on \fBarchivemount\fR, while the remaining functions depend on \fBatool\fR and other third\-party utilities for achive formats support, for example, \fBp7zip\fR. \fBp7zip\fR is also used to manage most decompressing options for ISO 9660 files, except for mount, in which case \fBmount(8)\fR is used. Creation of ISO files is done via \fBgenisoimage\fR(1). For more information consult \fBatool\fR(1), \fBarchivemount\fR(1), \fBzstd\fR(1), and \fB7z\fR(1).
 .TP
@@ -507,26 +511,26 @@ Toggle the autocd function. If set to on, `\fBDIR\fR` amounts to `\fBcd\ DIR\fR`
 .B actions \fR[list | edit [\fIAPP\fR]]
 To list available actions (or plugins) use the \fBlist\fR subcommand. Note that, since \fBlist\fR is the default action, it can be omitted.
 .sp
-Use the \fBedit\fR subcommand to add, remove or modify custom actions (using APP if specified or the default associated application for text files otherwise).
+Use the \fBedit\fR subcommand to add, remove or modify custom actions (using \fIAPP\fR if specified or the default associated application for text files otherwise).
 .sp
 The aim of this function is to allow the user to easily add custom commands and functions to \fBclifm\fR. In other words, the actions function is a plugins capability.
 .sp
-The general procedure is quite simple: a) edit the actions file (by running `\fBactions edit\fR`) and bind a custom action name to an executable file (written in any language you want, be it a shell or Python script, a C program or whatever you like). Example: "myaction=myscript.sh". b) Now, drop the corresponding script (in our example, \fImyscript.sh\fR) into the plugins directory, usually, \fI~/.config/clifm/plugins\fR (see the \fBFILES\fR section below). 3) Once this is done, you can call the script using the custom action name defined before as if it were any other command: run `\fBmyaction\fR`, and \fImyscript.sh\fR will be executed.
+This is the general procedure: \fBa)\fR edit the actions file (by running `\fBactions edit\fR`) and bind a custom action name to an executable file (written in any language you want, be it a shell or Python script, a C program or whatever you like). For example, "myaction=myscript.sh". \fBb)\fR Drop the corresponding script (in our example, \fImyscript.sh\fR) into the plugins directory, usually, \fI~/.config/clifm/plugins\fR (see the \fBFILES\fR section below). \fB3)\fR Call the script using the custom action name defined before as if it were any other command: run `\fBmyaction\fR`, and \fImyscript.sh\fR will be executed.
 .sp
-Note that all arguments passed to the action command (\fBmyaction\fR) are passed to the script or program as well (\fImyscript.sh\fR), which is executed via the system shell.
+Note that all arguments passed to the action command (\fBmyaction\fR) will be passed to the script or program as well (\fImyscript.sh\fR), which is executed via the system shell (consult the \fBMISCELLANEOUS NOTES\fR section for information on how shell commands are executed).
 .sp
-To assist the user when writing plugins, \fBclifm\fR's state information is exported via environment variables when running plugins. For example, \fBCLIFM_LONG_VIEW\fR is set to 1 if currently running in long view. See the \fBENVIRONMENT\fR section for the complete list of exported values.
+To assist the user when writing plugins, \fBclifm\fR's state information is exported via environment variables while running plugins. For example, \fBCLIFM_LONG_VIEW\fR is set to 1 if currently running in long view (see the \fBENVIRONMENT\fR section for the complete list of exported values).
 .sp
 The plugins bundled with \fBclifm\fR (take a look at the plugins directory) can be used as a starting point to create new plugins.
 .TP
 .B alias \fR[import \fIFILE\fR | ls, list | \fINAME\fR]
-With no argument (or with \fBls,list\fR parameters), it prints the list of available aliases, if any. To get the description of a specific alias enter `\fBalias\fR` followed by the alias name. To write a new alias simply enter \fBedit\fR (or press \fBF10\fR) to open the configuration file and add a line like this: "alias name=\'command args...\'" or "alias name=\'directory\'".
+With no argument (or with \fBls,list\fR parameters), it prints the list of available aliases. To get the description of a specific alias enter `\fBalias\fR` followed by the alias name. To write a new alias simply enter \fBedit\fR (or press \fBF10\fR) to open the configuration file and add a line like this: "alias name=\'command args...\'" or "alias name=\'directory\'".
 .sp
-To import aliases from a file, provided it contains aliases in the specified form (i.e. the POSIX syntax for the \fBalias\fR shell command), use the \fBimport\fR parameter. Aliases conflicting with some of the internal commands won\'t be imported.
+To import aliases from a file, provided it contains aliases in the specified form (i.e. the POSIX syntax for the \fBalias\fR shell command), use the \fBimport\fR parameter. Aliases conflicting with some of the internal commands will not be imported.
 .sp
-However, a neat usage for the \fBalias\fR function is not so much to bind short keys to commands, but to files and directories visited regularly. In this way, it is possible to bind as many files or directories, no matter how deep they are in the filesystem, to very short strings, even single characters. For example, "alias w=\'/some/file/deep/in/the/filesystem\'". Now, no matter where we are, you can enter `\fBw\fR`, provided \fBautocd\fR and/or \fBauto\-open\fR function is enabled, to access the file or directory you want. Theoretically at least, this procedure can be repeated until the system memory is exhausted.
+However, a neat usage for the \fBalias\fR function is not so much to bind short keys to commands, but to files and directories visited regularly. In this way, it is possible to bind as many files or directories, no matter how deep they are in the filesystem, to very short strings, even single characters. For example, "alias w=\'/some/file/deep/in/the/filesystem\'". Now, no matter where you are, you can enter `\fBw\fR`, provided \fBautocd\fR and/or \fBauto\-open\fR function is enabled, to access the file or directory you want. Theoretically at least, this procedure can be repeated until the system memory is exhausted.
 .sp
-To create multiple aliases for files at once, this is the recommended procedure: 1) Select all files you want to alias with the \fBsel\fR command: `\fBs\ file1\ file2\ file3\ ...\fR`. 2) Export the selected files into a temporary file running `\fBexp\ sel\fR`; 3) Edit this file to contain only valid alias lines:
+To create multiple aliases for files at once, this is the recommended procedure: \fB1)\fR Select all files you want to alias with the \fBsel\fR command: `\fBs\ file1\ file2\ file3\ ...\fR`. \fB2)\fR Export the selected files into a temporary file running `\fBexp\ sel\fR`; \fB3)\fR Edit this file to contain only valid alias lines:
 
  alias a1=\'file1\'
  alias b1=\'file2\'
@@ -534,7 +538,7 @@ To create multiple aliases for files at once, this is the recommended procedure:
 
 \fBNote\fR: Make sure alias names do not conflict with other commands, either internal or external. To bypass the conflicts check, performed automatically by the `\fBalias import\fR` command, you can edit the aliases file manually (\fBF10\fR).
 
-4) Finally, import this file with the \fIalias\fR command: `\fBalias\ import\ tmp_file\fR`. Now, you can access any of these files by entering just a few characters: `\fBa1\fR`, `\fBb1\fR`, and `\fBc1\fR`.
+\fB4)\fR Finally, import this file with the \fBalias\fR command: `\fBalias\ import\ tmp_file\fR`. Now you can access any of these files by entering just a few characters: `\fBa1\fR`, `\fBb1\fR`, and `\fBc1\fR`.
 .TP
 .B auto \fR[list | none | unset | \fIOPTION=VALUE\fR...]
 Set a temporary autocommand for the current directory.
@@ -574,9 +578,9 @@ For the list of available option codes consult the \fBAUTOCOMMANDS\fR section or
 Toggle the auto\-open function. If set to on, `\fBFILE\fR` amounts to `\fBopen\ FILE\fR`.
 .TP
 .B b, back \fR[h, hist | clear | !\fIELN\fR]
-Unlike `\fBcd\ ..\fR`, which changes to the parent directory of the current directory, this command (with no argument) changes to the previously visited directory.
+Unlike `\fBcd\ ..\fR`, which changes to the parent directory of the current directory, this command (with no argument) changes to the previously visited directory. You can also use \fBAlt+j\fR or \fBShift-Left\fR.
 .sp
-\fBclifm\fR keeps a record of all visited directories (to prevent a directory from being added to the directory history list use the \fBDirhistIgnore\fR option in the main configuration file). You can see this list by typing `\fBb\ hist\fR` or `\fBb\ h\fR`, and you can access any element in this list by simply passing the corresponding ELN in this list to the \fBback\fR command. Example:
+\fBClifm\fR keeps a record of all visited directories (to prevent a directory from being added to the directory history list use the \fBDirhistIgnore\fR option in the main configuration file). You can see this list by typing `\fBb\ hist\fR` or `\fBb\ h\fR`, and you can access any element in this list by simply passing the corresponding ELN in this list to the \fBback\fR command. Example:
         :) > ~ $ bh
         1 /home/user
         2 /etc
@@ -586,9 +590,11 @@ Unlike `\fBcd\ ..\fR`, which changes to the parent directory of the current dire
 .sp
 \fBNote:\fR the highlighted line (by default printed in bold cyan) indicates the current position of the \fBback\fR function in the directory history list.
 .sp
-Finally, you can also clear this history list by typing `\fBb\ clear\fR`.
+Finally, you can also clear this history list by entering `\fBb\ clear\fR`.
 .sp
-The best way of navigating the directory history list, however, is via the \fBdirectory jumper\fR function (see the \fBj\fR command below). You can take a look at the \fBdh\fR command as well.
+The best way of navigating the directory history list, however, is using the \fBdirectory jumper\fR function (invoked by \fBj\fR command). You can also take a look at the \fBdh\fR command.
+.sp
+Use the \fBf, forth\fR command to move forward, instead of backward, in the directory history list.
 .TP
 .B bb, bleach \fIFILE\fR...
 \fBBleach\fR is a builtin filenames cleaner (based on detox [\fIhttps://github.com/dharple/detox\fR]), whose main aim is to rename filenames using only ASCII characters.
@@ -611,15 +617,15 @@ Modified filenames will be listed on screen asking the user for confirmation, al
 If the replacement filename already exists, a dash and a number (starting from 1) will be appended. E.g.: file\-3.
 .TP
 .B bd \fR[\fINAME\fR]
-\fBbd\fR is the \fBbackdir\fR function: it takes you back to the parent directory matching NAME.
+\fBbd\fR is the \fBbackdir\fR function: it takes you back to the parent directory matching \fINAME\fR.
 .sp
-With no arguments, \fBbd\fR prints a menu with all parent directories relative to the current directory, allowing the user to select an entry. Otherwise, it checks the absolute current directory against the provided query string (NAME): if only one match is found, it automatically changes to this directory; if multiple matches are found, the list of matches is presented to the user in a selection menu. If NAME is a directory name, \fBbd\fR just changes to this directory, be it a parent of the current directory or not.
+With no arguments, \fBbd\fR lists all parent directories relative to the current directory, allowing the user to select an entry. Otherwise, it checks the absolute current directory against the provided query string (\fINAME\fR): if only one match is found, it automatically changes to this directory; if multiple matches are found, the list of matches is presented to the user in a selection menu. If \fINAME\fR is a directory name, \fBbd\fR just changes to this directory, be it a parent of the current directory or not.
 .sp
 Tab completion and suggestions are available for this function.
 .sp
 \fBExample\fR:
 .sp
-Provided that the current directory is \fI/home/user/git/repositories/lambda\fR, entering `\fBbd git\fR` will take you immediatelly to \fI/home/user/git\fR.
+Provided the current directory is \fI/home/user/git/repositories/lambda\fR, entering `\fBbd git\fR` will take you immediatelly to \fI/home/user/git\fR.
 .sp
 Note that there is no need to type the entire directory name; if the query is unambiguous, only a few characters, and even just one, suffices to match the appropriate directory. In our example, `\fBbd g\fR` is enough to take you to \fI/home/user/git\fR, just as `\fBbd h\fR` will take you to \fI/home\fR.
 .sp
@@ -684,14 +690,14 @@ T}	Select all bookmarks at once
  \fB(1)\fR If your are not sure about where a bookmark points to, type `\fBb:NAME<TAB>\fR`.
 .TP
 .B br, bulk \fIFILE\fR... [:\fIEDITOR\fR]
-Rename at once all files passed as arguments to the function. It accepts single and multiple filenames, wildcards, ELN ranges, and the \fBsel\fR keyword. Example: `\fBbr\ myfile\ 4\-10\ sel\fR`.
+Bulk rename \fIFILE\fR(s).
 .sp
-Each filename will be copied to a temporary file, which will be opened via EDITOR (default associated application for plain text files if omitted), letting the user modify it. Once the file has been modified and saved, the modifications are printed on the screen and the user is asked for confirmation.
+Each filename will be copied to a temporary file, which will be opened via \fIEDITOR\fR (default associated application for plain text files if omitted), letting the user modify it. Once the file has been modified and saved, the modified names are printed on the screen and the user is asked for confirmation.
 .sp
 This builtin bulk rename function will not deal with deletions, replacements, filename conflicts and the like. For a smarter alternative use \fBqmv\fR(1).
 .TP
 \fBc\fR, \fBm\fR, \fBmd\fR, \fBr\fR
-Short for the following commands respectively: `\fBcp\ \-iRp\fR`, `\fBmv\ \-i\fR`, `\fBmkdir\ \-p\fR`, and `\fBrm\fR` (for files) or `\fBrm\ \-r\fR` (for directories).
+Short for the following shell commands respectively: `\fBcp\ \-iRp\fR`, `\fBmv\ \-i\fR`, `\fBmkdir\ \-p\fR`, and `\fBrm\fR` (for files) or `\fBrm\ \-r\fR` (for directories).
 .sp
 By default, the \fBc\fR, \fBm\fR, and \fBr\fR commands ask for confirmation before operations. Since this might sometimes be quite intrusive (specially when operating on large number of files), it is possible to turn interactivity off in two different ways:
 
@@ -699,7 +705,7 @@ By default, the \fBc\fR, \fBm\fR, and \fBr\fR commands ask for confirmation befo
 
   b) Permanently. Use the \fBcpCmd\fR, \fBmvCmd\fR, and \fBrmForce\fR options in the configuration file to permanently set any of these commands to non\-interactive mode.
 .sp
-To use these commands without any of these arguments, or with any other argument you want, use the non\-abbreviated (shell) command, for instance, \fBcp\fR instead of \fBc\fR. Of course, you can also create aliases to use your preferred commands, for example, "c=\'cp \-adp\'". Consult the \fBalias\fR command above for more information.
+To use these commands without any of these options, or with any other option you want, use the appropriate shell command, for instance, \fBcp\fR instead of \fBc\fR. Of course, you can also create aliases to use your preferred commands, for example, "c=\'cp \-adp\'". Consult the \fBalias\fR command above for more information.
 .sp
 The \fBl\fR command allows the use of the \fBe, edit\fR option to modify the destination of a symbolic link. For example: `\fBl\ edit\ 12\fR` (or `\fBle\ 12\fR`)  to relink the symbolic link corresponding to the file whose ELN is 12.
 .sp
@@ -713,11 +719,11 @@ Whenever \fBsel\fR is not used, but just a source filename (and no destination i
 
 .TP
 .B cd \fR[\fIDIR\fR]
-Change the current working directory to \fIDIR\fR.
+Change the current working directory.
 .sp
-Directories check order:
-  1. If no argument, change to the home directory (\fB$HOME\fR, or, if \fB$HOME\fR is not set, the sixth field of the entry corresponding to the current user in \fI/etc/passwd\fR)
-  2. If argument is an absolute path (begins with a slash character), or the first component is dot (.) or dot\-dot (..), convert to canonical form (via \fBrealpath\fR(3)) and, if a valid directory, change to this directory.
+Directory check order:
+  1. If no argument is provided, change to the home directory (\fB$HOME\fR, or, if not set, the sixth field of the entry corresponding to the current user in \fI/etc/passwd\fR)
+  2. If the argument is an absolute path (begins with a slash character), or the first component is dot (.) or dot\-dot (..), convert to canonical form (via \fBrealpath\fR(3)) and, if a valid directory, change to this directory.
   3. Check the \fBCDPATH\fR environment variable and append /\fIDIR\fR to each of the paths specified here. If the result of the concatenation is a valid directory, change to it.
   4. Check directories in the current working directory. If a matching directory is found, change to it.
 .sp
@@ -731,7 +737,9 @@ Automatic file listing can be disabled by either setting \fBAutoLs\fR to \fBfals
 Toggle columned file listing.
 .TP
 .B cmd, commands
-Show this list of commands. A more convenient way of getting information about \fBclifm\fR commands is via the interactive help plugin (depends on \fBfzf\fR), by default bound to the \fBihelp\fR action name.
+Show this list of commands.
+.sp
+An alternative way of getting information about \fBclifm\fR commands is via the interactive help plugin (depends on \fBfzf\fR), by default bound to the \fBih\fR action name.
 .TP
 .B colors
 .br
@@ -771,7 +779,7 @@ To access a specific entry, you can pass the entry number preceded by an exclama
 .sp
 Finally, if an absolute path is passed as first parameter, \fBdh\fR works just as the \fBcd\fR command.
 .sp
-\fBNote\fR: Take a look at the \fBj\fR command as well. Both commands deal with the list of visited directories, but in slightly different ways: while \fBdh\fR deals with the list of the last \fIMaxDirhist\fR entries (see the configuration file), the \fBj\fR command deals with the \fIranked\fR list of visited directories.
+\fBNote\fR: Take a look at the \fBj\fR command as well. Both commands deal with the list of visited directories, but in slightly different ways: while \fBdh\fR deals with the list of the last \fIMaxDirhist\fR entries (see the configuration file), the \fBj\fR command deals with the \fBranked\fR list of visited directories.
 .TP
 .B ds, desel \fR[*, a, all | \fIFILE\fR]...
 Deselect one or more files.
@@ -782,19 +790,23 @@ Use \fB*\fR, \fBa\fR or \fBall\fR to deselect all selected entries at once. E.g.
 .sp
 You can also pass the filename(s) (or ELNs) to be deselected as a parameter. For example: `\fBds\ myfile\ 24\fR`.
 .sp
-Tab completion is available for this command.
+Tab completion is available for this command: `\fBds <TAB>\fR` will list all currently selected files.
 .TP
 .B exp \fR[\fIFILE\fR]...
-With no argument, export the list of files in the current working directory to a temporary file. Otherwise, export only those specified as further arguments: they can be directories, filenames, ELNs or some search expression like "*.c".
+With no argument, export the list of files in the current directory to a temporary file. Otherwise, export only those specified as further arguments: they can be directories, filenames, ELNs or some search expression like "*.c".
 .TP
 .B ext \fR[on | off | status]
 Toggle the ability to execute external commands.
 .TP
 .B f, forth \fR[h, hist | clear | !\fIELN\fR]
-It works just like the \fBback\fR command, but it goes forward in the history record. Of course, you can use `\fBf\ hist\fR`, `\fBf\ h\fR`, and `\fBf\ !ELN\fR`.
+This command works just like the \fBback\fR command, but it goes \fBforward\fR, instead of backward, in the history record.
+.sp
+Run `\fBf\fR` to change to the next visited directory (you can also just press \fBAlt+k\fR or \fBShift+Right\fR).
+.sp
+Of course, you can use `\fBf\ hist\fR`, `\fBf\ h\fR`, and `\fBf\ !ELN\fR` (consult the \fBback\fR command for details).
 .TP
 .B  fc \fR[on | off | status]
-By default, \fBclifm\fR prints the number of files contained by listed directories next to the directory name. However, since this is an expensive feature, it might be desirable (for example, when listing files in a remote machine) to disable this feature. Use the \fBoff\fR subcommand to disable it. To permanently disable it, use the \fBFileCounter\fR option in the configuration file.
+By default, \fBclifm\fR prints the number of files contained by listed directories next to directory names. However, since this is an expensive feature, it might be desirable (for example, when listing files on a remote machine) to disable this feature. Use the \fBoff\fR subcommand to disable it. To permanently disable it, use the \fBFileCounter\fR option in the configuration file.
 .TP
 .B ff, dirs\-first \fR[on | off | status]
 Toggle list directories first.
@@ -904,7 +916,7 @@ To change a keybinding use the \fBbind\fR subcommand.
 .sp
 Type `\fBkb bind <TAB>\fR` to get the list of bindable functions.
 .sp
-Enter `\fBkb bind FUNCTION\fR` to set a new keybinding for \fIFUNCTION\fR. For example, to bind the function \fBprevious-dir\fR to a new key, enter `\fBkb bind previous-dir\fR`. You'll see a little prompt: press the key combination you want to associate to the specified function and the press \fBEnter\fR (while in this prompt, press \fBCtrl+d\fR to abort or \fBCtrl+c\fR to clear the current line).
+Enter `\fBkb bind FUNCTION\fR` to set a new keybinding for \fIFUNCTION\fR. For example, to bind the function \fBprevious-dir\fR to a new key, enter `\fBkb bind previous-dir\fR`. You'll see a little prompt: press the key combination you want to associate to the specified function and then press \fBEnter\fR (while in this prompt, press \fBCtrl+d\fR to abort or \fBCtrl+c\fR to clear the current line).
 .sp
 To manually edit your keybindings use the \fBedit\fR option (the keybindings file will be opened with \fIAPP\fR, if specified, or with the default associated application otherwise).
 .sp
@@ -916,7 +928,7 @@ To list readline keybindings (defined in \fI~/.config/clifm/readline.clifm\fR), 
 .TP
 .B l, le
 .br
-Create (\fIl\fR) or edit (\fIle\fR) symbolic links.
+Create (\fBl\fR) or edit (\fBle\fR) symbolic links.
 .sp
 The syntax for the \fBl\fR command is: l \fITARGET\fR [\fILINK_NAME\fR]\fR. Note that if \fILINK_NAME\fR is omitted, the symbolic link is created as \fITARGET_BASENAME\fR.link in the current directory.
 .sp
@@ -948,16 +960,16 @@ When unmounting, and if the current directory is inside the mountpoint, \fBclifm
 To get information about a device, enter `\fBiELN\fR`, for example, `\fBi12\fR`, provided \'12\' is the ELN of the device you want.
 .TP
 .B mf \fR[\fINUM\fR | unset]
-List only up to \fINUM\fR files (valid range: >= 0). Use \fBunset\fR to list all files (default). An indicator (listed_files/total_files) will be printed below the list of files whenever some file is excluded from the current list (e.g. 20/310). Note, however, that though some files are excluded, all of them are loaded anyway, so that you can still perform any valid operation on them. For example, even if only 10 files are listed, you can still search for ALL symbolic links in the corresponding directory using the appropriate command: `\fB/*\ \-l\fR`.
+List only up to \fINUM\fR files (valid range: >= 0). Use \fBunset\fR to list all files (default). An indicator (listed_files/total_files) will be printed below the list of files whenever some file is excluded from the current list (e.g. 20/310). Note, however, that though some files are excluded, all of them are loaded anyway, so that you can still perform any valid operation on them. For example, even if only 10 files are listed, you can still search for all symbolic links in the corresponding directory using the appropriate command: `\fB/*\ \-l\fR`.
 .TP
 .B mm, mime \fR[open \fIFILE\fR | info \fIFILE\fR | edit [\fIAPP\fR] | import]
 This is \fBLira\fR, \fBclifm\fR's file opener.
 .sp
 Use the \fBopen\fR subcommand to open a file with the default associated application. Note that, since \fBopen\fR is the default action, it can be omitted. For example: `\fBmm file.pdf\fR`. The same can be achieved more easily using the \fBopen\fR command: `\fBopen file.pdf\fR` (or using the short command, `\fBo file.pdf\fR`). Or, even shorter, just `\fBfile.pdf\fR`.
 .sp
-The \fBinfo\fR option prints MIME information about \fIFILE\fR: its MIME type, and, if any, the application associated to this filename or to the file's MIME type.
+The \fBinfo\fR option prints MIME information about \fIFILE\fR: its MIME type, and, if any, the application (for both opening and previewing) associated with this filename or with the file's MIME type. If the application is associated with the file's name, \fB[FILENAME]\fR is printed after the associated application, otherwise, if associated with the file's MIME type, \fB[MIME]\fR is printed.
 .sp
-The \fBedit\fR option allows you to edit and customize the MIME list file. So, if a file has no default associated application, first get its MIME info or its file extension (running `\fBmm\ info\ FILE\fR`), and then add a value for it to the MIME list file using the \fBedit\fR option (`\fBmm\ edit\fR` or F6). Check the \fBFILE OPENER\fR section below for information about the mimelist file syntax.
+The \fBedit\fR option allows you to edit and customize the MIME list file. So, if a file has no default associated application, first get its MIME info or its file extension (running `\fBmm\ info\ FILE\fR`), and then add a value for it to the MIME list file using the \fBedit\fR option (`\fBmm\ edit\fR` or \fBF6\fR). Check the \fBFILE OPENER\fR section below for information about the mimelist file syntax.
 .sp
 Finally, via the \fBimport\fR option \fBclifm\fR will try to import MIME associations from the system looking for \fImimeapps.list\fR files in those paths specified by the Freedesktop specification (see \fIhttps://specifications.freedesktop.org/mime\-apps\-spec/mime\-apps\-spec\-latest.html\fR). If at least one MIME association is successfuly imported, it will be stored as \fImimelist.clifm.XXXXXX\fR (where XXXXXX is a random six digits alphanumerical string). You can add these new associations to your mimelist file using the `\fBmime edit\fR` command.
 .TP
@@ -1868,6 +1880,8 @@ For a full no\-color experience recall to edit your prompt removing all color co
 .TP
 .B 2. THE PROMPT
 .TP
+\fB2.a. Description\fR
+.TP
 \fBClifm\fR's prompt is taken from the \fBPrompt\fR line in the color scheme file using a prompt name as defined in the prompts file, for example, Prompt="security\-scanner".
 .TP
 Each prompt is built following almost the same escape codes and rules used by the Bash prompt, except that it does not accept shell functions (like conditionals and loops). Command substitution (in the form \fB$(cmd)\fR), prompt modules (in the form \fB${module}\fR), color codes (in the form \fB%{color}\fR), string literals, and escape sequences can be used to build the prompt.
@@ -1894,13 +1908,13 @@ or, using now command substitution:
 
  \fB"$(whoami)@$(hostname) $(pwd)> "\fR
 .TP
-\fBPrompt notifications\fR
+\fB2.b. Prompt notifications\fR
 .TP
 A bold red \'R\' at the left of the prompt reminds the user that the program is running as root. A bold green \'S\' indicates that there are elements in the Selection Box. In the same way, a cyan \'T\' means that there are currently files in the trash can, just as a bold blue \'S\' means that the program is running in stealth mode. Finally, \fBclifm\fR makes use of three kind of messages: errors (a red \'E\' at the left of the prompt), warnings (a yellow \'W\'), and simple notices (a green \'N\').
 .TP
 If \fBNotifications\fR is set to \fBfalse\fR in the prompts file, the above notifications won\'t be printed by the prompt, but are still available to the user as escape codes (see above) and environment variables (see the \fBENVIRONMENT\fR section below) to build custom prompts.
 .TP
-\fBThe Warning Prompt\fR
+\fB2.c. The Warning Prompt\fR
 .TP
 The suggestions system includes a secondary, warning prompt, used to highlight wrong/invalid/non\-existent command names. Once an invalid command is entered, the regular prompt will be switched to the warning prompt.
 .TP
@@ -1924,6 +1938,18 @@ the last line of the regular prompt will become "\fB(!) > \fR", with "(!)" print
 To disable this feature use the \fB\-\-no\-warning\-prompt\fR command line switch or set the \fBEnableWarningPrompt\fR option to \fBfalse\fR in the prompts file.
 .TP
 \fBNote\fR: Bear in mind that the warning prompt depends on the suggestions system, so that it will not be available if this system is disabled.
+.TP
+\fB2.d. The Right Prompt\fR
+.TP
+The right prompt is just like the regular prompt, but printed on the right side of the screen.
+.TP
+Use the \fBRightPrompt\fR option in the prompts file to set a right prompt. For a concrete usage example see the \fBinfo\fR prompt in the prompts file.
+.TP
+A few caveats:
+
+ \fBa\fR. Right prompts only work with multiline regular prompts (in the case of a single line regular prompt, the right prompt is not printed).
+ \fBb\fR. Multiple lines are not supported by right prompts (only the first line will be printed).
+ \fBc\fR. If the decoded right prompt exceeds the number of available terminal columns, the prompt is not printed.
 .TP
 
 \fB3. THE DIVIDING LINE\fR
@@ -3155,19 +3181,21 @@ Commands containing \fBat least one\fR unsafe character will be rejected. Of cou
 
 For each of the internal commands (see the \fBCOMMANDS\fR section above) you can use the semicolon to execute them sequentially and/or the double ampersand to execute them conditionally. For example: `\fBcmd1;\ cmd2\ &&\ cmd3\fR`.
 .sp
-Though you can use here external commands as well, bear in mind that, whenever at least one internal command is involved in a chained list of commands, \fBclifm\fR will take care of executing this list (simply because the system shell isn't able to understand any of these commands), so that no shell inter\-process function (like pipes), nor any stream redirection or shell expression (like IF blocks or FOR loops) will be available. However, the shell is still used to run single external commands found in the chained list, but in isolation from the remaining commands in this list.
+Though you can use here external commands as well, bear in mind that, whenever at least one internal command is involved in a chained list of commands, \fBclifm\fR will take care of executing this list (simply because the system shell is not able to understand any of these commands), so that no shell inter\-process function (like pipes), nor any stream redirection or shell expression (like IF blocks or FOR loops) will be available. However, the shell is still used to run single external commands found in the chained list, but in isolation from the remaining commands in this list.
 .sp
 As a rule of thumb, when using chained commands make sure to always expand ELNs to avoid undesired consequences. If, for instance, you issue this command: `\fBtouch\ aaa\ &&\ r\ 3\fR`, you will end up deleting a file you were not intended to delete, simple because after the successful execution of the first command, the ELN 3 corresponds now to a different file.
 .sp
 
 \fBExternal commands\fR:
 
-\fBClifm\fR is not limited to its own set of internal commands, like open, sel, trash, etc. It can run any external command as well, provided external commands are allowed (see the \fB\-x\fR option, the \fBext\fR command, or the configuration file).
+\fBClifm\fR is not limited to its own set of internal commands, like \fBopen\fR, \fBsel\fR, \fBtrash\fR, etc. It can run external commands as well, provided external commands are allowed (see the \fB\-x\fR option, the \fBext\fR command, and the \fBExternalCommands\fR option in the configuration file).
 .sp
-External commands are executed using an actual shell (say, \fI/bin/bash\fR), which is specified by \fBclifm\fR as follows:
+External commands are executed using the system shell (say, \fI/bin/sh\fR), which is specified by \fBclifm\fR as follows:
   1. If the \fBCLIFM_SHELL\fR environment variable is set, this value is used.
   2. If the \fBSHELL\fR environment variable is set, this value is used.
-  3. If none of the above, the value will be taken from the \fBpasswd\fR database (via \fBgetpwuid\fR(3)).
+  3. If none of the above, the value is taken from the \fBpasswd\fR database (via \fBgetpwuid\fR(3)).
+.sp
+The shell is invoked as follows: \fISHELL\fR -c '\fICMD ARG\fR...', for example, `\fB/bin/sh -c 'ls -l'\fR`.
 .sp
 By beginning the external command by a colon or a semicolon (':', ';') you tell \fBclifm\fR not to parse the input string, but instead letting this task to the system shell.
 .sp
