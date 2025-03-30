@@ -2081,9 +2081,9 @@ get_path_env(const int check_timestamps)
 	if (xargs.secure_cmds == 1 || xargs.secure_env == 1
 	|| xargs.secure_env_full == 1 || !(ptr = getenv("PATH")) || !*ptr) {
 		malloced_ptr = 1;
-#ifdef _PATH_STDPATH
+#if defined(_PATH_STDPATH)
 		ptr = savestring(_PATH_STDPATH, sizeof(_PATH_STDPATH) - 1);
-#else
+#elif defined(_CS_PATH)
 		size_t s = confstr(_CS_PATH, NULL, 0); /* Get value's size */
 		char *p = xnmalloc(s, sizeof(char));   /* Allocate space */
 		confstr(_CS_PATH, p, s);               /* Get value */

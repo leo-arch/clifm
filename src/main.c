@@ -1321,7 +1321,7 @@ main(int argc, char *argv[])
 		do_stat_and_exit(xargs.stat == FULL_STAT ? 1 : 0);
 
 	if (xargs.list_and_quit == 1)
-		list_files_and_quit();
+		list_files_and_quit(); /* No return. */
 
 	set_sel_file();
 	create_tmp_files();

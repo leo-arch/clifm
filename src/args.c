@@ -216,10 +216,10 @@ static struct option const longopts[] = {
 	{"full-dir-size", no_argument, 0, LOPT_FULL_DIR_SIZE},
 	{"fuzzy-matching", no_argument, 0, LOPT_FUZZY_MATCHING},
 	{"fuzzy-algo", required_argument, 0, LOPT_FUZZY_ALGO},
-	{"fzfpreview", no_argument, 0, LOPT_FZFPREVIEW}, // legacy: is default now
+	{"fzfpreview", no_argument, 0, LOPT_FZFPREVIEW}, /* Legacy: is default now */
 	{"fzfpreview-hidden", no_argument, 0, LOPT_FZFPREVIEW_HIDDEN},
 	{"fzftab", no_argument, 0, LOPT_FZFTAB},
-	{"fzytab", no_argument, 0, LOPT_FZYTAB}, // legacy: replaced by fnftab
+	{"fzytab", no_argument, 0, LOPT_FZYTAB}, /* Legacy: replaced by fnftab */
 	{"icons", no_argument, 0, LOPT_ICONS},
 	{"icons-use-file-color", no_argument, 0, LOPT_ICONS_USE_FILE_COLOR},
 	{"int-vars", no_argument, 0, LOPT_INT_VARS},
@@ -229,7 +229,7 @@ static struct option const longopts[] = {
 	{"lscolors", no_argument, 0, LOPT_LSCOLORS},
 	{"max-dirhist", required_argument, 0, LOPT_MAX_DIRHIST},
 	{"max-files", required_argument, 0, LOPT_MAX_FILES},
-	{"max-path", required_argument, 0, LOPT_MAX_PATH},
+	{"max-path", required_argument, 0, LOPT_MAX_PATH}, /* Deprecated */
 	{"mimelist-file", required_argument, 0, LOPT_ALT_MIMEFILE},
 	{"mnt-udisks2", no_argument, 0, LOPT_MNT_UDISKS2},
 	{"no-apparent-size", no_argument, 0, LOPT_NO_APPARENT_SIZE},
@@ -241,7 +241,7 @@ static struct option const longopts[] = {
 	{"no-columns", no_argument, 0, LOPT_NO_COLUMNS},
 	{"no-dir-jumper", no_argument, 0, LOPT_NO_DIR_JUMPER},
 	{"no-file-cap", no_argument, 0, LOPT_NO_FILE_CAP},
-	{"no-files-counter", no_argument, 0, LOPT_NO_FILES_COUNTER},
+	{"no-files-counter", no_argument, 0, LOPT_NO_FILES_COUNTER}, /* Deprecated */
 	{"no-file-counter", no_argument, 0, LOPT_NO_FILES_COUNTER},
 	{"no-file-ext", no_argument, 0, LOPT_NO_FILE_EXT},
 	{"no-follow-symlinks", no_argument, 0, LOPT_NO_FOLLOW_SYMLINKS},
@@ -253,7 +253,7 @@ static struct option const longopts[] = {
 	{"no-restore-last-path", no_argument, 0, LOPT_NO_RESTORE_LAST_PATH},
 	{"no-suggestions", no_argument, 0, LOPT_NO_SUGGESTIONS},
 	{"no-tips", no_argument, 0, LOPT_NO_TIPS},
-	{"no-trim-names", no_argument, 0, LOPT_NO_TRUNC_NAMES}, // Deprecated
+	{"no-trim-names", no_argument, 0, LOPT_NO_TRUNC_NAMES}, /* Deprecated */
 	{"no-truncate-names", no_argument, 0, LOPT_NO_TRUNC_NAMES},
 	{"no-unicode", no_argument, 0, LOPT_NO_UNICODE},
 	{"no-warning-prompt", no_argument, 0, LOPT_NO_WARNING_PROMPT},
