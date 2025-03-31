@@ -436,7 +436,6 @@ try_datadir_from_param(const char *dir)
 		*(r - 1) = '\0';
 
 	struct stat a;
-
 	char p[PATH_MAX + 1];
 
 	/* Try DIR/share/clifm/clifmrc */
@@ -771,12 +770,7 @@ set_sort_by_name(const char *name)
 static void
 set_sort(const char *arg)
 {
-	int n = 0;
-
-	if (!is_number(arg))
-		n = set_sort_by_name(arg);
-	else
-		n = atoi(arg);
+	const int n = !is_number(arg) ? set_sort_by_name(arg) : atoi(arg);
 
 	if (n < 0 || n > SORT_TYPES) {
 		fprintf(stderr, _("%s: --sort: '%s': Valid values are 0-%d\n"),
@@ -892,7 +886,7 @@ set_datadir(char *opt)
 static void
 set_fuzzy_algo(const char *opt)
 {
-	int a = opt ? atoi(opt) : -1;
+	const int a = opt ? atoi(opt) : -1;
 
 	if (a < 1 || a > FUZZY_ALGO_MAX) {
 		fprintf(stderr, _("%s: '%s': Invalid fuzzy algorithm. Valid "
@@ -906,7 +900,7 @@ set_fuzzy_algo(const char *opt)
 static void
 set_bell_style(const char *opt)
 {
-	int a = atoi(opt);
+	const int a = atoi(opt);
 
 	if (!is_number(opt) || a < 0 || a > 3) {
 		fprintf(stderr, _("%s: '%s': Invalid bell style. Valid values "
@@ -1210,7 +1204,7 @@ set_max_value(const char *opt, int *xval, int *intval)
 	if (!is_number(opt))
 		return;
 
-	int opt_int = atoi(opt);
+	const int opt_int = atoi(opt);
 	if (opt_int >= 0)
 		*xval = *intval = opt_int;
 }
@@ -1221,7 +1215,7 @@ set_workspace(const char *opt)
 	if (!is_number(opt))
 		goto ERROR;
 
-	int opt_int = atoi(opt);
+	const int opt_int = atoi(opt);
 	if (opt_int >= 0 && opt_int <= MAX_WS) {
 		cur_ws = opt_int - 1;
 		return;

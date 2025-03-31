@@ -149,10 +149,10 @@ When in long view, display information for the files referenced by symbolic link
 Enable the directory history map to keep in view previous, current, and next entries in the directory history list.
 .TP
 \fB\-o\fR, \fB\-\-autols\fR
-The \fBcd\fR command changes directory \fBand\fR automatically lists files.
+Automatically list files when changing the current directory with the \fBcd\fR command.
 .TP
 \fB\-O\fR, \fB\-\-no\-autols\fR
-The internal \fBcd\fR command works like the shell \fBcd\fR command: change directory but \fBdo not\fR automatically list files.
+Do not automatically list files when changing the current directory with the \fBcd\fR command.
 .TP
 \fB\-P\fR, \fB\-\-profile\fR=\fI\,PROFILE\/\fR
 Use \fIPROFILE\fR as profile. If \fIPROFILE\fR does not exist, it will be created. The default profile is \fBdefault\fR.
@@ -176,7 +176,7 @@ Set an alternative trash directory.
 Print version details and exit.
 .TP
 \fB\-w\fR, \fB\-\-workspace\fR=\fI\,NUM\/\fR
-Start in workspace \fINUM\fR. By default, \fBclifm\fR will recover the last visited directory for each workspace. However, you can override this behaviour using positional parameters to start in workspace \fINUM\fR and in the specified directory (e.g.: `\fBclifm -w4 /etc\fR`). Consult the \fBPOSITIONAL PARAMETERS\fR section above for more information.
+Start in workspace \fINUM\fR. By default, \fBclifm\fR will recover the last visited directory for each workspace. You can override this behavior using positional parameters to start in workspace \fINUM\fR and in the specified directory (e.g.: `\fBclifm -w4 /etc\fR`). Consult the \fBPOSITIONAL PARAMETERS\fR section above for more information.
 .TP
 \fB\-x\fR, \fB\-\-no\-ext\-cmds\fR
 Disallow the use of external (shell) commands.
@@ -188,7 +188,7 @@ Enable the light mode to speed up \fBclifm\fR (see the \fBNOTE ON SPEED\fR secti
 Sort files by \fIMETHOD\fR, where \fIMETHOD\fR is one of: 0 = none, 1 = name, 2 = size, 3 = atime, 4 = btime, 5 = ctime, 6 = mtime, 7 = version, 8 =  extension, 9 = inode, 10 = owner, 11 = group, 12 = blocks, 13 = links, or 14 = type. Both numbers and names are accepted. For example, you can use \fB\-\-sort=9\fR or \fB\-\-sort=inode\fR.
 .TP
 \fB\-\-bell\fR=\fI\,TYPE\/\fR
-Set the terminal bell type, where \fITYPE\fR is: 0 = none, 1 = audible, 2 = visible (requires readline >= 8.1), and 3 = flash. Defaults to \fB2\fR (\fBvisible\fR), and, if not available, \fB0\fR (\fBnone\fR). Only numbers are allowed.
+Set the terminal bell type, where \fITYPE\fR is one of: 0 = none, 1 = audible, 2 = visible (requires readline >= 8.1), and 3 = flash. Defaults to \fB2\fR (\fBvisible\fR), and, if not available, \fB0\fR (\fBnone\fR). Only numbers are allowed.
 .TP
 \fB\-\-case\-sens\-dirjump\fR
 Do not ignore case when consulting the jump database (via the \fBj\fR command).
@@ -203,7 +203,7 @@ Write the last visited directory to \fI$XDG_CONFIG_HOME/clifm/.last\fR for later
 Use the color scheme specified by \fINAME\fR.
 .TP
 \fB\-\-color\-links\-as\-target\fR
-Color symbolic links using the color of the target file (a '@' is prepended to the filename to mark it as a symbolic link).
+Color symbolic links using the color of the target file (an '@' character is prepended to the filename to mark it as a symbolic link).
 .TP
 \fB\-\-cwd\-in\-title\fR
 Print the current working directory in the terminal window title (otherwise, only the program name is printed).
@@ -221,7 +221,7 @@ Show disk usage of the filesystem where the current directory resides, in the fo
 Display recursive directory sizes (long view only).
 .TP
 \fB\-\-fuzzy\-algo\fR=\fI\,VER\/\fR
-Fuzzy matching algorithm, where \fIVER\fR is either \fB1\fR (faster, but not Unicode aware), or \fB2\fR (slower, Unicode aware). Bear in mind however that the second algorithm will fallback to the first one (because it is faster) whenever the query string contains only ASCII characters, to minimize the performance penalty.
+Fuzzy matching algorithm, where \fIVER\fR is either \fB1\fR (faster, but not Unicode aware), or \fB2\fR (slower, Unicode aware). Bear in mind however that the second algorithm (default) will fallback to the first one (because it is faster) whenever the query string contains only ASCII characters, to minimize the performance penalty.
 .TP
 \fB\-\-fuzzy\-matching\fR
 Enable fuzzy matching for filename/path completions and suggestions.
@@ -239,7 +239,7 @@ Use \fBfnf\fR(1) to display completion matches.
 Enable icons.
 .TP
 \fB\-\-icons\-use\-file\-color\fR
-Instead of a specific color, icons use the color of the corresponding filename. Useful when building custom color schemes. This option implies \fB\-\-icons\fR. Only if compiled with support for icons\-in\-terminal or Nerdfonts. The default build is compiled with emoji\-icons support, in which case this option is ignored, as Unicode icons have their own builtin colors.
+Instead of a specific color, icons use the color of the corresponding filename. Useful when building custom color schemes, this option implies \fB\-\-icons\fR, and is effective only when compiled with support for icons\-in\-terminal or Nerdfonts. The default build is compiled with emoji\-icons support, in which case this option is ignored, as Unicode icons have their own builtin colors.
 .TP
 \fB\-\-int\-vars
 Allow the use of internal variables (e.g.: `\fBVAR=/bin; cd $VAR\fR`).
@@ -336,7 +336,7 @@ Disable the auto\-suggestions system.
 Do not display startup tips.
 .TP
 \fB\-\-no\-truncate\-names\fR
-Do not truncate filenames (see \fBMaxFilenameLen\fR in the configuration file).
+Do not truncate filenames (see the \fBMaxFilenameLen\fR option in the configuration file).
 .TP
 \fB\-\-no\-unicode\fR
 Do not use Unicode decorations.
@@ -366,7 +366,7 @@ Display physical file sizes (device usage) instead of logical sizes (apparent si
 Display a preview of \fIFILE\fR (via \fBShotgun\fR) and exit. Use \fB\-\-shotgun\-file\fR to set an alternative configuration file. Consult the \fBSHOTGUN\fR section below for more information.
 .TP
 \fB\-\-print\-sel\fR
-Print the list of selected files. The maximum number of selected files to be printed can be specified using the \fBMaxPrintSelfiles\fR option in the configuration file (by default, this option is set to 0 (auto), meaning it will never exceed half the terminal height).
+Print the list of selected files after the file list. The maximum number of selected files to be printed can be specified using the \fBMaxPrintSelfiles\fR option in the configuration file (by default, this option is set to 0 (auto), meaning it will never exceed half the terminal height).
 .TP
 \fB\-\-prop\-fields\fR=\fI\,FORMAT\/\fR
 Set fields to be displayed in long view mode. For information on how to construct this format string consult the \fBPropFields\fR option in the configuration file.
@@ -399,7 +399,7 @@ Set \fIFILE\fR as the selections file.
 By default, each user profile has a private Selection Box. Use this option to make the Selection Box common to all user profiles.
 .TP
 \fB\-\-shotgun\-file\fR=\fI\,FILE\/\fR
-Set \fIFILE\fR as shotgun\'s configuration file. See the \fBSHOTGUN\fR section below for more information.
+Set \fIFILE\fR as the shotgun configuration file. See the \fBSHOTGUN\fR section below for more information.
 .TP
 \fB\-\-si\fR
 .br
@@ -447,7 +447,7 @@ Help for all commands listed here can be accessed via the \fB\-h\fR or \fB\-\-he
 .sp
 \fBNote 2:\fR In case of ELN\-filename conflict, the backslash can be used to prevent ELN expansion. For example, if there are at least two files and one of them is named \fI2\fR, \fBclifm\fR cannot determine in advance if the command refers to the ELN 2 or the filename \fI2\fR. To specify the ELN, simply write the ELN number (e.g. `\fBs\ 2\fR`). To refer to the filename, escape it using the backlash character: `\fBs\ \\2\fR`.
 .sp
-\fBNote 3:\fR \fBClifm\fR supports \fBfused parameters\fR for internal commands taking an ELN or range of ELNs as parameters. Much like short options for command line programs, you can omit the space between internal commands and the corresponding ELN passed as argument. For example, you can write \fICMDELN\fR instead of \fICMD\ ELN\fR. Thus, `\fBo12\fR` or `\fBs1\-5\fR` can be used instead of `\fBo\ 12\fR` and `\fBs\ 1\-5\fR, respectively. Be aware, however, that omitting the space character will disable tab completion and suggestions for ELNs. If there is a file named \fIo12\fR (more generally, \fICMDELN\fR), and if you want to refer to this file instead of a \fBclifm\fR command, escape the filename to prevent the split: `\fB\\o12\fR`.
+\fBNote 3:\fR \fBClifm\fR supports \fBfused parameters\fR for internal commands taking an ELN or range of ELNs as parameters. Much like short options for command line programs, you can omit the space between internal commands and the corresponding ELN passed as argument. For example, you can write \fICMDELN\fR instead of \fICMD\ ELN\fR. Thus, `\fBo12\fR` or `\fBs1\-5\fR` can be used instead of `\fBo\ 12\fR` and `\fBs\ 1\-5\fR, respectively. Be aware that omitting the space character will disable tab completion and suggestions for ELNs. If there is a file named \fIo12\fR (more generally, \fICMDELN\fR), and if you want to refer to this file instead of a \fBclifm\fR command, escape the filename to prevent the split: `\fB\\o12\fR`.
 .TP
 .B \fIFILE/DIR\fR
 If the \fBautocd\fR and/or \fBauto-open\fR functions are enabled (default), open \fIFILE\fR or change directory to \fIDIR\fR. In other words, `\fBFILE\fR` amounts to `\fBopen\ FILE\fR` (or `\fBo\ FILE\fR`), and `\fBDIR\fR` to `\fBcd\ DIR\fR`. ELNs, of course, are allowed. For example: `\fB12\fR`.
@@ -457,7 +457,7 @@ This is the \fBquick search\fR function. Type `\fB/\fR` followed by a glob or (e
 .sp
 You can list previously used search patterns using the TAB key: `\fB/*<TAB>\fR`.
 .sp
-\fBNote 1\fR: By default, the search function attempts to resolve a pattern first as glob, and then, if no matches are found, as a regular expression. This behavior can be customizad however in the configuration file, via the \fBSearchStrategy\fR option.
+\fBNote 1\fR: By default, the search function attempts to resolve a pattern first as glob, and then, if no matches are found, as a regular expression. This behavior can be customizad in the configuration file, using the \fBSearchStrategy\fR option.
 .sp
 \fBNote 2\fR: If no further parameter is provided, but only a glob pattern (wildcards), you can expand the pattern into the corresponding matches by hitting the TAB key. For example, to list all C files in the current directory: `\fB/*.c<TAB>\fR`.
 .sp
@@ -469,7 +469,7 @@ By default, regular expressions are case insensitive (glob expressions, by contr
 .sp
 \fB2. Destination directory\fR
 .sp
-To search for files in any directory other than the current directory, specify the directory name as a further parameter. This parameter (\fIDIR\fR) can be an absolute path, a relative path, or an ELN. For example, enter `\fB/^A\ 7\fR` to search for all files starting with \'A\' in the directory corresponding to the ELN 7.
+To search for files in any directory other than the current directory, specify the directory name as a further parameter (\fIDIR\fR). For example, enter `\fB/^A\ 7\fR` to search for all files starting with \'A\' in the directory corresponding to the ELN 7.
 .sp
 \fB3. File type filter\fR
 .sp
@@ -580,7 +580,7 @@ Toggle the auto\-open function. If set to on, `\fBFILE\fR` amounts to `\fBopen\ 
 .B b, back \fR[h, hist | clear | !\fIELN\fR]
 Unlike `\fBcd\ ..\fR`, which changes to the parent directory of the current directory, this command (with no argument) changes to the previously visited directory. You can also use \fBAlt+j\fR or \fBShift-Left\fR.
 .sp
-\fBClifm\fR keeps a record of all visited directories (to prevent a directory from being added to the directory history list use the \fBDirhistIgnore\fR option in the main configuration file). You can see this list by typing `\fBb\ hist\fR` or `\fBb\ h\fR`, and you can access any element in this list by simply passing the corresponding ELN in this list to the \fBback\fR command. Example:
+\fBClifm\fR keeps a record of all visited directories (to prevent a directory from being added to the directory history list use the \fBDirhistIgnore\fR option in the main configuration file). You can see this list by typing `\fBb\ hist\fR` or `\fBb\ h\fR`, and you can access any element in this list by simply passing the corresponding ELN in this list (preceded by an exclamation mark) to the \fBback\fR command. Example:
         :) > ~ $ bh
         1 /home/user
         2 /etc
@@ -588,16 +588,16 @@ Unlike `\fBcd\ ..\fR`, which changes to the parent directory of the current dire
         :) > ~ $ b !3
         :) > /proc $
 .sp
-\fBNote:\fR the highlighted line (by default printed in bold cyan) indicates the current position of the \fBback\fR function in the directory history list.
+\fBNote:\fR The highlighted line (by default printed in bold cyan) indicates the current position of the \fBback\fR function in the directory history list.
 .sp
 Finally, you can also clear this history list by entering `\fBb\ clear\fR`.
 .sp
-The best way of navigating the directory history list, however, is using the \fBdirectory jumper\fR function (invoked by \fBj\fR command). You can also take a look at the \fBdh\fR command.
+The best way of navigating the directory history list, however, is using the \fBdirectory jumper\fR function (invoked by the \fBj\fR command). You can also take a look at the \fBdh\fR command.
 .sp
-Use the \fBf, forth\fR command to move forward, instead of backward, in the directory history list.
+Use the \fBf\fR (or \fBforth\fR) command to move forward, instead of backward, in the directory history list.
 .TP
 .B bb, bleach \fIFILE\fR...
-\fBBleach\fR is a builtin filenames cleaner (based on detox [\fIhttps://github.com/dharple/detox\fR]), whose main aim is to rename filenames using only ASCII characters.
+\fBBleach\fR is a builtin filenames sanitizer (based on detox [\fIhttps://github.com/dharple/detox\fR]), whose aim is to rename filenames using only ASCII characters.
 .sp
 \fBBleach\fR sanitizes filenames either by removing extended\-ASCII/Unicode characters without an ASCII alternative/similar character, or by translating these characters into an alternative ASCII character based on familiarity/similarity.
 .sp
@@ -612,7 +612,7 @@ These following simple rules are used to compose sanitized filenames:
     \- Do not let a replacement filename start with a dot (hidden) if the original does not
     \- Max filename length is NAME_MAX (usually 255)
 .sp
-Modified filenames will be listed on screen asking the user for confirmation, allowing besides to edit (by pressing 'e') the list of modified filenames via a text editor.
+Modified filenames will be listed on the screen asking the user for confirmation, allowing besides to edit (by pressing 'e') the list of modified filenames via a text editor.
 .sp
 If the replacement filename already exists, a dash and a number (starting from 1) will be appended. E.g.: file\-3.
 .TP
@@ -639,7 +639,7 @@ Bookmarks can be managed either from the bookmark manager screen or from the com
 .sp
 \fB1. The bookmark manager screen\fR
 .sp
-To access the bookmark manager screen simply enter \fIbm\fR. Here you can cd to the desired bookmark by entering either its ELN or name (regular files can be bookmarked as well). In this screen you can also add, remove, or edit your bookmarks by simply entering 'e' to edit the bookmarks file (which is simply a list of lines with this format: \fINAME:PATH\fR. E.g.: "docs:/home/user/documents"). Make your changes, save, and exit.
+To access the bookmark manager screen enter \fIbm\fR. Here you can cd to the desired bookmark by entering either ELN or filename (regular files can be bookmarked as well). In this screen you can also add, remove, or edit your bookmarks by entering 'e' to edit the bookmarks file (which is simply a list of lines with this format: \fINAME:PATH\fR. E.g.: "docs:/home/user/documents"). Make your changes, save, and exit.
 .sp
 \fB2. The command line\fR
 .TS
@@ -748,7 +748,7 @@ Preview the current color scheme (same as `\fBcs preview\fR`).
 .B config \fR[edit [\fIAPP\fR] | reset | reload | dump]
 Manage the main configuration file.
 .sp
-To edit the configuration file use the \fBedit\fR subcommand. If an application is specified (`\fBconfig edit APP\fR`), \fIAPP\fR will be used to open the file (otherwise, the default associated program will be used). Edit settings to your liking if necessary, save, and quit the editor. Changes are automatically applied. Note that, since \fBedit\fR is the default action, it can be omitted. Enter just `\fBconfig\fR` to open the configuration file, or `\fBconfig APP\fR` to open it using \fIAPP\fR.
+To edit the configuration file use the \fBedit\fR subcommand. If an application is specified (`\fBconfig edit APP\fR`), \fIAPP\fR will be used to open the file (otherwise, the default associated program will be used). Edit settings to your liking, save, and quit the editor (changes are automatically applied). Note that, since \fBedit\fR is the default action, it can be omitted. Enter just `\fBconfig\fR` to open the configuration file, or `\fBconfig APP\fR` to open it using \fIAPP\fR.
 .sp
 Use the \fBreload\fR subcommand to reload the main configuration file and update settings accordingly.
 .sp
@@ -763,12 +763,12 @@ To get a preview of the current color scheme use the \fBpreview\fR subcommand: `
 .sp
 Use the \fBcheck\-ext\fR subcommand to check for file extension conflicts: `\fBcs check\-ext\fR`.
 .sp
-Use the \fBedit\fR subcommand to open/edit the configuration file of the current color scheme (open with \fIAPP\fR if specified or via the default associated application).
+Use the \fBedit\fR subcommand to open/edit the configuration file of the current color scheme (open with \fIAPP\fR if specified, or with the default associated application otherwise).
 .sp
-To switch color schemes, specify the color scheme name: `\fBcs NAME\fR`. (Tab completion is available: `\fBcs <TAB>\fR`).
+To switch color schemes, specify the color scheme name: `\fBcs NAME\fR`. (Use the TAB key to list available color schemes: `\fBcs <TAB>\fR`).
 .TP
 .B d, dup \fIFILE\fR...
-Duplicate files passed as parameters, either directories or regular files. The user will be asked for a destination directory. Duplicated filenames are generated by appending ".copy" to the basename of each source file. For example: `\fBd\ /my/file\fR` will copy \fI/my/file\fR to the directory selected by the user as \fIfile.copy\fR. If \fIfile.copy\fR already exists, an extra suffix will be added as follows: \fIfile.copy\-N\fR, where N is a positive integer (starting at 1).
+Duplicate files passed as parameters, either directories or regular files. The user will be asked for a destination directory. Duplicated filenames are generated by appending ".copy" to the basename of each source file. For example: `\fBd\ /my/file\fR` will copy \fI/my/file\fR to the directory selected by the user as \fIfile.copy\fR. If \fIfile.copy\fR already exists, an extra suffix will be added as follows: \fIfile.copy\-N\fR, where \fIN\fR is a positive integer (starting at 1).
 .sp
 If \fBrsync\fR(1) is found, it will be used as follows: `\fBrsync\ \-aczvAXHS\ \-\-progress\fR`. Else, \fBcp\fR(1) will be used: `\fBcp\ \-a\fR`.
 .TP
