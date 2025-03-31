@@ -432,11 +432,31 @@ try_datadir_from_param(const char *dir)
 
 	/* Remove ending "/bin" from DIR */
 	char *r = strrchr(dir, '/');
-	if (r && *r && *(++r) && *r == 'b' && strcmp(r, "bin") == 0)
+	if (r && *(++r) == 'b' && strcmp(r, "bin") == 0)
 		*(r - 1) = '\0';
 
 	struct stat a;
 	char p[PATH_MAX + 1];
+
+	/* Try DIR/clifmrc */
+	snprintf(p, sizeof(p), "%s/%src", dir, PROGRAM_NAME);
+	if (stat(p, &a) != -1 && S_ISREG(a.st_mode) && a.st_size > 0) {
+		char *tmp = savestring(dir, strlen(dir));
+
+		char *ptr = strrchr(tmp, '/');
+		if (!ptr) {
+			free(tmp);
+			return (char *)NULL;
+		}
+
+		*ptr = '\0';
+		return tmp;
+	}
+
+	/* Try DIR/clifm/clifmrc */
+	snprintf(p, sizeof(p), "%s/%s/%src", dir, PROGRAM_NAME, PROGRAM_NAME);
+	if (stat(p, &a) != -1 && S_ISREG(a.st_mode) && a.st_size > 0)
+		return savestring(dir, strlen(dir));
 
 	/* Try DIR/share/clifm/clifmrc */
 	snprintf(p, sizeof(p), "%s/share/%s/%src", dir, PROGRAM_NAME, PROGRAM_NAME);
@@ -446,11 +466,6 @@ try_datadir_from_param(const char *dir)
 		snprintf(q, len, "%s/share", dir);
 		return q;
 	}
-
-	/* Try DIR/clifm/clifmrc */
-	snprintf(p, sizeof(p), "%s/%s/%src", dir, PROGRAM_NAME, PROGRAM_NAME);
-	if (stat(p, &a) != -1 && S_ISREG(a.st_mode) && a.st_size > 0)
-		return savestring(dir, strlen(dir));
 
 	return (char *)NULL;
 }
@@ -545,9 +560,6 @@ resolve_absolute_path(const char *s)
 	else
 		t = "/";
 
-	if (p)
-		*p = '/';
-
 	return try_datadir_from_param(t ? t : s);
 }
 
@@ -567,6 +579,7 @@ resolve_relative_path(const char *s)
 
 	char *r = try_datadir_from_param(p);
 	free(p);
+
 	return r;
 }
 
