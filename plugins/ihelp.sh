@@ -146,7 +146,7 @@ t, trash@
 tag @
 te @
 tips @
-u, undel, untrash@
+u, untrash@
 unpin @
 v, paste@
 vv @

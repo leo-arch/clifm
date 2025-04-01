@@ -375,7 +375,7 @@ Set fields to be displayed in long view mode. For information on how to construc
 Time/date style used by the \fBp\fR/\fBpp\fR command and the \fB\-\-stat\fR/\fB\-\-stat\-full\fR command line switches. Available styles: \fBdefault\fR, \fBiso\fR, \fBlong-iso\fR, \fBfull\-iso\fR, \fBfull\-iso\-nano\fR, and \fB+FORMAT\fR (FORMAT is interpreted like in \fBstrftime\fR(3). Nano-second precision is available via the \fB%N\fR modifier, like in \fBdate\fR(1)).
 .TP
 \fB\-\-readonly\fR
-Run in read\-only mode (internal commands able to modify the filesystem are disabled). Disabled commands are: \fBac\fR, \fBad\fR, \fBbb\fR, \fBbl/bleach\fR, \fBbr/bulk\fR, \fBc\fR, \fBdup\fR, \fBl\fR, \fBle\fR, \fBm\fR, \fBmd\fR, \fBn/new\fR, \fBoc\fR, \fBpaste\fR, \fBpc\fR, \fBr\fR, \fBrr\fR, \fBt/trash\fR, \fBtag\fR, \fBte\fR, \fBu/undel/untrash\fR, and \fBvv\fR, plus the shell commands \fBcp\fR, \fBrm\fR, \fBmv\fR, \fBln\fR, \fBmkdir\fR, \fBrmdir\fR, \fBlink\fR, and \fBunlink\fR.
+Run in read\-only mode (internal commands able to modify the filesystem are disabled). Disabled commands are: \fBac\fR, \fBad\fR, \fBbb\fR, \fBbl/bleach\fR, \fBbr/bulk\fR, \fBc\fR, \fBdup\fR, \fBl\fR, \fBle\fR, \fBm\fR, \fBmd\fR, \fBn/new\fR, \fBoc\fR, \fBpaste\fR, \fBpc\fR, \fBr\fR, \fBrr\fR, \fBt/trash\fR, \fBtag\fR, \fBte\fR, \fBu/untrash\fR, and \fBvv\fR, plus the shell commands \fBcp\fR, \fBrm\fR, \fBmv\fR, \fBln\fR, \fBmkdir\fR, \fBrmdir\fR, \fBlink\fR, and \fBunlink\fR.
 .TP
 \fB\-\-report\-cwd\fR
 Report the current directory to the underlying terminal (using the \fBOSC-7\fR escape sequence, not supported by all terminals).
@@ -1266,7 +1266,7 @@ The trash directory is \fI$XDG_DATA_HOME/Trash\fR, falling back to \fI$HOME/.loc
 .sp
 Since this trash system follows the Freedesktop specification, it is able to handle files trashed by different Trash implementations.
 .sp
-To restore trashed files (to their original location) see the \fBundel\fR command below.
+To restore trashed files (to their original location) see the \fBuntrash\fR command below.
 .TP
 .B tag \fR[add | del | list | list\-full | new | merge | rename | untag] [\fIFILE\fR]... [[\fI:\fR]\fITAG\fR]
 \fItag\fR is the main \fIEtiqueta\fR command, \fBclifm\fR's builtin files tagging system. See the \fBFILE TAGS\fR section for a complete description of this command.
@@ -1278,8 +1278,8 @@ Toggle the executable bit (on user, group, and others) on FILE(s). It is equival
 .br
 Print the list of \fBclifm\fR tips.
 .TP
-.B u, undel, untrash \fR[*, a, all | \fIFILE\fR]...
-If filenames are passed as parameters, undelete these files, that is, restore them to their original location. Otherwise, this function prints a list of currently trashed files allowing the user to choose one or more of these files to be restored. Use the \fB*\fR, \fBa\fR or \fBall\fR parameters to restore all trashed files at once. Tab completion to list/select currently trashed files is available.
+.B u, untrash \fR[*, a, all | \fIFILE\fR]...
+If filenames are passed as parameters, restore them to their original location. Otherwise, this function prints a list of currently trashed files allowing the user to choose one or more of these files to be restored. Use the \fB*\fR, \fBa\fR or \fBall\fR parameters to restore all trashed files at once. Tab completion to list/select currently trashed files is available.
 .TP
 .B unpin
 .br
@@ -3421,7 +3421,7 @@ t 1\-3 *.old
 T}	Trash a few files
 T{
 u (u <TAB>)
-T}	Selectively undelete/restore trashed files using a menu
+T}	Selectively restore trashed files using a menu
 T{
 t del (t del <TAB>)
 T}	Selectively remove files from the trash can using a menu

@@ -1240,7 +1240,7 @@ Note: To permanently set the umask, use the Umask option in the config file."
 
 #define UNTRASH_USAGE "Restore files from the trash can\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
-  u, undel, untrash [FILE... | *, a, all]\n\n\
+  u, untrash [FILE... | *, a, all]\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
 - Restore all trashed files (to their original location)\n\
     u *\n\
@@ -1638,7 +1638,7 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  tag                Tag files\n\
  te                 Toggle the executable bit on files\n\
  tips               Print tips\n\
- u, undel, untrash  Restore trashed files (via a menu)\n\
+ u, untrash         Restore trashed files (via a menu)\n\
  unpin              Unpin the pinned directory\n\
  vv                 Copy and rename files at once\n\
  ver, version       Print version information\n\
@@ -1781,7 +1781,7 @@ te *.sh              Toggle the executable bit on all .sh files\n\
 t 12-18              Move files whose ELNs are 12-18 to the trash can\n\
 t del | t del <TAB>  Permanently remove trashed files using a menu\n\
 t empty              Empty the trash can\n\
-u | u <TAB>          Undelete trashed files using a menu\n\
+u | u <TAB>          Untrash files using a menu\n\
 ac sel               Compress/archive selected files (1)\n\n\
 (1) 's:' can be used instead of the 'sel' keyword"
 

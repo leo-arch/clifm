@@ -423,7 +423,7 @@ print_trashfiles(struct dirent ***ent, const int files_n)
 
 static char **
 list_and_get_input(struct dirent ***trash_files, const int files_n,
-	const int is_undel)
+	const int is_untrash)
 {
 	if (conf.clear_screen > 0)
 		CLEAR;
@@ -435,7 +435,7 @@ list_and_get_input(struct dirent ***trash_files, const int files_n,
 	/* Get input */
 	printf(_("\n%sEnter 'q' to quit\n"
 		"File(s) to be %s (e.g.: 1 2-6, or *):\n"), df_c,
-		is_undel == 1 ? _("restored") : _("removed"));
+		is_untrash == 1 ? _("restored") : _("removed"));
 
 	char *line = (char *)NULL;
 	char tprompt[(MAX_COLOR * 2) + 7];
@@ -614,7 +614,7 @@ read_original_path(const char *file, const char *src, int *status)
 	int fd = 0;
 	FILE *fp = open_fread(file, &fd);
 	if (!fp) {
-		xerror(_("undel: Info file for '%s' not found. Try restoring "
+		xerror(_("untrash: Info file for '%s' not found. Try restoring "
 			"the file manually.\n"), src);
 		*status = errno;
 		return (char *)NULL;
@@ -652,7 +652,7 @@ read_original_path(const char *file, const char *src, int *status)
 	char *url_decoded = url_decode(orig_path);
 
 	if (!url_decoded) {
-		xerror(_("undel: '%s': Error decoding original path\n"), orig_path);
+		xerror(_("untrash: '%s': Error decoding original path\n"), orig_path);
 		free(orig_path);
 		*status = FUNC_FAILURE;
 		return (char *)NULL;
@@ -674,13 +674,13 @@ static int
 check_untrash_dest(char *file)
 {
 	if (!file || !*file) {
-		xerror(_("undel: Filename is NULL or empty\n"));
+		xerror(_("untrash: Filename is NULL or empty\n"));
 		return FUNC_FAILURE;
 	}
 
 	char *p = strrchr(file, '/');
 	if (!p) {
-		xerror(_("undel: '%s': No directory specified\n"), file);
+		xerror(_("untrash: '%s': No directory specified\n"), file);
 		return FUNC_FAILURE;
 	}
 
@@ -696,7 +696,7 @@ check_untrash_dest(char *file)
 				return FUNC_FAILURE;
 			}
 		} else {
-			xerror("undel: '%s': %s\n", parent_dir, strerror(errno));
+			xerror("untrash: '%s': %s\n", parent_dir, strerror(errno));
 			*(p + 1) = c;
 			return errno;
 		}
@@ -706,7 +706,7 @@ check_untrash_dest(char *file)
 
 	struct stat a;
 	if (stat(file, &a) != -1) {
-		xerror(_("undel: '%s': Destination file exists\n"), file);
+		xerror(_("untrash: '%s': Destination file exists\n"), file);
 		return EEXIST;
 	}
 
@@ -719,14 +719,14 @@ untrash_file(char *file)
 	if (!file)
 		return FUNC_FAILURE;
 
-	char undel_file[PATH_MAX + 1];
-	char undel_info[PATH_MAX + 1];
-	snprintf(undel_file, sizeof(undel_file), "%s/%s", trash_files_dir, file);
-	snprintf(undel_info, sizeof(undel_info), "%s/%s.trashinfo",
+	char untrash_file[PATH_MAX + 1];
+	char untrash_info[PATH_MAX + 1];
+	snprintf(untrash_file, sizeof(untrash_file), "%s/%s", trash_files_dir, file);
+	snprintf(untrash_info, sizeof(untrash_info), "%s/%s.trashinfo",
 		trash_info_dir, file);
 
 	int ret = FUNC_SUCCESS;
-	char *orig_path = read_original_path(undel_info, file, &ret);
+	char *orig_path = read_original_path(untrash_info, file, &ret);
 	if (!orig_path)
 		return ret;
 
@@ -738,12 +738,12 @@ untrash_file(char *file)
 		return ret;
 	}
 
-	ret = renameat(XAT_FDCWD, undel_file, XAT_FDCWD, orig_path);
+	ret = renameat(XAT_FDCWD, untrash_file, XAT_FDCWD, orig_path);
 	if (ret == -1) {
 		if (errno == EXDEV) {
 			/* Destination file is on a different filesystem, which is why
 			 * rename(3) doesn't work: let's try with mv(1). */
-			char *cmd[] = {"mv", "--", undel_file, orig_path, NULL};
+			char *cmd[] = {"mv", "--", untrash_file, orig_path, NULL};
 			ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 			if (ret != FUNC_SUCCESS) {
 				if (conf.autols == 1)
@@ -752,7 +752,7 @@ untrash_file(char *file)
 				return ret;
 			}
 		} else {
-			xerror("undel: '%s': %s\n", undel_file, strerror(errno));
+			xerror("untrash: '%s': %s\n", untrash_file, strerror(errno));
 			if (conf.autols == 1)
 				press_any_key_to_continue(0);
 			free(orig_path);
@@ -762,8 +762,8 @@ untrash_file(char *file)
 
 	free(orig_path);
 
-	if (unlinkat(XAT_FDCWD, undel_info, 0) == -1) {
-		xerror(_("undel: '%s': %s\n"), undel_info, strerror(errno));
+	if (unlinkat(XAT_FDCWD, untrash_info, 0) == -1) {
+		xerror(_("untrash: '%s': %s\n"), untrash_info, strerror(errno));
 		return errno;
 	}
 
@@ -859,7 +859,7 @@ untrash_function(char **args)
 	if (files_n <= 0)
 		return exit_status;
 
-	/* if "undel all" (or "u a" or "u *") */
+	/* if "untrash all" (or "u a" or "u *") */
 	if (args[1] && (strcmp(args[1], "*") == 0 || strcmp(args[1], "a") == 0
 	|| strcmp(args[1], "all") == 0))
 		return untrash_all(&trash_files, files_n, 1);
@@ -893,7 +893,7 @@ untrash_function(char **args)
 
 		int num = atoi(input[i]);
 		if (!is_number(input[i]) || num <= 0 || num > files_n) {
-			xerror(_("undel: %s: Invalid ELN\n"), input[i]);
+			xerror(_("untrash: %s: Invalid ELN\n"), input[i]);
 			exit_status = FUNC_FAILURE;
 			free_and_return = 1;
 		}
@@ -906,7 +906,7 @@ untrash_function(char **args)
 		return exit_status;
 	}
 
-	/* Undelete trashed files */
+	/* Untrash files */
 	for (i = 0; input[i]; i++) {
 		int num = atoi(input[i]);
 		if (untrash_file(trash_files[num - 1]->d_name) != FUNC_SUCCESS)
@@ -915,7 +915,7 @@ untrash_function(char **args)
 
 	free_files_and_input(&input, &trash_files, files_n);
 
-	/* If some trashed file still remains, reload the undel screen */
+	/* If some trashed file still remains, reload the untrash screen */
 	const size_t n = count_trashed_files();
 	if (n > 0) {
 		if (conf.clear_screen > 0) CLEAR;
