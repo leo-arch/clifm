@@ -827,8 +827,7 @@ tags_function(char **args)
 	if (strcmp(a[0], "tag") != 0 && strspn(a[0] + 1, b))
 		{ a = reconstruct_input(args); free_args = 1; }
 
-	if (*a[1] == 'l' && (strcmp(a[1], "ls") == 0
-	|| strcmp(a[1], "list") == 0))
+	if (*a[1] == 'l' && strcmp(a[1], "list") == 0)
 		{ exit_status = list_tags(a); goto END; }
 
 	if (*a[1] == 'l' && strcmp(a[1], "list-full") == 0)
@@ -840,13 +839,10 @@ tags_function(char **args)
 	if (*a[1] == 'n' && strcmp(a[1], "new") == 0)
 		{ exit_status = create_tags(a); goto END; }
 
-	if ((*a[1] == 'r' && (strcmp(a[1], "rm") == 0
-	|| strcmp(a[1], "remove") == 0))
-	|| (*a[1] == 'd' && strcmp(a[1], "del") == 0))
+	if (*a[1] == 'd' && strcmp(a[1], "del") == 0)
 		{ exit_status = remove_tags(a); goto END; }
 
-	if ((*a[1] == 'r' && strcmp(a[1], "rename") == 0)
-	|| (*a[1] == 'm' && strcmp(a[1], "mv") == 0))
+	if (*a[1] == 'r' && strcmp(a[1], "rename") == 0)
 		{ exit_status = rename_tag(a); goto END; }
 
 	if (*a[1] == 'u' && strcmp(a[1], "untag") == 0)

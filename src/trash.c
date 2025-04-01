@@ -1226,9 +1226,8 @@ trash_function(char **args)
 		return FUNC_FAILURE;
 	}
 
-	/* List trashed files ('tr' or 'tr ls') */
-	if (!args[1] || (*args[1] == 'l'
-	&& (strcmp(args[1], "ls") == 0 || strcmp(args[1], "list") == 0)))
+	/* List trashed files ('tr' or 'tr list') */
+	if (!args[1] || (*args[1] == 'l' && strcmp(args[1], "list") == 0))
 		return list_trashed_files();
 
 	trash_n = count_trashed_files();
@@ -1236,8 +1235,7 @@ trash_function(char **args)
 	if (*args[1] == 'd' && strcmp(args[1], "del") == 0)
 		return remove_from_trash(args);
 
-	if ((*args[1] == 'c' && strcmp(args[1], "clear") == 0)
-	|| (*args[1] == 'e' && strcmp(args[1], "empty") == 0))
+	if (*args[1] == 'e' && strcmp(args[1], "empty") == 0)
 		return trash_clear();
 
 	return trash_files_args(args);

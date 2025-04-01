@@ -2206,7 +2206,7 @@ exec_cmd(char **comm)
 	}
 
 	/*         ############# (UN)TRASH ##################     */
-	else if (*comm[0] == 't' && (!comm[0][1] || strcmp(comm[0], "tr") == 0
+	else if (*comm[0] == 't' && (!comm[0][1]
 	|| strcmp(comm[0], "trash") == 0)) {
 		int _cont = 1;
 		exit_code = trash_func(comm, &_cont);
@@ -2293,8 +2293,8 @@ exec_cmd(char **comm)
 		return (exit_code = prompt_function(comm + 1));
 
 	/*    ############# PROPERTIES ##################     */
-	else if (*comm[0] == 'p' && (!comm[0][1] || strcmp(comm[0], "pr") == 0
-	|| strcmp(comm[0], "pp") == 0 || strcmp(comm[0], "prop") == 0))
+	else if (*comm[0] == 'p' && (!comm[0][1] || strcmp(comm[0], "prop") == 0
+	|| strcmp(comm[0], "pp") == 0))
 		return (exit_code = props_function(comm));
 
 	/*     ############### SEARCH ##################     */
@@ -2418,7 +2418,7 @@ exec_cmd(char **comm)
 
 	/* #### PROFILE #### */
 	else if (*comm[0] == 'p' && ((comm[0][1] == 'f' && !comm[0][2])
-	|| strcmp(comm[0], "prof") == 0 || strcmp(comm[0], "profile") == 0))
+	|| strcmp(comm[0], "profile") == 0))
 #ifndef _NO_PROFILES
 		return (exit_code = profile_function(comm));
 #else
@@ -2559,8 +2559,7 @@ exec_cmd(char **comm)
 
 	/* #### QUIT #### */
 	else if ((*comm[0] == 'q' && (!comm[0][1] || strcmp(comm[0], "quit") == 0))
-	|| (*comm[0] == 'e' && strcmp(comm[0], "exit") == 0)
-	|| (*comm[0] == 'Q' && !comm[0][1]))
+	|| (*comm[0] == 'e' && strcmp(comm[0], "exit") == 0))
 		quit_func(comm, old_exit_code);
 
 	else {

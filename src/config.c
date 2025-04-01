@@ -3545,12 +3545,6 @@ read_config(void)
 			set_config_bool_value(line + 13, &conf.long_view);
 		}
 
-		////////// DEPRECATED!!
-		else if (*line == 'L' && strncmp(line, "Logs=", 5) == 0) {
-			set_config_bool_value(line + 5, &conf.log_msgs);
-		}
-		//////////
-
 		else if (*line == 'L' && strncmp(line, "LogMsgs=", 8) == 0) {
 			set_config_bool_value(line + 8, &conf.log_msgs);
 		}
