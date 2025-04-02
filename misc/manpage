@@ -3,7 +3,7 @@
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
 .B clifm
-[\fI\,OPTION\/\fR]... [\fI\,PATH\/\fR]...
+[\fI\,OPTION\/\fR]... [\fI\,DIR\/\fR]...
 
 .SH INDEX
 \fB1.\fR Getting help

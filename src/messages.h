@@ -26,7 +26,7 @@
 #define MESSAGES_H
 
 /* Usage messages */
-# define GRAL_USAGE "[OPTIONS] [DIR]"
+# define GRAL_USAGE "[OPTION]... [DIR]..."
 
 #define ACTIONS_USAGE "List or edit actions/plugins\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
