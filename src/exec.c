@@ -385,29 +385,29 @@ dirs_first_function(const char *arg)
 
 	if (*arg == 's' && strcmp(arg, "status") == 0) {
 		printf(_("Directories first is %s\n"),
-			conf.list_dirs_first == 1 ? _("enabled") : _("disabled"));
+			conf.list_dirs_first == 1 ? _("on") : _("off"));
 	} else if (*arg == 'o' && strcmp(arg, "on") == 0) {
 		conf.list_dirs_first = 1;
 		if (conf.autols == 1) reload_dirlist();
-		print_reload_msg(NULL, NULL, _("Directories first enabled\n"));
+		print_reload_msg(NULL, NULL, _("Directories first: on\n"));
 	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
 		conf.list_dirs_first = 0;
 		if (conf.autols == 1) reload_dirlist();
-		print_reload_msg(NULL, NULL, _("Directories first disabled\n"));
+		print_reload_msg(NULL, NULL, _("Directories first: off\n"));
 	}
 
 	return FUNC_SUCCESS;
 }
 
 static int
-filescounter_function(const char *arg)
+file_counter_function(const char *arg)
 {
 	if (!arg) {
 		conf.files_counter = conf.files_counter == 1 ? 0 : 1;
 		update_autocmd_opts(AC_FILES_COUNTER);
 		if (conf.autols == 1) reload_dirlist();
-		print_reload_msg(NULL, NULL, _("File counter %s\n"),
-			conf.files_counter == 1 ? _("enabled") : _("disabled"));
+		print_reload_msg(NULL, NULL, _("File counter: %s\n"),
+			conf.files_counter == 1 ? _("on") : _("off"));
 		return FUNC_SUCCESS;
 	}
 
@@ -420,7 +420,7 @@ filescounter_function(const char *arg)
 		conf.files_counter = 1;
 		update_autocmd_opts(AC_FILES_COUNTER);
 		if (conf.autols == 1) reload_dirlist();
-		print_reload_msg(NULL, NULL, _("File counter enabled\n"));
+		print_reload_msg(NULL, NULL, _("File counter: on\n"));
 		return FUNC_SUCCESS;
 	}
 
@@ -428,15 +428,15 @@ filescounter_function(const char *arg)
 		conf.files_counter = 0;
 		update_autocmd_opts(AC_FILES_COUNTER);
 		if (conf.autols == 1) reload_dirlist();
-		print_reload_msg(NULL, NULL, _("File counter disabled\n"));
+		print_reload_msg(NULL, NULL, _("File counter: off\n"));
 		return FUNC_SUCCESS;
 	}
 
 	if (*arg == 's' && strcmp(arg, "status") == 0) {
 		if (conf.files_counter == 1)
-			puts(_("The file counter is enabled"));
+			puts(_("The file counter is on"));
 		else
-			puts(_("The file counter is disabled"));
+			puts(_("The file counter is off"));
 		return FUNC_SUCCESS;
 	}
 
@@ -465,8 +465,8 @@ pager_function(const char *arg)
 
 	if (*arg == 's' && strcmp(arg, "status") == 0) {
 		switch (conf.pager) {
-		case 0: puts(_("The pager is disabled")); break;
-		case 1: puts(_("The pager is enabled")); break;
+		case 0: puts(_("The pager is off")); break;
+		case 1: puts(_("The pager is on")); break;
 		default: printf(_("The pager is set to %d\n"), conf.pager); break;
 		}
 
@@ -486,7 +486,7 @@ pager_function(const char *arg)
 
 	if (*arg == 'o' && strcmp(arg, "off") == 0) {
 		conf.pager = 0;
-		puts(_("Pager disabled"));
+		puts(_("Pager: off"));
 		goto SUCCESS;
 	}
 
@@ -495,7 +495,7 @@ pager_function(const char *arg)
 		if (conf.autols == 1)
 			reload_dirlist();
 		else
-			puts(_("Pager enabled"));
+			puts(_("Pager: on"));
 		goto SUCCESS;
 	}
 
@@ -522,10 +522,10 @@ ext_cmds_function(const char *arg)
 			conf.ext_cmd_ok ? _("allowed") : _("not allowed"));
 	} else if (*arg == 'o' && strcmp(arg, "on") == 0) {
 		conf.ext_cmd_ok = 1;
-		puts(_("External commands allowed"));
+		puts(_("External commands: on"));
 	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
 		conf.ext_cmd_ok = 0;
-		puts(_("External commands disallowed"));
+		puts(_("External commands: off"));
 	} else {
 		fprintf(stderr, "%s\n", _(EXT_USAGE));
 		exit_status = FUNC_FAILURE;
@@ -544,13 +544,13 @@ autocd_function(const char *arg)
 
 	if (strcmp(arg, "on") == 0) {
 		conf.autocd = 1;
-		puts(_("Autocd enabled"));
+		puts(_("Autocd: on"));
 	} else if (strcmp(arg, "off") == 0) {
 		conf.autocd = 0;
-		puts(_("Autocd disabled"));
+		puts(_("Autocd: off"));
 	} else if (strcmp(arg, "status") == 0) {
 		printf(_("Autocd is %s\n"), conf.autocd == 1
-			? _("enabled") : _("disabled"));
+			? _("on") : _("off"));
 	} else if (IS_HELP(arg)) {
 		puts(_(AUTOCD_USAGE));
 	} else {
@@ -571,13 +571,13 @@ auto_open_function(const char *arg)
 
 	if (strcmp(arg, "on") == 0) {
 		conf.auto_open = 1;
-		puts(_("Auto-open enabled"));
+		puts(_("Auto-open: on"));
 	} else if (strcmp(arg, "off") == 0) {
 		conf.auto_open = 0;
-		puts(_("Auto-open disabled"));
+		puts(_("Auto-open: off"));
 	} else if (strcmp(arg, "status") == 0) {
 		printf(_("Auto-open is %s\n"), conf.auto_open == 1
-			? _("enabled") : _("disabled"));
+			? _("on") : _("off"));
 	} else if (IS_HELP(arg)) {
 		puts(_(AUTO_OPEN_USAGE));
 	} else {
@@ -593,8 +593,8 @@ columns_function(const char *arg)
 	if (!arg) {
 		conf.columned = conf.columned == 1 ? 0 : 1;
 		if (conf.autols == 1) reload_dirlist();
-		print_reload_msg(NULL, NULL, _("Columns %s\n"), conf.columned == 1
-			? _("enabled") : _("disabled"));
+		print_reload_msg(NULL, NULL, _("Columns: %s\n"), conf.columned == 1
+			? _("on") : _("off"));
 		return FUNC_SUCCESS;
 	}
 
@@ -606,11 +606,11 @@ columns_function(const char *arg)
 	if (*arg == 'o' && arg[1] == 'n' && !arg[2]) {
 		conf.columned = 1;
 		if (conf.autols == 1) reload_dirlist();
-		print_reload_msg(NULL, NULL, _("Columns enabled\n"));
+		print_reload_msg(NULL, NULL, _("Columns: on\n"));
 	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
 		conf.columned = 0;
 		if (conf.autols == 1) reload_dirlist();
-		print_reload_msg(NULL, NULL, _("Columns disabled\n"));
+		print_reload_msg(NULL, NULL, _("Columns: off\n"));
 	} else {
 		fprintf(stderr, "%s\n", _(COLUMNS_USAGE));
 		return FUNC_FAILURE;
@@ -635,12 +635,12 @@ icons_function(const char *arg)
 	if (*arg == 'o' && arg[1] == 'n' && !arg[2]) {
 		conf.icons = 1;
 		if (conf.autols == 1) reload_dirlist();
-		print_reload_msg(NULL, NULL, _("Icons enabled\n"));
+		print_reload_msg(NULL, NULL, _("Icons: on\n"));
 		return FUNC_SUCCESS;
 	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
 		conf.icons = 0;
 		if (conf.autols == 1) reload_dirlist();
-		print_reload_msg(NULL, NULL, _("Icons disabled\n"));
+		print_reload_msg(NULL, NULL, _("Icons: off\n"));
 		return FUNC_SUCCESS;
 	} else {
 		fprintf(stderr, "%s\n", _(ICONS_USAGE));
@@ -741,23 +741,15 @@ lightmode_function(const char *arg)
 	}
 
 	if (*arg == 'o' && strcmp(arg, "on") == 0) {
-		if (conf.light_mode == 1) {
-			puts(_("Light mode already on"));
-			return FUNC_SUCCESS;
-		}
 		conf.light_mode = 1;
 		update_autocmd_opts(AC_LIGHT_MODE);
 		if (conf.autols == 1) reload_dirlist();
-		print_reload_msg(NULL, NULL, _("Light mode enabled\n"));
+		print_reload_msg(NULL, NULL, _("Light mode: on\n"));
 	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
-		if (conf.light_mode == 0) {
-			puts(_("Light mode already off"));
-			return FUNC_SUCCESS;
-		}
 		conf.light_mode = 0;
 		update_autocmd_opts(AC_LIGHT_MODE);
 		if (conf.autols == 1) reload_dirlist();
-		print_reload_msg(NULL, NULL, _("Light mode disabled\n"));
+		print_reload_msg(NULL, NULL, _("Light mode: off\n"));
 	} else {
 		puts(LM_USAGE);
 	}
@@ -855,11 +847,11 @@ static const char *
 gen_hidden_status(void)
 {
 	switch (conf.show_hidden) {
-	case HIDDEN_FALSE: return _("disabled");
-	case HIDDEN_FIRST: return _("enabled (list first)");
-	case HIDDEN_LAST: return _("enabled (list last)");
+	case HIDDEN_FALSE: return _("off");
+	case HIDDEN_FIRST: return _("on (list first)");
+	case HIDDEN_LAST: return _("on (list last)");
 	case HIDDEN_TRUE: /* fallthrough */
-	default: return _("enabled");
+	default: return _("on");
 	}
 }
 
@@ -1546,27 +1538,19 @@ toggle_full_dir_size(const char *arg)
 		return FUNC_FAILURE;
 	}
 
-	if (*(arg + 1) == 'n' && !*(arg + 2)) {
-		if (conf.full_dir_size == 1) {
-			puts(_("Full directory size is already enabled"));
-		} else {
-			conf.full_dir_size = 1;
-			update_autocmd_opts(AC_FULL_DIR_SIZE);
-			if (conf.autols == 1) reload_dirlist();
-			print_reload_msg(NULL, NULL, _("Full directory size enabled\n"));
-		}
+	if (arg[1] == 'n' && !arg[2]) {
+		conf.full_dir_size = 1;
+		update_autocmd_opts(AC_FULL_DIR_SIZE);
+		if (conf.autols == 1) reload_dirlist();
+		print_reload_msg(NULL, NULL, _("Full directory size: on\n"));
 		return FUNC_SUCCESS;
 	}
 
-	if (*(arg + 1) == 'f' && *(arg + 2) == 'f' && !*(arg + 3)) {
-		if (conf.full_dir_size == 0) {
-			puts(_("Full directory size is already disabled"));
-		} else {
-			conf.full_dir_size = 0;
-			update_autocmd_opts(AC_FULL_DIR_SIZE);
-			if (conf.autols == 1) reload_dirlist();
-			print_reload_msg(NULL, NULL, _("Full directory size disabled\n"));
-		}
+	if (arg[1] == 'f' && arg[2] == 'f' && !arg[3]) {
+		conf.full_dir_size = 0;
+		update_autocmd_opts(AC_FULL_DIR_SIZE);
+		if (conf.autols == 1) reload_dirlist();
+		print_reload_msg(NULL, NULL, _("Full directory size: off\n"));
 		return FUNC_SUCCESS;
 	}
 
@@ -1738,8 +1722,8 @@ long_view_function(const char *arg)
 	if (conf.autols == 1)
 		reload_dirlist();
 
-	print_reload_msg(NULL, NULL, _("Long view %s\n"), arg[1] == 'n'
-		? _("enabled") : _("disabled"));
+	print_reload_msg(NULL, NULL, _("Long view: %s\n"), arg[1] == 'n'
+		? _("on") : _("off"));
 
 	return FUNC_SUCCESS;
 }
@@ -1951,8 +1935,8 @@ toggle_follow_links(const char *arg)
 	if (conf.autols == 1)
 		reload_dirlist();
 
-	print_reload_msg(NULL, NULL, _("Follow links %s\n"),
-		conf.follow_symlinks_long == 1 ? _("enabled") : _("disabled"));
+	print_reload_msg(NULL, NULL, _("Follow links: %s\n"),
+		conf.follow_symlinks_long == 1 ? _("on") : _("off"));
 
 	return FUNC_SUCCESS;
 }
@@ -2424,7 +2408,7 @@ exec_cmd(char **comm)
 	/* #### FILE COUNTER #### */
 	else if (*comm[0] == 'f' && ((comm[0][1] == 'c' && !comm[0][2])
 	|| strcmp(comm[0], "filecounter") == 0))
-		return (exit_code = filescounter_function(comm[1]));
+		return (exit_code = file_counter_function(comm[1]));
 
 	/* #### DIRECTORIES FIRST #### */
 	else if ((*comm[0] == 'f' && comm[0][1] == 'f' && !comm[0][2])
