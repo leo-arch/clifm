@@ -1407,7 +1407,7 @@ int_cmds_generator(const char *text, int state)
 		"dup     (duplicate files)",
 		"ds      (deselect files)",
 		"exp     (export filenames to a temporary file)",
-		"ext     (set external/shell commands on/off)",
+		"ext     (turn external/shell commands on/off)",
 		"f       (change to the next visited directory)",
 		"fc      (toggle the file-counter)",
 		"ff      (toggle list-directories-first)",

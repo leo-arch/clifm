@@ -1226,12 +1226,12 @@ Mark the files you need via TAB and then press Enter or Right."
     'u <TAB>' to select from a list (multi-selection is allowed)\n\n\
 Note: For more information try 'u --help'."
 
-#define UMASK_USAGE "Print/set the file mode creation mask\n\n\
+#define UMASK_USAGE "Get/set the file mode creation mask\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   umask [MODE]\n\n\
 Note: MODE is an octal value from 000 to 777.\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
-- Print the current value\n\
+- Get the current value\n\
     umask\n\
 - Set mask to 077\n\
     umask 077\n\n\
@@ -1572,10 +1572,10 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  /PATTERN           Search for files\n\
  ;[CMD], :[CMD]     Run CMD using the system shell\n\
  ac, ad             (De)archive files\n\
- acd, autocd        Set auto-cd on/off\n\
+ acd, autocd        Turn auto-cd on/off\n\
  actions            Manage actions/plugins\n\
  alias              Manage aliases\n\
- ao, auto-open      Set auto-open on/off\n\
+ ao, auto-open      Turn auto-open on/off\n\
  auto               Set an autocommand for the current directory\n\
  b, back            Change to the previously visited directory\n\
  bb, bleach         Sanitize non-ASCII filenames\n\
@@ -1586,7 +1586,7 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  c, l, m, md, r     Copy, link, move, makedir, and remove\n\
  colors             Preview the current color scheme\n\
  cd                 Change directory\n\
- cl, columns        Set columns on/off\n\
+ cl, columns        Toggle columns\n\
  cmd, commands      Jump to the COMMANDS section in the manpage\n\
  config             Open/edit the main configuration file\n\
  cs, colorscheme    Switch/edit color schemes\n\
@@ -1596,20 +1596,20 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  exp                Export filenames to a temporary file\n\
  ext                Set external/shell commands on/off\n\
  f, forth           Change to the next visited directory\n\
- fc                 Set the file counter on/off\n\
+ fc                 Toggle the file-counter\n\
  ff, dirs-first     Toggle list-directories-first\n\
  ft, filter         Set a file filter\n\
  fz                 Display recursive directory sizes (long view only)\n\
- hh, hidden         Toggle hidden-files\n\
+ hh, hidden         Toggle hidden files\n\
  history            Manage the commands history\n\
- icons              Set icons on/off\n\
+ icons              Turn icons on/off\n\
  k                  Toggle follow-links (long view only)\n\
  kk                 Toggle max-filename-len\n\
  j                  Jump to a visited directory\n\
  kb, keybinds       Manage keybindings\n\
  le                 Edit symbolic link target\n\
- ll, lv             Toggle long-view\n\
- lm                 Toggle light-mode\n\
+ ll, lv             Toggle the long-view\n\
+ lm                 Toggle the light-mode\n\
  log                Manage your logs\n\
  media              (Un)mount storage devices\n\
  mf                 Limit the number of listed files\n\
@@ -1619,13 +1619,13 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  n, new             Create new files/directories\n\
  net                Manage network/remote resources\n\
  o, open            Open a file\n\
- oc                 Change files ownership interactively\n\
+ oc                 Change ownership of files interactively\n\
  ow                 Open a file with ...\n\
  opener             Set a custom file opener\n\
  p, pp, prop        Print file properties\n\
- pc                 Change file permissions interactively\n\
+ pc                 Change permissions of files interactively\n\
  pf, profile        Manage profiles\n\
- pg, pager          Set the file pager on/off\n\
+ pg, pager          Turn the file pager on/off\n\
  pin                Pin a directory\n\
  prompt             Switch/edit the prompt\n\
  q, quit, exit      Quit Clifm\n\
@@ -1641,17 +1641,17 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  tag                Tag files\n\
  te                 Toggle the executable bit on files\n\
  tips               Print tips\n\
- u, untrash         Restore trashed files (via a menu)\n\
+ u, untrash         Restore trashed files (using a menu)\n\
  unpin              Unpin the pinned directory\n\
  vv                 Copy and rename files at once\n\
  ver, version       Print version information\n\
  view               Preview files in the current directory\n\
  ws                 Switch workspaces\n\
  x, X               Launch a new instance of Clifm (as root if 'X')\n\n\
- Shell-builtins implementations\n\
+ Shell-builtin implementations\n\
  export             Export variables to the environment\n\
  pwd                Print the current working directory\n\
- umask              Print/set umask\n\
+ umask              Get/set umask\n\
  unset              Remove variables from the environment\n"
 
 #define CLIFM_KEYBOARD_SHORTCUTS "DEFAULT KEYBOARD SHORTCUTS:\n\n\
@@ -1870,7 +1870,7 @@ q | F12         I'm tired, quit"
 #define DH_DESC      " (query the directory history list)"
 #define DS_DESC      " (deselect files)"
 #define EXP_DESC     " (export filenames to a temporary file)"
-#define EXT_DESC     " (set external/shell commands on/off)"
+#define EXT_DESC     " (turn external/shell commands on/off)"
 #define F_DESC       " (change to the next visited directory)"
 #define FC_DESC      " (toggle the file-counter)"
 #define FF_DESC      " (toggle list-directories-first)"

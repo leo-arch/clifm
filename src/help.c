@@ -60,30 +60,28 @@ print_tips(const int all)
 		"Manage default associated applications with the 'mime' command",
 		"Customize previewing applications: 'view edit' or F7",
 		"List mountpoints: 'mp' or Alt+m",
-		"Compress and decompress files using the 'ac' and 'ad' " /* NOLINT */
-		"commands respectively. E.g.: 'ac sel' or 'ad file.zip'",
+		"Compress files with 'ac' and decompress with 'ad'. E.g.: 'ac sel' or 'ad file.zip'",
 		"Disallow the use of shell commands with the -x option: 'clifm -x'",
 		"Don't like ELNs? Disable them using the -e command line switch",
-		"Disable file previews for tab completion (fzf mode only) via --no-fzfpreview",
+		"Disable file previews in fzf mode with --no-fzfpreview",
 # ifdef __linux__
 		"Manage removable devices via the 'media' command",
 # endif /* __linux__ */
 #endif /* _BE_POSIX */
 #ifndef _BE_POSIX
 		"Create a new profile: 'pf add PROFILE' or 'clifm -P PROFILE'",
-		"Run in incognito/private mode (-S, --stealth-mode)",
+		"Enable incognito/private mode with -S or --stealth-mode",
 		"Run in read-only mode via --readonly",
-		"Running in an untrusted environment? Try the --secure-env and "
-		"--secure-cmds command line switches",
+		"Use --secure-env and --secure-cmds for secure operation in untrusted environments",
 		"Run in disk usage analyzer mode using the -t command line switch",
 		"Fuzzy suggestions are supported. E.g.: 'dwn > Downloads'. Enable them via --fuzzy-matching, or FuzzyMatching in the configuration file",
 		"Miss LS_COLORS? Run with --lscolors",
 #else
 		"Create a new profile: 'pf add PROFILE' or 'clifm -p PROFILE'",
-		"Run in incognito/private mode via the -s flag",
+		"Enable incognito/private mode with the -s flag",
 		"Running in an untrusted environment? Try the -x, -X, and -Y flags",
 		"Run in disk usage analyzer mode using the -u flag",
-		"Fuzzy suggestions are supported. E.g.: 'dwn > Downloads'. Enable them via the -m flag (or FuzzyMatching in the configuration file)",
+		"Fuzzy suggestions are supported (e.g.: 'dwn > Downloads'). Enable them via the -m flag (or FuzzyMatching in the configuration file)",
 #endif /* _BE_POSIX */
 		"Clear the screen: 'rf', '.', Enter (on empty line), or Ctrl+l",
 		"Try the autocd and auto-open functions: run 'FILE' instead "
@@ -96,8 +94,7 @@ print_tips(const int all)
 		"'s *.c' or 's .*\\.c$'",
 		"Operate on selected files. E.g.: 'p sel' or 'p s:'",
 		"List selected files: 'sb' or s:<TAB>",
-		"ELNs and the 'sel' keyword work for shell commands as well. E.g.: "
-		"'ls -ld 1 sel'",
+		"Use ELNs and 'sel' with shell commands, like 'ls -ld 1 sel'",
 		"Press TAB to automatically expand an ELN. E.g.: 's 2<TAB>' -> 's FILENAME'",
 		"Use ranges (ELN-ELN) to easily move multiple files. E.g.: 'm 3-12 dir/'",
 		"Trash files with a simple 't FILE'",
@@ -120,7 +117,6 @@ print_tips(const int all)
 		"Import aliases from file: 'alias import FILE'",
 		"List available aliases: 'alias'",
 		"Create aliases to easily run your preferred commands (F10)",
-		"Open and edit the configuration file: 'config' or F10",
 		"Get a brief description for each Clifm command: 'cmd<TAB>'",
 		"Preview the current color scheme: 'cs preview'",
 		"Toggle hidden files: 'hh' or Alt+.",
@@ -131,7 +127,7 @@ print_tips(const int all)
 		"Open and edit the keybindings file: F9 (or 'kb edit')",
 		"Open and edit the main configuration file: F10 (or 'config')",
 		"Open and edit the bookmarks file: F11 (or 'bm edit')",
-		"Open and edit the bookmarks file: F6 (or 'mm edit')",
+		"Open and edit the MIME list file: F6 (or 'mm edit')",
 		"Set the starting path. E.g.: 'clifm ~/media'",
 		"Use the 'o' command to open files and directories. E.g.: 'o 12'",
 		"Open a file or directory by just entering its ELN or filename",
