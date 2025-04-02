@@ -471,12 +471,12 @@ get_mnt_input(const int mode, int *info)
 	while (!input) {
 #ifdef HAVE_PROC_MOUNTS
 		if (mode == MEDIA_LIST)
-			input = rl_no_hist(_("Choose a mountpoint: "), 0);
+			input = rl_no_hist(_("Select a mountpoint (by ELN): "), 0);
 		else
-			input = rl_no_hist(_("Choose a mountpoint/device: "), 0);
+			input = rl_no_hist(_("Select a mountpoint/device (by ELN): "), 0);
 #else
 		UNUSED(mode);
-		input = rl_no_hist(_("Choose a mountpoint: "), 0);
+		input = rl_no_hist(_("Select a mountpoint (by ELN): "), 0);
 #endif /* HAVE_PROC_MOUNTS */
 		if (!input || !*input) {
 			free(input);

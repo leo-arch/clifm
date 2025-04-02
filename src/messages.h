@@ -732,17 +732,17 @@ Tip: Use the 'le' command to edit a symbolic link. Try 'le --help'."
 Note: Use the 'n' command to create both files and directories.\n\
 Try 'n --help' for more details."
 
-#define MEDIA_USAGE "List, mount, and unmount media devices\n\
-Note: Either udevil(1) or udisks2(1) is required\n\n\
+#define MEDIA_USAGE "List, mount, and unmount storage devices\n\n\
+Note: udevil(1) or udisks2(1) is required\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   media\n\n\
 The list of mounted and unmounted devices will be displayed.\n\
-Choose the device you want using ELNs.\n\
-If the device is mounted, it will be unmounted; if unmounted, it will \
-be mounted.\n\
-If mounting a device, Clifm will change automatically to the corresponding\n\
-mountpoint.\n\n\
-To get information about a device, enter iELN. For example: 'i12'."
+Select a device using ELNs (Entry List Numbers).\n\n\
+If the device is mounted, it will be unmounted, and, if unmounted,\n\
+it will be mounted. Clifm will automatically change to the\n\
+mountpoint after mounting.\n\n\
+To get information about a device, enter 'i' followed by the ELN.\n\
+For example: 'i12'."
 
 #define MF_USAGE "Limit the number of listed files to NUM \
 (valid range: >= 0). Use 'unset' to remove the file limit.\n\n\
@@ -791,7 +791,7 @@ To get information about a device, enter iELN. For example: 'i12'."
     mp (or Alt+m)\n\
   Once there, select the mountpoint you want to change to."
 
-#define NET_USAGE "Manage network resources\n\n\
+#define NET_USAGE "Manage remote resources\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   net [NAME] [list | edit [APP] | m, mount NAME | u, unmount NAME]\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
@@ -807,7 +807,10 @@ To get information about a device, enter iELN. For example: 'i12'."
 - Open/edit the net configuration file using nano\n\
     net edit nano\n\
 - Copy a file to a remote location using the 'cr' plugin\n\
-    cr FILE (run 'cr --edit' before to set up your remotes)"
+    cr FILE (run 'cr --edit' before to set up your remotes)\n\n\
+Note: This command can also be used to (un)mount storage devices, such as\n\
+disk partitions or external drives. Run 'net edit' and consult the examples\n\
+section for more information."
 
 #define NEW_USAGE "Create new files and/or directories\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
@@ -1869,7 +1872,7 @@ q | F12         I'm tired, quit"
 #define EXP_DESC     " (export filenames to a temporary file)"
 #define EXT_DESC     " (set external/shell commands on/off)"
 #define F_DESC       " (change to the next visited directory)"
-#define FC_DESC      " (toggle the file counter)"
+#define FC_DESC      " (toggle the file-counter)"
 #define FF_DESC      " (toggle list-directories-first)"
 #define FT_DESC      " (set a file filter)"
 #define FZ_DESC      " (display recursive directory sizes - long view only)"
@@ -1882,8 +1885,8 @@ q | F12         I'm tired, quit"
 #define KB_DESC      " (manage keybindings)"
 #define L_DESC       " (create a symbolic link)"
 #define LE_DESC      " (edit a symbolic link)"
-#define LL_DESC      " (toggle long view)"
-#define LM_DESC      " (toggle light mode)"
+#define LL_DESC      " (toggle the long-view)"
+#define LM_DESC      " (toggle the light-mode)"
 #define LOG_DESC     " (manage logs)"
 #define M_DESC       " (move/rename files)"
 #define MD_DESC      " (create directories)"
