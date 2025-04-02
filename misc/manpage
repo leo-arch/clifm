@@ -140,7 +140,7 @@ Do not ignore case distinctions when listing files.
 Set an alternative keybindings file.
 .TP
 \fB\-l\fR, \fB\-\-long\-view\fR
-Print file extended metadata next to filenames. The displayed fields can be customized using \fB\-\-prop\-fields\fR (or the \fBPropFields\fR option in the configuration file). Set a custom time/date format with \fB\-\-time\-style\fR (or the \fBTimeStyle\fR option in the configuration file).
+Print file extended metadata next to filenames (long view). The displayed fields can be customized using \fB\-\-prop\-fields\fR (or the \fBPropFields\fR option in the configuration file). Set a custom time/date format with \fB\-\-time\-style\fR (or the \fBTimeStyle\fR option in the configuration file).
 .TP
 \fB\-L\fR, \fB\-\-follow\-symlinks\-long\fR
 When in long view, display information for the files referenced by symbolic links instead of the symbolic links themselves.
@@ -369,7 +369,7 @@ Display a preview of \fIFILE\fR (via \fBShotgun\fR) and exit. Use \fB\-\-shotgun
 Print the list of selected files after the file list. The maximum number of selected files to be printed can be specified using the \fBMaxPrintSelfiles\fR option in the configuration file (by default, this option is set to 0 (auto), meaning it will never exceed half the terminal height).
 .TP
 \fB\-\-prop\-fields\fR=\fI\,FORMAT\/\fR
-Set fields to be displayed in long view mode. For information on how to construct this format string consult the \fBPropFields\fR option in the configuration file.
+Set fields to be displayed in long view. For information on how to construct this format string consult the \fBPropFields\fR option in the configuration file.
 .TP
 \fB\-\-ptime\-style\fR=\fI\,STYLE\/\fR
 Time/date style used by the \fBp\fR/\fBpp\fR command and the \fB\-\-stat\fR/\fB\-\-stat\-full\fR command line switches. Available styles: \fBdefault\fR, \fBiso\fR, \fBlong-iso\fR, \fBfull\-iso\fR, \fBfull\-iso\-nano\fR, and \fB+FORMAT\fR (FORMAT is interpreted like in \fBstrftime\fR(3). Nano-second precision is available via the \fB%N\fR modifier, like in \fBdate\fR(1)).
@@ -836,7 +836,7 @@ The filter will be lost at program exit. To permanently set a filter use the \fI
 Toggle recursive directory sizes (long view only).
 .TP
 .B hf, hh, hidden \fR[on | off | first | last | status]
-Set hidden files on/off (use \fBfirst\fR/\fBlast\fR to sort hidden files before/after non-hidden files respectively).
+Turn hidden files on/off (use \fBfirst\fR/\fBlast\fR to sort hidden files before/after non-hidden files respectively).
 .TP
 .B history \fR[edit [\fIAPP\fR] | clear | -\fIN\fR | on | off | status | show\-time]
 With no arguments, it prints the commands history list (use \fBshow\-time\fR to print timestamps as well). If \fBclear\fR is passed as argument, it will delete all entries in the history file. Use \fBedit\fR to open the history file and modify it as required (the file will be opened with \fIAPP\fR, if specified, or with the default associated application otherwise). \fB\-N\fR tells the \fBhistory\fR command to list only the last 'N' commands in the history list. Finally, you can disable history (subsequent entries will not be written into the history file) via `\fBhistory\ off\fR` (you can also use the \fBHistIgnore\fR option in the configuration file to prevent specific command lines from being added to the history list).
@@ -937,7 +937,7 @@ By default, the link target is created literally (like `\fBln -s\fR` would). The
 To edit the target of a symbolic link use the \fBle\fR command followed by the desired link name. The user will be prompted to enter a new link target, using the current target as template.
 .TP
 .B ll, lv \fR[on | off]
-Toggle long/detail view mode.
+Toggle the long view.
 .TP
 .B lm \fR[on | off]
 Toggle the light mode. This option, aimed at making file listing faster than the default mode, is especially useful for really old hardware or when working on remote machines (for more information see the \fBNOTE ON SPEED\fR section below).
@@ -1129,7 +1129,7 @@ By default, directory sizes are not displayed. Use \fBpp\fR instead of just \fIp
 .sp
 The time format used to display time information can be customized via the \fBPTimeStyle\fR option in the configuration file (defaults to "%Y\-%m\-%d %H:%M:%S.%N %z", where %N stands for nano\-second precision).
 .sp
-If you need to list the properties of all files in the current directory, try the long view mode (\fBll\fR or \fBAlt+l\fR). Fields displayed in this mode can be customized using the \fBPropFields\fR option in the configuration file. For custom timestamp formats use the \fBTimeStyle\fR option.
+If you need to list the properties of all files in the current directory, try the long view (\fBll\fR or \fBAlt+l\fR). Fields displayed in this mode can be customized using the \fBPropFields\fR option in the configuration file. For custom timestamp formats use the \fBTimeStyle\fR option.
 .sp
 For more information about file details consult the \fBfile\-details\fR help topic: `\fBhelp file\-details\fR`.
 .TP
@@ -2277,7 +2277,7 @@ To customize the appearance of the preview window, use the \fB\-\-preview\-windo
 .TP
 Default keybindings for the preview window:
 .sp
- \fBAlt+p\fR: Toggle the preview window on/off
+ \fBAlt+p\fR: Toggle the preview window
  \fBCtrl+Up\fR / \fBShift+Up\fR: Scroll the preview window up one line
  \fBCtrl+Down\fR / \fBShift+Down\fR: Scroll the preview window down one line
  \fBAlt+Up\fR: Scroll the preview window up one page
@@ -2580,7 +2580,7 @@ The following codes are used to control \fBclifm\fR's file list:
  \fBfz\fR     Recursive dir sizes   fz=1
  \fBhf,hh\fR  Hidden files          hf=0
  \fBlm\fR     Light mode            lm=1
- \fBlv,ll\fR  Long/detail view      lv=0
+ \fBlv,ll\fR  Long view             lv=0
  \fBmf\fR     Max files             mf=100 \fB(1)\fR
  \fBmn\fR     Max filename length   mn=20 \fB(1)\fR
  \fBod\fR     Only directories      od=1
@@ -2985,7 +2985,7 @@ Terminal type for which output is to be prepared.
 A quoted list of options to be passed to fzf (if used for tab completion).
 .TP
 .B TIME_STYLE
-If set from neither \fB\-\-time\-style\fR nor \fBTimeStyle\fR (in the configuration file), use this time style for the long view mode.
+If set from neither \fB\-\-time\-style\fR nor \fBTimeStyle\fR (in the configuration file), use this time style for the long view.
 .TP
 .B CLIFM_TIME_STYLE
 Same as \fBTIME_STYLE\fR, but specific to \fBclifm\fR (takes precedence over \fBTIME_STYLE\fR).
@@ -3480,7 +3480,7 @@ hh (Alt+.)
 T}	Toggle hidden files
 T{
 ll (Alt+l)
-T}	Toggle detail/long view mode
+T}	Toggle long-view
 T{
 rf (Enter \-on empty line\- or Ctrl+l)
 T}	Clear/refresh the screen

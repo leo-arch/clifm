@@ -65,7 +65,7 @@ print_tips(const int all)
 		"Don't like ELNs? Disable them using the -e command line switch",
 		"Disable file previews in fzf mode with --no-fzfpreview",
 # ifdef __linux__
-		"Manage removable devices via the 'media' command",
+		"Manage removable devices with the 'media' command",
 # endif /* __linux__ */
 #endif /* _BE_POSIX */
 #ifndef _BE_POSIX
@@ -99,7 +99,7 @@ print_tips(const int all)
 		"Use ranges (ELN-ELN) to easily move multiple files. E.g.: 'm 3-12 dir/'",
 		"Trash files with a simple 't FILE'",
 		"Too many files? Run the pager: 'pg' or Alt+0",
-		"Switch to long/detail view mode: 'll' or Alt+l",
+		"Toggle the long-view: 'll' or Alt+l",
 		"Search for files using the slash command. E.g.: '/*.png'",
 		"The search function supports regular expressions. E.g.: '/^c'",
 		"Add a new bookmark: 'bm add FILENAME BM_NAME'",
@@ -192,8 +192,8 @@ print_tips(const int all)
 		"Use the 'm' command to interactively rename a file. E.g.: 'm 12'",
 		"Set options on a per-directory basis via the autocommands function. Try 'help autocommands'",
 		"Sanitize non-ASCII filenames using the 'bleach' command",
-		"Get help for any internal command using the -h or --help parameters: 'p -h'",
-		"Enable icons with 'icons on'",
+		"Get help for internal commands using the -h or --help parameters: 'p -h'",
+		"Enable icons with 'icons on' (or --icons)",
 		"Quickly change to any parent directory using the 'bd' command",
 		"Use 'stats' to print statistics on files in the current directory",
 		"Customize the warning prompt by setting WarningPrompt in the prompts file ('prompt edit')",
@@ -208,7 +208,7 @@ print_tips(const int all)
 		"Try help topics: 'help <TAB>'",
 		"List clifm commands, together with a brief description: 'cmd<TAB>'",
 		"List symlinks in the current directory: '=l<TAB>'. Try 'help file-filters' for more information",
-		"Use PropFields in the configuration file to customize fields in long view mode",
+		"Use PropFields in the configuration file to customize fields in long view",
 		"Preview files in the current directory using the 'view' command (requires fzf)",
 		"Press Alt+- to launch the file previewer (requires fzf)",
 		"Interactively select files (requires fzf, fnf, or smenu). E.g.: 's /dir/*<TAB>'",

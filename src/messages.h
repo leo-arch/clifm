@@ -394,7 +394,7 @@ Parameters passed to cp:    -a"
 
 #define FILE_DETAILS "List file details\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
-- Toggle long/detail view mode\n\
+- Toggle the long view\n\
     ll (also Alt+l)\n\
   Note: Use PropFields in the configuration file to customize output\n\
   fields (and TimeStyle for custom timestamp formats).\n\
@@ -419,13 +419,13 @@ Note 2: Unlike 'p', 'pp' always dereferences symbolic links."
 - Display file sizes in SI units (powers of 1000) instead of 1024\n\
     Run with --si"
 
-#define FF_USAGE "Set list-directories-first on/off\n\n\
+#define FF_USAGE "Turn list-directories-first on/off\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   ff, dirs-first [on | off | status]\n\
 \x1b[1mEXAMPLE\x1b[22m\n\
-- Disable list directories-first\n\
+- Disable list-directories-first\n\
     ff off\n\
-  Note: Toggle directories-first by pressing Alt+g."
+  Note: Toggle list-directories-first by pressing Alt+g."
 
 #define FILE_PREVIEWS "\
 File previews are enabled by default if running in fzf mode.\n\n\
@@ -545,7 +545,7 @@ files in the current directory:\n\n\
 - Print the list of available help topics\n\
     help <TAB>"
 
-#define HF_USAGE "Set hidden files on/off\n\n\
+#define HF_USAGE "Turn hidden files on/off\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   hf, hh, hidden [on | off | first | last | status]\n\n\
 \x1b[1mEXAMPLE\x1b[22m\n\
@@ -596,7 +596,7 @@ You can also access the command history via the exclamation mark (!).\n\
 Tip: Use HistIgnore in the configuration file to exclude command lines\n\
 from the history list."
 
-#define ICONS_USAGE "Set icons on/off\n\n\
+#define ICONS_USAGE "Turn icons on/off\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   icons [on, off]\n\n\
 Note: Depending on how the terminal renders icons, the apparent space\n\
@@ -641,7 +641,7 @@ For information about the matching algorithm consult the manpage\n\n\
   from the database ('je' or 'j --edit'). Note that if the directory\n\
   is in the directory history, it will not be removed from the database."
 
-#define K_USAGE "Toggle follow-links in long view mode\n\n\
+#define K_USAGE "Toggle follow-links (long view)\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   k\n\n\
 When enabled, the long view displays information about the file a symbolic\n\
@@ -697,16 +697,16 @@ can be set in the configuration file via the LinkCreationMode option\n\
 (available modes are: absolute, literal, relative).\n\n\
 Tip: Use the 'le' command to edit a symbolic link. Try 'le --help'."
 
-#define LL_USAGE "Toggle long view mode\n\n\
+#define LL_USAGE "Toggle the long view\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   ll, lv [on | off]\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
-- Change to long view\n\
+- Switch to long view\n\
     ll on\n\
 - Toggle long view\n\
     ll (or Alt+l)"
 
-#define LM_USAGE "Set light mode on/off\n\n\
+#define LM_USAGE "Turn the light mode on/off\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   lm [on, off]"
 
@@ -1392,7 +1392,7 @@ c: Stop paging (printing remaining files)\n"
 \n -D       List directories only\
 \n -e       Force the use of the 'o/open' command to open files\
 \n -E       Force the use of 'cd' to change directories\
-\n -f       Display recursive directories sizes (long view mode only)\
+\n -f       Display recursive directories sizes (long view only)\
 \n -F       Disable the file counter (directories)\
 \n -g       Display file sizes in SI units (powers of 1000) instead of 1024\
 \n -G       Display physical file sizes (disk usage) instead of logical sizes (apparent size)\
@@ -1403,7 +1403,7 @@ c: Stop paging (printing remaining files)\n"
 \n -j FILE  Run the 'p' command on FILE and exit\
 \n -J FILE  Run the 'pp' command on FILE and exit\
 \n -k FILE  Set an alternative keybindings file\
-\n -l       Display extended file metadata (long listing format)\
+\n -l       Display extended file metadata (long view)\
 \n -L       Follow symbolic links when running in long view\
 \n -m       Enable fuzzy matching\
 \n -M       Disable colors\
@@ -1451,7 +1451,7 @@ c: Stop paging (printing remaining files)\n"
 \n  -i, --no-case-sensitive\t Ignore case distinctions when listing files (default)\
 \n  -I, --case-sensitive\t\t Do not ignore case distinctions when listing files\
 \n  -k, --keybindings-file=FILE\t Set an alternative keybindings file\
-\n  -l, --long-view\t\t Display extended file metadata (long listing format)\
+\n  -l, --long-view\t\t Display extended file metadata (long view)\
 \n  -L, --follow-symlinks-long\t Follow symbolic links when running in long view\
 \n  -m, --dirhist-map\t\t Enable the directory history map\
 \n  -o, --autols\t\t\t List files automatically (default)\
@@ -1594,7 +1594,7 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  dh                 Access the directory history list\n\
  ds, desel          Deselect files\n\
  exp                Export filenames to a temporary file\n\
- ext                Set external/shell commands on/off\n\
+ ext                Turn external/shell commands on/off\n\
  f, forth           Change to the next visited directory\n\
  fc                 Toggle the file-counter\n\
  ff, dirs-first     Toggle list-directories-first\n\
@@ -1660,7 +1660,7 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  Alt+c              Clear the current command line buffer\n\
  Alt+q              Delete the last entered word\n\
  Alt+g              Toggle list-directories-first\n\
- Alt+l              Toggle long-view-mode\n\
+ Alt+l              Toggle long-view\n\
  Alt++              Toggle follow-links (long view only)\n\
  Alt+.              Toggle hidden-files\n\
  Alt+,              Toggle list-only-directories\n\
@@ -1795,7 +1795,7 @@ CMD --help      Get help for the command CMD\n\
 help <TAB>      List available help topics\n\
 F1              Open the manpage\n\
 ih              Run the interactive help plugin (requires fzf)\n\
-ll | Alt+l      Toggle detail/long view mode\n\
+ll | Alt+l      Toggle long view\n\
 hh | Alt+.      Toggle hidden files\n\
 rf | Ctrl+l     Clear the screen (also Enter on empty line)\n\
 pg | Alt+0      Run the pager (builtin)\n\
