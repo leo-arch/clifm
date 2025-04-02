@@ -75,7 +75,7 @@ use the -h,--help flag. Example: \"- --help\"."
 - Compress/archive a range of files\n\
     ac 12-24\n\
   or\n\
-    'ac <TAB>' to choose from a list (multi-selection is allowed)\n\
+    'ac <TAB>' to select from a list (multi-selection is allowed)\n\
 - Decompress/dearchive a file\n\
     ad file.tar.gz\n\
   or just open the file (the appropriate menu will be displayed)\n\
@@ -193,14 +193,14 @@ NAME is not specified, print the list of all parent directories\n\n\
 \x1b[1mEXAMPLE\x1b[22m\n\
 - Supposing you are in ~/Documents/misc/some/deep/dir, change to\n\
 ~/Documents/misc\n\
-    bd mi (or 'bd <TAB>' to choose from a list)"
+    bd mi (or 'bd <TAB>' to select from a list)"
 
 #define BL_USAGE "Create multiple symbolic links at once\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   bl FILE...\n\n\
 \x1b[1mEXAMPLE\x1b[22m\n\
 - Symlink files 'file1', 'file2', 'file3', and 'file4' at once\n\
-    bl file* (or 'bl <TAB>' to choose from a list - multi-selection is\n\
+    bl file* (or 'bl <TAB>' to select from a list - multi-selection is\n\
   allowed)\n\
 - Create symbolic links in the directory 'dir' for all .png files\n\
     s *.png\n\
@@ -225,9 +225,9 @@ Note: Links are always created in the current directory."
     bm add /media/mount mnt\n\
   Note: Regular files can be bookmarked too\n\
 - Access the bookmark named 'mnt'\n\
-    bm mnt (also 'b:mnt', 'b:<TAB>' or 'bm <TAB>' to choose from a list)\n\
+    bm mnt (also 'b:mnt', 'b:<TAB>' or 'bm <TAB>' to select from a list)\n\
 - Remove the bookmark named 'mnt'\n\
-    bm del mnt (or 'bm del <TAB>' to choose from a list)\n\
+    bm del mnt (or 'bm del <TAB>' to select from a list)\n\
 - Edit the bookmarks file manually\n\
     bm edit (or F11)\n\
 - Edit the bookmarks file using vi\n\
@@ -247,7 +247,7 @@ save changes, and quit the editor (quit without saving to cancel the operation).
 - Bulk rename all files ending with .pdf in the current directory\n\
     br *.pdf\n\
   or\n\
-    'br <TAB>' to choose from a list (mutli-selection is allowed)\n\
+    'br <TAB>' to select from a list (mutli-selection is allowed)\n\
 - Bulk rename all selected files\n\
     br sel\n\
   or, using vi:\n\
@@ -299,7 +299,7 @@ https://github.com/leo-arch/clifm/wiki/Customization#ls_colors-support"
 - Deselect all files\n\
     ds * (or Alt+d)\n\
 - Deselect files from a menu\n\
-    ds (or 'ds <TAB>' to choose from a list - multi-selection is allowed)"
+    ds (or 'ds <TAB>' to select from a list - multi-selection is allowed)"
 
 #define DESKTOP_NOTIFICATIONS_USAGE "Errors, warnings, and notices are displayed \
 using desktop notifications instead of\n\
@@ -901,7 +901,7 @@ Tip: Use the 'pc' command to change file permissions."
 \x1b[1mUSAGE\x1b[22m\n\
   ow FILE [APP]\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
-- Choose the opening application for the file 'test.c' from a menu\n\
+- Select the opening application for the file 'test.c' from a menu\n\
     ow test.c\n\
   or\n\
     'ow test.c <TAB>' (to get a list of available applications)\n\
@@ -971,11 +971,11 @@ Note: Use the 'oc' command to edit file ownership."
 - List available profiles\n\
     pf list\n\
 - Switch to the profile 'myprofile'\n\
-    pf set myprofile (or 'pf set <TAB>' to choose from a list)\n\
+    pf set myprofile (or 'pf set <TAB>' to select from a list)\n\
 - Add a new profile named new_profile\n\
     pf add new_profile\n\
 - Remove the profile 'myprofile'\n\
-    pf del myprofile (or 'pf del <TAB>' to choose from a list)\n\
+    pf del myprofile (or 'pf del <TAB>' to select from a list)\n\
 - Rename the profile 'myprofile' as 'cool_name'\n\
     pf rename myprofile cool_name"
 
@@ -984,7 +984,7 @@ Note: Use the 'oc' command to edit file ownership."
   prompt [set NAME | list | unset | edit [APP] | reload]\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
 - List available prompts\n\
-    prompt list (or 'prompt set <TAB>' to choose from a list)\n\
+    prompt list (or 'prompt set <TAB>' to select from a list)\n\
 - Change prompt to the prompt named MYPROMPT\n\
     prompt set MYPROMPT\n\
     Since 'set' is the default action, it can be omitted: 'prompt MYPROMPT'\n\
@@ -1005,7 +1005,7 @@ whatever prompt you like."
   p, pp, prop [ELN/FILE...]\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
 - Print the properties of the file whose ELN is 12\n\
-    p 12 (or 'p <TAB>' to choose from a list)\n\
+    p 12 (or 'p <TAB>' to select from a list)\n\
 - Print the properties of all selected files\n\
     p sel\n\
 - Print the properties of the directory 'dir' (including recursive size)\n\
@@ -1099,7 +1099,7 @@ Recognized file types: (d)irectory, regular (f)ile, symbolic (l)ink,\n\
 (s)ocket, fifo/(p)ipe, (b)lock device, (c)haracter device\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
 - Select the file whose ELN is 12\n\
-    s 12 (or 's <TAB>' to choose from a list - multi-selection is allowed)\n\
+    s 12 (or 's <TAB>' to select from a list - multi-selection is allowed)\n\
 - Select all files ending with .odt:\n\
     s *.odt\n\
 - Select multiple files at once\n\
@@ -1130,7 +1130,7 @@ Available methods: 0=none, 1=name, 2=size, 3=atime, 4=btime,\n\
 11=group, 12=blocks, 13=links, and 14=type.\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
 - List files by size\n\
-    st size (or 'st <TAB>' to choose from a list)\n\
+    st size (or 'st <TAB>' to select from a list)\n\
     Numbers can be used as well (e.g. 'st 2')\n\
 - Revert the current sort order (e.g. z-a instead of a-z)\n\
     st rev\n\
@@ -1181,7 +1181,7 @@ following shortcuts as well:\n\n\
     tag untag :<TAB> (and then TAB again to select tagged files)\n\n\
 Operating on tagged files (t:TAG)\n\
 - Print the file properties of all files tagged as 'docs'\n\
-    p t:docs (or 'p t:<TAB>' to choose from a list)\n\
+    p t:docs (or 'p t:<TAB>' to select from a list)\n\
 - Remove all files tagged as 'images'\n\
     r t:images\n\
 - Run stat(1) over all files tagged as 'work' and all files tagged as\n\
@@ -1195,7 +1195,7 @@ Mark the files you need via TAB and then press Enter or Right."
 \x1b[1mUSAGE\x1b[22m\n\
     te ELN/FILE...\n\
   or\n\
-    'te <TAB>' to choose from a list (multi-selection is allowed)\n\n\
+    'te <TAB>' to select from a list (multi-selection is allowed)\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
 - Set the executable bit on all shell scripts in the current directory\n\
     te *.sh\n\
@@ -1209,7 +1209,7 @@ Mark the files you need via TAB and then press Enter or Right."
 - Trash the file whose ELN is 12\n\
     t 12\n\
   or\n\
-    't <TAB>' to choose from a list (multi-selection is allowed)\n\
+    't <TAB>' to select from a list (multi-selection is allowed)\n\
 - Trash all files ending with .sh\n\
     t *.sh\n\
 - List currently trashed files\n\
@@ -1223,7 +1223,7 @@ Mark the files you need via TAB and then press Enter or Right."
 - Restore trashed files selectively using a menu\n\
     u\n\
   or\n\
-    'u <TAB>' to choose from a list (multi-selection is allowed)\n\n\
+    'u <TAB>' to select from a list (multi-selection is allowed)\n\n\
 Note: For more information try 'u --help'."
 
 #define UMASK_USAGE "Print/set the file mode creation mask\n\n\
@@ -1250,7 +1250,7 @@ Note: To permanently set the umask, use the Umask option in the config file."
 - Restore trashed files selectively using a menu\n\
     u\n\
   or\n\
-    'u <TAB>' to choose from a list (multi-selection is allowed)\n\n\
+    'u <TAB>' to select from a list (multi-selection is allowed)\n\n\
 Note: Use the 'trash' command to trash files. Try 'trash --help'."
 
 #define VV_USAGE "Copy files to a directory and bulk rename them at once\n\n\
@@ -1756,7 +1756,7 @@ myfile.txt           Open 'myfile.txt' with the default associated application\n
 myfile.txt vi        Open 'myfile.txt' with vi (also 'vi myfile.txt')\n\
 12                   Open the file whose ELN is 12\n\
 12&                  Open the file whose ELN is 12 in the background\n\
-ow 10 | ow 10 <TAB>  Choose opening application for the file whose ELN is 10\n\
+ow 10 | ow 10 <TAB>  Select opening application for the file whose ELN is 10\n\
 p 4                  Print file properties of the file whose ELN is 4\n\
 /*.png               Search for files ending with .png in the current directory\n\
 s *.c                Select all C files\n\

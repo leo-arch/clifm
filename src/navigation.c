@@ -187,7 +187,7 @@ grab_bd_input(const int n)
 	putchar('\n');
 
 	while (!input) {
-		input = rl_no_hist(_("Choose a directory ('q' to quit): "), 0);
+		input = rl_no_hist(_("Select a directory ('q' to quit): "), 0);
 		if (!input || !*input) {
 			free(input);
 			input = (char *)NULL;
@@ -244,7 +244,7 @@ backdir_directory(char *dir, const char *str)
 	return BD_CONTINUE;
 }
 
-/* If multiple matches, print a menu to choose from */
+/* If multiple matches, print a menu to select from. */
 static int
 backdir_menu(char **matches)
 {
@@ -320,7 +320,7 @@ backdir(char *str)
 	int exit_status = FUNC_SUCCESS, i = n;
 	if (n == 1) /* Just one match: change to it */
 		exit_status = cd_function(matches[0], CD_PRINT_ERROR);
-	else if (n > 1) /* Multiple matches: print a menu to choose from */
+	else if (n > 1) /* Multiple matches: print a menu to select from */
 		exit_status = backdir_menu(matches);
 
 	while (--i >= 0)
