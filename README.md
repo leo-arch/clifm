@@ -14,7 +14,7 @@ href="https://github.com/leo-arch/clifm/issues">Report bug</a></h4>
 ---
 
 <p align="center">
-<a href="https://github.com/leo-arch/clifm/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-GPL2%2B-red"/></a>
+<a href="https://github.com/leo-arch/clifm/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-GPL2%2B-red?style=flat"/></a>
 <a href="https://github.com/leo-arch/clifm/releases"><img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/leo-arch/clifm"></a>
 <a><img src="https://img.shields.io/github/commits-since/leo-arch/clifm/latest"></a>
 <a><img src="https://img.shields.io/github/last-commit/leo-arch/clifm/master?color=blue&style=flat"/></a>
