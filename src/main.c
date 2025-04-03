@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2016-2022 L. Abramovich <leo.clifm@outlook.com>
+ * SPDX-FileCopyrightText: 2016-2025 L. Abramovich <leo.clifm@outlook.com>
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
