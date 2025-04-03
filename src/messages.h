@@ -68,7 +68,7 @@ use the -h,--help flag. Example: \"- --help\"."
 
 #define ARCHIVE_USAGE "Compress/archive files\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
-  ac, ad ELN/FILE...\n\n\
+  ac, ad FILE...\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
 - Compress/archive all selected files\n\
     ac sel\n\
@@ -186,7 +186,7 @@ Note 3: To set a temporary autocommand for the current directory use the\n\
 - Use the 'f' command to go forward\n\
     f (also Alt+k or Shift+Right)"
 
-#define BD_USAGE "Quickly change to a parent directory matching NAME. If \
+#define BD_USAGE "Change to a parent directory matching NAME. If \
 NAME is not specified, print the list of all parent directories\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   bd [NAME]\n\n\
@@ -210,7 +210,7 @@ Note: Links are always created in the current directory."
 
 #define BLEACH_USAGE "Sanitize filenames by removing or converting non-ASCII characters\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
-  bb, bleach ELN/FILE...\n\n\
+  bb, bleach FILE...\n\n\
 \x1b[1mEXAMPLE\x1b[22m\n\
 - Sanitize filenames in your Downloads directory\n\
     bb ~/Downloads/*"
@@ -223,12 +223,12 @@ Note: Links are always created in the current directory."
     bm (also Alt+b, 'bm <TAB>' or 'b:<TAB>')\n\
 - Bookmark the directory '/media/mount' as 'mnt'\n\
     bm add /media/mount mnt\n\
-  Note: Regular files can be bookmarked too\n\
+  Note: Regular files can also be bookmarked\n\
 - Access the bookmark named 'mnt'\n\
     bm mnt (also 'b:mnt', 'b:<TAB>' or 'bm <TAB>' to select from a list)\n\
 - Remove the bookmark named 'mnt'\n\
     bm del mnt (or 'bm del <TAB>' to select from a list)\n\
-- Edit the bookmarks file manually\n\
+- Edit the bookmarks file\n\
     bm edit (or F11)\n\
 - Edit the bookmarks file using vi\n\
     bm edit vi\n\
@@ -239,7 +239,7 @@ Note: Links are always created in the current directory."
 
 #define BULK_RENAME_USAGE "Rename files in bulk\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
-  br, bulk ELN/FILE... [:EDITOR]\n\n\
+  br, bulk FILE... [:EDITOR]\n\n\
 The list of files to be renamed is opened via EDITOR (default associated\n\
 application for text files if omitted). Edit filenames as desired, rename,\n\
 save changes, and quit the editor (quit without saving to cancel the operation).\n\n\
@@ -255,7 +255,7 @@ save changes, and quit the editor (quit without saving to cancel the operation).
 
 #define CD_USAGE "Change the current working directory\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
-  cd [ELN/DIR]\n\n\
+  cd [DIR]\n\n\
 \x1b[1mEXAMPLE\x1b[22m\n\
 - Change to /var\n\
     cd /var\n\
@@ -264,7 +264,8 @@ save changes, and quit the editor (quit without saving to cancel the operation).
 
 #define COLORS_USAGE "Preview the current color scheme\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
-  colors"
+  colors\n\n\
+Note: 'cs preview' can be used as well."
 
 #define COLUMNS_USAGE "Toggle columned file listing\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
@@ -346,7 +347,7 @@ Tip: See also the 'dh' and 'j' commands."
 
 #define DUP_USAGE "Duplicate files via rsync(1) (cp(1) if rsync is not found)\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
-  d, dup ELN/FILE...\n\n\
+  d, dup FILE...\n\n\
 \x1b[1mEXAMPLE\x1b[22m\n\
 - Duplicate files whose ELNs are 12 through 20\n\
     d 12-20\n\n\
@@ -377,14 +378,14 @@ Parameters passed to cp:    -a"
 
 #define EXPORT_FILES_USAGE "Export filenames to a temporary file\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
-  exp [ELN/FILE...]\n\n\
+  exp [FILE...]\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
 - Export all selected files\n\
     exp sel\n\
 - Export all PDF files in the current directory\n\
     exp *.pdf"
 
-#define EXPORT_VAR_USAGE "Add one or more variables to the environment\n\n\
+#define EXPORT_VAR_USAGE "Add variables to the environment\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   export NAME=VALUE..."
 
@@ -400,7 +401,7 @@ Parameters passed to cp:    -a"
   fields (and TimeStyle for custom timestamp formats).\n\
 - Print file properties of the file whose ELN is 4\n\
     p4\n\
-- Print file properties, including recursive directory sizes\n\
+- Print file properties, using recursive directory sizes\n\
     pp DIR\n\n\
 Note: An exclamation mark (!) before directory sizes means that an\n\
 error ocurred while reading a subdirectory (most of the time due to\n\
@@ -416,7 +417,7 @@ Note 2: Unlike 'p', 'pp' always dereferences symbolic links."
 - Display physical file sizes (disk usage) instead of logical sizes (apparent size)\n\
     Run with --physical-size or set ApparentSize to false in the\n\
     configuration file.\n\
-- Display file sizes in SI units (powers of 1000) instead of 1024\n\
+- Display file sizes in SI units (powers of 1000) instead of IEC units (powers of 1024)\n\
     Run with --si"
 
 #define FF_USAGE "Turn list-directories-first on/off\n\n\
@@ -433,11 +434,11 @@ To disable this feature, run with '--no-fzfpreview' or set 'FzfPreview' to\n\
 false in the configuration file.\n\n\
 Clifm operates in fzf mode if the fzf binary is found in your $PATH.\n\
 You can also use '--fzftab' or 'TabCompletionMode' in the configuration file.\n\n\
-File previews are generated using a configuration file, which you can edit to\n\
+File previews are generated using a configuration file, which can be edited to\n\
 your liking by running 'view edit' (or pressing F7).\n\n\
 Use the 'view' command to preview files in the current directory in full screen.\n\n\
-To prevent large files from generating a preview, use the PreviewMaxSize option in\n\
-the configuration file. For example: 'PreviewMaxSize=100M' (supported size\n\
+To prevent large files from generating a preview, use the PreviewMaxSize option\n\
+in the configuration file. For example: 'PreviewMaxSize=100M' (supported size\n\
 units: K, M, G, T; supported range: 1K-2047G). By default, there is no limit.\n\n\
 To learn how to enable image previews run 'help image-previews'."
 
@@ -450,9 +451,9 @@ This instructs Clifm to use the 'clifmimg' script (~/.config/clifm/clifmimg)\n\
 to generate image previews (for both tab completion in fzf mode and the\n\
 'view' command).\n\
 \n\
-By default, Clifm will try to guess the best previewing method. However, you\n\
+By default, Clifm will try to guess the most suitable method. However, you\n\
 can edit the 'clifmimg' script and set the 'method' variable to any of the\n\
-available previewing methods: sixel, ueberzug, kitty, ansi (text mode).\n\
+available previewing methods: sixel, iterm, ueberzug, kitty, ansi (text mode).\n\
 \n\
 If using the 'ueberzug' method, you must start Clifm via the 'clifmrun' script\n\
 (~/.config/clifm/clifmrun)"
@@ -598,7 +599,7 @@ from the history list."
 
 #define ICONS_USAGE "Turn icons on/off\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
-  icons [on, off]\n\n\
+  icons [on | off]\n\n\
 Note: Depending on how the terminal renders icons, the apparent space\n\
 between icons and filenames may not be optimal. This space can be adjusted\n\
 using the IconsGap option in the configuration file (valid values: 0, 1, or 2)."
@@ -670,9 +671,10 @@ link points to, rather than the link itself."
     Method 2: Run 'kb edit' and comment out the corresponding entry\n\
 - Detect keybinding conflicts\n\
     kb conflict\n\
-- List the current keybindings for readline\n\
+- List the current keybindings for readline specific functions\n\
     kb readline\n\
-- Reset the keybindings file to its default state (keeping a backup of the existing file)\n\
+- Reset the keybindings file to its default state (keeping a backup of the\n\
+  existing file)\n\
     kb reset"
 
 #define LE_USAGE "Edit a symbolic link\n\n\
@@ -710,7 +712,7 @@ Tip: Use the 'le' command to edit a symbolic link. Try 'le --help'."
 \x1b[1mUSAGE\x1b[22m\n\
   lm [on, off]"
 
-#define LOG_USAGE "Manage Clifm logs\n\n\
+#define LOG_USAGE "Manage clifm logs\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   log [cmd | msg] [list | on | off | status | clear]\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
@@ -723,7 +725,7 @@ Tip: Use the 'le' command to edit a symbolic link. Try 'le --help'."
 - Clear message logs\n\
     log msg clear"
 
-#define MD_USAGE "Create one or more directories\n\
+#define MD_USAGE "Create directories\n\
 (parent directories are created if they do not exist)\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   md DIR...\n\n\
@@ -766,7 +768,7 @@ For example: 'i12'."
 - Try to import MIME file associations from the system\n\
     mm import\n\
 - Add/modify default opening application for myfile\n\
-    1) Find out the MIME type (or filename) of the file\n\
+    1) Determine the MIME type (or filename) of the file\n\
       mm info myfile\n\
     2) Edit the mimelist file\n\
       mm edit (or F6)\n\
@@ -789,7 +791,8 @@ For example: 'i12'."
 \x1b[1mEXAMPLES\x1b[22m\n\
 - List available mountpoints\n\
     mp (or Alt+m)\n\
-  Once there, select the mountpoint you want to change to."
+  Once there, select the mountpoint you want to change to\n\
+  (clifm will automatically change to the mountpoint)."
 
 #define NET_USAGE "Manage remote resources\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
@@ -850,7 +853,7 @@ Tab completion is available for explicit templates: simply type 'n file@<TAB>'.\
 (1) The templates directory is $CLIFM_TEMPLATES_DIR, $XDG_TEMPLATES_DIR,\n\
 or ~/Templates, in this precedence order."
 
-#define OC_USAGE "Interactively change file ownership\n\n\
+#define OC_USAGE "Edit file ownership\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   oc FILE...\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
@@ -859,11 +862,11 @@ or ~/Templates, in this precedence order."
 - Change ownership of all .iso files\n\
     oc *.iso\n\n\
 \x1b[1mNOTES\x1b[22m\n\
-A template is presented to the user to be edited.\n\n\
-Only user and primary group common to all specified files\n\
-are set in the ownership template.\n\n\
-Ownership (both user and primary group, if specified) is\n\
-changed for all specified files.\n\n\
+A template is presented to the user to edit the ownership information.\n\n\
+Only user and primary group common to all specified files are set in\n\
+the ownership template.\n\n\
+The new ownership (both user and primary group, if specified) will be\n\
+applied to each specified file.\n\n\
 Both names and ID numbers are allowed (tab completion is available).\n\n\
 If only a name/number is entered, it is taken as user.\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
@@ -873,11 +876,11 @@ If only a name/number is entered, it is taken as user.\n\n\
     :video (or \":981\")\n\
 - Change user to peter and primary group to audio\n\
     peter:audio (or \"1000:986\" or \"peter:986\" or \"1000:audio\")\n\n\
-Tip: Use the 'pc' command to change file permissions."
+Tip: Use the 'pc' command to edit file permissions."
 
 #define OPEN_USAGE "Open a file\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
-  o, open ELN/FILE [APPLICATION]\n\n\
+  o, open FILE [APPLICATION]\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
 - Open the file whose ELN is 12 with the default associated application\n\
   (see the 'mime' command)\n\
@@ -919,7 +922,7 @@ the screen.\n\n\
 If set to a positive integer greater than 1, run the pager whenever\n\
 the number of files in the current directory is greater than or equal to\n\
 that value (e.g., 1000). A value of 1 is equivalent to 'on', while 0 means 'off'.\n\n\
-Set to 'once' to run the pager only a single time.\n\n\
+Set it to 'once' to run the pager only a single time.\n\n\
 While paging, the following keys are available:\n\n\
 ?, h: Help\n\
 Down arrow, Enter, Space: Advance one line\n\
@@ -936,19 +939,19 @@ configuration file or the --pager-view command line option. Possibles values:\n\
 'short': List files in short view\n\n\
 Note: You can also try the 'gg' plugin (just enter 'gg')."
 
-#define PC_USAGE "Interactively edit file permissions\n\n\
+#define PC_USAGE "Edit file permissions\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   pc FILE...\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
-- Change permissions of the file named 'file.txt'\n\
+- Edit permissions of the file named 'file.txt'\n\
     pc file.txt\n\
-- Change permissions of all selected files at once\n\
+- Edit permissions of all selected files at once\n\
     pc sel\n\n\
-When editing multiple files with different permissions at once,\n\
-only shared permission bits will be set in the permissions template.\n\
-Bear in mind that the new permissions set will be applied to all files\n\
-passed as arguments.\n\n\
-Both symbolic and octal notation for the new permissions set are allowed.\n\n\
+When editing multiple files with different permissions at once, only\n\
+shared permission bits will be set in the permissions template.\n\n\
+The new permissions set will be applied to each specified file.\n\n\
+Both symbolic and octal notation for the new permissions set are\n\
+allowed.\n\n\
 Note: Use the 'oc' command to edit file ownership."
 
 #define PIN_USAGE "Pin a file or directory\n\n\
@@ -1002,7 +1005,7 @@ whatever prompt you like."
 
 #define PROP_USAGE "Print file properties\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
-  p, pp, prop [ELN/FILE...]\n\n\
+  p, pp, prop FILE...\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
 - Print the properties of the file whose ELN is 12\n\
     p 12 (or 'p <TAB>' to select from a list)\n\
@@ -1094,7 +1097,7 @@ injection. To enable this mode, use the --secure-cmds command line switch."
 
 #define SEL_USAGE "Select one or multiple files\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
-  s, sel ELN/FILE... [[!]PATTERN] [-FILETYPE] [:PATH]\n\n\
+  s, sel FILE... [[!]PATTERN] [-FILETYPE] [:PATH]\n\n\
 Recognized file types: (d)irectory, regular (f)ile, symbolic (l)ink,\n\
 (s)ocket, fifo/(p)ipe, (b)lock device, (c)haracter device\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
@@ -1109,7 +1112,7 @@ Recognized file types: (d)irectory, regular (f)ile, symbolic (l)ink,\n\
 - Select all files in the current directory (including hidden files)\n\
     s * .* (or Alt+a)\n\
 - Interactively select files in '/media' (requires fzf, fnf, or smenu\n\
-  tab completion mode)\n\
+  tab completion modes)\n\
     s /media/*<TAB>\n\
 - List currently selected files\n\
     sb\n\
@@ -1193,7 +1196,7 @@ Mark the files you need via TAB and then press Enter or Right."
 
 #define TE_USAGE "Toggle the executable bit on files\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
-    te ELN/FILE...\n\
+    te FILE...\n\
   or\n\
     'te <TAB>' to select from a list (multi-selection is allowed)\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
@@ -1204,7 +1207,7 @@ Mark the files you need via TAB and then press Enter or Right."
 
 #define TRASH_USAGE "Move files to the trash can\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
-  t, trash [FILE... | del | empty | list]\n\n\
+  t, trash [FILE... | del [FILE]... | empty | list]\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
 - Trash the file whose ELN is 12\n\
     t 12\n\
