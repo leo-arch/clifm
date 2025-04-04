@@ -20,7 +20,7 @@
  * MA 02110-1301, USA.
 */
 
-/* bulk_rename.h - bulk rename files */
+/* bulk_rename.h */
 
 #ifndef BULK_RENAME_H
 #define BULK_RENAME_H

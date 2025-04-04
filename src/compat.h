@@ -20,7 +20,7 @@
  * MA 02110-1301, USA.
 */
 
-/* compat.h -- compatibility layer for legacy systems (before POSIX-1.2008) */
+/* compat.h */
 
 #ifndef CLIFM_COMPAT_H
 #define CLIFM_COMPAT_H

@@ -20,7 +20,7 @@
  * MA 02110-1301, USA.
 */
 
-/* long_view.h - Construct entries in long view mode */
+/* long_view.h */
 
 #ifndef LONG_VIEW_H
 #define LONG_VIEW_H

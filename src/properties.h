@@ -20,7 +20,7 @@
  * MA 02110-1301, USA.
 */
 
-/* properties.h -- Home of the p/pp, pc, oc, and stats commands */
+/* properties.h */
 
 #ifndef PROPERTIES_H
 #define PROPERTIES_H

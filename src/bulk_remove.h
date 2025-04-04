@@ -20,7 +20,7 @@
  * MA 02110-1301, USA.
 */
 
-/* bulk_remove.h - bulk remove files */
+/* bulk_remove.h */
 
 #ifndef BULK_REMOVE_H
 #define BULK_REMOVE_H

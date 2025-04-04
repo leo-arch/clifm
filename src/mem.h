@@ -20,7 +20,7 @@
  * MA 02110-1301, USA.
 */
 
-/* mem.h - Some memory wrapper functions */
+/* mem.h */
 
 /* This file is included by aux.h */
 

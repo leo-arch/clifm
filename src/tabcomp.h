@@ -20,7 +20,7 @@
  * MA 02110-1301, USA.
 */
 
-/* tabcomp.h -- functions to perform tab completion */
+/* tabcomp.h */
 
 #ifndef TABCOMP_H
 #define TABCOMP_H
