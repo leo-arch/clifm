@@ -1807,7 +1807,9 @@ auto            Add an autocommand to the current directory\n\
 config | F10    View/edit the configuration file\n\
 mm edit | F6    Change default opening applications\n\
 view edit | F7  Change default previewing applications\n\
-kb edit | F9    Edit keybindings\n\
+kb bind <TAB>   List available functions for binding\n\
+kb bind FUNC    Bind FUNC to a new key sequence\n\
+kb edit | F9    Manually edit the keybindings file\n\
 mm info 12      Get MIME information for the file whose ELN is 12\n\
 Alt+Tab         Toggle the disk usage analyzer mode\n\
 cs              Manage color schemes\n\
