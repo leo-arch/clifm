@@ -1,16 +1,9 @@
-/* icons-emoji.h - Icon definitions for CliFM */
-
-/* Taken from
- * https://github.com/jarun/nnn, licensed under BSD-2-Clause.
- * All changes are licensed under GPL-2.0-or-later.
-*/
-
 /*
  * This file is part of Clifm
  *
+ * SPDX-License-Identifier: GPL-2.0-or-later
  * Copyright (C) 2016-2025, L. Abramovich <leo.clifm@outlook.com>
- * All rights reserved.
-
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -25,6 +18,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  * MA 02110-1301, USA.
+*/
+
+/* icons-emoji.h - Icon definitions for Clifm */
+
+/* Taken from
+ * https://github.com/jarun/nnn, licensed under BSD-2-Clause.
+ * All changes are licensed under GPL-2.0-or-later.
 */
 
 /* For a list of emojis consult:

@@ -1,13 +1,9 @@
-/* readline.c -- functions to control the behavior of readline,
- * specially completions. It also introduces both the syntax highlighting
- * and the suggestions system (via my_rl_getc) */
-
 /*
  * This file is part of Clifm
  *
+ * SPDX-License-Identifier: GPL-2.0-or-later
  * Copyright (C) 2016-2025, L. Abramovich <leo.clifm@outlook.com>
- * All rights reserved.
-
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -23,6 +19,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  * MA 02110-1301, USA.
 */
+
+/* readline.c -- functions to control the behavior of readline,
+ * specially completions. It also introduces both the syntax highlighting
+ * and the suggestions system (via my_rl_getc) */
 
 /* The following functions are taken from Bash (1.14.7), licensed under
  * GPL-1.0-or-later:

@@ -1,11 +1,9 @@
-/* init.c -- functions controlling the program initialization */
-
 /*
  * This file is part of Clifm
  *
+ * SPDX-License-Identifier: GPL-2.0-or-later
  * Copyright (C) 2016-2025, L. Abramovich <leo.clifm@outlook.com>
- * All rights reserved.
-
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -21,6 +19,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  * MA 02110-1301, USA.
 */
+
+/* init.c -- functions controlling the program initialization */
 
 #include "helpers.h"
 
@@ -1138,7 +1138,7 @@ load_jumpdb(void)
 		time_t first = 0;
 
 		if (is_number(tmp)) {
-			int a = atoi(tmp);
+			const int a = atoi(tmp);
 			first = a == INT_MIN ? 0 : (time_t)a;
 		}
 
@@ -1159,7 +1159,7 @@ load_jumpdb(void)
 		jump_db[jump_n].first_visit = first;
 
 		if (is_number(tmpb)) {
-			int a = atoi(tmpb);
+			const int a = atoi(tmpb);
 			jump_db[jump_n].last_visit = a == INT_MIN ? 0 : (time_t)a;
 		} else {
 			jump_db[jump_n].last_visit = 0; /* UNIX Epoch */

@@ -1,16 +1,9 @@
 /*
- * SPDX-FileCopyrightText: 2016-2025 L. Abramovich <leo.clifm@outlook.com>
+ * This file is part of Clifm
+ *
  * SPDX-License-Identifier: GPL-2.0-or-later
- */
-
-			/*  ########################################
-			 *  #               Clifm                  #
-			 *  # 	  The command line file manager    #
-			 *  ######################################## */
-
-/* Copyright (C) 2016-2025, L. Abramovich <leo.clifm@outlook.com>
- * All rights reserved.
-
+ * Copyright (C) 2016-2025, L. Abramovich <leo.clifm@outlook.com>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -26,6 +19,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  * MA 02110-1301, USA.
  */
+
+/* main.c -- Main file for Clifm */
 
 #include "helpers.h"
 
