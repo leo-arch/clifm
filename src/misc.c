@@ -1721,11 +1721,20 @@ sigwinch_handler(int sig)
 void
 set_signals_to_ignore(void)
 {
-	signal(SIGINT, SIG_IGN);  /* C-c */
-	signal(SIGQUIT, SIG_IGN); /* C-\ */
-	signal(SIGTSTP, SIG_IGN); /* C-z */
+	struct sigaction sa;
+
+	memset(&sa, '\0', sizeof(sa));
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = 0;
+	sa.sa_handler = SIG_IGN;
+
+	sigaction(SIGINT, &sa, NULL);
+	sigaction(SIGQUIT, &sa, NULL);
+	sigaction(SIGTSTP, &sa, NULL);
+
 #ifndef _BE_POSIX
-	signal(SIGWINCH, sigwinch_handler);
+	sa.sa_handler = sigwinch_handler;
+	sigaction(SIGWINCH, &sa, NULL);
 #endif /* !_BE_POSIX */
 }
 

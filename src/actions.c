@@ -437,7 +437,7 @@ actions_function(char **args)
 				"mode\n"), stderr);
 		} else {
 			fputs(_("actions: No actions defined. Use the 'actions edit' "
-				"command to add new actions\n"), stdout);
+				"command to add new actions.\n"), stdout);
 		}
 		return FUNC_SUCCESS;
 	}

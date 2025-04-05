@@ -91,11 +91,20 @@ run_in_background(const pid_t pid)
 static void
 set_cmd_signals(void)
 {
-	signal(SIGHUP,  SIG_DFL);
-	signal(SIGINT,  SIG_DFL);
-	signal(SIGQUIT, SIG_DFL);
-	signal(SIGTERM, SIG_DFL);
-	signal(SIGTSTP, SIG_IGN);
+	struct sigaction sa;
+
+	memset(&sa, '\0', sizeof(sa));
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = 0;
+	sa.sa_handler = SIG_DFL;
+
+	sigaction(SIGHUP, &sa, NULL);
+	sigaction(SIGINT, &sa, NULL);
+	sigaction(SIGQUIT, &sa, NULL);
+	sigaction(SIGTERM, &sa, NULL);
+
+	sa.sa_handler = SIG_IGN;
+	sigaction(SIGTSTP, &sa, NULL);
 }
 
 /* Implementation of system(3).

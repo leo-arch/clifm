@@ -27,7 +27,6 @@
 #include <errno.h>
 #include <grp.h> /* getgrouplist(), getgrent(), setgrent(), endgrent() */
 #include <pwd.h> /* getpwent(), setpwent(), endpwent() */
-#include <signal.h>
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
