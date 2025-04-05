@@ -33,9 +33,7 @@
 #else
 # define _PATH_DEVNULL "/dev/null"
 #endif /* !_BE_POSIX */
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun)
-# include <signal.h>  /* signal */
-#endif /* BSD || __sun */
+#include <signal.h>   /* sigaction */
 #include <string.h>   /* strerror */
 #include <unistd.h>   /* fork, execl, execvp, dup2, close, _exit */
 #include <sys/wait.h> /* waitpid */
@@ -93,7 +91,7 @@ set_cmd_signals(void)
 {
 	struct sigaction sa;
 
-	memset(&sa, '\0', sizeof(sa));
+	memset(&sa, 0, sizeof(sa));
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = 0;
 	sa.sa_handler = SIG_DFL;

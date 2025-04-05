@@ -1723,7 +1723,7 @@ set_signals_to_ignore(void)
 {
 	struct sigaction sa;
 
-	memset(&sa, '\0', sizeof(sa));
+	memset(&sa, 0, sizeof(sa));
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = 0;
 	sa.sa_handler = SIG_IGN;
