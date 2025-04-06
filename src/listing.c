@@ -2324,7 +2324,7 @@ init_fileinfo(const filesn_t n)
 	file_info[n].human_size.unit = 0;
 	file_info[n].linkn = 1;
 	file_info[n].user_access = 1;
-	file_info[n].size =  1;
+	file_info[n].size = 1;
 }
 
 static inline void
@@ -2765,8 +2765,8 @@ END:
 
 #ifndef ST_BTIME_LIGHT
 	if (conf.long_view == 1 && prop_fields.time == PROP_TIME_BIRTH)
-		print_reload_msg(NULL, NULL, "Long view: Birth time not available in light "
-			"mode. Using %smodification time%s.\n", BOLD, NC);
+		print_reload_msg(NULL, NULL, _("Long view: Birth time not available "
+			"in light mode. Using %smodification time%s.\n"), BOLD, NC);
 #endif /* !ST_BTIME_LIGHT */
 
 	if (xargs.disk_usage_analyzer == 1 && conf.long_view == 1

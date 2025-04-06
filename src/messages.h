@@ -767,13 +767,13 @@ For example: 'i12'."
     mm edit vim\n\
 - Try to import MIME file associations from the system\n\
     mm import\n\
-- Add/modify default opening application for myfile\n\
+- Add/modify the default opening application for 'myfile'\n\
     1) Determine the MIME type (or filename) of the file\n\
       mm info myfile\n\
     2) Edit the mimelist file\n\
       mm edit (or F6)\n\
-    Once in the file, find the appropriate entry and add the desired\n\
-    opening application.\n\
+    Once in the file, find the appropriate entry and add/modify\n\
+    the desired opening application.\n\
   For more information consult the manpage."
 
 #define MSG_USAGE "List available program messages\n\n\
@@ -1278,7 +1278,15 @@ Note: If DIR does not exist, it will be created."
 - Edit the configuration file using vi\n\
     view edit vi\n\
 - Purge the thumbnails directory(1) of dangling thumbnails\n\
-    view purge\n\n\
+    view purge\n\
+- Add/modify the default previewing application for 'myfile'\n\
+    1) Determine the MIME type (or filename) of the file\n\
+      mm info myfile\n\
+    2) Edit the mimelist file\n\
+      view edit (or F7)\n\
+    Once in the file, find the appropriate entry and add/modify\n\
+    the desired previewing application.\n\
+  For more information consult the manpage.\n\n\
 (1) $XDG_CACHE_HOME/clifm/thumbnails\n\n\
 Enter 'help file-previews' for more information."
 

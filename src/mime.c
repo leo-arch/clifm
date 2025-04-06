@@ -1597,20 +1597,20 @@ print_mime_info(char **app, char **fpath, char **mime)
 		printf(_("Opening application:    ad [builtin] [%s]\n"),
 			mime_match ? "MIME" : "FILENAME");
 	} else {
-		printf(_("Opening application:    %s [%s]\n"), *app,
+		printf(_("Opening application:    '%s' [%s]\n"), *app,
 			mime_match ? "MIME" : "FILENAME");
 	}
 
 	if (!config_dir || !*config_dir)
 		goto END;
 
-	char buf[PATH_MAX];
+	char buf[PATH_MAX + 1];
 	snprintf(buf, sizeof(buf), "%s/preview.clifm", config_dir);
 	char *mime_file_ptr = mime_file;
 	mime_file = buf;
 
 	char *preview_app = get_app(*mime, *fpath);
-	printf(_("Previewing application: %s %s\n"),
+	printf(_("Previewing application: '%s' %s\n"),
 		(preview_app && *preview_app) ? preview_app : "None",
 		(preview_app && *preview_app)
 		? (mime_match ? "[MIME]" : "[FILENAME]") : "");
