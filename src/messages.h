@@ -1386,9 +1386,9 @@ c: Stop paging (printing remaining files)\n"
 #define CONFIG_FILE_UPDATED "File modified. Settings updated.\n"
 
 #ifndef __HAIKU__
-# define HELP_MESSAGE "Enter '?' or press F1-F3 for instructions"
+# define HELP_MESSAGE "Enter '?' or press F1-F3 for help"
 #else
-# define HELP_MESSAGE "Enter '?' or press F5-F7 for instructions"
+# define HELP_MESSAGE "Enter '?' or press F5-F7 for help"
 #endif /* !__HAIKU__ */
 
 #ifdef _BE_POSIX
