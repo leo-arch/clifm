@@ -1,5 +1,5 @@
 ######################
-# Makefile for CliFM #
+# Makefile for clifm #
 ######################
 
 OS != uname -s

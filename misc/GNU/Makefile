@@ -1,5 +1,6 @@
+
 ######################
-# Makefile for CliFM #
+# Makefile for clifm #
 ######################
 
 OS != uname -s
@@ -9,7 +10,7 @@ BIN ?= clifm
 PREFIX ?= /usr/local
 BINDIR ?= $(PREFIX)/bin
 DATADIR ?= $(PREFIX)/share
-MANDIR ?= $(PREFIX)/man
+MANDIR ?= $(DATADIR)/man
 LOCALEDIR ?= $(DATADIR)/locale
 DESKTOPPREFIX ?= $(DATADIR)/applications
 DESKTOPICONPREFIX ?= $(DATADIR)/icons/hicolor
@@ -167,6 +168,7 @@ install: $(BIN)
 	chmod 644 $(DESTDIR)$(PROG_DATADIR)/plugins/plugins-helper
 	$(INSTALL) -m 0644 misc/colors/*.clifm $(DESTDIR)$(PROG_DATADIR)/colors
 	$(INSTALL) -m 0644 functions/* $(DESTDIR)$(PROG_DATADIR)/functions
+	$(INSTALL) -m 0755 functions/install-extensions.fish $(DESTDIR)$(PROG_DATADIR)/functions
 	@printf "Successfully installed $(BIN)\n"
 
 uninstall:
