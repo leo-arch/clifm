@@ -1,12 +1,12 @@
 # Coding suggestions for **Clifm**
 
-**NOTE**: To keep a consintent style, run `clang-format` over all source files, including header files, using the `_clang-format` file (in `/src`) as the formatting model:
+**NOTE**: To keep a consintent style, run `clang-format` over all source files, including header files, using the `.clang-format` file (in `/src`) as the formatting model:
 
 ```sh
 clang-format -i -style=file *.[hc]
 ```
 
-This command will reformat all C source and header files (`*.[hc]`) in place (`-i`) using the `_clang-format` file as model (`-style=file`).
+This command will reformat all C source and header files (`*.[hc]`) in place (`-i`) using the `.clang-format` file as model (`-style=file`).
 
 Once this is done, you might want to check and modify a few things from the resulting files, specially long `printf`'s and multi-line statements. Automatic formating in these cases is still not optimal.
 
@@ -14,13 +14,13 @@ Once this is done, you might want to check and modify a few things from the resu
 
 ### C source
 
-Portability: Though mostly developed in Linux (and this always means better support), we try to keep **clifm** working on \*BSD, MacOS, Solaris, and Haiku. So, when calling a function make sure it exists on these platforms as well, and, if possible, make sure it is POSIX. Check its syntax as well: some functions might take different parameters on different platforms. For example, **getmntinfo**(3) does not exist in Linux, and, while it takes a `statfs` struct in FreeBsd, OpenBSD, and MacOS, it takes a `statvfs` struct instead in NetBSD.
+Portability: Though mostly developed in Linux (and this always means better support), we try to keep **clifm** working on other  platforms as well (\*BSD, MacOS, Solaris, and Haiku). So, when calling a function make sure it exists on these platforms as well, and, if possible, make sure it is POSIX. Check its syntax as well: some functions might take different parameters on different platforms. For example, **getmntinfo**(3) does not exist in Linux, and, while it takes a `statfs` struct in FreeBSD, OpenBSD, and MacOS, it takes a `statvfs` struct instead in NetBSD.
 
-Generally, try to stick as closely as possible to the [Linux kernel coding style](https://www.kernel.org/doc/html/v4.10/process/coding-style.html). Also, though we don't follow it strictly, we also like the [Suckless coding style](https://suckless.org/coding_style/).
+Generally, try to stick as closely as possible to the [Linux kernel coding style](https://www.kernel.org/doc/html/v4.10/process/coding-style.html). Also, though we do not follow it strictly, we also like the [Suckless coding style](https://suckless.org/coding_style/).
 
-Indentation: TABS (I use a width of 4, but you can use 8 if you like)
+Indentation: TABS (I use a width of 4, but you can use 8 if you like).
 
-Naming convention: Linux kernel style
+Naming convention: Linux kernel style.
 
 Comments: C style only. E.g.:
 
@@ -40,6 +40,12 @@ if (condition) {
 }
 ```
 
+Brackets can be omitted in case of single instructions.
+```c
+while (cond)
+	counter++;
+```
+
 Functions definition:
 
 ```c
@@ -50,7 +56,7 @@ function_name(argument, ... n)
 }
 ```
 
-**NOTE**: Writing the function name and arguments in a separate line makes it more easily searchable
+**NOTE**: Writing the function name and arguments in a separate line makes it more easily searchable.
 
 Assignements and comparissons (spaces around equal sign):
 
@@ -58,21 +64,18 @@ Assignements and comparissons (spaces around equal sign):
 x = y
 ```
 
-Proper casting. For example, if initializing a pointer to a string, do not write:
+NULL casting. While not necessary, casting NULL to the pointer type can improve readability (specially for global variables). For example:
 
 ```c
-char *str = NULL;
-```
-
-But,
-
-```c
-char *str = (char *)NULL;
+buf = malloc(SIZE);
+...
+free(buf);
+buf = (char *)NULL;
 ```
 
 Prefer ASCII instead of Hex: E.g.: `'\0'` instead of `0x00`
 
-Spacing: Write easily readable code. Generally, use blank lines between code blocks (this, however, depends on the code written so far). Just make it readable (the code won't be better for being more tightly written)
+Spacing: Write easily readable code. Generally, use blank lines between code blocks (this, however, depends on the code written so far). Just make it readable (the code will not be better for being more tightly written).
 
 Max line legnth: `80 characters/columns`. If an statement exceeds this number, split it into multiple lines as follows:
 
@@ -91,17 +94,17 @@ A program should not only provide working features, but also well written, perfo
 
 ### 1. Performance and security
 
-**a)** Use the proper tool (and in the proper way) for the job: be as simple as possible and do not waste resources (they are highly valuable). For example: `strcmp(3)` is a standard and quite useful function. However, it is a good idea to prevent calling this function (possibily hundreds of times in a loop) if not needed. Before calling `strcmp` compare the first byte of the strings to be compared. If they do not match, there is no need to call the function:
+**a)** Use the proper tool (and in the proper way) for the job: be as simple as possible and do not waste resources (they are highly valuable). For example: `strcmp(3)` is a standard and quite useful function. However, it is a good idea to prevent calling this function (possibily hundreds of times in a loop) if not needed. Before calling `strcmp`, compare the first byte of the strings to be compared. If they do not match, there is no need to call the function (avoiding thus the function call overhead):
 
 ```c
 if (*str == *str2 && strcmp(str + 1, str2 + 1) == 0)
 ```
 
-**b)** In the same way, and for the same reason, use the cheapest function. If you do not need formatting, prefer `write(3)` or `fputs(3)` over `printf(3)`: they're faster.
+**b)** In the same way, and for the same reason, use the cheapest function. If you do not need formatting, prefer `write(3)` or `fputs(3)` over `printf(3)`: they are faster.
 
-**c)** Pass structs by address (`function(&my_struct)`) intead of by value (`function(my_struct)`): passing an address to a function is faster than duplicating the value of each struct member and then pass it to the function. Also, try not to pass more than 4 parameters to functions.
+**c)** Pass structs by address (`function(&my_struct)`) instead of by value (`function(my_struct)`): passing an address to a function is faster than duplicating the value of each struct member and then passing it to the function. Also, try not to pass more than 4 parameters to functions.
 
-**d)** Use `static` and `const` as much as possible. For example, if a variable won't be modified after the initial assignment, make it constant, i.e. read-only (`const int var = 12`). Likewise, if a function won't be invoked outside the current compilation unit (source file and its corresponding header file), declare it as `static`: `static int my_func()`. In the same line, limit the scope of your variables as much as possible. For example, do not write:
+**d)** Use `static` and `const` as much as possible. For example, if a variable will not be modified after the initial assignment, make it constant, i.e. read-only (`const int var = 12`). Likewise, if a function will not be invoked outside the current compilation unit (source file and its corresponding header file), declare it as `static`: `static int my_func()`. In the same line, limit the scope of your variables as much as possible. For example, do not write:
 
 ```c
 int n = 0;
@@ -120,7 +123,7 @@ while (cond) {
 }
 ```
 
-**e)** Use pointers whenever possible (they're fast): this is one of the greatest advantages of C. For instance, if you need to get the basename of a path, there is no need to copy the string in any way, neither manually nor via some other function. Just get a pointer to the last slash in the original string using `strrchr(3)`:
+**e)** Use pointers whenever possible (they are fast): this is one of the greatest advantages of C. For instance, if you need to get the basename of a path, there is no need to copy the string in any way, neither manually nor via some other function. Just get a pointer to the last slash in the original string using `strrchr(3)`:
 
 ```c
 char *ret = strrchr(path, '/');
@@ -138,7 +141,7 @@ strcpy(buf, src);
 
 or
 ```c
-/* If the buffer has a fixed size, make sure it won't be overflowed by a longer source string */
+/* If the buffer has a fixed size, make sure it will not be overflowed by a longer source string */
 buf[PATH_MAX + 1];
 xstrsncpy(buf, src, sizeof(buf));
 ```
@@ -166,30 +169,29 @@ while (cond && c < INT_MAX)
 char *file_ext = strrchr(filename, '.');
 size_t len = strlen(file_ext);
 ```
-will quite probably crash your program (if there's no dot in `filename`).
+will quite probably crash your program (if there is no dot in `filename`).
 
-Rewrite it as follows to avoid a NULL pointer dereference (and probably a crash).
+Rewrite this code as follows to avoid a NULL pointer dereference (and probably a crash).
 
 ```c
 char *file_ext = strrchr(filename, '.');
 size_t len = file_ext ? strlen(file_ext) : 0;
 ```
 
-**i)** **Validate input**: when it comes to untrsuted input (user supplied parameters, config files, etc), be extra distrustful. Sooner or later the user will enter exactly what you never expected (and the program will misbehave, or directly crash). For example, do not do this:
+**i)** **Validate input**: When it comes to untrsuted input (user supplied parameters, config files, etc), be extra distrustful. Sooner or later the user will enter exactly what you never expected (and the program will misbehave, or directly crash). For example, do not do this:
 ```c
 const char *param = get_param();
 return atoi(param);
 ```
-but this
+but this:
 ```c
 const char *param = get_param();
-const int n = param ? atoi(param) : -1;
+const int n = (param && is_number(param)) ? atoi(param) : -1;
 if (n >= PARAM_MIN && n <= PARAM_MAX) /* Let's say PARM_MIN = 1 and PARAM_MAX = 10 */
 	return n;
 else
 	/* Handle error */
 ```
-
 
 **j)** Keep your functions short (ideally, make them do one thing -and do it well). This helps to make more readable and deduggable code. For the same reason, split code into separate source files whenever possible.
 
@@ -213,7 +215,7 @@ Also, make sure to write [POSIX.1-2008](https://pubs.opengroup.org/onlinepubs/96
 
 ### 3. Memory
 
-Manual memory management is another of the greatest (dis)advantages of C. Use a tool like `valgrind` to make sure your code is not leaking memory. Free `malloc`'ed memory as soon as you don't need it any more. As a plus, compile with `clang` using the following flags to detect undefined behavior and integer overflow at run-time: `-fsanitize=integer -fsanitize=undefined`.
+Manual memory management is another of the greatest (dis)advantages of C. Use a tool like `valgrind` to make sure your code is not leaking memory. Free `malloc`'ed memory as soon as you do not need it any more. As a plus, compile with `clang` using the following flags to detect undefined behavior and integer overflow at run-time: `-fsanitize=integer -fsanitize=undefined`.
 
 ### 4. Static analysis
 
@@ -265,7 +267,7 @@ If not obvious, comment what your code is trying to achieve: there is no good so
 
 **D)** Listing
 
-This is the basic structure of **clifm**: generally speaking, it is just a shell. In between, however, lots of things happen. Leaving aside the above mentioned functions, the most important one is `listdir()`, defined in `listing.c`. Everything related to listing files happens here: reading files in the current directory (via **readdir**(3)), getting file information (via the dirent struct returned by **readdir**(3) itself and **stat**(2)), sorting files (via **qsort**(3)), and storing all this information into a global struct (`file_info`) for future access, for example, to get file properties of a given entry.
+The above describes the basic structure of **clifm**: generally speaking, it is just a shell. In between, however, lots of things happen. Leaving aside the above mentioned functions, the most important one is `list_dir()`, defined in `listing.c`. Everything related to listing files happens here: reading files in the current directory (via **readdir**(3)), getting file information (via the dirent struct returned by **readdir**(3) itself and **stat**(2)), sorting files (via **qsort**(3)), and storing all this information in a global struct (`file_info`) for future access, for example, to get file properties of a given entry.
 
 **E)** Whatever happens later, is just some function or operation invoked by the user and happening on top of the steps described above: opening a file or directory (via the `open_function()` and `cd_function()` functions, in `file_operations.c` and `navigation.c` respectivelly), opening a bookmark (`bookmarks.c`), operating on files (`file_operations.c`), switching to a different profile (`profiles.c`), trashing a file (`trash.c`), searching for a file (`search.c`), running a plugin (`actions.c`), and so on.
 
@@ -310,7 +312,7 @@ This is the basic structure of **clifm**: generally speaking, it is just a shell
 
 **Note**: For the list of dependencies, see the [installation page](https://github.com/leo-arch/clifm/wiki/Introduction#installation).
 
-**CliFM** is compiled using `gcc` (or `clang`) as follows:
+**Clifm** is compiled using `gcc` (or `clang`) as follows:
 
 1)  _Linux_:
 ```sh
@@ -347,13 +349,13 @@ gcc -o clifm *.c -lreadline -lintl -lmagic
 gcc -o clifm *.c -lreadline -ltermcap -lmagic -lnvpair
 ```
 
-**NOTE**: Since compiling in this way only produces a binary file, it is necessary to manually copy the remaining files. See the `install` block of the [Makefile](https://github.com/leo-arch/clifm/blob/master/Makefile).
+**NOTE 1**: Since compiling in this way only produces a binary file, it is necessary to manually copy the remaining files. See the `install` block of the [Makefile](https://github.com/leo-arch/clifm/blob/master/Makefile).
 
 **NOTE 2**: You can drop `-lmagic` if compiling with `_NO_MAGIC`. In the same way, you can drop `-lintl` if compiling with `_NO_GETTEXT`. See below.
 
 **NOTE 3**: If running on _Solaris/Illumos_ consult the [troubleshooting section](https://github.com/leo-arch/clifm/wiki/Troubleshooting#warning-prompt) in case of issues with the warning prompt. The `nvpair` library is used to get files creation time. You can drop `-lnvpair`, however, if compiling with `_NO_SUN_BIRTHTIME`.
 
-**NOTE 4**: If the binary size is an issue, it is recommended to use [upx(1)](https://linux.die.net/man/1/upx) to significantly reduce (50-70%) the size of the executable file (at the expense of some performance):
+**NOTE 4**: If the binary size is an issue, you can use [upx(1)](https://linux.die.net/man/1/upx) to significantly reduce (50-70%) the size of the executable file (at the expense of some performance):
 
 ```sh
 upx clifm
@@ -367,7 +369,7 @@ strip --strip-unneeded --remove-section=.comment --remove-section=.note clifm
 
 ### Compiling features in/out
 
-**Clifm** allows you to enable or disable some features at compile time. If for whatever reason you don't plan to use a certain feature, it is better to remove this feature from the resulting binary: you'll get a (bit) faster and smaller executable. To do this, pass one or more of the following options to the compiler using the `-D` parameter. For example, to get a binary without icons and translation support:
+**Clifm** allows you to enable or disable some features at compile time. If for whatever reason you do not plan to use a certain feature, it is better to remove this feature from the resulting binary: you will get a (bit) faster and smaller executable. To do this, pass one or more of the following options to the compiler using the `-D` parameter. For example, to get a binary without icons and translation support:
 
 ```sh
 gcc ... -D_NO_GETTEXT -D_NO_ICONS ...
@@ -423,4 +425,4 @@ make -f misc/GNU/Makefile _NO_GETTEXT=1 _NO_ICONS=1
 
 ## 6) Plugins
 
-**Clifm**'s plugins, that is, commands or set of commands executed by **Clifm**, could be any executable file, be it a shell script, a binary file (C, Python, Go, Rust, or whatever programming language you like). See the [plugins section](https://github.com/leo-arch/clifm/wiki/Advanced#plugins).
+**Clifm**'s plugins, that is, commands or set of commands executed by **clifm**, can be any executable file, be it a shell script, a binary file (C, Python, Go, Rust, or whatever programming language you like). See the [plugins section](https://github.com/leo-arch/clifm/wiki/Advanced#plugins).
