@@ -2511,8 +2511,8 @@ exec_cmd(char **comm)
 		if ((exit_code = check_auto_second(comm)) != -1)
 			return exit_code;
 
-		if (xargs.stealth_mode == 1	&& bin_name && *bin_name && *comm[0] == *bin_name
-		&& strcmp(comm[0], bin_name) == 0) {
+		if (xargs.stealth_mode == 1 && bin_name && *bin_name
+		&& *comm[0] == *bin_name && strcmp(comm[0], bin_name) == 0) {
 			fprintf(stderr, _("%s: Nested instances are not allowed in "
 				"stealth mode\n"), PROGRAM_NAME);
 			return (exit_code = FUNC_FAILURE);
@@ -2537,7 +2537,7 @@ CHECK_EVENTS:
 	if (watch && event_fd >= 0)
 		read_kqueue();
 #elif defined(GENERIC_FS_MONITOR)
-		check_fs_changes();
+	check_fs_changes();
 #endif /* LINUX_INOTIFY */
 
 	return exit_code;

@@ -563,7 +563,7 @@ check_regex(char *str)
 	return FUNC_FAILURE;
 }
 
-/* Returns the parsed aliased command in an array of strings if
+/* Returns the parsed aliased command in an array of strings if a
  * matching alias is found, or NULL if not. */
 char **
 check_for_alias(char **args)
@@ -589,31 +589,31 @@ check_for_alias(char **args)
 		&& sanitize_cmd(aliases[i].cmd, SNT_GRAL) == FUNC_FAILURE)
 			continue;
 
-		args_n = 0; /* Reset args_n to be used by parse_input_str() */
+		args_n = 0; /* Reset args_n to be used by parse_input_str(). */
 
 		char **alias_cmd = parse_input_str(aliases[i].cmd);
 		if (!alias_cmd) {
-			flags |= FAILED_ALIAS; /* Prevent exec_cmd() from being executed */
+			flags |= FAILED_ALIAS; /* Prevent exec_cmd() from being executed. */
 			return (char **)NULL;
 		}
 
 		size_t j;
-		/* Add input parameters, if any, to alias_comm. Expansions were
-		 * already performed before calling this function. */
+		/* Add input parameters, if any, to alias_cmd. Expansions for these
+		 * parameters were already performed before calling this function. */
 		if (args[1]) {
 			for (j = 1; args[j]; j++) {
-				alias_cmd = xnrealloc(alias_cmd,
-				    ++args_n + 2, sizeof(char *));
+				alias_cmd = xnrealloc(alias_cmd, ++args_n + 2, sizeof(char *));
 				alias_cmd[args_n] = savestring(args[j], strlen(args[j]));
 			}
 		}
 
 		alias_cmd[args_n + 1] = (char *)NULL;
 
-		/* Free original command */
+		/* Free the original command. */
 		for (j = 0; args[j]; j++)
 			free(args[j]);
 		free(args);
+
 		return alias_cmd;
 	}
 

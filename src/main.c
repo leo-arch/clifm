@@ -933,17 +933,17 @@ time_t curdir_mtime = 0;
 static void
 run_and_exit(void)
 {
-	/* 1) Parse input string */
+	/* 1) Parse input string. */
 	int i = 0;
 	char **cmd = parse_input_str(cmd_line_cmd);
 	if (!cmd)
 		exit(EXIT_FAILURE);
 
-	/* 2) Execute input string */
+	/* 2) Execute input string. */
 	char **alias_cmd = check_for_alias(cmd);
 	if (alias_cmd) {
 		/* If an alias is found, check_for_alias() frees CMD and returns
-		 * ALIAS_CMD in its place to be executed by exec_cmd() */
+		 * ALIAS_CMD in its place to be executed by exec_cmd(). */
 		exec_cmd(alias_cmd);
 
 		for (i = 0; alias_cmd[i]; i++)
@@ -965,7 +965,7 @@ run_and_exit(void)
 }
 #endif /* RUN_CMD */
 
-/* This is the main structure of any basic shell (a REPL)
+/* This is the main structure of a basic shell (a REPL)
 	 1 - Grab user input
 	 2 - Parse user input
 	 3 - Execute command
@@ -978,30 +978,29 @@ run_main_loop(void)
 {
 #ifdef RUN_CMD
 	if (cmd_line_cmd)
-		run_and_exit();
+		run_and_exit(); /* No return */
 #endif /* RUN_CMD */
 
 	int i;
-	/* 1) Infinite loop to keep the program running */
+	/* 1) Infinite loop to keep the program running. */
 	while (1) {
-		/* 2) Grab input string from the prompt */
+		/* 2) Grab the input string from the command prompt. */
 		char *input = prompt(PROMPT_SHOW, PROMPT_SCREEN_REFRESH);
 		if (!input)
 			continue;
 
-		/* 3) Parse input string */
+		/* 3) Parse the input string. */
 		char **cmd = parse_input_str(input);
 		free(input);
-		input = (char *)NULL;
 
 		if (!cmd)
 			continue;
 
-		/* 4) Execute input string */
+		/* 4) Execute the command. */
 		char **alias_cmd = check_for_alias(cmd);
 		if (alias_cmd) {
 			/* If an alias is found, check_for_alias() frees CMD and returns
-			 * ALIAS_CMD in its place to be executed by exec_cmd() */
+			 * ALIAS_CMD in its place to be executed by exec_cmd_tm(). */
 			exec_cmd_tm(alias_cmd);
 
 			for (i = 0; alias_cmd[i]; i++)
