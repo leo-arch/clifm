@@ -727,7 +727,7 @@ check_ext_string(const char *ext, size_t *val_len)
 
 /* Returns a pointer to the corresponding color code for the file
  * extension EXT (updating VAL_LEN to the length of this code).
- * The hash table is checked first if we have no hashes conflict. Otherwise,
+ * The hash table is checked first if we have no hash conflicts. Otherwise,
  * a regular string comparison is performed to resolve it. */
 char *
 get_ext_color(const char *ext, size_t *val_len)
@@ -735,9 +735,7 @@ get_ext_color(const char *ext, size_t *val_len)
 	if (!ext || !*ext || !*(++ext) || ext_colors_n == 0)
 		return (char *)NULL;
 
-	/* If the hash field at index 0 of the ext_colors struct is set to zero,
-	 * we have hash conflicts, in which case we fallback to regular string
-	 * comparison. */
+	/* If the hash field at index 0 is set to zero, we have hash conflicts. */
 	if (ext_colors[0].hash != 0)
 		return check_ext_hash(hashme(ext, 0), val_len);
 

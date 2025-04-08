@@ -535,7 +535,7 @@ print_entry_props(const struct fileinfo *props, const struct maxes_t *maxes,
 		construct_blocks_str(props, blocks_str, maxes->blocks);
 
 	static char fc_str[FC_STR_LEN]; *fc_str = '\0';
-	/* FC_MAX is zero if there are no subdirs in the current dir */
+	/* maxes->files_counter is zero if there are no subdirs in the current dir */
 	if (prop_fields.counter != 0 && conf.files_counter != 0
 	&& maxes->files_counter != 0)
 		construct_files_counter(props, fc_str, maxes->files_counter);

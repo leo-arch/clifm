@@ -1146,7 +1146,7 @@ set_locale(void)
 	if (strcmp(nl_langinfo(CODESET), "UTF-8") != 0) {
 		err('w', PRINT_PROMPT, _("%s: Locale is not UTF-8. To avoid "
 			"encoding issues you might want to set an UTF-8 locale. For "
-			"example: export LANG=es_AR.UTF-8\n"), PROGRAM_NAME);
+			"example: 'export LANG=es_AR.UTF-8'.\n"), PROGRAM_NAME);
 	}
 }
 
@@ -1230,8 +1230,8 @@ list_files_and_quit(void)
 				 * #############################
 				 * */
 
-/* 1. Initialize stuff
- * 2. Run the main program loop */
+/* 1. Initialize stuff.
+ * 2. Run the main program loop. */
 int
 main(int argc, char *argv[])
 {

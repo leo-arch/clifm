@@ -1128,6 +1128,7 @@ print_long_mode(size_t *counter, int *reset_pager, const int eln_len,
 			int ret = 0;
 			if (*counter > (size_t)(term_lines - 2))
 				ret = run_pager(-1, reset_pager, &i, counter);
+
 			if (ret == -3) {
 				pager_quit = 1;
 				break;
@@ -1174,12 +1175,12 @@ get_columns(void)
 #endif
 	/* +1 for the space between filenames. */
 
-	/* If LONGEST.NAME_LEN is bigger than terminal columns, N will zero.
-	 * To avoid this: */
+	/* If LONGEST.NAME_LEN is larger than the number of terminal columns,
+	 * N will zero. To avoid this: */
 	if (n < 1)
 		n = 1;
 
-	/* If we have only three files, we don't want four columns */
+	/* If we have only three files, we don't want four columns. */
 	if (n > (size_t)files)
 		n = (size_t)files > 0 ? (size_t)files : 1;
 
@@ -1836,12 +1837,12 @@ pad_filename_new(const filesn_t i, const int termcap_move_right,
 	const int diff = ((int)longest_in_col + COLUMNS_GAP)
 		- ((int)file_info[i].total_entry_len + (conf.no_eln == 1));
 
-	if (termcap_move_right == 0) {
+	if (termcap_move_right == 1) {
+		MOVE_CURSOR_RIGHT(diff);
+	} else {
 		int j = diff;
 		while (--j >= 0)
 			putchar(' ');
-	} else {
-		MOVE_CURSOR_RIGHT(diff);
 	}
 }
 #endif /* TIGHT_COLUMNS */
@@ -1863,12 +1864,12 @@ pad_filename(const int ind_char, const filesn_t i, const int eln_len,
 	}
 
 	const int diff = (int)longest.name_len - cur_len;
-	if (termcap_move_right == 0) {
+	if (termcap_move_right == 1) {
+		MOVE_CURSOR_RIGHT(diff + 1);
+	} else {
 		int j = diff + 1;
 		while (--j >= 0)
 			putchar(' ');
-	} else {
-		MOVE_CURSOR_RIGHT(diff + 1);
 	}
 }
 
@@ -1905,13 +1906,14 @@ list_files_horizontal(size_t *counter, int *reset_pager,
 	pager_quit = pager_help = 0;
 
 	for (i = 0; i < nn; i++) {
-		/* If current entry is in the last column, we need to print a new line char */
+		/* If current entry is in the last column, we need to print a
+		 * new line char. */
 		size_t bcur_cols = cur_cols;
-		if (++cur_cols == columns_n) {
+		if (++cur_cols != columns_n) {
+			last_column = 0;
+		} else {
 			cur_cols = 0;
 			last_column = 1;
-		} else {
-			last_column = 0;
 		}
 
 		int ind_char = (conf.classify != 0);
@@ -2032,13 +2034,13 @@ list_files_vertical(size_t *counter, int *reset_pager,
 		filesn_t backup_file_index = file_index; // Copies of file_index and row_index
 		size_t backup_column_count = column_count; // Copy of column_count
 
-		if (column_count == num_columns) {
+		if (column_count != num_columns) {
+			file_index += num_rows;
+			column_count++;
+		} else {
 			file_index = row_index;
 			row_index++;
 			column_count = 1;
-		} else {
-			file_index += num_rows;
-			column_count++;
 		}
 
 		if (row_index > num_rows)
@@ -3051,7 +3053,12 @@ load_link_info(const int fd, const filesn_t n)
 
 	const char *lname = *tmp ? tmp : file_info[n].name;
 
-	if (S_ISDIR(a.st_mode)) {
+	if (!S_ISDIR(a.st_mode)) {
+		if (conf.color_lnk_as_target == 1)
+			set_link_target_color(lname, &a, n);
+		else
+			file_info[n].color = ln_c;
+	} else {
 		file_info[n].dir = 1;
 		file_info[n].filesn = conf.files_counter == 1
 			? (count_dir(file_info[n].name, NO_CPOP) - 2) : 1;
@@ -3064,11 +3071,6 @@ load_link_info(const int fd, const filesn_t n)
 		 * this case only means EACCESS error. */
 		file_info[n].color = conf.color_lnk_as_target == 1
 			? get_dir_color(lname, &a, dir_files) : ln_c;
-	} else {
-		if (conf.color_lnk_as_target == 1)
-			set_link_target_color(lname, &a, n);
-		else
-			file_info[n].color = ln_c;
 	}
 }
 
@@ -3330,7 +3332,7 @@ list_dir(void)
 			}
 		}
 
-		if (hidden_list	&& check_dothidden(ename, &hidden_list) == 1) {
+		if (hidden_list && check_dothidden(ename, &hidden_list) == 1) {
 			stats.hidden++;
 			excluded_files++;
 			continue;
