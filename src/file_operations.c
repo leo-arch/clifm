@@ -1526,12 +1526,12 @@ vv_rename_files(char **args, const size_t copied)
 	if (conf.autols == 1)
 		reload_dirlist();
 
-	print_reload_msg(SET_SUCCESS_PTR, xs_cb, "%zu file(s) copied\n", copied);
+	print_reload_msg(SET_SUCCESS_PTR, xs_cb, _("%zu file(s) copied\n"), copied);
 	if (renamed > 0) {
 		print_reload_msg(SET_SUCCESS_PTR, xs_cb,
-			"%zu file(s) renamed\n", renamed);
+			_("%zu file(s) renamed\n"), renamed);
 	} else {
-		print_reload_msg(NULL, NULL, "%zu file(s) renamed\n", renamed);
+		print_reload_msg(NULL, NULL, _("%zu file(s) renamed\n"), renamed);
 	}
 
 	for (i = 0; tmp[i]; i++)
@@ -1792,7 +1792,7 @@ check_overwrite(char **args, const int force, size_t *skipped)
 	if (!S_ISDIR(a.st_mode)) {
 		char *p = unescape_str(args[2], 0);
 		if (p && lstat(p, &a) != -1) {
-			snprintf(msg, sizeof(msg), "%s: '%s': Overwrite this file?",
+			snprintf(msg, sizeof(msg), _("%s: '%s': Overwrite this file?"),
 				cmd_name, p);
 			if (rl_get_y_or_n(msg, conf.default_answer.overwrite) == 0) {
 				free(p);
@@ -1828,7 +1828,7 @@ check_overwrite(char **args, const int force, size_t *skipped)
 		if (lstat(buf, &a) == -1)
 			continue;
 
-		snprintf(msg, sizeof(msg), "%s: '%s': Overwrite this file?",
+		snprintf(msg, sizeof(msg), _("%s: '%s': Overwrite this file?"),
 			cmd_name, buf);
 		if (rl_get_y_or_n(msg, conf.default_answer.overwrite) == 0) {
 			/* Nullify this entry. It will be skipped later. */
