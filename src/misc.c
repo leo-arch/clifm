@@ -162,7 +162,7 @@ END:
 	return new_name;
 }
 
-/* Set ELN color according to the current workspace */
+/* Set ELN color according to the current workspace. */
 void
 set_eln_color(void)
 {
@@ -186,7 +186,7 @@ set_eln_color(void)
 		return;
 	}
 
-	/* Remove leading and trainling control characters (\001 and \002)*/
+	/* Remove leading and trailing control characters (\001 and \002). */
 	size_t cl_len = 0;
 	if (*cl == 001) {
 		cl++;
@@ -588,7 +588,7 @@ filter_function(char *arg)
 {
 	if (!arg) {
 		printf(_("Current filter: %c%s\n"), filter.rev == 1 ? '!' : 0,
-			filter.str ? filter.str : "none");
+			filter.str ? filter.str : _("none"));
 		return FUNC_SUCCESS;
 	}
 
@@ -664,7 +664,7 @@ check_new_instance_init_conditions(void)
 	return FUNC_SUCCESS;
 }
 
-/* Just check that DIR exists and is a directory */
+/* Just check if DIR exists and it is a directory. */
 static int
 check_dir(char **dir)
 {
@@ -1743,11 +1743,11 @@ create_virtual_dir(const int user_provided)
 {
 	if (!stdin_tmp_dir || !*stdin_tmp_dir) {
 		if (user_provided == 1) {
-			err('e', PRINT_PROMPT, "%s: Empty buffer for virtual "
-				"directory name. Trying with default value\n", PROGRAM_NAME);
+			err('e', PRINT_PROMPT, _("%s: Empty buffer for virtual "
+				"directory name. Trying with default value\n"), PROGRAM_NAME);
 		} else {
-			err('e', PRINT_PROMPT, "%s: Empty buffer for virtual "
-				"directory name\n", PROGRAM_NAME);
+			err('e', PRINT_PROMPT, _("%s: Empty buffer for virtual "
+				"directory name\n"), PROGRAM_NAME);
 		}
 		return FUNC_FAILURE;
 	}
@@ -1759,8 +1759,8 @@ create_virtual_dir(const int user_provided)
 			: (ret == E_NOEXEC ? NOEXEC_MSG : (char *)NULL));
 
 		if (user_provided == 1) {
-			err('e', PRINT_PROMPT, "%s: mkdir: '%s': %s. Trying with "
-				"default value\n", PROGRAM_NAME, stdin_tmp_dir,
+			err('e', PRINT_PROMPT, _("%s: mkdir: '%s': %s. Trying with "
+				"default value\n"), PROGRAM_NAME, stdin_tmp_dir,
 				errmsg ? errmsg : strerror(ret));
 		} else {
 			err('e', PRINT_PROMPT, "%s: mkdir: '%s': %s\n",
@@ -1792,8 +1792,8 @@ construct_name(char *file, const size_t flen)
 
 	if (!name || !*name) {
 		free(name);
-		err('w', PRINT_PROMPT, "%s: '%s': Error constructing "
-			"filename\n", PROGRAM_NAME, file);
+		err('w', PRINT_PROMPT, _("%s: '%s': Error constructing "
+			"filename\n"), PROGRAM_NAME, file);
 		return (char *)NULL;
 	}
 
@@ -1870,8 +1870,8 @@ gen_symlink(char *file, const char *cwd)
 	free(name);
 
 	if (errno != 0) {
-		err('w', PRINT_PROMPT, "%s: Cannot create symbolic "
-			"link '%s': %s\n", PROGRAM_NAME, dest, strerror(errno));
+		err('w', PRINT_PROMPT, _("%s: Cannot create symbolic "
+			"link '%s': %s\n"), PROGRAM_NAME, dest, strerror(errno));
 		return 0;
 	}
 
@@ -2223,7 +2223,7 @@ bonus_function(void)
 		"At the beginning, software was hardware; but today hardware is "
 		"being absorbed by software",
 		"\"Juremos con gloria morir\"",
-		"\"Given enough eyeballs, all bugs are shallow.\" (Linus' law)",
+		"\"Given enough eyeballs, all bugs are shallow.\" (E. Raymond)",
 		"\"We're gonna need a bigger boat.\" (Caleb)",
 		"\"Ein Verletzter, Alarm, Alarm!\"",
 		"\"There is not knowledge that is not power\"",

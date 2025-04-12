@@ -163,19 +163,20 @@ xregerror(const char *cmd_name, const char *pattern, const int errcode,
  * Based on the sdbm algorithm (see http://www.cse.yorku.ca/~oz/hash.html),
  * released under the public-domain. */
 size_t
-hashme(const char *restrict str, const int case_sensitive) {
+hashme(const char *restrict str, const int case_sensitive)
+{
 	size_t hash = 0;
 
 	/* Two while loops, so that we don't need to check CASE_SENSITIVE for
 	 * each character in STR. */
-	if (case_sensitive == 1) {
+	if (case_sensitive != 1) {
 		while (*str) {
-			hash = (size_t)*str	+ (hash << 6) + (hash << 16) - hash;
+			hash = (size_t)TOUPPER(*str) + (hash << 6) + (hash << 16) - hash;
 			str++;
 		}
 	} else {
 		while (*str) {
-			hash = (size_t)TOUPPER(*str) + (hash << 6) + (hash << 16) - hash;
+			hash = (size_t)*str + (hash << 6) + (hash << 16) - hash;
 			str++;
 		}
 	}

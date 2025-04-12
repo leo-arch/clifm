@@ -414,8 +414,8 @@ is_number(const char *restrict str)
 	return 1;
 }
 
-/* Check if command STR contains a digit and this digit is not the first
- * char of STR. Used by is_internal_cmd() to check for fused parameters in
+/* Check if string STR contains a digit and this digit is not the first
+ * char in STR. Used by is_internal_cmd() to check for fused parameters in
  * internal commands.
  * Returns the index of the digit in STR or -1 if no digit is found. */
 static int
