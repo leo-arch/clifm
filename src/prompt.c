@@ -1319,10 +1319,7 @@ update_trash_indicator(void)
 	trash_files_dir_mtime = a.st_mtime;
 
 	const filesn_t n = count_dir(trash_files_dir, NO_CPOP);
-	if (n <= 2)
-		trash_n = 0;
-	else
-		trash_n = (size_t)n - 2;
+	trash_n = n <= 2 ? 0 : (size_t)n - 2;
 }
 #endif /* !_NO_TRASH */
 

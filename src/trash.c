@@ -55,10 +55,7 @@ count_trashed_files(void)
 	size_t n = 0;
 	if (trash_ok == 1 && trash_files_dir != NULL) {
 		filesn_t ret = count_dir(trash_files_dir, NO_CPOP);
-		if (ret <= 2)
-			n = 0;
-		else
-			n = (size_t)ret - 2;
+		n = ret <= 2 ? 0 : (size_t)ret - 2;
 	}
 
 	return n;

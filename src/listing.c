@@ -2989,8 +2989,13 @@ load_dir_info(const struct stat *a, const filesn_t n)
 		get_dir_icon(n);
 #endif /* !_NO_ICONS */
 
-	file_info[n].filesn = (checks.files_counter == 1
-		? (count_dir(file_info[n].name, NO_CPOP) - 2) : 1);
+	if (checks.files_counter == 1) {
+		/* Avoid count_dir() if we have no access to the current directory. */
+		file_info[n].filesn = file_info[n].user_access == 0 ? -1
+			: count_dir(file_info[n].name, NO_CPOP) - 2;
+	} else {
+		file_info[n].filesn = 1;
+	}
 
 	if (*nd_c && (file_info[n].user_access == 0 || file_info[n].filesn < 0)) {
 		file_info[n].color = nd_c;
@@ -3060,17 +3065,23 @@ load_link_info(const int fd, const filesn_t n)
 			file_info[n].color = ln_c;
 	} else {
 		file_info[n].dir = 1;
+
 		file_info[n].filesn = conf.files_counter == 1
-			? (count_dir(file_info[n].name, NO_CPOP) - 2) : 1;
+			? count_dir(file_info[n].name, NO_CPOP) - 2
+			: 1;
 
-		const filesn_t dir_files = (conf.files_counter == 1)
-			? (file_info[n].filesn == 2 ? 3
-			: file_info[n].filesn) : 3; /* 3 == populated */
+		const filesn_t files_in_dir = conf.files_counter == 1
+			? (file_info[n].filesn > 0 ? 3 : file_info[n].filesn)
+			: 3;
+			/* 3 == populated (we don't care how many files the directory
+			 * actually contains). */
 
-		/* DIR_FILES is negative only if count_dir() failed, which in
-		 * this case only means EACCESS error. */
-		file_info[n].color = conf.color_lnk_as_target == 1
-			? get_dir_color(lname, &a, dir_files) : ln_c;
+		if (files_in_dir < 0 && *nd_c) { /* count_dir() failed. */
+			file_info[n].color = conf.color_lnk_as_target == 1 ? nd_c : ln_c;
+		} else {
+			file_info[n].color = conf.color_lnk_as_target == 1
+				? get_dir_color(lname, &a, files_in_dir) : ln_c;
+		}
 	}
 }
 

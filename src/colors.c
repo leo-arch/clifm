@@ -331,11 +331,17 @@ get_dir_color(const char *filename, const struct stat *a,
 	const int is_oth_w = (a->st_mode & S_IWOTH);
 	const filesn_t links = (filesn_t)a->st_nlink;
 
-	filesn_t files_dir = count > -1 ? count : (links > 2
-		? links : count_dir(filename, CPOP));
+	/* Let's find out whether the directory is populated. A positive value
+	 * means that it is actually populated (it has at least one file,
+	 * not counting self and parent dirs). */
+	const filesn_t files_in_dir = count > -1 ? count : (links > 2
+		? links : count_dir(filename, CPOP) - 2);
+
+	if (files_in_dir < 0 && *nd_c) /* count_dir() failed. */
+		return nd_c;
 
 	char *color = sticky ? (is_oth_w ? tw_c : st_c) : is_oth_w ? ow_c
-		: ((files_dir == 2 || files_dir == 0) ? ed_c : di_c);
+		: (files_in_dir == 0 ? ed_c : di_c);
 
 	return color;
 }

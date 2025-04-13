@@ -998,7 +998,7 @@ hex2rgb(char *hex)
 /* Count files in the directory DIR, including self and parent. If POP is set
  * to 1, the function will just check if the directory is populated (it has at
  * least 3 files, including self and parent).
- * Returns -1 in case of error or an integer (0-INTMAX_MAX) in case of success. */
+ * Returns -1 in case of error or an integer (0-FILESN_MAX) in case of success. */
 filesn_t
 count_dir(const char *dir, const int pop)
 {

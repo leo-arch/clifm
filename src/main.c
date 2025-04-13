@@ -1100,17 +1100,14 @@ check_working_directory(void)
 static inline void
 init_trash(void)
 {
-	if (trash_ok) {
-		filesn_t ret = count_dir(trash_files_dir, NO_CPOP);
-		if (ret <= 2)
-			trash_n = 0;
-		else
-			trash_n = (size_t)ret;
+	if (trash_ok == 1) {
+		const filesn_t ret = count_dir(trash_files_dir, NO_CPOP);
+		trash_n = ret <= 2 ? 0 : (size_t)ret;
 	}
 }
 #endif /* _NO_TRASH */
 
-static void
+static inline void
 get_hostname(void)
 {
 	if (gethostname(hostname, sizeof(hostname)) == -1) {
@@ -1122,7 +1119,7 @@ get_hostname(void)
 }
 
 /* Initialize the file filter struct */
-static void
+static inline void
 init_filter(void)
 {
 	filter.str = (char *)NULL;
@@ -1132,13 +1129,13 @@ init_filter(void)
 }
 
 /* Initialize the msgs struct */
-static void
+static inline void
 init_msgs(void)
 {
 	msgs.error = msgs.notice = msgs.warning = 0;
 }
 
-static void
+static inline void
 set_locale(void)
 {
 	/* Use the locale specified by the environment */
@@ -1150,7 +1147,7 @@ set_locale(void)
 	}
 }
 
-static void
+static inline void
 check_gui(void)
 {
 	/* Running on a graphical environment? */
@@ -1187,7 +1184,7 @@ set_security_paranoid_mode(void)
 #endif /* SECURITY_PARANOID */
 
 #ifdef HAVE_PLEDGE
-static void
+static inline void
 set_pledge(void)
 {
 	if (pledge("stdio rpath wpath cpath dpath tmppath fattr "
