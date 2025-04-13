@@ -992,7 +992,7 @@ static void
 run_main_loop(void)
 {
 #ifdef RUN_CMD
-	if (cmd_line_cmd)
+	if (cmd_line_cmd != NULL)
 		run_and_exit(); /* No return */
 #endif /* RUN_CMD */
 
@@ -1050,7 +1050,7 @@ static inline void
 list_files(void)
 {
 #ifdef RUN_CMD
-	if (cmd_line_cmd)
+	if (cmd_line_cmd != NULL)
 		return;
 #endif /* RUN_CMD */
 

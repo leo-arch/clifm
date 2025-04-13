@@ -134,6 +134,10 @@ init_shell(void)
 		return;
 	}
 
+// TESTING
+	return;
+// TESTING
+
 	reset_term = 1;
 
 	if ((nesting_level = check_nest_level()) > 1) {

@@ -3500,15 +3500,14 @@ list_dir(void)
 		 * ########################################## */
 
 	size_t counter = 0;
-	size_t columns_n = 1;
 
 	/* Get the longest filename. */
 	if (conf.columned == 1 || conf.long_view == 1
 	|| conf.pager_view != PAGER_AUTO)
 		get_longest_filename(n, (size_t)eln_len);
 
-	/* Get number of columns needed to print files in CWD. */
-	columns_n = (conf.pager_view == PAGER_AUTO
+	/* Get the number of columns required to print all filenames. */
+	const size_t columns_n = (conf.pager_view == PAGER_AUTO
 		&& (conf.columned == 0 || conf.long_view == 1)) ? 1 : get_columns();
 
 	set_pager_view((filesn_t)columns_n);
