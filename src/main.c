@@ -929,10 +929,25 @@ time_t curdir_mtime = 0;
 #endif /* LINUX_INOTIFY */
 
 #ifdef RUN_CMD
+# ifndef _NO_TRASH
+static inline void
+init_trash(void)
+{
+	if (trash_ok == 1) {
+		const filesn_t ret = count_dir(trash_files_dir, NO_CPOP);
+		trash_n = ret <= 2 ? 0 : (size_t)ret - 2;
+	}
+}
+# endif /* _NO_TRASH */
+
 /* Run the command passed via --cmd and exit */
 static void
 run_and_exit(void)
 {
+# ifndef _NO_TRASH
+	init_trash();
+# endif /* !_NO_TRASH */
+
 	/* 1) Parse input string. */
 	int i = 0;
 	char **cmd = parse_input_str(cmd_line_cmd);
@@ -943,8 +958,8 @@ run_and_exit(void)
 	char **alias_cmd = check_for_alias(cmd);
 	if (alias_cmd) {
 		/* If an alias is found, check_for_alias() frees CMD and returns
-		 * ALIAS_CMD in its place to be executed by exec_cmd(). */
-		exec_cmd(alias_cmd);
+		 * ALIAS_CMD in its place to be executed by exec_cmd_tm(). */
+		exec_cmd_tm(alias_cmd);
 
 		for (i = 0; alias_cmd[i]; i++)
 			free(alias_cmd[i]);
@@ -953,7 +968,7 @@ run_and_exit(void)
 	}
 
 	if (!(flags & FAILED_ALIAS))
-		exec_cmd(cmd);
+		exec_cmd_tm(cmd);
 	flags &= ~FAILED_ALIAS;
 
 	for (i = 0; cmd[i]; i++)
@@ -1069,7 +1084,7 @@ LIST:
 static inline void
 print_splash_screen(void)
 {
-	if (conf.splash_screen) {
+	if (conf.splash_screen == 1) {
 		splash();
 		conf.splash_screen = 0;
 		CLEAR;
@@ -1095,17 +1110,6 @@ check_working_directory(void)
 		exit(EXIT_FAILURE);
 	}
 }
-
-#ifndef _NO_TRASH
-static inline void
-init_trash(void)
-{
-	if (trash_ok == 1) {
-		const filesn_t ret = count_dir(trash_files_dir, NO_CPOP);
-		trash_n = ret <= 2 ? 0 : (size_t)ret;
-	}
-}
-#endif /* _NO_TRASH */
 
 static inline void
 get_hostname(void)
@@ -1256,7 +1260,6 @@ main(int argc, char *argv[])
 #ifndef _NO_ICONS
 	init_icons_hashes();
 #endif /* !_NO_ICONS */
-/*	init_file_flags(); */
 
 	set_locale();
 
@@ -1370,11 +1373,6 @@ main(int argc, char *argv[])
 	init_shell();
 	initialize_readline();
 	get_prompt_cmds();
-
-#ifndef _NO_TRASH
-	init_trash();
-#endif /* !_NO_TRASH */
-
 	get_hostname();
 	set_env(0);
 
