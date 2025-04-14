@@ -3312,6 +3312,17 @@ list_dir(void)
 
 	file_info = xnmalloc(ENTRY_N + 2, sizeof(struct fileinfo));
 
+	/* Cache used values in local variables for faster access. */
+	const int checks_filter_name = checks.filter_name;
+	const int checks_filter_type = checks.filter_type;
+	const int checks_scanning = checks.scanning;
+	const int checks_icons_use_file_color = checks.icons_use_file_color;
+	const int conf_only_dirs = conf.only_dirs;
+	const int conf_show_hidden = conf.show_hidden;
+	const int conf_follow_symlinks = conf.follow_symlinks;
+	const int conf_long_view = conf.long_view;
+	const int xargs_disk_usage_analyzer = xargs.disk_usage_analyzer;
+
 	const int stat_flag =
 		(conf.follow_symlinks == 1 && conf.long_view == 1
 		&& conf.follow_symlinks_long == 1) ? 0 : AT_SYMLINK_NOFOLLOW;
@@ -3323,7 +3334,7 @@ list_dir(void)
 			continue;
 
 		/* Filter files according to a regex filter */
-		if (checks.filter_name == 1) {
+		if (checks_filter_name == 1) {
 			if (regexec(&regex_exp, ename, 0, NULL, 0) == 0) {
 				if (filter.rev == 1) {
 					excluded_files++;
@@ -3337,7 +3348,7 @@ list_dir(void)
 
 		if (*ename == '.') {
 			stats.hidden++;
-			if (conf.show_hidden == 0) {
+			if (conf_show_hidden == 0) {
 				excluded_files++;
 				continue;
 			}
@@ -3363,7 +3374,7 @@ list_dir(void)
 		}
 
 		/* Filter files according to file type */
-		if (checks.filter_type == 1 && stat_ok == 1
+		if (checks_filter_type == 1 && stat_ok == 1
 		&& exclude_file_type(ename, attr.st_mode, attr.st_nlink,
 		attr.st_size) == FUNC_SUCCESS) {
 			/* Decrease counters: the file won't be displayed */
@@ -3375,8 +3386,8 @@ list_dir(void)
 			continue;
 		}
 
-		if (conf.only_dirs == 1 && stat_ok == 1 && !S_ISDIR(attr.st_mode)
-		&& (conf.follow_symlinks == 0 || !S_ISLNK(attr.st_mode)
+		if (conf_only_dirs == 1 && stat_ok == 1 && !S_ISDIR(attr.st_mode)
+		&& (conf_follow_symlinks == 0 || !S_ISLNK(attr.st_mode)
 		|| get_link_ref(ename) != S_IFDIR)) {
 			excluded_files++;
 			continue;
@@ -3438,17 +3449,17 @@ list_dir(void)
 		default: file_info[n].color = df_c; break;
 		}
 
-		if (checks.scanning == 1 && file_info[n].dir == 1)
+		if (checks_scanning == 1 && file_info[n].dir == 1)
 			print_scanned_file(file_info[n].name);
 
 #ifndef _NO_ICONS
-		if (checks.icons_use_file_color == 1)
+		if (checks_icons_use_file_color == 1)
 			file_info[n].icon_color = file_info[n].color;
 #endif /* !_NO_ICONS */
-		if (conf.long_view == 1 && stat_ok == 1)
+		if (conf_long_view == 1 && stat_ok == 1)
 			set_long_attribs(n, &attr);
 
-		if (xargs.disk_usage_analyzer == 1) {
+		if (xargs_disk_usage_analyzer == 1) {
 			get_largest_file_info(n, &largest_name_size, &largest_name,
 				&largest_color, &total_size);
 		}

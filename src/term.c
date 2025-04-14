@@ -135,6 +135,12 @@ init_shell(void)
 	}
 
 // TESTING
+	own_pid = get_own_pid();
+
+	set_signals_to_ignore();
+	signal(SIGTTIN, SIG_IGN);
+	signal(SIGTTOU, SIG_IGN);
+
 	return;
 // TESTING
 
