@@ -74,8 +74,7 @@
 		&& (n)[1] == '~')) && (n)[(l) - 1] == '#') \
 	|| (*(n) == '~' && (n)[1] == '$') ) )
 
-#define IS_EXEC(s) (((s)->st_mode & S_IXUSR)               \
-	|| ((s)->st_mode & S_IXGRP) || ((s)->st_mode & S_IXOTH))
+#define IS_EXEC(m) (((m) & S_IXUSR) || ((m) & S_IXGRP) || ((m) & S_IXOTH))
 
 #include "autocmds.h"
 #include "aux.h"
@@ -3092,15 +3091,16 @@ load_regfile_info(const struct stat *a, const filesn_t n)
 #ifdef LINUX_FILE_CAPS
 	cap_t cap;
 #endif /* !LINUX_FILE_CAPS */
+	const mode_t mode = a ? a->st_mode : 0;
 
 	if (file_info[n].user_access == 0 && *nf_c) {
 		file_info[n].color = nf_c;
-	} else if (a && (a->st_mode & S_ISUID)) {
+	} else if (mode & S_ISUID) {
 		file_info[n].exec = 1;
 		stats.exec++;
 		stats.suid++;
 		file_info[n].color = su_c;
-	} else if (a && (a->st_mode & S_ISGID)) {
+	} else if (mode & S_ISGID) {
 		file_info[n].exec = 1;
 		stats.exec++;
 		stats.sgid++;
@@ -3115,14 +3115,14 @@ load_regfile_info(const struct stat *a, const filesn_t n)
 		file_info[n].color = ca_c;
 		stats.caps++;
 		cap_free(cap);
-		if (a && IS_EXEC(a)) {
+		if (IS_EXEC(mode)) {
 			file_info[n].exec = 1;
 			stats.exec++;
 		}
 	}
 #endif /* LINUX_FILE_CAPS */
 
-	else if (a && IS_EXEC(a)) {
+	else if (IS_EXEC(mode)) {
 		file_info[n].exec = 1;
 		stats.exec++;
 		file_info[n].color = file_info[n].size == 0 ? ee_c : ex_c;

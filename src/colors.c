@@ -356,8 +356,8 @@ get_file_color(const char *filename, const struct stat *a)
 	UNUSED(filename);
 #endif /* LINUX_FILE_CAPS */
 
-	if (mode & 04000) return su_c; /* SUID */
-	if (mode & 02000) return sg_c; /* SGID */
+	if (mode & S_ISUID) return su_c; /* SUID */
+	if (mode & S_ISGID) return sg_c; /* SGID */
 
 #ifdef LINUX_FILE_CAPS
 	if (conf.check_cap == 1 && (cap = cap_get_file(filename))) {
@@ -366,7 +366,7 @@ get_file_color(const char *filename, const struct stat *a)
 	}
 #endif /* LINUX_FILE_CAPS */
 
-	if ((mode & 00100) || (mode & 00010) || (mode & 00001)) /* Exec */
+	if ((mode & S_IXUSR) || (mode & S_IXGRP) || (mode & S_IXOTH)) /* Exec */
 		return FILE_SIZE_PTR(a) == 0 ? ee_c : ex_c;
 
 	if (a->st_nlink > 1) return mh_c; /* Multi-hardlink */
