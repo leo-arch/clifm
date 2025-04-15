@@ -3000,9 +3000,10 @@ load_dir_info(const struct stat *a, const filesn_t n)
 	if (*nd_c && (file_info[n].user_access == 0 || file_info[n].filesn < 0)) {
 		file_info[n].color = nd_c;
 	} else {
-		file_info[n].color = a ? ((a->st_mode & S_ISVTX)
-			? ((a->st_mode & S_IWOTH) ? tw_c : st_c)
-			: ((a->st_mode & S_IWOTH) ? ow_c
+		const mode_t mode = a ? a->st_mode : 0;
+		file_info[n].color = a ? ((mode & S_ISVTX)
+			? ((mode & S_IWOTH) ? tw_c : st_c)
+			: ((mode & S_IWOTH) ? ow_c
 			: (file_info[n].filesn == 0 ? ed_c : di_c)))
 			: df_c;
 	}

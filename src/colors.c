@@ -324,11 +324,12 @@ char *
 get_dir_color(const char *filename, const struct stat *a,
 	const filesn_t count)
 {
-	if (*nd_c && check_file_access(a->st_mode, a->st_uid, a->st_gid) == 0)
+	const mode_t mode = a->st_mode;
+	if (*nd_c && check_file_access(mode, a->st_uid, a->st_gid) == 0)
 		return nd_c;
 
-	const int sticky = (a->st_mode & S_ISVTX);
-	const int is_oth_w = (a->st_mode & S_IWOTH);
+	const int sticky = (mode & S_ISVTX);
+	const int is_oth_w = (mode & S_IWOTH);
 	const filesn_t links = (filesn_t)a->st_nlink;
 
 	/* Let's find out whether the directory is populated. A positive value
@@ -340,25 +341,24 @@ get_dir_color(const char *filename, const struct stat *a,
 	if (files_in_dir < 0 && *nd_c) /* count_dir() failed. */
 		return nd_c;
 
-	char *color = sticky ? (is_oth_w ? tw_c : st_c) : is_oth_w ? ow_c
-		: (files_in_dir == 0 ? ed_c : di_c);
-
-	return color;
+	return (sticky ? (is_oth_w ? tw_c : st_c) : is_oth_w ? ow_c
+		: (files_in_dir == 0 ? ed_c : di_c));
 }
 
 char *
 get_file_color(const char *filename, const struct stat *a)
 {
 	char *color = (char *)NULL;
+	const mode_t mode = a->st_mode;
 
 #ifdef LINUX_FILE_CAPS
 	cap_t cap;
 #else
 	UNUSED(filename);
 #endif /* LINUX_FILE_CAPS */
-	if (a->st_mode & 04000) { /* SUID */
+	if (mode & 04000) { /* SUID */
 		color = su_c;
-	} else if (a->st_mode & 02000) { /* SGID */
+	} else if (mode & 02000) { /* SGID */
 		color = sg_c;
 	}
 #ifdef LINUX_FILE_CAPS
@@ -367,8 +367,7 @@ get_file_color(const char *filename, const struct stat *a)
 		cap_free(cap);
 	}
 #endif /* LINUX_FILE_CAPS */
-	else if ((a->st_mode & 00100) /* Exec */
-	|| (a->st_mode & 00010) || (a->st_mode & 00001)) {
+	else if ((mode & 00100)	|| (mode & 00010) || (mode & 00001)) { /* Exec */
 		color = FILE_SIZE_PTR(a) == 0 ? ee_c : ex_c;
 	} else if (FILE_SIZE_PTR(a) == 0) {
 		color = ef_c;
