@@ -296,7 +296,7 @@ get_regfile_color(const char *filename, const struct stat *a, size_t *is_ext)
 		return nf_c;
 
 	char *color = get_file_color(filename, a);
-	if (conf.check_ext == 0 || color != fi_c)
+	if (color != fi_c || conf.check_ext == 0)
 		return color ? color : fi_c;
 
 	char *ext = strrchr(filename, '.');
@@ -348,7 +348,6 @@ get_dir_color(const char *filename, const struct stat *a,
 char *
 get_file_color(const char *filename, const struct stat *a)
 {
-	char *color = (char *)NULL;
 	const mode_t mode = a->st_mode;
 
 #ifdef LINUX_FILE_CAPS
@@ -356,28 +355,23 @@ get_file_color(const char *filename, const struct stat *a)
 #else
 	UNUSED(filename);
 #endif /* LINUX_FILE_CAPS */
-	if (mode & 04000) { /* SUID */
-		color = su_c;
-	} else if (mode & 02000) { /* SGID */
-		color = sg_c;
-	}
+
+	if (mode & 04000) return su_c; /* SUID */
+	if (mode & 02000) return sg_c; /* SGID */
+
 #ifdef LINUX_FILE_CAPS
-	else if (conf.check_cap == 1 && (cap = cap_get_file(filename))) {
-		color = ca_c;
+	if (conf.check_cap == 1 && (cap = cap_get_file(filename))) {
 		cap_free(cap);
+		return ca_c;
 	}
 #endif /* LINUX_FILE_CAPS */
-	else if ((mode & 00100)	|| (mode & 00010) || (mode & 00001)) { /* Exec */
-		color = FILE_SIZE_PTR(a) == 0 ? ee_c : ex_c;
-	} else if (FILE_SIZE_PTR(a) == 0) {
-		color = ef_c;
-	} else if (a->st_nlink > 1) { /* Multi-hardlink */
-		color = mh_c;
-	} else { /* Regular file */
-		color = fi_c;
-	}
 
-	return color;
+	if ((mode & 00100) || (mode & 00010) || (mode & 00001)) /* Exec */
+		return FILE_SIZE_PTR(a) == 0 ? ee_c : ex_c;
+
+	if (a->st_nlink > 1) return mh_c; /* Multi-hardlink */
+
+	return (FILE_SIZE_PTR(a) == 0) ? ef_c : fi_c;
 }
 
 /* Validate a hex color code string with this format: RRGGBB-[1-9] or RGB-[1-9]. */
