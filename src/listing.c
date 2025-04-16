@@ -2591,13 +2591,13 @@ list_dir_light(const int autocmd_ret)
 		/* If type is unknown, we might be facing a filesystem not
 		 * supporting d_type, for example, loop devices. In this case,
 		 * try falling back to lstat(2). */
-		if (ent->d_type == DT_UNKNOWN) {
+		if (ent->d_type != DT_UNKNOWN) {
+			file_info[n].type = ent->d_type;
+		} else {
 			struct stat a;
 			if (lstat(ename, &a) == -1)
 				continue;
 			file_info[n].type = get_dt(a.st_mode);
-		} else {
-			file_info[n].type = ent->d_type;
 		}
 #endif /* !_DIRENT_HAVE_D_TYPE */
 
@@ -2877,7 +2877,7 @@ check_extra_file_types(mode_t *mode, const struct stat *a)
 }
 
 static inline void
-load_file_gral_info(const struct stat *a, const filesn_t n)
+load_file_gral_info(const struct stat *a, const filesn_t n, int *have_xattr)
 {
 	if (check_file_access(a->st_mode, a->st_uid, a->st_gid) == 0) {
 		file_info[n].user_access = 0;
@@ -2928,8 +2928,10 @@ load_file_gral_info(const struct stat *a, const filesn_t n)
 #if defined(LINUX_FILE_XATTRS)
 	if (file_info[n].type != DT_LNK
 	&& (checks.xattr == 1 || conf.check_cap == 1)
-	&& listxattr(file_info[n].name, NULL, 0) > 0)
+	&& listxattr(file_info[n].name, NULL, 0) > 0) {
 		file_info[n].xattr = 1;
+		*have_xattr = 1;
+	}
 #endif /* LINUX_FILE_XATTRS */
 
 	time_t btime = (time_t)-1;
@@ -2979,7 +2981,7 @@ load_file_gral_info(const struct stat *a, const filesn_t n)
 }
 
 static inline void
-load_dir_info(const struct stat *a, const filesn_t n)
+load_dir_info(const mode_t mode, const filesn_t n)
 {
 	file_info[n].dir = 1;
 
@@ -2999,8 +3001,7 @@ load_dir_info(const struct stat *a, const filesn_t n)
 	if (*nd_c && (file_info[n].user_access == 0 || file_info[n].filesn < 0)) {
 		file_info[n].color = nd_c;
 	} else {
-		const mode_t mode = a ? a->st_mode : 0;
-		file_info[n].color = a ? ((mode & S_ISVTX)
+		file_info[n].color = mode != 0 ? ((mode & S_ISVTX)
 			? ((mode & S_IWOTH) ? tw_c : st_c)
 			: ((mode & S_IWOTH) ? ow_c
 			: (file_info[n].filesn == 0 ? ed_c : di_c)))
@@ -3086,12 +3087,11 @@ load_link_info(const int fd, const filesn_t n)
 }
 
 static inline void
-load_regfile_info(const struct stat *a, const filesn_t n)
+load_regfile_info(const mode_t mode, const filesn_t n)
 {
 #ifdef LINUX_FILE_CAPS
 	cap_t cap;
 #endif /* !LINUX_FILE_CAPS */
-	const mode_t mode = a ? a->st_mode : 0;
 
 	if (file_info[n].user_access == 0 && *nf_c) {
 		file_info[n].color = nf_c;
@@ -3423,18 +3423,17 @@ list_dir(void)
 			? file_info[n].bytes : wc_xstrlen(ename);
 
 		if (stat_ok == 1) {
-			load_file_gral_info(&attr, n);
-			if (file_info[n].xattr == 1)
-				have_xattr = 1;
+			load_file_gral_info(&attr, n, &have_xattr);
 		} else {
 			file_info[n].type = DT_UNKNOWN;
 			stats.unknown++;
 		}
 
 		switch (file_info[n].type) {
-		case DT_DIR: load_dir_info(stat_ok == 1 ? &attr : NULL, n); break;
+		case DT_DIR: load_dir_info(stat_ok == 1 ? attr.st_mode : 0, n); break;
 		case DT_LNK: load_link_info(fd, n); break;
-		case DT_REG: load_regfile_info(stat_ok == 1 ? &attr : NULL, n); break;
+		case DT_REG:
+			load_regfile_info(stat_ok == 1 ? attr.st_mode : 0, n); break;
 
 		/* For the time being, we have no specific colors for DT_ARCH1,
 		 * DT_ARCH2, and DT_WHT. */
