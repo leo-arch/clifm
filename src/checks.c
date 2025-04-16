@@ -314,35 +314,25 @@ check_file_access(const mode_t mode, const uid_t uid, const gid_t gid)
 	if (user.uid == 0) /* We are root */
 		return 1;
 
-	int f = 0; /* Hold file ownership flags */
-
 	const mode_t val = (mode & (mode_t)~S_IFMT);
-	if (val & S_IRUSR) f |= R_USR;
-	if (val & S_IXUSR) f |= X_USR;
 
-	if (val & S_IRGRP) f |= R_GRP;
-	if (val & S_IXGRP) f |= X_GRP;
+	/* Check user permissions */
+	if ((val & S_IRUSR) && uid == user.uid) {
+		if (!S_ISDIR(mode) || (val & S_IXUSR)) /* Check exec for directories */
+			return 1;
+    }
 
-	if (val & S_IROTH) f |= R_OTH;
-	if (val & S_IXOTH) f |= X_OTH;
+	/* Check group permissions */
+	if ((val & S_IRGRP) && (gid == user.gid || check_user_groups(gid) == 1)) {
+		if (!S_ISDIR(mode) || (val & S_IXGRP)) /* Check exec for directories */
+			return 1;
+    }
 
-	if (S_ISDIR(mode)) {
-		if ((f & R_USR) && (f & X_USR) && uid == user.uid)
+	/* Check other permissions */
+	if ((val & S_IROTH)) {
+		if (!S_ISDIR(mode) || (val & S_IXOTH)) /* Check exec for directories */
 			return 1;
-		if ((f & R_GRP) && (f & X_GRP) && (gid == user.gid
-		|| check_user_groups(gid) == 1))
-			return 1;
-		if ((f & R_OTH) && (f & X_OTH))
-			return 1;
-	} else {
-		if ((f & R_USR) && uid == user.uid)
-			return 1;
-		if ((f & R_GRP) && (gid == user.gid
-		|| check_user_groups(gid) == 1))
-			return 1;
-		if (f & R_OTH)
-			return 1;
-	}
+    }
 
 	return 0;
 }
