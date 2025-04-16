@@ -493,7 +493,7 @@ append_ending_char(const enum comp_type ct)
 	struct stat attr;
 	if (stat(name, &attr) != -1 && S_ISDIR(attr.st_mode)) {
 		/* If not the root directory, append a slash. */
-		if ((*name != '/' || *(name + 1) || ct == TCMP_USERS))
+		if ((*name != '/' || name[1] || ct == TCMP_USERS))
 			rl_insert_text("/");
 	} else {
 		if (rl_end == rl_point && ct != TCMP_OPENWITH && ct != TCMP_TAGS_T

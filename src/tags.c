@@ -649,7 +649,7 @@ rename_tag(char **args)
 		return print_no_such_tag(old);
 
 	if (*old == *new && strcmp(old, new) == 0) {
-		xerror("%s\n", "tag: New and old filenames are the same");
+		xerror("%s\n", _("tag: New and old filenames are the same"));
 		return FUNC_FAILURE;
 	}
 
@@ -664,7 +664,7 @@ rename_tag(char **args)
 		return errno;
 	}
 
-	puts("Successfully renamed tag");
+	puts(_("Successfully renamed tag"));
 	reload_tags();
 	return FUNC_SUCCESS;
 }
