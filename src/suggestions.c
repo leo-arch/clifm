@@ -2165,9 +2165,7 @@ rl_suggestions(const unsigned char c)
 
 	case 'j': /* j command */
 		if (s[1] == ' ' || ((s[1] == 'c' || s[1] == 'p') && s[2] == ' ')) {
-//			if ((printed = check_jcmd(full_line)) != NO_MATCH) {
 			if ((printed = check_jcmd(s)) != NO_MATCH) {
-				zero_offset = 1;
 				goto SUCCESS;
 			} else {
 				goto FAIL;

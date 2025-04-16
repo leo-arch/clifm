@@ -42,11 +42,11 @@ skip_files(const struct dirent *ent)
 {
 	/* In case a directory isn't reacheable, like a failed
 	 * mountpoint... */
-	/*  struct stat file_attrib;
+	/*  struct stat a;
 
-	if (lstat(entry->d_name, &file_attrib) == -1) {
-		fprintf(stderr, _("stat: cannot access '%s': %s\n"),
-				entry->d_name, strerror(errno));
+	if (lstat(ent->d_name, &a) == -1) {
+		fprintf(stderr, _("lstat: cannot access '%s': %s\n"),
+			ent->d_name, strerror(errno));
 		return 0;
 	} */
 
@@ -139,11 +139,11 @@ namecmp(char *s1, char *s2)
 	}
 
 	if (!IS_UTF8_LEAD_BYTE(*s1) && !IS_UTF8_LEAD_BYTE(*s2)) {
-	/* None of the strings starts with a unicode char: compare the first
+	/* None of the strings begins with a unicode char: compare the first
 	 * byte of both strings. */
 		char ac = *s1, bc = *s2;
 
-		if (!conf.case_sens_list) {
+		if (conf.case_sens_list == 0) {
 			ac = (char)TOLOWER(*s1);
 			bc = (char)TOLOWER(*s2);
 		}
@@ -314,11 +314,7 @@ xalphasort(const struct dirent **a, const struct dirent **b)
 	else
 		ret = strcmp((*a)->d_name, (*b)->d_name);
 
-	if (!conf.sort_reverse)
-		return ret;
-
-	/* If sort_reverse, return the opposite value */
-	return (-ret);
+	return conf.sort_reverse == 0 ? ret : -ret;
 }
 
 /* This is a modification of the alphasort function that makes it case
@@ -331,10 +327,7 @@ alphasort_insensitive(const struct dirent **a, const struct dirent **b)
 	const int ret = strcasecmp(((*a)->d_name[0] == '.') ? (*a)->d_name + 1
 	: (*a)->d_name, ((*b)->d_name[0] == '.') ? (*b)->d_name + 1 : (*b)->d_name);
 
-	if (!conf.sort_reverse)
-		return ret;
-
-	return (-ret);
+	return conf.sort_reverse == 0 ? ret : -ret;
 }
 
 char *
@@ -377,10 +370,7 @@ print_sort_method(void)
 static inline void
 toggle_sort_reverse(void)
 {
-	if (conf.sort_reverse)
-		conf.sort_reverse = 0;
-	else
-		conf.sort_reverse = 1;
+	conf.sort_reverse = !conf.sort_reverse;
 }
 
 static inline int

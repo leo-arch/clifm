@@ -1809,8 +1809,6 @@ rl_accept_suggestion(int count, int key)
 		my_insert_text(suggestion_buf, s, _s); break;
 
 	case JCMD_SUG_NOACD:
-		rl_insert_text("cd ");
-		rl_redisplay();
 		my_insert_text(suggestion_buf, NULL, 0);
 		break;
 
