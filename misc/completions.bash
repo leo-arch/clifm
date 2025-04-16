@@ -110,7 +110,6 @@ _clifm ()
         --no-clear-screen
         --no-color
         --no-columns
-        --no-dir-jumper
         --no-file-cap
         --no-file-ext
         --no-file-counter

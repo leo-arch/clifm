@@ -1516,7 +1516,6 @@ and paths\
 \n      --no-clear-screen\t\t Do not clear the screen when listing files\
 \n      --no-color\t\t Disable colors \
 \n      --no-columns\t\t Disable columned file listing\
-\n      --no-dir-jumper\t\t Disable the directory jumper function\
 \n      --no-file-cap\t\t Do not check file capabilities when listing files\
 \n      --no-file-ext\t\t Do not check file extensions when listing files\
 \n      --no-file-counter\t\t Disable the file counter for directories\

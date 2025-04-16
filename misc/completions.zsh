@@ -73,7 +73,6 @@ args=(
 	'--no-clear-screen[do not clear the screen when listing directories]'
 	'--no-color[Run without colors]'
 	'--no-columns[disable columned file listing]'
-	'--no-dir-jumper[disable the directory jumper function]'
 	'--no-file-cap[do not check file capabilities when listing files]'
 	'--no-file-ext[do not check file extensions when listing files]'
 	'--no-file-counter[disable the file counter for directories]'

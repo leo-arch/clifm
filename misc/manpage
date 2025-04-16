@@ -296,9 +296,6 @@ Disable colors.
 \fB\-\-no\-columns\fR
 Disable columned file listing (use a single column).
 .TP
-\fB\-\-no\-dir\-jumper\fR
-Disable the directory jumper function.
-.TP
 \fB\-\-no\-file\-cap\fR
 Do not check file capabilities when listing files (only meaningful for performance reasons).
 .TP
