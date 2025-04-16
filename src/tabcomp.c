@@ -564,8 +564,6 @@ write_completion(char *buf, const size_t offset, const int multi)
 		return;
 
 	} else {
-		if (conf.autocd == 0 && t == TCMP_JUMP)
-			rl_insert_text("cd ");
 		rl_insert_text(buf + offset);
 	}
 
@@ -1662,9 +1660,9 @@ do_some_cleanup(char **buf, char **matches, const char *query,
 	}
 
 	else if (ct == TCMP_JUMP) {
-		if (*lb == 'j' && lb[1] == ' ') {
-			rl_delete_text(0, rl_end);
-			rl_point = rl_end = 0;
+		if (*lb == 'j' && lb[1] == ' ' && lb[2]) {
+			rl_delete_text(2, rl_end);
+			rl_point = rl_end = 2;
 		} else {
 			char *tmp = strstr(lb, "j ");
 			if (tmp && tmp[1] && tmp[2]) {
