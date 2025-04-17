@@ -1594,11 +1594,11 @@ expand_file_type_filter(const char t)
 				f[n++] = strdup(name);
 			break;
 		case 'o':
-			if (file_info[i].color == tw_c || file_info[i].color == ow_c)
+			if (file_info[i].mode & S_IWOTH)
 				f[n++] = strdup(name);
 			break;
 		case 't':
-			if (file_info[i].color == tw_c || file_info[i].color == st_c)
+			if (file_info[i].mode & S_ISVTX)
 				f[n++] = strdup(name);
 			break;
 
@@ -1615,11 +1615,11 @@ expand_file_type_filter(const char t)
 				f[n++] = strdup(name);
 			break;
 		case 'u':
-			if (file_info[i].color == su_c)
+			if (file_info[i].mode & S_ISUID)
 				f[n++] = strdup(name);
 			break;
 		case 'g':
-			if (file_info[i].color == sg_c)
+			if (file_info[i].mode & S_ISGID)
 				f[n++] = strdup(name);
 			break;
 		default: break;

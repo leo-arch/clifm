@@ -528,10 +528,10 @@ static int
 validate_file_type_filter(void)
 {
 	if (!filter.str || !*filter.str || *filter.str != '='
-	|| !*(filter.str + 1) || *(filter.str + 2))
+	|| !filter.str[1] || filter.str[2])
 		return FUNC_FAILURE;
 
-	const char c = *(filter.str + 1);
+	const char c = filter.str[1];
 	if (c == 'b' || c == 'c' || c == 'd' || c == 'f'
 #ifdef SOLARIS_DOORS
 	|| c == 'l' || c == 'p' || c == 's' || c == 'O' || c == 'P')
