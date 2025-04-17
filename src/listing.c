@@ -142,18 +142,21 @@ struct checks_t {
 
 static struct checks_t checks;
 
-static int pager_bk = 0;
-static int dir_out = 0;
-static int pager_quit = 0;
-static int pager_help = 0;
-static int long_view_bk = UNSET;
-
 /* Struct to store information about truncated filenames. */
 struct wtrunc_t {
 	char *wname; /* Address to store filename with replaced control chars */
 	int type; /* Truncation type: with or without file extension. */
 	int diff; /* */
 };
+
+/* Hold default values for the fileinfo struct. */
+static struct fileinfo default_file_info;
+
+static int pager_bk = 0;
+static int dir_out = 0;
+static int pager_quit = 0;
+static int pager_help = 0;
+static int long_view_bk = UNSET;
 
 /* A version of the loop-unswitching optimization: move loop-invariant
  * conditions out of the loop to reduce the number of conditions in each
@@ -2307,25 +2310,26 @@ exclude_file_type(const char *name, const mode_t mode,
 		return filter.rev == 1 ? FUNC_FAILURE : FUNC_SUCCESS;
 }
 
-/* Initialize the file_info struct, mostly in case stat fails. */
-static inline void
-init_fileinfo(const filesn_t n)
+/* Initialize the file_info struct with default values. */
+void
+init_default_file_info(void)
 {
-	file_info[n] = (struct fileinfo){0};
-	file_info[n].color = df_c;
+	static int set = 0;
+	if (set == 1) /* Initialize the struct only once. */
+		return;
+	set = 1;
+
+	default_file_info = (struct fileinfo){0};
+	default_file_info.color = df_c;
 #ifdef _NO_ICONS
-	file_info[n].icon = (char *)NULL;
-	file_info[n].icon_color = df_c;
+	default_file_info.icon_color = df_c;
 #else
-	file_info[n].icon = DEF_FILE_ICON;
-	file_info[n].icon_color = DEF_FILE_ICON_COLOR;
+	default_file_info.icon = DEF_FILE_ICON;
+	default_file_info.icon_color = DEF_FILE_ICON_COLOR;
 #endif /* _NO_ICONS */
-	file_info[n].human_size.str[0] = '\0';
-	file_info[n].human_size.len = 0;
-	file_info[n].human_size.unit = 0;
-	file_info[n].linkn = 1;
-	file_info[n].user_access = 1;
-	file_info[n].size = 1;
+	default_file_info.linkn = 1;
+	default_file_info.user_access = 1;
+	default_file_info.size = 1;
 }
 
 static inline void
@@ -2576,7 +2580,7 @@ list_dir_light(const int autocmd_ret)
 				sizeof(struct fileinfo));
 		}
 
-		init_fileinfo(n);
+		file_info[n] = default_file_info;
 
 		file_info[n].utf8 = is_utf8_name(ename, &file_info[n].bytes);
 		file_info[n].name = xnmalloc(file_info[n].bytes + 1, sizeof(char));
@@ -3247,9 +3251,9 @@ list_dir(void)
 	virtual_dir =
 		(stdin_tmp_dir && strcmp(stdin_tmp_dir, workspaces[cur_ws].path) == 0);
 
-	/* Reset the stats struct */
-	stats = (struct stats_t){0};
+	stats = (struct stats_t){0}; /* Reset the stats struct */
 	init_checks_struct();
+	init_default_file_info();
 
 	if (checks.scanning == 1)
 		print_scanning_message();
@@ -3361,7 +3365,7 @@ list_dir(void)
 			continue;
 		}
 
-		init_fileinfo(n);
+		file_info[n] = default_file_info;
 
 		const int stat_ok =
 			((virtual_dir == 1 ? vt_stat(fd, ent->d_name, &attr)
