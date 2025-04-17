@@ -2264,41 +2264,40 @@ exclude_file_type_light(const unsigned char type)
 /* Returns FUNC_SUCCESS if the file with mode MODE and LINKS number
  * of links must be excluded from the file list, or FUNC_FAILURE. */
 static int
-exclude_file_type(const char *name, const mode_t mode,
+exclude_file_type(const char *restrict name, const mode_t mode,
 	const nlink_t links, const off_t size)
 {
 /* ADD: C = Files with capabilities */
 
-	if (!*(filter.str + 1))
+	if (!filter.str[1])
 		return FUNC_FAILURE;
 
 	struct stat a;
 	int match = 0;
 
-	switch (*(filter.str + 1)) {
+	switch (filter.str[1]) {
 	case 'b': if (S_ISBLK(mode))  match = 1; break;
 	case 'd': if (S_ISDIR(mode))  match = 1; break;
 	case 'D': if (S_ISDIR(mode) && count_dir(name, CPOP) <= 2) match = 1; break;
-#ifdef SOLARIS_DOORS
-	case 'O': if (S_ISDOOR(mode)) match = 1; break;
-	case 'P': if (S_ISPORT(mode)) match = 1; break;
-#endif /* SOLARIS_DOORS */
 	case 'c': if (S_ISCHR(mode))  match = 1; break;
 	case 'f': if (S_ISREG(mode))  match = 1; break;
 	case 'F': if (S_ISREG(mode) && size == 0) match = 1; break;
 	case 'l': if (S_ISLNK(mode))  match = 1; break;
 	case 'L': if (S_ISLNK(mode) && stat(name, &a) == -1) match = 1; break;
+#ifdef SOLARIS_DOORS
+	case 'O': if (S_ISDOOR(mode)) match = 1; break;
+	case 'P': if (S_ISPORT(mode)) match = 1; break;
+#endif /* SOLARIS_DOORS */
 	case 'p': if (S_ISFIFO(mode)) match = 1; break;
 	case 's': if (S_ISSOCK(mode)) match = 1; break;
 
-	case 'g': if (mode & 02000) match = 1; break; /* SGID */
+	case 'g': if (mode & S_ISGID) match = 1; break; /* SGID */
 	case 'h': if (links > 1 && !S_ISDIR(mode)) match = 1; break;
-	case 'o': if (mode & 00002) match = 1; break; /* Other writable */
-	case 't': if (mode & 01000) match = 1; break; /* Sticky */
-	case 'u': if (mode & 04000) match = 1; break; /* SUID */
+	case 'o': if (mode & S_IWOTH) match = 1; break; /* Other writable */
+	case 't': if (mode & S_ISVTX) match = 1; break; /* Sticky */
+	case 'u': if (mode & S_ISUID) match = 1; break; /* SUID */
 	case 'x': /* Executable */
-		if (S_ISREG(mode) && ((mode & 00100) || (mode & 00010)
-		|| (mode & 00001)))
+		if (S_ISREG(mode) && IS_EXEC(mode))
 			match = 1;
 		break;
 	default: return FUNC_FAILURE;
