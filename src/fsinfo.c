@@ -36,7 +36,7 @@
 #elif defined(__sun)
 # include <sys/mnttab.h> /* getmntent() */
 # include <string.h> /* strstr() */
-#endif /* __linux__ */
+#endif /* LINUX_FSINFO */
 
 #if defined(LINUX_FSINFO)
 
@@ -412,4 +412,4 @@ get_dev_mountpoint(const char *file)
 
 #else
 void *_skip_me_fsinfo;
-#endif /* __linux__ */
+#endif /* LINUX_FSINFO */

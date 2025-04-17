@@ -1959,6 +1959,7 @@ cp_mv_file(char **args, const int copy_and_rename, const int force)
 
 	return FUNC_SUCCESS;
 }
+#undef IS_MVCMD
 
 static void
 print_removed_file_info(const struct rm_info info)

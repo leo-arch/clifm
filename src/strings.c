@@ -113,7 +113,7 @@ quote_str(const char *str)
 
 	const size_t len = strlen(str) + 3;
 	char *p = xnmalloc(len, sizeof(char));
-	char quote_char =
+	const char quote_char =
 		conf.quoting_style == QUOTING_STYLE_DOUBLE_QUOTES ? '"' : '\'';
 
 	snprintf(p, len, "%c%s%c", quote_char, str, quote_char);
