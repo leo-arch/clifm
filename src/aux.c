@@ -1015,13 +1015,18 @@ count_dir(const char *dir, const int pop)
 
 	filesn_t c = 0;
 
-	while (readdir(p)) {
-		if (c > FILESN_MAX - 1)
-			break;
-
-		c++;
-		if (pop && c > 2)
-			break;
+	if (pop) {
+		while (readdir(p)) {
+			c++;
+			if (c > 2)
+				break;
+		}
+	} else {
+		while (readdir(p)) {
+			if (c > FILESN_MAX - 1)
+				break;
+			c++;
+		}
 	}
 
 	closedir(p);
