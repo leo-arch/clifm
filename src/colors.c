@@ -2806,6 +2806,9 @@ get_colorschemes(void)
 	if (!data_dir)
 		goto END;
 
+	if (schemes_total < 0) /* count_dir() failed */
+		schemes_total = 0;
+
 	char sys_colors_dir[PATH_MAX + 1];
 	snprintf(sys_colors_dir, sizeof(sys_colors_dir), "%s/%s/colors",
 		data_dir, PROGRAM_NAME);
@@ -2813,10 +2816,11 @@ get_colorschemes(void)
 	if (stat(sys_colors_dir, &attr) == -1)
 		goto END;
 
-	int total_tmp = schemes_total;
-	schemes_total += ((int)count_dir(sys_colors_dir, NO_CPOP) - 2);
+	const int total_tmp = schemes_total;
+	const int n = (int)count_dir(sys_colors_dir, NO_CPOP) - 2;
+	schemes_total += (n > 0 ? n : 0);
 
-	if (schemes_total <= total_tmp)
+	if (schemes_total <= total_tmp) /* No extra color schemes */
 		goto END;
 
 	if (!(dir_p = opendir(sys_colors_dir))) {
@@ -2828,7 +2832,7 @@ get_colorschemes(void)
 	color_schemes = xnrealloc(color_schemes,
 		(size_t)schemes_total + 2, sizeof(char *));
 
-	size_t i_tmp = i;
+	const size_t i_tmp = i;
 
 	while ((ent = readdir(dir_p)) != NULL && i < (size_t)schemes_total) {
 		if (is_valid_colorscheme_name(ent->d_name) == 0
