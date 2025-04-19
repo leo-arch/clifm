@@ -2812,7 +2812,7 @@ get_colorschemes(void)
 	snprintf(sys_colors_dir, sizeof(sys_colors_dir), "%s/%s/colors",
 		data_dir, PROGRAM_NAME);
 
-	const int n = (int)count_dir(sys_colors_dir,NO_CPOP) - 2;
+	const int n = (int)count_dir(sys_colors_dir, NO_CPOP) - 2;
 	if (n <= 0)
 		goto END;
 
