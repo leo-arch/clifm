@@ -757,9 +757,7 @@ strip_color_line(const char *str, const char mode)
 	switch (mode) {
 	case 't': /* di=01;31: */
 		while (*str) {
-			if ((*str >= '0' && *str <= '9') || (*str >= 'a' && *str <= 'z')
-			|| (*str >= 'A' && *str <= 'Z')
-			|| *str == '=' || *str == ';' || *str == ':'
+			if (IS_ALNUM(*str) || *str == '=' || *str == ';' || *str == ':'
 			|| *str == RGB_COLOR_PREFIX || *str == COLOR256_PREFIX
 			|| *str == '-' || *str == '_')
 				{buf[len] = *str; len++;}
@@ -769,8 +767,7 @@ strip_color_line(const char *str, const char mode)
 
 	case 'x': /* *.tar=01;31: */
 		while (*str) {
-			if ((*str >= '0' && *str <= '9') || (*str >= 'a' && *str <= 'z')
-			|| (*str >= 'A' && *str <= 'Z') || *str == '*' || *str == '.'
+			if (IS_ALNUM(*str) || *str == '*' || *str == '.'
 			|| *str == '=' || *str == ';' || *str == ':'
 			|| *str == RGB_COLOR_PREFIX || *str == COLOR256_PREFIX
 			|| *str == '-' || *str == '_')
@@ -1125,7 +1122,7 @@ color256_to_ansi(char *s)
 	char *q = strchr(s + 1, '-');
 	if (q) {
 		*q = '\0';
-		if (q[1] >= '0' && q[1] <= '9' && !q[2])
+		if (IS_DIGIT(q[1]) && !q[2])
 			attr = q[1] - '0';
 	}
 
@@ -1390,7 +1387,7 @@ set_shades(char *line, const int type)
 
 		if (p) {
 			*p = '\0';
-			if (p[1] && p[1] >= '0' && p[1] <= '9' && !p[2])
+			if (p[1] && IS_DIGIT(p[1]) && !p[2])
 				color_attr = (uint8_t)(p[1] - '0');
 		}
 
@@ -1996,7 +1993,7 @@ store_definition(char *str)
 		val_len = strlen(value);
 	}
 
-	if ((*value >= 'A' && *value <= 'Z') || (*value >= 'a' && *value <= 'z')) {
+	if (IS_ALPHA(*value) || IS_ALPHA_UP(*value)) {
 		char *ret = check_names(value);
 		if (ret) {
 			value = ret;
@@ -2780,13 +2777,8 @@ get_colorschemes(void)
 	size_t i = 0;
 
 	if (colors_dir
-	&& (schemes_total = (int)count_dir(colors_dir, NO_CPOP) - 2) > 0) {
-		if (!(dir_p = opendir(colors_dir))) {
-			err('e', PRINT_PROMPT, "opendir: %s: %s\n", colors_dir,
-				strerror(errno));
-			return 0;
-		}
-
+	&& (schemes_total = (int)count_dir(colors_dir, NO_CPOP) - 2) > 0
+	&& (dir_p = opendir(colors_dir)) != NULL) {
 		color_schemes = xnrealloc(color_schemes,
 			(size_t)schemes_total + 2, sizeof(char *));
 
@@ -2802,7 +2794,7 @@ get_colorschemes(void)
 		color_schemes[i] = (char *)NULL;
 	}
 
-	if (!data_dir)
+	if (!data_dir || !*data_dir)
 		goto END;
 
 	if (schemes_total < 0) /* count_dir() failed */
@@ -2818,11 +2810,8 @@ get_colorschemes(void)
 
 	schemes_total += n;
 
-	if (!(dir_p = opendir(sys_colors_dir))) {
-		err('e', PRINT_PROMPT, "opendir: %s: %s\n", sys_colors_dir,
-			strerror(errno));
+	if (!(dir_p = opendir(sys_colors_dir)))
 		goto END;
-	}
 
 	color_schemes = xnrealloc(color_schemes,
 		(size_t)schemes_total + 2, sizeof(char *));
