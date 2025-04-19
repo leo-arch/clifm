@@ -2774,13 +2774,12 @@ get_colorschemes(void)
 	if (color_schemes && cschemes_n > 0)
 		return cschemes_n;
 
-	struct stat attr;
 	int schemes_total = 0;
 	struct dirent *ent;
 	DIR *dir_p;
 	size_t i = 0;
 
-	if (colors_dir && stat(colors_dir, &attr) != -1
+	if (colors_dir
 	&& (schemes_total = (int)count_dir(colors_dir, NO_CPOP) - 2) > 0) {
 		if (!(dir_p = opendir(colors_dir))) {
 			err('e', PRINT_PROMPT, "opendir: %s: %s\n", colors_dir,
@@ -2813,15 +2812,11 @@ get_colorschemes(void)
 	snprintf(sys_colors_dir, sizeof(sys_colors_dir), "%s/%s/colors",
 		data_dir, PROGRAM_NAME);
 
-	if (stat(sys_colors_dir, &attr) == -1)
+	const int n = (int)count_dir(sys_colors_dir,NO_CPOP) - 2;
+	if (n <= 0)
 		goto END;
 
-	const int total_tmp = schemes_total;
-	const int n = (int)count_dir(sys_colors_dir, NO_CPOP) - 2;
-	schemes_total += (n > 0 ? n : 0);
-
-	if (schemes_total <= total_tmp) /* No extra color schemes */
-		goto END;
+	schemes_total += n;
 
 	if (!(dir_p = opendir(sys_colors_dir))) {
 		err('e', PRINT_PROMPT, "opendir: %s: %s\n", sys_colors_dir,
