@@ -530,7 +530,7 @@ toggle_history(const char *arg)
 
 	switch (*arg) {
 	case 'o':
-		hist_status = (*(arg + 1) == 'n' ? 1 : 0);
+		hist_status = (arg[1] == 'n' ? 1 : 0);
 		return print_hist_status();
 	case 's': return print_hist_status();
 	default: puts(_(HISTORY_USAGE)); return FUNC_FAILURE;

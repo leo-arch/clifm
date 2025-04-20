@@ -114,6 +114,11 @@
 # define COLUMNS_GAP 2
 #endif
 
+#define ICONS_ELN       0
+#define ICONS_NO_ELN    1
+#define NO_ICONS_ELN    2
+#define NO_ICONS_NO_ELN 3
+
 /* Information about the longest filename in the curent list of files. */
 struct longest_t {
 	size_t fc_len;   /* Length of the file counter (if a directory). */
@@ -137,7 +142,7 @@ struct checks_t {
 	int scanning;
 	int time_follows_sort;
 	int xattr;
-	int pad0;
+	int list_format;
 };
 
 static struct checks_t checks;
@@ -203,6 +208,11 @@ init_checks_struct(void)
 	checks.time_follows_sort = (conf.time_follows_sort == 1
 		&& conf.sort >= SATIME && conf.sort <= SMTIME);
 	checks.xattr = (conf.long_view == 1 && prop_fields.xattr == 1);
+
+	if (conf.icons == 1)
+		checks.list_format = conf.no_eln == 1 ? ICONS_NO_ELN : ICONS_ELN;
+	else
+		checks.list_format = conf.no_eln == 1 ? NO_ICONS_NO_ELN : NO_ICONS_ELN;
 }
 
 #if !defined(_NO_ICONS)
@@ -980,7 +990,7 @@ get_ind_char(const filesn_t index, char **ind_chr)
 	}
 
 	if (file_info[index].symlink == 1 && checks.lnk_char == 1) {
-		*ind_chr = (term_caps.unicode == 1 ? LINK_STR_U : LINK_STR);
+		*ind_chr = term_caps.unicode == 1 ? LINK_STR_U : LINK_STR;
 		return lc_c;
 	}
 
@@ -1310,7 +1320,8 @@ print_entry_color(int *ind_char, const filesn_t i, const int pad,
 	const int max_namelen)
 {
 	*ind_char = 0;
-	const char *end_color = file_info[i].dir == 1 ? fc_c : df_c;
+	const char *end_color =
+		(file_info[i].dir == 1 && conf.classify == 1) ? fc_c : df_c;
 
 	struct wtrunc_t wtrunc = (struct wtrunc_t){0};
 	const char *n = construct_filename(i, &wtrunc, max_namelen);
@@ -1320,88 +1331,81 @@ print_entry_color(int *ind_char, const filesn_t i, const int pad,
 	char *ind_chr = (char *)NULL;
 	const char *ind_chr_color = get_ind_char(i, &ind_chr);
 
+	switch (checks.list_format) {
 #ifndef _NO_ICONS
-	if (conf.icons == 1) {
-		if (conf.no_eln == 1) {
-			if (wtrunc.type > 0) {
-				xprintf("%s%s%s%s%s%s%s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
-					ind_chr_color, ind_chr, df_c,
-					file_info[i].icon_color, file_info[i].icon,
-					checks.icons_gap, file_info[i].color, (wchar_t *)n,
-					trunc_diff, tt_c, TRUNC_FILE_CHR,
-					wtrunc.type == TRUNC_EXT ? file_info[i].color : "",
-					wtrunc.type == TRUNC_EXT ? file_info[i].ext_name : "",
-					end_color);
-			} else {
-				xprintf("%s%s%s%s%s%s%s%s%s", ind_chr_color, ind_chr, df_c,
-					file_info[i].icon_color, file_info[i].icon,
-					checks.icons_gap, file_info[i].color, n, end_color);
-			}
+	case ICONS_NO_ELN:
+		if (wtrunc.type > 0) {
+			xprintf("%s%s%s%s%s%s%s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
+				ind_chr_color, ind_chr, df_c,
+				file_info[i].icon_color, file_info[i].icon,
+				checks.icons_gap, file_info[i].color, (wchar_t *)n,
+				trunc_diff, tt_c, TRUNC_FILE_CHR,
+				wtrunc.type == TRUNC_EXT ? file_info[i].color : "",
+				wtrunc.type == TRUNC_EXT ? file_info[i].ext_name : "",
+				end_color);
 		} else {
-			if (wtrunc.type > 0) {
-				xprintf("%s%*jd%s%s%s%s%s%s%s%s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
-					el_c, pad, (intmax_t)i + 1, df_c, ind_chr_color, ind_chr,
-					df_c, file_info[i].icon_color, file_info[i].icon,
-					checks.icons_gap, file_info[i].color, (wchar_t *)n,
-					trunc_diff, tt_c, TRUNC_FILE_CHR,
-					wtrunc.type == TRUNC_EXT ? file_info[i].color : "",
-					wtrunc.type == TRUNC_EXT ? file_info[i].ext_name : "",
-					end_color);
-			} else {
-				xprintf("%s%*jd%s%s%s%s%s%s%s%s%s%s", el_c, pad,
-					(intmax_t)i + 1, df_c, ind_chr_color, ind_chr, df_c,
-					file_info[i].icon_color, file_info[i].icon,
-					checks.icons_gap, file_info[i].color, n, end_color);
-			}
+			xprintf("%s%s%s%s%s%s%s%s%s", ind_chr_color, ind_chr, df_c,
+				file_info[i].icon_color, file_info[i].icon,
+				checks.icons_gap, file_info[i].color, n, end_color);
 		}
-	} else
+		break;
+	case ICONS_ELN:
+		if (wtrunc.type > 0) {
+			xprintf("%s%*jd%s%s%s%s%s%s%s%s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
+				el_c, pad, (intmax_t)i + 1, df_c, ind_chr_color, ind_chr,
+				df_c, file_info[i].icon_color, file_info[i].icon,
+				checks.icons_gap, file_info[i].color, (wchar_t *)n,
+				trunc_diff, tt_c, TRUNC_FILE_CHR,
+				wtrunc.type == TRUNC_EXT ? file_info[i].color : "",
+				wtrunc.type == TRUNC_EXT ? file_info[i].ext_name : "",
+				end_color);
+		} else {
+			xprintf("%s%*jd%s%s%s%s%s%s%s%s%s%s", el_c, pad,
+				(intmax_t)i + 1, df_c, ind_chr_color, ind_chr, df_c,
+				file_info[i].icon_color, file_info[i].icon,
+				checks.icons_gap, file_info[i].color, n, end_color);
+		}
+		break;
 #endif /* !_NO_ICONS */
-	{
-		if (conf.no_eln == 1) {
-			if (wtrunc.type > 0) {
-				xprintf("%s%s%s%s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s", ind_chr_color,
-					ind_chr, df_c, file_info[i].color, (wchar_t *)n, trunc_diff,
-					tt_c, TRUNC_FILE_CHR,
-					wtrunc.type == TRUNC_EXT ? file_info[i].color : "",
-					wtrunc.type == TRUNC_EXT ? file_info[i].ext_name : "",
-					end_color);
-			} else {
-				xprintf("%s%s%s%s%s%s", ind_chr_color, ind_chr,
-					df_c, file_info[i].color, n, end_color);
-			}
+	case NO_ICONS_NO_ELN:
+		if (wtrunc.type > 0) {
+			xprintf("%s%s%s%s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s", ind_chr_color,
+				ind_chr, df_c, file_info[i].color, (wchar_t *)n, trunc_diff,
+				tt_c, TRUNC_FILE_CHR,
+				wtrunc.type == TRUNC_EXT ? file_info[i].color : "",
+				wtrunc.type == TRUNC_EXT ? file_info[i].ext_name : "",
+				end_color);
 		} else {
-			if (wtrunc.type > 0) {
-				xprintf("%s%*jd%s%s%s%s%s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
-					el_c, pad, (intmax_t)i + 1, df_c, ind_chr_color, ind_chr,
-					df_c, file_info[i].color, (wchar_t *)n,
-					trunc_diff, tt_c, TRUNC_FILE_CHR,
-					wtrunc.type == TRUNC_EXT ? file_info[i].color : "",
-					wtrunc.type == TRUNC_EXT ? file_info[i].ext_name : "",
-					end_color);
-			} else {
-				xprintf("%s%*jd%s%s%s%s%s%s%s", el_c, pad, (intmax_t)i + 1,
-					df_c, ind_chr_color, ind_chr, df_c,
-					file_info[i].color, n, end_color);
-			}
+			xprintf("%s%s%s%s%s%s", ind_chr_color, ind_chr,
+				df_c, file_info[i].color, n, end_color);
 		}
+		break;
+	case NO_ICONS_ELN:
+		if (wtrunc.type > 0) {
+			xprintf("%s%*jd%s%s%s%s%s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
+				el_c, pad, (intmax_t)i + 1, df_c, ind_chr_color, ind_chr,
+				df_c, file_info[i].color, (wchar_t *)n,
+				trunc_diff, tt_c, TRUNC_FILE_CHR,
+				wtrunc.type == TRUNC_EXT ? file_info[i].color : "",
+				wtrunc.type == TRUNC_EXT ? file_info[i].ext_name : "",
+				end_color);
+		} else {
+			xprintf("%s%*jd%s%s%s%s%s%s%s", el_c, pad, (intmax_t)i + 1,
+				df_c, ind_chr_color, ind_chr, df_c,
+				file_info[i].color, n, end_color);
+		}
+		break;
+	default: break;
 	}
 
-	if (conf.classify == 1) {
-		/* Append directory indicator and file counter */
-		switch (file_info[i].type) {
-		case DT_DIR: /* fallthrough */
-		case DT_LNK:
-			if (file_info[i].dir == 1)
-				putchar(DIR_CHR);
-			if (file_info[i].filesn > 0 && conf.files_counter == 1)
-				fputs(xitoa(file_info[i].filesn), stdout);
-			break;
-		default: break;
-		}
-	}
-
-	if (end_color == fc_c)
+	if (end_color == fc_c) {
+		/* We have a directory and classification is on: append directory
+		 * indicator and file counter. */
+		putchar(DIR_CHR);
+		if (file_info[i].filesn > 0 && conf.files_counter == 1)
+			fputs(xitoa(file_info[i].filesn), stdout);
 		fputs(df_c, stdout);
+	}
 
 	free(wtrunc.wname);
 }
@@ -1417,50 +1421,51 @@ print_entry_nocolor(int *ind_char, const filesn_t i, const int pad,
 	char *ind_chr = (char *)NULL;
 	(void)get_ind_char(i, &ind_chr);
 
+	switch (checks.list_format) {
 #ifndef _NO_ICONS
-	if (conf.icons == 1) {
-		if (conf.no_eln == 1) {
-			if (wtrunc.type > 0) {
-				xprintf("%s%s%s%ls%s%c%s", ind_chr, file_info[i].icon,
-					checks.icons_gap, (wchar_t *)n, trunc_diff,
-					TRUNC_FILE_CHR, wtrunc.type == TRUNC_EXT
-					? file_info[i].ext_name : "");
-			} else {
-				xprintf("%s%s%s%s", ind_chr, file_info[i].icon,
-					checks.icons_gap, n);
-			}
+	case ICONS_NO_ELN:
+		if (wtrunc.type > 0) {
+			xprintf("%s%s%s%ls%s%c%s", ind_chr, file_info[i].icon,
+				checks.icons_gap, (wchar_t *)n, trunc_diff,
+				TRUNC_FILE_CHR, wtrunc.type == TRUNC_EXT
+				? file_info[i].ext_name : "");
 		} else {
-			if (wtrunc.type > 0) {
-				xprintf("%s%*jd%s%s%s%s%ls%s%c%s", el_c, pad, (intmax_t)i + 1,
-					df_c, ind_chr, file_info[i].icon, checks.icons_gap,
-					(wchar_t *)n, trunc_diff, TRUNC_FILE_CHR,
-					wtrunc.type == TRUNC_EXT ? file_info[i].ext_name : "");
-			} else {
-				xprintf("%s%*jd%s%s%s%s%s", el_c, pad, (intmax_t)i + 1, df_c,
-					ind_chr, file_info[i].icon,	checks.icons_gap, n);
-			}
+			xprintf("%s%s%s%s", ind_chr, file_info[i].icon,
+				checks.icons_gap, n);
 		}
-	} else
+		break;
+	case ICONS_ELN:
+		if (wtrunc.type > 0) {
+			xprintf("%s%*jd%s%s%s%s%ls%s%c%s", el_c, pad, (intmax_t)i + 1,
+				df_c, ind_chr, file_info[i].icon, checks.icons_gap,
+				(wchar_t *)n, trunc_diff, TRUNC_FILE_CHR,
+				wtrunc.type == TRUNC_EXT ? file_info[i].ext_name : "");
+		} else {
+			xprintf("%s%*jd%s%s%s%s%s", el_c, pad, (intmax_t)i + 1, df_c,
+				ind_chr, file_info[i].icon,	checks.icons_gap, n);
+		}
+		break;
 #endif /* !_NO_ICONS */
-	{
-		if (conf.no_eln == 1) {
-			if (wtrunc.type > 0) {
-				xprintf("%s%ls%s%c%s", ind_chr, (wchar_t *)n,
-					trunc_diff, TRUNC_FILE_CHR,
-					wtrunc.type == TRUNC_EXT ? file_info[i].ext_name : "");
-			} else {
-				xprintf("%s%s", ind_chr, n);
-			}
+	case NO_ICONS_NO_ELN:
+		if (wtrunc.type > 0) {
+			xprintf("%s%ls%s%c%s", ind_chr, (wchar_t *)n,
+				trunc_diff, TRUNC_FILE_CHR,
+				wtrunc.type == TRUNC_EXT ? file_info[i].ext_name : "");
 		} else {
-			if (wtrunc.type > 0) {
-				xprintf("%s%*jd%s%s%ls%s%c%s", el_c, pad, (intmax_t)i + 1,
-					df_c, ind_chr, (wchar_t *)n, trunc_diff, TRUNC_FILE_CHR,
-					wtrunc.type == TRUNC_EXT ? file_info[i].ext_name : "");
-			} else {
-				xprintf("%s%*jd%s%s%s", el_c, pad, (intmax_t)i + 1,
-					df_c, ind_chr, n);
-			}
+			xprintf("%s%s", ind_chr, n);
 		}
+		break;
+	case NO_ICONS_ELN:
+		if (wtrunc.type > 0) {
+			xprintf("%s%*jd%s%s%ls%s%c%s", el_c, pad, (intmax_t)i + 1,
+				df_c, ind_chr, (wchar_t *)n, trunc_diff, TRUNC_FILE_CHR,
+				wtrunc.type == TRUNC_EXT ? file_info[i].ext_name : "");
+		} else {
+			xprintf("%s%*jd%s%s%s", el_c, pad, (intmax_t)i + 1,
+				df_c, ind_chr, n);
+		}
+		break;
+	default: break;
 	}
 
 	if (conf.classify == 1) {
@@ -1476,7 +1481,7 @@ print_entry_nocolor(int *ind_char, const filesn_t i, const int pad,
 		case DT_LNK:
 			if (file_info[i].color == or_c) {
 				putchar(BRK_LNK_CHR);
-			} else if (file_info[i].dir) {
+			} else if (file_info[i].dir == 1) {
 				*ind_char = 0;
 				putchar(DIR_CHR);
 				if (file_info[i].filesn > 0 && conf.files_counter == 1)
@@ -1524,67 +1529,65 @@ print_entry_color_light(int *ind_char, const filesn_t i,
 
 	const char *trunc_diff = wtrunc.diff > 0 ? gen_diff_str(wtrunc.diff) : "";
 
+	switch (checks.list_format) {
 #ifndef _NO_ICONS
-	if (conf.icons == 1) {
-		if (xargs.icons_use_file_color == 1)
-			file_info[i].icon_color = file_info[i].color;
-
-		if (conf.no_eln == 1) {
-			if (wtrunc.type > 0) {
-				xprintf("%s%s%s%s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
-					file_info[i].icon_color, file_info[i].icon,
-					checks.icons_gap, file_info[i].color, (wchar_t *)n,
-					trunc_diff, tt_c, TRUNC_FILE_CHR,
-					wtrunc.type == TRUNC_EXT ? file_info[i].color : "",
-					wtrunc.type == TRUNC_EXT ? file_info[i].ext_name : "",
-					end_color);
-			} else {
-				xprintf("%s%s%s%s%s%s", file_info[i].icon_color,
-					file_info[i].icon, checks.icons_gap,
-					file_info[i].color, n, end_color);
-			}
+	case ICONS_NO_ELN:
+		if (wtrunc.type > 0) {
+			xprintf("%s%s%s%s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
+				file_info[i].icon_color, file_info[i].icon,
+				checks.icons_gap, file_info[i].color, (wchar_t *)n,
+				trunc_diff, tt_c, TRUNC_FILE_CHR,
+				wtrunc.type == TRUNC_EXT ? file_info[i].color : "",
+				wtrunc.type == TRUNC_EXT ? file_info[i].ext_name : "",
+				end_color);
 		} else {
-			if (wtrunc.type > 0) {
-				xprintf("%s%*jd%s %s%s%s%s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
-					el_c, pad, (intmax_t)i + 1, df_c, file_info[i].icon_color,
-					file_info[i].icon, checks.icons_gap, file_info[i].color,
-					(wchar_t *)n, trunc_diff, tt_c, TRUNC_FILE_CHR,
-					wtrunc.type == TRUNC_EXT ? file_info[i].color : "",
-					wtrunc.type == TRUNC_EXT ? file_info[i].ext_name : "",
-					end_color);
-			} else {
-				xprintf("%s%*jd%s %s%s%s%s%s%s", el_c, pad, (intmax_t)i + 1,
-					df_c, file_info[i].icon_color, file_info[i].icon,
-					checks.icons_gap, file_info[i].color, n, end_color);
-			}
+			xprintf("%s%s%s%s%s%s", file_info[i].icon_color,
+				file_info[i].icon, checks.icons_gap,
+				file_info[i].color, n, end_color);
 		}
-	} else
-#endif /* _NO_ICONS */
-	{
-		if (conf.no_eln == 1) {
-			if (wtrunc.type > 0) {
-				xprintf("%s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
-					file_info[i].color, (wchar_t *)n,
-					trunc_diff, tt_c, TRUNC_FILE_CHR,
-					wtrunc.type == TRUNC_EXT ? file_info[i].color : "",
-					wtrunc.type == TRUNC_EXT ? file_info[i].ext_name : "",
-					end_color);
-			} else {
-				xprintf("%s%s%s", file_info[i].color, n, end_color);
-			}
+		break;
+	case ICONS_ELN:
+		if (wtrunc.type > 0) {
+			xprintf("%s%*jd%s %s%s%s%s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
+				el_c, pad, (intmax_t)i + 1, df_c, file_info[i].icon_color,
+				file_info[i].icon, checks.icons_gap, file_info[i].color,
+				(wchar_t *)n, trunc_diff, tt_c, TRUNC_FILE_CHR,
+				wtrunc.type == TRUNC_EXT ? file_info[i].color : "",
+				wtrunc.type == TRUNC_EXT ? file_info[i].ext_name : "",
+				end_color);
 		} else {
-			if (wtrunc.type > 0) {
-				xprintf("%s%*jd%s %s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
-					el_c, pad, (intmax_t)i + 1, df_c, file_info[i].color,
-					(wchar_t *)n, trunc_diff, tt_c, TRUNC_FILE_CHR,
-					wtrunc.type == TRUNC_EXT ? file_info[i].color : "",
-					wtrunc.type == TRUNC_EXT ? file_info[i].ext_name : "",
-					end_color);
-			} else {
-				xprintf("%s%*jd%s %s%s%s", el_c, pad, (intmax_t)i + 1, df_c,
-					file_info[i].color, n, end_color);
-			}
+			xprintf("%s%*jd%s %s%s%s%s%s%s", el_c, pad, (intmax_t)i + 1,
+				df_c, file_info[i].icon_color, file_info[i].icon,
+				checks.icons_gap, file_info[i].color, n, end_color);
 		}
+		break;
+#endif /* !_NO_ICONS */
+	case NO_ICONS_NO_ELN:
+		if (wtrunc.type > 0) {
+			xprintf("%s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
+				file_info[i].color, (wchar_t *)n,
+				trunc_diff, tt_c, TRUNC_FILE_CHR,
+				wtrunc.type == TRUNC_EXT ? file_info[i].color : "",
+				wtrunc.type == TRUNC_EXT ? file_info[i].ext_name : "",
+				end_color);
+		} else {
+			xprintf("%s%s%s", file_info[i].color, n, end_color);
+		}
+		break;
+	case NO_ICONS_ELN:
+		if (wtrunc.type > 0) {
+			xprintf("%s%*jd%s %s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
+				el_c, pad, (intmax_t)i + 1, df_c, file_info[i].color,
+				(wchar_t *)n, trunc_diff, tt_c, TRUNC_FILE_CHR,
+				wtrunc.type == TRUNC_EXT ? file_info[i].color : "",
+				wtrunc.type == TRUNC_EXT ? file_info[i].ext_name : "",
+				end_color);
+		} else {
+			xprintf("%s%*jd%s %s%s%s", el_c, pad, (intmax_t)i + 1, df_c,
+				file_info[i].color, n, end_color);
+		}
+		break;
+	default: break;
 	}
 
 	if (file_info[i].dir == 1 && conf.classify == 1) {
@@ -1608,46 +1611,47 @@ print_entry_nocolor_light(int *ind_char, const filesn_t i,
 
 	const char *trunc_diff = wtrunc.diff > 0 ? gen_diff_str(wtrunc.diff) : "";
 
+	switch (checks.list_format) {
 #ifndef _NO_ICONS
-	if (conf.icons == 1) {
-		if (conf.no_eln == 1) {
-			if (wtrunc.type > 0) {
-				xprintf("%s%s%ls%s%c%s", file_info[i].icon,
-					checks.icons_gap, (wchar_t *)n, trunc_diff, TRUNC_FILE_CHR,
-					wtrunc.type == TRUNC_EXT ? file_info[i].ext_name : "");
-			} else {
-				xprintf("%s%s%s", file_info[i].icon, checks.icons_gap, n);
-			}
+	case ICONS_NO_ELN:
+		if (wtrunc.type > 0) {
+			xprintf("%s%s%ls%s%c%s", file_info[i].icon,
+				checks.icons_gap, (wchar_t *)n, trunc_diff, TRUNC_FILE_CHR,
+				wtrunc.type == TRUNC_EXT ? file_info[i].ext_name : "");
 		} else {
-			if (wtrunc.type > 0) {
-				xprintf("%s%*jd%s %s%s%ls%s%c%s", el_c, pad, (intmax_t)i + 1,
-					df_c, file_info[i].icon, checks.icons_gap, (wchar_t *)n,
-					trunc_diff, TRUNC_FILE_CHR, wtrunc.type == TRUNC_EXT
-					? file_info[i].ext_name : "");
-			} else {
-				xprintf("%s%*jd%s %s%s%s", el_c, pad, (intmax_t)i + 1, df_c,
-					file_info[i].icon, checks.icons_gap, n);
-			}
+			xprintf("%s%s%s", file_info[i].icon, checks.icons_gap, n);
 		}
-	} else
-#endif /* _NO_ICONS */
-	{
-		if (conf.no_eln == 1) {
-			if (wtrunc.type > 0) {
-				xprintf("%ls%s%c%s", (wchar_t *)n, trunc_diff, TRUNC_FILE_CHR,
-					wtrunc.type == TRUNC_EXT ? file_info[i].ext_name : "");
-			} else {
-				fputs(file_info[i].name, stdout);
-			}
+		break;
+	case ICONS_ELN:
+		if (wtrunc.type > 0) {
+			xprintf("%s%*jd%s %s%s%ls%s%c%s", el_c, pad, (intmax_t)i + 1,
+				df_c, file_info[i].icon, checks.icons_gap, (wchar_t *)n,
+				trunc_diff, TRUNC_FILE_CHR, wtrunc.type == TRUNC_EXT
+				? file_info[i].ext_name : "");
 		} else {
-			if (wtrunc.type > 0) {
-				xprintf("%s%*jd%s %ls%s%c%s", el_c, pad, (intmax_t)i + 1,
-					df_c, (wchar_t *)n, trunc_diff, TRUNC_FILE_CHR,
-					wtrunc.type == TRUNC_EXT ? file_info[i].ext_name : "");
-			} else {
-				xprintf("%s%*jd%s %s", el_c, pad, (intmax_t)i + 1, df_c, n);
-			}
+			xprintf("%s%*jd%s %s%s%s", el_c, pad, (intmax_t)i + 1, df_c,
+				file_info[i].icon, checks.icons_gap, n);
 		}
+		break;
+#endif /* !_NO_ICONS */
+	case NO_ICONS_NO_ELN:
+		if (wtrunc.type > 0) {
+			xprintf("%ls%s%c%s", (wchar_t *)n, trunc_diff, TRUNC_FILE_CHR,
+				wtrunc.type == TRUNC_EXT ? file_info[i].ext_name : "");
+		} else {
+			fputs(file_info[i].name, stdout);
+		}
+		break;
+	case NO_ICONS_ELN:
+		if (wtrunc.type > 0) {
+			xprintf("%s%*jd%s %ls%s%c%s", el_c, pad, (intmax_t)i + 1,
+				df_c, (wchar_t *)n, trunc_diff, TRUNC_FILE_CHR,
+				wtrunc.type == TRUNC_EXT ? file_info[i].ext_name : "");
+		} else {
+			xprintf("%s%*jd%s %s", el_c, pad, (intmax_t)i + 1, df_c, n);
+		}
+		break;
+	default: break;
 	}
 
 	if (conf.classify == 1) {
@@ -3320,7 +3324,9 @@ list_dir(void)
 	const int checks_filter_name = checks.filter_name;
 	const int checks_filter_type = checks.filter_type;
 	const int checks_scanning = checks.scanning;
+#ifndef _NO_ICONS
 	const int checks_icons_use_file_color = checks.icons_use_file_color;
+#endif /* !_NO_ICONS */
 	const int conf_only_dirs = conf.only_dirs;
 	const int conf_show_hidden = conf.show_hidden;
 	const int conf_follow_symlinks = conf.follow_symlinks;
