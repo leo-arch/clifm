@@ -400,9 +400,13 @@ if (S_ISNWK(mode)) return 'n'; // HP/UX: network special file
  * actually store creation times: the value of __st_birthtim is always zero.
 #elif defined(__OpenBSD__)
 # define ST_BTIME __st_birthtim */
-# elif defined(__NetBSD__) || (defined(__APPLE__) && !defined(__ppc__) \
-&& !defined(__i386__))
+# elif defined(__NetBSD__)
 #  define ST_BTIME st_birthtimespec
+# elif defined(__APPLE__)
+#  include <AvailabilityMacros.h>
+#  if MAC_OS_X_VERSION_MIN_REQUIRED >= 1060
+#   define ST_BTIME st_birthtimespec
+#  endif
 # elif defined(__FreeBSD__) || defined(__CYGWIN__)
 #  define ST_BTIME st_birthtim
 # elif defined(__HAIKU__)
