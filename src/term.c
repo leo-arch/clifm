@@ -149,8 +149,8 @@ set_signals_to_ignore(void)
 	sigaction(SIGQUIT, &sa, NULL);
 	sigaction(SIGTSTP, &sa, NULL);
 	sigaction(SIGTERM, &sa, NULL);
-//	sigaction(SIGTTIN, &sa, NULL);
-//	sigaction(SIGTTOU, &sa, NULL);
+	sigaction(SIGTTIN, &sa, NULL);
+	sigaction(SIGTTOU, &sa, NULL);
 
 #ifndef _BE_POSIX
 	sa.sa_handler = sigwinch_handler;
