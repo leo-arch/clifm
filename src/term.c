@@ -121,6 +121,40 @@ FALLBACK:
 	return (getenv("CLIFM") ? 2 : 1);
 }
 
+#ifndef _BE_POSIX
+/* Get new window size and update/refresh the screen accordingly */
+static void
+sigwinch_handler(int sig)
+{
+	UNUSED(sig);
+	if (xargs.refresh_on_resize == 0 || conf.pager == 1 || kbind_busy == 1)
+		return;
+
+	get_term_size();
+	flags |= DELAYED_REFRESH;
+}
+#endif /* !_BE_POSIX */
+
+static void
+set_signals_to_ignore(void)
+{
+	struct sigaction sa;
+
+	memset(&sa, 0, sizeof(sa));
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = 0;
+	sa.sa_handler = SIG_IGN;
+
+	sigaction(SIGINT, &sa, NULL);
+	sigaction(SIGQUIT, &sa, NULL);
+	sigaction(SIGTSTP, &sa, NULL);
+
+#ifndef _BE_POSIX
+	sa.sa_handler = sigwinch_handler;
+	sigaction(SIGWINCH, &sa, NULL);
+#endif /* !_BE_POSIX */
+}
+
 /* Keep track of attributes of the shell. Make sure the shell is running
  * interactively as the foreground job before proceeding.
  * Based on https://www.gnu.org/software/libc/manual/html_node/Initializing-the-Shell.html#Initializing-the-Shell

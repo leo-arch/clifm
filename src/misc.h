@@ -53,7 +53,6 @@ int  print_reload_msg(const char *ptr, const char *color, const char *msg, ...);
 int  pin_directory(char *dir);
 void save_last_path(char *last_path_tmp);
 void set_eln_color(void);
-void set_signals_to_ignore(void);
 void set_filter_type(const char c);
 void splash(void);
 int  unpin_dir(void);
