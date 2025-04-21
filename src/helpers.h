@@ -2022,7 +2022,6 @@ extern char
 	*alt_mimelist_file,
 	*alt_preview_file,
 	*alt_profile,
-	*bin_name,
 	*bm_file,
 	*cmds_log_file,
 	*colors_dir,

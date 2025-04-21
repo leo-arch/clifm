@@ -88,29 +88,6 @@ typedef char *rl_cpvfunc_t;
 # include "view.h" /* preview_function */
 #endif /* !_NO_LIRA */
 
-/* Prevent the user from killing the program via the 'kill',
- * 'pkill' or 'killall' commands, from within CliFM itself.
- * Otherwise, the program will be forcefully terminated without
- * freeing allocated memory. */
-static int
-graceful_quit(char **args)
-{
-	if (!args || !args[0])
-		return FUNC_FAILURE;
-
-	size_t i;
-	for (i = 1; args[i]; i++) {
-		if ((strcmp(args[0], "kill") == 0 && atoi(args[i]) == (int)own_pid)
-		|| ((strcmp(args[0], "killall") == 0 || strcmp(args[0], "pkill") == 0)
-		&& bin_name && strcmp(args[i], bin_name) == 0)) {
-			xerror(_("%s: To gracefully quit enter 'q'\n"), PROGRAM_NAME);
-			return FUNC_FAILURE;
-		}
-	}
-
-	return FUNC_SUCCESS;
-}
-
 #if !defined(__CYGWIN__)
 /* Get current modification time for each path in PATH and compare it to
  * the cached time (in paths[n].mtime).
@@ -266,13 +243,6 @@ check_shell_cmd_conditions(char **args)
 		xerror("%s: '%s': %s\n", conf.autocd == 1 ? "cd" : "open",
 			args[0], strerror(ENOENT));
 		return conf.autocd == 1 ? FUNC_FAILURE : E_NOTFOUND;
-	}
-
-	/* Prevent ungraceful exit */
-	if ((*args[0] == 'k' || *args[0] == 'p') && (strcmp(args[0], "kill") == 0
-	|| strcmp(args[0], "killall") == 0 || strcmp(args[0], "pkill") == 0)) {
-		if (graceful_quit(args) != FUNC_SUCCESS)
-			return FUNC_FAILURE;
 	}
 
 	if (conf.ext_cmd_ok == 0) {
@@ -2510,13 +2480,6 @@ exec_cmd(char **args)
 		/* #  AUTOCD & AUTO-OPEN (2) # */
 		if ((exit_code = check_auto_second(args)) != -1)
 			return exit_code;
-
-		if (xargs.stealth_mode == 1 && bin_name && *bin_name
-		&& *args[0] == *bin_name && strcmp(args[0], bin_name) == 0) {
-			fprintf(stderr, _("%s: Nested instances are not allowed in "
-				"stealth mode\n"), PROGRAM_NAME);
-			return (exit_code = FUNC_FAILURE);
-		}
 
 		/* #  EXTERNAL/SHELL COMMANDS # */
 		if ((exit_code = run_shell_cmd(args)) == FUNC_FAILURE)

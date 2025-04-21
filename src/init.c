@@ -522,15 +522,6 @@ backup_argv(const int argc, char **argv)
 {
 	argc_bk = argc;
 	argv_bk = argv;
-
-	/* Let's store the executable base name, excluding the path.
-	 * Done to detect and disallow nested instances (see exec.c). */
-	char *n = strrchr(argv[0], '/');
-	if (n && n[1])
-		bin_name = savestring(n + 1, strlen(n + 1));
-	else
-		bin_name = savestring(argv[0], strlen(argv[0]));
-
 	return FUNC_SUCCESS;
 }
 

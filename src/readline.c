@@ -4631,9 +4631,8 @@ initialize_readline(void)
 #endif /* VANILLA_READLINE */
 
 	/* Set the name of the program using readline. Mostly used for
-	 * conditional constructs in the inputrc file */
-	if (bin_name && *bin_name)
-		rl_readline_name = bin_name;
+	 * conditional constructs in the inputrc file. */
+	rl_readline_name = PROGRAM_NAME;
 
 	disable_rl_conflicting_kbinds();
 	set_rl_init_file();

@@ -1450,7 +1450,6 @@ free_stuff(void)
 
 	handle_last_path();
 
-	free(bin_name);
 	free_bookmarks();
 	free(conf.encoded_prompt);
 	free_dirlist();

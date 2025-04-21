@@ -148,6 +148,9 @@ set_signals_to_ignore(void)
 	sigaction(SIGINT, &sa, NULL);
 	sigaction(SIGQUIT, &sa, NULL);
 	sigaction(SIGTSTP, &sa, NULL);
+	sigaction(SIGTERM, &sa, NULL);
+//	sigaction(SIGTTIN, &sa, NULL);
+//	sigaction(SIGTTOU, &sa, NULL);
 
 #ifndef _BE_POSIX
 	sa.sa_handler = sigwinch_handler;
@@ -170,11 +173,7 @@ init_shell(void)
 
 // TESTING
 	own_pid = get_own_pid();
-
 	set_signals_to_ignore();
-	signal(SIGTTIN, SIG_IGN);
-	signal(SIGTTOU, SIG_IGN);
-
 	return;
 // TESTING
 

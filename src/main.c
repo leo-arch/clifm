@@ -257,7 +257,6 @@ char
 	*alt_mimelist_file = (char *)NULL,
 	*alt_preview_file = (char *)NULL,
 	*alt_profile = (char *)NULL,
-	*bin_name = (char *)NULL,
 	*bm_file = (char *)NULL,
 	*cmds_log_file = (char *)NULL,
 	*colors_dir = (char *)NULL,
