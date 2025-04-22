@@ -34,6 +34,9 @@
 #include "misc.h"   /* gen_diff_str() */
 #include "properties.h" /* get_color_age, get_color_size, get_file_perms */
 
+/* Remaining space in the properties string buffer. */
+static size_t buf_rem_space = 0;
+
 static char *
 get_ext_info_long(const struct fileinfo *props, const size_t name_len,
 	int *trunc, size_t *ext_len)
@@ -176,28 +179,30 @@ construct_and_print_filename(const struct fileinfo *props,
 		trunc == TRUNC_EXT ? df_c : "");
 }
 
-static void
-construct_file_size(const struct fileinfo *props, char *size_str,
+static size_t
+gen_size(const struct fileinfo *props, char *size_str,
 	const int size_max, const int file_perm)
 {
 	if (prop_fields.size == 0) {
 		*size_str = '\0';
-		return;
+		return 0;
 	}
 
+	int bytes = 0;
+
 	if (props->stat_err == 1) {
-		snprintf(size_str, SIZE_STR_LEN, "%*s", size_max
+		bytes = snprintf(size_str, buf_rem_space, "%*s", size_max
 			+ (prop_fields.size == PROP_SIZE_HUMAN), UNKNOWN_STR);
-		return;
+		return bytes > 0 ? (size_t)bytes : 0;
 	}
 
 	const int no_dir_access =
 		(file_perm == 0 && props->dir == 1 && conf.full_dir_size == 1);
 	if (S_ISCHR(props->mode) || S_ISBLK(props->mode) || no_dir_access == 1) {
-		snprintf(size_str, SIZE_STR_LEN, "%s%*c%s", dn_c, size_max
+		bytes = snprintf(size_str, buf_rem_space, "%s%*c%s", dn_c, size_max
 			+ (prop_fields.size == PROP_SIZE_HUMAN),
 			no_dir_access == 1 ? UNKNOWN_CHR : '-', df_c);
-		return;
+		return bytes > 0 ? (size_t)bytes : 0;
 	}
 
 	const off_t size = (FILE_TYPE_NON_ZERO_SIZE(props->mode)
@@ -215,11 +220,11 @@ construct_file_size(const struct fileinfo *props, char *size_str,
 	}
 
 	if (prop_fields.size != PROP_SIZE_HUMAN) {
-		snprintf(size_str, SIZE_STR_LEN, "%s%*jd%s%c", csize,
+		bytes = snprintf(size_str, buf_rem_space, "%s%*jd%s%c", csize,
 			(props->du_status != 0 && size_max > 0) ? size_max - 1 : size_max,
 			(intmax_t)size, df_c,
 			props->du_status != 0 ? DU_ERR_CHAR : 0);
-		return;
+		return bytes > 0 ? (size_t)bytes : 0;
 	}
 
 	const int du_err = (props->dir == 1 && conf.full_dir_size == 1
@@ -228,16 +233,20 @@ construct_file_size(const struct fileinfo *props, char *size_str,
 		? (du_err == 1 ? "\x1b[1m" : "")
 		: (du_err == 1 ? xf_cb : dim_c);
 
-	snprintf(size_str, SIZE_STR_LEN, "%s%*s%s%c\x1b[0m%s",
+	bytes = snprintf(size_str, buf_rem_space, "%s%*s%s%c\x1b[0m%s",
 		csize, size_max,
 		*props->human_size.str ? props->human_size.str : UNKNOWN_STR,
 		unit_color, props->human_size.unit, df_c);
+
+	return bytes > 0 ? (size_t)bytes : 0;
 }
 
-static void
-construct_file_perms(const mode_t mode, char *perm_str, const char file_type,
+static size_t
+gen_perms(const mode_t mode, char *perm_str, const char file_type,
 	const char *ctype)
 {
+	int bytes = 0;
+
 	static char tmp_ctype[MAX_COLOR + 1];
 	xstrsncpy(tmp_ctype, (file_type == UNK_PCHR ? df_c : ctype),
 		sizeof(tmp_ctype));
@@ -246,7 +255,7 @@ construct_file_perms(const mode_t mode, char *perm_str, const char file_type,
 
 	if (prop_fields.perm == PERM_SYMBOLIC) {
 		const struct perms_t perms = get_file_perms(mode);
-		snprintf(perm_str, PERM_STR_LEN,
+		bytes = snprintf(perm_str, buf_rem_space,
 			"%s%c%s/%s%c%s%c%s%c%s.%s%c%s%c%s%c%s.%s%c%s%c%s%c%s",
 			tmp_ctype, file_type, dn_c,
 			perms.cur, perms.ur, perms.cuw, perms.uw, perms.cux, perms.ux, dn_c,
@@ -254,9 +263,12 @@ construct_file_perms(const mode_t mode, char *perm_str, const char file_type,
 			perms.cor, perms.or, perms.cow, perms.ow, perms.cox, perms.ox, df_c);
 
 	} else /* PERM_NUMERIC */ {
-		snprintf(perm_str, PERM_STR_LEN, "%s%04o%s", do_c, mode & 07777, df_c);
+		bytes = snprintf(perm_str, PERM_STR_LEN,
+			"%s%04o%s", do_c, mode & 07777, df_c);
 
 	}
+
+	return bytes > 0 ? (size_t)bytes : 0;
 }
 
 static char *
@@ -285,8 +297,8 @@ get_time_char(void)
  * silence this warning until we find a better approach. */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-nonliteral"
-static void
-construct_timestamp(char *time_str, const struct fileinfo *props)
+static size_t
+gen_time(char *time_str, const struct fileinfo *props)
 {
 	const time_t t = props->ltime;
 
@@ -334,16 +346,19 @@ construct_timestamp(char *time_str, const struct fileinfo *props)
 		xstrsncpy(file_time, invalid_time_str, sizeof(file_time));
 	}
 
-	snprintf(time_str, TIME_STR_LEN, "%s%s%s%s%s", cdate, *file_time
-		? file_time : UNKNOWN_STR, dt_c,
+	int bytes = snprintf(time_str, buf_rem_space, "%s%s%s%s%s", cdate,
+		*file_time ? file_time : UNKNOWN_STR, dt_c,
 		conf.timestamp_mark == 1 ? get_time_char() : "", df_c);
+
+	return bytes > 0 ? (size_t)bytes : 0;
 }
 #pragma GCC diagnostic pop
 
-static void
-construct_id_field(const struct fileinfo *props, char *id_str,
+static size_t
+gen_id(const struct fileinfo *props, char *id_str,
 	const struct maxes_t *maxes, const int file_perm)
 {
+	int bytes = 0;
 	const char *uid_color =
 		(file_perm == 1 && conf.colorize == 1) ? du_c : df_c;
 
@@ -355,18 +370,18 @@ construct_id_field(const struct fileinfo *props, char *id_str,
 	if (prop_fields.no_group == 1) {
 		if (prop_fields.ids == PROP_ID_NUM) {
 			if (props->stat_err == 1) {
-				snprintf(id_str, ID_STR_LEN, "%s%*s%s", uid_color,
+				bytes = snprintf(id_str, buf_rem_space, "%s%*s%s", uid_color,
 					maxes->id_user, UNKNOWN_STR, df_c);
 			} else {
-				snprintf(id_str, ID_STR_LEN, "%s%*u%s", uid_color,
+				bytes = snprintf(id_str, buf_rem_space, "%s%*u%s", uid_color,
 					maxes->id_user, props->uid, df_c);
 			}
 		} else { /* PROPS_ID_NAME */
-			snprintf(id_str, ID_STR_LEN, "%s%-*s%s", uid_color,
+			bytes = snprintf(id_str, buf_rem_space, "%s%-*s%s", uid_color,
 				maxes->id_user, USER_NAME, df_c);
 		}
 
-		return;
+		return bytes > 0 ? (size_t)bytes : 0;
 	}
 
 	const char *gid_color = conf.colorize == 0 ? "" :
@@ -374,38 +389,41 @@ construct_id_field(const struct fileinfo *props, char *id_str,
 
 	if (prop_fields.ids == PROP_ID_NUM) {
 		if (props->stat_err == 1) {
-			snprintf(id_str, ID_STR_LEN, "%s%*c %*c",
+			bytes = snprintf(id_str, buf_rem_space, "%s%*c %*c",
 				df_c, maxes->id_user, UNKNOWN_CHR,
 				maxes->id_group, UNKNOWN_CHR);
 		} else {
-			snprintf(id_str, ID_STR_LEN, "%s%*u %s%*u%s",
+			bytes = snprintf(id_str, buf_rem_space, "%s%*u %s%*u%s",
 				uid_color, maxes->id_user, props->uid,
 				gid_color, maxes->id_group, props->gid, df_c);
 		}
 	} else { /* PROPS_ID_NAME */
-		snprintf(id_str, ID_STR_LEN, "%s%-*s %s%-*s%s",
+		bytes = snprintf(id_str, buf_rem_space, "%s%-*s %s%-*s%s",
 			uid_color, maxes->id_user, USER_NAME,
 			props->stat_err == 1 ? "" : gid_color,
 			maxes->id_group, GROUP_NAME, df_c);
 	}
-
 #undef USER_NAME
 #undef GROUP_NAME
+	return bytes > 0 ? (size_t)bytes : 0;
 }
 
-static void
-construct_files_counter(const struct fileinfo *props, char *fc_str,
+static size_t
+gen_filecounter(const struct fileinfo *props, char *fc_str,
 	const int max)
 {
+	int bytes = 0;
+
 	if (props->filesn > 0) {
-		snprintf(fc_str, FC_STR_LEN, "%s%*d%s", fc_c, max,
+		bytes = snprintf(fc_str, buf_rem_space, "%s%*d%s", fc_c, max,
 			(int)props->filesn, df_c);
 	} else {
-		snprintf(fc_str, FC_STR_LEN, "%s%*c%s", dn_c, max,
+		bytes = snprintf(fc_str, buf_rem_space, "%s%*c%s", dn_c, max,
 			props->filesn < 0 ? UNKNOWN_CHR /* Dir with no read permission */
-			: (props->dir == 1 ? '0' : '-'),
-			df_c);
+			: (props->dir == 1 ? '0' : '-'), df_c);
 	}
+
+	return bytes > 0 ? (size_t)bytes : 0;
 }
 
 static void
@@ -448,41 +466,53 @@ set_file_type_and_color(const struct fileinfo *props, char *type, char **color)
 		*color = df_c;
 }
 
-static void
-construct_inode_num(const struct fileinfo *props, char *ino_str, const int max)
+static size_t
+gen_inode(const struct fileinfo *props, char *ino_str, const int max)
 {
+	int bytes = 0;
+
 	if (props->stat_err == 1) {
-		snprintf(ino_str, INO_STR_LEN, "\x1b[0m%*s%s", max, UNKNOWN_STR, df_c);
-		return;
+		bytes = snprintf(ino_str, buf_rem_space,
+			"\x1b[0m%*s%s", max, UNKNOWN_STR, df_c);
+	} else {
+		bytes = snprintf(ino_str, buf_rem_space, "\x1b[0m%s%*ju%s", de_c,
+			max, (uintmax_t)props->inode, df_c);
 	}
 
-	snprintf(ino_str, INO_STR_LEN, "\x1b[0m%s%*ju%s", de_c,
-		max, (uintmax_t)props->inode, df_c);
+	return bytes > 0 ? (size_t)bytes : 0;
 }
 
-static void
-construct_links_str(const struct fileinfo *props, char *links_str, const int max)
+static size_t
+gen_links(const struct fileinfo *props, char *links_str, const int max)
 {
+	int bytes = 0;
+
 	if (props->stat_err == 1) {
-		snprintf(links_str, LINKS_STR_LEN, "\x1b[0m%*s%s",
+		bytes = snprintf(links_str, buf_rem_space, "\x1b[0m%*s%s",
 			max, UNKNOWN_STR, df_c);
-		return;
+	} else {
+		bytes = snprintf(links_str, buf_rem_space, "\x1b[0m%s%s%*ju%s",
+			dk_c, props->linkn > 1 ? BOLD : "", max,
+			(uintmax_t)props->linkn, df_c);
 	}
 
-	snprintf(links_str, LINKS_STR_LEN, "\x1b[0m%s%s%*ju%s",
-		dk_c, props->linkn > 1 ? BOLD : "", max, (uintmax_t)props->linkn, df_c);
+	return bytes > 0 ? (size_t)bytes : 0;
 }
 
-static void
-construct_blocks_str(const struct fileinfo *props, char *blk_str, const int max)
+static size_t
+gen_blocks(const struct fileinfo *props, char *blk_str, const int max)
 {
+	int bytes = 0;
+
 	if (props->stat_err == 1) {
-		snprintf(blk_str, BLK_STR_LEN, "\x1b[0m%*s%s", max, UNKNOWN_STR, df_c);
-		return;
+		bytes = snprintf(blk_str, buf_rem_space,
+			"\x1b[0m%*s%s", max, UNKNOWN_STR, df_c);
+	} else {
+		bytes = snprintf(blk_str, buf_rem_space, "\x1b[0m%s%*jd%s",
+			db_c, max, (intmax_t)props->blocks, df_c);
 	}
 
-	snprintf(blk_str, BLK_STR_LEN, "\x1b[0m%s%*jd%s",
-		db_c, max, (intmax_t)props->blocks, df_c);
+	return bytes > 0 ? (size_t)bytes : 0;
 }
 
 /* Compose the properties line for the current filename.
@@ -493,6 +523,7 @@ int
 print_entry_props(const struct fileinfo *props, const struct maxes_t *maxes,
 	const int have_xattr)
 {
+	static char buf[MAX_PROP_STR + 1];
 	char file_type = 0; /* File type indicator */
 	char *ctype = dn_c; /* Color for file type indicator */
 
@@ -500,87 +531,59 @@ print_entry_props(const struct fileinfo *props, const struct maxes_t *maxes,
 	const int file_perm =
 		check_file_access(props->mode, props->uid, props->gid);
 
-	/* Let's compose each properties field individually to be able to
-	 * print only the desired ones. This is specified via the PropFields
-	 * option in the config file. */
-
 	construct_and_print_filename(props, maxes->name);
 
-	static char perm_str[PERM_STR_LEN]; *perm_str = '\0';
-	if (prop_fields.perm != 0)
-		construct_file_perms(props->mode, perm_str, file_type, ctype);
+	const char xattr_char =
+		have_xattr == 1 ? (props->xattr == 1 ? XATTR_CHAR : ' ') : 0;
 
-	static char time_str[TIME_STR_LEN]; *time_str = '\0';
-	if (prop_fields.time != 0)
-		construct_timestamp(time_str, props);
-
-	static char size_str[SIZE_STR_LEN]; *size_str = '\0';
-	if (prop_fields.size != 0)
-		construct_file_size(props, size_str, maxes->size, file_perm);
-
-	static char id_str[ID_STR_LEN]; *id_str = '\0';
-	if (prop_fields.ids != 0)
-		construct_id_field(props, id_str, maxes, file_perm);
-
-	static char links_str[LINKS_STR_LEN]; *links_str = '\0';
-	if (prop_fields.links != 0)
-		construct_links_str(props, links_str, maxes->links);
-
-	static char ino_str[INO_STR_LEN]; *ino_str = '\0';
-	if (prop_fields.inode != 0)
-		construct_inode_num(props, ino_str, maxes->inode);
-
-	static char blocks_str[BLK_STR_LEN]; *blocks_str = '\0';
-	if (prop_fields.blocks != 0)
-		construct_blocks_str(props, blocks_str, maxes->blocks);
-
-	static char fc_str[FC_STR_LEN]; *fc_str = '\0';
-	/* maxes->files_counter is zero if there are no subdirs in the current dir */
-	if (prop_fields.counter != 0 && conf.files_counter != 0
-	&& maxes->files_counter != 0)
-		construct_files_counter(props, fc_str, maxes->files_counter);
-
-	/* We only need a single character to print the xattributes indicator,
-	 * which would be normally printed like this:
-	 * printf("%c", x ? 'x' : 0);
-	 * However, some terminals, like 'cons25', print the 0 above graphically,
-	 * as a space, which is not what we want here. To fix this, let's
-	 * construct this char as a string. */
-	static char xattr_str[2] = {0};
-	*xattr_str = have_xattr == 1 ? (props->xattr == 1 ? XATTR_CHAR : ' ') : 0;
+	size_t len = 0; /* Bytes written into buf so far. */
 
 	/* Print stuff */
 	for (size_t i = 0; i < PROP_FIELDS_SIZE && prop_fields_str[i]; i++) {
 		int print_space = prop_fields_str[i + 1] ? 1 : 0;
 
+		if (len >= sizeof(buf) - 1)
+			break;
+
+		buf_rem_space = sizeof(buf) - len;
+
 		switch (prop_fields_str[i]) {
-		case 'B': if (*blocks_str) fputs(blocks_str, stdout); break;
-		case 'f': fputs(fc_str, stdout); break;
-		case 'd': if (*ino_str) fputs(ino_str, stdout); break;
+		case 'B':
+			len += gen_blocks(props, buf + len, maxes->blocks); break;
+		case 'f':
+			if (conf.files_counter != 0	&& maxes->files_counter != 0)
+				len += gen_filecounter(props, buf + len, maxes->files_counter);
+			break;
+		case 'd': len += gen_inode(props, buf + len, maxes->inode); break;
 		case 'p': /* fallthrough */
-		case 'n': fputs(perm_str, stdout);
-			if (*xattr_str) fputs(xattr_str, stdout);
+		case 'n':
+			len += gen_perms(props->mode, buf + len, file_type, ctype);
+			if (xattr_char != 0) { buf[len] = xattr_char; len++; }
 			break;
 		case 'i': /* fallthrough */
-		case 'I': fputs(id_str, stdout); break;
-		case 'l': if (*links_str) fputs(links_str, stdout); break;
+		case 'I': len += gen_id(props, buf + len, maxes, file_perm); break;
+		case 'l': len += gen_links(props, buf + len, maxes->links); break;
 		case 'a': /* fallthrough */
 		case 'b': /* fallthrough */
 		case 'm': /* fallthrough */
-		case 'c': fputs(time_str, stdout); break;
+		case 'c': len += gen_time(buf + len, props); break;
 		case 's': /* fallthrough */
-		case 'S': fputs(size_str, stdout); break;
+		case 'S':
+			len += gen_size(props, buf + len, maxes->size, file_perm); break;
 		default: print_space = 0; break;
 		}
 
-		if (print_space == 0)
+		if (print_space == 0
+		|| (sizeof(buf) - len) <= (size_t)conf.prop_fields_gap)
 			continue;
 
-		if (conf.prop_fields_gap <= 1)
-			putchar(' ');
-		else
-			MOVE_CURSOR_RIGHT(conf.prop_fields_gap);
+		buf[len++] = ' ';
+		if (conf.prop_fields_gap > 1) /* PropFieldsGap is at most 2. */
+			buf[len++] = ' ';
 	}
+
+	buf[len] = '\0';
+	fputs(buf, stdout);
 	putchar('\n');
 
 	return FUNC_SUCCESS;

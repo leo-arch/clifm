@@ -49,6 +49,12 @@
 /* File allocated blocks */
 #define BLK_STR_LEN   ((MAX_COLOR * 2) + 32)
 
+#define MAX_PROP_STR (PERM_STR_LEN + TIME_STR_LEN + SIZE_STR_LEN \
+	+ ID_STR_LEN + INO_STR_LEN + LINKS_STR_LEN + FC_STR_LEN + BLK_STR_LEN + 16)
+/* Since PropFieldsGap is at most 2, we need at most two characters per field,
+ * except the last one, totaling 14 bytes, leaving enough room for the NUL
+ * terminating character as well. */
+
 /* Macros to calculate relative timestamps (used by calc_relative_time()) */
 #define RT_SECOND 1
 #define RT_MINUTE (time_t)(60  * RT_SECOND)

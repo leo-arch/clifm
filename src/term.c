@@ -230,7 +230,7 @@ enable_raw_mode(const int fd)
 {
 	struct termios raw;
 
-	if (!isatty(STDIN_FILENO))
+	if (isatty(STDIN_FILENO) == 0)
 		goto FAIL;
 
 	if (tcgetattr(fd, &bk_term_attrs) == -1)
