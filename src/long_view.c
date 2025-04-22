@@ -523,9 +523,9 @@ int
 print_entry_props(const struct fileinfo *props, const struct maxes_t *maxes,
 	const int have_xattr)
 {
-	static char buf[MAX_PROP_STR + 1];
+	static char buf[MAX_PROP_STR + 1]; /* Store generated fields */
 	char file_type = 0; /* File type indicator */
-	char *ctype = dn_c; /* Color for file type indicator */
+	char *ctype = dn_c; /* Color for the file type indicator */
 
 	set_file_type_and_color(props, &file_type, &ctype);
 	const int file_perm =
@@ -538,7 +538,8 @@ print_entry_props(const struct fileinfo *props, const struct maxes_t *maxes,
 
 	size_t len = 0; /* Bytes written into buf so far. */
 
-	/* Print stuff */
+	/* Let's print fields according to the value of PropFields in the
+	 * config file (prop_fields_str). */
 	for (size_t i = 0; i < PROP_FIELDS_SIZE && prop_fields_str[i]; i++) {
 		if (len >= sizeof(buf) - 1)
 			break;
@@ -568,13 +569,15 @@ print_entry_props(const struct fileinfo *props, const struct maxes_t *maxes,
 		case 's': /* fallthrough */
 		case 'S':
 			len += gen_size(props, buf + len, maxes->size, file_perm); break;
-		default: continue;
+		default: continue; /* Unknown option character. Skip it. */
 		}
 
-		const int print_space = prop_fields_str[i + 1] ? 1 : 0;
-		if (print_space == 0
+		/* If not the last field, add some space to separate the current
+		 * field from the next one. */
+		const int last_field = prop_fields_str[i + 1] == '\0';
+		if (last_field == 1
 		|| (sizeof(buf) - len) <= (size_t)conf.prop_fields_gap)
-			continue;
+			break;
 
 		buf[len++] = ' ';
 		if (conf.prop_fields_gap > 1) /* PropFieldsGap is at most 2. */
