@@ -540,8 +540,6 @@ print_entry_props(const struct fileinfo *props, const struct maxes_t *maxes,
 
 	/* Print stuff */
 	for (size_t i = 0; i < PROP_FIELDS_SIZE && prop_fields_str[i]; i++) {
-		int print_space = prop_fields_str[i + 1] ? 1 : 0;
-
 		if (len >= sizeof(buf) - 1)
 			break;
 
@@ -570,9 +568,10 @@ print_entry_props(const struct fileinfo *props, const struct maxes_t *maxes,
 		case 's': /* fallthrough */
 		case 'S':
 			len += gen_size(props, buf + len, maxes->size, file_perm); break;
-		default: print_space = 0; break;
+		default: continue;
 		}
 
+		const int print_space = prop_fields_str[i + 1] ? 1 : 0;
 		if (print_space == 0
 		|| (sizeof(buf) - len) <= (size_t)conf.prop_fields_gap)
 			continue;
