@@ -415,8 +415,8 @@ gen_filecounter(const struct fileinfo *props, char *fc_str,
 	int bytes = 0;
 
 	if (props->filesn > 0) {
-		bytes = snprintf(fc_str, buf_rem_space, "%s%*d%s", fc_c, max,
-			(int)props->filesn, df_c);
+		bytes = snprintf(fc_str, buf_rem_space, "%s%*zu%s", fc_c, max,
+			props->filesn, df_c);
 	} else {
 		bytes = snprintf(fc_str, buf_rem_space, "%s%*c%s", dn_c, max,
 			props->filesn < 0 ? UNKNOWN_CHR /* Dir with no read permission */
