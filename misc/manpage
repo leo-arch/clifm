@@ -167,7 +167,7 @@ Display the splash screen at startup.
 In stealth mode (also known as incognito or private mode), no trace is left on the host system. No files are read or created, and all settings revert to their default values. However, most settings can still be controlled via command line options and dedicated environment variables (see the \fBENVIRONMENT\fR section below). Additionally, refer to the \fBhistory\fR command and the \fB--no-history\fR command line switch for more options.
 .TP
 \fB\-t\fR, \fB\-\-disk\-usage\-analyzer\fR
-Run in disk usage analyzer mode. This is equivalent to using \fB\-\-sort=size \-\-long\-view \-\-full\-dir\-size \-\-no\-dirs\-first\fR. The recursive size of the current directory will be diplayed after the list of files. You can toggle this mode in place by pressing \fBAlt+Tab\fR (or \fBCtrl+Alt+i\fR).
+Run in disk usage analyzer mode. This is equivalent to using \fB\-\-sort=size \-\-long\-view \-\-full\-dir\-size \-\-no\-dirs\-first\fR. The recursive size of the current directory will be displayed after the list of files. You can toggle this mode in place by pressing \fBAlt+Tab\fR (or \fBCtrl+Alt+i\fR).
 .TP
 \fB\-T\fR, \fB\-\-trash\-dir\fR=\fI\,DIR\/\fR
 Set an alternative trash directory.
@@ -500,7 +500,7 @@ Example: `\fBac\ sel\fR`, `\fBac\ 4\-25\ myfile\fR`, or `\fBad\ *.tar.gz\fR`.
 .sp
 Multiple archive/compression formats are supported, including Zstandard. Note that when it comes to ISO 9660 files only a single file is supported.
 .sp
-The archive mount function for non ISO files depends on \fBarchivemount\fR, while the remaining functions depend on \fBatool\fR and other third\-party utilities for achive formats support, for example, \fBp7zip\fR. \fBp7zip\fR is also used to manage most decompressing options for ISO 9660 files, except for mount, in which case \fBmount(8)\fR is used. Creation of ISO files is done via \fBgenisoimage\fR(1). For more information consult \fBatool\fR(1), \fBarchivemount\fR(1), \fBzstd\fR(1), and \fB7z\fR(1).
+The archive mount function for non ISO files depends on \fBarchivemount\fR, while the remaining functions depend on \fBatool\fR and other third\-party utilities for achieve formats support, for example, \fBp7zip\fR. \fBp7zip\fR is also used to manage most decompressing options for ISO 9660 files, except for mount, in which case \fBmount(8)\fR is used. Creation of ISO files is done via \fBgenisoimage\fR(1). For more information consult \fBatool\fR(1), \fBarchivemount\fR(1), \fBzstd\fR(1), and \fB7z\fR(1).
 .TP
 .B acd, autocd \fR[on | off | status]
 Toggle the autocd function. If set to on, `\fBDIR\fR` amounts to `\fBcd\ DIR\fR`.
@@ -622,7 +622,7 @@ Tab completion and suggestions are available for this function.
 .sp
 \fBExample\fR:
 .sp
-Provided the current directory is \fI/home/user/git/repositories/lambda\fR, entering `\fBbd git\fR` will take you immediatelly to \fI/home/user/git\fR.
+Provided the current directory is \fI/home/user/git/repositories/lambda\fR, entering `\fBbd git\fR` will take you immediately to \fI/home/user/git\fR.
 .sp
 Note that there is no need to type the entire directory name; if the query is unambiguous, only a few characters, and even just one, suffices to match the appropriate directory. In our example, `\fBbd g\fR` is enough to take you to \fI/home/user/git\fR, just as `\fBbd h\fR` will take you to \fI/home\fR.
 .sp
@@ -848,12 +848,12 @@ You can use the exclamation mark (!) to perform some history commands:
 .B icons \fR[on | off]
 Toggle icons.
 .sp
-\fBNote\fR: Depending on how the terminal renders icons, the apparent space between icons and filenames may not be the most appropiate. This space can be adjusted using the \fBIconsGap\fR option in the configuration file (valid values: 0, 1, 2).
+\fBNote\fR: Depending on how the terminal renders icons, the apparent space between icons and filenames may not be the most appropriate. This space can be adjusted using the \fBIconsGap\fR option in the configuration file (valid values: 0, 1, 2).
 .TP
 .B j \fR[\-\-purge [\fINUM\fR] | \-\-edit], jc, jl, jp \fR[\fISTR\fR]..., \fBje\fR
 \fBj\fR is the fastest way of using \fBKangaroo\fR, a \fBdirectory jumper\fR function used to quickly navigate through the jump database (i.e. a database of visited directories).
 .sp
-With no argument, \fBj\fR just lists the entries in the jump database \fB(1)(2)\fR, printing: \fBa)\fR order number of the corresponding entry, \fBb)\fR total sum of visits, \fBc)\fR days since the first visit, \fBd)\fR hours since the last visit, \fBe)\fR the rank value, and \fBf)\fR the directory name itself. An asterisk next to the rank value means that the corresponding directory will not be removed from the database, despite its rank, either becuase it has been visited in the last 24 hours, or because it is bookmarked, pinned, or currently active in some workspace.
+With no argument, \fBj\fR just lists the entries in the jump database \fB(1)(2)\fR, printing: \fBa)\fR order number of the corresponding entry, \fBb)\fR total sum of visits, \fBc)\fR days since the first visit, \fBd)\fR hours since the last visit, \fBe)\fR the rank value, and \fBf)\fR the directory name itself. An asterisk next to the rank value means that the corresponding directory will not be removed from the database, despite its rank, either because it has been visited in the last 24 hours, or because it is bookmarked, pinned, or currently active in some workspace.
 .sp
 \fB(1)\fR To prevent a directory from being \fBadded\fR to the jump database use the \fBDirhistIgnore\fR option in the main configuration file.
 .sp
@@ -950,7 +950,7 @@ Consult the \fBFILES\fR section below for information about how logs are written
 .sp
 List available storage devices and mount/unmount the selected one using either \fBudevil\fR or \fBudisks2\fR (at least one of these must be installed. \fBudevil\fR will be preferred over \fBudisks2\fR). If the device is unmounted, it will be automatically mounted, and if mounted, it will be automatically unmounted.
 .sp
-Though mountpoints are determined by the mounting application itself (\fBudevil\fR or \fBudisks2\fR), \fBclifm\fR will automatically cd to the corresponding mountpoint whenever the mount operation was succesfull.
+Though mountpoints are determined by the mounting application itself (\fBudevil\fR or \fBudisks2\fR), \fBclifm\fR will automatically cd to the corresponding mountpoint whenever the mount operation was successful.
 .sp
 When unmounting, and if the current directory is inside the mountpoint, \fBclifm\fR will attempt to cd to the previous visited directory, and, if none, to the home directory, before unmounting the device.
 .sp
@@ -968,7 +968,7 @@ The \fBinfo\fR option prints MIME information about \fIFILE\fR: its MIME type, a
 .sp
 The \fBedit\fR option allows you to edit and customize the MIME list file. So, if a file has no default associated application, first get its MIME info or its file extension (running `\fBmm\ info\ FILE\fR`), and then add a value for it to the MIME list file using the \fBedit\fR option (`\fBmm\ edit\fR` or \fBF6\fR). Check the \fBFILE OPENER\fR section below for information about the mimelist file syntax.
 .sp
-Finally, via the \fBimport\fR option \fBclifm\fR will try to import MIME associations from the system looking for \fImimeapps.list\fR files in those paths specified by the Freedesktop specification (see \fIhttps://specifications.freedesktop.org/mime\-apps\-spec/mime\-apps\-spec\-latest.html\fR). If at least one MIME association is successfuly imported, it will be stored as \fImimelist.clifm.XXXXXX\fR (where XXXXXX is a random six digits alphanumerical string). You can add these new associations to your mimelist file using the `\fBmime edit\fR` command.
+Finally, via the \fBimport\fR option \fBclifm\fR will try to import MIME associations from the system looking for \fImimeapps.list\fR files in those paths specified by the Freedesktop specification (see \fIhttps://specifications.freedesktop.org/mime\-apps\-spec/mime\-apps\-spec\-latest.html\fR). If at least one MIME association is successfully imported, it will be stored as \fImimelist.clifm.XXXXXX\fR (where XXXXXX is a random six digits alphanumerical string). You can add these new associations to your mimelist file using the `\fBmime edit\fR` command.
 .TP
 .B mp, mountpoints
 List available mountpoints and change the current working directory to the selected mountpoint.
@@ -998,7 +998,7 @@ If a filename is followed by the expression \fI@TEMPLATE\fR, where TEMPLATE is a
 .sp
 Tab completion is available for explicit templates: `\fBn file@<TAB>\fR`.
 .sp
-\fB(1)\fR The templates directory is \fB$CLIFM_TEMPLATES_DIR\fR, \fB$XDG_TEMPLATES_DIR\fR, or \fI~/Templates\fR, in this precendence order.
+\fB(1)\fR The templates directory is \fB$CLIFM_TEMPLATES_DIR\fR, \fB$XDG_TEMPLATES_DIR\fR, or \fI~/Templates\fR, in this precedence order.
 .sp
 \fBFilename validation\fR is performed over names before creation. In case of an unsafe name, the user is warned and asked for confirmation.
 .sp
@@ -1049,7 +1049,7 @@ The \fBnet\fR command manages connections to remote systems via a simple samba\-
 .sp
 \fB1.b.\fR Mounting local filesystems
 .sp
-Though originally intended to manage remote filesystems, \fBnet\fR can also manage \fBlocal filesystems\fR. Just provide the appropriate mount and unmount commands. Since the device name assigned by the kernel might change accross reboots (specially when it comes to removable drives), it is recommended to mount using the device\'s UUID (Universal Unique Identifier) instead of the drive name. For example:
+Though originally intended to manage remote filesystems, \fBnet\fR can also manage \fBlocal filesystems\fR. Just provide the appropriate mount and unmount commands. Since the device name assigned by the kernel might change across reboots (specially when it comes to removable drives), it is recommended to mount using the device\'s UUID (Universal Unique Identifier) instead of the drive name. For example:
 
   MountCmd=sudo mount \-U c98d91g4\-6781... %m
 
@@ -1557,7 +1557,7 @@ NetBSD (wsvt25) and OpenBSD (vt220) kernel consoles: Key sequences involving the
 
  On OpenBSD:
  1) Copy \fI/etc/examples/wsconsctl.conf\fR to \fI/etc\fR (if it does not already exist)
- 2) Add the \fBmetaesc\fR flag to your current keyboard enconding. For example: \fBkeyboard.encoding=us.metaesc\fR
+ 2) Add the \fBmetaesc\fR flag to your current keyboard encoding. For example: \fBkeyboard.encoding=us.metaesc\fR
  You may need to reboot the machine for changes to take effect.
 
  On NetBSD:
@@ -2209,7 +2209,7 @@ Match a single mimetype:
 
  \fB!X:^audio/mp3$=mpv %f \-\-terminal=no;ffplay \-nodisp \-autoexit;mpv;mplayer\fR
 .TP
-Match mutiple mimetypes:
+Match multiple mimetypes:
 
  \fBX:^audio/.*=mplayer;mplayer2;vlc %x;gmplayer %x;smplayer %x;totem %x\fR
 .TP
@@ -2291,7 +2291,7 @@ Image previews are available via the \fBclifmimg\fR plugin. Run `\fBhelp image-p
 .SH 12. AUTO\-SUGGESTIONS
 \fBGemini\fR is a builtin suggestions system (similar to that provided by the Fish shell). As you type, \fBGemini\fR will suggest possible completions right after the current cursor position.
 
-The following checks are availabe (the order can be customized, see below):
+The following checks are available (the order can be customized, see below):
 .sp
 a. ELNs
 .sp
@@ -2361,7 +2361,7 @@ Plugins are just scripts or programs (written in any language) intended to add, 
 
 To list available actions and the plugins they are linked to, run `\fBactions\fR`.
 
-To execute a given plugin, enter the corresponding action name (plus parameters if requiered).
+To execute a given plugin, enter the corresponding action name (plus parameters if required).
 
 To get information about a specific plugin, enter the action name followed by `\fB\-\-help\fR`.
 
@@ -2940,7 +2940,7 @@ Same as above, but for file extensions.
 Same as above, but for different elements of \fBclifm\fR's interface.
 .TP
 .B CLIFM_DATE_SHADES
-A comma separated list of colors used to print timetamps based on age.
+A comma separated list of colors used to print timestamps based on age.
 .TP
 .B CLIFM_SIZE_SHADES
 Same as \fBCLIFM_DATE_SHADES\fR, but for file sizes.
@@ -2972,7 +2972,7 @@ Same as \fBSHELL\fR, but specific to \fBclifm\fR (takes precedence over \fBSHELL
 Path to a directory where temporary files will be created.
 .TP
 .B CLIFM_TMPDIR
-Same as \fBTMPDIR\fR, but specific to \fBclifm\fR (takes precendece over \fBTMPDIR\fR).
+Same as \fBTMPDIR\fR, but specific to \fBclifm\fR (takes precedence over \fBTMPDIR\fR).
 .TP
 .B TERM
 .sp 0
@@ -3320,7 +3320,7 @@ bd w
 T}	Change to the parent directory matching "w" \fB(5)\fR
 T{
 ws2 (Alt+2)
-T}	Swtich to the second workspace \fB(6)\fR
+T}	Switch to the second workspace \fB(6)\fR
 T{
 /*.pdf<TAB>
 T}	List PDF files (current dir)
