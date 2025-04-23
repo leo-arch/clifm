@@ -809,12 +809,19 @@ dirjump(char **args, const int mode)
 		return FUNC_FAILURE;
 	}
 
-	/* If ARG is an actual directory, just cd into it. */
+	/* If ARG is an actual directory, just change to it. */
 	struct stat attr;
-	if (args[1] && !args[2] && lstat(args[1], &attr) != -1) {
-		if (mode == NO_SUG_JUMP)
-			return cd_function(args[1], CD_PRINT_ERROR);
-		return save_jump_suggestion(args[1]);
+	if (args[1] && !args[2]) {
+		char *dir = (mode == NO_SUG_JUMP && strchr(args[1], '\\'))
+			? unescape_str(args[1], 0) : args[1];
+		if (lstat(dir, &attr) != -1) {
+			const int ret = mode == NO_SUG_JUMP
+				? cd_function(dir, CD_NO_PRINT_ERROR)
+				: save_jump_suggestion(args[1]);
+			if (dir != args[1])
+				free(dir);
+			return ret;
+		}
 	}
 
 	/* Find the best ranked directory using ARGS as filter(s). */
