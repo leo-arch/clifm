@@ -100,15 +100,15 @@ static void
 construct_and_print_filename(const struct fileinfo *props,
 	const int max_namelen)
 {
-	/* If filename length is greater than max, truncate it to max (later a
-	 * tilde (~) will be appended to let the user know the filename was
-	 * truncated). */
+	/* If the filename length is greater than MAX_NAMELEN, truncate it to
+	 * MAX_NAMELEN (later a tilde (~) will be appended to let the user know
+	 * the filename was truncated). */
 	int trunc = 0;
 
-	/* Handle filenames with embedded control characters */
+	/* Handle filenames with embedded control characters. */
 	size_t plen = props->len;
 	char *wname = (char *)NULL;
-	if (props->len == 0) {
+	if (plen == 0) {
 		wname = replace_invalid_chars(props->name);
 		plen = wc_xstrlen(wname);
 	}
@@ -169,7 +169,6 @@ construct_and_print_filename(const struct fileinfo *props,
 	printf("%s%s%s%s%s%ls%s%s%-*s%s\x1b[0m%s%s\x1b[0m%s%s%s  ",
 		(conf.colorize == 1 && conf.icons == 1) ? props->icon_color : "",
 		conf.icons == 1 ? props->icon : "", conf.icons == 1 ? " " : "", df_c,
-
 		conf.colorize == 1 ? props->color : "",
 		(wchar_t *)name_buf, trunc_diff,
 		conf.light_mode == 1 ? "\x1b[0m" : df_c, pad, "", df_c,
@@ -212,11 +211,9 @@ gen_size(const struct fileinfo *props, char *size_str,
 	/* Let's construct the color for the current file size */
 	char *csize = dz_c;
 	static char sf[MAX_SHADE_LEN];
-	if (conf.colorize == 1) {
-		if (!*dz_c) {
-			get_color_size(size, sf, sizeof(sf));
-			csize = sf;
-		}
+	if (!*dz_c && conf.colorize == 1) {
+		get_color_size(size, sf, sizeof(sf));
+		csize = sf;
 	}
 
 	if (prop_fields.size != PROP_SIZE_HUMAN) {
@@ -227,11 +224,11 @@ gen_size(const struct fileinfo *props, char *size_str,
 		return bytes > 0 ? (size_t)bytes : 0;
 	}
 
-	const int du_err = (props->dir == 1 && conf.full_dir_size == 1
-		&& props->du_status != 0);
-	const char *unit_color = conf.colorize == 0
-		? (du_err == 1 ? "\x1b[1m" : "")
-		: (du_err == 1 ? xf_cb : dim_c);
+	const int du_err = (props->du_status != 0 && props->dir == 1
+		&& conf.full_dir_size == 1);
+	const char *unit_color = conf.colorize == 1
+		? (du_err == 1 ? xf_cb : dim_c)
+		: (du_err == 1 ? "\x1b[1m" : "");
 
 	bytes = snprintf(size_str, buf_rem_space, "%s%*s%s%c\x1b[0m%s",
 		csize, size_max,

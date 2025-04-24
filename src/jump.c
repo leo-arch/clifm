@@ -814,6 +814,7 @@ dirjump(char **args, const int mode)
 	if (args[1] && !args[2]) {
 		char *dir = (mode == NO_SUG_JUMP && strchr(args[1], '\\'))
 			? unescape_str(args[1], 0) : args[1];
+
 		if (lstat(dir, &attr) != -1) {
 			const int ret = mode == NO_SUG_JUMP
 				? cd_function(dir, CD_NO_PRINT_ERROR)
