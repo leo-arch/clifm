@@ -2939,6 +2939,8 @@ load_file_gral_info(const struct stat *a, const filesn_t n, int *have_xattr)
 		file_info[n].xattr = 1;
 		*have_xattr = 1;
 	}
+#else
+	UNUSED(have_xattr);
 #endif /* LINUX_FILE_XATTRS */
 
 	time_t btime = (time_t)-1;
