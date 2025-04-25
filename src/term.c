@@ -140,9 +140,8 @@ set_signals_to_ignore(void)
 {
 	struct sigaction sa;
 
-	memset(&sa, 0, sizeof(sa));
 	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = 0;
+	sa.sa_flags = SA_RESTART;
 	sa.sa_handler = SIG_IGN;
 
 	sigaction(SIGINT, &sa, NULL);
@@ -195,8 +194,6 @@ init_shell(void)
 
 	/* Ignore interactive and job-control signals */
 	set_signals_to_ignore();
-	signal(SIGTTIN, SIG_IGN);
-	signal(SIGTTOU, SIG_IGN);
 
 	/* Put ourselves in our own process group */
 	shell_pgid = getpid();
