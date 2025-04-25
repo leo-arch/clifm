@@ -748,8 +748,7 @@ validate_shell(void)
 	if ((!q && strcmp(p, PROGRAM_NAME) == 0)
 	|| (q && q[1] && strcmp(q + 1, PROGRAM_NAME) == 0)) {
 		err('w', PRINT_PROMPT, _("%s: '%s' is not a shell. "
-			"Setting SHELL to '%s'.\n"), PROGRAM_NAME, p,
-			def_shell);
+			"Setting SHELL to '%s'.\n"), PROGRAM_NAME, p, def_shell);
 		unsetenv("SHELL");
 		setenv("SHELL", def_shell, 1);
 	}
@@ -897,8 +896,8 @@ get_user_data(void)
 	if (homedir == pw->pw_dir && (!homedir
 	|| stat(homedir, &a) == -1 || !S_ISDIR(a.st_mode))) {
 		xerror(_("%s: '%s': Invalid home directory in the password "
-			"database.\nSomething is really wrong! Exiting.\n"), PROGRAM_NAME,
-			homedir ? homedir : "?");
+			"database.\nSomething is really wrong! Exiting.\n"),
+			PROGRAM_NAME, homedir ? homedir : "?");
 		exit(errno);
 	}
 

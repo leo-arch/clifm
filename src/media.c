@@ -134,7 +134,7 @@ unmount_dev(const size_t i, const int n)
 {
 	if (xargs.mount_cmd == UNSET) {
 		xerror(_("%s: No mount application found. Install either "
-			"udevil or udisks2\n"), PROGRAM_NAME);
+			"udevil or udisks2.\n"), PROGRAM_NAME);
 		return FUNC_FAILURE;
 	}
 
@@ -313,7 +313,7 @@ mount_dev(const int n)
 {
 	if (xargs.mount_cmd == UNSET) {
 		xerror(_("%s: No mount application found. Install either "
-			"udevil or udisks2\n"), PROGRAM_NAME);
+			"udevil or udisks2.\n"), PROGRAM_NAME);
 		return FUNC_FAILURE;
 	}
 
@@ -589,7 +589,7 @@ media_menu(const int mode)
 
 	if (mode == MEDIA_MOUNT && xargs.mount_cmd == UNSET) {
 		xerror("%s\n", _("media: No mount application found. Install either "
-			"udevil or udisks2"));
+			"udevil or udisks2."));
 		return FUNC_FAILURE;
 	}
 

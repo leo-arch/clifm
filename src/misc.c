@@ -1337,8 +1337,8 @@ handle_last_path(void)
 	 * directory specifcied in ~/.config/clifm/.last if this file is found (it
 	 * is actually a symlink to ~/.config/clifm/profiles/PROFILE/.last).
 	 * Remove the file to prevent the function from changing the directory
-	 * if cd-on-quit is disabled (e.g., not exiting via 'Q'). If necessary,
-	 * it will be recreated by save_last_path() below. */
+	 * if cd-on-quit is disabled. If necessary, it will be recreated by}
+	 * save_last_path() below. */
 	const size_t len = strlen(config_dir_gral) + 7;
 	char *last_path_tmp = xnmalloc(len, sizeof(char));
 	snprintf(last_path_tmp, len, "%s/.last", config_dir_gral);
