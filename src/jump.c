@@ -757,6 +757,29 @@ rank_tmp_entry(const struct jump_entry_t *entry, const time_t now,
 	return rank;
 }
 
+static int
+check_dir(char *param, const int mode, int *ret)
+{
+	char *dir = (mode == NO_SUG_JUMP && strchr(param, '\\'))
+		? unescape_str(param, 0) : param;
+
+	struct stat a;
+	if (lstat(dir, &a) == -1) {
+		if (dir != param)
+			free(dir);
+		return 0;
+	}
+
+	*ret = mode == NO_SUG_JUMP
+		? cd_function(dir, CD_NO_PRINT_ERROR)
+		: save_jump_suggestion(param);
+
+	if (dir != param)
+		free(dir);
+
+	return 1;
+}
+
 /* Found the best ranked directory matching query strings in ARGS.
  *
  * The rank is calculated as frecency. The algorithm is based on Mozilla,
@@ -810,20 +833,9 @@ dirjump(char **args, const int mode)
 	}
 
 	/* If ARG is an actual directory, just change to it. */
-	struct stat attr;
-	if (args[1] && !args[2]) {
-		char *dir = (mode == NO_SUG_JUMP && strchr(args[1], '\\'))
-			? unescape_str(args[1], 0) : args[1];
-
-		if (lstat(dir, &attr) != -1) {
-			const int ret = mode == NO_SUG_JUMP
-				? cd_function(dir, CD_NO_PRINT_ERROR)
-				: save_jump_suggestion(args[1]);
-			if (dir != args[1])
-				free(dir);
-			return ret;
-		}
-	}
+	int ret = 0;
+	if (args[1] && !args[2] && check_dir(args[1], mode, &ret) == 1)
+		return ret;
 
 	/* Find the best ranked directory using ARGS as filter(s). */
 	size_t i;
