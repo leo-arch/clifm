@@ -303,14 +303,14 @@ END:
 static int
 sanitize_mime(const char *cmd)
 {
-	/* Only %[fx] is allowed */
+	/* Only %[fxum] is allowed */
 	char *p = strchr(cmd, '%');
-	if (p && p[1] != 'f' && p[1] != 'x')
+	if (p && p[1] != 'f' && p[1] != 'x' && p[1] != 'u' && p[1] != 'm')
 		return FUNC_FAILURE;
 
 	/* Disallow double ampersand */
 	p = strchr(cmd, '&');
-	if (p && *(p + 1) == '&')
+	if (p && p[1] == '&')
 		return FUNC_FAILURE;
 
 	if (strlen(cmd) > strspn(cmd, ALLOWED_CHARS_MIME))
@@ -427,7 +427,7 @@ sanitize_cmd(const char *str, const int type)
 	switch (type) {
 	case SNT_MIME:
 		if (clean_cmd(str) != FUNC_SUCCESS)
-			/* Error message already pŕinted by clean_cmd() */
+			/* Error message already printed by clean_cmd() */
 			return FUNC_FAILURE;
 		exit_status = sanitize_mime(str);
 		break;

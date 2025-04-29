@@ -583,15 +583,13 @@ check_control_char(const unsigned char *s)
 	if (*s < ' ' || *s == 127)
 		return 1; /* C0 control characters and DEL char */
 
-	if (*s == 0xc2 && *(s + 1) >= 0x80 && *(s + 1) <= 0x9f)
+	if (*s == 0xc2 && s[1] >= 0x80 && s[1] <= 0x9f)
 		return 2; /* C1 controls characters */
 
-	if (*s == 0xe2 && *(s + 1) == 0x80
-	&& (*(s + 2) == 0xa8 || *(s + 2) == 0xa9))
+	if (*s == 0xe2 && s[1] == 0x80 && (s[2] == 0xa8 || s[2] == 0xa9))
 		return 3; /* Line separator (xa8) / Paragraph separator (xa9) */
 
-	if (*s == 0xf3 && *(s + 1) == 0xa9 && *(s + 2) == 0x80
-	&& *(s + 3) == 0x81)
+	if (*s == 0xf3 && s[1] == 0xa9 && s[2] == 0x80 && s[3] == 0x81)
 		return 4; /* Language tag */
 
 	return 0;
