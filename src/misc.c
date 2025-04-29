@@ -1666,12 +1666,6 @@ free_stuff(void)
 
 	if (xargs.kitty_keys == 1)
 		UNSET_KITTY_KEYS;
-
-	const int ret = restore_shell();
-	if (ret < 0) {
-		fprintf(stderr, "%s: tcsetattr: %s\n", PROGRAM_NAME, strerror(ret));
-		exit(ret);
-	}
 }
 
 /* Get current terminal dimensions and store them in TERM_COLS and

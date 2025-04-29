@@ -42,8 +42,6 @@
 #include "term_info.h"
 
 static struct termios bk_term_attrs;
-static struct termios orig_term_attrs;
-static int reset_term = 0;
 
 /* Set the terminal title using the OSC-2 escape sequence. */
 void
@@ -97,30 +95,6 @@ get_own_pid(void)
 	return (pid < 0) ? 0 : pid;
 }
 
-static int
-check_nest_level(void)
-{
-	/* If running on a fully sanitized environment, no variable is imported
-	 * at all, but CLIFMLVL is nevertheless consulted (by xsecure_env()) to
-	 * know whether we are running a nested instance, in which case
-	 * NESTING_LEVEL is set to 2. */
-	if (xargs.secure_env_full == 1 && nesting_level == 2)
-		return 2;
-
-	char *level = getenv("CLIFMLVL");
-	if (!level)
-		goto FALLBACK;
-
-	int a = atoi(level);
-	if (a < 1 || a > MAX_SHELL_LEVEL)
-		goto FALLBACK;
-
-	return a + 1;
-
-FALLBACK:
-	return (getenv("CLIFM") ? 2 : 1);
-}
-
 #ifndef _BE_POSIX
 /* Get new window size and update/refresh the screen accordingly */
 static void
@@ -140,6 +114,7 @@ set_signals_to_ignore(void)
 {
 	struct sigaction sa;
 
+	memset(&sa, 0, sizeof(sa));
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = SA_RESTART;
 	sa.sa_handler = SIG_IGN;
@@ -170,55 +145,8 @@ init_shell(void)
 		return;
 	}
 
-// TESTING
 	own_pid = get_own_pid();
 	set_signals_to_ignore();
-	return;
-// TESTING
-
-	reset_term = 1;
-
-	if ((nesting_level = check_nest_level()) > 1) {
-		set_signals_to_ignore();
-		own_pid = get_own_pid();
-		tcgetattr(STDIN_FILENO, &orig_term_attrs);
-		return;
-	}
-
-	own_pid = get_own_pid();
-	pid_t shell_pgid = 0;
-
-	/* Loop until we are in the foreground */
-	while (tcgetpgrp(STDIN_FILENO) != (shell_pgid = getpgrp()))
-		kill(- shell_pgid, SIGTTIN);
-
-	/* Ignore interactive and job-control signals */
-	set_signals_to_ignore();
-
-	/* Put ourselves in our own process group */
-	shell_pgid = getpid();
-	setpgid(shell_pgid, shell_pgid);
-/*	if (setpgid(shell_pgid, shell_pgid) < 0) {
-		// This fails with EPERM when running as 'term -e clifm'
-		err(0, NOPRINT_PROMPT, "%s: setpgid: %s\n", PROGRAM_NAME, strerror(errno));
-		exit(errno);
-	} */
-
-	/* Grab control of the terminal */
-	tcsetpgrp(STDIN_FILENO, shell_pgid);
-
-	/* Save default terminal attributes for shell */
-	tcgetattr(STDIN_FILENO, &orig_term_attrs);
-}
-
-int
-restore_shell(void)
-{
-	if (reset_term == 0)
-		return 0;
-
-	return tcsetattr(STDIN_FILENO,
-		TCSANOW, (const struct termios *)&orig_term_attrs);
 }
 
 /* Set the terminal into raw mode. Return 0 on success and -1 on error */
