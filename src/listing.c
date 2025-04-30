@@ -932,9 +932,10 @@ get_longest_filename(const filesn_t n, const size_t eln_len)
 	 * */
 
 	longest.fc_len = 0;
-	if (conf.max_name_len != UNSET && longest_index != -1
-	&& file_info[longest_index].dir == 1
-	&& file_info[longest_index].filesn > 0 && conf.files_counter == 1) {
+	if (file_info[longest_index].dir == 1
+	&& file_info[longest_index].filesn > 0
+	&& conf.max_name_len != UNSET && longest_index != -1
+	&& conf.files_counter == 1) {
 		longest.fc_len = DIGINUM(file_info[longest_index].filesn) + 1;
 		const size_t t = eln_len + (size_t)conf.max_name_len
 			+ 1 + longest.fc_len;
