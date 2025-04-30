@@ -1205,8 +1205,10 @@ get_ext_info(const filesn_t i, int *trunc_type)
 {
 	if (!file_info[i].ext_name) {
 		char *dot = xmemrchr(file_info[i].name, '.', file_info[i].bytes);
-		if (!dot || dot == file_info[i].name || !dot[1])
+		if (!dot || dot == file_info[i].name || !dot[1]) {
+			*trunc_type = TRUNC_NO_EXT;
 			return 0;
+		}
 
 		file_info[i].ext_name = dot;
 	}
@@ -1268,8 +1270,7 @@ construct_filename(const filesn_t i, struct wtrunc_t *wtrunc,
 	if (namelen == 0) {
 		wtrunc->wname = replace_invalid_chars(file_info[i].name);
 		namelen = file_info[i].len = wc_xstrlen(wtrunc->wname);
-		if (wtrunc->wname)
-			name = wtrunc->wname;
+		name = wtrunc->wname;
 	}
 
 	if ((int)namelen <= max_namelen || conf.max_name_len == UNSET
@@ -1290,8 +1291,7 @@ construct_filename(const filesn_t i, struct wtrunc_t *wtrunc,
 	 * file_info[i].ext_name should be a pointer to the beggining of SUFFIX
 	 * in file_info[i].name (this might impact on some later operation!) */
 
-	wtrunc->type = TRUNC_NO_EXT;
-	size_t ext_len = get_ext_info(i, &wtrunc->type);
+	const size_t ext_len = get_ext_info(i, &wtrunc->type);
 
 	const int trunc_len = max_namelen - 1 - (int)ext_len;
 
