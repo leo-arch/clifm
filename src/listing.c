@@ -1260,17 +1260,19 @@ construct_filename(const filesn_t i, struct wtrunc_t *wtrunc,
 		? (file_info[i].utf8 == 1 ? wc_xstrlen(file_info[i].name)
 		: file_info[i].bytes) : file_info[i].len;
 
+	char *name = file_info[i].name;
+
 	/* file_info[i].len is zero whenever an invalid character was found in
 	 * the filename. Let's recalculate the name length. */
 	if (namelen == 0) {
 		wtrunc->wname = replace_invalid_chars(file_info[i].name);
 		namelen = file_info[i].len = wc_xstrlen(wtrunc->wname);
+		if (wtrunc->wname)
+			name = wtrunc->wname;
 	}
 
-	char *name = wtrunc->wname ? wtrunc->wname : file_info[i].name;
-
-	if (files <= 1 || conf.max_name_len == UNSET || conf.long_view != 0
-	|| (int)namelen <= max_namelen)
+	if ((int)namelen <= max_namelen || conf.max_name_len == UNSET
+	|| conf.long_view != 0 || files <= 1)
 		return name;
 
 	/* Let's truncate the filename (at MAX_NAMELEN, in this example, 11).
@@ -1407,7 +1409,8 @@ print_entry_color(int *ind_char, const filesn_t i, const int pad,
 		fputs(df_c, stdout);
 	}
 
-	free(wtrunc.wname);
+	if (wtrunc.wname) /* This is NULL most of the time. */
+		free(wtrunc.wname);
 }
 
 static void
@@ -1514,7 +1517,8 @@ print_entry_nocolor(int *ind_char, const filesn_t i, const int pad,
 		}
 	}
 
-	free(wtrunc.wname);
+	if (wtrunc.wname) /* This is NULL most of the time. */
+		free(wtrunc.wname);
 }
 
 static void
@@ -1599,7 +1603,8 @@ print_entry_color_light(int *ind_char, const filesn_t i,
 	if (end_color == fc_c)
 		fputs(df_c, stdout);
 
-	free(wtrunc.wname);
+	if (wtrunc.wname) /* This is NULL most of the time. */
+		free(wtrunc.wname);
 }
 
 static void
@@ -1680,7 +1685,8 @@ print_entry_nocolor_light(int *ind_char, const filesn_t i,
 		}
 	}
 
-	free(wtrunc.wname);
+	if (wtrunc.wname) /* This is NULL most of the time. */
+		free(wtrunc.wname);
 }
 
 #ifdef TIGHT_COLUMNS
