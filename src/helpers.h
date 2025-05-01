@@ -290,6 +290,17 @@ if (S_ISNWK(mode)) return 'n'; // HP/UX: network special file
 # include <inttypes.h> /* uintmax_t, intmax_t */
 #endif /* BSD */
 
+#if !defined(_BE_POSIX)
+# if (defined(_GNU_SOURCE) && !defined(__TERMUX__))
+#  if defined(__CYGWIN__)
+#   include <sys/features.h>
+#  endif /* __CYGWIN__ */
+#  define HAVE_STRVERSCMP
+# elif (defined(__FreeBSD__) && __FreeBSD_version >= 1302501)
+#  define HAVE_STRVERSCMP
+# endif /* GNU */
+#endif /* !_BE_POSIX */
+
 /* Filesystem event monitors (inotify and kqueue) are OS-specific.
  * Let's fallback to our own generic monitor. */
 #if defined(_BE_POSIX) && !defined(USE_GENERIC_FS_MONITOR)

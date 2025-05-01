@@ -243,7 +243,25 @@ sort_by_type(struct fileinfo *pa, struct fileinfo *pb)
 static int
 sort_by_version(char *s1, char *s2, const int have_utf8)
 {
-	return have_utf8 == 0 ? xstrverscmp(s1, s2) : namecmp(s1, s2);
+#ifdef HAVE_STRVERSCMP
+	if (conf.skip_non_alnum_prefix == 1)
+#else
+	/* namecmp() already runs skip_name_prefixes(). */
+	if (have_utf8 == 0 && conf.skip_non_alnum_prefix == 1)
+#endif /* HAVE_STRVERSCMP */
+	{
+		skip_name_prefixes(&s1);
+		skip_name_prefixes(&s2);
+	}
+
+	if (have_utf8 == 0)
+		return xstrverscmp(s1, s2); /* Not Unicode aware. */
+
+#ifdef HAVE_STRVERSCMP
+	return strverscmp(s1, s2);
+#else
+	return namecmp(s1, s2);
+#endif /* HAVE_STRVERSCMP */
 }
 
 int
