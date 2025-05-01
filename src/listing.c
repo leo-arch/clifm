@@ -916,7 +916,7 @@ get_longest_filename(const filesn_t n, const size_t eln_len)
 		}
 	}
 
-	if (conf.long_view == 0 && conf.icons == 1 && conf.columned == 1)
+	if (conf.icons == 1 && conf.long_view == 0 && conf.columned == 1)
 		longest.name_len += (size_t)ICON_LEN;
 
 	/* LONGEST.FC_LEN stores the number of digits taken by the file counter of
@@ -3175,8 +3175,7 @@ load_regfile_info(const mode_t mode, const filesn_t n)
 	 * 2. extension
 	 * 3. file type */
 	/* Check icons for specific filenames */
-	const int name_icon_found = (conf.icons == 1)
-		? get_name_icon(n) : 0;
+	const int name_icon_found = conf.icons == 1 ? get_name_icon(n) : 0;
 #endif /* !_NO_ICONS */
 
 	/* Check file extension */
@@ -3188,7 +3187,7 @@ load_regfile_info(const mode_t mode, const filesn_t n)
 
 	file_info[n].ext_name = ext;
 #ifndef _NO_ICONS
-	if (name_icon_found == 0 && conf.icons == 1)
+	if (conf.icons == 1 && name_icon_found == 0)
 		get_ext_icon(ext, n);
 #endif /* !_NO_ICONS */
 

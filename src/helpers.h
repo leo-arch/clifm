@@ -556,14 +556,6 @@ extern time_t curdir_mtime;
 # define CHECK_COREUTILS
 #endif /* (__OpenBSD__ || __NetBSD__ || __APPLE__ || __sun) && !_BE_POSIX */
 
-/* File ownership flags (used by check_file_access() in checks.c) */
-#define R_USR (1 << 1)
-#define X_USR (1 << 2)
-#define R_GRP (1 << 3)
-#define X_GRP (1 << 4)
-#define R_OTH (1 << 5)
-#define X_OTH (1 << 6)
-
 /* Flag to control the search function behavior */
 #define NO_GLOB_CHAR (1 << 0)
 
@@ -2090,10 +2082,10 @@ extern char **environ;
 #define NAME_BUF_SIZE (NAME_MAX + 1)
 extern char name_buf[NAME_BUF_SIZE * sizeof(wchar_t)];
 
-/* To store all the 39 color variables we use, with 46 bytes each, we need
- * a total of 1,8Kb. It's not much but it could be less if we'd use
- * dynamically allocated arrays for them (which, on the other side,
- * would make the whole thing slower and more tedious) */
+/* For the almost 100 color variables we use, we need more or less 4,5Kb.
+ * It's not much, but it could be less if we'd use dynamically allocated
+ * arrays for them (which, on the other side, would make the whole thing
+ * slower and more tedious). */
 
 /* Colors */
 extern char

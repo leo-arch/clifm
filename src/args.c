@@ -144,7 +144,6 @@
 #define LOPT_NO_TRUNC_NAMES         268
 #define LOPT_NO_BOLD                269
 #define LOPT_FNFTAB                 270
-
 #define LOPT_STAT                   271
 #define LOPT_STAT_FULL              272
 #define LOPT_READONLY               273
