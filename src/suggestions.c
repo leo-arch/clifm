@@ -307,8 +307,6 @@ check_int_cmd_desc(const char *s, const size_t l)
 			return RL_DESC;
 		if (*s == 's' && strcmp(s + 1, "elbox") == 0)
 			return SB_DESC;
-//		if (*s == 's' && strcmp(s + 1, "plash") == 0)
-//			return SPLASH_DESC;
 	}
 
 	else if (l == 7) {
