@@ -324,7 +324,7 @@ xstrncat(char *restrict dst, const size_t dst_len, const char *restrict src,
 	return dst;
 }
 
-/* strverscmp() is a GNU extension, and as such not available on some systems
+/* strverscmp() is a GNU extension, and as such not available on some systems.
  * This function is a modified version of the GLIBC and uClibc strverscmp()
  * taken from here:
  * https://elixir.bootlin.com/uclibc-ng/latest/source/libc/string/strverscmp.c
