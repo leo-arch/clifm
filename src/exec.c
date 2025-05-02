@@ -2467,10 +2467,6 @@ exec_cmd(char **args)
 		bonus_function(); return FUNC_SUCCESS;
 	}
 
-	else if (*args[0] == 's' && strcmp(args[0], "splash") == 0) {
-		splash(); return FUNC_SUCCESS;
-	}
-
 	/* #### QUIT #### */
 	else if ((*args[0] == 'q' && (!args[0][1] || strcmp(args[0], "quit") == 0))
 	|| (*args[0] == 'e' && strcmp(args[0], "exit") == 0))

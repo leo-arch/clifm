@@ -139,7 +139,6 @@ rf, refresh@
 rr @
 s, sel@
 sb, selbox@
-splash @
 st, sort@
 stats @
 t, trash@

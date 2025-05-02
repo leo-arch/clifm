@@ -1239,10 +1239,6 @@ For more information consult the \fBBUILT\-IN EXPANSIONS\fR section below.
 .B sb, selbox
 Print the elements currently contained in the Selection Box.
 .TP
-.B splash
-.br
-Print the splash screen.
-.TP
 .B st, sort \fR[\fIMETHOD\fR] [rev]
 With no argument, print the current sort order. Else, sort files by METHOD, where METHOD is one of: 0=none, 1=name, 2=size, 3=atime, 4=btime, 5=ctime, 6=mtime, 7=version, 8=extension, 9=inode, 10=owner, 11=group, 12=blocks, 13=links, or 14=type (e.g.: \fIst atime\fR or \fIst 3\fR). Methods 10 and 11 sort by owner and group ID names if using ID names in long view (see the \fBPropFields\fR option in the configuration file). Else, ID numbers are used. The default order is \fBversion\fR.
 .sp

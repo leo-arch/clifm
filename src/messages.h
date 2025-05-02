@@ -1644,7 +1644,6 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  rr                 Remove files in bulk\n\
  s, sel             Select files\n\
  sb, selbox         Access the Selection Box\n\
- splash             Print the splash screen\n\
  st, sort           Change file sort order\n\
  stats              Print file statistics\n\
  t, trash           Move files to the trash can\n\
@@ -1927,7 +1926,7 @@ q | F12         I'm tired, quit"
 #define RR_DESC      " (remove files in bulk)"
 #define SB_DESC      " (access the selection box)"
 #define SEL_DESC     " (select files)"
-#define SPLASH_DESC  " (print the splash screen)"
+//#define SPLASH_DESC  " (print the splash screen)"
 #define ST_DESC      " (change file sort order)"
 #define STATS_DESC   " (print file statistics)"
 #define TAG_DESC     " (manage file tags)"
