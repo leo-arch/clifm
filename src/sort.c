@@ -246,6 +246,7 @@ sort_by_version(char *s1, char *s2, const int have_utf8)
 	if (have_utf8 == 1)
 		return namecmp(s1, s2);
 
+	/* xstrverscmp is not UTF-8 aware. */
 	if (conf.skip_non_alnum_prefix == 1) {
 		skip_name_prefixes(&s1);
 		skip_name_prefixes(&s2);
