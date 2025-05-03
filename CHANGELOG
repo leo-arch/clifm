@@ -1,3 +1,47 @@
+1.25 (Scumm Bar) - May 3, 2025
+
+BUG FIXES:
+* 'kb': Some escape sequences are not properly translated (e.g. '\e[200~' for 'bracketed-paste-begin').
+* Create a file (n file) and then remove it (r file). Press Alt+n and then Enter: a file named "n" is created! The same happens with 'le' and 'm' (interactive rename) when pressing Enter on empty line.
+* Some legacy terminals (like the FreeBSD console) froze as soon as we try to query some data from it.
+* 'kb bind' does not allow to switch keybindings (for example, setting F1 for bookmarks and Alt+b for show-manpage).
+* 'Alt+h' runs a wrong command name ('bh').
+* 'Ctrl+Alt+t' attempts to trash a file named 'sel' when there are no selected files.
+* The 'extension' sort method takes hidden files as file extensions.
+* No Tab completion for the 'hidden' command.
+* '--disk-usage': No device name when running on Termux (Android).
+* Positional parameter: cannot open file URI encoded directory names.
+* Positional parameter: If file contains references to self or parent dir ('.' or '..'), the path is not properly resolved.
+* '--data-dir' rejects '/usr/share/clifm', even when this is the actual data directory.
+* the '=g' filter skips some files with the SGID bit set.
+* Compilation error on MacOS Leopard (10.5).
+* The 'j' command fails to change directory with escaped directory names.
+
+NEW FEATURES/IMPROVEMENTS:
+* Add support for the kitty keyboard protocol. Use the --kitty-keys command line flag to ask the terminal to enable this protocol. Consult the manpage for more information.
+* Add support for styled underlines. See https://sw.kovidgoyal.net/kitty/underlines/#colored-and-styled-underlines
+* Add support for the Kitty Notifications Protocol (https://sw.kovidgoyal.net/kitty/desktop-notifications/). Enable via '--desktop-notifications=kitty' in the command line or 'DesktopNotifications=kitty' in the configuration file.
+* If running in vi editing mode, print "(ins)" or "(cmd)" (for insert and command modes respectively) at  the left of the prompt. Use the '\v' prompt escape code to handle this notification manually.
+* New bindable action: 'toggle-vi-mode' (bound by default to Ctrl+Alt+j). Update your 'readline.clifm' and 'keybindings.clifm' files.
+* Force the use of a specific color palette via $CLIFM_FORCE_COLOR (supported values: 8, 16, 256, truecolor or 24bit).
+* Improve 'kb bind' function (more sensible prompts and better overall flow).
+* Allow setting multiple keybindings for the same action. 'show-manpage2', for example, is not required anymore: just define an extra keybinding for 'show-manpage'.
+* Better organization for the keybindings file (update your keybindings file).
+* '--show-hidden','-a' now take 'true', 'first', 'last', and 'false' as optional parameters (if no parameter is given, 'true' is assumed).
+* Add 'first' and 'last' parameters to the 'hh'/'hidden' command.
+* New prompt escape codes: \Q (number of regular and special files); \g (current sort order), \j (octal permissions of the current directory).
+* New prompt ('counter'), using the above new prompt codes.
+* Image preview support for iTerm2. Set $method to 'iterm' in the clifmimg script to force the use of this protocol. Update your clifmimg script.
+* Allow the use of multiple positional parameters. For example, 'clifm /etc ~/Downloads' will start clifm in the '/etc' directory (first workspace), setting the second workspace to '~/Downloads'.
+* Consistent format for setting messages (on/off).
+* Make bulk rename work with 'vis' and 'helix' text editors: 'br' was complainig about the tmp file having changed on disk due to how these editors save files by default (via rename(2)).
+
+MISC:
+* '--no-apparent-size' is deprecated. Use '--physical-size' instead.
+* '--no-files-counter' is deprecated. Use '--no-file-counter' instead.
+* 'undel' command is deprecated. Use 'u/untrash' instead.
+* 'splash' command removed.
+
 1.24 (Toothrot) - Mar 2, 2025
 
 BUG FIXES
