@@ -92,7 +92,7 @@ int
 compare_strings(char **s1, char **s2)
 {
 #if defined(HAVE_STRCOLL)
-	return strcoll(*s2, *s2);
+	return strcoll(*s1, *s2);
 #else
 	const int ret = **s1 - **s2;
 	return ret == 0 ? strcmp(*s1, *s2) : ret;

@@ -2330,8 +2330,9 @@ expand_tilde_glob(char *text)
 static char **
 rl_mime_list(void)
 {
+#define WAIT_MSG " [wait...]"
 	if (term_caps.suggestions != 0)
-		{ HIDE_CURSOR; fputs(" [wait...]", stdout); fflush(stdout); }
+		{ HIDE_CURSOR; fputs(WAIT_MSG, stdout); fflush(stdout); }
 
 	char **t = xnmalloc((size_t)files + 2, sizeof(char *));
 	t[0] = xnmalloc(1, sizeof(char));
@@ -2377,8 +2378,10 @@ rl_mime_list(void)
 		}
 	}
 
-	if (term_caps.suggestions != 0)
-		{ MOVE_CURSOR_LEFT(10); ERASE_TO_RIGHT; UNHIDE_CURSOR; }
+	if (term_caps.suggestions != 0) {
+		MOVE_CURSOR_LEFT((int)sizeof(WAIT_MSG) - 1);
+		ERASE_TO_RIGHT; UNHIDE_CURSOR;
+	}
 
 	if (n == 1)
 		{ free(t[0]); free(t); return (char **)NULL; }
@@ -2388,6 +2391,7 @@ rl_mime_list(void)
 	if (rl_sort_completion_matches == 1)
 		qsort(t, n, sizeof(*t), (QSFUNC *)compare_strings);
 
+#undef WAIT_MSG
 	return t;
 }
 
