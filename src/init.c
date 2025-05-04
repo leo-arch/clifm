@@ -524,7 +524,7 @@ backup_argv(const int argc, char **argv)
 	argv_bk = argv;
 }
 
-int
+void
 init_workspaces(void)
 {
 	workspaces = xnmalloc(MAX_WS, sizeof(struct ws_t));
@@ -533,8 +533,6 @@ init_workspaces(void)
 		workspaces[i].path = (char *)NULL;
 		workspaces[i].name = (char *)NULL;
 	}
-
-	return FUNC_SUCCESS;
 }
 
 int

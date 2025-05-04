@@ -47,7 +47,7 @@ void init_conf_struct(void);
 int  init_gettext(void);
 int  init_history(void);
 void init_shell(void);
-int  init_workspaces(void);
+void init_workspaces(void);
 void init_workspaces_opts(void);
 int  load_actions(void);
 int  load_bookmarks(void);
