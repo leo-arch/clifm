@@ -27,7 +27,7 @@
 
 __BEGIN_DECLS
 
-int  backup_argv(const int argc, char **argv);
+void backup_argv(const int argc, char **argv);
 void check_env_filter(void);
 void check_options(void);
 void get_aliases(void);

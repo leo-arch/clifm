@@ -517,12 +517,11 @@ init_gettext(void)
 }
 #endif /* !_NO_GETTEXT */
 
-int
+void
 backup_argv(const int argc, char **argv)
 {
 	argc_bk = argc;
 	argv_bk = argv;
-	return FUNC_SUCCESS;
 }
 
 int
