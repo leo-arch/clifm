@@ -217,10 +217,11 @@ gen_size(const struct fileinfo *props, char *size_str,
 	}
 
 	if (prop_fields.size != PROP_SIZE_HUMAN) {
-		bytes = snprintf(size_str, buf_rem_space, "%s%*jd%s%c", csize,
+		char err_char[2] = {0};
+		err_char[0] = props->du_status != 0 ? DU_ERR_CHAR : 0;
+		bytes = snprintf(size_str, buf_rem_space, "%s%*jd%s%s", csize,
 			(props->du_status != 0 && size_max > 0) ? size_max - 1 : size_max,
-			(intmax_t)size, df_c,
-			props->du_status != 0 ? DU_ERR_CHAR : 0);
+			(intmax_t)size, df_c, err_char);
 		return bytes > 0 ? (size_t)bytes : 0;
 	}
 

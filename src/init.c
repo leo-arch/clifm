@@ -2286,7 +2286,7 @@ cygwin_exclude_file(char *name)
 		return 1;
 
 	char *p = strrchr(name, '.');
-	if (!p || !*(p + 1) || p == name)
+	if (!p || !p[1] || p == name)
 		return 0;
 
 	*p = '\0';
