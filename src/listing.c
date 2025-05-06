@@ -1131,13 +1131,20 @@ print_long_mode(size_t *counter, int *reset_pager, const int eln_len,
 	maxes.name = space_left + (conf.icons == 1 ? ICON_LEN : 0);
 	pager_quit = pager_help = 0;
 
-	filesn_t i, k = files;
-	for (i = 0; i < k; i++) {
-		if (conf.max_files != UNSET && i == conf.max_files)
+	/* Cache conf struct values for faster access. */
+	const filesn_t conf_max_files = conf.max_files;
+	const filesn_t conf_pager = (filesn_t)conf.pager;
+	const int conf_no_eln = conf.no_eln;
+
+	filesn_t i;
+	const filesn_t f = files; /* Cache global variable. */
+
+	for (i = 0; i < f; i++) {
+		if (conf_max_files != UNSET && i == conf_max_files)
 			break;
 
-		if (conf.pager == 1 || (*reset_pager == 0 && conf.pager > 1
-		&& files >= (filesn_t)conf.pager)) {
+		if (conf_pager == 1 || (*reset_pager == 0 && conf_pager > 1
+		&& files >= conf_pager)) {
 			int ret = 0;
 			if (*counter > (size_t)(term_lines - 2))
 				ret = run_pager(-1, reset_pager, &i, counter);
@@ -1159,7 +1166,7 @@ print_long_mode(size_t *counter, int *reset_pager, const int eln_len,
 		char *ind_chr = (char *)NULL;
 		const char *ind_chr_color = get_ind_char(i, &ind_chr);
 
-		if (conf.no_eln == 0) {
+		if (conf_no_eln == 0) {
 			printf("%s%*jd%s%s%s%s", el_c, eln_len, (intmax_t)i + 1, df_c,
 				ind_chr_color, ind_chr, df_c);
 		} else {
