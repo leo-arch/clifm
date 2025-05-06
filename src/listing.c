@@ -1167,7 +1167,7 @@ print_long_mode(size_t *counter, int *reset_pager, const int eln_len,
 		const char *ind_chr_color = get_ind_char(i, &ind_chr);
 
 		if (conf_no_eln == 0) {
-			printf("%s%*jd%s%s%s%s", el_c, eln_len, (intmax_t)i + 1, df_c,
+			printf("%s%*zd%s%s%s%s", el_c, eln_len, i + 1, df_c,
 				ind_chr_color, ind_chr, df_c);
 		} else {
 			printf("%s%s%s", ind_chr_color, ind_chr, df_c);
