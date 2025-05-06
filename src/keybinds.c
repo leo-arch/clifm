@@ -2679,6 +2679,9 @@ run_man_cmd(char *str)
 		free(mp);
 	}
 
+	if (ret != 0) /* Restore prompt in case of failure. */
+		rl_reset_line_state();
+
 	return ret;
 }
 
@@ -2738,8 +2741,10 @@ rl_manpage(int count, int key)
 		free_suggestion();
 #endif /* !_NO_SUGGESTIONS */
 	char *cmd[] = {"man", PROGRAM_NAME, NULL};
-	if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
+	if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS) {
+		rl_reset_line_state();
 		return FUNC_FAILURE;
+	}
 	return FUNC_SUCCESS;
 }
 
