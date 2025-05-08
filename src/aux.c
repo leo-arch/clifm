@@ -1013,7 +1013,7 @@ count_dir(const char *dir, const int pop)
 		return (-1);
 	}
 
-	filesn_t c = 0;
+	size_t c = 0;
 
 	if (pop) {
 		while (readdir(p)) {
@@ -1022,15 +1022,16 @@ count_dir(const char *dir, const int pop)
 				break;
 		}
 	} else {
-		while (readdir(p)) {
-			if (c > FILESN_MAX - 1)
-				break;
+		while (readdir(p))
+			/* It is extremely unlikely for a directory to have more than
+			 * SIZE_MAX entries. Even if it actually happens, c would wrap
+			 * around to zero, leading thus to a wrong count (in the
+			 * the absolute worst scenario). */
 			c++;
-		}
 	}
 
 	closedir(p);
-	return c;
+	return (filesn_t)(c > FILESN_MAX ? FILESN_MAX : c);
 }
 
 /* Get the path of the command CMD inspecting all paths in the PATH
