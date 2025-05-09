@@ -466,8 +466,7 @@ get_cwd(char *buf, const size_t buflen, const int check_workspace)
 void *
 xmemrchr(const void *s, const int c, size_t n)
 {
-#if !defined(_BE_POSIX) && (defined(__GLIBC__) || defined(__FreeBSD__) \
-|| defined(__OpenBSD__) || defined(__NetBSD__))
+#ifdef HAVE_MEMRCHR
 	return memrchr(s, c, n);
 #else
 	/* OpenBSD implementation of memrchr(), licensed MIT.
@@ -483,7 +482,7 @@ xmemrchr(const void *s, const int c, size_t n)
 	}
 
 	return (NULL);
-#endif /* __GLIBC__ || BSD */
+#endif /* HAVE_MEMRCHR */
 }
 
 /* Canonicalize/normalize the path SRC without resolving symlinks.

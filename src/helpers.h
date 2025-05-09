@@ -285,6 +285,19 @@ if (S_ISNWK(mode)) return 'n'; // HP/UX: network special file
 # include <stdint.h> /* uint8_t */
 #endif /* __linux__ */
 
+#if !defined(_BE_POSIX)
+# if defined(__GLIBC__) \
+|| (defined(__FreeBSD__) && __FreeBSD_version >= 604000) \
+|| (defined(__OpenBSD__) && OpenBSD >= 200805) \
+|| (defined(__sun) && defined(SUN_VERSION) && SUN_VERSION >= 511)
+#  define HAVE_MEMRCHR /* OpenBSD 200805 == version 4.3 */
+# elif defined(__NetBSD__)
+#  if __NetBSD_Prereq__(6,0,0)
+#   define HAVE_MEMRCHR
+#  endif
+# endif /* __GLIBC__ */
+#endif /* !_BE_POSIX */
+
 #if defined(__OpenBSD__) || defined(__NetBSD__) \
 || defined(__FreeBSD__) || defined(__APPLE__)
 # include <inttypes.h> /* uintmax_t, intmax_t */
