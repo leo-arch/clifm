@@ -1107,6 +1107,8 @@ is_cmd_in_path(const char *cmd)
 		return is_exec_cmd(cmd);
 
 	char cmd_path[PATH_MAX + 1];
+	const int is_secure_env =
+		(xargs.secure_env == 1 || xargs.secure_env_full == 1);
 
 	size_t i;
 	for (i = 0; i < path_n; i++) { /* Check each path in PATH */
@@ -1114,8 +1116,7 @@ is_cmd_in_path(const char *cmd)
 			continue;
 
 		/* Skip '.' (CWD) if running with secure environment */
-		if ((xargs.secure_env == 1 || xargs.secure_env_full == 1)
-		&& *paths[i].path == '.' && !paths[i].path[1])
+		if (*paths[i].path == '.' && !paths[i].path[1] && is_secure_env == 1)
 			continue;
 
 		snprintf(cmd_path, sizeof(cmd_path), "%s/%s", paths[i].path, cmd);
@@ -1220,7 +1221,10 @@ xitoa(long long n)
 		return nums[n];
 
 	static char buf[MAX_INT_STR] = {0};
-	long long i = 30;
+	/* We start writing at the end of the buffer, which has MAX_INT_STR bytes
+	 * (32), that is, from index 0 to 31. Index 31 is reserved for the NUL
+	 * terminator, so that we must start writing at index 30. */
+	long long i = MAX_INT_STR - 2;
 
 	while (n > 0 && i > 0) {
 		long long rem = n / 10;
