@@ -773,7 +773,7 @@ validate_filename(char **name, const int is_md)
 
 		*q = '/';
 
-		if (!*(q + 1))
+		if (!q[1])
 			break;
 
 		p = q + 1;
@@ -1067,25 +1067,19 @@ open_function(char **cmd)
 #endif /* __sun */
 	case S_IFDIR: return cd_function(file, CD_PRINT_ERROR);
 
-	case S_IFLNK: {
-		const int ret = get_link_ref(file);
-		if (ret == -1) {
-			return err_no_link(file);
-		} else if (ret == S_IFDIR) {
-			return cd_function(file, CD_PRINT_ERROR);
-		} else {
-			switch (ret) {
-			case S_IFREG: no_open_file = 0; break;
-			case S_IFBLK: file_type = types[OPEN_BLK]; break;
-			case S_IFCHR: file_type = types[OPEN_CHR]; break;
-			case S_IFSOCK: file_type = types[OPEN_SOCK]; break;
-			case S_IFIFO: file_type = types[OPEN_FIFO]; break;
+	case S_IFLNK:
+		switch (get_link_ref(file)) {
+		case -1: return err_no_link(file);
+		case S_IFDIR: return cd_function(file, CD_PRINT_ERROR);
+		case S_IFREG: no_open_file = 0; break;
+		case S_IFBLK: file_type = types[OPEN_BLK]; break;
+		case S_IFCHR: file_type = types[OPEN_CHR]; break;
+		case S_IFSOCK: file_type = types[OPEN_SOCK]; break;
+		case S_IFIFO: file_type = types[OPEN_FIFO]; break;
 #ifdef __sun
-			case S_IFDOOR: file_type = types[OPEN_DOOR]; break;
+		case S_IFDOOR: file_type = types[OPEN_DOOR]; break;
 #endif /* __sun */
-			default: file_type = types[OPEN_UNKNOWN]; break;
-			}
-		}
+		default: file_type = types[OPEN_UNKNOWN]; break;
 		}
 		break;
 
