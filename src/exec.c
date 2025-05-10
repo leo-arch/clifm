@@ -173,7 +173,7 @@ export_var_function(char **args)
 		}
 
 		char *p = strchr(ds, '=');
-		if (!p || !*(p + 1)) {
+		if (!p || !p[1]) {
 			xerror(_("export: %s: Empty assignement\n"), ds);
 			free(ds);
 			status = FUNC_FAILURE;
@@ -211,7 +211,7 @@ construct_shell_cmd(char **args)
 	for (i = 0; args[i]; i++)
 		total_len += strlen(args[i]) + 1; /* 1 == space */
 
-	char *cmd = (char *)xnmalloc(total_len + 1, sizeof(char));
+	char *cmd = xnmalloc(total_len + 1, sizeof(char));
 
 	for (i = 0; args[i]; i++) {
 		char *src = (i == 0 && bypass == 1) ? args[i] + 1 : args[i];
@@ -1110,17 +1110,6 @@ check_actions(char **args)
 	while (--i >= 0) {
 		if (*args[0] == *usr_actions[i].name
 		&& strcmp(args[0], usr_actions[i].name) == 0) {
-
-			// REMOVE ONCE THE DH PLUGIN'S DEPRECATION PERIOD IS OVER
-			if (*usr_actions[i].name == 'd' && usr_actions[i].name[1] == 'h'
-			&& !usr_actions[i].name[2]) {
-				err('n', PRINT_PROMPT, _("%s: The 'dh' plugin is deprecated. "
-					"Use the builtin 'dh' command instead disabling the "
-					"'dh' plugin ('actions edit'). Once done, run 'dh --help' "
-					"for more information about the new command.\n"),
-					PROGRAM_NAME);
-			}
-
 			setenv("CLIFM_PLUGIN_NAME", usr_actions[i].name, 1);
 			const int ret = run_action(usr_actions[i].value, args);
 			unsetenv("CLIFM_PLUGIN_NAME");
@@ -1935,14 +1924,14 @@ handle_copy_move_cmds(char ***cmd)
         use_force = is_force_param(args[1]);
         set_cp_cmd(&args[0], &use_force);
 
-    } else { // The m command
+    } else { /* The m command */
         if (args[1] && IS_HELP(args[1])) {
             puts(_(WRAPPERS_USAGE));
             return (-1);
         }
 
         if (sel_is_last == 0 && args[1] && !args[2])
-            alt_prompt = FILES_PROMPT; // Interactive rename
+            alt_prompt = FILES_PROMPT; /* Interactive rename */
 
         use_force = is_force_param(args[1]);
         set_mv_cmd(&args[0], &use_force);
