@@ -473,44 +473,47 @@ gen_blocks(const struct fileinfo *props, char *blk_str, const int max)
 	return bytes > 0 ? (size_t)bytes : 0;
 }
 
-static void
-set_file_type_and_color(const struct fileinfo *props, char *type, char **color)
+static char
+set_file_type_and_color(const struct fileinfo *props, char **color)
 {
 	struct stat a;
 	if (props->stat_err == 1 && conf.follow_symlinks_long == 1
 	&& conf.long_view == 1 && conf.follow_symlinks == 1
 	&& lstat(props->name, &a) == 0 && S_ISLNK(a.st_mode)) {
-		*type = LNK_PCHR;
 		*color = conf.colorize == 1 ? ln_c : df_c;
-		return;
+		return LNK_PCHR;
 	}
 
+	char type = 0;
+
 	switch (props->mode & S_IFMT) {
-	case S_IFREG:  *type = REG_PCHR; break;
-	case S_IFDIR:  *type = DIR_PCHR; *color = di_c; break;
-	case S_IFLNK:  *type = LNK_PCHR; *color = ln_c; break;
-	case S_IFIFO:  *type = FIFO_PCHR; *color = pi_c; break;
-	case S_IFSOCK: *type = SOCK_PCHR; *color = so_c; break;
-	case S_IFBLK:  *type = BLKDEV_PCHR; *color = bd_c; break;
-	case S_IFCHR:  *type = CHARDEV_PCHR; *color = cd_c; break;
+	case S_IFREG:  type = REG_PCHR; *color = dn_c; break;
+	case S_IFDIR:  type = DIR_PCHR; *color = di_c; break;
+	case S_IFLNK:  type = LNK_PCHR; *color = ln_c; break;
+	case S_IFIFO:  type = FIFO_PCHR; *color = pi_c; break;
+	case S_IFSOCK: type = SOCK_PCHR; *color = so_c; break;
+	case S_IFBLK:  type = BLKDEV_PCHR; *color = bd_c; break;
+	case S_IFCHR:  type = CHARDEV_PCHR; *color = cd_c; break;
 #ifndef _BE_POSIX
 # ifdef S_ARCH1
-	case S_ARCH1:  *type = ARCH1_PCHR; *color = fi_c; break;
-	case S_ARCH2:  *type = ARCH2_PCHR; *color = fi_c; break;
+	case S_ARCH1:  type = ARCH1_PCHR; *color = fi_c; break;
+	case S_ARCH2:  type = ARCH2_PCHR; *color = fi_c; break;
 # endif /* S_ARCH1 */
 # ifdef SOLARIS_DOORS
-	case S_IFDOOR: *type = DOOR_PCHR; *color = oo_c; break;
-	case S_IFPORT: *type = PORT_PCHR; *color = oo_c; break;
+	case S_IFDOOR: type = DOOR_PCHR; *color = oo_c; break;
+	case S_IFPORT: type = PORT_PCHR; *color = oo_c; break;
 # endif /* SOLARIS_DOORS */
 # ifdef S_IFWHT
-	case S_IFWHT:  *type = WHT_PCHR; *color = fi_c; break;
+	case S_IFWHT:  type = WHT_PCHR; *color = fi_c; break;
 # endif /* S_IFWHT */
 #endif /* !_BE_POSIX */
-	default:       *type = UNK_PCHR; break;
+	default:       type = UNK_PCHR; *color = dn_c; break;
 	}
 
 	if (conf.colorize == 0)
 		*color = df_c;
+
+	return type;
 }
 
 /* Compose the properties line for the current filename.
@@ -522,19 +525,17 @@ print_entry_props(const struct fileinfo *props, const struct maxes_t *maxes,
 	const int have_xattr)
 {
 	static char buf[MAX_PROP_STR + 1]; /* Store generated fields */
-	char file_type = 0; /* File type indicator */
-	char *ctype = dn_c; /* Color for the file type indicator */
+	size_t len = 0; /* Bytes written into buf so far. */
 
-	set_file_type_and_color(props, &file_type, &ctype);
+	char *ctype = NULL; /* Color for the file type indicator */
+	const char file_type = set_file_type_and_color(props, &ctype);
 	const int file_perm =
 		check_file_access(props->mode, props->uid, props->gid);
-
-	construct_and_print_filename(props, maxes->name);
-
 	const char xattr_char =
 		have_xattr == 1 ? (props->xattr == 1 ? XATTR_CHAR : ' ') : 0;
+	const size_t prop_fields_gap = (size_t)conf.prop_fields_gap;
 
-	size_t len = 0; /* Bytes written into buf so far. */
+	construct_and_print_filename(props, maxes->name);
 
 	/* Let's print fields according to the value of PropFields in the
 	 * config file (prop_fields_str). */
@@ -574,7 +575,7 @@ print_entry_props(const struct fileinfo *props, const struct maxes_t *maxes,
 		 * field from the next one. */
 		const int last_field = prop_fields_str[i + 1] == '\0';
 		if (last_field == 1
-		|| (sizeof(buf) - len) <= (size_t)conf.prop_fields_gap)
+		|| (sizeof(buf) - len) <= prop_fields_gap)
 			break;
 
 		buf[len++] = ' ';
