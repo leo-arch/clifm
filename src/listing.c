@@ -679,9 +679,11 @@ post_listing(DIR *dir, const int reset_pager, const int autocmd_ret)
 		conf.pager = 0;
 	}
 
+	const size_t s_files = (size_t)files;
+
 	if (pager_quit == 0 && conf.max_files != UNSET
 	&& files > (filesn_t)conf.max_files)
-		printf("... (%d/%jd)\n", conf.max_files, (intmax_t)files);
+		printf("... (%d/%zu)\n", conf.max_files, s_files);
 
 	print_div_line();
 
@@ -690,7 +692,7 @@ post_listing(DIR *dir, const int reset_pager, const int autocmd_ret)
 		print_div_line();
 	}
 
-	if (conf.print_selfiles == 1 && sel_n > 0)
+	if (sel_n > 0 && conf.print_selfiles == 1)
 		print_sel_files(term_lines);
 
 	if (is_cdpath == 1)
@@ -713,7 +715,7 @@ post_listing(DIR *dir, const int reset_pager, const int autocmd_ret)
 
 	if (stats.excluded > 0)
 		print_reload_msg(NULL, NULL, _("Showing %zu/%zu files\n"),
-			(size_t)files, (size_t)files + stats.excluded);
+			s_files, s_files + stats.excluded);
 
 	if (filter.str && *filter.str)
 		print_reload_msg(NULL, NULL, _("Active filter: %s%s%s%s\n"),
