@@ -1291,11 +1291,11 @@ is_fused_param(char *str)
 	int d = 0;
 
 	while (*p && *p != ' ') {
-		if (d == 0 && p != str && IS_DIGIT(*p) && IS_ALPHA(*(p - 1))) {
+		if (d == 0 && p != str && IS_DIGIT(*p) && IS_ALPHA_LOW(*(p - 1))) {
 			q = p;
 			d = 1;
 		}
-		if (d == 1 && IS_ALPHA(*p))
+		if (d == 1 && IS_ALPHA_LOW(*p))
 			return FUNC_FAILURE;
 		p++;
 	}

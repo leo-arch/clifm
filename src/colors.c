@@ -1993,7 +1993,7 @@ store_definition(char *str)
 		val_len = strlen(value);
 	}
 
-	if (IS_ALPHA(*value) || IS_ALPHA_UP(*value)) {
+	if (IS_ALPHA_LOW(*value) || IS_ALPHA_UP(*value)) {
 		char *ret = check_names(value);
 		if (ret) {
 			value = ret;

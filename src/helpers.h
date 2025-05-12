@@ -1028,12 +1028,12 @@ extern time_t curdir_mtime;
 		: ((off_t)(n) < 1000000000000000000) ? 18 \
                                              : 19)
 
-#define IS_DIGIT(c)    ((unsigned int)(c) >= '0' && (unsigned int)(c) <= '9')
-#define IS_ALPHA(c)    ((unsigned int)(c) >= 'a' && (unsigned int)(c) <= 'z')
-#define IS_ALPHA_UP(c) ((unsigned int)(c) >= 'A' && (unsigned int)(c) <= 'Z')
-#define IS_ALNUM(c)    (IS_ALPHA((c)) || IS_ALPHA_UP((c)) || IS_DIGIT((c)))
+#define IS_DIGIT(c)     ((unsigned int)(c) >= '0' && (unsigned int)(c) <= '9')
+#define IS_ALPHA_LOW(c) ((unsigned int)(c) >= 'a' && (unsigned int)(c) <= 'z')
+#define IS_ALPHA_UP(c)  ((unsigned int)(c) >= 'A' && (unsigned int)(c) <= 'Z')
+#define IS_ALNUM(c)     (IS_ALPHA_LOW((c)) || IS_ALPHA_UP((c)) || IS_DIGIT((c)))
 
-#define TOUPPER(c) (IS_ALPHA((c)) ? ((c) & ~0x20) : (c))
+#define TOUPPER(c) (IS_ALPHA_LOW((c)) ? ((c) & ~0x20) : (c))
 #define TOLOWER(c) (IS_ALPHA_UP((c)) ? ((c) | 0x20) : (c))
 
 #define IS_UTF8_LEAD_BYTE(c) (((c) & 0xc0) == 0xc0)

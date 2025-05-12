@@ -29,12 +29,12 @@
 #define FUZZY_MATCH_H
 /* Macros for our native fuzzy matcher: fuzzy_match() */
 
-#define IS_WORD_SEPARATOR(c) ( (c) == '-' || (c) == '_' || (c) == ' ' || (c) == '.' \
-|| (c) ==  ',' || (c) ==  ';' || (c) ==  ':' || (c) ==  '@' || (c) ==  '=' \
-|| (c) ==  '+' || (c) ==  '*' || (c) ==  '&')
+#define IS_WORD_SEPARATOR(c) ((c) == '-' || (c) == '_' || (c) == ' '      \
+|| (c) == '.' || (c) ==  ',' || (c) ==  ';' || (c) ==  ':' || (c) ==  '@' \
+|| (c) ==  '=' || (c) ==  '+' || (c) ==  '*' || (c) ==  '&')
 
-#define IS_ALPHA_CASE(c) ( ((c) >= 'a' && (c) <= 'z') || ((c) >= 'A' && (c) <= 'Z') )
-#define IS_CAMEL_CASE(c, p) ( (c) >= 'A' && (c) <= 'Z' && (p) >= 'a' && (p) <= 'z' )
+#define IS_ALPHA_CASE(c)    (IS_ALPHA_LOW((c)) || IS_ALPHA_UP((c)))
+#define IS_CAMEL_CASE(c, p) (IS_ALPHA_UP((c)) && IS_ALPHA_LOW((p)))
 
 #define TARGET_BEGINNING_BONUS  (NAME_MAX * 10)
 #define FIRST_CHAR_BONUS        10
