@@ -1106,13 +1106,11 @@ compute_maxes(void)
 }
 
 static void
-print_long_mode(size_t *counter, int *reset_pager, const int eln_len,
-	int have_xattr)
+print_long_mode(size_t *counter, int *reset_pager, const int eln_len)
 {
 	struct maxes_t maxes = compute_maxes();
 
-	if (prop_fields.xattr == 0)
-		have_xattr = 0;
+	const int have_xattr = (stats.extended > 0 && prop_fields.xattr != 0);
 
 	/* Available space (term cols) to print the filename. */
 	int space_left = (int)term_cols - (prop_fields.len + have_xattr
@@ -2493,7 +2491,6 @@ list_dir_light(const int autocmd_ret)
 	struct dirent *ent;
 	int reset_pager = 0;
 	int close_dir = 1;
-	int have_xattr = 0;
 
 	/* Let's store information about the largest file in the list for the
 	 * disk usage analyzer mode. */
@@ -2768,7 +2765,7 @@ list_dir_light(const int autocmd_ret)
 	if (conf.long_view == 1) {
 		if (prop_fields.size == PROP_SIZE_HUMAN)
 			construct_human_sizes();
-		print_long_mode(&counter, &reset_pager, eln_len, have_xattr);
+		print_long_mode(&counter, &reset_pager, eln_len);
 		goto END;
 	}
 
@@ -2901,7 +2898,7 @@ check_extra_file_types(mode_t *mode, const struct stat *a)
 }
 
 static inline void
-load_file_gral_info(const struct stat *a, const filesn_t n, int *have_xattr)
+load_file_gral_info(const struct stat *a, const filesn_t n)
 {
 	if (check_file_access(a->st_mode, a->st_uid, a->st_gid) == 0) {
 		file_info[n].user_access = 0;
@@ -2954,10 +2951,8 @@ load_file_gral_info(const struct stat *a, const filesn_t n, int *have_xattr)
 	&& (checks.xattr == 1 || conf.check_cap == 1)
 	&& listxattr(file_info[n].name, NULL, 0) > 0) {
 		file_info[n].xattr = 1;
-		*have_xattr = 1;
+		stats.extended++;
 	}
-#else
-	UNUSED(have_xattr);
 #endif /* LINUX_FILE_XATTRS */
 
 	time_t btime = (time_t)-1;
@@ -3294,7 +3289,6 @@ list_dir(void)
 	struct stat attr;
 	int reset_pager = 0;
 	int close_dir = 1;
-	int have_xattr = 0;
 
 	/* Let's store information about the largest file in the list for the
 	 * disk usage analyzer mode. */
@@ -3448,7 +3442,7 @@ list_dir(void)
 			? file_info[n].bytes : wc_xstrlen(ename);
 
 		if (stat_ok == 1) {
-			load_file_gral_info(&attr, n, &have_xattr);
+			load_file_gral_info(&attr, n);
 		} else {
 			file_info[n].type = DT_UNKNOWN;
 			file_info[n].stat_err = 1;
@@ -3557,7 +3551,7 @@ list_dir(void)
 	if (conf.long_view == 1) {
 		if (prop_fields.size == PROP_SIZE_HUMAN)
 			construct_human_sizes();
-		print_long_mode(&counter, &reset_pager, eln_len, have_xattr);
+		print_long_mode(&counter, &reset_pager, eln_len);
 		goto END;
 	}
 
