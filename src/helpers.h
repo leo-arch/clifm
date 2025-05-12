@@ -1642,6 +1642,7 @@ struct stats_t {
 	size_t extended;
 	size_t unknown;
 	size_t unstat; /* Non-statable file */
+	size_t excluded; /* Files not displayed */
 #ifdef __sun
 	size_t door;
 	size_t port;

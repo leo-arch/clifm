@@ -661,8 +661,7 @@ print_dir_cmds(void)
 }
 
 static int
-post_listing(DIR *dir, const int reset_pager, const filesn_t excluded_files,
-	const int autocmd_ret)
+post_listing(DIR *dir, const int reset_pager, const int autocmd_ret)
 {
 	restore_pager_view();
 
@@ -712,9 +711,9 @@ post_listing(DIR *dir, const int reset_pager, const filesn_t excluded_files,
 	if (virtual_dir == 1)
 		print_reload_msg(NULL, NULL, _("Virtual directory\n"));
 
-	if (excluded_files > 0)
-		print_reload_msg(NULL, NULL, _("Showing %jd/%jd files\n"),
-			(intmax_t)files, (intmax_t)(files + excluded_files));
+	if (stats.excluded > 0)
+		print_reload_msg(NULL, NULL, _("Showing %zu/%zu files\n"),
+			(size_t)files, (size_t)files + stats.excluded);
 
 	if (filter.str && *filter.str)
 		print_reload_msg(NULL, NULL, _("Active filter: %s%s%s%s\n"),
@@ -2491,7 +2490,6 @@ list_dir_light(const int autocmd_ret)
 	DIR *dir;
 	struct dirent *ent;
 	int reset_pager = 0;
-	filesn_t excluded_files = 0;
 	int close_dir = 1;
 	int have_xattr = 0;
 
@@ -2541,26 +2539,26 @@ list_dir_light(const int autocmd_ret)
 		if (checks.filter_name == 1) {
 			if (regexec(&regex_exp, ename, 0, NULL, 0) == FUNC_SUCCESS) {
 				if (filter.rev == 1) {
-					excluded_files++;
+					stats.excluded++;
 					continue;
 				}
 			} else if (filter.rev == 0) {
-				excluded_files++;
+				stats.excluded++;
 				continue;
 			}
 		}
 
 		if (*ename == '.') {
-			stats.hidden++;
 			if (conf.show_hidden == 0) {
-				excluded_files++;
+				stats.excluded++;
 				continue;
 			}
+			stats.hidden++;
 		}
 
 		if (hidden_list	&& check_dothidden(ename, &hidden_list) == 1) {
 			stats.hidden++;
-			excluded_files++;
+			stats.excluded++;
 			continue;
 		}
 
@@ -2573,7 +2571,9 @@ list_dir_light(const int autocmd_ret)
 		if (conf.only_dirs == 1 && ent->d_type != DT_DIR)
 #endif /* !_DIRENT_HAVE_D_TYPE */
 		{
-			excluded_files++;
+			if (*ename == '.' && stats.hidden > 0)
+				stats.hidden--;
+			stats.excluded++;
 			continue;
 		}
 
@@ -2586,7 +2586,9 @@ list_dir_light(const int autocmd_ret)
 		&& exclude_file_type_light(ent->d_type) == FUNC_SUCCESS)
 #endif /* !_DIRENT_HAVE_D_TYPE */
 		{
-			excluded_files++;
+			if (*ename == '.' && stats.hidden > 0)
+				stats.hidden--;
+			stats.excluded++;
 			continue;
 		}
 
@@ -2782,8 +2784,7 @@ END:
 		free_dothidden(&hidden_list);
 
 	exit_code =
-		post_listing(close_dir == 1 ? dir : NULL, reset_pager,
-			excluded_files, autocmd_ret);
+		post_listing(close_dir == 1 ? dir : NULL, reset_pager, autocmd_ret);
 
 #ifndef ST_BTIME_LIGHT
 	if (conf.long_view == 1 && prop_fields.time == PROP_TIME_BIRTH)
@@ -3290,7 +3291,6 @@ list_dir(void)
 	struct dirent *ent;
 	struct stat attr;
 	int reset_pager = 0;
-	filesn_t excluded_files = 0;
 	int close_dir = 1;
 	int have_xattr = 0;
 
@@ -3362,18 +3362,18 @@ list_dir(void)
 		if (checks_filter_name == 1) {
 			if (regexec(&regex_exp, ename, 0, NULL, 0) == 0) {
 				if (filter.rev == 1) {
-					excluded_files++;
+					stats.excluded++;
 					continue;
 				}
 			} else if (filter.rev == 0) {
-				excluded_files++;
+				stats.excluded++;
 				continue;
 			}
 		}
 
 		if (*ename == '.') {
 			if (conf_show_hidden == 0) {
-				excluded_files++;
+				stats.excluded++;
 				continue;
 			}
 			stats.hidden++;
@@ -3381,11 +3381,9 @@ list_dir(void)
 
 		if (hidden_list && check_dothidden(ename, &hidden_list) == 1) {
 			stats.hidden++;
-			excluded_files++;
+			stats.excluded++;
 			continue;
 		}
-
-		file_info[n] = default_file_info;
 
 		const int stat_ok =
 			((virtual_dir == 1 ? vt_stat(fd, ent->d_name, &attr)
@@ -3402,7 +3400,7 @@ list_dir(void)
 				/* Decrease the counter: the file won't be displayed. */
 				if (*ename == '.' && stats.hidden > 0)
 					stats.hidden--;
-				excluded_files++;
+				stats.excluded++;
 				continue;
 			}
 
@@ -3412,7 +3410,7 @@ list_dir(void)
 			|| get_link_ref(ename) != S_IFDIR)) {
 				if (*ename == '.' && stats.hidden > 0)
 					stats.hidden--;
-				excluded_files++;
+				stats.excluded++;
 				continue;
 			}
 		}
@@ -3423,6 +3421,8 @@ list_dir(void)
 			file_info = xnrealloc(file_info, total_dents + 2,
 				sizeof(struct fileinfo));
 		}
+
+		file_info[n] = default_file_info;
 
 		/* Both is_utf8_name() and wc_xstrlen() calculate the number of
 		 * columns needed to display the current filename on the screen
@@ -3577,8 +3577,7 @@ END:
 		free_dothidden(&hidden_list);
 
 	exit_code =
-		post_listing(close_dir == 1 ? dir : NULL, reset_pager,
-			excluded_files, autocmd_ret);
+		post_listing(close_dir == 1 ? dir : NULL, reset_pager, autocmd_ret);
 
 	if (xargs.disk_usage_analyzer == 1 && conf.long_view == 1
 	&& conf.full_dir_size == 1) {
