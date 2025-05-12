@@ -3372,11 +3372,11 @@ list_dir(void)
 		}
 
 		if (*ename == '.') {
-			stats.hidden++;
 			if (conf_show_hidden == 0) {
 				excluded_files++;
 				continue;
 			}
+			stats.hidden++;
 		}
 
 		if (hidden_list && check_dothidden(ename, &hidden_list) == 1) {
@@ -3394,28 +3394,27 @@ list_dir(void)
 		if (stat_ok == 0) {
 			if (virtual_dir == 1)
 				continue;
-			stats.unstat++;
-			file_info[n].stat_err = 1;
-		}
+		} else {
+			/* Filter files according to file type. */
+			if (checks_filter_type == 1
+			&& exclude_file_type(ename, attr.st_mode, attr.st_nlink,
+			attr.st_size) == FUNC_SUCCESS) {
+				/* Decrease the counter: the file won't be displayed. */
+				if (*ename == '.' && stats.hidden > 0)
+					stats.hidden--;
+				excluded_files++;
+				continue;
+			}
 
-		/* Filter files according to file type */
-		if (checks_filter_type == 1 && stat_ok == 1
-		&& exclude_file_type(ename, attr.st_mode, attr.st_nlink,
-		attr.st_size) == FUNC_SUCCESS) {
-			/* Decrease counters: the file won't be displayed */
-			if (*ename == '.' && stats.hidden > 0)
-				stats.hidden--;
-			if (stat_ok == 0 && stats.unstat > 0)
-				stats.unstat--;
-			excluded_files++;
-			continue;
-		}
-
-		if (conf_only_dirs == 1 && stat_ok == 1 && !S_ISDIR(attr.st_mode)
-		&& (conf_follow_symlinks == 0 || !S_ISLNK(attr.st_mode)
-		|| get_link_ref(ename) != S_IFDIR)) {
-			excluded_files++;
-			continue;
+			/* Filter non-directory files. */
+			if (conf_only_dirs == 1 && !S_ISDIR(attr.st_mode)
+			&& (conf_follow_symlinks == 0 || !S_ISLNK(attr.st_mode)
+			|| get_link_ref(ename) != S_IFDIR)) {
+				if (*ename == '.' && stats.hidden > 0)
+					stats.hidden--;
+				excluded_files++;
+				continue;
+			}
 		}
 
 		if (count > ENTRY_N) {
@@ -3450,7 +3449,9 @@ list_dir(void)
 			load_file_gral_info(&attr, n, &have_xattr);
 		} else {
 			file_info[n].type = DT_UNKNOWN;
+			file_info[n].stat_err = 1;
 			stats.unknown++;
+			stats.unstat++;
 		}
 
 		switch (file_info[n].type) {

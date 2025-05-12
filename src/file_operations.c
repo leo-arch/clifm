@@ -1279,9 +1279,9 @@ path_common_prefix(char const *path1, char const *path2)
 	return ret;
 }
 
-/* If *PBUF is not NULL then append STR to *PBUF and update *PBUF to point}
- * to the end of the buffer and adjust *PLEN to reflect the remaining space.
- * Return 0 on success and 1 on failure (no more buffer space). */
+/* If PBUF is not NULL, append STR to PBUF, update PBUF to point to the
+ * end of the buffer, and adjust PLEN to reflect the remaining space.
+ * Return 0 on success and 1 on failure (no remaining space). */
 static int
 append_to_buf(char const *str, char **pbuf, size_t *plen)
 {
@@ -1468,16 +1468,15 @@ symlink_file(char **args)
 	if (!resolved_target)
 		return FUNC_FAILURE;
 
-	if (symlinkat(resolved_target, XAT_FDCWD, link_name) == -1) {
-		xerror(_("link: Cannot create symbolic link '%s': %s\n"),
-			link_name, strerror(errno));
-		if (resolved_target != target)
-			free(resolved_target);
-		return FUNC_FAILURE;
-	}
-
+	const int ret = symlinkat(resolved_target, XAT_FDCWD, link_name);
 	if (resolved_target != target)
 		free(resolved_target);
+
+	if (ret == -1) {
+		xerror(_("link: Cannot create symbolic link '%s': %s\n"),
+			link_name, strerror(errno));
+		return FUNC_FAILURE;
+	}
 
 	return FUNC_SUCCESS;
 }

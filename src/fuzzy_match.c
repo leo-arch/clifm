@@ -133,8 +133,8 @@ fuzzy_match_v1(char *s1, char *s2, const size_t s1_len)
 		if (!m)
 			break;
 
-		if (*(s1 + 1) && *(m + 1) && (cs == 1 ? *(s1 + 1) == *(m + 1)
-		: TOUPPER(*(s1 + 1)) == TOUPPER(*(m + 1)) ))
+		if (s1[1] && m[1] && (cs == 1 ? s1[1] == m[1]
+		: TOUPPER(s1[1]) == TOUPPER(m[1]) ))
 			consecutive_chars++;
 
 		if (l > 0 && (!IS_ALPHA_CASE(*(m - 1)) || IS_CAMEL_CASE(*m, *(m - 1)) ) )
