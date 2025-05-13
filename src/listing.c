@@ -1775,6 +1775,10 @@ get_longest_per_col(size_t *columns_n, filesn_t *rows, const filesn_t files_n)
 		filesn_t counter = 1;
 		size_t longest_name_len = 0;
 
+		/* Cache the value referenced by the pointer once here instead of
+		 * dereferencing it hundreds of times in the below for-loop. */
+		const filesn_t cached_rows = *rows;
+
 		for (i = 0; i < files_n; i++) {
 			size_t len = 0;
 			if (file_info[i].total_entry_len > 0) {
@@ -1787,7 +1791,7 @@ get_longest_per_col(size_t *columns_n, filesn_t *rows, const filesn_t files_n)
 			if (len > longest_name_len)
 				longest_name_len = len;
 
-			if (counter == *rows) {
+			if (counter == cached_rows) {
 				counter = 1;
 				longest_per_col[longest_index] = longest_name_len;
 				used_cols += LONGEST_PLUS_GAP;
