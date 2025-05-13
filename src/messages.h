@@ -1377,10 +1377,13 @@ Note: By default, xterm is used. Set your preferred terminal\n\
 emulator using the TerminalCmd option in the configuration file."
 
 /* Misc messages */
-#define PAGER_HELP "?, h: help\nDown arrow, Enter, Space: Advance one line\n\
-Page Down: Advance one page\nq: Stop paging (without printing remaining files)\n\
-c: Stop paging (printing remaining files)\n"
+#define PAGER_HELP "? / h: Display this help message\n\
+Down arrow / Enter / Space: Advance one line\n\
+Page Down: Advance one page\n\
+q: Quit paging (without printing remaining files)\n\
+c: Quit paging (printing remaining files)\n"
 #define PAGER_LABEL "\x1b[7m--Mas-- (press 'h' for help)\x1b[0m"
+
 #define NOT_AVAILABLE "This feature has been disabled at compile time"
 #define STEALTH_DISABLED "Access to configuration files is not allowed in stealth mode"
 #define CONFIG_FILE_UPDATED "File modified. Settings updated.\n"

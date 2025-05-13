@@ -1137,6 +1137,7 @@ print_long_mode(size_t *counter, int *reset_pager, const int eln_len)
 
 	filesn_t i;
 	const filesn_t f = files; /* Cache global variable. */
+	const size_t s_term_lines = term_lines > 2 ? (size_t)(term_lines - 2) : 0;
 
 	for (i = 0; i < f; i++) {
 		if (conf_max_files != UNSET && i == conf_max_files)
@@ -1144,20 +1145,20 @@ print_long_mode(size_t *counter, int *reset_pager, const int eln_len)
 
 		if (conf_pager == 1 || (*reset_pager == 0 && conf_pager > 1
 		&& files >= conf_pager)) {
-			int ret = 0;
-			if (*counter > (size_t)(term_lines - 2))
-				ret = run_pager(-1, reset_pager, &i, counter);
+			if (*counter > s_term_lines) {
+				const int ret = run_pager(-1, reset_pager, &i, counter);
 
-			if (ret == -3) {
-				pager_quit = 1;
-				break;
-			}
+				if (ret == -3) {
+					pager_quit = 1;
+					break;
+				}
 
-			if (ret == -1 || ret == -2) {
-				--i;
-				if (ret == -2)
-					*counter = 0;
-				continue;
+				if (ret == -1 || ret == -2) {
+					--i;
+					if (ret == -2)
+						*counter = 0;
+					continue;
+				}
 			}
 			++(*counter);
 		}
