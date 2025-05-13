@@ -338,6 +338,45 @@ set_div_line_color(void)
 	}
 }
 
+static inline void
+print_bow_drawing_line(void)
+{
+	fputs("\x1b(0m", stdout);
+
+	int i;
+	const int cols = (int)term_cols - 2;
+
+	for (i = 0; i < cols; i++)
+		putchar('q');
+
+	fputs("\x1b(0j\x1b(B", stdout);
+	putchar('\n');
+}
+
+static inline void
+print_extended_line(void)
+{
+	const size_t c = count_utf8_chars(div_line);
+	if (c > 1) {
+		puts(div_line);
+		return;
+	}
+
+	const char *dl = (*div_line == '-' && !div_line[1]
+		&& term_caps.unicode == 1) ? DEF_DIV_LINE_U : div_line;
+
+	/* Extend DIV_LINE to the end of the screen - 1.
+	 * We subtract 1 to prevent an extra empty line after the
+	 * dividing line on some terminals (e.g. cons25). */
+	const size_t len = !dl[1] ? 1 : wc_xstrlen(dl);
+	int i = c > 0 ? (int)(term_cols / (len > 0 ? len : 1)) : 0;
+
+	for (; i > 1; i--)
+		fputs(dl, stdout);
+
+	putchar('\n');
+}
+
 /* Print the line dividing files and prompt using DIV_LINE.
  * If DIV_LINE is unset, draw a line using box-drawing characters.
  * If it contains exactly one character, print DIV_LINE up to the
@@ -356,32 +395,12 @@ print_div_line(void)
 	if (conf.colorize == 1)
 		set_div_line_color();
 
-	if (!*div_line) {
-		fputs("\x1b(0m", stdout);
-		int i;
-		for (i = 0; i < (int)term_cols - 2; i++)
-			putchar('q');
-		fputs("\x1b(0j\x1b(B", stdout);
-		putchar('\n');
-	} else if (*div_line == '0' && !div_line[1]) {
-		putchar('\n');
-	} else {
-		const size_t c = count_utf8_chars(div_line);
-		if (c > 1) {
-			puts(div_line);
-		} else {
-			const char *dl = (*div_line == '-' && !div_line[1]
-				&& term_caps.unicode == 1) ? DEF_DIV_LINE_U : div_line;
-			/* Extend DIV_LINE to the end of the screen - 1.
-			 * We substract 1 to prevent an extra empty line after the
-			 * dividing line on some terminals (e.g. cons25). */
-			const size_t len = !dl[1] ? 1 : wc_xstrlen(dl);
-			int i = c > 0 ? (int)(term_cols / (len > 0 ? len : 1)) : 0;
-			for (; i > 1; i--)
-				fputs(dl, stdout);
-			putchar('\n');
-		}
-	}
+	if (!*div_line)
+		print_bow_drawing_line();
+	else if (*div_line == '0' && !div_line[1])
+		putchar('\n'); /* Empty line. */
+	else
+		print_extended_line();
 
 	fputs(df_c, stdout);
 	fflush(stdout);
@@ -510,7 +529,8 @@ print_dirhist_map(void)
 		if (i > 0 && old_pwd[i - 1])
 			printf("%s%*d%s %s\n", el_c, pad, i, df_c, old_pwd[i - 1]);
 
-		printf("%s%*d%s %s%s%s\n", el_c, pad, i + 1, df_c, mi_c, old_pwd[i], df_c);
+		printf("%s%*d%s %s%s%s\n", el_c, pad, i + 1,
+			df_c, mi_c, old_pwd[i], df_c);
 
 		if (i + 1 < dirhist_total_index && old_pwd[i + 1])
 			printf("%s%*d%s %s\n", el_c, pad, i + 2, df_c, old_pwd[i + 1]);
@@ -642,7 +662,7 @@ set_pager_view(const filesn_t columns_n)
 	if (pager_will_run == 0)
 		return;
 
-	if (conf.pager == 1 || (conf.pager > 1 && files >= (filesn_t)conf.pager)) {
+	if (conf.pager == 1 || files >= (filesn_t)conf.pager) {
 		long_view_bk = conf.long_view;
 		conf.long_view = (conf.pager_view == PAGER_LONG);
 	}
@@ -1698,7 +1718,7 @@ print_entry_nocolor_light(int *ind_char, const filesn_t i,
 }
 
 #ifdef TIGHT_COLUMNS
-static int
+static size_t
 calc_item_length(const int eln_len, const int icon_len, const filesn_t i)
 {
 	size_t file_len = file_info[i].len;
@@ -1718,7 +1738,7 @@ calc_item_length(const int eln_len, const int icon_len, const filesn_t i)
 	int item_len = eln_len + 1 + (int)name_len + icon_len;
 
 	if (conf.classify != 1)
-		return item_len;
+		return (size_t)item_len;
 
 	if (file_info[i].dir == 1) {
 		item_len++;
@@ -1729,7 +1749,7 @@ calc_item_length(const int eln_len, const int icon_len, const filesn_t i)
 		item_len++;
 	}
 
-	return item_len;
+	return (size_t)item_len;
 }
 
 static size_t *
@@ -1785,7 +1805,7 @@ get_longest_per_col(size_t *columns_n, filesn_t *rows, const filesn_t files_n)
 				len = file_info[i].total_entry_len;
 			} else {
 				len = file_info[i].total_entry_len =
-					(size_t)calc_item_length(longest_eln, icon_len, i);
+					calc_item_length(longest_eln, icon_len, i);
 			}
 
 			if (len > longest_name_len)
@@ -2318,10 +2338,7 @@ exclude_file_type(const char *restrict name, const mode_t mode,
 	case 'o': if (mode & S_IWOTH) match = 1; break; /* Other writable */
 	case 't': if (mode & S_ISVTX) match = 1; break; /* Sticky */
 	case 'u': if (mode & S_ISUID) match = 1; break; /* SUID */
-	case 'x': /* Executable */
-		if (S_ISREG(mode) && IS_EXEC(mode))
-			match = 1;
-		break;
+	case 'x': if (S_ISREG(mode) && IS_EXEC(mode)) match = 1; break; /* Exec */
 	default: return FUNC_FAILURE;
 	}
 
@@ -2869,10 +2886,7 @@ set_link_target_color(const char *name, const struct stat *attr,
 
 		if (!color) {
 			file_info[i].color = fi_c;
-			return;
-		}
-
-		if (clen > 0) { /* We have an extension color */
+		} else if (clen > 0) { /* We have an extension color */
 			file_info[i].ext_color = savestring(color, clen);
 			file_info[i].color = file_info[i].ext_color;
 		} else {
