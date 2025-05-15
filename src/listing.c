@@ -119,6 +119,10 @@
 #define NO_ICONS_ELN    2
 #define NO_ICONS_NO_ELN 3
 
+/* A dummy pointer to mark a given file as having no extension. */
+static int dummy_value = 0;
+#define NO_EXT_PTR ((void *)&dummy_value)
+
 /* Information about the longest filename in the curent list of files. */
 struct longest_t {
 	size_t fc_len;   /* Length of the file counter (if a directory). */
@@ -369,9 +373,9 @@ print_extended_line(void)
 	 * We subtract 1 to prevent an extra empty line after the
 	 * dividing line on some terminals (e.g. cons25). */
 	const size_t len = !dl[1] ? 1 : wc_xstrlen(dl);
-	int i = c > 0 ? (int)(term_cols / (len > 0 ? len : 1)) : 0;
+	int cols = c > 0 ? (int)(term_cols / (len > 0 ? len : 1)) : 0;
 
-	for (; i > 1; i--)
+	for (; cols > 1; cols--)
 		fputs(dl, stdout);
 
 	putchar('\n');
@@ -1230,6 +1234,12 @@ get_columns(void)
 static size_t
 get_ext_info(const filesn_t i, int *trunc_type)
 {
+	if (file_info[i].ext_name == NO_EXT_PTR) {
+		file_info[i].ext_name = NULL;
+		*trunc_type = TRUNC_NO_EXT;
+		return 0;
+	}
+
 	if (!file_info[i].ext_name) {
 		char *dot = xmemrchr(file_info[i].name, '.', file_info[i].bytes);
 		if (!dot || dot == file_info[i].name || !dot[1]) {
@@ -1244,22 +1254,22 @@ get_ext_info(const filesn_t i, int *trunc_type)
 
 	size_t ext_len = 0;
 	size_t bytes = 0;
-	const char *e = file_info[i].ext_name;
+	const char *ext = file_info[i].ext_name;
 
 	if (file_info[i].utf8 == 0) {
 		/* Extension names are usually short. Let's call strlen(2) only
 		 * when it is longer than 6 (including the initial dot). */
-		ext_len = !e[1] ? 1
-			: !e[2] ? 2
-			: !e[3] ? 3
-			: !e[4] ? 4
-			: !e[5] ? 5
-			: !e[6] ? 6
-			: strlen(e);
-	} else if (is_utf8_name(e, &bytes) == 0) {
+		ext_len = !ext[1] ? 1
+			: !ext[2] ? 2
+			: !ext[3] ? 3
+			: !ext[4] ? 4
+			: !ext[5] ? 5
+			: !ext[6] ? 6
+			: strlen(ext);
+	} else if (is_utf8_name(ext, &bytes) == 0) {
 		ext_len = bytes;
 	} else {
-		ext_len = wc_xstrlen(e);
+		ext_len = wc_xstrlen(ext);
 	}
 
 	if ((int)ext_len >= conf.max_name_len - 1 || (int)ext_len <= 0) {
@@ -3202,12 +3212,17 @@ load_regfile_info(const mode_t mode, const filesn_t n)
 	const int name_icon_found = conf.icons == 1 ? get_name_icon(n) : 0;
 #endif /* !_NO_ICONS */
 
-	/* Check file extension */
-	char *ext = (override_color == 1 && conf.check_ext == 1)
-		? xmemrchr(file_info[n].name, '.', file_info[n].bytes) : (char *)NULL;
-
-	if (!ext || ext == file_info[n].name || !ext[1])
+	if (override_color == 0 || conf.check_ext == 0)
 		return;
+
+	/* Check file extension */
+	char *ext = xmemrchr(file_info[n].name, '.', file_info[n].bytes);
+	if (!ext || ext == file_info[n].name || !ext[1]) {
+		/* Mark this file as having no extension, to avoid running xmemrchr
+		 * again in get_ext_info(). */
+		file_info[n].ext_name = NO_EXT_PTR;
+		return;
+	}
 
 	file_info[n].ext_name = ext;
 #ifndef _NO_ICONS
