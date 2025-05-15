@@ -1234,12 +1234,6 @@ get_columns(void)
 static size_t
 get_ext_info(const filesn_t i, int *trunc_type)
 {
-	if (file_info[i].ext_name == NO_EXT_PTR) {
-		file_info[i].ext_name = NULL;
-		*trunc_type = TRUNC_NO_EXT;
-		return 0;
-	}
-
 	if (!file_info[i].ext_name) {
 		char *dot = xmemrchr(file_info[i].name, '.', file_info[i].bytes);
 		if (!dot || dot == file_info[i].name || !dot[1]) {
@@ -1328,7 +1322,13 @@ construct_filename(const filesn_t i, struct wtrunc_t *wtrunc,
 	 * file_info[i].ext_name should be a pointer to the beggining of SUFFIX
 	 * in file_info[i].name (this might impact on some later operation!) */
 
-	const size_t ext_len = get_ext_info(i, &wtrunc->type);
+	size_t ext_len = 0;
+	if (file_info[i].ext_name == NO_EXT_PTR) {
+		file_info[i].ext_name = NULL;
+		wtrunc->type = TRUNC_NO_EXT;
+	} else {
+		ext_len = get_ext_info(i, &wtrunc->type);
+	}
 
 	const int trunc_len = max_namelen - 1 - (int)ext_len;
 
