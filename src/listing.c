@@ -119,10 +119,6 @@
 #define NO_ICONS_ELN    2
 #define NO_ICONS_NO_ELN 3
 
-/* A dummy pointer to mark a given file as having no extension. */
-static int dummy_value = 0;
-#define NO_EXT_PTR ((void *)&dummy_value)
-
 /* Information about the longest filename in the curent list of files. */
 struct longest_t {
 	size_t fc_len;   /* Length of the file counter (if a directory). */
@@ -1243,16 +1239,6 @@ get_columns(void)
 static size_t
 get_ext_info(const filesn_t i, int *trunc_type)
 {
-	if (!file_info[i].ext_name) {
-		char *dot = xmemrchr(file_info[i].name, '.', file_info[i].bytes);
-		if (!dot || dot == file_info[i].name || !dot[1]) {
-			*trunc_type = TRUNC_NO_EXT;
-			return 0;
-		}
-
-		file_info[i].ext_name = dot;
-	}
-
 	*trunc_type = TRUNC_EXT;
 
 	size_t ext_len = 0;
@@ -1332,12 +1318,10 @@ construct_filename(const filesn_t i, struct wtrunc_t *wtrunc,
 	 * in file_info[i].name (this might impact on some later operation!) */
 
 	size_t ext_len = 0;
-	if (file_info[i].ext_name == NO_EXT_PTR) {
-		file_info[i].ext_name = NULL;
+	if (!file_info[i].ext_name)
 		wtrunc->type = TRUNC_NO_EXT;
-	} else {
+	else
 		ext_len = get_ext_info(i, &wtrunc->type);
-	}
 
 	const int trunc_len = max_namelen - 1 - (int)ext_len;
 
@@ -3146,7 +3130,7 @@ load_link_info(const int fd, const filesn_t n)
 }
 
 static inline void
-load_regfile_info(const mode_t mode, const filesn_t n, const size_t ext_index)
+load_regfile_info(const mode_t mode, const filesn_t n)
 {
 #ifdef LINUX_FILE_CAPS
 	cap_t cap;
@@ -3221,11 +3205,7 @@ load_regfile_info(const mode_t mode, const filesn_t n, const size_t ext_index)
 	const int name_icon_found = conf.icons == 1 ? get_name_icon(n) : 0;
 #endif /* !_NO_ICONS */
 
-	file_info[n].ext_name = ext_index == 0
-		? NO_EXT_PTR : file_info[n].name + ext_index;
-
-	if (override_color == 0 || conf.check_ext == 0
-	|| file_info[n].ext_name == NO_EXT_PTR)
+	if (override_color == 0 || conf.check_ext == 0 || !file_info[n].ext_name)
 		return;
 
 	/* Check file extension */
@@ -3483,6 +3463,9 @@ list_dir(void)
 		file_info[n].len = file_info[n].utf8 == 0
 			? file_info[n].bytes : wc_xstrlen(ename);
 
+		file_info[n].ext_name = ext_index == 0
+			? NULL : file_info[n].name + ext_index;
+
 		if (stat_ok == 1) {
 			load_file_gral_info(&attr, n);
 		} else {
@@ -3496,7 +3479,7 @@ list_dir(void)
 		case DT_DIR: load_dir_info(stat_ok == 1 ? attr.st_mode : 0, n); break;
 		case DT_LNK: load_link_info(fd, n); break;
 		case DT_REG:
-			load_regfile_info(stat_ok == 1 ? attr.st_mode : 0, n, ext_index);
+			load_regfile_info(stat_ok == 1 ? attr.st_mode : 0, n);
 			break;
 
 		/* For the time being, we have no specific colors for DT_ARCH1,
