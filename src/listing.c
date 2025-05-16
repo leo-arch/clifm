@@ -273,15 +273,19 @@ swap_ent(const size_t id1, const size_t id2)
 
 /* Return 1 if NAME contains at least one UTF8/control character, or 0
  * otherwise. BYTES is updated to the number of bytes needed to read the
- * entire name (excluding the terminating NUL char).
+ * entire name (excluding the terminating NUL char). EXT_INDEX, if not NULL,
+ * is updated to the index of the last dot character in NAME, provided it is
+ * neither the first nor the last character in NAME (we assume this is a
+ * file extension).
  *
  * This check is performed over filenames to be listed. If the filename is
  * not UTF8, we get its visible length from BYTES, instead of running
  * wc_xstrlen(). This gives us a little performance improvement: 3% faster
  * over 100,000 files. */
 static uint8_t
-is_utf8_name(const char *name, size_t *bytes)
+is_utf8_name(const char *name, size_t *bytes, size_t *ext_index)
 {
+	char *ext = NULL;
 	uint8_t is_utf8 = 0;
 	const char *start = name;
 
@@ -296,9 +300,14 @@ is_utf8_name(const char *name, size_t *bytes)
 		if (*name < ' ' || *name == 127)
 #endif /* CHAR_MIN >= 0 */
 			is_utf8 = 1;
+		else if (*name == '.')
+			ext = (char *)name;
 
 		name++;
 	}
+
+	if (ext_index && ext && ext != start && ext[1])
+		*ext_index = (size_t)(ext - start);
 
 	*bytes = (size_t)(name - start);
 	return is_utf8;
@@ -1260,7 +1269,7 @@ get_ext_info(const filesn_t i, int *trunc_type)
 			: !ext[5] ? 5
 			: !ext[6] ? 6
 			: strlen(ext);
-	} else if (is_utf8_name(ext, &bytes) == 0) {
+	} else if (is_utf8_name(ext, &bytes, NULL) == 0) {
 		ext_len = bytes;
 	} else {
 		ext_len = wc_xstrlen(ext);
@@ -2632,7 +2641,7 @@ list_dir_light(const int autocmd_ret)
 
 		file_info[n] = default_file_info;
 
-		file_info[n].utf8 = is_utf8_name(ename, &file_info[n].bytes);
+		file_info[n].utf8 = is_utf8_name(ename, &file_info[n].bytes, NULL);
 		file_info[n].name = xnmalloc(file_info[n].bytes + 1, sizeof(char));
 		memcpy(file_info[n].name, ename, file_info[n].bytes + 1);
 		file_info[n].len = (file_info[n].utf8 == 0)
@@ -3137,7 +3146,7 @@ load_link_info(const int fd, const filesn_t n)
 }
 
 static inline void
-load_regfile_info(const mode_t mode, const filesn_t n)
+load_regfile_info(const mode_t mode, const filesn_t n, const size_t ext_index)
 {
 #ifdef LINUX_FILE_CAPS
 	cap_t cap;
@@ -3212,19 +3221,16 @@ load_regfile_info(const mode_t mode, const filesn_t n)
 	const int name_icon_found = conf.icons == 1 ? get_name_icon(n) : 0;
 #endif /* !_NO_ICONS */
 
-	if (override_color == 0 || conf.check_ext == 0)
+	file_info[n].ext_name = ext_index == 0
+		? NO_EXT_PTR : file_info[n].name + ext_index;
+
+	if (override_color == 0 || conf.check_ext == 0
+	|| file_info[n].ext_name == NO_EXT_PTR)
 		return;
 
 	/* Check file extension */
-	char *ext = xmemrchr(file_info[n].name, '.', file_info[n].bytes);
-	if (!ext || ext == file_info[n].name || !ext[1]) {
-		/* Mark this file as having no extension, to avoid running xmemrchr
-		 * again in get_ext_info(). */
-		file_info[n].ext_name = NO_EXT_PTR;
-		return;
-	}
+	char *ext = file_info[n].ext_name;
 
-	file_info[n].ext_name = ext;
 #ifndef _NO_ICONS
 	if (conf.icons == 1 && name_icon_found == 0)
 		get_ext_icon(ext, n);
@@ -3466,7 +3472,9 @@ list_dir(void)
 		 * up being actually slower whenever the current directory contains
 		 * more UTF-8 than ASCII names. The assumption here is that ASCII
 		 * names are far more common than UTF-8 names. */
-		file_info[n].utf8 = is_utf8_name(ename, &file_info[n].bytes);
+		size_t ext_index = 0;
+		file_info[n].utf8 =
+			is_utf8_name(ename, &file_info[n].bytes, &ext_index);
 
 		file_info[n].name = xnmalloc(file_info[n].bytes + 1, sizeof(char));
 		memcpy(file_info[n].name, ename, file_info[n].bytes + 1);
@@ -3488,7 +3496,8 @@ list_dir(void)
 		case DT_DIR: load_dir_info(stat_ok == 1 ? attr.st_mode : 0, n); break;
 		case DT_LNK: load_link_info(fd, n); break;
 		case DT_REG:
-			load_regfile_info(stat_ok == 1 ? attr.st_mode : 0, n); break;
+			load_regfile_info(stat_ok == 1 ? attr.st_mode : 0, n, ext_index);
+			break;
 
 		/* For the time being, we have no specific colors for DT_ARCH1,
 		 * DT_ARCH2, and DT_WHT. */
