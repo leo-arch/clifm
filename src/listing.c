@@ -267,6 +267,29 @@ swap_ent(const size_t id1, const size_t id2)
 }
 #endif /* TOURBIN_QSORT */
 
+static int utf8_chars[256] = {
+	/* Control characters */
+	[0] = 1, [1] = 1, [2] = 1, [3] = 1, [4] = 1, [5] = 1, [6] = 1, [7] = 1,
+	[8] = 1, [9] = 1, [10] = 1, [11] = 1, [12] = 1, [13] = 1, [14] = 1,
+	[15] = 1, [16] = 1, [17] = 1, [18] = 1, [19] = 1, [20] = 1, [21] = 1,
+	[22] = 1, [23] = 1, [24] = 1, [25] = 1, [26] = 1, [27] = 1, [28] = 1,
+	[29] = 1, [30] = 1, [31] = 1,
+	/* Delete */
+	[127] = 1,
+	/* UTF-8*/
+	[192] = 1, [193] = 1, [194] = 1, [195] = 1, [196] = 1, [197] = 1,
+	[198] = 1, [199] = 1, [200] = 1, [201] = 1, [202] = 1, [203] = 1,
+	[204] = 1, [205] = 1, [206] = 1, [207] = 1, [208] = 1, [209] = 1,
+	[210] = 1, [211] = 1, [212] = 1, [213] = 1, [214] = 1, [215] = 1,
+	[216] = 1, [217] = 1, [218] = 1, [219] = 1, [220] = 1, [221] = 1,
+	[222] = 1, [223] = 1, [224] = 1, [225] = 1, [226] = 1, [227] = 1,
+	[228] = 1, [229] = 1, [230] = 1, [231] = 1, [232] = 1, [233] = 1,
+	[234] = 1, [235] = 1, [236] = 1, [237] = 1, [238] = 1, [239] = 1,
+	[240] = 1, [241] = 1, [242] = 1, [243] = 1, [244] = 1, [245] = 1,
+	[246] = 1, [247] = 1, [248] = 1, [249] = 1, [250] = 1, [251] = 1,
+	[252] = 1, [253] = 1, [254] = 1, [255] = 1
+};
+
 /* Return 1 if NAME contains at least one UTF8/control character, or 0
  * otherwise. BYTES is updated to the number of bytes needed to read the
  * entire name (excluding the terminating NUL char). EXT_INDEX, if not NULL,
@@ -279,25 +302,20 @@ swap_ent(const size_t id1, const size_t id2)
  * wc_xstrlen(). This gives us a little performance improvement: 3% faster
  * over 100,000 files. */
 static uint8_t
-is_utf8_name(const char *name, size_t *bytes, size_t *ext_index)
+is_utf8_name(const char *filename, size_t *bytes, size_t *ext_index)
 {
-	char *ext = NULL;
 	uint8_t is_utf8 = 0;
-	const char *start = name;
+	const unsigned char *start = (const unsigned char *)filename;
+	const unsigned char *name = (const unsigned char *)filename;
+	const unsigned char *ext = NULL;
 
 	while (*name) {
-#if !defined(CHAR_MIN) || CHAR_MIN >= 0 /* char is unsigned (PowerPC/ARM) */
-		if (*name >= 0xC0 || *name < ' ' || *name == 127)
-#else /* char is signed (X86) */
-		/* If UTF-8 char, the first byte is >= 0xC0, whose decimal
-		 * value is 192, which is bigger than CHAR_MAX if char is signed,
-		 * becoming thus a negative value. In this way, the above three-steps
-		 * check can be written using only two checks. */
-		if (*name < ' ' || *name == 127)
-#endif /* CHAR_MIN >= 0 */
+		if (utf8_chars[*name]) {
 			is_utf8 = 1;
-		else if (*name == '.')
-			ext = (char *)name;
+		} else {
+			if (*name == '.')
+				ext = name;
+		}
 
 		name++;
 	}
@@ -3479,8 +3497,7 @@ list_dir(void)
 		case DT_DIR: load_dir_info(stat_ok == 1 ? attr.st_mode : 0, n); break;
 		case DT_LNK: load_link_info(fd, n); break;
 		case DT_REG:
-			load_regfile_info(stat_ok == 1 ? attr.st_mode : 0, n);
-			break;
+			load_regfile_info(stat_ok == 1 ? attr.st_mode : 0, n); break;
 
 		/* For the time being, we have no specific colors for DT_ARCH1,
 		 * DT_ARCH2, and DT_WHT. */
