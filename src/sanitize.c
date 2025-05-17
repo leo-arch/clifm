@@ -303,15 +303,19 @@ END:
 static int
 sanitize_mime(const char *cmd)
 {
-	/* Only %[fxum] is allowed */
-	char *p = strchr(cmd, '%');
-	if (p && p[1] != 'f' && p[1] != 'x' && p[1] != 'u' && p[1] != 'm')
-		return FUNC_FAILURE;
+	const char *p = cmd;
+	while (*p) {
+		/* Only %[fxum] is allowed */
+		if (*p == '%' && p[1] != 'f' && p[1] != 'x'
+		&& p[1] != 'u' && p[1] != 'm')
+			return FUNC_FAILURE;
 
-	/* Disallow double ampersand */
-	p = strchr(cmd, '&');
-	if (p && p[1] == '&')
-		return FUNC_FAILURE;
+		/* Disallow double ampersand */
+		if (*p == '&' && p[1] == '&')
+			return FUNC_FAILURE;
+
+		p++;
+	}
 
 	if (strlen(cmd) > strspn(cmd, ALLOWED_CHARS_MIME))
 		return FUNC_FAILURE;
