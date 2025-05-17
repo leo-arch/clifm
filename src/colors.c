@@ -746,36 +746,20 @@ get_ext_color(const char *ext, size_t *val_len)
  * 't', and ExtColors, if MODE is 'x') returning the same string
  * containing only allowed characters. */
 static char *
-strip_color_line(const char *str, const char mode)
+strip_color_line(const char *str, const size_t str_len)
 {
 	if (!str || !*str)
 		return (char *)NULL;
 
-	char *buf = xnmalloc(strlen(str) + 1, sizeof(char));
+	char *buf = xnmalloc(str_len + 1, sizeof(char));
 	size_t len = 0;
 
-	switch (mode) {
-	case 't': /* di=01;31: */
-		while (*str) {
-			if (IS_ALNUM(*str) || *str == '=' || *str == ';' || *str == ':'
-			|| *str == RGB_COLOR_PREFIX || *str == COLOR256_PREFIX
-			|| *str == '-' || *str == '_')
-				{buf[len] = *str; len++;}
-			str++;
-		}
-		break;
-
-	case 'x': /* *.tar=01;31: */
-		while (*str) {
-			if (IS_ALNUM(*str) || *str == '*' || *str == '.'
-			|| *str == '=' || *str == ';' || *str == ':'
-			|| *str == RGB_COLOR_PREFIX || *str == COLOR256_PREFIX
-			|| *str == '-' || *str == '_')
-				{buf[len] = *str; len++;}
-			str++;
-		}
-		break;
-	default: break;
+	while (*str) {
+		if (IS_ALNUM(*str) || *str == '=' || *str == ';' || *str == ':'
+		|| *str == RGB_COLOR_PREFIX || *str == COLOR256_PREFIX
+		|| *str == '-' || *str == '_')
+			{buf[len] = *str; len++;}
+		str++;
 	}
 
 	if (!len || !*buf) {
@@ -2165,12 +2149,12 @@ set_cs_fzftabopts(char *line)
 #endif /* !_NO_FZF */
 
 static void
-set_cs_colors(char *line, char **colors)
+set_cs_colors(char *line, char **colors, const size_t line_len)
 {
 	if (IS_CTRL_CHR(*line))
 		return;
 
-	char *color_line = strip_color_line(line, 't');
+	char *color_line = strip_color_line(line, line_len);
 	if (!color_line)
 		return;
 
@@ -2335,13 +2319,13 @@ read_color_scheme_file(const char *colorscheme, char **filecolors,
 		/* Interface colors */
 		else if (!*ifacecolors && *line == 'I'
 		&& strncmp(line, "InterfaceColors=", 16) == 0) {
-			set_cs_colors(line + 16, ifacecolors);
+			set_cs_colors(line + 16, ifacecolors, (size_t)line_len - 16);
 		}
 
 		/* Filetype colors */
 		else if (!*filecolors && *line == 'F'
 		&& strncmp(line, "FiletypeColors=", 15) == 0) {
-			set_cs_colors(line + 15, filecolors);
+			set_cs_colors(line + 15, filecolors, (size_t)line_len - 15);
 		}
 
 		/* File extension colors */
