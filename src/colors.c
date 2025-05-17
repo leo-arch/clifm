@@ -385,21 +385,16 @@ is_hex_color(const char *str)
 
 	while (*str) {
 		c++;
-		if ((c == 7 || c == 4) && *str == '-') {
-			if (!str[1])
-				return 0;
-			return (str[1] >= '0' && str[1] <= '9');
-		}
-		if ( !( (*str >= '0' && *str <= '9') || (*str >= 'a' && *str <= 'f')
-		|| (*str >= 'A' && *str <= 'F') ) )
+		if ((c == 7 || c == 4) && *str == '-')
+			return !str[1] ? 0 : IS_DIGIT(str[1]);
+
+		if (!IS_HEX_DIGIT(*str))
 			return 0;
+
 		str++;
 	}
 
-	if (c != 6 && c != 3)
-		return 0;
-
-	return 1;
+	return (c == 6 || c == 3);
 }
 
 /* Validate a 256 color code string with this format: [0-999]-[0-9]. */
