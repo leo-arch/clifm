@@ -968,19 +968,19 @@ extern time_t curdir_mtime;
  * NOTE: In case of directories themselves (excluding their content), their
  * apparent size is always zero as well (see 'info du'). */
 #define FILE_TYPE_NON_ZERO_SIZE(m) (S_ISDIR((m)) || S_ISREG((m)) \
-		|| S_ISLNK((m)))
+	|| S_ISLNK((m)))
 /* du(1) also checks for
  * S_TYPEISSHM(struct stat *) // shared memory objects
  * S_TYPEISTMO(struct stat *) // typed memory objects */
 
 #define FILE_SIZE_PTR(s) (conf.apparent_size == 1 ? (s)->st_size \
-		: (s)->st_blocks * S_BLKSIZE)
+	: (s)->st_blocks * S_BLKSIZE)
 #define FILE_SIZE(s) (conf.apparent_size == 1 ? (s).st_size \
-		: (s).st_blocks * S_BLKSIZE)
+	: (s).st_blocks * S_BLKSIZE)
 
 /* Do we have the sort method S in light mode? */
 #define ST_IN_LIGHT_MODE(s) ((s) == SNAME || (s) == SVER || (s) == SINO \
-		|| (s) == SEXT || (s) == SNONE || (s) == STYPE)
+	|| (s) == SEXT || (s) == SNONE || (s) == STYPE)
 
 #define UNUSED(x) (void)(x) /* Just silence the compiler's warning */
 

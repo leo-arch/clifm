@@ -376,7 +376,7 @@ get_file_color(const char *filename, const struct stat *a)
 
 /* Validate a hex color code string with this format: RRGGBB-[1-9] or RGB-[1-9]. */
 static int
-is_hex_color(const char *str)
+is_hex_color(const char *restrict str)
 {
 	if (!str || !*str)
 		return 0;
@@ -399,24 +399,22 @@ is_hex_color(const char *str)
 
 /* Validate a 256 color code string with this format: [0-999]-[0-9]. */
 static int
-is_256_color(const char *str)
+is_256_color(const char *restrict str)
 {
 	if (!str || !*str)
 		return 0;
 
-	const char *s = str;
-
 	size_t c = 0;
-	while (s[c]) {
-		if (c == 0 && (s[c] < '0' || s[c] > '9'))
+	while (str[c]) {
+		if (c == 0 && (str[c] < '0' || str[c] > '9'))
 			return 0;
-		if (c == 1 && ((s[c] < '0' || s[c] > '9') && s[c] != '-'))
+		if (c == 1 && ((str[c] < '0' || str[c] > '9') && str[c] != '-'))
 			return 0;
-		if (c == 2 && ((s[c] < '0' || s[c] > '9') && s[c] != '-'))
+		if (c == 2 && ((str[c] < '0' || str[c] > '9') && str[c] != '-'))
 			return 0;
-		if (c == 3 && ((s[c] < '0' || s[c] > '9') && s[c] != '-'))
+		if (c == 3 && ((str[c] < '0' || str[c] > '9') && str[c] != '-'))
 			return 0;
-		if (c == 4 && (s[c] < '0' || s[c] > '9'))
+		if (c == 4 && (str[c] < '0' || str[c] > '9'))
 			return 0;
 		if (c == 5)
 			return 0;
