@@ -317,7 +317,8 @@ sanitize_mime(const char *cmd)
 		p++;
 	}
 
-	if (strlen(cmd) > strspn(cmd, ALLOWED_CHARS_MIME))
+	const size_t cmd_len = (size_t)(p - cmd);
+	if (cmd_len > strspn(cmd, ALLOWED_CHARS_MIME))
 		return FUNC_FAILURE;
 
 	return FUNC_SUCCESS;
