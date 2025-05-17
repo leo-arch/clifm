@@ -224,7 +224,7 @@ xsecure_env(const int mode)
 
 	char *display = (char *)NULL;
 	char *wayland_display = (char *)NULL;
-	char *_term = (char *)NULL;
+	char *term_env = (char *)NULL;
 	char *tz = (char *)NULL;
 	char *lang = (char *)NULL;
 	char *fzfopts = (char *)NULL;
@@ -237,7 +237,7 @@ xsecure_env(const int mode)
 		display = xgetenv("DISPLAY", 1);
 		if (!display)
 			wayland_display = xgetenv("WAYLAND_DISPLAY", 1);
-		_term = xgetenv("TERM", 1);
+		term_env = xgetenv("TERM", 1);
 		tz = xgetenv("TZ", 1);
 		lang = xgetenv("LANG", 1);
 		if (fzftab)
@@ -271,8 +271,8 @@ xsecure_env(const int mode)
 	if (clifm_level && sanitize_shell_level(clifm_level) == FUNC_SUCCESS)
 		xsetenv("CLIFMLVL", clifm_level);
 
-	if (_term && sanitize_cmd(_term, SNT_MISC) == FUNC_SUCCESS)
-		xsetenv("TERM", _term);
+	if (term_env && sanitize_cmd(term_env, SNT_MISC) == FUNC_SUCCESS)
+		xsetenv("TERM", term_env);
 
 	if (tz && sanitize_cmd(tz, SNT_MISC) == FUNC_SUCCESS)
 		xsetenv("TZ", tz);
@@ -291,7 +291,7 @@ END:
 	free(display);
 	free(wayland_display);
 	free(clifm_level);
-	free(_term);
+	free(term_env);
 	free(tz);
 	free(lang);
 	free(fzfopts);
@@ -324,41 +324,11 @@ sanitize_mime(const char *cmd)
 	return FUNC_SUCCESS;
 }
 
-/* Sanitize cmd string coming from the net file */
+/* Sanitize the string CMD using WHITELIST as whitelist. */
 static int
-sanitize_net(const char *cmd)
+sanitize_whitelist(const char *cmd, const char *whitelist)
 {
-	if (strlen(cmd) > strspn(cmd, ALLOWED_CHARS_NET))
-		return FUNC_FAILURE;
-
-	return FUNC_SUCCESS;
-}
-
-/* Sanitize value of DISPLAY env var */
-static int
-sanitize_misc(const char *str)
-{
-	if (strlen(str) > strspn(str, ALLOWED_CHARS_MISC))
-		return FUNC_FAILURE;
-
-	return FUNC_SUCCESS;
-}
-
-/* Sanitize value of DISPLAY env var */
-static int
-sanitize_display(const char *str)
-{
-	if (strlen(str) > strspn(str, ALLOWED_CHARS_DISPLAY))
-		return FUNC_FAILURE;
-
-	return FUNC_SUCCESS;
-}
-
-/* Sanitize cmd string coming from profile, prompt, and autocmds */
-static int
-sanitize_gral(const char *cmd)
-{
-	if (strlen(cmd) > strspn(cmd, ALLOWED_CHARS_GRAL))
+	if (strlen(cmd) > strspn(cmd, whitelist))
 		return FUNC_FAILURE;
 
 	return FUNC_SUCCESS;
@@ -436,16 +406,17 @@ sanitize_cmd(const char *str, const int type)
 			return FUNC_FAILURE;
 		exit_status = sanitize_mime(str);
 		break;
-	case SNT_NET: exit_status = sanitize_net(str); break;
-	case SNT_DISPLAY: return sanitize_display(str);
-	case SNT_MISC: return sanitize_misc(str);
+	case SNT_NET:
+		exit_status = sanitize_whitelist(str, ALLOWED_CHARS_NET); break;
+	case SNT_DISPLAY: return sanitize_whitelist(str, ALLOWED_CHARS_DISPLAY);
+	case SNT_MISC: return sanitize_whitelist(str, ALLOWED_CHARS_MISC);
 	case SNT_PROFILE: /* fallthrough */
 	case SNT_PROMPT:  /* fallthrough */
 	case SNT_AUTOCMD: /* fallthrough */
 	case SNT_GRAL:
 		if (clean_cmd(str) != FUNC_SUCCESS)
 			return FUNC_FAILURE;
-		exit_status = sanitize_gral(str);
+		exit_status = sanitize_whitelist(str, ALLOWED_CHARS_GRAL);
 		break;
 	case SNT_BLACKLIST: return sanitize_blacklist(str);
 	case SNT_NONE: /* fallthrough */
