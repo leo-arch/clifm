@@ -276,7 +276,7 @@ static unsigned char utf8_chars[256] = {
 	[29] = 1, [30] = 1, [31] = 1,
 	/* Delete */
 	[127] = 1,
-	/* UTF-8*/
+	/* UTF-8 */
 	[192] = 1, [193] = 1, [194] = 1, [195] = 1, [196] = 1, [197] = 1,
 	[198] = 1, [199] = 1, [200] = 1, [201] = 1, [202] = 1, [203] = 1,
 	[204] = 1, [205] = 1, [206] = 1, [207] = 1, [208] = 1, [209] = 1,
@@ -2646,7 +2646,7 @@ list_dir_light(const int autocmd_ret)
 		file_info[n].utf8 = is_utf8_name(ename, &file_info[n].bytes, NULL);
 		file_info[n].name = xnmalloc(file_info[n].bytes + 1, sizeof(char));
 		memcpy(file_info[n].name, ename, file_info[n].bytes + 1);
-		file_info[n].len = (file_info[n].utf8 == 0)
+		file_info[n].len = file_info[n].utf8 == 0
 			? file_info[n].bytes : wc_xstrlen(ename);
 
 		/* ################  */

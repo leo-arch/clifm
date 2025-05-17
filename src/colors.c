@@ -2165,7 +2165,7 @@ set_cs_fzftabopts(char *line)
 #endif /* !_NO_FZF */
 
 static void
-set_cs_iface_colors(char *line, char **ifacecolors)
+set_cs_colors(char *line, char **colors)
 {
 	if (IS_CTRL_CHR(*line))
 		return;
@@ -2174,21 +2174,7 @@ set_cs_iface_colors(char *line, char **ifacecolors)
 	if (!color_line)
 		return;
 
-	*ifacecolors = savestring(color_line, strlen(color_line));
-	free(color_line);
-}
-
-static void
-set_cs_filetype_colors(char *line, char **filecolors)
-{
-	if (IS_CTRL_CHR(*line))
-		return;
-
-	char *color_line = strip_color_line(line, 't');
-	if (!color_line)
-		return;
-
-	*filecolors = savestring(color_line, strlen(color_line));
+	*colors = savestring(color_line, strlen(color_line));
 	free(color_line);
 }
 
@@ -2349,13 +2335,13 @@ read_color_scheme_file(const char *colorscheme, char **filecolors,
 		/* Interface colors */
 		else if (!*ifacecolors && *line == 'I'
 		&& strncmp(line, "InterfaceColors=", 16) == 0) {
-			set_cs_iface_colors(line + 16, ifacecolors);
+			set_cs_colors(line + 16, ifacecolors);
 		}
 
 		/* Filetype colors */
 		else if (!*filecolors && *line == 'F'
 		&& strncmp(line, "FiletypeColors=", 15) == 0) {
-			set_cs_filetype_colors(line + 15, filecolors);
+			set_cs_colors(line + 15, filecolors);
 		}
 
 		/* File extension colors */
