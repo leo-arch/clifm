@@ -238,9 +238,9 @@ remove_bold_attr(char *str)
 	size_t c = 0;
 
 	while (1) {
-		if (*p == '\\' && *(p + 1) == 'x'
-		&& *(p + 2) == '1' && *(p + 3) == 'b') {
-			if (*(p + 4)) {
+		if (*p == '\\' && p[1] == 'x'
+		&& p[2] == '1' && p[3] == 'b') {
+			if (p[4]) {
 				p += 4;
 				q = p;
 				continue;
@@ -261,17 +261,17 @@ remove_bold_attr(char *str)
 			q = p;
 		}
 
-		if ( (*q == '0' && *(q + 1) == '1' && (*(q + 2) == ';'
-		|| *(q + 2) == 'm')) || (*q == '1' && (*(q + 1) == 'm'
-		|| *(q + 1) == ';')) ) {
+		if ( (*q == '0' && q[1] == '1' && (q[2] == ';'
+		|| q[2] == 'm')) || (*q == '1' && (q[1] == 'm'
+		|| q[1] == ';')) ) {
 			if (*q == '0')
-				*(q + 1) = '0';
+				q[1] = '0';
 			else
 				*q = '0';
 			break;
 		}
 
-		if (*p == ';' && *(p + 1)) {
+		if (*p == ';' && p[1]) {
 			q = p + 1;
 			c++;
 		}
@@ -971,7 +971,7 @@ print_colors_tip(const int stealth)
 	xerror(_("%s: %s.\nTIP: To edit the "
 		"color scheme use the following environment "
 		"variables: CLIFM_FILE_COLORS, CLIFM_IFACE_COLORS, "
-		"and CLIFM_EXT_COLORS.\nExample:\n\n"
+		"and CLIFM_EXT_COLORS.\nFor example:\n\n"
 		"CLIFM_FILE_COLORS=\"di=31:ln=33:\" CLIFM_IFACE_COLORS=\"el=35:fc=34:\" "
 		"CLIFM_EXT_COLORS=\"*.c=1;33:*.odt=4;35:\" clifm\n\n"
 		"Consult the manpage for more information.\n"),
@@ -1432,14 +1432,14 @@ store_extension_line(const char *line)
 		return FUNC_FAILURE;
 
 	/* Remove the leading "*.", if any, from the extension line. */
-	if (*line == '*' && *(line + 1) == '.') {
+	if (*line == '*' && line[1] == '.') {
 		line += 2;
 		if (!*line)
 			return FUNC_FAILURE;
 	}
 
 	char *q = strchr(line, '=');
-	if (!q || !*(q + 1) || q == line)
+	if (!q || !q[1] || q == line)
 		return FUNC_FAILURE;
 
 	*q = '\0';
@@ -2032,9 +2032,9 @@ set_cs_prompt_noti(const char *line)
 	if (IS_CTRL_CHR(*line))
 		return;
 
-	if (*line == 't' && strncmp(line, "true", 4) == 0)
+	if (*line == 't' && strcmp(line, "true") == 0)
 		prompt_notif = 1; /* NOLINT */
-	else if (*line == 'f' && strncmp(line, "false", 5) == 0)
+	else if (*line == 'f' && strcmp(line, "false") == 0)
 		prompt_notif = 0; /* NOLINT */
 	else
 		prompt_notif = DEF_PROMPT_NOTIF; /* NOLINT */
@@ -2046,9 +2046,9 @@ set_cs_enable_warning_prompt(const char *line)
 	if (IS_CTRL_CHR(*line))
 		return;
 
-	if (*line == 't' && strncmp(line, "true", 4) == 0)
+	if (*line == 't' && strcmp(line, "true") == 0)
 		conf.warning_prompt = 1; /* NOLINT */
-	else if (*line == 'f' && strncmp(line, "false", 5) == 0)
+	else if (*line == 'f' && strcmp(line, "false") == 0)
 		conf.warning_prompt = 0; /* NOLINT */
 	else
 		conf.warning_prompt = DEF_WARNING_PROMPT; /* NOLINT */
