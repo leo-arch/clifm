@@ -763,7 +763,7 @@ strip_color_line(const char *str, const size_t str_len)
 		str++;
 	}
 
-	if (!len || !*buf) {
+	if (len == 0 || !*buf) {
 		free(buf);
 		return (char *)NULL;
 	}
@@ -2159,8 +2159,7 @@ set_cs_colors(char *line, char **colors, const size_t line_len)
 	if (!color_line)
 		return;
 
-	*colors = savestring(color_line, strlen(color_line));
-	free(color_line);
+	*colors = color_line;
 }
 
 static void
