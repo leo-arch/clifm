@@ -742,8 +742,7 @@ get_ext_color(const char *ext, size_t *val_len)
 }
 
 #ifndef CLIFM_SUCKLESS
-/* Strip color line from the config file (FiletypeColors, if MODE is
- * 't', and ExtColors, if MODE is 'x') returning the same string
+/* Strip color line from the config file, returning the same string
  * containing only allowed characters. */
 static char *
 strip_color_line(const char *str, const size_t str_len)
@@ -757,8 +756,10 @@ strip_color_line(const char *str, const size_t str_len)
 	while (*str) {
 		if (IS_ALNUM(*str) || *str == '=' || *str == ';' || *str == ':'
 		|| *str == RGB_COLOR_PREFIX || *str == COLOR256_PREFIX
-		|| *str == '-' || *str == '_')
-			{buf[len] = *str; len++;}
+		|| *str == '-' || *str == '_') {
+			buf[len] = *str;
+			len++;
+		}
 		str++;
 	}
 
