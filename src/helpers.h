@@ -1032,6 +1032,8 @@ extern time_t curdir_mtime;
 #define IS_ALPHA_LOW(c) ((unsigned int)(c) >= 'a' && (unsigned int)(c) <= 'z')
 #define IS_ALPHA_UP(c)  ((unsigned int)(c) >= 'A' && (unsigned int)(c) <= 'Z')
 #define IS_ALNUM(c)     (IS_ALPHA_LOW((c)) || IS_ALPHA_UP((c)) || IS_DIGIT((c)))
+#define IS_HEX_DIGIT(c) (IS_DIGIT((c)) || ((c) >= 'a' && (c) <= 'f') \
+	|| ((c) >= 'A' && (c) <= 'F'))
 
 #define TOUPPER(c) (IS_ALPHA_LOW((c)) ? ((c) & ~0x20) : (c))
 #define TOLOWER(c) (IS_ALPHA_UP((c)) ? ((c) | 0x20) : (c))

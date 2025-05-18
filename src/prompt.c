@@ -429,13 +429,8 @@ static char *
 gen_mode(void)
 {
 	char *temp = xnmalloc(2, sizeof(char));
-
-	if (conf.light_mode == 1) {
-		*temp = LIGHT_MODE_CHAR;
-		temp[1] = '\0';
-	} else {
-		*temp = '\0';
-	}
+	*temp = conf.light_mode == 1 ? LIGHT_MODE_CHAR : '\0';
+	temp[1] = '\0';
 
 	return temp;
 }
@@ -461,7 +456,7 @@ static char *
 gen_non_print_sequence(const int c)
 {
 	char *temp = xnmalloc(2, sizeof(char));
-	*temp = (c == '[') ? RL_PROMPT_START_IGNORE : RL_PROMPT_END_IGNORE;
+	*temp = c == '[' ? RL_PROMPT_START_IGNORE : RL_PROMPT_END_IGNORE;
 	temp[1] = '\0';
 
 	return temp;
@@ -737,9 +732,7 @@ is_valid_hex(const char *s)
 
 	size_t i;
 	for (i = 0; s[i]; i++) {
-		if ( !( (s[i] >= '0' && s[i] <= '9')
-		|| (s[i] >= 'a' && s[i] <= 'f')
-		|| (s[i] >= 'A' && s[i] <= 'F') ) )
+		if (!IS_HEX_DIGIT(s[i]))
 			return 0;
 	}
 

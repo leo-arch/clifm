@@ -47,9 +47,6 @@
 #define COLOR256_PREFIX  '@'
 #define IS_COLOR_PREFIX(c) ((c) == RGB_COLOR_PREFIX || (c) == COLOR256_PREFIX)
 
-#define IS_HEX_DIGIT(c) (IS_DIGIT((c)) || ((c) >= 'a' && (c) <= 'f') \
-	|| ((c) >= 'A' && (c) <= 'F'))
-
 #define LS_COLORS_GNU  1
 #define LS_COLORS_BSD  2
 
