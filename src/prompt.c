@@ -343,13 +343,18 @@ static char *
 gen_octal(char **line, int *c)
 {
 	char octal_string[4];
-
 	xstrsncpy(octal_string, *line, sizeof(octal_string));
-	octal_string[3] = '\0'; /* Max octal number: 0777 */
 
 	int n = read_octal(octal_string);
+#ifdef CHAR_MAX
+	/* Max octal number: 0177 (char is signed) or 0377 (char is unsigned). */
 	if (n > CHAR_MAX)
-		n = CHAR_MAX - 1;
+		n = CHAR_MAX;
+#else
+	if (n > 127)
+		n = 127;
+#endif /* CHAR_MAX */
+
 	char *temp = xnmalloc(3, sizeof(char));
 
 	if (n == CTLESC || n == CTLNUL) {
