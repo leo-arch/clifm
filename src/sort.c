@@ -164,28 +164,11 @@ namecmp(char *s1, char *s2)
 static inline int
 sort_by_extension(struct fileinfo *pa, struct fileinfo *pb)
 {
-	char *e1 = (char *)NULL;
-	char *e2 = (char *)NULL;
+	const char *e1 = (pa->dir == 0 && pa->ext_name)
+		? pa->ext_name + (pa->ext_name[1] != '\0') : NULL;
 
-	if (pa->dir == 0) {
-		if (pa->ext_name) {
-			e1 = pa->ext_name + (pa->ext_name[1] != '\0');
-		} else {
-			char *p = strrchr(pa->name, '.');
-			if (p && p != pa->name && p[1])
-				e1 = p + 1;
-		}
-	}
-
-	if (pb->dir == 0) {
-		if (pb->ext_name) {
-			e2 = pb->ext_name + (pb->ext_name[1] != '\0');
-		} else {
-			char *p = strrchr(pb->name, '.');
-			if (p && p != pb->name && p[1])
-				e2 = p + 1;
-		}
-	}
+	const char *e2 = (pb->dir == 0 && pb->ext_name)
+		? pb->ext_name + (pb->ext_name[1] != '\0') : NULL;
 
 	if (e1 || e2) {
 		if (!e1)
