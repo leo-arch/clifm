@@ -690,7 +690,7 @@ gen_nesting_level(const int mode)
 		return p;
 	}
 
-	const size_t len = (MAX_COLOR * 2) + MAX_INT_STR;
+	const size_t len = MAX_INT_STR + 3;
 	p = xnmalloc(len, sizeof(char));
 	snprintf(p, len, "(%d)", nesting_level);
 

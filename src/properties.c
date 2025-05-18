@@ -378,7 +378,7 @@ static int
 validate_new_perms(const char *s)
 {
 	const size_t l = strlen(s);
-	if (*s >= '0' && *s <= '9')
+	if (IS_DIGIT(*s))
 		return validate_octal_perms(s, l);
 
 	if (l != 9) {
@@ -1357,7 +1357,7 @@ has_nsec_modifier(char *fmt)
 		return (char *)NULL;
 
 	while (*fmt) {
-		if (*fmt == '%' && *(fmt + 1) == 'N')
+		if (*fmt == '%' && fmt[1] == 'N')
 			return fmt;
 		++fmt;
 	}
@@ -1397,7 +1397,7 @@ gen_user_time_str(char *buf, size_t buf_size, struct tm *t, const size_t nsec)
 	if (len >= buf_size) /* Error or exhausted space in BUF. */
 		return;
 
-	ptr += 2; /* Move past the %N modifier in format string */
+	ptr += 2; /* Move past the %N modifier in format string. */
 	if (!*ptr)
 		return;
 
@@ -1430,12 +1430,12 @@ xgen_time_str(char *buf, const size_t buf_size, const time_t tim,
 
 	*buf = '\0';
 
-	if (conf.ptime_str) { /* User-defined time format */
+	if (conf.ptime_str) { /* User-defined time format. */
 		gen_user_time_str(buf, buf_size, &t, nsec);
 		return;
 	}
 
-	/* Default value */
+	/* Default value. */
 	size_t len = strftime(buf, buf_size, "%F %T", &t);
 	if (len == 0) /* Error or exhausted space in BUF. */
 		return;
@@ -1518,14 +1518,14 @@ print_timestamps(char *filename, const struct stat *attr)
 			attrx.ST_BTIME.tv_sec, (size_t)attrx.ST_BTIME.tv_nsec);
 		bt = attrx.ST_BTIME.tv_sec;
 	} else {
-		/* Birthtime is not available */
+		/* Birthtime is not available. */
 		*creation_time = '-';
 		creation_time[1] = '\0';
 	}
 
 # elif defined(__sun)
 	struct timespec birthtim = get_birthtime(filename);
-	if (birthtim.tv_sec == (time_t)-1) { /* Error */
+	if (birthtim.tv_sec == (time_t)-1) { /* Error. */
 		*creation_time = '-';
 		creation_time[1] = '\0';
 	} else {
@@ -1546,7 +1546,7 @@ print_timestamps(char *filename, const struct stat *attr)
 	}
 
 	printf(_("Birth: \t\t%s%s%s\n"), cbdate, creation_time, cend);
-#elif !defined(_BE_POSIX) /* Birthtime not supported */
+#elif !defined(_BE_POSIX) /* Birthtime is not supported. */
 	printf(_("Birth: \t\t%s-%s\n"), dn_c, cend);
 #endif /* ST_BTIME */
 }
@@ -1650,7 +1650,7 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 		return;
 	}
 
-	if (full_dirsize == 0) // We're running 'p', not 'pp'.
+	if (full_dirsize == 0) /* We're running 'p', not 'pp'. */
 		return;
 
 	int du_status = 0;
@@ -1658,9 +1658,9 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 		? get_total_size(filename, &du_status) : (-2);
 
 	if (total_size < 0) {
-		if (total_size == -2) // No access
+		if (total_size == -2) /* No access. */
 			printf(_("Total size: \t%s%c%s\n"), dn_c, UNKNOWN_CHR, cend);
-		else // get_total_size returned error (-1)
+		else /* get_total_size returned error (-1). */
 			puts(UNKNOWN_STR);
 		return;
 	}
@@ -1866,7 +1866,7 @@ do_stat(char *filename, const int follow_link)
 		return FUNC_FAILURE;
 
 	/* Remove leading "./" */
-	if (*filename == '.' && *(filename + 1) == '/' && *(filename + 2))
+	if (*filename == '.' && filename[1] == '/' && filename[2])
 		filename += 2;
 
 	/* Check file existence. */

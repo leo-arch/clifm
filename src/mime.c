@@ -135,8 +135,7 @@ xmagic(const char *file, const int query_mime)
 	if (!file || !*file)
 		return (char *)NULL;
 
-	if (query_mime == 1 && user_mimetypes
-	&& user_mimetypes[0].ext_hash != (size_t)-1) {
+	if (query_mime == 1 && user_mimetypes) {
 		const char *mime = check_user_mimetypes(file);
 		if (mime)
 			return strdup(mime);
@@ -545,12 +544,12 @@ mime_import(char *file)
 
 	if (!(flags & GUI)) { /* Not in X, exit */
 		xerror(_("%s: Nothing was imported. No graphical "
-			"environment found\n"), err_name);
+			"environment found.\n"), err_name);
 		return (-1);
 	}
 
 	if (!user.home) {
-		xerror(_("%s: Error getting home directory\n"), err_name);
+		xerror(_("%s: Error getting the home directory\n"), err_name);
 		return (-1);
 	}
 

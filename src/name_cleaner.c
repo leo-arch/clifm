@@ -113,8 +113,7 @@ static int
 translate_unsafe_char(const unsigned char c)
 {
 	unsigned char t = 0;
-	if ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'z')
-	|| (c >= 'A' && c <= 'Z') || c == '.' || c == '_' || c == '-')
+	if (IS_ALNUM(c) || c == '.' || c == '_' || c == '-')
 		t = c;
 	else if (c == '(' || c == ')' || c == '[' || c == ']'
 	|| c == '{' || c == '}')
