@@ -345,9 +345,11 @@ gen_octal(char **line, int *c)
 	char octal_string[4];
 
 	xstrsncpy(octal_string, *line, sizeof(octal_string));
-	octal_string[3] = '\0';
+	octal_string[3] = '\0'; /* Max octal number: 0777 */
 
-	const int n = read_octal(octal_string);
+	int n = read_octal(octal_string);
+	if (n > CHAR_MAX)
+		n = CHAR_MAX - 1;
 	char *temp = xnmalloc(3, sizeof(char));
 
 	if (n == CTLESC || n == CTLNUL) {

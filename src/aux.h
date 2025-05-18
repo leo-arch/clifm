@@ -62,7 +62,7 @@ FILE *open_fwrite(const char *name, int *fd);
 FILE *open_fappend(const char *name);
 void press_any_key_to_continue(const int init_newline);
 void print_file_name(char *fname, const int isdir);
-int  read_octal(char *str);
+int  read_octal(const char *str);
 void rl_ring_bell(void);
 void set_fzf_preview_border_type(void);
 int  should_expand_eln(const char *text, char *cmd_name);

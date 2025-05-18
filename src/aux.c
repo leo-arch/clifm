@@ -1399,33 +1399,30 @@ url_decode(char *str)
 	return buf;
 }
 
-/* Convert octal string into integer.
+/* Convert the octal string STR into an integer value.
  * Based on: https://www.geeksforgeeks.org/program-octal-decimal-conversion/
  * Used by decode_prompt() to make things like this work: \033[1;34m */
 int
-read_octal(char *str)
+read_octal(const char *str)
 {
 	if (!str || !*str)
 		return (-1);
 
-	int n = atoi(str);
-	if (n == INT_MIN)
+	const int num = atoi(str);
+	if (num == INT_MIN)
 		return (-1);
 
-	int num = n;
 	int dec_value = 0;
-
-	/* Initializing base value to 1, i.e 8^0 */
-	int base = 1;
-
+	int base = 1; /* Initializing base value to 1, i.e 8^0 */
 	int temp = num;
-	while (temp) {
-		/* Extracting last digit */
-		int last_digit = temp % 10;
+
+	while (temp != 0) {
+		/* Extract the last digit. */
+		const int last_digit = temp % 10;
 		temp = temp / 10;
 
-		/* Multiplying last digit with appropriate
-		 * base value and adding it to dec_value */
+		/* Multiply the last digit with appropriate
+		 * base value and add it to dec_value. */
 		dec_value += last_digit * base;
 		base = base * 8;
 	}
