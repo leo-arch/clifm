@@ -38,7 +38,7 @@
 #include "sanitize.h"
 
 #define UNSAFE_CMD "Unsafe command. Consult the manpage for more information"
-/* If PATH cannot be retrieved from any other source, let's use this value */
+/* If PATH cannot be retrieved from any other source, let's use this value. */
 #if !defined(_PATH_STDPATH) && !defined(_CS_PATH)
 # define MINIMAL_PATH "/usr/local/bin:/bin:/usr/bin:/sbin:/usr/sbin"
 #endif
@@ -130,18 +130,18 @@ get_open_max(void)
 #ifdef _SC_OPEN_MAX
 	return (int)sysconf(_SC_OPEN_MAX);
 #else
-	/* This is what getdtablesize(3) does */
+	/* This is what getdtablesize(3) does. */
 	struct rlimit rlim;
 	if (getrlimit(RLIMIT_NOFILE, &rlim) != -1)
 		return (int)rlim.rlim_cur;
 #endif /* _SC_OPEN_MAX */
 
-#ifdef OPEN_MAX /* Not defined in Linux */
+#ifdef OPEN_MAX /* Not defined in Linux. */
 	return OPEN_MAX;
 #elif defined(__linux__) && defined(NR_OPEN)
 	return NR_OPEN;
 #else
-	return 256; /* Let's fallback to a sane default */
+	return 256; /* Let's fallback to a sane default. */
 #endif /* OPEN_MAX */
 }
 
@@ -233,7 +233,7 @@ xsecure_env(const int mode)
 	clifm_level = xgetenv("CLIFMLVL", 1);
 
 	if (mode != SECURE_ENV_FULL) {
-		/* Let's keep these values from the current environment */
+		/* Let's keep these values from the current environment. */
 		display = xgetenv("DISPLAY", 1);
 		if (!display)
 			wayland_display = xgetenv("WAYLAND_DISPLAY", 1);
@@ -244,7 +244,7 @@ xsecure_env(const int mode)
 			fzfopts = xgetenv("FZF_DEFAULT_OPTS", 1);
 	} else {
 		if (clifm_level)
-			nesting_level = 2; /* This is a nested instance */
+			nesting_level = 2; /* This is a nested instance. */
 	}
 
 	xclearenv();
@@ -299,18 +299,18 @@ END:
 	return FUNC_SUCCESS;
 }
 
-/* Sanitize cmd string coming from the mimelist file */
+/* Sanitize cmd string coming from the mimelist file. */
 static int
 sanitize_mime(const char *cmd)
 {
 	const char *p = cmd;
 	while (*p) {
-		/* Only %[fxum] is allowed */
+		/* Only %[fxum] is allowed. */
 		if (*p == '%' && p[1] != 'f' && p[1] != 'x'
 		&& p[1] != 'u' && p[1] != 'm')
 			return FUNC_FAILURE;
 
-		/* Disallow double ampersand */
+		/* Disallow double ampersand. */
 		if (*p == '&' && p[1] == '&')
 			return FUNC_FAILURE;
 
@@ -364,7 +364,7 @@ sanitize_blacklist(const char *cmd)
 
 /* Check if command name in STR contains slashes. Return 1 if found,
  * zero otherwise. This means: do not allow custom scripts or binaries,
- * but only whatever could be found in the sanitized PATH variable. */
+ * but only whatever can be found in the sanitized PATH variable. */
 static int
 clean_cmd(const char *str)
 {
@@ -375,7 +375,7 @@ clean_cmd(const char *str)
 	if (p)
 		*p = '\0';
 
-	char *q = strchr(str, '/');
+	const char *q = strchr(str, '/');
 	if (p)
 		*p = ' ';
 

@@ -93,7 +93,7 @@ pwd_function(const char *arg)
 	return FUNC_SUCCESS;
 }
 
-/* Return the list of paths in CWD matching STR */
+/* Return the list of paths in CWD matching STR. */
 char **
 get_bd_matches(const char *str, int *n, const int mode)
 {
@@ -106,14 +106,14 @@ get_bd_matches(const char *str, int *n, const int mode)
 	if (mode == BD_TAB) {
 		/* matches will be passed to readline for tab completion, so
 		 * that we need to reserve the first slot to hold the query
-		 * string */
+		 * string. */
 		*n = 1;
 		matches = xnmalloc(2, sizeof(char *));
 	}
 
 	while (1) {
 		char *p = (char *)NULL;
-		if (str && *str) { /* Non-empty query string */
+		if (str && *str) { /* Non-empty query string. */
 			p = conf.case_sens_path_comp
 				? strstr(cwd, str) : xstrcasestr(cwd, (char *)str);
 			if (!p)
@@ -130,11 +130,11 @@ get_bd_matches(const char *str, int *n, const int mode)
 
 		matches = xnrealloc(matches, (size_t)*n + 2, sizeof(char *));
 		if (mode == BD_TAB) {
-			/* Print only the path base name */
+			/* Print only the path base name. */
 			char *ss = strrchr(workspaces[cur_ws].path, '/');
 			if (ss && *(++ss))
 				matches[*n] = savestring(ss, strlen(ss));
-			else /* Last slash is the first and only char: We have root dir */
+			else /* Last slash is the first and only char: We have root dir. */
 				matches[*n] = savestring("/", 1);
 			(*n)++;
 		} else {
@@ -155,10 +155,10 @@ get_bd_matches(const char *str, int *n, const int mode)
 	}
 
 	if (mode == BD_TAB) {
-		if (*n == 1) { /* No matches */
+		if (*n == 1) { /* No matches. */
 			free(matches);
 			return (char **)NULL;
-		} else if (*n == 2) { /* One match */
+		} else if (*n == 2) { /* One match. */
 			char *p = escape_str(matches[1]);
 			if (!p) {
 				free(matches);
@@ -168,7 +168,7 @@ get_bd_matches(const char *str, int *n, const int mode)
 			free(matches[1]);
 			matches[1] = (char *)NULL;
 			free(p);
-		} else { /* Multiple matches */
+		} else { /* Multiple matches. */
 			matches[0] = savestring(str, strlen(str));
 			matches[*n] = (char *)NULL;
 		}
@@ -216,7 +216,7 @@ grab_bd_input(const int n)
 		}
 	}
 
-	return (-1); /* Never reached */
+	return (-1); /* Never reached. */
 }
 
 static int
@@ -236,7 +236,7 @@ backdir_directory(char *dir, const char *str)
 		dir = exp_path;
 	}
 
-	/* If STR is a directory, just change to it */
+	/* If STR is a directory, just change to it. */
 	struct stat a;
 	if (stat(dir, &a) == 0 && S_ISDIR(a.st_mode))
 		return cd_function(dir, CD_PRINT_ERROR);
@@ -287,7 +287,7 @@ help_or_root(const char *str)
 	return FUNC_FAILURE;
 }
 
-/* Change to parent directory matching STR */
+/* Change to parent directory matching STR. */
 int
 backdir(char *str)
 {
@@ -318,9 +318,9 @@ backdir(char *str)
 	}
 
 	int exit_status = FUNC_SUCCESS, i = n;
-	if (n == 1) /* Just one match: change to it */
+	if (n == 1) /* Just one match: change to it. */
 		exit_status = cd_function(matches[0], CD_PRINT_ERROR);
-	else if (n > 1) /* Multiple matches: print a menu to select from */
+	else /* Multiple matches: print a menu to select from. */
 		exit_status = backdir_menu(matches);
 
 	while (--i >= 0)
@@ -431,9 +431,9 @@ check_cdpath(const char *name)
 	return p;
 }
 
-/* Change the current directory to the home directory */
+/* Change the current directory to the home directory. */
 static int
-go_home(const int cd_flag)
+change_to_home_dir(const int cd_flag)
 {
 	if (!user.home) {
 		if (cd_flag == CD_PRINT_ERROR)
@@ -524,15 +524,15 @@ skip_directory(const char *dir)
 int
 cd_function(char *new_path, const int cd_flag)
 {
-	/* If no argument, change to home */
+	/* If no argument, change to home. */
 	int ret = FUNC_SUCCESS;
 
 	if (!new_path || !*new_path) {
-		if ((ret = go_home(cd_flag)) != FUNC_SUCCESS)
+		if ((ret = change_to_home_dir(cd_flag)) != FUNC_SUCCESS)
 			return ret;
 
 	} else if (*new_path == '-' && !new_path[1]) {
-		/* Implementation of the shell 'cd -' command */
+		/* Implementation of the shell 'cd -' command. */
 		static int state = 0;
 		char *c[] = { state == 0 ? "b" : "f", NULL };
 		if (state == 0) {
@@ -676,7 +676,7 @@ clear_dirhist(void)
 }
 
 /* Change to the specified directory number (N) in the directory
- * history list */
+ * history list. */
 static int
 change_to_dirhist_num(int n)
 {
@@ -729,7 +729,7 @@ surf_hist(char **args)
 	return change_to_dirhist_num(n);
 }
 
-/* Set the path of the current workspace to NEW_PATH */
+/* Set the path of the current workspace to NEW_PATH. */
 static int
 set_path(const char *new_path)
 {
@@ -747,7 +747,7 @@ set_path(const char *new_path)
 	return FUNC_SUCCESS;
 }
 
-/* Go back one entry in dirhist */
+/* Go back one entry in dirhist. */
 int
 back_function(char **args)
 {
@@ -761,7 +761,7 @@ back_function(char **args)
 		return FUNC_SUCCESS;
 	}
 
-	/* Find the previous non-consecutive equal and valid entry */
+	/* Find the previous non-consecutive equal and valid entry. */
 	int i = dirhist_cur_index;
 	while (--i >= 0) {
 		if (old_pwd[i] && *old_pwd[i] != KEY_ESC && (!workspaces[cur_ws].path
@@ -779,7 +779,7 @@ back_function(char **args)
 
 	xerror("cd: '%s': %s\n", old_pwd[dirhist_cur_index], strerror(errno));
 
-	/* Invalidate this entry */
+	/* Invalidate this entry. */
 	*old_pwd[dirhist_cur_index] = KEY_ESC;
 	if (dirhist_cur_index > 0)
 		dirhist_cur_index--;
@@ -787,7 +787,7 @@ back_function(char **args)
 	return FUNC_FAILURE;
 }
 
-/* Go forth one entry in dirhist */
+/* Go forth one entry in dirhist. */
 int
 forth_function(char **args)
 {
@@ -801,7 +801,7 @@ forth_function(char **args)
 		return FUNC_SUCCESS;
 	}
 
-	/* Find the next valid entry */
+	/* Find the next valid entry. */
 	int i = dirhist_cur_index;
 	while (++i <= dirhist_total_index) {
 		if (old_pwd[i] && (*old_pwd[i] != KEY_ESC && (!workspaces[cur_ws].path
@@ -820,7 +820,7 @@ forth_function(char **args)
 
 	xerror("cd: '%s': %s\n", old_pwd[dirhist_cur_index], strerror(errno));
 
-	/* Invalidate this entry */
+	/* Invalidate this entry. */
 	*old_pwd[dirhist_cur_index] = KEY_ESC;
 	if (dirhist_cur_index < dirhist_total_index
 	&& old_pwd[dirhist_cur_index + 1])
