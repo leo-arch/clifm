@@ -310,15 +310,17 @@ is_utf8_name(const char *filename, size_t *bytes, size_t *ext_index)
 	const unsigned char *ext = NULL;
 
 	while (*name) {
-		is_utf8 |= utf8_chars[*name];
-
-		if (*name == '.')
-			ext = name;
+		if (utf8_chars[*name]) {
+			is_utf8 = 1;
+		} else {
+			if (*name == '.')
+				ext = name;
+		}
 
 		name++;
 	}
 
-	if (ext_index && ext && ext != start && ext[1])
+	if (ext && ext != start && ext[1] && ext_index)
 		*ext_index = (size_t)(ext - start);
 
 	*bytes = (size_t)(name - start);
