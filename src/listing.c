@@ -2643,11 +2643,15 @@ list_dir_light(const int autocmd_ret)
 
 		file_info[n] = default_file_info;
 
-		file_info[n].utf8 = is_utf8_name(ename, &file_info[n].bytes, NULL);
+		size_t ext_index = 0;
+		file_info[n].utf8 = is_utf8_name(ename, &file_info[n].bytes, &ext_index);
 		file_info[n].name = xnmalloc(file_info[n].bytes + 1, sizeof(char));
 		memcpy(file_info[n].name, ename, file_info[n].bytes + 1);
 		file_info[n].len = file_info[n].utf8 == 0
 			? file_info[n].bytes : wc_xstrlen(ename);
+
+		file_info[n].ext_name =
+			ext_index > 0 ? file_info[n].name + ext_index : NULL;
 
 		/* ################  */
 #ifndef _DIRENT_HAVE_D_TYPE
