@@ -2647,6 +2647,7 @@ list_dir_light(const int autocmd_ret)
 		file_info[n].utf8 = is_utf8_name(ename, &file_info[n].bytes, &ext_index);
 		file_info[n].name = xnmalloc(file_info[n].bytes + 1, sizeof(char));
 		memcpy(file_info[n].name, ename, file_info[n].bytes + 1);
+
 		file_info[n].len = file_info[n].utf8 == 0
 			? file_info[n].bytes : wc_xstrlen(ename);
 
@@ -3432,20 +3433,14 @@ list_dir(void)
 				continue;
 		} else {
 			/* Filter files according to file type. */
-			if (checks_filter_type == 1
+			if ((checks_filter_type == 1
 			&& exclude_file_type(ename, attr.st_mode, attr.st_nlink,
-			attr.st_size) == FUNC_SUCCESS) {
-				/* Decrease the counter: the file won't be displayed. */
-				if (*ename == '.' && stats.hidden > 0)
-					stats.hidden--;
-				stats.excluded++;
-				continue;
-			}
-
+			attr.st_size) == FUNC_SUCCESS)
 			/* Filter non-directory files. */
-			if (conf_only_dirs == 1 && !S_ISDIR(attr.st_mode)
+			|| (conf_only_dirs == 1 && !S_ISDIR(attr.st_mode)
 			&& (conf_follow_symlinks == 0 || !S_ISLNK(attr.st_mode)
-			|| get_link_ref(ename) != S_IFDIR)) {
+			|| get_link_ref(ename) != S_IFDIR))) {
+				/* Decrease the counter: the file won't be displayed. */
 				if (*ename == '.' && stats.hidden > 0)
 					stats.hidden--;
 				stats.excluded++;
