@@ -884,7 +884,8 @@ hex2int(const char *str)
 		['A'] = 10, ['B'] = 11, ['C'] = 12, ['D'] = 13, ['E'] = 14, ['F'] = 15
 	};
 
-	return ((hex_chars[(int)str[0]] * 16) + hex_chars[(int)str[1]]);
+	/* int << 4 == int * 16 */
+	return ((hex_chars[(int)str[0]] << 4) + hex_chars[(int)str[1]]);
 }
 
 /* Disassemble the hex color HEX into attribute, R, G, and B values.
