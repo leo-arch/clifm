@@ -160,15 +160,8 @@ init_shades(void)
 
 	int i = NUM_SHADES;
 	while (--i >= 0) {
-		date_shades.shades[i].attr = 0;
-		date_shades.shades[i].R = 0;
-		date_shades.shades[i].G = 0;
-		date_shades.shades[i].B = 0;
-
-		size_shades.shades[i].attr = 0;
-		size_shades.shades[i].R = 0;
-		size_shades.shades[i].G = 0;
-		size_shades.shades[i].B = 0;
+		date_shades.shades[i] = (struct rgb_t){0};
+		size_shades.shades[i] = (struct rgb_t){0};
 	}
 }
 
@@ -195,12 +188,7 @@ init_conf_struct(void)
 	conf.color_lnk_as_target = UNSET;
 	conf.columned = DEF_COLUMNS;
 	conf.cp_cmd = DEF_CP_CMD;
-	conf.default_answer.remove = 0;
-	conf.default_answer.trash = 0;
-	conf.default_answer.bulk_rename = 0;
-	conf.default_answer.overwrite = 0;
-	conf.default_answer.default_ = 0;
-	conf.default_answer.default_all = 0;
+	conf.default_answer = (struct default_answer_t){0};
 	conf.desktop_notifications = UNSET;
 	conf.dirhist_map = UNSET;
 	conf.disk_usage = UNSET;
@@ -402,17 +390,8 @@ set_prop_fields(const char *line)
 	if (!line || !*line)
 		return;
 
-	prop_fields.counter =  0;
-	prop_fields.perm =     0;
-	prop_fields.no_group = 0;
-	prop_fields.ids =      0;
-	prop_fields.time =     0;
-	prop_fields.size =     0;
-	prop_fields.inode =    0;
-	prop_fields.links =    0;
-	prop_fields.blocks =   0;
-	prop_fields.xattr =    0;
-	prop_fields.len =      2; /* Two spaces between filename and props string */
+	prop_fields = (struct props_t){0};
+	prop_fields.len = 2; /* Two spaces between filename and props string */
 
 	size_t i;
 	for (i = 0; i < PROP_FIELDS_SIZE && line[i]; i++) {
@@ -1381,19 +1360,6 @@ load_actions(void)
 	return FUNC_SUCCESS;
 }
 
-static inline void
-reset_remotes_values(const size_t i)
-{
-	remotes[i].name = (char *)NULL;
-	remotes[i].desc = (char *)NULL;
-	remotes[i].mountpoint = (char *)NULL;
-	remotes[i].mount_cmd = (char *)NULL;
-	remotes[i].unmount_cmd = (char *)NULL;
-	remotes[i].auto_unmount = 0;
-	remotes[i].auto_mount = 0;
-	remotes[i].mounted = 0;
-}
-
 /* Load remotes information from REMOTES_FILE. */
 int
 load_remotes(void)
@@ -1410,7 +1376,7 @@ load_remotes(void)
 
 	size_t n = 0;
 	remotes = xnmalloc(n + 1, sizeof(struct remote_t));
-	reset_remotes_values(n);
+	remotes[n] = (struct remote_t){0};
 
 	size_t line_sz = 0;
 	char *line = (char *)NULL;
@@ -1422,7 +1388,7 @@ load_remotes(void)
 			if (remotes[n].name)
 				n++;
 			remotes = xnrealloc(remotes, n + 2, sizeof(struct remote_t));
-			reset_remotes_values(n);
+			remotes[n] = (struct remote_t){0};
 
 			char *name = strbtw(line, '[', ']');
 			if (!name)
@@ -1543,13 +1509,9 @@ load_remotes(void)
 static void
 unset_prompt_values(const size_t n)
 {
-	prompts[n].name = (char *)NULL;
-	prompts[n].regular = (char *)NULL;
-	prompts[n].right = (char *)NULL;
-	prompts[n].warning = (char *)NULL;
+	prompts[n] = (struct prompts_t){0};
 	prompts[n].notifications = DEF_PROMPT_NOTIF;
 	prompts[n].warning_prompt_enabled = DEF_WARNING_PROMPT;
-	prompts[n].multiline = 0;
 }
 
 static char *
