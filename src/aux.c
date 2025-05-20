@@ -874,33 +874,17 @@ get_dt(const mode_t mode)
 	}
 }
 
+static unsigned char hex_chars[256] = {
+	['0'] = 0, ['1'] = 1, ['2'] = 2, ['3'] = 3, ['4'] = 4,
+	['5'] = 5, ['6'] = 6, ['7'] = 7, ['8'] = 8, ['9'] = 9,
+	['a'] = 10, ['b'] = 11, ['c'] = 12, ['d'] = 13, ['e'] = 14, ['f'] = 15,
+	['A'] = 10, ['B'] = 11, ['C'] = 12, ['D'] = 13, ['E'] = 14, ['F'] = 15
+};
+
 static int
 hex2int(const char *str)
 {
-	int i, n[2] = { 0 };
-	for (i = 1; i >= 0; i--) {
-		if (str[i] >= '0' && str[i] <= '9') {
-			n[i] = str[i] - '0';
-		} else {
-			switch (str[i]) {
-			case 'A': /* fallthrough */
-			case 'a': n[i] = 10; break;
-			case 'B': /* fallthrough */
-			case 'b': n[i] = 11; break;
-			case 'C': /* fallthrough */
-			case 'c': n[i] = 12; break;
-			case 'D': /* fallthrough */
-			case 'd': n[i] = 13; break;
-			case 'E': /* fallthrough */
-			case 'e': n[i] = 14; break;
-			case 'F': /* fallthrough */
-			case 'f': n[i] = 15; break;
-			default: break;
-			}
-		}
-	}
-
-	return ((n[0] * 16) + n[1]);
+	return ((hex_chars[(int)str[0]] * 16) + hex_chars[(int)str[1]]);
 }
 
 /* Disassemble the hex color HEX into attribute, R, G, and B values.
