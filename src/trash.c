@@ -681,25 +681,25 @@ check_untrash_dest(char *file)
 		return FUNC_FAILURE;
 	}
 
-	char c = *(p + 1);
-	*(p + 1) = '\0';
+	char c = p[1];
+	p[1] = '\0';
 	char *parent_dir = file;
 
 	const int ret = access(parent_dir, F_OK | X_OK | W_OK);
 	if (ret != 0) {
 		if (errno == ENOENT) {
 			if (create_untrash_parent(parent_dir) != FUNC_SUCCESS) {
-				*(p + 1) = c;
+				p[1] = c;
 				return FUNC_FAILURE;
 			}
 		} else {
 			xerror("untrash: '%s': %s\n", parent_dir, strerror(errno));
-			*(p + 1) = c;
+			p[1] = c;
 			return errno;
 		}
 	}
 
-	*(p + 1) = c;
+	p[1] = c;
 
 	struct stat a;
 	if (stat(file, &a) != -1) {

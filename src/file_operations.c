@@ -1688,7 +1688,7 @@ run_cp_mv_cmd(char **cmd, const int skip_force, const size_t files_num)
 	char **tcmd = xnmalloc(3 + args_n + 2, sizeof(char *));
 	size_t n = 0;
 	char *p = strchr(cmd[0], ' ');
-	if (p && *(p + 1)) {
+	if (p && p[1]) {
 		*p = '\0';
 		p++;
 		tcmd[0] = savestring(cmd[0], strlen(cmd[0]));
@@ -1894,7 +1894,7 @@ cp_mv_file(char **args, const int copy_and_rename, const int force)
 	size_t n = 0;
 	char **tcmd = xnmalloc(3 + args_n + 2, sizeof(char *));
 	char *p = strchr(args[0], ' ');
-	if (p && *(p + 1)) {
+	if (p && p[1]) {
 		*p = '\0';
 		p++;
 		tcmd[0] = savestring(args[0], strlen(args[0]));

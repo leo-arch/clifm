@@ -3287,7 +3287,7 @@ set_priority_sort_char(char *val)
 	char *buf = xnmalloc(l + 1, sizeof(char));
 	char *ptr = buf;
 	while (*v) {
-		if (*v >= 32 && *v <= 126) { /* Same as isprint(c) */
+		if (*v >= ' ' && *v <= '~') { /* Same as isprint(c) */
 			*ptr = *v;
 			ptr++;
 		}
