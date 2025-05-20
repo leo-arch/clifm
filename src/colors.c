@@ -463,7 +463,7 @@ is_color_code(const char *str)
 
 	/* No digits at all, ending semicolon, more than eleven fields, or
 	 * more than three consecutive digits. */
-	if (!digits || digits > 3 || semicolon > 11)
+	if (digits == 0 || digits > 3 || semicolon > 11)
 		return 0;
 
 	/* At this point, we have a semicolon separated string of digits (3
@@ -560,9 +560,9 @@ check_names(const char *str)
 {
 	char attr = 0;
 	char *dash = strchr(str, '-');
-	if (dash && *(dash + 1)) {
+	if (dash && dash[1]) {
 		*dash = '\0';
-		attr = *(dash + 1);
+		attr = dash[1];
 	}
 
 	int found = -1;
@@ -1146,9 +1146,7 @@ remove_ctrl_chars(char *s)
 	if (*s != 001)
 		return s;
 
-	s++;
-
-	xstrsncpy(tmp_color, s, sizeof(tmp_color));
+	xstrsncpy(tmp_color, s + 1, sizeof(tmp_color));
 
 	const size_t l = strlen(tmp_color);
 	if (l > 0 && tmp_color[l - 1] == 002)
@@ -1502,7 +1500,7 @@ split_extension_colors(char *extcolors)
 		case '\n': /* fallthrough */
 		case ':':
 			if (!*buf) {
-				if (!*p || !*(p + 1))
+				if (!*p || !p[1])
 					eol = 1;
 				else
 					p++;
@@ -2179,7 +2177,7 @@ set_cs_extcolors(char *line, char **extcolors, const ssize_t line_len)
 			curlen--;
 		}
 
-		if (*p == ':' && *(p + 1) && l > 0) {
+		if (*p == ':' && p[1] && l > 0) {
 			p++;
 			l--;
 		}
@@ -2373,7 +2371,7 @@ split_color_line(char *line, const int type)
 		case '\n': /* fallthrough */
 		case ':':
 			if (!*buf) {
-				if (!*p || !*(p + 1))
+				if (!*p || !p[1])
 					eol = 1;
 				else
 					p++;
