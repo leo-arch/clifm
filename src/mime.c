@@ -63,7 +63,7 @@
 
 #ifndef _NO_LIRA
 static char *err_name = (char *)NULL;
-static int mime_match = 0;
+static int g_mime_match = 0;
 static char *g_mime_type = (char *)NULL;
 #endif /* !_NO_LIRA */
 
@@ -345,7 +345,7 @@ test_pattern(const char *pattern, const char *filename, const char *mime)
 	regex_t regex;
 
 	if (filename && (*pattern == 'N' || *pattern == 'E')
-	&& *(pattern + 1) == ':') {
+	&& pattern[1] == ':') {
 		if (regcomp(&regex, pattern + 2,
 		REG_NOSUB | REG_EXTENDED | REG_ICASE) == 0
 		&& regexec(&regex, filename, 0, NULL, 0) == 0)
@@ -353,7 +353,7 @@ test_pattern(const char *pattern, const char *filename, const char *mime)
 	} else {
 		if (regcomp(&regex, pattern, REG_NOSUB | REG_EXTENDED) == 0
 		&& regexec(&regex, mime, 0, NULL, 0) == 0) {
-			mime_match = 1;
+			g_mime_match = 1;
 			ret = FUNC_SUCCESS;
 		}
 	}
@@ -421,10 +421,7 @@ get_cmd_from_line(char **line)
 	tmp[len] = '\0';
 	*line = l;
 
-	if (len == 0)
-		return (char *)NULL;
-
-	return savestring(tmp, len);
+	return len > 0 ? savestring(tmp, len) : NULL;
 }
 
 /* Return the first valid and existent opening application in LINE or NULL */
@@ -458,7 +455,7 @@ retrieve_app(char *line)
 		if (ret)
 			*ret = '\0';
 
-		const size_t param_len = (ret && *(ret + 1)) ? strlen(ret + 1) : 0;
+		const size_t param_len = (ret && ret[1]) ? strlen(ret + 1) : 0;
 
 		char *params = (char *)NULL;
 		if (*app == '~' && param_len > 0)
@@ -512,7 +509,7 @@ get_app(const char *mime, const char *filename)
 		/* PATTERN points now to the beginning of the null terminated pattern,
 		 * while CMDS points to the beginning of the list of opening cmds. */
 
-		mime_match = 0;
+		g_mime_match = 0;
 		/* Global. Are we matching a MIME type? It will be set by test_pattern. */
 		if (test_pattern(pattern, filename, mime) == FUNC_FAILURE)
 			continue;
@@ -1594,10 +1591,10 @@ print_mime_info(char **app, char **fpath, char **mime)
 {
 	if (*(*app) == 'a' && (*app)[1] == 'd' && !(*app)[2]) {
 		printf(_("Opening application:    ad [builtin] [%s]\n"),
-			mime_match ? "MIME" : "FILENAME");
+			g_mime_match ? "MIME" : "FILENAME");
 	} else {
 		printf(_("Opening application:    '%s' [%s]\n"), *app,
-			mime_match ? "MIME" : "FILENAME");
+			g_mime_match ? "MIME" : "FILENAME");
 	}
 
 	if (!config_dir || !*config_dir)
@@ -1612,7 +1609,7 @@ print_mime_info(char **app, char **fpath, char **mime)
 	printf(_("Previewing application: '%s' %s\n"),
 		(preview_app && *preview_app) ? preview_app : "None",
 		(preview_app && *preview_app)
-		? (mime_match ? "[MIME]" : "[FILENAME]") : "");
+		? (g_mime_match ? "[MIME]" : "[FILENAME]") : "");
 
 	mime_file = mime_file_ptr;
 	free(preview_app);

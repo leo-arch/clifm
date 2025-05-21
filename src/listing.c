@@ -2341,7 +2341,10 @@ exclude_file_type(const char *restrict name, const mode_t mode,
 	switch (filter.str[1]) {
 	case 'b': if (S_ISBLK(mode))  match = 1; break;
 	case 'd': if (S_ISDIR(mode))  match = 1; break;
-	case 'D': if (S_ISDIR(mode) && count_dir(name, CPOP) <= 2) match = 1; break;
+	case 'D':
+		if (S_ISDIR(mode) && links <= 2 && count_dir(name, CPOP) <= 2)
+			match = 1;
+		break;
 	case 'c': if (S_ISCHR(mode))  match = 1; break;
 	case 'f': if (S_ISREG(mode))  match = 1; break;
 	case 'F': if (S_ISREG(mode) && size == 0) match = 1; break;
@@ -3537,10 +3540,9 @@ list_dir(void)
 		count++;
 	}
 
-	/* Since we allocate memory by chunks, we might have allocated more
-	 * than needed. Reallocate only actually used memory.
-	 * NOTE: Haven't been able to measure any memory usage difference
-	 * running this code. */
+	/* Since we allocate memory by chunks, we probably allocated more
+	 * than required. Let's free unused memory.
+	 * Up to 18Kb can be freed this way. */
 /*	filesn_t tdents = total_dents > 0 ? (filesn_t)total_dents : ENTRY_N + 2;
 	if (tdents > n)
 		file_info =
