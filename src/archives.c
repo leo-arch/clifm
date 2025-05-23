@@ -56,7 +56,7 @@
 static char *
 ask_user_for_path(void)
 {
-	const char *m = "Extraction path ('q' to quit): ";
+	const char *m = _("Extraction path ('q' to quit): ");
 
 	const int poffset_bk = prompt_offset;
 	prompt_offset = (int)strlen(m) + 1;
@@ -94,7 +94,7 @@ get_extraction_path(void)
 		return (char *)NULL;
 	}
 
-	if (TOUPPER(*ext_path) == 'Q' && !*(ext_path + 1)) {
+	if (TOUPPER(*ext_path) == 'Q' && !ext_path[1]) {
 		free(ext_path);
 		return (char *)NULL;
 	}
@@ -107,7 +107,7 @@ get_extraction_path(void)
 		}
 	}
 
-	if (*ext_path == '.') {
+	if (*ext_path == '.' || strstr(ext_path, "../")) {
 		char *p = xrealpath(ext_path, NULL);
 		if (p) {
 			free(ext_path);

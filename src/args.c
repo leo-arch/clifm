@@ -1496,7 +1496,7 @@ resolve_and_set_starting_paths(char **dirs)
 			ws_num++;
 			if (ws_num >= MAX_WS) {
 				free(spath);
-				continue;
+				break;
 			}
 
 			free(workspaces[ws_num].path);

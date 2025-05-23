@@ -2093,11 +2093,10 @@ list_files_vertical(size_t *counter, int *reset_pager,
 	pager_quit = pager_help = 0;
 
 	for ( ; ; i++) {
-		/* Copy current values to restore them if necessary: done to
-		 * skip the first two chars of arrow keys : \x1b [ */
+		/* Copy current values to restore them if necessary. */
 		filesn_t backup_row_index = row_index;
-		filesn_t backup_file_index = file_index; // Copies of file_index and row_index
-		size_t backup_column_count = column_count; // Copy of column_count
+		filesn_t backup_file_index = file_index;
+		size_t backup_column_count = column_count;
 
 		if (column_count != num_columns) {
 			file_index += num_rows;
@@ -2298,12 +2297,12 @@ get_largest_file_info(const filesn_t i, off_t *size, char **name,
 static int
 exclude_file_type_light(const unsigned char type)
 {
-	if (!*(filter.str + 1))
+	if (!filter.str[1])
 		return FUNC_FAILURE;
 
 	int match = 0;
 
-	switch (*(filter.str + 1)) {
+	switch (filter.str[1]) {
 	case 'd': if (type == DT_DIR)  match = 1; break;
 	case 'f': if (type == DT_REG)  match = 1; break;
 	case 'l': if (type == DT_LNK)  match = 1; break;
@@ -2339,16 +2338,16 @@ exclude_file_type(const char *restrict name, const mode_t mode,
 	int match = 0;
 
 	switch (filter.str[1]) {
-	case 'b': if (S_ISBLK(mode))  match = 1; break;
-	case 'd': if (S_ISDIR(mode))  match = 1; break;
+	case 'b': if (S_ISBLK(mode)) match = 1; break;
+	case 'd': if (S_ISDIR(mode)) match = 1; break;
 	case 'D':
 		if (S_ISDIR(mode) && links <= 2 && count_dir(name, CPOP) <= 2)
 			match = 1;
 		break;
-	case 'c': if (S_ISCHR(mode))  match = 1; break;
-	case 'f': if (S_ISREG(mode))  match = 1; break;
+	case 'c': if (S_ISCHR(mode)) match = 1; break;
+	case 'f': if (S_ISREG(mode)) match = 1; break;
 	case 'F': if (S_ISREG(mode) && size == 0) match = 1; break;
-	case 'l': if (S_ISLNK(mode))  match = 1; break;
+	case 'l': if (S_ISLNK(mode)) match = 1; break;
 	case 'L': if (S_ISLNK(mode) && stat(name, &a) == -1) match = 1; break;
 #ifdef SOLARIS_DOORS
 	case 'O': if (S_ISDOOR(mode)) match = 1; break;
