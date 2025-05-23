@@ -1296,7 +1296,7 @@ xgetchar(void)
 char
 from_hex(char c)
 {
-	return (char)(isdigit(c) ? c - '0' : tolower(c) - 'a' + 10);
+	return (char)(IS_DIGIT(c) ? c - '0' : TOLOWER(c) - 'a' + 10);
 }
 
 /* Converts an integer value to its hex form. */
@@ -1336,11 +1336,11 @@ url_encode(char *str, const int file_uri)
 	for (; *pstr; pstr++) {
 		if (IS_ALNUM(*pstr) || *pstr == '-' || *pstr == '_' || *pstr == '.'
 		|| *pstr == '~' || *pstr == '/') {
-			/* Do not encode any of the above chars */
+			/* Do not encode any of the above chars. */
 			*pbuf = *pstr;
 			pbuf++;
 		} else {
-			/* Encode char to URL format. Example: space char to %20 */
+			/* Encode char to URL format. Example: space char to "%20". */
 			*pbuf = '%';
 			pbuf++;
 			*pbuf = to_hex(*pstr >> 4);
@@ -1362,15 +1362,14 @@ url_decode(char *str)
 		return (char *)NULL;
 
 	char *buf = xnmalloc(strlen(str) + 1, sizeof(char));
-	/* The decoded string will be at most as long as the encoded string */
+	/* The decoded string will be at most as long as the encoded string. */
 
 	char *pstr = str, *pbuf = buf;
 
 	for (; *pstr; pstr++) {
 		if (*pstr == '%') {
 			if (pstr[1] && pstr[2]) {
-				/* Decode URL code. Example: %20 to space char */
-				/* Left shift and bitwise OR operations */
+				/* Decode URL code. Example: %20 to space char. */
 				*pbuf = (char)(from_hex(pstr[1]) << 4 | from_hex(pstr[2]));
 				pbuf++;
 				pstr += 2;
