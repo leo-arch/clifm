@@ -1384,10 +1384,9 @@ url_decode(char *str)
 	return buf;
 }
 
-/* Convert the octal string STR into an integer value.
- * Used by decode_prompt() to make things like this work: \033[1;34m */
+/* Convert the octal string STR into the corresponding integer value. */
 int
-read_octal(const char *str)
+read_octal(const char *restrict str)
 {
 	if (!str || !*str)
 		return (-1);
