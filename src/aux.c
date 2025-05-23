@@ -1386,7 +1386,7 @@ url_decode(char *str)
 
 /* Convert the octal string STR into the corresponding integer value. */
 int
-read_octal(const char *restrict str)
+octal2int(const char *restrict str)
 {
 	if (!str || !*str)
 		return (-1);

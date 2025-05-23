@@ -345,7 +345,7 @@ gen_octal(char **line, int *c)
 	char octal_string[4];
 	xstrsncpy(octal_string, *line, sizeof(octal_string));
 
-	int n = read_octal(octal_string);
+	int n = octal2int(octal_string);
 #ifdef CHAR_MAX
 	/* Max octal number: 0177 (char is signed) or 0377 (char is unsigned). */
 	if (n > CHAR_MAX)

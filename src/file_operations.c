@@ -115,7 +115,7 @@ umask_function(char *arg)
 	if (!IS_DIGIT(*arg) || !is_number(arg))
 		goto ERROR;
 
-	int new_umask = read_octal(arg);
+	int new_umask = octal2int(arg);
 	if (new_umask < 0 || new_umask > MAX_UMASK)
 		goto ERROR;
 
