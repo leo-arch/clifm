@@ -205,7 +205,7 @@ grab_bd_input(const int n)
 				continue;
 			}
 
-		} else if (*input == 'q' && !*(input + 1)) {
+		} else if (*input == 'q' && !input[1]) {
 			free(input);
 			return (-1);
 

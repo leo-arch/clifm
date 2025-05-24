@@ -705,7 +705,7 @@ set_file_owner(char **args)
 		return exit_status;
 
 	/* Neither owners nor primary groups are common */
-	if (*own == ':' && !*(own + 1))
+	if (*own == ':' && !own[1])
 		*own = '\0';
 
 	char *new_own = get_new_ownership(own, diff);
@@ -719,7 +719,7 @@ set_file_owner(char **args)
 	char *new_group = (strchr(new_own, ':'));
 	if (new_group) {
 		*new_group = '\0';
-		if (!*(new_group + 1))
+		if (!new_group[1])
 			new_group = (char *)NULL;
 	}
 

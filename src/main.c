@@ -1113,7 +1113,7 @@ static inline void
 get_hostname(void)
 {
 	if (gethostname(hostname, sizeof(hostname)) == -1) {
-		hostname[0] = '?';
+		hostname[0] = UNKNOWN_CHR;
 		hostname[1] = '\0';
 		err('e', PRINT_PROMPT, _("%s: Error getting hostname\n"),
 			PROGRAM_NAME);

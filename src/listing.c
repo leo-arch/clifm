@@ -2428,7 +2428,12 @@ construct_human_sizes(void)
 	const float base = (float)ibase;
 	/* R: Ronnabyte, Q: Quettabyte. It's highly unlikely to have files of
 	 * such huge sizes (and even less) in the near future, but anyway... */
-	static const char *const u = "BKMGTPEZYRQ";
+	static const char *const u_iec = "BKMGTPEZYRQ";
+	/* Let's follow du(1) in using 'k' (lowercase) instead of 'K'
+	 * (uppercase) when using powers of 1000 (--si). */
+	static const char *const u_si =  "BkMGTPEZYRQ";
+	const char *units = xargs.si == 1 ? u_si : u_iec;
+
 	static float mult_factor = 0;
 	if (mult_factor == 0)
 		mult_factor = 1.0f / base;
@@ -2460,10 +2465,7 @@ construct_human_sizes(void)
 				(double)s);
 
 		file_info[i].human_size.len = ret > 0 ? (size_t)ret : 0;
-		/* Let's follow du(1) in using 'k' (lowercase) instead of 'K'
-		 * (uppercase) when using powers of 1000 (--si). */
-		file_info[i].human_size.unit = (xargs.si == 1 && u[n] == 'K')
-			? 'k' : u[n];
+		file_info[i].human_size.unit = units[n];
 	}
 }
 
