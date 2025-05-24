@@ -1138,18 +1138,16 @@ construct_human_size(const off_t size)
 		n++;
 	}
 
-	const int x = (int)s;
-	/* If (s == 0 || s - (float)x == 0), then S has no reminder (zero)
-	 * We don't want to print the reminder when it is zero.
-	 *
-	 * R: Ronnabyte, Q: Quettabyte. It's highly unlikely to have files of
+	static const char *const u = "BKMGTPEZYRQ";
+	/* R: Ronnabyte, Q: Quettabyte. It's highly unlikely to have files of
 	 * such huge sizes (and even less) in the near future. Even more, since
 	 * our original value is off_t (whose maximum value is INT64_MAX,
 	 * i.e. 2^63 - 1), we will never reach even a Zettabyte. */
-	static const char *const u = "BKMGTPEZYRQ";
+
+	/* If s == (float)(int)s, then S has no reminder (zero):
+	 * We don't want to print the reminder when it is zero. */
 	snprintf(str, sizeof(str), "%.*f %c%s",
-		(s == 0.00f || s - (float)x == 0.00f) ? 0 : 2,
-		(double)s,
+		s == (float)(int)s ? 0 : 2, (double)s,
 		(u[n] == 'K' && xargs.si == 1) ? 'k' : u[n],
 		u[n] != 'B' ? (xargs.si == 1 ? "B" : "iB") : "");
 

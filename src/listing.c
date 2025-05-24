@@ -2453,16 +2453,14 @@ construct_human_sizes(void)
 
 		while (s >= base) {
 			s = s * mult_factor; /* == (s = s / base), but faster */
-			++n;
+			n++;
 		}
 
-		const int x = (int)s;
-		/* If (s == 0 || s - (float)x == 0), then S has no reminder (zero).
+		/* If s == (float)(int)s, then S has no reminder (zero):
 		 * We don't want to print the reminder when it is zero. */
 		const int ret =
 			snprintf(file_info[i].human_size.str, MAX_HUMAN_SIZE, "%.*f",
-				(s == 0.00f || s - (float)x == 0.00f) ? 0 : 2,
-				(double)s);
+				s == (float)(int)s ? 0 : 2, (double)s);
 
 		file_info[i].human_size.len = ret > 0 ? (size_t)ret : 0;
 		file_info[i].human_size.unit = units[n];
