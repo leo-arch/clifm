@@ -1759,7 +1759,7 @@ print_size(const struct stat *attr, const int apparent)
 
 	printf("%s%s%s", csize, size_unit ? size_unit : "?", cend);
 
-	const int bigger_than_bytes = size > (xargs.si == 1 ? 1000 : 1024);
+	const int bigger_than_bytes = size >= (xargs.si == 1 ? 1000 : 1024);
 
 	const int is_sparse = (S_ISREG(attr->st_mode) && attr->st_blocks > 0
 		&& (intmax_t)(attr->st_blocks * S_BLKSIZE) < (intmax_t)attr->st_size);
