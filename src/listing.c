@@ -3073,7 +3073,7 @@ load_dir_info(const mode_t mode, const filesn_t n)
 			? ((mode & S_IWOTH) ? tw_c : st_c)
 			: ((mode & S_IWOTH) ? ow_c
 			: (file_info[n].filesn == 0 ? ed_c : di_c)))
-			: df_c;
+			: uf_c; /* stat error. */
 	}
 
 	stats.empty_dir += (file_info[n].filesn == 0);
