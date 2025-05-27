@@ -2917,7 +2917,7 @@ print_file_type_colors(void)
 	printf(_("%sColor%s (ow) Other-writable and NOT sticky directory\n"),
 	    ow_c, df_c);
 	printf(_("%sColor%s (no) Unknown file type\n"), no_c, df_c);
-	printf(_("%sColor%s (uf) Unaccessible (non-stat'able) file\n"),
+	printf(_("%sColor%s (uf) Inaccessible (non-statable) file\n"),
 		uf_c, df_c);
 }
 
