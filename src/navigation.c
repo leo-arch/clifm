@@ -477,15 +477,13 @@ change_to_path(char *new_path, const int cd_flag)
 	errno = 0;
 	char *tmp = cdpath_path ? cdpath_path : new_path;
 	char *dest_dir = normalize_path(tmp, strlen(tmp));
+	free(cdpath_path);
 
 	if (!dest_dir) {
 		if (cd_flag == CD_PRINT_ERROR)
 			xerror(_("cd: '%s': Error normalizing path\n"), new_path);
-		free(cdpath_path);
 		return FUNC_FAILURE;
 	}
-
-	free(cdpath_path);
 
 	if (xchdir(dest_dir, SET_TITLE) != FUNC_SUCCESS) {
 		if (cd_flag == CD_PRINT_ERROR)
@@ -586,50 +584,28 @@ fastback(char *str)
 	if (!str || !*str || xstrcpbrk(str, '.'))
 		return (char *)NULL;
 
-	char *p = str;
-	size_t dots = 0;
+	/* At this point we know STR contains only dots. */
+	const size_t dots = strlen(str);
 
-	char *rem = (char *)NULL;
-	while (*p) {
-		if (*p != '.') {
-			rem = p;
-			break;
-		}
-		dots++;
-		p++;
-	}
+	if (dots <= 2)
+		return dots == 2 ? normalize_path("..", 2) : NULL;
 
-	if (dots <= 2) {
-		if (dots == 2)
-			return normalize_path("..", 2);
-		return (char *)NULL;
-	}
+	char dir[PATH_MAX + 1];
+	dir[0] = '.';
+	dir[1] = '.';
 
-	char q[PATH_MAX];
-	q[0] = '.';
-	q[1] = '.';
-
+	/* Replace each dot after ".." by "/.." */
 	size_t i, c = 2;
 	for (i = 2; c < dots;) {
-		q[i] = '/'; i++;
-		q[i] = '.'; i++;
-		q[i] = '.'; i++;
+		dir[i] = '/'; i++;
+		dir[i] = '.'; i++;
+		dir[i] = '.'; i++;
 		c++;
 	}
 
-	q[i] = '\0';
+	dir[i] = '\0';
 
-	if (rem) {
-		if (*rem != '/') {
-			q[i] = '/';
-			q[i + 1] = '\0';
-			i++;
-		}
-
-		xstrncat(q, strnlen(q, sizeof(q)), rem, sizeof(q));
-	}
-
-	return normalize_path(q, i);
+	return normalize_path(dir, i);
 }
 
 void
