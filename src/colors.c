@@ -566,7 +566,7 @@ check_names(const char *str)
 	}
 
 	int found = -1;
-	char up_str = (char)TOUPPER(*str);
+	const char up_str = TOUPPER(*str);
 	size_t len = strlen(str);
 	size_t i;
 
@@ -873,22 +873,24 @@ edit_colorscheme(char *app)
 
 	struct stat attr;
 	char file[PATH_MAX + 1];
+	int ret = 0;
 
 	snprintf(file, sizeof(file), "%s/%s.clifm", colors_dir, cur_cscheme);
-	if (stat(file, &attr) == -1
+	if ((ret = stat(file, &attr)) == -1
 	&& import_color_scheme(cur_cscheme) != FUNC_SUCCESS) {
 		xerror(_("cs: '%s': No such color scheme\n"), cur_cscheme);
 		return FUNC_FAILURE;
 	}
 
-	if (stat(file, &attr) == -1) {
+	/* If the file was imported, get its attributes. */
+	if (ret == -1 && stat(file, &attr) == -1) {
 		xerror("cs: '%s': %s\n", file, strerror(errno));
 		return errno;
 	}
 
 	const time_t mtime_bfr = attr.st_mtime;
 
-	const int ret = open_config_file(app, file);
+	ret = open_config_file(app, file);
 	if (ret != FUNC_SUCCESS)
 		return ret;
 
