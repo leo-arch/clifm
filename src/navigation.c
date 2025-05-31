@@ -514,13 +514,9 @@ change_to_previous_dir(void)
 {
 	static int state = 0;
 	char *cmd[] = { state == 0 ? "b" : "f", NULL };
-	if (state == 0) {
-		state = 1;
-		return back_function(cmd);
-	} else {
-		state = 0;
-		return forth_function(cmd);
-	}
+
+	state = !state;
+	return *cmd[0] == 'b' ? back_function(cmd) : forth_function(cmd);
 }
 
 static int
