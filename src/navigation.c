@@ -385,7 +385,7 @@ xchdir(char *dir, const int cd_flag)
 static char *
 check_cdpath(const char *name)
 {
-	if (cdpath_n == 0 || !name || !*name)
+	if (!name || !*name)
 		return (char *)NULL;
 
 	if (*name == '/' || (*name == '.' && name[1] == '/')
@@ -411,7 +411,7 @@ check_cdpath(const char *name)
 		if (*tmp == '~')
 			exp_path = tilde_expand(tmp);
 
-		char *dir = exp_path ? exp_path : tmp;
+		const char *dir = exp_path ? exp_path : tmp;
 		if (stat(dir, &a) != -1 && S_ISDIR(a.st_mode)) {
 			p = savestring(dir, strlen(dir));
 			free(tmp);
@@ -449,7 +449,7 @@ change_to_home_dir(const int cd_flag)
 
 	if (workspaces) {
 		free(workspaces[cur_ws].path);
-		workspaces[cur_ws].path = savestring(user.home, strlen(user.home));
+		workspaces[cur_ws].path = savestring(user.home, user.home_len);
 	}
 
 	return FUNC_SUCCESS;
@@ -467,47 +467,45 @@ change_to_path(char *new_path, const int cd_flag)
 	if (strchr(new_path, '\\')) {
 		char *deq_path = unescape_str(new_path, 0);
 		if (deq_path) {
+			/* deq_path is guaranteed to be shorter than new_path. */
 			xstrsncpy(new_path, deq_path, strlen(deq_path) + 1);
 			free(deq_path);
 		}
 	}
 
-	char *p = check_cdpath(new_path);
+	char *cdpath_path = cdpath_n > 0 ? check_cdpath(new_path) : NULL;
 	errno = 0;
-	char *r = p ? p : new_path;
-	char *q = normalize_path(r, strlen(r));
+	char *tmp = cdpath_path ? cdpath_path : new_path;
+	char *dest_dir = normalize_path(tmp, strlen(tmp));
 
-	if (!q) {
+	if (!dest_dir) {
 		if (cd_flag == CD_PRINT_ERROR)
 			xerror(_("cd: '%s': Error normalizing path\n"), new_path);
-		free(p);
+		free(cdpath_path);
 		return FUNC_FAILURE;
 	}
 
-	free(p);
+	free(cdpath_path);
 
-	if (xchdir(q, SET_TITLE) != FUNC_SUCCESS) {
+	if (xchdir(dest_dir, SET_TITLE) != FUNC_SUCCESS) {
 		if (cd_flag == CD_PRINT_ERROR)
 			xerror("cd: '%s': %s\n", new_path, strerror(errno));
 
-		free(q);
+		free(dest_dir);
 
 		/* Most shells return 1 in case of EACCESS/ENOENT error. However, 1, as
 		 * a general error code, is not quite informative. Why not to return the
 		 * actual error code returned by chdir(3)? Note that POSIX only requires
 		 * for cd to return >0 in case of error (see cd(1p)). */
-		if (errno == EACCES || errno == ENOENT)
-			return FUNC_FAILURE;
-
-		return errno;
+		return (errno == EACCES || errno == ENOENT) ? 1 : errno;
 	}
 
 	if (workspaces) {
 		free(workspaces[cur_ws].path);
-		workspaces[cur_ws].path = savestring(q, strlen(q));
+		workspaces[cur_ws].path = savestring(dest_dir, strlen(dest_dir));
 	}
 
-	free(q);
+	free(dest_dir);
 
 	return FUNC_SUCCESS;
 }
@@ -534,13 +532,13 @@ cd_function(char *new_path, const int cd_flag)
 	} else if (*new_path == '-' && !new_path[1]) {
 		/* Implementation of the shell 'cd -' command. */
 		static int state = 0;
-		char *c[] = { state == 0 ? "b" : "f", NULL };
+		char *cmd[] = { state == 0 ? "b" : "f", NULL };
 		if (state == 0) {
 			state = 1;
-			return back_function(c);
+			return back_function(cmd);
 		} else {
 			state = 0;
-			return forth_function(c);
+			return forth_function(cmd);
 		}
 
 	} else {
