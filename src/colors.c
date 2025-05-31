@@ -3193,7 +3193,7 @@ void
 color_codes(void)
 {
 	if (conf.colorize == 0) {
-		printf(_("%s: Currently running without colors\n"), PROGRAM_NAME);
+		printf(_("%s: Running without colors\n"), PROGRAM_NAME);
 		return;
 	}
 
@@ -3207,8 +3207,8 @@ color_codes(void)
 	print_highlight_colors();
 	print_suggestion_colors();
 
-	puts(_("\nThe bracketed field is the code required to modify the "
-		 "color of the corresponding element in the color scheme file.\n\n"));
+	puts(_("\nThe codes in parentheses are used to modify the color of "
+		 "the corresponding elements in the color scheme file.\n\n"));
 
 	print_color_blocks();
 }

@@ -252,13 +252,13 @@ backdir_menu(char **matches)
 	for (i = 0; matches[i]; i++) {
 		char *sl = strrchr(matches[i], '/');
 		int flag = 0;
-		if (sl && *(sl + 1)) {
+		if (sl && sl[1]) {
 			*sl = '\0';
 			sl++;
 			flag = 1;
 		}
 		printf("%s%d%s %s%s%s\n", el_c, i + 1, df_c, di_c, sl ? sl : "/", df_c);
-		if (flag) {
+		if (flag == 1) {
 			sl--;
 			*sl = '/';
 		}
