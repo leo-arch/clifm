@@ -508,6 +508,21 @@ change_to_path(char *new_path, const int cd_flag)
 	return FUNC_SUCCESS;
 }
 
+/* Implementation of the shell 'cd -' command. */
+static int
+change_to_previous_dir(void)
+{
+	static int state = 0;
+	char *cmd[] = { state == 0 ? "b" : "f", NULL };
+	if (state == 0) {
+		state = 1;
+		return back_function(cmd);
+	} else {
+		state = 0;
+		return forth_function(cmd);
+	}
+}
+
 static int
 skip_directory(const char *dir)
 {
@@ -528,16 +543,7 @@ cd_function(char *new_path, const int cd_flag)
 			return ret;
 
 	} else if (*new_path == '-' && !new_path[1]) {
-		/* Implementation of the shell 'cd -' command. */
-		static int state = 0;
-		char *cmd[] = { state == 0 ? "b" : "f", NULL };
-		if (state == 0) {
-			state = 1;
-			return back_function(cmd);
-		} else {
-			state = 0;
-			return forth_function(cmd);
-		}
+		return change_to_previous_dir();
 
 	} else {
 		if ((ret = change_to_path(new_path, cd_flag)) != FUNC_SUCCESS)
