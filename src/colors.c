@@ -443,7 +443,7 @@ is_color_code(const char *str)
 	size_t digits = 0, semicolon = 0;
 
 	while (*str) {
-		if (*str >= '0' && *str <= '9') {
+		if (IS_DIGIT(*str)) {
 			digits++;
 		} else if (*str == ';') {
 			if (str[1] == ';') /* Consecutive semicolons. */
@@ -1334,7 +1334,7 @@ set_shades(char *line, const int type)
 	int c = 0;
 	while ((str = strtok(NULL, ",")) && c < NUM_SHADES) {
 		if (*str == '#') {
-			if (!*(str + 1) || t != SHADE_TYPE_TRUECOLOR)
+			if (!str[1] || t != SHADE_TYPE_TRUECOLOR)
 				goto NEXT;
 
 			int a = 0, r = 0, g = 0, b = 0;

@@ -1404,7 +1404,7 @@ Files w/extended attributes: %zu\n\
 Other-writable files:        %zu\n\
 Sticky files:                %zu\n\
 Unknown file types:          %zu\n\
-Unstatable files:            %zu\n\
+Inaccessible files:          %zu\n\
 "),
 	(intmax_t)files, stats.dir, dir_empty, stats.reg, reg_empty,
 	stats.exec, stats.hidden, stats.suid, stats.sgid, stats.caps, stats.fifo,

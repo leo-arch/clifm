@@ -76,7 +76,7 @@ is_file_in_cwd(char *name)
 		return 0;
 
 	const char *s = strchr(name, '/');
-	if (!s || !*(s + 1)) /* 'name' or 'name/' */
+	if (!s || !s[1]) /* 'name' or 'name/' */
 		return 1;
 
 	char *rpath = normalize_path(name, strlen(name));

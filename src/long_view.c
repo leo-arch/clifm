@@ -41,23 +41,21 @@ static char *
 get_ext_info_long(const struct fileinfo *props, const size_t name_len,
 	int *trunc, size_t *ext_len)
 {
-	char *ext_name = (char *)NULL;
-	char *e = strrchr(props->name, '.');
-	if (e && e != props->name && e[1]) {
-		ext_name = e;
-		*trunc = TRUNC_EXT;
-		if (props->utf8 == 0)
-			*ext_len = name_len - (size_t)(ext_name - props->name);
-		else
-			*ext_len = wc_xstrlen(ext_name);
-	}
+	/* At this point, TRUNC is set to TRUNC_NO_EXT and EXT_LEN to zero. */
+	if (!props->ext_name)
+		return (char *)NULL;
 
-	if ((int)*ext_len >= conf.max_name_len || (int)*ext_len <= 0) {
+	if (props->utf8 == 0)
+		*ext_len = name_len - (size_t)(props->ext_name - props->name);
+	else
+		*ext_len = wc_xstrlen(props->ext_name);
+
+	if ((int)*ext_len >= conf.max_name_len || (int)*ext_len <= 0)
 		*ext_len = 0;
-		*trunc = TRUNC_NO_EXT;
-	}
+	else
+		*trunc = TRUNC_EXT;
 
-	return ext_name;
+	return props->ext_name;
 }
 
 /* Calculate the relative time of AGE, which is the difference between
