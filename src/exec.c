@@ -373,7 +373,7 @@ static int
 file_counter_function(const char *arg)
 {
 	if (!arg) {
-		conf.files_counter = conf.files_counter == 1 ? 0 : 1;
+		conf.files_counter = !conf.files_counter;
 		update_autocmd_opts(AC_FILES_COUNTER);
 		if (conf.autols == 1) reload_dirlist();
 		print_reload_msg(NULL, NULL, _("File counter: %s\n"),
@@ -561,7 +561,7 @@ static int
 columns_function(const char *arg)
 {
 	if (!arg) {
-		conf.columned = conf.columned == 1 ? 0 : 1;
+		conf.columned = !conf.columned;
 		if (conf.autols == 1) reload_dirlist();
 		print_reload_msg(NULL, NULL, _("Columns: %s\n"), conf.columned == 1
 			? _("on") : _("off"));
@@ -600,8 +600,8 @@ icons_function(const char *arg)
 	if (!arg || !*arg) {
 		conf.icons = !conf.icons;
 		if (conf.autols == 1) reload_dirlist();
-		print_reload_msg(NULL, NULL, "Icons: %s\n",
-			conf.icons == 1 ? "on" : "off");
+		print_reload_msg(NULL, NULL, _("Icons: %s\n"),
+			conf.icons == 1 ? _("on") : _("off"));
 		return FUNC_SUCCESS;
 	}
 

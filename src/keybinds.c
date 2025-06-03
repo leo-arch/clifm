@@ -1996,7 +1996,7 @@ rl_toggle_long_view(int count, int key)
 		free_suggestion();
 #endif /* !_NO_SUGGESTIONS */
 
-	conf.long_view = conf.long_view == 1 ? 0 : 1;
+	conf.long_view = !conf.long_view;
 
 	update_autocmd_opts(AC_LONG_VIEW);
 
@@ -2026,7 +2026,7 @@ rl_toggle_follow_link_long(int count, int key)
 		free_suggestion();
 #endif /* !_NO_SUGGESTIONS */
 
-	conf.follow_symlinks_long = conf.follow_symlinks_long == 1 ? 0 : 1;
+	conf.follow_symlinks_long = !conf.follow_symlinks_long;
 
 	if (conf.autols == 1) {
 		if (conf.clear_screen == 0)
@@ -2054,7 +2054,7 @@ rl_toggle_dirs_first(int count, int key)
 		free_suggestion();
 #endif /* !_NO_SUGGESTIONS */
 
-	conf.list_dirs_first = conf.list_dirs_first ? 0 : 1;
+	conf.list_dirs_first = !conf.list_dirs_first;
 
 	if (conf.autols == 1) {
 		if (conf.clear_screen == 0)
@@ -2080,7 +2080,7 @@ rl_toggle_light_mode(int count, int key)
 		free_suggestion();
 #endif /* !_NO_SUGGESTIONS */
 
-	conf.light_mode = conf.light_mode == 1 ? 0 : 1;
+	conf.light_mode = !conf.light_mode;
 	update_autocmd_opts(AC_LIGHT_MODE);
 
 	if (conf.autols == 1) {
@@ -2964,7 +2964,7 @@ rl_toggle_only_dirs(int count, int key)
 	if (kbind_busy == 1)
 		return FUNC_SUCCESS;
 
-	conf.only_dirs = conf.only_dirs ? 0 : 1;
+	conf.only_dirs = !conf.only_dirs;
 	update_autocmd_opts(AC_ONLY_DIRS);
 
 	int exit_status = exit_code;
@@ -3256,7 +3256,7 @@ rl_toggle_virtualdir_full_paths(int count, int key)
 		return FUNC_SUCCESS;
 
 	xchmod(stdin_tmp_dir, "0700", 1);
-	xargs.virtual_dir_full_paths = xargs.virtual_dir_full_paths == 1 ? 0 : 1;
+	xargs.virtual_dir_full_paths = !xargs.virtual_dir_full_paths;
 
 	filesn_t i = files;
 	while (--i >= 0) {
