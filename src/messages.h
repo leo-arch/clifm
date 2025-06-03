@@ -597,7 +597,7 @@ You can also access the command history via the exclamation mark (!).\n\
 Tip: Use HistIgnore in the configuration file to exclude command lines\n\
 from the history list."
 
-#define ICONS_USAGE "Turn icons on/off\n\n\
+#define ICONS_USAGE "Toggle icons\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   icons [on | off]\n\n\
 Note: Depending on how the terminal renders icons, the apparent space\n\
@@ -1615,7 +1615,7 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  fz                 Display recursive directory sizes (long view only)\n\
  hh, hidden         Toggle hidden files\n\
  history            Manage the commands history\n\
- icons              Turn icons on/off\n\
+ icons              Toggle icons\n\
  k                  Toggle follow-links (long view only)\n\
  kk                 Toggle max-filename-len\n\
  j                  Jump to a visited directory\n\

@@ -597,7 +597,13 @@ icons_function(const char *arg)
 	xerror(_("%s: icons: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
 	return FUNC_SUCCESS;
 #else
-	if (!arg || IS_HELP(arg)) {
+	if (!arg || !*arg) {
+		conf.icons = !conf.icons;
+		if (conf.autols == 1) reload_dirlist();
+		return FUNC_SUCCESS;
+	}
+
+	if (IS_HELP(arg)) {
 		puts(_(ICONS_USAGE));
 		return FUNC_SUCCESS;
 	}
