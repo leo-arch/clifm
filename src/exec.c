@@ -600,6 +600,8 @@ icons_function(const char *arg)
 	if (!arg || !*arg) {
 		conf.icons = !conf.icons;
 		if (conf.autols == 1) reload_dirlist();
+		print_reload_msg(NULL, NULL, "Icons: %s\n",
+			conf.icons == 1 ? "on" : "off");
 		return FUNC_SUCCESS;
 	}
 
