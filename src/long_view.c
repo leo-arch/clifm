@@ -273,16 +273,16 @@ get_time_char(void)
 	if (conf.time_follows_sort == 1) {
 		switch (conf.sort) {
 		case SATIME: return conf.relative_time == 1 ? "A" : "a";
-		case SCTIME: return conf.relative_time == 1 ? "C" : "c";
 		case SBTIME: return conf.relative_time == 1 ? "B" : "b";
-		case SMTIME: return conf.relative_time == 1 ? "M" : "m";
-		default: break;
+		case SCTIME: return conf.relative_time == 1 ? "C" : "c";
+		case SMTIME: /* fallthrough */
+		default: return conf.relative_time == 1 ? "M" : "m";
 		}
 	}
 
 	switch (prop_fields.time) {
 	case PROP_TIME_ACCESS: return conf.relative_time == 1 ? "A" : "a";
-	case PROP_TIME_BIRTH: return conf.relative_time == 1 ? "B" : "b";
+	case PROP_TIME_BIRTH:  return conf.relative_time == 1 ? "B" : "b";
 	case PROP_TIME_CHANGE: return conf.relative_time == 1 ? "C" : "c";
 	case PROP_TIME_MOD: /* fallthrough */
 	default: return conf.relative_time == 1 ? "M" : "m";
@@ -527,8 +527,9 @@ print_entry_props(const struct fileinfo *props, const struct maxes_t *maxes,
 
 	char *ctype = NULL; /* Color for the file type indicator */
 	const char file_type = set_file_type_and_color(props, &ctype);
-	const int file_perm =
-		check_file_access(props->mode, props->uid, props->gid);
+	const int file_perm = conf.light_mode == 1
+		? check_file_access(props->mode, props->uid, props->gid)
+		: (props->stat_err != 1 && props->user_access != 0);
 	const char xattr_char =
 		have_xattr == 1 ? (props->xattr == 1 ? XATTR_CHAR : ' ') : 0;
 	const size_t prop_fields_gap = (size_t)conf.prop_fields_gap;
