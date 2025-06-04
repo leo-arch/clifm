@@ -414,7 +414,9 @@ is_256_color(const char *restrict str)
 	}
 
 	if (c >= 3 && str[0] != '1' && str[0] != '0') {
-		if (str[0] > '2' || str[1] > '5' || str[2] > '5')
+		if (str[0] > '2' || str[1] > '5')
+			return 0;
+		if (str[0] == '2' && str[1] == '5' && str[2] > '5')
 			return 0;
 	}
 
