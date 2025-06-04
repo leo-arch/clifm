@@ -451,16 +451,16 @@ is_color_code(const char *str)
 			if (*str != '\n'
 			/* Allow styled unerlines. */
 			&& !(digits > 0 && *(str - 1) == '4' && *str == ':'
-			&& str[1] && str[1] >= '0' && str[1] <= '5'))
+			&& str[1] >= '0' && str[1] <= '5'))
 				/* Neither digit nor semicolon. */
 				return 0;
 		}
 		str++;
 	}
 
-	/* No digits at all, ending semicolon, more than eleven fields, or
+	/* No digits at all, ending semicolon, more than 16 fields, or
 	 * more than three consecutive digits. */
-	if (digits == 0 || digits > 3 || semicolon > 11)
+	if (digits == 0 || digits > 3 || semicolon > 15)
 		return 0;
 
 	/* At this point, we have a semicolon separated string of digits (3

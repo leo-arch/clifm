@@ -759,11 +759,11 @@ extern time_t curdir_mtime;
 #define WS_PREFIX_SUG  33 /* Workspace name (w:NAME) */
 #define WS_NUM_PREFIX_SUG 34
 
-/* 46 == \x1b[00;38;02;000;000;000;00;48;02;000;000;000m\0 (24bit, RGB
- * true color format including foreground and background colors, the SGR
- * (Select Graphic Rendition) parameter, and, of course, the terminating
- * null byte. */
-#define MAX_COLOR 46
+/* Longest supported color:
+ * \x1b[4:4;38;2;000;000;000;48;2;000;000;000;58;2;000;000;000m\0
+ * This is a complete SGR sequence, with 24bit colors: foreground, background,
+ * and underline (kitty). */
+#define MAX_COLOR 64
 
 /* Macros to control file descriptors in exec functions. */
 #define E_NOFLAG   0
