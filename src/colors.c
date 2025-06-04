@@ -397,28 +397,25 @@ is_hex_color(const char *restrict str)
 	return (c == 6 || c == 3);
 }
 
-/* Validate a 256 color code string with this format: [0-999]-[0-9]. */
+/* Validate a 256 color code string with this format: [0-255]-[0-9]. */
 static int
 is_256_color(const char *restrict str)
 {
-	if (!str || !*str)
-		return 0;
-
 	size_t c = 0;
+
 	while (str[c]) {
-		if (c == 0 && (str[c] < '0' || str[c] > '9'))
+		if ((c == 0 || c == 4) && !IS_DIGIT(str[c]))
 			return 0;
-		if (c == 1 && ((str[c] < '0' || str[c] > '9') && str[c] != '-'))
-			return 0;
-		if (c == 2 && ((str[c] < '0' || str[c] > '9') && str[c] != '-'))
-			return 0;
-		if (c == 3 && ((str[c] < '0' || str[c] > '9') && str[c] != '-'))
-			return 0;
-		if (c == 4 && (str[c] < '0' || str[c] > '9'))
+		if (c <= 3 && !IS_DIGIT(str[c]) && str[c] != '-')
 			return 0;
 		if (c == 5)
 			return 0;
 		c++;
+	}
+
+	if (c >= 3 && str[0] != '1' && str[0] != '0') {
+		if (str[0] > '2' || str[1] > '5' || str[2] > '5')
+			return 0;
 	}
 
 	return 1;

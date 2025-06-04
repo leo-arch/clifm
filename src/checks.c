@@ -454,8 +454,8 @@ is_internal_cmd(char *cmd, const int flag, const int check_hist,
 
 	/* Old is_internal_f() function */
 	if ((flags & STATE_COMPLETING) && (flag & PARAM_FNAME_NUM)
-	&& (*cmd == 'w' || (*cmd == 'm' && *(cmd + 1) == 'f')
-	|| (*cmd == 's' && (*(cmd + 1) == 't' || *(cmd + 1) == 'o')) ) )
+	&& (*cmd == 'w' || (*cmd == 'm' && cmd[1] == 'f')
+	|| (*cmd == 's' && (cmd[1] == 't' || cmd[1] == 'o')) ) )
 		return 0;
 
 	char c = 0;

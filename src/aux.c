@@ -936,8 +936,7 @@ get_rgb(char *hex, int *attr, int *r, int *g, int *b)
 	*b = hex2int(tmp);
 
 	*attr = -1; /* Attribute unset */
-	if (h[6] == '-' && h[7] && h[7] >= '0'
-	&& h[7] <= '9' && !h[8])
+	if (h[6] == '-' && h[7] >= '0' && h[7] <= '9' && !h[8])
 		*attr = h[7] - '0';
 
 	if (xargs.no_bold == 1 && *attr == 1)
@@ -1096,12 +1095,12 @@ is_cmd_in_path(const char *cmd)
 		(xargs.secure_env == 1 || xargs.secure_env_full == 1);
 
 	size_t i;
-	for (i = 0; i < path_n; i++) { /* Check each path in PATH */
+	for (i = 0; i < path_n; i++) { /* Check each path in PATH. */
 		if (!paths[i].path || !*paths[i].path)
 			continue;
 
-		/* Skip '.' (CWD) if running with secure environment */
-		if (*paths[i].path == '.' && !paths[i].path[1] && is_secure_env == 1)
+		/* Skip '.' (CWD) if running in secure environment mode. */
+		if (is_secure_env == 1 && *paths[i].path == '.' && !paths[i].path[1])
 			continue;
 
 		snprintf(cmd_path, sizeof(cmd_path), "%s/%s", paths[i].path, cmd);
