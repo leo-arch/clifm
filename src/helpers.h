@@ -759,12 +759,6 @@ extern time_t curdir_mtime;
 #define WS_PREFIX_SUG  33 /* Workspace name (w:NAME) */
 #define WS_NUM_PREFIX_SUG 34
 
-/* Longest supported color:
- * \x1b[4:4;38;2;000;000;000;48;2;000;000;000;58;2;000;000;000m\0
- * This is a complete SGR sequence, with 24bit colors: foreground, background,
- * and underline (kitty). */
-#define MAX_COLOR 64
-
 /* Macros to control file descriptors in exec functions. */
 #define E_NOFLAG   0
 #define E_NOSTDIN  (1 << 1)
@@ -2098,7 +2092,13 @@ extern char **environ;
 #define NAME_BUF_SIZE (NAME_MAX + 1)
 extern char name_buf[NAME_BUF_SIZE * sizeof(wchar_t)];
 
-/* For the almost 100 color variables we use, we need more or less 4,5Kb.
+/* Longest supported color:
+ * \x1b[4:4;38;2;000;000;000;48;2;000;000;000;58;2;000;000;000m\0
+ * This is a complete SGR sequence, with 24bit colors: foreground, background,
+ * and underline (kitty). */
+#define MAX_COLOR 64
+
+/* For the almost 100 color variables we use, we need more or less 6Kb.
  * It's not much, but it could be less if we'd use dynamically allocated
  * arrays for them (which, on the other side, would make the whole thing
  * slower and more tedious). */

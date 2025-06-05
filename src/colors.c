@@ -421,22 +421,10 @@ is_256_color(const char *restrict str)
 	return 1;
 }
 
-/* Check if STR has the format of a color code string (a number or a
- * semicolon list (max 12 fields) of numbers of at most 3 digits each).
- * Hex color codes (#RRGGBB) and 256 colors short (@NUM) are also validated.
- * Returns 1 if true and 0 if false. */
+/* Validate an SGR color sequence. Return 1 if valid or 0 otherwise. */
 static int
-is_color_code(const char *str)
+is_sgr_color(const char *str)
 {
-	if (!str || !*str)
-		return 0;
-
-	if (*str == RGB_COLOR_PREFIX)
-		return is_hex_color(str + 1);
-
-	if (*str == COLOR256_PREFIX)
-		return is_256_color(str + 1);
-
 	size_t digits = 0, semicolon = 0;
 
 	while (*str) {
@@ -449,7 +437,7 @@ is_color_code(const char *str)
 			semicolon++;
 		} else {
 			if (*str != '\n'
-			/* Allow styled unerlines. */
+			/* Allow styled unerlines (Kitty terminal). */
 			&& !(digits > 0 && *(str - 1) == '4' && *str == ':'
 			&& str[1] >= '0' && str[1] <= '5'))
 				/* Neither digit nor semicolon. */
@@ -464,9 +452,28 @@ is_color_code(const char *str)
 		return 0;
 
 	/* At this point, we have a semicolon separated string of digits (3
-	 * consecutive max) with at most 12 fields. The only thing not
+	 * consecutive max) with at most 16 fields. The only thing not
 	 * validated here are numbers themselves. */
 	return 1;
+}
+
+/* Check if STR has the format of a color code string (a number or a
+ * semicolon list (max 16 fields) of numbers of at most 3 digits each).
+ * Hex color codes (#RRGGBB) and 256 colors short (@NUM) are also validated.
+ * Returns 1 if true and 0 if false. */
+static int
+is_color_code(const char *str)
+{
+	if (!str || !*str)
+		return 0;
+
+	if (*str == RGB_COLOR_PREFIX)
+		return is_hex_color(str + 1);
+
+	if (*str == COLOR256_PREFIX)
+		return is_256_color(str + 1);
+
+	return is_sgr_color(str);
 }
 
 static void
