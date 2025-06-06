@@ -120,125 +120,125 @@ check_int_cmd_desc(const char *s, const size_t l)
 
 	else if (l == 2) {
 		if (*s == 'a') {
-			if (*(s + 1) == 'c') return AC_DESC;
-			if (*(s + 1) == 'd') return AD_DESC;
-			if (*(s + 1) == 'o') return AO_DESC;
+			if (s[1] == 'c') return AC_DESC;
+			if (s[1] == 'd') return AD_DESC;
+			if (s[1] == 'o') return AO_DESC;
 		}
 
 		else if (*s == 'b') {
-			if (*(s + 1) == 'b') return BB_DESC;
-			if (*(s + 1) == 'd') return BD_DESC;
-			if (*(s + 1) == 'l') return BL_DESC;
-			if (*(s + 1) == 'm') return BM_DESC;
-			if (*(s + 1) == 'r') return BR_DESC;
+			if (s[1] == 'b') return BB_DESC;
+			if (s[1] == 'd') return BD_DESC;
+			if (s[1] == 'l') return BL_DESC;
+			if (s[1] == 'm') return BM_DESC;
+			if (s[1] == 'r') return BR_DESC;
 		}
 
 		else if (*s == 'c') {
-			if (*(s + 1) == 'd') return CD_DESC;
-			if (*(s + 1) == 'l') return CL_DESC;
-			if (*(s + 1) == 's') return CS_DESC;
+			if (s[1] == 'd') return CD_DESC;
+			if (s[1] == 'l') return CL_DESC;
+			if (s[1] == 's') return CS_DESC;
 		}
 
 		else if (*s == 'd') {
-			if (*(s + 1) == 's') return DS_DESC;
-			if (*(s + 1) == 'h') return DH_DESC;
+			if (s[1] == 's') return DS_DESC;
+			if (s[1] == 'h') return DH_DESC;
 		}
 
 		else if (*s == 'f') {
-			if (*(s + 1) == 'c') return FC_DESC;
-			if (*(s + 1) == 'f') return FF_DESC;
-			if (*(s + 1) == 't') return FT_DESC;
-			if (*(s + 1) == 'z') return FZ_DESC;
+			if (s[1] == 'c') return FC_DESC;
+			if (s[1] == 'f') return FF_DESC;
+			if (s[1] == 't') return FT_DESC;
+			if (s[1] == 'z') return FZ_DESC;
 		}
 
-		else if (*s == 'h' && (*(s + 1) == 'f' || *(s + 1) == 'h'))
+		else if (*s == 'h' && (s[1] == 'f' || s[1] == 'h'))
 			return HF_DESC;
 
 		else if (*s == 'k') {
-			if (*(s + 1) == 'b') return KB_DESC;
-			if (*(s + 1) == 'k') return KK_DESC;
+			if (s[1] == 'b') return KB_DESC;
+			if (s[1] == 'k') return KK_DESC;
 		}
 
 		else if (*s == 'l') {
-			if (*(s + 1) == 'e') return LE_DESC;
-			if (*(s + 1) == 'l' || *(s + 1) == 'v') return LL_DESC;
-			if (*(s + 1) == 'm') return LM_DESC;
+			if (s[1] == 'e') return LE_DESC;
+			if (s[1] == 'l' || s[1] == 'v') return LL_DESC;
+			if (s[1] == 'm') return LM_DESC;
 		}
 
 		else if (*s == 'm') {
-			if (*(s + 1) == 'd') return MD_DESC;
-			if (*(s + 1) == 'f') return MF_DESC;
-			if (*(s + 1) == 'm') return MM_DESC;
-			if (*(s + 1) == 'p') return MP_DESC;
+			if (s[1] == 'd') return MD_DESC;
+			if (s[1] == 'f') return MF_DESC;
+			if (s[1] == 'm') return MM_DESC;
+			if (s[1] == 'p') return MP_DESC;
 		}
 
 		else if (*s == 'o') {
-			if (*(s + 1) == 'c') return OC_DESC;
-			if (*(s + 1) == 'w') return OW_DESC;
+			if (s[1] == 'c') return OC_DESC;
+			if (s[1] == 'w') return OW_DESC;
 		}
 
 		else if (*s == 'p') {
-			if (*(s + 1) == 'c') return PC_DESC;
-			if (*(s + 1) == 'f') return PF_DESC;
-			if (*(s + 1) == 'g') return PG_DESC;
-			if (*(s + 1) == 'p') return PP_DESC;
+			if (s[1] == 'c') return PC_DESC;
+			if (s[1] == 'f') return PF_DESC;
+			if (s[1] == 'g') return PG_DESC;
+			if (s[1] == 'p') return PP_DESC;
 		}
 
 		else if (*s == 'r') {
-			if (*(s + 1) == 'f') return RF_DESC;
-			if (*(s + 1) == 'l') return RL_DESC;
-			if (*(s + 1) == 'r') return RR_DESC;
+			if (s[1] == 'f') return RF_DESC;
+			if (s[1] == 'l') return RL_DESC;
+			if (s[1] == 'r') return RR_DESC;
 		}
 
 		else if (*s == 's') {
-			if (*(s + 1) == 'b') return SB_DESC;
-			if (*(s + 1) == 't') return ST_DESC;
+			if (s[1] == 'b') return SB_DESC;
+			if (s[1] == 't') return ST_DESC;
 		}
 
 		else if (*s == 't') {
-			if (*(s + 1) == 'a') return TA_DESC;
-			if (*(s + 1) == 'd') return TD_DESC;
-			if (*(s + 1) == 'e') return TE_DESC;
-			if (*(s + 1) == 'l') return TL_DESC;
-			if (*(s + 1) == 'm') return TM_DESC;
-			if (*(s + 1) == 'n') return TN_DESC;
-			if (*(s + 1) == 'u') return TU_DESC;
-			if (*(s + 1) == 'y') return TY_DESC;
+			if (s[1] == 'a') return TA_DESC;
+			if (s[1] == 'd') return TD_DESC;
+			if (s[1] == 'e') return TE_DESC;
+			if (s[1] == 'l') return TL_DESC;
+			if (s[1] == 'm') return TM_DESC;
+			if (s[1] == 'n') return TN_DESC;
+			if (s[1] == 'u') return TU_DESC;
+			if (s[1] == 'y') return TY_DESC;
 		}
 
-		else if (*s == 'v' && *(s + 1) == 'v')
+		else if (*s == 'v' && s[1] == 'v')
 			return VV_DESC;
 
 		else if (*s == 'w') {
-			if (*(s + 1) == 's') return WS_DESC;
+			if (s[1] == 's') return WS_DESC;
 		}
 
 	} else if (l == 3) {
-		if (*s == 'a' && *(s + 1) == 'c' && *(s + 2) == 'd')
+		if (*s == 'a' && s[1] == 'c' && s[2] == 'd')
 			return ACD_DESC;
-		if (*s == 'c' && *(s + 1) == 'm' && *(s + 2) == 'd')
+		if (*s == 'c' && s[1] == 'm' && s[2] == 'd')
 			return CMD_DESC;
-		if (*s == 'd' && *(s + 1) == 'u' && *(s + 2) == 'p')
+		if (*s == 'd' && s[1] == 'u' && s[2] == 'p')
 			return D_DESC;
-		if (*s == 'e' && *(s + 1) == 'x') {
-			if (*(s + 2) == 'p') return EXP_DESC;
-			if (*(s + 2) == 't') return EXT_DESC;
+		if (*s == 'e' && s[1] == 'x') {
+			if (s[2] == 'p') return EXP_DESC;
+			if (s[2] == 't') return EXT_DESC;
 		}
-		if (*s == 'l' && *(s + 1) == 'o' && *(s + 2) == 'g')
+		if (*s == 'l' && s[1] == 'o' && s[2] == 'g')
 			return LOG_DESC;
-		if (*s == 'm' && *(s + 1) == 's' && *(s + 2) == 'g')
+		if (*s == 'm' && s[1] == 's' && s[2] == 'g')
 			return MSG_DESC;
-		if (*s == 'n' && *(s + 1) == 'e') {
-			if (*(s + 2) == 't') return NET_DESC;
-			if (*(s + 2) == 'w') return N_DESC;
+		if (*s == 'n' && s[1] == 'e') {
+			if (s[2] == 't') return NET_DESC;
+			if (s[2] == 'w') return N_DESC;
 		}
-		if (*s == 'p' && *(s + 1) == 'i' && *(s + 2) == 'n')
+		if (*s == 'p' && s[1] == 'i' && s[2] == 'n')
 			return PIN_DESC;
-		if (*s == 's' && *(s + 1) == 'e' && *(s + 2) == 'l')
+		if (*s == 's' && s[1] == 'e' && s[2] == 'l')
 			return SEL_DESC;
-		if (*s == 't' && *(s + 1) == 'a' && *(s + 2) == 'g')
+		if (*s == 't' && s[1] == 'a' && s[2] == 'g')
 			return TAG_DESC;
-		if (*s == 'v' && *(s + 1) == 'e' && *(s + 2) == 'r')
+		if (*s == 'v' && s[1] == 'e' && s[2] == 'r')
 			return VER_DESC;
 	}
 
@@ -362,7 +362,7 @@ recover_from_wrong_cmd(void)
 	if (rl_line_buffer && (rl_dispatching == 0
 	|| (words_num > 1 && point_is_first_word == 0))) {
 		const char *p = (strrchr(rl_line_buffer, ' '));
-		if (p && p != rl_line_buffer && *(p - 1) != '\\' && *(p + 1) != ' ')
+		if (p && p != rl_line_buffer && *(p - 1) != '\\' && p[1] != ' ')
 			return FUNC_FAILURE;
 	}
 
@@ -443,8 +443,7 @@ calculate_suggestion_lines(int *baej, const size_t suggestion_len)
 	|| suggestion.type == FUZZY_FILENAME || suggestion.type == DIRHIST_SUG
 	|| suggestion.type == FASTBACK_SUG || suggestion.type == WS_NUM_PREFIX_SUG
 	|| (suggestion.type == COMP_SUG && (flags & BAEJ_SUGGESTION))) {
-		/* 3 = 1 (one char forward) + 2 (" >") */
-		cuc += 3;
+		cuc += 3; /* 3 = 1 (one char forward) + 2 (" >") */
 		flags |= BAEJ_SUGGESTION;
 		*baej = 1;
 	}
@@ -1048,8 +1047,8 @@ check_history(const char *str, const size_t len)
 		if (!history[i].cmd || TOUPPER(*str) != TOUPPER(*history[i].cmd))
 			continue;
 
-		if (len > 1 && *(history[i].cmd + 1)
-		&& TOUPPER(*(str + 1)) != TOUPPER(*(history[i].cmd + 1)))
+		if (len > 1 && history[i].cmd[1]
+		&& TOUPPER(str[1]) != TOUPPER(history[i].cmd[1]))
 			continue;
 
 		if ((conf.case_sens_path_comp ? strncmp(str, history[i].cmd, len)
@@ -1162,7 +1161,7 @@ check_cmds(char *str, size_t len, const int print)
 		return NO_MATCH;
 
 	char *cmd = str;
-	if (*cmd == '\\' && *(cmd + 1)) {
+	if (*cmd == '\\' && cmd[1]) {
 		cmd++;
 		len--;
 	}
@@ -1172,15 +1171,15 @@ check_cmds(char *str, size_t len, const int print)
 		if (!bin_commands[i] || *cmd != *bin_commands[i])
 			continue;
 
-		if (!print) {
+		if (print == 0) {
 			if (strcmp(cmd, bin_commands[i]) == 0)
 				return FULL_MATCH;
 			continue;
 		}
 
 		/* Let's check the 2nd char as well before calling strcmp(). */
-		if (len > 1 && *(bin_commands[i] + 1)
-		&& *(cmd + 1) != *(bin_commands[i] + 1))
+		if (len > 1 && bin_commands[i][1]
+		&& cmd[1] != bin_commands[i][1])
 			continue;
 
 		if (strncmp(cmd, bin_commands[i], len) != 0)
@@ -1205,8 +1204,8 @@ check_jumpdb(const char *str, const size_t len, const int print)
 		if (!jump_db[i].path || TOUPPER(*str) != TOUPPER(*jump_db[i].path)
 		|| jump_db[i].rank == JUMP_ENTRY_PURGED)
 			continue;
-		if (len > 1 && *(jump_db[i].path + 1)
-		&& TOUPPER(*(str + 1)) != TOUPPER(*(jump_db[i].path + 1)))
+		if (len > 1 && jump_db[i].path[1]
+		&& TOUPPER(str[1]) != TOUPPER(jump_db[i].path[1]))
 			continue;
 		if (!print) {
 			if ((conf.case_sens_path_comp ? strcmp(str, jump_db[i].path)
@@ -1306,7 +1305,7 @@ check_aliases(const char *str, const size_t len, const int print)
 		if (TOUPPER(*p) != TOUPPER(*str))
 			continue;
 
-		if (!print) {
+		if (print == 0) {
 			if ((conf.case_sens_path_comp ? strcmp(p, str)
 			: strcasecmp(p, str)) == 0)
 				return FULL_MATCH;
@@ -1604,7 +1603,7 @@ check_prompts(char *word, const size_t len)
 static void
 get_last_word(const char *last_space)
 {
-	const char *tmp = (last_space && *(last_space + 1)) ? last_space + 1
+	const char *tmp = (last_space && last_space[1]) ? last_space + 1
 			: (rl_line_buffer ? rl_line_buffer : (char *)NULL);
 	if (tmp) {
 		const size_t len = strlen(tmp);
@@ -1615,7 +1614,7 @@ get_last_word(const char *last_space)
 		*last_word = '\0';
 	}
 
-	last_word_offset = (last_space && *(last_space + 1) && rl_line_buffer)
+	last_word_offset = (last_space && last_space[1] && rl_line_buffer)
 		? (int)((last_space + 1) - rl_line_buffer) : 0;
 }
 
@@ -1625,7 +1624,7 @@ check_workspaces(char *word, size_t wlen, const int type)
 	if (!word || !*word || !workspaces)
 		return NO_MATCH;
 
-	if (*word >= '1' && *word <= MAX_WS + '0' && !*(word + 1)) {
+	if (*word >= '1' && *word <= MAX_WS + '0' && !word[1]) {
 		const int a = atoi(word);
 		if (a > 0 && workspaces[a - 1].name) {
 			suggestion.type = type == WS_PREFIX_SUG
@@ -2116,14 +2115,14 @@ rl_suggestions(const unsigned char c)
 	switch (words_num > 1 ? *s : '\0') {
 	case 'b': /* Bookmark names */
 		if (bm_n > 0 && s[1] == 'm' && s[2] == ' ') {
-			if (!(*(s + 3) == 'a' && *(s + 4) == ' ')
+			if (!(s[3] == 'a' && s[4] == ' ')
 			&& strncmp(s + 3, "add", 3) != 0) {
 				if ((printed = check_bookmark_names(word, wlen)) != NO_MATCH) {
 					goto SUCCESS;
 				} else {
 					if (suggestion.printed)
 						clear_suggestion(CS_FREEBUF);
-					if (*(s + 3) != '-') /* Might be --help, let it continue. */
+					if (s[3] != '-') /* Might be --help, let it continue. */
 						goto FAIL;
 				}
 			} else if (words_num > 5) {
@@ -2134,7 +2133,7 @@ rl_suggestions(const unsigned char c)
 
 		/* Backdir function (bd) */
 		else if (s[1] == 'd' && s[2] == ' ' && s[3]) {
-				if (*(s + 3) == '/' && !*(s + 4)) {
+				if (s[3] == '/' && !s[4]) {
 					/* The query string is a single slash: do nothing. */
 					goto FAIL;
 				}
@@ -2218,7 +2217,7 @@ rl_suggestions(const unsigned char c)
 #ifndef _NO_TAGS
 	case 't': /* Tag command */
 		if ((s[1] == 'a' || s[1] == 'u') && s[2] == ' ') {
-			if (*word == ':' && *(word + 1)
+			if (*word == ':' && word[1]
 			&& (printed = check_tags(word + 1, wlen - 1, TAGC_SUG)) != NO_MATCH)
 				goto SUCCESS;
 		} else if ((s[1] == 'l' || s[1] == 'm' || s[1] == 'n'
@@ -2249,13 +2248,13 @@ rl_suggestions(const unsigned char c)
 	}
 
 	/* 3.d.2) ~usernames */
-	if (*word == '~' && *(word + 1) != '/') {
+	if (*word == '~' && word[1] != '/') {
 		if ((printed = check_users(word + 1, wlen - 1)) != NO_MATCH)
 			goto SUCCESS;
 	}
 
 	/* 3.d.3) Bookmark names (b:) */
-	if (*word == 'b' && *(word + 1) == ':' && *(word + 2)) {
+	if (*word == 'b' && word[1] == ':' && word[2]) {
 		if ((printed = check_bookmark_names(word, wlen)) != NO_MATCH)
 			goto SUCCESS;
 	}
@@ -2268,7 +2267,7 @@ rl_suggestions(const unsigned char c)
 
 #ifndef _NO_TAGS
 	/* 3.d.4) Tag names (t:) */
-	if (*lb != ';' && *lb != ':' && *word == 't' && *(word + 1) == ':'
+	if (*lb != ';' && *lb != ':' && *word == 't' && word[1] == ':'
 	&& *(word + 2)) {
 		if ((printed = check_tags(word + 2, wlen - 2, TAGT_SUG)) != NO_MATCH)
 			goto SUCCESS;
@@ -2391,7 +2390,7 @@ rl_suggestions(const unsigned char c)
 			}
 
 			/* If "./FILE" check only "FILE" */
-			if (wlen > 2 && *word == '.' && *(word + 1) == '/') {
+			if (wlen > 2 && *word == '.' && word[1] == '/') {
 				word += 2;
 				wlen -= 2;
 				last_word_offset += 2;
@@ -2399,7 +2398,7 @@ rl_suggestions(const unsigned char c)
 
 			/* If we have a slash, we're not looking for files in the CWD. */
 			char *p = strchr(word, '/');
-			if (p && *(p + 1))
+			if (p && p[1])
 				break;
 
 			/* Skip internal commands not dealing with filenames. */
@@ -2475,11 +2474,10 @@ CHECK_FIRST_WORD:
 	/* Skip 'b:' (bookmarks), 's:' (sel files) 't:' (tags) and 'w:'
 	 * (workspaces) constructs. */
 	if ((*word == 'b' || *word == 's' || *word == 't' || *word == 'w')
-	&& *(word + 1) == ':')
+	&& word[1] == ':')
 		goto NO_SUGGESTION;
 
 	if (!*word
-
 	|| (c == ' ' && (*word == '\''
 	|| *word == '"' || *word == '$' || *word == '#'))
 	|| *word == '<' || *word == '>' || *word == '!' || *word == '{'

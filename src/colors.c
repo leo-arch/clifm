@@ -423,7 +423,7 @@ is_256_color(const char *restrict str)
 
 /* Validate an SGR color sequence. Return 1 if valid or 0 otherwise. */
 static int
-is_sgr_color(const char *str)
+is_sgr_color(const char *restrict str)
 {
 	size_t digits = 0, semicolon = 0;
 
@@ -437,7 +437,7 @@ is_sgr_color(const char *str)
 			semicolon++;
 		} else {
 			if (*str != '\n'
-			/* Allow styled unerlines (Kitty terminal). */
+			/* Allow styled underline (Kitty terminal). */
 			&& !(digits > 0 && *(str - 1) == '4' && *str == ':'
 			&& str[1] >= '0' && str[1] <= '5'))
 				/* Neither digit nor semicolon. */
