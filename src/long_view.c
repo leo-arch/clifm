@@ -557,7 +557,7 @@ print_entry_props(const struct fileinfo *props, const struct maxes_t *maxes,
 		case 'p': /* fallthrough */
 		case 'n':
 			len += gen_perms(props->mode, buf + len, file_type, ctype);
-			if (xattr_char != 0) { buf[len] = xattr_char; len++; }
+			if (xattr_char != 0) buf[len++] = xattr_char;
 			break;
 		case 'i': /* fallthrough */
 		case 'I': len += gen_id(props, buf + len, maxes, file_perm); break;
@@ -575,8 +575,7 @@ print_entry_props(const struct fileinfo *props, const struct maxes_t *maxes,
 		/* If not the last field, add some space to separate the current
 		 * field from the next one. */
 		const int last_field = prop_fields_str[i + 1] == '\0';
-		if (last_field == 1
-		|| (sizeof(buf) - len) <= prop_fields_gap)
+		if (last_field == 1 || (sizeof(buf) - len) <= prop_fields_gap)
 			break;
 
 		buf[len++] = ' ';
