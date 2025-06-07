@@ -907,7 +907,6 @@ my_rl_path_completion(const char *text, int state)
 	static size_t filename_len;
 	static int match, ret;
 	struct dirent *ent = (struct dirent *)NULL;
-	static int exec = 0, exec_path = 0;
 	static char *dir_tmp = (char *)NULL;
 	static char tmp[PATH_MAX + 1];
 
@@ -935,7 +934,6 @@ my_rl_path_completion(const char *text, int state)
 			dirname[1] = '\0';
 		}
 
-		exec = (*dirname == '.' && dirname[1] == '/');
 		/* Get everything after last slash */
 		temp = strrchr(dirname, '/');
 
@@ -1007,16 +1005,12 @@ my_rl_path_completion(const char *text, int state)
 
 	/* This block is used only in case of "/path/./" to remove the ending "./"
 	 * from dirname and to be able to perform thus the executable check via access() */
-	exec_path = 0;
-
 	if (dirname_len > 2 && dirname[dirname_len - 3] == '/'
 	&& dirname[dirname_len - 2] == '.' && dirname[dirname_len - 1] == '/') {
 		dir_tmp = savestring(dirname, dirname_len);
 
-		if (dir_tmp) {
+		if (dir_tmp)
 			dir_tmp[dirname_len - 2] = '\0';
-			exec_path = 1;
-		}
 	}
 
 	/* ############### COMPLETION FILTER ################## */
@@ -1061,8 +1055,8 @@ my_rl_path_completion(const char *text, int state)
 				continue;
 
 			/* If 'cd', match only dirs or symlinks to dir */
-			if (*rl_line_buffer == 'c'
-			&& strncmp(rl_line_buffer, "cd ", 3) == 0) {
+			if (*rl_line_buffer == 'c' && rl_line_buffer[1] == 'd'
+			&& rl_line_buffer[2] == ' ') {
 				ret = -1;
 
 				switch (type) {
@@ -1120,25 +1114,6 @@ my_rl_path_completion(const char *text, int state)
 
 				if (type != DT_BLK && type != DT_CHR)
 					match = 1;
-			}
-
-			/* If "./", list only executable regular files and directories */
-			else if (exec) {
-				if (type == DT_DIR
-				|| (type == DT_REG && access(ent->d_name, X_OK) == 0))
-					match = 1;
-			}
-
-			/* If "/path/./", list only executable regular files */
-			else if (exec_path) {
-				if (type == DT_REG || type == DT_DIR) {
-					/* dir_tmp is dirname less "./", already allocated before
-					 * the while loop */
-					snprintf(tmp, sizeof(tmp), "%s%s", dir_tmp, ent->d_name);
-
-					if (type == DT_DIR || access(tmp, X_OK) == 0)
-						match = 1;
-				}
 			}
 
 			/* No filter for everything else. Just print whatever is there */
@@ -1251,14 +1226,6 @@ my_rl_path_completion(const char *text, int state)
 			|| strncmp(rl_line_buffer, "trash ", 6) == 0)) {
 				if (type != DT_BLK && type != DT_CHR)
 					match = 1;
-			}
-
-			else if (exec_path) {
-				if (type == DT_REG || type == DT_DIR) {
-					snprintf(tmp, sizeof(tmp), "%s%s", dir_tmp, ent->d_name);
-					if (type == DT_DIR || access(tmp, X_OK) == 0)
-						match = 1;
-				}
 			}
 
 			else {
@@ -3386,33 +3353,6 @@ complete_bookmark_names(char *text, const size_t words_n, int *exit_status)
 	return matches;
 }
 
-/*
-static char **
-complete_dirjump_jo(char *text, const int n, int *exit_status)
-{
-	*exit_status = FUNC_FAILURE;
-	char *lb = rl_line_buffer;
-
-	if (*lb != 'j' || lb[1] != 'o' || lb[2] != ' ')
-		return (char **)NULL;
-
-	if (!is_number(text) || n <= 0 || n > (int)jump_n
-	|| !jump_db[n - 1].path)
-		return (char **)NULL;
-
-	char *p = jump_db[n - 1].path;
-	char **matches = (char **)NULL;
-	matches = xnrealloc(matches, 2, sizeof(char **));
-	matches[0] = savestring(p, strlen(p));
-	matches[1] = (char *)NULL;
-
-	cur_comp_type = TCMP_PATH;
-	rl_filename_completion_desired = 1;
-	*exit_status = FUNC_SUCCESS;
-
-	return matches;
-} */
-
 static char **
 complete_ranges(char *text, int *exit_status)
 {
@@ -4445,11 +4385,6 @@ FIRST_WORD_COMP:
 		int n = atoi(text);
 		if (n == INT_MIN)
 			return (char **)NULL;
-
-		/* Dirjump: jo command */
-/*		matches = complete_dirjump_jo((char *)text, n, &exit_status);
-		if (exit_status == FUNC_SUCCESS)
-			return matches; */
 
 		/* Sort number */
 		if (s && *s == 's' && (strncmp(s, "st ", 3) == 0
