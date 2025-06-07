@@ -1722,7 +1722,7 @@ rl_accept_suggestion(int count, int key)
 			s = strpbrk(p, WORD_DELIMITERS);
 
 		while (s && IS_UTF8_CHAR(*s))
-			s = strpbrk(p++, WORD_DELIMITERS);
+			s = strpbrk(s + 1, WORD_DELIMITERS);
 
 		if (s && s[1]) { /* Truncate suggestion after word delimiter */
 			if (*s == '/')
