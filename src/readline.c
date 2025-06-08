@@ -923,6 +923,33 @@ check_match(const char *s1, const char *s2, const size_t s1_len)
 	return *s1 != *s2 ? 0 : (strncmp(s1, s2, s1_len) == 0);
 }
 
+static inline int
+get_best_fuzzy_match(char *filename, const char *dirname, char *d_name,
+	const size_t flen, const int fuzzy_str_type, int *best_fz_score)
+{
+	const int score = fuzzy_match(filename, d_name, flen, fuzzy_str_type);
+	if (score <= *best_fz_score)
+		return 0;
+
+	/* Best score so far. Keep a copy the best ranked entry.
+	 * FZ_MATCH is global. */
+	if (!dirname || (*dirname == '.' && !dirname[1])) {
+		xstrsncpy(fz_match, d_name, sizeof(fz_match));
+	} else {
+		snprintf(fz_match, sizeof(fz_match), "%s%s",
+			dirname, d_name);
+	}
+
+	/* If the current score isn't the best possible one, let's keep looking
+	 * for the best one. */
+	if (score != TARGET_BEGINNING_BONUS) {
+		*best_fz_score = score;
+		return 0;
+	}
+
+	return 1;
+}
+
 /* This is the filename_completion_function() function of an old Bash
  * release (1.14.7) modified to fit Clifm's needs */
 /* state is zero before completion, and 1 ... n after getting
@@ -1041,7 +1068,8 @@ my_rl_path_completion(const char *text, int state)
 	/* #        This is the heart of the function         #
 	 * #################################################### */
 	mode_t type;
-	int fuzzy_str_type = (conf.fuzzy_match == 1 && contains_utf8(filename) == 1)
+	const int fuzzy_str_type =
+		(conf.fuzzy_match == 1 && contains_utf8(filename) == 1)
 		? FUZZY_FILES_UTF8 : FUZZY_FILES_ASCII;
 	int best_fz_score = 0;
 
@@ -1115,36 +1143,14 @@ my_rl_path_completion(const char *text, int state)
 				if (check_match(filename, ent->d_name, filename_len) == 0)
 					continue;
 			} else {
-
 				/* ############### FUZZY MATCHING ################## */
-
 				if (flags & STATE_SUGGESTING) {
-					int r = 0;
-					/* Do not fuzzy suggest if not at the end of the line */
-					if (rl_point == rl_end
-					&& (r = fuzzy_match(filename, ent->d_name,
-					filename_len, fuzzy_str_type)) > best_fz_score) {
-						if (!dirname || (*dirname == '.' && !dirname[1])) {
-							xstrsncpy(fz_match, ent->d_name, sizeof(fz_match));
-						} else {
-							snprintf(fz_match, sizeof(fz_match), "%s%s",
-								dirname, ent->d_name);
-						}
-
-						/* We look for matches ranked 4 or 5. If none of them is
-						 * found, we take the closest ranked match (1-3)
-						 * If we set this value to 1, the first match will be returned,
-						 * which makes the computation much faster. */
-						if (r != TARGET_BEGINNING_BONUS) {
-							best_fz_score = r;
-							continue;
-						}
-					} else {
+					if (get_best_fuzzy_match(filename, dirname, ent->d_name,
+					filename_len, fuzzy_str_type, &best_fz_score) == 0)
 						continue;
-					}
-				} else {
-					/* This is for tab completion: accept all matches. */
-					if (fuzzy_match(filename, ent->d_name, filename_len, fuzzy_str_type) == 0)
+				} else { /* This is for tab completion: accept all matches. */
+					if (fuzzy_match(filename, ent->d_name,
+					filename_len, fuzzy_str_type) == 0)
 						continue;
 				}
 			}
@@ -1160,13 +1166,27 @@ my_rl_path_completion(const char *text, int state)
 				match = 1;
 		}
 
-		if (match)
+		if (match == 1)
 			break;
 	}
 
-	/* readdir() returns NULL on reaching the end of directory stream.
-	 * So that if entry is NULL, we have no matches */
-	if (!ent) { /* == !match */
+	char *cur_match = (char *)NULL;
+
+	/* readdir() returns NULL on reaching the end of the directory stream.
+	 * So that if ENT is not NULL, we have a match. */
+	if (ent) {
+		cur_comp_type = TCMP_PATH;
+		if (dirname && (dirname[0] != '.' || dirname[1])) {
+			size_t len = strlen(users_dirname) + strlen(ent->d_name) + 1;
+			cur_match = xnmalloc(len, sizeof(char));
+			snprintf(cur_match, len, "%s%s", users_dirname, ent->d_name);
+		} else {
+			cur_match = savestring(ent->d_name, strlen(ent->d_name));
+		}
+	}
+
+	/* Clean state. */
+	if ((flags & STATE_SUGGESTING) || !ent) {
 		if (directory) {
 			closedir(directory);
 			directory = (DIR *)NULL;
@@ -1175,36 +1195,9 @@ my_rl_path_completion(const char *text, int state)
 		free(dirname); dirname = (char *)NULL;
 		free(filename); filename = (char *)NULL;
 		free(users_dirname); users_dirname = (char *)NULL;
-
-		return (char *)NULL;
 	}
 
-	/* We have a match */
-	else {
-		cur_comp_type = TCMP_PATH;
-		char *temp = (char *)NULL;
-
-		if (dirname && (dirname[0] != '.' || dirname[1])) {
-			size_t temp_len = strlen(users_dirname) + strlen(ent->d_name) + 1;
-			temp = xnmalloc(temp_len, sizeof(char));
-			snprintf(temp, temp_len, "%s%s", users_dirname, ent->d_name);
-		} else {
-			temp = savestring(ent->d_name, strlen(ent->d_name));
-		}
-
-		if (flags & STATE_SUGGESTING) {
-			if (directory) {
-				closedir(directory);
-				directory = (DIR *)NULL;
-			}
-
-			free(dirname); dirname = (char *)NULL;
-			free(filename); filename = (char *)NULL;
-			free(users_dirname); users_dirname = (char *)NULL;
-		}
-
-		return temp;
-	}
+	return cur_match;
 }
 
 /* Used by bookmarks completion */
