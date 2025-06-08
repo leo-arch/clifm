@@ -907,7 +907,6 @@ my_rl_path_completion(const char *text, int state)
 	static size_t filename_len;
 	static int match, ret;
 	struct dirent *ent = (struct dirent *)NULL;
-	static char *dir_tmp = (char *)NULL;
 	static char tmp[PATH_MAX + 1];
 
 	/* If we don't have any state, then do some initialization. */
@@ -998,20 +997,6 @@ my_rl_path_completion(const char *text, int state)
 	/* Now that we have some state, we can read the directory. If we found
 	 * a match among files in dir, break the loop and print the match */
 	match = 0;
-
-	size_t dirname_len = 0;
-	if (dirname)
-		dirname_len = strlen(dirname);
-
-	/* This block is used only in case of "/path/./" to remove the ending "./"
-	 * from dirname and to be able to perform thus the executable check via access() */
-	if (dirname_len > 2 && dirname[dirname_len - 3] == '/'
-	&& dirname[dirname_len - 2] == '.' && dirname[dirname_len - 1] == '/') {
-		dir_tmp = savestring(dirname, dirname_len);
-
-		if (dir_tmp)
-			dir_tmp[dirname_len - 2] = '\0';
-	}
 
 	/* ############### COMPLETION FILTER ################## */
 	/* #        This is the heart of the function         #
@@ -1235,11 +1220,6 @@ my_rl_path_completion(const char *text, int state)
 
 		if (match)
 			break;
-	}
-
-	if (dir_tmp) { /* == exec_path */
-		free(dir_tmp);
-		dir_tmp = (char *)NULL;
 	}
 
 	/* readdir() returns NULL on reaching the end of directory stream.
