@@ -875,6 +875,42 @@ my_rl_quote(char *text, int mt, char *qp) /* NOLINT */
 	return r;
 }
 
+static int
+filter_cd_cmd(const char *dirname, const char *d_name, char *buf, mode_t type)
+{
+	if (type == DT_DIR)
+		return 1;
+
+	if (type != DT_LNK)
+		return 0;
+
+	if (*dirname == '.' && !dirname[1])
+		return (get_link_ref(d_name) == S_IFDIR);
+
+	snprintf(buf, PATH_MAX + 1, "%s%s", dirname, d_name);
+	return (get_link_ref(buf) == S_IFDIR);
+}
+
+static int
+filter_open_cmd(const char *dirname, const char *d_name, char *buf, mode_t type)
+{
+	if (type == DT_REG || type == DT_DIR)
+		return 1;
+
+	if (type != DT_LNK)
+		return 0;
+
+	int ret = -1;
+	if (*dirname == '.' && !dirname[1]) {
+		ret = get_link_ref(d_name);
+	} else {
+		snprintf(buf, PATH_MAX + 1, "%s%s", dirname, d_name);
+		ret = get_link_ref(buf);
+	}
+
+	return (ret == S_IFDIR || ret == S_IFREG);
+}
+
 /* This is the filename_completion_function() function of an old Bash
  * release (1.14.7) modified to fit Clifm's needs */
 /* state is zero before completion, and 1 ... n after getting
@@ -905,7 +941,7 @@ my_rl_path_completion(const char *text, int state)
 	static char *dirname = (char *)NULL;
 	static char *users_dirname = (char *)NULL;
 	static size_t filename_len;
-	static int match, ret;
+	static int match;
 	struct dirent *ent = (struct dirent *)NULL;
 	static char tmp[PATH_MAX + 1];
 
@@ -918,7 +954,7 @@ my_rl_path_completion(const char *text, int state)
 		free(users_dirname);
 
 		/* tmp_text is true whenever text was dequoted */
-		char *p = tmp_text ? tmp_text : (char *)text;
+		const char *p = tmp_text ? tmp_text : text;
 		size_t text_len = strlen(p);
 		if (text_len)
 			filename = savestring(p, text_len);
@@ -997,6 +1033,15 @@ my_rl_path_completion(const char *text, int state)
 		? FUZZY_FILES_UTF8 : FUZZY_FILES_ASCII;
 	int best_fz_score = 0;
 
+	const int is_cd_cmd = (rl_line_buffer && *rl_line_buffer == 'c'
+			&& rl_line_buffer[1] == 'd' && rl_line_buffer[2] == ' ');
+	const int is_open_cmd = (rl_line_buffer && *rl_line_buffer == 'o'
+			&& (strncmp(rl_line_buffer, "o ", 2) == 0
+			|| strncmp(rl_line_buffer, "open ", 5) == 0));
+	const int is_trash_cmd = (rl_line_buffer && *rl_line_buffer == 't'
+			&& (strncmp(rl_line_buffer, "t ", 2) == 0
+			|| strncmp(rl_line_buffer, "trash ", 6) == 0));
+
 	while (directory && (ent = readdir(directory))) {
 #if !defined(_DIRENT_HAVE_D_TYPE)
 		struct stat attr;
@@ -1020,81 +1065,32 @@ my_rl_path_completion(const char *text, int state)
 
 		/* Only dir names for cd */
 		if ((conf.suggestions == 0 || words_num > 1) && conf.fuzzy_match == 1
-		&& rl_line_buffer && *rl_line_buffer == 'c' && rl_line_buffer[1] == 'd'
-		&& rl_line_buffer[2] == ' ' && type != DT_DIR)
+		&& is_cd_cmd == 1 && type != DT_DIR)
 			continue;
 
 		/* If the user entered nothing before TAB (e.g., "cd [TAB]") */
-		if (!filename_len) {
+		if (filename_len == 0) {
 			/* Exclude "." and ".." as possible completions */
 			if (SELFORPARENT(ent->d_name))
 				continue;
 
 			/* If 'cd', match only dirs or symlinks to dir */
-			if (*rl_line_buffer == 'c' && rl_line_buffer[1] == 'd'
-			&& rl_line_buffer[2] == ' ') {
-				ret = -1;
-
-				switch (type) {
-				case DT_LNK:
-					if (dirname[0] == '.' && !dirname[1]) {
-						ret = get_link_ref(ent->d_name);
-					} else {
-						snprintf(tmp, sizeof(tmp), "%s%s", dirname, ent->d_name);
-						ret = get_link_ref(tmp);
-					}
-
-					if (ret == S_IFDIR)
-						match = 1;
-					break;
-
-				case DT_DIR: match = 1; break;
-				default: break;
-				}
-			}
+			if (is_cd_cmd == 1)
+				match = filter_cd_cmd(dirname, ent->d_name, tmp, type);
 
 			/* If 'open', allow only reg files, dirs, and symlinks */
-			else if (*rl_line_buffer == 'o'
-			&& (strncmp(rl_line_buffer, "o ", 2) == 0
-			|| strncmp(rl_line_buffer, "open ", 5) == 0)) {
-				ret = -1;
-
-				switch (type) {
-				case DT_LNK:
-					if (dirname[0] == '.' && !dirname[1]) {
-						ret = get_link_ref(ent->d_name);
-					} else {
-						snprintf(tmp, sizeof(tmp), "%s%s", dirname, ent->d_name);
-						ret = get_link_ref(tmp);
-					}
-
-					if (ret == S_IFDIR || ret == S_IFREG)
-						match = 1;
-
-					break;
-
-				case DT_REG: /* fallthrough */
-				case DT_DIR: match = 1; break;
-
-				default: break;
-				}
-			}
+			else if (is_open_cmd == 1)
+				match = filter_open_cmd(dirname, ent->d_name, tmp, type);
 
 			/* If 'trash', allow only reg files, dirs, symlinks, pipes
 			 * and sockets. You should not trash a block or a character
-			 * device */
-			else if (*rl_line_buffer == 't'
-			&& (strncmp(rl_line_buffer, "t ", 2) == 0
-			|| strncmp(rl_line_buffer, "trash ", 6) == 0)) {
+			 * device. */
+			else if (is_trash_cmd == 1)
+				match = (type != DT_BLK && type != DT_CHR);
 
-				if (type != DT_BLK && type != DT_CHR)
-					match = 1;
-			}
-
-			/* No filter for everything else. Just print whatever is there */
-			else {
+			/* No filter for everything else. Just print whatever is there. */
+			else
 				match = 1;
-			}
 		}
 
 		/* If there is at least one char to complete (e.g., "cd .[TAB]") */
@@ -1131,7 +1127,7 @@ my_rl_path_completion(const char *text, int state)
 						/* We look for matches ranked 4 or 5. If none of them is
 						 * found, we take the closest ranked match (1-3)
 						 * If we set this value to 1, the first match will be returned,
-						 * which makes the computation much faster */
+						 * which makes the computation much faster. */
 						if (r != TARGET_BEGINNING_BONUS) {
 							best_fz_score = r;
 							continue;
@@ -1140,71 +1136,21 @@ my_rl_path_completion(const char *text, int state)
 						continue;
 					}
 				} else {
-					/* This is for tab completion: accept all matches */
+					/* This is for tab completion: accept all matches. */
 					if (fuzzy_match(filename, ent->d_name, filename_len, fuzzy_str_type) == 0)
 						continue;
 				}
 			}
 			/* ################################################ */
 
-			if (*rl_line_buffer == 'c'
-			&& strncmp(rl_line_buffer, "cd ", 3) == 0) {
-				ret = -1;
-
-				switch (type) {
-				case DT_LNK:
-					if (dirname[0] == '.' && !dirname[1]) {
-						ret = get_link_ref(ent->d_name);
-					} else {
-						snprintf(tmp, sizeof(tmp), "%s%s", dirname, ent->d_name);
-						ret = get_link_ref(tmp);
-					}
-
-					if (ret == S_IFDIR)
-						match = 1;
-					break;
-
-				case DT_DIR: match = 1; break;
-
-				default: break;
-				}
-			}
-
-			else if (*rl_line_buffer == 'o'
-			&& (strncmp(rl_line_buffer, "o ", 2) == 0
-			|| strncmp(rl_line_buffer, "open ", 5) == 0)) {
-				ret = -1;
-
-				switch (type) {
-				case DT_REG: /* fallthrough */
-				case DT_DIR: match = 1; break;
-
-				case DT_LNK:
-					if (dirname[0] == '.' && !dirname[1]) {
-						ret = get_link_ref(ent->d_name);
-					} else {
-						snprintf(tmp, sizeof(tmp), "%s%s", dirname, ent->d_name);
-						ret = get_link_ref(tmp);
-					}
-
-					if (ret == S_IFDIR || ret == S_IFREG)
-						match = 1;
-					break;
-
-				default: break;
-				}
-			}
-
-			else if (*rl_line_buffer == 't'
-			&& (strncmp(rl_line_buffer, "t ", 2) == 0
-			|| strncmp(rl_line_buffer, "trash ", 6) == 0)) {
-				if (type != DT_BLK && type != DT_CHR)
-					match = 1;
-			}
-
-			else {
+			if (is_cd_cmd == 1)
+				match = filter_cd_cmd(dirname, ent->d_name, tmp, type);
+			else if (is_open_cmd == 1)
+				match = filter_open_cmd(dirname, ent->d_name, tmp, type);
+			else if (is_trash_cmd == 1)
+				match = (type != DT_BLK && type != DT_CHR);
+			else
 				match = 1;
-			}
 		}
 
 		if (match)
@@ -1219,14 +1165,9 @@ my_rl_path_completion(const char *text, int state)
 			directory = (DIR *)NULL;
 		}
 
-		free(dirname);
-		dirname = (char *)NULL;
-
-		free(filename);
-		filename = (char *)NULL;
-
-		free(users_dirname);
-		users_dirname = (char *)NULL;
+		free(dirname); dirname = (char *)NULL;
+		free(filename); filename = (char *)NULL;
+		free(users_dirname); users_dirname = (char *)NULL;
 
 		return (char *)NULL;
 	}
@@ -1250,17 +1191,12 @@ my_rl_path_completion(const char *text, int state)
 				directory = (DIR *)NULL;
 			}
 
-			free(dirname);
-			dirname = (char *)NULL;
-
-			free(filename);
-			filename = (char *)NULL;
-
-			free(users_dirname);
-			users_dirname = (char *)NULL;
+			free(dirname); dirname = (char *)NULL;
+			free(filename); filename = (char *)NULL;
+			free(users_dirname); users_dirname = (char *)NULL;
 		}
 
-		return (temp);
+		return temp;
 	}
 }
 
