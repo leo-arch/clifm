@@ -910,7 +910,7 @@ my_rl_path_completion(const char *text, int state)
 	static char tmp[PATH_MAX + 1];
 
 	/* If we don't have any state, then do some initialization. */
-	if (!state) {
+	if (state == 0) {
 		char *temp;
 
 		free(dirname);
@@ -935,7 +935,6 @@ my_rl_path_completion(const char *text, int state)
 
 		/* Get everything after last slash */
 		temp = strrchr(dirname, '/');
-
 		if (temp) {
 			/* At this point, FILENAME has been allocated with TEXT_LEN bytes. */
 			xstrsncpy(filename, ++temp, text_len + 1);
@@ -948,18 +947,12 @@ my_rl_path_completion(const char *text, int state)
 		/* We aren't done yet.  We also support the "~user" syntax. */
 		/* Save the version of the directory that the user typed. */
 		size_t dirname_len = strlen(dirname);
-
 		users_dirname = savestring(dirname, dirname_len);
 
-		char *temp_dirname;
-		int replace_dirname;
-
-		temp_dirname = tilde_expand(dirname);
-
+		int replace_dirname = 0;
+		char *temp_dirname = tilde_expand(dirname);
 		free(dirname);
 		dirname = temp_dirname;
-
-		replace_dirname = 0;
 
 		if (rl_directory_completion_hook)
 			replace_dirname = (*rl_directory_completion_hook)(&dirname);
@@ -989,10 +982,8 @@ my_rl_path_completion(const char *text, int state)
 		rl_filename_completion_desired = 1;
 	}
 
-	if (tmp_text) {
-		free(tmp_text);
-		tmp_text = (char *)NULL;
-	}
+	free(tmp_text);
+	tmp_text = (char *)NULL;
 
 	/* Now that we have some state, we can read the directory. If we found
 	 * a match among files in dir, break the loop and print the match */
@@ -1009,7 +1000,7 @@ my_rl_path_completion(const char *text, int state)
 	while (directory && (ent = readdir(directory))) {
 #if !defined(_DIRENT_HAVE_D_TYPE)
 		struct stat attr;
-		if (!dirname || (*dirname == '.' && !*(dirname + 1)))
+		if (!dirname || (*dirname == '.' && !dirname[1]))
 			xstrsncpy(tmp, ent->d_name, sizeof(tmp));
 		else
 			snprintf(tmp, sizeof(tmp), "%s%s", dirname, ent->d_name);
@@ -1094,7 +1085,6 @@ my_rl_path_completion(const char *text, int state)
 			 * device */
 			else if (*rl_line_buffer == 't'
 			&& (strncmp(rl_line_buffer, "t ", 2) == 0
-			|| strncmp(rl_line_buffer, "tr ", 2) == 0
 			|| strncmp(rl_line_buffer, "trash ", 6) == 0)) {
 
 				if (type != DT_BLK && type != DT_CHR)
@@ -1131,7 +1121,7 @@ my_rl_path_completion(const char *text, int state)
 					if (rl_point == rl_end
 					&& (r = fuzzy_match(filename, ent->d_name,
 					filename_len, fuzzy_str_type)) > best_fz_score) {
-						if (!dirname || (*dirname == '.' && !*(dirname + 1))) {
+						if (!dirname || (*dirname == '.' && !dirname[1])) {
 							xstrsncpy(fz_match, ent->d_name, sizeof(fz_match));
 						} else {
 							snprintf(fz_match, sizeof(fz_match), "%s%s",
@@ -1207,7 +1197,6 @@ my_rl_path_completion(const char *text, int state)
 
 			else if (*rl_line_buffer == 't'
 			&& (strncmp(rl_line_buffer, "t ", 2) == 0
-			|| strncmp(rl_line_buffer, "tr ", 3) == 0
 			|| strncmp(rl_line_buffer, "trash ", 6) == 0)) {
 				if (type != DT_BLK && type != DT_CHR)
 					match = 1;
