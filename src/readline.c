@@ -875,7 +875,7 @@ my_rl_quote(char *text, int mt, char *qp) /* NOLINT */
 	return r;
 }
 
-static int
+static inline int
 filter_cd_cmd(const char *dirname, const char *d_name, char *buf, mode_t type)
 {
 	if (type == DT_DIR)
@@ -891,7 +891,7 @@ filter_cd_cmd(const char *dirname, const char *d_name, char *buf, mode_t type)
 	return (get_link_ref(buf) == S_IFDIR);
 }
 
-static int
+static inline int
 filter_open_cmd(const char *dirname, const char *d_name, char *buf, mode_t type)
 {
 	if (type == DT_REG || type == DT_DIR)
@@ -909,6 +909,18 @@ filter_open_cmd(const char *dirname, const char *d_name, char *buf, mode_t type)
 	}
 
 	return (ret == S_IFDIR || ret == S_IFREG);
+}
+
+/* Compare the strings S1 to S2. Return 1 if they match or 0 otherwise. */
+static inline int
+check_match(const char *s1, const char *s2, const size_t s1_len)
+{
+	if (conf.case_sens_path_comp == 0) {
+		return TOUPPER(*s1) != TOUPPER(*s2) ? 0
+			: (strncasecmp(s1, s2, s1_len) == 0);
+	}
+
+	return *s1 != *s2 ? 0 : (strncmp(s1, s2, s1_len) == 0);
 }
 
 /* This is the filename_completion_function() function of an old Bash
@@ -1097,16 +1109,11 @@ my_rl_path_completion(const char *text, int state)
 		else {
 			/* Let's check for possible matches */
 			if (conf.fuzzy_match == 0 || rl_point < rl_end
-			|| (*filename == '.' && *(filename + 1) == '.')
+			|| (*filename == '.' && filename[1] == '.')
 			|| *filename == '-'
 			|| (tabmode == STD_TAB && !(flags & STATE_SUGGESTING))) {
-				if ( (conf.case_sens_path_comp == 0
-					? TOUPPER(*ent->d_name) != TOUPPER(*filename)
-					: *ent->d_name != *filename)
-					|| (conf.case_sens_path_comp == 0
-					? strncasecmp(filename, ent->d_name, filename_len) != 0
-					: strncmp(filename, ent->d_name, filename_len) != 0) )
-						continue;
+				if (check_match(filename, ent->d_name, filename_len) == 0)
+					continue;
 			} else {
 
 				/* ############### FUZZY MATCHING ################## */
