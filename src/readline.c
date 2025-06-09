@@ -1064,14 +1064,19 @@ my_rl_path_completion(const char *text, int state)
 			|| strncmp(rl_line_buffer, "trash ", 6) == 0));
 	const int line_buffer_has_space =
 		(rl_line_buffer && strchr(rl_line_buffer, ' '));
+	const int conf_suggestions = conf.suggestions;
+	const int conf_fuzzy_match = conf.fuzzy_match;
+	const int conf_auto_open = conf.auto_open;
+	const int conf_autocd = conf.autocd;
 
 	while (directory && (ent = readdir(directory))) {
+		char *ename = ent->d_name;
 #if !defined(_DIRENT_HAVE_D_TYPE)
 		struct stat attr;
 		if (*dirname == '.' && !dirname[1])
-			xstrsncpy(tmp, ent->d_name, sizeof(tmp));
+			xstrsncpy(tmp, ename, sizeof(tmp));
 		else
-			snprintf(tmp, sizeof(tmp), "%s%s", dirname, ent->d_name);
+			snprintf(tmp, sizeof(tmp), "%s%s", dirname, ename);
 
 		if (lstat(tmp, &attr) == -1)
 			continue;
@@ -1080,30 +1085,30 @@ my_rl_path_completion(const char *text, int state)
 		type = ent->d_type;
 #endif /* !_DIRENT_HAVE_D_TYPE */
 
-		if (((conf.suggestions == 1 && words_num == 1)
+		if (((conf_suggestions == 1 && words_num == 1)
 		|| line_buffer_has_space == 0)
-		&& ((type == DT_DIR && conf.autocd == 0)
-		|| (type != DT_DIR && conf.auto_open == 0)))
+		&& ((type == DT_DIR && conf_autocd == 0)
+		|| (type != DT_DIR && conf_auto_open == 0)))
 			continue;
 
 		/* Only dir names for cd */
-		if ((conf.suggestions == 0 || words_num > 1) && conf.fuzzy_match == 1
+		if ((conf_suggestions == 0 || words_num > 1) && conf_fuzzy_match == 1
 		&& is_cd_cmd == 1 && type != DT_DIR)
 			continue;
 
 		/* If the user entered nothing before TAB (e.g., "cd [TAB]") */
 		if (filename_len == 0) {
 			/* Exclude "." and ".." as possible completions */
-			if (SELFORPARENT(ent->d_name))
+			if (SELFORPARENT(ename))
 				continue;
 
 			/* If 'cd', match only dirs or symlinks to dir */
 			if (is_cd_cmd == 1)
-				match = filter_cd_cmd(dirname, ent->d_name, tmp, type);
+				match = filter_cd_cmd(dirname, ename, tmp, type);
 
 			/* If 'open', allow only reg files, dirs, and symlinks */
 			else if (is_open_cmd == 1)
-				match = filter_open_cmd(dirname, ent->d_name, tmp, type);
+				match = filter_open_cmd(dirname, ename, tmp, type);
 
 			/* If 'trash', allow only reg files, dirs, symlinks, pipes
 			 * and sockets. You should not trash a block or a character
@@ -1118,30 +1123,30 @@ my_rl_path_completion(const char *text, int state)
 
 		/* If there is at least one char to complete (e.g., "cd .[TAB]") */
 		else {
-			if (rl_point < rl_end || conf.fuzzy_match == 0
+			if (rl_point < rl_end || conf_fuzzy_match == 0
 			|| (*filename == '.' && filename[1] == '.')
 			|| *filename == '-'
 			|| (tabmode == STD_TAB && !(flags & STATE_SUGGESTING))) {
 				/* Regular matching. */
-				if (check_match(filename, ent->d_name, filename_len) == 0)
+				if (check_match(filename, ename, filename_len) == 0)
 					continue;
 			} else {
 				/* Fuzzy matching. */
 				if (flags & STATE_SUGGESTING) {
-					if (get_best_fuzzy_match(filename, dirname, ent->d_name,
+					if (get_best_fuzzy_match(filename, dirname, ename,
 					filename_len, fuzzy_str_type, &best_fz_score) == 0)
 						continue;
 				} else { /* This is for tab completion: accept all matches. */
-					if (fuzzy_match(filename, ent->d_name,
+					if (fuzzy_match(filename, ename,
 					filename_len, fuzzy_str_type) == 0)
 						continue;
 				}
 			}
 
 			if (is_cd_cmd == 1)
-				match = filter_cd_cmd(dirname, ent->d_name, tmp, type);
+				match = filter_cd_cmd(dirname, ename, tmp, type);
 			else if (is_open_cmd == 1)
-				match = filter_open_cmd(dirname, ent->d_name, tmp, type);
+				match = filter_open_cmd(dirname, ename, tmp, type);
 			else if (is_trash_cmd == 1)
 				match = (type != DT_BLK && type != DT_CHR);
 			else
