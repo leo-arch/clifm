@@ -961,7 +961,7 @@ get_best_fuzzy_match(char *filename, const char *dirname, char *d_name,
 char *
 my_rl_path_completion(const char *text, int state)
 {
-	if (!text || !*text || alt_prompt == 2)
+	if (!text || !*text || alt_prompt > 1)
 		return (char *)NULL;
 
 	static DIR *directory;
@@ -974,6 +974,15 @@ my_rl_path_completion(const char *text, int state)
 	static char tmp[PATH_MAX + 1];
 	static char *tmp_text = (char *)NULL;
 
+	static int is_cd_cmd = 0;
+	static int is_open_cmd = 0;
+	static int is_trash_cmd = 0;
+	static int line_buffer_has_space = 0;
+	static int conf_suggestions = 0;
+	static int conf_fuzzy_match = 0;
+	static int conf_auto_open = 0;
+	static int conf_autocd = 0;
+
 	/* Dequote string to be completed (text), if necessary. */
 	if (strchr(text, '\\')) {
 		char *p = savestring(text, strlen(text));
@@ -985,6 +994,25 @@ my_rl_path_completion(const char *text, int state)
 
 	/* If we don't have any state, then do some initialization. */
 	if (state == 0) {
+		if (rl_line_buffer) {
+			is_cd_cmd = (*rl_line_buffer == 'c'
+				&& rl_line_buffer[1] == 'd' && rl_line_buffer[2] == ' ');
+			is_open_cmd = (*rl_line_buffer == 'o'
+				&& (strncmp(rl_line_buffer, "o ", 2) == 0
+				|| strncmp(rl_line_buffer, "open ", 5) == 0));
+			is_trash_cmd = (*rl_line_buffer == 't'
+				&& (strncmp(rl_line_buffer, "t ", 2) == 0
+				|| strncmp(rl_line_buffer, "trash ", 6) == 0));
+			line_buffer_has_space = strchr(rl_line_buffer, ' ') != NULL;
+		} else {
+			is_cd_cmd = is_open_cmd = is_trash_cmd = line_buffer_has_space = 0;
+		}
+
+		conf_suggestions = conf.suggestions;
+		conf_fuzzy_match = conf.fuzzy_match;
+		conf_auto_open = conf.auto_open;
+		conf_autocd = conf.autocd;
+
 		free(dirname);
 		free(filename);
 		free(users_dirname);
@@ -1054,23 +1082,9 @@ my_rl_path_completion(const char *text, int state)
 		? FUZZY_FILES_UTF8 : FUZZY_FILES_ASCII;
 	int best_fz_score = 0;
 
-	const int is_cd_cmd = (rl_line_buffer && *rl_line_buffer == 'c'
-			&& rl_line_buffer[1] == 'd' && rl_line_buffer[2] == ' ');
-	const int is_open_cmd = (rl_line_buffer && *rl_line_buffer == 'o'
-			&& (strncmp(rl_line_buffer, "o ", 2) == 0
-			|| strncmp(rl_line_buffer, "open ", 5) == 0));
-	const int is_trash_cmd = (rl_line_buffer && *rl_line_buffer == 't'
-			&& (strncmp(rl_line_buffer, "t ", 2) == 0
-			|| strncmp(rl_line_buffer, "trash ", 6) == 0));
-	const int line_buffer_has_space =
-		(rl_line_buffer && strchr(rl_line_buffer, ' '));
-	const int conf_suggestions = conf.suggestions;
-	const int conf_fuzzy_match = conf.fuzzy_match;
-	const int conf_auto_open = conf.auto_open;
-	const int conf_autocd = conf.autocd;
-
 	while (directory && (ent = readdir(directory))) {
 		char *ename = ent->d_name;
+
 #if !defined(_DIRENT_HAVE_D_TYPE)
 		struct stat attr;
 		if (*dirname == '.' && !dirname[1])
@@ -1688,39 +1702,49 @@ filenames_gen_text(const char *text, int state)
 {
 	static filesn_t i;
 	static size_t len = 0;
+	static int fuzzy_str_type = 0;
+	static int line_has_space = 0;
+	static int is_cd_cmd = 0;
+
 	char *name;
 	rl_filename_completion_desired = 1;
-	if (!state) {
+	if (state == 0) {
 		i = 0;
 		len = strlen(text);
+		fuzzy_str_type = (conf.fuzzy_match == 1 && contains_utf8(text) == 1)
+			? FUZZY_FILES_UTF8 : FUZZY_FILES_ASCII;
+		if (rl_line_buffer) {
+			line_has_space = (strchr(rl_line_buffer, ' ') != NULL);
+			is_cd_cmd = (*rl_line_buffer == 'c' && rl_line_buffer[1] == 'd'
+				&& rl_line_buffer[2] == ' ');
+		} else {
+			line_has_space = is_cd_cmd = 0;
+		}
 	}
-
-	int fuzzy_str_type = (conf.fuzzy_match == 1 && contains_utf8(text) == 1)
-		? FUZZY_FILES_UTF8 : FUZZY_FILES_ASCII;
 
 	/* Check list of currently displayed files for a match */
 	while (i < files && (name = file_info[i].name) != NULL) {
 		i++;
-		/* If first word, filter files according to autocd and auto-open values */
-		if (((conf.suggestions == 1 && words_num == 1) || !strchr(rl_line_buffer, ' '))
+		/* If first word, filter files according to autocd and auto-open values. */
+		if (((conf.suggestions == 1 && words_num == 1) || line_has_space == 0)
 		&& ( (file_info[i - 1].dir == 1 && conf.autocd == 0)
 		|| (file_info[i - 1].dir == 0 && conf.auto_open == 0) ))
 			continue;
 
-		/* If cd, list only directories */
+		/* If cd, list only directories. */
 		if ((conf.suggestions == 0 || words_num > 1
 		|| (rl_end > 0 && rl_line_buffer[rl_end - 1] == ' '))
-		&& rl_line_buffer && *rl_line_buffer == 'c' && rl_line_buffer[1] == 'd'
-		&& rl_line_buffer[2] == ' ' && file_info[i - 1].dir == 0)
+		&& is_cd_cmd == 1 && file_info[i - 1].dir == 0)
 			continue;
 
-		if (conf.case_sens_path_comp ? strncmp(name, text, len) == 0
+		if (conf.case_sens_path_comp == 1 ? strncmp(name, text, len) == 0
 		: strncasecmp(name, text, len) == 0)
 			return strdup(name);
+
 		if (conf.fuzzy_match == 0 || tabmode == STD_TAB || rl_point < rl_end)
 			continue;
-		if (len == 0
-		|| fuzzy_match((char *)text, name, len, fuzzy_str_type) > 0)
+
+		if (len == 0 || fuzzy_match((char *)text, name, len, fuzzy_str_type) > 0)
 			return strdup(name);
 	}
 

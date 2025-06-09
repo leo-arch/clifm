@@ -923,7 +923,7 @@ extern time_t curdir_mtime;
 #define ICON_LEN (2 + conf.icons_gap) /* Fixed icon width + gap */
 
 /* Macros for alternative prompts (alt_prompt) */
-#define FILES_PROMPT       1 /* Allow files names completion */
+#define FILES_PROMPT       1 /* Allow filenames completion */
 #define PERMISSIONS_PROMPT 2 /* pc command */
 #define OWNERSHIP_PROMPT   3 /* oc command */
 #define BOOKMARKS_PROMPT   4 /* bookmarks screen */
