@@ -1062,6 +1062,8 @@ my_rl_path_completion(const char *text, int state)
 	const int is_trash_cmd = (rl_line_buffer && *rl_line_buffer == 't'
 			&& (strncmp(rl_line_buffer, "t ", 2) == 0
 			|| strncmp(rl_line_buffer, "trash ", 6) == 0));
+	const int line_buffer_has_space =
+		(rl_line_buffer && strchr(rl_line_buffer, ' '));
 
 	while (directory && (ent = readdir(directory))) {
 #if !defined(_DIRENT_HAVE_D_TYPE)
@@ -1079,7 +1081,7 @@ my_rl_path_completion(const char *text, int state)
 #endif /* !_DIRENT_HAVE_D_TYPE */
 
 		if (((conf.suggestions == 1 && words_num == 1)
-		|| !strchr(rl_line_buffer, ' '))
+		|| line_buffer_has_space == 0)
 		&& ((type == DT_DIR && conf.autocd == 0)
 		|| (type != DT_DIR && conf.auto_open == 0)))
 			continue;
@@ -1154,7 +1156,7 @@ my_rl_path_completion(const char *text, int state)
 
 	/* readdir() returns NULL on reaching the end of the directory stream.
 	 * So that if ENT is not NULL, we have a match. */
-	if (ent) {
+	if (ent) { /* Same as match == 1 */
 		cur_comp_type = TCMP_PATH;
 		if (dirname && (dirname[0] != '.' || dirname[1])) {
 			size_t len = strlen(users_dirname) + strlen(ent->d_name) + 1;
@@ -1165,7 +1167,7 @@ my_rl_path_completion(const char *text, int state)
 		}
 	}
 
-	/* Clean state. */
+	/* Clear state. */
 	if ((flags & STATE_SUGGESTING) || !ent) {
 		if (directory) {
 			closedir(directory);
