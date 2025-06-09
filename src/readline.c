@@ -964,17 +964,6 @@ my_rl_path_completion(const char *text, int state)
 	if (!text || !*text || alt_prompt == 2)
 		return (char *)NULL;
 
-	/* Dequote string to be completed (text), if necessary */
-	static char *tmp_text = (char *)NULL;
-
-	if (strchr(text, '\\')) {
-		char *p = savestring(text, strlen(text));
-		tmp_text = unescape_str(p, 0);
-		free(p);
-		if (!tmp_text)
-			return (char *)NULL;
-	}
-
 	static DIR *directory;
 	static char *filename = (char *)NULL;
 	static char *dirname = (char *)NULL;
@@ -983,76 +972,68 @@ my_rl_path_completion(const char *text, int state)
 	static int match;
 	struct dirent *ent = (struct dirent *)NULL;
 	static char tmp[PATH_MAX + 1];
+	static char *tmp_text = (char *)NULL;
+
+	/* Dequote string to be completed (text), if necessary. */
+	if (strchr(text, '\\')) {
+		char *p = savestring(text, strlen(text));
+		tmp_text = unescape_str(p, 0);
+		free(p);
+		if (!tmp_text)
+			return (char *)NULL;
+	}
 
 	/* If we don't have any state, then do some initialization. */
 	if (state == 0) {
-		char *temp;
-
 		free(dirname);
 		free(filename);
 		free(users_dirname);
 
-		/* tmp_text is true whenever text was dequoted */
+		/* tmp_text is not NULL whenever text was dequoted. */
 		const char *p = tmp_text ? tmp_text : text;
-		size_t text_len = strlen(p);
-		if (text_len)
+		size_t text_len = filename_len = strlen(p);
+		if (text_len > 0) {
 			filename = savestring(p, text_len);
-		else
-			filename = savestring("", 1);
-
-		if (text_len) {
 			dirname = savestring(p, text_len);
 		} else {
-			dirname = xnmalloc(2, sizeof(char));
-			*dirname = '\0';
-			dirname[1] = '\0';
+			filename = savestring("", 1);
+			dirname = savestring("", 1);
 		}
 
-		/* Get everything after last slash */
-		temp = strrchr(dirname, '/');
-		if (temp) {
-			/* At this point, FILENAME has been allocated with TEXT_LEN bytes. */
-			xstrsncpy(filename, ++temp, text_len + 1);
-			*temp = '\0';
-		} else {
+		/* Get everything after the last slash. */
+		char *base_name = strrchr(dirname, '/');
+		if (base_name) {
+			/* At this point, FILENAME has been allocated with FILENAME_LEN bytes. */
+			xstrsncpy(filename, ++base_name, filename_len + 1);
+			filename_len -= (size_t)(base_name - dirname);
+			*base_name = '\0';
+		} else { /* No slash. DIR is the current directory. */
 			*dirname = '.';
 			dirname[1] = '\0';
 		}
 
-		/* We aren't done yet.  We also support the "~user" syntax. */
 		/* Save the version of the directory that the user typed. */
-		size_t dirname_len = strlen(dirname);
-		users_dirname = savestring(dirname, dirname_len);
+		users_dirname = savestring(dirname, strlen(dirname));
 
-		int replace_dirname = 0;
 		char *temp_dirname = tilde_expand(dirname);
-		free(dirname);
-		dirname = temp_dirname;
-
-		if (rl_directory_completion_hook)
-			replace_dirname = (*rl_directory_completion_hook)(&dirname);
-
-		if (replace_dirname) {
-			free(users_dirname);
-			users_dirname = savestring(dirname, dirname_len);
+		if (temp_dirname) {
+			free(dirname);
+			dirname = temp_dirname;
 		}
 
-		char *d = dirname;
+		char *dir_name = dirname;
 		if (text_len > FILE_URI_PREFIX_LEN && IS_FILE_URI(p))
-			d = dirname + FILE_URI_PREFIX_LEN;
+			dir_name = dirname + FILE_URI_PREFIX_LEN;
 
-		/* Resolve special expression in the resulting directory */
-		char *e = (char *)NULL;
-		if ((*d == '.' && d[1] == '.' && d[2] == '/') || strstr(d, "/.."))
-			e = normalize_path(d, strlen(d));
-		if (!e)
-			e = d;
+		/* Resolve special expressions in the resulting directory. */
+		char *norm_path = dir_name;
+		if ((*dir_name == '.' && dir_name[1] == '.' && dir_name[2] == '/')
+		|| strstr(dir_name, "/.."))
+			norm_path = normalize_path(dir_name, strlen(dir_name));
 
-		directory = opendir(e);
-		if (e != d)
-			free(e);
-
-		filename_len = strlen(filename);
+		directory = opendir(norm_path);
+		if (norm_path != dir_name)
+			free(norm_path);
 
 		rl_filename_completion_desired = 1;
 	}
@@ -1085,7 +1066,7 @@ my_rl_path_completion(const char *text, int state)
 	while (directory && (ent = readdir(directory))) {
 #if !defined(_DIRENT_HAVE_D_TYPE)
 		struct stat attr;
-		if (!dirname || (*dirname == '.' && !dirname[1]))
+		if (*dirname == '.' && !dirname[1])
 			xstrsncpy(tmp, ent->d_name, sizeof(tmp));
 		else
 			snprintf(tmp, sizeof(tmp), "%s%s", dirname, ent->d_name);
@@ -1135,15 +1116,15 @@ my_rl_path_completion(const char *text, int state)
 
 		/* If there is at least one char to complete (e.g., "cd .[TAB]") */
 		else {
-			/* Let's check for possible matches */
-			if (conf.fuzzy_match == 0 || rl_point < rl_end
+			if (rl_point < rl_end || conf.fuzzy_match == 0
 			|| (*filename == '.' && filename[1] == '.')
 			|| *filename == '-'
 			|| (tabmode == STD_TAB && !(flags & STATE_SUGGESTING))) {
+				/* Regular matching. */
 				if (check_match(filename, ent->d_name, filename_len) == 0)
 					continue;
 			} else {
-				/* ############### FUZZY MATCHING ################## */
+				/* Fuzzy matching. */
 				if (flags & STATE_SUGGESTING) {
 					if (get_best_fuzzy_match(filename, dirname, ent->d_name,
 					filename_len, fuzzy_str_type, &best_fz_score) == 0)
@@ -1154,7 +1135,6 @@ my_rl_path_completion(const char *text, int state)
 						continue;
 				}
 			}
-			/* ################################################ */
 
 			if (is_cd_cmd == 1)
 				match = filter_cd_cmd(dirname, ent->d_name, tmp, type);
