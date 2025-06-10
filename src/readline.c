@@ -1211,20 +1211,16 @@ bookmarks_generator(const char *text, int state)
 	static int i;
 	static size_t len;
 	static int prefix;
-	char *name;
 
-	if (!state) {
-		/* The state variable is zero only the first time the function is
-		 * called, and a non-zero positive in later calls. This means that
-		 * I and LEN will be necessarilly initialized the first time */
+	if (state == 0) {
 		i = 0;
-		prefix = (*text == 'b' && *(text + 1) == ':') ? 2 : 0;
+		prefix = (*text == 'b' && text[1] == ':') ? 2 : 0;
 		len = strlen(text + prefix);
 	}
 
 	/* Look for bookmarks in bookmark names for a match */
 	while ((size_t)i < bm_n) {
-		name = bookmarks[i++].name;
+		const char *name = bookmarks[i++].name;
 		if (!name || !*name)
 			continue;
 
@@ -1252,7 +1248,7 @@ int_cmds_generator(const char *text, int state)
 	UNUSED(text);
 	static int i;
 
-	if (!state)
+	if (state == 0)
 		i = 0;
 
 	static char *const cmd_desc[] = {
@@ -1418,7 +1414,7 @@ get_shell_cmd_opts(char *cmd)
 		}
 
 		/* Get long option (-OPT or --OPT) */
-		char *long_str = strstr((opt_end && *(opt_end + 1))
+		char *long_str = strstr((opt_end && opt_end[1])
 			? opt_end + 1 : line, "-l ");
 
 		if (!long_str)
@@ -1467,7 +1463,7 @@ hist_generator(const char *text, int state)
 	static size_t len;
 	char *name;
 
-	if (!state) {
+	if (state == 0) {
 		i = 0;
 		len = strlen(*text == '!' ? text + 1 : text);
 	}
@@ -1475,7 +1471,7 @@ hist_generator(const char *text, int state)
 	while ((name = history[i++].cmd) != NULL) {
 		if (*text == '!') {
 			if (len == 0
-			|| (*name == *(text + 1) && strncmp(name, text + 1, len) == 0)
+			|| (*name == text[1] && strncmp(name, text + 1, len) == 0)
 			|| (conf.fuzzy_match == 1 && tabmode != STD_TAB
 			&& fuzzy_match((char *)(text + 1), name, len, FUZZY_HISTORY) > 0))
 				return strdup(name);
@@ -1484,7 +1480,7 @@ hist_generator(const char *text, int state)
 			 * The string before the first slash or space (not counting the initial
 			 * slash, used to fire up the search function) must contain a pattern
 			 * metacharacter */
-			if (!*name || !*(name + 1))
+			if (!*name || !name[1])
 				continue;
 			char *ret = strpbrk(name + 1, conf.search_strategy == GLOB_ONLY
 					? " /*?[{" : " /*?[{|^+$.");
@@ -1506,29 +1502,29 @@ bm_paths_generator(const char *text, int state)
 		return (char *)NULL;
 
 	static int i;
-	char *name, *_path;
+	char *bname, *bpath;
 
-	if (!state)
+	if (state == 0)
 		i = 0;
 
 	while (i < (int)bm_n) {
-		name = bookmarks[i].name;
-		_path = bookmarks[i].path;
+		bname = bookmarks[i].name;
+		bpath = bookmarks[i].path;
 		i++;
 
-		if (!name || !_path || (conf.case_sens_list == 1 ? strcmp(name, text)
-		: strcasecmp(name, text)) != 0)
+		if (!bname || !bpath || (conf.case_sens_list == 1 ? strcmp(bname, text)
+		: strcasecmp(bname, text)) != 0)
 			continue;
 
-		size_t plen = strlen(_path);
+		size_t plen = strlen(bpath);
 
-		if (plen > 1 && _path[plen - 1] == '/')
-			_path[plen - 1] = '\0';
+		if (plen > 1 && bpath[plen - 1] == '/')
+			bpath[plen - 1] = '\0';
 
-		char *p = abbreviate_file_name(_path);
-		char *ret = strdup(p ? p : _path);
+		char *p = abbreviate_file_name(bpath);
+		char *ret = strdup(p ? p : bpath);
 
-		if (p != _path)
+		if (p != bpath)
 			free(p);
 
 		return ret;
@@ -1548,7 +1544,7 @@ env_vars_generator(const char *text, int state)
 	static size_t len;
 	char *name;
 
-	if (!state) {
+	if (state == 0) {
 		i = 0;
 		len = strlen(text);
 	}
@@ -1580,7 +1576,7 @@ environ_generator(const char *text, int state)
 	static size_t len;
 	char *name;
 
-	if (!state) {
+	if (state == 0) {
 		i = 0;
 		len = strlen(text + 1);
 	}
@@ -1611,7 +1607,7 @@ jump_generator(const char *text, int state)
 	static int i;
 	char *name;
 
-	if (!state)
+	if (state == 0)
 		i = 0;
 
 	if (!jump_db)
@@ -1658,7 +1654,7 @@ cschemes_generator(const char *text, int state)
 	static size_t len;
 	char *name;
 
-	if (!state) {
+	if (state == 0) {
 		i = 0;
 		len = strlen(text);
 	}
@@ -1683,7 +1679,7 @@ profiles_generator(const char *text, int state)
 	static size_t len;
 	char *name;
 
-	if (!state) {
+	if (state == 0) {
 		i = 0;
 		len = strlen(text);
 	}
@@ -1705,12 +1701,14 @@ filenames_gen_text(const char *text, int state)
 	static int fuzzy_str_type = 0;
 	static int line_has_space = 0;
 	static int is_cd_cmd = 0;
+	static int (*cmp_func)(const char *, const char *, size_t);
 
 	char *name;
 	rl_filename_completion_desired = 1;
 	if (state == 0) {
 		i = 0;
 		len = strlen(text);
+		cmp_func = conf.case_sens_path_comp == 1 ? strncmp : strncasecmp;
 		fuzzy_str_type = (conf.fuzzy_match == 1 && contains_utf8(text) == 1)
 			? FUZZY_FILES_UTF8 : FUZZY_FILES_ASCII;
 		if (rl_line_buffer) {
@@ -1737,8 +1735,7 @@ filenames_gen_text(const char *text, int state)
 		&& is_cd_cmd == 1 && file_info[i - 1].dir == 0)
 			continue;
 
-		if (conf.case_sens_path_comp == 1 ? strncmp(name, text, len) == 0
-		: strncasecmp(name, text, len) == 0)
+		if (cmp_func(name, text, len) == 0)
 			return strdup(name);
 
 		if (conf.fuzzy_match == 0 || tabmode == STD_TAB || rl_point < rl_end)
@@ -1756,11 +1753,15 @@ static char *
 filenames_gen_eln(const char *text, int state)
 {
 	static filesn_t i;
+	static int is_cd_cmd = 0;
 	char *name;
 	rl_filename_completion_desired = 1;
 
-	if (!state)
+	if (state == 0) {
 		i = 0;
+		is_cd_cmd = (rl_line_buffer && *rl_line_buffer == 'c'
+			&& rl_line_buffer[1] == 'd' && rl_line_buffer[2] == ' ');
+	}
 
 	const filesn_t num_text = xatof(text);
 	if (num_text < 1 || num_text > files)
@@ -1770,9 +1771,8 @@ filenames_gen_eln(const char *text, int state)
 	while (i < files && (name = file_info[i++].name) != NULL) {
 		if (*name == *file_info[num_text - 1].name
 		&& strcmp(name, file_info[num_text - 1].name) == 0) {
-			if (words_num > 1 && rl_line_buffer && *rl_line_buffer == 'c'
-			&& rl_line_buffer[1] == 'd'
-			&& rl_line_buffer[2] == ' ' && file_info[num_text - 1].dir == 0)
+			if (words_num > 1 && is_cd_cmd == 1
+			&& file_info[num_text - 1].dir == 0)
 				continue;
 #ifndef _NO_SUGGESTIONS
 			if (suggestion_buf)
@@ -1793,20 +1793,19 @@ filenames_gen_ranges(const char *text, int state)
 	char *name;
 	rl_filename_completion_desired = 1;
 
-	if (!state)
+	if (state == 0)
 		i = 0;
 
-	char *r = strchr(text, '-');
-	if (!r)
+	char *dash = strchr(text, '-');
+	if (!dash)
 		return (char *)NULL;
 
-	*r = '\0';
+	*dash = '\0';
 	const filesn_t a = xatof(text);
-	const filesn_t b = xatof(r + 1);
-	if (a < 1 || a > files || b < 1 || b > files)
-		return (char *)NULL;
-	*r = '-';
-	if (a >= b)
+	const filesn_t b = xatof(dash + 1);
+	*dash = '-';
+
+	if (a < 1 || a > files || b < 1 || b > files || a >= b)
 		return (char *)NULL;
 
 	while (i < files && (name = file_info[i++].name) != NULL) {
@@ -1833,7 +1832,7 @@ dirhist_generator(const char *text, int state)
 	static int fuzzy_str_type;
 	char *name;
 
-	if (!state) {
+	if (state == 0) {
 		i = 0;
 		len = strlen(text);
 		fuzzy_str_type = (conf.fuzzy_match == 1 && contains_utf8(text) == 1)
@@ -1875,7 +1874,7 @@ bin_cmd_generator_ext(const char *text, int state)
 	static size_t len;
 	char *name;
 
-	if (!state) {
+	if (state == 0) {
 		i = 0;
 		len = strlen(text);
 	}
@@ -1902,7 +1901,7 @@ bin_cmd_generator(const char *text, int state)
 	static size_t len;
 	char *name;
 
-	if (!state) {
+	if (state == 0) {
 		i = 0;
 		len = strlen(text);
 	}
@@ -1924,7 +1923,7 @@ sort_num_generator(const char *text, int state)
 	char *name;
 	rl_filename_completion_desired = 1;
 
-	if (!state)
+	if (state == 0)
 		i = 0;
 
 	int num_text = atoi(text);
@@ -1970,7 +1969,7 @@ aliases_generator(const char *text, int state)
 	static size_t len;
 	char *name;
 
-	if (!state) {
+	if (state == 0) {
 		i = 0;
 		len = strlen(text);
 	}
@@ -1990,7 +1989,7 @@ kb_func_names_gen(const char *text, int state)
 	static size_t len;
 	char *name;
 
-	if (!state) {
+	if (state == 0) {
 		i = 0;
 		len = strlen(text);
 	}
@@ -2010,7 +2009,7 @@ file_templates_generator(const char *text, int state)
 	static size_t len;
 	char *name;
 
-	if (!state) {
+	if (state == 0) {
 		i = 0;
 		len = strlen(text);
 	}
@@ -2035,7 +2034,7 @@ nets_generator(const char *text, int state)
 	static size_t len;
 	char *name;
 
-	if (!state) {
+	if (state == 0) {
 		i = 0;
 		len = strlen(text);
 
@@ -2078,7 +2077,7 @@ sort_name_generator(const char *text, int state)
 	static size_t len;
 	const char *name;
 
-	if (!state) {
+	if (state == 0) {
 		i = 0;
 		len = strlen(text);
 	}
@@ -2100,7 +2099,7 @@ workspaces_generator(const char *text, int state)
 	static int i;
 	static size_t len;
 
-	if (!state) {
+	if (state == 0) {
 		i = 0;
 		len = text ? strlen(text) : 0;
 	}
@@ -2142,7 +2141,7 @@ sel_entries_generator(const char *text, int state)
 	static size_t len;
 	char *name;
 
-	if (!state) {
+	if (state == 0) {
 		i = 0;
 		len = strlen(text);
 	}
@@ -2170,7 +2169,7 @@ prompts_generator(const char *text, int state)
 	static size_t len;
 	char *name;
 
-	if (!state) {
+	if (state == 0) {
 		i = 0;
 		len = strlen(text);
 	}
@@ -2494,7 +2493,7 @@ tags_generator(const char *text, int state)
 	static size_t len, p = 0;
 	char *name;
 
-	if (!state) {
+	if (state == 0) {
 		i = 0;
 		if (cur_comp_type == TCMP_TAGS_T)
 			p = 2;
@@ -2532,7 +2531,7 @@ tag_entries_generator(const char *text, int state)
 	static int i;
 	char *name;
 
-	if (!state)
+	if (state == 0)
 		i = 0;
 
 	if (!tagged_files)
@@ -2636,7 +2635,7 @@ ext_options_generator(const char *text, int state)
 	static size_t len;
 	const char *name;
 
-	if (!state) {
+	if (state == 0) {
 		i = 0;
 		len = strlen(text);
 	}
@@ -2855,8 +2854,8 @@ groups_generator(const char *text, int state)
 	static size_t len;
 	const struct group *p;
 
-	if (!state)
-		len = *(text + 1) ? wc_xstrlen(text + 1) : 0;
+	if (state == 0)
+		len = text[1] ? wc_xstrlen(text + 1) : 0;
 
 	while ((p = getgrent())) {
 		if (!p->gr_name) break;
@@ -2878,7 +2877,7 @@ owners_generator(const char *text, int state)
 	static size_t len;
 	const struct passwd *p;
 
-	if (!state)
+	if (state == 0)
 		len = wc_xstrlen(text);
 
 	while ((p = getpwent())) {
@@ -2901,7 +2900,7 @@ users_generator(const char *text, int state)
 	static size_t len;
 	const struct passwd *p;
 
-	if (!state)
+	if (state == 0)
 		len = strlen(text);
 
 	while ((p = getpwent())) {
@@ -2923,13 +2922,13 @@ tag_complete(const char *text, char *start)
 {
 	char *l = start;
 	int comp = 0;
-	if (*(l + 1) && *(l + 2) == ' ') {
-		switch (*(l + 1)) {
+	if (l[1] && l[2] == ' ') {
+		switch (l[1]) {
 		case 'a': /* fallthough */
 		case 'u':
 			if (text && *text == ':') { /* We have a tag name */
 				comp = 1; cur_comp_type = TCMP_TAGS_C;
-			} else if (*(l + 1) == 'u') { /* We have a tagged file */
+			} else if (l[1] == 'u') { /* We have a tagged file */
 				comp = 2;
 			}
 			break;
@@ -2938,7 +2937,7 @@ tag_complete(const char *text, char *start)
 		case 'm': /* fallthough */
 //		case 'n': /* Just a new tag name: no completion */
 		case 'y':
-			if (*(l + 1) == 'd' || *(l + 1) == 'l') flags |= MULTI_SEL;
+			if (l[1] == 'd' || l[1] == 'l') flags |= MULTI_SEL;
 			comp = 1; cur_comp_type = TCMP_TAGS_S; break;
 		default: break;
 		}
@@ -2971,27 +2970,27 @@ static int
 check_file_type_opts(const char c)
 {
 	switch (c) {
-	case 'b': return stats.block_dev > 0 ? 1 : 0;
-	case 'c': return stats.char_dev > 0 ? 1 : 0;
-	case 'd': return stats.dir > 0 ? 1 : 0;
-	case 'D': return stats.empty_dir > 0 ? 1 : 0;
+	case 'b': return stats.block_dev > 0;
+	case 'c': return stats.char_dev > 0;
+	case 'd': return stats.dir > 0;
+	case 'D': return stats.empty_dir > 0;
 #ifdef SOLARIS_DOORS
-	case 'O': return stats.door > 0 ? 1 : 0;
-	case 'P': return stats.port > 0 ? 1 : 0;
+	case 'O': return stats.door > 0;
+	case 'P': return stats.port > 0;
 #endif /* SOLARIS_DOORS */
-	case 'f': return stats.reg > 0 ? 1 : 0;
-	case 'F': return stats.empty_reg > 0 ? 1 : 0;
-	case 'h': return stats.multi_link > 0 ? 1 : 0;
-	case 'l': return stats.link > 0 ? 1 : 0;
-	case 'L': return stats.broken_link > 0 ? 1 : 0;
-	case 'p': return stats.fifo > 0 ? 1 : 0;
-	case 's': return stats.socket > 0 ? 1 : 0;
-	case 'x': return stats.exec > 0 ? 1 : 0;
-	case 'o': return stats.other_writable > 0 ? 1 : 0;
-	case 't': return stats.sticky > 0 ? 1 : 0;
-	case 'u': return stats.suid > 0 ? 1 : 0;
-	case 'g': return stats.sgid > 0 ? 1 : 0;
-	case 'C': return stats.caps > 0 ? 1 : 0;
+	case 'f': return stats.reg > 0;
+	case 'F': return stats.empty_reg > 0;
+	case 'h': return stats.multi_link > 0;
+	case 'l': return stats.link > 0;
+	case 'L': return stats.broken_link > 0;
+	case 'p': return stats.fifo > 0;
+	case 's': return stats.socket > 0;
+	case 'x': return stats.exec > 0;
+	case 'o': return stats.other_writable > 0;
+	case 't': return stats.sticky > 0;
+	case 'u': return stats.suid > 0;
+	case 'g': return stats.sgid > 0;
+	case 'C': return stats.caps > 0;
 	default: return 0;
 	}
 }
@@ -3002,7 +3001,7 @@ file_types_opts_generator(const char *text, int state)
 	UNUSED(text);
 	static int i;
 
-	if (!state)
+	if (state == 0)
 		i = 0;
 
 	static char *const ft_opts[] = {
@@ -3045,7 +3044,7 @@ file_types_generator(const char *text, int state)
 	static filesn_t i;
 	const char *name;
 
-	if (!state)
+	if (state == 0)
 		i = 0;
 
 	char *ret = (char *)NULL;
@@ -3218,7 +3217,7 @@ is_edit(const char *str, const size_t words_n)
 		return 1;
 
 	char *p = strchr(str, ' ');
-	if (!p || *(p + 1) != 'e' || !*(p + 2))
+	if (!p || p[1] != 'e' || !p[2])
 		return 0;
 
 	*p = '\0';
@@ -3243,7 +3242,7 @@ complete_bookmark_names(char *text, const size_t words_n, int *exit_status)
 	/* rl_line_buffer is either "bm " or "bookmarks " */
 	char *q = rl_line_buffer + (rl_line_buffer[1] == 'o' ? 9 : 2);
 
-	if (q && *(q + 1) == 'a' && (*(q + 2) == ' '
+	if (q && q[1] == 'a' && (q[2] == ' '
 	|| strncmp(q + 1, "add ", 4) == 0)) {
 		if (words_n > 3) /* Do not complete anything after "bm add FILE" */
 			rl_attempted_completion_over = 1;
@@ -3273,19 +3272,19 @@ static char **
 complete_ranges(char *text, int *exit_status)
 {
 	*exit_status = FUNC_FAILURE;
-	char *r = strchr(text, '-');
-	if (!r || *(r + 1) < '0' || *(r + 1) > '9')
+	char *dash = strchr(text, '-');
+	if (!dash || dash[1] < '0' || dash[1] > '9')
 		return (char **)NULL;
 
-	*r = '\0';
-	if (!is_number(text) || !is_number(r + 1)) {
-		*r = '-';
+	*dash = '\0';
+	if (!is_number(text) || !is_number(dash + 1)) {
+		*dash = '-';
 		return (char **)NULL;
 	}
 
 	int a = atoi(text);
-	int b = atoi(r + 1);
-	*r = '-';
+	int b = atoi(dash + 1);
+	*dash = '-';
 
 	if (a < 1 || b < 1 || a >= b || (filesn_t)b > files)
 		return (char **)NULL;
@@ -3327,7 +3326,7 @@ complete_file_type_filter(char *text, int *exit_status)
 	*exit_status = FUNC_FAILURE;
 	char **matches = (char **)NULL;
 
-	if (!*(text + 1)) {
+	if (!text[1]) {
 		matches = rl_completion_matches(text, &file_types_opts_generator);
 		if (!matches)
 			return (char **)NULL;
@@ -3340,7 +3339,7 @@ complete_file_type_filter(char *text, int *exit_status)
 		return matches;
 	}
 
-	if (*(text + 2))
+	if (text[2])
 		return (char **)NULL;
 
 	matches = rl_completion_matches(text + 1, &file_types_generator);
@@ -3363,7 +3362,7 @@ complete_mime_type_filter(char *text, int *exit_status)
 	*exit_status = FUNC_FAILURE;
 	char **matches = (char **)NULL;
 
-	if (*(text + 1)) {
+	if (text[1]) {
 		if ((matches = rl_mime_files(text + 1)) == NULL)
 			return (char **)NULL;
 
@@ -3428,7 +3427,7 @@ get_cmd_name(void)
 	/* Truncate the command line before the first option word (starting
 	 * with a dash): "sudo cmd --opt" -> "sudo cmd" */
 	while (*p) {
-		if (*p == ' ' && *(p + 1) == '-') {
+		if (*p == ' ' && p[1] == '-') {
 			*p = '\0';
 			opt = p;
 			break;
@@ -3443,7 +3442,7 @@ get_cmd_name(void)
 		if (!name && *p != ' ') {
 			name = p;
 		} else {
-			if (*p == ' ' && *(p + 1) != ' ')
+			if (*p == ' ' && p[1] != ' ')
 				name = p + 1;
 		}
 		p++;
