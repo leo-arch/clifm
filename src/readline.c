@@ -3186,7 +3186,6 @@ cmd_takes_edit(const char *str)
 		"actions",
 		"bm", "bookmarks",
 		"config",
-		"edit", // DEPRECATED
 		"cs", "colorschemes",
 		"history",
 		"kb", "keybinds",
@@ -3216,18 +3215,18 @@ is_edit(const char *str, const size_t words_n)
 	if (words_n > 2 && *str == 'r' && str[1] == 'r' && str[2] == ' ')
 		return 1;
 
-	char *p = strchr(str, ' ');
-	if (!p || p[1] != 'e' || !p[2])
+	char *space = strchr(str, ' ');
+	if (!space || space[1] != 'e' || !space[2])
 		return 0;
 
-	*p = '\0';
+	*space = '\0';
 	if (cmd_takes_edit(str) != 1) {
-		*p = ' ';
+		*space = ' ';
 		return 0;
 	}
-	*p = ' ';
+	*space = ' ';
 
-	if (strncmp(p + 2, "dit ", 4) != 0)
+	if (strncmp(space + 2, "dit ", 4) != 0)
 		return 0;
 
 	return 1;
@@ -3240,10 +3239,10 @@ complete_bookmark_names(char *text, const size_t words_n, int *exit_status)
 	*exit_status = FUNC_SUCCESS;
 
 	/* rl_line_buffer is either "bm " or "bookmarks " */
-	char *q = rl_line_buffer + (rl_line_buffer[1] == 'o' ? 9 : 2);
+	const char *arg = rl_line_buffer + (rl_line_buffer[1] == 'o' ? 9 : 2);
 
-	if (q && q[1] == 'a' && (q[2] == ' '
-	|| strncmp(q + 1, "add ", 4) == 0)) {
+	if (arg && arg[1] == 'a' && (arg[2] == ' '
+	|| strncmp(arg + 1, "add ", 4) == 0)) {
 		if (words_n > 3) /* Do not complete anything after "bm add FILE" */
 			rl_attempted_completion_over = 1;
 		else /* 'bm add': complete with path completion */
@@ -3302,15 +3301,15 @@ complete_ranges(char *text, int *exit_status)
 static char **
 complete_open_with(char *text, char *start)
 {
-	char *p = start + 3;
-	char *s = strrchr(p, ' ');
-	if (s)
-		*s = '\0';
+	char *arg = start + 3; /* "ow " */
+	char *space = strrchr(arg, ' ');
+	if (space)
+		*space = '\0';
 
-	char **matches = mime_open_with_tab(p, text, 0);
+	char **matches = mime_open_with_tab(arg, text, 0);
 
-	if (s)
-		*s = ' ';
+	if (space)
+		*space = ' ';
 
 	if (!matches)
 		return (char **)NULL;
@@ -3420,32 +3419,32 @@ get_cmd_name(void)
 	if (!rl_line_buffer || !*rl_line_buffer)
 		return (char *)NULL;
 
-	char *p = rl_line_buffer;
+	char *lb = rl_line_buffer;
 	char *opt = (char *)NULL;
 	char *name = (char *)NULL;
 
 	/* Truncate the command line before the first option word (starting
 	 * with a dash): "sudo cmd --opt" -> "sudo cmd" */
-	while (*p) {
-		if (*p == ' ' && p[1] == '-') {
-			*p = '\0';
-			opt = p;
+	while (*lb) {
+		if (*lb == ' ' && lb[1] == '-') {
+			*lb = '\0';
+			opt = lb;
 			break;
 		}
-		p++;
+		lb++;
 	}
 
 	/* Get a pointer to the beginning of the last name in the truncated
 	 * command line. */
-	p = rl_line_buffer;
-	while (*p) {
-		if (!name && *p != ' ') {
-			name = p;
+	lb = rl_line_buffer;
+	while (*lb) {
+		if (!name && *lb != ' ') {
+			name = lb;
 		} else {
-			if (*p == ' ' && p[1] != ' ')
-				name = p + 1;
+			if (*lb == ' ' && lb[1] != ' ')
+				name = lb + 1;
 		}
-		p++;
+		lb++;
 	}
 
 	if (opt)
@@ -3742,7 +3741,7 @@ complete_profiles(char *text, const size_t words_n)
 	if (words_n > 3)
 		return (char **)NULL;
 
-	char *lb = rl_line_buffer;
+	const char *lb = rl_line_buffer;
 	if (strncmp(lb, "pf add ", 7) == 0 || strncmp(lb, "pf list ", 8) == 0
 	|| strncmp(lb, "profile add ", 12) == 0 || strncmp(lb, "profile list ", 13) == 0)
 		return (char **)NULL;
@@ -3980,7 +3979,7 @@ my_rl_completion(const char *text, const int start, const int end)
 	char **matches = (char **)NULL;
 	char *cmd_name = (char *)NULL;
 	char *cmd_start = (char *)NULL;
-	size_t words_n = rl_count_words(&cmd_name, &cmd_start);
+	const size_t words_n = rl_count_words(&cmd_name, &cmd_start);
 	char *s = cmd_start;
 
 	static size_t sudo_len = 0;
@@ -3989,7 +3988,7 @@ my_rl_completion(const char *text, const int start, const int end)
 
 	int escaped = 0;
 	while (*text == '\\') {
-		++text;
+		text++;
 		escaped = 1;
 	}
 
@@ -4051,7 +4050,7 @@ my_rl_completion(const char *text, const int start, const int end)
 	char *g = strpbrk(text, GLOB_CHARS);
 	/* Expand only glob expressions in the last path component */
 	if (g && !(rl_end == 2 && *rl_line_buffer == '/'
-	&& *(rl_line_buffer + 1) == '*') && !strchr(g, '/')
+	&& rl_line_buffer[1] == '*') && !strchr(g, '/')
 	&& access(text, F_OK) != 0) {
 		matches = complete_glob((char *)text, &exit_status);
 		if (exit_status == FUNC_SUCCESS)
@@ -4080,8 +4079,7 @@ my_rl_completion(const char *text, const int start, const int end)
 #ifndef _NO_TAGS
 	/* ##### TAGS ##### */
 	/* ##### 1. TAGGED FILES (t:NAME<TAB>) ##### */
-	if (tags_n > 0 && *text == 't'
-	&& text[1] == ':' && text[2]) {
+	if (tags_n > 0 && *text == 't' && text[1] == ':' && text[2]) {
 		matches = complete_tagged_file_names((char *)text, &exit_status);
 		if (exit_status == FUNC_SUCCESS)
 			return matches;
@@ -4222,8 +4220,7 @@ FIRST_WORD_COMP:
 	/* #### SUDO COMPLETION (e.g., "sudo <TAB>") #### */
 	if (sudo_len > 0 && words_n == 2 && s && strncmp(s, sudo_cmd, sudo_len) == 0
 	&& s[sudo_len] == ' ') {
-		matches = rl_completion_matches(text, &bin_cmd_generator_ext);
-		if (matches) {
+		if ((matches = rl_completion_matches(text, &bin_cmd_generator_ext))) {
 			cur_comp_type = TCMP_CMD;
 			return matches;
 		}
@@ -4297,7 +4294,7 @@ FIRST_WORD_COMP:
 		if (exit_status == FUNC_SUCCESS)
 			return matches;
 
-		int n = atoi(text);
+		const int n = atoi(text);
 		if (n == INT_MIN)
 			return (char **)NULL;
 
@@ -4311,7 +4308,7 @@ FIRST_WORD_COMP:
 	}
 
 	/* ### DESELECT COMPLETION ### */
-	if (sel_n && s && *s == 'd' && (strncmp(s, "ds ", 3) == 0
+	if (sel_n > 0 && s && *s == 'd' && (strncmp(s, "ds ", 3) == 0
 	|| strncmp(s, "desel ", 6) == 0))
 		return complete_desel(text);
 
