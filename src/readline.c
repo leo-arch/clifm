@@ -1517,7 +1517,7 @@ bm_paths_generator(const char *text, int state)
 		: strcasecmp(bname, text)) != 0)
 			continue;
 
-		size_t plen = strlen(bpath);
+		const size_t plen = strlen(bpath);
 
 		if (plen > 1 && bpath[plen - 1] == '/')
 			bpath[plen - 1] = '\0';
@@ -1753,24 +1753,25 @@ filenames_gen_text(const char *text, int state)
 static char *
 filenames_gen_ranges(const char *text, int state)
 {
-	static filesn_t i;
+	static filesn_t i = 0;
+	static filesn_t a = 0, b = 0;
 	char *name;
 	rl_filename_completion_desired = 1;
 
-	if (state == 0)
+	if (state == 0) {
 		i = 0;
+		char *dash = strchr(text, '-');
+		if (!dash)
+			return (char *)NULL;
 
-	char *dash = strchr(text, '-');
-	if (!dash)
-		return (char *)NULL;
+		*dash = '\0';
+		a = xatof(text);
+		b = xatof(dash + 1);
+		*dash = '-';
 
-	*dash = '\0';
-	const filesn_t a = xatof(text);
-	const filesn_t b = xatof(dash + 1);
-	*dash = '-';
-
-	if (a < 1 || a > files || b < 1 || b > files || a >= b)
-		return (char *)NULL;
+		if (a < 1 || a > files || b < 1 || b > files || a >= b)
+			return (char *)NULL;
+	}
 
 	while (i < files && (name = file_info[i++].name) != NULL) {
 		if (i >= a && i <= b) {
@@ -3232,9 +3233,8 @@ complete_bookmark_names(char *text, const size_t words_n, int *exit_status)
 }
 
 static char **
-complete_ranges(char *text, int *exit_status)
+complete_ranges(char *text)
 {
-	*exit_status = FUNC_FAILURE;
 	char *dash = strchr(text, '-');
 	if (!dash || dash[1] < '0' || dash[1] > '9')
 		return (char **)NULL;
@@ -3256,7 +3256,6 @@ complete_ranges(char *text, int *exit_status)
 	if (!matches)
 		return (char **)NULL;
 
-	*exit_status = FUNC_SUCCESS;
 	cur_comp_type = TCMP_RANGES;
 	return matches;
 }
@@ -4265,19 +4264,15 @@ FIRST_WORD_COMP:
 	/* ### TRASH DEL ### */
 	if (s && *s == 't' && (s[1] == ' ' || s[1] == 'r')
 	&& (strncmp(s, "t del ", 6) == 0
-	|| strncmp(s, "tr del ", 7) == 0
 	|| strncmp(s, "trash del ", 10) == 0))
 		return complete_trashed_files(text, TCMP_TRASHDEL);
 #endif /* !_NO_TRASH */
 
 	/* #### SOME NUMERIC EXPANSIONS ### */
-	/* Perform this check only if the first char of the string to be
-	 * completed is a number in order to prevent an unnecessary call
-	 * to atoi */
 	if (*text >= '0' && *text <= '9') {
 		/* Ranges */
-		matches = complete_ranges((char *)text, &exit_status);
-		if (exit_status == FUNC_SUCCESS)
+		matches = complete_ranges((char *)text);
+		if (matches)
 			return matches;
 
 		const int n = atoi(text);
@@ -4285,7 +4280,7 @@ FIRST_WORD_COMP:
 			return (char **)NULL;
 
 		/* Sort number */
-		if (s && *s == 's' && (strncmp(s, "st ", 3) == 0
+		if (s && *s == 's' && ((s[1] == 't' && s[2] == ' ')
 		|| strncmp(s, "sort ", 5) == 0)
 		&& is_number(text) && n >= 0 && n <= SORT_TYPES) {
 			rl_attempted_completion_over = 1;
