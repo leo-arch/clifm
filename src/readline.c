@@ -1749,43 +1749,6 @@ filenames_gen_text(const char *text, int state)
 	return (char *)NULL;
 }
 
-/* Used by ELN ranges expansion */
-static char *
-filenames_gen_ranges(const char *text, int state)
-{
-	static filesn_t i = 0;
-	static filesn_t a = 0, b = 0;
-	char *name;
-	rl_filename_completion_desired = 1;
-
-	if (state == 0) {
-		i = 0;
-		char *dash = strchr(text, '-');
-		if (!dash)
-			return (char *)NULL;
-
-		*dash = '\0';
-		a = xatof(text);
-		b = xatof(dash + 1);
-		*dash = '-';
-
-		if (a < 1 || a > files || b < 1 || b > files || a >= b)
-			return (char *)NULL;
-	}
-
-	while (i < files && (name = file_info[i++].name) != NULL) {
-		if (i >= a && i <= b) {
-#ifndef _NO_SUGGESTIONS
-			if (suggestion_buf)
-				clear_suggestion(CS_FREEBUF);
-#endif /* !_NO_SUGGESTIONS */
-			return strdup(name);
-		}
-	}
-
-	return (char *)NULL;
-}
-
 static char *
 dirhist_generator(const char *text, int state)
 {
@@ -3245,16 +3208,19 @@ complete_ranges(char *text)
 		return (char **)NULL;
 	}
 
-	int a = atoi(text);
-	int b = atoi(dash + 1);
+	const int a = atoi(text) - 1;
+	const int b = atoi(dash + 1) - 1;
 	*dash = '-';
 
-	if (a < 1 || b < 1 || a >= b || (filesn_t)b > files)
+	if (a < 0 || b < 0 || a >= b || (filesn_t)b >= files)
 		return (char **)NULL;
 
-	char **matches = rl_completion_matches(text, &filenames_gen_ranges);
-	if (!matches)
-		return (char **)NULL;
+	char **matches = xnmalloc((size_t)(b - a) + 3, sizeof(char *));
+	matches[0] = savestring("", 1);
+	size_t j = 1;
+	for (int i = a; i <= b; i++)
+		matches[j++] = savestring(file_info[i].name, file_info[i].bytes);
+	matches[j] = NULL;
 
 	cur_comp_type = TCMP_RANGES;
 	return matches;
