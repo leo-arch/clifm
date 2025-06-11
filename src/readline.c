@@ -213,7 +213,7 @@ leftmost_bell(void)
  * Each byte (C), in each subsequent call, is appended to a string (WC_STR),
  * until we have a complete multi-byte char (WC_BYTES were copied into WC_STR),
  * in which case we insert the character into the readline buffer (my_rl_getc
- * will then trigger the suggestions system using the updated input buffer) */
+ * will then trigger the suggestions system using the updated input buffer). */
 static int
 construct_utf8_char(unsigned char c)
 {
@@ -232,7 +232,8 @@ construct_utf8_char(unsigned char c)
 	if (wc_len < (size_t)wc_bytes - 1) {
 		wc_str[wc_len] = (char)c;
 		wc_len++;
-		return SKIP_CHAR_NO_REDISPLAY; /* Incomplete wide char: do not trigger suggestions */
+		/* Incomplete wide char: do not trigger suggestions. */
+		return SKIP_CHAR_NO_REDISPLAY;
 	}
 
 	wc_str[wc_len] = (char)c;
@@ -516,7 +517,7 @@ fix_rl_point(const unsigned char c)
 		return;
 
 	const char point = rl_line_buffer[rl_point];
-	/* Continue only if leading or continuation multi-byte */
+	/* Continue only in case of leading or continuation multi-byte. */
 	if (!IS_UTF8_CHAR(point))
 		return;
 
@@ -1743,43 +1744,6 @@ filenames_gen_text(const char *text, int state)
 
 		if (len == 0 || fuzzy_match((char *)text, name, len, fuzzy_str_type) > 0)
 			return strdup(name);
-	}
-
-	return (char *)NULL;
-}
-
-/* Used by ELN expansion */
-static char *
-filenames_gen_eln(const char *text, int state)
-{
-	static filesn_t i;
-	static int is_cd_cmd = 0;
-	char *name;
-	rl_filename_completion_desired = 1;
-
-	if (state == 0) {
-		i = 0;
-		is_cd_cmd = (rl_line_buffer && *rl_line_buffer == 'c'
-			&& rl_line_buffer[1] == 'd' && rl_line_buffer[2] == ' ');
-	}
-
-	const filesn_t num_text = xatof(text);
-	if (num_text < 1 || num_text > files)
-		return (char *)NULL;
-
-	/* Check list of currently displayed files for a match */
-	while (i < files && (name = file_info[i++].name) != NULL) {
-		if (*name == *file_info[num_text - 1].name
-		&& strcmp(name, file_info[num_text - 1].name) == 0) {
-			if (words_num > 1 && is_cd_cmd == 1
-			&& file_info[num_text - 1].dir == 0)
-				continue;
-#ifndef _NO_SUGGESTIONS
-			if (suggestion_buf)
-				clear_suggestion(CS_FREEBUF);
-#endif /* !_NO_SUGGESTIONS */
-			return strdup(name);
-		}
 	}
 
 	return (char *)NULL;
@@ -3464,11 +3428,11 @@ complete_shell_cmd_opts(char *text, int *exit_status)
 	if (!name)
 		return (char **)NULL;
 
-	char *s = strchr(name, ' ');
-	if (s) {
-		*s = '\0';
+	char *space = strchr(name, ' ');
+	if (space) {
+		*space = '\0';
 		xstrsncpy(cmd, name, sizeof(cmd));
-		*s = ' ';
+		*space = ' ';
 	}
 
 	if (*cmd && get_shell_cmd_opts(cmd) > 0
@@ -3685,22 +3649,22 @@ complete_workspaces(char *text)
 static int
 int_cmd_no_filename(char *start)
 {
-	char *lb = start;
-	char *p = strchr(lb, ' ');
-	if (!p)
+	char *line = start;
+	char *space = strchr(line, ' ');
+	if (!space)
 		return 0;
 
-	*p = '\0';
+	*space = '\0';
 	flags |= STATE_COMPLETING;
-	if (is_internal_cmd(lb, NO_FNAME_NUM, 1, 1)) {
+	if (is_internal_cmd(line, NO_FNAME_NUM, 1, 1)) {
 		rl_attempted_completion_over = 1;
-		*p = ' ';
+		*space = ' ';
 		flags &= ~STATE_COMPLETING;
 		return 1;
 	}
 
 	flags &= ~STATE_COMPLETING;
-	*p = ' ';
+	*space = ' ';
 	return 0;
 }
 
@@ -3923,10 +3887,31 @@ complete_sel_keyword(const char *text, int *exit_status, const size_t words_n)
 }
 
 static char **
+get_filename_by_eln(const filesn_t n)
+{
+	const int is_cd_cmd = (rl_line_buffer && *rl_line_buffer == 'c'
+		&& rl_line_buffer[1] == 'd' && rl_line_buffer[2] == ' ');
+
+	if (!file_info[n].name || !*file_info[n].name
+	|| (is_cd_cmd == 1 && file_info[n].dir == 0))
+		return (char **)NULL;
+
+	char **matches = xnmalloc(2, sizeof(char *));
+	matches[0] = savestring(file_info[n].name, file_info[n].bytes);
+	matches[1] = NULL;
+
+#ifndef _NO_SUGGESTIONS
+	if (suggestion_buf)
+		clear_suggestion(CS_FREEBUF);
+#endif /* !_NO_SUGGESTIONS */
+
+	return matches;
+}
+
+static char **
 complete_eln(char *text, int *exit_status, const size_t words_n, char *cmd_name)
 {
 	*exit_status = FUNC_FAILURE;
-	char **matches = (char **)NULL;
 	filesn_t n = 0;
 
 	if (!is_number(text) || (n = xatof(text)) < 1 || n > files)
@@ -3944,10 +3929,11 @@ complete_eln(char *text, int *exit_status, const size_t words_n, char *cmd_name)
 			return (char **)NULL;
 	}
 
-	matches = rl_completion_matches(text, &filenames_gen_eln);
+	char **matches = get_filename_by_eln(n - 1);
 	if (!matches)
 		return (char **)NULL;
 
+	rl_filename_completion_desired = 1;
 	*exit_status = FUNC_SUCCESS;
 	cur_comp_type = TCMP_ELN;
 	return matches;
