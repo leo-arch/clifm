@@ -2600,8 +2600,88 @@ rl_count_words(char **w, char **start)
 	return n;
 }
 
-/* THIS IS AWFUL! WRITE A BETTER IMPLEMENTATION */
-/* Complete with options for specific commands */
+/* Return a list of options for the command named CMD_NAME. */
+static char **
+fill_opts(const char *cmd_name, const char *word_start, const size_t w)
+{
+#define MAX_OPTS 23
+	struct cmd_opts_t {
+		const char *cmd;
+		char *opts[MAX_OPTS];
+	};
+
+	static struct cmd_opts_t cmd_opts[] = {
+		{"acd", {"on", "off", "status", NULL}},
+		{"ao", {"on", "off", "status", NULL}},
+		{"ext", {"on", "off", "status", NULL}},
+		{"ff", {"on", "off", "status", NULL}},
+		{"hf", {"on", "off", "first", "last", "status", NULL}},
+		{"hh", {"on", "off", "first", "last", "status", NULL}},
+		{"hidden", {"on", "off", "first", "last", "status", NULL}},
+		{"pg", {"on", "off", "once", "status", NULL}},
+		{"pager", {"on", "off", "once", "status", NULL}},
+		{"cl", {"on", "off", NULL}},
+		{"icons", {"on", "off", NULL}},
+		{"ll", {"on", "off", NULL}},
+		{"lv", {"on", "off", NULL}},
+		{"lm", {"on", "off", NULL}},
+		{"fz", {"on", "off", NULL}},
+		{"config", {"edit", "dump", "reload", "reset", NULL}},
+		{"actions", {"list", "edit", NULL}},
+		{"log", {"cmd", "msg", NULL}},
+		{"mm", {"open", "info", "edit", "import", NULL}},
+		{"mime", {"open", "info", "edit", "import", NULL}},
+		{"pf", {"set", "list", "add", "del", "rename", NULL}},
+		{"profile", {"set", "list", "add", "del", "rename", NULL}},
+		{"prompt", {"set", "list", "unset", "edit", "reload", NULL}},
+		{"pwd", {"-L", "-P", NULL}},
+		{"tag", {"add", "del", "list", "list-full", "merge", "new",
+			"rename", "untag", NULL}},
+		{"view", {"edit", "purge", NULL}},
+		{"net", {"mount", "unmount", "list", "edit", NULL}},
+		{"history", {"edit", "clear", "on", "off", "status",
+			"show-time", NULL}},
+		{"help", {"archives", "autocommands", "basics", "bookmarks",
+			"commands", "desktop-notifications", "dir-jumper", "file-details",
+			"file-filters", "file-previews", "image-previews",
+			"file-tags", "navigation", "plugins", "profiles", "remotes",
+			"resource-opener", "search", "security", "selection",
+			"theming", "trash", NULL}},
+		{"b", {"hist", "clear", NULL}},
+		{"f", {"hist", "clear", NULL}},
+		{"kb", {"list", "bind", "edit", "conflict", "reset", "readline", NULL}},
+		{"keybinds", {"list", "bind", "edit", "conflict", "reset",
+			"readline", NULL}},
+	};
+
+	static char *c_opts[MAX_OPTS];
+	/* Clear c_opts. */
+	memset(c_opts, 0, sizeof(c_opts));
+
+	if (w == 2) {
+		const size_t cmd_count = sizeof(cmd_opts) / sizeof(cmd_opts[0]);
+		for (size_t i = 0; i < cmd_count; i++) {
+			if (*cmd_name != *cmd_opts[i].cmd
+			|| strcmp(cmd_name, cmd_opts[i].cmd) != 0)
+				continue;
+
+			size_t j;
+			for (j = 0; j < MAX_OPTS && cmd_opts[i].opts[j] != NULL; j++)
+				c_opts[j] = cmd_opts[i].opts[j];
+
+			break;
+		}
+	} else if (w == 3 && word_start && (strncmp(word_start, "log msg ", 8) == 0
+	|| strncmp(word_start, "log cmd ", 8) == 0)) {
+		c_opts[0] = "list"; c_opts[1] = "on"; c_opts[2] = "off";
+		c_opts[3] = "status"; c_opts[4] = "clear"; c_opts[5] = NULL;
+	}
+
+#undef MAX_OPTS
+	return !c_opts[0] ? (char **)NULL : c_opts;
+}
+
+/* Complete with options for specific commands. */
 static char *
 options_generator(const char *text, int state)
 {
@@ -2610,158 +2690,21 @@ options_generator(const char *text, int state)
 
 	static size_t len = 0;
 	static size_t w = 0;
-	static int i;
-	char *name;
+	static int i = 0;
+	char *name = (char *)NULL;
 	static char *cmd_name = (char *)NULL;
 	static char *word_start = (char *)NULL;
+	static char **c_opts = (char **)NULL;
 
 	if (state == 0) {
 		i = 0;
 		len = strlen(text);
 		w = rl_count_words(&cmd_name, &word_start);
+		if (cmd_name)
+			c_opts = fill_opts(cmd_name, word_start, w);
 	}
 
-	if (!cmd_name)
-		return (char *)NULL;
-
-	char *c = cmd_name;
-	char *s = word_start;
-
-#define MAX_OPTS 23
-	char *c_opts[MAX_OPTS] = {0};
-
-	/* acd, ao, ext, ff (w == 2 -> second word only) */
-	if (w == 2 && ( ( *c == 'a' && ((c[1] == 'o' && !c[2])
-	|| strcmp(c, "acd") == 0) )
-	|| (*c == 'e' && strcmp(c, "ext") == 0)
-	|| (*c == 'f' && (c[1] == 'f' || c[1] == 'c') && !c[2])) ) {
-		c_opts[0] = "on"; c_opts[1] = "off"; c_opts[2] = "status"; c_opts[3] = NULL;
-
-	/* hf/hh/hidden */
-	} else if (w == 2 && (*c == 'h' && (((c[1] == 'f' || c[1] == 'h') && !c[2])
-	|| strcmp(c, "hidden") == 0))) {
-		c_opts[0] = "on"; c_opts[1] = "off"; c_opts[2] = "first";
-		c_opts[3] = "last"; c_opts[4] = "status"; c_opts[5] = NULL;
-
-	/* pg, pager */
-	} else if (w == 2 && (*c == 'p' && ((c[1] == 'g' && !c[2])
-	|| strcmp(c, "pager") == 0))) {
-		c_opts[0] = "on"; c_opts[1] = "off"; c_opts[2] = "once";
-		c_opts[3] = "status"; c_opts[4] = NULL;
-
-	/* cl, icons, ll-lv, lm, and fz */
-	} else if (w == 2 && ( (*c == 'c' && c[1] == 'l' && !c[2])
-	|| (*c == 'i' && strcmp(c, "icons") == 0)
-	|| (*c == 'l' && (c[1] == 'v' || c[1] == 'l' || c[1] == 'm') && !c[2])
-	|| (*c == 'f' && c[1] == 'z' && !c[2]) ) ) {
-		c_opts[0] = "on"; c_opts[1] = "off"; c_opts[2] = NULL;
-
-	/* config */
-	} else if (w == 2 && *c == 'c' && strcmp(c, "config") == 0) {
-		c_opts[0] = "edit"; c_opts[1] = "dump"; c_opts[2] = "reload";
-		c_opts[3] = "reset"; c_opts[4] = NULL;
-
-	/* actions */
-	} else if (w == 2 && *c == 'a' && strcmp(c, "actions") == 0) {
-		c_opts[0] = "list"; c_opts[1] = "edit"; c_opts[2] = NULL;
-
-	/* log */
-	} else if (w == 3 && s && *s == 'l' && (strncmp(s, "log msg ", 8) == 0
-	|| strncmp(s, "log cmd ", 8) == 0) ) {
-		c_opts[0] = "list"; c_opts[1] = "on"; c_opts[2] = "off";
-		c_opts[3] = "status"; c_opts[4] = "clear"; c_opts[5] = NULL;
-	} else if (w == 2 && *c == 'l' && strcmp(c, "log") == 0) {
-		c_opts[0] = "cmd"; c_opts[1] = "msg"; c_opts[2] = NULL;
-
-	/* mime */
-	} else if (w == 2 && *c == 'm' && ((c[1] == 'm' && !c[2])
-	|| strcmp(c, "mime") == 0)) {
-		c_opts[0] = "open"; c_opts[1] = "info"; c_opts[2] = "edit";
-		c_opts[3] = "import"; c_opts[4] = NULL;
-
-#ifndef _NO_PROFILES
-	/* profile */
-	} else if (w == 2 && ( (*c == 'p' && c[1] == 'f' && !c[2])
-	|| strcmp(c, "profile") == 0 ) ) {
-		c_opts[0] = "set"; c_opts[1] = "list"; c_opts[2] = "add";
-		c_opts[3] = "del"; c_opts[4] = "rename"; c_opts[5] = NULL;
-#endif /* _NO_PROFILES */
-
-	/* prompt */
-	} else if (w == 2 && *c == 'p' && strcmp(c, "prompt") == 0) {
-		c_opts[0] = "set"; c_opts[1] = "list"; c_opts[2] = "unset";
-		c_opts[3] = "edit"; c_opts[4] = "reload"; c_opts[5] = NULL;
-
-	/* pwd */
-	} else if (w == 2 && *c == 'p' && c[1] == 'w' && c[2] == 'd' && !c[3]) {
-		c_opts[0] = "-L"; c_opts[1] = "-P"; c_opts[2] = NULL;
-
-#ifndef _NO_TAGS
-	/* tag */
-	} else if (w == 2 && *c == 't' && c[1] == 'a' && c[2] == 'g' && !c[3]) {
-		c_opts[0] = "add"; c_opts[1] = "del"; c_opts[2] = "list";
-		c_opts[3] = "list-full"; c_opts[4] = "merge"; c_opts[5] = "new";
-		c_opts[6] = "rename"; c_opts[7] = "untag"; c_opts[8] = NULL;
-#endif /* !_NO_TAGS */
-
-	} else if (w == 2 && strcmp(c, "view") == 0) {
-		c_opts[0] = "edit"; c_opts[1] = "purge"; c_opts[3] = NULL;
-
-	/* net */
-	} else if (w == 2 && *c == 'n' && c[1] == 'e'
-	&& c[2] == 't' && !c[3]) {
-		c_opts[0] = "mount"; c_opts[1] = "unmount"; c_opts[2] = "list";
-		c_opts[3] = "edit"; c_opts[4] = NULL;
-
-	/* history */
-	} else if (w == 2 && *c == 'h' && strcmp(c, "history") == 0) {
-		c_opts[0] = "edit"; c_opts[1] = "clear"; c_opts[2] = "on";
-		c_opts[3] = "off"; c_opts[4] = "status"; c_opts[5] = "show-time";
-		c_opts[6] = NULL;
-
-	/* help topics */
-	} else if (w == 2 && *c == 'h' && c[1] == 'e'
-	&& strcmp(c, "help") == 0) {
-		c_opts[0] = "archives";
-		c_opts[1] = "autocommands";
-		c_opts[2] = "basics";
-		c_opts[3] = "bookmarks";
-		c_opts[4] = "commands";
-		c_opts[5] = "desktop-notifications";
-		c_opts[6] = "dir-jumper";
-		c_opts[7] = "file-details";
-		c_opts[8] = "file-filters";
-		c_opts[9] = "file-previews";
-		c_opts[10] = "image-previews";
-		c_opts[11] = "file-tags";
-		c_opts[12] = "navigation";
-		c_opts[13] = "plugins";
-		c_opts[14] = "profiles";
-		c_opts[15] = "remotes";
-		c_opts[16] = "resource-opener";
-		c_opts[17] = "search";
-		c_opts[18] = "security";
-		c_opts[19] = "selection";
-		c_opts[20] = "theming";
-		c_opts[21] = "trash";
-		c_opts[22] = NULL;
-
-	/* b, f */
-	} else if (w == 2 && ( (*c == 'b' && !c[1])
-	|| (*c == 'f' && !c[1]) ) ) {
-		c_opts[0] = "hist"; c_opts[1] = "clear"; c_opts[2] = NULL;
-
-	} else {
-		/* kb, keybinds */
-		if (w == 2 && ( (*c == 'k' && c[1] == 'b' && !c[2])
-		|| strcmp(c, "keybinds") == 0) ) {
-			c_opts[0] = "list"; c_opts[1] = "bind"; c_opts[2] = "edit";
-			c_opts[3] = "conflict"; c_opts[4] = "reset";
-			c_opts[5] = "readline"; c_opts[6] = NULL;
-		}
-	}
-
-	if (!c_opts[0])
+	if (!c_opts || !c_opts[0])
 		return (char *)NULL;
 
 	while ((name = c_opts[i++]) != NULL) {
