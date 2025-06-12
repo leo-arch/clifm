@@ -1702,7 +1702,7 @@ filenames_gen_text(const char *text, int state)
 	static int fuzzy_str_type = 0;
 	static int line_has_space = 0;
 	static int is_cd_cmd = 0;
-	static int (*cmp_func)(const char *, const char *, size_t);
+	static int (*cmp_func)(const char *, const char *, size_t) = strncmp;
 
 	char *name;
 	rl_filename_completion_desired = 1;
@@ -1732,8 +1732,8 @@ filenames_gen_text(const char *text, int state)
 
 		/* If cd, list only directories. */
 		if ((conf.suggestions == 0 || words_num > 1
-		|| (rl_end > 0 && rl_line_buffer[rl_end - 1] == ' '))
-		&& is_cd_cmd == 1 && file_info[i - 1].dir == 0)
+		|| (is_cd_cmd == 1 && rl_end > 0 && rl_line_buffer[rl_end - 1] == ' '))
+		&& file_info[i - 1].dir == 0)
 			continue;
 
 		if (cmp_func(name, text, len) == 0)
@@ -2708,7 +2708,7 @@ options_generator(const char *text, int state)
 		return (char *)NULL;
 
 	while ((name = c_opts[i++]) != NULL) {
-		if (strncmp(name, text, len) == 0)
+		if (len == 0 || strncmp(name, text, len) == 0)
 			return strdup(name);
 	}
 

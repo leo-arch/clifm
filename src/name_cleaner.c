@@ -558,7 +558,6 @@ bleach_files(char **names)
 CONFIRM:
 	while (!input) {
 		input = rl_no_hist(_("Is this OK? [y/n/(e)dit] "), 0);
-
 		if (!input)
 			continue;
 
@@ -601,17 +600,21 @@ CONFIRM:
 	if (f == 0) {
 		/* Just in case either the original or the replacement filename
 		 * was removed from the list by the user, leaving only one of the two. */
-		free(bfiles[0].original);
-		free(bfiles[0].replacement);
+		if (bfiles) {
+			free(bfiles[0].original);
+			free(bfiles[0].replacement);
+		}
 		free(bfiles);
 		printf(_("%s: Nothing to do\n"), FUNC_NAME);
 		return FUNC_SUCCESS;
 	}
 
 	if (edited_names == -1 || quit_func == 1) { /* ERROR or quit */
-		for (i = 0; i < f; i++) {
-			free(bfiles[i].original);
-			free(bfiles[i].replacement);
+		if (bfiles) {
+			for (i = 0; i < f; i++) {
+				free(bfiles[i].original);
+				free(bfiles[i].replacement);
+			}
 		}
 		free(bfiles);
 		return (quit_func == 1 ? FUNC_SUCCESS : FUNC_FAILURE);
@@ -623,9 +626,11 @@ CONFIRM:
 	if (do_edit == 1) {
 		printf(_("%zu filename(s) will be bleached\n"), f);
 		if (rl_get_y_or_n(_("Continue?"), 0) != 1) {
-			for (i = 0; i < f; i++) {
-				free(bfiles[i].original);
-				free(bfiles[i].replacement);
+			if (bfiles) {
+				for (i = 0; i < f; i++) {
+					free(bfiles[i].original);
+					free(bfiles[i].replacement);
+				}
 			}
 			free(bfiles);
 			return FUNC_SUCCESS;
@@ -641,8 +646,11 @@ CONFIRM:
 	int exit_status = FUNC_SUCCESS;
 
 	for (i = 0; i < f; i++) {
-		char *o = bfiles[i].original ? bfiles[i].original : (char *)NULL;
-		char *r = bfiles[i].replacement ? bfiles[i].replacement : (char *)NULL;
+		char *o = (bfiles && bfiles[i].original)
+			? bfiles[i].original : (char *)NULL;
+		char *r = (bfiles && bfiles[i].replacement)
+			? bfiles[i].replacement : (char *)NULL;
+
 		if (o && *o && r && *r && rename) {
 			/* Make sure the replacement filename does not exist. If
 			 * it does, append REP_SUFFIX and try again. */

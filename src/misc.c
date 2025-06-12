@@ -1785,15 +1785,15 @@ gen_symlink(char *file, const char *cwd)
 
 	struct stat attr;
 	if (lstat(file, &attr) == -1) {
-		/* "~" fails here. No need to check in construct_name() */
+		/* "~" fails here. No need to check in construct_name(). */
 		err('w', PRINT_PROMPT, "%s: '%s': %s\n",
 			PROGRAM_NAME, file, strerror(errno));
 		return 0;
 	}
 
-	/* Construct source and destiny files */
+	/* Construct source and destiny files. */
 
-	/* symlink(3) doesn't like filenames ending with slash */
+	/* symlink(3) doesn't like filenames ending with slash. */
 	size_t file_len = strlen(file);
 	if (file_len > 1 && file[file_len - 1] == '/') {
 		file[file_len - 1] = '\0';
@@ -1813,27 +1813,31 @@ gen_symlink(char *file, const char *cwd)
 	char dest[PATH_MAX + 32];
 	snprintf(dest, sizeof(dest), "%s/%s", stdin_tmp_dir, name);
 
-	errno = 0;
-	int suffix = 1;
-	while (symlink(source, dest) == -1 && errno == EEXIST) {
-		snprintf(dest, sizeof(dest), "%s/%s-%d", stdin_tmp_dir,
-			name, suffix);
-		suffix++;
+	int suffix = 0;
+
+	while (1) {
 		errno = 0;
+		if (symlink(source, dest) == 0)
+			break;
+
+		if (errno != EEXIST) {
+			err('w', PRINT_PROMPT, _("%s: Cannot create symbolic "
+				"link '%s': %s\n"), PROGRAM_NAME, dest, strerror(errno));
+			free(name);
+			return 0;
+		}
+
+		suffix++;
 		if (suffix == INT_MAX) {
 			free(name);
 			return 0;
 		}
+
+		snprintf(dest, sizeof(dest), "%s/%s-%d", stdin_tmp_dir,
+			name, suffix);
 	}
 
 	free(name);
-
-	if (errno != 0) {
-		err('w', PRINT_PROMPT, _("%s: Cannot create symbolic "
-			"link '%s': %s\n"), PROGRAM_NAME, dest, strerror(errno));
-		return 0;
-	}
-
 	return 1;
 }
 
