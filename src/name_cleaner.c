@@ -74,7 +74,7 @@
 #define UTF_8_ENCODED_2_BYTES_MASK 0xE0
 #define UTF_8_ENCODED_2_BYTES      0xC0
 
-#define BLEACH_TMP_HEADER "# CliFM - Bleach\n\
+#define BLEACH_TMP_HEADER "# Clifm - Bleach\n\
 # Edit replacement filenames as you wish, save, and close the editor.\n\
 # You will be asked for confirmation at exit.\n\n"
 

@@ -473,7 +473,10 @@ is_color_code(const char *str)
 	if (*str == COLOR256_PREFIX)
 		return is_256_color(str + 1);
 
-	return is_sgr_color(str);
+	if (IS_DIGIT(*str))
+		return is_sgr_color(str);
+
+	return 0;
 }
 
 static void
@@ -534,7 +537,7 @@ update_warning_prompt_text_color(void)
 	/* Let's look for the last "\e[" */
 	char *start = strrchr(conf.wprompt_str, '[');
 	if (!start || start - conf.wprompt_str < 2 || *(start - 1) != 'e'
-	|| *(start - 2) != '\\' || !IS_DIGIT(*(start + 1))) {
+	|| *(start - 2) != '\\' || !IS_DIGIT(start[1])) {
 		/* Let's check the new color notation (%{color}) as well */
 		update_warning_prompt_text_color_new_syntax();
 		return;
@@ -601,7 +604,6 @@ check_defs(const char *str)
 	if (defs_n == 0 || !str || !*str)
 		return (char *)NULL;
 
-	char *val = (char *)NULL;
 	int i = (int)defs_n;
 	const size_t slen = strlen(str);
 
@@ -612,16 +614,11 @@ check_defs(const char *str)
 
 		if (*defs[i].name == *str && slen == defs[i].namelen
 		&& strcmp(defs[i].name, str) == 0
-		&& is_color_code(defs[i].value) == 1) {
-			val = defs[i].value;
-			return val;
-		}
+		&& is_color_code(defs[i].value) == 1)
+			return defs[i].value;
 	}
 
-	if (!val)
-		val = check_names(str);
-
-	return val;
+	return check_names(str);
 }
 
 /* Free custom color variables set from the color scheme file. */
