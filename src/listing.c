@@ -607,11 +607,11 @@ get_dir_icon(const filesn_t n)
 	if (!file_info[n].name)
 		return;
 
-	const size_t dhash = hashme(file_info[n].name, 0);
+	const size_t dir_hash = hashme(file_info[n].name, 0);
 
 	int i = (int)(sizeof(icon_dirnames) / sizeof(struct icons_t));
 	while (--i >= 0) {
-		if (dhash != dir_icons_hashes[i])
+		if (dir_hash != dir_icons_hashes[i])
 			continue;
 		file_info[n].icon = icon_dirnames[i].icon;
 		file_info[n].icon_color = icon_dirnames[i].color;
@@ -632,11 +632,11 @@ get_ext_icon(const char *restrict ext, const filesn_t n)
 	if (!ext || !*(++ext))
 		return;
 
-	const size_t ehash = hashme(ext, 0);
+	const size_t ext_hash = hashme(ext, 0);
 
 	int i = (int)(sizeof(icon_ext) / sizeof(struct icons_t));
 	while (--i >= 0) {
-		if (ehash != ext_icons_hashes[i])
+		if (ext_hash != ext_icons_hashes[i])
 			continue;
 
 		file_info[n].icon = icon_ext[i].icon;
@@ -3419,7 +3419,6 @@ list_dir(void)
 		}
 
 		if (hidden_list && check_dothidden(ename, &hidden_list) == 1) {
-			stats.hidden++;
 			stats.excluded++;
 			continue;
 		}

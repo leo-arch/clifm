@@ -296,17 +296,18 @@ get_regfile_color(const char *filename, const struct stat *a, size_t *is_ext)
 		return nf_c;
 
 	char *color = get_file_color(filename, a);
+	/* get_file_color() is guaranteed to return a non-NULL value. */
 	if (color != fi_c || conf.check_ext == 0)
-		return color ? color : fi_c;
+		return color;
 
-	char *ext = strrchr(filename, '.');
+	const char *ext = strrchr(filename, '.');
 	if (!ext)
-		return color ? color : fi_c;
+		return color;
 
 	size_t color_len = 0;
 	char *extcolor = get_ext_color(ext, &color_len);
 	if (!extcolor || color_len == 0 || color_len + 4 > sizeof(tmp_color))
-		return color ? color : fi_c;
+		return color;
 
 	*tmp_color = '\x1b'; tmp_color[1] = '[';
 	memcpy(tmp_color + 2, extcolor, color_len);
@@ -462,7 +463,7 @@ is_sgr_color(const char *restrict str)
  * Hex color codes (#RRGGBB) and 256 colors short (@NUM) are also validated.
  * Returns 1 if true and 0 if false. */
 static int
-is_color_code(const char *str)
+is_color_code(const char *restrict str)
 {
 	if (!str || !*str)
 		return 0;
@@ -574,7 +575,7 @@ check_names(const char *str)
 
 	int found = -1;
 	const char up_str = TOUPPER(*str);
-	size_t len = strlen(str);
+	const size_t len = strlen(str);
 	size_t i;
 
 	for (i = 0; color_names[i].name; i++) {
@@ -739,7 +740,7 @@ get_ext_color(const char *ext, size_t *val_len)
 /* Strip color line from the config file, returning the same string
  * containing only allowed characters. */
 static char *
-strip_color_line(const char *str, const size_t str_len)
+strip_color_line(const char *restrict str, const size_t str_len)
 {
 	if (!str || !*str)
 		return (char *)NULL;
@@ -924,6 +925,7 @@ set_colorscheme(char *arg)
 		if (*q != *color_schemes[i]
 		|| strcmp(q, color_schemes[i]) != 0)
 			continue;
+
 		cs_found = 1;
 
 		if (set_colors(q, 0) != FUNC_SUCCESS)
@@ -936,7 +938,6 @@ set_colorscheme(char *arg)
 		switch_cscheme = 0;
 
 		free(p);
-
 		return FUNC_SUCCESS;
 	}
 
@@ -944,7 +945,6 @@ set_colorscheme(char *arg)
 		xerror(_("cs: '%s': No such color scheme\n"), p);
 
 	free(p);
-
 	return FUNC_FAILURE;
 }
 #endif /* !CLIFM_SUCKLESS */
@@ -1100,11 +1100,11 @@ color256_to_ansi(char *s)
 
 	int attr = -1;
 
-	char *q = strchr(s + 1, '-');
-	if (q) {
-		*q = '\0';
-		if (IS_DIGIT(q[1]) && !q[2])
-			attr = q[1] - '0';
+	char *dash = strchr(s + 1, '-');
+	if (dash) {
+		*dash = '\0';
+		if (IS_DIGIT(dash[1]) && !dash[2])
+			attr = dash[1] - '0';
 	}
 
 	char *ret = (char *)NULL;
@@ -1119,8 +1119,8 @@ color256_to_ansi(char *s)
 		ret = tmp_color;
 	}
 
-	if (q)
-		*q = '-';
+	if (dash)
+		*dash = '-';
 
 	return ret;
 }
