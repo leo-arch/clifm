@@ -2370,7 +2370,7 @@ exclude_file_type(const char *restrict name, const mode_t mode,
 }
 
 /* Initialize the file_info struct with default values. */
-void
+static void
 init_default_file_info(void)
 {
 	static int set = 0;
@@ -2599,7 +2599,6 @@ list_dir_light(const int autocmd_ret)
 		}
 
 		if (hidden_list	&& check_dothidden(ename, &hidden_list) == 1) {
-			stats.hidden++;
 			stats.excluded++;
 			continue;
 		}
@@ -3487,18 +3486,15 @@ list_dir(void)
 		} else {
 			file_info[n].type = DT_UNKNOWN;
 			file_info[n].stat_err = 1;
+			attr.st_mode = 0;
 			stats.unknown++;
 			stats.unstat++;
 		}
 
 		switch (file_info[n].type) {
-		case DT_DIR: load_dir_info(stat_ok == 1 ? attr.st_mode : 0, n); break;
+		case DT_DIR: load_dir_info(attr.st_mode, n); break;
 		case DT_LNK: load_link_info(fd, n); break;
-		case DT_REG:
-			load_regfile_info(stat_ok == 1 ? attr.st_mode : 0, n); break;
-
-		/* For the time being, we have no specific colors for DT_ARCH1,
-		 * DT_ARCH2, and DT_WHT. */
+		case DT_REG: load_regfile_info(attr.st_mode, n); break;
 		case DT_SOCK: file_info[n].color = so_c; break;
 		case DT_FIFO: file_info[n].color = pi_c; break;
 		case DT_BLK: file_info[n].color = bd_c; break;
@@ -3509,6 +3505,8 @@ list_dir(void)
 #endif /* SOLARIS_DOORS */
 		case DT_UNKNOWN: file_info[n].color = no_c; break;
 		default: file_info[n].color = df_c; break;
+		/* For the time being, we have no specific colors for DT_ARCH1,
+		 * DT_ARCH2, and DT_WHT. */
 		}
 
 		if (checks_scanning == 1 && file_info[n].dir == 1)
