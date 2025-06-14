@@ -552,6 +552,8 @@ print_dirhist_map(void)
 		? dirhist_cur_index + 1 : dirhist_cur_index));
 
 	const int i = dirhist_cur_index;
+	if (i < 0 || i >= dirhist_total_index)
+		return;
 
 	if (i > 0 && old_pwd[i - 1])
 		printf("%s%*d%s %s\n", el_c, pad, i, df_c, old_pwd[i - 1]);
@@ -748,8 +750,8 @@ post_listing(DIR *dir, const int reset_pager, const int autocmd_ret)
 	}
 
 	if (switch_cscheme == 1)
-		printf(_("Color scheme %s%s%s %s\n"), mi_c,	SET_MSG_PTR,
-			df_c, cur_cscheme);
+		print_reload_msg(NULL, NULL, _("Color scheme: %s%s%s\n"),
+			BOLD, cur_cscheme, df_c);
 
 	if (virtual_dir == 1)
 		print_reload_msg(NULL, NULL, _("Virtual directory\n"));
