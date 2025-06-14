@@ -551,19 +551,16 @@ print_dirhist_map(void)
 	const int pad = DIGINUM(1 + (dirhist_cur_index + 1 < dirhist_total_index
 		? dirhist_cur_index + 1 : dirhist_cur_index));
 
-	int i;
-	for (i = dirhist_cur_index; i < dirhist_total_index; i++) {
-		if (i > 0 && old_pwd[i - 1])
-			printf("%s%*d%s %s\n", el_c, pad, i, df_c, old_pwd[i - 1]);
+	const int i = dirhist_cur_index;
 
-		printf("%s%*d%s %s%s%s\n", el_c, pad, i + 1,
-			df_c, mi_c, old_pwd[i], df_c);
+	if (i > 0 && old_pwd[i - 1])
+		printf("%s%*d%s %s\n", el_c, pad, i, df_c, old_pwd[i - 1]);
 
-		if (i + 1 < dirhist_total_index && old_pwd[i + 1])
-			printf("%s%*d%s %s\n", el_c, pad, i + 2, df_c, old_pwd[i + 1]);
+	printf("%s%*d%s %s%s%s\n", el_c, pad, i + 1,
+		df_c, mi_c, old_pwd[i], df_c);
 
-		break;
-	}
+	if (i + 1 < dirhist_total_index && old_pwd[i + 1])
+		printf("%s%*d%s %s\n", el_c, pad, i + 2, df_c, old_pwd[i + 1]);
 }
 
 #ifndef _NO_ICONS
@@ -615,7 +612,7 @@ get_dir_icon(const filesn_t n)
 			continue;
 		file_info[n].icon = icon_dirnames[i].icon;
 		file_info[n].icon_color = icon_dirnames[i].color;
-		break;
+		return;
 	}
 }
 
@@ -638,10 +635,9 @@ get_ext_icon(const char *restrict ext, const filesn_t n)
 	while (--i >= 0) {
 		if (ext_hash != ext_icons_hashes[i])
 			continue;
-
 		file_info[n].icon = icon_ext[i].icon;
 		file_info[n].icon_color = icon_ext[i].color;
-		break;
+		return;
 	}
 }
 #endif /* _NO_ICONS */
