@@ -306,7 +306,7 @@ is_utf8_name(const char *filename, size_t *bytes, size_t *ext_index)
 
 	uint8_t is_utf8 = 0;
 	const unsigned char *start = (const unsigned char *)filename;
-	const unsigned char *name = (const unsigned char *)filename;
+	const unsigned char *name = start;
 	const unsigned char *ext = NULL;
 
 	while (*name) {
@@ -3335,7 +3335,8 @@ list_dir(void)
 	/* Let's store information about the largest file in the list for the
 	 * disk usage analyzer mode. */
 	off_t largest_name_size = 0, total_size = 0;
-	char *largest_name = (char *)NULL, *largest_color = (char *)NULL;
+	char *largest_name = (char *)NULL;
+	char *largest_color = (char *)NULL;
 
 	if ((dir = opendir(workspaces[cur_ws].path)) == NULL) {
 		xerror("%s: %s: %s\n", PROGRAM_NAME, workspaces[cur_ws].path,
