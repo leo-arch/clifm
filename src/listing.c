@@ -1069,35 +1069,42 @@ compute_maxes(void)
 	filesn_t i = xargs.max_files > 0 ? (filesn_t)xargs.max_files
 		: (conf.max_files > 0 ? conf.max_files : files);
 
+	const int conf_files_counter = conf.files_counter;
+	const int prop_fields_size = prop_fields.size;
+	const int prop_fields_ids = prop_fields.ids;
+	const int prop_fields_inode = prop_fields.inode;
+	const int prop_fields_links = prop_fields.links;
+	const int prop_fields_blocks = prop_fields.blocks;
+
 	if (i > files)
 		i = files;
 
 	while (--i >= 0) {
 		int t = 0;
-		if (file_info[i].dir == 1 && conf.files_counter == 1) {
+		if (file_info[i].dir == 1 && conf_files_counter == 1) {
 			t = DIGINUM_BIG(file_info[i].filesn);
 			if (t > maxes.files_counter)
 				maxes.files_counter = t;
 		}
 
-		if (prop_fields.size == PROP_SIZE_BYTES) {
+		if (prop_fields_size == PROP_SIZE_BYTES) {
 			t = DIGINUM_BIG(file_info[i].size);
 			if (t > maxes.size)
 				maxes.size = t;
-		} else if (prop_fields.size == PROP_SIZE_HUMAN) {
+		} else if (prop_fields_size == PROP_SIZE_HUMAN) {
 			t = (int)file_info[i].human_size.len;
 			if (t > maxes.size)
 				maxes.size = t;
 		}
 
-		if (prop_fields.ids == PROP_ID_NUM) {
+		if (prop_fields_ids == PROP_ID_NUM) {
 			const int u = DIGINUM(file_info[i].uid);
 			const int g = DIGINUM(file_info[i].gid);
 			if (g > maxes.id_group)
 				maxes.id_group = g;
 			if (u > maxes.id_user)
 				maxes.id_user = u;
-		} else if (prop_fields.ids == PROP_ID_NAME) {
+		} else if (prop_fields_ids == PROP_ID_NAME) {
 			const int g = file_info[i].gid_i.name
 				? (int)file_info[i].gid_i.namlen : DIGINUM(file_info[i].gid);
 			if (g > maxes.id_group)
@@ -1109,19 +1116,19 @@ compute_maxes(void)
 				maxes.id_user = u;
 		}
 
-		if (prop_fields.inode == 1) {
+		if (prop_fields_inode == 1) {
 			t = DIGINUM(file_info[i].inode);
 			if (t > maxes.inode)
 				maxes.inode = t;
 		}
 
-		if (prop_fields.links == 1) {
+		if (prop_fields_links == 1) {
 			t = DIGINUM((unsigned int)file_info[i].linkn);
 			if (t > maxes.links)
 				maxes.links = t;
 		}
 
-		if (prop_fields.blocks == 1) {
+		if (prop_fields_blocks == 1) {
 			t = DIGINUM_BIG(file_info[i].blocks);
 			if (t > maxes.blocks)
 				maxes.blocks = t;
@@ -1129,7 +1136,7 @@ compute_maxes(void)
 	}
 
 
-	if (conf.full_dir_size != 1 || prop_fields.size == PROP_SIZE_HUMAN)
+	if (conf.full_dir_size != 1 || prop_fields_size == PROP_SIZE_HUMAN)
 		return maxes;
 
 	/* If at least one directory size length equals the maximum size lenght
@@ -1140,7 +1147,7 @@ compute_maxes(void)
 		if (file_info[i].du_status == 0)
 			continue;
 
-		const int t = prop_fields.size == PROP_SIZE_BYTES
+		const int t = prop_fields_size == PROP_SIZE_BYTES
 			? DIGINUM_BIG(file_info[i].size)
 			: (int)file_info[i].human_size.len;
 
@@ -2091,6 +2098,11 @@ list_files_vertical(size_t *counter, int *reset_pager,
 	filesn_t row_index = 0; // Current line number
 	filesn_t i = 0; // Index of the current entry being analyzed
 
+	const int conf_max_name_len = conf.max_name_len;
+	const int conf_pager = conf.pager;
+	const int conf_no_eln = conf.no_eln;
+	const int conf_classify = conf.classify;
+
 	pager_quit = pager_help = 0;
 
 	for ( ; ; i++) {
@@ -2114,7 +2126,7 @@ list_files_vertical(size_t *counter, int *reset_pager,
 		/* If current entry is in the last column, print a new line char */
 		last_column = (column_count == num_columns);
 
-		int ind_char = (conf.classify != 0);
+		int ind_char = (conf_classify != 0);
 
 		if (file_index >= total_files || !file_info[file_index].name) {
 			if (last_column == 1) {
@@ -2134,8 +2146,8 @@ list_files_vertical(size_t *counter, int *reset_pager,
 				 * #  MAS: A SIMPLE PAGER   #
 				 * ########################## */
 
-		if (conf.pager == 1 || (*reset_pager == 0 && conf.pager > 1
-		&& files >= (filesn_t)conf.pager)) {
+		if (conf_pager == 1 || (*reset_pager == 0 && conf_pager > 1
+		&& files >= (filesn_t)conf_pager)) {
 			int ret = 0;
 			filesn_t backup_i = i;
 			/* Run the pager only once all columns and rows fitting in
@@ -2177,9 +2189,9 @@ list_files_vertical(size_t *counter, int *reset_pager,
 
 		const int fc = file_info[file_index].dir != 1 ? int_longest_fc_len : 0;
 		/* Displayed filename will be truncated to MAX_NAMELEN. */
-		const int max_namelen = conf.max_name_len + fc;
+		const int max_namelen = conf_max_name_len + fc;
 
-		file_info[file_index].eln_n = conf.no_eln == 1
+		file_info[file_index].eln_n = conf_no_eln == 1
 			? -1 : DIGINUM(file_index + 1);
 
 		print_entry_function(&ind_char, file_index, eln_len, max_namelen);
