@@ -548,12 +548,12 @@ print_sel_files(const unsigned short t_rows)
 static void
 print_dirhist_map(void)
 {
-	const int pad = DIGINUM(1 + (dirhist_cur_index + 1 < dirhist_total_index
-		? dirhist_cur_index + 1 : dirhist_cur_index));
-
 	const int i = dirhist_cur_index;
 	if (i < 0 || i >= dirhist_total_index)
 		return;
+
+	const int pad = DIGINUM(1 + (dirhist_cur_index + 1 < dirhist_total_index
+		? dirhist_cur_index + 1 : dirhist_cur_index));
 
 	if (i > 0 && old_pwd[i - 1])
 		printf("%s%*d%s %s\n", el_c, pad, i, df_c, old_pwd[i - 1]);
@@ -573,13 +573,13 @@ get_name_icon(const filesn_t n)
 	if (!file_info[n].name)
 		return 0;
 
-	const size_t nhash = hashme(file_info[n].name, 0);
+	const size_t name_hash = hashme(file_info[n].name, 0);
 
 	/* This division will be replaced by a constant integer at compile
 	 * time, so that it won't even be executed at runtime. */
-	int i = (int)(sizeof(icon_filenames) / sizeof(struct icons_t));
+	int i = (int)(sizeof(icon_filenames) / sizeof(icon_filenames[0]));
 	while (--i >= 0) {
-		if (nhash != name_icons_hashes[i])
+		if (name_hash != name_icons_hashes[i])
 			continue;
 		file_info[n].icon = icon_filenames[i].icon;
 		file_info[n].icon_color = icon_filenames[i].color;
@@ -608,7 +608,7 @@ get_dir_icon(const filesn_t n)
 
 	const size_t dir_hash = hashme(file_info[n].name, 0);
 
-	int i = (int)(sizeof(icon_dirnames) / sizeof(struct icons_t));
+	int i = (int)(sizeof(icon_dirnames) / sizeof(icon_dirnames[0]));
 	while (--i >= 0) {
 		if (dir_hash != dir_icons_hashes[i])
 			continue;
@@ -633,7 +633,7 @@ get_ext_icon(const char *restrict ext, const filesn_t n)
 
 	const size_t ext_hash = hashme(ext, 0);
 
-	int i = (int)(sizeof(icon_ext) / sizeof(struct icons_t));
+	int i = (int)(sizeof(icon_ext) / sizeof(icon_ext[0]));
 	while (--i >= 0) {
 		if (ext_hash != ext_icons_hashes[i])
 			continue;
@@ -647,8 +647,7 @@ get_ext_icon(const char *restrict ext, const filesn_t n)
 static void
 print_cdpath(void)
 {
-	if (workspaces && workspaces[cur_ws].path
-	&& *workspaces[cur_ws].path)
+	if (workspaces && workspaces[cur_ws].path && *workspaces[cur_ws].path)
 		print_reload_msg(NULL, NULL, "cdpath: %s\n", workspaces[cur_ws].path);
 
 	is_cdpath = 0;
@@ -926,9 +925,16 @@ get_longest_filename(const filesn_t n, const size_t eln_len)
 	const size_t max = checks.min_name_trunc == 1
 		? (size_t)conf.min_name_trunc : (size_t)conf.max_name_len;
 
+	const int conf_no_eln = conf.no_eln;
+	const int checks_classify = checks.classify;
+	const int conf_files_counter = conf.files_counter;
+	const int conf_colorize = conf.colorize;
+	const int conf_listing_mode = conf.listing_mode;
+	const int conf_max_files = conf.max_files;
+
 	while (--i >= 0) {
 		size_t total_len = 0;
-		file_info[i].eln_n = conf.no_eln == 1 ? -1 : DIGINUM(i + 1);
+		file_info[i].eln_n = conf_no_eln == 1 ? -1 : DIGINUM(i + 1);
 
 		size_t file_len = file_info[i].len;
 		if (file_len == 0) {
@@ -943,18 +949,18 @@ get_longest_filename(const filesn_t n, const size_t eln_len)
 
 		total_len = eln_len + 1 + file_len;
 
-		if (checks.classify == 1) {
-			if (file_info[i].filesn > 0 && conf.files_counter == 1)
+		if (checks_classify == 1) {
+			if (file_info[i].filesn > 0 && conf_files_counter == 1)
 				total_len += DIGINUM(file_info[i].filesn);
 
-			if (file_info[i].dir == 1 || (conf.colorize == 0
+			if (file_info[i].dir == 1 || (conf_colorize == 0
 			&& has_file_type_char(i)))
 				total_len++;
 		}
 
 		if (total_len > longest.name_len) {
 			longest_index = i;
-			if (conf.listing_mode == VERTLIST || conf.max_files == UNSET
+			if (conf_listing_mode == VERTLIST || conf_max_files == UNSET
 			|| i < c_max_files)
 				longest.name_len = total_len;
 		}
