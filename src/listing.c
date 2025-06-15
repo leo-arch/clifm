@@ -918,13 +918,6 @@ has_file_type_char(const filesn_t i)
 static void
 get_longest_filename(const filesn_t n, const size_t eln_len)
 {
-	const filesn_t c_max_files = (filesn_t)conf.max_files;
-	filesn_t i = (conf.max_files != UNSET && c_max_files < n) ? c_max_files : n;
-	filesn_t longest_index = -1;
-
-	const size_t max = checks.min_name_trunc == 1
-		? (size_t)conf.min_name_trunc : (size_t)conf.max_name_len;
-
 	const int conf_no_eln = conf.no_eln;
 	const int checks_classify = checks.classify;
 	const int conf_files_counter = conf.files_counter;
@@ -932,8 +925,14 @@ get_longest_filename(const filesn_t n, const size_t eln_len)
 	const int conf_listing_mode = conf.listing_mode;
 	const int conf_max_files = conf.max_files;
 
+	const filesn_t c_max_files = (filesn_t)conf_max_files;
+	filesn_t i = (conf_max_files != UNSET && c_max_files < n) ? c_max_files : n;
+	filesn_t longest_index = -1;
+
+	const size_t max = checks.min_name_trunc == 1
+		? (size_t)conf.min_name_trunc : (size_t)conf.max_name_len;
+
 	while (--i >= 0) {
-		size_t total_len = 0;
 		file_info[i].eln_n = conf_no_eln == 1 ? -1 : DIGINUM(i + 1);
 
 		size_t file_len = file_info[i].len;
@@ -947,7 +946,7 @@ get_longest_filename(const filesn_t n, const size_t eln_len)
 		if (file_len > max)
 			file_len = max;
 
-		total_len = eln_len + 1 + file_len;
+		size_t total_len = eln_len + 1 + file_len;
 
 		if (checks_classify == 1) {
 			if (file_info[i].filesn > 0 && conf_files_counter == 1)
