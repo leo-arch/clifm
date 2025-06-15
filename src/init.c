@@ -2470,7 +2470,7 @@ get_aliases(void)
 		return;
 	}
 
-	if (aliases_n)
+	if (aliases_n > 0)
 		free_aliases();
 
 	char *line = (char *)NULL;
@@ -2682,6 +2682,8 @@ set_sudo_cmd(void)
 	sudo_cmd = DEF_SUDO_CMD;
 }
 
+#define SETOPT(cmd_line, def) ((cmd_line) == UNSET ? (def) : (cmd_line))
+
 /* If some option was not set, set it to the default value. */
 void
 check_options(void)
@@ -2697,47 +2699,30 @@ check_options(void)
 			savestring(DEF_HISTIGNORE, sizeof(DEF_HISTIGNORE) - 1);
 	}
 
-	if (conf.pager_view == UNSET) {
-		if (xargs.pager_view == UNSET)
-			conf.pager_view = DEF_PAGER_VIEW;
-		else
-			conf.pager_view = xargs.pager_view;
-	}
+	if (conf.pager_view == UNSET)
+		conf.pager_view = SETOPT(xargs.pager_view, DEF_PAGER_VIEW);
 
-	if (conf.color_lnk_as_target == UNSET) {
-		if (xargs.color_lnk_as_target == UNSET)
-			conf.color_lnk_as_target = DEF_COLOR_LNK_AS_TARGET;
-		else
-			conf.color_lnk_as_target = xargs.color_lnk_as_target;
-	}
+	if (conf.color_lnk_as_target == UNSET)
+		conf.color_lnk_as_target =
+			SETOPT(xargs.color_lnk_as_target, DEF_COLOR_LNK_AS_TARGET);
 
-	if (conf.trunc_names == UNSET) {
-		if (xargs.trunc_names == UNSET)
-			conf.trunc_names = DEF_TRUNC_NAMES;
-		else
-			conf.trunc_names = xargs.trunc_names;
-	}
+	if (conf.trunc_names == UNSET)
+		conf.trunc_names = SETOPT(xargs.trunc_names, DEF_TRUNC_NAMES);
 
 	conf.max_name_len_bk = conf.max_name_len;
 	if (conf.trunc_names == 0)
 		conf.max_name_len = UNSET;
 
-	if (conf.fuzzy_match == UNSET) {
-		conf.fuzzy_match = xargs.fuzzy_match == UNSET
-			? DEF_FUZZY_MATCH : xargs.fuzzy_match;
-	}
+	if (conf.fuzzy_match == UNSET)
+		conf.fuzzy_match = SETOPT(xargs.fuzzy_match, DEF_FUZZY_MATCH);
 
-	if (conf.fuzzy_match_algo == UNSET) {
-		conf.fuzzy_match_algo = xargs.fuzzy_match_algo == UNSET
-			? DEF_FUZZY_MATCH_ALGO : xargs.fuzzy_match_algo;
-	}
+	if (conf.fuzzy_match_algo == UNSET)
+		conf.fuzzy_match_algo =
+			SETOPT(xargs.fuzzy_match_algo, DEF_FUZZY_MATCH_ALGO);
 
-	if (conf.desktop_notifications == UNSET) {
-		if (xargs.desktop_notifications == UNSET)
-			conf.desktop_notifications = DEF_DESKTOP_NOTIFICATIONS;
-		else
-			conf.desktop_notifications = xargs.desktop_notifications;
-	}
+	if (conf.desktop_notifications == UNSET)
+		conf.desktop_notifications =
+			SETOPT(xargs.desktop_notifications, DEF_DESKTOP_NOTIFICATIONS);
 
 	if (!*prop_fields_str)
 		xstrsncpy(prop_fields_str, DEF_PROP_FIELDS, sizeof(prop_fields_str));
@@ -2759,12 +2744,8 @@ check_options(void)
 	if (xargs.si == UNSET)
 		xargs.si = DEF_SI;
 
-	if (hist_status == UNSET) {
-		if (xargs.history == UNSET)
-			hist_status = DEF_HIST_STATUS;
-		else
-			hist_status = xargs.history;
-	}
+	if (hist_status == UNSET)
+		hist_status = SETOPT(xargs.history, DEF_HIST_STATUS);
 
 	/* Do no override command line options */
 	if (xargs.cwd_in_title == UNSET)
@@ -2782,45 +2763,25 @@ check_options(void)
 	if (xargs.secure_env_full == UNSET)
 		xargs.secure_env_full = DEF_SECURE_ENV_FULL;
 
-	if (conf.no_eln == UNSET) {
-		if (xargs.no_eln == UNSET)
-			conf.no_eln = DEF_NOELN;
-		else
-			conf.no_eln = xargs.no_eln;
-	}
+	if (conf.no_eln == UNSET)
+		conf.no_eln = SETOPT(xargs.no_eln, DEF_NOELN);
 
 	if (prompt_notif == UNSET)
 		prompt_notif = DEF_PROMPT_NOTIF;
 
 #ifndef _NO_HIGHLIGHT
-	if (conf.highlight == UNSET) {
-		if (xargs.highlight == UNSET)
-			conf.highlight = DEF_HIGHLIGHT;
-		else
-			conf.highlight = xargs.highlight;
-	}
+	if (conf.highlight == UNSET)
+		conf.highlight = SETOPT(xargs.highlight, DEF_HIGHLIGHT);
 #endif /* !_NO_HIGHLIGHT */
 
-	if (conf.apparent_size == UNSET) {
-		if (xargs.apparent_size == UNSET)
-			conf.apparent_size = DEF_APPARENT_SIZE;
-		else
-			conf.apparent_size = xargs.apparent_size;
-	}
+	if (conf.apparent_size == UNSET)
+		conf.apparent_size = SETOPT(xargs.apparent_size, DEF_APPARENT_SIZE);
 
-	if (conf.full_dir_size == UNSET) {
-		if (xargs.full_dir_size == UNSET)
-			conf.full_dir_size = DEF_FULL_DIR_SIZE;
-		else
-			conf.full_dir_size = xargs.full_dir_size;
-	}
+	if (conf.full_dir_size == UNSET)
+		conf.full_dir_size = SETOPT(xargs.full_dir_size, DEF_FULL_DIR_SIZE);
 
-	if (conf.warning_prompt == UNSET) {
-		if (xargs.warning_prompt == UNSET)
-			conf.warning_prompt = DEF_WARNING_PROMPT;
-		else
-			conf.warning_prompt = xargs.warning_prompt;
-	}
+	if (conf.warning_prompt == UNSET)
+		conf.warning_prompt = SETOPT(xargs.warning_prompt, DEF_WARNING_PROMPT);
 
 	if (conf.listing_mode == UNSET) {
 		if (xargs.horizontal_list == UNSET)
@@ -2888,10 +2849,7 @@ check_options(void)
 	if (xargs.stealth_mode == 1) {
 		xargs.fzf_preview = conf.fzf_preview = 0;
 	} else if (conf.fzf_preview == UNSET) {
-		if (xargs.fzf_preview == UNSET)
-			conf.fzf_preview = DEF_FZF_PREVIEW;
-		else
-			conf.fzf_preview = xargs.fzf_preview;
+		conf.fzf_preview = SETOPT(xargs.fzf_preview, DEF_FZF_PREVIEW);
 	}
 #else
 	if (conf.fzf_preview == UNSET)
@@ -2899,242 +2857,120 @@ check_options(void)
 #endif /* !_NO_LIRA */
 
 #ifndef _NO_ICONS
-	if (conf.icons == UNSET) {
-		if (xargs.icons == UNSET)
-			conf.icons = DEF_ICONS;
-		else
-			conf.icons = xargs.icons;
-	}
+	if (conf.icons == UNSET)
+		conf.icons = SETOPT(xargs.icons, DEF_ICONS);
 #endif /* _NO_ICONS */
 
 #ifndef _NO_SUGGESTIONS
-	if (conf.suggestions == UNSET) {
-		if (xargs.suggestions == UNSET)
-			conf.suggestions = DEF_SUGGESTIONS;
-		else
-			conf.suggestions = xargs.suggestions;
-	}
+	if (conf.suggestions == UNSET)
+		conf.suggestions = SETOPT(xargs.suggestions, DEF_SUGGESTIONS);
 
 	if (!conf.suggestion_strategy)
 		conf.suggestion_strategy = savestring(DEF_SUG_STRATEGY, SUG_STRATS);
 #endif /* _NO_SUGGESTIONS */
 
-	if (conf.print_selfiles == UNSET) {
-		if (xargs.print_selfiles == UNSET)
-			conf.print_selfiles = DEF_PRINTSEL;
-		else
-			conf.print_selfiles = xargs.print_selfiles;
-	}
+	if (conf.print_selfiles == UNSET)
+		conf.print_selfiles = SETOPT(xargs.print_selfiles, DEF_PRINTSEL);
 
-	if (conf.case_sens_list == UNSET) {
-		if (xargs.case_sens_list == UNSET)
-			conf.case_sens_list = DEF_CASE_SENS_LIST;
-		else
-			conf.case_sens_list = xargs.case_sens_list;
-	}
+	if (conf.case_sens_list == UNSET)
+		conf.case_sens_list = SETOPT(xargs.case_sens_list, DEF_CASE_SENS_LIST);
 
-	if (conf.case_sens_dirjump == UNSET) {
-		if (xargs.case_sens_dirjump == UNSET)
-			conf.case_sens_dirjump = DEF_CASE_SENS_DIRJUMP;
-		else
-			conf.case_sens_dirjump = xargs.case_sens_dirjump;
-	}
+	if (conf.case_sens_dirjump == UNSET)
+		conf.case_sens_dirjump =
+			SETOPT(xargs.case_sens_dirjump, DEF_CASE_SENS_DIRJUMP);
 
-	if (conf.case_sens_path_comp == UNSET) {
-		if (xargs.case_sens_path_comp == UNSET)
-			conf.case_sens_path_comp = DEF_CASE_SENS_PATH_COMP;
-		else
-			conf.case_sens_path_comp = xargs.case_sens_path_comp;
-	}
+	if (conf.case_sens_path_comp == UNSET)
+		conf.case_sens_path_comp =
+			SETOPT(xargs.case_sens_path_comp, DEF_CASE_SENS_PATH_COMP);
 
 #ifndef _NO_TRASH
-	if (conf.tr_as_rm == UNSET) {
-		if (xargs.trasrm == UNSET)
-			conf.tr_as_rm = DEF_TRASRM;
-		else
-			conf.tr_as_rm = xargs.trasrm;
-	}
+	if (conf.tr_as_rm == UNSET)
+		conf.tr_as_rm = SETOPT(xargs.trasrm, DEF_TRASRM);
 #endif /* _NO_TRASH */
 
-	if (conf.only_dirs == UNSET) {
-		if (xargs.only_dirs == UNSET)
-			conf.only_dirs = DEF_ONLY_DIRS;
-		else
-			conf.only_dirs = xargs.only_dirs;
-	}
+	if (conf.only_dirs == UNSET)
+		conf.only_dirs = SETOPT(xargs.only_dirs, DEF_ONLY_DIRS);
 
-	if (conf.splash_screen == UNSET) {
-		if (xargs.splash_screen == UNSET)
-			conf.splash_screen = DEF_SPLASH_SCREEN;
-		else
-			conf.splash_screen = xargs.splash_screen;
-	}
+	if (conf.splash_screen == UNSET)
+		conf.splash_screen = SETOPT(xargs.splash_screen, DEF_SPLASH_SCREEN);
 
-	if (conf.welcome_message == UNSET) {
-		if (xargs.welcome_message == UNSET)
-			conf.welcome_message = DEF_WELCOME_MESSAGE;
-		else
-			conf.welcome_message = xargs.welcome_message;
-	}
+	if (conf.welcome_message == UNSET)
+		conf.welcome_message =
+			SETOPT(xargs.welcome_message, DEF_WELCOME_MESSAGE);
 
-	if (conf.show_hidden == UNSET) {
-		if (xargs.show_hidden == UNSET)
-			conf.show_hidden = DEF_SHOW_HIDDEN;
-		else
-			conf.show_hidden = xargs.show_hidden;
-	}
+	if (conf.show_hidden == UNSET)
+		conf.show_hidden = SETOPT(xargs.show_hidden, DEF_SHOW_HIDDEN);
 
-	if (conf.files_counter == UNSET) {
-		if (xargs.files_counter == UNSET)
-			conf.files_counter = DEF_FILES_COUNTER;
-		else
-			conf.files_counter = xargs.files_counter;
-	}
+	if (conf.files_counter == UNSET)
+		conf.files_counter = SETOPT(xargs.files_counter, DEF_FILES_COUNTER);
 
-	if (conf.long_view == UNSET) {
-		if (xargs.long_view == UNSET)
-			conf.long_view = DEF_LONG_VIEW;
-		else
-			conf.long_view = xargs.long_view;
-	}
+	if (conf.long_view == UNSET)
+		conf.long_view = SETOPT(xargs.long_view, DEF_LONG_VIEW);
 
-	if (conf.ext_cmd_ok == UNSET) {
-		if (xargs.ext_cmd_ok == UNSET)
-			conf.ext_cmd_ok = DEF_EXT_CMD_OK;
-		else
-			conf.ext_cmd_ok = xargs.ext_cmd_ok;
-	}
+	if (conf.ext_cmd_ok == UNSET)
+		conf.ext_cmd_ok = SETOPT(xargs.ext_cmd_ok, DEF_EXT_CMD_OK);
 
-	if (conf.pager == UNSET) {
-		if (xargs.pager == UNSET)
-			conf.pager = DEF_PAGER;
-		else
-			conf.pager = xargs.pager;
-	}
+	if (conf.pager == UNSET)
+		conf.pager = SETOPT(xargs.pager, DEF_PAGER);
 
-	if (conf.max_dirhist == UNSET) {
-		if (xargs.max_dirhist == UNSET)
-			conf.max_dirhist = DEF_MAX_DIRHIST;
-		else
-			conf.max_dirhist = xargs.max_dirhist;
-	}
+	if (conf.max_dirhist == UNSET)
+		conf.max_dirhist = SETOPT(xargs.max_dirhist, DEF_MAX_DIRHIST);
 
-	if (conf.clear_screen == UNSET) {
-		if (xargs.clear_screen == UNSET)
-			conf.clear_screen = DEF_CLEAR_SCREEN;
-		else
-			conf.clear_screen = xargs.clear_screen;
-	}
+	if (conf.clear_screen == UNSET)
+		conf.clear_screen = SETOPT(xargs.clear_screen, DEF_CLEAR_SCREEN);
 
-	if (conf.list_dirs_first == UNSET) {
-		if (xargs.list_dirs_first == UNSET)
-			conf.list_dirs_first = DEF_LIST_DIRS_FIRST;
-		else
-			conf.list_dirs_first = xargs.list_dirs_first;
-	}
+	if (conf.list_dirs_first == UNSET)
+		conf.list_dirs_first =
+			SETOPT(xargs.list_dirs_first, DEF_LIST_DIRS_FIRST);
 
-	if (conf.autols == UNSET) {
-		if (xargs.autols == UNSET)
-			conf.autols = DEF_AUTOLS;
-		else
-			conf.autols = xargs.autols;
-	}
+	if (conf.autols == UNSET)
+		conf.autols = SETOPT(xargs.autols, DEF_AUTOLS);
 
 	if (xargs.prompt_p_max_path != UNSET)
 		err('n', PRINT_PROMPT, "%s: --max-path: This option is "
 			"deprecated. Use the CLIFM_PROMPT_P_MAX_PATH environment "
 			"variable instead.\n", PROGRAM_NAME);
 
-	if (conf.prompt_p_max_path == UNSET) {
-		if (xargs.prompt_p_max_path == UNSET)
-			conf.prompt_p_max_path = DEF_PROMPT_P_MAX_PATH;
-		else
-			conf.prompt_p_max_path = xargs.prompt_p_max_path;
-	}
+	if (conf.prompt_p_max_path == UNSET)
+		conf.prompt_p_max_path =
+			SETOPT(xargs.prompt_p_max_path, DEF_PROMPT_P_MAX_PATH);
 
-	if (conf.light_mode == UNSET) {
-		if (xargs.light_mode == UNSET)
-			conf.light_mode = DEF_LIGHT_MODE;
-		else
-			conf.light_mode = xargs.light_mode;
-	}
+	if (conf.light_mode == UNSET)
+		conf.light_mode = SETOPT(xargs.light_mode, DEF_LIGHT_MODE);
 
-	if (conf.classify == UNSET) {
-		if (xargs.classify == UNSET)
-			conf.classify = DEF_CLASSIFY;
-		else
-			conf.classify = xargs.classify;
-	}
+	if (conf.classify == UNSET)
+		conf.classify = SETOPT(xargs.classify, DEF_CLASSIFY);
 
-	if (conf.share_selbox == UNSET) {
-		if (xargs.share_selbox == UNSET)
-			conf.share_selbox = DEF_SHARE_SELBOX;
-		else
-			conf.share_selbox = xargs.share_selbox;
-	}
+	if (conf.share_selbox == UNSET)
+		conf.share_selbox = SETOPT(xargs.share_selbox, DEF_SHARE_SELBOX);
 
-	if (conf.sort == UNSET) {
-		if (xargs.sort == UNSET)
-			conf.sort = DEF_SORT;
-		else
-			conf.sort = xargs.sort;
-	}
+	if (conf.sort == UNSET)
+		conf.sort = SETOPT(xargs.sort, DEF_SORT);
 
-	if (conf.sort_reverse == UNSET) {
-		if (xargs.sort_reverse == UNSET)
-			conf.sort_reverse = DEF_SORT_REVERSE;
-		else
-			conf.sort_reverse = xargs.sort_reverse;
-	}
+	if (conf.sort_reverse == UNSET)
+		conf.sort_reverse = SETOPT(xargs.sort_reverse, DEF_SORT_REVERSE);
 
-	if (conf.tips == UNSET) {
-		if (xargs.tips == UNSET)
-			conf.tips = DEF_TIPS;
-		else
-			conf.tips = xargs.tips;
-	}
+	if (conf.tips == UNSET)
+		conf.tips = SETOPT(xargs.tips, DEF_TIPS);
 
-	if (conf.autocd == UNSET) {
-		if (xargs.autocd == UNSET)
-			conf.autocd = DEF_AUTOCD;
-		else
-			conf.autocd = xargs.autocd;
-	}
+	if (conf.autocd == UNSET)
+		conf.autocd = SETOPT(xargs.autocd, DEF_AUTOCD);
 
-	if (conf.auto_open == UNSET) {
-		if (xargs.auto_open == UNSET)
-			conf.auto_open = DEF_AUTO_OPEN;
-		else
-			conf.auto_open = xargs.auto_open;
-	}
+	if (conf.auto_open == UNSET)
+		conf.auto_open = SETOPT(xargs.auto_open, DEF_AUTO_OPEN);
 
-	if (conf.cd_on_quit == UNSET) {
-		if (xargs.cd_on_quit == UNSET)
-			conf.cd_on_quit = DEF_CD_ON_QUIT;
-		else
-			conf.cd_on_quit = xargs.cd_on_quit;
-	}
+	if (conf.cd_on_quit == UNSET)
+		conf.cd_on_quit = SETOPT(xargs.cd_on_quit, DEF_CD_ON_QUIT);
 
-	if (conf.dirhist_map == UNSET) {
-		if (xargs.dirhist_map == UNSET)
-			conf.dirhist_map = DEF_DIRHIST_MAP;
-		else
-			conf.dirhist_map = xargs.dirhist_map;
-	}
+	if (conf.dirhist_map == UNSET)
+		conf.dirhist_map = SETOPT(xargs.dirhist_map, DEF_DIRHIST_MAP);
 
-	if (conf.disk_usage == UNSET) {
-		if (xargs.disk_usage == UNSET)
-			conf.disk_usage = DEF_DISK_USAGE;
-		else
-			conf.disk_usage = xargs.disk_usage;
-	}
+	if (conf.disk_usage == UNSET)
+		conf.disk_usage = SETOPT(xargs.disk_usage, DEF_DISK_USAGE);
 
-	if (conf.restore_last_path == UNSET) {
-		if (xargs.restore_last_path == UNSET)
-			conf.restore_last_path = DEF_RESTORE_LAST_PATH;
-		else
-			conf.restore_last_path = xargs.restore_last_path;
-	}
+	if (conf.restore_last_path == UNSET)
+		conf.restore_last_path =
+			SETOPT(xargs.restore_last_path, DEF_RESTORE_LAST_PATH);
 
 	if (!conf.term)
 		conf.term = savestring(DEF_TERM_CMD, sizeof(DEF_TERM_CMD) - 1);
@@ -3201,3 +3037,5 @@ Falling back to modification time."
 
 	reset_opts();
 }
+
+#undef SETOPT

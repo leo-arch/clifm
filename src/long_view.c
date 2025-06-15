@@ -547,8 +547,7 @@ print_entry_props(const struct fileinfo *props, const struct maxes_t *maxes,
 		buf_rem_space = sizeof(buf) - len;
 
 		switch (prop_fields_str[i]) {
-		case 'B':
-			len += gen_blocks(props, buf + len, maxes->blocks); break;
+		case 'B': len += gen_blocks(props, buf + len, maxes->blocks); break;
 		case 'f':
 			if (file_counter == 1)
 				len += gen_filecounter(props, buf + len, maxes->files_counter);

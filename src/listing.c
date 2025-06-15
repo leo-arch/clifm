@@ -219,7 +219,7 @@ init_checks_struct(void)
 static void
 set_icon_names_hashes(void)
 {
-	int i = (int)(sizeof(icon_filenames) / sizeof(struct icons_t));
+	int i = (int)(sizeof(icon_filenames) / sizeof(icon_filenames[0]));
 	name_icons_hashes = xnmalloc((size_t)i + 1, sizeof(size_t));
 
 	while (--i >= 0)
@@ -229,7 +229,7 @@ set_icon_names_hashes(void)
 static void
 set_dir_names_hashes(void)
 {
-	int i = (int)(sizeof(icon_dirnames) / sizeof(struct icons_t));
+	int i = (int)(sizeof(icon_dirnames) / sizeof(icon_dirnames[0]));
 	dir_icons_hashes = xnmalloc((size_t)i + 1, sizeof(size_t));
 
 	while (--i >= 0)
@@ -239,7 +239,7 @@ set_dir_names_hashes(void)
 static void
 set_ext_names_hashes(void)
 {
-	int i = (int)(sizeof(icon_ext) / sizeof(struct icons_t));
+	int i = (int)(sizeof(icon_ext) / sizeof(icon_ext[0]));
 	ext_icons_hashes = xnmalloc((size_t)i + 1,  sizeof(size_t));
 
 	while (--i >= 0)
