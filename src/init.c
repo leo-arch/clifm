@@ -2682,6 +2682,76 @@ set_sudo_cmd(void)
 	sudo_cmd = DEF_SUDO_CMD;
 }
 
+#ifndef _NO_FZF
+static void
+set_fzftab_options(void)
+{
+	if (fzftab == UNSET) {
+		if (xargs.fzftab == UNSET) {
+			// This flag will be true only when reloading the config file,
+			// because the check for the fzf binary is made at startup AFTER
+			// reading the config file (check_third_party_cmds() in checks.c).
+			if (bin_flags & FZF_BIN_OK)
+				fzftab = 1;
+		} else {
+			fzftab = xargs.fzftab;
+		}
+
+		if (xargs.fnftab == 1)
+			tabmode = FNF_TAB;
+		else if (xargs.fzftab == 1)
+			tabmode = FZF_TAB;
+		else if (xargs.smenutab == 1)
+			tabmode = SMENU_TAB;
+		else
+			tabmode = STD_TAB;
+	}
+
+	if (!conf.fzftab_options) {
+		if (conf.colorize == 1 || !getenv("FZF_DEFAULT_OPTS")) {
+			if (conf.colorize == 1) {
+				conf.fzftab_options =
+					savestring(DEF_FZFTAB_OPTIONS,
+					sizeof(DEF_FZFTAB_OPTIONS) - 1);
+			} else {
+				conf.fzftab_options =
+					savestring(DEF_FZFTAB_OPTIONS_NO_COLOR,
+					sizeof(DEF_FZFTAB_OPTIONS_NO_COLOR) - 1);
+			}
+		} else {
+			conf.fzftab_options = savestring("", 1);
+		}
+	}
+
+	set_fzf_preview_border_type();
+
+	smenutab_options_env = (xargs.secure_env_full != 1 && tabmode == SMENU_TAB)
+		? getenv("CLIFM_SMENU_OPTIONS") : (char *)NULL;
+
+	if (smenutab_options_env
+	&& sanitize_cmd(smenutab_options_env, SNT_BLACKLIST) != 0) {
+		err('w', PRINT_PROMPT, "%s: CLIFM_SMENU_OPTIONS contains unsafe "
+			"characters (<>|;&$`). Falling back to default values.\n",
+			PROGRAM_NAME);
+		smenutab_options_env = (char *)NULL;
+	}
+}
+#endif /* !_NO_FZF */
+
+static void
+set_encoded_prompt(void)
+{
+	free(conf.encoded_prompt);
+	if (conf.colorize == 1) {
+		conf.encoded_prompt =
+			savestring(DEFAULT_PROMPT, sizeof(DEFAULT_PROMPT) - 1);
+	} else {
+		conf.encoded_prompt =
+			savestring(DEFAULT_PROMPT_NO_COLOR,
+			sizeof(DEFAULT_PROMPT_NO_COLOR) - 1);
+	}
+}
+
 #define SETOPT(cmd_line, def) ((cmd_line) == UNSET ? (def) : (cmd_line))
 
 /* If some option was not set, set it to the default value. */
@@ -2791,59 +2861,10 @@ check_options(void)
 	}
 
 #ifndef _NO_FZF
-	if (fzftab == UNSET) {
-		if (xargs.fzftab == UNSET) {
-			/* This flag will be true only when reloading the config file,
-			 * because the check for the fzf binary is made at startup AFTER
-			 * reading the config file (check_third_party_cmds() in checks.c) */
-			if (bin_flags & FZF_BIN_OK)
-				fzftab = 1;
-		} else {
-			fzftab = xargs.fzftab;
-		}
-
-		if (xargs.fnftab == 1)
-			tabmode = FNF_TAB;
-		else if (xargs.fzftab == 1)
-			tabmode = FZF_TAB;
-		else if (xargs.smenutab == 1)
-			tabmode = SMENU_TAB;
-		else
-			tabmode = STD_TAB;
-	}
-
-	if (!conf.fzftab_options) {
-		if (conf.colorize == 1 || !getenv("FZF_DEFAULT_OPTS")) {
-			if (conf.colorize == 1) {
-				conf.fzftab_options =
-					savestring(DEF_FZFTAB_OPTIONS,
-					sizeof(DEF_FZFTAB_OPTIONS) - 1);
-			} else {
-				conf.fzftab_options =
-					savestring(DEF_FZFTAB_OPTIONS_NO_COLOR,
-					sizeof(DEF_FZFTAB_OPTIONS_NO_COLOR) - 1);
-			}
-		} else {
-			conf.fzftab_options = savestring("", 1);
-		}
-	}
-
-	set_fzf_preview_border_type();
-
-	smenutab_options_env = (xargs.secure_env_full != 1 && tabmode == SMENU_TAB)
-		? getenv("CLIFM_SMENU_OPTIONS") : (char *)NULL;
-
-	if (smenutab_options_env
-	&& sanitize_cmd(smenutab_options_env, SNT_BLACKLIST) != 0) {
-		err('w', PRINT_PROMPT, "%s: CLIFM_SMENU_OPTIONS contains unsafe "
-			"characters (<>|;&$`). Falling back to default values.\n",
-			PROGRAM_NAME);
-		smenutab_options_env = (char *)NULL;
-	}
-
+	set_fzftab_options();
 #else
 	tabmode = STD_TAB;
-#endif /* _NO_FZF */
+#endif /* !_NO_FZF */
 
 #ifndef _NO_LIRA
 	if (xargs.stealth_mode == 1) {
@@ -2978,17 +2999,8 @@ check_options(void)
 	if (conf.colorize == 0)
 		expand_prompt_name(DEF_PROMPT_NO_COLOR_NAME);
 
-	if (!conf.encoded_prompt || !*conf.encoded_prompt) {
-		free(conf.encoded_prompt);
-		if (conf.colorize == 1) {
-			conf.encoded_prompt =
-				savestring(DEFAULT_PROMPT, sizeof(DEFAULT_PROMPT) - 1);
-		} else {
-			conf.encoded_prompt =
-				savestring(DEFAULT_PROMPT_NO_COLOR,
-				sizeof(DEFAULT_PROMPT_NO_COLOR) - 1);
-		}
-	}
+	if (!conf.encoded_prompt || !*conf.encoded_prompt)
+		set_encoded_prompt();
 
 	set_prompt_options();
 
@@ -3009,7 +3021,7 @@ check_options(void)
 	if (xargs.stealth_mode == 1 && !conf.opener) {
 		/* Since in stealth mode we have no access to the config file, we cannot
 		 * use Lira, since it relays on a file. Set it thus to FALLBACK_OPENER,
-		 * if not already set via command line */
+		 * if not already set via command line. */
 		conf.opener = savestring(FALLBACK_OPENER, sizeof(FALLBACK_OPENER) - 1);
 	}
 
