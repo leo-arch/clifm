@@ -2775,7 +2775,7 @@ rl_switch_workspace(const int n)
 	if (rl_line_buffer && *rl_line_buffer)
 		rl_delete_text(0, rl_end);
 
-	char t[16];
+	char t[MAX_INT_STR + 4];
 	exec_prompt_cmds = 1;
 
 	if (cur_ws == (n - 1)) {

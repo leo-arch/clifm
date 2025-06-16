@@ -161,7 +161,7 @@ sanitize_shell_level(char *str)
 	if (!str || !*str || !is_number(str))
 		return FUNC_FAILURE;
 
-	int a = atoi(str);
+	const int a = atoi(str);
 	if (a < 1 || a > MAX_SHELL_LEVEL)
 		return FUNC_FAILURE;
 
@@ -172,10 +172,10 @@ sanitize_shell_level(char *str)
 static void
 drop_privs(void)
 {
-	uid_t ruid = getuid();
-	uid_t euid = geteuid();
-	gid_t rgid = getgid();
-	gid_t egid = getegid();
+	const uid_t ruid = getuid();
+	const uid_t euid = geteuid();
+	const gid_t rgid = getgid();
+	const gid_t egid = getegid();
 
 	if (rgid != egid) {
 		int err = 0;

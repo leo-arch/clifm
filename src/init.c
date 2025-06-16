@@ -2752,6 +2752,15 @@ set_encoded_prompt(void)
 	}
 }
 
+static char *
+set_warning_prompt_str(void)
+{
+	return (conf.colorize == 1
+		? savestring(DEF_WPROMPT_STR, sizeof(DEF_WPROMPT_STR) - 1)
+		: savestring(DEF_WPROMPT_STR_NO_COLOR,
+				sizeof(DEF_WPROMPT_STR_NO_COLOR) - 1));
+}
+
 #define SETOPT(cmd_line, def) ((cmd_line) == UNSET ? (def) : (cmd_line))
 
 /* If some option was not set, set it to the default value. */
@@ -3004,13 +3013,8 @@ check_options(void)
 
 	set_prompt_options();
 
-	if (!conf.wprompt_str) {
-		if (conf.colorize == 1)
-			conf.wprompt_str = savestring(DEF_WPROMPT_STR, sizeof(DEF_WPROMPT_STR) - 1);
-		else
-			conf.wprompt_str = savestring(DEF_WPROMPT_STR_NO_COLOR,
-				sizeof(DEF_WPROMPT_STR_NO_COLOR) - 1);
-	}
+	if (!conf.wprompt_str)
+		conf.wprompt_str = set_warning_prompt_str();
 
 	if ((xargs.stealth_mode == 1 || home_ok == 0 ||
 	config_ok == 0 || !config_file) && !*div_line) {

@@ -359,12 +359,6 @@ print_sort_method(void)
 		putchar('\n');
 }
 
-static inline void
-toggle_sort_reverse(void)
-{
-	conf.sort_reverse = !conf.sort_reverse;
-}
-
 static inline int
 re_sort_files_list(void)
 {
@@ -421,7 +415,7 @@ sort_function(char **arg)
 	/* Argument is an alphanumerical string */
 	if (!is_number(arg[1])) {
 		if (*arg[1] == 'r' && strcmp(arg[1], "rev") == 0) {
-			toggle_sort_reverse();
+			conf.sort_reverse = !conf.sort_reverse;
 			return re_sort_files_list();
 		}
 
@@ -449,7 +443,7 @@ sort_function(char **arg)
 		conf.sort = n;
 
 		if (arg[2] && *arg[2] == 'r' && strcmp(arg[2], "rev") == 0)
-			toggle_sort_reverse();
+			conf.sort_reverse = !conf.sort_reverse;
 
 		update_autocmd_opts(AC_SORT);
 

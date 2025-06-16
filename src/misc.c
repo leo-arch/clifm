@@ -1861,11 +1861,10 @@ handle_stdin(void)
 	 * == (65535 * PATH_MAX)
 	 * == 262MiB of data ((65535 * PATH_MAX) / 1024). */
 
-	size_t chunk = (size_t)512 * 1024;
+	const size_t chunk = (size_t)512 * 1024;
+	const size_t max_chunks = 512;
 	size_t chunks_n = 1;
 	size_t total_len = 0;
-	size_t max_chunks = 512;
-
 	ssize_t input_len = 0;
 
 	/* Initial buffer allocation == 1 chunk */
