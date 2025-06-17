@@ -632,71 +632,62 @@ is_range(const char *str)
 	return 0;
 }
 
+static int
+print_val_err(const char *name, const int msg_type)
+{
+	printf("%s: %s\n", name, unsafe_name_msgs[msg_type]);
+	return 0;
+}
+
 /* Return 1 if NAME is a safe filename, or 0 if not.
  * See https://dwheeler.com/essays/fixing-unix-linux-filenames.html */
 static int
-is_valid_filename(char *name)
+is_valid_filename(const char *name)
 {
-	char *n = name;
+	const char *n = name;
 	/* Trailing spaces were already removed (by get_newname()) */
 
 	/* Starting with dash */
-	if (*n == '-') {
-		printf("%s: %s\n", name, unsafe_name_msgs[UNSAFE_DASH]);
-		return 0;
-	}
+	if (*n == '-')
+		return print_val_err(name, UNSAFE_DASH);
 
 	/* Reserved keyword (internal: MIME type and file type expansions) */
-	if ((*n == '=' && n[1] >= 'a' && n[1] <= 'z' && !n[2]) || *n == '@') {
-		printf("%s: %s\n", name, unsafe_name_msgs[UNSAFE_MIME]);
-		return 0;
-	}
+	if ((*n == '=' && n[1] >= 'a' && n[1] <= 'z' && !n[2]) || *n == '@')
+		return print_val_err(name, UNSAFE_MIME);
 
 	/* Reserved keyword (internal: bookmarks, tags, and selected files
 	 * constructs) */
 	if (((*n == 'b' || *n == 's') && n[1] == ':')
-	|| strcmp(n, "sel") == 0) {
-		printf("%s: %s\n", name, unsafe_name_msgs[UNSAFE_BTS_CONST]);
-		return 0;
-	}
+	|| strcmp(n, "sel") == 0)
+		return print_val_err(name, UNSAFE_BTS_CONST);
 
-	if (*n == 't' && n[1] == ':' && n[2]) {
-		printf("%s: %s\n", name, unsafe_name_msgs[UNSAFE_BTS_CONST]);
-		return 0;
-	}
+	if ((*n == 't' || *n == 'w') && n[1] == ':' && n[2])
+		return print_val_err(name, UNSAFE_BTS_CONST);
 
 	/* Reserved (internal: ELN/range expansion) */
-	if ((*n > '0' && is_number(n)) || is_range(n)) {
-		printf("%s: %s\n", name, unsafe_name_msgs[UNSAFE_ELN]);
-		return 0;
-	}
+	if ((*n > '0' && is_number(n)) || is_range(n))
+		return print_val_err(name, UNSAFE_ELN);
 
 	/* "~" or ".": Reserved keyword */
-	if ((*n == '~' || *n == '.') && !n[1]) {
-		printf("%s: %s\n", name, unsafe_name_msgs[UNSAFE_SYS_KEY]);
-		return 0;
-	}
+	if ((*n == '~' || *n == '.') && !n[1])
+		return print_val_err(name, UNSAFE_SYS_KEY);
 
 	/* ".." or "./": Reserved keyword */
-	if (*n == '.' && (n[1] == '.' || n[1] == '/') && !n[2]) {
-		printf("%s: %s\n", name, unsafe_name_msgs[UNSAFE_SYS_KEY]);
-		return 0;
-	}
+	if (*n == '.' && (n[1] == '.' || n[1] == '/') && !n[2])
+		return print_val_err(name, UNSAFE_SYS_KEY);
 
 	int only_dots = 1;
-	char *s = name;
+	const char *s = name;
 	while (*s) {
 		/* Contains control characters (being not UTF-8 leading nor
 		 * continuation bytes) */
-		if (*s < ' ' && (*s & 0xC0) != 0xC0 && (*s & 0xC0) != 0x80) {
-			printf("%s: %s\n", name, unsafe_name_msgs[UNSAFE_CONTROL]);
-			return 0;
-		}
+		if (*s < ' ' && !IS_UTF8_CHAR(*s))
+			return print_val_err(name, UNSAFE_CONTROL);
+
 		/* Contains shell meta-characters */
-		if (strchr("*?[]<>|(){}&=`^!\\;$", *s)) {
-			printf("%s: %s\n", name, unsafe_name_msgs[UNSAFE_META]);
-			return 0;
-		}
+		if (strchr("*?[]<>|(){}&=`^!\\;$", *s))
+			return print_val_err(name, UNSAFE_META);
+
 		/* Only dots: Reserved keyword (internal: fastback expansion) */
 		if (*s != '.')
 			only_dots = 0;
@@ -704,22 +695,16 @@ is_valid_filename(char *name)
 		s++;
 	}
 
-	if (only_dots == 1) {
-		printf("%s: %s\n", name, unsafe_name_msgs[UNSAFE_FASTBACK]);
-		return 0;
-	}
+	if (only_dots == 1)
+		return print_val_err(name, UNSAFE_FASTBACK);
 
 	/* Name too long */
-	if (s - name >= NAME_MAX) {
-		printf("%s: %s\n", name, unsafe_name_msgs[UNSAFE_TOO_LONG]);
-		return 0;
-	}
+	if (s - name >= NAME_MAX)
+		return print_val_err(name, UNSAFE_TOO_LONG);
 
 #ifdef _BE_POSIX
-	if (is_portable_filename(name, (size_t)(s - name)) != FUNC_SUCCESS) {
-		printf("%s: %s\n", name, unsafe_name_msgs[UNSAFE_NOT_PORTABLE]);
-		return 0;
-	}
+	if (is_portable_filename(name, (size_t)(s - name)) != FUNC_SUCCESS)
+		return print_val_err(name, UNSAFE_NOT_PORTABLE);
 #endif /* _BE_POSIX */
 
 	return 1;

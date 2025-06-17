@@ -1305,7 +1305,7 @@ is_fused_param(char *str)
 	if (!q)
 		return FUNC_FAILURE;
 
-	char c = *q;
+	const char c = *q;
 	*q = '\0';
 
 	const int ret = is_internal_cmd(str, PARAM_FNAME_NUM, 0, 0);
