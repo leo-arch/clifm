@@ -618,17 +618,17 @@ is_range(const char *str)
 	if (!str || !*str)
 		return 0;
 
-	char *p = strchr(str, '-');
-	if (!p)
+	char *dash = strchr(str, '-');
+	if (!dash)
 		return 0;
 
-	*p = '\0';
-	if (is_number(str) && (!p[1] || is_number(p + 1))) {
-		*p = '-';
+	*dash = '\0';
+	if (is_number(str) && (!dash[1] || is_number(dash + 1))) {
+		*dash = '-';
 		return 1;
 	}
 
-	*p = '-';
+	*dash = '-';
 	return 0;
 }
 
@@ -655,8 +655,8 @@ is_valid_filename(const char *name)
 	if ((*n == '=' && n[1] >= 'a' && n[1] <= 'z' && !n[2]) || *n == '@')
 		return print_val_err(name, UNSAFE_MIME);
 
-	/* Reserved keyword (internal: bookmarks, tags, and selected files
-	 * constructs) */
+	/* Reserved keyword (internal: bookmarks, tags, workspaces, and
+	 * selected files constructs) */
 	if (((*n == 'b' || *n == 's') && n[1] == ':')
 	|| strcmp(n, "sel") == 0)
 		return print_val_err(name, UNSAFE_BTS_CONST);
