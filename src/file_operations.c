@@ -274,7 +274,7 @@ get_dup_file_dest_dir(void)
 				char *name = file_info[n - 1].name;
 				dir = savestring(name, strlen(name));
 			}
-		} else if (*dir == '~') { // Expand tilde
+		} else if (*dir == '~') { /* Expand tilde */
 			char *tmp = tilde_expand(dir);
 			if (tmp) {
 				free(dir);
@@ -1643,9 +1643,22 @@ get_rename_dest_filename(char *name, int *status)
 
 	/* Get destination filename. */
 	char *new_name = get_new_filename(name);
-	if (!new_name) {
+	if (!new_name) { /* The user pressed Ctrl+d */
 		*status = FUNC_SUCCESS;
 		return (char *)NULL;
+	}
+
+	if (*new_name == '~') {
+		p = tilde_expand(new_name);
+		if (!p) {
+			*status = FUNC_FAILURE;
+			xerror(_("m: '%s': Error expanding tilde\n"), new_name);
+			free(new_name);
+			return (char *)NULL;
+		} else {
+			free(new_name);
+			new_name = p;
+		}
 	}
 
 	return new_name;
@@ -1654,12 +1667,12 @@ get_rename_dest_filename(char *name, int *status)
 
 /* Run CMD (either cp(1) or mv(1)) via execv().
  * skip_force is true (1) when the -f,--force parameter has been provided to
- * either 'c' or 'm' commands: it intructs cp/mv to run non-interactivelly
+ * either 'c' or 'm' commands: it intructs cp/mv to run non-interactively
  * (no -i). */
 static int
 run_cp_mv_cmd(char **cmd, const int skip_force, const size_t files_num)
 {
-	if (!cmd)
+	if (!cmd || !cmd[0])
 		return FUNC_FAILURE;
 
 	char *new_name = (char *)NULL;
@@ -1714,13 +1727,7 @@ run_cp_mv_cmd(char **cmd, const int skip_force, const size_t files_num)
 		n++;
 	} else {
 		if (new_name) {
-			p = (char *)NULL;
-			if (*new_name == '~')
-				p = tilde_expand(new_name);
-			char *q = p ? p : new_name;
-			tcmd[n] = savestring(q, strlen(q));
-			free(new_name);
-			free(p);
+			tcmd[n] = new_name;
 			if (cwd == 0)
 				cwd = is_file_in_cwd(tcmd[n]);
 			n++;
