@@ -1620,6 +1620,38 @@ print_cp_mv_summary_msg(const char *c, const size_t n, const int cwd)
 		print_reload_msg(SET_SUCCESS_PTR, xs_cb, _("%zu file(s) copied\n"), n);
 }
 
+static char *
+get_rename_dest_filename(char *name, int *status)
+{
+	if (!name || !*name) {
+		*status = EINVAL;
+		return (char *)NULL;
+	}
+
+	/* Check source file existence. */
+	struct stat a;
+	char *p = unescape_str(name, 0);
+	const int ret = lstat(p ? p : name, &a);
+	free(p);
+
+	if (ret == -1) {
+		*status = errno;
+		alt_prompt = 0;
+		xerror("m: '%s': %s\n", name, strerror(errno));
+		return (char *)NULL;
+	}
+
+	/* Get destination filename. */
+	char *new_name = get_new_filename(name);
+	if (!new_name) {
+		*status = FUNC_SUCCESS;
+		return (char *)NULL;
+	}
+
+	return new_name;
+}
+
+
 /* Run CMD (either cp(1) or mv(1)) via execv().
  * skip_force is true (1) when the -f,--force parameter has been provided to
  * either 'c' or 'm' commands: it intructs cp/mv to run non-interactivelly
@@ -1632,41 +1664,9 @@ run_cp_mv_cmd(char **cmd, const int skip_force, const size_t files_num)
 
 	char *new_name = (char *)NULL;
 	if (alt_prompt == FILES_PROMPT) { /* 'm' command (interactive rename) */
-		if (!cmd[1])
-			return EINVAL;
-
-		/* If we have a number, either it was not expanded by parse_input_str(),
-		 * in which case it is an invalid ELN, or it was expanded to a file
-		 * named as a number. Let's check if we have such filename in the
-		 * file list. */
-		if (is_number(cmd[1])) {
-			filesn_t i = files;
-			while (--i >= 0) {
-				if (*cmd[1] != *file_info[i].name)
-					continue;
-				if (strcmp(cmd[1], file_info[i].name) == 0)
-					break;
-			}
-			if (i == -1) {
-				xerror(_("%s: %s: No such ELN\n"), PROGRAM_NAME, cmd[1]);
-				alt_prompt = 0;
-				return ENOENT;
-			}
-		} else {
-			char *p = unescape_str(cmd[1], 0);
-			struct stat a;
-			const int ret = lstat(p ? p : cmd[1], &a);
-			free(p);
-			if (ret == -1) {
-				alt_prompt = 0;
-				xerror("m: %s: %s\n", cmd[1], strerror(errno));
-				return errno;
-			}
-		}
-
-		new_name = get_new_filename(cmd[1]);
-		if (!new_name)
-			return FUNC_SUCCESS;
+		int status = 0;
+		if (!(new_name = get_rename_dest_filename(cmd[1], &status)))
+			return status;
 	}
 
 	char **tcmd = xnmalloc(3 + args_n + 2, sizeof(char *));
