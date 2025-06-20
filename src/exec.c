@@ -1913,43 +1913,32 @@ toggle_follow_links(const char *arg)
 static int
 handle_copy_move_cmds(char ***cmd)
 {
-    int copy_and_rename = 0;
-    int use_force = 0;
-    char **args = *cmd;
+	char **args = *cmd;
+	if (!args || !args[0])
+		return (-1);
 
-    if (args[0][0] != 'm') { // Either c, vv, or paste commands
-        if (args[1] && IS_HELP(args[1])) {
-            if (args[0][1] == 'v')
-                puts(_(VV_USAGE));
-            else
-                puts(_(WRAPPERS_USAGE));
-            return (-1);
-        }
+	int copy_and_rename = 0;
+	int use_force = args[1] ? is_force_param(args[1]) : 0;
 
-        if (args[0][1]== 'v')
-            copy_and_rename = 1;
+	if (args[1] && IS_HELP(args[1])) {
+		puts(args[0][1] == 'v' ? _(VV_USAGE) : _(WRAPPERS_USAGE));
+		return (-1);
+	}
 
-        use_force = is_force_param(args[1]);
-        set_cp_cmd(&args[0], &use_force);
-
-    } else { /* The m command */
-        if (args[1] && IS_HELP(args[1])) {
-            puts(_(WRAPPERS_USAGE));
-            return (-1);
-        }
-
-        if (sel_is_last == 0 && args[1] && !args[2])
-            alt_prompt = FILES_PROMPT; /* Interactive rename */
-
-        use_force = is_force_param(args[1]);
-        set_mv_cmd(&args[0], &use_force);
+	if (args[0][0] != 'm') { /* Either c, vv, or paste commands. */
+		copy_and_rename = (args[0][1] == 'v'); /* vv command. */
+		set_cp_cmd(&args[0], &use_force);
+	} else { /* The m command. */
+		if (sel_is_last == 0 && args[1] && !args[2])
+			alt_prompt = FILES_PROMPT; /* Interactive rename. */
+		set_mv_cmd(&args[0], &use_force);
     }
 
-    kbind_busy = 1;
-    exit_code = cp_mv_file(args, copy_and_rename, use_force);
-    kbind_busy = 0;
+	kbind_busy = 1;
+	exit_code = cp_mv_file(args, copy_and_rename, use_force);
+	kbind_busy = 0;
 
-    return 0;
+	return 0;
 }
 
 /* Take the command entered by the user, already splitted into substrings
