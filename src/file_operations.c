@@ -679,8 +679,7 @@ is_valid_filename(const char *name)
 	int only_dots = 1;
 	const char *s = name;
 	while (*s) {
-		/* Contains control characters (being not UTF-8 leading nor
-		 * continuation bytes) */
+		/* Contains control characters (being not UTF-8 bytes) */
 		if (*s < ' ' && !IS_UTF8_CHAR(*s))
 			return print_val_err(name, UNSAFE_CONTROL);
 

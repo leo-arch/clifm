@@ -142,34 +142,34 @@ count_chars(const char *restrict s, const char c)
 size_t
 count_words(size_t *start_word, size_t *full_word)
 {
-	size_t words = 0, w = 0, first_non_space = 0;
-	char q = 0;
+	size_t words = 0, i = 0, first_non_space = 0;
+	char quote = 0;
 	char *b = rl_line_buffer;
 
-	for (; b[w]; w++) {
+	for (; b[i]; i++) {
 		/* Keep track of open quotes. */
-		if (b[w] == '\'' || b[w] == '"')
-			q = q == b[w] ? 0 : b[w];
+		if (b[i] == '\'' || b[i] == '"')
+			quote = quote == b[i] ? 0 : b[i];
 
-		if (!first_non_space && b[w] != ' ') {
+		if (first_non_space == 0 && b[i] != ' ') {
 			words = 1;
-			*start_word = w;
+			*start_word = i;
 			first_non_space = 1;
 			continue;
 		}
 
-		if (w > 0 && b[w] == ' ' && b[w - 1] != '\\') {
-			if (!*full_word && b[w - 1] != '|'
-			&& b[w - 1] != ';' && b[w - 1] != '&')
-				*full_word = w; /* Index of the end of the first full word (cmd). */
-			if (b[w + 1] && b[w + 1] != ' ')
+		if (i > 0 && b[i] == ' ' && b[i - 1] != '\\') {
+			if (!*full_word && b[i - 1] != '|'
+			&& b[i - 1] != ';' && b[i - 1] != '&')
+				*full_word = i; /* Index of the end of the first full word (cmd). */
+			if (b[i + 1] && b[i + 1] != ' ')
 				words++;
 		}
 
 		/* If a process separator char is found, reset variables so that we
 		 * can start counting again for the new command. */
-		if (!q && cur_color != hq_c && w > 0 && b[w - 1] != '\\'
-		&& ((b[w] == '&' && b[w - 1] == '&') || b[w] == '|' || b[w] == ';'))
+		if (quote == 0 && cur_color != hq_c && i > 0 && b[i - 1] != '\\'
+		&& ((b[i] == '&' && b[i - 1] == '&') || b[i] == '|' || b[i] == ';'))
 			words = first_non_space = *full_word = 0;
 	}
 
@@ -227,11 +227,9 @@ xstrcasechr(char *s, char c)
 
 	const char uc = (char)TOUPPER(c);
 	while (*s) {
-		if (TOUPPER(*s) != uc) {
-			s++;
-			continue;
-		}
-		return s;
+		if (TOUPPER(*s) == uc)
+			return s;
+		s++;
 	}
 
 	return (char *)NULL;
