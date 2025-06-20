@@ -575,6 +575,7 @@ struct icons_t const icon_ext[] = {
     {"lhs", ICON_HASKELL, BLUE},
     {"log", ICON_TXT, WHITE},
     {"lua", ICON_LUA, WHITE},
+    {"lz", ICON_ARCHIVE, YELLOW},
     {"lz4", ICON_ARCHIVE, YELLOW},
     {"lzh", ICON_ARCHIVE, YELLOW},
     {"lzma", ICON_ARCHIVE, YELLOW},
