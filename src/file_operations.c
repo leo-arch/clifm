@@ -1648,19 +1648,6 @@ get_rename_dest_filename(char *name, int *status)
 		return (char *)NULL;
 	}
 
-	if (*new_name == '~') {
-		p = tilde_expand(new_name);
-		if (!p) {
-			*status = FUNC_FAILURE;
-			xerror(_("m: '%s': Error expanding tilde\n"), new_name);
-			free(new_name);
-			return (char *)NULL;
-		} else {
-			free(new_name);
-			new_name = p;
-		}
-	}
-
 	return new_name;
 }
 
