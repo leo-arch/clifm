@@ -2457,7 +2457,7 @@ construct_human_sizes(void)
 			const int ret = snprintf(file_info[i].human_size.str,
 				MAX_HUMAN_SIZE, "%jd", (intmax_t)file_info[i].size);
 			file_info[i].human_size.len = ret > 0 ? (size_t)ret : 0;
-			file_info[i].human_size.unit = 'B';
+			file_info[i].human_size.unit = units[0];
 			continue;
 		}
 

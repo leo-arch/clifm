@@ -507,7 +507,7 @@ normalize_path(char *src, const size_t src_len)
 		}
 
 		const size_t tlen = strlen(tmp);
-		if (tlen > 0 && tmp[tlen - 1] == '/')
+		if (tlen > 1 && tmp[tlen - 1] == '/')
 			tmp[tlen - 1] = '\0';
 
 		xstrsncpy(src, tmp, tlen + 1);
@@ -523,7 +523,7 @@ normalize_path(char *src, const size_t src_len)
 			return (char *)NULL;
 		}
 		const size_t tlen = strlen(tmp);
-		if (tlen > 0 && tmp[tlen - 1] == '/')
+		if (tlen > 1 && tmp[tlen - 1] == '/')
 			tmp[tlen - 1] = '\0';
 
 		if (!strstr(tmp, "/.."))
