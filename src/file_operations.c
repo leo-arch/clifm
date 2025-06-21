@@ -1654,7 +1654,7 @@ get_rename_dest_filename(char *name, int *status)
 }
 
 static char **
-construct_cp_mv_cmd(char **cmd, char *new_name, int *cwd, const size_t force_param)
+construct_cp_mv_cmd(char **cmd, char *new_name, int *cwd, const size_t force)
 {
 	size_t n = 0;
 	char **tcmd = xnmalloc(3 + args_n + 2, sizeof(char *));
@@ -1679,10 +1679,11 @@ construct_cp_mv_cmd(char **cmd, char *new_name, int *cwd, const size_t force_par
 
 	/* The -f,--force parameter is internal. Skip it.
 	 * It instructs cp/mv to skip confirmation prompts. */
-	size_t i = force_param == 1 ? 2 : 1;
+	size_t i = force == 1 ? 2 : 1;
 
 	for (; cmd[i]; i++) {
-		if (!*cmd[i] || !(p = unescape_str(cmd[i], 0)))
+		if (!*cmd[i] /* File skipped by the user in the confirmation prompt. */
+		|| !(p = unescape_str(cmd[i], 0)))
 			continue;
 		tcmd[n] = savestring(p, strlen(p));
 		free(p);
@@ -1708,6 +1709,28 @@ construct_cp_mv_cmd(char **cmd, char *new_name, int *cwd, const size_t force_par
 }
 
 static int
+handle_nodir_overwrite(char *arg, const char *cmd_name)
+{
+	char *file = unescape_str(arg, 0);
+	if (!file)
+		return 0;
+
+	struct stat a;
+	if (lstat(file, &a) != -1) {
+		char msg[PATH_MAX + 28];
+		snprintf(msg, sizeof(msg), _("%s: '%s': Overwrite this file?"),
+			cmd_name, file);
+		if (rl_get_y_or_n(msg, conf.default_answer.overwrite) == 0) {
+			free(file);
+			return 0;
+		}
+	}
+
+	free(file);
+	return 1;
+}
+
+static int
 check_overwrite(char **args, const int force, size_t *skipped)
 {
 	const int append_curdir = (sel_is_last == 1 && sel_n > 0);
@@ -1723,23 +1746,10 @@ check_overwrite(char **args, const int force, size_t *skipped)
 	if (!dest || stat(dest, &a) == -1)
 		return 1;
 
+	if (!S_ISDIR(a.st_mode))
+		return handle_nodir_overwrite(args[2], cmd_name);
+
 	char msg[PATH_MAX + 28];
-
-	if (!S_ISDIR(a.st_mode)) {
-		char *p = unescape_str(args[2], 0);
-		if (p && lstat(p, &a) != -1) {
-			snprintf(msg, sizeof(msg), _("%s: '%s': Overwrite this file?"),
-				cmd_name, p);
-			if (rl_get_y_or_n(msg, conf.default_answer.overwrite) == 0) {
-				free(p);
-				return 0;
-			}
-		}
-		free(p);
-
-		return 1;
-	}
-
 	char buf[PATH_MAX + 1];
 	size_t i;
 	const size_t dest_len = strlen(dest);
@@ -1805,6 +1815,9 @@ cp_mv_file(char **args, const int copy_and_rename, const int force)
 {
 	int ret = 0;
 	size_t skipped = 0;
+
+	if (!args || !args[0])
+		return FUNC_FAILURE;
 
 	if (check_overwrite(args, force, &skipped) == 0)
 		return FUNC_SUCCESS;
