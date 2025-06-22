@@ -1025,6 +1025,11 @@ set_alt_file(char *src, char **dest, const char *err_name)
 		exit(errno);
 	}
 
+	if (!S_ISREG(a.st_mode)) {
+		fprintf(stderr, _("%s: '%s': Not a regular file\n"), PROGRAM_NAME, src);
+		exit(EXIT_FAILURE);
+	}
+
 	*dest = savestring(src, strlen(src));
 	free(tmp);
 }
