@@ -850,6 +850,35 @@ RUN:
 }
 #endif /* !_NO_LIRA */
 
+static int
+check_alt_dir(char *dir)
+{
+	if (!dir || !*dir)
+		return EINVAL;
+
+	struct stat a;
+	if (stat(dir, &a) == -1) {
+		char *tmp_cmd[] = {"mkdir", "-p", "--", dir, NULL};
+		const int ret = launch_execv(tmp_cmd, FOREGROUND, E_NOSTDERR);
+		if (ret != FUNC_SUCCESS) {
+			fprintf(stderr, _("%s: Cannot create directory '%s' (error %d)\n"),
+				PROGRAM_NAME, dir, ret);
+			return ret;
+		}
+	} else if (!S_ISDIR(a.st_mode)) {
+		fprintf(stderr, _("%s: '%s': Not a directory\n"), PROGRAM_NAME, dir);
+		return ENOTDIR;
+	}
+
+	if (access(dir, W_OK) == -1) {
+		fprintf(stderr, _("%s: '%s': Directory not writable\n"),
+			PROGRAM_NAME, dir);
+		return EXIT_FAILURE;
+	}
+
+	return 0;
+}
+
 #ifndef _BE_POSIX
 static void
 set_vt100(void)
@@ -932,44 +961,24 @@ set_alt_config_dir(char *dir)
 		err_arg_required("--config-dir"); /* noreturn */
 
 	char *dir_exp = (char *)NULL;
-
 	if (*dir == '~') {
 		dir_exp = tilde_expand(dir);
 		dir = dir_exp;
 	}
 
-	int dir_ok = 1;
-	struct stat attr;
-
-	if (stat(dir, &attr) == -1) {
-		char *tmp_cmd[] = {"mkdir", "-p", "--", dir, NULL};
-		const int ret = launch_execv(tmp_cmd, FOREGROUND, E_NOSTDERR);
-		if (ret != FUNC_SUCCESS) {
-			err('e', PRINT_PROMPT, _("%s: Cannot create directory '%s' "
-				"(error %d)\nFalling back to the default configuration "
-				"directory.\n"), PROGRAM_NAME, dir, ret);
-			dir_ok = 0;
-		}
+	const int ret = check_alt_dir(dir);
+	if (ret != 0) {
+		free(dir_exp);
+		exit(ret);
 	}
 
-	if (access(dir, W_OK) == -1) {
-		if (dir_ok == 1) {
-			err('e', PRINT_PROMPT, _("%s: '%s': %s\n"
-				"Falling back to the default configuration directory\n"),
-				PROGRAM_NAME, dir, strerror(errno));
-		}
-	} else {
-		alt_config_dir = savestring(dir, strlen(dir));
-		flags |= ALT_PREVIEW_FILE;
-		err(ERR_NO_LOG, PRINT_PROMPT, _("%s: '%s': Using an alternative "
-			"configuration directory\n"), PROGRAM_NAME, alt_config_dir);
-	}
-
+	alt_config_dir = savestring(dir, strlen(dir));
 	free(dir_exp);
+	flags |= ALT_PREVIEW_FILE;
 }
 
 static void
-set_custom_selfile(char *file)
+set_alt_selfile(char *file)
 {
 	if (!file || !*file || *file == '-')
 		err_arg_required("--sel-file"); /* noreturn */
@@ -984,29 +993,34 @@ set_custom_selfile(char *file)
 
 	free(p);
 	fprintf(stderr, _("%s: '%s': Invalid file format\n"), PROGRAM_NAME, file);
-	exit(errno);
+	exit(EXIT_FAILURE);
 }
 #endif /* !_BE_POSIX */
 
 static void
-set_alt_trash_dir(char *file)
+set_alt_trash_dir(char *dir)
 {
-	if (!file || !*file || *file == '-')
+	if (!dir || !*dir || *dir == '-')
 #ifndef _BE_POSIX
 		err_arg_required("-T"); /* noreturn */
 #else
 		err_arg_required("-i"); /* noreturn */
-#endif
+#endif /* !_BE_POSIX */
 
-	char *trash_exp = (char *)NULL;
-
-	if (*file == '~') {
-		trash_exp = tilde_expand(file);
-		file = trash_exp;
+	char *dir_exp = (char *)NULL;
+	if (*dir == '~') {
+		dir_exp = tilde_expand(dir);
+		dir = dir_exp;
 	}
 
-	alt_trash_dir = savestring(file, strlen(file));
-	free(trash_exp);
+	const int ret = check_alt_dir(dir);
+	if (ret != 0) {
+		free(dir_exp);
+		exit(ret);
+	}
+
+	alt_trash_dir = savestring(dir, strlen(dir));
+	free(dir_exp);
 }
 
 static void
@@ -1867,7 +1881,7 @@ parse_cmdline_args(const int argc, char **argv)
 			break;
 
 		case LOPT_SEL_FILE:
-			set_custom_selfile(optarg); break;
+			set_alt_selfile(optarg); break;
 		case LOPT_SHARE_SELBOX:
 			xargs.share_selbox = conf.share_selbox = 1; break;
 		case LOPT_SHOTGUN_FILE:

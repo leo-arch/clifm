@@ -1567,7 +1567,7 @@ PropFields in the config file)\
 \n      --trash-as-rm\t\t The 'r' command moves files to the trash instead of removing them\
 \n      --unicode\t\t\t Force the use of Unicode decorations\
 \n      --virtual-dir-full-paths\t Files in virtual directories are listed as full paths instead of target base names\
-\n      --virtual-dir=PATH\t Absolute path to a directory to be used as virtual directory\
+\n      --virtual-dir=DIR\t\t Absolute path to a directory to be used as virtual directory\
 \n      --vt100\t\t\t Run in vt100 compatibility mode\n"
 #endif /* _BE_POSIX */
 
