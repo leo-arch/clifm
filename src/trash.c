@@ -1018,7 +1018,8 @@ check_trash_file(char *file)
 	}
 
 	/* Do no trash TRASH_DIR itself nor anything inside it (trashed files) */
-	if (strncmp(tmp_file, trash_dir, strlen(trash_dir)) == 0) {
+	const size_t tlen = strlen(trash_dir);
+	if (strncmp(tmp_file, trash_dir, tlen) == 0 && tmp_file[tlen] == '/') {
 		fputs(_("trash: Use 'trash del' to remove trashed files\n"), stderr);
 		return FUNC_FAILURE;
 	}
