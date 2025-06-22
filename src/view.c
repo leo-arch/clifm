@@ -59,9 +59,14 @@ preview_edit(char *app)
 		return FUNC_FAILURE;
 	}
 
-	const size_t len = config_dir_len + 15;
-	char *file = xnmalloc(len, sizeof(char));
-	snprintf(file, len, "%s/preview.clifm", config_dir);
+	char *file = (char *)NULL;
+	if (alt_preview_file && *alt_preview_file) {
+		file = alt_preview_file;
+	} else {
+		const size_t len = config_dir_len + 15;
+		file = xnmalloc(len, sizeof(char));
+		snprintf(file, len, "%s/preview.clifm", config_dir);
+	}
 
 	int ret = FUNC_SUCCESS;
 	if (app) {
@@ -71,7 +76,9 @@ preview_edit(char *app)
 		ret = open_file(file);
 	}
 
-	free(file);
+	if (file != alt_preview_file)
+		free(file);
+
 	return ret;
 }
 
