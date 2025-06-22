@@ -879,6 +879,28 @@ check_alt_dir(char *dir)
 	return 0;
 }
 
+static void
+set_alt_dir(char *src, char **dest, const char *err_name)
+{
+	if (!src || !*src || *src == '-')
+		err_arg_required(err_name); /* noreturn */
+
+	char *src_exp = (char *)NULL;
+	if (*src == '~') {
+		src_exp = tilde_expand(src);
+		src = src_exp;
+	}
+
+	const int ret = check_alt_dir(src);
+	if (ret != 0) {
+		free(src_exp);
+		exit(ret);
+	}
+
+	*dest = savestring(src, strlen(src));
+	free(src_exp);
+}
+
 #ifndef _BE_POSIX
 static void
 set_vt100(void)
@@ -957,23 +979,7 @@ set_bell_style(const char *opt)
 static void
 set_alt_config_dir(char *dir)
 {
-	if (!dir || !*dir || *dir == '-')
-		err_arg_required("--config-dir"); /* noreturn */
-
-	char *dir_exp = (char *)NULL;
-	if (*dir == '~') {
-		dir_exp = tilde_expand(dir);
-		dir = dir_exp;
-	}
-
-	const int ret = check_alt_dir(dir);
-	if (ret != 0) {
-		free(dir_exp);
-		exit(ret);
-	}
-
-	alt_config_dir = savestring(dir, strlen(dir));
-	free(dir_exp);
+	set_alt_dir(dir, &alt_config_dir, "--config-dir");
 	flags |= ALT_PREVIEW_FILE;
 }
 
@@ -1000,27 +1006,11 @@ set_alt_selfile(char *file)
 static void
 set_alt_trash_dir(char *dir)
 {
-	if (!dir || !*dir || *dir == '-')
 #ifndef _BE_POSIX
-		err_arg_required("-T"); /* noreturn */
+	set_alt_dir(dir, &alt_trash_dir, "-T");
 #else
-		err_arg_required("-i"); /* noreturn */
+	set_alt_dir(dir, &alt_trash_dir, "-i");
 #endif /* !_BE_POSIX */
-
-	char *dir_exp = (char *)NULL;
-	if (*dir == '~') {
-		dir_exp = tilde_expand(dir);
-		dir = dir_exp;
-	}
-
-	const int ret = check_alt_dir(dir);
-	if (ret != 0) {
-		free(dir_exp);
-		exit(ret);
-	}
-
-	alt_trash_dir = savestring(dir, strlen(dir));
-	free(dir_exp);
 }
 
 static void
