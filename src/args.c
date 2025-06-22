@@ -1912,7 +1912,10 @@ parse_cmdline_args(const int argc, char **argv)
 		case ':':
 			err_arg_required(argv[optind - 1]); /* noreturn */
 		case '?':
-			err_invalid_opt(argv[optind - 1]); /* noreturn */
+			/* optopt is negative whenever a short option is used with a
+			 * Unicode character (say, "-µ"). Im this case, the problematic
+			 * option is not argv[optind - 1], but argv[optind]. */
+			err_invalid_opt(argv[optind - (optopt >= 0)]); /* noreturn */
 
 		default: break;
 		}
