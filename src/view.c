@@ -41,15 +41,15 @@ typedef char *rl_cpvfunc_t;
 # include <sys/stdio.h> /* renameat(2) */
 #endif /* MAC_OS_X_RENAMEAT_SYS_STDIO_H */
 
-#include "aux.h" // open_f functions, is_cmd_in_path, construct_human_size
-#include "file_operations.h" // open_file
-#include "init.h" // get_sel_files
-#include "listing.h" // reload_dirlist
-#include "messages.h" // VIEW_USAGE
-#include "misc.h" // xerror, print_reload_msg
-#include "selection.h" // save_sel
-#include "spawn.h" // launch_execve
-#include "tabcomp.h" // tab_complete
+#include "aux.h" /* open_f functions, is_cmd_in_path, construct_human_size */
+#include "file_operations.h" /* open_file */
+#include "init.h" /* get_sel_files */
+#include "listing.h" /* reload_dirlist */
+#include "messages.h" /* VIEW_USAGE */
+#include "misc.h" /* xerror, print_reload_msg */
+#include "selection.h" /* save_sel */
+#include "spawn.h" /* launch_execve */
+#include "tabcomp.h" /* tab_complete */
 
 static int
 preview_edit(char *app)

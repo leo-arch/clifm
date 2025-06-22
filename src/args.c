@@ -974,14 +974,17 @@ set_custom_selfile(char *file)
 	if (!file || !*file || *file == '-')
 		err_arg_required("--sel-file"); /* noreturn */
 
-	sel_file = normalize_path(file, strlen(file));
-	if (sel_file) {
+	struct stat a;
+	char *p = normalize_path(file, strlen(file));
+	if (p && (stat(p, &a) == -1 || S_ISREG(a.st_mode))) {
+		sel_file = p;
 		xargs.sel_file = 1;
 		return;
 	}
 
-	err('e', PRINT_PROMPT, _("%s: '%s': Error setting custom "
-		"selections file\n"), PROGRAM_NAME, file);
+	free(p);
+	fprintf(stderr, _("%s: '%s': Invalid file format\n"), PROGRAM_NAME, file);
+	exit(errno);
 }
 #endif /* !_BE_POSIX */
 
