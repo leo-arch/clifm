@@ -568,28 +568,20 @@ normalize_path(char *src, const size_t src_len)
 	const char *next;
 
 	for (ptr = s; ptr < end; ptr = next + 1) {
-		size_t len;
 		next = memchr(ptr, '/', (size_t)(end - ptr));
 		if (!next)
 			next = end;
-		len = (size_t)(next - ptr);
+		const size_t len = (size_t)(next - ptr);
 
-		switch (len) {
-		case 0: continue;
-
-		case 1:
-			if (*ptr == '.')
-				continue;
-			break;
-
-		case 2:
-			if (ptr[0] == '.' && ptr[1] == '.') {
+		if (len <= 2) {
+			if (len == 0) continue;
+			if (len == 1 && *ptr == '.') continue;
+			if (len == 2 && *ptr == '.' && ptr[1] == '.') {
 				const char *slash = xmemrchr(res, '/', res_len);
 				if (slash)
 					res_len = (size_t)(slash - res);
 				continue;
 			}
-			break;
 		}
 
 		res[res_len] = '/';

@@ -983,45 +983,6 @@ set_custom_selfile(char *file)
 	err('e', PRINT_PROMPT, _("%s: '%s': Error setting custom "
 		"selections file\n"), PROGRAM_NAME, file);
 }
-
-#ifndef _NO_LIRA
-static char *
-stat_file(char *file)
-{
-	if (!file || !*file)
-		exit(EXIT_FAILURE);
-
-	char *p = (char *)NULL;
-	if (*file == '~') {
-		if (!(p = tilde_expand(file))) {
-			xerror(_("%s: '%s': Error expanding tilde\n"), PROGRAM_NAME, file);
-			exit(EXIT_FAILURE);
-		}
-	} else {
-		p = savestring(file, strlen(file));
-	}
-
-	struct stat a;
-	if (stat(p, &a) == -1) {
-		xerror("%s: '%s': %s\n", PROGRAM_NAME, p, strerror(errno));
-		if (p != file)
-			free(p);
-		exit(errno);
-	}
-
-	return p;
-}
-
-static void
-set_shotgun_file(char *opt)
-{
-	if (!opt || !*opt || *opt == '-')
-		err_arg_required("--shotgun-file"); /* noreturn */
-
-	alt_preview_file = stat_file(opt);
-	flags |= ALT_PREVIEW_FILE;
-}
-#endif /* !_NO_LIRA */
 #endif /* !_BE_POSIX */
 
 static void
@@ -1907,7 +1868,9 @@ parse_cmdline_args(const int argc, char **argv)
 				PROGRAM_NAME, NOT_AVAILABLE);
 			exit(EXIT_FAILURE);
 #else
-			set_shotgun_file(optarg); break;
+			set_alt_file(optarg, &alt_preview_file, "--shotgun-file");
+			flags |= ALT_PREVIEW_FILE;
+			break;
 #endif /* !_NO_LIRA */
 		case LOPT_SI:
 			xargs.si = 1; break;
