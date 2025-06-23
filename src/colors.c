@@ -372,7 +372,7 @@ get_file_color(const char *filename, const struct stat *a)
 
 	if (a->st_nlink > 1) return mh_c; /* Multi-hardlink */
 
-	return (FILE_SIZE_PTR(a) == 0) ? ef_c : fi_c;
+	return FILE_SIZE_PTR(a) == 0 ? ef_c : fi_c;
 }
 
 /* Validate a hex color code string with this format: RRGGBB-[1-9] or RGB-[1-9]. */
@@ -552,7 +552,6 @@ update_warning_prompt_text_color(void)
 	*end = '\0';
 	if (is_color_code(start)) {
 		snprintf(wp_c, sizeof(wp_c), "\x1b[%sm", start);
-
 		check_rl_version_and_warn();
 	}
 
@@ -1541,7 +1540,6 @@ split_extension_colors(char *extcolors)
 		ext_colors[ext_colors_n].value = (char *)NULL;
 		ext_colors[ext_colors_n].len = 0;
 		ext_colors[ext_colors_n].value_len = 0;
-
 		ext_colors[ext_colors_n].hash = 0;
 		check_ext_color_hash_conflicts(0);
 	}
@@ -1803,23 +1801,14 @@ bsd_to_ansi_color(char color, const int bg)
 	}
 }
 
-static char *
+static const char *
 set_filetype(const int c)
 {
-	switch (c) {
-	case 0:  return "di";
-	case 1:  return "ln";
-	case 2:  return "so";
-	case 3:  return "pi";
-	case 4:  return "ex";
-	case 5:  return "bd";
-	case 6:  return "cd";
-	case 7:  return "su";
-	case 8:  return "sg";
-	case 9:  return "tw";
-	case 10: return "ow";
-	default: return "fi"; /* Never reached */
-	}
+	static const char *codes[] = {"di", "ln", "so", "pi", "ex", "bd", "cd",
+		"su", "sg", "tw", "ow", NULL};
+
+	/* C is guaranteed to be < 11 */
+	return codes[c];
 }
 
 /* If the LSCOLORS environment variable is set, convert its value to a valid
