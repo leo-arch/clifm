@@ -2590,9 +2590,9 @@ set_fzftab_options(void)
 {
 	if (fzftab == UNSET) {
 		if (xargs.fzftab == UNSET) {
-			// This flag will be true only when reloading the config file,
-			// because the check for the fzf binary is made at startup AFTER
-			// reading the config file (check_third_party_cmds() in checks.c).
+			/* This flag will be true only when reloading the config file,
+			 * because the check for the fzf binary is made at startup AFTER
+			 * reading the config file (check_third_party_cmds() in checks.c). */
 			if (bin_flags & FZF_BIN_OK)
 				fzftab = 1;
 		} else {

@@ -126,45 +126,55 @@ set_mount_cmd(const int udisks2ok, const int udevilok)
 }
 
 #ifndef _NO_FZF
-/* fzf, fnf, and smenu are used as alternative tab completion mechanisms.
- * fnf and smenu fallback to default if not found.
- * The default value is fzf, if found, or standard (readline). */
+static const char *
+tabmode_to_name(void)
+{
+	switch (tabmode) {
+	case FZF_TAB: return "fzf";
+	case FNF_TAB: return "fnf";
+	case SMENU_TAB: return "smenu";
+	case STD_TAB: /* fallthrough */
+	default: return "standard";
+	}
+}
+
+/* Set tab completion mode based on available binaries. */
 void
 check_completion_mode(void)
 {
-	if (fzftab == 1) { /* fzftab is zero only if running with --stdtab */
-		if (!(bin_flags & FZF_BIN_OK) && tabmode == FZF_TAB) {
-			err('w', PRINT_PROMPT, _("%s: fzf: Command not found. Falling "
-				"back to standard tab completion\n"), PROGRAM_NAME);
-			tabmode = STD_TAB;
-			fzftab = 0;
-		}
-
-		if (!(bin_flags & FNF_BIN_OK) && tabmode == FNF_TAB) {
-			err('w', PRINT_PROMPT, _("%s: fnf: Command not found. Falling "
-				"back to the default value (fzf, if found, or standard)\n"),
-				PROGRAM_NAME);
-			tabmode = (bin_flags & FZF_BIN_OK) ? FZF_TAB : STD_TAB;
-		} else if (!(bin_flags & SMENU_BIN_OK) && tabmode == SMENU_TAB) {
-			err('w', PRINT_PROMPT, _("%s: smenu: Command not found. Falling "
-				"back to the default value (fzf, if found, or standard)\n"),
-				PROGRAM_NAME);
-			tabmode = (bin_flags & FZF_BIN_OK) ? FZF_TAB : STD_TAB;
-		}
-
-		if (tabmode == STD_TAB) {
-			if (bin_flags & FZF_BIN_OK)
-				/* We have the fzf binary, let's run in FZF mode */
-				tabmode = FZF_TAB;
-			else
-				/* Either specified mode was not found or no mode was
-				 * specified */
-				fzftab = 0;
-		}
-	} else {
+	/* fzftab is zero only if running with --stdtab */
+	if (fzftab == 0) {
 		tabmode = STD_TAB;
 		fzftab = 0;
+		return;
 	}
+
+	/* The user asked for a specific mode, but the binary wasn't found. */
+	char *err_name = (char *)NULL;
+	if (!(bin_flags & FZF_BIN_OK) && tabmode == FZF_TAB) {
+		err_name = "fzf"; tabmode = STD_TAB;
+	} else if (!(bin_flags & FNF_BIN_OK) && tabmode == FNF_TAB) {
+		err_name = "fnf"; tabmode = STD_TAB;
+	} else if (!(bin_flags & SMENU_BIN_OK) && tabmode == SMENU_TAB) {
+		err_name = "smenu"; tabmode = STD_TAB;
+	}
+
+	if (tabmode == STD_TAB) {
+		/* If a suitable binary is found, let's run in the corresponding mode. */
+		if (bin_flags & FZF_BIN_OK)
+			tabmode = FZF_TAB;
+		else if (bin_flags & FNF_BIN_OK)
+			tabmode = FNF_TAB;
+		else if (bin_flags & SMENU_BIN_OK)
+			tabmode = SMENU_TAB;
+		else
+			/* No binary found. Let's run in standard mode. */
+			fzftab = 0;
+	}
+
+	if (err_name)
+		err('w', PRINT_PROMPT, _("%s: Command not found. Falling back "
+			"to '%s'.\n"), err_name, tabmode_to_name());
 }
 #endif /* !_NO_FZF */
 
@@ -224,7 +234,6 @@ check_third_party_cmds(void)
 		return;
 	}
 
-
 	int udisks2ok = 0, udevilok = 0, check_coreutils = 0;
 #if defined(CHECK_COREUTILS)
 	check_coreutils = 1;
@@ -244,20 +253,17 @@ check_third_party_cmds(void)
 
 		if (*bin_commands[i] == 'f' && strcmp(bin_commands[i], "fzf") == 0) {
 			bin_flags |= FZF_BIN_OK;
-			if (fzftab == UNSET)
-				fzftab = 1;
+			if (fzftab == UNSET) fzftab = 1;
 		}
 
 		if (*bin_commands[i] == 'f' && strcmp(bin_commands[i], "fnf") == 0) {
 			bin_flags |= FNF_BIN_OK;
-			if (fzftab == UNSET)
-				fzftab = 1;
+			if (fzftab == UNSET) fzftab = 1;
 		}
 
 		if (*bin_commands[i] == 's' && strcmp(bin_commands[i], "smenu") == 0) {
 			bin_flags |= SMENU_BIN_OK;
-			if (fzftab == UNSET)
-				fzftab = 1;
+			if (fzftab == UNSET) fzftab = 1;
 		}
 
 		if (*bin_commands[i] == 'u'

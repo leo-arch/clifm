@@ -441,7 +441,7 @@ is_sgr_color(const char *restrict str)
 			/* Allow styled underline (Kitty terminal). */
 			&& !(digits > 0 && *(str - 1) == '4' && *str == ':'
 			&& str[1] >= '0' && str[1] <= '5'))
-				/* Neither digit nor semicolon. */
+				/* Neither digit nor semicolon nor styled underline. */
 				return 0;
 		}
 		str++;
@@ -718,7 +718,7 @@ check_ext_string(const char *ext, size_t *val_len)
 	return (char *)NULL;
 }
 
-/* Returns a pointer to the corresponding color code for the file
+/* Return a pointer to the corresponding color code for the file
  * extension EXT (updating VAL_LEN to the length of this code).
  * The hash table is checked first if we have no hash conflicts. Otherwise,
  * a regular string comparison is performed to resolve it. */
@@ -1090,7 +1090,7 @@ cschemes_function(char **args)
 }
 
 /* Convert a @NUM color string to the proper ANSI code representation.
- * Return a pointer to the converted string on success or NULL on error. */
+ * Returns a pointer to the converted string on success or NULL on error. */
 static char *
 color256_to_ansi(char *s)
 {
@@ -1124,7 +1124,7 @@ color256_to_ansi(char *s)
 	return ret;
 }
 
-/* Decode the prefixed color string S to the proper ANSI representation
+/* Decode the prefixed color string S to the proper ANSI representation.
  * Returns a pointer to the decoded string on success, or NULL or error. */
 static char *
 decode_color_prefix(char *s)
@@ -1804,11 +1804,11 @@ bsd_to_ansi_color(char color, const int bg)
 static const char *
 set_filetype(const int c)
 {
-	static const char *codes[] = {"di", "ln", "so", "pi", "ex", "bd", "cd",
-		"su", "sg", "tw", "ow", NULL};
+	static const char *filetypes[] = {"di", "ln", "so", "pi", "ex", "bd",
+		"cd", "su", "sg", "tw", "ow", NULL};
 
 	/* C is guaranteed to be < 11 */
-	return codes[c];
+	return filetypes[c];
 }
 
 /* If the LSCOLORS environment variable is set, convert its value to a valid
@@ -2470,7 +2470,7 @@ disable_bold(void)
 	remove_bold_attr(wm_c);
 }
 
-/* Get color codes values from either the environment or the config file
+/* Get color code values from either the environment or the config file
  * and set colors accordingly. If some value is not found or is a wrong
  * value, the default is set. */
 int
