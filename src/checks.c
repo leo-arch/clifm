@@ -112,7 +112,7 @@ set_mount_cmd(const int udisks2ok, const int udevilok)
 {
 	if (xargs.mount_cmd == MNT_UDISKS2 && !udisks2ok && udevilok) {
 		err('w', PRINT_PROMPT, _("%s: udisks2: Command not found. Falling "
-			"back to udevil\n"), PROGRAM_NAME);
+			"back to 'udevil'.\n"), PROGRAM_NAME);
 		xargs.mount_cmd = MNT_UDEVIL;
 		return;
 	}
@@ -173,8 +173,8 @@ check_completion_mode(void)
 	}
 
 	if (err_name)
-		err('w', PRINT_PROMPT, _("%s: Command not found. Falling back "
-			"to '%s'.\n"), err_name, tabmode_to_name());
+		err('w', PRINT_PROMPT, _("%s: %s: Command not found. Falling back "
+			"to '%s'.\n"), PROGRAM_NAME, err_name, tabmode_to_name());
 }
 #endif /* !_NO_FZF */
 
