@@ -276,8 +276,8 @@
 ;FuzzyAlgorithm=2
 
 # Set the tab completion mode. Supported values: standard, fzf, fnf, smenu.
-# Defaults to 'fzf' if the binary is found in PATH. Othwerwise, the
-# standard mode is used.
+# Defaults to 'fzf', 'fnf', or 'smenu' (in this order), if the corresponding
+# binary is found in PATH. Othwerwise, the standard mode is used.
 ;TabCompletionMode=
 
 # Enable file previews for tab completion (fzf mode only). Supported values:

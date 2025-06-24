@@ -2008,7 +2008,9 @@ Needless to say, combinations are possible. For example, the command `\fBc sel b
 .SH
 \fB9. TAB COMPLETION\fR
 .TP
-There are four modes for tab completion: \fBstandard\fR (interface provided by readline), \fBfzf\fR, which depends on \fBfzf\fR (\fIhttps://github.com/junegunn/fzf\fR) (version 0.18.0 or later), \fBfnf\fR (\fIhttps://github.com/leo\-arch/fnf\fR), and \fBsmenu\fR (\fIhttps://github.com/p\-gen/smenu\fR). By default, if the \fBfzf\fR binary is found in \fB$PATH\fR, \fBclifm\fR will attempt to use \fBfzf\fR to display completions. You can force the use of the remaining modes via the \fB\-\-stdtab\fR, \fB\-\-fnftab\fR, and \fB\-\-smenutab\fR command line switches. The \fBTabCompletionMode\fR option in the configuration file can be used to permanently set the tab completion mode.
+There are four modes for tab completion: \fBstandard\fR (interface provided by readline), \fBfzf\fR, which depends on \fBfzf\fR (\fIhttps://github.com/junegunn/fzf\fR) (version 0.18.0 or later), \fBfnf\fR (\fIhttps://github.com/leo\-arch/fnf\fR), and \fBsmenu\fR (\fIhttps://github.com/p\-gen/smenu\fR).
+.TP
+By default, if any of \fBfzf\fR, \fBfnf\fR, or \fBsmenu\fR (in this order) is installed (found in \fB$PATH\fR), \fBclifm\fR will attempt to use the corresponding mode to display completions. You can force the use of a specific mode using the \fB\-\-stdtab\fR, \fB\-\-fzftab\fR, \fB\-\-fnftab\fR, and \fB\-\-smenutab\fR command line switches. The \fBTabCompletionMode\fR option in the configuration file can be used to permanently set the tab completion mode.
 .TP
 If using the \fBfzf\fR mode, the completions interface can be customized using the \fBFzfTabOptions\fR option in the color scheme file. \-\-height, \-\-margin, +i/\-i, \-\-read0, \-\-query, and \-\-ansi will be appended to set up some details of the completions interface. Set this value to \fBnone\fR to pass no option, to the empty string to load the default values, or to any other custom value. Unless set to \fBnone\fR, any option specified here will override \fBFZF_DEFAULT_OPTS\fR.
 .TP
