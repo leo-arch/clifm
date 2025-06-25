@@ -1463,7 +1463,7 @@ import_mime(void)
 }
 
 static int
-mime_info(char *arg, char **fpath)
+check_mime_info_file(char *arg, char **fpath)
 {
 	if (!arg) {
 		fprintf(stderr, "%s\n", _(MIME_USAGE));
@@ -1662,7 +1662,7 @@ mime_open(char **args)
 	int info = 0, file_index = 0;
 
 	if (*args[1] == 'i' && strcmp(args[1], "info") == 0) {
-		const int ret = mime_info(args[2], &file_path);
+		const int ret = check_mime_info_file(args[2], &file_path);
 		if (ret != FUNC_SUCCESS)
 			return ret;
 		info = 1;
