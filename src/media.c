@@ -484,7 +484,7 @@ get_mnt_input(const int mode, int *info)
 			continue;
 		}
 
-		if (*input == 'q' && *(input + 1) == '\0') {
+		if (*input == 'q' && !input[1]) {
 			if (conf.autols == 1)
 				reload_dirlist();
 			free(input);
@@ -499,7 +499,7 @@ get_mnt_input(const int mode, int *info)
 
 		const int atoi_num = atoi(p);
 		if (atoi_num <= 0 || atoi_num > (int)mp_n) {
-			xerror("%s: %s: Invalid ELN\n", PROGRAM_NAME, input);
+			xerror(_("%s: %s: Invalid ELN\n"), PROGRAM_NAME, input);
 			free(input);
 			input = (char *)NULL;
 			continue;

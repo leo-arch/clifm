@@ -99,7 +99,7 @@ load_user_mimetypes(void)
 		if (!mimetype)
 			continue;
 
-		size_t mime_len = strlen(mimetype);
+		const size_t mime_len = strlen(mimetype);
 
 		char *ext = (char *)NULL;
 		while ((ext = strtok(NULL, " \t")) != NULL) {

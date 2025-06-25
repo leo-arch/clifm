@@ -1463,7 +1463,7 @@ import_mime(void)
 }
 
 static int
-mime_info(char *arg, char **fpath, char **deq)
+mime_info(char *arg, char **fpath)
 {
 	if (!arg) {
 		fprintf(stderr, "%s\n", _(MIME_USAGE));
@@ -1471,10 +1471,9 @@ mime_info(char *arg, char **fpath, char **deq)
 	}
 
 	if (strchr(arg, '\\')) {
-		*deq = unescape_str(arg, 0);
-		*fpath = xrealpath(*deq, NULL);
-		free(*deq);
-		*deq = (char *)NULL;
+		char *deq = unescape_str(arg, 0);
+		*fpath = xrealpath(deq, NULL);
+		free(deq);
 	} else {
 		*fpath = xrealpath(arg, NULL);
 	}
@@ -1499,7 +1498,7 @@ mime_info(char *arg, char **fpath, char **deq)
 /* Get the full path of the file to be opened by mime
  * Returns 0 on success and 1 on error */
 static int
-get_open_file_path(char **args, char **fpath, char **deq)
+get_open_file_path(char **args, char **fpath)
 {
 	char *f = (char *)NULL;
 	if (*args[1] == 'o' && strcmp(args[1], "open") == 0 && args[2])
@@ -1509,10 +1508,9 @@ get_open_file_path(char **args, char **fpath, char **deq)
 
 	/* Only dequote the filename if coming from the mime command. */
 	if (*args[0] == 'm' && strchr(f, '\\')) {
-		*deq = unescape_str(f, 0);
-		*fpath = xrealpath(*deq, NULL);
-		free(*deq);
-		*deq = (char *)NULL;
+		char *deq = unescape_str(f, 0);
+		*fpath = xrealpath(deq, NULL);
+		free(deq);
 	}
 
 	if (!*fpath) {
@@ -1663,17 +1661,16 @@ mime_open(char **args)
 		return mime_edit(args);
 
 	char *file_path = (char *)NULL;
-	char *deq_file = (char *)NULL;
 	int info = 0, file_index = 0;
 
 	if (*args[1] == 'i' && strcmp(args[1], "info") == 0) {
-		const int ret = mime_info(args[2], &file_path, &deq_file);
+		const int ret = mime_info(args[2], &file_path);
 		if (ret != FUNC_SUCCESS)
 			return ret;
 		info = 1;
 		file_index = 2;
 	} else {
-		const int ret = get_open_file_path(args, &file_path, &deq_file);
+		const int ret = get_open_file_path(args, &file_path);
 		if (ret != FUNC_SUCCESS)
 			return ret;
 		file_index = 1;
