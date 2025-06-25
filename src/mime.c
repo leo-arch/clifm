@@ -1485,13 +1485,6 @@ mime_info(char *arg, char **fpath)
 		return isnum == 1 ? FUNC_FAILURE : errno;
 	}
 
-	if (access(*fpath, R_OK) == -1) {
-		xerror("%s: '%s': %s\n", err_name, *fpath, strerror(errno));
-		free(*fpath);
-		*fpath = (char *)NULL;
-		return errno;
-	}
-
 	return FUNC_SUCCESS;
 }
 
