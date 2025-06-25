@@ -1598,10 +1598,15 @@ print_mime_info(char **app, char **fpath, char **mime)
 	if (!config_dir || !*config_dir)
 		goto END;
 
-	char buf[PATH_MAX + 1];
-	snprintf(buf, sizeof(buf), "%s/preview.clifm", config_dir);
 	char *mime_file_ptr = mime_file;
-	mime_file = buf;
+
+	char buf[PATH_MAX + 1];
+	if (alt_preview_file && *alt_preview_file) {
+		mime_file = alt_preview_file;
+	} else {
+		snprintf(buf, sizeof(buf), "%s/preview.clifm", config_dir);
+		mime_file = buf;
+	}
 
 	char *preview_app = get_app(*mime, *fpath);
 	printf(_("Previewing application: '%s' %s\n"),
