@@ -69,6 +69,8 @@ struct p_mod_paths_t {
 static struct p_mod_paths_t p_mod_paths[MAX_PMOD_PATHS];
 #endif /* __HAIKU__ || __OpenBSD__ || __ANDROID__ */
 
+int g_prompt_ignore_empty_line = 0;
+
 static char *
 gen_time(const int c)
 {
@@ -1652,10 +1654,12 @@ handle_empty_line(const int screen_refresh)
 {
 	if (conf.autols == 1 && ((flags & DELAYED_REFRESH)
 	|| xargs.refresh_on_empty_line == 1)
-	&& screen_refresh == PROMPT_SCREEN_REFRESH) {
+	&& screen_refresh == PROMPT_SCREEN_REFRESH
+	&& g_prompt_ignore_empty_line == 0) {
 		flags &= ~DELAYED_REFRESH;
 		refresh_screen();
 	} else {
+		g_prompt_ignore_empty_line = 0;
 		flags &= ~DELAYED_REFRESH;
 	}
 

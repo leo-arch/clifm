@@ -1417,7 +1417,7 @@ run_kb_cmd(char *cmd)
 		recover_from_wrong_cmd();
 #endif /* _NO_SUGGESTIONS */
 
-	int exit_code_bk = exit_code;
+	const int exit_code_bk = exit_code;
 
 	keybind_exec_cmd(cmd);
 	rl_reset_line_state();
@@ -1427,6 +1427,8 @@ run_kb_cmd(char *cmd)
 		 * input taking function (my_rl_getc) to update the value of
 		 * prompt_offset to correctly calculate the cursor position. */
 		prompt_offset = UNSET;
+
+	g_prompt_ignore_empty_line = 1;
 
 	return FUNC_SUCCESS;
 }
@@ -2435,6 +2437,7 @@ rl_remove_sel(int count, int key)
 	rl_deprep_terminal();
 	char cmd[] = "r sel";
 	keybind_exec_cmd(cmd);
+	g_prompt_ignore_empty_line = 1;
 	rl_prep_terminal(0);
 	rl_reset_line_state();
 	return FUNC_SUCCESS;

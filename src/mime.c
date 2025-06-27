@@ -412,7 +412,7 @@ get_cmd_from_line(char **line)
 
 	/* Get the first field in LINE */
 	while (*l != '\0' && *l != ';' && *l != '\n'
-	&& *l != '\'' && *l != '"' && len < PATH_MAX - 1) {
+	&& *l != '\'' && *l != '"' && len < sizeof(tmp) - 1) {
 		tmp[len] = *l;
 		len++;
 		l++;
@@ -1246,7 +1246,7 @@ append_params(char **args, char *name, char ***cmd, int *exec_flags)
 			break;
 		}
 
-		if (*args[i] == '%' && *(args[i] + 1) == 'f' && !*(args[i] + 2)) {
+		if (*args[i] == '%' && args[i][1] == 'f' && !args[i][2]) {
 			f = 1;
 			(*cmd)[n] = savestring(name, strlen(name));
 			n++;
@@ -1258,8 +1258,7 @@ append_params(char **args, char *name, char ***cmd, int *exec_flags)
 			continue;
 		}
 
-		if (*args[i] == '$' && *(args[i] + 1) >= 'A'
-		&& *(args[i] + 1) <= 'Z') {
+		if (*args[i] == '$' && IS_ALPHA_UP(args[i][1])) {
 			char *env = expand_env(args[i]);
 			if (env) {
 				(*cmd)[n] = savestring(env, strlen(env));
@@ -1571,7 +1570,7 @@ print_error_no_mime(char **fpath)
 }
 
 static void
-print_info_name_mime(char *filename, char *mime)
+print_info_name_mime(const char *filename, const char *mime)
 {
 	printf(_("Name: %s\n"), filename ? filename : _("None"));
 	printf(_("MIME type: %s\n"), mime ? mime : _("unknown"));

@@ -101,6 +101,8 @@ emergency prompt."
 /* Color + 1 letter + plus unsigned integer (20 digits max)
  * + RL_NC length + nul char. */
 
+extern int g_prompt_ignore_empty_line;
+
 __BEGIN_DECLS
 
 char *prompt(const int prompt_flag, const int screen_refresh);
