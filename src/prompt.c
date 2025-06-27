@@ -1706,6 +1706,7 @@ prompt(const int prompt_flag, const int screen_refresh)
 		return handle_empty_line(screen_refresh);
 	}
 
+	g_prompt_ignore_empty_line = 0;
 	flags &= ~DELAYED_REFRESH;
 
 	if (expand_history(&input) != FUNC_SUCCESS)

@@ -101,6 +101,8 @@ emergency prompt."
 /* Color + 1 letter + plus unsigned integer (20 digits max)
  * + RL_NC length + nul char. */
 
+/* Set this variable to 1 to prevent an extra screen refresh, for example,
+ * after running a keybinding. See handle_empty_line(). */
 extern int g_prompt_ignore_empty_line;
 
 __BEGIN_DECLS
