@@ -1404,7 +1404,7 @@ keybind_exec_cmd(char *str)
 }
 
 static int
-run_kb_cmd(char *cmd)
+run_kb_cmd(char *cmd, const int ignore_empty_line)
 {
 	if (!cmd || !*cmd)
 		return FUNC_FAILURE;
@@ -1428,7 +1428,7 @@ run_kb_cmd(char *cmd)
 		 * prompt_offset to correctly calculate the cursor position. */
 		prompt_offset = UNSET;
 
-	g_prompt_ignore_empty_line = 1;
+	g_prompt_ignore_empty_line = ignore_empty_line;
 
 	return FUNC_SUCCESS;
 }
@@ -1563,7 +1563,7 @@ static int
 rl_create_file(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	return run_kb_cmd("n");
+	return run_kb_cmd("n", 1);
 }
 
 #ifndef _NO_SUGGESTIONS
@@ -1925,7 +1925,7 @@ rl_refresh(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	exec_prompt_cmds = 1;
-	return run_kb_cmd("rf");
+	return run_kb_cmd("rf", 0);
 }
 
 static int
@@ -1937,7 +1937,7 @@ rl_dir_parent(int count, int key)
 		return FUNC_SUCCESS;
 
 	exec_prompt_cmds = 1;
-	return run_kb_cmd("cd ..");
+	return run_kb_cmd("cd ..", 0);
 }
 
 static int
@@ -1948,7 +1948,7 @@ rl_dir_root(int count, int key)
 	if (*workspaces[cur_ws].path == '/' && !workspaces[cur_ws].path[1])
 		return FUNC_SUCCESS;
 
-	return run_kb_cmd("cd /");
+	return run_kb_cmd("cd /", 0);
 }
 
 static int
@@ -1961,7 +1961,7 @@ rl_dir_home(int count, int key)
 		return FUNC_SUCCESS;
 
 	exec_prompt_cmds = 1;
-	return run_kb_cmd("cd");
+	return run_kb_cmd("cd", 0);
 }
 
 static int
@@ -1973,7 +1973,7 @@ rl_dir_previous(int count, int key)
 		return FUNC_SUCCESS;
 
 	exec_prompt_cmds = 1;
-	return run_kb_cmd("b");
+	return run_kb_cmd("b", 0);
 }
 
 static int
@@ -1986,7 +1986,7 @@ rl_dir_next(int count, int key)
 		return FUNC_SUCCESS;
 
 	exec_prompt_cmds = 1;
-	return run_kb_cmd("f");
+	return run_kb_cmd("f", 0);
 }
 
 int
@@ -2147,35 +2147,35 @@ static int
 rl_open_config(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	return run_kb_cmd("config");
+	return run_kb_cmd("config", 0);
 }
 
 static int
 rl_open_keybinds(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	return run_kb_cmd("kb edit");
+	return run_kb_cmd("kb edit", 0);
 }
 
 static int
 rl_open_cscheme(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	return run_kb_cmd("cs edit");
+	return run_kb_cmd("cs edit", 0);
 }
 
 static int
 rl_open_bm_file(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	return run_kb_cmd("bm edit");
+	return run_kb_cmd("bm edit", 0);
 }
 
 static int
 rl_open_jump_db(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	return run_kb_cmd("je");
+	return run_kb_cmd("je", 0);
 }
 
 static int
@@ -2198,14 +2198,14 @@ static int
 rl_open_mime(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	return run_kb_cmd("mm edit");
+	return run_kb_cmd("mm edit", 0);
 }
 
 static int
 rl_mountpoints(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	return run_kb_cmd("mp");
+	return run_kb_cmd("mp", 1);
 }
 
 static int
@@ -2213,7 +2213,7 @@ rl_select_all(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	exec_prompt_cmds = 1;
-	return run_kb_cmd("s ^");
+	return run_kb_cmd("s ^", 0);
 }
 
 static int
@@ -2221,21 +2221,21 @@ rl_deselect_all(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	exec_prompt_cmds = 1;
-	return run_kb_cmd("ds *");
+	return run_kb_cmd("ds *", 0);
 }
 
 static int
 rl_bookmarks(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	return run_kb_cmd("bm");
+	return run_kb_cmd("bm", 1);
 }
 
 static int
 rl_selbox(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	return run_kb_cmd("ds");
+	return run_kb_cmd("ds", 1);
 }
 
 static int
@@ -2421,7 +2421,7 @@ rl_archive_sel(int count, int key)
 		return handle_no_sel("ac");
 
 	fputs(_("\nReady to archive/compress selected files."), stdout);
-	return run_kb_cmd("ac sel");
+	return run_kb_cmd("ac sel", 1);
 }
 
 static int
@@ -2454,7 +2454,7 @@ rl_export_sel(int count, int key)
 		return handle_no_sel("exp");
 
 	fputs(_("\nReady to export selected filenames"), stdout);
-	return run_kb_cmd("exp sel");
+	return run_kb_cmd("exp sel", 0);
 }
 
 static int
@@ -2466,7 +2466,7 @@ rl_move_sel(int count, int key)
 		return handle_no_sel("m");
 
 	exec_prompt_cmds = 1;
-	return run_kb_cmd("m sel");
+	return run_kb_cmd("m sel", 0);
 }
 
 static int
@@ -2478,7 +2478,7 @@ rl_rename_sel(int count, int key)
 		return handle_no_sel("br");
 
 	exec_prompt_cmds = 1;
-	return run_kb_cmd("br sel");
+	return run_kb_cmd("br sel", 0);
 }
 
 static int
@@ -2613,7 +2613,7 @@ static int
 rl_dirhist(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	return run_kb_cmd("dh");
+	return run_kb_cmd("dh", 0);
 }
 
 static int
@@ -2621,7 +2621,7 @@ rl_new_instance(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	exec_prompt_cmds = 1;
-	return run_kb_cmd("x .");
+	return run_kb_cmd("x .", 0);
 }
 
 static int
@@ -2629,7 +2629,7 @@ rl_clear_msgs(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	exec_prompt_cmds = 1;
-	return run_kb_cmd("msg clear");
+	return run_kb_cmd("msg clear", 0);
 }
 
 static int
@@ -2641,7 +2641,7 @@ rl_trash_sel(int count, int key)
 		return handle_no_sel("trash");
 
 	exec_prompt_cmds = 1;
-	return run_kb_cmd("t sel");
+	return run_kb_cmd("t sel", 1);
 }
 
 static int
@@ -2649,7 +2649,7 @@ rl_untrash_all(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	exec_prompt_cmds = 1;
-	return run_kb_cmd("u *");
+	return run_kb_cmd("u *", 0);
 }
 
 static int
@@ -2663,7 +2663,7 @@ rl_open_sel(int count, int key)
 	char cmd[PATH_MAX + 4];
 	snprintf(cmd, sizeof(cmd), "o %s", sel_elements[sel_n - 1].name);
 
-	return run_kb_cmd(cmd);
+	return run_kb_cmd(cmd, 0);
 }
 
 static int
@@ -2765,7 +2765,7 @@ rl_dir_pinned(int count, int key)
 		return FUNC_SUCCESS;
 	}
 
-	return run_kb_cmd(",");
+	return run_kb_cmd(",", 0);
 }
 
 /* Switch to workspace N. */
@@ -2786,14 +2786,14 @@ rl_switch_workspace(const int n)
 		 * currently in, switch rather to the previous workspace. */
 		if (prev_ws != cur_ws) {
 			snprintf(t, sizeof(t), "ws %d", prev_ws + 1);
-			return run_kb_cmd(t);
+			return run_kb_cmd(t, 0);
 		}
 
 		return FUNC_SUCCESS;
 	}
 
 	snprintf(t, sizeof(t), "ws %d", n);
-	return run_kb_cmd(t);
+	return run_kb_cmd(t, 0);
 }
 
 static int
@@ -2835,7 +2835,7 @@ run_plugin(const int num)
 
 	char cmd[MAX_INT_STR + 7];
 	snprintf(cmd, sizeof(cmd), "plugin%d", num);
-	const int ret = run_kb_cmd(cmd);
+	const int ret = run_kb_cmd(cmd, 0);
 
 	unsetenv("CLIFM_LINE");
 
@@ -2959,7 +2959,7 @@ rl_launch_view(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	exec_prompt_cmds = 1;
-	return run_kb_cmd("view");
+	return run_kb_cmd("view", 0);
 }
 
 static int
@@ -3306,7 +3306,7 @@ rl_run_pager(int count, int key)
 	if (kbind_busy == 1 || conf.pager == 1)
 		return FUNC_SUCCESS;
 
-	return run_kb_cmd("pg");
+	return run_kb_cmd("pg", 0);
 }
 
 /* Run "!<TAB>" to display the command history via finder. */

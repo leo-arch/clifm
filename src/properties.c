@@ -1622,7 +1622,7 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 
 	char *size_unit = construct_human_size(size);
 	char *csize = dz_c;
-	char *cend = conf.colorize == 1 ? df_c : "";
+	const char *cend = conf.colorize == 1 ? df_c : "";
 
 	char sf[MAX_SHADE_LEN];
 	*sf = '\0';
@@ -1672,7 +1672,7 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 		csize = sf;
 	}
 
-	char *human_size = construct_human_size(total_size);
+	const char *human_size = construct_human_size(total_size);
 	if (!human_size) {
 		puts(UNKNOWN_STR);
 		return;

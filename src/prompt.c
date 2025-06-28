@@ -1655,14 +1655,11 @@ handle_empty_line(const int screen_refresh)
 	if (conf.autols == 1 && ((flags & DELAYED_REFRESH)
 	|| xargs.refresh_on_empty_line == 1)
 	&& screen_refresh == PROMPT_SCREEN_REFRESH
-	&& g_prompt_ignore_empty_line == 0) {
-		flags &= ~DELAYED_REFRESH;
+	&& g_prompt_ignore_empty_line == 0)
 		refresh_screen();
-	} else {
-		g_prompt_ignore_empty_line = 0;
-		flags &= ~DELAYED_REFRESH;
-	}
 
+	g_prompt_ignore_empty_line = 0;
+	flags &= ~DELAYED_REFRESH;
 	return (char *)NULL;
 }
 
