@@ -339,8 +339,8 @@ count_utf8_chars(const char *s)
 	return count;
 }
 
-/* Set the color of the dividing line: DL, is the color code is set,
- * or the color of the current workspace if not */
+/* Set the color of the dividing line: DL, if the color code is set,
+ * or the color of the current workspace if not. */
 static void
 set_div_line_color(void)
 {

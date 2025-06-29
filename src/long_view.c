@@ -37,6 +37,21 @@
 /* Remaining space in the properties string buffer. */
 static size_t buf_rem_space = 0;
 
+/* Precomputed colors without the bold attribute for the file type field
+ * in the permissions string. */
+static char bd_nb[MAX_COLOR + 2];
+static char cd_nb[MAX_COLOR + 2];
+static char df_nb[MAX_COLOR + 2];
+static char di_nb[MAX_COLOR + 2];
+static char dn_nb[MAX_COLOR + 2];
+static char fi_nb[MAX_COLOR + 2];
+static char ln_nb[MAX_COLOR + 2];
+#ifdef SOLARIS_DOORS
+static char oo_nb[MAX_COLOR + 2];
+#endif /* SOLARIS_DOORS */
+static char pi_nb[MAX_COLOR + 2];
+static char so_nb[MAX_COLOR + 2];
+
 static char *
 get_ext_info_long(const struct fileinfo *props, const size_t name_len,
 	int *trunc, size_t *ext_len)
@@ -243,17 +258,11 @@ gen_perms(const mode_t mode, char *perm_str, const char file_type,
 {
 	int bytes = 0;
 
-	static char tmp_ctype[MAX_COLOR + 1];
-	xstrsncpy(tmp_ctype, (file_type == UNK_PCHR ? df_c : ctype),
-		sizeof(tmp_ctype));
-	if (xargs.no_bold != 1)
-		remove_bold_attr(tmp_ctype);
-
 	if (prop_fields.perm == PERM_SYMBOLIC) {
 		const struct perms_t perms = get_file_perms(mode);
 		bytes = snprintf(perm_str, buf_rem_space,
 			"%s%c%s/%s%c%s%c%s%c%s.%s%c%s%c%s%c%s.%s%c%s%c%s%c%s",
-			tmp_ctype, file_type, dn_c,
+			ctype, file_type, dn_c,
 			perms.cur, perms.ur, perms.cuw, perms.uw, perms.cux, perms.ux, dn_c,
 			perms.cgr, perms.gr, perms.cgw, perms.gw, perms.cgx, perms.gx, dn_c,
 			perms.cor, perms.or, perms.cow, perms.ow, perms.cox, perms.ox, df_c);
@@ -261,7 +270,6 @@ gen_perms(const mode_t mode, char *perm_str, const char file_type,
 	} else /* PERM_NUMERIC */ {
 		bytes = snprintf(perm_str, PERM_STR_LEN,
 			"%s%04o%s", do_c, mode & 07777, df_c);
-
 	}
 
 	return bytes > 0 ? (size_t)bytes : 0;
@@ -342,7 +350,7 @@ gen_time(char *time_str, const struct fileinfo *props)
 		xstrsncpy(file_time, invalid_time_str, sizeof(file_time));
 	}
 
-	int bytes = snprintf(time_str, buf_rem_space, "%s%s%s%s%s", cdate,
+	const int bytes = snprintf(time_str, buf_rem_space, "%s%s%s%s%s", cdate,
 		*file_time ? file_time : UNKNOWN_STR, dt_c,
 		conf.timestamp_mark == 1 ? get_time_char() : "", df_c);
 
@@ -471,45 +479,73 @@ gen_blocks(const struct fileinfo *props, char *blk_str, const int max)
 	return bytes > 0 ? (size_t)bytes : 0;
 }
 
+static void
+set_no_bold_colors(void)
+{
+	xstrsncpy(bd_nb, bd_c, sizeof(bd_nb)); remove_bold_attr(bd_nb);
+	xstrsncpy(cd_nb, cd_c, sizeof(cd_nb)); remove_bold_attr(cd_nb);
+	xstrsncpy(df_nb, df_c, sizeof(df_nb)); remove_bold_attr(df_nb);
+	xstrsncpy(di_nb, di_c, sizeof(di_nb)); remove_bold_attr(di_nb);
+	xstrsncpy(dn_nb, dn_c, sizeof(dn_nb)); remove_bold_attr(dn_nb);
+	xstrsncpy(fi_nb, fi_c, sizeof(fi_nb)); remove_bold_attr(fi_nb);
+	xstrsncpy(ln_nb, ln_c, sizeof(ln_nb)); remove_bold_attr(ln_nb);
+#ifdef SOLARIS_DOORS
+	xstrsncpy(oo_nb, oo_c, sizeof(oo_nb)); remove_bold_attr(oo_nb);
+#endif /* SOLARIS_DOORS */
+	xstrsncpy(pi_nb, pi_c, sizeof(pi_nb)); remove_bold_attr(pi_nb);
+	xstrsncpy(so_nb, so_c, sizeof(so_nb)); remove_bold_attr(so_nb);
+}
+
 static char
 set_file_type_and_color(const struct fileinfo *props, char **color)
 {
+	/* Precompute file type colors without the bold attribute for the
+	 * file type field in the permissions string. Let's do this only once,
+	 * and each time the color scheme is switched. */
+	static char *cscheme_bk = NULL;
+	static int no_bold_set = 0;
+	if (no_bold_set == 0 || !cscheme_bk || cscheme_bk != cur_cscheme) {
+		set_no_bold_colors();
+		cscheme_bk = cur_cscheme;
+		no_bold_set = 1;
+	}
+
 	struct stat a;
 	if (props->stat_err == 1 && conf.follow_symlinks_long == 1
 	&& conf.long_view == 1 && conf.follow_symlinks == 1
 	&& lstat(props->name, &a) == 0 && S_ISLNK(a.st_mode)) {
-		*color = conf.colorize == 1 ? ln_c : df_c;
+		*color = conf.colorize == 1 ? ln_nb : df_nb;
 		return LNK_PCHR;
 	}
 
 	char type = 0;
 
 	switch (props->mode & S_IFMT) {
-	case S_IFREG:  type = REG_PCHR; *color = dn_c; break;
-	case S_IFDIR:  type = DIR_PCHR; *color = di_c; break;
-	case S_IFLNK:  type = LNK_PCHR; *color = ln_c; break;
-	case S_IFIFO:  type = FIFO_PCHR; *color = pi_c; break;
-	case S_IFSOCK: type = SOCK_PCHR; *color = so_c; break;
-	case S_IFBLK:  type = BLKDEV_PCHR; *color = bd_c; break;
-	case S_IFCHR:  type = CHARDEV_PCHR; *color = cd_c; break;
+	case S_IFREG:  type = REG_PCHR; *color = dn_nb; break;
+	case S_IFDIR:  type = DIR_PCHR; *color = di_nb; break;
+	case S_IFLNK:  type = LNK_PCHR; *color = ln_nb; break;
+	case S_IFIFO:  type = FIFO_PCHR; *color = pi_nb; break;
+	case S_IFSOCK: type = SOCK_PCHR; *color = so_nb; break;
+	case S_IFBLK:  type = BLKDEV_PCHR; *color = bd_nb; break;
+	case S_IFCHR:  type = CHARDEV_PCHR; *color = cd_nb; break;
 #ifndef _BE_POSIX
 # ifdef S_ARCH1
-	case S_ARCH1:  type = ARCH1_PCHR; *color = fi_c; break;
-	case S_ARCH2:  type = ARCH2_PCHR; *color = fi_c; break;
+	case S_ARCH1:  type = ARCH1_PCHR; *color = fi_nb; break;
+	case S_ARCH2:  type = ARCH2_PCHR; *color = fi_nb; break;
 # endif /* S_ARCH1 */
 # ifdef SOLARIS_DOORS
-	case S_IFDOOR: type = DOOR_PCHR; *color = oo_c; break;
-	case S_IFPORT: type = PORT_PCHR; *color = oo_c; break;
+	case S_IFDOOR: type = DOOR_PCHR; *color = oo_nb; break;
+	case S_IFPORT: type = PORT_PCHR; *color = oo_nb; break;
 # endif /* SOLARIS_DOORS */
 # ifdef S_IFWHT
-	case S_IFWHT:  type = WHT_PCHR; *color = fi_c; break;
+	case S_IFWHT:  type = WHT_PCHR; *color = fi_nb; break;
 # endif /* S_IFWHT */
 #endif /* !_BE_POSIX */
-	default:       type = UNK_PCHR; *color = dn_c; break;
+	default:       type = UNK_PCHR; *color = dn_nb; break;
 	}
 
 	if (conf.colorize == 0)
-		*color = df_c;
+		*color = df_nb;
 
 	return type;
 }
