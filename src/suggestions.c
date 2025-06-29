@@ -91,6 +91,7 @@ change_word_color(const char *_last_word, const int offset, const char *color)
 }
 #endif // !_NO_HIGHLIGHT */
 
+/* Return a brief description for the command S, whose length is L. */
 static char *
 check_int_cmd_desc(const char *s, const size_t l)
 {
@@ -98,24 +99,27 @@ check_int_cmd_desc(const char *s, const size_t l)
 		return (char *)NULL;
 
 	if (l == 1) {
-		if (*s == 'b') return B_DESC;
-		if (*s == 'c') return C_DESC;
-		if (*s == 'd') return D_DESC;
-		if (*s == 'f') return F_DESC;
-		if (*s == 'j') return J_DESC;
-		if (*s == 'k') return K_DESC;
-		if (*s == 'l') return L_DESC;
-		if (*s == 'm') return M_DESC;
-		if (*s == 'n') return N_DESC;
-		if (*s == 'o') return O_DESC;
-		if (*s == 'p') return P_DESC;
-		if (*s == 'q') return Q_DESC;
-		if (*s == 'r') return R_DESC;
-		if (*s == 's') return SEL_DESC;
-		if (*s == 't') return TRASH_DESC;
-		if (*s == 'u') return U_DESC;
-		if (*s == 'x') return X_DESC;
-		if (*s == 'X') return XU_DESC;
+		switch (*s) {
+		case 'b': return B_DESC;
+		case 'c': return C_DESC;
+		case 'd': return D_DESC;
+		case 'f': return F_DESC;
+		case 'j': return J_DESC;
+		case 'k': return K_DESC;
+		case 'l': return L_DESC;
+		case 'm': return M_DESC;
+		case 'n': return N_DESC;
+		case 'o': return O_DESC;
+		case 'p': return P_DESC;
+		case 'q': return Q_DESC;
+		case 'r': return R_DESC;
+		case 's': return SEL_DESC;
+		case 't': return TRASH_DESC;
+		case 'u': return U_DESC;
+		case 'x': return X_DESC;
+		case 'X': return XU_DESC;
+		default: return (char *)NULL;
+		}
 	}
 
 	else if (l == 2) {
