@@ -39,18 +39,18 @@ static size_t buf_rem_space = 0;
 
 /* Precomputed colors without the bold attribute for the file type field
  * in the permissions string. */
-static char bd_nb[MAX_COLOR + 2];
-static char cd_nb[MAX_COLOR + 2];
-static char df_nb[MAX_COLOR + 2];
-static char di_nb[MAX_COLOR + 2];
-static char dn_nb[MAX_COLOR + 2];
-static char fi_nb[MAX_COLOR + 2];
-static char ln_nb[MAX_COLOR + 2];
+static char bd_nb[MAX_COLOR];
+static char cd_nb[MAX_COLOR];
+static char df_nb[MAX_COLOR];
+static char di_nb[MAX_COLOR];
+static char dn_nb[MAX_COLOR];
+static char fi_nb[MAX_COLOR];
+static char ln_nb[MAX_COLOR];
 #ifdef SOLARIS_DOORS
-static char oo_nb[MAX_COLOR + 2];
+static char oo_nb[MAX_COLOR];
 #endif /* SOLARIS_DOORS */
-static char pi_nb[MAX_COLOR + 2];
-static char so_nb[MAX_COLOR + 2];
+static char pi_nb[MAX_COLOR];
+static char so_nb[MAX_COLOR];
 
 static char *
 get_ext_info_long(const struct fileinfo *props, const size_t name_len,
@@ -503,11 +503,9 @@ set_file_type_and_color(const struct fileinfo *props, char **color)
 	 * file type field in the permissions string. Let's do this only once,
 	 * and each time the color scheme is switched. */
 	static char *cscheme_bk = NULL;
-	static int no_bold_set = 0;
-	if (no_bold_set == 0 || !cscheme_bk || cscheme_bk != cur_cscheme) {
+	if (!cscheme_bk || cscheme_bk != cur_cscheme) {
 		set_no_bold_colors();
 		cscheme_bk = cur_cscheme;
-		no_bold_set = 1;
 	}
 
 	struct stat a;
