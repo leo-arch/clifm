@@ -206,7 +206,7 @@
 ;PrivateWorkspaceSettings=false
 
 # Show disk usage of the filesystem where the current directory resides,
-# in the format "FREE/TOTAL (FREE %) TYPE DEVICE".
+# in the format "FREE % (FREE/TOTAL) TYPE DEVICE".
 ;DiskUsage=false
 
 # Print a map of the current position in the directory history list,

@@ -1429,7 +1429,6 @@ run_kb_cmd(char *cmd, const int ignore_empty_line)
 		prompt_offset = UNSET;
 
 	g_prompt_ignore_empty_line = ignore_empty_line;
-
 	return FUNC_SUCCESS;
 }
 
@@ -1708,7 +1707,7 @@ rl_accept_suggestion(int count, int key)
 
 	/* If accepting the first suggested word, accept only up to next
 	 * word delimiter. */
-	char *s = (char *)NULL, _s = 0;
+	char *s = (char *)NULL, truncated_char = 0;
 	int truncated = 0, accept_first_word_last = 0;
 	if (accept_first_word == 1) {
 		char *p = suggestion_buf + (rl_point - suggestion.offset);
@@ -1717,7 +1716,7 @@ rl_accept_suggestion(int count, int key)
 			p++;
 
 		/* Skip all consecutive word delimiters from the beginning of the
-		 * suggestion (P), except for slash and space */
+		 * suggestion (P), except for slash and space. */
 		while ((s = strpbrk(p, WORD_DELIMITERS)) == p && *s != '/' && *s != ' ')
 			p++;
 		if (s && s != p && *(s - 1) == ' ')
@@ -1729,7 +1728,7 @@ rl_accept_suggestion(int count, int key)
 		if (s && s[1]) { /* Truncate suggestion after word delimiter */
 			if (*s == '/')
 				++s;
-			_s = *s;
+			truncated_char = *s;
 			*s = '\0';
 			truncated = 1;
 		} else { /* Last word: No word delimiter */
@@ -1811,7 +1810,7 @@ rl_accept_suggestion(int count, int key)
 		break;
 
 	case FIRST_WORD:
-		my_insert_text(suggestion_buf, s, _s); break;
+		my_insert_text(suggestion_buf, s, truncated_char); break;
 
 	case JCMD_SUG_NOACD:
 		my_insert_text(suggestion_buf, NULL, 0);
@@ -1881,18 +1880,16 @@ rl_accept_suggestion(int count, int key)
 		break;
 	}
 
-	/* Move the cursor to the end of the line */
+	/* Move the cursor to the end of the line. */
 	rl_point = rl_end;
 	if (accept_first_word == 0) {
 		suggestion.printed = 0;
 		free(suggestion_buf);
 		suggestion_buf = (char *)NULL;
 	} else {
-		if (s) {
-			/* Reinsert the char we removed to print only the first word */
-			if (truncated == 1)
-				*s = _s;
-		}
+		if (s && truncated == 1)
+			/* Reinsert the char we removed to print only the first word. */
+			*s = truncated_char;
 		accept_first_word = 0;
 	}
 
@@ -1907,7 +1904,7 @@ rl_accept_first_word(int count, int key)
 		return rl_forward_word(1, 0);
 
 	/* Accepting the first suggested word is not supported for ELN's,
-	 * bookmark and alias names */
+	 * bookmark and alias names. */
 	int t = suggestion.type;
 	if (t != ELN_SUG && t != BOOKMARK_SUG && t != ALIAS_SUG && t != JCMD_SUG
 	&& t != JCMD_SUG_NOACD && t != FUZZY_FILENAME && t != CMD_DESC_SUG

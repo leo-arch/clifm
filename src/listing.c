@@ -501,8 +501,8 @@ print_disk_usage(void)
 	devname = DEV_NO_NAME;
 #endif /* _BE_POSIX */
 
-	print_reload_msg(NULL, NULL, _("%s/%s (%d%% free) %s %s\n"),
-		free_space ? free_space : "?", size ? size : "?", free_percentage,
+	print_reload_msg(NULL, NULL, _("%d%% free (%s/%s) %s %s\n"),
+		free_percentage, free_space ? free_space : "?", size ? size : "?",
 		fstype, devname);
 
 /* NOTE: If the f_blocks, f_bfree, f_files, f_ffree, f_bavail, and f_favail
