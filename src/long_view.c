@@ -242,7 +242,7 @@ gen_size(const struct fileinfo *props, char *size_str,
 		&& conf.full_dir_size == 1);
 	const char *unit_color = conf.colorize == 1
 		? (du_err == 1 ? xf_cb : dim_c)
-		: (du_err == 1 ? "\x1b[1m" : "");
+		: ((du_err == 1 && xargs.no_bold != 1) ? "\x1b[1m" : "");
 
 	bytes = snprintf(size_str, buf_rem_space, "%s%*s%s%c\x1b[0m%s",
 		csize, size_max,
