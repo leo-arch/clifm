@@ -1215,7 +1215,7 @@ get_query_str(char *lw)
 	case TCMP_TAGS_T: /* fallthrough */
 	case TCMP_WS_PREFIX: /* fallthrough */
 	case TCMP_BM_PREFIX:
-		query = (lw && *lw && lw[1] && lb[2]) ? lw + 2 : (char *)NULL;
+		query = (lw && *lw && lw[1] && lw[2]) ? lw + 2 : (char *)NULL;
 		break;
 
 	case TCMP_FILE_TEMPLATES: /* fallthrough */
@@ -1716,7 +1716,7 @@ do_some_cleanup(char **buf, char **matches, const char *query,
 		/* Honor case insensitive completion/fuzzy matches. */
 		if ((conf.case_sens_path_comp == 0 || conf.fuzzy_match == 1)
 		&& query && strncmp(matches[0], *buf, *prefix_len) != 0) {
-			int bk = rl_point;
+			const int bk = rl_point;
 			rl_delete_text(bk - (int)*prefix_len, rl_end);
 			rl_point = rl_end = bk - (int)*prefix_len;
 			*prefix_len = 0;
