@@ -1299,7 +1299,8 @@ calculate_prefix_len(const char *str, const char *query, const char *lw)
 		/* Insert the entire match (to honor case insensitive query) */
 		return 0;
 
-	size_t prefix_len = 0, len = strlen(str);
+	size_t prefix_len = 0;
+	const size_t len = strlen(str);
 
 	if (len == 0 || str[len - 1] == '/') {
 		if (ct != TCMP_DESEL)
@@ -1366,8 +1367,7 @@ is_multi_sel(void)
 		/* Select */
 		(*l == 's' && (l[1] == ' ' || strncmp(l, "sel ", 4) == 0))
 		/* Trash */
-		|| (*l == 't' && (l[1] == ' ' || (l[1] == 't' && l[2] == ' ')
-		|| strncmp(l, "trash ", 6) == 0))
+		|| (*l == 't' && (l[1] == ' ' || strncmp(l, "trash ", 6) == 0))
 		/* ac and ad */
 		|| (*l == 'a' && ((l[1] == 'c' || l[1] == 'd') && l[2] == ' '))
 		/* bb, bl, and br */
@@ -1377,8 +1377,7 @@ is_multi_sel(void)
 		/* d/dup */
 		|| (*l == 'd' && (l[1] == ' ' || strncmp(l, "dup ", 4) == 0))
 		/* Properties */
-		|| (*l == 'p' && (l[1] == ' ' || ((l[1] == 'r' && l[2] == ' ')
-		|| strncmp (l, "prop ", 5) == 0)))
+		|| (*l == 'p' && (l[1] == ' ' || strncmp (l, "prop ", 5) == 0))
 		/* te */
 		|| (*l == 't' && l[1] == 'e' && l[2] == ' ') ) {
 			return 1;
