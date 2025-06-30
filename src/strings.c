@@ -1493,123 +1493,70 @@ expand_mime_type_filter(const char *pattern)
 }
 #endif /* !_NO_MAGIC */
 
+/* Return an array of filenames matching the file type T or NULL if no
+ * match is found. */
 static char **
 expand_file_type_filter(const char t)
 {
 	if (files == 0)
 		return (char **)NULL;
 
-	filesn_t i = 0, n = 0;
+	filesn_t i = 0, c = 0;
 
 	char **f = xnmalloc((size_t)files + 1, sizeof(char *));
 	char buf[PATH_MAX + 1];
 
 	while (i < files) {
-		char *name = file_info[i].name;
+		char *n = file_info[i].name;
 		if (virtual_dir == 1) {
 			*buf = '\0';
 			if (xreadlink(XAT_FDCWD, file_info[i].name, buf, sizeof(buf)) == -1
 			|| !*buf)
 				continue;
-			name = buf;
+			n = buf;
 		}
 
-		if (!name || !*name)
+		if (!n || !*n)
 			continue;
 
 		switch (t) {
-		case 'b':
-			if (file_info[i].type == DT_BLK)
-				f[n++] = strdup(name);
-			break;
-		case 'c':
-			if (file_info[i].type == DT_CHR)
-				f[n++] = strdup(name);
-			break;
-		case 'C':
-			if (file_info[i].color == ca_c)
-				f[n++] = strdup(name);
-			break;
-		case 'd':
-			if (file_info[i].dir == 1)
-				f[n++] = strdup(name);
-			break;
-		case 'D':
-			if (file_info[i].color == ed_c)
-				f[n++] = strdup(name);
-			break;
+		case 'b': if (file_info[i].type == DT_BLK) f[c++] = strdup(n); break;
+		case 'c': if (file_info[i].type == DT_CHR) f[c++] = strdup(n); break;
+		case 'C': if (file_info[i].color == ca_c) f[c++] = strdup(n); break;
+		case 'd': if (file_info[i].dir == 1) f[c++] = strdup(n); break;
+		case 'D': if (file_info[i].color == ed_c) f[c++] = strdup(n); break;
 #ifdef SOLARIS_DOORS
-		case 'O':
-			if (file_info[i].type == DT_DOOR)
-				f[n++] = strdup(name);
-			break;
-		case 'P':
-			if (file_info[i].type == DT_PORT)
-				f[n++] = strdup(name);
-			break;
+		case 'O': if (file_info[i].type == DT_DOOR) f[c++] = strdup(n); break;
+		case 'P': if (file_info[i].type == DT_PORT) f[c++] = strdup(n); break;
 #endif /* SOLARIS_DOORS */
-		case 'f':
-			if (file_info[i].type == DT_REG)
-				f[n++] = strdup(name);
-			break;
-		case 'F':
-			if (file_info[i].color == ef_c)
-				f[n++] = strdup(name);
-			break;
-		case 'h':
+		case 'f': if (file_info[i].type == DT_REG) f[c++] = strdup(n); break;
+		case 'F': if (file_info[i].color == ef_c) f[c++] = strdup(n); break;
+		case 'h': 
 			if (file_info[i].dir == 0 && file_info[i].linkn > 1)
-				f[n++] = strdup(name);
+				f[c++] = strdup(n);
 			break;
-		case 'l':
-			if (file_info[i].type == DT_LNK)
-				f[n++] = strdup(name);
-			break;
-		case 'L':
-			if (file_info[i].color == or_c)
-				f[n++] = strdup(name);
-			break;
-		case 'o':
-			if (file_info[i].mode & S_IWOTH)
-				f[n++] = strdup(name);
-			break;
-		case 't':
-			if (file_info[i].mode & S_ISVTX)
-				f[n++] = strdup(name);
-			break;
-
-		case 'p':
-			if (file_info[i].type == DT_FIFO)
-				f[n++] = strdup(name);
-			break;
-		case 's':
-			if (file_info[i].type == DT_SOCK)
-				f[n++] = strdup(name);
-			break;
-		case 'x':
-			if (file_info[i].exec == 1)
-				f[n++] = strdup(name);
-			break;
-		case 'u':
-			if (file_info[i].mode & S_ISUID)
-				f[n++] = strdup(name);
-			break;
-		case 'g':
-			if (file_info[i].mode & S_ISGID)
-				f[n++] = strdup(name);
-			break;
+		case 'l': if (file_info[i].type == DT_LNK) f[c++] = strdup(n); break;
+		case 'L': if (file_info[i].color == or_c) f[c++] = strdup(n); break;
+		case 'o': if (file_info[i].mode & S_IWOTH) f[c++] = strdup(n); break;
+		case 't': if (file_info[i].mode & S_ISVTX) f[c++] = strdup(n); break;
+		case 'p': if (file_info[i].type == DT_FIFO) f[c++] = strdup(n); break;
+		case 's': if (file_info[i].type == DT_SOCK) f[c++] = strdup(n); break;
+		case 'x': if (file_info[i].exec == 1) f[c++] = strdup(n); break;
+		case 'u': if (file_info[i].mode & S_ISUID) f[c++] = strdup(n); break;
+		case 'g': if (file_info[i].mode & S_ISGID) f[c++] = strdup(n); break;
 		default: break;
 		}
 
 		i++;
 	}
 
-	if (n == 0) {
+	if (c == 0) {
 		free(f);
 		return (char **)NULL;
 	}
 
-	f[n] = (char *)NULL;
-	f = xnrealloc(f, (size_t)n + 1, sizeof(char *));
+	f[c] = (char *)NULL;
+	f = xnrealloc(f, (size_t)c + 1, sizeof(char *));
 
 	return f;
 }
