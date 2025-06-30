@@ -404,25 +404,21 @@ get_comp_entry_color(char *entry, const char *norm_prefix)
 	return df_c;
 }
 
-/* Get the word after the last non-escaped space in the input buffer. */
+/* Return a pointer to the word after the last non-escaped space in the input
+ * buffer. If no space is found, apointer to the entire command line
+ * (rl_line_buffer) is returned. */
 static char *
 get_last_input_word(void)
 {
 	if (!rl_line_buffer)
 		return (char *)NULL;
 
-	char *lb = rl_line_buffer;
-	char *lastword = (char *)NULL;
+	char *lb = rl_line_buffer + 1;
+	char *lastword = rl_line_buffer;
 
 	while (*lb) {
-		if (lb == rl_line_buffer) {
-			lb++;
-			continue;
-		}
-
-		if (*lb == ' ' && *(lb - 1) != '\\' && *(lb + 1) != ' ')
+		if (*lb == ' ' && *(lb - 1) != '\\' && lb[1] != ' ')
 			lastword = lb + 1;
-
 		lb++;
 	}
 
@@ -458,8 +454,6 @@ append_ending_char(const enum comp_type ct)
 	rl_line_buffer[rl_point] = '\0';
 
 	char *lastword = get_last_input_word();
-	if (!lastword || !*lastword)
-		lastword = rl_line_buffer;
 	if (!lastword)
 		return;
 
