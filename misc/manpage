@@ -3512,16 +3512,18 @@ T}	I\'m tired, quit
 .TE
 
 .TP
-There is a lot more you can do, but this should be enough to get you started.
+There is a lot more you can do, but this should be enough to get started.
 
 .SH EXIT STATUS
 \fBClifm\fR returns the exit status of the last executed command
 
-.SH CONFORMING TO
-\fBClifm\fR is C99 compliant, and, if compiled with the _BE_POSIX flag, it is POSIX.1\-2008 compliant as well. If not, just a single non\-POSIX function is used: \fBstatx\fR(2) (Linux specific), to get files birth time.
+.SH LICENSE
+This program is distributed under the terms of the GNU GPL version 2 or later <https://www.gnu.org/licenses/old\-licenses/gpl\-2.0.html>
+.sp 0
+This is free software: you are free to change and redistribute it. There is NO WARRANTY, to the extent permitted by law.
 
 .SH BUG AND FEATURE REQUESTS
-Report at <https://github.com/leo\\-arch/clifm/issues>
+Report at <https://github.com/leo\-arch/clifm/issues>
 
 .SH AUTHOR
 L. M. Abramovich <leo.clifm@outlook.com>
