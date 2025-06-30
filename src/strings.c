@@ -1185,14 +1185,14 @@ split_fused_param(char *str)
 			if (c && *(p - 1) != ' ' && *(p - 1) != '|'
 			&& *(p - 1) != '&' && *(p - 1) != ';')
 				words++;
-			if (*(p + 1))
+			if (p[1])
 				pp = p + 1;
 			break;
 		case '&': /* fallthrough */
 		case '|': /* fallthrough */
 		case ';':
 			words = 1;
-			if (*(p + 1))
+			if (p[1])
 				pp = p + 1;
 			break;
 		default: break;
@@ -1282,7 +1282,7 @@ check_shell_functions(const char *str)
 static int
 is_fused_param(char *str)
 {
-	if (!str || !*str || !*(str + 1))
+	if (!str || !*str || !str[1])
 		return FUNC_FAILURE;
 
 	char *p = str, *q = (char *)NULL;
@@ -1309,10 +1309,7 @@ is_fused_param(char *str)
 	const int ret = is_internal_cmd(str, PARAM_FNAME_NUM, 0, 0);
 	*q = c;
 
-	if (ret == 0)
-		return FUNC_FAILURE;
-
-	return FUNC_SUCCESS;
+	return (ret == 0 ? FUNC_FAILURE : FUNC_SUCCESS);
 }
 
 #ifndef _NO_TAGS

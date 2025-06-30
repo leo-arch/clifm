@@ -971,7 +971,8 @@ get_glob_file_target(char *str, const char *initial_path)
 static char *
 get_finder_output(const int multi, char *base)
 {
-	FILE *fp = fopen(finder_out_file, "r");
+	int fd = 0;
+	FILE *fp = open_fread(finder_out_file, &fd);
 	if (!fp) {
 		unlink(finder_out_file);
 		return print_no_finder_file();
@@ -1052,8 +1053,8 @@ get_finder_output(const int multi, char *base)
 	}
 
 	free(line);
-	fclose(fp);
-	unlink(finder_out_file);
+	unlinkat(fd, finder_out_file, 0);
+	close(fd);
 
 	if (*buf == '\0') {
 		free(buf);
@@ -1792,12 +1793,12 @@ set_finder_paths(void)
 	const int sm = (xargs.stealth_mode == 1);
 	const char *p = sm ? P_tmpdir : tmp_dir;
 
-	char *rand_ext = gen_rand_str(sm ? RAND_SUFFIX_LEN + 6 : RAND_SUFFIX_LEN);
+	char *rand_ext = gen_rand_str(RAND_SUFFIX_LEN + (sm ? 6 : 0));
 	snprintf(finder_in_file, sizeof(finder_in_file), "%s/.temp%s",
 		p, rand_ext ? rand_ext : "a3_2yu!d43");
 	free(rand_ext);
 
-	rand_ext = gen_rand_str(sm ? RAND_SUFFIX_LEN + 10 : RAND_SUFFIX_LEN + 4);
+	rand_ext = gen_rand_str(RAND_SUFFIX_LEN + (sm ? 10 : 4));
 	snprintf(finder_out_file, sizeof(finder_out_file), "%s/.temp%s",
 		p, rand_ext ? rand_ext : "0rNkds7++@");
 	free(rand_ext);
