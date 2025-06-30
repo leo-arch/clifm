@@ -1403,15 +1403,15 @@ clean_rl_buffer(const char *text)
 	if (rl_point != rl_end)
 		return FUNC_SUCCESS;
 
+	const char *lb = rl_line_buffer;
 	/* If the previous char is not space, then a common prefix was appended:
 	 * remove it. */
-	if ((rl_end > 0 && rl_line_buffer && rl_line_buffer[rl_end - 1] != ' ')
-	|| (rl_end >= 2 && rl_line_buffer && rl_line_buffer[rl_end - 2] == '\\')) {
+	if ((rl_end > 0 && lb && lb[rl_end - 1] != ' ')
+	|| (rl_end >= 2 && lb && lb[rl_end - 2] == '\\')) {
 		/* Find the last non-escaped space. */
 		int i = rl_end, sp = -1;
 		while (--i >= 0) {
-			if (rl_line_buffer[i] == ' ' && i > 0
-			&& rl_line_buffer[i - 1] != '\\') {
+			if (lb[i] == ' ' && i > 0 && lb[i - 1] != '\\') {
 				sp = i;
 				break;
 			}
@@ -1515,7 +1515,7 @@ get_finder_offset(const char *query, const char *text, char **matches,
 		if (lb && *lb == '/' && lb[1] == '*') { /* Search history */
 			finder_offset = 1 + prompt_offset - ((query && *query) ? 3 : 4);
 		} else { /* Commands history */
-			char *sp = lb ? get_last_chr(lb, '!', rl_point) : (char *)NULL;
+			const char *sp = lb ? get_last_chr(lb, '!', rl_point) : NULL;
 			finder_offset = prompt_offset + (sp ? (int)(sp - lb)
 				- ((query && *query) ? 2 : 3) : -1);
 		}
@@ -1542,7 +1542,7 @@ get_finder_offset(const char *query, const char *text, char **matches,
 			/* Coming from untag ('tu :TAG ') */
 			finder_offset++;
 		} else { /* Coming from tag expression ('t:FULL_TAG') */
-			char *sp = lb ? get_last_chr(lb, ' ', rl_point) : (char *)NULL;
+			const char *sp = lb ? get_last_chr(lb, ' ', rl_point) : NULL;
 			finder_offset = prompt_offset + (sp ? (int)(sp - lb): -1);
 		}
 	}
@@ -1556,7 +1556,7 @@ get_finder_offset(const char *query, const char *text, char **matches,
 	}
 
 	else if (ct == TCMP_FILE_TYPES_FILES) {
-		char *sp = lb ? get_last_chr(lb, ' ', rl_point) : (char *)NULL;
+		const char *sp = lb ? get_last_chr(lb, ' ', rl_point) : NULL;
 		if (sp) /* Expression is second or more word: "text =FILE_TYPE" */
 			finder_offset = prompt_offset + (int)(sp - lb) - 1;
 		else /* Expression is first word: "=FILE_TYPE" */
@@ -1564,28 +1564,28 @@ get_finder_offset(const char *query, const char *text, char **matches,
 	}
 
 	else if (ct == TCMP_SEL || ct == TCMP_RANGES) {
-		char *sp = lb ? get_last_chr(lb, ' ', rl_point) : (char *)NULL;
+		const char *sp = lb ? get_last_chr(lb, ' ', rl_point) : NULL;
 		finder_offset = prompt_offset + (sp ? (int)(sp - lb) - 2 : -(rl_end + 1));
 	}
 
 	else if (ct == TCMP_BM_PATHS) {
-		char *sp = lb ? get_last_chr(lb, ' ', rl_point) : (char *)NULL;
+		const char *sp = lb ? get_last_chr(lb, ' ', rl_point) : NULL;
 		finder_offset = prompt_offset + (sp ? (int)(sp - lb) - 2 : -3);
 	}
 
 	else if (ct == TCMP_TAGS_C) {
-		char *sp = lb ? strrchr(lb, ' ') : (char *)NULL;
+		const char *sp = lb ? strrchr(lb, ' ') : NULL;
 		finder_offset = prompt_offset + (sp ? (int)(sp - lb) - 1 : 0);
 	}
 
 	else if (ct == TCMP_BM_PREFIX || ct == TCMP_TAGS_T) {
-		char *sp = lb ? get_last_chr(lb, ' ', rl_point) : (char *)NULL;
+		const char *sp = lb ? get_last_chr(lb, ' ', rl_point) : NULL;
 		finder_offset = prompt_offset + (sp ? (int)(sp - lb): -1);
 	}
 
 	else if (ct == TCMP_GLOB) {
-		char *sl = lb ? get_last_chr(lb, '/', rl_point) : (char *)NULL;
-		char *sp = lb ? get_last_chr(lb, ' ', rl_point) : (char *)NULL;
+		const char *sl = lb ? get_last_chr(lb, '/', rl_point) : NULL;
+		const char *sp = lb ? get_last_chr(lb, ' ', rl_point) : NULL;
 		if (!sl) {
 			if (sp)
 				finder_offset = prompt_offset + (int)(sp - lb) - 2;
@@ -1634,8 +1634,8 @@ do_some_cleanup(char **buf, char **matches, const char *query,
 	const enum comp_type ct = cur_comp_type;
 	char *lb = rl_line_buffer;
 
-	/* TCMP_HIST might be either search or command history */
-	int cmd_hist = (ct == TCMP_HIST && rl_line_buffer
+	/* TCMP_HIST may be either search or command history */
+	const int cmd_hist = (ct == TCMP_HIST && rl_line_buffer
 		&& (*lb != '/' || lb[1] != '*'));
 
 	if (rl_point < rl_end && ct != TCMP_PATH && ct != TCMP_CMD) {
@@ -1664,7 +1664,7 @@ do_some_cleanup(char **buf, char **matches, const char *query,
 			rl_delete_text(2, rl_end);
 			rl_point = rl_end = 2;
 		} else {
-			char *tmp = strstr(lb, "j ");
+			const char *tmp = strstr(lb, "j ");
 			if (tmp && tmp[1] && tmp[2]) {
 				rl_point = (int)(tmp - lb + 2);
 				rl_delete_text(rl_point, rl_end);
@@ -1677,7 +1677,7 @@ do_some_cleanup(char **buf, char **matches, const char *query,
 	|| ct == TCMP_TAGS_F || ct == TCMP_GLOB
 	|| ct == TCMP_BM_PATHS || ct == TCMP_BM_PREFIX
 	|| ct == TCMP_TAGS_T || ct == TCMP_DIRHIST) {
-		char *s = lb ? get_last_chr(lb,
+		const char *s = lb ? get_last_chr(lb,
 			(ct == TCMP_GLOB && words_num == 1)
 			? '/' : ' ', rl_end) : (char *)NULL;
 		if (s) {
@@ -1694,7 +1694,7 @@ do_some_cleanup(char **buf, char **matches, const char *query,
 
 	else if (ct == TCMP_FILE_TYPES_FILES || ct == TCMP_CMD_DESC
 	|| ct == TCMP_FILE_TEMPLATES) {
-		char *s = lb ? get_last_chr(lb,
+		const char *s = lb ? get_last_chr(lb,
 			ct == TCMP_FILE_TEMPLATES ? '@' : ' ', rl_end) : (char *)NULL;
 		rl_point = !s ? 0 : (int)(s - lb + 1);
 		rl_delete_text(rl_point, rl_end);
@@ -1763,7 +1763,7 @@ move_cursor_up(const int total_line_len)
 
 	if (total_line_len > term_cols && term_cols > 0) {
 		lines = total_line_len / term_cols;
-		int rem = (int)total_line_len % term_cols;
+		const int rem = (int)total_line_len % term_cols;
 		if (rem > 0)
 			lines++;
 	}
