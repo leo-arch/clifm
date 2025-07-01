@@ -2340,7 +2340,7 @@ rl_glob(char *text)
 }
 
 #ifndef _NO_TRASH
-/* Return the list of currently trashed files matching TEXT, or NULL */
+/* Return the list of currently trashed files matching TEXT, or NULL. */
 static char **
 rl_trashed_files(const char *text)
 {
@@ -3118,7 +3118,6 @@ complete_bookmark_names(char *text, const size_t words_n, int *exit_status)
 			rl_attempted_completion_over = 1;
 		else /* 'bm add': complete with path completion */
 			*exit_status = FUNC_FAILURE;
-
 		return (char **)NULL;
 	}
 
@@ -3192,9 +3191,8 @@ complete_open_with(char *text, char *start)
 #endif /* !_NO_LIRA */
 
 static char **
-complete_file_type_filter(char *text, int *exit_status)
+complete_file_type_filter(char *text)
 {
-	*exit_status = FUNC_FAILURE;
 	char **matches = (char **)NULL;
 
 	if (!text[1]) {
@@ -3205,7 +3203,6 @@ complete_file_type_filter(char *text, int *exit_status)
 		if (!matches[1])
 			rl_swap_fields(&matches);
 
-		*exit_status = FUNC_SUCCESS;
 		cur_comp_type = TCMP_FILE_TYPES_OPTS;
 		return matches;
 	}
@@ -3222,15 +3219,13 @@ complete_file_type_filter(char *text, int *exit_status)
 	else
 		flags |= MULTI_SEL;
 
-	*exit_status = FUNC_SUCCESS;
 	cur_comp_type = TCMP_FILE_TYPES_FILES;
 	return matches;
 }
 
 static char **
-complete_mime_type_filter(char *text, int *exit_status)
+complete_mime_type_filter(char *text)
 {
-	*exit_status = FUNC_FAILURE;
 	char **matches = (char **)NULL;
 
 	if (text[1]) {
@@ -3240,22 +3235,19 @@ complete_mime_type_filter(char *text, int *exit_status)
 		cur_comp_type = TCMP_MIME_FILES; /* Same as TCMP_FILE_TYPES_FILES */
 		rl_filename_completion_desired = 1;
 		flags |= MULTI_SEL;
-		*exit_status = FUNC_SUCCESS;
 		return matches;
 	}
 
 	if ((matches = rl_mime_list()) == NULL)
 		return (char **)NULL;
 
-	*exit_status = FUNC_SUCCESS;
 	cur_comp_type = TCMP_MIME_LIST;
 	return matches;
 }
 
 static char **
-complete_glob(char *text, int *exit_status)
+complete_glob(char *text)
 {
-	*exit_status = FUNC_FAILURE;
 	char **matches = (char **)NULL;
 
 	char *p = (*rl_line_buffer == '/' && rl_end > 1
@@ -3279,7 +3271,6 @@ complete_glob(char *text, int *exit_status)
 	if (words_num > 1)
 		flags |= MULTI_SEL;
 
-	*exit_status = FUNC_SUCCESS;
 	return matches;
 }
 
@@ -3326,11 +3317,8 @@ get_cmd_name(void)
 }
 
 static char **
-complete_shell_cmd_opts(char *text, int *exit_status)
+complete_shell_cmd_opts(char *text)
 {
-	*exit_status = FUNC_FAILURE;
-	char **matches = (char **)NULL;
-
 	char cmd[NAME_MAX + 1]; *cmd = '\0';
 	char *name = get_cmd_name();
 	if (!name)
@@ -3343,20 +3331,16 @@ complete_shell_cmd_opts(char *text, int *exit_status)
 		*space = ' ';
 	}
 
-	if (*cmd && get_shell_cmd_opts(cmd) > 0
-	&& (matches = rl_completion_matches(text, &ext_options_generator)) ) {
-		*exit_status = FUNC_SUCCESS;
-		return matches;
-	}
+	if (*cmd && get_shell_cmd_opts(cmd) > 0)
+		return rl_completion_matches(text, &ext_options_generator);
 
 	return (char **)NULL;
 }
 
 #ifndef _NO_TAGS
 static char **
-complete_tag_names(char *text, int *exit_status, char *start)
+complete_tag_names(char *text, char *start)
 {
-	*exit_status = FUNC_FAILURE;
 	char **matches = (char **)NULL;
 
 	int comp = tag_complete(text, start);
@@ -3370,7 +3354,6 @@ complete_tag_names(char *text, int *exit_status, char *start)
 			return (char **)NULL;
 		}
 
-		*exit_status = FUNC_SUCCESS;
 		return matches;
 	}
 
@@ -3383,15 +3366,13 @@ complete_tag_names(char *text, int *exit_status, char *start)
 	if (!matches)
 		return (char **)NULL;
 
-	*exit_status = FUNC_SUCCESS;
 	cur_comp_type = TCMP_TAGS_F;
 	return matches;
 }
 
 static char **
-complete_tag_names_t(char *text, int *exit_status)
+complete_tag_names_t(char *text)
 {
-	*exit_status = FUNC_FAILURE;
 	cur_comp_type = TCMP_TAGS_T;
 
 	char *p = unescape_str(text, 0);
@@ -3403,15 +3384,15 @@ complete_tag_names_t(char *text, int *exit_status)
 		return (char **)NULL;
 	}
 
-	*exit_status = FUNC_SUCCESS;
 	flags |= MULTI_SEL;
 	return matches;
 }
 
 static char **
-complete_tagged_file_names(char *text, int *exit_status)
+complete_tags(char *text)
 {
-	*exit_status = FUNC_FAILURE;
+	if (!text[2])
+		return complete_tag_names_t(text);
 
 	free(cur_tag);
 	cur_tag = savestring(text + 2, strlen(text + 2));
@@ -3426,37 +3407,31 @@ complete_tagged_file_names(char *text, int *exit_status)
 	if (!matches[1])
 		rl_swap_fields(&matches);
 
-	*exit_status = FUNC_SUCCESS;
 	cur_comp_type = TCMP_TAGS_F;
 	return matches;
 }
 #endif /* !_NO_TAGS */
 
 static char **
-complete_bookmark_paths(char *text, int *exit_status)
+complete_bookmark_paths(char *text)
 {
-	char *t = text + 2;
-	char *p = unescape_str(t, 0);
-	char **matches = rl_completion_matches(p ? p : t, &bm_paths_generator);
+	char *p = unescape_str(text, 0);
+	char **matches = rl_completion_matches(p ? p : text, &bm_paths_generator);
 	free(p);
 
-	if (!matches) {
-		*exit_status = FUNC_FAILURE;
+	if (!matches)
 		return (char **)NULL;
-	}
 
 	if (!matches[1])
 		rl_swap_fields(&matches);
 
-	*exit_status = FUNC_SUCCESS;
 	cur_comp_type = TCMP_BM_PATHS;
 	return matches;
 }
 
 static char **
-complete_bookmark_names_b(char *text, int *exit_status)
+complete_bookmark_names_b(char *text)
 {
-	*exit_status = FUNC_FAILURE;
 	char *p = unescape_str(text, 0);
 	char **matches = rl_completion_matches(p ? p : text, &bookmarks_generator);
 	free(p);
@@ -3466,8 +3441,22 @@ complete_bookmark_names_b(char *text, int *exit_status)
 
 	flags |= MULTI_SEL;
 	cur_comp_type = TCMP_BM_PREFIX;
-	*exit_status = FUNC_SUCCESS;
 	return matches;
+}
+
+static char **
+complete_bookmarks(char *text, const size_t words_n)
+{
+	if (text[2]) {
+		char **matches = complete_bookmark_paths(text + 2);
+		if (matches)
+			return matches;
+	}
+
+	if (words_n || conf.autocd == 1 || conf.auto_open == 1)
+		return complete_bookmark_names_b(text);
+
+	return (char **)NULL;
 }
 
 static char **
@@ -3496,6 +3485,7 @@ complete_ownership(const char *text)
 static char **
 complete_dirhist(char *text, const size_t words_n)
 {
+	rl_attempted_completion_over = 1;
 	if (words_n > 2)
 		return (char **)NULL;
 
@@ -3516,6 +3506,7 @@ complete_dirhist(char *text, const size_t words_n)
 static char **
 complete_backdir(char *text, const size_t words_n)
 {
+	rl_attempted_completion_over = 1;
 	if (words_n != 2)
 		return (char **)NULL;
 
@@ -3534,8 +3525,11 @@ complete_backdir(char *text, const size_t words_n)
 static char **
 complete_workspaces(char *text)
 {
-	rl_sort_completion_matches = 0;
 	rl_attempted_completion_over = 1;
+	if (words_num > 2)
+		return (char **)NULL;
+
+	rl_sort_completion_matches = 0;
 	char *t = (*text == 'w' && text[1] == ':') ? text + 2 : text;
 	char *p = unescape_str(t, 0);
 
@@ -3579,6 +3573,7 @@ int_cmd_no_filename(char *start)
 static char **
 complete_net(char *text)
 {
+	rl_attempted_completion_over = 1;
 	char *p = unescape_str(text, 0);
 	char **matches = rl_completion_matches(p ? p : text, &nets_generator);
 	free(p);
@@ -3591,14 +3586,35 @@ complete_net(char *text)
 }
 
 static char **
-complete_sort_names(const char *text, const size_t words_n)
+complete_sort_num(const char *text, const size_t words_n)
 {
+	rl_attempted_completion_over = 1;
+	if (words_n != 2)
+		return (char **)NULL;
+
+	const int n = atoi(text);
+	if (n < 0 || n > SORT_TYPES)
+		return (char **)NULL;
+
+	char **matches = rl_completion_matches(text, &sort_num_generator);
+	if (!matches)
+		return (char **)NULL;
+
+	cur_comp_type = TCMP_SORT;
+	return matches;
+}
+
+static char **
+complete_sort(const char *text, const size_t words_n)
+{
+	rl_attempted_completion_over = 1;
 	if (words_n > 2)
 		return (char **)NULL;
 
-	rl_attempted_completion_over = 1;
-	char **matches = rl_completion_matches(text, &sort_name_generator);
+	if (text && *text && is_number(text))
+		return complete_sort_num(text, words_n);
 
+	char **matches = rl_completion_matches(text, &sort_name_generator);
 	if (!matches)
 		return (char **)NULL;
 
@@ -3610,6 +3626,7 @@ complete_sort_names(const char *text, const size_t words_n)
 static char **
 complete_profiles(char *text, const size_t words_n)
 {
+	rl_attempted_completion_over = 1;
 	if (words_n > 3)
 		return (char **)NULL;
 
@@ -3618,10 +3635,6 @@ complete_profiles(char *text, const size_t words_n)
 	|| strncmp(lb, "profile add ", 12) == 0 || strncmp(lb, "profile list ", 13) == 0)
 		return (char **)NULL;
 
-# ifndef _NO_SUGGESTIONS
-	if (suggestion.type != FILE_SUG)
-		rl_attempted_completion_over = 1;
-# endif /* _NO_SUGGESTIONS */
 	char *p = unescape_str(text, 0);
 	char **matches = rl_completion_matches(p ? p : text, &profiles_generator);
 	free(p);
@@ -3637,6 +3650,7 @@ complete_profiles(char *text, const size_t words_n)
 static char **
 complete_colorschemes(char *text, const size_t words_n)
 {
+	rl_attempted_completion_over = 1;
 	if (words_n != 2)
 		return (char **)NULL;
 
@@ -3654,6 +3668,7 @@ complete_colorschemes(char *text, const size_t words_n)
 static char **
 complete_file_templates(char *text)
 {
+	rl_attempted_completion_over = 1;
 	char *p = unescape_str(text, 0);
 	char **matches =
 		rl_completion_matches(p ? p : text, &file_templates_generator);
@@ -3670,8 +3685,8 @@ static char **
 complete_desel(const char *text)
 {
 	rl_attempted_completion_over = 1;
-	char **matches = rl_completion_matches(text, &sel_entries_generator);
-
+	char **matches = sel_n > 0
+		? rl_completion_matches(text, &sel_entries_generator) : NULL;
 	if (!matches)
 		return (char **)NULL;
 
@@ -3683,10 +3698,10 @@ complete_desel(const char *text)
 static char **
 complete_trashed_files(const char *text, const enum comp_type flag)
 {
-	char **matches = rl_trashed_files(text);
+	rl_attempted_completion_over = 1;
+	char **matches = trash_n > 0 ? rl_trashed_files(text) : NULL;
 	if (!matches)
 		return (char **)NULL;
-
 
 	if (tabmode == STD_TAB && conf.colorize == 1)
 		/* Only used to remove trash extension from files so
@@ -3702,7 +3717,6 @@ static char **
 complete_prompt_names(char *text, const size_t words_n)
 {
 	rl_attempted_completion_over = 1;
-
 	if (words_n > 3)
 		return (char **)NULL;
 
@@ -3718,23 +3732,9 @@ complete_prompt_names(char *text, const size_t words_n)
 }
 
 static char **
-complete_sort_num(const char *text, const size_t words_n)
-{
-	if (words_n != 2)
-		return (char **)NULL;
-
-	char **matches = rl_completion_matches(text, &sort_num_generator);
-
-	if (!matches)
-		return (char **)NULL;
-
-	cur_comp_type = TCMP_SORT;
-	return matches;
-}
-
-static char **
 complete_kb_func_names(const char *text, const size_t words_n)
 {
+	rl_attempted_completion_over = 1;
 	if (words_n != 3)
 		return (char **)NULL;
 
@@ -3749,7 +3749,8 @@ complete_kb_func_names(const char *text, const size_t words_n)
 static char **
 complete_alias_names(const char *text, const size_t words_n)
 {
-	if (words_n > 2)
+	rl_attempted_completion_over = 1;
+	if (words_n > 2 || aliases_n == 0)
 		return (char **)NULL;
 
 	char **matches = rl_completion_matches(text, &aliases_generator);
@@ -3775,10 +3776,8 @@ complete_jump(const char *text)
 }
 
 static char **
-complete_sel_keyword(const char *text, int *exit_status, const size_t words_n)
+complete_sel_keyword(const char *text, const size_t words_n)
 {
-	*exit_status = FUNC_FAILURE;
-
 	if (words_n == 1 && text[1] != ':') /* Only "s:" is allowed as first word */
 		return (char **)NULL;
 
@@ -3789,7 +3788,6 @@ complete_sel_keyword(const char *text, int *exit_status, const size_t words_n)
 	if (!matches[1])
 		rl_swap_fields(&matches);
 
-	*exit_status = FUNC_SUCCESS;
 	cur_comp_type = TCMP_SEL;
 	return matches;
 }
@@ -3817,9 +3815,8 @@ get_filename_by_eln(const filesn_t n)
 }
 
 static char **
-complete_eln(char *text, int *exit_status, const size_t words_n, char *cmd_name)
+complete_eln(char *text, const size_t words_n, char *cmd_name)
 {
-	*exit_status = FUNC_FAILURE;
 	filesn_t n = 0;
 
 	if (!is_number(text) || (n = xatof(text)) < 1 || n > files)
@@ -3842,11 +3839,20 @@ complete_eln(char *text, int *exit_status, const size_t words_n, char *cmd_name)
 		return (char **)NULL;
 
 	rl_filename_completion_desired = 1;
-	*exit_status = FUNC_SUCCESS;
 	cur_comp_type = TCMP_ELN;
 	return matches;
 }
 
+static char **
+complete_history(char *text)
+{
+	char *p = unescape_str(text, 0);
+	char **matches = rl_completion_matches(p ? p : text, &hist_generator);
+	free(p);
+	if (matches)
+		cur_comp_type = TCMP_HIST;
+	return matches;
+}
 
 /* Handle tab completion.
  *
@@ -3907,8 +3913,7 @@ my_rl_completion(const char *text, const int start, const int end)
 
 	/* ##### ELN EXPANSION ##### */
 	if (escaped == 0 && *text >= '1' && *text <= '9') {
-		matches = complete_eln((char *)text, &exit_status, words_n, cmd_name);
-		if (exit_status == FUNC_SUCCESS)
+		if ((matches = complete_eln((char *)text, words_n, cmd_name)))
 			return matches;
 	}
 
@@ -3917,18 +3922,12 @@ my_rl_completion(const char *text, const int start, const int end)
 		goto FIRST_WORD_COMP;
 
 	/* #### FILE TYPE EXPANSION #### */
-	if (*text == '=') {
-		matches = complete_file_type_filter((char *)text, &exit_status);
-		if (exit_status == FUNC_SUCCESS)
-			return matches;
-	}
+	if (*text == '=' && (matches = complete_file_type_filter((char *)text)))
+		return matches;
 
 	/* #### MIME TYPE EXPANSION #### */
-	if (*text == '@') {
-		matches = complete_mime_type_filter((char *)text, &exit_status);
-		if (exit_status == FUNC_SUCCESS)
-			return matches;
-	}
+	if (*text == '@' && (matches = complete_mime_type_filter((char *)text)))
+		return matches;
 
 	/* #### FASTBACK EXPANSION #### */
 	if (*text == '.' && text[1] == '.' && text[2] == '.') {
@@ -3946,8 +3945,7 @@ my_rl_completion(const char *text, const int start, const int end)
 	if (g && !(rl_end == 2 && *rl_line_buffer == '/'
 	&& rl_line_buffer[1] == '*') && !strchr(g, '/')
 	&& access(text, F_OK) != 0) {
-		matches = complete_glob((char *)text, &exit_status);
-		if (exit_status == FUNC_SUCCESS)
+		if ((matches = complete_glob((char *)text)))
 			return matches;
 	}
 
@@ -3963,67 +3961,39 @@ my_rl_completion(const char *text, const int start, const int end)
 
 	/* ##### ENVIRONMENT VARIABLES ##### */
 	if (*text == '$' && text[1] != '(') {
-		matches = rl_completion_matches(text, &environ_generator);
-		if (matches) {
+		if ((matches = rl_completion_matches(text, &environ_generator))) {
 			cur_comp_type = TCMP_ENVIRON;
 			return matches;
 		}
 	}
 
 #ifndef _NO_TAGS
-	/* ##### TAGS ##### */
-	/* ##### 1. TAGGED FILES (t:NAME<TAB>) ##### */
-	if (tags_n > 0 && *text == 't' && text[1] == ':' && text[2]) {
-		matches = complete_tagged_file_names((char *)text, &exit_status);
-		if (exit_status == FUNC_SUCCESS)
-			return matches;
-	}
-
-	/* ##### 2. TAG NAMES (t:<TAB>) ##### */
-	if (tags_n > 0 && *text == 't' && text[1] == ':') {
-		matches = complete_tag_names_t((char *)text, &exit_status);
-		if (exit_status == FUNC_SUCCESS)
-			return matches;
-	}
+	/* ##### TAGS (t:) ##### */
+	if (tags_n > 0 && *text == 't' && text[1] == ':'
+	&& (matches = complete_tags((char *)text)))
+		return matches;
 #endif /* !_NO_TAGS */
 
-	/* #### BOOKMARK PATH (b:FULLNAME) #### */
-	if (*text == 'b' && text[1] == ':' && text[2]) {
-		matches = complete_bookmark_paths((char *)text, &exit_status);
-		if (exit_status == FUNC_SUCCESS)
-			return matches;
-	}
+	/* #### BOOKMARKS (b:) #### */
+	if (*text == 'b' && text[1] == ':'
+	&& (matches = complete_bookmarks((char *)text, words_n)))
+		return matches;
 
-	/* ##### BOOKMARK NAMES (b:) ##### */
-	if ((words_n > 1 || conf.autocd == 1 || conf.auto_open == 1)
-	&& *text == 'b' && text[1] == ':') {
-		matches = complete_bookmark_names_b((char *)text, &exit_status);
-		if (exit_status == FUNC_SUCCESS)
-			return matches;
-	}
-
-	if ((words_n > 1 || conf.autocd == 1)
-	&& *text == 'w' && text[1] == ':')
-		return complete_workspaces((char *)text);
+	/* ##### WORKSPACES (w:) ##### */
+	if ((words_n > 1 || conf.autocd == 1) && *text == 'w' && text[1] == ':'
+	&& (matches = complete_workspaces((char *)text)))
+		return matches;
 
 	/* ##### SEL KEYWORD (both "sel" and "s:") ##### */
 	if (sel_n > 0 && *text == 's' && (text[1] == ':'
-	|| strcmp(text + 1, "el") == 0)) {
-		matches = complete_sel_keyword(text, &exit_status, words_n);
-		if (exit_status == FUNC_SUCCESS)
+	|| strcmp(text, "sel") == 0)) {
+		if ((matches = complete_sel_keyword(text, words_n)))
 			return matches;
 	}
 
 	/* ##### HISTORY COMPLETION ("!") ##### */
-	if (alt_prompt == 0 && *text == '!') {
-		char *p = unescape_str((char *)text, 0);
-		matches = rl_completion_matches(p ? p : text, &hist_generator);
-		free(p);
-		if (matches) {
-			cur_comp_type = TCMP_HIST;
-			return matches;
-		}
-	}
+	if (*text == '!' && (matches = complete_history((char *)text)))
+		return matches;
 
 FIRST_WORD_COMP:
 	if (start == 0) {
@@ -4034,7 +4004,6 @@ FIRST_WORD_COMP:
 
 		/* #### OWNERSHIP EXPANSION ####
 		 * Used only by the 'oc' command to edit files ownership. */
-
 		if (alt_prompt == OWNERSHIP_PROMPT)
 			return complete_ownership(text);
 
@@ -4092,18 +4061,18 @@ FIRST_WORD_COMP:
 				 * # 3. SECOND WORD OR MORE #
 				 * ########################## */
 
-	if (alt_prompt != 0) /* Disable for alternative prompts */
+	if (alt_prompt != 0) /* Disable completion for alternative prompts. */
 		return (char **)NULL;
 
 	rl_sort_completion_matches = 0;
-	/* Complete with specific options for internal commands */
+	/* Complete with specific options for internal commands. */
 	if ((matches = rl_completion_matches(text, &options_generator)))
 		return matches;
 	rl_sort_completion_matches = 1;
 
 	/* Command names completion for words after process separator: ; | && */
 	if (words_n == 1 && rl_end > 0 && rl_line_buffer[rl_end - 1] != ' '
-	/* No command name contains slashes */
+	/* No command name contains slashes. */
 	&& (*text != '/' || !strchr(text, '/'))) {
 		if ((matches = rl_completion_matches(text, &bin_cmd_generator))) {
 			cur_comp_type = TCMP_CMD;
@@ -4124,18 +4093,16 @@ FIRST_WORD_COMP:
 	/* #### TAG NAMES COMPLETION #### */
 	/* 't? TAG' and 't? :tag' */
 	if (tags_n > 0 && s && *s == 't' && rl_end > 2) {
-		matches = complete_tag_names((char *)text, &exit_status, s);
-		if (exit_status == FUNC_SUCCESS)
+		if ((matches = complete_tag_names((char *)text, s)))
 			return matches;
 	}
 #endif /* !_NO_TAGS */
 
-	/* #### DIRECTORY HISTORY COMPLETION #### */
-	if (s && (((*s == 'b' || *s == 'f' || *s == 'd') && s[1] == 'h'
-	&& s[2] == ' ') && !strchr(text, '/') ) )
+	/* #### DIRECTORY HISTORY COMPLETION (dh) #### */
+	if (s && *s == 'd' && s[1] == 'h' && s[2] == ' ' && !strchr(text, '/'))
 		return complete_dirhist((char *)text, words_n);
 
-	/* #### BACKDIR COMPLETION #### */
+	/* #### BACKDIR COMPLETION (bd) #### */
 	if (*text != '/' && s && *s == 'b' && s[1] == 'd' && s[2] == ' ')
 		return complete_backdir((char *)text, words_n);
 
@@ -4166,46 +4133,24 @@ FIRST_WORD_COMP:
 #ifndef _NO_TRASH
 	/* ### UNTRASH ### */
 	if (s && *s == 'u' && (s[1] == ' ' || (s[1] == 'n'
-	&& (strncmp(s, "untrash ", 8) == 0
-	|| strncmp(s, "undel ", 6) == 0))))
+	&& (strncmp(s, "untrash ", 8) == 0 || strncmp(s, "undel ", 6) == 0))))
 		return complete_trashed_files(text, TCMP_UNTRASH);
 
 	/* ### TRASH DEL ### */
 	if (s && *s == 't' && (s[1] == ' ' || s[1] == 'r')
-	&& (strncmp(s, "t del ", 6) == 0
-	|| strncmp(s, "trash del ", 10) == 0))
+	&& (strncmp(s, "t del ", 6) == 0 || strncmp(s, "trash del ", 10) == 0))
 		return complete_trashed_files(text, TCMP_TRASHDEL);
 #endif /* !_NO_TRASH */
 
-	/* #### SOME NUMERIC EXPANSIONS ### */
-	if (*text >= '0' && *text <= '9') {
-		/* Ranges */
-		matches = complete_ranges((char *)text);
-		if (matches)
-			return matches;
-
-		const int n = atoi(text);
-		if (n == INT_MIN)
-			return (char **)NULL;
-
-		/* Sort number */
-		if (s && *s == 's' && ((s[1] == 't' && s[2] == ' ')
-		|| strncmp(s, "sort ", 5) == 0)
-		&& is_number(text) && n >= 0 && n <= SORT_TYPES) {
-			rl_attempted_completion_over = 1;
-			return complete_sort_num(text, words_n);
-		}
-	}
-
-	/* ### DESELECT COMPLETION ### */
-	if (sel_n > 0 && s && *s == 'd' && (strncmp(s, "ds ", 3) == 0
+	/* ### DESELECT COMPLETION (ds, desel) ### */
+	if (s && *s == 'd' && (strncmp(s, "ds ", 3) == 0
 	|| strncmp(s, "desel ", 6) == 0))
 		return complete_desel(text);
 
 	/* ### DIRJUMP COMPLETION ### */
 	/* j, jc, jp commands */
 	if (s && *s == 'j' && (s[1] == ' ' || ((s[1] == 'c' || s[1] == 'p')
-	&& s[2] == ' ') || strncmp(s, "jump ", 5) == 0))
+	&& s[2] == ' ')))
 		return complete_jump(text);
 
 	/* ### BOOKMARKS COMPLETION ### */
@@ -4225,7 +4170,7 @@ FIRST_WORD_COMP:
 	}
 
 	/* ### ALIASES COMPLETION ### */
-	if (aliases_n > 0 && s && *s == 'a' && strncmp(s, "alias ", 6) == 0
+	if (s && *s == 'a' && strncmp(s, "alias ", 6) == 0
 	&& strncmp(s + 6, "import ", 7) != 0)
 		return complete_alias_names(text, words_n);
 
@@ -4248,10 +4193,10 @@ FIRST_WORD_COMP:
 	/* ### SORT COMMAND COMPLETION ### */
 	if (s && *s == 's' && (strncmp(s, "st ", 3) == 0
 	|| strncmp(s, "sort ", 5) == 0))
-		return complete_sort_names(text, words_n);
+		return complete_sort(text, words_n);
 
 	/* ### WORKSPACES COMPLETION ### */
-	if (s && *s == 'w' && strncmp(s, "ws ", 3) == 0 && words_n == 2)
+	if (s && *s == 'w' && strncmp(s, "ws ", 3) == 0)
 		return complete_workspaces((char *)text);
 
 	/* ### COMPLETIONS FOR THE 'UNSET' COMMAND ### */
@@ -4267,12 +4212,14 @@ FIRST_WORD_COMP:
 	if (s && int_cmd_no_filename(s) == 1)
 		return (char **)NULL;
 
-	/* Let's try to complete arguments for shell commands. */
-	if (*text == '-') {
-		matches = complete_shell_cmd_opts((char *)text, &exit_status);
-		if (exit_status == FUNC_SUCCESS)
-			return matches;
-	}
+	/* Arguments for shell commands. */
+	if (*text == '-' && (matches = complete_shell_cmd_opts((char *)text)))
+		return matches;
+
+	/* ELN ranges */
+	if (*text >= '0' && *text <= '9'
+	&& (matches = complete_ranges((char *)text)))
+		return matches;
 
 	/* Finally, try to complete with filenames in CWD. */
 	if ((matches = rl_completion_matches(text, &filenames_gen_text))) {

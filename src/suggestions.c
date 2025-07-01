@@ -2198,6 +2198,7 @@ rl_suggestions(const unsigned char c)
 #endif /* !_NO_PROFILES */
 
 		if (s[1] == 'r' && strncmp(s, "prompt set ", 11) == 0) {
+			if (words_num != 3) goto FAIL;
 			printed = check_prompts(word, wlen);
 			if (prompts_n > 0 && printed != NO_MATCH)
 				goto SUCCESS;
@@ -2207,8 +2208,7 @@ rl_suggestions(const unsigned char c)
 	case 's': /* Sort */
 		if (((s[1] == 't' && s[2] == ' ') || strncmp(s, "sort ", 5) == 0)
 		&& is_number(word)) {
-			if (words_num > 2)
-				goto FAIL;
+			if (words_num > 2) goto FAIL;
 			if ((printed = check_sort_methods(word, wlen)) != NO_MATCH)
 				goto SUCCESS;
 			goto FAIL;
@@ -2232,8 +2232,7 @@ rl_suggestions(const unsigned char c)
 
 	case 'w': /* Workspaces */
 		if (s[1] == 's' && s[2] == ' ') {
-			if (words_num > 2)
-				goto FAIL;
+			if (words_num > 2) goto FAIL;
 			if ((printed = check_workspaces(word, wlen, WS_NAME_SUG)) != NO_MATCH)
 				goto SUCCESS;
 		}
