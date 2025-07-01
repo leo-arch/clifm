@@ -462,7 +462,7 @@ calculate_suggestion_lines(int *baej, const size_t suggestion_len)
 
 	if (cucs > term_cols && term_cols > 0) {
 		slines = cucs / (size_t)term_cols;
-		const int cucs_rem = (int)cucs % term_cols;
+		const size_t cucs_rem = cucs % (size_t)term_cols;
 		if (cucs_rem > 0)
 			slines++;
 	}
@@ -770,7 +770,7 @@ match_print(char *match, const size_t len, char *color, const int append_slash)
 	}
 
 	char *q;
-	if (cur_comp_type == TCMP_PATH && *tmp == '\\' && *(tmp + 1) == '~')
+	if (cur_comp_type == TCMP_PATH && *tmp == '\\' && tmp[1] == '~')
 		q = tmp + 1;
 	else
 		q = tmp;
@@ -784,7 +784,7 @@ print_match(char *match, const size_t len)
 {
 	int append_slash = 0, free_color = 0;
 
-	char *p = (char *)NULL, *_color = (char *)NULL;
+	char *p = (char *)NULL, *temp_color = (char *)NULL;
 	char *color = (conf.suggest_filetype_color == 1) ? no_c : sf_c;
 
 	if (*match == '~')
@@ -795,14 +795,14 @@ print_match(char *match, const size_t len)
 		if (S_ISDIR(attr.st_mode)
 		|| (S_ISLNK(attr.st_mode) && get_link_ref(p ? p : match) == S_IFDIR)) {
 			/* Do not append slash if suggesting the root dir. */
-			append_slash = (*match == '/' && !*(match + 1)) ? 0 : 1;
+			append_slash = (*match == '/' && !match[1]) ? 0 : 1;
 			suggestion.filetype = DT_DIR;
 		}
 
 		if (conf.suggest_filetype_color == 1) {
-			_color = get_comp_color(p ? p : match, &attr, &free_color);
-			if (_color)
-				color = _color;
+			temp_color = get_comp_color(p ? p : match, &attr, &free_color);
+			if (temp_color)
+				color = temp_color;
 			else
 				free_color = 0;
 		}
@@ -814,7 +814,7 @@ print_match(char *match, const size_t len)
 	suggestion.type = COMP_SUG;
 	match_print(match, len, color, append_slash);
 
-	if (free_color)
+	if (free_color == 1)
 		free(color);
 	return PARTIAL_MATCH;
 }
@@ -924,7 +924,7 @@ print_reg_file_suggestion(char *str, const filesn_t i, size_t len,
 			s++;
 		}
 
-		if (dot_slash) { /* Reinsert './', removed to check filename. */
+		if (dot_slash == 1) { /* Reinsert './', removed to check filename. */
 			*tmp_buf = '\0';
 			snprintf(tmp_buf, sizeof(tmp_buf), "./%s", tmp);
 			print_suggestion(tmp_buf, len + 2, color);
@@ -936,7 +936,7 @@ print_reg_file_suggestion(char *str, const filesn_t i, size_t len,
 		return;
 	}
 
-	if (dot_slash) {
+	if (dot_slash == 1) {
 		*tmp_buf = '\0';
 		snprintf(tmp_buf, sizeof(tmp_buf), "./%s", file_info[i].name);
 		print_suggestion(tmp_buf, len + 2, color);
@@ -958,7 +958,7 @@ check_filenames(char *str, size_t len, const int first_word,
 	int removed_slash = remove_trailing_slash(&str, &len);
 
 	filesn_t fuzzy_index = -1;
-	int fuzzy_str_type = (conf.fuzzy_match == 1 && contains_utf8(str) == 1)
+	const int fuzzy_str_type = (conf.fuzzy_match == 1 && contains_utf8(str) == 1)
 		? FUZZY_FILES_UTF8 : FUZZY_FILES_ASCII;
 	int best_fz_score = 0;
 
@@ -971,7 +971,7 @@ check_filenames(char *str, size_t len, const int first_word,
 		|| len != file_info[i].len))
 			continue;
 
-		if (full_word) {
+		if (full_word == 1) {
 			if ((conf.case_sens_path_comp ? strcmp(str, file_info[i].name)
 			: strcasecmp(str, file_info[i].name)) == 0)
 				return FULL_MATCH;
@@ -1009,7 +1009,7 @@ check_filenames(char *str, size_t len, const int first_word,
 
 		/* ############### FUZZY MATCHING ################## */
 		else {
-			int s = fuzzy_match(str, file_info[i].name, len, fuzzy_str_type);
+			const int s = fuzzy_match(str, file_info[i].name, len, fuzzy_str_type);
 			if (s > best_fz_score) {
 				fuzzy_index = i;
 				if (s == TARGET_BEGINNING_BONUS)
@@ -1028,8 +1028,7 @@ check_filenames(char *str, size_t len, const int first_word,
 		if (file_info[fuzzy_index].dir)
 			print_directory_suggestion(fuzzy_index, len, color);
 		else
-			print_reg_file_suggestion(str, fuzzy_index, len, color,
-				dot_slash);
+			print_reg_file_suggestion(str, fuzzy_index, len, color, dot_slash);
 
 		return PARTIAL_MATCH;
 	}
@@ -1122,7 +1121,7 @@ print_cmd_suggestion(const size_t i, const size_t len)
 		return FULL_MATCH;
 	}
 
-	if (conf.ext_cmd_ok) {
+	if (conf.ext_cmd_ok == 1) {
 		if (strlen(bin_commands[i]) > len) {
 			suggestion.type = CMD_SUG;
 			print_suggestion(bin_commands[i], len, sc_c);
@@ -1211,14 +1210,14 @@ check_jumpdb(const char *str, const size_t len, const int print)
 		if (len > 1 && jump_db[i].path[1]
 		&& TOUPPER(str[1]) != TOUPPER(jump_db[i].path[1]))
 			continue;
-		if (!print) {
+		if (print == 0) {
 			if ((conf.case_sens_path_comp ? strcmp(str, jump_db[i].path)
 			: strcasecmp(str, jump_db[i].path)) == 0)
 				return FULL_MATCH;
 			continue;
 		}
 
-		if (len && (conf.case_sens_path_comp
+		if (len > 0 && (conf.case_sens_path_comp
 		? strncmp(str, jump_db[i].path, len)
 		: strncasecmp(str, jump_db[i].path, len)) == 0) {
 			if (jump_db[i].len <= len)
@@ -1276,12 +1275,12 @@ check_eln(const char *str, const int print)
 
 	n--;
 	char *color = sf_c;
-	suggestion.type = ELN_SUG;
-	if (conf.suggest_filetype_color)
+	if (conf.suggest_filetype_color == 1)
 		color = file_info[n].color;
+	suggestion.type = ELN_SUG;
 
 	*tmp_buf = '\0';
-	if (file_info[n].dir) {
+	if (file_info[n].dir == 1) {
 		snprintf(tmp_buf, sizeof(tmp_buf), "%s/", file_info[n].name);
 		suggestion.filetype = DT_DIR;
 	} else {
@@ -1382,10 +1381,10 @@ check_help(char *full_line, const char *_last_word)
 		return NO_MATCH;
 
 	*ret = '\0';
-	int retval = is_internal_cmd(full_line, ALL_CMDS, 1, 1);
+	const int retval = is_internal_cmd(full_line, ALL_CMDS, 1, 1);
 	*ret = ' ';
 
-	if (!retval)
+	if (retval == 0)
 		return NO_MATCH;
 
 	suggestion.type = INT_HELP_SUG;
@@ -1556,7 +1555,7 @@ check_sort_methods(const char *str, const size_t len)
 		return NO_MATCH;
 	}
 
-	int a = atoi(str);
+	const int a = atoi(str);
 	if (a < 0 || a > SORT_TYPES
 	|| (conf.light_mode == 1 && !ST_IN_LIGHT_MODE(a))) {
 		if (suggestion.printed)
@@ -1827,7 +1826,7 @@ check_bookmark_names(char *word, const size_t len)
 	if (!word || !*word || !bookmarks)
 		return NO_MATCH;
 
-	size_t prefix = (*word == 'b' && *(word + 1) == ':') ? 2 : 0;
+	const size_t prefix = (*word == 'b' && word[1] == ':') ? 2 : 0;
 	char *q = (char *)NULL, *w = word + prefix;
 	size_t l = len - prefix;
 
@@ -1907,7 +1906,7 @@ check_backdir(char *start)
 static int
 check_dirhist(char *word, const size_t len)
 {
-	int fuzzy_str_type = (conf.fuzzy_match == 1 && contains_utf8(word) == 1)
+	const int fuzzy_str_type = (conf.fuzzy_match == 1 && contains_utf8(word) == 1)
 		? FUZZY_FILES_UTF8 : FUZZY_FILES_ASCII;
 	int best_fz_score = 0, fuzzy_index = -1;
 
