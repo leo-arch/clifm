@@ -1812,10 +1812,6 @@ rl_accept_suggestion(int count, int key)
 	case FIRST_WORD:
 		my_insert_text(suggestion_buf, s, truncated_char); break;
 
-	case JCMD_SUG_NOACD:
-		my_insert_text(suggestion_buf, NULL, 0);
-		break;
-
 	case SEL_SUG:      /* fallthrough */
 	case HIST_SUG:     /* fallthrough */
 	case BM_NAME_SUG:  /* fallthrough */
@@ -1907,7 +1903,7 @@ rl_accept_first_word(int count, int key)
 	 * bookmark and alias names. */
 	int t = suggestion.type;
 	if (t != ELN_SUG && t != BOOKMARK_SUG && t != ALIAS_SUG && t != JCMD_SUG
-	&& t != JCMD_SUG_NOACD && t != FUZZY_FILENAME && t != CMD_DESC_SUG
+	&& t != FUZZY_FILENAME && t != CMD_DESC_SUG
 	&& t != BM_NAME_SUG && t != INT_HELP_SUG && t != TAGT_SUG
 	&& t != BM_PREFIX_SUG) {
 		accept_first_word = 1;

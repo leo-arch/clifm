@@ -734,7 +734,7 @@ extern time_t curdir_mtime;
 #define ELN_SUG        8
 #define FIRST_WORD     9
 #define JCMD_SUG       10
-#define JCMD_SUG_NOACD 11 /* No auto-cd */
+/*#define JCMD_SUG_NOACD 11 // No auto-cd */
 #define VAR_SUG	       12
 #define SEL_SUG	       13
 #define BACKDIR_SUG	   14

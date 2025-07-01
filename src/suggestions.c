@@ -65,6 +65,13 @@ typedef char *rl_cpvfunc_t;
 
 #define BAEJ_OFFSET 1
 
+#define IS_BAEJ_SUG(t) ((t) == BOOKMARK_SUG || (t) == ALIAS_SUG \
+	|| (t) == ELN_SUG || (t) == JCMD_SUG || (t) == BACKDIR_SUG  \
+	|| (t) == SORT_SUG || (t) == WS_NUM_SUG                     \
+	|| (t) == FUZZY_FILENAME || (t) == DIRHIST_SUG              \
+	|| (t) == FASTBACK_SUG || (t) == WS_NUM_PREFIX_SUG          \
+	|| ((t) == COMP_SUG && (flags & BAEJ_SUGGESTION)))
+
 static char *last_word = (char *)NULL;
 static int last_word_offset = 0;
 static int point_is_first_word = 0;
@@ -440,13 +447,7 @@ calculate_suggestion_lines(int *baej, const size_t suggestion_len)
 {
 	size_t cuc = (size_t)curcol; /* Current cursor column position. */
 
-	if (suggestion.type == BOOKMARK_SUG || suggestion.type == ALIAS_SUG
-	|| suggestion.type == ELN_SUG || suggestion.type == JCMD_SUG
-	|| suggestion.type == JCMD_SUG_NOACD || suggestion.type == BACKDIR_SUG
-	|| suggestion.type == SORT_SUG || suggestion.type == WS_NUM_SUG
-	|| suggestion.type == FUZZY_FILENAME || suggestion.type == DIRHIST_SUG
-	|| suggestion.type == FASTBACK_SUG || suggestion.type == WS_NUM_PREFIX_SUG
-	|| (suggestion.type == COMP_SUG && (flags & BAEJ_SUGGESTION))) {
+	if (IS_BAEJ_SUG(suggestion.type)) {
 		cuc += 3; /* 3 = 1 (one char forward) + 2 (" >") */
 		flags |= BAEJ_SUGGESTION;
 		*baej = 1;
@@ -953,9 +954,9 @@ check_filenames(char *str, size_t len, const int first_word,
 	char *color = (conf.suggest_filetype_color == 1) ? no_c : sf_c;
 
 	skip_leading_backslashes(&str, &len);
-	int dot_slash = skip_leading_dot_slash(&str, &len);
+	const int dot_slash = skip_leading_dot_slash(&str, &len);
 	skip_trailing_spaces(&str, &len);
-	int removed_slash = remove_trailing_slash(&str, &len);
+	const int removed_slash = remove_trailing_slash(&str, &len);
 
 	filesn_t fuzzy_index = -1;
 	const int fuzzy_str_type = (conf.fuzzy_match == 1 && contains_utf8(str) == 1)
@@ -1359,9 +1360,6 @@ check_jcmd(char *line)
 
 	print_suggestion(jump_suggestion, 0,
 		conf.suggest_filetype_color ? di_c : sf_c);
-
-	if (conf.autocd == 0)
-		suggestion.type = JCMD_SUG_NOACD;
 
 	free(jump_suggestion);
 	jump_suggestion = (char *)NULL;
