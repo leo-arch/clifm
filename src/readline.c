@@ -1731,9 +1731,7 @@ filenames_gen_text(const char *text, int state)
 			continue;
 
 		/* If cd, list only directories. */
-		if ((conf.suggestions == 0 || words_num > 1
-		|| (is_cd_cmd == 1 && rl_end > 0 && rl_line_buffer[rl_end - 1] == ' '))
-		&& file_info[i - 1].dir == 0)
+		if (is_cd_cmd == 1 && file_info[i - 1].dir == 0)
 			continue;
 
 		if (cmp_func(name, text, len) == 0)
@@ -3886,12 +3884,6 @@ my_rl_completion(const char *text, const int start, const int end)
 	if (sudo_len == 0)
 		sudo_len = (sudo_cmd && *sudo_cmd) ? strlen(sudo_cmd) : 0;
 
-	int escaped = 0;
-	while (*text == '\\') {
-		text++;
-		escaped = 1;
-	}
-
 #ifndef _NO_HIGHLIGHT
 	if (conf.highlight == 1 && rl_point < rl_end)
 	/* Prevent the inserted word from being printed using the current color,
@@ -3910,12 +3902,12 @@ my_rl_completion(const char *text, const int start, const int end)
 				/* ##########################
 				 * # 1. GENERAL EXPANSIONS  #
 				 * ########################## */
+	 /* These expansions are made no matter the word position in the cmd line. */
 
 	/* ##### ELN EXPANSION ##### */
-	if (escaped == 0 && *text >= '1' && *text <= '9') {
-		if ((matches = complete_eln((char *)text, words_n, cmd_name)))
-			return matches;
-	}
+	if (*text >= '1' && *text <= '9'
+	&& (matches = complete_eln((char *)text, words_n, cmd_name)))
+		return matches;
 
 	/* alt_prompt is set (non-zero) whenever we are using an alternative prompt. */
 	if (alt_prompt != 0)
@@ -3930,13 +3922,12 @@ my_rl_completion(const char *text, const int start, const int end)
 		return matches;
 
 	/* #### FASTBACK EXPANSION #### */
-	if (*text == '.' && text[1] == '.' && text[2] == '.') {
-		if ((matches = rl_fastback((char *)text)) != NULL) {
-			if (*matches[0] != '/' || matches[0][1])
-				rl_filename_completion_desired = 1;
-			cur_comp_type = TCMP_PATH;
-			return matches;
-		}
+	if (*text == '.' && text[1] == '.' && text[2] == '.'
+	&& (matches = rl_fastback((char *)text))) {
+		if (*matches[0] != '/' || matches[0][1])
+			rl_filename_completion_desired = 1;
+		cur_comp_type = TCMP_PATH;
+		return matches;
 	}
 
 	/* #### WILDCARDS EXPANSION #### */
@@ -3960,11 +3951,10 @@ my_rl_completion(const char *text, const int start, const int end)
 	}
 
 	/* ##### ENVIRONMENT VARIABLES ##### */
-	if (*text == '$' && text[1] != '(') {
-		if ((matches = rl_completion_matches(text, &environ_generator))) {
-			cur_comp_type = TCMP_ENVIRON;
-			return matches;
-		}
+	if (*text == '$' && text[1] != '('
+	&& (matches = rl_completion_matches(text, &environ_generator))) {
+		cur_comp_type = TCMP_ENVIRON;
+		return matches;
 	}
 
 #ifndef _NO_TAGS
@@ -3986,10 +3976,9 @@ my_rl_completion(const char *text, const int start, const int end)
 
 	/* ##### SEL KEYWORD (both "sel" and "s:") ##### */
 	if (sel_n > 0 && *text == 's' && (text[1] == ':'
-	|| strcmp(text, "sel") == 0)) {
-		if ((matches = complete_sel_keyword(text, words_n)))
-			return matches;
-	}
+	|| strcmp(text, "sel") == 0)
+	&& (matches = complete_sel_keyword(text, words_n)))
+		return matches;
 
 	/* ##### HISTORY COMPLETION ("!") ##### */
 	if (*text == '!' && (matches = complete_history((char *)text)))
@@ -4015,7 +4004,7 @@ FIRST_WORD_COMP:
 			}
 		}
 
-		/* #### INTERNAL COMMANDS EXPANSION #### */
+		/* #### CMD<TAB> #### */
 		if (alt_prompt == 0 && ((*text == 'c' && text[1] == 'm'
 		&& text[2] == 'd' && !text[3]) || strcmp(text, "commands") == 0)) {
 			if ((matches = rl_completion_matches(text, &int_cmds_generator))) {
@@ -4035,23 +4024,20 @@ FIRST_WORD_COMP:
 			}
 		}
 
+		/* Complete with files in CWD */
 		if ((conf.autocd == 1 || conf.auto_open == 1) && (alt_prompt == 0
-		|| alt_prompt == FILES_PROMPT) && *text != '/') {
-			/* Compĺete with files in CWD */
-			matches = rl_completion_matches(text, &filenames_gen_text);
-			if (matches) {
-				cur_comp_type = TCMP_PATH;
-				return matches;
-			}
+		|| alt_prompt == FILES_PROMPT) && *text != '/'
+		&& (matches = rl_completion_matches(text, &filenames_gen_text))) {
+			cur_comp_type = TCMP_PATH;
+			return matches;
 		}
 
 		/* If neither autocd nor auto-open, try to complete with command names,
 		 * except when TEXT is "/" */
-		if (alt_prompt == 0 && (conf.autocd == 0 || *text != '/' || text[1])) {
-			if ((matches = rl_completion_matches(text, &bin_cmd_generator))) {
-				cur_comp_type = TCMP_CMD;
-				return matches;
-			}
+		if (alt_prompt == 0 && (conf.autocd == 0 || *text != '/' || text[1])
+		&& (matches = rl_completion_matches(text, &bin_cmd_generator))) {
+			cur_comp_type = TCMP_CMD;
+			return matches;
 		}
 
 		return (char **)NULL;
@@ -4092,10 +4078,9 @@ FIRST_WORD_COMP:
 #ifndef _NO_TAGS
 	/* #### TAG NAMES COMPLETION #### */
 	/* 't? TAG' and 't? :tag' */
-	if (tags_n > 0 && s && *s == 't' && rl_end > 2) {
-		if ((matches = complete_tag_names((char *)text, s)))
-			return matches;
-	}
+	if (tags_n > 0 && s && *s == 't' && rl_end > 2
+	&& (matches = complete_tag_names((char *)text, s)))
+		return matches;
 #endif /* !_NO_TAGS */
 
 	/* #### DIRECTORY HISTORY COMPLETION (dh) #### */
