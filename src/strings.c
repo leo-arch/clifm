@@ -152,9 +152,8 @@ count_words(size_t *start_word, size_t *full_word)
 			quote = quote == b[i] ? 0 : b[i];
 
 		if (first_non_space == 0 && b[i] != ' ') {
-			words = 1;
+			words = first_non_space = 1;
 			*start_word = i;
-			first_non_space = 1;
 			continue;
 		}
 

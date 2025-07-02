@@ -2579,23 +2579,36 @@ rl_count_words(char **w, char **start)
 {
 	size_t start_word = 0, full_word = 0;
 	size_t n = count_words(&start_word, &full_word);
+	char *lb = rl_line_buffer;
 
 	static char first_word[NAME_MAX];
 	*first_word = '\0';
 	*w = (char *)NULL;
 
 	if (full_word != 0) {
-		rl_line_buffer[full_word] = '\0';
-		char *q = rl_line_buffer + start_word;
+		lb[full_word] = '\0';
+		const char *q = lb + start_word;
 		xstrsncpy(first_word, q, sizeof(first_word));
-		rl_line_buffer[full_word] = ' ';
+		lb[full_word] = ' ';
 		*w = first_word;
-		if (rl_line_buffer && rl_end > 0 && rl_line_buffer[rl_end - 1] == ' ')
+		if (lb && rl_end > 0 && lb[rl_end - 1] == ' ')
 			n++;
 	}
 
-	*start = rl_line_buffer ? rl_line_buffer + start_word : (char *)NULL;
+	*start = lb ? lb + start_word : (char *)NULL;
 	return n;
+}
+
+/* Readline returned a single match: let's swap the first and second fields
+ * of the returned array (A), so that the match is listed instead of
+ * automatically inserted into the command line (by tab_complete() in tabcomp.c) */
+static void
+rl_swap_fields(char ***a)
+{
+	*a = xnrealloc(*a, 3, sizeof(char *));
+	(*a)[1] = strdup((*a)[0]);
+	*(*a)[0] = '\0';
+	(*a)[2] = (char *)NULL;
 }
 
 /* Return a list of options for the command named CMD_NAME. */
@@ -2679,38 +2692,48 @@ fill_opts(const char *cmd_name, const char *word_start, const size_t w)
 	return !c_opts[0] ? (char **)NULL : c_opts;
 }
 
-/* Complete with options for specific commands. */
-static char *
-options_generator(const char *text, int state)
+/* Return an array of options, matching TEXT, for the command CMD_NAME. */
+static char **
+complete_options(const char *text, const char *cmd_name, const char *cmd_start,
+	const size_t words_n)
 {
-	if (!rl_line_buffer || !*rl_line_buffer)
-		return (char *)NULL;
+	if (!cmd_name || !cmd_start)
+		return (char **)NULL;
 
-	static size_t len = 0;
-	static size_t w = 0;
-	static int i = 0;
-	char *name = (char *)NULL;
-	static char *cmd_name = (char *)NULL;
-	static char *word_start = (char *)NULL;
-	static char **c_opts = (char **)NULL;
-
-	if (state == 0) {
-		i = 0;
-		len = strlen(text);
-		w = rl_count_words(&cmd_name, &word_start);
-		if (cmd_name)
-			c_opts = fill_opts(cmd_name, word_start, w);
-	}
-
+	char **c_opts = fill_opts(cmd_name, cmd_start, words_n);
 	if (!c_opts || !c_opts[0])
-		return (char *)NULL;
+		return (char **)NULL;
 
+	size_t n;
+	for (n = 0; c_opts[n]; n++);
+	char **matches = xnmalloc(n + 2, sizeof(char *));
+	matches[0] = savestring("", 1);
+
+	const size_t len = (!text || !*text) ? 0 : strlen(text);
+	char *name;
+
+	n = 1;
+	size_t i = 0;
 	while ((name = c_opts[i++]) != NULL) {
 		if (len == 0 || strncmp(name, text, len) == 0)
-			return strdup(name);
+			matches[n++] = strdup(name);
 	}
 
-	return (char *)NULL;
+	if (n == 1) { /* No matches. */
+		free(matches[0]);
+		free(matches);
+		return (char **)NULL;
+	}
+
+	if (n == 2) { /* A single match. */
+		free(matches[0]);
+		matches[0] = matches[1];
+		matches[1] = (char *)NULL;
+	} else { /* Multiple matches. */
+		matches[n] = NULL;
+	}
+
+	return matches;
 }
 
 static char *
@@ -3031,18 +3054,6 @@ rl_fastback(char *s)
 	free(p);
 
 	return matches;
-}
-
-/* Readline returned a single match: let's swap the first and second fields
- * of the returned array (A), so that the match is listed instead of
- * automatically inserted into the command line (by tab_complete() in tabcomp.c) */
-static void
-rl_swap_fields(char ***a)
-{
-	*a = xnrealloc(*a, 3, sizeof(char *));
-	(*a)[1] = strdup((*a)[0]);
-	*(*a)[0] = '\0';
-	(*a)[2] = (char *)NULL;
 }
 
 #ifndef _NO_LIRA
@@ -3852,6 +3863,58 @@ complete_history(char *text)
 	return matches;
 }
 
+static char **
+complete_bookmarks_prompt(const char *text)
+{
+	rl_attempted_completion_over = 1;
+	char **matches = rl_completion_matches(text, &bookmarks_generator);
+	if (matches)
+		cur_comp_type = TCMP_NET;
+	return matches;
+}
+
+static char **
+complete_cmd_desc(const char *text)
+{
+	char **matches = rl_completion_matches(text, &int_cmds_generator);
+	if (matches)
+		cur_comp_type = TCMP_CMD_DESC;
+	return matches;
+}
+
+static char **
+complete_fastback(char *text)
+{
+	char **matches = rl_fastback((char *)text);
+	if (!matches)
+		return (char **)NULL;
+
+	if (*matches[0] != '/' || matches[0][1])
+		rl_filename_completion_desired = 1;
+
+	cur_comp_type = TCMP_PATH;
+	return matches;
+}
+
+static char **
+complete_users(const char *text)
+{
+	char **matches = rl_completion_matches(text, &users_generator);
+	endpwent();
+	if (matches)
+		cur_comp_type = TCMP_USERS;
+	return matches;
+}
+
+static char **
+complete_environ(const char *text)
+{
+	char **matches = rl_completion_matches(text, &environ_generator);
+	if (matches)
+		cur_comp_type = TCMP_ENVIRON;
+	return matches;
+}
+
 /* Handle tab completion.
  *
  * This function has three main blocks:
@@ -3873,7 +3936,6 @@ my_rl_completion(const char *text, const int start, const int end)
 	cur_comp_type = TCMP_NONE;
 	flags &= ~MULTI_SEL;
 
-	int exit_status = FUNC_SUCCESS;
 	char **matches = (char **)NULL;
 	char *cmd_name = (char *)NULL;
 	char *cmd_start = (char *)NULL;
@@ -3923,12 +3985,8 @@ my_rl_completion(const char *text, const int start, const int end)
 
 	/* #### FASTBACK EXPANSION #### */
 	if (*text == '.' && text[1] == '.' && text[2] == '.'
-	&& (matches = rl_fastback((char *)text))) {
-		if (*matches[0] != '/' || matches[0][1])
-			rl_filename_completion_desired = 1;
-		cur_comp_type = TCMP_PATH;
+	&& (matches = complete_fastback((char *)text)))
 		return matches;
-	}
 
 	/* #### WILDCARDS EXPANSION #### */
 	char *g = strpbrk(text, GLOB_CHARS);
@@ -3941,21 +3999,12 @@ my_rl_completion(const char *text, const int start, const int end)
 	}
 
 	/* #### USERS EXPANSION (~) #### */
-	if (*text == '~' && text[1] != '/') {
-		matches = rl_completion_matches(text + 1, &users_generator);
-		endpwent();
-		if (matches) {
-			cur_comp_type = TCMP_USERS;
-			return matches;
-		}
-	}
+	if (*text == '~' && text[1] != '/' && (matches = complete_users(text + 1)))
+		return matches;
 
 	/* ##### ENVIRONMENT VARIABLES ##### */
-	if (*text == '$' && text[1] != '('
-	&& (matches = rl_completion_matches(text, &environ_generator))) {
-		cur_comp_type = TCMP_ENVIRON;
+	if (*text == '$' && text[1] != '(' && (matches = complete_environ(text)))
 		return matches;
-	}
 
 #ifndef _NO_TAGS
 	/* ##### TAGS (t:) ##### */
@@ -3996,33 +4045,19 @@ FIRST_WORD_COMP:
 		if (alt_prompt == OWNERSHIP_PROMPT)
 			return complete_ownership(text);
 
-		if (alt_prompt == BOOKMARKS_PROMPT) {
-			rl_attempted_completion_over = 1;
-			if ((matches = rl_completion_matches(text, &bookmarks_generator))) {
-				cur_comp_type = TCMP_NET;
-				return matches;
-			}
-		}
+		/* Bookmarks screen: expand bookmark names */
+		if (alt_prompt == BOOKMARKS_PROMPT)
+			return complete_bookmarks_prompt(text);
 
 		/* #### CMD<TAB> #### */
 		if (alt_prompt == 0 && ((*text == 'c' && text[1] == 'm'
-		&& text[2] == 'd' && !text[3]) || strcmp(text, "commands") == 0)) {
-			if ((matches = rl_completion_matches(text, &int_cmds_generator))) {
-				cur_comp_type = TCMP_CMD_DESC;
-				return matches;
-			}
-		}
+		&& text[2] == 'd' && !text[3]) || strcmp(text, "commands") == 0))
+			return complete_cmd_desc(text);
 
 		/* SEARCH PATTERNS COMPLETION */
-		if (alt_prompt == 0 && *text == '/' && text[1] == '*') {
-			char *p = unescape_str((char *)text, 0);
-			matches = rl_completion_matches(p ? p : text, &hist_generator);
-			free(p);
-			if (matches) {
-				cur_comp_type = TCMP_HIST;
-				return matches;
-			}
-		}
+		if (alt_prompt == 0 && *text == '/' && text[1] == '*'
+		&& (matches = complete_history((char *)text)))
+			return matches;
 
 		/* Complete with files in CWD */
 		if ((conf.autocd == 1 || conf.auto_open == 1) && (alt_prompt == 0
@@ -4050,11 +4085,9 @@ FIRST_WORD_COMP:
 	if (alt_prompt != 0) /* Disable completion for alternative prompts. */
 		return (char **)NULL;
 
-	rl_sort_completion_matches = 0;
-	/* Complete with specific options for internal commands. */
-	if ((matches = rl_completion_matches(text, &options_generator)))
+	/* Complete options for internal commands. */
+	if ((matches = complete_options(text, cmd_name, cmd_start, words_n)))
 		return matches;
-	rl_sort_completion_matches = 1;
 
 	/* Command names completion for words after process separator: ; | && */
 	if (words_n == 1 && rl_end > 0 && rl_line_buffer[rl_end - 1] != ' '
@@ -4141,6 +4174,7 @@ FIRST_WORD_COMP:
 	/* ### BOOKMARKS COMPLETION ### */
 	if (s && *s == 'b' && (s[1] == 'm' || s[1] == 'o')
 	&& (strncmp(s, "bm ", 3) == 0 || strncmp(s, "bookmarks ", 10) == 0)) {
+		int exit_status = FUNC_SUCCESS;
 		matches = complete_bookmark_names((char *)text, words_n, &exit_status);
 		if (exit_status == FUNC_SUCCESS)
 			return matches;
