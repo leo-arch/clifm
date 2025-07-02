@@ -2577,7 +2577,8 @@ ext_options_generator(const char *text, int state)
 static size_t
 rl_count_words(char **w, char **start)
 {
-	size_t start_word = 0, full_word = 0;
+	size_t start_word = 0;
+	size_t full_word = 0;
 	size_t n = count_words(&start_word, &full_word);
 	char *lb = rl_line_buffer;
 
@@ -2692,6 +2693,30 @@ fill_opts(const char *cmd_name, const char *word_start, const size_t w)
 	return !c_opts[0] ? (char **)NULL : c_opts;
 }
 
+/* Return the common initial prefix for all strings in MATCHES. */
+static char *
+get_common_prefix(char **matches)
+{
+	if (!matches || !matches[0])
+		return strdup("");
+
+	const char *first_str = matches[0];
+	size_t prefix_len = strlen(first_str);
+
+	for (size_t i = 1; matches[i]; i++) {
+		size_t j = 0;
+		while (j < prefix_len && matches[i][j] == first_str[j])
+			j++;
+
+		if (j == 0)
+			return strdup("");
+
+		prefix_len = j;
+	}
+
+	return savestring(first_str, prefix_len);
+}
+
 /* Return an array of options, matching TEXT, for the command CMD_NAME. */
 static char **
 complete_options(const char *text, const char *cmd_name, const char *cmd_start,
@@ -2707,7 +2732,6 @@ complete_options(const char *text, const char *cmd_name, const char *cmd_start,
 	size_t n;
 	for (n = 0; c_opts[n]; n++);
 	char **matches = xnmalloc(n + 2, sizeof(char *));
-	matches[0] = savestring("", 1);
 
 	const size_t len = (!text || !*text) ? 0 : strlen(text);
 	char *name;
@@ -2720,17 +2744,16 @@ complete_options(const char *text, const char *cmd_name, const char *cmd_start,
 	}
 
 	if (n == 1) { /* No matches. */
-		free(matches[0]);
 		free(matches);
 		return (char **)NULL;
 	}
 
 	if (n == 2) { /* A single match. */
-		free(matches[0]);
 		matches[0] = matches[1];
 		matches[1] = (char *)NULL;
 	} else { /* Multiple matches. */
-		matches[n] = NULL;
+		matches[n] = (char *)NULL;
+		matches[0] = get_common_prefix(matches + 1);
 	}
 
 	return matches;
