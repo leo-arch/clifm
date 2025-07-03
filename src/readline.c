@@ -3850,7 +3850,6 @@ static char **
 complete_eln(char *text, const size_t words_n, char *cmd_name)
 {
 	filesn_t n = 0;
-
 	if (!is_number(text) || (n = xatof(text)) < 1 || n > files)
 		return (char **)NULL;
 
@@ -3861,8 +3860,7 @@ complete_eln(char *text, const size_t words_n, char *cmd_name)
 		|| (file_info[n - 1].dir == 0 && conf.auto_open == 0))
 			return (char **)NULL;
 	} else { /* Second word or more */
-		if (alt_prompt == FILES_PROMPT || alt_prompt == OWNERSHIP_PROMPT
-		|| should_expand_eln(text, cmd_name) == 0)
+		if (alt_prompt != 0 || should_expand_eln(text, cmd_name) == 0)
 			return (char **)NULL;
 	}
 
@@ -3990,6 +3988,9 @@ my_rl_completion(const char *text, const int start, const int end)
 	 /* These expansions are made no matter the word position in the cmd line. */
 
 	/* ##### ELN EXPANSION ##### */
+	/* We allow ELN expansion in some alternative prompts (FILES_PROMPT),
+	 * mostly those taking filenames, such as 'n' and 'm' (interactive).
+	 * The check for alaternative prompts is made in complete_eln() itself. */
 	if (*text >= '1' && *text <= '9'
 	&& (matches = complete_eln((char *)text, words_n, cmd_name)))
 		return matches;

@@ -256,12 +256,12 @@ get_dup_file_dest_dir(void)
 
 	puts(_("Enter destination directory (Ctrl+d to quit)\n"
 		"Tip: \".\" for the current directory"));
-	char _prompt[NAME_MAX];
-	snprintf(_prompt, sizeof(_prompt), "\001%s\002>\001%s\002 ", mi_c, tx_c);
+	char n_prompt[NAME_MAX];
+	snprintf(n_prompt, sizeof(n_prompt), "\001%s\002>\001%s\002 ", mi_c, tx_c);
 
 	while (!dir) {
 		int quoted = 0;
-		dir = get_newname(_prompt, (char *)NULL, &quoted);
+		dir = get_newname(n_prompt, (char *)NULL, &quoted);
 		UNUSED(quoted);
 		if (!dir) /* The user pressed ctrl+d */
 			return (char *)NULL;
@@ -815,11 +815,11 @@ ask_and_create_file(void)
 {
 	puts(_("Enter new filename (Ctrl+d to quit)\n"
 		"Tip: End name with a slash to create a directory"));
-	char _prompt[NAME_MAX];
-	snprintf(_prompt, sizeof(_prompt), "\001%s\002>\001%s\002 ", mi_c, tx_c);
+	char n_prompt[NAME_MAX];
+	snprintf(n_prompt, sizeof(n_prompt), "\001%s\002>\001%s\002 ", mi_c, tx_c);
 
 	int quoted = 0;
-	char *filename = get_newname(_prompt, (char *)NULL, &quoted);
+	char *filename = get_newname(n_prompt, (char *)NULL, &quoted);
 	if (!filename) /* The user pressed Ctrl+d */
 		return FUNC_SUCCESS;
 
@@ -844,8 +844,8 @@ ask_and_create_file(void)
 
 	exit_status = create_file(filename, 0);
 	if (exit_status == FUNC_SUCCESS) {
-		char *f[] = { filename, (char *)NULL };
-		list_created_files(f, 1);
+		char *args[] = { filename, (char *)NULL };
+		list_created_files(args, 1);
 	}
 
 ERROR:
@@ -1560,14 +1560,14 @@ validate_vv_dest_dir(const char *file)
 static char *
 get_new_filename(char *cur_name)
 {
-	char _prompt[NAME_MAX];
-	snprintf(_prompt, sizeof(_prompt), _("Enter new name (Ctrl+d to quit)\n"
+	char n_prompt[NAME_MAX];
+	snprintf(n_prompt, sizeof(n_prompt), _("Enter new name (Ctrl+d to quit)\n"
 		"\001%s\002>\001%s\002 "), mi_c, tx_c);
 
 	char *new_name = (char *)NULL;
 	while (!new_name) {
 		int quoted = 0;
-		new_name = get_newname(_prompt, cur_name, &quoted);
+		new_name = get_newname(n_prompt, cur_name, &quoted);
 		UNUSED(quoted);
 
 		if (!new_name) /* The user pressed Ctrl+d */
@@ -1579,13 +1579,13 @@ get_new_filename(char *cur_name)
 		}
 	}
 
-	size_t l = strlen(new_name);
-	if (l > 0 && new_name[l - 1] == ' ') {
-		l--;
-		new_name[l] = '\0';
+	size_t len = strlen(new_name);
+	if (len > 0 && new_name[len - 1] == ' ') {
+		len--;
+		new_name[len] = '\0';
 	}
 
-	char *n = normalize_path(new_name, l);
+	char *n = normalize_path(new_name, len);
 	free(new_name);
 
 	return n;
