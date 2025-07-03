@@ -3887,7 +3887,25 @@ complete_history(char *text)
 static char **
 complete_bookmarks_prompt(const char *text)
 {
+	if (!text || !*text)
+		return (char **)NULL;
+
 	rl_attempted_completion_over = 1;
+
+	if (is_number(text)) {
+		const int n = atoi(text);
+		if (n < 1 || (size_t)n > bm_n)
+			return (char **)NULL;
+
+		char **matches = xnmalloc(2, sizeof(char *));
+		const char *name = bookmarks[n - 1].name;
+		matches[0] = savestring(name, strlen(name));
+		matches[1] = (char *)NULL;
+		cur_comp_type = TCMP_NET; /* Same behavior as 'net'. */
+
+		return matches;
+	}
+
 	char **matches = rl_completion_matches(text, &bookmarks_generator);
 	if (matches)
 		cur_comp_type = TCMP_NET;
@@ -3990,7 +4008,7 @@ my_rl_completion(const char *text, const int start, const int end)
 	/* ##### ELN EXPANSION ##### */
 	/* We allow ELN expansion in some alternative prompts (FILES_PROMPT),
 	 * mostly those taking filenames, such as 'n' and 'm' (interactive).
-	 * The check for alaternative prompts is made in complete_eln() itself. */
+	 * The check for alternative prompts is made in complete_eln() itself. */
 	if (*text >= '1' && *text <= '9'
 	&& (matches = complete_eln((char *)text, words_n, cmd_name)))
 		return matches;
