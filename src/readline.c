@@ -3888,13 +3888,14 @@ static char **
 complete_bookmarks_prompt(const char *text)
 {
 	rl_attempted_completion_over = 1;
+	char **matches = (char **)NULL;
 
 	if (text && *text && is_number(text)) {
 		const int n = atoi(text);
 		if (n < 1 || (size_t)n > bm_n)
-			return (char **)NULL;
+			goto CHECK_NAME;
 
-		char **matches = xnmalloc(2, sizeof(char *));
+		matches = xnmalloc(2, sizeof(char *));
 		const char *name = bookmarks[n - 1].name;
 		matches[0] = savestring(name, strlen(name));
 		matches[1] = (char *)NULL;
@@ -3903,7 +3904,8 @@ complete_bookmarks_prompt(const char *text)
 		return matches;
 	}
 
-	char **matches = rl_completion_matches(text, &bookmarks_generator);
+CHECK_NAME:
+	matches = rl_completion_matches(text, &bookmarks_generator);
 	if (matches)
 		cur_comp_type = TCMP_NET;
 	return matches;
@@ -3955,7 +3957,7 @@ complete_environ(const char *text)
  *
  * This function has three main blocks:
  * 1) General expansions: These expansions can be performed in any part of
- *    the current input string (mostly special expansions, like ELN's,
+ *    the current input string (mostly special expansions, like ELNs,
  *    bookmarks, sel keyword, tags, and so on).
  * 2) First word only (mostly command names).
  * 3) Second word or more (mostly command parameters).
