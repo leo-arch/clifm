@@ -3887,12 +3887,9 @@ complete_history(char *text)
 static char **
 complete_bookmarks_prompt(const char *text)
 {
-	if (!text || !*text)
-		return (char **)NULL;
-
 	rl_attempted_completion_over = 1;
 
-	if (is_number(text)) {
+	if (text && *text && is_number(text)) {
 		const int n = atoi(text);
 		if (n < 1 || (size_t)n > bm_n)
 			return (char **)NULL;
