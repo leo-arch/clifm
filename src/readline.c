@@ -2204,7 +2204,7 @@ rl_mime_list(void)
 }
 
 /* Returns the list of files in the current directory whose MIME type
- * contains the string TEXT */
+ * contains the string TEXT. */
 static char **
 rl_mime_files(const char *text)
 {
@@ -3170,7 +3170,7 @@ complete_bookmark_names(char *text, const size_t words_n, int *exit_status)
 }
 
 static char **
-complete_ranges(char *text)
+complete_ranges(const char *text)
 {
 	char *dash = strchr(text, '-');
 	if (!dash || dash[1] < '0' || dash[1] > '9')
@@ -3349,7 +3349,7 @@ get_cmd_name(void)
 }
 
 static char **
-complete_shell_cmd_opts(char *text)
+complete_shell_cmd_opts(const char *text)
 {
 	char cmd[NAME_MAX + 1]; *cmd = '\0';
 	char *name = get_cmd_name();
@@ -3847,7 +3847,7 @@ get_filename_by_eln(const filesn_t n)
 }
 
 static char **
-complete_eln(char *text, const size_t words_n, char *cmd_name)
+complete_eln(const char *text, const size_t words_n, char *cmd_name)
 {
 	filesn_t n = 0;
 	if (!is_number(text) || (n = xatof(text)) < 1 || n > files)
@@ -4008,7 +4008,7 @@ my_rl_completion(const char *text, const int start, const int end)
 	 * mostly those taking filenames, such as 'n' and 'm' (interactive).
 	 * The check for alternative prompts is made in complete_eln() itself. */
 	if (*text >= '1' && *text <= '9'
-	&& (matches = complete_eln((char *)text, words_n, cmd_name)))
+	&& (matches = complete_eln(text, words_n, cmd_name)))
 		return matches;
 
 	/* alt_prompt is set (non-zero) whenever we are using an alternative prompt. */
@@ -4272,12 +4272,12 @@ FIRST_WORD_COMP:
 		return (char **)NULL;
 
 	/* Arguments for shell commands. */
-	if (*text == '-' && (matches = complete_shell_cmd_opts((char *)text)))
+	if (*text == '-' && (matches = complete_shell_cmd_opts(text)))
 		return matches;
 
 	/* ELN ranges */
 	if (*text >= '0' && *text <= '9'
-	&& (matches = complete_ranges((char *)text)))
+	&& (matches = complete_ranges(text)))
 		return matches;
 
 	/* Finally, try to complete with filenames in CWD. */
