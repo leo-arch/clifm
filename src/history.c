@@ -82,7 +82,7 @@ print_logs(const int flag)
 }
 
 static int
-gen_file(char *file)
+gen_file(const char *file)
 {
 	int fd = 0;
 	FILE *fp = open_fwrite(file, &fd);
@@ -494,7 +494,7 @@ print_history_list(const int timestamp)
 }
 
 static int
-print_last_items(char *str, const int timestamp)
+print_last_items(const char *str, const int timestamp)
 {
 	int num = atoi(str);
 
@@ -676,7 +676,7 @@ add_to_cmdhist(char *cmd)
 
 /* Returns 1 if INPUT should be saved on history or 0 if not. */
 int
-record_cmd(char *input)
+record_cmd(const char *input)
 {
 	if (!input || !*input)
 		return 0;

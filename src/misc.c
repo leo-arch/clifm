@@ -785,8 +785,7 @@ launch_new_instance_cmd(char ***cmd, char **self, char **sudo_prog,
 		ret = (sudo == 0 || confirm_sudo_cmd(*cmd) == 1)
 			? launch_execv(*cmd, BACKGROUND, E_SETSID)
 			: FUNC_SUCCESS;
-		size_t i;
-		for (i = 0; (*cmd)[i]; i++)
+		for (size_t i = 0; (*cmd)[i]; i++)
 			free((*cmd)[i]);
 		free(*cmd);
 	} else {
@@ -1013,9 +1012,8 @@ parse_usrvar_value(const char *str, const char c)
 
 	/* Remove trailing spaces, tabs, new line chars, and quotes */
 	const size_t tmp_len = strlen(tmp);
-	size_t i;
 
-	for (i = tmp_len - 1; tmp[i] && i > 0; i--) {
+	for (size_t i = tmp_len - 1; tmp[i] && i > 0; i--) {
 		if (tmp[i] != ' ' && tmp[i] != '\t' && tmp[i] != '"' && tmp[i] != '\''
 		&& tmp[i] != '\n')
 			break;
@@ -1142,8 +1140,7 @@ free_remotes(const int exit)
 	if (exit)
 		autounmount_remotes();
 
-	size_t i;
-	for (i = 0; i < remotes_n; i++) {
+	for (size_t i = 0; i < remotes_n; i++) {
 		free(remotes[i].name);
 		free(remotes[i].desc);
 		free(remotes[i].mountpoint);
@@ -1271,8 +1268,7 @@ xrl_discard_keymap(Keymap map)
 void
 free_workspaces_filters(void)
 {
-	size_t i;
-	for (i = 0; i < MAX_WS; i++) {
+	for (size_t i = 0; i < MAX_WS; i++) {
 		free(workspace_opts[i].filter.str);
 		workspace_opts[i].filter.str = (char *)NULL;
 		workspace_opts[i].filter.rev = 0;
@@ -1740,7 +1736,7 @@ construct_name(char *file, const size_t flen)
 	/* Should we construct destiny file as full path or using only the
 	 * last path component (the file's basename)? */
 	if (xargs.virtual_dir_full_paths != 1) {
-		char *p = strrchr(file, '/');
+		const char *p = strrchr(file, '/');
 		if (!p || !*(++p))
 			name = savestring(file, flen);
 		else

@@ -937,9 +937,7 @@ mime_list_open(char **apps, char *file)
 static int
 is_dup_entry(const char *prefix, char **apps, const char *app)
 {
-	size_t i;
-
-	for (i = prefix ? 1 : 0; apps && apps[i]; i++) {
+	for (size_t i = prefix ? 1 : 0; apps && apps[i]; i++) {
 		if (*app == *apps[i] && strcmp(app, apps[i]) == 0)
 			return 1;
 	}
@@ -963,7 +961,7 @@ get_apps_from_file(FILE *fp, char *file_name, const char *mime,
 	size_t appsn = prefix != NULL ? 1 : 0;
 	const size_t prefix_len = prefix ? strlen(prefix) : 0;
 
-	char *base_name = get_basename(file_name);
+	const char *base_name = get_basename(file_name);
 
 	while (getline(&line, &line_size, fp) > 0) {
 		if (*line == '#' || *line == '[' || *line == '\n')

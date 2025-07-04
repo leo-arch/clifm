@@ -119,7 +119,7 @@ calculate_bonus_credit(const char *entry, const char *query, int *keep)
 
 	int bonus = 0;
 
-	char *tmp = query ? strrchr(entry, '/') : (char *)NULL;
+	const char *tmp = query ? strrchr(entry, '/') : (char *)NULL;
 	if (tmp && *(++tmp)) {
 		if (strstr(tmp, query))
 			bonus += BASENAME_BONUS;
@@ -288,7 +288,7 @@ save_jumpdb(void)
 			continue;
 
 		int days_since_first = 0, hours_since_last = 0;
-		int rank = rank_entry(i, now, &days_since_first, &hours_since_last);
+		const int rank = rank_entry(i, now, &days_since_first, &hours_since_last);
 		UNUSED(days_since_first); UNUSED(hours_since_last);
 
 		jump_db[i].rank = rank;
@@ -372,7 +372,7 @@ edit_jumpdb(char *app)
 
 /* Save jump entry into the suggestions buffer. */
 static int
-save_jump_suggestion(char *str)
+save_jump_suggestion(const char *str)
 {
 	if (!str || !*str)
 		return FUNC_FAILURE;
@@ -598,7 +598,7 @@ purge_low_ranked_entries(const int limit)
 {
 	int i = (int)jump_n;
 	int c = 0;
-	time_t now = time(NULL);
+	const time_t now = time(NULL);
 
 	while (--i >= 0) {
 		if (!IS_VALID_JUMP_ENTRY(i))
@@ -635,7 +635,7 @@ purge_low_ranked_entries(const int limit)
 }
 
 static int
-purge_jump_database(char *arg)
+purge_jump_database(const char *arg)
 {
 	if (!arg || !*arg)
 		return purge_invalid_entries();

@@ -675,7 +675,7 @@ get_user_groups(const char *name, const gid_t gid, int *ngroups)
  * '/etc/shells'.
  * Return FUNC_SUCCESS if found or FUNC_FAILURE if not. */
 static int
-check_etc_shells(const char *file, char *shells_file, int *tmp_errno)
+check_etc_shells(const char *file, const char *shells_file, int *tmp_errno)
 {
 	int fd;
 	FILE *fp = open_fread(shells_file, &fd);
@@ -710,14 +710,14 @@ check_etc_shells(const char *file, char *shells_file, int *tmp_errno)
 static void
 validate_shell(void)
 {
-	char *p = xgetenv("SHELL", 0);
+	const char *p = xgetenv("SHELL", 0);
 	if (!p)
 		return;
 
 #ifdef _PATH_BSHELL
-	char *def_shell = _PATH_BSHELL;
+	const char *def_shell = _PATH_BSHELL;
 #else
-	char *def_shell = "/bin/sh";
+	const char *def_shell = "/bin/sh";
 #endif /* _PATH_BSHELL */
 
 	char *q = strrchr(p, '/');
@@ -737,15 +737,15 @@ validate_custom_shell(char **file)
 	errno = 0;
 
 #ifdef _PATH_SHELLS
-	char *shells_file = _PATH_SHELLS;
+	const char *shells_file = _PATH_SHELLS;
 #else
-	char *shells_file = "/etc/shells";
+	const char *shells_file = "/etc/shells";
 #endif /* _PATH_SHELLS */
 
 #ifdef _PATH_BSHELL
-	char *def_shell = _PATH_BSHELL;
+	const char *def_shell = _PATH_BSHELL;
 #else
-	char *def_shell = "/bin/sh";
+	const char *def_shell = "/bin/sh";
 #endif /* _PATH_BSHELL */
 
 	if (*file && check_etc_shells(*file, shells_file,
@@ -775,7 +775,7 @@ get_user_data_env(void)
 	struct user_t tmp_user = {0};
 
 	/* If secure-env, do not fallback to environment variables */
-	int sec_env = is_secure_env();
+	const int sec_env = is_secure_env();
 	char *t = sec_env == 0 ? xgetenv("HOME", 0) : (char *)NULL;
 
 	if (t) {
@@ -929,7 +929,8 @@ load_tags(void)
 	if (!tags_dir || !*tags_dir) return;
 
 	struct dirent **t = (struct dirent **)NULL;
-	int i, n = scandir(tags_dir, &t, NULL, alphasort);
+	int i;
+	const int n = scandir(tags_dir, &t, NULL, alphasort);
 	if (n == -1) return;
 
 	if (n <= 2) {
@@ -1341,8 +1342,7 @@ load_actions(void)
 		if (line[line_len - 1] == '\n')
 			line[line_len - 1] = '\0';
 
-		char *tmp = (char *)NULL;
-		tmp = strrchr(line, '=');
+		char *tmp = strrchr(line, '=');
 		if (!tmp)
 			continue;
 
@@ -1398,7 +1398,7 @@ load_remotes(void)
 				name = (char *)NULL;
 				continue;
 			}
-			size_t name_len = strlen(name);
+			const size_t name_len = strlen(name);
 			remotes[n].name = xnrealloc(remotes[n].name,
 				name_len + 1, sizeof(char));
 			xstrsncpy(remotes[n].name, name, name_len + 1);
@@ -1861,7 +1861,7 @@ get_cdpath(void)
 	|| xargs.secure_cmds == 1)
 		return 0;
 
-	char *p = getenv("CDPATH");
+	const char *p = getenv("CDPATH");
 	if (!p || !*p)
 		return 0;
 
@@ -2164,7 +2164,7 @@ cygwin_exclude_file(char *name)
  * /bin and /sbin, which are usually symlinks to /usr/bin and /usr/sbin
  * respectively. */
 static int
-skip_this_path(char *name)
+skip_this_path(const char *name)
 {
 	if (!name || !*name)
 		return 1;

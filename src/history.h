@@ -44,7 +44,7 @@ int  log_cmd(void);
 void log_msg(char *msg_str, const int print_prompt, const int logme,
 	const int add_to_msgs_list);
 int  print_logs(const int flag);
-int  record_cmd(char *input);
+int  record_cmd(const char *input);
 
 __END_DECLS
 

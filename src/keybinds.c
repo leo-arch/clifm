@@ -412,8 +412,8 @@ translate_key(const char *key)
 		return NULL;
 
 	struct keys_t {
-		char *key;
-		char *translation;
+		const char *key;
+		const char *translation;
 	};
 
 	struct keys_t keys[] = {
@@ -975,7 +975,7 @@ rebind_kb(const char *func_name, const char *kb)
 	char *tmp_name = xnmalloc(len, sizeof(char));
 	snprintf(tmp_name, len, "%s/%s", config_dir_gral, TMP_FILENAME);
 
-	int tmp_fd = mkstemp(tmp_name);
+	const int tmp_fd = mkstemp(tmp_name);
 	if (tmp_fd == -1) {
 		xerror(_("kb: Error creating temporary file: %s\n"), strerror(errno));
 		goto ERROR;
@@ -1031,9 +1031,9 @@ ERROR:
 static int
 check_func_name(const char *func_name)
 {
-	size_t len = strlen(func_name);
-	size_t i;
-	for (i = 0; kb_cmds[i].name; i++) {
+	const size_t len = strlen(func_name);
+
+	for (size_t i = 0; kb_cmds[i].name; i++) {
 		if (len == kb_cmds[i].len && *kb_cmds[i].name == *func_name
 		&& strcmp(kb_cmds[i].name, func_name) == 0)
 			return FUNC_SUCCESS;
@@ -1143,7 +1143,7 @@ list_kbinds(void)
 	size_t flen = 0;
 	size_t i;
 	for (i = 0; i < kbinds_n; i++) {
-		size_t l = kbinds[i].function ? strlen(kbinds[i].function) : 0;
+		const size_t l = kbinds[i].function ? strlen(kbinds[i].function) : 0;
 		if (l > flen)
 			flen = l;
 	}
@@ -1182,7 +1182,7 @@ list_rl_kbinds(void)
 			free(keys[j]);
 		free(keys);
 
-		size_t l = strlen(name);
+		const size_t l = strlen(name);
 		if (l > flen)
 			flen = l;
 	}
@@ -1369,7 +1369,7 @@ xrl_update_prompt(void)
 int
 keybind_exec_cmd(char *str)
 {
-	size_t old_args = args_n;
+	const size_t old_args = args_n;
 	args_n = 0;
 
 #ifndef _NO_SUGGESTIONS
@@ -1518,7 +1518,7 @@ rl_prepend_sudo(int count, int key)
 		fputs(tx_c, stdout);
 	}
 
-	int p = rl_point;
+	const int p = rl_point;
 	if (*rl_line_buffer == *s
 	&& strncmp(rl_line_buffer, s, len) == 0) {
 		rl_delete_text(0, (int)len);
@@ -1688,7 +1688,7 @@ rl_accept_suggestion(int count, int key)
 		return FUNC_SUCCESS;
 	}
 
-	if (!wrong_cmd && cur_color != hq_c) {
+	if (wrong_cmd == 0 && cur_color != hq_c) {
 		cur_color = tx_c;
 		fputs(tx_c, stdout);
 	}
@@ -1699,7 +1699,7 @@ rl_accept_suggestion(int count, int key)
 	|| suggestion.type == CMD_DESC_SUG) {
 		if (rl_point < rl_end) {
 			/* Just move the cursor forward one character */
-			int mlen = mblen(rl_line_buffer + rl_point, MB_CUR_MAX);
+			const int mlen = mblen(rl_line_buffer + rl_point, MB_CUR_MAX);
 			rl_point += mlen;
 		}
 		return FUNC_SUCCESS;
@@ -1732,7 +1732,7 @@ rl_accept_suggestion(int count, int key)
 			*s = '\0';
 			truncated = 1;
 		} else { /* Last word: No word delimiter */
-			size_t len = strlen(suggestion_buf);
+			const size_t len = strlen(suggestion_buf);
 			if (len > 0 && suggestion_buf[len - 1] != '/'
 			&& suggestion_buf[len - 1] != ' ')
 				suggestion.type = NO_SUG;
@@ -1741,9 +1741,8 @@ rl_accept_suggestion(int count, int key)
 		}
 	}
 
-	int bypass_alias = 0;
-	if (rl_line_buffer && *rl_line_buffer == '\\' && *(rl_line_buffer + 1))
-		bypass_alias = 1;
+	const int bypass_alias =
+		(rl_line_buffer && *rl_line_buffer == '\\' && rl_line_buffer[1]);
 
 	rl_delete_text(suggestion.offset, rl_end);
 	rl_point = suggestion.offset;
@@ -1901,7 +1900,7 @@ rl_accept_first_word(int count, int key)
 
 	/* Accepting the first suggested word is not supported for ELN's,
 	 * bookmark and alias names. */
-	int t = suggestion.type;
+	const int t = suggestion.type;
 	if (t != ELN_SUG && t != BOOKMARK_SUG && t != ALIAS_SUG && t != JCMD_SUG
 	&& t != FUZZY_FILENAME && t != CMD_DESC_SUG
 	&& t != BM_NAME_SUG && t != INT_HELP_SUG && t != TAGT_SUG
@@ -2181,7 +2180,7 @@ rl_open_preview(int count, int key)
 	char *file = xnmalloc(config_dir_len + 15, sizeof(char));
 	snprintf(file, config_dir_len + 15, "%s/preview.clifm", config_dir);
 
-	int ret = open_file(file);
+	const int ret = open_file(file);
 	free(file);
 	rl_on_new_line();
 	return ret;
@@ -2663,15 +2662,15 @@ static int
 run_man_cmd(char *str)
 {
 	char *mp = (char *)NULL;
-	char *p = getenv("MANPAGER");
+	const char *p = getenv("MANPAGER");
 	if (p) {
-		size_t len = strlen(p);
+		const size_t len = strlen(p);
 		mp = xnmalloc(len + 1, sizeof(char *));
 		xstrsncpy(mp, p, len + 1);
 		unsetenv("MANPAGER");
 	}
 
-	int ret = launch_execl(str) != FUNC_SUCCESS;
+	const int ret = launch_execl(str) != FUNC_SUCCESS;
 
 	if (mp) {
 		setenv("MANPAGER", mp, 1);
@@ -2700,7 +2699,7 @@ rl_kbinds_help(int count, int key)
 	snprintf(cmd, sizeof(cmd),
 		"export PAGER=\"less -p ^[0-9]+\\.[[:space:]]KEYBOARD[[:space:]]SHORTCUTS\"; man %s\n",
 		PROGRAM_NAME);
-	int ret = run_man_cmd(cmd);
+	const int ret = run_man_cmd(cmd);
 	if (!ret)
 		return FUNC_FAILURE;
 	return FUNC_SUCCESS;
@@ -2722,7 +2721,7 @@ rl_cmds_help(int count, int key)
 	snprintf(cmd, sizeof(cmd),
 		"export PAGER=\"less -p ^[0-9]+\\.[[:space:]]COMMANDS\"; man %s\n",
 		PROGRAM_NAME);
-	int ret = run_man_cmd(cmd);
+	const int ret = run_man_cmd(cmd);
 	if (!ret)
 		return FUNC_FAILURE;
 	return FUNC_SUCCESS;
@@ -2966,7 +2965,7 @@ rl_toggle_only_dirs(int count, int key)
 	conf.only_dirs = !conf.only_dirs;
 	update_autocmd_opts(AC_ONLY_DIRS);
 
-	int exit_status = exit_code;
+	const int exit_status = exit_code;
 	if (conf.autols == 1) {
 		if (conf.clear_screen == 0)
 			putchar('\n');
@@ -3171,7 +3170,7 @@ rl_toggle_disk_usage(int count, int key)
 		conf.list_dirs_first = 0;
 	}
 
-	int exit_status = exit_code;
+	const int exit_status = exit_code;
 	if (conf.autols == 1) {
 		if (conf.clear_screen == 0)
 			putchar('\n');
@@ -3264,7 +3263,7 @@ rl_toggle_virtualdir_full_paths(int count, int key)
 
 		char *p = (char *)NULL;
 		if (xargs.virtual_dir_full_paths != 1) {
-			if ((p = strrchr(rp, '/')) && *(p + 1))
+			if ((p = strrchr(rp, '/')) && p[1])
 				++p;
 		} else {
 			p = replace_slashes(rp, ':');
@@ -3365,7 +3364,7 @@ do_nothing(int count, int key)
 
 /* Hold kebinding names and associated functions. */
 struct keyfuncs_t {
-	char *name;
+	const char *name;
 	int (*func)(int, int);
 };
 
