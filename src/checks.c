@@ -533,13 +533,13 @@ is_bin_cmd(char *str)
 }
 
 int
-check_regex(char *str)
+check_regex(const char *str)
 {
 	if (!str || !*str)
 		return FUNC_FAILURE;
 
 	int char_found = 0;
-	char *p = str;
+	const char *p = str;
 
 	while (*p) {
 		/* If STR contains at least one of the following chars */
@@ -619,7 +619,7 @@ check_for_alias(char **args)
 /* Keep only the last MAX records in FILE.
  * If CHECK_DUPS is 1, skip consecutive equal entries. */
 void
-truncate_file(char *file, const int max, const int check_dups)
+truncate_file(const char *file, const int max, const int check_dups)
 {
 	if (config_ok == 0 || !file || !*file)
 		return;

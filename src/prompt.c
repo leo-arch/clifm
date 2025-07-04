@@ -699,7 +699,7 @@ gen_nesting_level(const int mode)
 	return p;
 }
 
-static char *
+static const char *
 get_color_attribute(const char *line)
 {
 	if (!line || !line[0] || line[1] != ':')
@@ -754,7 +754,7 @@ gen_color(char **line)
 	char *l = (*line) + 1; /* L is now "color}" */
 
 	const int bg = (l[0] == 'k' && l[1] == ':' && l[2]);
-	char *attr = bg == 0 ? get_color_attribute(l) : (char *)NULL;
+	const char *attr = bg == 0 ? get_color_attribute(l) : (char *)NULL;
 	if (bg == 1 || attr)
 		l += 2; /* Remove background/attribute prefix ("x:") */
 

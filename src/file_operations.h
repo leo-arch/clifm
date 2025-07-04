@@ -69,7 +69,7 @@ int  open_function(char **cmd);
 int  remove_files(char **args);
 int  symlink_file(char **args);
 int  toggle_exec(const char *file, mode_t mode);
-int  umask_function(char *arg);
+int  umask_function(const char *arg);
 int  xchmod(const char *file, const char *mode_str, const int flag);
 
 __END_DECLS

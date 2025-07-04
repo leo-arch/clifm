@@ -2344,7 +2344,7 @@ create_config_files(const int just_listing)
 
 /* Create a completely new mimelist file and store it in FILE. */
 static int
-create_mime_file_anew(char *file)
+create_mime_file_anew(const char *file)
 {
 	int fd;
 	FILE *fp = open_fwrite(file, &fd);
@@ -3949,7 +3949,7 @@ first_non_blank(const char *line)
 /* Return a macro describing the border type set for the '--border' option
  * in a fzf command (either FZF_DEFAULT_OPTS or FzfTabOptions). */
 static int
-get_fzf_border(char *line)
+get_fzf_border(const char *line)
 {
 	if (!line || !*line || (*line != ' ' && *line != '='))
 		/* No value for "--border". It defaults to "rounded". */
@@ -3957,7 +3957,7 @@ get_fzf_border(char *line)
 
 	line++;
 
-	char *p = line + (*line == '\'' || *line == '"');
+	const char *p = line + (*line == '\'' || *line == '"');
 	char c = first_non_blank(p);
 	if (!*p || *p == '-' || c == '-' || c == '\0')
 		return FZF_BORDER_ROUNDED;
@@ -3990,7 +3990,7 @@ get_fzf_border(char *line)
  * or 2 (left and right border). We need this value to properly calculate
  * the width of the fzf preview window (get_preview_win_width(), in tabcomp.c). */
 int
-get_fzf_border_type(char *line)
+get_fzf_border_type(const char *line)
 {
 	fzf_ext_border = get_fzf_border(line);
 
@@ -4064,7 +4064,8 @@ END:
 static void
 get_fzf_win_height_and_preview(void)
 {
-	char *p = xargs.secure_env_full == 1 ? NULL : getenv("FZF_DEFAULT_OPTS");
+	const char *p = xargs.secure_env_full == 1 ? NULL
+		: getenv("FZF_DEFAULT_OPTS");
 	if (!p || !*p)
 		return;
 

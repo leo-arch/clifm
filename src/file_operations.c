@@ -96,7 +96,7 @@ is_portable_filename(const char *name, const size_t len)
 
 /* Print/set the file creation mode mask (umask). */
 int
-umask_function(char *arg)
+umask_function(const char *arg)
 {
 	if (!arg) {
 		const mode_t old_umask = umask(0); /* flawfinder: ignore */
@@ -1107,13 +1107,13 @@ static char *
 get_new_link_target(char *cur_target)
 {
 	puts(_("Edit target (Ctrl+d to quit)"));
-	char _prompt[NAME_MAX];
-	snprintf(_prompt, sizeof(_prompt), "\001%s\002>\001%s\002 ", mi_c, tx_c);
+	char n_prompt[NAME_MAX];
+	snprintf(n_prompt, sizeof(n_prompt), "\001%s\002>\001%s\002 ", mi_c, tx_c);
 
 	char *new_target = (char *)NULL;
 	while (!new_target) {
 		int quoted = 0;
-		new_target = get_newname(_prompt, cur_target, &quoted);
+		new_target = get_newname(n_prompt, cur_target, &quoted);
 		UNUSED(quoted);
 
 		if (!new_target) /* The user pressed Ctrl+d */
@@ -1905,8 +1905,7 @@ print_removed_file_info(const struct rm_info info)
 
 /* Print the list of files removed via the most recent call to the 'r' command */
 static void
-list_removed_files(struct rm_info *info, const size_t start,
-	const int cwd)
+list_removed_files(struct rm_info *info, const size_t start, const int cwd)
 {
 	size_t i, c = 0;
 
@@ -1939,7 +1938,7 @@ list_removed_files(struct rm_info *info, const size_t start,
 /* Print files to be removed and ask the user for confirmation.
  * Returns 0 if no or 1 if yes. */
 static int
-rm_confirm(struct rm_info *info, const size_t start, const int have_dirs)
+rm_confirm(const struct rm_info *info, const size_t start, const int have_dirs)
 {
 	printf(_("File(s) to be removed%s:\n"),
 		have_dirs == 1 ? _(" (recursively)") : "");
@@ -1952,7 +1951,8 @@ rm_confirm(struct rm_info *info, const size_t start, const int have_dirs)
 }
 
 static int
-check_rm_files(struct rm_info *info, const size_t start, const char *errname)
+check_rm_files(const struct rm_info *info, const size_t start,
+	const char *errname)
 {
 	struct stat a;
 	size_t i;

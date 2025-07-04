@@ -706,8 +706,8 @@ gen_backup_file(const char *file, const int human)
 int
 xmkdir(const char *dir, const mode_t mode)
 {
-	mode_t old_mask = umask(0077); /* flawfinder: ignore */
-	int ret = mkdirat(XAT_FDCWD, dir, mode);
+	const mode_t old_mask = umask(0077); /* flawfinder: ignore */
+	const int ret = mkdirat(XAT_FDCWD, dir, mode);
 	umask(old_mask); /* flawfinder: ignore */
 
 	if (ret == -1)
@@ -723,7 +723,7 @@ xreadlink(const int fd, char *restrict path, char *restrict buf,
 	const size_t bufsize)
 {
 	buf[0] = '\0';
-	ssize_t buf_len = readlinkat(fd, path, buf, bufsize - 1);
+	const ssize_t buf_len = readlinkat(fd, path, buf, bufsize - 1);
 	if (buf_len == -1)
 		return (-1);
 
@@ -869,7 +869,7 @@ get_dt(const mode_t mode)
 static int
 hex2int(const char *str)
 {
-	static unsigned char hex_chars[256] = {
+	static const unsigned char hex_chars[256] = {
 		['0'] = 0, ['1'] = 1, ['2'] = 2, ['3'] = 3, ['4'] = 4,
 		['5'] = 5, ['6'] = 6, ['7'] = 7, ['8'] = 8, ['9'] = 9,
 		['a'] = 10, ['b'] = 11, ['c'] = 12, ['d'] = 13, ['e'] = 14, ['f'] = 15,
@@ -884,7 +884,7 @@ hex2int(const char *str)
 /* Disassemble the hex color HEX into attribute, R, G, and B values.
  * Based on https://mprog.wordpress.com/c/miscellaneous/convert-hexcolor-to-rgb-decimal */
 int
-get_rgb(char *hex, int *attr, int *r, int *g, int *b)
+get_rgb(const char *hex, int *attr, int *r, int *g, int *b)
 {
 	if (!hex || !*hex)
 		return (-1);
@@ -895,7 +895,7 @@ get_rgb(char *hex, int *attr, int *r, int *g, int *b)
 		hex++;
 	}
 
-	char *h = hex;
+	const char *h = hex;
 
 	/* Convert 3-digits HEX to 6-digits */
 	static char buf[9];
@@ -958,7 +958,7 @@ get_rgb(char *hex, int *attr, int *r, int *g, int *b)
  *
  */
 char *
-hex2rgb(char *hex)
+hex2rgb(const char *hex)
 {
 	int attr = -1, r = 0, g = 0, b = 0;
 	if (get_rgb(hex, &attr, &r, &g, &b) == -1)
@@ -1283,14 +1283,14 @@ xgetchar(void)
 
 /* Converts a hex char to its integer value. */
 char
-from_hex(char c)
+from_hex(const char c)
 {
 	return (char)(IS_DIGIT(c) ? c - '0' : TOLOWER(c) - 'a' + 10);
 }
 
 /* Converts an integer value to its hex form. */
 static char
-to_hex(char c)
+to_hex(const char c)
 {
 	static const char hex[] = "0123456789ABCDEF";
 	return hex[c & 15];
@@ -1299,7 +1299,7 @@ to_hex(char c)
 /* Return an URL-encoded version of STR, prefixed with "file://" if
  * FILE_URI is set to 1. */
 char *
-url_encode(char *str, const int file_uri)
+url_encode(const char *str, const int file_uri)
 {
 	if (!str || !*str)
 		return (char *)NULL;
@@ -1345,7 +1345,7 @@ url_encode(char *str, const int file_uri)
 
 /* Returns a url-decoded version of STR. */
 char *
-url_decode(char *str)
+url_decode(const char *str)
 {
 	if (!str || !*str)
 		return (char *)NULL;
@@ -1353,7 +1353,8 @@ url_decode(char *str)
 	char *buf = xnmalloc(strlen(str) + 1, sizeof(char));
 	/* The decoded string will be at most as long as the encoded string. */
 
-	char *pstr = str, *pbuf = buf;
+	const char *pstr = str;
+	char *pbuf = buf;
 
 	for (; *pstr; pstr++) {
 		if (*pstr == '%') {

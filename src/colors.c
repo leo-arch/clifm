@@ -658,7 +658,7 @@ bcomp(const void *a, const void *b)
 static char *
 check_ext_hash(const size_t hash, size_t *val_len)
 {
-	struct ext_t *ptr = bsearch(&hash, ext_colors, ext_colors_n,
+	const struct ext_t *ptr = bsearch(&hash, ext_colors, ext_colors_n,
 		sizeof(struct ext_t), bcomp);
 
 	if (!ptr || !ptr->value || !*ptr->value)
@@ -1773,7 +1773,7 @@ get_cur_colorscheme(const char *colorscheme)
 	return FUNC_SUCCESS;
 }
 
-static char *
+static const char *
 bsd_to_ansi_color(char color, const int bg)
 {
 	char c = color;
@@ -1936,12 +1936,12 @@ get_colors_from_env(char **file, char **ext, char **iface)
 /* Store the color variable STR (in the form VAR=VALUE) in the global
  * defs struct. */
 static void
-store_definition(char *str)
+store_definition(const char *str)
 {
 	if (!str || !*str || *str == '\n' || defs_n > MAX_DEFS)
 		return;
 
-	char *name = str;
+	const char *name = str;
 	char *value = strchr(name, '=');
 	if (!value || !value[1] || value == name)
 		return;
@@ -2069,7 +2069,7 @@ set_cs_right_prompt_str(char *line)
 
 #ifndef _NO_FZF
 static void
-set_fzf_opts(char *line)
+set_fzf_opts(const char *line)
 {
 	free(conf.fzftab_options);
 	conf.fzftab_options = (char *)NULL;
@@ -2133,7 +2133,7 @@ set_cs_fzftabopts(char *line)
 #endif /* !_NO_FZF */
 
 static void
-set_cs_colors(char *line, char **colors, const size_t line_len)
+set_cs_colors(const char *line, char **colors, const size_t line_len)
 {
 	if (IS_CTRL_CHR(*line))
 		return;
@@ -2205,7 +2205,7 @@ set_cs_dir_icon_color(char *line, const ssize_t line_len)
 /* Get color lines from the configuration file */
 static int
 read_color_scheme_file(const char *colorscheme, char **filecolors,
-			char **extcolors, char **ifacecolors, const int env)
+	char **extcolors, char **ifacecolors, const int env)
 {
 	/* Allocate some memory for custom color variables */
 	defs = xnmalloc(MAX_DEFS + 1, sizeof(struct colors_t));

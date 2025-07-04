@@ -2126,7 +2126,7 @@ expand_tilde_glob(char *text)
 	if (!q)
 		return (char *)NULL;
 
-	char *g = *(ls + 1) ? ls + 1 : (char *)NULL;
+	const char *g = ls[1] ? ls + 1 : (char *)NULL;
 	size_t len = strlen(q) + 2 + (g ? strlen(g) : 0);
 	char *tmp = xnmalloc(len, sizeof(char));
 	snprintf(tmp, len, "%s/%s", q, g);
@@ -2274,7 +2274,7 @@ rl_glob(char *text)
 		char **matches = xnmalloc(globbuf.gl_pathc + 2, sizeof(char *));
 		char *basename = strrchr(globbuf.gl_pathv[0], '/');
 		if (basename && *(++basename)) {
-			char c = *basename;
+			const char c = *basename;
 			*basename = '\0';
 			matches[0] =
 				savestring(globbuf.gl_pathv[0], strlen(globbuf.gl_pathv[0]));
@@ -2349,7 +2349,7 @@ rl_trashed_files(const char *text)
 		return (char **)NULL;
 
 	struct dirent **t = (struct dirent **)NULL;
-	int n = scandir(trash_files_dir, &t, NULL, alphasort);
+	const int n = scandir(trash_files_dir, &t, NULL, alphasort);
 
 	xchdir(workspaces[cur_ws].path, NO_TITLE);
 

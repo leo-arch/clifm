@@ -275,7 +275,7 @@ gen_perms(const mode_t mode, char *perm_str, const char file_type,
 	return bytes > 0 ? (size_t)bytes : 0;
 }
 
-static char *
+static const char *
 get_time_char(void)
 {
 	if (conf.time_follows_sort == 1) {
