@@ -3056,7 +3056,7 @@ file_types_generator(const char *text, int state)
 }
 
 static char **
-rl_fastback(char *s)
+rl_fastback(const char *s)
 {
 	if (!s || !*s)
 		return (char **)NULL;
@@ -3223,7 +3223,7 @@ complete_open_with(char *text, char *start)
 #endif /* !_NO_LIRA */
 
 static char **
-complete_file_type_filter(char *text)
+complete_file_type_filter(const char *text)
 {
 	char **matches = (char **)NULL;
 
@@ -3256,7 +3256,7 @@ complete_file_type_filter(char *text)
 }
 
 static char **
-complete_mime_type_filter(char *text)
+complete_mime_type_filter(const char *text)
 {
 	char **matches = (char **)NULL;
 
@@ -3371,7 +3371,7 @@ complete_shell_cmd_opts(char *text)
 
 #ifndef _NO_TAGS
 static char **
-complete_tag_names(char *text, char *start)
+complete_tag_names(const char *text, char *start)
 {
 	char **matches = (char **)NULL;
 
@@ -3485,7 +3485,7 @@ complete_bookmarks(char *text, const size_t words_n)
 			return matches;
 	}
 
-	if (words_n || conf.autocd == 1 || conf.auto_open == 1)
+	if (words_n > 0 || conf.autocd == 1 || conf.auto_open == 1)
 		return complete_bookmark_names_b(text);
 
 	return (char **)NULL;
@@ -3853,8 +3853,7 @@ complete_eln(char *text, const size_t words_n, char *cmd_name)
 	if (!is_number(text) || (n = xatof(text)) < 1 || n > files)
 		return (char **)NULL;
 
-	/* First word */
-	if (words_n == 1) {
+	if (words_n == 1) { /* First word */
 		if ((alt_prompt != 0 && alt_prompt != FILES_PROMPT)
 		|| (file_info[n - 1].dir == 1 && conf.autocd == 0)
 		|| (file_info[n - 1].dir == 0 && conf.auto_open == 0))
@@ -3921,9 +3920,9 @@ complete_cmd_desc(const char *text)
 }
 
 static char **
-complete_fastback(char *text)
+complete_fastback(const char *text)
 {
-	char **matches = rl_fastback((char *)text);
+	char **matches = rl_fastback(text);
 	if (!matches)
 		return (char **)NULL;
 
@@ -4017,20 +4016,20 @@ my_rl_completion(const char *text, const int start, const int end)
 		goto FIRST_WORD_COMP;
 
 	/* #### FILE TYPE EXPANSION #### */
-	if (*text == '=' && (matches = complete_file_type_filter((char *)text)))
+	if (*text == '=' && (matches = complete_file_type_filter(text)))
 		return matches;
 
 	/* #### MIME TYPE EXPANSION #### */
-	if (*text == '@' && (matches = complete_mime_type_filter((char *)text)))
+	if (*text == '@' && (matches = complete_mime_type_filter(text)))
 		return matches;
 
 	/* #### FASTBACK EXPANSION #### */
 	if (*text == '.' && text[1] == '.' && text[2] == '.'
-	&& (matches = complete_fastback((char *)text)))
+	&& (matches = complete_fastback(text)))
 		return matches;
 
 	/* #### WILDCARDS EXPANSION #### */
-	char *g = strpbrk(text, GLOB_CHARS);
+	const char *g = strpbrk(text, GLOB_CHARS);
 	/* Expand only glob expressions in the last path component */
 	if (g && !(rl_end == 2 && *rl_line_buffer == '/'
 	&& rl_line_buffer[1] == '*') && !strchr(g, '/')

@@ -32,7 +32,7 @@ __BEGIN_DECLS
 int  back_function(char **args);
 int  backdir(char *str);
 int  cd_function(char *new_path, const int cd_flag);
-char *fastback(char *str);
+char *fastback(const char *str);
 int  forth_function(char **args);
 char **get_bd_matches(const char *str, int *n, const int mode);
 void print_dirhist(char *query);

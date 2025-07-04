@@ -1667,7 +1667,7 @@ check_workspaces(char *word, size_t wlen, const int type)
 }
 
 static int
-check_fastback(char *w)
+check_fastback(const char *w)
 {
 	if (!w || !*w)
 		return NO_MATCH;

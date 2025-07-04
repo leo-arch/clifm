@@ -563,8 +563,8 @@ cd_function(char *new_path, const int cd_flag)
 
 /* Return a pointer to the first occurrence in the string STR of a byte that
  * is not C. Otherwise, if only C is found, NULL is returned. */
-static char *
-xstrcpbrk(char *str, const char c)
+static const char *
+xstrcpbrk(const char *str, const char c)
 {
 	if (!str || !*str)
 		return (char *)NULL;
@@ -581,7 +581,7 @@ xstrcpbrk(char *str, const char c)
 /* Convert "... n" into "../.. n"
  * and "../.. n" into the corresponding path. */
 char *
-fastback(char *str)
+fastback(const char *str)
 {
 	if (!str || !*str || xstrcpbrk(str, '.'))
 		return (char *)NULL;
