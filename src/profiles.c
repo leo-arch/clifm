@@ -111,8 +111,7 @@ get_profile_names(void)
 static int
 check_profile(const char *name)
 {
-	int i;
-	for (i = 0; profile_names[i]; i++) {
+	for (int i = 0; profile_names[i]; i++) {
 		if (*name == *profile_names[i] && strcmp(name, profile_names[i]) == 0)
 			return i;
 	}

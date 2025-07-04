@@ -1201,9 +1201,8 @@ static void
 trim_final_slashes(void)
 {
 	const size_t path_len = strlen(workspaces[cur_ws].path);
-	size_t i;
 
-	for (i = path_len - 1; workspaces[cur_ws].path[i] && i > 0; i--) {
+	for (size_t i = path_len - 1; workspaces[cur_ws].path[i] && i > 0; i--) {
 		if (workspaces[cur_ws].path[i] != '/')
 			break;
 		else
@@ -1291,9 +1290,8 @@ run_prompt_cmds(void)
 
 	const int tflags = flags;
 	flags &= ~DELAYED_REFRESH;
-	size_t i;
 
-	for (i = 0; i < prompt_cmds_n; i++) {
+	for (size_t i = 0; i < prompt_cmds_n; i++) {
 		if (xargs.secure_cmds == 0
 		|| sanitize_cmd(prompt_cmds[i], SNT_PROMPT) == FUNC_SUCCESS)
 			launch_execl(prompt_cmds[i]);
@@ -1436,8 +1434,7 @@ construct_prompt(const char *decoded_prompt)
 static void
 print_prompt_messages(void)
 {
-	size_t i;
-	for (i = 0; i < msgs_n; i++) {
+	for (size_t i = 0; i < msgs_n; i++) {
 		if (messages[i].read == 1)
 			continue;
 
@@ -1722,8 +1719,7 @@ list_prompts(void)
 	}
 
 	const char *ptr = SET_MISC_PTR;
-	size_t i;
-	for (i = 0; i < prompts_n; i++) {
+	for (size_t i = 0; i < prompts_n; i++) {
 		if (!prompts[i].name)
 			continue;
 

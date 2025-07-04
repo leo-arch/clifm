@@ -1525,7 +1525,7 @@ bm_paths_generator(const char *text, int state)
 		char *p = abbreviate_file_name(bpath);
 		char *ret = strdup(p ? p : bpath);
 
-		if (p != bpath)
+		if (p && p != bpath)
 			free(p);
 
 		return ret;
@@ -1543,7 +1543,7 @@ env_vars_generator(const char *text, int state)
 
 	static int i;
 	static size_t len;
-	char *name;
+	const char *name;
 
 	if (state == 0) {
 		i = 0;
@@ -1575,7 +1575,7 @@ environ_generator(const char *text, int state)
 
 	static int i;
 	static size_t len;
-	char *name;
+	const char *name;
 
 	if (state == 0) {
 		i = 0;
@@ -1606,7 +1606,7 @@ static char *
 jump_generator(const char *text, int state)
 {
 	static int i;
-	char *name;
+	const char *name;
 
 	if (state == 0)
 		i = 0;
@@ -1653,7 +1653,7 @@ cschemes_generator(const char *text, int state)
 
 	static int i;
 	static size_t len;
-	char *name;
+	const char *name;
 
 	if (state == 0) {
 		i = 0;
@@ -1678,7 +1678,7 @@ profiles_generator(const char *text, int state)
 
 	static int i;
 	static size_t len;
-	char *name;
+	const char *name;
 
 	if (state == 0) {
 		i = 0;
@@ -1825,7 +1825,7 @@ bin_cmd_generator(const char *text, int state)
 
 	static int i;
 	static size_t len;
-	char *name;
+	const char *name;
 
 	if (state == 0) {
 		i = 0;
@@ -1846,18 +1846,17 @@ static char *
 sort_num_generator(const char *text, int state)
 {
 	static size_t i;
-	char *name;
-	rl_filename_completion_desired = 1;
+	const char *name;
 
 	if (state == 0)
 		i = 0;
 
-	int num_text = atoi(text);
+	const int num_text = atoi(text);
 	if (num_text == INT_MIN
 	|| (conf.light_mode == 1 && !ST_IN_LIGHT_MODE(num_text)))
 		return (char *)NULL;
 
-	static char *const sorts[] = {
+	static const char *const sorts[] = {
 	    "none",
 	    "name",
 	    "size",
@@ -1893,7 +1892,7 @@ aliases_generator(const char *text, int state)
 
 	static int i;
 	static size_t len;
-	char *name;
+	const char *name;
 
 	if (state == 0) {
 		i = 0;
@@ -1913,7 +1912,7 @@ kb_func_names_gen(const char *text, int state)
 {
 	static int i;
 	static size_t len;
-	char *name;
+	const char *name;
 
 	if (state == 0) {
 		i = 0;
@@ -1933,7 +1932,7 @@ file_templates_generator(const char *text, int state)
 {
 	static int i;
 	static size_t len;
-	char *name;
+	const char *name;
 
 	if (state == 0) {
 		i = 0;
@@ -1958,20 +1957,20 @@ nets_generator(const char *text, int state)
 	static int i;
 	static int is_unmount, is_mount;
 	static size_t len;
-	char *name;
+	const char *name;
 
 	if (state == 0) {
 		i = 0;
 		len = strlen(text);
 
 		/* Let's find out whether we have a 'mount' or 'unmount' subcommands */
-		if (*(rl_line_buffer + 4) == 'u' && (*(rl_line_buffer + 5) == ' '
+		if (rl_line_buffer[4] == 'u' && (rl_line_buffer[5] == ' '
 		|| strncmp(rl_line_buffer + 5, "nmount ", 7) == 0))
 			is_unmount = 1;
 		else
 			is_unmount = 0;
 
-		if (*(rl_line_buffer + 4) == 'm' && (*(rl_line_buffer + 5) == ' '
+		if (rl_line_buffer[4] == 'm' && (rl_line_buffer[5] == ' '
 		|| strncmp(rl_line_buffer + 5, "ount ", 5) == 0))
 			is_mount = 1;
 		else
@@ -2093,7 +2092,7 @@ prompts_generator(const char *text, int state)
 
 	static int i;
 	static size_t len;
-	char *name;
+	const char *name;
 
 	if (state == 0) {
 		i = 0;
@@ -2417,7 +2416,7 @@ tags_generator(const char *text, int state)
 
 	static int i;
 	static size_t len, p = 0;
-	char *name;
+	const char *name;
 
 	if (state == 0) {
 		i = 0;
@@ -2518,14 +2517,14 @@ check_tagged_files(char *tag)
 	}
 
 	tagged_files_n = n;
-	char **_matches = rl_completion_matches("", &tag_entries_generator);
+	char **matches = rl_completion_matches("", &tag_entries_generator);
 	while (--n >= 0)
 		free(tagged_files[n]);
 	free(tagged_files);
 	tagged_files = (struct dirent **)NULL;
 	tagged_files_n = 0;
 
-	return _matches;
+	return matches;
 }
 
 static char *
@@ -2553,7 +2552,7 @@ get_cur_tag(void)
 #endif /* _NO_TAGS */
 
 /* Generate possible arguments for a shell command. Arguments should have
- * been previously loaded by get_ext_options() and stored in ext_opts array */
+ * been previously loaded by get_ext_options() and stored in ext_opts array. */
 static char *
 ext_options_generator(const char *text, int state)
 {
@@ -2734,7 +2733,7 @@ complete_options(const char *text, const char *cmd_name, const char *cmd_start,
 	char **matches = xnmalloc(n + 2, sizeof(char *));
 
 	const size_t len = (!text || !*text) ? 0 : strlen(text);
-	char *name;
+	const char *name;
 
 	n = 1;
 	size_t i = 0;
@@ -2944,7 +2943,7 @@ file_types_opts_generator(const char *text, int state)
 		NULL
 	};
 
-	char *name;
+	const char *name;
 	while ((name = ft_opts[i++])) {
 		if (check_file_type_opts(*name) == 1)
 			return strdup(name);
@@ -3938,8 +3937,10 @@ complete_users(const char *text)
 {
 	char **matches = rl_completion_matches(text, &users_generator);
 	endpwent();
-	if (matches)
+	if (matches) {
+		rl_filename_completion_desired = 1;
 		cur_comp_type = TCMP_USERS;
+	}
 	return matches;
 }
 

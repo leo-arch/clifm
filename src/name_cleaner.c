@@ -310,7 +310,7 @@ clean_file_name(char *restrict name)
 		snprintf(p, NAME_MAX, "%s.%s", FUNC_NAME, suffix);
 		free(suffix);
 	} else {
-		if (!*(p + 1)) {
+		if (!p[1]) {
 			/* Avoid one character long filenames. Specially because files
 			 * named with a single dot should be avoided */
 			char c = *p;
