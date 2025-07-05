@@ -98,9 +98,8 @@ get_utf_8_width(const char c)
 		check_width(c, 6);
     }
 
-	if ((c & UTF_8_ENCODED_MASK) == UTF_8_ENCODED_CONT) { /* UTF-8 continuation byte */
+	if ((c & UTF_8_ENCODED_MASK) == UTF_8_ENCODED_CONT) /* UTF-8 continuation byte */
 		return -1;
-	}
 
 	return 1;
 }
@@ -138,7 +137,7 @@ get_uft8_dec_value(size_t *i, const char *str)
 		case 4: new_value = unpack_start(c, 4); break;
 		case 5: new_value = unpack_start(c, 5); break;
 		case 6: new_value = unpack_start(c, 6); break;
-		default: return (-1); /* -1 */
+		default: return (-1);
 	}
 
 	int expected_chars = utf8_width - 1;
@@ -216,7 +215,7 @@ clean_file_name(char *restrict name)
 		}
 
 		if (n <= 127) {
-			int ret = translate_unsafe_char(n);
+			const int ret = translate_unsafe_char(n);
 			if (ret == -1)
 				continue;
 
@@ -254,7 +253,7 @@ clean_file_name(char *restrict name)
 		}
 
 		/* Extended ASCII and Unicode chars */
-		int dec_value = get_uft8_dec_value(&i, name);
+		const int dec_value = get_uft8_dec_value(&i, name);
 		if (!name[i])
 			break;
 

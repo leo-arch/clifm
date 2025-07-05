@@ -1857,22 +1857,9 @@ sort_num_generator(const char *text, int state)
 		return (char *)NULL;
 
 	static const char *const sorts[] = {
-	    "none",
-	    "name",
-	    "size",
-	    "atime",
-	    "btime",
-	    "ctime",
-	    "mtime",
-	    "version",
-	    "extension",
-	    "inode",
-	    "owner",
-	    "group",
-	    "blocks",
-	    "links",
-	    "type",
-	    NULL
+	    "none", "name", "size", "atime", "btime", "ctime", "mtime",
+	    "version", "extension", "inode", "owner", "group", "blocks",
+	    "links", "type", NULL
 	};
 
 	while (i <= SORT_TYPES && (name = sorts[i++]) != NULL) {
@@ -2919,28 +2906,18 @@ file_types_opts_generator(const char *text, int state)
 		i = 0;
 
 	static char *const ft_opts[] = {
-		"b (Block device)",
-		"c (Character device)",
-		"d (Directory)",
-		"D (Empty directory)",
+		"b (Block device)", "c (Character device)",
+		"d (Directory)", "D (Empty directory)",
 #ifdef SOLARIS_DOORS
-		"O (Door)",
-		"P (Port)",
+		"O (Door)", "P (Port)",
 #endif /* SOLARIS_DOORS */
-		"f (Regular file)",
-		"F (Empty regular file)",
-		"h (Multi-hardlink file)",
-		"l (Symbolic link)",
-		"L (Broken symbolic link)",
-		"p (FIFO-pipe)",
-		"s (Socket)",
-		"x (Executable)",
-		"o (Other writable)",
-		"t (Sticky)",
-		"u (SUID)",
-		"g (SGID)",
-		"C (Capabilities)",
-		NULL
+		"f (Regular file)", "F (Empty regular file)",
+		"h (Multi-hardlink file)", "l (Symbolic link)",
+		"L (Broken symbolic link)", "p (FIFO-pipe)",
+		"s (Socket)", "x (Executable)",
+		"o (Other writable)", "t (Sticky)",
+		"u (SUID)", "g (SGID)",
+		"C (Capabilities)", NULL
 	};
 
 	const char *name;

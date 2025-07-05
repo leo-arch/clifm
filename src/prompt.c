@@ -976,8 +976,7 @@ gen_cwd_perms(void)
 	|| stat(workspaces[cur_ws].path, &a) == -1)
 		return savestring(UNKNOWN_STR, sizeof(UNKNOWN_STR) - 1);
 
-	char *buf = NULL;
-	buf = xnmalloc(5, sizeof(char));
+	char *buf = xnmalloc(5, sizeof(char));
 	snprintf(buf, 5, "%04o", a.st_mode & 07777);
 
 	return buf;

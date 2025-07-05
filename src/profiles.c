@@ -63,7 +63,7 @@ get_profile_names(void)
 	snprintf(pf_dir, len, "%s/profiles", config_dir_gral);
 
 	struct dirent **profs = (struct dirent **)NULL;
-	int files_n = scandir(pf_dir, &profs, NULL, xalphasort);
+	const int files_n = scandir(pf_dir, &profs, NULL, xalphasort);
 
 	if (files_n == -1) {
 		free(pf_dir);
@@ -404,7 +404,7 @@ static int
 print_profiles(void)
 {
 	size_t i;
-	char *cur_prof = alt_profile ? alt_profile : "default";
+	const char *cur_prof = alt_profile ? alt_profile : "default";
 
 	const char *ptr = SET_MISC_PTR;
 	for (i = 0; profile_names[i]; i++) {

@@ -83,7 +83,7 @@ pwd_function(const char *arg)
 	}
 
 	char p[PATH_MAX + 1]; *p = '\0';
-	char *real_path = xrealpath(pwd, p);
+	const char *real_path = xrealpath(pwd, p);
 	if (!real_path) {
 		xerror("pwd: '%s': %s\n", pwd, strerror(errno));
 		return errno;

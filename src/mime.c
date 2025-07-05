@@ -1256,6 +1256,27 @@ append_params(char **args, char *name, char ***cmd, int *exec_flags)
 			continue;
 		}
 
+		/* Expand %m placeholder to the file's MIME type */
+		if (*args[i] == '%' && args[i][1] == 'm') {
+			char *mime = xmagic(name, MIME_TYPE);
+			if (mime) {
+				(*cmd)[n] = mime;
+				n++;
+			}
+			continue;
+		}
+
+		/* Expand %u to the file URI for the original filename */
+		if (*args[i] == '%' && args[i][1] == 'u') {
+			char *p = url_encode(name, 1);
+			if (p) {
+				(*cmd)[n] = p;
+				n++;
+				f = 1;
+			}
+			continue;
+		}
+
 		if (*args[i] == '$' && IS_ALPHA_UP(args[i][1])) {
 			char *env = expand_env(args[i]);
 			if (env) {
@@ -1656,19 +1677,17 @@ mime_open(char **args)
 		return mime_edit(args);
 
 	char *file_path = (char *)NULL;
-	int info = 0, file_index = 0;
+	const int info = (*args[1] == 'i' && strcmp(args[1], "info") == 0);
+	const int file_index = info == 1 ? 2 : 1;
 
-	if (*args[1] == 'i' && strcmp(args[1], "info") == 0) {
+	if (info == 1) {
 		const int ret = check_mime_info_file(args[2], &file_path);
 		if (ret != FUNC_SUCCESS)
 			return ret;
-		info = 1;
-		file_index = 2;
 	} else {
 		const int ret = get_open_file_path(args, &file_path);
 		if (ret != FUNC_SUCCESS)
 			return ret;
-		file_index = 1;
 	}
 
 	if (!file_path) {
@@ -1681,7 +1700,7 @@ mime_open(char **args)
 	if (!mime)
 		return print_error_no_mime(&file_path);
 
-	char *filename = get_basename(file_path);
+	const char *filename = get_basename(file_path);
 
 	if (info == 1)
 		print_info_name_mime(filename, mime);
@@ -1701,7 +1720,6 @@ mime_open(char **args)
 #endif /* !_NO_ARCHIVING */
 
 	g_mime_type = mime;
-	int ret = 0;
 #ifdef __CYGWIN__
 	/* Some Windows programs, like Word and Powerpoint (but not Excel!!), do
 	 * not like absolute paths when the filename contains spaces. So, let's
@@ -1710,9 +1728,9 @@ mime_open(char **args)
 	 * This hack must be removed as soon as the real cause is discovered:
 	 * why Word/Powerpoint fails to open absolute paths when the filename
 	 * contains spaces? */
-	ret = run_mime_app(app, args[file_index]);
+	const int ret = run_mime_app(app, args[file_index]);
 #else
-	ret = run_mime_app(app, file_path);
+	const int ret = run_mime_app(app, file_path);
 #endif /* __CYGWIN__ */
 
 	free(mime);
