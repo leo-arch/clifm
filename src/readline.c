@@ -962,6 +962,7 @@ get_best_fuzzy_match(char *filename, const char *dirname, char *d_name,
 char *
 my_rl_path_completion(const char *text, int state)
 {
+	/* Tab complete only for regular prompt (0) and FILES_PROMPT (1). */
 	if (!text || !*text || alt_prompt > 1)
 		return (char *)NULL;
 

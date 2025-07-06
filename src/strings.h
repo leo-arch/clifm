@@ -45,7 +45,7 @@ char *remove_quotes(char *str);
 char *replace_invalid_chars(const char *name);
 char *replace_slashes(char *str, const char c);
 char *replace_substr(const char *haystack, const char *needle, char *rep);
-char *savestring(const char *restrict str, size_t size);
+char *savestring(const char *restrict str, const size_t size);
 char **split_str(char *str, const int update_args);
 char *strbfrlst(char *str, const char c);
 char *strbtw(char *str, const char a, const char b);

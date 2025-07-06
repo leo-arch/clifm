@@ -1044,9 +1044,9 @@ extern time_t curdir_mtime;
 #define SELFORPARENT(s) (*(s) == '.' && (!(s)[1] || ((s)[1] == '.' && !(s)[2])))
 
 #define FILE_URI_PREFIX_LEN 7
-#define IS_FILE_URI(f, l) ((l) > FILE_URI_PREFIX_LEN     \
-	&& (f)[4] == ':' && (f)[FILE_URI_PREFIX_LEN]         \
-	&& strncmp((f), "file://", FILE_URI_PREFIX_LEN) == 0)
+#define IS_FILE_URI(file, len) ((len) > FILE_URI_PREFIX_LEN     \
+	&& (file)[4] == ':' && (file)[FILE_URI_PREFIX_LEN]          \
+	&& strncmp((file), "file://", FILE_URI_PREFIX_LEN) == 0)
 
 #define IS_HELP(s) (*(s) == '-' && (((s)[1] == 'h' && !(s)[2]) \
 	|| strcmp((s), "--help") == 0))
