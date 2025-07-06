@@ -1977,6 +1977,7 @@ rl_suggestions(const unsigned char c)
 
 	/* We need a copy of the complete line. */
 	char *full_line = rl_line_buffer;
+	const char *lb = rl_line_buffer;
 
 	/* A copy of the last entered word. */
 	get_last_word(last_space);
@@ -2109,7 +2110,6 @@ rl_suggestions(const unsigned char c)
 		}
 	}
 
-	char *lb = rl_line_buffer;
 	/* 3.d) Let's suggest non-fixed parameters for internal commands
 	 * Only if second word or more (first word is the command name). */
 
@@ -2134,10 +2134,9 @@ rl_suggestions(const unsigned char c)
 
 		/* Backdir function (bd) */
 		else if (s[1] == 'd' && s[2] == ' ' && s[3]) {
-				if (s[3] == '/' && !s[4]) {
+				if (s[3] == '/' && !s[4])
 					/* The query string is a single slash: do nothing. */
 					goto FAIL;
-				}
 				if ((printed = check_backdir(s)) != NO_MATCH)
 					goto SUCCESS;
 		}
@@ -2163,11 +2162,10 @@ rl_suggestions(const unsigned char c)
 
 	case 'j': /* j command */
 		if (s[1] == ' ' || ((s[1] == 'c' || s[1] == 'p') && s[2] == ' ')) {
-			if ((printed = check_jcmd(s)) != NO_MATCH) {
+			if ((printed = check_jcmd(s)) != NO_MATCH)
 				goto SUCCESS;
-			} else {
+			else
 				goto FAIL;
-			}
 		}
 		break;
 
@@ -2268,7 +2266,7 @@ rl_suggestions(const unsigned char c)
 #ifndef _NO_TAGS
 	/* 3.d.4) Tag names (t:) */
 	if (*lb != ';' && *lb != ':' && *word == 't' && word[1] == ':'
-	&& *(word + 2)) {
+	&& word[2]) {
 		if ((printed = check_tags(word + 2, wlen - 2, TAGT_SUG)) != NO_MATCH)
 			goto SUCCESS;
 	}
@@ -2280,7 +2278,7 @@ rl_suggestions(const unsigned char c)
 	int flag = 0;
 
 	/* Let's find out whether the last entered character is escaped. */
-	int escaped = (wlen > 1 && word[wlen - 2] == '\\') ? 1 : 0;
+	const int escaped = (wlen > 1 && word[wlen - 2] == '\\');
 
 	for (st = 0; conf.suggestion_strategy[st]; st++) {
 		switch (conf.suggestion_strategy[st]) {

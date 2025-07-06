@@ -2,9 +2,10 @@
 Type=Application
 Name=Clifm
 Comment=The command line file manager
+GenericName=File Manager
 Icon=clifm
 Terminal=true
-Exec=clifm %f
+Exec=clifm %F
 Categories=ConsoleOnly;System;FileTools;FileManager
 MimeType=inode/directory;
-Keywords=File;Manager;Browser;Explorer;Launcher
+Keywords=File;Directory;Manager;Browser;Explorer;Launcher

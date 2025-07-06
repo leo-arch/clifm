@@ -1148,7 +1148,7 @@ my_rl_path_completion(const char *text, int state)
 				match = 1;
 		}
 
-		/* If there is at least one char to complete (e.g., "cd .[TAB]") */
+		/* There is at least one char to complete (e.g., "cd .[TAB]") */
 		else {
 			if (do_regular_matching(filename) == 1) {
 				if (check_match(filename, ename, filename_len) == 0)
