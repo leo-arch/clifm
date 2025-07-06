@@ -807,12 +807,11 @@ expand_app_fields(char ***cmd, size_t *n, char *fpath, int *exec_flags)
 		/* Expand %u to the file URI for the original filename */
 		if (*a[i] == '%' && a[i][1] == 'u') {
 			char *p = url_encode(fpath, 1);
-			if (!p)
-				continue;
-
-			copy_field(&a[i], p);
-			free(p);
-			f = 1;
+			if (p) {
+				copy_field(&a[i], p);
+				free(p);
+				f = 1;
+			}
 			continue;
 		}
 
@@ -827,11 +826,10 @@ expand_app_fields(char ***cmd, size_t *n, char *fpath, int *exec_flags)
 		/* Expand environment variable */
 		if (*a[i] == '$' && a[i][1] >= 'A' && a[i][1] <= 'Z') {
 			char *p = expand_env(a[i]);
-			if (!p)
-				continue;
-
-			copy_field(&a[i], p);
-			free(p);
+			if (p) {
+				copy_field(&a[i], p);
+				free(p);
+			}
 			continue;
 		}
 
@@ -916,7 +914,7 @@ mime_list_open(char **apps, char *file)
 	for (i = 0; apps[i]; i++)
 		printf("%s%*zu%s %s\n", el_c, pad, i + 1, df_c, apps[i]);
 
-	int n = get_user_input(i);
+	const int n = get_user_input(i);
 	if (n == -1) /* 'q' or Ctrl+d */
 		return FUNC_SUCCESS;
 
@@ -967,7 +965,7 @@ get_apps_from_file(FILE *fp, char *file_name, const char *mime,
 		if (*line == '#' || *line == '[' || *line == '\n')
 			continue;
 
-		char *p = skip_line_prefix(line);
+		const char *p = skip_line_prefix(line);
 		if (!p)
 			continue;
 
@@ -1239,6 +1237,7 @@ append_params(char **args, char *name, char ***cmd, int *exec_flags)
 			(*cmd)[n] = savestring(name, strlen(name));
 			f = 1;
 			set_exec_flags("EO", exec_flags);
+			*exec_flags |= E_SETSID;
 			bg_proc = 1;
 			n++;
 			break;
@@ -1417,8 +1416,8 @@ mime_open_with(char *filename, char **args)
 
 	g_mime_type = mime;
 	const int ret = mime_list_open(apps, name);
-	free(mime);
 	g_mime_type = (char *)NULL;
+	free(mime);
 
 	size_t i;
 	for (i = 0; apps[i]; i++)

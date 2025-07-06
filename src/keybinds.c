@@ -3391,7 +3391,7 @@ set_keybinds_from_file(void)
 		{"workspace1", rl_ws1}, {"workspace2", rl_ws2},
 		{"workspace3", rl_ws3}, {"workspace4", rl_ws4},
 
-		{"create-file", rl_create_file}, {"archive-sel",rl_archive_sel},
+		{"create-file", rl_create_file}, {"archive-sel", rl_archive_sel},
 		{"open-sel", rl_open_sel}, {"export-sel", rl_export_sel},
 		{"move-sel", rl_move_sel}, {"rename-sel", rl_rename_sel},
 		{"remove-sel", rl_remove_sel}, {"trash-sel", rl_trash_sel},
@@ -3454,134 +3454,94 @@ set_keybinds_from_file(void)
 static void
 set_default_keybinds(void)
 {
-	/* Help */
-	rl_bind_keyseq("\\eOP", rl_manpage);
-	rl_bind_keyseq("\\eOQ", rl_cmds_help);
-	rl_bind_keyseq("\\eOR", rl_kbinds_help);
-	rl_bind_keyseq("\\e[11~", rl_manpage);
-	rl_bind_keyseq("\\e[12~", rl_cmds_help);
-	rl_bind_keyseq("\\e[13~", rl_kbinds_help);
+	struct keyfuncs_t keys[] = {
+		/* Help */
+		{"\\eOP", rl_manpage}, {"\\e[11~", rl_manpage},
+		{"\\eOQ", rl_cmds_help}, {"\\e[12~", rl_cmds_help},
+		{"\\eOR", rl_kbinds_help}, {"\\e[13~", rl_kbinds_help},
+		/* Navigation */
+		{"\\M-u", rl_dir_parent}, {"\\e[a", rl_dir_parent},
+		{"\\e[2A", rl_dir_parent}, {"\\e[1;2A", rl_dir_parent},
+		{"\\M-j", rl_dir_previous}, {"\\e[d", rl_dir_previous},
+		{"\\e[2D", rl_dir_previous}, {"\\e[1;2D", rl_dir_previous},
+		{"\\M-k", rl_dir_next}, {"\\e[c", rl_dir_next},
+		{"\\e[2C", rl_dir_next}, {"\\e[1;2C", rl_dir_next},
+		{"\\M-e", rl_dir_home}, {"\\e[1~", rl_dir_home},
+		{"\\e[7~", rl_dir_home}, {"\\e[H", rl_dir_home},
+		{"\\M-r", rl_dir_root}, {"\\e/", rl_dir_root},
+		{"\\M-p", rl_dir_pinned},
+		{"\\M-1", rl_ws1}, {"\\M-2", rl_ws2},
+		{"\\M-3", rl_ws3}, {"\\M-4", rl_ws4},
+		/* Operations on files */
+		{"\\M-n", rl_create_file}, {"\\C-\\M-a", rl_archive_sel},
+		{"\\C-\\M-e", rl_export_sel}, {"\\C-\\M-r", rl_rename_sel},
+		{"\\C-\\M-d", rl_remove_sel}, {"\\C-\\M-t", rl_trash_sel},
+		{"\\C-\\M-v", rl_paste_sel}, {"\\M-a", rl_select_all},
+		{"\\M-d", rl_deselect_all}, {"\\M-v", rl_prepend_sudo},
+		/* Config files */
+		{"\\e[17~", rl_open_mime}, {"\\e[18~", rl_open_preview},
+		{"\\e[19~", rl_open_cscheme}, {"\\e[20~", rl_open_keybinds},
+		{"\\e[21~", rl_open_config}, {"\\e[23~", rl_open_bm_file},
+		/* Settings */
+		{"\\M-w", rl_toggle_virtualdir_full_paths},
+		{"\\M-t", rl_clear_msgs}, {"\\M-o", rl_lock},
+		{"\\C-r", rl_refresh}, {"\\M-c", rl_clear_line},
+		{"\\M-i", rl_toggle_hidden_files}, {"\\M-.", rl_toggle_hidden_files},
+		{"\\M-l", rl_toggle_long_view}, {"\\M-+", rl_toggle_follow_link_long},
+		{"\\M-y", rl_toggle_light_mode}, {"\\M-g", rl_toggle_dirs_first},
+		{"\\M-z", rl_sort_previous}, {"\\M-x", rl_sort_next},
+		{"\\M-,", rl_toggle_only_dirs}, {"\\M-0", rl_run_pager},
+		/* Misc */
+		{"\\M--", rl_launch_view}, {"\\C-\\M-x", rl_new_instance},
+		{"\\M-h", rl_dirhist}, {"\\M-b", rl_bookmarks},
+		{"\\M-m", rl_mountpoints}, {"\\M-s", rl_selbox},
+		{"\\C-\\M-l", rl_toggle_max_filename_len},
+		{"\\C-\\M-i", rl_toggle_disk_usage}, {"\\e[24~", rl_quit},
+/*		{"\\C-\\M-g", rl_open_sel}, // Disabled by default
+		{"\\C-\\M-n", rl_move_sel}, // Disabled by default
+		{"\\C-\\M-u", rl_untrash_all}, // Disabled by default
+		{"\\e[18~", rl_open_jump_db}, // Disabled by default */
+		{NULL, NULL}
+	};
 
-	/* Navigation */
-	rl_bind_keyseq("\\M-u", rl_dir_parent);
-	rl_bind_keyseq("\\e[a", rl_dir_parent);
-	rl_bind_keyseq("\\e[2A", rl_dir_parent);
-	rl_bind_keyseq("\\e[1;2A", rl_dir_parent);
-	rl_bind_keyseq("\\M-j", rl_dir_previous);
-	rl_bind_keyseq("\\e[d", rl_dir_previous);
-	rl_bind_keyseq("\\e[2D", rl_dir_previous);
-	rl_bind_keyseq("\\e[1;2D", rl_dir_previous);
-	rl_bind_keyseq("\\M-k", rl_dir_next);
-	rl_bind_keyseq("\\e[c", rl_dir_next);
-	rl_bind_keyseq("\\e[2C", rl_dir_next);
-	rl_bind_keyseq("\\e[1;2C", rl_dir_next);
-	rl_bind_keyseq("\\M-e", rl_dir_home);
-	rl_bind_keyseq("\\e[1~", rl_dir_home);
-	rl_bind_keyseq("\\e[7~", rl_dir_home);
-	rl_bind_keyseq("\\e[H", rl_dir_home);
-	rl_bind_keyseq("\\M-r", rl_dir_root);
-	rl_bind_keyseq("\\e/", rl_dir_root);
-	rl_bind_keyseq("\\M-p", rl_dir_pinned);
-	rl_bind_keyseq("\\M-1", rl_ws1);
-	rl_bind_keyseq("\\M-2", rl_ws2);
-	rl_bind_keyseq("\\M-3", rl_ws3);
-	rl_bind_keyseq("\\M-4", rl_ws4);
-
-	/* Operations on files */
-	rl_bind_keyseq("\\M-n", rl_create_file);
-	rl_bind_keyseq("\\C-\\M-a", rl_archive_sel);
-/*	rl_bind_keyseq("\\C-\\M-g", rl_open_sel); // Disabled by default */
-	rl_bind_keyseq("\\C-\\M-e", rl_export_sel);
-/*	rl_bind_keyseq("\\C-\\M-n", rl_move_sel); // Disabled by default */
-	rl_bind_keyseq("\\C-\\M-r", rl_rename_sel);
-	rl_bind_keyseq("\\C-\\M-d", rl_remove_sel);
-	rl_bind_keyseq("\\C-\\M-t", rl_trash_sel);
-/*	rl_bind_keyseq("\\C-\\M-u", rl_untrash_all); // Disabled by default */
-	rl_bind_keyseq("\\C-\\M-v", rl_paste_sel);
-	rl_bind_keyseq("\\M-a", rl_select_all);
-	rl_bind_keyseq("\\M-d", rl_deselect_all);
-	rl_bind_keyseq("\\M-v", rl_prepend_sudo);
-
-	/* Config files */
-	rl_bind_keyseq("\\e[17~", rl_open_mime);
-	rl_bind_keyseq("\\e[18~", rl_open_preview);
-/*	rl_bind_keyseq("\\e[18~", rl_open_jump_db); // Disabled by default */
-	rl_bind_keyseq("\\e[19~", rl_open_cscheme);
-	rl_bind_keyseq("\\e[20~", rl_open_keybinds);
-	rl_bind_keyseq("\\e[21~", rl_open_config);
-	rl_bind_keyseq("\\e[23~", rl_open_bm_file);
-
-	/* Settings */
-	rl_bind_keyseq("\\M-w", rl_toggle_virtualdir_full_paths);
-	rl_bind_keyseq("\\M-t", rl_clear_msgs);
-	rl_bind_keyseq("\\M-o", rl_lock);
-	rl_bind_keyseq("\\C-r", rl_refresh);
-	rl_bind_keyseq("\\M-c", rl_clear_line);
-	rl_bind_keyseq("\\M-i", rl_toggle_hidden_files);
-	rl_bind_keyseq("\\M-.", rl_toggle_hidden_files);
-	rl_bind_keyseq("\\M-l", rl_toggle_long_view);
-	rl_bind_keyseq("\\M-+", rl_toggle_follow_link_long);
-	rl_bind_keyseq("\\M-y", rl_toggle_light_mode);
-	rl_bind_keyseq("\\M-g", rl_toggle_dirs_first);
-	rl_bind_keyseq("\\M-z", rl_sort_previous);
-	rl_bind_keyseq("\\M-x", rl_sort_next);
-	rl_bind_keyseq("\\M-,", rl_toggle_only_dirs);
-	rl_bind_keyseq("\\M-0", rl_run_pager);
+	for (size_t i = 0; keys[i].name; i++)
+		rl_bind_keyseq(keys[i].name, keys[i].func);
 
 	rl_bind_keyseq("\\C-\\M-j", rl_toggle_vi_mode);
 	Keymap keymap = rl_get_keymap_by_name("vi-insert");
 	if (keymap)
 		rl_bind_keyseq_in_map("\\C-\\M-j", rl_toggle_vi_mode, keymap);
-
-	rl_bind_keyseq("\\M--", rl_launch_view);
-	rl_bind_keyseq("\\C-\\M-x", rl_new_instance);
-	rl_bind_keyseq("\\M-h", rl_dirhist);
-	rl_bind_keyseq("\\M-b", rl_bookmarks);
-	rl_bind_keyseq("\\M-m", rl_mountpoints);
-	rl_bind_keyseq("\\M-s", rl_selbox);
-
-	rl_bind_keyseq("\\C-\\M-l", rl_toggle_max_filename_len);
-	rl_bind_keyseq("\\C-\\M-i", rl_toggle_disk_usage);
-	rl_bind_keyseq("\\e[24~", rl_quit);
 }
 
 static void
 set_hardcoded_keybinds(void)
 {
-	rl_bind_keyseq("\\M-*", do_nothing);
-	rl_bind_keyseq("\x1b[42;3u", do_nothing);
-
+	struct keyfuncs_t keys[] = {
+		{"\\M-*", do_nothing}, {"\x1b[42;3u", do_nothing},
 #ifndef __HAIKU__
-	rl_bind_keyseq("\\C-l", rl_refresh);
-	rl_bind_keyseq("\x1b[108;5u", rl_refresh);
-	rl_bind_keyseq("\\C-p", rl_cmdhist);
-	rl_bind_keyseq("\\C-n", rl_cmdhist);
+		{"\\C-l", rl_refresh}, {"\x1b[108;5u", rl_refresh},
+		{"\\C-p", rl_cmdhist}, {"\\C-n", rl_cmdhist},
 #endif /* !__HAIKU__ */
-	rl_bind_keyseq("\x1b[A", rl_cmdhist);
-	rl_bind_keyseq("\x1b[B", rl_cmdhist);
-
-	rl_bind_keyseq("\\M-q", rl_del_last_word);
-	rl_bind_keyseq("\x1b[113;3u", rl_del_last_word);
-	rl_bind_key('\t', rl_tab_comp);
-
+		{"\x1b[A", rl_cmdhist}, {"\x1b[B", rl_cmdhist},
+		{"\\M-q", rl_del_last_word}, {"\x1b[113;3u", rl_del_last_word},
 #ifndef _NO_SUGGESTIONS
 # ifndef __HAIKU__
-	rl_bind_keyseq("\x1b[102;5u", rl_accept_suggestion);
-	rl_bind_keyseq("\\C-f", rl_accept_suggestion);
-	rl_bind_keyseq("\x1b[C", rl_accept_suggestion);
-	rl_bind_keyseq("\x1bOC", rl_accept_suggestion);
-
-	/* Bind Alt+Right and Alt+f to accept the first suggested word */
-	rl_bind_keyseq("\x1b[102;3u", rl_accept_first_word);
-	rl_bind_keyseq("\x1b\x66", rl_accept_first_word);
-	rl_bind_keyseq("\x1b[3C", rl_accept_first_word);
-	rl_bind_keyseq("\x1b\x1b[C", rl_accept_first_word);
-	rl_bind_keyseq("\x1b[1;3C", rl_accept_first_word);
+		{"\x1b[102;5u", rl_accept_suggestion}, {"\\C-f", rl_accept_suggestion},
+		{"\x1b[C", rl_accept_suggestion}, {"\x1bOC", rl_accept_suggestion},
+		{"\x1b[102;3u", rl_accept_first_word}, {"\\M-f", rl_accept_first_word},
+		{"\x1b[3C", rl_accept_first_word}, {"\x1b\x1b[C", rl_accept_first_word},
+		{"\x1b[1;3C", rl_accept_first_word},
 # else
-	rl_bind_keyseq("\x1bOC", rl_accept_suggestion);
-	rl_bind_keyseq("\\C-f", rl_accept_first_word);
+		{"\x1bOC", rl_accept_suggestion}, {"\\C-f", rl_accept_first_word},
 # endif /* !__HAIKU__ */
 #endif /* !_NO_SUGGESTIONS */
+		{NULL, NULL}
+	};
+
+	for (size_t i = 0; keys[i].name; i++)
+		rl_bind_keyseq(keys[i].name, keys[i].func);
+
+	rl_bind_key('\t', rl_tab_comp);
 }
 
 /* Disable readline keybindings conflicting with clifm's.
