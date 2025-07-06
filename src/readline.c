@@ -951,6 +951,24 @@ get_best_fuzzy_match(char *filename, const char *dirname, char *d_name,
 	return 1;
 }
 
+static inline int
+skip_first_word(const mode_t type, const int line_buffer_has_space)
+{
+	return (((conf.suggestions == 1 && words_num == 1)
+	|| line_buffer_has_space == 0)
+	&& ((type == DT_DIR && conf.autocd == 0)
+	|| (type != DT_DIR && conf.auto_open == 0)));
+}
+
+static inline int
+do_regular_matching(const char *filename)
+{
+	return (rl_point < rl_end || conf.fuzzy_match == 0
+	|| (*filename == '.' && filename[1] == '.')
+	|| *filename == '-'
+	|| (tabmode == STD_TAB && !(flags & STATE_SUGGESTING)));
+}
+
 /* This is the filename_completion_function() function of an old Bash
  * release (1.14.7) modified to fit Clifm's needs */
 /* state is zero before completion, and 1 ... n after getting
@@ -982,8 +1000,6 @@ my_rl_path_completion(const char *text, int state)
 	static int line_buffer_has_space = 0;
 	static int conf_suggestions = 0;
 	static int conf_fuzzy_match = 0;
-	static int conf_auto_open = 0;
-	static int conf_autocd = 0;
 
 	/* Dequote string to be completed (text), if necessary. */
 	if (strchr(text, '\\')) {
@@ -1012,8 +1028,6 @@ my_rl_path_completion(const char *text, int state)
 
 		conf_suggestions = conf.suggestions;
 		conf_fuzzy_match = conf.fuzzy_match;
-		conf_auto_open = conf.auto_open;
-		conf_autocd = conf.autocd;
 
 		free(dirname);
 		free(filename);
@@ -1101,10 +1115,9 @@ my_rl_path_completion(const char *text, int state)
 		type = ent->d_type;
 #endif /* !_DIRENT_HAVE_D_TYPE */
 
-		if (((conf_suggestions == 1 && words_num == 1)
-		|| line_buffer_has_space == 0)
-		&& ((type == DT_DIR && conf_autocd == 0)
-		|| (type != DT_DIR && conf_auto_open == 0)))
+		/* First word: skip dirs if autocd is off, and non-dirs if
+		 * auto-open is off. */
+		if (skip_first_word(type, line_buffer_has_space) == 1)
 			continue;
 
 		/* Only dir names for cd */
@@ -1126,9 +1139,7 @@ my_rl_path_completion(const char *text, int state)
 			else if (is_open_cmd == 1)
 				match = filter_open_cmd(dirname, ename, tmp, type);
 
-			/* If 'trash', allow only reg files, dirs, symlinks, pipes
-			 * and sockets. You should not trash a block or a character
-			 * device. */
+			/* If 'trash', skip block and character devices. */
 			else if (is_trash_cmd == 1)
 				match = (type != DT_BLK && type != DT_CHR);
 
@@ -1139,15 +1150,10 @@ my_rl_path_completion(const char *text, int state)
 
 		/* If there is at least one char to complete (e.g., "cd .[TAB]") */
 		else {
-			if (rl_point < rl_end || conf_fuzzy_match == 0
-			|| (*filename == '.' && filename[1] == '.')
-			|| *filename == '-'
-			|| (tabmode == STD_TAB && !(flags & STATE_SUGGESTING))) {
-				/* Regular matching. */
+			if (do_regular_matching(filename) == 1) {
 				if (check_match(filename, ename, filename_len) == 0)
 					continue;
-			} else {
-				/* Fuzzy matching. */
+			} else { /* Fuzzy matching. */
 				if (flags & STATE_SUGGESTING) {
 					if (get_best_fuzzy_match(filename, dirname, ename,
 					filename_len, fuzzy_str_type, &best_fz_score) == 0)
