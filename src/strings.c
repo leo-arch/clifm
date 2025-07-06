@@ -2908,7 +2908,7 @@ parse_input_str(char *str)
 			/* file:///some/file -> /some/file */
 
 		size_t slen = strlen(substr[i]);
-		if (slen > FILE_URI_PREFIX_LEN && IS_FILE_URI(substr[i])) {
+		if (IS_FILE_URI(substr[i], slen)) {
 			char *ptr = url_decode(substr[i] + FILE_URI_PREFIX_LEN);
 			if (ptr && *ptr)
 				xstrsncpy(substr[i], ptr, slen + 1);

@@ -2322,7 +2322,7 @@ rl_suggestions(const unsigned char c)
 			flag = (c == ' ' && escaped == 0) ? CHECK_MATCH : PRINT_MATCH;
 
 			char *d = word;
-			if (wlen > FILE_URI_PREFIX_LEN && IS_FILE_URI(word)) {
+			if (IS_FILE_URI(word, wlen)) {
 				d += FILE_URI_PREFIX_LEN;
 				wlen -= FILE_URI_PREFIX_LEN;
 				last_word_offset += FILE_URI_PREFIX_LEN;

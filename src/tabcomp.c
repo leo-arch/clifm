@@ -327,7 +327,7 @@ get_comp_entry_color(char *entry, const char *norm_prefix)
 
 	/* Normalize URI file scheme */
 	const size_t len = strlen(entry);
-	if (len > FILE_URI_PREFIX_LEN && IS_FILE_URI(entry))
+	if (IS_FILE_URI(entry, len))
 		entry += FILE_URI_PREFIX_LEN;
 
 	if (norm_prefix && !*vt_file) {
@@ -472,8 +472,7 @@ append_ending_char(const enum comp_type ct)
 	const size_t len = tmp == deq_str ? deq_str_len : strlen(tmp);
 	size_t is_file_uri = 0;
 
-	if (*tmp == 'f' && tmp[1] == 'i' && len > FILE_URI_PREFIX_LEN
-	&& IS_FILE_URI(tmp))
+	if (*tmp == 'f' && tmp[1] == 'i' && IS_FILE_URI(tmp, len))
 		is_file_uri = 1;
 
 	char *name = tmp;
@@ -2367,7 +2366,7 @@ AFTER_USUAL_COMPLETION:
 				char *d = filename;
 				if (filename && *filename == 'f' && filename[1] == 'i') {
 					size_t flen = strlen(filename);
-					if (flen > FILE_URI_PREFIX_LEN && IS_FILE_URI(filename))
+					if (IS_FILE_URI(filename, flen))
 						d = filename + FILE_URI_PREFIX_LEN;
 				}
 
@@ -2509,7 +2508,7 @@ DISPLAY_MATCHES:
 			char *dir = matches[0];
 
 			size_t dir_len = strlen(dir);
-			if (dir_len > FILE_URI_PREFIX_LEN && IS_FILE_URI(dir))
+			if (IS_FILE_URI(dir, dir_len))
 				dir += FILE_URI_PREFIX_LEN;
 
 			char *last_slash = strrchr(dir, '/');

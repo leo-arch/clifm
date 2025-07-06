@@ -809,16 +809,17 @@ open_preview_file(char *file, const int mode)
 	char *fpath = file;
 	int url = 1;
 	const int preview = mode == PREVIEW_FILE ? 1 : 0;
+	const size_t flen = fpath ? strlen(file) : 0;
 
 	struct stat attr;
-	if (IS_FILE_URI(fpath)) {
-		if (strchr(file + 7, '%')) {
-			char *ptr = url_decode(file + 7);
+	if (IS_FILE_URI(fpath, flen)) {
+		if (strchr(file + FILE_URI_PREFIX_LEN, '%')) {
+			char *ptr = url_decode(file + FILE_URI_PREFIX_LEN);
 			xstrsncpy(buf, ptr ? ptr : file, sizeof(buf));
 			free(ptr);
 			fpath = buf;
 		} else {
-			fpath = file + 7;
+			fpath = file + FILE_URI_PREFIX_LEN;
 		}
 
 		if (stat(fpath, &attr) == -1) {
@@ -1042,11 +1043,11 @@ set_alt_file(char *src, char **dest, const char *err_name)
 }
 
 static char *
-resolve_path(char *file)
+resolve_path(char *file, const size_t flen)
 {
 	char *s_path = (char *)NULL;
 
-	if (IS_FILE_URI(file)) {
+	if (IS_FILE_URI(file, flen)) {
 		s_path = url_decode(file + FILE_URI_PREFIX_LEN);
 		if (!s_path) {
 			fprintf(stderr, _("%s: '%s': Error decoding filename\n"),
@@ -1084,9 +1085,10 @@ resolve_path(char *file)
 static char *
 resolve_starting_path(char *file)
 {
-	char *s_path = resolve_path(file);
+	const size_t len = file ? strlen(file) : 0;
+	char *s_path = resolve_path(file, len);
 
-	if (!IS_FILE_URI(file) && is_url(file) == FUNC_SUCCESS)
+	if (!IS_FILE_URI(file, len) && is_url(file) == FUNC_SUCCESS)
 		open_reg_exit(file, 1, 0); /* noreturn */
 
 	struct stat a;

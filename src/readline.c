@@ -1051,7 +1051,7 @@ my_rl_path_completion(const char *text, int state)
 		}
 
 		char *dir_name = dirname;
-		if (text_len > FILE_URI_PREFIX_LEN && IS_FILE_URI(p))
+		if (IS_FILE_URI(p, text_len))
 			dir_name = dirname + FILE_URI_PREFIX_LEN;
 
 		/* Resolve special expressions in the resulting directory. */
