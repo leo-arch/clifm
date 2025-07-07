@@ -71,7 +71,7 @@ set_term_title(char *dir)
  * how to implement it. We, as a client of the terminal, just emit the code,
  * and it's up to the terminal to decide what to do with it. */
 void
-report_cwd(char *dir)
+report_cwd(const char *dir)
 {
 	if (!dir || !*dir)
 		return;
@@ -96,7 +96,7 @@ get_own_pid(void)
 }
 
 #ifndef _BE_POSIX
-/* Get new window size and update/refresh the screen accordingly */
+/* Get new window size and update/refresh the screen accordingly. */
 static void
 sigwinch_handler(int sig)
 {
@@ -212,7 +212,7 @@ read_timeout(struct pollfd *pfd, const int timeout)
 
 /* Use the "ESC [6n" escape sequence to query the cursor position (both
  * vertical and horizontal) and store both values in C (columns) and L (lines).
- * Returns 0 on success and 1 on error. */
+ * Returns 0 on success or 1 on error. */
 int
 get_cursor_position(int *c, int *l)
 {
@@ -250,11 +250,11 @@ get_cursor_position(int *c, int *l)
 		return FUNC_FAILURE;
 
 	/* 3. Parse the response */
-	if (*buf != KEY_ESC || *(buf + 1) != '[' || !*(buf + 2))
+	if (*buf != KEY_ESC || buf[1] != '[' || !buf[2])
 		return FUNC_FAILURE;
 
 	char *p = strchr(buf + 2, ';');
-	if (!p || !*(p + 1))
+	if (!p || !p[1])
 		return FUNC_FAILURE;
 
 	*p = '\0';
@@ -354,7 +354,7 @@ check_unicode_support(void)
 		return (-1);
 
 	/* 3. Parse the response. If we get 2, we have Unicode support. */
-	char *p = strchr(buf, ';');
+	const char *p = strchr(buf, ';');
 	if (p && p[1] == '2' && !p[2])
 		return 1;
 
@@ -365,7 +365,7 @@ check_unicode_support(void)
 static int
 check_truecolor(void)
 {
-	char *c = getenv("COLORTERM");
+	const char *c = getenv("COLORTERM");
 
 	if (c && ((*c == 't' && strcmp(c + 1, "ruecolor") == 0)
 	|| (*c == '2' && strcmp(c + 1, "4bit") == 0) ) )
@@ -417,11 +417,10 @@ check_term_support(const char *env_term)
 		return;
 	}
 
-	size_t i;
 	const size_t len = strlen(env_term);
 	int index = -1;
 
-	for (i = 0; TERM_INFO[i].name; i++) {
+	for (size_t i = 0; TERM_INFO[i].name; i++) {
 		if (*env_term != *TERM_INFO[i].name || len != TERM_INFO[i].len
 		|| strcmp(env_term, TERM_INFO[i].name) != 0)
 			continue;
@@ -472,7 +471,7 @@ check_img_support(const char *env_term)
 void
 check_term(void)
 {
-	char *t = getenv("TERM");
+	const char *t = getenv("TERM");
 	if (!t || !*t) {
 		t = "xterm";
 		err('w', PRINT_PROMPT, _("%s: TERM variable unset. Running in xterm "

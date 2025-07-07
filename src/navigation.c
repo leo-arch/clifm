@@ -316,12 +316,13 @@ backdir(char *str)
 		return FUNC_FAILURE;
 	}
 
-	int exit_status = FUNC_SUCCESS, i = n;
+	int exit_status = FUNC_SUCCESS;
 	if (n == 1) /* Just one match: change to it. */
 		exit_status = cd_function(matches[0], CD_PRINT_ERROR);
 	else /* Multiple matches: print a menu to select from. */
 		exit_status = backdir_menu(matches);
 
+	int i = n;
 	while (--i >= 0)
 		free(matches[i]);
 	free(matches);
@@ -360,7 +361,7 @@ xchdir(char *dir, const int cd_flag)
 
 	if (ret == 0 && cd_flag == SET_TITLE) {
 		char tmp[PATH_MAX + 1]; *tmp = '\0';
-		char *p = get_cwd(tmp, sizeof(tmp), 0);
+		const char *p = get_cwd(tmp, sizeof(tmp), 0);
 
 		/* Do not set OLDPWD if changing to the same directory ("cd ."
 		 * and similar commands). */
@@ -391,12 +392,11 @@ check_cdpath(const char *name)
 	|| (*name == '.' && name[1] == '.' && name[2] == '/'))
 		return (char *)NULL;
 
-	size_t i;
 	const size_t namelen = strlen(name);
 	char *p = (char *)NULL;
 	struct stat a;
 
-	for (i = 0; cdpaths[i]; i++) {
+	for (size_t i = 0; cdpaths[i]; i++) {
 		const size_t len = strlen(cdpaths[i]);
 		const size_t tmp_len = len + namelen + 2;
 		char *tmp = xnmalloc(tmp_len, sizeof(char));
@@ -454,7 +454,7 @@ change_to_home_dir(const int cd_flag)
 	return FUNC_SUCCESS;
 }
 
-/* Change current directory to NEW_PATH */
+/* Change current directory to NEW_PATH. */
 static int
 change_to_path(char *new_path, const int cd_flag)
 {
@@ -518,7 +518,7 @@ change_to_previous_dir(void)
 	return *cmd[0] == 'b' ? back_function(cmd) : forth_function(cmd);
 }
 
-static int
+static inline int
 skip_directory(const char *dir)
 {
 	return (conf.dirhistignore_regex && *conf.dirhistignore_regex
@@ -563,7 +563,7 @@ cd_function(char *new_path, const int cd_flag)
 /* Return a pointer to the first occurrence in the string STR of a byte that
  * is not C. Otherwise, if only C is found, NULL is returned. */
 static const char *
-xstrcpbrk(const char *str, const char c)
+xstrcpbrk(const char *restrict str, const char c)
 {
 	if (!str || !*str)
 		return (char *)NULL;
@@ -612,12 +612,12 @@ fastback(const char *str)
 void
 print_dirhist(char *query)
 {
-	int n = DIGINUM(dirhist_total_index), i;
+	const int n = DIGINUM(dirhist_total_index);
 	const size_t len = (query && conf.fuzzy_match == 1) ? strlen(query) : 0;
-	int fuzzy_str_type = (len > 0 && contains_utf8(query) == 1)
+	const int fuzzy_str_type = (len > 0 && contains_utf8(query) == 1)
 		? FUZZY_FILES_UTF8 : FUZZY_FILES_ASCII;
 
-	for (i = 0; i < dirhist_total_index; i++) {
+	for (int i = 0; i < dirhist_total_index; i++) {
 		if (!old_pwd[i] || *old_pwd[i] == KEY_ESC)
 			continue;
 
