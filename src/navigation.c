@@ -104,9 +104,8 @@ get_bd_matches(const char *str, int *n, const int mode)
 	char **matches = (char **)NULL;
 
 	if (mode == BD_TAB) {
-		/* matches will be passed to readline for tab completion, so
-		 * that we need to reserve the first slot to hold the query
-		 * string. */
+		/* matches will be passed to readline for tab completion, so that
+		 * we need to reserve the first slot to hold the query string. */
 		*n = 1;
 		matches = xnmalloc(2, sizeof(char *));
 	}
@@ -134,7 +133,7 @@ get_bd_matches(const char *str, int *n, const int mode)
 			char *ss = strrchr(workspaces[cur_ws].path, '/');
 			if (ss && *(++ss))
 				matches[*n] = savestring(ss, strlen(ss));
-			else /* Last slash is the first and only char: We have root dir. */
+			else /* Last slash is the first and only char: we have the root dir. */
 				matches[*n] = savestring("/", 1);
 			(*n)++;
 		} else {
@@ -161,13 +160,13 @@ get_bd_matches(const char *str, int *n, const int mode)
 		} else if (*n == 2) { /* One match. */
 			char *p = escape_str(matches[1]);
 			if (!p) {
+				free(matches[1]);
 				free(matches);
 				return (char **)NULL;
 			}
-			matches[0] = savestring(p, strlen(p));
+			matches[0] = p;
 			free(matches[1]);
 			matches[1] = (char *)NULL;
-			free(p);
 		} else { /* Multiple matches. */
 			matches[0] = savestring(str, strlen(str));
 			matches[*n] = (char *)NULL;

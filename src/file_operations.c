@@ -709,7 +709,7 @@ is_valid_filename(const char *name)
 	return 1;
 }
 
-/* Returns 0 if the file path NAME (or any component in it) does not exist and
+/* Return 0 if the file path NAME (or any component in it) does not exist and
  * is an invalid name. Otherwise, it returns 1.
  * If NAME is escaped, it is replaced by the unescaped name. */
 static int
@@ -780,20 +780,16 @@ format_new_filename(char **name)
 		return FUNC_FAILURE;
 
 	const size_t flen = strlen(p);
-	const int is_dir = (flen > 1 && p[flen - 1] == '/') ? 1 : 0;
+	const int is_dir = (flen > 1 && p[flen - 1] == '/');
 	if (is_dir == 1)
 		p[flen - 1 ] = '\0'; /* Remove ending slash */
 
 	char *npath = (char *)NULL;
 	if (p == *name) {
-		char *tilde = (char *)NULL;
-		if (*p == '~')
-			tilde = tilde_expand(p);
-
+		char *tilde = *p == '~' ? tilde_expand(p) : NULL;
 		const size_t len = tilde ? strlen(tilde) : flen;
 		npath = normalize_path(tilde ? tilde : p, len);
 		free(tilde);
-
 	} else { /* Quoted string. Copy it verbatim. */
 		npath = savestring(p, flen);
 	}

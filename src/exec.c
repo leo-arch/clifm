@@ -214,7 +214,7 @@ construct_shell_cmd(char **args)
 	char *cmd = xnmalloc(total_len + 1, sizeof(char));
 
 	for (i = 0; args[i]; i++) {
-		char *src = (i == 0 && bypass == 1) ? args[i] + 1 : args[i];
+		const char *src = (i == 0 && bypass == 1) ? args[i] + 1 : args[i];
 		xstrsncpy(cmd + cmd_len, src, total_len + 1);
 		cmd_len += strlen(src) + 1;
 		cmd[cmd_len - 1] = ' ';
