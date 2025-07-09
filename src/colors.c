@@ -77,7 +77,7 @@ struct colors_t {
 struct color_mapping_t {
 	const char *prefix; /* Color code name (e.g. "el") */
 	char *color;        /* Pointer to the color variable (.e.g. el_c) */
-	int prefix_len;
+	int prefix_len;     /* Length of prefix */
 	int printable;      /* Either RL_PRINTABLE or RL_NO_PRINTABLE */
 };
 
@@ -575,9 +575,8 @@ check_names(const char *str)
 	int found = -1;
 	const char up_str = TOUPPER(*str);
 	const size_t len = strlen(str);
-	size_t i;
 
-	for (i = 0; color_names[i].name; i++) {
+	for (size_t i = 0; color_names[i].name; i++) {
 		if (up_str == *color_names[i].name /* All names start with upper case */
 		&& color_names[i].namelen == len
 		&& strcasecmp(str + 1, color_names[i].name + 1) == 0) {
@@ -919,8 +918,8 @@ set_colorscheme(char *arg)
 	char *p = unescape_str(arg, 0);
 	char *q = p ? p : arg;
 
-	size_t i, cs_found = 0;
-	for (i = 0; color_schemes[i]; i++) {
+	size_t cs_found = 0;
+	for (size_t i = 0; color_schemes[i]; i++) {
 		if (*q != *color_schemes[i]
 		|| strcmp(q, color_schemes[i]) != 0)
 			continue;
@@ -1125,7 +1124,7 @@ color256_to_ansi(char *s)
 }
 
 /* Decode the prefixed color string S to the proper ANSI representation.
- * Returns a pointer to the decoded string on success, or NULL or error. */
+ * Returns a pointer to the decoded string on success, or NULL on error. */
 static char *
 decode_color_prefix(char *s)
 {
@@ -1201,7 +1200,7 @@ set_filetype_colors(char **colors, const size_t num_colors)
 		return;
 
 	const int p = RL_PRINTABLE;
-	struct color_mapping_t mappings[] = {
+	const struct color_mapping_t mappings[] = {
 		{"bd", bd_c, 2, p}, {"ca", ca_c, 2, p}, {"cd", cd_c, 2, p},
 		{"di", di_c, 2, p}, {"ed", ed_c, 2, p}, {"ee", ee_c, 2, p},
 		{"ef", ef_c, 2, p}, {"ex", ex_c, 2, p}, {"fi", fi_c, 2, p},
@@ -1217,17 +1216,15 @@ set_filetype_colors(char **colors, const size_t num_colors)
 	};
 
 	const size_t mappings_n = sizeof(mappings) / sizeof(struct color_mapping_t);
-	size_t i;
 
-	for (i = 0; i < num_colors; i++) {
+	for (size_t i = 0; i < num_colors; i++) {
 		if (!colors[i] || !colors[i][1] || colors[i][2] != '=') {
 			free(colors[i]);
 			continue;
 		}
 
-		size_t j;
 		char *color_code = colors[i] + 3;
-		for (j = 0; j < mappings_n; j++) {
+		for (size_t j = 0; j < mappings_n; j++) {
 			if (*colors[i] == *mappings[j].prefix
 			&& colors[i][1] == mappings[j].prefix[1]) {
 				set_color(color_code, mappings[j].color, mappings[j].printable);
@@ -1250,7 +1247,7 @@ set_iface_colors(char **colors, const size_t num_colors)
 	const int y = RL_PRINTABLE;
 	const int n = RL_NO_PRINTABLE;
 
-	struct color_mapping_t mappings[] = {
+	const struct color_mapping_t mappings[] = {
 		{"ac", ac_c, 2, n}, {"dxd", dxd_c, 3, y}, {"dxr", dxr_c, 3, y},
 		{"db", db_c, 2, y}, {"dd", dd_c, 2, y}, {"de", de_c, 2, y},
 		{"df", df_c, 2, y}, {"dg", dg_c, 2, y}, {"dk", dk_c, 2, y},
@@ -1275,11 +1272,9 @@ set_iface_colors(char **colors, const size_t num_colors)
 	};
 
 	const size_t mappings_n = sizeof(mappings) / sizeof(struct color_mapping_t);
-	size_t i;
 
-	for (i = 0; i < num_colors; i++) {
-		size_t j;
-		for (j = 0; j < mappings_n; j++) {
+	for (size_t i = 0; i < num_colors; i++) {
+		for (size_t j = 0; j < mappings_n; j++) {
 			if (*colors[i] == *mappings[j].prefix
 			&& strncmp(colors[i], mappings[j].prefix,
 				(size_t)mappings[j].prefix_len) == 0
@@ -1338,7 +1333,6 @@ set_shades(char *line, const int type)
 				goto NEXT;
 
 			int a = 0, r = 0, g = 0, b = 0;
-
 			if (get_rgb(str + 1, &a, &r, &g, &b) == -1)
 				goto NEXT;
 
@@ -2793,10 +2787,9 @@ END:
 static size_t
 get_longest_ext_name(void)
 {
-	size_t i;
 	size_t l = 0;
 
-	for (i = 0; i < ext_colors_n; i++)
+	for (size_t i = 0; i < ext_colors_n; i++)
 		if (ext_colors[i].len > l)
 			l = ext_colors[i].len;
 
@@ -2834,9 +2827,8 @@ print_ext_colors(void)
 		(QSFUNC *)color_sort);
 
 	int n = 1;
-	size_t i;
 
-	for (i = 0; i < ext_colors_n; i++) {
+	for (size_t i = 0; i < ext_colors_n; i++) {
 		const int pad = l - (int)ext_colors[i].len;
 		printf("\x1b[%sm*.%s%s%*s", ext_colors[i].value,
 			ext_colors[i].name, NC, pad, "");
