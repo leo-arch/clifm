@@ -587,7 +587,7 @@ get_last_word(char *str, const int original_query)
 	/* Remove ending backslash to avoid finder (fzf) error: no ending '"' */
 	if (original_query == 1 && w) {
 		char *bs = strrchr(w, '\\');
-		if (bs && !*(bs + 1))
+		if (bs && !bs[1])
 			*bs = '\0';
 	}
 

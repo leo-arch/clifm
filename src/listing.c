@@ -3133,7 +3133,7 @@ load_link_info(const int fd, const filesn_t n)
 	static char tmp[PATH_MAX + 1]; *tmp = '\0';
 	const ssize_t ret =
 		(conf.color_lnk_as_target == 1 && !S_ISDIR(a.st_mode))
-		? readlinkat(XAT_FDCWD, file_info[n].name, tmp, sizeof(tmp) - 1)  : 0;
+		? readlinkat(XAT_FDCWD, file_info[n].name, tmp, sizeof(tmp) - 1) : 0;
 	if (ret > 0)
 		tmp[ret] = '\0';
 

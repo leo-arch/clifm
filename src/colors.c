@@ -995,10 +995,10 @@ print_ext_conflict(const char *a, const char *b)
 static int
 check_ext_color_hash_conflicts(const int cs_check)
 {
-	size_t i, j, conflicts = 0;
+	size_t conflicts = 0;
 
-	for (i = 0; i < ext_colors_n; i++) {
-		for (j = i + 1; j < ext_colors_n; j++) {
+	for (size_t i = 0; i < ext_colors_n; i++) {
+		for (size_t j = i + 1; j < ext_colors_n; j++) {
 			if (ext_colors[i].hash != ext_colors[j].hash)
 				continue;
 

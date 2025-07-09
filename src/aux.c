@@ -236,10 +236,10 @@ set_fzf_preview_border_type(void)
 
 	fzf_preview_border_type = FZF_BORDER_ROUNDED; /* fzf default */
 
-	char *p = (conf.fzftab_options && *conf.fzftab_options)
+	const char *p = (conf.fzftab_options && *conf.fzftab_options)
 		? strstr(conf.fzftab_options, "border-") : (char *)NULL;
 	if (!p || !p[7]) {
-		char *q = getenv("FZF_DEFAULT_OPTS");
+		const char *q = getenv("FZF_DEFAULT_OPTS");
 		p = q ? strstr(q, "border-") : (char *)NULL;
 		if (!p || !p[7])
 			return;
@@ -457,7 +457,7 @@ get_cwd(char *buf, const size_t buflen, const int check_workspace)
 	if (tmp)
 		return tmp;
 
-	char *ret = getcwd(buf, buflen);
+	const char *ret = getcwd(buf, buflen);
 	tmp = (ret && *buf) ? buf : (char *)NULL;
 
 	return tmp;
