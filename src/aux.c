@@ -954,7 +954,7 @@ get_rgb(const char *hex, int *attr, int *r, int *g, int *b)
  *
  * At this point we know HEX is a valid hex color code (see is_hex_color() in
  * colors.c).
- * If using this function outside CliFM, make sure to validate HEX yourself
+ * If using this function outside Clifm, make sure to validate HEX yourself
  *
  */
 char *
