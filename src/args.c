@@ -707,6 +707,9 @@ __attribute__ ((noreturn))
 static void
 open_reg_exit(char *filename, const int url, const int preview)
 {
+	if (!filename)
+		exit(EXIT_FAILURE);
+
 	char *max_size =
 		(preview == 1 && url == 0 && xargs.secure_env != 1
 		&& xargs.secure_env_full != 1)
@@ -799,6 +802,9 @@ __attribute__ ((noreturn))
 static void
 open_preview_file(char *file, const int mode)
 {
+	if (!file)
+		exit(EXIT_FAILURE);
+
 	if (xargs.stealth_mode == 1) {
 		fprintf(stderr, _("%s: Running in stealth mode. Access to "
 			"configuration files is not allowed.\n"), PROGRAM_NAME);
@@ -1086,7 +1092,9 @@ static char *
 resolve_starting_path(char *file)
 {
 	const size_t len = file ? strlen(file) : 0;
-	char *s_path = resolve_path(file, len);
+	char *s_path = file ? resolve_path(file, len) : NULL;
+	if (!s_path)
+		return (char *)NULL;
 
 	if (!IS_FILE_URI(file, len) && is_url(file) == FUNC_SUCCESS)
 		open_reg_exit(file, 1, 0); /* noreturn */
