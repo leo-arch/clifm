@@ -1,3 +1,33 @@
+1.26 (Fetuccini Bros) - Jul 21, 2025
+
+BUG FIXES:
+* No field printed after 'S' in long view.
+* No prompt in case of F1-F3 failure.
+* The 'stats' command does not count files with extended attributes.
+* --secure-cmds: Only the first mime placeholder (%) is sanitized: in "CMD %f %u", "%u" won't be checked.
+* 'p' command: no size in bytes when size is exactly 1k.
+* 24bit SGR sequence with foreground, background, and underline color (kitty) not working.
+* Accept first suggested word (Alt+f) fails with Unicode string.
+* './<TAB>' lists only executable files and directories, even if auto-open is enabled.
+* Though "w:" is a reserved keyword (for workspaces), filename validation (when creating new files) does not warn about it.
+* "--sel-file=\\/" is interpreted as the current directory instead of the root dir.
+* Cannot trash '~/trashdir2' if the trash directory is '~/trashdir'.
+* Bad error message when a short option with a Unicode character is used. E.g.: 'clifm -ö' complains "clifm: 'clifm': Unrecognized option", when it should be '-ö'.
+* 'view edit' does not open the alternative shotgun file, but the default one.
+* 'mm info' ignores alternative shotgun file.
+* 'mm info' refuses to run on privileged files.
+* Double screen refresh after running a keybinding.
+* 'ow' does not support %m and %u placeholders.
+
+IMPROVEMENTS:
+* The 'icons' command toggles icons when used without parameters.
+* Harden alternative config dirs/files checks: avoid using non-dirs/reg_files respectively.
+* Better autodetect tab completion mode: use any of fzf, fnf, or smenu if the appropriate binary is found in PATH (and not specified otherwise in the command line or in the configuration file).
+* Allow tab completion for ELNs in the bookmarks screen.
+
+MISC:
+* Lots of code cleaning and improvements.
+
 1.25 (Scumm Bar) - May 3, 2025
 
 BUG FIXES:
