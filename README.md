@@ -1,6 +1,6 @@
 <p align="center">
 	<a href="https://github.com/leo-arch/clifm">
-		<img src="misc/logo/clifm-banner.png" alt="CliFM logo">
+		<img src="misc/logo/clifm-banner.png" alt="CliFM logo" width="500" height="300">
 	</a>
 </p>
 <h2 align="center">The Command Line File Manager</h2>
