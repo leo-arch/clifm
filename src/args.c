@@ -1231,7 +1231,14 @@ set_no_colors(void)
 }
 
 static void
-set_fnftab(void)
+print_tabmode_deprecation_warning(const char *mode, const char *name)
+{
+	err('w', PRINT_PROMPT, _("%s: '%s' is deprecated. "
+		"Use '--tabmode=%s' instead.\n"), PROGRAM_NAME, mode, name);
+}
+
+static void
+set_fnftab(const int deprecation_warning)
 {
 #ifndef _NO_FZF
 	xargs.fnftab = 1; fzftab = 1; tabmode = FNF_TAB;
@@ -1239,10 +1246,13 @@ set_fnftab(void)
 	fprintf(stderr, "%s: fnf-tab: %s\n", PROGRAM_NAME, _(NOT_AVAILABLE));
 	exit(EXIT_FAILURE);
 #endif /* _NO_FZF */
+
+	if (deprecation_warning == 1)
+		print_tabmode_deprecation_warning("--fnftab", "fnf");
 }
 
 static void
-set_fzftab(void)
+set_fzftab(const int deprecation_warning)
 {
 #ifndef _NO_FZF
 	xargs.fzftab = fzftab = 1; tabmode = FZF_TAB;
@@ -1251,10 +1261,13 @@ set_fzftab(void)
 		PROGRAM_NAME, _(NOT_AVAILABLE));
 	exit(EXIT_FAILURE);
 #endif /* !_NO_FZF */
+
+	if (deprecation_warning == 1)
+		print_tabmode_deprecation_warning("--fzftab", "fzf");
 }
 
 static void
-set_smenutab(void)
+set_smenutab(const int deprecation_warning)
 {
 #ifndef _NO_FZF
 	xargs.smenutab = 1; fzftab = 1; tabmode = SMENU_TAB;
@@ -1263,15 +1276,21 @@ set_smenutab(void)
 		PROGRAM_NAME, _(NOT_AVAILABLE));
 	exit(EXIT_FAILURE);
 #endif /* !_NO_FZF */
+
+	if (deprecation_warning == 1)
+		print_tabmode_deprecation_warning("--smenutab", "smenu");
 }
 
 static void
-set_stdtab(void)
+set_stdtab(const int deprecation_warning)
 {
 #ifndef _NO_FZF
 	xargs.fzftab = 0;
 #endif /* !_NO_FZF */
 	fzftab = 0; tabmode = STD_TAB;
+
+	if (deprecation_warning == 1)
+		print_tabmode_deprecation_warning("--stdtab", "standard");
 }
 
 static void
@@ -1348,13 +1367,13 @@ set_tabmode(const char *mode)
 		err_arg_required("--tabmode"); /* noreturn */
 
 	if (*mode == 'f' && strcmp(mode, "fzf") == 0) {
-		set_fzftab();
+		set_fzftab(0);
 	} else if (*mode == 'f' && strcmp(mode, "fnf") == 0) {
-		set_fnftab();
+		set_fnftab(0);
 	} else if (*mode == 's' && strcmp(mode, "smenu") == 0) {
-		set_smenutab();
+		set_smenutab(0);
 	} else if (*mode == 's' && strcmp(mode, "standard") == 0) {
-		set_stdtab();
+		set_stdtab(0);
 	} else {
 		fprintf(stderr, _("%s: --tabmode: '%s': Invalid value\n"
 			"Valid values: fzf, fnf, smenu, standard.\n"), PROGRAM_NAME, mode);
@@ -1454,10 +1473,10 @@ set_tab_mode(const char *opt)
 	const int n = *opt - '0';
 
 	switch (n) {
-	case 0:	set_stdtab(); break;
-	case 1:	set_fzftab(); break;
-	case 2: set_smenutab(); break;
-	case 3: set_fnftab(); break;
+	case 0:	set_stdtab(0); break;
+	case 1:	set_fzftab(0); break;
+	case 2: set_smenutab(0); break;
+	case 3: set_fnftab(0); break;
 	default:
 		fprintf(stderr, _("%s: '%s': Valid values are 0-3\n"), PROGRAM_NAME, opt);
 		exit(EXIT_FAILURE);
@@ -1743,7 +1762,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case LOPT_DISK_USAGE:
 			xargs.disk_usage = conf.disk_usage = 1; break;
 		case LOPT_FNFTAB:
-			set_fnftab(); break;
+			set_fnftab(1); break;
 		case LOPT_FULL_DIR_SIZE:
 			xargs.full_dir_size = conf.full_dir_size = 1; break;
 		case LOPT_FUZZY_ALGO:
@@ -1754,7 +1773,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case LOPT_FZFPREVIEW_HIDDEN:
 			set_fzfpreview(optc); break;
 		case LOPT_FZFTAB:
-			set_fzftab(); break;
+			set_fzftab(1); break;
 
 #ifndef _NO_ICONS
 		case LOPT_ICONS:
@@ -1911,14 +1930,14 @@ parse_cmdline_args(const int argc, char **argv)
 		case LOPT_SI:
 			xargs.si = 1; break;
 		case LOPT_SMENUTAB:
-			set_smenutab(); break;
+			set_smenutab(1); break;
 		case LOPT_SORT_REVERSE:
 			xargs.sort_reverse = conf.sort_reverse = 1; break;
 		case LOPT_STAT: /* fallthrough */
 		case LOPT_STAT_FULL:
 			set_stat(optc, optarg); break;
 		case LOPT_STDTAB:
-			set_stdtab(); break;
+			set_stdtab(1); break;
 		case LOPT_PTIME_STYLE:
 			xset_time_style(optarg, 1); break;
 		case LOPT_TABMODE:
