@@ -158,6 +158,7 @@
 #define LOPT_ALT_MIMEFILE           282
 #define LOPT_REPORT_CWD             283
 #define LOPT_KITTY_KEYS             284
+#define LOPT_TABMODE                285
 
 /* Link long (--option) and short options (-o) for the getopt_long function. */
 static struct option const longopts[] = {
@@ -282,6 +283,7 @@ static struct option const longopts[] = {
 	{"stat", required_argument, 0, LOPT_STAT},
 	{"stat-full", required_argument, 0, LOPT_STAT_FULL},
 	{"stdtab", no_argument, 0, LOPT_STDTAB},
+	{"tabmode", required_argument, 0, LOPT_TABMODE},
 	{"time-style", required_argument, 0, LOPT_TIME_STYLE},
 	{"unicode", no_argument, 0, LOPT_UNICODE},
 	{"virtual-dir", required_argument, 0, LOPT_VIRTUAL_DIR},
@@ -1352,6 +1354,27 @@ set_show_hidden(const char *val)
 
 #ifndef _BE_POSIX
 static void
+set_tabmode(const char *mode)
+{
+	if (!mode || !*mode || *mode == '-')
+		err_arg_required("--tabmode"); /* noreturn */
+
+	if (*mode == 'f' && strcmp(mode, "fzf") == 0) {
+		set_fzftab();
+	} else if (*mode == 'f' && strcmp(mode, "fnf") == 0) {
+		set_fnftab();
+	} else if (*mode == 's' && strcmp(mode, "smenu") == 0) {
+		set_smenutab();
+	} else if (*mode == 's' && strcmp(mode, "standard") == 0) {
+		set_stdtab();
+	} else {
+		fprintf(stderr, _("%s: --tabmode: '%s': Invalid value\n"
+			"Valid values: fzf, fnf, smenu, standard.\n"), PROGRAM_NAME, mode);
+		exit(EXIT_FAILURE);
+	}
+}
+
+static void
 xset_time_style(char *optval, const int ptime)
 {
 	if (!optval || !*optval || *optval == '-')
@@ -1762,13 +1785,15 @@ parse_cmdline_args(const int argc, char **argv)
 
 		case LOPT_INT_VARS:
 			xargs.int_vars = conf.int_vars = 1; break;
-		case LOPT_KITTY_KEYS: xargs.kitty_keys = 1; break;
+		case LOPT_KITTY_KEYS:
+			xargs.kitty_keys = 1; break;
 		case LOPT_LIST_AND_QUIT:
 			xargs.list_and_quit = 1;
 			xargs.no_dirjump = 1;
 			xargs.restore_last_path = conf.restore_last_path = 0;
 			break;
-		case LOPT_LSCOLORS: xargs.lscolors = 1; break;
+		case LOPT_LSCOLORS:
+			xargs.lscolors = 1; break;
 		case LOPT_MAX_DIRHIST:
 			set_max_value(optarg, &xargs.max_dirhist, &conf.max_dirhist);
 			break;
@@ -1858,11 +1883,14 @@ parse_cmdline_args(const int argc, char **argv)
 
 		case LOPT_OPENER:
 			set_opener(optarg, "--opener"); break;
-		case LOPT_PAGER_VIEW: xset_pager_view(optarg); break;
+		case LOPT_PAGER_VIEW:
+			xset_pager_view(optarg); break;
 		case LOPT_PRINT_SEL:
 			xargs.print_selfiles = conf.print_selfiles = 1; break;
-		case LOPT_PROP_FIELDS: xset_prop_fields(optarg); break;
-		case LOPT_READONLY: xargs.readonly = conf.readonly = 1; break;
+		case LOPT_PROP_FIELDS:
+			xset_prop_fields(optarg); break;
+		case LOPT_READONLY:
+			xargs.readonly = conf.readonly = 1; break;
 		case LOPT_RL_VI_MODE:
 			xargs.rl_vi_mode = 1; break;
 		case LOPT_SECURE_CMDS:
@@ -1905,8 +1933,12 @@ parse_cmdline_args(const int argc, char **argv)
 			set_stat(optc, optarg); break;
 		case LOPT_STDTAB:
 			set_stdtab(); break;
-		case LOPT_PTIME_STYLE: xset_time_style(optarg, 1); break;
-		case LOPT_TIME_STYLE: xset_time_style(optarg, 0); break;
+		case LOPT_PTIME_STYLE:
+			xset_time_style(optarg, 1); break;
+		case LOPT_TABMODE:
+			set_tabmode(optarg); break;
+		case LOPT_TIME_STYLE:
+			xset_time_style(optarg, 0); break;
 		case LOPT_TRASH_AS_RM:
 			set_trash_as_rm(); break;
 		case LOPT_UNICODE:
