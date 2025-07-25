@@ -1500,8 +1500,6 @@ database (via the 'j' command)\
 \n      --fuzzy-matching\t\t Enable fuzzy tab completion/suggestions for filenames \
 and paths\
 \n      --fzfpreview-hidden\t Enable file previews for tab completion (fzf mode only) with the preview window hidden (toggle with Alt+p)\
-\n      --fzftab\t\t\t Use fzf to display completion matches (default if the fzf binary is found in PATH)\
-\n      --fnftab\t\t\t Use fnf to display completion matches\
 \n      --icons\t\t\t Enable icons\
 \n      --icons-use-file-color\t Icon colors follow file colors\
 \n      --int-vars\t\t Enable the use internal variables\
@@ -1558,11 +1556,10 @@ PropFields in the config file)\
 \n      --share-selbox\t\t Make the Selection Box common to different profiles\
 \n      --shotgun-file=FILE\t Set FILE as shotgun's configuration file\
 \n      --si\t\t\t Display file sizes in SI units (powers of 1000) instead of 1024\
-\n      --smenutab\t\t Use smenu to display completion matches\
 \n      --sort-reverse\t\t Sort in reverse order, e.g., z-a instead of a-z\
 \n      --stat FILE...\t\t Run the 'p' command on FILE(s) and exit\
 \n      --stat-full FILE...\t Run the 'pp' command on FILE(s) and exit\
-\n      --stdtab\t\t\t Force the use of the standard tab completion mode (readline)\
+\n      --tabmode=MODE\t\t Set tab completion mode to one of 'fzf', 'fnf', 'smenu', or 'standard'\
 \n      --time-style=STYLE\t Time/date style used in long view (see TimeStyle in the config file)\
 \n      --trash-as-rm\t\t The 'r' command moves files to the trash instead of removing them\
 \n      --unicode\t\t\t Force the use of Unicode decorations\
