@@ -1613,7 +1613,11 @@ static char *
 jump_generator(const char *text, int state)
 {
 	static int i;
+#ifndef _BE_POSIX
 	const char *name;
+#else
+	char *name;
+#endif /* !_BE_POSIX */
 
 	if (state == 0)
 		i = 0;
