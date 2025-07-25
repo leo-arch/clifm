@@ -123,7 +123,6 @@
 #define LOPT_FULL_DIR_SIZE          247
 #define LOPT_NO_APPARENT_SIZE       248
 #define LOPT_NO_HISTORY             249
-#define LOPT_FZYTAB                 250 /* legacy: replaced by fnftab */
 #define LOPT_NO_REFRESH_ON_RESIZE   251
 #define LOPT_BELL                   252
 #define LOPT_FUZZY_MATCHING         253
@@ -219,7 +218,6 @@ static struct option const longopts[] = {
 	{"fzfpreview", no_argument, 0, LOPT_FZFPREVIEW}, /* Legacy: is default now */
 	{"fzfpreview-hidden", no_argument, 0, LOPT_FZFPREVIEW_HIDDEN},
 	{"fzftab", no_argument, 0, LOPT_FZFTAB},
-	{"fzytab", no_argument, 0, LOPT_FZYTAB}, /* Legacy: replaced by fnftab */
 	{"icons", no_argument, 0, LOPT_ICONS},
 	{"icons-use-file-color", no_argument, 0, LOPT_ICONS_USE_FILE_COLOR},
 	{"int-vars", no_argument, 0, LOPT_INT_VARS},
@@ -919,16 +917,6 @@ set_vt100(void)
 	xargs.unicode = 0;
 	xargs.report_cwd = 0;
 	fzftab = 0; tabmode = STD_TAB;
-}
-
-__attribute__ ((noreturn))
-static void
-set_fzytab(void)
-{
-	fprintf(stderr, _("%s: --fzytab: We have migrated to 'fnf'.\n"
-		"Install 'fnf' (https://github.com/leo-arch/fnf) and then "
-		"use --fnftab instead.\n"), PROGRAM_NAME);
-	exit(EXIT_FAILURE);
 }
 
 static void
@@ -1767,8 +1755,6 @@ parse_cmdline_args(const int argc, char **argv)
 			set_fzfpreview(optc); break;
 		case LOPT_FZFTAB:
 			set_fzftab(); break;
-		case LOPT_FZYTAB:
-			set_fzytab(); /* noreturn */
 
 #ifndef _NO_ICONS
 		case LOPT_ICONS:
