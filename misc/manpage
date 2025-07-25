@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Jul 21, 2025" "clifm 1.26" "Clifm Manual"
+.TH "CLIFM" "1" "Jul 25, 2025" "clifm 1.26.1" "Clifm Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -229,12 +229,6 @@ Enable fuzzy matching for filename/path completions and suggestions.
 \fB\-\-fzfpreview\-hidden\fR
 Enable file previews for tab completion (\fBfzf\fR mode only) with the preview window hidden (toggle it by pressing \fBAlt+p\fR).
 .TP
-\fB\-\-fzftab\fR
-Use \fBfzf\fR(1) to display completion matches.
-.TP
-\fB\-\-fnftab\fR
-Use \fBfnf\fR(1) to display completion matches.
-.TP
 \fB\-\-icons\fR
 Enable icons.
 .TP
@@ -402,9 +396,6 @@ Set \fIFILE\fR as the shotgun configuration file. See the \fBSHOTGUN\fR section 
 .br
 Display file sizes in SI units (powers of 1000) instead of IEC units (powers of 1024).
 .TP
-\fB\-\-smenutab\fR
-Use \fBsmenu\fR(1) to display completion matches.
-.TP
 \fB\-\-sort\-reverse\fR
 Sort files in reverse order (e.g.: z\-a instead of a\-z).
 .TP
@@ -414,8 +405,8 @@ Run the \fBp\fR command on \fIFILE\fR(s) and exit. This must be the \fBlast opti
 \fB\-\-stat\-full\fR \fI\,FILE\/\fR...
 Same as \fB\-\-stat\fR, but it runs the \fBpp\fR command (instead of \fBp\fR) on \fIFILE\fR(s).
 .TP
-\fB\-\-stdtab\fR
-Use the standard mode (readline\'s builtin) for tab completion.
+\fB\-\-tabmode\fR=\fI\,MODE\/\fR
+Set tab completion mode. Available modes: \fBfzf\fR, \fBfnf\fR, \fBsmenu\fR, and \fBstandard\fR.
 .TP
 \fB\-\-time\-style\fR=\fI\,STYLE\/\fR
 Time/date style used in long view. Available styles: \fBdefault\fR, \fBrelative\fR, \fBiso\fR, \fBlong-iso\fR, \fBfull-iso\fR, \fB+FORMAT\fR (FORMAT is interpreted like in \fBstrftime\fR(3)).
