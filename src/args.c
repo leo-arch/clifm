@@ -1473,8 +1473,8 @@ set_tab_mode(const char *opt)
 	const int n = *opt - '0';
 
 	switch (n) {
-	case 0:	set_stdtab(0); break;
-	case 1:	set_fzftab(0); break;
+	case 0: set_stdtab(0); break;
+	case 1: set_fzftab(0); break;
 	case 2: set_smenutab(0); break;
 	case 3: set_fnftab(0); break;
 	default:

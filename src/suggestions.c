@@ -1518,9 +1518,13 @@ print_warning_prompt(const char fc, const unsigned char lc)
 	rl_set_prompt(decoded_prompt);
 	free(decoded_prompt);
 
-	if (conf.highlight == 1
+/*	if (conf.highlight == 1
 	&& ( (rl_point < rl_end && words_num > 1)
 	|| (lc == ' ' && words_num == 1) ) )
+		turn_it_wrong(); */
+	UNUSED(lc);
+	if (conf.highlight == 1
+	&& ((rl_point < rl_end && words_num > 1) || words_num == 1))
 		turn_it_wrong();
 }
 
