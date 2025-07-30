@@ -1,5 +1,5 @@
 ##############################
-# Makefile for CliFM (HAIKU) #
+# Makefile for clifm (HAIKU) #
 ##############################
 
 BIN ?= clifm

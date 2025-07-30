@@ -1,5 +1,5 @@
 ###############################
-# Makefile for CliFM - Termux #
+# Makefile for clifm - Termux #
 ###############################
 
 BIN ?= clifm

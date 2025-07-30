@@ -1,5 +1,5 @@
 ######################
-# Makefile for CliFM #
+# Makefile for clifm #
 ######################
 
 BIN ?= clifm
@@ -57,7 +57,7 @@ install:
 
 uninstall:
 	$(RM) -- $(DESTDIR)$(PREFIX)/bin/$(BIN)
-	$(RM) -- $(DESTDIR)$(MANDIR)/man1/$(BIN).1.gz
+	$(RM) -- $(DESTDIR)$(MANDIR)/man1/$(BIN).1*
 	$(RM) -- $(DESTDIR)$(DATADIR)/bash-completion/completions/$(BIN)
 	$(RM) -- $(DESTDIR)$(DATADIR)/zsh/site-functions/_$(BIN)
 	$(RM) -- $(DESTDIR)$(DATADIR)/fish/vendor_completions.d/$(BIN).fish

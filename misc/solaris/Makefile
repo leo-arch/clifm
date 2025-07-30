@@ -1,5 +1,5 @@
 ########################################
-# Makefile for CliFM (Solaris/Illumos) #
+# Makefile for clifm (Solaris/Illumos) #
 ########################################
 
 BIN ?= clifm

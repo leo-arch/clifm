@@ -1,5 +1,5 @@
 ###############################
-# Makefile for CliFM - CYGWIN #
+# Makefile for clifm - CYGWIN #
 ###############################
 
 BIN ?= clifm
