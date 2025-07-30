@@ -46,7 +46,7 @@ install: $(BIN_EXE)
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(DATADIR)/fish/vendor_completions.d
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(DESKTOPPREFIX)
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(DESKTOPICONPREFIX)/scalable/apps
-	$(INSTALL) -m 0644 misc/manpage $(DESTDIR)$(MANDIR)/man1/$(BIN).1
+	$(INSTALL) -m 0644 misc/$(BIN).1 $(DESTDIR)$(MANDIR)/man1
 	$(INSTALL) -m 0644 misc/completions.bash $(DESTDIR)$(DATADIR)/bash-completion/completions/$(BIN)
 	$(INSTALL) -m 0644 misc/completions.zsh $(DESTDIR)$(DATADIR)/zsh/site-functions/_$(BIN)
 	$(INSTALL) -m 0644 misc/completions.fish $(DESTDIR)$(DATADIR)/fish/vendor_completions.d/$(BIN).fish

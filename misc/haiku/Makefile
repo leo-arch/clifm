@@ -77,7 +77,7 @@ install: build
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(DATADIR)/bash-completion/completions
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(DATADIR)/zsh/site-functions
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(DATADIR)/fish/vendor_completions.d
-	$(INSTALL) -m 0644 misc/manpage $(DESTDIR)$(MANPREFIX)/man1/$(BIN).1
+	$(INSTALL) -m 0644 misc/$(BIN).1 $(DESTDIR)$(MANPREFIX)/man1
 	$(INSTALL) -m 0644 misc/completions.bash $(DESTDIR)$(DATADIR)/bash-completion/completions/$(BIN)
 	$(INSTALL) -m 0644 misc/completions.zsh $(DESTDIR)$(DATADIR)/zsh/site-functions/_$(BIN)
 	$(INSTALL) -m 0644 misc/completions.fish $(DESTDIR)$(DATADIR)/fish/vendor_completions.d/$(BIN).fish
@@ -100,7 +100,7 @@ install: build
 
 uninstall:
 	$(RM) -- $(DESTDIR)$(BINDIR)/$(BIN)
-	$(RM) -- $(DESTDIR)$(MANPREFIX)/man1/$(BIN).1.gz
+	$(RM) -- $(DESTDIR)$(MANPREFIX)/man1/$(BIN).1*
 	$(RM) -- $(DESTDIR)$(DATADIR)/bash-completion/completions/$(BIN)
 	$(RM) -- $(DESTDIR)$(DATADIR)/zsh/site-functions/_$(BIN)
 	$(RM) -- $(DESTDIR)$(DATADIR)/fish/vendor_completions/$(BIN).fish

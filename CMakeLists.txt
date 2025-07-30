@@ -91,12 +91,7 @@ install(DIRECTORY misc/colors functions DESTINATION "${_PROG_DATADIR}")
 
 install(FILES "misc/${BIN}.desktop" DESTINATION "${_DESKTOPPREFIX}")
 install(FILES "misc/logo/${BIN}.svg" DESTINATION "${_DESKTOPICONPREFIX}")
-
-install(FILES misc/manpage DESTINATION "${_MANDIR}" RENAME "${BIN}.1"
-	PERMISSIONS
-		OWNER_READ OWNER_WRITE
-		GROUP_READ
-		WORLD_READ)
+install(FILES "misc/${BIN}.1" DESTINATION "${_MANDIR}")
 
 install(FILES misc/completions.bash DESTINATION "${_BASHDIR}" RENAME "${BIN}")
 install(FILES misc/completions.zsh DESTINATION "${_ZSHDIR}" RENAME "_${BIN}")
