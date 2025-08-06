@@ -266,7 +266,7 @@ recolorize_line(void)
 	rl_delete_text(start, rl_end);
 	rl_point = rl_end = start;
 
-	if (start == 0 && end_bk > 1)
+	if (start == 0 && end_bk >= 1)
 		/* First char of a non-empty recolored line (recovering from wrong cmd) */
 		rl_redisplay();
 
