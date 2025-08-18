@@ -1886,8 +1886,11 @@ handle_stdin(void)
 		buf = xnrealloc(buf, chunks_n + 1, chunk);
 	}
 
-	if (total_len == 0)
-		goto FREE_N_EXIT;
+	if (total_len == 0) {
+		free(buf);
+		fprintf(stderr, _("%s: No entries\n"), PROGRAM_NAME);
+		exit(EXIT_FAILURE);
+	}
 
 	/* Null terminate the input buffer */
 	buf[total_len] = '\0';
