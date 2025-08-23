@@ -28,6 +28,7 @@
 #include <string.h>
 #include <unistd.h>   /* access() */
 #include <sys/wait.h> /* waitpid() */
+#include <termios.h>  /* tcgetattr(), tcsetattr() */
 #include <time.h>     /* clock_gettime() */
 
 #ifdef __OpenBSD__
@@ -263,10 +264,15 @@ run_shell_cmd(char **args)
 
 	char *cmd = construct_shell_cmd(args);
 
+	struct termios orig_termios;
+	tcgetattr(STDIN_FILENO, &orig_termios);
+
 	/* Calling the system shell is vulnerable to command injection, true.
 	 * But it is the user here who is directly running the command: this
 	 * should not be taken as an untrusted source. */
 	const int exit_status = launch_execl(cmd);
+
+	tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
 	free(cmd);
 
 /* For the time being, this is too slow on Cygwin. */
