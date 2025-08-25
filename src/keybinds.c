@@ -63,6 +63,7 @@ typedef char *rl_cpvfunc_t;
 #include "sort.h" /* QSFUNC macro for qsort(3) */
 #include "spawn.h"
 #include "tabcomp.h" /* tab_complete() */
+#include "translate_key.h" /* translate_key() */
 
 #ifndef _NO_SUGGESTIONS
 # include "suggestions.h"
@@ -108,215 +109,12 @@ append_str(char *buf, const int buf_size, size_t *len, const char *str)
 }
 
 static const char *
-get_key_symbol(const int key)
-{
-	static char keysym_str[2] = {0};
-
-	/* These are directly printable */
-	if (key > 32 && key < 256 && key != 127  && key != 160 && key != 173) {
-		keysym_str[0] = (char)key;
-		return keysym_str;
-	}
-
-	switch (key) {
-	/* Control keys */
-	case 0: return "NULL"; case 1: return "SOH"; case 2: return "STX";
-	case 3: return "ETX"; case 4: return "EOT"; case 5: return "ENQ";
-	case 6: return "ACK"; case 7: return "BELL"; case 8: return "BS";
-	case 9: return "Tab"; case 10: return "LF"; case 11: return "VT";
-	case 12: return "FF"; case 13: return "CR"; case 14: return "SO";
-	case 15: return "SI"; case 16: return "DLE"; case 17: return "DC1";
-	case 18: return "DC2"; case 19: return "DC3"; case 20: return "DC4";
-	case 21: return "NAK"; case 22: return "SYN"; case 23: return "ETB";
-	case 24: return "CAN"; case 25: return "EM"; case 26: return "SUB";
-	case 27: return "ESC"; case 28: return "FS"; case 29: return "GS";
-	case 30: return "RS"; case 31: return "US";
-
-	/* Non-printable regular keys */
-	case 32: return "Space"; case 127: return "Del";
-	case 160: return "NSBP"; case 173: return "SHY";
-
-	/* Special keyboard keys */
-	case 57358: return "CapsLock"; case 57359: return "ScrollLock";
-	case 57360: return "NumLock"; case 57361: return "PrtScr";
-	case 57362: return "Pause"; case 57363: return "Menu";
-	case 57376: return "F13"; case 57377: return "F14";
-	case 57378: return "F15"; case 57379: return "F16";
-	case 57380: return "F17"; case 57381: return "F18";
-	case 57382: return "F19"; case 57383: return "F20";
-	case 57384: return "F21"; case 57385: return "F22";
-	case 57386: return "F23"; case 57387: return "F24";
-	case 57388: return "F25"; case 57389: return "F26";
-	case 57390: return "F27"; case 57391: return "F28";
-	case 57392: return "F29"; case 57393: return "F30";
-	case 57394: return "F31"; case 57395: return "F32";
-	case 57396: return "F33"; case 57397: return "F34";
-	case 57398: return "F35"; case 57399: return "KP_0";
-	case 57400: return "KP_1"; case 57401: return "KP_2";
-	case 57402: return "KP_3"; case 57403: return "KP_4";
-	case 57404: return "KP_5"; case 57405: return "KP_6";
-	case 57406: return "KP_7"; case 57407: return "KP_8";
-	case 57408: return "KP_9"; case 57409: return "KP_Decimal";
-	case 57410: return "KP_Divide"; case 57411: return "KP_Multiply";
-	case 57412: return "KP_Subtract"; case 57413: return "KP_Add";
-	case 57414: return "KP_Enter"; case 57415: return "KP_Equals";
-	case 57416: return "KP_Separator"; case 57417: return "KP_Left";
-	case 57418: return "KP_Right"; case 57419: return "KP_Up";
-	case 57420: return "KP_Down"; case 57421: return "KP_PageUp";
-	case 57422: return "KP_PageDown"; case 57423: return "KP_Home";
-	case 57424: return "KP_End"; case 57425: return "KP_Insert";
-	case 57426: return "KP_Delete"; case 57427: return "KP_Begin";
-	case 57428: return "MediaPlay"; case 57429: return "MediaPause";
-	case 57430: return "MediaPlayPause"; case 57431: return "MediaReverse";
-	case 57432: return "MediaStop"; case 57433: return "MediaFastForward";
-	case 57434: return "MediaRewind"; case 57435: return "MediaTrackNext";
-	case 57436: return "MediaTrackPrevious"; case 57437: return "MediaRecord";
-	case 57438: return "VolumeDown"; case 57439: return "VolumeUp";
-	case 57440: return "VolumeMute"; case 57441: return "LShift";
-	case 57442: return "LControl"; case 57443: return "LAlt";
-	case 57444: return "LSuper"; case 57445: return "LHyper";
-	case 57446: return "LMeta"; case 57447: return "RShift";
-	case 57448: return "RControl"; case 57449: return "RAlt";
-	case 57450: return "RSuper"; case 57451: return "RHyper";
-	case 57452: return "RMeta"; case 57453: return "ISO_Level3_Shift";
-	case 57454: return "ISO_Level5_Shift";
-
-	default: return "UNKNOWN";
-	}
-}
-
-/* Translate the modifier number MOD_NUM into human-readable form. */
-static const char *
-get_mod_symbol(const int mod_num)
-{
-	/* The biggest value mod_num can take is 255 (since
-	 * 1 + 2 + 4 + 8 + 16 + 32 + 64 + 128 = 255). In this case, the modifier
-	 * string would be "Shift+Alt+Ctrl+Super+Hyper+Meta+CapsLock+NumLock-",
-	 * which is 50 bytes long, including the terminating NUL char. */
-	static char mod[64];
-	memset(mod, '\0', sizeof(mod));
-
-	const int modifiers = mod_num - 1;
-	int len = 0;
-
-	if (modifiers & 4)
-		len += snprintf(mod + len, sizeof(mod) - (size_t)len, "Ctrl+");
-
-	if (modifiers & 2)
-		len += snprintf(mod + len, sizeof(mod) - (size_t)len, "Alt+");
-
-	if (modifiers & 1)
-		len += snprintf(mod + len, sizeof(mod) - (size_t)len, "Shift+");
-
-	if (modifiers & 8)
-		len += snprintf(mod + len, sizeof(mod) - (size_t)len, "Super+");
-
-	if (modifiers & 16)
-		len += snprintf(mod + len, sizeof(mod) - (size_t)len, "Hyper+");
-
-	if (modifiers & 32)
-		len += snprintf(mod + len, sizeof(mod) - (size_t)len, "Meta+");
-
-	if (modifiers & 64)
-		len += snprintf(mod + len, sizeof(mod) - (size_t)len, "CapsLock+");
-
-	if (modifiers & 128)
-		snprintf(mod + len, sizeof(mod) - (size_t)len, "NumLock+");
-
-	return mod;
-}
-
-#define VALID_KITTY_KEY(n) (((n) >= 0 && (n) <= 255) \
-	|| ((n) >= 57344 && (n) <= 63743))
-
-static int
-append_kitty_key_no_mod(char *buf, const int buf_size, size_t *len, char *str)
-{
-	char *key_end = strchr(str, 'u');
-	if (!key_end)
-		return 0;
-
-	*key_end = '\0';
-	/* STR is "\e[NNN", so that we move past '[' to get the number */
-	const int key_num = atoi(str + 3);
-	*key_end = 'u';
-
-	if (!VALID_KITTY_KEY(key_num))
-		return 0;
-
-	const int cont = (key_end[1] != '\0');
-	const char *keysym = get_key_symbol(key_num);
-	if (!keysym)
-		return 0;
-
-	const int bytes = snprintf(buf + *len, (size_t)buf_size - *len,
-		"%s%s", keysym, cont == 1 ? "," : "");
-
-	*len += (size_t)bytes;
-
-	return (int)((key_end + 1) - str);
-
-}
-
-static int
-append_str_kitty(char *buf, const int buf_size, size_t *len, char *str)
-{
-	const size_t length = strlen(str);
-
-	if (length >= (size_t)buf_size - *len)
-		return (-1); /* Buffer overflow */
-
-	if (length <= 2)
-		return 0;
-
-	char *orig_str = str;
-	str += 3; /* Move past '[' */
-
-	char *key_end = strchr(str, ';');
-	if (!key_end || !key_end[1])
-		/* We may have a key with no modifier. */
-		return append_kitty_key_no_mod(buf, buf_size, len, orig_str);
-
-	*key_end = '\0';
-	const int key_num = atoi(str);
-	*key_end = ';';
-	if (!VALID_KITTY_KEY(key_num))
-		return 0;
-
-	char *mod_end = strchr(key_end + 1, 'u');
-	if (!mod_end)
-		return 0;
-
-	*mod_end = '\0';
-	const int mod_num = atoi(key_end + 1);
-	*mod_end = 'u';
-	if (mod_num < 0 || mod_num > 512)
-		return 0;
-
-	const char *mod = get_mod_symbol(mod_num);
-	if (!mod || !*mod)
-		return 0;
-
-	/* Check whether there's another key sequence after the one currently
-	 * analyzed, in which case we append an ending comma (,). */
-	const int cont = (mod_end[1] != '\0');
-
-	const char *keysym = get_key_symbol(key_num);
-
-	const int bytes = snprintf(buf + *len, (size_t)buf_size - *len,
-		"%s%s%s", mod, keysym, cont == 1 ? "," : "");
-
-	*len += (size_t)bytes;
-
-	return (int)((mod_end + 1) - orig_str);
-}
-
-#undef VALID_KITTY_KEY
-
-static const char *
-translate_key_nofunc(const char *key)
+translate_emacs_style_keyseq(const char *key)
 {
 	if (!key || !*key || *key != '\\')
+		return NULL;
+
+	if (key[1] == 'e' && (key[2] == CSI_INTRODUCER || key[2] == SS3_INTRODUCER))
 		return NULL;
 
 #define KBUF_SIZE 256 /* This should be enough to handle most keybindings. */
@@ -326,16 +124,6 @@ translate_key_nofunc(const char *key)
 
 	while (*key) {
 		if (*key == '\\') {
-
-			if (key[1] == 'e' && key[2] == '[' && key[3]) {
-				const int len =
-					append_str_kitty(buf, KBUF_SIZE, &buf_len, (char *)key);
-				if (len <= 0)
-					return NULL;
-				key += len;
-				continue;
-			}
-
 			if (key[1] == 'e' || (key[1] == 'M' && key[2] ==  '-')) {
 				if (append_str(buf, KBUF_SIZE, &buf_len, "Alt+") == -1)
 					return NULL;
@@ -376,7 +164,7 @@ translate_key_nofunc(const char *key)
 			return NULL;
 
 		/* Append single character to the buffer. */
-		buf[buf_len] = *key;
+		buf[buf_len] = TOUPPER(*key);
 		buf_len++;
 		key++;
 		/* A character that is not a modifier key marks the end of the
@@ -400,240 +188,40 @@ translate_key_nofunc(const char *key)
 
 /* Translate the raw escape code KEY (sent by the terminal upon a key press)
  * into a human-readable format.
- * Return the translation, if found, or NULL otherwise.
- *
- * The function uses a simple lookup table and covers the most common cases,
- * but is far from complete: exotic terminals and complex key combinations are
- * not supported. */
+ * Return the translation, if found, or NULL otherwise. */
 static const char *
-translate_key(const char *key)
+xtranslate_key(const char *key)
 {
 	if (!key || !*key)
 		return NULL;
 
-	struct keys_t {
-		const char *key;
-		const char *translation;
-	};
+	const char *t = (strstr(key, "C-") || strstr(key, "M-"))
+		? translate_emacs_style_keyseq(key) : NULL;
+	if (t)
+		return t;
 
-	struct keys_t keys[] = {
-		{"-", _("not bound")},
+	const char *str = key;
 
-		/* xterm */
-		{"\\e[A", "Up"}, {"\\e[B", "Down"},
-		{"\\e[C", "Right"}, {"\\e[D", "Left"},
+	static char k[256] = "";
+	int c = 0;
+	while (*str) {
+		if (*str == '\\' && str[1] == 'e') {
+			k[c++] = 0x1b;
+			str += 2;
+		} else {
+			k[c++] = *str++;
+		}
+	}
+	k[c] = '\0';
 
-		{"\\e[1;2A", "Shift+Up"}, {"\\e[1;2B", "Shift+Down"},
-		{"\\e[1;2C", "Shift+Right"}, {"\\e[1;2D", "Shift+Left"},
-
-		{"\\e[1;3A", "Alt+Up"}, {"\\e[1;3B", "Alt+Down"},
-		{"\\e[1;3C", "Alt+Right"}, {"\\e[1;3D", "Alt+Left"},
-
-		{"\\e[1;5A", "Ctrl+Up"}, {"\\e[1;5B", "Ctrl+Down"},
-		{"\\e[1;5C", "Ctrl+Right"}, {"\\e[1;5D", "Ctrl+Left"},
-
-		{"\\e[1;6A", "Ctrl+Shift+Up"}, {"\\e[1;6B", "Ctrl+Shift+Down"},
-		{"\\e[1;6C", "Ctrl+Shift+Right"}, {"\\e[1;6D", "Ctrl+Shift+Left"},
-
-		{"\\e[1;7A", "Ctrl+Alt+Up"}, {"\\e[1;7B", "Ctrl+Alt+Down"},
-		{"\\e[1;7C", "Ctrl+Alt+Right"}, {"\\e[1;7D", "Ctrl+Alt+Left"},
-
-		{"\\e[1;8A", "Ctrl+Alt+Shift+Up"}, {"\\e[1;8B", "Ctrl+Alt+Shift+Down"},
-		{"\\e[1;8C", "Ctrl+Alt+Shift+Right"}, {"\\e[1;8D", "Ctrl+Alt+Shift+Left"},
-
-		{"\\eOP", "F1"}, {"\\eOQ", "F2"}, {"\\eOR", "F3"},
-		{"\\eOS", "F4"}, {"\\e[15~", "F5"}, {"\\e[17~", "F6"},
-		{"\\e[18~", "F7"}, {"\\e[19~", "F8"}, {"\\e[20~", "F9"},
-		{"\\e[21~", "F10"}, {"\\e[23~", "F11"}, {"\\e[24~", "F12"},
-
-		{"\\e[1;2P", "Shift+F1"}, {"\\e[1;2Q", "Shift+F2"},
-		{"\\e[1;2R", "Shift+F3"}, {"\\e[1;2S", "Shift+F4"},
-		{"\\e[15;2~", "Shift+F5"}, {"\\e[17;2~", "Shift+F6"},
-		{"\\e[18;2~", "Shift+F7"}, {"\\e[19;2~", "Shift+F8"},
-		{"\\e[20;2~", "Shift+F9"}, {"\\e[21;2~", "Shift+F10"},
-		{"\\e[23;2~", "Shift+F11"}, {"\\e[24;2~", "Shift+F12"},
-
-		{"\\e[1;3P", "Alt+F1"}, {"\\e[1;3Q", "Alt+F2"},
-		{"\\e[1;3R", "Alt+F3"}, {"\\e[1;3S", "Alt+F4"},
-		{"\\e[15;3~", "Alt+F5"}, {"\\e[17;3~", "Alt+F6"},
-		{"\\e[18;3~", "Alt+F7"}, {"\\e[19;3~", "Alt+F8"},
-		{"\\e[20;3~", "Alt+F9"}, {"\\e[21;3~", "Alt+F10"},
-		{"\\e[23;3~", "Alt+F11"}, {"\\e[24;3~", "Alt+F12"},
-
-		{"\\e[1;4P", "Alt+Shift+F1"}, {"\\e[1;4Q", "Alt+Shift+F2"},
-		{"\\e[1;4R", "Alt+Shift+F3"}, {"\\e[1;4S", "Alt+Shift+F4"},
-		{"\\e[15;4~", "Alt+Shift+F5"}, {"\\e[17;4~", "Alt+Shift+F6"},
-		{"\\e[18;4~", "Alt+Shift+F7"}, {"\\e[19;4~", "Alt+Shift+F8"},
-		{"\\e[20;4~", "Alt+Shift+F9"}, {"\\e[21;4~", "Alt+Shift+F10"},
-		{"\\e[23;4~", "Alt+Shift+F11"}, {"\\e[24;4~", "Alt+Shift+F12"},
-
-		{"\\e[1;5P", "Ctrl+F1"}, {"\\e[1;5Q", "Ctrl+F2"},
-		{"\\e[1;5R", "Ctrl+F3"}, {"\\e[1;5S", "Ctrl+F4"},
-		{"\\e[15;5~", "Ctrl+F5"}, {"\\e[17;5~", "Ctrl+F6"},
-		{"\\e[18;5~", "Ctrl+F7"}, {"\\e[19;5~", "Ctrl+F8"},
-		{"\\e[20;5~", "Ctrl+F9"}, {"\\e[21;5~", "Ctrl+F10"},
-		{"\\e[23;5~", "Ctrl+F11"}, {"\\e[24;5~", "Ctrl+F12"},
-
-		{"\\e[1;6P", "Ctrl+Shift+F1"}, {"\\e[1;6Q", "Ctrl+Shift+F2"},
-		{"\\e[1;6R", "Ctrl+Shift+F3"}, {"\\e[1;6S", "Ctrl+Shift+F4"},
-		{"\\e[15;6~", "Ctrl+Shift+F5"}, {"\\e[17;6~", "Ctrl+Shift+F6"},
-		{"\\e[18;6~", "Ctrl+Shift+F7"}, {"\\e[19;6~", "Ctrl+Shift+F8"},
-		{"\\e[20;6~", "Ctrl+Shift+F9"}, {"\\e[21;6~", "Ctrl+Shift+F10"},
-		{"\\e[23;6~", "Ctrl+Shift+F11"}, {"\\e[24;6~", "Ctrl+Shift+F12"},
-
-		{"\\e[1;8P", "Ctrl+Alt+Shift+F1"}, {"\\e[1;8Q", "Ctrl+Alt+Shift+F2"},
-		{"\\e[1;8R", "Ctrl+Alt+Shift+F3"}, {"\\e[1;8S", "Ctrl+Alt+Shift+F4"},
-		{"\\e[15;8~", "Ctrl+Alt+Shift+F5"}, {"\\e[17;8~", "Ctrl+Alt+Shift+F6"},
-		{"\\e[18;8~", "Ctrl+Alt+Shift+F7"}, {"\\e[19;8~", "Ctrl+Alt+Shift+F8"},
-		{"\\e[20;8~", "Ctrl+Alt+Shift+F9"}, {"\\e[21;8~", "Ctrl+Alt+Shift+F10"},
-		{"\\e[23;8~", "Ctrl+Alt+Shift+F11"}, {"\\e[24;8~", "Ctrl+Alt+Shift+F12"},
-
-		{"\\e[H", "Home"}, {"\\e[F", "End"},
-		{"\\e[2~", "Ins"}, {"\\e[3~", "Del"},
-		{"\\e[5~", "PgUp"}, {"\\e[6~", "PgDn"},
-
-		{"\\e[1;3H", "Alt+Home"}, {"\\e[1;3F", "Alt+End"},
-		{"\\e[2;3~", "Alt+Ins"}, {"\\e[3;3~", "Alt+Del"},
-		{"\\e[5;3~", "Alt+PgUp"}, {"\\e[6;3~", "Alt+PgDn"},
-
-		{"\\e[1;5H", "Ctrl+Home"}, {"\\e[1;5F", "Ctrl+End"},
-		{"\\e[2;5~", "Ctrl+Ins"}, {"\\e[3;5~", "Ctrl+Del"},
-		{"\\e[5;5~", "Ctrl+PgUp"}, {"\\e[6;5~", "Ctrl+PgDn"},
-
-		{"\\e[1;7H", "Ctrl+Alt+Home"}, {"\\e[1;7F", "Ctrl+Alt+End"},
-		{"\\e[2;7~", "Ctrl+Alt+Ins"}, {"\\e[3;7~", "Ctrl+Alt+Del"},
-		{"\\e[5;7~", "Ctrl+Alt+PgUp"}, {"\\e[6;7~", "Ctrl+Alt+PgDn"},
-
-		{"\\e[1;4H", "Alt+Shift+Home"}, {"\\e[1;4F", "Alt+Shift+End"},
-		{"\\e[2;4~", "Alt+Shift+Ins"}, {"\\e[3;4~", "Alt+Shift+Del"},
-		{"\\e[5;4~", "Alt+Shift+PgUp"}, {"\\e[6;4~", "Alt+Shift+PgDn"},
-
-		{"\\e[1;6H", "Ctrl+Shift+Home"}, {"\\e[1;6F", "Ctrl+Shift+End"},
-		{"\\e[2;6~", "Ctrl+Shift+Ins"}, {"\\e[3;6~", "Ctrl+Shift+Del"},
-		{"\\e[5;6~", "Ctrl+Shift+PgUp"}, {"\\e[6;6~", "Ctrl+Shift+PgDn"},
-
-		{"\\e[1;8H", "Ctrl+Alt+Shift+Home"}, {"\\e[1;8F", "Ctrl+Alt+Shift+End"},
-		{"\\e[2;8~", "Ctrl+Alt+Shift+Ins"}, {"\\e[3;8~", "Ctrl+Alt+Shift+Del"},
-		{"\\e[5;8~", "Ctrl+Alt+Shift+PgUp"}, {"\\e[6;8~", "Ctrl+Alt+Shift+PgDn"},
-
-		{"\\e[3;2~", "Shift+Del"}, {"\\e[1;2H", "Shift+Home"},
-		{"\\e[1;2F", "Shift+End"},
-
-		{"\\e", "Esc"},
-
-		{"\\C-i", "Tab"}, {"\\e\\C-i", "Alt+Tab"},
-		{"\\e[Z", "Shift+Tab"},
-
-		/* Note: xterm sends \x7f for Ctrl+Backspace and \C-h for Backspace */
-		{"\\x7f", "Backspace"}, {"\\e\\x7f", "Alt+Backspace"},
-
-		/* rxvt-specific */
-		{"\\e[11~", "F1"}, {"\\e[12~", "F2"},
-		{"\\e[13~", "F3"}, {"\\e[14~", "F4"},
-
-		{"\\e[11^", "Ctrl+F1"}, {"\\e[12^", "Ctrl+F2"},
-		{"\\e[13^", "Ctrl+F3"}, {"\\e[14^", "Ctrl+F4"},
-		{"\\e[15^", "Ctrl+F5"}, {"\\e[17^", "Ctrl+F6"},
-		{"\\e[18^", "Ctrl+F7"}, {"\\e[19^", "Ctrl+F8"},
-		{"\\e[20^", "Ctrl+F9"}, {"\\e[21^", "Ctrl+F10"},
-		{"\\e[23^", "Ctrl+F11"}, {"\\e[24^", "Ctrl+F12"},
-
-		{"\\e[23~", "Shift+F1"}, {"\\e[24~", "Shift+F2"},
-		{"\\e[25~", "Shift+F3"}, {"\\e[26~", "Shift+F4"},
-		{"\\e[28~", "Shift+F5"}, {"\\e[29~", "Shift+F6"},
-		{"\\e[31~", "Shift+F7"}, {"\\e[32~", "Shift+F8"},
-		{"\\e[33~", "Shift+F9"}, {"\\e[34~", "Shift+F10"},
-		{"\\e[23$", "Shift+F11"}, {"\\e[24$", "Shift+F12"},
-
-		{"\\e\\e[11~", "Alt+F1"}, {"\\e\\e[12~", "Alt+F2"},
-		{"\\e\\e[13~", "Alt+F3"}, {"\\e\\e[14~", "Alt+F4"},
-		{"\\e\\e[15~", "Alt+F5"}, {"\\e\\e[17~", "Alt+F6"},
-		{"\\e\\e[18~", "Alt+F7"}, {"\\e\\e[19~", "Alt+F8"},
-		{"\\e\\e[20~", "Alt+F9"}, {"\\e\\e[21~", "Alt+F10"},
-		{"\\e\\e[23~", "Alt+F11"}, {"\\e\\e[24~", "Alt+F12"},
-
-		{"\\e[23^", "Ctrl+Shift+F1"}, {"\\e[24^", "Ctrl+Shift+F2"},
-		{"\\e[25^", "Ctrl+Shift+F3"}, {"\\e[26^", "Ctrl+Shift+F4"},
-		{"\\e[28^", "Ctrl+Shift+F5"}, {"\\e[29^", "Ctrl+Shift+F6"},
-		{"\\e[31^", "Ctrl+Shift+F7"}, {"\\e[32^", "Ctrl+Shift+F8"},
-		{"\\e[33^", "Ctrl+Shift+F9"}, {"\\e[34^", "Ctrl+Shift+F10"},
-		{"\\e[23@", "Ctrl+Shift+F11"}, {"\\e[24@", "Ctrl+Shift+F12"},
-
-		{"\\e[a", "Shift+Up"}, {"\\e[b", "Shift+Down"},
-		{"\\e[c", "Shift+Right"}, {"\\e[d", "Shift+Left"},
-
-		{"\\e\\e[A", "Alt+Up"}, {"\\e\\e[B", "Alt+Down"},
-		{"\\e\\e[C", "Alt+Right"}, {"\\e\\e[D", "Alt+Left"},
-
-		{"\\eOa", "Ctrl+Up"}, {"\\eOb", "Ctrl+Down"},
-		{"\\eOc", "Ctrl+Right"}, {"\\eOd", "Ctrl+Left"},
-
-		{"\\e[7~", "Home"}, {"\\e[8~", "End"},
-
-		{"\\e\\e[7~", "Alt+Home"}, {"\\e\\e[8~", "Alt+End"},
-		{"\\e\\e[2~", "Alt+Ins"}, {"\\e\\e[3~", "Alt+Del"},
-		{"\\e\\e[5~", "Alt+PgUp"}, {"\\e\\e[6~", "Alt+PgDn"},
-
-		{"\\e[7^", "Ctrl+Home"}, {"\\e[8^", "Ctrl+End"},
-		{"\\e[2^", "Ctrl+Ins"}, {"\\e[3^", "Ctrl+Del"},
-		{"\\e[5^", "Ctrl+PgUp"}, {"\\e[6^", "Ctrl+PgDn"},
-
-		{"\\e[7$", "Shift+Home"}, {"\\e[8$", "Shift+End"},
-		{"\\e[5^", "Ctrl+PgUp"}, {"\\e[6^", "Ctrl+PgDn"},
-		{"\\e[7^", "Ctrl+Home"}, {"\\e[8^", "Ctrl+End"},
-
-		{"\\e\\e[7^", "Ctrl+Alt+Home"}, {"\\e\\e[8^", "Ctrl+Alt+End"},
-		{"\\e\\e[2^", "Ctrl+Alt+Ins"}, {"\\e\\e[3^", "Ctrl+Alt+Del"},
-		{"\\e\\e[5^", "Ctrl+Alt+PgUp"}, {"\\e\\e[6^", "Ctrl+Alt+PgDn"},
-
-		{"\\e[2@", "Ctrl+Shift+Ins"},	{"\\e[3@", "Ctrl+Shift+Del"},
-		{"\\e[7@", "Ctrl+Shift+Home"}, {"\\e[8@", "Ctrl+Shift+End"},
-
-		/* Vte-specific */
-		{"\\e[01;2P", "Shift+F1"}, {"\\e[01;2Q", "Shift+F2"},
-		{"\\e[01;2R", "Shift+F3"}, {"\\e[01;2S", "Shift+F4"},
-
-		{"\\e[01;3P", "Alt+F1"}, {"\\e[01;3Q", "Alt+F2"},
-		{"\\e[01;3R", "Alt+F3"}, {"\\e[01;3S", "Alt+F4"},
-
-		{"\\e[01;5P", "Ctrl+F1"}, {"\\e[01;5Q", "Ctrl+F2"},
-		{"\\e[01;5R", "Ctrl+F3"}, {"\\e[01;5S", "Ctrl+F4"},
-
-		{"\\eOH", "Home"}, {"\\eOF", "End"},
-
-		/* kitty keyboard protocol */
-		{"\\e[P", "F1"}, {"\\e[Q", "F2"}, {"\\e[S", "F4"},
-
-		/* emacs and others */
-		{"\\eOA", "Up"}, {"\\eOB", "Down"},
-		{"\\eOC", "Right"}, {"\\eOD", "Left"},
-		{"\\eO5A", "Ctrl+Up"}, {"\\eO5B", "Ctrl+Down"},
-		{"\\eO5C", "Ctrl+Right"}, {"\\eO5D", "Ctrl+Left"},
-
-		{"\\e[5A", "Ctrl+Up"},{"\\e[5B", "Ctrl+Down"},
-		{"\\e[5C", "Ctrl+Right"},{"\\e[5D", "Ctrl+Left"},
-
-		{"\\e[2A", "Shift+Up"}, {"\\e[2B", "Shift+Down"},
-		{"\\e[2C", "Shift+Right"}, {"\\e[2D", "Shift+Left"},
-
-		{"\\e[1~", "Home"}, {"\\e[4~", "End"},
-
-		{"\\e[4h", "Ins"}, {"\\e[L", "Ctrl+Ins"}, /* st */
-		{"\\e[M", "Ctrl+Del"},
-
-		/* sun-color uses \e[224z-\e[235z for F1-F12 keys. */
-		/* cons25 uses \e[M-\e[X for F1-F12 keys. */
-
-		{NULL, NULL},
-	};
-
-	size_t i;
-	for (i = 0; keys[i].key; i++) {
-		if (strcmp(key, keys[i].key) == 0)
-			return keys[i].translation;
+	char *s = translate_key(k);
+	if (s) {
+		xstrsncpy(k, s, sizeof(k));
+		free(s);
+		return k;
 	}
 
-	return translate_key_nofunc(key);
+	return key;
 }
 
 static int
@@ -737,7 +325,7 @@ check_clifm_kb(const char *kb, const char *func_name)
 		} else {
 			const char *func = kbinds[i].function
 				? kbinds[i].function : "unnamed";
-			const char *t = translate_key(kbinds[i].key);
+			const char *t = xtranslate_key(kbinds[i].key);
 
 			fprintf(stderr, _("kb: %s: Key already in use by '%s'.\n"),
 				t ? t : kbinds[i].key, func);
@@ -749,7 +337,7 @@ check_clifm_kb(const char *kb, const char *func_name)
 	return conflicts;
 }
 
-/* Check all readline key sequences against the key seqeunce KB, if not NULL
+/* Check all readline key sequences against the key sequence KB, if not NULL
  * (this is the case when validating a key entered via 'kb bind').
  * Otherwise the check is made against all clifm key sequences (i.e., when
  * the invoking command is 'kb conflict').
@@ -776,7 +364,7 @@ check_rl_kbinds(const char *kb)
 				conflicts += check_clifm_kb(keys[j], name);
 			} else {
 				if (strcmp(kb, keys[j]) == 0) {
-					const char *t = translate_key(kb);
+					const char *t = xtranslate_key(kb);
 					fprintf(stderr, _("kb: %s: Key already in use by '%s' "
 						"(readline)\n"), t ? t : kb, name);
 					conflicts++;
@@ -1092,7 +680,7 @@ bind_kb_func(const char *func_name)
 		return FUNC_FAILURE;
 
 	const char *func_key = find_key(func_name);
-	const char *translated_key = func_key ? translate_key(func_key) : "unset";
+	const char *translated_key = func_key ? xtranslate_key(func_key) : "unset";
 	/* translated_key can only be NULL if func_key is not NULL. */
 	const char *cur_key = translated_key ? translated_key : func_key;
 
@@ -1109,7 +697,7 @@ bind_kb_func(const char *func_name)
 	if (unset_key == 0 && check_kb_conflicts(kb) == 0) {
 		/* If any conflict was found (check_kb_conflicts() is greater than
 		 * zero), the function already displayed the keybinding translation. */
-		const char *translation = translate_key(kb);
+		const char *translation = xtranslate_key(kb);
 		printf(_("New key: %s\n"), translation ? translation : kb);
 	}
 
@@ -1152,7 +740,7 @@ list_kbinds(void)
 		if (!kbinds[i].key || !kbinds[i].function)
 			continue;
 
-		const char *translation = translate_key(kbinds[i].key);
+		const char *translation = xtranslate_key(kbinds[i].key);
 		printf("%-*s (%s)\n", (int)flen, kbinds[i].function,
 			translation ? translation : kbinds[i].key);
 	}
@@ -1187,6 +775,8 @@ list_rl_kbinds(void)
 			flen = l;
 	}
 
+	char prev[256] = "";
+
 	for (i = 0; (name = names[i]); i++) {
 		if ((*name == 's' && strcmp(name, "self-insert") == 0)
 		|| (*name == 'd' && strcmp(name, "do-lowercase-version") == 0))
@@ -1199,21 +789,21 @@ list_rl_kbinds(void)
 
 		printf("%-*s ", (int)flen, name);
 
-		char *prev = NULL;
 		for (j = 0; keys[j]; j++) {
-			const char *t = translate_key(keys[j]);
+			const char *t = xtranslate_key(keys[j]);
 
 			/* Skip consecutive duplicates. */
-			if (prev && t && *prev == *t && strcmp(prev, t) == 0) {
+			if (t && *prev == *t && strcmp(prev, t) == 0) {
 				free(keys[j]);
 				continue;
 			}
 
 			printf("(%s) ", t ? t : keys[j]);
-			free(keys[j]);
 
 			if (t)
-				prev = (char *)t;
+				xstrsncpy(prev, t, sizeof(prev));
+
+			free(keys[j]);
 		}
 
 		putchar('\n');
