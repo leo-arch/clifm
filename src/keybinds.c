@@ -108,6 +108,9 @@ append_str(char *buf, const int buf_size, size_t *len, const char *str)
 	return 0;
 }
 
+#define KBUF_SIZE 256 /* This should be enough to handle most keybindings. */
+#define END_KEYSEQ_CHAR ','
+
 static const char *
 translate_emacs_style_keyseq(const char *key)
 {
@@ -117,8 +120,6 @@ translate_emacs_style_keyseq(const char *key)
 	if (key[1] == 'e' && (key[2] == CSI_INTRODUCER || key[2] == SS3_INTRODUCER))
 		return NULL;
 
-#define KBUF_SIZE 256 /* This should be enough to handle most keybindings. */
-#define END_KEYSEQ_CHAR ','
 	static char buf[KBUF_SIZE] = {0};
 	size_t buf_len = 0;
 
@@ -175,8 +176,6 @@ translate_emacs_style_keyseq(const char *key)
 			buf_len++;
 		}
 	}
-#undef KBUF_SIZE
-#undef END_KEYSEQ_CHAR
 
 	buf[buf_len] = '\0';
 
@@ -185,10 +184,11 @@ translate_emacs_style_keyseq(const char *key)
 
 	return *buf ? buf : NULL;
 }
+#undef END_KEYSEQ_CHAR
 
 /* Translate the raw escape code KEY (sent by the terminal upon a key press)
  * into a human-readable format.
- * Return the translation, if found, or NULL otherwise. */
+ * Return the translation, if found, or the original sequence (KEY) otherwise. */
 static const char *
 xtranslate_key(const char *key)
 {
@@ -203,25 +203,25 @@ xtranslate_key(const char *key)
 	if (t)
 		return t;
 
-	const char *str = key;
+	const char *key_ptr = key;
 
-	static char k[256] = "";
+	static char buf[KBUF_SIZE] = "";
 	int c = 0;
-	while (*str) {
-		if (*str == '\\' && str[1] == 'e') {
-			k[c++] = 0x1b;
-			str += 2;
+	while (*key_ptr) {
+		if (*key_ptr == '\\' && key_ptr[1] == 'e') {
+			buf[c++] = KEY_ESC;
+			key_ptr += 2;
 		} else {
-			k[c++] = *str++;
+			buf[c++] = *key_ptr++;
 		}
 	}
-	k[c] = '\0';
+	buf[c] = '\0';
 
-	char *s = translate_key(k);
-	if (s) {
-		xstrsncpy(k, s, sizeof(k));
-		free(s);
-		return k;
+	char *translation = translate_key(buf);
+	if (translation) {
+		xstrsncpy(buf, translation, sizeof(buf));
+		free(translation);
+		return buf;
 	}
 
 	return key;
@@ -778,7 +778,7 @@ list_rl_kbinds(void)
 			flen = l;
 	}
 
-	char prev[NAME_MAX] = "";
+	char prev[KBUF_SIZE] = "";
 
 	for (i = 0; (name = names[i]); i++) {
 		if ((*name == 's' && strcmp(name, "self-insert") == 0)
@@ -821,6 +821,7 @@ list_rl_kbinds(void)
 
 	return FUNC_SUCCESS;
 }
+#undef KBUF_SIZE
 
 int
 kbinds_function(char **args)
