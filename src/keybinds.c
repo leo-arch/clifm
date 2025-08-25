@@ -195,6 +195,9 @@ xtranslate_key(const char *key)
 	if (!key || !*key)
 		return NULL;
 
+	if (*key == '-' && !key[1])
+		return _("not bound");
+
 	const char *t = (strstr(key, "C-") || strstr(key, "M-"))
 		? translate_emacs_style_keyseq(key) : NULL;
 	if (t)
@@ -775,7 +778,7 @@ list_rl_kbinds(void)
 			flen = l;
 	}
 
-	char prev[256] = "";
+	char prev[NAME_MAX] = "";
 
 	for (i = 0; (name = names[i]); i++) {
 		if ((*name == 's' && strcmp(name, "self-insert") == 0)
