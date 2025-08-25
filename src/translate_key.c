@@ -410,7 +410,7 @@ check_single_key(char *str, const int csi_seq)
 		else if (*s < 0x20)
 			snprintf(buf, MAX_BUF, "Ctrl+Alt+%c", *s + '@');
 		else
-			snprintf(buf, MAX_BUF, "Alt+%c", toupper(*s));
+			snprintf(buf, MAX_BUF, "Alt+%c", *s);
 		return buf;
 	}
 

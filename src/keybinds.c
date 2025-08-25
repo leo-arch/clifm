@@ -122,6 +122,7 @@ translate_emacs_style_keyseq(const char *key)
 
 	static char buf[KBUF_SIZE] = {0};
 	size_t buf_len = 0;
+	int is_ctrl_key = 0;
 
 	while (*key) {
 		if (*key == '\\') {
@@ -141,6 +142,7 @@ translate_emacs_style_keyseq(const char *key)
 				key += 3;
 				if (!*key) /* Incomplete sequence: Ctrl without modified key. */
 					return NULL;
+				is_ctrl_key = 1;
 				continue;
 			}
 
@@ -165,7 +167,8 @@ translate_emacs_style_keyseq(const char *key)
 			return NULL;
 
 		/* Append single character to the buffer. */
-		buf[buf_len] = TOUPPER(*key);
+		buf[buf_len] = is_ctrl_key ? TOUPPER(*key) : *key;
+		is_ctrl_key = 0;
 		buf_len++;
 		key++;
 		/* A character that is not a modifier key marks the end of the
