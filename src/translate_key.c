@@ -49,9 +49,12 @@
 #define IS_UPPER_ARROW_CHAR(c) ((c) >= 'A' && (c) <= 'D')
 #define IS_ARROW_CHAR(c) (IS_LOWER_ARROW_CHAR((c)) || IS_UPPER_ARROW_CHAR((c)))
 
-#define IS_FOOT_SEQ(s, end) (*(s) == '2' && (s)[1] == '7' && (s)[2] == ';' \
-	&& (end) == '~')
+/* Xterm, with modifyOtherKeys resource enabled */
+#define IS_XTERM_MOK_SEQ(s, end) (*(s) == '2' && (s)[1] == '7' \
+	&& (s)[2] == ';' && (end) == '~')
+/* The kitty keyboard protocol */
 #define IS_KITTY_END_CHAR(c)   ((c) == 'u')
+
 #define IS_MODKEY_END_CHAR(c)  ((c) == '^' || (c) == '$' || (c) == '@')
 #define IS_GENERIC_END_CHAR(c) ((c) == '~' || (c) == 'z')
 #define IS_KEYCODE_END_CHAR(c) (  \
@@ -64,7 +67,7 @@
 #define ESC_KEY 0x1b
 
 /* Values for modifier keys.
- * See https://en.wikipedia.org/wiki/ANSI_escape_code*/
+ * See https://en.wikipedia.org/wiki/ANSI_escape_code */
 #define SHIFT_VAL 1
 #define ALT_VAL   2
 #define CTRL_VAL  4
@@ -86,13 +89,13 @@ static const char *mod_table[256] = {
 	[SUPER_VAL] = "Super",
 	[ALT_VAL + SHIFT_VAL] = "Alt+Shift",
 	[CTRL_VAL + SHIFT_VAL] = "Ctrl+Shift",
-	[SUPER_VAL + SHIFT_VAL] = "Super+Shift",
 	[CTRL_VAL + ALT_VAL] = "Ctrl+Alt",
 	[CTRL_VAL + ALT_VAL + SHIFT_VAL] = "Ctrl+Alt+Shift",
-	[CTRL_VAL + SUPER_VAL] = "Ctrl+Super",
-	[ALT_VAL + SUPER_VAL] = "Alt+Super",
-	[CTRL_VAL + ALT_VAL + SUPER_VAL] = "Ctrl+Alt+Super",
-	[CTRL_VAL + ALT_VAL + SHIFT_VAL + SUPER_VAL] = "Ctrl+Alt+Shift+Super"
+	[SUPER_VAL + SHIFT_VAL] = "Super+Shift",
+	[SUPER_VAL + ALT_VAL] = "Super+Alt",
+	[SUPER_VAL + CTRL_VAL] = "Super+Ctrl",
+	[SUPER_VAL + CTRL_VAL + ALT_VAL] = "Super+Ctrl+Alt",
+	[SUPER_VAL + CTRL_VAL + ALT_VAL + SHIFT_VAL] = "Super+Ctrl+Alt+Shift"
 };
 
 static const char *key_table[256] = {
@@ -372,7 +375,7 @@ print_non_esc_seq(const char *str)
 	} else if (ctrl_keys[*s]) { /* Backspace, Tab, Enter, Space, Del */
 		snprintf(buf, MAX_BUF, "%s", ctrl_keys[*s]);
 	} else if (*s < 0x20) { /* Control characters */
-		snprintf(buf, MAX_BUF, "%s%c", "Ctrl+", *s + '@');
+		snprintf(buf, MAX_BUF, "%s%c", "Ctrl+", *s + '@' + 0x20);
 	} else {
 		free(buf);
 		return NULL;
@@ -408,7 +411,7 @@ check_single_key(char *str, const int csi_seq)
 		if (ctrl_keys[*s]) /* Backspace, Tab, Enter, Space, Del */
 			snprintf(buf, MAX_BUF, "Alt+%s", ctrl_keys[*s]);
 		else if (*s < 0x20)
-			snprintf(buf, MAX_BUF, "Ctrl+Alt+%c", *s + '@');
+			snprintf(buf, MAX_BUF, "Ctrl+Alt+%c", *s + '@' + 0x20);
 		else
 			snprintf(buf, MAX_BUF, "Alt+%c", *s);
 		return buf;
@@ -450,7 +453,7 @@ get_ext_key_symbol(const int keycode)
 
 	/* These are directly printable */
 	if (keycode > 32 && keycode <= 126) {
-		keysym_str[0] = (char)toupper(keycode);
+		keysym_str[0] = (char)keycode;
 		return keysym_str;
 	}
 
@@ -542,10 +545,10 @@ write_kitty_keys(char *str, const size_t end)
 	return buf;
 }
 
-/* A Foot sequence is "CSI 27;mod;key~"
- * See https://codeberg.org/dnkl/foot/src/branch/master/keymap.h*/
+/* An Xterm MOK (modifyOtherKeys) sequence is "CSI 27;mod;key~"
+ * See https://xterm.dev/manpage-xterm/#VT100-Widget-Resources:modifyOtherKeys */
 static char *
-write_foot_seq(char *str, const size_t end)
+write_xterm_mok_seq(char *str, const size_t end)
 {
 	str[end] = '\0';
 	str += 3; /* Skip "27;" */
@@ -612,8 +615,8 @@ translate_key(char *str)
 	if (IS_KITTY_END_CHAR(end_char) && csi_seq == 1)
 		return write_kitty_keys(str, end);
 
-	if (IS_FOOT_SEQ(str, end_char) && csi_seq == 1)
-		return write_foot_seq(str, end);
+	if (IS_XTERM_MOK_SEQ(str, end_char) && csi_seq == 1)
+		return write_xterm_mok_seq(str, end);
 
 	else if (IS_MODKEY_END_CHAR(end_char))
 		set_end_char_is_mod_key(str, end, &keycode, &mod_key);
