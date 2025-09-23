@@ -422,6 +422,8 @@ is_256_color(const char *restrict str)
 	return 1;
 }
 
+#define IS_COLOR_DELIM(c) ((c) == ':' || (c) == ';')
+
 /* Validate an SGR color sequence. Return 1 if valid or 0 otherwise. */
 static int
 is_sgr_color(const char *restrict str)
@@ -431,8 +433,8 @@ is_sgr_color(const char *restrict str)
 	while (*str) {
 		if (IS_DIGIT(*str)) {
 			digits++;
-		} else if (*str == ';') {
-			if (str[1] == ';') /* Consecutive semicolons. */
+		} else if (IS_COLOR_DELIM(*str)) {
+			if (IS_COLOR_DELIM(str[1])) /* Consecutive (semi)colons. */
 				return 0;
 			digits = 0;
 			semicolon++;
@@ -452,11 +454,12 @@ is_sgr_color(const char *restrict str)
 	if (digits == 0 || digits > 3 || semicolon > 15)
 		return 0;
 
-	/* At this point, we have a semicolon separated string of digits (3
+	/* At this point, we have a (semi)colon separated string of digits (3
 	 * consecutive max) with at most 16 fields. The only thing not
 	 * validated here are numbers themselves. */
 	return 1;
 }
+#undef IS_COLOR_DELIM
 
 /* Check if STR has the format of a color code string (a number or a
  * semicolon list (max 16 fields) of numbers of at most 3 digits each).
