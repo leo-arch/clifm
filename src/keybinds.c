@@ -217,7 +217,7 @@ xtranslate_key(const char *key)
 	}
 	buf[c] = '\0';
 
-	char *translation = translate_key(buf);
+	char *translation = translate_key(buf, 0);
 	if (translation) {
 		xstrsncpy(buf, translation, sizeof(buf));
 		free(translation);
