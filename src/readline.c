@@ -242,7 +242,7 @@ construct_utf8_char(unsigned char c)
 
 	if (conf.highlight == 1 && cur_color != tx_c && cur_color != hv_c
 	&& cur_color != hc_c && cur_color != hp_c && cur_color != hq_c) {
-		cur_color = tx_c;
+		cur_color = wrong_cmd == 1 ? wp_c : tx_c;
 		fputs(cur_color, stdout);
 	}
 
