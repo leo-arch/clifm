@@ -1,3 +1,21 @@
+1.26.3 - Sep 28, 2025
+
+BUG FIXES:
+* Warning prompt color is broken.
+* Single character commands not recovering from warning prompt.
+* Run with "-T ~/trashfile", create a file named ~/trashfile2: this latter cannot be trashed.
+* Freeze when running non-interactively and in the background.
+* Some GTK programs chash when launched from within clifm (XDG_DATA_DIRS corruption).
+
+IMPROVEMENTS:
+* Replace --stdtab, --fzftab, --fzftab, and --smenutab by --tabmode=fzf|fnf|smenu|standard.
+* Prevent shell commands from leaving the terminal in an unusable state.
+* Improved key binding translation support (via the keypress translation library).
+* Allow the use of colon as color field separator.
+
+MISC:
+* Remove --fzytab (deprecated since 1.12.9).
+
 1.26 (Fettucini Bros) - Jul 21, 2025
 
 BUG FIXES:
