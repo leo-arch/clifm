@@ -476,21 +476,33 @@ static int
 try_xdg_data_dirs(void)
 {
 	char *env = getenv("XDG_DATA_DIRS");
+
 	if (!env || !*env)
 		return FUNC_FAILURE;
 
-	char *str = strtok(env, ":");
-	if (!str || !*str)
+	char *dirs = strdup(env);
+	if (!dirs)
 		return FUNC_FAILURE;
 
-	if ((data_dir = try_datadir(str)) != NULL)
-		return FUNC_SUCCESS;
-
-	while ((str = strtok(NULL, ":")) != NULL) {
-		if ((data_dir = try_datadir(str)) != NULL)
-			return FUNC_SUCCESS;
+	char *str = strtok(dirs, ":");
+	if (!str || !*str) {
+		free(dirs);
+		return FUNC_FAILURE;
 	}
 
+	if ((data_dir = try_datadir(str)) != NULL) {
+		free(dirs);
+		return FUNC_SUCCESS;
+	}
+
+	while ((str = strtok(NULL, ":")) != NULL) {
+		if ((data_dir = try_datadir(str)) != NULL) {
+			free(dirs);
+			return FUNC_SUCCESS;
+		}
+	}
+
+	free(dirs);
 	return FUNC_FAILURE;
 }
 
