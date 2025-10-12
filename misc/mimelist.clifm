@@ -211,8 +211,8 @@ X:^image/.*=imv %x;nsxiv %x;sxiv %x;pqiv %x;qview %x;qimgv %x;viewnior %x;oculan
 # Video and audio
 #-----------------------------
 
-X:^video/.*=ffplay %x;mplayer %x;mplayer2 %x;mpv %x;vlc %x;gmplayer %x;smplayer %x;celluloid %x;qmplayer2 %x;haruna %x;totem %x
-X:^audio/.*=gmplayer %x;smplayer %x;vlc %x;totem %x;ffplay %x;audacity %x;mpv --player-operation-mode=pseudo-gui %x;mplayer;mplayer2
+X:^video/.*=iina %x;mplayer %x;mplayer2 %x;mpv %x;vlc %x;gmplayer %x;smplayer %x;celluloid %x;qmplayer2 %x;haruna %x;totem %x;ffplay %x
+X:^audio/.*=iina --music-mode %x;gmplayer %x;smplayer %x;vlc %x;totem %x;ffplay %x;audacity %x;mpv --player-operation-mode=pseudo-gui %x;mplayer;mplayer2
 !X:^audio/.*=ffplay -nodisp -autoexit -hide_banner %f !EO;mplayer %f !EO;mpv --no-terminal
 
 #-----------------------------
