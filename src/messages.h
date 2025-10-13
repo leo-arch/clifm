@@ -1097,7 +1097,7 @@ injection. To enable this mode, use the --secure-cmds command line switch."
 
 #define SEL_USAGE "Select one or multiple files\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
-  s, sel FILE... [[!]PATTERN] [-FILETYPE] [:PATH]\n\n\
+  s, sel [--invert] [FILE...] [(!)PATTERN] [-(d|f|l|s|p|b|c)] [:PATH]\n\n\
 Recognized file types: (d)irectory, regular (f)ile, symbolic (l)ink,\n\
 (s)ocket, fifo/(p)ipe, (b)lock device, (c)haracter device\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
@@ -1116,6 +1116,8 @@ Recognized file types: (d)irectory, regular (f)ile, symbolic (l)ink,\n\
     s /media/*<TAB>\n\
 - List currently selected files\n\
     sb\n\
+- Invert (toggle) selection in the current directory\n\
+    s --invert (or Shift+Tab)\n\
 - Copy selected files to the current directory:\n\
     c sel\n\
 - Move selected files to the directory whose ELN is 24\n\

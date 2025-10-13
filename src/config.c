@@ -984,8 +984,9 @@ clear-msgs:\\et\n\
 copy-sel:\\e\\C-v\n\
 create-file:\\en\n\
 deselect-all:\\ed\n\
-export-sel:\\e\\C-e\n\
 dirs-first:\\eg\n\
+export-sel:\\e\\C-e\n\
+invert-selection:\\e[Z\n\
 launch-view:\\e-\n\
 #lock:\\eo\n\
 mountpoints:\\em\n\

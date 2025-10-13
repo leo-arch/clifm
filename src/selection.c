@@ -777,6 +777,88 @@ select_pattern(char *arg, const char *dir, const mode_t filetype, int *err)
 	return ret;
 }
 
+/* Reconstruct the list of selections excluding those located in the current
+ * directory. */
+static void
+deselect_files_in_cwd(void)
+{
+	/* Free data about selected files. It will be reconstructed later
+	 * by get_sel_files(). */
+	free(sel_devino);
+	sel_devino = (struct devino_t *)NULL;
+
+	struct sel_t *sel = NULL;
+	size_t n = 0;
+
+	for (size_t i = 0; i < sel_n; i++) {
+		if (!is_file_in_cwd(sel_elements[i].name)) {
+			sel = xnrealloc(sel, n + 2, sizeof(sel[0]));
+			sel[n].name =
+				savestring(sel_elements[i].name, strlen(sel_elements[i].name));
+			sel[n].size = (off_t)UNSET;
+			n++;
+		}
+	}
+
+	if (n == 0) { /* All selections are in the current directory. */
+		deselect_all();
+		return;
+	}
+
+	sel[n].name = NULL;
+	sel[n].size = (off_t)UNSET;
+
+	for (size_t i = 0; i < sel_n; i++)
+		free(sel_elements[i].name);
+	free(sel_elements);
+	sel_n = n;
+	sel_elements = sel;
+}
+
+static void
+print_inversion_results(const int new_sel, const int desel, const int errors)
+{
+	if (new_sel > 0) {
+		print_sel_results(new_sel, NULL, NULL, errors);
+		return;
+	}
+
+	save_sel();
+
+	if (errors == 0 && conf.autols == 1)
+		reload_dirlist();
+
+	print_reload_msg(SET_SUCCESS_PTR, xs_cb,
+		_("%zu file(s) deselected\n"), desel);
+	print_reload_msg(NULL, NULL, "%zu total selected file(s)\n", sel_n);
+}
+
+/* Invert the list of selections in the current directory. */
+static int
+invert_selection(void)
+{
+	if (sel_n > 0)
+		deselect_files_in_cwd();
+
+	int new_sel = 0;
+	int errors = 0;
+	int desel = 0;
+
+	for (filesn_t i = 0; i < files; i++) {
+		if (file_info[i].sel == 0) {
+			new_sel += select_filename(file_info[i].name, NULL, &errors);
+			file_info[i].sel = 1;
+		} else {
+			file_info[i].sel = 0;
+			desel++;
+		}
+	}
+
+	print_inversion_results(new_sel, desel, errors);
+
+	return (errors != 0);
+}
+
 int
 sel_function(char **args)
 {
@@ -786,6 +868,9 @@ sel_function(char **args)
 		puts(_(SEL_USAGE));
 		return FUNC_SUCCESS;
 	}
+
+	if (args[1] && strcmp(args[1], "--invert") == 0)
+		return invert_selection();
 
 	mode_t filetype = 0;
 	int i, ifiletype = 0, isel_path = 0, new_sel = 0, err = 0, f = 0;

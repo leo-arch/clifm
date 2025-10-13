@@ -1811,6 +1811,14 @@ rl_deselect_all(int count, int key)
 }
 
 static int
+rl_invert_selection(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	exec_prompt_cmds = 1;
+	return run_kb_cmd("s --invert", 0);
+}
+
+static int
 rl_bookmarks(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
@@ -3009,6 +3017,7 @@ set_keybinds_from_file(void)
 		{"toggle-long", rl_toggle_long_view},
 		{"toggle-follow-links-long", rl_toggle_follow_link_long},
 		{"toggle-light", rl_toggle_light_mode},
+		{"invert-selection", rl_invert_selection},
 		{"dirs-first", rl_toggle_dirs_first},
 		{"sort-previous", rl_sort_previous}, {"sort-next", rl_sort_next},
 		{"only-dirs", rl_toggle_only_dirs},
@@ -3071,7 +3080,8 @@ set_default_keybinds(void)
 		{"\\C-\\M-e", rl_export_sel}, {"\\C-\\M-r", rl_rename_sel},
 		{"\\C-\\M-d", rl_remove_sel}, {"\\C-\\M-t", rl_trash_sel},
 		{"\\C-\\M-v", rl_paste_sel}, {"\\M-a", rl_select_all},
-		{"\\M-d", rl_deselect_all}, {"\\M-v", rl_prepend_sudo},
+		{"\\M-d", rl_deselect_all}, {"\\e[Z", rl_invert_selection},
+		{"\\M-v", rl_prepend_sudo},
 		/* Config files */
 		{"\\e[17~", rl_open_mime}, {"\\e[18~", rl_open_preview},
 		{"\\e[19~", rl_open_cscheme}, {"\\e[20~", rl_open_keybinds},
