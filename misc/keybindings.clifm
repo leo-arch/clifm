@@ -91,6 +91,7 @@ rename-sel:\e\C-r
 remove-sel:\e\C-d
 select-all:\ea
 deselect-all:\ed
+invert-selection:\e[Z
 selbox:\es
 #open-sel:\e\C-g
 trash-sel:\e\C-t
