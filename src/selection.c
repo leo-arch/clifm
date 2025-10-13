@@ -830,7 +830,7 @@ print_inversion_results(const int new_sel, const int desel, const int errors)
 
 	print_reload_msg(SET_SUCCESS_PTR, xs_cb,
 		_("%zu file(s) deselected\n"), desel);
-	print_reload_msg(NULL, NULL, "%zu total selected file(s)\n", sel_n);
+	print_reload_msg(NULL, NULL, _("%zu total selected file(s)\n"), sel_n);
 }
 
 /* Invert the list of selections in the current directory. */
