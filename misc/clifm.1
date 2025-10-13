@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Sep 28, 2025" "clifm 1.26.3" "Clifm Manual"
+.TH "CLIFM" "1" "Oct 13, 2025" "clifm 1.26.4" "Clifm Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -1194,14 +1194,14 @@ Remove files and/or directories in bulk using a text editor.
 .sp
 Once in the editor, remove the lines corresponding to the files you want to delete. Save changes and close the editor. Removed files will be listed and the user asked for confirmation.
 .TP
-.B s, sel \fIFILE\fR... [[!]\fIPATTERN\fR] [\fI\-FILETYPE\fR] [\fI:PATH\fR]
+.B s, sel [--invert] \fIFILE\fR... [(!)\fIPATTERN\fR] [\fI\-(d|f|l|s|p|b|c)\fR] [\fI:PATH\fR]
 Mark one or more files (either regular files or directories) as selected (send to the Selection Box). \fBsel\fR accepts individual elements, range of elements, say 1\-6, filenames and paths, just as wildcards (globbing) and regular expressions. For example: `\fBs 1 4\-10 ^r file* filename /path/to/filename\fR`.
 .sp
 If not in light mode, once a file is selected, and if the file is in the current directory, the corresponding filename will be highlighted with a mark (colored according to the value of \fBli\fR in the color scheme file (by default bold green)) at the left of the filename (and at the right of its ELN).
 .sp
 Just as in the \fBsearch\fR function, it is also possible to further filter the list of matches indicating the desired file type. For instance, `\fBs ^ \-d\fR` will select all directories in the current directory. For available file type filters see the \fBsearch\fR function above.
 .sp
-By default, the selection function operates on the current working directory. To select files in any other directory use the ":PATH" expression. For example, to select all regular files with a .conf extension in the \fI/etc\fR directory, the command would be: `\fBs\ .*\\.conf$\ \-f :/etc\fR`, or using wildcards: `\fBs *.conf \-f\ :/etc\fR`. Of course, you can also do just `\fBs \-f /etc/*.conf\fR`.
+By default, the selection function operates on the current working directory. To select files in any other directory use the \fB:PATH\fR expression. For example, to select all regular files with a .conf extension in the \fI/etc\fR directory, the command would be: `\fBs\ .*\\.conf$\ \-f :/etc\fR`, or using wildcards: `\fBs *.conf \-f\ :/etc\fR`. Of course, you can also do just `\fBs \-f /etc/*.conf\fR`.
 .sp
 Just as in the case of the \fBsearch\fR function, inverse matching is supported for patterns, either wildcards or regular expressions. To invert the meaning and action of a pattern, prepend an exclamation mark (!). E.g., to select all non\-hidden regular files in the Documents directory, issue this command: `\fBs !^\.\ \-f :Documents\fR`, or, to select all directories in \fI/etc\fR, except those ending with ".d": `\fBs !*.d \-d :/etc\fR`.
 .sp
@@ -1210,6 +1210,8 @@ Glob and regular expressions can be used together. For example: `\fBs ^[r|R].*d$
 It is important to note that glob expressions are evaluated before regular expressions, in such a way that any pattern that could be understood by both kinds of pattern matching mechanisms will be evaluated first according to the former, that is, as a glob expression. For example, '.*', as regular expression, should match all files. However, since glob expressions are evaluated first, it will only match hidden files. To select all files using a glob expression, try \'.* *\', or, with a regular expression: \'^\' or \'(.*?)\'. The keyboard shortcut \fBAlt+a\fR is also available to perform the same operation.
 .sp
 The Selection Box is accessible from different instances of the program, provided they use the same profile (see the \fBprofile\fR command below). By default, indeed, each profile keeps a private Selection Box, being thus not accessible to other profiles. You can nonetheless modify this behavior via the \fBShareSelbox\fR option in the configuration file. If \fBShareSelbox\fR is enabled, selected files are stored in \fI/tmp/clifm/username/.selbox.clifm\fR. Otherwise, \fI/tmp/clifm/username/.selbox_profilename.clifm\fR is used (this is the default).
+.sp
+To invert selected files in the current directory, use the \fB--invert\fR option (or press \fBShift+Tab\fR). Note that selected files not falling under the current directory are not affected.
 .sp
 \fBOperating on selected files\fR
 .sp
