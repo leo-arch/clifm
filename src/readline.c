@@ -1370,6 +1370,25 @@ gen_shell_cmd_comp(char *cmd)
 	return launch_execv(c, FOREGROUND, E_MUTE);
 }
 
+static char *
+gen_comp_cache_dir(const char *cmd)
+{
+	static const char *xdg_cache_dir = NULL;
+	if (!xdg_cache_dir)
+		xdg_cache_dir = getenv("XDG_CACHE_HOME");
+
+	static char cache_dir[PATH_MAX + 1];
+	if (xdg_cache_dir) {
+		snprintf(cache_dir, sizeof(cache_dir), "%s/%s/completions/%s.clifm",
+			xdg_cache_dir, PROGRAM_NAME, cmd);
+	} else {
+		snprintf(cache_dir, sizeof(cache_dir),
+			"%s/.cache/%s/completions/%s.clifm", user.home, PROGRAM_NAME, cmd);
+	}
+
+	return cache_dir;
+}
+
 /* Get short and long options for command CMD, store them in the EXT_OPTS
  * array and return the number of options found. */
 static int
@@ -1380,19 +1399,17 @@ get_shell_cmd_opts(char *cmd)
 	|| (conf.suggestions == 1 && wrong_cmd == 1))
 		return FUNC_FAILURE;
 
-	char p[PATH_MAX + 1];
-	snprintf(p, sizeof(p), "%s/.cache/%s/completions/%s.clifm",
-		user.home, PROGRAM_NAME, cmd);
+	const char *cache_dir = gen_comp_cache_dir(cmd);
 
 	struct stat a;
-	if (stat(p, &a) == -1) {
+	if (stat(cache_dir, &a) == -1) {
 		/* Comp file does not exist. Try to generate via manpages_comp_gen.py */
-		if (gen_shell_cmd_comp(cmd) != FUNC_SUCCESS || stat(p, &a) == -1)
+		if (gen_shell_cmd_comp(cmd) != FUNC_SUCCESS || stat(cache_dir, &a) == -1)
 			return FUNC_FAILURE;
 	}
 
 	int fd;
-	FILE *fp = open_fread(p, &fd);
+	FILE *fp = open_fread(cache_dir, &fd);
 	if (!fp)
 		return FUNC_FAILURE;
 
