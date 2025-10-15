@@ -519,14 +519,14 @@ main() {
 			export UEBERZUG_OK=1
 		elif [ "$TERM" = "xterm-kitty" ]; then
 			export IMG_VIEWER="kitty"
+		elif type chafa > /dev/null 2>&1; then
+			export IMG_VIEWER="chafa"
 		elif type pixterm > /dev/null 2>&1; then
 			export IMG_VIEWER="pixterm"
 		elif type viu > /dev/null 2>&1; then
 			export IMG_VIEWER="viu"
 		elif type catimg > /dev/null 2>&1; then
 			export IMG_VIEWER="catimg"
-		elif type chafa > /dev/null 2>&1; then
-			export IMG_VIEWER="chafa"
 		elif type img2txt > /dev/null 2>&1; then
 			export IMG_VIEWER="img2txt"
 		fi

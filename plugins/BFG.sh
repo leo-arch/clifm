@@ -99,7 +99,7 @@ preview_image() {
 		pixterm) pixterm -s 2 -tc $((COLUMNS - 2)) "$img" && return 0 ;;
 		catimg) catimg -H$LINES "$img" && return 0 ;;
 		img2txt) img2txt -H$LINES -W$((COLUMNS - 2)) "$img" && return 0 ;;
-		chafa) chafa -s "$((COLUMNS - 2))x$LINES" "$img" && return 0 ;;
+		chafa) chafa -s "$((COLUMNS - 2))x$((LINES - 2))" "$img" && return 0 ;;
 		viu) viu -h$LINES -w$((COLUMNS - 2)) "$img" && return 0 ;;
 		*) "$IMG_VIEWER" "$img" && return 0 ;;
 	esac
