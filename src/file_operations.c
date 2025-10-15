@@ -1646,6 +1646,15 @@ get_rename_dest_filename(char *name, int *status)
 		return (char *)NULL;
 	}
 
+	if (validate_filename(&new_name, 0) == 0) {
+		xerror(_("m: '%s': Unsafe filename\n"), new_name);
+		if (rl_get_y_or_n(_("Continue?"), 0) == 0) {
+			*status = FUNC_SUCCESS;
+			free(new_name);
+			return NULL;
+		}
+	}
+
 	return new_name;
 }
 
@@ -1732,10 +1741,16 @@ check_overwrite(char **args, const int force, size_t *skipped)
 	const int append_curdir = (sel_is_last == 1 && sel_n > 0);
 	const size_t files_num = args_n + (append_curdir == 1);
 
+	const char *cmd_name = IS_MVCMD(args[0]) ? "m" : "c";
+	if (append_curdir == 0 && validate_filename(&args[args_n], 0) == 0) {
+		xerror(_("%s: '%s': Unsafe filename\n"), cmd_name, args[args_n]);
+		if (rl_get_y_or_n(_("Continue?"), 0) == 0)
+			return 0;
+	}
+
 	if (!args || files_num <= 1 || force == 1)
 		return 1;
 
-	const char *cmd_name = IS_MVCMD(args[0]) ? "m" : "c";
 	const char *dest = append_curdir == 1 ? "." : args[args_n];
 
 	struct stat a;
