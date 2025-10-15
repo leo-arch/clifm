@@ -1373,14 +1373,11 @@ gen_shell_cmd_comp(char *cmd)
 static char *
 gen_comp_cache_dir(const char *cmd)
 {
-	static char cache_dir[PATH_MAX + 1] = "";
-	if (*cache_dir)
-		return cache_dir;
-
 	static const char *xdg_cache_dir = NULL;
 	if (!xdg_cache_dir)
 		xdg_cache_dir = getenv("XDG_CACHE_HOME");
 
+	static char cache_dir[PATH_MAX + 1];
 	if (xdg_cache_dir) {
 		snprintf(cache_dir, sizeof(cache_dir), "%s/%s/completions/%s.clifm",
 			xdg_cache_dir, PROGRAM_NAME, cmd);
