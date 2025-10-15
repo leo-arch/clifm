@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-# This file is part of CliFM
+# This file is part of Clifm
 # Taken from https://github.com/fish-shell/fish-shell/blob/master/share/tools/deroff.py
 
 """ Deroff.py, ported to Python from the venerable deroff.c """

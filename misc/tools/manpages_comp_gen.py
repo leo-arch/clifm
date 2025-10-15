@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-# This file is part of CliFM
+# This file is part of Clifm
 # Taken from https://github.com/fish-shell/fish-shell/blob/master/share/tools/create_manpage_completions.py
 # and modified to fit our needs:
 # 1. Added the ability to generate completion files for single program names instead
@@ -1151,9 +1151,9 @@ if __name__ == "__main__":
 
     if not args.stdout and not args.directory:
         # Create destination dir if it doesn't exist
-        xdg_data_home = os.getenv("XDG_DATA_HOME", "~/.local/share")
+        xdg_cache_home = os.getenv("XDG_CACHE_HOME", "~/.cache")
         args.directory = os.path.expanduser(
-            xdg_data_home + DEST_DIR_SUFFIX
+            xdg_cache_home + DEST_DIR_SUFFIX
         )
         try:
             os.makedirs(args.directory)

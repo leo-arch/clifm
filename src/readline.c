@@ -1354,7 +1354,8 @@ int_cmds_generator(const char *text, int state)
 }
 
 /* Generate completions for command CMD using a modified version of
- * fish's manpages parser. */
+ * fish's manpages parser. The resulting completions file is stored in
+ * $XDG_CACHE_HOME/clifm/completions/ (usually ~/.cache/clifm/completions). */
 static int
 gen_shell_cmd_comp(char *cmd)
 {
@@ -1380,7 +1381,7 @@ get_shell_cmd_opts(char *cmd)
 		return FUNC_FAILURE;
 
 	char p[PATH_MAX + 1];
-	snprintf(p, sizeof(p), "%s/.local/share/%s/completions/%s.clifm",
+	snprintf(p, sizeof(p), "%s/.cache/%s/completions/%s.clifm",
 		user.home, PROGRAM_NAME, cmd);
 
 	struct stat a;
