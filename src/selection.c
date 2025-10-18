@@ -869,7 +869,7 @@ sel_function(char **args)
 		return FUNC_SUCCESS;
 	}
 
-	if (args[1] && strcmp(args[1], "--invert") == 0)
+	if (*args[1] == '-' && strcmp(args[1], "--invert") == 0)
 		return invert_selection();
 
 	mode_t filetype = 0;
