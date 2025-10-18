@@ -1672,11 +1672,11 @@ get_term_size(void)
 {
 	struct winsize w;
 	if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) == -1) {
-		term_cols = 80;
-		term_lines = 24;
+		term_cols = DEFAULT_WIN_COLS;
+		term_lines = DEFAULT_WIN_ROWS;
 	} else {
-		term_cols =  w.ws_col > 0 ? w.ws_col : 80;
-		term_lines = w.ws_row > 0 ? w.ws_row : 24;
+		term_cols =  w.ws_col > 0 ? w.ws_col : DEFAULT_WIN_COLS;
+		term_lines = w.ws_row > 0 ? w.ws_row : DEFAULT_WIN_ROWS;
 	}
 
 	if (xargs.secure_env == 1 || xargs.secure_env_full == 1)

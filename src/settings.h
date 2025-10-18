@@ -639,6 +639,9 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define MIN_SCREEN_WIDTH 20
 #define MIN_SCREEN_HEIGHT 5
 
+#define DEFAULT_WIN_COLS 80
+#define DEFAULT_WIN_ROWS 24
+
 /* If running colorless, let's try to use this prompt. If not available,
  * fallback to DEFAULT_PROMPT_NO_COLOR. */
 #define DEF_PROMPT_NO_COLOR_NAME "clifm-no-color"

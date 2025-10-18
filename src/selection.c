@@ -938,8 +938,7 @@ list_selected_files(void)
 	if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) == -1)
 		w.ws_row = 24;
 
-	int t_lines = w.ws_row > 0 ? (int)w.ws_row : 24;
-	t_lines -= 2;
+	const int t_lines = (w.ws_row > 0 ? (int)w.ws_row : DEFAULT_WIN_ROWS) - 2;
 
 	size_t counter = 0;
 	size_t i;
@@ -952,7 +951,6 @@ list_selected_files(void)
 
 	flags |= IN_SELBOX_SCREEN;
 	for (i = 0; i < sel_n; i++) {
-		/* if (pager && counter > (term_lines-2)) { */
 		if (conf.pager && counter > (size_t)t_lines) {
 			switch (xgetchar()) {
 			/* Advance one line at a time */
@@ -964,8 +962,7 @@ list_selected_files(void)
 			case 126:
 				counter = 0; /* Page Down */
 				break;
-			/* Stop paging (and set a flag to reenable the pager
-			 * later) */
+			/* Stop paging (and set a flag to reenable the pager later) */
 			case 99: /* fallthrough */  /* 'c' */
 			case 112: /* fallthrough */ /* 'p' */
 			case 113:

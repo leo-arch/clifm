@@ -480,9 +480,10 @@ calculate_glob_output_columns(const size_t flongest, const int found)
 {
 	int columns_n = 0;
 
+	unsigned short tcols = DEFAULT_WIN_COLS;
 	struct winsize w;
-	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-	unsigned short tcols = w.ws_col;
+	if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) != -1 && w.ws_col > 0)
+		tcols = w.ws_col;
 
 	if (flongest == 0 || flongest > tcols)
 		columns_n = 1;
@@ -785,8 +786,9 @@ static size_t
 calc_columns(const size_t longest_file_len, const size_t matches)
 {
 	struct winsize w;
-	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-	unsigned short termcols = w.ws_col > 0 ? w.ws_col : 80;
+	unsigned short termcols = DEFAULT_WIN_COLS;
+	if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) != -1 && w.ws_col > 0)
+		termcols = w.ws_col;
 
 	size_t columns;
 	if (longest_file_len == 0 || longest_file_len > termcols)
