@@ -652,7 +652,7 @@ is_valid_filename(const char *name)
 		return print_val_err(name, UNSAFE_DASH);
 
 	/* Reserved keyword (internal: MIME type and file type expansions) */
-	if ((*n == '=' && strchr(FILE_TYPE_CHARS, n[1])| && !n[2]) || *n == '@')
+	if ((*n == '=' && strchr(FILE_TYPE_CHARS, n[1]) && !n[2]) || *n == '@')
 		return print_val_err(name, UNSAFE_MIME);
 
 	/* Reserved keyword (internal: bookmarks, tags, workspaces, and
