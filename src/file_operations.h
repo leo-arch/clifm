@@ -43,6 +43,8 @@
 # define UNSAFE_NOT_PORTABLE 9
 #endif
 
+#define FILE_TYPE_CHARS "bcCdDfFghlLoOpPstux"
+
 /* Macros for open_function */
 #define OPEN_BLK     0
 #define OPEN_CHR     1
