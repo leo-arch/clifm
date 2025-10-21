@@ -359,7 +359,7 @@ dump_config(void)
 		DUMP_CONFIG_BOOL);
 
 	n = DEF_FILES_COUNTER;
-	print_config_value("FilesCounter", &conf.files_counter, &n,
+	print_config_value("FileCounter", &conf.files_counter, &n,
 		DUMP_CONFIG_BOOL);
 
 	s = "";
@@ -3471,8 +3471,10 @@ read_config(void)
 		}
 
 		else if (xargs.files_counter == UNSET && *line == 'F'
-		&& strncmp(line, "FilesCounter=", 13) == 0) {
-			set_config_bool_value(line + 13, &conf.files_counter);
+		&& (strncmp(line, "FilesCounter=", 13) == 0
+		|| strncmp(line, "FileCounter=", 12) == 0)) {
+			set_config_bool_value(line + (line[4] == 's' ? 13 : 12),
+				&conf.files_counter);
 		}
 
 		else if (!filter.str && *line == 'F'

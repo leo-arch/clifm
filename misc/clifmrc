@@ -38,11 +38,11 @@
 
 # Display the number of files contained in each directory next to the
 # directory name. This feature may slow down performance when, for example,
-# listing files on a remote server. The files counter can be disabled here,
-# via the --no-files-counter option, or using the 'fc' command while in the
+# listing files on a remote server. The file counter can be disabled here,
+# via the --no-file-counter option, or using the 'fc' command while in the
 # program itself.
 # Note: This option requires Classify (see below) to be set to true.
-;FilesCounter=true
+;FileCounter=true
 
 # When using colors, append directory indicator to directories. If colors
 # are disabled (via the --no-color option), append file type indicator to
