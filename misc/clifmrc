@@ -58,7 +58,7 @@
 # Bear in mind that when running in light mode the check for executable
 # files will not be performed, and thereby no indicator will be added to
 # executable files.
-# Note: Disabling this option also disables the files counter.
+# Note: Disabling this option also disables the file counter.
 ;Classify=true
 
 # Color symbolic links according to their target filename. An indicator
@@ -107,7 +107,7 @@
 ;LongViewMode=false
 
 # Specify which properties to display for each filename in long view mode:
-# f       = Files counter (for directories)
+# f       = File counter (for directories)
 # B       = File allocated blocks
 # d       = Inode number
 # l       = Number of hard links
@@ -582,7 +582,7 @@
 # consult the manpage.
 
 # Remote file systems are slow: let's speed this up by enabling the light
-# mode and disabling the files counter.
+# mode and disabling the file counter.
 #autocmd /media/remotes/** lm=1,fc=0
 
 # Just a friendly reminder when entering the ~/important directory.
