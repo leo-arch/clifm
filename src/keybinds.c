@@ -2419,6 +2419,35 @@ rl_ws4(int count, int key)
 }
 
 static int
+rl_ws5(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	return rl_switch_workspace(5);
+}
+
+static int
+rl_ws6(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	return rl_switch_workspace(6);
+}
+
+static int
+rl_ws7(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	return rl_switch_workspace(7);
+}
+
+static int
+rl_ws8(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	return rl_switch_workspace(8);
+}
+
+
+static int
 run_plugin(const int num)
 {
 	if (kbind_busy == 1)
@@ -2992,6 +3021,8 @@ set_keybinds_from_file(void)
 		{"home-dir", rl_dir_home}, {"root-dir", rl_dir_root},
 		{"workspace1", rl_ws1}, {"workspace2", rl_ws2},
 		{"workspace3", rl_ws3}, {"workspace4", rl_ws4},
+		{"workspace5", rl_ws5}, {"workspace6", rl_ws6},
+		{"workspace7", rl_ws7}, {"workspace8", rl_ws8},
 
 		{"create-file", rl_create_file}, {"archive-sel", rl_archive_sel},
 		{"open-sel", rl_open_sel}, {"export-sel", rl_export_sel},
@@ -3075,6 +3106,8 @@ set_default_keybinds(void)
 		{"\\M-p", rl_dir_pinned},
 		{"\\M-1", rl_ws1}, {"\\M-2", rl_ws2},
 		{"\\M-3", rl_ws3}, {"\\M-4", rl_ws4},
+		{"\\M-5", rl_ws5}, {"\\M-6", rl_ws6},
+		{"\\M-7", rl_ws7}, {"\\M-8", rl_ws8},
 		/* Operations on files */
 		{"\\M-n", rl_create_file}, {"\\C-\\M-a", rl_archive_sel},
 		{"\\C-\\M-e", rl_export_sel}, {"\\C-\\M-r", rl_rename_sel},
