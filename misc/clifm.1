@@ -1299,7 +1299,7 @@ Use \fINUM\fR to switch to the workspace number \fINUM\fR, \fINAME\fR to switch 
 .sp
 To unset a workspace use the \fBunset\fR subcommand preceded by the workspace (either number or name) to be unset. For example: `\fBws 2 unset\fR`.
 .sp
-Four keyboard shortcuts are available to easily switch to any of the first four workspaces: \fBAlt+[1\-4]\fR.
+Four keyboard shortcuts are available to easily switch workspaces: \fBAlt+[1\-8]\fR.
 .sp
 Every time an empty workspace is created, it starts in the current working directory.
 .sp
@@ -1309,7 +1309,7 @@ Use autocommands to persistenly set options per workspace, for example, to alway
 .sp
 Make local settings private to the current workspace by setting the \fBPrivateWorkspaceSettings\fR option to \fBtrue\fR in the configuration file: settings changed via either the command line or keyboard shortcuts (say \fBAlt+l\fR, to toggle the long view) will apply only to the current workspace and will be remembered even when switching workspaces.
 .sp
-To directly operate on a workspace (namely, the path it points to) you can use the \fBw:\fR prefix followed by a workspace number or name. For example, to copy all .png files in the current directory to the third workspace, enter `\fBc *.png w:3\fR`. Press TAB immediately after \fBw:\fR to get the list of available workspaces. 
+To directly operate on a workspace (namely, the path it points to) you can use the \fBw:\fR prefix followed by a workspace number or name. For example, to copy all .png files in the current directory to the third workspace, enter `\fBc *.png w:3\fR`. Press TAB immediately after \fBw:\fR to get the list of available workspaces.
 .TP
 .B x, X \fR[\fIDIR\fR]
 Open \fIDIR\fR, or the current working directory if \fIDIR\fR is not specified, in a new instance of \fBclifm\fR (as root if \fBX\fR, as the current unprivileged user if \fBx\fR) using the value of \fBTerminalCmd\fR (from the configuration file) as terminal emulator. If this value is not set, \fBxterm\fR will be used as fallback terminal emulator. This function is only available for graphical environments.
@@ -1446,12 +1446,8 @@ Alt+a : Select all files in the current directory
 Alt+d : Deselect all files
 Alt+0 : Run MAS, the file pager
 Alt+p : Change to the pinned directory
-Alt+1 : Switch to workspace 1
-Alt+2 : Switch to workspace 2
-Alt+3 : Switch to workspace 3
-Alt+4 : Switch to workspace 4
+Alt+[1-8] : Switch to workspace 1-8
 .TE
-
 .TS
 allbox tab(:);
 lb lb
