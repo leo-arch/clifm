@@ -903,6 +903,10 @@ const struct nameslist_t kb_cmds[] = {
 	{"workspace2", 10},
 	{"workspace3", 10},
 	{"workspace4", 10},
+	{"workspace5", 10},
+	{"workspace6", 10},
+	{"workspace7", 10},
+	{"workspace8", 10},
 	{NULL, 0}
 };
 
