@@ -414,9 +414,7 @@ reload_history(void)
 	history_truncate_file(hist_file, conf.max_hist);
 
 	/* Update the history array */
-	const int ret = get_history();
-
-	return ret;
+	return get_history();
 }
 
 static int

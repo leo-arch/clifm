@@ -1608,6 +1608,7 @@ get_total_size(char *filename, int *status)
 		fputs(df_c, stdout);
 		fflush(stdout);
 	}
+#undef SCANNING_MSG
 
 	return total_size;
 }
@@ -1724,6 +1725,7 @@ print_dir_items(const char *dir, const int file_perm)
 		fputs(df_c, stdout);
 		fflush(stdout);
 	}
+#undef COUNTING_MSG
 
 	char read_err[5 + (MAX_COLOR * 2)]; *read_err = '\0';
 	if (info.status != 0)

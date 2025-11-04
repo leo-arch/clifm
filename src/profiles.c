@@ -39,7 +39,7 @@
 #include "bookmarks.h"
 #include "checks.h"
 #include "config.h"
-#include "exec.h" // exec_profile
+#include "exec.h" /* exec_profile */
 #include "history.h"
 #include "init.h"
 #include "listing.h"

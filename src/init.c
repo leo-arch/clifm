@@ -976,9 +976,7 @@ load_tags(void)
  *
  * One of the drawbacks of this approach is that IT ONLY RETRIEVES NEW ENTRIES
  * BUT WON'T UPDATE EXISTING ONES with values coming from the second instance:
- * they're lost.
- *
-*/
+ * they're lost. */
 static void
 sync_jumpdb_with_dirhist(void)
 {
@@ -1434,7 +1432,7 @@ load_remotes(void)
 			char *tmp = (char *)NULL;
 			if (*ret == '~')
 				tmp = tilde_expand(ret);
-			size_t mnt_len = tmp ? strlen(tmp) : ret_len;
+			const size_t mnt_len = tmp ? strlen(tmp) : ret_len;
 			remotes[n].mountpoint = xnrealloc(remotes[n].mountpoint,
 				mnt_len + 1, sizeof(char));
 			xstrsncpy(remotes[n].mountpoint, tmp ? tmp : ret, mnt_len + 1);
@@ -1447,7 +1445,7 @@ load_remotes(void)
 			if (remotes[n].mountpoint) {
 				char *rep = replace_substr(ret, "%m", remotes[n].mountpoint);
 				if (rep) {
-					size_t rep_len = strlen(rep);
+					const size_t rep_len = strlen(rep);
 					remotes[n].mount_cmd = xnrealloc(
 						remotes[n].mount_cmd, rep_len + 1, sizeof(char));
 					xstrsncpy(remotes[n].mount_cmd, rep, rep_len + 1);
@@ -1467,7 +1465,7 @@ load_remotes(void)
 			if (remotes[n].mountpoint) {
 				char *rep = replace_substr(ret, "%m", remotes[n].mountpoint);
 				if (rep) {
-					size_t rep_len = strlen(rep);
+					const size_t rep_len = strlen(rep);
 					remotes[n].unmount_cmd = xnrealloc(
 						remotes[n].unmount_cmd, rep_len + 1, sizeof(char));
 					xstrsncpy(remotes[n].unmount_cmd, rep, rep_len + 1);
@@ -1498,7 +1496,7 @@ load_remotes(void)
 	fclose(fp);
 
 	if (remotes[n].name) {
-		++n;
+		n++;
 		remotes[n].name = (char *)NULL;
 	}
 
@@ -1666,7 +1664,7 @@ load_prompts(void)
 				name = (char *)NULL;
 				continue;
 			}
-			size_t name_len = strlen(name);
+			const size_t name_len = strlen(name);
 			prompts[n].name = xnrealloc(prompts[n].name,
 				name_len + 1, sizeof(char));
 			xstrsncpy(prompts[n].name, name, name_len + 1);
@@ -1843,7 +1841,7 @@ get_sel_files(void)
 	if (sel_n > 0)
 		set_sel_devino();
 
-	/* If previous and current number of sel files don't match (mostly
+	/* If previous and current number of selected files don't match (mostly
 	 * because some selected files were removed), recreate the selections
 	 * file to reflect the current state. */
 	if (selnbk != sel_n)
@@ -2385,7 +2383,7 @@ get_aliases(void)
 				continue;
 
 			char *p = strchr(s, '=');
-			if (!p || !*(p + 1))
+			if (!p || !p[1])
 				continue;
 
 			*p = '\0';
@@ -2499,7 +2497,7 @@ get_prompt_cmds(void)
 			continue;
 		if (line[line_len - 1] == '\n')
 			line[line_len - 1] = '\0';
-		if (!(*line + 10))
+		if (!line[10])
 			continue;
 		prompt_cmds = xnrealloc(prompt_cmds, prompt_cmds_n + 1, sizeof(char *));
 		prompt_cmds[prompt_cmds_n] = savestring(
