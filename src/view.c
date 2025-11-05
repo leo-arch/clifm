@@ -32,6 +32,7 @@
 
 #ifdef __OpenBSD__
 typedef char *rl_cpvfunc_t;
+typedef void rl_macro_print_func_t (const char *, const char *, int, const char *);
 # include <ereadline/readline/readline.h>
 #else
 # include <readline/readline.h>
