@@ -3246,7 +3246,7 @@ load_regfile_info(const mode_t mode, const filesn_t n)
 		return;
 
 	/* Check file extension */
-	char *ext = file_info[n].ext_name;
+	const char *ext = file_info[n].ext_name;
 
 #ifndef _NO_ICONS
 	if (conf.icons == 1 && name_icon_found == 0)

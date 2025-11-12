@@ -481,7 +481,7 @@ sel_regex(char *str, const char *sel_path, const mode_t filetype)
 /* Convert file type into a macro that can be decoded by stat(3).
  * If file type is specified, matches will be checked against
  * this value. */
-static mode_t
+static int
 convert_filetype(mode_t *filetype)
 {
 	switch (*filetype) {
