@@ -2190,7 +2190,7 @@ skip_this_path(const char *name)
 	return 0;
 }
 
-/* Get the list of files in PATH, plus CliFM internal commands, aliases, and
+/* Get the list of files in PATH, plus Clifm internal commands, aliases, and
  * action names, and store them in an array (bin_commands) to be read by
  * my_rl_completion(). */
 void

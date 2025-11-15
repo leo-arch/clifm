@@ -305,7 +305,7 @@ save_jumpdb(void)
 	for (i = 0; i < (int)jump_n; i++) {
 		if (total_rank > conf.max_jump_total_rank) {
 			if (reduce) {
-				int tmp_rank = jump_db[i].rank;
+				const int tmp_rank = jump_db[i].rank;
 				jump_db[i].rank = tmp_rank / reduce;
 			}
 		}
