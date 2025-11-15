@@ -580,7 +580,7 @@ remove_from_trash(char **args)
 		return FUNC_SUCCESS;
 	}
 
-	/* At this point we now all input fields are valid ELNs. */
+	/* At this point we know all input fields are valid ELNs. */
 	size_t removed = 0;
 	for (i = 0; input[i]; i++) {
 		const int num = atoi(input[i]);
