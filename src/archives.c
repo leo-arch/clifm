@@ -1113,7 +1113,7 @@ handle_zip(char **args)
 	int zip_found = 0;
 	int success = 0;
 	int ret = FUNC_SUCCESS;
-	char dest_dir[PATH_MAX];
+	char dest_dir[PATH_MAX + 2];
 
 	size_t i;
 	for (i = 1; args[i]; i++) {
@@ -1128,7 +1128,7 @@ handle_zip(char **args)
 		int retval = -1;
 		if (zip_app == ZIP_APP_UNZIP) {
 			snprintf(dest_dir, sizeof(dest_dir), "%s.extracted", args[i]);
-			char *cmd[] = {"unzip", "-qq", args[i], "-d", dest_dir, NULL};
+			char *cmd[] = {"unzip", args[i], "-d", dest_dir, NULL};
 			retval = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 		} else {
 			snprintf(dest_dir, sizeof(dest_dir), "-o%s.extracted", args[i]);
