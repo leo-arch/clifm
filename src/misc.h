@@ -64,6 +64,7 @@ void reset_inotify(void);
 #elif defined(BSD_KQUEUE)
 void read_kqueue(void);
 #endif /* LINUX_INOTIFY */
+void check_fs_events(const int is_internal_cmd);
 
 __END_DECLS
 

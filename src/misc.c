@@ -491,7 +491,47 @@ read_kqueue(void)
 		}
 	}
 }
+#elif defined(GENERIC_FS_MONITOR)
+/* Update the current list of files if the modification time of the current
+ * directory changed and if the number of files differ. Sometimes, processes
+ * create temporary files (changing modification time) that are immediately
+ * deleted (resulting in the same number of files), in which case there is no
+ * need to update the list of files (this happens for example with 'git pull',
+ * or with a command along the lines of 'touch file && rm file'). */
+static void
+check_fs_changes(void)
+{
+	if (!workspaces || cur_ws < 0 || cur_ws >= MAX_WS
+	|| !workspaces[cur_ws].path)
+		return;
+
+	const filesn_t cur_files = count_dir(workspaces[cur_ws].path, 0) - 2;
+	struct stat a;
+
+	if (curdir_mtime != 0 && stat(workspaces[cur_ws].path, &a) != -1
+	&& curdir_mtime != a.st_mtime
+	&& cur_files >= 0 && files != cur_files)
+		reload_dirlist();
+}
 #endif /* LINUX_INOTIFY */
+
+void
+check_fs_events(const int is_internal_cmd)
+{
+	if (conf.autols == 0 || (is_internal_cmd == 0
+	&& conf.clear_screen == CLEAR_INTERNAL_CMD_ONLY))
+		return;
+
+#if defined(LINUX_INOTIFY)
+	if (watch)
+		read_inotify();
+#elif defined(BSD_KQUEUE)
+	if (watch && event_fd >= 0)
+		read_kqueue();
+#elif defined(GENERIC_FS_MONITOR)
+	check_fs_changes();
+#endif /* LINUX_INOTIFY */
+}
 
 void
 set_filter_type(const char c)

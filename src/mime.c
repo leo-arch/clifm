@@ -1646,6 +1646,9 @@ run_archiver(char **fpath, char **app, char **mime_type)
 	free(*app);
 	free(*mime_type);
 
+	exit_code = exit_status;
+	check_fs_events(1);
+
 	return exit_status;
 }
 #endif /* _NO_ARCHIVING */
