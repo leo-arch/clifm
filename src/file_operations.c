@@ -1952,7 +1952,7 @@ static int
 rm_confirm(const struct rm_info *info, const size_t start, const int have_dirs)
 {
 	printf(_("File(s) to be removed%s:\n"),
-		have_dirs == 1 ? _(" (recursively)") : "");
+		have_dirs > 0 ? _(" (recursively)") : "");
 
 	size_t i;
 	for (i = start; info[i].name; i++)
