@@ -2474,7 +2474,7 @@ CHECK_FIRST_WORD:
 
 	word = first_word ? first_word : last_word;
 
-	/* Skip 'b:' (bookmarks), 's:' (sel files) 't:' (tags) and 'w:'
+	/* Skip 'b:' (bookmarks), 's:' (sel files), 't:' (tags), and 'w:'
 	 * (workspaces) constructs. */
 	if ((*word == 'b' || *word == 's' || *word == 't' || *word == 'w')
 	&& word[1] == ':')

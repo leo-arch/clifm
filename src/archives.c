@@ -747,10 +747,8 @@ check_not_compressed(char **args)
 			free(deq);
 		}
 
-		if (is_compressed(args[i], 1) != 0) {
-			xerror(_("archiver: '%s': Not an archive/compressed file\n"), args[i]);
+		if (is_compressed(args[i], 1) != FUNC_SUCCESS)
 			return 1;
-		}
 	}
 
 	return 0;
@@ -1059,11 +1057,72 @@ decompress_others(char **args)
 	return FUNC_SUCCESS;
 }
 
+/* Some files, like .docx and .odt, while not properly zip files, are
+ * nonetheless zip-based. This function checks the first four bytes of the file
+ * FILE to identify zip-based files. It returns 1 if FILE is zip-based or
+ * zero otherwise.
+ * -1 is returned in case of error reading the file. */
+static int
+is_probably_zip(const char *file)
+{
+	FILE *f = fopen(file, "rb");
+	if (!f)
+		return (-1);
+
+	uint8_t sig[4];
+	if (fread(sig, 1, 4, f) != 4) {
+		fclose(f);
+		return 0;
+	}
+
+	fclose(f);
+	/* Common ZIP signatures:
+	 * local file header:   0x50 0x4B 0x03 0x04
+	 * empty archive:       0x50 0x4B 0x05 0x06 (end of central dir)
+	 * spanned archive:     0x50 0x4B 0x07 0x08 (spanned) */
+	if (sig[0] == 0x50 && sig[1] == 0x4B &&
+	((sig[2]== 0x03 && sig[3] == 0x04) ||
+	(sig[2] == 0x05 && sig[3] == 0x06) ||
+	(sig[2] == 0x07 && sig[3] == 0x08)))
+		return 1;
+
+	return 0;
+}
+
+static int
+handle_zip(char **args)
+{
+	int zip_found = 0;
+	int ret = FUNC_SUCCESS;
+	char dest_dir[PATH_MAX];
+
+	size_t i;
+	for (i = 1; args[i]; i++) {
+		if (is_probably_zip(args[i]) != 1) {
+			xerror(_("archiver: '%s': Not an archive/compressed file\n"), args[i]);
+			ret = FUNC_FAILURE;
+			continue;
+		}
+
+		zip_found = 1;
+		snprintf(dest_dir, sizeof(dest_dir), "%s.extracted", args[i]);
+
+		char *cmd[] = {"unzip",  "-qq", args[i], "-d", dest_dir, NULL};
+		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != 0) {
+			if (args[i + 1])
+				press_any_key_to_continue(0);
+			ret = FUNC_FAILURE;
+		}
+	}
+
+	return zip_found == 0 ? FUNC_FAILURE : ret;
+}
+
 static int
 decompress_files(char **args)
 {
 	if (check_not_compressed(args) == 1)
-		return FUNC_FAILURE;
+		return handle_zip(args);
 
 	/* # ISO 9660 # */
 	const char *ret = strrchr(args[1], '.');

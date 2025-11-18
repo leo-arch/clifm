@@ -2532,8 +2532,8 @@ check_autocmd_files(void)
 
 /* List files in the current working directory (global variable 'path').
  * Unlike list_dir(), however, this function uses no color and runs
- * neither stat() nor count_dir(), which makes it quite faster. Return
- * zero on success and one on error */
+ * neither stat() nor count_dir(), which makes it quite faster. Returns
+ * zero on success and one on error. */
 static int
 list_dir_light(const int autocmd_ret)
 {
