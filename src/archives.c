@@ -1089,9 +1089,27 @@ is_probably_zip(const char *file)
 	return 0;
 }
 
+#define ZIP_APP_NONE  0
+#define ZIP_APP_UNZIP 1
+#define ZIP_APP_7Z    2
+
+static int
+get_zip_app(void)
+{
+	if (is_cmd_in_path("unzip"))
+		return ZIP_APP_UNZIP;
+	if (is_cmd_in_path("7z"))
+		return ZIP_APP_7Z;
+	return ZIP_APP_NONE;
+}
+
 static int
 handle_zip(char **args)
 {
+	static int zip_app = -1;
+	if (zip_app == -1)
+		zip_app = get_zip_app();
+
 	int zip_found = 0;
 	int success = 0;
 	int ret = FUNC_SUCCESS;
@@ -1099,17 +1117,26 @@ handle_zip(char **args)
 
 	size_t i;
 	for (i = 1; args[i]; i++) {
-		if (is_probably_zip(args[i]) != 1) {
+		if (zip_app == ZIP_APP_NONE || is_probably_zip(args[i]) != 1) {
 			xerror(_("archiver: '%s': Not an archive/compressed file\n"), args[i]);
 			ret = FUNC_FAILURE;
 			continue;
 		}
 
 		zip_found = 1;
-		snprintf(dest_dir, sizeof(dest_dir), "%s.extracted", args[i]);
 
-		char *cmd[] = {"unzip",  "-qq", args[i], "-d", dest_dir, NULL};
-		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != 0) {
+		int retval = -1;
+		if (zip_app == ZIP_APP_UNZIP) {
+			snprintf(dest_dir, sizeof(dest_dir), "%s.extracted", args[i]);
+			char *cmd[] = {"unzip", "-qq", args[i], "-d", dest_dir, NULL};
+			retval = launch_execv(cmd, FOREGROUND, E_NOFLAG);
+		} else {
+			snprintf(dest_dir, sizeof(dest_dir), "-o%s.extracted", args[i]);
+			char *cmd[] = {"7z", "x", args[i], dest_dir, NULL};
+			retval = launch_execv(cmd, FOREGROUND, E_NOFLAG);
+		}
+
+		if (retval != 0) {
 			if (success == 1 || args[i + 1])
 				press_any_key_to_continue(0);
 			ret = FUNC_FAILURE;
@@ -1120,6 +1147,9 @@ handle_zip(char **args)
 
 	return zip_found == 0 ? FUNC_FAILURE : ret;
 }
+#undef ZIP_APP_NONE
+#undef ZIP_APP_UNZIP
+#undef ZIP_APP_7Z
 
 static int
 decompress_files(char **args)
