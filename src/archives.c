@@ -1093,6 +1093,7 @@ static int
 handle_zip(char **args)
 {
 	int zip_found = 0;
+	int success = 0;
 	int ret = FUNC_SUCCESS;
 	char dest_dir[PATH_MAX];
 
@@ -1109,9 +1110,11 @@ handle_zip(char **args)
 
 		char *cmd[] = {"unzip",  "-qq", args[i], "-d", dest_dir, NULL};
 		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != 0) {
-			if (args[i + 1])
+			if (success == 1 || args[i + 1])
 				press_any_key_to_continue(0);
 			ret = FUNC_FAILURE;
+		} else {
+			success = 1;
 		}
 	}
 
