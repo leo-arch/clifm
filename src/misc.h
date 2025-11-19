@@ -59,10 +59,7 @@ int  unpin_dir(void);
 void version_function(const int full);
 
 #ifdef LINUX_INOTIFY
-void read_inotify(void);
 void reset_inotify(void);
-#elif defined(BSD_KQUEUE)
-void read_kqueue(void);
 #endif /* LINUX_INOTIFY */
 void check_fs_events(const int is_internal_cmd);
 

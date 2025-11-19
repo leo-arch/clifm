@@ -351,7 +351,7 @@ reset_inotify(void)
 			PROGRAM_NAME, rpath, strerror(errno));
 }
 
-void
+static void
 read_inotify(void)
 {
 	if (inotify_fd == UNSET)
@@ -475,7 +475,7 @@ if (event_data[i].fflags & NOTE_RENAME)
 	puts("NOTE_RENAME");
 if (event_data[i].fflags & NOTE_REVOKE)
 	puts("NOTE_REVOKE"); */
-void
+static void
 read_kqueue(void)
 {
 	struct kevent event_data[NUM_EVENT_SLOTS];
