@@ -2845,7 +2845,7 @@ set_search_strategy(const char *line)
 }
 
 static void
-free_workspaces_names(void)
+free_workspace_names(void)
 {
 	if (workspaces) {
 		int i = MAX_WS;
@@ -3337,7 +3337,7 @@ read_config(void)
 		return;
 	}
 
-	free_workspaces_names();
+	free_workspace_names();
 
 	if (xargs.rl_vi_mode == 1)
 		rl_vi_editing_mode(1, 0);

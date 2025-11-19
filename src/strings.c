@@ -2923,9 +2923,10 @@ parse_input_str(char *str)
 		if ((*substr[i] == '.' && (!substr[i][1] || (substr[i][1] == '.'
 		&& (!substr[i][2] || substr[i][2] == '/'))))
 		|| strstr(substr[i], "/..")) {
-			char *tmp = (is_int_cmd == 1
-			&& (*substr[0] != 'l' || substr[0][1])) /* Exclude 'l' command. */
-				? normalize_path(substr[i], strlen(substr[i])) : NULL;
+			char *tmp = (i == 0 /* autocd/auto-open (no command name) */
+				/* Exclude 'l' command. */
+				|| (is_int_cmd == 1 && (*substr[0] != 'l' || substr[0][1])))
+					? normalize_path(substr[i], strlen(substr[i])) : NULL;
 			if (tmp) {
 				free(substr[i]);
 				substr[i] = tmp;

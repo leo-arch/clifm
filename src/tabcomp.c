@@ -2518,7 +2518,7 @@ DISPLAY_MATCHES:
 
 			char *norm_dir = (char *)NULL;
 			/* MATCHES[0] SHOULD BE DIR!! */
-			if (strstr(matches[0], "/..")) {
+			if (strstr(matches[0], "..")) {
 				norm_dir = normalize_path(matches[0], strlen(matches[0]));
 				if (norm_dir) {
 					size_t norm_dir_len = strlen(norm_dir) + 2;
