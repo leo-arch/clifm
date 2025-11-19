@@ -58,11 +58,6 @@ void splash(void);
 int  unpin_dir(void);
 void version_function(const int full);
 
-#ifdef LINUX_INOTIFY
-void reset_inotify(void);
-#endif /* LINUX_INOTIFY */
-void check_fs_events(const int is_internal_cmd);
-
 __END_DECLS
 
 #endif /* MISC_H */

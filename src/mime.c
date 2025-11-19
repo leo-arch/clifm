@@ -47,6 +47,7 @@
 # include "aux.h"
 # include "checks.h"
 # include "config.h"
+# include "fs_events.h" /* check_fs_events */
 # include "listing.h"
 # include "messages.h"
 # include "mime.h"

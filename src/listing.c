@@ -81,6 +81,7 @@
 #include "checks.h"
 #include "colors.h"
 #include "dothidden.h" /* load_dothidden, check_dothidden, free_dothidden */
+#include "fs_events.h" /* set_events_checker */
 #ifndef _NO_ICONS
 # include "icons.h"
 #endif /* !_NO_ICONS */
@@ -855,45 +856,6 @@ run_pager(const int columns_n, int *reset_pager, filesn_t *i, size_t *counter)
 	putchar('\r');
 	ERASE_TO_RIGHT;
 	return 0;
-}
-
-static void
-set_events_checker(void)
-{
-	if (xargs.list_and_quit == 1)
-		return;
-
-#if defined(LINUX_INOTIFY)
-	reset_inotify();
-
-#elif defined(BSD_KQUEUE)
-	if (event_fd >= 0) {
-		close(event_fd);
-		event_fd = -1;
-		watch = 0;
-	}
-
-# if defined(O_EVTONLY)
-	event_fd = open(workspaces[cur_ws].path, O_EVTONLY);
-# else
-	event_fd = open(workspaces[cur_ws].path, O_RDONLY);
-# endif /* O_EVTONLY */
-	if (event_fd >= 0) {
-		/* Prepare for events */
-		EV_SET(&events_to_monitor[0], (uintptr_t)event_fd, EVFILT_VNODE,
-			EV_ADD | EV_CLEAR, KQUEUE_FFLAGS, 0, workspaces[cur_ws].path);
-		watch = 1;
-		/* Register events */
-		kevent(kq, events_to_monitor, NUM_EVENT_SLOTS, NULL, 0, NULL);
-	}
-
-#elif defined(GENERIC_FS_MONITOR)
-	struct stat a;
-	if (stat(workspaces[cur_ws].path, &a) != -1)
-		curdir_mtime = a.st_mtime;
-	else
-		curdir_mtime = 0;
-#endif /* LINUX_INOTIFY */
 }
 
 static int

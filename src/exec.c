@@ -55,6 +55,7 @@ typedef void rl_macro_print_func_t (const char *, const char *, int, const char 
 #include "config.h"
 #include "exec.h"
 #include "file_operations.h"
+#include "fs_events.h" /* check_fs_events */
 #include "history.h"
 #include "init.h"
 #include "jump.h"
