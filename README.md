@@ -18,10 +18,6 @@ href="https://github.com/leo-arch/clifm/issues">Report bug</a></h4>
 <a href="https://github.com/leo-arch/clifm/releases"><img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/leo-arch/clifm"></a>
 <a><img src="https://img.shields.io/github/commits-since/leo-arch/clifm/latest"></a>
 <a><img src="https://img.shields.io/github/last-commit/leo-arch/clifm/master?color=blue&style=flat"/></a>
-<!---
-<a href="https://en.wikipedia.org/wiki/Privacy-invasive_software"><img src="https://img.shields.io/badge/privacy-✓-green?style=flat"/></a>
-<a href="https://gitter.im/leo-arch/clifm"><img src="https://img.shields.io/gitter/room/leo-arch/clifm?style=flat"/></a>
--->
 	<a href="https://software.opensuse.org//download.html?project=home%3Aarchcrack&package=clifm"><img src="https://img.shields.io/badge/CD-OBS-red?logo=opensuse&logoColor=white"/></a>
 </p>
 
@@ -29,24 +25,11 @@ href="https://github.com/leo-arch/clifm/issues">Report bug</a></h4>
 <a href="https://github.com/leo-arch/clifm/actions/workflows/codeql-analysis.yml"><img src="https://github.com/leo-arch/clifm/actions/workflows/codeql-analysis.yml/badge.svg?branch=master"></a>
 <a href="https://www.codacy.com/gh/leo-arch/clifm/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=leo-arch/clifm&amp;utm_campaign=Badge_Grade"><img src="https://app.codacy.com/project/badge/Grade/c2c24860fce64d2aa6ca8e1dd0981d6d"/></a>
 <a href="https://build.opensuse.org/package/show/home:archcrack/CliFM"><img src="https://build.opensuse.org/projects/home:archcrack/packages/CliFM/badge.svg?type=default"></a>
-<!---
-<a href="https://app.codiga.io/project/30518/dashboard"><img alt="Code grade" src="https://api.codiga.io/project/30518/status/svg"/></a>
--->
-
-<!---
-<a href="https://bestpractices.coreinfrastructure.org/projects/4884"><img src="https://bestpractices.coreinfrastructure.org/projects/4884/badge"></a>
--->
 </p>
 
 ---
 
 [![demo](https://asciinema.org/a/ov5HnwdlPvnR7ucfDrQMfeg2N.svg)](https://asciinema.org/a/ov5HnwdlPvnR7ucfDrQMfeg2N?autoplay=1)
-
-<!---
-<h4 align="center">Clifm's interface</h4>
-<p align="center"><img src="https://i.postimg.cc/YC77qSLK/interface-1-7-9.png"></p>
-<p align="center">You only need 7 keystrokes to move all selected files into the <i>images</i> directory: <b>m sel 8</b></p>
--->
 
 ---
 
@@ -165,19 +148,6 @@ For a detailed explanation of each of these features, follow the corresponding l
 
 [![Alt text](https://img.youtube.com/vi/CJmcisw9F90/0.jpg)](https://www.youtube.com/watch?v=CJmcisw9F90)
 
-<!---
-<details>
-<summary>Watch me fly!</summary>
-
-<h3 align="center"><br><i>Did I say it's fast?</i></h3>
-<p align="center"><a href="https://mega.nz/embed/J8hEkCZZ#fGp0JtcDvFIWKmTc4cOp0iMrWRlbqs99THg8F7EmQWI"><img src="https://i.postimg.cc/CKx6zrvL/vid-thumb.png"></a></p>
-
-Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Dikiciyan) \
-**Note**: Icons and files preview depend on third-party software. Consult the [icons](https://github.com/leo-arch/clifm/wiki/Advanced#icons-smirk) and [files preview](https://github.com/leo-arch/clifm/wiki/Advanced#files-preview) sections.
-
-</details>
--->
-
 ---
 
 ## :floppy_disk: Installation
@@ -226,132 +196,6 @@ For a complete description, please consult our [Wiki](https://github.com/leo-arc
 ---
 
 ## :newspaper: What's new?
-<!---
-<details>
-<summary>Click here to expand</summary>
-
-* `1.18 (Caniche endormi)`
-  - [Support for `.hidden` files, including wildcards](https://github.com/leo-arch/clifm/wiki/Advanced#1b-hidden-files).
-  - Several improvements to the long view
-    - [Set time style via either `--time-style`, `TimeStyle` (config file), or **TIME_STYLE** (environment variable)](https://github.com/leo-arch/clifm/wiki/Common-Operations#time-styles).
-	- Dereference symbolic links via `-L,--follow-symlinks-long`.
-    - Toggle `follow-symlinks-long` via the [`k` command](https://github.com/leo-arch/clifm/wiki/Introduction#k) and the <kbd>Alt-+</kbd> keybinding (edit your keybindings file -via `kb edit`- and add this line to enable this new keybinding: `toggle-follow-links-long:\M-+`).
-    - [Disable the group ID field](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode).
-    - [File allocated blocks support](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode).
-    - [Hard links number support](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode).
-    - [Birth time support](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode).
-    - [User/group ID **names** (instead of just numbers)](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode).
-    - [Customize displayed fields via `--prop-fields`](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode).
-    - [Allow double spacing for fields](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode).
-  - [Set time style used by the `p/pp` command via either `--ptime-style`, `PTimeStyle` (config file), or **PTIME_STYLE** (environment variable)](https://github.com/leo-arch/clifm/wiki/Introduction#p-prop).
-  - Since **1)** it was unintuitive to have `-a` and `-l` options to **disable** hidden files and long view respectively (instead of enabling these features, like most files listers do (ex: `ls`, `exa`, `eza`, `lsd`)), and **2)** we were using uppercase options sometimes to enable and sometimes to disable features (which is not consistent), we made the following changes:
-    - `-a` enables hidden files and `-A` disables it
-    - `-f` enables dirs-first and `-F` disables it
-    - `-l` enables long-view and
-    - `-L` follow symbolic links in long view (short for `--follow-symlinks-long`)
-	- `-o` enables autocd and `-O` disables it
-* `1.17 (Lechuck)`
-  - [Allow properties fields order customization in long view](https://github.com/leo-arch/clifm/wiki/Common-Operations#file-details).
-  - [Autocommand files](https://github.com/leo-arch/clifm/wiki/Specifics#autocommand-files-cfmin-and-cfmout) won't be read unless `ReadAutocmdFiles` is set to `true` in the main configuration file.
-* `1.16 (Big Whoop)`
-  - [**LS_COLORS** support](https://github.com/leo-arch/clifm/wiki/Customization#ls_colors-support).
-* `1.15 (Jolly Rogger)`
-  - Image previews using sixel (requires `fzf` 0.44 or later).
-  - List ACLs (`p`/`pp` command) (Linux).
-  - Run in [read-only mode](https://github.com/leo-arch/clifm/wiki/Specifics#read-only-mode).
-* `1.14 (Jawbreaker)`
-  - [Run as a **stat**(1) replacement via `--stat` and `--stat-full` options](https://github.com/leo-arch/clifm/wiki/Advanced/#stat1-replacement).
-  - Exclude commands from the commands history via `HistIgnore` in the config file.
-  - Exclude directories from the directories history (and the jump database) via `DirhistIgnore` in the config file.
-  - Maximum limit of listed files increased from **INT_MAX** to **SSIZE_MAX**.
-  - Nested instances are now allowed (setting both **SHLVL** and **CLIFMLVL** as appropriate).
-  - Files extended attributes on non-glibc Linux distributions.
-  - Files birth time support on Haiku.
-  - **random**(3) replaced by **arc4random**(3), if available, for increased security. 
-  - More restrictive values when running in [secure mode](https://github.com/leo-arch/clifm/wiki/Specifics#a-secure-environment).
-* `1.13 (Voodoo Root)`
-  - Support for BSD file flags (`p`/`pp` command).
-  - Nano-second precision for timestamps (`p`/`pp` command).
-  - Ported to Solaris (including doors support). If you experience some issue with the warning prompt, please consult the [troubleshooting section](https://github.com/leo-arch/clifm/wiki/Troubleshooting#warning-prompt).
-  - Since `fzy` has been [inactive for more than a year](https://github.com/jhawthorn/fzy), we have forked it as [fnf](https://github.com/leo-arch/fnf) (including some features needed to make it work with **clifm**). Because of this, `--fzytab` has been renamed to `--fnftab`, just as the `TabCompletionMode` option in the config file now takes `fnf` instead of `fzy` as value.
-  - [Filenames validation via the `new` command](https://github.com/leo-arch/clifm/wiki/Introduction#n-new).
-  - If using the [new ueberzug](https://github.com/ueber-devel/ueberzug) (18.2.0), please update your [`clifmrun` file](https://github.com/leo-arch/clifm/blob/master/misc/tools/imgprev/clifmrun) to get image previews working again.
-  - [Run external commands using any shell you like via the **CLIFM_SHELL** environment variable](https://github.com/leo-arch/clifm/wiki/FAQ#large_blue_diamond-how-do-i-run-with-a-different-shell.).
-* `1.12 (Blondebeard)`
-  - [Improved logs system](https://github.com/leo-arch/clifm/wiki/Introduction#log).
-  - Better tab completion for internal commands.
-  - Allow the use of [Xterm-like color names in color schemes](https://github.com/leo-arch/clifm/wiki/Customization#xterm-like-color-names-256-colors).
-  - Disable bold colors via `--no-bold`.
-  - Colorize symlinks according to the target file via `ColorLinksAsTarget` in the config file.
-  - Filenames truncation can now be disabled permanently via the `TrimNames` option in the config file and `--no-trim-names`.
-  - Improved interface fot the [`tag` command](https://github.com/leo-arch/clifm/wiki/Introduction#tag).
-  - Improved synchronization between multiple instances.
-* `version 1.11 (Cobb)`
-  - Files apparent size is used now by default. Revert via `--no-apparent-size` or setting `ApparentSize` to `false` in the config file. 
-  - [**Clifm** will try to run in 256 colors mode if support is detected](https://github.com/leo-arch/clifm/wiki/Customization#color-support). Just comment out the `ColorScheme` option in the config file (or set it either to an empty value or to `default-256`) to enable this feature.
-  - [Mark files with extended attributes (long view)](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode)
-  - [Customizable timestamps, including relative times (long view)](https://github.com/leo-arch/clifm/wiki/Common-Operations#time-styles)
-  - [Color gradients for file sizes and timestamps (long view)](https://github.com/leo-arch/clifm/wiki/Common-Operations#file-details)
-  - [Use `config dump` to print the list of settings and their current value (highlighting those differing from default values)](https://github.com/leo-arch/clifm/wiki/Introduction#config)
-  - The [`config` command](https://github.com/leo-arch/clifm/wiki/Introduction#config) is now used to open/edit the main configuration file (`edit` can still be used, but is deprecated and might be removed in a future release)
-  - `FzfPreview` (file previews in tab completion - fzf mode only) is now enabled by default (disable via `--no-fzfpreview`)
-  - Improved jump table screen (via the [`j` command](https://github.com/leo-arch/clifm/wiki/Introduction#j-jc-jl-jp-jo-je))
-  - [Purge the jump database via the `--purge` option](https://github.com/leo-arch/clifm/wiki/Introduction#j-jc-jl-jp-jo-je)
-* `version 1.10 (Swordmaster)`:
-  - [Quickly access the directory history list via the `dh` command](https://github.com/leo-arch/clifm/wiki/Introduction#dh). The `dh` plugin, just as the `bh` and `fh` commands, is now deprecated.
-  - [History timestamps](https://github.com/leo-arch/clifm/wiki/Introduction#history)
-  - `s:` works now like `sel` keyword, to be in line with `t:` (for tags) and `b:` (for bookmarks). Consult the [Files selection](https://github.com/leo-arch/clifm/wiki/Common-Operations#selection) section.
-  - The `:b` construct was removed. `b:` now lists bookmark names instead of paths. `b:mybm` expands to the path pointed to by the bookmark named `mybm`. The `ExpandBookmarks` option (config file) is now deprecated, just as the bookmarks suggestions strategy (in the `SuggestionStrategy` option). See the [Bookmarks](https://github.com/leo-arch/clifm/wiki/Common-Operations#bookmarks) section.
-  - Bookmarks can be created directly from the command line, without an interactive prompt: `bm add FILE BM_NAME`.
-  - [Rename profiles via the `rename` subcommand](https://github.com/leo-arch/clifm/wiki/Introduction#pf-profile)
-  - [`oc`, a files ownership editor](https://github.com/leo-arch/clifm/wiki/Introduction#oc)
-  - Get list of commands and a brief description via `cmd<TAB>` 
-  - [Suggest a brief description for internal commands](https://github.com/leo-arch/clifm/wiki/Specifics#auto-suggestions)
-  - Set a custom selections file via the `--sel-file` flag
-* `version 1.9 (Sharptooth)`:
-  - [Improved fuzzy suggestions/completions for filenames and paths](https://github.com/leo-arch/clifm/wiki/Specifics#auto-suggestions)
-  - [Automatic expansion for bookmarks, file type, and MIME type filters](https://github.com/leo-arch/clifm/wiki/Advanced#grouping-files-via-automatic-expansion)
-  - [Private workspace settings](https://github.com/leo-arch/clifm/wiki/Specifics#workspace-settings)
-  - [Run autocommands based on workspaces, and not just on paths](https://github.com/leo-arch/clifm/wiki/Specifics#autocommands)
-  - [Run the pager based on the current amount of files](https://github.com/leo-arch/clifm/wiki/Introduction#pg-pager)
-  - Files counter for directories in long view mode
-  - [Filter files by file type](https://github.com/leo-arch/clifm/wiki/Introduction#ft-filter)
-  - [Filter files by MIME type](https://github.com/leo-arch/clifm/wiki/Advanced/#quickly-filtering-files-with-the-tab-key)
-  - [`pc`, a file permissions editor](https://github.com/leo-arch/clifm/wiki/Introduction#pc)
-  - `cd -` works now just like in most shells
-  - The [`view` command](https://github.com/leo-arch/clifm/wiki/Introduction#view) can now select files via <kbd>TAB</kbd>
-  - Launch the [`view` command](https://github.com/leo-arch/clifm/wiki/Introduction#view) via <kbd>Alt+-</kbd>
-  - Use `--fzfpreview-hidden` to start the preview window hidden (toggle via <kbd>Alt-p</kbd>)
-* `version 1.8 (Otis)`:
-  - If upgrading from a previous version (optional, but recommended):
-    - <kbd>F7</kbd> opens now shotgun's configuration file (instead of the jump database file). Update `keybindings.clifm`: removing the file and restarting is enough. Manually: run `kb edit` and then replace `open-jump-db:\e[18~` by `open-preview:\e[18~`.
-    - New specific options to control the files preview window. Add the following options to the `FzfTabOptions` line in your theme file (via the `cs edit` command) or just copy the theme file from the data directory (usually `/usr/local/share/clifm/colors`): `--bind alt-p:toggle-preview,change:top,alt-up:preview-page-up,alt-down:preview-page-down --preview-window=wrap,border-left --color="border:7:dim"`.
-  - [`clifmimg` plugin, for image previews](https://github.com/leo-arch/clifm/tree/master/misc/tools/imgprev#image-previews)
-  - [`view` command, to preview files in full screen](https://github.com/leo-arch/clifm/wiki/Introduction#view)
-  - [Tab completion with file previews](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion-with-file-previews)
-  - [Shotgun, a built-in files previewer](https://github.com/leo-arch/clifm/wiki/Advanced#shotgun)
-  - Improved Unicode support for the suggestions system
-  - Flat-view for the [`fzfsel` plugin](https://github.com/leo-arch/clifm/wiki/Advanced#plugins) via the `-f` option
-  - [Improved VT100 compatibility via the `--vt100` switch](https://github.com/leo-arch/clifm/wiki/Extra#clifm-running-on-a-dec-vt100-terminal-1978)
-  - [Cygwin support](https://github.com/leo-arch/clifm/wiki/Introduction#small_blue_diamond-d-cygwin)
-  - Improved performance/portability of the suggestions system: no more slow/non-portable `CPR`-`CUP` [escape sequences](https://www.xfree86.org/current/ctlseqs.html)! These were replaced by 100% made in-house cursor position calculation plus basic/portable escape sequences: `CUU`, `CUD`, `CUF`, and `CUB`.
-* `version 1.7 (Elaine)`:
-  - [Configuration files renamed from `.cfm` to `.clifm`](https://github.com/leo-arch/clifm/wiki/Specifics#new-extension-for-configuration-files) (avoid conflict with [ColdFusion](https://en.wikipedia.org/wiki/ColdFusion_Markup_Language) files)
-  - <kbd>Ctrl-l</kbd> added for screen refresh
-  - `cc` command removed to avoid conflicts with `/bin/cc` (use `colors` instead)
-  - `--std-tab-comp` option renamed to `--stdtab` (to match `--fzytab` and `--smenutab` options)
-* `version 1.6 (Guybrush)`:
-  - ELNs color defaults now to cyan
-  - `--no-folders-first` and `--folders-first` options renamed to `--no-dirs-first` and `--dirs-first` respectively. In the same way, the `folders-first` command was renamed to `dirs-first`.
-  - `PromptStyle` option renamed as `Notifications` (taking `true` and `false` as values)
-* `version 1.5 (Nano)`:
-  - `Prompt`, `WarningPromptStr`, `DividingLine`, and `FfzTabOptions` options were moved from the config file to the color scheme file to get a **centralized and single theming file**. However, to keep backwards compatibility, the old location is still recognized. If any of these options is found in the color scheme file, values taken from the main configuration file will be overriden.
-  - The [warning prompt](https://github.com/leo-arch/clifm/wiki/Customization#the-warning-prompt) color is set now via escape codes (exactly as the regular prompt). The `wp` color code is used now only for the _input text color_ of the warning prompt.
-* `version 1.4 (Alma)`:
-  - In order to make _Lira_ more powerful (it can now match entire filenames instead of just file extensions) it was necessary to introduce [a little syntax modification](https://github.com/leo-arch/clifm/wiki/Specifics#syntax) in its configuration file.
-
-</details>
--->
 
 Consult the [changelog file](https://github.com/leo-arch/clifm/blob/master/CHANGELOG).
 
@@ -375,9 +219,6 @@ Contributions are kindly welcome! Please see our [contribution guidelines](https
 ---
 
 ## Community
-<!---
-Join our [Gitter discussion room](https://gitter.im/leo-arch/clifm) and let us know what you think: ideas, comments, observations and questions are always useful.
--->
 
 Visit the [Discussions section](https://github.com/leo-arch/clifm/discussions) of this repo and let us know what you think: ideas, comments, observations and questions are always useful.
 
