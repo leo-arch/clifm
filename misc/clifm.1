@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Oct 13, 2025" "clifm 1.26.4" "Clifm Manual"
+.TH "CLIFM" "1" "Nov 22, 2025" "clifm 1.26.4" "Clifm Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -489,9 +489,11 @@ The archiver function brings two modes: \fBac\fR, to generate archives or compre
 .sp
 Example: `\fBac\ sel\fR`, `\fBac\ 4\-25\ myfile\fR`, or `\fBad\ *.tar.gz\fR`.
 .sp
+Notice that, in the case of ZIP-based files, such as \fI.odt\fR, \fI.docx\fR, \fI.apk\fR, and so on, \fBclifm\fR will attempt to dearchive them using either \fBunzip\fR(1) or \fB7z\fR (in this order). If none is found, the operation is skipped. Files are extracted into a directoy named like the archive followed by \fI.extracted\fR in the current curectory. For example, the contents of the file named \fIdocument.odt\fR will be extracted into the directory \fIdocument.odt.extracted\fR.
+.sp
 Multiple archive/compression formats are supported, including Zstandard. Note that when it comes to ISO 9660 files only a single file is supported.
 .sp
-The archive mount function for non ISO files depends on \fBarchivemount\fR, while the remaining functions depend on \fBatool\fR and other third\-party utilities for achieve formats support, for example, \fBp7zip\fR. \fBp7zip\fR is also used to manage most decompressing options for ISO 9660 files, except for mount, in which case \fBmount(8)\fR is used. Creation of ISO files is done via \fBgenisoimage\fR(1). For more information consult \fBatool\fR(1), \fBarchivemount\fR(1), \fBzstd\fR(1), and \fB7z\fR(1).
+The archive mount function for non ISO files depends on \fBarchivemount\fR, while the remaining functions depend on \fBatool\fR and other third\-party utilities for achieve formats support, for example, \fBp7zip\fR. \fBp7zip\fR is also used to manage most decompressing options for ISO 9660 files, except for mount, in which case \fBmount\fR(8) is used. Creation of ISO files is done via \fBgenisoimage\fR(1). For more information consult \fBatool\fR(1), \fBarchivemount\fR(1), \fBzstd\fR(1), and \fB7z\fR(1).
 .TP
 .B acd, autocd \fR[on | off | status]
 Toggle the autocd function. If set to on, `\fBDIR\fR` amounts to `\fBcd\ DIR\fR`.
