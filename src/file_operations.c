@@ -702,8 +702,9 @@ is_safe_filename(const char *name)
 	const char *s = name;
 	while (*s) {
 		/* Contains control characters (being not UTF-8 bytes), or the
-		 * DEL character (0x7f). */
-		if ((*s < ' ' && !IS_UTF8_CHAR(*s)) || *s == 0x7f)
+		 * DEL character (0x7f), or non-breaking space (0xa0). */
+		if ((*s < ' ' && !IS_UTF8_CHAR(*s)) || *s == 0x7f
+		|| (unsigned char)*s == 0xa0)
 			print_val_err(name, UNSAFE_CONTROL, &safe);
 
 		/* Contains shell meta-characters */
