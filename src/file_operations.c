@@ -78,6 +78,8 @@ static char *const unsafe_name_msgs[] = {
 	"Reserved shell/system keyword",
 	"Contains control characters",
 	"Contains shell meta-characters",
+	"Contains a leading whitespace",
+	"Contains a trailing whitespace",
 	"Too long",
 	"Contains characters not in the Portable Filename Character Set"
 };
@@ -632,60 +634,70 @@ is_range(const char *str)
 	return 0;
 }
 
-static int
-print_val_err(const char *name, const int msg_type)
+static void
+print_val_err(const char *name, const int msg_type, int *safe)
 {
-	printf("%s: %s\n", name, unsafe_name_msgs[msg_type]);
-	return 0;
+	printf("'%s': %s\n", name, unsafe_name_msgs[msg_type]);
+	*safe = 0;
 }
 
 /* Return 1 if NAME is a safe filename, or 0 if not.
  * See https://dwheeler.com/essays/fixing-unix-linux-filenames.html */
 static int
-is_valid_filename(const char *name)
+is_safe_filename(const char *name)
 {
+	if (!name || !*name)
+		return 0;
+
+	int safe = 1;
 	const char *n = name;
-	/* Trailing spaces were already removed (by get_newname()) */
+	const size_t len = strlen(name);
+
+	if (strchr(WHITE_SPACES, *name))
+		print_val_err(name, UNSAFE_LEADING_WHITESPACE, &safe);
+
+	if (len > 1 && strchr(WHITE_SPACES, name[len - 1]))
+		print_val_err(name, UNSAFE_TRAILING_WHITESPACE, &safe);
 
 	/* Starting with dash */
 	if (*n == '-')
-		return print_val_err(name, UNSAFE_DASH);
+		print_val_err(name, UNSAFE_DASH, &safe);
 
 	/* Reserved keyword (internal: MIME type and file type expansions) */
 	if ((*n == '=' && strchr(FILE_TYPE_CHARS, n[1]) && !n[2]) || *n == '@')
-		return print_val_err(name, UNSAFE_MIME);
+		print_val_err(name, UNSAFE_MIME, &safe);
 
 	/* Reserved keyword (internal: bookmarks, tags, workspaces, and
 	 * selected files constructs) */
 	if (((*n == 'b' || *n == 's') && n[1] == ':')
 	|| strcmp(n, "sel") == 0)
-		return print_val_err(name, UNSAFE_BTS_CONST);
+		print_val_err(name, UNSAFE_BTS_CONST, &safe);
 
 	if ((*n == 't' || *n == 'w') && n[1] == ':' && n[2])
-		return print_val_err(name, UNSAFE_BTS_CONST);
+		print_val_err(name, UNSAFE_BTS_CONST, &safe);
 
 	/* Reserved (internal: ELN/range expansion) */
 	if ((*n > '0' && is_number(n)) || is_range(n))
-		return print_val_err(name, UNSAFE_ELN);
+		print_val_err(name, UNSAFE_ELN, &safe);
 
 	/* "~" or ".": Reserved keyword */
 	if ((*n == '~' || *n == '.') && !n[1])
-		return print_val_err(name, UNSAFE_SYS_KEY);
+		print_val_err(name, UNSAFE_SYS_KEY, &safe);
 
 	/* ".." or "./": Reserved keyword */
 	if (*n == '.' && (n[1] == '.' || n[1] == '/') && !n[2])
-		return print_val_err(name, UNSAFE_SYS_KEY);
+		print_val_err(name, UNSAFE_SYS_KEY, &safe);
 
 	int only_dots = 1;
 	const char *s = name;
 	while (*s) {
 		/* Contains control characters (being not UTF-8 bytes) */
 		if (*s < ' ' && !IS_UTF8_CHAR(*s))
-			return print_val_err(name, UNSAFE_CONTROL);
+			print_val_err(name, UNSAFE_CONTROL, &safe);
 
 		/* Contains shell meta-characters */
 		if (strchr("*?[]<>|(){}&=`^!\\;$", *s))
-			return print_val_err(name, UNSAFE_META);
+			print_val_err(name, UNSAFE_META, &safe);
 
 		/* Only dots: Reserved keyword (internal: fastback expansion) */
 		if (*s != '.')
@@ -695,22 +707,22 @@ is_valid_filename(const char *name)
 	}
 
 	if (only_dots == 1)
-		return print_val_err(name, UNSAFE_FASTBACK);
+		print_val_err(name, UNSAFE_FASTBACK, &safe);
 
 	/* Name too long */
 	if (s - name >= NAME_MAX)
-		return print_val_err(name, UNSAFE_TOO_LONG);
+		print_val_err(name, UNSAFE_TOO_LONG, &safe);
 
 #ifdef _BE_POSIX
 	if (is_portable_filename(name, (size_t)(s - name)) != FUNC_SUCCESS)
-		return print_val_err(name, UNSAFE_NOT_PORTABLE);
+		print_val_err(name, UNSAFE_NOT_PORTABLE, &safe);
 #endif /* _BE_POSIX */
 
-	return 1;
+	return safe;
 }
 
 /* Return 0 if the file path NAME (or any component in it) does not exist and
- * is an invalid name. Otherwise, it returns 1.
+ * is an invalid/unsafe name. Otherwise, it returns 1.
  * If NAME is escaped, it is replaced by the unescaped name. */
 static int
 validate_filename(char **name, const int is_md)
@@ -740,7 +752,7 @@ validate_filename(char **name, const int is_md)
 	while (1) {
 		if (!*q) { /* Basename */
 			if (lstat(deq, &a) == -1)
-				ret = is_valid_filename(p);
+				ret = is_safe_filename(p);
 			break;
 		}
 
@@ -750,7 +762,7 @@ validate_filename(char **name, const int is_md)
 		/* Path component */
 		*q = '\0';
 
-		if (lstat(deq, &a) == -1 && (ret = is_valid_filename(p)) == 0) {
+		if (lstat(deq, &a) == -1 && (ret = is_safe_filename(p)) == 0) {
 			*q = '/';
 			break;
 		}

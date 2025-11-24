@@ -38,10 +38,14 @@
 #define UNSAFE_SYS_KEY   5
 #define UNSAFE_CONTROL   6
 #define UNSAFE_META      7
-#define UNSAFE_TOO_LONG  8
+#define UNSAFE_LEADING_WHITESPACE 8
+#define UNSAFE_TRAILING_WHITESPACE 9
+#define UNSAFE_TOO_LONG  10
 #ifdef _BE_POSIX
-# define UNSAFE_NOT_PORTABLE 9
+# define UNSAFE_NOT_PORTABLE 11
 #endif
+
+#define WHITE_SPACES " \t\n"
 
 #define FILE_TYPE_CHARS "bcCdDfFghlLoOpPstux"
 
