@@ -47,8 +47,6 @@
 ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-_"
 #endif
 
-#define WHITE_SPACES " \t\n"
-
 #define FILE_TYPE_CHARS "bcCdDfFghlLoOpPstux"
 
 /* Macros for open_function */

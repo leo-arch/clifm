@@ -638,6 +638,19 @@ print_val_err(const char *name, const int msg_type, int *safe)
 	*safe = 0;
 }
 
+static int
+is_whitespace(const char c)
+{
+	return (c == 0x20 /* Space */
+		|| c == 0x09  /* Horizontal TAB */
+		|| c == 0x0a  /* Line feed */
+		|| c == 0x0b  /* Vertical TAB */
+		|| c == 0x0c  /* Form feed */
+		|| c == 0x0d  /* Carriage return */
+		|| (unsigned char)c == 0xa0 /* Non-breaking space (NSBP) */
+	);
+}
+
 /* Return 1 if NAME is a safe filename, or 0 if not.
  * See https://dwheeler.com/essays/fixing-unix-linux-filenames.html */
 static int
@@ -650,10 +663,10 @@ is_safe_filename(const char *name)
 	const char *n = name;
 	const size_t len = strlen(name);
 
-	if (strchr(WHITE_SPACES, *name))
+	if (is_whitespace(*name))
 		print_val_err(name, UNSAFE_LEADING_WHITESPACE, &safe);
 
-	if (len > 1 && strchr(WHITE_SPACES, name[len - 1]))
+	if (len > 1 && is_whitespace(name[len - 1]))
 		print_val_err(name, UNSAFE_TRAILING_WHITESPACE, &safe);
 
 	/* Starting with dash */
@@ -688,8 +701,9 @@ is_safe_filename(const char *name)
 	int only_dots = 1;
 	const char *s = name;
 	while (*s) {
-		/* Contains control characters (being not UTF-8 bytes) */
-		if (*s < ' ' && !IS_UTF8_CHAR(*s))
+		/* Contains control characters (being not UTF-8 bytes), or the
+		 * DEL character (0x7f). */
+		if ((*s < ' ' && !IS_UTF8_CHAR(*s)) || *s == 0x7f)
 			print_val_err(name, UNSAFE_CONTROL, &safe);
 
 		/* Contains shell meta-characters */
