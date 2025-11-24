@@ -43,6 +43,8 @@
 #define UNSAFE_TOO_LONG  10
 #ifdef _BE_POSIX
 # define UNSAFE_NOT_PORTABLE 11
+# define PORTABLE_CHARSET "abcdefghijklmnopqrstuvwxyz\
+ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-_"
 #endif
 
 #define WHITE_SPACES " \t\n"

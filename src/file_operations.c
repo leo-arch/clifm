@@ -80,14 +80,11 @@ static char *const unsafe_name_msgs[] = {
 	"Contains shell meta-characters",
 	"Contains a leading whitespace",
 	"Contains a trailing whitespace",
-	"Too long",
+	"Name is too long",
 	"Contains characters not in the Portable Filename Character Set"
 };
 
 #ifdef _BE_POSIX
-# define PORTABLE_CHARSET "abcdefghijklmnopqrstuvwxyz\
-ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-_"
-
 /* Return 0 if NAME is a portable filename. Otherwise, return 1. */
 static int
 is_portable_filename(const char *name, const size_t len)
