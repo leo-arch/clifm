@@ -2651,6 +2651,10 @@ list_dir_light(const int autocmd_ret)
 		file_info[n].symlink = (file_info[n].type == DT_LNK);
 		file_info[n].inode = ent->d_ino;
 
+		/* Avoid truncating dir names by extension. */
+		if (file_info[n].dir == 1)
+			file_info[n].ext_name = file_info[n].ext_color = NULL;
+
 		if (checks.scanning == 1 && file_info[n].dir == 1)
 			print_scanned_file(file_info[n].name);
 
@@ -3026,6 +3030,8 @@ static inline void
 load_dir_info(const mode_t mode, const filesn_t n)
 {
 	file_info[n].dir = 1;
+	/* Avoid truncating dir names by extension. */
+	file_info[n].ext_name = file_info[n].ext_color = NULL;
 
 #ifndef _NO_ICONS
 	if (conf.icons == 1)
@@ -3108,6 +3114,8 @@ load_link_info(const int fd, const filesn_t n)
 			file_info[n].color = ln_c;
 	} else {
 		file_info[n].dir = 1;
+		/* Avoid truncating dir names by extension. */
+		file_info[n].ext_name = file_info[n].ext_color = NULL;
 
 		file_info[n].filesn = conf.files_counter == 1
 			? count_dir(file_info[n].name, NO_CPOP) - 2

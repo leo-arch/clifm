@@ -47,6 +47,8 @@
 ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-_"
 #endif
 
+#define SHELL_META_CHARS "*?[]<>|(){}&=`^!\\;$"
+
 #define FILE_TYPE_CHARS "bcCdDfFghlLoOpPstux"
 
 /* Macros for open_function */
