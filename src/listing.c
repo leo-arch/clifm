@@ -2651,10 +2651,6 @@ list_dir_light(const int autocmd_ret)
 		file_info[n].symlink = (file_info[n].type == DT_LNK);
 		file_info[n].inode = ent->d_ino;
 
-		/* Avoid truncating dir names by extension. */
-		if (file_info[n].dir == 1)
-			file_info[n].ext_name = file_info[n].ext_color = NULL;
-
 		if (checks.scanning == 1 && file_info[n].dir == 1)
 			print_scanned_file(file_info[n].name);
 
@@ -2669,6 +2665,9 @@ list_dir_light(const int autocmd_ret)
 					file_info[n].icon_color = dir_ico_c;
 			}
 #endif /* !_NO_ICONS */
+
+			/* Avoid truncating dir names by extension. */
+			file_info[n].ext_name = file_info[n].ext_color = NULL;
 
 			stats.dir++;
 			if (conf.files_counter == 1)
