@@ -1306,7 +1306,8 @@ construct_filename(const filesn_t i, struct wtrunc_t *wtrunc,
 	 * in file_info[i].name (this might impact on some later operation!) */
 
 	size_t ext_len = 0;
-	if (!file_info[i].ext_name)
+	/* Avoid truncating dir names by extension. */
+	if (!file_info[i].ext_name || file_info[i].dir == 1)
 		wtrunc->type = TRUNC_NO_EXT;
 	else
 		ext_len = get_ext_info(i, &wtrunc->type);
@@ -2666,9 +2667,6 @@ list_dir_light(const int autocmd_ret)
 			}
 #endif /* !_NO_ICONS */
 
-			/* Avoid truncating dir names by extension. */
-			file_info[n].ext_name = file_info[n].ext_color = NULL;
-
 			stats.dir++;
 			if (conf.files_counter == 1)
 				file_info[n].filesn = count_dir(ename, NO_CPOP) - 2;
@@ -3029,8 +3027,6 @@ static inline void
 load_dir_info(const mode_t mode, const filesn_t n)
 {
 	file_info[n].dir = 1;
-	/* Avoid truncating dir names by extension. */
-	file_info[n].ext_name = file_info[n].ext_color = NULL;
 
 #ifndef _NO_ICONS
 	if (conf.icons == 1)
@@ -3113,9 +3109,6 @@ load_link_info(const int fd, const filesn_t n)
 			file_info[n].color = ln_c;
 	} else {
 		file_info[n].dir = 1;
-		/* Avoid truncating dir names by extension. */
-		file_info[n].ext_name = file_info[n].ext_color = NULL;
-
 		file_info[n].filesn = conf.files_counter == 1
 			? count_dir(file_info[n].name, NO_CPOP) - 2
 			: 1;
