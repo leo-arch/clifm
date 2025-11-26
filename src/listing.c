@@ -526,11 +526,12 @@ print_sel_files(const unsigned short t_rows)
 			limit = 1;
 	}
 
-	if (limit > (int)sel_n)
-		limit = (int)sel_n;
+	const int int_sel_n = sel_n > INT_MAX ? INT_MAX : (int)sel_n;
+	if (limit > int_sel_n)
+		limit = int_sel_n;
 
 	int i;
-	for (i = 0; i < (conf.max_printselfiles != UNSET ? limit : (int)sel_n)
+	for (i = 0; i < (conf.max_printselfiles != UNSET ? limit : int_sel_n)
 	&& sel_elements[i].name; i++) {
 		char *p = abbreviate_file_name(sel_elements[i].name);
 		if (!p)
@@ -540,7 +541,7 @@ print_sel_files(const unsigned short t_rows)
 			free(p);
 	}
 
-	if (conf.max_printselfiles != UNSET && limit < (int)sel_n)
+	if (conf.max_printselfiles != UNSET && limit < int_sel_n)
 		printf("... (%d/%zu)\n", i, sel_n);
 
 	print_div_line();
@@ -578,8 +579,8 @@ get_name_icon(const filesn_t n)
 
 	/* This division will be replaced by a constant integer at compile
 	 * time, so that it won't even be executed at runtime. */
-	int i = (int)(sizeof(icon_filenames) / sizeof(icon_filenames[0]));
-	while (--i >= 0) {
+	size_t i = sizeof(icon_filenames) / sizeof(icon_filenames[0]);
+	for (; i-- > 0;) {
 		if (name_hash != name_icons_hashes[i])
 			continue;
 		file_info[n].icon = icon_filenames[i].icon;
@@ -609,8 +610,8 @@ get_dir_icon(const filesn_t n)
 
 	const size_t dir_hash = hashme(file_info[n].name, 0);
 
-	int i = (int)(sizeof(icon_dirnames) / sizeof(icon_dirnames[0]));
-	while (--i >= 0) {
+	size_t i = sizeof(icon_dirnames) / sizeof(icon_dirnames[0]);
+	for (; i-- > 0;) {
 		if (dir_hash != dir_icons_hashes[i])
 			continue;
 		file_info[n].icon = icon_dirnames[i].icon;
@@ -634,8 +635,8 @@ get_ext_icon(const char *restrict ext, const filesn_t n)
 
 	const size_t ext_hash = hashme(ext, 0);
 
-	int i = (int)(sizeof(icon_ext) / sizeof(icon_ext[0]));
-	while (--i >= 0) {
+	size_t i = sizeof(icon_ext) / sizeof(icon_ext[0]);
+	for (; i-- > 0;) {
 		if (ext_hash != ext_icons_hashes[i])
 			continue;
 		file_info[n].icon = icon_ext[i].icon;
