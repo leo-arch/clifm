@@ -1366,35 +1366,35 @@ free_stuff(void)
 	}
 
 	i = aliases_n;
-		for (; i-- > 0;) {
+	for (; i-- > 0;) {
 		free(aliases[i].name);
 		free(aliases[i].cmd);
 	}
 	free(aliases);
 
 	i = kbinds_n;
-		for (; i-- > 0;) {
+	for (; i-- > 0;) {
 		free(kbinds[i].function);
 		free(kbinds[i].key);
 	}
 	free(kbinds);
 
 	i = usrvar_n;
-		for (; i-- > 0;) {
+	for (; i-- > 0;) {
 		free(usr_var[i].name);
 		free(usr_var[i].value);
 	}
 	free(usr_var);
 
 	i = actions_n;
-		for (; i-- > 0;) {
+	for (; i-- > 0;) {
 		free(usr_actions[i].name);
 		free(usr_actions[i].value);
 	}
 	free(usr_actions);
 
 	i = prompt_cmds_n;
-		for (; i-- > 0;)
+	for (; i-- > 0;)
 		free(prompt_cmds[i]);
 	free(prompt_cmds);
 
