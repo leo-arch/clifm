@@ -607,10 +607,10 @@ check_defs(const char *str)
 	if (defs_n == 0 || !str || !*str)
 		return (char *)NULL;
 
-	int i = (int)defs_n;
+	size_t i = defs_n;
 	const size_t slen = strlen(str);
 
-	while (--i >= 0) {
+	for (; i-- > 0;) {
 		if (!defs[i].name || !defs[i].value || !*defs[i].name
 		|| !*defs[i].value)
 			continue;
@@ -631,8 +631,8 @@ clear_defs(void)
 	if (defs_n == 0)
 		goto END;
 
-	int i = (int)defs_n;
-	while (--i >= 0) {
+	size_t i = defs_n;
+	for (; i-- > 0;) {
 		free(defs[i].name);
 		free(defs[i].value);
 	}
@@ -684,15 +684,15 @@ check_ext_string(const char *ext, size_t *val_len)
 	static char tmp_ext[NAME_MAX];
 	char *ptr = tmp_ext;
 
-	int i;
+	size_t i;
 	for (i = 0; i < NAME_MAX && ext[i]; i++)
 		tmp_ext[i] = TOLOWER(ext[i]);
 	tmp_ext[i] = '\0';
 
-	const size_t len = (size_t)i;
+	const size_t len = i;
 
-	i = (int)ext_colors_n;
-	while (--i >= 0) {
+	i = ext_colors_n;
+	for (; i-- > 0;) {
 		if (!ext_colors[i].name || !*ext_colors[i].name
 		|| ext_colors[i].len != len || *ptr != TOLOWER(*ext_colors[i].name))
 			continue;

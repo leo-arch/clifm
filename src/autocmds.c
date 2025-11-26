@@ -568,8 +568,8 @@ set_autocmd_color_scheme(const char *name, const size_t n)
 		return FUNC_SUCCESS;
 	}
 
-	int i = (int)cschemes_n;
-	while (--i >= 0) {
+	size_t i = cschemes_n;
+	for (; i-- > 0;) {
 		if (*color_schemes[i] == *name
 		&& strcmp(color_schemes[i], name) == 0) {
 			autocmds[n].color_scheme = color_schemes[i];

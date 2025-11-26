@@ -425,7 +425,7 @@ check_term_support(const char *env_term)
 		|| strcmp(env_term, TERM_INFO[i].name) != 0)
 			continue;
 
-		index = (int)i;
+		index = i > INT_MAX ? INT_MAX : (int)i;
 		break;
 	}
 

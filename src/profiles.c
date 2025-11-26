@@ -148,8 +148,6 @@ profile_set(const char *prof)
 		return FUNC_SUCCESS;
 	}
 
-	int i;
-
 	if (conf.restore_last_path == 1)
 		save_last_path(NULL);
 
@@ -163,8 +161,8 @@ profile_set(const char *prof)
 	if (*prof != 'd' || strcmp(prof, "default") != 0)
 		alt_profile = savestring(prof, strlen(prof));
 
-	i = MAX_WS;
-	while (--i >= 0) {
+	size_t i = MAX_WS;
+	for (; i-- > 0;) {
 		free(workspaces[i].path);
 		workspaces[i].path = (char *)NULL;
 		free(workspaces[i].name);
@@ -175,15 +173,15 @@ profile_set(const char *prof)
 	/* Reset everything */
 	reload_config();
 
-	i = (int)usrvar_n;
-	while (--i >= 0) {
+	i = usrvar_n;
+	for (; i-- > 0;) {
 		free(usr_var[i].name);
 		free(usr_var[i].value);
 	}
 	usrvar_n = 0;
 
-	i = (int)actions_n;
-	while (--i >= 0) {
+	i = actions_n;
+	for (; i-- > 0;) {
 		free(usr_actions[i].name);
 		free(usr_actions[i].value);
 	}
@@ -229,8 +227,8 @@ profile_set(const char *prof)
 	}
 
 	if (paths) {
-		i = (int)path_n;
-		while (--i >= 0)
+		i = path_n;
+		for (; i-- > 0;)
 			free(paths[i].path);
 		free(paths);
 	}

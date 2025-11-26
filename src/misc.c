@@ -924,10 +924,10 @@ void
 free_autocmds(const int keep_temp)
 {
 	UNUSED(keep_temp);
-/*	int i = (int)autocmds_n;
+/*	size_t i = autocmds_n;
 
 	if (keep_temp == 1) {
-		while (--i >= 0) {
+		for (; i-- > 0;) {
 			if (autocmds[i].temp == 1) {
 				keep_temp_autocmds();
 				return;

@@ -417,8 +417,8 @@ find_key(const char *function)
 	if (kbinds_n == 0)
 		return (char *)NULL;
 
-	int n = (int)kbinds_n;
-	while (--n >= 0) {
+	size_t n = kbinds_n;
+	for (; n-- > 0;) {
 		if (*function != *kbinds[n].function)
 			continue;
 		if (strcmp(function, kbinds[n].function) == 0)
@@ -866,9 +866,9 @@ load_keybinds(void)
 
 	/* Free the keybinds struct array */
 	if (kbinds_n > 0) {
-		int i = (int)kbinds_n;
+		size_t i = kbinds_n;
 
-		while (--i >= 0) {
+		for (; i-- > 0;) {
 			free(kbinds[i].function);
 			free(kbinds[i].key);
 		}
@@ -986,8 +986,8 @@ keybind_exec_cmd(char *str)
 		if (kbind_busy == 1)
 			kbind_busy = 0;
 
-		int i = (int)args_n + 1;
-		while (--i >= 0)
+		size_t i = args_n + 1;
+		for (; i-- > 0;)
 			free(cmd[i]);
 		free(cmd);
 
@@ -2683,7 +2683,7 @@ print_cmdhist_line(int n, int beg_line)
 static inline int
 handle_cmdhist_beginning(int key)
 {
-	int p = (int)curhistindex;
+	int p = curhistindex > INT_MAX ? INT_MAX : (int)curhistindex;
 	cmdhist_flag = 1;
 
 	if (key == 65) { /* Up arrow key */
@@ -2710,7 +2710,8 @@ handle_cmdhist_beginning(int key)
 static inline int
 handle_cmdhist_middle(int key)
 {
-	int found = 0, p = (int)curhistindex;
+	int found = 0;
+	int p = curhistindex > INT_MAX ? INT_MAX : (int)curhistindex;
 
 	if (key == 65) { /* Up arrow key */
 		if (--p < 0) return FUNC_FAILURE;

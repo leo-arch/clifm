@@ -196,7 +196,7 @@ load_matches_invert_nocwd(glob_t *gbuf, struct dirent **ent,
 #endif /* !_DIRENT_HAVE_D_TYPE */
 			continue;
 
-		int j = (int)gbuf->gl_pathc;
+		int j = gbuf->gl_pathc > INT_MAX ? INT_MAX : (int)gbuf->gl_pathc;
 		while (--j >= 0) {
 			if (*ent[i]->d_name == *gbuf->gl_pathv[j]
 			&& strcmp(ent[i]->d_name, gbuf->gl_pathv[j]) == 0)
@@ -233,8 +233,8 @@ load_matches(glob_t *gbuf, const mode_t filetype, int *matches)
 	char **list = xnmalloc(gbuf->gl_pathc + 2, sizeof(char *));
 	const mode_t type = convert_filetype_mask(filetype);
 
-	int i = (int)gbuf->gl_pathc;
-	while (--i >= 0) {
+	size_t i = gbuf->gl_pathc;
+	for (; i-- > 0;) {
 		char *basename = strrchr(gbuf->gl_pathv[i], '/');
 		if (!basename && SELFORPARENT(gbuf->gl_pathv[i]))
 			continue;
@@ -410,8 +410,8 @@ sel_regex_nocwd(regex_t regex, const char *sel_path, const mode_t filetype,
 
 	const mode_t type = convert_filetype_mask(filetype);
 
-	int i = (int)filesn;
-	while (--i >= 0) {
+	size_t i = filesn >= 0 ? (size_t)filesn : 0;
+	for (; i-- > 0;) {
 		if (filetype != 0) {
 			struct stat attr;
 			if (lstat(list[i]->d_name, &attr) != -1

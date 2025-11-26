@@ -153,9 +153,9 @@ get_longest_entries(size_t *ls, size_t *ln)
 	if (bm_n == 0 || !bookmarks)
 		return;
 
-	int i = (int)bm_n;
+	size_t i = bm_n;
 
-	while (--i >= 0) {
+	for (; i-- > 0;) {
 		if (bookmarks[i].shortcut && *bookmarks[i].shortcut) {
 			const size_t slen = strlen(bookmarks[i].shortcut);
 			if (slen > *ls)
@@ -391,8 +391,8 @@ check_bm_path(char *file)
 	char *p = normalize_path(file, strlen(file));
 	char *new_path = p ? p : file;
 
-	int i = (int)bm_n;
-	while (--i >= 0) {
+	size_t i = bm_n;
+	for (; i-- > 0;) {
 		if (!bookmarks[i].path || strcmp(new_path, bookmarks[i].path) != 0)
 			continue;
 
@@ -444,15 +444,15 @@ check_bm_name(const char *name, const int add)
 	if (add == 1 && name_is_reserved_keyword(name) == 1)
 		return 0;
 
-	int i = (int)bm_n;
-	while (--i >= 0) {
+	size_t i = bm_n;
+	for (; i-- > 0;) {
 		if (!bookmarks[i].name || *name != *bookmarks[i].name
 		|| strcmp(name, bookmarks[i].name) != 0)
 			continue;
 
 		if (add == 1)
 			xerror(_("bookmarks: '%s': Name already in use\n"), name);
-		return i;
+		return i > INT_MAX ? INT_MAX : (int)i;
 	}
 
 	return (-1);
@@ -468,15 +468,15 @@ check_bm_shortcut(const char *shortcut, const int add)
 	if (add == 1 && name_is_reserved_keyword(shortcut) == 1)
 		return 0;
 
-	int i = (int)bm_n;
-	while (--i >= 0) {
+	size_t i = bm_n;
+	for (; i-- > 0;) {
 		if (!bookmarks[i].shortcut || *shortcut != *bookmarks[i].shortcut
 		|| strcmp(shortcut, bookmarks[i].shortcut) != 0)
 			continue;
 
 		if (add == 1)
 			xerror(_("bookmarks: '%s': Shortcut already in use\n"), shortcut);
-		return i;
+		return i > INT_MAX ? INT_MAX : (int)i;
 	}
 
 	return (-1);

@@ -1782,13 +1782,13 @@ set_prompt(char *name)
 		return FUNC_FAILURE;
 	}
 
-	int i = (int)prompts_n;
-	while (--i >= 0) {
+	size_t i = prompts_n;
+	for (; i-- > 0;) {
 		if (*p != *prompts[i].name || strcmp(p, prompts[i].name) != 0)
 			continue;
 		free(p);
 		xstrsncpy(cur_prompt_name, prompts[i].name, sizeof(cur_prompt_name));
-		return switch_prompt((size_t)i);
+		return switch_prompt(i);
 	}
 
 	xerror(_("prompt: %s: No such prompt\n"), p);

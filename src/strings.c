@@ -245,8 +245,8 @@ xstrrpbrk(char *s, const char *accept)
 
 	const size_t l = strlen(s);
 
-	int i = (int)l, j;
-	while (--i >= 0) {
+	size_t i = l, j;
+	for (; i-- > 0;) {
 		for (j = 0; accept[j]; j++) {
 			if (s[i] == accept[j])
 				return s + i;
@@ -766,7 +766,7 @@ gen_rand_str(const size_t len)
 	char *p = xnmalloc(len + 1, sizeof(char));
 	char *str = p;
 
-	int x = (int)len;
+	int x = len > INT_MAX ? INT_MAX : (int)len;
 	while (x--) {
 #ifndef HAVE_ARC4RANDOM
 		const long i = random() % (int)(sizeof(charset) - 1);
@@ -968,9 +968,9 @@ split_str(char *str, const int update_args)
 				xerror(_("%s: Missing '%c'\n"), PROGRAM_NAME, close);
 				free(buf);
 				buf = (char *)NULL;
-				int i = (int)words;
+				size_t i = words;
 
-				while (--i >= 0)
+				for (; i-- > 0;)
 					free(substr[i]);
 				free(substr);
 
@@ -1034,9 +1034,9 @@ split_str(char *str, const int update_args)
 				/* Free stuff and return. */
 				free(buf);
 				buf = (char *)NULL;
-				int i = (int)words;
+				size_t i = words;
 
-				while (--i >= 0)
+				for (; i-- > 0;)
 					free(substr[i]);
 				free(substr);
 				return (char **)NULL;
@@ -1853,8 +1853,8 @@ expand_int_var(char **name)
 {
 	char *var_name = (*name) + 1;
 
-	int j = (int)usrvar_n;
-	while (--j >= 0) {
+	size_t j = usrvar_n;
+	for (; j-- > 0;) {
 		if (*var_name != *usr_var[j].name
 		|| strcmp(var_name, usr_var[j].name) != 0 || !usr_var[j].value)
 			continue;
@@ -2436,8 +2436,8 @@ expand_regex(char ***substr)
 				continue;
 
 			/* Make sure the matching filename is not already in the tmp array */
-			filesn_t m = (filesn_t)n, found = 0;
-			while (--m >= 0) {
+			size_t m = n, found = 0;
+			for (; m-- > 0;) {
 				if (*file_info[j].name == *tmp[m]
 				&& strcmp(file_info[j].name, tmp[m]) == 0)
 					found = 1;

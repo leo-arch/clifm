@@ -162,7 +162,7 @@ calculate_bonus_credit(const char *entry, const char *query, int *keep)
  * "https://github.com/ajeetdsouza/zoxide/wiki/Algorithm#aging"
  * "https://github.com/skywind3000/z.lua#aging" */
 static int
-rank_entry(const int i, const time_t now, int *days_since_first,
+rank_entry(const size_t i, const time_t now, int *days_since_first,
 	int *hours_since_last)
 {
 	/* 86400 = 60 secs / 60 mins / 24 hours */
@@ -279,12 +279,12 @@ save_jumpdb(void)
 	if (!fp)
 		return;
 
-	int i, reduce = 0, total_rank = 0;
+	int reduce = 0, total_rank = 0;
 	const time_t now = time(NULL);
 
 	/* Calculate both total rank sum, and rank for each entry. */
-	i = (int)jump_n;
-	while (--i >= 0) {
+	size_t i = jump_n;
+	for (; i-- > 0;) {
 		if (!IS_VALID_JUMP_ENTRY(i))
 			continue;
 
@@ -303,7 +303,7 @@ save_jumpdb(void)
 
 	char perm_chr_str[2] = "";
 
-	for (i = 0; i < (int)jump_n; i++) {
+	for (i = 0; i < jump_n; i++) {
 		if (total_rank > conf.max_jump_total_rank) {
 			if (reduce) {
 				const int tmp_rank = jump_db[i].rank;
@@ -485,7 +485,7 @@ print_jump_table(const int reduce, const time_t now)
 		}
 
 		int days_since_first = 0, hours_since_last = 0;
-		int rank = rank_entry((int)i, now, &days_since_first, &hours_since_last);
+		int rank = rank_entry(i, now, &days_since_first, &hours_since_last);
 
 		if (reduce) {
 			const int tmp_rank = rank;
@@ -566,11 +566,11 @@ print_jump_table(const int reduce, const time_t now)
 static int
 purge_invalid_entries(void)
 {
-	int i = (int)jump_n;
+	size_t i = jump_n;
 	int c = 0;
 
 	struct stat a;
-	while (--i >= 0) {
+	for (; i-- > 0;) {
 		if (!IS_VALID_JUMP_ENTRY(i))
 			continue;
 
@@ -597,11 +597,11 @@ purge_invalid_entries(void)
 static int
 purge_low_ranked_entries(const int limit)
 {
-	int i = (int)jump_n;
+	size_t i = jump_n;
 	int c = 0;
 	const time_t now = time(NULL);
 
-	while (--i >= 0) {
+	for (; i-- > 0;) {
 		if (!IS_VALID_JUMP_ENTRY(i))
 			continue;
 

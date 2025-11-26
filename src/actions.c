@@ -404,10 +404,10 @@ edit_actions(char *app)
 static size_t
 get_longest_action_name(void)
 {
-	int i = (int)actions_n;
+	size_t i = actions_n;
 	size_t l = 0;
-	while (--i >= 0) {
-		size_t len = strlen(usr_actions[i].name);
+	for (; i-- > 0;) {
+		const size_t len = strlen(usr_actions[i].name);
 		if (len > l)
 			l = len;
 	}

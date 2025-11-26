@@ -239,9 +239,9 @@ check_third_party_cmds(void)
 	check_coreutils = 1;
 #endif /* CHECK_COREUTILS */
 
-	int i = (int)path_progsn;
+	size_t i = path_progsn;
 
-	while (--i >= 0) {
+	for (; i-- > 0;) {
 		if (*bin_commands[i] != 'u' && *bin_commands[i] != 'f'
 		&& *bin_commands[i] != 's'
 #if defined(USE_DU1) && !defined(HAVE_GNU_DU) && !defined(_BE_POSIX)
@@ -440,8 +440,8 @@ is_action_name(const char *s)
 	if (actions_n == 0)
 		return 0;
 
-	int n = (int)actions_n;
-	while (--n >= 0) {
+	size_t n = actions_n;
+	for (; n-- > 0;) {
 		if (*s == *usr_actions[n].name && strcmp(s, usr_actions[n].name) == 0)
 			return 1;
 	}
@@ -473,10 +473,10 @@ is_internal_cmd(char *cmd, const int flag, const int check_hist,
 	}
 
 	const size_t clen = strlen(cmd);
-	ssize_t i = (ssize_t)internal_cmds_n;
+	size_t i = internal_cmds_n;
 	int found = 0;
 
-	while (--i >= 0) {
+	for (; i-- > 0;) {
 		if (((flag & ALL_CMDS) || (internal_cmds[i].flag & flag))
 		&& clen == internal_cmds[i].len && *cmd == *internal_cmds[i].name
 		&& strcmp(cmd + 1, internal_cmds[i].name + 1) == 0) {
@@ -570,9 +570,9 @@ check_for_alias(char **args)
 	|| *args[0] == '\\')
 		return (char **)NULL;
 
-	int i = (int)aliases_n;
+	size_t i = aliases_n;
 
-	while (--i >= 0) {
+	for (; i-- > 0;) {
 		if (!aliases[i].name || !aliases[i].cmd || !*aliases[i].name
 		|| !*aliases[i].cmd)
 			continue;

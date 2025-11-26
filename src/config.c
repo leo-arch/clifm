@@ -4447,8 +4447,8 @@ reload_config(void)
 #endif /* !_NO_FZF */
 
 	/* Free the aliases and prompt_cmds arrays to be allocated again */
-	int i = dirhist_total_index;
-	while (--i >= 0)
+	size_t i = (size_t)dirhist_total_index;
+	for (; i-- > 0;)
 		free(old_pwd[i]);
 	free(old_pwd);
 	old_pwd = (char **)NULL;
@@ -4462,8 +4462,8 @@ reload_config(void)
 	}
 	jump_n = 0;
 
-	i = (int)aliases_n;
-	while (--i >= 0) {
+	i = aliases_n;
+	for (; i-- > 0;) {
 		free(aliases[i].name);
 		free(aliases[i].cmd);
 	}
@@ -4471,8 +4471,8 @@ reload_config(void)
 	aliases = (struct alias_t *)NULL;
 	aliases_n = 0;
 
-	i = (int)prompt_cmds_n;
-	while (--i >= 0)
+	i = prompt_cmds_n;
+	for (; i-- > 0;)
 		free(prompt_cmds[i]);
 
 	dirhist_total_index = 0;

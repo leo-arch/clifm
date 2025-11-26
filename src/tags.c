@@ -254,8 +254,8 @@ is_tag(char *name)
 		}
 	}
 
-	int i = (int)tags_n;
-	while (--i >= 0) {
+	size_t i = tags_n;
+	for (; i-- > 0;) {
 		if (*name == *tags[i] && strcmp(name, tags[i]) == 0)
 			return 1;
 	}

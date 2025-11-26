@@ -128,16 +128,16 @@ reload_binaries(void)
 		return;
 
 	if (bin_commands) {
-		int j = (int)path_progsn;
-		while (--j >= 0)
+		size_t j = path_progsn;
+		for (; j-- > 0;)
 			free(bin_commands[j]);
 		free(bin_commands);
 		bin_commands = (char **)NULL;
 	}
 
 	if (paths) {
-		int j = (int)path_n;
-		while (--j >= 0)
+		size_t j = path_n;
+		for (; j-- > 0;)
 			free(paths[j].path);
 		free(paths);
 	}
@@ -297,8 +297,8 @@ quit_func(char **args, const int exit_status)
 		return;
 	}
 
-	int i = (int)args_n + 1;
-	while (--i >= 0)
+	size_t i = args_n + 1;
+	for (; i-- > 0;)
 		free(args[i]);
 	free(args);
 
@@ -746,9 +746,9 @@ lightmode_function(const char *arg)
 static size_t
 get_longest_alias_name(void)
 {
-	int i = (int)aliases_n;
+	size_t i = aliases_n;
 	size_t l = 0;
-	while (--i >= 0) {
+	for (; i-- > 0;) {
 		const size_t len = strlen(aliases[i].name);
 		if (len > l)
 			l = len;
@@ -787,8 +787,8 @@ print_alias(const char *name)
 		return FUNC_SUCCESS;
 	}
 
-	int i = (int)aliases_n;
-	while (--i >= 0) {
+	size_t i = aliases_n;
+	for (; i-- > 0;) {
 		if (aliases[i].name && *name == *aliases[i].name
 		&& strcmp(name, aliases[i].name) == 0) {
 			printf("alias %s='%s'\n", aliases[i].name,
@@ -1105,8 +1105,8 @@ sort_func(char **args)
 static int
 check_pinned_file(char **args)
 {
-	int i = (int)args_n + 1;
-	while (--i >= 0) {
+	size_t i = args_n + 1;
+	for (; i-- > 0;) {
 		if (*args[i] == ',' && !args[i][1]) {
 			xerror(_("%s: No pinned file\n"), PROGRAM_NAME);
 			return FUNC_FAILURE;
@@ -1122,8 +1122,8 @@ check_actions(char **args)
 	if (actions_n == 0)
 		return (-1);
 
-	int i = (int)actions_n;
-	while (--i >= 0) {
+	size_t i = actions_n;
+	for (; i-- > 0;) {
 		if (*args[0] == *usr_actions[i].name
 		&& strcmp(args[0], usr_actions[i].name) == 0) {
 			setenv("CLIFM_PLUGIN_NAME", usr_actions[i].name, 1);
@@ -1458,8 +1458,8 @@ trash_func(char **args, int *_cont)
 	int exit_status = trash_function(args);
 
 	if (is_sel && sel_n > 0) { /* If 'tr sel', deselect everything */
-		int i = (int)sel_n;
-		while (--i >= 0)
+		size_t i = sel_n;
+		for (; i-- > 0;)
 			free(sel_elements[i].name);
 		sel_n = 0;
 		if (save_sel() != 0)
@@ -1597,7 +1597,7 @@ static void
 check_zombies(void)
 {
 	int status = 0;
-	if (waitpid(-1, &status, WNOHANG) > 0)
+	if (waitpid(-1, &status, WNOHANG) > 0 && zombies > 0)
 		zombies--;
 }
 
@@ -1838,9 +1838,9 @@ is_write_cmd(const char *cmd)
 		wcmds_n = (sizeof(wcmds) / sizeof(wcmds[0])) - 1;
 
 	const size_t clen = strlen(cmd);
-	int i = (int)wcmds_n;
+	size_t i = wcmds_n;
 
-	while (--i >= 0) {
+	for (; i-- > 0;) {
 		if (clen == wcmds[i].len && *cmd == *wcmds[i].name
 		&& strcmp(cmd + 1, wcmds[i].name + 1) == 0) {
 			xerror(_("%s: %s: Command not allowed in read-only mode\n"),
@@ -2574,8 +2574,8 @@ run_profile_line(char *cmd)
 	exec_cmd(cmds);
 	no_log = 0;
 
-	int i = (int)args_n + 1;
-	while (--i >= 0)
+	size_t i = args_n + 1;
+	for (; i-- > 0;)
 		free(cmds[i]);
 	free(cmds);
 

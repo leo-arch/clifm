@@ -1722,7 +1722,7 @@ do_completion(char *buf, const size_t prefix_len, const int multi)
 {
 	/* Some further buffer clean up: remove new line char and ending spaces. */
 	const size_t blen = strlen(buf);
-	int j = (int)blen;
+	int j = blen > INT_MAX ? INT_MAX : (int)blen;
 
 	if (j > 0 && buf[j - 1] == '\n') {
 		j--;
