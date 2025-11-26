@@ -1472,8 +1472,8 @@ store_extension_line(const char *line)
 static void
 free_extension_colors(void)
 {
-	int i = (int)ext_colors_n;
-	while (--i >= 0) {
+	size_t i = ext_colors_n;
+	for (; i-- > 0;) {
 		free(ext_colors[i].name);
 		free(ext_colors[i].value);
 	}
@@ -1984,8 +1984,8 @@ store_definition(const char *str)
 static void
 init_defs(void)
 {
-	int n = MAX_DEFS;
-	while (--n >= 0) {
+	size_t n = MAX_DEFS;
+	for (; n-- > 0;) {
 		defs[n].name = (char *)NULL;
 		defs[n].value = (char *)NULL;
 	}

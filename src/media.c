@@ -386,8 +386,8 @@ mount_dev(const int n)
 static void
 free_media(void)
 {
-	int i = (int)mp_n;
-	while (--i >= 0) {
+	size_t i = mp_n;
+	for (; i-- > 0;) {
 		free(media[i].mnt);
 		free(media[i].dev);
 		free(media[i].label);

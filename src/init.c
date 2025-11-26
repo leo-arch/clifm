@@ -158,8 +158,8 @@ init_shades(void)
 	date_shades.type = SHADE_TYPE_UNSET;
 	size_shades.type = SHADE_TYPE_UNSET;
 
-	int i = NUM_SHADES;
-	while (--i >= 0) {
+	size_t i = NUM_SHADES;
+	for (; i-- > 0;) {
 		date_shades.shades[i] = (struct rgb_t){0};
 		size_shades.shades[i] = (struct rgb_t){0};
 	}
@@ -507,8 +507,8 @@ void
 init_workspaces(void)
 {
 	workspaces = xnmalloc(MAX_WS, sizeof(struct ws_t));
-	int i = MAX_WS;
-	while (--i >= 0) {
+	size_t i = MAX_WS;
+	for (; i-- > 0;) {
 		workspaces[i].path = (char *)NULL;
 		workspaces[i].name = (char *)NULL;
 	}
@@ -1313,8 +1313,8 @@ load_actions(void)
 
 	/* Free the actions struct array */
 	if (actions_n > 0) {
-		int i = (int)actions_n;
-		while (--i >= 0) {
+		size_t i = actions_n;
+		for (; i-- > 0;) {
 			free(usr_actions[i].name);
 			free(usr_actions[i].value);
 		}
@@ -1904,8 +1904,8 @@ get_paths_timestamps(const size_t n)
 		return;
 
 	struct stat a;
-	int i = (int)n;
-	while (--i >= 0) {
+	size_t i = n;
+	for (; i-- > 0;) {
 		if (paths[i].path && *paths[i].path && stat(paths[i].path, &a) != -1)
 			paths[i].mtime = a.st_mtime;
 		else
@@ -2199,7 +2199,8 @@ get_path_programs(void)
 	if (xargs.list_and_quit == 1)
 		return;
 
-	int i, l = 0, total_cmd = 0;
+	int l = 0, total_cmd = 0;
+	size_t i = 0;
 	int *cmd_n = (int *)0;
 	struct dirent ***commands_bin = (struct dirent ***)NULL;
 
@@ -2207,8 +2208,8 @@ get_path_programs(void)
 		commands_bin = xnmalloc(path_n, sizeof(struct dirent));
 		cmd_n = xnmalloc(path_n, sizeof(int));
 
-		i = (int)path_n;
-		while (--i >= 0) {
+		i = path_n;
+		for (; i-- > 0;) {
 			cmd_n[i] = 0;
 			commands_bin[i] = (struct dirent **)NULL;
 
@@ -2234,8 +2235,8 @@ get_path_programs(void)
 	bin_commands = xnmalloc((size_t)total_cmd
 		+ internal_cmds_n + aliases_n + actions_n + 2, sizeof(char *));
 
-	i = (int)internal_cmds_n;
-	while (--i >= 0) {
+	i = internal_cmds_n;
+	for (; i-- > 0;) {
 		bin_commands[l] = savestring(internal_cmds[i].name,
 			internal_cmds[i].len);
 		l++;
@@ -2243,8 +2244,8 @@ get_path_programs(void)
 
 	/* Now add aliases, if any */
 	if (aliases_n > 0) {
-		i = (int)aliases_n;
-		while (--i >= 0) {
+		i = aliases_n;
+		for (; i-- > 0;) {
 			bin_commands[l] = savestring(aliases[i].name,
 				strlen(aliases[i].name));
 			l++;
@@ -2253,8 +2254,8 @@ get_path_programs(void)
 
 	/* And user defined actions too, if any */
 	if (actions_n > 0) {
-		i = (int)actions_n;
-		while (--i >= 0) {
+		i = actions_n;
+		for (; i-- > 0;) {
 			bin_commands[l] = savestring(usr_actions[i].name,
 				strlen(usr_actions[i].name));
 			l++;
@@ -2263,8 +2264,8 @@ get_path_programs(void)
 
 	if (total_cmd > 0) {
 		/* And finally, add commands in PATH */
-		i = (int)path_n;
-		while (--i >= 0) {
+		i = path_n;
+		for (; i-- > 0;) {
 			if (cmd_n[i] <= 0 || !commands_bin[i])
 				continue;
 
@@ -2305,9 +2306,9 @@ get_path_programs(void)
 static void
 free_aliases(void)
 {
-	int i = (int)aliases_n;
+	size_t i = aliases_n;
 
-	while (--i >= 0) {
+	for (; i-- > 0;) {
 		free(aliases[i].name);
 		free(aliases[i].cmd);
 	}

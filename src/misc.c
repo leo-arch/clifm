@@ -935,8 +935,8 @@ free_autocmds(const int keep_temp)
 		}
 	} */
 
-	int i = (int)autocmds_n;
-	while (--i >= 0) {
+	size_t i = autocmds_n;
+	for (; i-- > 0;) {
 		free(autocmds[i].pattern);
 		free(autocmds[i].cmd);
 		free(autocmds[i].filter.str);
@@ -952,8 +952,8 @@ free_autocmds(const int keep_temp)
 void
 free_tags(void)
 {
-	int i = (int)tags_n;
-	while (--i >= 0)
+	size_t i = tags_n;
+	for (; i-- > 0;)
 		free(tags[i]);
 	free(tags);
 	tags = (char **)NULL;
@@ -1033,8 +1033,8 @@ expand_prompt_name(char *name)
 void
 free_prompts(void)
 {
-	int i = (int)prompts_n;
-	while (--i >= 0) {
+	size_t i = prompts_n;
+	for (; i-- > 0;) {
 		free(prompts[i].name);
 		free(prompts[i].regular);
 		free(prompts[i].warning);
@@ -1182,7 +1182,7 @@ free_file_templates(void)
 	if (!file_templates)
 		return;
 
-	filesn_t i;
+	size_t i; /* Max file_templates is filesn_t (ssize_t), <= size_t. */
 	for (i = 0; file_templates[i]; i++)
 		free(file_templates[i]);
 
@@ -1195,7 +1195,7 @@ free_file_templates(void)
 void
 free_stuff(void)
 {
-	int i = 0;
+	size_t i = 0;
 
 	free(alt_config_dir);
 	free(alt_trash_dir);
@@ -1283,15 +1283,15 @@ free_stuff(void)
 
 	remove_virtual_dir();
 
-	i = (int)cschemes_n;
-	while (i-- > 0)
+	i = cschemes_n;
+	for (; i-- > 0;)
 		free(color_schemes[i]);
 	free(color_schemes);
 	free(conf.usr_cscheme);
 
 	if (jump_db) {
-		i = (int)jump_n;
-		while (--i >= 0)
+		i = jump_n;
+		for (; i-- > 0;)
 			free(jump_db[i].path);
 		free(jump_db);
 	}
@@ -1323,91 +1323,91 @@ free_stuff(void)
 	}
 
 	if (sel_n > 0) {
-		i = (int)sel_n;
-		while (--i >= 0)
+		i = sel_n;
+		for (; i-- > 0;)
 			free(sel_elements[i].name);
 		free(sel_elements);
 	}
 	free(sel_devino);
 
 	if (bin_commands) {
-		i = (int)path_progsn;
-		while (--i >= 0)
+		i = path_progsn;
+		for (; i-- > 0;)
 			free(bin_commands[i]);
 		free(bin_commands);
 	}
 
 	if (paths) {
-		i = (int)path_n;
-		while (--i >= 0)
+		i = path_n;
+		for (; i-- > 0;)
 			free(paths[i].path);
 		free(paths);
 	}
 
 	if (cdpaths) {
-		i = (int)cdpath_n;
-		while (--i >= 0)
+		i = cdpath_n;
+		for (; i-- > 0;)
 			free(cdpaths[i]);
 		free(cdpaths);
 	}
 
 	if (history) {
-		i = (int)current_hist_n;
-		while (--i >= 0)
+		i = current_hist_n;
+		for (; i-- > 0;)
 			free(history[i].cmd);
 		free(history);
 	}
 
 	if (dirhist_total_index) {
-		i = dirhist_total_index;
-		while (--i >= 0)
+		i = dirhist_total_index > 0 ? (size_t)dirhist_total_index : 0;
+		for (; i-- > 0;)
 			free(old_pwd[i]);
 		free(old_pwd);
 	}
 
-	i = (int)aliases_n;
-	while (--i >= 0) {
+	i = aliases_n;
+		for (; i-- > 0;) {
 		free(aliases[i].name);
 		free(aliases[i].cmd);
 	}
 	free(aliases);
 
-	i = (int)kbinds_n;
-	while (--i >= 0) {
+	i = kbinds_n;
+		for (; i-- > 0;) {
 		free(kbinds[i].function);
 		free(kbinds[i].key);
 	}
 	free(kbinds);
 
-	i = (int)usrvar_n;
-	while (--i >= 0) {
+	i = usrvar_n;
+		for (; i-- > 0;) {
 		free(usr_var[i].name);
 		free(usr_var[i].value);
 	}
 	free(usr_var);
 
-	i = (int)actions_n;
-	while (--i >= 0) {
+	i = actions_n;
+		for (; i-- > 0;) {
 		free(usr_actions[i].name);
 		free(usr_actions[i].value);
 	}
 	free(usr_actions);
 
-	i = (int)prompt_cmds_n;
-	while (--i >= 0)
+	i = prompt_cmds_n;
+		for (; i-- > 0;)
 		free(prompt_cmds[i]);
 	free(prompt_cmds);
 
 	if (msgs_n > 0) {
-		i = (int)msgs_n;
-		while (--i >= 0)
+		i = msgs_n;
+		for (; i-- > 0;)
 			free(messages[i].text);
 		free(messages);
 	}
 
 	if (ext_colors_n) {
-		i = (int)ext_colors_n;
-		while (--i >= 0) {
+		i = ext_colors_n;
+		for (; i-- > 0;) {
 			free(ext_colors[i].name);
 			free(ext_colors[i].value);
 		}
@@ -1416,7 +1416,7 @@ free_stuff(void)
 
 	if (workspaces && workspaces[0].path) {
 		i = MAX_WS;
-		while (--i >= 0) {
+		for (; i-- > 0;) {
 			free(workspaces[i].path);
 			free(workspaces[i].name);
 		}

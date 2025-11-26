@@ -1054,17 +1054,17 @@ deselect_entries(char **desel_path, const size_t desel_n, int *error,
 	int i = (int)desel_n;
 
 	while (--i >= 0) {
-		int j, k, desel_index = -1;
+		int j, desel_index = -1;
 
 		if (!desel_path[i])
 			continue;
 
 		/* Search the sel array for the path of the entry to be deselected and
 		 * store its index. */
-		k = (int)sel_n;
-		while (--k >= 0) {
+		size_t k = sel_n;
+		for (; k-- > 0;) {
 			if (strcmp(sel_elements[k].name, desel_path[i]) == 0) {
-				desel_index = k;
+				desel_index = k > INT_MAX ? INT_MAX : (int)k;
 				break;
 			}
 		}
@@ -1111,12 +1111,12 @@ static int
 desel_entries(char **desel_elements, const size_t desel_n, const int desel_screen)
 {
 	char **desel_path = (char **)NULL;
-	int i = (int)desel_n;
+	size_t i = desel_n;
 
 	/* Get entries to be deselected */
 	if (desel_screen == 1) { /* Coming from the deselect screen */
 		desel_path = xnmalloc(desel_n, sizeof(char *));
-		while (--i >= 0) {
+		for (; i-- > 0;) {
 			const int desel_int = atoi(desel_elements[i]);
 			if (desel_int == INT_MIN) {
 				desel_path[i] = (char *)NULL;
@@ -1143,8 +1143,8 @@ desel_entries(char **desel_elements, const size_t desel_n, const int desel_scree
 		sel_elements = xnrealloc(sel_elements, sel_n, sizeof(struct sel_t));
 
 	/* Deallocate local arrays. */
-	i = (int)desel_n;
-	while (--i >= 0) {
+	i = desel_n;
+	for (; i-- > 0;) {
 		if (desel_screen == 1)
 			free(desel_path[i]);
 		free(desel_elements[i]);
@@ -1170,8 +1170,8 @@ desel_entries(char **desel_elements, const size_t desel_n, const int desel_scree
 int
 deselect_all(void)
 {
-	int i = (int)sel_n;
-	while (--i >= 0) {
+	size_t i = sel_n;
+	for (; i-- > 0;) {
 		free(sel_elements[i].name);
 		sel_elements[i].name = (char *)NULL;
 		sel_elements[i].size = (off_t)UNSET;
@@ -1244,14 +1244,14 @@ get_desel_input(size_t *n)
 static inline void
 free_desel_elements(const size_t desel_n, char ***desel_elements)
 {
-	int i = (int)desel_n;
-	while (--i >= 0)
+	size_t i = desel_n;
+	for (; i-- > 0;)
 		free((*desel_elements)[i]);
 	free(*desel_elements);
 }
 
 static int
-handle_alpha_entry(const int i, const size_t desel_n, char **desel_elements)
+handle_alpha_entry(const size_t i, const size_t desel_n, char **desel_elements)
 {
 	if (*desel_elements[i] == 'e' && !desel_elements[i][1]) {
 		free_desel_elements(desel_n, &desel_elements);
@@ -1279,7 +1279,7 @@ handle_alpha_entry(const int i, const size_t desel_n, char **desel_elements)
 }
 
 static int
-valid_desel_eln(const int i, const size_t desel_n, char **desel_elements)
+valid_desel_eln(const size_t i, const size_t desel_n, char **desel_elements)
 {
 	const int n = atoi(desel_elements[i]);
 
@@ -1380,8 +1380,8 @@ deselect(char **args)
 	size_t desel_n = 0;
 	char **desel_elements = get_desel_input(&desel_n);
 
-	int i = (int)desel_n;
-	while (--i >= 0) {
+	size_t i = desel_n;
+	for (; i-- > 0;) {
 		if (!is_number(desel_elements[i])) /* Only for 'q', 'e', and '*' */
 			return handle_alpha_entry(i, desel_n, desel_elements);
 

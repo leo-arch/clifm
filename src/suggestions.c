@@ -1047,8 +1047,8 @@ check_history(const char *str, const size_t len)
 	if (!history || !str || !*str || len == 0)
 		return NO_MATCH;
 
-	int i = (int)current_hist_n;
-	while (--i >= 0) {
+	size_t i = current_hist_n;
+	for (; i-- > 0;) {
 		if (!history[i].cmd || TOUPPER(*str) != TOUPPER(*history[i].cmd))
 			continue;
 
@@ -1204,8 +1204,8 @@ check_jumpdb(const char *str, const size_t len, const int print)
 {
 	char *color = (conf.suggest_filetype_color == 1) ? di_c : sf_c;
 
-	int i = (int)jump_n;
-	while (--i >= 0) {
+	size_t i = jump_n;
+	for (; i-- > 0;) {
 		if (!jump_db[i].path || TOUPPER(*str) != TOUPPER(*jump_db[i].path)
 		|| jump_db[i].rank == JUMP_ENTRY_PURGED)
 			continue;
@@ -1302,8 +1302,8 @@ check_aliases(const char *str, const size_t len, const int print)
 
 	char *color = sc_c;
 
-	int i = (int)aliases_n;
-	while (--i >= 0) {
+	size_t i = aliases_n;
+	for (; i-- > 0;) {
 		if (!aliases[i].name)
 			continue;
 		char *p = aliases[i].name;
@@ -1574,7 +1574,7 @@ check_sort_methods(const char *str, const size_t len)
 static int
 check_prompts(char *word, const size_t len)
 {
-	int i = (int)prompts_n;
+	size_t i = prompts_n;
 
 	char *q = (char *)NULL, *w = word;
 	size_t l = len;
@@ -1585,7 +1585,7 @@ check_prompts(char *word, const size_t len)
 		l = w == q ? strlen(w) : len;
 	}
 
-	while (--i >= 0) {
+	for (; i-- > 0;) {
 		if (TOUPPER(*w) == TOUPPER(*prompts[i].name)
 		&& (conf.case_sens_list ? strncmp(prompts[i].name, w, l)
 		: strncasecmp(prompts[i].name, w, l)) == 0) {
@@ -1651,8 +1651,8 @@ check_workspaces(char *word, size_t wlen, const int type)
 		l = w == q ? strlen(w) : wlen;
 	}
 
-	int i = MAX_WS;
-	while (--i >= 0) {
+	size_t i = MAX_WS;
+	for (; i-- > 0;) {
 		if (!workspaces[i].name)
 			continue;
 

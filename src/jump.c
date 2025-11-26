@@ -186,9 +186,9 @@ rank_entry(const int i, const time_t now, int *days_since_first,
 static void
 free_jump_database(void)
 {
-	int i = (int)jump_n;
+	size_t i = jump_n;
 
-	while (--i >= 0)
+	for (; i-- > 0;)
 		free(jump_db[i].path);
 
 	free(jump_db);
@@ -240,8 +240,9 @@ add_to_jumpdb(char *dir)
 		jump_n = 0;
 	}
 
-	int i = (int)jump_n, new_entry = 1;
-	while (--i >= 0) {
+	int new_entry = 1;
+	size_t i = jump_n;
+	for (; i-- > 0;) {
 		/* Jump entries are all absolute paths, so that they all start with
 		 * a slash. Let's start comparing them from the second char. */
 		if (!IS_VALID_JUMP_ENTRY(i) || dir_len != jump_db[i].len

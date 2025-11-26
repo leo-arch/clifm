@@ -837,8 +837,8 @@ print_regex_matches(const mode_t file_type, struct dirent **reg_dirlist,
 
 	size_t matches = 0; /* Number of filtered matches */
 
-	int i = (int)total;
-	while (--i >= 0) {
+	size_t i = total;
+	for (; i-- > 0;) {
 		int index = regex_index[i];
 
 		if (file_type != 0 && check_regex_file_type(reg_dirlist,
@@ -861,8 +861,8 @@ print_regex_matches(const mode_t file_type, struct dirent **reg_dirlist,
 
 	size_t last_col = 0, cur_col = 0;
 
-	i = (int)matches;
-	while (--i >= 0) {
+	i = matches;
+	for (; i-- > 0;) {
 		cur_col++;
 		count++;
 

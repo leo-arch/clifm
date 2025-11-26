@@ -102,10 +102,10 @@ get_remote(char *name)
 	if (dequote_remote_name(name) == FUNC_FAILURE)
 		return (-1);
 
-	int i = (int)remotes_n,
-		found = 0;
+	size_t i = remotes_n;
+	int found = 0;
 
-	while (--i >= 0) {
+	for (; i-- > 0;) {
 		if (*name == *remotes[i].name && strcmp(name, remotes[i].name) == 0) {
 			found = 1;
 			break;
@@ -122,7 +122,7 @@ get_remote(char *name)
 		return (-1);
 	}
 
-	return i;
+	return i > INT_MAX ? INT_MAX : (int)i;
 }
 
 static int
@@ -352,10 +352,10 @@ automount_remotes(void)
 	if (remotes_n == 0)
 		return FUNC_SUCCESS;
 
-	int i = (int)remotes_n;
+	size_t i = remotes_n;
 	int exit_status = FUNC_SUCCESS;
 
-	while (--i >= 0) {
+	for (; i-- > 0;) {
 		if (remotes[i].name && remotes[i].auto_mount == 1
 		&& remotes[i].mountpoint && remotes[i].mount_cmd) {
 
@@ -395,9 +395,10 @@ autounmount_remotes(void)
 	if (remotes_n == 0)
 		return FUNC_SUCCESS;
 
-	int i = (int)remotes_n, exit_status = FUNC_SUCCESS;
+	size_t i = remotes_n;
+	int exit_status = FUNC_SUCCESS;
 
-	while (--i >= 0) {
+	for (; i-- > 0;) {
 		if (remotes[i].name && remotes[i].auto_unmount == 1
 		&& remotes[i].mountpoint && remotes[i].unmount_cmd) {
 
