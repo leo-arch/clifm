@@ -2831,8 +2831,8 @@ check_seltag(const dev_t dev, const ino_t ino, const nlink_t links,
 	if (sel_n == 0 || !sel_devino)
 		return 0;
 
-	filesn_t j = (filesn_t)sel_n;
-	while (--j >= 0) {
+	size_t j = sel_n;
+	for (; j-- > 0;) {
 		if (sel_devino[j].dev != dev || sel_devino[j].ino != ino)
 			continue;
 		/* Only check hardlinks in case of regular files */

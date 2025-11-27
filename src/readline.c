@@ -4360,14 +4360,14 @@ set_rl_input_file(void)
 		xerror(_("%s: An input file must be provided via the "
 			"CLIFM_TEST_INPUT_FILE environment variable\n"), PROGRAM_NAME);
 		UNHIDE_CURSOR;
-		exit(FUNC_FAILURE);
+		exit(EXIT_FAILURE);
 	}
 
 	FILE *fstream = fopen(input_file, "r");
 	if (!fstream) {
 		xerror("%s: '%s': %s\n", PROGRAM_NAME, input_file, strerror(errno));
 		UNHIDE_CURSOR;
-		exit(FUNC_FAILURE);
+		exit(EXIT_FAILURE);
 	}
 
 	rl_instream = fstream;
