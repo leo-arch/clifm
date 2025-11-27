@@ -1351,21 +1351,23 @@ print_entry_color(int *ind_char, const filesn_t i, const int pad,
 
 	const char *trunc_diff = wtrunc.diff > 0 ? gen_diff_str(wtrunc.diff) : "";
 
-	char *ind_chr = (char *)NULL;
+	char *ind_chr = NULL;
 	const char *ind_chr_color = get_ind_char(i, &ind_chr);
+
+	const int trunc = wtrunc.type;
+	const char *ext_color = trunc == TRUNC_EXT ? file_info[i].color : "";
+	const char *ext_name  = trunc == TRUNC_EXT ? file_info[i].ext_name : "";
 
 	switch (checks.list_format) {
 #ifndef _NO_ICONS
 	case ICONS_NO_ELN:
-		if (wtrunc.type > 0) {
+		if (trunc > 0) {
 			xprintf("%s%s%s%s%s%s%s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
 				ind_chr_color, ind_chr, df_c,
 				file_info[i].icon_color, file_info[i].icon,
 				checks.icons_gap, file_info[i].color, (wchar_t *)n,
 				trunc_diff, tt_c, TRUNC_FILE_CHR,
-				wtrunc.type == TRUNC_EXT ? file_info[i].color : "",
-				wtrunc.type == TRUNC_EXT ? file_info[i].ext_name : "",
-				end_color);
+				ext_color, ext_name, end_color);
 		} else {
 			xprintf("%s%s%s%s%s%s%s%s%s", ind_chr_color, ind_chr, df_c,
 				file_info[i].icon_color, file_info[i].icon,
@@ -1373,15 +1375,13 @@ print_entry_color(int *ind_char, const filesn_t i, const int pad,
 		}
 		break;
 	case ICONS_ELN:
-		if (wtrunc.type > 0) {
+		if (trunc > 0) {
 			xprintf("%s%*jd%s%s%s%s%s%s%s%s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
 				el_c, pad, (intmax_t)i + 1, df_c, ind_chr_color, ind_chr,
 				df_c, file_info[i].icon_color, file_info[i].icon,
 				checks.icons_gap, file_info[i].color, (wchar_t *)n,
 				trunc_diff, tt_c, TRUNC_FILE_CHR,
-				wtrunc.type == TRUNC_EXT ? file_info[i].color : "",
-				wtrunc.type == TRUNC_EXT ? file_info[i].ext_name : "",
-				end_color);
+				ext_color, ext_name, end_color);
 		} else {
 			xprintf("%s%*jd%s%s%s%s%s%s%s%s%s%s", el_c, pad,
 				(intmax_t)i + 1, df_c, ind_chr_color, ind_chr, df_c,
@@ -1391,27 +1391,22 @@ print_entry_color(int *ind_char, const filesn_t i, const int pad,
 		break;
 #endif /* !_NO_ICONS */
 	case NO_ICONS_NO_ELN:
-		if (wtrunc.type > 0) {
+		if (trunc > 0) {
 			xprintf("%s%s%s%s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s", ind_chr_color,
 				ind_chr, df_c, file_info[i].color, (wchar_t *)n, trunc_diff,
-				tt_c, TRUNC_FILE_CHR,
-				wtrunc.type == TRUNC_EXT ? file_info[i].color : "",
-				wtrunc.type == TRUNC_EXT ? file_info[i].ext_name : "",
-				end_color);
+				tt_c, TRUNC_FILE_CHR, ext_color, ext_name, end_color);
 		} else {
 			xprintf("%s%s%s%s%s%s", ind_chr_color, ind_chr,
 				df_c, file_info[i].color, n, end_color);
 		}
 		break;
 	case NO_ICONS_ELN:
-		if (wtrunc.type > 0) {
+		if (trunc > 0) {
 			xprintf("%s%*jd%s%s%s%s%s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
 				el_c, pad, (intmax_t)i + 1, df_c, ind_chr_color, ind_chr,
 				df_c, file_info[i].color, (wchar_t *)n,
 				trunc_diff, tt_c, TRUNC_FILE_CHR,
-				wtrunc.type == TRUNC_EXT ? file_info[i].color : "",
-				wtrunc.type == TRUNC_EXT ? file_info[i].ext_name : "",
-				end_color);
+				ext_color, ext_name, end_color);
 		} else {
 			xprintf("%s%*jd%s%s%s%s%s%s%s", el_c, pad, (intmax_t)i + 1,
 				df_c, ind_chr_color, ind_chr, df_c,
@@ -1442,7 +1437,7 @@ print_entry_nocolor(int *ind_char, const filesn_t i, const int pad,
 	const char *n = construct_filename(i, &wtrunc, max_namelen);
 
 	const char *trunc_diff = wtrunc.diff > 0 ? gen_diff_str(wtrunc.diff) : "";
-	char *ind_chr = (char *)NULL;
+	char *ind_chr = NULL;
 	(void)get_ind_char(i, &ind_chr);
 
 	switch (checks.list_format) {
@@ -1554,17 +1549,19 @@ print_entry_color_light(int *ind_char, const filesn_t i,
 
 	const char *trunc_diff = wtrunc.diff > 0 ? gen_diff_str(wtrunc.diff) : "";
 
+	const int trunc = wtrunc.type;
+	const char *ext_color = trunc == TRUNC_EXT ? file_info[i].color : "";
+	const char *ext_name  = trunc == TRUNC_EXT ? file_info[i].ext_name : "";
+
 	switch (checks.list_format) {
 #ifndef _NO_ICONS
 	case ICONS_NO_ELN:
-		if (wtrunc.type > 0) {
+		if (trunc > 0) {
 			xprintf("%s%s%s%s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
 				file_info[i].icon_color, file_info[i].icon,
 				checks.icons_gap, file_info[i].color, (wchar_t *)n,
 				trunc_diff, tt_c, TRUNC_FILE_CHR,
-				wtrunc.type == TRUNC_EXT ? file_info[i].color : "",
-				wtrunc.type == TRUNC_EXT ? file_info[i].ext_name : "",
-				end_color);
+				ext_color, ext_name, end_color);
 		} else {
 			xprintf("%s%s%s%s%s%s", file_info[i].icon_color,
 				file_info[i].icon, checks.icons_gap,
@@ -1572,14 +1569,12 @@ print_entry_color_light(int *ind_char, const filesn_t i,
 		}
 		break;
 	case ICONS_ELN:
-		if (wtrunc.type > 0) {
+		if (trunc > 0) {
 			xprintf("%s%*jd%s %s%s%s%s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
 				el_c, pad, (intmax_t)i + 1, df_c, file_info[i].icon_color,
 				file_info[i].icon, checks.icons_gap, file_info[i].color,
 				(wchar_t *)n, trunc_diff, tt_c, TRUNC_FILE_CHR,
-				wtrunc.type == TRUNC_EXT ? file_info[i].color : "",
-				wtrunc.type == TRUNC_EXT ? file_info[i].ext_name : "",
-				end_color);
+				ext_color, ext_name, end_color);
 		} else {
 			xprintf("%s%*jd%s %s%s%s%s%s%s", el_c, pad, (intmax_t)i + 1,
 				df_c, file_info[i].icon_color, file_info[i].icon,
@@ -1588,25 +1583,21 @@ print_entry_color_light(int *ind_char, const filesn_t i,
 		break;
 #endif /* !_NO_ICONS */
 	case NO_ICONS_NO_ELN:
-		if (wtrunc.type > 0) {
+		if (trunc > 0) {
 			xprintf("%s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
 				file_info[i].color, (wchar_t *)n,
 				trunc_diff, tt_c, TRUNC_FILE_CHR,
-				wtrunc.type == TRUNC_EXT ? file_info[i].color : "",
-				wtrunc.type == TRUNC_EXT ? file_info[i].ext_name : "",
-				end_color);
+				ext_color, ext_name, end_color);
 		} else {
 			xprintf("%s%s%s", file_info[i].color, n, end_color);
 		}
 		break;
 	case NO_ICONS_ELN:
-		if (wtrunc.type > 0) {
+		if (trunc > 0) {
 			xprintf("%s%*jd%s %s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
 				el_c, pad, (intmax_t)i + 1, df_c, file_info[i].color,
 				(wchar_t *)n, trunc_diff, tt_c, TRUNC_FILE_CHR,
-				wtrunc.type == TRUNC_EXT ? file_info[i].color : "",
-				wtrunc.type == TRUNC_EXT ? file_info[i].ext_name : "",
-				end_color);
+				ext_color, ext_name, end_color);
 		} else {
 			xprintf("%s%*jd%s %s%s%s", el_c, pad, (intmax_t)i + 1, df_c,
 				file_info[i].color, n, end_color);
