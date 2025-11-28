@@ -371,6 +371,10 @@
 # confirmation off for a single command. E.g.: 'r -f FILE'.
 ;rmForce=false
 
+# Check filenames safety when creating/renaming files ('n' and 'm' commands
+# respectively).
+;SafeFilenames=true
+
 # Set the default command used for copying files. Supported values:
 # 0 = 'cp -Rp'
 # 1 = 'cp -Rp' (force: do not prompt before overwrite)
