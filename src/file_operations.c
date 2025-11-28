@@ -659,6 +659,9 @@ is_safe_filename(const char *name)
 	if (!name || !*name)
 		return 0;
 
+	if (conf.safe_filenames == 0) /* This check is disabled. */
+		return 1;
+
 	int safe = 1;
 	const char *n = name;
 	const size_t len = strlen(name);

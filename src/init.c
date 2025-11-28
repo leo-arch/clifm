@@ -255,6 +255,7 @@ init_conf_struct(void)
 	conf.relative_time = DEF_RELATIVE_TIME;
 	conf.restore_last_path = UNSET;
 	conf.rm_force = DEF_RM_FORCE;
+	conf.safe_filenames = DEF_SAFE_FILENAMES;
 	conf.search_strategy = DEF_SEARCH_STRATEGY;
 	conf.share_selbox = UNSET;
 	conf.show_hidden = UNSET;

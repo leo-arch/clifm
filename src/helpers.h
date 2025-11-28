@@ -1213,6 +1213,7 @@ struct config_t {
 	int relative_time;
 	int restore_last_path;
 	int rm_force;
+	int safe_filenames;
 	int search_strategy;
 	int share_selbox;
 	int show_hidden;
@@ -1235,7 +1236,6 @@ struct config_t {
 #endif /* !_NO_TRASH */
 	int warning_prompt;
 	int welcome_message;
-	int pad3;
 };
 
 extern struct config_t conf;

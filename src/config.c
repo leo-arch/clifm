@@ -1723,10 +1723,13 @@ create_main_config_file(char *file)
 ;mvCmd=%d\n\n"
 
 		"# If set to true, the 'r' command will never prompt before removals.\n\
-;rmForce=%s\n\n",
+;rmForce=%s\n\n"
+
+		"# Check filenames safety when creating or renaming files ('n' and 'm' commands respectively).\n\
+;SafeFilenames=%s\n\n"
 
 		"# Default answers for specific confirmation prompts:\n\
-;DefaultAnswer=\"\"\n\n"
+;DefaultAnswer=\"\"\n\n",
 
 		DEF_COLOR_SCHEME,
 		DEF_FILES_COUNTER == 1 ? "true" : "false",
@@ -1738,7 +1741,8 @@ create_main_config_file(char *file)
 		DEF_DIRHIST_MAP == 1 ? "true" : "false",
 		DEF_CP_CMD,
 		DEF_MV_CMD,
-		DEF_RM_FORCE == 1 ? "true" : "false");
+		DEF_RM_FORCE == 1 ? "true" : "false",
+		DEF_SAFE_FILENAMES == 1 ? "true" : "false");
 
 	fprintf(config_fp,
 		"# How 'l' creates symlinks (absolute, relative, literal).\n\
@@ -3704,6 +3708,10 @@ read_config(void)
 
 		else if (*line == 'r' && strncmp(line, "rmForce=", 8) == 0) {
 			set_config_bool_value(line + 8, &conf.rm_force);
+		}
+
+		else if (*line == 'S' && strncmp(line, "SafeFilenames=", 14) == 0) {
+			set_config_bool_value(line + 14, &conf.safe_filenames);
 		}
 
 		else if (*line == 'S' && strncmp(line, "SearchStrategy=", 15) == 0) {

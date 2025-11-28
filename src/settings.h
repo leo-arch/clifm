@@ -575,6 +575,7 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define DEF_REPORT_CWD 0 /* Report CWD to terminal via OSC-7 escape sequence */
 #define DEF_RESTORE_LAST_PATH 1
 #define DEF_RL_EDIT_MODE 1
+#define DEF_SAFE_FILENAMES 1 /* Check filenames safety with 'n' and 'm' commands */
 #define DEF_SECURE_CMDS 0
 #define DEF_SECURE_ENV 0
 #define DEF_SECURE_ENV_FULL 0
