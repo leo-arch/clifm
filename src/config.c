@@ -513,6 +513,9 @@ dump_config(void)
 	n = DEF_RM_FORCE;
 	print_config_value("rmForce", &conf.rm_force, &n, DUMP_CONFIG_BOOL);
 
+	n = DEF_SAFE_FILENAMES;
+	print_config_value("SafeFilenames", &conf.safe_filenames, &n, DUMP_CONFIG_BOOL);
+
 	n = DEF_SEARCH_STRATEGY;
 	print_config_value("SearchStrategy", &conf.search_strategy, &n,
 		DUMP_CONFIG_INT);
