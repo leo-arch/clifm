@@ -371,7 +371,7 @@
 # confirmation off for a single command. E.g.: 'r -f FILE'.
 ;rmForce=false
 
-# Check filenames safety when creating/renaming files ('n' and 'm' commands
+# Warn about unsafe filenames when creating/renaming files ('n' and 'm' commands
 # respectively).
 ;SafeFilenames=true
 

@@ -1725,7 +1725,7 @@ create_main_config_file(char *file)
 		"# If set to true, the 'r' command will never prompt before removals.\n\
 ;rmForce=%s\n\n"
 
-		"# Check filenames safety when creating or renaming files ('n' and 'm' commands respectively).\n\
+		"# Warn about unsafe filenames when creating/renaming files ('n' and 'm' commands respectively).\n\
 ;SafeFilenames=%s\n\n"
 
 		"# Default answers for specific confirmation prompts:\n\
