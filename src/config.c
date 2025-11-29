@@ -263,6 +263,18 @@ gen_desktop_notif_str(const int value)
 	}
 }
 
+static char *
+gen_safenames_str(const int value)
+{
+	switch (value) {
+	case SAFENAMES_NOCHECK: return "false";
+	case SAFENAMES_BASIC: return "basic";
+	case SAFENAMES_STRICT: return "strict";
+	case SAFENAMES_POSIX: return "posix";
+	default: return "unknown";
+	}
+}
+
 /* Dump current value of config options (as defined in the config file),
  * highlighting those that differ from default values.
  * Note that values displayed here represent the CURRENT status of the
@@ -513,8 +525,8 @@ dump_config(void)
 	n = DEF_RM_FORCE;
 	print_config_value("rmForce", &conf.rm_force, &n, DUMP_CONFIG_BOOL);
 
-	n = DEF_SAFE_FILENAMES;
-	print_config_value("SafeFilenames", &conf.safe_filenames, &n, DUMP_CONFIG_BOOL);
+	print_config_value("SafeFilenames", gen_safenames_str(conf.safe_filenames),
+		gen_safenames_str(DEF_SAFE_FILENAMES), DUMP_CONFIG_STR);
 
 	n = DEF_SEARCH_STRATEGY;
 	print_config_value("SearchStrategy", &conf.search_strategy, &n,
@@ -3332,6 +3344,22 @@ set_desktop_notis(char *val)
 	}
 }
 
+static void
+set_safe_filenames(const char *val)
+{
+	if (!val || !*val)
+		return;
+
+	if (*val == 'f' && strncmp(val, "false\n", 6) == 0)
+		conf.safe_filenames = SAFENAMES_NOCHECK;
+	else if (*val == 'b' && strncmp(val, "basic\n", 6) == 0)
+		conf.safe_filenames = SAFENAMES_BASIC;
+	else if (*val == 'p' && strncmp(val, "posix\n", 6) == 0)
+		conf.safe_filenames = SAFENAMES_POSIX;
+	else if (*val == 's' && strncmp(val, "strict\n", 7) == 0)
+		conf.safe_filenames = SAFENAMES_STRICT;
+}
+
 /* Read the main configuration file and set options accordingly */
 static void
 read_config(void)
@@ -3714,7 +3742,7 @@ read_config(void)
 		}
 
 		else if (*line == 'S' && strncmp(line, "SafeFilenames=", 14) == 0) {
-			set_config_bool_value(line + 14, &conf.safe_filenames);
+			set_safe_filenames(line + 14);
 		}
 
 		else if (*line == 'S' && strncmp(line, "SearchStrategy=", 15) == 0) {

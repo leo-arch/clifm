@@ -595,6 +595,12 @@ extern time_t curdir_mtime;
 #define PAGER_LONG  1
 #define PAGER_SHORT 2
 
+/* Values for SafeFilenames (conf.safe_filenames) */
+#define SAFENAMES_NOCHECK 0 /* The check is disabled */
+#define SAFENAMES_BASIC   1 /* Only basic checks are performed */
+#define SAFENAMES_STRICT  2 /* Shell metacharacters are disallowed */
+#define SAFENAMES_POSIX   3 /* Only characters in the Portable Character Set are allowed */
+
 /* ClearScreen=internal: clear screen only if command is internal */
 #define CLEAR_INTERNAL_CMD_ONLY 2
 

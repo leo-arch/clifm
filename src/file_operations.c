@@ -80,18 +80,17 @@ static char *const unsafe_name_msgs[] = {
 	"Contains shell meta-characters",
 	"Contains a leading whitespace",
 	"Contains a trailing whitespace",
+	"Contains an illegal UTF-8 byte",
 	"Name is too long",
 	"Contains characters not in the Portable Filename Character Set"
 };
 
-#ifdef _BE_POSIX
 /* Return 0 if NAME is a portable filename. Otherwise, return 1. */
 static int
 is_portable_filename(const char *name, const size_t len)
 {
 	return len > strspn(name, PORTABLE_CHARSET);
 }
-#endif /* _BE_POSIX */
 
 /* Print/set the file creation mode mask (umask). */
 int
@@ -659,7 +658,7 @@ is_safe_filename(const char *name)
 	if (!name || !*name)
 		return 0;
 
-	if (conf.safe_filenames == 0) /* This check is disabled. */
+	if (conf.safe_filenames == SAFENAMES_NOCHECK) /* This check is disabled. */
 		return 1;
 
 	int safe = 1;
@@ -704,14 +703,19 @@ is_safe_filename(const char *name)
 	int only_dots = 1;
 	const char *s = name;
 	while (*s) {
-		/* Contains control characters (being not UTF-8 bytes), the
-		 * DEL character (0x7f), or a non-breaking space (0xa0). */
-		if ((*s < ' ' && !IS_UTF8_CHAR(*s)) || *s == 0x7f
-		|| (unsigned char)*s == 0xa0)
+		/* Contains control characters (being not UTF-8 bytes) or the
+		 * DEL character (0x7f). */
+		if ((*s < ' ' && !IS_UTF8_CHAR(*s)) || *s == 0x7f)
 			print_val_err(name, UNSAFE_CONTROL, &safe);
 
-		/* Contains shell meta-characters */
-		if (strchr(SHELL_META_CHARS, *s))
+		/* Illegal bytes in well‑formed UTF‑8 sequences (RFC 3629) */
+		if ((unsigned char)*s == 0xc0 || (unsigned char)*s == 0xc1
+		|| (unsigned char)*s >= 0xf5)
+			print_val_err(name, UNSAFE_ILLEGAL_UTF8, &safe);
+
+		/* Contains shell meta-characters (only in strict mode) */
+		if (conf.safe_filenames == SAFENAMES_STRICT
+		&& strchr(SHELL_META_CHARS, *s))
 			print_val_err(name, UNSAFE_META, &safe);
 
 		/* Only dots: Reserved keyword (internal: fastback expansion) */
@@ -728,10 +732,9 @@ is_safe_filename(const char *name)
 	if (s - name >= NAME_MAX)
 		print_val_err(name, UNSAFE_TOO_LONG, &safe);
 
-#ifdef _BE_POSIX
-	if (is_portable_filename(name, (size_t)(s - name)) != FUNC_SUCCESS)
+	if (conf.safe_filenames == SAFENAMES_POSIX
+	&& is_portable_filename(name, (size_t)(s - name)) != FUNC_SUCCESS)
 		print_val_err(name, UNSAFE_NOT_PORTABLE, &safe);
-#endif /* _BE_POSIX */
 
 	return safe;
 }

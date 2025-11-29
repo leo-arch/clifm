@@ -40,13 +40,12 @@
 #define UNSAFE_META      7
 #define UNSAFE_LEADING_WHITESPACE 8
 #define UNSAFE_TRAILING_WHITESPACE 9
-#define UNSAFE_TOO_LONG  10
-#ifdef _BE_POSIX
-# define UNSAFE_NOT_PORTABLE 11
-# define PORTABLE_CHARSET "abcdefghijklmnopqrstuvwxyz\
-ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-_"
-#endif
+#define UNSAFE_ILLEGAL_UTF8 10
+#define UNSAFE_TOO_LONG  11
+#define UNSAFE_NOT_PORTABLE 12
 
+#define PORTABLE_CHARSET "abcdefghijklmnopqrstuvwxyz\
+ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-_"
 #define SHELL_META_CHARS "*?[]<>|(){}&=`^!\\;$"
 
 #define FILE_TYPE_CHARS "bcCdDfFghlLoOpPstux"
