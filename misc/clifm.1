@@ -1003,7 +1003,7 @@ A name (namely, any component of a path) is considered unsafe if:
   3. Is a reserved system/shell keyword (\'~\', \'.\' ,\'..\')
   4. Contains leading or trailing whitespace
   5. Contains embedded control characters (0x00\-0x1f in the ASCII table)
-  6. Contains embedded shell meta\-characters (*?:[]"<>|(){}&'!\\;$)
+  6. Contains embedded shell meta\-characters (*?[]<>|(){}&=`!\\;$)
   7. It is too long (larger than NAME_MAX, usually 255 bytes)
 .sp
 For more information about unsafe filenames consult \fIhttps://dwheeler.com/essays/fixing\-unix\-linux\-filenames.html\fR.
