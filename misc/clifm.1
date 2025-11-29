@@ -995,20 +995,29 @@ Tab completion is available for explicit templates: `\fBn file@<TAB>\fR`.
 .sp
 \fB(1)\fR The templates directory is \fB$CLIFM_TEMPLATES_DIR\fR, \fB$XDG_TEMPLATES_DIR\fR, or \fI~/Templates\fR, in this precedence order.
 .sp
-\fBFilename validation\fR is performed over names before creation. In case of an unsafe name, the user is warned and asked for confirmation.
+\fBFilename validation\fR
 .sp
-A name (namely, any component of a path) is considered unsafe if:
+Filename validation is performed on new filenames before creation/modification using a set of different checks. If a name fails any check, the user is warned and asked to confirm.
+.sp
+Available checks:
   1. Starts with a dash (\-): command option flags collision
   2. Is a reserved keyword/expression (internal): fastback (...), ELN/range (12, 1\-45), and MIME/file type expansion (@query, =x)
   3. Is a reserved system/shell keyword (\'~\', \'.\' ,\'..\')
   4. Contains leading or trailing whitespace
   5. Contains embedded control characters (0x00\-0x1f in the ASCII table)
-  6. Contains embedded shell meta\-characters (*?[]<>|(){}&=`!\\;$)
+  6. Contains invalid UTF-8 bytes (0xc0, 0xc1, 0xf5-0xff)
   7. It is too long (larger than NAME_MAX, usually 255 bytes)
+  8. Contains embedded shell metacharacters (*?[]<>|(){}&=`!\\;$)
+  9. Contains characters outside the POSIX Portable Character Set (a-zA-Z0-9._-)
 .sp
-For more information about unsafe filenames consult \fIhttps://dwheeler.com/essays/fixing\-unix\-linux\-filenames.html\fR.
+The set of checks to be performed is controlled by the \fBSafeFilenames\fR option in the configuration file. This option supports the following values:
 .sp
-You can disable this check by setting \fBSafeFilenames\fR to \fBfalse\fR in the configuration file.
+  \fBfalse\fR: No check is performed
+  \fBbasic\fR: Only basic checks (1-7 above) are performed (this is the default)
+  \fBstrict\fR: Basic + disallow shell metacharacters (check 8)
+  \fBposix\fR: Basic + allow only characters in the POSIX Portable Character Set (check 9)
+.sp
+For more information about safe filenames consult \fIhttps://dwheeler.com/essays/fixing\-unix\-linux\-filenames.html\fR.
 .TP
 .B net \fR[\fINAME\fR | list | edit | m, mount \fINAME\fR | u, unmount \fINAME\fR]
 \fB1. The configuration file\fR

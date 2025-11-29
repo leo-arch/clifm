@@ -372,8 +372,13 @@
 ;rmForce=false
 
 # Warn about unsafe filenames when creating/renaming files ('n' and 'm' commands
-# respectively).
-;SafeFilenames=true
+# respectively). Supported values:
+# false =  No check is performed
+# basic =  Only basic checks are performed
+# strict = Basic + no shell meta-character is allowed
+# posix  = Basic + only characters in the Portable Character Set are allowed
+# Consult the manpage for details.
+;SafeFilenames=basic
 
 # Set the default command used for copying files. Supported values:
 # 0 = 'cp -Rp'
