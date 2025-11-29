@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Nov 22, 2025" "clifm 1.26.4" "Clifm Manual"
+.TH "CLIFM" "1" "Nov 29, 2025" "clifm 1.26.5" "Clifm Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -701,6 +701,8 @@ The \fBl\fR command allows the use of the \fBe, edit\fR option to modify the des
 .sp
 When using the \fBsel\fR keyword and no destination is provided, \fBc\fR and \fBm\fR will copy/move selected files to the current directory.
 .sp
+When renaming a file with the \fBm\fR command, filename validation is performed for the new filename. See the \fBnew\fR command below for more information.
+.sp
 Whenever \fBsel\fR is not used, but just a source filename (and no destination is provided), the \fBm\fR command behaves much like the \fBimv\fR(1) shell command (from the \'renameutils\' package), providing an interactive renaming function: it prompts the user to enter a new name using the source filename as base, so that it does not need to be typed twice. For this alternative prompt, only tab completion for filenames is available.
 .sp
 \fBClifm\fR supports \fBadvcp\fR(1), \fBwcp\fR, and \fBrsync\fR(1) to copy files (they include a progress bar). To use them instead of \fBcp\fR(1) set the corresponding option (\fBcpCmd\fR) in the configuration file. If \fBadvcp\fR is selected, the command used is `\fBadvcp\ \-giRp\fR` (or `\fBadvcp \-gRp\fR`, for non\-interactive mode). If \fBrsync\fR, the command is `\fBrsync\ \-avP\fR`. \fBwcp\fR takes no argument.
@@ -999,11 +1001,14 @@ A name (namely, any component of a path) is considered unsafe if:
   1. Starts with a dash (\-): command option flags collision
   2. Is a reserved keyword/expression (internal): fastback (...), ELN/range (12, 1\-45), and MIME/file type expansion (@query, =x)
   3. Is a reserved system/shell keyword (\'~\', \'.\' ,\'..\')
-  4. Contains embedded control characters (0x00\-0x1f in the ASCII table)
-  5. Contains embedded shell meta\-characters (*?:[]"<>|(){}&'!\\;$)
-  6. It is too long (larger than NAME_MAX, usually 255 bytes)
+  4. Contains leading or trailing whitespace
+  5. Contains embedded control characters (0x00\-0x1f in the ASCII table)
+  6. Contains embedded shell meta\-characters (*?:[]"<>|(){}&'!\\;$)
+  7. It is too long (larger than NAME_MAX, usually 255 bytes)
 .sp
 For more information about unsafe filenames consult \fIhttps://dwheeler.com/essays/fixing\-unix\-linux\-filenames.html\fR.
+.sp
+You can disable this check by setting \fBSafeFilenames\fR to \fBfalse\fR in the configuration file.
 .TP
 .B net \fR[\fINAME\fR | list | edit | m, mount \fINAME\fR | u, unmount \fINAME\fR]
 \fB1. The configuration file\fR
