@@ -1757,7 +1757,10 @@ create_main_config_file(char *file)
 		DEF_CP_CMD,
 		DEF_MV_CMD,
 		DEF_RM_FORCE == 1 ? "true" : "false",
-		DEF_SAFE_FILENAMES == 1 ? "true" : "false");
+		DEF_SAFE_FILENAMES == SAFENAMES_BASIC ? "basic"
+			: (DEF_SAFE_FILENAMES == SAFENAMES_STRICT ? "strict"
+			: (DEF_SAFE_FILENAMES == SAFENAMES_POSIX ? "posix"
+			: "false")));
 
 	fprintf(config_fp,
 		"# How 'l' creates symlinks (absolute, relative, literal).\n\
