@@ -220,30 +220,30 @@ init_checks_struct(void)
 static void
 set_icon_names_hashes(void)
 {
-	int i = (int)(sizeof(icon_filenames) / sizeof(icon_filenames[0]));
+	size_t i = sizeof(icon_filenames) / sizeof(icon_filenames[0]);
 	name_icons_hashes = xnmalloc((size_t)i + 1, sizeof(size_t));
 
-	while (--i >= 0)
+	for (; i-- > 0;)
 		name_icons_hashes[i] = hashme(icon_filenames[i].name, 0);
 }
 
 static void
 set_dir_names_hashes(void)
 {
-	int i = (int)(sizeof(icon_dirnames) / sizeof(icon_dirnames[0]));
+	size_t i = sizeof(icon_dirnames) / sizeof(icon_dirnames[0]);
 	dir_icons_hashes = xnmalloc((size_t)i + 1, sizeof(size_t));
 
-	while (--i >= 0)
+	for (; i-- > 0;)
 		dir_icons_hashes[i] = hashme(icon_dirnames[i].name, 0);
 }
 
 static void
 set_ext_names_hashes(void)
 {
-	int i = (int)(sizeof(icon_ext) / sizeof(icon_ext[0]));
+	size_t i = sizeof(icon_ext) / sizeof(icon_ext[0]);
 	ext_icons_hashes = xnmalloc((size_t)i + 1,  sizeof(size_t));
 
-	while (--i >= 0)
+	for (; i-- > 0;)
 		ext_icons_hashes[i] = hashme(icon_ext[i].name, 0);
 }
 

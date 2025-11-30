@@ -1001,12 +1001,12 @@ Filename validation is performed on new filenames before creation/modification u
 .sp
 Available checks:
   1. Starts with a dash (\-): command option flags collision
-  2. Is a reserved keyword/expression (internal): fastback (...), ELN/range (12, 1\-45), and MIME/file type expansion (@query, =x)
-  3. Is a reserved system/shell keyword (\'~\', \'.\' ,\'..\')
-  4. Contains leading or trailing whitespace
+  2. Is a reserved keyword/expression (internal use): fastback (...), ELN/range (12, 1\-45), and MIME/file type expansion (@query, =x)
+  3. Contains leading or trailing whitespace
+  4. Contains leading tilde
   5. Contains embedded control characters (0x00\-0x1f in the ASCII table)
-  6. Contains invalid UTF-8 bytes (0xc0, 0xc1, 0xf5-0xff)
-  7. It is too long (larger than NAME_MAX, usually 255 bytes)
+  6. Contains invalid UTF-8 bytes (0xc0, 0xc1, and 0xf5-0xff)
+  7. It is too long (longer than NAME_MAX, usually 255 bytes)
   8. Contains embedded shell metacharacters (*?[]<>|(){}&=`!\\;$)
   9. Contains characters outside the POSIX Portable Filename Character Set (a-zA-Z0-9._-)
 .sp

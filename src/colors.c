@@ -1744,9 +1744,9 @@ static int
 get_cur_colorscheme(const char *colorscheme)
 {
 	char *def_cscheme = (char *)NULL;
-	int i = (int)cschemes_n;
+	size_t i = cschemes_n;
 
-	while (--i >= 0) {
+	for (; i-- > 0;) {
 		if (*colorscheme == *color_schemes[i]
 		&& strcmp(colorscheme, color_schemes[i]) == 0) {
 			cur_cscheme = color_schemes[i];

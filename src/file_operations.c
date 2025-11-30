@@ -75,9 +75,9 @@ static char *const unsafe_name_msgs[] = {
 	"Reserved (internal: ELN/range expansion)",
 	"Reserved (internal: fastback expansion)",
 	"Reserved (internal: bookmarks, tags, and selected files constructs)",
-	"Reserved shell/system keyword",
 	"Contains control/non-printable characters",
 	"Contains shell metacharacters",
+	"Contains a leading tilde",
 	"Contains a leading whitespace",
 	"Contains a trailing whitespace",
 	"Contains illegal UTF-8 bytes",
@@ -631,10 +631,15 @@ is_range(const char *str)
 }
 
 static void
-print_val_err(const char *name, const int msg_type, int *safe)
+print_val_err(const char *name, const int msg_type, int *safe, int *printed)
 {
+	if (printed && *printed == 1)
+		return;
+
 	printf("'%s': %s\n", name, unsafe_name_msgs[msg_type]);
 	*safe = 0;
+	if (printed)
+		*printed = 1;
 }
 
 static int
@@ -663,60 +668,64 @@ is_safe_filename(const char *name)
 
 	int safe = 1;
 	const char *n = name;
-	const size_t len = strlen(name);
+	const size_t namelen = strlen(name);
 
 	if (is_whitespace(*name))
-		print_val_err(name, UNSAFE_LEADING_WHITESPACE, &safe);
+		print_val_err(name, UNSAFE_LEADING_WHITESPACE, &safe, NULL);
 
-	if (len > 1 && is_whitespace(name[len - 1]))
-		print_val_err(name, UNSAFE_TRAILING_WHITESPACE, &safe);
+	if (namelen > 1 && is_whitespace(name[namelen - 1]))
+		print_val_err(name, UNSAFE_TRAILING_WHITESPACE, &safe, NULL);
 
 	/* Starting with dash */
 	if (*n == '-')
-		print_val_err(name, UNSAFE_DASH, &safe);
+		print_val_err(name, UNSAFE_DASH, &safe, NULL);
+
+	/* Starting with a tilde */
+	if (namelen > 1 && *n == '~')
+		print_val_err(name, UNSAFE_LEADING_TILDE, &safe, NULL);
 
 	/* Reserved keyword (internal: MIME type and file type expansions) */
 	if ((*n == '=' && strchr(FILE_TYPE_CHARS, n[1]) && !n[2]) || *n == '@')
-		print_val_err(name, UNSAFE_MIME, &safe);
+		print_val_err(name, UNSAFE_MIME, &safe, NULL);
 
 	/* Reserved keyword (internal: bookmarks, tags, workspaces, and
 	 * selected files constructs) */
 	if (((*n == 'b' || *n == 's') && n[1] == ':')
 	|| strcmp(n, "sel") == 0)
-		print_val_err(name, UNSAFE_BTS_CONST, &safe);
+		print_val_err(name, UNSAFE_BTS_CONST, &safe, NULL);
 
 	if ((*n == 't' || *n == 'w') && n[1] == ':' && n[2])
-		print_val_err(name, UNSAFE_BTS_CONST, &safe);
+		print_val_err(name, UNSAFE_BTS_CONST, &safe, NULL);
 
 	/* Reserved (internal: ELN/range expansion) */
 	if ((*n > '0' && is_number(n)) || is_range(n))
-		print_val_err(name, UNSAFE_ELN, &safe);
+		print_val_err(name, UNSAFE_ELN, &safe, NULL);
 
-	/* "~" or ".": Reserved keyword */
-	if ((*n == '~' || *n == '.') && !n[1])
-		print_val_err(name, UNSAFE_SYS_KEY, &safe);
+	struct flags_t {
+		int control;
+		int illegal_utf8;
+		int meta;
+	};
 
-	/* ".." or "./": Reserved keyword */
-	if (*n == '.' && (n[1] == '.' || n[1] == '/') && !n[2])
-		print_val_err(name, UNSAFE_SYS_KEY, &safe);
-
+	struct flags_t printed = (struct flags_t){0};
 	int only_dots = 1;
 	const char *s = name;
+
 	while (*s) {
 		/* Contains control characters (being not UTF-8 bytes) or the
 		 * DEL character (0x7f). */
 		if ((*s < ' ' && !IS_UTF8_CHAR(*s)) || *s == 0x7f)
-			print_val_err(name, UNSAFE_CONTROL, &safe);
+			print_val_err(name, UNSAFE_CONTROL, &safe, &printed.control);
 
 		/* Illegal bytes in well‑formed UTF‑8 sequences (RFC 3629) */
 		if ((unsigned char)*s == 0xc0 || (unsigned char)*s == 0xc1
 		|| (unsigned char)*s >= 0xf5)
-			print_val_err(name, UNSAFE_ILLEGAL_UTF8, &safe);
+			print_val_err(name, UNSAFE_ILLEGAL_UTF8, &safe, &printed.illegal_utf8);
 
 		/* Contains shell meta-characters (only in strict mode) */
 		if (conf.safe_filenames == SAFENAMES_STRICT
 		&& strchr(SHELL_META_CHARS, *s))
-			print_val_err(name, UNSAFE_META, &safe);
+			print_val_err(name, UNSAFE_META, &safe, &printed.meta);
 
 		/* Only dots: Reserved keyword (internal: fastback expansion) */
 		if (*s != '.')
@@ -725,16 +734,16 @@ is_safe_filename(const char *name)
 		s++;
 	}
 
-	if (only_dots == 1)
-		print_val_err(name, UNSAFE_FASTBACK, &safe);
+	if (only_dots == 1 && namelen > 2)
+		print_val_err(name, UNSAFE_FASTBACK, &safe, NULL);
 
 	/* Name too long */
 	if (s - name >= NAME_MAX)
-		print_val_err(name, UNSAFE_TOO_LONG, &safe);
+		print_val_err(name, UNSAFE_TOO_LONG, &safe, NULL);
 
 	if (conf.safe_filenames == SAFENAMES_POSIX
 	&& is_portable_filename(name, (size_t)(s - name)) != FUNC_SUCCESS)
-		print_val_err(name, UNSAFE_NOT_PORTABLE, &safe);
+		print_val_err(name, UNSAFE_NOT_PORTABLE, &safe, NULL);
 
 	return safe;
 }
