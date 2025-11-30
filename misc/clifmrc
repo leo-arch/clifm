@@ -371,12 +371,12 @@
 # confirmation off for a single command. E.g.: 'r -f FILE'.
 ;rmForce=false
 
-# Warn about unsafe filenames when creating/renaming files ('n' and 'm' commands
-# respectively). Supported values:
+# Warn about unsafe filenames when creating/renaming files ('n' and 'm'
+# commands respectively). Supported values:
 # false =  No check is performed
 # basic =  Only basic checks are performed
-# strict = Basic + no shell meta-character is allowed
-# posix  = Basic + only characters in the Portable Character Set are allowed
+# strict = Basic + disallow shell metacharacters
+# posix  = Basic + allow only characters in the Portable Character Set
 # Consult the manpage for details.
 ;SafeFilenames=basic
 

@@ -576,7 +576,10 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define DEF_RESTORE_LAST_PATH 1
 #define DEF_RL_EDIT_MODE 1
 /* Check filenames safety with 'n' and 'm' commands. Allowed values:
- * SAFENAMES_NOCHECK, SAFENAMES_BASIC, SAFENAMES_STRICT, SAFENAMES_POSIX */
+ * SAFENAMES_NOCHECK: no check is performed
+ * SAFENAMES_BASIC: basic checks such as leading/trailing whitespaces, ctrl chars, etc
+ * SAFENAMES_STRICT: basic + disallow shell metacharacters
+ * SAFENAMES_POSIX: basic + allow only chars in the POSIX Portable Filename Character Set */
 #define DEF_SAFE_FILENAMES SAFENAMES_BASIC
 #define DEF_SECURE_CMDS 0
 #define DEF_SECURE_ENV 0

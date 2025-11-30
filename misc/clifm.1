@@ -593,7 +593,7 @@ Use the \fBf\fR (or \fBforth\fR) command to move forward, instead of backward, i
 .sp
 These following simple rules are used to compose sanitized filenames:
     \- NUL (\\0) and slash (/) characters are completely disallowed
-    \- Only characters from the \fBPortable Filename Characters Set\fR (a\-zA\-Z0-9._\-) are allowed
+    \- Only characters from the \fBPOSIX Portable Filename Character Set\fR (a\-zA\-Z0-9._\-) are allowed
     \- { [ ( ) ] } are replaced by a dash (\-). Everything else is replaced by an underscore (_)
     \- Unicode characters are translated, whenever possible, into an ASCII replacement. Otherwise, they are just ignored. For example, an upper case A with diacritic (accent, umlaut, diaresis, and so on) will be replaced by an ASCII A, but the smiley face emoji will be simply ignored. A few special signs will be translated into text, for instance, the pound sign will be replaced by "_pound_" and the Euro symbol by "EUR". Translations are made via a translation table (see the \fIcleaner_table.h\fR in the source code).
     \- Filenames never start with a dash (\-)
@@ -1008,14 +1008,14 @@ Available checks:
   6. Contains invalid UTF-8 bytes (0xc0, 0xc1, 0xf5-0xff)
   7. It is too long (larger than NAME_MAX, usually 255 bytes)
   8. Contains embedded shell metacharacters (*?[]<>|(){}&=`!\\;$)
-  9. Contains characters outside the POSIX Portable Character Set (a-zA-Z0-9._-)
+  9. Contains characters outside the POSIX Portable Filename Character Set (a-zA-Z0-9._-)
 .sp
 The set of checks to be performed is controlled by the \fBSafeFilenames\fR option in the configuration file. This option supports the following values:
 .sp
   \fBfalse\fR: No check is performed
   \fBbasic\fR: Only basic checks (1-7 above) are performed (this is the default)
   \fBstrict\fR: Basic + disallow shell metacharacters (check 8)
-  \fBposix\fR: Basic + allow only characters in the POSIX Portable Character Set (check 9)
+  \fBposix\fR: Basic + allow only characters in the POSIX Portable Filename Character Set (check 9)
 .sp
 For more information about safe filenames consult \fIhttps://dwheeler.com/essays/fixing\-unix\-linux\-filenames.html\fR.
 .TP
