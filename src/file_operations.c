@@ -77,10 +77,10 @@ static char *const unsafe_name_msgs[] = {
 	"Reserved (internal: bookmarks, tags, and selected files constructs)",
 	"Reserved shell/system keyword",
 	"Contains control/non-printable characters",
-	"Contains shell meta-characters",
+	"Contains shell metacharacters",
 	"Contains a leading whitespace",
 	"Contains a trailing whitespace",
-	"Contains an illegal UTF-8 byte",
+	"Contains illegal UTF-8 bytes",
 	"Name is too long",
 	"Contains characters not in the Portable Filename Character Set"
 };
@@ -646,7 +646,7 @@ is_whitespace(const char c)
 		|| c == 0x0b  /* Vertical TAB */
 		|| c == 0x0c  /* Form feed */
 		|| c == 0x0d  /* Carriage return */
-		|| (unsigned char)c == 0xa0 /* Non-breaking space (NSBP) */
+		|| (unsigned char)c == 0xa0 /* Non-breaking space (NBSP) */
 	);
 }
 
