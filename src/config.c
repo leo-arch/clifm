@@ -1352,12 +1352,10 @@ create_tmp_files(void)
 	const size_t tmp_rootdir_len = strlen(tmp_rootdir);
 	const size_t pnl_len = sizeof(PROGRAM_NAME) - 1;
 	const size_t user_len = user.name ? strlen(user.name) : 7;
-                                       /* 7: len of "unknown" */
-
-#define MAX_TRIES 100
+                                       /* 7: length of "unknown" */
 
 	const size_t tmp_len = tmp_rootdir_len + pnl_len + user_len
-		+ 3 + DIGINUM(MAX_TRIES) + 1;
+		+ 3 + DIGINUM(MAX_FILE_CREATION_TRIES) + 1;
 	tmp_dir = xnmalloc(tmp_len, sizeof(char));
 	snprintf(tmp_dir, tmp_len, "%s/%s-%s", tmp_rootdir,
 		PROGRAM_NAME, user.name ? user.name : "unknown");
@@ -1376,7 +1374,7 @@ create_tmp_files(void)
 			break;
 
 		suffix++;
-		if (suffix > MAX_TRIES) {
+		if (suffix > MAX_FILE_CREATION_TRIES) {
 			snprintf(tmp_dir, tmp_len, "%s", tmp_rootdir);
 			err('e', PRINT_PROMPT, _("%s: Cannot create temporary directory. "
 				"Falling back to '%s'.\n"), PROGRAM_NAME, tmp_rootdir);
@@ -1387,8 +1385,6 @@ create_tmp_files(void)
 		snprintf(tmp_dir, tmp_len, "%s/%s-%s.%d", tmp_rootdir,
 			PROGRAM_NAME, user.name ? user.name : "unknown", suffix);
 	}
-
-#undef MAX_TRIES
 
 	define_selfile();
 }

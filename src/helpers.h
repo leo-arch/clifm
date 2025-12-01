@@ -500,6 +500,9 @@ extern time_t curdir_mtime;
 #define MAX_TRASH     INT_MAX
 #define MAX_BOOKMARKS INT_MAX
 
+/* File creation attempt limit (e.g. tmp dir, dup file, or trashed file) */
+#define MAX_FILE_CREATION_TRIES 1000
+
 /* Max length of a file size in human format */
 #define MAX_HUMAN_SIZE 10 /* "1023.99YB\0" */
 

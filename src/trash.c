@@ -218,7 +218,7 @@ gen_dest_file(const char *file, const char *suffix, char **file_suffix)
 	char *filename = strrchr(file, '/');
 	if (!filename || !*(++filename)) {
 		xerror(_("trash: '%s': Error getting file base name\n"), file);
-		return (char *)NULL;
+		return NULL;
 	}
 
 	/* If the length of the trashed filename (orig_filename.suffix) is
@@ -253,11 +253,18 @@ gen_dest_file(const char *file, const char *suffix, char **file_suffix)
 	/* If the destination file exists (there's already a trashed file with
 	 * this name), append an integer until it is made unique. */
 	struct stat a;
-	int inc = 1;
-	while (lstat(dest, &a) == 0 && inc > 0) {
-		snprintf(*file_suffix, slen, "%s.%s-%d", filename, suffix, inc);
+	size_t inc = 1;
+	while (lstat(dest, &a) == 0 && inc <= MAX_FILE_CREATION_TRIES) {
+		snprintf(*file_suffix, slen, "%s.%s-%zu", filename, suffix, inc);
 		snprintf(dest, dlen, "%s/%s", trash_files_dir, *file_suffix);
 		inc++;
+	}
+
+	if (inc > MAX_FILE_CREATION_TRIES) {
+		xerror(_("trash: Cannot create trashinfo file for '%s'\n"), filename);
+		free(dest);
+		free(*file_suffix);
+		return NULL;
 	}
 
 	return dest;

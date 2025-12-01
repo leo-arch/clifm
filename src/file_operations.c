@@ -310,16 +310,13 @@ dup_file(char **cmd)
 		 * exists, source.copy-n, where N is an integer greater than zero. */
 		const size_t source_len = strlen(source);
 		int rem_slash = 0;
-		if (strcmp(source, "/") != 0 && source_len > 0
-		&& source[source_len - 1] == '/') {
+		if (source_len > 1 && source[source_len - 1] == '/') {
 			source[source_len - 1] = '\0';
 			rem_slash = 1;
 		}
 
 		char *tmp = strrchr(source, '/');
-		char *source_name;
-
-		source_name = (tmp && *(tmp + 1)) ? tmp + 1 : source;
+		char *source_name = (tmp && tmp[1]) ? tmp + 1 : source;
 
 		char tmp_dest[PATH_MAX + 1];
 		if (*dest_dir == '/' && !dest_dir[1]) /* Root dir */
@@ -332,10 +329,16 @@ dup_file(char **cmd)
 		xstrsncpy(bk, tmp_dest, sizeof(bk));
 		struct stat attr;
 		size_t suffix = 1;
-		while (lstat(bk, &attr) == 0) {
+		while (lstat(bk, &attr) == 0 && suffix <= MAX_FILE_CREATION_TRIES) {
 			snprintf(bk, sizeof(bk), "%s-%zu", tmp_dest, suffix);
 			suffix++;
 		}
+
+		if (suffix > MAX_FILE_CREATION_TRIES) {
+			xerror(_("dup: Cannot create unique filename for '%s'\n"), source);
+			continue;
+		}
+
 		char *dest = savestring(bk, strnlen(bk, sizeof(bk)));
 
 		if (rem_slash == 1)
