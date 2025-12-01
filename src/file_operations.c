@@ -267,6 +267,63 @@ ERROR:
 	return dir;
 }
 
+static char *
+construct_dup_destination(char *source, const char *dest_dir)
+{
+	if (strchr(source, '\\')) {
+		char *deq_str = unescape_str(source, 0);
+		if (!deq_str) {
+			xerror(_("dup: '%s': Error unescaping filename\n"), source);
+			return NULL;
+		}
+
+		/* An unescaped filename is always <= than the original filename,
+		 * so that there's no need to reallocate the buffer. */
+		xstrsncpy(source, deq_str, strlen(deq_str) + 1);
+		free(deq_str);
+	}
+
+	/* Use source as destination filename: source.copy, and, if already
+	 * exists, source.copy-n, where N is an integer greater than zero. */
+	const size_t source_len = strlen(source);
+	int rem_slash = 0;
+	if (source_len > 1 && source[source_len - 1] == '/') {
+		source[source_len - 1] = '\0';
+		rem_slash = 1;
+	}
+
+	char *tmp = strrchr(source, '/');
+	char *source_name = (tmp && tmp[1]) ? tmp + 1 : source;
+
+	char tmp_dest[PATH_MAX + 1];
+	if (*dest_dir == '/' && !dest_dir[1]) // Root dir
+		snprintf(tmp_dest, sizeof(tmp_dest), "/%s.copy", source_name);
+	else
+		snprintf(tmp_dest, sizeof(tmp_dest), "%s/%s.copy",
+			dest_dir, source_name);
+
+	char bk[PATH_MAX + 11];
+	xstrsncpy(bk, tmp_dest, sizeof(bk));
+	struct stat attr;
+	size_t suffix = 1;
+	while (lstat(bk, &attr) == 0 && suffix <= MAX_FILE_CREATION_TRIES) {
+		snprintf(bk, sizeof(bk), "%s-%zu", tmp_dest, suffix);
+		suffix++;
+	}
+
+	if (suffix > MAX_FILE_CREATION_TRIES) {
+		xerror(_("dup: Cannot create unique filename for '%s'\n"), source);
+		return NULL;
+	}
+
+	char *dest = savestring(bk, strnlen(bk, sizeof(bk)));
+
+	if (rem_slash == 1)
+		source[source_len - 1] = '/';
+
+	return dest;
+}
+
 int
 dup_file(char **cmd)
 {
@@ -293,58 +350,13 @@ dup_file(char **cmd)
 		if (!cmd[i] || !*cmd[i])
 			continue;
 
-		/* 1. Construct filenames. */
+		/* Construct destination filename. */
 		char *source = cmd[i];
-		if (strchr(source, '\\')) {
-			char *deq_str = unescape_str(source, 0);
-			if (!deq_str) {
-				xerror(_("dup: '%s': Error unescaping filename\n"), source);
-				continue;
-			}
-
-			xstrsncpy(source, deq_str, strlen(deq_str) + 1);
-			free(deq_str);
-		}
-
-		/* Use source as destination filename: source.copy, and, if already
-		 * exists, source.copy-n, where N is an integer greater than zero. */
-		const size_t source_len = strlen(source);
-		int rem_slash = 0;
-		if (source_len > 1 && source[source_len - 1] == '/') {
-			source[source_len - 1] = '\0';
-			rem_slash = 1;
-		}
-
-		char *tmp = strrchr(source, '/');
-		char *source_name = (tmp && tmp[1]) ? tmp + 1 : source;
-
-		char tmp_dest[PATH_MAX + 1];
-		if (*dest_dir == '/' && !dest_dir[1]) /* Root dir */
-			snprintf(tmp_dest, sizeof(tmp_dest), "/%s.copy", source_name);
-		else
-			snprintf(tmp_dest, sizeof(tmp_dest), "%s/%s.copy",
-				dest_dir, source_name);
-
-		char bk[PATH_MAX + 11];
-		xstrsncpy(bk, tmp_dest, sizeof(bk));
-		struct stat attr;
-		size_t suffix = 1;
-		while (lstat(bk, &attr) == 0 && suffix <= MAX_FILE_CREATION_TRIES) {
-			snprintf(bk, sizeof(bk), "%s-%zu", tmp_dest, suffix);
-			suffix++;
-		}
-
-		if (suffix > MAX_FILE_CREATION_TRIES) {
-			xerror(_("dup: Cannot create unique filename for '%s'\n"), source);
+		char *dest = construct_dup_destination(source, dest_dir);
+		if (!dest)
 			continue;
-		}
 
-		char *dest = savestring(bk, strnlen(bk, sizeof(bk)));
-
-		if (rem_slash == 1)
-			source[source_len - 1] = '/';
-
-		/* 2. Run command. */
+		/* Run command. */
 		if (rsync_ok == 1) {
 			char *dup_cmd[] = {"rsync", "-aczvAXHS", "--progress", "--",
 				source, dest, NULL};

@@ -235,7 +235,7 @@ gen_dest_file(const char *file, const char *suffix, char **file_suffix)
 		/* If SIZE is a positive value, that is, the trashed filename
 		 * exceeds NAME_MAX by SIZE bytes, reduce the original filename
 		 * SIZE bytes. Terminate the original filename (FILENAME) with
-		 * a tilde (~), to let the user know it was trimmed. */
+		 * a tilde (~), to let the user know it was truncated. */
 		filename[filename_len - (size_t)size - 1] = '~';
 		filename[filename_len - (size_t)size] = '\0';
 	}
