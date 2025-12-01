@@ -332,7 +332,7 @@ dup_file(char **cmd)
 		xstrsncpy(bk, tmp_dest, sizeof(bk));
 		struct stat attr;
 		size_t suffix = 1;
-		while (stat(bk, &attr) == FUNC_SUCCESS) {
+		while (lstat(bk, &attr) == 0) {
 			snprintf(bk, sizeof(bk), "%s-%zu", tmp_dest, suffix);
 			suffix++;
 		}
