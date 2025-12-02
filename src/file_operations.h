@@ -14,14 +14,17 @@
 #include "bulk_remove.h"
 
 /* Macros for open_function */
-#define OPEN_BLK     0
-#define OPEN_CHR     1
-#define OPEN_SOCK    2
-#define OPEN_FIFO    3
-#define OPEN_UNKNOWN 4
+#define OPEN_BLK      0
+#define OPEN_CHR      1
+#define OPEN_DIR      2
+#define OPEN_REG      3
+#define OPEN_SOCK     4
+#define OPEN_FIFO     5
+#define OPEN_UNKNOWN  6
 #ifdef __sun
-# define OPEN_DOOR   5
-#endif /*  */
+# define OPEN_DOOR    7
+#endif /* __sun */
+#define OPEN_LINK_ERR 8
 
 __BEGIN_DECLS
 

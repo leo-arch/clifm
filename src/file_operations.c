@@ -133,7 +133,7 @@ open_file(char *file)
 
 	int ret = FUNC_SUCCESS;
 
-	if (conf.opener) {
+	if (conf.opener != NULL) {
 		if (*conf.opener == 'g' && strcmp(conf.opener, "gio") == 0) {
 			char *cmd[] = {"gio", "open", file, NULL};
 			ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
@@ -803,6 +803,55 @@ err_no_link(const char *file)
 	return saved_errno;
 }
 
+static const char *
+get_file_type_str(const int file_type)
+{
+	switch (file_type) {
+	case OPEN_BLK:  return "block device";
+	case OPEN_CHR:  return "character device";
+#ifdef __sun
+	case OPEN_DOOR: return "door";
+#endif /* __sun */
+	case OPEN_FIFO: return "FIFO/pipe";
+	case OPEN_SOCK: return "socket";
+	default:        return "unknown file type";
+	};
+}
+
+static int
+get_file_type(const mode_t mode, const char *filename)
+{
+	switch ((mode & S_IFMT)) {
+	case S_IFBLK:  return OPEN_BLK;
+	case S_IFCHR:  return OPEN_CHR;
+	case S_IFSOCK: return OPEN_SOCK;
+	case S_IFIFO:  return OPEN_FIFO;
+#ifdef __sun
+	case S_IFDOOR: return OPEN_DOOR;
+#endif /* __sun */
+	case S_IFDIR:  return OPEN_DIR;
+	case S_IFREG:  return OPEN_REG;
+
+	case S_IFLNK:
+		switch (get_link_ref(filename)) {
+		case -1:       return OPEN_LINK_ERR;
+		case S_IFDIR:  return OPEN_DIR;
+		case S_IFREG:  return OPEN_REG;
+		case S_IFBLK:  return OPEN_BLK;
+		case S_IFCHR:  return OPEN_CHR;
+		case S_IFSOCK: return OPEN_SOCK;
+		case S_IFIFO:  return OPEN_FIFO;
+#ifdef __sun
+		case S_IFDOOR: return OPEN_DOOR;
+#endif /* __sun */
+		default:       return OPEN_UNKNOWN;
+		}
+		break;
+
+	default: return OPEN_UNKNOWN;
+	}
+}
+
 int
 open_function(char **cmd)
 {
@@ -816,18 +865,16 @@ open_function(char **cmd)
 
 	const char *const errname = "open";
 
-	if (*cmd[0] == 'o' && (!cmd[0][1] || strcmp(cmd[0], "open") == 0)) {
-		if (strchr(cmd[1], '\\')) {
-			char *deq_path = unescape_str(cmd[1], 0);
-			if (!deq_path) {
-				xerror(_("%s: '%s': Error unescaping filename\n"),
-					errname, cmd[1]);
-				return FUNC_FAILURE;
-			}
-
-			xstrsncpy(cmd[1], deq_path, strlen(deq_path) + 1);
-			free(deq_path);
+	if ((*cmd[0] == 'o' && (!cmd[0][1] || strcmp(cmd[0], "open") == 0))
+	&& strchr(cmd[1], '\\')) {
+		char *deq_path = unescape_str(cmd[1], 0);
+		if (!deq_path) {
+			xerror(_("%s: '%s': Error unescaping filename\n"), errname, cmd[1]);
+			return FUNC_FAILURE;
 		}
+
+		xstrsncpy(cmd[1], deq_path, strlen(deq_path) + 1);
+		free(deq_path);
 	}
 
 	char *file = cmd[1];
@@ -842,55 +889,16 @@ open_function(char **cmd)
 
 	/* Check file type: only directories, symlinks, and regular files
 	 * will be opened. */
-	char no_open_file = 1;
-	const char *file_type = (char *)NULL;
-	const char *const types[] = {
-		"block device",
-		"character device",
-		"socket",
-		"FIFO/pipe",
-		"unknown file type",
-#ifdef __sun
-		"door",
-#endif /* __sun */
-		NULL};
+	const int file_type = get_file_type(attr.st_mode, file);
 
-	switch ((attr.st_mode & S_IFMT)) {
-	/* Store file type to compose and print the error message, if necessary. */
-	case S_IFBLK: file_type = types[OPEN_BLK]; break;
-	case S_IFCHR: file_type = types[OPEN_CHR]; break;
-	case S_IFSOCK: file_type = types[OPEN_SOCK]; break;
-	case S_IFIFO: file_type = types[OPEN_FIFO]; break;
-#ifdef __sun
-	case S_IFDOOR: file_type = types[OPEN_DOOR]; break;
-#endif /* __sun */
-	case S_IFDIR: return cd_function(file, CD_PRINT_ERROR);
-
-	case S_IFLNK:
-		switch (get_link_ref(file)) {
-		case -1: return err_no_link(file);
-		case S_IFDIR: return cd_function(file, CD_PRINT_ERROR);
-		case S_IFREG: no_open_file = 0; break;
-		case S_IFBLK: file_type = types[OPEN_BLK]; break;
-		case S_IFCHR: file_type = types[OPEN_CHR]; break;
-		case S_IFSOCK: file_type = types[OPEN_SOCK]; break;
-		case S_IFIFO: file_type = types[OPEN_FIFO]; break;
-#ifdef __sun
-		case S_IFDOOR: file_type = types[OPEN_DOOR]; break;
-#endif /* __sun */
-		default: file_type = types[OPEN_UNKNOWN]; break;
-		}
-		break;
-
-	case S_IFREG: no_open_file = 0;	break;
-	default: file_type = types[OPEN_UNKNOWN]; break;
-	}
-
-	/* If neither directory nor regular file nor symlink (to directory
-	 * or regular file), print the corresponding error message and exit. */
-	if (no_open_file == 1) {
+	switch (file_type) {
+	case OPEN_DIR: return cd_function(file, CD_PRINT_ERROR);
+	case OPEN_LINK_ERR: return err_no_link(file);
+	case OPEN_REG: break;
+	default:
 		xerror(_("%s: '%s' (%s): Cannot open file\nTry "
-			"'APP FILE' or 'open FILE APP'\n"), errname, cmd[1], file_type);
+			"'APP FILE' or 'open FILE APP'\n"), errname, file,
+			get_file_type_str(file_type));
 		return FUNC_FAILURE;
 	}
 

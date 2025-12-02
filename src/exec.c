@@ -1298,7 +1298,7 @@ check_auto_second(char **args)
 	 * not ./file, and not /path/to/file */
 	if (conf.auto_open == 1 && S_ISREG(attr.st_mode)
 	&& (!(attr.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH))
-	|| (!is_bin_cmd(tmp) && !(*tmp == '.' && *(tmp + 1) == '/')
+	|| (!is_bin_cmd(tmp) && !(*tmp == '.' && tmp[1] == '/')
 	&& *tmp != '/' ) ) )
 		return auto_open_file(args, tmp);
 

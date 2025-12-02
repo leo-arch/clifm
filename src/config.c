@@ -1363,7 +1363,7 @@ create_tmp_files(void)
 	int suffix = 0;
 	struct stat a;
 
-	/* Loop until we get a valid tmp directory or MAX_TRIES is reached. */
+	/* Loop until we get a valid tmp dir or MAX_FILE_CREATION_TRIES is reached. */
 	while (1) {
 		const int ret = lstat(tmp_dir, &a);
 		if (ret == 0 && S_ISDIR(a.st_mode)
