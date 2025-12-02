@@ -430,6 +430,7 @@ char
 
 /* Per file extension icons */
 struct icons_t const icon_ext[] = {
+    {"1", ICON_MANPAGE, WHITE},
     {"7z", ICON_ARCHIVE, YELLOW},
     {"3gp", ICON_VID, BLUE},
 
@@ -446,6 +447,8 @@ struct icons_t const icon_ext[] = {
     {"bat", ICON_SCRIPT, WHITE},
 #if defined(_ICONS_IN_TERMINAL)
     {"bib", FILE_BIBTEX, B_WHITE},
+#else
+    {"bib", ICON_TEX, B_WHITE},
 #endif /* _ICONS_IN_TERMINAL */
     {"bin", ICON_BINARY, WHITE},
     {"bmp", ICON_IMG, GREEN},
@@ -461,6 +464,7 @@ struct icons_t const icon_ext[] = {
     {"cbz", ICON_ARCHIVE, YELLOW},
     {"cc", ICON_CPP, WHITE},
     {"cfg", ICON_CONF, WHITE},
+    {"cjs", ICON_JAVASCRIPT, WHITE},
     {"clifm", ICON_CONF, WHITE},
     {"class", ICON_JAVA, B_WHITE},
     {"clj", ICON_CLOJURE, GREEN},
@@ -474,6 +478,7 @@ struct icons_t const icon_ext[] = {
     {"cpp", ICON_CPP, WHITE},
     {"csh", ICON_SCRIPT, WHITE},
     {"css", ICON_CSS, BLUE},
+    {"cts", ICON_TS, BLUE},
     {"cue", ICON_PLAYLIST, YELLOW},
     {"cvs", ICON_CONF, WHITE},
     {"cxx", ICON_CPP, WHITE},
@@ -571,6 +576,7 @@ struct icons_t const icon_ext[] = {
     {"markdown", ICON_MARKDOWN, WHITE},
     {"mat", ICON_MATLAB, YELLOW},
     {"md", ICON_MARKDOWN, WHITE},
+    {"mjs", ICON_JAVASCRIPT, WHITE},
     {"mk", ICON_MAKEFILE, WHITE},
     {"mkv", ICON_VID, BLUE},
     {"ml", ICON_OCAML, WHITE},
@@ -581,6 +587,7 @@ struct icons_t const icon_ext[] = {
     {"mpeg", ICON_VID, BLUE},
     {"mpg", ICON_VID, BLUE},
     {"msi", ICON_WINDOWS, BLUE},
+    {"mts", ICON_TS, BLUE},
 
     {"nix", ICON_NIX, BLUE},
 
