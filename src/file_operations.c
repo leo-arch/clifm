@@ -100,7 +100,7 @@ open_file(char *file)
 
 	int ret = FUNC_SUCCESS;
 
-	if (conf.opener != NULL) {
+	if (conf.opener && *conf.opener) {
 		if (*conf.opener == 'g' && strcmp(conf.opener, "gio") == 0) {
 			char *cmd[] = {"gio", "open", file, NULL};
 			ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);

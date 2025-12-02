@@ -275,7 +275,7 @@ char *
 get_regfile_color(const char *filename, const struct stat *a, size_t *is_ext)
 {
 	*is_ext = 0;
-	if (conf.colorize == 0)
+	if (conf.colorize == 0 || conf.light_mode == 1)
 		return fi_c;
 
 	if (*nf_c && check_file_access(a->st_mode, a->st_uid, a->st_gid) == 0)
@@ -311,6 +311,9 @@ char *
 get_dir_color(const char *filename, const struct stat *a,
 	const filesn_t count)
 {
+	if (conf.files_counter == 0 && conf.light_mode == 1)
+		return di_c;
+
 	const mode_t mode = a->st_mode;
 	if (*nd_c && check_file_access(mode, a->st_uid, a->st_gid) == 0)
 		return nd_c;
@@ -2578,7 +2581,7 @@ get_entry_color(char *ent, const struct stat *a)
 		break;
 
 	case S_IFLNK: {
-		if (conf.colorize == 0) {
+		if (conf.colorize == 0 || conf.light_mode == 1) {
 			color = ln_c;
 		} else {
 			char *linkname = xrealpath(ent, NULL);

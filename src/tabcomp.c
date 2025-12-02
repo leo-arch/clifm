@@ -263,6 +263,9 @@ fzftab_color(char *filename, const struct stat *attr)
 		return get_dir_color(filename, attr, -1);
 
 	case S_IFREG: {
+		if (conf.light_mode == 1)
+			return fi_c;
+
 		if (*nf_c
 		&& check_file_access(attr->st_mode, attr->st_uid, attr->st_gid) == 0)
 			return nf_c;
@@ -294,7 +297,8 @@ fzftab_color(char *filename, const struct stat *attr)
 	case S_IFIFO: return pi_c;
 	case S_IFBLK: return bd_c;
 	case S_IFCHR: return cd_c;
-	case S_IFLNK: return stat(filename, &a) == -1 ? or_c : ln_c;
+	case S_IFLNK: return conf.light_mode == 1 ? ln_c
+		: (stat(filename, &a) == -1 ? or_c : ln_c);
 	default: return uf_c;
 	}
 }
