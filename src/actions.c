@@ -281,8 +281,8 @@ run_action(char *action, char **args)
 
 	struct stat attr;
 	if (lstat(buf, &attr) != -1) { /* If a valid file, open it */
-		char *o_cmd[] = {"o", buf, NULL};
-		exit_status = open_function(o_cmd);
+		char *open_cmd[] = {"o", buf, NULL};
+		exit_status = open_function(open_cmd);
 
 	} else { /* If not a file, take it as a command */
 		if (xargs.secure_cmds == 1
@@ -292,9 +292,9 @@ run_action(char *action, char **args)
 		size_t old_args = args_n;
 		args_n = 0;
 
-		char **_cmd = parse_input_str(buf);
-		if (_cmd) {
-			char **alias_cmd = check_for_alias(_cmd);
+		char **input = parse_input_str(buf);
+		if (input) {
+			char **alias_cmd = check_for_alias(input);
 			if (alias_cmd) {
 				exit_status = exec_cmd_tm(alias_cmd);
 				for (i = 0; alias_cmd[i]; i++)
@@ -302,11 +302,11 @@ run_action(char *action, char **args)
 				free(alias_cmd);
 			} else {
 				if (!(flags & FAILED_ALIAS))
-					exit_status = exec_cmd_tm(_cmd);
+					exit_status = exec_cmd_tm(input);
 				flags &= ~FAILED_ALIAS;
 				for (i = 0; i <= args_n; i++)
-					free(_cmd[i]);
-				free(_cmd);
+					free(input[i]);
+				free(input);
 			}
 		}
 

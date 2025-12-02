@@ -89,39 +89,6 @@ ERROR:
 	return FUNC_FAILURE;
 }
 
-#ifndef _NO_LIRA
-static int
-run_mime(char *file)
-{
-	if (!file || !*file)
-		return FUNC_FAILURE;
-
-	if (xargs.preview == 1 || xargs.open == 1)
-		goto RUN;
-
-	char *p = rl_line_buffer ? rl_line_buffer : (char *)NULL;
-
-	/* Convert ELN into filename (rl_line_buffer) */
-	if (p && *p >= '1' && *p <= '9') {
-		const filesn_t a = xatof(p);
-		if (a > 0 && a <= files && file_info[a - 1].name)
-			p = file_info[a - 1].name;
-	}
-
-	if (p && ( (*p == 'i' && (strncmp(p, "import", 6) == 0
-	|| strncmp(p, "info", 4) == 0))
-	|| (*p == 'o' && (p[1] == ' ' || strncmp(p, "open", 4) == 0)) ) ) {
-		char *cmd[] = {"mm", "open", file, NULL};
-		return mime_open(cmd);
-	}
-
-RUN: {
-	char *cmd[] = {"mm", file, NULL};
-	return mime_open(cmd);
-	}
-}
-#endif /* _NO_LIRA */
-
 /* Open a file via OPENER, if set, or via LIRA. If not compiled with
  * Lira support, fallback to open (Haiku), or xdg-open. Returns zero
  * on success or one on failure. */
@@ -143,7 +110,8 @@ open_file(char *file)
 		}
 	} else {
 #ifndef _NO_LIRA
-		ret = run_mime(file);
+		char *cmd[] = {"mm", "open", file, NULL};
+		ret = mime_open(cmd);
 #else
 		/* Fallback to (xdg-)open */
 # if defined(__HAIKU__)
