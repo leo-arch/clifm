@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Nov 29, 2025" "clifm 1.26.5" "Clifm Manual"
+.TH "CLIFM" "1" "Dec 3, 2025" "clifm 1.26.5" "Clifm Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -3056,7 +3056,7 @@ Exit code of the last executed command.
 .B CLIFM_STAT_STEALTH
 1 if running in stealth mode, 0 otherwise.
 .TP
-When running a plugin, the following environment variables are set:
+When running a plugin, the following environment variables are set (and immediately unset after the plugin's execution):
 .TP
 .B CLIFM_BUS
 The path to a pipe by means of which plugins can talk to \fBclifm\fR. See the \fBPLUGINS\fR section for more information.
@@ -3065,40 +3065,40 @@ The path to a pipe by means of which plugins can talk to \fBclifm\fR. See the \f
 Set to the name of the current color scheme.
 .TP
 .B CLIFM_COLORLESS
-Set to 1 if running without colors.
+Set to 1 if running without colors. Unset otherwise.
 .TP
 .B CLIFM_CUR_WS
 Set to the current workspace number.
 .TP
 .B CLIFM_DIRS_FIRST
-Set to 1 if list-dirs-first is enabled. Otherwise it is set to 0.
+Set to 1 if list-dirs-first is enabled. Unset otherwise.
 .TP
-.B CLIFM_FILES_COUNTER
-Set to 1 if files-counter is enabled. Otherwise it is set to 0.
+.B CLIFM_FILE_COUNTER
+Set to 1 if files-counter is enabled. Unset otherwise.
 .TP
-.B CLIFM_FILES_FILTER
-Set to the files filter string. Unset if no files filter is set.
+.B CLIFM_FILE_FILTER
+Set to the file filter string. Unset if no file filter is set.
 .TP
 .B CLIFM_FILTER_REVERSE
-Set to 1 if filter-reverse is set or to 0 otherwise (unset if no files filter is set).
+Set to 1 if filter-reverse is set. Unset otherwise (or if no file filter is set).
 .TP
 .B CLIFM_FOLLOW_LINKS
-Set to 1 if follow-symlinks is enabled. Otherwise it is set to 0.
+Set to 1 if follow-symlinks is enabled. Unset otherwise.
 .TP
 .B CLIFM_LIGHT_MODE
-Set to 1 if light-mode is enabled. Otherwise it is set to 0.
+Set to 1 if light-mode is enabled. Unset otherwise.
 .TP
 .B CLIFM_LINE
 When running a plugin via a keybinding, this variable holds the content of the current line buffer. For a usage example see the \fIxclip.sh\fR plugin.
 .TP
 .B CLIFM_LONG_VIEW
-Set to 1 if long-view is enabled. Otherwise it is set to 0.
+Set to 1 if long-view is enabled. Unset otherwise.
 .TP
 .B CLIFM_MAX_FILES
 Set to MAX_FILES if max-files is set. Unset otherwise.
 .TP
 .B CLIFM_ONLY_DIRS
-Set to 1 if only-dirs is enabled. Otherwise it is set to 0.
+Set to 1 if only-dirs is enabled. Unset otherwise.
 .TP
 .B CLIFM_PLUGINS_HELPER
 Set to the absolute path to the plugins\-helper script used by several plugins.
@@ -3113,10 +3113,10 @@ Set to the number of currently selected files (unset if there are no selected fi
 Set to the path to the current selection file.
 .TP
 .B CLIFM_SHOW_HIDDEN
-Set to 1-3 if show-hidden is enabled (true, first, last, in this order). Otherwise it is set to 0.
+Set to 1-3 (true, first, and last respectively) if show-hidden is enabled. Unset otherwise.
 .TP
 .B CLIFM_SORT_REVERSE
-Set to 1 if sort-reverse is enabled. Otherwise it is set to 0.
+Set to 1 if sort-reverse is enabled. Unset otherwise.
 .TP
 .B CLIFM_SORT_STYLE
 Set to the current sort method.
@@ -3125,7 +3125,7 @@ Set to the current sort method.
 Set to the number of currently trashed files (unset if there are no trashed files).
 .TP
 .B CLIFM_TRUNCATE_NAMES
-Set to 1 if truncate-names is enabled. Otherwise it is set to 0.
+Set to 1 if truncate-names is enabled. Unset otherwise.
 
 .SH 21. SECURITY
 Since \fBclifm\fR executes OS commands, it needs to provide a way to securely run these commands, specially when it comes to untrusted environments. Two features are provided to achieve this aim: \fBsecure environment\fR and \fBsecure commands\fR.
