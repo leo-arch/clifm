@@ -83,8 +83,10 @@ get_plugin_path(char *action, int *status)
 }
 
 static void
-export_status_values(void)
+export_status_values(const char *fifo_path)
 {
+	setenv("CLIFM_BUS", fifo_path, 1);
+
 	if (cur_cscheme && *cur_cscheme)
 		setenv("CLIFM_COLOR_SCHEME", cur_cscheme, 1);
 	if (conf.colorize != 1) setenv("CLIFM_COLORLESS", "1", 1);
@@ -116,31 +118,6 @@ export_status_values(void)
 	setenv("CLIFM_SORT_STYLE", num_to_sort_name(conf.sort, 0), 1);
 	setenv("CLIFM_CUR_WS", xitoa(cur_ws + 1), 1);
 	setenv("CLIFM_PROFILE", alt_profile ? alt_profile : "default", 1);
-}
-
-static void
-unset_export_values(void) {
-	unsetenv("CLIFM_COLOR_SCHEME");
-	unsetenv("CLIFM_COLORLESS");
-	unsetenv("CLIFM_CUR_WS");
-	unsetenv("CLIFM_DIRS_FIRST");
-	unsetenv("CLIFM_FILE_COUNTER");
-	unsetenv("CLIFM_FILE_FILTER");
-	unsetenv("CLIFM_FILTER_REVERSE");
-	unsetenv("CLIFM_FOLLOW_LINKS");
-	unsetenv("CLIFM_LIGHT_MODE");
-	unsetenv("CLIFM_LONG_VIEW");
-	unsetenv("CLIFM_MAX_FILES");
-	unsetenv("CLIFM_ONLY_DIRS");
-	unsetenv("CLIFM_PLUGINS_HELPER");
-	unsetenv("CLIFM_PROFILE");
-	unsetenv("CLIFM_SEL_FILES");
-	unsetenv("CLIFM_SELFILE");
-	unsetenv("CLIFM_SHOW_HIDDEN");
-	unsetenv("CLIFM_SORT_REVERSE");
-	unsetenv("CLIFM_SORT_STYLE");
-	unsetenv("CLIFM_TRASH_FILES");
-	unsetenv("CLIFM_TRUNCATE_NAMES");
 }
 
 static void
@@ -238,9 +215,6 @@ run_action(char *action, char **args)
 		return errno;
 	}
 
-	export_status_values();
-	setenv("CLIFM_BUS", fifo_path, 1);
-
 	if (xargs.cwd_in_title == 1)
 		set_term_title(action);
 
@@ -256,6 +230,8 @@ run_action(char *action, char **args)
 	}
 
 	if (pid == 0) {
+		export_status_values(fifo_path);
+
 		/* Child: write-only end of the pipe */
 		const int wfd = open(fifo_path, O_WRONLY | O_CLOEXEC);
 		if (wfd == -1)
@@ -325,8 +301,6 @@ END:
 	if (xargs.cwd_in_title == 1)
 		set_term_title(workspaces[cur_ws].path);
 
-	unsetenv("CLIFM_BUS");
-	unset_export_values();
 	return exit_status;
 }
 
