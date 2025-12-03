@@ -595,10 +595,9 @@ check_defs(const char *str)
 	if (defs_n == 0 || !str || !*str)
 		return (char *)NULL;
 
-	size_t i = defs_n;
 	const size_t slen = strlen(str);
 
-	for (; i-- > 0;) {
+	for (size_t i = defs_n; i-- > 0;) {
 		if (!defs[i].name || !defs[i].value || !*defs[i].name
 		|| !*defs[i].value)
 			continue;
@@ -619,8 +618,7 @@ clear_defs(void)
 	if (defs_n == 0)
 		goto END;
 
-	size_t i = defs_n;
-	for (; i-- > 0;) {
+	for (size_t i = defs_n; i-- > 0;) {
 		free(defs[i].name);
 		free(defs[i].value);
 	}
@@ -834,8 +832,7 @@ list_colorschemes(void)
 	}
 
 	const char *ptr = SET_MISC_PTR;
-	size_t i;
-	for (i = 0; color_schemes[i]; i++) {
+	for (size_t i = 0; color_schemes[i]; i++) {
 		if (cur_cscheme == color_schemes[i]) {
 			printf("%s%s%s %s%s\n", mi_c, ptr, df_c, color_schemes[i],
 				ON_LSCOLORS);
@@ -1460,8 +1457,7 @@ store_extension_line(const char *line)
 static void
 free_extension_colors(void)
 {
-	size_t i = ext_colors_n;
-	for (; i-- > 0;) {
+	for (size_t i = ext_colors_n; i-- > 0;) {
 		free(ext_colors[i].name);
 		free(ext_colors[i].value);
 	}
@@ -1732,9 +1728,8 @@ static int
 get_cur_colorscheme(const char *colorscheme)
 {
 	char *def_cscheme = (char *)NULL;
-	size_t i = cschemes_n;
 
-	for (; i-- > 0;) {
+	for (size_t i = cschemes_n; i-- > 0;) {
 		if (*colorscheme == *color_schemes[i]
 		&& strcmp(colorscheme, color_schemes[i]) == 0) {
 			cur_cscheme = color_schemes[i];
@@ -1972,8 +1967,7 @@ store_definition(const char *str)
 static void
 init_defs(void)
 {
-	size_t n = MAX_DEFS;
-	for (; n-- > 0;) {
+	for (size_t n = MAX_DEFS; n-- > 0;) {
 		defs[n].name = (char *)NULL;
 		defs[n].value = (char *)NULL;
 	}
@@ -2553,12 +2547,12 @@ remove_trash_ext(char **ent)
 	&& cur_comp_type != TCMP_TRASHDEL))
 		return (char *)NULL;
 
-	char *d = strrchr(*ent, '.');
-	if (d && d != *ent && d[1] == '2'
-	&& strlen(d + 1) == 14 && is_number(d + 1))
-		*d = '\0';
+	char *dot = strrchr(*ent, '.');
+	if (dot && dot != *ent && dot[1] == '2'
+	&& strlen(dot + 1) == 14 && is_number(dot + 1))
+		*dot = '\0';
 
-	return d;
+	return dot;
 }
 
 char *
@@ -2695,8 +2689,7 @@ is_valid_colorscheme_name(char *name)
 static int
 is_duplicate_colorscheme_name(const char *name, const size_t total)
 {
-	size_t i;
-	for (i = 0; i < total; i++) {
+	for (size_t i = 0; i < total; i++) {
 		if (*color_schemes[i] == *name && strcmp(name, color_schemes[i]) == 0)
 			return 1;
 	}

@@ -2,7 +2,7 @@
 
 # Description: Image thumbnails plugin for Clifm
 # Dependencies (any of the following):
-#     nsxiv sxiv feh pqiv gthumb ristretto gwenview lsix img2sixel
+#     nsxiv sxiv swayimg feh pqiv gthumb ristretto gwenview lsix img2sixel
 #       (or just your preferred image viewer)
 #     xargs
 #     tr
@@ -25,8 +25,8 @@ fi
 found=0
 args="${*:-.}"
 
-if [ -n "$VIEWER" ] && [ "$(type "$VIEWER" 2>/dev/null)" ]; then
-	if [ -n "$VIEWER_OPTS" ]; then
+if [ "$VIEWER" != "" ] && [ "$(type "$VIEWER" 2>/dev/null)" ]; then
+	if [ "$VIEWER_OPTS" != "" ]; then
 		"$VIEWER" "$VIEWER_OPTS" "$args"
 	else
 		"$VIEWER" "$args"
@@ -40,6 +40,8 @@ if type nsxiv > /dev/null 2>&1; then
 	(echo "$names" | tr \\n \\0 | xargs -0 nsxiv -aqt) && exit 0 || found=1
 elif type sxiv > /dev/null 2>&1; then
 	(echo "$names" | tr \\n \\0 | xargs -0 sxiv -aqt) && exit 0 || found=1
+elif [ "$WAYLAND_DISPLAY" != "" ] && type swayimg > /dev/null 2>&1; then
+	(echo "$names" | tr \\n \\0 | xargs -0 swayimg --gallery) && exit 0 || found=1
 elif type feh > /dev/null 2>&1; then
 	(echo "$names" | tr \\n \\0 | xargs -0 feh -tZ) && exit 0 || found=1
 elif type pqiv > /dev/null 2>&1; then
