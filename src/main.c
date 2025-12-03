@@ -986,7 +986,6 @@ run_main_loop(void)
 		run_and_exit(); /* No return */
 #endif /* RUN_CMD */
 
-	int i;
 	/* 1) Infinite loop to keep the program running. */
 	while (1) {
 		/* 2) Grab the input string from the command prompt. */
@@ -1008,7 +1007,7 @@ run_main_loop(void)
 			 * ALIAS_CMD in its place to be executed by exec_cmd_tm(). */
 			exec_cmd_tm(alias_cmd);
 
-			for (i = 0; alias_cmd[i]; i++)
+			for (size_t i = 0; alias_cmd[i]; i++)
 				free(alias_cmd[i]);
 			free(alias_cmd);
 			continue;
@@ -1018,8 +1017,7 @@ run_main_loop(void)
 			exec_cmd_tm(cmd);
 		flags &= ~FAILED_ALIAS;
 
-		i = (int)args_n + 1;
-		while (--i >= 0)
+		for (size_t i = 0; i <= args_n; i++)
 			free(cmd[i]);
 		free(cmd);
 	}
