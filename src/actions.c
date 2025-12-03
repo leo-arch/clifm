@@ -143,6 +143,40 @@ unset_export_values(void) {
 	unsetenv("CLIFM_TRUNCATE_NAMES");
 }
 
+static void
+run_action_output_cmd(char *cmd, int *exit_status)
+{
+	if (xargs.secure_cmds == 1
+	&& sanitize_cmd(cmd, SNT_GRAL) != FUNC_SUCCESS)
+		return;
+
+	const size_t old_args = args_n;
+	args_n = 0;
+
+	char **input = parse_input_str(cmd);
+	if (!input) {
+		args_n = old_args;
+		return;
+	}
+
+	char **alias_cmd = check_for_alias(input);
+	if (alias_cmd) {
+		*exit_status = exec_cmd_tm(alias_cmd);
+		for (size_t i = 0; alias_cmd[i]; i++)
+			free(alias_cmd[i]);
+		free(alias_cmd);
+	} else {
+		if (!(flags & FAILED_ALIAS))
+			*exit_status = exec_cmd_tm(input);
+		flags &= ~FAILED_ALIAS;
+		for (size_t i = 0; i <= args_n; i++)
+			free(input[i]);
+		free(input);
+	}
+
+	args_n = old_args;
+}
+
 int
 run_action(char *action, char **args)
 {
@@ -172,8 +206,7 @@ run_action(char *action, char **args)
 	free(cmd);
 
 	/* 1.b Escape non-escaped filenames */
-	size_t i;
-	for (i = 1; args[i]; i++) {
+	for (size_t i = 1; args[i]; i++) {
 		struct stat a;
 		/* If the filename is already escaped, lstat(2) will fail, so that
 		 * it won't be reescaped. */
@@ -282,34 +315,8 @@ run_action(char *action, char **args)
 	if (lstat(buf, &attr) != -1) { /* If a valid file, open it */
 		char *open_cmd[] = {"o", buf, NULL};
 		exit_status = open_function(open_cmd);
-
 	} else { /* If not a file, take it as a command */
-		if (xargs.secure_cmds == 1
-		&& sanitize_cmd(buf, SNT_GRAL) != FUNC_SUCCESS)
-			goto END;
-
-		size_t old_args = args_n;
-		args_n = 0;
-
-		char **input = parse_input_str(buf);
-		if (input) {
-			char **alias_cmd = check_for_alias(input);
-			if (alias_cmd) {
-				exit_status = exec_cmd_tm(alias_cmd);
-				for (i = 0; alias_cmd[i]; i++)
-					free(alias_cmd[i]);
-				free(alias_cmd);
-			} else {
-				if (!(flags & FAILED_ALIAS))
-					exit_status = exec_cmd_tm(input);
-				flags &= ~FAILED_ALIAS;
-				for (i = 0; i <= args_n; i++)
-					free(input[i]);
-				free(input);
-			}
-		}
-
-		args_n = old_args;
+		run_action_output_cmd(buf, &exit_status);
 	}
 
 END:
