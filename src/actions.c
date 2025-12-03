@@ -371,16 +371,14 @@ edit_actions(char *app)
 
 	/* Reload PATH commands as well to add new action(s) */
 	if (bin_commands) {
-		size_t i;
-		for (i = 0; bin_commands[i]; i++)
+		for (size_t i = 0; bin_commands[i]; i++)
 			free(bin_commands[i]);
 		free(bin_commands);
 		bin_commands = (char **)NULL;
 	}
 
 	if (paths) {
-		size_t i;
-		for (i = 0; i < path_n; i++)
+		for (size_t i = 0; i < path_n; i++)
 			free(paths[i].path);
 		free(paths);
 	}
@@ -395,9 +393,8 @@ edit_actions(char *app)
 static size_t
 get_longest_action_name(void)
 {
-	size_t i = actions_n;
 	size_t l = 0;
-	for (; i-- > 0;) {
+	for (size_t i = actions_n; i-- > 0;) {
 		const size_t len = strlen(usr_actions[i].name);
 		if (len > l)
 			l = len;
@@ -414,8 +411,8 @@ actions_function(char **args)
 			/* Just list available actions */
 			puts(_("To run a plugin just enter its action name\n"
 				"Example: enter '//' to run the rgfind plugin"));
-			size_t i, longest_name_len = get_longest_action_name();
-			for (i = 0; i < actions_n; i++) {
+			size_t longest_name_len = get_longest_action_name();
+			for (size_t i = 0; i < actions_n; i++) {
 				printf("%-*s %s%s%s %s\n", (int)longest_name_len,
 					usr_actions[i].name, mi_c, SET_MSG_PTR,
 					df_c, usr_actions[i].value);
