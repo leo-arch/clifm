@@ -431,8 +431,7 @@ print_jump_table_header(void)
 			"removed at program exit.\n"), item, conf.min_jump_rank);
 	}
 
-	printf(_("\n %sOrder\tVisits\tFirst\tLast\tRank\tDirectory%s\n"),
-		conf.colorize == 1 ? BOLD : "", NC);
+	printf(_("\n%sVisits\tFirst\tLast\tRank\tDirectory%s\n"), BOLD, NC);
 }
 
 /* Print the jump database, field by field, incuding the current rank.
@@ -455,7 +454,6 @@ print_jump_table(const int reduce, const time_t now)
 	int ranks_sum = 0;
 	size_t visits_sum = 0;
 	int max_rank = 0, max_visits = 0, max_first = 0, max_last = 0;
-	const int max_order = DIGINUM(jump_n);
 
 	struct jump_t *tmp_jump = xnmalloc(jump_n + 1, sizeof(struct jump_t));
 
@@ -521,9 +519,8 @@ print_jump_table(const int reduce, const time_t now)
 			: ((keep == JUMP_ENTRY_PERMANENT)
 			? JUMP_ENTRY_PERMANENT_CHR : 0);
 
-		printf(" %s%*zu\t%*zu\t%*jd\t%*jd\t%s%*d%s%s%c%s\t%c%s%s%s\n",
-			color != uf_c ? color : df_c, max_order, i + 1,
-			max_visits, tmp_jump[i].visits,
+		printf("%s%*zu\t%*jd\t%*jd\t%s%*d%s%s%c%s\t%c%s%s%s\n",
+			color != uf_c ? color : df_c, max_visits, tmp_jump[i].visits,
 			max_first, (intmax_t)tmp_jump[i].first_visit,
 			max_last, (intmax_t)tmp_jump[i].last_visit,
 		    conf.colorize == 1 ? BOLD : "", max_rank, tmp_jump[i].rank,
