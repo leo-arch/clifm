@@ -908,6 +908,7 @@ untrash_function(char **args)
 	const size_t n = count_trashed_files();
 	if (n > 0) {
 		if (conf.clear_screen > 0) CLEAR;
+		trash_n = n;
 		untrash_function(args);
 	} else {
 		if (conf.autols == 1)
@@ -1044,8 +1045,7 @@ list_ok_trashed_files(char **args, const int *trashed, const size_t trashed_n)
 	if (print_removed_files == 0)
 		return;
 
-	size_t i;
-	for (i = 0; i < trashed_n; i++) {
+	for (size_t i = 0; i < trashed_n; i++) {
 		if (!args[trashed[i]] || !*args[trashed[i]])
 			continue;
 
