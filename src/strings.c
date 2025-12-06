@@ -3260,12 +3260,11 @@ get_substr(char *str, const char ifs, const int fproc)
 	}
 
 	char **dstr = (char **)NULL;
-	size_t i, j;
 	size_t n = 0;
 
-	for (i = 0; i < substr_n; i++) {
+	for (size_t i = 0; i < substr_n; i++) {
 		int dup = 0;
-		for (j = (i + 1); j < substr_n; j++) {
+		for (size_t j = (i + 1); j < substr_n; j++) {
 			if (*substr[i] == *substr[j] && strcmp(substr[i], substr[j]) == 0) {
 				dup = 1;
 				break;

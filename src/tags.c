@@ -176,9 +176,9 @@ list_files_in_tag(char *name)
 static size_t
 get_longest_tag(void)
 {
-	size_t i, longest_tag = 0;
+	size_t longest_tag = 0;
 
-	for (i = 0; i < tags_n; i++) {
+	for (size_t i = 0; i < tags_n; i++) {
 		const size_t l = strlen(tags[i]);
 		if (l > longest_tag)
 			longest_tag = l;
@@ -195,8 +195,7 @@ list_tags_having_file(const dev_t dev, const ino_t ino)
 	if (!tags_dir || !tags)
 		return;
 
-	size_t i;
-	for (i = 0; tags[i]; i++) {
+	for (size_t i = 0; tags[i]; i++) {
 		char tmp[PATH_MAX + 1];
 		snprintf(tmp, sizeof(tmp), "%s/%s", tags_dir, tags[i]);
 
@@ -239,8 +238,7 @@ is_tag(char *name)
 		}
 	}
 
-	size_t i = tags_n;
-	for (; i-- > 0;) {
+	for (size_t i = tags_n; i-- > 0;) {
 		if (*name == *tags[i] && strcmp(name, tags[i]) == 0)
 			return 1;
 	}
@@ -257,10 +255,9 @@ list_tags_full(void)
 		return FUNC_SUCCESS;
 	}
 
-	size_t i;
 	int exit_status = FUNC_SUCCESS;
 
-	for (i = 0; tags[i]; i++) {
+	for (size_t i = 0; tags[i]; i++) {
 		printf(_("Files tagged as %s%s%s:\n"), conf.colorize == 1
 			? BOLD : "'", tags[i], conf.colorize == 1 ? NC : "'");
 		if (list_files_in_tag(tags[i]) != FUNC_SUCCESS)
@@ -348,10 +345,9 @@ create_tags(char **args)
 	if (!args || !args[1] || !args[2])
 		return print_usage(FUNC_FAILURE);
 
-	size_t i;
 	int exit_status = FUNC_SUCCESS;
 
-	for (i = 2; args[i]; i++) {
+	for (size_t i = 2; args[i]; i++) {
 		char dir[PATH_MAX + 1];
 		char *p = strchr(args[i], '\\');
 		if (p) {
@@ -393,8 +389,8 @@ remove_tags(char **args)
 		return print_no_tags();
 
 	int exit_status = FUNC_SUCCESS;
-	size_t i;
-	for (i = 2; args[i]; i++) {
+
+	for (size_t i = 2; args[i]; i++) {
 		char *p = strchr(args[i], '\\');
 		if (p) {
 			char *deq = unescape_str(args[i], 0);
@@ -557,8 +553,8 @@ untag(char **args, const size_t n, size_t *t)
 		return FUNC_FAILURE;
 
 	int exit_status = FUNC_SUCCESS;
-	size_t i;
-	for (i = 2; args[i]; i++) {
+
+	for (size_t i = 2; args[i]; i++) {
 		if (i == n || (*args[i] == ':' && *(args[1] + 1)))
 			continue;
 
@@ -608,9 +604,9 @@ static int
 untag_files(char **args)
 {
 	int exit_status = FUNC_SUCCESS;
-	size_t i, n = 0;
+	size_t n = 0;
 
-	for (i = 1; args[i]; i++) {
+	for (size_t i = 1; args[i]; i++) {
 		if (*args[i] == ':' && *(args[i] + 1)
 		&& untag(args, i, &n) == FUNC_FAILURE)
 			exit_status = FUNC_FAILURE;
@@ -778,8 +774,7 @@ end_tag_function(const int exit_status, char **a, const int free_args)
 	if (free_args == 0)
 		return exit_status;
 
-	size_t i;
-	for (i = 0; a[i]; i++)
+	for (size_t i = 0; a[i]; i++)
 		free(a[i]);
 	free(a);
 

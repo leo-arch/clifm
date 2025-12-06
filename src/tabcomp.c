@@ -715,11 +715,13 @@ get_preview_win_width(const int offset)
 		 * double, or vertical): this takes 4 extra columns. */
 		: (fzf_border_type == 1 ? 2 : 4));
 	const int total_win_width = term_cols - offset;
+	const size_t s_total_win_width = total_win_width < 0 ? 0
+		: (size_t)total_win_width;
 
-	if (l < (size_t)total_win_width)
-		w = (size_t)total_win_width - l;
+	if (l < s_total_win_width)
+		w = s_total_win_width - l;
 
-	if (w > (size_t)total_win_width / 2)
+	if (w > s_total_win_width / 2)
 		return w;
 
 	return (size_t)-1;
@@ -1253,9 +1255,8 @@ static size_t
 count_quote_chars(const char *str, const size_t len)
 {
 	size_t n = 0;
-	int i = (int)len;
 
-	while (--i >= 0) {
+	for (size_t i = len; i-- > 0;) {
 		if (is_quote_char(str[i]))
 			n++;
 	}
