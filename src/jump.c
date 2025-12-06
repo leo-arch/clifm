@@ -69,11 +69,12 @@ struct jump_entry_t {
  * its current rank. */
 static int
 calculate_base_credit(const int days_since_first, const int hours_since_last,
-	const int visits, int *keep)
+	const size_t visits, int *keep)
 {
+	const int ivisits = visits > INT_MAX ? INT_MAX : (int)visits;
 	int rank = days_since_first > 1
-		? ((int)visits * VISIT_BONUS) / days_since_first
-		: ((int)visits * VISIT_BONUS);
+		? (ivisits * VISIT_BONUS) / days_since_first
+		: (ivisits * VISIT_BONUS);
 
 	/* Credit or penalty based on last directory access. */
 	int tmp_rank = rank;
@@ -110,8 +111,7 @@ calculate_bonus_credit(const char *entry, const char *query, int *keep)
 			bonus += BASENAME_BONUS;
 	}
 
-	int i = (int)bm_n;
-	while (--i >= 0) {
+	for (size_t i = bm_n; i-- > 0;) {
 		if (bookmarks[i].path && *bookmarks[i].path
 		&& bookmarks[i].path[1] == entry[1]
 		&& strcmp(bookmarks[i].path, entry) == 0) {
@@ -127,8 +127,7 @@ calculate_bonus_credit(const char *entry, const char *query, int *keep)
 		bonus += PINNED_BONUS;
 	}
 
-	i = MAX_WS;
-	while (--i >= 0) {
+	for (size_t i = MAX_WS; i-- > 0;) {
 		if (workspaces[i].path && *workspaces[i].path
 		&& workspaces[i].path[1] == entry[1]
 		&& strcmp(workspaces[i].path, entry) == 0) {
@@ -157,7 +156,7 @@ rank_entry(const size_t i, const time_t now, int *days_since_first,
 
 	int keep = 0;
 	int rank = calculate_base_credit(*days_since_first, *hours_since_last,
-		(int)jump_db[i].visits, &keep);
+		jump_db[i].visits, &keep);
 
 	rank += calculate_bonus_credit(jump_db[i].path, (char *)NULL, &keep);
 	if (jump_db[i].keep == JUMP_ENTRY_PERMANENT)
@@ -171,9 +170,7 @@ rank_entry(const size_t i, const time_t now, int *days_since_first,
 static void
 free_jump_database(void)
 {
-	size_t i = jump_n;
-
-	for (; i-- > 0;)
+	for (size_t i = jump_n; i-- > 0;)
 		free(jump_db[i].path);
 
 	free(jump_db);
@@ -226,8 +223,7 @@ add_to_jumpdb(char *dir)
 	}
 
 	int new_entry = 1;
-	size_t i = jump_n;
-	for (; i-- > 0;) {
+	for (size_t i = jump_n; i-- > 0;) {
 		/* Jump entries are all absolute paths, so that they all start with
 		 * a slash. Let's start comparing them from the second char. */
 		if (!IS_VALID_JUMP_ENTRY(i) || dir_len != jump_db[i].len
@@ -268,8 +264,7 @@ save_jumpdb(void)
 	const time_t now = time(NULL);
 
 	/* Calculate both total rank sum, and rank for each entry. */
-	size_t i = jump_n;
-	for (; i-- > 0;) {
+	for (size_t i = jump_n; i-- > 0;) {
 		if (!IS_VALID_JUMP_ENTRY(i))
 			continue;
 
@@ -288,7 +283,7 @@ save_jumpdb(void)
 
 	char perm_chr_str[2] = "";
 
-	for (i = 0; i < jump_n; i++) {
+	for (size_t i = 0; i < jump_n; i++) {
 		if (total_rank > conf.max_jump_total_rank) {
 			if (reduce) {
 				const int tmp_rank = jump_db[i].rank;
@@ -412,8 +407,9 @@ rank_cmp(const void *a, const void *b)
 static void
 print_jump_table_header(void)
 {
-	char item[10]; /* BOLD and NC are 4 bytes each */
-	snprintf(item, sizeof(item), "%s*%s", conf.colorize == 1 ? BOLD : "", NC);
+	char item[16]; /* BOLD and NC are 4 bytes each */
+	snprintf(item, sizeof(item), "%s%s%s", BOLD,
+		term_caps.unicode == 1 ? "•" : "*", NC);
 
 	printf(_("%s First time access is displayed in days, while last "
 		"time access is displayed in hours.\n"), item);
@@ -456,14 +452,14 @@ print_jump_table(const int reduce, const time_t now)
 	HIDE_CURSOR;
 	print_jump_table_header();
 
-	size_t i;
-	int ranks_sum = 0, visits_sum = 0;
+	int ranks_sum = 0;
+	size_t visits_sum = 0;
 	int max_rank = 0, max_visits = 0, max_first = 0, max_last = 0;
 	const int max_order = DIGINUM(jump_n);
 
 	struct jump_t *tmp_jump = xnmalloc(jump_n + 1, sizeof(struct jump_t));
 
-	for (i = 0; i < jump_n; i++) {
+	for (size_t i = 0; i < jump_n; i++) {
 		if (!IS_VALID_JUMP_ENTRY(i)) {
 			tmp_jump[i].path = (char *)NULL;
 			continue;
@@ -478,7 +474,7 @@ print_jump_table(const int reduce, const time_t now)
 		}
 
 		ranks_sum += rank;
-		visits_sum += (int)jump_db[i].visits;
+		visits_sum += jump_db[i].visits;
 
 		tmp_jump[i].path = jump_db[i].path;
 		tmp_jump[i].keep = jump_db[i].keep;
@@ -506,7 +502,7 @@ print_jump_table(const int reduce, const time_t now)
 	/* Sort entries by rank (from less to more). */
 	qsort(tmp_jump, jump_n, sizeof(*tmp_jump), rank_cmp);
 
-	for (i = 0; i < jump_n; i++) {
+	for (size_t i = 0; i < jump_n; i++) {
 		if (!tmp_jump[i].path)
 			continue;
 
@@ -525,11 +521,11 @@ print_jump_table(const int reduce, const time_t now)
 			: ((keep == JUMP_ENTRY_PERMANENT)
 			? JUMP_ENTRY_PERMANENT_CHR : 0);
 
-		printf(" %s%*zu\t%*zu\t%*d\t%*d\t%s%*d%s%s%c%s\t%c%s%s%s\n",
+		printf(" %s%*zu\t%*zu\t%*jd\t%*jd\t%s%*d%s%s%c%s\t%c%s%s%s\n",
 			color != uf_c ? color : df_c, max_order, i + 1,
 			max_visits, tmp_jump[i].visits,
-			max_first, (int)tmp_jump[i].first_visit,
-			max_last, (int)tmp_jump[i].last_visit,
+			max_first, (intmax_t)tmp_jump[i].first_visit,
+			max_last, (intmax_t)tmp_jump[i].last_visit,
 		    conf.colorize == 1 ? BOLD : "", max_rank, tmp_jump[i].rank,
 		    color != uf_c ? color : "",
 		    keep == 1 ? li_c : (keep == 2 ? mi_c : ""),
@@ -541,7 +537,7 @@ print_jump_table(const int reduce, const time_t now)
 
 	free(tmp_jump);
 
-	printf(_("\nTotal rank: %d/%d\nTotal visits: %d\n"), ranks_sum,
+	printf(_("\nTotal rank: %d/%d\nTotal visits: %zu\n"), ranks_sum,
 	    conf.max_jump_total_rank, visits_sum);
 
 	UNHIDE_CURSOR;
@@ -551,11 +547,10 @@ print_jump_table(const int reduce, const time_t now)
 static int
 purge_invalid_entries(void)
 {
-	size_t i = jump_n;
 	int c = 0;
 
 	struct stat a;
-	for (; i-- > 0;) {
+	for (size_t i = jump_n; i-- > 0;) {
 		if (!IS_VALID_JUMP_ENTRY(i))
 			continue;
 
@@ -582,11 +577,10 @@ purge_invalid_entries(void)
 static int
 purge_low_ranked_entries(const int limit)
 {
-	size_t i = jump_n;
 	int c = 0;
 	const time_t now = time(NULL);
 
-	for (; i-- > 0;) {
+	for (size_t i = jump_n; i-- > 0;) {
 		if (!IS_VALID_JUMP_ENTRY(i))
 			continue;
 
@@ -727,7 +721,7 @@ rank_tmp_entry(const struct jump_entry_t *entry, const time_t now,
 
 	int keep = 0;
 	int rank = calculate_base_credit(days_since_first, hours_since_last,
-		(int)entry->visits, &keep);
+		entry->visits, &keep);
 
 	rank += calculate_bonus_credit(entry->match, query, &keep);
 	if (entry->keep == JUMP_ENTRY_PERMANENT)
@@ -824,13 +818,12 @@ dirjump(char **args, const int mode)
 		return ret;
 
 	/* Find the best ranked directory using ARGS as filter(s). */
-	size_t i;
-	int j, match = 0;
+	size_t j, match = 0;
 
 	struct jump_entry_t *entry =
 		xnmalloc(jump_n + 1, sizeof(struct jump_entry_t));
 
-	for (i = 1; args[i]; i++) {
+	for (size_t i = 1; args[i]; i++) {
 		/* 1) Using the first parameter, get a list of matches in the
 		 * database. */
 
@@ -841,8 +834,7 @@ dirjump(char **args, const int mode)
 		const int segment = mark_target_segment(args[i]);
 
 		if (match == 0) {
-			j = (int)jump_n;
-			while (--j >= 0) {
+			for (j = jump_n; j-- > 0;) {
 				if (!IS_VALID_JUMP_ENTRY(j))
 					continue;
 
@@ -898,8 +890,7 @@ dirjump(char **args, const int mode)
 		 * matching process, that is, excluding non-matches,
 		 * using subsequent parameters. */
 		else {
-			j = match;
-			while (--j >= 0) {
+			for (j = match; j-- > 0;) {
 				if (!entry[j].match || !*entry[j].match) {
 					entry[j].match = (char *)NULL;
 					continue;
@@ -926,9 +917,7 @@ dirjump(char **args, const int mode)
 	int found = 0, exit_status = FUNC_FAILURE, max = -1;
 	char *best_ranked = (char *)NULL;
 
-	j = match;
-
-	while (--j >= 0) {
+	for (j = match; j-- > 0;) {
 		if (!entry[j].match)
 			continue;
 
