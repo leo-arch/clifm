@@ -939,7 +939,6 @@ run_and_exit(void)
 # endif /* !_NO_TRASH */
 
 	/* 1) Parse input string. */
-	int i = 0;
 	char **cmd = parse_input_str(cmd_line_cmd);
 	if (!cmd)
 		exit(EXIT_FAILURE);
@@ -951,7 +950,7 @@ run_and_exit(void)
 		 * ALIAS_CMD in its place to be executed by exec_cmd_tm(). */
 		exec_cmd_tm(alias_cmd);
 
-		for (i = 0; alias_cmd[i]; i++)
+		for (size_t i = 0; alias_cmd[i]; i++)
 			free(alias_cmd[i]);
 		free(alias_cmd);
 		exit(exit_code);
@@ -961,7 +960,7 @@ run_and_exit(void)
 		exec_cmd_tm(cmd);
 	flags &= ~FAILED_ALIAS;
 
-	for (i = 0; cmd[i]; i++)
+	for (size_t i = 0; cmd[i]; i++)
 		free(cmd[i]);
 	free(cmd);
 

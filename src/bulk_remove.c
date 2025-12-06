@@ -280,8 +280,7 @@ remove_this_file(char *file, char **list)
 	if (SELFORPARENT(file))
 		return 0;
 
-	size_t i;
-	for (i = 0; list[i]; i++) {
+	for (size_t i = 0; list[i]; i++) {
 		if (*file == *list[i] && strcmp(file, list[i]) == 0)
 			return 0;
 	}

@@ -366,8 +366,7 @@ re_sort_files_list(void)
 static inline int
 set_sort_by_name(char **arg)
 {
-	size_t i;
-	for (i = 0; i <= SORT_TYPES; i++) {
+	for (size_t i = 0; i <= SORT_TYPES; i++) {
 		if (*(*arg) == *sort_methods[i].name
 		&& strcmp(*arg, sort_methods[i].name) == 0) {
 			if (conf.light_mode == 1

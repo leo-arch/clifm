@@ -230,9 +230,8 @@ xstrrpbrk(char *s, const char *accept)
 
 	const size_t l = strlen(s);
 
-	size_t i = l, j;
-	for (; i-- > 0;) {
-		for (j = 0; accept[j]; j++) {
+	for (size_t i = l; i-- > 0;) {
+		for (size_t j = 0; accept[j]; j++) {
 			if (s[i] == accept[j])
 				return s + i;
 		}
@@ -815,8 +814,7 @@ remove_quotes(char *str)
 static void
 init_quoted_words(void)
 {
-	size_t i;
-	for (i = 0; i < QWORDS_ARRAY_LEN; i++)
+	for (size_t i = 0; i < QWORDS_ARRAY_LEN; i++)
 		quoted_words[i] = -1;
 }
 
@@ -835,8 +833,7 @@ update_quoted_words_index(const size_t start, const size_t added_items)
 	const size_t s = start + 1;
 	const size_t n = added_items - (added_items > 0 ? 1 : 0);
 
-	size_t i;
-	for (i = 0; i < QWORDS_ARRAY_LEN; i++)
+	for (size_t i = 0; i < QWORDS_ARRAY_LEN; i++)
 		if (quoted_words[i] > -1 && (size_t)quoted_words[i] >= s)
 			quoted_words[i] += (int)n;
 }
@@ -845,8 +842,7 @@ update_quoted_words_index(const size_t start, const size_t added_items)
 static int
 is_quoted_word(const size_t index)
 {
-	size_t i;
-	for (i = 0; i < QWORDS_ARRAY_LEN; i++)
+	for (size_t i = 0; i < QWORDS_ARRAY_LEN; i++)
 		if (index == (size_t)quoted_words[i])
 			return 1;
 
@@ -1252,8 +1248,7 @@ check_shell_functions(const char *str)
 		NULL
 	};
 
-	size_t i;
-	for (i = 0; funcs[i]; i++) {
+	for (size_t i = 0; funcs[i]; i++) {
 		const size_t f_len = strlen(funcs[i]);
 		if (*str == *funcs[i] && strncmp(str, funcs[i], f_len) == 0)
 			return 1;
@@ -1675,12 +1670,10 @@ eln_expand(char ***substr, const size_t i)
 static void
 expand_sel(char ***substr)
 {
-	size_t i = 0;
-
 	if (sel_n == 0)
 		return;
 
-	size_t j = 0;
+	size_t i = 0, j = 0;
 	char **sel_array = xnmalloc(args_n + sel_n + 2, sizeof(char *));
 
 	/* 1. Copy all words before 'sel' */
@@ -1730,9 +1723,8 @@ expand_sel_keyword(char ***substr)
 		return;
 
 	struct stat a;
-	size_t i;
 
-	for (i = 1; (*substr)[i]; i++) {
+	for (size_t i = 1; (*substr)[i]; i++) {
 		if (*(*substr)[i] != 's')
 			continue;
 
@@ -1780,8 +1772,8 @@ expand_workspace(char **name)
 
 	char *deq_str = unescape_str(ws_name, 0);
 	char *tmp_name = deq_str ? deq_str : ws_name;
-	size_t i = 0;
-	for (i = 0; i < MAX_WS; i++) {
+
+	for (size_t i = 0; i < MAX_WS; i++) {
 		if (!workspaces[i].path || !workspaces[i].name
 		|| *tmp_name != *workspaces[i].name
 		|| strcmp(tmp_name, workspaces[i].name) != 0)
@@ -1807,12 +1799,11 @@ expand_workspace(char **name)
 static int
 expand_bm_name(char **name)
 {
-	size_t j;
 	int bm_exp = FUNC_FAILURE;
 	char *p = unescape_str(*name + 2, 0);
 	char *n = p ? p : *name + 2;
 
-	for (j = 0; j < bm_n; j++) {
+	for (size_t j = 0; j < bm_n; j++) {
 		if (!bookmarks[j].name || *n != *bookmarks[j].name
 		|| strcmp(n, bookmarks[j].name) != 0)
 			continue;
@@ -1838,8 +1829,7 @@ expand_int_var(char **name)
 {
 	char *var_name = (*name) + 1;
 
-	size_t j = usrvar_n;
-	for (; j-- > 0;) {
+	for (size_t j = usrvar_n; j-- > 0;) {
 		if (*var_name != *usr_var[j].name
 		|| strcmp(var_name, usr_var[j].name) != 0 || !usr_var[j].value)
 			continue;
@@ -2030,8 +2020,7 @@ expand_glob(char ***substr, const int *glob_array, const size_t glob_n)
 	size_t old_pathc = 0;
 	size_t i = 0;
 
-	size_t g = 0;
-	for (g = 0; g < (size_t)glob_n; g++) {
+	for (size_t g = 0; g < (size_t)glob_n; g++) {
 		glob_t globbuf;
 
 		if (is_quoted_word((size_t)glob_array[g] + old_pathc))
@@ -2109,12 +2098,12 @@ static int
 expand_word(char ***substr, const int *word_array, const size_t word_n)
 {
 	size_t old_pathc = 0;
-	size_t w = 0, i = 0;
+	size_t i = 0;
 
 	const int is_sel_cmd =
 		(strcmp((*substr)[0], "s") == 0 || strcmp((*substr)[0], "sel") == 0);
 
-	for (w = 0; w < word_n; w++) {
+	for (size_t w = 0; w < word_n; w++) {
 		if (is_sel_cmd == 1) {
 			/* If the command is 'sel', perform only command substitution
 			 * and environment variables expansion. Otherwise, wordexp(3)
@@ -2193,16 +2182,16 @@ expand_word(char ***substr, const int *word_array, const size_t word_n)
 static size_t
 check_ranges(char ***substr, int **range_array)
 {
-	size_t i = 0, j = 0, n = 0;
+	size_t n = 0;
 	struct stat a;
 
-	for (i = 0; i <= args_n; i++) {
+	for (size_t i = 0; i <= args_n; i++) {
 		if (!(*substr)[i] || is_quoted_word(i) || lstat((*substr)[i], &a) != -1)
 			continue;
 
 		const size_t len = strlen((*substr)[i]);
 
-		for (j = 0; (*substr)[i][j]; j++) {
+		for (size_t j = 0; (*substr)[i][j]; j++) {
 			/* If some alphabetic char, besides '-', is found in the
 			 * string, we have no range. */
 			if ((*substr)[i][j] != '-' && !IS_DIGIT((*substr)[i][j]))
@@ -2297,9 +2286,8 @@ expand_ranges(char ***substr)
 	}
 
 	size_t old_ranges_n = 0;
-	size_t r = 0;
 
-	for (r = 0; r < ranges_ok; r++) {
+	for (size_t r = 0; r < ranges_ok; r++) {
 		size_t ranges_n = 0;
 		filesn_t *ranges = expand_range((*substr)[range_array[r] +
 			(int)old_ranges_n], 1);
@@ -2639,14 +2627,13 @@ check_chained_cmds(char *str)
 		return 1;
 	}
 
-	size_t i = 0;
 	const size_t str_len = strlen(str);
 	size_t len = 0, internal_ok = 0;
 	char *buf = (char *)NULL;
 
 	/* Get each word (cmd) in STR */
 	buf = xnmalloc(str_len + 1, sizeof(char));
-	for (i = 0; i < str_len; i++) {
+	for (size_t i = 0; i < str_len; i++) {
 		while (str[i] && str[i] != ' ' && str[i] != ';' && str[i] != '&') {
 			buf[len] = str[i];
 			len++;

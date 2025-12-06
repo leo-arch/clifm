@@ -898,7 +898,7 @@ search_regex(char **args)
 		return FUNC_SUCCESS;
 
 	struct dirent **reg_dirlist = (struct dirent **)NULL;
-	int tmp_files = - 1;
+	int tmp_files = -1;
 
 	if (search_path && *search_path) {
 		if (chdir_search_path(&search_path, args[1]) == FUNC_FAILURE)
@@ -920,8 +920,6 @@ search_regex(char **args)
 	search_query = construct_regex_query(&args[0], invert, &regex_found);
 
 	/* Get matches */
-	size_t i;
-
 	regex_t regex_files;
 	int reg_flags = conf.case_sens_search == 1 ? (REG_NOSUB | REG_EXTENDED)
 		: (REG_NOSUB | REG_EXTENDED | REG_ICASE);
@@ -940,7 +938,7 @@ search_regex(char **args)
 	const size_t max =
 		(search_path && *search_path) ? (size_t)tmp_files : (size_t)files;
 
-	for (i = 0; i < max; i++) {
+	for (size_t i = 0; i < max; i++) {
 		char *name = (search_path && *search_path) ? reg_dirlist[i]->d_name
 		: file_info[i].name;
 

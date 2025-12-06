@@ -85,7 +85,7 @@ change_word_color(const char *_last_word, const int offset, const char *color)
 #endif // !_NO_HIGHLIGHT */
 
 /* Return a brief description for the command S, whose length is L. */
-static char *
+static const char *
 check_int_cmd_desc(const char *s, const size_t l)
 {
 	if (!s || !*s)
@@ -2039,7 +2039,7 @@ rl_suggestions(const unsigned char c)
 		goto SUCCESS;
 
 	/* 3.a) Internal command description */
-	char *cdesc = (char *)NULL;
+	const char *cdesc = (char *)NULL;
 	if (conf.cmd_desc_sug == 1 && c != ' ' && words_num == 1
 	&& (!rl_line_buffer || (rl_end > 0 && rl_line_buffer[rl_end - 1] != ' '))
 	&& (cdesc = check_int_cmd_desc(word, wlen)) != NULL) {
