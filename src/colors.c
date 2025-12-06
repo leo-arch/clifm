@@ -39,25 +39,12 @@ typedef void rl_macro_print_func_t (const char *, const char *, int, const char 
 #include "prompt.h" /* gen_color() */
 #include "properties.h" /* get_color_age(), get_color_size() */
 #include "sanitize.h"
+#include "sort.h" /* compare_string() (used by qsort(3)), QSFUNC */
 #include "spawn.h"
-
-#ifndef CLIFM_SUCKLESS
-/* qsort(3) is used only by get_colorschemes(), which is not included
- * if CLIFM_SUCKLESS is defined */
-# include "sort.h" /* compare_string() (used by qsort(3)) */
-#endif /* !CLIFM_SUCKLESS */
 
 #define ON_LSCOLORS (xargs.lscolors == LS_COLORS_GNU              \
 		? _(" (on LS_COLORS)") : (xargs.lscolors == LS_COLORS_BSD \
 		? _(" (on LSCOLORS)") : ""))
-
-#ifndef CLIFM_SUCKLESS
-/* A struct to hold color variables */
-struct colors_t {
-	char *name;
-	char *value;
-	size_t namelen;
-};
 
 /* A struct to map color codes to color variables */
 struct color_mapping_t {
@@ -65,6 +52,14 @@ struct color_mapping_t {
 	char *color;        /* Pointer to the color variable (.e.g. el_c) */
 	int prefix_len;     /* Length of prefix */
 	int printable;      /* Either RL_PRINTABLE or RL_NO_PRINTABLE */
+};
+
+#ifndef CLIFM_SUCKLESS
+/* A struct to hold color variables */
+struct colors_t {
+	char *name;
+	char *value;
+	size_t namelen;
 };
 
 static struct colors_t *defs;
