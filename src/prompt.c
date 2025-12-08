@@ -609,8 +609,7 @@ count_autocmd_matches(void)
 		return 0;
 
 	size_t c = 0;
-	ssize_t i = (ssize_t)autocmds_n;
-	while (--i >= 0)
+	for (size_t i = 0; i < autocmds_n; i++)
 		c += (autocmds[i].match == 1);
 
 	return c;
@@ -1308,7 +1307,7 @@ update_trash_indicator(void)
 #endif /* !_NO_TRASH */
 
 static void
-setenv_prompt(void)
+setenv_prompt(const size_t ac_matches)
 {
 	if (prompt_notif == 1)
 		return;
@@ -1320,6 +1319,7 @@ setenv_prompt(void)
 #ifndef _NO_TRASH
 	setenv("CLIFM_STAT_TRASH", xitoa((long long)trash_n), 1);
 #endif /* !_NO_TRASH */
+	setenv("CLIFM_STAT_AUTOCMD", ac_matches > 0 ? "1" : "0", 1);
 	setenv("CLIFM_STAT_ERROR_MSGS", xitoa((long long)msgs.error), 1);
 	setenv("CLIFM_STAT_WARNING_MSGS", xitoa((long long)msgs.warning), 1);
 	setenv("CLIFM_STAT_NOTICE_MSGS", xitoa((long long)msgs.notice), 1);
@@ -1354,23 +1354,19 @@ set_prompt_length(const size_t decoded_prompt_len, const size_t ac_matches)
 }
 
 static char *
-construct_prompt(const char *decoded_prompt)
+construct_prompt(const char *decoded_prompt, const size_t ac_matches)
 {
 	char *rl_vi_mode = (char *)NULL;
 	/* Construct indicators: MSGS (ERR, WARN, and NOTICE), SEL, and TRASH */
-	char err_ind[N_IND], warn_ind[N_IND],
-		notice_ind[N_IND], trash_ind[N_IND], sel_ind[N_IND],
-		acmd_ind[N_IND];
+	char err_ind[N_IND], warn_ind[N_IND], notice_ind[N_IND],
+		trash_ind[N_IND], sel_ind[N_IND], acmd_ind[N_IND];
 	*err_ind = *warn_ind = *notice_ind = *trash_ind = *sel_ind = '\0';
 	*acmd_ind = '\0';
-
-	size_t ac_matches = 0;
 
 	if (prompt_notif == 1) {
 		if (rl_editing_mode == RL_VI_MODE)
 			rl_vi_mode = gen_rl_vi_mode(0);
-		if (conf.autocmd_msg == AUTOCMD_MSG_PROMPT
-		&& (ac_matches = count_autocmd_matches()) > 0)
+		if (ac_matches > 0)
 			snprintf(acmd_ind, N_IND, "%sA%s", ac_c, RL_NC);
 		if (msgs.error > 0)
 			snprintf(err_ind, N_IND, "%sE%zu%s", em_c, msgs.error, RL_NC);
@@ -1394,18 +1390,15 @@ construct_prompt(const char *decoded_prompt)
 		snprintf(the_prompt, prompt_len,
 			"%s%s%s%s%s%s%s%s%s%s%s%s%s%s\001%s\002",
 			rl_vi_mode ? rl_vi_mode : "",
-			ac_matches > 0 ? acmd_ind : "",
+			acmd_ind,
 			(user.uid == 0) ? (conf.colorize == 1
 				? ROOT_IND : ROOT_IND_NO_COLOR) : "",
 			(conf.readonly == 1) ? ro_c : "",
 			(conf.readonly == 1) ? RDONLY_IND : "",
-			(msgs.error > 0) ? err_ind : "",
-			(msgs.warning > 0) ? warn_ind : "",
-			(msgs.notice > 0) ? notice_ind : "",
+			err_ind, warn_ind, notice_ind,
 			(xargs.stealth_mode == 1) ? si_c : "",
 			(xargs.stealth_mode == 1) ? STEALTH_IND : "",
-			(trash_n > 0) ? trash_ind : "",
-			(sel_n > 0) ? sel_ind : "",
+			trash_ind, sel_ind,
 			decoded_prompt, RL_NC, tx_c);
 	} else {
 		snprintf(the_prompt, prompt_len, "%s%s\001%s\002",
@@ -1430,7 +1423,7 @@ print_prompt_messages(void)
 }
 
 static void
-initialize_prompt_data(const int prompt_flag)
+initialize_prompt_data(const int prompt_flag, size_t *ac_matches)
 {
 	check_cwd();
 	trim_final_slashes();
@@ -1455,7 +1448,10 @@ initialize_prompt_data(const int prompt_flag)
 	update_trash_indicator();
 #endif /* !_NO_TRASH */
 	get_sel_files();
-	setenv_prompt();
+
+	*ac_matches = conf.autocmd_msg == AUTOCMD_MSG_PROMPT
+		? count_autocmd_matches() : 0;
+	setenv_prompt(*ac_matches);
 
 	args_n = 0;
 	curhistindex = current_hist_n;
@@ -1649,12 +1645,13 @@ handle_empty_line(const int screen_refresh)
 char *
 prompt(const int prompt_flag, const int screen_refresh)
 {
-	initialize_prompt_data(prompt_flag);
+	size_t ac_matches = 0;
+	initialize_prompt_data(prompt_flag, &ac_matches);
 	/* Generate the prompt string using the prompt line in the config
 	 * file (stored in encoded_prompt at startup). */
 	char *decoded_prompt = decode_prompt(conf.encoded_prompt);
 	char *the_prompt = construct_prompt(decoded_prompt
-		? decoded_prompt : EMERGENCY_PROMPT);
+		? decoded_prompt : EMERGENCY_PROMPT, ac_matches);
 	free(decoded_prompt);
 
 	if (conf.rprompt_str && *conf.rprompt_str
@@ -1767,8 +1764,7 @@ set_prompt(char *name)
 		return FUNC_FAILURE;
 	}
 
-	size_t i = prompts_n;
-	for (; i-- > 0;) {
+	for (size_t i = prompts_n; i-- > 0;) {
 		if (*p != *prompts[i].name || strcmp(p, prompts[i].name) != 0)
 			continue;
 		free(p);

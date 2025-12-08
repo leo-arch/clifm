@@ -189,7 +189,6 @@ gen_common_options(void)
 {
 	struct autocmds_t a;
 	struct autocmds_t *b = autocmds;
-	size_t i;
 
 	a.cmd = (char *)NULL;
 	a.color_scheme = (char *)NULL;
@@ -207,7 +206,7 @@ gen_common_options(void)
 	a.filter = (struct filter_t){0};
 	a.temp = 0;
 
-	for (i = 0; i < autocmds_n; i++) {
+	for (size_t i = 0; i < autocmds_n; i++) {
 		if (b[i].match == 0)
 			continue;
 
@@ -316,8 +315,7 @@ gen_autocmd_options_list(char *buf, struct autocmds_t *a, const int print_filter
 static void
 print_autocmd_options_list_full(void)
 {
-	size_t i;
-	for (i = 0; i < autocmds_n; i++) {
+	for (size_t i = 0; i < autocmds_n; i++) {
 		if (autocmds[i].match == 0)
 			continue;
 
@@ -365,9 +363,8 @@ run_autocmds(const size_t *matches, const size_t matches_n)
 
 	int cs_last_index = UNSET;
 	int ft_last_index = UNSET;
-	size_t i;
 
-	for (i = 0; i < matches_n; i++) {
+	for (size_t i = 0; i < matches_n; i++) {
 		autocmds[matches[i]].match = 1;
 		if (autocmds[matches[i]].color_scheme != NULL)
 			cs_last_index = (int)matches[i];
@@ -387,8 +384,7 @@ run_autocmds(const size_t *matches, const size_t matches_n)
 static void
 unset_autocmd_matches(void)
 {
-	size_t i;
-	for (i = 0; i < autocmds_n; i++)
+	for (size_t i = 0; i < autocmds_n; i++)
 		autocmds[i].match = 0;
 }
 
@@ -947,8 +943,7 @@ add_autocmd(char **args)
 			: autocmd_dirlist_reload());
 	}
 
-	size_t i;
-	for (i = 0; i < autocmds_n; i++) {
+	for (size_t i = 0; i < autocmds_n; i++) {
 		if (autocmds[i].temp == 1
 		&& strcmp(workspaces[cur_ws].path, autocmds[i].pattern) == 0) {
 			/* Add option to an existing autocmd */
