@@ -1184,12 +1184,12 @@ xitoa(long long n)
 	 * (32), that is, from index 0 to 31. Index 31 is reserved for the NUL
 	 * terminator, so that we must start writing at index 30. */
 	long long i = MAX_INT_STR - 2;
+	long long rem = 0;
 
-	while (n > 0 && i > 0) {
-		long long rem = n / 10;
-		buf[i] = (char)('0' + (n - (rem * 10)));
+	while (n > 0 && i >= 0) {
+		rem = n / 10;
+		buf[i--] = (char)('0' + (n - (rem * 10)));
 		n = rem;
-		--i;
 	}
 
 	return &buf[i + 1];
