@@ -929,7 +929,7 @@ get_longest_filename(const filesn_t n, const size_t eln_len)
 	 * */
 
 	longest.fc_len = 0;
-	if (file_info[longest_index].dir == 1
+	if (longest_index >= 0 && file_info[longest_index].dir == 1
 	&& file_info[longest_index].filesn > 0
 	&& conf.max_name_len != UNSET && longest_index != -1
 	&& conf.files_counter == 1) {

@@ -401,9 +401,8 @@ check_autocmds(void)
 
 	size_t matches[256]; /* Store indices of matching entries */
 	size_t matches_n = 0;
-	size_t i;
 
-	for (i = 0; i < autocmds_n && matches_n < sizeof(matches); i++) {
+	for (size_t i = 0; i < autocmds_n && matches_n < sizeof(matches); i++) {
 		if (!autocmds[i].pattern || !*autocmds[i].pattern)
 			continue;
 
@@ -549,8 +548,7 @@ set_autocmd_color_scheme(const char *name, const size_t n)
 		return FUNC_SUCCESS;
 	}
 
-	size_t i = cschemes_n;
-	for (; i-- > 0;) {
+	for (size_t i = cschemes_n; i-- > 0;) {
 		if (*color_schemes[i] == *name
 		&& strcmp(color_schemes[i], name) == 0) {
 			autocmds[n].color_scheme = color_schemes[i];
@@ -572,8 +570,7 @@ set_autocmd_sort_by_name(const char *name, const size_t n)
 		return FUNC_SUCCESS;
 	}
 
-	size_t i;
-	for (i = 0; i <= SORT_TYPES; i++) {
+	for (size_t i = 0; i <= SORT_TYPES; i++) {
 		if (*name != *sort_methods[i].name
 		|| strcmp(name, sort_methods[i].name) != 0)
 			continue;
@@ -649,7 +646,7 @@ fill_autocmd_opt(char *opt, const size_t n)
 	if (*opt == 's' && opt[1] == 't')
 		return set_autocmd_sort(*p ? p : "unset", n);
 
-	/* The below options taken only numbers (or 'unset') as values. */
+	/* The below options take only numbers (or 'unset') as values. */
 	int a = 0;
 	if (!*p) { /* 'OPTION=' amounts to 'OPTION=unset'. */
 		a = UNSET;
@@ -662,12 +659,12 @@ fill_autocmd_opt(char *opt, const size_t n)
 	}
 
 	if (*opt == 'm' && opt[1] == 'f') {
-		autocmds[n].max_files = !*p ? AC_UNSET : a;
+		autocmds[n].max_files = a == UNSET ? AC_UNSET : a;
 		return FUNC_SUCCESS;
 	}
 
 	if (*opt == 'm' && opt[1] == 'n') {
-		autocmds[n].max_name_len = !*p ? AC_UNSET : a;
+		autocmds[n].max_name_len = a == UNSET ? AC_UNSET : a;
 		return FUNC_SUCCESS;
 	}
 
@@ -828,8 +825,8 @@ static int
 unset_tmp_autocmds(void)
 {
 	size_t found = 0;
-	size_t i;
-	for (i = 0; i < autocmds_n; i++) {
+
+	for (size_t i = 0; i < autocmds_n; i++) {
 		if (autocmds[i].temp == 1
 		&& *autocmds[i].pattern == *workspaces[cur_ws].path
 		&& strcmp(autocmds[i].pattern, workspaces[cur_ws].path) == 0) {
@@ -859,10 +856,9 @@ autocmd_dirlist_reload(void)
 static size_t
 get_longest_pattern(void)
 {
-	size_t i;
 	size_t len = 0;
 
-	for (i = 0; i < autocmds_n; i++) {
+	for (size_t i = 0; i < autocmds_n; i++) {
 		if (!autocmds[i].pattern || !*autocmds[i].pattern)
 			continue;
 
@@ -884,10 +880,9 @@ print_autocmds_list(void)
 	}
 
 	char buf[AC_BUF_SIZE];
-	size_t i;
 	const int longest_pattern = (int)get_longest_pattern();
 
-	for (i = 0; i < autocmds_n; i++) {
+	for (size_t i = 0; i < autocmds_n; i++) {
 		if (!autocmds[i].pattern || !*autocmds[i].pattern
 		|| gen_autocmd_options_list(buf, &autocmds[i], 1) <= 0)
 			continue;
