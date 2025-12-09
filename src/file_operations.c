@@ -152,10 +152,11 @@ xchmod(const char *file, const char *mode_str, const int flag)
 
 	const mode_t mode = (mode_t)strtol(mode_str, 0, 8);
 	if (fchmod(fd, mode) == -1) {
+		const int saved_errno = errno;
 		close(fd);
 		err(flag == 1 ? 'e' : 0, flag == 1 ? PRINT_PROMPT : NOPRINT_PROMPT,
-			"xchmod: '%s': %s\n", file, strerror(errno));
-		return errno;
+			"xchmod: '%s': %s\n", file, strerror(saved_errno));
+		return saved_errno;
 	}
 
 	close(fd);
