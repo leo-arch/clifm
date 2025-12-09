@@ -314,8 +314,7 @@ dup_file(char **cmd)
 	const int rsync_ok = is_cmd_in_path("rsync");
 	int exit_status = FUNC_SUCCESS;
 
-	size_t i;
-	for (i = 1; cmd[i]; i++) {
+	for (size_t i = 1; cmd[i]; i++) {
 		if (!cmd[i] || !*cmd[i])
 			continue;
 
@@ -399,8 +398,7 @@ find_template(const char *name)
 	if (!file_templates)
 		return 0;
 
-	filesn_t i;
-	for (i = 0; file_templates[i]; i++) {
+	for (size_t i = 0; file_templates[i]; i++) {
 		if (*name == *file_templates[i]
 		&& strcmp(name, file_templates[i]) == 0)
 			return 1;
@@ -534,7 +532,6 @@ END:
 static void
 list_created_files(char **nfiles, const filesn_t nfiles_n)
 {
-	size_t i;
 	int file_in_cwd = 0;
 	filesn_t n = workspaces[cur_ws].path
 		? count_dir(workspaces[cur_ws].path, NO_CPOP) - 2 : 0;
@@ -545,7 +542,7 @@ list_created_files(char **nfiles, const filesn_t nfiles_n)
 	if (conf.autols == 1 && file_in_cwd == 1)
 		reload_dirlist();
 
-	for (i = 0; nfiles[i]; i++) {
+	for (size_t i = 0; nfiles[i]; i++) {
 		char *f = abbreviate_file_name(nfiles[i]);
 		char *p = f ? f : nfiles[i];
 		puts((*p == '.' && p[1] == '/' && p[2]) ? p + 2 : p);
@@ -671,7 +668,6 @@ create_files(char **args, const int is_md)
 	}
 
 	int exit_status = FUNC_SUCCESS;
-	size_t i;
 
 	/* If no argument provided, ask the user for a filename, create it and exit. */
 	if (!args[0])
@@ -686,7 +682,7 @@ create_files(char **args, const int is_md)
 	char **new_files = xnmalloc(argsn + 1, sizeof(char *));
 	filesn_t new_files_n = 0;
 
-	for (i = 0; args[i]; i++) {
+	for (size_t i = 0; args[i]; i++) {
 		if (validate_filename(&args[i], is_md) == 0) {
 			xerror(_("%s: '%s': Unsafe filename\n"),
 				is_md ? "md" : "new", args[i]);
@@ -739,8 +735,7 @@ create_dirs(char **args)
 
 	/* Append an ending slash to all names, so that create_files() will create
 	 * them all as directories. */
-	size_t i;
-	for (i = 0; args[i]; i++) {
+	for (size_t i = 0; args[i]; i++) {
 		const size_t len = strlen(args[i]);
 		if (len > 0 && args[i][len - 1] == '/')
 			continue;
@@ -1197,9 +1192,9 @@ symlink_file(char **args)
 		char *p = strrchr(target, '/');
 		snprintf(tmp, sizeof(tmp), "%s.link", (p && p[1]) ? p + 1 : target);
 
-		int suffix = 1;
-		while (lstat(tmp, &a) == 0 && suffix < INT_MAX) {
-			snprintf(tmp, sizeof(tmp), "%s.link-%d",
+		size_t suffix = 1;
+		while (lstat(tmp, &a) == 0 && suffix < MAX_FILE_CREATION_TRIES) {
+			snprintf(tmp, sizeof(tmp), "%s.link-%zu",
 				(p && p[1]) ? p + 1 : target, suffix);
 			suffix++;
 		}
@@ -1558,12 +1553,11 @@ check_overwrite(char **args, const int force, size_t *skipped)
 
 	char msg[PATH_MAX + 28];
 	char buf[PATH_MAX + 1];
-	size_t i;
 	const size_t dest_len = strlen(dest);
 	const int ends_with_slash =
 		(dest_len > 1 && dest[dest_len - 1] == '/');
 
-	for (i = 1; i < files_num; i++) {
+	for (size_t i = 1; i < files_num; i++) {
 		char *p = unescape_str(args[i], 0);
 		if (!p)
 			continue;
@@ -1602,8 +1596,7 @@ remove_dirslash_from_source(char **args)
 	if (args_n <= 1)
 		return;
 
-	size_t i;
-	for (i = 1; i < args_n; i++) {
+	for (size_t i = 1; i < args_n; i++) {
 		if (!args[i])
 			break;
 		if (!*args[i])
@@ -1666,8 +1659,7 @@ cp_mv_file(char **args, const int copy_and_rename, const int force)
 
 	ret = launch_execv(tcmd, FOREGROUND, E_NOFLAG);
 
-	size_t i;
-	for (i = 0; tcmd[i]; i++)
+	for (size_t i = 0; tcmd[i]; i++)
 		free(tcmd[i]);
 	free(tcmd);
 
@@ -1750,8 +1742,7 @@ rm_confirm(const struct rm_info *info, const size_t start, const int have_dirs)
 	printf(_("File(s) to be removed%s:\n"),
 		have_dirs > 0 ? _(" (recursively)") : "");
 
-	size_t i;
-	for (i = start; info[i].name; i++)
+	for (size_t i = start; info[i].name; i++)
 		print_file_name(info[i].name, info[i].dir);
 
 	return rl_get_y_or_n(_("Continue?"), conf.default_answer.remove);
@@ -1762,10 +1753,9 @@ check_rm_files(const struct rm_info *info, const size_t start,
 	const char *errname)
 {
 	struct stat a;
-	size_t i;
 	int ret = FUNC_SUCCESS;
 
-	for (i = start; info[i].name; i++) {
+	for (size_t i = start; info[i].name; i++) {
 		if (lstat(info[i].name, &a) == -1)
 			continue;
 
@@ -1929,7 +1919,6 @@ export_files(char **filenames, const int open)
 		return (char *)NULL;
 	}
 
-	size_t i;
 	FILE *fp = fdopen(fd, "w");
 	if (!fp) {
 		xerror("exp: '%s': %s\n", tmp_file, strerror(errno));
@@ -1943,7 +1932,7 @@ export_files(char **filenames, const int open)
 	/* If no argument, export files in CWD. */
 	if (!filenames[1]) {
 		char buf[PATH_MAX + 1];
-		for (i = 0; file_info[i].name; i++) {
+		for (size_t i = 0; file_info[i].name; i++) {
 			char *name = file_info[i].name;
 			if (virtual_dir == 1) {
 				*buf = '\0';
@@ -1959,7 +1948,7 @@ export_files(char **filenames, const int open)
 			fprintf(fp, "%s\n", name);
 		}
 	} else {
-		for (i = 1; filenames[i]; i++) {
+		for (size_t i = 1; filenames[i]; i++) {
 			if (SELFORPARENT(filenames[i]))
 				continue;
 
@@ -1993,11 +1982,10 @@ batch_link(char **args)
 		return FUNC_SUCCESS;
 	}
 
-	size_t i;
 	size_t symlinked = 0;
 	int exit_status = FUNC_SUCCESS;
 
-	for (i = 0; args[i]; i++) {
+	for (size_t i = 0; args[i]; i++) {
 		char *filename = unescape_str(args[i], 0);
 		if (!filename) {
 			exit_status = FUNC_FAILURE;
