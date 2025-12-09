@@ -32,8 +32,7 @@ free_bookmarks(void)
 	if (bm_n == 0)
 		return;
 
-	size_t i;
-	for (i = 0; i < bm_n; i++) {
+	for (size_t i = 0; i < bm_n; i++) {
 		free(bookmarks[i].shortcut);
 		free(bookmarks[i].name);
 		free(bookmarks[i].path);
@@ -138,9 +137,7 @@ get_longest_entries(size_t *ls, size_t *ln)
 	if (bm_n == 0 || !bookmarks)
 		return;
 
-	size_t i = bm_n;
-
-	for (; i-- > 0;) {
+	for (size_t i = bm_n; i-- > 0;) {
 		if (bookmarks[i].shortcut && *bookmarks[i].shortcut) {
 			const size_t slen = strlen(bookmarks[i].shortcut);
 			if (slen > *ls)
@@ -165,12 +162,11 @@ print_bookmarks(void)
 	struct stat attr;
 	const int eln_pad = DIGINUM(bm_n);
 	size_t ls = 0, ln = 0;
-	size_t i;
 
 	get_longest_entries(&ls, &ln);
 
 	/* Print bookmarks, taking into account shortcut, name, and path. */
-	for (i = 0; i < bm_n; i++) {
+	for (size_t i = 0; i < bm_n; i++) {
 		if (!bookmarks[i].path || !*bookmarks[i].path)
 			continue;
 
@@ -207,8 +203,7 @@ edit_bookmarks_func(char **arg)
 {
 	edit_bookmarks(arg[1], BM_SCREEN);
 
-	size_t i;
-	for (i = 0; arg[i]; i++)
+	for (size_t i = 0; arg[i]; i++)
 		free(arg[i]);
 	free(arg);
 
@@ -237,8 +232,7 @@ get_bm_path(char *arg)
 	char *name = p ? p : arg;
 
 	/* If string, check shortcuts and names */
-	size_t i;
-	for (i = 0; i < bm_n; i++) {
+	for (size_t i = 0; i < bm_n; i++) {
 		if ((bookmarks[i].shortcut && *name == *bookmarks[i].shortcut
 		&& strcmp(name, bookmarks[i].shortcut) == 0)
 		|| (bookmarks[i].name && *name == *bookmarks[i].name
@@ -258,9 +252,7 @@ get_bm_path(char *arg)
 static void
 free_bm_input(char ***p)
 {
-	size_t i;
-
-	for (i = 0; (*p)[i]; i++)
+	for (size_t i = 0; (*p)[i]; i++)
 		free((*p)[i]);
 	free(*p);
 	*p = (char **)NULL;
@@ -337,8 +329,7 @@ bm_open(char **cmd)
 	if (!p)
 		p = cmd[1];
 
-	size_t i;
-	for (i = 0; i < bm_n; i++) {
+	for (size_t i = 0; i < bm_n; i++) {
 		if (!(bookmarks[i].shortcut && *p == *bookmarks[i].shortcut
 		&& strcmp(p, bookmarks[i].shortcut) == 0)
 
@@ -376,8 +367,7 @@ check_bm_path(char *file)
 	char *p = normalize_path(file, strlen(file));
 	char *new_path = p ? p : file;
 
-	size_t i = bm_n;
-	for (; i-- > 0;) {
+	for (size_t i = bm_n; i-- > 0;) {
 		if (!bookmarks[i].path || strcmp(new_path, bookmarks[i].path) != 0)
 			continue;
 
@@ -429,8 +419,7 @@ check_bm_name(const char *name, const int add)
 	if (add == 1 && name_is_reserved_keyword(name) == 1)
 		return 0;
 
-	size_t i = bm_n;
-	for (; i-- > 0;) {
+	for (size_t i = bm_n; i-- > 0;) {
 		if (!bookmarks[i].name || *name != *bookmarks[i].name
 		|| strcmp(name, bookmarks[i].name) != 0)
 			continue;
@@ -453,8 +442,7 @@ check_bm_shortcut(const char *shortcut, const int add)
 	if (add == 1 && name_is_reserved_keyword(shortcut) == 1)
 		return 0;
 
-	size_t i = bm_n;
-	for (; i-- > 0;) {
+	for (size_t i = bm_n; i-- > 0;) {
 		if (!bookmarks[i].shortcut || *shortcut != *bookmarks[i].shortcut
 		|| strcmp(shortcut, bookmarks[i].shortcut) != 0)
 			continue;
@@ -579,9 +567,9 @@ static size_t
 mark_bookmarks_for_deletion(char **args, int *exit_status)
 {
 	*exit_status = FUNC_SUCCESS;
-	size_t i, counter = 0;
+	size_t counter = 0;
 
-	for (i = 0; args[i]; i++) {
+	for (size_t i = 0; args[i]; i++) {
 		char *p = unescape_str(args[i], 0);
 		char *name = p ? p : args[i];
 		int index = -1;
@@ -642,9 +630,8 @@ keep_bm_line(char *line)
 
 	struct bookmarks_t bm = extract_shortcut_and_name(line);
 	int keep = 1;
-	size_t i;
 
-	for (i = 0; i < bm_n; i++) {
+	for (size_t i = 0; i < bm_n; i++) {
 		if (!bookmarks[i].path || *bookmarks[i].path) /* Not marked for deletion */
 			continue;
 

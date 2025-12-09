@@ -723,8 +723,7 @@ compress_files(char **args)
 static int
 check_not_compressed(char **args)
 {
-	size_t i;
-	for (i = 1; args[i]; i++) {
+	for (size_t i = 1; args[i]; i++) {
 		char *deq = (char *)NULL;
 		if (strchr(args[i], '\\')) {
 			deq = unescape_str(args[i], 0);
@@ -743,9 +742,9 @@ check_not_compressed(char **args)
 static size_t
 check_zstandard(char **args)
 {
-	size_t zst = 0, i;
+	size_t zst = 0;
 
-	for (i = 1; args[i]; i++) {
+	for (size_t i = 1; args[i]; i++) {
 		char *mime = xmagic(args[i], MIME_TYPE);
 		if (!mime || !*mime)
 			continue;
@@ -830,8 +829,7 @@ list_others(char **args)
 {
 	int exit_status = FUNC_SUCCESS;
 
-	size_t i;
-	for (i = 1; args[i]; i++) {
+	for (size_t i = 1; args[i]; i++) {
 		printf(_("%s%sFile%s: %s\n"), (i > 1) ? "\n" : "", BOLD, df_c, args[i]);
 
 		char *cmd[] = {"atool", "-l", args[i], NULL};
@@ -847,8 +845,7 @@ extract_to_dir_others(char **args)
 {
 	int exit_status = FUNC_SUCCESS;
 
-	size_t i;
-	for (i = 1; args[i]; i++) {
+	for (size_t i = 1; args[i]; i++) {
 		/* Ask for extraction path */
 		printf(_("%sFile%s: %s\n"), BOLD, df_c, args[i]);
 
@@ -1100,8 +1097,7 @@ handle_zip(char **args)
 	int ret = FUNC_SUCCESS;
 	char dest_dir[PATH_MAX + 2];
 
-	size_t i;
-	for (i = 1; args[i]; i++) {
+	for (size_t i = 1; args[i]; i++) {
 		if (zip_app == ZIP_APP_NONE || is_probably_zip(args[i]) != 1) {
 			xerror(_("archiver: '%s': Not an archive/compressed file\n"), args[i]);
 			ret = FUNC_FAILURE;
