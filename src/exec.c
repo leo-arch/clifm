@@ -87,10 +87,9 @@ check_paths_timestamps(void)
 		return FUNC_SUCCESS;
 
 	struct stat a;
-	int i = (int)path_n;
 	int status = FUNC_SUCCESS;
 
-	while (--i >= 0) {
+	for (size_t i = path_n; i-- > 0;) {
 		if (paths[i].path && *paths[i].path && stat(paths[i].path, &a) != -1
 		&& a.st_mtime != paths[i].mtime) {
 			paths[i].mtime = a.st_mtime;
@@ -113,16 +112,14 @@ reload_binaries(void)
 		return;
 
 	if (bin_commands) {
-		size_t j = path_progsn;
-		for (; j-- > 0;)
+		for (size_t j = path_progsn; j-- > 0;)
 			free(bin_commands[j]);
 		free(bin_commands);
 		bin_commands = (char **)NULL;
 	}
 
 	if (paths) {
-		size_t j = path_n;
-		for (; j-- > 0;)
+		for (size_t j = path_n; j-- > 0;)
 			free(paths[j].path);
 		free(paths);
 	}
@@ -149,8 +146,7 @@ export_var_function(char **args)
 	}
 
 	int status = FUNC_SUCCESS;
-	size_t i;
-	for (i = 0; args[i]; i++) {
+	for (size_t i = 0; args[i]; i++) {
 		/* ARG might have been escaped by parse_input_str(), in the command
 		 * and parameter substitution block. Let's deescape it. */
 		char *ds = unescape_str(args[i], 0);
@@ -282,8 +278,7 @@ quit_func(char **args, const int exit_status)
 		return;
 	}
 
-	size_t i = args_n + 1;
-	for (; i-- > 0;)
+	for (size_t i = args_n + 1; i-- > 0;)
 		free(args[i]);
 	free(args);
 
@@ -630,8 +625,7 @@ clear_msgs(void)
 		return FUNC_SUCCESS;
 	}
 
-	size_t i;
-	for (i = 0; i < msgs_n; i++)
+	for (size_t i = 0; i < msgs_n; i++)
 		free(messages[i].text);
 
 	if (conf.autols == 1)
@@ -646,8 +640,7 @@ clear_msgs(void)
 static int
 print_msgs(void)
 {
-	size_t i;
-	for (i = 0; i < msgs_n; i++) {
+	for (size_t i = 0; i < msgs_n; i++) {
 		if (i > 0 && strcmp(messages[i].text, messages[i - 1].text) == 0)
 			continue;
 		printf("%s", messages[i].text);
@@ -731,9 +724,8 @@ lightmode_function(const char *arg)
 static size_t
 get_longest_alias_name(void)
 {
-	size_t i = aliases_n;
 	size_t l = 0;
-	for (; i-- > 0;) {
+	for (size_t i = aliases_n; i-- > 0;) {
 		const size_t len = strlen(aliases[i].name);
 		if (len > l)
 			l = len;
@@ -750,10 +742,9 @@ list_aliases(void)
 		return FUNC_SUCCESS;
 	}
 
-	size_t i;
 	const size_t longest_name_len = get_longest_alias_name();
 
-	for (i = 0; i < aliases_n; i++) {
+	for (size_t i = 0; i < aliases_n; i++) {
 		printf("%-*s %s%s%s %s\n", (int)longest_name_len,
 			aliases[i].name, mi_c, SET_MSG_PTR, df_c, aliases[i].cmd);
 	}
@@ -772,8 +763,7 @@ print_alias(const char *name)
 		return FUNC_SUCCESS;
 	}
 
-	size_t i = aliases_n;
-	for (; i-- > 0;) {
+	for (size_t i = aliases_n; i-- > 0;) {
 		if (aliases[i].name && *name == *aliases[i].name
 		&& strcmp(name, aliases[i].name) == 0) {
 			printf("alias %s='%s'\n", aliases[i].name,
@@ -869,9 +859,9 @@ toggle_exec_func(char **args)
 		{ puts(_(TE_USAGE)); return FUNC_SUCCESS; }
 
 	int exit_status = FUNC_SUCCESS;
-	size_t i, n = 0;
+	size_t n = 0;
 
-	for (i = 1; args[i]; i++) {
+	for (size_t i = 1; args[i]; i++) {
 		struct stat attr;
 		if (strchr(args[i], '\\')) {
 			char *tmp = unescape_str(args[i], 0);
@@ -1090,8 +1080,7 @@ sort_func(char **args)
 static int
 check_pinned_file(char **args)
 {
-	size_t i = args_n + 1;
-	for (; i-- > 0;) {
+	for (size_t i = args_n + 1; i-- > 0;) {
 		if (*args[i] == ',' && !args[i][1]) {
 			xerror(_("%s: No pinned file\n"), PROGRAM_NAME);
 			return FUNC_FAILURE;
@@ -1107,8 +1096,7 @@ check_actions(char **args)
 	if (actions_n == 0)
 		return (-1);
 
-	size_t i = actions_n;
-	for (; i-- > 0;) {
+	for (size_t i = actions_n; i-- > 0;) {
 		if (*args[0] == *usr_actions[i].name
 		&& strcmp(args[0], usr_actions[i].name) == 0) {
 			setenv("CLIFM_PLUGIN_NAME", usr_actions[i].name, 1);
@@ -1431,20 +1419,19 @@ Inaccessible files:          %zu\n\
 }
 
 static int
-trash_func(char **args, int *_cont)
+trash_func(char **args, int *t_cont)
 {
 #ifndef _NO_TRASH
 	if (args[1] && IS_HELP(args[1])) {
 		puts(_(TRASH_USAGE));
-		*_cont = 0;
+		*t_cont = 0;
 		return FUNC_SUCCESS;
 	}
 
 	int exit_status = trash_function(args);
 
 	if (is_sel && sel_n > 0) { /* If 'tr sel', deselect everything */
-		size_t i = sel_n;
-		for (; i-- > 0;)
+		for (size_t i = sel_n; i-- > 0;)
 			free(sel_elements[i].name);
 		sel_n = 0;
 		if (save_sel() != 0)
@@ -1455,18 +1442,18 @@ trash_func(char **args, int *_cont)
 #else
 	UNUSED(args);
 	xerror(_("%s: trash: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
-	*_cont = 0;
+	*t_cont = 0;
 	return FUNC_FAILURE;
 #endif /* !_NO_TRASH */
 }
 
 static int
-untrash_func(char **args, int *_cont)
+untrash_func(char **args, int *u_cont)
 {
 #ifndef _NO_TRASH
 	if (args[1] && IS_HELP(args[1])) {
 		puts(_(UNTRASH_USAGE));
-		*_cont = 0;
+		*u_cont = 0;
 		return FUNC_SUCCESS;
 	}
 
@@ -1480,7 +1467,7 @@ untrash_func(char **args, int *_cont)
 #else
 	UNUSED(args);
 	xerror("%s: trash: %s\n", PROGRAM_NAME, _(NOT_AVAILABLE));
-	*_cont = 0;
+	*u_cont = 0;
 	return FUNC_FAILURE;
 #endif /* !_NO_TRASH */
 }
@@ -1703,8 +1690,7 @@ unset_function(char **var)
 	}
 
 	int status = FUNC_SUCCESS;
-	size_t i;
-	for (i = 0; var[i]; i++) {
+	for (size_t i = 0; var[i]; i++) {
 		if (unsetenv(var[i]) == -1) {
 			status = errno;
 			xerror("unset: '%s': %s\n", var[i], strerror(errno));
@@ -1823,9 +1809,8 @@ is_write_cmd(const char *cmd)
 		wcmds_n = (sizeof(wcmds) / sizeof(wcmds[0])) - 1;
 
 	const size_t clen = strlen(cmd);
-	size_t i = wcmds_n;
 
-	for (; i-- > 0;) {
+	for (size_t i = wcmds_n; i-- > 0;) {
 		if (clen == wcmds[i].len && *cmd == *wcmds[i].name
 		&& strcmp(cmd + 1, wcmds[i].name + 1) == 0) {
 			xerror(_("%s: %s: Command not allowed in read-only mode\n"),
