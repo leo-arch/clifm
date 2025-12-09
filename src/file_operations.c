@@ -110,7 +110,7 @@ open_file(char *file)
 		}
 	} else {
 #ifndef _NO_LIRA
-		char *cmd[] = {"mm", "open", file, NULL};
+		char *cmd[] = {"mime", "open", file, NULL};
 		ret = mime_open(cmd);
 #else
 		/* Fallback to (xdg-)open */

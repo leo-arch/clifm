@@ -2077,17 +2077,17 @@ exec_cmd(char **args)
 	/*         ############# (UN)TRASH ##################     */
 	else if (*args[0] == 't' && (!args[0][1]
 	|| strcmp(args[0], "trash") == 0)) {
-		int _cont = 1;
-		exit_code = trash_func(args, &_cont);
-		if (_cont == 0)
+		int t_cont = 1;
+		exit_code = trash_func(args, &t_cont);
+		if (t_cont == 0)
 			return exit_code;
 	}
 
 	else if (*args[0] == 'u' && (!args[0][1] || strcmp(args[0], "undel") == 0
 	|| strcmp(args[0], "untrash") == 0)) {
-		int _cont = 1; /* Tells whether to continue or return right here */
-		exit_code = untrash_func(args, &_cont);
-		if (_cont == 0)
+		int u_cont = 1; /* Tells whether to continue or return right here */
+		exit_code = untrash_func(args, &u_cont);
+		if (u_cont == 0)
 			return exit_code;
 	}
 

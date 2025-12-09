@@ -59,7 +59,7 @@ static char *g_mime_type = (char *)NULL;
 static char *
 check_user_mimetypes(const char *file)
 {
-	char *ext = strrchr(file, '.');
+	const char *ext = strrchr(file, '.');
 	if (!ext || ext == file || !*(++ext))
 		return (char *)NULL;
 
@@ -1333,8 +1333,7 @@ join_and_run(char **args, char *name)
 
 	const int ret = run_cmd_plus_args(ss, name);
 
-	size_t i;
-	for (i = 0; ss[i]; i++)
+	for (size_t i = 0; ss[i]; i++)
 		free(ss[i]);
 	free(ss);
 
@@ -1405,8 +1404,7 @@ mime_open_with(char *filename, char **args)
 	g_mime_type = (char *)NULL;
 	free(mime);
 
-	size_t i;
-	for (i = 0; apps[i]; i++)
+	for (size_t i = 0; apps[i]; i++)
 		free(apps[i]);
 	free(apps);
 	free(name);
@@ -1665,8 +1663,10 @@ mime_open(char **args)
 		return mime_edit(args);
 
 	char *file_path = (char *)NULL;
-	const int info = (*args[1] == 'i' && strcmp(args[1], "info") == 0 && args[2]);
-	const int open_arg = (*args[1] == 'o' && strcmp(args[1], "open") == 0 && args[2]);
+	const int info =
+		(*args[1] == 'i' && strcmp(args[1], "info") == 0 && args[2]);
+	const int open_arg =
+		(*args[1] == 'o' && strcmp(args[1], "open") == 0 && args[2]);
 	const int file_index = (info == 1 || open_arg == 1) ? 2 : 1;
 
 	if (info == 1) {
