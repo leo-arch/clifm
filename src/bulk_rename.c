@@ -109,7 +109,6 @@ static int
 write_files_to_tmp(char ***args, const char *tmpfile, const int fd,
 	struct stat *attr, size_t *written)
 {
-	size_t i;
 	FILE *fp = fdopen(fd, "w");
 	if (!fp)
 		return err_open_tmp_file(tmpfile, fd);
@@ -117,7 +116,7 @@ write_files_to_tmp(char ***args, const char *tmpfile, const int fd,
 	fprintf(fp, BULK_RENAME_TMP_FILE_HEADER);
 
 	/* Copy all files to be renamed into the bulk file */
-	for (i = 1; (*args)[i]; i++) {
+	for (size_t i = 1; (*args)[i]; i++) {
 		/* Dequote filename, if necessary */
 		if (strchr((*args)[i], '\\')) {
 			char *deq_file = unescape_str((*args)[i], 0);
@@ -173,10 +172,9 @@ static size_t
 print_and_count_modified_names(char **args, char **new_names)
 {
 	size_t modified = 0;
-	size_t i;
 
 	/* Print what would be done */
-	for (i = 0; new_names[i]; i++) {
+	for (size_t i = 0; new_names[i]; i++) {
 		if (args[i] && strcmp(args[i], new_names[i]) != 0) {
 			char *a = abbreviate_file_name(args[i]);
 			char *b = abbreviate_file_name(new_names[i]);
@@ -242,10 +240,9 @@ static int
 rename_bulk_files(char **old_names, char **new_names, int *is_cwd,
 	size_t *renamed, const size_t modified)
 {
-	size_t i = 1;
 	int exit_status = FUNC_SUCCESS;
 
-	for (i = 0; new_names[i]; i++) {
+	for (size_t i = 0; new_names[i]; i++) {
 		if (!old_names[i] || strcmp(old_names[i], new_names[i]) == 0)
 			continue;
 

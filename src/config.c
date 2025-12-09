@@ -967,6 +967,10 @@ workspace1:\\e1\n\
 workspace2:\\e2\n\
 workspace3:\\e3\n\
 workspace4:\\e4\n\
+workspace5:\\e5\n\
+workspace6:\\e6\n\
+workspace7:\\e7\n\
+workspace8:\\e8\n\
 \n\
 # Help\n\
 # F1-F3\n\
@@ -1651,7 +1655,7 @@ import_data_file(const char *src, const char *dst, const int exec)
 	return import_from_data_dir(src, dest_file, exec);
 }
 
-/* Create the main configuration file and save it into FILE. */
+/* Create the main configuration file and save its path into FILE. */
 int
 create_main_config_file(char *file)
 {
@@ -3044,8 +3048,7 @@ set_sort_name(char *line)
 	if (!name || !*name)
 		return;
 
-	size_t i;
-	for (i = 0; i <= SORT_TYPES; i++) {
+	for (size_t i = 0; i <= SORT_TYPES; i++) {
 		if (*name == *sort_methods[i].name
 		&& strcmp(name, sort_methods[i].name) == 0) {
 			conf.sort = sort_methods[i].num;

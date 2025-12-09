@@ -287,8 +287,7 @@ check_third_party_cmds(void)
 static int
 check_user_groups(const gid_t gid)
 {
-	int i;
-	for (i = 0; i < user.ngroups; i++) {
+	for (int i = 0; i < user.ngroups; i++) {
 		if (user.groups[i] == gid)
 			return 1;
 	}
@@ -425,8 +424,7 @@ is_action_name(const char *s)
 	if (actions_n == 0)
 		return 0;
 
-	size_t n = actions_n;
-	for (; n-- > 0;) {
+	for (size_t n = actions_n; n-- > 0;) {
 		if (*s == *usr_actions[n].name && strcmp(s, usr_actions[n].name) == 0)
 			return 1;
 	}
@@ -458,10 +456,9 @@ is_internal_cmd(char *cmd, const int flag, const int check_hist,
 	}
 
 	const size_t clen = strlen(cmd);
-	size_t i = internal_cmds_n;
 	int found = 0;
 
-	for (; i-- > 0;) {
+	for (size_t i = internal_cmds_n; i-- > 0;) {
 		if (((flag & ALL_CMDS) || (internal_cmds[i].flag & flag))
 		&& clen == internal_cmds[i].len && *cmd == *internal_cmds[i].name
 		&& strcmp(cmd + 1, internal_cmds[i].name + 1) == 0) {
@@ -501,8 +498,7 @@ is_bin_cmd(char *str)
 		index++;
 	}
 
-	size_t i;
-	for (i = 0; bin_commands[i]; i++) {
+	for (size_t i = 0; bin_commands[i]; i++) {
 		if (*q == *bin_commands[i] && q[1] == bin_commands[i][1]
 		&& strcmp(q, bin_commands[i]) == 0) {
 			if (space_index != -1)
@@ -555,9 +551,7 @@ check_for_alias(char **args)
 	|| *args[0] == '\\')
 		return (char **)NULL;
 
-	size_t i = aliases_n;
-
-	for (; i-- > 0;) {
+	for (size_t i = aliases_n; i-- > 0;) {
 		if (!aliases[i].name || !aliases[i].cmd || !*aliases[i].name
 		|| !*aliases[i].cmd)
 			continue;
