@@ -659,7 +659,7 @@ mime_edit(char **args)
 	const time_t prev = a.st_mtime;
 
 	if (!args[2]) {
-		char *cmd[] = {"mime", mime_file, NULL};
+		char *cmd[] = {"mime", "open", mime_file, NULL};
 		open_in_foreground = 1;
 		if (mime_open(cmd) != 0) {
 			fputs(_("Try 'mm edit APPLICATION'\n"), stderr);
@@ -1665,8 +1665,9 @@ mime_open(char **args)
 		return mime_edit(args);
 
 	char *file_path = (char *)NULL;
-	const int info = (*args[1] == 'i' && strcmp(args[1], "info") == 0);
-	const int file_index = info == 1 ? 2 : 1;
+	const int info = (*args[1] == 'i' && strcmp(args[1], "info") == 0 && args[2]);
+	const int open_arg = (*args[1] == 'o' && strcmp(args[1], "open") == 0 && args[2]);
+	const int file_index = (info == 1 || open_arg == 1) ? 2 : 1;
 
 	if (info == 1) {
 		const int ret = check_mime_info_file(args[2], &file_path);
