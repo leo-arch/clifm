@@ -460,8 +460,7 @@ static int
 print_history_list(const int timestamp)
 {
 	int n = DIGINUM(current_hist_n);
-	size_t i;
-	for (i = 0; i < current_hist_n; i++) {
+	for (size_t i = 0; i < current_hist_n; i++) {
 		if (timestamp == 1 && history[i].date != -1) {
 			char tdate[MAX_TIME_STR];
 			gen_time_str(tdate, sizeof(tdate), history[i].date);
@@ -485,8 +484,7 @@ print_last_items(const char *str, const int timestamp)
 		num = (int)current_hist_n;
 
 	int n = DIGINUM(current_hist_n);
-	size_t i;
-	for (i = current_hist_n - (size_t)num; i < current_hist_n; i++) {
+	for (size_t i = current_hist_n - (size_t)num; i < current_hist_n; i++) {
 		if (timestamp == 1 && history[i].date != -1) {
 			char tdate[MAX_TIME_STR];
 			gen_time_str(tdate, sizeof(tdate), history[i].date);
@@ -570,8 +568,7 @@ get_history(void)
 	if (current_hist_n == 0) { /* Coming from main() */
 		history = xcalloc(1, sizeof(struct history_t));
 	} else { /* Only true when comming from 'history clear' */
-		size_t i;
-		for (i = 0; history[i].cmd; i++)
+		for (size_t i = 0; history[i].cmd; i++)
 			free(history[i].cmd);
 		history = xnrealloc(history, 1, sizeof(struct history_t));
 		current_hist_n = 0;
@@ -629,8 +626,7 @@ add_to_cmdhist(char *cmd)
 
 	/* Remove trailing spaces from CMD */
 	size_t cmd_len = strlen(cmd);
-	int i = (int)cmd_len;
-	while (--i >= 0 && cmd[i] == ' ') {
+	for (size_t i = cmd_len; i-- > 0 && cmd[i] == ' ';) {
 		cmd[i] = '\0';
 		cmd_len--;
 	}

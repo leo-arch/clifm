@@ -70,8 +70,7 @@ void
 get_ext_mountpoints(void)
 {
 	if (ext_mnt) {
-		int i;
-		for (i = 0; ext_mnt[i].mnt_point; i++)
+		for (size_t i = 0; ext_mnt[i].mnt_point; i++)
 			free(ext_mnt[i].mnt_point);
 		free(ext_mnt);
 		ext_mnt = (struct ext_mnt_t *)NULL;
@@ -113,8 +112,7 @@ get_ext_mountpoints(void)
 void
 init_workspaces_opts(void)
 {
-	size_t i;
-	for (i = 0; i < MAX_WS; i++) {
+	for (size_t i = 0; i < MAX_WS; i++) {
 		workspace_opts[i].color_scheme = cur_cscheme;
 		workspace_opts[i].files_counter = conf.files_counter;
 
@@ -143,8 +141,7 @@ init_shades(void)
 	date_shades.type = SHADE_TYPE_UNSET;
 	size_shades.type = SHADE_TYPE_UNSET;
 
-	size_t i = NUM_SHADES;
-	for (; i-- > 0;) {
+	for (size_t i = NUM_SHADES; i-- > 0;) {
 		date_shades.shades[i] = (struct rgb_t){0};
 		size_shades.shades[i] = (struct rgb_t){0};
 	}
@@ -379,8 +376,7 @@ set_prop_fields(const char *line)
 	prop_fields = (struct props_t){0};
 	prop_fields.len = 2; /* Two spaces between filename and props string */
 
-	size_t i;
-	for (i = 0; i < PROP_FIELDS_SIZE && line[i]; i++) {
+	for (size_t i = 0; i < PROP_FIELDS_SIZE && line[i]; i++) {
 		switch (line[i]) {
 		case 'B': prop_fields.blocks = 1; break;
 		case 'f': prop_fields.counter = 1; break;
@@ -493,8 +489,7 @@ void
 init_workspaces(void)
 {
 	workspaces = xnmalloc(MAX_WS, sizeof(struct ws_t));
-	size_t i = MAX_WS;
-	for (; i-- > 0;) {
+	for (size_t i = MAX_WS; i-- > 0;) {
 		workspaces[i].path = (char *)NULL;
 		workspaces[i].name = (char *)NULL;
 	}
@@ -596,8 +591,7 @@ is_secure_env(void)
 	if (!argv_bk)
 		return 0;
 
-	size_t i;
-	for (i = 0; argv_bk[i]; i++) {
+	for (size_t i = 0; argv_bk[i]; i++) {
 		if (*argv_bk[i] == '-'
 #ifndef _BE_POSIX
 		&& (strncmp(argv_bk[i], "--secure-", 9) == 0))
@@ -677,7 +671,7 @@ check_etc_shells(const char *file, const char *shells_file, int *tmp_errno)
 		if (*line != '/')
 			continue;
 
-		size_t len = strnlen(line, sizeof(line));
+		const size_t len = strnlen(line, sizeof(line));
 		if (len > 0 && line[len - 1] == '\n')
 			line[len - 1] = '\0';
 
@@ -970,7 +964,6 @@ sync_jumpdb_with_dirhist(void)
 		return;
 
 	int i = dirhist_total_index;
-	size_t j = 0;
 
 	while (--i >= 0) {
 		if (!old_pwd[i] || !*old_pwd[i])
@@ -979,7 +972,7 @@ sync_jumpdb_with_dirhist(void)
 		const size_t old_pwd_len = strlen(old_pwd[i]);
 
 		int found = 0;
-		for (j = 0; j < jump_n; j++) {
+		for (size_t j = 0; j < jump_n; j++) {
 			if (!jump_db[j].path || !*jump_db[j].path
 			|| old_pwd[i][1] != jump_db[j].path[1]
 			|| old_pwd_len != jump_db[j].len
@@ -1299,8 +1292,7 @@ load_actions(void)
 
 	/* Free the actions struct array */
 	if (actions_n > 0) {
-		size_t i = actions_n;
-		for (; i-- > 0;) {
+		for (size_t i = actions_n; i-- > 0;) {
 			free(usr_actions[i].name);
 			free(usr_actions[i].value);
 		}
@@ -1749,9 +1741,8 @@ set_sel_devino(void)
 	free(sel_devino);
 	sel_devino = xnmalloc(sel_n + 1, sizeof(struct devino_t));
 
-	size_t i;
 	struct stat a;
-	for (i = 0; i < sel_n; i++) {
+	for (size_t i = 0; i < sel_n; i++) {
 		const char *name = sel_elements[i].name;
 		if (fstatat(XAT_FDCWD, name, &a, AT_SYMLINK_NOFOLLOW) == -1)
 			continue;
@@ -1776,8 +1767,7 @@ get_sel_files(void)
 	const size_t selnbk = sel_n;
 	/* First, clear the sel array, in case it was already used. */
 	if (sel_n > 0) {
-		int i = (int)sel_n;
-		while (--i >= 0)
+		for (size_t i = sel_n; i-- > 0;)
 			free(sel_elements[i].name);
 	}
 	sel_n = 0;
@@ -1854,8 +1844,8 @@ get_cdpath(void)
 		return 0;
 
 	/* Get each path in CDPATH */
-	size_t i, n = 0, len = 0;
-	for (i = 0; t[i]; i++) {
+	size_t n = 0, len = 0;
+	for (size_t i = 0; t[i]; i++) {
 		/* Store path in CDPATH in a tmp buffer */
 		char buf[PATH_MAX + 1];
 		while (t[i] && t[i] != ':' && len < sizeof(buf) - 1) {
@@ -1890,8 +1880,7 @@ get_paths_timestamps(const size_t n)
 		return;
 
 	struct stat a;
-	size_t i = n;
-	for (; i-- > 0;) {
+	for (size_t i = n; i-- > 0;) {
 		if (paths[i].path && *paths[i].path && stat(paths[i].path, &a) != -1)
 			paths[i].mtime = a.st_mtime;
 		else
@@ -1961,8 +1950,7 @@ get_path_env(const int check_timestamps)
 			}
 
 			/* Skip duplicate entries */
-			size_t i;
-			for (i = 0; i < n; i++) {
+			for (size_t i = 0; i < n; i++) {
 				if (strcmp(paths[i].path, p) == 0)
 					goto CONT;
 			}
@@ -2164,8 +2152,7 @@ skip_this_path(const char *name)
 	if (!rpath)
 		return 1;
 
-	size_t i;
-	for (i = 0; paths[i].path; i++) {
+	for (size_t i = 0; paths[i].path; i++) {
 		if (*paths[i].path && strcmp(paths[i].path, rpath) == 0) {
 			free(rpath);
 			return 1;
@@ -2292,9 +2279,7 @@ get_path_programs(void)
 static void
 free_aliases(void)
 {
-	size_t i = aliases_n;
-
-	for (; i-- > 0;) {
+	for (size_t i = aliases_n; i-- > 0;) {
 		free(aliases[i].name);
 		free(aliases[i].cmd);
 	}
@@ -2331,9 +2316,7 @@ write_alias(const char *s, char *p)
 static int
 alias_exists(const char *s)
 {
-	int i = (int)aliases_n;
-
-	while (--i >= 0) {
+	for (size_t i = aliases_n; i-- > 0;) {
 		if (!aliases[i].name)
 			continue;
 		if (*s == *aliases[i].name && strcmp(s, aliases[i].name) == 0)
@@ -2450,8 +2433,7 @@ load_dirhist(void)
 static void
 free_prompt_cmds(void)
 {
-	size_t i;
-	for (i = 0; i < prompt_cmds_n; i++)
+	for (size_t i = 0; i < prompt_cmds_n; i++)
 		free(prompt_cmds[i]);
 	free(prompt_cmds);
 	prompt_cmds = (char **)NULL;

@@ -206,9 +206,8 @@ print_tips(const int all)
 	const size_t tipsn = (sizeof(TIPS) / sizeof(TIPS[0])) - 1;
 
 	if (all == 1) {
-		size_t i;
 		const int l = DIGINUM(tipsn);
-		for (i = 0; i < tipsn; i++) {
+		for (size_t i = 0; i < tipsn; i++) {
 			printf("%s%sTIP %*zu%s: %s\n",
 				conf.colorize == 1 ? df_c : "", conf.colorize == 1 ? BOLD : "",
 				l, i, conf.colorize == 1 ? df_c : "", TIPS[i]);
