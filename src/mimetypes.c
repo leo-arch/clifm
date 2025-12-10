@@ -18,9 +18,8 @@
 static void
 check_hash_conflicts(void)
 {
-	size_t i, j;
-	for (i = 0; user_mimetypes[i].mimetype; i++)
-		for (j = i + 1; user_mimetypes[j].mimetype; j++)
+	for (size_t i = 0; user_mimetypes[i].mimetype; i++)
+		for (size_t j = i + 1; user_mimetypes[j].mimetype; j++)
 			if (user_mimetypes[i].ext_hash == user_mimetypes[j].ext_hash)
 				*user_mimetypes[i].ext = '\0';
 }

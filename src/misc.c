@@ -920,8 +920,7 @@ free_autocmds(const int keep_temp)
 		}
 	} */
 
-	size_t i = autocmds_n;
-	for (; i-- > 0;) {
+	for (size_t i = autocmds_n; i-- > 0;) {
 		free(autocmds[i].pattern);
 		free(autocmds[i].cmd);
 		free(autocmds[i].filter.str);
@@ -937,8 +936,7 @@ free_autocmds(const int keep_temp)
 void
 free_tags(void)
 {
-	size_t i = tags_n;
-	for (; i-- > 0;)
+	for (size_t i = tags_n; i-- > 0;)
 		free(tags[i]);
 	free(tags);
 	tags = (char **)NULL;
@@ -976,8 +974,7 @@ expand_prompt_name(char *name)
 	if (!p || !*p || strchr(p, '\\')) /* Exclude prompt codes. */
 		return FUNC_FAILURE;
 
-	int i = (int)prompts_n;
-	while (--i >= 0) {
+	for (size_t i = prompts_n; i-- > 0;) {
 		if (*p != *prompts[i].name || strcmp(p, prompts[i].name) != 0)
 			continue;
 
@@ -1018,8 +1015,7 @@ expand_prompt_name(char *name)
 void
 free_prompts(void)
 {
-	size_t i = prompts_n;
-	for (; i-- > 0;) {
+	for (size_t i = prompts_n; i-- > 0;) {
 		free(prompts[i].name);
 		free(prompts[i].regular);
 		free(prompts[i].warning);
@@ -1167,8 +1163,8 @@ free_file_templates(void)
 	if (!file_templates)
 		return;
 
-	size_t i; /* Max file_templates is filesn_t (ssize_t), <= size_t. */
-	for (i = 0; file_templates[i]; i++)
+	/* Max file_templates is filesn_t (ssize_t), <= size_t. */
+	for (size_t i = 0; file_templates[i]; i++)
 		free(file_templates[i]);
 
 	free(file_templates);
@@ -1268,15 +1264,13 @@ free_stuff(void)
 
 	remove_virtual_dir();
 
-	i = cschemes_n;
-	for (; i-- > 0;)
+	for (i = cschemes_n; i-- > 0;)
 		free(color_schemes[i]);
 	free(color_schemes);
 	free(conf.usr_cscheme);
 
 	if (jump_db) {
-		i = jump_n;
-		for (; i-- > 0;)
+		for (i = jump_n; i-- > 0;)
 			free(jump_db[i].path);
 		free(jump_db);
 	}
@@ -1308,37 +1302,32 @@ free_stuff(void)
 	}
 
 	if (sel_n > 0) {
-		i = sel_n;
-		for (; i-- > 0;)
+		for (i = sel_n; i-- > 0;)
 			free(sel_elements[i].name);
 		free(sel_elements);
 	}
 	free(sel_devino);
 
 	if (bin_commands) {
-		i = path_progsn;
-		for (; i-- > 0;)
+		for (i = path_progsn; i-- > 0;)
 			free(bin_commands[i]);
 		free(bin_commands);
 	}
 
 	if (paths) {
-		i = path_n;
-		for (; i-- > 0;)
+		for (i = path_n; i-- > 0;)
 			free(paths[i].path);
 		free(paths);
 	}
 
 	if (cdpaths) {
-		i = cdpath_n;
-		for (; i-- > 0;)
+		for (i = cdpath_n; i-- > 0;)
 			free(cdpaths[i]);
 		free(cdpaths);
 	}
 
 	if (history) {
-		i = current_hist_n;
-		for (; i-- > 0;)
+		for (i = current_hist_n; i-- > 0;)
 			free(history[i].cmd);
 		free(history);
 	}
@@ -1350,49 +1339,42 @@ free_stuff(void)
 		free(old_pwd);
 	}
 
-	i = aliases_n;
-	for (; i-- > 0;) {
+	for (i = aliases_n; i-- > 0;) {
 		free(aliases[i].name);
 		free(aliases[i].cmd);
 	}
 	free(aliases);
 
-	i = kbinds_n;
-	for (; i-- > 0;) {
+	for (i = kbinds_n; i-- > 0;) {
 		free(kbinds[i].function);
 		free(kbinds[i].key);
 	}
 	free(kbinds);
 
-	i = usrvar_n;
-	for (; i-- > 0;) {
+	for (i = usrvar_n; i-- > 0;) {
 		free(usr_var[i].name);
 		free(usr_var[i].value);
 	}
 	free(usr_var);
 
-	i = actions_n;
-	for (; i-- > 0;) {
+	for (i = actions_n; i-- > 0;) {
 		free(usr_actions[i].name);
 		free(usr_actions[i].value);
 	}
 	free(usr_actions);
 
-	i = prompt_cmds_n;
-	for (; i-- > 0;)
+	for (i = prompt_cmds_n; i-- > 0;)
 		free(prompt_cmds[i]);
 	free(prompt_cmds);
 
 	if (msgs_n > 0) {
-		i = msgs_n;
-		for (; i-- > 0;)
+		for (i = msgs_n; i-- > 0;)
 			free(messages[i].text);
 		free(messages);
 	}
 
 	if (ext_colors_n) {
-		i = ext_colors_n;
-		for (; i-- > 0;) {
+		for (i = ext_colors_n; i-- > 0;) {
 			free(ext_colors[i].name);
 			free(ext_colors[i].value);
 		}
@@ -1400,8 +1382,7 @@ free_stuff(void)
 	}
 
 	if (workspaces && workspaces[0].path) {
-		i = MAX_WS;
-		for (; i-- > 0;) {
+		for (i = MAX_WS; i-- > 0;) {
 			free(workspaces[i].path);
 			free(workspaces[i].name);
 		}

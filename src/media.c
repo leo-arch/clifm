@@ -161,9 +161,8 @@ get_dev_label(void)
 		return (char *)NULL;
 
 	char *label = (char *)NULL;
-	int i;
 
-	for (i = 0; i < ln; i++) {
+	for (int i = 0; i < ln; i++) {
 		if (label) {
 			free(labels[i]);
 			continue;
@@ -202,7 +201,6 @@ get_dev_label(void)
 static void
 list_unmounted_devs(void)
 {
-	int i;
 	const size_t mp_n_bk = mp_n;
 	char **unm_devs = get_block_devices();
 	if (!unm_devs)
@@ -210,11 +208,10 @@ list_unmounted_devs(void)
 
 	printf(_("\n%sUnmounted devices%s\n\n"), BOLD, df_c);
 
-	for (i = 0; unm_devs[i]; i++) {
+	for (int i = 0; unm_devs[i]; i++) {
 		int skip = 0;
-		size_t j;
 		/* Skip already mounted devices */
-		for (j = 0; j < mp_n_bk; j++) {
+		for (size_t j = 0; j < mp_n_bk; j++) {
 			if (strcmp(media[j].dev, unm_devs[i]) == 0)
 				skip = 1;
 		}
@@ -371,8 +368,7 @@ mount_dev(const int n)
 static void
 free_media(void)
 {
-	size_t i = mp_n;
-	for (; i-- > 0;) {
+	for (size_t i = mp_n; i-- > 0;) {
 		free(media[i].mnt);
 		free(media[i].dev);
 		free(media[i].label);
@@ -411,9 +407,9 @@ list_mountpoints_bsd(struct statvfs *fslist)
 list_mountpoints_bsd(struct statfs *fslist)
 # endif /* __NetBSD__ */
 {
-	size_t i, j = 0;
+	size_t j = 0;
 
-	for (i = 0; i < mp_n; i++) {
+	for (size_t i = 0; i < mp_n; i++) {
 		/* Do not list all mountpoints, but only those corresponding
 		 * to a block device (/dev) */
 		if (strncmp(fslist[i].f_mntfromname, "/dev/", 5) != 0)

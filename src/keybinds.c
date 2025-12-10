@@ -303,8 +303,7 @@ check_clifm_kb(const char *kb, const char *func_name)
 {
 	int conflicts = 0;
 
-	size_t i;
-	for (i = 0; i < kbinds_n; i++) {
+	for (size_t i = 0; i < kbinds_n; i++) {
 		if (!kbinds[i].key || strcmp(kb, kbinds[i].key) != 0)
 			continue;
 
@@ -334,7 +333,6 @@ check_clifm_kb(const char *kb, const char *func_name)
 static int
 check_rl_kbinds(const char *kb)
 {
-	size_t i, j;
 	char *name = (char *)NULL;
 	char **names = (char **)rl_funmap_names();
 	int conflicts = 0;
@@ -342,13 +340,13 @@ check_rl_kbinds(const char *kb)
 	if (!names)
 		return FUNC_SUCCESS;
 
-	for (i = 0; (name = names[i]); i++) {
+	for (size_t i = 0; (name = names[i]); i++) {
 		rl_command_func_t *function = rl_named_function(name);
 		char **keys = rl_invoking_keyseqs(function);
 		if (!keys)
 			continue;
 
-		for (j = 0; keys[j]; j++) {
+		for (size_t j = 0; keys[j]; j++) {
 			if (kb == NULL) {
 				conflicts += check_clifm_kb(keys[j], name);
 			} else {
@@ -378,9 +376,8 @@ check_kbinds_conflict(void)
 	}
 
 	int ret = FUNC_SUCCESS;
-	size_t i, j;
-	for (i = 0; i < kbinds_n; i++) {
-		for (j = i + 1; j < kbinds_n; j++) {
+	for (size_t i = 0; i < kbinds_n; i++) {
+		for (size_t j = i + 1; j < kbinds_n; j++) {
 			if (strcmp(kbinds[i].key, kbinds[j].key) == 0) {
 				fprintf(stderr, _("kb: '%s' conflicts with '%s'\n"),
 					kbinds[i].function, kbinds[j].function);
@@ -402,8 +399,7 @@ find_key(const char *function)
 	if (kbinds_n == 0)
 		return (char *)NULL;
 
-	size_t n = kbinds_n;
-	for (; n-- > 0;) {
+	for (size_t n = kbinds_n; n-- > 0;) {
 		if (*function != *kbinds[n].function)
 			continue;
 		if (strcmp(function, kbinds[n].function) == 0)
@@ -851,9 +847,7 @@ load_keybinds(void)
 
 	/* Free the keybinds struct array */
 	if (kbinds_n > 0) {
-		size_t i = kbinds_n;
-
-		for (; i-- > 0;) {
+		for (size_t i = kbinds_n; i-- > 0;) {
 			free(kbinds[i].function);
 			free(kbinds[i].key);
 		}
@@ -971,8 +965,7 @@ keybind_exec_cmd(char *str)
 		if (kbind_busy == 1)
 			kbind_busy = 0;
 
-		size_t i = args_n + 1;
-		for (; i-- > 0;)
+		for (size_t i = args_n + 1; i-- > 0;)
 			free(cmd[i]);
 		free(cmd);
 
@@ -1119,7 +1112,7 @@ rl_prepend_sudo(int count, int key)
 
 #ifndef _NO_SUGGESTIONS
 	if (suggestion.offset == 0 && suggestion_buf) {
-		int r = rl_point;
+		const int r = rl_point;
 		rl_point = rl_end;
 		clear_suggestion(CS_FREEBUF);
 		rl_point = r;
@@ -1128,7 +1121,7 @@ rl_prepend_sudo(int count, int key)
 
 #ifndef _NO_HIGHLIGHT
 	if (conf.highlight == 1) {
-		int r = rl_point;
+		const int r = rl_point;
 		rl_point = 0;
 		recolorize_line();
 		rl_point = r;
@@ -1240,7 +1233,7 @@ my_insert_text(char *text, char *s, const char _s)
 			 * In other words, if we correctly print colors, we lose the
 			 * suggestion.
 			 * As a workaround, let's reprint the suggestion */
-			size_t slen = strlen(suggestion_buf);
+			const size_t slen = strlen(suggestion_buf);
 			*s = _s ? _s : ' ';
 			print_suggestion(suggestion_buf, slen, suggestion.color);
 			*s = '\0';
@@ -2097,8 +2090,7 @@ rl_quit(int count, int key)
 static void
 get_cur_prof(int *cur, int *total)
 {
-	int i;
-	for (i = 0; profile_names[i]; i++) {
+	for (int i = 0; profile_names[i]; i++) {
 		(*total)++;
 
 		if (!alt_profile) {
