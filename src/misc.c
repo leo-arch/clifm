@@ -1601,7 +1601,7 @@ gen_symlink(char *file, const char *cwd)
 	char dest[PATH_MAX + 32];
 	snprintf(dest, sizeof(dest), "%s/%s", stdin_tmp_dir, name);
 
-	int suffix = 0;
+	size_t suffix = 0;
 
 	while (1) {
 		errno = 0;
@@ -1616,12 +1616,12 @@ gen_symlink(char *file, const char *cwd)
 		}
 
 		suffix++;
-		if (suffix == INT_MAX) {
+		if (suffix > MAX_FILE_CREATION_TRIES) {
 			free(name);
 			return 0;
 		}
 
-		snprintf(dest, sizeof(dest), "%s/%s-%d", stdin_tmp_dir,
+		snprintf(dest, sizeof(dest), "%s/%s-%zu", stdin_tmp_dir,
 			name, suffix);
 	}
 
