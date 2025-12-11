@@ -279,7 +279,7 @@ construct_dup_destination(char *source, const char *dest_dir)
 		suffix++;
 		if (suffix > MAX_FILE_CREATION_TRIES) {
 			xerror(_("dup: Cannot create unique filename for '%s': max "
-			"attempts (%d) reached\n"), source, MAX_FILE_CREATION_TRIES);
+				"attempts (%d) reached\n"), source, MAX_FILE_CREATION_TRIES);
 			return NULL;
 		}
 		snprintf(bk, sizeof(bk), "%s-%zu", tmp_dest, suffix);
