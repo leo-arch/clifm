@@ -1364,7 +1364,7 @@ create_tmp_files(void)
 	snprintf(tmp_dir, tmp_len, "%s/%s-%s", tmp_rootdir,
 		PROGRAM_NAME, user.name ? user.name : "unknown");
 
-	int suffix = 0;
+	size_t suffix = 0;
 	struct stat a;
 
 	/* Loop until we get a valid tmp dir or MAX_FILE_CREATION_TRIES is reached. */
@@ -1386,7 +1386,7 @@ create_tmp_files(void)
 		}
 
 		/* Append suffix and try again. */
-		snprintf(tmp_dir, tmp_len, "%s/%s-%s.%d", tmp_rootdir,
+		snprintf(tmp_dir, tmp_len, "%s/%s-%s.%zu", tmp_rootdir,
 			PROGRAM_NAME, user.name ? user.name : "unknown", suffix);
 	}
 

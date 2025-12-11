@@ -265,7 +265,7 @@ construct_dup_destination(char *source, const char *dest_dir)
 	char *source_name = (tmp && tmp[1]) ? tmp + 1 : source;
 
 	char tmp_dest[PATH_MAX + 1];
-	if (*dest_dir == '/' && !dest_dir[1]) // Root dir
+	if (*dest_dir == '/' && !dest_dir[1]) /* Root dir */
 		snprintf(tmp_dest, sizeof(tmp_dest), "/%s.copy", source_name);
 	else
 		snprintf(tmp_dest, sizeof(tmp_dest), "%s/%s.copy",
@@ -274,15 +274,15 @@ construct_dup_destination(char *source, const char *dest_dir)
 	char bk[PATH_MAX + 11];
 	xstrsncpy(bk, tmp_dest, sizeof(bk));
 	struct stat attr;
-	size_t suffix = 1;
-	while (lstat(bk, &attr) == 0 && suffix <= MAX_FILE_CREATION_TRIES) {
-		snprintf(bk, sizeof(bk), "%s-%zu", tmp_dest, suffix);
+	size_t suffix = 0;
+	while (lstat(bk, &attr) == 0) {
 		suffix++;
-	}
-
-	if (suffix > MAX_FILE_CREATION_TRIES) {
-		xerror(_("dup: Cannot create unique filename for '%s'\n"), source);
-		return NULL;
+		if (suffix > MAX_FILE_CREATION_TRIES) {
+			xerror(_("dup: Cannot create unique filename for '%s': max "
+			"attempts (%d) reached\n"), source, MAX_FILE_CREATION_TRIES);
+			return NULL;
+		}
+		snprintf(bk, sizeof(bk), "%s-%zu", tmp_dest, suffix);
 	}
 
 	char *dest = savestring(bk, strnlen(bk, sizeof(bk)));
@@ -1192,11 +1192,16 @@ symlink_file(char **args)
 		char *p = strrchr(target, '/');
 		snprintf(tmp, sizeof(tmp), "%s.link", (p && p[1]) ? p + 1 : target);
 
-		size_t suffix = 1;
-		while (lstat(tmp, &a) == 0 && suffix < MAX_FILE_CREATION_TRIES) {
+		size_t suffix = 0;
+		while (lstat(tmp, &a) == 0) {
+			suffix++;
+			if (suffix > MAX_FILE_CREATION_TRIES) {
+				xerror(_("link: Cannot create symbolic link to '%s': max "
+					"attempts (%d) reached\n"), target, MAX_FILE_CREATION_TRIES);
+				return FUNC_FAILURE;
+			}
 			snprintf(tmp, sizeof(tmp), "%s.link-%zu",
 				(p && p[1]) ? p + 1 : target, suffix);
-			suffix++;
 		}
 
 		link_name = tmp;

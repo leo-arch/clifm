@@ -253,18 +253,19 @@ gen_dest_file(const char *file, const char *suffix, char **file_suffix)
 	/* If the destination file exists (there's already a trashed file with
 	 * this name), append an integer until it is made unique. */
 	struct stat a;
-	size_t inc = 1;
-	while (lstat(dest, &a) == 0 && inc <= MAX_FILE_CREATION_TRIES) {
+	size_t inc = 0;
+	while (lstat(dest, &a) == 0) {
+		inc++;
+		if (inc > MAX_FILE_CREATION_TRIES) {
+			xerror(_("trash: Cannot create trashinfo file for '%s': max "
+				"attempts (%d) reached\n"), filename, MAX_FILE_CREATION_TRIES);
+			free(dest);
+			free(*file_suffix);
+			return NULL;
+		}
+
 		snprintf(*file_suffix, slen, "%s.%s-%zu", filename, suffix, inc);
 		snprintf(dest, dlen, "%s/%s", trash_files_dir, *file_suffix);
-		inc++;
-	}
-
-	if (inc > MAX_FILE_CREATION_TRIES) {
-		xerror(_("trash: Cannot create trashinfo file for '%s'\n"), filename);
-		free(dest);
-		free(*file_suffix);
-		return NULL;
 	}
 
 	return dest;

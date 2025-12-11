@@ -1617,6 +1617,9 @@ gen_symlink(char *file, const char *cwd)
 
 		suffix++;
 		if (suffix > MAX_FILE_CREATION_TRIES) {
+			err('w', PRINT_PROMPT, _("%s: Cannot create symbolic "
+				"link to '%s': max attempts (%d) reached\n"),
+				PROGRAM_NAME, stdin_tmp_dir, name, MAX_FILE_CREATION_TRIES);
 			free(name);
 			return 0;
 		}
