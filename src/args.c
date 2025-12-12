@@ -685,7 +685,7 @@ preview_this_file(const char *filename, const char *max_size)
 	if (s == 0 || errno == ERANGE)
 		return 0;
 
-	if (s > 0 && s <= LONG_MAX) {
+	if (s > 0) {
 		struct stat a;
 		/* n >> 10 == n / 1024, i.e. n (which is in bytes) in KiB. */
 		if (stat(filename, &a) != -1 && (a.st_size >> 10) > (off_t)s)
