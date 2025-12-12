@@ -703,17 +703,15 @@ open_reg_exit(char *filename, const int url, const int preview)
 	if (!filename)
 		exit(EXIT_FAILURE);
 
-	char *max_size =
-		(preview == 1 && url == 0 && xargs.secure_env != 1
-		&& xargs.secure_env_full != 1)
-			? getenv("CLIFM_PREVIEW_MAX_SIZE") : NULL;
+	const int sec_env = (xargs.secure_env == 1 || xargs.secure_env_full == 1);
+	char *max_size = (preview == 1 && url == 0 && sec_env == 0)
+		? getenv("CLIFM_PREVIEW_MAX_SIZE") : NULL;
 
 	if (max_size && *max_size && is_number(max_size)
 	&& preview_this_file(filename, max_size) == 0)
 		exit(EXIT_SUCCESS);
 
-	char *homedir = (xargs.secure_env == 1 || xargs.secure_env_full == 1)
-		? get_home_sec_env() : getenv("HOME");
+	char *homedir = sec_env == 1 ? get_home_sec_env() : getenv("HOME");
 	if (!homedir) {
 		xerror(_("%s: Cannot retrieve the home directory\n"), PROGRAM_NAME);
 		exit(EXIT_FAILURE);
@@ -721,8 +719,9 @@ open_reg_exit(char *filename, const int url, const int preview)
 
 	tmp_dir = savestring(P_tmpdir, P_tmpdir_len);
 
-	const char *env_preview_file = (preview == 1 && !alt_preview_file)
-		? getenv("CLIFM_ALT_PREVIEW_FILE") : NULL;
+	const char *env_preview_file =
+		(preview == 1 && !alt_preview_file && sec_env == 0)
+			? getenv("CLIFM_ALT_PREVIEW_FILE") : NULL;
 
 	if (env_preview_file && *env_preview_file) {
 		mime_file = savestring(env_preview_file, strlen(env_preview_file));
