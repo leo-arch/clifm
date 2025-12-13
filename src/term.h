@@ -60,7 +60,8 @@
 #define UNSET_KITTY_KEYS fputs("\x1b[<u", stdout)
 
 /* Time in millisenconds to wait for terminal responses. */
-#define DEF_READ_TIMEOUT 50
+#define DEF_READ_TIMEOUT_MS_LOCAL  100
+#define DEF_READ_TIMEOUT_MS_REMOTE 500
 
 __BEGIN_DECLS
 

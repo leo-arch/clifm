@@ -180,8 +180,20 @@ disable_raw_mode(const int fd)
 }
 
 static int
-read_timeout(struct pollfd *pfd, const int timeout)
+get_timeout(void)
 {
+	const char *ssh_connection = getenv("SSH_CONNECTION");
+	return (ssh_connection && *ssh_connection) ? DEF_READ_TIMEOUT_MS_REMOTE
+		: DEF_READ_TIMEOUT_MS_LOCAL;
+}
+
+static int
+read_timeout(struct pollfd *pfd)
+{
+	static int timeout = -1;
+	if (timeout == -1)
+		timeout = get_timeout();
+
 	pfd->fd = STDIN_FILENO;
 	pfd->events = POLLIN;
 
@@ -218,7 +230,7 @@ get_cursor_position(int *c, int *l)
 	/* 2. Read the response: "ESC [ rows ; cols R" */
 	int read_err = 0;
 	while (i < sizeof(buf) - 1) {
-		if (read_timeout(&pfd, DEF_READ_TIMEOUT) != 1
+		if (read_timeout(&pfd) != 1
 		|| read(STDIN_FILENO, buf + i, 1) != 1) { // flawfinder: ignore
 			read_err = 1;
 			break;
@@ -270,7 +282,7 @@ check_sixel_support(void)
 	/* 2. Read the response: "n;n;n;...c" */
 	int read_err = 0;
 	while (i < sizeof(buf) - 1) {
-		if (read_timeout(&pfd, DEF_READ_TIMEOUT) != 1
+		if (read_timeout(&pfd) != 1
 		|| read(STDIN_FILENO, buf + i, 1) != 1) { // flawfinder: ignore
 			read_err = 1;
 			break;
@@ -322,7 +334,7 @@ check_unicode_support(void)
 	/* 2. Read the response: "...;nR" */
 	int read_err = 0;
 	while (i < sizeof(buf) - 1) {
-		if (read_timeout(&pfd, DEF_READ_TIMEOUT) != 1
+		if (read_timeout(&pfd) != 1
 		|| read(STDIN_FILENO, buf + i, 1) != 1) { // flawfinder: ignore
 			read_err = 1;
 			break;
