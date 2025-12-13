@@ -352,7 +352,7 @@ set_div_line_color(void)
 }
 
 static inline void
-print_bow_drawing_line(void)
+print_box_drawing_line(void)
 {
 	fputs("\x1b(0m", stdout);
 
@@ -409,7 +409,7 @@ print_div_line(void)
 		set_div_line_color();
 
 	if (!*div_line)
-		print_bow_drawing_line();
+		print_box_drawing_line();
 	else if (*div_line == '0' && !div_line[1])
 		putchar('\n'); /* Empty line. */
 	else
@@ -931,8 +931,7 @@ get_longest_filename(const filesn_t n, const size_t eln_len)
 	longest.fc_len = 0;
 	if (longest_index >= 0 && file_info[longest_index].dir == 1
 	&& file_info[longest_index].filesn > 0
-	&& conf.max_name_len != UNSET && longest_index != -1
-	&& conf.files_counter == 1) {
+	&& conf.max_name_len != UNSET && conf.files_counter == 1) {
 		longest.fc_len = DIGINUM(file_info[longest_index].filesn) + 1;
 		const size_t t = eln_len + (size_t)conf.max_name_len
 			+ 1 + longest.fc_len;
