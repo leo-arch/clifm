@@ -39,7 +39,7 @@ count_trashed_files(void)
 {
 	size_t n = 0;
 	if (trash_ok == 1 && trash_files_dir != NULL) {
-		filesn_t ret = count_dir(trash_files_dir, NO_CPOP);
+		const filesn_t ret = count_dir(trash_files_dir, NO_CPOP);
 		n = ret <= 2 ? 0 : (size_t)ret - 2;
 	}
 
@@ -395,8 +395,7 @@ print_trashfiles(struct dirent ***ent, const int files_n)
 	cur_comp_type = TCMP_UNTRASH;
 
 	const uint8_t tpad = DIGINUM(files_n);
-	size_t i;
-	for (i = 0; i < (size_t)files_n; i++) {
+	for (size_t i = 0; i < (size_t)files_n; i++) {
 		printf("%s%*zu%s ", el_c, tpad, i + 1, df_c);
 		colors_list((*ent)[i]->d_name, NO_ELN, NO_PAD, PRINT_NEWLINE);
 	}
@@ -462,7 +461,6 @@ remove_from_trash_all(struct dirent ***tfiles, const int tfiles_n,
 	int *status)
 {
 	int n = 0;
-	size_t i;
 
 	if (tfiles_n > 0 && confirm_removal((size_t)tfiles_n) == 0) {
 		if (conf.autols == 1)
@@ -470,7 +468,7 @@ remove_from_trash_all(struct dirent ***tfiles, const int tfiles_n,
 		return (-1);
 	}
 
-	for (i = 0; i < (size_t)tfiles_n; i++) {
+	for (size_t i = 0; i < (size_t)tfiles_n; i++) {
 		int ret = remove_file_from_trash((*tfiles)[i]->d_name);
 		if (ret != FUNC_SUCCESS)
 			*status = FUNC_FAILURE;
@@ -765,11 +763,10 @@ untrash_file(char *file)
 static int
 untrash_all(struct dirent ***tfiles, const int tfiles_n, const int free_files)
 {
-	size_t i;
 	size_t untrashed = 0;
 	int status = FUNC_SUCCESS;
 
-	for (i = 0; i < (size_t)tfiles_n; i++) {
+	for (size_t i = 0; i < (size_t)tfiles_n; i++) {
 		if (untrash_file((*tfiles)[i]->d_name) != 0)
 			status = FUNC_FAILURE;
 		else
@@ -798,10 +795,9 @@ static int
 untrash_files(char **args)
 {
 	int status = FUNC_SUCCESS;
-	size_t i;
 	size_t untrashed = 0;
 
-	for (i = 0; args[i]; i++) {
+	for (size_t i = 0; args[i]; i++) {
 		char *d = (char *)NULL;
 		if (strchr(args[i], '\\'))
 			d = unescape_str(args[i], 0);
@@ -877,12 +873,12 @@ untrash_function(char **args)
 		}
 
 		if (strcmp(input[i], "*") == 0) {
-			int ret = untrash_all(&trash_files, files_n, 0);
+			const int ret = untrash_all(&trash_files, files_n, 0);
 			free_files_and_input(&input, &trash_files, files_n);
 			return ret;
 		}
 
-		int num = atoi(input[i]);
+		const int num = atoi(input[i]);
 		if (!is_number(input[i]) || num <= 0 || num > files_n) {
 			xerror(_("untrash: %s: Invalid ELN\n"), input[i]);
 			exit_status = FUNC_FAILURE;
@@ -899,7 +895,7 @@ untrash_function(char **args)
 
 	/* Untrash files */
 	for (i = 0; input[i]; i++) {
-		int num = atoi(input[i]);
+		const int num = atoi(input[i]);
 		if (untrash_file(trash_files[num - 1]->d_name) != FUNC_SUCCESS)
 			exit_status = FUNC_FAILURE;
 	}

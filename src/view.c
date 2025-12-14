@@ -86,11 +86,17 @@ remove_empty_thumbnails(void)
 			continue;
 
 		snprintf(buf, sizeof(buf), "%s/%s", thumbnails_dir, ent->d_name);
-		if (lstat(buf, &a) == -1 || !S_ISREG(a.st_mode))
+		if (lstat(buf, &a) == -1 || !S_ISREG(a.st_mode) || a.st_size > 0)
 			continue;
 
-		if (a.st_size == 0 && unlinkat(XAT_FDCWD, buf, 0) != -1)
+		printf(_("view: '%s': Removing empty thumbnail... "), ent->d_name);
+
+		if (unlinkat(XAT_FDCWD, buf, 0) == -1) {
+			printf("%s\n", strerror(errno));
+		} else {
+			puts("OK");
 			removed++;
+		}
 	}
 
 	closedir(dir);
@@ -324,8 +330,7 @@ purge_thumbnails_cache(void)
 	thumbs_in_db[thumbs_in_db_c] = (char *)NULL;
 	rem_files += remove_thumbs_not_in_db(thumbs_in_db, &size_sum, &errors);
 
-	size_t i;
-	for (i = 0; thumbs_in_db[i]; i++)
+	for (size_t i = 0; thumbs_in_db[i]; i++)
 		free(thumbs_in_db[i]);
 	free(thumbs_in_db);
 
