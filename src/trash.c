@@ -261,6 +261,7 @@ gen_dest_file(const char *file, const char *suffix, char **file_suffix)
 				"attempts (%d) reached\n"), filename, MAX_FILE_CREATION_TRIES);
 			free(dest);
 			free(*file_suffix);
+			*file_suffix = NULL;
 			return NULL;
 		}
 

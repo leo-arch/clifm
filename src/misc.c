@@ -69,7 +69,7 @@ gen_diff_str(const int diff)
 	if (diff == 3)
 		return "\x1b[3C";
 
-	static char diff_str[14];
+	static char diff_str[MAX_INT_STR + 4];
 	snprintf(diff_str, sizeof(diff_str), "\x1b[%dC", diff);
 
 	return diff_str;
