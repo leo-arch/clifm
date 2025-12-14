@@ -481,12 +481,12 @@ tag_file(char *name, char *tag)
 static int *
 get_tags(char **args)
 {
-	int n, i, c = 0;
+	int n, c = 0;
 
 	for (n = 0; args[n]; n++);
 	int *t = xnmalloc((size_t)n + 1, sizeof(int));
 
-	for (i = 0; i < n; i++) {
+	for (int i = 0; i < n; i++) {
 		if (*args[i] == ':' && *(args[i] + 1)) {
 			t[c] = i;
 			c++;
@@ -655,7 +655,7 @@ rename_tag(char **args)
 static int
 recursive_mv_tags(const char *src, const char *dst)
 {
-	int i, n, exit_status = FUNC_SUCCESS, ret;
+	int n, exit_status = FUNC_SUCCESS, ret;
 	char src_dir[PATH_MAX + 1];
 	char dst_dir[PATH_MAX + 1];
 	struct dirent **a = (struct dirent **)NULL;
@@ -670,7 +670,7 @@ recursive_mv_tags(const char *src, const char *dst)
 
 	snprintf(dst_dir, sizeof(dst_dir), "%s/%s", tags_dir, dst);
 
-	for (i = 0; i < n; i++) {
+	for (int i = 0; i < n; i++) {
 		if (SELFORPARENT(a[i]->d_name)) {
 			free(a[i]);
 			continue;
