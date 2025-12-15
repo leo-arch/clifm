@@ -1498,7 +1498,7 @@ set_prompts_file(void)
 
 	struct stat a;
 
-	size_t len = strlen(config_dir_gral) + 15;
+	const size_t len = strlen(config_dir_gral) + 15;
 	char *f = xnmalloc(len, sizeof(char));
 	snprintf(f, len, "%s/prompts.clifm", config_dir_gral);
 
@@ -2172,7 +2172,8 @@ get_path_programs(void)
 	if (xargs.list_and_quit == 1)
 		return;
 
-	int l = 0, total_cmd = 0;
+	int total_cmd = 0;
+	size_t l = 0;
 	size_t i = 0;
 	int *cmd_n = (int *)0;
 	struct dirent ***commands_bin = (struct dirent ***)NULL;
@@ -2181,8 +2182,7 @@ get_path_programs(void)
 		commands_bin = xnmalloc(path_n, sizeof(struct dirent));
 		cmd_n = xnmalloc(path_n, sizeof(int));
 
-		i = path_n;
-		for (; i-- > 0;) {
+		for (i = path_n; i-- > 0;) {
 			cmd_n[i] = 0;
 			commands_bin[i] = (struct dirent **)NULL;
 
@@ -2208,8 +2208,7 @@ get_path_programs(void)
 	bin_commands = xnmalloc((size_t)total_cmd
 		+ internal_cmds_n + aliases_n + actions_n + 2, sizeof(char *));
 
-	i = internal_cmds_n;
-	for (; i-- > 0;) {
+	for (i = internal_cmds_n; i-- > 0;) {
 		bin_commands[l] = savestring(internal_cmds[i].name,
 			internal_cmds[i].len);
 		l++;
@@ -2217,8 +2216,7 @@ get_path_programs(void)
 
 	/* Now add aliases, if any */
 	if (aliases_n > 0) {
-		i = aliases_n;
-		for (; i-- > 0;) {
+		for (i = aliases_n; i-- > 0;) {
 			bin_commands[l] = savestring(aliases[i].name,
 				strlen(aliases[i].name));
 			l++;
@@ -2227,8 +2225,7 @@ get_path_programs(void)
 
 	/* And user defined actions too, if any */
 	if (actions_n > 0) {
-		i = actions_n;
-		for (; i-- > 0;) {
+		for (i = actions_n; i-- > 0;) {
 			bin_commands[l] = savestring(usr_actions[i].name,
 				strlen(usr_actions[i].name));
 			l++;
@@ -2237,13 +2234,11 @@ get_path_programs(void)
 
 	if (total_cmd > 0) {
 		/* And finally, add commands in PATH */
-		i = path_n;
-		for (; i-- > 0;) {
+		for (i = path_n; i-- > 0;) {
 			if (cmd_n[i] <= 0 || !commands_bin[i])
 				continue;
 
-			int j = cmd_n[i];
-			while (--j >= 0) {
+			for (int j = cmd_n[i]; j-- > 0;) {
 #ifdef _DIRENT_HAVE_D_TYPE
 				if (SELFORPARENT(commands_bin[i][j]->d_name)
 				|| (commands_bin[i][j]->d_type != DT_REG
@@ -2272,7 +2267,7 @@ get_path_programs(void)
 
 	free(commands_bin);
 	free(cmd_n);
-	path_progsn = (size_t)l;
+	path_progsn = l;
 	bin_commands[l] = (char *)NULL;
 }
 

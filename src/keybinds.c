@@ -2628,17 +2628,17 @@ print_highlight_string(char *s, const int insert_point)
 #endif /* !_NO_HIGHLIGHT */
 
 static int
-print_cmdhist_line(int n, int beg_line)
+print_cmdhist_line(const size_t n, const int beg_line)
 {
 #ifndef _NO_SUGGESTIONS
 	if (wrong_cmd == 1)
 		recover_from_wrong_cmd();
 #endif /* !_NO_SUGGESTIONS */
 
-	curhistindex = (size_t)n;
+	curhistindex = n;
 
 	HIDE_CURSOR;
-	int rl_point_bk = rl_point;
+	const int rl_point_bk = rl_point;
 
 #ifndef _NO_HIGHLIGHT
 	if (conf.highlight == 1)
@@ -2660,16 +2660,16 @@ print_cmdhist_line(int n, int beg_line)
 static inline int
 handle_cmdhist_beginning(int key)
 {
-	int p = curhistindex > INT_MAX ? INT_MAX : (int)curhistindex;
+	size_t p = curhistindex;
 	cmdhist_flag = 1;
 
 	if (key == 65) { /* Up arrow key */
-		if (--p < 0)
-			return FUNC_FAILURE;
+		if (p == 0) return FUNC_FAILURE;
+		p--;
 	} else { /* Down arrow key */
 		if (rl_end == 0)
 			return FUNC_SUCCESS;
-		if (++p >= (int)current_hist_n) {
+		if (++p >= current_hist_n) {
 			rl_replace_line("", 1);
 			curhistindex++;
 			return FUNC_SUCCESS;
@@ -2679,7 +2679,7 @@ handle_cmdhist_beginning(int key)
 	if (!history[p].cmd)
 		return FUNC_FAILURE;
 
-	curhistindex = (size_t)p;
+	curhistindex = p;
 
 	return print_cmdhist_line(p, 1);
 }
@@ -2688,23 +2688,26 @@ static inline int
 handle_cmdhist_middle(int key)
 {
 	int found = 0;
-	int p = curhistindex > INT_MAX ? INT_MAX : (int)curhistindex;
+	const size_t s_rl_point = rl_point < 0 ? 0 : (size_t)rl_point;
+	size_t p = curhistindex;
 
 	if (key == 65) { /* Up arrow key */
-		if (--p < 0) return FUNC_FAILURE;
+		if (p == 0) return FUNC_FAILURE;
+		p--;
 
-		while (p >= 0 && history[p].cmd) {
-			if (strncmp(rl_line_buffer, history[p].cmd, (size_t)rl_point) == 0
+		while (history[p].cmd) {
+			if (strncmp(rl_line_buffer, history[p].cmd, s_rl_point) == 0
 			&& strcmp(rl_line_buffer, history[p].cmd) != 0) {
 				found = 1; break;
 			}
+			if (p == 0) break;
 			p--;
 		}
 	} else { /* Down arrow key */
-		if (++p >= (int)current_hist_n)	return FUNC_FAILURE;
+		if (++p >= current_hist_n) return FUNC_FAILURE;
 
 		while (history[p].cmd) {
-			if (strncmp(rl_line_buffer, history[p].cmd, (size_t)rl_point) == 0
+			if (strncmp(rl_line_buffer, history[p].cmd, s_rl_point) == 0
 			&& strcmp(rl_line_buffer, history[p].cmd) != 0) {
 				found = 1; break;
 			}
@@ -2827,15 +2830,15 @@ rl_del_last_word(int count, int key)
 	char *b = rl_line_buffer;
 
 	if (b[rl_point - 1] == '/' || b[rl_point - 1] == ' ') {
-		--rl_point;
+		rl_point--;
 		b[rl_point] = '\0';
-		--rl_end;
+		rl_end--;
 	}
 
 	int n = 0;
 	char *p = xstrrpbrk(b, WORD_DELIMITERS);
 	if (p)
-		n = (int)(p - b) + (*(p + 1) ? 1 : 0);
+		n = (int)(p - b) + (p[1] ? 1 : 0);
 
 	rl_begin_undo_group();
 	rl_delete_text(n, rl_end);
@@ -3173,8 +3176,7 @@ disable_rl_conflicting_kbinds(void)
 		"\\e\\", "\\e\\e", "\\eb", "\\e.", "\\et", "\\ey", "\\e-",
 		"\\eu", "\\M-5", "\\M-6", "\\M-7", "\\M-8", "\\M-9", NULL};
 
-	size_t i;
-	for (i = 0; keys[i]; i++)
+	for (size_t i = 0; keys[i]; i++)
 		rl_bind_keyseq(keys[i], do_nothing);
 }
 
