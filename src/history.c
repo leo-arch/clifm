@@ -307,8 +307,7 @@ log_msg(char *msg_str, const int print_prompt, const int logme,
 
 	if (add_to_msgs_list == 1) {
 		msgs_n++;
-		messages = xnrealloc(messages, (size_t)(msgs_n + 1),
-			sizeof(struct pmsgs_t));
+		messages = xnrealloc(messages, msgs_n + 1, sizeof(struct pmsgs_t));
 		messages[msgs_n - 1].text = savestring(msg_str, msg_len);
 		messages[msgs_n - 1].read = 0;
 		messages[msgs_n].text = (char *)NULL;
@@ -459,16 +458,16 @@ clear_history_func(char **args)
 static int
 print_history_list(const int timestamp)
 {
-	int n = DIGINUM(current_hist_n);
+	int pad = DIGINUM(current_hist_n);
 	for (size_t i = 0; i < current_hist_n; i++) {
 		if (timestamp == 1 && history[i].date != -1) {
 			char tdate[MAX_TIME_STR];
 			gen_time_str(tdate, sizeof(tdate), history[i].date);
-			printf(" %s%-*zu%s %s%s%s %s\n", el_c, n, i + 1, df_c,
+			printf(" %s%-*zu%s %s%s%s %s\n", el_c, pad, i + 1, df_c,
 				conf.colorize == 1 ? "\x1b[0;2m" : "",
 				tdate, "\x1b[0m", history[i].cmd);
 		} else {
-			printf(" %s%-*zu%s %s\n", el_c, n, i + 1, df_c, history[i].cmd);
+			printf(" %s%-*zu%s %s\n", el_c, pad, i + 1, df_c, history[i].cmd);
 		}
 	}
 
@@ -478,19 +477,22 @@ print_history_list(const int timestamp)
 static int
 print_last_items(const char *str, const int timestamp)
 {
-	int num = atoi(str);
+	int x = atoi(str);
 
-	if (num < 0 || num > (int)current_hist_n)
-		num = (int)current_hist_n;
+	/* X won't be bigger than INT_MAX, so casting is safe. */
+	size_t num = x < 0 ? current_hist_n : (size_t)x;
 
-	int n = DIGINUM(current_hist_n);
-	for (size_t i = current_hist_n - (size_t)num; i < current_hist_n; i++) {
+	if (num > current_hist_n)
+		num = current_hist_n;
+
+	int pad = DIGINUM(current_hist_n);
+	for (size_t i = current_hist_n - num; i < current_hist_n; i++) {
 		if (timestamp == 1 && history[i].date != -1) {
 			char tdate[MAX_TIME_STR];
 			gen_time_str(tdate, sizeof(tdate), history[i].date);
 			printf(" %s# %s%s\n", "\x1b[0;2m", tdate, "\x1b[0m");
 		}
-		printf(" %s%-*zu%s %s\n", el_c, n, i + 1, df_c, history[i].cmd);
+		printf(" %s%-*zu%s %s\n", el_c, pad, i + 1, df_c, history[i].cmd);
 	}
 
 	return FUNC_SUCCESS;
