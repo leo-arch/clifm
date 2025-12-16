@@ -129,9 +129,7 @@ char
     ICON_ZIG[] = NERD_ZIG,
 
     ICON_ARCH[] = NERD_ARCHLINUX,
-    ICON_DEBIAN[] = NERD_DEBIAN,
 	ICON_NIX[] = NERD_NIX,
-    ICON_REDHAT[] = NERD_REDHAT,
 
     /* Dir names */
     ICON_DESKTOP[] = NERD_DESKTOP,
@@ -248,9 +246,7 @@ char
     ICON_ZIG[] = FA_FILE_O,
 
     ICON_ARCH[] = MFIZZ_ARCHLINUX,
-    ICON_DEBIAN[] = MFIZZ_DEBIAN,
     ICON_NIX[] = LINUX_NIXOS,
-    ICON_REDHAT[] = LINUX_REDHAT,
 
     /* Dir names */
     ICON_DESKTOP[] = FA_DESKTOP,
@@ -367,9 +363,7 @@ char
 	ICON_ZIG[] = EMOJI_FILE,
 
     ICON_ARCH[] = EMOJI_MAKE,
-    ICON_REDHAT[] = EMOJI_ARCHIVE,
     ICON_NIX[] = EMOJI_SCRIPT,
-    ICON_DEBIAN[] = EMOJI_ARCHIVE,
 
     /* Dir names */
     ICON_DESKTOP[] = EMOJI_DESKTOP,
@@ -493,7 +487,7 @@ struct icons_t const icon_ext[] = {
     {"dat", ICON_BINARY, WHITE},
     {"dart", ICON_DART, BLUE},
     {"db", ICON_DATABASE, WHITE},
-    {"deb", ICON_DEBIAN, RED},
+    {"deb", ICON_ARCHIVE, YELLOW},
     {"diff", ICON_DIFF, WHITE},
     {"djvu", ICON_BOOK, B_WHITE},
     {"dll", ICON_SHARE, BLUE},
@@ -527,7 +521,7 @@ struct icons_t const icon_ext[] = {
 
     {"gem", ICON_ARCHIVE, YELLOW},
     {"gif", ICON_IMG, GREEN},
-    {"gpg", ICON_LOCK, YELLOW},
+    {"gpg", ICON_KEY, YELLOW},
     {"go", ICON_GO, YELLOW},
     {"gz", ICON_ARCHIVE, YELLOW},
     {"gzip", ICON_ARCHIVE, YELLOW},
@@ -629,9 +623,6 @@ struct icons_t const icon_ext[] = {
     {"ppt", ICON_POWERPOINT, YELLOW},
     {"pptx", ICON_POWERPOINT, YELLOW},
     {"ps", ICON_POSTSCRIPT, RED},
-/*    {"psb", ICON_PHOTOSHOP, WHITE},
-    {"psv", ICON_PHOTOSHOP, WHITE},
-    {"psd", ICON_PHOTOSHOP, WHITE}, */
     {"psb", ICON_IMG, GREEN},
     {"psv", ICON_IMG, GREEN},
     {"psd", ICON_IMG, GREEN},
@@ -651,7 +642,7 @@ struct icons_t const icon_ext[] = {
     {"rc", ICON_CONF, WHITE},
     {"rlib", ICON_RUST, WHITE},
     {"rom", ICON_ROM, WHITE},
-    {"rpm", ICON_REDHAT, RED},
+    {"rpm", ICON_ARCHIVE, YELLOW},
     {"rs", ICON_RUST, WHITE},
     {"rss", ICON_RSS, BLUE},
     {"rtf", ICON_PDF, RED},
@@ -664,7 +655,7 @@ struct icons_t const icon_ext[] = {
     {"slim", ICON_CODE, WHITE},
     {"sln", ICON_VISUALSTUDIO, BLUE},
     {"so", ICON_BINARY, WHITE},
-    {"sql", ICON_MYSQL, B_WHITE},
+    {"sql", ICON_MYSQL, B_BLUE},
     {"sqlite", ICON_SQLITE, WHITE},
     {"srt", ICON_COMMENTS, WHITE},
     {"sub", ICON_COMMENTS, WHITE},

@@ -78,7 +78,6 @@
 #define LINEA_MUSIC_CD "\uecd3"
 
 #define LINUX_NIXOS "\ue9ee"
-#define LINUX_REDHAT "\ue9e2"
 
 #define MFIZZ_ARCHLINUX "\uedaa"
 #define MFIZZ_C "\uedb1"
@@ -86,7 +85,6 @@
 #define MFIZZ_CPLUSPLUS "\uedb8"
 #define MFIZZ_CSHARP "\uedb9"
 #define MFIZZ_CSS3_ALT "\uedbc"
-#define MFIZZ_DEBIAN "\uedc1"
 #define MFIZZ_DOCKER "\uedc2"
 #define MFIZZ_ELIXIR "\uedc4"
 #define MFIZZ_ELM "\uedc5"

@@ -44,9 +44,11 @@
 #define NERD_GIT           "󰊢"
 #define NERD_HOME          "󰋜"
 #define NERD_LICENSE       "󰈙"
+#define NERD_LOCK          ""
 #define NERD_MAKEFILE      ""
 #define NERD_MUSIC         "󰋋"
 #define NERD_MUSICFILE     "󰝚"
+#define NERD_OPTICALDISK   "󰗮"
 #define NERD_PICTURES      "󰄀"
 #define NERD_PICTUREFILE   "󱅬"
 #define NERD_PUBLIC        ""
@@ -91,7 +93,6 @@
 #define NERD_NIM           ""
 #define NERD_NIX           ""
 #define NERD_OCAML         ""
-#define NERD_OPTICALDISK   "󰗮"
 #define NERD_PATCH         "󰶯"
 #define NERD_PDF           ""
 #define NERD_PERL          ""
@@ -113,7 +114,6 @@
 #define NERD_TXT           ""
 #define NERD_VIM           ""
 #define NERD_ZIG           ""
-#define NERD_LOCK          ""
 
 #define NERD_EXCELDOC      "󰈜"
 #define NERD_PPTDOC        "󰈨"
@@ -132,7 +132,5 @@
 #define NERD_STEAM         ""
 
 #define NERD_ARCHLINUX     ""
-#define NERD_DEBIAN        ""
-#define NERD_REDHAT        "󱄛"
 
 #endif /* ICONS_NERDFONT */
