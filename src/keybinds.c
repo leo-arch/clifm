@@ -1912,7 +1912,7 @@ rl_sort_previous(int count, int key)
 
 	conf.sort--;
 	if (conf.sort < 0)
-		conf.sort = conf.light_mode == 1 ? SINO : SORT_TYPES;
+		conf.sort = SORT_TYPES;
 
 	if (conf.autols == 1) {
 		sort_switch = 1;
@@ -2594,15 +2594,13 @@ print_highlight_string(char *s, const int insert_point)
 	if (!s || !*s)
 		return;
 
-	size_t i, l = 0;
-
 	rl_delete_text(insert_point, rl_end);
 	rl_point = rl_end = insert_point;
 	fputs(tx_c, stdout);
 	cur_color = tx_c;
 
 	char q[PATH_MAX + 1];
-	for (i = 0; s[i]; i++) {
+	for (size_t i = 0, l = 0; s[i]; i++) {
 		rl_highlight(s, i, SET_COLOR);
 
 		if ((signed char)s[i] < 0) {
