@@ -399,11 +399,11 @@ find_key(const char *function)
 	if (kbinds_n == 0)
 		return (char *)NULL;
 
-	for (size_t n = kbinds_n; n-- > 0;) {
-		if (*function != *kbinds[n].function)
+	for (size_t i = kbinds_n; i-- > 0;) {
+		if (*function != *kbinds[i].function)
 			continue;
-		if (strcmp(function, kbinds[n].function) == 0)
-			return kbinds[n].key;
+		if (strcmp(function, kbinds[i].function) == 0)
+			return kbinds[i].key;
 	}
 
 	return (char *)NULL;
@@ -714,14 +714,13 @@ list_kbinds(void)
 	}
 
 	size_t flen = 0;
-	size_t i;
-	for (i = 0; i < kbinds_n; i++) {
+	for (size_t i = 0; i < kbinds_n; i++) {
 		const size_t l = kbinds[i].function ? strlen(kbinds[i].function) : 0;
 		if (l > flen)
 			flen = l;
 	}
 
-	for (i = 0; i < kbinds_n; i++) {
+	for (size_t i = 0; i < kbinds_n; i++) {
 		if (!kbinds[i].key || !kbinds[i].function)
 			continue;
 
@@ -737,7 +736,6 @@ list_kbinds(void)
 static int
 list_rl_kbinds(void)
 {
-	size_t i, j;
 	char *name = (char *)NULL;
 	char **names = (char **)rl_funmap_names();
 
@@ -745,13 +743,13 @@ list_rl_kbinds(void)
 		return FUNC_SUCCESS;
 
 	size_t flen = 0;
-	for (i = 0; (name = names[i]); i++) {
+	for (size_t i = 0; (name = names[i]); i++) {
 		rl_command_func_t *function = rl_named_function(name);
 		char **keys = rl_invoking_keyseqs(function);
 		if (!keys)
 			continue;
 
-		for (j = 0; keys[j]; j++)
+		for (size_t j = 0; keys[j]; j++)
 			free(keys[j]);
 		free(keys);
 
@@ -762,7 +760,7 @@ list_rl_kbinds(void)
 
 	char prev[KBUF_SIZE] = "";
 
-	for (i = 0; (name = names[i]); i++) {
+	for (size_t i = 0; (name = names[i]); i++) {
 		if ((*name == 's' && strcmp(name, "self-insert") == 0)
 		|| (*name == 'd' && strcmp(name, "do-lowercase-version") == 0))
 			continue;
@@ -774,7 +772,7 @@ list_rl_kbinds(void)
 
 		printf("%-*s ", (int)flen, name);
 
-		for (j = 0; keys[j]; j++) {
+		for (size_t j = 0; keys[j]; j++) {
 			const char *t = xtranslate_key(keys[j]);
 
 			/* Skip consecutive duplicates. */
@@ -1162,13 +1160,12 @@ my_insert_text(char *text, char *s, const char _s)
 		fputs(tx_c, stdout);
 		cur_color = tx_c;
 		char *t = text;
-		size_t i;
 
 		/* We only need to redisplay first suggested word if it contains
 		 * a highlighting char and it is not preceded by a space */
 		int redisplay = 0;
 		if (accept_first_word == 1) {
-			for (i = 0; t[i]; i++) {
+			for (size_t i = 0; t[i]; i++) {
 				if (t[i] >= '0' && t[i] <= '9') {
 					if (i == 0 || t[i - 1] != ' ') {
 						redisplay = 1;
@@ -1206,7 +1203,7 @@ my_insert_text(char *text, char *s, const char _s)
 
 		char q[PATH_MAX + 1];
 		int l = 0;
-		for (i = 0; t[i]; i++) {
+		for (size_t i = 0; t[i]; i++) {
 			rl_highlight(t, i, SET_COLOR);
 			if ((signed char)t[i] < 0) {
 				q[l] = t[i];
@@ -1342,8 +1339,8 @@ rl_accept_suggestion(int count, int key)
 	case FUZZY_FILENAME: /* fallthrough */
 	case FILE_SUG: {
 		char *tmp = (char *)NULL;
-		size_t i, isquote = 0, backslash = 0;
-		for (i = 0; suggestion_buf[i]; i++) {
+		size_t isquote = 0, backslash = 0;
+		for (size_t i = 0; suggestion_buf[i]; i++) {
 			if (is_quote_char(suggestion_buf[i]))
 				isquote = 1;
 

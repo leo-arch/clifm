@@ -128,11 +128,11 @@ count_chars(const char *restrict s, const char c)
 size_t
 count_words(size_t *start_word, size_t *full_word)
 {
-	size_t words = 0, i = 0, first_non_space = 0;
+	size_t words = 0, first_non_space = 0;
 	char quote = 0;
 	char *b = rl_line_buffer;
 
-	for (; b[i]; i++) {
+	for (size_t i = 0; b[i]; i++) {
 		/* Keep track of open quotes. */
 		if (b[i] == '\'' || b[i] == '"')
 			quote = quote == b[i] ? 0 : b[i];
@@ -348,14 +348,14 @@ xstrverscmp(const char *s1, const char *s2)
 
 	if (!conf.case_sens_list) {
 		c1 = (unsigned char)TOLOWER(*p1);
-		++p1;
+		p1++;
 		c2 = (unsigned char)TOLOWER(*p2);
-		++p2;
+		p2++;
 	} else {
 		c1 = *p1;
 		c2 = *p2;
-		++p1;
-		++p2;
+		p1++;
+		p2++;
 	}
 
 	/* Hint: '0' is a digit too */
@@ -368,14 +368,14 @@ xstrverscmp(const char *s1, const char *s2)
 		state = next_state[state];
 		if (!conf.case_sens_list) {
 			c1 = (unsigned char)TOLOWER(*p1);
-			++p1;
+			p1++;
 			c2 = (unsigned char)TOLOWER(*p2);
-			++p2;
+			p2++;
 		} else {
 			c1 = *p1;
 			c2 = *p2;
-			++p1;
-			++p2;
+			p1++;
+			p2++;
 		}
 		state += (c1 == '0') + (IS_DIGIT(c1) != 0);
 	}
@@ -386,10 +386,10 @@ xstrverscmp(const char *s1, const char *s2)
 	case VCMP: return diff;
 	case VLEN:
 		while (*p1 && IS_DIGIT(*p1)) {
-			++p1;
+			p1++;
 			if (!*p2 || !IS_DIGIT(*p2))
 				return 1;
-			++p2;
+			p2++;
 		}
 		return (*p2 && IS_DIGIT(*p2)) ? -1 : diff;
 
@@ -444,11 +444,11 @@ u8truncstr(char *restrict str, const size_t max)
 	if (mbstowcs(buf, str, NAME_BUF_SIZE) == (size_t)-1)
 		return 0;
 
-	int i, bmax = (int)max;
+	int bmax = max > INT_MAX ? INT_MAX : (int)max;
 	if (bmax < 0)
 		bmax = conf.max_name_len;
 
-	for (i = 0; buf[i]; i++) {
+	for (size_t i = 0; buf[i]; i++) {
 		int l = wcwidth(buf[i]);
 		if (len + l > bmax) {
 			buf[i] = L'\0';
@@ -650,18 +650,14 @@ strbfrlst(char *str, const char c)
 	*q = '\0';
 
 	const size_t buf_len = (size_t)(q - str);
-	char *buf = malloc(buf_len + 1);
-	if (!buf) {
-		*q = c;
-		return (char *)NULL;
-	}
+	char *buf = xnmalloc(buf_len + 1, sizeof(char));
 
 	xstrsncpy(buf, str, buf_len + 1);
 	*q = c;
 	return buf;
 }
 
-/* Returns the string between first ocurrence of A and the first
+/* Return the string between the first ocurrence of A and the first
  * ocurrence of B in STR, or NULL if: there is nothing between A and
  * B, or A and/or B are not found. */
 char *
@@ -688,12 +684,7 @@ strbtw(char *str, const char a, const char b)
 	*pb = '\0';
 
 	const size_t buf_len = (size_t)(pb - pa);
-	char *buf = malloc(buf_len + 1);
-
-	if (!buf) {
-		*pb = b;
-		return (char *)NULL;
-	}
+	char *buf = xnmalloc(buf_len + 1, sizeof(char));
 
 	xstrsncpy(buf, pa + 1, buf_len + 1);
 	*pb = b;
@@ -1393,11 +1384,11 @@ expand_tag(char ***args, const int tag_index)
 static void
 expand_tags(char ***substr)
 {
-	size_t ntags = 0, i;
+	size_t ntags = 0;
 	int *tag_index = (int *)NULL;
 	struct stat a;
 
-	for (i = 0; (*substr)[i]; i++) {
+	for (size_t i = 0; (*substr)[i]; i++) {
 		if (*(*substr)[i] == 't' && *((*substr)[i] + 1) == ':'
 		&& lstat((*substr)[i], &a) == -1) {
 			tag_index = xnrealloc(tag_index, ntags + 2, sizeof(int));
@@ -1410,7 +1401,7 @@ expand_tags(char ***substr)
 	if (ntags == 0)
 		return;
 
-	for (i = 0; i < ntags; i++) {
+	for (size_t i = 0; i < ntags; i++) {
 		const size_t tn = expand_tag(substr, tag_index[i]);
 		/* TN is the number of files tagged as SUBSTR[TAG_INDEX[I]]
 		 * Let's update the index of the next tag expression using this
@@ -1437,8 +1428,8 @@ expand_mime_type_filter(const char *pattern)
 	char **t = xnmalloc((size_t)files + 1, sizeof(char *));
 	char buf[PATH_MAX + 1];
 
-	filesn_t i, n = 0;
-	for (i = 0; i < files; i++) {
+	filesn_t n = 0;
+	for (filesn_t i = 0; i < files; i++) {
 		char *name = file_info[i].name;
 		if (virtual_dir == 1) {
 			*buf = '\0';
@@ -1577,9 +1568,9 @@ insert_fields(char ***dst, char ***src, const size_t i, size_t *num)
 	char **tail = args_n > i /* Substraction must be bigger than zero */
 		? xnmalloc(args_n - i + 1, sizeof(char *)) : (char **)NULL;
 
-	size_t t, n = 0;
+	size_t n = 0;
 	if (tail) {
-		for (t = i + 1; (*dst)[t]; t++)
+		for (size_t t = i + 1; (*dst)[t]; t++)
 			tail[n++] = strdup((*dst)[t]);
 		tail[n] = (char *)NULL;
 	}
@@ -1850,13 +1841,12 @@ expand_file_type(char ***substr)
 	&& (*substr)[0][1] == 't' && !(*substr)[0][2]))
 		return;
 
-	size_t i = 0;
 	struct stat a;
 
 	int *file_type_array = xnmalloc(INT_ARRAY_MAX, sizeof(int));
 	size_t file_type_n = 0;
 
-	for (i = 0; (*substr)[i] && file_type_n < INT_ARRAY_MAX; i++) {
+	for (size_t i = 0; (*substr)[i] && file_type_n < INT_ARRAY_MAX; i++) {
 		if (*(*substr)[i] != '=' || !(*substr)[i][1])
 			continue;
 
@@ -1874,7 +1864,7 @@ expand_file_type(char ***substr)
 	}
 
 	size_t old_ft = 0;
-	for (i = 0; i < file_type_n; i++) {
+	for (size_t i = 0; i < file_type_n; i++) {
 		int index = file_type_array[i] + (int)old_ft;
 
 		char **p =
@@ -1885,13 +1875,12 @@ expand_file_type(char ***substr)
 		if (p) {
 			char **ret = insert_fields(substr, &p, (size_t)index, &c);
 
-			size_t n;
-			for (n = 0; p[n]; n++)
+			for (size_t n = 0; p[n]; n++)
 				free(p[n]);
 			free(p);
 
 			if (ret) {
-				for (n = 0; n <= args_n; n++)
+				for (size_t n = 0; n <= args_n; n++)
 					free((*substr)[n]);
 				free((*substr));
 
@@ -1911,12 +1900,11 @@ expand_file_type(char ***substr)
 static void
 expand_mime_type(char ***substr)
 {
-	size_t i = 0;
 	int *mime_type_array = xnmalloc(INT_ARRAY_MAX, sizeof(int));
 	size_t mime_type_n = 0;
 	struct stat a;
 
-	for (i = 0; (*substr)[i] && mime_type_n < INT_ARRAY_MAX; i++) {
+	for (size_t i = 0; (*substr)[i] && mime_type_n < INT_ARRAY_MAX; i++) {
 		if (*(*substr)[i] == '@' && *((*substr)[i] + 1)
 		&& lstat((*substr)[i], &a) == -1) {
 			mime_type_array[mime_type_n] = (int)i;
@@ -1930,7 +1918,7 @@ expand_mime_type(char ***substr)
 	}
 
 	size_t old_mt = 0;
-	for (i = 0; i < mime_type_n; i++) {
+	for (size_t i = 0; i < mime_type_n; i++) {
 		int index = mime_type_array[i] + (int)old_mt;
 
 		char **p = *((*substr)[index] + 1)
@@ -1972,13 +1960,12 @@ expand_mime_type(char ***substr)
 static void
 expand_bookmarks(char ***substr)
 {
-	size_t i = 0;
 	struct stat a;
 
 	int *bm_array = xnmalloc(INT_ARRAY_MAX, sizeof(int));
 	size_t bn = 0;
 
-	for (i = 0; (*substr)[i] && bn < INT_ARRAY_MAX; i++) {
+	for (size_t i = 0; (*substr)[i] && bn < INT_ARRAY_MAX; i++) {
 		if (*(*substr)[i] == 'b' && *((*substr)[i] + 1) == ':'
 		&& !*((*substr)[i] + 2) && lstat((*substr)[i], &a) == -1) {
 			bm_array[bn] = (int)i;
@@ -1987,7 +1974,7 @@ expand_bookmarks(char ***substr)
 	}
 
 	size_t old_bm = 0;
-	for (i = 0; i < bn; i++) {
+	for (size_t i = 0; i < bn; i++) {
 		int index = bm_array[i] + (int)old_bm;
 		char **p = get_bm_paths();
 		size_t c = 0;
@@ -1997,8 +1984,7 @@ expand_bookmarks(char ***substr)
 			free(p);
 
 			if (ret) {
-				size_t n;
-				for (n = 0; n <= args_n; n++)
+				for (size_t n = 0; n <= args_n; n++)
 					free((*substr)[n]);
 				free((*substr));
 
@@ -2141,14 +2127,13 @@ expand_word(char ***substr, const int *word_array, const size_t word_n)
 					xerror(_("%s: '%s': Error quoting filename\n"),
 						PROGRAM_NAME, wordbuf.we_wordv[i]);
 
-					size_t k = 0;
-					for (k = 0; k < j; k++)
+					for (size_t k = 0; k < j; k++)
 						free(word_cmd[k]);
 					free(word_cmd);
 
 					word_cmd = (char **)NULL;
 
-					for (k = 0; k <= args_n; k++)
+					for (size_t k = 0; k <= args_n; k++)
 						free((*substr)[k]);
 					free((*substr));
 					return (-1);
@@ -2263,8 +2248,7 @@ expand_range(char *str, int listdir)
 
 	filesn_t *buf = xcalloc((size_t)(asecond - afirst) + 2, sizeof(filesn_t));
 
-	filesn_t i, j = 0;
-	for (i = afirst; i <= asecond; i++) {
+	for (filesn_t i = afirst, j = 0; i <= asecond; i++) {
 		buf[j] = i;
 		j++;
 	}

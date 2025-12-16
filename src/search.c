@@ -254,11 +254,10 @@ get_glob_matches(char **gfiles, const char *search_path,
 {
 	struct search_t *matches = xnmalloc(g + 1, sizeof(struct search_t));
 
-	size_t i;
 	int n = 0;
 	struct stat attr;
 
-	for (i = 0; gfiles[i]; i++) {
+	for (size_t i = 0; gfiles[i]; i++) {
 		if (SELFORPARENT(gfiles[i]))
 			continue;
 
@@ -284,8 +283,8 @@ get_glob_matches(char **gfiles, const char *search_path,
 		/* No search_path */
 		/* If searching in CWD, take into account the file's ELN
 		 * when calculating its length. */
-		size_t j, f = 0;
-		for (j = 0; file_info[j].name; j++) {
+		size_t f = 0;
+		for (size_t j = 0; file_info[j].name; j++) {
 			if (!matches[n].name || *matches[n].name != *file_info[j].name
 			|| strcmp(matches[n].name, file_info[j].name) != 0)
 				continue;
@@ -368,13 +367,13 @@ get_glob_matches_invert(char **gfiles, const char *search_path,
 	if (search_path)
 		return get_non_matches_from_search_path(search_path, gfiles, file_type);
 
-	filesn_t i, j, n = 0;
+	filesn_t n = 0;
 	struct search_t *matches = xnmalloc((size_t)files + 1, sizeof(struct search_t));
 
-	for (i = 0; file_info[i].name; i++) {
+	for (filesn_t i = 0; file_info[i].name; i++) {
 		int f = 0;
 
-		for (j = 0; gfiles[j]; j++) {
+		for (filesn_t j = 0; gfiles[j]; j++) {
 			if (*gfiles[j] == *file_info[i].name
 			&& strcmp(gfiles[j], file_info[i].name) == 0) {
 				f = 1;
@@ -403,8 +402,7 @@ get_glob_longest(struct search_t *matches, int *longest_eln,
 {
 	int search_path = (*eln_pad == -1);
 
-	size_t i;
-	for (i = 0; matches[i].name; i++) {
+	for (size_t i = 0; matches[i].name; i++) {
 		if (matches[i].len <= *longest_match)
 			continue;
 
@@ -421,7 +419,7 @@ get_glob_longest(struct search_t *matches, int *longest_eln,
 		*longest_match += (size_t)ICON_LEN;
 
 	int longest_name = 0;
-	for (i = 0; matches[i].name; i++) {
+	for (size_t i = 0; matches[i].name; i++) {
 		if (matches[i].eln > longest_name)
 			longest_name = matches[i].eln;
 	}
@@ -610,8 +608,7 @@ search_glob(char **args)
 
 	/* Free stuff */
 	if (list) {
-		size_t i;
-		for (i = 0; list[i].name; i++)
+		for (size_t i = 0; list[i].name; i++)
 			free(list[i].name);
 		free(list);
 	}
@@ -822,8 +819,7 @@ print_regex_matches(const mode_t file_type, struct dirent **reg_dirlist,
 
 	size_t matches = 0; /* Number of filtered matches */
 
-	size_t i = total;
-	for (; i-- > 0;) {
+	for (size_t i = total; i-- > 0;) {
 		int index = regex_index[i];
 
 		if (file_type != 0 && check_regex_file_type(reg_dirlist,
@@ -846,8 +842,7 @@ print_regex_matches(const mode_t file_type, struct dirent **reg_dirlist,
 
 	size_t last_col = 0, cur_col = 0;
 
-	i = matches;
-	for (; i-- > 0;) {
+	for (size_t i = matches; i-- > 0;) {
 		cur_col++;
 		count++;
 

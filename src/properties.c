@@ -293,8 +293,7 @@ validate_octal_perms(const char *s, const size_t l)
 		return FUNC_FAILURE;
 	}
 
-	size_t i;
-	for (i = 0; s[i]; i++) {
+	for (size_t i = 0; s[i]; i++) {
 		if (s[i] < '0' || s[i] > '7') {
 			xerror(_("pc: '%c': Invalid digit. Values in the range 0-7 "
 				"are expected for each field\n"), s[i]);
@@ -310,8 +309,7 @@ validate_octal_perms(const char *s, const size_t l)
 static int
 validate_symbolic_perms(const char *s)
 {
-	size_t i;
-	for (i = 0; i < 9; i++) {
+	for (size_t i = 0; i < 9; i++) {
 		switch (i) {
 		case 0: /* fallthrough */
 		case 3: /* fallthrough */
@@ -456,8 +454,8 @@ get_common_perms(char **s, int *diff)
 	p.ux = p.gx = p.ox = 'x';
 	int suid = 1, sgid = 1, sticky = 1;
 
-	int i, stat_ready = 0;
-	for (i = 0; s[i]; i++) {
+	int stat_ready = 0;
+	for (size_t i = 0; s[i]; i++) {
 		if (stat(s[i], &a) == -1)
 			continue;
 		if (stat_ready == 1 && a.st_mode != b.st_mode)
@@ -534,8 +532,7 @@ set_file_perms(char **args)
 		return FUNC_SUCCESS;
 	}
 
-	size_t i;
-	for (i = 1; args[i]; i++) {
+	for (size_t i = 1; args[i]; i++) {
 		if (!strchr(args[i], '\\'))
 			continue;
 		char *t = unescape_str(args[i], 0);
@@ -566,7 +563,7 @@ set_file_perms(char **args)
 	int ret = FUNC_SUCCESS;
 	size_t n = 0;
 	const mode_t mode = (mode_t)strtol(octal_str, 0, 8);
-	for (i = 1; args[i]; i++) {
+	for (size_t i = 1; args[i]; i++) {
 		if (fchmodat(XAT_FDCWD, args[i], mode, 0) == FUNC_SUCCESS) {
 			n++;
 		} else {
@@ -634,9 +631,8 @@ get_common_ownership(char **args, int *exit_status, int *diff)
 
 	int common_uid = 1, common_gid = 1;
 	struct stat b;
-	size_t i;
 
-	for (i = 1; args[i]; i++) {
+	for (size_t i = 1; args[i]; i++) {
 		if (stat(args[i], &b) == -1) {
 			xerror("oc: '%s': %s\n", args[i], strerror(errno));
 			*exit_status = errno;
@@ -740,9 +736,9 @@ set_file_owner(char **args)
 
 	/* Change ownership */
 	struct stat a;
-	size_t new_o = 0, new_g = 0, i;
+	size_t new_o = 0, new_g = 0;
 
-	for (i = 1; args[i]; i++) {
+	for (size_t i = 1; args[i]; i++) {
 		if (stat(args[i], &a) == -1) {
 			xerror("stat: '%s': %s\n", args[i], strerror(errno));
 			free(new_own);
@@ -882,8 +878,7 @@ get_color_age(const time_t t, char *str, const size_t len)
 static int
 xattr_val_is_printable(const char *val, const size_t len)
 {
-	size_t i;
-	for (i = 0; i < len; i++)
+	for (size_t i = 0; i < len; i++)
 		if (val[len] < ' ') /* Control char (== non-printable) */
 			return 0;
 

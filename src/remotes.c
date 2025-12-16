@@ -33,8 +33,7 @@ remotes_list(void)
 		return FUNC_SUCCESS;
 	}
 
-	size_t i;
-	for (i = 0; i < remotes_n; i++) {
+	for (size_t i = 0; i < remotes_n; i++) {
 		if (!remotes[i].name)
 			continue;
 		printf(_("Name: %s%s%s\n"), BOLD, remotes[i].name, df_c);
@@ -337,10 +336,9 @@ automount_remotes(void)
 	if (remotes_n == 0)
 		return FUNC_SUCCESS;
 
-	size_t i = remotes_n;
 	int exit_status = FUNC_SUCCESS;
 
-	for (; i-- > 0;) {
+	for (size_t i = remotes_n; i-- > 0;) {
 		if (remotes[i].name && remotes[i].auto_mount == 1
 		&& remotes[i].mountpoint && remotes[i].mount_cmd) {
 
@@ -380,10 +378,9 @@ autounmount_remotes(void)
 	if (remotes_n == 0)
 		return FUNC_SUCCESS;
 
-	size_t i = remotes_n;
 	int exit_status = FUNC_SUCCESS;
 
-	for (; i-- > 0;) {
+	for (size_t i = remotes_n; i-- > 0;) {
 		if (remotes[i].name && remotes[i].auto_unmount == 1
 		&& remotes[i].mountpoint && remotes[i].unmount_cmd) {
 

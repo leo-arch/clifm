@@ -837,7 +837,7 @@ my_rl_quote(char *text, int mt, char *qp) /* NOLINT */
 	 * which is at the beginning of the same string pointed to by P. */
 	char *r = (char *)NULL, *p = (char *)NULL, *tp = (char *)NULL;
 
-	size_t text_len = strlen(text);
+	const size_t text_len = strlen(text);
 	/* Worst case: every character of text needs to be escaped. In this
 	 * case we need 2x text's bytes plus the NULL byte. */
 	p = xnmalloc((text_len * 2) + 1, sizeof(char));
@@ -1202,7 +1202,7 @@ bookmarks_generator(const char *text, int state)
 	if (!bookmarks || bm_n == 0)
 		return (char *)NULL;
 
-	static int i;
+	static size_t i;
 	static size_t len;
 	static int prefix;
 
@@ -1213,7 +1213,7 @@ bookmarks_generator(const char *text, int state)
 	}
 
 	/* Look for bookmarks in bookmark names for a match */
-	while ((size_t)i < bm_n) {
+	while (i < bm_n) {
 		const char *name = bookmarks[i++].name;
 		if (!name || !*name)
 			continue;
@@ -1407,7 +1407,7 @@ get_shell_cmd_opts(char *cmd)
 		if (!*line || *line == '#' || *line == '\n')
 			continue;
 
-		size_t l = strnlen(line, sizeof(line));
+		const size_t l = strnlen(line, sizeof(line));
 		if (l > 0) {
 			while (line[l - 1] == '\n')
 				line[l - 1] = '\0';
@@ -1513,13 +1513,13 @@ bm_paths_generator(const char *text, int state)
 	if (!bookmarks || bm_n == 0)
 		return (char *)NULL;
 
-	static int i;
+	static size_t i;
 	char *bname, *bpath;
 
 	if (state == 0)
 		i = 0;
 
-	while (i < (int)bm_n) {
+	while (i < bm_n) {
 		bname = bookmarks[i].name;
 		bpath = bookmarks[i].path;
 		i++;
@@ -2064,7 +2064,7 @@ workspaces_generator(const char *text, int state)
 static char *
 sel_entries_generator(const char *text, int state)
 {
-	static int i;
+	static size_t i;
 	static size_t len;
 	char *name;
 
@@ -2073,7 +2073,7 @@ sel_entries_generator(const char *text, int state)
 		len = strlen(text);
 	}
 
-	while (i < (int)sel_n && (name = sel_elements[i++].name) != NULL) {
+	while (i < sel_n && (name = sel_elements[i++].name) != NULL) {
 		if (strncmp(name, text, len) == 0) {
 			char *p = abbreviate_file_name(name);
 			char *ret = strdup(p ? p : name);
@@ -2092,7 +2092,7 @@ prompts_generator(const char *text, int state)
 	if (prompts_n == 0)
 		return (char *)NULL;
 
-	static int i;
+	static size_t i;
 	static size_t len;
 	const char *name;
 
@@ -2101,7 +2101,7 @@ prompts_generator(const char *text, int state)
 		len = strlen(text);
 	}
 
-	while (i < (int)prompts_n && (name = prompts[i++].name) != NULL) {
+	while (i < prompts_n && (name = prompts[i++].name) != NULL) {
 		if ((conf.case_sens_list == 1 ? strncmp(name, text, len)
 		: strncasecmp(name, text, len)) == 0)
 			return strdup(name);
@@ -2168,8 +2168,8 @@ rl_mime_list(void)
 		if (!m)
 			continue;
 
-		size_t j, found = 0;
-		for (j = 1; j < n; j++) {
+		size_t found = 0;
+		for (size_t j = 1; j < n; j++) {
 			if (*t[j] == *m && strcmp(t[j], m) == 0) {
 				found = 1;
 				break;
@@ -2220,8 +2220,8 @@ rl_mime_files(const char *text)
 	*t[0] = '\0';
 	char buf[PATH_MAX + 1];
 
-	filesn_t i, n = 1;
-	for (i = 0; i < files; i++) {
+	size_t n = 1;
+	for (filesn_t i = 0; i < files; i++) {
 		char *name = file_info[i].name;
 		if (virtual_dir == 1) {
 			*buf = '\0';
@@ -2251,7 +2251,7 @@ rl_mime_files(const char *text)
 	if (n == 1)
 		{ free(t[0]); free(t); return (char **)NULL; }
 
-	t = xnrealloc(t, (size_t)n + 1, sizeof(char *));
+	t = xnrealloc(t, n + 1, sizeof(char *));
 	return t;
 }
 
@@ -2291,7 +2291,6 @@ rl_glob(char *text)
 		return matches;
 	}
 
-	size_t i, j = 1;
 	char **matches = xnmalloc(globbuf.gl_pathc + 3, sizeof(char *));
 
 	/* If /path/to/dir/GLOB<TAB>, /path/to/dir goes to slot 0 */
@@ -2325,7 +2324,8 @@ rl_glob(char *text)
 
 	free(str);
 
-	for (i = 0; i < globbuf.gl_pathc; i++) {
+	size_t j = 1;
+	for (size_t i = 0; i < globbuf.gl_pathc; i++) {
 		if (SELFORPARENT(globbuf.gl_pathv[i]))
 			continue;
 		matches[j] =
@@ -2375,9 +2375,9 @@ rl_trashed_files(const char *text)
 		*tfiles[0] = '\0';
 	}
 
-	int nn = 1, i;
+	int nn = 1;
 	size_t tlen = f ? strlen(f) : 0;
-	for (i = 0; i < n; i++) {
+	for (int i = 0; i < n; i++) {
 		char *name = t[i]->d_name;
 		if (SELFORPARENT(name) || !f || strncmp(f, name, tlen) != 0) {
 			free(t[i]);
@@ -2678,8 +2678,7 @@ fill_opts(const char *cmd_name, const char *word_start, const size_t w)
 			|| strcmp(cmd_name, cmd_opts[i].cmd) != 0)
 				continue;
 
-			size_t j;
-			for (j = 0; j < MAX_OPTS && cmd_opts[i].opts[j] != NULL; j++)
+			for (size_t j = 0; j < MAX_OPTS && cmd_opts[i].opts[j] != NULL; j++)
 				c_opts[j] = cmd_opts[i].opts[j];
 
 			break;

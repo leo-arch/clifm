@@ -67,9 +67,9 @@ get_block_devices(void)
 		return (char **)NULL;
 
 	char **bd = (char **)NULL;
-	size_t i, n = 0;
+	size_t n = 0;
 
-	for (i = 0; (int)i < block_n; i++) {
+	for (int i = 0; i < block_n; i++) {
 # ifndef _DIRENT_HAVE_D_TYPE
 		char bpath[PATH_MAX + 1];
 		snprintf(bpath, sizeof(bpath), "/dev/%s", blockdev[i]->d_name);

@@ -327,8 +327,7 @@ sanitize_blacklist(const char *cmd)
 	if (!cmd || !*cmd)
 		return FUNC_SUCCESS;
 
-	size_t i;
-	for (i = 0; cmd[i]; i++) {
+	for (size_t i = 0; cmd[i]; i++) {
 		switch (cmd[i]) {
 		case '<': /* fallthrough */
 		case '>': /* fallthrough */

@@ -67,8 +67,7 @@ save_sel(void)
 		return FUNC_FAILURE;
 	}
 
-	size_t i;
-	for (i = 0; i < sel_n; i++) {
+	for (size_t i = 0; i < sel_n; i++) {
 		fputs(sel_elements[i].name, fp);
 		fputc('\n', fp);
 	}
@@ -218,8 +217,7 @@ load_matches(glob_t *gbuf, const mode_t filetype, int *matches)
 	char **list = xnmalloc(gbuf->gl_pathc + 2, sizeof(char *));
 	const mode_t type = convert_filetype_mask(filetype);
 
-	size_t i = gbuf->gl_pathc;
-	for (; i-- > 0;) {
+	for (size_t i = gbuf->gl_pathc; i-- > 0;) {
 		char *basename = strrchr(gbuf->gl_pathv[i], '/');
 		if (!basename && SELFORPARENT(gbuf->gl_pathv[i]))
 			continue;
