@@ -27,7 +27,7 @@
 #define NERD_DIRECTORY     ""
 #define NERD_FILE          ""
 #define NERD_EXEC          ""
-#define NERD_MANUAL        "󱓷"
+#define NERD_MANUAL        "󰘥"
 #define NERD_LINK          ""
 
 /* Top level and common icons */
