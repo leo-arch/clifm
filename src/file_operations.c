@@ -533,7 +533,7 @@ static void
 list_created_files(char **nfiles, const filesn_t nfiles_n)
 {
 	int file_in_cwd = 0;
-	filesn_t n = workspaces[cur_ws].path
+	const filesn_t n = workspaces[cur_ws].path
 		? count_dir(workspaces[cur_ws].path, NO_CPOP) - 2 : 0;
 
 	if (n > 0 && n > files)

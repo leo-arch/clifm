@@ -2223,7 +2223,7 @@ AFTER_USUAL_COMPLETION:
 				start += 2;
 			else if (c == TCMP_FILE_TEMPLATES) {
 				char *p = strrchr(text, '@');
-				if (p && p[1])
+				if (p)
 					start = rl_point - (int)strlen(p + 1);
 			}
 
