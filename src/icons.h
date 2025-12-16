@@ -43,6 +43,7 @@ char
     /* Extensions */
     ICON_ACCESS[] = NERD_FILE,
     ICON_ARCHIVE[] = NERD_ARCHIVE,
+    ICON_ARDUINO[] = NERD_ARDUINO,
     ICON_AUDIO[] = NERD_MUSICFILE,
     ICON_BINARY[] = NERD_BINARY,
     ICON_BOOK[] = NERD_BOOK,
@@ -91,6 +92,7 @@ char
     ICON_MARKDOWN[] = NERD_MARKDOWN,
     ICON_MATLAB[] = NERD_MATLAB,
     ICON_MYSQL[] = NERD_MYSQL,
+    ICON_NIM[] = NERD_NIM,
     ICON_ASM[] = NERD_ASM,
     ICON_OCAML[] = NERD_OCAML,
     ICON_OPENOFFICE_P[] = NERD_PPTDOC,
@@ -161,6 +163,7 @@ char
     /* Extensions */
     ICON_ACCESS[] = FILE_ACCESS,
     ICON_ARCHIVE[] = FA_ARCHIVE,
+    ICON_ARDUINO[] = FILE_ARDUINO,
     ICON_AUDIO[] = FA_FILE_AUDIO_O,
     ICON_BINARY[] = OCT_FILE_BINARY,
     ICON_BOOK[] = OCT_BOOK,
@@ -209,6 +212,7 @@ char
     ICON_MATLAB[] = FILE_MATLAB,
     ICON_MARKDOWN[] = OCT_MARKDOWN,
     ICON_MYSQL[] = MFIZZ_MYSQL,
+    ICON_NIM[] = FILE_NIM,
     ICON_ASM[] = FILE_NASM,
     ICON_OCAML[] = FILE_OCAML,
     ICON_OPENOFFICE_P[] = FILE_OPENOFFICE,
@@ -279,6 +283,7 @@ char
     /* Extensions */
     ICON_ACCESS[] = EMOJI_PRESENTATION,
     ICON_ARCHIVE[] = EMOJI_ARCHIVE,
+    ICON_ARDUINO[] = EMOJI_FILE,
     ICON_AUDIO[] = EMOJI_AUDIO,
     ICON_BINARY[] = EMOJI_BINARY,
     ICON_BOOK[] = EMOJI_BOOK_OPEN,
@@ -327,6 +332,7 @@ char
     ICON_MARKDOWN[] = EMOJI_MARKDOWN,
     ICON_MATLAB[] = EMOJI_MATLAB,
     ICON_MYSQL[] = EMOJI_DATABASE,
+    ICON_NIM[] = EMOJI_NIM,
     ICON_ASM[] = EMOJI_ASM,
     ICON_OCAML[] = EMOJI_OCAML,
     ICON_OPENOFFICE_P[] = EMOJI_PRESENTATION,
@@ -541,6 +547,7 @@ struct icons_t const icon_ext[] = {
     {"ico", ICON_IMG, GREEN},
     {"img", ICON_CD, B_WHITE},
     {"ini", ICON_CONF, WHITE},
+    {"ino", ICON_ARDUINO, GREEN},
     {"iso", ICON_CD, B_WHITE},
 
     {"jar", ICON_JAVA, B_WHITE},
@@ -589,6 +596,9 @@ struct icons_t const icon_ext[] = {
     {"msi", ICON_WINDOWS, BLUE},
     {"mts", ICON_TS, BLUE},
 
+    {"nim", ICON_NIM, YELLOW},
+    {"nimble", ICON_NIM, YELLOW},
+    {"nims", ICON_NIM, YELLOW},
     {"nix", ICON_NIX, BLUE},
 
     {"o", ICON_BINARY, WHITE},
@@ -627,9 +637,9 @@ struct icons_t const icon_ext[] = {
     {"qcow", ICON_CD, B_WHITE},
     {"qcow2", ICON_CD, B_WHITE},
 
-    {"r", ICON_R, WHITE},
-    {"rda", ICON_R, WHITE},
-    {"rdata", ICON_R, WHITE},
+    {"r", ICON_R, BLUE},
+    {"rda", ICON_R, BLUE},
+    {"rdata", ICON_R, BLUE},
     {"rar", ICON_ARCHIVE, YELLOW},
     {"rb", ICON_RUBY, RED},
     {"rc", ICON_CONF, WHITE},
@@ -641,7 +651,8 @@ struct icons_t const icon_ext[] = {
     {"rtf", ICON_PDF, RED},
 
     {"sass", ICON_SASS, B_BLUE},
-    {"scala", ICON_SCALA, WHITE},
+    {"scala", ICON_SCALA, RED},
+    {"scss", ICON_SASS, B_BLUE},
     {"service", ICON_SCRIPT, WHITE},
     {"sh", ICON_SCRIPT, WHITE},
     {"slim", ICON_CODE, WHITE},
@@ -745,7 +756,7 @@ struct icons_t const icon_filenames[] = {
     {"Makefile", ICON_MAKEFILE, DEF_FILE_ICON_COLOR},
     {"PKGBUILD", ICON_ARCH, CYAN},
     {"README", ICON_README, YELLOW},
-    {"TODO", ICON_LIST, WHITE},
+    {"TODO", ICON_LIST, GREEN},
 };
 
 #endif /* ICONS_H */

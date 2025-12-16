@@ -29,6 +29,7 @@
 #define NERD_EXEC          ""
 #define NERD_MANUAL        "󱓷"
 #define NERD_LINK          ""
+
 /* Top level and common icons */
 #define NERD_ARCHIVE       ""
 #define NERD_BINARY        ""
@@ -55,6 +56,7 @@
 #define NERD_VIDEOS        "󰕧"
 #define NERD_VIDEOFILE     "󰈰"
 
+#define NERD_ARDUINO       ""
 #define NERD_ASM           ""
 #define NERD_C             ""
 #define NERD_CHESS         "󰡘"
@@ -86,6 +88,7 @@
 #define NERD_MARKDOWN      ""
 #define NERD_MATLAB        ""
 #define NERD_MYSQL         ""
+#define NERD_NIM           ""
 #define NERD_NIX           ""
 #define NERD_OCAML         ""
 #define NERD_OPTICALDISK   "󰗮"

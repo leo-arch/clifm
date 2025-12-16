@@ -46,6 +46,7 @@
 #define FA_TRASH "\ue2ae"
 
 #define FILE_ACCESS "\ue84d"
+#define FILE_ARDUINO "\ue793"
 #define FILE_BIBTEX "\ue756"
 #define FILE_CMAKE "\ue7a2"
 #define FILE_DIFF "\ue7c3"
@@ -61,6 +62,7 @@
 #define FILE_MAPBOX "\ue7a4"
 #define FILE_MATLAB "\ue7f4"
 #define FILE_NASM "\ue8d5"
+#define FILE_NIM "\ue7fb"
 #define FILE_OCAML "\ue77d"
 #define FILE_OPENOFFICE "\ue847"
 #define FILE_PATCH "\ue7c4"

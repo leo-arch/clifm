@@ -83,6 +83,7 @@
 #define EMOJI_MATLAB EMOJI_CODE
 #define EMOJI_MOVIE "🎬"
 #define EMOJI_MUSIC "🎧"
+#define EMOJI_NIM EMOJI_CODE
 #define EMOJI_NOTE "📝"
 #define EMOJI_OCAML "🐫"
 #define EMOJI_PATCH "🩹"
