@@ -20,7 +20,6 @@
 
 #define FA_ARCHIVE "\ue244"
 #define FA_BRIEFCASE "\ue187"
-#define FA_CHAIN "\ue18a"
 #define FA_CHECK_SQUARE_O "\ue123"
 #define FA_COG "\ue0f3"
 #define FA_COMMENTS "\ue15f"
@@ -114,6 +113,7 @@
 
 #define OCT_BOOK "\ue007"
 #define OCT_FILE_BINARY "\ue073"
+#define OCT_FILE_SYMLINK_FILE "\ue083"
 #define OCT_LAW "\ue097"
 #define OCT_MARKDOWN "\ue08c"
 #define OCT_TERMINAL "\ue08b"

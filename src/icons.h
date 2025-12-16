@@ -154,7 +154,7 @@ char
     /* File types */
     ICON_DIR[] = FA_FOLDER,
     ICON_EXEC[] = FA_COG,
-    ICON_LINK[] = FA_CHAIN,
+    ICON_LINK[] = OCT_FILE_SYMLINK_FILE,
     ICON_LOCK[] = FA_LOCK,
     ICON_REG[] = FA_FILE_O,
 
