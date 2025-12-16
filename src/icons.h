@@ -609,7 +609,7 @@ struct icons_t const icon_ext[] = {
     {"ogv", ICON_VID, BLUE},
     {"opdownload", ICON_DOWNLOADS, WHITE},
     {"opus", ICON_AUDIO, YELLOW},
-    {"otf", ICON_FONT, WHITE},
+    {"otf", ICON_FONT, BLUE},
     {"out", ICON_ELF, WHITE},
 
     {"part", ICON_DOWNLOADS, WHITE},
@@ -675,7 +675,7 @@ struct icons_t const icon_ext[] = {
     {"torrent", ICON_DOWNLOADS, WHITE},
     {"ts", ICON_TS, BLUE},
     {"tsx", ICON_REACT, B_BLUE},
-    {"ttf", ICON_FONT, WHITE},
+    {"ttf", ICON_FONT, BLUE},
     {"txt", ICON_TXT, WHITE},
     {"txz", ICON_ARCHIVE, YELLOW},
 
