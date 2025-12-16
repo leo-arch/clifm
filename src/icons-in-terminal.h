@@ -12,7 +12,6 @@
 #define DEV_ERLANG "\ueab8"
 #define DEV_FSHARP "\ueaae"
 #define DEV_JAVASCRIPT "\uea55"
-#define DEV_PHOTOSHOP "\ueabf"
 #define DEV_SWIFT "\uea5c"
 #define DEV_VIM "\ueacc"
 #define DEV_VISUALSTUDIO "\uea13"

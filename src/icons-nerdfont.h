@@ -120,7 +120,6 @@
 #define NERD_WORDDOC       "󰈭"
 #define NERD_WINDOWS       ""
 
-#define NERD_PHOTOSHOP     ""
 #define NERD_HISTORY       "󰋚"
 #define NERD_COPYRIGHT     ""
 #define NERD_KEY           "󰌆"
