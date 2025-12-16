@@ -3180,7 +3180,7 @@ load_regfile_info(const mode_t mode, const filesn_t n)
 	const int name_icon_found = conf.icons == 1 ? get_name_icon(n) : 0;
 #endif /* !_NO_ICONS */
 
-	if (!file_info[n].ext_name || override_color == 0 || conf.check_ext == 0)
+	if (!file_info[n].ext_name || conf.check_ext == 0)
 		return;
 
 	/* Check file extension */
@@ -3192,7 +3192,8 @@ load_regfile_info(const mode_t mode, const filesn_t n)
 #endif /* !_NO_ICONS */
 
 	size_t color_len = 0;
-	const char *extcolor = get_ext_color(ext, &color_len);
+	const char *extcolor =
+		override_color == 1 ? get_ext_color(ext, &color_len) : NULL;
 	if (!extcolor)
 		return;
 
