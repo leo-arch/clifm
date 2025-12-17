@@ -108,6 +108,7 @@
 #define NERD_SASS          ""
 #define NERD_SCALA         ""
 #define NERD_SHARE         ""
+#define NERD_STYLUS        ""
 #define NERD_SWIFT         "󰛥"
 #define NERD_TEX           ""
 #define NERD_TS            "󰛦"

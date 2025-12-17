@@ -107,6 +107,7 @@
 #define EMOJI_SHARE "🖇 "
 #define EMOJI_STEAM EMOJI_GAMES
 #define EMOJI_STYLESHEET "📗"
+#define EMOJI_STYLUS EMOJI_CODE
 #define EMOJI_SUBTITLES "💬"
 #define EMOJI_SWIFT EMOJI_CODE
 #define EMOJI_TEMPLATE "📎"

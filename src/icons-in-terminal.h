@@ -69,6 +69,7 @@
 #define FILE_R "\ue768"
 #define FILE_REACT "\ue8e4"
 #define FILE_SQLITE "\ue840"
+#define FILE_STYLUS "\ue73b"
 #define FILE_SWAGGER "\ue88c"
 #define FILE_TEX "\ue755"
 #define FILE_TS "\ue73f"
