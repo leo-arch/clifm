@@ -275,7 +275,7 @@ ExtColors="$$$=TEMP:aux=TEMP:bak=TEMP:bbl=TEMP:bc=TEMP:bk=TEMP:bkp=TEMP:cache=TE
 
 # DATABASES
 define DB=@211
-ExtColors="cdx=DB:dat=DB:db=DB:dbf=DB:dbi=DB:dbx=DB:fox=DB:mdb=DB:mdn=DB:mdx=DB:msql=DB:mssql=DB:pgsql=DB:sql=DB:sqlite=DB:ssql=DB:"
+ExtColors="accdb=DB:cdx=DB:dat=DB:db=DB:dbf=DB:dbi=DB:dbx=DB:fox=DB:mdb=DB:mdn=DB:mdx=DB:msql=DB:mssql=DB:odb=DB:pgsql=DB:sql=DB:sqlite=DB:ssql=DB:"
 
 #=====================================#
 #           COLOR SHADES              #

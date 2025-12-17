@@ -5,7 +5,7 @@
  * SPDX-FileCopyrightText: 2016-2025 L. Abramovich <leo.clifm@outlook.com>
 */
 
-/* icons.h - Icon definitions for CliFM */
+/* icons.h - Icon definitions for Clifm */
 
 /* Taken from
  * https://github.com/jarun/nnn, licensed under BSD-2-Clause.
@@ -41,7 +41,7 @@ char
     ICON_REG[] = NERD_FILE,
 
     /* Extensions */
-    ICON_ACCESS[] = NERD_FILE,
+    ICON_ACCESS[] = NERD_ACCESS,
     ICON_ARCHIVE[] = NERD_ARCHIVE,
     ICON_ARDUINO[] = NERD_ARDUINO,
     ICON_AUDIO[] = NERD_MUSICFILE,
@@ -95,6 +95,7 @@ char
     ICON_NIM[] = NERD_NIM,
     ICON_ASM[] = NERD_ASM,
     ICON_OCAML[] = NERD_OCAML,
+    ICON_OPENOFFICE_A[] = NERD_ACCESS,
     ICON_OPENOFFICE_P[] = NERD_PPTDOC,
     ICON_OPENOFFICE_S[] = NERD_EXCELDOC,
     ICON_OPENOFFICE_T[] = NERD_WORDDOC,
@@ -195,7 +196,7 @@ char
     ICON_GO[] = FILE_GO,
     ICON_HASKELL[] = MFIZZ_HASKELL,
     ICON_HISTORY[] = FA_HISTORY,
-    ICON_HTML[] = FA_FILE_CODE_O,
+    ICON_HTML[] = MFIZZ_HTML,
     ICON_IMG[] = FA_FILE_IMAGE_O,
     ICON_JAVA[] = MFIZZ_JAVA,
     ICON_JAVASCRIPT[] = DEV_JAVASCRIPT,
@@ -213,6 +214,7 @@ char
     ICON_NIM[] = FILE_NIM,
     ICON_ASM[] = FILE_NASM,
     ICON_OCAML[] = FILE_OCAML,
+    ICON_OPENOFFICE_A[] = FILE_OPENOFFICE,
     ICON_OPENOFFICE_P[] = FILE_OPENOFFICE,
     ICON_OPENOFFICE_S[] = FILE_OPENOFFICE,
     ICON_OPENOFFICE_T[] = FILE_OPENOFFICE,
@@ -277,7 +279,7 @@ char
     ICON_REG[] = EMOJI_FILE,
 
     /* Extensions */
-    ICON_ACCESS[] = EMOJI_PRESENTATION,
+    ICON_ACCESS[] = EMOJI_DATABASE,
     ICON_ARCHIVE[] = EMOJI_ARCHIVE,
     ICON_ARDUINO[] = EMOJI_FILE,
     ICON_AUDIO[] = EMOJI_AUDIO,
@@ -331,6 +333,7 @@ char
     ICON_NIM[] = EMOJI_NIM,
     ICON_ASM[] = EMOJI_ASM,
     ICON_OCAML[] = EMOJI_OCAML,
+    ICON_OPENOFFICE_A[] = EMOJI_DATABASE,
     ICON_OPENOFFICE_P[] = EMOJI_PRESENTATION,
     ICON_OPENOFFICE_S[] = EMOJI_STYLESHEET,
     ICON_OPENOFFICE_T[] = EMOJI_WORD,
@@ -436,11 +439,13 @@ struct icons_t const icon_ext[] = {
 
     {"a", ICON_ARCHIVE, YELLOW},
     {"aac", ICON_AUDIO, YELLOW},
+    {"accdb", ICON_ACCESS, RED},
+    {"abw", ICON_OPENOFFICE_T, CYAN},
     {"aiff", ICON_AUDIO, YELLOW},
     {"alac", ICON_AUDIO, YELLOW},
     {"apk", ICON_ARCHIVE, YELLOW},
     {"asm", ICON_ASM, WHITE},
-    {"aup", ICON_AUDIO, YELLOW},
+    {"au", ICON_AUDIO, YELLOW},
     {"avi", ICON_VID, BLUE},
     {"avif", ICON_IMG, GREEN},
     {"awk", ICON_SCRIPT, WHITE},
@@ -542,8 +547,8 @@ struct icons_t const icon_ext[] = {
     {"htpasswd", ICON_CONF, WHITE},
     {"hrl", ICON_ERLANG, RED},
     {"hs", ICON_HASKELL, BLUE},
-    {"htm", ICON_HTML, WHITE},
-    {"html", ICON_HTML, WHITE},
+    {"htm", ICON_HTML, YELLOW},
+    {"html", ICON_HTML, YELLOW},
     {"hxx", ICON_CPP, WHITE},
 
     {"ico", ICON_IMG, GREEN},
@@ -585,6 +590,7 @@ struct icons_t const icon_ext[] = {
     {"markdown", ICON_MARKDOWN, WHITE},
     {"mat", ICON_MATLAB, YELLOW},
     {"md", ICON_MARKDOWN, WHITE},
+    {"mdb", ICON_ACCESS, RED},
     {"mjs", ICON_JAVASCRIPT, WHITE},
     {"mk", ICON_MAKEFILE, WHITE},
     {"mkv", ICON_VID, BLUE},
@@ -604,6 +610,7 @@ struct icons_t const icon_ext[] = {
     {"nix", ICON_NIX, BLUE},
 
     {"o", ICON_BINARY, WHITE},
+    {"odb", ICON_OPENOFFICE_A, RED},
     {"odp", ICON_OPENOFFICE_P, YELLOW},
     {"ods", ICON_OPENOFFICE_S, GREEN},
     {"odt", ICON_OPENOFFICE_T, BLUE},
@@ -650,7 +657,7 @@ struct icons_t const icon_ext[] = {
     {"rpm", ICON_ARCHIVE, YELLOW},
     {"rs", ICON_RUST, WHITE},
     {"rss", ICON_RSS, BLUE},
-    {"rtf", ICON_PDF, RED},
+    {"rtf", ICON_WORD, CYAN},
 
     {"sass", ICON_SASS, B_BLUE},
     {"scala", ICON_SCALA, RED},
@@ -660,7 +667,7 @@ struct icons_t const icon_ext[] = {
     {"slim", ICON_CODE, WHITE},
     {"sln", ICON_VISUALSTUDIO, BLUE},
     {"so", ICON_BINARY, WHITE},
-    {"sql", ICON_MYSQL, B_BLUE},
+    {"sql", ICON_MYSQL, CYAN},
     {"sqlite", ICON_SQLITE, WHITE},
     {"srt", ICON_COMMENTS, WHITE},
     {"styl", ICON_STYLUS, B_GREEN},
@@ -700,10 +707,10 @@ struct icons_t const icon_ext[] = {
 
     {"xbps", ICON_ARCHIVE, YELLOW},
     {"xcf", ICON_IMG, GREEN},
-    {"xthml", ICON_HTML, WHITE},
+    {"xthml", ICON_HTML, YELLOW},
     {"xls", ICON_EXCEL, GREEN},
     {"xlsx", ICON_EXCEL, GREEN},
-    {"xml", ICON_CODE, WHITE},
+    {"xml", ICON_HTML, YELLOW},
     {"xs", ICON_PERL, YELLOW},
     {"xz", ICON_ARCHIVE, RED},
 

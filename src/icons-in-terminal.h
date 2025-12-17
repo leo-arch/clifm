@@ -91,6 +91,7 @@
 #define MFIZZ_ELM "\uedc5"
 #define MFIZZ_GIT "\uedce"
 #define MFIZZ_HASKELL "\ueddd"
+#define MFIZZ_HTML "\ueddf"
 #define MFIZZ_JAVA "\uede3"
 #define MFIZZ_MYSQL "\uedf8"
 #define MFIZZ_PERL "\uee05"

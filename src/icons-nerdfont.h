@@ -31,6 +31,7 @@
 #define NERD_LINK          ""
 
 /* Top level and common icons */
+#define NERD_ACCESS        "󱎎"
 #define NERD_ARCHIVE       ""
 #define NERD_BINARY        ""
 #define NERD_BRIEFCASE     "󱒔"
