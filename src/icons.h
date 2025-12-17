@@ -98,7 +98,7 @@ char
     ICON_OPENOFFICE_A[] = NERD_ACCESS,
     ICON_OPENOFFICE_P[] = NERD_PPTDOC,
     ICON_OPENOFFICE_S[] = NERD_EXCELDOC,
-    ICON_OPENOFFICE_T[] = NERD_WORDDOC,
+    ICON_OPENOFFICE_W[] = NERD_WORDDOC,
     ICON_PATCH[] = NERD_PATCH,
     ICON_PDF[] = NERD_PDF,
     ICON_PERL[] = NERD_PERL,
@@ -217,7 +217,7 @@ char
     ICON_OPENOFFICE_A[] = FILE_OPENOFFICE,
     ICON_OPENOFFICE_P[] = FILE_OPENOFFICE,
     ICON_OPENOFFICE_S[] = FILE_OPENOFFICE,
-    ICON_OPENOFFICE_T[] = FILE_OPENOFFICE,
+    ICON_OPENOFFICE_W[] = FILE_OPENOFFICE,
     ICON_PATCH[] = FILE_PATCH,
     ICON_PDF[] = FA_FILE_PDF_O,
     ICON_PERL[] = MFIZZ_PERL,
@@ -336,7 +336,7 @@ char
     ICON_OPENOFFICE_A[] = EMOJI_DATABASE,
     ICON_OPENOFFICE_P[] = EMOJI_PRESENTATION,
     ICON_OPENOFFICE_S[] = EMOJI_STYLESHEET,
-    ICON_OPENOFFICE_T[] = EMOJI_WORD,
+    ICON_OPENOFFICE_W[] = EMOJI_WORD,
     ICON_PATCH[] = EMOJI_PATCH,
     ICON_PDF[] = EMOJI_PDF,
     ICON_PERL[] = EMOJI_PERL,
@@ -440,7 +440,7 @@ struct icons_t const icon_ext[] = {
     {"a", ICON_ARCHIVE, YELLOW},
     {"aac", ICON_AUDIO, YELLOW},
     {"accdb", ICON_ACCESS, RED},
-    {"abw", ICON_OPENOFFICE_T, CYAN},
+    {"abw", ICON_OPENOFFICE_W, CYAN},
     {"aiff", ICON_AUDIO, YELLOW},
     {"alac", ICON_AUDIO, YELLOW},
     {"apk", ICON_ARCHIVE, YELLOW},
@@ -454,7 +454,7 @@ struct icons_t const icon_ext[] = {
 
     {"bash", ICON_SCRIPT, WHITE},
     {"bat", ICON_SCRIPT, WHITE},
-#if defined(_ICONS_IN_TERMINAL)
+#ifdef _ICONS_IN_TERMINAL
     {"bib", FILE_BIBTEX, B_WHITE},
 #else
     {"bib", ICON_TEX, B_WHITE},
@@ -523,7 +523,7 @@ struct icons_t const icon_ext[] = {
     {"flv", ICON_VID, BLUE},
     {"fodp", ICON_OPENOFFICE_P, YELLOW},
     {"fods", ICON_OPENOFFICE_S, GREEN},
-    {"fodt", ICON_OPENOFFICE_T, BLUE},
+    {"fodt", ICON_OPENOFFICE_W, BLUE},
     {"fs", ICON_FSHARP, CYAN},
     {"fsi", ICON_FSHARP, CYAN},
     {"fsscript", ICON_FSHARP, CYAN},
@@ -611,9 +611,12 @@ struct icons_t const icon_ext[] = {
 
     {"o", ICON_BINARY, WHITE},
     {"odb", ICON_OPENOFFICE_A, RED},
+#ifdef _ICONS_IN_TERMINAL
+    {"odg", ICON_OPENOFFICE_P, YELLOW},
+#endif
     {"odp", ICON_OPENOFFICE_P, YELLOW},
     {"ods", ICON_OPENOFFICE_S, GREEN},
-    {"odt", ICON_OPENOFFICE_T, BLUE},
+    {"odt", ICON_OPENOFFICE_W, BLUE},
     {"ogg", ICON_AUDIO, YELLOW},
     {"ogv", ICON_VID, BLUE},
     {"opdownload", ICON_DOWNLOADS, WHITE},
