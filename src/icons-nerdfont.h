@@ -132,6 +132,7 @@
 #define NERD_VISUALSTUDIO  "󰨞"
 #define NERD_DROPBOX       "󰇣"
 #define NERD_STEAM         ""
+#define NERD_ONEDRIVE      "󰏊"
 
 #define NERD_ARCHLINUX     ""
 

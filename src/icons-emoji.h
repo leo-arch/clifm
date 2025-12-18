@@ -86,6 +86,7 @@
 #define EMOJI_NIM EMOJI_CODE
 #define EMOJI_NOTE "📝"
 #define EMOJI_OCAML "🐫"
+#define EMOJI_ONEDRIVE "☁️"
 #define EMOJI_PATCH "🩹"
 #define EMOJI_PDF "🔖"
 #define EMOJI_PERL "🐪"
