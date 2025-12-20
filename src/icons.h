@@ -597,7 +597,7 @@ struct icons_t const icon_ext[] = {
     {"lzh", ICON_ARCHIVE, YELLOW},
     {"lzma", ICON_ARCHIVE, YELLOW},
 
-    {"m", ICON_MATLAB, YELLOW},
+    {"m", ICON_C, BLUE},
     {"m4a", ICON_AUDIO, YELLOW},
     {"m4v", ICON_VID, BLUE},
     {"markdown", ICON_MARKDOWN, WHITE},
@@ -609,6 +609,7 @@ struct icons_t const icon_ext[] = {
     {"mkv", ICON_VID, BLUE},
     {"ml", ICON_OCAML, WHITE},
     {"mli", ICON_OCAML, WHITE},
+    {"mm", ICON_CPP, B_BLUE},
     {"mov", ICON_VID, BLUE},
     {"mp3", ICON_AUDIO, YELLOW},
     {"mp4", ICON_VID, BLUE},
