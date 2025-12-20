@@ -18,11 +18,6 @@
 #ifndef ICONS_NERDFONT
 #define ICONS_NERDFONT
 
-/* Arrows */
-#define MD_ARROW_UPWARD    ""
-#define MD_ARROW_FORWARD   ""
-#define MD_ARROW_DOWNWARD  ""
-
 /* Generics */
 #define NERD_DIRECTORY     ""
 #define NERD_FILE          ""
@@ -69,7 +64,7 @@
 #define NERD_CSS3          ""
 #define NERD_DART          ""
 #define NERD_DATABASE      ""
-#define NERD_DIFF          ""
+#define NERD_DIFF          ""
 #define NERD_DOCKER        ""
 #define NERD_ELECTRON      "󱀤"
 #define NERD_ELIXIR        ""

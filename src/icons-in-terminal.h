@@ -51,7 +51,6 @@
 #define FILE_ARDUINO "\ue793"
 #define FILE_BIBTEX "\ue756"
 #define FILE_CMAKE "\ue7a2"
-#define FILE_DIFF "\ue7c3"
 #define FILE_ELECTRON "\ue88a"
 #define FILE_EMACS "\ue789"
 #define FILE_EXCEL "\ue851"
@@ -116,6 +115,7 @@
 #define MD_VPN_KEY "\ue402"
 
 #define OCT_BOOK "\ue007"
+#define OCT_DIFF "\ue042"
 #define OCT_FILE_BINARY "\ue073"
 #define OCT_FILE_SYMLINK_FILE "\ue083"
 #define OCT_LAW "\ue097"

@@ -183,7 +183,7 @@ char
     ICON_CSS[] = MFIZZ_CSS3_ALT,
     ICON_DART[] = DEV_DART,
     ICON_DATABASE[] = FA_DATABASE,
-    ICON_DIFF[] = FILE_DIFF,
+    ICON_DIFF[] = OCT_DIFF,
     ICON_DOCKER[] = MFIZZ_DOCKER,
     ICON_ELECTRON[] = FILE_ELECTRON,
     ICON_ELF[] = OCT_FILE_BINARY,
@@ -432,7 +432,8 @@ char
 #define DEF_EXEC_ICON_COLOR WHITE
 
 #define DEF_NOPERM_ICON ICON_LOCK /* File without access permission */
-#define DEF_NOPERM_ICON_COLOR YELLOW
+#define DEF_NOPERM_ICON_COLOR_DIR  YELLOW
+#define DEF_NOPERM_ICON_COLOR_FILE RED
 
 #define DEF_FILE_ICON ICON_REG /* None of the above */
 #define DEF_FILE_ICON_COLOR WHITE
@@ -745,6 +746,7 @@ struct icons_t const icon_dirnames[] = {
     {"Documents", ICON_DOCUMENTS, DEF_DIR_ICON_COLOR},
     {"Downloads", ICON_DOWNLOADS, DEF_DIR_ICON_COLOR},
     {"Dropbox", ICON_DROPBOX, DEF_DIR_ICON_COLOR},
+    {"etc", ICON_CONFIGURE, DEF_DIR_ICON_COLOR},
     {"games", ICON_GAMES, DEF_DIR_ICON_COLOR},
     {"Music", ICON_MUSIC, DEF_DIR_ICON_COLOR},
     {"OneDrive", ICON_ONEDRIVE, DEF_DIR_ICON_COLOR},
@@ -752,12 +754,14 @@ struct icons_t const icon_dirnames[] = {
     {"Public", ICON_PUBLIC, DEF_DIR_ICON_COLOR},
     {"Steam", ICON_STEAM, DEF_DIR_ICON_COLOR},
     {"Templates", ICON_TEMPLATES, DEF_DIR_ICON_COLOR},
+    {"Trash", ICON_TRASH, DEF_DIR_ICON_COLOR},
     {"Videos", ICON_VIDEOS, DEF_DIR_ICON_COLOR},
 };
 
 /* Icons for some specific filenames */
 struct icons_t const icon_filenames[] = {
 /* More specific filenames from here https://github.com/alexanderjeurissen/ranger_devicons/blob/main/devicons.py */
+    {".bash_aliases", ICON_CONF, WHITE},
     {".bash_history", ICON_CONF, WHITE},
     {".bash_logout", ICON_CONF, WHITE},
     {".bash_profile", ICON_CONF, WHITE},
@@ -778,7 +782,7 @@ struct icons_t const icon_filenames[] = {
     {"CMakeLists.txt", ICON_CMAKE, WHITE},
     {"configure", ICON_CONFIGURE, DEF_FILE_ICON_COLOR},
     {"Dockerfile", ICON_DOCKER, BLUE},
-    {"License", ICON_COPYRIGHT, DEF_FILE_ICON_COLOR},
+    {"License", ICON_COPYRIGHT, YELLOW},
     {"Makefile", ICON_MAKEFILE, DEF_FILE_ICON_COLOR},
     {"mimeapps.list", ICON_CONF, WHITE},
     {"PKGBUILD", ICON_ARCH, CYAN},
