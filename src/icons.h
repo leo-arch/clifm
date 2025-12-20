@@ -446,8 +446,8 @@ struct icons_t const icon_ext[] = {
 
     {"a", ICON_ARCHIVE, YELLOW},
     {"aac", ICON_AUDIO, YELLOW},
-    {"accdb", ICON_ACCESS, RED},
     {"abw", ICON_OPENOFFICE_W, CYAN},
+    {"accdb", ICON_ACCESS, RED},
     {"aiff", ICON_AUDIO, YELLOW},
     {"alac", ICON_AUDIO, YELLOW},
     {"apk", ICON_ARCHIVE, YELLOW},
@@ -470,6 +470,7 @@ struct icons_t const icon_ext[] = {
     {"bin", ICON_BINARY, WHITE},
     {"bmp", ICON_IMG, GREEN},
     {"bz2", ICON_ARCHIVE, YELLOW},
+    {"bz3", ICON_ARCHIVE, YELLOW},
 
     {"c", ICON_C, BLUE},
     {"c++", ICON_CPP, B_BLUE},
@@ -660,9 +661,9 @@ struct icons_t const icon_ext[] = {
     {"qcow2", ICON_CD, B_WHITE},
 
     {"r", ICON_R, BLUE},
+    {"rar", ICON_ARCHIVE, YELLOW},
     {"rda", ICON_R, BLUE},
     {"rdata", ICON_R, BLUE},
-    {"rar", ICON_ARCHIVE, YELLOW},
     {"rb", ICON_RUBY, RED},
     {"rc", ICON_CONF, WHITE},
     {"rlib", ICON_RUST, WHITE},
