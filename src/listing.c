@@ -2902,7 +2902,7 @@ load_file_gral_info(const struct stat *a, const filesn_t n)
 		file_info[n].user_access = 0;
 #ifndef _NO_ICONS
 		file_info[n].icon = DEF_NOPERM_ICON;
-		file_info[n].icon_color = file_info[n].dir == 1
+		file_info[n].icon_color = S_ISDIR(a->st_mode)
 			? DEF_NOPERM_ICON_COLOR_DIR : DEF_NOPERM_ICON_COLOR_FILE;
 #endif /* !_NO_ICONS */
 	}
