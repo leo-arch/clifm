@@ -27,6 +27,7 @@
 #define ICONS_EMOJI
 
 #define EMOJI_ARCHIVE "📦"
+#define EMOJI_ARDUINO EMOJI_CODE
 #define EMOJI_ASM EMOJI_CODE
 #define EMOJI_AUDIO "🎵"
 #define EMOJI_BINARY "📓"
@@ -41,6 +42,7 @@
 #define EMOJI_CPP EMOJI_C
 #define EMOJI_CSHARP EMOJI_CODE
 #define EMOJI_CSS "🦋"
+#define EMOJI_D EMOJI_CODE
 #define EMOJI_DATABASE EMOJI_FILE
 #define EMOJI_DESKTOP "💻"
 #define EMOJI_DART EMOJI_CODE
@@ -103,6 +105,7 @@
 #define EMOJI_R "🇷 "
 #define EMOJI_RSS "📡"
 #define EMOJI_RUBY "💎"
+#define EMOJI_RUBYRAILS EMOJI_RUBY
 #define EMOJI_RUST "🦀"
 #define EMOJI_SASS EMOJI_CODE
 #define EMOJI_SCALA EMOJI_CODE
@@ -111,13 +114,15 @@
 #define EMOJI_STEAM EMOJI_GAMES
 #define EMOJI_STYLESHEET "📗"
 #define EMOJI_STYLUS EMOJI_CODE
-#define EMOJI_SUBTITLES "💬"
+#define EMOJI_SUBTITLE "💬"
 #define EMOJI_SWIFT EMOJI_CODE
+#define EMOJI_TCL "🪶"
 #define EMOJI_TEMPLATE "📎"
 #define EMOJI_TEX EMOJI_FILE
 #define EMOJI_TEXT EMOJI_FILE
 #define EMOJI_TYPESCRIPT EMOJI_CODE
 #define EMOJI_TRASH EMOJI_FOLDER
+#define EMOJI_TWIG "🌱"
 #define EMOJI_VIDEOS "📽 "
 #define EMOJI_VIM EMOJI_TEXT
 #define EMOJI_VISUALSTUDIO EMOJI_CODE

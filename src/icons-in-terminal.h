@@ -9,10 +9,12 @@
 
 #define DEV_COFFEESCRIPT "\uea58"
 #define DEV_DART "\uea9f"
+#define DEV_DLANG "\ueab6"
 #define DEV_ERLANG "\ueab8"
 #define DEV_FSHARP "\ueaae"
 #define DEV_JAVASCRIPT "\uea55"
 #define DEV_ONEDRIVE "\uea69"
+#define DEV_RUBY_ON_RAILS "\uea42"
 #define DEV_SWIFT "\uea5c"
 #define DEV_VIM "\ueacc"
 #define DEV_VISUALSTUDIO "\uea13"
@@ -74,8 +76,10 @@
 #define FILE_SQLITE "\ue840"
 #define FILE_STYLUS "\ue73b"
 #define FILE_SWAGGER "\ue88c"
+#define FILE_TCL "\ue7b9"
 #define FILE_TEX "\ue755"
 #define FILE_TS "\ue73f"
+#define FILE_TWIG "\ue753"
 #define FILE_WORD "\ue850"
 
 #define LINEA_MUSIC_CD "\uecd3"
