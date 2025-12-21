@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Dec 3, 2025" "clifm 1.26.5" "Clifm Manual"
+.TH "CLIFM" "1" "Dec 21, 2025" "clifm 1.26.6" "Clifm Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -233,7 +233,7 @@ Enable file previews for tab completion (\fBfzf\fR mode only) with the preview w
 Enable icons.
 .TP
 \fB\-\-icons\-use\-file\-color\fR
-Instead of a specific color, icons use the color of the corresponding filename. Useful when building custom color schemes, this option implies \fB\-\-icons\fR, and is effective only when compiled with support for icons\-in\-terminal or Nerdfonts. The default build is compiled with emoji\-icons support, in which case this option is ignored, as Unicode icons have their own builtin colors.
+Instead of a specific color, icons use the color of the corresponding filename. Useful when building custom color schemes, this option implies \fB\-\-icons\fR, and is effective only when compiled with support for icons\-in\-terminal or Nerdfonts (default). Note that when compiled with emoji\-icons support this option is ignored, as Unicode icons have their own builtin colors.
 .TP
 \fB\-\-int\-vars
 Allow the use of internal variables (e.g.: `\fBVAR=/bin; cd $VAR\fR`).
@@ -1594,7 +1594,7 @@ Each color scheme may include any (or all) of the below options:
 .TP
  \fBSizeShades\fR = A comma delimited list of colors used to print file sizes (long view). Consult the default color scheme file for more information.
 .TP
- \fBDirIconColor\fR = Color for the directory icon (when icons are enabled). See the \fBCOLORS\fR section below. Only when using icons\-in\-terminal or Nerfonts. If using rather emoji\-icons (default build), this option is ignored.
+ \fBDirIconColor\fR = Color for the directory icon (when icons are enabled). See the \fBCOLORS\fR section below. Only when using icons\-in\-terminal or Nerfonts (default). If using rather emoji\-icons, this option is ignored.
 .TP
  \fBPrompt\fR = Define \fBclifm\fR\'s prompt. See the \fBTHE PROMPT\fR section below.
 .TP
