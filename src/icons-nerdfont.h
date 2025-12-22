@@ -89,6 +89,7 @@
 #define NERD_JUPYTER       ""
 #define NERD_KOTLIN        "󱈙"
 #define NERD_LINUX         ""
+#define NERD_LIVESCRIPT    ""
 #define NERD_LUA           ""
 #define NERD_MARKDOWN      ""
 #define NERD_MATLAB        ""

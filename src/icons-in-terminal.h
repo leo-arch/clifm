@@ -63,6 +63,7 @@
 #define FILE_JULIA "\ue74d"
 #define FILE_JUPYTER "\ue7ea"
 #define FILE_KOTLIN "\ue7ec"
+#define FILE_LS "\ue777"
 #define FILE_LUA "\ue77e"
 #define FILE_MAPBOX "\ue7a4"
 #define FILE_MATLAB "\ue7f4"

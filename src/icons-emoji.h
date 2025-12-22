@@ -83,6 +83,7 @@
 #define EMOJI_LINK "🔗"
 #define EMOJI_LINUX "🐧"
 #define EMOJI_LIST "✅"
+#define EMOJI_LIVESCRIPT EMOJI_SCRIPT
 #define EMOJI_LOCK "🔐"
 #define EMOJI_LUA "🌘"
 #define EMOJI_MAKE "🛠 "
