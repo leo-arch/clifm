@@ -70,6 +70,7 @@
 #define FILE_OCAML "\ue77d"
 #define FILE_OPENOFFICE "\ue847"
 #define FILE_PATCH "\ue7c4"
+#define FILE_POLYMER "\ue88e" /* Replacement for svelte */
 #define FILE_POSTSCRIPT "\ue7b8"
 #define FILE_POWERPOINT "\ue84f"
 #define FILE_R "\ue768"

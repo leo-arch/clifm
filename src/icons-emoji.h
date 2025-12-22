@@ -117,6 +117,7 @@
 #define EMOJI_STYLESHEET "📗"
 #define EMOJI_STYLUS EMOJI_CODE
 #define EMOJI_SUBTITLES "💬"
+#define EMOJI_SVELTE EMOJI_CODE
 #define EMOJI_SWIFT EMOJI_CODE
 #define EMOJI_TCL "🪶"
 #define EMOJI_TEMPLATE "📎"

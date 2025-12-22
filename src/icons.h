@@ -123,6 +123,7 @@ char
     ICON_SHARE[] = EMOJI_SHARE,
     ICON_SQLITE[] = EMOJI_DATABASE,
     ICON_STYLUS[] = EMOJI_STYLUS,
+    ICON_SVELTE[] = EMOJI_SVELTE,
     ICON_SWIFT[] = EMOJI_SWIFT,
     ICON_TCL[] = EMOJI_TCL,
     ICON_TEX[] = EMOJI_TEX,
@@ -251,6 +252,7 @@ char
     ICON_SHARE[] = MD_SHARE,
     ICON_SQLITE[] = FILE_SQLITE,
     ICON_STYLUS[] = FILE_STYLUS,
+    ICON_SVELTE[] = FILE_POLYMER, /* svelte is missing. Let's use this. */
     ICON_SWIFT[] = DEV_SWIFT,
     ICON_TCL[] = FILE_TCL,
     ICON_TEX[] = FILE_TEX,
@@ -704,9 +706,7 @@ struct icons_t const icon_ext[] = {
     {"srt", ICON_SUBTITLES, WHITE},
     {"styl", ICON_STYLUS, B_GREEN},
     {"sub", ICON_SUBTITLES, WHITE},
-#ifdef NERDFONTS
     {"svelte", ICON_SVELTE, RED},
-#endif
     {"svg", ICON_IMG, GREEN},
     {"swift", ICON_SWIFT, GREEN},
 
