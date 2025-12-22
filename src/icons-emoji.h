@@ -67,11 +67,13 @@
 #define EMOJI_GIT "🌱"
 #define EMOJI_GO "🐹"
 #define EMOJI_HAML EMOJI_CODE
+#define EMOJI_HEROKU EMOJI_CONF
 #define EMOJI_HOME "🏠"
 #define EMOJI_HTML "🌐"
 #define EMOJI_IMAGE "🎨"
 #define EMOJI_JAVA "☕"
 #define EMOJI_JAVASCRIPT EMOJI_CODE
+#define EMOJI_JENKINS EMOJI_CONF
 #define EMOJI_JULIA EMOJI_CODE
 #define EMOJI_JSON EMOJI_CONF
 #define EMOJI_KEY "🔑"
@@ -126,6 +128,7 @@
 #define EMOJI_TYPESCRIPT EMOJI_CODE
 #define EMOJI_TRASH EMOJI_FOLDER
 #define EMOJI_TWIG "🌱"
+#define EMOJI_VAGRANT EMOJI_FILE
 #define EMOJI_VIDEOS "📽 "
 #define EMOJI_VIM EMOJI_TEXT
 #define EMOJI_VISUALSTUDIO EMOJI_CODE

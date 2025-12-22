@@ -59,6 +59,7 @@
 #define FILE_FORTRAN "\ue76d"
 #define FILE_GO "\ue75b"
 #define FILE_HAML "\ue8ed"
+#define FILE_JENKINS "\ue75c"
 #define FILE_JULIA "\ue74d"
 #define FILE_KOTLIN "\ue7ec"
 #define FILE_LUA "\ue77e"
@@ -82,6 +83,7 @@
 #define FILE_TEX "\ue755"
 #define FILE_TS "\ue73f"
 #define FILE_TWIG "\ue753"
+#define FILE_VAGRANT "\ue737"
 #define FILE_VUE "\ue769"
 #define FILE_WORD "\ue850"
 
@@ -100,6 +102,7 @@
 #define MFIZZ_ELM "\uedc5"
 #define MFIZZ_GIT "\uedce"
 #define MFIZZ_HASKELL "\ueddd"
+#define MFIZZ_HEROKU "\uedde"
 #define MFIZZ_HTML5_ALT "\uede1"
 #define MFIZZ_JAVA "\uede3"
 #define MFIZZ_MYSQL "\uedf8"
