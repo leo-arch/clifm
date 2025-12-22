@@ -440,7 +440,6 @@ char
 # define BLUE "\x1b[0;34m"
 # define B_BLUE "\x1b[1;34m"
 # define WHITE "\x1b[0;37m"
-# define B_WHITE "\x1b[1;37m"
 # define YELLOW "\x1b[0;33m"
 # define GREEN "\x1b[0;32m"
 # define B_GREEN "\x1b[1;32m"
@@ -452,7 +451,6 @@ char
 # define BLUE EMPTY_STR
 # define B_BLUE EMPTY_STR
 # define WHITE EMPTY_STR
-# define B_WHITE EMPTY_STR
 # define YELLOW EMPTY_STR
 # define GREEN EMPTY_STR
 # define B_GREEN EMPTY_STR
@@ -496,15 +494,15 @@ struct icons_t const icon_ext[] = {
     {"avi", ICON_VID, BLUE},
     {"avif", ICON_IMG, GREEN},
     {"awk", ICON_SCRIPT, WHITE},
-    {"azw", ICON_BOOK, B_WHITE},
-    {"azw3", ICON_BOOK, B_WHITE},
+    {"azw", ICON_BOOK, WHITE},
+    {"azw3", ICON_BOOK, WHITE},
 
     {"bash", ICON_SCRIPT, WHITE},
     {"bat", ICON_SCRIPT, WHITE},
 #ifdef _ICONS_IN_TERMINAL
-    {"bib", FILE_BIBTEX, B_WHITE},
+    {"bib", FILE_BIBTEX, WHITE},
 #else
-    {"bib", ICON_TEX, B_WHITE},
+    {"bib", ICON_TEX, WHITE},
 #endif
     {"bin", ICON_BINARY, WHITE},
     {"bmp", ICON_IMG, GREEN},
@@ -520,11 +518,11 @@ struct icons_t const icon_ext[] = {
     {"cfg", ICON_CONF, WHITE},
     {"cjs", ICON_JAVASCRIPT, WHITE},
     {"clifm", ICON_CONF, WHITE},
-    {"class", ICON_JAVA, B_WHITE},
+    {"class", ICON_JAVA, WHITE},
     {"clj", ICON_CLOJURE, GREEN},
     {"cljc", ICON_CLOJURE, GREEN},
     {"cljs", ICON_CLOJURE, B_BLUE},
-    {"cls", ICON_TEX, B_WHITE},
+    {"cls", ICON_TEX, WHITE},
     {"cmake", ICON_CMAKE, WHITE},
     {"coffee", ICON_COFFEE, WHITE},
     {"conf", ICON_CONF, WHITE},
@@ -550,9 +548,9 @@ struct icons_t const icon_ext[] = {
     {"desktop", ICON_CONF, WHITE},
     {"di", ICON_D, RED},
     {"diff", ICON_DIFF, WHITE},
-    {"djvu", ICON_BOOK, B_WHITE},
+    {"djvu", ICON_BOOK, WHITE},
     {"dll", ICON_SHARE, BLUE},
-    {"dmg", ICON_CD, B_WHITE},
+    {"dmg", ICON_CD, WHITE},
     {"doc", ICON_WORD, BLUE},
     {"docx", ICON_WORD, BLUE},
 
@@ -561,7 +559,7 @@ struct icons_t const icon_ext[] = {
     {"el", ICON_EMACS, BLUE},
     {"elf", ICON_ELF, WHITE},
     {"elm", ICON_ELM, GREEN},
-    {"epub", ICON_BOOK, B_WHITE},
+    {"epub", ICON_BOOK, WHITE},
     {"erb", ICON_RUBYRAILS, RED},
     {"erl", ICON_ERLANG, RED},
     {"ex", ICON_ELIXIR, BLUE},
@@ -602,14 +600,14 @@ struct icons_t const icon_ext[] = {
     {"hxx", ICON_CPP, B_BLUE},
 
     {"ico", ICON_IMG, GREEN},
-    {"img", ICON_CD, B_WHITE},
+    {"img", ICON_CD, WHITE},
     {"ini", ICON_CONF, WHITE},
     {"ino", ICON_ARDUINO, GREEN},
     {"ipynb", ICON_JUPYTER, RED},
-    {"iso", ICON_CD, B_WHITE},
+    {"iso", ICON_CD, WHITE},
 
-    {"jar", ICON_JAVA, B_WHITE},
-    {"java", ICON_JAVA, B_WHITE},
+    {"jar", ICON_JAVA, WHITE},
+    {"java", ICON_JAVA, WHITE},
     {"jl", ICON_JULIA, BLUE},
     {"jpeg", ICON_IMG, GREEN},
     {"jpg", ICON_IMG, GREEN},
@@ -619,7 +617,7 @@ struct icons_t const icon_ext[] = {
     {"jxl", ICON_IMG, GREEN},
 
     {"key", ICON_KEY, YELLOW},
-    {"kfx", ICON_BOOK, B_WHITE},
+    {"kfx", ICON_BOOK, WHITE},
     {"ko", ICON_BINARY, WHITE},
     {"kra", ICON_IMG, GREEN},
     {"kt", ICON_KOTLIN, BLUE},
@@ -697,8 +695,8 @@ struct icons_t const icon_ext[] = {
     {"pyd", ICON_PYTHON, GREEN},
     {"pyo", ICON_PYTHON, GREEN},
 
-    {"qcow", ICON_CD, B_WHITE},
-    {"qcow2", ICON_CD, B_WHITE},
+    {"qcow", ICON_CD, WHITE},
+    {"qcow2", ICON_CD, WHITE},
 
     {"r", ICON_R, BLUE},
     {"rar", ICON_ARCHIVE, YELLOW},
@@ -733,7 +731,7 @@ struct icons_t const icon_ext[] = {
     {"tar", ICON_ARCHIVE, YELLOW},
     {"tbz2", ICON_ARCHIVE, YELLOW},
     {"tcl", ICON_TCL, GREEN},
-    {"tex", ICON_TEX, B_WHITE},
+    {"tex", ICON_TEX, WHITE},
     {"tgz", ICON_ARCHIVE, YELLOW},
     {"tif", ICON_IMG, GREEN},
     {"tiff", ICON_IMG, GREEN},
@@ -746,10 +744,10 @@ struct icons_t const icon_ext[] = {
     {"txt", ICON_TXT, WHITE},
     {"txz", ICON_ARCHIVE, YELLOW},
 
-    {"vdi", ICON_CD, B_WHITE},
-    {"vhd", ICON_CD, B_WHITE},
-    {"vhdx", ICON_CD, B_WHITE},
-    {"vmdk", ICON_CD, B_WHITE},
+    {"vdi", ICON_CD, WHITE},
+    {"vhd", ICON_CD, WHITE},
+    {"vhdx", ICON_CD, WHITE},
+    {"vmdk", ICON_CD, WHITE},
     {"vim", ICON_VIM, GREEN},
     {"vimrc", ICON_VIM, GREEN},
     {"vtt", ICON_SUBTITLES, WHITE},
