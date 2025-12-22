@@ -469,7 +469,7 @@ struct icons_t const icon_ext[] = {
     {"7z", ICON_ARCHIVE, YELLOW},
     {"3gp", ICON_VID, BLUE},
 
-    {"a", ICON_ARCHIVE, YELLOW},
+    {"a", ICON_BINARY, WHITE},
     {"aac", ICON_AUDIO, YELLOW},
     {"abw", ICON_OPENOFFICE_W, CYAN},
     {"accdb", ICON_ACCESS, RED},
@@ -491,7 +491,7 @@ struct icons_t const icon_ext[] = {
     {"bib", FILE_BIBTEX, B_WHITE},
 #else
     {"bib", ICON_TEX, B_WHITE},
-#endif /* _ICONS_IN_TERMINAL */
+#endif
     {"bin", ICON_BINARY, WHITE},
     {"bmp", ICON_IMG, GREEN},
     {"bz2", ICON_ARCHIVE, YELLOW},
