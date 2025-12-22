@@ -66,6 +66,7 @@
 #define EMOJI_GAMES "🎮"
 #define EMOJI_GIT "🌱"
 #define EMOJI_GO "🐹"
+#define EMOJI_HAML EMOJI_CODE
 #define EMOJI_HOME "🏠"
 #define EMOJI_HTML "🌐"
 #define EMOJI_IMAGE "🎨"
@@ -87,6 +88,7 @@
 #define EMOJI_MATLAB EMOJI_CODE
 #define EMOJI_MOVIE "🎬"
 #define EMOJI_MUSIC "🎧"
+#define EMOJI_MUSTACHE EMOJI_CODE
 #define EMOJI_NIM EMOJI_CODE
 #define EMOJI_NOTE "📝"
 #define EMOJI_OCAML "🐫"
@@ -114,7 +116,7 @@
 #define EMOJI_STEAM EMOJI_GAMES
 #define EMOJI_STYLESHEET "📗"
 #define EMOJI_STYLUS EMOJI_CODE
-#define EMOJI_SUBTITLE "💬"
+#define EMOJI_SUBTITLES "💬"
 #define EMOJI_SWIFT EMOJI_CODE
 #define EMOJI_TCL "🪶"
 #define EMOJI_TEMPLATE "📎"
@@ -126,6 +128,7 @@
 #define EMOJI_VIDEOS "📽 "
 #define EMOJI_VIM EMOJI_TEXT
 #define EMOJI_VISUALSTUDIO EMOJI_CODE
+#define EMOJI_VUE EMOJI_CODE
 #define EMOJI_WINDOWS "🪟"
 #define EMOJI_WORD "📘"
 #define EMOJI_XML EMOJI_CODE

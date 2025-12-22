@@ -15,11 +15,12 @@
 #ifndef ICONS_H
 #define ICONS_H
 
-#if defined(_ICONS_EMOJI)
+#if defined(EMOJI_ICONS)
 # include "icons-emoji.h"
 #elif defined(_ICONS_IN_TERMINAL)
 # include "icons-in-terminal.h"
 #else
+# define NERDFONTS
 # include "icons-nerdfont.h"
 #endif /* _NERD */
 
@@ -32,7 +33,7 @@ struct icons_t {
 /* Icon macros are defined in icons-in-terminal.h (provided by the
  * 'icons-in-terminal' project), icons-nerdfont.h, and icons-emoji.h */
 char
-#if defined(_ICONS_EMOJI)
+#if defined(EMOJI_ICONS)
     /* File types */
     ICON_DIR[] = EMOJI_FOLDER,
     ICON_EXEC[] = EMOJI_EXEC,
@@ -53,7 +54,6 @@ char
     ICON_CMAKE[] = EMOJI_MAKE,
     ICON_CODE[] = EMOJI_CODE,
     ICON_COFFEE[] = EMOJI_COFFEE,
-    ICON_SUBTITLE[] = EMOJI_SUBTITLE,
     ICON_CONF[] = EMOJI_CONF,
     ICON_CONFIGURE[] = EMOJI_CONF,
     ICON_COPYRIGHT[] = EMOJI_LICENSE,
@@ -77,6 +77,7 @@ char
     ICON_FSHARP[] = EMOJI_FSHARP,
     ICON_GLEAM[] = EMOJI_GLEAM,
     ICON_GO[] = EMOJI_GO,
+    ICON_HAML[] = EMOJI_HAML,
     ICON_HASKELL[] = EMOJI_HASKELL,
     ICON_HISTORY[] = EMOJI_CHANGELOG,
     ICON_HTML[] = EMOJI_HTML,
@@ -93,6 +94,7 @@ char
     ICON_MANPAGE[] = EMOJI_MANUAL,
     ICON_MARKDOWN[] = EMOJI_MARKDOWN,
     ICON_MATLAB[] = EMOJI_MATLAB,
+    ICON_MUSTACHE[] = EMOJI_MUSTACHE,
     ICON_MYSQL[] = EMOJI_DATABASE,
     ICON_NIM[] = EMOJI_NIM,
     ICON_ASM[] = EMOJI_ASM,
@@ -130,6 +132,7 @@ char
     ICON_VIM[] = EMOJI_VIM,
     ICON_VID[] = EMOJI_MOVIE,
     ICON_VISUALSTUDIO[] = EMOJI_VISUALSTUDIO,
+    ICON_VUE[] = EMOJI_VUE,
     ICON_WINDOWS[] = EMOJI_WINDOWS,
     ICON_WORD[] = EMOJI_WORD,
     ICON_XML[] = EMOJI_XML,
@@ -153,6 +156,7 @@ char
     ICON_PICTURES[] = EMOJI_PICTURE,
     ICON_PUBLIC[] = EMOJI_PUBLIC,
     ICON_STEAM[] = EMOJI_STEAM,
+    ICON_SUBTITLES[] = EMOJI_SUBTITLES,
     ICON_TEMPLATES[] = EMOJI_TEMPLATE,
     ICON_TRASH[] = EMOJI_TRASH,
     ICON_VIDEOS[] = EMOJI_VIDEOS;
@@ -178,7 +182,6 @@ char
     ICON_CMAKE[] = FILE_CMAKE,
     ICON_CODE[] = FA_FILE_CODE_O,
     ICON_COFFEE[] = DEV_COFFEESCRIPT,
-    ICON_SUBTITLE[] = FA_COMMENTS,
     ICON_CONF[] = FA_SLIDERS,
     ICON_CONFIGURE[] = FA_SLIDERS,
     ICON_COPYRIGHT[] = OCT_LAW,
@@ -202,6 +205,7 @@ char
     ICON_FSHARP[] = DEV_FSHARP,
     ICON_GLEAM[] = FA_STAR,
     ICON_GO[] = FILE_GO,
+    ICON_HAML[] = FILE_HAML,
     ICON_HASKELL[] = MFIZZ_HASKELL,
     ICON_HISTORY[] = FA_HISTORY,
     ICON_HTML[] = MFIZZ_HTML5_ALT,
@@ -218,6 +222,7 @@ char
     ICON_MAKEFILE[] = FILE_MAPBOX,
     ICON_MATLAB[] = FILE_MATLAB,
     ICON_MARKDOWN[] = OCT_MARKDOWN,
+    ICON_MUSTACHE[] = FILE_MUSTACHE,
     ICON_MYSQL[] = MFIZZ_MYSQL,
     ICON_NIM[] = FILE_NIM,
     ICON_ASM[] = FILE_NASM,
@@ -255,6 +260,7 @@ char
     ICON_VID[] = FA_FILE_MOVIE_O,
     ICON_VIM[] = DEV_VIM,
     ICON_VISUALSTUDIO[] = DEV_VISUALSTUDIO,
+    ICON_VUE[] = FILE_VUE,
     ICON_WINDOWS[] = DEV_WINDOWS,
     ICON_WORD[] = FILE_WORD,
     ICON_XML[] = FA_CODE,
@@ -278,11 +284,12 @@ char
     ICON_PICTURES[] = MD_CAMERA_ALT,
     ICON_PUBLIC[] = FA_INBOX,
     ICON_STEAM[] = FA_STEAM,
+    ICON_SUBTITLES[] = MD_SUBTITLES,
     ICON_TEMPLATES[] = FA_PAPERCLIP,
     ICON_TRASH[] = FA_TRASH,
     ICON_VIDEOS[] = FA_FILM;
 
-#else /* nerd-icons */
+#else /* Nerdfonts */
     /* File types */
     ICON_DIR[] = NERD_DIRECTORY,
     ICON_EXEC[] = NERD_EXEC,
@@ -303,7 +310,6 @@ char
     ICON_CMAKE[] = NERD_CMAKE,
     ICON_CODE[] = NERD_FILE,
     ICON_COFFEE[] = NERD_COFFEE,
-    ICON_SUBTITLE[] = NERD_SUBTITLE,
     ICON_CONF[] = NERD_CONFIGURE,
     ICON_CONFIGURE[] = NERD_CONFIGURE,
     ICON_COPYRIGHT[] = NERD_COPYRIGHT,
@@ -327,6 +333,7 @@ char
     ICON_FSHARP[] = NERD_FSHARP,
     ICON_GLEAM[] = NERD_GLEAM,
     ICON_GO[] = NERD_GO,
+    ICON_HAML[] = NERD_HAML,
     ICON_HASKELL[] = NERD_HASKELL,
     ICON_HISTORY[] = NERD_HISTORY,
     ICON_HTML[] = NERD_HTML,
@@ -343,6 +350,7 @@ char
     ICON_MANPAGE[] = NERD_MANUAL,
     ICON_MARKDOWN[] = NERD_MARKDOWN,
     ICON_MATLAB[] = NERD_MATLAB,
+    ICON_MUSTACHE[] = NERD_MUSTACHE,
     ICON_MYSQL[] = NERD_MYSQL,
     ICON_NIM[] = NERD_NIM,
     ICON_ASM[] = NERD_ASM,
@@ -371,6 +379,7 @@ char
     ICON_SHARE[] = NERD_SHARE,
     ICON_SQLITE[] = NERD_FILE,
     ICON_STYLUS[] = NERD_STYLUS,
+    ICON_SVELTE[] = NERD_SVELTE,
     ICON_SWIFT[] = NERD_SWIFT,
     ICON_TCL[] = NERD_TCL,
     ICON_TEX[] = NERD_TEX,
@@ -380,6 +389,7 @@ char
     ICON_VID[] = NERD_VIDEOFILE,
     ICON_VIM[] = NERD_VIM,
     ICON_VISUALSTUDIO[] = NERD_VISUALSTUDIO,
+    ICON_VUE[] = NERD_VUE,
     ICON_WINDOWS[] = NERD_WINDOWS,
     ICON_WORD[] = NERD_WORDDOC,
     ICON_XML[] = NERD_XML,
@@ -404,11 +414,12 @@ char
     ICON_PICTURES[] = NERD_PICTURES,
     ICON_PUBLIC[] = NERD_PUBLIC,
     ICON_STEAM[] = NERD_STEAM,
+    ICON_SUBTITLES[] = NERD_SUBTITLES,
     ICON_TEMPLATES[] = NERD_TEMPLATES,
     ICON_VIDEOS[] = NERD_VIDEOS;
 #endif /* _EMOJI_ICONS */
 
-#if defined(_ICONS_IN_TERMINAL) || !defined(_ICONS_EMOJI)
+#if !defined(EMOJI_ICONS)
 # define BLUE "\x1b[0;34m"
 # define B_BLUE "\x1b[1;34m"
 # define WHITE "\x1b[0;37m"
@@ -486,10 +497,7 @@ struct icons_t const icon_ext[] = {
 
     {"c", ICON_C, BLUE},
     {"c++", ICON_CPP, B_BLUE},
-    {"cabal", ICON_HASKELL, BLUE},
     {"cab", ICON_ARCHIVE, YELLOW},
-    {"cb7", ICON_ARCHIVE, YELLOW},
-    {"cba", ICON_ARCHIVE, YELLOW},
     {"cbr", ICON_ARCHIVE, YELLOW},
     {"cbz", ICON_ARCHIVE, YELLOW},
     {"cc", ICON_CPP, B_BLUE},
@@ -499,7 +507,7 @@ struct icons_t const icon_ext[] = {
     {"class", ICON_JAVA, B_WHITE},
     {"clj", ICON_CLOJURE, GREEN},
     {"cljc", ICON_CLOJURE, GREEN},
-    {"cljs", ICON_CLOJURE, GREEN},
+    {"cljs", ICON_CLOJURE, B_BLUE},
     {"cls", ICON_TEX, B_WHITE},
     {"cmake", ICON_CMAKE, WHITE},
     {"coffee", ICON_COFFEE, WHITE},
@@ -563,8 +571,8 @@ struct icons_t const icon_ext[] = {
     {"gzip", ICON_ARCHIVE, YELLOW},
 
     {"h", ICON_C, BLUE},
-    {"haml", ICON_CODE, WHITE},
-    {"heex", ICON_ELIXIR, BLUE},
+    {"haml", ICON_HAML, YELLOW},
+    {"hbs", ICON_MUSTACHE, WHITE},
     {"heic", ICON_IMG, GREEN},
     {"heif", ICON_IMG, GREEN},
     {"hh", ICON_CPP, B_BLUE},
@@ -599,6 +607,7 @@ struct icons_t const icon_ext[] = {
     {"kts", ICON_KOTLIN, BLUE},
     {"ksh", ICON_SCRIPT, WHITE},
 
+    {"leex", ICON_ELIXIR, BLUE},
     {"lhs", ICON_HASKELL, BLUE},
     {"log", ICON_TXT, WHITE},
     {"lua", ICON_LUA, BLUE},
@@ -627,6 +636,7 @@ struct icons_t const icon_ext[] = {
     {"mpg", ICON_VID, BLUE},
     {"msi", ICON_WINDOWS, BLUE},
     {"mts", ICON_TS, BLUE},
+    {"mustache", ICON_MUSTACHE, WHITE},
 
     {"nim", ICON_NIM, YELLOW},
     {"nimble", ICON_NIM, YELLOW},
@@ -660,8 +670,6 @@ struct icons_t const icon_ext[] = {
     {"ppt", ICON_POWERPOINT, YELLOW},
     {"pptx", ICON_POWERPOINT, YELLOW},
     {"ps", ICON_POSTSCRIPT, RED},
-    {"psb", ICON_IMG, GREEN},
-    {"psv", ICON_IMG, GREEN},
     {"psd", ICON_IMG, GREEN},
     {"py", ICON_PYTHON, GREEN},
     {"pyc", ICON_PYTHON, GREEN},
@@ -693,9 +701,12 @@ struct icons_t const icon_ext[] = {
     {"so", ICON_BINARY, WHITE},
     {"sql", ICON_MYSQL, CYAN},
     {"sqlite", ICON_SQLITE, WHITE},
-    {"srt", ICON_SUBTITLE, WHITE},
+    {"srt", ICON_SUBTITLES, WHITE},
     {"styl", ICON_STYLUS, B_GREEN},
-    {"sub", ICON_SUBTITLE, WHITE},
+    {"sub", ICON_SUBTITLES, WHITE},
+#ifdef NERDFONTS
+    {"svelte", ICON_SVELTE, RED},
+#endif
     {"svg", ICON_IMG, GREEN},
     {"swift", ICON_SWIFT, GREEN},
 
@@ -722,7 +733,8 @@ struct icons_t const icon_ext[] = {
     {"vmdk", ICON_CD, B_WHITE},
     {"vim", ICON_VIM, GREEN},
     {"vimrc", ICON_VIM, GREEN},
-    {"vtt", ICON_SUBTITLE, WHITE},
+    {"vtt", ICON_SUBTITLES, WHITE},
+    {"vue", ICON_VUE, GREEN},
 
     {"wav", ICON_AUDIO, YELLOW},
     {"webm", ICON_VID, BLUE},
