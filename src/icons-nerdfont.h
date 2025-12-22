@@ -86,6 +86,7 @@
 #define NERD_JENKINS       ""
 #define NERD_JSON          ""
 #define NERD_JULIA         ""
+#define NERD_JUPYTER       ""
 #define NERD_KOTLIN        "󱈙"
 #define NERD_LINUX         ""
 #define NERD_LUA           ""

@@ -61,6 +61,7 @@
 #define FILE_HAML "\ue8ed"
 #define FILE_JENKINS "\ue75c"
 #define FILE_JULIA "\ue74d"
+#define FILE_JUPYTER "\ue7ea"
 #define FILE_KOTLIN "\ue7ec"
 #define FILE_LUA "\ue77e"
 #define FILE_MAPBOX "\ue7a4"
