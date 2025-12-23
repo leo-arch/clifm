@@ -267,7 +267,7 @@ ExtColors="3gp=VIDEO:asf=VIDEO:avi=VIDEO:cgm=VIDEO:dl=VIDEO:flc=VIDEO:fli=VIDEO:
 
 # MARKUP FILES
 define MARKUP=@85
-ExtColors="css=MARKUP:htm=MARKUP:html=MARKUP:ltx=MARKUP:markdown=MARKUP:md=MARKUP:mdown=MARKUP:opf=MARKUP:rss=MARKUP:sass=MARKUP:scss=MARKUP:sgml=MARKUP:shtml=MARKUP:tex=MARKUP:xbel=MARKUP:xhtml=MARKUP:xml=MARKUP:xsd=MARKUP:xslt=MARKUP:"
+ExtColors="css=MARKUP:htm=MARKUP:html=MARKUP:ltx=MARKUP:markdown=MARKUP:md=MARKUP:mdown=MARKUP:opf=MARKUP:rss=MARKUP:rst=MARKUP:sass=MARKUP:scss=MARKUP:sgml=MARKUP:shtml=MARKUP:tex=MARKUP:xbel=MARKUP:xhtml=MARKUP:xml=MARKUP:xsd=MARKUP:xslt=MARKUP:"
 
 # TEMPORARY FILES
 define TEMP=@247
@@ -275,7 +275,7 @@ ExtColors="$$$=TEMP:aux=TEMP:bak=TEMP:bbl=TEMP:bc=TEMP:bk=TEMP:bkp=TEMP:cache=TE
 
 # DATABASES
 define DB=@211
-ExtColors="accdb=DB:cdx=DB:db=DB:dbf=DB:dbi=DB:dbx=DB:fox=DB:mdb=DB:mdn=DB:mdx=DB:msql=DB:mssql=DB:odb=DB:pgsql=DB:sql=DB:sqlite=DB:ssql=DB:"
+ExtColors="cdx=DB:db=DB:dbf=DB:dbi=DB:dbx=DB:fox=DB:mdb=DB:mdn=DB:mdx=DB:msql=DB:mssql=DB:odb=DB:pgsql=DB:sql=DB:sqlite=DB:ssql=DB:"
 
 #=====================================#
 #           COLOR SHADES              #
