@@ -107,7 +107,7 @@
 #define MFIZZ_HEROKU "\uedde"
 #define MFIZZ_HTML5_ALT "\uede1"
 #define MFIZZ_JAVA "\uede3"
-#define MFIZZ_MYSQL "\uedf8"
+#define MFIZZ_MYSQL_ALT "\uedf9"
 #define MFIZZ_PERL "\uee05"
 #define MFIZZ_PHP_ALT "\uee0a"
 #define MFIZZ_PYTHON "\uee10"
