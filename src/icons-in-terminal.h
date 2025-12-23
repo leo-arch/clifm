@@ -34,6 +34,7 @@
 #define FA_FILE_MOVIE_O "\ue281"
 #define FA_FILE_O "\ue0f6"
 #define FA_FILE_PDF_O "\ue27a"
+#define FA_FILE_TEXT_O "\ue1bc"
 #define FA_FILM "\ue0e9"
 #define FA_FOLDER "\ue155"
 #define FA_HISTORY "\ue292"
