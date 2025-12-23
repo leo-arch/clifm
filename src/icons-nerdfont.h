@@ -27,11 +27,12 @@
 
 /* Top level and common icons */
 #define NERD_ACCESS        "󱎎"
-#define NERD_ARCHIVE       ""
+#define NERD_ARCHIVE       "󰀼"
 #define NERD_BINARY        ""
 #define NERD_BRIEFCASE     "󱒔"
 #define NERD_CHANGELOG     ""
-#define NERD_CONFIGURE     ""
+#define NERD_CONFIG_DIR    ""
+#define NERD_CONFIG_FILE   "󱁼"
 #define NERD_DESKTOP       "󰟀"
 #define NERD_DOCUMENT      NERD_FILE
 #define NERD_DOWNLOADS     "󰇚"
@@ -103,7 +104,7 @@
 #define NERD_PERL          ""
 #define NERD_PHP           "󰌟"
 #define NERD_PLAYLIST      "󰲸"
-#define NERD_PYTHON        ""
+#define NERD_PYTHON        "󰌠"
 #define NERD_R             "󰟔"
 #define NERD_REACT         ""
 #define NERD_RSS           ""
