@@ -33,6 +33,7 @@
 #define EMOJI_BOOK_OPEN "📖"
 #define EMOJI_BRIEFCASE "💼"
 #define EMOJI_C "🇨 "
+#define EMOJI_CERT EMOJI_KEY
 #define EMOJI_CLOJURE EMOJI_CODE
 #define EMOJI_CODE "📑"
 #define EMOJI_CHANGELOG "🔺"

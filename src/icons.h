@@ -50,6 +50,7 @@ char
     ICON_BOOK[] = EMOJI_BOOK_OPEN,
     ICON_C[] = EMOJI_C,
     ICON_CD[] = EMOJI_DISK,
+    ICON_CERT[] = EMOJI_CERT,
     ICON_CLOJURE[] = EMOJI_CLOJURE,
     ICON_CMAKE[] = EMOJI_MAKE,
     ICON_CODE[] = EMOJI_CODE,
@@ -185,6 +186,7 @@ char
     ICON_BOOK[] = OCT_BOOK,
     ICON_C[] = MFIZZ_C,
     ICON_CD[] = LINEA_MUSIC_CD,
+    ICON_CERT[] = MD_VPN_KEY,
     ICON_CLOJURE[] = MFIZZ_CLOJURE,
     ICON_CMAKE[] = FILE_CMAKE,
     ICON_CODE[] = FA_FILE_CODE_O,
@@ -320,6 +322,7 @@ char
     ICON_BOOK[] = NERD_BOOK,
     ICON_C[] = NERD_C,
     ICON_CD[] = NERD_OPTICALDISK,
+    ICON_CERT[] = NERD_CERT,
     ICON_CLOJURE[] = NERD_CLOJURE,
     ICON_CMAKE[] = NERD_CMAKE,
     ICON_CODE[] = NERD_FILE,
@@ -481,7 +484,6 @@ char
 
 /* Per file extension icons */
 struct icons_t const icon_ext[] = {
-    {"1", ICON_MANPAGE, WHITE},
     {"7z", ICON_ARCHIVE, YELLOW},
     {"3gp", ICON_VID, BLUE},
 
@@ -492,7 +494,7 @@ struct icons_t const icon_ext[] = {
     {"alac", ICON_AUDIO, YELLOW},
     {"apk", ICON_ARCHIVE, YELLOW},
     {"arj", ICON_ARCHIVE, YELLOW},
-    {"asc", ICON_KEY, YELLOW},
+    {"asc", ICON_LOCK, GREEN},
     {"asm", ICON_ASM, BLUE},
     {"avi", ICON_VID, BLUE},
     {"avif", ICON_IMG, GREEN},
@@ -516,6 +518,8 @@ struct icons_t const icon_ext[] = {
     {"c++", ICON_CPP, B_BLUE},
     {"cab", ICON_ARCHIVE, YELLOW},
     {"cbr", ICON_ARCHIVE, YELLOW},
+    {"cert", ICON_CERT, RED},
+    {"crt", ICON_CERT, RED},
     {"cbz", ICON_ARCHIVE, YELLOW},
     {"cc", ICON_CPP, B_BLUE},
     {"cfg", ICON_CONFIG, WHITE},
@@ -582,9 +586,10 @@ struct icons_t const icon_ext[] = {
     {"fsx", ICON_FSHARP, CYAN},
 
     {"gem", ICON_ARCHIVE, YELLOW},
+    {"gemspec", ICON_RUBY, RED},
     {"gif", ICON_IMG, GREEN},
     {"gleam", ICON_GLEAM, MAGENTA},
-    {"gpg", ICON_KEY, YELLOW},
+    {"gpg", ICON_LOCK, GREEN},
     {"go", ICON_GO, B_BLUE},
     {"gz", ICON_ARCHIVE, YELLOW},
     {"gzip", ICON_ARCHIVE, YELLOW},
@@ -694,6 +699,7 @@ struct icons_t const icon_ext[] = {
     {"pptx", ICON_POWERPOINT, YELLOW},
     {"ps", ICON_POSTSCRIPT, RED},
     {"psd", ICON_IMG, GREEN},
+    {"pub", ICON_KEY, GREEN},
     {"py", ICON_PYTHON, GREEN},
     {"pyc", ICON_PYTHON, GREEN},
     {"pyd", ICON_PYTHON, GREEN},
@@ -753,7 +759,6 @@ struct icons_t const icon_ext[] = {
     {"vhdx", ICON_CD, WHITE},
     {"vmdk", ICON_CD, WHITE},
     {"vim", ICON_VIM, GREEN},
-    {"vtt", ICON_SUBTITLES, WHITE},
     {"vue", ICON_VUE, GREEN},
 
     {"wav", ICON_AUDIO, YELLOW},

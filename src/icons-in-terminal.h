@@ -22,6 +22,7 @@
 
 #define FA_ARCHIVE "\ue244"
 #define FA_BRIEFCASE "\ue187"
+//#define FA_CERTIFICATE "\ue17a"
 #define FA_CHECK_SQUARE_O "\ue123"
 #define FA_CODE "\ue1e4"
 #define FA_COG "\ue0f3"
