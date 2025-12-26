@@ -245,7 +245,7 @@ ExtColors="cfg=CONFIG:clifm=CONFIG:conf=CONFIG:desktop=CONFIG:hjson=CONFIG:ini=C
 
 # DOCUMENTS
 define DOC=@228
-ExtColors="abw=DOC:chm=DOC:csv=DOC:doc=DOC:docx=DOC:eml=DOC:gdoc=DOC:key=DOC:keynote=DOC:numbers=DOC:odg=DOC:odp=DOC:ods=DOC:odt=DOC:pages=DOC:pps=DOC:ppt=DOC:pptx=DOC:rtf=DOC:sla=DOC:sxi=DOC:sxw=DOC:txt=DOC:xlr=DOC:xls=DOC:xlsx=DOC:"
+ExtColors="abw=DOC:chm=DOC:csv=DOC:doc=DOC:docx=DOC:eml=DOC:gdoc=DOC:key=DOC:keynote=DOC:numbers=DOC:odg=DOC:odp=DOC:ods=DOC:odt=DOC:pages=DOC:pps=DOC:ppt=DOC:pptx=DOC:rtf=DOC:sla=DOC:txt=DOC:xls=DOC:xlsx=DOC:"
 
 # EBOOKS
 define EBOOK=@223
