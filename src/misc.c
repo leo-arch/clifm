@@ -1222,6 +1222,9 @@ free_stuff(void)
 	free(name_icons_hashes);
 	free(dir_icons_hashes);
 	free(ext_icons_hashes);
+#ifndef OLD_ICON_LOOKUP
+	free(ext_table);
+#endif
 #endif /* !_NO_ICONS */
 
 	free(conf.time_str);

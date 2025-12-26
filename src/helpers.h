@@ -1995,6 +1995,9 @@ extern size_t
 extern size_t *name_icons_hashes;
 extern size_t *dir_icons_hashes;
 extern size_t *ext_icons_hashes;
+#ifndef OLD_ICON_LOOKUP
+extern size_t *ext_table;
+#endif
 #endif /* !_NO_ICONS */
 
 extern pid_t own_pid;
