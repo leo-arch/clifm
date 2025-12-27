@@ -80,6 +80,7 @@ char
 	ICON_FONT[] = EMOJI_FONT,
 	ICON_FORTRAN[] = EMOJI_FORTRAN,
 	ICON_FSHARP[] = EMOJI_FSHARP,
+	ICON_GIMP[] = EMOJI_GIMP,
 	ICON_GLEAM[] = EMOJI_GLEAM,
 	ICON_GO[] = EMOJI_GO,
 	ICON_GODOT[] = EMOJI_GODOT,
@@ -102,6 +103,7 @@ char
 	ICON_KEY[] = EMOJI_KEY,
 	ICON_KICAD[] = EMOJI_KICAD,
 	ICON_KOTLIN[] = EMOJI_KOTLIN,
+	ICON_KRITA[] = EMOJI_KRITA,
 	ICON_LIBREOFFICE_BASE[] = EMOJI_DATABASE,
 	ICON_LIBREOFFICE_DRAW[] = EMOJI_IMAGE,
 	ICON_LIBREOFFICE_CALC[] = EMOJI_STYLESHEET,
@@ -120,11 +122,13 @@ char
 	ICON_MUSTACHE[] = EMOJI_MUSTACHE,
 	ICON_MYSQL[] = EMOJI_DATABASE,
 	ICON_NIM[] = EMOJI_NIM,
+	ICON_NIX[] = EMOJI_SHELL,
 	ICON_NODEJS[] = EMOJI_NODEJS,
 	ICON_OCAML[] = EMOJI_OCAML,
-	ICON_PATCH[] = EMOJI_PATCH,
+	ICON_PACKAGE[] = EMOJI_PACKAGE,
 	ICON_PDF[] = EMOJI_PDF,
 	ICON_PERL[] = EMOJI_PERL,
+	ICON_PHOTOSHOP[] = EMOJI_PHOTOSHOP,
 	ICON_PHP[] = EMOJI_HTML,
 	ICON_POSTSCRIPT[] = EMOJI_POSTSCRIPT,
 	ICON_POWERSHELL[] = EMOJI_POWERSHELL,
@@ -161,20 +165,16 @@ char
 	ICON_VID[] = EMOJI_MOVIE,
 	ICON_VISUALSTUDIO[] = EMOJI_VISUALSTUDIO,
 	ICON_VUE[] = EMOJI_VUE,
-	ICON_WINDOWS[] = EMOJI_WINDOWS,
 	ICON_WORD[] = EMOJI_WORD,
 	ICON_XML[] = EMOJI_XML,
 	ICON_ZIG[] = EMOJI_FILE,
-
-	ICON_ARCH[] = EMOJI_MAKE,
-	ICON_NIX[] = EMOJI_SHELL,
 
 	/* Dir names */
 	ICON_CONFIG_DIR[] = EMOJI_CONF,
 	ICON_DESKTOP[] = EMOJI_DESKTOP,
 	ICON_DOCUMENTS[] = EMOJI_BRIEFCASE,
 	ICON_DOWNLOADS[] = EMOJI_DOWNLOAD,
-	ICON_DROPBOX[] = EMOJI_FOLDER,
+	ICON_DROPBOX[] = EMOJI_DROPBOX,
 	ICON_FAV[] = EMOJI_FOLDER,
 	ICON_GAMES[] = EMOJI_GAMES,
 	ICON_GIT[] = EMOJI_GIT,
@@ -237,6 +237,7 @@ char
 	ICON_FONT[] = FILE_FONT,
 	ICON_FORTRAN[] = FILE_FORTRAN,
 	ICON_FSHARP[] = DEV_FSHARP,
+	ICON_GIMP[] = FA_FILE_IMAGE_O, /* No Gimp icon */
 	ICON_GLEAM[] = FA_STAR,
 	ICON_GO[] = FILE_GO,
 	ICON_GODOT[] = FILE_GODOT,
@@ -259,6 +260,7 @@ char
 	ICON_KEY[] = MD_VPN_KEY,
 	ICON_KICAD[] = FILE_KICAD,
 	ICON_KOTLIN[] = FILE_KOTLIN,
+	ICON_KRITA[] = FA_FILE_IMAGE_O, /* No krita icon */
 	ICON_LIBREOFFICE_BASE[] = FILE_OPENOFFICE,
 	ICON_LIBREOFFICE_CALC[] = FILE_OPENOFFICE,
 	ICON_LIBREOFFICE_DRAW[] = FILE_OPENOFFICE,
@@ -277,11 +279,13 @@ char
 	ICON_MUSTACHE[] = FILE_MUSTACHE,
 	ICON_MYSQL[] = MFIZZ_MYSQL_ALT,
 	ICON_NIM[] = FILE_NIM,
+	ICON_NIX[] = LINUX_NIXOS,
 	ICON_NODEJS[] = MFIZZ_NODEJS,
 	ICON_OCAML[] = FILE_OCAML,
-	ICON_PATCH[] = FILE_PATCH,
+	ICON_PACKAGE[] = OCT_PACKAGE,
 	ICON_PDF[] = FA_FILE_PDF_O,
 	ICON_PERL[] = MFIZZ_PERL,
+	ICON_PHOTOSHOP[] = DEV_PHOTOSHOP,
 	ICON_PHP[] = MFIZZ_PHP_ALT,
 	ICON_POSTSCRIPT[] = FILE_POSTSCRIPT,
 	ICON_POWERSHELL[] = FILE_POWERSHELL,
@@ -318,13 +322,9 @@ char
 	ICON_VIM[] = DEV_VIM,
 	ICON_VISUALSTUDIO[] = DEV_VISUALSTUDIO,
 	ICON_VUE[] = FILE_VUE,
-	ICON_WINDOWS[] = DEV_WINDOWS,
 	ICON_WORD[] = FILE_WORD,
 	ICON_XML[] = FA_CODE,
 	ICON_ZIG[] = FA_FILE_O,
-
-	ICON_ARCH[] = MFIZZ_ARCHLINUX,
-	ICON_NIX[] = LINUX_NIXOS,
 
 	/* Dir names */
 	ICON_CONFIG_DIR[] = FA_SLIDERS,
@@ -394,6 +394,7 @@ char
 	ICON_FONT[] = NERD_FONT,
 	ICON_FORTRAN[] = NERD_FORTRAN,
 	ICON_FSHARP[] = NERD_FSHARP,
+	ICON_GIMP[] = NERD_GIMP,
 	ICON_GLEAM[] = NERD_GLEAM,
 	ICON_GO[] = NERD_GO,
 	ICON_GODOT[] = NERD_GODOT,
@@ -416,6 +417,7 @@ char
 	ICON_KEY[] = NERD_KEY,
 	ICON_KICAD[] = NERD_KICAD,
 	ICON_KOTLIN[] = NERD_KOTLIN,
+	ICON_KRITA[] = NERD_KRITA,
 	ICON_LIBREOFFICE_BASE[] = NERD_LIBREOFFICE_BASE,
 	ICON_LIBREOFFICE_CALC[] = NERD_LIBREOFFICE_CALC,
 	ICON_LIBREOFFICE_DRAW[] = NERD_LIBREOFFICE_DRAW,
@@ -434,13 +436,15 @@ char
 	ICON_MUSTACHE[] = NERD_MUSTACHE,
 	ICON_MYSQL[] = NERD_MYSQL,
 	ICON_NIM[] = NERD_NIM,
+	ICON_NIX[] = NERD_NIX,
 	ICON_NODEJS[] = NERD_NODEJS,
 	ICON_OCAML[] = NERD_OCAML,
-	ICON_PATCH[] = NERD_PATCH,
+	ICON_PACKAGE[] = NERD_PACKAGE,
 	ICON_PDF[] = NERD_PDF,
 	ICON_PERL[] = NERD_PERL,
+	ICON_PHOTOSHOP[] = NERD_PHOTOSHOP,
 	ICON_PHP[] = NERD_PHP,
-	ICON_POSTSCRIPT[] = NERD_FILE,
+	ICON_POSTSCRIPT[] = NERD_POSTSCRIPT,
 	ICON_POWERSHELL[] = NERD_POWERSHELL,
 	ICON_POWERPOINT[] = NERD_PPTDOC,
 	ICON_PURESCRIPT[] = NERD_PURESCRIPT,
@@ -475,13 +479,9 @@ char
 	ICON_VIM[] = NERD_VIM,
 	ICON_VISUALSTUDIO[] = NERD_VISUALSTUDIO,
 	ICON_VUE[] = NERD_VUE,
-	ICON_WINDOWS[] = NERD_WINDOWS,
 	ICON_WORD[] = NERD_WORDDOC,
 	ICON_XML[] = NERD_XML,
 	ICON_ZIG[] = NERD_ZIG,
-
-	ICON_ARCH[] = NERD_ARCHLINUX,
-	ICON_NIX[] = NERD_NIX,
 
 	/* Dir names */
 	ICON_CONFIG_DIR[] = NERD_CONFIG_DIR,
@@ -546,6 +546,15 @@ char
 #define DEF_FILE_ICON_COLOR WHITE
 
 /* Per file extension icons */
+/* Criteria for icon assignment:
+* 1. If the file/extension is associated to a specific program (e.g. kra files),
+*    use the icon for that program.
+* 2. Use a generic file type icon (e.g. an image icon for PNG files, or a C
+*    icon for C files).
+* 3. Fallback to a generic file icon.
+*
+* The general idea is to give the user a hint about how to open/handle the file. */
+
 struct icons_t const icon_ext[] = {
 	{"7z", ICON_ARCHIVE, YELLOW},
 	{"3gp", ICON_VID, BLUE},
@@ -555,7 +564,6 @@ struct icons_t const icon_ext[] = {
 	{"abw", ICON_LIBREOFFICE_WRITER, BLUE},
 	{"aiff", ICON_AUDIO, YELLOW},
 	{"alac", ICON_AUDIO, YELLOW},
-	{"apk", ICON_ARCHIVE, YELLOW},
 	{"arj", ICON_ARCHIVE, YELLOW},
 	{"asc", ICON_LOCK, GREEN},
 	{"asm", ICON_ASM, BLUE},
@@ -633,7 +641,7 @@ struct icons_t const icon_ext[] = {
 	{"erb", ICON_RUBYRAILS, RED},
 	{"erl", ICON_ERLANG, RED},
 	{"ex", ICON_ELIXIR, BLUE},
-	{"exe", ICON_WINDOWS, BLUE},
+	{"exe", ICON_BINARY, WHITE},
 	{"exs", ICON_ELIXIR, BLUE},
 
 	{"f", ICON_FORTRAN, MAGENTA},
@@ -690,7 +698,7 @@ struct icons_t const icon_ext[] = {
 	{"key", ICON_KEY, YELLOW},
 	{"kfx", ICON_BOOK, WHITE},
 	{"ko", ICON_BINARY, WHITE},
-	{"kra", ICON_IMG, GREEN},
+	{"kra", ICON_KRITA, MAGENTA},
 	{"kt", ICON_KOTLIN, BLUE},
 	{"kts", ICON_KOTLIN, BLUE},
 	{"ksh", ICON_SHELL, WHITE},
@@ -724,7 +732,6 @@ struct icons_t const icon_ext[] = {
 	{"mp4", ICON_VID, BLUE},
 	{"mpeg", ICON_VID, BLUE},
 	{"mpg", ICON_VID, BLUE},
-	{"msi", ICON_WINDOWS, BLUE},
 	{"mts", ICON_TS, BLUE},
 	{"mustache", ICON_MUSTACHE, WHITE},
 
@@ -747,7 +754,7 @@ struct icons_t const icon_ext[] = {
 	{"out", ICON_ELF, WHITE},
 
 	{"part", ICON_DOWNLOADS, WHITE},
-	{"patch", ICON_PATCH, WHITE},
+	{"patch", ICON_DIFF, WHITE},
 	{"pem", ICON_KEY, YELLOW},
 	{"pdf", ICON_PDF, RED},
 	{"php", ICON_PHP, MAGENTA},
@@ -759,7 +766,7 @@ struct icons_t const icon_ext[] = {
 	{"ppt", ICON_POWERPOINT, YELLOW},
 	{"pptx", ICON_POWERPOINT, YELLOW},
 	{"ps", ICON_POSTSCRIPT, RED},
-	{"psd", ICON_IMG, GREEN},
+	{"psd", ICON_PHOTOSHOP, BLUE},
 	{"pub", ICON_KEY, GREEN},
 	{"py", ICON_PYTHON, GREEN},
 	{"pyc", ICON_PYTHON, GREEN},
@@ -829,7 +836,7 @@ struct icons_t const icon_ext[] = {
 	{"wmv", ICON_VID, BLUE},
 
 	{"xbps", ICON_ARCHIVE, YELLOW},
-	{"xcf", ICON_IMG, GREEN},
+	{"xcf", ICON_GIMP, WHITE},
 	{"xhtml", ICON_HTML, YELLOW},
 	{"xls", ICON_EXCEL, GREEN},
 	{"xlsx", ICON_EXCEL, GREEN},
@@ -867,6 +874,8 @@ struct icons_t const icon_ext[] = {
 	{"jpf", ICON_IMG, GREEN},
 	{"jps", ICON_IMG, GREEN},
 	{"jpx", ICON_IMG, GREEN},
+	{"kpp", ICON_KRITA, MAGENTA},
+	{"krz", ICON_KRITA, MAGENTA},
 	{"miff", ICON_IMG, GREEN},
 	{"mng", ICON_IMG, GREEN},
 	{"ora", ICON_IMG, GREEN},
@@ -877,6 +886,7 @@ struct icons_t const icon_ext[] = {
 	{"pgm", ICON_IMG, GREEN},
 	{"pnm", ICON_IMG, GREEN},
 	{"ppm", ICON_IMG, GREEN},
+	{"psb", ICON_PHOTOSHOP, BLUE},
 	{"pxm", ICON_IMG, GREEN},
 	{"sgi", ICON_IMG, GREEN},
 	{"tga", ICON_IMG, GREEN},
@@ -923,6 +933,7 @@ struct icons_t const icon_ext[] = {
 	{"arc", ICON_ARCHIVE, YELLOW},
 	{"br", ICON_ARCHIVE, YELLOW},
 	{"bz", ICON_ARCHIVE, YELLOW},
+	{"lbr", ICON_ARCHIVE, YELLOW},
 	{"pak", ICON_ARCHIVE, YELLOW},
 	{"phar", ICON_ARCHIVE, YELLOW}, /* PHP archive */
 	{"pk3", ICON_ARCHIVE, YELLOW},
@@ -935,8 +946,15 @@ struct icons_t const icon_ext[] = {
 	{"war", ICON_ARCHIVE, YELLOW}, /* Java web archive */
 	{"z", ICON_ARCHIVE, YELLOW},
 
+	{"apk", ICON_PACKAGE, YELLOW},
+	{"msi", ICON_PACKAGE, YELLOW},
+	{"pkg", ICON_PACKAGE, YELLOW},
+	{"xpi", ICON_PACKAGE, YELLOW},
+
+	{"image", ICON_CD, WHITE},
 	{"nrg", ICON_CD, WHITE},
 	{"toast", ICON_CD, WHITE},
+	{"tc", ICON_CD, WHITE},
 
 	{"bdf", ICON_FONT, BLUE},
 	{"eot", ICON_FONT, BLUE},
@@ -1003,16 +1021,28 @@ struct icons_t const icon_ext[] = {
 	{"sty", ICON_TEX, WHITE},
 	{"stylus", ICON_STYLUS, B_GREEN},
 	{"suo", ICON_VISUALSTUDIO, BLUE},
+	{"tbc", ICON_TCL, GREEN},
 	{"tres", ICON_GODOT, CYAN},
 	{"tscn", ICON_GODOT, CYAN},
 	{"v", ICON_V, B_BLUE},
 	{"vala", ICON_VALA, MAGENTA},
 	{"vsix", ICON_VISUALSTUDIO, BLUE},
 	{"whl", ICON_PYTHON, GREEN},
-/*    {"iml", ICON_INTELLIJ, BLUE or RED},
-	  {"sv", ICON_LANG_HDL, ?},
-	  {"svh", ICON_LANG_HDL, ?},
-	  {"vhdl", ICON_LANG_HDL, ?}, */
+/*	{"iml", ICON_INTELLIJ, BLUE or RED},
+	{"rdf", ICON_REDIS, RED},
+	{"aof", ICON_REDIS, RED},
+	{"fnl", ICON_FENNEL, GREEN}, // No IIT icon
+	{"qml", ICON_QT, GREEN}, // No IIT icon
+	{"qrc", ICON_QT, GREEN},
+	{"qss", ICON_QT, GREEN},
+	{"sv", ICON_LANG_HDL, ?},
+	{"svh", ICON_LANG_HDL, ?},
+	{"typ", ICON_TYPST, GREEN}, // No IIT icon
+	{"unity, ICON_UNITY, WHITE"},
+	{"unity3d, ICON_UNITY, WHITE"},
+	{"vhdl", ICON_LANG_HDL, ?},
+	{"xaml", ICON_XAML, B_BLUE}, // Nerd: xaml, IIT: cube
+	{"xoml", ICON_XAML, B_BLUE}, */
 
 	/* Office */
 	{"csv", ICON_EXCEL, GREEN},
@@ -1054,6 +1084,7 @@ struct icons_t const icon_ext[] = {
 	{"uot", ICON_LIBREOFFICE_WRITER, BLUE},
 	{"wps", ICON_WORD, BLUE}, /* Kingsoft WPS Office */
 	{"wpt", ICON_WORD, BLUE}, /* Kingsoft WPS Office */
+	{"xlr", ICON_EXCEL, GREEN},
 	{"xlsb", ICON_EXCEL, GREEN},
 	{"xlsm", ICON_EXCEL, GREEN},
 	{"xlt", ICON_EXCEL, GREEN},
@@ -1149,6 +1180,9 @@ struct icons_t const icon_ext[] = {
 	{"kdb", ICON_LOCK, BLUE},
 	{"kdbx", ICON_LOCK, BLUE},
 	{"lck", ICON_LOCK, WHITE},
+	{"kbx", ICON_KEY, RED},
+	{"p12", ICON_KEY, YELLOW},
+	{"pfx", ICON_KEY, YELLOW},
 
 	{"fb2", ICON_BOOK, WHITE},
 	{"kf8", ICON_BOOK, WHITE},
@@ -1160,14 +1194,20 @@ struct icons_t const icon_ext[] = {
 
 	{"opml", ICON_XML, YELLOW},
 	{"rdf", ICON_XML, YELLOW},
-
-	{"p12", ICON_KEY, YELLOW},
-	{"pfx", ICON_KEY, YELLOW},
+	{"xul", ICON_XML, YELLOW},
 
 	{"cache", ICON_CACHE, WHITE},
 	{"magnet", ICON_MAGNET, RED},
 	{"rst", ICON_TXT, WHITE},
 	{"chm", ICON_MANPAGE, WHITE},
+
+/* Legacy
+ * Amiga: lha, nfo, diz, mod, pic, lbm, ilbm, dib, rle, adf, dms
+ * MS-DOS: voc, bas */
+
+/*	{"tf", ICON_TERRAFORM, MAGENTA},
+	{"tfstate", ICON_TERRAFORM, MAGENTA},
+	{"tfvars", ICON_TERRAFORM, MAGENTA}, */
 
 /* SoftMaker Office
 	{"tmd", ICON_WORD, BLUE},
@@ -1183,21 +1223,20 @@ struct icons_t const icon_ext[] = {
 	{"prv", ICON_POWERPOINT, YELLOW},
 	{"prvx", ICON_POWERPOINT, YELLOW}, */
 
-/*    {"sxw", ICON_WORD, BLUE}, // StarOffice (legacy)
+/*	{"sxw", ICON_WORD, BLUE}, // StarOffice (legacy)
 	{"sxc", ICON_EXCEL, GREEN}, // StarOffice (legacy)
 	{"sxi", ICON_POWERPOINT, YELLOW}, // StarOffice (legacy)
 	{"sxd", ICON_LIBREOFFICE_DRAW, MAGENTA}, // StarOffice (legacy)
 	{"sdb", ICON_DATABASE, WHITE}, // StarOffice (legacy) */
 
-/*    {"one", ICON_ONENOTE, MAGENTA}, */
+/*	{"one", ICON_ONENOTE, MAGENTA}, */
+/*	{"blend", ICON_BLENDER, YELLOW}, */
+/*	{"eml", ICON_MAIL, WHITE}, */
 
 /* Calligra Plan/Gnome Planner
-   {"plan", ICON_PLAN, WHITE} // icon Nerd: chart_gantt, IIT: chart */
+	{"plan", ICON_PLAN, WHITE} // icon Nerd: chart_gantt, IIT: chart */
 
-/* Microsoft Works (6-9) spreadsheet (legacy)
-	{"xlr", ICON_EXCEL, GREEN}, */
-
-/*    {"sch", ICON_EDA_SCH, ??}, // Nerd: resistor
+/*	{"sch", ICON_EDA_SCH, ??}, // Nerd: resistor
 	{"schdoc", ICON_EDA_SCH, ??},
 	{"brd", ICON_EDA_PCB, ??}, // Nerd: circuit, IIT: circuit_board
 	{"gbl", ICON_EDA_PCB, ??},
@@ -1240,7 +1279,7 @@ struct icons_t const icon_ext[] = {
 	{"stp", ICON_CAD, ?},
 	{"x_b", ICON_CAD, ?},
 	{"x_t", ICON_CAD, ?},
-	{"fcbak", ICON_FREECAD, RED}, Nerd: nf_linux_freecad
+	{"fcbaktmp", ICON_FREECAD, RED}, Nerd: nf_linux_freecad
 	{"fcmacro", ICON_FREECAD, RED},
 	{"fcmat", ICON_FREECAD, RED},
 	{"fcparam", ICON_FREECAD, RED},
@@ -1249,8 +1288,9 @@ struct icons_t const icon_ext[] = {
 	{"fcstd1", ICON_FREECAD, RED},
 	{"fctb", ICON_FREECAD, RED},
 	{"fctl", ICON_FREECAD, RED},
+	{"scad", ICON_OPENSCAD, YELLOW}, // icon scad
 
-	{"3mf", ICON_FILE3D, ?},    cube
+	{"3mf", ICON_FILE3D, ?}, // icon cube
 	{"fbx", ICON_FILE3D, ?},
 	{"obj", ICON_FILE3D, ?},
 	{"ply", ICON_FILE3D, ?},
@@ -1322,7 +1362,7 @@ struct icons_t const icon_filenames[] = {
 	{"Makefile.am", ICON_MAKEFILE, B_BLUE},
 	{"Makefile.in", ICON_MAKEFILE, B_BLUE},
 	{"mimeapps.list", ICON_CONFIG, WHITE},
-	{"PKGBUILD", ICON_ARCH, CYAN},
+	{"PKGBUILD", ICON_CONFIG, WHITE},
 	{"Procfile", ICON_HEROKU, MAGENTA},
 	{"Rakefile", ICON_RUBY, RED},
 	{"README", ICON_README, YELLOW},

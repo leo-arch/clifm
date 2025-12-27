@@ -14,12 +14,12 @@
 #define DEV_FSHARP "\ueaae"
 #define DEV_JAVASCRIPT "\uea55"
 #define DEV_ONEDRIVE "\uea69"
+#define DEV_PHOTOSHOP "\ueabf"
 #define DEV_RUBY_ON_RAILS "\uea42"
 #define DEV_SUBLIME "\ueab1"
 #define DEV_SWIFT "\uea5c"
 #define DEV_VIM "\ueacc"
 #define DEV_VISUALSTUDIO "\uea13"
-#define DEV_WINDOWS "\uea16"
 
 #define FA_ARCHIVE "\ue244"
 #define FA_BRIEFCASE "\ue187"
@@ -84,7 +84,6 @@
 #define FILE_NIM "\ue7fb"
 #define FILE_OCAML "\ue77d"
 #define FILE_OPENOFFICE "\ue847"
-#define FILE_PATCH "\ue7c4"
 #define FILE_POLYMER "\ue88e" /* No svelte icon. Let's use this for it. */
 #define FILE_POSTSCRIPT "\ue7b8"
 #define FILE_POWERSHELL "\ue83d"
@@ -108,7 +107,7 @@
 
 #define LINUX_NIXOS "\ue9ee"
 
-#define MFIZZ_ARCHLINUX "\uedaa"
+//#define MFIZZ_ARCHLINUX "\uedaa"
 #define MFIZZ_C "\uedb1"
 #define MFIZZ_CLOJURE "\uedb4"
 #define MFIZZ_CPLUSPLUS "\uedb8"
@@ -151,6 +150,7 @@
 #define OCT_FILE_SYMLINK_FILE "\ue083"
 #define OCT_LAW "\ue097"
 #define OCT_MARKDOWN "\ue08c"
+#define OCT_PACKAGE "\ue089"
 #define OCT_TERMINAL "\ue08b"
 
 #endif /* ICONS_IN_TERMINAL */

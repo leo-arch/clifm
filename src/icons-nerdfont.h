@@ -76,6 +76,7 @@
 #define NERD_ERLANG        ""
 #define NERD_FORTRAN       "󱈚"
 #define NERD_FSHARP        ""
+#define NERD_GIMP          ""
 #define NERD_GLEAM         "󰦥"
 #define NERD_GO            ""
 #define NERD_GODOT         ""
@@ -95,7 +96,7 @@
 #define NERD_JUPYTER       ""
 #define NERD_KICAD         ""
 #define NERD_KOTLIN        "󱈙"
-#define NERD_LINUX         ""
+#define NERD_KRITA         ""
 #define NERD_LIVESCRIPT    ""
 #define NERD_LUA           ""
 #define NERD_MAGNET        ""
@@ -107,11 +108,12 @@
 #define NERD_NIX           ""
 #define NERD_NODEJS        ""
 #define NERD_OCAML         ""
-#define NERD_PATCH         "󰶯"
 #define NERD_PDF           ""
 #define NERD_PERL          ""
+#define NERD_PHOTOSHOP     ""
 #define NERD_PHP           "󰌟"
 #define NERD_PLAYLIST      "󰲸"
+#define NERD_POSTSCRIPT    "󰕡"
 #define NERD_POWERSHELL    ""
 #define NERD_PURESCRIPT    ""
 #define NERD_PYTHON        "󰌠"
@@ -146,14 +148,10 @@
 #define NERD_EXCELDOC      "󰈜"
 #define NERD_PPTDOC        "󰈨"
 #define NERD_WORDDOC       "󰈭"
-#define NERD_WINDOWS       ""
 
-#define NERD_LIBREOFFICE_WRITER NERD_WORDDOC
-#define NERD_LIBREOFFICE_CALC NERD_EXCELDOC
-#define NERD_LIBREOFFICE_IMPRESS NERD_PPTDOC
-/*#define NERD_LIBREOFFICE_WRITER  ""
+#define NERD_LIBREOFFICE_WRITER  ""
 #define NERD_LIBREOFFICE_CALC    ""
-#define NERD_LIBREOFFICE_IMPRESS "" */
+#define NERD_LIBREOFFICE_IMPRESS ""
 #define NERD_LIBREOFFICE_BASE    ""
 #define NERD_LIBREOFFICE_DRAW    ""
 #define NERD_LIBREOFFICE_MATH    ""
@@ -170,12 +168,11 @@
 #define NERD_KEY           "󰌆"
 #define NERD_LOG           ""
 #define NERD_ONEDRIVE      "󰏊"
+#define NERD_PACKAGE       ""
 #define NERD_ROM           ""
 #define NERD_STEAM         ""
 #define NERD_SUBTITLES     "󰨖"
 #define NERD_TXT           ""
 #define NERD_VISUALSTUDIO  "󰨞"
-
-#define NERD_ARCHLINUX     ""
 
 #endif /* ICONS_NERDFONT */
