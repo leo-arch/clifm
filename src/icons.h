@@ -603,10 +603,10 @@ struct icons_t const icon_ext[] = {
 	{"c", ICON_C, BLUE},
 	{"c++", ICON_CPP, B_BLUE},
 	{"cab", ICON_ARCHIVE, YELLOW},
-	{"cbr", ICON_ARCHIVE, YELLOW},
+	{"cbr", ICON_BOOK, YELLOW},
 	{"cert", ICON_CERT, RED},
 	{"crt", ICON_CERT, RED},
-	{"cbz", ICON_ARCHIVE, YELLOW},
+	{"cbz", ICON_BOOK, YELLOW},
 	{"cc", ICON_CPP, B_BLUE},
 	{"cfg", ICON_CONFIG, WHITE},
 	{"cjs", ICON_JAVASCRIPT, WHITE},
@@ -1216,6 +1216,8 @@ struct icons_t const icon_ext[] = {
 	{"kf8", ICON_BOOK, WHITE},
 	{"mobi", ICON_BOOK, WHITE},
 	{"pdb", ICON_BOOK, WHITE},
+	{"cba", ICON_BOOK, YELLOW},
+	{"cb7", ICON_BOOK, YELLOW},
 
 	{"dylib", ICON_SHARE, BLUE},
 	{"lib", ICON_SHARE, BLUE},
@@ -1389,7 +1391,7 @@ struct icons_t const icon_filenames[] = {
 	{"PKGBUILD", ICON_CONFIG, WHITE},
 	{"Procfile", ICON_HEROKU, MAGENTA},
 	{"Rakefile", ICON_RUBY, RED},
-	{"README", ICON_README, YELLOW},
+	{"README", ICON_README, CYAN},
 	{"TODO", ICON_LIST, GREEN},
 	{"Vagrantfile", ICON_VAGRANT, CYAN}
 };
