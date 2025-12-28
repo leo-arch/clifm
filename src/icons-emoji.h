@@ -135,6 +135,7 @@
 #define EMOJI_TEX EMOJI_FILE
 #define EMOJI_TEXT EMOJI_FILE
 #define EMOJI_LOG EMOJI_NOTE
+#define EMOJI_TOML EMOJI_CONF
 #define EMOJI_TYPESCRIPT EMOJI_CODE
 #define EMOJI_TRASH EMOJI_FOLDER
 #define EMOJI_TWIG "🌱"
@@ -146,6 +147,7 @@
 #define EMOJI_VUE EMOJI_CODE
 #define EMOJI_WORD "📘"
 #define EMOJI_XML EMOJI_CODE
+#define EMOJI_JAML EMOJI_CONF
 
 /* One char wide emojis (this depends on the terminal though). */
 #define EMOJI_C "©️ "

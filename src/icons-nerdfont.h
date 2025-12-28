@@ -134,6 +134,7 @@
 #define NERD_SWIFT         "󰛥"
 #define NERD_TCL           "󰛓"
 #define NERD_TEX           ""
+#define NERD_TOML          ""
 #define NERD_TS            "󰛦"
 #define NERD_TWIG          ""
 #define NERD_V             ""
@@ -142,6 +143,7 @@
 #define NERD_VIM           ""
 #define NERD_VUE           "󰡄"
 #define NERD_XML           "󰗀"
+#define NERD_YAML          ""
 #define NERD_ZIG           ""
 
 #define NERD_ACCESS        "󱎎"

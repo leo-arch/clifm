@@ -155,6 +155,7 @@ char
 	ICON_SWIFT[] = EMOJI_SWIFT,
 	ICON_TCL[] = EMOJI_TCL,
 	ICON_TEX[] = EMOJI_TEX,
+	ICON_TOML[] = EMOJI_TOML,
 	ICON_TS[] = EMOJI_TYPESCRIPT,
 	ICON_TXT[] = EMOJI_NOTE,
 	ICON_TWIG[] = EMOJI_TWIG,
@@ -167,6 +168,7 @@ char
 	ICON_VUE[] = EMOJI_VUE,
 	ICON_WORD[] = EMOJI_WORD,
 	ICON_XML[] = EMOJI_XML,
+	ICON_YAML[] = EMOJI_YAML,
 	ICON_ZIG[] = EMOJI_FILE,
 
 	/* Dir names */
@@ -254,7 +256,7 @@ char
 	ICON_JAVA[] = MFIZZ_JAVA,
 	ICON_JAVASCRIPT[] = DEV_JAVASCRIPT,
 	ICON_JENKINS[] = FILE_JENKINS,
-	ICON_JSON[] = FILE_SWAGGER,
+	ICON_JSON[] = FILE_SWAGGER, /* No json icon */
 	ICON_JULIA[] = FILE_JULIA,
 	ICON_JUPYTER[] = FILE_JUPYTER,
 	ICON_KEY[] = MD_VPN_KEY,
@@ -312,6 +314,7 @@ char
 	ICON_SWIFT[] = DEV_SWIFT,
 	ICON_TCL[] = FILE_TCL,
 	ICON_TEX[] = FILE_TEX,
+	ICON_TOML[] = FA_SLIDERS, /* No toml icon */
 	ICON_TS[] = FILE_TS,
 	ICON_TXT[] = FA_FILE_TEXT_O,
 	ICON_TWIG[] = FILE_TWIG,
@@ -324,6 +327,7 @@ char
 	ICON_VUE[] = FILE_VUE,
 	ICON_WORD[] = FILE_WORD,
 	ICON_XML[] = FA_CODE,
+	ICON_YAML[] = FA_SLIDERS, /* No yaml icon */
 	ICON_ZIG[] = FA_FILE_O,
 
 	/* Dir names */
@@ -469,6 +473,7 @@ char
 	ICON_SWIFT[] = NERD_SWIFT,
 	ICON_TCL[] = NERD_TCL,
 	ICON_TEX[] = NERD_TEX,
+	ICON_TOML[] = NERD_TOML,
 	ICON_TS[] = NERD_TS,
 	ICON_TXT[] = NERD_TXT,
 	ICON_TWIG[] = NERD_TWIG,
@@ -481,6 +486,7 @@ char
 	ICON_VUE[] = NERD_VUE,
 	ICON_WORD[] = NERD_WORDDOC,
 	ICON_XML[] = NERD_XML,
+	ICON_YAML[] = NERD_YAML,
 	ICON_ZIG[] = NERD_ZIG,
 
 	/* Dir names */
@@ -813,7 +819,7 @@ struct icons_t const icon_ext[] = {
 	{"tgz", ICON_ARCHIVE, YELLOW},
 	{"tif", ICON_IMG, GREEN},
 	{"tiff", ICON_IMG, GREEN},
-	{"toml", ICON_CONFIG, WHITE},
+	{"toml", ICON_TOML, WHITE},
 	{"torrent", ICON_DOWNLOADS, WHITE},
 	{"ts", ICON_TS, BLUE},
 	{"tsx", ICON_REACT, B_BLUE},
@@ -843,8 +849,8 @@ struct icons_t const icon_ext[] = {
 	{"xml", ICON_XML, YELLOW},
 	{"xz", ICON_ARCHIVE, RED},
 
-	{"yaml", ICON_CONFIG, WHITE},
-	{"yml", ICON_CONFIG, WHITE},
+	{"yaml", ICON_YAML, WHITE},
+	{"yml", ICON_YAML, WHITE},
 
 	{"zig", ICON_ZIG, YELLOW},
 	{"zip", ICON_ARCHIVE, YELLOW},
@@ -1004,6 +1010,7 @@ struct icons_t const icon_ext[] = {
 	{"mll", ICON_OCAML, WHITE},
 	{"mly", ICON_OCAML, WHITE},
 	{"node", ICON_NODEJS, GREEN},
+	{"opml", ICON_XML, YELLOW},
 	{"ps1", ICON_POWERSHELL, WHITE},
 	{"psd1", ICON_POWERSHELL, WHITE},
 	{"psm1", ICON_POWERSHELL, WHITE},
@@ -1011,6 +1018,7 @@ struct icons_t const icon_ext[] = {
 	{"pxd", ICON_PYTHON, GREEN},
 	{"pyi", ICON_PYTHON, GREEN},
 	{"pyw", ICON_PYTHON, GREEN},
+	{"rdf", ICON_XML, YELLOW},
 	{"rds", ICON_R, BLUE},
 	{"rkt", ICON_SCHEME, WHITE},
 	{"rmd", ICON_RUST, WHITE},
@@ -1027,6 +1035,7 @@ struct icons_t const icon_ext[] = {
 	{"v", ICON_V, B_BLUE},
 	{"vala", ICON_VALA, MAGENTA},
 	{"vsix", ICON_VISUALSTUDIO, BLUE},
+	{"xul", ICON_XML, YELLOW},
 	{"whl", ICON_PYTHON, GREEN},
 /*	{"iml", ICON_INTELLIJ, BLUE or RED},
 	{"rdf", ICON_REDIS, RED},
@@ -1192,10 +1201,6 @@ struct icons_t const icon_ext[] = {
 	{"dylib", ICON_SHARE, BLUE},
 	{"lib", ICON_SHARE, BLUE},
 
-	{"opml", ICON_XML, YELLOW},
-	{"rdf", ICON_XML, YELLOW},
-	{"xul", ICON_XML, YELLOW},
-
 	{"cache", ICON_CACHE, WHITE},
 	{"magnet", ICON_MAGNET, RED},
 	{"rst", ICON_TXT, WHITE},
@@ -1279,7 +1284,7 @@ struct icons_t const icon_ext[] = {
 	{"stp", ICON_CAD, ?},
 	{"x_b", ICON_CAD, ?},
 	{"x_t", ICON_CAD, ?},
-	{"fcbaktmp", ICON_FREECAD, RED}, Nerd: nf_linux_freecad
+	{"fcbak", ICON_FREECAD, RED}, Nerd: nf_linux_freecad
 	{"fcmacro", ICON_FREECAD, RED},
 	{"fcmat", ICON_FREECAD, RED},
 	{"fcparam", ICON_FREECAD, RED},
