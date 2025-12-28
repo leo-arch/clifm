@@ -35,6 +35,7 @@
 #define EMOJI_BRIEFCASE "💼"
 #define EMOJI_CACHE EMOJI_FILE
 #define EMOJI_CALENDAR "📅"
+#define EMOJI_CD "💿"
 #define EMOJI_CERT EMOJI_KEY
 #define EMOJI_CLOJURE EMOJI_CODE
 #define EMOJI_CODE "📑"
@@ -49,7 +50,7 @@
 #define EMOJI_DESKTOP "💻"
 #define EMOJI_DART EMOJI_CODE
 #define EMOJI_DIFF "📋"
-#define EMOJI_DISK "💿"
+#define EMOJI_DISK "💾"
 #define EMOJI_DOCKER "🐋"
 #define EMOJI_DOWNLOAD "📥"
 #define EMOJI_ELIXIR "💧"
@@ -146,8 +147,9 @@
 #define EMOJI_VISUALSTUDIO EMOJI_CODE
 #define EMOJI_VUE EMOJI_CODE
 #define EMOJI_WORD "📘"
+#define EMOJI_XAML EMOJI_CODE
 #define EMOJI_XML EMOJI_CODE
-#define EMOJI_JAML EMOJI_CONF
+#define EMOJI_YAML EMOJI_CONF
 
 /* One char wide emojis (this depends on the terminal though). */
 #define EMOJI_C "©️ "
@@ -155,6 +157,7 @@
 #define EMOJI_DROPBOX "☁️ "
 #define EMOJI_ELECTRON "⚛ "
 #define EMOJI_GIMP "🖌️ "
+#define EMOJI_ILLUSTRATOR "🖌️ "
 #define EMOJI_KRITA "🖌️ "
 #define EMOJI_LICENSE "⚖️ "
 #define EMOJI_MAKE "🛠 "

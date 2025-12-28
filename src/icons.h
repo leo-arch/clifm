@@ -52,7 +52,7 @@ char
 	ICON_C[] = EMOJI_C,
 	ICON_CACHE[] = EMOJI_CACHE,
 	ICON_CALENDAR[] = EMOJI_CALENDAR,
-	ICON_CD[] = EMOJI_DISK,
+	ICON_CD[] = EMOJI_CD,
 	ICON_CERT[] = EMOJI_CERT,
 	ICON_CHECKSUM[] = EMOJI_CHECKSUM,
 	ICON_CLOJURE[] = EMOJI_CLOJURE,
@@ -69,6 +69,7 @@ char
 	ICON_DART[] = EMOJI_DART,
 	ICON_DATABASE[] = EMOJI_DATABASE,
 	ICON_DIFF[] = EMOJI_DIFF,
+	ICON_DISK[] = EMOJI_DISK,
 	ICON_DOCKER[] = EMOJI_DOCKER,
 	ICON_ELECTRON[] = EMOJI_ELECTRON,
 	ICON_ELF[] = EMOJI_BINARY,
@@ -93,6 +94,7 @@ char
 	ICON_HEROKU[] = EMOJI_HEROKU,
 	ICON_HISTORY[] = EMOJI_CHANGELOG,
 	ICON_HTML[] = EMOJI_HTML,
+	ICON_ILLUSTRATOR[] = EMOJI_ILLUSTRATOR,
 	ICON_IMG[] = EMOJI_IMAGE,
 	ICON_JAVA[] = EMOJI_JAVA,
 	ICON_JAVASCRIPT[] = EMOJI_JAVASCRIPT,
@@ -167,6 +169,7 @@ char
 	ICON_VISUALSTUDIO[] = EMOJI_VISUALSTUDIO,
 	ICON_VUE[] = EMOJI_VUE,
 	ICON_WORD[] = EMOJI_WORD,
+	ICON_XAML[] = EMOJI_XAML,
 	ICON_XML[] = EMOJI_XML,
 	ICON_YAML[] = EMOJI_YAML,
 	ICON_ZIG[] = EMOJI_FILE,
@@ -228,6 +231,7 @@ char
 	ICON_DART[] = DEV_DART,
 	ICON_DATABASE[] = FA_DATABASE,
 	ICON_DIFF[] = OCT_DIFF,
+	ICON_DISK[] = FA_FLOPPY_O,
 	ICON_DOCKER[] = MFIZZ_DOCKER,
 	ICON_ELECTRON[] = FILE_ELECTRON,
 	ICON_ELF[] = OCT_FILE_BINARY,
@@ -252,6 +256,7 @@ char
 	ICON_HEROKU[] = MFIZZ_HEROKU,
 	ICON_HISTORY[] = FA_HISTORY,
 	ICON_HTML[] = MFIZZ_HTML5_ALT,
+	ICON_ILLUSTRATOR[] = DEV_ILLUSTRATOR,
 	ICON_IMG[] = FA_FILE_IMAGE_O,
 	ICON_JAVA[] = MFIZZ_JAVA,
 	ICON_JAVASCRIPT[] = DEV_JAVASCRIPT,
@@ -310,7 +315,7 @@ char
 	ICON_SQLITE[] = MFIZZ_MYSQL_ALT,
 	ICON_STYLUS[] = FILE_STYLUS,
 	ICON_SUBLIME[] = DEV_SUBLIME,
-	ICON_SVELTE[] = FILE_POLYMER, /* svelte is missing. Let's use this. */
+	ICON_SVELTE[] = FILE_POLYMER, /* No svelte icon. */
 	ICON_SWIFT[] = DEV_SWIFT,
 	ICON_TCL[] = FILE_TCL,
 	ICON_TEX[] = FILE_TEX,
@@ -318,7 +323,7 @@ char
 	ICON_TS[] = FILE_TS,
 	ICON_TXT[] = FA_FILE_TEXT_O,
 	ICON_TWIG[] = FILE_TWIG,
-	ICON_V[] = FILE_VAGRANT, /* V lang is missing. Let's use this. */
+	ICON_V[] = FILE_VAGRANT, /* No V lang icon. */
 	ICON_VAGRANT[] = FILE_VAGRANT,
 	ICON_VALA[] = FA_VIMEO,
 	ICON_VID[] = FA_FILE_MOVIE_O,
@@ -326,6 +331,7 @@ char
 	ICON_VISUALSTUDIO[] = DEV_VISUALSTUDIO,
 	ICON_VUE[] = FILE_VUE,
 	ICON_WORD[] = FILE_WORD,
+	ICON_XAML[] = FA_CODE, /* No xaml icon */
 	ICON_XML[] = FA_CODE,
 	ICON_YAML[] = FA_SLIDERS, /* No yaml icon */
 	ICON_ZIG[] = FA_FILE_O,
@@ -387,6 +393,7 @@ char
 	ICON_DART[] = NERD_DART,
 	ICON_DATABASE[] = NERD_DATABASE,
 	ICON_DIFF[] = NERD_DIFF,
+	ICON_DISK[] = NERD_DISK,
 	ICON_DOCKER[] = NERD_DOCKER,
 	ICON_ELECTRON[] = NERD_ELECTRON,
 	ICON_ELF[] = NERD_BINARY,
@@ -411,6 +418,7 @@ char
 	ICON_HEROKU[] = NERD_HEROKU,
 	ICON_HISTORY[] = NERD_HISTORY,
 	ICON_HTML[] = NERD_HTML,
+	ICON_ILLUSTRATOR[] = NERD_ILLUSTRATOR,
 	ICON_IMG[] = NERD_PICTUREFILE,
 	ICON_JAVA[] = NERD_JAVA,
 	ICON_JAVASCRIPT[] = NERD_JAVASCRIPT,
@@ -485,6 +493,7 @@ char
 	ICON_VISUALSTUDIO[] = NERD_VISUALSTUDIO,
 	ICON_VUE[] = NERD_VUE,
 	ICON_WORD[] = NERD_WORDDOC,
+	ICON_XAML[] = NERD_XAML,
 	ICON_XML[] = NERD_XML,
 	ICON_YAML[] = NERD_YAML,
 	ICON_ZIG[] = NERD_ZIG,
@@ -634,7 +643,7 @@ struct icons_t const icon_ext[] = {
 	{"diff", ICON_DIFF, WHITE},
 	{"djvu", ICON_BOOK, WHITE},
 	{"dll", ICON_SHARE, BLUE},
-	{"dmg", ICON_CD, WHITE},
+	{"dmg", ICON_DISK, WHITE},
 	{"doc", ICON_WORD, BLUE},
 	{"docx", ICON_WORD, BLUE},
 
@@ -685,7 +694,7 @@ struct icons_t const icon_ext[] = {
 	{"hxx", ICON_CPP, B_BLUE},
 
 	{"ico", ICON_IMG, GREEN},
-	{"img", ICON_CD, WHITE},
+	{"img", ICON_DISK, WHITE},
 	{"ini", ICON_CONFIG, WHITE},
 	{"ino", ICON_ARDUINO, GREEN},
 	{"ipynb", ICON_JUPYTER, RED},
@@ -772,15 +781,15 @@ struct icons_t const icon_ext[] = {
 	{"ppt", ICON_POWERPOINT, YELLOW},
 	{"pptx", ICON_POWERPOINT, YELLOW},
 	{"ps", ICON_POSTSCRIPT, RED},
-	{"psd", ICON_PHOTOSHOP, BLUE},
+	{"psd", ICON_PHOTOSHOP, B_BLUE},
 	{"pub", ICON_KEY, GREEN},
 	{"py", ICON_PYTHON, GREEN},
 	{"pyc", ICON_PYTHON, GREEN},
 	{"pyd", ICON_PYTHON, GREEN},
 	{"pyo", ICON_PYTHON, GREEN},
 
-	{"qcow", ICON_CD, WHITE},
-	{"qcow2", ICON_CD, WHITE},
+	{"qcow", ICON_DISK, WHITE},
+	{"qcow2", ICON_DISK, WHITE},
 
 	{"r", ICON_R, BLUE},
 	{"rar", ICON_ARCHIVE, YELLOW},
@@ -828,10 +837,10 @@ struct icons_t const icon_ext[] = {
 	{"txt", ICON_TXT, WHITE},
 	{"txz", ICON_ARCHIVE, YELLOW},
 
-	{"vdi", ICON_CD, WHITE},
-	{"vhd", ICON_CD, WHITE},
-	{"vhdx", ICON_CD, WHITE},
-	{"vmdk", ICON_CD, WHITE},
+	{"vdi", ICON_DISK, WHITE},
+	{"vhd", ICON_DISK, WHITE},
+	{"vhdx", ICON_DISK, WHITE},
+	{"vmdk", ICON_DISK, WHITE},
 	{"vim", ICON_VIM, GREEN},
 	{"vue", ICON_VUE, GREEN},
 
@@ -863,7 +872,7 @@ struct icons_t const icon_ext[] = {
  * Do not exceed 768 extensions. Otherwise, ext_table will raise from 1024
  * to 2048, probably making the lookup slower. Even more, keep the list
  * below 650 entries, to avoid overloading the table and reducing performance. */
-	{"ai", ICON_IMG, GREEN},
+	{"ai", ICON_ILLUSTRATOR, YELLOW},
 	{"dpx", ICON_IMG, GREEN},
 	{"eps", ICON_IMG, GREEN},
 	{"exr", ICON_IMG, GREEN},
@@ -892,7 +901,7 @@ struct icons_t const icon_ext[] = {
 	{"pgm", ICON_IMG, GREEN},
 	{"pnm", ICON_IMG, GREEN},
 	{"ppm", ICON_IMG, GREEN},
-	{"psb", ICON_PHOTOSHOP, BLUE},
+	{"psb", ICON_PHOTOSHOP, B_BLUE},
 	{"pxm", ICON_IMG, GREEN},
 	{"sgi", ICON_IMG, GREEN},
 	{"tga", ICON_IMG, GREEN},
@@ -957,10 +966,15 @@ struct icons_t const icon_ext[] = {
 	{"pkg", ICON_PACKAGE, YELLOW},
 	{"xpi", ICON_PACKAGE, YELLOW},
 
-	{"image", ICON_CD, WHITE},
+	{"aff", ICON_DISK, WHITE},
+	{"image", ICON_DISK, WHITE},
+
+	{"cdi", ICON_CD, WHITE},
+	{"isz", ICON_CD, WHITE},
+	{"mdf", ICON_CD, WHITE},
 	{"nrg", ICON_CD, WHITE},
-	{"toast", ICON_CD, WHITE},
 	{"tc", ICON_CD, WHITE},
+	{"toast", ICON_CD, WHITE},
 
 	{"bdf", ICON_FONT, BLUE},
 	{"eot", ICON_FONT, BLUE},
@@ -1035,6 +1049,7 @@ struct icons_t const icon_ext[] = {
 	{"v", ICON_V, B_BLUE},
 	{"vala", ICON_VALA, MAGENTA},
 	{"vsix", ICON_VISUALSTUDIO, BLUE},
+	{"xaml", ICON_XAML, WHITE},
 	{"xul", ICON_XML, YELLOW},
 	{"whl", ICON_PYTHON, GREEN},
 /*	{"iml", ICON_INTELLIJ, BLUE or RED},
@@ -1046,6 +1061,7 @@ struct icons_t const icon_ext[] = {
 	{"qss", ICON_QT, GREEN},
 	{"sv", ICON_LANG_HDL, ?},
 	{"svh", ICON_LANG_HDL, ?},
+	{"vhdl", ICON_LANG_HDL, ?},
 	{"typ", ICON_TYPST, GREEN}, // No IIT icon
 	{"unity, ICON_UNITY, WHITE"},
 	{"unity3d, ICON_UNITY, WHITE"},
