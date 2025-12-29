@@ -874,9 +874,10 @@ struct icons_t const icon_ext[] = {
  * below 650 entries, to avoid overloading the table and reducing performance. */
 	{"ai", ICON_ILLUSTRATOR, YELLOW},
 	{"dpx", ICON_IMG, GREEN},
+	{"emf", ICON_IMG, GREEN},
 	{"eps", ICON_IMG, GREEN},
 	{"exr", ICON_IMG, GREEN},
-	{"fit", ICON_IMG, GREEN},
+	{"ff", ICON_IMG, GREEN},
 	{"fts", ICON_IMG, GREEN},
 	{"hdr", ICON_IMG, GREEN},
 	{"j2c", ICON_IMG, GREEN},
@@ -903,6 +904,7 @@ struct icons_t const icon_ext[] = {
 	{"ppm", ICON_IMG, GREEN},
 	{"psb", ICON_PHOTOSHOP, B_BLUE},
 	{"pxm", ICON_IMG, GREEN},
+	{"qoi", ICON_IMG, GREEN},
 	{"sgi", ICON_IMG, GREEN},
 	{"tga", ICON_IMG, GREEN},
 	{"wmf", ICON_IMG, GREEN},
@@ -919,11 +921,17 @@ struct icons_t const icon_ext[] = {
 	{"heics", ICON_VID, BLUE},
 	{"m2ts", ICON_VID, BLUE},
 	{"m2v", ICON_VID, BLUE},
+	{"mjpeg", ICON_VID, BLUE},
+	{"mjpg", ICON_VID, BLUE},
 	{"qt", ICON_VID, BLUE},
 	{"rm", ICON_VID, BLUE},
 	{"video", ICON_VID, BLUE},
 	{"vob", ICON_VID, BLUE},
 	{"ogm", ICON_VID, BLUE},
+/*	{"swf", ICON_VID, BLUE}, // Legacy: Flash container
+	{"f4v, ICON_VID, BLUE"} // Legacy: Flash video
+	{"dv", ICON_VID, BLUE}, // Legacy
+	{"divx", ICON_VID, BLUE}, // Legacy */
 
 	{"ac3", ICON_AUDIO, YELLOW},
 	{"aif", ICON_AUDIO, YELLOW},
@@ -940,8 +948,10 @@ struct icons_t const icon_ext[] = {
 	{"pcm", ICON_AUDIO, YELLOW},
 	{"ra", ICON_AUDIO, YELLOW},
 	{"spx", ICON_AUDIO, YELLOW},
-	{"swf", ICON_AUDIO, YELLOW},
 	{"wv", ICON_AUDIO, YELLOW},
+/*	{"snd", ICON_AUDIO, YELLOW}, // Generic
+	{"sou", ICON_AUDIO, YELLOW}, // Legacy
+	{"voc", ICON_AUDIO, YELLOW}, // Legacy */
 
 	{"alz", ICON_ARCHIVE, YELLOW},
 	{"ar", ICON_ARCHIVE, YELLOW},
@@ -962,7 +972,7 @@ struct icons_t const icon_ext[] = {
 	{"z", ICON_ARCHIVE, YELLOW},
 
 	{"apk", ICON_PACKAGE, YELLOW},
-	{"appimage", ICON_PACKAGE, YELLOW},
+	{"Appimage", ICON_PACKAGE, YELLOW},
 	{"flatpak", ICON_PACKAGE, YELLOW},
 	{"msi", ICON_PACKAGE, YELLOW},
 	{"pkg", ICON_PACKAGE, YELLOW},
@@ -974,14 +984,12 @@ struct icons_t const icon_ext[] = {
 
 	{"cdi", ICON_CD, WHITE},
 	{"isz", ICON_CD, WHITE},
-	{"mdf", ICON_CD, WHITE},
 	{"nrg", ICON_CD, WHITE},
 	{"tc", ICON_CD, WHITE},
 	{"toast", ICON_CD, WHITE},
 
 	{"bdf", ICON_FONT, BLUE},
 	{"eot", ICON_FONT, BLUE},
-	{"flc", ICON_FONT, BLUE},
 	{"flf", ICON_FONT, BLUE},
 	{"fnt", ICON_FONT, BLUE},
 	{"fon", ICON_FONT, BLUE},
@@ -1067,15 +1075,12 @@ struct icons_t const icon_ext[] = {
 	{"vhdl", ICON_LANG_HDL, ?},
 	{"typ", ICON_TYPST, GREEN}, // No IIT icon
 	{"unity, ICON_UNITY, WHITE"},
-	{"unity3d, ICON_UNITY, WHITE"},
-	{"vhdl", ICON_LANG_HDL, ?},
-	{"xaml", ICON_XAML, B_BLUE}, // Nerd: xaml, IIT: cube
-	{"xoml", ICON_XAML, B_BLUE}, */
+	{"unity3d, ICON_UNITY, WHITE"}, */
 
 	/* Office */
 	{"csv", ICON_EXCEL, GREEN},
 	{"dif", ICON_EXCEL, GREEN},
-/*    {"dot", ICON_WORD, BLUE} // Old: conflicts with Graphviz files */
+/*	{"dot", ICON_WORD, BLUE} // Old: conflicts with Graphviz files */
 	{"docm", ICON_WORD, BLUE},
 	{"dotm", ICON_WORD, BLUE},
 	{"dotx", ICON_WORD, BLUE},
@@ -1091,7 +1096,7 @@ struct icons_t const icon_ext[] = {
 	{"gdocx", ICON_WORD, BLUE},
 	{"gsheet", ICON_EXCEL, GREEN},
 	{"gslides", ICON_POWERPOINT, YELLOW},
-/*    {"key", ICON_POWERPOINT, YELLOW}, // Apple. Conflicts with .key security files */
+/*	{"key", ICON_POWERPOINT, YELLOW}, // Apple. Conflicts with .key security files */
 	{"numbers", ICON_EXCEL, GREEN}, /* Apple */
 	{"odf", ICON_LIBREOFFICE_MATH, WHITE},
 	{"otg", ICON_LIBREOFFICE_DRAW, MAGENTA},
@@ -1099,7 +1104,7 @@ struct icons_t const icon_ext[] = {
 	{"ots", ICON_LIBREOFFICE_CALC, GREEN},
 	{"ott", ICON_LIBREOFFICE_WRITER, BLUE},
 	{"pages", ICON_WORD, BLUE}, /* Apple */
-/*    {"pot", ICON_POWERPOINT, YELLOW}, // Conflicts with .pot translation files */
+/*	{"pot", ICON_POWERPOINT, YELLOW}, // Conflicts with .pot translation files */
 	{"potm", ICON_POWERPOINT, YELLOW},
 	{"potx", ICON_POWERPOINT, YELLOW},
 	{"pps", ICON_POWERPOINT, YELLOW},
@@ -1178,7 +1183,7 @@ struct icons_t const icon_ext[] = {
 	{"xci", ICON_ROM, WHITE},
 	{"xex", ICON_ROM, WHITE},
 	{"z64", ICON_ROM, WHITE},
-/*    {"md", ICON_ROM, WHITE}, // Conflicts with markdown
+/*	{"md", ICON_ROM, WHITE}, // Conflicts with markdown
 	{"wad", ICON_ROM, WHITE}, // If Doom, this isn't a rom file */
 
 	{"jmd", ICON_MARKDOWN, WHITE},
@@ -1201,23 +1206,36 @@ struct icons_t const icon_ext[] = {
 	{"dbf", ICON_DATABASE, WHITE},
 	{"dconf", ICON_DATABASE, WHITE},
 	{"dump", ICON_DATABASE, WHITE},
-	{"ldb", ICON_DATABASE, WHITE},
-	{"prql", ICON_DATABASE, WHITE},
+	{"fdb", ICON_DATABASE, WHITE},
+	{"gdb", ICON_DATABASE, WHITE},
+	{"kdb", ICON_DATABASE, WHITE},
+	{"kdbx", ICON_DATABASE, WHITE},
+	{"mdf", ICON_DATABASE, WHITE},
+	{"ndf", ICON_DATABASE, WHITE},
+	{"sdf", ICON_DATABASE, WHITE},
 
 	{"age", ICON_LOCK, GREEN},
-	{"kdb", ICON_LOCK, BLUE},
-	{"kdbx", ICON_LOCK, BLUE},
 	{"lck", ICON_LOCK, WHITE},
 	{"kbx", ICON_KEY, RED},
 	{"p12", ICON_KEY, YELLOW},
 	{"pfx", ICON_KEY, YELLOW},
 
+	{"azw4", ICON_BOOK, WHITE},
 	{"fb2", ICON_BOOK, WHITE},
 	{"kf8", ICON_BOOK, WHITE},
 	{"mobi", ICON_BOOK, WHITE},
-	{"pdb", ICON_BOOK, WHITE},
-	{"cba", ICON_BOOK, YELLOW},
 	{"cb7", ICON_BOOK, YELLOW},
+	{"cba", ICON_BOOK, YELLOW},
+/*	{"cbt", ICON_BOOK, YELLOW}, // tar'ed comic book
+	{"oxps", ICON_BOOK/POSTSCRIPT, YELLOW}, // Open XML Paper Specification
+	{"xps", ICON_BOOK/POSTSCRIPT, YELLOW}, // XML Paper Specification (Microsoft)
+	{"iba", ICON_BOOK, YELLOW} // Legacy: Apple iBooks Author
+	{"ibooks", ICON_BOOK, YELLOW} // Legacy: Apple iBooks Author
+	{"lrf", ICON_BOOK, YELLOW} // Legacy: Sony BBeB
+	{"opf", ICON_BOOK, YELLOW}, // Legacy: Open eBook
+	{"pdb", ICON_BOOK, YELLOW}, // Legacy: PalmDoc
+	{"prc", ICON_BOOK, YELLOW}, // Legacy: PalmDoc
+	{"tcr", ICON_BOOK, YELLOW}, // Legacy: Psion Series 3 palmtop */
 
 	{"dylib", ICON_SHARE, BLUE},
 	{"lib", ICON_SHARE, BLUE},
@@ -1229,7 +1247,7 @@ struct icons_t const icon_ext[] = {
 
 /* Legacy
  * Amiga: lha, nfo, diz, mod, pic, lbm, ilbm, dib, rle, adf, dms
- * MS-DOS: voc, bas */
+ * MS-DOS: voc, sou, bas */
 
 /*	{"tf", ICON_TERRAFORM, MAGENTA},
 	{"tfstate", ICON_TERRAFORM, MAGENTA},
@@ -1249,11 +1267,12 @@ struct icons_t const icon_ext[] = {
 	{"prv", ICON_POWERPOINT, YELLOW},
 	{"prvx", ICON_POWERPOINT, YELLOW}, */
 
-/*	{"sxw", ICON_WORD, BLUE}, // StarOffice (legacy)
-	{"sxc", ICON_EXCEL, GREEN}, // StarOffice (legacy)
-	{"sxi", ICON_POWERPOINT, YELLOW}, // StarOffice (legacy)
-	{"sxd", ICON_LIBREOFFICE_DRAW, MAGENTA}, // StarOffice (legacy)
-	{"sdb", ICON_DATABASE, WHITE}, // StarOffice (legacy) */
+/* StarOffice (legacy)
+	{"sxw", ICON_WORD, BLUE},
+	{"sxc", ICON_EXCEL, GREEN},
+	{"sxi", ICON_POWERPOINT, YELLOW},
+	{"sxd", ICON_LIBREOFFICE_DRAW, MAGENTA},
+	{"sdb", ICON_DATABASE, WHITE}, */
 
 /*	{"one", ICON_ONENOTE, MAGENTA}, */
 /*	{"blend", ICON_BLENDER, YELLOW}, */
