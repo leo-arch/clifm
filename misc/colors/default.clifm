@@ -240,7 +240,7 @@ ExtColors="azw=EBOOK:azw3=EBOOK:cbr=EBOOK:cbz=EBOOK:djv=EBOOK:djvu=EBOOK:epub=EB
 
 # IMAGES
 define IMAGE=35 # Magenta
-ExtColors="ai=IMAGE:avif=IMAGE:bmp=IMAGE:dpx=IMAGE:dvi=IMAGE:eps=IMAGE:exr=IMAGE:ff=IMAGE:fit=IMAGE:fts=IMAGE:gif=IMAGE:hdr=IMAGE:heic=IMAGE:heif=IMAGE:ico=IMAGE:j2c=IMAGE:j2k=IMAGE:jfi=IMAGE:jfif=IMAGE:jif=IMAGE:jp2=IMAGE:jpe=IMAGE:jpeg=IMAGE:jpf=IMAGE:jpg=IMAGE:jps=IMAGE:jpx=IMAGE:jxl=IMAGE:kra=IMAGE:miff=IMAGE:mng=IMAGE:ora=IMAGE:pam=IMAGE:pbm=IMAGE:pcx=IMAGE:pdd=IMAGE:pgm=IMAGE:png=IMAGE:pnm=IMAGE:ppm=IMAGE:psd=IMAGE:pxm=IMAGE:qoi=IMAGE:rgba=IMAGE:sgi=IMAGE:svg=IMAGE:svgz=IMAGE:tga=IMAGE:tif=IMAGE:tiff=IMAGE:webp=IMAGE:wmf=IMAGE:xbm=IMAGE:xcf=IMAGE:xpm=IMAGE:xwd=IMAGE:"
+ExtColors="ai=IMAGE:avif=IMAGE:bmp=IMAGE:cgm=IMAGE:dpx=IMAGE:dvi=IMAGE:eps=IMAGE:exr=IMAGE:ff=IMAGE:fts=IMAGE:gif=IMAGE:hdr=IMAGE:heic=IMAGE:heif=IMAGE:ico=IMAGE:j2c=IMAGE:j2k=IMAGE:jfi=IMAGE:jfif=IMAGE:jif=IMAGE:jp2=IMAGE:jpe=IMAGE:jpeg=IMAGE:jpf=IMAGE:jpg=IMAGE:jps=IMAGE:jpx=IMAGE:jxl=IMAGE:kra=IMAGE:miff=IMAGE:mng=IMAGE:ora=IMAGE:pam=IMAGE:pbm=IMAGE:pcx=IMAGE:pdd=IMAGE:pgm=IMAGE:png=IMAGE:pnm=IMAGE:ppm=IMAGE:psd=IMAGE:pxm=IMAGE:qoi=IMAGE:rgba=IMAGE:sgi=IMAGE:svg=IMAGE:svgz=IMAGE:tga=IMAGE:tif=IMAGE:tiff=IMAGE:webp=IMAGE:wmf=IMAGE:xbm=IMAGE:xcf=IMAGE:xpm=IMAGE:xwd=IMAGE:"
 
 # RAW IMAGES
 # There are plenty of raw image formats out there. This is an incomplete list taken from "https://en.wikipedia.org/wiki/Raw_image_format".
@@ -258,7 +258,7 @@ ExtColors="$$$=TEMP:aux=TEMP:bak=TEMP:bbl=TEMP:bc=TEMP:cache=TEMP:class=TEMP:git
 
 # VIDEO FILES
 define VIDEO=1;35 # Bold magenta
-ExtColors="3gp=VIDEO:asf=VIDEO:avi=VIDEO:cgm=VIDEO:dl=VIDEO:flc=VIDEO:fli=VIDEO:flv=VIDEO:h264=VIDEO:heics=VIDEO:gl=VIDEO:m2ts=VIDEO:m2v=VIDEO:m4v=VIDEO:mkv=VIDEO:mov=VIDEO:mp4=VIDEO:mp4v=VIDEO:mpeg=VIDEO:mpg=VIDEO:nuv=VIDEO:ogm=VIDEO:ogv=VIDEO:qt=VIDEO:rm=VIDEO:rmvb=VIDEO:vob=VIDEO:webm=VIDEO:wmv=VIDEO:yuv=VIDEO:"
+ExtColors="3gp=VIDEO:asf=VIDEO:avi=VIDEO:flc=VIDEO:fli=VIDEO:flv=VIDEO:h264=VIDEO:heics=VIDEO:m2ts=VIDEO:m2v=VIDEO:m4v=VIDEO:mkv=VIDEO:mov=VIDEO:mp4=VIDEO:mp4v=VIDEO:mpeg=VIDEO:mpg=VIDEO:nuv=VIDEO:ogm=VIDEO:ogv=VIDEO:qt=VIDEO:rm=VIDEO:rmvb=VIDEO:vob=VIDEO:webm=VIDEO:wmv=VIDEO:yuv=VIDEO:"
 
 #=====================================#
 #           COLOR SHADES              #

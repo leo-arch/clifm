@@ -237,7 +237,7 @@ ExtColors="applescript=CODE:asm=CODE:awk=CODE:bash=CODE:bat=CODE:c=CODE:c++=CODE
 
 # COMPILER OUTPUT FILES
 define COMP=33
-ExtColors="a=COMP:bundle=COMP:class=COMP:cma=COMP:cmi=COMP:cmo=COMP:cmx=COMP:dll=COMP:dylib=COMP:elc=COMP:ko=COMP:lib=COMP:o=COMP:obj=COMP:pyc=COMP:pyd=COMP:pyo=COMP:so=COMP:zwc=COMP:"
+ExtColors="a=COMP:bundle=COMP:class=COMP:cma=COMP:cmi=COMP:cmo=COMP:cmx=COMP:dll=COMP:dylib=COMP:elc=COMP:ko=COMP:lib=COMP:o=COMP:obj=COMP:pyc=COMP:pyd=COMP:pyo=COMP:rlib=COMP:so=COMP:zwc=COMP:"
 
 # CONFIG FILES
 define CONFIG=@44
@@ -253,7 +253,7 @@ ExtColors="azw=EBOOK:azw3=EBOOK:cbr=EBOOK:cbz=EBOOK:djv=EBOOK:djvu=EBOOK:epub=EB
 
 # IMAGES
 define IMAGE=@141
-ExtColors="ai=IMAGE:avif=IMAGE:bmp=IMAGE:dpx=IMAGE:dvi=IMAGE:eps=IMAGE:exr=IMAGE:ff=IMAGE:fit=IMAGE:fts=IMAGE:gif=IMAGE:hdr=IMAGE:heic=IMAGE:heif=IMAGE:ico=IMAGE:j2c=IMAGE:j2k=IMAGE:jfi=IMAGE:jfif=IMAGE:jif=IMAGE:jp2=IMAGE:jpe=IMAGE:jpeg=IMAGE:jpf=IMAGE:jpg=IMAGE:jps=IMAGE:jpx=IMAGE:jxl=IMAGE:kra=IMAGE:miff=IMAGE:mng=IMAGE:ora=IMAGE:pam=IMAGE:pbm=IMAGE:pcx=IMAGE:pdd=IMAGE:pgm=IMAGE:png=IMAGE:pnm=IMAGE:ppm=IMAGE:psd=IMAGE:pxm=IMAGE:qoi=IMAGE:rgba=IMAGE:sgi=IMAGE:svg=IMAGE:svgz=IMAGE:tga=IMAGE:tif=IMAGE:tiff=IMAGE:webp=IMAGE:wmf=IMAGE:xbm=IMAGE:xcf=IMAGE:xpm=IMAGE:xwd=IMAGE:"
+ExtColors="ai=IMAGE:avif=IMAGE:bmp=IMAGE:cgm=IMAGE:dpx=IMAGE:dvi=IMAGE:eps=IMAGE:exr=IMAGE:ff=IMAGE:fts=IMAGE:gif=IMAGE:hdr=IMAGE:heic=IMAGE:heif=IMAGE:ico=IMAGE:j2c=IMAGE:j2k=IMAGE:jfi=IMAGE:jfif=IMAGE:jif=IMAGE:jp2=IMAGE:jpe=IMAGE:jpeg=IMAGE:jpf=IMAGE:jpg=IMAGE:jps=IMAGE:jpx=IMAGE:jxl=IMAGE:kra=IMAGE:miff=IMAGE:mng=IMAGE:ora=IMAGE:pam=IMAGE:pbm=IMAGE:pcx=IMAGE:pdd=IMAGE:pgm=IMAGE:png=IMAGE:pnm=IMAGE:ppm=IMAGE:psd=IMAGE:pxm=IMAGE:qoi=IMAGE:rgba=IMAGE:sgi=IMAGE:svg=IMAGE:svgz=IMAGE:tga=IMAGE:tif=IMAGE:tiff=IMAGE:webp=IMAGE:wmf=IMAGE:xbm=IMAGE:xcf=IMAGE:xpm=IMAGE:xwd=IMAGE:"
 
 # RAW IMAGES
 # There are plenty of raw image formats out there. This is an incomplete list taken from "https://en.wikipedia.org/wiki/Raw_image_format".
@@ -263,7 +263,7 @@ ExtColors="ai=IMAGE:avif=IMAGE:bmp=IMAGE:dpx=IMAGE:dvi=IMAGE:eps=IMAGE:exr=IMAGE
 
 # VIDEO FILES
 define VIDEO=@141-1
-ExtColors="3gp=VIDEO:asf=VIDEO:avi=VIDEO:cgm=VIDEO:dl=VIDEO:flc=VIDEO:fli=VIDEO:flv=VIDEO:h264=VIDEO:heics=VIDEO:gl=VIDEO:m2ts=VIDEO:m2v=VIDEO:m4v=VIDEO:mkv=VIDEO:mov=VIDEO:mp4=VIDEO:mp4v=VIDEO:mpeg=VIDEO:mpg=VIDEO:nuv=VIDEO:ogm=VIDEO:ogv=VIDEO:qt=VIDEO:rm=VIDEO:rmvb=VIDEO:vob=VIDEO:webm=VIDEO:wmv=VIDEO:yuv=VIDEO:"
+ExtColors="3gp=VIDEO:asf=VIDEO:avi=VIDEO:flc=VIDEO:fli=VIDEO:flv=VIDEO:h264=VIDEO:heics=VIDEO:m2ts=VIDEO:m2v=VIDEO:m4v=VIDEO:mkv=VIDEO:mov=VIDEO:mp4=VIDEO:mp4v=VIDEO:mpeg=VIDEO:mpg=VIDEO:nuv=VIDEO:ogm=VIDEO:ogv=VIDEO:qt=VIDEO:rm=VIDEO:rmvb=VIDEO:vob=VIDEO:webm=VIDEO:wmv=VIDEO:yuv=VIDEO:"
 
 # MARKUP FILES
 define MARKUP=@85
@@ -271,11 +271,11 @@ ExtColors="css=MARKUP:htm=MARKUP:html=MARKUP:ltx=MARKUP:markdown=MARKUP:md=MARKU
 
 # TEMPORARY FILES
 define TEMP=@247
-ExtColors="$$$=TEMP:aux=TEMP:bak=TEMP:bbl=TEMP:bc=TEMP:bk=TEMP:bkp=TEMP:cache=TEMP:git=TEMP:hi=TEMP:idx=TEMP:ilg=TEMP:ind=TEMP:la=TEMP:lo=TEMP:localized=TEMP:lock=TEMP:log=TEMP:orig=TEMP:pid=TEMP:rej=TEMP:rlib=TEMP:swp=TEMP:tmp=TEMP:toc=TEMP:"
+ExtColors="$$$=TEMP:aux=TEMP:bak=TEMP:bbl=TEMP:bc=TEMP:bk=TEMP:bkp=TEMP:cache=TEMP:git=TEMP:hi=TEMP:idx=TEMP:ilg=TEMP:ind=TEMP:la=TEMP:lo=TEMP:localized=TEMP:lock=TEMP:log=TEMP:orig=TEMP:pid=TEMP:rej=TEMP:swp=TEMP:tmp=TEMP:toc=TEMP:"
 
 # DATABASES
 define DB=@211
-ExtColors="cdx=DB:db=DB:dbf=DB:dbi=DB:dbx=DB:fox=DB:mdb=DB:mdn=DB:mdx=DB:msql=DB:mssql=DB:odb=DB:pgsql=DB:sql=DB:sqlite=DB:ssql=DB:"
+ExtColors="db=DB:db3=DB:dbf=DB:fdb=DB:gdb=DB:kdb=DB:kdbx=DB:mdb=DB:mdf=DB:ndf=DB:odb=DB:s3db=DB:sdf=DB:sl3=DB:sqlite=DB:sqlite3=DB:"
 
 #=====================================#
 #           COLOR SHADES              #
