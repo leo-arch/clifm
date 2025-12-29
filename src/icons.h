@@ -947,7 +947,9 @@ struct icons_t const icon_ext[] = {
 	{"oga", ICON_AUDIO, YELLOW},
 	{"pcm", ICON_AUDIO, YELLOW},
 	{"ra", ICON_AUDIO, YELLOW},
+	{"sf2", ICON_AUDIO, YELLOW},
 	{"spx", ICON_AUDIO, YELLOW},
+	{"tta", ICON_AUDIO, YELLOW},
 	{"wv", ICON_AUDIO, YELLOW},
 /*	{"snd", ICON_AUDIO, YELLOW}, // Generic
 	{"sou", ICON_AUDIO, YELLOW}, // Legacy
@@ -970,6 +972,7 @@ struct icons_t const icon_ext[] = {
 	{"tzo", ICON_ARCHIVE, YELLOW},
 	{"war", ICON_ARCHIVE, YELLOW}, /* Java web archive */
 	{"z", ICON_ARCHIVE, YELLOW},
+/*	{"pk7", ICON_ARCHIVE, YELLOW}, // GZDoom archive file */
 
 	{"apk", ICON_PACKAGE, YELLOW},
 	{"Appimage", ICON_PACKAGE, YELLOW},
@@ -1049,6 +1052,7 @@ struct icons_t const icon_ext[] = {
 	{"rmd", ICON_RUST, WHITE},
 	{"rmeta", ICON_RUST, WHITE},
 	{"scm", ICON_SCHEME, WHITE},
+	{"sgml", ICON_XML, YELLOW},
 	{"sld", ICON_SCHEME, WHITE},
 	{"ss", ICON_SCHEME, WHITE},
 	{"sty", ICON_TEX, WHITE},
@@ -1061,6 +1065,8 @@ struct icons_t const icon_ext[] = {
 	{"vala", ICON_VALA, MAGENTA},
 	{"vsix", ICON_VISUALSTUDIO, BLUE},
 	{"xaml", ICON_XAML, WHITE},
+	{"xsd", ICON_XML, YELLOW},
+	{"xsl", ICON_XML, YELLOW},
 	{"xul", ICON_XML, YELLOW},
 	{"whl", ICON_PYTHON, GREEN},
 /*	{"iml", ICON_INTELLIJ, BLUE or RED},
@@ -1247,7 +1253,7 @@ struct icons_t const icon_ext[] = {
 
 /* Legacy
  * Amiga: lha, nfo, diz, mod, pic, lbm, ilbm, dib, rle, adf, dms
- * MS-DOS: voc, sou, bas */
+ * MS-DOS: voc, sou, bas, com, sys, vxd, drv, hlp */
 
 /*	{"tf", ICON_TERRAFORM, MAGENTA},
 	{"tfstate", ICON_TERRAFORM, MAGENTA},
