@@ -229,11 +229,11 @@ ExtColors="aac=AUDIO:ac3=AUDIO:anx=AUDIO:au=AUDIO:axa=AUDIO:cue=AUDIO:m2a=AUDIO:
 
 # LOSSLESS AUDIO
 define LAUDIO=@214-1
-ExtColors="aif=LAUDIO:aifc=LAUDIO:aiff=LAUDIO:alac=LAUDIO:ape=LAUDIO:flac=LAUDIO:pcm=LAUDIO:wav=LAUDIO:wm=LAUDIO:wv=LAUDIO:"
+ExtColors="aif=LAUDIO:aifc=LAUDIO:aiff=LAUDIO:alac=LAUDIO:ape=LAUDIO:flac=LAUDIO:pcm=LAUDIO:wav=LAUDIO:wv=LAUDIO:"
 
 # SOURCE FILES
 define CODE=@247-1
-ExtColors="applescript=CODE:asm=CODE:awk=CODE:bash=CODE:bat=CODE:c=CODE:c++=CODE:cabal=CODE:cc=CODE:cgi=CODE:clj=CODE:cp=CODE:cpp=CODE:cs=CODE:csx=CODE:cxx=CODE:d=CODE:dart=CODE:di=CODE:dpr=CODE:el=CODE:elm=CODE:erl=CODE:ex=CODE:exs=CODE:f=CODE:f90=CODE:fish=CODE:for=CODE:fs=CODE:fsi=CODE:fsx=CODE:gd=CODE:gleam=CODE:go=CODE:gradle=CODE:groovy=CODE:gv=CODE:gvy=CODE:h=CODE:h++=CODE:hh=CODE:hpp=CODE:hs=CODE:hxx=CODE:inl=CODE:ino=CODE:ipp=CODE:ipynb=CODE:java=CODE:jl=CODE:js=CODE:jsx=CODE:kt=CODE:kts=CODE:lhs=CODE:lisp=CODE:lua=CODE:m=CODE:mat=CODE:ml=CODE:mli=CODE:mm=CODE:nim=CODE:p=CODE:pas=CODE:php=CODE:pl=CODE:pm=CODE:pp=CODE:pro=CODE:ps1=CODE:psd1=CODE:psm1=CODE:purs=CODE:py=CODE:r=CODE:rb=CODE:rs=CODE:scala=CODE:sh=CODE:swift=CODE:t=CODE:tcl=CODE:ts=CODE:tsx=CODE:twig=CODE:v=CODE:vala=CODE:vb=CODE:zig=CODE:zsh=CODE:"
+ExtColors="applescript=CODE:asm=CODE:awk=CODE:bash=CODE:bat=CODE:c=CODE:c++=CODE:cabal=CODE:cc=CODE:cgi=CODE:clj=CODE:cp=CODE:cpp=CODE:cs=CODE:csx=CODE:cxx=CODE:d=CODE:dart=CODE:di=CODE:dpr=CODE:el=CODE:elm=CODE:erl=CODE:ex=CODE:exs=CODE:f=CODE:f90=CODE:fish=CODE:for=CODE:fs=CODE:fsi=CODE:fsx=CODE:gd=CODE:gleam=CODE:go=CODE:gradle=CODE:groovy=CODE:gvy=CODE:h=CODE:h++=CODE:hh=CODE:hpp=CODE:hs=CODE:hxx=CODE:inl=CODE:ino=CODE:ipp=CODE:ipynb=CODE:java=CODE:jl=CODE:js=CODE:jsx=CODE:kt=CODE:kts=CODE:lhs=CODE:lisp=CODE:lua=CODE:m=CODE:ml=CODE:mli=CODE:mm=CODE:nim=CODE:p=CODE:pas=CODE:php=CODE:pl=CODE:pm=CODE:pp=CODE:ps1=CODE:psd1=CODE:psm1=CODE:purs=CODE:py=CODE:r=CODE:rb=CODE:rs=CODE:scala=CODE:sh=CODE:swift=CODE:t=CODE:tcl=CODE:ts=CODE:tsx=CODE:twig=CODE:v=CODE:vala=CODE:vb=CODE:zig=CODE:zsh=CODE:"
 
 # COMPILER OUTPUT FILES
 define COMP=33
@@ -245,7 +245,7 @@ ExtColors="cfg=CONFIG:clifm=CONFIG:conf=CONFIG:desktop=CONFIG:hjson=CONFIG:ini=C
 
 # DOCUMENTS
 define DOC=@228
-ExtColors="abw=DOC:chm=DOC:csv=DOC:doc=DOC:docx=DOC:eml=DOC:gdoc=DOC:numbers=DOC:odg=DOC:odp=DOC:ods=DOC:odt=DOC:pages=DOC:pps=DOC:ppt=DOC:pptx=DOC:rtf=DOC:sla=DOC:txt=DOC:xls=DOC:xlsx=DOC:"
+ExtColors="abw=DOC:csv=DOC:doc=DOC:docx=DOC:eml=DOC:gdoc=DOC:numbers=DOC:odg=DOC:odp=DOC:ods=DOC:odt=DOC:pages=DOC:pps=DOC:ppt=DOC:pptx=DOC:rtf=DOC:sla=DOC:txt=DOC:xls=DOC:xlsx=DOC:"
 
 # EBOOKS
 define EBOOK=@223
@@ -267,7 +267,7 @@ ExtColors="3gp=VIDEO:asf=VIDEO:avi=VIDEO:flc=VIDEO:fli=VIDEO:flv=VIDEO:h264=VIDE
 
 # MARKUP FILES
 define MARKUP=@85
-ExtColors="css=MARKUP:htm=MARKUP:html=MARKUP:ltx=MARKUP:markdown=MARKUP:md=MARKUP:mdown=MARKUP:opf=MARKUP:rss=MARKUP:rst=MARKUP:sass=MARKUP:scss=MARKUP:sgml=MARKUP:shtml=MARKUP:tex=MARKUP:xbel=MARKUP:xhtml=MARKUP:xml=MARKUP:xsd=MARKUP:xslt=MARKUP:"
+ExtColors="css=MARKUP:htm=MARKUP:html=MARKUP:ltx=MARKUP:markdown=MARKUP:md=MARKUP:mdown=MARKUP:opf=MARKUP:rss=MARKUP:rst=MARKUP:sass=MARKUP:scss=MARKUP:sgml=MARKUP:shtml=MARKUP:tex=MARKUP:xbel=MARKUP:xhtml=MARKUP:xml=MARKUP:xsd=MARKUP:xsl=MARKUP:xslt=MARKUP:"
 
 # TEMPORARY FILES
 define TEMP=@247
