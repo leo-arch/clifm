@@ -221,7 +221,7 @@ InterfaceColors="ac=PROMPT_AUTOCMD:db=PROP_BLKS:dd=PROP_DATE:de=PROP_INODE:df=IF
 
 # ARCHIVES
 define ARCHIVE=@1-1
-ExtColors="7z=ARCHIVE:alz=ARCHIVE:apk=ARCHIVE:arj=ARCHIVE:bz=ARCHIVE:bz2=ARCHIVE:bz3=ARCHIVE:cab=ARCHIVE:cpio=ARCHIVE:crate=ARCHIVE:deb=ARCHIVE:dmg=ARCHIVE:ear=ARCHIVE:esd=ARCHIVE:gz=ARCHIVE:img=ARCHIVE:iso=ARCHIVE:jar=ARCHIVE:lrz=ARCHIVE:lz=ARCHIVE:lz4=ARCHIVE:lzh=ARCHIVE:lzma=ARCHIVE:lzo=ARCHIVE:pyz=ARCHIVE:qcow=ARCHIVE:qcow2=ARCHIVE:rar=ARCHIVE:rpm=ARCHIVE:rz=ARCHIVE:sar=ARCHIVE:swm=ARCHIVE:t7z=ARCHIVE:tar=ARCHIVE:taz=ARCHIVE:tbz=ARCHIVE:tbz2=ARCHIVE:tgz=ARCHIVE:tlz=ARCHIVE:txz=ARCHIVE:tz=ARCHIVE:tzo=ARCHIVE:tzst=ARCHIVE:vcd=ARCHIVE:vdi=ARCHIVE:vhd=ARCHIVE:vhdx=ARCHIVE:vmdk=ARCHIVE:war=ARCHIVE:xz=ARCHIVE:z=ARCHIVE:zip=ARCHIVE:zst=ARCHIVE:"
+ExtColors="7z=ARCHIVE:alz=ARCHIVE:apk=ARCHIVE:arj=ARCHIVE:bz=ARCHIVE:bz2=ARCHIVE:bz3=ARCHIVE:cab=ARCHIVE:cpio=ARCHIVE:crate=ARCHIVE:deb=ARCHIVE:dmg=ARCHIVE:ear=ARCHIVE:esd=ARCHIVE:gz=ARCHIVE:img=ARCHIVE:iso=ARCHIVE:lrz=ARCHIVE:lz=ARCHIVE:lz4=ARCHIVE:lzh=ARCHIVE:lzma=ARCHIVE:lzo=ARCHIVE:pyz=ARCHIVE:qcow=ARCHIVE:qcow2=ARCHIVE:rar=ARCHIVE:rpm=ARCHIVE:rz=ARCHIVE:sar=ARCHIVE:swm=ARCHIVE:t7z=ARCHIVE:tar=ARCHIVE:taz=ARCHIVE:tbz=ARCHIVE:tbz2=ARCHIVE:tgz=ARCHIVE:tlz=ARCHIVE:txz=ARCHIVE:tz=ARCHIVE:tzo=ARCHIVE:tzst=ARCHIVE:vcd=ARCHIVE:vdi=ARCHIVE:vhd=ARCHIVE:vhdx=ARCHIVE:vmdk=ARCHIVE:xz=ARCHIVE:z=ARCHIVE:zip=ARCHIVE:zst=ARCHIVE:"
 
 # AUDIO FILES
 define AUDIO=@214
@@ -229,15 +229,15 @@ ExtColors="aac=AUDIO:ac3=AUDIO:anx=AUDIO:au=AUDIO:axa=AUDIO:cue=AUDIO:m2a=AUDIO:
 
 # LOSSLESS AUDIO
 define LAUDIO=@214-1
-ExtColors="aif=LAUDIO:aifc=LAUDIO:aiff=LAUDIO:alac=LAUDIO:ape=LAUDIO:flac=LAUDIO:pcm=LAUDIO:wav=LAUDIO:wv=LAUDIO:"
+ExtColors="aif=LAUDIO:aifc=LAUDIO:aiff=LAUDIO:alac=LAUDIO:ape=LAUDIO:flac=LAUDIO:pcm=LAUDIO:tta=LAUDIO:wav=LAUDIO:wv=LAUDIO:"
 
 # SOURCE FILES
 define CODE=@247-1
-ExtColors="applescript=CODE:asm=CODE:awk=CODE:bash=CODE:bat=CODE:c=CODE:c++=CODE:cabal=CODE:cc=CODE:cgi=CODE:clj=CODE:cp=CODE:cpp=CODE:cs=CODE:csx=CODE:cxx=CODE:d=CODE:dart=CODE:di=CODE:dpr=CODE:el=CODE:elm=CODE:erl=CODE:ex=CODE:exs=CODE:f=CODE:f90=CODE:fish=CODE:for=CODE:fs=CODE:fsi=CODE:fsx=CODE:gd=CODE:gleam=CODE:go=CODE:gradle=CODE:groovy=CODE:gvy=CODE:h=CODE:h++=CODE:hh=CODE:hpp=CODE:hs=CODE:hxx=CODE:inl=CODE:ino=CODE:ipp=CODE:ipynb=CODE:java=CODE:jl=CODE:js=CODE:jsx=CODE:kt=CODE:kts=CODE:lhs=CODE:lisp=CODE:lua=CODE:m=CODE:ml=CODE:mli=CODE:mm=CODE:nim=CODE:p=CODE:pas=CODE:php=CODE:pl=CODE:pm=CODE:pp=CODE:ps1=CODE:psd1=CODE:psm1=CODE:purs=CODE:py=CODE:r=CODE:rb=CODE:rs=CODE:scala=CODE:sh=CODE:swift=CODE:t=CODE:tcl=CODE:ts=CODE:tsx=CODE:twig=CODE:v=CODE:vala=CODE:vb=CODE:zig=CODE:zsh=CODE:"
+ExtColors="applescript=CODE:asm=CODE:awk=CODE:bash=CODE:bat=CODE:c=CODE:c++=CODE:cabal=CODE:cc=CODE:cgi=CODE:clj=CODE:cp=CODE:cpp=CODE:cs=CODE:csx=CODE:cxx=CODE:d=CODE:dart=CODE:di=CODE:dpr=CODE:el=CODE:elm=CODE:erl=CODE:ex=CODE:exs=CODE:f=CODE:f90=CODE:fish=CODE:for=CODE:fs=CODE:fsi=CODE:fsx=CODE:gd=CODE:gleam=CODE:go=CODE:gradle=CODE:groovy=CODE:gvy=CODE:h=CODE:h++=CODE:hh=CODE:hpp=CODE:hs=CODE:hxx=CODE:inc=CODE:inl=CODE:ino=CODE:ipp=CODE:ipynb=CODE:java=CODE:jl=CODE:js=CODE:jsx=CODE:kt=CODE:kts=CODE:lhs=CODE:lisp=CODE:lua=CODE:m=CODE:ml=CODE:mli=CODE:nim=CODE:p=CODE:pas=CODE:php=CODE:pl=CODE:pm=CODE:pp=CODE:ps1=CODE:psd1=CODE:psm1=CODE:purs=CODE:py=CODE:r=CODE:rb=CODE:rs=CODE:scala=CODE:sh=CODE:swift=CODE:t=CODE:tcl=CODE:ts=CODE:tsx=CODE:twig=CODE:v=CODE:vala=CODE:vb=CODE:zig=CODE:zsh=CODE:"
 
-# COMPILER OUTPUT FILES
+# COMPILER OUTPUT FILES (build artifacts)
 define COMP=33
-ExtColors="a=COMP:bundle=COMP:class=COMP:cma=COMP:cmi=COMP:cmo=COMP:cmx=COMP:dll=COMP:dylib=COMP:elc=COMP:ko=COMP:lib=COMP:o=COMP:obj=COMP:pyc=COMP:pyd=COMP:pyo=COMP:rlib=COMP:so=COMP:zwc=COMP:"
+ExtColors="a=COMP:bundle=COMP:class=COMP:cma=COMP:cmi=COMP:cmo=COMP:cmx=COMP:dll=COMP:dylib=COMP:elc=COMP:hi=COMP:jar=COMP:ko=COMP:la=COMP:lib=COMP:lo=COMP:o=COMP:obj=COMP:out=COMP:pyc=COMP:pyd=COMP:pyo=COMP:rlib=COMP:rmeta=COMP:so=COMP:war=COMP:zwc=COMP:"
 
 # CONFIG FILES
 define CONFIG=@44
@@ -269,9 +269,9 @@ ExtColors="3gp=VIDEO:asf=VIDEO:avi=VIDEO:flc=VIDEO:fli=VIDEO:flv=VIDEO:h264=VIDE
 define MARKUP=@85
 ExtColors="css=MARKUP:htm=MARKUP:html=MARKUP:ltx=MARKUP:markdown=MARKUP:md=MARKUP:mdown=MARKUP:opf=MARKUP:rss=MARKUP:rst=MARKUP:sass=MARKUP:scss=MARKUP:sgml=MARKUP:shtml=MARKUP:tex=MARKUP:xbel=MARKUP:xhtml=MARKUP:xml=MARKUP:xsd=MARKUP:xsl=MARKUP:xslt=MARKUP:"
 
-# TEMPORARY FILES
+# TEMPORARY FILES (runtime artifacts)
 define TEMP=@247
-ExtColors="$$$=TEMP:aux=TEMP:bak=TEMP:bbl=TEMP:bc=TEMP:bk=TEMP:bkp=TEMP:cache=TEMP:git=TEMP:hi=TEMP:idx=TEMP:ilg=TEMP:ind=TEMP:la=TEMP:lo=TEMP:localized=TEMP:lock=TEMP:log=TEMP:orig=TEMP:pid=TEMP:rej=TEMP:swp=TEMP:tmp=TEMP:toc=TEMP:"
+ExtColors="bak=TEMP:bk=TEMP:bkp=TEMP:cache=TEMP:crdownload=TEMP:lock=TEMP:log=TEMP:old=TEMP:orig=TEMP:part=TEMP:pid=TEMP:rej=TEMP:swo=TEMP:swp=TEMP:tmp=TEMP:"
 
 # DATABASES
 define DB=@211
