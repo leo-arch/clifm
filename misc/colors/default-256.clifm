@@ -270,7 +270,7 @@ define MARKUP=@85
 ExtColors="css=MARKUP:htm=MARKUP:html=MARKUP:ltx=MARKUP:markdown=MARKUP:md=MARKUP:mdown=MARKUP:opf=MARKUP:rss=MARKUP:rst=MARKUP:sass=MARKUP:scss=MARKUP:sgml=MARKUP:shtml=MARKUP:tex=MARKUP:xbel=MARKUP:xhtml=MARKUP:xml=MARKUP:xsd=MARKUP:xsl=MARKUP:xslt=MARKUP:"
 
 # TEMPORARY FILES (runtime artifacts)
-define TEMP=@247
+define TEMP=@242
 ExtColors="bak=TEMP:bk=TEMP:bkp=TEMP:cache=TEMP:crdownload=TEMP:lock=TEMP:log=TEMP:old=TEMP:orig=TEMP:part=TEMP:pid=TEMP:rej=TEMP:swo=TEMP:swp=TEMP:tmp=TEMP:"
 
 # DATABASES
