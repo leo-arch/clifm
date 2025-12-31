@@ -41,7 +41,7 @@
 #define NERD_HOME          "󰋜"
 #define NERD_LICENSE       "󰈙"
 #define NERD_LOCK          "󰌾"
-#define NERD_CERT          "󱧉"
+#define NERD_CERT          "󱆇"
 #define NERD_MAKEFILE      ""
 #define NERD_MUSIC         "󰋋"
 #define NERD_MUSICFILE     "󰝚"

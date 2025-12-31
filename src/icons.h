@@ -856,7 +856,7 @@ struct icons_t const icon_ext[] = {
 	{"xls", ICON_EXCEL, GREEN},
 	{"xlsx", ICON_EXCEL, GREEN},
 	{"xml", ICON_XML, YELLOW},
-	{"xz", ICON_ARCHIVE, RED},
+	{"xz", ICON_ARCHIVE, YELLOW},
 
 	{"yaml", ICON_YAML, WHITE},
 	{"yml", ICON_YAML, WHITE},
@@ -1014,7 +1014,8 @@ struct icons_t const icon_ext[] = {
 	{"webmanifest", ICON_JSON, WHITE},
 
 	/* Programming */
-	{"asp", ICON_XML, YELLOW},
+	{"asp", ICON_HTML, YELLOW},
+	{"aspx", ICON_HTML, YELLOW},
 	{"bst", ICON_TEX, WHITE},
 	{"csproj", ICON_CSHARP, MAGENTA},
 	{"cu", ICON_CUDA, BLUE},
@@ -1031,6 +1032,8 @@ struct icons_t const icon_ext[] = {
 	{"gvy", ICON_GROOVY, CYAN},
 	{"inl", ICON_CPP, B_BLUE},
 	{"jad", ICON_JAVA, WHITE},
+	{"jsp", ICON_HTML, YELLOW},
+	{"jspx", ICON_HTML, YELLOW},
 	{"latex", ICON_TEX, WHITE},
 	{"ltx", ICON_TEX, WHITE},
 	{"luac", ICON_LUA, BLUE},
@@ -1059,6 +1062,7 @@ struct icons_t const icon_ext[] = {
 	{"stylus", ICON_STYLUS, B_GREEN},
 	{"suo", ICON_VISUALSTUDIO, BLUE},
 	{"tbc", ICON_TCL, GREEN},
+	{"tld", ICON_XML, YELLOW},
 	{"tres", ICON_GODOT, CYAN},
 	{"tscn", ICON_GODOT, CYAN},
 	{"v", ICON_V, B_BLUE},
