@@ -2747,8 +2747,7 @@ set_config_int_value(char *line, int *var, const int min, const int max)
 		return;
 
 	int num = 0;
-	const int ret = sscanf(line, "%d\n", &num);
-	if (ret > 0 && num >= min && num <= max)
+	if (sscanf(line, "%d\n", &num) == 1 && num >= min && num <= max)
 		*var = num;
 }
 
@@ -3347,6 +3346,19 @@ set_safe_filenames(const char *val)
 		conf.safe_filenames = SAFENAMES_STRICT;
 }
 
+static void
+set_umask(const char *line)
+{
+	if (!line || !*line)
+		return;
+
+	unsigned int opt_num = MAX_UMASK + 1;
+	if (sscanf(line, "%o\n", &opt_num) == 1 && opt_num <= MAX_UMASK) {
+		conf.umask_set = 1;
+		umask((mode_t)opt_num); /* flawfinder: ignore */
+	}
+}
+
 /* Read the main configuration file and set options accordingly */
 static void
 read_config(void)
@@ -3852,11 +3864,7 @@ read_config(void)
 
 		else if (xargs.secure_env != 1 && xargs.secure_env_full != 1
 		&& *line == 'U' && strncmp(line, "Umask=", 6) == 0) {
-			unsigned int opt_num = MAX_UMASK + 1;
-			ret = sscanf(line + 6, "%o\n", &opt_num);
-			if (ret == -1 || opt_num > MAX_UMASK)
-				continue;
-			umask((mode_t)opt_num); /* flawfinder: ignore */
+			set_umask(line + 6);
 		}
 
 		else if (xargs.welcome_message == UNSET && *line == 'W'

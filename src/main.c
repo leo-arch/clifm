@@ -1380,8 +1380,9 @@ main(int argc, char *argv[])
 	init_workspaces_opts();
 	load_user_mimetypes();
 
-	/* Restore user umask */
-	umask(old_mask); /* flawfinder: ignore */
+	/* Restore user umask (if not set via Umask in the config file) */
+	if (conf.umask_set != 1)
+		umask(old_mask); /* flawfinder: ignore */
 
 	/* # 2. MAIN PROGRAM LOOP # */
 	run_main_loop();

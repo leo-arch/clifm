@@ -1227,6 +1227,7 @@ struct config_t {
 	int pad1; /* Keep the struct alignment */
 	int pad2;
 #endif /* !_NO_TRASH */
+	int umask_set; /* Value set from Umask in the config file */
 	int warning_prompt;
 	int welcome_message;
 };

@@ -255,6 +255,7 @@ init_conf_struct(void)
 	conf.tr_as_rm = UNSET;
 	conf.trash_force = DEF_TRASH_FORCE;
 #endif /* !_NO_TRASH */
+	conf.umask_set = UNSET;
 	conf.warning_prompt = UNSET;
 	conf.welcome_message = UNSET;
 
