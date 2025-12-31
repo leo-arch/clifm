@@ -1535,7 +1535,7 @@ parse_cmdline_args(const int argc, char **argv)
 	while ((optc = getopt(argc, argv, OPTSTRING)) != EOF) {
 		switch (optc) {
 		case 'a': set_show_hidden(optarg); break;
-		case 'A': xargs.show_hidden = conf.show_hidden = 0; break;
+		case 'A': xargs.show_hidden = conf.show_hidden = HIDDEN_FALSE; break;
 		case 'b':
 			xargs.bm_file = 1;
 			set_alt_file(optarg, &alt_bm_file, "-b");
@@ -1683,7 +1683,7 @@ parse_cmdline_args(const int argc, char **argv)
 		switch (optc) {
 		/* Short options */
 		case 'a': set_show_hidden(optarg); break;
-		case 'A': xargs.show_hidden = conf.show_hidden = 0; break;
+		case 'A': xargs.show_hidden = conf.show_hidden = HIDDEN_FALSE; break;
 		case 'b':
 			xargs.bm_file = 1;
 			set_alt_file(optarg, &alt_bm_file, "-b");
