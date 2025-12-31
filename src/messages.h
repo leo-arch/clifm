@@ -1384,7 +1384,7 @@ c: Quit paging (printing remaining files)\n"
 #ifdef _BE_POSIX
 #define OPTIONS_LIST "\
 \n -a[VAL]  List hidden files ('first', 'last', 'true', or 'false')\
-\n -A       Do not list hidden files\
+\n -A       Do not list hidden files (same as -afalse)\
 \n -b FILE  Set an alternative bookmarks file\
 \n -B NUM   Set TAB-completion mode (NUM=[0-3])\
 \n -c FILE  Set an alternative main configuration file\
@@ -1436,8 +1436,8 @@ c: Quit paging (printing remaining files)\n"
 \n -Z NUM   List only up to NUM files"
 #else
 #define SHORT_OPTIONS "\
-\n  -a, --show-hidden[=VAL]\t Show hidden files ('first', 'last', 'true', or 'false')\
-\n  -A, --no-hidden\t\t Do not show hidden files\
+\n  -a, --show-hidden[=VAL]\t Show hidden files ('first', 'last', 'true', or 'false'). If VAL is omitted, 'true' is assumed.\
+\n  -A, --no-hidden\t\t Do not show hidden files (same as --show-hidden=false)\
 \n  -b, --bookmarks-file=FILE\t Set an alternative bookmarks file\
 \n  -c, --config-file=FILE\t Set an alternative configuration file\
 \n  -D, --config-dir=DIR\t\t Set an alternative configuration directory\
@@ -1489,7 +1489,7 @@ and paths\
 \n      --fzfpreview-hidden\t Enable file previews for tab completion (fzf mode only) with the preview window hidden (toggle with Alt+p)\
 \n      --icons\t\t\t Enable icons\
 \n      --icons-use-file-color\t Icon colors follow file colors\
-\n      --int-vars\t\t Enable the use internal variables\
+\n      --int-vars\t\t Enable the use of internal variables\
 \n      --kitty-keys\t\t Ask the terminal to enable the kitty keyboard protocol\
 \n      --list-and-quit\t\t List files and quit\
 \n      --ls\t\t\t Short for --list-and-quit\
@@ -1542,7 +1542,7 @@ PropFields in the config file)\
 \n      --sel-file=FILE\t\t Set FILE as custom selections file\
 \n      --share-selbox\t\t Make the Selection Box common to different profiles\
 \n      --shotgun-file=FILE\t Set FILE as shotgun's configuration file\
-\n      --si\t\t\t Display file sizes in SI units (powers of 1000) instead of 1024\
+\n      --si\t\t\t Display file sizes in powers of 1000 (SI units) instead of 1024\
 \n      --sort-reverse\t\t Sort in reverse order, e.g., z-a instead of a-z\
 \n      --stat FILE...\t\t Run the 'p' command on FILE(s) and exit\
 \n      --stat-full FILE...\t Run the 'pp' command on FILE(s) and exit\
@@ -1677,7 +1677,7 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  Alt+p              Change to the pinned directory\n\
  Alt+v              Toggle prepend sudo\n\
  Alt+0              Run the file pager\n\
- Alt+[1-4]          Switch to workspace 1-4\n\
+ Alt+[1-8]          Switch to workspace 1-8\n\
  Ctrl+Alt+o         Switch to previous profile\n\
  Ctrl+Alt+p         Switch to next profile\n\
  Ctrl+Alt+a         Archive selected files\n\
