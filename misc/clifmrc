@@ -185,7 +185,7 @@
 # Set it to -1 (or leave empty) to remove this limit.
 # If running in long view mode, this setting is overriden by MinNameTruncate
 # if MaxFilenameLen is smaller than MinNameTruncate.
-;MaxFilenameLen=20
+;MaxFilenameLen=32
 
 # Truncate filenames longer than MaxFilenameLen.
 ;TruncateNames=true
