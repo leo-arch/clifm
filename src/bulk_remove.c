@@ -17,14 +17,14 @@
 #include <errno.h>
 
 #include "aux.h" /* xnmalloc, open_fwrite(), is_cmd_in_path(), count_dir() */
-#include "file_operations.h" // open_file() */
+#include "file_operations.h" /* open_file() */
 #include "messages.h" /* RR_USAGE */
 #include "misc.h" /* xerror() */
 #include "spawn.h" /* launch_execv() */
 
 #define BULK_RM_TMP_FILE_HEADER "# Clifm - Remove files in bulk\n\
 # Remove the filenames you want to be deleted, save, and quit the\n\
-# editor (you will be asked for confirmation).\n\
+# editor (you will be prompted to confirm).\n\
 # Quit the editor without saving to cancel the operation.\n\n"
 
 #define IS_RR_COMMENT(s) (*(s) == '#' && (s)[1] == ' ')

@@ -35,7 +35,7 @@
 
 #define BULK_RENAME_TMP_FILE_HEADER "# Clifm - Rename files in bulk\n\
 # Edit filenames, save, and quit the editor (you will be\n\
-# asked for confirmation).\n\
+# prompted to confirm).\n\
 # Quit the editor without saving to cancel the operation.\n\n"
 
 #define IS_BR_COMMENT(l) (*(l) == '#' && (l)[1] == ' ')
