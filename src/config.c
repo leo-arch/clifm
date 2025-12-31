@@ -3359,6 +3359,32 @@ set_umask(const char *line)
 	}
 }
 
+static void
+set_welcome_msg_str(char *line)
+{
+	char *val = get_line_value(line);
+	if (!val)
+		return;
+
+	free(conf.welcome_message_str);
+	conf.welcome_message_str = savestring(val, strlen(val));
+}
+
+static void
+set_filename_filter(void)
+{
+	regfree(&regex_exp);
+	const int ret = regcomp(&regex_exp, filter.str, REG_NOSUB | REG_EXTENDED);
+	if (ret == 0) /* Successfully compiled regex */
+		return;
+
+	err('w', PRINT_PROMPT, _("%s: '%s': Invalid regular "
+		"expression\n"), PROGRAM_NAME, filter.str);
+	free(filter.str);
+	filter.str = (char *)NULL;
+	regfree(&regex_exp);
+}
+
 /* Read the main configuration file and set options accordingly */
 static void
 read_config(void)
@@ -3377,7 +3403,6 @@ read_config(void)
 		rl_vi_editing_mode(1, 0);
 
 	int default_answers_set = 0;
-	int ret = -1;
 	conf.max_name_len = DEF_MAX_NAME_LEN;
 	*div_line = *DEF_DIV_LINE;
 	/* The longest possible line in the config file is StartingPath="PATH" */
@@ -3873,11 +3898,7 @@ read_config(void)
 		}
 
 		else if (*line == 'W' && strncmp(line, "WelcomeMessageStr=", 18) == 0) {
-			char *tmp = get_line_value(line + 18);
-			if (!tmp)
-				continue;
-			free(conf.welcome_message_str);
-			conf.welcome_message_str = savestring(tmp, strlen(tmp));
+			set_welcome_msg_str(line + 18);
 		}
 
 		else {
@@ -3897,17 +3918,8 @@ read_config(void)
 		conf.list_dirs_first = conf.welcome_message = 0;
 	}
 
-	if (filter.str && filter.type == FILTER_FILE_NAME) {
-		regfree(&regex_exp);
-		ret = regcomp(&regex_exp, filter.str, REG_NOSUB | REG_EXTENDED);
-		if (ret != FUNC_SUCCESS) {
-			err('w', PRINT_PROMPT, _("%s: '%s': Invalid regular "
-				"expression\n"), PROGRAM_NAME, filter.str);
-			free(filter.str);
-			filter.str = (char *)NULL;
-			regfree(&regex_exp);
-		}
-	}
+	if (filter.str && filter.type == FILTER_FILE_NAME)
+		set_filename_filter();
 }
 #endif /* CLIFM_SUCKLESS */
 
