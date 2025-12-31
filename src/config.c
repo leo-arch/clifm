@@ -2726,7 +2726,7 @@ static void
 set_config_bool_value(char *line, int *var)
 {
 	char *p = line;
-	if (!p || !*p || *p < 'f')
+	if (!p || !*p || !var)
 		return;
 
 	if (*p == 't' && strncmp(p, "true\n", 5) == 0) {
@@ -2743,12 +2743,25 @@ set_config_bool_value(char *line, int *var)
 static void
 set_config_int_value(char *line, int *var, const int min, const int max)
 {
-	if (!line || !*line)
+	if (!line || !*line || !var)
 		return;
 
-	int num = 0;
-	if (sscanf(line, "%d\n", &num) == 1 && num >= min && num <= max)
-		*var = num;
+	char *end_ptr = NULL;
+	errno = 0;
+	const long num = strtol(line, &end_ptr, 10);
+	if (errno != 0)
+		return; /* Number out of range */
+
+	if (end_ptr == line)
+		return; /* Not a number */
+
+	if (*end_ptr != '\n' && *end_ptr != '\0' && *end_ptr != ' ')
+		return; /* Garbage after number */
+
+	/* Validate number */
+	if (num >= INT_MIN && num <= INT_MAX
+	&& num >= (long)min && num <= (long)max)
+		*var = (int)num;
 }
 
 static void
@@ -3352,10 +3365,21 @@ set_umask(const char *line)
 	if (!line || !*line)
 		return;
 
-	unsigned int opt_num = MAX_UMASK + 1;
-	if (sscanf(line, "%o\n", &opt_num) == 1 && opt_num <= MAX_UMASK) {
+	char *end_ptr = NULL;
+	errno = 0;
+	unsigned long val = strtoul(line, &end_ptr, 8);
+	if (end_ptr == line)
+		return; /* No number */
+
+	if (errno != 0)
+		return; /* Number out of range */
+
+	if (*end_ptr != '\n' && *end_ptr != '\0' && *end_ptr != ' ')
+		return; /* Garbage after number */
+
+	if (val <= MAX_UMASK) {
 		conf.umask_set = 1;
-		umask((mode_t)opt_num); /* flawfinder: ignore */
+		umask((mode_t)val); /* flawfinder: ignore */
 	}
 }
 
