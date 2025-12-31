@@ -245,10 +245,10 @@
 ;ColorScheme=
 
 # Enable the use of icons in the file list.
-# By default, emojis (widely available today) are used as icons, but
-# Nerd-fonts and icons-in-terminal are supported as well, though Clifm
-# needs to be recompiled in order to enable support. Consult our Wiki
-# (https://github.com/leo-arch/clifm/wiki) for more information.
+# By default, Nerdfonts are used as icon set, but emojis and icons-in-terminal
+# are supported as well (although Clifm needs to be recompiled in order to
+# enable support). Consult our Wiki (https://github.com/leo-arch/clifm/wiki)
+# for more information.
 ;Icons=false
 
 # Number of spaces between icons and filenames (supported values: 0, 1, or 2).
