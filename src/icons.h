@@ -619,7 +619,7 @@ struct icons_t const icon_ext[] = {
 	{"cmake", ICON_CMAKE, WHITE},
 	{"coffee", ICON_COFFEE, WHITE},
 	{"conf", ICON_CONFIG, WHITE},
-	{"cpio", ICON_ARCHIVE, YELLOW}, // Uncompressed
+	{"cpio", ICON_ARCHIVE, WHITE}, // Uncompressed
 	{"cpp", ICON_CPP, B_BLUE},
 	{"crdownload", ICON_DOWNLOADS, WHITE},
 	{"crate", ICON_ARCHIVE, YELLOW},
@@ -821,7 +821,7 @@ struct icons_t const icon_ext[] = {
 	{"swift", ICON_SWIFT, GREEN},
 
 	{"t", ICON_PERL, YELLOW},
-	{"tar", ICON_ARCHIVE, YELLOW}, // Uncompressed
+	{"tar", ICON_ARCHIVE, WHITE}, // Uncompressed
 	{"tbz2", ICON_ARCHIVE, YELLOW},
 	{"tcl", ICON_TCL, GREEN},
 	{"tex", ICON_TEX, WHITE},
@@ -923,34 +923,36 @@ struct icons_t const icon_ext[] = {
 	{"rw2", ICON_IMG, B_GREEN}, // Panasonic
 	{"rwl", ICON_IMG, B_GREEN}, // Leica
 /*	{"3fr", ICON_IMG, GREEN}, // Hasselblad
-	{"ari", ICON_IMG, GREEN}, // ARRI
+	{"ari", ICON_IMG, GREEN}, // Sony/Arri Alexa
 	{"bay", ICON_IMG, GREEN}, // Casio
 	{"braw", ICON_IMG, GREEN}, // BlackMagic
-	{"crw", ICON_IMG, GREEN}, // Canon
+	{"crw", ICON_IMG, GREEN}, // Canon: older than cr2/cr3
 	{"cap", ICON_IMG, GREEN},
+	{"cin", ICON_IMG, GREEN}, // Kodak
+	{"crf", ICON_IMG, GREEN}, // Casio
 	{"data", ICON_IMG, GREEN},
-	{"dcs", ICON_IMG, GREEN},
+	{"dcs", ICON_IMG, GREEN}, // Kodak
 	{"dcr", ICON_IMG, GREEN}, // Kodak
-	{"drf", ICON_IMG, GREEN},
-	{"eip", ICON_IMG, GREEN},
+	{"drf", ICON_IMG, GREEN}, // Kodak
+	{"eip", ICON_IMG, GREEN}, // Epson
 	{"erf", ICON_IMG, GREEN}, // Epson
 	{"fff", ICON_IMG, GREEN}, // Hasselblad
 	{"gpr", ICON_IMG, GREEN}, // GoPro
-	{"iiq", ICON_IMG, GREEN}, // Phase One
+	{"iiq", ICON_IMG, GREEN}, // Phase One/Capture One
 	{"k25", ICON_IMG, GREEN}, // Kodac
 	{"kdc", ICON_IMG, GREEN}, // Kodak
-	{"mdc", ICON_IMG, GREEN}, // Minolta
+	{"mdc", ICON_IMG, GREEN}, // Minolta/Agfa
 	{"mef", ICON_IMG, GREEN}, // Mamiya
 	{"mos", ICON_IMG, GREEN}, // Leaf/Mamiya
 	{"mrw", ICON_IMG, GREEN}, // Minolta
 	{"nrw", ICON_IMG, GREEN}, // Nikon
-	{"obm", ICON_IMG, GREEN},
+	{"obm", ICON_IMG, GREEN}, // Olympus
 	{"pef", ICON_IMG, GREEN}, // Pentax
 	{"ptx", ICON_IMG, GREEN}, // Pentax
-	{"pxn", ICON_IMG, GREEN},
-	{"r3d", ICON_IMG, GREEN}, // RED
+	{"pxn", ICON_IMG, GREEN}, // Logitech
+	{"r3d", ICON_IMG, GREEN}, // Fujifilm
 	{"raw", ICON_IMG, GREEN}, // Generic (might be audio, disk image, etc)
-	{"rwz", ICON_IMG, GREEN},
+	{"rwz", ICON_IMG, GREEN}, // Panasonic
 	{"sr2", ICON_IMG, GREEN}, // Sony
 	{"srf", ICON_IMG, GREEN}, // Sony
 	{"srw", ICON_IMG, GREEN}, // Samsumg
@@ -1000,11 +1002,11 @@ struct icons_t const icon_ext[] = {
 	{"voc", ICON_AUDIO, YELLOW}, // Legacy */
 
 	{"alz", ICON_ARCHIVE, YELLOW},
-	{"ar", ICON_ARCHIVE, YELLOW}, // Uncompressed
+	{"ar", ICON_ARCHIVE, WHITE}, // Uncompressed
 	{"arc", ICON_ARCHIVE, YELLOW},
 	{"br", ICON_ARCHIVE, YELLOW},
 	{"bz", ICON_ARCHIVE, YELLOW},
-	{"lbr", ICON_ARCHIVE, YELLOW}, // Uncompressed
+	{"lbr", ICON_ARCHIVE, WHITE}, // Uncompressed
 	{"pak", ICON_ARCHIVE, YELLOW},
 	{"phar", ICON_ARCHIVE, YELLOW}, /* PHP archive */
 	{"pk3", ICON_ARCHIVE, YELLOW},
