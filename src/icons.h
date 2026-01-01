@@ -525,6 +525,7 @@ char
 # define B_BLUE "\x1b[1;34m"
 # define WHITE "\x1b[0;37m"
 # define YELLOW "\x1b[0;33m"
+# define B_YELLOW "\x1b[1;33m"
 # define GREEN "\x1b[0;32m"
 # define B_GREEN "\x1b[1;32m"
 # define CYAN "\x1b[0;36m"
@@ -536,6 +537,7 @@ char
 # define B_BLUE EMPTY_STR
 # define WHITE EMPTY_STR
 # define YELLOW EMPTY_STR
+# define B_YELLOW EMPTY_STR
 # define GREEN EMPTY_STR
 # define B_GREEN EMPTY_STR
 # define CYAN EMPTY_STR
@@ -577,8 +579,8 @@ struct icons_t const icon_ext[] = {
 	{"a", ICON_BINARY, WHITE},
 	{"aac", ICON_AUDIO, YELLOW},
 	{"abw", ICON_LIBREOFFICE_WRITER, BLUE},
-	{"aiff", ICON_AUDIO, YELLOW},
-	{"alac", ICON_AUDIO, YELLOW},
+	{"aiff", ICON_AUDIO, B_YELLOW}, // Loseless
+	{"alac", ICON_AUDIO, B_YELLOW}, // Loseless
 	{"arj", ICON_ARCHIVE, YELLOW},
 	{"asc", ICON_LOCK, GREEN},
 	{"asm", ICON_ASM, BLUE},
@@ -663,7 +665,7 @@ struct icons_t const icon_ext[] = {
 	{"f90", ICON_FORTRAN, MAGENTA},
 	{"f#", ICON_FSHARP, CYAN},
 	{"fish", ICON_SHELL, WHITE},
-	{"flac", ICON_AUDIO, YELLOW},
+	{"flac", ICON_AUDIO, B_YELLOW}, // Loseless
 	{"flv", ICON_VID, BLUE},
 	{"for", ICON_FORTRAN, MAGENTA},
 	{"fs", ICON_FSHARP, CYAN},
@@ -844,7 +846,7 @@ struct icons_t const icon_ext[] = {
 	{"vim", ICON_VIM, GREEN},
 	{"vue", ICON_VUE, GREEN},
 
-	{"wav", ICON_AUDIO, YELLOW},
+	{"wav", ICON_AUDIO, B_YELLOW}, // Loseless
 	{"webm", ICON_VID, BLUE},
 	{"webp", ICON_IMG, GREEN},
 	{"wma", ICON_AUDIO, YELLOW},
@@ -980,9 +982,9 @@ struct icons_t const icon_ext[] = {
 	{"divx", ICON_VID, BLUE}, // Legacy */
 
 	{"ac3", ICON_AUDIO, YELLOW},
-	{"aif", ICON_AUDIO, YELLOW},
-	{"aifc", ICON_AUDIO, YELLOW},
-	{"ape", ICON_AUDIO, YELLOW},
+	{"aif", ICON_AUDIO, B_YELLOW}, // Loseless
+	{"aifc", ICON_AUDIO, B_YELLOW}, // Loseless
+	{"ape", ICON_AUDIO, B_YELLOW}, // Loseless
 	{"au", ICON_AUDIO, YELLOW},
 	{"aup", ICON_AUDIO, YELLOW},
 	{"aup3", ICON_AUDIO, YELLOW},
@@ -991,12 +993,12 @@ struct icons_t const icon_ext[] = {
 	{"mka", ICON_AUDIO, YELLOW},
 	{"mp2", ICON_AUDIO, YELLOW},
 	{"oga", ICON_AUDIO, YELLOW},
-	{"pcm", ICON_AUDIO, YELLOW},
+	{"pcm", ICON_AUDIO, B_YELLOW}, // Loseless
 	{"ra", ICON_AUDIO, YELLOW},
 	{"sf2", ICON_AUDIO, YELLOW},
 	{"spx", ICON_AUDIO, YELLOW},
-	{"tta", ICON_AUDIO, YELLOW},
-	{"wv", ICON_AUDIO, YELLOW},
+	{"tta", ICON_AUDIO, B_YELLOW}, // Loseless
+	{"wv", ICON_AUDIO, B_YELLOW}, // Loseless
 /*	{"snd", ICON_AUDIO, YELLOW}, // Generic
 	{"sou", ICON_AUDIO, YELLOW}, // Legacy
 	{"voc", ICON_AUDIO, YELLOW}, // Legacy */
