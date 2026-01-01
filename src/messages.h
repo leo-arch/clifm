@@ -1436,7 +1436,7 @@ c: Quit paging (printing remaining files)\n"
 \n -Z NUM   List only up to NUM files"
 #else
 #define SHORT_OPTIONS "\
-\n  -a, --show-hidden[=VAL]\t Show hidden files ('first', 'last', 'true', or 'false'). If VAL is omitted, 'true' is assumed.\
+\n  -a, --show-hidden[=VALUE]\t Show hidden files ('first', 'last', 'true', or 'false'). If VALUE is omitted, 'true' is assumed.\
 \n  -A, --no-hidden\t\t Do not show hidden files (same as --show-hidden=false)\
 \n  -b, --bookmarks-file=FILE\t Set an alternative bookmarks file\
 \n  -c, --config-file=FILE\t Set an alternative configuration file\
@@ -1480,7 +1480,7 @@ database (via the 'j' command)\
 \n      --color-links-as-target\t Colorize symbolic links according to the target file\
 \n      --cwd-in-title\t\t Print the current directory in the terminal window title\
 \n      --data-dir=PATH\t\t Use PATH as data directory (e.g.: /usr/local/share)\
-\n      --desktop-notifications\t Set the desktop notifications style: 'kitty', 'system', or 'false' (default)\
+\n      --desktop-noti=STYLE\t Set the desktop notification style: 'kitty', 'system', or 'false' (default)\
 \n      --disk-usage\t\t Show disk usage (FREE/TOTAL (FREE %) TYPE DEVICE)\
 \n      --full-dir-size\t\t Display recursive directory sizes (long view only)\
 \n      --fuzzy-algo=NUM\t\t Set fuzzy algorithm for fuzzy matching (1 or 2)\

@@ -619,7 +619,7 @@ struct icons_t const icon_ext[] = {
 	{"cmake", ICON_CMAKE, WHITE},
 	{"coffee", ICON_COFFEE, WHITE},
 	{"conf", ICON_CONFIG, WHITE},
-	{"cpio", ICON_ARCHIVE, YELLOW},
+	{"cpio", ICON_ARCHIVE, YELLOW}, // Uncompressed
 	{"cpp", ICON_CPP, B_BLUE},
 	{"crdownload", ICON_DOWNLOADS, WHITE},
 	{"crate", ICON_ARCHIVE, YELLOW},
@@ -821,7 +821,7 @@ struct icons_t const icon_ext[] = {
 	{"swift", ICON_SWIFT, GREEN},
 
 	{"t", ICON_PERL, YELLOW},
-	{"tar", ICON_ARCHIVE, YELLOW},
+	{"tar", ICON_ARCHIVE, YELLOW}, // Uncompressed
 	{"tbz2", ICON_ARCHIVE, YELLOW},
 	{"tcl", ICON_TCL, GREEN},
 	{"tex", ICON_TEX, WHITE},
@@ -873,11 +873,9 @@ struct icons_t const icon_ext[] = {
  * to 2048, probably making the lookup slower. Even more, keep the list
  * below 650 entries, to avoid overloading the table and reducing performance. */
 	{"ai", ICON_ILLUSTRATOR, YELLOW},
-	{"dpx", ICON_IMG, GREEN},
-	{"emf", ICON_IMG, GREEN},
+	{"emf", ICON_IMG, GREEN}, // Windows: wmf replacement
 	{"eps", ICON_IMG, GREEN},
 	{"exr", ICON_IMG, GREEN},
-	{"ff", ICON_IMG, GREEN},
 	{"fts", ICON_IMG, GREEN},
 	{"hdr", ICON_IMG, GREEN},
 	{"j2c", ICON_IMG, GREEN},
@@ -892,25 +890,71 @@ struct icons_t const icon_ext[] = {
 	{"jpx", ICON_IMG, GREEN},
 	{"kpp", ICON_KRITA, MAGENTA},
 	{"krz", ICON_KRITA, MAGENTA},
-	{"miff", ICON_IMG, GREEN},
 	{"mng", ICON_IMG, GREEN},
 	{"ora", ICON_IMG, GREEN},
-	{"pam", ICON_IMG, GREEN},
 	{"pbm", ICON_IMG, GREEN},
 	{"pcx", ICON_IMG, GREEN},
-	{"pdd", ICON_IMG, GREEN},
 	{"pgm", ICON_IMG, GREEN},
 	{"pnm", ICON_IMG, GREEN},
 	{"ppm", ICON_IMG, GREEN},
 	{"psb", ICON_PHOTOSHOP, B_BLUE},
 	{"pxm", ICON_IMG, GREEN},
 	{"qoi", ICON_IMG, GREEN},
-	{"sgi", ICON_IMG, GREEN},
 	{"tga", ICON_IMG, GREEN},
-	{"wmf", ICON_IMG, GREEN},
-	{"xbm", ICON_IMG, GREEN},
 	{"xpm", ICON_IMG, GREEN},
 	{"xwd", ICON_IMG, GREEN},
+/*	{"dpx", ICON_IMG, GREEN}, // Uncommon: highly specialized
+	{"ff", ICON_IMG, GREEN}, // Farbfeld: Never took off
+	{"miff", ICON_IMG, GREEN}, // ImageMagick: Uncommon
+	{"pam", ICON_IMG, GREEN}, // Portable Arbitrary Map: Uncommon
+	{"pdd", ICON_IMG, GREEN}, // Adobe PhotoDeluxe
+	{"sgi", ICON_IMG, GREEN}, // Legacy
+	{"wmf", ICON_IMG, GREEN}, // Windows: Legacy
+	{"xbm", ICON_IMG, GREEN}, // Replaced by xpm */
+
+	/* Raw image formats */
+	{"arw", ICON_IMG, B_GREEN}, // Sony
+	{"cr2", ICON_IMG, B_GREEN}, // Canon
+	{"cr3", ICON_IMG, B_GREEN}, // Canon
+	{"dng", ICON_IMG, B_GREEN}, // Adobe Digital Negative (several brands)
+	{"nef", ICON_IMG, B_GREEN}, // Nikon
+	{"orf", ICON_IMG, B_GREEN}, // Olympus
+	{"raf", ICON_IMG, B_GREEN}, // Fujifilm
+	{"rw2", ICON_IMG, B_GREEN}, // Panasonic
+	{"rwl", ICON_IMG, B_GREEN}, // Leica
+/*	{"3fr", ICON_IMG, GREEN}, // Hasselblad
+	{"ari", ICON_IMG, GREEN}, // ARRI
+	{"bay", ICON_IMG, GREEN}, // Casio
+	{"braw", ICON_IMG, GREEN}, // BlackMagic
+	{"crw", ICON_IMG, GREEN}, // Canon
+	{"cap", ICON_IMG, GREEN},
+	{"data", ICON_IMG, GREEN},
+	{"dcs", ICON_IMG, GREEN},
+	{"dcr", ICON_IMG, GREEN}, // Kodak
+	{"drf", ICON_IMG, GREEN},
+	{"eip", ICON_IMG, GREEN},
+	{"erf", ICON_IMG, GREEN}, // Epson
+	{"fff", ICON_IMG, GREEN}, // Hasselblad
+	{"gpr", ICON_IMG, GREEN}, // GoPro
+	{"iiq", ICON_IMG, GREEN}, // Phase One
+	{"k25", ICON_IMG, GREEN}, // Kodac
+	{"kdc", ICON_IMG, GREEN}, // Kodak
+	{"mdc", ICON_IMG, GREEN}, // Minolta
+	{"mef", ICON_IMG, GREEN}, // Mamiya
+	{"mos", ICON_IMG, GREEN}, // Leaf/Mamiya
+	{"mrw", ICON_IMG, GREEN}, // Minolta
+	{"nrw", ICON_IMG, GREEN}, // Nikon
+	{"obm", ICON_IMG, GREEN},
+	{"pef", ICON_IMG, GREEN}, // Pentax
+	{"ptx", ICON_IMG, GREEN}, // Pentax
+	{"pxn", ICON_IMG, GREEN},
+	{"r3d", ICON_IMG, GREEN}, // RED
+	{"raw", ICON_IMG, GREEN}, // Generic (might be audio, disk image, etc)
+	{"rwz", ICON_IMG, GREEN},
+	{"sr2", ICON_IMG, GREEN}, // Sony
+	{"srf", ICON_IMG, GREEN}, // Sony
+	{"srw", ICON_IMG, GREEN}, // Samsumg
+	{"x3f", ICON_IMG, GREEN}, // Sigma */
 
 	{"3g2", ICON_VID, BLUE},
 	{"3gp2", ICON_VID, BLUE},
@@ -956,11 +1000,11 @@ struct icons_t const icon_ext[] = {
 	{"voc", ICON_AUDIO, YELLOW}, // Legacy */
 
 	{"alz", ICON_ARCHIVE, YELLOW},
-	{"ar", ICON_ARCHIVE, YELLOW},
+	{"ar", ICON_ARCHIVE, YELLOW}, // Uncompressed
 	{"arc", ICON_ARCHIVE, YELLOW},
 	{"br", ICON_ARCHIVE, YELLOW},
 	{"bz", ICON_ARCHIVE, YELLOW},
-	{"lbr", ICON_ARCHIVE, YELLOW},
+	{"lbr", ICON_ARCHIVE, YELLOW}, // Uncompressed
 	{"pak", ICON_ARCHIVE, YELLOW},
 	{"phar", ICON_ARCHIVE, YELLOW}, /* PHP archive */
 	{"pk3", ICON_ARCHIVE, YELLOW},
@@ -972,18 +1016,33 @@ struct icons_t const icon_ext[] = {
 	{"tzo", ICON_ARCHIVE, YELLOW},
 	{"war", ICON_ARCHIVE, YELLOW}, /* Java web archive */
 	{"z", ICON_ARCHIVE, YELLOW},
-/*	{"pk7", ICON_ARCHIVE, YELLOW}, // GZDoom archive file */
+	{"zpaq", ICON_ARCHIVE, YELLOW},
+/*	{"ace", ICON_ARCHIVE, YELLOW}, // Legacy
+	{"lzx", ICON_ARCHIVE, YELLOW}, // Legacy: Amiga
+	{"pax", ICON_ARCHIVE, YELLOW}, // Uncompressed
+	{"pea", ICON_ARCHIVE, YELLOW},
+	{"pk7", ICON_ARCHIVE, YELLOW}, // GZDoom archive file
+	{"shar", ICON_ARCHIVE, YELLOW}, // Uncompressed
+	{"warc", ICON_ARCHIVE, YELLOW}, // Uncompressed
+	{"zoo", ICON_ARCHIVE, YELLOW}, */
 
 	{"apk", ICON_PACKAGE, YELLOW},
 	{"Appimage", ICON_PACKAGE, YELLOW},
 	{"flatpak", ICON_PACKAGE, YELLOW},
-	{"msi", ICON_PACKAGE, YELLOW},
+	{"msi", ICON_PACKAGE, YELLOW}, // Windows installer
 	{"pkg", ICON_PACKAGE, YELLOW},
 	{"snap", ICON_PACKAGE, YELLOW},
-	{"xpi", ICON_PACKAGE, YELLOW},
+	{"xpi", ICON_PACKAGE, YELLOW}, // Mozilla add-ons
+/*	{"crx", ICON_PACKAGE, YELLOW}, // Chrome add-ons
+	{"appx", ICON_PACKAGE, YELLOW} // Windows 8 app installer
+	{"appxbundle", ICON_PACKAGE, YELLOW} // Windows 8 app installer
+	{"msix", ICON_PACKAGE, YELLOW} // Windows 10 app installer
+	{"msixbundle", ICON_PACKAGE, YELLOW} // Windows 10 app installer */
 
 	{"aff", ICON_DISK, WHITE},
 	{"image", ICON_DISK, WHITE},
+/*	{"adf", ICON_DISK, WHITE}, // Amiga disk file (also adz, hdf, hdz)
+	{"ima", ICON_DISK, WHITE}, */
 
 	{"cdi", ICON_CD, WHITE},
 	{"isz", ICON_CD, WHITE},
