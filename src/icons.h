@@ -658,7 +658,7 @@ struct icons_t const icon_ext[] = {
 	{"erb", ICON_RUBYRAILS, RED},
 	{"erl", ICON_ERLANG, RED},
 	{"ex", ICON_ELIXIR, BLUE},
-	{"exe", ICON_BINARY, WHITE},
+	{"exe", ICON_EXEC, WHITE},
 	{"exs", ICON_ELIXIR, BLUE},
 
 	{"f", ICON_FORTRAN, MAGENTA},
@@ -1317,10 +1317,11 @@ struct icons_t const icon_ext[] = {
 	{"magnet", ICON_MAGNET, RED},
 	{"rst", ICON_TXT, WHITE},
 	{"chm", ICON_MANPAGE, WHITE},
+	{"com", ICON_EXEC, WHITE},
 
 /* Legacy
  * Amiga: lha, nfo, diz, mod, pic, lbm, ilbm, dib, rle, adf, dms
- * MS-DOS: voc, sou, bas, com, sys, vxd, drv, hlp */
+ * MS-DOS: voc, sou, bas, sys, vxd, drv, hlp */
 
 /*	{"tf", ICON_TERRAFORM, MAGENTA},
 	{"tfstate", ICON_TERRAFORM, MAGENTA},
