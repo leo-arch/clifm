@@ -343,11 +343,11 @@ ext_table_init(void)
 	if (ext_table)
 		return;
 
-	size_t n = sizeof(icon_ext) / sizeof(icon_ext[0]);
+	const size_t n = sizeof(icon_ext) / sizeof(icon_ext[0]);
 	if (n == 0)
 		return;
 
-	size_t needed = (size_t)((double)n / TABLE_LOAD_FACTOR) + 1;
+	const size_t needed = (size_t)((double)n / TABLE_LOAD_FACTOR) + 1;
 	size_t table_size = next_pow2(needed);
 
 	/* Ensure table_size >= n+1 to guarantee at least one empty slot */
@@ -455,7 +455,7 @@ swap_ent(const size_t id1, const size_t id2)
 }
 #endif /* TOURBIN_QSORT */
 
-/* Return 1 if NAME contains at least one UTF8/control character, or 0
+/* Return 1 if NAME contains at least one non-ASCII/control character, or 0
  * otherwise. BYTES is updated to the number of bytes needed to read the
  * entire name (excluding the terminating NUL char). EXT_INDEX, if not NULL,
  * is updated to the index of the last dot character in NAME, provided it is
@@ -463,33 +463,33 @@ swap_ent(const size_t id1, const size_t id2)
  * file extension).
  *
  * This check is performed over filenames to be listed. If the filename is
- * not UTF8, we get its visible length from BYTES, instead of running
+ * pure ASCII, we get its visible length from BYTES, instead of running
  * wc_xstrlen(). This gives us a little performance improvement: 3% faster
  * over 100,000 files. */
 static uint8_t
 is_utf8_name(const char *filename, size_t *bytes, size_t *ext_index)
 {
-	static const unsigned char utf8_chars[256] = {
-		/* Control characters */
-		[0] = 1, [1] = 1, [2] = 1, [3] = 1, [4] = 1, [5] = 1, [6] = 1, [7] = 1,
-		[8] = 1, [9] = 1, [10] = 1, [11] = 1, [12] = 1, [13] = 1, [14] = 1,
-		[15] = 1, [16] = 1, [17] = 1, [18] = 1, [19] = 1, [20] = 1, [21] = 1,
-		[22] = 1, [23] = 1, [24] = 1, [25] = 1, [26] = 1, [27] = 1, [28] = 1,
-		[29] = 1, [30] = 1, [31] = 1,
-		/* Delete, non-breaking space (NBSP), and soft hyphen (SHY) */
-		[127] = 1, [160] = 1, [173] = 1,
-		/* UTF-8 */
-		[192] = 1, [193] = 1, [194] = 1, [195] = 1, [196] = 1, [197] = 1,
-		[198] = 1, [199] = 1, [200] = 1, [201] = 1, [202] = 1, [203] = 1,
-		[204] = 1, [205] = 1, [206] = 1, [207] = 1, [208] = 1, [209] = 1,
-		[210] = 1, [211] = 1, [212] = 1, [213] = 1, [214] = 1, [215] = 1,
-		[216] = 1, [217] = 1, [218] = 1, [219] = 1, [220] = 1, [221] = 1,
-		[222] = 1, [223] = 1, [224] = 1, [225] = 1, [226] = 1, [227] = 1,
-		[228] = 1, [229] = 1, [230] = 1, [231] = 1, [232] = 1, [233] = 1,
-		[234] = 1, [235] = 1, [236] = 1, [237] = 1, [238] = 1, [239] = 1,
-		[240] = 1, [241] = 1, [242] = 1, [243] = 1, [244] = 1, [245] = 1,
-		[246] = 1, [247] = 1, [248] = 1, [249] = 1, [250] = 1, [251] = 1,
-		[252] = 1, [253] = 1, [254] = 1, [255] = 1
+	static const uint8_t utf8_chars[256] = {
+		/* 0x00 - 0x1F (Control chars) */
+		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* 0x00 - 0x0F */
+		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* 0x10 - 0x1F */
+		/* 0x20 - 0x7E (ASCII chars) */
+		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 0x20 - 0x2F */
+		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 0x30 - 0x3F */
+		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 0x40 - 0x4F */
+		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 0x50 - 0x5F */
+		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 0x60 - 0x6F */
+		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,	 /* 0x70 - 0x7E */
+		1, /* 0x7F (DEL) */
+		/* 0x80 - 0xFF (non-ASCII chars) */
+		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* 0x80-0x8F */
+		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* 0x90-0x9F */
+		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* 0xA0-0xAF */
+		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* 0xB0-0xBF */
+		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* 0xC0-0xCF */
+		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* 0xD0-0xDF */
+		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* 0xE0-0xEF */
+		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1  /* 0xF0-0xFF */
 	};
 
 	uint8_t is_utf8 = 0;
