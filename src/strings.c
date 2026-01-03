@@ -444,7 +444,7 @@ u8truncstr(char *restrict str, const size_t max)
 	if (mbstowcs(buf, str, NAME_BUF_SIZE) == (size_t)-1)
 		return 0;
 
-	int bmax = max > INT_MAX ? INT_MAX : (int)max;
+	int bmax = (int)max;
 	if (bmax < 0)
 		bmax = conf.max_name_len;
 

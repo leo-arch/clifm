@@ -511,7 +511,9 @@ is_utf8_name(const char *filename, size_t *bytes, size_t *ext_index)
 	if (ext && ext != start && ext[1] && ext_index)
 		*ext_index = (size_t)(ext - start);
 
-	*bytes = (size_t)(name - start);
+	if (bytes)
+		*bytes = (size_t)(name - start);
+
 	return is_utf8;
 }
 

@@ -1321,7 +1321,8 @@ struct icons_t const icon_ext[] = {
 
 /* Legacy
  * Amiga: lha, nfo, diz, mod, pic, lbm, ilbm, dib, rle, adf, dms
- * MS-DOS: voc, sou, bas, sys, vxd, drv, hlp */
+ * MS-DOS: voc, sou, bas, sys, vxd, drv, hlp, ffn, qfs (archive),
+ * tgv (video), mdi (image), pif (info, binary) */
 
 /*	{"tf", ICON_TERRAFORM, MAGENTA},
 	{"tfstate", ICON_TERRAFORM, MAGENTA},
