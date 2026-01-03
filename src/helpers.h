@@ -2,7 +2,7 @@
  * This file is part of Clifm
  *
  * SPDX-License-Identifier: GPL-2.0-or-later
- * SPDX-FileCopyrightText: 2016-2025 L. Abramovich <leo.clifm@outlook.com>
+ * SPDX-FileCopyrightText: 2016-2026 L. Abramovich <leo.clifm@outlook.com>
 */
 /* helpers.h -- main header file */
 
@@ -12,8 +12,8 @@
 #define PROGRAM_NAME_UPPERCASE "Clifm"
 #define PROGRAM_NAME "clifm"
 #define PROGRAM_DESC "The command line file manager"
-#define VERSION "1.26.6"
-#define DATE "Dec 21, 2025"
+#define VERSION "1.27-rc"
+#define DATE "Jan 3, 2026"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "https://github.com/leo-arch/clifm"
 #define LICENSE "GPL2+"
