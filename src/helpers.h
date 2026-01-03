@@ -1044,39 +1044,6 @@ extern time_t curdir_mtime;
 #define IS_HELP(s) (*(s) == '-' && (((s)[1] == 'h' && !(s)[2]) \
 	|| strcmp((s), "--help") == 0))
 
-/* Get the maximum value for a given data type.
- * Taken from coreutils (https://github.com/coreutils/gnulib/blob/master/lib/intprops.h) */
-/*
-#include <limits.h> // CHAR_BIT
-#define TYPE_SIGNED(t)  (!((t)0 < (t)-1))
-#define TYPE_WIDTH(t)   (sizeof(t) * CHAR_BIT)
-#define TYPE_MAXIMUM(t)                                   \
-        ((t)(!TYPE_SIGNED(t)                              \
-        ? (t)-1                                           \
-        : ((((t)1 << (TYPE_WIDTH(t) - 2)) - 1) * 2 + 1)))
-
-// Safely cast the number N to the type T. The type T is never overflowed:
-// if N is bigger than what T can hold, the maximum value T can hold is
-// returned. What about underflow?
-#define SAFECAST(n, t) ((t)(n) < 0 ? TYPE_MAXIMUM(t) : (t)(n)) */
-
-/*
-// See https://bestasciitable.com
-#define __CTRL(n) ((n) & ~(1 << 6)) // Just unset (set to zero) the seventh bit
-#define ___CTRL(n) ((n) & 0x3f) // Same as __CTRL
-#define _SHIFT(n) ((n) & ~(1 << 5)) // Unset the sixth bit
-
-// As defined by readline. Explanation:
-// 0x1ff == 0011111
-// So, this bitwise AND operation: 'n & 0x1f', means: set to zero whatever
-// bits in N that are zero in 0x1f, that is, the sixth and seventh bits
-#define _CTRL(n)  ((n) & 0x1f)
-// As defined by readline: set to one the eight bit in N
-#define _META(n)  ((n) | 0x80)
-// E.g.: 'A' == 01000001
-//     ('A' | 0x80) == 11000001 == 193 == Á
- */
-
 				/** #########################
 				 *  #    GLOBAL VARIABLES   #
 				 *  ######################### */
