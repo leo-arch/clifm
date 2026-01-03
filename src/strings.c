@@ -1731,7 +1731,7 @@ expand_sel_keyword(char ***substr)
 	}
 
 	/* If "sel" is last, and there are selected elements, and the command
-	 * is either "cp" or "mv", emulate "c" or "m" respectivelly: later,
+	 * is either "cp" or "mv", emulate "c" or "m" respectively: later,
 	 * and final "." will be added to the command, so that we avoid
 	 * overwriting files. */
 	if (sel_n == 0 || is_sel == 0 || sel_is_last == 0)
@@ -2669,7 +2669,6 @@ parse_input_str(char *str)
 	if (!str)
 		return (char **)NULL;
 
-	size_t i = 0;
 	int fusedcmd_ok = 0;
 
 	flags &= ~FIRST_WORD_IS_ELN;
@@ -2701,7 +2700,7 @@ parse_input_str(char *str)
 		send_shell = 1;
 
 	if (send_shell == 0) {
-		for (i = 0; str[i]; i++) {
+		for (size_t i = 0; str[i]; i++) {
 
 				/* ##################################
 				 * #   0.2) CONDITIONAL EXECUTION   #
@@ -2711,7 +2710,7 @@ parse_input_str(char *str)
 			if (chaining == 0 && str[i] == ';' && i > 0 && str[i - 1] != '\\')
 				chaining = 1;
 
-			/* Check for conditional execution (cmd1 && cmd 2). */
+			/* Check for conditional execution (cmd1 && cmd2). */
 			if (cond_cmd == 0 && str[i] == '&' && i > 0 && str[i - 1] != '\\'
 			&& str[i + 1] == '&')
 				cond_cmd = 1;
@@ -2804,7 +2803,7 @@ parse_input_str(char *str)
 	 * will be expanded into the corresponding filenames by eln_expand() below. */
 	expand_ranges(&substr);
 
-	for (i = 0; i <= args_n; i++) {
+	for (size_t i = 0; i <= args_n; i++) {
 		if (!substr[i] || (is_quoted_word(i)
 		&& (virtual_dir == 0 || is_file_in_cwd(substr[i]) == 0)))
 			continue;
@@ -3008,7 +3007,7 @@ parse_input_str(char *str)
 	size_t word_n = 0;
 #endif /* HAVE_WORDEXP */
 
-	for (i = 0; substr[i]; i++) {
+	for (size_t i = 0; substr[i]; i++) {
 		if ((is_action == 1 && i == 0) || is_quoted_word(i))
 			continue;
 		/* Do not perform any of the expansions below for selected
@@ -3037,8 +3036,7 @@ parse_input_str(char *str)
 		const int is_escaped = strchr(substr[i], '\\') ? 1 : 0;
 #endif /* HAVE_WORDEXP */
 
-		size_t j = 0;
-		for (j = 0; substr[i][j]; j++) {
+		for (size_t j = 0; substr[i][j]; j++) {
 			/* Brace and wildcard expansion is made by glob(3). */
 			if (IS_GLOB(substr[i][j], substr[i][j + 1])) {
 				/* Strings containing these characters are taken as wildacard
