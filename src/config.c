@@ -3436,6 +3436,17 @@ set_max_name_len(char *line)
 	conf.max_name_len_auto = UNSET;
 }
 
+static void
+set_file_opener(char *line)
+{
+	char *tmp = get_line_value(line);
+	if (!tmp)
+		return;
+
+	free(conf.opener);
+	conf.opener = savestring(tmp, strlen(tmp));
+}
+
 /* Read the main configuration file and set options accordingly */
 static void
 read_config(void)
@@ -3720,11 +3731,7 @@ read_config(void)
 
 		else if (!conf.opener && *line == 'O'
 		&& strncmp(line, "Opener=", 7) == 0) {
-			char *tmp = get_line_value(line + 7);
-			if (!tmp)
-				continue;
-			free(conf.opener);
-			conf.opener = savestring(tmp, strlen(tmp));
+			set_file_opener(line + 7);
 		}
 
 		else if (xargs.pager == UNSET && *line == 'P'
