@@ -1459,13 +1459,22 @@ free_stuff(void)
 		UNSET_KITTY_KEYS;
 }
 
+/* Dynamically set MaxFilenameLen based on the current number of terminal
+ * columns. */
 static void
 set_max_filename_len_auto(void)
 {
 	if (conf.max_name_len_auto == 0 || conf.max_name_len == UNSET)
 		return;
 
-	int n = term_cols / 4;
+	if ((conf.columned == 0 || files == 1) && conf.long_view == 0) {
+		/* Displaying in a single column or there is just one file in the list:
+		 * Do not truncate names. */
+		conf.max_name_len = term_cols;
+		return;
+	}
+
+	const int n = (int)(term_cols * MAX_NAMELEN_AUTO_RATIO);
 	conf.max_name_len = n < conf.min_name_trunc ? conf.min_name_trunc : n;
 }
 
