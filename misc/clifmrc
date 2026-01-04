@@ -180,12 +180,14 @@
 # current directory.
 ;ClearScreen=true
 
-# Set the maximum filename length for listed files. If TruncateNames is enabled,
-# names longer than MaxFilenameLen will be truncated using a tilde (~).
-# Set it to -1 (or leave empty) to remove this limit.
-# If running in long view mode, this setting is overriden by MinNameTruncate
-# if MaxFilenameLen is smaller than MinNameTruncate.
-;MaxFilenameLen=32
+# Maximum filename length for displayed files. If TruncateNames is enabled,
+# names longer than MaxFilenameLen will be truncated with a tilde (~).
+# Set to -1 (or leave empty) to disable the limit.
+# Set to 'auto' to use 1/4 of terminal columns  (if that value is smaller than
+# MinNameTruncate, MinNameTruncate will be used instead).
+# Note: in long view mode, MinNameTruncate overrides MaxFilenameLen when
+# MaxFilenameLen is smaller than MinNameTruncate.
+;MaxFilenameLen=auto
 
 # Truncate filenames longer than MaxFilenameLen.
 ;TruncateNames=true
