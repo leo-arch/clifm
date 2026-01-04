@@ -31,7 +31,7 @@ typedef void rl_macro_print_func_t (const char *, const char *, int, const char 
 #include "autocmds.h" /* update_autocmd_opts() */
 #include "checks.h"
 #include "colors.h"
-#include "config.h" /* set_div_line() */
+#include "config.h" /* get_fzf_height(), get_fzf_border_type() */
 #include "file_operations.h"
 #include "listing.h"
 #include "messages.h"
@@ -2176,6 +2176,23 @@ set_cs_dir_icon_color(char *line, const ssize_t line_len)
 	snprintf(dir_ico_c, sizeof(dir_ico_c), "\x1b[%sm", c ? c : p);
 }
 #endif /* !_NO_ICONS */
+
+static void
+set_div_line(char *line)
+{
+	if (!line || *line < ' ') {
+		*div_line = *DEF_DIV_LINE;
+		return;
+	}
+
+	char *tmp = remove_quotes(line);
+	if (!tmp) {
+		*div_line = '\0';
+		return;
+	}
+
+	xstrsncpy(div_line, tmp, sizeof(div_line));
+}
 
 /* Get color lines from the configuration file */
 static int

@@ -2792,23 +2792,6 @@ set_colorscheme(char *line)
 	conf.usr_cscheme = savestring(p, strlen(p));
 }
 
-void
-set_div_line(char *line)
-{
-	if (!line || *line < ' ') {
-		*div_line = *DEF_DIV_LINE;
-		return;
-	}
-
-	char *tmp = remove_quotes(line);
-	if (!tmp) {
-		*div_line = '\0';
-		return;
-	}
-
-	xstrsncpy(div_line, tmp, sizeof(div_line));
-}
-
 static int
 set_files_filter(const char *line)
 {
@@ -3473,8 +3456,8 @@ read_config(void)
 	int default_answers_set = 0;
 	conf.max_name_len = DEF_MAX_NAME_LEN;
 	conf.max_name_len_auto = (DEF_MAX_NAME_LEN == MAX_NAMELEN_AUTO)
-		? DEF_MAX_NAMELEN_AUTO_RATIO : -1;
-	*div_line = *DEF_DIV_LINE;
+		? DEF_MAX_NAMELEN_AUTO_RATIO : UNSET;
+
 	/* The longest possible line in the config file is StartingPath="PATH" */
 	char line[PATH_MAX + 16]; *line = '\0';
 
@@ -3588,10 +3571,6 @@ read_config(void)
 		else if (xargs.disk_usage == UNSET && *line == 'D'
 		&& strncmp(line, "DiskUsage=", 10) == 0) {
 			set_config_bool_value(line + 10, &conf.disk_usage);
-		}
-
-		else if (*line == 'D' && strncmp(line, "DividingLine=", 13) == 0) {
-			set_div_line(line + 13);
 		}
 
 		else if (xargs.ext_cmd_ok == UNSET && *line == 'E'
