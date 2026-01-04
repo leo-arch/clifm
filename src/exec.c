@@ -361,11 +361,11 @@ static int
 file_counter_function(const char *arg)
 {
 	if (!arg) {
-		conf.files_counter = !conf.files_counter;
-		update_autocmd_opts(AC_FILES_COUNTER);
+		conf.file_counter = !conf.file_counter;
+		update_autocmd_opts(AC_FILE_COUNTER);
 		if (conf.autols == 1) reload_dirlist();
 		print_reload_msg(NULL, NULL, _("File counter: %s\n"),
-			conf.files_counter == 1 ? _("on") : _("off"));
+			conf.file_counter == 1 ? _("on") : _("off"));
 		return FUNC_SUCCESS;
 	}
 
@@ -375,23 +375,23 @@ file_counter_function(const char *arg)
 	}
 
 	if (*arg == 'o' && strcmp(arg, "on") == 0) {
-		conf.files_counter = 1;
-		update_autocmd_opts(AC_FILES_COUNTER);
+		conf.file_counter = 1;
+		update_autocmd_opts(AC_FILE_COUNTER);
 		if (conf.autols == 1) reload_dirlist();
 		print_reload_msg(NULL, NULL, _("File counter: on\n"));
 		return FUNC_SUCCESS;
 	}
 
 	if (*arg == 'o' && strcmp(arg, "off") == 0) {
-		conf.files_counter = 0;
-		update_autocmd_opts(AC_FILES_COUNTER);
+		conf.file_counter = 0;
+		update_autocmd_opts(AC_FILE_COUNTER);
 		if (conf.autols == 1) reload_dirlist();
 		print_reload_msg(NULL, NULL, _("File counter: off\n"));
 		return FUNC_SUCCESS;
 	}
 
 	if (*arg == 's' && strcmp(arg, "status") == 0) {
-		if (conf.files_counter == 1)
+		if (conf.file_counter == 1)
 			puts(_("The file counter is on"));
 		else
 			puts(_("The file counter is off"));

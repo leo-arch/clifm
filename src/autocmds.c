@@ -35,7 +35,7 @@ void
 reset_opts(void)
 {
 	opts.color_scheme = cur_cscheme;
-	opts.files_counter = conf.files_counter;
+	opts.file_counter = conf.file_counter;
 	opts.light_mode = conf.light_mode;
 	opts.max_files = conf.max_files;
 	opts.full_dir_size = conf.full_dir_size;
@@ -54,7 +54,7 @@ update_autocmd_opts(const int opt)
 {
 	switch (opt) {
 	case AC_COLOR_SCHEME: opts.color_scheme = cur_cscheme; break;
-	case AC_FILES_COUNTER: opts.files_counter = conf.files_counter; break;
+	case AC_FILE_COUNTER: opts.file_counter = conf.file_counter; break;
 	case AC_FULL_DIR_SIZE: opts.full_dir_size = conf.full_dir_size; break;
 	case AC_LIGHT_MODE: opts.light_mode = conf.light_mode; break;
 	case AC_LONG_VIEW: opts.long_view = conf.long_view; break;
@@ -133,7 +133,7 @@ static void
 save_current_options(void)
 {
 	opts.light_mode = conf.light_mode;
-	opts.files_counter = conf.files_counter;
+	opts.file_counter = conf.file_counter;
 	opts.full_dir_size = conf.full_dir_size;
 	opts.long_view = conf.long_view;
 	opts.max_files = conf.max_files;
@@ -153,8 +153,8 @@ set_autocmd_options(const size_t i)
 {
 	if (autocmds[i].light_mode != UNSET)
 		conf.light_mode = autocmds[i].light_mode;
-	if (autocmds[i].files_counter != UNSET)
-		conf.files_counter = autocmds[i].files_counter;
+	if (autocmds[i].file_counter != UNSET)
+		conf.file_counter = autocmds[i].file_counter;
 	if (autocmds[i].full_dir_size != UNSET)
 		conf.full_dir_size = autocmds[i].full_dir_size;
 	if (autocmds[i].long_view != UNSET)
@@ -192,7 +192,7 @@ gen_common_options(void)
 
 	a.cmd = (char *)NULL;
 	a.color_scheme = (char *)NULL;
-	a.files_counter = UNSET;
+	a.file_counter = UNSET;
 	a.full_dir_size = UNSET;
 	a.light_mode = UNSET;
 	a.long_view = UNSET;
@@ -217,8 +217,8 @@ gen_common_options(void)
 			a.filter.rev = b[i].filter.rev;
 			a.filter.type = b[i].filter.type;
 		}
-		if (b[i].files_counter != UNSET)
-			a.files_counter = b[i].files_counter;
+		if (b[i].file_counter != UNSET)
+			a.file_counter = b[i].file_counter;
 		if (b[i].full_dir_size != UNSET)
 			a.full_dir_size = b[i].full_dir_size;
 		if (b[i].light_mode != UNSET)
@@ -270,8 +270,8 @@ gen_autocmd_options_list(char *buf, struct autocmds_t *a, const int print_filter
 	if (a->color_scheme != NULL)
 		len += gen_opt_entry(buf + len, "cs", a->color_scheme, &c, lm);
 
-	if (a->files_counter != UNSET)
-		len += gen_opt_entry(buf + len, "fc", xitoa(a->files_counter), &c, lm);
+	if (a->file_counter != UNSET)
+		len += gen_opt_entry(buf + len, "fc", xitoa(a->file_counter), &c, lm);
 
 	if (a->filter.str != NULL)
 		len += gen_opt_entry(buf + len, "ft",
@@ -513,7 +513,7 @@ void
 revert_autocmd_opts(void)
 {
 	conf.light_mode = opts.light_mode;
-	conf.files_counter = opts.files_counter;
+	conf.file_counter = opts.file_counter;
 	conf.full_dir_size = opts.full_dir_size;
 	conf.long_view = opts.long_view;
 	conf.max_files = opts.max_files;
@@ -672,7 +672,7 @@ fill_autocmd_opt(char *opt, const size_t n)
 		goto ERR_VAL;
 
 	if (*opt == 'f' && opt[1] == 'c')
-		autocmds[n].files_counter = a;
+		autocmds[n].file_counter = a;
 	else if (*opt == 'f' && opt[1] == 'z')
 		autocmds[n].full_dir_size = a;
 	else if (*opt == 'h' && (opt[1] == 'f' || opt[1] == 'h'))
@@ -708,7 +708,7 @@ init_autocmd_opts(const size_t n)
 {
 	autocmds[n].cmd = (char *)NULL;
 	autocmds[n].color_scheme = (char *)NULL;
-	autocmds[n].files_counter = UNSET;
+	autocmds[n].file_counter = UNSET;
 	autocmds[n].full_dir_size = UNSET;
 	autocmds[n].light_mode = UNSET;
 	autocmds[n].long_view = UNSET;

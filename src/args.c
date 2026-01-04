@@ -69,7 +69,7 @@
 #define LOPT_RL_VI_MODE             207
 #define LOPT_MAX_DIRHIST            208
 #define LOPT_SORT_REVERSE           209
-#define LOPT_NO_FILES_COUNTER       210
+#define LOPT_NO_FILE_COUNTER        210
 #define LOPT_NO_WELCOME_MESSAGE     211
 #define LOPT_NO_CLEAR_SCREEN        212
 //#define LOPT_ENABLE_LOGS            213
@@ -224,8 +224,8 @@ static struct option const longopts[] = {
 	{"no-columns", no_argument, 0, LOPT_NO_COLUMNS},
 	{"no-dir-jumper", no_argument, 0, LOPT_NO_DIR_JUMPER},
 	{"no-file-cap", no_argument, 0, LOPT_NO_FILE_CAP},
-	{"no-files-counter", no_argument, 0, LOPT_NO_FILES_COUNTER}, /* Deprecated */
-	{"no-file-counter", no_argument, 0, LOPT_NO_FILES_COUNTER},
+	{"no-files-counter", no_argument, 0, LOPT_NO_FILE_COUNTER}, /* Deprecated */
+	{"no-file-counter", no_argument, 0, LOPT_NO_FILE_COUNTER},
 	{"no-file-ext", no_argument, 0, LOPT_NO_FILE_EXT},
 	{"no-follow-symlinks", no_argument, 0, LOPT_NO_FOLLOW_SYMLINKS},
 	{"no-fzfpreview", no_argument, 0, LOPT_NO_FZFPREVIEW},
@@ -1551,7 +1551,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case 'e': xargs.auto_open = conf.auto_open = 0; break;
 		case 'E': xargs.autocd = conf.autocd = 0; break;
 		case 'f': xargs.full_dir_size = conf.full_dir_size = 1; break;
-		case 'F': xargs.files_counter = conf.files_counter = 0; break;
+		case 'F': xargs.file_counter = conf.file_counter = 0; break;
 		case 'g': xargs.si = 1; break;
 		case 'G': xargs.apparent_size = conf.apparent_size = 0; break;
 		case 'h': help_function(); break; /* noreturn */
@@ -1825,8 +1825,8 @@ parse_cmdline_args(const int argc, char **argv)
 			xargs.check_cap = conf.check_cap = 0; break;
 		case LOPT_NO_FILE_EXT:
 			xargs.check_ext = conf.check_ext = 0; break;
-		case LOPT_NO_FILES_COUNTER:
-			xargs.files_counter = conf.files_counter = 0; break;
+		case LOPT_NO_FILE_COUNTER:
+			xargs.file_counter = conf.file_counter = 0; break;
 		case LOPT_NO_FOLLOW_SYMLINKS:
 			xargs.follow_symlinks = conf.follow_symlinks = 0; break;
 		case LOPT_NO_FZFPREVIEW:

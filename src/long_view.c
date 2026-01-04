@@ -553,7 +553,7 @@ print_entry_props(const struct fileinfo *props, const struct maxes_t *maxes,
 		have_xattr == 1 ? (props->xattr == 1 ? XATTR_CHAR : ' ') : 0;
 	const size_t prop_fields_gap = (size_t)conf.prop_fields_gap;
 	const int file_counter =
-		(conf.files_counter != 0 && maxes->files_counter != 0);
+		(conf.file_counter != 0 && maxes->file_counter != 0);
 
 	construct_and_print_filename(props, maxes->name);
 
@@ -569,7 +569,7 @@ print_entry_props(const struct fileinfo *props, const struct maxes_t *maxes,
 		case 'B': len += gen_blocks(props, buf + len, maxes->blocks); break;
 		case 'f':
 			if (file_counter == 1)
-				len += gen_filecounter(props, buf + len, maxes->files_counter);
+				len += gen_filecounter(props, buf + len, maxes->file_counter);
 			break;
 		case 'd': len += gen_inode(props, buf + len, maxes->inode); break;
 		case 'p': /* fallthrough */

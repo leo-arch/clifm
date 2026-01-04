@@ -133,7 +133,7 @@ save_workspace_opts(const int n)
 	workspace_opts[n].filter.env = filter.env;
 
 	workspace_opts[n].color_scheme = cur_cscheme;
-	workspace_opts[n].files_counter = conf.files_counter;
+	workspace_opts[n].file_counter = conf.file_counter;
 	workspace_opts[n].light_mode = conf.light_mode;
 	workspace_opts[n].list_dirs_first = conf.list_dirs_first;
 	workspace_opts[n].long_view = conf.long_view;
@@ -193,7 +193,7 @@ set_workspace_opts(const int n)
 	conf.light_mode = workspace_opts[n].light_mode;
 	conf.list_dirs_first = workspace_opts[n].list_dirs_first;
 	conf.long_view = workspace_opts[n].long_view;
-	conf.files_counter = workspace_opts[n].files_counter;
+	conf.file_counter = workspace_opts[n].file_counter;
 	conf.max_files = workspace_opts[n].max_files;
 	conf.max_name_len = workspace_opts[n].max_name_len;
 	conf.only_dirs = workspace_opts[n].only_dirs;

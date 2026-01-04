@@ -306,7 +306,7 @@ char *
 get_dir_color(const char *filename, const struct stat *a,
 	const filesn_t count)
 {
-	if (conf.files_counter == 0 && conf.light_mode == 1)
+	if (conf.file_counter == 0 && conf.light_mode == 1)
 		return di_c;
 
 	const mode_t mode = a->st_mode;

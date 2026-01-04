@@ -648,7 +648,7 @@ extern time_t curdir_mtime;
 
 /* Macros for the update_autocmd_opts() function */
 #define AC_COLOR_SCHEME  0
-#define AC_FILES_COUNTER 1
+#define AC_FILE_COUNTER  1
 #define AC_FILTER        2
 #define AC_FULL_DIR_SIZE 3
 #define AC_LIGHT_MODE    4
@@ -1119,7 +1119,7 @@ struct config_t {
 	int dirhist_map;
 	int disk_usage;
 	int ext_cmd_ok;
-	int files_counter;
+	int file_counter;
 	int follow_symlinks;
 	int follow_symlinks_long;
 	int full_dir_size;
@@ -1363,7 +1363,7 @@ struct maxes_t {
 	int id_group;
 	int id_user;
 	int inode;
-	int files_counter;
+	int file_counter;
 	int links;
 	int name;
 	int size;
@@ -1387,7 +1387,7 @@ struct autocmds_t {
 	char *pattern;
 	char *color_scheme;
 	char *cmd;
-	int files_counter;
+	int file_counter;
 	int full_dir_size;
 	int long_view;
 	int light_mode;
@@ -1408,7 +1408,7 @@ extern struct autocmds_t *autocmds;
 struct opts_t {
 	struct filter_t filter;
 	char *color_scheme;
-	int files_counter;
+	int file_counter;
 	int full_dir_size;
 	int light_mode;
 	int list_dirs_first;
@@ -1457,7 +1457,7 @@ struct param_t {
 	int disk_usage_analyzer;
 	int eln_use_workspace_color;
 	int ext_cmd_ok;
-	int files_counter;
+	int file_counter;
 	int follow_symlinks;
 	int follow_symlinks_long;
 	int full_dir_size;

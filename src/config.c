@@ -355,8 +355,8 @@ dump_config(void)
 	print_config_value("ExternalCommands", &conf.ext_cmd_ok, &n,
 		DUMP_CONFIG_BOOL);
 
-	n = DEF_FILES_COUNTER;
-	print_config_value("FileCounter", &conf.files_counter, &n,
+	n = DEF_FILE_COUNTER;
+	print_config_value("FileCounter", &conf.file_counter, &n,
 		DUMP_CONFIG_BOOL);
 
 	s = "";
@@ -1732,7 +1732,7 @@ create_main_config_file(char *file)
 ;DefaultAnswer=\"\"\n\n",
 
 		DEF_COLOR_SCHEME,
-		DEF_FILES_COUNTER == 1 ? "true" : "false",
+		DEF_FILE_COUNTER == 1 ? "true" : "false",
 		DEF_LISTING_MODE,
 		DEF_AUTOLS == 1 ? "true" : "false",
 		DEF_DESKTOP_NOTIFICATIONS == DESKTOP_NOTIF_SYSTEM ? "system"
@@ -3553,11 +3553,11 @@ read_config(void)
 			set_config_bool_value(line + 17, &conf.ext_cmd_ok);
 		}
 
-		else if (xargs.files_counter == UNSET && *line == 'F'
+		else if (xargs.file_counter == UNSET && *line == 'F'
 		&& (strncmp(line, "FilesCounter=", 13) == 0
 		|| strncmp(line, "FileCounter=", 12) == 0)) {
 			set_config_bool_value(line + (line[4] == 's' ? 13 : 12),
-				&conf.files_counter);
+				&conf.file_counter);
 		}
 
 		else if (!filter.str && *line == 'F'

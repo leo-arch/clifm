@@ -114,7 +114,7 @@ init_workspaces_opts(void)
 {
 	for (size_t i = 0; i < MAX_WS; i++) {
 		workspace_opts[i].color_scheme = cur_cscheme;
-		workspace_opts[i].files_counter = conf.files_counter;
+		workspace_opts[i].file_counter = conf.file_counter;
 
 		workspace_opts[i].filter.str = filter.str
 			? savestring(filter.str, strlen(filter.str)) : (char *)NULL;
@@ -175,7 +175,7 @@ init_conf_struct(void)
 	conf.dirhist_map = UNSET;
 	conf.disk_usage = UNSET;
 	conf.ext_cmd_ok = UNSET;
-	conf.files_counter = UNSET;
+	conf.file_counter = UNSET;
 	conf.follow_symlinks = DEF_FOLLOW_SYMLINKS;
 	conf.follow_symlinks_long = DEF_FOLLOW_SYMLINKS_LONG;
 	conf.full_dir_size = UNSET;
@@ -2796,8 +2796,8 @@ check_options(void)
 	if (conf.show_hidden == UNSET)
 		conf.show_hidden = SETOPT(xargs.show_hidden, DEF_SHOW_HIDDEN);
 
-	if (conf.files_counter == UNSET)
-		conf.files_counter = SETOPT(xargs.files_counter, DEF_FILES_COUNTER);
+	if (conf.file_counter == UNSET)
+		conf.file_counter = SETOPT(xargs.file_counter, DEF_FILE_COUNTER);
 
 	if (conf.long_view == UNSET)
 		conf.long_view = SETOPT(xargs.long_view, DEF_LONG_VIEW);

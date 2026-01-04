@@ -118,7 +118,7 @@ struct checks_t {
 	int autocmd_files;
 	int birthtime;
 	int classify;
-	int files_counter;
+	int file_counter;
 	int filter_name;
 	int filter_type;
 	int icons_use_file_color;
@@ -166,7 +166,7 @@ init_checks_struct(void)
 		&& prop_fields.time == PROP_TIME_BIRTH));
 	checks.classify = (conf.long_view == 0 && conf.classify == 1);
 
-	checks.files_counter = (conf.files_counter == 1
+	checks.file_counter = (conf.file_counter == 1
 		&& ((conf.long_view == 1 && prop_fields.counter == 1)
 		|| (conf.long_view == 0 && conf.classify == 1)));
 
@@ -993,7 +993,7 @@ get_longest_filename(const filesn_t n, const size_t eln_len)
 {
 	const int conf_no_eln = conf.no_eln;
 	const int checks_classify = checks.classify;
-	const int conf_files_counter = conf.files_counter;
+	const int conf_file_counter = conf.file_counter;
 	const int conf_colorize = conf.colorize;
 	const int conf_listing_mode = conf.listing_mode;
 	const int conf_max_files = conf.max_files;
@@ -1022,7 +1022,7 @@ get_longest_filename(const filesn_t n, const size_t eln_len)
 		size_t total_len = eln_len + 1 + file_len;
 
 		if (checks_classify == 1) {
-			if (file_info[i].filesn > 0 && conf_files_counter == 1)
+			if (file_info[i].filesn > 0 && conf_file_counter == 1)
 				total_len += DIGINUM(file_info[i].filesn);
 
 			if (file_info[i].dir == 1 || (conf_colorize == 0
@@ -1056,7 +1056,7 @@ get_longest_filename(const filesn_t n, const size_t eln_len)
 	longest.fc_len = 0;
 	if (longest_index >= 0 && file_info[longest_index].dir == 1
 	&& file_info[longest_index].filesn > 0
-	&& conf.max_name_len != UNSET && conf.files_counter == 1) {
+	&& conf.max_name_len != UNSET && conf.file_counter == 1) {
 		longest.fc_len = DIGINUM(file_info[longest_index].filesn) + 1;
 		const size_t t = eln_len + (size_t)conf.max_name_len
 			+ 1 + longest.fc_len;
@@ -1141,7 +1141,7 @@ compute_maxes(void)
 	filesn_t i = xargs.max_files > 0 ? (filesn_t)xargs.max_files
 		: (conf.max_files > 0 ? conf.max_files : files);
 
-	const int conf_files_counter = conf.files_counter;
+	const int conf_file_counter = conf.file_counter;
 	const int prop_fields_size = prop_fields.size;
 	const int prop_fields_ids = prop_fields.ids;
 	const int prop_fields_inode = prop_fields.inode;
@@ -1153,10 +1153,10 @@ compute_maxes(void)
 
 	while (--i >= 0) {
 		int t = 0;
-		if (file_info[i].dir == 1 && conf_files_counter == 1) {
+		if (file_info[i].dir == 1 && conf_file_counter == 1) {
 			t = DIGINUM_BIG(file_info[i].filesn);
-			if (t > maxes.files_counter)
-				maxes.files_counter = t;
+			if (t > maxes.file_counter)
+				maxes.file_counter = t;
 		}
 
 		if (prop_fields_size == PROP_SIZE_BYTES) {
@@ -1241,7 +1241,7 @@ print_long_mode(size_t *counter, int *reset_pager, const int eln_len)
 
 	/* Available space (term cols) to print the filename. */
 	int space_left = (int)term_cols - (prop_fields.len + have_xattr
-		+ maxes.files_counter + maxes.size + maxes.links + maxes.inode
+		+ maxes.file_counter + maxes.size + maxes.links + maxes.inode
 		+ maxes.id_user + (prop_fields.no_group == 0 ? maxes.id_group : 0)
 		+ maxes.blocks + (conf.icons == 1 ? ICON_LEN : 0));
 
@@ -1529,7 +1529,7 @@ print_entry_color(int *ind_char, const filesn_t i, const int pad,
 		/* We have a directory and classification is on: append directory
 		 * indicator and file counter. */
 		putchar(DIR_CHR);
-		if (file_info[i].filesn > 0 && conf.files_counter == 1)
+		if (file_info[i].filesn > 0 && conf.file_counter == 1)
 			fputs(xitoa(file_info[i].filesn), stdout);
 		fputs(df_c, stdout);
 	}
@@ -1602,7 +1602,7 @@ print_entry_nocolor(int *ind_char, const filesn_t i, const int pad,
 		case DT_DIR:
 			*ind_char = 0;
 			putchar(DIR_CHR);
-			if (file_info[i].filesn > 0 && conf.files_counter == 1)
+			if (file_info[i].filesn > 0 && conf.file_counter == 1)
 				fputs(xitoa(file_info[i].filesn), stdout);
 			break;
 
@@ -1612,7 +1612,7 @@ print_entry_nocolor(int *ind_char, const filesn_t i, const int pad,
 			} else if (file_info[i].dir == 1) {
 				*ind_char = 0;
 				putchar(DIR_CHR);
-				if (file_info[i].filesn > 0 && conf.files_counter == 1)
+				if (file_info[i].filesn > 0 && conf.file_counter == 1)
 					fputs(xitoa(file_info[i].filesn), stdout);
 			} else {
 				putchar(LINK_CHR);
@@ -1717,7 +1717,7 @@ print_entry_color_light(int *ind_char, const filesn_t i,
 
 	if (file_info[i].dir == 1 && conf.classify == 1) {
 		putchar(DIR_CHR);
-		if (file_info[i].filesn > 0 && conf.files_counter == 1)
+		if (file_info[i].filesn > 0 && conf.file_counter == 1)
 			fputs(xitoa(file_info[i].filesn), stdout);
 	}
 
@@ -1785,7 +1785,7 @@ print_entry_nocolor_light(int *ind_char, const filesn_t i,
 		case DT_DIR:
 			*ind_char = 0;
 			putchar(DIR_CHR);
-			if (file_info[i].filesn > 0 && conf.files_counter == 1)
+			if (file_info[i].filesn > 0 && conf.file_counter == 1)
 				fputs(xitoa(file_info[i].filesn), stdout);
 			break;
 
@@ -1835,7 +1835,7 @@ calc_item_length(const int eln_len, const int icon_len, const filesn_t i)
 
 	if (file_info[i].dir == 1) {
 		item_len++;
-		if (file_info[i].filesn > 0 && conf.files_counter == 1
+		if (file_info[i].filesn > 0 && conf.file_counter == 1
 		&& file_info[i].user_access == 1)
 			item_len += DIGINUM((int)file_info[i].filesn);
 	} else if (conf.colorize == 0 && has_file_type_char(i) == 1) {
@@ -1995,7 +1995,7 @@ pad_filename(const int ind_char, const filesn_t i, const int eln_len,
 
 	if (file_info[i].dir == 1 && conf.classify == 1) {
 		cur_len++;
-		if (file_info[i].filesn > 0 && conf.files_counter == 1
+		if (file_info[i].filesn > 0 && conf.file_counter == 1
 		&& file_info[i].user_access == 1)
 			cur_len += DIGINUM((int)file_info[i].filesn);
 	}
@@ -2769,7 +2769,7 @@ list_dir_light(const int autocmd_ret)
 #endif /* !_NO_ICONS */
 
 			stats.dir++;
-			if (conf.files_counter == 1)
+			if (conf.file_counter == 1)
 				file_info[n].filesn = count_dir(ename, NO_CPOP) - 2;
 			else
 				file_info[n].filesn = 1;
@@ -3135,7 +3135,7 @@ load_dir_info(const mode_t mode, const filesn_t n)
 		get_dir_icon(n);
 #endif /* !_NO_ICONS */
 
-	if (checks.files_counter == 1) {
+	if (checks.file_counter == 1) {
 		/* Avoid count_dir() if we have no access to the current directory. */
 		file_info[n].filesn = file_info[n].user_access == 0 ? -1
 			: count_dir(file_info[n].name, NO_CPOP) - 2;
@@ -3211,11 +3211,11 @@ load_link_info(const int fd, const filesn_t n)
 			file_info[n].color = ln_c;
 	} else {
 		file_info[n].dir = 1;
-		file_info[n].filesn = conf.files_counter == 1
+		file_info[n].filesn = conf.file_counter == 1
 			? count_dir(file_info[n].name, NO_CPOP) - 2
 			: 1;
 
-		const filesn_t files_in_dir = conf.files_counter == 1
+		const filesn_t files_in_dir = conf.file_counter == 1
 			? (file_info[n].filesn > 0 ? 3 : file_info[n].filesn)
 			: 3;
 			/* 3 == populated (we don't care how many files the directory
