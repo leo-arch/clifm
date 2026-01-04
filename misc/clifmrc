@@ -182,19 +182,16 @@
 
 # Maximum filename length for displayed files. If TruncateNames is enabled,
 # names longer than MaxFilenameLen will be truncated with a tilde (~).
-# Set to -1 (or leave empty) to disable the limit.
-# Set to 'auto' to use 1/4 of terminal columns  (if that value is smaller than
-# MinNameTruncate, MinNameTruncate will be used instead).
-# Note: in long view mode, MinNameTruncate overrides MaxFilenameLen when
-# MaxFilenameLen is smaller than MinNameTruncate.
-;MaxFilenameLen=auto
+# Set to -1, 'unset' (or leave empty) to disable the limit.
+# Set to a percentage (e.g. 20%) to use that fraction of terminal columns.
+# Note: if the computed value is smaller than MinNameTruncate, MinNameTruncate
+# will be used instead.
+;MaxFilenameLen=25%
 
 # Truncate filenames longer than MaxFilenameLen.
 ;TruncateNames=true
 
-# Minimum length at which a filename can be truncated in long view mode.
-# When running in long mode, this setting overrides MaxFilenameLen
-# if MaxFilenameLen is smaller than MinNameTruncate.
+# Minimum length at which a filename can be truncated.
 ;MinNameTruncate=20
 
 # A comma separated list of workspace names in the format NUM=NAME.
