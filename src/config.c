@@ -2012,7 +2012,7 @@ create_main_config_file(char *file)
 # Define how to list files in the pager: auto (default), short, long\n\
 ;PagerView=%s\n\n"
 
-	"# Maximum filename length for displayed files (number of percentage).\n\
+	"# Maximum filename length for displayed files (number or percentage).\n\
 # Set to -1, 'unset' (or leave empty) to disable the limit.\n\
 ;MaxFilenameLen=%s\n\n\
 # Truncate filenames longer than MAXFILENAMELEN.\n\
