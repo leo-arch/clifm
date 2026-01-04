@@ -524,7 +524,7 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 /* Either UNSET, a positive integer, or
  * MAX_NAMELEN_AUTO (term_columns * MAX_NAMELEN_AUTO_RATIO) */
 #define DEF_MAX_NAME_LEN MAX_NAMELEN_AUTO
-#define MAX_NAMELEN_AUTO_RATIO 0.25 /* 1/4 of terminal columns */
+#define DEF_MAX_NAMELEN_AUTO_RATIO 25 /* 25% of terminal columns */
 #define DEF_MAX_HIST 1000
 #define DEF_MAX_JUMP_TOTAL_RANK 100000
 #define DEF_MAX_LOG 1000

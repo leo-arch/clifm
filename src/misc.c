@@ -1464,7 +1464,7 @@ free_stuff(void)
 static void
 set_max_filename_len_auto(void)
 {
-	if (conf.max_name_len_auto == 0 || conf.max_name_len == UNSET)
+	if (conf.max_name_len_auto == UNSET || conf.max_name_len == UNSET)
 		return;
 
 	if ((conf.columned == 0 || files == 1) && conf.long_view == 0) {
@@ -1474,7 +1474,7 @@ set_max_filename_len_auto(void)
 		return;
 	}
 
-	const int n = (int)(term_cols * MAX_NAMELEN_AUTO_RATIO);
+	const int n = (int)(term_cols * conf.max_name_len_auto / 100);
 	conf.max_name_len = n < conf.min_name_trunc ? conf.min_name_trunc : n;
 }
 

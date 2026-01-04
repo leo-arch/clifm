@@ -207,7 +207,8 @@ init_conf_struct(void)
 	conf.max_log = DEF_MAX_LOG;
 	conf.max_jump_total_rank = DEF_MAX_JUMP_TOTAL_RANK;
 	conf.max_name_len = DEF_MAX_NAME_LEN;
-	conf.max_name_len_auto = (DEF_MAX_NAME_LEN == MAX_NAMELEN_AUTO);
+	conf.max_name_len_auto = (DEF_MAX_NAME_LEN == MAX_NAMELEN_AUTO)
+		? DEF_MAX_NAMELEN_AUTO_RATIO : -1;
 	conf.max_name_len_bk = 0;
 	conf.max_printselfiles = DEF_MAX_PRINTSEL;
 	conf.min_jump_rank = DEF_MIN_JUMP_RANK;

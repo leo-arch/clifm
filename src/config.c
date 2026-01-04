@@ -84,14 +84,15 @@ print_config_value(const char *option, void *cur_value, void *def_value,
 {
 	const char *ptr = SET_MISC_PTR;
 
-	if (type == DUMP_CONFIG_STR) {
+	if (type == DUMP_CONFIG_STR || type == DUMP_CONFIG_STR_NO_QUOTE) {
+		char *quote = type == DUMP_CONFIG_STR ? "\"" : "";
 		char *cv = (char *)cur_value;
 		char *dv = (char *)def_value;
 		if (!cv || (dv && strcmp(cv, dv) == 0))
-			printf("  %s: \"%s\"\n", option, dv);
+			printf("  %s: %s%s%s\n", option, quote, dv, quote);
 		else
-			printf("%s%s%s %s%s: \"%s\" [\"%s\"]%s\n", mi_c, ptr, df_c,
-				BOLD, option, cv, dv, df_c);
+			printf("%s%s%s %s%s: %s%s%s [%s%s%s]%s\n", mi_c, ptr, df_c,
+				BOLD, option, quote, cv, quote, quote, dv, quote, df_c);
 	}
 
 	else if (type == DUMP_CONFIG_BOOL) {
@@ -241,12 +242,20 @@ static char *
 gen_max_namelen_value_str(const int cfg)
 {
 	if (cfg == 0) {
-		return DEF_MAX_NAME_LEN == MAX_NAMELEN_AUTO
-			? "auto" : (char *)xitoa(DEF_MAX_NAME_LEN);
+		static char tmp[MAX_INT_STR + 2];
+		snprintf(tmp, sizeof(tmp), "%d%s",
+			DEF_MAX_NAME_LEN == MAX_NAMELEN_AUTO ? DEF_MAX_NAMELEN_AUTO_RATIO
+			: DEF_MAX_NAME_LEN,
+			DEF_MAX_NAME_LEN == MAX_NAMELEN_AUTO ? "%" : "");
+		return tmp;
+	} else {
+		static char tmp[MAX_INT_STR + 2];
+		snprintf(tmp, sizeof(tmp), "%d%s",
+			conf.max_name_len_auto != UNSET ? conf.max_name_len_auto
+			: conf.max_name_len,
+			conf.max_name_len_auto != UNSET ? "%" : "");
+		return tmp;
 	}
-
-	return conf.max_name_len_auto == 1
-		? "auto" : (char *)xitoa(conf.max_name_len);
 }
 
 static char *
@@ -432,7 +441,7 @@ dump_config(void)
 	print_config_value("MaxDirhist", &conf.max_dirhist, &n, DUMP_CONFIG_INT);
 
 	print_config_value("MaxFilenameLen", gen_max_namelen_value_str(1),
-		gen_max_namelen_value_str(0), DUMP_CONFIG_STR);
+		gen_max_namelen_value_str(0), DUMP_CONFIG_STR_NO_QUOTE);
 
 	n = DEF_MAX_HIST;
 	print_config_value("MaxHistory", &conf.max_hist, &n, DUMP_CONFIG_INT);
@@ -1819,9 +1828,7 @@ create_main_config_file(char *file)
 # Log commands entered in the command line\n\
 ;LogCmds=%s\n\n"
 
-	    "# Minimum length at which a filename can be truncated in long view mode.\n\
-# If running in long mode, this setting overrides MaxFilenameLen whenever\n\
-# this latter is smaller than MINNAMETRUNCATE.\n\
+	    "# Minimum length at which a filename can be truncated.\n\
 ;MinNameTruncate=%d\n\n"
 
 	    "# When a directory rank in the jump database is below MinJumpRank, it\n\
@@ -2005,13 +2012,9 @@ create_main_config_file(char *file)
 # Define how to list files in the pager: auto (default), short, long\n\
 ;PagerView=%s\n\n"
 
-	"# Maximum filename length for listed files. If TruncateNames is set to\n\
-# true, names larger than MAXFILENAMELEN will be truncated at MAXFILENAMELEN\n\
-# using a tilde.\n\
-# Set it to -1 (or leave empty) to remove this limit.\n\
-# When running in long mode, this setting is overriden by MinNameTruncate\n\
-# whenever MAXFILENAMELEN is smaller than MINNAMETRUNCATE.\n\
-;MaxFilenameLen=%d\n\n\
+	"# Maximum filename length for displayed files (number of percentage).\n\
+# Set to -1, 'unset' (or leave empty) to disable the limit.\n\
+;MaxFilenameLen=%s\n\n\
 # Truncate filenames longer than MAXFILENAMELEN.\n\
 ;TruncateNames=%s\n\n",
 
@@ -2033,7 +2036,7 @@ create_main_config_file(char *file)
 		DEF_PAGER == 1 ? "true" : "false",
 		DEF_PAGER_VIEW == PAGER_AUTO ? "auto"
 			: (DEF_PAGER_VIEW == PAGER_LONG ? "long" : "short"),
-		DEF_MAX_NAME_LEN,
+		gen_max_namelen_value_str(0),
 		DEF_TRUNC_NAMES == 1 ? "true" : "false"
 		);
 
@@ -3423,20 +3426,31 @@ set_filename_filter(void)
 static void
 set_max_name_len(char *line)
 {
+	if (!line || !*line)
+		return;
+
 	if ((*line == '\n' && !line[1]) || strcmp(line, "unset\n") == 0) {
 		/* Empty == -1 == UNSET */
 		conf.max_name_len = UNSET;
-		conf.max_name_len_auto = 0;
-	} else if (*line == 'a' && strcmp(line, "auto\n") == 0) {
-		conf.max_name_len_auto = 1;
-		/* conf.max_name_len will be set by set_max_filename_len_auto(),
-		 * in misc.c, based on the terminal number of columns, and updated
-		 * accordingly every time this changes. */
-	} else {
-		conf.max_name_len = UNSET; /* In case the conversion fails */
-		set_config_int_value(line, &conf.max_name_len, -1, NAME_BUF_SIZE);
-		conf.max_name_len_auto = 0;
+		conf.max_name_len_auto = UNSET;
+		return;
 	}
+
+	const size_t line_len = strlen(line);
+	if (line_len > 2 && line[line_len - 2] == '%') {
+		line[line_len - 2] = '\0';
+		const int n = atoi(line);
+		if (n >= 0 && n <= 100)
+			/* conf.max_name_len will be set by set_max_filename_len_auto(),
+			 * in misc.c, as the N percentage of current terminal columns,
+			 * and updated accordingly every time the terminal is resized. */
+			conf.max_name_len_auto = n;
+		return;
+	}
+
+	conf.max_name_len = UNSET; /* In case the conversion fails */
+	set_config_int_value(line, &conf.max_name_len, -1, NAME_BUF_SIZE);
+	conf.max_name_len_auto = UNSET;
 }
 
 /* Read the main configuration file and set options accordingly */
@@ -3458,7 +3472,8 @@ read_config(void)
 
 	int default_answers_set = 0;
 	conf.max_name_len = DEF_MAX_NAME_LEN;
-	conf.max_name_len_auto = (DEF_MAX_NAME_LEN == MAX_NAMELEN_AUTO);
+	conf.max_name_len_auto = (DEF_MAX_NAME_LEN == MAX_NAMELEN_AUTO)
+		? DEF_MAX_NAMELEN_AUTO_RATIO : -1;
 	*div_line = *DEF_DIV_LINE;
 	/* The longest possible line in the config file is StartingPath="PATH" */
 	char line[PATH_MAX + 16]; *line = '\0';

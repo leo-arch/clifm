@@ -1036,8 +1036,11 @@ rl_toggle_max_filename_len(int count, int key)
 	if (conf.max_name_len == UNSET) {
 		print_reload_msg(NULL, NULL, _("Max name length unset\n"));
 	} else {
+		char auto_perc[MAX_INT_STR + 5] = "";
+		if (conf.max_name_len_auto != UNSET)
+			snprintf(auto_perc, sizeof(auto_perc), " (%d%%)", conf.max_name_len_auto);
 		print_reload_msg(NULL, NULL, _("Max name length set to %d%s\n"),
-			conf.max_name_len, conf.max_name_len_auto == 1 ? " (auto)" : "");
+			conf.max_name_len, auto_perc);
 	}
 
 	xrl_reset_line_state();
