@@ -238,6 +238,18 @@ gen_default_answer_value_str(const int cfg)
 }
 
 static char *
+gen_max_namelen_value_str(const int cfg)
+{
+	if (cfg == 0) {
+		return DEF_MAX_NAME_LEN == MAX_NAMELEN_AUTO
+			? "auto" : (char *)xitoa(DEF_MAX_NAME_LEN);
+	}
+
+	return conf.max_name_len_auto == 1
+		? "auto" : (char *)xitoa(conf.max_name_len);
+}
+
+static char *
 gen_desktop_notif_str(const int value)
 {
 	switch (value) {
@@ -419,9 +431,8 @@ dump_config(void)
 	n = DEF_MAX_DIRHIST;
 	print_config_value("MaxDirhist", &conf.max_dirhist, &n, DUMP_CONFIG_INT);
 
-	n = DEF_MAX_NAME_LEN;
-	print_config_value("MaxFilenameLen", &conf.max_name_len, &n,
-		DUMP_CONFIG_INT);
+	print_config_value("MaxFilenameLen", gen_max_namelen_value_str(1),
+		gen_max_namelen_value_str(0), DUMP_CONFIG_STR);
 
 	n = DEF_MAX_HIST;
 	print_config_value("MaxHistory", &conf.max_hist, &n, DUMP_CONFIG_INT);
@@ -3409,6 +3420,25 @@ set_filename_filter(void)
 	regfree(&regex_exp);
 }
 
+static void
+set_max_name_len(char *line)
+{
+	if ((*line == '\n' && !line[1]) || strcmp(line, "unset\n") == 0) {
+		/* Empty == -1 == UNSET */
+		conf.max_name_len = UNSET;
+		conf.max_name_len_auto = 0;
+	} else if (*line == 'a' && strcmp(line, "auto\n") == 0) {
+		conf.max_name_len_auto = 1;
+		/* conf.max_name_len will be set by set_max_filename_len_auto(),
+		 * in misc.c, based on the terminal number of columns, and updated
+		 * accordingly every time this changes. */
+	} else {
+		conf.max_name_len = UNSET; /* In case the conversion fails */
+		set_config_int_value(line, &conf.max_name_len, -1, NAME_BUF_SIZE);
+		conf.max_name_len_auto = 0;
+	}
+}
+
 /* Read the main configuration file and set options accordingly */
 static void
 read_config(void)
@@ -3428,6 +3458,7 @@ read_config(void)
 
 	int default_answers_set = 0;
 	conf.max_name_len = DEF_MAX_NAME_LEN;
+	conf.max_name_len_auto = (DEF_MAX_NAME_LEN == MAX_NAMELEN_AUTO);
 	*div_line = *DEF_DIV_LINE;
 	/* The longest possible line in the config file is StartingPath="PATH" */
 	char line[PATH_MAX + 16]; *line = '\0';
@@ -3645,11 +3676,7 @@ read_config(void)
 		}
 
 		else if (*line == 'M' && strncmp(line, "MaxFilenameLen=", 15) == 0) {
-			if (line[15] == '\n' && !line[16]) /* Empty == -1 == UNSET */
-				conf.max_name_len = UNSET;
-			else
-				set_config_int_value(line + 15, &conf.max_name_len,
-					-1, NAME_BUF_SIZE);
+			set_max_name_len(line + 15);
 		}
 
 		else if (*line == 'M' && strncmp(line, "MaxHistory=", 11) == 0) {

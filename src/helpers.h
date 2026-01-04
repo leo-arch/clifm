@@ -897,6 +897,7 @@ extern time_t curdir_mtime;
 #define JUMP_ENTRY_PERMANENT_CHR '+'
 
 #define MAX_TIME_STR 256
+#define MAX_NAMELEN_AUTO (-2) /* Macro for MaxFilenameLen=auto */
 
 #define SHADE_TYPE_UNSET     0
 #define SHADE_TYPE_8COLORS   1
@@ -1143,6 +1144,7 @@ struct config_t {
 	int max_files;
 	int max_log;
 	int max_name_len;
+	int max_name_len_auto;
 	int max_name_len_bk;
 	int max_printselfiles;
 	int min_jump_rank;

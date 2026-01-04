@@ -1036,8 +1036,8 @@ rl_toggle_max_filename_len(int count, int key)
 	if (conf.max_name_len == UNSET) {
 		print_reload_msg(NULL, NULL, _("Max name length unset\n"));
 	} else {
-		print_reload_msg(NULL, NULL, _("Max name length set to %d\n"),
-			conf.max_name_len);
+		print_reload_msg(NULL, NULL, _("Max name length set to %d%s\n"),
+			conf.max_name_len, conf.max_name_len_auto == 1 ? " (auto)" : "");
 	}
 
 	xrl_reset_line_state();

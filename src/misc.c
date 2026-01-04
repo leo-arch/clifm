@@ -1459,6 +1459,16 @@ free_stuff(void)
 		UNSET_KITTY_KEYS;
 }
 
+static void
+set_max_filename_len_auto(void)
+{
+	if (conf.max_name_len_auto == 0 || conf.max_name_len == UNSET)
+		return;
+
+	int n = term_cols / 4;
+	conf.max_name_len = n < conf.min_name_trunc ? conf.min_name_trunc : n;
+}
+
 /* Get current terminal dimensions and store them in TERM_COLS and
  * TERM_LINES (globals). These values will be updated upon SIGWINCH.
  * In case of error, we fallback to 80x24. */
@@ -1474,8 +1484,10 @@ get_term_size(void)
 		term_lines = w.ws_row > 0 ? w.ws_row : DEFAULT_WIN_ROWS;
 	}
 
-	if (xargs.secure_env == 1 || xargs.secure_env_full == 1)
+	if (xargs.secure_env == 1 || xargs.secure_env_full == 1) {
+		set_max_filename_len_auto();
 		return;
+	}
 
 	char *env = getenv("CLIFM_COLUMNS");
 	int value = env ? atoi(env) : -1;
@@ -1486,6 +1498,8 @@ get_term_size(void)
 	value = env ? atoi(env) : -1;
 	if (value > 0 && value <= USHRT_MAX)
 		term_lines = (unsigned short)value;
+
+	set_max_filename_len_auto();
 }
 
 static int
