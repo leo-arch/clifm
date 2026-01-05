@@ -139,6 +139,7 @@
 #define MD_FORMAT_ALIGN_LEFT "\ue47b"
 #define MD_GAMES "\ue393"
 #define MD_HELP_OUTLINE "\ue6ee"
+#define MD_PLAYLIST_ADD_CHECK "\ue3cf"
 #define MD_QUEUE_MUSIC "\ue3a8"
 #define MD_RSS_FEED "\ue40d"
 #define MD_SHARE "\ue634"

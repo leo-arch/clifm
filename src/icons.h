@@ -150,6 +150,7 @@ char
 	ICON_SCHEME[] = EMOJI_SCHEME,
 	ICON_SHARE[] = EMOJI_SHARE,
 	ICON_SHELL[] = EMOJI_SHELL,
+	ICON_SIG[] = EMOJI_LIST,
 	ICON_SQLITE[] = EMOJI_DATABASE,
 	ICON_STYLUS[] = EMOJI_STYLUS,
 	ICON_SUBLIME[] = EMOJI_SUBLIME,
@@ -312,6 +313,7 @@ char
 	ICON_SCHEME[] = FILE_SCHEME,
 	ICON_SHARE[] = MD_SHARE,
 	ICON_SHELL[] = OCT_TERMINAL,
+	ICON_SIG[] = MD_PLAYLIST_ADD_CHECK,
 	ICON_SQLITE[] = MFIZZ_MYSQL_ALT,
 	ICON_STYLUS[] = FILE_STYLUS,
 	ICON_SUBLIME[] = DEV_SUBLIME,
@@ -474,6 +476,7 @@ char
 	ICON_SCHEME[] = NERD_SCHEME,
 	ICON_SHARE[] = NERD_SHARE,
 	ICON_SHELL[] = NERD_SHELL,
+	ICON_SIG[] = NERD_SIG,
 	ICON_SQLITE[] = NERD_SQLITE,
 	ICON_STYLUS[] = NERD_STYLUS,
 	ICON_SUBLIME[] = NERD_SUBLIME,
@@ -1318,6 +1321,7 @@ struct icons_t const icon_ext[] = {
 	{"rst", ICON_TXT, WHITE},
 	{"chm", ICON_MANPAGE, WHITE},
 	{"com", ICON_EXEC, WHITE},
+	{"sig", ICON_SIG, GREEN},
 
 /* Legacy
  * Amiga: lha, nfo, diz, mod, pic, lbm, ilbm, dib, rle, adf, dms
@@ -1459,6 +1463,7 @@ struct icons_t const icon_filenames[] = {
 	{".htaccess", ICON_CONFIG, WHITE},
 	{".htpasswd", ICON_CONFIG, WHITE},
 	{".inputrc", ICON_CONFIG, WHITE},
+	{".mailmap", ICON_GIT, WHITE},
 	{".mime.types", ICON_CONFIG, WHITE},
 	{".vimrc", ICON_CONFIG, WHITE},
 	{".Xdefaults", ICON_CONFIG, WHITE},

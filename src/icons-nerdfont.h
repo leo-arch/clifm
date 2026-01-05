@@ -50,6 +50,7 @@
 #define NERD_PICTUREFILE   "󱅬"
 #define NERD_PUBLIC        ""
 #define NERD_SHELL         ""
+#define NERD_SIG           "󱧃"
 #define NERD_TEMPLATES     ""
 #define NERD_TRASH         ""
 #define NERD_VIDEOS        "󰕧"
