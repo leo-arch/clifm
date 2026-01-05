@@ -456,7 +456,7 @@ check_bm_shortcut(const char *shortcut, const int add)
 }
 
 /* Bookmark the file FILE as NAME and shortcut SHORTCUT.
- * FILE and NAME are guarranteed to be non-NULL.
+ * FILE and NAME are guaranteed to be non-NULL.
  * FILE is already dequoted. */
 static int
 bookmark_add(char *file, char *name, char *shortcut)

@@ -503,12 +503,12 @@ bleach_files(char **names)
 		}
 
 		char *sl = strrchr(names[i], '/');
-		char *p = clean_file_name((sl && *(sl + 1)) ? sl + 1 : names[i]);
+		char *p = clean_file_name((sl && sl[1]) ? sl + 1 : names[i]);
 		if (!p)
 			continue;
 
 		/* Nothing to clean. Skip this one */
-		char *n = (sl && *(sl + 1)) ? sl + 1 : names[i];
+		char *n = (sl && sl[1]) ? sl + 1 : names[i];
 		if (*n == *p && strcmp(n, p) == 0) {
 			free(p);
 			continue;
