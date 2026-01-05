@@ -61,7 +61,7 @@
 # Note: Disabling this option also disables the file counter.
 ;Classify=true
 
-# Color symbolic links according to their target filename. An indicator
+# Colorize symbolic links according to their target filename. An indicator
 # character (by default '@') is placed at the beginning of the name to mark
 # it as a symbolic link.
 # The color of this indicator can be customized in the color scheme file
@@ -139,8 +139,8 @@
 # Defaults to "+%b %e %H:%M" for recent files (< 6 months) and "+%b %e  %Y"
 # for older files.
 # Examples:
-;TimeStyle="full-iso"
-;TimeStyle="relative"
+;TimeStyle=full-iso
+;TimeStyle=relative
 ;TimeStyle="+%F %T"
 
 # If files are sorted by time in the file list, this option specifies whether
