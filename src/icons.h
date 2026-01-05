@@ -903,6 +903,7 @@ struct icons_t const icon_ext[] = {
 	{"pxm", ICON_IMG, GREEN},
 	{"qoi", ICON_IMG, GREEN},
 	{"tga", ICON_IMG, GREEN},
+	{"xbm", ICON_IMG, GREEN},
 	{"xpm", ICON_IMG, GREEN},
 	{"xwd", ICON_IMG, GREEN},
 /*	{"dpx", ICON_IMG, GREEN}, // Uncommon: highly specialized
@@ -911,8 +912,7 @@ struct icons_t const icon_ext[] = {
 	{"pam", ICON_IMG, GREEN}, // Portable Arbitrary Map: Uncommon
 	{"pdd", ICON_IMG, GREEN}, // Adobe PhotoDeluxe
 	{"sgi", ICON_IMG, GREEN}, // Legacy
-	{"wmf", ICON_IMG, GREEN}, // Windows: Legacy
-	{"xbm", ICON_IMG, GREEN}, // Replaced by xpm */
+	{"wmf", ICON_IMG, GREEN}, // Windows: Legacy */
 
 	/* Raw image formats */
 	{"arw", ICON_IMG, B_GREEN}, // Sony
@@ -1032,13 +1032,13 @@ struct icons_t const icon_ext[] = {
 
 	{"apk", ICON_PACKAGE, YELLOW},
 	{"Appimage", ICON_PACKAGE, YELLOW},
+	{"crx", ICON_PACKAGE, YELLOW}, // Chrome add-ons
 	{"flatpak", ICON_PACKAGE, YELLOW},
 	{"msi", ICON_PACKAGE, YELLOW}, // Windows installer
 	{"pkg", ICON_PACKAGE, YELLOW},
 	{"snap", ICON_PACKAGE, YELLOW},
 	{"xpi", ICON_PACKAGE, YELLOW}, // Mozilla add-ons
-/*	{"crx", ICON_PACKAGE, YELLOW}, // Chrome add-ons
-	{"appx", ICON_PACKAGE, YELLOW} // Windows 8 app installer
+/*	{"appx", ICON_PACKAGE, YELLOW} // Windows 8 app installer
 	{"appxbundle", ICON_PACKAGE, YELLOW} // Windows 8 app installer
 	{"msix", ICON_PACKAGE, YELLOW} // Windows 10 app installer
 	{"msixbundle", ICON_PACKAGE, YELLOW} // Windows 10 app installer */
