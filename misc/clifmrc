@@ -285,8 +285,8 @@
 # Enable auto-suggestions for commands, file paths, and options as you type.
 ;AutoSuggestions=true
 
-# The following suggestion checks will be performed in the order
-# specified by SuggestionStrategy. Available checks include:
+# The following suggestion checks are performed in the order specified
+# by SuggestionStrategy. Available checks include:
 # a = Alias names
 # c = Path completion
 # e = ELNs
@@ -405,7 +405,7 @@
 #  'y', 'n', or 'u' (unset - no default answer, wait for explicit input).
 #
 # If a value, left or right, is unset (or set to any other value), no default
-# answer will be used ('y' or 'n' will be explicitly required, unless 'd' or 'D'
+# answer is used ('y' or 'n' is explicitly required, unless 'd' or 'D'
 # are set to any valid value, in which case this value is used instead).
 #
 # For example, to set 'n' as the default answer for the 'r' command, unset for
@@ -420,7 +420,7 @@
 
 # Choose the file opener for opening files with their default associated
 # application (e.g., Ranger's rifle or xdg-open). If not specified, 'lira',
-# Clifm's builtin opener, will be used.
+# Clifm's builtin opener, is used.
 ;Opener=
 
 # Command used to launch a terminal emulator for opening a new Clifm instance
@@ -439,13 +439,13 @@
 ;SearchStrategy=2
 
 # Minimum rank for directories in the jump database. Directories with a rank
-# below this value will be removed. If set to 0, directories will be retained
+# below this value are removed. If set to 0, directories are retained
 # indefinitely.
 ;MinJumpRank=10
 
 # Maximum total rank allowed in the jump database. When exceeded, all ranks
-# will be reduced dynamically to ensure the total falls below this limit.
-# Entries below MinJumpRank will be deleted.
+# are reduced dynamically to ensure the total falls below this limit.
+# Entries below MinJumpRank are deleted.
 ;MaxJumpTotalRank=100000
 
 # Automatically remove non-existing directories from the jump database at
@@ -509,7 +509,7 @@
 ;CaseSensitiveSearch=false
 
 # When sorting files by 'version' or 'name', skip non-alphanumeric characters.
-# For example, '__file' will be sorted as 'file'.
+# For example, '__file' is sorted as 'file'.
 # This also affects hidden files: if set to false, '.hidden' will appear
 # before 'afile'; if set to true, it will appear after 'gfile' (unless
 # ShowHiddenFiles is set to 'first' or 'last').
@@ -542,7 +542,7 @@
 
 # Set a custom welcome message.
 # Colors are available via escape codes. E.g., "\e[34mWelcome!\e[0m".
-# An ending new line character will be appended automatically.
+# An ending new line character is appended automatically.
 ;WelcomeMessageStr=""
 
 # Print Clifm's logo screen at startup.
