@@ -49,7 +49,7 @@
 #define EMOJI_DATABASE EMOJI_FILE
 #define EMOJI_DESKTOP "💻"
 #define EMOJI_DART EMOJI_CODE
-#define EMOJI_DIFF "📋"
+#define EMOJI_DIFF "🩹"
 #define EMOJI_DISK "💾"
 #define EMOJI_DOCKER "🐋"
 #define EMOJI_DOWNLOAD "📥"
@@ -106,6 +106,7 @@
 #define EMOJI_PDF "🔖"
 #define EMOJI_PERL "🐪"
 #define EMOJI_PHOTO "📸"
+#define EMOJI_PHP "🐘"
 #define EMOJI_PICTURE "📷"
 #define EMOJI_PLAYLIST EMOJI_MUSIC
 #define EMOJI_POSTSCRIPT EMOJI_PDF
@@ -135,7 +136,7 @@
 #define EMOJI_TEXT EMOJI_FILE
 #define EMOJI_LOG EMOJI_NOTE
 #define EMOJI_TOML EMOJI_CONF
-#define EMOJI_TYPESCRIPT EMOJI_CODE
+#define EMOJI_TYPESCRIPT "🔷"
 #define EMOJI_TRASH EMOJI_FOLDER
 #define EMOJI_TWIG "🌱"
 #define EMOJI_V EMOJI_CODE
