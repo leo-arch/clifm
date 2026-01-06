@@ -108,7 +108,8 @@ set_default_answer(const char default_answer)
 int
 rl_get_y_or_n(const char *msg_str, char default_answer)
 {
-	rl_default_answer = set_default_answer(default_answer);
+	char def_answer = set_default_answer(default_answer);
+	rl_default_answer = def_answer;
 
 	const char *yes_no_str = gen_y_n_str(rl_default_answer);
 	const size_t msg_len = strlen(msg_str) + strlen(yes_no_str) + 3;
@@ -120,6 +121,7 @@ rl_get_y_or_n(const char *msg_str, char default_answer)
 	char *answer = (char *)NULL;
 	while (!answer) {
 		answer = rl_no_hist(msg, 0);
+		rl_default_answer = def_answer;
 		if (!answer)
 			continue;
 
