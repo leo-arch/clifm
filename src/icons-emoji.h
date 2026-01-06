@@ -57,9 +57,8 @@
 #define EMOJI_ELM EMOJI_CODE
 #define EMOJI_ENCRYPTED "🔒"
 #define EMOJI_ERLANG EMOJI_CODE
-#define EMOJI_EXEC "⚙️ "
 #define EMOJI_FILE "📄"
-#define EMOJI_FOLDER "📂"
+#define EMOJI_FOLDER "📁"
 #define EMOJI_FONT "🔤"
 #define EMOJI_FORTRAN EMOJI_CODE
 #define EMOJI_FSHARP EMOJI_CODE
@@ -95,7 +94,6 @@
 #define EMOJI_LUA "🌘"
 #define EMOJI_MAGNET "🧲"
 #define EMOJI_MANUAL "❔"
-#define EMOJI_MARKDOWN "⬇ "
 #define EMOJI_MATLAB EMOJI_CODE
 #define EMOJI_MOVIE "🎬"
 #define EMOJI_MUSIC "🎧"
@@ -151,21 +149,22 @@
 #define EMOJI_XML EMOJI_CODE
 #define EMOJI_YAML EMOJI_CONF
 
-/* One char wide emojis (this depends on the terminal though). */
-#define EMOJI_C "©️ "
-#define EMOJI_CHECKSUM "✔️ "
-#define EMOJI_DROPBOX "☁️ "
-#define EMOJI_ELECTRON "⚛ "
-#define EMOJI_GIMP "🖌️ "
-#define EMOJI_ILLUSTRATOR "🖌️ "
-#define EMOJI_KRITA "🖌️ "
-#define EMOJI_LICENSE "⚖️ "
-#define EMOJI_MAKE "🛠 "
-#define EMOJI_ONEDRIVE "☁️ "
-#define EMOJI_PHOTOSHOP "🖌️ "
-#define EMOJI_PUBLIC "👁 "
-#define EMOJI_R "®️ "
-#define EMOJI_SHARE "🖇 "
-#define EMOJI_VIDEOS "📽 "
+#define EMOJI_MARKDOWN "📃"
+#define EMOJI_EXEC "🛞"
+#define EMOJI_LICENSE "🔏"
+#define EMOJI_SHARE "📎"
+#define EMOJI_C EMOJI_CODE
+#define EMOJI_CHECKSUM "✅"
+#define EMOJI_DROPBOX EMOJI_FOLDER
+#define EMOJI_ELECTRON EMOJI_CODE
+#define EMOJI_GIMP EMOJI_IMAGE
+#define EMOJI_ILLUSTRATOR EMOJI_IMAGE
+#define EMOJI_KRITA EMOJI_IMAGE
+#define EMOJI_MAKE "🚧"
+#define EMOJI_ONEDRIVE EMOJI_FOLDER
+#define EMOJI_PHOTOSHOP EMOJI_IMAGE
+#define EMOJI_PUBLIC "📂"
+#define EMOJI_R EMOJI_CODE
+#define EMOJI_VIDEOS "📼"
 
 #endif /* ICONS_EMOJI */
