@@ -132,13 +132,13 @@ rl_get_y_or_n(const char *msg_str, char default_answer)
 		switch (*answer) {
 		case 'y': /* fallthrough */
 		case 'Y':
-			if (!answer[1] || strcmp(answer + 1, "es") == 0)
+			if (!answer[1] || strcasecmp(answer + 1, "es") == 0)
 				{ free(answer); ret = 1; break; }
 			else
 				{ free(answer); answer = (char *)NULL; continue; }
 		case 'n': /* fallthrough */
 		case 'N':
-			if (!answer[1] || (answer[1] == 'o' && !answer[2]))
+			if (!answer[1] || (TOLOWER(answer[1]) == 'o' && !answer[2]))
 				{ free(answer); ret = 0; break; }
 			else
 				{ free(answer); answer = (char *)NULL; continue; }
