@@ -486,8 +486,8 @@ bleach_files(char **names)
 	int do_edit = 0, edited_names = 0;
 	struct bleach_t *bfiles = (struct bleach_t *)NULL;
 
-	size_t f = 0, i = 1;
-	for (; names[i]; i++) {
+	size_t f = 0;
+	for (size_t i = 1; names[i]; i++) {
 		char *dstr = unescape_str(names[i], 0);
 		if (!dstr) {
 			xerror(_("bleach: '%s': Error unescaping filename\n"), names[i]);
@@ -595,7 +595,7 @@ CONFIRM:
 
 	if (edited_names == -1 || quit_func == 1) { /* ERROR or quit */
 		if (bfiles) {
-			for (i = 0; i < f; i++) {
+			for (size_t i = 0; i < f; i++) {
 				free(bfiles[i].original);
 				free(bfiles[i].replacement);
 			}
@@ -611,7 +611,7 @@ CONFIRM:
 		printf(_("%zu filename(s) will be bleached\n"), f);
 		if (rl_get_y_or_n(_("Continue?"), 0) != 1) {
 			if (bfiles) {
-				for (i = 0; i < f; i++) {
+				for (size_t i = 0; i < f; i++) {
 					free(bfiles[i].original);
 					free(bfiles[i].replacement);
 				}
@@ -629,7 +629,7 @@ CONFIRM:
 	size_t rep_suffix = 1;
 	int exit_status = FUNC_SUCCESS;
 
-	for (i = 0; i < f; i++) {
+	for (size_t i = 0; i < f; i++) {
 		char *o = (bfiles && bfiles[i].original)
 			? bfiles[i].original : (char *)NULL;
 		char *r = (bfiles && bfiles[i].replacement)

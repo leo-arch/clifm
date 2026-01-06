@@ -33,8 +33,8 @@
 static int
 parse_bulk_remove_params(char *s1, char *s2, char **app, char **target)
 {
-	if (!s1 || !*s1) { /* No parameters */
-		/* TARGET defaults to CWD and APP to default associated app */
+	if (!s1 || !*s1) { /* No parameters. */
+		/* TARGET defaults to CWD and APP to default associated app. */
 		*target = workspaces[cur_ws].path;
 		return FUNC_SUCCESS;
 	}
@@ -43,7 +43,7 @@ parse_bulk_remove_params(char *s1, char *s2, char **app, char **target)
 	struct stat a;
 	if ((ret = stat(s1, &a)) == -1 || !S_ISDIR(a.st_mode)) {
 		if (is_cmd_in_path(BULK_APP(s1)) == 0) {
-			/* S1 is neither a directory nor a valid application */
+			/* S1 is neither a directory nor a valid application. */
 			int ec = (ret == -1 && *s1 == ':') ? E_NOTFOUND : ENOTDIR;
 			if (ec == ENOTDIR)
 				xerror("rr: '%s': %s\n", s1, strerror(ec));
@@ -52,7 +52,7 @@ parse_bulk_remove_params(char *s1, char *s2, char **app, char **target)
 			return ec;
 		}
 
-		/* S1 is an application name. TARGET defaults to CWD */
+		/* S1 is an application name. TARGET defaults to CWD. */
 		*target = workspaces[cur_ws].path;
 		*app = BULK_APP(s1);
 		return FUNC_SUCCESS;
@@ -64,16 +64,16 @@ parse_bulk_remove_params(char *s1, char *s2, char **app, char **target)
 		s1[tlen - 1] = '\0';
 	*target = s1;
 
-	if (!s2 || !*s2) /* No S2. APP defaults to default associated app */
+	if (!s2 || !*s2) /* No S2. APP defaults to default associated app. */
 		return FUNC_SUCCESS;
 
 	if (is_cmd_in_path(BULK_APP(s2)) == 1) {
-		/* S2 is a valid application name */
+		/* S2 is a valid application name. */
 		*app = BULK_APP(s2);
 		return FUNC_SUCCESS;
 	}
 
-	/* S2 is not a valid application name */
+	/* S2 is not a valid application name. */
 	xerror("rr: '%s': %s\n", BULK_APP(s2), NOTFOUND_MSG);
 	return E_NOTFOUND;
 }
@@ -164,8 +164,7 @@ write_files_to_tmp(struct dirent ***a, filesn_t *n, const char *target,
 		if (files == 0)
 			goto EMPTY_DIR;
 
-		filesn_t i;
-		for (i = 0; i < files; i++)
+		for (filesn_t i = 0; i < files; i++)
 			write_name(fp, file_info[i].name, file_info[i].type);
 	} else {
 		if (count_dir(target, CPOP) <= 2)
@@ -179,8 +178,7 @@ write_files_to_tmp(struct dirent ***a, filesn_t *n, const char *target,
 			return tmp_err;
 		}
 
-		filesn_t i;
-		for (i = 0; i < *n; i++) {
+		for (filesn_t i = 0; i < *n; i++) {
 			if (SELFORPARENT((*a)[i]->d_name))
 				continue;
 #ifndef _DIRENT_HAVE_D_TYPE
@@ -450,6 +448,7 @@ bulk_remove(char *s1, char *s2)
 	if (!rem_files)
 		goto FREE_N_EXIT;
 
+	/* remove_files() will prompt the user for confirmation. */
 	ret = remove_files(rem_files);
 
 	for (i = 0; rem_files[i]; i++)
