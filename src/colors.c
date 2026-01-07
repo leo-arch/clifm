@@ -14,9 +14,7 @@
 #endif /* __linux__ */
 #include <errno.h>
 #include <string.h>
-#ifndef CLIFM_SUCKLESS
 # include <strings.h> /* str(n)casecmp() */
-#endif /* CLIFM_SUCKLESS */
 
 /* Only used to check the readline version */
 #ifdef __OpenBSD__
