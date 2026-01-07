@@ -1,3 +1,56 @@
+1.27 (Pieces O'Eight) - Jan 7, 2026
+
+BUG FIXES
+* fzfnav/BFG plugin: chafa does not display images on foot.
+* Filename validation not working for uppercase file type characters (e.g. "=C").
+* Cannot compile in OpenBSD 7.8-CURRENT (missing typedef).
+* Recursive remove message not shown when removing multiple directories.
+* No screen refresh after archive extraction.
+* '../' in a symlinked directory does not work when 'cd' is omitted (autocd).
+* Directory names containing a dot are truncated as if they have an extension (sorting by extension already omits extensions in directory names).
+* The safe names check emits warnings only for the first error, omitting the remainig ones.
+* 'dup FILE' replaces broken symlink if it is named 'FILE.copy'.
+* File colors do not match those in the file list when in light mode.
+* Using incomplete ranges ('ELN-') in the untrash screen silently fails the second time.
+* Error when compiling with CLIFM_SUCKLESS.
+* Cannot open files using the 'mm open' command on Windows (#354).
+* Garbled output (in the prompt) on slow SSH connections (#355).
+* Alt-z skips 'type' sort in light mode.
+* 'n FILE@<TAB>' overrides FILE in the command line when there is a single template file.
+* No icon for hardlinked files.
+* Wrong icon for '.a' files.
+* Some icons are not visible in light themed terminals.
+* Umask in config does not work at startup (overriden by shell inherited value).
+* Filenames with embedded single UTF-8 continuation bytes are not properly handled.
+* Default answer ignored after pressing Ctrl+d in confirmation prompts.
+
+NEW FEATURES/IMPROVEMENTS
+* Add iina to video/audio opening apps.
+* Invert/toggle selections in the current directory with 'sel --invert' (or Shift+Tab). Note: you may need to add the keybinding yourself. Enter 'kb bind invert-selection' and then press Shift+Tab.
+* Add key bindings for workspaces 5-8 (Alt+[5-8]).
+* Allow decompressing ZIP-based files (such as .docx, .odt, and .apk files) via the 'ad' command.
+* Make safe filename check inform all safety warnings.
+* Add leading/trailing whitespace and leading tilde check to the safe filename check.
+* Validate new filenames when copying or renaming files.
+* Enable/disable filenames validation when creating/renaming files ('n' and 'm' commands respectively) using the 'SafeFilenames' option in the configuration file (consult the manpage for details).
+* Add 'swayimg' support to 'img_view.sh' plugin.
+* Import CLIFM_STAT_AUTOCMD when 'Notifications' are disabled for the current prompt.
+* Use a more proper icon for symlinks (oct_file_symlink_file).
+* Allow MaxFilenameLen to take percentage values. E.g. '25%' for 1/4 of terminal columns.
+* MaxFilenameLen defaults now to '25%'. To get back the old behavior, set MaxFilenameLen to 20 in the config file.
+* Avoid single-width emojis (for emoji-icons) to prevent rendering issues.
+
+MISC
+* Manpage completions directory moved from $XDG_DATA_HOME to $XDG_CACHE_HOME.
+* FilesCounter option renamed to FileCounter.
+* Since fzf 0.66, hiding the gutter requires adding "--gutter=' '" to FzfTabOptions in the color scheme file (edit using 'cs edit'). Notice that 'gutter:-1' is not required anymore in the --color option. See https://github.com/junegunn/fzf/blob/master/CHANGELOG.md#hiding-the-gutter-column
+* A few changes on how state information is exported to the environment when running a plugin:
+1. CLIFM_FILES_COUNTER and CLIFM_FILES_FILTER were renamed to CLIFM_FILE_COUNTER and CLIFM_FILE_FILTER respectively.
+2. When a value is disabled, nothing is exported (previously, it was set to zero). E.g. if long-view is enabled, CLIFM_LONG_VIEW is set to 1. Otherwise, it is unset.
+* Removed the Order column from the jump table screen ('j').
+* Nerdfonts is now the default icon set. To get the old emoji-icons compile with the EMOJI_ICONS flag.
+* Added several new icons.
+
 1.26.3 - Sep 28, 2025
 
 BUG FIXES:
