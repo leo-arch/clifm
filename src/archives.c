@@ -1095,6 +1095,7 @@ handle_zip(char **args)
 	int success = 0;
 	int ret = FUNC_SUCCESS;
 	char dest_dir[PATH_MAX + 2];
+	char *suffix = "extracted"; /* Append this suffix to extracted files */
 
 	for (size_t i = 1; args[i]; i++) {
 		if (zip_app == ZIP_APP_NONE || is_probably_zip(args[i]) != 1) {
@@ -1107,11 +1108,11 @@ handle_zip(char **args)
 
 		int retval = -1;
 		if (zip_app == ZIP_APP_UNZIP) {
-			snprintf(dest_dir, sizeof(dest_dir), "%s-extracted", args[i]);
+			snprintf(dest_dir, sizeof(dest_dir), "%s-%s", args[i], suffix);
 			char *cmd[] = {"unzip", args[i], "-d", dest_dir, NULL};
 			retval = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 		} else {
-			snprintf(dest_dir, sizeof(dest_dir), "-o%s-extracted", args[i]);
+			snprintf(dest_dir, sizeof(dest_dir), "-o%s-%s", args[i], suffix);
 			char *cmd[] = {"7z", "x", args[i], dest_dir, NULL};
 			retval = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 		}
@@ -1123,7 +1124,7 @@ handle_zip(char **args)
 		} else {
 			if (conf.autols == 1)
 				err(ERR_NO_LOG, PRINT_PROMPT, _("ad: File extracted to "
-					"'%s-%s'\n"), args[i], "extracted");
+					"'%s-%s'\n"), args[i], suffix);
 			success = 1;
 		}
 	}
