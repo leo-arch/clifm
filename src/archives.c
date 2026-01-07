@@ -644,8 +644,7 @@ compress_zstandard(char *name, char **args)
 		 "will be compressed into multiple compressed files using their "
 		 "original filenames.\n"), BOLD, df_c);
 
-	size_t i;
-	for (i = 1; args[i]; i++) {
+	for (size_t i = 1; args[i]; i++) {
 		if (zstandard(args[i], NULL, 'c', 0) != FUNC_SUCCESS)
 			exit_status = FUNC_FAILURE;
 	}
@@ -1108,11 +1107,11 @@ handle_zip(char **args)
 
 		int retval = -1;
 		if (zip_app == ZIP_APP_UNZIP) {
-			snprintf(dest_dir, sizeof(dest_dir), "%s.extracted", args[i]);
+			snprintf(dest_dir, sizeof(dest_dir), "%s-extracted", args[i]);
 			char *cmd[] = {"unzip", args[i], "-d", dest_dir, NULL};
 			retval = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 		} else {
-			snprintf(dest_dir, sizeof(dest_dir), "-o%s.extracted", args[i]);
+			snprintf(dest_dir, sizeof(dest_dir), "-o%s-extracted", args[i]);
 			char *cmd[] = {"7z", "x", args[i], dest_dir, NULL};
 			retval = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 		}
@@ -1122,6 +1121,9 @@ handle_zip(char **args)
 				press_any_key_to_continue(0);
 			ret = FUNC_FAILURE;
 		} else {
+			if (conf.autols == 1)
+				err(ERR_NO_LOG, PRINT_PROMPT, _("ad: File extracted to "
+					"'%s-%s'\n"), args[i], "extracted");
 			success = 1;
 		}
 	}
