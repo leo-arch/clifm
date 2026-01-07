@@ -2,7 +2,7 @@
  * This file is part of Clifm
  *
  * SPDX-License-Identifier: GPL-2.0-or-later
- * SPDX-FileCopyrightText: 2016-2025 L. Abramovich <leo.clifm@outlook.com>
+ * SPDX-FileCopyrightText: 2016-2026 L. Abramovich <leo.clifm@outlook.com>
 */
 
 /* listing.c -- functions controlling what is listed on the screen */
@@ -2940,8 +2940,7 @@ check_seltag(const dev_t dev, const ino_t ino, const nlink_t links,
 	if (sel_n == 0 || !sel_devino)
 		return 0;
 
-	size_t j = sel_n;
-	for (; j-- > 0;) {
+	for (size_t j = sel_n; j-- > 0;) {
 		if (sel_devino[j].dev != dev || sel_devino[j].ino != ino)
 			continue;
 		/* Only check hardlinks in case of regular files */

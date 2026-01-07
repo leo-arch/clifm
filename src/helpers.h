@@ -500,7 +500,7 @@ extern time_t curdir_mtime;
 #define MAX_TRASH     INT_MAX
 #define MAX_BOOKMARKS INT_MAX
 
-/* File creation attempt limit (e.g. tmp dir, dup file, or trashed file) */
+/* File creation attempt limit (e.g., tmp dir, dup file, trashed file, etc) */
 #define MAX_FILE_CREATION_TRIES 1000
 
 /* Max length of a file size in human format */
@@ -897,7 +897,7 @@ extern time_t curdir_mtime;
 #define JUMP_ENTRY_PERMANENT_CHR '+'
 
 #define MAX_TIME_STR 256
-#define MAX_NAMELEN_AUTO (-2) /* Macro for MaxFilenameLen=auto */
+#define MAX_NAMELEN_AUTO (-2) /* Macro for MaxFilenameLen=N% */
 
 #define SHADE_TYPE_UNSET     0
 #define SHADE_TYPE_8COLORS   1

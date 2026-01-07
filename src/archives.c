@@ -2,7 +2,7 @@
  * This file is part of Clifm
  *
  * SPDX-License-Identifier: GPL-2.0-or-later
- * SPDX-FileCopyrightText: 2016-2025 L. Abramovich <leo.clifm@outlook.com>
+ * SPDX-FileCopyrightText: 2016-2026 L. Abramovich <leo.clifm@outlook.com>
 */
 
 /* archives.c -- archiving functions */
@@ -1139,8 +1139,7 @@ extract_with_bsdtar(char *file, const char *suffix, size_t *increment)
 }
 
 static void
-report_extraction_dir(const char *file, const char *suffix,
-	const size_t increment)
+report_extraction_dir(const char *file, const char *suffix, const size_t increment)
 {
 	if (conf.autols == 0)
 		return;

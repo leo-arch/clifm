@@ -2,7 +2,7 @@
  * This file is part of Clifm
  *
  * SPDX-License-Identifier: GPL-2.0-or-later
- * SPDX-FileCopyrightText: 2016-2025 L. Abramovich <leo.clifm@outlook.com>
+ * SPDX-FileCopyrightText: 2016-2026 L. Abramovich <leo.clifm@outlook.com>
 */
 
 /* compat.c -- compatibility layer for legacy systems (before POSIX-1.2008) */
