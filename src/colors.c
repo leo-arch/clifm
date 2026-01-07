@@ -2,7 +2,7 @@
  * This file is part of Clifm
  *
  * SPDX-License-Identifier: GPL-2.0-or-later
- * SPDX-FileCopyrightText: 2016-2025 L. Abramovich <leo.clifm@outlook.com>
+ * SPDX-FileCopyrightText: 2016-2026 L. Abramovich <leo.clifm@outlook.com>
 */
 
 /* colors.c -- functions to control interface colors */
@@ -14,7 +14,7 @@
 #endif /* __linux__ */
 #include <errno.h>
 #include <string.h>
-# include <strings.h> /* str(n)casecmp() */
+#include <strings.h> /* str(n)casecmp() */
 
 /* Only used to check the readline version */
 #ifdef __OpenBSD__
@@ -2845,8 +2845,9 @@ static void
 print_color_blocks(void)
 {
 	UNSET_LINE_WRAP;
+	const int color_block_len = 24;
 
-	const int pad = (term_cols - 24) / 2;
+	const int pad = (term_cols - color_block_len) / 2;
 	printf("\x1b[%dC\x1b[0;40m   \x1b[0m\x1b[0;41m   \x1b[0m\x1b[0;42m   "
 		"\x1b[0m\x1b[0;43m   \x1b[0m\x1b[0;44m   \x1b[0m\x1b[0;45m   "
 		"\x1b[0m\x1b[0;46m   \x1b[0m\x1b[0;47m   \x1b[0m\n", pad);

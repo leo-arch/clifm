@@ -2,7 +2,7 @@
  * This file is part of Clifm
  *
  * SPDX-License-Identifier: GPL-2.0-or-later
- * SPDX-FileCopyrightText: 2016-2025 L. Abramovich <leo.clifm@outlook.com>
+ * SPDX-FileCopyrightText: 2016-2026 L. Abramovich <leo.clifm@outlook.com>
 */
 
 /* misc.c -- functions that do not fit in any other file */
@@ -1101,14 +1101,14 @@ save_last_path(char *last_path_tmp)
 		return;
 	}
 
-	for (size_t i = 0; i < MAX_WS; i++) {
+	for (int i = 0; i < MAX_WS; i++) {
 		if (!workspaces[i].path)
 			continue;
 
-		if ((size_t)cur_ws == i)
-			fprintf(last_fp, "*%zu:%s\n", i, workspaces[i].path);
+		if (cur_ws == i)
+			fprintf(last_fp, "*%d:%s\n", i, workspaces[i].path);
 		else
-			fprintf(last_fp, "%zu:%s\n", i, workspaces[i].path);
+			fprintf(last_fp, "%d:%s\n", i, workspaces[i].path);
 	}
 
 	fclose(last_fp);
