@@ -1070,9 +1070,10 @@ is_probably_zip(const char *file)
 	return 0;
 }
 
-#define ZIP_APP_NONE  0
-#define ZIP_APP_UNZIP 1
-#define ZIP_APP_7Z    2
+#define ZIP_APP_NONE   0
+#define ZIP_APP_UNZIP  1
+#define ZIP_APP_7Z     2
+#define ZIP_APP_BSDTAR 3
 
 static int
 get_zip_app(void)
@@ -1081,7 +1082,75 @@ get_zip_app(void)
 		return ZIP_APP_UNZIP;
 	if (is_cmd_in_path("7z"))
 		return ZIP_APP_7Z;
+	if (is_cmd_in_path("bsdtar"))
+		return ZIP_APP_BSDTAR;
 	return ZIP_APP_NONE;
+}
+
+/* Extract the zip-based file FILE using bsdtar(1).
+ * The file is extracted to FILE-SUFFIX/ in the current directory.
+ * If FILE-SUFFIX already exists, a numeric suffix is added, and the value
+ * stored in INCREMENT (so that we can later inform, via report_extraction_dir,
+ * where the file was extacted to). */
+static int
+extract_with_bsdtar(char *file, const char *suffix, size_t *increment)
+{
+	if (!file || !suffix || !increment)
+		return FUNC_FAILURE;
+
+	char out_dir[PATH_MAX + 1];
+	snprintf(out_dir, sizeof(out_dir), "%s-%s", file, suffix);
+
+	struct stat a;
+	size_t u_suffix = 1;
+	while (lstat(out_dir, &a) == 0 && u_suffix <= MAX_FILE_CREATION_TRIES) {
+		snprintf(out_dir, sizeof(out_dir), "%s-%s-%zu", file, suffix, u_suffix);
+		*increment = u_suffix;
+		u_suffix++;
+	}
+
+	if (u_suffix > MAX_FILE_CREATION_TRIES) {
+		xerror(_("ad: Cannot create extraction directory for '%s': "
+			"Max attempts (%d) reached\n"), file, MAX_FILE_CREATION_TRIES);
+		return FUNC_FAILURE;
+	}
+
+	const mode_t mode = (xargs.secure_env == 1 || xargs.secure_env_full == 1)
+		? S_IRWXU : S_IRWXU | S_IRWXG | S_IRWXO;
+
+	errno = 0;
+	if (mkdirat(XAT_FDCWD, out_dir, mode) == -1) {
+		xerror("ad: '%s': %s\n", out_dir, strerror(errno));
+		return FUNC_FAILURE;
+	}
+
+	char *cmd[] = {"bsdtar", "-xvf", file, "-C", out_dir, NULL};
+	const int retval = launch_execv(cmd, FOREGROUND, E_NOFLAG);
+
+	if (retval != 0) {
+		/* Let's use rm(1) in case bsdtar somehow populated the directory
+		 * before failing. */
+		char *rm_cmd[] = {"rm", "-rf", "--", out_dir, NULL};
+		launch_execv(rm_cmd, FOREGROUND, E_MUTE);
+		return FUNC_FAILURE;
+	}
+
+	return FUNC_SUCCESS;
+}
+
+static void
+report_extraction_dir(const char *file, const char *suffix,
+	const size_t increment)
+{
+	if (conf.autols == 0)
+		return;
+
+	char inc_str[MAX_INT_STR + 2] = "";
+	if (increment > 0)
+		snprintf(inc_str, sizeof(inc_str), "-%zu", increment);
+
+	err(ERR_NO_LOG, PRINT_PROMPT, _("ad: File extracted to "
+		"'%s-%s%s'\n"), file, suffix, inc_str);
 }
 
 static int
@@ -1099,15 +1168,19 @@ handle_zip(char **args)
 
 	for (size_t i = 1; args[i]; i++) {
 		if (zip_app == ZIP_APP_NONE || is_probably_zip(args[i]) != 1) {
-			xerror(_("archiver: '%s': Not an archive/compressed file\n"), args[i]);
+			xerror(_("archiver: '%s': Not an archive/compressed file\n"),
+				args[i]);
 			ret = FUNC_FAILURE;
 			continue;
 		}
 
 		zip_found = 1;
 
+		size_t increment = 0;
 		int retval = -1;
-		if (zip_app == ZIP_APP_UNZIP) {
+		if (zip_app == ZIP_APP_BSDTAR){
+			retval = extract_with_bsdtar(args[i], suffix, &increment);
+		} else if (zip_app == ZIP_APP_UNZIP) {
 			snprintf(dest_dir, sizeof(dest_dir), "%s-%s", args[i], suffix);
 			char *cmd[] = {"unzip", args[i], "-d", dest_dir, NULL};
 			retval = launch_execv(cmd, FOREGROUND, E_NOFLAG);
@@ -1122,9 +1195,7 @@ handle_zip(char **args)
 				press_any_key_to_continue(0);
 			ret = FUNC_FAILURE;
 		} else {
-			if (conf.autols == 1)
-				err(ERR_NO_LOG, PRINT_PROMPT, _("ad: File extracted to "
-					"'%s-%s'\n"), args[i], suffix);
+			report_extraction_dir(args[i], suffix, increment);
 			success = 1;
 		}
 	}
@@ -1134,6 +1205,7 @@ handle_zip(char **args)
 #undef ZIP_APP_NONE
 #undef ZIP_APP_UNZIP
 #undef ZIP_APP_7Z
+#undef ZIP_APP_BSDTAR
 
 static int
 decompress_files(char **args)
