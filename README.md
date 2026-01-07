@@ -33,7 +33,7 @@ href="https://github.com/leo-arch/clifm/issues">Report bug</a></h4>
 
 ---
 
-## :space_invader: Brief description
+## 👾 Brief description
 
 **Clifm** is a shell-like, text-based terminal file manager that sits on the command line.
 
@@ -47,7 +47,7 @@ To get started, consult the [Getting started](#bulb-getting-started) section bel
 
 ---
 
-## :heavy_check_mark: Features
+## ✔️ Features
 
 <details>
 <summary>Click here to expand</summary>
@@ -144,13 +144,13 @@ For a detailed explanation of each of these features, follow the corresponding l
 
 ---
 
-## :clapper: Introduction video
+## 🎬 Introduction video
 
 [![Alt text](https://img.youtube.com/vi/CJmcisw9F90/0.jpg)](https://www.youtube.com/watch?v=CJmcisw9F90)
 
 ---
 
-## :floppy_disk: Installation
+## 💾 Installation
 
 ### From a package manager
 
@@ -177,7 +177,7 @@ For more information/supported platforms, consult the [installation page](https:
 
 ---
 
-## :bulb: Getting started
+## 💡 Getting started
 
 To start using **clifm**, _you don't need to learn anything new_: the usual shell commands will just work. However, there is much more than just shell commands... \
 ✓ The `help` command gives you a quick introduction to **clifm**: once in the command prompt, enter `help` or `?`. \
@@ -195,7 +195,7 @@ For a complete description, please consult our [Wiki](https://github.com/leo-arc
 
 ---
 
-## :newspaper: What's new?
+## 📰 What's new?
 
 Consult the [changelog file](https://github.com/leo-arch/clifm/blob/master/CHANGELOG).
 
