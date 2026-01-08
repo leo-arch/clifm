@@ -1724,7 +1724,7 @@ handle_stdin(void)
 
 		suffix = gen_rand_str(RAND_SUFFIX_LEN);
 		char *temp = tmp_dir ? tmp_dir : P_tmpdir;
-		const size_t tmp_len = strlen(temp) + 13;
+		const size_t tmp_len = strlen(temp) + RAND_SUFFIX_LEN + 7;
 		stdin_tmp_dir = xnmalloc(tmp_len, sizeof(char));
 		snprintf(stdin_tmp_dir, tmp_len, "%s/vdir.%s", temp,
 			suffix ? suffix : "nTmp0B9&54");
