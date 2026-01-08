@@ -202,11 +202,9 @@ run_action(char *action, char **args)
 			 * ############################## */
 
 	char *rand_ext = gen_rand_str(RAND_SUFFIX_LEN);
-	if (!rand_ext)
-		return FUNC_FAILURE;
-
 	char fifo_path[PATH_MAX + 1];
-	snprintf(fifo_path, sizeof(fifo_path), "%s/.pipe.%s", tmp_dir, rand_ext);
+	snprintf(fifo_path, sizeof(fifo_path), "%s/.pipe.%s", tmp_dir,
+		rand_ext ? rand_ext : "ULk#509a10");
 	free(rand_ext);
 
 	errno = 0;
