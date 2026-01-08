@@ -2090,6 +2090,9 @@ rl_quit(int count, int key)
 static void
 get_cur_prof(int *cur, int *total)
 {
+	if (!profile_names)
+		return;
+
 	for (int i = 0; profile_names[i]; i++) {
 		(*total)++;
 

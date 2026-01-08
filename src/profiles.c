@@ -47,45 +47,37 @@ get_profile_names(void)
 	char *pf_dir = xnmalloc(len, sizeof(char));
 	snprintf(pf_dir, len, "%s/profiles", config_dir_gral);
 
-	struct dirent **profs = (struct dirent **)NULL;
-	const int files_n = scandir(pf_dir, &profs, NULL, xalphasort);
-
-	if (files_n == -1) {
+	DIR *dir = opendir(pf_dir);
+	if (!dir) { // Error
 		free(pf_dir);
 		return FUNC_FAILURE;
 	}
 
-	size_t i, pf_n = 0;
-#if !defined(_DIRENT_HAVE_D_TYPE)
-	struct stat attr;
-#endif /* !_DIRENT_HAVE_D_TYPE */
+	struct dirent *ent;
+	size_t pf_n = 0;
 
-	for (i = 0; i < (size_t)files_n; i++) {
+	while ((ent = readdir(dir))) {
+		if (SELFORPARENT(ent->d_name))
+			continue;
+
 #if !defined(_DIRENT_HAVE_D_TYPE)
 		char tmp[PATH_MAX + 1];
-		snprintf(tmp, sizeof(tmp), "%s/%s", pf_dir, profs[i]->d_name);
-		if (lstat(tmp, &attr) == -1)
+		snprintf(tmp, sizeof(tmp), "%s/%s", pf_dir, ent->d_name);
+		struct stat a;
+		if (lstat(tmp, &a) == -1 || !S_ISDIR(a.st_mode))
 			continue;
-		if (S_ISDIR(attr.st_mode)
 #else
-		if (profs[i]->d_type == DT_DIR
+		if (ent->d_type != DT_DIR)
+			continue;
 #endif /* !_DIRENT_HAVE_D_TYPE */
-		    /* Discard ".", "..", and hidden dirs */
-		    && *profs[i]->d_name != '.') {
-			profile_names = xnrealloc(profile_names, pf_n + 1, sizeof(char *));
-			profile_names[pf_n] = savestring(profs[i]->d_name,
-			    strlen(profs[i]->d_name));
-			pf_n++;
-		}
-
-		free(profs[i]);
+		profile_names = xnrealloc(profile_names, pf_n + 2, sizeof(char *));
+		profile_names[pf_n] = savestring(ent->d_name, strlen(ent->d_name));
+		pf_n++;
 	}
 
 	free(pf_dir);
-	free(profs);
-
-	profile_names = xnrealloc(profile_names, pf_n + 1, sizeof(char *));
-	profile_names[pf_n] = (char *)NULL;
+	closedir(dir);
+	profile_names[pf_n] = NULL;
 
 	return FUNC_SUCCESS;
 }
@@ -96,11 +88,22 @@ get_profile_names(void)
 static int
 check_profile(const char *name)
 {
+	if (!profile_names)
+		return (-1);
+
 	for (int i = 0; profile_names[i]; i++) {
 		if (*name == *profile_names[i] && strcmp(name, profile_names[i]) == 0)
 			return i;
 	}
 	return (-1);
+}
+
+static int
+is_current_profile(const char *prof)
+{
+	return ((!alt_profile && *prof == 'd' && strcmp(prof, "default") == 0)
+	|| (alt_profile && *prof == *alt_profile
+	&& strcmp(prof, alt_profile) == 0));
 }
 
 /* Switch profile to PROF */
@@ -126,9 +129,7 @@ profile_set(const char *prof)
 	}
 
 	/* If changing to the current profile, do nothing */
-	if ((!alt_profile && *prof == 'd' && strcmp(prof, "default") == 0)
-	|| (alt_profile && *prof == *alt_profile
-	&& strcmp(prof, alt_profile) == 0)) {
+	if (is_current_profile(prof)) {
 		printf(_("pf: '%s' is the current profile\n"), prof);
 		return FUNC_SUCCESS;
 	}
@@ -158,15 +159,13 @@ profile_set(const char *prof)
 	/* Reset everything */
 	reload_config();
 
-	i = usrvar_n;
-	for (; i-- > 0;) {
+	for (i= usrvar_n; i-- > 0;) {
 		free(usr_var[i].name);
 		free(usr_var[i].value);
 	}
 	usrvar_n = 0;
 
-	i = actions_n;
-	for (; i-- > 0;) {
+	for (i = actions_n; i-- > 0;) {
 		free(usr_actions[i].name);
 		free(usr_actions[i].value);
 	}
@@ -212,8 +211,7 @@ profile_set(const char *prof)
 	}
 
 	if (paths) {
-		i = path_n;
-		for (; i-- > 0;)
+		for (i = path_n; i-- > 0;)
 			free(paths[i].path);
 		free(paths);
 	}
@@ -330,9 +328,10 @@ profile_add(const char *prof)
 	if (exit_status == FUNC_SUCCESS) {
 		printf(_("Succesfully created profile %s%s%s\n"), BOLD, prof, df_c);
 
-		size_t i;
-		for (i = 0; profile_names[i]; i++)
-			free(profile_names[i]);
+		if (profile_names) {
+			for (size_t i = 0; profile_names[i]; i++)
+				free(profile_names[i]);
+		}
 
 		get_profile_names();
 	} else {
@@ -361,6 +360,11 @@ profile_del(const char *prof)
 		return FUNC_FAILURE;
 	}
 
+	if (is_current_profile(prof)) {
+		xerror(_("pf: '%s': Is the current profile\n"), prof);
+		return FUNC_FAILURE;
+	}
+
 	const size_t len = strlen(config_dir_gral) + strlen(prof) + 11;
 	char *tmp = xnmalloc(len, sizeof(char));
 	snprintf(tmp, len, "%s/profiles/%s", config_dir_gral, prof);
@@ -375,9 +379,11 @@ profile_del(const char *prof)
 	}
 
 	printf(_("Successfully removed profile %s%s%s\n"), BOLD, prof, df_c);
-	size_t i;
-	for (i = 0; profile_names[i]; i++)
-		free(profile_names[i]);
+
+	if (profile_names) {
+		for (size_t i = 0; profile_names[i]; i++)
+			free(profile_names[i]);
+	}
 
 	get_profile_names();
 	return FUNC_SUCCESS;
@@ -386,6 +392,11 @@ profile_del(const char *prof)
 static int
 print_profiles(void)
 {
+	if (!profile_names) {
+		xerror(_("pf: No profiles found\n"));
+		return FUNC_FAILURE;
+	}
+
 	size_t i;
 	const char *cur_prof = alt_profile ? alt_profile : "default";
 
