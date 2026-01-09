@@ -1467,9 +1467,8 @@ set_max_filename_len_auto(void)
 	if (conf.max_name_len_auto == UNSET || conf.max_name_len == UNSET)
 		return;
 
-	if ((conf.columned == 0 || files == 1) && conf.long_view == 0) {
-		/* Displaying in a single column or there is just one file in the list:
-		 * Do not truncate names. */
+	if (conf.columned == 0 && conf.long_view == 0) {
+		/* Displaying in a single column: Do not truncate names. */
 		conf.max_name_len = term_cols;
 		return;
 	}
