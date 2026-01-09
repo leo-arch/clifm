@@ -220,15 +220,15 @@ InterfaceColors="ac=PROMPT_AUTOCMD:db=PROP_BLKS:dd=PROP_DATE:de=PROP_INODE:df=IF
 # Colors for specific file extensions (case insensitive). ExtColors can be used multiple times.
 # ARCHIVES
 define ARCHIVE=1;31 # Bold red
-ExtColors="7z=ARCHIVE:alz=ARCHIVE:apk=ARCHIVE:arj=ARCHIVE:bz=ARCHIVE:bz2=ARCHIVE:bz3=ARCHIVE:cab=ARCHIVE:cpio=ARCHIVE:crate=ARCHIVE:deb=ARCHIVE:dmg=ARCHIVE:ear=ARCHIVE:esd=ARCHIVE:gz=ARCHIVE:img=ARCHIVE:iso=ARCHIVE:jar=ARCHIVE:lrz=ARCHIVE:lz=ARCHIVE:lz4=ARCHIVE:lzh=ARCHIVE:lzma=ARCHIVE:lzo=ARCHIVE:pyz=ARCHIVE:qcow=ARCHIVE:qcow2=ARCHIVE:rar=ARCHIVE:rpm=ARCHIVE:rz=ARCHIVE:sar=ARCHIVE:swm=ARCHIVE:t7z=ARCHIVE:tar=ARCHIVE:taz=ARCHIVE:tbz=ARCHIVE:tbz2=ARCHIVE:tgz=ARCHIVE:tlz=ARCHIVE:txz=ARCHIVE:tz=ARCHIVE:tzo=ARCHIVE:tzst=ARCHIVE:vcd=ARCHIVE:vdi=ARCHIVE:vhd=ARCHIVE:vhdx=ARCHIVE:vmdk=ARCHIVE:war=ARCHIVE:xz=ARCHIVE:z=ARCHIVE:zip=ARCHIVE:zst=ARCHIVE:"
+ExtColors="7z=ARCHIVE:alz=ARCHIVE:apk=ARCHIVE:arj=ARCHIVE:bz=ARCHIVE:bz2=ARCHIVE:bz3=ARCHIVE:cab=ARCHIVE:cpio=ARCHIVE:crate=ARCHIVE:deb=ARCHIVE:dmg=ARCHIVE:ear=ARCHIVE:esd=ARCHIVE:gz=ARCHIVE:img=ARCHIVE:iso=ARCHIVE:jar=ARCHIVE:lrz=ARCHIVE:lz=ARCHIVE:lz4=ARCHIVE:lzh=ARCHIVE:lzma=ARCHIVE:lzo=ARCHIVE:pyz=ARCHIVE:qcow=ARCHIVE:qcow2=ARCHIVE:rar=ARCHIVE:rpm=ARCHIVE:rz=ARCHIVE:sar=ARCHIVE:swm=ARCHIVE:tar=ARCHIVE:taz=ARCHIVE:tbz=ARCHIVE:tbz2=ARCHIVE:tgz=ARCHIVE:tlz=ARCHIVE:txz=ARCHIVE:tz=ARCHIVE:tzo=ARCHIVE:tzst=ARCHIVE:vcd=ARCHIVE:vdi=ARCHIVE:vhd=ARCHIVE:vhdx=ARCHIVE:vmdk=ARCHIVE:war=ARCHIVE:xbps=ARCHIVE:xz=ARCHIVE:z=ARCHIVE:zip=ARCHIVE:zst=ARCHIVE:"
 
 # AUDIO FILES
 define AUDIO=36 # Cyan
-ExtColors="aac=AUDIO:ac3=AUDIO:aif=AUDIO:aifc=AUDIO:aiff=AUDIO:alac=AUDIO:anx=AUDIO:ape=AUDIO:au=AUDIO:axa=AUDIO:cue=AUDIO:flac=AUDIO:m2a=AUDIO:m4a=AUDIO:m4b=AUDIO:mid=AUDIO:midi=AUDIO:mka=AUDIO:mp2=AUDIO:mp3=AUDIO:mpc=AUDIO:mpga=AUDIO:oga=AUDIO:ogg=AUDIO:ogx=AUDIO:opus=AUDIO:pcm=AUDIO:ra=AUDIO:ram=AUDIO:spx=AUDIO:wav=AUDIO:wma=AUDIO:wv=AUDIO:"
+ExtColors="aac=AUDIO:ac3=AUDIO:aif=AUDIO:aifc=AUDIO:aiff=AUDIO:alac=AUDIO:ape=AUDIO:au=AUDIO:cue=AUDIO:flac=AUDIO:m2a=AUDIO:m4a=AUDIO:m4b=AUDIO:mid=AUDIO:midi=AUDIO:mka=AUDIO:mp2=AUDIO:mp3=AUDIO:mpc=AUDIO:mpga=AUDIO:oga=AUDIO:ogg=AUDIO:ogx=AUDIO:opus=AUDIO:pcm=AUDIO:ra=AUDIO:spx=AUDIO:wav=AUDIO:wma=AUDIO:wv=AUDIO:"
 
 # SOURCE FILES
 define CODE=1;33 # Bold yellow
-ExtColors="applescript=CODE:asm=CODE:awk=CODE:bash=CODE:bat=CODE:c=CODE:c++=CODE:cabal=CODE:cc=CODE:cgi=CODE:clj=CODE:cp=CODE:cpp=CODE:cs=CODE:csx=CODE:cxx=CODE:d=CODE:dart=CODE:di=CODE:el=CODE:elm=CODE:erl=CODE:ex=CODE:exs=CODE:f=CODE:f90=CODE:fish=CODE:for=CODE:fs=CODE:fsi=CODE:fsx=CODE:gd=CODE:gleam=CODE:go=CODE:gradle=CODE:groovy=CODE:gvy=CODE:h=CODE:h++=CODE:hh=CODE:hpp=CODE:hs=CODE:hxx=CODE:inc=CODE:inl=CODE:ino=CODE:ipp=CODE:ipynb=CODE:java=CODE:jl=CODE:js=CODE:jsx=CODE:kt=CODE:kts=CODE:lhs=CODE:lisp=CODE:lua=CODE:m=CODE:ml=CODE:mli=CODE:mm=CODE:nim=CODE:p=CODE:pas=CODE:php=CODE:pl=CODE:pm=CODE:pod=CODE:pp=CODE:ps1=CODE:psd1=CODE:psm1=CODE:purs=CODE:py=CODE:r=CODE:rb=CODE:rs=CODE:scala=CODE:sh=CODE:swift=CODE:t=CODE:tcl=CODE:tsx=CODE:twig=CODE:v=CODE:vala=CODE:vb=CODE:zig=CODE:zsh=CODE:"
+ExtColors="applescript=CODE:asm=CODE:awk=CODE:bash=CODE:bat=CODE:c=CODE:c++=CODE:cc=CODE:clj=CODE:cp=CODE:cpp=CODE:cs=CODE:csx=CODE:cxx=CODE:d=CODE:dart=CODE:di=CODE:el=CODE:elm=CODE:erl=CODE:ex=CODE:exs=CODE:f=CODE:f90=CODE:fish=CODE:for=CODE:fs=CODE:fsi=CODE:fsx=CODE:gd=CODE:gleam=CODE:go=CODE:gradle=CODE:groovy=CODE:gvy=CODE:h=CODE:h++=CODE:hh=CODE:hpp=CODE:hs=CODE:hxx=CODE:inc=CODE:inl=CODE:ino=CODE:ipynb=CODE:java=CODE:jl=CODE:js=CODE:jsx=CODE:kt=CODE:kts=CODE:lhs=CODE:lisp=CODE:lua=CODE:m=CODE:ml=CODE:mli=CODE:mm=CODE:nim=CODE:p=CODE:pas=CODE:php=CODE:pl=CODE:pm=CODE:pod=CODE:pp=CODE:ps1=CODE:psd1=CODE:psm1=CODE:purs=CODE:py=CODE:r=CODE:rb=CODE:rs=CODE:scala=CODE:sh=CODE:swift=CODE:t=CODE:tcl=CODE:tsx=CODE:twig=CODE:v=CODE:vala=CODE:vb=CODE:zig=CODE:zsh=CODE:"
 
 # DOCUMENTS
 define DOC=1 # Bold
@@ -240,7 +240,7 @@ ExtColors="azw=EBOOK:azw3=EBOOK:cbz=EBOOK:djv=EBOOK:djvu=EBOOK:epub=EBOOK:fb2=EB
 
 # IMAGES
 define IMAGE=35 # Magenta
-ExtColors="ai=IMAGE:avif=IMAGE:bmp=IMAGE:cgm=IMAGE:dvi=IMAGE:eps=IMAGE:exr=IMAGE:fts=IMAGE:gif=IMAGE:hdr=IMAGE:heic=IMAGE:heif=IMAGE:ico=IMAGE:j2c=IMAGE:j2k=IMAGE:jfi=IMAGE:jfif=IMAGE:jif=IMAGE:jp2=IMAGE:jpe=IMAGE:jpeg=IMAGE:jpf=IMAGE:jpg=IMAGE:jps=IMAGE:jpx=IMAGE:jxl=IMAGE:kra=IMAGE:mng=IMAGE:ora=IMAGE:pbm=IMAGE:pcx=IMAGE:pgm=IMAGE:png=IMAGE:pnm=IMAGE:ppm=IMAGE:psd=IMAGE:pxm=IMAGE:qoi=IMAGE:svg=IMAGE:svgz=IMAGE:tga=IMAGE:tif=IMAGE:tiff=IMAGE:webp=IMAGE:xcf=IMAGE:xpm=IMAGE:xwd=IMAGE:"
+ExtColors="ai=IMAGE:avif=IMAGE:bmp=IMAGE:cgm=IMAGE:eps=IMAGE:exr=IMAGE:fts=IMAGE:gif=IMAGE:hdr=IMAGE:heic=IMAGE:heif=IMAGE:ico=IMAGE:j2c=IMAGE:j2k=IMAGE:jfi=IMAGE:jfif=IMAGE:jif=IMAGE:jp2=IMAGE:jpe=IMAGE:jpeg=IMAGE:jpf=IMAGE:jpg=IMAGE:jps=IMAGE:jpx=IMAGE:jxl=IMAGE:kra=IMAGE:mng=IMAGE:ora=IMAGE:pbm=IMAGE:pcx=IMAGE:pgm=IMAGE:png=IMAGE:pnm=IMAGE:ppm=IMAGE:psd=IMAGE:pxm=IMAGE:qoi=IMAGE:svg=IMAGE:svgz=IMAGE:tga=IMAGE:tif=IMAGE:tiff=IMAGE:webp=IMAGE:xcf=IMAGE:xpm=IMAGE:xwd=IMAGE:"
 
 # RAW IMAGES
 define RAW=35 # Magenta
@@ -248,7 +248,7 @@ ExtColors="arw=RAW:cr2=RAW:cr3=RAW:dng=RAW:nef=RAW:orf=RAW:raf=RAW:rw2=RAW:rwl=R
 
 # MARKUP FILES
 define MARKUP=1;33 # Same as CODE
-ExtColors="css=MARKUP:htm=MARKUP:html=MARKUP:ltx=MARKUP:markdown=MARKUP:md=MARKUP:mdown=MARKUP:opf=MARKUP:rss=MARKUP:rst=MARKUP:sass=MARKUP:scss=MARKUP:sgml=MARKUP:shtml=MARKUP:tex=MARKUP:xbel=MARKUP:xhtml=MARKUP:xml=MARKUP:xsd=MARKUP:xsl=MARKUP:xslt=MARKUP:"
+ExtColors="css=MARKUP:htm=MARKUP:html=MARKUP:ltx=MARKUP:markdown=MARKUP:md=MARKUP:mdown=MARKUP:rss=MARKUP:rst=MARKUP:sass=MARKUP:scss=MARKUP:sgml=MARKUP:shtml=MARKUP:tex=MARKUP:xbel=MARKUP:xhtml=MARKUP:xml=MARKUP:xmp=MARKUP:xsd=MARKUP:xsl=MARKUP:xslt=MARKUP:"
 
 # TEMPORARY FILES
 define TEMP=2;37 # Dimmed white
@@ -256,7 +256,7 @@ ExtColors="bak=TEMP:bk=TEMP:bkp=TEMP:cache=TEMP:class=TEMP:crdownload=TEMP:hi=TE
 
 # VIDEO FILES
 define VIDEO=1;35 # Bold magenta
-ExtColors="3gp=VIDEO:asf=VIDEO:avi=VIDEO:flc=VIDEO:fli=VIDEO:flv=VIDEO:h264=VIDEO:heics=VIDEO:m2ts=VIDEO:m2v=VIDEO:m4v=VIDEO:mkv=VIDEO:mov=VIDEO:mp4=VIDEO:mp4v=VIDEO:mpeg=VIDEO:mpg=VIDEO:nuv=VIDEO:ogm=VIDEO:ogv=VIDEO:qt=VIDEO:rm=VIDEO:rmvb=VIDEO:vob=VIDEO:webm=VIDEO:wmv=VIDEO:yuv=VIDEO:"
+ExtColors="3gp=VIDEO:3gpp=VIDEO:asf=VIDEO:avi=VIDEO:flv=VIDEO:h264=VIDEO:heics=VIDEO:m2ts=VIDEO:m2v=VIDEO:m4v=VIDEO:mkv=VIDEO:mov=VIDEO:mp4=VIDEO:mp4v=VIDEO:mpeg=VIDEO:mpg=VIDEO:nuv=VIDEO:ogm=VIDEO:ogv=VIDEO:qt=VIDEO:rm=VIDEO:rmvb=VIDEO:swf=VIDEO:vob=VIDEO:webm=VIDEO:wmv=VIDEO:yuv=VIDEO:"
 
 #=====================================#
 #           COLOR SHADES              #
