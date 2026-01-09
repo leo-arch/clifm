@@ -878,6 +878,7 @@ struct icons_t const icon_ext[] = {
  * to 2048, probably making the lookup slower. Even more, keep the list
  * below 650 entries, to avoid overloading the table and reducing performance. */
 	{"ai", ICON_ILLUSTRATOR, YELLOW},
+	{"dcm", ICON_IMG, GREEN}, // DICOM: Medical images
 	{"emf", ICON_IMG, GREEN}, // Windows: wmf replacement
 	{"eps", ICON_IMG, GREEN},
 	{"exr", ICON_IMG, GREEN},
@@ -895,10 +896,12 @@ struct icons_t const icon_ext[] = {
 	{"jpx", ICON_IMG, GREEN},
 	{"kpp", ICON_KRITA, MAGENTA},
 	{"krz", ICON_KRITA, MAGENTA},
+	{"miff", ICON_IMG, GREEN}, // ImageMagick: Uncommon
 	{"mng", ICON_IMG, GREEN},
 	{"ora", ICON_IMG, GREEN},
 	{"pbm", ICON_IMG, GREEN},
 	{"pcx", ICON_IMG, GREEN},
+	{"pdd", ICON_IMG, GREEN}, // Adobe PhotoDeluxe
 	{"pgm", ICON_IMG, GREEN},
 	{"pnm", ICON_IMG, GREEN},
 	{"ppm", ICON_IMG, GREEN},
@@ -907,61 +910,61 @@ struct icons_t const icon_ext[] = {
 	{"qoi", ICON_IMG, GREEN},
 	{"svgz", ICON_IMG, GREEN},
 	{"tga", ICON_IMG, GREEN},
+	{"wmf", ICON_IMG, GREEN}, // Legacy: Windows
 	{"xbm", ICON_IMG, GREEN},
 	{"xpm", ICON_IMG, GREEN},
 	{"xwd", ICON_IMG, GREEN},
 /*	{"cgm", ICON_IMG, GREEN}, // Legacy: vector graphics
 	{"dpx", ICON_IMG, GREEN}, // Uncommon: highly specialized
 	{"ff", ICON_IMG, GREEN}, // Farbfeld: Never took off
-	{"miff", ICON_IMG, GREEN}, // ImageMagick: Uncommon
 	{"pam", ICON_IMG, GREEN}, // Portable Arbitrary Map: Uncommon
-	{"pdd", ICON_IMG, GREEN}, // Adobe PhotoDeluxe
-	{"sgi", ICON_IMG, GREEN}, // Legacy
-	{"wmf", ICON_IMG, GREEN}, // Windows: Legacy */
+	{"pic", ICON_IMG, GREEN}, // Legacy: generic
+	{"pict", ICON_IMG, GREEN}, // Legacy: Apple Macintosh
+	{"sgi", ICON_IMG, GREEN}, // Legacy */
 
 	/* Raw image formats */
+	{"ari", ICON_IMG, B_GREEN}, // Sony/Arri Alexa
 	{"arw", ICON_IMG, B_GREEN}, // Sony
+	{"crw", ICON_IMG, B_GREEN}, // Canon: older than cr2/cr3
 	{"cr2", ICON_IMG, B_GREEN}, // Canon
 	{"cr3", ICON_IMG, B_GREEN}, // Canon
+	{"dcs", ICON_IMG, GREEN}, // Kodak
+	{"dcr", ICON_IMG, GREEN}, // Kodak
 	{"dng", ICON_IMG, B_GREEN}, // Adobe Digital Negative (several brands)
+	{"drf", ICON_IMG, GREEN}, // Kodak
+	{"erf", ICON_IMG, GREEN}, // Epson
+	{"iiq", ICON_IMG, B_GREEN}, // Phase One/Capture One
+	{"k25", ICON_IMG, GREEN}, // Kodac
+	{"kdc", ICON_IMG, GREEN}, // Kodak
+	{"mef", ICON_IMG, GREEN}, // Mamiya
 	{"nef", ICON_IMG, B_GREEN}, // Nikon
+	{"nrw", ICON_IMG, B_GREEN}, // Nikon
 	{"orf", ICON_IMG, B_GREEN}, // Olympus
+	{"pef", ICON_IMG, B_GREEN}, // Pentax
+	{"r3d", ICON_IMG, B_GREEN}, // Fujifilm
 	{"raf", ICON_IMG, B_GREEN}, // Fujifilm
 	{"rw2", ICON_IMG, B_GREEN}, // Panasonic
 	{"rwl", ICON_IMG, B_GREEN}, // Leica
+	{"rwz", ICON_IMG, B_GREEN}, // Panasonic
+	{"sr2", ICON_IMG, B_GREEN}, // Sony
+	{"srf", ICON_IMG, B_GREEN}, // Sony
 /*	{"3fr", ICON_IMG, GREEN}, // Hasselblad
-	{"ari", ICON_IMG, GREEN}, // Sony/Arri Alexa
 	{"bay", ICON_IMG, GREEN}, // Casio
 	{"braw", ICON_IMG, GREEN}, // BlackMagic
-	{"crw", ICON_IMG, GREEN}, // Canon: older than cr2/cr3
 	{"cap", ICON_IMG, GREEN},
 	{"cin", ICON_IMG, GREEN}, // Kodak
 	{"crf", ICON_IMG, GREEN}, // Casio
 	{"data", ICON_IMG, GREEN},
-	{"dcs", ICON_IMG, GREEN}, // Kodak
-	{"dcr", ICON_IMG, GREEN}, // Kodak
-	{"drf", ICON_IMG, GREEN}, // Kodak
 	{"eip", ICON_IMG, GREEN}, // Epson
-	{"erf", ICON_IMG, GREEN}, // Epson
 	{"fff", ICON_IMG, GREEN}, // Hasselblad
 	{"gpr", ICON_IMG, GREEN}, // GoPro
-	{"iiq", ICON_IMG, GREEN}, // Phase One/Capture One
-	{"k25", ICON_IMG, GREEN}, // Kodac
-	{"kdc", ICON_IMG, GREEN}, // Kodak
 	{"mdc", ICON_IMG, GREEN}, // Minolta/Agfa
-	{"mef", ICON_IMG, GREEN}, // Mamiya
 	{"mos", ICON_IMG, GREEN}, // Leaf/Mamiya
 	{"mrw", ICON_IMG, GREEN}, // Minolta
-	{"nrw", ICON_IMG, GREEN}, // Nikon
 	{"obm", ICON_IMG, GREEN}, // Olympus
-	{"pef", ICON_IMG, GREEN}, // Pentax
 	{"ptx", ICON_IMG, GREEN}, // Pentax
 	{"pxn", ICON_IMG, GREEN}, // Logitech
-	{"r3d", ICON_IMG, GREEN}, // Fujifilm
-	{"raw", ICON_IMG, GREEN}, // Generic (might be audio, disk image, etc)
-	{"rwz", ICON_IMG, GREEN}, // Panasonic
-	{"sr2", ICON_IMG, GREEN}, // Sony
-	{"srf", ICON_IMG, GREEN}, // Sony
+	{"raw", ICON_IMG, GREEN}, // Generic (may be audio, disk image, etc)
 	{"srw", ICON_IMG, GREEN}, // Samsumg
 	{"x3f", ICON_IMG, GREEN}, // Sigma */
 
@@ -970,53 +973,58 @@ struct icons_t const icon_ext[] = {
 	{"3gpp", ICON_VID, BLUE},
 	{"3gpp2", ICON_VID, BLUE},
 	{"asf", ICON_VID, BLUE},
+	{"divx", ICON_VID, BLUE}, // Legacy: common before mp4/mkv
 	{"h264", ICON_VID, BLUE},
 	{"heics", ICON_VID, BLUE},
 	{"m2ts", ICON_VID, BLUE},
 	{"m2v", ICON_VID, BLUE},
 	{"mjpeg", ICON_VID, BLUE},
 	{"mjpg", ICON_VID, BLUE},
+	{"mp4v", ICON_VID, BLUE}, // Legacy: very common before H.264 dominance
 	{"qt", ICON_VID, BLUE},
 	{"rm", ICON_VID, BLUE},
 	{"video", ICON_VID, BLUE},
 	{"vob", ICON_VID, BLUE},
 	{"ogm", ICON_VID, BLUE},
-	{"swf", ICON_VID, BLUE}, // Legacy: Flash container
-/*	{"f4v, ICON_VID, BLUE"} // Legacy: Flash video
-	{"dv", ICON_VID, BLUE}, // Legacy
-	{"divx", ICON_VID, BLUE}, // Legacy: common before mp4/mkv
-	{"mp4v", ICON_VID, BLUE}, // Very common before H.264 dominance
-	{"rmvb", ICON_VID, BLUE}, // Legacy
+	{"swf", ICON_VID, BLUE}, // Legacy: typical Flash container
+/*	{"f4v, ICON_VID, BLUE"} // Legacy: Flash video (quite uncommon)
+	{"dv", ICON_VID, BLUE}, // Legacy (digital cameras 1990s-2000s)
+	{"rmvb", ICON_VID, BLUE}, // Legacy: RealMedia Variable Bit Rate
 	{"flc", ICON_VID, BLUE}, // Legacy: Autodesk
-	{"fli", ICON_VID, BLUE}, // Legacy: Autodesk */
+	{"fli", ICON_VID, BLUE}, // Legacy: Autodesk
+	{"gl", ICON_VID, BLUE}, // Legacy: GRASP animation (MS-DOS)
+	{"nuv", ICON_VID, BLUE},
+	{"y4m", ICON_VID, BLUE}, // YUV4MPEG2: Uncompressed, intermediate processing
+	{"yuv", ICON_VID, BLUE}, // Uncompressed: may be both video or image */
 
 	{"ac3", ICON_AUDIO, YELLOW},
-	{"aif", ICON_AUDIO, B_YELLOW}, // Loseless
+	{"aif", ICON_AUDIO, B_YELLOW}, // Lossless
 	{"aifc", ICON_AUDIO, B_YELLOW}, // Lossless
 	{"ape", ICON_AUDIO, B_YELLOW}, // Lossless
 	{"au", ICON_AUDIO, YELLOW},
 	{"aup", ICON_AUDIO, YELLOW},
 	{"aup3", ICON_AUDIO, YELLOW},
+	{"m2a", ICON_AUDIO, YELLOW}, // Legacy
 	{"m4b", ICON_AUDIO, YELLOW},
 	{"mid", ICON_AUDIO, YELLOW},
 	{"midi", ICON_AUDIO, YELLOW},
 	{"mka", ICON_AUDIO, YELLOW},
 	{"mp2", ICON_AUDIO, YELLOW},
-	{"mpga", ICON_AUDIO, YELLOW}, // Legacy, but widely used
+	{"mpga", ICON_AUDIO, YELLOW}, // Legacy, but widely used in its time
 	{"oga", ICON_AUDIO, YELLOW},
 	{"pcm", ICON_AUDIO, B_YELLOW}, // Lossless
 	{"ra", ICON_AUDIO, YELLOW},
 	{"sf2", ICON_AUDIO, YELLOW},
 	{"spx", ICON_AUDIO, YELLOW},
-	{"tta", ICON_AUDIO, B_YELLOW}, // Loseless
-	{"wv", ICON_AUDIO, B_YELLOW}, // Loseless
-/*	{"m2a", ICON_AUDIO, YELLOW}, // Legacy
-	{"mpc", ICON_AUDIO, YELLOW}, // Legacy
+	{"tta", ICON_AUDIO, B_YELLOW}, // Lossless
+	{"wv", ICON_AUDIO, B_YELLOW}, // Lossless
+/*	{"mpc", ICON_AUDIO, YELLOW}, // Legacy/Niche: Musepack Compressed Audio
 	{"snd", ICON_AUDIO, YELLOW}, // Generic
 	{"sou", ICON_AUDIO, YELLOW}, // Legacy
 	{"voc", ICON_AUDIO, YELLOW}, // Legacy */
 
-	{"alz", ICON_ARCHIVE, YELLOW},
+	{"ace", ICON_ARCHIVE, YELLOW}, // Legacy
+	{"alz", ICON_ARCHIVE, YELLOW}, // ALZip file
 	{"ar", ICON_ARCHIVE, WHITE}, // Uncompressed
 	{"arc", ICON_ARCHIVE, YELLOW},
 	{"br", ICON_ARCHIVE, YELLOW},
@@ -1039,15 +1047,18 @@ struct icons_t const icon_ext[] = {
 	{"tzst", ICON_ARCHIVE, YELLOW},
 	{"war", ICON_ARCHIVE, YELLOW}, /* Java web archive */
 	{"z", ICON_ARCHIVE, YELLOW},
+	{"zoo", ICON_ARCHIVE, YELLOW}, // Legacy
 	{"zpaq", ICON_ARCHIVE, YELLOW},
-/*	{"ace", ICON_ARCHIVE, YELLOW}, // Legacy
+/*	{"drpm", ICON_ARCHIVE, YELLOW}, // Delta RPM archive
+	{"dz", ICON_ARCHIVE, YELLOW}, // Dzip file
+	{"egg", ICON_ARCHIVE, YELLOW}, // ALZip file (commonly .alz)
+	{"lha", ICON_ARCHIVE, YELLOW}, // Legacy: Amiga
 	{"lzx", ICON_ARCHIVE, YELLOW}, // Legacy: Amiga
-	{"pax", ICON_ARCHIVE, YELLOW}, // Uncompressed
+	{"pax", ICON_ARCHIVE, WHITE}, // Uncompressed
 	{"pea", ICON_ARCHIVE, YELLOW},
 	{"pk7", ICON_ARCHIVE, YELLOW}, // GZDoom archive file
-	{"shar", ICON_ARCHIVE, YELLOW}, // Uncompressed
-	{"warc", ICON_ARCHIVE, YELLOW}, // Uncompressed
-	{"zoo", ICON_ARCHIVE, YELLOW}, */
+	{"shar", ICON_ARCHIVE, WHITE}, // Uncompressed
+	{"warc", ICON_ARCHIVE, WHITE}, // Uncompressed: Web archive */
 
 	{"apk", ICON_PACKAGE, YELLOW},
 	{"Appimage", ICON_PACKAGE, YELLOW},
@@ -1057,7 +1068,9 @@ struct icons_t const icon_ext[] = {
 	{"pkg", ICON_PACKAGE, YELLOW},
 	{"snap", ICON_PACKAGE, YELLOW},
 	{"xpi", ICON_PACKAGE, YELLOW}, // Mozilla add-ons
-/*	{"appx", ICON_PACKAGE, YELLOW} // Windows 8 app installer
+/*	{"udeb", ICON_PACKAGE, YELLOW}, // Debian micro package
+	{"whl", ICON_PACKAGE, YELLOW}, // Python Wheel package
+	{"appx", ICON_PACKAGE, YELLOW} // Windows 8 app installer
 	{"appxbundle", ICON_PACKAGE, YELLOW} // Windows 8 app installer
 	{"msix", ICON_PACKAGE, YELLOW} // Windows 10 app installer
 	{"msixbundle", ICON_PACKAGE, YELLOW} // Windows 10 app installer */
@@ -1065,7 +1078,8 @@ struct icons_t const icon_ext[] = {
 	{"aff", ICON_DISK, WHITE}, // Advanced Forensics Format disk image
 	{"image", ICON_DISK, WHITE},
 /*	{"adf", ICON_DISK, WHITE}, // Amiga disk file (also adz, hdf, hdz)
-	{"ima", ICON_DISK, WHITE}, */
+	{"ima", ICON_DISK, WHITE},
+	{"wim", ICON_DISK, WHITE}, // Windows Imaging Format File */
 
 	{"cdi", ICON_CD, WHITE},
 	{"isz", ICON_CD, WHITE},
@@ -1165,10 +1179,13 @@ struct icons_t const icon_ext[] = {
 /*	{"iml", ICON_INTELLIJ, BLUE or RED},
 	{"rdf", ICON_REDIS, RED},
 	{"aof", ICON_REDIS, RED},
+	{"cr", ICON_CRYSTAL, WHITE}, nf-dev-crystal
 	{"fnl", ICON_FENNEL, GREEN}, // No IIT icon
+	{"hack", ICON_HACK, YELLOW}, nf-seti-hacklang
 	{"qml", ICON_QT, GREEN}, // No IIT icon
 	{"qrc", ICON_QT, GREEN},
 	{"qss", ICON_QT, GREEN},
+	{"raku", ICON_?, ?} // Icon: a colorful butterfly
 	{"sv", ICON_LANG_HDL, ?},
 	{"svh", ICON_LANG_HDL, ?},
 	{"vhdl", ICON_LANG_HDL, ?},
@@ -1255,7 +1272,8 @@ struct icons_t const icon_ext[] = {
 	{"sha384", ICON_CHECKSUM, GREEN},
 	{"sha512", ICON_CHECKSUM, GREEN},
 
-	{"3ds", ICON_ROM, WHITE},
+	{"rom", ICON_ROM, WHITE},
+/*	{"3ds", ICON_ROM, WHITE},
 	{"32x", ICON_ROM, WHITE},
 	{"cci", ICON_ROM, WHITE},
 	{"chd", ICON_ROM, WHITE},
@@ -1272,7 +1290,6 @@ struct icons_t const icon_ext[] = {
 	{"nsf", ICON_ROM, WHITE},
 	{"nsp", ICON_ROM, WHITE},
 	{"pce", ICON_ROM, WHITE},
-	{"rom", ICON_ROM, WHITE},
 	{"sap", ICON_ROM, WHITE},
 	{"sfc", ICON_ROM, WHITE},
 	{"smc", ICON_ROM, WHITE},
@@ -1282,8 +1299,8 @@ struct icons_t const icon_ext[] = {
 	{"xci", ICON_ROM, WHITE},
 	{"xex", ICON_ROM, WHITE},
 	{"z64", ICON_ROM, WHITE},
-/*	{"md", ICON_ROM, WHITE}, // Conflicts with markdown
-	{"wad", ICON_ROM, WHITE}, // If Doom, this isn't a rom file */
+//	{"md", ICON_ROM, WHITE}, // Conflicts with markdown
+//	{"wad", ICON_ROM, WHITE}, // If Doom, this isn't a rom file */
 
 	{"jmd", ICON_MARKDOWN, WHITE},
 	{"mdown", ICON_MARKDOWN, WHITE},
@@ -1298,6 +1315,7 @@ struct icons_t const icon_ext[] = {
 	{"m3u", ICON_PLAYLIST, YELLOW},
 	{"m3u8", ICON_PLAYLIST, YELLOW},
 	{"pls", ICON_PLAYLIST, YELLOW},
+//	{"xspf", ICON_PLAYLIST, YELLOW},
 
 	{"s3db", ICON_SQLITE, BLUE},
 	{"sqlite3", ICON_SQLITE, BLUE},
@@ -1350,7 +1368,7 @@ struct icons_t const icon_ext[] = {
 	{"tml", ICON_CONFIG, WHITE},
 
 /* Legacy
- * Amiga: lha, nfo, diz, mod, pic, lbm, ilbm, dib, rle, adf, dms
+ * Amiga: nfo, diz, mod, pic, lbm, ilbm, dib, rle, adf, dms
  * MS-DOS: voc, sou, bas, sys, vxd, drv, hlp, ffn, qfs (archive),
  * tgv (video), mdi (image), pif (info, binary) */
 
