@@ -216,9 +216,9 @@ size_t
 	zombies = 0;
 
 #if !defined(_NO_ICONS)
-size_t *name_icons_hashes = (size_t *)0;
-size_t *dir_icons_hashes = (size_t *)0;
-size_t *ext_icons_hashes = (size_t *)0;
+size_t *name_icon_hashes = (size_t *)0;
+size_t *dir_icon_hashes = (size_t *)0;
+size_t *ext_icon_hashes = (size_t *)0;
 #ifndef OLD_ICON_LOOKUP
 size_t *ext_table = (size_t *)0;
 #endif

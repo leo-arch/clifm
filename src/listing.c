@@ -206,30 +206,30 @@ static void
 set_icon_name_hashes(void)
 {
 	size_t i = sizeof(icon_filenames) / sizeof(icon_filenames[0]);
-	name_icons_hashes = xnmalloc(i + 1, sizeof(size_t));
+	name_icon_hashes = xnmalloc(i + 1, sizeof(size_t));
 
 	for (; i-- > 0;)
-		name_icons_hashes[i] = hashme(icon_filenames[i].name, 0);
+		name_icon_hashes[i] = hashme(icon_filenames[i].name, 0);
 }
 
 static void
 set_dir_name_hashes(void)
 {
 	size_t i = sizeof(icon_dirnames) / sizeof(icon_dirnames[0]);
-	dir_icons_hashes = xnmalloc(i + 1, sizeof(size_t));
+	dir_icon_hashes = xnmalloc(i + 1, sizeof(size_t));
 
 	for (; i-- > 0;)
-		dir_icons_hashes[i] = hashme(icon_dirnames[i].name, 0);
+		dir_icon_hashes[i] = hashme(icon_dirnames[i].name, 0);
 }
 
 static void
 set_ext_name_hashes(void)
 {
 	size_t i = sizeof(icon_ext) / sizeof(icon_ext[0]);
-	ext_icons_hashes = xnmalloc(i + 1,  sizeof(size_t));
+	ext_icon_hashes = xnmalloc(i + 1,  sizeof(size_t));
 
 	for (; i-- > 0;)
-		ext_icons_hashes[i] = hashme(icon_ext[i].name, 0);
+		ext_icon_hashes[i] = hashme(icon_ext[i].name, 0);
 }
 
 /* Set the icon field to the corresponding icon for the file file_info[N].name */
@@ -245,7 +245,7 @@ get_name_icon(const filesn_t n)
 	 * time, so that it won't even be executed at runtime. */
 	size_t i = sizeof(icon_filenames) / sizeof(icon_filenames[0]);
 	for (; i-- > 0;) {
-		if (name_hash != name_icons_hashes[i])
+		if (name_hash != name_icon_hashes[i])
 			continue;
 		file_info[n].icon = icon_filenames[i].icon;
 		file_info[n].icon_color = icon_filenames[i].color;
@@ -276,7 +276,7 @@ get_dir_icon(const filesn_t n)
 
 	size_t i = sizeof(icon_dirnames) / sizeof(icon_dirnames[0]);
 	for (; i-- > 0;) {
-		if (dir_hash != dir_icons_hashes[i])
+		if (dir_hash != dir_icon_hashes[i])
 			continue;
 		file_info[n].icon = icon_dirnames[i].icon;
 		file_info[n].icon_color = icon_dirnames[i].color;
@@ -363,7 +363,7 @@ ext_table_init(void)
 		ext_table[i] = SIZE_MAX;
 
 	for (size_t i = 0; i < n; i++) {
-		size_t h = ext_icons_hashes[i];
+		size_t h = ext_icon_hashes[i];
 		/* Mix, then mask */
 		size_t idx = (h * (size_t)HASH_MULTIPLIER) & ext_table_mask;
 		while (ext_table[idx] != SIZE_MAX)
@@ -387,7 +387,7 @@ ext_table_lookup(size_t ext_hash)
 		if (val == SIZE_MAX)
 			return SIZE_MAX; /* Not found */
 
-		if (ext_icons_hashes[val] == ext_hash)
+		if (ext_icon_hashes[val] == ext_hash)
 			return val;
 
 		idx = (idx + 1) & ext_table_mask;
@@ -421,7 +421,7 @@ get_ext_icon(const char *restrict ext, const filesn_t n)
 #else
 	size_t i = sizeof(icon_ext) / sizeof(icon_ext[0]);
 	for (; i-- > 0;) {
-		if (ext_hash != ext_icons_hashes[i])
+		if (ext_hash != ext_icon_hashes[i])
 			continue;
 		file_info[n].icon = icon_ext[i].icon;
 		file_info[n].icon_color = icon_ext[i].color;

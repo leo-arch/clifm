@@ -1219,9 +1219,9 @@ free_stuff(void)
 #endif /* RUN_CMD */
 
 #if !defined(_NO_ICONS)
-	free(name_icons_hashes);
-	free(dir_icons_hashes);
-	free(ext_icons_hashes);
+	free(name_icon_hashes);
+	free(dir_icon_hashes);
+	free(ext_icon_hashes);
 #ifndef OLD_ICON_LOOKUP
 	free(ext_table);
 #endif

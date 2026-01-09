@@ -1962,9 +1962,9 @@ extern size_t
 	zombies;
 
 #ifndef _NO_ICONS
-extern size_t *name_icons_hashes;
-extern size_t *dir_icons_hashes;
-extern size_t *ext_icons_hashes;
+extern size_t *name_icon_hashes;
+extern size_t *dir_icon_hashes;
+extern size_t *ext_icon_hashes;
 #ifndef OLD_ICON_LOOKUP
 extern size_t *ext_table;
 #endif
