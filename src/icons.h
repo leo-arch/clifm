@@ -582,8 +582,8 @@ struct icons_t const icon_ext[] = {
 	{"a", ICON_BINARY, WHITE},
 	{"aac", ICON_AUDIO, YELLOW},
 	{"abw", ICON_LIBREOFFICE_WRITER, BLUE},
-	{"aiff", ICON_AUDIO, B_YELLOW}, // Loseless
-	{"alac", ICON_AUDIO, B_YELLOW}, // Loseless
+	{"aiff", ICON_AUDIO, B_YELLOW}, // Lossless
+	{"alac", ICON_AUDIO, B_YELLOW}, // Lossless
 	{"arj", ICON_ARCHIVE, YELLOW},
 	{"asc", ICON_LOCK, GREEN},
 	{"asm", ICON_ASM, BLUE},
@@ -668,7 +668,7 @@ struct icons_t const icon_ext[] = {
 	{"f90", ICON_FORTRAN, MAGENTA},
 	{"f#", ICON_FSHARP, CYAN},
 	{"fish", ICON_SHELL, WHITE},
-	{"flac", ICON_AUDIO, B_YELLOW}, // Loseless
+	{"flac", ICON_AUDIO, B_YELLOW}, // Lossless
 	{"flv", ICON_VID, BLUE},
 	{"for", ICON_FORTRAN, MAGENTA},
 	{"fs", ICON_FSHARP, CYAN},
@@ -849,13 +849,13 @@ struct icons_t const icon_ext[] = {
 	{"vim", ICON_VIM, GREEN},
 	{"vue", ICON_VUE, GREEN},
 
-	{"wav", ICON_AUDIO, B_YELLOW}, // Loseless
+	{"wav", ICON_AUDIO, B_YELLOW}, // Lossless
 	{"webm", ICON_VID, BLUE},
 	{"webp", ICON_IMG, GREEN},
 	{"wma", ICON_AUDIO, YELLOW},
 	{"wmv", ICON_VID, BLUE},
 
-	{"xbps", ICON_ARCHIVE, YELLOW},
+	{"xbps", ICON_PACKAGE, YELLOW}, // Void Linux package
 	{"xcf", ICON_GIMP, WHITE},
 	{"xhtml", ICON_HTML, YELLOW},
 	{"xls", ICON_EXCEL, GREEN},
@@ -905,11 +905,13 @@ struct icons_t const icon_ext[] = {
 	{"psb", ICON_PHOTOSHOP, B_BLUE},
 	{"pxm", ICON_IMG, GREEN},
 	{"qoi", ICON_IMG, GREEN},
+	{"svgz", ICON_IMG, GREEN},
 	{"tga", ICON_IMG, GREEN},
 	{"xbm", ICON_IMG, GREEN},
 	{"xpm", ICON_IMG, GREEN},
 	{"xwd", ICON_IMG, GREEN},
-/*	{"dpx", ICON_IMG, GREEN}, // Uncommon: highly specialized
+/*	{"cgm", ICON_IMG, GREEN}, // Legacy: vector graphics
+	{"dpx", ICON_IMG, GREEN}, // Uncommon: highly specialized
 	{"ff", ICON_IMG, GREEN}, // Farbfeld: Never took off
 	{"miff", ICON_IMG, GREEN}, // ImageMagick: Uncommon
 	{"pam", ICON_IMG, GREEN}, // Portable Arbitrary Map: Uncommon
@@ -979,30 +981,38 @@ struct icons_t const icon_ext[] = {
 	{"video", ICON_VID, BLUE},
 	{"vob", ICON_VID, BLUE},
 	{"ogm", ICON_VID, BLUE},
-/*	{"swf", ICON_VID, BLUE}, // Legacy: Flash container
-	{"f4v, ICON_VID, BLUE"} // Legacy: Flash video
+	{"swf", ICON_VID, BLUE}, // Legacy: Flash container
+/*	{"f4v, ICON_VID, BLUE"} // Legacy: Flash video
 	{"dv", ICON_VID, BLUE}, // Legacy
-	{"divx", ICON_VID, BLUE}, // Legacy */
+	{"divx", ICON_VID, BLUE}, // Legacy: common before mp4/mkv
+	{"mp4v", ICON_VID, BLUE}, // Very common before H.264 dominance
+	{"rmvb", ICON_VID, BLUE}, // Legacy
+	{"flc", ICON_VID, BLUE}, // Legacy: Autodesk
+	{"fli", ICON_VID, BLUE}, // Legacy: Autodesk */
 
 	{"ac3", ICON_AUDIO, YELLOW},
 	{"aif", ICON_AUDIO, B_YELLOW}, // Loseless
-	{"aifc", ICON_AUDIO, B_YELLOW}, // Loseless
-	{"ape", ICON_AUDIO, B_YELLOW}, // Loseless
+	{"aifc", ICON_AUDIO, B_YELLOW}, // Lossless
+	{"ape", ICON_AUDIO, B_YELLOW}, // Lossless
 	{"au", ICON_AUDIO, YELLOW},
 	{"aup", ICON_AUDIO, YELLOW},
 	{"aup3", ICON_AUDIO, YELLOW},
+	{"m4b", ICON_AUDIO, YELLOW},
 	{"mid", ICON_AUDIO, YELLOW},
 	{"midi", ICON_AUDIO, YELLOW},
 	{"mka", ICON_AUDIO, YELLOW},
 	{"mp2", ICON_AUDIO, YELLOW},
+	{"mpga", ICON_AUDIO, YELLOW}, // Legacy, but widely used
 	{"oga", ICON_AUDIO, YELLOW},
-	{"pcm", ICON_AUDIO, B_YELLOW}, // Loseless
+	{"pcm", ICON_AUDIO, B_YELLOW}, // Lossless
 	{"ra", ICON_AUDIO, YELLOW},
 	{"sf2", ICON_AUDIO, YELLOW},
 	{"spx", ICON_AUDIO, YELLOW},
 	{"tta", ICON_AUDIO, B_YELLOW}, // Loseless
 	{"wv", ICON_AUDIO, B_YELLOW}, // Loseless
-/*	{"snd", ICON_AUDIO, YELLOW}, // Generic
+/*	{"m2a", ICON_AUDIO, YELLOW}, // Legacy
+	{"mpc", ICON_AUDIO, YELLOW}, // Legacy
+	{"snd", ICON_AUDIO, YELLOW}, // Generic
 	{"sou", ICON_AUDIO, YELLOW}, // Legacy
 	{"voc", ICON_AUDIO, YELLOW}, // Legacy */
 
@@ -1011,16 +1021,22 @@ struct icons_t const icon_ext[] = {
 	{"arc", ICON_ARCHIVE, YELLOW},
 	{"br", ICON_ARCHIVE, YELLOW},
 	{"bz", ICON_ARCHIVE, YELLOW},
+	{"ear", ICON_ARCHIVE, YELLOW}, // Java enterprise archive
 	{"lbr", ICON_ARCHIVE, WHITE}, // Uncompressed
+	{"lrz", ICON_ARCHIVE, YELLOW},
+	{"lzo", ICON_ARCHIVE, YELLOW},
 	{"pak", ICON_ARCHIVE, YELLOW},
 	{"phar", ICON_ARCHIVE, YELLOW}, /* PHP archive */
 	{"pk3", ICON_ARCHIVE, YELLOW},
 	{"par", ICON_ARCHIVE, YELLOW},
+	{"pyz", ICON_ARCHIVE, YELLOW},
+	{"rz", ICON_ARCHIVE, YELLOW},
 	{"taz", ICON_ARCHIVE, YELLOW},
 	{"tbz", ICON_ARCHIVE, YELLOW},
 	{"tlz", ICON_ARCHIVE, YELLOW},
 	{"tz", ICON_ARCHIVE, YELLOW},
 	{"tzo", ICON_ARCHIVE, YELLOW},
+	{"tzst", ICON_ARCHIVE, YELLOW},
 	{"war", ICON_ARCHIVE, YELLOW}, /* Java web archive */
 	{"z", ICON_ARCHIVE, YELLOW},
 	{"zpaq", ICON_ARCHIVE, YELLOW},
@@ -1046,7 +1062,7 @@ struct icons_t const icon_ext[] = {
 	{"msix", ICON_PACKAGE, YELLOW} // Windows 10 app installer
 	{"msixbundle", ICON_PACKAGE, YELLOW} // Windows 10 app installer */
 
-	{"aff", ICON_DISK, WHITE},
+	{"aff", ICON_DISK, WHITE}, // Advanced Forensics Format disk image
 	{"image", ICON_DISK, WHITE},
 /*	{"adf", ICON_DISK, WHITE}, // Amiga disk file (also adz, hdf, hdz)
 	{"ima", ICON_DISK, WHITE}, */
@@ -1056,18 +1072,19 @@ struct icons_t const icon_ext[] = {
 	{"nrg", ICON_CD, WHITE},
 	{"tc", ICON_CD, WHITE},
 	{"toast", ICON_CD, WHITE},
+	{"vcd", ICON_CD, WHITE},
 
-	{"bdf", ICON_FONT, BLUE},
+	{"bdf", ICON_FONT, BLUE}, // X11 bitmap font
 	{"eot", ICON_FONT, BLUE},
-	{"flf", ICON_FONT, BLUE},
-	{"fnt", ICON_FONT, BLUE},
-	{"fon", ICON_FONT, BLUE},
-	{"font", ICON_FONT, BLUE},
-	{"lff", ICON_FONT, BLUE},
-	{"psf", ICON_FONT, BLUE},
-	{"ttc", ICON_FONT, BLUE},
-	{"woff", ICON_FONT, BLUE},
-	{"woff2", ICON_FONT, BLUE},
+	{"flf", ICON_FONT, BLUE}, // Plain‑text FIGlet font
+	{"fnt", ICON_FONT, BLUE}, // Legacy: DOS/Windows bitmap font
+	{"fon", ICON_FONT, BLUE}, // Legacy: DOS/Windows bitmap font
+	{"font", ICON_FONT, BLUE}, // Generic
+	{"lff", ICON_FONT, BLUE}, // Legacy
+	{"psf", ICON_FONT, BLUE}, // Unix console font
+	{"ttc", ICON_FONT, BLUE}, // TrueType Font Collection
+	{"woff", ICON_FONT, BLUE}, // Web font
+	{"woff2", ICON_FONT, BLUE}, // Web font
 
 	{"ass", ICON_SUBTITLES, WHITE},
 	{"lrc", ICON_SUBTITLES, WHITE},
@@ -1083,6 +1100,7 @@ struct icons_t const icon_ext[] = {
 	{"asp", ICON_HTML, YELLOW},
 	{"aspx", ICON_HTML, YELLOW},
 	{"bst", ICON_TEX, WHITE},
+	{"cp", ICON_CPP, B_BLUE},
 	{"csproj", ICON_CSHARP, MAGENTA},
 	{"cu", ICON_CUDA, BLUE},
 	{"dot", ICON_GRAPHVIZ, WHITE},
@@ -1096,6 +1114,7 @@ struct icons_t const icon_ext[] = {
 	{"groovy", ICON_GROOVY, CYAN},
 	{"gv", ICON_GRAPHVIZ, WHITE},
 	{"gvy", ICON_GROOVY, CYAN},
+	{"h++", ICON_CPP, B_BLUE},
 	{"inl", ICON_CPP, B_BLUE},
 	{"jad", ICON_JAVA, WHITE},
 	{"jsp", ICON_HTML, YELLOW},
@@ -1122,6 +1141,7 @@ struct icons_t const icon_ext[] = {
 	{"rmeta", ICON_RUST, WHITE},
 	{"scm", ICON_SCHEME, WHITE},
 	{"sgml", ICON_XML, YELLOW},
+	{"shtml", ICON_HTML, YELLOW},
 	{"sld", ICON_SCHEME, WHITE},
 	{"ss", ICON_SCHEME, WHITE},
 	{"sty", ICON_TEX, WHITE},
@@ -1135,8 +1155,11 @@ struct icons_t const icon_ext[] = {
 	{"vala", ICON_VALA, MAGENTA},
 	{"vsix", ICON_VISUALSTUDIO, BLUE},
 	{"xaml", ICON_XAML, WHITE},
+	{"xbel", ICON_XML, YELLOW},
+	{"xmp", ICON_XML, YELLOW},
 	{"xsd", ICON_XML, YELLOW},
 	{"xsl", ICON_XML, YELLOW},
+	{"xslt", ICON_XML, YELLOW},
 	{"xul", ICON_XML, YELLOW},
 	{"whl", ICON_PYTHON, GREEN},
 /*	{"iml", ICON_INTELLIJ, BLUE or RED},
@@ -1200,7 +1223,7 @@ struct icons_t const icon_ext[] = {
 	{"xltm", ICON_EXCEL, GREEN},
 	{"xltx", ICON_EXCEL, GREEN},
 
-	{"sublime-build", ICON_SUBLIME, YELLOW},
+/*	{"sublime-build", ICON_SUBLIME, YELLOW},
 	{"sublime-keymap", ICON_SUBLIME, YELLOW},
 	{"sublime-menu", ICON_SUBLIME, YELLOW},
 	{"sublime-options", ICON_SUBLIME, YELLOW},
@@ -1218,12 +1241,12 @@ struct icons_t const icon_ext[] = {
 	{"kicad_pro", ICON_KICAD, BLUE},
 	{"kicad_sch", ICON_KICAD, BLUE},
 	{"kicad_sym", ICON_KICAD, BLUE},
-	{"kicad_wks", ICON_KICAD, BLUE},
+	{"kicad_wks", ICON_KICAD, BLUE}, */
 
 	{"ical", ICON_CALENDAR, WHITE},
-	{"icalendar", ICON_CALENDAR, WHITE},
+	{"icalendar", ICON_CALENDAR, WHITE}, // Rare
 	{"ics", ICON_CALENDAR, WHITE},
-	{"ifb", ICON_CALENDAR, WHITE},
+	{"ifb", ICON_CALENDAR, WHITE}, // Niche
 
 	{"md5", ICON_CHECKSUM, GREEN},
 	{"sha1", ICON_CHECKSUM, GREEN},
@@ -1263,6 +1286,7 @@ struct icons_t const icon_ext[] = {
 	{"wad", ICON_ROM, WHITE}, // If Doom, this isn't a rom file */
 
 	{"jmd", ICON_MARKDOWN, WHITE},
+	{"mdown", ICON_MARKDOWN, WHITE},
 	{"mdx", ICON_MARKDOWN, WHITE},
 	{"mkd", ICON_MARKDOWN, WHITE},
 	{"rdoc", ICON_MARKDOWN, WHITE},
@@ -1297,14 +1321,15 @@ struct icons_t const icon_ext[] = {
 	{"pfx", ICON_KEY, YELLOW},
 
 	{"azw4", ICON_BOOK, WHITE},
+	{"cb7", ICON_BOOK, YELLOW},
+	{"cba", ICON_BOOK, YELLOW},
+	{"djv", ICON_BOOK, WHITE},
 	{"fb2", ICON_BOOK, WHITE},
 	{"kf8", ICON_BOOK, WHITE},
 	{"mobi", ICON_BOOK, WHITE},
-	{"cb7", ICON_BOOK, YELLOW},
-	{"cba", ICON_BOOK, YELLOW},
+	{"oxps", ICON_BOOK, WHITE}, // Open XML Paper Specification
+	{"xps", ICON_BOOK, WHITE}, // XML Paper Specification (Microsoft)
 /*	{"cbt", ICON_BOOK, YELLOW}, // tar'ed comic book
-	{"oxps", ICON_BOOK/POSTSCRIPT, YELLOW}, // Open XML Paper Specification
-	{"xps", ICON_BOOK/POSTSCRIPT, YELLOW}, // XML Paper Specification (Microsoft)
 	{"iba", ICON_BOOK, YELLOW} // Legacy: Apple iBooks Author
 	{"ibooks", ICON_BOOK, YELLOW} // Legacy: Apple iBooks Author
 	{"lrf", ICON_BOOK, YELLOW} // Legacy: Sony BBeB
@@ -1322,6 +1347,7 @@ struct icons_t const icon_ext[] = {
 	{"chm", ICON_MANPAGE, WHITE},
 	{"com", ICON_EXEC, WHITE},
 	{"sig", ICON_SIG, GREEN},
+	{"tml", ICON_CONFIG, WHITE},
 
 /* Legacy
  * Amiga: lha, nfo, diz, mod, pic, lbm, ilbm, dib, rle, adf, dms
