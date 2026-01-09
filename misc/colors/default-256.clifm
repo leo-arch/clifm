@@ -225,7 +225,7 @@ ExtColors="7z=ARCHIVE:alz=ARCHIVE:apk=ARCHIVE:arj=ARCHIVE:bz=ARCHIVE:bz2=ARCHIVE
 
 # AUDIO FILES
 define AUDIO=@214
-ExtColors="aac=AUDIO:ac3=AUDIO:au=AUDIO:cue=AUDIO:m2a=AUDIO:m4a=AUDIO:m4b=AUDIO:mid=AUDIO:midi=AUDIO:mka=AUDIO:mp2=AUDIO:mp3=AUDIO:mpc=AUDIO:mpga=AUDIO:oga=AUDIO:ogg=AUDIO:ogx=AUDIO:opus=AUDIO:ra=AUDIO:spx=AUDIO:wma=AUDIO:"
+ExtColors="aac=AUDIO:ac3=AUDIO:au=AUDIO:cue=AUDIO:m4a=AUDIO:m4b=AUDIO:mid=AUDIO:midi=AUDIO:mka=AUDIO:mp2=AUDIO:mp3=AUDIO:mpga=AUDIO:oga=AUDIO:ogg=AUDIO:ogx=AUDIO:opus=AUDIO:ra=AUDIO:spx=AUDIO:wma=AUDIO:"
 
 # LOSSLESS AUDIO
 define LAUDIO=@214-1
@@ -261,7 +261,7 @@ ExtColors="arw=RAW:cr2=RAW:cr3=RAW:dng=RAW:nef=RAW:orf=RAW:raf=RAW:rw2=RAW:rwl=R
 
 # VIDEO FILES
 define VIDEO=@141-1
-ExtColors="3gp=VIDEO:3gpp=VIDEO:asf=VIDEO:avi=VIDEO:flv=VIDEO:h264=VIDEO:heics=VIDEO:m2ts=VIDEO:m2v=VIDEO:m4v=VIDEO:mkv=VIDEO:mov=VIDEO:mp4=VIDEO:mp4v=VIDEO:mpeg=VIDEO:mpg=VIDEO:nuv=VIDEO:ogm=VIDEO:ogv=VIDEO:qt=VIDEO:rm=VIDEO:rmvb=VIDEO:swf=VIDEO:vob=VIDEO:webm=VIDEO:wmv=VIDEO:yuv=VIDEO:"
+ExtColors="3gp=VIDEO:3gpp=VIDEO:asf=VIDEO:avi=VIDEO:flv=VIDEO:h264=VIDEO:heics=VIDEO:m2ts=VIDEO:m2v=VIDEO:m4v=VIDEO:mkv=VIDEO:mov=VIDEO:mp4=VIDEO:mpeg=VIDEO:mpg=VIDEO:ogm=VIDEO:ogv=VIDEO:qt=VIDEO:rm=VIDEO:swf=VIDEO:vob=VIDEO:webm=VIDEO:wmv=VIDEO:"
 
 # MARKUP FILES
 define MARKUP=@85

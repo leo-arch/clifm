@@ -256,7 +256,7 @@ ExtColors="bak=TEMP:bk=TEMP:bkp=TEMP:cache=TEMP:class=TEMP:crdownload=TEMP:hi=TE
 
 # VIDEO FILES
 define VIDEO=1;35 # Bold magenta
-ExtColors="3gp=VIDEO:3gpp=VIDEO:asf=VIDEO:avi=VIDEO:flv=VIDEO:h264=VIDEO:heics=VIDEO:m2ts=VIDEO:m2v=VIDEO:m4v=VIDEO:mkv=VIDEO:mov=VIDEO:mp4=VIDEO:mp4v=VIDEO:mpeg=VIDEO:mpg=VIDEO:nuv=VIDEO:ogm=VIDEO:ogv=VIDEO:qt=VIDEO:rm=VIDEO:rmvb=VIDEO:swf=VIDEO:vob=VIDEO:webm=VIDEO:wmv=VIDEO:yuv=VIDEO:"
+ExtColors="3gp=VIDEO:3gpp=VIDEO:asf=VIDEO:avi=VIDEO:flv=VIDEO:h264=VIDEO:heics=VIDEO:m2ts=VIDEO:m2v=VIDEO:m4v=VIDEO:mkv=VIDEO:mov=VIDEO:mp4=VIDEO:mpeg=VIDEO:mpg=VIDEO:ogm=VIDEO:ogv=VIDEO:qt=VIDEO:rm=VIDEO:swf=VIDEO:vob=VIDEO:webm=VIDEO:wmv=VIDEO:"
 
 #=====================================#
 #           COLOR SHADES              #
