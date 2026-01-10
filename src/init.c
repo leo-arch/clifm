@@ -1632,25 +1632,19 @@ load_prompts(void)
 			continue;
 
 		if (*line == '[') {
+			char *name = line + 1;
+			char *name_end = strchr(name, ']');
+			if (!name_end)
+				continue;
+
 			if (prompts[n].name)
 				n++;
+
 			prompts = xnrealloc(prompts, n + 2, sizeof(struct prompts_t));
 			unset_prompt_values(n);
 
-			char *name = strbtw(line, '[', ']');
-			if (!name)
-				continue;
-			if (!*name) {
-				free(name);
-				name = (char *)NULL;
-				continue;
-			}
-			const size_t name_len = strlen(name);
-			prompts[n].name = xnrealloc(prompts[n].name,
-				name_len + 1, sizeof(char));
-			xstrsncpy(prompts[n].name, name, name_len + 1);
-			free(name);
-			name = (char *)NULL;
+			*name_end = '\0';
+			prompts[n].name = savestring(name, strlen(name));
 		}
 
 		if (!prompts[n].name)
@@ -1677,36 +1671,30 @@ load_prompts(void)
 		}
 
 		char *deq_str = remove_quotes(ret);
-		if (deq_str)
+		if (deq_str) {
 			ret = deq_str;
-
-		if (strncmp(line, "RegularPrompt=", 14) == 0) {
-			prompts[n].regular = xnrealloc(prompts[n].regular,
-				ret_len + 1, sizeof(char));
-			xstrsncpy(prompts[n].regular, ret, ret_len + 1);
-			continue;
+			ret_len = strlen(ret);
 		}
 
-		if (strncmp(line, "EnableWarningPrompt=", 20) == 0) {
+		if (strncmp(line, "RegularPrompt=", 14) == 0) {
+			prompts[n].regular = savestring(ret, ret_len);
+		}
+
+		else if (strncmp(line, "EnableWarningPrompt=", 20) == 0) {
 			if (*ret == 't' && strcmp(ret, "true") == 0)
 				prompts[n].warning_prompt_enabled = 1; /* NOLINT */
 			else if (*ret == 'f' && strcmp(ret, "false") == 0)
 				prompts[n].warning_prompt_enabled = 0; /* NOLINT */
 			else
 				prompts[n].warning_prompt_enabled = DEF_WARNING_PROMPT; /* NOLINT */
-			continue;
 		}
 
-		if (strncmp(line, "WarningPrompt=", 14) == 0) {
-			prompts[n].warning = xnrealloc(prompts[n].warning,
-				ret_len + 1, sizeof(char));
-			xstrsncpy(prompts[n].warning, ret, ret_len + 1);
+		else if (strncmp(line, "WarningPrompt=", 14) == 0) {
+			prompts[n].warning = savestring(ret, ret_len);
 		}
 
-		if (strncmp(line, "RightPrompt=", 12) == 0) {
-			prompts[n].right = xnrealloc(prompts[n].right,
-				ret_len + 1, sizeof(char));
-			xstrsncpy(prompts[n].right, ret, ret_len + 1);
+		else if (strncmp(line, "RightPrompt=", 12) == 0) {
+			prompts[n].right = savestring(ret, ret_len);
 			if (prompts[n].regular)
 				prompts[n].multiline =
 					strstr(prompts[n].regular, "\\n") ? 1 : 0;
