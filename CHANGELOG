@@ -1,3 +1,14 @@
+1.27.1 - Jan 9, 2026
+
+BUG FIXES
+* If the 'profiles' directory cannot be read, we get NULL pointer dereferences (possibly crashing).
+* 'MaxFilenameLen' lost after visiting a directory containing a single file.
+
+NEW FEATURES/IMPROVEMENTS:
+* Add extraction message when extracting zip-based files (e.g., 'docx' or 'odt').
+* Allow extracting zip-based files with bsdtar(1). Previosly, only unzip(1) and 7z(1) were used.
+* Do not allow to delete the current profile (using 'pf del').
+
 1.27 (Pieces O'Eight) - Jan 7, 2026
 
 BUG FIXES
