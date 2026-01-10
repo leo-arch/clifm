@@ -2850,7 +2850,7 @@ check_options(void)
 		conf.wprompt_str = set_warning_prompt_str();
 
 	if ((xargs.stealth_mode == 1 || home_ok == 0 ||
-	config_ok == 0 || !config_file) && !*div_line) {
+	config_ok == 0 || !config_file || conf.colorize == 0) && !*div_line) {
 		xstrsncpy(div_line, term_caps.unicode == 1
 			? DEF_DIV_LINE_U : DEF_DIV_LINE, sizeof(div_line));
 	}

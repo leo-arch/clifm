@@ -2179,7 +2179,8 @@ static void
 set_div_line(char *line)
 {
 	if (!line || *line < ' ') {
-		*div_line = *DEF_DIV_LINE;
+		xstrsncpy(div_line, term_caps.unicode == 1
+			? DEF_DIV_LINE_U : DEF_DIV_LINE, sizeof(div_line));
 		return;
 	}
 
