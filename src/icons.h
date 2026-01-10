@@ -1010,7 +1010,7 @@ struct icons_t const icon_ext[] = {
 	{"midi", ICON_AUDIO, YELLOW},
 	{"mka", ICON_AUDIO, YELLOW},
 	{"mp2", ICON_AUDIO, YELLOW},
-	{"mpga", ICON_AUDIO, YELLOW}, // Legacy, but widely used in its time
+	{"mpga", ICON_AUDIO, YELLOW}, // Legacy, but widely used back then
 	{"oga", ICON_AUDIO, YELLOW},
 	{"pcm", ICON_AUDIO, B_YELLOW}, // Lossless
 	{"ra", ICON_AUDIO, YELLOW},
@@ -1018,7 +1018,8 @@ struct icons_t const icon_ext[] = {
 	{"spx", ICON_AUDIO, YELLOW},
 	{"tta", ICON_AUDIO, B_YELLOW}, // Lossless
 	{"wv", ICON_AUDIO, B_YELLOW}, // Lossless
-/*	{"mpc", ICON_AUDIO, YELLOW}, // Legacy/Niche: Musepack Compressed Audio
+/*	{"axa", ICON_AUDIO, YELLOW}, // Legacy: Annodex Audio File
+	{"mpc", ICON_AUDIO, YELLOW}, // Legacy/Niche: Musepack Compressed Audio
 	{"snd", ICON_AUDIO, YELLOW}, // Generic
 	{"sou", ICON_AUDIO, YELLOW}, // Legacy
 	{"voc", ICON_AUDIO, YELLOW}, // Legacy */
@@ -1191,7 +1192,8 @@ struct icons_t const icon_ext[] = {
 	{"vhdl", ICON_LANG_HDL, ?},
 	{"typ", ICON_TYPST, GREEN}, // No IIT icon
 	{"unity, ICON_UNITY, WHITE"},
-	{"unity3d, ICON_UNITY, WHITE"}, */
+	{"unity3d, ICON_UNITY, WHITE"},
+//	applescript, scptd, scpt, ICON_APPLE, WHITE */
 
 	/* Office */
 	{"csv", ICON_EXCEL, GREEN},

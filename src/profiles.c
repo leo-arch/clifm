@@ -423,8 +423,7 @@ print_current_profile(void)
 int
 validate_profile_name(const char *name)
 {
-	if (!name || !*name || *name == '.' || *name == '~' || *name == '$'
-	|| strchr(name, '/'))
+	if (!name || !*name || *name == '~' || *name == '$'	|| strchr(name, '/'))
 		return FUNC_FAILURE;
 
 	return FUNC_SUCCESS;
