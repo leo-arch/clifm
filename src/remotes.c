@@ -90,7 +90,8 @@ get_remote(char *name)
 	int found = 0;
 
 	for (; i-- > 0;) {
-		if (*name == *remotes[i].name && strcmp(name, remotes[i].name) == 0) {
+		if (remotes[i].name && *name == *remotes[i].name
+		&& strcmp(name, remotes[i].name) == 0) {
 			found = 1;
 			break;
 		}
@@ -101,7 +102,12 @@ get_remote(char *name)
 		return (-1);
 	}
 
-	if (!remotes[i].mountpoint) {
+	if (!remotes[i].mount_cmd || !*remotes[i].mount_cmd) {
+		xerror(_("net: No mount command specified for '%s'\n"), remotes[i].name);
+		return (-1);
+	}
+
+	if (!remotes[i].mountpoint || !*remotes[i].mountpoint) {
 		xerror(_("net: No mountpoint specified for '%s'\n"), remotes[i].name);
 		return (-1);
 	}
@@ -145,21 +151,14 @@ print_cd_error(const int i)
 }
 
 static int
-print_no_mount_cmd_error(const int i)
-{
-	xerror(_("net: No mount command specified for '%s'\n"), remotes[i].name);
-	return FUNC_FAILURE;
-}
-
-static int
 remotes_mount(char *name)
 {
-	int i = get_remote(name);
+	const int i = get_remote(name);
 	if (i == -1)
 		return FUNC_FAILURE;
 
-	if (!remotes[i].mount_cmd)
-		return print_no_mount_cmd_error(i);
+	/* name, mountpoint, and mount_cmd members of the remotes struct are
+	 * guaranteed to be non-NULL by get_remote(). */
 
 	if (xargs.secure_cmds == 1
 	&& sanitize_cmd(remotes[i].mount_cmd, SNT_NET) != FUNC_SUCCESS)
