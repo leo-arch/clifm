@@ -1363,35 +1363,28 @@ load_remotes(void)
 	while (getline(&line, &line_sz, fp) > 0) {
 		if (!*line || *line == '#' || *line == '\n')
 			continue;
+
 		if (*line == '[') {
+			char *name = line + 1;
+			char *name_end = strchr(name, ']');
+			if (!name_end || name_end == name)
+				continue;
+
 			if (remotes[n].name)
 				n++;
+
 			remotes = xnrealloc(remotes, n + 2, sizeof(struct remote_t));
 			remotes[n] = (struct remote_t){0};
 
-			char *name = strbtw(line, '[', ']');
-			if (!name)
-				continue;
-			if (!*name) {
-				free(name);
-				name = (char *)NULL;
-				continue;
-			}
-			const size_t name_len = strlen(name);
-			remotes[n].name = xnrealloc(remotes[n].name,
-				name_len + 1, sizeof(char));
-			xstrsncpy(remotes[n].name, name, name_len + 1);
-			free(name);
-			name = (char *)NULL;
+			*name_end = '\0';
+			remotes[n].name = savestring(name, strlen(name));
 		}
 
 		if (!remotes[n].name)
 			continue;
 
 		char *ret = strchr(line, '=');
-		if (!ret)
-			continue;
-		if (!*(++ret))
+		if (!ret || !*(++ret))
 			continue;
 
 		size_t ret_len = strlen(ret);
@@ -1401,22 +1394,20 @@ load_remotes(void)
 		}
 
 		char *deq_str = remove_quotes(ret);
-		if (deq_str)
+		if (deq_str) {
 			ret = deq_str;
+			ret_len = strlen(ret);
+		}
 
 		if (strncmp(line, "Comment=", 8) == 0) {
-			remotes[n].desc = xnrealloc(remotes[n].desc,
-				ret_len + 1, sizeof(char));
-			xstrsncpy(remotes[n].desc, ret, ret_len + 1);
+			remotes[n].desc = savestring(ret, ret_len);
 
 		} else if (strncmp(line, "Mountpoint=", 11) == 0) {
 			char *tmp = (char *)NULL;
 			if (*ret == '~')
 				tmp = tilde_expand(ret);
 			const size_t mnt_len = tmp ? strlen(tmp) : ret_len;
-			remotes[n].mountpoint = xnrealloc(remotes[n].mountpoint,
-				mnt_len + 1, sizeof(char));
-			xstrsncpy(remotes[n].mountpoint, tmp ? tmp : ret, mnt_len + 1);
+			remotes[n].mountpoint = savestring(tmp ? tmp : ret, mnt_len);
 			free(tmp);
 			if (count_dir(remotes[n].mountpoint, CPOP) > 2)
 				remotes[n].mounted = 1;
@@ -1426,40 +1417,28 @@ load_remotes(void)
 			if (remotes[n].mountpoint) {
 				char *rep = replace_substr(ret, "%m", remotes[n].mountpoint);
 				if (rep) {
-					const size_t rep_len = strlen(rep);
-					remotes[n].mount_cmd = xnrealloc(
-						remotes[n].mount_cmd, rep_len + 1, sizeof(char));
-					xstrsncpy(remotes[n].mount_cmd, rep, rep_len + 1);
+					remotes[n].mount_cmd = savestring(rep, strlen(rep));
 					free(rep);
 					replaced = 1;
 				}
 			}
 
-			if (!replaced) {
-				remotes[n].mount_cmd = xnrealloc(remotes[n].mount_cmd,
-					ret_len + 1, sizeof(char));
-				xstrsncpy(remotes[n].mount_cmd, ret, ret_len + 1);
-			}
+			if (!replaced)
+				remotes[n].mount_cmd = savestring(ret, ret_len);
 
 		} else if (strncmp(line, "UnmountCmd=", 11) == 0) {
 			int replaced = 0;
 			if (remotes[n].mountpoint) {
 				char *rep = replace_substr(ret, "%m", remotes[n].mountpoint);
 				if (rep) {
-					const size_t rep_len = strlen(rep);
-					remotes[n].unmount_cmd = xnrealloc(
-						remotes[n].unmount_cmd, rep_len + 1, sizeof(char));
-					xstrsncpy(remotes[n].unmount_cmd, rep, rep_len + 1);
+					remotes[n].unmount_cmd = savestring(rep, strlen(rep));
 					free(rep);
 					replaced = 1;
 				}
 			}
 
-			if (!replaced) {
-				remotes[n].unmount_cmd = xnrealloc(remotes[n].unmount_cmd,
-					ret_len + 1, sizeof(char));
-				xstrsncpy(remotes[n].unmount_cmd, ret, ret_len + 1);
-			}
+			if (!replaced)
+				remotes[n].unmount_cmd = savestring(ret, ret_len);
 
 		} else if (strncmp(line, "AutoUnmount=", 12) == 0) {
 			if (strcmp(ret, "true") == 0)
@@ -1634,7 +1613,7 @@ load_prompts(void)
 		if (*line == '[') {
 			char *name = line + 1;
 			char *name_end = strchr(name, ']');
-			if (!name_end)
+			if (!name_end || name_end == name)
 				continue;
 
 			if (prompts[n].name)
