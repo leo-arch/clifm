@@ -1677,6 +1677,7 @@ load_prompts(void)
 		}
 
 		if (strncmp(line, "RegularPrompt=", 14) == 0) {
+			free(prompts[n].regular);
 			prompts[n].regular = savestring(ret, ret_len);
 		}
 
@@ -1690,10 +1691,12 @@ load_prompts(void)
 		}
 
 		else if (strncmp(line, "WarningPrompt=", 14) == 0) {
+			free(prompts[n].warning);
 			prompts[n].warning = savestring(ret, ret_len);
 		}
 
 		else if (strncmp(line, "RightPrompt=", 12) == 0) {
+			free(prompts[n].right);
 			prompts[n].right = savestring(ret, ret_len);
 			if (prompts[n].regular)
 				prompts[n].multiline =
