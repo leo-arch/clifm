@@ -48,7 +48,7 @@ get_profile_names(void)
 	snprintf(pf_dir, len, "%s/profiles", config_dir_gral);
 
 	DIR *dir = opendir(pf_dir);
-	if (!dir) { // Error
+	if (!dir) {
 		free(pf_dir);
 		return FUNC_FAILURE;
 	}

@@ -1501,7 +1501,7 @@ print_warning_prompt(const char fc, const unsigned char lc)
 	rl_save_prompt();
 
 	char *decoded_prompt = decode_prompt(conf.wprompt_str);
-	rl_set_prompt(decoded_prompt);
+	rl_set_prompt(decoded_prompt ? decoded_prompt : EMERGENCY_PROMPT);
 	free(decoded_prompt);
 
 /*	if (conf.highlight == 1
