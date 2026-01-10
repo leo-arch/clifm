@@ -3468,6 +3468,7 @@ read_config(void)
 	conf.max_name_len = DEF_MAX_NAME_LEN;
 	conf.max_name_len_auto = (DEF_MAX_NAME_LEN == MAX_NAMELEN_AUTO)
 		? DEF_MAX_NAMELEN_AUTO_RATIO : UNSET;
+	*div_line = *DEF_DIV_LINE;
 
 	/* The longest possible line in the config file is StartingPath="PATH" */
 	char line[PATH_MAX + 16]; *line = '\0';
