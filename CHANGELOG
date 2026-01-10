@@ -8,6 +8,7 @@ NEW FEATURES/IMPROVEMENTS:
 * Add extraction message when extracting zip-based files (e.g., 'docx' or 'odt').
 * Allow extracting zip-based files with bsdtar(1). Previosly, only unzip(1) and 7z(1) were used.
 * Do not allow to delete the current profile (using 'pf del').
+* Allow profile names to start with a dot.
 
 1.27 (Pieces O'Eight) - Jan 7, 2026
 
