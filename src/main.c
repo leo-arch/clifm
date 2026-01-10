@@ -1026,14 +1026,16 @@ run_main_loop(void)
 }
 
 static inline void
-set_root_indicator(void)
+print_root_indicator(void)
 {
-	if (user.uid == 0) {
-		const char *bold_red = conf.colorize == 1 ? "\x1b[1;31m" : "";
+#ifndef __HAIKU__
+	if (user.uid == 0)
 		err(ERR_NO_LOG, PRINT_PROMPT, _("%s%s%s Running as root%s\n"),
-			conf.colorize == 1 ? mi_c : "", SET_MSG_PTR, bold_red,
-			conf.colorize == 1 ? df_c : "");
-	}
+			mi_c, SET_MSG_PTR, xf_cb, df_c);
+#else
+	/* No need for this warning on Haiku: it runs as root by default. */
+	return;
+#endif /* !__HAIKU__ */
 }
 
 static inline void
@@ -1136,8 +1138,8 @@ set_locale(void)
 	setlocale(LC_ALL, "");
 	if (strcmp(nl_langinfo(CODESET), "UTF-8") != 0) {
 		err('w', PRINT_PROMPT, _("%s: Locale is not UTF-8. To avoid "
-			"encoding issues you might want to set an UTF-8 locale. For "
-			"example: 'export LANG=es_AR.UTF-8'.\n"), PROGRAM_NAME);
+			"encoding issues, set a UTF-8 locale. For example: "
+			"'export LANG=es_AR.UTF-8'.\n"), PROGRAM_NAME);
 	}
 }
 
@@ -1331,10 +1333,7 @@ main(int argc, char *argv[])
 	fputs(df_c, stdout);
 	fflush(stdout);
 
-#ifndef __HAIKU__
-	/* No need for this warning on Haiku: it runs as root by default. */
-	set_root_indicator();
-#endif /* !__HAIKU__ */
+	print_root_indicator();
 
 	load_remotes();
 	automount_remotes();

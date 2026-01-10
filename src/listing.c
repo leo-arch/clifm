@@ -3542,7 +3542,7 @@ list_dir(void)
 		 * character).
 		 * Now, since is_utf8_name() is ~8 times faster than wc_xstrlen()
 		 * (10,000 entries, optimization O3), we only run wc_xstrlen() in
-		 * case of an UTF-8 name.
+		 * case of a UTF-8 name.
 		 * However, since is_utf8_name() will be executed anyway, this ends
 		 * up being actually slower whenever the current directory contains
 		 * more UTF-8 than ASCII names. The assumption here is that ASCII

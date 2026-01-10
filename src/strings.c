@@ -426,7 +426,7 @@ wc_xstrlen(const char *restrict str)
 	return 0;
 }
 
-/* Truncate an UTF-8 string at width MAX.
+/* Truncate a UTF-8 string at width MAX.
  * Returns the difference beetween MAX and the point at which STR was actually
  * truncated (this difference should be added to STR as spaces to equate MAX
  * and get a correct length).
