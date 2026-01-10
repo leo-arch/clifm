@@ -28,7 +28,7 @@ static int
 remotes_list(void)
 {
 	if (remotes_n == 0) {
-		printf(_("%s: No remotes defined. Run 'net edit' to add one.\n"),
+		printf(_("%s: No remotes defined. Run 'net edit' to add a remote.\n"),
 			PROGRAM_NAME);
 		return FUNC_SUCCESS;
 	}
@@ -216,14 +216,12 @@ remotes_unmount(char *name)
 	&& sanitize_cmd(remotes[i].unmount_cmd, SNT_NET) != FUNC_SUCCESS)
 		return FUNC_FAILURE;
 
-	/* Get out of mountpoint before unmounting */
+	/* Get out of mountpoint before unmounting. */
 	int reload_files = 0;
 	size_t mlen = strlen(remotes[i].mountpoint);
 	if (strncmp(remotes[i].mountpoint, workspaces[cur_ws].path, mlen) == 0) {
-		if (mlen > 0 && remotes[i].mountpoint[mlen - 1] == '/') {
-			mlen--;
-			remotes[i].mountpoint[mlen] = '\0';
-		}
+		if (mlen > 0 && remotes[i].mountpoint[mlen - 1] == '/')
+			remotes[i].mountpoint[mlen - 1] = '\0';
 
 		char *p = strrchr(remotes[i].mountpoint, '/');
 		if (!p) {
