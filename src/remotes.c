@@ -194,7 +194,7 @@ remotes_mount(char *name)
 static int
 remotes_unmount(char *name)
 {
-	int i = get_remote(name);
+	const int i = get_remote(name);
 	if (i == -1)
 		return FUNC_FAILURE;
 
@@ -203,12 +203,12 @@ remotes_unmount(char *name)
 		return FUNC_FAILURE;
 	}
 
-	if (!remotes[i].mountpoint) {
+	if (!remotes[i].mountpoint || !*remotes[i].mountpoint) {
 		xerror(_("net: Error getting mountpoint for '%s'\n"), remotes[i].name);
 		return FUNC_FAILURE;
 	}
 
-	if (!remotes[i].unmount_cmd) {
+	if (!remotes[i].unmount_cmd || !*remotes[i].unmount_cmd) {
 		xerror(_("net: No unmount command for '%s'\n"), remotes[i].name);
 		return FUNC_FAILURE;
 	}
