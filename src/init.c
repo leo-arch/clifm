@@ -2046,11 +2046,7 @@ load_pinned_dir(void)
 		return FUNC_FAILURE;
 	}
 
-	if (pinned_dir) {
-		free(pinned_dir);
-		pinned_dir = (char *)NULL;
-	}
-
+	free(pinned_dir);
 	pinned_dir = savestring(line, strlen(line));
 	fclose(fp);
 	free(pin_file);
