@@ -84,20 +84,10 @@ get_extraction_path(void)
 		return (char *)NULL;
 	}
 
-	if (*ext_path == '~') {
-		char *p = tilde_expand(ext_path);
-		if (p) {
-			free(ext_path);
-			return p;
-		}
-	}
-
-	if (*ext_path == '.' || strstr(ext_path, "../")) {
-		char *p = xrealpath(ext_path, NULL);
-		if (p) {
-			free(ext_path);
-			return p;
-		}
+	char *p = normalize_path(ext_path, strlen(ext_path));
+	if (p) {
+		free(ext_path);
+		ext_path = p;
 	}
 
 	return ext_path;
@@ -511,15 +501,11 @@ get_archive_filename(void)
 		}
 
 		char *dot = strrchr(name, '.');
-		if (!dot) /* If no extension, add the default */
+		if (!dot || (dot == name && dot[1]))
+			/* No extension or hidden: add the default extension. */
 			return add_default_extension(name);
 
-		if (dot == name) { /* Dot is first char */
-			xerror("%s\n", _("Invalid filename"));
-			free(name);
-			name = (char *)NULL;
-			continue;
-		}
+		/* Let atool(1) handle this name. */
 	}
 
 	return name;
