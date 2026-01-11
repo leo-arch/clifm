@@ -215,7 +215,7 @@ dir_size(char *dir, const int size_in_bytes, int *status)
 
 	int stdout_bk = dup(STDOUT_FILENO); /* Save original stdout */
 	if (stdout_bk == -1) {
-		unlinkat(fd, file, 0);
+		unlinkat(XAT_FDCWD, file, 0);
 		close(fd);
 		return (-1);
 	}
@@ -255,7 +255,7 @@ dir_size(char *dir, const int size_in_bytes, int *status)
 
 	FILE *fp = open_fread(file, &fd);
 	if (!fp) {
-		unlink(file);
+		unlinkat(XAT_FDCWD, file, 0);
 		return (-1);
 	}
 
@@ -274,8 +274,8 @@ dir_size(char *dir, const int size_in_bytes, int *status)
 	}
 
 END:
-	unlinkat(fd, file, 0);
-	fclose(fp);
+	unlinkat(XAT_FDCWD, file, 0);
+	close(fd);
 	return retval;
 }
 #endif /* !USE_DU1 */

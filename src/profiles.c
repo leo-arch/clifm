@@ -534,7 +534,7 @@ rename_profile(char **args)
 	snprintf(dst_pf_name, sizeof(dst_pf_name), "%s/profiles/%s",
 		config_dir_gral, args[1]);
 
-	const int ret = renameat(fd, src_pf_name, XAT_FDCWD, dst_pf_name);
+	const int ret = renameat(XAT_FDCWD, src_pf_name, XAT_FDCWD, dst_pf_name);
 	closedir(dir);
 
 	if (ret == -1) {

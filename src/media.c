@@ -309,7 +309,8 @@ mount_dev(const int n)
 
 	int stdout_bk = dup(STDOUT_FILENO); /* Save original stdout */
 	if (stdout_bk == -1) {
-		unlinkat(fd, file, 0);
+		unlinkat(XAT_FDCWD, file, 0);
+		close(fd);
 		return FUNC_FAILURE;
 	}
 
@@ -329,20 +330,20 @@ mount_dev(const int n)
 
 	FILE *fp = open_fread(file, &fd);
 	if (!fp) {
-		unlink(file);
+		unlinkat(XAT_FDCWD, file, 0);
 		return FUNC_FAILURE;
 	}
 
 	char out_line[PATH_MAX + 1]; *out_line = '\0';
 	if (fgets(out_line, (int)sizeof(out_line), fp) == NULL) {
 		/* Error is printed by the mount command itself */
-		unlinkat(fd, file, 0);
-		fclose(fp);
+		unlinkat(XAT_FDCWD, file, 0);
+		close(fd);
 		return FUNC_FAILURE;
 	}
 
-	unlinkat(fd, file, 0);
-	fclose(fp);
+	unlinkat(XAT_FDCWD, file, 0);
+	close(fd);
 
 	/* Recover the mountpoint used by the mounting command. */
 	char *p = strstr(out_line, " at ");

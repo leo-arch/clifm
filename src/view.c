@@ -237,7 +237,8 @@ purge_thumbnails_cache(void)
 	if (!tmp_fp) {
 		xerror(_("view: Cannot open temporary file '%s': %s\n"),
 			tmp_file, strerror(errno));
-		unlinkat(tmp_fd, tmp_file, 0);
+		unlinkat(XAT_FDCWD, tmp_file, 0);
+		close(tmp_fd);
 		return FUNC_FAILURE;
 	}
 
@@ -245,8 +246,8 @@ purge_thumbnails_cache(void)
 	FILE *fp = open_fread(thumb_file, &fd);
 	if (!fp) {
 		xerror(_("view: Cannot open '%s': %s\n"), thumb_file, strerror(errno));
-		unlinkat(tmp_fd, tmp_file, 0);
-		fclose(tmp_fp);
+		unlinkat(XAT_FDCWD, tmp_file, 0);
+		close(tmp_fd);
 		return FUNC_FAILURE;
 	}
 
@@ -321,10 +322,10 @@ purge_thumbnails_cache(void)
 		}
 	}
 
-	renameat(tmp_fd, tmp_file, fd, thumb_file);
+	renameat(XAT_FDCWD, tmp_file, XAT_FDCWD, thumb_file);
 
-	fclose(fp);
-	fclose(tmp_fp);
+	close(fd);
+	close(tmp_fd);
 	free(line);
 
 	thumbs_in_db[thumbs_in_db_c] = (char *)NULL;

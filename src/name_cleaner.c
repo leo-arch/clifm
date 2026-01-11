@@ -356,7 +356,7 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 		goto ERROR_CLOSE;
 	const time_t mtime_bfr = attr.st_mtime;
 
-	fclose(fp);
+	close(fd);
 
 	/* Open the temp file */
 	open_in_foreground = 1;
@@ -375,10 +375,10 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 		goto ERROR_CLOSE;
 
 	if (mtime_bfr == attr.st_mtime) {
-		fclose(fp);
-		if (unlinkat(fd, f, 0) == -1)
+		if (unlinkat(XAT_FDCWD, f, 0) == -1)
 			err('w', PRINT_PROMPT, "bleach: Cannot remove '%s': %s\n",
 				f, strerror(errno));
+		close(fd);
 		*edited_names = 0;
 		return bfiles; /* Return the original list of files */
 	}
@@ -455,19 +455,19 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 	*n = j;
 	free(line);
 
-	if (unlinkat(fd, f, 0) == -1)
+	if (unlinkat(XAT_FDCWD, f, 0) == -1)
 		err('w', PRINT_PROMPT, "bleach: Cannot remove '%s': %s\n",
 			f, strerror(errno));
-	fclose(fp);
+	close(fd);
 
 	return bfiles;
 
 ERROR_CLOSE:
-	fclose(fp);
+	close(fd);
 ERROR:
 	*edited_names = -1;
 	xerror("bleach: '%s': %s\n", f, strerror(errno));
-	if (unlink(f) == -1)
+	if (unlinkat(XAT_FDCWD, f, 0) == -1)
 		xerror("bleach: Cannot remove '%s': %s\n", f, strerror(errno));
 	return bfiles;
 }

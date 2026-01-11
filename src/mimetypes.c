@@ -66,7 +66,8 @@ load_user_mimetypes(void)
 
 	size_t buf_size = INIT_BUF_SIZE;
 	size_t n = 0;
-	char line[PATH_MAX];
+	/* The longest line in /etc/mime.types is 100 bytes. */
+	char line[PATH_MAX + 1];
 	*line = '\0';
 
 	user_mimetypes = xnmalloc(buf_size, sizeof(struct mime_t));

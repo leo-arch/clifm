@@ -97,7 +97,7 @@ create_tmp_file(char **file, int *fd, struct stat *attr)
 
 	if (fstat(*fd, attr) == -1) {
 		xerror("rr: fstat: '%s': %s\n", *file, strerror(errno));
-		unlinkat(*fd, *file, 0);
+		unlinkat(XAT_FDCWD, *file, 0);
 		close(*fd);
 		free(*file);
 		return FUNC_FAILURE;
@@ -461,7 +461,7 @@ FREE_N_EXIT:
 	free(rfiles);
 
 END:
-	if (unlinkat(fd, tmp_file, 0) == -1) {
+	if (unlinkat(XAT_FDCWD, tmp_file, 0) == -1) {
 		err('w', PRINT_PROMPT, "rr: unlink: '%s': %s\n",
 			tmp_file, strerror(errno));
 	}

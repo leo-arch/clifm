@@ -605,9 +605,9 @@ truncate_file(const char *file, const int max, const int check_dups)
 
 	char *tmp_name = (char *)NULL;
 	FILE *orig_fp = (FILE *)NULL;
+	int orig_fd = 0;
 	struct stat attr;
 
-	int orig_fd = 0;
 	if (stat(file, &attr) == -1) {
 		/* File doesn't exist: create it and exit. */
 		orig_fp = open_fwrite(file, &orig_fd);
@@ -615,7 +615,7 @@ truncate_file(const char *file, const int max, const int check_dups)
 			err('w', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME, file,
 				strerror(errno));
 		} else {
-			fclose(orig_fp);
+			close(orig_fd);
 		}
 
 		return;
@@ -661,9 +661,9 @@ truncate_file(const char *file, const int max, const int check_dups)
 
 	FILE *tmp_fp = fdopen(tmp_fd, "w");
 	if (!tmp_fp) {
-		unlinkat(tmp_fd, tmp_name, 0);
 		err('w', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME, tmp_name,
 			strerror(errno));
+		unlinkat(XAT_FDCWD, tmp_name, 0);
 		close(tmp_fd);
 		goto EXIT;
 	}
@@ -696,10 +696,10 @@ truncate_file(const char *file, const int max, const int check_dups)
 	free(prev_line);
 	free(line);
 
-	renameat(tmp_fd, tmp_name, orig_fd, file);
-	fclose(tmp_fp);
+	renameat(XAT_FDCWD, tmp_name, XAT_FDCWD, file);
+	close(tmp_fd);
 
 EXIT:
 	free(tmp_name);
-	fclose(orig_fp);
+	close(orig_fd);
 }

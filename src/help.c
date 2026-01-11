@@ -501,8 +501,9 @@ quick_help(const char *topic)
 	if (!fp) {
 		xerror("%s: '%s': %s\n", PROGRAM_NAME, tmp_file, strerror(errno));
 		free(pager_app);
-		if (unlinkat(fd, tmp_file, 0) == -1)
+		if (unlinkat(XAT_FDCWD, tmp_file, 0) == -1)
 			xerror("%s: '%s': %s\n", PROGRAM_NAME, tmp_file, strerror(errno));
+		close(fd);
 		return FUNC_FAILURE;
 	}
 
@@ -511,7 +512,7 @@ quick_help(const char *topic)
 		QUICK_HELP_NAVIGATION);
 	fprintf(fp, "\n\n%s\n\n%s", QUICK_HELP_BASIC_OPERATIONS, QUICK_HELP_MISC);
 
-	fclose(fp);
+	close(fd);
 
 	int ret = 0;
 	char *s = strrchr(pager_app, '/');
@@ -527,7 +528,7 @@ quick_help(const char *topic)
 
 	free(pager_app);
 
-	if (unlink(tmp_file) == -1)
+	if (unlinkat(XAT_FDCWD, tmp_file, 0) == -1)
 		err('w', PRINT_PROMPT, "help: '%s': %s\n", tmp_file, strerror(errno));
 
 	if (ret != FUNC_SUCCESS)

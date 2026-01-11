@@ -959,7 +959,7 @@ get_finder_output(const int multi, char *base)
 	int fd = 0;
 	FILE *fp = open_fread(finder_out_file, &fd);
 	if (!fp) {
-		unlink(finder_out_file);
+		unlinkat(XAT_FDCWD, finder_out_file, 0);
 		return print_no_finder_file();
 	}
 
@@ -978,8 +978,8 @@ get_finder_output(const int multi, char *base)
 			line[line_len] = '\0';
 		}
 
-		if (cur_comp_type == TCMP_FILE_TYPES_OPTS && *line && *(line + 1)) {
-			*(line + 1) = '\0';
+		if (cur_comp_type == TCMP_FILE_TYPES_OPTS && *line && line[1]) {
+			line[1] = '\0';
 			line_len = 1;
 		}
 
@@ -1012,6 +1012,7 @@ get_finder_output(const int multi, char *base)
 				s = xnmalloc(len, sizeof(char));
 				snprintf(s, len, "t:%s", line);
 			}
+
 			q = escape_str(s);
 			if (s != line)
 				free(s);
@@ -1038,7 +1039,7 @@ get_finder_output(const int multi, char *base)
 	}
 
 	free(line);
-	unlinkat(fd, finder_out_file, 0);
+	unlinkat(XAT_FDCWD, finder_out_file, 0);
 	close(fd);
 
 	if (*buf == '\0') {

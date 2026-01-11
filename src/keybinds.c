@@ -557,7 +557,7 @@ rebind_kb(const char *func_name, const char *kb)
 	FILE *tmp_fp = fdopen(tmp_fd, "w");
 	if (!tmp_fp) {
 		xerror(_("kb: Cannot open temporary file: %s\n"), strerror(errno));
-		unlinkat(tmp_fd, tmp_name, 0);
+		unlinkat(XAT_FDCWD, tmp_name, 0);
 		close(tmp_fd);
 		goto ERROR;
 	}
@@ -576,15 +576,15 @@ rebind_kb(const char *func_name, const char *kb)
 	}
 
 	if (found == 1) {
-		if (renameat(tmp_fd, tmp_name, orig_fd, kbinds_file) == -1)
+		if (renameat(XAT_FDCWD, tmp_name, XAT_FDCWD, kbinds_file) == -1)
 			xerror(_("kb: Cannot rename '%s' to '%s': %s\n"),
 				tmp_name, kbinds_file, strerror(errno));
 	} else {
-		unlinkat(tmp_fd, tmp_name, 0);
+		unlinkat(XAT_FDCWD, tmp_name, 0);
 	}
 
-	fclose(orig_fp);
-	fclose(tmp_fp);
+	close(orig_fd);
+	close(tmp_fd);
 
 	free(tmp_name);
 

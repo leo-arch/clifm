@@ -1927,7 +1927,7 @@ export_files(char **filenames, const int open)
 	FILE *fp = fdopen(fd, "w");
 	if (!fp) {
 		xerror("exp: '%s': %s\n", tmp_file, strerror(errno));
-		if (unlinkat(fd, tmp_file, 0) == -1)
+		if (unlinkat(XAT_FDCWD, tmp_file, 0) == -1)
 			xerror("exp: unlink: '%s': %s\n", tmp_file, strerror(errno));
 		close(fd);
 		free(tmp_file);
@@ -1961,7 +1961,7 @@ export_files(char **filenames, const int open)
 		}
 	}
 
-	fclose(fp);
+	close(fd);
 
 	if (open == 0)
 		return tmp_file;
@@ -1970,7 +1970,7 @@ export_files(char **filenames, const int open)
 	if (ret == FUNC_SUCCESS)
 		return tmp_file;
 
-	if (unlink(tmp_file) == -1)
+	if (unlinkat(XAT_FDCWD, tmp_file, 0) == -1)
 		xerror("exp: unlink: '%s': %s\n", tmp_file, strerror(errno));
 	free(tmp_file);
 	return (char *)NULL;
