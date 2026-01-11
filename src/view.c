@@ -258,9 +258,9 @@ purge_thumbnails_cache(void)
 	/* Let's keep a record of all thumbnail files in the database.
 	 * We use this list to found unregistered thumbnails (not in
 	 * the database). */
-	char buf[NAME_MAX + 1];
+	char buf[PATH_MAX + 1];
 	size_t thumbs_in_db_c = 0;
-	while (fgets(buf, 2, fp) != NULL)
+	while (fgets(buf, (int)sizeof(buf), fp) != NULL)
 		thumbs_in_db_c++;
 
 	fseek(fp, 0L, SEEK_SET);
