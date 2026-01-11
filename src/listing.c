@@ -2602,7 +2602,8 @@ static int
 list_dir_light(const int autocmd_ret)
 {
 #ifdef LIST_SPEED_TEST
-	clock_t start = clock();
+	struct timespec t1, t2;
+	clock_gettime(CLOCK_MONOTONIC, &t1);
 #endif /* LIST_SPEED_TEST */
 
 	struct dothidden_t *hidden_list =
@@ -2924,8 +2925,10 @@ END:
 	}
 
 #ifdef LIST_SPEED_TEST
-	clock_t end = clock();
-	printf("list_dir time: %f\n", (double)(end - start) / CLOCKS_PER_SEC);
+	clock_gettime(CLOCK_MONOTONIC, &t2);
+	double secs = (double)(t2.tv_sec - t1.tv_sec)
+		+ (double)(t2.tv_nsec - t1.tv_nsec) * 1e-9;
+	printf("list_dir time: %f\n", secs);
 #endif /* LIST_SPEED_TEST */
 
 	return exit_code;
@@ -3351,7 +3354,8 @@ int
 list_dir(void)
 {
 #ifdef LIST_SPEED_TEST
-	clock_t start = clock();
+	struct timespec t1, t2;
+	clock_gettime(CLOCK_MONOTONIC, &t1);
 #endif /* LIST_SPEED_TEST */
 
 	if (conf.clear_screen > 0) {
@@ -3700,8 +3704,10 @@ END:
 	}
 
 #ifdef LIST_SPEED_TEST
-	clock_t end = clock();
-	printf("list_dir time: %f\n", (double)(end - start) / CLOCKS_PER_SEC);
+	clock_gettime(CLOCK_MONOTONIC, &t2);
+	double secs = (double)(t2.tv_sec - t1.tv_sec)
+		+ (double)(t2.tv_nsec - t1.tv_nsec) * 1e-9;
+	printf("list_dir time: %f\n", secs);
 #endif /* LIST_SPEED_TEST */
 
 	return exit_code;
