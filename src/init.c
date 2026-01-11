@@ -1388,16 +1388,15 @@ load_remotes(void)
 			continue;
 
 		size_t ret_len = strlen(ret);
-		if (ret_len > 0 && ret[ret_len - 1] == '\n') {
-			ret_len--;
-			ret[ret_len] = '\0';
-		}
+		if (ret_len > 0 && ret[ret_len - 1] == '\n')
+			ret[ret_len - 1] = '\0';
 
 		char *deq_str = remove_quotes(ret);
-		if (deq_str) {
-			ret = deq_str;
-			ret_len = strlen(ret);
-		}
+		if (!deq_str)
+			continue;
+
+		ret = deq_str;
+		ret_len = strlen(ret);
 
 		if (strncmp(line, "Comment=", 8) == 0) {
 			remotes[n].desc = savestring(ret, ret_len);
@@ -1634,10 +1633,8 @@ load_prompts(void)
 			continue;
 
 		size_t ret_len = strlen(ret);
-		if (ret_len > 0 && ret[ret_len - 1] == '\n') {
-			ret_len--;
-			ret[ret_len] = '\0';
-		}
+		if (ret_len > 0 && ret[ret_len - 1] == '\n')
+			ret[ret_len - 1] = '\0';
 
 		if (*line == 'N' && strncmp(line, "Notifications=", 14) == 0) {
 			if (*ret == 't' && strcmp(ret, "true") == 0)
@@ -1650,10 +1647,11 @@ load_prompts(void)
 		}
 
 		char *deq_str = remove_quotes(ret);
-		if (deq_str) {
-			ret = deq_str;
-			ret_len = strlen(ret);
-		}
+		if (!deq_str)
+			continue;
+
+		ret = deq_str;
+		ret_len = strlen(ret);
 
 		if (strncmp(line, "RegularPrompt=", 14) == 0) {
 			free(prompts[n].regular);
