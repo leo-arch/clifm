@@ -40,7 +40,7 @@ load_dothidden(void)
 
 	char line[NAME_MAX + 1];
 	size_t lines = 0;
-	while (fgets(line, 2, fp) != NULL)
+	while (fgets(line, (int)sizeof(line), fp) != NULL)
 		lines++;
 
 	if (lines == 0) {
@@ -53,7 +53,7 @@ load_dothidden(void)
 	h = xnmalloc(lines + 1, sizeof(struct dothidden_t));
 
 	size_t counter = 0;
-	while (fgets(line, sizeof(line), fp) != NULL) {
+	while (fgets(line, (int)sizeof(line), fp) != NULL) {
 		if (!*line || *line == '\n' || strchr(line, '/'))
 			continue;
 
