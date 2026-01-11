@@ -200,7 +200,7 @@ remove_trashinfo_file(const char *name)
 	char *info_file = xnmalloc(len, sizeof(char));
 	snprintf(info_file, len, "%s/%s.trashinfo", trash_info_dir, name);
 
-	if (unlink(info_file) == -1) {
+	if (unlinkat(XAT_FDCWD, info_file, 0) == -1) {
 		err('w', PRINT_PROMPT, "trash: Cannot remove info file '%s': %s\n",
 			info_file, strerror(errno));
 	}

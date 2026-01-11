@@ -1893,7 +1893,7 @@ unpin_dir(void)
 		int cmd_error = 0;
 		char *pin_file = xnmalloc(config_dir_len + 7, sizeof(char));
 		snprintf(pin_file, config_dir_len + 7, "%s/.pin", config_dir);
-		if (unlink(pin_file) == -1) {
+		if (unlinkat(XAT_FDCWD, pin_file, 0) == -1) {
 			xerror("pin: '%s': %s\n", pin_file, strerror(errno));
 			cmd_error = 1;
 		}

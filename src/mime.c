@@ -179,7 +179,7 @@ xmagic(const char *file, const int query_mime)
 
 	if (ret != FUNC_SUCCESS
 	|| (fp_out = fopen(tmp_file, "r")) == NULL) {
-		unlink(tmp_file);
+		unlinkat(XAT_FDCWD, tmp_file, 0);
 		return (char *)NULL;
 	}
 
@@ -205,14 +205,14 @@ xmagic(const char *file, const int query_mime)
 
 END:
 	fclose(fp_out);
-	unlink(tmp_file);
+	unlinkat(XAT_FDCWD, tmp_file, 0);
 
 	return mime_type;
 
 ERROR:
 	fclose(fp_out);
 	fclose(fp_err);
-	unlink(tmp_file);
+	unlinkat(XAT_FDCWD, tmp_file, 0);
 	close(stdout_bk);
 	close(stderr_bk);
 	return (char *)NULL;

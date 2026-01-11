@@ -367,7 +367,7 @@ nothing_to_do(char **tmp_file, struct dirent ***a,
 {
 	puts(_("rr: Nothing to do"));
 
-	if (unlink(*tmp_file) == 1)
+	if (unlinkat(XAT_FDCWD, *tmp_file, 0) == 1)
 		xerror("rr: unlink: '%s': %s\n", *tmp_file, strerror(errno));
 
 	close(fd);

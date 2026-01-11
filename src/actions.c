@@ -294,7 +294,7 @@ run_action(char *action, char **args)
 	}
 
 END:
-	unlink(fifo_path);
+	unlinkat(XAT_FDCWD, fifo_path, 0);
 
 	if (xargs.cwd_in_title == 1)
 		set_term_title(workspaces[cur_ws].path);

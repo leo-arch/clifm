@@ -213,7 +213,7 @@ open_tmpfile(char *app, char *file)
 		const int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 
 		if (ret != FUNC_SUCCESS)
-			unlink(file);
+			unlinkat(XAT_FDCWD, file, 0);
 
 		return ret;
 	}
@@ -226,7 +226,7 @@ open_tmpfile(char *app, char *file)
 		xerror("br: %s\n", errno != 0
 			? strerror(errno) : _("Error opening temporary file"));
 
-		if (unlink(file) == -1)
+		if (unlinkat(XAT_FDCWD, file, 0) == -1)
 			xerror("br: unlink: '%s': %s\n", file, strerror(errno));
 
 		return exit_status;

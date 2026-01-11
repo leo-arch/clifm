@@ -640,7 +640,7 @@ rename_tag(char **args)
 	char new_dir[PATH_MAX + 1];
 	snprintf(new_dir, sizeof(new_dir), "%s/%s", tags_dir, new);
 
-	if (rename(old_dir, new_dir) == -1) {
+	if (renameat(XAT_FDCWD, old_dir, XAT_FDCWD, new_dir) == -1) {
 		xerror("tag: %s\n", strerror(errno));
 		return errno;
 	}

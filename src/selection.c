@@ -53,7 +53,7 @@ save_sel(void)
 		return (xargs.stealth_mode == 1 ? FUNC_SUCCESS : FUNC_FAILURE);
 
 	if (sel_n == 0) {
-		if (unlink(sel_file) == -1) {
+		if (unlinkat(XAT_FDCWD, sel_file, 0) == -1) {
 			xerror("sel: '%s': %s\n", sel_file, strerror(errno));
 			return FUNC_FAILURE;
 		}

@@ -1860,14 +1860,14 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	if (deq && deq != q)
 		free(deq);
 
-	unlink(finder_in_file);
+	unlinkat(XAT_FDCWD, finder_in_file, 0);
 
 	if (!(flags & PREVIEWER))
 		move_cursor_up(total_line_len);
 
 	/* No results (the user pressed ESC or the Left arrow key). */
 	if (ret != FUNC_SUCCESS) {
-		unlink(finder_out_file);
+		unlinkat(XAT_FDCWD, finder_out_file, 0);
 		return clean_rl_buffer(text);
 	}
 
