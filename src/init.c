@@ -1318,11 +1318,12 @@ load_actions(void)
 	while ((line_len = getline(&line, &line_size, fp)) > 0) {
 		if (!line || !*line || *line == '#' || *line == '\n')
 			continue;
+
 		if (line[line_len - 1] == '\n')
 			line[line_len - 1] = '\0';
 
 		char *tmp = strrchr(line, '=');
-		if (!tmp)
+		if (!tmp || !tmp[1])
 			continue;
 
 		/* Now copy left and right value of each action into the actions struct */
