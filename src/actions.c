@@ -47,8 +47,7 @@ get_plugin_path(char *action, int *status)
 	size_t cmd_len = 0;
 
 	if (strchr(action, '/')) {
-		cmd = xnmalloc(action_len + 1, sizeof(char));
-		xstrsncpy(cmd, action, action_len + 1);
+		cmd = savestring(action, action_len);
 		dir_path = 1;
 	} else { /* If not a path, PLUGINS_DIR is assumed */
 		if (!plugins_dir || !*plugins_dir) {
@@ -56,6 +55,7 @@ get_plugin_path(char *action, int *status)
 			*status = FUNC_FAILURE;
 			return (char *)NULL;
 		}
+
 		cmd_len = action_len + strlen(plugins_dir) + 2;
 		cmd = xnmalloc(cmd_len, sizeof(char));
 		snprintf(cmd, cmd_len, "%s/%s", plugins_dir, action);
@@ -375,32 +375,38 @@ get_longest_action_name(void)
 	return l;
 }
 
-int
-actions_function(char **args)
+static int
+list_actions(void)
 {
-	if (!args[1] || strcmp(args[1], "list") == 0) {
-		if (actions_n > 0) {
-			/* Just list available actions */
-			puts(_("To run a plugin just enter its action name\n"
-				"Example: enter '//' to run the rgfind plugin"));
-			size_t longest_name_len = get_longest_action_name();
-			for (size_t i = 0; i < actions_n; i++) {
-				printf("%-*s %s%s%s %s\n", (int)longest_name_len,
-					usr_actions[i].name, mi_c, SET_MSG_PTR,
-					df_c, usr_actions[i].value);
-			}
-			return FUNC_SUCCESS;
-		}
-
-		if (xargs.stealth_mode == 1) {
-			fputs(_("actions: Plugins are not allowed in stealth "
-				"mode\n"), stderr);
-		} else {
-			fputs(_("actions: No actions defined. Use the 'actions edit' "
-				"command to add new actions.\n"), stdout);
+	if (actions_n > 0) {
+		/* Just list available actions */
+		puts(_("To run a plugin just enter its action name\n"
+			"Example: enter '//' to run the rgfind plugin"));
+		size_t longest_name_len = get_longest_action_name();
+		for (size_t i = 0; i < actions_n; i++) {
+			printf("%-*s %s%s%s %s\n", (int)longest_name_len,
+				usr_actions[i].name, mi_c, SET_MSG_PTR,
+				df_c, usr_actions[i].value);
 		}
 		return FUNC_SUCCESS;
 	}
+
+	if (xargs.stealth_mode == 1) {
+		fputs(_("actions: Plugins are not allowed in stealth "
+			"mode\n"), stderr);
+	} else {
+		fputs(_("actions: No actions defined. Use the 'actions edit' "
+			"command to add new actions.\n"), stdout);
+	}
+
+	return FUNC_SUCCESS;
+}
+
+int
+actions_function(char **args)
+{
+	if (!args[1] || strcmp(args[1], "list") == 0)
+		return list_actions();
 
 	if (strcmp(args[1], "edit") == 0) {
 		return edit_actions(args[2]);
