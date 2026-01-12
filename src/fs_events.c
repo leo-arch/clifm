@@ -80,6 +80,7 @@ read_inotify(void)
 	ptr + ((struct inotify_event *)ptr)->len < inotify_buf + i;
 	ptr += sizeof(struct inotify_event) + event->len) {
 		event = (struct inotify_event *)ptr;
+		ignore_event = 0;
 
 # ifdef INOTIFY_DEBUG
 		printf("%s (%u:%d): ", *event->name
