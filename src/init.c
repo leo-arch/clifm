@@ -967,6 +967,7 @@ sync_jumpdb_with_dirhist(void)
 		return;
 
 	int i = dirhist_total_index;
+	struct stat a;
 
 	while (--i >= 0) {
 		if (!old_pwd[i] || !*old_pwd[i])
@@ -988,7 +989,7 @@ sync_jumpdb_with_dirhist(void)
 			}
 		}
 
-		if (found == 0)
+		if (found == 0 && stat(old_pwd[i], &a) != -1)
 			add_to_jumpdb(old_pwd[i]);
 	}
 }
