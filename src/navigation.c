@@ -16,6 +16,7 @@
 
 #include "aux.h"         /* mem.h, normalize_path, get_cwd */
 #include "checks.h"      /* is_number */
+#include "colors.h"      /* get_entry_color() */
 #include "fuzzy_match.h" /* fuzzy_match, contains_utf8 */
 #include "history.h"     /* add_to_dirhist */
 #include "jump.h"        /* add_to_jumpdb */
@@ -601,6 +602,10 @@ print_dirhist(char *query)
 	const size_t len = (query && conf.fuzzy_match == 1) ? strlen(query) : 0;
 	const int fuzzy_str_type = (len > 0 && contains_utf8(query) == 1)
 		? FUZZY_FILES_UTF8 : FUZZY_FILES_ASCII;
+	struct stat a;
+	char pointer[32];
+
+	snprintf(pointer, sizeof(pointer), "%s%s%s", mi_c, SET_MISC_PTR, df_c);
 
 	for (int i = 0; i < dirhist_total_index; i++) {
 		if (!old_pwd[i] || *old_pwd[i] == KEY_ESC)
@@ -611,12 +616,11 @@ print_dirhist(char *query)
 		: !strstr(old_pwd[i], query) ) )
 			continue;
 
-		if (i == dirhist_cur_index)
-			printf(" %s%-*d%s %s%s%s\n", el_c, n, i + 1, df_c, mi_c,
-				old_pwd[i], df_c);
-		else
-			printf(" %s%-*d%s %s%s%s\n", el_c, n, i + 1, df_c, di_c,
-				old_pwd[i], df_c);
+		char *color = lstat(old_pwd[i], &a) == 0 ?
+			get_entry_color(old_pwd[i], &a) : uf_c;
+
+		printf("%s %s%-*d%s %s%s%s\n", i == dirhist_cur_index ? pointer : " ",
+			el_c, n, i + 1, df_c, color, old_pwd[i], df_c);
 	}
 }
 
