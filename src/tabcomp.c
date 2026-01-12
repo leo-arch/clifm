@@ -1040,7 +1040,7 @@ get_finder_output(const int multi, char *base)
 
 	free(line);
 	unlinkat(XAT_FDCWD, finder_out_file, 0);
-	close(fd);
+	fclose(fp);
 
 	if (*buf == '\0') {
 		free(buf);

@@ -615,7 +615,7 @@ truncate_file(const char *file, const int max, const int check_dups)
 			err('w', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME, file,
 				strerror(errno));
 		} else {
-			close(orig_fd);
+			fclose(orig_fp);
 		}
 
 		return;
@@ -697,9 +697,9 @@ truncate_file(const char *file, const int max, const int check_dups)
 	free(line);
 
 	renameat(XAT_FDCWD, tmp_name, XAT_FDCWD, file);
-	close(tmp_fd);
+	fclose(tmp_fp);
 
 EXIT:
 	free(tmp_name);
-	close(orig_fd);
+	fclose(orig_fp);
 }

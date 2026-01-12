@@ -583,8 +583,8 @@ rebind_kb(const char *func_name, const char *kb)
 		unlinkat(XAT_FDCWD, tmp_name, 0);
 	}
 
-	close(orig_fd);
-	close(tmp_fd);
+	fclose(orig_fp);
+	fclose(tmp_fp);
 
 	free(tmp_name);
 

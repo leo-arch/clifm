@@ -512,7 +512,7 @@ quick_help(const char *topic)
 		QUICK_HELP_NAVIGATION);
 	fprintf(fp, "\n\n%s\n\n%s", QUICK_HELP_BASIC_OPERATIONS, QUICK_HELP_MISC);
 
-	close(fd);
+	fclose(fp);
 
 	int ret = 0;
 	char *s = strrchr(pager_app, '/');

@@ -275,7 +275,7 @@ dir_size(char *dir, const int size_in_bytes, int *status)
 
 END:
 	unlinkat(XAT_FDCWD, file, 0);
-	close(fd);
+	fclose(fp);
 	return retval;
 }
 #endif /* !USE_DU1 */

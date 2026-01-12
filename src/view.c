@@ -247,7 +247,7 @@ purge_thumbnails_cache(void)
 	if (!fp) {
 		xerror(_("view: Cannot open '%s': %s\n"), thumb_file, strerror(errno));
 		unlinkat(XAT_FDCWD, tmp_file, 0);
-		close(tmp_fd);
+		fclose(tmp_fp);
 		return FUNC_FAILURE;
 	}
 
@@ -324,8 +324,8 @@ purge_thumbnails_cache(void)
 
 	renameat(XAT_FDCWD, tmp_file, XAT_FDCWD, thumb_file);
 
-	close(fd);
-	close(tmp_fd);
+	fclose(fp);
+	fclose(tmp_fp);
 	free(line);
 
 	thumbs_in_db[thumbs_in_db_c] = (char *)NULL;

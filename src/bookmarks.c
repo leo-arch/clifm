@@ -686,7 +686,7 @@ del_bookmarks(char **args)
 		const int saved_errno = errno;
 		xerror(_("'%s': %s\nbookmarks: Error creating temporary file\n"),
 			tmp_file, strerror(errno));
-		close(fd);
+		fclose(fp);
 		return saved_errno;
 	}
 
@@ -694,8 +694,8 @@ del_bookmarks(char **args)
 	const size_t n = mark_bookmarks_for_deletion(args, &exit_status);
 
 	if (n == 0) {
-		close(fd);
-		close(tmp_fd);
+		fclose(fp);
+		fclose(tmp_fp);
 		unlinkat(XAT_FDCWD, tmp_file, 0);
 		return exit_status;
 	}
@@ -713,8 +713,8 @@ del_bookmarks(char **args)
 
 	free(line);
 
-	close(fd);
-	close(tmp_fd);
+	fclose(fp);
+	fclose(tmp_fp);
 
 	if (removed > 0) {
 		if (renameat(XAT_FDCWD, tmp_file, XAT_FDCWD, bm_file) == 0) {

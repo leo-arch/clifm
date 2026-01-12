@@ -160,11 +160,11 @@ write_files_to_tmp(char ***args, const char *tmpfile, const int fd,
 	if (*written == 0 || fstat(fd, attr) == -1) {
 		if (unlinkat(XAT_FDCWD, tmpfile, 0) == -1)
 			xerror("br: unlink: '%s': %s\n", tmpfile, strerror(errno));
-		close(fd);
+		fclose(fp);
 		return FUNC_FAILURE;
 	}
 
-	close(fd);
+	fclose(fp);
 	return FUNC_SUCCESS;
 }
 
@@ -348,7 +348,7 @@ FREE_AND_EXIT:
 }
 
 static void
-unlink_and_close_tmpfile(const int fd, const char *tmpfile, int *status)
+unlink_and_close_tmpfile(FILE *fp, const char *tmpfile, int *status)
 {
 	if (unlinkat(XAT_FDCWD, tmpfile, 0) == -1) {
 		*status = errno;
@@ -356,7 +356,7 @@ unlink_and_close_tmpfile(const int fd, const char *tmpfile, int *status)
 			tmpfile, strerror(errno));
 	}
 
-	close(fd);
+	fclose(fp);
 }
 
 /* Rename a bulk of files (ARGS) at once.
@@ -431,7 +431,7 @@ bulk_rename(char **args, size_t *renamed, const size_t reload_list)
 	/* Load destiny names, checking for line mismatch and duplicates. */
 	char **new_names = get_new_names(fp, written, &exit_status);
 
-	unlink_and_close_tmpfile(fd, tmpfile, &exit_status);
+	unlink_and_close_tmpfile(fp, tmpfile, &exit_status);
 
 	if (!new_names)
 		return exit_status;
@@ -471,6 +471,6 @@ FREE_AND_EXIT:
 	return exit_status;
 
 CLOSE_AND_EXIT:
-	unlink_and_close_tmpfile(fd, tmpfile, &exit_status);
+	unlink_and_close_tmpfile(fp, tmpfile, &exit_status);
 	return exit_status;
 }

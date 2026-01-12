@@ -1961,7 +1961,7 @@ export_files(char **filenames, const int open)
 		}
 	}
 
-	close(fd);
+	fclose(fp);
 
 	if (open == 0)
 		return tmp_file;

@@ -338,12 +338,12 @@ mount_dev(const int n)
 	if (fgets(out_line, (int)sizeof(out_line), fp) == NULL) {
 		/* Error is printed by the mount command itself */
 		unlinkat(XAT_FDCWD, file, 0);
-		close(fd);
+		fclose(fp);
 		return FUNC_FAILURE;
 	}
 
 	unlinkat(XAT_FDCWD, file, 0);
-	close(fd);
+	fclose(fp);
 
 	/* Recover the mountpoint used by the mounting command. */
 	char *p = strstr(out_line, " at ");
