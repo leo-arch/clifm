@@ -284,6 +284,9 @@ save_jumpdb(void)
 	char perm_chr_str[2] = "";
 
 	for (size_t i = 0; i < jump_n; i++) {
+		if (!IS_VALID_JUMP_ENTRY(i))
+			continue;
+
 		if (total_rank > conf.max_jump_total_rank) {
 			if (reduce) {
 				const int tmp_rank = jump_db[i].rank;
