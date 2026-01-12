@@ -533,8 +533,10 @@ print_jump_table(const int reduce, const time_t now)
 
 	free(tmp_jump);
 
-	printf(_("\nTotal rank: %d/%d\nTotal visits: %zu\n"), ranks_sum,
-	    conf.max_jump_total_rank, visits_sum);
+	printf(_("\nTotal rank: %d/%d\n"
+		"Total visits: %zu\n"
+		"Total entries: %zu\n"), ranks_sum,
+	    conf.max_jump_total_rank, visits_sum, jump_n);
 
 	UNHIDE_CURSOR;
 	return FUNC_SUCCESS;
