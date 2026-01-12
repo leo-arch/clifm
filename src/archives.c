@@ -623,15 +623,13 @@ compress_zstandard(char *name, char **args)
 	if (!args[2]) /* A single file */
 		return zstandard(args[1], name, 'c', 0);
 
-	int exit_status = FUNC_SUCCESS;
-
 	/* Multiple files */
 
 	/* Zstandard only compresses data, but it won't archive multiple files.
 	 * Let's archive all files first via tar(1), and then compress the tar
 	 * archive with zstandard, producing a .tar.zst compressed archive. */
 
-	/* Build the tar file name. */
+	/* 1. Build the tar file name. */
 	char *dot = strchr(name, '.');
 	if (dot && dot != name)
 		*dot = '\0';
@@ -640,8 +638,9 @@ compress_zstandard(char *name, char **args)
 	char *archive_name = xnmalloc(name_len, sizeof(char));
 	snprintf(archive_name, name_len, "%s.tar", name);
 
-	/* Build and run the tar command. */
-	size_t n = 0, j = 0;
+	/* 2. Build and run the tar command. */
+	size_t n = 0;
+	size_t j = 0;
 	for (n = 1; args[n]; n++);
 
 	char **cmd = xnmalloc(n + 4, sizeof(char *));
@@ -651,17 +650,13 @@ compress_zstandard(char *name, char **args)
 		cmd[j++] = args[n];
 	cmd[j] = NULL;
 
-	const int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
+	int exit_status = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 
-	/* If tar suceeded, compress the archive with zstandard. */
-	if (ret == 0) {
-		if (zstandard(archive_name, NULL, 'c', 0) != FUNC_SUCCESS)
-			exit_status = FUNC_FAILURE;
+	/* 3. If tar suceeded, compress the archive with zstandard. */
+	if (exit_status == 0) {
+		exit_status = zstandard(archive_name, NULL, 'c', 0);
 		unlinkat(XAT_FDCWD, archive_name, 0);
 	}
-
-	if (dot && dot != name)
-		*dot = '.';
 
 	free(cmd);
 	free(archive_name);
