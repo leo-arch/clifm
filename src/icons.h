@@ -827,10 +827,10 @@ struct icons_t const icon_ext[] = {
 
 	{"t", ICON_PERL, YELLOW},
 	{"tar", ICON_ARCHIVE, WHITE}, // Uncompressed
-	{"tbz2", ICON_ARCHIVE, YELLOW},
+	{"tbz2", ICON_ARCHIVE, YELLOW}, // .tar.bz2 (bzip2)
 	{"tcl", ICON_TCL, GREEN},
 	{"tex", ICON_TEX, WHITE},
-	{"tgz", ICON_ARCHIVE, YELLOW},
+	{"tgz", ICON_ARCHIVE, YELLOW}, // .tar.gz (gzip)
 	{"tif", ICON_IMG, GREEN},
 	{"tiff", ICON_IMG, GREEN},
 	{"toml", ICON_TOML, WHITE},
@@ -840,7 +840,7 @@ struct icons_t const icon_ext[] = {
 	{"ttf", ICON_FONT, BLUE},
 	{"twig", ICON_TWIG, GREEN},
 	{"txt", ICON_TXT, WHITE},
-	{"txz", ICON_ARCHIVE, YELLOW},
+	{"txz", ICON_ARCHIVE, YELLOW}, // .tar.xz
 
 	{"vdi", ICON_DISK, WHITE},
 	{"vhd", ICON_DISK, WHITE},
@@ -1001,22 +1001,22 @@ struct icons_t const icon_ext[] = {
 	{"aif", ICON_AUDIO, B_YELLOW}, // Lossless
 	{"aifc", ICON_AUDIO, B_YELLOW}, // Lossless
 	{"ape", ICON_AUDIO, B_YELLOW}, // Lossless
-	{"au", ICON_AUDIO, YELLOW},
-	{"aup", ICON_AUDIO, YELLOW},
-	{"aup3", ICON_AUDIO, YELLOW},
+	{"au", ICON_AUDIO, YELLOW}, // Audacity Audio File
+	{"aup", ICON_AUDIO, YELLOW}, // Audacity Project File
+	{"aup3", ICON_AUDIO, YELLOW}, // Audacity 3 Project File
 	{"m2a", ICON_AUDIO, YELLOW}, // Legacy
-	{"m4b", ICON_AUDIO, YELLOW},
+	{"m4b", ICON_AUDIO, YELLOW}, // MPEG-4 Audiobook
 	{"mid", ICON_AUDIO, YELLOW},
 	{"midi", ICON_AUDIO, YELLOW},
 	{"mka", ICON_AUDIO, YELLOW},
 	{"mp2", ICON_AUDIO, YELLOW},
 	{"mpga", ICON_AUDIO, YELLOW}, // Legacy, but widely used back then
-	{"oga", ICON_AUDIO, YELLOW},
+	{"oga", ICON_AUDIO, YELLOW}, // OGG Vorbis audio
 	{"pcm", ICON_AUDIO, B_YELLOW}, // Lossless
-	{"ra", ICON_AUDIO, YELLOW},
+	{"ra", ICON_AUDIO, YELLOW}, // RealAudio File
 	{"sf2", ICON_AUDIO, YELLOW},
 	{"spx", ICON_AUDIO, YELLOW},
-	{"tta", ICON_AUDIO, B_YELLOW}, // Lossless
+	{"tta", ICON_AUDIO, B_YELLOW}, // True Audio File (lossless)
 	{"wv", ICON_AUDIO, B_YELLOW}, // Lossless
 /*	{"axa", ICON_AUDIO, YELLOW}, // Legacy: Annodex Audio File
 	{"mpc", ICON_AUDIO, YELLOW}, // Legacy/Niche: Musepack Compressed Audio
@@ -1027,33 +1027,34 @@ struct icons_t const icon_ext[] = {
 	{"ace", ICON_ARCHIVE, YELLOW}, // Legacy
 	{"alz", ICON_ARCHIVE, YELLOW}, // ALZip file
 	{"ar", ICON_ARCHIVE, WHITE}, // Uncompressed
-	{"arc", ICON_ARCHIVE, YELLOW},
+	{"arc", ICON_ARCHIVE, YELLOW}, // Legacy
 	{"br", ICON_ARCHIVE, YELLOW},
-	{"bz", ICON_ARCHIVE, YELLOW},
+	{"bz", ICON_ARCHIVE, YELLOW}, // bzip
 	{"ear", ICON_ARCHIVE, YELLOW}, // Java enterprise archive
 	{"lbr", ICON_ARCHIVE, WHITE}, // Uncompressed
-	{"lrz", ICON_ARCHIVE, YELLOW},
-	{"lzo", ICON_ARCHIVE, YELLOW},
+	{"lrz", ICON_ARCHIVE, YELLOW}, // lrzip
+	{"lzo", ICON_ARCHIVE, YELLOW}, // lzop
 	{"pak", ICON_ARCHIVE, YELLOW},
 	{"phar", ICON_ARCHIVE, YELLOW}, /* PHP archive */
-	{"pk3", ICON_ARCHIVE, YELLOW},
+	{"pk3", ICON_ARCHIVE, YELLOW}, // ZIP-based
 	{"par", ICON_ARCHIVE, YELLOW},
-	{"pyz", ICON_ARCHIVE, YELLOW},
-	{"rz", ICON_ARCHIVE, YELLOW},
-	{"taz", ICON_ARCHIVE, YELLOW},
-	{"tbz", ICON_ARCHIVE, YELLOW},
-	{"tlz", ICON_ARCHIVE, YELLOW},
-	{"tz", ICON_ARCHIVE, YELLOW},
-	{"tzo", ICON_ARCHIVE, YELLOW},
-	{"tzst", ICON_ARCHIVE, YELLOW},
+	{"pyz", ICON_ARCHIVE, YELLOW}, // Python Application Zip File
+	{"rz", ICON_ARCHIVE, YELLOW}, // rzip
+	{"t7z", ICON_ARCHIVE, YELLOW}, // .tar.7z
+	{"taz", ICON_ARCHIVE, YELLOW}, // .tar.Z (also .tz)
+	{"tbz", ICON_ARCHIVE, YELLOW}, // .tar.bz (bzip)
+	{"tlz", ICON_ARCHIVE, YELLOW}, // .tar.lz (lzip)
+	{"tz", ICON_ARCHIVE, YELLOW}, // .tar.Z (compress)
+	{"tzo", ICON_ARCHIVE, YELLOW}, // .tar.lzo (lzop)
+	{"tzst", ICON_ARCHIVE, YELLOW}, // .tar.zst
 	{"war", ICON_ARCHIVE, YELLOW}, /* Java web archive */
-	{"z", ICON_ARCHIVE, YELLOW},
+	{"z", ICON_ARCHIVE, YELLOW}, // Compress
 	{"zoo", ICON_ARCHIVE, YELLOW}, // Legacy
 	{"zpaq", ICON_ARCHIVE, YELLOW},
 /*	{"drpm", ICON_ARCHIVE, YELLOW}, // Delta RPM archive
 	{"dz", ICON_ARCHIVE, YELLOW}, // Dzip file
 	{"egg", ICON_ARCHIVE, YELLOW}, // ALZip file (commonly .alz)
-	{"lha", ICON_ARCHIVE, YELLOW}, // Legacy: Amiga
+	{"lha", ICON_ARCHIVE, YELLOW}, // Legacy: Amiga (like .lzh)
 	{"lzx", ICON_ARCHIVE, YELLOW}, // Legacy: Amiga
 	{"pax", ICON_ARCHIVE, WHITE}, // Uncompressed
 	{"pea", ICON_ARCHIVE, YELLOW},
