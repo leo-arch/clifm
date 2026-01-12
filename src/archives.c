@@ -14,6 +14,7 @@
 #include <errno.h>
 #include <string.h>
 #include <readline/readline.h>
+#include <unistd.h> /* unlinkat() */
 
 #if defined(_NO_MAGIC)
 # if !defined(_BE_POSIX)
@@ -619,21 +620,51 @@ zstandard(char *in_file, char *out_file, const char mode, const char op)
 static int
 compress_zstandard(char *name, char **args)
 {
-	if (!args[2]) /* Only one file */
+	if (!args[2]) /* A single file */
 		return zstandard(args[1], name, 'c', 0);
 
 	int exit_status = FUNC_SUCCESS;
 
 	/* Multiple files */
-	printf(_("\n%sNOTE%s: Zstandard does not support compression of "
-		 "multiple files into a single compressed file. Instead, files "
-		 "will be compressed into multiple compressed files using their "
-		 "original filenames.\n"), BOLD, df_c);
 
-	for (size_t i = 1; args[i]; i++) {
-		if (zstandard(args[i], NULL, 'c', 0) != FUNC_SUCCESS)
+	/* Zstandard only compresses data, but it won't archive multiple files.
+	 * Let's archive all files first via tar(1), and then compress the tar
+	 * archive with zstandard, producing a .tar.zst compressed archive. */
+
+	/* Build the tar file name. */
+	char *dot = strchr(name, '.');
+	if (dot && dot != name)
+		*dot = '\0';
+
+	const size_t name_len = strlen(name) + 5;
+	char *archive_name = xnmalloc(name_len, sizeof(char));
+	snprintf(archive_name, name_len, "%s.tar", name);
+
+	/* Build and run the tar command. */
+	size_t n = 0, j = 0;
+	for (n = 1; args[n]; n++);
+
+	char **cmd = xnmalloc(n + 4, sizeof(char *));
+	cmd[j++] = "tar"; cmd[j++] = "cf"; cmd[j++] = archive_name;
+
+	for (n = 1; args[n]; n++)
+		cmd[j++] = args[n];
+	cmd[j] = NULL;
+
+	const int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
+
+	/* If tar suceeded, compress the archive with zstandard. */
+	if (ret == 0) {
+		if (zstandard(archive_name, NULL, 'c', 0) != FUNC_SUCCESS)
 			exit_status = FUNC_FAILURE;
+		unlinkat(XAT_FDCWD, archive_name, 0);
 	}
+
+	if (dot && dot != name)
+		*dot = '.';
+
+	free(cmd);
+	free(archive_name);
 
 	return exit_status;
 }
