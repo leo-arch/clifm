@@ -1027,8 +1027,8 @@ struct icons_t const icon_ext[] = {
 	{"ace", ICON_ARCHIVE, YELLOW}, // Legacy
 	{"alz", ICON_ARCHIVE, YELLOW}, // ALZip file
 	{"ar", ICON_ARCHIVE, WHITE}, // Uncompressed
-	{"arc", ICON_ARCHIVE, YELLOW}, // Legacy
-	{"br", ICON_ARCHIVE, YELLOW},
+	{"arc", ICON_ARCHIVE, YELLOW}, // Legacy: it could also be .ark
+	{"br", ICON_ARCHIVE, YELLOW}, // Brotli
 	{"bz", ICON_ARCHIVE, YELLOW}, // bzip
 	{"ear", ICON_ARCHIVE, YELLOW}, // Java enterprise archive
 	{"lbr", ICON_ARCHIVE, WHITE}, // Uncompressed
@@ -1051,13 +1051,14 @@ struct icons_t const icon_ext[] = {
 	{"z", ICON_ARCHIVE, YELLOW}, // Compress
 	{"zoo", ICON_ARCHIVE, YELLOW}, // Legacy
 	{"zpaq", ICON_ARCHIVE, YELLOW},
-/*	{"drpm", ICON_ARCHIVE, YELLOW}, // Delta RPM archive
+/*	{"dar", ICON_ARCHIVE, YELLOW} // Disk archive
+	{"drpm", ICON_ARCHIVE, YELLOW}, // Delta RPM archive
 	{"dz", ICON_ARCHIVE, YELLOW}, // Dzip file
-	{"egg", ICON_ARCHIVE, YELLOW}, // ALZip file (commonly .alz)
+	{"egg", ICON_ARCHIVE, YELLOW}, // ALZip file (previously .alz)
 	{"lha", ICON_ARCHIVE, YELLOW}, // Legacy: Amiga (like .lzh)
 	{"lzx", ICON_ARCHIVE, YELLOW}, // Legacy: Amiga
 	{"pax", ICON_ARCHIVE, WHITE}, // Uncompressed
-	{"pea", ICON_ARCHIVE, YELLOW},
+	{"pea", ICON_ARCHIVE, YELLOW}, // PeaZip
 	{"pk7", ICON_ARCHIVE, YELLOW}, // GZDoom archive file
 	{"shar", ICON_ARCHIVE, WHITE}, // Uncompressed
 	{"warc", ICON_ARCHIVE, WHITE}, // Uncompressed: Web archive */

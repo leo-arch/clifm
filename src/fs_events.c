@@ -205,15 +205,18 @@ static void
 check_fs_changes(void)
 {
 	if (!workspaces || cur_ws < 0 || cur_ws >= MAX_WS
-	|| !workspaces[cur_ws].path)
+	|| !workspaces[cur_ws].path || curdir_mtime == 0)
 		return;
 
-	const filesn_t cur_files = count_dir(workspaces[cur_ws].path, 0) - 2;
 	struct stat a;
+	if (stat(workspaces[cur_ws].path, &a) == -1 || curdir_mtime == a.st_mtime)
+		return;
 
-	if (curdir_mtime != 0 && stat(workspaces[cur_ws].path, &a) != -1
-	&& curdir_mtime != a.st_mtime
-	&& cur_files >= 0 && files != cur_files)
+	const filesn_t cur_files = count_dir(workspaces[cur_ws].path, 0);
+	if (cur_files < 2) /* Error (-1) or empty (only self and parent dirs) */
+		return;
+
+	if ((cur_files - 2) != files)
 		reload_dirlist();
 }
 #endif /* LINUX_INOTIFY */
