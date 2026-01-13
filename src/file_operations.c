@@ -113,11 +113,13 @@ open_file(char *file)
 		char *cmd[] = {"mime", "open", file, NULL};
 		ret = mime_open(cmd);
 #else
-		/* Fallback to (xdg-)open */
+		/* Fallback to OS-specific openers */
 # if defined(__HAIKU__)
 		char *cmd[] = {"open", file, NULL};
 # elif defined(__APPLE__)
 		char *cmd[] = {"/usr/bin/open", file, NULL};
+# elif defined(__CYGWIN__)
+		char *cmd[] = {"cygstart", file, NULL};
 # else
 		char *cmd[] = {"xdg-open", file, NULL};
 # endif /* __HAIKU__ */
