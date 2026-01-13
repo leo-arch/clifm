@@ -951,7 +951,7 @@ check_filenames(char *str, size_t len, const int first_word,
 
 	filesn_t i;
 
-	for (i = 0; i < files; i++) {
+	for (i = 0; i < g_files_num; i++) {
 		if (!file_info[i].name)	continue;
 
 		if (removed_slash == 1 && (file_info[i].dir != 1
@@ -1010,7 +1010,7 @@ check_filenames(char *str, size_t len, const int first_word,
 		cur_comp_type = TCMP_PATH;
 
 		/* i < files == we have a full match (TARGET_BEGINNING_BONUS). */
-		suggestion.type = i < files ? FILE_SUG : FUZZY_FILENAME;
+		suggestion.type = i < g_files_num ? FILE_SUG : FUZZY_FILENAME;
 
 		if (file_info[fuzzy_index].dir)
 			print_directory_suggestion(fuzzy_index, len, color);
@@ -1252,7 +1252,7 @@ check_eln(const char *str, const int print)
 		return NO_MATCH;
 
 	filesn_t n = xatof(str);
-	if ( n < 1 || n > files || !file_info[n - 1].name
+	if ( n < 1 || n > g_files_num || !file_info[n - 1].name
 	|| ( words_num == 1 && ( (file_info[n - 1].dir == 1 && conf.autocd == 0)
 	|| (file_info[n - 1].dir == 0 && conf.auto_open == 0) ) ) )
 		return NO_MATCH;
@@ -2485,7 +2485,7 @@ CHECK_FIRST_WORD:
 	} else if (point_is_first_word && rl_point < rl_end
 	&& *word >= '1' && *word <= '9' && is_number(word)) {
 		const filesn_t a = xatof(word);
-		if (a > 0 && a <= files)
+		if (a > 0 && a <= g_files_num)
 			printed = PARTIAL_MATCH;
 
 	} else if (point_is_first_word && rl_point < rl_end

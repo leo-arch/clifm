@@ -161,10 +161,10 @@ write_files_to_tmp(struct dirent ***a, filesn_t *n, const char *target,
 	fprintf(fp, "%s", _(BULK_RM_TMP_FILE_HEADER));
 
 	if (target == workspaces[cur_ws].path) {
-		if (files == 0)
+		if (g_files_num == 0)
 			goto EMPTY_DIR;
 
-		for (filesn_t i = 0; i < files; i++)
+		for (filesn_t i = 0; i < g_files_num; i++)
 			write_name(fp, file_info[i].name, file_info[i].type);
 	} else {
 		if (count_dir(target, CPOP) <= 2)
@@ -234,7 +234,7 @@ static char **
 get_files_from_tmp_file(const char *tmpfile, const char *target, const filesn_t n)
 {
 	size_t nfiles = (target == workspaces[cur_ws].path)
-		? (size_t)files : (size_t)n;
+		? (size_t)g_files_num : (size_t)n;
 	char **tmp_files = xnmalloc(nfiles + 2, sizeof(char *));
 
 	FILE *fp = fopen(tmpfile, "r");
@@ -291,12 +291,13 @@ get_remove_files(const char *target, char **tmp_files,
 	struct dirent ***a, const filesn_t n)
 {
 	size_t i, j = 1;
-	size_t l = (target == workspaces[cur_ws].path) ? (size_t)files : (size_t)n;
+	size_t l = (target == workspaces[cur_ws].path)
+		? (size_t)g_files_num : (size_t)n;
 	char **rem_files = xnmalloc(l + 3, sizeof(char *));
 	rem_files[0] = savestring("rr", 2);
 
 	if (target == workspaces[cur_ws].path) {
-		for (i = 0; i < (size_t)files; i++) {
+		for (i = 0; i < (size_t)g_files_num; i++) {
 			if (remove_this_file(file_info[i].name, tmp_files) == 1) {
 				rem_files[j] = savestring(file_info[i].name,
 					strlen(file_info[i].name));
@@ -436,7 +437,8 @@ bulk_remove(char *s1, char *s2)
 		goto END;
 	}
 
-	const filesn_t num = (target == workspaces[cur_ws].path) ? files : n - 2;
+	const filesn_t num = (target == workspaces[cur_ws].path)
+		? g_files_num : n - 2;
 	if (old_mtime == attr.st_mtime || diff_files(tmp_file, num) == 0)
 		return nothing_to_do(&tmp_file, &a, n, fd);
 

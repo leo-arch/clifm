@@ -327,7 +327,7 @@ should_expand_eln(const char *text, char *cmd_name)
 		return 0;
 
 	const filesn_t a = xatof(text);
-	if (a <= 0 || a > files) /* Only expand numbers matching ELN's */
+	if (a <= 0 || a > g_files_num) /* Only expand numbers matching ELN's */
 		return 0;
 
 	if (words_num == 1) { /* First word */

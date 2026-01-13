@@ -184,7 +184,7 @@ int
 	virtual_dir = 0,
 	wrong_cmd = 0;
 
-filesn_t files = 0;
+filesn_t g_files_num = 0;
 
 size_t
 	actions_n = 0,

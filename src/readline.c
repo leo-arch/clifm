@@ -1739,7 +1739,7 @@ filenames_gen_text(const char *text, int state)
 	}
 
 	/* Check list of currently displayed files for a match */
-	while (i < files && (name = file_info[i].name) != NULL) {
+	while (i < g_files_num && (name = file_info[i].name) != NULL) {
 		i++;
 		/* If first word, filter files according to autocd and auto-open values. */
 		if (((conf.suggestions == 1 && words_num == 1) || line_has_space == 0)
@@ -2145,14 +2145,14 @@ rl_mime_list(void)
 	if (term_caps.suggestions != 0)
 		{ HIDE_CURSOR; fputs(WAIT_MSG, stdout); fflush(stdout); }
 
-	char **t = xnmalloc((size_t)files + 2, sizeof(char *));
+	char **t = xnmalloc((size_t)g_files_num + 2, sizeof(char *));
 	t[0] = xnmalloc(1, sizeof(char));
 	*t[0] = '\0';
 	t[1] = (char *)NULL;
 	char buf[PATH_MAX + 1];
 
 	size_t n = 1;
-	filesn_t i = files;
+	filesn_t i = g_files_num;
 	while (--i >= 0) {
 		if (file_info[i].user_access == 0 && file_info[i].type == DT_REG)
 			continue;
@@ -2217,13 +2217,13 @@ rl_mime_files(const char *text)
 	if (term_caps.suggestions != 0)
 		{ HIDE_CURSOR; fputs(" [wait...]", stdout); fflush(stdout); }
 
-	char **t = xnmalloc((size_t)files + 2, sizeof(char *));
+	char **t = xnmalloc((size_t)g_files_num + 2, sizeof(char *));
 	t[0] = xnmalloc(1, sizeof(char));
 	*t[0] = '\0';
 	char buf[PATH_MAX + 1];
 
 	size_t n = 1;
-	for (filesn_t i = 0; i < files; i++) {
+	for (filesn_t i = 0; i < g_files_num; i++) {
 		char *name = file_info[i].name;
 		if (virtual_dir == 1) {
 			*buf = '\0';
@@ -2955,7 +2955,7 @@ file_types_generator(const char *text, int state)
 		i = 0;
 
 	char *ret = (char *)NULL;
-	while (i < files && (name = file_info[i].name)) {
+	while (i < g_files_num && (name = file_info[i].name)) {
 		switch (*text) {
 		case 'b':
 			if (file_info[i].type == DT_BLK)
@@ -3178,7 +3178,7 @@ complete_ranges(const char *text)
 	const int b = atoi(dash + 1) - 1;
 	*dash = '-';
 
-	if (a < 0 || b < 0 || a >= b || (filesn_t)b >= files)
+	if (a < 0 || b < 0 || a >= b || (filesn_t)b >= g_files_num)
 		return (char **)NULL;
 
 	char **matches = xnmalloc((size_t)(b - a) + 3, sizeof(char *));
@@ -3842,7 +3842,7 @@ static char **
 complete_eln(const char *text, const size_t words_n, char *cmd_name)
 {
 	filesn_t n = 0;
-	if (!is_number(text) || (n = xatof(text)) < 1 || n > files)
+	if (!is_number(text) || (n = xatof(text)) < 1 || n > g_files_num)
 		return (char **)NULL;
 
 	if (words_n == 1) { /* First word */

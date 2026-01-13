@@ -199,7 +199,7 @@ get_dup_file_dest_dir(void)
 		/* Expand ELN */
 		if (IS_DIGIT(*dir) && is_number(dir)) {
 			const int n = atoi(dir);
-			if (n > 0 && (filesn_t)n <= files) {
+			if (n > 0 && (filesn_t)n <= g_files_num) {
 				free(dir);
 				char *name = file_info[n - 1].name;
 				dir = savestring(name, strlen(name));
@@ -536,7 +536,7 @@ list_created_files(char **nfiles, const filesn_t nfiles_n)
 	const filesn_t n = workspaces[cur_ws].path
 		? count_dir(workspaces[cur_ws].path, NO_CPOP) - 2 : 0;
 
-	if (n > 0 && n > files)
+	if (n > 0 && n > g_files_num)
 		file_in_cwd = 1;
 
 	if (conf.autols == 1 && file_in_cwd == 1)
@@ -1388,7 +1388,7 @@ get_new_filename(char *cur_name)
 int
 cwd_has_sel_files(void)
 {
-	filesn_t i = files;
+	filesn_t i = g_files_num;
 	while (--i >= 0) {
 		if (file_info[i].sel == 1)
 			return 1;

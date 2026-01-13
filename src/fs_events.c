@@ -110,7 +110,7 @@ read_inotify(void)
 # ifdef INOTIFY_DEBUG
 			puts("IN_MOVED_TO");
 # endif /* INOTIFY_DEBUG */
-			filesn_t j = files;
+			filesn_t j = g_files_num;
 			while (--j >= 0) {
 				if (*file_info[j].name == *event->name
 				&& strcmp(file_info[j].name, event->name) == 0)
@@ -216,7 +216,7 @@ check_fs_changes(void)
 	if (cur_files < 2) /* Error (-1) or empty (only self and parent dirs) */
 		return;
 
-	if ((cur_files - 2) != files)
+	if ((cur_files - 2) != g_files_num)
 		reload_dirlist();
 }
 #endif /* LINUX_INOTIFY */

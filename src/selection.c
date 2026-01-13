@@ -138,9 +138,9 @@ select_file(char *file)
 static char **
 load_matches_invert_cwd(glob_t *gbuf, const mode_t filetype, int *matches)
 {
-	char **list = xnmalloc((size_t)files + 2, sizeof(char *));
+	char **list = xnmalloc((size_t)g_files_num + 2, sizeof(char *));
 
-	filesn_t i = files;
+	filesn_t i = g_files_num;
 	while (--i >= 0) {
 		if (filetype != 0 && file_info[i].type != filetype)
 			continue;
@@ -352,7 +352,7 @@ static int
 sel_regex_cwd(regex_t regex, const mode_t filetype, const int invert)
 {
 	int new_sel = 0;
-	filesn_t i = files;
+	filesn_t i = g_files_num;
 
 	while (--i >= 0) {
 		if (filetype != 0 && file_info[i].type != filetype)
@@ -827,7 +827,7 @@ invert_selection(void)
 	int errors = 0;
 	int desel = 0;
 
-	for (filesn_t i = 0; i < files; i++) {
+	for (filesn_t i = 0; i < g_files_num; i++) {
 		if (file_info[i].sel == 0) {
 			new_sel += select_filename(file_info[i].name, NULL, &errors);
 			file_info[i].sel = 1;
@@ -1210,10 +1210,10 @@ get_desel_input(size_t *n)
 	 * variable FILES). But, since we are deselecting files, FILES must be the
 	 * number of selected files (SEL_N), and not that of listed files in
 	 * the CWD. */
-	const filesn_t files_bk = files;
-	files = (filesn_t)sel_n;
+	const filesn_t files_bk = g_files_num;
+	g_files_num = (filesn_t)sel_n;
 	char **entries = get_substr(line, ' ', 1);
-	files = files_bk;
+	g_files_num = files_bk;
 	free(line);
 
 	if (!entries)

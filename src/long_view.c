@@ -112,7 +112,8 @@ construct_and_print_filename(const struct fileinfo *props,
 	}
 
 	const filesn_t n = (conf.max_files > UNSET
-		&& files > (filesn_t)conf.max_files) ? (filesn_t)conf.max_files : files;
+		&& g_files_num > (filesn_t)conf.max_files)
+		? (filesn_t)conf.max_files : g_files_num;
 
 	size_t cur_len = (size_t)DIGINUM(n) + 1 + plen
 		+ (conf.icons == 1 ? (size_t)ICON_LEN : 0);

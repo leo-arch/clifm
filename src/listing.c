@@ -790,13 +790,13 @@ set_pager_view(const filesn_t columns_n)
 	 * by get_longest_per_col() in list_files_vertical(), modifying thus
 	 * whether the pager will be executed or not. */
 	const int pager_will_run =
-		(files > ((conf.long_view == 1 || conf.pager_view == PAGER_LONG)
+		(g_files_num > ((conf.long_view == 1 || conf.pager_view == PAGER_LONG)
 		? lines : (columns_n * lines)));
 
 	if (pager_will_run == 0)
 		return;
 
-	if (conf.pager == 1 || files >= (filesn_t)conf.pager) {
+	if (conf.pager == 1 || g_files_num >= (filesn_t)conf.pager) {
 		long_view_bk = conf.long_view;
 		conf.long_view = (conf.pager_view == PAGER_LONG);
 	}
@@ -826,17 +826,18 @@ post_listing(DIR *dir, const int reset_pager, const int autocmd_ret)
 		exit(exit_code);
 
 	if (conf.pager_once == 0) {
-		if (reset_pager == 1 && (conf.pager < 2 || files < (filesn_t)conf.pager))
+		if (reset_pager == 1 && (conf.pager < 2
+		|| g_files_num < (filesn_t)conf.pager))
 			conf.pager = pager_bk;
 	} else {
 		conf.pager_once = 0;
 		conf.pager = 0;
 	}
 
-	const size_t s_files = (size_t)files;
+	const size_t s_files = (size_t)g_files_num;
 
 	if (pager_quit == 0 && conf.max_files != UNSET
-	&& files > (filesn_t)conf.max_files)
+	&& g_files_num > (filesn_t)conf.max_files)
 		printf("... (%d/%zu)\n", conf.max_files, s_files);
 
 	print_div_line();
@@ -1139,7 +1140,7 @@ compute_maxes(void)
 	struct maxes_t maxes = {0};
 
 	filesn_t i = xargs.max_files > 0 ? (filesn_t)xargs.max_files
-		: (conf.max_files > 0 ? conf.max_files : files);
+		: (conf.max_files > 0 ? conf.max_files : g_files_num);
 
 	const int conf_file_counter = conf.file_counter;
 	const int prop_fields_size = prop_fields.size;
@@ -1148,8 +1149,8 @@ compute_maxes(void)
 	const int prop_fields_links = prop_fields.links;
 	const int prop_fields_blocks = prop_fields.blocks;
 
-	if (i > files)
-		i = files;
+	if (i > g_files_num)
+		i = g_files_num;
 
 	while (--i >= 0) {
 		int t = 0;
@@ -1214,7 +1215,7 @@ compute_maxes(void)
 	/* If at least one directory size length equals the maximum size lenght
 	 * in the current directory, and we have a du(1) error for this directory,
 	 * we need to make room for the du error char (!). */
-	i = files;
+	i = g_files_num;
 	while (--i >= 0) {
 		if (file_info[i].du_status == 0)
 			continue;
@@ -1263,7 +1264,7 @@ print_long_mode(size_t *counter, int *reset_pager, const int eln_len)
 	const int conf_no_eln = conf.no_eln;
 
 	filesn_t i;
-	const filesn_t f = files; /* Cache global variable. */
+	const filesn_t f = g_files_num; /* Cache global variable. */
 	const size_t s_term_lines = term_lines > 2 ? (size_t)(term_lines - 2) : 0;
 
 	for (i = 0; i < f; i++) {
@@ -1271,7 +1272,7 @@ print_long_mode(size_t *counter, int *reset_pager, const int eln_len)
 			break;
 
 		if (conf_pager == 1 || (*reset_pager == 0 && conf_pager > 1
-		&& files >= conf_pager)) {
+		&& g_files_num >= conf_pager)) {
 			if (*counter > s_term_lines) {
 				const int ret = run_pager(-1, reset_pager, &i, counter);
 
@@ -1305,7 +1306,7 @@ print_long_mode(size_t *counter, int *reset_pager, const int eln_len)
 	}
 
 	if (pager_quit == 1)
-		printf("... (%zd/%zd)\n", i, files);
+		printf("... (%zd/%zd)\n", i, g_files_num);
 }
 
 /* Return the minimal number of columns we can use for the current list
@@ -1328,8 +1329,8 @@ get_columns(void)
 		n = 1;
 
 	/* If we have only three files, we don't want four columns. */
-	if (n > (size_t)files)
-		n = (size_t)files > 0 ? (size_t)files : 1;
+	if (n > (size_t)g_files_num)
+		n = (size_t)g_files_num > 0 ? (size_t)g_files_num : 1;
 
 	return n;
 }
@@ -1398,7 +1399,7 @@ construct_filename(const filesn_t i, struct wtrunc_t *wtrunc,
 	}
 
 	if ((int)namelen <= max_namelen || conf.max_name_len == UNSET
-	|| conf.long_view != 0 || files <= 1)
+	|| conf.long_view != 0 || g_files_num <= 1)
 		return name;
 
 	/* Let's truncate the filename (at MAX_NAMELEN, in this example, 11).
@@ -1850,7 +1851,7 @@ get_longest_per_col(size_t *columns_n, filesn_t *rows, const filesn_t files_n)
 {
 	if (conf.columned == 0) {
 		*columns_n = 1;
-		*rows = files;
+		*rows = g_files_num;
 		size_t *longest_per_col = xnmalloc(2, sizeof(size_t));
 		longest_per_col[0] = term_cols;
 		return longest_per_col;
@@ -2018,7 +2019,8 @@ list_files_horizontal(size_t *counter, int *reset_pager,
 	const int eln_len, size_t columns_n)
 {
 	const filesn_t nn = (conf.max_files != UNSET
-		&& (filesn_t)conf.max_files < files) ? (filesn_t)conf.max_files : files;
+		&& (filesn_t)conf.max_files < g_files_num)
+		? (filesn_t)conf.max_files : g_files_num;
 
 /*	size_t *longest_per_col = get_longest_per_col(&columns_n, nn);
 	size_t cur_col = 0; */
@@ -2060,7 +2062,7 @@ list_files_horizontal(size_t *counter, int *reset_pager,
 				 * ########################## */
 
 		if (conf.pager == 1 || (*reset_pager == 0 && conf.pager > 1
-		&& files >= (filesn_t)conf.pager)) {
+		&& g_files_num >= (filesn_t)conf.pager)) {
 			/* Run the pager only once all columns and rows fitting in
 			 * the screen are filled with the corresponding filenames */
 			int ret = 0;
@@ -2111,7 +2113,7 @@ END:
 	if (last_column == 0)
 		putchar('\n');
 	if (pager_quit == 1)
-		printf("... (%zd/%zd)\n", i, files);
+		printf("... (%zd/%zd)\n", i, g_files_num);
 }
 
 /* List files vertically, like ls(1) would
@@ -2123,8 +2125,8 @@ list_files_vertical(size_t *counter, int *reset_pager,
 {
 	/* Total number of files to be listed. */
 	const filesn_t total_files = (conf.max_files != UNSET
-		&& (filesn_t)conf.max_files < files)
-		? (filesn_t)conf.max_files : files;
+		&& (filesn_t)conf.max_files < g_files_num)
+		? (filesn_t)conf.max_files : g_files_num;
 
 #ifdef TIGHT_COLUMNS
 	filesn_t num_rows = 0;
@@ -2211,7 +2213,7 @@ list_files_vertical(size_t *counter, int *reset_pager,
 				 * ########################## */
 
 		if (conf_pager == 1 || (*reset_pager == 0 && conf_pager > 1
-		&& files >= (filesn_t)conf_pager)) {
+		&& g_files_num >= (filesn_t)conf_pager)) {
 			int ret = 0;
 			filesn_t backup_i = i;
 			/* Run the pager only once all columns and rows fitting in
@@ -2287,7 +2289,7 @@ END:
 	if (last_column == 0)
 		putchar('\n');
 	if (pager_quit == 1)
-		printf("... (%zd/%zd)\n", i, files);
+		printf("... (%zd/%zd)\n", i, g_files_num);
 }
 
 /* Execute commands in either AUTOCMD_DIR_IN_FILE or AUTOCMD_DIR_OUT_FILE files.
@@ -2515,7 +2517,7 @@ construct_human_sizes(void)
 	if (mult_factor == 0)
 		mult_factor = 1.0f / base;
 
-	filesn_t i = files;
+	filesn_t i = g_files_num;
 	while (--i >= 0) {
 		if (file_info[i].size < ibase) { /* This includes negative values */
 			const int ret = snprintf(file_info[i].human_size.str,
@@ -2854,7 +2856,7 @@ list_dir_light(const int autocmd_ret)
 	}
 
 	file_info[n].name = (char *)NULL;
-	files = n;
+	g_files_num = n;
 
 	if (checks.scanning == 1)
 		erase_scanning_message();
@@ -2866,8 +2868,8 @@ list_dir_light(const int autocmd_ret)
 	}
 
 	const int eln_len = conf.no_eln == 1 ? 0
-		: ((conf.max_files != UNSET && files > (filesn_t)conf.max_files)
-		? DIGINUM(conf.max_files) : DIGINUM(files));
+		: ((conf.max_files != UNSET && g_files_num > (filesn_t)conf.max_files)
+		? DIGINUM(conf.max_files) : DIGINUM(g_files_num));
 
 	if (conf.sort != SNONE)
 		ENTSORT(file_info, (size_t)n, entrycmp);
@@ -3627,7 +3629,7 @@ list_dir(void)
 			xnrealloc(file_info, (size_t)n + 1, sizeof(struct fileinfo)); */
 
 	file_info[n].name = (char *)NULL;
-	files = n;
+	g_files_num = n;
 
 	if (checks.scanning == 1)
 		erase_scanning_message();
@@ -3639,8 +3641,8 @@ list_dir(void)
 	}
 
 	const int eln_len = conf.no_eln == 1 ? 0
-		: ((conf.max_files != UNSET && files > (filesn_t)conf.max_files)
-		? DIGINUM(conf.max_files) : DIGINUM(files));
+		: ((conf.max_files != UNSET && g_files_num > (filesn_t)conf.max_files)
+		? DIGINUM(conf.max_files) : DIGINUM(g_files_num));
 
 		/* #############################################
 		 * #    SORT FILES ACCORDING TO SORT METHOD    #
@@ -3716,10 +3718,10 @@ END:
 void
 free_dirlist(void)
 {
-	if (!file_info || files == 0)
+	if (!file_info || g_files_num == 0)
 		return;
 
-	filesn_t i = files;
+	filesn_t i = g_files_num;
 	while (--i >= 0) {
 		free(file_info[i].name);
 		free(file_info[i].ext_color);

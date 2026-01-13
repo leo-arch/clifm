@@ -1194,7 +1194,7 @@ check_auto_first(char **args)
 		return FUNC_SUCCESS;
 	}
 
-	filesn_t i = files;
+	filesn_t i = g_files_num;
 	while (--i >= 0) {
 		if (*tmp != *file_info[i].name || strcmp(tmp, file_info[i].name) != 0)
 			continue;
@@ -1395,7 +1395,7 @@ Sticky files:                %zu\n\
 Unknown file types:          %zu\n\
 Inaccessible files:          %zu\n\
 "),
-	(intmax_t)files, stats.dir, dir_empty, stats.reg, reg_empty,
+	(intmax_t)g_files_num, stats.dir, dir_empty, stats.reg, reg_empty,
 	stats.exec, stats.hidden, stats.suid, stats.sgid, stats.caps, stats.fifo,
 	stats.socket, stats.block_dev, stats.char_dev, stats.link,
 	lnk_broken, stats.multi_link, stats.extended, stats.other_writable,

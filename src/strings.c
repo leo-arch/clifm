@@ -1425,11 +1425,11 @@ expand_mime_type_filter(const char *pattern)
 	if (!pattern || !*pattern)
 		return (char **)NULL;
 
-	char **t = xnmalloc((size_t)files + 1, sizeof(char *));
+	char **t = xnmalloc((size_t)g_files_num + 1, sizeof(char *));
 	char buf[PATH_MAX + 1];
 
 	filesn_t n = 0;
-	for (filesn_t i = 0; i < files; i++) {
+	for (filesn_t i = 0; i < g_files_num; i++) {
 		char *name = file_info[i].name;
 		if (virtual_dir == 1) {
 			*buf = '\0';
@@ -1466,15 +1466,15 @@ expand_mime_type_filter(const char *pattern)
 static char **
 expand_file_type_filter(const char t)
 {
-	if (files == 0)
+	if (g_files_num == 0)
 		return (char **)NULL;
 
 	filesn_t i = 0, c = 0;
 
-	char **f = xnmalloc((size_t)files + 1, sizeof(char *));
+	char **f = xnmalloc((size_t)g_files_num + 1, sizeof(char *));
 	char buf[PATH_MAX + 1];
 
-	while (i < files) {
+	while (i < g_files_num) {
 		char *n = file_info[i].name;
 		if (virtual_dir == 1) {
 			*buf = '\0';
@@ -2227,7 +2227,7 @@ expand_range(char *str, int listdir)
 	++p;
 	filesn_t asecond = 0;
 	if (!*p) { /* No second field: assume last listed file */
-		asecond = files;
+		asecond = g_files_num;
 	} else {
 		if (!is_number(p))
 			return (filesn_t *)NULL;
@@ -2238,8 +2238,8 @@ expand_range(char *str, int listdir)
 		return (filesn_t *)NULL;
 
 	if (listdir) {
-		if (afirst <= 0 || afirst > files || asecond <= 0
-		|| asecond > files || afirst >= asecond)
+		if (afirst <= 0 || afirst > g_files_num || asecond <= 0
+		|| asecond > g_files_num || afirst >= asecond)
 			return (filesn_t *)NULL;
 	} else {
 		if (afirst >= asecond) 
@@ -2330,7 +2330,7 @@ expand_regex(char ***substr)
 {
 	/* Let's store all strings currently in substr plus REGEX expanded
 	 * files, if any, in a temporary array. */
-	char **tmp = xnmalloc((size_t)files + args_n + 2, sizeof(char *));
+	char **tmp = xnmalloc((size_t)g_files_num + args_n + 2, sizeof(char *));
 	filesn_t i, j;
 	size_t n = 0;
 	regex_t regex;
@@ -2341,7 +2341,7 @@ expand_regex(char ***substr)
 	const int reg_flags = (REG_NOSUB | REG_EXTENDED);
 
 	for (i = 0; (*substr)[i]; i++) {
-		if (n > ((size_t)files + args_n))
+		if (n > ((size_t)g_files_num + args_n))
 			break;
 
 		/* Ignore the first string of the search function: it will be
@@ -2388,7 +2388,7 @@ expand_regex(char ***substr)
 		free(rstr);
 		int reg_found = 0;
 
-		for (j = 0; j < files; j++) {
+		for (j = 0; j < g_files_num; j++) {
 			if (regexec(&regex, file_info[j].name, 0, NULL, 0) != FUNC_SUCCESS)
 				continue;
 

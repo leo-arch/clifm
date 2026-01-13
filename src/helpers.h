@@ -1062,7 +1062,7 @@ extern time_t curdir_mtime;
  * 64-bit:     INT_MAX < LONG_MAX == LLONG_MAX == INTMAX_MAX == SSIZE_MAX < SIZE_MAX */
 #define FILESN_MAX SSIZE_MAX
 typedef ssize_t filesn_t;
-extern filesn_t files;
+extern filesn_t g_files_num;
 
 struct default_answer_t {
 	char remove;

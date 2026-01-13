@@ -2870,7 +2870,7 @@ rl_toggle_virtualdir_full_paths(int count, int key)
 	xchmod(stdin_tmp_dir, "0700", 1);
 	xargs.virtual_dir_full_paths = !xargs.virtual_dir_full_paths;
 
-	filesn_t i = files;
+	filesn_t i = g_files_num;
 	while (--i >= 0) {
 		char *rp = xrealpath(file_info[i].name, NULL);
 		if (!rp) continue;
