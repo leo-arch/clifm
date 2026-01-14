@@ -17,7 +17,6 @@
 
 #include "helpers.h"
 
-#include <stddef.h> /* ptrdiff_t */
 #if defined(__HAIKU__)
 # include <stdint.h>
 #endif /* __HAIKU__ */
@@ -2650,7 +2649,12 @@ check_chained_cmds(char *str)
 static int
 do_path_normalization(char **s, const size_t i, const int is_int_cmd)
 {
-	if (!s || !s[i] || is_int_cmd == 0) /* Exclude external commands. */
+	if (!s || !s[i])
+		return 0;
+
+	/* Exclude external commands. */
+	/* i == 0: maybe autocd or auto-open. Let's allow this. */
+	if (is_int_cmd == 0 && i != 0)
 		return 0;
 
 	const char *cmd = s[0];
@@ -2669,6 +2673,7 @@ do_path_normalization(char **s, const size_t i, const int is_int_cmd)
 	 * normalization. */
 	const char *p = arg;
 	const char *start;
+
 	while (*p) {
 		/* Skip consecutive slashes. */
 		while (*p == '/')
@@ -2681,7 +2686,7 @@ do_path_normalization(char **s, const size_t i, const int is_int_cmd)
 		while (*p && *p != '/')
 			p++;
 
-		ptrdiff_t len = p - start;
+		size_t len = (size_t)(p - start);
 		if ((len == 1 && start[0] == '.')
 		|| (len == 2 && start[0] == '.' && start[1] == '.'))
 			return 1;
