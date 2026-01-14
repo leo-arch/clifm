@@ -674,9 +674,9 @@ compress_others(char **args, char *name)
 	char **tcmd = xnmalloc(3 + i + 1, sizeof(char *));
 	tcmd[0] = savestring("atool", 5);
 	tcmd[1] = savestring("-a", 2);
-	const size_t len = strlen(name) + (!ext_ok ? 7 : 0) + 1;
+	const size_t len = strlen(name) + (ext_ok ? 0 : 7) + 1;
 	tcmd[2] = xnmalloc(len, sizeof(char *));
-	snprintf(tcmd[2], len, "%s%s", name, !ext_ok ? ".tar.gz" : "");
+	snprintf(tcmd[2], len, "%s%s", name, ext_ok ? "" : ".tar.gz");
 	n += 3;
 
 	for (i = 1; args[i]; i++) {
@@ -1249,7 +1249,7 @@ decompress_files(char **args)
 int
 archiver(char **args, const char mode)
 {
-	if (!args[1])
+	if (!args || !args[0] || !args[1])
 		return FUNC_FAILURE;
 
 	if (mode == 'c')

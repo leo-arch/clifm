@@ -17,6 +17,7 @@
 
 #include "helpers.h"
 
+#include <stddef.h> /* ptrdiff_t */
 #if defined(__HAIKU__)
 # include <stdint.h>
 #endif /* __HAIKU__ */
@@ -940,9 +941,8 @@ split_str(char *str, const int update_args)
 				xerror(_("%s: Missing '%c'\n"), PROGRAM_NAME, close);
 				free(buf);
 				buf = (char *)NULL;
-				size_t i = words;
 
-				for (; i-- > 0;)
+				for (size_t i = words; i-- > 0;)
 					free(substr[i]);
 				free(substr);
 
@@ -1006,9 +1006,8 @@ split_str(char *str, const int update_args)
 				/* Free stuff and return. */
 				free(buf);
 				buf = (char *)NULL;
-				size_t i = words;
 
-				for (; i-- > 0;)
+				for (size_t i = words; i-- > 0;)
 					free(substr[i]);
 				free(substr);
 				return (char **)NULL;
@@ -2646,6 +2645,51 @@ check_chained_cmds(char *str)
 	return 0;
 }
 
+/* Return 1 if the string s[i] is a path and needs to be normalized.
+ * Otherwise, 0. */
+static int
+do_path_normalization(char **s, const size_t i, const int is_int_cmd)
+{
+	if (!s || !s[i] || is_int_cmd == 0) /* Exclude external commands. */
+		return 0;
+
+	const char *cmd = s[0];
+	const char *arg = s[i];
+
+	if (*cmd == 'l' && !cmd[1]) /* Exclude the internal 'l' command. */
+		return 0;
+
+	if (SELFORPARENT(arg)) /* Plain self/parent dir. */
+		return 1;
+
+	if (!strchr(arg, '/')) /* Not a path. */
+		return 0;
+
+	/* If at least one path component is self or parent, we need to do
+	 * normalization. */
+	const char *p = arg;
+	const char *start;
+	while (*p) {
+		/* Skip consecutive slashes. */
+		while (*p == '/')
+			p++;
+
+		if (!*p)
+			break;
+
+		start = p;
+		while (*p && *p != '/')
+			p++;
+
+		ptrdiff_t len = p - start;
+		if ((len == 1 && start[0] == '.')
+		|| (len == 2 && start[0] == '.' && start[1] == '.'))
+			return 1;
+	}
+
+	return 0;
+}
+
 /*
  * This function is one of the keys of clifm. It will perform a series of
  * actions:
@@ -2875,13 +2919,8 @@ parse_input_str(char *str)
 			 * #     2.6) "." and ".."       #
 			 * ############################### */
 
-		if ((*substr[i] == '.' && (!substr[i][1] || (substr[i][1] == '.'
-		&& (!substr[i][2] || substr[i][2] == '/'))))
-		|| strstr(substr[i], "/..")) {
-			char *tmp = (i == 0 /* autocd/auto-open (no command name) */
-				/* Exclude 'l' command. */
-				|| (is_int_cmd == 1 && (*substr[0] != 'l' || substr[0][1])))
-					? normalize_path(substr[i], strlen(substr[i])) : NULL;
+		if (do_path_normalization(substr, i, is_int_cmd) == 1) {
+			char *tmp = normalize_path(substr[i], strlen(substr[i]));
 			if (tmp) {
 				free(substr[i]);
 				substr[i] = tmp;
@@ -3089,6 +3128,7 @@ parse_input_str(char *str)
 			 * ####################################### */
 
 	if (regex_expand(substr[0]) == 1)
+		/* Escaped file names are unescaped here. */
 		expand_regex(&substr);
 
 	/* #### NULL TERMINATE THE INPUT STRING ARRAY (again) #### */
