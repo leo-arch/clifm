@@ -653,11 +653,10 @@ compress_zstandard(char *name, char **args)
 	int exit_status = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 
 	/* 3. If tar suceeded, compress the archive with zstandard. */
-	if (exit_status == 0) {
+	if (exit_status == 0)
 		exit_status = zstandard(archive_name, NULL, 'c', 0);
-		unlinkat(XAT_FDCWD, archive_name, 0);
-	}
 
+	unlinkat(XAT_FDCWD, archive_name, 0);
 	free(cmd);
 	free(archive_name);
 
