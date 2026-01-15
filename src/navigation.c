@@ -603,7 +603,7 @@ print_dirhist(char *query)
 	const int fuzzy_str_type = (len > 0 && contains_utf8(query) == 1)
 		? FUZZY_FILES_UTF8 : FUZZY_FILES_ASCII;
 	struct stat a;
-	char pointer[32];
+	char pointer[(MAX_COLOR * 2) + 8];
 
 	snprintf(pointer, sizeof(pointer), "%s%s%s", mi_c, SET_MISC_PTR, df_c);
 
