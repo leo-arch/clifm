@@ -646,7 +646,7 @@ new_instance(char *dir, int sudo)
 	char *deq_dir = unescape_str(dir, 0);
 	if (!deq_dir) {
 		free(sudo_prog);
-		xerror(_("%s: '%s': Cannot escape filename\n"), PROGRAM_NAME, dir);
+		xerror(_("%s: '%s': Error unescaping filename\n"), PROGRAM_NAME, dir);
 		return FUNC_FAILURE;
 	}
 
