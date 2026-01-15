@@ -1898,6 +1898,9 @@ expand_file_type(char ***substr)
 static void
 expand_mime_type(char ***substr)
 {
+	if (!*substr)
+		return;
+
 	int *mime_type_array = xnmalloc(INT_ARRAY_MAX, sizeof(int));
 	size_t mime_type_n = 0;
 	struct stat a;
@@ -1958,6 +1961,9 @@ expand_mime_type(char ***substr)
 static void
 expand_bookmarks(char ***substr)
 {
+	if (!*substr)
+		return;
+
 	struct stat a;
 
 	int *bm_array = xnmalloc(INT_ARRAY_MAX, sizeof(int));
@@ -2660,7 +2666,7 @@ do_path_normalization(char **s, const size_t i, const int is_int_cmd)
 	const char *cmd = s[0];
 	const char *arg = s[i];
 
-	if (*cmd == 'l' && !cmd[1]) /* Exclude the internal 'l' command. */
+	if (cmd && *cmd == 'l' && !cmd[1]) /* Exclude the internal 'l' command. */
 		return 0;
 
 	if (SELFORPARENT(arg)) /* Plain self/parent dir. */
@@ -2675,8 +2681,7 @@ do_path_normalization(char **s, const size_t i, const int is_int_cmd)
 	const char *start;
 
 	while (*p) {
-		/* Skip consecutive slashes. */
-		while (*p == '/')
+		while (*p == '/') /* Skip consecutive slashes. */
 			p++;
 
 		if (!*p)
