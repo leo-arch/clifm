@@ -53,6 +53,24 @@ reset_inotify(void)
 			PROGRAM_NAME, rpath, strerror(errno));
 }
 
+/* Return 1 if NAME is in the current file list, or 0 otherwise. */
+static int
+is_file_in_list(const char *name, const size_t name_len)
+{
+	if (!name || !*name)
+		return 0;
+
+	filesn_t i = g_files_num;
+	while (--i >= 0) {
+		if (*file_info[i].name == *name
+		&& name_len == file_info[i].bytes
+		&& memcmp(file_info[i].name, name, name_len) == 0)
+			return 1;
+	}
+
+	return 0;
+}
+
 static void
 read_inotify(void)
 {
@@ -75,6 +93,7 @@ read_inotify(void)
 
 	int ignore_event = 0;
 	int refresh = 0;
+	struct stat a;
 
 	for (char *ptr = inotify_buf;
 	ptr + ((struct inotify_event *)ptr)->len < inotify_buf + i;
@@ -94,15 +113,25 @@ read_inotify(void)
 			break;
 		}
 
+		const size_t event_name_len = strlen(event->name);
+
 		if (event->mask & IN_CREATE) {
 # ifdef INOTIFY_DEBUG
 			puts("IN_CREATE");
 # endif /* INOTIFY_DEBUG */
-			struct stat a;
 			if (event->len && lstat(event->name, &a) != 0) {
-				/* The file was created, but doesn't exist anymore */
+				/* The file was created, but doesn't exist anymore. */
 				ignore_event = 1;
 			}
+		}
+
+		if (event->mask & IN_MOVED_FROM) {
+# ifdef INOTIFY_DEBUG
+			puts("IN_MOVED_FROM");
+# endif /* INOTIFY_DEBUG */
+			/* If the source filename is not in the file list, ignore
+			 * this event. */
+			ignore_event = !is_file_in_list(event->name, event_name_len);
 		}
 
 		/* A file was renamed */
@@ -110,37 +139,29 @@ read_inotify(void)
 # ifdef INOTIFY_DEBUG
 			puts("IN_MOVED_TO");
 # endif /* INOTIFY_DEBUG */
-			filesn_t j = g_files_num;
-			while (--j >= 0) {
-				if (*file_info[j].name == *event->name
-				&& strcmp(file_info[j].name, event->name) == 0)
-					break;
-			}
-
-			/* If destiny filename is already in the file list (j >= 0),
-			 * ignore this event. */
-			ignore_event = (j < 0) ? 0 : 1;
+			/* If the destination filename is in the file list, ignore
+			 * this event. */
+			ignore_event = is_file_in_list(event->name, event_name_len);
 		}
 
 		if (event->mask & IN_DELETE) {
 # ifdef INOTIFY_DEBUG
 			puts("IN_DELETE");
 # endif /* INOTIFY_DEBUG */
-			struct stat a;
 			if (event->len && lstat(event->name, &a) == 0)
-				/* The file was removed, but is still there (recreated) */
+				/* The file was removed, but is still there (recreated). */
 				ignore_event = 1;
 		}
 
 # ifdef INOTIFY_DEBUG
+		if (event->mask & IN_ACCESS)
+			puts("IN_ACCESS");
+		if (event->mask & IN_ATTRIB)
+			puts("IN_ATTRIB");
 		if (event->mask & IN_DELETE_SELF)
 			puts("IN_DELETE_SELF");
 		if (event->mask & IN_MOVE_SELF)
 			puts("IN_MOVE_SELF");
-		if (event->mask & IN_MOVED_FROM)
-			puts("IN_MOVED_FROM");
-		if (event->mask & IN_MOVED_TO)
-			puts("IN_MOVED_TO");
 		if (event->mask & IN_IGNORED)
 			puts("IN_IGNORED");
 # endif /* INOTIFY_DEBUG */
