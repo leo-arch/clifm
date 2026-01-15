@@ -11,10 +11,9 @@
 
 #include <errno.h>
 #include <langinfo.h> /* nl_langinfo() */
-#include <locale.h>
-#include <string.h>
-#include <termios.h>
-#include <unistd.h>
+#include <locale.h>   /* setlocale */
+#include <string.h>   /* strcmp, strerror */
+#include <unistd.h>   /* isatty, gethostname, STDIN_FILENO */
 
 #include "args.h"
 #include "aux.h"
