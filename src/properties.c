@@ -1283,15 +1283,13 @@ print_file_details(char *filename, const struct stat *attr, const char file_type
 
 	printf(_("  Uid: %s%u (%s)%s"), uid_color, attr->st_uid, !owner
 		? _("UNKNOWN") : owner->pw_name, cend);
-	printf(_("  Gid: %s%u (%s)%s"), gid_color, attr->st_gid, !group
+	printf(_("  Gid: %s%u (%s)%s\n"), gid_color, attr->st_gid, !group
 		? _("UNKNOWN") : group->gr_name, cend);
 
 	if (S_ISCHR(attr->st_mode) || S_ISBLK(attr->st_mode)) {
-		printf(_("  Device type: %s%ju,%ju%s\n"), BOLD,
-			(uintmax_t)major(attr->st_rdev), (uintmax_t)minor(attr->st_rdev),
-			cend);
-	} else {
-		putchar('\n');
+		printf(_("Device type:\t%s%ju,%ju%s\n"), BOLD,
+			(uintmax_t)major(attr->st_rdev),
+			(uintmax_t)minor(attr->st_rdev), cend);
 	}
 
 #if defined(LINUX_FILE_ATTRS)
@@ -1757,6 +1755,9 @@ print_size(const struct stat *attr, const int apparent)
 static void
 print_file_size(const struct stat *attr)
 {
+	if (S_ISCHR(attr->st_mode) || S_ISBLK(attr->st_mode))
+		return;
+
 	fputs(_("Size:\t\t"), stdout);
 	print_size(attr, 1); /* Apparent size */
 	fputs("\t\t", stdout);

@@ -2549,8 +2549,7 @@ run_profile_line(char *cmd)
 	exec_cmd(cmds);
 	no_log = 0;
 
-	size_t i = args_n + 1;
-	for (; i-- > 0;)
+	for (size_t i = args_n + 1; i-- > 0;)
 		free(cmds[i]);
 	free(cmds);
 
