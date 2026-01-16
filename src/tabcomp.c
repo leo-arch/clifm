@@ -424,10 +424,8 @@ unescape_word(char *str, char *buf, const size_t max)
 	char *p = str;
 
 	while (*p && i < max) {
-		if (*p != '\\') {
-			buf[i] = *p;
-			i++;
-		}
+		if (*p != '\\')
+			buf[i++] = *p;
 		p++;
 	}
 
@@ -2095,10 +2093,8 @@ AFTER_USUAL_COMPLETION:
 		 * Copy all the non-dead entries into a new array. */
 		temp_array = xnmalloc(3 + newlen, sizeof (char *));
 		for (i = j = 1; matches[i]; i++) {
-			if (matches[i] != &dead_slot) {
-				temp_array[j] = matches[i];
-				j++;
-			}
+			if (matches[i] != &dead_slot)
+				temp_array[j++] = matches[i];
 		}
 		temp_array[j] = (char *)NULL;
 
@@ -2244,8 +2240,8 @@ AFTER_USUAL_COMPLETION:
 				for (k = _start; replacement[k]; k++) {
 					rl_highlight(replacement, k, SET_COLOR);
 					if ((signed char)replacement[k] < 0) {
-						t[l] = replacement[k];
-						l++;
+						t[l++] = replacement[k];
+
 						if ((signed char)replacement[k + 1] >= 0) {
 							t[l] = '\0';
 							l = 0;
@@ -2339,13 +2335,10 @@ AFTER_USUAL_COMPLETION:
 			char temp_string[4];
 			int temp_string_index = 0;
 
-			if (quote_char) {
-				temp_string[temp_string_index] = quote_char;
-				temp_string_index++;
-			}
+			if (quote_char)
+				temp_string[temp_string_index++] = quote_char;
 
-			temp_string[temp_string_index] = (char)(delimiter ? delimiter : ' ');
-			temp_string_index++;
+			temp_string[temp_string_index++] = (char)(delimiter ? delimiter : ' ');
 
 			temp_string[temp_string_index] = '\0';
 
@@ -2691,8 +2684,8 @@ RESTART:
 				rl_highlight(ss, (size_t)k, SET_COLOR);
 
 				if ((signed char)ss[k] < 0) {
-					t[l] = ss[k];
-					l++;
+					t[l++] = ss[k];
+
 					if ((signed char)ss[k + 1] >= 0) {
 						t[l] = '\0';
 						l = 0;

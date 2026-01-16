@@ -569,16 +569,14 @@ normalize_path(char *src, const size_t src_len)
 			}
 		}
 
-		res[res_len] = '/';
-		res_len++;
+		res[res_len++] = '/';
 		memcpy(&res[res_len], ptr, len);
 		res_len += len;
 	}
 
-	if (res_len == 0) {
-		res[res_len] = '/';
-		res_len++;
-	}
+	if (res_len == 0)
+		res[res_len++] = '/';
+
 
 	res[res_len] = '\0';
 
@@ -953,6 +951,7 @@ hex2rgb(const char *hex)
 		snprintf(tmp_color, sizeof(tmp_color), "38;2;%d;%d;%d", r, g, b);
 	else
 		snprintf(tmp_color, sizeof(tmp_color), "%d;38;2;%d;%d;%d", attr, r, g, b);
+
 	return tmp_color;
 }
 
@@ -1071,8 +1070,7 @@ is_cmd_in_path(const char *cmd)
 	const int is_secure_env =
 		(xargs.secure_env == 1 || xargs.secure_env_full == 1);
 
-	size_t i;
-	for (i = 0; i < path_n; i++) { /* Check each path in PATH. */
+	for (size_t i = 0; i < path_n; i++) { /* Check each path in PATH. */
 		if (!paths[i].path || !*paths[i].path)
 			continue;
 

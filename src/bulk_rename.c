@@ -307,8 +307,7 @@ get_new_names(FILE *fp, const size_t total, int *status)
 			line[len] = '\0';
 		}
 
-		fnames[i] = savestring(line, len);
-		i++;
+		fnames[i++] = savestring(line, len);
 	}
 
 	fnames[i] = (char *)NULL;

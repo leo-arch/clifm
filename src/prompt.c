@@ -158,11 +158,8 @@ copy_char(char *buf, char *s)
 	}
 
 	int c = 0;
-	while (c < bytes) {
-		buf[c] = *s;
-		c++;
-		s++;
-	}
+	while (c < bytes)
+		buf[c++] = *s++;
 
 	return (size_t)c;
 }
@@ -216,10 +213,8 @@ reduce_path_fish(char *str)
 			break;
 		}
 
-		if (*s == '.') {
-			buf[i++] = *s;
-			s++;
-		}
+		if (*s == '.')
+			buf[i++] = *s++;
 
 		if (conf.prompt_f_dir_len == 1) {
 			const size_t bytes = copy_char(buf + i, s);
@@ -1142,8 +1137,8 @@ ADD_STRING:
 			const size_t new_len = result_len + 2
 				+ (wrong_cmd ? (MAX_COLOR + 6) : 0);
 			result = xnrealloc(result, new_len, sizeof(char));
-			result[result_len] = (char)c;
-			result_len++;
+			result[result_len++] = (char)c;
+
 			result[result_len] = '\0';
 		}
 	}
@@ -1509,8 +1504,7 @@ get_rprompt_len_utf8(char *rprompt)
 			if (tmp)
 				i += (size_t)(tmp - (buf + i) + 1);
 		} else {
-			len += wcwidth(buf[i]);
-			i++;
+			len += wcwidth(buf[i++]);
 		}
 	}
 

@@ -706,8 +706,7 @@ create_files(char **args, const int is_md)
 
 		const int ret = create_file(args[i], is_md);
 		if (ret == FUNC_SUCCESS) {
-			new_files[new_files_n] = args[i];
-			new_files_n++;
+			new_files[new_files_n++] = args[i];
 		} else {
 			exit_status = ret;
 		}
@@ -1285,8 +1284,7 @@ vv_rename_files(char **args, const size_t copied)
 		char *s = strrchr(args[i], '/');
 		snprintf(p, sizeof(p), "%s/%s", dest, (s && *(++s)) ? s : args[i]);
 
-		tmp[c] = savestring(p, strnlen(p, sizeof(p)));
-		c++;
+		tmp[c++] = savestring(p, strnlen(p, sizeof(p)));
 	}
 
 	tmp[c] = (char *)NULL;
@@ -1475,10 +1473,8 @@ construct_cp_mv_cmd(char **cmd, char *new_name, int *cwd, const size_t force)
 	}
 
 	/* wcp(1) does not support end of options (--). */
-	if (*tcmd[0] != 'w' || strcmp(tcmd[0], "wcp") != 0) {
-		tcmd[n] = savestring("--", 2);
-		n++;
-	}
+	if (*tcmd[0] != 'w' || strcmp(tcmd[0], "wcp") != 0)
+		tcmd[n++] = savestring("--", 2);
 
 	/* The -f,--force parameter is internal. Skip it.
 	 * It instructs cp/mv to skip confirmation prompts. */

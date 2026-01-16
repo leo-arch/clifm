@@ -275,9 +275,7 @@ list_mounted_devs(const int mode)
 		media = xnrealloc(media, mp_n + 2, sizeof(struct mnt_t));
 		media[mp_n].mnt = savestring(ent->mnt_dir, strlen(ent->mnt_dir));
 		media[mp_n].dev = savestring(ent->mnt_fsname, strlen(ent->mnt_fsname));
-		media[mp_n].label = (char *)NULL;
-
-		mp_n++;
+		media[mp_n++].label = (char *)NULL;
 	}
 
 	endmntent(fp);
@@ -429,8 +427,7 @@ list_mountpoints_bsd(struct statfs *fslist)
 		media[j].mnt = savestring(fslist[i].f_mntonname,
 			strlen(fslist[i].f_mntonname));
 		media[j].label = (char *)NULL;
-		media[j].dev = (char *)NULL;
-		j++;
+		media[j++].dev = (char *)NULL;
 	}
 
 	media[j].dev = (char *)NULL;
@@ -535,8 +532,7 @@ xgetmntinfo_sun(void)
 		media = xnrealloc(media, n + 2, sizeof(struct mnt_t));
 		media[n].mnt = savestring(mp, strlen(mp));
 		media[n].label = (char *)NULL;
-		media[n].dev = (char *)NULL;
-		n++;
+		media[n++].dev = (char *)NULL;
 	}
 
 	fclose(fp);

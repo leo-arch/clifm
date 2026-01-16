@@ -228,17 +228,13 @@ glob_sort_dirs(glob_t *globbed_files, size_t *g)
 	}
 
 	for (i = 0; globbed_files->gl_pathv[i]; i++) {
-		if (dirs[i] == 1) {
-			gfiles[n] = globbed_files->gl_pathv[i];
-			n++;
-		}
+		if (dirs[i] == 1)
+			gfiles[n++] = globbed_files->gl_pathv[i];
 	}
 
 	for (i = 0; globbed_files->gl_pathv[i]; i++) {
-		if (dirs[i] == 0) {
-			gfiles[n] = globbed_files->gl_pathv[i];
-			n++;
-		}
+		if (dirs[i] == 0)
+			gfiles[n++] = globbed_files->gl_pathv[i];
 	}
 
 	free(dirs);
@@ -347,8 +343,7 @@ get_non_matches_from_search_path(const char *search_path, char **gfiles,
 
 		matches[n].eln = -1;
 		matches[n].len = wc_xstrlen(ent[i]->d_name);
-		matches[n].name = strdup(ent[i]->d_name);
-		n++;
+		matches[n++].name = strdup(ent[i]->d_name);
 	}
 
 	i = dir_entries;
@@ -389,8 +384,7 @@ get_glob_matches_invert(char **gfiles, const char *search_path,
 		matches[n].len = wc_xstrlen(file_info[i].name)
 			+ (size_t)file_info[i].eln_n + 1;
 
-		matches[n].name = strdup(file_info[i].name);
-		n++;
+		matches[n++].name = strdup(file_info[i].name);
 	}
 
 	matches[n].name = (char *)NULL;
@@ -827,8 +821,7 @@ print_regex_matches(const mode_t file_type, struct dirent **reg_dirlist,
 		index, file_type) == FUNC_FAILURE)
 			continue;
 
-		list[matches] = load_entry_info(reg_dirlist, index);
-		matches++;
+		list[matches++] = load_entry_info(reg_dirlist, index);
 	}
 
 	size_t count = 0;
@@ -939,15 +932,11 @@ search_regex(char **args)
 		: file_info[i].name;
 
 		if (regexec(&regex_files, name, 0, NULL, 0) == FUNC_SUCCESS) {
-			if (invert == 0) {
-				regex_index[found] = (int)i;
-				found++;
-			}
+			if (invert == 0)
+				regex_index[found++] = (int)i;
 		} else {
-			if (invert == 1) {
-				regex_index[found] = (int)i;
-				found++;
-			}
+			if (invert == 1)
+				regex_index[found++] = (int)i;
 		}
 	}
 

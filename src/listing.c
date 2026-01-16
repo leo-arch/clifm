@@ -2140,7 +2140,7 @@ list_files_vertical(size_t *counter, int *reset_pager,
 	/* NUM_COLUMNS is guarranteed to be >0 by get_columns() */
 	filesn_t num_rows = total_files / (filesn_t)num_columns;
 	if (total_files % (filesn_t)num_columns > 0)
-		++num_rows;
+		num_rows++;
 #endif
 
 	int last_column = 0;

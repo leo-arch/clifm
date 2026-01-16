@@ -263,6 +263,14 @@ run_shell_cmd(char **args)
 	reload_binaries();
 #endif /* !__CYGWIN__ */
 
+#if defined(GENERIC_FS_MONITOR)
+	const char *p = args[0];
+	if (exit_status == FUNC_SUCCESS && ((*p == 'm' && p[1] == 'v' && !p[2])
+	|| (*p == 'g' && p[1] == 'm' && p[2] == 'v' && !p[3])))
+		if (args[1] && is_file_in_cwd(args[1]) == 1)
+			reload_dirlist();
+#endif
+
 	return exit_status;
 }
 
@@ -2499,11 +2507,8 @@ exec_chained_cmds(char *cmd)
 
 		/* Get command */
 		str = xcalloc(strlen(cmd) + 1, sizeof(char));
-		while (cmd[i] && cmd[i] != '&' && cmd[i] != ';') {
-			str[len] = cmd[i];
-			len++;
-			i++;
-		}
+		while (cmd[i] && cmd[i] != '&' && cmd[i] != ';')
+			str[len++] = cmd[i++];
 
 		if (!*str) {
 			free(str);

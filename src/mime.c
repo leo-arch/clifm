@@ -398,11 +398,8 @@ get_cmd_from_line(char **line)
 
 	/* Get the first field in LINE */
 	while (*l != '\0' && *l != ';' && *l != '\n'
-	&& *l != '\'' && *l != '"' && len < sizeof(tmp) - 1) {
-		tmp[len] = *l;
-		len++;
-		l++;
-	}
+	&& *l != '\'' && *l != '"' && len < sizeof(tmp) - 1)
+		tmp[len++] = *l++;
 
 	tmp[len] = '\0';
 	*line = l;
@@ -973,11 +970,8 @@ get_apps_from_file(FILE *fp, char *file_name, const char *mime,
 			size_t app_len = 0;
 			/* Split the applications line into substrings, if any */
 			while (*tmp != '\0' && *tmp != ';' && *tmp != '\n' && *tmp != '\''
-			&& *tmp != '"') {
-				app[app_len] = *tmp;
-				app_len++;
-				tmp++;
-			}
+			&& *tmp != '"')
+				app[app_len++] = *tmp++;
 
 			while (*tmp == ' ') /* Remove leading spaces */
 				tmp++;
@@ -1231,8 +1225,7 @@ append_params(char **args, char *name, char ***cmd, int *exec_flags)
 
 		if (*args[i] == '%' && args[i][1] == 'f' && !args[i][2]) {
 			f = 1;
-			(*cmd)[n] = savestring(name, strlen(name));
-			n++;
+			(*cmd)[n++] = savestring(name, strlen(name));
 			continue;
 		}
 
@@ -1244,10 +1237,8 @@ append_params(char **args, char *name, char ***cmd, int *exec_flags)
 		/* Expand %m placeholder to the file's MIME type */
 		if (*args[i] == '%' && args[i][1] == 'm') {
 			char *mime = xmagic(name, MIME_TYPE);
-			if (mime) {
-				(*cmd)[n] = mime;
-				n++;
-			}
+			if (mime)
+				(*cmd)[n++] = mime;
 			continue;
 		}
 
@@ -1255,8 +1246,7 @@ append_params(char **args, char *name, char ***cmd, int *exec_flags)
 		if (*args[i] == '%' && args[i][1] == 'u') {
 			char *p = url_encode(name, 1);
 			if (p) {
-				(*cmd)[n] = p;
-				n++;
+				(*cmd)[n++] = p;
 				f = 1;
 			}
 			continue;
@@ -1265,24 +1255,19 @@ append_params(char **args, char *name, char ***cmd, int *exec_flags)
 		if (*args[i] == '$' && IS_ALPHA_UP(args[i][1])) {
 			char *env = expand_env(args[i]);
 			if (env) {
-				(*cmd)[n] = savestring(env, strlen(env));
-				n++;
+				(*cmd)[n++] = savestring(env, strlen(env));
 			}
 			continue;
 		}
 
-		if (*args[i] == '&') {
+		if (*args[i] == '&')
 			bg_proc = 1;
-		} else {
-			(*cmd)[n] = savestring(args[i], strlen(args[i]));
-			n++;
-		}
+		else
+			(*cmd)[n++] = savestring(args[i], strlen(args[i]));
 	}
 
-	if (f == 0) {
-		(*cmd)[n] = savestring(name, strlen(name));
-		n++;
-	}
+	if (f == 0)
+		(*cmd)[n++] = savestring(name, strlen(name));
 
 	(*cmd)[n] = (char *)NULL;
 }

@@ -218,14 +218,12 @@ construct_utf8_char(unsigned char c)
 		return SKIP_CHAR_NO_REDISPLAY;
 
 	if (wc_len < (size_t)wc_bytes - 1) {
-		wc_str[wc_len] = (char)c;
-		wc_len++;
+		wc_str[wc_len++] = (char)c;
 		/* Incomplete wide char: do not trigger suggestions. */
 		return SKIP_CHAR_NO_REDISPLAY;
 	}
 
-	wc_str[wc_len] = (char)c;
-	wc_len++;
+	wc_str[wc_len++] = (char)c;
 	wc_str[wc_len] = '\0';
 
 	if (conf.highlight == 1 && cur_color != tx_c && cur_color != hv_c
@@ -1523,8 +1521,7 @@ bm_paths_generator(const char *text, int state)
 
 	while (i < bm_n) {
 		bname = bookmarks[i].name;
-		bpath = bookmarks[i].path;
-		i++;
+		bpath = bookmarks[i++].path;
 
 		if (!bname || !bpath || (conf.case_sens_list == 1 ? strcmp(bname, text)
 		: strcasecmp(bname, text)) != 0)
@@ -2182,9 +2179,8 @@ rl_mime_list(void)
 			free(m);
 			continue;
 		} else {
-			t[n] = savestring(m, strlen(m));
+			t[n++] = savestring(m, strlen(m));
 			free(m);
-			n++;
 			t[n] = (char *)NULL;
 		}
 	}
@@ -2241,8 +2237,7 @@ rl_mime_files(const char *text)
 
 		if (!p) continue;
 
-		t[n] = savestring(name, strlen(name));
-		n++;
+		t[n++] = savestring(name, strlen(name));
 	}
 
 	t[n] = (char *)NULL;
@@ -2330,9 +2325,8 @@ rl_glob(char *text)
 	for (size_t i = 0; i < globbuf.gl_pathc; i++) {
 		if (SELFORPARENT(globbuf.gl_pathv[i]))
 			continue;
-		matches[j] =
+		matches[j++] =
 			savestring(globbuf.gl_pathv[i], strlen(globbuf.gl_pathv[i]));
-		j++;
 	}
 	matches[j] = (char *)NULL;
 
@@ -2385,8 +2379,7 @@ rl_trashed_files(const char *text)
 			free(t[i]);
 			continue;
 		}
-		tfiles[nn] = savestring(name, strlen(name));
-		nn++;
+		tfiles[nn++] = savestring(name, strlen(name));
 		free(t[i]);
 	}
 	free(t);

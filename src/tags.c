@@ -487,10 +487,8 @@ get_tags(char **args)
 	int *t = xnmalloc((size_t)n + 1, sizeof(int));
 
 	for (int i = 0; i < n; i++) {
-		if (*args[i] == ':' && *(args[i] + 1)) {
-			t[c] = i;
-			c++;
-		}
+		if (*args[i] == ':' && *(args[i] + 1))
+			t[c++] = i;
 	}
 
 	if (c == 0) {
@@ -758,10 +756,8 @@ reconstruct_input(char **args)
 	default:  a[1] = savestring("-h", 2); c = 2; break;
 	}
 
-	for (n = 1; args[n]; n++) {
-		a[c] = savestring(args[n], strlen(args[n]));
-		c++;
-	}
+	for (n = 1; args[n]; n++)
+		a[c++] = savestring(args[n], strlen(args[n]));
 	a[c] = (char *)NULL;
 
 	return a;

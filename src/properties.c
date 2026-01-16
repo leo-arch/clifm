@@ -1339,7 +1339,7 @@ has_nsec_modifier(char *fmt)
 	while (*fmt) {
 		if (*fmt == '%' && fmt[1] == 'N')
 			return fmt;
-		++fmt;
+		fmt++;
 	}
 
 	return (char *)NULL;

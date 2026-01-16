@@ -732,10 +732,8 @@ strip_color_line(const char *restrict str, const size_t str_len)
 	while (*str) {
 		if (IS_ALNUM(*str) || *str == '=' || *str == ';' || *str == ':'
 		|| *str == RGB_COLOR_PREFIX || *str == COLOR256_PREFIX
-		|| *str == '-' || *str == '_') {
-			buf[len] = *str;
-			len++;
-		}
+		|| *str == '-' || *str == '_')
+			buf[len++] = *str;
 		str++;
 	}
 
@@ -1501,9 +1499,7 @@ split_extension_colors(char *extcolors)
 				break;
 			}
 
-			buf[len] = *p;
-			len++;
-			p++;
+			buf[len++] = *p++;
 			break;
 		}
 	}
@@ -2364,8 +2360,7 @@ split_color_line(char *line, const int type)
 			buf[len] = '\0';
 
 			colors = xnrealloc(colors, words + 2, sizeof(char *));
-			colors[words] = savestring(buf, len);
-			words++;
+			colors[words++] = savestring(buf, len);
 			*buf = '\0';
 
 			if (*p == '\0')
@@ -2381,9 +2376,7 @@ split_color_line(char *line, const int type)
 				break;
 			}
 
-			buf[len] = *p;
-			len++;
-			p++;
+			buf[len++] = *p++;
 			break;
 		}
 	}
@@ -2729,8 +2722,7 @@ get_colorschemes(void)
 			if (is_valid_colorscheme_name(ent->d_name) == 0)
 				continue;
 
-			color_schemes[i] = savestring(ent->d_name, strlen(ent->d_name));
-			i++;
+			color_schemes[i++] = savestring(ent->d_name, strlen(ent->d_name));
 		}
 
 		closedir(dir_p);
@@ -2766,8 +2758,7 @@ get_colorschemes(void)
 		|| is_duplicate_colorscheme_name(ent->d_name, i_tmp) == 1)
 			continue;
 
-		color_schemes[i] = savestring(ent->d_name, strlen(ent->d_name));
-		i++;
+		color_schemes[i++] = savestring(ent->d_name, strlen(ent->d_name));
 	}
 
 	closedir(dir_p);

@@ -1158,8 +1158,7 @@ trash_files_args(char **args)
 			trashed_files++;
 			if (print_removed_files == 1) {
 				/* Store indices of successfully trashed files */
-				successfully_trashed[n] = (int)i;
-				n++;
+				successfully_trashed[n++] = (int)i;
 			}
 		} else {
 			cwd = 0;

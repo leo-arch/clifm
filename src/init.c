@@ -320,8 +320,7 @@ get_sysusers(void)
 		const size_t namlen = strlen(name);
 		sys_users[n].name = savestring(name, namlen);
 		sys_users[n].namlen = namlen;
-		sys_users[n].id = p->pw_uid;
-		n++;
+		sys_users[n++].id = p->pw_uid;
 	}
 
 	endpwent();
@@ -360,8 +359,7 @@ get_sysgroups(void)
 		const size_t namlen = strlen(g->gr_name);
 		sys_groups[n].name = savestring(g->gr_name, namlen);
 		sys_groups[n].namlen = namlen;
-		sys_groups[n].id = g->gr_gid;
-		n++;
+		sys_groups[n++].id = g->gr_gid;
 	}
 
 	endgrent();
@@ -939,8 +937,7 @@ load_tags(void)
 			free(t[i]);
 			continue;
 		}
-		tags[tags_n] = savestring(t[i]->d_name, strlen(t[i]->d_name));
-		tags_n++;
+		tags[tags_n++] = savestring(t[i]->d_name, strlen(t[i]->d_name));
 		free(t[i]);
 	}
 	free(t);
@@ -1200,8 +1197,7 @@ load_bookmarks(void)
 		if (*line == '/') {
 			bookmarks[bm_n].shortcut = (char *)NULL;
 			bookmarks[bm_n].name = (char *)NULL;
-			bookmarks[bm_n].path = savestring(line, strlen(line));
-			bm_n++;
+			bookmarks[bm_n++].path = savestring(line, strlen(line));
 			continue;
 		}
 
@@ -1212,8 +1208,7 @@ load_bookmarks(void)
 			if (!tmp) {
 				bookmarks[bm_n].shortcut = (char *)NULL;
 				bookmarks[bm_n].name = (char *)NULL;
-				bookmarks[bm_n].path = (char *)NULL;
-				bm_n++;
+				bookmarks[bm_n++].path = (char *)NULL;
 				continue;
 			}
 
@@ -1227,8 +1222,7 @@ load_bookmarks(void)
 
 			if (!tmp) {
 				bookmarks[bm_n].name = (char *)NULL;
-				bookmarks[bm_n].path = save_bm_path(p);
-				bm_n++;
+				bookmarks[bm_n++].path = save_bm_path(p);
 				continue;
 			}
 
@@ -1236,13 +1230,11 @@ load_bookmarks(void)
 			bookmarks[bm_n].name = savestring(p, strlen(p));
 
 			if (!*(++tmp)) {
-				bookmarks[bm_n].path = (char *)NULL;
-				bm_n++;
+				bookmarks[bm_n++].path = (char *)NULL;
 				continue;
 			}
 
-			bookmarks[bm_n].path = save_bm_path(tmp);
-			bm_n++;
+			bookmarks[bm_n++].path = save_bm_path(tmp);
 			continue;
 		}
 
@@ -1253,8 +1245,7 @@ load_bookmarks(void)
 		/* No name either */
 		if (!tmp) {
 			bookmarks[bm_n].name = (char *)NULL;
-			bookmarks[bm_n].path = (char *)NULL;
-			bm_n++;
+			bookmarks[bm_n++].path = (char *)NULL;
 			continue;
 		}
 
@@ -1262,12 +1253,10 @@ load_bookmarks(void)
 		bookmarks[bm_n].name = savestring(line, strlen(line));
 
 		if (!*(++tmp)) {
-			bookmarks[bm_n].path = (char *)NULL;
-			bm_n++;
+			bookmarks[bm_n++].path = (char *)NULL;
 			continue;
 		} else {
-			bookmarks[bm_n].path = save_bm_path(tmp);
-			bm_n++;
+			bookmarks[bm_n++].path = save_bm_path(tmp);
 		}
 	}
 
@@ -1332,8 +1321,7 @@ load_actions(void)
 			sizeof(struct actions_t));
 		usr_actions[actions_n].value = savestring(tmp + 1, strlen(tmp + 1));
 		*tmp = '\0';
-		usr_actions[actions_n].name = savestring(line, strlen(line));
-		actions_n++;
+		usr_actions[actions_n++].name = savestring(line, strlen(line));
 	}
 
 	free(line);
@@ -1568,8 +1556,7 @@ load_file_templates(void)
 #endif /* !_DIRENT_HAVE_D_TYPE */
 			continue;
 
-		file_templates[n] = savestring(ename, strlen(ename));
-		n++;
+		file_templates[n++] = savestring(ename, strlen(ename));
 	}
 
 	closedir(dir);
@@ -1779,8 +1766,8 @@ get_sel_files(void)
 
 		sel_elements = xnrealloc(sel_elements, sel_n + 2, sizeof(struct sel_t));
 		sel_elements[sel_n].name = savestring(line, len);
-		sel_elements[sel_n].size = (off_t)UNSET;
-		sel_n++;
+		sel_elements[sel_n++].size = (off_t)UNSET;
+
 		sel_elements[sel_n].name = (char *)NULL;
 		sel_elements[sel_n].size = (off_t)UNSET;
 	}
@@ -1821,19 +1808,16 @@ get_cdpath(void)
 	for (size_t i = 0; t[i]; i++) {
 		/* Store path in CDPATH in a tmp buffer */
 		char buf[PATH_MAX + 1];
-		while (t[i] && t[i] != ':' && len < sizeof(buf) - 1) {
-			buf[len] = t[i];
-			len++;
-			i++;
-		}
+		while (t[i] && t[i] != ':' && len < sizeof(buf) - 1)
+			buf[len++] = t[i++];
+
 		buf[len] = '\0';
 
 		/* Make room in cdpaths for a new path */
 		cdpaths = xnrealloc(cdpaths, n + 2, sizeof(char *));
 
 		/* Dump the buffer into the global cdpaths array */
-		cdpaths[n] = savestring(buf, len);
-		n++;
+		cdpaths[n++] = savestring(buf, len);
 
 		len = 0;
 		if (!t[i])
@@ -1928,8 +1912,7 @@ get_path_env(const int check_timestamps)
 					goto CONT;
 			}
 
-			paths[n].path = savestring(p, len);
-			n++;
+			paths[n++].path = savestring(p, len);
 		}
 
 CONT:
@@ -2260,13 +2243,11 @@ write_alias(const char *s, char *p)
 	aliases[aliases_n].name = savestring(s, strlen(s));
 	int add = 0;
 	if (*p == '\'') {
-		aliases[aliases_n].cmd = strbtw(p, '\'', '\'');
-		aliases_n++;
+		aliases[aliases_n++].cmd = strbtw(p, '\'', '\'');
 		add = 1;
 	} else {
 		if (*p == '"') {
-			aliases[aliases_n].cmd = strbtw(p, '"', '"');
-			aliases_n++;
+			aliases[aliases_n++].cmd = strbtw(p, '"', '"');
 			add = 1;
 		}
 	}
@@ -2433,9 +2414,8 @@ get_prompt_cmds(void)
 		if (!line[10])
 			continue;
 		prompt_cmds = xnrealloc(prompt_cmds, prompt_cmds_n + 1, sizeof(char *));
-		prompt_cmds[prompt_cmds_n] = savestring(
+		prompt_cmds[prompt_cmds_n++] = savestring(
 		    line + 10, (size_t)line_len - 10);
-		prompt_cmds_n++;
 	}
 
 	free(line);

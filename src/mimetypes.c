@@ -96,8 +96,7 @@ load_user_mimetypes(void)
 
 			user_mimetypes[n].ext = savestring(ext, strlen(ext));
 			user_mimetypes[n].ext_hash = hashme(ext, conf.case_sens_list);
-			user_mimetypes[n].mimetype = savestring(mimetype, mime_len);
-			n++;
+			user_mimetypes[n++].mimetype = savestring(mimetype, mime_len);
 		}
 	}
 

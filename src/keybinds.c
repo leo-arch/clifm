@@ -151,16 +151,13 @@ translate_emacs_style_keyseq(const char *key)
 			return NULL;
 
 		/* Append single character to the buffer. */
-		buf[buf_len] = *key;
-		buf_len++;
-		key++;
+		buf[buf_len++] = *key++;
+
 		/* A character that is not a modifier key marks the end of the
 		 * key sequence. Append an ',' in this case, provided it is
 		 * not the end of the string. */
-		if (*key) {
-			buf[buf_len] = END_KEYSEQ_CHAR;
-			buf_len++;
-		}
+		if (*key)
+			buf[buf_len++] = END_KEYSEQ_CHAR;
 	}
 
 	buf[buf_len] = '\0';
@@ -883,8 +880,7 @@ load_keybinds(void)
 
 		*tmp = '\0';
 
-		kbinds[kbinds_n].function = savestring(line, strlen(line));
-		kbinds_n++;
+		kbinds[kbinds_n++].function = savestring(line, strlen(line));
 	}
 
 	fclose(fp);
@@ -1209,8 +1205,7 @@ my_insert_text(char *text, char *s, const char _s)
 		for (size_t i = 0; t[i]; i++) {
 			rl_highlight(t, i, SET_COLOR);
 			if ((signed char)t[i] < 0) {
-				q[l] = t[i];
-				l++;
+				q[l++] = t[i];
 				if ((signed char)t[i + 1] >= 0) {
 					q[l] = '\0';
 					l = 0;
@@ -2607,8 +2602,7 @@ print_highlight_string(char *s, const int insert_point)
 		rl_highlight(s, i, SET_COLOR);
 
 		if ((signed char)s[i] < 0) {
-			q[l] = s[i];
-			l++;
+			q[l++] = s[i];
 
 			if ((signed char)s[i + 1] >= 0) {
 				q[l] = '\0';

@@ -865,8 +865,7 @@ create_usr_var(const char *str)
 
 	usr_var = xnrealloc(usr_var, (size_t)(usrvar_n + 2), sizeof(struct usrvar_t));
 	usr_var[usrvar_n].name = savestring(name, strlen(name));
-	usr_var[usrvar_n].value = savestring(value, strlen(value));
-	usrvar_n++;
+	usr_var[usrvar_n++].value = savestring(value, strlen(value));
 
 	usr_var[usrvar_n].name = (char *)NULL;
 	usr_var[usrvar_n].value = (char *)NULL;

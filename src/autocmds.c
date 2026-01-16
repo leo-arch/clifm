@@ -444,8 +444,7 @@ CHECK_MATCH:
 		if ((rev == 0 && found == 0) || (rev == 1 && found == 1))
 			continue;
 
-		matches[matches_n] = i;
-		matches_n++;
+		matches[matches_n++] = i;
 	}
 
 	return (matches_n > 0 ? run_autocmds(matches, matches_n) : 0);

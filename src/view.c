@@ -305,8 +305,7 @@ purge_thumbnails_cache(void)
 
 		if (retval != -1) {
 			/* Both the thumbnail file and the original file exist. */
-			thumbs_in_db[thumbs_in_db_c] = savestring(line, strlen(line));
-			thumbs_in_db_c++;
+			thumbs_in_db[thumbs_in_db_c++] = savestring(line, strlen(line));
 			fprintf(tmp_fp, "%s@file://%s\n", line, p);
 			continue;
 		}

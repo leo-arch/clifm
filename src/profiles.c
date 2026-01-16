@@ -71,8 +71,7 @@ get_profile_names(void)
 			continue;
 #endif /* !_DIRENT_HAVE_D_TYPE */
 		profile_names = xnrealloc(profile_names, pf_n + 2, sizeof(char *));
-		profile_names[pf_n] = savestring(ent->d_name, strlen(ent->d_name));
-		pf_n++;
+		profile_names[pf_n++] = savestring(ent->d_name, strlen(ent->d_name));
 	}
 
 	free(pf_dir);

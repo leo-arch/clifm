@@ -122,8 +122,8 @@ select_file(char *file)
 	if (exists == 0) {
 		sel_elements = xnrealloc(sel_elements, sel_n + 2, sizeof(struct sel_t));
 		sel_elements[sel_n].name = savestring(tfile, strlen(tfile));
-		sel_elements[sel_n].size = (off_t)UNSET;
-		sel_n++;
+		sel_elements[sel_n++].size = (off_t)UNSET;
+
 		sel_elements[sel_n].name = (char *)NULL;
 		sel_elements[sel_n].size = (off_t)UNSET;
 
@@ -778,8 +778,7 @@ deselect_files_in_cwd(void)
 			sel = xnrealloc(sel, n + 2, sizeof(sel[0]));
 			sel[n].name =
 				savestring(sel_elements[i].name, strlen(sel_elements[i].name));
-			sel[n].size = (off_t)UNSET;
-			n++;
+			sel[n++].size = (off_t)UNSET;
 		}
 	}
 
@@ -1178,8 +1177,7 @@ deselect_from_args(char **args)
 		if (!ptr)
 			continue;
 
-		ds[j] = savestring(ptr, strlen(ptr));
-		j++;
+		ds[j++] = savestring(ptr, strlen(ptr));
 
 		free(ptr);
 	}

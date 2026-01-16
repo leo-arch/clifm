@@ -261,8 +261,7 @@ get_files_from_tmp_file(const char *tmpfile, const char *target, const filesn_t 
 			len--;
 		}
 
-		tmp_files[i] = savestring(line, len);
-		i++;
+		tmp_files[i++] = savestring(line, len);
 	}
 
 	tmp_files[i] = (char *)NULL;
@@ -299,9 +298,8 @@ get_remove_files(const char *target, char **tmp_files,
 	if (target == workspaces[cur_ws].path) {
 		for (i = 0; i < (size_t)g_files_num; i++) {
 			if (remove_this_file(file_info[i].name, tmp_files) == 1) {
-				rem_files[j] = savestring(file_info[i].name,
+				rem_files[j++] = savestring(file_info[i].name,
 					strlen(file_info[i].name));
-				j++;
 			}
 		}
 
@@ -319,8 +317,7 @@ get_remove_files(const char *target, char **tmp_files,
 					target, (*a)[i]->d_name);
 			}
 
-			rem_files[j] = savestring(p, strnlen(p, sizeof(p)));
-			j++;
+			rem_files[j++] = savestring(p, strnlen(p, sizeof(p)));
 		}
 		free((*a)[i]);
 	}

@@ -682,9 +682,8 @@ compress_others(char **args, char *name)
 		char *p = unescape_str(args[i], 0);
 		if (!p)
 			continue;
-		tcmd[n] = savestring(p, strlen(p));
+		tcmd[n++] = savestring(p, strlen(p));
 		free(p);
-		n++;
 	}
 	tcmd[n] = (char *)NULL;
 
@@ -888,10 +887,8 @@ extract_others(char **args)
 	tcmd[1] = savestring("-x", 2);
 	tcmd[2] = savestring("-e", 2);
 	n += 3;
-	for (i = 1; args[i]; i++) {
-		tcmd[n] = savestring(args[i], strlen(args[i]));
-		n++;
-	}
+	for (i = 1; args[i]; i++)
+		tcmd[n++] = savestring(args[i], strlen(args[i]));
 	tcmd[n] = (char *)NULL;
 
 	/* Launch it */
@@ -953,10 +950,8 @@ repack_others(char **args)
 	tcmd[2] = savestring(format, strlen(format));
 	tcmd[3] = savestring("-e", 2);
 	n += 4;
-	for (i = 1; args[i]; i++) {
-		tcmd[n] = savestring(args[i], strlen(args[i]));
-		n++;
-	}
+	for (i = 1; args[i]; i++)
+		tcmd[n++] = savestring(args[i], strlen(args[i]));
 	tcmd[n] = (char *)NULL;
 
 	int exit_status = FUNC_SUCCESS;

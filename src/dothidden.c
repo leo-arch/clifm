@@ -65,8 +65,7 @@ load_dothidden(void)
 
 		if (check_glob_char(line, GLOB_ONLY) == 0) {
 			h[counter].name = savestring(line, len);
-			h[counter].len = len;
-			counter++;
+			h[counter++].len = len;
 			continue;
 		}
 
@@ -88,8 +87,7 @@ load_dothidden(void)
 
 			len = strlen(gbuf.gl_pathv[i]);
 			h[counter].name = savestring(gbuf.gl_pathv[i], len);
-			h[counter].len = len;
-			counter++;
+			h[counter++].len = len;
 		}
 
 		globfree(&gbuf);

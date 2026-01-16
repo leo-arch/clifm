@@ -189,8 +189,7 @@ add_new_jump_entry(const char *dir, const size_t dir_len)
 	jump_db[jump_n].rank = 0;
 	jump_db[jump_n].keep = 0;
 	jump_db[jump_n].len = dir_len;
-	jump_db[jump_n].path = savestring(dir, dir_len);
-	jump_n++;
+	jump_db[jump_n++].path = savestring(dir, dir_len);
 
 	jump_db[jump_n].path = (char *)NULL;
 	jump_db[jump_n].len = 0;
@@ -882,8 +881,7 @@ dirjump(char **args, const int mode)
 				entry[match].last = jump_db[j].last_visit;
 				entry[match].needle = needle;
 				entry[match].match = jump_db[j].path;
-				entry[match].keep = (size_t)jump_db[j].keep;
-				match++;
+				entry[match++].keep = (size_t)jump_db[j].keep;
 			}
 		}
 
