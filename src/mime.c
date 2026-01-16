@@ -130,7 +130,8 @@ xmagic(const char *file, const int query_mime)
 	char *mime_type = NULL;
 
 	char tmp_file[PATH_MAX + 1];
-	snprintf(tmp_file, sizeof(tmp_file), "%s/%s", tmp_dir, TMP_FILENAME);
+	snprintf(tmp_file, sizeof(tmp_file), "%s/%s",
+		xargs.stealth_mode == 1 ? P_tmpdir : tmp_dir, TMP_FILENAME);
 	int tmp_fd = mkstemp(tmp_file);
 	if (tmp_fd == -1)
 		return NULL;
