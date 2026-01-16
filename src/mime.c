@@ -119,7 +119,7 @@ char *
 xmagic(const char *file, const int query_mime)
 {
 	if (!file || !*file)
-		return (char *)NULL;
+		return NULL;
 
 	if (query_mime == 1 && user_mimetypes) {
 		const char *mime = check_user_mimetypes(file);
@@ -127,39 +127,23 @@ xmagic(const char *file, const int query_mime)
 			return strdup(mime);
 	}
 
-	char *mime_type = (char *)NULL;
-	char *rand_ext = gen_rand_str(RAND_SUFFIX_LEN);
+	char *mime_type = NULL;
 
 	char tmp_file[PATH_MAX + 1];
-	snprintf(tmp_file, sizeof(tmp_file), "%s/mime.%s", tmp_dir,
-		rand_ext ? rand_ext : "Hu?+6545jk");
-	free(rand_ext);
-
-	int fd = 0;
-	FILE *fp_out = open_fwrite(tmp_file, &fd);
-	if (!fp_out)
-		return (char *)NULL;
-
-	FILE *fp_err = fopen(_PATH_DEVNULL, "w");
-	if (!fp_err)
-		goto END;
+	snprintf(tmp_file, sizeof(tmp_file), "%s/%s", tmp_dir, TMP_FILENAME);
+	int tmp_fd = mkstemp(tmp_file);
+	if (tmp_fd == -1)
+		return NULL;
 
 	int stdout_bk = dup(STDOUT_FILENO); /* Store original stdout */
-	int stderr_bk = dup(STDERR_FILENO); /* Store original stderr */
-
-	if (stdout_bk == -1 || stderr_bk == -1)
+	if (stdout_bk == -1)
 		goto ERROR;
 
 	/* Redirect stdout to the desired file */
-	if (dup2(fileno(fp_out), STDOUT_FILENO) == -1)
+	if (dup2(tmp_fd, STDOUT_FILENO) == -1)
 		goto ERROR;
 
-	/* Redirect stderr to /dev/null */
-	if (dup2(fileno(fp_err), STDERR_FILENO) == -1)
-		goto ERROR;
-
-	fclose(fp_out);
-	fclose(fp_err);
+	close(tmp_fd);
 
 /* --mime-type is only available since file 4.24 (Mar, 2008), while the -i
  * flag (-I in MacOS) is supported since 3.30 (Apr, 2000).
@@ -170,17 +154,16 @@ xmagic(const char *file, const int query_mime)
 #else
 	char *cmd[] = {"file", query_mime ? "-bi" : "-b", (char *)file, NULL};
 #endif /* __APPLE__ */
-	int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
+	int ret = launch_execv(cmd, FOREGROUND, E_NOSTDERR);
 
 	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
-	dup2(stderr_bk, STDERR_FILENO); /* Restore original stderr */
 	close(stdout_bk);
-	close(stderr_bk);
 
+	FILE *fp_out = NULL;
 	if (ret != FUNC_SUCCESS
 	|| (fp_out = fopen(tmp_file, "r")) == NULL) {
 		unlinkat(XAT_FDCWD, tmp_file, 0);
-		return (char *)NULL;
+		return NULL;
 	}
 
 	/* According to the RFC-4288, both type and subtype of a MIME type cannot
@@ -191,31 +174,27 @@ xmagic(const char *file, const int query_mime)
 	if (fgets(line, (int)sizeof(line), fp_out) == NULL)
 		goto END;
 
-	char *s = query_mime ? strrchr(line, ';') : (char *)NULL;
+	/* 'file -i' outputs 'mimetype; charset'. We only want the mimetype. */
+	char *s = query_mime ? strrchr(line, ';') : NULL;
 	if (s)
 		*s = '\0';
 
 	size_t len = strlen(line);
-	if (len > 0 && line[len - 1] == '\n') {
-		line[len - 1] = '\0';
-		len--;
-	}
+	if (len > 0 && line[len - 1] == '\n')
+		line[--len] = '\0';
 
-	mime_type = len > 0 ? savestring(line, len) : (char *)NULL;
+	mime_type = len > 0 ? savestring(line, len) : NULL;
 
 END:
 	fclose(fp_out);
 	unlinkat(XAT_FDCWD, tmp_file, 0);
-
 	return mime_type;
 
 ERROR:
-	fclose(fp_out);
-	fclose(fp_err);
+	close(tmp_fd);
 	unlinkat(XAT_FDCWD, tmp_file, 0);
 	close(stdout_bk);
-	close(stderr_bk);
-	return (char *)NULL;
+	return NULL;
 }
 #endif /* !_NO_MAGIC */
 
