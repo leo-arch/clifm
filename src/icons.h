@@ -42,6 +42,7 @@ char
 	ICON_REG[] = EMOJI_FILE,
 
 	/* Extensions */
+	ICON_3D_FILE[] = EMOJI_3D_FILE,
 	ICON_ACCESS[] = EMOJI_DATABASE,
 	ICON_ARCHIVE[] = EMOJI_ARCHIVE,
 	ICON_ARDUINO[] = EMOJI_ARDUINO,
@@ -205,6 +206,7 @@ char
 	ICON_REG[] = FA_FILE_O,
 
 	/* Extensions */
+	ICON_3D_FILE[] = FA_CUBE,
 	ICON_ACCESS[] = FILE_ACCESS,
 	ICON_ARCHIVE[] = FA_ARCHIVE,
 	ICON_ARDUINO[] = FILE_ARDUINO,
@@ -368,6 +370,7 @@ char
 	ICON_REG[] = NERD_FILE,
 
 	/* Extensions */
+	ICON_3D_FILE[] = NERD_3D_FILE,
 	ICON_ACCESS[] = NERD_ACCESS,
 	ICON_ARCHIVE[] = NERD_ARCHIVE,
 	ICON_ARDUINO[] = NERD_ARDUINO,
@@ -735,7 +738,7 @@ struct icons_t const icon_ext[] = {
 	{"lzma", ICON_ARCHIVE, YELLOW},
 
 	{"m", ICON_C, BLUE},
-	{"m4a", ICON_AUDIO, YELLOW},
+	{"m4a", ICON_AUDIO, YELLOW}, // MPEG-4 Audio
 	{"m4v", ICON_VID, BLUE},
 	{"markdown", ICON_MARKDOWN, WHITE},
 	{"mat", ICON_MATLAB, YELLOW},
@@ -917,6 +920,7 @@ struct icons_t const icon_ext[] = {
 /*	{"cgm", ICON_IMG, GREEN}, // Legacy: vector graphics
 	{"dpx", ICON_IMG, GREEN}, // Uncommon: highly specialized
 	{"ff", ICON_IMG, GREEN}, // Farbfeld: Never took off
+	{"hif", ICON_IMG, GREEN}, // Like HEIC, it is a HEIF variant (uncommon)
 	{"pam", ICON_IMG, GREEN}, // Portable Arbitrary Map: Uncommon
 	{"pic", ICON_IMG, GREEN}, // Legacy: generic
 	{"pict", ICON_IMG, GREEN}, // Legacy: Apple Macintosh
@@ -972,20 +976,20 @@ struct icons_t const icon_ext[] = {
 	{"3gp2", ICON_VID, BLUE},
 	{"3gpp", ICON_VID, BLUE},
 	{"3gpp2", ICON_VID, BLUE},
-	{"asf", ICON_VID, BLUE},
+	{"asf", ICON_VID, BLUE}, // Advanced Systems Format File
 	{"divx", ICON_VID, BLUE}, // Legacy: common before mp4/mkv
 	{"h264", ICON_VID, BLUE},
 	{"heics", ICON_VID, BLUE},
-	{"m2ts", ICON_VID, BLUE},
+	{"m2ts", ICON_VID, BLUE}, // Blu-ray BDAV Video File
 	{"m2v", ICON_VID, BLUE},
 	{"mjpeg", ICON_VID, BLUE},
 	{"mjpg", ICON_VID, BLUE},
 	{"mp4v", ICON_VID, BLUE}, // Legacy: very common before H.264 dominance
-	{"qt", ICON_VID, BLUE},
-	{"rm", ICON_VID, BLUE},
-	{"video", ICON_VID, BLUE},
+	{"qt", ICON_VID, BLUE}, // Apple QuickTime Movie
+	{"rm", ICON_VID, BLUE}, // RealMedia File
+	{"video", ICON_VID, BLUE}, // Generic (maybe aTube Catcher Video File)
 	{"vob", ICON_VID, BLUE},
-	{"ogm", ICON_VID, BLUE},
+	{"ogm", ICON_VID, BLUE}, // Ogg Media File
 	{"swf", ICON_VID, BLUE}, // Legacy: typical Flash container
 /*	{"f4v, ICON_VID, BLUE"} // Legacy: Flash video (quite uncommon)
 	{"dv", ICON_VID, BLUE}, // Legacy (digital cameras 1990s-2000s)
@@ -993,10 +997,12 @@ struct icons_t const icon_ext[] = {
 	{"flc", ICON_VID, BLUE}, // Legacy: Autodesk
 	{"fli", ICON_VID, BLUE}, // Legacy: Autodesk
 	{"gl", ICON_VID, BLUE}, // Legacy: GRASP animation (MS-DOS)
+	{"m2t", ICON_VID, BLUE} // Legacy: HDV Video File
 	{"nuv", ICON_VID, BLUE},
 	{"y4m", ICON_VID, BLUE}, // YUV4MPEG2: Uncompressed, intermediate processing
 	{"yuv", ICON_VID, BLUE}, // Uncompressed: may be both video or image */
 
+//	{"3ga", ICON_AUDIO, YELLOW}, // 3GPP audio (mostly legacy)
 	{"ac3", ICON_AUDIO, YELLOW},
 	{"aif", ICON_AUDIO, B_YELLOW}, // Lossless
 	{"aifc", ICON_AUDIO, B_YELLOW}, // Lossless
@@ -1014,10 +1020,10 @@ struct icons_t const icon_ext[] = {
 	{"oga", ICON_AUDIO, YELLOW}, // OGG Vorbis audio
 	{"pcm", ICON_AUDIO, B_YELLOW}, // Lossless
 	{"ra", ICON_AUDIO, YELLOW}, // RealAudio File
-	{"sf2", ICON_AUDIO, YELLOW},
-	{"spx", ICON_AUDIO, YELLOW},
+	{"sf2", ICON_AUDIO, YELLOW}, // SoundFont 2 Sound Bank
+	{"spx", ICON_AUDIO, YELLOW}, // Ogg Vorbis Speex File
 	{"tta", ICON_AUDIO, B_YELLOW}, // True Audio File (lossless)
-	{"wv", ICON_AUDIO, B_YELLOW}, // Lossless
+	{"wv", ICON_AUDIO, B_YELLOW}, // WavPack Audio (lossless)
 /*	{"axa", ICON_AUDIO, YELLOW}, // Legacy: Annodex Audio File
 	{"mpc", ICON_AUDIO, YELLOW}, // Legacy/Niche: Musepack Compressed Audio
 	{"snd", ICON_AUDIO, YELLOW}, // Generic
@@ -1107,6 +1113,14 @@ struct icons_t const icon_ext[] = {
 	{"lrc", ICON_SUBTITLES, WHITE},
 	{"sbt", ICON_SUBTITLES, WHITE},
 	{"ssa", ICON_SUBTITLES, WHITE},
+
+	{"3mf", ICON_3D_FILE, WHITE},
+	{"fbx", ICON_3D_FILE, WHITE},
+	{"obj", ICON_3D_FILE, WHITE},
+	{"ply", ICON_3D_FILE, WHITE},
+	{"stl", ICON_3D_FILE, WHITE},
+/*	{"wrl", ICON_3D_FILE, WHITE}, // Uncommon
+	{"wrz", ICON_3D_FILE, WHITE}, // Uncommon */
 
 	{"avro", ICON_JSON, WHITE},
 	{"json5", ICON_JSON, WHITE},

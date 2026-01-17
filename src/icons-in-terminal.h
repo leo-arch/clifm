@@ -28,6 +28,7 @@
 #define FA_CHECK_SQUARE_O "\ue123"
 #define FA_CODE "\ue1e4"
 #define FA_COG "\ue0f3"
+#define FA_CUBE "\ue26c"
 #define FA_DATABASE "\ue279"
 #define FA_DESKTOP "\ue1cd"
 #define FA_DROPBOX "\ue22a"

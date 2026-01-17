@@ -26,6 +26,7 @@
 #ifndef ICONS_EMOJI
 #define ICONS_EMOJI
 
+#define EMOJI_3D_FILE "🧊"
 #define EMOJI_ARCHIVE "📦"
 #define EMOJI_ARDUINO EMOJI_CODE
 #define EMOJI_ASM EMOJI_CODE

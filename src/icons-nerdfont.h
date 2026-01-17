@@ -162,6 +162,7 @@
 #define NERD_LIBREOFFICE_DRAW    ""
 #define NERD_LIBREOFFICE_MATH    ""
 
+#define NERD_3D_FILE       "󰆧"
 #define NERD_BOOK          ""
 #define NERD_CACHE         "󰃨"
 #define NERD_CALENDAR      "󰸘"
