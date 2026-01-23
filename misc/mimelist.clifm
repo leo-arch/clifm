@@ -188,8 +188,8 @@ X:^application/(vnd.ms-powerpoint|.*(open|office)document\.presentation.*)=calli
 # Note: 'ad' is Clifm's built-in archives utility (based on atool(1)). Remove it if you
 # prefer another application.
 
-X:^application/(gzip|java-archive|vnd.(debian.binary-package|ms-cab-compressed|rar)|x-(7z-compressed|arj|bzip*|compress|iso9660-image|lzip|lzma|lzop|rpm|tar|xz)|zip|zstd)=ad;xarchiver %x;lxqt-archiver %x;ark %x
-!X:^application/(gzip|java-archive|vnd.(debian.binary-package|ms-cab-compressed|rar)|x-(7z-compressed|arj|bzip*|compress|iso9660-image|lzip|lzma|lzop|rpm|tar|xz)|zip|zstd)=ad
+X:^application/(gzip|java-archive|vnd.(debian.binary-package|ms-cab-compressed|rar)|x-(7z-compressed|archive|arj|bzip*|compress|iso9660-image|lzip|lzma|lzop|rpm|tar|xz)|zip|zstd)=ad;xarchiver %x;lxqt-archiver %x;ark %x
+!X:^application/(gzip|java-archive|vnd.(debian.binary-package|ms-cab-compressed|rar)|x-(7z-compressed|archive|arj|bzip*|compress|iso9660-image|lzip|lzma|lzop|rpm|tar|xz)|zip|zstd)=ad
 
 #-----------------------------
 # PDF
