@@ -180,6 +180,7 @@
 #define NERD_ONEDRIVE      "󰏊"
 #define NERD_PACKAGE       ""
 #define NERD_ROM           ""
+#define NERD_SCAD          ""
 #define NERD_STEAM         ""
 #define NERD_SUBTITLES     "󰨖"
 #define NERD_TXT           ""

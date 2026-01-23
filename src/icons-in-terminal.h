@@ -95,6 +95,7 @@
 #define FILE_PURESCRIPT "\ue815"
 #define FILE_R "\ue768"
 #define FILE_REACT "\ue8e4"
+#define FILE_SCAD "\ue774"
 #define FILE_SCHEME "\ue740"
 #define FILE_SQLITE "\ue840"
 #define FILE_STYLUS "\ue73b"
