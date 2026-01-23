@@ -58,6 +58,7 @@
 
 #define NERD_ARDUINO       ""
 #define NERD_ASM           ""
+#define NERD_BLENDER       ""
 #define NERD_C             ""
 #define NERD_CLOJURE       ""
 #define NERD_CMAKE         ""

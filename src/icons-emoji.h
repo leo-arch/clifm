@@ -32,6 +32,7 @@
 #define EMOJI_ASM EMOJI_CODE
 #define EMOJI_AUDIO "🎵"
 #define EMOJI_BINARY "📓"
+#define EMOJI_BLENDER EMOJI_IMAGE
 #define EMOJI_BOOK_OPEN "📖"
 #define EMOJI_BRIEFCASE "💼"
 #define EMOJI_CACHE EMOJI_FILE

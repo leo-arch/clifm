@@ -60,6 +60,7 @@
 #define FILE_ACCESS "\ue84d"
 #define FILE_ARDUINO "\ue793"
 #define FILE_BIBTEX "\ue756"
+#define FILE_BLENDER "\ue85d"
 #define FILE_CMAKE "\ue7a2"
 #define FILE_ELECTRON "\ue88a"
 #define FILE_EMACS "\ue789"

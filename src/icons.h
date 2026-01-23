@@ -49,6 +49,7 @@ char
 	ICON_ASM[] = EMOJI_ASM,
 	ICON_AUDIO[] = EMOJI_AUDIO,
 	ICON_BINARY[] = EMOJI_BINARY,
+	ICON_BLENDER[] = EMOJI_BLENDER,
 	ICON_BOOK[] = EMOJI_BOOK_OPEN,
 	ICON_C[] = EMOJI_C,
 	ICON_CACHE[] = EMOJI_CACHE,
@@ -215,6 +216,7 @@ char
 	ICON_ASM[] = FILE_NASM,
 	ICON_AUDIO[] = FA_FILE_AUDIO_O,
 	ICON_BINARY[] = OCT_FILE_BINARY,
+	ICON_BLENDER[] = FILE_BLENDER,
 	ICON_BOOK[] = OCT_BOOK,
 	ICON_C[] = MFIZZ_C,
 	ICON_CACHE[] = MD_CACHED,
@@ -381,6 +383,7 @@ char
 	ICON_ASM[] = NERD_ASM,
 	ICON_AUDIO[] = NERD_MUSICFILE,
 	ICON_BINARY[] = NERD_BINARY,
+	ICON_BLENDER[] = NERD_BLENDER,
 	ICON_BOOK[] = NERD_BOOK,
 	ICON_C[] = NERD_C,
 	ICON_CACHE[] = NERD_CACHE,
@@ -697,8 +700,8 @@ struct icons_t const icon_ext[] = {
 	{"h", ICON_C, BLUE},
 	{"haml", ICON_HAML, YELLOW},
 	{"hbs", ICON_MUSTACHE, WHITE},
-	{"heic", ICON_IMG, GREEN},
-	{"heif", ICON_IMG, GREEN},
+	{"heic", ICON_IMG, GREEN}, // High Efficiency Image Format
+	{"heif", ICON_IMG, GREEN}, // High Efficiency Image Format
 	{"hh", ICON_CPP, B_BLUE},
 	{"hpp", ICON_CPP, B_BLUE},
 	{"hrl", ICON_ERLANG, RED},
@@ -720,7 +723,7 @@ struct icons_t const icon_ext[] = {
 	{"jpeg", ICON_IMG, GREEN},
 	{"jpg", ICON_IMG, GREEN},
 	{"js", ICON_JAVASCRIPT, WHITE},
-	{"json", ICON_JSON, WHITE},
+	{"json", ICON_JSON, WHITE}, // JSON: JavaScript Object Notation file
 	{"jsx", ICON_ELECTRON, B_GREEN},
 	{"jxl", ICON_IMG, GREEN},
 
@@ -886,43 +889,44 @@ struct icons_t const icon_ext[] = {
  * Do not exceed 768 extensions. Otherwise, ext_table will raise from 1024
  * to 2048, probably making the lookup slower. Even more, keep the list
  * below 650 entries, to avoid overloading the table and reducing performance. */
-	{"ai", ICON_ILLUSTRATOR, YELLOW},
+	{"ai", ICON_ILLUSTRATOR, YELLOW}, // Adobe Illustrator
+	{"blend", ICON_BLENDER, YELLOW}, // Blender project
 	{"dcm", ICON_IMG, GREEN}, // DICOM: Medical images
 	{"emf", ICON_IMG, GREEN}, // Windows: wmf replacement
-	{"eps", ICON_IMG, GREEN},
-	{"exr", ICON_IMG, GREEN},
-	{"fts", ICON_IMG, GREEN},
-	{"hdr", ICON_IMG, GREEN},
-	{"j2c", ICON_IMG, GREEN},
-	{"j2k", ICON_IMG, GREEN},
-	{"jfi", ICON_IMG, GREEN},
-	{"jfif", ICON_IMG, GREEN},
-	{"jif", ICON_IMG, GREEN},
-	{"jp2", ICON_IMG, GREEN},
-	{"jpe", ICON_IMG, GREEN},
-	{"jpf", ICON_IMG, GREEN},
-	{"jps", ICON_IMG, GREEN},
-	{"jpx", ICON_IMG, GREEN},
-	{"kpp", ICON_KRITA, MAGENTA},
-	{"krz", ICON_KRITA, MAGENTA},
+	{"eps", ICON_IMG, GREEN}, // Encapsulated PostScript File (vector graphic)
+	{"exr", ICON_IMG, GREEN}, // OpenEXR raster image
+	{"fts", ICON_IMG, GREEN}, // FITS (Flexible Image Transport System): Astronomy
+	{"hdr", ICON_IMG, GREEN}, // High Dynamic Range raster image
+	{"j2c", ICON_IMG, GREEN}, // JPEG 2000 Code Stream bitmap image
+	{"j2k", ICON_IMG, GREEN}, // JPEG 2000 compressed bitmap image
+	{"jfi", ICON_IMG, GREEN},  // JPEG File Interchange compressed bitmap (obsolete)
+	{"jfif", ICON_IMG, GREEN}, // JPEG File Interchange compressed bitmap (obsolete)
+	{"jif", ICON_IMG, GREEN}, // JPEG Interchange Format bitmap (obsolete)
+	{"jp2", ICON_IMG, GREEN}, // JPEG 2000 Core Image (compressed bitmap)
+	{"jpe", ICON_IMG, GREEN}, // 24-bit compressed JPEG graphic
+	{"jpf", ICON_IMG, GREEN}, // JPEG 2000 Image File
+	{"jps", ICON_IMG, GREEN}, // Stereo JPEG Image
+	{"jpx", ICON_IMG, GREEN}, // JPEG 2000 Image File
+	{"kpp", ICON_KRITA, MAGENTA}, // Krita image
+	{"krz", ICON_KRITA, MAGENTA}, // Krita image
 	{"miff", ICON_IMG, GREEN}, // ImageMagick: Uncommon
-	{"mng", ICON_IMG, GREEN},
-	{"ora", ICON_IMG, GREEN},
-	{"pbm", ICON_IMG, GREEN},
-	{"pcx", ICON_IMG, GREEN},
-	{"pdd", ICON_IMG, GREEN}, // Adobe PhotoDeluxe
-	{"pgm", ICON_IMG, GREEN},
-	{"pnm", ICON_IMG, GREEN},
-	{"ppm", ICON_IMG, GREEN},
-	{"psb", ICON_PHOTOSHOP, B_BLUE},
-	{"pxm", ICON_IMG, GREEN},
-	{"qoi", ICON_IMG, GREEN},
-	{"svgz", ICON_IMG, GREEN},
-	{"tga", ICON_IMG, GREEN},
+	{"mng", ICON_IMG, GREEN}, // Multiple-Image Network Graphics: animated image
+	{"ora", ICON_IMG, GREEN}, // OpenRaster Image
+	{"pbm", ICON_IMG, GREEN}, // Portable Bitmap Image
+	{"pcx", ICON_IMG, GREEN}, // Paintbrush Bitmap raster image (legacy)
+	{"pdd", ICON_IMG, GREEN}, // Adobe PhotoDeluxe (legacy)
+	{"pgm", ICON_IMG, GREEN}, // Portable Gray Map Image
+	{"pnm", ICON_IMG, GREEN}, // Portable Any Map Image
+	{"ppm", ICON_IMG, GREEN}, // Portable Pixmap Image
+	{"psb", ICON_PHOTOSHOP, B_BLUE}, // Adobe Photoshop Big (PSB) format
+	{"pxm", ICON_IMG, GREEN}, // MacOS/iOS Pixelmator Image
+	{"qoi", ICON_IMG, GREEN}, // Quite OK Image Format
+	{"svgz", ICON_IMG, GREEN}, // Compressed SVG
+	{"tga", ICON_IMG, GREEN}, // Targa Graphic (Legacy)
 	{"wmf", ICON_IMG, GREEN}, // Legacy: Windows
-	{"xbm", ICON_IMG, GREEN},
-	{"xpm", ICON_IMG, GREEN},
-	{"xwd", ICON_IMG, GREEN},
+	{"xbm", ICON_IMG, GREEN}, // X11 BitMap Graphic
+	{"xpm", ICON_IMG, GREEN}, // X11 Pixmap Graphic
+	{"xwd", ICON_IMG, GREEN}, // X Windows Dump uncompressed bitmap
 /*	{"cgm", ICON_IMG, GREEN}, // Legacy: vector graphics
 	{"dpx", ICON_IMG, GREEN}, // Uncommon: highly specialized
 	{"ff", ICON_IMG, GREEN}, // Farbfeld: Never took off
@@ -978,53 +982,53 @@ struct icons_t const icon_ext[] = {
 	{"srw", ICON_IMG, GREEN}, // Samsumg
 	{"x3f", ICON_IMG, GREEN}, // Sigma */
 
-	{"3g2", ICON_VID, BLUE},
-	{"3gp2", ICON_VID, BLUE},
-	{"3gpp", ICON_VID, BLUE},
-	{"3gpp2", ICON_VID, BLUE},
+	{"3g2", ICON_VID, BLUE}, // 3GPP2 Multimedia File
+	{"3gp2", ICON_VID, BLUE}, // 3GPP Multimedia File
+	{"3gpp", ICON_VID, BLUE}, // 3GPP Media File
+	{"3gpp2", ICON_VID, BLUE}, // 3GPP2 Multimedia File
 	{"asf", ICON_VID, BLUE}, // Advanced Systems Format File
 	{"divx", ICON_VID, BLUE}, // Legacy: common before mp4/mkv
-	{"h264", ICON_VID, BLUE},
-	{"heics", ICON_VID, BLUE},
+	{"h264", ICON_VID, BLUE}, // H.264 Encoded Video File
+	{"heics", ICON_VID, BLUE}, // HEIF image sequence (video?)
 	{"m2ts", ICON_VID, BLUE}, // Blu-ray BDAV Video File
-	{"m2v", ICON_VID, BLUE},
-	{"mjpeg", ICON_VID, BLUE},
-	{"mjpg", ICON_VID, BLUE},
+	{"m2v", ICON_VID, BLUE}, // MPEG-2 Video
+	{"mjpeg", ICON_VID, BLUE}, // Motion JPEG Video
+	{"mjpg", ICON_VID, BLUE}, // Motion JPEG Video
 	{"mp4v", ICON_VID, BLUE}, // Legacy: very common before H.264 dominance
 	{"qt", ICON_VID, BLUE}, // Apple QuickTime Movie
 	{"rm", ICON_VID, BLUE}, // RealMedia File
 	{"video", ICON_VID, BLUE}, // Generic (maybe aTube Catcher Video File)
-	{"vob", ICON_VID, BLUE},
+	{"vob", ICON_VID, BLUE}, // DVD Video Object File
 	{"ogm", ICON_VID, BLUE}, // Ogg Media File
 	{"swf", ICON_VID, BLUE}, // Legacy: typical Flash container
-/*	{"f4v, ICON_VID, BLUE"} // Legacy: Flash video (quite uncommon)
+/*	{"f4v, ICON_VID, BLUE"} // Legacy: Flash MP4 Video File (quite uncommon)
 	{"dv", ICON_VID, BLUE}, // Legacy (digital cameras 1990s-2000s)
 	{"rmvb", ICON_VID, BLUE}, // Legacy: RealMedia Variable Bit Rate
 	{"flc", ICON_VID, BLUE}, // Legacy: Autodesk
 	{"fli", ICON_VID, BLUE}, // Legacy: Autodesk
 	{"gl", ICON_VID, BLUE}, // Legacy: GRASP animation (MS-DOS)
 	{"m2t", ICON_VID, BLUE} // Legacy: HDV Video File
-	{"nuv", ICON_VID, BLUE},
+	{"nuv", ICON_VID, BLUE}, // NuppelVideo File
 	{"y4m", ICON_VID, BLUE}, // YUV4MPEG2: Uncompressed, intermediate processing
 	{"yuv", ICON_VID, BLUE}, // Uncompressed: may be both video or image */
 
 //	{"3ga", ICON_AUDIO, YELLOW}, // 3GPP audio (mostly legacy)
-	{"ac3", ICON_AUDIO, YELLOW},
-	{"aif", ICON_AUDIO, B_YELLOW}, // Lossless
-	{"aifc", ICON_AUDIO, B_YELLOW}, // Lossless
-	{"ape", ICON_AUDIO, B_YELLOW}, // Lossless
+	{"ac3", ICON_AUDIO, YELLOW}, // Audio Codec 3 File
+	{"aif", ICON_AUDIO, B_YELLOW}, // Audio Interchange File Format (Lossless)
+	{"aifc", ICON_AUDIO, B_YELLOW}, // Compressed Audio Interchange File (Lossless)
+	{"ape", ICON_AUDIO, B_YELLOW}, // Monkey's Audio (Lossless)
 	{"au", ICON_AUDIO, YELLOW}, // Audacity Audio File
 	{"aup", ICON_AUDIO, YELLOW}, // Audacity Project File
 	{"aup3", ICON_AUDIO, YELLOW}, // Audacity 3 Project File
-	{"m2a", ICON_AUDIO, YELLOW}, // Legacy
+	{"m2a", ICON_AUDIO, YELLOW}, // MPEG-1 Layer 2 Audio File: Legacy
 	{"m4b", ICON_AUDIO, YELLOW}, // MPEG-4 Audiobook
-	{"mid", ICON_AUDIO, YELLOW},
-	{"midi", ICON_AUDIO, YELLOW},
-	{"mka", ICON_AUDIO, YELLOW},
-	{"mp2", ICON_AUDIO, YELLOW},
+	{"mid", ICON_AUDIO, YELLOW}, // MIDI (Musical Instrument Digital Interface)
+	{"midi", ICON_AUDIO, YELLOW}, // MIDI
+	{"mka", ICON_AUDIO, YELLOW}, // Matroska Audio
+	{"mp2", ICON_AUDIO, YELLOW}, // MPEG Layer II Compressed Audio File
 	{"mpga", ICON_AUDIO, YELLOW}, // Legacy, but widely used back then
 	{"oga", ICON_AUDIO, YELLOW}, // OGG Vorbis audio
-	{"pcm", ICON_AUDIO, B_YELLOW}, // Lossless
+	{"pcm", ICON_AUDIO, B_YELLOW}, // Pulse Code Modulation File (Lossless)
 	{"ra", ICON_AUDIO, YELLOW}, // RealAudio File
 	{"sf2", ICON_AUDIO, YELLOW}, // SoundFont 2 Sound Bank
 	{"spx", ICON_AUDIO, YELLOW}, // Ogg Vorbis Speex File
@@ -1096,15 +1100,15 @@ struct icons_t const icon_ext[] = {
 	{"ima", ICON_DISK, WHITE},
 	{"wim", ICON_DISK, WHITE}, // Windows Imaging Format File */
 
-	{"cdi", ICON_CD, WHITE},
-	{"isz", ICON_CD, WHITE},
-	{"nrg", ICON_CD, WHITE},
-	{"tc", ICON_CD, WHITE},
-	{"toast", ICON_CD, WHITE},
-	{"vcd", ICON_CD, WHITE},
+	{"cdi", ICON_CD, WHITE}, // DiscJuggler Disc Image
+	{"isz", ICON_CD, WHITE}, // Zipped ISO Disk Image
+	{"nrg", ICON_CD, WHITE}, // Nero CD/DVD Image File
+	{"tc", ICON_CD, WHITE}, // TrueCrypt Volume
+	{"toast", ICON_CD, WHITE}, // Toast Disc Image
+	{"vcd", ICON_CD, WHITE}, // Virtual CD
 
 	{"bdf", ICON_FONT, BLUE}, // X11 bitmap font
-	{"eot", ICON_FONT, BLUE},
+	{"eot", ICON_FONT, BLUE}, // Embedded OpenType Font
 	{"flf", ICON_FONT, BLUE}, // Plain‑text FIGlet font
 	{"fnt", ICON_FONT, BLUE}, // Legacy: DOS/Windows bitmap font
 	{"fon", ICON_FONT, BLUE}, // Legacy: DOS/Windows bitmap font
@@ -1115,16 +1119,16 @@ struct icons_t const icon_ext[] = {
 	{"woff", ICON_FONT, BLUE}, // Web font
 	{"woff2", ICON_FONT, BLUE}, // Web font
 
-	{"ass", ICON_SUBTITLES, WHITE},
-	{"lrc", ICON_SUBTITLES, WHITE},
-	{"sbt", ICON_SUBTITLES, WHITE},
-	{"ssa", ICON_SUBTITLES, WHITE},
+	{"ass", ICON_SUBTITLES, WHITE}, // Aegisub Advanced SubStation Alpha
+	{"lrc", ICON_SUBTITLES, WHITE}, // Lyrics File
+	{"sbt", ICON_SUBTITLES, WHITE}, // SBT Subtitle File
+	{"ssa", ICON_SUBTITLES, WHITE}, // Sub Station Alpha Subtitle File
 
-	{"3mf", ICON_3D_FILE, WHITE},
-	{"fbx", ICON_3D_FILE, WHITE},
-	{"obj", ICON_3D_FILE, WHITE},
+	{"3mf", ICON_3D_FILE, WHITE}, // 3D Manufacturing File
+	{"fbx", ICON_3D_FILE, WHITE}, // Autodesk FBX Interchange File
+	{"obj", ICON_3D_FILE, WHITE}, // Wavefront 3D Object File
 	{"ply", ICON_3D_FILE, WHITE}, // Common for scanners
-	{"stl", ICON_3D_FILE, WHITE},
+	{"stl", ICON_3D_FILE, WHITE}, // Stereolithography File
 /*	{"3ds", ICON_3D_FILE, WHITE}, // Legacy
 	{"dae", ICON_3D_FILE, WHITE}, // Collada: Legacy
 	{"max", ICON_3D_FILE, WHITE}, // Proprietary to 3ds MAX
@@ -1168,10 +1172,10 @@ struct icons_t const icon_ext[] = {
 	{"fctb", ICON_FREECAD, RED}, // FreeCAD Drawing
 	{"fctl", ICON_FREECAD, RED}, // FreeCAD Drawing */
 
-	{"avro", ICON_JSON, WHITE},
-	{"json5", ICON_JSON, WHITE},
-	{"jsonc", ICON_JSON, WHITE},
-	{"webmanifest", ICON_JSON, WHITE},
+	{"avro", ICON_JSON, WHITE}, // Avro Data File (JSON binary encoding)
+	{"json5", ICON_JSON, WHITE}, // JSON5 Data File
+	{"jsonc", ICON_JSON, WHITE}, // JSON With Comments File
+	{"webmanifest", ICON_JSON, WHITE}, // Progressive Web Application Manifest
 
 	/* Programming */
 	{"asp", ICON_HTML, YELLOW},
@@ -1242,7 +1246,7 @@ struct icons_t const icon_ext[] = {
 /*	{"iml", ICON_INTELLIJ, BLUE or RED},
 	{"rdf", ICON_REDIS, RED},
 	{"aof", ICON_REDIS, RED},
-	{"cr", ICON_CRYSTAL, WHITE}, nf-dev-crystal
+	{"cr", ICON_CRYSTAL, WHITE}, // nf-dev-crystal
 	{"fnl", ICON_FENNEL, GREEN}, // No IIT icon
 	{"hack", ICON_HACK, YELLOW}, nf-seti-hacklang
 	{"qml", ICON_QT, GREEN}, // No IIT icon
@@ -1258,8 +1262,8 @@ struct icons_t const icon_ext[] = {
 //	applescript, scptd, scpt, ICON_APPLE, WHITE */
 
 	/* Office */
-	{"csv", ICON_EXCEL, GREEN},
-	{"dif", ICON_EXCEL, GREEN},
+	{"csv", ICON_EXCEL, GREEN}, // Comma-Separated Values File
+	{"dif", ICON_EXCEL, GREEN}, // Data Interchange Format (ASCII text)
 /*	{"dot", ICON_WORD, BLUE} // Old: conflicts with Graphviz files */
 	{"docm", ICON_WORD, BLUE},
 	{"dotm", ICON_WORD, BLUE},
@@ -1272,10 +1276,10 @@ struct icons_t const icon_ext[] = {
 	{"fodp", ICON_LIBREOFFICE_IMPRESS, YELLOW},
 	{"fods", ICON_LIBREOFFICE_CALC, GREEN},
 	{"fodt", ICON_LIBREOFFICE_WRITER, BLUE},
-	{"gdoc", ICON_WORD, BLUE},
-	{"gdocx", ICON_WORD, BLUE},
-	{"gsheet", ICON_EXCEL, GREEN},
-	{"gslides", ICON_POWERPOINT, YELLOW},
+	{"gdoc", ICON_WORD, BLUE}, // Google Drive Document
+	{"gdocx", ICON_WORD, BLUE}, // Google Drive Document
+	{"gsheet", ICON_EXCEL, GREEN}, // Google Sheets Shortcut
+	{"gslides", ICON_POWERPOINT, YELLOW}, // Google Slides Shortcut
 /*	{"key", ICON_POWERPOINT, YELLOW}, // Apple. Conflicts with .key security files */
 	{"numbers", ICON_EXCEL, GREEN}, /* Apple */
 	{"odf", ICON_LIBREOFFICE_MATH, WHITE},
@@ -1290,8 +1294,8 @@ struct icons_t const icon_ext[] = {
 	{"pps", ICON_POWERPOINT, YELLOW},
 	{"ppsx", ICON_POWERPOINT, YELLOW},
 	{"pptm", ICON_POWERPOINT, YELLOW},
-	{"slk", ICON_EXCEL, GREEN},
-	{"tsv", ICON_EXCEL, GREEN},
+	{"slk", ICON_EXCEL, GREEN}, // Symbolic Link File (semi-colons delimited text)
+	{"tsv", ICON_EXCEL, GREEN}, // Tab-Separated Values File
 	{"uop", ICON_LIBREOFFICE_IMPRESS, YELLOW},
 	{"uos", ICON_LIBREOFFICE_CALC, GREEN},
 	{"uot", ICON_LIBREOFFICE_WRITER, BLUE},
@@ -1372,9 +1376,9 @@ struct icons_t const icon_ext[] = {
 	{"mkd", ICON_MARKDOWN, WHITE},
 	{"rdoc", ICON_MARKDOWN, WHITE},
 
-	{"download", ICON_DOWNLOADS, WHITE},
-	{"fdmdownload", ICON_DOWNLOADS, WHITE},
-	{"opdownload", ICON_DOWNLOADS, WHITE},
+	{"download", ICON_DOWNLOADS, WHITE}, // Safari Partially Downloaded File
+	{"fdmdownload", ICON_DOWNLOADS, WHITE}, // Free Download Manager Partially Downloaded File
+	{"opdownload", ICON_DOWNLOADS, WHITE}, // Opera Partially Downloaded File
 
 	{"m3u", ICON_PLAYLIST, YELLOW},
 	{"m3u8", ICON_PLAYLIST, YELLOW},
@@ -1390,8 +1394,8 @@ struct icons_t const icon_ext[] = {
 	{"dump", ICON_DATABASE, WHITE},
 	{"fdb", ICON_DATABASE, WHITE},
 	{"gdb", ICON_DATABASE, WHITE},
-	{"kdb", ICON_DATABASE, WHITE},
-	{"kdbx", ICON_DATABASE, WHITE},
+	{"kdb", ICON_DATABASE, WHITE}, // Keypass Database File
+	{"kdbx", ICON_DATABASE, WHITE}, // KeePass Password Database
 	{"mdf", ICON_DATABASE, WHITE},
 	{"ndf", ICON_DATABASE, WHITE},
 	{"sdf", ICON_DATABASE, WHITE},
@@ -1462,7 +1466,6 @@ struct icons_t const icon_ext[] = {
 	{"sdb", ICON_DATABASE, WHITE}, */
 
 /*	{"one", ICON_ONENOTE, MAGENTA}, */
-/*	{"blend", ICON_BLENDER, YELLOW}, */
 /*	{"eml", ICON_MAIL, WHITE}, */
 
 /* Calligra Plan/Gnome Planner
