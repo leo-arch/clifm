@@ -35,6 +35,7 @@
 #define EMOJI_BOOK_OPEN "📖"
 #define EMOJI_BRIEFCASE "💼"
 #define EMOJI_CACHE EMOJI_FILE
+#define EMOJI_CAD EMOJI_3D_FILE
 #define EMOJI_CALENDAR "📅"
 #define EMOJI_CD "💿"
 #define EMOJI_CERT EMOJI_KEY
@@ -62,6 +63,7 @@
 #define EMOJI_FOLDER "📁"
 #define EMOJI_FONT "🔤"
 #define EMOJI_FORTRAN EMOJI_CODE
+#define EMOJI_FREECAD EMOJI_3D_FILE
 #define EMOJI_FSHARP EMOJI_CODE
 #define EMOJI_GLEAM "⭐"
 #define EMOJI_HASKELL EMOJI_CODE

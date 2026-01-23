@@ -52,6 +52,7 @@ char
 	ICON_BOOK[] = EMOJI_BOOK_OPEN,
 	ICON_C[] = EMOJI_C,
 	ICON_CACHE[] = EMOJI_CACHE,
+	ICON_CAD[] = EMOJI_CAD,
 	ICON_CALENDAR[] = EMOJI_CALENDAR,
 	ICON_CD[] = EMOJI_CD,
 	ICON_CERT[] = EMOJI_CERT,
@@ -81,6 +82,7 @@ char
 	ICON_EXCEL[] = EMOJI_STYLESHEET,
 	ICON_FONT[] = EMOJI_FONT,
 	ICON_FORTRAN[] = EMOJI_FORTRAN,
+	ICON_FREECAD[] = EMOJI_FREECAD,
 	ICON_FSHARP[] = EMOJI_FSHARP,
 	ICON_GIMP[] = EMOJI_GIMP,
 	ICON_GLEAM[] = EMOJI_GLEAM,
@@ -216,6 +218,7 @@ char
 	ICON_BOOK[] = OCT_BOOK,
 	ICON_C[] = MFIZZ_C,
 	ICON_CACHE[] = MD_CACHED,
+	ICON_CAD[] = FA_CUBE, /* No CAD icon */
 	ICON_CALENDAR[] = FA_CALENDAR,
 	ICON_CD[] = LINEA_MUSIC_CD,
 	ICON_CERT[] = MD_VPN_KEY,
@@ -245,6 +248,7 @@ char
 	ICON_EXCEL[] = FILE_EXCEL,
 	ICON_FONT[] = FILE_FONT,
 	ICON_FORTRAN[] = FILE_FORTRAN,
+	ICON_FREECAD[] = FA_CUBE, /* No FreeCAD icon */
 	ICON_FSHARP[] = DEV_FSHARP,
 	ICON_GIMP[] = FA_FILE_IMAGE_O, /* No Gimp icon */
 	ICON_GLEAM[] = FA_STAR,
@@ -380,6 +384,7 @@ char
 	ICON_BOOK[] = NERD_BOOK,
 	ICON_C[] = NERD_C,
 	ICON_CACHE[] = NERD_CACHE,
+	ICON_CAD[] = NERD_CAD,
 	ICON_CALENDAR[] = NERD_CALENDAR,
 	ICON_CD[] = NERD_OPTICALDISK,
 	ICON_CERT[] = NERD_CERT,
@@ -409,6 +414,7 @@ char
 	ICON_EXCEL[] = NERD_EXCELDOC,
 	ICON_FONT[] = NERD_FONT,
 	ICON_FORTRAN[] = NERD_FORTRAN,
+	ICON_FREECAD[] = NERD_FREECAD,
 	ICON_FSHARP[] = NERD_FSHARP,
 	ICON_GIMP[] = NERD_GIMP,
 	ICON_GLEAM[] = NERD_GLEAM,
@@ -1117,10 +1123,50 @@ struct icons_t const icon_ext[] = {
 	{"3mf", ICON_3D_FILE, WHITE},
 	{"fbx", ICON_3D_FILE, WHITE},
 	{"obj", ICON_3D_FILE, WHITE},
-	{"ply", ICON_3D_FILE, WHITE},
+	{"ply", ICON_3D_FILE, WHITE}, // Common for scanners
 	{"stl", ICON_3D_FILE, WHITE},
-/*	{"wrl", ICON_3D_FILE, WHITE}, // Uncommon
-	{"wrz", ICON_3D_FILE, WHITE}, // Uncommon */
+/*	{"3ds", ICON_3D_FILE, WHITE}, // Legacy
+	{"dae", ICON_3D_FILE, WHITE}, // Collada: Legacy
+	{"max", ICON_3D_FILE, WHITE}, // Proprietary to 3ds MAX
+	{"wrl", ICON_3D_FILE, WHITE}, // VRML variant: Rare
+	{"wrz", ICON_3D_FILE, WHITE}, // VRML variant: Rare */
+
+	{"dwg", ICON_CAD, RED}, // AutoCAD Drawing
+	{"dxf", ICON_CAD, RED}, // AutoCAD Drawing
+/*	{"123dx", ICON_CAD, RED}, // AutoCAD Drawing
+	{"3dm", ICON_CAD, RED}, // AutoCAD Drawing
+	{"brep", ICON_CAD, RED}, // AutoCAD Drawing
+	{"catpart", ICON_CAD, RED}, // AutoCAD Drawing
+	{"catproduct", ICON_CAD, RED}, // AutoCAD Drawing
+	{"f3d", ICON_CAD, RED}, // AutoCAD Drawing
+	{"f3z", ICON_CAD, RED}, // AutoCAD Drawing
+	{"iam", ICON_CAD, RED}, // AutoCAD Drawing
+	{"ifc", ICON_CAD, RED}, // AutoCAD Drawing
+	{"ige", ICON_CAD, RED}, // IGES: CAD-legacy
+	{"iges", ICON_CAD, RED}, // IGES: CAD-legacy
+	{"igs", ICON_CAD, RED}, // IGES: CAD-legacy
+	{"ipt", ICON_CAD, RED}, // AutoCAD Drawing
+	{"psm", ICON_CAD, RED}, // AutoCAD Drawing
+	{"skp", ICON_CAD, RED}, // AutoCAD Drawing
+	{"sldasm", ICON_CAD, RED}, // AutoCAD Drawing
+	{"sldprt", ICON_CAD, RED}, // AutoCAD Drawing
+	{"slvs", ICON_CAD, RED}, // AutoCAD Drawing
+	{"ste", ICON_CAD, RED}, // AutoCAD Drawing
+	{"step", ICON_CAD, RED}, // AutoCAD Drawing
+	{"stp", ICON_CAD, RED}, // AutoCAD Drawing
+	{"x_b", ICON_CAD, RED}, // AutoCAD Drawing
+	{"x_t", ICON_CAD, RED}, // AutoCAD Drawing */
+
+	{"fcstd", ICON_FREECAD, RED}, // FreeCAD Drawing
+/*	{"fcbak", ICON_FREECAD, RED}, // FreeCAD Drawing
+	{"fcmacro", ICON_FREECAD, RED}, // FreeCAD Drawing
+	{"fcmat", ICON_FREECAD, RED}, // FreeCAD Drawing
+	{"fcparam", ICON_FREECAD, RED}, // FreeCAD Drawing
+	{"fcscript", ICON_FREECAD, RED}, // FreeCAD Drawing
+	{"fcstd", ICON_FREECAD, RED}, // FreeCAD Drawing
+	{"fcstd1", ICON_FREECAD, RED}, // FreeCAD Drawing
+	{"fctb", ICON_FREECAD, RED}, // FreeCAD Drawing
+	{"fctl", ICON_FREECAD, RED}, // FreeCAD Drawing */
 
 	{"avro", ICON_JSON, WHITE},
 	{"json5", ICON_JSON, WHITE},
