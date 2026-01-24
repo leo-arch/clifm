@@ -884,6 +884,7 @@ struct icons_t const icon_ext[] = {
 	{"taz", ICON_ARCHIVE, YELLOW}, // .tar.Z (also .tz)
 	{"tbz", ICON_ARCHIVE, YELLOW}, // .tar.bz (bzip)
 	{"tbz2", ICON_ARCHIVE, YELLOW}, // .tar.bz2 (bzip2)
+	{"tbz3", ICON_ARCHIVE, YELLOW}, // .tar.bz3 (bzip3)
 	{"tgz", ICON_ARCHIVE, YELLOW}, // .tar.gz (gzip)
 	{"tlz", ICON_ARCHIVE, YELLOW}, // .tar.lz (lzip)
 	{"txz", ICON_ARCHIVE, YELLOW}, // .tar.xz
