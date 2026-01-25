@@ -160,10 +160,11 @@ get_mimetype_fallback(const char *file)
 
 	/* NAME_MAX should be enough to store a MIME type. */
 	char line[NAME_MAX + 1]; *line = '\0';
-	if (fgets(line, (int)sizeof(line), fp_out) == NULL) {
-		fclose(fp_out);
+	char *retval = fgets(line, (int)sizeof(line), fp_out);
+	fclose(fp_out);
+
+	if (!retval)
 		return NULL;
-	}
 
 	size_t len = strlen(line);
 	if (len > 0 && line[len - 1] == '\n')
