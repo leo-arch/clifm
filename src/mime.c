@@ -78,6 +78,107 @@ check_user_mimetypes(const char *file)
 	return (char *)NULL;
 }
 
+#define MIME_FALLBACK_NONE     0
+#define MIME_FALLBACK_MIMETYPE 1
+#define MIME_FALLBACK_XDG_MIME 2
+
+static int
+check_mimetype_fallback_program(void)
+{
+	static int mime_fallback = -1;
+	if (mime_fallback != -1)
+		return mime_fallback;
+
+	if (is_cmd_in_path("mimetype"))
+		mime_fallback = MIME_FALLBACK_MIMETYPE;
+	else if (is_cmd_in_path("xdg-mime"))
+		mime_fallback = MIME_FALLBACK_XDG_MIME;
+	else
+		mime_fallback = MIME_FALLBACK_NONE;
+
+	return mime_fallback;
+}
+
+static char *
+get_mimetype_fallback(const char *file)
+{
+	if (!file || !*file)
+		return NULL;
+
+	const int mime_fallback = check_mimetype_fallback_program();
+	if (mime_fallback == MIME_FALLBACK_NONE)
+		return NULL;
+
+	char *mime_type = NULL;
+
+	char tmp_file[PATH_MAX + 1];
+	snprintf(tmp_file, sizeof(tmp_file), "%s/%s",
+		xargs.stealth_mode == 1 ? P_tmpdir : tmp_dir, TMP_FILENAME);
+	int tmp_fd = mkstemp(tmp_file);
+	if (tmp_fd == -1)
+		return NULL;
+
+	int stdout_bk = dup(STDOUT_FILENO); /* Store original stdout */
+	if (stdout_bk == -1)
+		goto ERROR;
+
+	/* Redirect stdout to the desired file */
+	if (dup2(tmp_fd, STDOUT_FILENO) == -1)
+		goto ERROR;
+
+	close(tmp_fd);
+
+	int ret = FUNC_FAILURE;
+	if (mime_fallback == MIME_FALLBACK_MIMETYPE) {
+		char *cmd[] = {"mimetype", "-b", (char *)file, NULL};
+		ret = launch_execv(cmd, FOREGROUND, E_NOSTDERR);
+	} else if (mime_fallback == MIME_FALLBACK_XDG_MIME) {
+		char *cmd[] = {"xdg-mime", "query", "filetype", (char *)file, NULL};
+		ret = launch_execv(cmd, FOREGROUND, E_NOSTDERR);
+	}
+
+	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
+	close(stdout_bk);
+
+	FILE *fp_out = NULL;
+	if (ret != FUNC_SUCCESS
+	|| (fp_out = fopen(tmp_file, "r")) == NULL) {
+		unlinkat(XAT_FDCWD, tmp_file, 0);
+		return NULL;
+	}
+
+	char line[NAME_MAX + 1]; *line = '\0';
+	if (fgets(line, (int)sizeof(line), fp_out) == NULL)
+		goto END;
+
+	size_t len = strlen(line);
+	if (len > 0 && line[len - 1] == '\n')
+		line[--len] = '\0';
+
+	/* Let's skip text/plain. Since libmagic returned application/octet-stream
+	 * for the current file, we can be quite sure it is not a plain text file.
+	 * Programs consulting the Shared MIME-info database, like mimetype(1) and
+	 * xdg-mime(1), sometimes return text/plain when the file cannot be
+	 * identified. */
+	const int is_text_plain = (*line == 't' && strcmp(line, "text/plain") == 0);
+
+	mime_type = (len > 0 && is_text_plain == 0) ? savestring(line, len) : NULL;
+
+END:
+	fclose(fp_out);
+	unlinkat(XAT_FDCWD, tmp_file, 0);
+	return mime_type;
+
+ERROR:
+	close(tmp_fd);
+	unlinkat(XAT_FDCWD, tmp_file, 0);
+	close(stdout_bk);
+	return NULL;
+}
+#undef MIME_FALLBACK_NONE
+#undef MIME_FALLBACK_MIMETYPE
+#undef MIME_FALLBACK_XDG_MIME
+
 #ifndef _NO_MAGIC
 /* Get FILE's type using the libmagic library.
  * Return the MIME type if QUERY_MIME is set to 1, or a text description
@@ -106,6 +207,14 @@ xmagic(const char *file, const int query_mime)
 
 	char *str = mime ? savestring(mime, strlen(mime)) : (char *)NULL;
 	magic_close(cookie);
+
+	if (!str || (*str == 'a' && strcmp(str, "application/octet-stream") == 0)) {
+		char *tmp = get_mimetype_fallback(file);
+		if (tmp) {
+			free(str);
+			str = tmp;
+		}
+	}
 
 	return str;
 }
@@ -185,6 +294,14 @@ xmagic(const char *file, const int query_mime)
 		line[--len] = '\0';
 
 	mime_type = len > 0 ? savestring(line, len) : NULL;
+
+	if (!mime_type || (*mime_type == 'a' && strcmp(mime_type, "application/octet-stream") == 0)) {
+		char *tmp = get_mimetype_fallback(file);
+		if (tmp) {
+			free(mime_type);
+			mime_type = tmp;
+		}
+	}
 
 END:
 	fclose(fp_out);
