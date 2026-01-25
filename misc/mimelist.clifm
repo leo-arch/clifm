@@ -121,7 +121,7 @@ X:N:(.*\.clifm$|clifmrc)=$EDITOR;$VISUAL;kak;micro;nvim;vim;vi;mg;emacs;nano;mil
 X:N:.*\.djvu$=djview %x;zathura %x;xreader %x;evince %x;atril %x
 X:N:.*\.(fb2|epub)$=mupdf %x;zathura %x;xreader %x;ebook-viewer %x;FBReader %x;foliate %x
 X:N:.*\.mobi$=mupdf %x;ebook-viewer %x;FBReader %x;foliate %x
-X:N:.*\.(cbr|cbz|cb7|cbt|cba)$=mcomix %x;xreader %x;YACReader %x;qcomicbook %x;zathura %x;foliate %x;atril %x
+X:N:.*\.(cbr|cbz|cb7|cbt|cba)$=llpp %x;mcomix %x;xreader %x;YACReader %x;qcomicbook %x;zathura %x;foliate %x;atril %x
 X:N:.*\.chm$=xchm %x
 
 #-----------------------------
