@@ -208,7 +208,8 @@ xmagic(const char *file, const int query_mime)
 	char *str = mime ? savestring(mime, strlen(mime)) : (char *)NULL;
 	magic_close(cookie);
 
-	if (!str || (*str == 'a' && strcmp(str, "application/octet-stream") == 0)) {
+	if (query_mime == 1 && (!str || (*str == 'a'
+	&& strcmp(str, "application/octet-stream") == 0))) {
 		char *tmp = get_mimetype_fallback(file);
 		if (tmp) {
 			free(str);
@@ -295,7 +296,8 @@ xmagic(const char *file, const int query_mime)
 
 	mime_type = len > 0 ? savestring(line, len) : NULL;
 
-	if (!mime_type || (*mime_type == 'a' && strcmp(mime_type, "application/octet-stream") == 0)) {
+	if (query_mime == 1 && (!mime_type || (*mime_type == 'a'
+	&& strcmp(mime_type, "application/octet-stream") == 0))) {
 		char *tmp = get_mimetype_fallback(file);
 		if (tmp) {
 			free(mime_type);
