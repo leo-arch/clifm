@@ -169,8 +169,8 @@ X:^text/html$=$BROWSER;surf %x;vimprobable %x;vimprobable2 %x;qutebrowser %x;dwb
 #-----------------------------
 
 X:^text/rtf$=libreoffice %x;soffice %x;ooffice %x
-X:(^text/.*|application/(json|javascript)|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;vim;vi;mg;emacs;nano;mili;leafpad %x;mousepad %x;featherpad %x;nedit %x;kate %x;gedit %x;pluma %x;io.elementary.code %x;liri-text %x;xed %x;atom %x;nota %x;gobby %x;kwrite %x;xedit %x
-!X:(^text/.*|application/(json|javascript)|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;vim;vi;mg;emacs;nano
+X:(^text/.*|application/(json|javascript)|inode/x-empty|message/rfc822)=$EDITOR;$VISUAL;kak;micro;dte;nvim;vim;vi;mg;emacs;nano;mili;leafpad %x;mousepad %x;featherpad %x;nedit %x;kate %x;gedit %x;pluma %x;io.elementary.code %x;liri-text %x;xed %x;atom %x;nota %x;gobby %x;kwrite %x;xedit %x
+!X:(^text/.*|application/(json|javascript)|inode/x-empty|message/rfc822)=$EDITOR;$VISUAL;kak;micro;dte;nvim;vim;vi;mg;emacs;nano
 
 #-----------------------------
 # Office documents
@@ -211,7 +211,7 @@ X:^image/.*=imv %x;nsxiv %x;sxiv %x;pqiv %x;qview %x;qimgv %x;viewnior %x;oculan
 # Video and audio
 #-----------------------------
 
-X:^video/.*=iina %x;mplayer %x;mplayer2 %x;mpv %x;vlc %x;gmplayer %x;smplayer %x;celluloid %x;qmplayer2 %x;haruna %x;totem %x;ffplay %x
+X:^video/.*|application/(x-shockwave-flash|vnd.rn-realmedia|mxf)=iina %x;mplayer %x;mplayer2 %x;mpv %x;vlc %x;gmplayer %x;smplayer %x;celluloid %x;qmplayer2 %x;haruna %x;totem %x;ffplay %x
 X:^audio/.*=iina --music-mode %x;gmplayer %x;smplayer %x;vlc %x;totem %x;ffplay %x;audacity %x;mpv --player-operation-mode=pseudo-gui %x;mplayer;mplayer2
 !X:^audio/.*=ffplay -nodisp -autoexit -hide_banner %f !EO;mplayer %f !EO;mpv --no-terminal
 
