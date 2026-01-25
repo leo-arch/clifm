@@ -649,6 +649,7 @@ struct icons_t const icon_ext[] = {
 	{"xpm", ICON_IMG, GREEN}, // X11 Pixmap Graphic
 	{"xwd", ICON_IMG, GREEN}, // X Windows Dump uncompressed bitmap
 /*	{"cgm", ICON_IMG, GREEN}, // Legacy: vector graphics
+	{"dib", ICON_IMG, GREEN}, // Device-Independent Bitmap Image (much like BMP)
 	{"dpx", ICON_IMG, GREEN}, // Uncommon: highly specialized
 	{"ff", ICON_IMG, GREEN}, // Farbfeld: Never took off
 	{"hif", ICON_IMG, GREEN}, // Like HEIC, it is a HEIF variant (uncommon)
@@ -795,6 +796,7 @@ struct icons_t const icon_ext[] = {
 	{"hevc", ICON_VID, BLUE}, // High Efficiency Video Coding
 	{"gl", ICON_VID, BLUE}, // Legacy: GRASP animation (MS-DOS)
 	{"m2t", ICON_VID, BLUE} // Legacy: HDV Video File
+	{"mxf", ICON_VID, BLUE} // Material Exchange Format video
 	{"nuv", ICON_VID, BLUE}, // NuppelVideo File
 	{"wtv", ICON_VID, BLUE}, // Windows Recorded TV Show File
 	{"y4m", ICON_VID, BLUE}, // YUV4MPEG2: Uncompressed, intermediate processing
@@ -1154,6 +1156,7 @@ struct icons_t const icon_ext[] = {
 	{"mdown", ICON_MARKDOWN, WHITE},
 	{"mdx", ICON_MARKDOWN, WHITE},
 	{"mkd", ICON_MARKDOWN, WHITE},
+	{"opf", ICON_XML, YELLOW}, // OEB Package Format (FlipViewer FlipBook File)
 	{"opml", ICON_XML, YELLOW},
 	{"rdf", ICON_XML, YELLOW},
 	{"rdoc", ICON_MARKDOWN, WHITE},
