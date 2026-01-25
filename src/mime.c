@@ -691,10 +691,11 @@ mime_import(char *file)
 		"%s/.local/share/applications/mimeapps.list", user.home);
 
 	const char *const mime_paths[] = {config_path, local_path,
-	    "/usr/local/share/applications/mimeapps.list",
-	    "/usr/share/applications/mimeapps.list",
-	    "/etc/xdg/mimeapps.list",
-	    NULL};
+		"/usr/local/share/applications/mimeapps.list",
+		"/usr/share/applications/mimeapps.list",
+		"/etc/xdg/mimeapps.list",
+		"/usr/share/applications/mimeinfo.cache",
+		NULL};
 
 	/* Check each mimeapps.list file and save its associations into FILE */
 	size_t i;
@@ -708,34 +709,35 @@ mime_import(char *file)
 
 		size_t line_size = 0;
 		char *line = (char *)NULL;
-		/* Only store associations in the "Default Applications" section */
 		int header_found = 0;
 
 		while (getline(&line, &line_size, sys_mime_fp) > 0) {
 			if (header_found == 0
 			&& (strncmp(line, "[Default Applications]", 22) == 0
-			|| strncmp(line, "[Added Associations]", 20) == 0)) {
+			|| strncmp(line, "[Added Associations]", 20) == 0
+			|| strncmp(line, "[MIME Cache]", 12) == 0)) {
 				header_found = 1;
 				continue;
 			}
 
-			if (header_found == 1) {
-				if (*line == '[')
-					break;
-				if (*line == '#' || *line == '\n')
-					continue;
+			if (header_found == 0)
+				continue;
 
-				char *a = strchr(line, '=');
-				if (!a || !a[1] || a == line)
-					continue;
+			if (*line == '[')
+				break;
+			if (*line == '#' || *line == '\n')
+				continue;
 
-				char *ret = strchr(a + 1, '.');
-				if (ret)
-					*ret = '\0';
+			char *a = strchr(line, '=');
+			if (!a || !a[1] || a == line)
+				continue;
 
-				fprintf(mime_fp, "%s\n", line);
-				mime_defs++;
-			}
+			char *ret = strchr(a + 1, '.');
+			if (ret)
+				*ret = '\0';
+
+			fprintf(mime_fp, "%s\n", line);
+			mime_defs++;
 		}
 
 		free(line);
