@@ -1895,6 +1895,8 @@ do_stat(char *filename, const int follow_link)
 	const int xattr = 0;
 #endif /* LINUX_FILE_XATTRS */
 
+	HIDE_CURSOR;
+
 	print_file_perms(&attr, file_type, ctype, xattr);
 	print_filename(filename, color, follow_link, attr.st_mode, link_target);
 	print_file_details(filename, &attr, file_type, file_perm, xattr);
@@ -1914,6 +1916,7 @@ do_stat(char *filename, const int follow_link)
 	}
 #endif /* USE_DU1 */
 
+	UNHIDE_CURSOR;
 	return FUNC_SUCCESS;
 }
 
