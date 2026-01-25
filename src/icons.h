@@ -1128,6 +1128,7 @@ struct icons_t const icon_ext[] = {
 	{"raku", ICON_?, ?} // Icon: a colorful butterfly
 	{"sv", ICON_LANG_HDL, ?},
 	{"svh", ICON_LANG_HDL, ?},
+	{"vbs", ICON_?, ?} // Visual Basic script
 	{"vhdl", ICON_LANG_HDL, ?},
 	{"typ", ICON_TYPST, GREEN}, // No IIT icon
 	{"unity, ICON_UNITY, WHITE"},

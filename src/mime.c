@@ -226,7 +226,8 @@ xmagic(const char *file, const int query_mime)
 	const char *mime = cookie ? magic_file(cookie, file) : NULL;
 
 	if (!mime) {
-		magic_close(cookie);
+		if (cookie)
+			magic_close(cookie);
 		if (query_mime == 1)
 			g_magic_mime_type_cookie = NULL;
 		else
