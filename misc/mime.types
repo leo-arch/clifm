@@ -28,6 +28,7 @@ audio/x-wavpack           wv
 audio/x-wve               wve
 
 image/x-sony-arw          arw
+image/x-cin               cin
 image/x-canon-cr3         cr3
 image/vnd-ms.dds          dds
 image/emf                 emf
