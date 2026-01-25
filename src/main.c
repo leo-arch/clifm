@@ -81,6 +81,11 @@ struct dircmds_t dir_cmds = {UNSET, 0};
 struct pmsgs_t *messages = (struct pmsgs_t *)NULL;
 struct mime_t *user_mimetypes = (struct mime_t *)NULL;
 
+#ifndef _NO_MAGIC
+magic_t g_magic_mime_type_cookie = NULL;
+magic_t g_magic_text_desc_cookie = NULL;
+#endif /* !_NO_MAGIC */
+
 const struct sort_t sort_methods[] = {
     {"none", 0, 0},
     {"name", 1, 0},

@@ -9,17 +9,6 @@
 
 #include "helpers.h"
 
-#ifndef _NO_MAGIC
-# include <magic.h>
-#else
-# if !defined(_BE_POSIX)
-#  include <paths.h>
-# endif /* !_BE_POSIX */
-# ifndef _PATH_DEVNULL
-#  define _PATH_DEVNULL "/dev/null"
-# endif /* _PATH_DEVNULL */
-#endif /* !_NO_MAGIC */
-
 #ifndef _NO_LIRA
 # include <errno.h>
 # include <string.h>
@@ -48,9 +37,9 @@
 #endif /* !_NO_LIRA */
 
 #ifndef _NO_LIRA
-static char *err_name = (char *)NULL;
+static char *err_name = NULL;
 static int g_mime_match = 0;
-static char *g_mime_type = (char *)NULL;
+static char *g_mime_type = NULL;
 #endif /* !_NO_LIRA */
 
 /* Return the MIME type associated to the current file based on its extension.
@@ -204,7 +193,7 @@ char *
 xmagic(const char *file, const int query_mime)
 {
 	if (!file || !*file)
-		return (char *)NULL;
+		return NULL;
 
 	if (query_mime == 1 && user_mimetypes) {
 		const char *mime = check_user_mimetypes(file);
@@ -212,18 +201,40 @@ xmagic(const char *file, const int query_mime)
 			return strdup(mime);
 	}
 
-	magic_t cookie = magic_open(query_mime ? (MAGIC_MIME_TYPE | MAGIC_ERROR)
-		: MAGIC_ERROR);
-	if (!cookie)
-		return NULL;
+	if (query_mime == 1 && !g_magic_mime_type_cookie) {
+		g_magic_mime_type_cookie = magic_open(MAGIC_MIME_TYPE | MAGIC_ERROR);
+		if (!g_magic_mime_type_cookie)
+			return NULL;
+		if (magic_load(g_magic_mime_type_cookie, NULL) == -1) {
+			magic_close(g_magic_mime_type_cookie);
+			g_magic_mime_type_cookie = NULL;
+			return NULL;
+		}
+	} else if (query_mime == 0 && !g_magic_text_desc_cookie) {
+		g_magic_text_desc_cookie = magic_open(MAGIC_ERROR);
+		if (!g_magic_text_desc_cookie)
+			return NULL;
+		if (magic_load(g_magic_text_desc_cookie, NULL) == -1) {
+			magic_close(g_magic_text_desc_cookie);
+			g_magic_text_desc_cookie = NULL;
+			return NULL;
+		}
+	}
 
-	magic_load(cookie, NULL);
+	magic_t cookie = query_mime == 1 ? g_magic_mime_type_cookie
+		: g_magic_text_desc_cookie;
+	const char *mime = cookie ? magic_file(cookie, file) : NULL;
 
-	const char *mime = magic_file(cookie, file);
+	if (!mime) {
+		magic_close(cookie);
+		if (query_mime == 1)
+			g_magic_mime_type_cookie = NULL;
+		else
+			g_magic_text_desc_cookie = NULL;
+	}
 
 	const size_t mime_len = mime ? strlen(mime) : 0;
 	char *str = mime ? savestring(mime, mime_len) : NULL;
-	magic_close(cookie);
 
 	if (query_mime == 1 && (!str || (mime_len == 24 && *str == 'a'
 	&& strcmp(str, "application/octet-stream") == 0))) {

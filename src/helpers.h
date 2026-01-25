@@ -110,6 +110,11 @@
 #endif /* !_NO_GETTEXT*/
 
 #include <glob.h>
+
+#ifndef _NO_MAGIC
+# include <magic.h>
+#endif /* !_NO_MAGIC */
+
 #include <limits.h>
 #include <regex.h>
 #include <stdio.h>
@@ -1063,6 +1068,11 @@ extern time_t curdir_mtime;
 #define FILESN_MAX SSIZE_MAX
 typedef ssize_t filesn_t;
 extern filesn_t g_files_num;
+
+#ifndef _NO_MAGIC
+extern magic_t g_magic_mime_type_cookie;
+extern magic_t g_magic_text_desc_cookie;
+#endif /* !_NO_MAGIC */
 
 struct default_answer_t {
 	char remove;

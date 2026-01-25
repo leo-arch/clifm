@@ -1177,6 +1177,13 @@ free_stuff(void)
 {
 	size_t i = 0;
 
+#ifndef _NO_MAGIC
+	if (g_magic_mime_type_cookie)
+		magic_close(g_magic_mime_type_cookie);
+	if (g_magic_text_desc_cookie)
+		magic_close(g_magic_text_desc_cookie);
+#endif /* !_NO_MAGIC */
+
 	free(alt_config_dir);
 	free(alt_trash_dir);
 	free(alt_config_file);
