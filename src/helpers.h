@@ -761,7 +761,7 @@ extern time_t curdir_mtime;
 #define E_MUTE     (E_NOSTDOUT | E_NOSTDERR)
 
 /* Number of available suggestion strategies (a,b,c,e,f,h,j).
- * 'b' is deprecated (kept only for compatibility with old versions) */
+ * 'b' is deprecated (kept only for compatibility with old versions). */
 #define SUG_STRATS 7
 
 #define FZF_INTERNAL_PREVIEWER 1 /* clifm itself */
@@ -769,27 +769,27 @@ extern time_t curdir_mtime;
  * FZF_DEFAULT_OPTS environment variable. */
 #define FZF_EXTERNAL_PREVIEWER 3
 
-/* Macros for the backdir (bd) function */
+/* Macros for the backdir (bd) function (navigation.c) */
 #define BD_TAB    1
 #define BD_NO_TAB 0
 
-/* Macros for the clear_suggestion function */
+/* Macros for the clear_suggestion function (suggestions.c) */
 #define CS_FREEBUF 1
 #define CS_KEEPBUF 0
 
-/* Macros for the get_file_type function */
+/* Macros for the xmagic function (mime.c) */
 #define MIME_TYPE 1
 #define TEXT_DESC 0
 
-/* Macros for the dirjump function */
+/* Macros for the dirjump function (jump.c) */
 #define SUG_JUMP    0
 #define NO_SUG_JUMP 1
 
-/* Macros for the media_menu function */
+/* Macros for the media_menu function (media.c) */
 #define MEDIA_LIST 	0
 #define MEDIA_MOUNT	1
 
-/* Macros for the rl_highlight function */
+/* Macros for the rl_highlight function (highlight.c) */
 #define SET_COLOR    1
 #define INFORM_COLOR 0
 
