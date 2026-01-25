@@ -1,0 +1,60 @@
+application/x-alz         alz
+application/x-bzip3       bz3 tbz3
+application/vnd.comicbook-rar cbr
+application/vnd.comicbook+zip cbz
+application/pgp-encrypted gpg
+application/vnd.efi.img   img
+application/x-pak         pak
+application/zip           pk3
+application/vnd.apple.pages pages
+application/x-spss-sav    sav
+application/x-shar        shar
+application/x-doom-wad    wad
+application/x-zpaq        zpaq
+
+audio/x-avr               avr
+audio/x-caf               caf
+audio/vnd.dts             dts
+audio/x-fap               fap
+audio/x-hcom              hcom
+audio/x-ircam             ircam
+audio/x-maud              maud
+audio/x-nist              nist
+audio/x-paf               paf
+audio/x-pvf               pvf
+audio/x-sph               sph
+audio/x-tta               tta
+audio/x-wavpack           wv
+audio/x-wve               wve
+
+image/x-sony-arw          arw
+image/x-canon-cr3         cr3
+image/vnd-ms.dds          dds
+image/emf                 emf
+image/x-kde-raw           erf
+image/x-farbfeld          ff
+image/x-hrz               hrz
+image/x-ilbm              iff lbm
+image/x-sun-raster        im1
+image/x-ipl               ipl
+image/jbig                jbig
+image/x-mtv               mtv
+image/x-nikon-nrw         nrw
+image/openraster          ora
+image/x-ota-bitmap        otb
+image/x-photo-cd          pcd
+image/x-pes               pes
+image/x-portable-floatmap pfm
+image/x-pgx               pgx
+image/x-cmu-raster        ras
+image/x-rgb               rgb
+image/x-rgf               rgf
+image/x-sixel             six sixel
+image/vnd.wap.wbmp        wbmp
+
+text/x-nfo                nfo
+
+video/mp4                 f4v
+video/x-hevc              hevc
+video/x-mjpeg             mjpeg
+video/x-wtv               wtv
