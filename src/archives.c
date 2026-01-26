@@ -16,15 +16,6 @@
 #include <readline/readline.h>
 #include <unistd.h> /* unlinkat() */
 
-#if defined(_NO_MAGIC)
-# if !defined(_BE_POSIX)
-#  include <paths.h>
-#  ifndef _PATH_DEVNULL
-#   define _PATH_DEVNULL "/dev/null"
-#  endif /* _PATH_DEVNULL */
-# endif /* !_BE_POSIX */
-#endif /* _NO_MAGIC */
-
 #include "aux.h"
 #include "checks.h"
 #include "history.h"
