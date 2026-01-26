@@ -211,9 +211,9 @@ X:^image/.*=imv %x;nsxiv %x;sxiv %x;pqiv %x;qview %x;qimgv %x;viewnior %x;oculan
 # Video and audio
 #-----------------------------
 
-X:^video/.*|application/(x-shockwave-flash|vnd.rn-realmedia|mxf)=iina %x;mplayer %x;mplayer2 %x;mpv %x;vlc %x;gmplayer %x;smplayer %x;celluloid %x;qmplayer2 %x;haruna %x;totem %x;ffplay %x
+X:^video/.*|application/(x-shockwave-flash|vnd.rn-realmedia|mxf)=iina %x;mplayer %x;mplayer2 %x;mpv %x;vlc %x;gmplayer %x;smplayer %x;celluloid %x;qmplayer2 %x;haruna %x;showtime %x;totem %x;ffplay %x
 ^audio/midi$=wildmidi
-X:^audio/.*=iina --music-mode %x;gmplayer %x;smplayer %x;vlc %x;totem %x;ffplay %x;audacity %x;mpv --player-operation-mode=pseudo-gui %x;mplayer;mplayer2
+X:^audio/.*=iina --music-mode %x;gmplayer %x;smplayer %x;vlc %x;showtime %x;totem %x;ffplay %x;audacity %x;mpv --player-operation-mode=pseudo-gui %x;mplayer;mplayer2
 !X:^audio/.*=ffplay -nodisp -autoexit -hide_banner %f !EO;mplayer %f !EO;mpv --no-terminal
 
 #-----------------------------
