@@ -90,9 +90,9 @@ N:.*\.(odt|ods|odp|sxw)$=odt2txt;pandoc -s -t markdown;
 # Archives
 #--------------------------------
 
-N:.*\.rar=unrar lt -p-;
-application/(zstd|x-rpm|debian.binary-package)=bsdtar --list --file;
-application/(zip|gzip|x-7z-compressed|x-xz|x-bzip*|x-tar)=atool --list;bsdtar --list --file;
+^application/x-bzip3=file -b;
+^application/(gzip|java-archive|vnd.debian.binary-package|x-(archive|bzip|compress|cpio|lrzip|lz4|lzip|lzma|lzop|rpm|tar|xz)|zip|zstd)=bsdtar -tvf;
+^application/(vnd.(ms-cab-compressed|rar)|x-(7z-compressed|ace-compressed|arc|arj))=atool -l;bsdtar -tvf;
 
 #--------------------------------
 # PDF
