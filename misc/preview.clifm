@@ -91,7 +91,7 @@ N:.*\.(odt|ods|odp|sxw)$=odt2txt;pandoc -s -t markdown;
 #--------------------------------
 
 ^application/x-bzip3=file -b;
-^application/(gzip|java-archive|vnd.debian.binary-package|x-(archive|bzip|compress|cpio|lha|lrzip|lz4|lzh|lzip|lzma|lzop|rpm|tar|xz)|zip|zstd)=bsdtar -tvf;
+^application/(gzip|java-archive|vnd.debian.binary-package|x-(archive|bzip|compress|cpio|lha|lrzip|lz4|lzh|lzip|lzma|lzop|rpm|tar|tzo|xz)|zip|zstd)=bsdtar -tvf;
 ^application/(vnd.(ms-cab-compressed|rar)|x-(7z-compressed|ace-compressed|arc|arj))=atool -l;bsdtar -tvf;
 
 #--------------------------------
