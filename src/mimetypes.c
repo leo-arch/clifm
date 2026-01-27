@@ -244,7 +244,11 @@ load_user_mimetypes(void)
 	free(mimetypes_file);
 
 	int c = fgetc(fp);
-	const int is_xml = ((char)c == '<');
+	if (c == EOF) {
+		fclose(fp);
+		return FUNC_FAILURE;
+	}
+	const int is_xml = ((unsigned char)c == (unsigned char)'<');
 	ungetc(c, fp);
 
 	/* Store mappings in the user_mimetypes global array. */
