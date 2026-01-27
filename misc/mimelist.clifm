@@ -118,7 +118,7 @@ X:N:(.*\.clifm$|clifmrc)=$EDITOR;$VISUAL;kak;micro;nvim;vim;vi;mg;emacs;nano;mil
 # Digital books
 #-----------------------------
 
-X:N:.*\.djvu$=djview %x;zathura %x;xreader %x;papers %x;evince %x;atril %x
+X:^image/vnd\.djvu.*=djview %x;zathura %x;xreader %x;papers %x;evince %x;atril %x
 X:N:.*\.(fb2|epub)$=mupdf %x;zathura %x;xreader %x;ebook-viewer %x;FBReader %x;foliate %x
 X:N:.*\.mobi$=mupdf %x;ebook-viewer %x;FBReader %x;foliate %x
 X:N:.*\.(cbr|cbz|cb7|cbt|cba)$=llpp %x;mcomix %x;xreader %x;YACReader %x;qcomicbook %x;zathura %x;foliate %x;atril %x
@@ -202,7 +202,7 @@ X:.*/pdf$=mupdf %x;sioyek %x;llpp %x;lpdf %x;zathura %x;mupdf-x11 %x;apvlv %x;xp
 #-----------------------------
 
 X:^image/gif$=animate %x;pqiv %x;sxiv -a %x;nsxiv -a %x;feh %x
-X:^image/svg$=display %x;inkscape %x
+X:^image/svg=inkscape %x
 X:^image/x-xcf$=gimp %x
 X:^image/.*=imv %x;nsxiv %x;sxiv %x;pqiv %x;qview %x;qimgv %x;viewnior %x;oculante %x;mirage %x;ristretto %x;xviewer %x;nomacs %x;geeqie %x;gpicview %x;gthumb %x;gwenview %x;shotwell %x;loupe %x;eog %x;eom %x;mcomix %x;feh %x;display %x;gimp %x;krita %x
 !X:^image/.*=fim;img2txt;cacaview;fbi;fbv;zgv

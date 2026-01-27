@@ -53,6 +53,7 @@ image/x-rgf               rgf
 image/x-sixel             six sixel
 image/x-sony-srf          srf
 image/vnd.wap.wbmp        wbmp
+image/x-xbitmap           xbm
 
 text/x-nfo                nfo
 
