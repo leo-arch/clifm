@@ -157,7 +157,16 @@ parse_mime_types_file(FILE *fp)
 		if (p)
 			*p = '\0';
 
-		const char *mimetype = strtok(line, " \t:");
+		/* Remove NN: weigth prefix (glob2 files). */
+		char *line_ptr = line;
+		while (IS_DIGIT(*line_ptr))
+			line_ptr++;
+		if (*line_ptr == ':')
+			line_ptr++;
+		if (!*line_ptr)
+			continue;
+
+		const char *mimetype = strtok(line_ptr, " \t:");
 		if (!mimetype)
 			continue;
 
