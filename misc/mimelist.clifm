@@ -205,7 +205,7 @@ X:^image/gif$=animate %x;pqiv %x;sxiv -a %x;nsxiv -a %x;feh %x
 X:^image/svg$=display %x;inkscape %x
 X:^image/x-xcf$=gimp %x
 X:^image/.*=imv %x;nsxiv %x;sxiv %x;pqiv %x;qview %x;qimgv %x;viewnior %x;oculante %x;mirage %x;ristretto %x;xviewer %x;nomacs %x;geeqie %x;gpicview %x;gthumb %x;gwenview %x;shotwell %x;loupe %x;eog %x;eom %x;mcomix %x;feh %x;display %x;gimp %x;krita %x
-!X:^image/.*=fim;img2txt;cacaview;fbi;fbv
+!X:^image/.*=fim;img2txt;cacaview;fbi;fbv;zgv
 
 #-----------------------------
 # Video
