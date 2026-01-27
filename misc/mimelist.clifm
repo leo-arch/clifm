@@ -65,7 +65,7 @@
 # The '%x' flag is a shorthand for "%f !EO &". For example:
 #    mpv %x
 #
-# This flag runs the application is in a new session, detached from the
+# This flag runs the application in a new session, detached from the
 # running terminal (via setsid(3)).
 #
 # For Ranger users, the '%x' flag is equivalent to "flag f" in rifle.conf.
