@@ -39,9 +39,9 @@ set_term_title(char *dir)
 	char *tmp = (dir && *dir) ? home_tilde(dir, &free_tmp) : (char *)NULL;
 
 	if (!tmp)
-		printf("\x1b]2;%s\x1b\\", PROGRAM_NAME);
+		printf("\x1b]0;%s\x1b\\", PROGRAM_NAME);
 	else
-		printf("\x1b]2;%s: %s\x1b\\", PROGRAM_NAME, tmp);
+		printf("\x1b]0;%s: %s\x1b\\", PROGRAM_NAME, tmp);
 
 	fflush(stdout);
 
@@ -378,8 +378,9 @@ check_truecolor(void)
 static int
 check_term_title_support(const char *name)
 {
-	if (!(flags & GUI) || xargs.list_and_quit == 1 || xargs.vt100 == 1
-	|| xargs.open == 1 || xargs.preview == 1 || xargs.stat > 0)
+	if (!name || !*name || !(flags & GUI) || xargs.list_and_quit == 1
+	|| xargs.vt100 == 1 || xargs.open == 1 || xargs.preview == 1
+	|| xargs.stat > 0)
 		return 0;
 
 	/* This is what MC does. See lib/tty/tty.c (tty_check_xterm_compat). */
