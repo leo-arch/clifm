@@ -2089,6 +2089,9 @@ create_main_config_file(char *file)
 	    "# If set to true, do not ask for confirmation before trashing files.\n\
 ;TrashForce=%s\n\n"
 
+	    "# Set terminal title (auto, true, false).\n\
+;TermTitle=%s\n\n"
+
 	    "# Set readline editing mode: 0 for vi and 1 for emacs (default).\n\
 ;RlEditMode=%d\n\n",
 
@@ -2105,6 +2108,7 @@ create_main_config_file(char *file)
 		DEF_RESTORE_LAST_PATH == 1 ? "true" : "false",
 		DEF_TRASRM == 1 ? "true" : "false",
 		DEF_TRASH_FORCE == 1 ? "true" : "false",
+		DEF_TERM_TITLE == -1 ? "auto" : (DEF_TERM_TITLE == 1 ? "true" : "false"),
 		DEF_RL_EDIT_MODE
 		);
 
