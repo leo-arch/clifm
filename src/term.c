@@ -32,13 +32,16 @@ static struct termios bk_term_attrs;
 void
 set_term_title(char *dir)
 {
+	if (term_caps.term_title == 0 || conf.term_title == 0)
+		return;
+
 	int free_tmp = 0;
 	char *tmp = (dir && *dir) ? home_tilde(dir, &free_tmp) : (char *)NULL;
 
 	if (!tmp)
 		printf("\x1b]2;%s\x1b\\", PROGRAM_NAME);
 	else
-		printf("\x1b]2;%s - %s\x1b\\", PROGRAM_NAME, tmp);
+		printf("\x1b]2;%s: %s\x1b\\", PROGRAM_NAME, tmp);
 
 	fflush(stdout);
 
@@ -371,6 +374,27 @@ check_truecolor(void)
 	return 0;
 }
 
+/* Basic heuristic for determining OSC-2 support. */
+static int
+check_term_title_support(const char *name)
+{
+	if (!(flags & GUI) || xargs.list_and_quit == 1 || xargs.vt100 == 1
+	|| xargs.open == 1 || xargs.preview == 1 || xargs.stat > 0)
+		return 0;
+
+	/* This is what MC does. See lib/tty/tty.c (tty_check_xterm_compat). */
+	return ((*name == 'x' && strncmp(name, "xterm", 5) == 0)
+		|| (*name == 'k' && strncmp(name, "konsole", 7) == 0)
+		|| (*name == 'r' && strncmp(name, "rxvt", 4) == 0)
+		|| (*name == 'E' && strcmp(name, "Eterm") == 0)
+		|| (*name == 'd' && strcmp(name, "dtterm") == 0)
+		|| (*name == 'a' && strncmp(name, "alacritty", 9) == 0)
+		|| (*name == 'f' && strncmp(name, "foot", 4) == 0)
+		|| (*name == 's' && strncmp(name, "screen", 6) == 0)
+		|| (*name == 't' && strncmp(name, "tmux", 4) == 0)
+		|| (*name == 'c' && strncmp(name, "contour", 7) == 0));
+}
+
 static void
 set_term_caps(const int i)
 {
@@ -401,6 +425,7 @@ set_term_caps(const int i)
 		&& TERM_INFO[i].el == 1) ? 1 : 0;
 
 	term_caps.pager = (TERM_INFO[i].cub == 0 || TERM_INFO[i].el == 0) ? 0 : 1;
+	term_caps.term_title = check_term_title_support(TERM_INFO[i].name);
 }
 
 /* Check whether current terminal (ENV_TERM) supports colors and requesting

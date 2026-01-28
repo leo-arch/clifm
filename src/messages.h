@@ -1395,7 +1395,7 @@ c: Quit paging (printing remaining files)\n"
 \n -E       Force the use of 'cd' to change directories\
 \n -f       Display recursive directories sizes (long view only)\
 \n -F       Disable the file counter (directories)\
-\n -g       Display file sizes in SI units (powers of 1000) instead of 1024\
+\n -g       Display file sizes in powers of 1000 (SI units) instead of 1024\
 \n -G       Display physical file sizes (disk usage) instead of logical sizes (apparent size)\
 \n -h       Print this help and exit\
 \n -H       Disable syntax-highlighting\
@@ -1478,7 +1478,6 @@ database (via the 'j' command)\
 \n      --cd-on-quit\t\t Enable cd-on-quit functionality (see the manpage)\
 \n      --color-scheme=NAME\t Use the color scheme NAME\
 \n      --color-links-as-target\t Colorize symbolic links according to the target file\
-\n      --cwd-in-title\t\t Print the current directory in the terminal window title\
 \n      --data-dir=PATH\t\t Use PATH as data directory (e.g.: /usr/local/share)\
 \n      --desktop-noti=STYLE\t Set the desktop notification style: 'kitty', 'system', or 'false' (default)\
 \n      --disk-usage\t\t Show disk usage (FREE/TOTAL (FREE %) TYPE DEVICE)\

@@ -281,6 +281,16 @@ gen_safenames_str(const int value)
 	}
 }
 
+static char *
+gen_term_title_str(const int value)
+{
+	switch (value) {
+	case 0: return "false";
+	case 1: return "true";
+	default: return "auto";
+	}
+}
+
 /* Dump current value of config options (as defined in the config file),
  * highlighting those that differ from default values.
  * Note that values displayed here represent the CURRENT status of the
@@ -592,6 +602,10 @@ dump_config(void)
 
 	s = DEF_TERM_CMD;
 	print_config_value("TerminalCmd", conf.term, s, DUMP_CONFIG_STR);
+
+	print_config_value("TermTitle",
+		gen_term_title_str(conf.term_title),
+		gen_term_title_str(DEF_TERM_TITLE), DUMP_CONFIG_STR_NO_QUOTE);
 
 	n = DEF_TIME_FOLLOWS_SORT;
 	print_config_value("TimeFollowsSort", &conf.time_follows_sort,
@@ -3447,6 +3461,18 @@ set_file_opener(char *line)
 	conf.opener = savestring(tmp, strlen(tmp));
 }
 
+static void
+set_term_title_value(char *line)
+{
+	if (!line || !*line || *line == '\n'
+	|| (*line == 'a' && strcmp(line, "auto\n") == 0)) {
+		conf.term_title = UNSET;
+		return;
+	}
+
+	set_config_bool_value(line, &conf.term_title);
+}
+
 /* Read the main configuration file and set options accordingly */
 static void
 read_config(void)
@@ -3893,6 +3919,10 @@ read_config(void)
 			set_tabcomp_mode(line + 18);
 		}
 #endif /* !_NO_FZF */
+
+		else if (*line == 'T' && strncmp(line, "TermTitle=", 10) == 0) {
+			set_term_title_value(line + 10);
+		}
 
 		else if (*line == 'T' && strncmp(line, "TerminalCmd=", 12) == 0) {
 			set_term_cmd(line + 12);

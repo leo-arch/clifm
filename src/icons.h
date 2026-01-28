@@ -993,7 +993,7 @@ struct icons_t const icon_ext[] = {
 	{"erl", ICON_ERLANG, RED},
 	{"ex", ICON_ELIXIR, BLUE},
 	{"exs", ICON_ELIXIR, BLUE},
-	{"f", ICON_FORTRAN, MAGENTA},
+	{"f", ICON_FORTRAN, MAGENTA}, // In uppercase, it may also be a Freeze compressed file
 	{"f90", ICON_FORTRAN, MAGENTA},
 	{"f#", ICON_FSHARP, CYAN},
 	{"fish", ICON_SHELL, WHITE},

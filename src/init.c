@@ -249,6 +249,7 @@ init_conf_struct(void)
 	conf.splash_screen = UNSET;
 	conf.suggest_filetype_color = DEF_SUG_FILETYPE_COLOR;
 	conf.suggestions = UNSET;
+	conf.term_title = DEF_TERM_TITLE;
 	conf.time_follows_sort = DEF_TIME_FOLLOWS_SORT;
 	conf.timestamp_mark = DEF_TIMESTAMP_MARK;
 	conf.tips = UNSET;

@@ -360,8 +360,7 @@ xchdir(char *dir, const int cd_flag)
 			if (xargs.report_cwd != 0) /* --no-report-cwd */
 				report_cwd(dir); /* OSC-7 escape sequence */
 
-			if (xargs.cwd_in_title == 1)
-				set_term_title(dir); /* --cwd-in-title */
+			set_term_title(dir); /* OSC-2 escape sequence */
 		}
 	}
 

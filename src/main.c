@@ -1087,15 +1087,6 @@ print_splash_screen(void)
 	}
 }
 
-/* Set terminal window title */
-static inline void
-set_term_win_title(void)
-{
-	if ((flags & GUI) && xargs.list_and_quit != 1 && xargs.vt100 != 1)
-		set_term_title(xargs.cwd_in_title == 1
-			? workspaces[cur_ws].path : (char *)NULL);
-}
-
 static inline void
 check_working_directory(void)
 {
@@ -1344,7 +1335,7 @@ main(int argc, char *argv[])
 	print_splash_screen();
 	set_start_path();
 	check_working_directory();
-	set_term_win_title();
+	set_term_title(workspaces[cur_ws].path);
 	exec_profile();
 	load_dirhist();
 	add_to_dirhist(workspaces[cur_ws].path);

@@ -1195,6 +1195,7 @@ struct config_t {
 	int splash_screen;
 	int suggest_filetype_color;
 	int suggestions;
+	int term_title;
 	int time_follows_sort;
 	int timestamp_mark;
 	int tips;
@@ -1668,6 +1669,7 @@ struct termcaps_t {
 	int del_scrollback; /* E3 */
 	int req_cur_pos; /* CPR (cursor position request) */
 	int req_dev_attrs; /* Primary DA (device attributes request) */
+	int term_title; /* OSC-2 support */
 	int unicode;
 };
 extern struct termcaps_t term_caps;

@@ -213,8 +213,7 @@ run_action(char *action, char **args)
 		return errno;
 	}
 
-	if (xargs.cwd_in_title == 1)
-		set_term_title(action);
+	set_term_title(action);
 
 	/* ################################################
 	 * #   3) EXEC CMD & LET THE CHILD WRITE TO PIPE  #
@@ -296,8 +295,7 @@ run_action(char *action, char **args)
 END:
 	unlinkat(XAT_FDCWD, fifo_path, 0);
 
-	if (xargs.cwd_in_title == 1)
-		set_term_title(workspaces[cur_ws].path);
+	set_term_title(workspaces[cur_ws].path);
 
 	return exit_status;
 }

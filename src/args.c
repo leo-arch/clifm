@@ -1230,6 +1230,14 @@ print_tabmode_deprecation_warning(const char *mode, const char *name)
 }
 
 static void
+print_cwd_in_title_deprecation_warning(void)
+{
+	err('w', PRINT_PROMPT, _("%s: '--cwd-in-title' is deprecated. "
+		"Use TermTitle=[true|false|auto] in the configuration file "
+		"instead.\n"), PROGRAM_NAME);
+}
+
+static void
 set_fnftab(const int deprecation_warning)
 {
 #ifndef _NO_FZF
@@ -1746,7 +1754,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case LOPT_COLOR_LNK_AS_TARGET:
 			xargs.color_lnk_as_target = conf.color_lnk_as_target = 1; break;
 		case LOPT_CWD_IN_TITLE:
-			xargs.cwd_in_title = 1; break;
+			print_cwd_in_title_deprecation_warning(); break;
 		case LOPT_DATA_DIR:
 			set_datadir(optarg); break;
 		case LOPT_DESKTOP_NOTIFICATIONS:
