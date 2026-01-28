@@ -1131,11 +1131,16 @@ set_locale(void)
 {
 	/* Use the locale specified by the environment */
 	setlocale(LC_ALL, "");
-	if (strcmp(nl_langinfo(CODESET), "UTF-8") != 0) {
-		err('w', PRINT_PROMPT, _("%s: Locale is not UTF-8. To avoid "
-			"encoding issues, set a UTF-8 locale. For example: "
-			"'export LANG=es_AR.UTF-8'.\n"), PROGRAM_NAME);
-	}
+
+	/* Check whether we have a UTF-8 encoding. */
+    char *cs = nl_langinfo(CODESET);
+    if (cs && strncasecmp(cs, "UTF", 3) == 0
+    && (cs[3] == '8' || (cs[3] == '-' && cs[4] == '8')))
+		return;
+
+	err('w', PRINT_PROMPT, _("%s: Locale is not UTF-8. To avoid "
+		"encoding issues, set a UTF-8 locale. For example: "
+		"'export LANG=es_AR.UTF-8'.\n"), PROGRAM_NAME);
 }
 
 static inline void
