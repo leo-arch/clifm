@@ -810,17 +810,35 @@ write_legacy_keys(char *seq, const size_t end, const int term_type)
 	return write_translation(seq[end], mod_key, term_type);
 }
 
-/* Translate the escape sequence STR into the corresponding symbolic value.
+/* Translate the escape sequence SEQ into the corresponding symbolic value.
  * E.g. "\x1b[1;7D" will return "Ctrl+Alt+Left". If no symbolic value is
  * found, NULL is returned.
  * The returned value, if not NULL, is dinamically allocated and must be
  * free'd by the caller.
  *
  * TERM_TYPE is one of the TK_TERM values (defined in translate_key.h).
- * It defines how SEQ will be translated.
+ * It defines how SEQ will be translated. Unless running on a legacy terminal,
+ * or using a legacy keyboard type (like SCO or HP), you most likely want to
+ * set this value to TK_TERM_GENERIC. For more info consult the -kt option in
+ * the XTerm manpage.
  *
- * NOTE: This function assumes STR comes directly from the terminal, i.e. by
- * reading terminal input in raw mode. User suplied input, therefore, will
+ * The following encoding schemes are supported:
+ * 1. SCO (legacy): set term_type to TK_TERM_LEGACY_SCO
+ * 2. HP (legacy): set term_type to TK_TERM_LEGACY_HP
+ *
+ * The following encondings are automatically handled by this function
+ * (set term_type to TK_TERM_GENERIC):
+ *
+ * 3. Sun (CSI-z)
+ * 4. Xterm
+ * 5. Xterm (modifyOtherKeys)
+ * 6. Rxvt
+ * 7. Fixterms (CSI-u)
+ * 8. Kitty (extended CSI-u)
+ * 9. Foot (extended CSI-u)
+ *
+ * NOTE: This function assumes SEQ comes directly from the terminal, i.e. by
+ * reading terminal input in raw mode. User suplied input, therefore, may
  * return false positives. */
 char *
 translate_key(char *seq, const int term_type)
