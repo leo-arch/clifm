@@ -102,13 +102,13 @@
 #  define ATIMNSEC st_atime
 #  define CTIMNSEC st_ctime
 #  define MTIMNSEC st_mtime
-#endif /* CLIFM_LEGACY */
+#endif /* !CLIFM_LEGACY */
 
 #ifndef major /* Not defined in Haiku */
-# define major(x) ((x >> 8) & 0x7F)
+# define major(x) (((x) >> 8) & 0x7F)
 #endif /* major */
 #ifndef minor /* Not defined in Haiku */
-# define minor(x) (x & 0xFF)
+# define minor(x) ((x) & 0xFF)
 #endif /* minor */
 
 #if defined(LINUX_FILE_ATTRS)
@@ -305,7 +305,8 @@ validate_octal_perms(const char *s, const size_t l)
 }
 
 /* Validate each field of a symbolic permissions string.
- * Returns FUNC_SUCCESS on success and FUNC_FAILURE on error. */
+ * Returns FUNC_SUCCESS on success and FUNC_FAILURE on error.
+ * The string S is guaranteed to have 9 bytes (plus NUL). */
 static int
 validate_symbolic_perms(const char *s)
 {
@@ -374,7 +375,8 @@ validate_new_perms(const char *s)
 }
 
 /* Convert permissions in symbolic notation given by S into octal notation
- * and return it as a string. */
+ * and return it as a string.
+ * The string S is guaranteed to have 9 bytes (plus NUL). */
 static char *
 perm2octal(const char *s)
 {
@@ -558,7 +560,8 @@ set_file_perms(char **args)
 		return FUNC_FAILURE;
 	}
 
-	char *octal_str = IS_DIGIT(*new_perms) ? new_perms : perm2octal(new_perms);
+	char *octal_str = IS_DIGIT(*new_perms) ? new_perms /* Octal */
+		: perm2octal(new_perms); /* Symbolic */
 
 	int ret = FUNC_SUCCESS;
 	size_t n = 0;
