@@ -170,7 +170,7 @@ translate_emacs_style_keyseq(const char *key)
 #undef END_KEYSEQ_CHAR
 
 /* Translate the raw escape code KEY (sent by the terminal upon a key press)
- * into a human-readable format.
+ * into human-readable format.
  * Return the translation, if found, or the original sequence (KEY) otherwise. */
 static const char *
 xtranslate_key(const char *key)
@@ -200,7 +200,7 @@ xtranslate_key(const char *key)
 	}
 	buf[c] = '\0';
 
-	char *translation = translate_key(buf, 0);
+	char *translation = translate_key(buf, TK_TERM_GENERIC);
 	if (translation) {
 		xstrsncpy(buf, translation, sizeof(buf));
 		free(translation);
