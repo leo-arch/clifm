@@ -526,10 +526,10 @@
 # Set the readline editing mode: 0 for vi and 1 for emacs (default).
 ;RlEditMode=1
 
-# Set terminal window title.
+# Set the terminal window title.
 # Supported values:
-# auto =  If supported by the running terminal.
-# true =  Always (disregarding terminal support).
+# auto =  Set only if the terminal supports it.
+# true =  Always (regarless of terminal support).
 # false = Never.
 ;TermTitle=auto
 
