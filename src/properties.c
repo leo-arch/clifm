@@ -435,17 +435,17 @@ get_new_perms(const char *str, const int diff)
 	&& strcmp(str, new_perms) == 0) {
 		fputs(_("pc: Nothing to do\n"), stderr);
 		free(new_perms);
-		new_perms = (char *)NULL;
+		new_perms = NULL;
 	}
 
 	return new_perms;
 }
 
-/* Returns a struct perms_t with only those permission bits shared by
- * all files in S set. DIFF is set to 1 in case files in S have different
+/* Return a struct perms_t with only those permission bits shared by
+ * all files in FILES set. DIFF is set to 1 in case files in S have different
  * permission sets. Otherwise, it is set to 0. */
 static struct perms_t
-get_common_perms(char **s, int *diff)
+get_common_perms(char **files, int *diff)
 {
 	*diff = 0;
 	struct stat a, b;
@@ -457,8 +457,8 @@ get_common_perms(char **s, int *diff)
 	int suid = 1, sgid = 1, sticky = 1;
 
 	int stat_ready = 0;
-	for (size_t i = 0; s[i]; i++) {
-		if (stat(s[i], &a) == -1)
+	for (size_t i = 0; files[i]; i++) {
+		if (stat(files[i], &a) == -1)
 			continue;
 		if (stat_ready == 1 && a.st_mode != b.st_mode)
 			*diff = 1;
@@ -491,38 +491,39 @@ get_common_perms(char **s, int *diff)
 	return p;
 }
 
-/* Returns the permissions string of files passed as arguments (S).
- * If only a single file or multiple files with the same set of permissions,
- * the actual permissions are returned. Otherwise, only shared permissions
- * bits are set in the permissions template.
- * DIFF is set to 1 if files in S have different permission sets. Otherwise,
+/* Return the permissions string of files passed as arguments (FILES).
+ * If only a single file, or multiple files with the same set of permissions,
+ * the current set of permissions is returned. Otherwise, only shared
+ * permissions bits are set in the permissions string.
+ * DIFF is set to 1 if files in FILES have different permission sets. Otherwise,
  * it is set to 0. */
 static char *
-get_perm_str(char **s, int *diff)
+get_perm_str(char **files, int *diff)
 {
-	char *ptr = xnmalloc(10, sizeof(char));
+	const size_t buflen = 10;
+	char *buf = xnmalloc(buflen, sizeof(char));
 	*diff = 0;
 
-	if (s[1]) { /* Multiple files */
-		struct perms_t p = get_common_perms(s, diff);
-		snprintf(ptr, 10, "%c%c%c%c%c%c%c%c%c",
+	if (files[1]) { /* Multiple files */
+		struct perms_t p = get_common_perms(files, diff);
+		snprintf(buf, buflen, "%c%c%c%c%c%c%c%c%c",
 			p.ur, p.uw, p.ux, p.gr, p.gw, p.gx, p.or, p.ow, p.ox);
-		return ptr;
+		return buf;
 	}
 
 	/* Single file */
 	struct stat a;
-	if (stat(s[0], &a) == -1) {
-		xerror("stat: '%s': %s\n", s[0], strerror(errno));
-		free(ptr);
-		return (char *)NULL;
+	if (stat(files[0], &a) == -1) {
+		xerror("stat: '%s': %s\n", files[0], strerror(errno));
+		free(buf);
+		return NULL;
 	}
 
 	struct perms_t p = get_file_perms(a.st_mode);
-	snprintf(ptr, 10, "%c%c%c%c%c%c%c%c%c",
+	snprintf(buf, buflen, "%c%c%c%c%c%c%c%c%c",
 		p.ur, p.uw, p.ux, p.gr, p.gw, p.gx, p.or, p.ow, p.ox);
 
-	return ptr;
+	return buf;
 }
 
 /* Interactively change permissions of files passed via ARGS. */
@@ -537,14 +538,14 @@ set_file_perms(char **args)
 	for (size_t i = 1; args[i]; i++) {
 		if (!strchr(args[i], '\\'))
 			continue;
-		char *t = unescape_str(args[i], 0);
-		if (t) {
+		char *tmp = unescape_str(args[i], 0);
+		if (tmp) {
 			free(args[i]);
-			args[i] = t;
+			args[i] = tmp;
 		}
 	}
 
-	int diff = 0; /* Either a single file o multiple files with same perms */
+	int diff = 0; /* Either a single file or multiple files with same perms */
 	char *pstr = get_perm_str(args + 1, &diff);
 	if (!pstr)
 		return errno;

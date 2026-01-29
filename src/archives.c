@@ -267,7 +267,7 @@ mount_iso(char *file)
 {
 #if !defined(__linux__)
 	UNUSED(file);
-	xerror("%s\n", _("mount: This feature is available for Linux only."));
+	xerror("%s\n", _("mount: This feature is available only on Linux."));
 	return FUNC_SUCCESS;
 #else
 	char *mountpoint = create_mountpoint(file);
