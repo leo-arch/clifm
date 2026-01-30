@@ -71,6 +71,41 @@ is_file_in_list(const char *name, const size_t name_len)
 	return 0;
 }
 
+static char removed_files[NUM_EVENT_SLOTS][NAME_MAX];
+static size_t rem_file_slots = sizeof(removed_files) / sizeof(removed_files[0]);
+static size_t rem_file_slot_len = sizeof(removed_files[0]) - 1;
+static size_t rem_file_cur_index = 0;
+
+static void
+init_removed_files(void)
+{
+	for (size_t i = 0; i < rem_file_slots; i++)
+		removed_files[i][0] = '\0';
+	rem_file_cur_index = 0;
+}
+
+static void
+add_removed_file(const char *file)
+{
+	if (rem_file_cur_index >= rem_file_slots)
+		return;
+
+	memcpy(removed_files[rem_file_cur_index], file,
+		strnlen(file, rem_file_slot_len));
+	removed_files[rem_file_cur_index++][rem_file_slot_len] = '\0';
+}
+
+static int
+file_was_removed(const char *file)
+{
+	for (size_t i = 0; removed_files[i][0] != '\0'; i++) {
+		if (removed_files[i][0] == *file && strcmp(removed_files[i], file) == 0)
+			return 1;
+	}
+
+	return 0;
+}
+
 static void
 read_inotify(void)
 {
@@ -80,6 +115,8 @@ read_inotify(void)
 	int i;
 	struct inotify_event *event;
 	char inotify_buf[EVENT_BUF_LEN];
+
+	init_removed_files();
 
 	memset((void *)inotify_buf, '\0', sizeof(inotify_buf));
 	i = (int)read(inotify_fd, inotify_buf, sizeof(inotify_buf)); /* flawfinder: ignore */
@@ -119,7 +156,8 @@ read_inotify(void)
 # ifdef INOTIFY_DEBUG
 			puts("IN_CREATE");
 # endif /* INOTIFY_DEBUG */
-			if (event->len && lstat(event->name, &a) != 0) {
+			if (file_was_removed(event->name) /* Previously removed (recreated) */
+			|| lstat(event->name, &a) != 0) {
 				/* The file was created, but doesn't exist anymore. */
 				ignore_event = 1;
 			}
@@ -148,9 +186,12 @@ read_inotify(void)
 # ifdef INOTIFY_DEBUG
 			puts("IN_DELETE");
 # endif /* INOTIFY_DEBUG */
-			if (event->len && lstat(event->name, &a) == 0)
+			if (lstat(event->name, &a) == 0) {
 				/* The file was removed, but is still there (recreated). */
 				ignore_event = 1;
+			}
+
+			add_removed_file(event->name);
 		}
 
 # ifdef INOTIFY_DEBUG
