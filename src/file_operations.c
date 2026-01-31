@@ -886,7 +886,7 @@ open_function(char **cmd)
 	else if (ret == E_NOTFOUND) /* ENOENT */
 		xerror("%s: %s: %s\n", errname, cmd[2], NOTFOUND_MSG);
 	else
-		xerror("%s: %s: %s\n", errname, cmd[2], strerror(errno));
+		xerror(_("%s: '%s' failed with error code %d\n"), errname, cmd[2], ret);
 
 	return ret;
 }
