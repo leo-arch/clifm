@@ -935,7 +935,7 @@ init_trash(void)
 		trash_n = ret <= 2 ? 0 : (size_t)ret - 2;
 	}
 }
-# endif /* _NO_TRASH */
+# endif /* !_NO_TRASH */
 
 /* Run the command passed via --cmd and exit */
 static void

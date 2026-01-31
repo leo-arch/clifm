@@ -246,10 +246,9 @@ read_kqueue(void)
 	struct kevent event_data[NUM_EVENT_SLOTS];
 	memset((void *)event_data, '\0', sizeof(struct kevent) * NUM_EVENT_SLOTS);
 
-	int i;
 	const int count = kevent(kq, NULL, 0, event_data, 4096, &timeout);
 
-	for (i = 0; i < count; i++) {
+	for (int i = 0; i < count; i++) {
 		if (event_data[i].fflags & KQUEUE_FFLAGS) {
 			reload_dirlist();
 			return;
