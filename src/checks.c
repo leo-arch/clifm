@@ -571,6 +571,10 @@ check_regex(const char *str)
 	return FUNC_FAILURE;
 }
 
+/* Return 1 if the string STR contains pattern expansion characters (either
+ * glob or REGEX), or zero otherwise.
+ * Escaped expansion characters are rejected, just as existent filenames
+ * and file names whose only expansion character is a dot (REGEX). */
 int
 check_expansion_patterns(const char *str)
 {
@@ -582,11 +586,17 @@ check_expansion_patterns(const char *str)
 		return 0;
 
 	while (*str) {
-		if (*str == '\\') // Ignore escaped chars
-			str += (str[1] ? 2 : 1);
-		if (!*str)
-			break;
-		if (strchr(GLOB_CHARS, *str) || strchr(GLOB_REGEX_CHARS, *str))
+		if (*str == '\\') { /* Ignore escaped chars */
+			if (str[1])
+				str += 2;
+			else
+				break;
+			continue;
+		}
+
+		/* Ignore patterns whose only meta-character is a dot (REGEX) to
+		 * minimize conflict with file names. */
+		if (*str != '.' && strchr(GLOB_REGEX_CHARS, *str))
 			return 1;
 		str++;
 	}
