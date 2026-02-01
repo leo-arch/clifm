@@ -1451,7 +1451,10 @@ get_matching_app(char **files)
 
 	for (i = 0; files[i]; i++) {
 		apps[n] = NULL;
-		char *mime_type = xmagic(files[i], 1);
+
+		char *file = construct_filename(files[i]);
+		char *mime_type = xmagic(file, 1);
+		free(file);
 		if (!mime_type)
 			goto ERROR;
 
