@@ -4221,15 +4221,17 @@ static void
 create_trash_dirs(void)
 {
 	struct stat a;
+	errno = 0;
 	if (stat(trash_files_dir, &a) != -1 && S_ISDIR(a.st_mode)
 	&& stat(trash_info_dir, &a) != -1 && S_ISDIR(a.st_mode))
 		return;
 
 	if (xargs.stealth_mode == 1) {
 		err('w', PRINT_PROMPT, _("%s: '%s': %s. Trash function disabled. "
-			"If needed, create the directories manually and restart %s.\n"
+			"If required, create the directories manually and restart %s.\n"
 			"E.g.: mkdir -p ~/.local/share/Trash/{files,info}\n"),
-			PROGRAM_NAME, trash_dir, strerror(errno), PROGRAM_NAME);
+			PROGRAM_NAME, trash_dir, strerror(errno != 0 ? errno : ENOTDIR),
+			PROGRAM_NAME);
 		trash_ok = 0;
 		return;
 	}
