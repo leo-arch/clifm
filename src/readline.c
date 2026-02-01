@@ -4002,6 +4002,10 @@ my_rl_completion(const char *text, const int start, const int end)
 	if (alt_prompt != 0)
 		goto FIRST_WORD_COMP;
 
+	/* ELN ranges */
+	if (*text >= '0' && *text <= '9' && (matches = complete_ranges(text)))
+		return matches;
+
 	/* #### FILE TYPE EXPANSION #### */
 	if (*text == '=' && (matches = complete_file_type_filter(text)))
 		return matches;
@@ -4263,9 +4267,9 @@ FIRST_WORD_COMP:
 		return matches;
 
 	/* ELN ranges */
-	if (*text >= '0' && *text <= '9'
+/*	if (*text >= '0' && *text <= '9'
 	&& (matches = complete_ranges(text)))
-		return matches;
+		return matches; */
 
 	/* Finally, try to complete with filenames in CWD. */
 	if ((matches = rl_completion_matches(text, &filenames_gen_text))) {

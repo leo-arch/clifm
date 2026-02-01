@@ -1667,8 +1667,9 @@ do_some_cleanup(char **buf, char **matches, const char *query,
 			rl_point = (int)(s - lb + 1);
 			rl_delete_text(rl_point, rl_end);
 			rl_end = rl_point;
+		/* Completions allowed for the first word. */
 		} else if (cmd_hist == 1 || ct == TCMP_BM_PATHS || ct == TCMP_TAGS_F
-		|| ct == TCMP_BM_PREFIX || ct == TCMP_TAGS_T
+		|| ct == TCMP_BM_PREFIX || ct == TCMP_TAGS_T || ct == TCMP_RANGES
 		|| ct == TCMP_SEL || ct == TCMP_DIRHIST || ct == TCMP_GLOB) {
 			rl_delete_text(0, rl_end);
 			rl_end = rl_point = 0;
