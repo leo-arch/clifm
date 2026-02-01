@@ -1225,12 +1225,23 @@ check_auto_first(char **args)
 static int
 auto_open_file(char **args, char *tmp)
 {
-	char *cmd[] = {"open", tmp, args_n >= 1 ? args[1]
-		: NULL, args_n >= 2 ? args[2] : NULL, NULL};
+	size_t i, n = 0;
+	for (i = 0; args[i]; i++);
+
+	char **cmd = xnmalloc(i + 3, sizeof(char *));
+	cmd[n++] = "open";
+	cmd[n++] = tmp;
+
+	for (i = 1; args[i]; i++)
+		cmd[n++] = args[i];
+
+	cmd[n] = NULL;
+
 	args_n++;
 	const int ret = open_function(cmd);
 	args_n--;
 	free(tmp);
+	free(cmd);
 
 	return ret;
 }

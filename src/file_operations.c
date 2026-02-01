@@ -124,7 +124,7 @@ open_file(char *file)
 		char *cmd[] = {"xdg-open", file, NULL};
 # endif /* __HAIKU__ */
 		ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
-#endif /* _NO_LIRA */
+#endif /* !_NO_LIRA */
 	}
 
 	return ret;
@@ -870,10 +870,16 @@ open_function(char **cmd)
 	/* At this point we know that the file to be openend is either a regular
 	 * file or a symlink to a regular file. So, just open the file. */
 
+	/* A single file with no opening application */
 	if (!cmd[2] || (*cmd[2] == '&' && !cmd[2][1]))
 		return open_file(file);
 
-	/* Some application was specified to open the file. Use it. */
+	/* Multiple files */
+	if (!is_cmd_in_path(cmd[2])) {
+		return mime_open_multiple_files(cmd + 1);
+	}
+
+	/* A single file plus an opening application. */
 	char *tmp_cmd[] = {cmd[2], file, NULL};
 	const int ret =
 		launch_execv(tmp_cmd, bg_proc ? BACKGROUND : FOREGROUND, E_NOSTDERR);
@@ -881,6 +887,7 @@ open_function(char **cmd)
 	if (ret == FUNC_SUCCESS)
 		return FUNC_SUCCESS;
 
+	/* Since STDERR is silenced, we print the error message here. */
 	if (ret == E_NOEXEC) /* EACCESS && ENOEXEC */
 		xerror("%s: %s: %s\n", errname, cmd[2], NOEXEC_MSG);
 	else if (ret == E_NOTFOUND) /* ENOENT */

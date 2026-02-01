@@ -1337,85 +1337,248 @@ run_cmd_noargs(char *arg, char *name)
 }
 
 static void
-append_params(char **args, char *name, char ***cmd, int *exec_flags)
+append_filenames(char **cmd, char **files, size_t *index)
 {
-	size_t i, n = 1, f = 0;
-	for (i = 1; args[i]; i++) {
+	for (size_t i = 0; files[i] && *files[i]; i++) {
+		if (strchr(files[i], '\\')) {
+			char *tmp = unescape_str(files[i], 0);
+			if (tmp)
+				cmd[(*index)++] = tmp;
+		} else {
+			cmd[(*index)++] = strdup(files[i]);
+		}
+	}
+}
+
+static char **
+build_command(char **app_fields, char **files, int *exec_flags)
+{
+	size_t n = 0, f_flag = 0;
+
+	size_t app_fields_num, files_num;
+	for (app_fields_num = 0; app_fields[app_fields_num]; app_fields_num++);
+	for (files_num = 0; files[files_num]; files_num++);
+
+	char **cmd = xnmalloc(app_fields_num + files_num + 1, sizeof(char *));
+
+	for (size_t i = 0; app_fields[i]; i++) {
+		if (i == 0) { /* Command name. */
+			cmd[n++] = strdup(app_fields[i]);
+			continue;
+		}
+
 		/* "%x" is short for "%f !EO &". It must be the last field in the
 		 * command entry (subsequent fields will be ignored). */
-		if (*args[i] == '%' && args[i][1] == 'x') {
-			(*cmd)[n] = savestring(name, strlen(name));
-			f = 1;
+		if (*app_fields[i] == '%' && app_fields[i][1] == 'x') {
+			append_filenames(cmd, files, &n);
+			f_flag = 1;
 			set_exec_flags("EO", exec_flags);
 			*exec_flags |= E_SETSID;
 			bg_proc = 1;
-			n++;
 			break;
 		}
 
-		if (*args[i] == '%' && args[i][1] == 'f' && !args[i][2]) {
-			f = 1;
-			(*cmd)[n++] = savestring(name, strlen(name));
+		if (*app_fields[i] == '%' && app_fields[i][1] == 'f'
+		&& !app_fields[i][2]) {
+			append_filenames(cmd, files, &n);
+			f_flag = 1;
 			continue;
 		}
 
-		if (*args[i] == '!' && (args[i][1] == 'E' || args[i][1] == 'O')) {
-			set_exec_flags(args[i] + 1, exec_flags);
+		if (*app_fields[i] == '!' && (app_fields[i][1] == 'E'
+		|| app_fields[i][1] == 'O')) {
+			set_exec_flags(app_fields[i] + 1, exec_flags);
 			continue;
 		}
 
-		/* Expand %m placeholder to the file's MIME type */
-		if (*args[i] == '%' && args[i][1] == 'm') {
-			char *mime = xmagic(name, MIME_TYPE);
-			if (mime)
-				(*cmd)[n++] = mime;
+		/* %m and %u work only for single files. */
+		/* Expand %m placeholder to the file's MIME type. */
+		if (*app_fields[i] == '%' && app_fields[i][1] == 'm') {
+			if (files[1])
+				continue;
+			char *mime_type = xmagic(files[0], MIME_TYPE);
+			if (mime_type)
+				cmd[n++] = mime_type;
 			continue;
 		}
 
-		/* Expand %u to the file URI for the original filename */
-		if (*args[i] == '%' && args[i][1] == 'u') {
-			char *p = url_encode(name, 1);
-			if (p) {
-				(*cmd)[n++] = p;
-				f = 1;
+		/* Expand %u to the file URI for the original filename. */
+		if (*app_fields[i] == '%' && app_fields[i][1] == 'u') {
+			if (files[1])
+				continue;
+			char *encoded_path = url_encode(files[0], 1);
+			if (encoded_path) {
+				cmd[n++] = encoded_path;
+				f_flag = 1;
 			}
 			continue;
 		}
 
-		if (*args[i] == '$' && IS_ALPHA_UP(args[i][1])) {
-			char *env = expand_env(args[i]);
-			if (env) {
-				(*cmd)[n++] = savestring(env, strlen(env));
-			}
+		if (*app_fields[i] == '$' && IS_ALPHA_UP(app_fields[i][1])) {
+			char *env = expand_env(app_fields[i]);
+			if (env)
+				cmd[n++] = strdup(env);
 			continue;
 		}
 
-		if (*args[i] == '&')
+		if (*app_fields[i] == '&')
 			bg_proc = 1;
 		else
-			(*cmd)[n++] = savestring(args[i], strlen(args[i]));
+			cmd[n++] = strdup(app_fields[i]);
 	}
 
-	if (f == 0)
-		(*cmd)[n++] = savestring(name, strlen(name));
+	if (f_flag == 0)
+		append_filenames(cmd, files, &n);
 
-	(*cmd)[n] = (char *)NULL;
+	cmd[n] = NULL;
+
+	return cmd;
+}
+
+/* Check if opening apps for each file in FILES match. Return the app string
+ * in case of success, or NULL otherwise. */
+static char *
+get_matching_app(char **files)
+{
+	if (!files || !files[0])
+		return NULL;
+
+	size_t i = 0;
+	for (i = 0; files[i]; i++);
+
+	size_t n = 0;
+	char **apps = xnmalloc(i + 1, sizeof(char *));
+
+	for (i = 0; files[i]; i++) {
+		apps[n] = NULL;
+		char *mime_type = xmagic(files[i], 1);
+		if (!mime_type)
+			goto ERROR;
+
+		char *app = get_app(mime_type, files[i]);
+		free(mime_type);
+		if (!app)
+			goto ERROR;
+
+		apps[n++] = strdup(app);
+		free(app);
+	}
+
+	apps[n] = NULL;
+
+	if (!apps[0])
+		goto ERROR;
+
+	for (i = 0; apps[i]; i++) {
+		for (size_t j = i + 1; apps[j]; j++)
+			if (*apps[i] != *apps[j] || strcmp(apps[i], apps[j]) != 0)
+				goto ERROR;
+	}
+
+	char *app = strdup(apps[0]);
+	for (i = 0; apps[i]; i++)
+		free(apps[i]);
+	free(apps);
+
+	return app;
+
+ERROR:
+	for (i = 0; apps[i]; i++)
+		free(apps[i]);
+	free(apps);
+
+	return NULL;
+}
+
+static char **
+build_app_fields(char *app)
+{
+	char **app_fields = NULL;
+	if (strchr(app, ' ')) {
+		char **tmp = split_str(app, NO_UPDATE_ARGS);
+		if (tmp)
+			app_fields = tmp;
+		else
+			return NULL;
+	} else {
+		app_fields = xnmalloc(2, sizeof(char *));
+		app_fields[0] = strdup(app);
+		app_fields[1] = NULL;
+	}
+
+	return app_fields;
+}
+
+int
+mime_open_multiple_files(char **files)
+{
+	if (!files || !files[0])
+		return FUNC_FAILURE;
+
+	size_t i;
+	for (i = 0; files[i]; i++);
+
+	char *app = NULL;
+	if (i > 0 && is_cmd_in_path(files[i - 1])) {
+		app = strdup(files[i - 1]); /* Opening app specified in command line. */
+		/* Nullify this entry: it will be skipped by build_command(). */
+		*files[i - 1] = '\0';
+	} else {
+		app = get_matching_app(files);
+	}
+
+	if (!app) {
+		xerror(_("open: Opening application mismatch\n"
+			"TIP: Try with 'APP FILE(s)' or 'FILE(s) APP'\n"));
+		return FUNC_FAILURE;
+	}
+
+	/* Command plus options (excluding files). */
+	char **app_fields = build_app_fields(app);
+	if (!app_fields) {
+		free(app);
+		return FUNC_FAILURE;
+	}
+
+	int exec_flags = E_NOFLAG;
+	char **cmd = build_command(app_fields, files, &exec_flags);
+
+	free(app);
+	for (i = 0; app_fields[i]; i++)
+		free(app_fields[i]);
+	free(app_fields);
+
+	if (!cmd)
+		return FUNC_FAILURE;
+
+	char msg[NAME_MAX + 20];
+	snprintf(msg, sizeof(msg), _("Open files with '%s'?"), cmd[0]);
+	const int answer = rl_get_y_or_n(msg, 0);
+
+	const int ret = answer == 0 ? FUNC_SUCCESS :
+		launch_execv(cmd, bg_proc ? BACKGROUND : FOREGROUND, exec_flags);
+
+	for (i = 0; cmd[i]; i++)
+		free(cmd[i]);
+	free(cmd);
+
+	return ret;
 }
 
 static int
-run_cmd_plus_args(char **args, char *name)
+run_cmd_plus_args(char **args, char *file)
 {
 	if (!args || !args[0])
 		return FUNC_FAILURE;
 
 	size_t i;
-	for (i = 0; args[i]; i++);
-
-	char **cmd = xnmalloc(i + 2, sizeof(char *));
-	cmd[0] = savestring(args[0], strlen(args[0]));
 
 	int exec_flags = E_NOFLAG;
-	append_params(args, name, &cmd, &exec_flags);
+	char *files[] = {file, NULL};
+	char **cmd = build_command(args, files, &exec_flags);
+
+	if (!cmd)
+		return FUNC_FAILURE;
 
 	const int ret =
 		launch_execv(cmd, bg_proc ? BACKGROUND : FOREGROUND, exec_flags);

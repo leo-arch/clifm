@@ -19,6 +19,8 @@ char **mime_open_with_tab(char *filename, const char *prefix,
 	const int only_names);
 char *xmagic(const char *file, const int query_mime);
 
+int  mime_open_multiple_files(char **files);
+
 __END_DECLS
 
 #endif /* MIME_H */
