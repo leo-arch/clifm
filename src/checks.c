@@ -394,6 +394,37 @@ is_number(const char *restrict str)
 	return 1;
 }
 
+int
+is_eln_range(char *str)
+{
+	if (!str || !*str)
+		return 0;
+
+	char *dash = strchr(str, '-');
+	if (dash)
+		*dash = '\0';
+
+	filesn_t a = is_number(str) ? xatof(str) : -1;
+	if (!dash)
+		return 0;
+
+	filesn_t b = -1;
+	if (!dash[1]) // "n-"
+		b = g_files_num;
+	else if (is_number(dash + 1))
+		b = xatof(dash + 1);
+
+	if (dash)
+		*dash = '-';
+
+	if (a < 1 || a > g_files_num
+	|| b < 1 || b > g_files_num
+	|| b <= a)
+		return 0;
+
+	return 1;
+}
+
 /* Check if string STR contains a digit and this digit is not the first
  * char in STR. Used by is_internal_cmd() to check for fused parameters in
  * internal commands.

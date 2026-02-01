@@ -2488,6 +2488,11 @@ CHECK_FIRST_WORD:
 		if (a > 0 && a <= g_files_num)
 			printed = PARTIAL_MATCH;
 
+	} else if (IS_DIGIT(*word) && is_eln_range(word)) {
+		if (suggestion.printed && suggestion_buf)
+			clear_suggestion(CS_FREEBUF);
+		printed = 1;
+
 	} else if (point_is_first_word && rl_point < rl_end
 	&& (printed = check_completions(word, wlen, CHECK_MATCH)) != NO_MATCH) {
 		if (c == ' ' && printed != FULL_MATCH)
