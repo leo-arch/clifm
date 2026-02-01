@@ -1178,7 +1178,7 @@ check_shell_functions(const char *str)
 
 	if (conf.int_vars == 0) { /* Take assignements as shell functions */
 		const char *s = strchr(str, ' ');
-		const char *e = strchr(str, '=');
+		const char *e = strchr(str + 1, '='); /* No assignment starts with '=' */
 		if (!s && e)
 			return 1;
 		if (s && e && e < s)
@@ -2964,7 +2964,8 @@ parse_input_str(char *str)
 	substr[args_n + 1] = (char *)NULL;
 
 	const int is_action = is_action_name(substr[0]);
-	if (is_int_cmd == 0 && is_action == 0)
+	if (is_int_cmd == 0 && is_action == 0
+	&& check_expansion_patterns(substr[0]) == 0)
 		return substr;
 
 		/* ####################################################

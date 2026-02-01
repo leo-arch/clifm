@@ -571,6 +571,29 @@ check_regex(const char *str)
 	return FUNC_FAILURE;
 }
 
+int
+check_expansion_patterns(const char *str)
+{
+	if (!str || !*str)
+		return 0;
+
+	struct stat a;
+	if (lstat(str, &a) == 0)
+		return 0;
+
+	while (*str) {
+		if (*str == '\\') // Ignore escaped chars
+			str += (str[1] ? 2 : 1);
+		if (!*str)
+			break;
+		if (strchr(GLOB_CHARS, *str) || strchr(GLOB_REGEX_CHARS, *str))
+			return 1;
+		str++;
+	}
+
+	return 0;
+}
+
 /* Returns the parsed aliased command in an array of strings if a
  * matching alias is found, or NULL if not. */
 char **

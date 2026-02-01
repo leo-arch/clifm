@@ -16,6 +16,7 @@ __BEGIN_DECLS
 void check_completion_mode(void);
 #endif /* !_NO_FZF */
 
+int  check_expansion_patterns(const char *str);
 int  check_file_access(const mode_t mode, const uid_t uid, const gid_t gid);
 char **check_for_alias(char **args);
 int  check_glob_char(const char *str, const int gflag);
