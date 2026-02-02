@@ -594,19 +594,19 @@ struct icons_t const icon_ext[] = {
 
 	/* Graphics */
 	{"ai", ICON_ILLUSTRATOR, YELLOW}, // Adobe Illustrator
-	{"avif", ICON_IMG, GREEN},
+	{"avif", ICON_IMG, GREEN}, // AVIF Image
 	{"blend", ICON_BLENDER, YELLOW}, // Blender project
-	{"bmp", ICON_IMG, GREEN},
+	{"bmp", ICON_IMG, GREEN}, // Bitmap Image
 	{"dcm", ICON_IMG, GREEN}, // DICOM: Medical images
 	{"emf", ICON_IMG, GREEN}, // Windows: wmf replacement
 	{"eps", ICON_IMG, GREEN}, // Encapsulated PostScript File (vector graphic)
 	{"exr", ICON_IMG, GREEN}, // OpenEXR raster image
 	{"fts", ICON_IMG, GREEN}, // FITS (Flexible Image Transport System): Astronomy
-	{"gif", ICON_IMG, GREEN},
+	{"gif", ICON_IMG, GREEN}, // Graphical Interchange Format File
 	{"hdr", ICON_IMG, GREEN}, // High Dynamic Range raster image
 	{"heic", ICON_IMG, GREEN}, // High Efficiency Image Format
 	{"heif", ICON_IMG, GREEN}, // High Efficiency Image Format
-	{"ico", ICON_IMG, GREEN},
+	{"ico", ICON_IMG, GREEN}, // Windows Icon File
 	{"j2c", ICON_IMG, GREEN}, // JPEG 2000 Code Stream bitmap image
 	{"j2k", ICON_IMG, GREEN}, // JPEG 2000 compressed bitmap image
 	{"jfi", ICON_IMG, GREEN},  // JPEG File Interchange compressed bitmap (obsolete)
@@ -614,12 +614,12 @@ struct icons_t const icon_ext[] = {
 	{"jif", ICON_IMG, GREEN}, // JPEG Interchange Format bitmap (obsolete)
 	{"jp2", ICON_IMG, GREEN}, // JPEG 2000 Core Image (compressed bitmap)
 	{"jpe", ICON_IMG, GREEN}, // 24-bit compressed JPEG graphic
-	{"jpeg", ICON_IMG, GREEN},
+	{"jpeg", ICON_IMG, GREEN}, // JPEG (Joint Photographic Experts Group) image
 	{"jpf", ICON_IMG, GREEN}, // JPEG 2000 Image File
-	{"jpg", ICON_IMG, GREEN},
+	{"jpg", ICON_IMG, GREEN}, // JPEG image
 	{"jps", ICON_IMG, GREEN}, // Stereo JPEG Image
 	{"jpx", ICON_IMG, GREEN}, // JPEG 2000 Image File
-	{"jxl", ICON_IMG, GREEN},
+	{"jxl", ICON_IMG, GREEN}, // JPEG XL Image
 	{"kpp", ICON_KRITA, MAGENTA}, // Krita image
 	{"kra", ICON_KRITA, MAGENTA}, // Krita image
 	{"krz", ICON_KRITA, MAGENTA}, // Krita image
@@ -630,22 +630,22 @@ struct icons_t const icon_ext[] = {
 	{"pcx", ICON_IMG, GREEN}, // Paintbrush Bitmap raster image (legacy)
 	{"pdd", ICON_IMG, GREEN}, // Adobe PhotoDeluxe (legacy)
 	{"pgm", ICON_IMG, GREEN}, // Portable Gray Map Image
-	{"png", ICON_IMG, GREEN},
+	{"png", ICON_IMG, GREEN}, // Portable Network Graphic
 	{"pnm", ICON_IMG, GREEN}, // Portable Any Map Image
 	{"ppm", ICON_IMG, GREEN}, // Portable Pixmap Image
 	{"psb", ICON_PHOTOSHOP, B_BLUE}, // Adobe Photoshop Big (PSB) format
-	{"psd", ICON_PHOTOSHOP, B_BLUE},
+	{"psd", ICON_PHOTOSHOP, B_BLUE}, // Adobe Photoshop Document
 	{"pxm", ICON_IMG, GREEN}, // MacOS/iOS Pixelmator Image
 	{"qoi", ICON_IMG, GREEN}, // Quite OK Image Format
-	{"svg", ICON_IMG, GREEN},
+	{"svg", ICON_IMG, GREEN}, // Scalable Vector Graphic
 	{"svgz", ICON_IMG, GREEN}, // Compressed SVG
 	{"tga", ICON_IMG, GREEN}, // Targa Graphic (Legacy)
-	{"tif", ICON_IMG, GREEN},
-	{"tiff", ICON_IMG, GREEN},
-	{"webp", ICON_IMG, GREEN},
+	{"tif", ICON_IMG, GREEN}, // Tagged Image File Format
+	{"tiff", ICON_IMG, GREEN}, // Tagged Image File Format
+	{"webp", ICON_IMG, GREEN}, // WebP Image
 	{"wmf", ICON_IMG, GREEN}, // Legacy: Windows
 	{"xbm", ICON_IMG, GREEN}, // X11 BitMap Graphic
-	{"xcf", ICON_GIMP, WHITE},
+	{"xcf", ICON_GIMP, WHITE}, // GIMP Image
 	{"xpm", ICON_IMG, GREEN}, // X11 Pixmap Graphic
 	{"xwd", ICON_IMG, GREEN}, // X Windows Dump uncompressed bitmap
 /*	{"ani", ICON_IMG, GREEN}, // Legacy: Animated icon
@@ -761,36 +761,36 @@ struct icons_t const icon_ext[] = {
 
 	/* Video */
 	{"3g2", ICON_VID, BLUE}, // 3GPP2 Multimedia File
-	{"3gp", ICON_VID, BLUE},
+	{"3gp", ICON_VID, BLUE}, // 3GPP Multimedia File
 	{"3gp2", ICON_VID, BLUE}, // 3GPP Multimedia File
 	{"3gpp", ICON_VID, BLUE}, // 3GPP Media File
 	{"3gpp2", ICON_VID, BLUE}, // 3GPP2 Multimedia File
 	{"asf", ICON_VID, BLUE}, // Advanced Systems Format File
-	{"avi", ICON_VID, BLUE},
+	{"avi", ICON_VID, BLUE}, // Audio Video Interleave File
 	{"divx", ICON_VID, BLUE}, // Legacy: common before mp4/mkv
 	{"flv", ICON_VID, BLUE}, // Flash video
 	{"h264", ICON_VID, BLUE}, // H.264 Encoded Video File
 	{"heics", ICON_VID, BLUE}, // HEIF image sequence (video?)
 	{"m2ts", ICON_VID, BLUE}, // Blu-ray BDAV Video File
 	{"m2v", ICON_VID, BLUE}, // MPEG-2 Video
-	{"m4v", ICON_VID, BLUE},
+	{"m4v", ICON_VID, BLUE}, // iTunes Video File
 	{"mjpeg", ICON_VID, BLUE}, // Motion JPEG Video
 	{"mjpg", ICON_VID, BLUE}, // Motion JPEG Video
-	{"mkv", ICON_VID, BLUE},
-	{"mov", ICON_VID, BLUE},
-	{"mp4", ICON_VID, BLUE},
+	{"mkv", ICON_VID, BLUE}, // Matroska Video
+	{"mov", ICON_VID, BLUE}, // Apple QuickTime Movie
+	{"mp4", ICON_VID, BLUE}, // MPEG-4 Video
 	{"mp4v", ICON_VID, BLUE}, // Legacy: very common before H.264 dominance
-	{"mpeg", ICON_VID, BLUE},
-	{"mpg", ICON_VID, BLUE},
-	{"ogv", ICON_VID, BLUE},
+	{"mpeg", ICON_VID, BLUE}, // MPEG Video
+	{"mpg", ICON_VID, BLUE}, // MPEG Video
+	{"ogv", ICON_VID, BLUE}, // Ogg Video
 	{"qt", ICON_VID, BLUE}, // Apple QuickTime Movie
 	{"rm", ICON_VID, BLUE}, // RealMedia File
 	{"video", ICON_VID, BLUE}, // Generic (maybe aTube Catcher Video File)
 	{"vob", ICON_VID, BLUE}, // DVD Video Object File
 	{"ogm", ICON_VID, BLUE}, // Ogg Media File
 	{"swf", ICON_VID, BLUE}, // Legacy: typical Flash container
-	{"webm", ICON_VID, BLUE},
-	{"wmv", ICON_VID, BLUE},
+	{"webm", ICON_VID, BLUE}, // WebM Video
+	{"wmv", ICON_VID, BLUE}, // Windows Media Video
 /*	{"f4v, ICON_VID, BLUE"} // Legacy: Flash MP4 Video File (quite uncommon)
 	{"dv", ICON_VID, BLUE}, // Legacy (digital cameras 1990s-2000s)
 	{"rmvb", ICON_VID, BLUE}, // Legacy: RealMedia Variable Bit Rate
@@ -807,7 +807,7 @@ struct icons_t const icon_ext[] = {
 
 	/* Audio */
 //	{"3ga", ICON_AUDIO, YELLOW}, // 3GPP audio (mostly legacy)
-	{"aac", ICON_AUDIO, YELLOW},
+	{"aac", ICON_AUDIO, YELLOW}, // Advanced Audio Coding File
 	{"ac3", ICON_AUDIO, YELLOW}, // Audio Codec 3 File
 	{"aif", ICON_AUDIO, B_YELLOW}, // Audio Interchange File Format (Lossless)
 	{"aiff", ICON_AUDIO, B_YELLOW}, // Lossless
@@ -825,31 +825,33 @@ struct icons_t const icon_ext[] = {
 	{"mka", ICON_AUDIO, YELLOW}, // Matroska Audio
 	{"m4a", ICON_AUDIO, YELLOW}, // MPEG-4 Audio
 	{"mp2", ICON_AUDIO, YELLOW}, // MPEG Layer II Compressed Audio File
-	{"mp3", ICON_AUDIO, YELLOW},
+	{"mp3", ICON_AUDIO, YELLOW}, // MPEG Layer III Compressed Audio File
 	{"mpga", ICON_AUDIO, YELLOW}, // Legacy, but widely used back then
-	{"oga", ICON_AUDIO, YELLOW}, // OGG Vorbis audio
-	{"ogg", ICON_AUDIO, YELLOW},
-	{"opus", ICON_AUDIO, YELLOW},
+	{"oga", ICON_AUDIO, YELLOW}, // OGG Vorbis (audio only)
+	{"ogg", ICON_AUDIO, YELLOW}, // Ogg Vorbis
+	{"opus", ICON_AUDIO, YELLOW}, // Opus audio (mostly used in streaming)
 	{"pcm", ICON_AUDIO, B_YELLOW}, // Pulse Code Modulation File (Lossless)
 	{"ra", ICON_AUDIO, YELLOW}, // RealAudio File
 	{"sf2", ICON_AUDIO, YELLOW}, // SoundFont 2 Sound Bank
 	{"spx", ICON_AUDIO, YELLOW}, // Ogg Vorbis Speex File
 	{"tta", ICON_AUDIO, B_YELLOW}, // True Audio File (lossless)
 	{"wav", ICON_AUDIO, B_YELLOW}, // Lossless
-	{"wma", ICON_AUDIO, YELLOW},
+	{"wma", ICON_AUDIO, YELLOW}, // Windows Media Audio
 	{"wv", ICON_AUDIO, B_YELLOW}, // WavPack Audio (lossless)
 /*	{"axa", ICON_AUDIO, YELLOW}, // Legacy: Annodex Audio File
+	{"bwf", ICON_AUDIO, YELLOW}, // Broadcast Wave Format (WAV extension)
 	{"mpc", ICON_AUDIO, YELLOW}, // Legacy/Niche: Musepack Compressed Audio
 	{"snd", ICON_AUDIO, YELLOW}, // Generic
 	{"sou", ICON_AUDIO, YELLOW}, // Legacy
 	{"voc", ICON_AUDIO, YELLOW}, // Legacy */
 
 	/* Playlists */
-	{"cue", ICON_PLAYLIST, YELLOW},
-	{"m3u", ICON_PLAYLIST, YELLOW},
-	{"m3u8", ICON_PLAYLIST, YELLOW},
-	{"pls", ICON_PLAYLIST, YELLOW},
-//	{"xspf", ICON_PLAYLIST, YELLOW},
+	{"cue", ICON_PLAYLIST, YELLOW}, // Cue Sheet File (describes a CD layout)
+	{"m3u", ICON_PLAYLIST, YELLOW}, // M3U Media Playlist
+	{"m3u8", ICON_PLAYLIST, YELLOW}, // UTF-8 M3U Playlist
+	{"pls", ICON_PLAYLIST, YELLOW}, // Multimedia Playlist File
+//	{"wpl", ICON_PLAYLIST, YELLOW}, // Windows Media Player Playlist
+//	{"xspf", ICON_PLAYLIST, YELLOW}, // XML Shareable Playlist File
 
 	/* Archive/compressed */
 	{"7z", ICON_ARCHIVE, YELLOW},
@@ -858,34 +860,33 @@ struct icons_t const icon_ext[] = {
 	{"alz", ICON_ARCHIVE, YELLOW}, // ALZip file
 	{"ar", ICON_ARCHIVE, WHITE}, // AR archive: uncompressed
 	{"arc", ICON_ARCHIVE, YELLOW}, // Legacy: it could also be .ark
-	{"arj", ICON_ARCHIVE, YELLOW},
+	{"arj", ICON_ARCHIVE, YELLOW}, // ARJ Compressed File Archive
 	{"br", ICON_ARCHIVE, YELLOW}, // Brotli
 	{"bz", ICON_ARCHIVE, YELLOW}, // bzip
-	{"bz2", ICON_ARCHIVE, YELLOW},
-	{"bz3", ICON_ARCHIVE, YELLOW},
+	{"bz2", ICON_ARCHIVE, YELLOW}, // bzip version 2
+	{"bz3", ICON_ARCHIVE, YELLOW}, // bzip version 3
 	{"cab", ICON_ARCHIVE, YELLOW}, // Windows Cabinet File
 	{"cpio", ICON_ARCHIVE, WHITE}, // Uncompressed
-	{"crate", ICON_ARCHIVE, YELLOW},
 	{"ear", ICON_ARCHIVE, YELLOW}, // Java enterprise archive
-	{"gz", ICON_ARCHIVE, YELLOW},
-	{"gzip", ICON_ARCHIVE, YELLOW},
+	{"gz", ICON_ARCHIVE, YELLOW}, // Gnu Zipped File
+	{"gzip", ICON_ARCHIVE, YELLOW}, // Gnu Zipped File
 	{"jar", ICON_ARCHIVE, YELLOW}, // Java archive
 	{"lbr", ICON_ARCHIVE, WHITE}, // Uncompressed
 	{"lrz", ICON_ARCHIVE, YELLOW}, // lrzip
-	{"lz", ICON_ARCHIVE, YELLOW},
-	{"lz4", ICON_ARCHIVE, YELLOW},
-	{"lzh", ICON_ARCHIVE, YELLOW},
-	{"lzma", ICON_ARCHIVE, YELLOW},
-	{"lzo", ICON_ARCHIVE, YELLOW}, // lzop
-	{"pak", ICON_ARCHIVE, YELLOW},
-	{"phar", ICON_ARCHIVE, YELLOW}, /* PHP archive */
+	{"lz", ICON_ARCHIVE, YELLOW}, // Lzip Compressed File
+	{"lz4", ICON_ARCHIVE, YELLOW}, // LZ4 Compressed File
+	{"lzh", ICON_ARCHIVE, YELLOW}, // Lempel-Ziv and Haruyasu Compressed File
+	{"lzma", ICON_ARCHIVE, YELLOW}, // Lempel-Ziv-Markov chain Algorithm Compressed File
+	{"lzo", ICON_ARCHIVE, YELLOW}, // Lempel-Ziv-Oberhume Compressed File
+	{"pak", ICON_ARCHIVE, YELLOW}, // Game archive (ZIP) / PAK compressed (ARC variant)
+	{"phar", ICON_ARCHIVE, YELLOW}, // PHP archive
 	{"pk3", ICON_ARCHIVE, YELLOW}, // ZIP-based
-	{"par", ICON_ARCHIVE, YELLOW},
+	{"par", ICON_ARCHIVE, YELLOW}, // Parchive Index File
 	{"pyz", ICON_ARCHIVE, YELLOW}, // Python Application Zip File
-	{"rar", ICON_ARCHIVE, YELLOW},
+	{"rar", ICON_ARCHIVE, YELLOW}, // WinRAR Compressed Archive (proprietary)
 	{"rz", ICON_ARCHIVE, YELLOW}, // rzip
 	{"t7z", ICON_ARCHIVE, YELLOW}, // .tar.7z
-	{"tar", ICON_ARCHIVE, WHITE}, // Uncompressed
+	{"tar", ICON_ARCHIVE, WHITE}, // Tape Archive: Uncompressed
 	{"taz", ICON_ARCHIVE, YELLOW}, // .tar.Z (also .tz)
 	{"tbz", ICON_ARCHIVE, YELLOW}, // .tar.bz (bzip)
 	{"tbz2", ICON_ARCHIVE, YELLOW}, // .tar.bz2 (bzip2)
@@ -897,12 +898,12 @@ struct icons_t const icon_ext[] = {
 	{"tzo", ICON_ARCHIVE, YELLOW}, // .tar.lzo (lzop)
 	{"tzst", ICON_ARCHIVE, YELLOW}, // .tar.zst
 	{"war", ICON_ARCHIVE, YELLOW}, /* Java web archive */
-	{"xz", ICON_ARCHIVE, YELLOW},
-	{"z", ICON_ARCHIVE, YELLOW}, // Compress
-	{"zip", ICON_ARCHIVE, YELLOW},
-	{"zoo", ICON_ARCHIVE, YELLOW}, // Legacy
-	{"zpaq", ICON_ARCHIVE, YELLOW},
-	{"zst", ICON_ARCHIVE, YELLOW},
+	{"xz", ICON_ARCHIVE, YELLOW}, // XZ Compressed File
+	{"z", ICON_ARCHIVE, YELLOW}, // Unix Compress'ed File
+	{"zip", ICON_ARCHIVE, YELLOW}, // Zipped File
+	{"zoo", ICON_ARCHIVE, YELLOW}, // Zoo Compressed File (legacy)
+	{"zpaq", ICON_ARCHIVE, YELLOW}, // ZPAQ File
+	{"zst", ICON_ARCHIVE, YELLOW}, // Zstandard File
 /*	{"dar", ICON_ARCHIVE, YELLOW} // Disk archive
 	{"drpm", ICON_ARCHIVE, YELLOW}, // Delta RPM archive
 	{"dz", ICON_ARCHIVE, YELLOW}, // Dzip file
@@ -920,20 +921,22 @@ struct icons_t const icon_ext[] = {
 	{"zipx", ICON_ARCHIVE, YELLOW}, // Extended ZIP archive (Winzip 12.1) */
 
 	/* Packages */
-	{"apk", ICON_PACKAGE, YELLOW},
-	{"Appimage", ICON_PACKAGE, YELLOW},
+	{"apk", ICON_PACKAGE, YELLOW}, // Android package (ZIP-based)
+	{"Appimage", ICON_PACKAGE, YELLOW}, // Linux Software Package
+	{"crate", ICON_PACKAGE, YELLOW}, // Rust package
 	{"crx", ICON_PACKAGE, YELLOW}, // Chrome add-ons
-	{"deb", ICON_PACKAGE, YELLOW},
-	{"flatpak", ICON_PACKAGE, YELLOW},
-	{"gem", ICON_PACKAGE, YELLOW},
+	{"deb", ICON_PACKAGE, YELLOW}, // Debian package
+	{"flatpak", ICON_PACKAGE, YELLOW}, // Linux Flatpak Application Bundle
+	{"gem", ICON_PACKAGE, YELLOW}, // RubyGems Package
 	{"msi", ICON_PACKAGE, YELLOW}, // Windows installer
-	{"pkg", ICON_PACKAGE, YELLOW},
-	{"rpm", ICON_PACKAGE, YELLOW},
-	{"snap", ICON_PACKAGE, YELLOW},
+	{"pkg", ICON_PACKAGE, YELLOW}, // Generic package file (used by several vendors)
+	{"rpm", ICON_PACKAGE, YELLOW}, // Red Hat Package Manager File
+	{"snap", ICON_PACKAGE, YELLOW}, // Snap Application Package
 	{"whl", ICON_PACKAGE, YELLOW}, // Python Wheel package
 	{"xbps", ICON_PACKAGE, YELLOW}, // Void Linux package
 	{"xpi", ICON_PACKAGE, YELLOW}, // Mozilla add-ons
-/*	{"udeb", ICON_PACKAGE, YELLOW}, // Debian micro package
+/*	{"aar", ICON_PACKAGE, YELLOW}, // Android archive (ZIP-based)
+	{"udeb", ICON_PACKAGE, YELLOW}, // Debian micro package
 	{"appx", ICON_PACKAGE, YELLOW} // Windows 8 app installer
 	{"appxbundle", ICON_PACKAGE, YELLOW} // Windows 8 app installer
 	{"msix", ICON_PACKAGE, YELLOW} // Windows 10 app installer
@@ -941,22 +944,22 @@ struct icons_t const icon_ext[] = {
 
 	/* Disk images */
 	{"aff", ICON_DISK, WHITE}, // Advanced Forensics Format disk image
-	{"dmg", ICON_DISK, WHITE},
-	{"image", ICON_DISK, WHITE},
-	{"img", ICON_DISK, WHITE},
-	{"qcow", ICON_DISK, WHITE},
-	{"qcow2", ICON_DISK, WHITE},
-	{"vdi", ICON_DISK, WHITE},
-	{"vhd", ICON_DISK, WHITE},
-	{"vhdx", ICON_DISK, WHITE},
-	{"vmdk", ICON_DISK, WHITE},
+	{"dmg", ICON_DISK, WHITE}, // Apple Disk Image
+	{"image", ICON_DISK, WHITE}, // Apple Disk Image
+	{"img", ICON_DISK, WHITE}, // Disc Image Data File
+	{"qcow", ICON_DISK, WHITE}, // QEMU Copy On Write Disk Image
+	{"qcow2", ICON_DISK, WHITE}, // QEMU Copy On Write Version 2
+	{"vdi", ICON_DISK, WHITE}, // VirtualBox Virtual Disk Image
+	{"vhd", ICON_DISK, WHITE}, // Virtual PC Virtual Hard Disk
+	{"vhdx", ICON_DISK, WHITE}, // Windows 8 Virtual Hard Drive File
+	{"vmdk", ICON_DISK, WHITE}, // Virtual Machine Disk File
 /*	{"adf", ICON_DISK, WHITE}, // Amiga disk file (also adz, hdf, hdz)
-	{"ima", ICON_DISK, WHITE},
+	{"ima", ICON_DISK, WHITE}, // Disk Image
 	{"wim", ICON_DISK, WHITE}, // Windows Imaging Format File */
 
 	/* Optical disk images */
 	{"cdi", ICON_CD, WHITE}, // DiscJuggler Disc Image
-	{"iso", ICON_CD, WHITE},
+	{"iso", ICON_CD, WHITE}, // ISO-9660 Disk Image
 	{"isz", ICON_CD, WHITE}, // Zipped ISO Disk Image
 	{"nrg", ICON_CD, WHITE}, // Nero CD/DVD Image File
 	{"tc", ICON_CD, WHITE}, // TrueCrypt Volume
@@ -1103,8 +1106,8 @@ struct icons_t const icon_ext[] = {
 	{"sln", ICON_VISUALSTUDIO, BLUE},
 	{"sql", ICON_MYSQL, CYAN},
 	{"ss", ICON_SCHEME, WHITE},
-	{"styl", ICON_STYLUS, B_GREEN},
-	{"stylus", ICON_STYLUS, B_GREEN},
+	{"styl", ICON_STYLUS, B_GREEN}, // Stylus File
+	{"stylus", ICON_STYLUS, B_GREEN}, // Stylus File
 	{"suo", ICON_VISUALSTUDIO, BLUE},
 	{"svelte", ICON_SVELTE, RED},
 	{"swift", ICON_SWIFT, GREEN},
@@ -1143,100 +1146,100 @@ struct icons_t const icon_ext[] = {
 //	applescript, scptd, scpt, ICON_APPLE, WHITE */
 
 	/* Markup */
-	{"asp", ICON_HTML, YELLOW},
-	{"aspx", ICON_HTML, YELLOW},
+	{"asp", ICON_HTML, YELLOW}, // Active Server Page
+	{"aspx", ICON_HTML, YELLOW}, // Active Server Page Extended Webpage
 #ifdef _ICONS_IN_TERMINAL
-	{"bib", FILE_BIBTEX, WHITE},
+	{"bib", FILE_BIBTEX, WHITE}, // BibTeX Bibliography Database
 #else
-	{"bib", ICON_TEX, WHITE},
+	{"bib", ICON_TEX, WHITE}, // BibTeX Bibliography Database
 #endif
-	{"bst", ICON_TEX, WHITE},
-	{"cls", ICON_TEX, WHITE},
-	{"htm", ICON_HTML, YELLOW},
-	{"html", ICON_HTML, YELLOW},
-	{"jmd", ICON_MARKDOWN, WHITE},
-	{"jsp", ICON_HTML, YELLOW},
-	{"jspx", ICON_HTML, YELLOW},
-	{"latex", ICON_TEX, WHITE},
-	{"ltx", ICON_TEX, WHITE},
-	{"markdown", ICON_MARKDOWN, WHITE},
-	{"md", ICON_MARKDOWN, WHITE},
-	{"mdown", ICON_MARKDOWN, WHITE},
-	{"mdx", ICON_MARKDOWN, WHITE},
-	{"mkd", ICON_MARKDOWN, WHITE},
+	{"bst", ICON_TEX, WHITE}, // BibTeX Style Document
+	{"cls", ICON_TEX, WHITE}, // LaTeX Document Class File
+	{"htm", ICON_HTML, YELLOW}, // Hypertext Markup Language File
+	{"html", ICON_HTML, YELLOW}, // Hypertext Markup Language File
+	{"jmd", ICON_MARKDOWN, WHITE}, // Jupyter Markdown File
+	{"jsp", ICON_HTML, YELLOW}, // Jakarta Server Page
+	{"jspx", ICON_HTML, YELLOW}, // XML Jakarta Server Page
+	{"latex", ICON_TEX, WHITE}, // LaTeX Document
+	{"ltx", ICON_TEX, WHITE}, // LaTeX Document
+	{"markdown", ICON_MARKDOWN, WHITE}, // Markdown Documentation File
+	{"md", ICON_MARKDOWN, WHITE}, // Markdown Documentation File
+	{"mdown", ICON_MARKDOWN, WHITE}, // Markdown Documentation File
+	{"mdx", ICON_MARKDOWN, WHITE}, // Markdown Documentation File
+	{"mkd", ICON_MARKDOWN, WHITE}, // Markdown Documentation File
 	{"opf", ICON_XML, YELLOW}, // OEB Package Format (FlipViewer FlipBook File)
-	{"opml", ICON_XML, YELLOW},
-	{"rdf", ICON_XML, YELLOW},
-	{"rdoc", ICON_MARKDOWN, WHITE},
-	{"sgml", ICON_XML, YELLOW},
-	{"shtml", ICON_HTML, YELLOW},
-	{"sty", ICON_TEX, WHITE},
-	{"tld", ICON_XML, YELLOW},
-	{"tex", ICON_TEX, WHITE},
-	{"xaml", ICON_XAML, WHITE},
-	{"xbel", ICON_XML, YELLOW},
-	{"xhtml", ICON_HTML, YELLOW},
-	{"xml", ICON_XML, YELLOW},
-	{"xmp", ICON_XML, YELLOW},
-	{"xsd", ICON_XML, YELLOW},
-	{"xsl", ICON_XML, YELLOW},
-	{"xslt", ICON_XML, YELLOW},
-	{"xul", ICON_XML, YELLOW},
+	{"opml", ICON_XML, YELLOW}, // Outline Processor Markup Language File
+	{"rdf", ICON_XML, YELLOW}, // Resource Description Framework File
+	{"rdoc", ICON_MARKDOWN, WHITE}, // Ruby Document
+	{"sgml", ICON_XML, YELLOW}, // Standard Generalized Markup Language File
+	{"shtml", ICON_HTML, YELLOW}, // Server Side Include HTML File
+	{"sty", ICON_TEX, WHITE}, // LaTeX Style Files
+	{"tld", ICON_XML, YELLOW}, // Tag Library Descriptor File - used for Java Server Page (JSP)
+	{"tex", ICON_TEX, WHITE}, // LaTeX Source Document
+	{"xaml", ICON_XAML, WHITE}, // Extensible Application Markup Language File
+	{"xbel", ICON_XML, YELLOW}, // XML Bookmark Exchange Language
+	{"xhtml", ICON_HTML, YELLOW}, // Extensible Hypertext Markup Language File
+	{"xml", ICON_XML, YELLOW}, // Extensible Markup Language File
+	{"xmp", ICON_XML, YELLOW}, // Extensible Metadata Platform File
+	{"xsd", ICON_XML, YELLOW}, // XML Schema Definition
+	{"xsl", ICON_XML, YELLOW}, // XML Stylesheet
+	{"xslt", ICON_XML, YELLOW}, // Extensible Stylesheet Language Transformations File
+	{"xul", ICON_XML, YELLOW}, // XML User Interface Language File (Mozilla)
 /*	{"mhtml", ICON_HTML, YELLOW}, // MIME HTML File */
 
-	{"diff", ICON_DIFF, WHITE},
-	{"patch", ICON_DIFF, WHITE},
+	{"diff", ICON_DIFF, WHITE}, // Patch File
+	{"patch", ICON_DIFF, WHITE}, // Patch File
 
 	/* Binaries */
-	{"bin", ICON_BINARY, WHITE},
-	{"com", ICON_EXEC, WHITE},
-	{"dat", ICON_BINARY, WHITE},
-	{"dll", ICON_SHARE, BLUE},
-	{"dylib", ICON_SHARE, BLUE},
+	{"bin", ICON_BINARY, WHITE}, // Generic Binary File
+	{"com", ICON_EXEC, WHITE}, // DOS Command File
+	{"dat", ICON_BINARY, WHITE}, // Generic binary data file
+	{"dll", ICON_SHARE, BLUE}, // Dynamic Link Library (Windows)
+	{"dylib", ICON_SHARE, BLUE}, // Mach-O Dynamic Library (MacOS)
 	{"elc", ICON_EMACS, BLUE}, // Compiled bytecode from .el files (Emacs)
-	{"elf", ICON_BINARY, WHITE},
-	{"exe", ICON_EXEC, WHITE},
-	{"ko", ICON_BINARY, WHITE},
-	{"lib", ICON_SHARE, BLUE},
-	{"o", ICON_BINARY, WHITE},
-	{"out", ICON_BINARY, WHITE},
-	{"so", ICON_BINARY, WHITE},
+	{"elf", ICON_BINARY, WHITE}, // Executable and Linkable Format (Unix)
+	{"exe", ICON_EXEC, WHITE}, // Windows Executable File
+	{"ko", ICON_BINARY, WHITE}, // Linux Kernel Module File
+	{"lib", ICON_SHARE, BLUE}, // Generic Data Library
+	{"o", ICON_BINARY, WHITE}, // Compiled C Object File
+	{"out", ICON_BINARY, WHITE}, // Compiled Executable File
+	{"so", ICON_BINARY, WHITE}, // Unix Shared Library
 
 	/* Config */
 	{"avro", ICON_JSON, WHITE}, // Avro Data File (JSON binary encoding)
-	{"cfg", ICON_CONFIG, WHITE},
-	{"clifm", ICON_CONFIG, WHITE},
-	{"conf", ICON_CONFIG, WHITE},
-	{"desktop", ICON_CONFIG, WHITE},
-	{"ini", ICON_CONFIG, WHITE},
+	{"cfg", ICON_CONFIG, WHITE}, // Generic Configuration File
+	{"clifm", ICON_CONFIG, WHITE}, // Clifm config file
+	{"conf", ICON_CONFIG, WHITE}, // Unix Configuration File
+	{"desktop", ICON_CONFIG, WHITE}, // Desktop Entry File
+	{"ini", ICON_CONFIG, WHITE}, // Initialization File
 	{"json", ICON_JSON, WHITE}, // JSON: JavaScript Object Notation file
 	{"json5", ICON_JSON, WHITE}, // JSON5 Data File
 	{"jsonc", ICON_JSON, WHITE}, // JSON With Comments File
-	{"rc", ICON_CONFIG, WHITE},
-	{"tml", ICON_CONFIG, WHITE},
-	{"toml", ICON_TOML, WHITE},
-	{"yaml", ICON_YAML, WHITE},
-	{"yml", ICON_YAML, WHITE},
+	{"rc", ICON_CONFIG, WHITE}, // Resource Configuration File
+	{"tml", ICON_CONFIG, WHITE}, // Generic config file
+	{"toml", ICON_TOML, WHITE}, // TOML Configuration File
+	{"yaml", ICON_YAML, WHITE}, // YAML Document
+	{"yml", ICON_YAML, WHITE}, // YAML Document
 	{"webmanifest", ICON_JSON, WHITE}, // Progressive Web Application Manifest
 
 	/* Databases */
-	{"db", ICON_DATABASE, WHITE},
-	{"db3", ICON_SQLITE, BLUE},
-	{"dbf", ICON_DATABASE, WHITE},
-	{"dconf", ICON_DATABASE, WHITE},
-	{"dump", ICON_DATABASE, WHITE},
-	{"fdb", ICON_DATABASE, WHITE},
-	{"gdb", ICON_DATABASE, WHITE},
-	{"kdb", ICON_DATABASE, WHITE}, // Keypass Database File
+	{"db", ICON_DATABASE, WHITE}, // Database File
+	{"db3", ICON_SQLITE, BLUE}, // SQLite Database
+	{"dbf", ICON_DATABASE, WHITE}, // Database File
+	{"dconf", ICON_DATABASE, WHITE}, // Gnome DConf binary config file
+	{"dump", ICON_DATABASE, WHITE}, // Plain-text export/backup/analyze data
+	{"fdb", ICON_DATABASE, WHITE}, // Microsoft Dynamics NAV Database
+	{"gdb", ICON_DATABASE, WHITE}, // InterBase Database / GPS Database
+	{"kdb", ICON_DATABASE, WHITE}, // Keypass Database
 	{"kdbx", ICON_DATABASE, WHITE}, // KeePass Password Database
-	{"mdb", ICON_ACCESS, RED},
-	{"mdf", ICON_DATABASE, WHITE},
-	{"ndf", ICON_DATABASE, WHITE},
-	{"s3db", ICON_SQLITE, BLUE},
-	{"sdf", ICON_DATABASE, WHITE},
-	{"sl3", ICON_SQLITE, BLUE},
-	{"sqlite", ICON_SQLITE, BLUE},
-	{"sqlite3", ICON_SQLITE, BLUE},
+	{"mdb", ICON_ACCESS, RED}, // Microsoft Access Database
+	{"mdf", ICON_DATABASE, WHITE}, // SQL Server Database
+	{"ndf", ICON_DATABASE, WHITE}, // SQL Server Secondary Database
+	{"s3db", ICON_SQLITE, BLUE}, // SQLite Database
+	{"sdf", ICON_DATABASE, WHITE}, // SQL Server Compact Database
+	{"sl3", ICON_SQLITE, BLUE}, // SQLite Database
+	{"sqlite", ICON_SQLITE, BLUE}, // SQLite Database
+	{"sqlite3", ICON_SQLITE, BLUE}, // SQLite Database
 
 	/* Security */
 	{"asc", ICON_LOCK, GREEN},
@@ -1528,6 +1531,9 @@ struct icons_t const icon_filenames[] = {
 	{".bash_logout", ICON_CONFIG, WHITE},
 	{".bash_profile", ICON_CONFIG, WHITE},
 	{".bashrc", ICON_CONFIG, WHITE},
+	{".clang-format", ICON_CONFIG, WHITE},
+	{".clang-tidy", ICON_CONFIG, WHITE},
+	{".DS_Store", ICON_CONFIG, WHITE},
 	{".gitattributes", ICON_GIT, WHITE},
 	{".gitconfig", ICON_GIT, WHITE},
 	{".gitignore", ICON_GIT, WHITE},
