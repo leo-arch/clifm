@@ -648,9 +648,12 @@ struct icons_t const icon_ext[] = {
 	{"xcf", ICON_GIMP, WHITE},
 	{"xpm", ICON_IMG, GREEN}, // X11 Pixmap Graphic
 	{"xwd", ICON_IMG, GREEN}, // X Windows Dump uncompressed bitmap
-/*	{"cgm", ICON_IMG, GREEN}, // Legacy: vector graphics
+/*	{"ani", ICON_IMG, GREEN}, // Legacy: Animated icon
+	{"apng", ICON_IMG, GREEN}, // Animated PNG (similar to GIF)
+	{"cgm", ICON_IMG, GREEN}, // Legacy: vector graphics
 	{"dib", ICON_IMG, GREEN}, // Device-Independent Bitmap Image (much like BMP)
 	{"dpx", ICON_IMG, GREEN}, // Uncommon: highly specialized
+	{"flif", ICON_IMG, GREEN}, // Free Lossless Image Format
 	{"ff", ICON_IMG, GREEN}, // Farbfeld: Never took off
 	{"hif", ICON_IMG, GREEN}, // Like HEIC, it is a HEIF variant (uncommon)
 	{"pam", ICON_IMG, GREEN}, // Portable Arbitrary Map: Uncommon
@@ -906,11 +909,15 @@ struct icons_t const icon_ext[] = {
 	{"egg", ICON_ARCHIVE, YELLOW}, // ALZip file (previously .alz)
 	{"lha", ICON_ARCHIVE, YELLOW}, // Legacy: Amiga (like .lzh)
 	{"lzx", ICON_ARCHIVE, YELLOW}, // Legacy: Amiga
+	{"maff", ICON_ARCHIVE, YELLOW}, // Mozilla Archive File Format (ZIP-based)
 	{"pax", ICON_ARCHIVE, WHITE}, // Uncompressed
 	{"pea", ICON_ARCHIVE, YELLOW}, // PeaZip
 	{"pk7", ICON_ARCHIVE, YELLOW}, // GZDoom archive file
 	{"shar", ICON_ARCHIVE, WHITE}, // Uncompressed
-	{"warc", ICON_ARCHIVE, WHITE}, // Uncompressed: Web archive */
+	{"sqx", ICON_ARCHIVE, WHITE}, // SQX Archive
+	{"uc2", ICON_ARCHIVE, WHITE}, // Legacy: Ultra Compressor II
+	{"warc", ICON_ARCHIVE, WHITE}, // Uncompressed: Web archive
+	{"zipx", ICON_ARCHIVE, YELLOW}, // Extended ZIP archive (Winzip 12.1) */
 
 	/* Packages */
 	{"apk", ICON_PACKAGE, YELLOW},
@@ -1175,6 +1182,7 @@ struct icons_t const icon_ext[] = {
 	{"xsl", ICON_XML, YELLOW},
 	{"xslt", ICON_XML, YELLOW},
 	{"xul", ICON_XML, YELLOW},
+/*	{"mhtml", ICON_HTML, YELLOW}, // MIME HTML File */
 
 	{"diff", ICON_DIFF, WHITE},
 	{"patch", ICON_DIFF, WHITE},

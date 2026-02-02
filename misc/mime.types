@@ -1,3 +1,6 @@
+# The following MIME-types are currently not recognized by file(1)
+# As a workaround, we add them here.
+
 application/x-alz         alz
 application/x-bzip3       bz3 tbz3
 application/vnd.comicbook-rar cbr
@@ -27,12 +30,14 @@ audio/x-tta               tta
 audio/x-wavpack           wv
 audio/x-wve               wve
 
+image/apng                apng
 image/x-sony-arw          arw
 image/x-cin               cin
 image/x-canon-cr3         cr3
 image/vnd-ms.dds          dds
 image/emf                 emf
 image/x-kde-raw           erf
+image/flif                flif
 image/x-farbfeld          ff
 image/x-hrz               hrz
 image/x-ilbm              iff lbm
