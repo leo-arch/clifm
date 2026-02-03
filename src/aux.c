@@ -1194,7 +1194,8 @@ xitoa(long long n)
 }
 
 /* Convert the string S into a number in the range of valid ELN's
- * (1 - FILESN_MAX). Returns this value if valid or -1 in case of error. */
+ * (1 - FILESN_MAX). Returns this value if valid, or -1 in case of error,
+ * setting errno to indicate the error (EINVAL or ERANGE). */
 filesn_t
 xatof(const char *s)
 {
@@ -1206,8 +1207,13 @@ xatof(const char *s)
 	if (!s[1] && *s > '0' && *s <= '9')
 		return (filesn_t)(*s - '0');
 
-	errno = 0;
-	const long long ret = strtoll(s, NULL, 10);
+	char *ptr = NULL;
+	const long long ret = strtoll(s, &ptr, 10);
+
+	if (ptr == s) { /* No digits in S. */
+		errno = EINVAL;
+		return (-1);
+	}
 
 #if FILESN_MAX < LLONG_MAX
 	/* 1 - FILESN_MAX */
@@ -1228,7 +1234,7 @@ xatof(const char *s)
 
 /* A secure atoi implementation to prevent integer under- and over-flow.
  * Returns the corresponding integer, if valid, or INT_MIN if invalid,
- * setting errno to ERANGE. */
+ * setting errno to indicate the error (EINVAL or ERANGE). */
 int
 xatoi(const char *s)
 {
@@ -1240,8 +1246,13 @@ xatoi(const char *s)
 	if (!s[1] && *s >= '0' && *s <= '9')
 		return (*s - '0');
 
-	errno = 0;
-	const long ret = strtol(s, NULL, 10);
+	char *ptr = NULL;
+	const long ret = strtol(s, &ptr, 10);
+
+	if (ptr == s) { /* No digits in S. */
+		errno = EINVAL;
+		return INT_MIN;
+	}
 
 	if (ret < INT_MIN || ret > INT_MAX) {
 		errno = ERANGE;

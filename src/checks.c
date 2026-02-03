@@ -86,6 +86,9 @@ is_file_in_cwd(char *name)
 int
 is_url(const char *url)
 {
+	if (!url || !*url)
+		return FUNC_FAILURE;
+
 	if ((*url == 'w' && url[1] == 'w' && url[2] == 'w' && url[3] == '.'
 	&& url[4]) || strstr(url, "://") != NULL)
 		return FUNC_SUCCESS;
@@ -383,10 +386,13 @@ get_sudo_path(void)
 }
 
 /* Check whether a given string contains only digits. Returns 1 if true
- * and 0 if false. It does not work with negative numbers. */
+ * or 0 if false. It does not work with negative numbers. */
 int
 is_number(const char *restrict str)
 {
+	if (!str || !*str)
+		return 0;
+
 	for (; *str; str++)
 		if (*str > '9' || *str < '0')
 			return 0;
@@ -452,7 +458,7 @@ contains_digit(const char *str)
 int
 is_action_name(const char *s)
 {
-	if (actions_n == 0)
+	if (actions_n == 0 || !s || !*s)
 		return 0;
 
 	for (size_t n = actions_n; n-- > 0;) {
@@ -516,6 +522,9 @@ is_internal_cmd(char *cmd, const int flag, const int check_hist,
 int
 is_bin_cmd(char *str)
 {
+	if (!str || !*str)
+		return 0;
+
 	char *p = str, *q = str;
 	int index = 0, space_index = -1;
 
@@ -611,8 +620,8 @@ check_for_alias(char **args)
 {
 	/* Do not expand alias if first word is an ELN or the alias name
 	 * starts with a backslash. */
-	if (aliases_n == 0 || !aliases || !args || flags & FIRST_WORD_IS_ELN
-	|| *args[0] == '\\')
+	if (aliases_n == 0 || !aliases || !args || !args[0]
+	|| (flags & FIRST_WORD_IS_ELN) || *args[0] == '\\')
 		return NULL;
 
 	for (size_t i = aliases_n; i-- > 0;) {

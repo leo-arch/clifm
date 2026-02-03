@@ -1599,7 +1599,7 @@ construct_name(char *file, const size_t flen)
 static size_t
 gen_symlink(char *file, const char *cwd)
 {
-	if (SELFORPARENT(file))
+	if (!file || !*file || SELFORPARENT(file))
 		return 0;
 
 	struct stat attr;
@@ -1621,7 +1621,7 @@ gen_symlink(char *file, const char *cwd)
 
 	char source[PATH_MAX + 1];
 	if (*file != '/')
-		snprintf(source, sizeof(source), "%s/%s", cwd, file);
+		snprintf(source, sizeof(source), "%s/%s", cwd ? cwd : "", file);
 	else
 		xstrsncpy(source, file, sizeof(source));
 
