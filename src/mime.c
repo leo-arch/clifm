@@ -50,7 +50,7 @@ check_user_mimetypes(const char *file)
 {
 	const char *ext = strrchr(file, '.');
 	if (!ext || ext == file || !*(++ext))
-		return (char *)NULL;
+		return NULL;
 
 	const size_t hash = hashme(ext, conf.case_sens_list);
 
@@ -64,7 +64,7 @@ check_user_mimetypes(const char *file)
 		if (hash == user_mimetypes[i].ext_hash && *user_mimetypes[i].ext)
 			return user_mimetypes[i].mimetype;
 
-	return (char *)NULL;
+	return NULL;
 }
 
 #define MIME_FALLBACK_NONE     0
@@ -355,7 +355,7 @@ expand_env(char *s)
 {
 	char *p = strchr(s, '$');
 	if (!p)
-		return (char *)NULL;
+		return NULL;
 
 	const int buf_size = PATH_MAX;
 	p = xnmalloc((size_t)buf_size, sizeof(char));
@@ -368,14 +368,14 @@ expand_env(char *s)
 			continue;
 		}
 
-		char *env = (char *)NULL;
+		char *env = NULL;
 		char *r = strchr(s, ' ');
 		if (r) *r = '\0';
 		env = getenv(s + 1);
 		if (r) *r = ' ';
 		if (!env) {
 			free(ret);
-			return (char *)NULL;
+			return NULL;
 		}
 
 		const size_t env_len = strlen(env);
@@ -404,18 +404,18 @@ static char *
 skip_line_prefix(char *line)
 {
 	if (!line || !*line)
-		return (char *)NULL;
+		return NULL;
 
 	char *p = line;
 
 	if (!(flags & GUI)) {
 		if (*p == 'X' && p[1] == ':')
-			return (char *)NULL;
+			return NULL;
 		if (*p == '!' && p[1] == 'X' && p[2] == ':')
 			p += 3;
 	} else {
 		if (*p == '!' && p[1] == 'X')
-			return (char *)NULL;
+			return NULL;
 		if (*p == 'X' && p[1] == ':')
 			p += 2;
 	}
@@ -568,7 +568,7 @@ retrieve_app(char *line)
 
 		const size_t param_len = (ret && ret[1]) ? strlen(ret + 1) : 0;
 
-		char *params = (char *)NULL;
+		char *params = NULL;
 		if (*app == '~' && param_len > 0)
 			params = savestring(ret + 1, param_len);
 
@@ -586,7 +586,7 @@ retrieve_app(char *line)
 		return app; /* Valid app. Return it */
 	}
 
-	return (char *)NULL; /* No app was found */
+	return NULL; /* No app was found */
 }
 
 /* Get application associated to a given MIME type or filename.
@@ -596,23 +596,23 @@ static char *
 get_app(const char *mime, const char *filename)
 {
 	if (!mime || !mime_file || !*mime_file)
-		return (char *)NULL;
+		return NULL;
 
 	int fd = 0;
 	FILE *fp = open_fread(mime_file, &fd);
 	if (!fp) {
 		xerror("%s: '%s': %s\n", err_name, mime_file, strerror(errno));
-		return (char *)NULL;
+		return NULL;
 	}
 
 	size_t line_size = 0;
-	char *line = (char *)NULL;
-	char *app = (char *)NULL;
+	char *line = NULL;
+	char *app = NULL;
 
 	/* Each line has this form: prefix:pattern=cmd;cmd;cmd... */
 	while (getline(&line, &line_size, fp) > 0) {
-		char *pattern = (char *)NULL;
-		char *cmds = (char *)NULL;
+		char *pattern = NULL;
+		char *cmds = NULL;
 
 		if (skip_line(line, &pattern, &cmds) == 1)
 			continue;
@@ -672,7 +672,7 @@ mime_import(char *file)
 	/* Create a list of possible paths for the 'mimeapps.list' file as
 	 * specified by the Freedesktop specification */
 	const size_t home_len = strlen(user.home);
-	char *config_path = (char *)NULL, *local_path = (char *)NULL;
+	char *config_path = NULL, *local_path = NULL;
 	config_path = xnmalloc(home_len + 23, sizeof(char));
 	local_path = xnmalloc(home_len + 41, sizeof(char));
 	/* xnmalloc will exit in case of error. However, GCC-13's analyzer
@@ -708,7 +708,7 @@ mime_import(char *file)
 			continue;
 
 		size_t line_size = 0;
-		char *line = (char *)NULL;
+		char *line = NULL;
 		int header_found = 0;
 
 		while (getline(&line, &line_size, sys_mime_fp) > 0) {
@@ -741,7 +741,7 @@ mime_import(char *file)
 		}
 
 		free(line);
-		line = (char *)NULL;
+		line = NULL;
 		fclose(sys_mime_fp);
 	}
 
@@ -816,7 +816,7 @@ get_basename(char *file_path)
 	if (f && *(++f))
 		return f;
 
-	return (char *)NULL;
+	return NULL;
 }
 
 /* Get user input for the 'open with' function.
@@ -825,13 +825,13 @@ get_basename(char *file_path)
 static int
 get_user_input(const size_t max)
 {
-	char *input = (char *)NULL;
+	char *input = NULL;
 
 	while (!input) {
 		input = rl_no_hist(_("Select an application ('q' to quit): "), 0);
 		if (!input || !*input) {
 			free(input);
-			input = (char *)NULL;
+			input = NULL;
 			continue;
 		}
 
@@ -842,14 +842,14 @@ get_user_input(const size_t max)
 
 		if (!is_number(input)) {
 			free(input);
-			input = (char *)NULL;
+			input = NULL;
 			continue;
 		}
 
 		int num = atoi(input);
 		if (num <= 0 || num > (int)max) {
 			free(input);
-			input = (char *)NULL;
+			input = NULL;
 			continue;
 		}
 
@@ -932,7 +932,7 @@ expand_app_fields(char ***cmd, size_t *n, char *fpath, int *exec_flags)
 		if (*a[i] == '!' && (a[i][1] == 'E' || a[i][1] == 'O')) {
 			set_exec_flags(a[i] + 1, exec_flags);
 			free(a[i]);
-			a[i] = (char *)NULL;
+			a[i] = NULL;
 			continue;
 		}
 
@@ -950,7 +950,7 @@ expand_app_fields(char ***cmd, size_t *n, char *fpath, int *exec_flags)
 		if (*a[i] == '&') {
 			bg_proc = 1;
 			free(a[i]);
-			a[i] = (char *)NULL;
+			a[i] = NULL;
 		}
 	}
 
@@ -975,7 +975,7 @@ run_mime_app(char *app, char *file)
 	if (f == 0) {
 		cmd = xnrealloc(cmd, i + 2, sizeof(char *));
 		cmd[i] = savestring(file, strlen(file));
-		cmd[i + 1] = (char *)NULL;
+		cmd[i + 1] = NULL;
 	}
 
 	const int ret = launch_execv(cmd, (bg_proc && !open_in_foreground)
@@ -1002,7 +1002,7 @@ run_cmd(char *app, char *file)
 	}
 #endif /* !_NO_ARCHIVING */
 
-	char *env = (char *)NULL;
+	char *env = NULL;
 	if (*app == '$' && app[1] >= 'A' && app[1] <= 'Z')
 		env = expand_env(app);
 
@@ -1066,8 +1066,8 @@ get_apps_from_file(FILE *fp, char *file_name, const char *mime,
 	const char *prefix, const int only_names)
 {
 	size_t line_size = 0;
-	char *line = (char *)NULL;
-	char *app = (char *)NULL;
+	char *line = NULL;
+	char *app = NULL;
 	char **apps = (char **)NULL;
 	size_t appsn = prefix != NULL ? 1 : 0;
 	const size_t prefix_len = prefix ? strlen(prefix) : 0;
@@ -1121,10 +1121,10 @@ get_apps_from_file(FILE *fp, char *file_name, const char *mime,
 				continue;
 
 			/* Check each application existence */
-			char *file_path = (char *)NULL;
+			char *file_path = NULL;
 
 			/* Expand environment variables */
-			char *appb = (char *)NULL;
+			char *appb = NULL;
 			if (strchr(app, '$')) {
 				char *t = expand_env(app);
 				if (!t)
@@ -1149,7 +1149,7 @@ get_apps_from_file(FILE *fp, char *file_name, const char *mime,
 				file_path = tilde_expand(app);
 				if (file_path && access(file_path, X_OK) != 0) {
 					free(file_path);
-					file_path = (char *)NULL;
+					file_path = NULL;
 				}
 			}
 
@@ -1179,7 +1179,7 @@ get_apps_from_file(FILE *fp, char *file_name, const char *mime,
 			/* If the app exists, store it in the APPS array */
 			if (*app != '/') {
 				free(file_path);
-				file_path = (char *)NULL;
+				file_path = NULL;
 			}
 			apps = xnrealloc(apps, appsn + 2, sizeof(char *));
 
@@ -1192,7 +1192,7 @@ get_apps_from_file(FILE *fp, char *file_name, const char *mime,
 			}
 
 			appsn++;
-			apps[appsn] = (char *)NULL;
+			apps[appsn] = NULL;
 
 			tmp++;
 		}
@@ -1207,12 +1207,12 @@ get_apps_from_file(FILE *fp, char *file_name, const char *mime,
 static char *
 construct_filename(char *filename)
 {
-	char *name = (char *)NULL;
+	char *name = NULL;
 
 	if (*filename == '~') {
 		char *tmp = tilde_expand(filename);
 		if (!tmp)
-			return (char *)NULL;
+			return NULL;
 		name = tmp;
 	} else {
 		if (*filename == '\'' || *filename == '"') {
@@ -1225,7 +1225,7 @@ construct_filename(char *filename)
 		char *deq_file = unescape_str(name ? name : filename, 0);
 		if (!deq_file) {
 			free(name);
-			return (char *)NULL;
+			return NULL;
 		}
 
 		free(name);
@@ -1236,7 +1236,7 @@ construct_filename(char *filename)
 	if (!name) {
 		name = xrealpath(filename, NULL);
 		if (!name)
-			return (char *)NULL;
+			return NULL;
 	}
 
 	return name;
@@ -1284,7 +1284,7 @@ mime_open_with_tab(char *filename, const char *prefix, const int only_names)
 	 * already matched string. */
 	if (!apps) {
 		apps = xnmalloc(2, sizeof(char *));
-		apps[1] = (char *)NULL;
+		apps[1] = NULL;
 	}
 
 	if (prefix) {
@@ -1303,7 +1303,7 @@ mime_open_with_tab(char *filename, const char *prefix, const int only_names)
 		apps[0] = xnrealloc(apps[0], src_len + 1, sizeof(char));
 		xstrsncpy(apps[0], apps[1], src_len + 1);
 		free(apps[1]);
-		apps[1] = (char *)NULL;
+		apps[1] = NULL;
 	}
 
 	return apps;
@@ -1682,7 +1682,7 @@ mime_open_with(char *filename, char **args)
 
 	g_mime_type = mime;
 	const int ret = mime_list_open(apps, name);
-	g_mime_type = (char *)NULL;
+	g_mime_type = NULL;
 	free(mime);
 
 	for (size_t i = 0; apps[i]; i++)
@@ -1775,7 +1775,7 @@ check_mime_info_file(char *arg, char **fpath)
 static int
 get_open_file_path(char **args, char **fpath)
 {
-	char *f = (char *)NULL;
+	char *f = NULL;
 	if (*args[1] == 'o' && strcmp(args[1], "open") == 0 && args[2])
 		f = args[2];
 	else
@@ -1943,7 +1943,7 @@ mime_open(char **args)
 	if (*args[1] == 'e' && strcmp(args[1], "edit") == 0)
 		return mime_edit(args);
 
-	char *file_path = (char *)NULL;
+	char *file_path = NULL;
 	const int info =
 		(*args[1] == 'i' && strcmp(args[1], "info") == 0 && args[2]);
 	const int open_arg =
@@ -2004,7 +2004,7 @@ mime_open(char **args)
 #endif /* __CYGWIN__ */
 
 	free(mime);
-	g_mime_type = (char *)NULL;
+	g_mime_type = NULL;
 	free(app);
 	free(file_path);
 	return ret;

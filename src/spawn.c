@@ -111,7 +111,7 @@ xsystem(const char *cmd)
 		return (-1);
 	} else if (pid == 0) {
 		set_cmd_signals();
-		execl(shell_path, shell_name, "-c", cmd, (char *)NULL);
+		execl(shell_path, shell_name, "-c", cmd, NULL);
 		_exit(errno);
 	} else {
 		if (waitpid(pid, &status, 0) == pid)

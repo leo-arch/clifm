@@ -47,10 +47,10 @@ static char *
 utf8casechr(char *s, char *c)
 {
 	if (!s || !*s || !c || !*c)
-		return (char *)NULL;
+		return NULL;
 
 	utf8_int32_t cps = 0, cpc = 0, cp = 0;
-	char *ret = (char *)NULL;
+	char *ret = NULL;
 
 	utf8codepoint(c, &cpc);
 	cp = utf8uprcodepoint(cpc);
@@ -65,7 +65,7 @@ utf8casechr(char *s, char *c)
 		return s;
 	}
 
-	return (char *)NULL;
+	return NULL;
 }
 
 /* Check whether the string S contains at least one UTF8 codepoint.
@@ -93,7 +93,7 @@ fuzzy_match_v1(char *s1, char *s2, const size_t s1_len)
 {
 	const int cs = conf.case_sens_path_comp;
 	int included = 0;
-	char *p = (char *)NULL;
+	char *p = NULL;
 
 	if (cs == 1 ? (p = strstr(s2, s1)) : (p = xstrcasestr(s2, s1))) {
 		if (p == s2) {
@@ -175,7 +175,7 @@ fuzzy_match(char *s1, char *s2, const size_t s1_len, const int type)
 
 	const int cs = conf.case_sens_path_comp;
 	int included = 0;
-	char *p = (char *)NULL;
+	char *p = NULL;
 
 	if (cs == 1 ? (p = utf8str(s2, s1)) : (p = utf8casestr(s2, s1))) {
 		if (p == s2) {
@@ -200,7 +200,7 @@ fuzzy_match(char *s1, char *s2, const size_t s1_len, const int type)
 	char *hs = s2;
 
 	while (*s1) {
-		char *m = (char *)NULL;
+		char *m = NULL;
 		if (cs == 1) {
 			utf8codepoint(s1, &cp1);
 			m = utf8chr(hs, cp1);
@@ -220,7 +220,7 @@ fuzzy_match(char *s1, char *s2, const size_t s1_len, const int type)
 		: (utf8uprcodepoint(cp1) == utf8uprcodepoint(cp2)) ) )
 			consecutive_chars++;
 
-		const char *bc = l > 0 ? utf8rcodepoint(m, &cp1) : (char *)NULL;
+		const char *bc = l > 0 ? utf8rcodepoint(m, &cp1) : NULL;
 		if (bc) {
 			if (IS_WORD_SEPARATOR(*bc)) {
 				word_beginning++;

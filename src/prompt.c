@@ -59,7 +59,7 @@ int g_prompt_ignore_empty_line = 0;
 static char *
 gen_time(const int c)
 {
-	char *temp = (char *)NULL;
+	char *temp = NULL;
 	const time_t rawtime = time(NULL);
 	struct tm tm;
 
@@ -120,7 +120,7 @@ get_dir_basename(const char *str)
 {
 	/* If not root dir (/), get last path component */
 	const char *ret = (*str == '/' && !str[1])
-		? (char *)NULL : strrchr(str, '/');
+		? NULL : strrchr(str, '/');
 
 	if (!ret || !ret[1])
 		return savestring(str, strlen(str));
@@ -131,7 +131,7 @@ get_dir_basename(const char *str)
 static char *
 reduce_path(const char *str)
 {
-	char *temp = (char *)NULL;
+	char *temp = NULL;
 	const size_t slen = strlen(str);
 
 	if (slen > (size_t)conf.prompt_p_max_path) {
@@ -238,8 +238,8 @@ reduce_path_fish(char *str)
 static char *
 gen_pwd(const int c)
 {
-	char *temp = (char *)NULL;
-	char *tmp_path = (char *)NULL;
+	char *temp = NULL;
+	char *tmp_path = NULL;
 	int free_tmp_path = 0;
 
 	if (user.home
@@ -584,7 +584,7 @@ gen_stats_str(const int flag)
 	default: break;
 	}
 
-	char *p = (char *)NULL;
+	char *p = NULL;
 	if (val != 0) {
 		p = xnmalloc(MAX_INT_STR, sizeof(char));
 		snprintf(p, MAX_INT_STR, "%zu", val);
@@ -656,7 +656,7 @@ gen_notification(const int flag)
 static char *
 gen_nesting_level(const int mode)
 {
-	char *p = (char *)NULL;
+	char *p = NULL;
 
 	if (mode == 'i') {
 		p = xnmalloc(MAX_INT_STR, sizeof(char));
@@ -682,7 +682,7 @@ static const char *
 get_color_attribute(const char *line)
 {
 	if (!line || !line[0] || line[1] != ':')
-		return (char *)NULL;
+		return NULL;
 
 	switch (line[0]) {
 	case 'b': return "1;"; /* Bold */
@@ -700,7 +700,7 @@ get_color_attribute(const char *line)
 	case 'U': return "24;"; /* Disable underline */
 	case 'K': return "49;"; /* Disable background (terminal default) */
 	case 'N': return "39;"; /* Disable foreground (terminal default) */
-	default: return (char *)NULL;
+	default: return NULL;
 	}
 }
 
@@ -727,13 +727,13 @@ char *
 gen_color(char **line)
 {
 	if (!*line || !*(*line))
-		return (char *)NULL;
+		return NULL;
 
 	/* At this point LINE is "{color}" */
 	char *l = (*line) + 1; /* L is now "color}" */
 
 	const int bg = (l[0] == 'k' && l[1] == ':' && l[2]);
-	const char *attr = bg == 0 ? get_color_attribute(l) : (char *)NULL;
+	const char *attr = bg == 0 ? get_color_attribute(l) : NULL;
 	if (bg == 1 || attr)
 		l += 2; /* Remove background/attribute prefix ("x:") */
 
@@ -749,7 +749,7 @@ gen_color(char **line)
 
 	char *p = strchr(l, '}');
 	if (!p)
-		return (char *)NULL;
+		return NULL;
 
 	*p = '\0'; /* Remove trailing '}': now we have "color" */
 
@@ -819,7 +819,7 @@ gen_color(char **line)
 	} else {
 		*p = '}'; /* Restore the trailing '}' */
 		free(temp);
-		return (char *)NULL;
+		return NULL;
 	}
 
 	*p = '}'; /* Restore the trailing '}' */
@@ -845,7 +845,7 @@ check_mod_paths_cache(const char *name)
 		init = 1;
 		for (i = 0; i < MAX_PMOD_PATHS; i++) {
 			p_mod_paths[i].path[0] = '\0';
-			p_mod_paths[i].name = (char *)NULL;
+			p_mod_paths[i].name = NULL;
 		}
 	}
 
@@ -855,7 +855,7 @@ check_mod_paths_cache(const char *name)
 			return &p_mod_paths[i].path[0];
 	}
 
-	return (char *)NULL;
+	return NULL;
 }
 
 static void
@@ -900,7 +900,7 @@ get_prompt_module_path(const char *name)
 		}
 	}
 
-	return (char *)NULL;
+	return NULL;
 }
 
 static void
@@ -944,7 +944,7 @@ gen_last_cmd_time(char **line)
 
 END:
 	(*line)++;
-	return (char *)NULL;
+	return NULL;
 }
 
 static char *
@@ -967,10 +967,10 @@ char *
 decode_prompt(char *line)
 {
 	if (!line)
-		return (char *)NULL;
+		return NULL;
 
-	char *temp = (char *)NULL;
-	char *result = (char *)NULL;
+	char *temp = NULL;
+	char *result = NULL;
 	size_t result_len = 0;
 	int c;
 
@@ -1199,7 +1199,7 @@ print_user_message(void)
 	}
 
 	int c = 0;
-	char *tmp = (char *)NULL;
+	char *tmp = NULL;
 
 	fputs(wc_c, stdout);
 
@@ -1351,7 +1351,7 @@ set_prompt_length(const size_t decoded_prompt_len, const size_t ac_matches)
 static char *
 construct_prompt(const char *decoded_prompt, const size_t ac_matches)
 {
-	char *rl_vi_mode = (char *)NULL;
+	char *rl_vi_mode = NULL;
 	/* Construct indicators: MSGS (ERR, WARN, and NOTICE), SEL, and TRASH */
 	char err_ind[N_IND], warn_ind[N_IND], notice_ind[N_IND],
 		trash_ind[N_IND], sel_ind[N_IND], acmd_ind[N_IND];
@@ -1591,7 +1591,7 @@ expand_history(char **input)
 	|| exclude_from_history(*input) == 1)
 		return FUNC_SUCCESS;
 
-	char *exp_input = (char *)NULL;
+	char *exp_input = NULL;
 	const int ret = history_expand(*input, &exp_input);
 
 	if (ret == -1) { /* Error in expansion */
@@ -1631,7 +1631,7 @@ handle_empty_line(const int screen_refresh)
 
 	g_prompt_ignore_empty_line = 0;
 	flags &= ~DELAYED_REFRESH;
-	return (char *)NULL;
+	return NULL;
 }
 
 /* Print the prompt and return the string entered by the user, to be
@@ -1655,7 +1655,7 @@ prompt(const int prompt_flag, const int screen_refresh)
 	if (prompt_flag == PROMPT_UPDATE || prompt_flag == PROMPT_UPDATE_RUN_CMDS) {
 		rl_set_prompt(the_prompt);
 		free(the_prompt);
-		return (char *)NULL;
+		return NULL;
 	}
 
 	/* Tell my_rl_getc() (readline.c) to recalculate the length
@@ -1679,7 +1679,7 @@ prompt(const int prompt_flag, const int screen_refresh)
 	flags &= ~DELAYED_REFRESH;
 
 	if (expand_history(&input) != FUNC_SUCCESS)
-		return (char *)NULL;
+		return NULL;
 
 	log_and_record(input);
 	return input;
@@ -1714,7 +1714,7 @@ switch_prompt(const size_t n)
 	free(conf.encoded_prompt);
 	free(conf.wprompt_str);
 	free(conf.rprompt_str);
-	conf.encoded_prompt = conf.wprompt_str = conf.rprompt_str = (char *)NULL;
+	conf.encoded_prompt = conf.wprompt_str = conf.rprompt_str = NULL;
 
 	if (prompts[n].regular)
 		conf.encoded_prompt = savestring(prompts[n].regular, strlen(prompts[n].regular));
@@ -1788,7 +1788,7 @@ set_default_prompt(void)
 void
 set_prompt_options(void)
 {
-	char *val = (char *)NULL;
+	char *val = NULL;
 	int n = 0;
 
 	const char *np = conf.encoded_prompt; /* Normal/Regular prompt */

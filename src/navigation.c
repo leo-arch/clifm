@@ -36,7 +36,7 @@ int
 pwd_function(const char *arg)
 {
 	int resolve_links = 0;
-	char *pwd = (char *)NULL;
+	char *pwd = NULL;
 
 	if (arg && *arg == '-') {
 		if (arg[1] == 'P')  {
@@ -97,7 +97,7 @@ get_bd_matches(const char *str, int *n, const int mode)
 	}
 
 	while (1) {
-		char *p = (char *)NULL;
+		char *p = NULL;
 		if (str && *str) { /* Non-empty query string. */
 			p = conf.case_sens_path_comp
 				? strstr(cwd, str) : xstrcasestr(cwd, (char *)str);
@@ -152,14 +152,14 @@ get_bd_matches(const char *str, int *n, const int mode)
 			}
 			matches[0] = p;
 			free(matches[1]);
-			matches[1] = (char *)NULL;
+			matches[1] = NULL;
 		} else { /* Multiple matches. */
 			matches[0] = savestring(str, strlen(str));
-			matches[*n] = (char *)NULL;
+			matches[*n] = NULL;
 		}
 	} else {
 		if (*n > 0)
-			matches[*n] = (char *)NULL;
+			matches[*n] = NULL;
 	}
 
 	return matches;
@@ -168,14 +168,14 @@ get_bd_matches(const char *str, int *n, const int mode)
 static int
 grab_bd_input(const int n)
 {
-	char *input = (char *)NULL;
+	char *input = NULL;
 	putchar('\n');
 
 	while (!input) {
 		input = rl_no_hist(_("Select a directory ('q' to quit): "), 0);
 		if (!input || !*input) {
 			free(input);
-			input = (char *)NULL;
+			input = NULL;
 			continue;
 		}
 
@@ -186,7 +186,7 @@ grab_bd_input(const int n)
 				return a - 1;
 			} else {
 				free(input);
-				input = (char *)NULL;
+				input = NULL;
 				continue;
 			}
 
@@ -196,7 +196,7 @@ grab_bd_input(const int n)
 
 		} else {
 			free(input);
-			input = (char *)NULL;
+			input = NULL;
 			continue;
 		}
 	}
@@ -279,7 +279,7 @@ backdir(char *str)
 	if (help_or_root(str) == FUNC_SUCCESS)
 		return FUNC_SUCCESS;
 
-	char *deq_str = str ? unescape_str(str, 0) : (char *)NULL;
+	char *deq_str = str ? unescape_str(str, 0) : NULL;
 	if (str) {
 		const int ret = backdir_directory(deq_str, str);
 		if (ret != BD_CONTINUE) {
@@ -371,14 +371,14 @@ static char *
 check_cdpath(const char *name)
 {
 	if (!name || !*name)
-		return (char *)NULL;
+		return NULL;
 
 	if (*name == '/' || (*name == '.' && name[1] == '/')
 	|| (*name == '.' && name[1] == '.' && name[2] == '/'))
-		return (char *)NULL;
+		return NULL;
 
 	const size_t namelen = strlen(name);
-	char *p = (char *)NULL;
+	char *p = NULL;
 	struct stat a;
 
 	for (size_t i = 0; cdpaths[i]; i++) {
@@ -391,7 +391,7 @@ check_cdpath(const char *name)
 		else
 			snprintf(tmp, tmp_len, "%s/%s", cdpaths[i], name);
 
-		char *exp_path = (char *)NULL;
+		char *exp_path = NULL;
 		if (*tmp == '~')
 			exp_path = tilde_expand(tmp);
 
@@ -551,7 +551,7 @@ static const char *
 xstrcpbrk(const char *restrict str, const char c)
 {
 	if (!str || !*str)
-		return (char *)NULL;
+		return NULL;
 
 	while (*str) {
 		if (*str != c)
@@ -559,7 +559,7 @@ xstrcpbrk(const char *restrict str, const char c)
 		str++;
 	}
 
-	return (char *)NULL;
+	return NULL;
 }
 
 /* Convert "... n" into "../.. n"
@@ -568,7 +568,7 @@ char *
 fastback(const char *str)
 {
 	if (!str || !*str || xstrcpbrk(str, '.'))
-		return (char *)NULL;
+		return NULL;
 
 	/* At this point we know STR contains only dots. */
 	const size_t dots = strlen(str);

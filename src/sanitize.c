@@ -71,7 +71,7 @@ set_path_env(void)
 #if defined(_PATH_STDPATH)
 	ret = setenv("PATH", _PATH_STDPATH, 1);
 #elif defined(_CS_PATH)
-	char *p = (char *)NULL;
+	char *p = NULL;
 	size_t n = confstr(_CS_PATH, NULL, 0); /* Get value's size */
 	p = xnmalloc(n, sizeof(char)); /* Allocate space */
 	confstr(_CS_PATH, p, n);               /* Get value */
@@ -207,13 +207,13 @@ xsecure_env(const int mode)
 	drop_privs();
 	umask(0077); /* flawfinder: ignore */
 
-	char *display = (char *)NULL;
-	char *wayland_display = (char *)NULL;
-	char *term_env = (char *)NULL;
-	char *tz = (char *)NULL;
-	char *lang = (char *)NULL;
-	char *fzfopts = (char *)NULL;
-	char *clifm_level = (char *)NULL;
+	char *display = NULL;
+	char *wayland_display = NULL;
+	char *term_env = NULL;
+	char *tz = NULL;
+	char *lang = NULL;
+	char *fzfopts = NULL;
+	char *clifm_level = NULL;
 
 	clifm_level = xgetenv("CLIFMLVL", 1);
 

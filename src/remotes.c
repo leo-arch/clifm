@@ -60,7 +60,7 @@ remotes_list(void)
 static int
 dequote_remote_name(char *name)
 {
-	char *deq = (char *)NULL;
+	char *deq = NULL;
 	if (strchr(name, '\\')) {
 		deq = unescape_str(name, 0);
 		if (deq) {

@@ -138,7 +138,7 @@ profile_set(const char *prof)
 
 	if (alt_profile) {
 		free(alt_profile);
-		alt_profile = (char *)NULL;
+		alt_profile = NULL;
 	}
 
 	/* Set the new profile value */
@@ -149,9 +149,9 @@ profile_set(const char *prof)
 	size_t i = MAX_WS;
 	for (; i-- > 0;) {
 		free(workspaces[i].path);
-		workspaces[i].path = (char *)NULL;
+		workspaces[i].path = NULL;
 		free(workspaces[i].name);
-		workspaces[i].name = (char *)NULL;
+		workspaces[i].name = NULL;
 	}
 	cur_ws = UNSET;
 

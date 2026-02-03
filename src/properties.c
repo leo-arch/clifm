@@ -609,7 +609,7 @@ get_new_ownership(const char *str, const int diff)
 	if (diff == 0 && new_own && *str == *new_own && strcmp(str, new_own) == 0) {
 		fputs(_("oc: Nothing to do\n"), stderr);
 		free(new_own);
-		new_own = (char *)NULL;
+		new_own = NULL;
 	}
 
 	return new_own;
@@ -619,14 +619,14 @@ static char *
 get_common_ownership(char **args, int *exit_status, int *diff)
 {
 	if (!args || !args[0])
-		return (char *)NULL;
+		return NULL;
 
 	*exit_status = FUNC_SUCCESS;
 	struct stat a;
 	if (stat(args[0], &a) == -1) {
 		xerror("oc: '%s': %s\n", args[0], strerror(errno));
 		*exit_status = errno;
-		return (char *)NULL;
+		return NULL;
 	}
 
 	int common_uid = 1, common_gid = 1;
@@ -659,7 +659,7 @@ get_common_ownership(char **args, int *exit_status, int *diff)
 		? wc_xstrlen(group->gr_name) : 0;
 
 	if (owner_len + group_len == 0)
-		return (char *)NULL;
+		return NULL;
 
 	const size_t len = owner_len + group_len + 2;
 	char *p = xnmalloc(len, sizeof(char));
@@ -701,7 +701,7 @@ set_file_owner(char **args)
 	if (new_group) {
 		*new_group = '\0';
 		if (!new_group[1])
-			new_group = (char *)NULL;
+			new_group = NULL;
 	}
 
 	struct passwd *owner = (struct passwd *)NULL;
@@ -894,7 +894,7 @@ print_extended_attributes(char *s, const mode_t mode, const int xattr)
 	}
 
 	ssize_t buflen = 0, keylen = 0, vallen = 0;
-	char *buf = (char *)NULL, *key = (char *)NULL, *val = (char *)NULL;
+	char *buf = NULL, *key = NULL, *val = NULL;
 
 	/* Determine the length of the buffer needed */
 	buflen = listxattr(s, NULL, 0);
@@ -1053,7 +1053,7 @@ print_filename(char *filename, const char *color, const int follow_link,
 	const mode_t mode, char *link_target)
 {
 	char *wname = wc_xstrlen(filename) == 0
-		? replace_invalid_chars(filename) : (char *)NULL;
+		? replace_invalid_chars(filename) : NULL;
 
 	char name[(NAME_MAX * sizeof(wchar_t)) + 3]; *name = '\0';
 	if (detect_space(wname ? wname : filename) == 1)
@@ -1152,7 +1152,7 @@ list_acl(acl_t acl, int *found, const acl_type_t type)
 		if (num == 3) {
 			/* acl_to_any_text() is Linux-specific */
 			char *val = acl_to_any_text(acl,
-				type == ACL_TYPE_DEFAULT ? "default:" : (char *)NULL,
+				type == ACL_TYPE_DEFAULT ? "default:" : NULL,
 				',', TEXT_ABBREVIATE);
 
 			if (val) {
@@ -1302,7 +1302,7 @@ print_file_details(char *filename, const struct stat *attr, const char file_type
 #elif defined(HAVE_BSD_FFLAGS)
 	fputs(_("Flags: \t\t"), stdout);
 	char *fflags = (!S_ISDIR(attr->st_mode) && !S_ISLNK(attr->st_mode))
-		? FLAGSTOSTR_FUNC(attr->st_flags) : (char *)NULL;
+		? FLAGSTOSTR_FUNC(attr->st_flags) : NULL;
 	printf("%s\n", (!fflags || !*fflags) ? "-" : fflags);
 	free(fflags);
 #endif /* LINUX_FILE_ATTRS */
@@ -1332,7 +1332,7 @@ static char *
 has_nsec_modifier(char *fmt)
 {
 	if (!fmt || !*fmt)
-		return (char *)NULL;
+		return NULL;
 
 	while (*fmt) {
 		if (*fmt == '%' && fmt[1] == 'N')
@@ -1340,7 +1340,7 @@ has_nsec_modifier(char *fmt)
 		fmt++;
 	}
 
-	return (char *)NULL;
+	return NULL;
 }
 
 #pragma GCC diagnostic push
@@ -2003,7 +2003,7 @@ do_stat_and_exit(const int full_stat)
 
 	for (i = start; i < argc_bk; i++) {
 		char *norm_path = *argv_bk[i] == '~'
-			? tilde_expand(argv_bk[i]) : (char *)NULL;
+			? tilde_expand(argv_bk[i]) : NULL;
 
 		 const int ret =
 			do_stat(norm_path ? norm_path : argv_bk[i], full_stat);
@@ -2021,8 +2021,8 @@ void
 print_analysis_stats(const off_t total, const off_t largest,
 	const char *color, const char *name)
 {
-	char *t = (char *)NULL;
-	char *l = (char *)NULL;
+	char *t = NULL;
+	char *l = NULL;
 
 	if (prop_fields.size == PROP_SIZE_HUMAN) {
 		const char *p_total = construct_human_size(total);

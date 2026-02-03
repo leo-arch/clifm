@@ -50,7 +50,7 @@ change_word_color(const char *_last_word, const int offset, const char *color)
 char *
 rl_highlight(const char *str, const size_t pos, const int flag)
 {
-	char *cl = (char *)NULL;
+	char *cl = NULL;
 	/* PREV is 0 when there is no previous char (STR[POS] is the first one) */
 	char prev = pos > 0 ? str[pos - 1] : 0;
 	char c = *(str + pos);
@@ -178,11 +178,11 @@ rl_highlight(const char *str, const size_t pos, const int flag)
 	case '$': cl = (cur_color != hq_c) ? hv_c : cl; break;
 	case '-':
 		if (prev == ' ' || prev == 0)
-			cl = (cur_color != hq_c) ? hp_c : (char *)NULL;
+			cl = (cur_color != hq_c) ? hp_c : NULL;
 		break;
 	case '#':
 		if (prev == ' ' || prev == 0)
-			cl = (cur_color != hq_c) ? hc_c : (char *)NULL;
+			cl = (cur_color != hq_c) ? hc_c : NULL;
 		else
 			cl = tx_c;
 		break;
@@ -195,7 +195,7 @@ rl_highlight(const char *str, const size_t pos, const int flag)
 
 	if (cur_color == hq_c) {
 		if (quote[Q_SINGLE] == 1 || quote[Q_DOUBLE] == 1)
-			cl = (char *)NULL;
+			cl = NULL;
 	}
 
 END:
@@ -204,7 +204,7 @@ END:
 			cur_color = cl;
 			fputs(cl, stdout);
 		}
-		return (char *)NULL;
+		return NULL;
 	}
 
 	if (!cl)
@@ -231,7 +231,7 @@ recolorize_line(void)
 
 	/* Get the current color up to the current cursor position */
 	size_t i;
-	char *cl = (char *)NULL;
+	char *cl = NULL;
 	for (i = 0; i < (size_t)rl_point; i++) {
 		cl = rl_highlight(rl_line_buffer, i, INFORM_COLOR);
 		if (cl)

@@ -110,7 +110,7 @@ old_realpath(const char *restrict path, char *restrict resolved_path)
 
 	char *ptr = malloc(PATH_MAX + 1);
 	if (!ptr)
-		return (char *)NULL;
+		return NULL;
 
 	char *ret = realpath(path, ptr);
 	if (!ret)
@@ -274,7 +274,7 @@ nx_getdelim_get_realloc_size(size_t current_size)
 static int
 nx_getdelim_append(char **lineptr, size_t *bufsize, size_t count, char ch)
 {
-	char *tmp = (char *)NULL;
+	char *tmp = NULL;
 	size_t tmp_size = 0;
 
 	if (!lineptr || !bufsize)
@@ -327,7 +327,7 @@ nx_getdelim_append(char **lineptr, size_t *bufsize, size_t count, char ch)
 static ssize_t
 nx_getdelim(char **lineptr, size_t *n, int delim, FILE *stream)
 {
-	char *line = (char *)NULL;
+	char *line = NULL;
 	size_t size = 0;
 	size_t count = 0;
 	int err = 0;

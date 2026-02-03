@@ -262,21 +262,21 @@ init_conf_struct(void)
 	conf.warning_prompt = UNSET;
 	conf.welcome_message = UNSET;
 
-	conf.encoded_prompt = (char *)NULL;
-	conf.fzftab_options = (char *)NULL;
-	conf.histignore_regex = (char *)NULL;
-	conf.opener = (char *)NULL;
+	conf.encoded_prompt = NULL;
+	conf.fzftab_options = NULL;
+	conf.histignore_regex = NULL;
+	conf.opener = NULL;
 #ifndef _NO_SUGGESTIONS
-	conf.suggestion_strategy = (char *)NULL;
+	conf.suggestion_strategy = NULL;
 #endif /* !_NO_SUGGESTIONS */
-	conf.term = (char *)NULL;
-	conf.time_str = (char *)NULL;
-	conf.priority_sort_char = (char *)NULL;
-	conf.ptime_str = (char *)NULL;
-	conf.rprompt_str = (char *)NULL;
-	conf.usr_cscheme = (char *)NULL;
-	conf.wprompt_str = (char *)NULL;
-	conf.welcome_message_str = (char *)NULL;
+	conf.term = NULL;
+	conf.time_str = NULL;
+	conf.priority_sort_char = NULL;
+	conf.ptime_str = NULL;
+	conf.rprompt_str = NULL;
+	conf.usr_cscheme = NULL;
+	conf.wprompt_str = NULL;
+	conf.welcome_message_str = NULL;
 
 	init_shades();
 }
@@ -325,7 +325,7 @@ get_sysusers(void)
 	}
 
 	endpwent();
-	sys_users[n].name = (char *)NULL;
+	sys_users[n].name = NULL;
 	sys_users[n].namlen = 0;
 	sys_users[n].id = 0;
 #endif /* __ANDROID__ */
@@ -364,7 +364,7 @@ get_sysgroups(void)
 	}
 
 	endgrent();
-	sys_groups[n].name = (char *)NULL;
+	sys_groups[n].name = NULL;
 	sys_groups[n].namlen = 0;
 	sys_groups[n].id = 0;
 }
@@ -492,8 +492,8 @@ init_workspaces(void)
 {
 	workspaces = xnmalloc(MAX_WS, sizeof(struct ws_t));
 	for (size_t i = MAX_WS; i-- > 0;) {
-		workspaces[i].path = (char *)NULL;
-		workspaces[i].name = (char *)NULL;
+		workspaces[i].path = NULL;
+		workspaces[i].name = NULL;
 	}
 }
 
@@ -758,7 +758,7 @@ get_user_data_env(void)
 
 	/* If secure-env, do not fallback to environment variables */
 	const int sec_env = is_secure_env();
-	char *t = sec_env == 0 ? xgetenv("HOME", 0) : (char *)NULL;
+	char *t = sec_env == 0 ? xgetenv("HOME", 0) : NULL;
 
 	if (t) {
 		char *p = xrealpath(t, NULL);
@@ -776,8 +776,8 @@ get_user_data_env(void)
 	}
 
 	tmp_user.home_len = strlen(tmp_user.home);
-	t = sec_env == 0 ? xgetenv("USER", 0) : (char *)NULL;
-	tmp_user.name = t ? savestring(t, strlen(t)) : (char *)NULL;
+	t = sec_env == 0 ? xgetenv("USER", 0) : NULL;
+	tmp_user.name = t ? savestring(t, strlen(t)) : NULL;
 
 	tmp_user.gid = getgid();
 	tmp_user.ngroups = 0;
@@ -789,10 +789,10 @@ get_user_data_env(void)
 	}
 
 	char *p = xgetenv("CLIFM_SHELL", 0);
-	t = sec_env == 0 ? (p ? p : xgetenv("SHELL", 0)) : (char *)NULL;
-	tmp_user.shell = t ? savestring(t, strlen(t)) : (char *)NULL;
+	t = sec_env == 0 ? (p ? p : xgetenv("SHELL", 0)) : NULL;
+	tmp_user.shell = t ? savestring(t, strlen(t)) : NULL;
 
-	tmp_user.shell_basename = (char *)NULL;
+	tmp_user.shell_basename = NULL;
 	if (p && t == p) /* CLIFM_SHELL */
 		validate_custom_shell(&tmp_user.shell);
 
@@ -824,7 +824,7 @@ get_user_data(void)
 
 	int is_custom_shell = 0;
 	struct stat a;
-	char *homedir = (char *)NULL;
+	char *homedir = NULL;
 
 	if (is_secure_env() == 0) {
 		char *p = xgetenv("USER", 1);
@@ -878,7 +878,7 @@ get_user_data(void)
 		tmp_user.home = savestring(homedir, tmp_user.home_len);
 	}
 
-	tmp_user.shell_basename = (char *)NULL;
+	tmp_user.shell_basename = NULL;
 	if (is_custom_shell == 1)
 		validate_custom_shell(&tmp_user.shell);
 
@@ -943,7 +943,7 @@ load_tags(void)
 	}
 	free(t);
 
-	tags[tags_n] = (char *)NULL;
+	tags[tags_n] = NULL;
 }
 
 /* Make sure no entry in the directory history is absent in the jump database.
@@ -1029,7 +1029,7 @@ load_jumpdb(void)
 	fseek(fp, 0L, SEEK_SET);
 
 	size_t line_size = 0;
-	char *line = (char *)NULL;
+	char *line = NULL;
 	ssize_t line_len = 0;
 
 	while ((line_len = getline(&line, &line_size, fp)) > 0) {
@@ -1127,7 +1127,7 @@ load_jumpdb(void)
 		return;
 	}
 
-	jump_db[jump_n].path = (char *)NULL;
+	jump_db[jump_n].path = NULL;
 	jump_db[jump_n].len = 0;
 	jump_db[jump_n].rank = 0;
 	jump_db[jump_n].keep = 0;
@@ -1141,9 +1141,9 @@ static char *
 save_bm_path(char *file)
 {
 	if (!file || !*file)
-		return (char *)NULL;
+		return NULL;
 
-	char *p = *file != '/' ? normalize_path(file, strlen(file)) : (char *)NULL;
+	char *p = *file != '/' ? normalize_path(file, strlen(file)) : NULL;
 
 	return p ? p : savestring(file, strlen(file));
 }
@@ -1185,7 +1185,7 @@ load_bookmarks(void)
 
 	bookmarks = xnmalloc(bm_total + 1, sizeof(struct bookmarks_t));
 	size_t line_size = 0;
-	char *line = (char *)NULL;
+	char *line = NULL;
 	ssize_t line_len = 0;
 
 	while ((line_len = getline(&line, &line_size, fp)) > 0) {
@@ -1196,8 +1196,8 @@ load_bookmarks(void)
 
 		/* Neither hotkey nor name, but only a path */
 		if (*line == '/') {
-			bookmarks[bm_n].shortcut = (char *)NULL;
-			bookmarks[bm_n].name = (char *)NULL;
+			bookmarks[bm_n].shortcut = NULL;
+			bookmarks[bm_n].name = NULL;
 			bookmarks[bm_n++].path = savestring(line, strlen(line));
 			continue;
 		}
@@ -1207,9 +1207,9 @@ load_bookmarks(void)
 			p++;
 			char *tmp = strchr(line, ']');
 			if (!tmp) {
-				bookmarks[bm_n].shortcut = (char *)NULL;
-				bookmarks[bm_n].name = (char *)NULL;
-				bookmarks[bm_n++].path = (char *)NULL;
+				bookmarks[bm_n].shortcut = NULL;
+				bookmarks[bm_n].name = NULL;
+				bookmarks[bm_n++].path = NULL;
 				continue;
 			}
 
@@ -1222,7 +1222,7 @@ load_bookmarks(void)
 			tmp = strchr(p, ':');
 
 			if (!tmp) {
-				bookmarks[bm_n].name = (char *)NULL;
+				bookmarks[bm_n].name = NULL;
 				bookmarks[bm_n++].path = save_bm_path(p);
 				continue;
 			}
@@ -1231,7 +1231,7 @@ load_bookmarks(void)
 			bookmarks[bm_n].name = savestring(p, strlen(p));
 
 			if (!*(++tmp)) {
-				bookmarks[bm_n++].path = (char *)NULL;
+				bookmarks[bm_n++].path = NULL;
 				continue;
 			}
 
@@ -1240,13 +1240,13 @@ load_bookmarks(void)
 		}
 
 		/* No shortcut. Let's try with name */
-		bookmarks[bm_n].shortcut = (char *)NULL;
+		bookmarks[bm_n].shortcut = NULL;
 		char *tmp = strchr(line, ':');
 
 		/* No name either */
 		if (!tmp) {
-			bookmarks[bm_n].name = (char *)NULL;
-			bookmarks[bm_n++].path = (char *)NULL;
+			bookmarks[bm_n].name = NULL;
+			bookmarks[bm_n++].path = NULL;
 			continue;
 		}
 
@@ -1254,7 +1254,7 @@ load_bookmarks(void)
 		bookmarks[bm_n].name = savestring(line, strlen(line));
 
 		if (!*(++tmp)) {
-			bookmarks[bm_n++].path = (char *)NULL;
+			bookmarks[bm_n++].path = NULL;
 			continue;
 		} else {
 			bookmarks[bm_n++].path = save_bm_path(tmp);
@@ -1270,9 +1270,9 @@ load_bookmarks(void)
 		return FUNC_SUCCESS;
 	}
 
-	bookmarks[bm_n].name = (char *)NULL;
-	bookmarks[bm_n].path = (char *)NULL;
-	bookmarks[bm_n].shortcut = (char *)NULL;
+	bookmarks[bm_n].name = NULL;
+	bookmarks[bm_n].path = NULL;
+	bookmarks[bm_n].shortcut = NULL;
 
 	return FUNC_SUCCESS;
 }
@@ -1303,7 +1303,7 @@ load_actions(void)
 		return FUNC_FAILURE;
 
 	size_t line_size = 0;
-	char *line = (char *)NULL;
+	char *line = NULL;
 	ssize_t line_len = 0;
 
 	while ((line_len = getline(&line, &line_size, fp)) > 0) {
@@ -1349,7 +1349,7 @@ load_remotes(void)
 	remotes[n] = (struct remote_t){0};
 
 	size_t line_sz = 0;
-	char *line = (char *)NULL;
+	char *line = NULL;
 
 	while (getline(&line, &line_sz, fp) > 0) {
 		if (!*line || *line == '#' || *line == '\n')
@@ -1393,7 +1393,7 @@ load_remotes(void)
 			remotes[n].desc = savestring(ret, ret_len);
 
 		} else if (strncmp(line, "Mountpoint=", 11) == 0) {
-			char *tmp = (char *)NULL;
+			char *tmp = NULL;
 			if (*ret == '~')
 				tmp = tilde_expand(ret);
 			const size_t mnt_len = tmp ? strlen(tmp) : ret_len;
@@ -1447,7 +1447,7 @@ load_remotes(void)
 
 	if (remotes[n].name) {
 		n++;
-		remotes[n].name = (char *)NULL;
+		remotes[n].name = NULL;
 	}
 
 	remotes_n = n;
@@ -1466,7 +1466,7 @@ static char *
 set_prompts_file(void)
 {
 	if (!config_dir_gral || !*config_dir_gral)
-		return (char *)NULL;
+		return NULL;
 
 	struct stat a;
 
@@ -1492,16 +1492,16 @@ set_prompts_file(void)
 
 ERROR:
 	free(f);
-	return (char *)NULL;
+	return NULL;
 }
 
 static char *
 set_templates_dir(void)
 {
-	char *buf = (char *)NULL;
+	char *buf = NULL;
 	const int se = (xargs.secure_env == 1 || xargs.secure_env_full == 1);
 
-	char *p = se == 0 ? getenv("CLIFM_TEMPLATES_DIR") : (char *)NULL;
+	char *p = se == 0 ? getenv("CLIFM_TEMPLATES_DIR") : NULL;
 	if (p && *p) {
 		buf = savestring(p, strlen(p));
 	} else if (se == 0 && (p = getenv("XDG_TEMPLATES_DIR")) && *p) {
@@ -1568,7 +1568,7 @@ load_file_templates(void)
 		return;
 	}
 
-	file_templates[n] = (char *)NULL;
+	file_templates[n] = NULL;
 }
 
 /* Load prompts from PROMPTS_FILE. */
@@ -1593,7 +1593,7 @@ load_prompts(void)
 	unset_prompt_values(n);
 
 	size_t line_sz = 0;
-	char *line = (char *)NULL;
+	char *line = NULL;
 
 	while (getline(&line, &line_sz, fp) > 0) {
 		if (SKIP_LINE(*line))
@@ -1676,7 +1676,7 @@ load_prompts(void)
 
 	if (prompts[n].name) {
 		n++;
-		prompts[n].name = (char *)NULL;
+		prompts[n].name = NULL;
 	}
 
 	prompts_n = n;
@@ -1769,7 +1769,7 @@ get_sel_files(void)
 		sel_elements[sel_n].name = savestring(line, len);
 		sel_elements[sel_n++].size = (off_t)UNSET;
 
-		sel_elements[sel_n].name = (char *)NULL;
+		sel_elements[sel_n].name = NULL;
 		sel_elements[sel_n].size = (off_t)UNSET;
 	}
 
@@ -1825,7 +1825,7 @@ get_cdpath(void)
 			break;
 	}
 
-	cdpaths[n] = (char *)NULL;
+	cdpaths[n] = NULL;
 
 	free(t);
 	return n;
@@ -1854,7 +1854,7 @@ get_paths_timestamps(const size_t n)
 size_t
 get_path_env(const int check_timestamps)
 {
-	char *ptr = (char *)NULL;
+	char *ptr = NULL;
 	int malloced_ptr = 0;
 
 	/* If running on a sanitized environment, or PATH cannot be retrieved for
@@ -1923,7 +1923,7 @@ CONT:
 		p = ++q;
 	}
 
-	paths[n].path = (char *)NULL;
+	paths[n].path = NULL;
 	free(path_tmp);
 
 	if (check_timestamps == 1)
@@ -1980,7 +1980,7 @@ get_last_path(void)
 	 * between 0 and 7 (eight workspaces). */
 	char line[PATH_MAX + 4]; *line = '\0';
 	while (fgets(line, (int)sizeof(line), fp) != NULL) {
-		char *p = (char *)NULL;
+		char *p = NULL;
 		const int cur = validate_line(line, &p, sizeof(line));
 		if (cur == -1)
 			continue;
@@ -2221,7 +2221,7 @@ get_path_programs(void)
 	free(commands_bin);
 	free(cmd_n);
 	path_progsn = l;
-	bin_commands[l] = (char *)NULL;
+	bin_commands[l] = NULL;
 }
 
 static void
@@ -2254,8 +2254,8 @@ write_alias(const char *s, char *p)
 	}
 
 	if (add == 1) {
-		aliases[aliases_n].name = (char *)NULL;
-		aliases[aliases_n].cmd = (char *)NULL;
+		aliases[aliases_n].name = NULL;
+		aliases[aliases_n].cmd = NULL;
 	}
 }
 
@@ -2289,7 +2289,7 @@ get_aliases(void)
 	if (aliases_n > 0)
 		free_aliases();
 
-	char *line = (char *)NULL;
+	char *line = NULL;
 	size_t line_size = 0;
 
 	while (getline(&line, &line_size, fp) > 0) {
@@ -2362,7 +2362,7 @@ load_dirhist(void)
 	fseek(fp, 0L, SEEK_SET);
 
 	size_t line_size = 0;
-	char *line = (char *)NULL;
+	char *line = NULL;
 	ssize_t line_len = 0;
 	dirhist_total_index = 0;
 
@@ -2370,7 +2370,7 @@ load_dirhist(void)
 		write_dirhist(line, line_len);
 
 	fclose(fp);
-	old_pwd[dirhist_total_index] = (char *)NULL;
+	old_pwd[dirhist_total_index] = NULL;
 	free(line);
 	dirhist_cur_index = dirhist_total_index - 1;
 	return FUNC_SUCCESS;
@@ -2403,7 +2403,7 @@ get_prompt_cmds(void)
 	if (prompt_cmds_n)
 		free_prompt_cmds();
 
-	char *line = (char *)NULL;
+	char *line = NULL;
 	size_t line_size = 0;
 	ssize_t line_len = 0;
 
@@ -2477,7 +2477,7 @@ set_sudo_cmd(void)
 		return;
 
 	sudo_cmd = (xargs.secure_env != 1 && xargs.secure_env_full != 1
-		&& xargs.secure_cmds != 1) ? getenv("CLIFM_SUDO_CMD") : (char *)NULL;
+		&& xargs.secure_cmds != 1) ? getenv("CLIFM_SUDO_CMD") : NULL;
 
 	if (!sudo_cmd || !*sudo_cmd) {
 		sudo_cmd = DEF_SUDO_CMD;
@@ -2540,14 +2540,14 @@ set_fzftab_options(void)
 	set_fzf_preview_border_type();
 
 	smenutab_options_env = (xargs.secure_env_full != 1 && tabmode == SMENU_TAB)
-		? getenv("CLIFM_SMENU_OPTIONS") : (char *)NULL;
+		? getenv("CLIFM_SMENU_OPTIONS") : NULL;
 
 	if (smenutab_options_env
 	&& sanitize_cmd(smenutab_options_env, SNT_BLACKLIST) != 0) {
 		err('w', PRINT_PROMPT, "%s: CLIFM_SMENU_OPTIONS contains unsafe "
 			"characters (<>|;&$`). Falling back to default values.\n",
 			PROGRAM_NAME);
-		smenutab_options_env = (char *)NULL;
+		smenutab_options_env = NULL;
 	}
 }
 #endif /* !_NO_FZF */

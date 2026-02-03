@@ -202,7 +202,7 @@ print_and_count_modified_names(char **args, char **new_names)
 static int
 open_tmpfile(char *app, char *file)
 {
-	char *application = (char *)NULL;
+	char *application = NULL;
 	struct stat a;
 
 	if (app && *app == ':' && app[1] && lstat(app, &a) == -1)
@@ -310,7 +310,7 @@ get_new_names(FILE *fp, const size_t total, int *status)
 		fnames[i++] = savestring(line, len);
 	}
 
-	fnames[i] = (char *)NULL;
+	fnames[i] = NULL;
 
 	if (i == 0)
 		goto FREE_AND_EXIT;

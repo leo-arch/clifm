@@ -46,9 +46,9 @@ ask_user_for_path(void)
 	prompt_offset = poffset_bk;
 
 	if (!ext_path)
-		return (char *)NULL;
+		return NULL;
 
-	char *p = (char *)NULL;
+	char *p = NULL;
 	if ((*ext_path == '"' || *ext_path == '\'')
 	&& (p = remove_quotes(ext_path)))
 		memmove(ext_path, p, strlen(p) + 1);
@@ -68,12 +68,12 @@ get_extraction_path(void)
 	char *ext_path = ask_user_for_path();
 	if (!ext_path || !*ext_path) {
 		free(ext_path);
-		return (char *)NULL;
+		return NULL;
 	}
 
 	if (TOUPPER(*ext_path) == 'Q' && !ext_path[1]) {
 		free(ext_path);
-		return (char *)NULL;
+		return NULL;
 	}
 
 	char *p = normalize_path(ext_path, strlen(ext_path));
@@ -89,14 +89,14 @@ static char
 get_operation(const int mode)
 {
 	char sel_op = 0;
-	char *op = (char *)NULL;
+	char *op = NULL;
 	while (!op) {
 		op = rl_no_hist(_("Operation: "), 0);
 		if (!op)
 			continue;
 		if (!*op || op[1] != '\0') {
 			free(op);
-			op = (char *)NULL;
+			op = NULL;
 			continue;
 		}
 
@@ -109,12 +109,12 @@ get_operation(const int mode)
 		case 'r':
 			if (mode == OP_ISO && *op == 'r') {
 				free(op);
-				op = (char *)NULL;
+				op = NULL;
 				break;
 			}
 			if (mode == OP_OTHERS && *op == 't') {
 				free(op);
-				op = (char *)NULL;
+				op = NULL;
 				break;
 			}
 			sel_op = *op;
@@ -128,7 +128,7 @@ get_operation(const int mode)
 
 		default:
 			free(op);
-			op = (char *)NULL;
+			op = NULL;
 			break;
 		}
 
@@ -214,7 +214,7 @@ test_iso(char *file)
 static char *
 create_mountpoint(char *file)
 {
-	char *mountpoint = (char *)NULL;
+	char *mountpoint = NULL;
 	char *p = strrchr(file, '/');
 	char *tfile = (p && *(++p)) ? p : file;
 
@@ -231,7 +231,7 @@ create_mountpoint(char *file)
 	char *dir_cmd[] = {"mkdir", "-pm700", mountpoint, NULL};
 	if (launch_execv(dir_cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS) {
 		free(mountpoint);
-		mountpoint = (char *)NULL;
+		mountpoint = NULL;
 	}
 
 	return mountpoint;
@@ -476,7 +476,7 @@ get_archive_filename(void)
 {
 	puts(_("Use extension to specify archive/compression type "
 	       "(defaults to .tar.gz)\nExample: myarchive.xz"));
-	char *name = (char *)NULL;
+	char *name = NULL;
 	while (!name) {
 		flags |= NO_FIX_RL_POINT;
 		name = rl_no_hist(_("Filename ('q' to quit): "), 0);
@@ -484,13 +484,13 @@ get_archive_filename(void)
 
 		if (!name || !*name) {
 			free(name);
-			name = (char *)NULL;
+			name = NULL;
 			continue;
 		}
 
 		if (*name == 'q' && name[1] == '\0') {
 			free(name);
-			return (char *)NULL;
+			return NULL;
 		}
 
 		char *dot = strrchr(name, '.');
@@ -562,14 +562,14 @@ zstandard(char *in_file, char *out_file, const char mode, const char op)
 	printf(_("%s[e]%sxtract %s[t]%sest %s[i]%snfo %s[q]%suit\n"),
 	    BOLD, df_c, BOLD, df_c, BOLD, df_c, BOLD, df_c);
 
-	char *operation = (char *)NULL;
+	char *operation = NULL;
 	while (!operation) {
 		operation = rl_no_hist(_("Operation: "), 0);
 		if (!operation)
 			continue;
 		if (!*operation || operation[1] != '\0') {
 			free(operation);
-			operation = (char *)NULL;
+			operation = NULL;
 			continue;
 		}
 
@@ -599,7 +599,7 @@ zstandard(char *in_file, char *out_file, const char mode, const char op)
 
 		default:
 			free(operation);
-			operation = (char *)NULL;
+			operation = NULL;
 			break;
 		}
 	}
@@ -677,7 +677,7 @@ compress_others(char **args, char *name)
 		tcmd[n++] = savestring(p, strlen(p));
 		free(p);
 	}
-	tcmd[n] = (char *)NULL;
+	tcmd[n] = NULL;
 
 	const int ret = launch_execv(tcmd, FOREGROUND, E_NOFLAG);
 
@@ -725,7 +725,7 @@ static int
 check_not_compressed(char **args)
 {
 	for (size_t i = 1; args[i]; i++) {
-		char *deq = (char *)NULL;
+		char *deq = NULL;
 		if (strchr(args[i], '\\')) {
 			deq = unescape_str(args[i], 0);
 			xstrsncpy(args[i], deq, strlen(deq) + 1);
@@ -768,7 +768,7 @@ get_zstandard_operation(void)
 	    BOLD, df_c, BOLD, df_c, BOLD, df_c, BOLD, df_c);
 
 	char sel_op = 0;
-	char *operation = (char *)NULL;
+	char *operation = NULL;
 
 	while (!operation) {
 		operation = rl_no_hist(_("Operation: "), 0);
@@ -776,7 +776,7 @@ get_zstandard_operation(void)
 			continue;
 		if (!*operation || operation[1] != '\0') {
 			free(operation);
-			operation = (char *)NULL;
+			operation = NULL;
 			continue;
 		}
 
@@ -788,7 +788,7 @@ get_zstandard_operation(void)
 
 		default:
 			free(operation);
-			operation = (char *)NULL;
+			operation = NULL;
 			continue;
 		}
 	}
@@ -881,7 +881,7 @@ extract_others(char **args)
 	n += 3;
 	for (i = 1; args[i]; i++)
 		tcmd[n++] = savestring(args[i], strlen(args[i]));
-	tcmd[n] = (char *)NULL;
+	tcmd[n] = NULL;
 
 	/* Launch it */
 	int exit_status = FUNC_SUCCESS;
@@ -900,7 +900,7 @@ get_repack_format(void)
 {
 	puts(_("Enter 'q' to quit"));
 
-	char *format = (char *)NULL;
+	char *format = NULL;
 	while (!format) {
 		format = rl_no_hist(_("New format (e.g.: .tar.xz): "), 0);
 		if (!format)
@@ -911,13 +911,13 @@ get_repack_format(void)
 		if (!*format || (*format != '.' && *format != 'q')
 		|| strpbrk(format, invalid_c)) {
 			free(format);
-			format = (char *)NULL;
+			format = NULL;
 			continue;
 		}
 
 		if (*format == 'q' && format[1] == '\0') {
 			free(format);
-			return (char *)NULL;
+			return NULL;
 		}
 	}
 
@@ -944,7 +944,7 @@ repack_others(char **args)
 	n += 4;
 	for (i = 1; args[i]; i++)
 		tcmd[n++] = savestring(args[i], strlen(args[i]));
-	tcmd[n] = (char *)NULL;
+	tcmd[n] = NULL;
 
 	int exit_status = FUNC_SUCCESS;
 	if (launch_execv(tcmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)

@@ -58,7 +58,7 @@ typedef void rl_macro_print_func_t (const char *, const char *, int, const char 
 	|| (t) == FASTBACK_SUG || (t) == WS_NUM_PREFIX_SUG          \
 	|| ((t) == COMP_SUG && (flags & BAEJ_SUGGESTION)))
 
-static char *last_word = (char *)NULL;
+static char *last_word = NULL;
 static int last_word_offset = 0;
 static int point_is_first_word = 0;
 
@@ -89,7 +89,7 @@ static const char *
 check_int_cmd_desc(const char *s, const size_t l)
 {
 	if (!s || !*s)
-		return (char *)NULL;
+		return NULL;
 
 	if (l == 1) {
 		switch (*s) {
@@ -111,7 +111,7 @@ check_int_cmd_desc(const char *s, const size_t l)
 		case 'u': return U_DESC;
 		case 'x': return X_DESC;
 		case 'X': return XU_DESC;
-		default: return (char *)NULL;
+		default: return NULL;
 		}
 	}
 
@@ -348,7 +348,7 @@ check_int_cmd_desc(const char *s, const size_t l)
 	else if (l == 12 && *s == 'c' && strcmp(s + 1, "olorschemes") == 0)
 		return CS_DESC;
 
-	return (char *)NULL;
+	return NULL;
 }
 
 int
@@ -364,7 +364,7 @@ recover_from_wrong_cmd(void)
 	}
 
 	fputs(NC, stdout);
-	cur_color = (char *)NULL;
+	cur_color = NULL;
 	rl_restore_prompt();
 	rl_clear_message();
 
@@ -387,7 +387,7 @@ void
 free_suggestion(void)
 {
 	free(suggestion_buf);
-	suggestion_buf = (char *)NULL;
+	suggestion_buf = NULL;
 	suggestion.printed = 0;
 	suggestion.nlines = 0;
 }
@@ -410,7 +410,7 @@ clear_suggestion(const int sflag)
 	suggestion.printed = 0;
 	if (sflag == CS_FREEBUF) {
 		free(suggestion_buf);
-		suggestion_buf = (char *)NULL;
+		suggestion_buf = NULL;
 	}
 }
 
@@ -460,7 +460,7 @@ calculate_suggestion_lines(int *baej, const size_t suggestion_len)
 static inline char *
 truncate_name(const char *str)
 {
-	char *wname = (char *)NULL;
+	char *wname = NULL;
 
 	if (suggestion.type == ELN_SUG || suggestion.type == COMP_SUG
 	|| suggestion.type == FILE_SUG) {
@@ -643,7 +643,7 @@ get_reg_file_color(const char *filename, const struct stat *attr,
 	if (attr->st_nlink > 1)	return mh_c;
 
 	const char *ext =
-		conf.check_ext == 1 ? strrchr(filename, '.') : (char *)NULL;
+		conf.check_ext == 1 ? strrchr(filename, '.') : NULL;
 	if (!ext || ext == filename)
 		return fi_c;
 
@@ -771,7 +771,7 @@ print_match(char *match, const size_t len)
 {
 	int append_slash = 0, free_color = 0;
 
-	char *p = (char *)NULL, *temp_color = (char *)NULL;
+	char *p = NULL, *temp_color = NULL;
 	char *color = (conf.suggest_filetype_color == 1) ? no_c : sf_c;
 
 	if (*match == '~')
@@ -1124,7 +1124,7 @@ static inline int
 print_internal_cmd_suggestion(char *str, const size_t len, const int print)
 {
 	/* Check internal command with fused parameter. */
-	char *p = (char *)NULL;
+	char *p = NULL;
 	size_t j;
 	for (j = 0; str[j]; j++) {
 		if (str[j] >= '1' && str[j] <= '9') {
@@ -1348,7 +1348,7 @@ check_jcmd(char *line)
 		conf.suggest_filetype_color ? di_c : sf_c);
 
 	free(jump_suggestion);
-	jump_suggestion = (char *)NULL;
+	jump_suggestion = NULL;
 	return PARTIAL_MATCH;
 }
 
@@ -1561,7 +1561,7 @@ check_prompts(char *word, const size_t len)
 {
 	size_t i = prompts_n;
 
-	char *q = (char *)NULL, *w = word;
+	char *q = NULL, *w = word;
 	size_t l = len;
 
 	if (strchr(word, '\\')) {
@@ -1595,7 +1595,7 @@ static void
 get_last_word(const char *last_space)
 {
 	const char *tmp = (last_space && last_space[1]) ? last_space + 1
-			: (rl_line_buffer ? rl_line_buffer : (char *)NULL);
+			: (rl_line_buffer ? rl_line_buffer : NULL);
 	if (tmp) {
 		const size_t len = strlen(tmp);
 		last_word = xnrealloc(last_word, len + 1, sizeof(char));
@@ -1627,7 +1627,7 @@ check_workspaces(char *word, size_t wlen, const int type)
 		return NO_MATCH;
 	}
 
-	char *q = (char *)NULL, *w = word;
+	char *q = NULL, *w = word;
 	size_t l = wlen;
 
 	if (strchr(word, '\\')) {
@@ -1689,7 +1689,7 @@ check_profiles(char *word, const size_t len)
 	if (!word || !*word || !profile_names)
 		return NO_MATCH;
 
-	char *q = (char *)NULL, *w = word;
+	char *q = NULL, *w = word;
 	size_t l = len;
 
 	if (strchr(word, '\\')) {
@@ -1744,7 +1744,7 @@ check_remotes(char *word, const size_t len)
 	if (!word || !*word || !remotes)
 		return NO_MATCH;
 
-	char *q = (char *)NULL, *w = word;
+	char *q = NULL, *w = word;
 	size_t l = len;
 
 	if (strchr(word, '\\')) {
@@ -1779,7 +1779,7 @@ check_color_schemes(char *word, const size_t len)
 	if (!word || !*word || !color_schemes)
 		return NO_MATCH;
 
-	char *q = (char *)NULL, *w = word;
+	char *q = NULL, *w = word;
 	size_t l = len;
 
 	if (strchr(word, '\\')) {
@@ -1815,7 +1815,7 @@ check_bookmark_names(char *word, const size_t len)
 		return NO_MATCH;
 
 	const size_t prefix = (*word == 'b' && word[1] == ':') ? 2 : 0;
-	char *q = (char *)NULL, *w = word + prefix;
+	char *q = NULL, *w = word + prefix;
 	size_t l = len - prefix;
 
 	if (strchr(word + prefix, '\\')) {
@@ -1950,7 +1950,7 @@ rl_suggestions(const unsigned char c)
 
 	if (rl_end == 0 && rl_point == 0) {
 		free(suggestion_buf);
-		suggestion_buf = (char *)NULL;
+		suggestion_buf = NULL;
 		if (wrong_cmd)
 			recover_from_wrong_cmd();
 		return FUNC_SUCCESS;
@@ -1977,7 +1977,7 @@ rl_suggestions(const unsigned char c)
 	words_num = count_words(&start_word, &full_word);
 
 	/* And a copy of the first word as well. */
-	char *first_word = (char *)NULL;
+	char *first_word = NULL;
 	if (full_word) {
 		rl_line_buffer[full_word] = '\0';
 		char *q = rl_line_buffer + start_word;
@@ -2039,7 +2039,7 @@ rl_suggestions(const unsigned char c)
 		goto SUCCESS;
 
 	/* 3.a) Internal command description */
-	const char *cdesc = (char *)NULL;
+	const char *cdesc = NULL;
 	if (conf.cmd_desc_sug == 1 && c != ' ' && words_num == 1
 	&& (!rl_line_buffer || (rl_end > 0 && rl_line_buffer[rl_end - 1] != ' '))
 	&& (cdesc = check_int_cmd_desc(word, wlen)) != NULL) {
@@ -2580,7 +2580,7 @@ SUCCESS:
 
 	free(first_word);
 	free(last_word);
-	last_word = (char *)NULL;
+	last_word = NULL;
 
 	return FUNC_SUCCESS;
 
@@ -2590,7 +2590,7 @@ FAIL:
 
 	free(first_word);
 	free(last_word);
-	last_word = (char *)NULL;
+	last_word = NULL;
 
 	return FUNC_FAILURE;
 }

@@ -53,7 +53,7 @@ reload_bookmarks(void)
 static char **
 bm_prompt(const int print_header)
 {
-	char *bm = (char *)NULL;
+	char *bm = NULL;
 	if (print_header)
 		printf(_("%s%s\nEnter '%c' to edit your bookmarks or '%c' to quit\n"
 			"Select a bookmark (by ELN, shortcut, or name):\n"),
@@ -80,10 +80,10 @@ bm_prompt(const int print_header)
 		flags &= ~IN_BOOKMARKS_SCREEN;
 		free(bm);
 	} else {
-		char *tmp = strchr(bm, '\\') ? unescape_str(bm, 0) : (char *)NULL;
+		char *tmp = strchr(bm, '\\') ? unescape_str(bm, 0) : NULL;
 		cmd = xnmalloc(2, sizeof(char *));
 		cmd[0] = tmp ? tmp : bm;
-		cmd[1] = (char *)NULL;
+		cmd[1] = NULL;
 		if (tmp)
 			free(bm);
 	}
@@ -223,7 +223,7 @@ get_bm_path(char *arg)
 		const int num = atoi(arg);
 		if (num <= 0 || (size_t)num > bm_n) {
 			xerror(_("%s: No such ELN\n"), arg);
-			return (char *)NULL;
+			return NULL;
 		}
 		return bookmarks[num - 1].path;
 	}
@@ -241,12 +241,12 @@ get_bm_path(char *arg)
 				return bookmarks[i].path;
 
 			xerror(_("'%s': Invalid bookmark\n"), name);
-			return (char *)NULL;
+			return NULL;
 		}
 	}
 
 	xerror(_("'%s': No such bookmark\n"), name);
-	return (char *)NULL;
+	return NULL;
 }
 
 static void
@@ -467,8 +467,8 @@ bookmark_add(char *file, char *name, char *shortcut)
 	int exit_status = FUNC_FAILURE;
 	char *p = unescape_str(name, 0);
 	char *n = p ? p : name;
-	char *q = (char *)NULL;
-	char *s = (char *)NULL;
+	char *q = NULL;
+	char *s = NULL;
 
 	if (check_bm_name(n, 1) != -1)
 		goto ERROR;
@@ -622,7 +622,7 @@ extract_shortcut_and_name(char *line)
 static int
 keep_bm_line(char *line)
 {
-	char *p = (char *)NULL;
+	char *p = NULL;
 	if (*line == '#' || *line == '\n' || !(p = strchr(line, '/')))
 		return 1;
 
@@ -701,7 +701,7 @@ del_bookmarks(char **args)
 	}
 
 	size_t removed = 0;
-	char *line = (char *)NULL;
+	char *line = NULL;
 	size_t line_size = 0;
 
 	while (getline(&line, &line_size, fp) > 0) {

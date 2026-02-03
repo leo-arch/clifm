@@ -127,7 +127,7 @@ save_workspace_opts(const int n)
 {
 	free(workspace_opts[n].filter.str);
 	workspace_opts[n].filter.str = filter.str
-		? savestring(filter.str, strlen(filter.str)) : (char *)NULL;
+		? savestring(filter.str, strlen(filter.str)) : NULL;
 	workspace_opts[n].filter.rev = filter.rev;
 	workspace_opts[n].filter.type = filter.type;
 	workspace_opts[n].filter.env = filter.env;
@@ -150,7 +150,7 @@ static void
 unset_ws_filter(void)
 {
 	free(filter.str);
-	filter.str = (char *)NULL;
+	filter.str = NULL;
 	filter.rev = 0;
 	filter.type = FILTER_NONE;
 	regfree(&regex_exp);
@@ -273,7 +273,7 @@ get_workspace_by_name(char *name, const int check_current)
 
 	/* CHECK_CURRENT is zero when coming from unset_workspace(), in which
 	 * case name is already unescapeed. */
-	char *p = check_current == 1 ? unescape_str(name, 0) : (char *)NULL;
+	char *p = check_current == 1 ? unescape_str(name, 0) : NULL;
 	char *q = p ? p : name;
 
 	int n = MAX_WS;
@@ -335,7 +335,7 @@ unset_workspace(char *str)
 	free(name);
 
 	free(workspaces[n].path);
-	workspaces[n].path = (char *)NULL;
+	workspaces[n].path = NULL;
 
 	return FUNC_SUCCESS;
 

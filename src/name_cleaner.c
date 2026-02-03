@@ -168,7 +168,7 @@ static char *
 clean_file_name(char *restrict name)
 {
 	if (!name || !*name)
-		return (char *)NULL;
+		return NULL;
 
 	char *p = xcalloc(NAME_MAX + 1, sizeof(char));
 	char *q = p;
@@ -254,7 +254,7 @@ clean_file_name(char *restrict name)
 		}
 
 		int j = (int)(sizeof(unitable) / sizeof(struct utable_t));
-		char *t = (char *)NULL;
+		char *t = NULL;
 		while (--j >= 0) {
 			if (dec_value == unitable[j].key && unitable[j].data)
 				t = unitable[j].data;
@@ -286,10 +286,10 @@ clean_file_name(char *restrict name)
 		time_t rawtime = time(NULL);
 		struct tm t;
 		char *suffix = localtime_r(&rawtime, &t)
-			? gen_date_suffix(t, 0) : (char *)NULL;
+			? gen_date_suffix(t, 0) : NULL;
 		if (!suffix) {
 			free(p);
-			return (char *)NULL;
+			return NULL;
 		}
 		snprintf(p, NAME_MAX, "%s.%s", FUNC_NAME, suffix);
 		free(suffix);
@@ -396,12 +396,12 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 
 	/* Initialize all values */
 	for (i = 0; i < total_files; i++) {
-		bfiles[i].original = (char *)NULL;
-		bfiles[i].replacement = (char *)NULL;
+		bfiles[i].original = NULL;
+		bfiles[i].replacement = NULL;
 	}
 
 	size_t line_size = 0;
-	char *line = (char *)NULL;
+	char *line = NULL;
 	ssize_t line_len = 0;
 
 	i = 0;
@@ -423,7 +423,7 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 		if (strncmp(line, "original: ", 10) == 0) {
 			if (bfiles[i].original) {
 				free(bfiles[i].original);
-				bfiles[i].original = (char *)NULL;
+				bfiles[i].original = NULL;
 			}
 			bfiles[i].original = savestring(p, strlen(p));
 		/* Do not store the replacement filename is there is no original */
@@ -445,8 +445,8 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 		|| !bfiles[i].replacement || !*bfiles[i].replacement) {
 			free(bfiles[i].original);
 			free(bfiles[i].replacement);
-			bfiles[i].original = (char *)NULL;
-			bfiles[i].replacement = (char *)NULL;
+			bfiles[i].original = NULL;
+			bfiles[i].replacement = NULL;
 		} else {
 			j++;
 		}
@@ -537,7 +537,7 @@ bleach_files(char **names)
 	}
 
 	int rename = 0, quit_func = 0;
-	char *input = (char *)NULL;
+	char *input = NULL;
 
 CONFIRM:
 	while (!input) {
@@ -551,7 +551,7 @@ CONFIRM:
 
 		if (input[1] || !strchr("yYnNeEq", *input)) {
 			free(input);
-			input = (char *)NULL;
+			input = NULL;
 			continue;
 		}
 
@@ -569,7 +569,7 @@ CONFIRM:
 
 			if (edited_names == 1 && f > 0) {
 				free(input);
-				input = (char *)NULL;
+				input = NULL;
 				goto CONFIRM;
 			} else {
 				rename = 1;
@@ -631,9 +631,9 @@ CONFIRM:
 
 	for (size_t i = 0; i < f; i++) {
 		char *o = (bfiles && bfiles[i].original)
-			? bfiles[i].original : (char *)NULL;
+			? bfiles[i].original : NULL;
 		char *r = (bfiles && bfiles[i].replacement)
-			? bfiles[i].replacement : (char *)NULL;
+			? bfiles[i].replacement : NULL;
 
 		if (o && *o && r && *r && rename) {
 			/* Make sure the replacement filename does not exist. If

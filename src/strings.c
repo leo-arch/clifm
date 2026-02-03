@@ -95,7 +95,7 @@ char *
 quote_str(const char *str)
 {
 	if (!str || !*str || conf.quoting_style == QUOTING_STYLE_BACKSLASH)
-		return (char *)NULL;
+		return NULL;
 
 	const size_t len = strlen(str) + 3;
 	char *p = xnmalloc(len, sizeof(char));
@@ -167,7 +167,7 @@ char *
 get_last_chr(char *str, const char c, const int len)
 {
 	if (!str || !*str)
-		return (char *)NULL;
+		return NULL;
 
 	int i = len;
 	while (--i >= 0) {
@@ -176,7 +176,7 @@ get_last_chr(char *str, const char c, const int len)
 			return str + i;
 	}
 
-	return (char *)NULL;
+	return NULL;
 }
 
 /* Replace all slashes in STR by the character C. */
@@ -184,7 +184,7 @@ char *
 replace_slashes(char *str, const char c)
 {
 	if (!str || !*str)
-		return (char *)NULL;
+		return NULL;
 
 	if (*str == '/')
 		str++;
@@ -208,7 +208,7 @@ char *
 xstrcasechr(char *s, char c)
 {
 	if (!s || !*s)
-		return (char *)NULL;
+		return NULL;
 
 	const char uc = (char)TOUPPER(c);
 	while (*s) {
@@ -217,7 +217,7 @@ xstrcasechr(char *s, char c)
 		s++;
 	}
 
-	return (char *)NULL;
+	return NULL;
 }
 
 /* A reverse strpbrk(3): returns a pointer to the LAST char in S matching
@@ -226,7 +226,7 @@ char *
 xstrrpbrk(char *s, const char *accept)
 {
 	if (!s || !*s || !accept || !*accept)
-		return (char *)NULL;
+		return NULL;
 
 	const size_t l = strlen(s);
 
@@ -237,7 +237,7 @@ xstrrpbrk(char *s, const char *accept)
 		}
 	}
 
-	return (char *)NULL;
+	return NULL;
 }
 
 #ifdef _BE_POSIX
@@ -247,10 +247,10 @@ char *
 x_strcasestr(char *a, char *b)
 {
 	if (!a || !b)
-		return (char *)NULL;
+		return NULL;
 
 	size_t f = 0;
-	char *p = (char *)NULL, *bb = b;
+	char *p = NULL, *bb = b;
 	while (*a && *b) {
 		if (TOUPPER(*a) != TOUPPER(*b)) {
 			if (f == 1) {
@@ -270,7 +270,7 @@ x_strcasestr(char *a, char *b)
 		b++;
 	}
 
-	return (!*b && f == 1) ? p : (char *)NULL;
+	return (!*b && f == 1) ? p : NULL;
 }
 #endif /* _BE_POSIX */
 
@@ -628,9 +628,9 @@ char *
 strbfrlst(char *str, const char c)
 {
 	if (!str || !*str || !c)
-		return (char *)NULL;
+		return NULL;
 
-	char *p = str, *q = (char *)NULL;
+	char *p = str, *q = NULL;
 	while (*p) {
 		if (*p == c)
 			q = p;
@@ -638,7 +638,7 @@ strbfrlst(char *str, const char c)
 	}
 
 	if (!q || q == str)
-		return (char *)NULL;
+		return NULL;
 
 	*q = '\0';
 
@@ -657,9 +657,9 @@ char *
 strbtw(char *str, const char a, const char b)
 {
 	if (!str || !*str || !a || !b)
-		return (char *)NULL;
+		return NULL;
 
-	char *p = str, *pa = (char *)NULL, *pb = (char *)NULL;
+	char *p = str, *pa = NULL, *pb = NULL;
 	while (*p) {
 		if (!pa) {
 			if (*p == a)
@@ -672,7 +672,7 @@ strbtw(char *str, const char a, const char b)
 	}
 
 	if (!pb)
-		return (char *)NULL;
+		return NULL;
 
 	*pb = '\0';
 
@@ -689,11 +689,11 @@ char *
 replace_substr(const char *haystack, const char *needle, char *rep)
 {
 	if (!haystack || !*haystack || !needle || !*needle || !rep)
-		return (char *)NULL;
+		return NULL;
 
 	char *ret = strstr(haystack, needle);
 	if (!ret)
-		return (char *)NULL;
+		return NULL;
 
 	char *needle_end = ret + strlen(needle);
 	*ret = '\0';
@@ -756,7 +756,7 @@ char *
 remove_quotes(char *str)
 {
 	if (!str || !*str)
-		return (char *)NULL;
+		return NULL;
 
 	char *p = str;
 	size_t len = strlen(p);
@@ -773,7 +773,7 @@ remove_quotes(char *str)
 		p++;
 
 	if (!*p)
-		return (char *)NULL;
+		return NULL;
 
 	char *q = p;
 	int blank = 1;
@@ -789,7 +789,7 @@ remove_quotes(char *str)
 	if (blank == 0)
 		return p;
 
-	return (char *)NULL;
+	return NULL;
 }
 
 /* Set all slots in the QUOTED_WORDS array to -1 to mark uninitialized slots.
@@ -926,7 +926,7 @@ split_str(char *str, const int update_args)
 			if (!*str) {
 				xerror(_("%s: Missing '%c'\n"), PROGRAM_NAME, close);
 				free(buf);
-				buf = (char *)NULL;
+				buf = NULL;
 
 				for (size_t i = words; i-- > 0;)
 					free(substr[i]);
@@ -985,7 +985,7 @@ split_str(char *str, const int update_args)
 					PROGRAM_NAME, quote);
 				/* Free stuff and return. */
 				free(buf);
-				buf = (char *)NULL;
+				buf = NULL;
 
 				for (size_t i = words; i-- > 0;)
 					free(substr[i]);
@@ -1060,12 +1060,12 @@ split_str(char *str, const int update_args)
 	}
 
 	free(buf);
-	buf = (char *)NULL;
+	buf = NULL;
 
 	if (words > 0) {
 		/* Add a final null string to the array. */
 		substr = xnrealloc(substr, words + 1, sizeof(char *));
-		substr[words] = (char *)NULL;
+		substr[words] = NULL;
 
 		if (update_args == 1)
 			args_n = words - 1;
@@ -1105,16 +1105,16 @@ static char *
 split_fused_param(char *str)
 {
 	if (!str || !*str || *str == ';' || *str == ':' || *str == '\\')
-		return (char *)NULL;
+		return NULL;
 
 	const char *space = strchr(str, ' ');
 	const char *slash = strchr(str, '/');
 
 	if (!space && slash) /* If "/some/path/" */
-		return (char *)NULL;
+		return NULL;
 
 	if (space && slash && slash < space) /* If "/some/string something" */
-		return (char *)NULL;
+		return NULL;
 
 	/* The buffer size is the double of STR, just in case each subtr
 	 * needs to be splitted. */
@@ -1229,7 +1229,7 @@ is_fused_param(char *str)
 	if (!str || !*str || !str[1])
 		return FUNC_FAILURE;
 
-	char *p = str, *q = (char *)NULL;
+	char *p = str, *q = NULL;
 	int d = 0;
 
 	while (*p && *p != ' ') {
@@ -1270,7 +1270,7 @@ expand_tag(char ***args, const int tag_index)
 		return 0;
 
 	char *tag = (s[tag_index] && *(s[tag_index] + 1) && *(s[tag_index] + 2))
-		? s[tag_index] + 2 : (char *)NULL;
+		? s[tag_index] + 2 : NULL;
 	if (!tag || !*tag || !tags_dir || is_tag(tag) == 0)
 		return 0;
 
@@ -1297,7 +1297,7 @@ expand_tag(char ***args, const int tag_index)
 	/* Copy whatever is before the tag expression */
 	for (i = 0; i < (size_t)tag_index; i++)
 		p[j++] = savestring(s[i], strlen(s[i]));
-	p[j] = (char *)NULL;
+	p[j] = NULL;
 
 	/* Append all filenames pointed to by the tag expression */
 	for (i = 0; i < (size_t)n; i++) {
@@ -1321,7 +1321,7 @@ expand_tag(char ***args, const int tag_index)
 		p[j++] = savestring(q, strlen(q));
 		free(esc_str);
 	}
-	p[j] = (char *)NULL;
+	p[j] = NULL;
 
 	/* Append whatever is after the tag expression */
 	for (i = (size_t)tag_index + 1; i <= args_n; i++) {
@@ -1329,7 +1329,7 @@ expand_tag(char ***args, const int tag_index)
 			continue;
 		p[j++] = savestring(s[i], strlen(s[i]));
 	}
-	p[j] = (char *)NULL;
+	p[j] = NULL;
 
 	/* Free the dirent struct */
 	for (i = 0; i < (size_t)n; i++)
@@ -1408,7 +1408,7 @@ expand_mime_type_filter(const char *pattern)
 			name = buf;
 		}
 
-		char *m = (name && *name) ? xmagic(name, MIME_TYPE) : (char *)NULL;
+		char *m = (name && *name) ? xmagic(name, MIME_TYPE) : NULL;
 		if (!m) continue;
 
 		char *p = strstr(m, pattern);
@@ -1419,7 +1419,7 @@ expand_mime_type_filter(const char *pattern)
 		t[n++] = savestring(name, strlen(name));
 	}
 
-	t[n] = (char *)NULL;
+	t[n] = NULL;
 
 	if (n == 0)
 		{ free(t); return (char **)NULL; }
@@ -1491,7 +1491,7 @@ expand_file_type_filter(const char t)
 		return (char **)NULL;
 	}
 
-	f[c] = (char *)NULL;
+	f[c] = NULL;
 	f = xnrealloc(f, (size_t)c + 1, sizeof(char *));
 
 	return f;
@@ -1509,7 +1509,7 @@ get_bm_paths(void)
 	for (i = 0; i < bm_n && bookmarks[i].path; i++)
 		b[i] = bookmarks[i].path;
 
-	b[i] = (char *)NULL;
+	b[i] = NULL;
 	return b;
 }
 
@@ -1540,7 +1540,7 @@ insert_fields(char ***dst, char ***src, const size_t i, size_t *num)
 	if (tail) {
 		for (size_t t = i + 1; (*dst)[t]; t++)
 			tail[n++] = strdup((*dst)[t]);
-		tail[n] = (char *)NULL;
+		tail[n] = NULL;
 	}
 
 	/* 3. Append SRC fields, plus TAIL fields, to DST */
@@ -1565,7 +1565,7 @@ insert_fields(char ***dst, char ***src, const size_t i, size_t *num)
 	}
 
 	*num = sn;
-	d[c] = (char *)NULL;
+	d[c] = NULL;
 	return d;
 }
 
@@ -1587,12 +1587,12 @@ eln_expand(char ***substr, const size_t i)
 	/* If filename starts with a dash, and the command is external,
 	 * use the absolute path to the filename, to prevent the command from
 	 * taking the filename as a command option. */
-	char *abs_path = (char *)NULL;
+	char *abs_path = NULL;
 	if (file_info[j].name && *file_info[j].name == '-'
 	&& !is_internal_cmd((*substr)[0], ALL_CMDS, 1, 1))
 		abs_path = xrealpath(file_info[j].name, NULL);
 
-	char *esc_str = (char *)NULL;
+	char *esc_str = NULL;
 	if (conf.quoting_style == QUOTING_STYLE_BACKSLASH
 	|| is_internal_cmd((*substr)[0], ALL_CMDS, 1, 1) || is_number((*substr)[0]))
 		esc_str = escape_str(abs_path ? abs_path : file_info[j].name);
@@ -1657,7 +1657,7 @@ expand_sel(char ***substr)
 	/* 3. Add words after 'sel' as well */
 	for (i = (size_t)is_sel + 1; i <= args_n; i++)
 		sel_array[j++] = savestring((*substr)[i], strlen((*substr)[i]));
-	sel_array[j] = (char *)NULL;
+	sel_array[j] = NULL;
 
 	/* 4. Free the original input string and replace by the new sel_array */
 	for (i = 0; i <= args_n; i++)
@@ -1995,7 +1995,7 @@ expand_glob(char ***substr, const int *glob_array, const size_t glob_n)
 			if (SELFORPARENT(globbuf.gl_pathv[i]))
 				continue;
 
-			char *esc_str = (char *)NULL;
+			char *esc_str = NULL;
 			/* Escape the globbed filename and copy it */
 			if (virtual_dir == 1 && is_file_in_cwd(globbuf.gl_pathv[i])) {
 				char buf[PATH_MAX + 1]; *buf = '\0';
@@ -2019,7 +2019,7 @@ expand_glob(char ***substr, const int *glob_array, const size_t glob_n)
 		for (i = (size_t)glob_array[g] + old_pathc + 1; i <= args_n; i++)
 			glob_cmd[j++] = savestring((*substr)[i], strlen((*substr)[i]));
 
-		glob_cmd[j] = (char *)NULL;
+		glob_cmd[j] = NULL;
 
 		for (i = 0; i <= args_n; i++)
 			free((*substr)[i]);
@@ -2098,7 +2098,7 @@ expand_word(char ***substr, const int *word_array, const size_t word_n)
 			for (i = (size_t)word_array[w] + old_pathc + 1; i <= args_n; i++)
 				word_cmd[j++] = savestring((*substr)[i], strlen((*substr)[i]));
 
-			word_cmd[j] = (char *)NULL;
+			word_cmd[j] = NULL;
 
 			for (i = 0; i <= args_n; i++)
 				free((*substr)[i]);
@@ -2256,7 +2256,7 @@ expand_ranges(char ***substr)
 				ranges_cmd[j++] = savestring((*substr)[i], strlen((*substr)[i]));
 			}
 
-			ranges_cmd[j] = (char *)NULL;
+			ranges_cmd[j] = NULL;
 			free(ranges);
 
 			for (i = 0; i <= args_n; i++)
@@ -2305,7 +2305,7 @@ expand_regex(char ***substr)
 		/* At this point, all filenames are escaped. But check_regex()
 		 * needs unescaped filenames. So, let's deescape it. */
 		char *p = strchr((*substr)[i], '\\');
-		char *dstr = (char *)NULL;
+		char *dstr = NULL;
 		if (p)
 			dstr = unescape_str((*substr)[i], 0);
 
@@ -2360,7 +2360,7 @@ expand_regex(char ***substr)
 	}
 
 	if (n > 0) {
-		tmp[n] = (char *)NULL;
+		tmp[n] = NULL;
 
 		char **tmp_files = xnmalloc(n + 2, sizeof(char *));
 
@@ -2379,7 +2379,7 @@ expand_regex(char ***substr)
 				tmp_files[k++] = savestring(tmp[j], strlen(tmp[j]));
 			}
 		}
-		tmp_files[k] = (char *)NULL;
+		tmp_files[k] = NULL;
 
 		for (j = 0; (*substr)[j]; j++)
 			free((*substr)[j]);
@@ -2496,7 +2496,7 @@ gen_full_line(char **str, const int fusedcmd_ok)
 
 	char **cmd = xnmalloc(2, sizeof(char *));
 	cmd[0] = savestring(p, strlen(p));
-	cmd[1] = (char *)NULL;
+	cmd[1] = NULL;
 
 	if (fusedcmd_ok == 1)
 		free(*str);
@@ -2554,7 +2554,7 @@ check_chained_cmds(char *str)
 
 	const size_t str_len = strlen(str);
 	size_t len = 0, internal_ok = 0;
-	char *buf = (char *)NULL;
+	char *buf = NULL;
 
 	/* Get each word (cmd) in STR */
 	buf = xnmalloc(str_len + 1, sizeof(char));
@@ -2753,7 +2753,7 @@ parse_input_str(char *str)
 	if (args_n > 0 && *substr[args_n] == '&' && !*(substr[args_n] + 1)) {
 		bg_proc = 1;
 		free(substr[args_n]);
-		substr[args_n] = (char *)NULL;
+		substr[args_n] = NULL;
 		args_n--;
 	} else {
 		const size_t len = strlen(substr[args_n]);
@@ -2961,7 +2961,7 @@ parse_input_str(char *str)
 
 	/* #### NULL TERMINATE THE INPUT STRING ARRAY #### */
 	substr = xnrealloc(substr, args_n + 2, sizeof(char *));
-	substr[args_n + 1] = (char *)NULL;
+	substr[args_n + 1] = NULL;
 
 	const int is_action = is_action_name(substr[0]);
 	if (is_int_cmd == 0 && is_action == 0
@@ -3074,7 +3074,7 @@ parse_input_str(char *str)
 
 	/* #### NULL TERMINATE THE INPUT STRING ARRAY (again) #### */
 	substr = xnrealloc(substr, args_n + 2, sizeof(char *));
-	substr[args_n + 1] = (char *)NULL;
+	substr[args_n + 1] = NULL;
 
 	return substr;
 }
@@ -3088,7 +3088,7 @@ home_tilde(char *new_path, int *free_buf)
 {
 	*free_buf = 0;
 	if (home_ok == 0 || !new_path || !*new_path || !user.home)
-		return (char *)NULL;
+		return NULL;
 
 	/* If new_path == HOME */
 	if (new_path[1] && user.home[1] && new_path[1] == user.home[1]
@@ -3123,11 +3123,11 @@ char *
 savestring(const char *restrict str, const size_t size)
 {
 	if (!str)
-		return (char *)NULL;
+		return NULL;
 
 	char *ptr = malloc((size + 1) * sizeof(char));
 	if (!ptr)
-		return (char *)NULL;
+		return NULL;
 
 	const char *ret = memccpy(ptr, str, '\0', size + 1);
 	if (!ret)
@@ -3143,10 +3143,10 @@ char *
 escape_str(const char *str)
 {
 	if (!str)
-		return (char *)NULL;
+		return NULL;
 
 	size_t len = 0;
-	char *buf = (char *)NULL;
+	char *buf = NULL;
 
 	buf = xnmalloc(strlen(str) * 2 + 1, sizeof(char));
 
@@ -3197,7 +3197,7 @@ get_substr(char *str, const char ifs, const int fproc)
 	if (substr_n == 0)
 		return (char **)NULL;
 
-	substr[substr_n] = (char *)NULL;
+	substr[substr_n] = NULL;
 
 	if (fproc == 0)
 		return substr;
@@ -3237,7 +3237,7 @@ get_substr(char *str, const char ifs, const int fproc)
 
 	free(substr);
 
-	dstr[n] = (char *)NULL;
+	dstr[n] = NULL;
 	return dstr;
 }
 
@@ -3248,7 +3248,7 @@ unescape_str(char *text, int mt)
 {
 	UNUSED(mt);
 	if (!text || !*text)
-		return (char *)NULL;
+		return NULL;
 
 	/* At most, we need as many bytes as in TEXT (in case no escape
 	 * sequence is found). */

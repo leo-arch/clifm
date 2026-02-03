@@ -202,6 +202,7 @@ init_checks_struct(void)
 }
 
 #if !defined(_NO_ICONS)
+/* Create a list of hashes for file names associated to icons. */
 static void
 set_icon_name_hashes(void)
 {
@@ -212,6 +213,7 @@ set_icon_name_hashes(void)
 		name_icon_hashes[i] = hashme(icon_filenames[i].name, 0);
 }
 
+/* Create a list of hashes for directory names associated to icons. */
 static void
 set_dir_name_hashes(void)
 {
@@ -223,6 +225,7 @@ set_dir_name_hashes(void)
 }
 
 static void
+/* Create a list of hashes for file extensions associated to icons. */
 set_ext_name_hashes(void)
 {
 	size_t i = sizeof(icon_ext) / sizeof(icon_ext[0]);
@@ -230,6 +233,23 @@ set_ext_name_hashes(void)
 
 	for (; i-- > 0;)
 		ext_icon_hashes[i] = hashme(icon_ext[i].name, 0);
+
+#ifdef CHECK_ICONS
+	const size_t total = sizeof(icon_ext) / sizeof(icon_ext[0]);
+	size_t conflicts = 0;
+	for (i = 0; i < total; i++) {
+		for (size_t j = i + 1; j < total; j++) {
+			if (ext_icon_hashes[i] != ext_icon_hashes[j])
+				continue:
+			printf("%s conflicts with %s\n", icon_ext[i].name, icon_ext[j].name);
+			conflicts++;
+		}
+	}
+
+	printf("Number of icons: %zu\n", total);
+	printf("Icon conflicts:  %zu\n", conflicts);
+	press_any_key_to_continue(0);
+#endif
 }
 
 /* Set the icon field to the corresponding icon for the file file_info[N].name */
@@ -668,8 +688,8 @@ print_disk_usage(void)
 
 	const int free_percentage = (int)((free_s * 100) / (total > 0 ? total : 1));
 
-	char *devname = (char *)NULL;
-	char *fstype = (char *)NULL;
+	char *devname = NULL;
+	char *fstype = NULL;
 
 #ifdef _BE_POSIX
 	fstype = DEV_NO_NAME;
@@ -1291,7 +1311,7 @@ print_long_mode(size_t *counter, int *reset_pager, const int eln_len)
 			++(*counter);
 		}
 
-		char *ind_chr = (char *)NULL;
+		char *ind_chr = NULL;
 		const char *ind_chr_color = get_ind_char(i, &ind_chr);
 
 		if (conf_no_eln == 0) {
@@ -2301,7 +2321,7 @@ static void
 run_dir_cmd(const int mode, const char *dir)
 {
 	char dpath[PATH_MAX + 1];
-	const char *path = (char *)NULL;
+	const char *path = NULL;
 
 	if (mode == AUTOCMD_DIR_IN) {
 		if (!dir || !*dir)
@@ -2620,7 +2640,7 @@ list_dir_light(const int autocmd_ret)
 	/* Let's store information about the largest file in the list for the
 	 * disk usage analyzer mode. */
 	off_t largest_name_size = 0, total_size = 0;
-	char *largest_name = (char *)NULL, *largest_color = (char *)NULL;
+	char *largest_name = NULL, *largest_color = NULL;
 
 	if ((dir = opendir(workspaces[cur_ws].path)) == NULL) {
 		xerror("%s: %s: %s\n", PROGRAM_NAME, workspaces[cur_ws].path,
@@ -2855,7 +2875,7 @@ list_dir_light(const int autocmd_ret)
 		count++;
 	}
 
-	file_info[n].name = (char *)NULL;
+	file_info[n].name = NULL;
 	g_files_num = n;
 
 	if (checks.scanning == 1)
@@ -3420,8 +3440,8 @@ list_dir(void)
 	/* Let's store information about the largest file in the list for the
 	 * disk usage analyzer mode. */
 	off_t largest_name_size = 0, total_size = 0;
-	char *largest_name = (char *)NULL;
-	char *largest_color = (char *)NULL;
+	char *largest_name = NULL;
+	char *largest_color = NULL;
 
 	if ((dir = opendir(workspaces[cur_ws].path)) == NULL) {
 		xerror("%s: %s: %s\n", PROGRAM_NAME, workspaces[cur_ws].path,
@@ -3628,7 +3648,7 @@ list_dir(void)
 		file_info =
 			xnrealloc(file_info, (size_t)n + 1, sizeof(struct fileinfo)); */
 
-	file_info[n].name = (char *)NULL;
+	file_info[n].name = NULL;
 	g_files_num = n;
 
 	if (checks.scanning == 1)

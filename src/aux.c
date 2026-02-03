@@ -90,7 +90,7 @@ press_any_key_to_continue(const int init_newline)
 void
 print_file_name(char *fname, const int isdir)
 {
-	char *tmp_name = (char *)NULL;
+	char *tmp_name = NULL;
 	if (wc_xstrlen(fname) == 0)
 		tmp_name = replace_invalid_chars(fname);
 
@@ -115,13 +115,13 @@ char *
 xgetenv(const char *s, const int alloc)
 {
 	if (!s || !*s)
-		return (char *)NULL;
+		return NULL;
 
 	char *p = getenv(s);
 	if (p && *p)
 		return (alloc == 1 ? strdup(p) : p);
 
-	return (char *)NULL;
+	return NULL;
 }
 
 /* Print the regex error ERRCODE (returned by either regcomp(3) or regexec(3)),
@@ -222,10 +222,10 @@ set_fzf_preview_border_type(void)
 	fzf_preview_border_type = FZF_BORDER_ROUNDED; /* fzf default */
 
 	const char *p = (conf.fzftab_options && *conf.fzftab_options)
-		? strstr(conf.fzftab_options, "border-") : (char *)NULL;
+		? strstr(conf.fzftab_options, "border-") : NULL;
 	if (!p || !p[7]) {
 		const char *q = getenv("FZF_DEFAULT_OPTS");
-		p = q ? strstr(q, "border-") : (char *)NULL;
+		p = q ? strstr(q, "border-") : NULL;
 		if (!p || !p[7])
 			return;
 	}
@@ -281,7 +281,7 @@ void
 clear_term_img(void)
 {
 	static char fu[PATH_MAX + 1] = "";
-	char *p = (char *)NULL;
+	char *p = NULL;
 
 	if (!*fu) {
 		p = getenv("CLIFM_FIFO_UEBERZUG");
@@ -299,7 +299,7 @@ static char *
 find_digit(char *str)
 {
 	if (!str || !*str)
-		return (char *)NULL;
+		return NULL;
 
 	while (*str) {
 		if (*str >= '1' && *str <= '9')
@@ -307,7 +307,7 @@ find_digit(char *str)
 		str++;
 	}
 
-	return (char *)NULL;
+	return NULL;
 }
 
 /* Check whether a given command needs ELN's to be expanded/completed/suggested.
@@ -395,9 +395,9 @@ char *
 abbreviate_file_name(char *str)
 {
 	if (!str || !*str)
-		return (char *)NULL;
+		return NULL;
 
-	char *name = (char *)NULL;
+	char *name = NULL;
 	const size_t len = strlen(str);
 	const size_t wlen = (workspaces && workspaces[cur_ws].path)
 		? strlen(workspaces[cur_ws].path) : 0;
@@ -438,12 +438,12 @@ get_cwd(char *buf, const size_t buflen, const int check_workspace)
 	&& workspaces[cur_ws].path)
 		return workspaces[cur_ws].path;
 
-	char *tmp = xargs.secure_env_full != 1 ? getenv("PWD") : (char *)NULL;
+	char *tmp = xargs.secure_env_full != 1 ? getenv("PWD") : NULL;
 	if (tmp)
 		return tmp;
 
 	const char *ret = getcwd(buf, buflen);
-	tmp = (ret && *buf) ? buf : (char *)NULL;
+	tmp = (ret && *buf) ? buf : NULL;
 
 	return tmp;
 }
@@ -478,17 +478,17 @@ char *
 normalize_path(char *src, const size_t src_len)
 {
 	if (!src || !*src)
-		return (char *)NULL;
+		return NULL;
 
 	/* Deescape SRC */
-	char *tmp = (char *)NULL;
+	char *tmp = NULL;
 	const int is_escaped = *src == '\\';
 
 	if (strchr(src, '\\')) {
 		tmp = unescape_str(src, 0);
 		if (!tmp) {
 			xerror(_("%s: '%s': Error unescaping string\n"), PROGRAM_NAME, src);
-			return (char *)NULL;
+			return NULL;
 		}
 
 		const size_t tlen = strlen(tmp);
@@ -497,7 +497,7 @@ normalize_path(char *src, const size_t src_len)
 
 		xstrsncpy(src, tmp, tlen + 1);
 		free(tmp);
-		tmp = (char *)NULL;
+		tmp = NULL;
 	}
 
 	/* Expand tilde */
@@ -505,7 +505,7 @@ normalize_path(char *src, const size_t src_len)
 		tmp = tilde_expand(src);
 		if (!tmp) {
 			xerror(_("%s: '%s': Error expanding tilde\n"), PROGRAM_NAME, src);
-			return (char *)NULL;
+			return NULL;
 		}
 		const size_t tlen = strlen(tmp);
 		if (tlen > 1 && tmp[tlen - 1] == '/')
@@ -519,7 +519,7 @@ normalize_path(char *src, const size_t src_len)
 	const size_t l = tmp ? strlen(tmp) : src_len;
 
 	/* Resolve references to . and .. */
-	char *res = (char *)NULL;
+	char *res = NULL;
 	size_t res_len = 0;
 
 	if (l == 0 || *s != '/') {
@@ -529,7 +529,7 @@ normalize_path(char *src, const size_t src_len)
 		if (!cwd || !*cwd) {
 			xerror(_("%s: Error getting current directory\n"), PROGRAM_NAME);
 			free(tmp);
-			return (char *)NULL;
+			return NULL;
 		}
 
 		const size_t pwd_len = strlen(cwd);
@@ -722,7 +722,7 @@ xreadlink(const int fd, char *restrict path, char *restrict buf,
 		rem_slash = 1;
 	}
 
-	char *p = (char *)NULL;
+	char *p = NULL;
 	if (*buf != '/' && (p = strrchr(path, '/'))) { /* Relative link */
 		*p = '\0';
 
@@ -945,7 +945,7 @@ hex2rgb(const char *hex)
 {
 	int attr = -1, r = 0, g = 0, b = 0;
 	if (get_rgb(hex, &attr, &r, &g, &b) == -1)
-		return (char *)NULL;
+		return NULL;
 
 	if (attr == -1) /* No attribute */
 		snprintf(tmp_color, sizeof(tmp_color), "38;2;%d;%d;%d", r, g, b);
@@ -1004,10 +1004,10 @@ get_cmd_path(const char *cmd)
 	errno = 0;
 	if (!cmd || !*cmd) {
 		errno = EINVAL;
-		return (char *)NULL;
+		return NULL;
 	}
 
-	char *cmd_path = (char *)NULL;
+	char *cmd_path = NULL;
 
 	if (*cmd == '~') {
 		char *p = tilde_expand(cmd);
@@ -1041,7 +1041,7 @@ get_cmd_path(const char *cmd)
 
 	errno = ENOENT;
 	free(cmd_path);
-	return (char *)NULL;
+	return NULL;
 }
 
 /* Same thing as get_cmd_path(), but returns 1 in case of success or 0
@@ -1285,7 +1285,7 @@ char *
 url_encode(const char *str, const int file_uri)
 {
 	if (!str || !*str)
-		return (char *)NULL;
+		return NULL;
 
 	const size_t len = (strlen(str) * 3) + 1 + (file_uri == 1 ? 7 : 0);
 	char *buf = xnmalloc(len, sizeof(char));
@@ -1331,7 +1331,7 @@ char *
 url_decode(const char *str)
 {
 	if (!str || !*str)
-		return (char *)NULL;
+		return NULL;
 
 	char *buf = xnmalloc(strlen(str) + 1, sizeof(char));
 	/* The decoded string will be at most as long as the encoded string. */

@@ -43,7 +43,7 @@ get_ext_info_long(const struct fileinfo *props, const size_t name_len,
 {
 	/* At this point, TRUNC is set to TRUNC_NO_EXT and EXT_LEN to zero. */
 	if (!props->ext_name)
-		return (char *)NULL;
+		return NULL;
 
 	if (props->utf8 == 0)
 		*ext_len = name_len - (size_t)(props->ext_name - props->name);
@@ -105,7 +105,7 @@ construct_and_print_filename(const struct fileinfo *props,
 
 	/* Handle filenames with embedded control characters. */
 	size_t plen = props->len;
-	char *wname = (char *)NULL;
+	char *wname = NULL;
 	if (plen == 0) {
 		wname = replace_invalid_chars(props->name);
 		plen = wc_xstrlen(wname);
@@ -120,7 +120,7 @@ construct_and_print_filename(const struct fileinfo *props,
 
 	int diff = 0;
 	char *name = wname ? wname : props->name;
-	char *ext_name = (char *)NULL;
+	char *ext_name = NULL;
 
 	if (cur_len > (size_t)max_namelen) {
 		const int rest = (int)cur_len - max_namelen;

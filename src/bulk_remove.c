@@ -264,7 +264,7 @@ get_files_from_tmp_file(const char *tmpfile, const char *target, const filesn_t 
 		tmp_files[i++] = savestring(line, len);
 	}
 
-	tmp_files[i] = (char *)NULL;
+	tmp_files[i] = NULL;
 	fclose(fp);
 
 	return tmp_files;
@@ -303,7 +303,7 @@ get_remove_files(const char *target, char **tmp_files,
 			}
 		}
 
-		rem_files[j] = (char *)NULL;
+		rem_files[j] = NULL;
 		return rem_files;
 	}
 
@@ -323,7 +323,7 @@ get_remove_files(const char *target, char **tmp_files,
 	}
 
 	free(*a);
-	rem_files[j] = (char *)NULL;
+	rem_files[j] = NULL;
 
 	return rem_files;
 }
@@ -389,8 +389,8 @@ bulk_remove(char *s1, char *s2)
 		return FUNC_SUCCESS;
 	}
 
-	char *app = (char *)NULL;
-	char *target = (char *)NULL;
+	char *app = NULL;
+	char *target = NULL;
 	int fd = 0, ret = 0, i = 0;
 	filesn_t n = 0;
 
@@ -409,7 +409,7 @@ bulk_remove(char *s1, char *s2)
 		return ret;
 
 	struct stat attr;
-	char *tmp_file = (char *)NULL;
+	char *tmp_file = NULL;
 	if ((ret = create_tmp_file(&tmp_file, &fd, &attr)) != FUNC_SUCCESS)
 		return ret;
 

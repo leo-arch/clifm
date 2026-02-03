@@ -304,10 +304,10 @@ dump_config(void)
 		"default, the entry is highlighted and the default value is displayed "
 		"in square brackets.\n"));
 
-	char *start_path = (char *)NULL, *ws_names = (char *)NULL;
+	char *start_path = NULL, *ws_names = NULL;
 	get_start_path_and_ws_names(&start_path, &ws_names);
 
-	char *s = (char *)NULL;
+	char *s = NULL;
 	int n = 0;
 
 	n = DEF_APPARENT_SIZE;
@@ -867,7 +867,7 @@ set_sel_file(void)
 
 	if (sel_file) {
 		free(sel_file);
-		sel_file = (char *)NULL;
+		sel_file = NULL;
 	}
 
 	if (!config_dir)
@@ -1273,7 +1273,7 @@ create_actions_file(char *file)
 static char *
 define_tmp_rootdir(int *from_env)
 {
-	char *temp = (char *)NULL;
+	char *temp = NULL;
 	*from_env = 1;
 
 	if (xargs.secure_env != 1 && xargs.secure_env_full != 1) {
@@ -1440,9 +1440,8 @@ set_main_config_dir(const int secure_mode)
 		return;
 	}
 
-	char *env = secure_mode == 0 ? getenv("XDG_CONFIG_HOME") : (char *)NULL;
-	char *home_env = (env && *env) ? normalize_path(env, strlen(env))
-		: (char *)NULL;
+	char *env = secure_mode == 0 ? getenv("XDG_CONFIG_HOME") : NULL;
+	char *home_env = (env && *env) ? normalize_path(env, strlen(env)) : NULL;
 
 	if (home_env && *home_env) {
 		const size_t len = strlen(home_env) + (sizeof(PROGRAM_NAME) - 1) + 2;
@@ -1503,9 +1502,9 @@ set_main_config_file(void)
 static void
 set_hist_file(const int secure_mode, const size_t tmp_len)
 {
-	char *env_val = secure_mode == 0 ? getenv("CLIFM_HISTFILE") : (char *)NULL;
+	char *env_val = secure_mode == 0 ? getenv("CLIFM_HISTFILE") : NULL;
 	char *hist_env = (env_val && *env_val)
-		? normalize_path(env_val, strlen(env_val)) : (char *)NULL;
+		? normalize_path(env_val, strlen(env_val)) : NULL;
 
 	const size_t hist_len =
 		(hist_env && *hist_env) ? strlen(hist_env) + 1 : tmp_len;
@@ -1582,7 +1581,7 @@ set_thumbnails_dir(void)
 
 	const int se = (xargs.secure_env == 1 || xargs.secure_env_full == 1);
 
-	const char *p = se == 0 ? getenv("XDG_CACHE_HOME") : (char *)NULL;
+	const char *p = se == 0 ? getenv("XDG_CACHE_HOME") : NULL;
 	if ((!p || !*p) && (!user.home || !*user.home))
 		return;
 
@@ -2607,7 +2606,7 @@ static char *
 get_line_value(char *line)
 {
 	if (!line || *line < ' ') /* Skip non-printable chars */
-		return (char *)NULL;
+		return NULL;
 
 	return remove_quotes(line);
 }
@@ -2626,7 +2625,7 @@ set_time_style(char *line, char **str, const int ptime)
 		return;
 
 	free(*str);
-	*str = (char *)NULL;
+	*str = NULL;
 
 	if (*tmp == 'r' && strcmp(tmp + 1, "elative") == 0) {
 		if (ptime == 0) conf.relative_time = 1;
@@ -2885,7 +2884,7 @@ free_workspace_names(void)
 		int i = MAX_WS;
 		while (--i >= 0) {
 			free(workspaces[i].name);
-			workspaces[i].name = (char *)NULL;
+			workspaces[i].name = NULL;
 		}
 	}
 }
@@ -2895,12 +2894,12 @@ free_workspace_names(void)
 void
 set_workspace_names(char *line)
 {
-	char *e = (char *)NULL;
+	char *e = NULL;
 	char *t = remove_quotes(line);
 	if (!t || !*t)
 		return;
 
-	char *p = (char *)NULL;
+	char *p = NULL;
 	while (*t) {
 		p = strchr(t, ',');
 		if (p)
@@ -3027,7 +3026,7 @@ set_histignore_pattern(char *str)
 	if (conf.histignore_regex) {
 		regfree(&regex_hist);
 		free(conf.histignore_regex);
-		conf.histignore_regex = (char *)NULL;
+		conf.histignore_regex = NULL;
 	}
 
 	int ret = regcomp(&regex_hist, pattern, REG_NOSUB | REG_EXTENDED);
@@ -3055,7 +3054,7 @@ set_dirhistignore_pattern(char *str)
 	if (conf.dirhistignore_regex) {
 		regfree(&regex_dirhist);
 		free(conf.dirhistignore_regex);
-		conf.dirhistignore_regex = (char *)NULL;
+		conf.dirhistignore_regex = NULL;
 	}
 
 	int ret = regcomp(&regex_dirhist, pattern, REG_NOSUB | REG_EXTENDED);
@@ -3135,7 +3134,7 @@ static char *
 get_term_env(const char *cmd)
 {
 	if (!cmd || !*cmd)
-		return (char *)NULL;
+		return NULL;
 
 	char *s = strchr(cmd, ' ');
 	if (s)
@@ -3146,7 +3145,7 @@ get_term_env(const char *cmd)
 	if (s)
 		*s = ' ';
 
-	char *buf = (char *)NULL;
+	char *buf = NULL;
 	if (env && *env) {
 		const size_t len = strlen(env) + (s ? strlen(s) : 0) + 1;
 		buf = xnmalloc(len, sizeof(char));
@@ -3167,7 +3166,7 @@ set_term_cmd(char *cmd)
 		return;
 
 	char *val = tmp;
-	char *buf = (char *)NULL;
+	char *buf = NULL;
 
 	if (*tmp == '$' && tmp[1] && xargs.secure_env != 1
 	&& xargs.secure_env_full != 1) {
@@ -3420,7 +3419,7 @@ set_filename_filter(void)
 	err('w', PRINT_PROMPT, _("%s: '%s': Invalid regular "
 		"expression\n"), PROGRAM_NAME, filter.str);
 	free(filter.str);
-	filter.str = (char *)NULL;
+	filter.str = NULL;
 	regfree(&regex_exp);
 }
 
@@ -4207,7 +4206,7 @@ get_fzf_win_height_and_preview(void)
 	if (conf.fzf_preview == UNSET && strstr(p, "--preview "))
 		conf.fzf_preview = FZF_EXTERNAL_PREVIEWER;
 
-	char *b = (char *)NULL;
+	char *b = NULL;
 	if ((b = strstr(p, "--height")) != NULL)
 		fzf_height_value = get_fzf_height(b + (sizeof("--height") - 1));
 
@@ -4264,8 +4263,8 @@ set_trash_dirs(void)
 			return;
 		}
 
-		char *env = (char *)NULL;
-		char *data_home = (char *)NULL;
+		char *env = NULL;
+		char *data_home = NULL;
 		if (xargs.secure_env != 1 && xargs.secure_env_full != 1
 		&& (env = getenv("XDG_DATA_HOME")) && *env
 		&& (data_home = normalize_path(env, strlen(env))) && *data_home) {
@@ -4298,22 +4297,22 @@ set_trash_dirs(void)
 static void
 undef_config_file_names(void)
 {
-	free(config_dir_gral); config_dir_gral = (char *)NULL;
-	free(config_dir); config_dir = (char *)NULL;
-	free(tags_dir); tags_dir = (char *)NULL;
-	free(kbinds_file); kbinds_file = (char *)NULL;
-	free(colors_dir); colors_dir = (char *)NULL;
-	free(plugins_dir); plugins_dir = (char *)NULL;
-	free(dirhist_file); dirhist_file = (char *)NULL;
-	free(bm_file); bm_file = (char *)NULL;
-	free(msgs_log_file); msgs_log_file = (char *)NULL;
-	free(cmds_log_file); cmds_log_file = (char *)NULL;
-	free(hist_file); hist_file = (char *)NULL;
-	free(config_file); config_file = (char *)NULL;
-	free(profile_file); profile_file = (char *)NULL;
-	free(mime_file); mime_file = (char *)NULL;
-	free(actions_file); actions_file = (char *)NULL;
-	free(remotes_file); remotes_file = (char *)NULL;
+	free(config_dir_gral); config_dir_gral = NULL;
+	free(config_dir); config_dir = NULL;
+	free(tags_dir); tags_dir = NULL;
+	free(kbinds_file); kbinds_file = NULL;
+	free(colors_dir); colors_dir = NULL;
+	free(plugins_dir); plugins_dir = NULL;
+	free(dirhist_file); dirhist_file = NULL;
+	free(bm_file); bm_file = NULL;
+	free(msgs_log_file); msgs_log_file = NULL;
+	free(cmds_log_file); cmds_log_file = NULL;
+	free(hist_file); hist_file = NULL;
+	free(config_file); config_file = NULL;
+	free(profile_file); profile_file = NULL;
+	free(mime_file); mime_file = NULL;
+	free(actions_file); actions_file = NULL;
+	free(remotes_file); remotes_file = NULL;
 }
 
 /* Set up Clifm directories and config files. Load the user's
@@ -4403,7 +4402,7 @@ free_regex_filters(void)
 	if (filter.str && filter.env == 0) {
 		regfree(&regex_exp);
 		free(filter.str);
-		filter.str = (char *)NULL;
+		filter.str = NULL;
 		filter.rev = 0;
 		filter.type = FILTER_NONE;
 	}
@@ -4411,13 +4410,13 @@ free_regex_filters(void)
 	if (conf.histignore_regex) {
 		regfree(&regex_hist);
 		free(conf.histignore_regex);
-		conf.histignore_regex = (char *)NULL;
+		conf.histignore_regex = NULL;
 	}
 
 	if (conf.dirhistignore_regex) {
 		regfree(&regex_dirhist);
 		free(conf.dirhistignore_regex);
-		conf.dirhistignore_regex = (char *)NULL;
+		conf.dirhistignore_regex = NULL;
 	}
 }
 
@@ -4439,62 +4438,62 @@ reset_variables(void)
 	free(conf.time_str);
 	free(conf.ptime_str);
 	free(conf.priority_sort_char);
-	conf.time_str = conf.ptime_str = conf.priority_sort_char = (char *)NULL;
+	conf.time_str = conf.ptime_str = conf.priority_sort_char = NULL;
 
 	free(conf.usr_cscheme);
-	conf.usr_cscheme = (char *)NULL;
+	conf.usr_cscheme = NULL;
 
 	free(config_dir_gral);
 	free(config_dir);
-	config_dir = config_dir_gral = (char *)NULL;
+	config_dir = config_dir_gral = NULL;
 
 #ifndef _NO_TRASH
 	free(trash_dir);
 	free(trash_files_dir);
 	free(trash_info_dir);
-	trash_dir = trash_files_dir = trash_info_dir = (char *)NULL;
+	trash_dir = trash_files_dir = trash_info_dir = NULL;
 #endif /* !_NO_TRASH */
 
 	free(bm_file);
 	free(msgs_log_file);
 	free(cmds_log_file);
-	bm_file = msgs_log_file = cmds_log_file = (char *)NULL;
+	bm_file = msgs_log_file = cmds_log_file = NULL;
 
 	free(hist_file);
 	free(dirhist_file);
-	hist_file = dirhist_file = (char *)NULL;
+	hist_file = dirhist_file = NULL;
 
 	free(config_file);
 	free(profile_file);
-	config_file = profile_file = (char *)NULL;
+	config_file = profile_file = NULL;
 
 	free(mime_file);
 	free(plugins_dir);
 	free(actions_file);
 	free(kbinds_file);
-	mime_file = plugins_dir = actions_file = kbinds_file = (char *)NULL;
+	mime_file = plugins_dir = actions_file = kbinds_file = NULL;
 
 	free(plugins_helper_file);
-	plugins_helper_file = (char *)NULL;
+	plugins_helper_file = NULL;
 
 	free(colors_dir);
 	free(tmp_dir);
 	free(sel_file);
 	free(remotes_file);
-	tmp_dir = colors_dir = sel_file = remotes_file = (char *)NULL;
+	tmp_dir = colors_dir = sel_file = remotes_file = NULL;
 
 #ifndef _NO_SUGGESTIONS
 	free(suggestion_buf);
 	free(conf.suggestion_strategy);
-	suggestion_buf = conf.suggestion_strategy = (char *)NULL;
+	suggestion_buf = conf.suggestion_strategy = NULL;
 #endif /* !_NO_SUGGESTIONS */
 
 	free(conf.fzftab_options);
 	free(tags_dir);
 	free(conf.wprompt_str);
-	conf.fzftab_options = tags_dir = conf.wprompt_str = (char *)NULL;
+	conf.fzftab_options = tags_dir = conf.wprompt_str = NULL;
 	free(conf.welcome_message_str);
-	conf.welcome_message_str = (char *)NULL;
+	conf.welcome_message_str = NULL;
 
 	free_autocmds(1);
 	free_tags();
@@ -4505,7 +4504,7 @@ reset_variables(void)
 	free(conf.opener);
 	free(conf.encoded_prompt);
 	free(conf.term);
-	conf.opener = conf.encoded_prompt = conf.term = (char *)NULL;
+	conf.opener = conf.encoded_prompt = conf.term = NULL;
 
 	init_conf_struct();
 	free_workspaces_filters();

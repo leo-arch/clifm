@@ -105,7 +105,7 @@ calculate_bonus_credit(const char *entry, const char *query, int *keep)
 
 	int bonus = 0;
 
-	const char *tmp = query ? strrchr(entry, '/') : (char *)NULL;
+	const char *tmp = query ? strrchr(entry, '/') : NULL;
 	if (tmp && *(++tmp)) {
 		if (strstr(tmp, query))
 			bonus += BASENAME_BONUS;
@@ -158,7 +158,7 @@ rank_entry(const size_t i, const time_t now, int *days_since_first,
 	int rank = calculate_base_credit(*days_since_first, *hours_since_last,
 		jump_db[i].visits, &keep);
 
-	rank += calculate_bonus_credit(jump_db[i].path, (char *)NULL, &keep);
+	rank += calculate_bonus_credit(jump_db[i].path, NULL, &keep);
 	if (jump_db[i].keep == JUMP_ENTRY_PERMANENT)
 		rank += PERMANENT_BONUS;
 	else
@@ -191,7 +191,7 @@ add_new_jump_entry(const char *dir, const size_t dir_len)
 	jump_db[jump_n].len = dir_len;
 	jump_db[jump_n++].path = savestring(dir, dir_len);
 
-	jump_db[jump_n].path = (char *)NULL;
+	jump_db[jump_n].path = NULL;
 	jump_db[jump_n].len = 0;
 	jump_db[jump_n].visits = 0;
 	jump_db[jump_n].rank = 0;
@@ -465,7 +465,7 @@ print_jump_table(const int reduce, const time_t now)
 
 	for (size_t i = 0; i < jump_n; i++) {
 		if (!IS_VALID_JUMP_ENTRY(i)) {
-			tmp_jump[i].path = (char *)NULL;
+			tmp_jump[i].path = NULL;
 			continue;
 		}
 
@@ -693,7 +693,7 @@ get_needle(const char *needle, const char *match, const char *query,
 #endif /* _BE_POSIX */
 
 	if (!ret || ((segment & LAST_SEGMENT) && strchr(ret, '/')))
-		return (char *)NULL;
+		return NULL;
 
 	if (segment & FIRST_SEGMENT) {
 		const char p = *ret;
@@ -701,7 +701,7 @@ get_needle(const char *needle, const char *match, const char *query,
 
 		if (strrchr(match, '/') != match) {
 			*ret = p;
-			return (char *)NULL;
+			return NULL;
 		}
 
 		*ret = p;
@@ -891,7 +891,7 @@ dirjump(char **args, const int mode)
 		else {
 			for (j = match; j-- > 0;) {
 				if (!entry[j].match || !*entry[j].match) {
-					entry[j].match = (char *)NULL;
+					entry[j].match = NULL;
 					continue;
 				}
 
@@ -899,7 +899,7 @@ dirjump(char **args, const int mode)
 					entry[j].match, args[i], segment);
 
 				if (!needle) {
-					entry[j].match = (char *)NULL;
+					entry[j].match = NULL;
 					continue;
 				}
 
@@ -914,7 +914,7 @@ dirjump(char **args, const int mode)
 	 * the best ranked directory will be returned. */
 
 	int found = 0, exit_status = FUNC_FAILURE, max = -1;
-	char *best_ranked = (char *)NULL;
+	char *best_ranked = NULL;
 
 	for (j = match; j-- > 0;) {
 		if (!entry[j].match)

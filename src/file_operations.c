@@ -905,17 +905,17 @@ get_new_link_target(char *cur_target)
 	char n_prompt[NAME_MAX];
 	snprintf(n_prompt, sizeof(n_prompt), "\001%s\002>\001%s\002 ", mi_c, tx_c);
 
-	char *new_target = (char *)NULL;
+	char *new_target = NULL;
 	while (!new_target) {
 		int quoted = 0;
 		new_target = get_newname(n_prompt, cur_target, &quoted);
 		UNUSED(quoted);
 
 		if (!new_target) /* The user pressed Ctrl+d */
-			return (char *)NULL;
+			return NULL;
 	}
 
-	char *tmp = (char *)NULL;
+	char *tmp = NULL;
 	if (*new_target == '~' && (tmp = tilde_expand(new_target))) {
 		free(new_target);
 		new_target = tmp;
@@ -1131,7 +1131,7 @@ gen_relative_target(char *link_name, char *target)
 	char *norm_link = normalize_path(link_name, strlen(link_name));
 	if (!norm_link) {
 		xerror(_("link: '%s': Error normalizing path\n"), link_name);
-		return (char *)NULL;
+		return NULL;
 	}
 
 	char *p = strrchr(norm_link, '/');
@@ -1142,7 +1142,7 @@ gen_relative_target(char *link_name, char *target)
 	if (!norm_target) {
 		free(norm_link);
 		xerror(_("link: '%s': Error normalizing path\n"), target);
-		return (char *)NULL;
+		return NULL;
 	}
 
 	char *resolved_target = xnmalloc(PATH_MAX + 1, sizeof(char));
@@ -1154,7 +1154,7 @@ gen_relative_target(char *link_name, char *target)
 
 	if (ret != 0) {
 		free(resolved_target);
-		return (char *)NULL;
+		return NULL;
 	}
 
 	return resolved_target;
@@ -1294,7 +1294,7 @@ vv_rename_files(char **args, const size_t copied)
 		tmp[c++] = savestring(p, strnlen(p, sizeof(p)));
 	}
 
-	tmp[c] = (char *)NULL;
+	tmp[c] = NULL;
 
 	size_t renamed = 0;
 	const int ret = bulk_rename(tmp, &renamed, 0);
@@ -1363,18 +1363,18 @@ get_new_filename(char *cur_name)
 	snprintf(n_prompt, sizeof(n_prompt), _("Enter new name (Ctrl+d to quit)\n"
 		"\001%s\002>\001%s\002 "), mi_c, tx_c);
 
-	char *new_name = (char *)NULL;
+	char *new_name = NULL;
 	while (!new_name) {
 		int quoted = 0;
 		new_name = get_newname(n_prompt, cur_name, &quoted);
 		UNUSED(quoted);
 
 		if (!new_name) /* The user pressed Ctrl+d */
-			return (char *)NULL;
+			return NULL;
 
 		if (is_blank_name(new_name) == 1) {
 			free(new_name);
-			new_name = (char *)NULL;
+			new_name = NULL;
 		}
 	}
 
@@ -1426,7 +1426,7 @@ get_rename_dest_filename(char *name, int *status)
 {
 	if (!name || !*name) {
 		*status = EINVAL;
-		return (char *)NULL;
+		return NULL;
 	}
 
 	/* Check source file existence. */
@@ -1439,14 +1439,14 @@ get_rename_dest_filename(char *name, int *status)
 		*status = errno;
 		alt_prompt = 0;
 		xerror("m: '%s': %s\n", name, strerror(errno));
-		return (char *)NULL;
+		return NULL;
 	}
 
 	/* Get destination filename. */
 	char *new_name = get_new_filename(name);
 	if (!new_name) { /* The user pressed Ctrl+d */
 		*status = FUNC_SUCCESS;
-		return (char *)NULL;
+		return NULL;
 	}
 
 	if (validate_filename(&new_name, 0) == 0) {
@@ -1510,7 +1510,7 @@ construct_cp_mv_cmd(char **cmd, char *new_name, int *cwd, const size_t force)
 		n++;
 	}
 
-	tcmd[n] = (char *)NULL;
+	tcmd[n] = NULL;
 	return tcmd;
 }
 
@@ -1638,7 +1638,7 @@ cp_mv_file(char **args, const int copy_and_rename, const int force)
 		return ret == -1 ? FUNC_SUCCESS : FUNC_FAILURE;
 
 	/* m command */
-	char *new_name = (char *)NULL;
+	char *new_name = NULL;
 	if (IS_MVCMD(args[0]) && args[1]) {
 		const size_t len = strlen(args[1]);
 		if (len > 0 && args[1][len - 1] == '/')
@@ -1863,7 +1863,7 @@ remove_files(char **args)
 		free(tmp);
 	}
 
-	rm_cmd[j] = info[j].name = (char *)NULL;
+	rm_cmd[j] = info[j].name = NULL;
 
 	if (j == 3) { /* No file to be deleted */
 		free(rm_cmd);
@@ -1926,7 +1926,7 @@ export_files(char **filenames, const int open)
 	if (fd == -1) {
 		xerror("exp: '%s': %s\n", tmp_file, strerror(errno));
 		free(tmp_file);
-		return (char *)NULL;
+		return NULL;
 	}
 
 	FILE *fp = fdopen(fd, "w");
@@ -1936,7 +1936,7 @@ export_files(char **filenames, const int open)
 			xerror("exp: unlink: '%s': %s\n", tmp_file, strerror(errno));
 		close(fd);
 		free(tmp_file);
-		return (char *)NULL;
+		return NULL;
 	}
 
 	/* If no argument, export files in CWD. */
@@ -1978,7 +1978,7 @@ export_files(char **filenames, const int open)
 	if (unlinkat(XAT_FDCWD, tmp_file, 0) == -1)
 		xerror("exp: unlink: '%s': %s\n", tmp_file, strerror(errno));
 	free(tmp_file);
-	return (char *)NULL;
+	return NULL;
 }
 
 /* Create a symlink in CWD for each filename in ARGS.

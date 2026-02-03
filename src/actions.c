@@ -42,7 +42,7 @@ get_plugin_path(char *action, int *status)
 	if (action_len > 0 && action[action_len - 1] == '\n')
 		action[action_len - 1] = '\0';
 
-	char *cmd = (char *)NULL;
+	char *cmd = NULL;
 	int dir_path = 0;
 	size_t cmd_len = 0;
 
@@ -53,7 +53,7 @@ get_plugin_path(char *action, int *status)
 		if (!plugins_dir || !*plugins_dir) {
 			xerror("%s\n", _("actions: Plugins directory not defined"));
 			*status = FUNC_FAILURE;
-			return (char *)NULL;
+			return NULL;
 		}
 
 		cmd_len = action_len + strlen(plugins_dir) + 2;
@@ -79,7 +79,7 @@ get_plugin_path(char *action, int *status)
 	free(cmd);
 	*status = ENOENT;
 	xerror("actions: '%s': %s\n", action, strerror(ENOENT));
-	return (char *)NULL;
+	return NULL;
 }
 
 static void

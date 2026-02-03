@@ -135,7 +135,7 @@ check_completion_mode(void)
 	}
 
 	/* The user asked for a specific mode, but the binary wasn't found. */
-	char *err_name = (char *)NULL;
+	char *err_name = NULL;
 	if (!(bin_flags & FZF_BIN_OK) && tabmode == FZF_TAB) {
 		err_name = "fzf"; tabmode = STD_TAB;
 	} else if (!(bin_flags & FNF_BIN_OK) && tabmode == FNF_TAB) {
@@ -367,7 +367,7 @@ get_sudo_path(void)
 {
 	if (!sudo_cmd) {
 		errno = ENOENT;
-		return (char *)NULL;
+		return NULL;
 	}
 
 	char *sudo_path = get_cmd_path(sudo_cmd);
@@ -376,7 +376,7 @@ get_sudo_path(void)
 	if (!sudo_path) {
 		xerror("%s: '%s': %s\n", PROGRAM_NAME, sudo_cmd, strerror(ENOENT));
 		errno = ret;
-		return (char *)NULL;
+		return NULL;
 	}
 
 	return sudo_path;
@@ -646,7 +646,7 @@ check_for_alias(char **args)
 			}
 		}
 
-		alias_cmd[args_n + 1] = (char *)NULL;
+		alias_cmd[args_n + 1] = NULL;
 
 		/* Free the original command. */
 		for (j = 0; args[j]; j++)
@@ -667,7 +667,7 @@ truncate_file(const char *file, const int max, const int check_dups)
 	if (config_ok == 0 || !file || !*file)
 		return;
 
-	char *tmp_name = (char *)NULL;
+	char *tmp_name = NULL;
 	FILE *orig_fp = (FILE *)NULL;
 	int orig_fd = 0;
 	struct stat attr;
@@ -734,9 +734,9 @@ truncate_file(const char *file, const int max, const int check_dups)
 
 	int i = 1;
 	size_t line_size = 0;
-	char *line = (char *)NULL;
+	char *line = NULL;
 	ssize_t line_len = 0;
-	char *prev_line = (char *)NULL;
+	char *prev_line = NULL;
 	ssize_t prev_line_len = 0;
 
 	while ((line_len = getline(&line, &line_size, orig_fp)) > 0) {

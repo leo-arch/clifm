@@ -29,7 +29,7 @@ check_hash_conflicts(void)
 static char *
 get_mimetypes_file(void)
 {
-	char *p = (char *)NULL;
+	char *p = NULL;
 
 	if (xargs.secure_env != 1 && xargs.secure_env_full != 1) {
 		p = getenv("CLIFM_MIMETYPES_FILE");
@@ -38,7 +38,7 @@ get_mimetypes_file(void)
 	}
 
 	if (!user.home || !*user.home)
-		return (char *)NULL;
+		return NULL;
 
 	const size_t len = user.home_len + 13;
 	p = xnmalloc(len, sizeof(char));
@@ -126,8 +126,8 @@ parse_shared_mime_info_db(FILE *fp)
 		return;
 	}
 
-	user_mimetypes[n].mimetype = (char *)NULL;
-	user_mimetypes[n].ext = (char *)NULL;
+	user_mimetypes[n].mimetype = NULL;
+	user_mimetypes[n].ext = NULL;
 	user_mimetypes[n].ext_hash = 0;
 
 	if (n != buf_size) {
@@ -172,7 +172,7 @@ parse_mime_types_file(FILE *fp)
 
 		const size_t mime_len = strlen(mimetype);
 
-		char *ext = (char *)NULL;
+		char *ext = NULL;
 		while ((ext = strtok(NULL, " \t")) != NULL) {
 			if (n + 1 >= buf_size) {
 				buf_size *= 2;
@@ -199,8 +199,8 @@ parse_mime_types_file(FILE *fp)
 		return;
 	}
 
-	user_mimetypes[n].mimetype = (char *)NULL;
-	user_mimetypes[n].ext = (char *)NULL;
+	user_mimetypes[n].mimetype = NULL;
+	user_mimetypes[n].ext = NULL;
 	user_mimetypes[n].ext_hash = 0;
 
 	if (n != buf_size) {

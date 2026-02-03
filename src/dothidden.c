@@ -93,7 +93,7 @@ load_dothidden(void)
 		globfree(&gbuf);
 	}
 
-	h[counter].name = (char *)NULL;
+	h[counter].name = NULL;
 	h[counter].len = 0;
 
 	fclose(fp);

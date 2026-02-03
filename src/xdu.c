@@ -225,7 +225,7 @@ dir_size(char *dir, const int size_in_bytes, int *status)
 	close(fd);
 
 	if (bin_flags & (GNU_DU_BIN_DU | GNU_DU_BIN_GDU)) {
-		char *block_size = (char *)NULL;
+		char *block_size = NULL;
 
 		if (size_in_bytes == 1) {
 			block_size = "--block-size=1";

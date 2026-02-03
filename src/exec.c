@@ -183,7 +183,7 @@ static char *
 construct_shell_cmd(char **args)
 {
 	if (!args || !args[0])
-		return (char *)NULL;
+		return NULL;
 
 	/* If the command starts with either ':' or ';', it has bypassed all clifm
 	 * expansions. At this point we don't care about it: skip this char. */
@@ -690,7 +690,7 @@ opener_function(const char *arg)
 	}
 
 	free(conf.opener);
-	conf.opener = (char *)NULL;
+	conf.opener = NULL;
 
 	if (strcmp(arg, "default") != 0 && strcmp(arg, "lira") != 0)
 		conf.opener = savestring(arg, strlen(arg));
@@ -1184,7 +1184,7 @@ check_auto_first(char **args)
 	if (!(flags & FIRST_WORD_IS_ELN) && is_internal_cmd(args[0], ALL_CMDS, 1, 1))
 		return (-1);
 
-	char *deq_str = (char *)NULL;
+	char *deq_str = NULL;
 	if (conf.autocd == 1 || conf.auto_open == 1)
 		expand_and_deescape(&args[0], &deq_str);
 
@@ -1208,7 +1208,7 @@ check_auto_first(char **args)
 			continue;
 
 		free(deq_str);
-		deq_str = (char *)NULL;
+		deq_str = NULL;
 		const int ret = open_file_func(args, i);
 		if (ret != -1)
 			return ret;
@@ -1355,7 +1355,7 @@ check_comments(char *name)
 		return FUNC_FAILURE;
 
 	char *p = (*name == '\\' || strchr(name + 1, '\\'))
-		? unescape_str(name, 0) : (char *)NULL;
+		? unescape_str(name, 0) : NULL;
 	char * n = p ? p : name;
 
 	/* Skip lines starting with '#' if there is no such filename
@@ -1535,7 +1535,7 @@ set_cp_cmd(char **cmd, int *cp_force)
 			conf.cp_cmd = CP_CP_FORCE;
 	}
 
-	char *n = (char *)NULL;
+	char *n = NULL;
 
 	switch (conf.cp_cmd) {
 	case CP_ADVCP: n = DEFAULT_ADVCP_CMD; break;
@@ -1565,7 +1565,7 @@ set_mv_cmd(char **cmd, int *mv_force)
 			conf.mv_cmd = MV_MV_FORCE;
 	}
 
-	char *n = (char *)NULL;
+	char *n = NULL;
 
 	switch (conf.mv_cmd) {
 	case MV_ADVMV: n = DEFAULT_ADVMV_CMD; break;
@@ -2513,7 +2513,7 @@ exec_chained_cmds(char *cmd)
 	const size_t cmd_len = strlen(cmd);
 
 	for (i = 0; i < cmd_len; i++) {
-		char *str = (char *)NULL;
+		char *str = NULL;
 		size_t len = 0, cond_exec = 0, error_code = 0;
 
 		/* Get command */
@@ -2578,7 +2578,7 @@ exec_profile(void)
 		return;
 
 	size_t line_size = 0;
-	char *line = (char *)NULL;
+	char *line = NULL;
 	ssize_t line_len = 0;
 
 	while ((line_len = getline(&line, &line_size, fp)) > 0) {

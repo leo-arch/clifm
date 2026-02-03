@@ -124,7 +124,7 @@ select_file(char *file)
 		sel_elements[sel_n].name = savestring(tfile, strlen(tfile));
 		sel_elements[sel_n++].size = (off_t)UNSET;
 
-		sel_elements[sel_n].name = (char *)NULL;
+		sel_elements[sel_n].name = NULL;
 		sel_elements[sel_n].size = (off_t)UNSET;
 
 		new_sel++;
@@ -266,7 +266,7 @@ select_matches(char **list, const char *sel_path, const int matches)
 		}
 
 		/* Relative path */
-		char *tmp = (char *)NULL;
+		char *tmp = NULL;
 
 		if (*workspaces[cur_ws].path == '/'
 		&& !*(workspaces[cur_ws].path + 1)) {
@@ -331,7 +331,7 @@ sel_glob(char *str, const char *sel_path, const mode_t filetype)
 		list = load_matches(&gbuf, filetype, &matches);
 	}
 
-	list[matches] = (char *)NULL;
+	list[matches] = NULL;
 
 	int new_sel = select_matches(list, sel_path, matches);
 
@@ -487,7 +487,7 @@ convert_filetype(mode_t *filetype)
 static char *
 parse_sel_params(char ***args, int *ifiletype, mode_t *filetype, int *isel_path)
 {
-	char *sel_path = (char *)NULL;
+	char *sel_path = NULL;
 	int i;
 	for (i = 1; (*args)[i]; i++) {
 		if (*(*args)[i] == '-' && (*args)[i][1] && !(*args)[i][2]) {
@@ -505,7 +505,7 @@ parse_sel_params(char ***args, int *ifiletype, mode_t *filetype, int *isel_path)
 			if (!exp_path) {
 				xerror("sel: '%s': Cannot expand tilde\n", (*args)[i]);
 				*filetype = (mode_t)-1;
-				return (char *)NULL;
+				return NULL;
 			}
 
 			free((*args)[i]);
@@ -515,7 +515,7 @@ parse_sel_params(char ***args, int *ifiletype, mode_t *filetype, int *isel_path)
 
 	if (*filetype != 0 && convert_filetype(filetype) == FUNC_FAILURE) {
 		*filetype = (mode_t)-1;
-		return (char *)NULL;
+		return NULL;
 	}
 
 	return sel_path;
@@ -529,7 +529,7 @@ construct_sel_path(char *sel_path)
 
 	if (*sel_path == '.' && xrealpath(sel_path, tmpdir) == NULL) {
 		xerror("sel: '%s': %s\n", sel_path, strerror(errno));
-		return (char *)NULL;
+		return NULL;
 	}
 
 	if (*sel_path == '~') {
@@ -537,14 +537,14 @@ construct_sel_path(char *sel_path)
 		if (!exp_path) {
 			xerror("%s\n", _("sel: Error expanding path"));
 			errno = 1;
-			return (char *)NULL;
+			return NULL;
 		}
 
 		xstrsncpy(tmpdir, exp_path, sizeof(tmpdir));
 		free(exp_path);
 	}
 
-	char *dir = (char *)NULL;
+	char *dir = NULL;
 	if (*tmpdir != '/') {
 		const size_t dir_len = strlen(workspaces[cur_ws].path)
 			+ strnlen(tmpdir, sizeof(tmpdir)) + 2;
@@ -575,12 +575,12 @@ check_sel_path(char **sel_path)
 	errno = 0;
 	char *dir = construct_sel_path(*sel_path);
 	if (!dir)
-		return (char *)NULL;
+		return NULL;
 
 	if (xchdir(dir, NO_TITLE) == -1) {
 		xerror("sel: '%s': %s\n", dir, strerror(errno));
 		free(dir);
-		return (char *)NULL;
+		return NULL;
 	}
 
 	return dir;
@@ -657,7 +657,7 @@ print_sel_results(const int new_sel, const char *sel_path,
 static char *
 construct_sel_filename(const char *dir, const char *name)
 {
-	char *f = (char *)NULL;
+	char *f = NULL;
 	size_t flen = 0;
 
 	if (!dir) {
@@ -857,7 +857,7 @@ sel_function(char **args)
 	mode_t filetype = 0;
 	int i, ifiletype = 0, isel_path = 0, new_sel = 0, err = 0, f = 0;
 
-	char *dir = (char *)NULL, *pattern = (char *)NULL;
+	char *dir = NULL, *pattern = NULL;
 	char *sel_path = parse_sel_params(&args, &ifiletype, &filetype, &isel_path);
 
 	if (sel_path) {
@@ -876,7 +876,7 @@ sel_function(char **args)
 			continue;
 		f++;
 
-		pattern = (char *)NULL;
+		pattern = NULL;
 		if (check_regex(args[i]) == FUNC_SUCCESS) {
 			pattern = args[i];
 			if (*pattern == '!')
@@ -1101,7 +1101,7 @@ desel_entries(char **desel_elements, const size_t desel_n, const int desel_scree
 		for (; i-- > 0;) {
 			const int desel_int = atoi(desel_elements[i]);
 			if (desel_int == INT_MIN) {
-				desel_path[i] = (char *)NULL;
+				desel_path[i] = NULL;
 				continue;
 			}
 			desel_path[i] = savestring(sel_elements[desel_int - 1].name,
@@ -1155,7 +1155,7 @@ deselect_all(void)
 	size_t i = sel_n;
 	for (; i-- > 0;) {
 		free(sel_elements[i].name);
-		sel_elements[i].name = (char *)NULL;
+		sel_elements[i].name = NULL;
 		sel_elements[i].size = (off_t)UNSET;
 	}
 
@@ -1182,7 +1182,7 @@ deselect_from_args(char **args)
 		free(ptr);
 	}
 
-	ds[j] = (char *)NULL;
+	ds[j] = NULL;
 
 	return (desel_entries(ds, j, 0) == FUNC_FAILURE
 		? FUNC_FAILURE : FUNC_SUCCESS);
@@ -1284,7 +1284,7 @@ end_deselect(const int err, char ***args)
 		size_t i;
 		for (i = 1; i <= args_n; i++) {
 			free((*args)[i]);
-			(*args)[i] = (char *)NULL;
+			(*args)[i] = NULL;
 			desel_files++;
 		}
 		args_n = 0;

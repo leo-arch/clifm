@@ -330,7 +330,7 @@ check_clifm_kb(const char *kb, const char *func_name)
 static int
 check_rl_kbinds(const char *kb)
 {
-	char *name = (char *)NULL;
+	char *name = NULL;
 	char **names = (char **)rl_funmap_names();
 	int conflicts = 0;
 
@@ -394,7 +394,7 @@ static char *
 find_key(const char *function)
 {
 	if (kbinds_n == 0)
-		return (char *)NULL;
+		return NULL;
 
 	for (size_t i = kbinds_n; i-- > 0;) {
 		if (*function != *kbinds[i].function)
@@ -403,7 +403,7 @@ find_key(const char *function)
 			return kbinds[i].key;
 	}
 
-	return (char *)NULL;
+	return NULL;
 }
 
 /* Read a key sequence from STDIN and return its value (memory to hold this
@@ -425,7 +425,7 @@ get_new_keybind(void)
 
 	if (enable_raw_mode(STDIN_FILENO) == -1) {
 		UNHIDE_CURSOR;
-		return (char *)NULL;
+		return NULL;
 	}
 
 	while (1) {
@@ -507,7 +507,7 @@ get_new_keybind(void)
 	putchar('\n');
 
 	if (!*buf)
-		return (char *)NULL;
+		return NULL;
 
 	return savestring(buf, strlen(buf));
 }
@@ -733,7 +733,7 @@ list_kbinds(void)
 static int
 list_rl_kbinds(void)
 {
-	char *name = (char *)NULL;
+	char *name = NULL;
 	char **names = (char **)rl_funmap_names();
 
 	if (!names)
@@ -858,7 +858,7 @@ load_keybinds(void)
 		return FUNC_FAILURE;
 
 	size_t line_size = 0;
-	char *line = (char *)NULL;
+	char *line = NULL;
 	ssize_t line_len = 0;
 
 	while ((line_len = getline(&line, &line_size, fp)) > 0) {
@@ -868,7 +868,7 @@ load_keybinds(void)
 		if (line[line_len - 1] == '\n')
 			line[line_len - 1] = '\0';
 
-		char *tmp = (char *)NULL;
+		char *tmp = NULL;
 		tmp = strchr(line, ':');
 		if (!tmp || !*(tmp + 1))
 			continue;
@@ -1063,7 +1063,7 @@ rl_prepend_sudo(int count, int key)
 	int free_s = 1;
 	size_t len = 0;
 	char *t = sudo_cmd;
-	char *s = (char *)NULL;
+	char *s = NULL;
 
 	if (t) {
 		len = strlen(t);
@@ -1081,7 +1081,7 @@ rl_prepend_sudo(int count, int key)
 		snprintf(s, len + 1, "%s ", DEF_SUDO_CMD);
 	}
 
-	char *c = (char *)NULL;
+	char *c = NULL;
 	if (conf.highlight == 1 && conf.colorize == 1
 	&& cur_color && cur_color != tx_c) {
 		c = cur_color;
@@ -1275,7 +1275,7 @@ rl_accept_suggestion(int count, int key)
 
 	/* If accepting the first suggested word, accept only up to next
 	 * word delimiter. */
-	char *s = (char *)NULL, truncated_char = 0;
+	char *s = NULL, truncated_char = 0;
 	int truncated = 0, accept_first_word_last = 0;
 	if (accept_first_word == 1) {
 		char *p = suggestion_buf + (rl_point - suggestion.offset);
@@ -1305,7 +1305,7 @@ rl_accept_suggestion(int count, int key)
 			&& suggestion_buf[len - 1] != ' ')
 				suggestion.type = NO_SUG;
 			accept_first_word_last = 1;
-			s = (char *)NULL;
+			s = NULL;
 		}
 	}
 
@@ -1336,7 +1336,7 @@ rl_accept_suggestion(int count, int key)
 	case FASTBACK_SUG:   /* fallthrough */
 	case FUZZY_FILENAME: /* fallthrough */
 	case FILE_SUG: {
-		char *tmp = (char *)NULL;
+		char *tmp = NULL;
 		size_t isquote = 0, backslash = 0;
 		for (size_t i = 0; suggestion_buf[i]; i++) {
 			if (is_quote_char(suggestion_buf[i]))
@@ -1413,7 +1413,7 @@ rl_accept_suggestion(int count, int key)
 		rl_insert_text(prefix);
 		char *p = (suggestion.type != BM_PREFIX_SUG
 			&& suggestion.type != WS_PREFIX_SUG)
-			? escape_str(suggestion_buf) : (char *)NULL;
+			? escape_str(suggestion_buf) : NULL;
 
 		my_insert_text(p ? p : suggestion_buf, NULL, 0);
 
@@ -1448,7 +1448,7 @@ rl_accept_suggestion(int count, int key)
 	if (accept_first_word == 0) {
 		suggestion.printed = 0;
 		free(suggestion_buf);
-		suggestion_buf = (char *)NULL;
+		suggestion_buf = NULL;
 	} else {
 		if (s && truncated == 1)
 			/* Reinsert the char we removed to print only the first word. */
@@ -2239,7 +2239,7 @@ rl_open_sel(int count, int key)
 static int
 run_man_cmd(char *str)
 {
-	char *mp = (char *)NULL;
+	char *mp = NULL;
 	const char *p = getenv("MANPAGER");
 	if (p) {
 		const size_t len = strlen(p);
@@ -2729,7 +2729,7 @@ rl_cmdhist(int count, int key)
 #ifndef _NO_SUGGESTIONS
 	if (suggestion_buf) {
 		free(suggestion_buf);
-		suggestion_buf = (char *)NULL;
+		suggestion_buf = NULL;
 	}
 #endif /* !_NO_SUGGESTIONS */
 
@@ -2816,7 +2816,7 @@ rl_del_last_word(int count, int key)
 	if (rl_point == 0)
 		return FUNC_SUCCESS;
 
-	char *end_buf = (char *)NULL;
+	char *end_buf = NULL;
 	if (rl_point < rl_end) { /* Somewhere before the end of the line */
 		end_buf = rl_copy_text(rl_point, rl_end);
 		rl_delete_text(rl_point, rl_end);
@@ -2869,7 +2869,7 @@ rl_toggle_virtualdir_full_paths(int count, int key)
 		char *rp = xrealpath(file_info[i].name, NULL);
 		if (!rp) continue;
 
-		char *p = (char *)NULL;
+		char *p = NULL;
 		if (xargs.virtual_dir_full_paths != 1) {
 			if ((p = strrchr(rp, '/')) && p[1])
 				++p;

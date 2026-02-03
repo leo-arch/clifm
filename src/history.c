@@ -32,7 +32,7 @@ get_date(void)
 	const time_t rawtime = time(NULL);
 	struct tm t;
 	if (!localtime_r(&rawtime, &t))
-		return (char *)NULL;
+		return NULL;
 
 	const size_t date_max = MAX_TIME_STR;
 	char *date = xnmalloc(date_max + 1, sizeof(char));
@@ -56,7 +56,7 @@ print_logs(const int flag)
 	}
 
 	size_t line_size = 0;
-	char *line_buff = (char *)NULL;
+	char *line_buff = NULL;
 
 	while (getline(&line_buff, &line_size, log_fp) > 0)
 		fputs(line_buff, stdout);
@@ -117,7 +117,7 @@ log_cmd(void)
 {
 	if (xargs.stealth_mode == 1 || !last_cmd || conf.log_cmds == 0) {
 		free(last_cmd);
-		last_cmd = (char *)NULL;
+		last_cmd = NULL;
 		return FUNC_SUCCESS;
 	}
 
@@ -137,7 +137,7 @@ log_cmd(void)
 
 	free(date);
 	free(last_cmd);
-	last_cmd = (char *)NULL;
+	last_cmd = NULL;
 
 	/* Write the log into LOG_FILE */
 	FILE *log_fp = open_fappend(cmds_log_file);
@@ -310,7 +310,7 @@ log_msg(char *msg_str, const int print_prompt, const int logme,
 		messages = xnrealloc(messages, msgs_n + 1, sizeof(struct pmsgs_t));
 		messages[msgs_n - 1].text = savestring(msg_str, msg_len);
 		messages[msgs_n - 1].read = 0;
-		messages[msgs_n].text = (char *)NULL;
+		messages[msgs_n].text = NULL;
 		messages[msgs_n].read = 0;
 	}
 
@@ -369,7 +369,7 @@ add_to_dirhist(const char *dir_path)
 		append_to_dirhist_file(dir_path);
 
 		dirhist_total_index++;
-		old_pwd[dirhist_total_index] = (char *)NULL;
+		old_pwd[dirhist_total_index] = NULL;
 	}
 
 	/* If not at the end of dirhist, add previous AND new entry */
@@ -386,7 +386,7 @@ add_to_dirhist(const char *dir_path)
 		old_pwd[dirhist_total_index] = savestring(dir_path, strlen(dir_path));
 		dirhist_total_index++;
 
-		old_pwd[dirhist_total_index] = (char *)NULL;
+		old_pwd[dirhist_total_index] = NULL;
 	}
 }
 
@@ -583,7 +583,7 @@ get_history(void)
 	}
 
 	size_t line_size = 0;
-	char *line_buff = (char *)NULL;
+	char *line_buff = NULL;
 	ssize_t line_len = 0;
 	time_t tdate = -1;
 
@@ -611,7 +611,7 @@ get_history(void)
 	}
 
 	curhistindex = current_hist_n ? current_hist_n - 1 : 0;
-	history[current_hist_n].cmd = (char *)NULL;
+	history[current_hist_n].cmd = NULL;
 	history[current_hist_n].len = 0;
 	history[current_hist_n].date = -1;
 	free(line_buff);
@@ -650,7 +650,7 @@ add_to_cmdhist(char *cmd)
 	history[current_hist_n].len = cmd_len;
 	history[current_hist_n].date = tdate;
 	current_hist_n++;
-	history[current_hist_n].cmd = (char *)NULL;
+	history[current_hist_n].cmd = NULL;
 	history[current_hist_n].len = 0;
 	history[current_hist_n].date = -1;
 }

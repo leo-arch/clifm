@@ -106,7 +106,7 @@ get_block_devices(void)
 		bd[n] = xnmalloc(blen + 6, sizeof(char *));
 		snprintf(bd[n], blen + 6, "/dev/%s", name);
 		n++;
-		bd[n] = (char *)NULL;
+		bd[n] = NULL;
 		free(blockdev[i]);
 	}
 
@@ -158,9 +158,9 @@ get_dev_label(void)
 	struct dirent **labels = (struct dirent **)NULL;
 	const int ln = scandir(DISK_LABELS_PATH, &labels, NULL, alphasort);
 	if (ln == - 1)
-		return (char *)NULL;
+		return NULL;
 
-	char *label = (char *)NULL;
+	char *label = NULL;
 
 	for (int i = 0; i < ln; i++) {
 		if (label) {
@@ -223,7 +223,7 @@ list_unmounted_devs(void)
 
 		media = xnrealloc(media, mp_n + 2, sizeof(struct mnt_t));
 		media[mp_n].dev = savestring(unm_devs[i], strlen(unm_devs[i]));
-		media[mp_n].mnt = (char *)NULL;
+		media[mp_n].mnt = NULL;
 
 		media[mp_n].label = get_dev_label();
 
@@ -238,9 +238,9 @@ list_unmounted_devs(void)
 	}
 	free(unm_devs);
 
-	media[mp_n].dev = (char *)NULL;
-	media[mp_n].mnt = (char *)NULL;
-	media[mp_n].label = (char *)NULL;
+	media[mp_n].dev = NULL;
+	media[mp_n].mnt = NULL;
+	media[mp_n].label = NULL;
 }
 
 static int
@@ -275,14 +275,14 @@ list_mounted_devs(const int mode)
 		media = xnrealloc(media, mp_n + 2, sizeof(struct mnt_t));
 		media[mp_n].mnt = savestring(ent->mnt_dir, strlen(ent->mnt_dir));
 		media[mp_n].dev = savestring(ent->mnt_fsname, strlen(ent->mnt_fsname));
-		media[mp_n++].label = (char *)NULL;
+		media[mp_n++].label = NULL;
 	}
 
 	endmntent(fp);
 
-	media[mp_n].dev = (char *)NULL;
-	media[mp_n].mnt = (char *)NULL;
-	media[mp_n].label = (char *)NULL;
+	media[mp_n].dev = NULL;
+	media[mp_n].mnt = NULL;
+	media[mp_n].label = NULL;
 
 	return FUNC_SUCCESS;
 }
@@ -426,13 +426,13 @@ list_mountpoints_bsd(struct statfs *fslist)
 		media = xnrealloc(media, j + 2, sizeof(struct mnt_t));
 		media[j].mnt = savestring(fslist[i].f_mntonname,
 			strlen(fslist[i].f_mntonname));
-		media[j].label = (char *)NULL;
-		media[j++].dev = (char *)NULL;
+		media[j].label = NULL;
+		media[j++].dev = NULL;
 	}
 
-	media[j].dev = (char *)NULL;
-	media[j].mnt = (char *)NULL;
-	media[j].label = (char *)NULL;
+	media[j].dev = NULL;
+	media[j].mnt = NULL;
+	media[j].label = NULL;
 
 	return j;
 }
@@ -446,7 +446,7 @@ get_mnt_input(const int mode, int *info)
 	if (xargs.mount_cmd != UNSET)
 		puts(_("Enter 'iELN' for device information. E.g.: i4"));
 
-	char *input = (char *)NULL;
+	char *input = NULL;
 	while (!input) {
 #ifdef HAVE_PROC_MOUNTS
 		if (mode == MEDIA_LIST)
@@ -459,7 +459,7 @@ get_mnt_input(const int mode, int *info)
 #endif /* HAVE_PROC_MOUNTS */
 		if (!input || !*input) {
 			free(input);
-			input = (char *)NULL;
+			input = NULL;
 			continue;
 		}
 
@@ -480,7 +480,7 @@ get_mnt_input(const int mode, int *info)
 		if (atoi_num <= 0 || atoi_num > (int)mp_n) {
 			xerror(_("%s: %s: Invalid ELN\n"), PROGRAM_NAME, input);
 			free(input);
-			input = (char *)NULL;
+			input = NULL;
 			continue;
 		}
 
@@ -531,15 +531,15 @@ xgetmntinfo_sun(void)
 
 		media = xnrealloc(media, n + 2, sizeof(struct mnt_t));
 		media[n].mnt = savestring(mp, strlen(mp));
-		media[n].label = (char *)NULL;
-		media[n++].dev = (char *)NULL;
+		media[n].label = NULL;
+		media[n++].dev = NULL;
 	}
 
 	fclose(fp);
 
-	media[n].mnt = (char *)NULL;
-	media[n].label = (char *)NULL;
-	media[n].dev = (char *)NULL;
+	media[n].mnt = NULL;
+	media[n].label = NULL;
+	media[n].dev = NULL;
 
 	return n;
 }

@@ -200,7 +200,7 @@ chdir_search_path(char **search_path, const char *arg)
 	if ((*(*search_path) == '.' && !(*search_path)[1]) ||
 	    ((*search_path)[1] == workspaces[cur_ws].path[1]
 	    && strcmp(*search_path, workspaces[cur_ws].path) == 0)) {
-			*search_path = (char *)NULL;
+			*search_path = NULL;
 	} else {
 		if (xchdir(*search_path, NO_TITLE) == -1) {
 			xerror("search: '%s': %s\n", *search_path, strerror(errno));
@@ -238,7 +238,7 @@ glob_sort_dirs(glob_t *globbed_files, size_t *g)
 	}
 
 	free(dirs);
-	gfiles[n] = (char *)NULL;
+	gfiles[n] = NULL;
 
 	*g = n;
 	return gfiles;
@@ -299,7 +299,7 @@ get_glob_matches(char **gfiles, const char *search_path,
 		n++;
 	}
 
-	matches[n].name = (char *)NULL;
+	matches[n].name = NULL;
 	return matches;
 }
 
@@ -351,7 +351,7 @@ get_non_matches_from_search_path(const char *search_path, char **gfiles,
 		free(ent[i]);
 	free(ent);
 
-	matches[n].name = (char *)NULL;
+	matches[n].name = NULL;
 	return matches;
 }
 
@@ -387,7 +387,7 @@ get_glob_matches_invert(char **gfiles, const char *search_path,
 		matches[n++].name = strdup(file_info[i].name);
 	}
 
-	matches[n].name = (char *)NULL;
+	matches[n].name = NULL;
 	return matches;
 }
 
@@ -438,7 +438,7 @@ construct_glob_query(char **arg, const int invert)
 	search_flags |= NO_GLOB_CHAR;
 	if (conf.search_strategy != GLOB_ONLY) {
 		/* Let's return here to perform a regex search. */
-		return (char *)NULL;
+		return NULL;
 	}
 
 	/* Search strategy is glob-only */
@@ -544,7 +544,7 @@ search_glob(char **args)
 
 	int invert = (args[0][1] == '!');
 
-	char *search_query = (char *)NULL, *search_path = (char *)NULL;
+	char *search_query = NULL, *search_path = NULL;
 	mode_t file_type = 0;
 
 	if (set_file_type_and_search_path(args, &file_type,
@@ -647,7 +647,7 @@ err_regex_no_match(const int regex_found, const char *arg)
 {
 	char *input = (conf.autocd == 1 && !arg && (regex_found == FUNC_FAILURE
 			|| (search_flags & NO_GLOB_CHAR)) && rl_line_buffer)
-			? strrchr(rl_line_buffer, '/') : (char *)NULL;
+			? strrchr(rl_line_buffer, '/') : NULL;
 
 	if (input && input != rl_line_buffer) {
 		/* Input string contains at least two slashes. It looks like a path:
@@ -876,7 +876,7 @@ search_regex(char **args)
 		return FUNC_FAILURE;
 
 	int invert = (args[0][1] == '!');
-	char *search_query = (char *)NULL, *search_path = (char *)NULL;
+	char *search_query = NULL, *search_path = NULL;
 	mode_t file_type = 0;
 
 	if (set_file_type_and_search_path(args, &file_type,
@@ -965,8 +965,7 @@ err_glob_no_match(const char *arg)
 {
 	char *input = (conf.autocd == 1 && !arg
 		&& (search_flags & NO_GLOB_CHAR)
-		&& rl_line_buffer) ? strrchr(rl_line_buffer, '/')
-		: (char *)NULL;
+		&& rl_line_buffer) ? strrchr(rl_line_buffer, '/') : NULL;
 
 	if (input && input != rl_line_buffer) {
 		/* Input string contains two slashes: it looks like a path, so let's

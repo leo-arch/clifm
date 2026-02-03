@@ -45,7 +45,7 @@ preview_edit(char *app)
 		return FUNC_FAILURE;
 	}
 
-	char *file = (char *)NULL;
+	char *file = NULL;
 	if (alt_preview_file && *alt_preview_file) {
 		file = alt_preview_file;
 	} else {
@@ -269,7 +269,7 @@ purge_thumbnails_cache(void)
 	char **thumbs_in_db = xnmalloc(thumbs_in_db_c + 1, sizeof(char *));
 	thumbs_in_db_c = 0;
 
-	char *line = (char *)NULL;
+	char *line = NULL;
 	size_t line_size = 0;
 
 	while (getline(&line, &line_size, fp) > 0) {
@@ -327,7 +327,7 @@ purge_thumbnails_cache(void)
 	fclose(tmp_fp);
 	free(line);
 
-	thumbs_in_db[thumbs_in_db_c] = (char *)NULL;
+	thumbs_in_db[thumbs_in_db_c] = NULL;
 	rem_files += remove_thumbs_not_in_db(thumbs_in_db, &size_sum, &errors);
 
 	for (size_t i = 0; thumbs_in_db[i]; i++)

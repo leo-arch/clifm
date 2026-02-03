@@ -36,7 +36,7 @@ set_term_title(char *dir)
 		return;
 
 	int free_tmp = 0;
-	char *tmp = (dir && *dir) ? home_tilde(dir, &free_tmp) : (char *)NULL;
+	char *tmp = (dir && *dir) ? home_tilde(dir, &free_tmp) : NULL;
 
 	if (!tmp)
 		printf("\x1b]0;%s\x1b\\", PROGRAM_NAME);

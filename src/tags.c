@@ -430,7 +430,7 @@ tag_file(char *name, char *tag)
 	}
 
 	int new_tag = 0;
-	char *p = (char *)NULL;
+	char *p = NULL;
 	if (strchr(tag, '\\'))
 		p = unescape_str(tag, 0);
 	char dir[PATH_MAX + 1];
@@ -460,7 +460,7 @@ tag_file(char *name, char *tag)
 			workspaces[cur_ws].path, name);
 	}
 
-	char link[PATH_MAX + NAME_MAX], *q = (char *)NULL;
+	char link[PATH_MAX + NAME_MAX], *q = NULL;
 	char *link_path = replace_slashes(*name_path ? name_path : name, ':');
 
 	snprintf(link, sizeof(link), "%s/%s", dir, link_path);
@@ -526,7 +526,7 @@ tag_files(char **args)
 			if (*args[j] == ':')
 				continue;
 
-			char *p = (char *)NULL;
+			char *p = NULL;
 			if (strchr(args[j], '\\'))
 				p = unescape_str(args[j], 0);
 
@@ -568,7 +568,7 @@ untag(char **args, const size_t n, size_t *t)
 		char f[PATH_MAX + NAME_MAX];
 		char *deq = unescape_str(args[i], 0);
 		char *p = deq ? deq : args[i];
-		char *exp = (char *)NULL;
+		char *exp = NULL;
 		if (*p == '~')
 			exp = tilde_expand(p);
 		char *q = exp ? exp : p;
@@ -758,7 +758,7 @@ reconstruct_input(char **args)
 
 	for (n = 1; args[n]; n++)
 		a[c++] = savestring(args[n], strlen(args[n]));
-	a[c] = (char *)NULL;
+	a[c] = NULL;
 
 	return a;
 }

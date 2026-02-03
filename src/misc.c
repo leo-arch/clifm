@@ -107,12 +107,12 @@ get_newname(const char *msg, char *old_name, int *quoted)
 	int poffset_bk = prompt_offset;
 	prompt_offset = 3;
 
-	char *n = (old_name && *old_name) ? unescape_str(old_name, 0) : (char *)NULL;
+	char *n = (old_name && *old_name) ? unescape_str(old_name, 0) : NULL;
 	char *input = secondary_prompt((msg && *msg) ? msg : "> ",
-		n ? n : (char *)NULL);
+		n ? n : NULL);
 	free(n);
 
-	char *new_name = (char *)NULL;
+	char *new_name = NULL;
 	if (!input)
 		goto END;
 
@@ -152,7 +152,7 @@ END:
 void
 set_eln_color(void)
 {
-	char *cl = (char *)NULL;
+	char *cl = NULL;
 
 	switch (cur_ws) {
 	case 0: cl = ws1_c; break;
@@ -215,7 +215,7 @@ err(const int msg_type, const int prompt_flag, const char *format, ...)
 	va_list arglist;
 
 	va_start(arglist, format);
-	int size = vsnprintf((char *)NULL, 0, format, arglist);
+	int size = vsnprintf(NULL, 0, format, arglist);
 	va_end(arglist);
 
 	if (size < 0)
@@ -281,7 +281,7 @@ print_reload_msg(const char *ptr, const char *color, const char *msg, ...)
 	va_list arglist;
 
 	va_start(arglist, msg);
-	const int size = vsnprintf((char *)NULL, 0, msg, arglist);
+	const int size = vsnprintf(NULL, 0, msg, arglist);
 	va_end(arglist);
 
 	if (size < 0)
@@ -323,7 +323,7 @@ unset_filter(void)
 	}
 
 	free(filter.str);
-	filter.str = (char *)NULL;
+	filter.str = NULL;
 	filter.rev = 0;
 	filter.type = FILTER_NONE;
 	regfree(&regex_exp);
@@ -389,7 +389,7 @@ compile_filter(void)
 
 ERR:
 	free(filter.str);
-	filter.str = (char *)NULL;
+	filter.str = NULL;
 	filter.type = FILTER_NONE;
 	return FUNC_FAILURE;
 }
@@ -498,14 +498,14 @@ check_dir(char **dir)
 static char *
 get_path_dir(char **dir)
 {
-	char *path_dir = (char *)NULL;
+	char *path_dir = NULL;
 
 	if (*(*dir) != '/') {
 		const size_t len = strlen(workspaces[cur_ws].path) + strlen(*dir) + 2;
 		path_dir = xnmalloc(len, sizeof(char));
 		snprintf(path_dir, len, "%s/%s", workspaces[cur_ws].path, *dir);
 		free(*dir);
-		*dir = (char *)NULL;
+		*dir = NULL;
 	} else {
 		path_dir = *dir;
 	}
@@ -557,7 +557,7 @@ get_cmd(char *dir, char *_sudo, char *self, const int sudo)
 	cmd[i + plus] = xnmalloc(len + 1, sizeof(char));
 	xstrsncpy(cmd[i + plus], dir, len + 1);
 	plus++;
-	cmd[i + plus] = (char *)NULL;
+	cmd[i + plus] = NULL;
 
 	return cmd;
 }
@@ -637,7 +637,7 @@ new_instance(char *dir, int sudo)
 	if (user.uid == 0)
 		sudo = 0;
 
-	char *sudo_prog = (char *)NULL;
+	char *sudo_prog = NULL;
 #ifndef __HAIKU__
 	if (sudo == 1 && !(sudo_prog = get_sudo_path()))
 		return errno;
@@ -708,7 +708,7 @@ alias_import(char *file)
 	}
 
 	size_t line_size = 0, i;
-	char *line = (char *)NULL;
+	char *line = NULL;
 	size_t alias_found = 0, alias_imported = 0;
 	int first = 1;
 
@@ -810,12 +810,12 @@ char *
 parse_usrvar_value(const char *str, const char c)
 {
 	if (c == '\0' || !str)
-		return (char *)NULL;
+		return NULL;
 
 	/* Get whatever comes after c */
 	char *tmp = strchr(str, c);
 	if (!tmp || !*(++tmp))
-		return (char *)NULL;
+		return NULL;
 
 	/* Remove leading quotes */
 	if (*tmp == '"' || *tmp == '\'')
@@ -833,7 +833,7 @@ parse_usrvar_value(const char *str, const char c)
 	}
 
 	if (!*tmp)
-		return (char *)NULL;
+		return NULL;
 
 	char *buf = savestring(tmp, strlen(tmp));
 	return buf;
@@ -867,8 +867,8 @@ create_usr_var(const char *str)
 	usr_var[usrvar_n].name = savestring(name, strlen(name));
 	usr_var[usrvar_n++].value = savestring(value, strlen(value));
 
-	usr_var[usrvar_n].name = (char *)NULL;
-	usr_var[usrvar_n].value = (char *)NULL;
+	usr_var[usrvar_n].name = NULL;
+	usr_var[usrvar_n].value = NULL;
 
 	free(name);
 	free(value);
@@ -923,7 +923,7 @@ free_autocmds(const int keep_temp)
 		free(autocmds[i].pattern);
 		free(autocmds[i].cmd);
 		free(autocmds[i].filter.str);
-		autocmds[i].color_scheme = (char *)NULL;
+		autocmds[i].color_scheme = NULL;
 	}
 
 	free(autocmds);
@@ -1076,7 +1076,7 @@ free_workspaces_filters(void)
 {
 	for (size_t i = 0; i < MAX_WS; i++) {
 		free(workspace_opts[i].filter.str);
-		workspace_opts[i].filter.str = (char *)NULL;
+		workspace_opts[i].filter.str = NULL;
 		workspace_opts[i].filter.rev = 0;
 		workspace_opts[i].filter.type = FILTER_NONE;
 	}
@@ -1534,7 +1534,7 @@ create_virtual_dir(const int user_provided)
 	int ret = 0;
 	if ((ret = launch_execv(cmd, FOREGROUND, E_MUTE)) != FUNC_SUCCESS) {
 		char *errmsg = (ret == E_NOTFOUND ? NOTFOUND_MSG
-			: (ret == E_NOEXEC ? NOEXEC_MSG : (char *)NULL));
+			: (ret == E_NOEXEC ? NOEXEC_MSG : NULL));
 
 		if (user_provided == 1) {
 			err('e', PRINT_PROMPT, _("%s: mkdir: '%s': %s. Trying with "
@@ -1554,7 +1554,7 @@ create_virtual_dir(const int user_provided)
 static char *
 construct_name(char *file, const size_t flen)
 {
-	char *name = (char *)NULL;
+	char *name = NULL;
 
 	/* Should we construct destiny file as full path or using only the
 	 * last path component (the file's basename)? */
@@ -1572,7 +1572,7 @@ construct_name(char *file, const size_t flen)
 		free(name);
 		err('w', PRINT_PROMPT, _("%s: '%s': Error constructing "
 			"filename\n"), PROGRAM_NAME, file);
-		return (char *)NULL;
+		return NULL;
 	}
 
 	/* Prohibited names */
@@ -1722,7 +1722,7 @@ handle_stdin(void)
 	buf[total_len] = '\0';
 
 	/* Create tmp dir to store links to files */
-	char *suffix = (char *)NULL;
+	char *suffix = NULL;
 
 	if (!stdin_tmp_dir || (exit_status = create_virtual_dir(1)) != FUNC_SUCCESS) {
 		free(stdin_tmp_dir);
@@ -1856,7 +1856,7 @@ pin_directory(char *dir)
 
 	if (pinned_dir) {
 		free(pinned_dir);
-		pinned_dir = (char *)NULL;
+		pinned_dir = NULL;
 	}
 
 	const size_t dir_len = strlen(d);
@@ -1882,7 +1882,7 @@ pin_directory(char *dir)
 	} else {
 		free(d);
 		free(pinned_dir);
-		pinned_dir = (char *)NULL;
+		pinned_dir = NULL;
 		return FUNC_FAILURE;
 	}
 }
@@ -1912,7 +1912,7 @@ unpin_dir(void)
 	printf(_("unpin: Succesfully unpinned '%s'\n"), pinned_dir);
 
 	free(pinned_dir);
-	pinned_dir = (char *)NULL;
+	pinned_dir = NULL;
 	return FUNC_SUCCESS;
 }
 

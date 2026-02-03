@@ -1163,7 +1163,7 @@ set_color(char *color, char var[], const int flag)
 	char *p = color;
 #endif /* !CLIFM_SUCKLESS */
 
-	char *s = (char *)NULL;
+	char *s = NULL;
 	if (IS_COLOR_PREFIX(*p) && !(s = decode_color_prefix(p))) {
 		*var = '\0';
 		return;
@@ -1413,7 +1413,7 @@ store_extension_line(const char *line)
 
 	*q = '\0';
 
-	char *def = (char *)NULL;
+	char *def = NULL;
 #ifndef CLIFM_SUCKLESS
 	if (is_color_code(q + 1) == 0 && (def = check_defs(q + 1)) == NULL)
 #else
@@ -1718,7 +1718,7 @@ set_default_colors(void)
 static int
 get_cur_colorscheme(const char *colorscheme)
 {
-	char *def_cscheme = (char *)NULL;
+	char *def_cscheme = NULL;
 
 	for (size_t i = cschemes_n; i-- > 0;) {
 		if (*colorscheme == *color_schemes[i]
@@ -1959,8 +1959,8 @@ static void
 init_defs(void)
 {
 	for (size_t n = MAX_DEFS; n-- > 0;) {
-		defs[n].name = (char *)NULL;
-		defs[n].value = (char *)NULL;
+		defs[n].name = NULL;
+		defs[n].value = NULL;
 	}
 }
 
@@ -2043,7 +2043,7 @@ static void
 set_fzf_opts(const char *line)
 {
 	free(conf.fzftab_options);
-	conf.fzftab_options = (char *)NULL;
+	conf.fzftab_options = NULL;
 
 	if (!line) {
 		char *p = conf.colorize == 1 ? DEF_FZFTAB_OPTIONS
@@ -2383,7 +2383,7 @@ split_color_line(char *line, const int type)
 		}
 	}
 
-	p = (char *)NULL;
+	p = NULL;
 
 	if (!colors)
 		return;
@@ -2691,7 +2691,7 @@ get_colorschemes(void)
 		}
 
 		closedir(dir_p);
-		color_schemes[i] = (char *)NULL;
+		color_schemes[i] = NULL;
 	}
 
 	if (!data_dir || !*data_dir)

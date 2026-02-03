@@ -232,7 +232,7 @@ print_tips(const int all)
 static char *
 get_pager(void)
 {
-	char *pager_cmd = (char *)NULL;
+	char *pager_cmd = NULL;
 	char *p = getenv("PAGER");
 	if (p) {
 		char *s = strchr(p, ' ');
@@ -255,7 +255,7 @@ get_pager(void)
 		return pager_cmd;
 	}
 
-	return (char *)NULL;
+	return NULL;
 }
 
 /* Help topics */
@@ -476,7 +476,7 @@ quick_help(const char *topic)
 	if (topic && *topic)
 		return run_help_topic(topic);
 
-	char *pager_app = (char *)NULL;
+	char *pager_app = NULL;
 	if (xargs.stealth_mode == 1 || !(pager_app = get_pager())) {
 		printf("%s                                %s\n\n%s\n\n%s",
 			ASCII_LOGO, PROGRAM_NAME_UPPERCASE, QUICK_HELP_HEADER,

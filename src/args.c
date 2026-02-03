@@ -394,7 +394,7 @@ static char *
 try_datadir(const char *dir)
 {
 	if (!dir || !*dir)
-		return (char *)NULL;
+		return NULL;
 
 	struct stat a;
 	char p[PATH_MAX + 5 + ((sizeof(PROGRAM_NAME) - 1) * 2)];
@@ -404,7 +404,7 @@ try_datadir(const char *dir)
 	if (stat(p, &a) != -1 && S_ISREG(a.st_mode) && a.st_size > 0)
 		return savestring(dir, strlen(dir));
 
-	return (char *)NULL;
+	return NULL;
 }
 
 /* Same as try_datadir(), but performs a few extra checks. */
@@ -412,7 +412,7 @@ static char *
 try_datadir_from_param(const char *dir)
 {
 	if (!dir || !*dir)
-		return (char *)NULL;
+		return NULL;
 
 	/* Remove ending "/bin" from DIR */
 	char *r = strrchr(dir, '/');
@@ -430,7 +430,7 @@ try_datadir_from_param(const char *dir)
 		char *ptr = strrchr(tmp, '/');
 		if (!ptr) {
 			free(tmp);
-			return (char *)NULL;
+			return NULL;
 		}
 
 		*ptr = '\0';
@@ -451,7 +451,7 @@ try_datadir_from_param(const char *dir)
 		return q;
 	}
 
-	return (char *)NULL;
+	return NULL;
 }
 
 /* Let's inspect paths in XDG_DATA_DIRS looking for clifm's data directory.
@@ -502,7 +502,7 @@ try_standard_data_dirs(void)
 	*home_local = '\0';
 	const int sec_env = (xargs.secure_env == 1 || xargs.secure_env_full == 1);
 
-	char *env = sec_env != 1 ? getenv("XDG_DATA_HOME") : (char *)NULL;
+	char *env = sec_env != 1 ? getenv("XDG_DATA_HOME") : NULL;
 	if (env && *env)
 		xstrsncpy(home_local, env, sizeof(home_local));
 	else if (user.home && *user.home)
@@ -541,10 +541,10 @@ static char *
 resolve_absolute_path(const char *s)
 {
 	if (!s || !*s)
-		return (char *)NULL;
+		return NULL;
 
 	char *p = strrchr(s, '/');
-	char *t = (char *)NULL;
+	char *t = NULL;
 
 	if (p && p != s)
 		*p = '\0';
@@ -558,11 +558,11 @@ static char *
 resolve_relative_path(const char *s)
 {
 	if (!s || !*s)
-		return (char *)NULL;
+		return NULL;
 
 	char *p = xrealpath(s, NULL);
 	if (!p)
-		return (char *)NULL;
+		return NULL;
 
 	char *q = strrchr(p, '/');
 	if (q && q != p)
@@ -578,11 +578,11 @@ static char *
 resolve_basename(const char *s)
 {
 	if (!s || !*s)
-		return (char *)NULL;
+		return NULL;
 
 	char *p = get_cmd_path(s);
 	if (!p)
-		return (char *)NULL;
+		return NULL;
 
 	char *q = strrchr(p, '/');
 	if (q && q != p)
@@ -602,7 +602,7 @@ get_data_dir_from_path(char *arg)
 	if (!arg || !*arg)
 		return FUNC_FAILURE;
 
-	char *datadir = (char *)NULL;
+	char *datadir = NULL;
 	char *name = *arg == '~' ? tilde_expand(arg) : arg;
 
 	if (*name == '/' && (datadir = resolve_absolute_path(name)))
@@ -750,7 +750,7 @@ open_reg_exit(char *filename, const int url, const int preview)
 	UNUSED(url);
 #endif /* !_NO_LIRA */
 
-	char *p = (*filename == '~') ? tilde_expand(filename) : (char *)NULL;
+	char *p = (*filename == '~') ? tilde_expand(filename) : NULL;
 
 	const int ret = open_file(p ? p : filename);
 	free(p);
@@ -884,7 +884,7 @@ set_alt_dir(char *src, char **dest, const char *err_name)
 	if (!src || !*src || *src == '-')
 		err_arg_required(err_name); /* noreturn */
 
-	char *src_exp = (char *)NULL;
+	char *src_exp = NULL;
 	if (*src == '~') {
 		src_exp = tilde_expand(src);
 		src = src_exp;
@@ -1008,7 +1008,7 @@ set_alt_file(char *src, char **dest, const char *err_name)
 	if (!src || !*src || *src == '-')
 		err_arg_required(err_name); /* noreturn */
 
-	char *tmp = (char *)NULL;
+	char *tmp = NULL;
 
 	if (*src == '~') {
 		tmp = tilde_expand(src);
@@ -1033,7 +1033,7 @@ set_alt_file(char *src, char **dest, const char *err_name)
 static char *
 resolve_path(char *file, const size_t flen)
 {
-	char *s_path = (char *)NULL;
+	char *s_path = NULL;
 
 	if (IS_FILE_URI(file, flen)) {
 		s_path = url_decode(file + FILE_URI_PREFIX_LEN);
@@ -1076,7 +1076,7 @@ resolve_starting_path(char *file)
 	const size_t len = file ? strlen(file) : 0;
 	char *s_path = file ? resolve_path(file, len) : NULL;
 	if (!s_path)
-		return (char *)NULL;
+		return NULL;
 
 	if (!IS_FILE_URI(file, len) && is_url(file) == FUNC_SUCCESS)
 		open_reg_exit(file, 1, 0); /* noreturn */
@@ -1537,7 +1537,7 @@ parse_cmdline_args(const int argc, char **argv)
 	int optc;
 #ifndef _NO_LIRA
 	int open_prev_mode = 0;
-	char *open_prev_file = (char *)NULL;
+	char *open_prev_file = NULL;
 #endif /* !_NO_LIRA */
 
 	while ((optc = getopt(argc, argv, OPTSTRING)) != EOF) {
@@ -1682,7 +1682,7 @@ parse_cmdline_args(const int argc, char **argv)
 	int optc;
 #ifndef _NO_LIRA
 	int open_prev_mode = 0;
-	char *open_prev_file = (char *)NULL;
+	char *open_prev_file = NULL;
 #endif /* _NO_LIRA */
 
 	while ((optc = getopt_long(argc, argv, OPTSTRING,
