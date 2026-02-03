@@ -1088,7 +1088,7 @@ color256_to_ansi(char *s)
 	}
 
 	char *ret = NULL;
-	const int n = atoi(s + 1);
+	const int n = xatoi(s + 1);
 
 	if (n >= 0 && n <= 255) {
 		if (attr == -1) /* No attribute */
@@ -1345,7 +1345,7 @@ set_shades(char *line, const int type)
 				color_attr = (uint8_t)(p[1] - '0');
 		}
 
-		const int n = atoi(str);
+		const int n = xatoi(str);
 		if (n < 0 || n > 255)
 			goto NEXT;
 

@@ -477,7 +477,7 @@ print_history_list(const int timestamp)
 static int
 print_last_items(const char *str, const int timestamp)
 {
-	int x = atoi(str);
+	int x = xatoi(str);
 
 	/* X won't be bigger than INT_MAX, so casting is safe. */
 	size_t num = x < 0 ? current_hist_n : (size_t)x;
@@ -596,7 +596,7 @@ get_history(void)
 		 * the cmd itself. */
 		if (*line_buff == history_comment_char && *(line_buff + 1)
 		&& is_number(line_buff + 1)) {
-			int d = atoi(line_buff + 1);
+			int d = xatoi(line_buff + 1);
 			tdate = d == INT_MIN ? -1 : (time_t)d;
 			continue;
 		}

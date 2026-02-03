@@ -1198,6 +1198,11 @@ xitoa(long long n)
 filesn_t
 xatof(const char *s)
 {
+	if (!s || !*s) {
+		errno = EINVAL;
+		return (-1);
+	}
+
 	if (!s[1] && *s > '0' && *s <= '9')
 		return (filesn_t)(*s - '0');
 
@@ -1227,6 +1232,11 @@ xatof(const char *s)
 int
 xatoi(const char *s)
 {
+	if (!s || !*s) {
+		errno = EINVAL;
+		return INT_MIN;
+	}
+
 	if (!s[1] && *s >= '0' && *s <= '9')
 		return (*s - '0');
 

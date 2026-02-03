@@ -710,7 +710,7 @@ set_file_owner(char **args)
 	/* Validate new ownership */
 	if (*new_own) { /* NEW_OWN is null in case of ":group" or ":gid" */
 		if (is_number(new_own))
-			owner = getpwuid((uid_t)atoi(new_own));
+			owner = getpwuid((uid_t)xatoi(new_own));
 		else
 			owner = getpwnam(new_own);
 
@@ -723,7 +723,7 @@ set_file_owner(char **args)
 
 	if (new_group && *(++new_group)) {
 		if (is_number(new_group))
-			group = getgrgid((gid_t)atoi(new_group));
+			group = getgrgid((gid_t)xatoi(new_group));
 		else
 			group = getgrnam(new_group);
 

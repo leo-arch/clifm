@@ -934,9 +934,6 @@ extern time_t curdir_mtime;
 #define AUTOCMD_MSG_FULL   4
 #define AUTOCMD_MSG_PROMPT 5
 
-/* Function macros */
-#define atoi xatoi /* xatoi is just a secure atoi */
-
 #ifndef _NO_GETTEXT
 # define _(str) gettext(str)
 #else

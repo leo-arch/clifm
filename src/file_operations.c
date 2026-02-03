@@ -200,7 +200,7 @@ get_dup_file_dest_dir(void)
 
 		/* Expand ELN */
 		if (IS_DIGIT(*dir) && is_number(dir)) {
-			const int n = atoi(dir);
+			const int n = xatoi(dir);
 			if (n > 0 && (filesn_t)n <= g_files_num) {
 				free(dir);
 				char *name = file_info[n - 1].name;

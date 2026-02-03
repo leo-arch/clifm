@@ -258,7 +258,7 @@ get_cursor_position(int *c, int *l)
 		return FUNC_FAILURE;
 
 	*p = '\0';
-	*l = atoi(buf + 2); *c = atoi(p + 1);
+	*l = xatoi(buf + 2); *c = xatoi(p + 1);
 	if (*l == INT_MIN || *c == INT_MIN)
 		return FUNC_FAILURE;
 

@@ -440,7 +440,7 @@ pager_function(const char *arg)
 	}
 
 	if (is_number(arg)) {
-		const int n = atoi(arg);
+		const int n = xatoi(arg);
 		if (n == INT_MIN) {
 			xerror("%s\n", _("pg: xatoi: Error converting to integer"));
 			return FUNC_FAILURE;
@@ -1648,7 +1648,7 @@ dirhist_function(char *dir)
 	}
 
 	if (*dir == '!' && is_number(dir + 1)) {
-		int n = atoi(dir + 1);
+		int n = xatoi(dir + 1);
 		if (n <= 0 || n > dirhist_total_index) {
 			xerror(_("dh: '%d': No such entry number\n"), n);
 			return FUNC_FAILURE;

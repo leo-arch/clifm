@@ -1041,7 +1041,7 @@ load_jumpdb(void)
 
 		if (*line == '@') {
 			if (is_number(line + 1)) {
-				const int a = atoi(line + 1);
+				const int a = xatoi(line + 1);
 				jump_total_rank = a == INT_MIN ? 0 : a;
 			}
 			continue;
@@ -1066,7 +1066,7 @@ load_jumpdb(void)
 
 		int visits = 1;
 		if (is_number(kline)) {
-			visits = atoi(kline);
+			visits = xatoi(kline);
 			if (visits == INT_MIN)
 				visits = 0;
 		}
@@ -1083,7 +1083,7 @@ load_jumpdb(void)
 		time_t first = 0;
 
 		if (is_number(tmp)) {
-			const int a = atoi(tmp);
+			const int a = xatoi(tmp);
 			first = a == INT_MIN ? 0 : (time_t)a;
 		}
 
@@ -1104,7 +1104,7 @@ load_jumpdb(void)
 		jump_db[jump_n].first_visit = first;
 
 		if (is_number(tmpb)) {
-			const int a = atoi(tmpb);
+			const int a = xatoi(tmpb);
 			jump_db[jump_n].last_visit = a == INT_MIN ? 0 : (time_t)a;
 		} else {
 			jump_db[jump_n].last_visit = 0; /* UNIX Epoch */

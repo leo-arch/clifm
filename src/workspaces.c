@@ -105,7 +105,7 @@ list_workspaces(void)
 static int
 check_workspace_num(char *str, int *tmp_ws)
 {
-	const int istr = atoi(str);
+	const int istr = xatoi(str);
 	if (istr <= 0 || istr > MAX_WS) {
 		xerror(_("ws: %d: No such workspace (valid workspaces: "
 			"1-%d)\n"), istr, MAX_WS);
@@ -311,7 +311,7 @@ unset_workspace(char *str)
 			goto ERROR;
 		n++;
 	} else {
-		n = atoi(name);
+		n = xatoi(name);
 	}
 
 	if (n < 1 || n > MAX_WS) {

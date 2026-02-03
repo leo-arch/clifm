@@ -1710,7 +1710,7 @@ expand_workspace(char **name)
 	char *ws_name = *name + 2;
 
 	if (is_number(ws_name)) {
-		const int n = MAX_WS > 9 ? atoi(ws_name) : *ws_name - '0';
+		const int n = MAX_WS > 9 ? xatoi(ws_name) : *ws_name - '0';
 		if (n <= 0 || n > MAX_WS || !workspaces[n - 1].path)
 			return FUNC_FAILURE;
 

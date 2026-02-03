@@ -595,7 +595,7 @@ set_autocmd_sort(const char *val, const size_t n)
 		goto ERROR;
 	}
 
-	const int a = atoi(val);
+	const int a = xatoi(val);
 	if (a >= 0 && a <= SORT_TYPES) {
 		autocmds[n].sort = a;
 		return FUNC_SUCCESS;
@@ -654,7 +654,7 @@ fill_autocmd_opt(char *opt, const size_t n)
 			goto ERR_VAL;
 		a = UNSET;
 	} else {
-		a = atoi(p);
+		a = xatoi(p);
 	}
 
 	if (*opt == 'm' && opt[1] == 'f') {

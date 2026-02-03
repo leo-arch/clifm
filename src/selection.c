@@ -1099,7 +1099,7 @@ desel_entries(char **desel_elements, const size_t desel_n, const int desel_scree
 	if (desel_screen == 1) { /* Coming from the deselect screen */
 		desel_path = xnmalloc(desel_n, sizeof(char *));
 		for (; i-- > 0;) {
-			const int desel_int = atoi(desel_elements[i]);
+			const int desel_int = xatoi(desel_elements[i]);
 			if (desel_int == INT_MIN) {
 				desel_path[i] = NULL;
 				continue;
@@ -1262,7 +1262,7 @@ handle_alpha_entry(const size_t i, const size_t desel_n, char **desel_elements)
 static int
 valid_desel_eln(const size_t i, const size_t desel_n, char **desel_elements)
 {
-	const int n = atoi(desel_elements[i]);
+	const int n = xatoi(desel_elements[i]);
 
 	if (n <= 0 || (size_t)n > sel_n) {
 		printf(_("desel: %s: Invalid ELN\n"), desel_elements[i]);

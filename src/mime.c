@@ -846,7 +846,7 @@ get_user_input(const size_t max)
 			continue;
 		}
 
-		int num = atoi(input);
+		int num = xatoi(input);
 		if (num <= 0 || num > (int)max) {
 			free(input);
 			input = NULL;

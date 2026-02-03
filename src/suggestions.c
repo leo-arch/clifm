@@ -1543,7 +1543,7 @@ check_sort_methods(const char *str, const size_t len)
 		return NO_MATCH;
 	}
 
-	const int a = atoi(str);
+	const int a = xatoi(str);
 	if (a < 0 || a > SORT_TYPES
 	|| (conf.light_mode == 1 && !ST_IN_LIGHT_MODE(a))) {
 		if (suggestion.printed)
@@ -1616,7 +1616,7 @@ check_workspaces(char *word, size_t wlen, const int type)
 		return NO_MATCH;
 
 	if (*word >= '1' && *word <= MAX_WS + '0' && !word[1]) {
-		const int a = atoi(word);
+		const int a = xatoi(word);
 		if (a > 0 && workspaces[a - 1].name) {
 			suggestion.type = type == WS_PREFIX_SUG
 				? WS_NUM_PREFIX_SUG : WS_NUM_SUG;

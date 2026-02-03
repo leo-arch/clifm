@@ -476,7 +476,7 @@ get_mnt_input(const int mode, int *info)
 			++p;
 		}
 
-		const int atoi_num = atoi(p);
+		const int atoi_num = xatoi(p);
 		if (atoi_num <= 0 || atoi_num > (int)mp_n) {
 			xerror(_("%s: %s: Invalid ELN\n"), PROGRAM_NAME, input);
 			free(input);

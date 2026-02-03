@@ -408,7 +408,7 @@ sort_function(char **arg)
 	}
 
 	/* Argument is a number */
-	const int n = atoi(arg[1]);
+	const int n = xatoi(arg[1]);
 
 	if (conf.light_mode == 1 && !ST_IN_LIGHT_MODE(n)) {
 		fprintf(stderr, _("st: %d (%s): Not available in light mode\n"),

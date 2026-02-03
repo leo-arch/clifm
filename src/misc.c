@@ -1504,12 +1504,12 @@ get_term_size(void)
 	}
 
 	char *env = getenv("CLIFM_COLUMNS");
-	int value = env ? atoi(env) : -1;
+	int value = env ? xatoi(env) : -1;
 	if (value > 0 && value <= USHRT_MAX)
 		term_cols = (unsigned short)value;
 
 	env = getenv("CLIFM_LINES");
-	value = env ? atoi(env) : -1;
+	value = env ? xatoi(env) : -1;
 	if (value > 0 && value <= USHRT_MAX)
 		term_lines = (unsigned short)value;
 

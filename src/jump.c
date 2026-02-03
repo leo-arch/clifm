@@ -625,7 +625,7 @@ purge_jump_database(const char *arg)
 		return FUNC_FAILURE;
 	}
 
-	const int n = atoi(arg);
+	const int n = xatoi(arg);
 	if (n < 0) {
 		xerror(_("jump: '%s': Invalid value\n"), arg);
 		return FUNC_FAILURE;

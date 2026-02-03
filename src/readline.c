@@ -1865,7 +1865,7 @@ sort_num_generator(const char *text, int state)
 	if (state == 0)
 		i = 0;
 
-	const int num_text = atoi(text);
+	const int num_text = xatoi(text);
 	if (num_text == INT_MIN
 	|| (conf.light_mode == 1 && !ST_IN_LIGHT_MODE(num_text)))
 		return NULL;
@@ -3167,8 +3167,8 @@ complete_ranges(const char *text)
 		return NULL;
 	}
 
-	const int a = atoi(text) - 1;
-	const int b = atoi(dash + 1) - 1;
+	const int a = xatoi(text) - 1;
+	const int b = xatoi(dash + 1) - 1;
 	*dash = '-';
 
 	if (a < 0 || b < 0 || a >= b || (filesn_t)b >= g_files_num)
@@ -3609,7 +3609,7 @@ complete_sort_num(const char *text, const size_t words_n)
 	if (words_n != 2)
 		return NULL;
 
-	const int n = atoi(text);
+	const int n = xatoi(text);
 	if (n < 0 || n > SORT_TYPES)
 		return NULL;
 
@@ -3875,7 +3875,7 @@ complete_bookmarks_prompt(const char *text)
 	char **matches = NULL;
 
 	if (text && *text && is_number(text)) {
-		const int n = atoi(text);
+		const int n = xatoi(text);
 		if (n < 1 || (size_t)n > bm_n)
 			goto CHECK_NAME;
 

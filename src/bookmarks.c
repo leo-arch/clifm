@@ -220,7 +220,7 @@ get_bm_path(char *arg)
 {
 	/* If an ELN */
 	if (is_number(arg)) {
-		const int num = atoi(arg);
+		const int num = xatoi(arg);
 		if (num <= 0 || (size_t)num > bm_n) {
 			xerror(_("%s: No such ELN\n"), arg);
 			return NULL;

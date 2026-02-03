@@ -180,7 +180,7 @@ grab_bd_input(const int n)
 		}
 
 		if (is_number(input)) {
-			const int a = atoi(input);
+			const int a = xatoi(input);
 			if (a > 0 && a <= n) {
 				free(input);
 				return a - 1;
@@ -688,7 +688,7 @@ surf_hist(char **args)
 		return FUNC_FAILURE;
 	}
 
-	const int n = atoi(args[1] + 1);
+	const int n = xatoi(args[1] + 1);
 	return change_to_dirhist_num(n);
 }
 

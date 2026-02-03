@@ -562,7 +562,7 @@ remove_from_trash(char **args)
 		}
 
 		/* Non-number or invalid ELN */
-		const int num = atoi(input[i]);
+		const int num = xatoi(input[i]);
 		if (!is_number(input[i]) || num <= 0 || num > files_n) {
 			xerror(_("trash: %s: Invalid ELN\n"), input[i]);
 			free_files_and_input(&input, &trash_files, files_n);
@@ -582,7 +582,7 @@ remove_from_trash(char **args)
 	/* At this point we know all input fields are valid ELNs. */
 	size_t removed = 0;
 	for (i = 0; input[i]; i++) {
-		const int num = atoi(input[i]);
+		const int num = xatoi(input[i]);
 
 		const int ret = remove_file_from_trash(trash_files[num - 1]->d_name);
 		if (ret != FUNC_SUCCESS) {
@@ -890,7 +890,7 @@ untrash_function(char **args)
 			return ret;
 		}
 
-		const int num = atoi(input[i]);
+		const int num = xatoi(input[i]);
 		if (!is_number(input[i]) || num <= 0 || num > files_n) {
 			xerror(_("untrash: %s: Invalid ELN\n"), input[i]);
 			exit_status = FUNC_FAILURE;
@@ -907,7 +907,7 @@ untrash_function(char **args)
 
 	/* Untrash files */
 	for (i = 0; input[i]; i++) {
-		const int num = atoi(input[i]);
+		const int num = xatoi(input[i]);
 		if (untrash_file(trash_files[num - 1]->d_name) != FUNC_SUCCESS)
 			exit_status = FUNC_FAILURE;
 	}

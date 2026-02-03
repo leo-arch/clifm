@@ -803,7 +803,7 @@ gen_color(char **line)
 	} else if (l[0] == 'b' && l[1] == 'g' && strcmp(l + 2, "reset") == 0) {
 		GEN_ATTR("49");
 	} else if (IS_DIGIT(l[0]) && (!l[1] || (is_number(l + 1)
-	&& (n = atoi(l)) <= 255))) {
+	&& (n = xatoi(l)) <= 255))) {
 		if (!l[1])
 			n = l[0] - '0';
 		snprintf(temp, C_LEN, "%c%c[%s%s;5;%dm%c",
@@ -1809,11 +1809,11 @@ set_prompt_options(void)
 
 	if (f_is_set == 1) {
 		val = getenv("CLIFM_PROMPT_F_DIR_LEN");
-		if (val && is_number(val) && (n = atoi(val)) > 0 && n < INT_MAX)
+		if (val && is_number(val) && (n = xatoi(val)) > 0 && n < INT_MAX)
 			conf.prompt_f_dir_len = n;
 
 		val = getenv("CLIFM_PROMPT_F_FULL_LEN_DIRS");
-		if (val && is_number(val) && (n = atoi(val)) > 0 && n < INT_MAX)
+		if (val && is_number(val) && (n = xatoi(val)) > 0 && n < INT_MAX)
 			conf.prompt_f_full_len_dirs = n;
 	}
 
@@ -1823,13 +1823,13 @@ set_prompt_options(void)
 			conf.prompt_b_precision = *val - '0';
 
 		val = getenv("CLIFM_PROMPT_B_MIN");
-		if (val && is_number(val) && (n = atoi(val)) < INT_MAX)
+		if (val && is_number(val) && (n = xatoi(val)) < INT_MAX)
 			conf.prompt_b_min = n;
 	}
 
 	if (conf.prompt_p_max_path == UNSET && p_is_set == 1) {
 		val = getenv("CLIFM_PROMPT_P_MAX_PATH");
-		if (val && is_number(val) && (n = atoi(val)) > 0 && n < INT_MAX)
+		if (val && is_number(val) && (n = xatoi(val)) > 0 && n < INT_MAX)
 			conf.prompt_p_max_path = n;
 	}
 }

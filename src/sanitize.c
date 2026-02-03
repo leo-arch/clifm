@@ -146,7 +146,7 @@ sanitize_shell_level(char *str)
 	if (!str || !*str || !is_number(str))
 		return FUNC_FAILURE;
 
-	const int a = atoi(str);
+	const int a = xatoi(str);
 	if (a < 1 || a > MAX_SHELL_LEVEL)
 		return FUNC_FAILURE;
 

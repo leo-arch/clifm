@@ -812,7 +812,7 @@ set_shell_level(void)
 {
 	char *shlvl = getenv("SHLVL");
 
-	int shlvl_n = shlvl ? atoi(shlvl) : -1;
+	int shlvl_n = shlvl ? xatoi(shlvl) : -1;
 	if (shlvl_n > 0 && shlvl_n < MAX_SHELL_LEVEL)
 		shlvl_n++;
 	else
@@ -828,7 +828,7 @@ set_shell_level(void)
 		return;
 	}
 
-	int lvl_n = atoi(lvl);
+	int lvl_n = xatoi(lvl);
 	if (lvl_n > 0 && lvl_n < (MAX_SHELL_LEVEL - shlvl_n))
 		lvl_n++;
 	else
@@ -2718,7 +2718,7 @@ set_pager_value(char *line, int *var, const size_t buflen)
 		if (l > 0 && p[l - 1] == '\n')
 			p[l - 1] = '\0';
 
-		int n = atoi(p);
+		int n = xatoi(p);
 		if (n == INT_MIN)
 			return;
 
@@ -2849,7 +2849,7 @@ set_listing_mode(char *line)
 
 	line[1] = '\0';
 
-	const int n = atoi(line);
+	const int n = xatoi(line);
 	if (n == INT_MIN)
 		goto END;
 
@@ -2915,7 +2915,7 @@ set_workspace_names(char *line)
 		if (!is_number(t))
 			goto CONT;
 
-		const int a = atoi(t);
+		const int a = xatoi(t);
 		if (a <= 0 || a > MAX_WS)
 			goto CONT;
 
@@ -3439,7 +3439,7 @@ set_max_name_len(char *line)
 	const size_t line_len = strlen(line);
 	if (line_len > 2 && line[line_len - 2] == '%') {
 		line[line_len - 2] = '\0';
-		const int n = atoi(line);
+		const int n = xatoi(line);
 		if (n >= 0 && n <= 100)
 			/* conf.max_name_len will be set by set_max_filename_len_auto(),
 			 * in misc.c, as the N percentage of current terminal columns,
@@ -4023,7 +4023,7 @@ set_force_color(const char *val)
 	if (!is_number(val))
 		return fallback;
 
-	const int n = atoi(val);
+	const int n = xatoi(val);
 	if (n == 8 || n == 16 || n == 256 || n == TRUECOLOR_NUM)
 		return n;
 
@@ -4160,7 +4160,7 @@ get_fzf_height(char *line)
 		*s = '\0';
 
 	if (*line == '-') {
-		const int n = atoi(line + 1);
+		const int n = xatoi(line + 1);
 		if (n >= 0 && n < term_lines)
 			val = term_lines - n;
 		goto END;
@@ -4176,11 +4176,11 @@ get_fzf_height(char *line)
 		goto END;
 
 	if (percent == 0) {
-		val = atoi(line);
+		val = xatoi(line);
 		goto END;
 	} else {
 		line[len - 1] = '\0';
-		const int n = atoi(line);
+		const int n = xatoi(line);
 		if (n > 0 && n <= 100)
 			val = n * term_lines / 100;
 	}
