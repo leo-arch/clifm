@@ -715,42 +715,36 @@ untrash_file(char *file)
 	if (!file)
 		return FUNC_FAILURE;
 
-	char untrash_file[PATH_MAX + 1];
-	char untrash_info[PATH_MAX + 1];
-	snprintf(untrash_file, sizeof(untrash_file), "%s/%s", trash_files_dir, file);
-	snprintf(untrash_info, sizeof(untrash_info), "%s/%s.trashinfo",
+	char trash_file[PATH_MAX + 1];
+	char trash_info[PATH_MAX + 1];
+	snprintf(trash_file, sizeof(trash_file), "%s/%s", trash_files_dir, file);
+	snprintf(trash_info, sizeof(trash_info), "%s/%s.trashinfo",
 		trash_info_dir, file);
 
 	int ret = FUNC_SUCCESS;
-	char *orig_path = read_original_path(untrash_info, file, &ret);
+	char *orig_path = read_original_path(trash_info, file, &ret);
 	if (!orig_path)
 		return ret;
 
 	ret = check_untrash_dest(orig_path);
 	if (ret != FUNC_SUCCESS) {
-		if (conf.autols == 1)
-			press_any_key_to_continue(0);
 		free(orig_path);
 		return ret;
 	}
 
-	ret = renameat(XAT_FDCWD, untrash_file, XAT_FDCWD, orig_path);
+	ret = renameat(XAT_FDCWD, trash_file, XAT_FDCWD, orig_path);
 	if (ret == -1) {
 		if (errno == EXDEV) {
 			/* Destination file is on a different filesystem, which is why
 			 * rename(3) doesn't work: let's try with mv(1). */
-			char *cmd[] = {"mv", "--", untrash_file, orig_path, NULL};
+			char *cmd[] = {"mv", "--", trash_file, orig_path, NULL};
 			ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 			if (ret != FUNC_SUCCESS) {
-				if (conf.autols == 1)
-					press_any_key_to_continue(0);
 				free(orig_path);
 				return ret;
 			}
 		} else {
-			xerror("untrash: '%s': %s\n", untrash_file, strerror(errno));
-			if (conf.autols == 1)
-				press_any_key_to_continue(0);
+			xerror("untrash: '%s': %s\n", trash_file, strerror(errno));
 			free(orig_path);
 			return errno;
 		}
@@ -758,26 +752,48 @@ untrash_file(char *file)
 
 	free(orig_path);
 
-	if (unlinkat(XAT_FDCWD, untrash_info, 0) == -1) {
-		xerror(_("untrash: '%s': %s\n"), untrash_info, strerror(errno));
+	if (unlinkat(XAT_FDCWD, trash_info, 0) == -1) {
+		xerror(_("untrash: '%s': %s\n"), trash_info, strerror(errno));
 		return errno;
 	}
 
 	return FUNC_SUCCESS;
 }
 
-/* Untrash/restore all trashed files. */
+static void
+print_untrash_status_msg(const int status, const int multi,
+const size_t untrashed_files)
+{
+	/* If there was at least one error when untrashing multiple files,
+	 * and at least some file was successfully untrashed, pause, so that the
+	 * user can read the error message (printed by untrash_files()). */
+	if (status == FUNC_FAILURE && multi == 1 && conf.autols == 1
+	&& untrashed_files > 0)
+		press_any_key_to_continue(0);
+
+	/* Print the trash status message. */
+	if (untrashed_files > 0) {
+		if (conf.autols == 1)
+			reload_dirlist();
+		const size_t n = count_trashed_files();
+		print_reload_msg(SET_SUCCESS_PTR, xs_cb,
+			_("%zu file(s) restored\n"), untrashed_files);
+		print_reload_msg(NULL, NULL, _("%zu total trashed file(s)\n"), n);
+	}
+}
+
+/* Untrash/restore all trashed files to their original location. */
 static int
 untrash_all(struct dirent ***tfiles, const int tfiles_n, const int free_files)
 {
-	size_t untrashed = 0;
+	size_t untrashed_files = 0;
 	int status = FUNC_SUCCESS;
 
 	for (size_t i = 0; i < (size_t)tfiles_n; i++) {
 		if (untrash_file((*tfiles)[i]->d_name) != 0)
 			status = FUNC_FAILURE;
 		else
-			untrashed++;
+			untrashed_files++;
 		if (free_files == 1)
 			free((*tfiles)[i]);
 	}
@@ -785,46 +801,35 @@ untrash_all(struct dirent ***tfiles, const int tfiles_n, const int free_files)
 	if (free_files == 1)
 		free(*tfiles);
 
-	if (status == FUNC_SUCCESS) {
-		if (conf.autols == 1) reload_dirlist();
-
-		const size_t n = count_trashed_files();
-		print_reload_msg(SET_SUCCESS_PTR, xs_cb,
-			_("%zu file(s) restored\n"), untrashed);
-		print_reload_msg(NULL, NULL, _("%zu total trashed file(s)\n"), n);
-	}
+	const int multi_files = tfiles_n > 1;
+	print_untrash_status_msg(status, multi_files, untrashed_files);
 
 	return status;
 }
 
-/* Untrash files passed as parameters (ARGS). */
+/* Untrash/restore files passed as parameters (ARGS) to their original
+ * location. */
 static int
 untrash_files(char **args)
 {
 	int status = FUNC_SUCCESS;
-	size_t untrashed = 0;
+	size_t untrashed_files = 0;
 
 	for (size_t i = 0; args[i]; i++) {
-		char *d = (char *)NULL;
+		char *d = NULL;
 		if (strchr(args[i], '\\'))
 			d = unescape_str(args[i], 0);
 
 		if (untrash_file(d ? d : args[i]) != FUNC_SUCCESS)
 			status = FUNC_FAILURE;
 		else
-			untrashed++;
+			untrashed_files++;
 
 		free(d);
 	}
 
-	if (status == FUNC_SUCCESS) {
-		if (conf.autols == 1) reload_dirlist();
-
-		const size_t n = count_trashed_files();
-		print_reload_msg(SET_SUCCESS_PTR, xs_cb,
-			_("%zu file(s) restored\n"), untrashed);
-		print_reload_msg(NULL, NULL, _("%zu total trashed file(s)\n"), n);
-	}
+	const int multi_files = args[1] != NULL;
+	print_untrash_status_msg(status, multi_files, untrashed_files);
 
 	return status;
 }
