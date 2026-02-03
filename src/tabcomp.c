@@ -2010,7 +2010,7 @@ tab_complete(const int what_to_do)
 	int start = rl_point;
 	rl_point = end;
 	char *text = rl_copy_text(start, end);
-	char **matches = (char **)NULL;
+	char **matches = NULL;
 
 	/* At this point, we know we have an open quote if quote_char != '\0'. */
 
@@ -2021,7 +2021,7 @@ tab_complete(const int what_to_do)
 		matches = (*rl_attempted_completion_function) (text, start, end);
 		if (matches || rl_attempted_completion_over) {
 			rl_attempted_completion_over = 0;
-			our_func = (rl_compentry_func_t *)NULL;
+			our_func = NULL;
 			goto AFTER_USUAL_COMPLETION;
 		}
 	}

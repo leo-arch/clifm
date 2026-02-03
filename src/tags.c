@@ -138,7 +138,7 @@ list_files_in_tag(char *name)
 	char tmp[PATH_MAX + 1];
 	snprintf(tmp, sizeof(tmp), "%s/%s", tags_dir, name);
 
-	struct dirent **t = (struct dirent **)NULL;
+	struct dirent **t = NULL;
 	const int n = scandir(tmp, &t, NULL, conf.case_sens_list
 		? xalphasort : alphasort_insensitive);
 	if (n == -1) {
@@ -493,7 +493,7 @@ get_tags(char **args)
 
 	if (c == 0) {
 		free(t);
-		t = (int *)NULL;
+		t = NULL;
 	} else {
 		t[c] = -1;
 	}
@@ -656,7 +656,7 @@ recursive_mv_tags(const char *src, const char *dst)
 	int n, exit_status = FUNC_SUCCESS, ret;
 	char src_dir[PATH_MAX + 1];
 	char dst_dir[PATH_MAX + 1];
-	struct dirent **a = (struct dirent **)NULL;
+	struct dirent **a = NULL;
 
 	snprintf(src_dir, sizeof(src_dir), "%s/%s", tags_dir, src);
 

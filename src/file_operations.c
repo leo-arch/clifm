@@ -184,7 +184,7 @@ toggle_exec(const char *file, mode_t mode)
 static char *
 get_dup_file_dest_dir(void)
 {
-	char *dir = (char *)NULL;
+	char *dir = NULL;
 
 	puts(_("Enter destination directory (Ctrl+d to quit)\n"
 		"Tip: \".\" for the current directory"));
@@ -193,10 +193,10 @@ get_dup_file_dest_dir(void)
 
 	while (!dir) {
 		int quoted = 0;
-		dir = get_newname(n_prompt, (char *)NULL, &quoted);
+		dir = get_newname(n_prompt, NULL, &quoted);
 		UNUSED(quoted);
 		if (!dir) /* The user pressed ctrl+d */
-			return (char *)NULL;
+			return NULL;
 
 		/* Expand ELN */
 		if (IS_DIGIT(*dir) && is_number(dir)) {
@@ -232,7 +232,7 @@ get_dup_file_dest_dir(void)
 ERROR:
 		xerror("dup: '%s': %s\n", dir, strerror(errno));
 		free(dir);
-		dir = (char *)NULL;
+		dir = NULL;
 	}
 
 	return dir;
@@ -389,7 +389,7 @@ extract_template_name_from_filename(char *basename, int *t_auto)
 	if (tname && tname != basename && tname[1])
 		return tname + 1;
 
-	return (char *)NULL;
+	return NULL;
 }
 
 /* Return 1 if the template NAME is found in the templates list,
@@ -471,7 +471,7 @@ static int
 create_file(char *name, const int is_md)
 {
 	struct stat a;
-	char *ret = (char *)NULL;
+	char *ret = NULL;
 	char *n = name;
 	char *errname = is_md == 1 ? "md" : "new";
 	int status = FUNC_SUCCESS;
@@ -571,7 +571,7 @@ format_new_filename(char **name)
 	if (is_dir == 1)
 		p[flen - 1 ] = '\0'; /* Remove ending slash */
 
-	char *npath = (char *)NULL;
+	char *npath = NULL;
 	if (p == *name) {
 		char *tilde = *p == '~' ? tilde_expand(p) : NULL;
 		const size_t len = tilde ? strlen(tilde) : flen;
@@ -602,7 +602,7 @@ ask_and_create_file(void)
 	snprintf(n_prompt, sizeof(n_prompt), "\001%s\002>\001%s\002 ", mi_c, tx_c);
 
 	int quoted = 0;
-	char *filename = get_newname(n_prompt, (char *)NULL, &quoted);
+	char *filename = get_newname(n_prompt, NULL, &quoted);
 	if (!filename) /* The user pressed Ctrl+d */
 		return FUNC_SUCCESS;
 
@@ -627,7 +627,7 @@ ask_and_create_file(void)
 
 	exit_status = create_file(filename, 0);
 	if (exit_status == FUNC_SUCCESS) {
-		char *args[] = { filename, (char *)NULL };
+		char *args[] = { filename, NULL };
 		list_created_files(args, 1);
 	}
 
@@ -712,7 +712,7 @@ create_files(char **args, const int is_md)
 		}
 	}
 
-	new_files[new_files_n] = (char *)NULL;
+	new_files[new_files_n] = NULL;
 
 	if (new_files_n > 0) {
 		if (exit_status != FUNC_SUCCESS && conf.autols == 1)

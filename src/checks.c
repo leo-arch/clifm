@@ -613,7 +613,7 @@ check_for_alias(char **args)
 	 * starts with a backslash. */
 	if (aliases_n == 0 || !aliases || !args || flags & FIRST_WORD_IS_ELN
 	|| *args[0] == '\\')
-		return (char **)NULL;
+		return NULL;
 
 	for (size_t i = aliases_n; i-- > 0;) {
 		if (!aliases[i].name || !aliases[i].cmd || !*aliases[i].name
@@ -633,7 +633,7 @@ check_for_alias(char **args)
 		char **alias_cmd = parse_input_str(aliases[i].cmd);
 		if (!alias_cmd) {
 			flags |= FAILED_ALIAS; /* Prevent exec_cmd() from being executed. */
-			return (char **)NULL;
+			return NULL;
 		}
 
 		size_t j;
@@ -656,7 +656,7 @@ check_for_alias(char **args)
 		return alias_cmd;
 	}
 
-	return (char **)NULL;
+	return NULL;
 }
 
 /* Keep only the last MAX records in FILE.
@@ -668,7 +668,7 @@ truncate_file(const char *file, const int max, const int check_dups)
 		return;
 
 	char *tmp_name = NULL;
-	FILE *orig_fp = (FILE *)NULL;
+	FILE *orig_fp = NULL;
 	int orig_fd = 0;
 	struct stat attr;
 

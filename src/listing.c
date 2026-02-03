@@ -1890,7 +1890,7 @@ get_longest_per_col(size_t *columns_n, filesn_t *rows, const filesn_t files_n)
 	size_t *longest_per_col = xnmalloc((size_t)term_cols + 1, sizeof(size_t));
 
 	/* Hold info about the previous columns state */
-	size_t *prev_longest_per_col = (size_t *)NULL;
+	size_t *prev_longest_per_col = NULL;
 	filesn_t prev_rows = *rows;
 
 	const int longest_eln = conf.no_eln != 1 ? DIGINUM(files_n + 1) : 1;
@@ -3748,7 +3748,7 @@ free_dirlist(void)
 	}
 
 	free(file_info);
-	file_info = (struct fileinfo *)NULL;
+	file_info = NULL;
 }
 
 void

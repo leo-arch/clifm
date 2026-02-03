@@ -868,7 +868,7 @@ extract_to_dir_others(char **args)
 static int
 extract_others(char **args)
 {
-	char **tcmd = (char **)NULL;
+	char **tcmd = NULL;
 	size_t n = 0, i;
 
 	for (i = 1; args[i]; i++);

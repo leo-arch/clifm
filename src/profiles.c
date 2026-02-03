@@ -206,7 +206,7 @@ profile_set(const char *prof)
 		for (i = 0; bin_commands[i]; i++)
 			free(bin_commands[i]);
 		free(bin_commands);
-		bin_commands = (char **)NULL;
+		bin_commands = NULL;
 	}
 
 	if (paths) {

@@ -174,7 +174,7 @@ free_jump_database(void)
 		free(jump_db[i].path);
 
 	free(jump_db);
-	jump_db = (struct jump_t *)NULL;
+	jump_db = NULL;
 	jump_n = 0;
 }
 

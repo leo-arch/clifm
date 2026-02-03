@@ -122,7 +122,7 @@ parse_shared_mime_info_db(FILE *fp)
 
 	if (n == 0) {
 		free(user_mimetypes);
-		user_mimetypes = (struct mime_t *)NULL;
+		user_mimetypes = NULL;
 		return;
 	}
 
@@ -195,7 +195,7 @@ parse_mime_types_file(FILE *fp)
 
 	if (n == 0) {
 		free(user_mimetypes);
-		user_mimetypes = (struct mime_t *)NULL;
+		user_mimetypes = NULL;
 		return;
 	}
 

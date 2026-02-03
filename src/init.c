@@ -73,7 +73,7 @@ get_ext_mountpoints(void)
 		for (size_t i = 0; ext_mnt[i].mnt_point; i++)
 			free(ext_mnt[i].mnt_point);
 		free(ext_mnt);
-		ext_mnt = (struct ext_mnt_t *)NULL;
+		ext_mnt = NULL;
 	}
 
 	FILE *fp = setmntent(_PATH_MOUNTED, "r");
@@ -101,7 +101,7 @@ get_ext_mountpoints(void)
 	}
 
 	if (n > 0) {
-		ext_mnt[n].mnt_point = (char *)NULL;
+		ext_mnt[n].mnt_point = NULL;
 		ext_mnt[n].type = -1;
 	}
 
@@ -117,7 +117,7 @@ init_workspaces_opts(void)
 		workspace_opts[i].file_counter = conf.file_counter;
 
 		workspace_opts[i].filter.str = filter.str
-			? savestring(filter.str, strlen(filter.str)) : (char *)NULL;
+			? savestring(filter.str, strlen(filter.str)) : NULL;
 		workspace_opts[i].filter.rev = filter.rev;
 		workspace_opts[i].filter.type = filter.type;
 		workspace_opts[i].filter.env = filter.env;
@@ -300,7 +300,7 @@ get_sysusers(void)
 
 	if (n == 0) {
 		endpwent();
-		sys_users = (struct groups_t *)NULL;
+		sys_users = NULL;
 		return;
 	}
 
@@ -347,7 +347,7 @@ get_sysgroups(void)
 
 	if (n == 0) {
 		endgrent();
-		sys_groups = (struct groups_t *)NULL;
+		sys_groups = NULL;
 		return;
 	}
 
@@ -624,7 +624,7 @@ get_user_groups(const char *name, const gid_t gid, int *ngroups)
 		err('e', PRINT_PROMPT, "%s: getgroups: %s\n",
 			PROGRAM_NAME, strerror(errno));
 		free(g);
-		return (gid_t *)NULL;
+		return NULL;
 	}
 	if (NGROUPS_MAX > n) /* Reduce array to actual number of groups (N) */
 		g = xnrealloc(g, (size_t)n, sizeof(g));
@@ -785,7 +785,7 @@ get_user_data_env(void)
 		tmp_user.groups = get_user_groups(tmp_user.name,
 			tmp_user.gid, &tmp_user.ngroups);
 	} else {
-		tmp_user.groups = (gid_t *)NULL;
+		tmp_user.groups = NULL;
 	}
 
 	char *p = xgetenv("CLIFM_SHELL", 0);
@@ -805,7 +805,7 @@ get_user_data_env(void)
 struct user_t
 get_user_data(void)
 {
-	struct passwd *pw = (struct passwd *)NULL;
+	struct passwd *pw = NULL;
 	struct user_t tmp_user = {0};
 
 	errno = 0;
@@ -910,7 +910,7 @@ load_tags(void)
 {
 	if (!tags_dir || !*tags_dir) return;
 
-	struct dirent **t = (struct dirent **)NULL;
+	struct dirent **t = NULL;
 	int i;
 	const int n = scandir(tags_dir, &t, NULL, alphasort);
 	if (n == -1) return;
@@ -1123,7 +1123,7 @@ load_jumpdb(void)
 
 	if (jump_n == 0) {
 		free(jump_db);
-		jump_db = (struct jump_t *)NULL;
+		jump_db = NULL;
 		return;
 	}
 
@@ -1266,7 +1266,7 @@ load_bookmarks(void)
 
 	if (bm_n == 0) {
 		free(bookmarks);
-		bookmarks = (struct bookmarks_t *)NULL;
+		bookmarks = NULL;
 		return FUNC_SUCCESS;
 	}
 
@@ -1564,7 +1564,7 @@ load_file_templates(void)
 
 	if (n == 0) {
 		free(file_templates);
-		file_templates = (char **)NULL;
+		file_templates = NULL;
 		return;
 	}
 
@@ -2129,7 +2129,7 @@ get_path_programs(void)
 	size_t l = 0;
 	size_t i = 0;
 	int *cmd_n = (int *)0;
-	struct dirent ***commands_bin = (struct dirent ***)NULL;
+	struct dirent ***commands_bin = NULL;
 
 	if (conf.ext_cmd_ok == 1) {
 		commands_bin = xnmalloc(path_n, sizeof(struct dirent));
@@ -2137,7 +2137,7 @@ get_path_programs(void)
 
 		for (i = path_n; i-- > 0;) {
 			cmd_n[i] = 0;
-			commands_bin[i] = (struct dirent **)NULL;
+			commands_bin[i] = NULL;
 
 			if (!paths[i].path || !*paths[i].path
 			|| skip_this_path(paths[i].path) == 1)
@@ -2382,7 +2382,7 @@ free_prompt_cmds(void)
 	for (size_t i = 0; i < prompt_cmds_n; i++)
 		free(prompt_cmds[i]);
 	free(prompt_cmds);
-	prompt_cmds = (char **)NULL;
+	prompt_cmds = NULL;
 	prompt_cmds_n = 0;
 }
 

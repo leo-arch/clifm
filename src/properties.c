@@ -704,8 +704,8 @@ set_file_owner(char **args)
 			new_group = NULL;
 	}
 
-	struct passwd *owner = (struct passwd *)NULL;
-	struct group *group = (struct group *)NULL;
+	struct passwd *owner = NULL;
+	struct group *group = NULL;
 
 	/* Validate new ownership */
 	if (*new_own) { /* NEW_OWN is null in case of ":group" or ":gid" */

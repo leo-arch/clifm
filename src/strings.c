@@ -873,14 +873,14 @@ char **
 split_str(char *str, const int update_args)
 {
 	if (!str)
-		return (char **)NULL;
+		return NULL;
 
 	init_quoted_words();
 
 	size_t buf_len = 0, words = 0, str_len = 0;
 	char *buf = xnmalloc(1, sizeof(char));
 	char close = 0;
-	char **substr = (char **)NULL;
+	char **substr = NULL;
 
 	int keep_quotes = cmd_keeps_quotes(str);
 
@@ -932,7 +932,7 @@ split_str(char *str, const int update_args)
 					free(substr[i]);
 				free(substr);
 
-				return (char **)NULL;
+				return NULL;
 			}
 
 			/* Copy the closing char and add an space: this function
@@ -990,7 +990,7 @@ split_str(char *str, const int update_args)
 				for (size_t i = words; i-- > 0;)
 					free(substr[i]);
 				free(substr);
-				return (char **)NULL;
+				return NULL;
 			}
 
 			if (is_quoted == 1) { /* Add closing quote. */
@@ -1073,7 +1073,7 @@ split_str(char *str, const int update_args)
 	} else {
 		if (update_args == 1)
 			args_n = 0; /* Just in case, but I think it's not required. */
-		return (char **)NULL;
+		return NULL;
 	}
 }
 
@@ -1185,7 +1185,7 @@ check_shell_functions(const char *str)
 			return 1;
 	}
 
-/*	char **b = (char **)NULL;
+/*	char **b = NULL;
 
 	switch (shell) {
 	case SHELL_NONE: return 0;
@@ -1277,7 +1277,7 @@ expand_tag(char ***args, const int tag_index)
 	char dir[PATH_MAX + 1];
 	snprintf(dir, sizeof(dir), "%s/%s", tags_dir, tag);
 
-	struct dirent **t = (struct dirent **)NULL;
+	struct dirent **t = NULL;
 	const int n = scandir(dir, &t, NULL, conf.case_sens_list
 		? xalphasort : alphasort_insensitive);
 	if (n == -1)
@@ -1354,7 +1354,7 @@ static void
 expand_tags(char ***substr)
 {
 	size_t ntags = 0;
-	int *tag_index = (int *)NULL;
+	int *tag_index = NULL;
 	struct stat a;
 
 	for (size_t i = 0; (*substr)[i]; i++) {
@@ -1392,7 +1392,7 @@ static char **
 expand_mime_type_filter(const char *pattern)
 {
 	if (!pattern || !*pattern)
-		return (char **)NULL;
+		return NULL;
 
 	char **t = xnmalloc((size_t)g_files_num + 1, sizeof(char *));
 	char buf[PATH_MAX + 1];
@@ -1422,7 +1422,7 @@ expand_mime_type_filter(const char *pattern)
 	t[n] = NULL;
 
 	if (n == 0)
-		{ free(t); return (char **)NULL; }
+		{ free(t); return NULL; }
 
 	t = xnrealloc(t, (size_t)n + 1, sizeof(char *));
 	return t;
@@ -1435,7 +1435,7 @@ static char **
 expand_file_type_filter(const char t)
 {
 	if (g_files_num == 0)
-		return (char **)NULL;
+		return NULL;
 
 	filesn_t i = 0, c = 0;
 
@@ -1488,7 +1488,7 @@ expand_file_type_filter(const char t)
 
 	if (c == 0) {
 		free(f);
-		return (char **)NULL;
+		return NULL;
 	}
 
 	f[c] = NULL;
@@ -1501,7 +1501,7 @@ static char **
 get_bm_paths(void)
 {
 	if (bm_n == 0)
-		return (char **)NULL;
+		return NULL;
 
 	char **b = xnmalloc(bm_n + 1, sizeof(char *));
 
@@ -1519,7 +1519,7 @@ static char **
 insert_fields(char ***dst, char ***src, const size_t i, size_t *num)
 {
 	if (!*dst || !*src)
-		return (char **)NULL;
+		return NULL;
 
 	char **s = *src;
 
@@ -1528,13 +1528,13 @@ insert_fields(char ***dst, char ***src, const size_t i, size_t *num)
 	for (sn = 0; s[sn]; sn++);
 
 	if (sn == 0)
-		return (char **)NULL;
+		return NULL;
 
 	update_quoted_words_index(i, sn);
 
 	/* 2. Store fields in DST after the field to be expanded (I) */
 	char **tail = args_n > i /* Substraction must be bigger than zero */
-		? xnmalloc(args_n - i + 1, sizeof(char *)) : (char **)NULL;
+		? xnmalloc(args_n - i + 1, sizeof(char *)) : NULL;
 
 	size_t n = 0;
 	if (tail) {
@@ -1830,7 +1830,7 @@ expand_file_type(char ***substr)
 
 		char **p =
 			(*substr)[index][1] ? expand_file_type_filter((*substr)[index][1])
-			: (char **)NULL;
+			: NULL;
 
 		size_t c = 0;
 		if (p) {
@@ -1846,7 +1846,7 @@ expand_file_type(char ***substr)
 				free((*substr));
 
 				(*substr) = ret;
-				ret = (char **)NULL;
+				ret = NULL;
 				args_n += (c > 0 ? c - 1 : 0);
 			}
 		}
@@ -1884,7 +1884,7 @@ expand_mime_type(char ***substr)
 		int index = mime_type_array[i] + (int)old_mt;
 
 		char **p = *((*substr)[index] + 1)
-			? expand_mime_type_filter((*substr)[index] + 1) : (char **)NULL;
+			? expand_mime_type_filter((*substr)[index] + 1) : NULL;
 
 		size_t c = 0;
 		if (p) {
@@ -1901,7 +1901,7 @@ expand_mime_type(char ***substr)
 				free((*substr));
 
 				(*substr) = ret;
-				ret = (char **)NULL;
+				ret = NULL;
 				args_n += (c > 0 ? c - 1 : 0);
 			}
 		}
@@ -1952,7 +1952,7 @@ expand_bookmarks(char ***substr)
 				free((*substr));
 
 				(*substr) = ret;
-				ret = (char **)NULL;
+				ret = NULL;
 				args_n += (c > 0 ? c - 1 : 0);
 			}
 		}
@@ -1985,7 +1985,7 @@ expand_glob(char ***substr, const int *glob_array, const size_t glob_n)
 			goto CONT;
 
 		size_t j = 0;
-		char **glob_cmd = (char **)NULL;
+		char **glob_cmd = NULL;
 		glob_cmd = xcalloc(args_n + globbuf.gl_pathc + 1, sizeof(char *));
 
 		for (i = 0; i < ((size_t)glob_array[g] + old_pathc); i++)
@@ -2026,7 +2026,7 @@ expand_glob(char ***substr, const int *glob_array, const size_t glob_n)
 		free((*substr));
 
 		(*substr) = glob_cmd;
-		glob_cmd = (char **)NULL;
+		glob_cmd = NULL;
 		args_n = j - 1;
 
 CONT:
@@ -2086,7 +2086,7 @@ expand_word(char ***substr, const int *word_array, const size_t word_n)
 						free(word_cmd[k]);
 					free(word_cmd);
 
-					word_cmd = (char **)NULL;
+					word_cmd = NULL;
 
 					for (size_t k = 0; k <= args_n; k++)
 						free((*substr)[k]);
@@ -2105,7 +2105,7 @@ expand_word(char ***substr, const int *word_array, const size_t word_n)
 			free((*substr));
 
 			(*substr) = word_cmd;
-			word_cmd = (char **)NULL;
+			word_cmd = NULL;
 			args_n = j - 1;
 		}
 
@@ -2158,21 +2158,21 @@ static filesn_t *
 expand_range(char *str, int listdir)
 {
 	if (!str || !*str)
-		return (filesn_t *)NULL;
+		return NULL;
 
 	struct stat a;
 	if (lstat(str, &a) != -1)
-		return (filesn_t *)NULL;
+		return NULL;
 
 	char *p = strchr(str, '-');
 	if (!p || p == str || *(p - 1) < '0' || *(p - 1) > '9')
-		return (filesn_t *)NULL;
+		return NULL;
 
 	*p = '\0';
 	const int ret = is_number(str);
 	*p = '-';
 	if (!ret)
-		return (filesn_t *)NULL;
+		return NULL;
 
 	const filesn_t afirst = xatof(str);
 
@@ -2182,20 +2182,20 @@ expand_range(char *str, int listdir)
 		asecond = g_files_num;
 	} else {
 		if (!is_number(p))
-			return (filesn_t *)NULL;
+			return NULL;
 		asecond = xatof(p);
 	}
 
 	if (afirst == -1 || asecond == -1)
-		return (filesn_t *)NULL;
+		return NULL;
 
 	if (listdir) {
 		if (afirst <= 0 || afirst > g_files_num || asecond <= 0
 		|| asecond > g_files_num || afirst >= asecond)
-			return (filesn_t *)NULL;
+			return NULL;
 	} else {
 		if (afirst >= asecond) 
-			return (filesn_t *)NULL;
+			return NULL;
 	}
 
 	filesn_t *buf = xcalloc((size_t)(asecond - afirst) + 2, sizeof(filesn_t));
@@ -2233,7 +2233,7 @@ expand_ranges(char ***substr)
 			update_quoted_words_index((size_t)range_array[r]
 				+ old_ranges_n, ranges_n);
 
-			char **ranges_cmd = (char **)NULL;
+			char **ranges_cmd = NULL;
 			ranges_cmd = xcalloc(args_n + ranges_n + 2, sizeof(char *));
 
 			for (i = 0; i < (size_t)range_array[r] + old_ranges_n; i++) {
@@ -2655,7 +2655,7 @@ char **
 parse_input_str(char *str)
 {
 	if (!str)
-		return (char **)NULL;
+		return NULL;
 
 	int fusedcmd_ok = 0;
 
@@ -2723,7 +2723,7 @@ parse_input_str(char *str)
 	if ((chaining == 1 || cond_cmd == 1) && check_chained_cmds(str) == 1) {
 		if (fusedcmd_ok == 1)
 			free(str);
-		return (char **)NULL;
+		return NULL;
 	}
 
 	if ((flags & IS_USRVAR_DEF) || send_shell == 1)
@@ -2741,7 +2741,7 @@ parse_input_str(char *str)
 		free(str);
 
 	if (!substr)
-		return (char **)NULL;
+		return NULL;
 
 	/* Do not perform expansions for the 'n/new' command. */
 	if (*substr[0] == 'n' && (!substr[0][1] || strcmp(substr[0], "new") == 0))
@@ -2919,7 +2919,7 @@ parse_input_str(char *str)
 			for (i = 0; i <= args_n; i++)
 				free(substr[i]);
 			free(substr);
-			return (char **)NULL;
+			return NULL;
 		}
 	}
 
@@ -3049,7 +3049,7 @@ parse_input_str(char *str)
 
 	if (glob_n > 0 && glob_expand(substr) == 1
 	&& expand_glob(&substr, glob_array, glob_n) == -1)
-		return (char **)NULL;
+		return NULL;
 
 	free(glob_array);
 
@@ -3059,7 +3059,7 @@ parse_input_str(char *str)
 
 #ifdef HAVE_WORDEXP
 	if (word_n > 0 && expand_word(&substr, word_array, word_n) == -1)
-		return (char **)NULL;
+		return NULL;
 
 	free(word_array);
 #endif /* HAVE_WORDEXP */
@@ -3169,10 +3169,10 @@ char **
 get_substr(char *str, const char ifs, const int fproc)
 {
 	if (!str || !*str)
-		return (char **)NULL;
+		return NULL;
 
 	/* a. SPLIT THE STRING */
-	char **substr = (char **)NULL;
+	char **substr = NULL;
 	size_t len = 0;
 	size_t substr_n = 0;
 	const size_t str_len = strlen(str);
@@ -3195,7 +3195,7 @@ get_substr(char *str, const char ifs, const int fproc)
 	free(buf);
 
 	if (substr_n == 0)
-		return (char **)NULL;
+		return NULL;
 
 	substr[substr_n] = NULL;
 
@@ -3212,10 +3212,10 @@ get_substr(char *str, const char ifs, const int fproc)
 	for (substr_n = 0; substr[substr_n]; substr_n++);
 	if (substr_n == 0) {
 		free(substr);
-		return (char **)NULL;
+		return NULL;
 	}
 
-	char **dstr = (char **)NULL;
+	char **dstr = NULL;
 	size_t n = 0;
 
 	for (size_t i = 0; i < substr_n; i++) {

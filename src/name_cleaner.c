@@ -325,7 +325,7 @@ static struct bleach_t *
 edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 {
 	if (!bfiles || !bfiles[0].original)
-		return (struct bleach_t *)NULL;
+		return NULL;
 
 	*edited_names = 1;
 
@@ -484,7 +484,7 @@ bleach_files(char **names)
 	}
 
 	int do_edit = 0, edited_names = 0;
-	struct bleach_t *bfiles = (struct bleach_t *)NULL;
+	struct bleach_t *bfiles = NULL;
 
 	size_t f = 0;
 	for (size_t i = 1; names[i]; i++) {

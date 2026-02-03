@@ -621,7 +621,7 @@ clear_defs(void)
 	defs_n = 0;
 END:
 	free(defs);
-	defs = (struct colors_t *)NULL;
+	defs = NULL;
 }
 #endif /* !CLIFM_SUCKLESS */
 
@@ -1455,7 +1455,7 @@ free_extension_colors(void)
 		free(ext_colors[i].value);
 	}
 	free(ext_colors);
-	ext_colors = (struct ext_t *)NULL;
+	ext_colors = NULL;
 	ext_colors_n = 0;
 }
 
@@ -2337,7 +2337,7 @@ static void
 split_color_line(char *line, const int type)
 {
 	char *p = line;
-	char **colors = (char **)NULL;
+	char **colors = NULL;
 	/* MAX_COLOR is not enough when parsing LS_COLORS lines, where we
 	 * usually find extension colors ("*.ext=color"). */
 	char buf[MAX_COLOR + 3 + NAME_MAX]; *buf = '\0';

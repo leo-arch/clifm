@@ -99,7 +99,7 @@ static void
 copy_current_files_filter(void)
 {
 	free(opts.filter.str);
-	opts.filter.str = (char *)NULL;
+	opts.filter.str = NULL;
 
 	if (!filter.str)
 		return;
@@ -115,7 +115,7 @@ install_autocmd_files_filter(const size_t i)
 {
 	free(filter.str);
 	if (strcmp(autocmds[i].filter.str, "unset") == 0) {
-		filter.str = (char *)NULL;
+		filter.str = NULL;
 		if (filter.type == FILTER_FILE_NAME)
 			regfree(&regex_exp);
 	} else {
@@ -190,8 +190,8 @@ gen_common_options(void)
 	struct autocmds_t a;
 	struct autocmds_t *b = autocmds;
 
-	a.cmd = (char *)NULL;
-	a.color_scheme = (char *)NULL;
+	a.cmd = NULL;
+	a.color_scheme = NULL;
 	a.file_counter = UNSET;
 	a.full_dir_size = UNSET;
 	a.light_mode = UNSET;
@@ -472,7 +472,7 @@ revert_files_filter(void)
 	free(filter.str);
 	filter.str = savestring(opts.filter.str, strlen(opts.filter.str));
 	free(opts.filter.str);
-	opts.filter.str = (char *)NULL;
+	opts.filter.str = NULL;
 
 	if (filter.type == FILTER_FILE_NAME)
 		set_autocmd_regex_filter(filter.str);
@@ -543,7 +543,7 @@ set_autocmd_color_scheme(const char *name, const size_t n)
 		return FUNC_FAILURE;
 
 	if (*name == 'u' && strcmp(name, "unset") == 0) {
-		autocmds[n].color_scheme = (char *)NULL;
+		autocmds[n].color_scheme = NULL;
 		return FUNC_SUCCESS;
 	}
 
@@ -557,7 +557,7 @@ set_autocmd_color_scheme(const char *name, const size_t n)
 
 	err(ERR_NO_LOG, PRINT_PROMPT, _("autocmd: '%s': Invalid value for 'cs'\n"),
 		name);
-	autocmds[n].color_scheme = (char *)NULL;
+	autocmds[n].color_scheme = NULL;
 	return FUNC_FAILURE;
 }
 
@@ -705,8 +705,8 @@ ERR_VAL:
 static void
 init_autocmd_opts(const size_t n)
 {
-	autocmds[n].cmd = (char *)NULL;
-	autocmds[n].color_scheme = (char *)NULL;
+	autocmds[n].cmd = NULL;
+	autocmds[n].color_scheme = NULL;
 	autocmds[n].file_counter = UNSET;
 	autocmds[n].full_dir_size = UNSET;
 	autocmds[n].light_mode = UNSET;
@@ -733,7 +733,7 @@ modify_autocmd(char *arg, const size_t n)
 	int exit_status = FUNC_FAILURE;
 
 	while (1) {
-		char *val = (char *)NULL;
+		char *val = NULL;
 		if (*arg == ',') {
 			*arg = '\0';
 			arg++;
@@ -810,7 +810,7 @@ parse_autocmd_line(char *cmd, const size_t buflen)
 				xnrealloc(autocmds, autocmds_n, sizeof(struct autocmds_t));
 		} else {
 			free(autocmds);
-			autocmds = (struct autocmds_t *)NULL;
+			autocmds = NULL;
 		}
 
 		return FUNC_FAILURE;

@@ -305,7 +305,7 @@ trash_file(char *file)
 		tmpfile = full_path;
 	}
 
-	char *file_suffix = (char *)NULL;
+	char *file_suffix = NULL;
 	char *dest = gen_dest_file(tmpfile, &file_suffix);
 
 	/* As per the FreeDesktop specification, generate the info file first. */
@@ -365,7 +365,7 @@ remove_from_trash_params(char **args)
 
 
 	for (i = 0; args[i]; i++) {
-		char *d = (char *)NULL;
+		char *d = NULL;
 		if (strchr(args[i], '\\'))
 			d = unescape_str(args[i], 0);
 
@@ -427,14 +427,14 @@ list_and_get_input(struct dirent ***trash_files, const int files_n,
 
 	const int ret = print_trashfiles(trash_files, files_n);
 	if (ret != FUNC_SUCCESS)
-		return (char **)NULL;
+		return NULL;
 
 	/* Get input */
 	printf(_("\n%sEnter 'q' to quit\n"
 		"File(s) to be %s (e.g.: 1 2-6, or *):\n"), df_c,
 		is_untrash == 1 ? _("restored") : _("removed"));
 
-	char *line = (char *)NULL;
+	char *line = NULL;
 	char tprompt[(MAX_COLOR * 2) + 7];
 	snprintf(tprompt, sizeof(tprompt), "\001%s\002>\001%s\002 ", mi_c, tx_c);
 
@@ -495,7 +495,7 @@ load_trashed_files(int *n, int *status)
 {
 	*status = FUNC_SUCCESS;
 
-	struct dirent **tfiles = (struct dirent **)NULL;
+	struct dirent **tfiles = NULL;
 	*n = scandir(trash_files_dir, &tfiles,
 		skip_files, conf.case_sens_list == 1 ? xalphasort
 		: alphasort_insensitive);
@@ -613,10 +613,10 @@ read_original_path(const char *file, const char *src, int *status)
 		xerror(_("untrash: Info file for '%s' not found. Try restoring "
 			"the file manually.\n"), src);
 		*status = errno;
-		return (char *)NULL;
+		return NULL;
 	}
 
-	char *orig_path = (char *)NULL;
+	char *orig_path = NULL;
 	/* The max length for line is: Path=(5) + PATH_MAX + \n(1) */
 	char line[PATH_MAX + 6]; *line = '\0';
 
@@ -636,7 +636,7 @@ read_original_path(const char *file, const char *src, int *status)
 	if (!orig_path || !*orig_path) {
 		free(orig_path);
 		*status = FUNC_FAILURE;
-		return (char *)NULL;
+		return NULL;
 	}
 
 	/* Remove new line char from original path, if any */
@@ -651,7 +651,7 @@ read_original_path(const char *file, const char *src, int *status)
 		xerror(_("untrash: '%s': Error decoding original path\n"), orig_path);
 		free(orig_path);
 		*status = FUNC_FAILURE;
-		return (char *)NULL;
+		return NULL;
 	}
 
 	free(orig_path);
@@ -964,7 +964,7 @@ list_trashed_files(void)
 		return FUNC_FAILURE;
 	}
 
-	struct dirent **trash_files = (struct dirent **)NULL;
+	struct dirent **trash_files = NULL;
 	const int files_n = scandir(trash_files_dir, &trash_files,
 		skip_files, conf.case_sens_list == 1
 		? xalphasort : alphasort_insensitive);

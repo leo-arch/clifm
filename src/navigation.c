@@ -84,10 +84,10 @@ char **
 get_bd_matches(const char *str, int *n, const int mode)
 {
 	if (*workspaces[cur_ws].path == '/' && !workspaces[cur_ws].path[1])
-		return (char **)NULL;
+		return NULL;
 
 	char *cwd = workspaces[cur_ws].path;
-	char **matches = (char **)NULL;
+	char **matches = NULL;
 
 	if (mode == BD_TAB) {
 		/* matches will be passed to readline for tab completion, so that
@@ -142,13 +142,13 @@ get_bd_matches(const char *str, int *n, const int mode)
 	if (mode == BD_TAB) {
 		if (*n == 1) { /* No matches. */
 			free(matches);
-			return (char **)NULL;
+			return NULL;
 		} else if (*n == 2) { /* One match. */
 			char *p = escape_str(matches[1]);
 			if (!p) {
 				free(matches[1]);
 				free(matches);
-				return (char **)NULL;
+				return NULL;
 			}
 			matches[0] = p;
 			free(matches[1]);

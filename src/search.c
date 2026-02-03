@@ -307,10 +307,10 @@ static struct search_t *
 get_non_matches_from_search_path(const char *search_path, char **gfiles,
 		const mode_t file_type)
 {
-	struct dirent **ent = (struct dirent **)NULL;
+	struct dirent **ent = NULL;
 	int dir_entries = scandir(search_path, &ent, skip_files, xalphasort);
 	if (dir_entries == -1)
-		return (struct search_t *)NULL;
+		return NULL;
 
 	int i, j, n = 0;
 	struct search_t *matches = xnmalloc((size_t)dir_entries + 1,
@@ -590,7 +590,7 @@ search_glob(char **args)
 	/* We need to store pointers to matching filenames in array of pointers,
 	 * just as the filename length (to construct the columned output), and,
 	 * if searching in CWD, its index (ELN) in the dirlist array as well. */
-	struct search_t *list = (struct search_t *)NULL;
+	struct search_t *list = NULL;
 
 	if (invert == 0)
 		list = get_glob_matches(gfiles, search_path, file_type, g);
@@ -886,7 +886,7 @@ search_regex(char **args)
 	if (file_type == 'x') /* Recursive search via find(1) */
 		return FUNC_SUCCESS;
 
-	struct dirent **reg_dirlist = (struct dirent **)NULL;
+	struct dirent **reg_dirlist = NULL;
 	int tmp_files = -1;
 
 	if (search_path && *search_path) {

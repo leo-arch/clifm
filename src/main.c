@@ -41,28 +41,28 @@
 
 /* Globals */
 
-struct usrvar_t *usr_var = (struct usrvar_t *)NULL;
-struct actions_t *usr_actions = (struct actions_t *)NULL;
-struct ws_t *workspaces = (struct ws_t *)NULL;
-struct kbinds_t *kbinds = (struct kbinds_t *)NULL;
-struct jump_t *jump_db = (struct jump_t *)NULL;
-struct bookmarks_t *bookmarks = (struct bookmarks_t *)NULL;
-struct fileinfo *file_info = (struct fileinfo *)NULL;
-struct remote_t *remotes = (struct remote_t *)NULL;
-struct alias_t *aliases = (struct alias_t *)NULL;
+struct usrvar_t *usr_var = NULL;
+struct actions_t *usr_actions = NULL;
+struct ws_t *workspaces = NULL;
+struct kbinds_t *kbinds = NULL;
+struct jump_t *jump_db = NULL;
+struct bookmarks_t *bookmarks = NULL;
+struct fileinfo *file_info = NULL;
+struct remote_t *remotes = NULL;
+struct alias_t *aliases = NULL;
 struct user_t user = {0};
 /* Store device and inode number of selected files */
-struct devino_t *sel_devino = (struct devino_t *)NULL;
+struct devino_t *sel_devino = NULL;
 #ifndef _NO_SUGGESTIONS
 struct suggestions_t suggestion = {0};
 #endif /* !_NO_SUGGESTIONS */
 struct stats_t stats = {0};
-struct autocmds_t *autocmds = (struct autocmds_t *)NULL;
+struct autocmds_t *autocmds = NULL;
 struct opts_t opts = {0};
 struct opts_t workspace_opts[MAX_WS];
-struct sel_t *sel_elements = (struct sel_t *)NULL;
-struct prompts_t *prompts = (struct prompts_t *)NULL;
-struct history_t *history = (struct history_t *)NULL;
+struct sel_t *sel_elements = NULL;
+struct prompts_t *prompts = NULL;
+struct history_t *history = NULL;
 struct msgs_t msgs = {0};
 struct props_t prop_fields = {0};
 struct termcaps_t term_caps = {0};
@@ -70,16 +70,16 @@ struct filter_t filter = {0};
 struct config_t conf = {0};
 struct shades_t date_shades = {0};
 struct shades_t size_shades = {0};
-struct paths_t *paths = (struct paths_t *)NULL;
-struct ext_t *ext_colors = (struct ext_t *)NULL;
+struct paths_t *paths = NULL;
+struct ext_t *ext_colors = NULL;
 #ifdef LINUX_FSINFO
-struct ext_mnt_t *ext_mnt = (struct ext_mnt_t *)NULL;
+struct ext_mnt_t *ext_mnt = NULL;
 #endif /* LINUX_FSINFO */
-struct groups_t *sys_users = (struct groups_t *)NULL;
-struct groups_t *sys_groups = (struct groups_t *)NULL;
+struct groups_t *sys_users = NULL;
+struct groups_t *sys_groups = NULL;
 struct dircmds_t dir_cmds = {UNSET, 0};
-struct pmsgs_t *messages = (struct pmsgs_t *)NULL;
-struct mime_t *user_mimetypes = (struct mime_t *)NULL;
+struct pmsgs_t *messages = NULL;
+struct mime_t *user_mimetypes = NULL;
 
 #ifndef _NO_MAGIC
 magic_t g_magic_mime_type_cookie = NULL;
@@ -294,15 +294,15 @@ char
 	*trash_info_dir = NULL,
 #endif /* !_NO_TRASH */
 
-	**argv_bk = (char **)NULL,
-	**bin_commands = (char **)NULL,
-	**cdpaths = (char **)NULL,
-	**color_schemes = (char **)NULL,
-	**file_templates = (char **)NULL,
-	**old_pwd = (char **)NULL,
-	**profile_names = (char **)NULL,
-	**prompt_cmds = (char **)NULL,
-	**tags = (char **)NULL;
+	**argv_bk = NULL,
+	**bin_commands = NULL,
+	**cdpaths = NULL,
+	**color_schemes = NULL,
+	**file_templates = NULL,
+	**old_pwd = NULL,
+	**profile_names = NULL,
+	**prompt_cmds = NULL,
+	**tags = NULL;
 
 /* Colors */
 char
@@ -1090,7 +1090,7 @@ print_splash_screen(void)
 static inline void
 check_working_directory(void)
 {
-	if (workspaces == (struct ws_t *)NULL || !workspaces[cur_ws].path
+	if (workspaces == NULL || !workspaces[cur_ws].path
 	|| !*workspaces[cur_ws].path) {
 		err(0, NOPRINT_PROMPT, _("%s: Fatal error! Failure "
 			"retrieving the current working directory\n"), PROGRAM_NAME);

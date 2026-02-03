@@ -39,7 +39,7 @@ free_bookmarks(void)
 	}
 
 	free(bookmarks);
-	bookmarks = (struct bookmarks_t *)NULL;
+	bookmarks = NULL;
 	bm_n = 0;
 }
 
@@ -71,7 +71,7 @@ bm_prompt(const int print_header)
 	alt_prompt = 0;
 	prompt_offset = prompt_offset_bk;
 
-	char **cmd = (char **)NULL;
+	char **cmd = NULL;
 	/* "e/edit" is the only command that needs to split the input string:
 	 * the second field may be an opening application. */
 	if (*bm == 'e' && (bm[1] == ' ' || strncmp(bm, "edit ", 5) == 0)) {
@@ -255,7 +255,7 @@ free_bm_input(char ***p)
 	for (size_t i = 0; (*p)[i]; i++)
 		free((*p)[i]);
 	free(*p);
-	*p = (char **)NULL;
+	*p = NULL;
 }
 
 /* This function takes care of the bookmarks screen.
@@ -278,7 +278,7 @@ open_bookmark(void)
 
 	print_bookmarks();
 
-	char **arg = (char **)NULL;
+	char **arg = NULL;
 	while (!arg) {
 		arg = bm_prompt(header_printed == 1 ? NO_BM_HEADER : PRINT_BM_HEADER);
 		header_printed = 1;

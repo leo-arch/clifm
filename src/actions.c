@@ -344,7 +344,7 @@ edit_actions(char *app)
 		for (size_t i = 0; bin_commands[i]; i++)
 			free(bin_commands[i]);
 		free(bin_commands);
-		bin_commands = (char **)NULL;
+		bin_commands = NULL;
 	}
 
 	if (paths) {

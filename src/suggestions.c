@@ -1058,7 +1058,7 @@ check_history(const char *str, const size_t len)
 static int
 check_builtins(const char *str, const size_t len, const int print)
 {
-	char **b = (char **)NULL;
+	char **b = NULL;
 
 	switch (shell) {
 	case SHELL_NONE: return NO_MATCH;
@@ -1325,7 +1325,7 @@ check_jcmd(char *line)
 		clear_suggestion(CS_FREEBUF);
 
 	/* Split line into an array of substrings. */
-	char **substr = line ? get_substr(line, ' ', 0) : (char **)NULL;
+	char **substr = line ? get_substr(line, ' ', 0) : NULL;
 	if (!substr)
 		return NO_MATCH;
 

@@ -54,19 +54,19 @@ struct mnt_t {
 	char *label; /* Device label */
 };
 
-static struct mnt_t *media = (struct mnt_t *)NULL;
+static struct mnt_t *media = NULL;
 static size_t mp_n = 0;
 
 #ifdef HAVE_PROC_MOUNTS
 static char **
 get_block_devices(void)
 {
-	struct dirent **blockdev = (struct dirent **)NULL;
+	struct dirent **blockdev = NULL;
 	int block_n = scandir("/dev", &blockdev, NULL, alphasort);
 	if (block_n == - 1)
-		return (char **)NULL;
+		return NULL;
 
-	char **bd = (char **)NULL;
+	char **bd = NULL;
 	size_t n = 0;
 
 	for (int i = 0; i < block_n; i++) {
@@ -155,7 +155,7 @@ static char *
 get_dev_label(void)
 {
 	const size_t n = mp_n;
-	struct dirent **labels = (struct dirent **)NULL;
+	struct dirent **labels = NULL;
 	const int ln = scandir(DISK_LABELS_PATH, &labels, NULL, alphasort);
 	if (ln == - 1)
 		return NULL;
@@ -373,7 +373,7 @@ free_media(void)
 		free(media[i].label);
 	}
 	free(media);
-	media = (struct mnt_t *)NULL;
+	media = NULL;
 }
 
 /* Get device information via external application */
@@ -587,7 +587,7 @@ media_menu(const int mode)
 #ifdef HAVE_PROC_MOUNTS
 	if (list_mounted_devs(mode) == FUNC_FAILURE) {
 		free(media);
-		media = (struct mnt_t *)NULL;
+		media = NULL;
 		return FUNC_FAILURE;
 	}
 

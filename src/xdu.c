@@ -70,7 +70,7 @@ static inline void
 free_xdu_hardlinks(void)
 {
 	free(xdu_hardlinks);
-	xdu_hardlinks = (struct hlink_t *)NULL;
+	xdu_hardlinks = NULL;
 	xdu_hardlink_n = 0;
 }
 

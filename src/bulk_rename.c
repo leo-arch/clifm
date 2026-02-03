@@ -281,7 +281,7 @@ char **
 get_new_names(FILE *fp, const size_t total, int *status)
 {
 	if (!fp)
-		return (char **)NULL;
+		return NULL;
 
 	char line[PATH_MAX + 1];
 	*line = '\0';
@@ -343,7 +343,7 @@ FREE_AND_EXIT:
 	for (i = 0; fnames[i]; i++)
 		free(fnames[i]);
 	free(fnames);
-	return (char **)NULL;
+	return NULL;
 }
 
 static void

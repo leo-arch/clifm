@@ -310,9 +310,9 @@ sel_glob(char *str, const char *sel_path, const mode_t filetype)
 		return (-1);
 	}
 
-	char **list = (char **)NULL;
+	char **list = NULL;
 	int matches = 0;
-	struct dirent **ent = (struct dirent **)NULL;
+	struct dirent **ent = NULL;
 
 	if (invert == 1) {
 		if (!sel_path) {
@@ -383,7 +383,7 @@ sel_regex_nocwd(regex_t regex, const char *sel_path, const mode_t filetype,
 	const int invert)
 {
 	int new_sel = 0;
-	struct dirent **list = (struct dirent **)NULL;
+	struct dirent **list = NULL;
 	const int filesn = scandir(sel_path, &list, skip_files, xalphasort);
 
 	if (filesn == -1) {
@@ -768,7 +768,7 @@ deselect_files_in_cwd(void)
 	/* Free data about selected files. It will be reconstructed later
 	 * by get_sel_files(). */
 	free(sel_devino);
-	sel_devino = (struct devino_t *)NULL;
+	sel_devino = NULL;
 
 	struct sel_t *sel = NULL;
 	size_t n = 0;
@@ -1092,7 +1092,7 @@ deselect_entries(char **desel_path, const size_t desel_n, int *error,
 static int
 desel_entries(char **desel_elements, const size_t desel_n, const int desel_screen)
 {
-	char **desel_path = (char **)NULL;
+	char **desel_path = NULL;
 	size_t i = desel_n;
 
 	/* Get entries to be deselected */
@@ -1215,7 +1215,7 @@ get_desel_input(size_t *n)
 	free(line);
 
 	if (!entries)
-		return (char **)NULL;
+		return NULL;
 
 	for (*n = 0; entries[*n]; (*n)++);
 

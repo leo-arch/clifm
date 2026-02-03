@@ -239,7 +239,7 @@ get_files_from_tmp_file(const char *tmpfile, const char *target, const filesn_t 
 
 	FILE *fp = fopen(tmpfile, "r");
 	if (!fp)
-		return (char **)NULL;
+		return NULL;
 
 	size_t i = 0;
 	char line[PATH_MAX + 1]; *line = '\0';
@@ -417,7 +417,7 @@ bulk_remove(char *s1, char *s2)
 	const ino_t old_ino = attr.st_ino;
 	const dev_t old_dev = attr.st_dev;
 
-	struct dirent **a = (struct dirent **)NULL;
+	struct dirent **a = NULL;
 	if ((ret = write_files_to_tmp(&a, &n, target, tmp_file)) != FUNC_SUCCESS)
 		goto END;
 

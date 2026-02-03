@@ -662,7 +662,7 @@ get_data_dir(void)
 static char *
 get_home_sec_env(void)
 {
-	struct passwd *pw = (struct passwd *)NULL;
+	struct passwd *pw = NULL;
 
 	uid_t u = geteuid();
 	pw = getpwuid(u);

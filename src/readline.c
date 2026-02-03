@@ -72,7 +72,7 @@ typedef void rl_macro_print_func_t (const char *, const char *, int, const char 
 
 static char ext_opts[MAX_EXT_OPTS][MAX_EXT_OPTS_LEN];
 #ifndef _NO_TAGS
-static struct dirent **tagged_files = (struct dirent **)NULL;
+static struct dirent **tagged_files = NULL;
 static int tagged_files_n = 0;
 #endif /* !_NO_TAGS */
 static int cb_running = 0;
@@ -976,7 +976,7 @@ my_rl_path_completion(const char *text, int state)
 	static char *users_dirname = NULL;
 	static size_t filename_len;
 	static int match;
-	struct dirent *ent = (struct dirent *)NULL;
+	struct dirent *ent = NULL;
 	static char tmp[PATH_MAX + 1];
 	static char *tmp_text = NULL;
 
@@ -1184,7 +1184,7 @@ my_rl_path_completion(const char *text, int state)
 	if ((flags & STATE_SUGGESTING) || !ent) {
 		if (directory) {
 			closedir(directory);
-			directory = (DIR *)NULL;
+			directory = NULL;
 		}
 
 		free(dirname); dirname = NULL;
@@ -2191,7 +2191,7 @@ rl_mime_list(void)
 	}
 
 	if (n == 1)
-		{ free(t[0]); free(t); return (char **)NULL; }
+		{ free(t[0]); free(t); return NULL; }
 
 	t = xnrealloc(t, n + 1, sizeof(char *));
 
@@ -2208,7 +2208,7 @@ static char **
 rl_mime_files(const char *text)
 {
 	if (!text || !*text)
-		return (char **)NULL;
+		return NULL;
 
 	if (term_caps.suggestions != 0)
 		{ HIDE_CURSOR; fputs(" [wait...]", stdout); fflush(stdout); }
@@ -2246,7 +2246,7 @@ rl_mime_files(const char *text)
 		{ MOVE_CURSOR_LEFT(10); ERASE_TO_RIGHT; UNHIDE_CURSOR; }
 
 	if (n == 1)
-		{ free(t[0]); free(t); return (char **)NULL; }
+		{ free(t[0]); free(t); return NULL; }
 
 	t = xnrealloc(t, n + 1, sizeof(char *));
 	return t;
@@ -2263,7 +2263,7 @@ rl_glob(char *text)
 	if (glob(tmp ? tmp : text, 0, NULL, &globbuf) != FUNC_SUCCESS) {
 		globfree(&globbuf);
 		free(tmp);
-		return (char **)NULL;
+		return NULL;
 	}
 
 	free(tmp);
@@ -2340,24 +2340,24 @@ static char **
 rl_trashed_files(const char *text)
 {
 	if (!trash_files_dir || !*trash_files_dir)
-		return (char **)NULL;
+		return NULL;
 
 	if (xchdir(trash_files_dir, NO_TITLE) == -1)
-		return (char **)NULL;
+		return NULL;
 
-	struct dirent **t = (struct dirent **)NULL;
+	struct dirent **t = NULL;
 	const int n = scandir(trash_files_dir, &t, NULL, alphasort);
 
 	xchdir(workspaces[cur_ws].path, NO_TITLE);
 
 	if (n == - 1)
-		return (char **)NULL;
+		return NULL;
 
 	if (n == 2) {
 		free(t[0]);
 		free(t[1]);
 		free(t);
-		return (char **)NULL;
+		return NULL;
 	}
 
 	char *p = unescape_str((char *)text, 0);
@@ -2495,7 +2495,7 @@ static char **
 check_tagged_files(char *tag)
 {
 	if (!is_tag(tag))
-		return (char **)NULL;
+		return NULL;
 
 	tagged_files_n = 0;
 
@@ -2503,14 +2503,14 @@ check_tagged_files(char *tag)
 	snprintf(dir, sizeof(dir), "%s/%s", tags_dir, tag);
 	int n = scandir(dir, &tagged_files, NULL, alphasort);
 	if (n == -1)
-		return (char **)NULL;
+		return NULL;
 
 	if (n == 2) {
 		free(tagged_files[0]);
 		free(tagged_files[1]);
 		free(tagged_files);
-		tagged_files = (struct dirent **)NULL;
-		return (char **)NULL;
+		tagged_files = NULL;
+		return NULL;
 	}
 
 	tagged_files_n = n;
@@ -2518,7 +2518,7 @@ check_tagged_files(char *tag)
 	while (--n >= 0)
 		free(tagged_files[n]);
 	free(tagged_files);
-	tagged_files = (struct dirent **)NULL;
+	tagged_files = NULL;
 	tagged_files_n = 0;
 
 	return matches;
@@ -2685,7 +2685,7 @@ fill_opts(const char *cmd_name, const char *word_start, const size_t w)
 	}
 
 #undef MAX_OPTS
-	return !c_opts[0] ? (char **)NULL : c_opts;
+	return !c_opts[0] ? NULL : c_opts;
 }
 
 /* Return the common initial prefix for all strings in MATCHES. */
@@ -2718,11 +2718,11 @@ complete_options(const char *text, const char *cmd_name, const char *cmd_start,
 	const size_t words_n)
 {
 	if (!cmd_name || !cmd_start)
-		return (char **)NULL;
+		return NULL;
 
 	char **c_opts = fill_opts(cmd_name, cmd_start, words_n);
 	if (!c_opts || !c_opts[0])
-		return (char **)NULL;
+		return NULL;
 
 	size_t n;
 	for (n = 0; c_opts[n]; n++);
@@ -2740,7 +2740,7 @@ complete_options(const char *text, const char *cmd_name, const char *cmd_start,
 
 	if (n == 1) { /* No matches. */
 		free(matches);
-		return (char **)NULL;
+		return NULL;
 	}
 
 	if (n == 2) { /* A single match. */
@@ -3044,15 +3044,15 @@ static char **
 rl_fastback(const char *s)
 {
 	if (!s || !*s)
-		return (char **)NULL;
+		return NULL;
 
 	char *p = fastback(s);
 	if (!p)
-		return (char **)NULL;
+		return NULL;
 
 	if (!*p) {
 		free(p);
-		return (char **)NULL;
+		return NULL;
 	}
 
 	char **matches = xnmalloc(2, sizeof(char *));
@@ -3135,7 +3135,7 @@ complete_bookmark_names(char *text, const size_t words_n, int *exit_status)
 			rl_attempted_completion_over = 1;
 		else /* 'bm add': complete with path completion */
 			*exit_status = FUNC_FAILURE;
-		return (char **)NULL;
+		return NULL;
 	}
 
 	/* If not 'bm add' complete with bookmarks */
@@ -3148,7 +3148,7 @@ complete_bookmark_names(char *text, const size_t words_n, int *exit_status)
 	free(p);
 
 	if (!matches)
-		return (char **)NULL;
+		return NULL;
 
 	cur_comp_type = TCMP_BOOKMARK;
 	return matches;
@@ -3159,12 +3159,12 @@ complete_ranges(const char *text)
 {
 	char *dash = strchr(text, '-');
 	if (!dash || dash[1] < '0' || dash[1] > '9')
-		return (char **)NULL;
+		return NULL;
 
 	*dash = '\0';
 	if (!is_number(text) || !is_number(dash + 1)) {
 		*dash = '-';
-		return (char **)NULL;
+		return NULL;
 	}
 
 	const int a = atoi(text) - 1;
@@ -3172,7 +3172,7 @@ complete_ranges(const char *text)
 	*dash = '-';
 
 	if (a < 0 || b < 0 || a >= b || (filesn_t)b >= g_files_num)
-		return (char **)NULL;
+		return NULL;
 
 	char **matches = xnmalloc((size_t)(b - a) + 3, sizeof(char *));
 	matches[0] = savestring("", 1);
@@ -3200,7 +3200,7 @@ complete_open_with(char *text, char *start)
 		*space = ' ';
 
 	if (!matches)
-		return (char **)NULL;
+		return NULL;
 
 	cur_comp_type = TCMP_OPENWITH;
 	return matches;
@@ -3210,12 +3210,12 @@ complete_open_with(char *text, char *start)
 static char **
 complete_file_type_filter(const char *text)
 {
-	char **matches = (char **)NULL;
+	char **matches = NULL;
 
 	if (!text[1]) {
 		matches = rl_completion_matches(text, &file_types_opts_generator);
 		if (!matches)
-			return (char **)NULL;
+			return NULL;
 
 		if (!matches[1])
 			rl_swap_fields(&matches);
@@ -3225,11 +3225,11 @@ complete_file_type_filter(const char *text)
 	}
 
 	if (text[2])
-		return (char **)NULL;
+		return NULL;
 
 	matches = rl_completion_matches(text + 1, &file_types_generator);
 	if (!matches)
-		return (char **)NULL;
+		return NULL;
 
 	if (!matches[1])
 		rl_swap_fields(&matches);
@@ -3243,11 +3243,11 @@ complete_file_type_filter(const char *text)
 static char **
 complete_mime_type_filter(const char *text)
 {
-	char **matches = (char **)NULL;
+	char **matches = NULL;
 
 	if (text[1]) {
 		if ((matches = rl_mime_files(text + 1)) == NULL)
-			return (char **)NULL;
+			return NULL;
 
 		cur_comp_type = TCMP_MIME_FILES; /* Same as TCMP_FILE_TYPES_FILES */
 		rl_filename_completion_desired = 1;
@@ -3256,7 +3256,7 @@ complete_mime_type_filter(const char *text)
 	}
 
 	if ((matches = rl_mime_list()) == NULL)
-		return (char **)NULL;
+		return NULL;
 
 	cur_comp_type = TCMP_MIME_LIST;
 	return matches;
@@ -3265,7 +3265,7 @@ complete_mime_type_filter(const char *text)
 static char **
 complete_glob(char *text)
 {
-	char **matches = (char **)NULL;
+	char **matches = NULL;
 
 	char *p = (*rl_line_buffer == '/' && rl_end > 1
 		&& !strchr(rl_line_buffer + 1, ' ')
@@ -3273,7 +3273,7 @@ complete_glob(char *text)
 			? (text + 1) : text;
 
 	if ((matches = rl_glob(p)) == NULL)
-		return (char **)NULL;
+		return NULL;
 
 #ifndef _NO_SUGGESTIONS
 	if (conf.suggestions == 1 && wrong_cmd == 1)
@@ -3339,7 +3339,7 @@ complete_shell_cmd_opts(const char *text)
 	char cmd[NAME_MAX + 1]; *cmd = '\0';
 	char *name = get_cmd_name();
 	if (!name)
-		return (char **)NULL;
+		return NULL;
 
 	char *space = strchr(name, ' ');
 	if (space) {
@@ -3351,24 +3351,24 @@ complete_shell_cmd_opts(const char *text)
 	if (*cmd && get_shell_cmd_opts(cmd) > 0)
 		return rl_completion_matches(text, &ext_options_generator);
 
-	return (char **)NULL;
+	return NULL;
 }
 
 #ifndef _NO_TAGS
 static char **
 complete_tag_names(const char *text, char *start)
 {
-	char **matches = (char **)NULL;
+	char **matches = NULL;
 
 	int comp = tag_complete(text, start);
 	if (comp != 1 && comp != 2)
-		return (char **)NULL;
+		return NULL;
 
 	if (comp == 1) {
 		matches = rl_completion_matches(text, &tags_generator);
 		if (!matches) {
 			cur_comp_type = TCMP_NONE;
-			return (char **)NULL;
+			return NULL;
 		}
 
 		return matches;
@@ -3381,7 +3381,7 @@ complete_tag_names(const char *text, char *start)
 	free(c_tag);
 
 	if (!matches)
-		return (char **)NULL;
+		return NULL;
 
 	cur_comp_type = TCMP_TAGS_F;
 	return matches;
@@ -3398,7 +3398,7 @@ complete_tag_names_t(char *text)
 
 	if (!matches) {
 		cur_comp_type = TCMP_NONE;
-		return (char **)NULL;
+		return NULL;
 	}
 
 	flags |= MULTI_SEL;
@@ -3418,7 +3418,7 @@ complete_tags(char *text)
 	if (!matches) {
 		free(cur_tag);
 		cur_tag = NULL;
-		return (char **)NULL;
+		return NULL;
 	}
 
 	if (!matches[1])
@@ -3437,7 +3437,7 @@ complete_bookmark_paths(char *text)
 	free(p);
 
 	if (!matches)
-		return (char **)NULL;
+		return NULL;
 
 	if (!matches[1])
 		rl_swap_fields(&matches);
@@ -3454,7 +3454,7 @@ complete_bookmark_names_b(char *text)
 	free(p);
 
 	if (!matches)
-		return (char **)NULL;
+		return NULL;
 
 	flags |= MULTI_SEL;
 	cur_comp_type = TCMP_BM_PREFIX;
@@ -3473,13 +3473,13 @@ complete_bookmarks(char *text, const size_t words_n)
 	if (words_n > 0 || conf.autocd == 1 || conf.auto_open == 1)
 		return complete_bookmark_names_b(text);
 
-	return (char **)NULL;
+	return NULL;
 }
 
 static char **
 complete_ownership(const char *text)
 {
-	char **matches = (char **)NULL;
+	char **matches = NULL;
 
 	rl_attempted_completion_over = 1;
 	char *sc = strchr(text, ':');
@@ -3496,7 +3496,7 @@ complete_ownership(const char *text)
 		return matches;
 	}
 
-	return (char **)NULL;
+	return NULL;
 }
 
 static char **
@@ -3504,14 +3504,14 @@ complete_dirhist(char *text, const size_t words_n)
 {
 	rl_attempted_completion_over = 1;
 	if (words_n > 2)
-		return (char **)NULL;
+		return NULL;
 
 	char *p = unescape_str(text, 0);
 	char **matches = rl_completion_matches(p ? p : text, &dirhist_generator);
 	free(p);
 
 	if (!matches)
-		return (char **)NULL;
+		return NULL;
 
 	if (!matches[1])
 		rl_swap_fields(&matches);
@@ -3525,7 +3525,7 @@ complete_backdir(char *text, const size_t words_n)
 {
 	rl_attempted_completion_over = 1;
 	if (words_n != 2)
-		return (char **)NULL;
+		return NULL;
 
 	int n = 0;
 	char *p = unescape_str(text, 0);
@@ -3533,7 +3533,7 @@ complete_backdir(char *text, const size_t words_n)
 	free(p);
 
 	if (!matches)
-		return (char **)NULL;
+		return NULL;
 
 	cur_comp_type = TCMP_BACKDIR;
 	return matches;
@@ -3544,7 +3544,7 @@ complete_workspaces(char *text)
 {
 	rl_attempted_completion_over = 1;
 	if (words_num > 2)
-		return (char **)NULL;
+		return NULL;
 
 	rl_sort_completion_matches = 0;
 	char *t = (*text == 'w' && text[1] == ':') ? text + 2 : text;
@@ -3562,7 +3562,7 @@ complete_workspaces(char *text)
 	cur_comp_type = ct;
 
 	rl_sort_completion_matches = 1;
-	return (char **)NULL;
+	return NULL;
 }
 
 static int
@@ -3596,7 +3596,7 @@ complete_net(char *text)
 	free(p);
 
 	if (!matches)
-		return (char **)NULL;
+		return NULL;
 
 	cur_comp_type = TCMP_NET;
 	return matches;
@@ -3607,15 +3607,15 @@ complete_sort_num(const char *text, const size_t words_n)
 {
 	rl_attempted_completion_over = 1;
 	if (words_n != 2)
-		return (char **)NULL;
+		return NULL;
 
 	const int n = atoi(text);
 	if (n < 0 || n > SORT_TYPES)
-		return (char **)NULL;
+		return NULL;
 
 	char **matches = rl_completion_matches(text, &sort_num_generator);
 	if (!matches)
-		return (char **)NULL;
+		return NULL;
 
 	cur_comp_type = TCMP_SORT;
 	return matches;
@@ -3626,14 +3626,14 @@ complete_sort(const char *text, const size_t words_n)
 {
 	rl_attempted_completion_over = 1;
 	if (words_n > 2)
-		return (char **)NULL;
+		return NULL;
 
 	if (text && *text && is_number(text))
 		return complete_sort_num(text, words_n);
 
 	char **matches = rl_completion_matches(text, &sort_name_generator);
 	if (!matches)
-		return (char **)NULL;
+		return NULL;
 
 	cur_comp_type = TCMP_SORT;
 	return matches;
@@ -3645,19 +3645,19 @@ complete_profiles(char *text, const size_t words_n)
 {
 	rl_attempted_completion_over = 1;
 	if (words_n > 3)
-		return (char **)NULL;
+		return NULL;
 
 	const char *lb = rl_line_buffer;
 	if (strncmp(lb, "pf add ", 7) == 0 || strncmp(lb, "pf list ", 8) == 0
 	|| strncmp(lb, "profile add ", 12) == 0 || strncmp(lb, "profile list ", 13) == 0)
-		return (char **)NULL;
+		return NULL;
 
 	char *p = unescape_str(text, 0);
 	char **matches = rl_completion_matches(p ? p : text, &profiles_generator);
 	free(p);
 
 	if (!matches)
-		return (char **)NULL;
+		return NULL;
 
 	cur_comp_type = TCMP_PROF;
 	return matches;
@@ -3669,14 +3669,14 @@ complete_colorschemes(char *text, const size_t words_n)
 {
 	rl_attempted_completion_over = 1;
 	if (words_n != 2)
-		return (char **)NULL;
+		return NULL;
 
 	char *p = unescape_str(text, 0);
 	char **matches = rl_completion_matches(p ? p : text, &cschemes_generator);
 	free(p);
 
 	if (!matches)
-		return (char **)NULL;
+		return NULL;
 
 	cur_comp_type = TCMP_CSCHEME;
 	return matches;
@@ -3692,7 +3692,7 @@ complete_file_templates(char *text)
 	free(p);
 
 	if (!matches)
-		return (char **)NULL;
+		return NULL;
 
 	cur_comp_type = TCMP_FILE_TEMPLATES;
 	return matches;
@@ -3705,7 +3705,7 @@ complete_desel(const char *text)
 	char **matches = sel_n > 0
 		? rl_completion_matches(text, &sel_entries_generator) : NULL;
 	if (!matches)
-		return (char **)NULL;
+		return NULL;
 
 	cur_comp_type = TCMP_DESEL;
 	return matches;
@@ -3718,7 +3718,7 @@ complete_trashed_files(const char *text, const enum comp_type flag)
 	rl_attempted_completion_over = 1;
 	char **matches = trash_n > 0 ? rl_trashed_files(text) : NULL;
 	if (!matches)
-		return (char **)NULL;
+		return NULL;
 
 	if (tabmode == STD_TAB && conf.colorize == 1)
 		/* Only used to remove trash extension from files so
@@ -3735,14 +3735,14 @@ complete_prompt_names(char *text, const size_t words_n)
 {
 	rl_attempted_completion_over = 1;
 	if (words_n > 3)
-		return (char **)NULL;
+		return NULL;
 
 	char *p = unescape_str(text, 0);
 	char **matches = rl_completion_matches(p ? p : text, &prompts_generator);
 	free(p);
 
 	if (!matches)
-		return (char **)NULL;
+		return NULL;
 
 	cur_comp_type = TCMP_PROMPTS;
 	return matches;
@@ -3753,11 +3753,11 @@ complete_kb_func_names(const char *text, const size_t words_n)
 {
 	rl_attempted_completion_over = 1;
 	if (words_n != 3)
-		return (char **)NULL;
+		return NULL;
 
 	char **matches = rl_completion_matches(text, &kb_func_names_gen);
 	if (!matches)
-		return (char **)NULL;
+		return NULL;
 
 	cur_comp_type = TCMP_NET; /* Same behavior */
 	return matches;
@@ -3768,11 +3768,11 @@ complete_alias_names(const char *text, const size_t words_n)
 {
 	rl_attempted_completion_over = 1;
 	if (words_n > 2 || aliases_n == 0)
-		return (char **)NULL;
+		return NULL;
 
 	char **matches = rl_completion_matches(text, &aliases_generator);
 	if (!matches)
-		return (char **)NULL;
+		return NULL;
 
 	cur_comp_type = TCMP_ALIAS;
 	return matches;
@@ -3783,7 +3783,7 @@ complete_jump(const char *text)
 {
 	char **matches = rl_completion_matches(text, &jump_generator);
 	if (!matches)
-		return (char **)NULL;
+		return NULL;
 
 	if (!matches[1])
 		rl_swap_fields(&matches);
@@ -3796,11 +3796,11 @@ static char **
 complete_sel_keyword(const char *text, const size_t words_n)
 {
 	if (words_n == 1 && text[1] != ':') /* Only "s:" is allowed as first word */
-		return (char **)NULL;
+		return NULL;
 
 	char **matches = rl_completion_matches("", &sel_entries_generator);
 	if (!matches)
-		return (char **)NULL;
+		return NULL;
 
 	if (!matches[1])
 		rl_swap_fields(&matches);
@@ -3817,7 +3817,7 @@ get_filename_by_eln(const filesn_t n)
 
 	if (!file_info[n].name || !*file_info[n].name
 	|| (is_cd_cmd == 1 && file_info[n].dir == 0))
-		return (char **)NULL;
+		return NULL;
 
 	char **matches = xnmalloc(2, sizeof(char *));
 	matches[0] = savestring(file_info[n].name, file_info[n].bytes);
@@ -3836,21 +3836,21 @@ complete_eln(const char *text, const size_t words_n, char *cmd_name)
 {
 	filesn_t n = 0;
 	if (!is_number(text) || (n = xatof(text)) < 1 || n > g_files_num)
-		return (char **)NULL;
+		return NULL;
 
 	if (words_n == 1) { /* First word */
 		if ((alt_prompt != 0 && alt_prompt != FILES_PROMPT)
 		|| (file_info[n - 1].dir == 1 && conf.autocd == 0)
 		|| (file_info[n - 1].dir == 0 && conf.auto_open == 0))
-			return (char **)NULL;
+			return NULL;
 	} else { /* Second word or more */
 		if (alt_prompt != 0 || should_expand_eln(text, cmd_name) == 0)
-			return (char **)NULL;
+			return NULL;
 	}
 
 	char **matches = get_filename_by_eln(n - 1);
 	if (!matches)
-		return (char **)NULL;
+		return NULL;
 
 	rl_filename_completion_desired = 1;
 	cur_comp_type = TCMP_ELN;
@@ -3872,7 +3872,7 @@ static char **
 complete_bookmarks_prompt(const char *text)
 {
 	rl_attempted_completion_over = 1;
-	char **matches = (char **)NULL;
+	char **matches = NULL;
 
 	if (text && *text && is_number(text)) {
 		const int n = atoi(text);
@@ -3909,7 +3909,7 @@ complete_fastback(const char *text)
 {
 	char **matches = rl_fastback(text);
 	if (!matches)
-		return (char **)NULL;
+		return NULL;
 
 	if (*matches[0] != '/' || matches[0][1])
 		rl_filename_completion_desired = 1;
@@ -3960,7 +3960,7 @@ my_rl_completion(const char *text, const int start, const int end)
 	cur_comp_type = TCMP_NONE;
 	flags &= ~MULTI_SEL;
 
-	char **matches = (char **)NULL;
+	char **matches = NULL;
 	char *cmd_name = NULL;
 	char *cmd_start = NULL;
 	const size_t words_n = rl_count_words(&cmd_name, &cmd_start);
@@ -3982,7 +3982,7 @@ my_rl_completion(const char *text, const int start, const int end)
 	/* Do not complete when the cursor is on a word. E.g., dir/_ilename */
 	if (rl_point < rl_end && rl_line_buffer[rl_point] != ' ') {
 		rl_attempted_completion_over = 1;
-		return (char **)NULL;
+		return NULL;
 	}
 
 				/* ##########################
@@ -4106,7 +4106,7 @@ FIRST_WORD_COMP:
 			return matches;
 		}
 
-		return (char **)NULL;
+		return NULL;
 	}
 
 				/* ##########################
@@ -4114,7 +4114,7 @@ FIRST_WORD_COMP:
 				 * ########################## */
 
 	if (alt_prompt != 0) /* Disable completion for alternative prompts. */
-		return (char **)NULL;
+		return NULL;
 
 	/* Complete options for internal commands. */
 	if ((matches = complete_options(text, cmd_name, cmd_start, words_n)))
@@ -4260,7 +4260,7 @@ FIRST_WORD_COMP:
 	/* If we have an internal command not dealing with filenames,
 	 * do not perform any further completion. */
 	if (s && int_cmd_no_filename(s) == 1)
-		return (char **)NULL;
+		return NULL;
 
 	/* Arguments for shell commands. */
 	if (*text == '-' && (matches = complete_shell_cmd_opts(text)))
@@ -4280,7 +4280,7 @@ FIRST_WORD_COMP:
 	/* ### PATH COMPLETION ### */
 	/* If none of the above, readline will attempt path completion
 	 * instead via my_rl_path_completion(). */
-	return (char **)NULL;
+	return NULL;
 }
 
 /* Load readline initialization file (inputrc)

@@ -115,7 +115,7 @@ reload_binaries(void)
 		for (size_t j = path_progsn; j-- > 0;)
 			free(bin_commands[j]);
 		free(bin_commands);
-		bin_commands = (char **)NULL;
+		bin_commands = NULL;
 	}
 
 	if (paths) {

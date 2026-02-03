@@ -753,17 +753,17 @@ open_fread(const char *name, int *fd)
 	errno = 0;
 	if (!name || !*name) {
 		errno = EINVAL;
-		return (FILE *)NULL;
+		return NULL;
 	}
 
 	*fd = open(name, O_RDONLY);
 	if (*fd == -1)
-		return (FILE *)NULL;
+		return NULL;
 
 	FILE *fp = fdopen(*fd, "r");
 	if (!fp) {
 		close(*fd);
-		return (FILE *)NULL;
+		return NULL;
 	}
 
 	return fp;
@@ -779,17 +779,17 @@ open_fwrite(const char *name, int *fd)
 	errno = 0;
 	if (!name || !*name) {
 		errno = EINVAL;
-		return (FILE *)NULL;
+		return NULL;
 	}
 
 	*fd = open(name, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
 	if (*fd == -1)
-		return (FILE *)NULL;
+		return NULL;
 
 	FILE *fp = fdopen(*fd, "w");
 	if (!fp) {
 		close(*fd);
-		return (FILE *)NULL;
+		return NULL;
 	}
 
 	return fp;
@@ -804,17 +804,17 @@ open_fappend(const char *name)
 	errno = 0;
 	if (!name || !*name) {
 		errno = EINVAL;
-		return (FILE *)NULL;
+		return NULL;
 	}
 
 	int fd = open(name, O_WRONLY | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR);
 	if (fd == -1)
-		return (FILE *)NULL;
+		return NULL;
 
 	FILE *fp = fdopen(fd, "a");
 	if (!fp) {
 		close(fd);
-		return (FILE *)NULL;
+		return NULL;
 	}
 
 	return fp;

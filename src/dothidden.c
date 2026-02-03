@@ -29,7 +29,7 @@
 struct dothidden_t *
 load_dothidden(void)
 {
-	struct dothidden_t *h = (struct dothidden_t *)NULL;
+	struct dothidden_t *h = NULL;
 	FILE *fp;
 	int fd = 0;
 	struct stat a;

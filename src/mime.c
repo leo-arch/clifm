@@ -1068,7 +1068,7 @@ get_apps_from_file(FILE *fp, char *file_name, const char *mime,
 	size_t line_size = 0;
 	char *line = NULL;
 	char *app = NULL;
-	char **apps = (char **)NULL;
+	char **apps = NULL;
 	size_t appsn = prefix != NULL ? 1 : 0;
 	const size_t prefix_len = prefix ? strlen(prefix) : 0;
 
@@ -1252,23 +1252,23 @@ char **
 mime_open_with_tab(char *filename, const char *prefix, const int only_names)
 {
 	if (!filename || !mime_file)
-		return (char **)NULL;
+		return NULL;
 
 	char *name = construct_filename(filename);
 	if (!name)
-		return (char **)NULL;
+		return NULL;
 
 	char *mime = xmagic(name, MIME_TYPE);
 	if (!mime) {
 		free(name);
-		return (char **)NULL;
+		return NULL;
 	}
 
 	FILE *fp = fopen(mime_file, "r");
 	if (!fp) {
 		free(name);
 		free(mime);
-		return (char **)NULL;
+		return NULL;
 	}
 
 	/* Do not let PREFIX be NULL, so that get_apps_from_file() knows

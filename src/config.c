@@ -4584,14 +4584,14 @@ reload_config(void)
 	for (; i-- > 0;)
 		free(old_pwd[i]);
 	free(old_pwd);
-	old_pwd = (char **)NULL;
+	old_pwd = NULL;
 
 	if (jump_db) {
 		for (i = 0; jump_db[i].path; i++)
 			free(jump_db[i].path);
 
 		free(jump_db);
-		jump_db = (struct jump_t *)NULL;
+		jump_db = NULL;
 	}
 	jump_n = 0;
 
@@ -4601,7 +4601,7 @@ reload_config(void)
 		free(aliases[i].cmd);
 	}
 	free(aliases);
-	aliases = (struct alias_t *)NULL;
+	aliases = NULL;
 	aliases_n = 0;
 
 	i = prompt_cmds_n;

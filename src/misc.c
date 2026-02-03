@@ -520,11 +520,11 @@ static char **
 get_cmd(char *dir, char *_sudo, char *self, const int sudo)
 {
 	if (!conf.term || !strchr(conf.term, ' '))
-		return (char **)NULL;
+		return NULL;
 
 	char **tmp_term = get_substr(conf.term, ' ', 0);
 	if (!tmp_term)
-		return (char **)NULL;
+		return NULL;
 
 	int i;
 	for (i = 0; tmp_term[i]; i++);
@@ -799,7 +799,7 @@ alias_import(char *file)
 		for (i = 0; bin_commands[i]; i++)
 			free(bin_commands[i]);
 		free(bin_commands);
-		bin_commands = (char **)NULL;
+		bin_commands = NULL;
 	}
 	get_path_programs();
 
@@ -882,7 +882,7 @@ keep_temp_autocmds(void)
 {
 	size_t i;
 	size_t c = 0;
-	struct autocmds_t *a = (struct autocmds_t *)NULL;
+	struct autocmds_t *a = NULL;
 
 	for (i = 0; i < autocmds_n; i++) {
 		if (autocmds[i].temp == 1) {
@@ -927,7 +927,7 @@ free_autocmds(const int keep_temp)
 	}
 
 	free(autocmds);
-	autocmds = (struct autocmds_t *)NULL;
+	autocmds = NULL;
 	autocmds_n = 0;
 	autocmd_set = 0;
 }
@@ -938,7 +938,7 @@ free_tags(void)
 	for (size_t i = tags_n; i-- > 0;)
 		free(tags[i]);
 	free(tags);
-	tags = (char **)NULL;
+	tags = NULL;
 	tags_n = 0;
 }
 
@@ -1021,7 +1021,7 @@ free_prompts(void)
 		free(prompts[i].right);
 	}
 	free(prompts);
-	prompts = (struct prompts_t *)NULL;
+	prompts = NULL;
 	prompts_n = 0;
 }
 
@@ -1167,7 +1167,7 @@ free_file_templates(void)
 		free(file_templates[i]);
 
 	free(file_templates);
-	file_templates = (char **)NULL;
+	file_templates = NULL;
 }
 
 /* This function is called by atexit() to clear whatever is there at exit
