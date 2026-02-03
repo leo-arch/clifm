@@ -1216,6 +1216,7 @@ struct icons_t const icon_ext[] = {
 	{"json5", ICON_JSON, WHITE}, // JSON5 Data File
 	{"jsonc", ICON_JSON, WHITE}, // JSON With Comments File
 	{"rc", ICON_CONFIG, WHITE}, // Resource Configuration File
+	{"theme", ICON_CONFIG, WHITE}, // GTK Theme Index File (INI format)
 	{"tml", ICON_CONFIG, WHITE}, // Generic config file
 	{"toml", ICON_TOML, WHITE}, // TOML Configuration File
 	{"yaml", ICON_YAML, WHITE}, // YAML Document
