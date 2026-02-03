@@ -157,8 +157,15 @@ trash_clear(void)
 }
 
 static int
-gen_trashinfo_file(char *file, const char *suffix, const struct tm *tm)
+gen_trashinfo_file(const char *file, const char *suffix)
 {
+	struct tm tm;
+	time_t now = time(NULL);
+	if (now == (time_t)-1 || localtime_r(&now, &tm) == NULL) {
+		xerror(_("trash: Error getting current time\n"));
+		return FUNC_FAILURE;
+	}
+
 	/* Encode path to URL format (RF 2396) */
 	char *url_str = url_encode(file, 0);
 	if (!url_str) {
@@ -183,8 +190,8 @@ gen_trashinfo_file(char *file, const char *suffix, const struct tm *tm)
 
 	fprintf(fp,
 	    "[Trash Info]\nPath=%s\nDeletionDate=%d-%02d-%02dT%02d:%02d:%02d\n",
-	    url_str, tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
-	    tm->tm_hour, tm->tm_min, tm->tm_sec);
+	    url_str, tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday,
+	    tm.tm_hour, tm.tm_min, tm.tm_sec);
 
 	free(url_str);
 	free(info_file);
@@ -213,7 +220,7 @@ remove_trashinfo_file(const char *name)
  * Returns the absolute path to this file and updates FILE_SUFFIX to
  * its basename. */
 static char *
-gen_dest_file(const char *file, const char *suffix, char **file_suffix)
+gen_dest_file(const char *file, char **file_suffix)
 {
 	char *filename = strrchr(file, '/');
 	if (!filename || !*(++filename)) {
@@ -221,14 +228,13 @@ gen_dest_file(const char *file, const char *suffix, char **file_suffix)
 		return NULL;
 	}
 
-	/* If the length of the trashed filename (orig_filename.suffix) is
+	/* If the length of the trashed filename (orig_filename) is
 	 * longer than NAME_MAX (255), trim the original filename, so that
 	 * (original_filename_len + 1 (dot) + suffix_len) won't be longer
 	 * than NAME_MAX. */
 	const size_t filename_len = strlen(filename);
-	const size_t suffix_len = strlen(suffix);
-	const int size = (int)(filename_len + suffix_len + 11) - NAME_MAX;
-	/* len = filename.suffix.trashinfo */
+	const int size = (int)(filename_len + 11) - NAME_MAX;
+	/* len = filename.trashinfo */
 
 	if (size > 0) {
 		/* THIS IS NOT UNICODE AWARE */
@@ -240,9 +246,10 @@ gen_dest_file(const char *file, const char *suffix, char **file_suffix)
 		filename[filename_len - (size_t)size] = '\0';
 	}
 
-	const size_t slen = filename_len + suffix_len + 2 + 16;
+	/* Make room for an integer suffix in case of a duplicated file name. */
+	const size_t slen = filename_len + 2 + MAX_INT_STR;
 	*file_suffix = xnmalloc(slen, sizeof(char));
-	snprintf(*file_suffix, slen, "%s.%s", filename, suffix);
+	snprintf(*file_suffix, slen, "%s", filename);
 
 	/* NOTE: It is guaranteed (by check_trash_file(), called before from
 	 * trash_file_args()) that FILE does not end with a slash. */
@@ -265,7 +272,7 @@ gen_dest_file(const char *file, const char *suffix, char **file_suffix)
 			return NULL;
 		}
 
-		snprintf(*file_suffix, slen, "%s.%s-%zu", filename, suffix, inc);
+		snprintf(*file_suffix, slen, "%s-%zu", filename, inc);
 		snprintf(dest, dlen, "%s/%s", trash_files_dir, *file_suffix);
 	}
 
@@ -273,7 +280,7 @@ gen_dest_file(const char *file, const char *suffix, char **file_suffix)
 }
 
 static int
-trash_file(const char *suffix, const struct tm *tm, char *file)
+trash_file(char *file)
 {
 	struct stat attr;
 	if (lstat(file, &attr) == -1) {
@@ -299,11 +306,11 @@ trash_file(const char *suffix, const struct tm *tm, char *file)
 	}
 
 	char *file_suffix = (char *)NULL;
-	char *dest = gen_dest_file(tmpfile, suffix, &file_suffix);
+	char *dest = gen_dest_file(tmpfile, &file_suffix);
 
 	/* As per the FreeDesktop specification, generate the info file first. */
 	if (!dest || !file_suffix
-	|| gen_trashinfo_file(tmpfile, file_suffix, tm) != FUNC_SUCCESS) {
+	|| gen_trashinfo_file(tmpfile, file_suffix) != FUNC_SUCCESS) {
 		free(dest);
 		free(file_suffix);
 		return FUNC_FAILURE;
@@ -1122,12 +1129,6 @@ trash_files_args(char **args)
 			return FUNC_SUCCESS;
 	}
 
-	time_t rawtime = time(NULL);
-	struct tm t;
-	char *suffix = localtime_r(&rawtime, &t) ? gen_date_suffix(t, 0) : NULL;
-	if (!suffix)
-		return FUNC_FAILURE;
-
 	int *successfully_trashed = xnmalloc(i + 1, sizeof(int));
 
 	for (i = 1; args[i]; i++) {
@@ -1154,7 +1155,7 @@ trash_files_args(char **args)
 			cwd = is_file_in_cwd(deq_file);
 
 		/* Once here, everything is fine: trash the file */
-		if (trash_file(suffix, &t, deq_file) == FUNC_SUCCESS) {
+		if (trash_file(deq_file) == FUNC_SUCCESS) {
 			trashed_files++;
 			if (print_removed_files == 1) {
 				/* Store indices of successfully trashed files */
@@ -1167,8 +1168,6 @@ trash_files_args(char **args)
 
 		free(deq_file);
 	}
-
-	free(suffix);
 
 	if (exit_status == FUNC_SUCCESS) {
 		if (conf.autols == 1 && cwd == 1)

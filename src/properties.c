@@ -198,11 +198,7 @@ get_link_color(const char *name)
 		case S_IFDOOR: color = oo_c; break;
 		case S_IFPORT: color = oo_c; break;
 #endif /* SOLARIS_DOORS */
-		case S_IFREG: {
-			size_t ext = 0;
-			color = get_regfile_color(name, &a, &ext);
-			}
-			break;
+		case S_IFREG: color = get_regfile_color(name, &a, NULL); break;
 		default: color = df_c; break;
 		}
 	}

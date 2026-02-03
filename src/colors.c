@@ -267,7 +267,8 @@ remove_bold_attr(char *str)
 char *
 get_regfile_color(const char *filename, const struct stat *a, size_t *is_ext)
 {
-	*is_ext = 0;
+	if (is_ext)
+		*is_ext = 0;
 	if (conf.colorize == 0 || conf.light_mode == 1)
 		return fi_c;
 
@@ -293,7 +294,8 @@ get_regfile_color(const char *filename, const struct stat *a, size_t *is_ext)
 	tmp_color[color_len + 2] = 'm';
 	tmp_color[color_len + 3] = '\0';
 
-	*is_ext = color_len + 3;
+	if (is_ext)
+		*is_ext = color_len + 3;
 	return tmp_color;
 }
 
@@ -571,7 +573,7 @@ check_names(const char *str)
 	}
 
 	if (found == -1)
-		return (char *)NULL;
+		return NULL;
 
 	if (attr == 0)
 		return color_names[found].value;
@@ -586,7 +588,7 @@ static char *
 check_defs(const char *str)
 {
 	if (defs_n == 0 || !str || !*str)
-		return (char *)NULL;
+		return NULL;
 
 	const size_t slen = strlen(str);
 
@@ -644,7 +646,7 @@ check_ext_hash(const size_t hash, size_t *val_len)
 		sizeof(struct ext_t), bcomp);
 
 	if (!ptr || !ptr->value || !*ptr->value)
-		return (char *)NULL;
+		return NULL;
 
 	if (val_len)
 		*val_len = ptr->value_len;
@@ -697,7 +699,7 @@ check_ext_string(const char *ext, size_t *val_len)
 		return ext_colors[i].value;
 	}
 
-	return (char *)NULL;
+	return NULL;
 }
 
 /* Return a pointer to the corresponding color code for the file
@@ -708,7 +710,7 @@ char *
 get_ext_color(const char *ext, size_t *val_len)
 {
 	if (!ext || !*ext || !*(++ext) || ext_colors_n == 0)
-		return (char *)NULL;
+		return NULL;
 
 	/* If the hash field at index 0 is set to zero, we have hash conflicts. */
 	if (ext_colors[0].hash != 0)
@@ -724,7 +726,7 @@ static char *
 strip_color_line(const char *restrict str, const size_t str_len)
 {
 	if (!str || !*str)
-		return (char *)NULL;
+		return NULL;
 
 	char *buf = xnmalloc(str_len + 1, sizeof(char));
 	size_t len = 0;
@@ -739,7 +741,7 @@ strip_color_line(const char *restrict str, const size_t str_len)
 
 	if (len == 0 || !*buf) {
 		free(buf);
-		return (char *)NULL;
+		return NULL;
 	}
 
 	buf[len] = '\0';
@@ -1074,7 +1076,7 @@ static char *
 color256_to_ansi(char *s)
 {
 	if (!s || !*s || !s[1])
-		return (char *)NULL;
+		return NULL;
 
 	int attr = -1;
 
@@ -1085,7 +1087,7 @@ color256_to_ansi(char *s)
 			attr = dash[1] - '0';
 	}
 
-	char *ret = (char *)NULL;
+	char *ret = NULL;
 	const int n = atoi(s + 1);
 
 	if (n >= 0 && n <= 255) {
@@ -1109,14 +1111,14 @@ static char *
 decode_color_prefix(char *s)
 {
 	if (!s || !*s)
-		return (char *)NULL;
+		return NULL;
 
 	if (*s == RGB_COLOR_PREFIX)
 		return hex2rgb(s);
 	if (*s == COLOR256_PREFIX)
 		return color256_to_ansi(s);
 
-	return (char *)NULL;
+	return NULL;
 }
 
 /* Return a pointer to a statically allocated buffer storing the color code
@@ -1142,7 +1144,7 @@ static void
 set_color(char *color, char var[], const int flag)
 {
 #ifndef CLIFM_SUCKLESS
-	char *def_color = (char *)NULL;
+	char *def_color = NULL;
 	if (is_color_code(color) == 0
 	&& (def_color = check_defs(color)) == NULL)
 #else
@@ -1504,11 +1506,11 @@ split_extension_colors(char *extcolors)
 		}
 	}
 
-	p = (char *)NULL;
+	p = NULL;
 
 	if (ext_colors) {
-		ext_colors[ext_colors_n].name = (char *)NULL;
-		ext_colors[ext_colors_n].value = (char *)NULL;
+		ext_colors[ext_colors_n].name = NULL;
+		ext_colors[ext_colors_n].value = NULL;
 		ext_colors[ext_colors_n].len = 0;
 		ext_colors[ext_colors_n].value_len = 0;
 		ext_colors[ext_colors_n].hash = 0;
@@ -1791,7 +1793,7 @@ set_lscolors_bsd(void)
 {
 	char *env = getenv("LSCOLORS");
 	if (!env)
-		return (char *)NULL;
+		return NULL;
 
 	/* 144 bytes are required to hold the largest possible value for LSCOLORS:
 	 * 11 file types, 13 chars max each, plus the terminating NUL char.
@@ -1839,7 +1841,7 @@ set_lscolors_bsd(void)
 #undef IS_BSD_COLOR
 
 	buf[len] = '\0';
-	return *buf ? buf : (char *)NULL;
+	return *buf ? buf : NULL;
 }
 
 /* Inspect LS_COLORS/LSCOLORS variable and assign pointers to ENV_FILECOLORS
@@ -1847,7 +1849,7 @@ set_lscolors_bsd(void)
 static void
 set_lscolors(char **env_filecolors, char **env_extcolors)
 {
-	static char *ls_colors = (char *)NULL;
+	static char *ls_colors = NULL;
 	ls_colors = getenv("LS_COLORS");
 	if (!ls_colors || !*ls_colors) {
 		ls_colors = set_lscolors_bsd();
@@ -1872,8 +1874,8 @@ set_lscolors(char **env_filecolors, char **env_extcolors)
 static void
 get_colors_from_env(char **file, char **ext, char **iface)
 {
-	char *env_filecolors = (char *)NULL;
-	char *env_extcolors = (char *)NULL;
+	char *env_filecolors = NULL;
+	char *env_extcolors = NULL;
 
 	if (xargs.lscolors > 0) {
 		set_lscolors(&env_filecolors, &env_extcolors);
@@ -2163,7 +2165,7 @@ set_cs_dir_icon_color(char *line, const ssize_t line_len)
 	if (line[line_len - 1] == '\'' || line[line_len - 1] == '"')
 		line[line_len - 1] = '\0';
 
-	char *c = (char *)NULL;
+	char *c = NULL;
 	if (is_color_code(p) == 0 && (c = check_defs(p)) == NULL)
 		return;
 
@@ -2235,7 +2237,7 @@ read_color_scheme_file(const char *colorscheme, char **filecolors,
 		reset_iface_colors();
 	}
 
-	char *line = (char *)NULL;
+	char *line = NULL;
 	size_t line_size = 0;
 	ssize_t line_len = 0;
 
@@ -2386,7 +2388,7 @@ split_color_line(char *line, const int type)
 	if (!colors)
 		return;
 
-	colors[words] = (char *)NULL;
+	colors[words] = NULL;
 
 	/* Set the color variables.
 	 * The colors array is free'd by both of these functions. */
@@ -2460,9 +2462,9 @@ disable_bold(void)
 int
 set_colors(const char *colorscheme, const int check_env)
 {
-	char *filecolors = (char *)NULL;
-	char *extcolors = (char *)NULL;
-	char *ifacecolors = (char *)NULL;
+	char *filecolors = NULL;
+	char *extcolors = NULL;
+	char *ifacecolors = NULL;
 
 	date_shades.type = SHADE_TYPE_UNSET;
 	size_shades.type = SHADE_TYPE_UNSET;
@@ -2529,53 +2531,16 @@ set_colors(const char *colorscheme, const int check_env)
 	return FUNC_SUCCESS;
 }
 
-/* If completing trashed files (regular only) we need to remove the trash
- * extension in order to correctly determine the file color (according to
- * its actual extension).
- * Remove this extension (setting the initial dot to NULL) and return a
- * pointer to this character, so that we can later reinsert the dot.
- *
- * NOTE: We append a time suffix (via gen_time_suffix()) to the trashed file
- * name in order to make it unique. Now, since other trash implementations do
- * not do this, we need to check the extension name (otherwise, we might end
- * up removing the original file extension).
- * The time suffix is "YYYYMMDDHHMMSS". So we need to check whether we have an
- * extension name of at least 14 digits, being the first one '2' (the time
- * suffix starts by the year, so that it's quite safe to assume the first
- * one will be '2' (at least until the year 3000!)). Not perfect, but it
- * works most of the time. */
 char *
-remove_trash_ext(char **ent)
+get_entry_color(char *ent, const struct stat *attr)
 {
-	if (!(flags & STATE_COMPLETING) || (cur_comp_type != TCMP_UNTRASH
-	&& cur_comp_type != TCMP_TRASHDEL))
-		return (char *)NULL;
+	char *color = NULL;
 
-	char *dot = strrchr(*ent, '.');
-	if (dot && dot != *ent && dot[1] == '2'
-	&& strlen(dot + 1) == 14 && is_number(dot + 1))
-		*dot = '\0';
-
-	return dot;
-}
-
-char *
-get_entry_color(char *ent, const struct stat *a)
-{
-	char *color = (char *)NULL;
-
-	switch (a->st_mode & S_IFMT) {
-	case S_IFREG: {
-		size_t ext = 0;
-		char *d = remove_trash_ext(&ent);
-		color = get_regfile_color(ent, a, &ext);
-		if (d)
-			*d = '.';
-		}
-		break;
+	switch (attr->st_mode & S_IFMT) {
+	case S_IFREG: color = get_regfile_color(ent, attr, NULL); break;
 
 	case S_IFDIR:
-		color = conf.colorize == 0 ? di_c : get_dir_color(ent, a, -1);
+		color = conf.colorize == 0 ? di_c : get_dir_color(ent, attr, -1);
 		break;
 
 	case S_IFLNK: {
@@ -2652,7 +2617,7 @@ colors_list(char *ent, const int eln, const int pad, const int new_line)
 	if (rem_slash == 1)
 		p[len - 1] = '/';
 
-	char *wname = (char *)NULL;
+	char *wname = NULL;
 	const size_t wlen = wc_xstrlen(ent);
 	if (wlen == 0) /* Invalid chars found. */
 		wname = replace_invalid_chars(ent);
@@ -2762,7 +2727,7 @@ get_colorschemes(void)
 	}
 
 	closedir(dir_p);
-	color_schemes[i] = (char *)NULL;
+	color_schemes[i] = NULL;
 
 END:
 	if (color_schemes)

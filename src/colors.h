@@ -53,7 +53,6 @@ char *get_regfile_color(const char *filename, const struct stat *a,
 int  import_color_scheme(const char *name);
 void update_warning_prompt_text_color(void);
 void remove_bold_attr(char *str);
-char *remove_trash_ext(char **ent);
 void reset_filetype_colors(void);
 void reset_iface_colors(void);
 int  set_colors(const char *colorscheme, const int check_env);

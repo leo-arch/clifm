@@ -274,21 +274,10 @@ fzftab_color(char *filename, const struct stat *attr)
 		if (conf.check_ext == 0 || cl != fi_c)
 			return (cl ? cl : fi_c);
 
-		/* If trashed file, remove the trash extension, so we can get the
-		 * color according to the actual file extension. */
-		char *te = (char *)NULL;
-		if (cur_comp_type == TCMP_UNTRASH || cur_comp_type == TCMP_TRASHDEL) {
-			flags |= STATE_COMPLETING;
-			te = remove_trash_ext(&filename);
-			flags &= ~STATE_COMPLETING;
-		}
-
 		char *ext_cl = (char *)NULL;
 		char *ext = strrchr(filename, '.');
 		if (ext && ext != filename)
 			ext_cl = get_ext_color(ext, NULL);
-
-		if (te) *te = '.';
 
 		return ext_cl ? ext_cl : (cl ? cl : fi_c);
 		}
