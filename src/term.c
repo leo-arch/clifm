@@ -193,14 +193,14 @@ get_timeout(void)
 static int
 read_timeout(struct pollfd *pfd)
 {
-	static int timeout = -1;
-	if (timeout == -1)
-		timeout = get_timeout();
+	static int time_out = -1;
+	if (time_out == -1)
+		time_out = get_timeout();
 
 	pfd->fd = STDIN_FILENO;
 	pfd->events = POLLIN;
 
-	if (poll(pfd, 1, timeout) == -1)
+	if (poll(pfd, 1, time_out) == -1)
 		return (-1);
 
 	if (!(pfd->revents & POLLIN))
