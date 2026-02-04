@@ -62,7 +62,7 @@ struct jump_entry_t {
  * 1) rank = calculate_base_credit()
  * 2) rank += calculate_bonus_credit() */
 
-/* Calcualte the base credit for a directory based on time data
+/* Calculate the base credit for a directory based on time data
  * (DAYS_SINCE_FIRST and HOURS_SINCE_LAST) and number of visits (VISITS).
  * If the directory has been visited within the last day, KEEP will be
  * set to 1, so that it won't be removed from the database, no matter
@@ -398,8 +398,8 @@ get_directory_color(const char *filename)
 int
 rank_cmp(const void *a, const void *b)
 {
-	struct jump_t *pa = (struct jump_t *)a;
-	struct jump_t *pb = (struct jump_t *)b;
+	const struct jump_t *pa = (const struct jump_t *)a;
+	const struct jump_t *pb = (const struct jump_t *)b;
 
 	if (!pa->path)
 		return 0;
