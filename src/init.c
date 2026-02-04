@@ -696,18 +696,16 @@ validate_shell(void)
 	if (!p)
 		return;
 
-#ifdef _PATH_BSHELL
-	const char *def_shell = _PATH_BSHELL;
-#else
-	const char *def_shell = "/bin/sh";
-#endif /* _PATH_BSHELL */
-
 	char *q = strrchr(p, '/');
 	if ((!q && strcmp(p, PROGRAM_NAME) == 0)
 	|| (q && q[1] && strcmp(q + 1, PROGRAM_NAME) == 0)) {
+#ifdef _PATH_BSHELL
+		const char *def_shell = _PATH_BSHELL;
+#else
+		const char *def_shell = "/bin/sh";
+#endif /* _PATH_BSHELL */
 		err('w', PRINT_PROMPT, _("%s: '%s' is not a shell. "
 			"Setting SHELL to '%s'.\n"), PROGRAM_NAME, p, def_shell);
-		unsetenv("SHELL");
 		setenv("SHELL", def_shell, 1);
 	}
 }

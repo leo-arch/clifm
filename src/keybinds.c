@@ -414,7 +414,6 @@ get_new_keybind(void)
 	char buf[64];
 	size_t len = 0;
 	int ret = 0;
-	int result = 0;
 	int ch = 0;
 	int prev = 0;
 
@@ -429,7 +428,7 @@ get_new_keybind(void)
 	}
 
 	while (1) {
-		result = (int)read(STDIN_FILENO, &ch, sizeof(unsigned char)); /* flawfinder: ignore */
+		int result = (int)read(STDIN_FILENO, &ch, sizeof(unsigned char)); /* flawfinder: ignore */
 		if (result <= 0 || len >= sizeof(buf) - 1) {
 			buf[len] = '\0';
 			break;

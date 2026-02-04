@@ -893,7 +893,7 @@ print_extended_attributes(char *s, const mode_t mode, const int xattr)
 		return FUNC_SUCCESS;
 	}
 
-	ssize_t buflen = 0, keylen = 0, vallen = 0;
+	ssize_t buflen = 0, vallen = 0;
 	char *buf = NULL, *key = NULL, *val = NULL;
 
 	/* Determine the length of the buffer needed */
@@ -958,7 +958,7 @@ print_extended_attributes(char *s, const mode_t mode, const int xattr)
 		}
 
 		/* Forward to next attribute key */
-		keylen = (ssize_t)strlen(key) + 1;
+		const ssize_t keylen = (ssize_t)strlen(key) + 1;
 		buflen -= keylen;
 		key += keylen;
 	}

@@ -1514,14 +1514,13 @@ bm_paths_generator(const char *text, int state)
 		return NULL;
 
 	static size_t i;
-	char *bname, *bpath;
 
 	if (state == 0)
 		i = 0;
 
 	while (i < bm_n) {
-		bname = bookmarks[i].name;
-		bpath = bookmarks[i++].path;
+		char *bname = bookmarks[i].name;
+		char *bpath = bookmarks[i++].path;
 
 		if (!bname || !bpath || (conf.case_sens_list == 1 ? strcmp(bname, text)
 		: strcasecmp(bname, text)) != 0)

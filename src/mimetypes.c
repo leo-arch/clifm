@@ -243,7 +243,7 @@ load_user_mimetypes(void)
 
 	free(mimetypes_file);
 
-	int c = fgetc(fp);
+	int c = fgetc(fp); /* flawfinder: ignore */
 	if (c == EOF) {
 		fclose(fp);
 		return FUNC_FAILURE;
