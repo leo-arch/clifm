@@ -1504,10 +1504,12 @@ set_templates_dir(void)
 		buf = savestring(p, strlen(p));
 	} else if (se == 0 && (p = getenv("XDG_TEMPLATES_DIR")) && *p) {
 		buf = savestring(p, strlen(p));
-	} else if (user.home != NULL) {
-		const size_t len = strlen(user.home) + 11;
-		buf = xnmalloc(len, sizeof(char));
-		snprintf(buf, len, "%s/Templates", user.home);
+	} else {
+		if (user.home != NULL) {
+			const size_t len = strlen(user.home) + 11;
+			buf = xnmalloc(len, sizeof(char));
+			snprintf(buf, len, "%s/Templates", user.home);
+		}
 	}
 
 	if (buf && *buf == '~') {

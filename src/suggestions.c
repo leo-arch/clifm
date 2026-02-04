@@ -148,10 +148,10 @@ check_int_cmd_desc(const char *s, const size_t l)
 			if (s[1] == 'z') return FZ_DESC;
 		}
 
-		else if (*s == 'h' && (s[1] == 'f' || s[1] == 'h'))
+		else if (*s == 'h' && (s[1] == 'f' || s[1] == 'h')) {
 			return HF_DESC;
 
-		else if (*s == 'k') {
+		} else if (*s == 'k') {
 			if (s[1] == 'b') return KB_DESC;
 			if (s[1] == 'k') return KK_DESC;
 		}
@@ -203,11 +203,11 @@ check_int_cmd_desc(const char *s, const size_t l)
 			if (s[1] == 'y') return TY_DESC;
 		}
 
-		else if (*s == 'v' && s[1] == 'v')
+		else if (*s == 'v' && s[1] == 'v') {
 			return VV_DESC;
 
-		else if (*s == 'w') {
-			if (s[1] == 's') return WS_DESC;
+		} else {
+			if (*s == 'w' && s[1] == 's') return WS_DESC;
 		}
 
 	} else if (l == 3) {
@@ -345,8 +345,9 @@ check_int_cmd_desc(const char *s, const size_t l)
 	else if (l == 11 && *s == 'm' && strcmp(s + 1, "ountpoints") == 0)
 		return MP_DESC;
 
-	else if (l == 12 && *s == 'c' && strcmp(s + 1, "olorschemes") == 0)
-		return CS_DESC;
+	else
+		if (l == 12 && *s == 'c' && strcmp(s + 1, "olorschemes") == 0)
+			return CS_DESC;
 
 	return NULL;
 }

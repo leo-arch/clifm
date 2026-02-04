@@ -513,12 +513,14 @@ set_end_char_is_keycode(char *str, size_t end, int *keycode, int *mod_key)
 			*mod_key += MOD_CTRL;
 		else
 			*mod_key += MOD_SHIFT;
-	} else if (IS_UPPER_ARROW_CHAR(str[end])) {
-		str[end] = '\0';
-		if (*str == SS3_INTRODUCER)
-			str++;
-		if (IS_DIGIT(*str))
-			*mod_key += xatoi(str) - 1;
+	} else {
+		if (IS_UPPER_ARROW_CHAR(str[end])) {
+			str[end] = '\0';
+			if (*str == SS3_INTRODUCER)
+				str++;
+			if (IS_DIGIT(*str))
+				*mod_key += xatoi(str) - 1;
+		}
 	}
 }
 

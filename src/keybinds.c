@@ -1361,15 +1361,18 @@ rl_accept_suggestion(int count, int key)
 		if (suggestion.type == FASTBACK_SUG) {
 			if (conf.highlight == 0) {
 				rl_insert_text("/");
-			} else if (*suggestion_buf != '/' || suggestion_buf[1]) {
-				fputs(hd_c, stdout);
-				rl_insert_text("/");
-				rl_redisplay();
-				fputs(df_c, stdout);
+			} else {
+				if (*suggestion_buf != '/' || suggestion_buf[1]) {
+					fputs(hd_c, stdout);
+					rl_insert_text("/");
+					rl_redisplay();
+					fputs(df_c, stdout);
+				}
 			}
-		} else if (suggestion.filetype != DT_DIR
-		&& suggestion.type != BOOKMARK_SUG && suggestion.type != BACKDIR_SUG) {
-			rl_stuff_char(' ');
+		} else {
+			if (suggestion.filetype != DT_DIR
+			&& suggestion.type != BOOKMARK_SUG && suggestion.type != BACKDIR_SUG)
+				rl_stuff_char(' ');
 		}
 		suggestion.type = NO_SUG;
 		}
@@ -1404,9 +1407,10 @@ rl_accept_suggestion(int count, int key)
 			prefix[0] = 't'; prefix[1] = ':'; prefix[2] = '\0';
 		} else if (suggestion.type == BM_PREFIX_SUG) {
 			prefix[0] = 'b'; prefix[1] = ':'; prefix[2] = '\0';
-		} else if (suggestion.type == WS_PREFIX_SUG
-		|| suggestion.type == WS_NUM_PREFIX_SUG) {
-			prefix[0] = 'w'; prefix[1] = ':'; prefix[2] = '\0';
+		} else {
+			if (suggestion.type == WS_PREFIX_SUG
+			|| suggestion.type == WS_NUM_PREFIX_SUG)
+				{ prefix[0] = 'w'; prefix[1] = ':'; prefix[2] = '\0'; }
 		}
 
 		rl_insert_text(prefix);

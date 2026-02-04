@@ -123,12 +123,14 @@ get_mimetype_fallback(const char *file)
 	}
 
 	int ret = FUNC_FAILURE;
-	if (mime_fallback == MIME_FALLBACK_MIMETYPE) {
-		char *cmd[] = {"mimetype", "-b", (char *)file, NULL};
-		ret = launch_execv(cmd, FOREGROUND, E_NOSTDERR);
-	} else if (mime_fallback == MIME_FALLBACK_XDG_MIME) {
+	if (mime_fallback == MIME_FALLBACK_XDG_MIME) {
 		char *cmd[] = {"xdg-mime", "query", "filetype", (char *)file, NULL};
 		ret = launch_execv(cmd, FOREGROUND, E_NOSTDERR);
+	} else {
+		if (mime_fallback == MIME_FALLBACK_MIMETYPE) {
+			char *cmd[] = {"mimetype", "-b", (char *)file, NULL};
+			ret = launch_execv(cmd, FOREGROUND, E_NOSTDERR);
+		}
 	}
 
 	if (dup2(stdout_bk, STDOUT_FILENO) == -1) { /* Restore original stdout */

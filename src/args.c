@@ -503,10 +503,13 @@ try_standard_data_dirs(void)
 	const int sec_env = (xargs.secure_env == 1 || xargs.secure_env_full == 1);
 
 	char *env = sec_env != 1 ? getenv("XDG_DATA_HOME") : NULL;
-	if (env && *env)
+	if (env && *env) {
 		xstrsncpy(home_local, env, sizeof(home_local));
-	else if (user.home && *user.home)
-		snprintf(home_local, sizeof(home_local), "%s/.local/share", user.home);
+	} else {
+		if (user.home && *user.home)
+			snprintf(home_local, sizeof(home_local),
+				"%s/.local/share", user.home);
+	}
 
 	if ((data_dir = try_datadir(home_local)) != NULL)
 		return FUNC_SUCCESS;
@@ -864,9 +867,11 @@ check_alt_dir(char *dir)
 				PROGRAM_NAME, dir, ret);
 			return ret;
 		}
-	} else if (!S_ISDIR(a.st_mode)) {
-		fprintf(stderr, _("%s: '%s': Not a directory\n"), PROGRAM_NAME, dir);
-		return ENOTDIR;
+	} else {
+		if (!S_ISDIR(a.st_mode)) {
+			fprintf(stderr, _("%s: '%s': Not a directory\n"), PROGRAM_NAME, dir);
+			return ENOTDIR;
+		}
 	}
 
 	if (access(dir, W_OK) == -1) {

@@ -629,7 +629,7 @@ static int
 bcomp(const void *a, const void *b)
 {
 	size_t pa = *(size_t *)a;
-	struct ext_t *pb = (struct ext_t *)b;
+	const struct ext_t *pb = (const struct ext_t *)b;
 
 	if (pa < pb->hash) return (-1);
 	if (pa > pb->hash) return 1;
@@ -2318,9 +2318,10 @@ read_color_scheme_file(const char *colorscheme, char **filecolors,
 			set_shades(line + 11, DATE_SHADES);
 		}
 
-		else if (size_shades.type == SHADE_TYPE_UNSET
-		&& *line == 'S' && strncmp(line, "SizeShades=", 11) == 0) {
-			set_shades(line + 11, SIZE_SHADES);
+		else {
+			if (size_shades.type == SHADE_TYPE_UNSET
+			&& *line == 'S' && strncmp(line, "SizeShades=", 11) == 0)
+				set_shades(line + 11, SIZE_SHADES);
 		}
 	}
 

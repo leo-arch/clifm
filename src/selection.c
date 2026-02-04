@@ -370,8 +370,9 @@ sel_regex_cwd(regex_t regex, const mode_t filetype, const int invert)
 		if (regexec(&regex, file_info[i].name, 0, NULL, 0) == FUNC_SUCCESS) {
 			if (invert == 0)
 				new_sel += select_file(tmp_path);
-		} else if (invert == 1) {
-			new_sel += select_file(tmp_path);
+		} else {
+			if (invert == 1)
+				new_sel += select_file(tmp_path);
 		}
 	}
 

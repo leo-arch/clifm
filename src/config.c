@@ -1537,10 +1537,12 @@ check_file_safety(const char *name)
 		safe = 0;
 	}
 
-	else if (a.st_nlink > 1) {
-		err('w', PRINT_PROMPT, _("%s: There is another name hard linked "
-			"to this file\n"), name);
-		safe = 0;
+	else {
+		if (a.st_nlink > 1) {
+			err('w', PRINT_PROMPT, _("%s: There is another name hard linked "
+				"to this file\n"), name);
+			safe = 0;
+		}
 	}
 
 	if (safe == 0)
@@ -2744,12 +2746,14 @@ set_pager_view_value(char *line)
 	if (!p)
 		return;
 
-	if (*p == 'a' && strcmp(p, "auto") == 0)
+	if (*p == 'a' && strcmp(p, "auto") == 0) {
 		conf.pager_view = PAGER_AUTO;
-	else if (*p == 'l' && strcmp(p, "long") == 0)
+	} else if (*p == 'l' && strcmp(p, "long") == 0) {
 		conf.pager_view = PAGER_LONG;
-	else if (*p == 's' && strcmp(p, "short") == 0)
-		conf.pager_view = PAGER_SHORT;
+	} else {
+		if (*p == 's' && strcmp(p, "short") == 0)
+			conf.pager_view = PAGER_SHORT;
+	}
 }
 
 /* Get boolean value from LINE and set VAR accordingly. */
@@ -2961,8 +2965,9 @@ set_tabcomp_mode(char *line)
 		fzftab = 1; tabmode = FZF_TAB;
 	} else if (strcmp(tmp, "fnf") == 0) {
 		fzftab = 1; tabmode = FNF_TAB;
-	} else if (strcmp(tmp, "smenu") == 0) {
-		fzftab = 1; tabmode = SMENU_TAB;
+	} else {
+		if (strcmp(tmp, "smenu") == 0)
+			{ fzftab = 1; tabmode = SMENU_TAB; }
 	}
 }
 #endif /* !_NO_FZF */

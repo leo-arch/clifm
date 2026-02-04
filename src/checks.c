@@ -143,8 +143,9 @@ check_completion_mode(void)
 		err_name = "fzf"; tabmode = STD_TAB;
 	} else if (!(bin_flags & FNF_BIN_OK) && tabmode == FNF_TAB) {
 		err_name = "fnf"; tabmode = STD_TAB;
-	} else if (!(bin_flags & SMENU_BIN_OK) && tabmode == SMENU_TAB) {
-		err_name = "smenu"; tabmode = STD_TAB;
+	} else {
+		if (!(bin_flags & SMENU_BIN_OK) && tabmode == SMENU_TAB)
+			{ err_name = "smenu"; tabmode = STD_TAB; }
 	}
 
 	if (tabmode == STD_TAB) {
@@ -415,10 +416,12 @@ is_eln_range(char *str)
 		return 0;
 
 	filesn_t b = -1;
-	if (!dash[1]) // "n-"
+	if (!dash[1]) { /* "n-" */
 		b = g_files_num;
-	else if (is_number(dash + 1))
-		b = xatof(dash + 1);
+	} else {
+		if (is_number(dash + 1))
+			b = xatof(dash + 1);
+	}
 
 	*dash = '-';
 

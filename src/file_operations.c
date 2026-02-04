@@ -206,11 +206,13 @@ get_dup_file_dest_dir(void)
 				char *name = file_info[n - 1].name;
 				dir = savestring(name, strlen(name));
 			}
-		} else if (*dir == '~') { /* Expand tilde */
-			char *tmp = tilde_expand(dir);
-			if (tmp) {
-				free(dir);
-				dir = tmp;
+		} else {
+			if (*dir == '~') { /* Expand tilde */
+				char *tmp = tilde_expand(dir);
+				if (tmp) {
+					free(dir);
+					dir = tmp;
+				}
 			}
 		}
 
@@ -222,9 +224,11 @@ get_dup_file_dest_dir(void)
 		} else if (!S_ISDIR(a.st_mode)) {
 			errno = ENOTDIR;
 			goto ERROR;
-		} else if (check_file_access(a.st_mode, a.st_uid, a.st_gid) == 0) {
-			errno = EACCES;
-			goto ERROR;
+		} else {
+			if (check_file_access(a.st_mode, a.st_uid, a.st_gid) == 0) {
+				errno = EACCES;
+				goto ERROR;
+			}
 		}
 
 		break;
@@ -1684,9 +1688,11 @@ cp_mv_file(char **args, const int copy_and_rename, const int force)
 			/* If 'mv sel' and command is successful deselect everything:
 			 * selected files are not there anymore. */
 			deselect_all();
-		else if (cwd_has_sel_files())
+		else {
+			if (cwd_has_sel_files())
 			/* Just in case a selected file in the current dir was renamed. */
-			get_sel_files();
+				get_sel_files();
+		}
 	}
 
 	return print_cp_mv_summary_msg(args[0], files_num, cwd);

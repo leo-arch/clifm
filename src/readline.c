@@ -1639,15 +1639,19 @@ jump_generator(const char *text, int state)
 			continue;
 		/* Filter by parent */
 		if (rl_line_buffer[1] == 'p') {
-			if ((conf.case_sens_dirjump == 1 ? strstr(workspaces[cur_ws].path, name)
+			if ((conf.case_sens_dirjump == 1
+			? strstr(workspaces[cur_ws].path, name)
 			: xstrcasestr(workspaces[cur_ws].path, name)) == NULL)
 				continue;
 		}
 		/* Filter by child */
-		else if (rl_line_buffer[1] == 'c') {
-			if ((conf.case_sens_dirjump == 1 ? strstr(name, workspaces[cur_ws].path)
-			: xstrcasestr(name, workspaces[cur_ws].path)) == NULL)
-				continue;
+		else {
+			if (rl_line_buffer[1] == 'c') {
+				if ((conf.case_sens_dirjump == 1
+				? strstr(name, workspaces[cur_ws].path)
+				: xstrcasestr(name, workspaces[cur_ws].path)) == NULL)
+					continue;
+			}
 		}
 
 		if ((conf.case_sens_dirjump == 1 ? strstr(name, text)

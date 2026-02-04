@@ -503,8 +503,9 @@ load_trashed_files(int *n, int *status)
 	if (*n <= -1) {
 		*status = errno;
 		xerror("trash: '%s': %s\n", trash_files_dir, strerror(errno));
-	} else if (*n == 0) {
-		puts(_("trash: No trashed files"));
+	} else {
+		if (*n == 0)
+			puts(_("trash: No trashed files"));
 	}
 
 	return tfiles;

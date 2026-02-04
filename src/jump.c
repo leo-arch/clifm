@@ -666,9 +666,11 @@ mark_target_segment(char *str)
 	if (len > 0 && str[len - 1] == '/') {
 		str[len - 1] = '\0';
 		segment |= LAST_SEGMENT;
-	} else if (len > 0 && str[len - 1] == '\\') {
-		str[len - 1] = '\0';
-		segment |= FIRST_SEGMENT;
+	} else {
+		if (len > 0 && str[len - 1] == '\\') {
+			str[len - 1] = '\0';
+			segment |= FIRST_SEGMENT;
+		}
 	}
 
 	return segment;

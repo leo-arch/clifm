@@ -665,9 +665,11 @@ strbtw(char *str, const char a, const char b)
 		if (!pa) {
 			if (*p == a)
 				pa = p;
-		} else if (*p == b) {
-			pb = p;
-			break;
+		} else {
+			if (*p == b) {
+				pb = p;
+				break;
+			}
 		}
 		p++;
 	}
@@ -2750,7 +2752,7 @@ parse_input_str(char *str)
 	/* Handle background/foreground process. */
 	bg_proc = 0;
 
-	if (args_n > 0 && *substr[args_n] == '&' && !*(substr[args_n] + 1)) {
+	if (args_n > 0 && *substr[args_n] == '&' && !substr[args_n][1]) {
 		bg_proc = 1;
 		free(substr[args_n]);
 		substr[args_n] = NULL;

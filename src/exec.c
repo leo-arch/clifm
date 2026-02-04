@@ -353,10 +353,12 @@ dirs_first_function(const char *arg)
 		conf.list_dirs_first = 1;
 		if (conf.autols == 1) reload_dirlist();
 		print_reload_msg(NULL, NULL, _("Directories first: on\n"));
-	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
-		conf.list_dirs_first = 0;
-		if (conf.autols == 1) reload_dirlist();
-		print_reload_msg(NULL, NULL, _("Directories first: off\n"));
+	} else {
+		if (*arg == 'o' && strcmp(arg, "off") == 0) {
+			conf.list_dirs_first = 0;
+			if (conf.autols == 1) reload_dirlist();
+			print_reload_msg(NULL, NULL, _("Directories first: off\n"));
+		}
 	}
 
 	return FUNC_SUCCESS;
@@ -1526,10 +1528,12 @@ set_cp_cmd(char **cmd, int *cp_force)
 {
 	const int bk_cp_cmd = conf.cp_cmd;
 	if (*cp_force == 1) {
-		if (conf.cp_cmd == CP_ADVCP)
+		if (conf.cp_cmd == CP_ADVCP) {
 			conf.cp_cmd = CP_ADVCP_FORCE;
-		else if (conf.cp_cmd == CP_CP)
-			conf.cp_cmd = CP_CP_FORCE;
+		} else {
+			if (conf.cp_cmd == CP_CP)
+				conf.cp_cmd = CP_CP_FORCE;
+		}
 	}
 
 	char *n = NULL;
@@ -1556,10 +1560,12 @@ set_mv_cmd(char **cmd, int *mv_force)
 {
 	int bk_mv_cmd = conf.mv_cmd;
 	if (*mv_force == 1) {
-		if (conf.mv_cmd == MV_ADVMV)
+		if (conf.mv_cmd == MV_ADVMV) {
 			conf.mv_cmd = MV_ADVMV_FORCE;
-		else if (conf.mv_cmd == MV_MV)
-			conf.mv_cmd = MV_MV_FORCE;
+		} else {
+			if (conf.mv_cmd == MV_MV)
+				conf.mv_cmd = MV_MV_FORCE;
+		}
 	}
 
 	char *n = NULL;

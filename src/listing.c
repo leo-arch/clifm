@@ -1169,10 +1169,12 @@ compute_maxes(void)
 			t = DIGINUM_BIG(file_info[i].size);
 			if (t > maxes.size)
 				maxes.size = t;
-		} else if (prop_fields_size == PROP_SIZE_HUMAN) {
-			t = (int)file_info[i].human_size.len;
-			if (t > maxes.size)
-				maxes.size = t;
+		} else {
+			if (prop_fields_size == PROP_SIZE_HUMAN) {
+				t = (int)file_info[i].human_size.len;
+				if (t > maxes.size)
+					maxes.size = t;
+			}
 		}
 
 		if (prop_fields_ids == PROP_ID_NUM) {
@@ -1182,16 +1184,18 @@ compute_maxes(void)
 				maxes.id_group = g;
 			if (u > maxes.id_user)
 				maxes.id_user = u;
-		} else if (prop_fields_ids == PROP_ID_NAME) {
-			const int g = file_info[i].gid_i.name
-				? (int)file_info[i].gid_i.namlen : DIGINUM(file_info[i].gid);
-			if (g > maxes.id_group)
-				maxes.id_group = g;
+		} else {
+			if (prop_fields_ids == PROP_ID_NAME) {
+				const int g = file_info[i].gid_i.name
+					? (int)file_info[i].gid_i.namlen : DIGINUM(file_info[i].gid);
+				if (g > maxes.id_group)
+					maxes.id_group = g;
 
-			const int u = file_info[i].uid_i.name
-				? (int)file_info[i].uid_i.namlen : DIGINUM(file_info[i].uid);
-			if (u > maxes.id_user)
-				maxes.id_user = u;
+				const int u = file_info[i].uid_i.name
+					? (int)file_info[i].uid_i.namlen : DIGINUM(file_info[i].uid);
+				if (u > maxes.id_user)
+					maxes.id_user = u;
+			}
 		}
 
 		if (prop_fields_inode == 1) {
@@ -3019,14 +3023,16 @@ check_extra_file_types(mode_t *mode, const struct stat *a)
 	 * zero, in which case A is never used. Let's avoid a compiler warning. */
 	UNUSED(a);
 
-	if (S_TYPEISMQ(a))
+	if (S_TYPEISMQ(a)) {
 		*mode = DT_MQ;
-	else if (S_TYPEISSEM(a))
+	} else if (S_TYPEISSEM(a)) {
 		*mode = DT_SEM;
-	else if (S_TYPEISSHM(a))
+	} else if (S_TYPEISSHM(a)) {
 		*mode = DT_SHM;
-	else if (S_TYPEISTMO(a))
-		*mode = DT_TPO;
+	} else {
+		if (S_TYPEISTMO(a))
+			*mode = DT_TPO;
+	}
 }
 
 static inline void
