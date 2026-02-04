@@ -764,8 +764,8 @@ static void
 print_untrash_status_msg(const int status, const int multi,
 const size_t untrashed_files)
 {
-	/* If there was at least one error when untrashing multiple files,
-	 * and at least some file was successfully untrashed, pause, so that the
+	/* If there was at least one error when restoring multiple files,
+	 * and at least some file was successfully restored, pause, so that the
 	 * user can read the error message (printed by untrash_files()). */
 	if (status == FUNC_FAILURE && multi == 1 && conf.autols == 1
 	&& untrashed_files > 0)
@@ -807,8 +807,7 @@ untrash_all(struct dirent ***tfiles, const int tfiles_n, const int free_files)
 	return status;
 }
 
-/* Untrash/restore files passed as parameters (ARGS) to their original
- * location. */
+/* Restore files passed as parameters (ARGS) to their original location. */
 static int
 untrash_files(char **args)
 {

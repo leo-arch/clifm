@@ -30,7 +30,7 @@ An action definition has the following form: \"NAME=plugin\", for example:\n\
 To run a plugin enter the action name. For example, to run the rgfind.sh plugin,\n\
 enter \"//\".\n\
 Some plugins accept parameters. To get information about a specific plugin\n\
-use the -h,--help flag. Example: \"- --help\"."
+use the -h/--help flag. Example: \"- --help\"."
 
 #define ALIAS_USAGE "List, print, or import aliases\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
@@ -193,7 +193,7 @@ NAME is not specified, print the list of all parent directories\n\n\
     bl sel\n\n\
 Note: Links are always created in the current directory."
 
-#define BLEACH_USAGE "Sanitize filenames by removing or converting non-ASCII characters\n\n\
+#define BLEACH_USAGE "Sanitize filenames by removing/converting non-ASCII characters\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   bb, bleach FILE...\n\n\
 \x1b[1mEXAMPLE\x1b[22m\n\
@@ -217,7 +217,7 @@ Note: Links are always created in the current directory."
     bm edit (or F11)\n\
 - Edit the bookmarks file using vi\n\
     bm edit vi\n\
-- Print file properties of specific bookmarks using the 'b:' construct\n\
+- Print file properties of specific bookmarks using the 'b:' prefix\n\
     p b:<TAB> (multi-selection is allowed)\n\
 - Select all bookmarks at once\n\
     s b:"
@@ -225,7 +225,7 @@ Note: Links are always created in the current directory."
 #define BULK_RENAME_USAGE "Rename files in bulk\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   br, bulk FILE... [:EDITOR]\n\n\
-The list of files to be renamed is opened via EDITOR (default associated\n\
+The list of files to be renamed is opened with EDITOR (default associated\n\
 application for text files if omitted). Edit filenames as desired, rename,\n\
 save changes, and quit the editor (quit without saving to cancel the operation).\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
@@ -330,7 +330,7 @@ Tip: Take a look at the 'j' command as well."
     b clear\n\n\
 Tip: See also the 'dh' and 'j' commands."
 
-#define DUP_USAGE "Duplicate files via rsync(1) (cp(1) if rsync is not found)\n\n\
+#define DUP_USAGE "Duplicate files with rsync(1) (cp(1) if rsync is not found)\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   d, dup FILE...\n\n\
 \x1b[1mEXAMPLE\x1b[22m\n\
@@ -398,11 +398,11 @@ Note 2: Unlike 'p', 'pp' always dereferences symbolic links."
 - Enable recursive directory sizes (long view)\n\
     fz on (or --full-dir-size)\n\
 - Toggle the disk usage analyzer mode\n\
-    Alt+Tab (or -t,--disk-usage-analyzer)\n\
+    Alt+Tab (or -t/--disk-usage-analyzer)\n\
 - Display physical file sizes (disk usage) instead of logical sizes (apparent size)\n\
     Run with --physical-size or set ApparentSize to false in the\n\
     configuration file.\n\
-- Display file sizes in SI units (powers of 1000) instead of IEC units (powers of 1024)\n\
+- Display file sizes in powers of 1000 (SI units) instead of 1024 (IEC units)\n\
     Run with --si"
 
 #define FF_USAGE "Turn list-directories-first on/off\n\n\
@@ -411,7 +411,7 @@ Note 2: Unlike 'p', 'pp' always dereferences symbolic links."
 \x1b[1mEXAMPLE\x1b[22m\n\
 - Disable list-directories-first\n\
     ff off\n\
-  Note: Toggle list-directories-first by pressing Alt+g."
+  Note: Toggle list-directories-first with Alt+g."
 
 #define FILE_PREVIEWS "\
 File previews are enabled by default if running in fzf mode.\n\n\
@@ -436,11 +436,11 @@ This instructs Clifm to use the 'clifmimg' script (~/.config/clifm/clifmimg)\n\
 to generate image previews (for both tab completion in fzf mode and the\n\
 'view' command).\n\
 \n\
-By default, Clifm will try to guess the most suitable method. However, you\n\
+By default, Clifm tries to guess the most suitable method. However, you\n\
 can edit the 'clifmimg' script and set the 'method' variable to any of the\n\
 available previewing methods: sixel, iterm, ueberzug, kitty, ansi (text mode).\n\
 \n\
-If using the 'ueberzug' method, you must start Clifm via the 'clifmrun' script\n\
+If using the 'ueberzug' method, Clifm must be started with the 'clifmrun' script\n\
 (~/.config/clifm/clifmrun)"
 
 #define FILTER_USAGE "Set a filter for the file list\n\n\
@@ -491,9 +491,9 @@ Available file type characters:\n\
 Type '=<TAB>' to get the list of available file type filters.\n\n\
 Other ways of filtering files in the current directory:\n\n\
 * @<TAB>       List all MIME types found\n\
-* @query<TAB>  MIME type filter. E.g.: @pdf<TAB> to list all PDF files\n\
+* @query<TAB>  MIME type filter: e.g., @pdf<TAB> to list all PDF files\n\
 * /query       Quick search function: consult the 'search' help topic\n\
-* Alt+.        Toggle hidden files\n\
+* Alt+.        Toggle show-hidden-files\n\
 * Alt+,        Toggle list-only-dirs\n\
 * Just press TAB (fzf/fnf mode) and perform a fuzzy search\n\n\
 You can also operate on files filtered by file type and/or MIME type as\n\
@@ -546,7 +546,7 @@ files in the current directory:\n\n\
 history or !<TAB>: List available commands\n\
 !!: Execute the last command\n\
 !n: Execute the command number 'n' in the history list\n\
-!-n: Execute the last - n command in the history list"
+!-n: Execute the 'last - n' command in the history list"
 
 #define HISTORY_USAGE "List or access command history entries\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
@@ -558,10 +558,10 @@ history or !<TAB>: List available commands\n\
     history show-time\n\
 - Print the last 4 commands in history\n\
     history -4\n\
-  Note: 'history show-time -4' to add timestamps.\n\
+  Note: Use 'history show-time -4' to display timestamps.\n\
 - Prevent subsequent commands from being written to the history file\n\
-    history off (then reenable it via 'history on')\n\
-  Note: Starting a command by a space prevent it from being added to history.\n\
+    history off (then reenable with 'history on')\n\
+  Note: Commands starting with a space are not added to history.\n\
 - Edit the commands history list\n\
     history edit\n\
 - Edit the commands history list using vi\n\
@@ -717,7 +717,7 @@ Tip: Use the 'le' command to edit a symbolic link. Try 'le --help'."
 \x1b[1mEXAMPLE\x1b[22m\n\
   md dir1 dir2 dir3/subdir\n\n\
 Note: Use the 'n' command to create both files and directories.\n\
-Try 'n --help' for more details."
+Try 'n --help' for more information."
 
 #define MEDIA_USAGE "List, mount, and unmount storage devices\n\n\
 Note: udevil(1) or udisks2(1) is required\n\n\
@@ -833,7 +833,7 @@ new files are created using the template name as the extension. E.g.:\n\
 \x1b[1m2. Explicit templates\x1b[22m\n\n\
 If a filename is followed by '@TEMPLATE', where TEMPLATE is any regular\n\
 file found in the templates directory (1), the file will be created as a\n\
-copy of the specified template. E.g.: 'n file.sh@my_script.sh'.\n\n\
+copy of the specified template. E.g., 'n file.sh@my_script.sh'.\n\n\
 Tab completion is available for explicit templates: simply type 'n file@<TAB>'.\n\n\
 (1) The templates directory is $CLIFM_TEMPLATES_DIR, $XDG_TEMPLATES_DIR,\n\
 or ~/Templates, in this precedence order."
@@ -880,9 +880,9 @@ Tip: Use the 'pc' command to edit file permissions."
 \x1b[1mUSAGE\x1b[22m\n\
   opener APPLICATION\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
-- Set the file opener to xdg-open (instead of the built-in Lira)\n\
+- Set the file opener to xdg-open\n\
     opener xdg-open\n\
-- Set the file opener back to the default\n\
+- Set the file opener back to the default (the built-in Lira)\n\
     opener default"
 
 #define OW_USAGE "Open a file using a specific application\n\n\
@@ -1069,7 +1069,7 @@ Note: This plugin requires fzf and rg (ripgrep)."
 from or written to the filesystem unless explicitly requested by the user\n\
 through a command.\n\
 Default values are used.\n\
-You can enable this mode using the -S or --stealth-mode command line switch.\n\n\
+You can enable this mode using the -S/--stealth-mode command line switch.\n\n\
 2. Secure Environment: Clifm operates within a sanitized environment where most\n\
 environment variables are cleared, and a select few are set to secure defaults.\n\
 This mode can be activated with the --secure-env or --secure-env-full command\n\
@@ -1179,7 +1179,7 @@ Operating on tagged files (t:TAG)\n\
     stat t:work t:docs\n\n\
 To operate only on some tagged files use TAB as follows:\n\
     t:TAG<TAB> (multi-selection is allowed)\n\
-Mark the files you need via TAB and then press Enter or Right."
+Mark the files you need with Tab and then press Enter or Right."
 
 #define TE_USAGE "Toggle the executable bit on files\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
@@ -1289,11 +1289,11 @@ The 'paste' command is equivalent to 'c' and exists only for semantic\n\
 reasons: if you want to copy selected files to the current directory, it\n\
 makes sense to write 'paste sel'.\n\n\
 By default, both the 'c' and 'm' commands run cp(1)/mv(1) interactively\n\
-(-i), i.e. prompting before overwriting a file. To run non-interactively\n\
-instead, use the -f, --force parameter (see the examples below). You can\n\
+(-i), i.e., prompting before overwriting a file. To run non-interactively\n\
+instead, use the -f/--force parameter (see the examples below). You can\n\
 also permanently run in non-interactive mode using the cpCmd/mvCmd options\n\
 in the configuration file ('config' or F10).\n\n\
-Just as 'c' and 'm', the 'r' command accepts -f, --force as paramater to\n\
+Just as 'c' and 'm', the 'r' command accepts -f/--force as paramater to\n\
 prevent 'r' from prompting before removals. Set rmForce to true in the\n\
 configuration file to make this option permanent.\n\n\
 To use different parameters, run the corresponding utility as usual.\n\
@@ -1386,7 +1386,7 @@ c: Quit paging (printing remaining files)\n"
 \n -a[VAL]  List hidden files ('first', 'last', 'true', or 'false')\
 \n -A       Do not list hidden files (same as -afalse)\
 \n -b FILE  Set an alternative bookmarks file\
-\n -B NUM   Set tab-completion mode (NUM=[0–3])\
+\n -B NUM   Set tab-completion mode (NUM=[0-3])\
 \n -c FILE  Set an alternative main configuration file\
 \n -C       Do not clear the screen when changing directories\
 \n -d       Print disk usage (free/total)\
@@ -1426,13 +1426,13 @@ c: Quit paging (printing remaining files)\n"
 \n -U       Disable Unicode decorations\
 \n -v       Print version information and exit\
 \n -V DIR   Set a custom virtual directory\
-\n -w NUM   Start in workspace NUM (1–8)\
+\n -w NUM   Start in workspace NUM (1-8)\
 \n -W       Keep the list of selected files in sight\
 \n -x       Run in secure-environment mode\
 \n -X       Run in secure-environment mode (paranoid)\
 \n -y       Run in light mode\
 \n -Y       Run in secure-commands mode\
-\n -z NUM   Set a file sort order (1–13)\
+\n -z NUM   Set a file sort order (1-13)\
 \n -Z NUM   List only up to NUM files"
 #else
 #define SHORT_OPTIONS "\
@@ -1541,7 +1541,7 @@ PropFields in the config file)\
 \n      --share-selbox\t\t Make the Selection Box common to different profiles\
 \n      --shotgun-file=FILE\t Set FILE as Shotgun's configuration file\
 \n      --si\t\t\t Display file sizes in powers of 1000 (SI units) instead of 1024\
-\n      --sort-reverse\t\t Sort in reverse order, e.g., z–a instead of a–z\
+\n      --sort-reverse\t\t Sort in reverse order, e.g., z-a instead of a-z\
 \n      --stat FILE...\t\t Run the 'p' command on FILE(s) and exit\
 \n      --stat-full FILE...\t Run the 'pp' command on FILE(s) and exit\
 \n      --tabmode=MODE\t\t Set tab completion mode to one of 'fzf', 'fnf', 'smenu', or 'standard'\
@@ -1675,7 +1675,7 @@ For more information about a specific command, run 'CMD -h' or 'CMD --help'.\n"
  Alt+p              Change to the pinned directory\n\
  Alt+v              Toggle prepend-sudo\n\
  Alt+0              Run the file pager\n\
- Alt+[1–8]          Switch to workspace 1–8\n\
+ Alt+[1-8]          Switch to workspace 1-8\n\
  Ctrl+Alt+o         Switch to the previous profile\n\
  Ctrl+Alt+p         Switch to the next profile\n\
  Ctrl+Alt+a         Archive selected files\n\
@@ -1775,10 +1775,10 @@ le mylink            Edit the symbolic link 'mylink'\n\
 oc myfile            Edit ownership of the file 'myfile'\n\
 pc myfile            Edit permissions of the file 'myfile'\n\
 te *.sh              Toggle the executable bit on all .sh files\n\
-t 12-18              Move files whose ELNs are 12–18 to the trash can\n\
+t 12-18              Move files whose ELNs are 12-18 to the trash can\n\
 t del | t del <TAB>  Permanently remove trashed files using a menu\n\
 t empty              Empty the trash can\n\
-u | u <TAB>          Untrash files using a menu\n\
+u | u <TAB>          Restore trashed files using a menu\n\
 ac sel               Compress/archive selected files (1)\n\n\
 (1) 's:' can be used instead of the 'sel' keyword"
 
