@@ -44,9 +44,11 @@ pwd_function(const char *arg)
 		} else if (IS_HELP(arg)) {
 			puts(PWD_DESC);
 			return FUNC_SUCCESS;
-		} else if (arg[1] != 'L') {
-			xerror(_("pwd: '%s': Invalid option\nUsage: pwd [-LP]\n"), arg);
-			return FUNC_FAILURE;
+		} else {
+			if (arg[1] != 'L') {
+				xerror(_("pwd: '%s': Invalid option\nUsage: pwd [-LP]\n"), arg);
+				return FUNC_FAILURE;
+			}
 		}
 	}
 
@@ -582,7 +584,7 @@ fastback(const char *str)
 
 	/* Replace each dot after ".." by "/.." */
 	size_t i, c = 2;
-	for (i = 2; c < dots;) {
+	for (i = 2; c < dots && i + 3 < sizeof(dir);) {
 		dir[i] = '/'; i++;
 		dir[i] = '.'; i++;
 		dir[i] = '.'; i++;
