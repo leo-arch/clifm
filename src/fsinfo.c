@@ -15,7 +15,7 @@
 # include <sys/statfs.h> /* statfs(2) */
 # include <sys/sysmacros.h> /* major() and minor(), used by get_dev_name() */
 # include "aux.h" /* open_fread() */
-# include "linuxfs.h" /* FS_MAGIC macros for filesystem types */
+# include "linuxfs.h" /* T_*_MAGIC macros for filesystem types */
 #elif defined(HAVE_STATFS)
 # include <sys/mount.h> /* statfs(2) */
 #elif defined(__sun)
@@ -87,7 +87,7 @@ char *
 get_fs_type_name(const char *file, int *remote)
 {
 	struct statfs a;
-	if (!file || !*file || statfs(file, &a) == -1)
+	if (!file || !*file || !remote || statfs(file, &a) == -1)
 		return UNKNOWN_STR;
 
 	switch (a.f_type) {

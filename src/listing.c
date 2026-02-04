@@ -304,7 +304,6 @@ get_dir_icon(const filesn_t n)
 	}
 }
 
-#ifndef OLD_ICON_LOOKUP
 #define TABLE_LOAD_FACTOR 0.75
 /* 0.75: Do not allow the table to be loaded beyond 75% (i.e. make sure there
  * is always at least 25% free slots). This value balances space vs. probe
@@ -415,7 +414,6 @@ ext_table_lookup(size_t ext_hash)
 
 	return SIZE_MAX; /* Table exhausted. Not found. */
 }
-#endif /* !OLD_ICON_LOOKUP */
 
 /* Set the icon and color fields of the file_info[N] struct to the corresponding
  * icon for EXT. If not found, set the default icon and color. */
@@ -432,22 +430,11 @@ get_ext_icon(const char *restrict ext, const filesn_t n)
 
 	const size_t ext_hash = hashme(ext, 0);
 
-#ifndef OLD_ICON_LOOKUP
 	const size_t i = ext_table_lookup(ext_hash);
 	if (i != SIZE_MAX) {
 		file_info[n].icon = icon_ext[i].icon;
 		file_info[n].icon_color = icon_ext[i].color;
 	}
-#else
-	size_t i = sizeof(icon_ext) / sizeof(icon_ext[0]);
-	for (; i-- > 0;) {
-		if (ext_hash != ext_icon_hashes[i])
-			continue;
-		file_info[n].icon = icon_ext[i].icon;
-		file_info[n].icon_color = icon_ext[i].color;
-		return;
-	}
-#endif
 }
 
 void
@@ -457,9 +444,7 @@ init_icons_hashes(void)
 	set_dir_name_hashes();
 
 	set_ext_name_hashes();
-#ifndef OLD_ICON_LOOKUP
 	ext_table_init();
-#endif
 }
 #endif /* !_NO_ICONS */
 
