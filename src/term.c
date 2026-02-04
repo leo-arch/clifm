@@ -397,12 +397,15 @@ check_term_title_support(const char *name)
 }
 
 static void
-set_term_caps(const int i)
+set_term_caps(const size_t i, const char *env_term)
 {
 	const int true_color = check_truecolor();
 	term_caps.unicode = 0;
 
-	if (i == -1) { /* TERM not found in our terminfo database */
+	if (i == (size_t)-1) { /* TERM not found in our terminfo database */
+		err('w', PRINT_PROMPT, _("%s: '%s': Terminal type not supported. "
+			"Limited functionality is expected.\n"), PROGRAM_NAME,
+			env_term ? env_term : "unknown");
 		term_caps.color = true_color == 1 ? TRUECOLOR_NUM : 0;
 		if (term_caps.color <= 8)
 			memset(dim_c, '\0', sizeof(dim_c));
@@ -436,28 +439,25 @@ static void
 check_term_support(const char *env_term)
 {
 	if (!env_term || !*env_term) {
-		set_term_caps(-1);
+		set_term_caps((size_t)-1, NULL);
 		return;
 	}
 
 	const size_t len = strlen(env_term);
-	int index = -1;
+	size_t index = (size_t)-1;
 
-	for (size_t i = 0; TERM_INFO[i].name; i++) {
+	const size_t total = (sizeof(TERM_INFO) / sizeof(TERM_INFO[0]) - 1);
+
+	for (size_t i = 0; i < total && TERM_INFO[i].name; i++) {
 		if (*env_term != *TERM_INFO[i].name || len != TERM_INFO[i].len
 		|| strcmp(env_term, TERM_INFO[i].name) != 0)
 			continue;
 
-		index = i > INT_MAX ? INT_MAX : (int)i;
+		index = i;
 		break;
 	}
 
-	if (index == -1) {
-		err('w', PRINT_PROMPT, _("%s: '%s': Terminal type not supported. "
-			"Limited functionality is expected.\n"), PROGRAM_NAME, env_term);
-	}
-
-	set_term_caps(index);
+	set_term_caps(index, env_term);
 }
 
 /* Try to detect what kind of image capability the running terminal supports
@@ -497,7 +497,7 @@ check_term(void)
 	const char *t = getenv("TERM");
 	if (!t || !*t) {
 		t = "xterm";
-		err('w', PRINT_PROMPT, _("%s: TERM variable unset. Running in xterm "
+		err('w', PRINT_PROMPT, _("%s: TERM variable unset. Running in XTerm "
 			"compatibility mode.\n"), PROGRAM_NAME);
 	}
 

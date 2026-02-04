@@ -132,7 +132,7 @@ parse_shared_mime_info_db(FILE *fp)
 
 	if (n != buf_size) {
 		user_mimetypes =
-			realloc(user_mimetypes, (n + 1) * sizeof(struct mime_t));
+			xnrealloc(user_mimetypes, n + 1, sizeof(struct mime_t));
 	}
 
 	check_hash_conflicts();
@@ -205,7 +205,7 @@ parse_mime_types_file(FILE *fp)
 
 	if (n != buf_size) {
 		user_mimetypes =
-			realloc(user_mimetypes, (n + 1) * sizeof(struct mime_t));
+			xnrealloc(user_mimetypes, n + 1, sizeof(struct mime_t));
 	}
 
 	check_hash_conflicts();
