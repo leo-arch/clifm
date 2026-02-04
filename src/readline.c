@@ -2581,13 +2581,13 @@ rl_count_words(char **w, char **start)
 	*first_word = '\0';
 	*w = NULL;
 
-	if (full_word != 0) {
+	if (lb && full_word != 0) {
 		lb[full_word] = '\0';
 		const char *q = lb + start_word;
 		xstrsncpy(first_word, q, sizeof(first_word));
 		lb[full_word] = ' ';
 		*w = first_word;
-		if (lb && rl_end > 0 && lb[rl_end - 1] == ' ')
+		if (rl_end > 0 && lb[rl_end - 1] == ' ')
 			n++;
 	}
 
